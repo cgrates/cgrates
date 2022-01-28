@@ -226,6 +226,7 @@ func (ap *ActionProfile) Merge(v2 interface{}) {
 		if !equal {
 			ap.Actions = append(ap.Actions, actionV2)
 		}
+		equal = false
 	}
 
 	if vi.Weight != 0 {
@@ -243,6 +244,9 @@ func (ap *ActionProfile) Merge(v2 interface{}) {
 }
 
 func (apAct *APAction) Merge(v2 *APAction) {
+	if len(v2.ID) != 0 {
+		apAct.ID = v2.ID
+	}
 	if v2.Blocker {
 		apAct.Blocker = v2.Blocker
 	}

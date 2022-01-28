@@ -583,22 +583,25 @@ func (sqp *StatQueueProfile) Set(path []string, val interface{}, newBranch bool,
 		if path[0] != utils.Metrics {
 			return utils.ErrWrongPath
 		}
-		if len(sqp.Metrics) == 0 || newBranch {
-			sqp.Metrics = append(sqp.Metrics, new(MetricWithFilters))
-		}
-		switch path[1] {
-		case utils.FilterIDs:
-			var valA []string
-			valA, err = utils.IfaceAsStringSlice(val)
-			sqp.Metrics[len(sqp.Metrics)-1].FilterIDs = append(sqp.Metrics[len(sqp.Metrics)-1].FilterIDs, valA...)
-		case utils.MetricID:
-			valA := utils.InfieldSplit(utils.IfaceAsString(val))
-			sqp.Metrics[len(sqp.Metrics)-1].MetricID = valA[0]
-			for _, mID := range valA[1:] { // add the rest of the metrics
-				sqp.Metrics = append(sqp.Metrics, &MetricWithFilters{MetricID: mID})
+		if val != utils.EmptyString {
+			if len(sqp.Metrics) == 0 || newBranch {
+				sqp.Metrics = append(sqp.Metrics, new(MetricWithFilters))
 			}
-		default:
-			return utils.ErrWrongPath
+			switch path[1] {
+			case utils.FilterIDs:
+				var valA []string
+				valA, err = utils.IfaceAsStringSlice(val)
+				sqp.Metrics[len(sqp.Metrics)-1].FilterIDs = append(sqp.Metrics[len(sqp.Metrics)-1].FilterIDs, valA...)
+			case utils.MetricID:
+				valA := utils.InfieldSplit(utils.IfaceAsString(val))
+				sqp.Metrics[len(sqp.Metrics)-1].MetricID = valA[0]
+				for _, mID := range valA[1:] { // add the rest of the metrics
+					sqp.Metrics = append(sqp.Metrics, &MetricWithFilters{MetricID: mID})
+				}
+
+			default:
+				return utils.ErrWrongPath
+			}
 		}
 	}
 	return

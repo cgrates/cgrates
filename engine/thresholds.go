@@ -615,9 +615,13 @@ func (tp *ThresholdProfile) Set(path []string, val interface{}, _ bool, _ string
 		valA, err = utils.IfaceAsStringSlice(val)
 		tp.FilterIDs = append(tp.FilterIDs, valA...)
 	case utils.MaxHits:
-		tp.MaxHits, err = utils.IfaceAsTInt(val)
+		if val != utils.EmptyString {
+			tp.MaxHits, err = utils.IfaceAsTInt(val)
+		}
 	case utils.MinHits:
-		tp.MinHits, err = utils.IfaceAsTInt(val)
+		if val != utils.EmptyString {
+			tp.MinHits, err = utils.IfaceAsTInt(val)
+		}
 	case utils.MinSleep:
 		tp.MinSleep, err = utils.IfaceAsDuration(val)
 	case utils.ActionProfileIDs:
