@@ -1205,7 +1205,7 @@ func TestCsvDumpForAttributeModels(t *testing.T) {
 			FilterIDs: "FLTR_ACNT_dan;*ai:~*req.AnswerTime:2014-07-14T14:35:00Z;*string:~*opts.*context:con1",
 			Path:      utils.MetaReq + utils.NestingSep + "FL1",
 			Value:     "Al1",
-			Weights:   "20",
+			Weights:   ";20",
 		},
 		&AttributeMdl{
 			Tpid:   "TP1",
@@ -1219,10 +1219,10 @@ func TestCsvDumpForAttributeModels(t *testing.T) {
 	if !reflect.DeepEqual(expected, rcv) {
 		t.Errorf("Expecting : %+v,\n received: %+v", utils.ToJSON(expected), utils.ToJSON(rcv))
 	}
-	expRecord := []string{"cgrates.org", "ALS1", "FLTR_ACNT_dan;*ai:~*req.AnswerTime:2014-07-14T14:35:00Z;*string:~*opts.*context:con1", "20", "", "*req.FL1", "", "Al1", "false"}
+	expRecord := []string{"cgrates.org", "ALS1", "FLTR_ACNT_dan;*ai:~*req.AnswerTime:2014-07-14T14:35:00Z;*string:~*opts.*context:con1", ";20", "", "*req.FL1", "", "Al1", "false"}
 	for i, model := range rcv {
 		if i == 1 {
-			expRecord = []string{"cgrates.org", "ALS1", "", "0", "", "*req.FL2", "", "Al2", "false"}
+			expRecord = []string{"cgrates.org", "ALS1", "", "", "", "*req.FL2", "", "Al2", "false"}
 		}
 		if csvRecordRcv, _ := CsvDump(model); !reflect.DeepEqual(expRecord, csvRecordRcv) {
 			t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(expRecord), utils.ToJSON(csvRecordRcv))
