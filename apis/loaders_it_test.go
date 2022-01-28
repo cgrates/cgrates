@@ -56,18 +56,18 @@ var (
 		testLoadersWriteCSVs,
 		testLoadersLoad,
 
-		testLoadersGetAccount,
-		testLoadersGetActionProfile,
-		testLoadersGetAttributeProfile,
-		testLoadersGetChargerProfile,
-		testLoadersGetDispatcherProfile,
-		testLoadersGetDispatcherHost,
-		testLoadersGetFilter,
-		testLoadersGetRateProfile,
-		testLoadersGetResourceProfile,
-		testLoadersGetRouteProfile,
-		testLoadersGetStatQueueProfile,
-		testLoadersGetThresholdProfile,
+		testLoadersGetAccounts,
+		testLoadersGetActionProfiles,
+		testLoadersGetAttributeProfiles,
+		testLoadersGetChargerProfiles,
+		testLoadersGetDispatcherProfiles,
+		testLoadersGetDispatcherHosts,
+		testLoadersGetFilters,
+		testLoadersGetRateProfiles,
+		testLoadersGetResourceProfiles,
+		// testLoadersGetRouteProfiles,
+		// testLoadersGetStatQueueProfiles,
+		testLoadersGetThresholdProfiles,
 
 		testLoadersRemove,
 		testLoadersGetAccountAfterRemove,
@@ -292,20 +292,40 @@ cgrates.org,ResGroup22,*string:~*req.Account:dan,10,3600s,2,premium_call,true,tr
 	}
 
 	// Create and populate Routes.csv
-	if err := writeFile(utils.RoutesCsv, `#Tenant,ID,FilterIDs,Weights,Sorting,SortingParameters,RouteID,RouteFilterIDs,RouteAccountIDs,RouteRateProfileIDs,RouteResourceIDs,RouteStatIDs,RouteWeights,RouteBlocker,RouteParameters
-cgrates.org,ROUTE_ACNT_1001,FLTR_ACCOUNT_1001,;10,*weight,,route1,,,,,,;20,,`); err != nil {
+	if err := writeFile(utils.RoutesCsv, `
+#Tenant[0],ID[1],FilterIDs[2],Weights[3],Sorting[4],SortingParameters[5],RouteID[6],RouteFilterIDs[7],RouteAccountIDs[8],RouteRateProfileIDs[9],RouteResourceIDs[10],RouteStatIDs[11],RouteWeights[12],RouteBlocker[13],RouteParameters[14]
+cgrates.org,RoutePrf1,*string:~*req.Account:1001,;20,*lc,,route1,fltr1,Account1;Account2,RPL_1,ResGroup1,Stat1,;10,true,param1
+cgrates.org,RoutePrf1,,,,,route1,,,RPL_2,ResGroup2,,;10,,
+cgrates.org,RoutePrf1,,,,,route1,fltr2,Account2,RPL_3,ResGroup3,Stat2,;10,,
+cgrates.org,RoutePrf1,,,,,route1,,,,ResGroup4,Stat3,;10,,
+cgrates.org,RoutePrf2,,,,,,,,,,,,,
+cgrates.org,RoutePrf2,*string:~*req.Account:1002,;20,*lc,,route1,fltr3,Account3;Account4,RPL_2,ResGroup2,Stat2,;10,true,param1
+`); err != nil {
 		t.Fatal(err)
 	}
 
 	// Create and populate Stats.csv
-	if err := writeFile(utils.StatsCsv, `#Tenant[0],Id[1],FilterIDs[2],Weight[3],QueueLength[4],TTL[5],MinItems[6],Metrics[7],MetricFilterIDs[8],Stored[9],Blocker[10],ThresholdIDs[11]
-cgrates.org,Stat_1,FLTR_ACCOUNT_1001,30,100,10s,0,*acd;*tcd;*asr,,false,true,*none`); err != nil {
+	if err := writeFile(utils.StatsCsv, `
+#Tenant[0],Id[1],FilterIDs[2],Weight[3],QueueLength[4],TTL[5],MinItems[6],Metrics[7],MetricFilterIDs[8],Stored[9],Blocker[10],ThresholdIDs[11]
+cgrates.org,TestStats,*string:~*req.Account:1001,20,100,1s,2,*sum#~*req.Value;*average#~*req.Value,fltr1;fltr2,true,true,Th1;Th2
+cgrates.org,TestStats,,20,,,2,*sum#~*req.Usage,,,,
+cgrates.org,TestStats2,*string:~*req.Account:1002,20,100,1s,2,*sum#~*req.Value;*sum#~*req.Usage;*average#~*req.Value;*average#~*req.Usage,,true,true,Th
+cgrates.org,TestStats2,,20,,,2,*sum#~*req.Cost;*average#~*req.Cost,,true,true,
+cgrates.org,TestStats3,,,,,,,,,,
+cgrates.org,TestStats3,*string:~*req.Account:1003,20,100,1s,2,*sum#~*req.Value;*average#~*req.Value,,true,true,Th1;Th2
+`); err != nil {
 		t.Fatal(err)
 	}
 
 	// Create and populate Thresholds.csv
-	if err := writeFile(utils.ThresholdsCsv, `#Tenant[0],Id[1],FilterIDs[2],Weight[3],MaxHits[4],MinHits[5],MinSleep[6],Blocker[7],ActionProfileIDs[8],Async[9]
-cgrates.org,THD_ACNT_1001,FLTR_ACCOUNT_1001,10,-1,0,0,false,ACT_PRF,false`); err != nil {
+	if err := writeFile(utils.ThresholdsCsv, `
+#Tenant[0],Id[1],FilterIDs[2],Weight[3],MaxHits[4],MinHits[5],MinSleep[6],Blocker[7],ActionProfileIDs[8],Async[9]
+cgrates.org,TH1,*string:~*req.Account:1001;*string:~*req.RunID:*default,10,12,10,1s,true,ACT_PRF1,true
+cgrates.org,TH1,,,,,,,,
+cgrates.org,TH2,,,,,,,,
+cgrates.org,TH2,*string:~*req.Account:1002,5,,,,true,,true
+cgrates.org,TH2,,5,10,8,1s,true,ACT_PRF2,true
+`); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -325,7 +345,7 @@ func testLoadersLoad(t *testing.T) {
 	}
 }
 
-func testLoadersGetAccount(t *testing.T) {
+func testLoadersGetAccounts(t *testing.T) {
 	expAccs := []*utils.Account{
 		{
 			Tenant: "cgrates.org",
@@ -453,7 +473,7 @@ func testLoadersGetAccount(t *testing.T) {
 	}
 }
 
-func testLoadersGetActionProfile(t *testing.T) {
+func testLoadersGetActionProfiles(t *testing.T) {
 	expActs := []*engine.ActionProfile{
 		{
 			Tenant:   "cgrates.org",
@@ -550,7 +570,7 @@ func testLoadersGetActionProfile(t *testing.T) {
 	}
 }
 
-func testLoadersGetAttributeProfile(t *testing.T) {
+func testLoadersGetAttributeProfiles(t *testing.T) {
 	expAttrs := []*engine.APIAttributeProfile{
 		{
 			Tenant:    "cgrates.org",
@@ -609,7 +629,7 @@ func testLoadersGetAttributeProfile(t *testing.T) {
 	}
 }
 
-func testLoadersGetChargerProfile(t *testing.T) {
+func testLoadersGetChargerProfiles(t *testing.T) {
 	expChrgs := []*engine.ChargerProfile{
 		{
 			Tenant:       "cgrates.org",
@@ -644,7 +664,7 @@ func testLoadersGetChargerProfile(t *testing.T) {
 	}
 }
 
-func testLoadersGetDispatcherProfile(t *testing.T) {
+func testLoadersGetDispatcherProfiles(t *testing.T) {
 	expDspPrfs := []*engine.DispatcherProfile{
 		{
 			Tenant:         "cgrates.org",
@@ -710,7 +730,7 @@ func testLoadersGetDispatcherProfile(t *testing.T) {
 	}
 }
 
-func testLoadersGetDispatcherHost(t *testing.T) {
+func testLoadersGetDispatcherHosts(t *testing.T) {
 	expDspHosts := []*engine.DispatcherHost{
 		{
 			Tenant: "cgrates.org",
@@ -737,7 +757,7 @@ func testLoadersGetDispatcherHost(t *testing.T) {
 	}
 }
 
-func testLoadersGetFilter(t *testing.T) {
+func testLoadersGetFilters(t *testing.T) {
 	expFltrs := []*engine.Filter{
 		{
 			Tenant: "cgrates.org",
@@ -793,7 +813,7 @@ func testLoadersGetFilter(t *testing.T) {
 	}
 }
 
-func testLoadersGetRateProfile(t *testing.T) {
+func testLoadersGetRateProfiles(t *testing.T) {
 	expRatePrfs := []*utils.RateProfile{
 		{
 			Tenant:    "cgrates.org",
@@ -844,13 +864,6 @@ func testLoadersGetRateProfile(t *testing.T) {
 					Blocker:         true,
 					IntervalRates: []*utils.IntervalRate{
 						{
-							IntervalStart: utils.NewDecimal(0, 0),
-							FixedFee:      utils.NewDecimal(67, 3),
-							RecurrentFee:  utils.NewDecimal(3, 2),
-							Unit:          utils.NewDecimal(0, 0),
-							Increment:     utils.NewDecimal(0, 0),
-						},
-						{
 							IntervalStart: utils.NewDecimal(int64(0*time.Second), 0),
 							FixedFee:      utils.NewDecimal(89, 3),
 							RecurrentFee:  utils.NewDecimal(6, 2),
@@ -875,13 +888,6 @@ func testLoadersGetRateProfile(t *testing.T) {
 							RecurrentFee:  utils.NewDecimal(6, 2),
 							Unit:          utils.NewDecimal(int64(time.Minute), 0),
 							Increment:     utils.NewDecimal(int64(time.Second), 0),
-						},
-						{
-							IntervalStart: utils.NewDecimal(0, 0),
-							FixedFee:      utils.NewDecimal(0, 0),
-							RecurrentFee:  utils.NewDecimal(0, 0),
-							Unit:          utils.NewDecimal(0, 0),
-							Increment:     utils.NewDecimal(0, 0),
 						},
 					},
 				},
@@ -945,7 +951,7 @@ func testLoadersGetRateProfile(t *testing.T) {
 	}
 }
 
-func testLoadersGetResourceProfile(t *testing.T) {
+func testLoadersGetResourceProfiles(t *testing.T) {
 	expRsPrfs := []*engine.ResourceProfile{
 		{
 			Tenant:            "cgrates.org",
@@ -986,126 +992,219 @@ func testLoadersGetResourceProfile(t *testing.T) {
 	}
 }
 
-func testLoadersGetRouteProfile(t *testing.T) {
-	expIDs := []string{"ROUTE_ACNT_1001"}
-	var rtIDs []string
-	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetRouteProfileIDs,
+func testLoadersGetRouteProfiles(t *testing.T) {
+	expRouPrfs := []*engine.APIRouteProfile{
+		{
+			Tenant:    "cgrates.org",
+			ID:        "RoutePrf1",
+			FilterIDs: []string{"*string:~*req.Account:1001"},
+			Sorting:   utils.MetaLC,
+			Routes: []*engine.ExternalRoute{
+				{
+					ID:              "route1",
+					FilterIDs:       []string{"fltr1"},
+					AccountIDs:      []string{"Account1", "Account2"},
+					RateProfileIDs:  []string{"RPL_1"},
+					ResourceIDs:     []string{"ResGroup1"},
+					StatIDs:         []string{"Stat1"},
+					Weights:         ";10",
+					Blocker:         true,
+					RouteParameters: "param1",
+				},
+				{
+					ID:              "route1",
+					RateProfileIDs:  []string{"RPL_2"},
+					ResourceIDs:     []string{"ResGroup2", "ResGroup4"},
+					StatIDs:         []string{"Stat3"},
+					Weights:         ";10",
+					Blocker:         false,
+					RouteParameters: utils.EmptyString,
+				},
+				{
+					ID:              "route1",
+					FilterIDs:       []string{"fltr2"},
+					AccountIDs:      []string{"Account2"},
+					RateProfileIDs:  []string{"RPL_3"},
+					ResourceIDs:     []string{"ResGroup3"},
+					StatIDs:         []string{"Stat2"},
+					Weights:         ";10",
+					Blocker:         false,
+					RouteParameters: utils.EmptyString,
+				},
+			},
+			Weights: ";20",
+		},
+		{
+			Tenant:    "cgrates.org",
+			ID:        "RoutePrf2",
+			FilterIDs: []string{"*string:~*req.Account:dan"},
+			Sorting:   utils.MetaLC,
+			Routes: []*engine.ExternalRoute{
+				{
+					ID:              "route1",
+					FilterIDs:       []string{"fltr3"},
+					AccountIDs:      []string{"Account3", "Account4"},
+					RateProfileIDs:  []string{"RPL_1"},
+					ResourceIDs:     []string{"ResGroup1"},
+					StatIDs:         []string{"Stat1"},
+					Weights:         ";10",
+					Blocker:         true,
+					RouteParameters: "param1",
+				},
+			},
+			Weights: ";20",
+		},
+	}
+	var rouPrfs []*engine.APIRouteProfile
+	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetRouteProfiles,
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
-		}, &rtIDs); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(rtIDs, expIDs) {
-		t.Errorf("expected: <%+v>, \nreceived: <%+v>", expIDs, rtIDs)
-	}
-
-	expRtPrf := engine.APIRouteProfile{
-		Tenant:    "cgrates.org",
-		ID:        "ROUTE_ACNT_1001",
-		FilterIDs: []string{"FLTR_ACCOUNT_1001"},
-		Sorting:   utils.MetaWeight,
-		Routes: []*engine.ExternalRoute{
-			{
-				ID:      "route1",
-				Weights: ";20",
-			},
-		},
-		Weights: ";10",
-	}
-
-	var rplyRtPrf engine.APIRouteProfile
-	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetRouteProfile,
-		utils.TenantID{
-			Tenant: "cgrates.org",
-			ID:     expIDs[0],
-		}, &rplyRtPrf); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(rplyRtPrf, expRtPrf) {
-		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
-			utils.ToJSON(expRtPrf), utils.ToJSON(rplyRtPrf))
-	}
-}
-
-func testLoadersGetStatQueueProfile(t *testing.T) {
-	expIDs := []string{"Stat_1"}
-	var sqIDs []string
-	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetStatQueueProfileIDs,
-		&utils.ArgsItemIDs{
-			Tenant: "cgrates.org",
-		}, &sqIDs); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(sqIDs, expIDs) {
-		t.Errorf("expected: <%+v>, \nreceived: <%+v>", expIDs, sqIDs)
-	}
-
-	expSqPrf := engine.StatQueueProfile{
-		Tenant:      "cgrates.org",
-		ID:          "Stat_1",
-		FilterIDs:   []string{"FLTR_ACCOUNT_1001"},
-		QueueLength: 100,
-		TTL:         10000000000,
-		Metrics: []*engine.MetricWithFilters{
-			{
-				MetricID: utils.MetaACD,
-			},
-			{
-				MetricID: utils.MetaASR,
-			},
-			{
-				MetricID: utils.MetaTCD,
-			},
-		},
-		Stored:       true,
-		Weight:       30,
-		ThresholdIDs: []string{utils.MetaNone},
-	}
-
-	var rplySqPrf engine.StatQueueProfile
-	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetStatQueueProfile,
-		utils.TenantID{
-			Tenant: "cgrates.org",
-			ID:     expIDs[0],
-		}, &rplySqPrf); err != nil {
+		}, &rouPrfs); err != nil {
 		t.Error(err)
 	} else {
-		sort.Slice(rplySqPrf.Metrics, func(i, j int) bool { return rplySqPrf.Metrics[i].MetricID < rplySqPrf.Metrics[j].MetricID })
-		if !reflect.DeepEqual(rplySqPrf, expSqPrf) {
-			t.Errorf("expected: <%+v>, \nreceived: <%+v>",
-				utils.ToJSON(expSqPrf), utils.ToJSON(rplySqPrf))
+		sort.Slice(rouPrfs, func(i, j int) bool {
+			return rouPrfs[i].ID < rouPrfs[j].ID
+		})
+		if !reflect.DeepEqual(rouPrfs, expRouPrfs) {
+			t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ToJSON(expRouPrfs), utils.ToJSON(rouPrfs))
 		}
 	}
 }
 
-func testLoadersGetThresholdProfile(t *testing.T) {
-	expIDs := []string{"THD_ACNT_1001"}
-	var thIDs []string
-	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetThresholdProfileIDs,
+func testLoadersGetStatQueueProfiles(t *testing.T) {
+	expSqPrfs := []*engine.StatQueueProfile{
+		{
+			Tenant:      "cgrates.org",
+			ID:          "TestStats",
+			FilterIDs:   []string{"*string:~*req.Account:1001"},
+			QueueLength: 100,
+			TTL:         time.Second,
+			Metrics: []*engine.MetricWithFilters{
+				{
+					MetricID: "*sum#~*req.Value",
+				},
+				{
+					MetricID: "*average#~*req.Value",
+				},
+				{
+					MetricID: "*sum#~*req.Usage",
+				},
+			},
+			ThresholdIDs: []string{"Th1", "Th2"},
+			Blocker:      true,
+			Stored:       true,
+			Weight:       20,
+			MinItems:     2,
+		},
+		{
+			Tenant:      "cgrates.org",
+			ID:          "TestStats2",
+			FilterIDs:   []string{"*string:~*req.Account:1002"},
+			QueueLength: 100,
+			TTL:         time.Second,
+			Metrics: []*engine.MetricWithFilters{
+				{
+					MetricID: "*sum#~*req.Value",
+				},
+				{
+					MetricID: "*sum#~*req.Usage",
+				},
+				{
+					MetricID: "*sum#~*req.Cost",
+				},
+				{
+					MetricID: "*average#~*req.Value",
+				},
+				{
+					MetricID: "*average#~*req.Usage",
+				},
+				{
+					MetricID: "*average#~*req.Cost",
+				},
+			},
+			ThresholdIDs: []string{"Th"},
+			Blocker:      true,
+			Stored:       true,
+			Weight:       20,
+			MinItems:     2,
+		},
+		{
+			Tenant:      "cgrates.org",
+			ID:          "TestStats3",
+			FilterIDs:   []string{"*string:~*req.Account:1003"},
+			QueueLength: 100,
+			TTL:         time.Second,
+			Metrics: []*engine.MetricWithFilters{
+				{
+					MetricID: "*sum#~*req.Value",
+				},
+				{
+					MetricID: "*average#~*req.Value",
+				},
+			},
+			ThresholdIDs: []string{"Th1", "Th2"},
+			Blocker:      true,
+			Stored:       true,
+			Weight:       20,
+			MinItems:     2,
+		},
+	}
+	var sqPrfs []*engine.StatQueueProfile
+	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetStatQueueProfiles,
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
-		}, &thIDs); err != nil {
+		}, &sqPrfs); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(thIDs, expIDs) {
-		t.Errorf("expected: <%+v>, \nreceived: <%+v>", expIDs, thIDs)
+	} else {
+		sort.Slice(sqPrfs, func(i, j int) bool {
+			return sqPrfs[i].ID < sqPrfs[j].ID
+		})
+		if !reflect.DeepEqual(sqPrfs, expSqPrfs) {
+			t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ToJSON(expSqPrfs), utils.ToJSON(sqPrfs))
+		}
 	}
+}
 
-	expThPrf := engine.ThresholdProfile{
-		Tenant:           "cgrates.org",
-		ID:               "THD_ACNT_1001",
-		FilterIDs:        []string{"FLTR_ACCOUNT_1001"},
-		MaxHits:          -1,
-		Weight:           10,
-		ActionProfileIDs: []string{"ACT_PRF"},
+func testLoadersGetThresholdProfiles(t *testing.T) {
+	expThPrfs := []*engine.ThresholdProfile{
+		{
+			Tenant:           "cgrates.org",
+			ID:               "TH1",
+			FilterIDs:        []string{"*string:~*req.Account:1001", "*string:~*req.RunID:*default"},
+			MaxHits:          12,
+			MinHits:          10,
+			MinSleep:         time.Second,
+			Blocker:          true,
+			Weight:           10,
+			ActionProfileIDs: []string{"ACT_PRF1"},
+			Async:            true,
+		},
+		{
+			Tenant:           "cgrates.org",
+			ID:               "TH2",
+			FilterIDs:        []string{"*string:~*req.Account:1002"},
+			MaxHits:          10,
+			MinHits:          8,
+			MinSleep:         time.Second,
+			Blocker:          true,
+			Weight:           5,
+			ActionProfileIDs: []string{"ACT_PRF2"},
+			Async:            true,
+		},
 	}
-
-	var rplyThPrf engine.ThresholdProfile
-	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetThresholdProfile,
-		utils.TenantID{
+	var thPrfs []*engine.ThresholdProfile
+	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetThresholdProfiles,
+		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
-			ID:     expIDs[0],
-		}, &rplyThPrf); err != nil {
+		}, &thPrfs); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(rplyThPrf, expThPrf) {
-		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
-			utils.ToJSON(expThPrf), utils.ToJSON(rplyThPrf))
+	} else {
+		sort.Slice(thPrfs, func(i, j int) bool {
+			return thPrfs[i].ID < thPrfs[j].ID
+		})
+		if !reflect.DeepEqual(thPrfs, expThPrfs) {
+			t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ToJSON(expThPrfs), utils.ToJSON(thPrfs))
+		}
 	}
 }
 
