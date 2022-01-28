@@ -47,35 +47,35 @@ var (
 		testAttributeSResetStorDb,
 		testAttributeSStartEngine,
 		testAttributeSRPCConn,
-		// testGetAttributeProfileBeforeSet,
-		// testGetAttributeProfilesBeforeSet,
+		testGetAttributeProfileBeforeSet,
+		testGetAttributeProfilesBeforeSet,
 		testAttributeSetAttributeProfile,
-		// testAttributeGetAttributeIDs,
-		// testAttributeGetAttributes,
-		// testAttributeGetAttributeCount,
-		// testGetAttributeProfileBeforeSet2,
-		// testAttributeSetAttributeProfile2,
-		// testAttributeGetAttributeIDs2,
-		// testAttributeGetAttributes2,
-		// testAttributeGetAttributeCount2,
-		// testAttributeRemoveAttributeProfile,
-		// testAttributeGetAttributesAfterRemove,
-		// testAttributeGetAttributeIDs,
-		// testAttributeGetAttributeCount,
-		// testAttributeSetAttributeProfileBrokenReference,
-		// testAttributeSGetAttributeForEventMissingEvent,
-		// testAttributeSGetAttributeForEventAnyContext,
-		// testAttributeSGetAttributeForEventSameAnyContext,
-		// testAttributeSGetAttributeForEventNotFound,
-		// testAttributeSGetAttributeForEvent,
-		// testAttributeProcessEvent,
-		// testAttributeProcessEventWithSearchAndReplace,
-		// testAttributeSProcessWithMultipleRuns,
-		// testAttributeSProcessWithMultipleRuns2,
-		// testAttributeGetAttributeProfileAllIDs,
-		// testAttributeGetAttributeProfileAllCount,
-		// testAttributeRemoveRemainAttributeProfiles,
-		// testAttributeGetAttributeProfileAfterRemove,
+		testAttributeGetAttributeIDs,
+		testAttributeGetAttributes,
+		testAttributeGetAttributeCount,
+		testGetAttributeProfileBeforeSet2,
+		testAttributeSetAttributeProfile2,
+		testAttributeGetAttributeIDs2,
+		testAttributeGetAttributes2,
+		testAttributeGetAttributeCount2,
+		testAttributeRemoveAttributeProfile,
+		testAttributeGetAttributesAfterRemove,
+		testAttributeGetAttributeIDs,
+		testAttributeGetAttributeCount,
+		testAttributeSetAttributeProfileBrokenReference,
+		testAttributeSGetAttributeForEventMissingEvent,
+		testAttributeSGetAttributeForEventAnyContext,
+		testAttributeSGetAttributeForEventSameAnyContext,
+		testAttributeSGetAttributeForEventNotFound,
+		testAttributeSGetAttributeForEvent,
+		testAttributeProcessEvent,
+		testAttributeProcessEventWithSearchAndReplace,
+		testAttributeSProcessWithMultipleRuns,
+		testAttributeSProcessWithMultipleRuns2,
+		testAttributeGetAttributeProfileAllIDs,
+		testAttributeGetAttributeProfileAllCount,
+		testAttributeRemoveRemainAttributeProfiles,
+		testAttributeGetAttributeProfileAfterRemove,
 		testAttributeSKillEngine,
 	}
 )
@@ -205,6 +205,7 @@ func testAttributeSetAttributeProfile(t *testing.T) {
 				Value: "cgrates.itsyscom",
 			},
 		},
+		Weights: ";20",
 	}
 	var result *engine.APIAttributeProfile
 	if err := attrSRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfile,
@@ -254,6 +255,7 @@ func testAttributeGetAttributes(t *testing.T) {
 					Value: "cgrates.itsyscom",
 				},
 			},
+			Weights: ";20",
 		},
 	}
 	if err := attrSRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfiles,
@@ -361,6 +363,7 @@ func testAttributeGetAttributes2(t *testing.T) {
 					Value: "cgrates.itsyscom",
 				},
 			},
+			Weights: ";20",
 		},
 		{
 			Tenant:    utils.CGRateSorg,
@@ -464,6 +467,7 @@ func testAttributeGetAttributesAfterRemove(t *testing.T) {
 					Value: "cgrates.itsyscom",
 				},
 			},
+			Weights: ";20",
 		},
 	}
 	if err := attrSRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfiles,
@@ -538,6 +542,7 @@ func testAttributeSGetAttributesWithPrefix(t *testing.T) {
 					Value: "cgrates.itsyscom",
 				},
 			},
+			Weights: ";20.0",
 		},
 	}
 	if err := attrSRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfiles,
@@ -610,7 +615,7 @@ func testAttributeSGetAttributeForEventAnyContext(t *testing.T) {
 					Value: "1001",
 				},
 			},
-			Weights: ";10.0",
+			Weights: ";10",
 		},
 	}
 	var result string
@@ -645,7 +650,7 @@ func testAttributeSGetAttributeForEventAnyContext(t *testing.T) {
 				Value: "1001",
 			},
 		},
-		Weights: ";10.0",
+		Weights: ";10",
 	}
 	if !reflect.DeepEqual(expAttrFromEv, attrReply) {
 		t.Errorf("Expecting: %s, received: %s", utils.ToJSON(expAttrFromEv), utils.ToJSON(attrReply))
@@ -681,7 +686,7 @@ func testAttributeSGetAttributeForEventSameAnyContext(t *testing.T) {
 				Value: "1001",
 			},
 		},
-		Weights: ";10.0",
+		Weights: ";10",
 	}
 	if !reflect.DeepEqual(expAttrFromEv, attrReply) {
 		t.Errorf("Expecting: %s, received: %s", utils.ToJSON(expAttrFromEv), utils.ToJSON(attrReply))
@@ -739,7 +744,7 @@ func testAttributeSGetAttributeForEvent(t *testing.T) {
 				FilterIDs: []string{},
 			},
 		},
-		Weights: ";10.0",
+		Weights: ";10",
 	}
 	if *encoding == utils.MetaGOB {
 		eAttrPrf.Attributes[0].FilterIDs = nil
@@ -765,7 +770,7 @@ func testAttributeSGetAttributeForEvent(t *testing.T) {
 					FilterIDs: []string{},
 				},
 			},
-			Weights: ";10.0",
+			Weights: ";10",
 		},
 	}
 	if err := attrSRPC.Call(context.Background(), utils.AdminSv1SetAttributeProfile,
