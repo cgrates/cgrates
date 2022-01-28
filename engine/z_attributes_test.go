@@ -4707,6 +4707,11 @@ func TestAttributesV1GetAttributeForEventProfileIgnoreOpts(t *testing.T) {
 		Tenant:    "cgrates.org",
 		ID:        "AC1",
 		FilterIDs: []string{"*string:~*req.Attribute:testAttrValue"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 	}
 	if err := dm.SetAttributeProfile(context.Background(), acPrf, true); err != nil {
 		t.Error(err)
@@ -4729,7 +4734,7 @@ func TestAttributesV1GetAttributeForEventProfileIgnoreOpts(t *testing.T) {
 		ID:         "AC1",
 		FilterIDs:  []string{"*string:~*req.Attribute:testAttrValue"},
 		Attributes: []*ExternalAttribute{},
-		Weights:    ";0",
+		Weights:    ";20",
 	}
 
 	err = aA.V1GetAttributeForEvent(context.Background(), ev, rply)
@@ -4758,7 +4763,7 @@ func TestAttributesV1GetAttributeForEventProfileIgnoreOpts(t *testing.T) {
 		ID:         "AC1",
 		FilterIDs:  []string{"*string:~*req.Attribute:testAttrValue"},
 		Attributes: []*ExternalAttribute{},
-		Weights:    ";0",
+		Weights:    ";20",
 	}
 	// with ignore filters on true and with bad filter
 	err = aA.V1GetAttributeForEvent(context.Background(), ev2, rply2)

@@ -147,7 +147,7 @@ CREATE TABLE tp_attributes (
   `type` varchar(64) NOT NULL,
   `value` varchar(64) NOT NULL,
   `blocker` BOOLEAN NOT NULL,
-  `weight` decimal(8,2) NOT NULL,
+  `weights` varchar(64) NOT NULL,
   `created_at` TIMESTAMP,
   PRIMARY KEY (`pk`),
   KEY `tpid` (`tpid`),
