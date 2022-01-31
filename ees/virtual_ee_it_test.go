@@ -178,7 +178,7 @@ func testVirtVerifyExports(t *testing.T) {
 	if len(files) != 1 {
 		t.Errorf("Expected %+v, received: %+v", 1, len(files))
 	}
-	eCnt := "dbafe9c8614c785a65aabd116dd3959c3c56f7f6,SupplierRun,dsafdsaf,cgrates.org,1001,1.01,CustomValue,1.23,SupplierRun\n"
+	eCnt := "SupplierRun,dsafdsaf,cgrates.org,1001,1.01,CustomValue,1.23,SupplierRun\n"
 	if outContent1, err := os.ReadFile(files[0]); err != nil {
 		t.Error(err)
 	} else if eCnt != string(outContent1) {
