@@ -44,7 +44,7 @@ func TestAgReqSetFields(t *testing.T) {
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil)
 	// populate request, emulating the way will be done in HTTPAgent
-	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.MetaOriginID, PathSlice: []string{utils.MetaOriginID}},
+	agReq.Opts.Set([]string{utils.MetaOriginID},
 		utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()))
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.ToR, PathSlice: []string{utils.ToR}}, utils.MetaVoice)
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AccountField, PathSlice: []string{utils.AccountField}}, "1001")
@@ -1115,17 +1115,18 @@ func TestAgReqFieldAsInterfaceForOneFldPathReq(t *testing.T) {
 		config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	dP := &utils.MapStorage{
-		utils.MetaOriginID: "CGRATES_ID1",
 		utils.AccountField: "1002",
 		utils.AnswerTime:   time.Date(2013, 12, 30, 14, 59, 31, 0, time.UTC),
 	}
-	aqReq := NewAgentRequest(dP, nil, nil, nil, nil, nil,
+	opts := utils.MapStorage{
+		utils.MetaOriginID: "CGRATES_ID1",
+	}
+	aqReq := NewAgentRequest(dP, nil, nil, nil, opts, nil,
 		"cgrates.org", utils.EmptyString, filterS, nil)
 
 	path := []string{utils.MetaReq}
 
 	expVal := &utils.MapStorage{
-		utils.MetaOriginID: "CGRATES_ID1",
 		utils.AccountField: "1002",
 		utils.AnswerTime:   time.Date(2013, 12, 30, 14, 59, 31, 0, time.UTC),
 	}

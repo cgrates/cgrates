@@ -1334,11 +1334,11 @@ func TestSessionSrelocateSessionS(t *testing.T) {
 		utils.OriginHost:   "127.0.0.1",
 	})
 	opt := make(map[string]interface{})
-	initialCGRID := GetSetOptsOriginID(sSEv, opt)
+	initialOriginID := GetSetOptsOriginID(sSEv, opt)
 	s := &Session{
 		EventStart: sSEv,
 		OptsStart: map[string]interface{}{
-			utils.MetaOriginID: initialCGRID,
+			utils.MetaOriginID: initialOriginID,
 		},
 	}
 	//register the session as active
@@ -1350,8 +1350,8 @@ func TestSessionSrelocateSessionS(t *testing.T) {
 	}
 	//relocate the session
 	sS.relocateSession(context.Background(), "111", "222", "127.0.0.1")
-	//check if the session exist with old CGRID
-	rcvS = sS.getSessions(initialCGRID, false)
+	//check if the session exist with old originID
+	rcvS = sS.getSessions(initialOriginID, false)
 	if len(rcvS) != 0 {
 		t.Errorf("Expecting 0, received: %+v", len(rcvS))
 	}
@@ -1359,9 +1359,9 @@ func TestSessionSrelocateSessionS(t *testing.T) {
 		utils.OriginID:   "222",
 		utils.OriginHost: "127.0.0.1"})
 	opt2 := make(map[string]interface{})
-	cgrID := GetSetOptsOriginID(ev, opt2)
-	//check the session with new CGRID
-	rcvS = sS.getSessions(cgrID, false)
+	originID := GetSetOptsOriginID(ev, opt2)
+	//check the session with new originID
+	rcvS = sS.getSessions(originID, false)
 	if !reflect.DeepEqual(rcvS[0], s) {
 		t.Errorf("Expecting %+v, received: %+v", s, rcvS[0])
 	}

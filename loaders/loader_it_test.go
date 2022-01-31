@@ -243,7 +243,7 @@ func testLoaderCheckAttributes(t *testing.T) {
 			Value: "Sub2",
 		}},
 		Blocker: true,
-		Weight:  20,
+		Weights: ";20",
 	}
 	if *encoding == utils.MetaGOB { // gob threats empty slices as nil values
 		eAttrPrf.Attributes[1].FilterIDs = nil

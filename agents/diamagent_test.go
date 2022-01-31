@@ -215,7 +215,7 @@ func TestProcessRequest(t *testing.T) {
 							"Usage":         "10s",
 						},
 						APIOpts: map[string]interface{}{
-							"CGRID": "1133dc80896edf5049b46aa911cb9085eeb27f4c",
+							"originID": "1133dc80896edf5049b46aa911cb9085eeb27f4c",
 						},
 					},
 				},
@@ -279,7 +279,7 @@ func TestProcessRequest(t *testing.T) {
 							"Usage":         "10s",
 						},
 						APIOpts: map[string]interface{}{
-							"CGRID": "1133dc80896edf5049b46aa911cb9085eeb27f4c",
+							"originID": "1133dc80896edf5049b46aa911cb9085eeb27f4c",
 						},
 					},
 				},
@@ -415,7 +415,7 @@ func TestProcessRequest(t *testing.T) {
 							"Usage":         "10s",
 						},
 						APIOpts: map[string]interface{}{
-							"CGRID": "1133dc80896edf5049b46aa911cb9085eeb27f4c",
+							"originID": "1133dc80896edf5049b46aa911cb9085eeb27f4c",
 						},
 					},
 				},
