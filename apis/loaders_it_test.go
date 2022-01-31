@@ -66,7 +66,7 @@ var (
 		testLoadersGetRateProfiles,
 		testLoadersGetResourceProfiles,
 		// testLoadersGetRouteProfiles,
-		// testLoadersGetStatQueueProfiles,
+		testLoadersGetStatQueueProfiles,
 		testLoadersGetThresholdProfiles,
 
 		testLoadersRemove,
@@ -1084,7 +1084,8 @@ func testLoadersGetStatQueueProfiles(t *testing.T) {
 					MetricID: "*sum#~*req.Value",
 				},
 				{
-					MetricID: "*average#~*req.Value",
+					FilterIDs: []string{"fltr1", "fltr2"},
+					MetricID:  "*average#~*req.Value",
 				},
 				{
 					MetricID: "*sum#~*req.Usage",
@@ -1110,13 +1111,13 @@ func testLoadersGetStatQueueProfiles(t *testing.T) {
 					MetricID: "*sum#~*req.Usage",
 				},
 				{
-					MetricID: "*sum#~*req.Cost",
-				},
-				{
 					MetricID: "*average#~*req.Value",
 				},
 				{
 					MetricID: "*average#~*req.Usage",
+				},
+				{
+					MetricID: "*sum#~*req.Cost",
 				},
 				{
 					MetricID: "*average#~*req.Cost",
