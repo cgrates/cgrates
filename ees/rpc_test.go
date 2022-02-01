@@ -197,7 +197,7 @@ func TestRPCPrepareMap(t *testing.T) {
 
 	exp := &utils.CGREvent{
 		Tenant: "cgrates.org",
-		ID:     "CGRID1",
+		ID:     "testID1",
 		Event: map[string]interface{}{
 			utils.Usage: 21,
 		},
@@ -208,7 +208,7 @@ func TestRPCPrepareMap(t *testing.T) {
 
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
-		ID:     "CGRID1",
+		ID:     "testID1",
 		Event: map[string]interface{}{
 			utils.Usage: 21,
 		},

@@ -178,7 +178,7 @@ var (
 			Rules: []*engine.FilterRule{
 				{
 					Type:    utils.MetaString,
-					Element: "~*req.CGRID",
+					Element: "~*opts.*originID",
 					Values:  []string{"QWEASDZXC", "IOPJKLBNM"},
 				},
 				{
@@ -363,8 +363,8 @@ func testV1FIdxSetAttributeSProfileWithFltr(t *testing.T) {
 
 	// check the updated indexes
 	expectedIDx = []string{"*string:*opts.*context:*sessions:TEST_ATTRIBUTES_IT_TEST",
-		"*string:*req.CGRID:QWEASDZXC:TEST_ATTRIBUTES_IT_TEST",
-		"*string:*req.CGRID:IOPJKLBNM:TEST_ATTRIBUTES_IT_TEST",
+		"*string:*opts.*originID:QWEASDZXC:TEST_ATTRIBUTES_IT_TEST",
+		"*string:*opts.*originID:IOPJKLBNM:TEST_ATTRIBUTES_IT_TEST",
 		"*string:*opts.Subsystems:*attributes:TEST_ATTRIBUTES_IT_TEST",
 		"*notexists:*opts.*rateS:*none:TEST_ATTRIBUTES_IT_TEST"}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
@@ -868,8 +868,8 @@ func testV1FIdxSetAccountWithFltr(t *testing.T) {
 
 	// check the updated indexes
 	expectedIDx = []string{"*string:*opts.*context:*sessions:ACCOUNT_FILTER_INDEXES",
-		"*string:*req.CGRID:QWEASDZXC:ACCOUNT_FILTER_INDEXES",
-		"*string:*req.CGRID:IOPJKLBNM:ACCOUNT_FILTER_INDEXES",
+		"*string:*opts.*originID:QWEASDZXC:ACCOUNT_FILTER_INDEXES",
+		"*string:*opts.*originID:IOPJKLBNM:ACCOUNT_FILTER_INDEXES",
 		"*string:*opts.Subsystems:*attributes:ACCOUNT_FILTER_INDEXES",
 		"*notexists:*opts.*rateS:*none:ACCOUNT_FILTER_INDEXES"}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
@@ -1332,8 +1332,8 @@ func testV1FIdxSetActionProfileWithFltr(t *testing.T) {
 
 	// check the updated indexes
 	expectedIDx = []string{"*string:*req.Account:1001:REM_ACC",
-		"*string:*req.CGRID:QWEASDZXC:REM_ACC",
-		"*string:*req.CGRID:IOPJKLBNM:REM_ACC",
+		"*string:*opts.*originID:QWEASDZXC:REM_ACC",
+		"*string:*opts.*originID:IOPJKLBNM:REM_ACC",
 		"*string:*opts.Subsystems:*attributes:REM_ACC",
 		"*notexists:*opts.*rateS:*none:REM_ACC"}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
@@ -1797,8 +1797,8 @@ func testV1FIdxSetChargerSProfileWithFltr(t *testing.T) {
 
 	// check the updated indexes
 	expectedIDx = []string{"*string:*req.Account:1001:1001_Charger",
-		"*string:*req.CGRID:QWEASDZXC:1001_Charger",
-		"*string:*req.CGRID:IOPJKLBNM:1001_Charger",
+		"*string:*opts.*originID:QWEASDZXC:1001_Charger",
+		"*string:*opts.*originID:IOPJKLBNM:1001_Charger",
 		"*string:*opts.Subsystems:*attributes:1001_Charger",
 		"*notexists:*opts.*rateS:*none:1001_Charger"}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
@@ -2236,8 +2236,8 @@ func testV1FIdxSetRateSProfileWithFltr(t *testing.T) {
 
 	// check the updated indexes
 	expectedIDx = []string{"*string:*req.Account:1001:RATE_1",
-		"*string:*req.CGRID:QWEASDZXC:RATE_1",
-		"*string:*req.CGRID:IOPJKLBNM:RATE_1",
+		"*string:*opts.*originID:QWEASDZXC:RATE_1",
+		"*string:*opts.*originID:IOPJKLBNM:RATE_1",
 		"*string:*opts.Subsystems:*attributes:RATE_1",
 		"*notexists:*opts.*rateS:*none:RATE_1"}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
@@ -2724,8 +2724,8 @@ func testV1FIdxRateSProfileRatesWithFltr(t *testing.T) {
 	}
 
 	// check the updated indexes
-	expectedIDx = []string{"*string:*req.CGRID:QWEASDZXC:RT_ALWAYS",
-		"*string:*req.CGRID:IOPJKLBNM:RT_ALWAYS",
+	expectedIDx = []string{"*string:*opts.*originID:QWEASDZXC:RT_ALWAYS",
+		"*string:*opts.*originID:IOPJKLBNM:RT_ALWAYS",
 		"*string:*req.RequestType:*prepaid:RT_ALWAYS",
 		"*string:*req.RequestType:*postpaid:RT_CHRISTMAS",
 		"*string:*opts.Subsystems:*attributes:RT_ALWAYS",
@@ -3325,8 +3325,8 @@ func testV1FIdxSetResourceSProfileWithFltr(t *testing.T) {
 
 	// check the updated indexes
 	expectedIDx = []string{"*string:*req.Account:1001:RESOURCE1",
-		"*string:*req.CGRID:QWEASDZXC:RESOURCE1",
-		"*string:*req.CGRID:IOPJKLBNM:RESOURCE1",
+		"*string:*opts.*originID:QWEASDZXC:RESOURCE1",
+		"*string:*opts.*originID:IOPJKLBNM:RESOURCE1",
 		"*string:*opts.Subsystems:*attributes:RESOURCE1",
 		"*notexists:*opts.*rateS:*none:RESOURCE1"}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
@@ -3777,8 +3777,8 @@ func testV1FIdxSetRouteSProfileWithFltr(t *testing.T) {
 
 	// check the updated indexes
 	expectedIDx = []string{"*string:*req.Account:1001:ROUTE_1",
-		"*string:*req.CGRID:QWEASDZXC:ROUTE_1",
-		"*string:*req.CGRID:IOPJKLBNM:ROUTE_1",
+		"*string:*opts.*originID:QWEASDZXC:ROUTE_1",
+		"*string:*opts.*originID:IOPJKLBNM:ROUTE_1",
 		"*string:*opts.Subsystems:*attributes:ROUTE_1",
 		"*notexists:*opts.*rateS:*none:ROUTE_1"}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
@@ -4263,8 +4263,8 @@ func testV1FIdxSetStatSProfileWithFltr(t *testing.T) {
 
 	// check the updated indexes
 	expectedIDx = []string{"*string:*req.Account:1001:Stat_1",
-		"*string:*req.CGRID:QWEASDZXC:Stat_1",
-		"*string:*req.CGRID:IOPJKLBNM:Stat_1",
+		"*string:*opts.*originID:QWEASDZXC:Stat_1",
+		"*string:*opts.*originID:IOPJKLBNM:Stat_1",
 		"*string:*opts.Subsystems:*attributes:Stat_1",
 		"*notexists:*opts.*rateS:*none:Stat_1"}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
@@ -4712,8 +4712,8 @@ func testV1FIdxSetThresholdProfileWithFltr(t *testing.T) {
 
 	// check the updated indexes
 	expectedIDx = []string{"*string:*req.Account:1001:THD_ACNT_1001",
-		"*string:*req.CGRID:QWEASDZXC:THD_ACNT_1001",
-		"*string:*req.CGRID:IOPJKLBNM:THD_ACNT_1001",
+		"*string:*opts.*originID:QWEASDZXC:THD_ACNT_1001",
+		"*string:*opts.*originID:IOPJKLBNM:THD_ACNT_1001",
 		"*string:*opts.Subsystems:*attributes:THD_ACNT_1001",
 		"*notexists:*opts.*rateS:*none:THD_ACNT_1001"}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,

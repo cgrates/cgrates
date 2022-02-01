@@ -158,7 +158,7 @@ func TestFilterIndexesCheckingDynamicPathToNotIndexLibphNmbr(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "CHARGER_2",
 		FilterIDs: []string{
-			"*prefix:~*req.CGRID:TEST_ID",
+			"*prefix:~*opts.*originID:TEST_ID",
 			"*string:~*opts.TotalCost:~*stats.STS_PRF1.*tcc",
 			"*string:~*libphonenumber.<~*req.Destination>:1233",
 		},
@@ -172,7 +172,7 @@ func TestFilterIndexesCheckingDynamicPathToNotIndexLibphNmbr(t *testing.T) {
 	}
 
 	expIDx := map[string]utils.StringSet{
-		"*prefix:*req.CGRID:TEST_ID": {
+		"*prefix:*opts.*originID:TEST_ID": {
 			"CHARGER_2": {},
 		},
 	}

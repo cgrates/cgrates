@@ -106,7 +106,7 @@ func testSQLInitConfig(t *testing.T) {
 					"filters": [],										// limit parsing based on the filters
 					"flags": [],										// flags to influence the event processing
 					"fields":[									// import fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
-						{"tag": "CGRID", "type": "*composed", "value": "~*req.cgrid", "path": "*cgreq.CGRID"},
+						{"tag": "OriginID", "type": "*composed", "value": "~*req.OriginID", "path": "*cgreq.OriginID"},
 					],
 				},
 			],
@@ -127,7 +127,6 @@ func testSQLInitCdrDb(t *testing.T) {
 
 type testModelSql struct {
 	ID          int64
-	Cgrid       string
 	RunID       string
 	OriginHost  string
 	Source      string
@@ -375,7 +374,7 @@ func testSQLInitConfig2(t *testing.T) {
 					"filters": [],										// limit parsing based on the filters
 					"flags": [],										// flags to influence the event processing
 					"fields":[									// import fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
-						{"tag": "CGRID", "type": "*composed", "value": "~*req.cgrid", "path": "*cgreq.CGRID"},
+						{"tag": "OriginID", "type": "*composed", "value": "~*req.OriginID", "path": "*cgreq.OriginID"},
 					],
 				},
 			],

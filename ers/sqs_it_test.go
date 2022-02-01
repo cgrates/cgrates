@@ -68,7 +68,7 @@ func TestSQSER(t *testing.T) {
 				// "awsToken": "".
 			},
 			"fields":[									// import fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
-				{"tag": "CGRID", "type": "*composed", "value": "~*req.CGRID", "path": "*cgreq.CGRID"},
+				{"tag": "OriginID", "type": "*composed", "value": "~*req.OriginID", "path": "*cgreq.OriginID"},
 			],
 		},
 	],
@@ -99,9 +99,9 @@ func TestSQSER(t *testing.T) {
 	}
 	scv := sqs.New(sess)
 
-	randomCGRID := utils.UUIDSha1Prefix()
+	randomOriginID := utils.UUIDSha1Prefix()
 	scv.SendMessage(&sqs.SendMessageInput{
-		MessageBody: aws.String(fmt.Sprintf(`{"CGRID": "%s"}`, randomCGRID)),
+		MessageBody: aws.String(fmt.Sprintf(`{"OriginID": "%s"}`, randomOriginID)),
 		QueueUrl:    sqsRdr.queueURL,
 	})
 
@@ -120,7 +120,7 @@ func TestSQSER(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     ev.cgrEvent.ID,
 			Event: map[string]interface{}{
-				"CGRID": randomCGRID,
+				"OriginID": randomOriginID,
 			},
 		}
 		if !reflect.DeepEqual(ev.cgrEvent, expected) {

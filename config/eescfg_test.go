@@ -373,9 +373,9 @@ func TestEEsCfgloadFromJsonCfgCase1(t *testing.T) {
 				Fields: &[]*FcTemplateJsonCfg{
 					{
 						Tag:   utils.StringPointer(utils.MetaOriginID),
-						Path:  utils.StringPointer("*exp.CGRID"),
+						Path:  utils.StringPointer("*exp.*originID"),
 						Type:  utils.StringPointer(utils.MetaVariable),
-						Value: utils.StringPointer("~*req.CGRID"),
+						Value: utils.StringPointer("~*opts.*originID"),
 					},
 				},
 			},
@@ -423,15 +423,15 @@ func TestEEsCfgloadFromJsonCfgCase1(t *testing.T) {
 				contentFields: []*FCTemplate{
 					{
 						Tag:    utils.MetaOriginID,
-						Path:   "*exp.CGRID",
+						Path:   "*exp.*originID",
 						Type:   utils.MetaVariable,
-						Value:  NewRSRParsersMustCompile("~*req.CGRID", utils.InfieldSep),
+						Value:  NewRSRParsersMustCompile("~*opts.*originID", utils.InfieldSep),
 						Layout: time.RFC3339,
 					},
 				},
 				Opts: &EventExporterOpts{},
 				Fields: []*FCTemplate{
-					{Tag: utils.MetaOriginID, Path: "*exp.CGRID", Type: utils.MetaVariable, Value: NewRSRParsersMustCompile("~*req.CGRID", utils.InfieldSep), Layout: time.RFC3339},
+					{Tag: utils.MetaOriginID, Path: "*exp.*originID", Type: utils.MetaVariable, Value: NewRSRParsersMustCompile("~*opts.*originID", utils.InfieldSep), Layout: time.RFC3339},
 				},
 				FailedPostsDir: "/var/spool/cgrates/failed_posts",
 			},
@@ -486,7 +486,7 @@ func TestEEsCfgloadFromJsonCfgCase2(t *testing.T) {
 						Layout: utils.StringPointer(time.RFC3339),
 					},
 					{
-						Path:  utils.StringPointer("*req.CGRID"),
+						Path:  utils.StringPointer("*opts.*originID"),
 						Type:  utils.StringPointer(utils.MetaVariable),
 						Value: utils.StringPointer("1"),
 					},
@@ -536,9 +536,9 @@ func TestEEsCfgloadFromJsonCfgCase2(t *testing.T) {
 				contentFields: []*FCTemplate{
 					{
 						Tag:    utils.MetaOriginID,
-						Path:   "*exp.CGRID",
+						Path:   "*exp.*originID",
 						Type:   utils.MetaVariable,
-						Value:  NewRSRParsersMustCompile("~*req.CGRID", utils.InfieldSep),
+						Value:  NewRSRParsersMustCompile("~*opts.*originID", utils.InfieldSep),
 						Layout: time.RFC3339,
 					},
 				},
@@ -547,14 +547,14 @@ func TestEEsCfgloadFromJsonCfgCase2(t *testing.T) {
 				Fields: []*FCTemplate{
 					{
 						Tag:    utils.MetaOriginID,
-						Path:   "*exp.CGRID",
+						Path:   "*exp.*originID",
 						Type:   utils.MetaVariable,
-						Value:  NewRSRParsersMustCompile("~*req.CGRID", utils.InfieldSep),
+						Value:  NewRSRParsersMustCompile("~*opts.*originID", utils.InfieldSep),
 						Layout: time.RFC3339,
 					},
 					{
-						Tag:    "*req.CGRID",
-						Path:   "*req.CGRID",
+						Tag:    "*opts.*originID",
+						Path:   "*opts.*originID",
 						Type:   utils.MetaVariable,
 						Value:  NewRSRParsersMustCompile("1", utils.InfieldSep),
 						Layout: time.RFC3339,
@@ -567,9 +567,9 @@ func TestEEsCfgloadFromJsonCfgCase2(t *testing.T) {
 		"randomVal": {
 			{
 				Tag:    utils.MetaOriginID,
-				Path:   "*exp.CGRID",
+				Path:   "*exp.*originID",
 				Type:   utils.MetaVariable,
-				Value:  NewRSRParsersMustCompile("~*req.CGRID", utils.InfieldSep),
+				Value:  NewRSRParsersMustCompile("~*opts.*originID", utils.InfieldSep),
 				Layout: time.RFC3339,
 			},
 		},
@@ -622,7 +622,7 @@ func TestEEsCfgAsMapInterface(t *testing.T) {
 			      "attempts": 1,										
 			      "field_separator": ",",								
 			      "fields":[
-                      {"tag": "CGRID", "path": "*exp.CGRID", "type": "*variable", "value": "~*req.CGRID"}
+                      {"tag": "*originID", "path": "*exp.*originID", "type": "*variable", "value": "~*opts.*originID"}
                   ]
             }]
 	  }
@@ -662,9 +662,9 @@ func TestEEsCfgAsMapInterface(t *testing.T) {
 				utils.FieldsCfg: []map[string]interface{}{
 					{
 						utils.TagCfg:   utils.MetaOriginID,
-						utils.PathCfg:  "*exp.CGRID",
+						utils.PathCfg:  "*exp.*originID",
 						utils.TypeCfg:  utils.MetaVariable,
-						utils.ValueCfg: "~*req.CGRID",
+						utils.ValueCfg: "~*opts.*originID",
 					},
 				},
 				utils.FailedPostsDirCfg: "/var/spool/cgrates/failed_posts",

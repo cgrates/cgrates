@@ -128,6 +128,7 @@ func (rdr *SQSER) processMessage(body []byte) (err error) {
 	}
 	cgrEv := utils.NMAsCGREvent(agReq.CGRRequest, agReq.Tenant, utils.NestingSep, agReq.Opts)
 	rdrEv := rdr.rdrEvents
+	cgrEv.APIOpts = make(map[string]interface{})
 	if _, isPartial := cgrEv.APIOpts[utils.PartialOpt]; isPartial {
 		rdrEv = rdr.partialEvents
 	}

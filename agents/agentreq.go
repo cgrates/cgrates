@@ -234,7 +234,6 @@ func (ar *AgentRequest) SetFields(tplFlds []*config.FCTemplate) (err error) {
 					Path:      tplFld.Path,
 				}
 			}
-
 			nMItm := &utils.DataLeaf{Data: out, NewBranch: tplFld.NewBranch, AttributeID: tplFld.AttributeID}
 			switch tplFld.Type {
 			case utils.MetaComposed:

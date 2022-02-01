@@ -134,6 +134,7 @@ func NMAsCGREvent(nM *OrderedNavigableMap, tnt string, pathSep string, opts MapS
 	if el == nil {
 		return
 	}
+
 	cgrEv = &CGREvent{
 		Tenant:  tnt,
 		ID:      UUIDSha1Prefix(),

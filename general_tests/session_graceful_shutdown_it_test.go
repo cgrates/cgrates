@@ -183,12 +183,13 @@ func testSessionSRplcApierGetInitateSessions(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "TestSSv1ItInitiateSession",
 		Event: map[string]interface{}{
-			utils.Tenant:       "cgrates.org",
-			utils.RequestType:  utils.MetaNone,
-			utils.MetaOriginID: "testSessionRplCGRID",
-			utils.OriginID:     "testSessionRplORIGINID",
+			utils.Tenant:      "cgrates.org",
+			utils.RequestType: utils.MetaNone,
+
+			utils.OriginID: "testSessionRplORIGINID",
 		},
 		APIOpts: map[string]interface{}{
+			utils.MetaOriginID:    "testSessionRploriginID",
 			utils.OptsSesInitiate: true,
 		},
 	}

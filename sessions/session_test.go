@@ -99,7 +99,7 @@ func TestSessionClone(t *testing.T) {
 			},
 		},
 		OptsStart: map[string]interface{}{
-			utils.MetaOriginID: "CGRID",
+			utils.MetaOriginID: "originID",
 		},
 	}
 
@@ -124,7 +124,7 @@ func TestSessionClone(t *testing.T) {
 			},
 		},
 		OptsStart: map[string]interface{}{
-			utils.MetaOriginID: "CGRID",
+			utils.MetaOriginID: "originID",
 		},
 	}
 	rcv = session.Clone()
@@ -133,11 +133,11 @@ func TestSessionClone(t *testing.T) {
 	}
 	//check clone
 	rcv.OptsStart = map[string]interface{}{
-		utils.MetaOriginID: "newCGRID",
+		utils.MetaOriginID: "neworiginID",
 	}
 
-	if session.OptsStart[utils.MetaOriginID] == "newCGRID" {
-		t.Errorf("Expecting: CGRID, received: newCGRID")
+	if session.OptsStart[utils.MetaOriginID] == "neworiginID" {
+		t.Errorf("Expecting: originID, received: neworiginID")
 	}
 	rcv.SRuns[1].TotalUsage = 10
 	if session.SRuns[1].TotalUsage == 10 {
@@ -170,7 +170,7 @@ func TestSessionAsCGREventsRawEvent(t *testing.T) {
 	}
 	s := &Session{
 		OptsStart: map[string]interface{}{
-			utils.MetaOriginID: "RandomCGRID",
+			utils.MetaOriginID: "RandomoriginID",
 		},
 		Tenant:     "cgrates.org",
 		EventStart: engine.NewMapEvent(ev),
@@ -214,7 +214,7 @@ func TestSessionAsCGREvents(t *testing.T) {
 	}
 	s := &Session{
 		OptsStart: map[string]interface{}{
-			utils.MetaOriginID: "RandomCGRID",
+			utils.MetaOriginID: "RandomoriginID",
 		},
 		Tenant:     "cgrates.org",
 		EventStart: engine.NewMapEvent(startEv),
@@ -270,7 +270,7 @@ func TestSessionAsExternalSessions(t *testing.T) {
 	tTime := time.Date(2020, time.April, 18, 23, 0, 0, 0, time.UTC)
 	s := &Session{
 		OptsStart: map[string]interface{}{
-			utils.MetaOriginID: "RandomCGRID",
+			utils.MetaOriginID: "RandomoriginID",
 		},
 		Tenant:        "cgrates.org",
 		EventStart:    engine.NewMapEvent(startEv),
@@ -282,7 +282,7 @@ func TestSessionAsExternalSessions(t *testing.T) {
 		}},
 	}
 	exp := []*ExternalSession{{
-		//CGRID:    "RandomCGRID",
+		//CGRID:    "RandomoriginID",
 		ToR:      utils.MetaVoice,
 		OriginID: "123451",
 		// OriginHost:  s.EventStart.GetStringIgnoreErrors(utils.OriginHost),
@@ -351,7 +351,7 @@ func TestSessionAsExternalSessions2(t *testing.T) {
 	}
 	s := &Session{
 		OptsStart: map[string]interface{}{
-			utils.MetaOriginID: "RandomCGRID",
+			utils.MetaOriginID: "RandomoriginID",
 		},
 		Tenant:        "cgrates.org",
 		EventStart:    engine.NewMapEvent(startEv),
@@ -362,7 +362,7 @@ func TestSessionAsExternalSessions2(t *testing.T) {
 		}},
 	}
 	exp := []*ExternalSession{{
-		CGRID:    "RandomCGRID",
+		//CGRID:    "RandomCGRID",
 		RunID:    utils.MetaDefault,
 		ToR:      utils.MetaVoice,
 		OriginID: "123451",
@@ -492,7 +492,7 @@ func TestSessiontotalUsage(t *testing.T) {
 	tTime2 := time.Date(2020, time.April, 18, 23, 0, 0, 0, time.UTC)
 	session = &Session{
 		OptsStart: map[string]interface{}{
-			utils.MetaOriginID: "CGRID",
+			utils.MetaOriginID: "originID",
 		},
 		Tenant:        "cgrates.org",
 		ResourceID:    "resourceID",
@@ -585,7 +585,7 @@ func TestUpdateSRuns(t *testing.T) {
 	}
 	s := &Session{
 		OptsStart: map[string]interface{}{
-			utils.MetaOriginID: "RandomCGRID",
+			utils.MetaOriginID: "RandomOriginID",
 		},
 		Tenant:        "cgrates.org",
 		EventStart:    engine.NewMapEvent(startEv),
