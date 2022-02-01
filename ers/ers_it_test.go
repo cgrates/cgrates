@@ -1224,7 +1224,7 @@ func TestErsOnEvictedDumpToJSONMergeError(t *testing.T) {
 		rdrEvents: make(chan *erEvent, 1),
 		filterS:   fltrS,
 	}
-	expLog := `[WARNING] <ERs> failed posting expired parial events <[{"Tenant":"cgrates.org","ID":"EventErsOnEvicted2","Event":{"Account":"1002","Additional_Field":"Additional_Value2","AnswerTime":"2021-06-01T13:00:00Z","CGRID":"1133dc80896edf5049b46aa911cb9085eeb27f4d","Category":"call","Destination":"1003","OriginID":"1234567","ToR":"*sms","Usage":"12s","password":"secure_password"},"APIOpts":null},{"Tenant":"cgrates.org","ID":"EventErsOnEvicted","Event":{"Account":"1001","Additional_Field":"Additional_Value","AnswerTime":"2021-06-01T12:00:00Z","CGRID":"1133dc80896edf5049b46aa911cb9085eeb27f4c","Category":"call","Destination":"1002","OriginHost":"local","OriginID":"123456","ToR":"*voice","Usage":"10s","password":"secure_pass"},"APIOpts":null}]>`
+	expLog := `[WARNING] <ERs> failed posting expired parial events <[{"Tenant":"cgrates.org","ID":"EventErsOnEvicted2","Event":{"Account":"1002","Additional_Field":"Additional_Value2","AnswerTime":"2021-06-01T13:00:00Z","Category":"call","Destination":"1003","OriginID":"1234567","ToR":"*sms","Usage":"12s","password":"secure_password"},"APIOpts":{"*originID":"1133dc80896edf5049b46aa911cb9085eeb27f4d",}},{"Tenant":"cgrates.org","ID":"EventErsOnEvicted","Event":{"Account":"1001","Additional_Field":"Additional_Value","AnswerTime":"2021-06-01T12:00:00Z","Category":"call","Destination":"1002","OriginHost":"local","OriginID":"123456","ToR":"*voice","Usage":"10s","password":"secure_pass"},"APIOpts":{"*originID":"1133dc80896edf5049b46aa911cb9085eeb27f4c",}}]>`
 	erS.onEvicted("ID", value)
 	rcvLog := buf.String()[20:]
 	if !strings.Contains(rcvLog, expLog) {
@@ -1302,7 +1302,7 @@ func TestERsOnEvictedDumpToJSONWithCacheDumpFieldsErrPrefix(t *testing.T) {
 		filterS:   fltrS,
 	}
 
-	expLog := `Converting CDR with CGRID: <ID_JSON> to record , ignoring due to error: <unsupported field prefix: <~*req> when set field>`
+	expLog := `Converting CDR with originID: <ID_JSON> to record , ignoring due to error: <unsupported field prefix: <~*req> when set field>`
 	erS.onEvicted("ID_JSON", value)
 	rcvLog := buf.String()
 	if !strings.Contains(rcvLog, expLog) {

@@ -2964,7 +2964,7 @@ func (sS *SessionS) processCDR(ctx *context.Context, cgrEv *utils.CGREvent, rply
 		if err = sS.connMgr.Call(ctx, sS.cfg.SessionSCfg().CDRsConns, utils.CDRsV1ProcessEvent,
 			cgrEv, rply); err != nil {
 			utils.Logger.Warning(
-				fmt.Sprintf("<%s> error <%s> posting CDR with CGRID: <%s>",
+				fmt.Sprintf("<%s> error <%s> posting CDR with originID: <%s>",
 					utils.SessionS, err.Error(), originID))
 			withErrors = true
 		}

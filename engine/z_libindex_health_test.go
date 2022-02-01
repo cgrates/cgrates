@@ -429,7 +429,7 @@ func TestHealthIndexResources(t *testing.T) {
 		"*suffix:*req.Destination:+10": { // obj exist but the index don't
 			"RES_GRP1": {},
 		},
-		"*string:*req.CGRID:not_an_id": { // index is valid but the obj does not exist
+		"*string:*opts.*originID:not_an_id": { // index is valid but the obj does not exist
 			"InexistingResource": {},
 		},
 	}
@@ -1012,7 +1012,7 @@ func TestIndexHealthMultipleProfiles(t *testing.T) {
 		ID:     "Default",
 		FilterIDs: []string{
 			"*string:~*opts.*eventType:ChargerAccountUpdate",
-			"*prefix:~*req.Destination:+2234|~*req.CGRID",
+			"*prefix:~*req.Destination:+2234|~*opts.*originID",
 			"*suffix:~*req.Usage:10",
 			"*string:~*req.Account:1234",
 			"FLTR_1_NOT_EXIST2",

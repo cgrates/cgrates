@@ -362,7 +362,7 @@ func (erS *ERService) onEvicted(id string, value interface{}) {
 
 			if err = eeReq.SetFields(context.Background(), eEvs.rdrCfg.CacheDumpFields); err != nil {
 				utils.Logger.Warning(
-					fmt.Sprintf("<%s> Converting CDR with CGRID: <%s> to record , ignoring due to error: <%s>",
+					fmt.Sprintf("<%s> Converting CDR with originID: <%s> to record , ignoring due to error: <%s>",
 						utils.ERs, id, err.Error()))
 				return
 			}
@@ -431,7 +431,7 @@ func (erS *ERService) onEvicted(id string, value interface{}) {
 
 			if err = eeReq.SetFields(context.Background(), eEvs.rdrCfg.CacheDumpFields); err != nil {
 				utils.Logger.Warning(
-					fmt.Sprintf("<%s> Converting CDR with CGRID: <%s> to record , ignoring due to error: <%s>",
+					fmt.Sprintf("<%s> Converting CDR with originID: <%s> to record , ignoring due to error: <%s>",
 						utils.ERs, id, err.Error()))
 				return
 			}

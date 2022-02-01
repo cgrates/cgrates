@@ -366,7 +366,7 @@ func TestCGREventSetCloneable(t *testing.T) {
 func TestCGREventRPCClone(t *testing.T) {
 	cgrEv := &CGREvent{
 		Tenant: "cgrates.org",
-		ID:     "CGRID",
+		ID:     "testID",
 		Event: map[string]interface{}{
 			AnswerTime:         nil,
 			"supplierprofile1": "Supplier",
@@ -396,7 +396,7 @@ func TestCGREventRPCClone(t *testing.T) {
 	}
 	exp := &CGREvent{
 		Tenant: "cgrates.org",
-		ID:     "CGRID",
+		ID:     "testID",
 		Event: map[string]interface{}{
 			AnswerTime:         nil,
 			"supplierprofile1": "Supplier",

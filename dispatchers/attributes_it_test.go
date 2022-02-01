@@ -233,7 +233,7 @@ func testDspAttrGetAttrFailover(t *testing.T) {
 			Type:      utils.MetaConstant,
 			Value:     "CGRateS.org",
 		}},
-		Weights: ";20.0",
+		Weights: ";20",
 	}
 	if *encoding == utils.MetaGOB {
 		eAttrPrf.Attributes[0].FilterIDs = nil // empty slice are nil in gob
@@ -412,7 +412,7 @@ func testDspAttrTestAuthKey2(t *testing.T) {
 			Type:      utils.MetaConstant,
 			Value:     "CGRateS.org",
 		}},
-		Weights: ";20.0",
+		Weights: ";20",
 	}
 	if *encoding == utils.MetaGOB {
 		eAttrPrf.Attributes[0].FilterIDs = nil // empty slice are nil in gob
@@ -499,7 +499,7 @@ func testDspAttrGetAttrRoundRobin(t *testing.T) {
 			Type:      utils.MetaConstant,
 			Value:     "CGRateS.org",
 		}},
-		Weights: ";20.0",
+		Weights: ";20",
 	}
 	if *encoding == utils.MetaGOB {
 		eAttrPrf.Attributes[0].FilterIDs = nil // empty slice are nil in gob

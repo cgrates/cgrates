@@ -5,7 +5,6 @@
 DROP TABLE IF EXISTS cdrs;
 CREATE TABLE cdrs (
   id int(11) NOT NULL AUTO_INCREMENT,
-  cgrid varchar(40) NOT NULL,
   run_id  varchar(64) NOT NULL,
   origin_host varchar(64) NOT NULL,
   source varchar(64) NOT NULL,
@@ -29,13 +28,12 @@ CREATE TABLE cdrs (
   updated_at TIMESTAMP NULL,
   deleted_at TIMESTAMP NULL,
   PRIMARY KEY (id),
-  UNIQUE KEY cdrrun (cgrid, run_id)
+  UNIQUE KEY cdrrun ( run_id)
 );
 
 DROP TABLE IF EXISTS session_costs;
 CREATE TABLE session_costs (
   id int(11) NOT NULL AUTO_INCREMENT,
-  cgrid varchar(40) NOT NULL,
   run_id  varchar(64) NOT NULL,
   origin_host varchar(64) NOT NULL,
   origin_id varchar(128) NOT NULL,
@@ -45,7 +43,7 @@ CREATE TABLE session_costs (
   created_at TIMESTAMP NULL,
   deleted_at TIMESTAMP NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY costid (cgrid, run_id),
+  UNIQUE KEY costid ( run_id),
   KEY origin_idx (origin_host, origin_id),
   KEY run_origin_idx (run_id, origin_id),
   KEY deleted_at_idx (deleted_at)

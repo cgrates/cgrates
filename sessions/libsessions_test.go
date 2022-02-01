@@ -51,17 +51,17 @@ func TestLibSessionSGetSetOptsOriginID(t *testing.T) {
 		utils.DisconnectCause: "NORMAL_DISCONNECT",
 		utils.OriginHost:      "127.0.0.1",
 	})
-	//Empty CGRID in event
+	//Empty originID in event
 	opt := map[string]interface{}{}
-	cgrID := GetSetOptsOriginID(sEv, opt)
-	if len(cgrID) == 0 {
-		t.Errorf("Unexpected cgrID: %+v", cgrID)
+	originID := GetSetOptsOriginID(sEv, opt)
+	if len(originID) == 0 {
+		t.Errorf("Unexpected originID: %+v", originID)
 	}
-	//populate CGRID in event
+	//populate originID in event
 	opt[utils.MetaOriginID] = "someRandomVal"
-	cgrID = GetSetOptsOriginID(sEv, opt)
-	if cgrID != "someRandomVal" {
-		t.Errorf("Expecting: someRandomVal, received: %+v", cgrID)
+	originID = GetSetOptsOriginID(sEv, opt)
+	if originID != "someRandomVal" {
+		t.Errorf("Expecting: someRandomVal, received: %+v", originID)
 	}
 }
 

@@ -37,7 +37,7 @@ import (
 	"github.com/nats-io/nats.go"
 )
 
-func testCheckNatsData(t *testing.T, randomCGRID, expData string, ch chan *nats.Msg) {
+func testCheckNatsData(t *testing.T, randomOriginID, expData string, ch chan *nats.Msg) {
 	select {
 	case err := <-rdrErr:
 		t.Fatal(err)
@@ -49,7 +49,7 @@ func testCheckNatsData(t *testing.T, randomCGRID, expData string, ch chan *nats.
 			Tenant: "cgrates.org",
 			ID:     ev.cgrEvent.ID,
 			Event: map[string]interface{}{
-				"CGRID": randomCGRID,
+				"OriginID": randomOriginID,
 			},
 			APIOpts: map[string]interface{}{},
 		}
@@ -141,8 +141,8 @@ func testCheckNatsJetStream(t *testing.T, cfg *config.CGRConfig) {
 	time.Sleep(10 * time.Nanosecond)
 
 	for i := 0; i < 3; i++ {
-		randomCGRID := utils.UUIDSha1Prefix()
-		expData := fmt.Sprintf(`{"CGRID": "%s"}`, randomCGRID)
+		randomOriginID := utils.UUIDSha1Prefix()
+		expData := fmt.Sprintf(`{"OriginID": "%s"}`, randomOriginID)
 		if _, err = js.Publish(utils.DefaultQueueID, []byte(expData)); err != nil {
 			t.Fatal(err)
 		}
@@ -150,7 +150,7 @@ func testCheckNatsJetStream(t *testing.T, cfg *config.CGRConfig) {
 		nc.FlushTimeout(time.Second)
 		nc.Flush()
 
-		testCheckNatsData(t, randomCGRID, expData, ch)
+		testCheckNatsData(t, randomOriginID, expData, ch)
 	}
 	close(rdrExit)
 }
@@ -185,8 +185,8 @@ func testCheckNatsNormal(t *testing.T, cfg *config.CGRConfig) {
 	runtime.Gosched()
 	time.Sleep(100 * time.Millisecond)
 	for i := 0; i < 3; i++ {
-		randomCGRID := utils.UUIDSha1Prefix()
-		expData := fmt.Sprintf(`{"CGRID": "%s"}`, randomCGRID)
+		randomOriginID := utils.UUIDSha1Prefix()
+		expData := fmt.Sprintf(`{"OriginID": "%s"}`, randomOriginID)
 		if err = nc.Publish(utils.DefaultQueueID, []byte(expData)); err != nil {
 			t.Fatal(err)
 		}
@@ -194,7 +194,7 @@ func testCheckNatsNormal(t *testing.T, cfg *config.CGRConfig) {
 		nc.FlushTimeout(time.Second)
 		nc.Flush()
 
-		testCheckNatsData(t, randomCGRID, expData, ch)
+		testCheckNatsData(t, randomOriginID, expData, ch)
 	}
 	close(rdrExit)
 }
@@ -227,7 +227,7 @@ func TestNatsERJetStream(t *testing.T) {
 			"filters": [],										
 			"flags": [],										
 			"fields":[									
-				{"tag": "CGRID", "type": "*composed", "value": "~*req.CGRID", "path": "*cgreq.CGRID"},
+				{"tag": "OriginID", "type": "*composed", "value": "~*req.OriginID", "path": "*cgreq.OriginID"},
 			],
 			"opts": {
 				"natsJetStream": true,
@@ -275,7 +275,7 @@ func TestNatsER(t *testing.T) {
 			"filters": [],										
 			"flags": [],										
 			"fields":[									
-				{"tag": "CGRID", "type": "*composed", "value": "~*req.CGRID", "path": "*cgreq.CGRID"},
+				{"tag": "OriginID", "type": "*composed", "value": "~*req.OriginID", "path": "*cgreq.OriginID"},
 			],
 			"opts": {
 				"natsSubjectProcessed": "processed_cdrs",
@@ -321,7 +321,7 @@ func TestNatsERJetStreamUser(t *testing.T) {
 			"filters": [],										
 			"flags": [],										
 			"fields":[									
-				{"tag": "CGRID", "type": "*composed", "value": "~*req.CGRID", "path": "*cgreq.CGRID"},
+				{"tag": "OriginID", "type": "*composed", "value": "~*req.OriginID", "path": "*cgreq.OriginID"},
 			],
 			"opts": {
 				"natsJetStream": true,
@@ -369,7 +369,7 @@ func TestNatsERUser(t *testing.T) {
 			"filters": [],										
 			"flags": [],										
 			"fields":[									
-				{"tag": "CGRID", "type": "*composed", "value": "~*req.CGRID", "path": "*cgreq.CGRID"},
+				{"tag": "OriginID", "type": "*composed", "value": "~*req.OriginID", "path": "*cgreq.OriginID"},
 			],
 			"opts": {
 				"natsSubjectProcessed": "processed_cdrs",
@@ -415,7 +415,7 @@ func TestNatsERJetStreamToken(t *testing.T) {
 			"filters": [],										
 			"flags": [],										
 			"fields":[									
-				{"tag": "CGRID", "type": "*composed", "value": "~*req.CGRID", "path": "*cgreq.CGRID"},
+				{"tag": "OriginID", "type": "*composed", "value": "~*req.OriginID", "path": "*cgreq.OriginID"},
 			],
 			"opts": {
 				"natsJetStream": true,
@@ -463,7 +463,7 @@ func TestNatsERToken(t *testing.T) {
 			"filters": [],										
 			"flags": [],										
 			"fields":[									
-				{"tag": "CGRID", "type": "*composed", "value": "~*req.CGRID", "path": "*cgreq.CGRID"},
+				{"tag": "OriginID", "type": "*composed", "value": "~*req.OriginID", "path": "*cgreq.OriginID"},
 			],
 			"opts": {
 				"natsSubjectProcessed": "processed_cdrs",
@@ -529,7 +529,7 @@ func TestNatsERNkey(t *testing.T) {
 			"filters": [],										
 			"flags": [],										
 			"fields":[									
-				{"tag": "CGRID", "type": "*composed", "value": "~*req.CGRID", "path": "*cgreq.CGRID"},
+				{"tag": "OriginID", "type": "*composed", "value": "~*req.OriginID", "path": "*cgreq.OriginID"},
 			],
 			"opts": {
 				"natsSubjectProcessed": "processed_cdrs",
@@ -597,7 +597,7 @@ users: [
 			"filters": [],										
 			"flags": [],										
 			"fields":[									
-				{"tag": "CGRID", "type": "*composed", "value": "~*req.CGRID", "path": "*cgreq.CGRID"},
+				{"tag": "OriginID", "type": "*composed", "value": "~*req.OriginID", "path": "*cgreq.OriginID"},
 			],
 			"opts": {
 				"natsJetStream": true,
@@ -684,7 +684,7 @@ resolver_preload: {
 			"filters": [],										
 			"flags": [],										
 			"fields":[									
-				{"tag": "CGRID", "type": "*composed", "value": "~*req.CGRID", "path": "*cgreq.CGRID"},
+				{"tag": "OriginID", "type": "*composed", "value": "~*req.OriginID", "path": "*cgreq.OriginID"},
 			],
 			"opts": {
 				"natsSubjectProcessed": "processed_cdrs",
@@ -772,7 +772,7 @@ system_account:AAFIBB6C56ROU5XRVJLJYR3BTGGYK3HJGHEHQV7L7QZMTT3ZRBLHBS7F
 			"filters": [],										
 			"flags": [],										
 			"fields":[									
-				{"tag": "CGRID", "type": "*composed", "value": "~*req.CGRID", "path": "*cgreq.CGRID"},
+				{"tag": "OriginID", "type": "*composed", "value": "~*req.OriginID", "path": "*cgreq.OriginID"},
 			],
 			"opts": {
 				"natsJetStream": true,

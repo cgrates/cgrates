@@ -41,7 +41,7 @@ func TestRadiusAgentCfgloadFromJsonCfgCase1(t *testing.T) {
 				Filters:        &[]string{"*string:~*req.request_type:OutboundAUTH", "*string:~*req.Msisdn:497700056231"},
 				Flags:          &[]string{utils.MetaDryRun},
 				Timezone:       utils.StringPointer(utils.EmptyString),
-				Tenant:         utils.StringPointer("~*req.CGRID"),
+				Tenant:         utils.StringPointer("~*opts.*originID"),
 				Request_fields: &[]*FcTemplateJsonCfg{},
 				Reply_fields: &[]*FcTemplateJsonCfg{
 					{
@@ -70,7 +70,7 @@ func TestRadiusAgentCfgloadFromJsonCfgCase1(t *testing.T) {
 				Filters:       []string{"*string:~*req.request_type:OutboundAUTH", "*string:~*req.Msisdn:497700056231"},
 				Flags:         utils.FlagsWithParams{utils.MetaDryRun: {}},
 				Timezone:      utils.EmptyString,
-				Tenant:        NewRSRParsersMustCompile("~*req.CGRID", utils.InfieldSep),
+				Tenant:        NewRSRParsersMustCompile("~*opts.*originID", utils.InfieldSep),
 				RequestFields: []*FCTemplate{},
 				ReplyFields: []*FCTemplate{
 					{
@@ -247,7 +247,7 @@ func TestRadiusAgentCfgClone(t *testing.T) {
 				Filters:       []string{"*string:~*req.request_type:OutboundAUTH", "*string:~*req.Msisdn:497700056231"},
 				Flags:         utils.FlagsWithParams{utils.MetaDryRun: {}},
 				Timezone:      utils.EmptyString,
-				Tenant:        NewRSRParsersMustCompile("~*req.CGRID", utils.InfieldSep),
+				Tenant:        NewRSRParsersMustCompile("~*opts.*originID", utils.InfieldSep),
 				RequestFields: []*FCTemplate{},
 				ReplyFields: []*FCTemplate{
 					{

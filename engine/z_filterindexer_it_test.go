@@ -1056,7 +1056,7 @@ func testITAccountIndexes(t *testing.T) {
 	fltr2 = &Filter{
 		Tenant: "cgrates.org",
 		ID:     "SECOND",
-		Rules:  []*FilterRule{{Type: utils.MetaString, Element: "DEST4", Values: []string{"~*req.CGRID"}}},
+		Rules:  []*FilterRule{{Type: utils.MetaString, Element: "DEST4", Values: []string{"~*opts.*originID"}}},
 	}
 	if err := dataManager.SetFilter(context.Background(), fltr1, true); err != nil {
 		t.Error(err)
@@ -1069,7 +1069,7 @@ func testITAccountIndexes(t *testing.T) {
 			"test_ID1": struct{}{},
 			"test_ID2": struct{}{},
 		},
-		"*string:*req.CGRID:DEST4": {
+		"*string:*opts.*originID:DEST4": {
 			"test_ID3": struct{}{},
 		},
 		"*string:*req.Account:DAN": {
@@ -1419,7 +1419,7 @@ func testITChargerProfileIndexes(t *testing.T) {
 	fltr1 = &Filter{
 		Tenant: "cgrates.org",
 		ID:     "CHARGER_FLTR",
-		Rules:  []*FilterRule{{Type: utils.MetaString, Element: "~*req.CGRID", Values: []string{"~*req.Usage", "DAN1"}}},
+		Rules:  []*FilterRule{{Type: utils.MetaString, Element: "~*opts.*originID", Values: []string{"~*req.Usage", "DAN1"}}},
 	}
 	if err := dataManager.SetFilter(context.Background(), fltr1, true); err != nil {
 		t.Error(err)
@@ -1433,7 +1433,7 @@ func testITChargerProfileIndexes(t *testing.T) {
 	}
 
 	expIdx = map[string]utils.StringSet{
-		"*string:*req.CGRID:DAN1": {
+		"*string:*opts.*originID:DAN1": {
 			"CHARGER_PRF1":         struct{}{},
 			"CHARGER_PRF2":         struct{}{},
 			"CHANGED_CHARGER_PRF1": struct{}{},
@@ -1656,7 +1656,7 @@ func testITActionProfileIndexes(t *testing.T) {
 	fltr2 = &Filter{
 		Tenant: "itsyscom",
 		ID:     "ACTPRF_FLTR2",
-		Rules:  []*FilterRule{{Type: utils.MetaString, Element: "~*req.CGRID", Values: []string{"CHANGED_ID_1", "~*req.Account"}}},
+		Rules:  []*FilterRule{{Type: utils.MetaString, Element: "~*opts.*originID", Values: []string{"CHANGED_ID_1", "~*req.Account"}}},
 	}
 
 	if err := dataManager.SetFilter(context.Background(), fltr1, true); err != nil {
@@ -1686,7 +1686,7 @@ func testITActionProfileIndexes(t *testing.T) {
 			"ACTPRF1":         struct{}{},
 			"CHANGED_ACTPRF1": struct{}{},
 		},
-		"*string:*req.CGRID:CHANGED_ID_1": {
+		"*string:*opts.*originID:CHANGED_ID_1": {
 			"ACTPRF2":         struct{}{},
 			"CHANGED_ACTPRF2": struct{}{},
 		},
@@ -1924,7 +1924,7 @@ func testITTestIndexingWithEmptyFltrID2(t *testing.T) {
 			{
 				Type:    utils.MetaString,
 				Element: "ORG_ID",
-				Values:  []string{"~*req.OriginID", "~*opts.CGRID", "DAN"},
+				Values:  []string{"~*req.OriginID", "~*opts.*originID", "DAN"},
 			},
 		},
 	}
@@ -1951,7 +1951,7 @@ func testITTestIndexingWithEmptyFltrID2(t *testing.T) {
 			"SPL_WITH_FILTER1": struct{}{},
 			"SPL_WITH_FILTER2": struct{}{},
 		},
-		"*string:*opts.CGRID:ORG_ID": {
+		"*string:*opts.*originID:ORG_ID": {
 			"SPL_WITH_FILTER1": struct{}{},
 			"SPL_WITH_FILTER2": struct{}{},
 		},
@@ -1968,13 +1968,13 @@ func testITTestIndexingWithEmptyFltrID2(t *testing.T) {
 	}
 
 	expIdx = map[string]utils.StringSet{
-		"*string:*opts.CGRID:ORG_ID": {
+		"*string:*opts.*originID:ORG_ID": {
 			"SPL_WITH_FILTER1": struct{}{},
 			"SPL_WITH_FILTER2": struct{}{},
 		},
 	}
 	if rcvIdx, err := dataManager.GetIndexes(context.Background(), utils.CacheRouteFilterIndexes,
-		"cgrates.org", "*string:*opts.CGRID:ORG_ID",
+		"cgrates.org", "*string:*opts.*originID:ORG_ID",
 		utils.NonTransactional, false, false); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expIdx, rcvIdx) {

@@ -723,7 +723,7 @@ func TestTPFilterAsTPFilterWithDynValues(t *testing.T) {
 			ID:      "Filter1",
 			Type:    utils.MetaString,
 			Element: "CustomField",
-			Values:  "1001;~*uch.<~*rep.CGRID;~*rep.RunID;-Cost>;1002;~*uch.<~*rep.CGRID;~*rep.RunID>",
+			Values:  "1001;~*uch.<~*opts.*originID;~*rep.RunID;-Cost>;1002;~*uch.<~*opts.*originID;~*rep.RunID>",
 		},
 	}
 	eTPs := []*utils.TPFilterProfile{
@@ -734,7 +734,7 @@ func TestTPFilterAsTPFilterWithDynValues(t *testing.T) {
 				{
 					Type:    utils.MetaString,
 					Element: "CustomField",
-					Values:  []string{"1001", "~*uch.<~*rep.CGRID;~*rep.RunID;-Cost>", "1002", "~*uch.<~*rep.CGRID;~*rep.RunID>"},
+					Values:  []string{"1001", "~*uch.<~*opts.*originID;~*rep.RunID;-Cost>", "1002", "~*uch.<~*opts.*originID;~*rep.RunID>"},
 				},
 			},
 		},
@@ -938,7 +938,7 @@ func TestAPItoModelTPFilter(t *testing.T) {
 			{
 				Type:    utils.MetaString,
 				Element: "CustomField",
-				Values:  []string{"1001", "~*uch.<~*rep.CGRID;~*rep.RunID;-Cost>", "1002", "~*uch.<~*rep.CGRID;~*rep.RunID>"},
+				Values:  []string{"1001", "~*uch.<~*opts.*originID;~*rep.RunID;-Cost>", "1002", "~*uch.<~*opts.*originID;~*rep.RunID>"},
 			},
 		},
 	}
@@ -949,7 +949,7 @@ func TestAPItoModelTPFilter(t *testing.T) {
 			ID:      "testID",
 			Type:    "*string",
 			Element: "CustomField",
-			Values:  "1001;~*uch.\u003c~*rep.CGRID;~*rep.RunID;-Cost\u003e;1002;~*uch.\u003c~*rep.CGRID;~*rep.RunID\u003e",
+			Values:  "1001;~*uch.\u003c~*opts.*originID;~*rep.RunID;-Cost\u003e;1002;~*uch.\u003c~*opts.*originID;~*rep.RunID\u003e",
 		},
 	}
 	if rcv := APItoModelTPFilter(th); !reflect.DeepEqual(eOut, rcv) {

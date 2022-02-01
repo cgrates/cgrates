@@ -58,7 +58,7 @@ func TestKafkaER(t *testing.T) {
 			"filters": [],										// limit parsing based on the filters
 			"flags": [],										// flags to influence the event processing
 			"fields":[									// import fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
-				{"tag": "CGRID", "type": "*composed", "value": "~*req.CGRID", "path": "*cgreq.CGRID"},
+				{"tag": "OriginID", "type": "*composed", "value": "~*req.OriginID", "path": "*cgreq.OriginID"},
 			],
 		},
 	],
@@ -84,11 +84,11 @@ func TestKafkaER(t *testing.T) {
 		WriteTimeout: 5 * time.Second,
 		ReadTimeout:  5 * time.Second,
 	})
-	randomCGRID := utils.UUIDSha1Prefix()
+	randomOriginID := utils.UUIDSha1Prefix()
 	w.WriteMessages(context.Background(),
 		kafka.Message{
-			Key:   []byte(randomCGRID), // for the momment we do not proccess the key
-			Value: []byte(fmt.Sprintf(`{"CGRID": "%s"}`, randomCGRID)),
+			Key:   []byte(randomOriginID), // for the momment we do not proccess the key
+			Value: []byte(fmt.Sprintf(`{"OriginID": "%s"}`, randomOriginID)),
 		},
 	)
 
@@ -106,7 +106,7 @@ func TestKafkaER(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     ev.cgrEvent.ID,
 			Event: map[string]interface{}{
-				"CGRID": randomCGRID,
+				"OriginID": randomOriginID,
 			},
 			APIOpts: map[string]interface{}{},
 		}

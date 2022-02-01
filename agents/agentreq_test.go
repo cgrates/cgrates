@@ -2715,7 +2715,7 @@ func TestAgentRequestParseFieldDateTimeError(t *testing.T) {
 }
 
 func TestAgentRequestParseFieldDateTimeError2(t *testing.T) {
-	prsr, err := config.NewRSRParsersFromSlice([]string{"2.", "~*req.CGRID<~*opts.Converter>"})
+	prsr, err := config.NewRSRParsersFromSlice([]string{"2.", "~*opts.*originID<~*opts.Converter>"})
 	if err != nil {
 		t.Fatal(err)
 	}
