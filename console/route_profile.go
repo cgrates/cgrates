@@ -60,6 +60,6 @@ func (self *CmdGetRouteProfile) PostprocessRpcParams() error {
 }
 
 func (self *CmdGetRouteProfile) RpcResult() interface{} {
-	var atr engine.APIRouteProfile
+	var atr engine.RouteProfile
 	return &atr
 }

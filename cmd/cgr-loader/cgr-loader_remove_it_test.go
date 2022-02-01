@@ -180,7 +180,7 @@ func testCgrLdrGetSubsystemsNotLoadedLoad(t *testing.T) {
 	}
 
 	// routesPrf
-	var replyRts *engine.APIRouteProfile
+	var replyRts *engine.RouteProfile
 	if err := cgrLdrBIRPC.Call(context.Background(), utils.AdminSv1GetRouteProfile,
 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ROUTE_ACNT_1001"}},
 		&replyRts); err == nil || err.Error() != utils.ErrNotFound.Error() {
@@ -534,25 +534,37 @@ func testCgrLdrGetResourceAfterLoad(t *testing.T) {
 }
 
 func testCgrLdrGetRouteProfileAfterLoad(t *testing.T) {
-	expRoutePrf := &engine.APIRouteProfile{
-		ID:                "ROUTE_ACNT_1001",
-		Tenant:            "cgrates.org",
-		FilterIDs:         []string{"FLTR_ACCOUNT_1001"},
-		Weights:           ";10",
+	expRoutePrf := &engine.RouteProfile{
+		ID:        "ROUTE_ACNT_1001",
+		Tenant:    "cgrates.org",
+		FilterIDs: []string{"FLTR_ACCOUNT_1001"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 		Sorting:           utils.MetaWeight,
 		SortingParameters: []string{},
-		Routes: []*engine.ExternalRoute{
+		Routes: []*engine.Route{
 			{
-				ID:      "route1",
-				Weights: ";20",
+				ID: "route1",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 20,
+					},
+				},
 			},
 			{
-				ID:      "route2",
-				Weights: ";10",
+				ID: "route2",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 10,
+					},
+				},
 			},
 		},
 	}
-	var replyRts *engine.APIRouteProfile
+	var replyRts *engine.RouteProfile
 	if err := cgrLdrBIRPC.Call(context.Background(), utils.AdminSv1GetRouteProfile,
 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ROUTE_ACNT_1001"}},
 		&replyRts); err != nil {

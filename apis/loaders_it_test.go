@@ -993,69 +993,93 @@ func testLoadersGetResourceProfiles(t *testing.T) {
 }
 
 func testLoadersGetRouteProfiles(t *testing.T) {
-	expRouPrfs := []*engine.APIRouteProfile{
+	expRouPrfs := []*engine.RouteProfile{
 		{
 			Tenant:    "cgrates.org",
 			ID:        "RoutePrf1",
 			FilterIDs: []string{"*string:~*req.Account:1001"},
 			Sorting:   utils.MetaLC,
-			Routes: []*engine.ExternalRoute{
+			Routes: []*engine.Route{
 				{
-					ID:              "route1",
-					FilterIDs:       []string{"fltr1"},
-					AccountIDs:      []string{"Account1", "Account2"},
-					RateProfileIDs:  []string{"RPL_1"},
-					ResourceIDs:     []string{"ResGroup1"},
-					StatIDs:         []string{"Stat1"},
-					Weights:         ";10",
+					ID:             "route1",
+					FilterIDs:      []string{"fltr1"},
+					AccountIDs:     []string{"Account1", "Account2"},
+					RateProfileIDs: []string{"RPL_1"},
+					ResourceIDs:    []string{"ResGroup1"},
+					StatIDs:        []string{"Stat1"},
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 10,
+						},
+					},
 					Blocker:         true,
 					RouteParameters: "param1",
 				},
 				{
-					ID:              "route1",
-					RateProfileIDs:  []string{"RPL_2"},
-					ResourceIDs:     []string{"ResGroup2", "ResGroup4"},
-					StatIDs:         []string{"Stat3"},
-					Weights:         ";10",
+					ID:             "route1",
+					RateProfileIDs: []string{"RPL_2"},
+					ResourceIDs:    []string{"ResGroup2", "ResGroup4"},
+					StatIDs:        []string{"Stat3"},
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 10,
+						},
+					},
 					Blocker:         false,
 					RouteParameters: utils.EmptyString,
 				},
 				{
-					ID:              "route1",
-					FilterIDs:       []string{"fltr2"},
-					AccountIDs:      []string{"Account2"},
-					RateProfileIDs:  []string{"RPL_3"},
-					ResourceIDs:     []string{"ResGroup3"},
-					StatIDs:         []string{"Stat2"},
-					Weights:         ";10",
+					ID:             "route1",
+					FilterIDs:      []string{"fltr2"},
+					AccountIDs:     []string{"Account2"},
+					RateProfileIDs: []string{"RPL_3"},
+					ResourceIDs:    []string{"ResGroup3"},
+					StatIDs:        []string{"Stat2"},
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 10,
+						},
+					},
 					Blocker:         false,
 					RouteParameters: utils.EmptyString,
 				},
 			},
-			Weights: ";20",
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
 		},
 		{
 			Tenant:    "cgrates.org",
 			ID:        "RoutePrf2",
 			FilterIDs: []string{"*string:~*req.Account:dan"},
 			Sorting:   utils.MetaLC,
-			Routes: []*engine.ExternalRoute{
+			Routes: []*engine.Route{
 				{
-					ID:              "route1",
-					FilterIDs:       []string{"fltr3"},
-					AccountIDs:      []string{"Account3", "Account4"},
-					RateProfileIDs:  []string{"RPL_1"},
-					ResourceIDs:     []string{"ResGroup1"},
-					StatIDs:         []string{"Stat1"},
-					Weights:         ";10",
+					ID:             "route1",
+					FilterIDs:      []string{"fltr3"},
+					AccountIDs:     []string{"Account3", "Account4"},
+					RateProfileIDs: []string{"RPL_1"},
+					ResourceIDs:    []string{"ResGroup1"},
+					StatIDs:        []string{"Stat1"},
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 10,
+						},
+					},
 					Blocker:         true,
 					RouteParameters: "param1",
 				},
 			},
-			Weights: ";20",
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
 		},
 	}
-	var rouPrfs []*engine.APIRouteProfile
+	var rouPrfs []*engine.RouteProfile
 	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetRouteProfiles,
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
@@ -1405,7 +1429,7 @@ func testLoadersGetRouteProfileAfterRemove(t *testing.T) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	}
 
-	var rplyRtPrf engine.APIRouteProfile
+	var rplyRtPrf engine.RouteProfile
 	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetRouteProfile,
 		utils.TenantID{
 			Tenant: "cgrates.org",

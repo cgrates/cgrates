@@ -27,7 +27,7 @@ import (
 )
 
 // GetRouteProfile returns a Route configuration
-func (adms *AdminSv1) GetRouteProfile(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *engine.APIRouteProfile) error {
+func (adms *AdminSv1) GetRouteProfile(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *engine.RouteProfile) error {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -38,7 +38,7 @@ func (adms *AdminSv1) GetRouteProfile(ctx *context.Context, arg *utils.TenantIDW
 	if rp, err := adms.dm.GetRouteProfile(ctx, tnt, arg.ID, true, true, utils.NonTransactional); err != nil {
 		return utils.APIErrorHandler(err)
 	} else {
-		*reply = *engine.NewAPIRouteProfile(rp)
+		*reply = *rp
 	}
 	return nil
 }
@@ -72,7 +72,7 @@ func (adms *AdminSv1) GetRouteProfileIDs(ctx *context.Context, args *utils.ArgsI
 }
 
 // GetRouteProfiles returns a list of route profiles registered for a tenant
-func (admS *AdminSv1) GetRouteProfiles(ctx *context.Context, args *utils.ArgsItemIDs, rouPrfs *[]*engine.APIRouteProfile) (err error) {
+func (admS *AdminSv1) GetRouteProfiles(ctx *context.Context, args *utils.ArgsItemIDs, rouPrfs *[]*engine.RouteProfile) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = admS.cfg.GeneralCfg().DefaultTenant
@@ -81,15 +81,14 @@ func (admS *AdminSv1) GetRouteProfiles(ctx *context.Context, args *utils.ArgsIte
 	if err = admS.GetRouteProfileIDs(ctx, args, &rouPrfIDs); err != nil {
 		return
 	}
-	*rouPrfs = make([]*engine.APIRouteProfile, 0, len(rouPrfIDs))
+	*rouPrfs = make([]*engine.RouteProfile, 0, len(rouPrfIDs))
 	for _, rouPrfID := range rouPrfIDs {
 		var rouPrf *engine.RouteProfile
 		rouPrf, err = admS.dm.GetRouteProfile(ctx, tnt, rouPrfID, true, true, utils.NonTransactional)
 		if err != nil {
 			return utils.APIErrorHandler(err)
 		}
-		rouAPIPrf := engine.NewAPIRouteProfile(rouPrf)
-		*rouPrfs = append(*rouPrfs, rouAPIPrf)
+		*rouPrfs = append(*rouPrfs, rouPrf)
 	}
 	return
 }
@@ -114,18 +113,14 @@ func (adms *AdminSv1) GetRouteProfileCount(ctx *context.Context, args *utils.Arg
 }
 
 //SetRouteProfile add a new Route configuration
-func (adms *AdminSv1) SetRouteProfile(ctx *context.Context, args *engine.APIRouteProfileWithAPIOpts, reply *string) error {
-	if missing := utils.MissingStructFields(args.APIRouteProfile, []string{utils.ID}); len(missing) != 0 {
+func (adms *AdminSv1) SetRouteProfile(ctx *context.Context, args *engine.RouteProfileWithAPIOpts, reply *string) error {
+	if missing := utils.MissingStructFields(args.RouteProfile, []string{utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if args.Tenant == utils.EmptyString {
 		args.Tenant = adms.cfg.GeneralCfg().DefaultTenant
 	}
-	rp, err := args.AsRouteProfile()
-	if err != nil {
-		return err
-	}
-	if err := adms.dm.SetRouteProfile(ctx, rp, true); err != nil {
+	if err := adms.dm.SetRouteProfile(ctx, args.RouteProfile, true); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//generate a loadID for CacheRouteProfiles and store it in database
@@ -134,7 +129,7 @@ func (adms *AdminSv1) SetRouteProfile(ctx *context.Context, args *engine.APIRout
 	}
 	//handle caching for SupplierProfile
 	if err := adms.CallCache(ctx, utils.IfaceAsString(args.APIOpts[utils.MetaCache]), args.Tenant, utils.CacheRouteProfiles,
-		rp.TenantID(), &args.FilterIDs, args.APIOpts); err != nil {
+		args.TenantID(), &args.FilterIDs, args.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK

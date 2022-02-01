@@ -27,7 +27,7 @@ func init() {
 	c := &CmdSetRouteProfile{
 		name:      "route_profile_set",
 		rpcMethod: utils.AdminSv1SetRouteProfile,
-		rpcParams: &engine.APIRouteProfileWithAPIOpts{},
+		rpcParams: &engine.RouteProfileWithAPIOpts{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -36,7 +36,7 @@ func init() {
 type CmdSetRouteProfile struct {
 	name      string
 	rpcMethod string
-	rpcParams *engine.APIRouteProfileWithAPIOpts
+	rpcParams *engine.RouteProfileWithAPIOpts
 	*CommandExecuter
 }
 
@@ -50,9 +50,9 @@ func (self *CmdSetRouteProfile) RpcMethod() string {
 
 func (self *CmdSetRouteProfile) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &engine.APIRouteProfileWithAPIOpts{
-			APIRouteProfile: new(engine.APIRouteProfile),
-			APIOpts:         map[string]interface{}{},
+		self.rpcParams = &engine.RouteProfileWithAPIOpts{
+			RouteProfile: new(engine.RouteProfile),
+			APIOpts:      map[string]interface{}{},
 		}
 	}
 	return self.rpcParams

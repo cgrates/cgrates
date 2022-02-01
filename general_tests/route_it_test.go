@@ -25,7 +25,7 @@ package general_tests
 // 	splSv1CfgPath string
 // 	splSv1Cfg     *config.CGRConfig
 // 	splSv1Rpc     *birpc.Client
-// 	splPrf        *engine.APIRouteProfileWithAPIOpts
+// 	splPrf        *engine.RouteProfileWithAPIOpts
 // 	splSv1ConfDIR string //run tests for specific configuration
 
 // 	sTestsSupplierSV1 = []func(t *testing.T){
@@ -105,7 +105,7 @@ package general_tests
 // }
 
 // func testV1SplSSetSupplierProfilesWithoutRateProfileIDs(t *testing.T) {
-// 	var reply *engine.APIRouteProfile
+// 	var reply *engine.RouteProfile
 // 	if err := splSv1Rpc.Call(context.Background(), utils.AdminSv1GetRouteProfile,
 // 		&utils.TenantIDWithAPIOpts{
 // 			TenantID: &utils.TenantID{
@@ -115,12 +115,12 @@ package general_tests
 // 		err.Error() != utils.ErrNotFound.Error() {
 // 		t.Error(err)
 // 	}
-// 	splPrf = &engine.APIRouteProfileWithAPIOpts{
-// 		APIRouteProfile: &engine.APIRouteProfile{
+// 	splPrf = &engine.RouteProfileWithAPIOpts{
+// 		RouteProfile: &engine.RouteProfile{
 // 			Tenant:  "cgrates.org",
 // 			ID:      "TEST_PROFILE2",
 // 			Sorting: utils.MetaLC,
-// 			Routes: []*engine.ExternalRoute{
+// 			Routes: []*engine.Route{
 // 				{
 // 					ID:         "ROUTE1",
 // 					AccountIDs: []string{"accc"},
@@ -142,8 +142,8 @@ package general_tests
 // 			Tenant: "cgrates.org", ID: "TEST_PROFILE2",
 // 		}}, &reply); err != nil {
 // 		t.Error(err)
-// 	} else if !reflect.DeepEqual(splPrf.APIRouteProfile, reply) {
-// 		t.Errorf("Expecting: %+v, received: %+v", splPrf.APIRouteProfile, reply)
+// 	} else if !reflect.DeepEqual(splPrf.RouteProfile, reply) {
+// 		t.Errorf("Expecting: %+v, received: %+v", splPrf.RouteProfile, reply)
 // 	}
 // 	ev := &utils.CGREvent{
 // 		Tenant: "cgrates.org",
@@ -179,13 +179,13 @@ package general_tests
 // 		t.Error(err)
 // 	}
 // 	//create a new Supplier Profile to test *reas and *reds sorting strategy
-// 	splPrf = &engine.APIRouteProfileWithAPIOpts{
-// 		APIRouteProfile: &engine.APIRouteProfile{
+// 	splPrf = &engine.RouteProfileWithAPIOpts{
+// 		RouteProfile: &engine.RouteProfile{
 // 			Tenant:    "cgrates.org",
 // 			ID:        "ROUTE_ResourceTest",
 // 			Sorting:   utils.MetaReas,
 // 			FilterIDs: []string{"*string:~*req.CustomField:ResourceTest"},
-// 			Routes: []*engine.ExternalRoute{
+// 			Routes: []*engine.Route{
 // 				//route1 will have ResourceUsage = 11
 // 				{
 // 					ID:          "route1",
@@ -219,8 +219,8 @@ package general_tests
 // 	if err := splSv1Rpc.Call(context.Background(), utils.AdminSv1GetRouteProfile,
 // 		&utils.TenantID{Tenant: "cgrates.org", ID: "ROUTE_ResourceTest"}, &reply); err != nil {
 // 		t.Error(err)
-// 	} else if !reflect.DeepEqual(splPrf.APIRouteProfile, reply) {
-// 		t.Errorf("Expecting: %+v, received: %+v", splPrf.APIRouteProfile, reply)
+// 	} else if !reflect.DeepEqual(splPrf.RouteProfile, reply) {
+// 		t.Errorf("Expecting: %+v, received: %+v", splPrf.RouteProfile, reply)
 // 	}
 // }
 
@@ -433,13 +433,13 @@ package general_tests
 // 		t.Error(err)
 // 	}
 // 	//create a new Supplier Profile to test *reas and *reds sorting strategy
-// 	splPrf = &engine.APIRouteProfileWithAPIOpts{
-// 		APIRouteProfile: &engine.APIRouteProfile{
+// 	splPrf = &engine.RouteProfileWithAPIOpts{
+// 		RouteProfile: &engine.RouteProfile{
 // 			Tenant:    "cgrates.org",
 // 			ID:        "ROUTE_ResourceDescendent",
 // 			Sorting:   utils.MetaReds,
 // 			FilterIDs: []string{"*string:~*req.CustomField:ResourceDescendent"},
-// 			Routes: []*engine.ExternalRoute{
+// 			Routes: []*engine.Route{
 // 				//route1 will have ResourceUsage = 11
 // 				{
 // 					ID:          "route1",
@@ -473,8 +473,8 @@ package general_tests
 // 	if err := splSv1Rpc.Call(context.Background(), utils.AdminSv1GetRouteProfile,
 // 		&utils.TenantID{Tenant: "cgrates.org", ID: "ROUTE_ResourceDescendent"}, &reply); err != nil {
 // 		t.Error(err)
-// 	} else if !reflect.DeepEqual(splPrf.APIRouteProfile, reply) {
-// 		t.Errorf("Expecting: %+v, received: %+v", splPrf.APIRouteProfile, reply)
+// 	} else if !reflect.DeepEqual(splPrf.RouteProfile, reply) {
+// 		t.Errorf("Expecting: %+v, received: %+v", splPrf.RouteProfile, reply)
 // 	}
 // }
 
