@@ -56,7 +56,7 @@
 			"attempts": 1,
 			"filters":["*string:~*opts.ExporterID:http_localhost"],
 			"fields":[
-				{"tag": "CGRID", "path": "*exp.CGRID", "type": "*variable", "value": "~*req.CGRID"},
+				{"tag": "*originID", "path": "*exp.*originID", "type": "*variable", "value": "~*opts.*originID"},
 				{"tag": "RunID", "path": "*exp.RunID", "type": "*variable", "value": "~*req.RunID"},
 				{"tag": "ToR", "path": "*exp.ToR", "type": "*variable", "value": "~*req.ToR"},
 				{"tag": "OriginID", "path": "*exp.OriginID", "type": "*variable", "value": "~*req.OriginID"},
@@ -84,7 +84,7 @@
 			},
 			"attempts": 3,
 			"fields":[
-				{"tag": "CGRID", "path": "*exp.CGRID", "type": "*variable", "value": "~*req.CGRID"},
+				{"tag": "*originID", "path": "*exp.*originID", "type": "*variable", "value": "~*opts.*originID"},
 				{"tag": "RunID", "path": "*exp.RunID", "type": "*variable", "value": "~*req.RunID"},
 				{"tag": "ToR", "path": "*exp.ToR", "type": "*variable", "value": "~*req.ToR"},
 				{"tag": "OriginID", "path": "*exp.OriginID", "type": "*variable", "value": "~*req.OriginID"},
@@ -120,7 +120,7 @@
 			"synchronous": true,
 			"attempts": 1,
 			"fields":[
-				{"tag": "CGRID", "path": "*exp.CGRID", "type": "*variable", "value": "~*req.CGRID"}
+				{"tag": "*originID", "path": "*exp.*originID", "type": "*variable", "value": "~*opts.*originID"}
 			],
 		},
 		{
@@ -134,7 +134,7 @@
 			"synchronous": true,
 			"attempts": 1,
 			"fields":[
-				{"tag": "CGRID", "path": "*exp.CGRID", "type": "*variable", "value": "~*req.CGRID"}
+				{"tag": "*originID", "path": "*exp.*originID", "type": "*variable", "value": "~*opts.*originID"}
 			],
 		}
 	],

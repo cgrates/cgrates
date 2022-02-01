@@ -39,7 +39,7 @@
 			"attempts": 1,
 			"synchronous": true,
 			"fields":[
-				{"tag": "CGRID", "path": "*exp.CGRID", "type": "*variable", "value": "~*req.CGRID"},
+				{"tag": "*originID", "path": "*exp.*originID", "type": "*variable", "value": "~*opts.*originID"},
 			],
 		}
 	]
