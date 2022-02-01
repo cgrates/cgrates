@@ -151,35 +151,55 @@ func testV1RtsCaseFromFolder(t *testing.T) {
 
 func testV1RtsCaseGetRoutesAfterLoading(t *testing.T) {
 	// ROUTE_ACNT_1001
-	expRt1 := &engine.APIRouteProfile{
+	expRt1 := &engine.RouteProfile{
 		ID:        "ROUTE_ACNT_1001",
 		Tenant:    "cgrates.org",
 		FilterIDs: []string{"*string:~*req.Account:1001"},
 		Sorting:   "*weight",
-		Routes: []*engine.ExternalRoute{
+		Routes: []*engine.Route{
 			{
 				ID:        "vendor1",
 				FilterIDs: []string{"FLTR_DEST_1003"},
-				Weights:   ";10",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 10,
+					},
+				},
 			},
 			{
 				ID:        "vendor2",
 				FilterIDs: []string{"*gte:~*accounts.1001.Balance[Concrete1].Units:10"},
-				Weights:   ";20",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 20,
+					},
+				},
 			},
 			{
 				ID:        "vendor3",
 				FilterIDs: []string{"FLTR_DEST_1003", "*prefix:~*req.Account:10"},
-				Weights:   ";40",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 40,
+					},
+				},
 			},
 			{
-				ID:      "vendor4",
-				Weights: ";35",
+				ID: "vendor4",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 35,
+					},
+				},
 			},
 		},
-		Weights: "",
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 0,
+			},
+		},
 	}
-	var reply *engine.APIRouteProfile
+	var reply *engine.RouteProfile
 	if err := rtsCaseSv1BiRpc.Call(context.Background(), utils.AdminSv1GetRouteProfile,
 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{ID: "ROUTE_ACNT_1001", Tenant: "cgrates.org"}},
 		&reply); err != nil {
@@ -194,34 +214,50 @@ func testV1RtsCaseGetRoutesAfterLoading(t *testing.T) {
 	}
 
 	// ROUTE_ACNT_1002
-	expRt2 := &engine.APIRouteProfile{
+	expRt2 := &engine.RouteProfile{
 		ID:        "ROUTE_ACNT_1002",
 		Tenant:    "cgrates.org",
 		FilterIDs: []string{"*string:~*req.Account:1002"},
 		Sorting:   "*lc",
-		Routes: []*engine.ExternalRoute{
+		Routes: []*engine.Route{
 			{
 				ID:             "vendor1",
 				FilterIDs:      []string{"*lte:~*resources.RES_GRP1.TotalUsage:5"},
 				RateProfileIDs: []string{"RP_VENDOR1"},
-				Weights:        ";0",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 0,
+					},
+				},
 			},
 			{
 				ID:             "vendor2",
 				FilterIDs:      []string{"*gte:~*stats.STATS_VENDOR_2.*acd:1m"},
 				RateProfileIDs: []string{"RP_VENDOR2"},
-				Weights:        ";0",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 0,
+					},
+				},
 			},
 			{
 				ID:             "vendor3",
 				RateProfileIDs: []string{"RP_VENDOR2"},
-				Weights:        ";10",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 10,
+					},
+				},
 			},
 			{
 				ID:             "vendor4",
 				FilterIDs:      []string{"*ai:~*req.AnswerTime:2013-06-01T00:00:00Z|2013-06-01T10:00:00Z"},
 				RateProfileIDs: []string{"RP_STANDARD"},
-				Weights:        ";30",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 30,
+					},
+				},
 			},
 		},
 	}
@@ -239,29 +275,41 @@ func testV1RtsCaseGetRoutesAfterLoading(t *testing.T) {
 	}
 
 	// ROUTE_ACNT_1003
-	expRt3 := &engine.APIRouteProfile{
+	expRt3 := &engine.RouteProfile{
 		ID:                "ROUTE_ACNT_1003",
 		Tenant:            "cgrates.org",
 		FilterIDs:         []string{"*string:~*req.Account:1003"},
 		Sorting:           "*qos",
 		SortingParameters: []string{"*acd", "*tcc"},
-		Routes: []*engine.ExternalRoute{
+		Routes: []*engine.Route{
 			{
 				ID:      "vendor1",
 				StatIDs: []string{"STATS_VENDOR_1"},
-				Weights: ";0",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 0,
+					},
+				},
 			},
 			{
 				ID:        "vendor2",
 				FilterIDs: []string{"*prefix:~*req.Destination:10"},
 				StatIDs:   []string{"STATS_VENDOR_2"},
-				Weights:   ";0",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 0,
+					},
+				},
 			},
 			{
 				ID:        "vendor3",
 				FilterIDs: []string{"*gte:~*stats.STATS_VENDOR_1.*tcc:6"},
 				StatIDs:   []string{"STATS_VENDOR_1"},
-				Weights:   ";20",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 20,
+					},
+				},
 			},
 		},
 	}
@@ -281,27 +329,39 @@ func testV1RtsCaseGetRoutesAfterLoading(t *testing.T) {
 	}
 
 	// ROUTE_ACNT_1004
-	expRt4 := &engine.APIRouteProfile{
+	expRt4 := &engine.RouteProfile{
 		ID:        "ROUTE_ACNT_1004",
 		Tenant:    "cgrates.org",
 		FilterIDs: []string{"*string:~*req.Account:1004"},
 		Sorting:   "*reas",
-		Routes: []*engine.ExternalRoute{
+		Routes: []*engine.Route{
 			{
 				ID:          "vendor1",
 				ResourceIDs: []string{"RES_GRP1"},
-				Weights:     ";0",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 0,
+					},
+				},
 			},
 			{
 				ID:          "vendor2",
 				ResourceIDs: []string{"RES_GRP2"},
-				Weights:     ";0",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 0,
+					},
+				},
 			},
 			{
 				ID:          "vendor3",
 				FilterIDs:   []string{"*gte:~*resources.RES_GRP1.TotalUsage:9"},
 				ResourceIDs: []string{"RES_GRP2"},
-				Weights:     ";10",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 10,
+					},
+				},
 			},
 		},
 	}
@@ -319,13 +379,13 @@ func testV1RtsCaseGetRoutesAfterLoading(t *testing.T) {
 	}
 
 	// ROUTE_ACNT_1005
-	expRt5 := &engine.APIRouteProfile{
+	expRt5 := &engine.RouteProfile{
 		ID:                "ROUTE_ACNT_1005",
 		Tenant:            "cgrates.org",
 		FilterIDs:         []string{"*string:~*req.Account:1005"},
 		Sorting:           "*load",
 		SortingParameters: []string{"vendor1:3", "*default:2"},
-		Routes: []*engine.ExternalRoute{
+		Routes: []*engine.Route{
 			{
 				ID:      "vendor1",
 				StatIDs: []string{"STATS_VENDOR_1:*sum#1"},
@@ -333,7 +393,11 @@ func testV1RtsCaseGetRoutesAfterLoading(t *testing.T) {
 			{
 				ID:      "vendor2",
 				StatIDs: []string{"STATS_VENDOR_2:*sum#1"},
-				Weights: ";10",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 10,
+					},
+				},
 			},
 			{
 				ID:      "vendor3",
@@ -357,31 +421,43 @@ func testV1RtsCaseGetRoutesAfterLoading(t *testing.T) {
 	}
 
 	// ROUTE_STATS1
-	expRt6 := &engine.APIRouteProfile{
+	expRt6 := &engine.RouteProfile{
 		ID:        "ROUTE_HC1",
 		Tenant:    "cgrates.org",
 		FilterIDs: []string{"Fltr_tcc"},
 		Sorting:   "*hc",
-		Routes: []*engine.ExternalRoute{
+		Routes: []*engine.Route{
 			{
 				ID:             "route1",
 				FilterIDs:      []string{"*gte:~*resources.RES_GRP2.Available:6"},
 				RateProfileIDs: []string{"RP_VENDOR2"},
 				ResourceIDs:    []string{"RES_GRP2"},
-				Weights:        ";20",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 20,
+					},
+				},
 			},
 			{
 				ID:             "route2",
 				FilterIDs:      []string{"*gte:~*resources.RES_GRP1.TotalUsage:9"},
 				RateProfileIDs: []string{"RP_VENDOR1"},
 				ResourceIDs:    []string{"RES_GRP1"},
-				Weights:        ";20",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 20,
+					},
+				},
 			},
 			{
 				ID:             "route3",
 				RateProfileIDs: []string{"RP_VENDOR1"},
 				ResourceIDs:    []string{"RES_GRP2"},
-				Weights:        ";10",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 10,
+					},
+				},
 			},
 		},
 	}

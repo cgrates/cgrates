@@ -3688,26 +3688,38 @@ func testV1FIdxSetRouteSProfileWithFltr(t *testing.T) {
 	}
 
 	//we will set a RouteProfile with our filter and check the indexes
-	rtPrf := &engine.APIRouteProfileWithAPIOpts{
-		APIRouteProfile: &engine.APIRouteProfile{
+	rtPrf := &engine.RouteProfileWithAPIOpts{
+		RouteProfile: &engine.RouteProfile{
 			Tenant: "cgrates.org",
 			ID:     "ROUTE_1",
 			FilterIDs: []string{"fltr_for_attr",
 				"*string:~*req.Account:1001"},
 			Sorting: utils.MetaWeight,
-			Routes: []*engine.ExternalRoute{
+			Routes: []*engine.Route{
 				{
 					ID:             "local",
 					RateProfileIDs: []string{"RP_LOCAL"},
-					Weights:        ";10",
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 10,
+						},
+					},
 				},
 				{
 					ID:             "mobile",
 					RateProfileIDs: []string{"RP_MOBILE"},
-					Weights:        ";30",
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 30,
+						},
+					},
 				},
 			},
-			Weights: ";10",
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				},
+			},
 		},
 	}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1SetRouteProfile,
@@ -3789,27 +3801,39 @@ func testV1FIdxSetRouteSMoreFltrsMoreIndexing(t *testing.T) {
 		t.Error("Unexpected reply result", reply)
 	}
 	// update our RoutesProfile with our filters
-	rtPrf := &engine.APIRouteProfileWithAPIOpts{
-		APIRouteProfile: &engine.APIRouteProfile{
+	rtPrf := &engine.RouteProfileWithAPIOpts{
+		RouteProfile: &engine.RouteProfile{
 			Tenant: "cgrates.org",
 			ID:     "ROUTE_1",
 			FilterIDs: []string{"fltr_for_attr",
 				"fltr_for_attr2", "fltr_for_attr3",
 				"*string:~*req.Account:1001"},
 			Sorting: utils.MetaWeight,
-			Routes: []*engine.ExternalRoute{
+			Routes: []*engine.Route{
 				{
 					ID:             "local",
 					RateProfileIDs: []string{"RP_LOCAL"},
-					Weights:        ";10",
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 10,
+						},
+					},
 				},
 				{
 					ID:             "mobile",
 					RateProfileIDs: []string{"RP_MOBILE"},
-					Weights:        ";30",
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 30,
+						},
+					},
 				},
 			},
-			Weights: ";10",
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				},
+			},
 		},
 	}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1SetRouteProfile,
@@ -3901,38 +3925,54 @@ func testV1FIdxRouteSProfileComputeIndexes(t *testing.T) {
 
 func testV1FIdxRouteSMoreProfilesForFltrs(t *testing.T) {
 	// will add more routes with our filters for matching indexes
-	rtPrf1 := &engine.APIRouteProfileWithAPIOpts{
-		APIRouteProfile: &engine.APIRouteProfile{
+	rtPrf1 := &engine.RouteProfileWithAPIOpts{
+		RouteProfile: &engine.RouteProfile{
 			Tenant: "cgrates.org",
 			ID:     "ROUTE_2",
 			FilterIDs: []string{"fltr_for_attr2", "fltr_for_attr3",
 				"*string:~*req.Account:1001"},
 			Sorting: utils.MetaWeight,
-			Routes: []*engine.ExternalRoute{
+			Routes: []*engine.Route{
 				{
 					ID:             "route1",
 					RateProfileIDs: []string{"RP_LOCAL"},
-					Weights:        ";10",
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 10,
+						},
+					},
 				},
 			},
-			Weights: ";10",
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				},
+			},
 		},
 	}
-	rtPrf2 := &engine.APIRouteProfileWithAPIOpts{
-		APIRouteProfile: &engine.APIRouteProfile{
+	rtPrf2 := &engine.RouteProfileWithAPIOpts{
+		RouteProfile: &engine.RouteProfile{
 			Tenant: "cgrates.org",
 			ID:     "ROUTE_3",
 			FilterIDs: []string{"fltr_for_attr",
 				"*string:~*req.Account:1001"},
 			Sorting: utils.MetaWeight,
-			Routes: []*engine.ExternalRoute{
+			Routes: []*engine.Route{
 				{
 					ID:             "route2",
 					RateProfileIDs: []string{"RP_LOCAL"},
-					Weights:        ";10",
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 10,
+						},
+					},
 				},
 			},
-			Weights: ";10",
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				},
+			},
 		},
 	}
 	var reply string

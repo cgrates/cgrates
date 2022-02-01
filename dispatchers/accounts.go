@@ -195,3 +195,20 @@ func (dS *DispatcherService) AccountSv1Ping(ctx *context.Context, args *utils.CG
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaAccounts, utils.AccountSv1Ping, args, reply)
 }
+func (dS *DispatcherService) AccountSv1RefundCharges(ctx *context.Context, args *utils.APIEventCharges, reply *string) (err error) {
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args != nil && len(args.Tenant) != 0 {
+		tnt = args.Tenant
+	}
+	ev := make(map[string]interface{})
+	opts := make(map[string]interface{})
+	if args != nil {
+		opts = args.APIOpts
+	}
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
+		if err = dS.authorize(ctx, utils.AccountSv1RefundCharges, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
+			return
+		}
+	}
+	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaAccounts, utils.AccountSv1RefundCharges, args, reply)
+}
