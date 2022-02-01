@@ -81,7 +81,7 @@
 			"field_separator": ",",
 			"fields":[
 				{"tag": "Number", "path": "*hdr.Number", "type": "*constant", "value": "NumberOfEvent"},
-				{"tag": "CGRID", "path": "*hdr.CGRID", "type": "*constant", "value": "CGRID"},
+				{"tag": "*originID", "path": "*hdr.*originID", "type": "*constant", "value": "*originID"},
 				{"tag": "RunID", "path": "*hdr.RunID", "type": "*constant", "value": "RunID"},
 				{"tag": "ToR", "path": "*hdr.ToR", "type": "*constant", "value": "ToR"},
 				{"tag": "OriginID", "path": "*hdr.OriginID", "type": "*constant", "value": "OriginID"},
@@ -97,7 +97,7 @@
 				{"tag": "Cost", "path": "*hdr.Cost", "type": "*constant", "value": "Cost"},
 
 				{"tag": "Number", "path": "*exp.Number", "type": "*variable", "value": "~*dc.NumberOfEvents"},
-				{"tag": "CGRID", "path": "*exp.CGRID", "type": "*variable", "value": "~*req.CGRID"},
+				{"tag": "*originID", "path": "*exp.*originID", "type": "*variable", "value": "~*opts.*originID"},
 				{"tag": "RunID", "path": "*exp.RunID", "type": "*variable", "value": "~*req.RunID"},
 				{"tag": "ToR", "path": "*exp.ToR", "type": "*variable", "value": "~*req.ToR"},
 				{"tag": "OriginID1", "path": "*exp.OriginID", "type": "*composed", "value": "~*req.ComposedOriginID1"},
@@ -129,7 +129,7 @@
 			"synchronous": true,
 			"fields":[		
 				{"tag": "Number", "path": "*hdr.Number", "type": "*constant", "value": "NumberOfEvent"},
-				{"tag": "CGRID", "path": "*hdr.CGRID", "type": "*constant", "value": "CGRID"},
+				{"tag": "*originID", "path": "*hdr.*originID", "type": "*constant", "value": "*originID"},
 				{"tag": "RunID", "path": "*hdr.RunID", "type": "*constant", "value": "RunID"},
 				{"tag": "ToR", "path": "*hdr.ToR", "type": "*constant", "value": "ToR"},
 				{"tag": "OriginID", "path": "*hdr.OriginID", "type": "*constant", "value": "OriginID"},
@@ -145,7 +145,7 @@
 				{"tag": "Cost", "path": "*hdr.Cost", "type": "*constant", "value": "Cost"},
 
 				{"tag": "Number", "path": "*exp.Number", "type": "*variable", "value": "~*dc.NumberOfEvents"},
-				{"tag": "CGRID", "path": "*exp.CGRID", "type": "*variable", "value": "~*req.CGRID"},
+				{"tag": "*originID", "path": "*exp.*originID", "type": "*variable", "value": "~*opts.*originID"},
 				{"tag": "RunID", "path": "*exp.RunID", "type": "*variable", "value": "~*req.RunID"},
 				{"tag": "ToR", "path": "*exp.ToR", "type": "*constant", "value": ""},
 				{"tag": "ToR", "path": "*exp.ToR", "type": "*variable", "value": "~*req.ToR"},
@@ -251,7 +251,7 @@
 			"attribute_context": "customContext",
 			"attempts": 1,
 			"fields":[
-				{"tag": "CGRID", "path": "*exp.CGRID", "type": "*variable", "value": "~*req.CGRID"},
+				{"tag": "*originID", "path": "*exp.*originID", "type": "*variable", "value": "~*opts.*originID"},
 				{"tag": "RunID", "path": "*exp.RunID", "type": "*variable", "value": "~*req.RunID"},
 				{"tag": "ToR", "path": "*exp.ToR", "type": "*variable", "value": "~*req.ToR"},
 				{"tag": "OriginID", "path": "*exp.OriginID", "type": "*variable", "value": "~*req.OriginID"},
@@ -276,7 +276,7 @@
 			"attribute_context": "customContext",
 			"attempts": 1,
 			"fields":[
-				{"tag": "CGRID", "path": "*exp.CGRID", "type": "*variable", "value": "~*req.CGRID"},
+				{"tag": "*originID", "path": "*exp.*originID", "type": "*variable", "value": "~*opts.*originID"},
 				{"tag": "RunID", "path": "*exp.RunID", "type": "*variable", "value": "~*req.RunID"},
 				{"tag": "ToR", "path": "*exp.ToR", "type": "*variable", "value": "~*req.ToR"},
 				{"tag": "OriginID", "path": "*exp.OriginID", "type": "*variable", "value": "~*req.OriginID"},
@@ -303,7 +303,7 @@
 			"attempts": 1,
 			"field_separator": ",",
 			"fields":[
-				{"tag": "CGRID", "path": "*exp.CGRID", "type": "*variable", "value": "~*req.CGRID"},
+				{"tag": "*originID", "path": "*exp.*originID", "type": "*variable", "value": "~*opts.*originID"},
 				{"tag": "RunID", "path": "*exp.RunID", "type": "*variable", "value": "~*req.RunID"},
 				{"tag": "ToR", "path": "*exp.ToR", "type": "*variable", "value": "~*req.ToR"},
 				{"tag": "OriginID", "path": "*exp.OriginID", "type": "*variable", "value": "~*req.OriginID"},
@@ -325,11 +325,11 @@
 			"type": "*virt",
 			"attempts": 1,
 			"fields":[
-				{"tag": "Cost", "path": "*uch.<~*req.CGRID;~*req.RunID;-Cost>", "type": "*variable",
+				{"tag": "Cost", "path": "*uch.<~*opts.*originID;~*req.RunID;-Cost>", "type": "*variable",
 					"value": "~*req.Cost", "rounding_decimals": 4},
-				{"tag": "Account", "path": "*uch.<~*req.CGRID;~*req.RunID;-Account>", "type": "*variable", "value": "~*req.Account"},
-				{"tag": "RunID", "path": "*uch.<~*req.CGRID;~*req.RunID;-RunID>", "type": "*variable", "value": "~*req.RunID"},
-				{"tag": "CustomVariable", "path": "*uch.<~*req.CGRID;~*req.RunID;-CustomVariable>",
+				{"tag": "Account", "path": "*uch.<~*opts.*originID;~*req.RunID;-Account>", "type": "*variable", "value": "~*req.Account"},
+				{"tag": "RunID", "path": "*uch.<~*opts.*originID;~*req.RunID;-RunID>", "type": "*variable", "value": "~*req.RunID"},
+				{"tag": "CustomVariable", "path": "*uch.<~*opts.*originID;~*req.RunID;-CustomVariable>",
 					"type": "*variable", "value": "CustomValue"}
 			],
 		},
@@ -342,18 +342,18 @@
 			"attempts": 1,
 			"field_separator": ",",
 			"fields":[
-				{"tag": "CGRID", "path": "*exp.CGRID", "type": "*variable", "value": "~*req.CGRID"},
+				{"tag": "*originID", "path": "*exp.*originID", "type": "*variable", "value": "~*opts.*originID"},
 				{"tag": "RunID", "path": "*exp.RunID", "type": "*variable", "value": "~*req.RunID"},
 				{"tag": "OriginID", "path": "*exp.OriginID", "type": "*variable", "value": "~*req.OriginID"},
 				{"tag": "Tenant", "path": "*exp.Tenant", "type": "*variable", "value": "~*req.Tenant"},
 				{"tag": "Account", "path": "*exp.Account", "type": "*variable", "value": "~*req.Account"},
 				{"tag": "Cost", "path": "*exp.Cost", "type": "*variable", "value": "~*req.Cost", "rounding_decimals": 4},
-				{"tag": "SupplierCustomVariable","filters": ["*exists:~*uch.<~*req.CGRID;~*req.RunID;-CustomVariable>:"],
-					"path": "*exp.SupplierCustomVariable", "type": "*variable", "value": "~*uch.<`~*req.CGRID;~*req.RunID;-CustomVariable`>"},
-				{"tag": "SupplierCost","filters": ["*exists:~*uch.<~*req.CGRID;~*req.RunID;-Cost>:"],
-					"path": "*exp.SupplierCost", "type": "*variable", "value": "~*uch.<`~*req.CGRID;~*req.RunID;-Cost`>"},
-				{"tag": "SupplierRun","filters": ["*exists:~*uch.<~*req.CGRID;~*req.RunID;-RunID>:"],
-					"path": "*exp.SupplierRun", "type": "*variable", "value": "~*uch.<`~*req.CGRID;~*req.RunID;-RunID`>"},
+				{"tag": "SupplierCustomVariable","filters": ["*exists:~*uch.<~*opts.*originID;~*req.RunID;-CustomVariable>:"],
+					"path": "*exp.SupplierCustomVariable", "type": "*variable", "value": "~*uch.<`~*opts.*originID;~*req.RunID;-CustomVariable`>"},
+				{"tag": "SupplierCost","filters": ["*exists:~*uch.<~*opts.*originID;~*req.RunID;-Cost>:"],
+					"path": "*exp.SupplierCost", "type": "*variable", "value": "~*uch.<`~*opts.*originID;~*req.RunID;-Cost`>"},
+				{"tag": "SupplierRun","filters": ["*exists:~*uch.<~*opts.*originID;~*req.RunID;-RunID>:"],
+					"path": "*exp.SupplierRun", "type": "*variable", "value": "~*uch.<`~*opts.*originID;~*req.RunID;-RunID`>"},
 			],
 		},
 		{
@@ -387,7 +387,7 @@
 					"elsWaitForActiveShards": "",
 			},
 			"fields":[
-				{"tag": "CGRID", "path": "*exp.CGRID", "type": "*variable", "value": "~*req.CGRID"},
+				{"tag": "*originID", "path": "*exp.*originID", "type": "*variable", "value": "~*opts.*originID"},
 				{"tag": "RunID", "path": "*exp.RunID", "type": "*variable", "value": "~*req.RunID"},
 				{"tag": "ToR", "path": "*exp.ToR", "type": "*variable", "value": "~*req.ToR"},
 				{"tag": "OriginID", "path": "*exp.OriginID", "type": "*variable", "value": "~*req.OriginID"},
@@ -443,7 +443,7 @@
 				},
 			},
 			"fields":[ // in case that the path is *exp.*row user must complete all the fields one to one with his sql schema in the correct order
-				{"tag": "CGRID", "path": "*exp.*row", "type": "*group", "value": "~*req.CGRID"},
+				{"tag": "*originID", "path": "*exp.*row", "type": "*group", "value": "~*opts.*originID"},
 				{"tag": "AnswerTime", "path": "*exp.*row", "type": "*group", "value": "~*req.AnswerTime"},
 				{"tag": "Usage", "path": "*exp.*row", "type": "*group", "value": "~*req.Usage"},
 				{"tag": "Cost", "path": "*exp.*row", "type": "*group", "value": "~*req.Cost{*round:4}"},
@@ -463,7 +463,7 @@
 				"sqlConnMaxLifetime": "0",
 			},
 			"fields":[ // the path constains *exp.columnName
-				{"tag": "CGRID", "path": "*exp.cgrid", "type": "*variable", "value": "~*req.CGRID"},
+				{"tag": "*originID", "path": "*exp.*originID", "type": "*variable", "value": "~*opts.*originID"},
 				{"tag": "AnswerTime", "path": "*exp.answer_time", "type": "*variable", "value": "~*req.AnswerTime"},
 				{"tag": "Cost", "path": "*exp.cost", "type": "*variable", "value": "~*req.Cost{*round:4}"},
 				{"tag": "Usage", "path": "*exp.`usage`", "type": "*variable", "value": "~*req.Usage"},
@@ -497,7 +497,7 @@
 				"sqlTableName": "cdrs", // tableName is mandatory in opts for sql exporter
 			},
 			"fields":[
-				{"tag": "CGRID", "path": "*exp.CGRID", "type": "*variable", "value": "~*req.CGRID"},
+				{"tag": "*originID", "path": "*exp.*originID", "type": "*variable", "value": "~*opts.*originID"},
 				{"tag": "RunID", "path": "*exp.RunID", "type": "*variable", "value": "~*req.RunID"},
 				{"tag": "OriginHost", "path": "*exp.OriginHost", "type": "*variable", "value": "~*req.OriginHost"},
 				{"tag": "Source", "path": "*exp.Source", "type": "*variable", "value": "~*req.Source"},
@@ -538,7 +538,7 @@
 
 "templates": {
 	"requiredFields": [
-		{"tag": "CGRID", "path": "*exp.CGRID", "type": "*variable", "value": "~*req.CGRID"},
+		{"tag": "*originID", "path": "*exp.*originID", "type": "*variable", "value": "~*opts.*originID"},
 		{"tag": "RunID", "path": "*exp.RunID", "type": "*variable", "value": "~*req.RunID"},
 		{"tag": "ToR", "path": "*exp.ToR", "type": "*variable", "value": "~*req.ToR"},
 		{"tag": "OriginID", "path": "*exp.OriginID", "type": "*variable", "value": "~*req.OriginID"},
