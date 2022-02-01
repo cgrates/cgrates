@@ -1228,7 +1228,7 @@ func (ms *MongoStorage) SetRateProfileDrv(ctx *context.Context, rpp *utils.RateP
 	})
 }
 
-func (ms *MongoStorage) RemoveRateProfileDrv(ctx *context.Context, tenant, id string) (err error) {
+func (ms *MongoStorage) RemoveRateProfileDrv(ctx *context.Context, tenant, id string, rateIDs []string) (err error) {
 	return ms.query(ctx, func(sctx mongo.SessionContext) (err error) {
 		dr, err := ms.getCol(ColRpp).DeleteOne(sctx, bson.M{"tenant": tenant, "id": id})
 		if dr.DeletedCount == 0 {

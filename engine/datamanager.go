@@ -2028,7 +2028,7 @@ func (dm *DataManager) RemoveRateProfile(ctx *context.Context, tenant, id string
 	if err != nil && err != utils.ErrNotFound {
 		return
 	}
-	if err = dm.DataDB().RemoveRateProfileDrv(ctx, tenant, id); err != nil {
+	if err = dm.DataDB().RemoveRateProfileDrv(ctx, tenant, id, []string{}); err != nil {
 		return
 	}
 	if oldRpp == nil {
@@ -2103,8 +2103,8 @@ func (dm *DataManager) RemoveRateProfileRates(ctx *context.Context, tenant, id s
 			delete(oldRpp.Rates, rateID)
 		}
 	}
-	if err = dm.DataDB().SetRateProfileDrv(ctx, oldRpp); err != nil {
-		return err
+	if err = dm.DataDB().RemoveRateProfileDrv(ctx, tenant, id, rateIDs); err != nil {
+		return
 	}
 
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaRateProfiles]; itm.Replicate {
