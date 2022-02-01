@@ -64,6 +64,7 @@ const (
 	redisHGET     = "HGET"
 	redisRENAME   = "RENAME"
 	redisHMSET    = "HMSET"
+	redisHSET     = "HSET"
 
 	redisLoadError = "Redis is loading the dataset in memory"
 	RedisLimit     = 524287 // https://github.com/StackExchange/StackExchange.Redis/issues/201#issuecomment-98639005
@@ -727,6 +728,7 @@ func (rs *RedisStorage) RemoveLoadIDsDrv() (err error) {
 	return rs.Cmd(nil, redisDEL, utils.LoadIDs)
 }
 
+/*
 func (rs *RedisStorage) GetRateProfileDrv(ctx *context.Context, tenant, id string) (rpp *utils.RateProfile, err error) {
 	var values []byte
 	if err = rs.Cmd(&values, redisGET, utils.RateProfilePrefix+utils.ConcatenatedKey(tenant, id)); err != nil {
@@ -739,6 +741,7 @@ func (rs *RedisStorage) GetRateProfileDrv(ctx *context.Context, tenant, id strin
 	return
 }
 
+
 func (rs *RedisStorage) SetRateProfileDrv(ctx *context.Context, rpp *utils.RateProfile) (err error) {
 	var result []byte
 	if result, err = rs.ms.Marshal(rpp); err != nil {
@@ -746,8 +749,40 @@ func (rs *RedisStorage) SetRateProfileDrv(ctx *context.Context, rpp *utils.RateP
 	}
 	return rs.Cmd(nil, redisSET, utils.RateProfilePrefix+utils.ConcatenatedKey(rpp.Tenant, rpp.ID), string(result))
 }
+*/
 
-func (rs *RedisStorage) RemoveRateProfileDrv(ctx *context.Context, tenant, id string) (err error) {
+func (rs *RedisStorage) SetRateProfileDrv(ctx *context.Context, rpp *utils.RateProfile) (err error) {
+	rpMap, err := rpp.AsDataDBMap()
+	if err != nil {
+		return
+	}
+	for key, val := range rpMap {
+		if err = rs.FlatCmd(nil, redisHSET, utils.RateProfilePrefix+utils.ConcatenatedKey(rpp.Tenant, rpp.ID), key, val); err != nil {
+			break
+		}
+	}
+	return
+}
+
+func (rs *RedisStorage) GetRateProfileDrv(ctx *context.Context, tenant, id string) (rpp *utils.RateProfile, err error) {
+	mapRP := make(map[string]interface{})
+	if err = rs.Cmd(&mapRP, redisHGETALL, utils.RateProfilePrefix+utils.ConcatenatedKey(tenant, id)); err != nil {
+		return
+	} else if len(mapRP) == 0 {
+		err = utils.ErrNotFound
+		return
+	}
+	rpp, err = utils.NewRateProfileFromMapDataDBMap(tenant, id, mapRP)
+	return
+}
+
+func (rs *RedisStorage) RemoveRateProfileDrv(ctx *context.Context, tenant, id string, rateIDs []string) (err error) {
+	if len(rateIDs) != 0 {
+		tntID := utils.ConcatenatedKey(tenant, id)
+		for _, rateID := range rateIDs {
+			return rs.Cmd(nil, redisHDEL, utils.RateProfilePrefix+tntID, utils.Rates+utils.InInFieldSep+rateID)
+		}
+	}
 	return rs.Cmd(nil, redisDEL, utils.RateProfilePrefix+utils.ConcatenatedKey(tenant, id))
 }
 

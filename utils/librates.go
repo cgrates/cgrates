@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 import (
+	"encoding/json"
 	"fmt"
 	"sort"
 	"strconv"
@@ -908,4 +909,92 @@ func (iR *IntervalRate) FieldAsInterface(fldPath []string) (_ interface{}, err e
 	case Increment:
 		return iR.Increment, nil
 	}
+}
+
+// AsDataDBMap is used to is a convert method in order to properly set trough a hasmap in redis server our rate profile
+func (rp *RateProfile) AsDataDBMap() (mp map[string]interface{}, err error) {
+	mp = map[string]interface{}{
+		MaxCostStrategy: rp.MaxCostStrategy,
+	}
+	if len(rp.FilterIDs) != 0 {
+		var fltrs string
+		for idx, fltr := range rp.FilterIDs {
+			fltrs += fltr
+			if idx != len(rp.FilterIDs)-1 {
+				fltrs += InfieldSep
+			}
+		}
+		mp[FilterIDs] = fltrs
+	}
+	if rp.Weights != nil {
+		mp[Weights] = rp.Weights.String(InfieldSep, ANDSep)
+	}
+	if rp.MinCost != nil {
+		minCostBts, err := rp.MinCost.MarshalBinary()
+		if err != nil {
+			return nil, err
+		}
+		mp[MinCost] = minCostBts
+	}
+	if rp.MaxCost != nil {
+		maxCostBts, err := rp.MaxCost.MarshalBinary()
+		if err != nil {
+			return nil, err
+		}
+		mp[MaxCost] = maxCostBts
+	}
+	for rateID, rt := range rp.Rates {
+		var result []byte
+		if result, err = json.Marshal(rt); err != nil {
+			return nil, err
+		}
+		fldKey := ConcatenatedKey(Rates, rateID)
+		mp[fldKey] = result
+	}
+	return mp, nil
+}
+
+// NewRateProfileFromMapDataDBMap will convert a RateProfile map into a RatePRofile struct. This is used when we get the map from redis database
+func NewRateProfileFromMapDataDBMap(tnt, id string, mapRP map[string]interface{}) (rp *RateProfile, err error) {
+	rp = &RateProfile{
+		ID:              id,
+		Tenant:          tnt,
+		MaxCostStrategy: IfaceAsString(mapRP[MaxCostStrategy]),
+		Rates:           make(map[string]*Rate),
+	}
+	if fltrsIDs, has := mapRP[FilterIDs]; has {
+		fltrs := strings.Split(IfaceAsString(fltrsIDs), InfieldSep)
+		rp.FilterIDs = make([]string, len(fltrs))
+		for idx, fltr := range fltrs {
+			rp.FilterIDs[idx] = fltr
+		}
+	}
+	if weights, has := mapRP[Weights]; has {
+		rp.Weights, err = NewDynamicWeightsFromString(IfaceAsString(weights), InfieldSep, ANDSep)
+		if err != nil {
+			return nil, err
+		}
+	}
+	if minCost, has := mapRP[MinCost]; has {
+		rp.MinCost, err = NewDecimalFromString(IfaceAsString(minCost))
+		if err != nil {
+			return nil, err
+		}
+	}
+	if maxCost, has := mapRP[MaxCost]; has {
+		rp.MaxCost, err = NewDecimalFromString(IfaceAsString(maxCost))
+		if err != nil {
+			return nil, err
+		}
+	}
+	for keyID, rateStr := range mapRP {
+		if strings.HasPrefix(keyID, Rates+ConcatenatedKeySep) {
+			var rate *Rate
+			if err := json.Unmarshal([]byte(IfaceAsString(rateStr)), &rate); err != nil {
+				return nil, err
+			}
+			rp.Rates[strings.TrimPrefix(keyID, Rates+ConcatenatedKeySep)] = rate
+		}
+	}
+	return rp, err
 }
