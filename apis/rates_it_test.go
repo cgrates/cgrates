@@ -26,6 +26,7 @@ import (
 	"reflect"
 	"sort"
 	"testing"
+	"time"
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
@@ -127,7 +128,8 @@ func testRateSRPCConn(t *testing.T) {
 
 func testGetRateProfileBeforeSet(t *testing.T) {
 	var reply *utils.RateProfile
-	if err := rateSRPC.Call(context.Background(), utils.AdminSv1GetRateProfile,
+	var err error
+	if err = rateSRPC.Call(context.Background(), utils.AdminSv1GetRateProfile,
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{
 				Tenant: utils.CGRateSorg,
@@ -659,18 +661,13 @@ func testRateSetRateProfile3(t *testing.T) {
 				ID: "RT_WEEK",
 				Weights: []*utils.DynamicWeight{
 					{
-						FilterIDs: nil,
-						Weight:    0,
+						Weight: 0,
 					},
 				},
 				ActivationTimes: "* * * * 1-5",
 				IntervalRates: []*utils.IntervalRate{
 					{
 						IntervalStart: utils.NewDecimal(0, 0),
-						FixedFee:      nil,
-						RecurrentFee:  nil,
-						Unit:          nil,
-						Increment:     nil,
 					},
 				},
 			},
@@ -678,18 +675,13 @@ func testRateSetRateProfile3(t *testing.T) {
 				ID: "RT_MONTH",
 				Weights: []*utils.DynamicWeight{
 					{
-						FilterIDs: nil,
-						Weight:    0,
+						Weight: 0,
 					},
 				},
 				ActivationTimes: "* * * * 1-5",
 				IntervalRates: []*utils.IntervalRate{
 					{
 						IntervalStart: utils.NewDecimal(0, 0),
-						FixedFee:      nil,
-						RecurrentFee:  nil,
-						Unit:          nil,
-						Increment:     nil,
 					},
 				},
 			},
@@ -739,18 +731,13 @@ func testRateRemoveRateProfileRates(t *testing.T) {
 				ID: "RT_MONTH",
 				Weights: []*utils.DynamicWeight{
 					{
-						FilterIDs: nil,
-						Weight:    0,
+						Weight: 0,
 					},
 				},
 				ActivationTimes: "* * * * 1-5",
 				IntervalRates: []*utils.IntervalRate{
 					{
 						IntervalStart: utils.NewDecimal(0, 0),
-						FixedFee:      nil,
-						RecurrentFee:  nil,
-						Unit:          nil,
-						Increment:     nil,
 					},
 				},
 			},
@@ -768,61 +755,8 @@ func testRateRemoveRateProfileRates(t *testing.T) {
 	} else if !reflect.DeepEqual(result, expectedRate) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expectedRate), utils.ToJSON(result))
 	}
-}
 
-func testRateSetRateProfileRates(t *testing.T) {
-	expectedRate := &utils.RateProfile{
-		Tenant:    utils.CGRateSorg,
-		ID:        "TEST_RATE_IT_TEST_THIRD",
-		FilterIDs: []string{"*string:~*req.Account:dan"},
-		Weights: []*utils.DynamicWeight{
-			{
-				FilterIDs: nil,
-				Weight:    0,
-			},
-		},
-		MaxCostStrategy: "*free",
-		Rates: map[string]*utils.Rate{
-			"RT_MONTH": {
-				ID: "RT_MONTH",
-				Weights: []*utils.DynamicWeight{
-					{
-						FilterIDs: nil,
-						Weight:    0,
-					},
-				},
-				ActivationTimes: "* * * * 1-5",
-				IntervalRates: []*utils.IntervalRate{
-					{
-						IntervalStart: utils.NewDecimal(0, 0),
-						FixedFee:      nil,
-						RecurrentFee:  nil,
-						Unit:          nil,
-						Increment:     nil,
-					},
-				},
-			},
-			"RT_YEAR": {
-				ID: "RT_YEAR",
-				Weights: []*utils.DynamicWeight{
-					{
-						FilterIDs: nil,
-						Weight:    0,
-					},
-				},
-				ActivationTimes: "* * * * 1-5",
-				IntervalRates: []*utils.IntervalRate{
-					{
-						IntervalStart: utils.NewDecimal(0, 0),
-						FixedFee:      nil,
-						RecurrentFee:  nil,
-						Unit:          nil,
-						Increment:     nil,
-					},
-				},
-			},
-		},
-	}
+	// as we removed our RT_WEEK, we will add it back to our profile
 	argsRate := &utils.APIRateProfile{
 		Tenant:          utils.CGRateSorg,
 		ID:              "TEST_RATE_IT_TEST_THIRD",
@@ -830,8 +764,9 @@ func testRateSetRateProfileRates(t *testing.T) {
 		Weights:         ";0",
 		MaxCostStrategy: "*free",
 		Rates: map[string]*utils.APIRate{
-			"RT_MONTH": {
-				ID:              "RT_MONTH",
+			// RT_WEEK wich we added back we added back
+			"RT_WEEK": {
+				ID:              "RT_WEEK",
 				Weights:         ";0",
 				ActivationTimes: "* * * * 1-5",
 				IntervalRates: []*utils.APIIntervalRate{
@@ -840,13 +775,50 @@ func testRateSetRateProfileRates(t *testing.T) {
 					},
 				},
 			},
-			"RT_YEAR": {
-				ID:              "RT_YEAR",
-				Weights:         ";0",
-				ActivationTimes: "* * * * 1-5",
+		},
+	}
+	if err := rateSRPC.Call(context.Background(), utils.AdminSv1SetRateProfileRates,
+		argsRate, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("UNexpected reply returned: %v", reply)
+	}
+}
+
+func testRateSetRateProfileRates(t *testing.T) {
+	argsRate := &utils.APIRateProfile{
+		Tenant:          utils.CGRateSorg,
+		ID:              "TEST_RATE_IT_TEST_THIRD",
+		FilterIDs:       []string{"*string:~*req.Account:dan"},
+		Weights:         ";0",
+		MaxCostStrategy: "*free",
+		Rates: map[string]*utils.APIRate{
+			// RT_MONTH rate will be updated
+			"RT_MONTH": {
+				ID:              "RT_MONTH",
+				Weights:         "*exists:~*req.Destination:;25",
+				ActivationTimes: "* 10 * * 1-5",
 				IntervalRates: []*utils.APIIntervalRate{
 					{
 						IntervalStart: "0",
+						FixedFee:      utils.Float64Pointer(0.4),
+						Increment:     utils.Float64Pointer(float64(time.Second)),
+						RecurrentFee:  utils.Float64Pointer(float64(time.Second)),
+						Unit:          utils.Float64Pointer(1),
+					},
+				},
+			},
+			// RT_CHRISTMAS will be added as a new rate into our profile
+			"RT_CHRISTMAS": {
+				ID:              "RT_CHRISTMAS",
+				Weights:         ";10",
+				ActivationTimes: "1 * * * *",
+				IntervalRates: []*utils.APIIntervalRate{
+					{
+						IntervalStart: "0",
+						RecurrentFee:  utils.Float64Pointer(0.2),
+						Unit:          utils.Float64Pointer(float64(time.Minute)),
+						Increment:     utils.Float64Pointer(0),
 					},
 				},
 			},
@@ -858,6 +830,73 @@ func testRateSetRateProfileRates(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(result, utils.StringPointer("OK")) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON("OK"), utils.ToJSON(result))
+	}
+
+	expectedRate := &utils.RateProfile{
+		Tenant:    utils.CGRateSorg,
+		ID:        "TEST_RATE_IT_TEST_THIRD",
+		FilterIDs: []string{"*string:~*req.Account:dan"},
+		Weights: []*utils.DynamicWeight{
+			{
+				Weight: 0,
+			},
+		},
+		MaxCostStrategy: "*free",
+		Rates: map[string]*utils.Rate{
+			// RT_WEEK that remains the same
+			"RT_WEEK": {
+				ID: "RT_WEEK",
+				Weights: []*utils.DynamicWeight{
+					{
+						Weight: 0,
+					},
+				},
+				ActivationTimes: "* * * * 1-5",
+				IntervalRates: []*utils.IntervalRate{
+					{
+						IntervalStart: utils.NewDecimal(0, 0),
+					},
+				},
+			},
+			// RT_MONTH that was updated
+			"RT_MONTH": {
+				ID: "RT_MONTH",
+				Weights: []*utils.DynamicWeight{
+					{
+						FilterIDs: []string{"*exists:~*req.Destination:"},
+						Weight:    25,
+					},
+				},
+				ActivationTimes: "* 10 * * 1-5",
+				IntervalRates: []*utils.IntervalRate{
+					{
+						IntervalStart: utils.NewDecimal(0, 0),
+						FixedFee:      utils.NewDecimal(4, 1),
+						Increment:     utils.NewDecimal(int64(time.Second), 0),
+						RecurrentFee:  utils.NewDecimal(int64(time.Second), 0),
+						Unit:          utils.NewDecimal(1, 0),
+					},
+				},
+			},
+			// RT_YEAR that was uadded as a new rate
+			"RT_CHRISTMAS": {
+				ID: "RT_CHRISTMAS",
+				Weights: []*utils.DynamicWeight{
+					{
+						Weight: 10,
+					},
+				},
+				ActivationTimes: "1 * * * *",
+				IntervalRates: []*utils.IntervalRate{
+					{
+						IntervalStart: utils.NewDecimal(0, 0),
+						Increment:     utils.NewDecimal(0, 0),
+						RecurrentFee:  utils.NewDecimal(2, 1),
+						Unit:          utils.NewDecimal(int64(time.Minute), 0),
+					},
+				},
+			},
+		},
 	}
 	var result2 *utils.RateProfile
 	if err := rateSRPC.Call(context.Background(), utils.AdminSv1GetRateProfile,
@@ -907,8 +946,7 @@ func testRateSetRateProfilesWithPrefix(t *testing.T) {
 		FilterIDs: []string{"*string:~*req.Account:dan"},
 		Weights: []*utils.DynamicWeight{
 			{
-				FilterIDs: nil,
-				Weight:    0,
+				Weight: 0,
 			},
 		},
 		MaxCostStrategy: "*free",
@@ -917,18 +955,14 @@ func testRateSetRateProfilesWithPrefix(t *testing.T) {
 				ID: "RT_WEEK",
 				Weights: []*utils.DynamicWeight{
 					{
-						FilterIDs: nil,
-						Weight:    0,
+
+						Weight: 0,
 					},
 				},
 				ActivationTimes: "* * * * 1-5",
 				IntervalRates: []*utils.IntervalRate{
 					{
 						IntervalStart: utils.NewDecimal(0, 0),
-						FixedFee:      nil,
-						RecurrentFee:  nil,
-						Unit:          nil,
-						Increment:     nil,
 					},
 				},
 			},
