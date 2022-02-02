@@ -176,6 +176,7 @@ func (sS *StatS) matchingStatQueuesForEvent(ctx *context.Context, tnt string, st
 		}
 	}
 	sqs = make(StatQueues, 0, len(sqIDs))
+
 	for sqID := range sqIDs {
 		lkPrflID := guardian.Guardian.GuardIDs("",
 			config.CgrConfig().GeneralCfg().LockingTimeout,

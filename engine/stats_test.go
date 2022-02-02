@@ -48,8 +48,12 @@ var (
 			ThresholdIDs: []string{},
 			Blocker:      false,
 			Stored:       true,
-			Weight:       20,
-			MinItems:     1,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
+			MinItems: 1,
 		},
 		{
 			Tenant:      "cgrates.org",
@@ -65,8 +69,12 @@ var (
 			ThresholdIDs: []string{},
 			Blocker:      false,
 			Stored:       true,
-			Weight:       20,
-			MinItems:     1,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
+			MinItems: 1,
 		},
 		{
 			Tenant:      "cgrates.org",
@@ -82,8 +90,12 @@ var (
 			ThresholdIDs: []string{},
 			Blocker:      false,
 			Stored:       true,
-			Weight:       20,
-			MinItems:     1,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
+			MinItems: 1,
 		},
 	}
 	testStatsQ = []*StatQueue{
@@ -427,8 +439,12 @@ func TestStatQueuesV1ProcessEvent(t *testing.T) {
 		},
 		ThresholdIDs: []string{},
 		Stored:       true,
-		Weight:       20,
-		MinItems:     1,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
+		MinItems: 1,
 	}
 	sq := &StatQueue{Tenant: "cgrates.org", ID: "StatQueueProfile3", sqPrfl: sqPrf, SQMetrics: make(map[string]StatMetric)}
 	if err := dmSTS.SetStatQueueProfile(context.TODO(), sqPrf, true); err != nil {
@@ -673,9 +689,13 @@ func TestStatQueueMatchingStatQueuesForEventLocks(t *testing.T) {
 	ids := utils.StringSet{}
 	for i := 0; i < 10; i++ {
 		rPrf := &StatQueueProfile{
-			Tenant:       "cgrates.org",
-			ID:           fmt.Sprintf("STS%d", i),
-			Weight:       20.00,
+			Tenant: "cgrates.org",
+			ID:     fmt.Sprintf("STS%d", i),
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20.00,
+				},
+			},
 			ThresholdIDs: []string{utils.MetaNone},
 			QueueLength:  1,
 			Stored:       true,
@@ -722,11 +742,15 @@ func TestStatQueueMatchingStatQueuesForEventLocks2(t *testing.T) {
 	ids := utils.StringSet{}
 	for i := 0; i < 10; i++ {
 		rPrf := &StatQueueProfile{
-			Tenant:       "cgrates.org",
-			ID:           fmt.Sprintf("STS%d", i),
-			QueueLength:  1,
-			Stored:       true,
-			Weight:       20.00,
+			Tenant:      "cgrates.org",
+			ID:          fmt.Sprintf("STS%d", i),
+			QueueLength: 1,
+			Stored:      true,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20.00,
+				},
+			},
 			ThresholdIDs: []string{utils.MetaNone},
 		}
 		dm.SetStatQueueProfile(context.Background(), rPrf, true)
@@ -734,12 +758,16 @@ func TestStatQueueMatchingStatQueuesForEventLocks2(t *testing.T) {
 		ids.Add(rPrf.ID)
 	}
 	rPrf := &StatQueueProfile{
-		Tenant:       "cgrates.org",
-		ID:           "STS20",
-		FilterIDs:    []string{"FLTR_RES_201"},
-		QueueLength:  1,
-		Stored:       true,
-		Weight:       20.00,
+		Tenant:      "cgrates.org",
+		ID:          "STS20",
+		FilterIDs:   []string{"FLTR_RES_201"},
+		QueueLength: 1,
+		Stored:      true,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20.00,
+			},
+		},
 		ThresholdIDs: []string{utils.MetaNone},
 	}
 	err = db.SetStatQueueProfileDrv(context.Background(), rPrf)
@@ -785,11 +813,15 @@ func TestStatQueueMatchingStatQueuesForEventLocksBlocker(t *testing.T) {
 	ids := utils.StringSet{}
 	for i := 0; i < 10; i++ {
 		rPrf := &StatQueueProfile{
-			Tenant:       "cgrates.org",
-			ID:           fmt.Sprintf("STS%d", i),
-			QueueLength:  1,
-			Stored:       true,
-			Weight:       float64(10 - i),
+			Tenant:      "cgrates.org",
+			ID:          fmt.Sprintf("STS%d", i),
+			QueueLength: 1,
+			Stored:      true,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: float64(10 - i),
+				},
+			},
 			Blocker:      i == 4,
 			ThresholdIDs: []string{utils.MetaNone},
 		}
@@ -839,11 +871,15 @@ func TestStatQueueMatchingStatQueuesForEventLocks3(t *testing.T) {
 				return nil, utils.ErrNotImplemented
 			}
 			rPrf := &StatQueueProfile{
-				Tenant:       "cgrates.org",
-				ID:           id,
-				QueueLength:  1,
-				Stored:       true,
-				Weight:       20.00,
+				Tenant:      "cgrates.org",
+				ID:          id,
+				QueueLength: 1,
+				Stored:      true,
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 20.00,
+					},
+				},
 				ThresholdIDs: []string{utils.MetaNone},
 			}
 			Cache.Set(ctx, utils.CacheStatQueues, rPrf.TenantID(), &StatQueue{
@@ -895,9 +931,13 @@ func TestStatQueueMatchingStatQueuesForEventLocks4(t *testing.T) {
 	ids := utils.StringSet{}
 	for i := 0; i < 10; i++ {
 		rPrf := &StatQueueProfile{
-			Tenant:       "cgrates.org",
-			ID:           fmt.Sprintf("STS%d", i),
-			Weight:       20.00,
+			Tenant: "cgrates.org",
+			ID:     fmt.Sprintf("STS%d", i),
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20.00,
+				},
+			},
 			ThresholdIDs: []string{utils.MetaNone},
 			QueueLength:  1,
 			Stored:       true,
@@ -1167,10 +1207,14 @@ func TestStatQueueProcessEventOK(t *testing.T) {
 	sS := NewStatService(dm, cfg, filterS, nil)
 
 	sqPrf := &StatQueueProfile{
-		Tenant:       "cgrates.org",
-		ID:           "SQ1",
-		FilterIDs:    []string{"*string:~*req.Account:1001"},
-		Weight:       10,
+		Tenant:    "cgrates.org",
+		ID:        "SQ1",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 		Blocker:      true,
 		QueueLength:  10,
 		ThresholdIDs: []string{"*none"},
@@ -1228,10 +1272,14 @@ func TestStatQueueProcessEventProcessThPartExec(t *testing.T) {
 	sS := NewStatService(dm, cfg, filterS, nil)
 
 	sqPrf := &StatQueueProfile{
-		Tenant:       "cgrates.org",
-		ID:           "SQ1",
-		FilterIDs:    []string{"*string:~*req.Account:1001"},
-		Weight:       10,
+		Tenant:    "cgrates.org",
+		ID:        "SQ1",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 		Blocker:      true,
 		QueueLength:  10,
 		ThresholdIDs: []string{"*none"},
@@ -1356,10 +1404,14 @@ func TestStatQueueV1ProcessEventMissingArgs(t *testing.T) {
 	sS := NewStatService(dm, cfg, filterS, nil)
 
 	sqPrf := &StatQueueProfile{
-		Tenant:       "cgrates.org",
-		ID:           "SQ1",
-		FilterIDs:    []string{"*string:~*req.Account:1001"},
-		Weight:       10,
+		Tenant:    "cgrates.org",
+		ID:        "SQ1",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 		Blocker:      true,
 		QueueLength:  10,
 		ThresholdIDs: []string{"*none"},
@@ -1446,10 +1498,14 @@ func TestStatQueueV1GetQueueIDsOK(t *testing.T) {
 	sS := NewStatService(dm, cfg, filterS, nil)
 
 	sqPrf := &StatQueueProfile{
-		Tenant:       "cgrates.org",
-		ID:           "SQ1",
-		FilterIDs:    []string{"*string:~*req.Account:1001"},
-		Weight:       10,
+		Tenant:    "cgrates.org",
+		ID:        "SQ1",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 		Blocker:      true,
 		QueueLength:  10,
 		ThresholdIDs: []string{"*none"},
@@ -1550,10 +1606,14 @@ func TestStatQueueV1GetStatQueueOK(t *testing.T) {
 	sS := NewStatService(dm, cfg, filterS, nil)
 
 	sqPrf := &StatQueueProfile{
-		Tenant:       "cgrates.org",
-		ID:           "SQ1",
-		FilterIDs:    []string{"*string:~*req.Account:1001"},
-		Weight:       10,
+		Tenant:    "cgrates.org",
+		ID:        "SQ1",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 		Blocker:      true,
 		QueueLength:  10,
 		ThresholdIDs: []string{"*none"},
@@ -1639,10 +1699,14 @@ func TestStatQueueV1GetStatQueueMissingArgs(t *testing.T) {
 	sS := NewStatService(dm, cfg, filterS, nil)
 
 	sqPrf := &StatQueueProfile{
-		Tenant:       "cgrates.org",
-		ID:           "SQ1",
-		FilterIDs:    []string{"*string:~*req.Account:1001"},
-		Weight:       10,
+		Tenant:    "cgrates.org",
+		ID:        "SQ1",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 		Blocker:      true,
 		QueueLength:  10,
 		ThresholdIDs: []string{"*none"},
@@ -1699,10 +1763,14 @@ func TestStatQueueV1GetStatQueuesForEventOK(t *testing.T) {
 	sS := NewStatService(dm, cfg, filterS, nil)
 
 	sqPrf1 := &StatQueueProfile{
-		Tenant:       "cgrates.org",
-		ID:           "SQ1",
-		FilterIDs:    []string{"*string:~*req.Account:1001"},
-		Weight:       10,
+		Tenant:    "cgrates.org",
+		ID:        "SQ1",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 		Blocker:      true,
 		QueueLength:  10,
 		ThresholdIDs: []string{"*none"},
@@ -1719,9 +1787,13 @@ func TestStatQueueV1GetStatQueuesForEventOK(t *testing.T) {
 	}
 
 	sqPrf2 := &StatQueueProfile{
-		Tenant:       "cgrates.org",
-		ID:           "SQ2",
-		Weight:       20,
+		Tenant: "cgrates.org",
+		ID:     "SQ2",
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 		Blocker:      false,
 		QueueLength:  10,
 		ThresholdIDs: []string{"*none"},
@@ -1772,10 +1844,14 @@ func TestStatQueueV1GetStatQueuesForEventNotFoundErr(t *testing.T) {
 	sS := NewStatService(dm, cfg, filterS, nil)
 
 	sqPrf := &StatQueueProfile{
-		Tenant:       "cgrates.org",
-		ID:           "SQ1",
-		FilterIDs:    []string{"*string:~*req.Account:1001"},
-		Weight:       10,
+		Tenant:    "cgrates.org",
+		ID:        "SQ1",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 		Blocker:      true,
 		QueueLength:  10,
 		ThresholdIDs: []string{"*none"},
@@ -1821,10 +1897,14 @@ func TestStatQueueV1GetStatQueuesForEventMissingArgs(t *testing.T) {
 	sS := NewStatService(dm, cfg, filterS, nil)
 
 	sqPrf := &StatQueueProfile{
-		Tenant:       "cgrates.org",
-		ID:           "SQ1",
-		FilterIDs:    []string{"*string:~*req.Account:1001"},
-		Weight:       10,
+		Tenant:    "cgrates.org",
+		ID:        "SQ1",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 		Blocker:      true,
 		QueueLength:  10,
 		ThresholdIDs: []string{"*none"},
@@ -1891,10 +1971,14 @@ func TestStatQueueV1ResetStatQueueOK(t *testing.T) {
 	sS := NewStatService(dm, cfg, filterS, nil)
 
 	sqPrf := &StatQueueProfile{
-		Tenant:       "cgrates.org",
-		ID:           "SQ1",
-		FilterIDs:    []string{"*string:~*req.Account:1001"},
-		Weight:       10,
+		Tenant:    "cgrates.org",
+		ID:        "SQ1",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 		Blocker:      true,
 		QueueLength:  10,
 		ThresholdIDs: []string{"*none"},
@@ -1982,10 +2066,14 @@ func TestStatQueueV1ResetStatQueueNotFoundErr(t *testing.T) {
 	sS := NewStatService(dm, cfg, filterS, nil)
 
 	sqPrf := &StatQueueProfile{
-		Tenant:       "cgrates.org",
-		ID:           "SQ1",
-		FilterIDs:    []string{"*string:~*req.Account:1001"},
-		Weight:       10,
+		Tenant:    "cgrates.org",
+		ID:        "SQ1",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 		Blocker:      true,
 		QueueLength:  10,
 		ThresholdIDs: []string{"*none"},
@@ -2048,10 +2136,14 @@ func TestStatQueueV1ResetStatQueueMissingArgs(t *testing.T) {
 	sS := NewStatService(dm, cfg, filterS, nil)
 
 	sqPrf := &StatQueueProfile{
-		Tenant:       "cgrates.org",
-		ID:           "SQ1",
-		FilterIDs:    []string{"*string:~*req.Account:1001"},
-		Weight:       10,
+		Tenant:    "cgrates.org",
+		ID:        "SQ1",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 		Blocker:      true,
 		QueueLength:  10,
 		ThresholdIDs: []string{"*none"},
@@ -2112,10 +2204,14 @@ func TestStatQueueV1ResetStatQueueUnsupportedMetricType(t *testing.T) {
 	sS := NewStatService(dm, cfg, filterS, nil)
 
 	sqPrf := &StatQueueProfile{
-		Tenant:       "cgrates.org",
-		ID:           "SQ1",
-		FilterIDs:    []string{"*string:~*req.Account:1001"},
-		Weight:       10,
+		Tenant:    "cgrates.org",
+		ID:        "SQ1",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 		Blocker:      true,
 		QueueLength:  10,
 		ThresholdIDs: []string{"*none"},
@@ -2183,10 +2279,14 @@ func TestStatQueueProcessThresholdsOKNoThIDs(t *testing.T) {
 	sS := NewStatService(dm, cfg, filterS, nil)
 
 	sqPrf := &StatQueueProfile{
-		Tenant:       "cgrates.org",
-		ID:           "SQ1",
-		FilterIDs:    []string{"*string:~*req.Account:1001"},
-		Weight:       10,
+		Tenant:    "cgrates.org",
+		ID:        "SQ1",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 		Blocker:      true,
 		QueueLength:  10,
 		ThresholdIDs: []string{"*none"},
@@ -2282,10 +2382,14 @@ func TestStatQueueProcessThresholdsOK(t *testing.T) {
 	sS := NewStatService(dm, cfg, filterS, connMgr)
 
 	sqPrf := &StatQueueProfile{
-		Tenant:       "cgrates.org",
-		ID:           "SQ1",
-		FilterIDs:    []string{"*string:~*req.Account:1001"},
-		Weight:       10,
+		Tenant:    "cgrates.org",
+		ID:        "SQ1",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 		Blocker:      true,
 		QueueLength:  10,
 		ThresholdIDs: []string{"TH1"},
@@ -2364,10 +2468,14 @@ func TestStatQueueProcessThresholdsErrPartExec(t *testing.T) {
 	sS := NewStatService(dm, cfg, filterS, connMgr)
 
 	sqPrf := &StatQueueProfile{
-		Tenant:       "cgrates.org",
-		ID:           "SQ1",
-		FilterIDs:    []string{"*string:~*req.Account:1001"},
-		Weight:       10,
+		Tenant:    "cgrates.org",
+		ID:        "SQ1",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 		Blocker:      true,
 		QueueLength:  10,
 		ThresholdIDs: []string{"TH1"},
@@ -2433,10 +2541,14 @@ func TestStatQueueV1GetQueueFloatMetricsOK(t *testing.T) {
 	sS := NewStatService(dm, cfg, filterS, nil)
 
 	sqPrf := &StatQueueProfile{
-		Tenant:       "cgrates.org",
-		ID:           "SQ1",
-		FilterIDs:    []string{"*string:~*req.Account:1001"},
-		Weight:       10,
+		Tenant:    "cgrates.org",
+		ID:        "SQ1",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 		Blocker:      true,
 		QueueLength:  10,
 		ThresholdIDs: []string{"*none"},
@@ -2502,10 +2614,14 @@ func TestStatQueueV1GetQueueFloatMetricsErrNotFound(t *testing.T) {
 	sS := NewStatService(dm, cfg, filterS, nil)
 
 	sqPrf := &StatQueueProfile{
-		Tenant:       "cgrates.org",
-		ID:           "SQ1",
-		FilterIDs:    []string{"*string:~*req.Account:1001"},
-		Weight:       10,
+		Tenant:    "cgrates.org",
+		ID:        "SQ1",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 		Blocker:      true,
 		QueueLength:  10,
 		ThresholdIDs: []string{"*none"},
@@ -2566,10 +2682,14 @@ func TestStatQueueV1GetQueueFloatMetricsMissingArgs(t *testing.T) {
 	sS := NewStatService(dm, cfg, filterS, nil)
 
 	sqPrf := &StatQueueProfile{
-		Tenant:       "cgrates.org",
-		ID:           "SQ1",
-		FilterIDs:    []string{"*string:~*req.Account:1001"},
-		Weight:       10,
+		Tenant:    "cgrates.org",
+		ID:        "SQ1",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 		Blocker:      true,
 		QueueLength:  10,
 		ThresholdIDs: []string{"*none"},
@@ -2651,10 +2771,14 @@ func TestStatQueueV1GetQueueStringMetricsOK(t *testing.T) {
 	sS := NewStatService(dm, cfg, filterS, nil)
 
 	sqPrf := &StatQueueProfile{
-		Tenant:       "cgrates.org",
-		ID:           "SQ1",
-		FilterIDs:    []string{"*string:~*req.Account:1001"},
-		Weight:       10,
+		Tenant:    "cgrates.org",
+		ID:        "SQ1",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 		Blocker:      true,
 		QueueLength:  10,
 		ThresholdIDs: []string{"*none"},
@@ -2720,10 +2844,14 @@ func TestStatQueueV1GetQueueStringMetricsErrNotFound(t *testing.T) {
 	sS := NewStatService(dm, cfg, filterS, nil)
 
 	sqPrf := &StatQueueProfile{
-		Tenant:       "cgrates.org",
-		ID:           "SQ1",
-		FilterIDs:    []string{"*string:~*req.Account:1001"},
-		Weight:       10,
+		Tenant:    "cgrates.org",
+		ID:        "SQ1",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 		Blocker:      true,
 		QueueLength:  10,
 		ThresholdIDs: []string{"*none"},
@@ -2782,10 +2910,14 @@ func TestStatQueueV1GetQueueStringMetricsMissingArgs(t *testing.T) {
 	sS := NewStatService(dm, cfg, filterS, nil)
 
 	sqPrf := &StatQueueProfile{
-		Tenant:       "cgrates.org",
-		ID:           "SQ1",
-		FilterIDs:    []string{"*string:~*req.Account:1001"},
-		Weight:       10,
+		Tenant:    "cgrates.org",
+		ID:        "SQ1",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 		Blocker:      true,
 		QueueLength:  10,
 		ThresholdIDs: []string{"*none"},
@@ -2901,10 +3033,14 @@ func TestStatQueueGetStatQueueOK(t *testing.T) {
 	sS := NewStatService(dm, cfg, filterS, nil)
 
 	sqPrf := &StatQueueProfile{
-		Tenant:       "cgrates.org",
-		ID:           "SQ1",
-		FilterIDs:    []string{"*string:~*req.Account:1001"},
-		Weight:       10,
+		Tenant:    "cgrates.org",
+		ID:        "SQ1",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 		Blocker:      true,
 		QueueLength:  10,
 		ThresholdIDs: []string{"*none"},
@@ -3102,10 +3238,14 @@ func TestStatQueueV1GetStatQueuesForEventProfileIgnoreFilters(t *testing.T) {
 	sS := NewStatService(dm, cfg, filterS, nil)
 
 	sqPrf1 := &StatQueueProfile{
-		Tenant:       "cgrates.org",
-		ID:           "SQ1",
-		FilterIDs:    []string{"*string:~*req.Account:1001"},
-		Weight:       10,
+		Tenant:    "cgrates.org",
+		ID:        "SQ1",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 		Blocker:      true,
 		QueueLength:  10,
 		ThresholdIDs: []string{"*none"},

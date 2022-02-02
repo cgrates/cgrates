@@ -184,7 +184,7 @@ func TestTPStatsAsTPStats(t *testing.T) {
 			MetricIDs:   "*asr;*acc;*tcc;*acd;*tcd;*pdd",
 			Stored:      true,
 			Blocker:     true,
-			Weight:      20.0,
+			Weights:     ";20",
 		},
 		&StatMdl{
 			Tpid:         "TEST_TPID",
@@ -198,7 +198,7 @@ func TestTPStatsAsTPStats(t *testing.T) {
 			ThresholdIDs: "THRESH3",
 			Stored:       true,
 			Blocker:      true,
-			Weight:       20.0,
+			Weights:      ";20",
 		},
 		&StatMdl{
 			Tpid:         "TEST_TPID",
@@ -212,7 +212,7 @@ func TestTPStatsAsTPStats(t *testing.T) {
 			ThresholdIDs: "THRESH4",
 			Stored:       true,
 			Blocker:      true,
-			Weight:       20.0,
+			Weights:      ";20",
 		},
 	}
 	rcvTPs := tps.AsTPStats()
@@ -254,7 +254,7 @@ func TestAPItoTPStats(t *testing.T) {
 		ThresholdIDs: []string{"THRESH1", "THRESH2"},
 		Stored:       false,
 		Blocker:      false,
-		Weight:       20.0,
+		Weights:      ";20.0",
 	}
 	eTPs := &StatQueueProfile{ID: tps.ID,
 		QueueLength: tps.QueueLength,
@@ -273,8 +273,12 @@ func TestAPItoTPStats(t *testing.T) {
 		FilterIDs:    []string{"FLTR_1", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z"},
 		Stored:       tps.Stored,
 		Blocker:      tps.Blocker,
-		Weight:       20.0,
-		MinItems:     tps.MinItems,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20.0,
+			},
+		},
+		MinItems: tps.MinItems,
 	}
 	if eTPs.TTL, err = utils.ParseDurationWithNanosecs(tps.TTL); err != nil {
 		t.Errorf("Got error: %+v", err)
@@ -307,7 +311,7 @@ func TestStatQueueProfileToAPI(t *testing.T) {
 		},
 		MinItems:     1,
 		ThresholdIDs: []string{"THRESH1", "THRESH2"},
-		Weight:       20.0,
+		Weights:      ";20",
 	}
 	sqPrf := &StatQueueProfile{
 		Tenant:      "cgrates.org",
@@ -327,8 +331,12 @@ func TestStatQueueProfileToAPI(t *testing.T) {
 		TTL:          time.Second,
 		ThresholdIDs: []string{"THRESH1", "THRESH2"},
 		FilterIDs:    []string{"FLTR_1", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z"},
-		Weight:       20.0,
-		MinItems:     1,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20.0,
+			},
+		},
+		MinItems: 1,
 	}
 
 	if rcv := StatQueueProfileToAPI(sqPrf); !reflect.DeepEqual(expected, rcv) {
@@ -354,7 +362,7 @@ func TestAPItoModelStats(t *testing.T) {
 		},
 		Blocker:      true,
 		Stored:       true,
-		Weight:       20,
+		Weights:      ";20",
 		MinItems:     2,
 		ThresholdIDs: []string{"Th1"},
 	}
@@ -371,7 +379,7 @@ func TestAPItoModelStats(t *testing.T) {
 			MetricIDs:    "*tcc",
 			Stored:       true,
 			Blocker:      true,
-			Weight:       20.0,
+			Weights:      ";20",
 			ThresholdIDs: "Th1",
 		},
 		&StatMdl{
@@ -4258,9 +4266,13 @@ func TestModelHelpersStatQueueProfileToAPIFilterIds(t *testing.T) {
 			FilterIDs: []string{"test_id"},
 		},
 		},
-		Stored:       false,
-		Blocker:      false,
-		Weight:       0,
+		Stored:  false,
+		Blocker: false,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 0,
+			},
+		},
 		ThresholdIDs: []string{"threshold_id"},
 	}
 	expStruct := &utils.TPStatProfile{
@@ -4276,7 +4288,7 @@ func TestModelHelpersStatQueueProfileToAPIFilterIds(t *testing.T) {
 		},
 		Blocker:      false,
 		Stored:       false,
-		Weight:       0,
+		Weights:      ";0",
 		ThresholdIDs: []string{"threshold_id"},
 	}
 	result := StatQueueProfileToAPI(testStruct)
@@ -4294,7 +4306,7 @@ func TestModelHelpersAPItoStatsError1(t *testing.T) {
 		TTL:          "cat",
 		Blocker:      false,
 		Stored:       false,
-		Weight:       0,
+		Weights:      ";0",
 		MinItems:     0,
 		ThresholdIDs: nil,
 	}
@@ -4320,7 +4332,7 @@ func TestModelHelpersAPItoModelStatsCase2(t *testing.T) {
 		},
 		Blocker:      true,
 		Stored:       true,
-		Weight:       20,
+		Weights:      ";20",
 		MinItems:     2,
 		ThresholdIDs: []string{"Th1", "Th2"},
 	}
@@ -4337,7 +4349,7 @@ func TestModelHelpersAPItoModelStatsCase2(t *testing.T) {
 			MetricFilterIDs: "test_filter_id1;test_filter_id2",
 			Stored:          true,
 			Blocker:         true,
-			Weight:          20.0,
+			Weights:         ";20",
 			ThresholdIDs:    "Th1;Th2",
 		},
 	}
@@ -4382,7 +4394,7 @@ func TestStatMdlsCSVHeader(t *testing.T) {
 		MetricFilterIDs: "",
 		Stored:          false,
 		Blocker:         false,
-		Weight:          0,
+		Weights:         ";0",
 		ThresholdIDs:    "",
 		CreatedAt:       time.Time{},
 	}}

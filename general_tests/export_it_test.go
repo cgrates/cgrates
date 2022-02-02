@@ -290,9 +290,13 @@ func testExpVerifyStats(t *testing.T) {
 				MetricID: utils.MetaTCD,
 			},
 		},
-		Blocker:      true,
-		Stored:       false,
-		Weight:       30,
+		Blocker: true,
+		Stored:  false,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 40,
+			},
+		},
 		MinItems:     0,
 		ThresholdIDs: []string{utils.MetaNone},
 	}

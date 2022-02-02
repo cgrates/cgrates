@@ -143,7 +143,7 @@ func TestLoadStatQueueProfiles(t *testing.T) {
 			ThresholdIDs: []string{"Th1", "Th2"},
 			Blocker:      true,
 			Stored:       true,
-			Weight:       20,
+			Weights:      ";20",
 			MinItems:     2,
 		},
 		{Tenant: "cgrates.org", ID: "TestStats2"}: {
@@ -178,7 +178,7 @@ func TestLoadStatQueueProfiles(t *testing.T) {
 			ThresholdIDs: []string{"Th"},
 			Blocker:      true,
 			Stored:       true,
-			Weight:       20,
+			Weights:      ";20",
 			MinItems:     2,
 		},
 	}

@@ -864,7 +864,11 @@ func TestFiltersSetFilterReloadCache(t *testing.T) {
 		StatQueueProfile: &engine.StatQueueProfile{
 			ID:        "SQ_ID",
 			FilterIDs: []string{"FLTR_ID"},
-			Weight:    10,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10.0,
+				},
+			},
 		},
 		APIOpts: map[string]interface{}{
 			utils.MetaCache: utils.MetaNone,
@@ -1021,7 +1025,11 @@ func TestFiltersSetFilterClearCache(t *testing.T) {
 		StatQueueProfile: &engine.StatQueueProfile{
 			ID:        "SQ_ID",
 			FilterIDs: []string{"FLTR_ID"},
-			Weight:    10,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				},
+			},
 		},
 		APIOpts: map[string]interface{}{
 			utils.MetaCache: utils.MetaNone,

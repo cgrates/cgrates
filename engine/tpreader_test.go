@@ -433,7 +433,7 @@ func TestTPReaderGetLoadedIdsStatQueueProfiles(t *testing.T) {
 				Tenant:    "cgrates.org",
 				ID:        "ResGroup1",
 				FilterIDs: []string{"*string:~*req.Account:1001", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z"},
-				Weight:    10,
+				Weights:   ";10",
 				Blocker:   true,
 				Stored:    true,
 			},

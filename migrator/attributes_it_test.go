@@ -316,7 +316,11 @@ func testAttrITMigrateAndMove(t *testing.T) {
 				Value:     config.NewRSRParsersMustCompile("Al1", utils.InfieldSep),
 			},
 		},
-		Weight: 20,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 	}
 	attrPrf2 := &engine.AttributeProfile{
 		Tenant:    "cgrates.com",
@@ -330,7 +334,11 @@ func testAttrITMigrateAndMove(t *testing.T) {
 				Value:     config.NewRSRParsersMustCompile("Al1", utils.InfieldSep),
 			},
 		},
-		Weight: 20,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 	}
 	switch attrAction {
 	case utils.Migrate:
@@ -471,7 +479,11 @@ func testAttrITMigrateV2(t *testing.T) {
 				Value:     config.NewRSRParsersMustCompile("Al1", utils.InfieldSep),
 			},
 		},
-		Weight: 20,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 	}
 
 	err := attrMigrator.dmIN.setV2AttributeProfile(v2attr)
@@ -548,7 +560,11 @@ func testAttrITMigrateV3(t *testing.T) {
 				Value:     config.NewRSRParsersMustCompile("Al1", utils.InfieldSep),
 			},
 		},
-		Weight: 20,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 	}
 
 	err := attrMigrator.dmIN.setV3AttributeProfile(v3attr)
@@ -629,7 +645,11 @@ func testAttrITMigrateV4(t *testing.T) {
 				Value:     config.NewRSRParsersMustCompile("~*req.Category:s/(.*)/${1}_UK_Mobile_Vodafone_GBRVF/", utils.InfieldSep),
 			},
 		},
-		Weight: 20,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 	}
 
 	err := attrMigrator.dmIN.setV4AttributeProfile(v4attr)
@@ -732,7 +752,11 @@ func testAttrITV1ToV5(t *testing.T) {
 				Type:      utils.MetaVariable,
 				Value:     sbstPrsr,
 			}},
-		Weight: 20,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 	}
 	eOut2 := &engine.AttributeProfile{
 		Tenant:    "cgrates.org",
@@ -745,7 +769,11 @@ func testAttrITV1ToV5(t *testing.T) {
 				Type:      utils.MetaVariable,
 				Value:     sbstPrsr,
 			}},
-		Weight: 20,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 	}
 
 	// Migrate to latest version
@@ -861,7 +889,11 @@ func testAttrITV2ToV5(t *testing.T) {
 				Type:      utils.MetaVariable,
 				Value:     sbstPrsr,
 			}},
-		Weight: 20,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 	}
 	eOut2 := &engine.AttributeProfile{
 		Tenant:    "cgrates.org",
@@ -874,7 +906,11 @@ func testAttrITV2ToV5(t *testing.T) {
 				Type:      utils.MetaVariable,
 				Value:     sbstPrsr,
 			}},
-		Weight: 20,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 	}
 
 	//Migrate to latest version
@@ -979,7 +1015,11 @@ func testAttrITV3ToV5(t *testing.T) {
 				Type:      utils.MetaVariable,
 				Value:     sbstPrsr,
 			}},
-		Weight: 20,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 	}
 	eOut2 := &engine.AttributeProfile{
 		Tenant:    "cgrates.org",
@@ -992,7 +1032,11 @@ func testAttrITV3ToV5(t *testing.T) {
 				Type:      utils.MetaVariable,
 				Value:     sbstPrsr,
 			}},
-		Weight: 20,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 	}
 
 	//Migrate to latest version

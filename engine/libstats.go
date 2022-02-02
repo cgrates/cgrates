@@ -44,10 +44,15 @@ type StatQueueProfile struct {
 	Metrics      []*MetricWithFilters // list of metrics to build
 	Stored       bool
 	Blocker      bool // blocker flag to stop processing on filters matched
-	Weight       float64
+	Weights      utils.DynamicWeights
 	ThresholdIDs []string // list of thresholds to be checked after changes
 
 	lkID string // holds the reference towards guardian lock key
+}
+
+type statprfWithWeight struct {
+	*StatQueueProfile
+	weight float64
 }
 
 // StatQueueProfileWithAPIOpts is used in replicatorV1 for dispatcher
@@ -391,7 +396,9 @@ type StatQueues []*StatQueue
 
 // Sort is part of sort interface, sort based on Weight
 func (sis StatQueues) Sort() {
-	sort.Slice(sis, func(i, j int) bool { return sis[i].sqPrfl.Weight > sis[j].sqPrfl.Weight })
+	sort.Slice(sis, func(i, j int) bool {
+		return sis[i].sqPrfl.Weights[i].Weight > sis[j].sqPrfl.Weights[j].Weight
+	})
 }
 
 func (sq *StatQueue) MarshalJSON() (rply []byte, err error) {
@@ -566,10 +573,11 @@ func (sqp *StatQueueProfile) Set(path []string, val interface{}, newBranch bool,
 			sqp.Stored, err = utils.IfaceAsBool(val)
 		case utils.Blocker:
 			sqp.Blocker, err = utils.IfaceAsBool(val)
-		case utils.Weight:
+		case utils.Weights:
 			if val != utils.EmptyString {
-				sqp.Weight, err = utils.IfaceAsFloat64(val)
+				sqp.Weights, err = utils.NewDynamicWeightsFromString(utils.IfaceAsString(val), utils.InfieldSep, utils.ANDSep)
 			}
+
 		case utils.FilterIDs:
 			var valA []string
 			valA, err = utils.IfaceAsStringSlice(val)
@@ -634,9 +642,7 @@ func (sqp *StatQueueProfile) Merge(v2 interface{}) {
 	if vi.Stored {
 		sqp.Stored = vi.Stored
 	}
-	if vi.Weight != 0 {
-		sqp.Weight = vi.Weight
-	}
+	sqp.Weights = append(sqp.Weights, vi.Weights...)
 }
 
 func (sqp *StatQueueProfile) String() string { return utils.ToJSON(sqp) }
@@ -676,7 +682,7 @@ func (sqp *StatQueueProfile) FieldAsInterface(fldPath []string) (_ interface{}, 
 		case utils.FilterIDs:
 			return sqp.FilterIDs, nil
 		case utils.Weight:
-			return sqp.Weight, nil
+			return sqp.Weights, nil
 		case utils.ThresholdIDs:
 			return sqp.ThresholdIDs, nil
 		case utils.QueueLength:

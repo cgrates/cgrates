@@ -1162,6 +1162,13 @@ func testLoadersGetStatQueueProfiles(t *testing.T) {
 			Weight:       20,
 			MinItems:     2,
 		},
+		Stored: true,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 30,
+			},
+		},
+		ThresholdIDs: []string{utils.MetaNone},
 	}
 	var sqPrfs []*engine.StatQueueProfile
 	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetStatQueueProfiles,

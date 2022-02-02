@@ -4221,7 +4221,11 @@ func testV1FIdxSetStatSProfileWithFltr(t *testing.T) {
 				},
 			},
 			Stored:       true,
-			Weight:       30,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 30,
+				},
+			},
 			ThresholdIDs: []string{utils.MetaNone},
 		},
 	}
@@ -4322,7 +4326,11 @@ func testV1FIdxSetStatSMoreFltrsMoreIndexing(t *testing.T) {
 				},
 			},
 			Stored:       true,
-			Weight:       30,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 30,
+				},
+			},
 			ThresholdIDs: []string{utils.MetaNone},
 		},
 	}
@@ -4429,7 +4437,11 @@ func testV1FIdxStatSMoreProfilesForFltrs(t *testing.T) {
 				},
 			},
 			Stored:       true,
-			Weight:       30,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 30,
+				},
+			},
 			ThresholdIDs: []string{utils.MetaNone},
 		},
 	}
