@@ -736,7 +736,7 @@ func GetCGRVersion() (vers string, err error) {
 			commitHash = commitSplt[1]
 			continue
 		}
-		if strings.HasPrefix(ln, "Date:") {
+		if strings.HasPrefix(ln, "CommitDate:") {
 			dateSplt := strings.Split(ln, ": ")
 			if len(dateSplt) != 2 {
 				return vers, fmt.Errorf("Building version - cannot split commit date")

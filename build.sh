@@ -1,7 +1,7 @@
 #! /usr/bin/env sh
 echo "Building CGRateS ..."
 
-GIT_LAST_LOG=$(git log -1 | tr -d "'")
+GIT_LAST_LOG=$(git log -1 --format=fuller | tr -d "'")
 
 GIT_TAG_LOG=$(git tag -l --points-at HEAD)
 
