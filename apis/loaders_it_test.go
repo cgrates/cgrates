@@ -294,10 +294,11 @@ cgrates.org,ResGroup22,*string:~*req.Account:dan,10,3600s,2,premium_call,true,tr
 	// Create and populate Routes.csv
 	if err := writeFile(utils.RoutesCsv, `
 #Tenant[0],ID[1],FilterIDs[2],Weights[3],Sorting[4],SortingParameters[5],RouteID[6],RouteFilterIDs[7],RouteAccountIDs[8],RouteRateProfileIDs[9],RouteResourceIDs[10],RouteStatIDs[11],RouteWeights[12],RouteBlocker[13],RouteParameters[14]
-cgrates.org,RoutePrf1,*string:~*req.Account:1001,;20,*lc,,route1,fltr1,Account1;Account2,RPL_1,ResGroup1,Stat1,;10,true,param1
+cgrates.org,RoutePrf1,*string:~*req.Account:1001,;20,*lc,,route1,fltr1,Account1;Account2,RPL_1,ResGroup1,Stat1,,true,param1
 cgrates.org,RoutePrf1,,,,,route1,,,RPL_2,ResGroup2,,;10,,
-cgrates.org,RoutePrf1,,,,,route1,fltr2,Account2,RPL_3,ResGroup3,Stat2,;10,,
-cgrates.org,RoutePrf1,,,,,route1,,,,ResGroup4,Stat3,;10,,
+cgrates.org,RoutePrf1,,,,,route1,fltr2,,RPL_3,ResGroup3,Stat2,,,param2
+cgrates.org,RoutePrf1,,,,,route1,,,,ResGroup4,Stat3,,,
+cgrates.org,RoutePrf1,,,,,route2,fltr5,Account1,RPL_1,ResGroup1,Stat1,fltr1;10,true,param1
 cgrates.org,RoutePrf2,,,,,,,,,,,,,
 cgrates.org,RoutePrf2,*string:~*req.Account:1002,;20,*lc,,route1,fltr3,Account3;Account4,RPL_2,ResGroup2,Stat2,;10,true,param1
 `); err != nil {
@@ -1002,46 +1003,34 @@ func testLoadersGetRouteProfiles(t *testing.T) {
 			Routes: []*engine.Route{
 				{
 					ID:             "route1",
-					FilterIDs:      []string{"fltr1"},
+					FilterIDs:      []string{"fltr1", "fltr2"},
 					AccountIDs:     []string{"Account1", "Account2"},
-					RateProfileIDs: []string{"RPL_1"},
-					ResourceIDs:    []string{"ResGroup1"},
-					StatIDs:        []string{"Stat1"},
+					RateProfileIDs: []string{"RPL_1", "RPL_2", "RPL_3"},
+					ResourceIDs:    []string{"ResGroup1", "ResGroup2", "ResGroup3", "ResGroup4"},
+					StatIDs:        []string{"Stat1", "Stat2", "Stat3"},
 					Weights: utils.DynamicWeights{
 						{
 							Weight: 10,
 						},
 					},
 					Blocker:         true,
+					RouteParameters: "param2",
+				},
+				{
+					ID:             "route2",
+					FilterIDs:      []string{"fltr5"},
+					AccountIDs:     []string{"Account1"},
+					RateProfileIDs: []string{"RPL_1"},
+					ResourceIDs:    []string{"ResGroup1"},
+					StatIDs:        []string{"Stat1"},
+					Weights: utils.DynamicWeights{
+						{
+							FilterIDs: []string{"fltr1"},
+							Weight:    10,
+						},
+					},
+					Blocker:         true,
 					RouteParameters: "param1",
-				},
-				{
-					ID:             "route1",
-					RateProfileIDs: []string{"RPL_2"},
-					ResourceIDs:    []string{"ResGroup2", "ResGroup4"},
-					StatIDs:        []string{"Stat3"},
-					Weights: utils.DynamicWeights{
-						{
-							Weight: 10,
-						},
-					},
-					Blocker:         false,
-					RouteParameters: utils.EmptyString,
-				},
-				{
-					ID:             "route1",
-					FilterIDs:      []string{"fltr2"},
-					AccountIDs:     []string{"Account2"},
-					RateProfileIDs: []string{"RPL_3"},
-					ResourceIDs:    []string{"ResGroup3"},
-					StatIDs:        []string{"Stat2"},
-					Weights: utils.DynamicWeights{
-						{
-							Weight: 10,
-						},
-					},
-					Blocker:         false,
-					RouteParameters: utils.EmptyString,
 				},
 			},
 			Weights: utils.DynamicWeights{
@@ -1053,16 +1042,16 @@ func testLoadersGetRouteProfiles(t *testing.T) {
 		{
 			Tenant:    "cgrates.org",
 			ID:        "RoutePrf2",
-			FilterIDs: []string{"*string:~*req.Account:dan"},
+			FilterIDs: []string{"*string:~*req.Account:1002"},
 			Sorting:   utils.MetaLC,
 			Routes: []*engine.Route{
 				{
 					ID:             "route1",
 					FilterIDs:      []string{"fltr3"},
 					AccountIDs:     []string{"Account3", "Account4"},
-					RateProfileIDs: []string{"RPL_1"},
-					ResourceIDs:    []string{"ResGroup1"},
-					StatIDs:        []string{"Stat1"},
+					RateProfileIDs: []string{"RPL_2"},
+					ResourceIDs:    []string{"ResGroup2"},
+					StatIDs:        []string{"Stat2"},
 					Weights: utils.DynamicWeights{
 						{
 							Weight: 10,
