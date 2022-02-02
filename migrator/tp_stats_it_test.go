@@ -121,7 +121,7 @@ func testTpStatsITPopulate(t *testing.T) {
 			},
 			Blocker:      false,
 			Stored:       false,
-			Weight:       20,
+			Weights:      ";20",
 			MinItems:     1,
 			ThresholdIDs: []string{"ThreshValueTwo"},
 		},

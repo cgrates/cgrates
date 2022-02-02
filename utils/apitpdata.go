@@ -238,7 +238,7 @@ type TPStatProfile struct {
 	Metrics      []*MetricWithFilters
 	Blocker      bool // blocker flag to stop processing on filters matched
 	Stored       bool
-	Weight       float64
+	Weights      string
 	MinItems     int
 	ThresholdIDs []string
 }

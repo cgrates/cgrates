@@ -172,7 +172,11 @@ func testFltrITMigrateAndMove(t *testing.T) {
 				Value:     config.NewRSRParsersMustCompile("1002", utils.InfieldSep),
 			},
 		},
-		Weight: 10,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 	}
 	expAttrProf := &engine.AttributeProfile{
 		Tenant:    "cgrates.org",
@@ -185,7 +189,11 @@ func testFltrITMigrateAndMove(t *testing.T) {
 				Value:     config.NewRSRParsersMustCompile("1002", utils.InfieldSep),
 			},
 		},
-		Weight: 10,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 	}
 	expAttrProf.Compile()
 	attrProf.Compile()
@@ -364,7 +372,11 @@ func testFltrITMigratev2(t *testing.T) {
 				Value:     config.NewRSRParsersMustCompile("1002", utils.InfieldSep),
 			},
 		},
-		Weight: 10,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 	}
 	expAttrProf := &engine.AttributeProfile{
 		Tenant:    "cgrates.org",
@@ -377,7 +389,11 @@ func testFltrITMigratev2(t *testing.T) {
 				Value:     config.NewRSRParsersMustCompile("1002", utils.InfieldSep),
 			},
 		},
-		Weight: 10,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 	}
 	expAttrProf.Compile()
 	attrProf.Compile()

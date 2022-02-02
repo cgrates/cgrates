@@ -490,9 +490,13 @@ func testActionsExecuteActionsHTTPPost(t *testing.T) {
 func testActionsSetStatQueueProfileBeforeExecuteResetSQ(t *testing.T) {
 	sqPrf := &engine.StatQueueProfileWithAPIOpts{
 		StatQueueProfile: &engine.StatQueueProfile{
-			Tenant:      "cgrates.org",
-			ID:          "SQ_ID",
-			Weight:      10,
+			Tenant: "cgrates.org",
+			ID:     "SQ_ID",
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				},
+			},
 			QueueLength: 100,
 			TTL:         time.Duration(1 * time.Minute),
 			MinItems:    0,
@@ -514,9 +518,13 @@ func testActionsSetStatQueueProfileBeforeExecuteResetSQ(t *testing.T) {
 	}
 
 	expSqPrf := engine.StatQueueProfile{
-		Tenant:      "cgrates.org",
-		ID:          "SQ_ID",
-		Weight:      10,
+		Tenant: "cgrates.org",
+		ID:     "SQ_ID",
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 		QueueLength: 100,
 		TTL:         time.Duration(1 * time.Minute),
 		MinItems:    0,

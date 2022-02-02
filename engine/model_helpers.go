@@ -338,7 +338,7 @@ func (tps StatMdls) AsTPStats() (result []*utils.TPStatProfile) {
 				ID:          model.ID,
 				Blocker:     model.Blocker,
 				Stored:      model.Stored,
-				Weight:      model.Weight,
+				Weights:     model.Weights,
 				MinItems:    model.MinItems,
 				TTL:         model.TTL,
 				QueueLength: model.QueueLength,
@@ -350,8 +350,8 @@ func (tps StatMdls) AsTPStats() (result []*utils.TPStatProfile) {
 		if model.Stored {
 			st.Stored = model.Stored
 		}
-		if model.Weight != 0 {
-			st.Weight = model.Weight
+		if model.Weights != "" {
+			st.Weights = model.Weights
 		}
 		if model.MinItems != 0 {
 			st.MinItems = model.MinItems
@@ -429,7 +429,7 @@ func APItoModelStats(st *utils.TPStatProfile) (mdls StatMdls) {
 				mdl.MinItems = st.MinItems
 				mdl.Stored = st.Stored
 				mdl.Blocker = st.Blocker
-				mdl.Weight = st.Weight
+				mdl.Weights = st.Weights
 				for i, val := range st.ThresholdIDs {
 					if i != 0 {
 						mdl.ThresholdIDs += utils.InfieldSep
@@ -460,8 +460,12 @@ func APItoStats(tpST *utils.TPStatProfile, timezone string) (st *StatQueueProfil
 		Metrics:      make([]*MetricWithFilters, len(tpST.Metrics)),
 		Stored:       tpST.Stored,
 		Blocker:      tpST.Blocker,
-		Weight:       tpST.Weight,
 		ThresholdIDs: make([]string, len(tpST.ThresholdIDs)),
+	}
+	if tpST.Weights != utils.EmptyString {
+		if st.Weights, err = utils.NewDynamicWeightsFromString(tpST.Weights, utils.InfieldSep, utils.ANDSep); err != nil {
+			return
+		}
 	}
 	if tpST.TTL != utils.EmptyString {
 		if st.TTL, err = utils.ParseDurationWithNanosecs(tpST.TTL); err != nil {
@@ -492,7 +496,7 @@ func StatQueueProfileToAPI(st *StatQueueProfile) (tpST *utils.TPStatProfile) {
 		Metrics:      make([]*utils.MetricWithFilters, len(st.Metrics)),
 		Blocker:      st.Blocker,
 		Stored:       st.Stored,
-		Weight:       st.Weight,
+		Weights:      st.Weights.String(utils.InfieldSep, utils.ANDSep),
 		MinItems:     st.MinItems,
 		ThresholdIDs: make([]string, len(st.ThresholdIDs)),
 	}

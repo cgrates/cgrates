@@ -435,8 +435,12 @@ func testStsITMigrateFromv1(t *testing.T) {
 		t.Error(err)
 	} else if statQueueProfile.ThresholdIDs[0] != "Test" {
 		t.Errorf("Expecting: 'Test', received: %+v", statQueueProfile.ThresholdIDs[0])
-	} else if statQueueProfile.Weight != 0 {
-		t.Errorf("Expecting: '0', received: %+v", statQueueProfile.Weight)
+	} else if reflect.DeepEqual(statQueueProfile.Weights, utils.DynamicWeights{
+		{
+			Weight: 0,
+		},
+	}) {
+		t.Errorf("Expecting: '0', received: %+v", statQueueProfile.Weights)
 	} else if !statQueueProfile.Stored {
 		t.Errorf("Expecting: 'true', received: %+v", statQueueProfile.Stored)
 	} else if statQueueProfile.Blocker {

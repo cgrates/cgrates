@@ -179,9 +179,13 @@ func testStatsGetStatQueueProfilesBeforeSet(t *testing.T) {
 func testStatsSetStatQueueProfiles(t *testing.T) {
 	sqPrf1 := &engine.StatQueueProfileWithAPIOpts{
 		StatQueueProfile: &engine.StatQueueProfile{
-			Tenant:      "cgrates.org",
-			ID:          "SQ_1",
-			Weight:      10,
+			Tenant: "cgrates.org",
+			ID:     "SQ_1",
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				},
+			},
 			QueueLength: 100,
 			TTL:         time.Duration(1 * time.Minute),
 			MinItems:    5,
@@ -218,7 +222,11 @@ func testStatsSetStatQueueProfiles(t *testing.T) {
 		StatQueueProfile: &engine.StatQueueProfile{
 			Tenant: "cgrates.org",
 			ID:     "SQ_2",
-			Weight: 20,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
 			Metrics: []*engine.MetricWithFilters{
 				{
 					MetricID: utils.MetaASR,
@@ -265,9 +273,13 @@ func testStatsGetStatQueueAfterSet(t *testing.T) {
 		utils.MetaTCD: -1,
 	}
 	expSqPrf := engine.StatQueueProfile{
-		Tenant:      "cgrates.org",
-		ID:          "SQ_1",
-		Weight:      10,
+		Tenant: "cgrates.org",
+		ID:     "SQ_1",
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 		QueueLength: 100,
 		TTL:         time.Duration(1 * time.Minute),
 		MinItems:    5,
@@ -345,7 +357,11 @@ func testStatsGetStatQueueAfterSet(t *testing.T) {
 	expSqPrf = engine.StatQueueProfile{
 		Tenant: "cgrates.org",
 		ID:     "SQ_2",
-		Weight: 20,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 		Metrics: []*engine.MetricWithFilters{
 			{
 				MetricID: utils.MetaASR,
@@ -443,9 +459,13 @@ func testStatsGetStatQueueProfiles1(t *testing.T) {
 	var args *utils.ArgsItemIDs
 	exp := []*engine.StatQueueProfile{
 		{
-			Tenant:      "cgrates.org",
-			ID:          "SQ_1",
-			Weight:      10,
+			Tenant: "cgrates.org",
+			ID:     "SQ_1",
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				},
+			},
 			QueueLength: 100,
 			TTL:         time.Duration(1 * time.Minute),
 			MinItems:    5,
@@ -471,7 +491,11 @@ func testStatsGetStatQueueProfiles1(t *testing.T) {
 		{
 			Tenant: "cgrates.org",
 			ID:     "SQ_2",
-			Weight: 20,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
 			Metrics: []*engine.MetricWithFilters{
 				{
 					MetricID: utils.MetaASR,
@@ -513,7 +537,11 @@ func testStatsGetStatQueueProfilesWithPrefix(t *testing.T) {
 		{
 			Tenant: "cgrates.org",
 			ID:     "SQ_2",
-			Weight: 20,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
 			Metrics: []*engine.MetricWithFilters{
 				{
 					MetricID: utils.MetaASR,
@@ -722,9 +750,13 @@ func testStatsSetThresholdProfilesBeforeProcessEv(t *testing.T) {
 func testStatsSetStatQueueProfileBeforeProcessEv(t *testing.T) {
 	sqPrf := &engine.StatQueueProfileWithAPIOpts{
 		StatQueueProfile: &engine.StatQueueProfile{
-			Tenant:      "cgrates.org",
-			ID:          "SQ_3",
-			Weight:      10,
+			Tenant: "cgrates.org",
+			ID:     "SQ_3",
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				},
+			},
 			QueueLength: 100,
 			TTL:         time.Duration(1 * time.Minute),
 			MinItems:    0,
@@ -746,9 +778,13 @@ func testStatsSetStatQueueProfileBeforeProcessEv(t *testing.T) {
 	}
 
 	expSqPrf := engine.StatQueueProfile{
-		Tenant:      "cgrates.org",
-		ID:          "SQ_3",
-		Weight:      10,
+		Tenant: "cgrates.org",
+		ID:     "SQ_3",
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 		QueueLength: 100,
 		TTL:         time.Duration(1 * time.Minute),
 		MinItems:    0,

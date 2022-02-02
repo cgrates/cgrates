@@ -521,7 +521,11 @@ func TestHealthIndexStats(t *testing.T) {
 			"*prefix:~*resources.RES_GRP1.Available:10", // *resources will not be indexing
 			"*suffix:BrokenFilter:Invalid",
 		},
-		Weight:      30,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 30,
+			},
+		},
 		QueueLength: 100,
 		TTL:         10 * time.Second,
 		MinItems:    0,
@@ -608,7 +612,11 @@ func TestHealthIndexStats(t *testing.T) {
 			"*suffix:BrokenFilter:Invalid",
 			"FLTR_1_NOT_EXIST",
 		},
-		Weight:      30,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 30,
+			},
+		},
 		QueueLength: 100,
 		TTL:         10 * time.Second,
 		MinItems:    0,

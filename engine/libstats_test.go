@@ -34,18 +34,51 @@ var sq *StatQueue
 
 func TestStatQueuesSort(t *testing.T) {
 	sInsts := StatQueues{
-		&StatQueue{sqPrfl: &StatQueueProfile{ID: "FIRST", Weight: 30.0}},
-		&StatQueue{sqPrfl: &StatQueueProfile{ID: "SECOND", Weight: 40.0}},
-		&StatQueue{sqPrfl: &StatQueueProfile{ID: "THIRD", Weight: 30.0}},
-		&StatQueue{sqPrfl: &StatQueueProfile{ID: "FOURTH", Weight: 35.0}},
+		&StatQueue{sqPrfl: &StatQueueProfile{ID: "FIRST", Weights: utils.DynamicWeights{
+			{
+				Weight: 30.0,
+			},
+		}}},
+		&StatQueue{sqPrfl: &StatQueueProfile{ID: "SECOND", Weights: utils.DynamicWeights{
+			{
+				Weight: 40.0,
+			},
+		}}},
+		&StatQueue{sqPrfl: &StatQueueProfile{ID: "THIRD", Weights: utils.DynamicWeights{
+			{
+				Weight: 30.0,
+			},
+		}}},
+		&StatQueue{sqPrfl: &StatQueueProfile{ID: "FOURTH", Weights: utils.DynamicWeights{
+			{
+				Weight: 35.0,
+			},
+		}}},
 	}
 	sInsts.Sort()
 	eSInst := StatQueues{
-		&StatQueue{sqPrfl: &StatQueueProfile{ID: "SECOND", Weight: 40.0}},
-		&StatQueue{sqPrfl: &StatQueueProfile{ID: "FOURTH", Weight: 35.0}},
-		&StatQueue{sqPrfl: &StatQueueProfile{ID: "FIRST", Weight: 30.0}},
-		&StatQueue{sqPrfl: &StatQueueProfile{ID: "THIRD", Weight: 30.0}},
+		&StatQueue{sqPrfl: &StatQueueProfile{ID: "SECOND", Weights: utils.DynamicWeights{
+			{
+				Weight: 40.0,
+			},
+		}}},
+		&StatQueue{sqPrfl: &StatQueueProfile{ID: "FOURTH", Weights: utils.DynamicWeights{
+			{
+				Weight: 35.0,
+			},
+		}}},
+		&StatQueue{sqPrfl: &StatQueueProfile{ID: "FIRST", Weights: utils.DynamicWeights{
+			{
+				Weight: 30.0,
+			},
+		}}},
+		&StatQueue{sqPrfl: &StatQueueProfile{ID: "THIRD", Weights: utils.DynamicWeights{
+			{
+				Weight: 30.0,
+			},
+		}}},
 	}
+
 	if !reflect.DeepEqual(eSInst, sInsts) {
 		t.Errorf("expecting: %+v, received: %+v", eSInst, sInsts)
 	}
@@ -1303,9 +1336,13 @@ func TestStatQueueWithAPIOptsJSONMarshall(t *testing.T) {
 
 func TestStatQueueLockUnlockStatQueueProfiles(t *testing.T) {
 	sqPrf := &StatQueueProfile{
-		Tenant:      "cgrates.org",
-		ID:          "SQ1",
-		Weight:      10,
+		Tenant: "cgrates.org",
+		ID:     "SQ1",
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 		QueueLength: 10,
 	}
 
@@ -1374,10 +1411,14 @@ func TestStatQueueLockUnlockStatQueues(t *testing.T) {
 func TestStatQueueProfileSet(t *testing.T) {
 	sq := StatQueueProfile{}
 	exp := StatQueueProfile{
-		Tenant:       "cgrates.org",
-		ID:           "ID",
-		FilterIDs:    []string{"fltr1", "*string:~*req.Account:1001"},
-		Weight:       10,
+		Tenant:    "cgrates.org",
+		ID:        "ID",
+		FilterIDs: []string{"fltr1", "*string:~*req.Account:1001"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 		QueueLength:  10,
 		TTL:          10,
 		MinItems:     10,
@@ -1452,10 +1493,14 @@ func TestStatQueueProfileSet(t *testing.T) {
 
 func TestStatQueueProfileAsInterface(t *testing.T) {
 	sqp := StatQueueProfile{
-		Tenant:       "cgrates.org",
-		ID:           "ID",
-		FilterIDs:    []string{"fltr1", "*string:~*req.Account:1001"},
-		Weight:       10,
+		Tenant:    "cgrates.org",
+		ID:        "ID",
+		FilterIDs: []string{"fltr1", "*string:~*req.Account:1001"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 		QueueLength:  10,
 		TTL:          10,
 		MinItems:     10,
@@ -1500,7 +1545,7 @@ func TestStatQueueProfileAsInterface(t *testing.T) {
 	}
 	if val, err := sqp.FieldAsInterface([]string{utils.Weight}); err != nil {
 		t.Fatal(err)
-	} else if exp := sqp.Weight; !reflect.DeepEqual(exp, val) {
+	} else if exp := sqp.Weights; !reflect.DeepEqual(exp, val) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
 	}
 	if val, err := sqp.FieldAsInterface([]string{utils.ThresholdIDs}); err != nil {
@@ -1610,10 +1655,14 @@ func TestStatQueueProfileAsInterface(t *testing.T) {
 func TestStatQueueProfileMerge(t *testing.T) {
 	sqp := &StatQueueProfile{}
 	exp := &StatQueueProfile{
-		Tenant:       "cgrates.org",
-		ID:           "ID",
-		FilterIDs:    []string{"fltr1", "*string:~*req.Account:1001"},
-		Weight:       10,
+		Tenant:    "cgrates.org",
+		ID:        "ID",
+		FilterIDs: []string{"fltr1", "*string:~*req.Account:1001"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 		QueueLength:  10,
 		TTL:          10,
 		MinItems:     10,
@@ -1628,10 +1677,14 @@ func TestStatQueueProfileMerge(t *testing.T) {
 		}},
 	}
 	if sqp.Merge(&StatQueueProfile{
-		Tenant:       "cgrates.org",
-		ID:           "ID",
-		FilterIDs:    []string{"fltr1", "*string:~*req.Account:1001"},
-		Weight:       10,
+		Tenant:    "cgrates.org",
+		ID:        "ID",
+		FilterIDs: []string{"fltr1", "*string:~*req.Account:1001"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 		QueueLength:  10,
 		TTL:          10,
 		MinItems:     10,

@@ -584,10 +584,14 @@ func testCgrLdrGetRouteProfileAfterLoad(t *testing.T) {
 
 func testCgrLdrGetStatsProfileAfterLoad(t *testing.T) {
 	expStatsprf := &engine.StatQueueProfile{
-		Tenant:      utils.CGRateSorg,
-		ID:          "Stat_1",
-		FilterIDs:   []string{"FLTR_STAT_1"},
-		Weight:      30,
+		Tenant:    utils.CGRateSorg,
+		ID:        "Stat_1",
+		FilterIDs: []string{"FLTR_STAT_1"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 30,
+			},
+		},
 		QueueLength: 100,
 		TTL:         10 * time.Second,
 		MinItems:    0,

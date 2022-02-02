@@ -54,7 +54,11 @@ func TestStatsSetGetRemStatQueueProfile(t *testing.T) {
 		StatQueueProfile: &engine.StatQueueProfile{
 			Tenant: "cgrates.org",
 			ID:     "sqID",
-			Weight: 10,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				},
+			},
 		},
 	}
 
@@ -227,7 +231,11 @@ func TestStatsRemoveStatQueueProfileCheckErrors(t *testing.T) {
 		StatQueueProfile: &engine.StatQueueProfile{
 			ID:     "TestStatsRemoveStatQueueProfileCheckErrors",
 			Tenant: "cgrates.org",
-			Weight: 10,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				},
+			},
 		},
 	}
 	var reply string
@@ -581,7 +589,11 @@ func TestStatsAPIs(t *testing.T) {
 			},
 			Blocker:      true,
 			ThresholdIDs: []string{utils.MetaNone},
-			Weight:       20,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
 		},
 	}
 
@@ -611,7 +623,11 @@ func TestStatsAPIs(t *testing.T) {
 			},
 			Blocker:      true,
 			ThresholdIDs: []string{"thdID"},
-			Weight:       20,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
 		},
 	}
 
