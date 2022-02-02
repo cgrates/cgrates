@@ -19,17 +19,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"bytes"
-	"encoding/gob"
-	"encoding/json"
-	"fmt"
-	"reflect"
-
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/ugocodec/codec"
-	"go.mongodb.org/mongo-driver/bson"
 )
 
 type Storage interface {
@@ -155,112 +147,6 @@ type LoadWriter interface {
 	SetTPRateProfiles([]*utils.TPRateProfile) error
 	SetTPActionProfiles([]*utils.TPActionProfile) error
 	SetTPAccounts([]*utils.TPAccount) error
-}
-
-// NewMarshaler returns the marshaler type selected by mrshlerStr
-func NewMarshaler(mrshlerStr string) (ms Marshaler, err error) {
-	switch mrshlerStr {
-	case utils.MsgPack:
-		ms = NewCodecMsgpackMarshaler()
-	case utils.JSON:
-		ms = new(JSONMarshaler)
-	default:
-		err = fmt.Errorf("Unsupported marshaler: %v", mrshlerStr)
-	}
-	return
-}
-
-type Marshaler interface {
-	Marshal(v interface{}) ([]byte, error)
-	Unmarshal(data []byte, v interface{}) error
-}
-
-type JSONMarshaler struct{}
-
-func (JSONMarshaler) Marshal(v interface{}) ([]byte, error) {
-	return json.Marshal(v)
-}
-
-func (JSONMarshaler) Unmarshal(data []byte, v interface{}) error {
-	return json.Unmarshal(data, v)
-}
-
-type BSONMarshaler struct{}
-
-func (BSONMarshaler) Marshal(v interface{}) ([]byte, error) {
-	return bson.Marshal(v)
-}
-
-func (BSONMarshaler) Unmarshal(data []byte, v interface{}) error {
-	return bson.Unmarshal(data, v)
-}
-
-type JSONBufMarshaler struct{}
-
-func (JSONBufMarshaler) Marshal(v interface{}) (data []byte, err error) {
-	buf := new(bytes.Buffer)
-	err = json.NewEncoder(buf).Encode(v)
-	data = buf.Bytes()
-	return
-}
-
-func (JSONBufMarshaler) Unmarshal(data []byte, v interface{}) error {
-	return json.NewDecoder(bytes.NewBuffer(data)).Decode(v)
-}
-
-type CodecMsgpackMarshaler struct {
-	mh *codec.MsgpackHandle
-}
-
-func NewCodecMsgpackMarshaler() *CodecMsgpackMarshaler {
-	cmm := &CodecMsgpackMarshaler{new(codec.MsgpackHandle)}
-	mh := cmm.mh
-	mh.MapType = reflect.TypeOf(map[string]interface{}(nil))
-	mh.RawToString = true
-	return cmm
-}
-
-func (cmm *CodecMsgpackMarshaler) Marshal(v interface{}) (b []byte, err error) {
-	enc := codec.NewEncoderBytes(&b, cmm.mh)
-	err = enc.Encode(v)
-	return
-}
-
-func (cmm *CodecMsgpackMarshaler) Unmarshal(data []byte, v interface{}) error {
-	dec := codec.NewDecoderBytes(data, cmm.mh)
-	return dec.Decode(&v)
-}
-
-type BincMarshaler struct {
-	bh *codec.BincHandle
-}
-
-func NewBincMarshaler() *BincMarshaler {
-	return &BincMarshaler{new(codec.BincHandle)}
-}
-
-func (bm *BincMarshaler) Marshal(v interface{}) (b []byte, err error) {
-	enc := codec.NewEncoderBytes(&b, bm.bh)
-	err = enc.Encode(v)
-	return
-}
-
-func (bm *BincMarshaler) Unmarshal(data []byte, v interface{}) error {
-	dec := codec.NewDecoderBytes(data, bm.bh)
-	return dec.Decode(&v)
-}
-
-type GOBMarshaler struct{}
-
-func (GOBMarshaler) Marshal(v interface{}) (data []byte, err error) {
-	buf := new(bytes.Buffer)
-	err = gob.NewEncoder(buf).Encode(v)
-	data = buf.Bytes()
-	return
-}
-
-func (GOBMarshaler) Unmarshal(data []byte, v interface{}) error {
-	return gob.NewDecoder(bytes.NewBuffer(data)).Decode(v)
 }
 
 // Decide the value of cacheCommit parameter based on transactionID

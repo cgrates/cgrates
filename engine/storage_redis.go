@@ -36,7 +36,7 @@ import (
 
 type RedisStorage struct {
 	client radix.Client
-	ms     Marshaler
+	ms     utils.Marshaler
 }
 
 // Redis commands
@@ -74,8 +74,8 @@ func NewRedisStorage(address string, db int, user, pass, mrshlerStr string,
 	maxConns, attempts int, sentinelName string, isCluster bool, clusterSync,
 	clusterOnDownDelay time.Duration, tlsConn bool,
 	tlsClientCert, tlsClientKey, tlsCACert string) (_ *RedisStorage, err error) {
-	var ms Marshaler
-	if ms, err = NewMarshaler(mrshlerStr); err != nil {
+	var ms utils.Marshaler
+	if ms, err = utils.NewMarshaler(mrshlerStr); err != nil {
 		return
 	}
 
@@ -192,7 +192,7 @@ func (rs *RedisStorage) Flush(ignore string) error {
 	return rs.Cmd(nil, redisFLUSHDB)
 }
 
-func (rs *RedisStorage) Marshaler() Marshaler {
+func (rs *RedisStorage) Marshaler() utils.Marshaler {
 	return rs.ms
 }
 
@@ -728,40 +728,12 @@ func (rs *RedisStorage) RemoveLoadIDsDrv() (err error) {
 	return rs.Cmd(nil, redisDEL, utils.LoadIDs)
 }
 
-/*
-func (rs *RedisStorage) GetRateProfileDrv(ctx *context.Context, tenant, id string) (rpp *utils.RateProfile, err error) {
-	var values []byte
-	if err = rs.Cmd(&values, redisGET, utils.RateProfilePrefix+utils.ConcatenatedKey(tenant, id)); err != nil {
-		return
-	} else if len(values) == 0 {
-		err = utils.ErrNotFound
-		return
-	}
-	err = rs.ms.Unmarshal(values, &rpp)
-	return
-}
-
-
 func (rs *RedisStorage) SetRateProfileDrv(ctx *context.Context, rpp *utils.RateProfile) (err error) {
-	var result []byte
-	if result, err = rs.ms.Marshal(rpp); err != nil {
-		return
-	}
-	return rs.Cmd(nil, redisSET, utils.RateProfilePrefix+utils.ConcatenatedKey(rpp.Tenant, rpp.ID), string(result))
-}
-*/
-
-func (rs *RedisStorage) SetRateProfileDrv(ctx *context.Context, rpp *utils.RateProfile) (err error) {
-	rpMap, err := rpp.AsDataDBMap()
+	rpMap, err := rpp.AsDataDBMap(rs.ms)
 	if err != nil {
 		return
 	}
-	for key, val := range rpMap {
-		if err = rs.FlatCmd(nil, redisHSET, utils.RateProfilePrefix+utils.ConcatenatedKey(rpp.Tenant, rpp.ID), key, val); err != nil {
-			break
-		}
-	}
-	return
+	return rs.FlatCmd(nil, redisHSET, utils.RateProfilePrefix+utils.ConcatenatedKey(rpp.Tenant, rpp.ID), rpMap)
 }
 
 func (rs *RedisStorage) GetRateProfileDrv(ctx *context.Context, tenant, id string) (rpp *utils.RateProfile, err error) {
@@ -772,8 +744,7 @@ func (rs *RedisStorage) GetRateProfileDrv(ctx *context.Context, tenant, id strin
 		err = utils.ErrNotFound
 		return
 	}
-	rpp, err = utils.NewRateProfileFromMapDataDBMap(tenant, id, mapRP)
-	return
+	return utils.NewRateProfileFromMapDataDBMap(tenant, id, mapRP, rs.ms)
 }
 
 func (rs *RedisStorage) RemoveRateProfileDrv(ctx *context.Context, tenant, id string, rateIDs []string) (err error) {

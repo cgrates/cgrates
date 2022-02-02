@@ -194,7 +194,7 @@ func NewMongoStorage(host, port, db, user, pass, mrshlerStr, storageType string,
 	if err != nil {
 		return nil, err
 	}
-	mrshler, err := NewMarshaler(mrshlerStr)
+	mrshler, err := utils.NewMarshaler(mrshlerStr)
 	if err != nil {
 		return nil, err
 	}
@@ -238,7 +238,7 @@ type MongoStorage struct {
 	ctxTTLMutex sync.RWMutex // used for TTL reload
 	db          string
 	storageType string // datadb, stordb
-	ms          Marshaler
+	ms          utils.Marshaler
 	cdrsIndexes []string
 	cnter       *utils.Counter
 }

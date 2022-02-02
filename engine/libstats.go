@@ -96,7 +96,7 @@ type MetricWithFilters struct {
 }
 
 // NewStoredStatQueue initiates a StoredStatQueue out of StatQueue
-func NewStoredStatQueue(sq *StatQueue, ms Marshaler) (sSQ *StoredStatQueue, err error) {
+func NewStoredStatQueue(sq *StatQueue, ms utils.Marshaler) (sSQ *StoredStatQueue, err error) {
 	sSQ = &StoredStatQueue{
 		Tenant:     sq.Tenant,
 		ID:         sq.ID,
@@ -137,7 +137,7 @@ func (ssq *StoredStatQueue) SqID() string {
 }
 
 // AsStatQueue converts into StatQueue unmarshaling SQMetrics
-func (ssq *StoredStatQueue) AsStatQueue(ms Marshaler) (sq *StatQueue, err error) {
+func (ssq *StoredStatQueue) AsStatQueue(ms utils.Marshaler) (sq *StatQueue, err error) {
 	if ssq == nil {
 		return
 	}
