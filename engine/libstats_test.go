@@ -825,7 +825,7 @@ func TestStatQueueNewStoredStatQueue(t *testing.T) {
 		},
 	}
 	experr := "marshal mock error"
-	var ms Marshaler = mockMarshal(experr)
+	var ms utils.Marshaler = mockMarshal(experr)
 
 	rcv, err := NewStoredStatQueue(sq, ms)
 
@@ -840,7 +840,7 @@ func TestStatQueueNewStoredStatQueue(t *testing.T) {
 
 func TestStatQueueAsStatQueueNilStoredSq(t *testing.T) {
 	var ssq *StoredStatQueue
-	var ms Marshaler
+	var ms utils.Marshaler
 
 	rcv, err := ssq.AsStatQueue(ms)
 
@@ -861,7 +861,7 @@ func TestStatQueueAsStatQueueSuccess(t *testing.T) {
 			},
 		},
 	}
-	var ms Marshaler
+	var ms utils.Marshaler
 
 	exp := &StatQueue{
 		SQItems: []SQItem{
@@ -893,7 +893,7 @@ func TestStatQueueAsStatQueueUnsupportedMetric(t *testing.T) {
 			"key": []byte("sqmetric"),
 		},
 	}
-	var ms Marshaler
+	var ms utils.Marshaler
 
 	experr := fmt.Sprintf("unsupported metric type <%s>", "key")
 	rcv, err := ssq.AsStatQueue(ms)
@@ -919,7 +919,7 @@ func TestStatQueueAsStatQueueErrLoadMarshaled(t *testing.T) {
 		},
 		Compressed: true,
 	}
-	ms, err := NewMarshaler(utils.JSON)
+	ms, err := utils.NewMarshaler(utils.JSON)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -937,7 +937,7 @@ func TestStatQueueAsStatQueueErrLoadMarshaled(t *testing.T) {
 }
 
 func TestStatQueueAsStatQueueOK(t *testing.T) {
-	ms, err := NewMarshaler(utils.JSON)
+	ms, err := utils.NewMarshaler(utils.JSON)
 	if err != nil {
 		t.Fatal(err)
 	}

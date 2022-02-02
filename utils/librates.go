@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 import (
-	"encoding/json"
 	"fmt"
 	"sort"
 	"strconv"
@@ -912,7 +911,7 @@ func (iR *IntervalRate) FieldAsInterface(fldPath []string) (_ interface{}, err e
 }
 
 // AsDataDBMap is used to is a convert method in order to properly set trough a hasmap in redis server our rate profile
-func (rp *RateProfile) AsDataDBMap() (mp map[string]interface{}, err error) {
+func (rp *RateProfile) AsDataDBMap(ms Marshaler) (mp map[string]interface{}, err error) {
 	mp = map[string]interface{}{
 		MaxCostStrategy: rp.MaxCostStrategy,
 	}
@@ -945,7 +944,7 @@ func (rp *RateProfile) AsDataDBMap() (mp map[string]interface{}, err error) {
 	}
 	for rateID, rt := range rp.Rates {
 		var result []byte
-		if result, err = json.Marshal(rt); err != nil {
+		if result, err = ms.Marshal(rt); err != nil {
 			return nil, err
 		}
 		fldKey := ConcatenatedKey(Rates, rateID)
@@ -955,7 +954,7 @@ func (rp *RateProfile) AsDataDBMap() (mp map[string]interface{}, err error) {
 }
 
 // NewRateProfileFromMapDataDBMap will convert a RateProfile map into a RatePRofile struct. This is used when we get the map from redis database
-func NewRateProfileFromMapDataDBMap(tnt, id string, mapRP map[string]interface{}) (rp *RateProfile, err error) {
+func NewRateProfileFromMapDataDBMap(tnt, id string, mapRP map[string]interface{}, ms Marshaler) (rp *RateProfile, err error) {
 	rp = &RateProfile{
 		ID:              id,
 		Tenant:          tnt,
@@ -990,7 +989,7 @@ func NewRateProfileFromMapDataDBMap(tnt, id string, mapRP map[string]interface{}
 	for keyID, rateStr := range mapRP {
 		if strings.HasPrefix(keyID, Rates+ConcatenatedKeySep) {
 			var rate *Rate
-			if err := json.Unmarshal([]byte(IfaceAsString(rateStr)), &rate); err != nil {
+			if err := ms.Unmarshal([]byte(IfaceAsString(rateStr)), &rate); err != nil {
 				return nil, err
 			}
 			rp.Rates[strings.TrimPrefix(keyID, Rates+ConcatenatedKeySep)] = rate

@@ -20,6 +20,8 @@ package engine
 import (
 	"testing"
 	"time"
+
+	"github.com/cgrates/cgrates/utils"
 )
 
 func TestMsgpackStructsAdded(t *testing.T) {
@@ -28,7 +30,7 @@ func TestMsgpackStructsAdded(t *testing.T) {
 		First  string
 		Second string
 	}{}
-	m := NewCodecMsgpackMarshaler()
+	m := utils.NewCodecMsgpackMarshaler()
 	buf, err := m.Marshal(&a)
 	if err != nil {
 		t.Error("error marshaling structure: ", err)
@@ -45,7 +47,7 @@ func TestMsgpackStructsMissing(t *testing.T) {
 		Second string
 	}{"test1", "test2"}
 	var b = struct{ First string }{}
-	m := NewCodecMsgpackMarshaler()
+	m := utils.NewCodecMsgpackMarshaler()
 	buf, err := m.Marshal(&a)
 	if err != nil {
 		t.Error("error marshaling structure: ", err)
@@ -58,7 +60,7 @@ func TestMsgpackStructsMissing(t *testing.T) {
 
 func TestMsgpackTime(t *testing.T) {
 	t1 := time.Date(2013, 8, 28, 22, 27, 30, 11, time.UTC)
-	m := NewCodecMsgpackMarshaler()
+	m := utils.NewCodecMsgpackMarshaler()
 	buf, err := m.Marshal(&t1)
 	if err != nil {
 		t.Error("error marshaling structure: ", err)

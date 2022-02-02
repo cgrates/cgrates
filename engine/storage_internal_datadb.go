@@ -38,7 +38,7 @@ type InternalDB struct {
 	prefixIndexedFields []string
 	indexedFieldsMutex  sync.RWMutex   // used for reload
 	cnter               *utils.Counter // used for OrderID for cdr
-	ms                  Marshaler
+	ms                  utils.Marshaler
 	db                  *ltcache.TransCache
 }
 
@@ -53,7 +53,7 @@ func NewInternalDB(stringIndexedFields, prefixIndexedFields []string,
 			StaticTTL: cPcfg.StaticTTL,
 		}
 	}
-	ms, _ := NewMarshaler(config.CgrConfig().GeneralCfg().DBDataEncoding)
+	ms, _ := utils.NewMarshaler(config.CgrConfig().GeneralCfg().DBDataEncoding)
 	return &InternalDB{
 		stringIndexedFields: stringIndexedFields,
 		prefixIndexedFields: prefixIndexedFields,
@@ -475,6 +475,17 @@ func (iDB *InternalDB) GetRateProfileDrv(_ *context.Context, tenant, id string) 
 	}
 	return x.(*utils.RateProfile), nil
 }
+
+/*
+func (iDB *InternalDB) SetRateProfileDrv(_ *context.Context, rpp *utils.RateProfile) (err error) {
+	if err = rpp.Compile(); err != nil {
+		return
+	}
+	iDB.db.Set(utils.CacheRateProfiles, rpp.TenantID(), rpp, nil,
+		true, utils.NonTransactional)
+	return
+}
+*/
 
 func (iDB *InternalDB) SetRateProfileDrv(_ *context.Context, rpp *utils.RateProfile) (err error) {
 	if err = rpp.Compile(); err != nil {

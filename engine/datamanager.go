@@ -79,7 +79,7 @@ var (
 
 // NewDataManager returns a new DataManager
 func NewDataManager(dataDB DataDB, cacheCfg *config.CacheCfg, connMgr *ConnManager) *DataManager {
-	ms, _ := NewMarshaler(config.CgrConfig().GeneralCfg().DBDataEncoding)
+	ms, _ := utils.NewMarshaler(config.CgrConfig().GeneralCfg().DBDataEncoding)
 	return &DataManager{
 		dataDB:   dataDB,
 		cacheCfg: cacheCfg,
@@ -94,7 +94,7 @@ type DataManager struct {
 	dataDB   DataDB
 	cacheCfg *config.CacheCfg
 	connMgr  *ConnManager
-	ms       Marshaler
+	ms       utils.Marshaler
 }
 
 // DataDB exports access to dataDB

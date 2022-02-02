@@ -2857,7 +2857,7 @@ func TestStatDistinctGetCompressFactor(t *testing.T) {
 	}
 }
 
-var jMarshaler JSONMarshaler
+var jMarshaler utils.JSONMarshaler
 
 func TestASRMarshal(t *testing.T) {
 	asr, err := NewStatMetric(utils.MetaASR, 2, []string{"*string:Account:1001"})
