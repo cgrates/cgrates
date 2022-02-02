@@ -554,11 +554,42 @@ func (rp *RouteProfile) Merge(v2 interface{}) {
 	}
 	rp.FilterIDs = append(rp.FilterIDs, vi.FilterIDs...)
 	rp.SortingParameters = append(rp.SortingParameters, vi.SortingParameters...)
-	rp.Routes = append(rp.Routes, vi.Routes...)
+	var equal bool
+	for _, routeV2 := range vi.Routes {
+		for _, route := range rp.Routes {
+			if route.ID == routeV2.ID {
+				route.Merge(routeV2)
+				equal = true
+				break
+			}
+		}
+		if !equal {
+			rp.Routes = append(rp.Routes, routeV2)
+		}
+		equal = false
+	}
 	rp.Weights = append(rp.Weights, vi.Weights...)
 	if len(vi.Sorting) != 0 {
 		rp.Sorting = vi.Sorting
 	}
+}
+
+func (route *Route) Merge(v2 *Route) {
+	if len(v2.ID) != 0 {
+		route.ID = v2.ID
+	}
+	if v2.Blocker {
+		route.Blocker = v2.Blocker
+	}
+	if len(v2.RouteParameters) != 0 {
+		route.RouteParameters = v2.RouteParameters
+	}
+	route.Weights = append(route.Weights, v2.Weights...)
+	route.FilterIDs = append(route.FilterIDs, v2.FilterIDs...)
+	route.AccountIDs = append(route.AccountIDs, v2.AccountIDs...)
+	route.RateProfileIDs = append(route.RateProfileIDs, v2.RateProfileIDs...)
+	route.ResourceIDs = append(route.ResourceIDs, v2.ResourceIDs...)
+	route.StatIDs = append(route.StatIDs, v2.StatIDs...)
 }
 
 func (rp *RouteProfile) String() string { return utils.ToJSON(rp) }
