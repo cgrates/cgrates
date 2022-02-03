@@ -929,18 +929,10 @@ func (rp *RateProfile) AsDataDBMap(ms Marshaler) (mp map[string]interface{}, err
 		mp[Weights] = rp.Weights.String(InfieldSep, ANDSep)
 	}
 	if rp.MinCost != nil {
-		minCostBts, err := rp.MinCost.MarshalBinary()
-		if err != nil {
-			return nil, err
-		}
-		mp[MinCost] = minCostBts
+		mp[MinCost] = rp.MinCost.String()
 	}
 	if rp.MaxCost != nil {
-		maxCostBts, err := rp.MaxCost.MarshalBinary()
-		if err != nil {
-			return nil, err
-		}
-		mp[MaxCost] = maxCostBts
+		mp[MaxCost] = rp.MaxCost.String()
 	}
 	for rateID, rt := range rp.Rates {
 		var result []byte
@@ -948,7 +940,7 @@ func (rp *RateProfile) AsDataDBMap(ms Marshaler) (mp map[string]interface{}, err
 			return nil, err
 		}
 		fldKey := ConcatenatedKey(Rates, rateID)
-		mp[fldKey] = result
+		mp[fldKey] = string(result)
 	}
 	return mp, nil
 }
@@ -987,6 +979,7 @@ func NewRateProfileFromMapDataDBMap(tnt, id string, mapRP map[string]interface{}
 		}
 	}
 	for keyID, rateStr := range mapRP {
+		Logger.Crit(fmt.Sprintf("rateStr: %v", ToJSON(rateStr)))
 		if strings.HasPrefix(keyID, Rates+ConcatenatedKeySep) {
 			var rate *Rate
 			if err := ms.Unmarshal([]byte(IfaceAsString(rateStr)), &rate); err != nil {

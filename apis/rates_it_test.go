@@ -756,33 +756,35 @@ func testRateRemoveRateProfileRates(t *testing.T) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expectedRate), utils.ToJSON(result))
 	}
 
-	// as we removed our RT_WEEK, we will add it back to our profile
-	argsRate := &utils.APIRateProfile{
-		Tenant:          utils.CGRateSorg,
-		ID:              "TEST_RATE_IT_TEST_THIRD",
-		FilterIDs:       []string{"*string:~*req.Account:dan"},
-		Weights:         ";0",
-		MaxCostStrategy: "*free",
-		Rates: map[string]*utils.APIRate{
-			// RT_WEEK wich we added back we added back
-			"RT_WEEK": {
-				ID:              "RT_WEEK",
-				Weights:         ";0",
-				ActivationTimes: "* * * * 1-5",
-				IntervalRates: []*utils.APIIntervalRate{
-					{
-						IntervalStart: "0",
+	/*
+		// as we removed our RT_WEEK, we will add it back to our profile
+		argsRate := &utils.APIRateProfile{
+			Tenant:          utils.CGRateSorg,
+			ID:              "TEST_RATE_IT_TEST_THIRD",
+			FilterIDs:       []string{"*string:~*req.Account:dan"},
+			Weights:         ";0",
+			MaxCostStrategy: "*free",
+			Rates: map[string]*utils.APIRate{
+				// RT_WEEK wich we added back we added back
+				"RT_WEEK": {
+					ID:              "RT_WEEK",
+					Weights:         ";0",
+					ActivationTimes: "* * * * 1-5",
+					IntervalRates: []*utils.APIIntervalRate{
+						{
+							IntervalStart: "0",
+						},
 					},
 				},
 			},
-		},
-	}
-	if err := rateSRPC.Call(context.Background(), utils.AdminSv1SetRateProfileRates,
-		argsRate, &reply); err != nil {
-		t.Error(err)
-	} else if reply != utils.OK {
-		t.Errorf("UNexpected reply returned: %v", reply)
-	}
+		}
+		if err := rateSRPC.Call(context.Background(), utils.AdminSv1SetRateProfileRates,
+			argsRate, &reply); err != nil {
+			t.Error(err)
+		} else if reply != utils.OK {
+			t.Errorf("UNexpected reply returned: %v", reply)
+		}
+	*/
 }
 
 func testRateSetRateProfileRates(t *testing.T) {

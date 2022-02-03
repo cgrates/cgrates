@@ -496,7 +496,7 @@ func (iDB *InternalDB) SetRateProfileDrv(_ *context.Context, rpp *utils.RateProf
 	return
 }
 
-func (iDB *InternalDB) RemoveRateProfileDrv(_ *context.Context, tenant, id string, rateIDs []string) (err error) {
+func (iDB *InternalDB) RemoveRateProfileDrv(_ *context.Context, tenant, id string, rateIDs *[]string) (err error) {
 	iDB.db.Remove(utils.CacheRateProfiles, utils.ConcatenatedKey(tenant, id),
 		true, utils.NonTransactional)
 	return

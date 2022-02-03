@@ -65,7 +65,7 @@ var (
 		testLoadersGetFilters,
 		testLoadersGetRateProfiles,
 		testLoadersGetResourceProfiles,
-		// testLoadersGetRouteProfiles,
+		testLoadersGetRouteProfiles,
 		testLoadersGetStatQueueProfiles,
 		testLoadersGetThresholdProfiles,
 
