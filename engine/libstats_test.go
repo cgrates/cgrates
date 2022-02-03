@@ -34,49 +34,17 @@ var sq *StatQueue
 
 func TestStatQueuesSort(t *testing.T) {
 	sInsts := StatQueues{
-		&StatQueue{sqPrfl: &StatQueueProfile{ID: "FIRST", Weights: utils.DynamicWeights{
-			{
-				Weight: 30.0,
-			},
-		}}},
-		&StatQueue{sqPrfl: &StatQueueProfile{ID: "SECOND", Weights: utils.DynamicWeights{
-			{
-				Weight: 40.0,
-			},
-		}}},
-		&StatQueue{sqPrfl: &StatQueueProfile{ID: "THIRD", Weights: utils.DynamicWeights{
-			{
-				Weight: 30.0,
-			},
-		}}},
-		&StatQueue{sqPrfl: &StatQueueProfile{ID: "FOURTH", Weights: utils.DynamicWeights{
-			{
-				Weight: 35.0,
-			},
-		}}},
+		&StatQueue{weight: 30.0, sqPrfl: &StatQueueProfile{ID: "FIRST"}},
+		&StatQueue{weight: 40.0, sqPrfl: &StatQueueProfile{ID: "SECOND"}},
+		&StatQueue{weight: 30.0, sqPrfl: &StatQueueProfile{ID: "THIRD"}},
+		&StatQueue{weight: 35.0, sqPrfl: &StatQueueProfile{ID: "FOURTH"}},
 	}
 	sInsts.Sort()
 	eSInst := StatQueues{
-		&StatQueue{sqPrfl: &StatQueueProfile{ID: "SECOND", Weights: utils.DynamicWeights{
-			{
-				Weight: 40.0,
-			},
-		}}},
-		&StatQueue{sqPrfl: &StatQueueProfile{ID: "FOURTH", Weights: utils.DynamicWeights{
-			{
-				Weight: 35.0,
-			},
-		}}},
-		&StatQueue{sqPrfl: &StatQueueProfile{ID: "FIRST", Weights: utils.DynamicWeights{
-			{
-				Weight: 30.0,
-			},
-		}}},
-		&StatQueue{sqPrfl: &StatQueueProfile{ID: "THIRD", Weights: utils.DynamicWeights{
-			{
-				Weight: 30.0,
-			},
-		}}},
+		&StatQueue{weight: 40.0, sqPrfl: &StatQueueProfile{ID: "SECOND"}},
+		&StatQueue{weight: 35.0, sqPrfl: &StatQueueProfile{ID: "FOURTH"}},
+		&StatQueue{weight: 30.0, sqPrfl: &StatQueueProfile{ID: "FIRST"}},
+		&StatQueue{weight: 30.0, sqPrfl: &StatQueueProfile{ID: "THIRD"}},
 	}
 
 	if !reflect.DeepEqual(eSInst, sInsts) {
@@ -1454,7 +1422,7 @@ func TestStatQueueProfileSet(t *testing.T) {
 	if err := sq.Set([]string{utils.FilterIDs}, "fltr1;*string:~*req.Account:1001", false, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
-	if err := sq.Set([]string{utils.Weight}, 10, false, utils.EmptyString); err != nil {
+	if err := sq.Set([]string{utils.Weights}, ";10", false, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
 	if err := sq.Set([]string{utils.QueueLength}, 10, false, utils.EmptyString); err != nil {
