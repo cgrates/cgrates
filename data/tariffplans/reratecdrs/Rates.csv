@@ -1,0 +1,2 @@
+#Id,ConnectFee,Rate,RateUnit,RateIncrement,GroupIntervalStart
+RT_ANY,0,0.6,60s,1s,0s
