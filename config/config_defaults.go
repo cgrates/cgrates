@@ -1271,7 +1271,7 @@ const CGRATES_CFG_JSON = `
 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
 					{"tag": "FilterIDs", "path": "FilterIDs", "type": "*variable", "value": "~*req.2"},
-					{"tag": "Weight", "path": "Weight", "type": "*variable", "value": "~*req.3"},
+					{"tag": "Weights", "path": "Weights", "type": "*variable", "value": "~*req.3"},
 					{"tag": "QueueLength", "path": "QueueLength", "type": "*variable", "value": "~*req.4"},
 					{"tag": "TTL", "path": "TTL", "type": "*variable", "value": "~*req.5"},
 					{"tag": "MinItems", "path": "MinItems", "type": "*variable", "value": "~*req.6"},

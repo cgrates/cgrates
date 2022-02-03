@@ -176,7 +176,6 @@ func (sS *StatS) matchingStatQueuesForEvent(ctx *context.Context, tnt string, st
 		}
 	}
 	sqs = make(StatQueues, 0, len(sqIDs))
-
 	for sqID := range sqIDs {
 		lkPrflID := guardian.Guardian.GuardIDs("",
 			config.CgrConfig().GeneralCfg().LockingTimeout,
@@ -222,6 +221,10 @@ func (sS *StatS) matchingStatQueuesForEvent(ctx *context.Context, tnt string, st
 			sq.ttl = utils.DurationPointer(sqPrfl.TTL)
 		}
 		sq.sqPrfl = sqPrfl
+		if sq.weight, err = WeightFromDynamics(ctx, sqPrfl.Weights,
+			sS.fltrS, tnt, evNm); err != nil {
+			return
+		}
 		sqs = append(sqs, sq)
 	}
 	if len(sqs) == 0 {
@@ -236,6 +239,7 @@ func (sS *StatS) matchingStatQueuesForEvent(ctx *context.Context, tnt string, st
 			break
 		}
 	}
+
 	return
 }
 

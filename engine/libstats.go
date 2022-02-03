@@ -201,6 +201,7 @@ type StatQueue struct {
 	sqPrfl    *StatQueueProfile
 	dirty     *bool          // needs save
 	ttl       *time.Duration // timeToLeave, picked on each init
+	weight    float64
 }
 
 // statQueueLockKey returns the ID used to lock a StatQueue with guardian
@@ -397,7 +398,7 @@ type StatQueues []*StatQueue
 // Sort is part of sort interface, sort based on Weight
 func (sis StatQueues) Sort() {
 	sort.Slice(sis, func(i, j int) bool {
-		return sis[i].sqPrfl.Weights[i].Weight > sis[j].sqPrfl.Weights[j].Weight
+		return sis[i].weight > sis[j].weight
 	})
 }
 

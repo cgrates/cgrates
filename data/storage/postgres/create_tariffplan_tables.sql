@@ -43,7 +43,7 @@ CREATE TABLE tp_stats (
   "metric_filter_ids" VARCHAR(128) NOT NULL,
   "stored" BOOLEAN NOT NULL,
   "blocker" BOOLEAN NOT NULL,
-  "weight" decimal(8,2) NOT NULL,
+  "weights" VARCHAR(128) NOT NULL,
   "threshold_ids" varchar(64) NOT NULL,
   "created_at" TIMESTAMP WITH TIME ZONE
 );

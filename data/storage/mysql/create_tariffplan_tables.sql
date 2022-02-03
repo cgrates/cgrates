@@ -43,7 +43,7 @@ CREATE TABLE tp_stats (
   `metric_filter_ids` varchar(64) NOT NULL,
   `stored` BOOLEAN NOT NULL,
   `blocker` BOOLEAN NOT NULL,
-  `weight` decimal(8,2) NOT NULL,
+  `weights` varchar(128) NOT NULL,
   `threshold_ids` varchar(64) NOT NULL,
   `created_at` TIMESTAMP,
   PRIMARY KEY (`pk`),
