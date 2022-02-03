@@ -476,17 +476,6 @@ func (iDB *InternalDB) GetRateProfileDrv(_ *context.Context, tenant, id string) 
 	return x.(*utils.RateProfile), nil
 }
 
-/*
-func (iDB *InternalDB) SetRateProfileDrv(_ *context.Context, rpp *utils.RateProfile) (err error) {
-	if err = rpp.Compile(); err != nil {
-		return
-	}
-	iDB.db.Set(utils.CacheRateProfiles, rpp.TenantID(), rpp, nil,
-		true, utils.NonTransactional)
-	return
-}
-*/
-
 func (iDB *InternalDB) SetRateProfileDrv(_ *context.Context, rpp *utils.RateProfile) (err error) {
 	if err = rpp.Compile(); err != nil {
 		return
@@ -497,6 +486,18 @@ func (iDB *InternalDB) SetRateProfileDrv(_ *context.Context, rpp *utils.RateProf
 }
 
 func (iDB *InternalDB) RemoveRateProfileDrv(_ *context.Context, tenant, id string, rateIDs *[]string) (err error) {
+	// if we want to remove just some rates from our profile, we will remove by their key Rates:rateID, but firstly we have to get the obejct from cache
+	if rateIDs != nil {
+		x, ok := iDB.db.Get(utils.CacheRateProfiles, utils.ConcatenatedKey(tenant, id))
+		if !ok || x == nil {
+			return utils.ErrNotFound
+		}
+		rpfl := *x.(*utils.RateProfile)
+		for _, rateID := range *rateIDs {
+			delete(rpfl.Rates, rateID)
+		}
+		return
+	}
 	iDB.db.Remove(utils.CacheRateProfiles, utils.ConcatenatedKey(tenant, id),
 		true, utils.NonTransactional)
 	return

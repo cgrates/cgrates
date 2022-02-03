@@ -748,6 +748,7 @@ func (rs *RedisStorage) GetRateProfileDrv(ctx *context.Context, tenant, id strin
 }
 
 func (rs *RedisStorage) RemoveRateProfileDrv(ctx *context.Context, tenant, id string, rateIDs *[]string) (err error) {
+	// if we want to remove just some rates from our profile, we will remove by their key Rates:rateID
 	if rateIDs != nil {
 		tntID := utils.ConcatenatedKey(tenant, id)
 		for _, rateID := range *rateIDs {

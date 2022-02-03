@@ -2128,7 +2128,6 @@ func (dm *DataManager) SetRateProfileRates(ctx *context.Context, rpp *utils.Rate
 		for _, rate := range rpp.Rates {
 			if err := dm.checkFilters(ctx, rpp.Tenant, rate.FilterIDs); err != nil {
 				// if we get a broken filter do not update the rates
-
 				return fmt.Errorf("%+s for item with ID: %+v",
 					err, rate.ID)
 			}
