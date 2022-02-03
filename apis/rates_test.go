@@ -1413,7 +1413,7 @@ func TestRatesRemoveRateProfileRatesErrorSetLoadIDs(t *testing.T) {
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := &engine.DataDBMock{
-		RemoveRateProfileDrvF: func(ctx *context.Context, str1 string, str2 string, rtIDs []string) error {
+		RemoveRateProfileDrvF: func(ctx *context.Context, str1 string, str2 string, rtIDs *[]string) error {
 			return nil
 		},
 		GetRateProfileDrvF: func(c *context.Context, s string, s2 string) (*utils.RateProfile, error) {
@@ -1453,7 +1453,7 @@ func TestRatesRemoveRateProfileErrorSetLoadIDs(t *testing.T) {
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := &engine.DataDBMock{
-		RemoveRateProfileDrvF: func(ctx *context.Context, str1 string, str2 string, rateIDs []string) error {
+		RemoveRateProfileDrvF: func(ctx *context.Context, str1 string, str2 string, rateIDs *[]string) error {
 			return nil
 		},
 		GetRateProfileDrvF: func(c *context.Context, s string, s2 string) (*utils.RateProfile, error) {
@@ -1597,7 +1597,7 @@ func TestRatesRemoveRateProfileRatesErrorCache(t *testing.T) {
 	cfg.AdminSCfg().CachesConns = []string{}
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := &engine.DataDBMock{
-		RemoveRateProfileDrvF: func(ctx *context.Context, str1 string, str2 string, rateIDs []string) error {
+		RemoveRateProfileDrvF: func(ctx *context.Context, str1 string, str2 string, rateIDs *[]string) error {
 			return nil
 		},
 		GetRateProfileDrvF: func(c *context.Context, s string, s2 string) (*utils.RateProfile, error) {
@@ -1641,7 +1641,7 @@ func TestRatesRemoveRateProfileErrorSetCache(t *testing.T) {
 	cfg.AdminSCfg().CachesConns = []string{}
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := &engine.DataDBMock{
-		RemoveRateProfileDrvF: func(ctx *context.Context, str1 string, str2 string, rateIDs []string) error {
+		RemoveRateProfileDrvF: func(ctx *context.Context, str1 string, str2 string, rateIDs *[]string) error {
 			return nil
 		},
 		GetRateProfileDrvF: func(c *context.Context, s string, s2 string) (*utils.RateProfile, error) {

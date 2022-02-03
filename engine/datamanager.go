@@ -2028,7 +2028,7 @@ func (dm *DataManager) RemoveRateProfile(ctx *context.Context, tenant, id string
 	if err != nil && err != utils.ErrNotFound {
 		return
 	}
-	if err = dm.DataDB().RemoveRateProfileDrv(ctx, tenant, id, []string{}); err != nil {
+	if err = dm.DataDB().RemoveRateProfileDrv(ctx, tenant, id, nil); err != nil {
 		return
 	}
 	if oldRpp == nil {
@@ -2065,7 +2065,7 @@ func (dm *DataManager) RemoveRateProfile(ctx *context.Context, tenant, id string
 	return
 }
 
-func (dm *DataManager) RemoveRateProfileRates(ctx *context.Context, tenant, id string, rateIDs []string, withIndex bool) (err error) {
+func (dm *DataManager) RemoveRateProfileRates(ctx *context.Context, tenant, id string, rateIDs *[]string, withIndex bool) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
@@ -2073,7 +2073,7 @@ func (dm *DataManager) RemoveRateProfileRates(ctx *context.Context, tenant, id s
 	if err != nil {
 		return err
 	}
-	if len(rateIDs) == 0 {
+	if rateIDs == nil {
 		if withIndex {
 			for key, rate := range oldRpp.Rates {
 				if err = removeItemFromFilterIndex(ctx, dm, utils.CacheRateFilterIndexes,
@@ -2084,7 +2084,7 @@ func (dm *DataManager) RemoveRateProfileRates(ctx *context.Context, tenant, id s
 		}
 		oldRpp.Rates = map[string]*utils.Rate{}
 	} else {
-		for _, rateID := range rateIDs {
+		for _, rateID := range *rateIDs {
 			if _, has := oldRpp.Rates[rateID]; !has {
 				continue
 			}

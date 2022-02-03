@@ -66,7 +66,7 @@ func removeFromDB(ctx *context.Context, dm *engine.DataManager, lType string, wi
 			for k := range rt.Rates {
 				ids = append(ids, k)
 			}
-			return dm.RemoveRateProfileRates(ctx, tnt, id, ids, withIndex)
+			return dm.RemoveRateProfileRates(ctx, tnt, id, &ids, withIndex)
 		}
 		return dm.RemoveRateProfile(ctx, tnt, id, withIndex)
 	case utils.MetaActionProfiles:

@@ -747,10 +747,10 @@ func (rs *RedisStorage) GetRateProfileDrv(ctx *context.Context, tenant, id strin
 	return utils.NewRateProfileFromMapDataDBMap(tenant, id, mapRP, rs.ms)
 }
 
-func (rs *RedisStorage) RemoveRateProfileDrv(ctx *context.Context, tenant, id string, rateIDs []string) (err error) {
-	if len(rateIDs) != 0 {
+func (rs *RedisStorage) RemoveRateProfileDrv(ctx *context.Context, tenant, id string, rateIDs *[]string) (err error) {
+	if rateIDs != nil {
 		tntID := utils.ConcatenatedKey(tenant, id)
-		for _, rateID := range rateIDs {
+		for _, rateID := range *rateIDs {
 			return rs.Cmd(nil, redisHDEL, utils.RateProfilePrefix+tntID, utils.Rates+utils.InInFieldSep+rateID)
 		}
 	}
