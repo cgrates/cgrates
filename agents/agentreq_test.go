@@ -1008,13 +1008,13 @@ func TestAgReqFieldAsInterfaceForOneFldPathCgrReq(t *testing.T) {
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	aqReq := NewAgentRequest(nil, nil, nil, nil, nil, nil,
 		"cgrates.org", utils.EmptyString, filterS, nil)
-	aqReq.CGRRequest.Set(&utils.FullPath{Path: utils.MetaOriginID, PathSlice: []string{utils.MetaOriginID}}, utils.NewLeafNode("CGRATES_ID1"))
+	aqReq.Opts.Set([]string{utils.MetaOriginID}, utils.NewLeafNode("CGRATES_ID1"))
 	aqReq.CGRRequest.Set(&utils.FullPath{Path: utils.AccountField, PathSlice: []string{utils.AccountField}}, utils.NewLeafNode("1002"))
 	aqReq.CGRRequest.Set(&utils.FullPath{Path: utils.AnswerTime, PathSlice: []string{utils.AnswerTime}}, utils.NewLeafNode(time.Date(2013, 12, 30, 14, 59, 31, 0, time.UTC)))
 
 	path := []string{utils.MetaCgreq}
 	expVal := utils.NewOrderedNavigableMap()
-	expVal.Set(&utils.FullPath{Path: utils.MetaOriginID, PathSlice: []string{utils.MetaOriginID}}, &utils.DataLeaf{Data: "CGRATES_ID1"})
+
 	expVal.Set(&utils.FullPath{Path: utils.AccountField, PathSlice: []string{utils.AccountField}}, &utils.DataLeaf{Data: "1002"})
 	expVal.Set(&utils.FullPath{Path: utils.AnswerTime, PathSlice: []string{utils.AnswerTime}}, &utils.DataLeaf{Data: time.Date(2013, 12, 30, 14, 59, 31, 0, time.UTC)})
 	if rply, err := aqReq.FieldAsInterface(path); err != nil {
@@ -1943,8 +1943,7 @@ func TestAgReqSetFieldsWithRemove(t *testing.T) {
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil)
 	// populate request, emulating the way will be done in HTTPAgent
-	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.MetaOriginID, PathSlice: []string{utils.MetaOriginID}},
-		utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()))
+	agReq.Opts.Set([]string{utils.MetaOriginID}, utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()))
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.ToR, PathSlice: []string{utils.ToR}}, utils.NewLeafNode(utils.MetaVoice))
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AccountField, PathSlice: []string{utils.AccountField}}, utils.NewLeafNode("1001"))
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.Destination, PathSlice: []string{utils.Destination}}, utils.NewLeafNode("1002"))
