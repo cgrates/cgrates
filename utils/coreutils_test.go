@@ -1223,7 +1223,9 @@ func TestLess(t *testing.T) {
 func TestGetCGRVersion(t *testing.T) {
 	GitLastLog = `commit 73014daa0c1d7edcb532d5fe600b8a20d588cdf8
 Author: DanB <danb@cgrates.org>
-Date:   Fri Dec 30 19:48:09 2016 +0100
+AuthorDate:   Fri Dec 30 19:48:09 2016 +0100
+Commit: DanB <danb@cgrates.org>
+CommitDate:   Fri Dec 30 19:48:09 2016 +0100
 
 	Fixes for db driver to avoid returning new values in case of errors
 `
@@ -1253,14 +1255,14 @@ Date:   Fri Dec 30 19:48:09 2016 +0100
 	} else if vers != expVers {
 		t.Errorf("Expecting: <%s>, received: <%s>", expVers, vers)
 	}
-	GitLastLog = `Date: : :
+	GitLastLog = `CommitDate: : :
 `
 	if vers, err := GetCGRVersion(); err == nil || err.Error() != "Building version - cannot split commit date" {
 		t.Error(err)
 	} else if vers != expVers {
 		t.Errorf("Expecting: <%s>, received: <%s>", expVers, vers)
 	}
-	GitLastLog = `Date: wrong format
+	GitLastLog = `CommitDate: wrong format
 `
 	if vers, err := GetCGRVersion(); err == nil || err.Error() != `Building version - error: <parsing time "wrong format" as "Mon Jan 2 15:04:05 2006 -0700": cannot parse "wrong format" as "Mon"> compiling commit date` {
 		t.Error(err)
@@ -1277,6 +1279,38 @@ Date:   Fri Dec 30 19:48:09 2016 +0100
 		t.Error(err)
 	} else if vers != expVers {
 		t.Errorf("Expecting: <%s>, received: <%s>", expVers, vers)
+	}
+
+	GitLastLog = `commit c34d5753cf5ae15a3b7ae9bea30a4900fb8191a0
+Author:     nickolasdaniel <nickolas.filip@itsyscom.com>
+AuthorDate: Wed Feb 2 16:54:59 2022 +0200
+Commit:     nickolasdaniel <nickolas.filip@itsyscom.com>
+CommitDate: Wed Feb 2 16:54:59 2022 +0200
+	
+		Changed the build script and GetCGRVersion() to get the CommitDate instead of AuthorDate
+`
+	expVers = "CGRateS@" + Version
+	eVers = expVers + "-20220202145459-c34d5753cf5a"
+	if vers, err := GetCGRVersion(); err != nil {
+		t.Error(err)
+	} else if vers != eVers {
+		t.Errorf("Expecting: <%s>, received: <%s>", eVers, vers)
+	}
+
+	GitLastLog = `commit c34d5753cf5ae15a3b7ae9bea30a4900fb8191a0
+Author:     nickolasdaniel <nickolas.filip@itsyscom.com>
+AuthorDate: Thu Jun 5 12:14:49 2026 +0800
+Commit:     nickolasdaniel <nickolas.filip@itsyscom.com>
+CommitDate: Wed Feb 2 16:54:59 2022 +0200
+	
+		Changed the build script and GetCGRVersion() to get the CommitDate instead of AuthorDate
+`
+	expVers = "CGRateS@" + Version
+	eVers = expVers + "-20220202145459-c34d5753cf5a"
+	if vers, err := GetCGRVersion(); err != nil {
+		t.Error(err)
+	} else if vers != eVers {
+		t.Errorf("Expecting: <%s>, received: <%s>", eVers, vers)
 	}
 }
 
