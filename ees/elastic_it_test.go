@@ -125,7 +125,7 @@ func testElasticExportEvents(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "voiceEvent",
 			Event: map[string]interface{}{
-				utils.MetaOriginID: utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()),
+
 				utils.ToR:          utils.MetaVoice,
 				utils.OriginID:     "dsafdsaf",
 				utils.OriginHost:   "192.168.1.1",
@@ -144,7 +144,8 @@ func testElasticExportEvents(t *testing.T) {
 					"extra2": "val_extra2", "extra3": "val_extra3"},
 			},
 			APIOpts: map[string]interface{}{
-				utils.MetaRunID: utils.MetaDefault,
+				utils.MetaOriginID: utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()),
+				utils.MetaRunID:    utils.MetaDefault,
 			},
 		},
 	}
@@ -155,7 +156,7 @@ func testElasticExportEvents(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "dataEvent",
 			Event: map[string]interface{}{
-				utils.MetaOriginID: utils.Sha1("abcdef", time.Unix(1383813745, 0).UTC().String()),
+
 				utils.ToR:          utils.MetaData,
 				utils.OriginID:     "abcdef",
 				utils.OriginHost:   "192.168.1.1",
@@ -174,7 +175,8 @@ func testElasticExportEvents(t *testing.T) {
 					"extra2": "val_extra2", "extra3": "val_extra3"},
 			},
 			APIOpts: map[string]interface{}{
-				utils.MetaRunID: utils.MetaDefault,
+				utils.MetaOriginID: utils.Sha1("abcdef", time.Unix(1383813745, 0).UTC().String()),
+				utils.MetaRunID:    utils.MetaDefault,
 			},
 		},
 	}
@@ -185,7 +187,7 @@ func testElasticExportEvents(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "SMSEvent",
 			Event: map[string]interface{}{
-				utils.MetaOriginID: utils.Sha1("sdfwer", time.Unix(1383813745, 0).UTC().String()),
+
 				utils.ToR:          utils.MetaSMS,
 				utils.OriginID:     "sdfwer",
 				utils.OriginHost:   "192.168.1.1",
@@ -204,7 +206,8 @@ func testElasticExportEvents(t *testing.T) {
 					"extra2": "val_extra2", "extra3": "val_extra3"},
 			},
 			APIOpts: map[string]interface{}{
-				utils.MetaRunID: utils.MetaDefault,
+				utils.MetaOriginID: utils.Sha1("sdfwer", time.Unix(1383813745, 0).UTC().String()),
+				utils.MetaRunID:    utils.MetaDefault,
 			},
 		},
 	}
@@ -215,7 +218,7 @@ func testElasticExportEvents(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "SMSEvent",
 			Event: map[string]interface{}{
-				utils.MetaOriginID: utils.Sha1("sms2", time.Unix(1383813745, 0).UTC().String()),
+
 				utils.ToR:          utils.MetaSMS,
 				utils.Tenant:       "cgrates.org",
 				utils.Category:     "call",
@@ -224,8 +227,9 @@ func testElasticExportEvents(t *testing.T) {
 				utils.Destination:  "1002",
 			},
 			APIOpts: map[string]interface{}{
-				"ExporterUsed":  "ElasticExporterWithNoFields",
-				utils.MetaRunID: utils.MetaDefault,
+				utils.MetaOriginID: utils.Sha1("sms2", time.Unix(1383813745, 0).UTC().String()),
+				"ExporterUsed":     "ElasticExporterWithNoFields",
+				utils.MetaRunID:    utils.MetaDefault,
 			},
 		},
 	}

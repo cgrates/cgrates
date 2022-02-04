@@ -105,8 +105,8 @@ func testFwvExportEvent(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "Event",
 			Event: map[string]interface{}{
-				utils.OrderID:      1,
-				utils.MetaOriginID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC).String()),
+				utils.OrderID: 1,
+
 				utils.ToR:          utils.MetaVoice,
 				utils.OriginID:     "dsafdsaf",
 				utils.OriginHost:   "192.168.1.1",
@@ -124,7 +124,8 @@ func testFwvExportEvent(t *testing.T) {
 				"ExtraFields": map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
 			},
 			APIOpts: map[string]interface{}{
-				utils.RunID: utils.MetaDefault,
+				utils.MetaOriginID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC).String()),
+				utils.RunID:        utils.MetaDefault,
 			},
 		},
 	}

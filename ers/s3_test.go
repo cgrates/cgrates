@@ -86,17 +86,17 @@ func TestS3ERProcessMessage(t *testing.T) {
 	expEvent := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		Event: map[string]interface{}{
-			utils.MetaOriginID: "testoriginID",
+			utils.Destination: "testdest",
 		},
 		APIOpts: map[string]interface{}{},
 	}
-	body := []byte(`{"*originID":"testoriginID"}`)
+	body := []byte(`{"Destination":"testdest"}`)
 	rdr.Config().Fields = []*config.FCTemplate{
 		{
-			Tag:   "*originID",
+			Tag:   "Destination",
 			Type:  utils.MetaConstant,
-			Value: config.NewRSRParsersMustCompile("testoriginID", utils.InfieldSep),
-			Path:  "*cgreq.*originID",
+			Value: config.NewRSRParsersMustCompile("testdest", utils.InfieldSep),
+			Path:  "*cgreq.Destination",
 		},
 	}
 	rdr.Config().Fields[0].ComputePath()

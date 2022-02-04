@@ -4557,8 +4557,8 @@ func TestBiRPCv1ForceDisconnect(t *testing.T) {
 		"sess1": {
 
 			EventStart: map[string]interface{}{
-				utils.MetaOriginID: "dfa2adaa5ab49349777c1ab3bcf3455df0259880",
-				utils.OriginID:     "222",
+
+				utils.OriginID: "222",
 			},
 			SRuns: []*SRun{
 				{
@@ -4569,7 +4569,8 @@ func TestBiRPCv1ForceDisconnect(t *testing.T) {
 				},
 			},
 			OptsStart: map[string]interface{}{
-				utils.MetaOriginID: "CGRATES_ID",
+
+				utils.MetaOriginID: "dfa2adaa5ab49349777c1ab3bcf3455df0259880",
 			},
 		},
 		"CGRATES_ID": {
