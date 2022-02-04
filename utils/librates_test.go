@@ -198,9 +198,8 @@ func TestLibratesRunTimes(t *testing.T) {
 	}
 }
 
-/*
 func TestLibratesCorrectCost(t *testing.T) {
-	//CorrectCost does nothing
+	//CorrectCost does nothing in this case
 	rPc := &RateProfileCost{
 		Cost:    NewDecimal(1234, 3),
 		MinCost: NewDecimal(1, 0),
@@ -216,7 +215,7 @@ func TestLibratesCorrectCost(t *testing.T) {
 	}
 	rPc.CorrectCost(nil, "")
 
-	if !reflect.DeepEqual(rPc, expected) {
+	if !rPc.Equals(expected) {
 		t.Errorf("\nExpected: <%+v>, \nReceived: <%+v>", expected, rPc)
 	}
 
@@ -230,7 +229,7 @@ func TestLibratesCorrectCost(t *testing.T) {
 
 	rPc.CorrectCost(IntPointer(2), MetaRoundingUp)
 
-	if !reflect.DeepEqual(rPc, expected) {
+	if !rPc.Equals(expected) {
 		t.Errorf("\nExpected: <%+v>, \nReceived: <%+v>", ToJSON(expected), ToJSON(rPc))
 	}
 
@@ -244,7 +243,7 @@ func TestLibratesCorrectCost(t *testing.T) {
 	rPc.Cost = NewDecimal(234, 2)
 	rPc.CorrectCost(nil, "")
 
-	if !reflect.DeepEqual(rPc, expected) {
+	if !rPc.Equals(expected) {
 		t.Errorf("\nExpected: <%+v>, \nReceived: <%+v>", expected, rPc)
 	}
 
@@ -259,11 +258,10 @@ func TestLibratesCorrectCost(t *testing.T) {
 	rPc.Cost = NewDecimal(12, 2)
 	rPc.CorrectCost(nil, "")
 
-	if !reflect.DeepEqual(rPc, expected) {
+	if !rPc.Equals(expected) {
 		t.Errorf("\nExpected: <%+v>, \nReceived: <%+v>", expected, rPc)
 	}
 }
-*/
 
 func TestRateProfileSort(t *testing.T) {
 	minDecimal, err := NewDecimalFromUsage("1m")
@@ -1000,104 +998,6 @@ func TestRateSIntervalCompressEqualsCase3(t *testing.T) {
 	result := rateSintrv1.CompressEquals(rateSintrv2)
 	if result != true {
 		t.Errorf("\nExpecting <true>,\nReceived <%+v>", result)
-	}
-}
-
-func TestLibratesAsRateProfile(t *testing.T) {
-	// Invalid DynamicWeights string
-	ext := &APIRateProfile{
-		Weights: "testWeight",
-	}
-	rp := &RateProfile{
-		Tenant:          ext.Tenant,
-		ID:              ext.ID,
-		FilterIDs:       ext.FilterIDs,
-		MaxCostStrategy: ext.MaxCostStrategy,
-	}
-
-	received, err := ext.AsRateProfile()
-	experr := "invalid DynamicWeight format for string <testWeight>"
-
-	if err == nil || err.Error() != experr {
-		t.Errorf("\nExpected: <%+v>, \nReceived: <%+v>", experr, err)
-	}
-
-	if received != nil {
-		t.Errorf("\nExpected: <%+v>, \nReceived: <%+v>", nil, received)
-	}
-
-	// No changes
-	ext.Weights = EmptyString
-
-	expected := rp
-	received, err = ext.AsRateProfile()
-
-	if err != nil {
-		t.Errorf("\nExpected nil, got <%+v>", err)
-	}
-
-	if !reflect.DeepEqual(received, expected) {
-		t.Errorf("\nExpected: <%+v>, \nReceived: <%+v>", expected, received)
-	}
-
-	// assign MinCost to rp
-	ext.MinCost = Float64Pointer(1)
-
-	expected.MinCost = NewDecimal(1, 0)
-	received, err = ext.AsRateProfile()
-
-	if err != nil {
-		t.Errorf("\nExpected nil, got <%+v>", err)
-	}
-
-	if !reflect.DeepEqual(received, expected) {
-		t.Errorf("\nExpected: <%+v>, \nReceived: <%+v>", expected, received)
-	}
-
-	// assign MaxCost to rp
-	ext.MaxCost = Float64Pointer(2)
-
-	expected.MaxCost = NewDecimal(2, 0)
-	received, err = ext.AsRateProfile()
-
-	if err != nil {
-		t.Errorf("\nExpected nil, got <%+v>", err)
-	}
-
-	if !reflect.DeepEqual(received, expected) {
-		t.Errorf("\nExpected: <%+v>, \nReceived: <%+v>", expected, received)
-	}
-}
-
-func TestLibratesAsRateProfileNon0Len(t *testing.T) {
-	id := "testID"
-	ext := &APIRateProfile{
-		Rates: map[string]*APIRate{
-			"testKey": {
-				ID:      id,
-				Weights: "testWeight",
-			},
-		},
-	}
-	rp := &RateProfile{
-		Tenant:          ext.Tenant,
-		ID:              ext.ID,
-		FilterIDs:       ext.FilterIDs,
-		MaxCostStrategy: ext.MaxCostStrategy,
-	}
-
-	expected := rp
-	expected.Rates = map[string]*Rate{
-		"testKey": nil,
-	}
-	received, err := ext.AsRateProfile()
-
-	if err.Error() != "invalid DynamicWeight format for string <testWeight>" {
-		t.Errorf("\nExpected nil, got <%+v>", err)
-	}
-
-	if !reflect.DeepEqual(received, expected) {
-		t.Errorf("\nExpected: <%v>, \nReceived: <%v>", expected, received)
 	}
 }
 

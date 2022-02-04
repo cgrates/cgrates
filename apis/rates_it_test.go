@@ -68,6 +68,9 @@ var (
 		testRateRemoveRateProfileRates,
 		testRateSetRateProfileRates,
 		testRateSetRateProfilesWithPrefix,
+		// here we will tests better the create,read,update and delte for the rates inside of a RateProfile
+		//testRateProfileWithMultipleRates,
+		//testRateProfileUpdateRates,
 		testRateSKillEngine,
 	}
 )
@@ -150,19 +153,29 @@ func testGetRateProfilesBeforeSet(t *testing.T) {
 }
 func testRateSetRateProfile(t *testing.T) {
 	ratePrf := &utils.APIRateProfile{
-		Tenant:          utils.CGRateSorg,
-		ID:              "TEST_RATE_IT_TEST",
-		FilterIDs:       []string{"*string:~*req.Account:dan"},
-		Weights:         ";0",
-		MaxCostStrategy: "*free",
-		Rates: map[string]*utils.APIRate{
-			"RT_WEEK": {
-				ID:              "RT_WEEK",
-				Weights:         ";0",
-				ActivationTimes: "* * * * 1-5",
-				IntervalRates: []*utils.APIIntervalRate{
-					{
-						IntervalStart: "0",
+		RateProfile: &utils.RateProfile{
+			Tenant:    utils.CGRateSorg,
+			ID:        "TEST_RATE_IT_TEST",
+			FilterIDs: []string{"*string:~*req.Account:dan"},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 0,
+				},
+			},
+			MaxCostStrategy: "*free",
+			Rates: map[string]*utils.Rate{
+				"RT_WEEK": {
+					ID: "RT_WEEK",
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 0,
+						},
+					},
+					ActivationTimes: "* * * * 1-5",
+					IntervalRates: []*utils.IntervalRate{
+						{
+							IntervalStart: utils.NewDecimal(0, 0),
+						},
 					},
 				},
 			},
@@ -315,19 +328,29 @@ func testGetRateProfileBeforeSet2(t *testing.T) {
 
 func testRateSetRateProfile2(t *testing.T) {
 	ratePrf := &utils.APIRateProfile{
-		Tenant:          utils.CGRateSorg,
-		ID:              "TEST_RATE_IT_TEST_SECOND",
-		FilterIDs:       []string{"*string:~*req.Account:dan"},
-		Weights:         ";0",
-		MaxCostStrategy: "*free",
-		Rates: map[string]*utils.APIRate{
-			"RT_WEEK": {
-				ID:              "RT_WEEK",
-				Weights:         ";0",
-				ActivationTimes: "* * * * 1-5",
-				IntervalRates: []*utils.APIIntervalRate{
-					{
-						IntervalStart: "0",
+		RateProfile: &utils.RateProfile{
+			Tenant:    utils.CGRateSorg,
+			ID:        "TEST_RATE_IT_TEST_SECOND",
+			FilterIDs: []string{"*string:~*req.Account:dan"},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 0,
+				},
+			},
+			MaxCostStrategy: "*free",
+			Rates: map[string]*utils.Rate{
+				"RT_WEEK": {
+					ID: "RT_WEEK",
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 0,
+						},
+					},
+					ActivationTimes: "* * * * 1-5",
+					IntervalRates: []*utils.IntervalRate{
+						{
+							IntervalStart: utils.NewDecimal(0, 0),
+						},
 					},
 				},
 			},
@@ -457,18 +480,13 @@ func testRateGetRateProfiles2(t *testing.T) {
 					ID: "RT_WEEK",
 					Weights: []*utils.DynamicWeight{
 						{
-							FilterIDs: nil,
-							Weight:    0,
+							Weight: 0,
 						},
 					},
 					ActivationTimes: "* * * * 1-5",
 					IntervalRates: []*utils.IntervalRate{
 						{
 							IntervalStart: utils.NewDecimal(0, 0),
-							FixedFee:      nil,
-							RecurrentFee:  nil,
-							Unit:          nil,
-							Increment:     nil,
 						},
 					},
 				},
@@ -542,8 +560,7 @@ func testRateGetRateProfilesAfterRemove(t *testing.T) {
 			FilterIDs: []string{"*string:~*req.Account:dan"},
 			Weights: []*utils.DynamicWeight{
 				{
-					FilterIDs: nil,
-					Weight:    0,
+					Weight: 0,
 				},
 			},
 			MaxCostStrategy: "*free",
@@ -552,18 +569,13 @@ func testRateGetRateProfilesAfterRemove(t *testing.T) {
 					ID: "RT_WEEK",
 					Weights: []*utils.DynamicWeight{
 						{
-							FilterIDs: nil,
-							Weight:    0,
+							Weight: 0,
 						},
 					},
 					ActivationTimes: "* * * * 1-5",
 					IntervalRates: []*utils.IntervalRate{
 						{
 							IntervalStart: utils.NewDecimal(0, 0),
-							FixedFee:      nil,
-							RecurrentFee:  nil,
-							Unit:          nil,
-							Increment:     nil,
 						},
 					},
 				},
@@ -581,19 +593,29 @@ func testRateGetRateProfilesAfterRemove(t *testing.T) {
 
 func testRateSetAttributeProfileBrokenReference(t *testing.T) {
 	ratePrf := &utils.APIRateProfile{
-		Tenant:          utils.CGRateSorg,
-		ID:              "TEST_RATE_IT_TEST_SECOND",
-		FilterIDs:       []string{"invalid_filter_format", "*string:~*opts.*context:*sessions"},
-		Weights:         ";0",
-		MaxCostStrategy: "*free",
-		Rates: map[string]*utils.APIRate{
-			"RT_WEEK": {
-				ID:              "RT_WEEK",
-				Weights:         ";0",
-				ActivationTimes: "* * * * 1-5",
-				IntervalRates: []*utils.APIIntervalRate{
-					{
-						IntervalStart: "0",
+		RateProfile: &utils.RateProfile{
+			Tenant:    utils.CGRateSorg,
+			ID:        "TEST_RATE_IT_TEST_SECOND",
+			FilterIDs: []string{"invalid_filter_format", "*string:~*opts.*context:*sessions"},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 0,
+				},
+			},
+			MaxCostStrategy: "*free",
+			Rates: map[string]*utils.Rate{
+				"RT_WEEK": {
+					ID: "RT_WEEK",
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 0,
+						},
+					},
+					ActivationTimes: "* * * * 1-5",
+					IntervalRates: []*utils.IntervalRate{
+						{
+							IntervalStart: utils.NewDecimal(0, 0),
+						},
 					},
 				},
 			},
@@ -609,29 +631,43 @@ func testRateSetAttributeProfileBrokenReference(t *testing.T) {
 
 func testRateSetRateProfile3(t *testing.T) {
 	ratePrf := &utils.APIRateProfile{
-		Tenant:          utils.CGRateSorg,
-		ID:              "TEST_RATE_IT_TEST_THIRD",
-		FilterIDs:       []string{"*string:~*req.Account:dan"},
-		Weights:         ";0",
-		MaxCostStrategy: "*free",
-		Rates: map[string]*utils.APIRate{
-			"RT_WEEK": {
-				ID:              "RT_WEEK",
-				Weights:         ";0",
-				ActivationTimes: "* * * * 1-5",
-				IntervalRates: []*utils.APIIntervalRate{
-					{
-						IntervalStart: "0",
-					},
+		RateProfile: &utils.RateProfile{
+			Tenant:    utils.CGRateSorg,
+			ID:        "TEST_RATE_IT_TEST_THIRD",
+			FilterIDs: []string{"*string:~*req.Account:dan"},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 0,
 				},
 			},
-			"RT_MONTH": {
-				ID:              "RT_MONTH",
-				Weights:         ";0",
-				ActivationTimes: "* * * * 1-5",
-				IntervalRates: []*utils.APIIntervalRate{
-					{
-						IntervalStart: "0",
+			MaxCostStrategy: "*free",
+			Rates: map[string]*utils.Rate{
+				"RT_WEEK": {
+					ID: "RT_WEEK",
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 0,
+						},
+					},
+					ActivationTimes: "* * * * 1-5",
+					IntervalRates: []*utils.IntervalRate{
+						{
+							IntervalStart: utils.NewDecimal(0, 0),
+						},
+					},
+				},
+				"RT_MONTH": {
+					ID: "RT_MONTH",
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 0,
+						},
+					},
+					ActivationTimes: "* * * * 1-5",
+					IntervalRates: []*utils.IntervalRate{
+						{
+							IntervalStart: utils.NewDecimal(0, 0),
+						},
 					},
 				},
 			},
@@ -758,20 +794,30 @@ func testRateRemoveRateProfileRates(t *testing.T) {
 
 	// as we removed our RT_WEEK, we will add it back to our profile
 	argsRate := &utils.APIRateProfile{
-		Tenant:          utils.CGRateSorg,
-		ID:              "TEST_RATE_IT_TEST_THIRD",
-		FilterIDs:       []string{"*string:~*req.Account:dan"},
-		Weights:         ";0",
-		MaxCostStrategy: "*free",
-		Rates: map[string]*utils.APIRate{
-			// RT_WEEK wich we added back we added back
-			"RT_WEEK": {
-				ID:              "RT_WEEK",
-				Weights:         ";0",
-				ActivationTimes: "* * * * 1-5",
-				IntervalRates: []*utils.APIIntervalRate{
-					{
-						IntervalStart: "0",
+		RateProfile: &utils.RateProfile{
+			Tenant:    utils.CGRateSorg,
+			ID:        "TEST_RATE_IT_TEST_THIRD",
+			FilterIDs: []string{"*string:~*req.Account:dan"},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 0,
+				},
+			},
+			MaxCostStrategy: "*free",
+			Rates: map[string]*utils.Rate{
+				// RT_WEEK wich we added back we added back
+				"RT_WEEK": {
+					ID: "RT_WEEK",
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 0,
+						},
+					},
+					ActivationTimes: "* * * * 1-5",
+					IntervalRates: []*utils.IntervalRate{
+						{
+							IntervalStart: utils.NewDecimal(0, 0),
+						},
 					},
 				},
 			},
@@ -787,38 +833,53 @@ func testRateRemoveRateProfileRates(t *testing.T) {
 
 func testRateSetRateProfileRates(t *testing.T) {
 	argsRate := &utils.APIRateProfile{
-		Tenant:          utils.CGRateSorg,
-		ID:              "TEST_RATE_IT_TEST_THIRD",
-		FilterIDs:       []string{"*string:~*req.Account:dan"},
-		Weights:         ";0",
-		MaxCostStrategy: "*free",
-		Rates: map[string]*utils.APIRate{
-			// RT_MONTH rate will be updated
-			"RT_MONTH": {
-				ID:              "RT_MONTH",
-				Weights:         "*exists:~*req.Destination:;25",
-				ActivationTimes: "* 10 * * 1-5",
-				IntervalRates: []*utils.APIIntervalRate{
-					{
-						IntervalStart: "0",
-						FixedFee:      utils.Float64Pointer(0.4),
-						Increment:     utils.Float64Pointer(float64(time.Second)),
-						RecurrentFee:  utils.Float64Pointer(float64(time.Second)),
-						Unit:          utils.Float64Pointer(1),
-					},
+		RateProfile: &utils.RateProfile{
+			Tenant:    utils.CGRateSorg,
+			ID:        "TEST_RATE_IT_TEST_THIRD",
+			FilterIDs: []string{"*string:~*req.Account:dan"},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 0,
 				},
 			},
-			// RT_CHRISTMAS will be added as a new rate into our profile
-			"RT_CHRISTMAS": {
-				ID:              "RT_CHRISTMAS",
-				Weights:         ";10",
-				ActivationTimes: "1 * * * *",
-				IntervalRates: []*utils.APIIntervalRate{
-					{
-						IntervalStart: "0",
-						RecurrentFee:  utils.Float64Pointer(0.2),
-						Unit:          utils.Float64Pointer(float64(time.Minute)),
-						Increment:     utils.Float64Pointer(0),
+			MaxCostStrategy: "*free",
+			Rates: map[string]*utils.Rate{
+				// RT_MONTH rate will be updated
+				"RT_MONTH": {
+					ID: "RT_MONTH",
+					Weights: utils.DynamicWeights{
+						{
+							FilterIDs: []string{"*exists:~*req.Destination:"},
+							Weight:    25,
+						},
+					},
+					ActivationTimes: "* 10 * * 1-5",
+					IntervalRates: []*utils.IntervalRate{
+						{
+							IntervalStart: utils.NewDecimal(0, 0),
+							FixedFee:      utils.NewDecimal(4, 1),
+							Increment:     utils.NewDecimal(int64(time.Second), 0),
+							RecurrentFee:  utils.NewDecimal(int64(time.Second), 0),
+							Unit:          utils.NewDecimal(1, 0),
+						},
+					},
+				},
+				// RT_CHRISTMAS will be added as a new rate into our profile
+				"RT_CHRISTMAS": {
+					ID: "RT_CHRISTMAS",
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 10,
+						},
+					},
+					ActivationTimes: "1 * * * *",
+					IntervalRates: []*utils.IntervalRate{
+						{
+							IntervalStart: utils.NewDecimal(0, 0),
+							RecurrentFee:  utils.NewDecimal(2, 1),
+							Unit:          utils.NewDecimal(int64(time.Minute), 0),
+							Increment:     utils.NewDecimal(0, 0),
+						},
 					},
 				},
 			},
@@ -914,19 +975,29 @@ func testRateSetRateProfileRates(t *testing.T) {
 
 func testRateSetRateProfilesWithPrefix(t *testing.T) {
 	ratePrf := &utils.APIRateProfile{
-		Tenant:          utils.CGRateSorg,
-		ID:              "PrefixTEST_RATE_IT_TEST",
-		FilterIDs:       []string{"*string:~*req.Account:dan"},
-		Weights:         ";0",
-		MaxCostStrategy: "*free",
-		Rates: map[string]*utils.APIRate{
-			"RT_WEEK": {
-				ID:              "RT_WEEK",
-				Weights:         ";0",
-				ActivationTimes: "* * * * 1-5",
-				IntervalRates: []*utils.APIIntervalRate{
-					{
-						IntervalStart: "0",
+		RateProfile: &utils.RateProfile{
+			Tenant:    utils.CGRateSorg,
+			ID:        "PrefixTEST_RATE_IT_TEST",
+			FilterIDs: []string{"*string:~*req.Account:dan"},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 0,
+				},
+			},
+			MaxCostStrategy: "*free",
+			Rates: map[string]*utils.Rate{
+				"RT_WEEK": {
+					ID: "RT_WEEK",
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 0,
+						},
+					},
+					ActivationTimes: "* * * * 1-5",
+					IntervalRates: []*utils.IntervalRate{
+						{
+							IntervalStart: utils.NewDecimal(0, 0),
+						},
 					},
 				},
 			},
@@ -1003,18 +1074,13 @@ func testRateSetRateProfilesWithPrefix(t *testing.T) {
 					ID: "RT_WEEK",
 					Weights: []*utils.DynamicWeight{
 						{
-							FilterIDs: nil,
-							Weight:    0,
+							Weight: 0,
 						},
 					},
 					ActivationTimes: "* * * * 1-5",
 					IntervalRates: []*utils.IntervalRate{
 						{
 							IntervalStart: utils.NewDecimal(0, 0),
-							FixedFee:      nil,
-							RecurrentFee:  nil,
-							Unit:          nil,
-							Increment:     nil,
 						},
 					},
 				},
@@ -1026,6 +1092,381 @@ func testRateSetRateProfilesWithPrefix(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply2, expected) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(reply2))
+	}
+}
+
+func testRateProfileWithMultipleRates(t *testing.T) {
+	ratePrf := &utils.APIRateProfile{
+		RateProfile: &utils.RateProfile{
+			Tenant:    utils.CGRateSorg,
+			ID:        "MultipleRates",
+			FilterIDs: []string{"*exists:~*req.CGRID:", "*prefix:~*req.Destination:12354"},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 100,
+				},
+			},
+			MinCost:         utils.NewDecimal(2, 1),
+			MaxCost:         utils.NewDecimal(20244, 3),
+			MaxCostStrategy: "*free",
+			Rates: map[string]*utils.Rate{
+				"RT_MONDAY": {
+					ID: "RT_MONDAY",
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 50,
+						},
+					},
+					ActivationTimes: "* * * * 0",
+					IntervalRates: []*utils.IntervalRate{
+						{
+							IntervalStart: utils.NewDecimal(0, 0),
+							FixedFee:      utils.NewDecimal(33, 2),
+							Increment:     utils.NewDecimal(int64(time.Second), 0),
+							RecurrentFee:  utils.NewDecimal(int64(time.Second), 0),
+							Unit:          utils.NewDecimal(int64(time.Minute), 0),
+						},
+						{
+							IntervalStart: utils.NewDecimal(int64(60*time.Second), 0),
+							FixedFee:      utils.NewDecimal(1, 1),
+							Increment:     utils.NewDecimal(int64(time.Minute), 0),
+							RecurrentFee:  utils.NewDecimal(int64(time.Second), 0),
+							Unit:          utils.NewDecimal(int64(time.Minute), 0),
+						},
+					},
+				},
+				"RT_THUESDAY": {
+					ID: "RT_THUESDAY",
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 40,
+						},
+					},
+					FilterIDs:       []string{"*string:~*opts.*rates:true"},
+					ActivationTimes: "* * * * 1",
+					IntervalRates: []*utils.IntervalRate{
+						{
+							IntervalStart: utils.NewDecimal(0, 0),
+							FixedFee:      utils.NewDecimal(20, 2),
+							Increment:     utils.NewDecimal(int64(time.Second), 0),
+							RecurrentFee:  utils.NewDecimal(int64(time.Second), 0),
+							Unit:          utils.NewDecimal(int64(time.Minute), 0),
+						},
+						{
+							IntervalStart: utils.NewDecimal(int64(45*time.Second), 0),
+							FixedFee:      utils.NewDecimal(0, 0),
+							Increment:     utils.NewDecimal(int64(time.Minute), 0),
+							RecurrentFee:  utils.NewDecimal(int64(time.Second), 0),
+							Unit:          utils.NewDecimal(int64(time.Minute), 0),
+						},
+					},
+				},
+				"RT_WEDNESDAY": {
+					ID: "RT_WEDNESDAY",
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 30,
+						},
+					},
+					ActivationTimes: "* * * * 2",
+					IntervalRates: []*utils.IntervalRate{
+						{
+							IntervalStart: utils.NewDecimal(0, 0),
+							FixedFee:      utils.NewDecimal(1, 1),
+							Increment:     utils.NewDecimal(int64(time.Second), 0),
+							RecurrentFee:  utils.NewDecimal(int64(time.Second), 0),
+							Unit:          utils.NewDecimal(int64(time.Minute), 0),
+						},
+						{
+							IntervalStart: utils.NewDecimal(int64(45*time.Second), 0),
+							FixedFee:      utils.NewDecimal(2, 3),
+							Increment:     utils.NewDecimal(int64(time.Minute), 0),
+							RecurrentFee:  utils.NewDecimal(int64(time.Second), 0),
+							Unit:          utils.NewDecimal(int64(time.Minute), 0),
+						},
+					},
+				},
+				"RT_THURSDAY": {
+					ID: "RT_THURSDAY",
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 20,
+						},
+					},
+					ActivationTimes: "* * * * 3",
+					IntervalRates: []*utils.IntervalRate{
+						{
+							IntervalStart: utils.NewDecimal(0, 0),
+							FixedFee:      utils.NewDecimal(2, 1),
+							Increment:     utils.NewDecimal(int64(time.Second), 0),
+							RecurrentFee:  utils.NewDecimal(int64(time.Second), 0),
+							Unit:          utils.NewDecimal(int64(time.Minute), 0),
+						},
+						{
+							IntervalStart: utils.NewDecimal(int64(2*time.Minute), 0),
+							FixedFee:      utils.NewDecimal(1, 3),
+							Increment:     utils.NewDecimal(int64(time.Minute), 0),
+							RecurrentFee:  utils.NewDecimal(int64(time.Second), 0),
+							Unit:          utils.NewDecimal(int64(time.Minute), 0),
+						},
+					},
+				},
+				"RT_FRIDAY": {
+					ID: "RT_FRIDAY",
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 10,
+						},
+					},
+					ActivationTimes: "* * * * 4",
+					IntervalRates: []*utils.IntervalRate{
+						{
+							IntervalStart: utils.NewDecimal(0, 0),
+							FixedFee:      utils.NewDecimal(5, 1),
+							Increment:     utils.NewDecimal(int64(time.Second), 0),
+							RecurrentFee:  utils.NewDecimal(int64(time.Second), 0),
+							Unit:          utils.NewDecimal(int64(time.Minute), 0),
+						},
+						{
+							IntervalStart: utils.NewDecimal(int64(time.Minute+30*time.Second), 0),
+							FixedFee:      utils.NewDecimal(21, 3),
+							Increment:     utils.NewDecimal(int64(time.Minute), 0),
+							RecurrentFee:  utils.NewDecimal(int64(time.Second), 0),
+							Unit:          utils.NewDecimal(int64(time.Minute), 0),
+						},
+					},
+				},
+			},
+		},
+	}
+	var reply string
+	if err := rateSRPC.Call(context.Background(), utils.AdminSv1SetRateProfile,
+		ratePrf, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error(err)
+	}
+
+	// as we created our profile, count the rates
+	var result *utils.RateProfile
+	if err := rateSRPC.Call(context.Background(), utils.AdminSv1GetRateProfile,
+		&utils.TenantIDWithAPIOpts{
+			TenantID: &utils.TenantID{
+				Tenant: utils.CGRateSorg,
+				ID:     "MultipleRates",
+			},
+		}, &result); err != nil {
+		t.Error(err)
+	} else if len(result.Rates) != 5 {
+		t.Errorf("Unexpected reply returned")
+	}
+}
+
+func testRateProfileUpdateRates(t *testing.T) {
+	argsRate := &utils.APIRateProfile{
+		RateProfile: &utils.RateProfile{
+			Tenant:    utils.CGRateSorg,
+			ID:        "MultipleRates",
+			FilterIDs: []string{"*exists:~*req.CGRID:", "*prefix:~*req.Destination:12354"},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 100,
+				},
+			},
+			MinCost:         utils.NewDecimal(2, 1),
+			MaxCost:         utils.NewDecimal(20244, 3),
+			MaxCostStrategy: "*free",
+			Rates: map[string]*utils.Rate{
+				// RT_MMONDAY Modified the interval rates
+				"RT_MONDAY": {
+					ID: "RT_MONDAY",
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 0,
+						},
+					},
+					FilterIDs:       []string{"*lt:~*req.*usage:6"},
+					ActivationTimes: "* 12 * * 0",
+					IntervalRates: []*utils.IntervalRate{
+						{
+							IntervalStart: utils.NewDecimal(0, 0),
+							Increment:     utils.NewDecimal(int64(2*time.Second), 0),
+							RecurrentFee:  utils.NewDecimal(int64(2*time.Second), 0),
+							Unit:          utils.NewDecimal(int64(2*time.Minute), 0),
+						},
+					},
+					Blocker: true,
+				},
+				// on rate_friday we will modify just the activationTimes and one intervalRate, in all weekend
+				"RT_FRIDAY": {
+					ID: "RT_FRIDAY",
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 10,
+						},
+					},
+					ActivationTimes: "* * * * 4-6",
+					IntervalRates: []*utils.IntervalRate{
+						{
+							IntervalStart: utils.NewDecimal(0, 0),
+							FixedFee:      utils.NewDecimal(5, 1),
+							Increment:     utils.NewDecimal(int64(time.Second), 0),
+							RecurrentFee:  utils.NewDecimal(int64(time.Second), 0),
+							Unit:          utils.NewDecimal(int64(time.Minute), 0),
+						},
+					},
+				},
+			},
+		},
+	}
+	var result *string
+	if err := rateSRPC.Call(context.Background(), utils.AdminSv1SetRateProfileRates,
+		argsRate, &result); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(result, utils.StringPointer("OK")) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON("OK"), utils.ToJSON(result))
+	}
+
+	// so, RT_MONDAY, RT_FRIDAY were update
+	// RT_THURSDAY, RT_WEDNESDAY AND RATE_THUESDAY are the same
+	expectedRate := &utils.RateProfile{
+		Tenant:    utils.CGRateSorg,
+		ID:        "TEST_RATE_IT_TEST_THIRD",
+		FilterIDs: []string{"*string:~*req.Account:dan"},
+		Weights: []*utils.DynamicWeight{
+			{
+				Weight: 0,
+			},
+		},
+		MaxCostStrategy: "*free",
+		Rates: map[string]*utils.Rate{
+			// RT_WEEK that remains the same
+			"RT_MONDAY": {
+				ID: "RT_MONDAY",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 0,
+					},
+				},
+				FilterIDs:       []string{"*lt:~*req.*usage:6"},
+				ActivationTimes: "* 12 * * 0",
+				IntervalRates: []*utils.IntervalRate{
+					{
+						IntervalStart: utils.NewDecimal(0, 0),
+						Increment:     utils.NewDecimal(int64(2*time.Second), 0),
+						RecurrentFee:  utils.NewDecimal(int64(2*time.Second), 0),
+						Unit:          utils.NewDecimal(int64(2*time.Minute), 0),
+					},
+				},
+				Blocker: true,
+			},
+			"RT_THUESDAY": {
+				ID: "RT_THUESDAY",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 40,
+					},
+				},
+				FilterIDs:       []string{"*string:~*opts.*rates:true"},
+				ActivationTimes: "* * * * 1",
+				IntervalRates: []*utils.IntervalRate{
+					{
+						IntervalStart: utils.NewDecimal(0, 0),
+						FixedFee:      utils.NewDecimal(20, 2),
+						Increment:     utils.NewDecimal(int64(2*time.Second), 0),
+						RecurrentFee:  utils.NewDecimal(int64(2*time.Second), 0),
+						Unit:          utils.NewDecimal(int64(2*time.Minute), 0),
+					},
+					{
+						IntervalStart: utils.NewDecimal(int64(45*time.Second), 0),
+						FixedFee:      utils.NewDecimal(0, 0),
+						Increment:     utils.NewDecimal(int64(2*time.Minute), 0),
+						RecurrentFee:  utils.NewDecimal(int64(2*time.Second), 0),
+						Unit:          utils.NewDecimal(int64(2*time.Minute), 0),
+					},
+				},
+			},
+			"RT_WEDNESDAY": {
+				ID: "RT_WEDNESDAY",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 30,
+					},
+				},
+				ActivationTimes: "* * * * 2",
+				IntervalRates: []*utils.IntervalRate{
+					{
+						IntervalStart: utils.NewDecimal(0, 0),
+						FixedFee:      utils.NewDecimal(1, 1),
+						Increment:     utils.NewDecimal(int64(2*time.Second), 0),
+						RecurrentFee:  utils.NewDecimal(int64(2*time.Second), 0),
+						Unit:          utils.NewDecimal(int64(2*time.Minute), 0),
+					},
+					{
+						IntervalStart: utils.NewDecimal(int64(45*time.Second), 0),
+						FixedFee:      utils.NewDecimal(2, 3),
+						Increment:     utils.NewDecimal(int64(2*time.Minute), 0),
+						RecurrentFee:  utils.NewDecimal(int64(2*time.Second), 0),
+						Unit:          utils.NewDecimal(int64(2*time.Minute), 0),
+					},
+				},
+			},
+			"RT_THURSDAY": {
+				ID: "RT_THURSDAY",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 20,
+					},
+				},
+				ActivationTimes: "* * * * 3",
+				IntervalRates: []*utils.IntervalRate{
+					{
+						IntervalStart: utils.NewDecimal(0, 0),
+						FixedFee:      utils.NewDecimal(2, 1),
+						Increment:     utils.NewDecimal(int64(2*time.Second), 0),
+						RecurrentFee:  utils.NewDecimal(int64(2*time.Second), 0),
+						Unit:          utils.NewDecimal(int64(2*time.Minute), 0),
+					},
+					{
+						IntervalStart: utils.NewDecimal(int64(2*time.Minute), 0),
+						FixedFee:      utils.NewDecimal(1, 3),
+						Increment:     utils.NewDecimal(int64(2*time.Minute), 0),
+						RecurrentFee:  utils.NewDecimal(int64(2*time.Second), 0),
+						Unit:          utils.NewDecimal(int64(2*time.Minute), 0),
+					},
+				},
+			},
+			"RT_FRIDAY": {
+				ID: "RT_FRIDAY",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 10,
+					},
+				},
+				ActivationTimes: "* * * * 4-6",
+				IntervalRates: []*utils.IntervalRate{
+					{
+						IntervalStart: utils.NewDecimal(0, 0),
+						FixedFee:      utils.NewDecimal(5, 1),
+						Increment:     utils.NewDecimal(int64(2*time.Second), 0),
+						RecurrentFee:  utils.NewDecimal(int64(2*time.Second), 0),
+						Unit:          utils.NewDecimal(int64(2*time.Minute), 0),
+					},
+				},
+			},
+		},
+	}
+	var result2 *utils.RateProfile
+	if err := rateSRPC.Call(context.Background(), utils.AdminSv1GetRateProfile,
+		&utils.TenantIDWithAPIOpts{
+			TenantID: &utils.TenantID{
+				Tenant: utils.CGRateSorg,
+				ID:     "TEST_RATE_IT_TEST_THIRD",
+			},
+		}, &result2); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(result2, expectedRate) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expectedRate), utils.ToJSON(result2))
 	}
 }
 

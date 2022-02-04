@@ -117,26 +117,22 @@ func (admS *AdminSv1) GetRateProfileCount(ctx *context.Context, args *utils.Args
 }
 
 // SetRateProfile add/update a new Rate Profile
-func (admS *AdminSv1) SetRateProfile(ctx *context.Context, ext *utils.APIRateProfile, reply *string) error {
-	if missing := utils.MissingStructFields(ext, []string{utils.ID, utils.Rates}); len(missing) != 0 {
+func (admS *AdminSv1) SetRateProfile(ctx *context.Context, args *utils.APIRateProfile, reply *string) error {
+	if missing := utils.MissingStructFields(args, []string{utils.ID, utils.Rates}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if ext.Tenant == utils.EmptyString {
-		ext.Tenant = admS.cfg.GeneralCfg().DefaultTenant
+	if args.Tenant == utils.EmptyString {
+		args.Tenant = admS.cfg.GeneralCfg().DefaultTenant
 	}
-	rPrf, err := ext.AsRateProfile()
-	if err != nil {
-		return err
-	}
-	if err := admS.dm.SetRateProfile(ctx, rPrf, true); err != nil {
+	if err := admS.dm.SetRateProfile(ctx, args.RateProfile, true); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//generate a loadID for CacheRateProfiles and store it in database
 	if err := admS.dm.SetLoadIDs(ctx, map[string]int64{utils.CacheRateProfiles: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
-	if err := admS.CallCache(ctx, utils.IfaceAsString(ext.APIOpts[utils.MetaCache]), rPrf.Tenant, utils.CacheRateProfiles,
-		rPrf.TenantID(), &rPrf.FilterIDs, ext.APIOpts); err != nil {
+	if err := admS.CallCache(ctx, utils.IfaceAsString(args.APIOpts[utils.MetaCache]), args.Tenant, utils.CacheRateProfiles,
+		args.TenantID(), &args.FilterIDs, args.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
@@ -144,26 +140,22 @@ func (admS *AdminSv1) SetRateProfile(ctx *context.Context, ext *utils.APIRatePro
 }
 
 // SetRateProfileRates add/update Rates from existing RateProfiles
-func (admS *AdminSv1) SetRateProfileRates(ctx *context.Context, ext *utils.APIRateProfile, reply *string) (err error) {
-	if missing := utils.MissingStructFields(ext, []string{utils.ID, utils.Rates}); len(missing) != 0 {
+func (admS *AdminSv1) SetRateProfileRates(ctx *context.Context, args *utils.APIRateProfile, reply *string) (err error) {
+	if missing := utils.MissingStructFields(args, []string{utils.ID, utils.Rates}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if ext.Tenant == utils.EmptyString {
-		ext.Tenant = admS.cfg.GeneralCfg().DefaultTenant
+	if args.Tenant == utils.EmptyString {
+		args.Tenant = admS.cfg.GeneralCfg().DefaultTenant
 	}
-	rPrf, err := ext.AsRateProfile()
-	if err != nil {
-		return err
-	}
-	if err = admS.dm.SetRateProfileRates(ctx, rPrf, true); err != nil {
+	if err = admS.dm.SetRateProfileRates(ctx, args.RateProfile, true); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//generate a loadID for CacheRateProfiles and store it in database
 	if err = admS.dm.SetLoadIDs(ctx, map[string]int64{utils.CacheRateProfiles: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
-	if err = admS.CallCache(ctx, utils.IfaceAsString(ext.APIOpts[utils.MetaCache]), rPrf.Tenant, utils.CacheRateProfiles,
-		rPrf.TenantID(), &rPrf.FilterIDs, ext.APIOpts); err != nil {
+	if err = admS.CallCache(ctx, utils.IfaceAsString(args.APIOpts[utils.MetaCache]), args.Tenant, utils.CacheRateProfiles,
+		args.TenantID(), &args.FilterIDs, args.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK

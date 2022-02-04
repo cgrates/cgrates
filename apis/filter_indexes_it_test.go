@@ -2176,20 +2176,22 @@ func testV1FIdxSetRateSProfileWithFltr(t *testing.T) {
 
 	//we will set a RateProfile with our filter and check the indexes
 	rtPrf := utils.APIRateProfile{
-		Tenant: "cgrates.org",
-		ID:     "RATE_1",
-		FilterIDs: []string{"fltr_for_attr",
-			"*string:~*req.Account:1001"},
-		Rates: map[string]*utils.APIRate{
-			"RT_ALWAYS": {
-				ID:              "RT_ALWAYS",
-				FilterIDs:       []string{"*string:~*req.RequestType:*prepaid"},
-				ActivationTimes: "* * * * *",
-				IntervalRates: []*utils.APIIntervalRate{
-					{
-						IntervalStart: "0",
-						RecurrentFee:  utils.Float64Pointer(0.01),
-						FixedFee:      utils.Float64Pointer(0),
+		RateProfile: &utils.RateProfile{
+			Tenant: "cgrates.org",
+			ID:     "RATE_1",
+			FilterIDs: []string{"fltr_for_attr",
+				"*string:~*req.Account:1001"},
+			Rates: map[string]*utils.Rate{
+				"RT_ALWAYS": {
+					ID:              "RT_ALWAYS",
+					FilterIDs:       []string{"*string:~*req.RequestType:*prepaid"},
+					ActivationTimes: "* * * * *",
+					IntervalRates: []*utils.IntervalRate{
+						{
+							IntervalStart: utils.NewDecimal(0, 0),
+							RecurrentFee:  utils.NewDecimal(1, 2),
+							FixedFee:      utils.NewDecimal(0, 0),
+						},
 					},
 				},
 			},
@@ -2277,21 +2279,23 @@ func testV1FIdxSetRateProfileMoreFltrsMoreIndexing(t *testing.T) {
 
 	// update our RateProfile with our filter
 	rtPrf := utils.APIRateProfile{
-		Tenant: "cgrates.org",
-		ID:     "RATE_1",
-		FilterIDs: []string{"fltr_for_attr",
-			"fltr_for_attr2", "fltr_for_attr3",
-			"*string:~*req.Account:1001"},
-		Rates: map[string]*utils.APIRate{
-			"RT_ALWAYS": {
-				ID:              "RT_ALWAYS",
-				FilterIDs:       []string{"*string:~*req.RequestType:*prepaid"},
-				ActivationTimes: "* * * * *",
-				IntervalRates: []*utils.APIIntervalRate{
-					{
-						IntervalStart: "0",
-						RecurrentFee:  utils.Float64Pointer(0.01),
-						FixedFee:      utils.Float64Pointer(0),
+		RateProfile: &utils.RateProfile{
+			Tenant: "cgrates.org",
+			ID:     "RATE_1",
+			FilterIDs: []string{"fltr_for_attr",
+				"fltr_for_attr2", "fltr_for_attr3",
+				"*string:~*req.Account:1001"},
+			Rates: map[string]*utils.Rate{
+				"RT_ALWAYS": {
+					ID:              "RT_ALWAYS",
+					FilterIDs:       []string{"*string:~*req.RequestType:*prepaid"},
+					ActivationTimes: "* * * * *",
+					IntervalRates: []*utils.IntervalRate{
+						{
+							IntervalStart: utils.NewDecimal(0, 0),
+							RecurrentFee:  utils.NewDecimal(1, 2),
+							FixedFee:      utils.NewDecimal(0, 0),
+						},
 					},
 				},
 			},
@@ -2388,42 +2392,46 @@ func testV1FIdxRateSProfileComputeIndexes(t *testing.T) {
 func testV1FIdxRateSProfileMoreProfilesForFilters(t *testing.T) {
 	// we will add more RateProfiles for indexing
 	rtPrf1 := utils.APIRateProfile{
-		Tenant: "cgrates.org",
-		ID:     "RATE_2",
-		FilterIDs: []string{
-			"fltr_for_attr2", "fltr_for_attr3",
-			"*string:~*req.Account:1001"},
-		Rates: map[string]*utils.APIRate{
-			"RT_CHRISTMAS": {
-				ID:              "RT_CHRISTMAS",
-				FilterIDs:       []string{"*string:~*req.RequestType:*pseudoprepaid"},
-				ActivationTimes: "* * * * *",
-				IntervalRates: []*utils.APIIntervalRate{
-					{
-						IntervalStart: "0",
-						RecurrentFee:  utils.Float64Pointer(0.001),
-						FixedFee:      utils.Float64Pointer(0),
+		RateProfile: &utils.RateProfile{
+			Tenant: "cgrates.org",
+			ID:     "RATE_2",
+			FilterIDs: []string{
+				"fltr_for_attr2", "fltr_for_attr3",
+				"*string:~*req.Account:1001"},
+			Rates: map[string]*utils.Rate{
+				"RT_CHRISTMAS": {
+					ID:              "RT_CHRISTMAS",
+					FilterIDs:       []string{"*string:~*req.RequestType:*pseudoprepaid"},
+					ActivationTimes: "* * * * *",
+					IntervalRates: []*utils.IntervalRate{
+						{
+							IntervalStart: utils.NewDecimal(0, 0),
+							RecurrentFee:  utils.NewDecimal(1, 3),
+							FixedFee:      utils.NewDecimal(0, 0),
+						},
 					},
 				},
 			},
 		},
 	}
 	rtPrf2 := utils.APIRateProfile{
-		Tenant: "cgrates.org",
-		ID:     "RATE_3",
-		FilterIDs: []string{
-			"fltr_for_attr",
-			"*string:~*req.Account:1001"},
-		Rates: map[string]*utils.APIRate{
-			"RT_ALWAYS": {
-				ID:              "RT_ALWAYS",
-				FilterIDs:       nil,
-				ActivationTimes: "* * * * *",
-				IntervalRates: []*utils.APIIntervalRate{
-					{
-						IntervalStart: "0",
-						RecurrentFee:  utils.Float64Pointer(0.5),
-						FixedFee:      utils.Float64Pointer(0),
+		RateProfile: &utils.RateProfile{
+			Tenant: "cgrates.org",
+			ID:     "RATE_3",
+			FilterIDs: []string{
+				"fltr_for_attr",
+				"*string:~*req.Account:1001"},
+			Rates: map[string]*utils.Rate{
+				"RT_ALWAYS": {
+					ID:              "RT_ALWAYS",
+					FilterIDs:       nil,
+					ActivationTimes: "* * * * *",
+					IntervalRates: []*utils.IntervalRate{
+						{
+							IntervalStart: utils.NewDecimal(0, 0),
+							RecurrentFee:  utils.NewDecimal(5, 1),
+							FixedFee:      utils.NewDecimal(0, 0),
+						},
 					},
 				},
 			},
@@ -2644,32 +2652,34 @@ func testV1FIdxRateSProfileRatesWithFltr(t *testing.T) {
 
 	//we will set a RateProfile with our filter and check the indexes
 	rtPrf := utils.APIRateProfile{
-		Tenant:    "cgrates.org",
-		ID:        "RATE_1",
-		FilterIDs: []string{"*string:~*req.Account:1001"},
-		Rates: map[string]*utils.APIRate{
-			"RT_ALWAYS": {
-				ID: "RT_ALWAYS",
-				FilterIDs: []string{"fltr_for_attr",
-					"*string:~*req.RequestType:*prepaid"},
-				ActivationTimes: "* * * * *",
-				IntervalRates: []*utils.APIIntervalRate{
-					{
-						IntervalStart: "0",
-						RecurrentFee:  utils.Float64Pointer(0.01),
-						FixedFee:      utils.Float64Pointer(0),
+		RateProfile: &utils.RateProfile{
+			Tenant:    "cgrates.org",
+			ID:        "RATE_1",
+			FilterIDs: []string{"*string:~*req.Account:1001"},
+			Rates: map[string]*utils.Rate{
+				"RT_ALWAYS": {
+					ID: "RT_ALWAYS",
+					FilterIDs: []string{"fltr_for_attr",
+						"*string:~*req.RequestType:*prepaid"},
+					ActivationTimes: "* * * * *",
+					IntervalRates: []*utils.IntervalRate{
+						{
+							IntervalStart: utils.NewDecimal(0, 0),
+							RecurrentFee:  utils.NewDecimal(1, 2),
+							FixedFee:      utils.NewDecimal(0, 0),
+						},
 					},
 				},
-			},
-			"RT_CHRISTMAS": {
-				ID:              "RT_CHRISTMAS",
-				FilterIDs:       []string{"*string:~*req.RequestType:*postpaid"},
-				ActivationTimes: "* * * * *",
-				IntervalRates: []*utils.APIIntervalRate{
-					{
-						IntervalStart: "0",
-						RecurrentFee:  utils.Float64Pointer(0.01),
-						FixedFee:      utils.Float64Pointer(0),
+				"RT_CHRISTMAS": {
+					ID:              "RT_CHRISTMAS",
+					FilterIDs:       []string{"*string:~*req.RequestType:*postpaid"},
+					ActivationTimes: "* * * * *",
+					IntervalRates: []*utils.IntervalRate{
+						{
+							IntervalStart: utils.NewDecimal(0, 0),
+							RecurrentFee:  utils.NewDecimal(1, 2),
+							FixedFee:      utils.NewDecimal(0, 0),
+						},
 					},
 				},
 			},
@@ -2759,33 +2769,35 @@ func testV1FIdxSetRatePofileRatesMoreFltrsMoreIndexing(t *testing.T) {
 
 	// update our RateProfileRates with our filters
 	rtPrf := utils.APIRateProfile{
-		Tenant:    "cgrates.org",
-		ID:        "RATE_1",
-		FilterIDs: []string{"*string:~*req.Account:1001", "fltr_for_attr"},
-		Rates: map[string]*utils.APIRate{
-			"RT_ALWAYS": {
-				ID: "RT_ALWAYS",
-				FilterIDs: []string{"fltr_for_attr", "fltr_for_attr2",
-					"*string:~*req.RequestType:*prepaid"},
-				ActivationTimes: "* * * * *",
-				IntervalRates: []*utils.APIIntervalRate{
-					{
-						IntervalStart: "0",
-						RecurrentFee:  utils.Float64Pointer(0.01),
-						FixedFee:      utils.Float64Pointer(0),
+		RateProfile: &utils.RateProfile{
+			Tenant:    "cgrates.org",
+			ID:        "RATE_1",
+			FilterIDs: []string{"*string:~*req.Account:1001", "fltr_for_attr"},
+			Rates: map[string]*utils.Rate{
+				"RT_ALWAYS": {
+					ID: "RT_ALWAYS",
+					FilterIDs: []string{"fltr_for_attr", "fltr_for_attr2",
+						"*string:~*req.RequestType:*prepaid"},
+					ActivationTimes: "* * * * *",
+					IntervalRates: []*utils.IntervalRate{
+						{
+							IntervalStart: utils.NewDecimal(0, 0),
+							RecurrentFee:  utils.NewDecimal(1, 2),
+							FixedFee:      utils.NewDecimal(0, 0),
+						},
 					},
 				},
-			},
-			"RT_CHRISTMAS": {
-				ID: "RT_CHRISTMAS",
-				FilterIDs: []string{"fltr_for_attr3",
-					"*string:~*req.RequestType:*postpaid"},
-				ActivationTimes: "* * * * *",
-				IntervalRates: []*utils.APIIntervalRate{
-					{
-						IntervalStart: "0",
-						RecurrentFee:  utils.Float64Pointer(0.01),
-						FixedFee:      utils.Float64Pointer(0),
+				"RT_CHRISTMAS": {
+					ID: "RT_CHRISTMAS",
+					FilterIDs: []string{"fltr_for_attr3",
+						"*string:~*req.RequestType:*postpaid"},
+					ActivationTimes: "* * * * *",
+					IntervalRates: []*utils.IntervalRate{
+						{
+							IntervalStart: utils.NewDecimal(0, 0),
+							RecurrentFee:  utils.NewDecimal(1, 2),
+							FixedFee:      utils.NewDecimal(0, 0),
+						},
 					},
 				},
 			},
@@ -2887,32 +2899,34 @@ func testV1FIdxRateProfileRatesMoreRatesForFilters(t *testing.T) {
 	//we will add more rates in RATE_1 for matching filters and also
 	// another RateProfile with new rates
 	rtPrf := utils.APIRateProfile{
-		Tenant:    "cgrates.org",
-		ID:        "RATE_1",
-		FilterIDs: []string{"*string:~*req.Account:1001", "fltr_for_attr"},
-		Rates: map[string]*utils.APIRate{
-			"RT_WEEKEND": {
-				ID: "RT_WEEKEND",
-				FilterIDs: []string{"fltr_for_attr3", "fltr_for_attr2",
-					"*string:~*req.RequestType:*postpaid"},
-				ActivationTimes: "* * * * *",
-				IntervalRates: []*utils.APIIntervalRate{
-					{
-						IntervalStart: "0",
-						RecurrentFee:  utils.Float64Pointer(0.1),
-						FixedFee:      utils.Float64Pointer(0),
+		RateProfile: &utils.RateProfile{
+			Tenant:    "cgrates.org",
+			ID:        "RATE_1",
+			FilterIDs: []string{"*string:~*req.Account:1001", "fltr_for_attr"},
+			Rates: map[string]*utils.Rate{
+				"RT_WEEKEND": {
+					ID: "RT_WEEKEND",
+					FilterIDs: []string{"fltr_for_attr3", "fltr_for_attr2",
+						"*string:~*req.RequestType:*postpaid"},
+					ActivationTimes: "* * * * *",
+					IntervalRates: []*utils.IntervalRate{
+						{
+							IntervalStart: utils.NewDecimal(0, 0),
+							RecurrentFee:  utils.NewDecimal(1, 1),
+							FixedFee:      utils.NewDecimal(0, 0),
+						},
 					},
 				},
-			},
-			"RT_GOLDEN_HOUR": {
-				ID:              "RT_GOLDEN_HOUR",
-				FilterIDs:       []string{"fltr_for_attr"},
-				ActivationTimes: "* * 1 * *",
-				IntervalRates: []*utils.APIIntervalRate{
-					{
-						IntervalStart: "0",
-						RecurrentFee:  utils.Float64Pointer(0.001),
-						FixedFee:      utils.Float64Pointer(0),
+				"RT_GOLDEN_HOUR": {
+					ID:              "RT_GOLDEN_HOUR",
+					FilterIDs:       []string{"fltr_for_attr"},
+					ActivationTimes: "* * * * *",
+					IntervalRates: []*utils.IntervalRate{
+						{
+							IntervalStart: utils.NewDecimal(0, 0),
+							RecurrentFee:  utils.NewDecimal(1, 3),
+							FixedFee:      utils.NewDecimal(0, 0),
+						},
 					},
 				},
 			},
@@ -2926,32 +2940,34 @@ func testV1FIdxRateProfileRatesMoreRatesForFilters(t *testing.T) {
 		t.Errorf("UNexpected reply returne")
 	}
 	rtPrf2 := utils.APIRateProfile{
-		Tenant:    "cgrates.org",
-		ID:        "RATE_2",
-		FilterIDs: []string{"*string:~*req.Account:1007", "fltr_for_attr"},
-		Rates: map[string]*utils.APIRate{
-			"RT_CHRISTMAS_2": {
-				ID: "RT_CHRISTMAS_2",
-				FilterIDs: []string{"fltr_for_attr3", "fltr_for_attr2",
-					"*string:~*req.RequestType:*postpaid"},
-				ActivationTimes: "* * * * *",
-				IntervalRates: []*utils.APIIntervalRate{
-					{
-						IntervalStart: "0",
-						RecurrentFee:  utils.Float64Pointer(0.1),
-						FixedFee:      utils.Float64Pointer(0),
+		RateProfile: &utils.RateProfile{
+			Tenant:    "cgrates.org",
+			ID:        "RATE_2",
+			FilterIDs: []string{"*string:~*req.Account:1007", "fltr_for_attr"},
+			Rates: map[string]*utils.Rate{
+				"RT_CHRISTMAS_2": {
+					ID: "RT_CHRISTMAS_2",
+					FilterIDs: []string{"fltr_for_attr3", "fltr_for_attr2",
+						"*string:~*req.RequestType:*postpaid"},
+					ActivationTimes: "* * * * *",
+					IntervalRates: []*utils.IntervalRate{
+						{
+							IntervalStart: utils.NewDecimal(0, 0),
+							RecurrentFee:  utils.NewDecimal(1, 1),
+							FixedFee:      utils.NewDecimal(0, 0),
+						},
 					},
 				},
-			},
-			"RT_ALWAYS_2": {
-				ID:              "RT_ALWAYS_2",
-				FilterIDs:       []string{"fltr_for_attr", "fltr_for_attr2"},
-				ActivationTimes: "* * 1 * *",
-				IntervalRates: []*utils.APIIntervalRate{
-					{
-						IntervalStart: "0",
-						RecurrentFee:  utils.Float64Pointer(0.001),
-						FixedFee:      utils.Float64Pointer(0),
+				"RT_ALWAYS_2": {
+					ID:              "RT_ALWAYS_2",
+					FilterIDs:       []string{"fltr_for_attr", "fltr_for_attr2"},
+					ActivationTimes: "* * 1 * *",
+					IntervalRates: []*utils.IntervalRate{
+						{
+							IntervalStart: utils.NewDecimal(0, 0),
+							RecurrentFee:  utils.NewDecimal(1, 3),
+							FixedFee:      utils.NewDecimal(0, 0),
+						},
 					},
 				},
 			},

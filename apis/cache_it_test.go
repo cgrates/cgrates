@@ -155,21 +155,31 @@ func testCacheSSetAttributeProfile(t *testing.T) {
 func testCacheSSetRateProfile(t *testing.T) {
 	var reply string
 	rtPrf := &utils.APIRateProfile{
-		ID:        "DefaultRate",
-		Tenant:    "cgrates.org",
-		FilterIDs: []string{"*string:~*req.Subject:1001"},
-		Weights:   ";10",
-		Rates: map[string]*utils.APIRate{
-			"RT_WEEK": {
-				ID:              "RT_WEEK",
-				Weights:         ";0",
-				ActivationTimes: "* * * * *",
-				IntervalRates: []*utils.APIIntervalRate{
-					{
-						IntervalStart: "0",
-						RecurrentFee:  utils.Float64Pointer(0.12),
-						Unit:          utils.Float64Pointer(float64(time.Minute)),
-						Increment:     utils.Float64Pointer(float64(time.Minute)),
+		RateProfile: &utils.RateProfile{
+			ID:        "DefaultRate",
+			Tenant:    "cgrates.org",
+			FilterIDs: []string{"*string:~*req.Subject:1001"},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				},
+			},
+			Rates: map[string]*utils.Rate{
+				"RT_WEEK": {
+					ID: "RT_WEEK",
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 10,
+						},
+					},
+					ActivationTimes: "* * * * *",
+					IntervalRates: []*utils.IntervalRate{
+						{
+							IntervalStart: utils.NewDecimal(0, 0),
+							RecurrentFee:  utils.NewDecimal(12, 2),
+							Unit:          utils.NewDecimal(int64(time.Minute), 0),
+							Increment:     utils.NewDecimal(int64(time.Minute), 0),
+						},
 					},
 				},
 			},
@@ -181,10 +191,6 @@ func testCacheSSetRateProfile(t *testing.T) {
 	}
 
 	var result *utils.RateProfile
-	expRtPrf, err := rtPrf.AsRateProfile()
-	if err != nil {
-		t.Error(err)
-	}
 	if err := chcRPC.Call(context.Background(), utils.AdminSv1GetRateProfile,
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{
@@ -193,10 +199,10 @@ func testCacheSSetRateProfile(t *testing.T) {
 			},
 		}, &result); err != nil {
 	} else {
-		expRtPrf.Compile()
+		rtPrf.Compile()
 		result.Compile()
-		if !reflect.DeepEqual(expRtPrf, result) {
-			t.Errorf("Expected %+v, received %+v", utils.ToJSON(expRtPrf), utils.ToJSON(result))
+		if !reflect.DeepEqual(rtPrf.RateProfile, result) {
+			t.Errorf("Expected %+v, received %+v", utils.ToJSON(rtPrf), utils.ToJSON(result))
 		}
 	}
 }
