@@ -49,7 +49,7 @@ var (
 		testRateSResetStorDb,
 		testRateSStartEngine,
 		testRateSRPCConn,
-		testGetRateProfileBeforeSet,
+		/* testGetRateProfileBeforeSet,
 		testGetRateProfilesBeforeSet,
 		testRateSetRateProfile,
 		testRateGetRateProfileIDs,
@@ -67,12 +67,13 @@ var (
 		testRateSetAttributeProfileBrokenReference,
 		testRateRemoveRateProfileRates,
 		testRateSetRateProfileRates,
-		testRateSetRateProfilesWithPrefix,
+		testRateSetRateProfilesWithPrefix, */
 		// here we will tests better the create,read,update and delte for the rates inside of a RateProfile
 		testRateProfileWithMultipleRates,
 		testRateProfileUpdateRates,
 		testRateProfileRemoveMultipleRates,
 		testRateProfileSetMultipleRatesInProfile,
+		testRateProfileUpdateProfile,
 		testRateSKillEngine,
 	}
 )
@@ -1751,6 +1752,109 @@ func testRateProfileSetMultipleRatesInProfile(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(result2, expectedRate) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expectedRate), utils.ToJSON(result2))
+	}
+
+}
+
+func testRateProfileUpdateProfile(t *testing.T) {
+	ratePrf := &utils.APIRateProfile{
+		RateProfile: &utils.RateProfile{
+			Tenant:    utils.CGRateSorg,
+			ID:        "FirstNoUpdate",
+			FilterIDs: []string{"*string:~*req.Account:dan"},
+			Weights: utils.DynamicWeights{
+				{
+					FilterIDs: []string{"*prefix:~*req.Destination:+33223"},
+					Weight:    20,
+				},
+				{
+					Weight: 10,
+				},
+			},
+			MinCost:         utils.NewDecimal(22, 2),
+			MaxCost:         utils.NewDecimal(500000, 6),
+			MaxCostStrategy: "*free",
+			Rates: map[string]*utils.Rate{
+				"RT_WEEK": {
+					ID: "RT_WEEK",
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 0,
+						},
+					},
+					ActivationTimes: "* * * * 1-5",
+					IntervalRates: []*utils.IntervalRate{
+						{
+							IntervalStart: utils.NewDecimal(0, 0),
+						},
+					},
+				},
+			},
+		},
+	}
+	var reply string
+	if err := rateSRPC.Call(context.Background(), utils.AdminSv1SetRateProfile,
+		ratePrf, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error(err)
+	}
+
+	var result2 *utils.RateProfile
+	if err := rateSRPC.Call(context.Background(), utils.AdminSv1GetRateProfile,
+		&utils.TenantIDWithAPIOpts{
+			TenantID: &utils.TenantID{
+				Tenant: utils.CGRateSorg,
+				ID:     "FirstNoUpdate",
+			},
+		}, &result2); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(result2, ratePrf.RateProfile) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(ratePrf.RateProfile), utils.ToJSON(result2))
+	}
+
+	// now we will update just some fields of the profile (some of them will remain the same)
+	ratePrf = &utils.APIRateProfile{
+		RateProfile: &utils.RateProfile{
+			Tenant:    utils.CGRateSorg,
+			ID:        "FirstNoUpdate",
+			FilterIDs: []string{"*string:~*req.CGRID:123sdf75623t5y"},
+			MaxCost:   utils.NewDecimal(100, 0),
+			Rates: map[string]*utils.Rate{
+				"RT_WEEK": {
+					ID: "RT_WEEK",
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 0,
+						},
+					},
+					ActivationTimes: "* * * * 1-5",
+					IntervalRates: []*utils.IntervalRate{
+						{
+							IntervalStart: utils.NewDecimal(0, 0),
+						},
+					},
+				},
+			},
+		},
+	}
+	if err := rateSRPC.Call(context.Background(), utils.AdminSv1SetRateProfile,
+		ratePrf, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error(err)
+	}
+
+	if err := rateSRPC.Call(context.Background(), utils.AdminSv1GetRateProfile,
+		&utils.TenantIDWithAPIOpts{
+			TenantID: &utils.TenantID{
+				Tenant: utils.CGRateSorg,
+				ID:     "FirstNoUpdate",
+			},
+		}, &result2); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(result2, ratePrf.RateProfile) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(ratePrf.RateProfile), utils.ToJSON(result2))
 	}
 
 }
