@@ -82,21 +82,31 @@ func testDspRPrfPing(t *testing.T) {
 
 func testDspRPrfCostForEvent(t *testing.T) {
 	rPrf := &utils.APIRateProfile{
-		ID:        "DefaultRate",
-		Tenant:    "cgrates.org",
-		FilterIDs: []string{"*string:~*req.Subject:1001"},
-		Weights:   ";10",
-		Rates: map[string]*utils.APIRate{
-			"RT_WEEK": {
-				ID:              "RT_WEEK",
-				Weights:         ";0",
-				ActivationTimes: "* * * * *",
-				IntervalRates: []*utils.APIIntervalRate{
-					{
-						IntervalStart: "0",
-						RecurrentFee:  utils.Float64Pointer(0.12),
-						Unit:          utils.Float64Pointer(float64(time.Minute)),
-						Increment:     utils.Float64Pointer(float64(time.Minute)),
+		RateProfile: &utils.RateProfile{
+			ID:        "DefaultRate",
+			Tenant:    "cgrates.org",
+			FilterIDs: []string{"*string:~*req.Subject:1001"},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 0,
+				},
+			},
+			Rates: map[string]*utils.Rate{
+				"RT_WEEK": {
+					ID: "RT_WEEK",
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 0,
+						},
+					},
+					ActivationTimes: "* * * * *",
+					IntervalRates: []*utils.IntervalRate{
+						{
+							IntervalStart: utils.NewDecimal(0, 0),
+							RecurrentFee:  utils.NewDecimal(12, 1),
+							Unit:          utils.NewDecimal(int64(time.Minute), 0),
+							Increment:     utils.NewDecimal(int64(time.Minute), 0),
+						},
 					},
 				},
 			},
@@ -154,20 +164,30 @@ func testDspRPrfCostForEvent(t *testing.T) {
 
 func testDspRPrfCostForEventWithoutFilters(t *testing.T) {
 	rPrf := &utils.APIRateProfile{
-		ID:      "ID_RP",
-		Tenant:  "cgrates.org",
-		Weights: ";10",
-		Rates: map[string]*utils.APIRate{
-			"RT_WEEK": {
-				ID:              "RT_WEEK",
-				Weights:         ";0",
-				ActivationTimes: "* * * * *",
-				IntervalRates: []*utils.APIIntervalRate{
-					{
-						IntervalStart: "0",
-						RecurrentFee:  utils.Float64Pointer(0.25),
-						Unit:          utils.Float64Pointer(float64(time.Minute)),
-						Increment:     utils.Float64Pointer(float64(time.Second)),
+		RateProfile: &utils.RateProfile{
+			ID:     "ID_RP",
+			Tenant: "cgrates.org",
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				},
+			},
+			Rates: map[string]*utils.Rate{
+				"RT_WEEK": {
+					ID: "RT_WEEK",
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 0,
+						},
+					},
+					ActivationTimes: "* * * * *",
+					IntervalRates: []*utils.IntervalRate{
+						{
+							IntervalStart: utils.NewDecimal(0, 0),
+							RecurrentFee:  utils.NewDecimal(25, 2),
+							Unit:          utils.NewDecimal(int64(time.Minute), 0),
+							Increment:     utils.NewDecimal(int64(time.Second), 0),
+						},
 					},
 				},
 			},

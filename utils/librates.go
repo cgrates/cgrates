@@ -455,47 +455,9 @@ func (rIcr *RateSIncrement) Cost(rts map[string]*IntervalRate) (cost *decimal.Bi
 // func CompressIntervals(rtIvls []*RateSInterval) {
 // }
 
-// AsRateProfile converts APIRateProfile to RateProfile
-func (ext *APIRateProfile) AsRateProfile() (rp *RateProfile, err error) {
-	rp = &RateProfile{
-		Tenant:          ext.Tenant,
-		ID:              ext.ID,
-		FilterIDs:       ext.FilterIDs,
-		MaxCostStrategy: ext.MaxCostStrategy,
-	}
-	if ext.Weights != EmptyString {
-		if rp.Weights, err = NewDynamicWeightsFromString(ext.Weights, ";", "&"); err != nil {
-			return nil, err
-		}
-	}
-	if ext.MinCost != nil {
-		rp.MinCost = NewDecimalFromFloat64(*ext.MinCost)
-	}
-	if ext.MaxCost != nil {
-		rp.MaxCost = NewDecimalFromFloat64(*ext.MaxCost)
-	}
-	if len(ext.Rates) != 0 {
-		rp.Rates = make(map[string]*Rate)
-		for key, extRate := range ext.Rates {
-			if rp.Rates[key], err = extRate.AsRate(); err != nil {
-				return
-			}
-		}
-	}
-	err = rp.Compile()
-	return
-}
-
 type APIRateProfile struct {
-	Tenant          string
-	ID              string
-	FilterIDs       []string
-	Weights         string
-	MinCost         *float64
-	MaxCost         *float64
-	MaxCostStrategy string
-	Rates           map[string]*APIRate
-	APIOpts         map[string]interface{}
+	*RateProfile
+	APIOpts map[string]interface{}
 }
 
 // AsRate converts APIRate to Rate

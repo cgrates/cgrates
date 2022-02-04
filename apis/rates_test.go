@@ -59,13 +59,15 @@ func TestRatesGetRateProfile1(t *testing.T) {
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
 	admS := NewAdminSv1(cfg, dm, connMgr)
 	ext := &utils.APIRateProfile{
-		ID:        "DefaultRate",
-		Tenant:    "cgrates.org",
-		FilterIDs: []string{"*string:~*req.Subject:1001"},
-		Rates: map[string]*utils.APIRate{
-			"RT_WEEK": {
-				ID:              "RT_WEEK",
-				ActivationTimes: "* * * * *",
+		RateProfile: &utils.RateProfile{
+			ID:        "DefaultRate",
+			Tenant:    "cgrates.org",
+			FilterIDs: []string{"*string:~*req.Subject:1001"},
+			Rates: map[string]*utils.Rate{
+				"RT_WEEK": {
+					ID:              "RT_WEEK",
+					ActivationTimes: "* * * * *",
+				},
 			},
 		},
 	}
@@ -142,13 +144,15 @@ func TestRatesGetRateProfileIDs(t *testing.T) {
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
 	admS := NewAdminSv1(cfg, dm, connMgr)
 	ext := &utils.APIRateProfile{
-		ID:        "RP1",
-		Tenant:    "cgrates.org",
-		FilterIDs: []string{"*string:~*req.Subject:1001"},
-		Rates: map[string]*utils.APIRate{
-			"RT_WEEK": {
-				ID:              "RT_WEEK",
-				ActivationTimes: "* * * * *",
+		RateProfile: &utils.RateProfile{
+			ID:        "RP1",
+			Tenant:    "cgrates.org",
+			FilterIDs: []string{"*string:~*req.Subject:1001"},
+			Rates: map[string]*utils.Rate{
+				"RT_WEEK": {
+					ID:              "RT_WEEK",
+					ActivationTimes: "* * * * *",
+				},
 			},
 		},
 	}
@@ -179,13 +183,15 @@ func TestRatesGetRateProfile2(t *testing.T) {
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
 	admS := NewAdminSv1(cfg, dm, connMgr)
 	ext := &utils.APIRateProfile{
-		ID:        "RP2",
-		Tenant:    "tenant",
-		FilterIDs: []string{"*string:~*req.Subject:1001"},
-		Rates: map[string]*utils.APIRate{
-			"RT_WEEK": {
-				ID:              "RT_WEEK",
-				ActivationTimes: "* * * * *",
+		RateProfile: &utils.RateProfile{
+			ID:        "RP2",
+			Tenant:    "tenant",
+			FilterIDs: []string{"*string:~*req.Subject:1001"},
+			Rates: map[string]*utils.Rate{
+				"RT_WEEK": {
+					ID:              "RT_WEEK",
+					ActivationTimes: "* * * * *",
+				},
 			},
 		},
 	}
@@ -258,17 +264,18 @@ func TestRatesGetRateProfileCount(t *testing.T) {
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
 	admS := NewAdminSv1(cfg, dm, connMgr)
 	ext := &utils.APIRateProfile{
-		ID:        "RP3",
-		Tenant:    "tenant",
-		FilterIDs: []string{"*string:~*req.Subject:1001"},
-		Rates: map[string]*utils.APIRate{
-			"RT_WEEK": {
-				ID:              "RT_WEEK",
-				ActivationTimes: "* * * * *",
+		RateProfile: &utils.RateProfile{
+			ID:        "RP3",
+			Tenant:    "tenant",
+			FilterIDs: []string{"*string:~*req.Subject:1001"},
+			Rates: map[string]*utils.Rate{
+				"RT_WEEK": {
+					ID:              "RT_WEEK",
+					ActivationTimes: "* * * * *",
+				},
 			},
 		},
 	}
-
 	var rtRply string
 	err := admS.SetRateProfile(context.Background(), ext, &rtRply)
 	if err != nil {
@@ -297,13 +304,15 @@ func TestRatesGetRateProfileCountEmptyTenant(t *testing.T) {
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
 	admS := NewAdminSv1(cfg, dm, connMgr)
 	ext := &utils.APIRateProfile{
-		ID:        "RP4",
-		Tenant:    "cgrates.org",
-		FilterIDs: []string{"*string:~*req.Subject:1001"},
-		Rates: map[string]*utils.APIRate{
-			"RT_WEEK": {
-				ID:              "RT_WEEK",
-				ActivationTimes: "* * * * *",
+		RateProfile: &utils.RateProfile{
+			ID:        "RP4",
+			Tenant:    "cgrates.org",
+			FilterIDs: []string{"*string:~*req.Subject:1001"},
+			Rates: map[string]*utils.Rate{
+				"RT_WEEK": {
+					ID:              "RT_WEEK",
+					ActivationTimes: "* * * * *",
+				},
 			},
 		},
 	}
@@ -370,12 +379,14 @@ func TestRatesSetRateProfileMissingStructFieldError(t *testing.T) {
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
 	admS := NewAdminSv1(cfg, dm, connMgr)
 	ext := &utils.APIRateProfile{
-		Tenant:    "cgrates.org",
-		FilterIDs: []string{"*string:~*req.Subject:1001"},
-		Rates: map[string]*utils.APIRate{
-			"RT_WEEK": {
-				ID:              "RT_WEEK",
-				ActivationTimes: "* * * * *",
+		RateProfile: &utils.RateProfile{
+			Tenant:    "cgrates.org",
+			FilterIDs: []string{"*string:~*req.Subject:1001"},
+			Rates: map[string]*utils.Rate{
+				"RT_WEEK": {
+					ID:              "RT_WEEK",
+					ActivationTimes: "* * * * *",
+				},
 			},
 		},
 	}
@@ -396,12 +407,14 @@ func TestRatesSetRateProfileEmptyTenant(t *testing.T) {
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
 	admS := NewAdminSv1(cfg, dm, connMgr)
 	ext := &utils.APIRateProfile{
-		ID:        "2",
-		FilterIDs: []string{"*string:~*req.Subject:1001"},
-		Rates: map[string]*utils.APIRate{
-			"RT_WEEK": {
-				ID:              "RT_WEEK",
-				ActivationTimes: "* * * * *",
+		RateProfile: &utils.RateProfile{
+			ID:        "2",
+			FilterIDs: []string{"*string:~*req.Subject:1001"},
+			Rates: map[string]*utils.Rate{
+				"RT_WEEK": {
+					ID:              "RT_WEEK",
+					ActivationTimes: "* * * * *",
+				},
 			},
 		},
 	}
@@ -457,15 +470,19 @@ func TestRatesSetRateProfileError(t *testing.T) {
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
 	admS := NewAdminSv1(cfg, dm, connMgr)
 	ext := &utils.APIRateProfile{
-		ID:        "RP6",
-		FilterIDs: []string{"*string:~*req.Subject:1001"},
-		Rates: map[string]*utils.APIRate{
-			"RT_WEEK": {
-				ID:              "RT_WEEK",
-				ActivationTimes: "* * * * *",
+		RateProfile: &utils.RateProfile{
+			ID:        "RP6",
+			Tenant:    "cgrates.org",
+			FilterIDs: []string{"*string:~*req.Subject:1001"},
+			Rates: map[string]*utils.Rate{
+				"RT_WEEK": {
+					ID:              "RT_WEEK",
+					ActivationTimes: "* * * * *",
+				},
 			},
 		},
 	}
+
 	var rtRply string
 	err := admS.SetRateProfile(context.Background(), ext, &rtRply)
 	if err != nil {
@@ -518,16 +535,19 @@ func TestRatesSetRateProfile(t *testing.T) {
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
 	admS := NewAdminSv1(cfg, dm, connMgr)
 	ext := &utils.APIRateProfile{
-		ID:        "2",
-		Tenant:    "tenant",
-		FilterIDs: []string{"*string:~*req.Subject:1001"},
-		Rates: map[string]*utils.APIRate{
-			"RT_WEEK": {
-				ID:              "RT_WEEK",
-				ActivationTimes: "* * * * *",
+		RateProfile: &utils.RateProfile{
+			ID:        "2",
+			Tenant:    "tenant",
+			FilterIDs: []string{"*string:~*req.Subject:1001"},
+			Rates: map[string]*utils.Rate{
+				"RT_WEEK": {
+					ID:              "RT_WEEK",
+					ActivationTimes: "* * * * *",
+				},
 			},
 		},
 	}
+
 	var rtRply string
 	err := admS.SetRateProfile(context.Background(), ext, &rtRply)
 	if err != nil {
@@ -626,13 +646,15 @@ func TestRatesRemoveRateProfile(t *testing.T) {
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
 	admS := NewAdminSv1(cfg, dm, connMgr)
 	ext := &utils.APIRateProfile{
-		ID:        "2",
-		Tenant:    "tenant",
-		FilterIDs: []string{"*string:~*req.Subject:1001"},
-		Rates: map[string]*utils.APIRate{
-			"RT_WEEK": {
-				ID:              "RT_WEEK",
-				ActivationTimes: "* * * * *",
+		RateProfile: &utils.RateProfile{
+			ID:        "2",
+			Tenant:    "tenant",
+			FilterIDs: []string{"*string:~*req.Subject:1001"},
+			Rates: map[string]*utils.Rate{
+				"RT_WEEK": {
+					ID:              "RT_WEEK",
+					ActivationTimes: "* * * * *",
+				},
 			},
 		},
 	}
@@ -679,16 +701,19 @@ func TestRatesRemoveRateProfileMissing(t *testing.T) {
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
 	admS := NewAdminSv1(cfg, dm, connMgr)
 	ext := &utils.APIRateProfile{
-		ID:        "2",
-		Tenant:    "tenant",
-		FilterIDs: []string{"*string:~*req.Subject:1001"},
-		Rates: map[string]*utils.APIRate{
-			"RT_WEEK": {
-				ID:              "RT_WEEK",
-				ActivationTimes: "* * * * *",
+		RateProfile: &utils.RateProfile{
+			ID:        "2",
+			Tenant:    "tenant",
+			FilterIDs: []string{"*string:~*req.Subject:1001"},
+			Rates: map[string]*utils.Rate{
+				"RT_WEEK": {
+					ID:              "RT_WEEK",
+					ActivationTimes: "* * * * *",
+				},
 			},
 		},
 	}
+
 	var rtRply string
 	err := admS.SetRateProfile(context.Background(), ext, &rtRply)
 	if err != nil {
@@ -719,12 +744,14 @@ func TestRatesRemoveRateProfileEmptyTenant(t *testing.T) {
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
 	admS := NewAdminSv1(cfg, dm, connMgr)
 	ext := &utils.APIRateProfile{
-		ID:        "2",
-		FilterIDs: []string{"*string:~*req.Subject:1001"},
-		Rates: map[string]*utils.APIRate{
-			"RT_WEEK": {
-				ID:              "RT_WEEK",
-				ActivationTimes: "* * * * *",
+		RateProfile: &utils.RateProfile{
+			ID:        "2",
+			FilterIDs: []string{"*string:~*req.Subject:1001"},
+			Rates: map[string]*utils.Rate{
+				"RT_WEEK": {
+					ID:              "RT_WEEK",
+					ActivationTimes: "* * * * *",
+				},
 			},
 		},
 	}
@@ -769,16 +796,19 @@ func TestRatesSetGetRateProfileError(t *testing.T) {
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
 	admS := NewAdminSv1(cfg, dm, connMgr)
 	ext := &utils.APIRateProfile{
-		ID:        "2",
-		Tenant:    "tenant",
-		FilterIDs: []string{"*string:~*req.Subject:1001"},
-		Rates: map[string]*utils.APIRate{
-			"RT_WEEK": {
-				ID:              "RT_WEEK",
-				ActivationTimes: "* * * * *",
+		RateProfile: &utils.RateProfile{
+			ID:        "2",
+			Tenant:    "tenant",
+			FilterIDs: []string{"*string:~*req.Subject:1001"},
+			Rates: map[string]*utils.Rate{
+				"RT_WEEK": {
+					ID:              "RT_WEEK",
+					ActivationTimes: "* * * * *",
+				},
 			},
 		},
 	}
+
 	expected := "SERVER_ERROR: NOT_IMPLEMENTED"
 	var rtRply string
 	err := admS.SetRateProfile(context.Background(), ext, &rtRply)
@@ -808,16 +838,19 @@ func TestRatesSetRemoveRateProfileError(t *testing.T) {
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
 	admS := NewAdminSv1(cfg, dm, connMgr)
 	ext := &utils.APIRateProfile{
-		ID:        "2",
-		Tenant:    "tenant",
-		FilterIDs: []string{"*string:~*req.Subject:1001"},
-		Rates: map[string]*utils.APIRate{
-			"RT_WEEK": {
-				ID:              "RT_WEEK",
-				ActivationTimes: "* * * * *",
+		RateProfile: &utils.RateProfile{
+			ID:        "2",
+			Tenant:    "tenant",
+			FilterIDs: []string{"*string:~*req.Subject:1001"},
+			Rates: map[string]*utils.Rate{
+				"RT_WEEK": {
+					ID:              "RT_WEEK",
+					ActivationTimes: "* * * * *",
+				},
 			},
 		},
 	}
+
 	expected := "SERVER_ERROR: NOT_IMPLEMENTED"
 	var rtRply string
 	err := admS.SetRateProfile(context.Background(), ext, &rtRply)
@@ -851,42 +884,6 @@ func TestRatesSetRemoveRateProfileError(t *testing.T) {
 	}
 }
 
-func TestRatesSetRateProfileError2(t *testing.T) {
-	engine.Cache.Clear(nil)
-	cfg := config.NewDefaultCGRConfig()
-	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	connMgr := engine.NewConnManager(cfg)
-	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	admS := NewAdminSv1(cfg, dm, connMgr)
-	ext := &utils.APIRateProfile{
-		ID:        "2",
-		Tenant:    "tenant",
-		FilterIDs: []string{"*string:~*req.Subject:1001"},
-		Rates: map[string]*utils.APIRate{
-			"RT_WEEK": {
-				ID:              "RT_WEEK",
-				ActivationTimes: "* * * * *",
-				IntervalRates: []*utils.APIIntervalRate{
-					{
-						IntervalStart: "error",
-						FixedFee:      nil,
-						RecurrentFee:  nil,
-						Unit:          nil,
-						Increment:     nil,
-					},
-				},
-			},
-		},
-	}
-	expected := "can't convert <error> to decimal"
-	var rtRply string
-	err := admS.SetRateProfile(context.Background(), ext, &rtRply)
-	if err == nil || err.Error() != expected {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
-	}
-}
-
 func TestRatesSetRateProfileRates(t *testing.T) {
 	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
@@ -896,13 +893,15 @@ func TestRatesSetRateProfileRates(t *testing.T) {
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
 	admS := NewAdminSv1(cfg, dm, connMgr)
 	ext1 := &utils.APIRateProfile{
-		ID:        "2",
-		Tenant:    "tenant",
-		FilterIDs: []string{"*string:~*req.Subject:1001"},
-		Rates: map[string]*utils.APIRate{
-			"RT_WEEK": {
-				ID:              "RT_WEEK",
-				ActivationTimes: "* * * * *",
+		RateProfile: &utils.RateProfile{
+			ID:        "2",
+			Tenant:    "tenant",
+			FilterIDs: []string{"*string:~*req.Subject:1001"},
+			Rates: map[string]*utils.Rate{
+				"RT_WEEK": {
+					ID:              "RT_WEEK",
+					ActivationTimes: "* * * * *",
+				},
 			},
 		},
 	}
@@ -912,13 +911,15 @@ func TestRatesSetRateProfileRates(t *testing.T) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
 	ext2 := &utils.APIRateProfile{
-		ID:        "2",
-		Tenant:    "tenant",
-		FilterIDs: []string{"*string:~*req.Subject:1001"},
-		Rates: map[string]*utils.APIRate{
-			"RT_WEEK": {
-				ID:              "RT_WEEK",
-				ActivationTimes: "* * * * *",
+		RateProfile: &utils.RateProfile{
+			ID:        "2",
+			Tenant:    "tenant",
+			FilterIDs: []string{"*string:~*req.Subject:1001"},
+			Rates: map[string]*utils.Rate{
+				"RT_WEEK": {
+					ID:              "RT_WEEK",
+					ActivationTimes: "* * * * *",
+				},
 			},
 		},
 	}
@@ -967,12 +968,14 @@ func TestRatesSetRateProfileRatesNoTenant(t *testing.T) {
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
 	admS := NewAdminSv1(cfg, dm, connMgr)
 	ext1 := &utils.APIRateProfile{
-		ID:        "2",
-		FilterIDs: []string{"*string:~*req.Subject:1001"},
-		Rates: map[string]*utils.APIRate{
-			"RT_WEEK": {
-				ID:              "RT_WEEK",
-				ActivationTimes: "* * * * *",
+		RateProfile: &utils.RateProfile{
+			ID:        "2",
+			FilterIDs: []string{"*string:~*req.Subject:1001"},
+			Rates: map[string]*utils.Rate{
+				"RT_WEEK": {
+					ID:              "RT_WEEK",
+					ActivationTimes: "* * * * *",
+				},
 			},
 		},
 	}
@@ -982,12 +985,14 @@ func TestRatesSetRateProfileRatesNoTenant(t *testing.T) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
 	ext2 := &utils.APIRateProfile{
-		ID:        "2",
-		FilterIDs: []string{"*string:~*req.Subject:1001"},
-		Rates: map[string]*utils.APIRate{
-			"RT_WEEK": {
-				ID:              "RT_WEEK",
-				ActivationTimes: "* * * * *",
+		RateProfile: &utils.RateProfile{
+			ID:        "2",
+			FilterIDs: []string{"*string:~*req.Subject:1001"},
+			Rates: map[string]*utils.Rate{
+				"RT_WEEK": {
+					ID:              "RT_WEEK",
+					ActivationTimes: "* * * * *",
+				},
 			},
 		},
 	}
@@ -1035,11 +1040,13 @@ func TestRatesSetRateProfileRatesMissingField(t *testing.T) {
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
 	admS := NewAdminSv1(cfg, dm, connMgr)
 	ext2 := &utils.APIRateProfile{
-		FilterIDs: []string{"*string:~*req.Subject:1001"},
-		Rates: map[string]*utils.APIRate{
-			"RT_WEEK": {
-				ID:              "RT_WEEK",
-				ActivationTimes: "* * * * *",
+		RateProfile: &utils.RateProfile{
+			FilterIDs: []string{"*string:~*req.Subject:1001"},
+			Rates: map[string]*utils.Rate{
+				"RT_WEEK": {
+					ID:              "RT_WEEK",
+					ActivationTimes: "* * * * *",
+				},
 			},
 		},
 	}
@@ -1064,13 +1071,15 @@ func TestRatesSetRateProfileRatesErr(t *testing.T) {
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
 	admS := NewAdminSv1(cfg, dm, connMgr)
 	ext2 := &utils.APIRateProfile{
-		ID:        "2",
-		Tenant:    "cgrates.org",
-		FilterIDs: []string{"*string:~*req.Subject:1001"},
-		Rates: map[string]*utils.APIRate{
-			"RT_WEEK": {
-				ID:              "RT_WEEK",
-				ActivationTimes: "* * * * *",
+		RateProfile: &utils.RateProfile{
+			ID:        "2",
+			Tenant:    "cgrates.org",
+			FilterIDs: []string{"*string:~*req.Subject:1001"},
+			Rates: map[string]*utils.Rate{
+				"RT_WEEK": {
+					ID:              "RT_WEEK",
+					ActivationTimes: "* * * * *",
+				},
 			},
 		},
 	}
@@ -1086,42 +1095,6 @@ func TestRatesSetRateProfileRatesErr(t *testing.T) {
 
 }
 
-func TestRatesSetRateProfileRatesErr2(t *testing.T) {
-	engine.Cache.Clear(nil)
-	cfg := config.NewDefaultCGRConfig()
-	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	connMgr := engine.NewConnManager(cfg)
-	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	admS := NewAdminSv1(cfg, dm, connMgr)
-	ext2 := &utils.APIRateProfile{
-		ID:        "2",
-		Tenant:    "tenant",
-		FilterIDs: []string{"*string:~*req.Subject:1001"},
-		Rates: map[string]*utils.APIRate{
-			"RT_WEEK": {
-				ID:              "RT_WEEK",
-				ActivationTimes: "* * * * *",
-				IntervalRates: []*utils.APIIntervalRate{
-					{
-						IntervalStart: "error",
-					},
-				},
-			},
-		},
-	}
-	var rtRply string
-	expected := "can't convert <error> to decimal"
-	err := admS.SetRateProfileRates(context.Background(), ext2, &rtRply)
-	if err == nil || err.Error() != expected {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
-	} else if rtRply != utils.EmptyString {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ToJSON(expected), utils.ToJSON(rtRply))
-	}
-
-}
-
-/*
 func TestRatesRemoveRateProfileRate(t *testing.T) {
 	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
@@ -1131,12 +1104,14 @@ func TestRatesRemoveRateProfileRate(t *testing.T) {
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
 	admS := NewAdminSv1(cfg, dm, connMgr)
 	ext1 := &utils.APIRateProfile{
-		ID:        "2",
-		FilterIDs: []string{"*string:~*req.Subject:1001"},
-		Rates: map[string]*utils.APIRate{
-			"RT_WEEK": {
-				ID:              "RT_WEEK",
-				ActivationTimes: "* * * * *",
+		RateProfile: &utils.RateProfile{
+			ID:        "2",
+			FilterIDs: []string{"*string:~*req.Subject:1001"},
+			Rates: map[string]*utils.Rate{
+				"RT_WEEK": {
+					ID:              "RT_WEEK",
+					ActivationTimes: "* * * * *",
+				},
 			},
 		},
 	}
@@ -1146,12 +1121,14 @@ func TestRatesRemoveRateProfileRate(t *testing.T) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
 	ext2 := &utils.APIRateProfile{
-		ID:        "2",
-		FilterIDs: []string{"*string:~*req.Subject:1001"},
-		Rates: map[string]*utils.APIRate{
-			"RT_WEEK": {
-				ID:              "RT_WEEK",
-				ActivationTimes: "* * * * *",
+		RateProfile: &utils.RateProfile{
+			ID:        "2",
+			FilterIDs: []string{"*string:~*req.Subject:1001"},
+			Rates: map[string]*utils.Rate{
+				"RT_WEEK": {
+					ID:              "RT_WEEK",
+					ActivationTimes: "* * * * *",
+				},
 			},
 		},
 	}
@@ -1197,7 +1174,6 @@ func TestRatesRemoveRateProfileRate(t *testing.T) {
 	if !reflect.DeepEqual(utils.ToJSON(expected2), utils.ToJSON(&result)) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ToJSON(expected2), utils.ToJSON(&result))
 	}
-
 }
 
 func TestRatesRemoveRateProfileRateEmptyTenant(t *testing.T) {
@@ -1209,12 +1185,14 @@ func TestRatesRemoveRateProfileRateEmptyTenant(t *testing.T) {
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
 	admS := NewAdminSv1(cfg, dm, connMgr)
 	ext1 := &utils.APIRateProfile{
-		ID:        "2",
-		FilterIDs: []string{"*string:~*req.Subject:1001"},
-		Rates: map[string]*utils.APIRate{
-			"RT_WEEK": {
-				ID:              "RT_WEEK",
-				ActivationTimes: "* * * * *",
+		RateProfile: &utils.RateProfile{
+			ID:        "2",
+			FilterIDs: []string{"*string:~*req.Subject:1001"},
+			Rates: map[string]*utils.Rate{
+				"RT_WEEK": {
+					ID:              "RT_WEEK",
+					ActivationTimes: "* * * * *",
+				},
 			},
 		},
 	}
@@ -1224,12 +1202,14 @@ func TestRatesRemoveRateProfileRateEmptyTenant(t *testing.T) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
 	ext2 := &utils.APIRateProfile{
-		ID:        "2",
-		FilterIDs: []string{"*string:~*req.Subject:1001"},
-		Rates: map[string]*utils.APIRate{
-			"RT_WEEK": {
-				ID:              "RT_WEEK",
-				ActivationTimes: "* * * * *",
+		RateProfile: &utils.RateProfile{
+			ID:        "2",
+			FilterIDs: []string{"*string:~*req.Subject:1001"},
+			Rates: map[string]*utils.Rate{
+				"RT_WEEK": {
+					ID:              "RT_WEEK",
+					ActivationTimes: "* * * * *",
+				},
 			},
 		},
 	}
@@ -1275,7 +1255,6 @@ func TestRatesRemoveRateProfileRateEmptyTenant(t *testing.T) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ToJSON(expected2), utils.ToJSON(&result))
 	}
 }
-*/
 
 func TestRatesRemoveRateProfileRateError(t *testing.T) {
 	engine.Cache.Clear(nil)
@@ -1342,13 +1321,15 @@ func TestRatesSetRateProfileErrorSetLoadIDs(t *testing.T) {
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
 	admS := NewAdminSv1(cfg, dm, connMgr)
 	ext := &utils.APIRateProfile{
-		ID:        "2",
-		Tenant:    "tenant",
-		FilterIDs: []string{"*string:~*req.Subject:1001"},
-		Rates: map[string]*utils.APIRate{
-			"RT_WEEK": {
-				ID:              "RT_WEEK",
-				ActivationTimes: "* * * * *",
+		RateProfile: &utils.RateProfile{
+			ID:        "2",
+			Tenant:    "tenant",
+			FilterIDs: []string{"*string:~*req.Subject:1001"},
+			Rates: map[string]*utils.Rate{
+				"RT_WEEK": {
+					ID:              "RT_WEEK",
+					ActivationTimes: "* * * * *",
+				},
 			},
 		},
 	}
@@ -1388,13 +1369,15 @@ func TestRatesSetRateProfileRatesErrorSetLoadIDs(t *testing.T) {
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
 	admS := NewAdminSv1(cfg, dm, connMgr)
 	ext := &utils.APIRateProfile{
-		ID:        "2",
-		Tenant:    "tenant",
-		FilterIDs: []string{"*string:~*req.Subject:1001"},
-		Rates: map[string]*utils.APIRate{
-			"RT_WEEK": {
-				ID:              "RT_WEEK",
-				ActivationTimes: "* * * * *",
+		RateProfile: &utils.RateProfile{
+			ID:        "2",
+			Tenant:    "tenant",
+			FilterIDs: []string{"*string:~*req.Subject:1001"},
+			Rates: map[string]*utils.Rate{
+				"RT_WEEK": {
+					ID:              "RT_WEEK",
+					ActivationTimes: "* * * * *",
+				},
 			},
 		},
 	}
@@ -1517,13 +1500,15 @@ func TestRatesSetRateProfileErrorCache(t *testing.T) {
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
 	admS := NewAdminSv1(cfg, dm, connMgr)
 	ext := &utils.APIRateProfile{
-		ID:        "2",
-		Tenant:    "tenant",
-		FilterIDs: []string{"*string:~*req.Subject:1001"},
-		Rates: map[string]*utils.APIRate{
-			"RT_WEEK": {
-				ID:              "RT_WEEK",
-				ActivationTimes: "* * * * *",
+		RateProfile: &utils.RateProfile{
+			ID:        "2",
+			Tenant:    "tenant",
+			FilterIDs: []string{"*string:~*req.Subject:1001"},
+			Rates: map[string]*utils.Rate{
+				"RT_WEEK": {
+					ID:              "RT_WEEK",
+					ActivationTimes: "* * * * *",
+				},
 			},
 		},
 		APIOpts: map[string]interface{}{
@@ -1571,13 +1556,15 @@ func TestRatesSetRateProfileRatesErrorCache(t *testing.T) {
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
 	admS := NewAdminSv1(cfg, dm, connMgr)
 	ext := &utils.APIRateProfile{
-		ID:        "2",
-		Tenant:    "tenant",
-		FilterIDs: []string{"*string:~*req.Subject:1001"},
-		Rates: map[string]*utils.APIRate{
-			"RT_WEEK": {
-				ID:              "RT_WEEK",
-				ActivationTimes: "* * * * *",
+		RateProfile: &utils.RateProfile{
+			ID:        "2",
+			Tenant:    "tenant",
+			FilterIDs: []string{"*string:~*req.Subject:1001"},
+			Rates: map[string]*utils.Rate{
+				"RT_WEEK": {
+					ID:              "RT_WEEK",
+					ActivationTimes: "* * * * *",
+				},
 			},
 		},
 	}
