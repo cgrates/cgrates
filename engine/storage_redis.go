@@ -752,8 +752,12 @@ func (rs *RedisStorage) RemoveRateProfileDrv(ctx *context.Context, tenant, id st
 	if rateIDs != nil {
 		tntID := utils.ConcatenatedKey(tenant, id)
 		for _, rateID := range *rateIDs {
-			return rs.Cmd(nil, redisHDEL, utils.RateProfilePrefix+tntID, utils.Rates+utils.InInFieldSep+rateID)
+			err = rs.Cmd(nil, redisHDEL, utils.RateProfilePrefix+tntID, utils.Rates+utils.InInFieldSep+rateID)
+			if err != nil {
+				return
+			}
 		}
+		return
 	}
 	return rs.Cmd(nil, redisDEL, utils.RateProfilePrefix+utils.ConcatenatedKey(tenant, id))
 }

@@ -941,7 +941,6 @@ func NewRateProfileFromMapDataDBMap(tnt, id string, mapRP map[string]interface{}
 		}
 	}
 	for keyID, rateStr := range mapRP {
-		Logger.Crit(fmt.Sprintf("rateStr: %v", ToJSON(rateStr)))
 		if strings.HasPrefix(keyID, Rates+ConcatenatedKeySep) {
 			var rate *Rate
 			if err := ms.Unmarshal([]byte(IfaceAsString(rateStr)), &rate); err != nil {

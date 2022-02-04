@@ -1241,6 +1241,9 @@ func (ms *MongoStorage) RemoveRateProfileDrv(ctx *context.Context, tenant, id st
 		return ms.query(ctx, func(sctx mongo.SessionContext) (err error) {
 			for _, rateID := range *rateIDs {
 				_, err = ms.getCol(ColRpp).UpdateOne(ctx, bson.M{"tenant": tenant, "id": id}, bson.A{bson.M{"$unset": utils.Rates + utils.InInFieldSep + rateID}})
+				if err != nil {
+					return
+				}
 			}
 			return
 		})
