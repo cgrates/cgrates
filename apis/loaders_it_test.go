@@ -1107,8 +1107,12 @@ func testLoadersGetStatQueueProfiles(t *testing.T) {
 			ThresholdIDs: []string{"Th1", "Th2"},
 			Blocker:      true,
 			Stored:       true,
-			Weight:       20,
-			MinItems:     2,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
+			MinItems: 2,
 		},
 		{
 			Tenant:      "cgrates.org",
@@ -1139,8 +1143,12 @@ func testLoadersGetStatQueueProfiles(t *testing.T) {
 			ThresholdIDs: []string{"Th"},
 			Blocker:      true,
 			Stored:       true,
-			Weight:       20,
-			MinItems:     2,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
+			MinItems: 2,
 		},
 		{
 			Tenant:      "cgrates.org",
@@ -1159,16 +1167,15 @@ func testLoadersGetStatQueueProfiles(t *testing.T) {
 			ThresholdIDs: []string{"Th1", "Th2"},
 			Blocker:      true,
 			Stored:       true,
-			Weight:       20,
-			MinItems:     2,
-		},
-		Stored: true,
-		Weights: utils.DynamicWeights{
-			{
-				Weight: 30,
+
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
 			},
+
+			MinItems: 2,
 		},
-		ThresholdIDs: []string{utils.MetaNone},
 	}
 	var sqPrfs []*engine.StatQueueProfile
 	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetStatQueueProfiles,

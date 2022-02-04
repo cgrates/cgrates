@@ -122,7 +122,7 @@ func testHTTPExportEvent(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "voiceEvent",
 			Event: map[string]interface{}{
-				utils.MetaOriginID: utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()),
+
 				utils.ToR:          utils.MetaVoice,
 				utils.OriginID:     "dsafdsaf",
 				utils.OriginHost:   "192.168.1.1",
@@ -141,7 +141,8 @@ func testHTTPExportEvent(t *testing.T) {
 					"extra2": "val_extra2", "extra3": "val_extra3"},
 			},
 			APIOpts: map[string]interface{}{
-				utils.RunID: utils.MetaDefault,
+				utils.MetaOriginID: utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()),
+				utils.RunID:        utils.MetaDefault,
 			},
 		},
 	}
@@ -152,7 +153,7 @@ func testHTTPExportEvent(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "dataEvent",
 			Event: map[string]interface{}{
-				utils.MetaOriginID: utils.Sha1("abcdef", time.Unix(1383813745, 0).UTC().String()),
+
 				utils.ToR:          utils.MetaData,
 				utils.OriginID:     "abcdef",
 				utils.OriginHost:   "192.168.1.1",
@@ -171,7 +172,8 @@ func testHTTPExportEvent(t *testing.T) {
 					"extra2": "val_extra2", "extra3": "val_extra3"},
 			},
 			APIOpts: map[string]interface{}{
-				utils.RunID: utils.MetaDefault,
+				utils.MetaOriginID: utils.Sha1("abcdef", time.Unix(1383813745, 0).UTC().String()),
+				utils.RunID:        utils.MetaDefault,
 			},
 		},
 	}
@@ -182,7 +184,7 @@ func testHTTPExportEvent(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "SMSEvent",
 			Event: map[string]interface{}{
-				utils.MetaOriginID: utils.Sha1("sdfwer", time.Unix(1383813745, 0).UTC().String()),
+
 				utils.ToR:          utils.MetaSMS,
 				utils.OriginID:     "sdfwer",
 				utils.OriginHost:   "192.168.1.1",
@@ -201,7 +203,8 @@ func testHTTPExportEvent(t *testing.T) {
 					"extra2": "val_extra2", "extra3": "val_extra3"},
 			},
 			APIOpts: map[string]interface{}{
-				utils.RunID: utils.MetaDefault,
+				utils.MetaOriginID: utils.Sha1("sdfwer", time.Unix(1383813745, 0).UTC().String()),
+				utils.RunID:        utils.MetaDefault,
 			},
 		},
 	}
@@ -212,7 +215,7 @@ func testHTTPExportEvent(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "SMSEvent",
 			Event: map[string]interface{}{
-				utils.MetaOriginID: utils.Sha1("sms2", time.Unix(1383813745, 0).UTC().String()),
+
 				utils.ToR:          utils.MetaSMS,
 				utils.OriginID:     "sms2",
 				utils.RequestType:  utils.MetaRated,
@@ -223,7 +226,8 @@ func testHTTPExportEvent(t *testing.T) {
 				utils.Destination:  "1002",
 			},
 			APIOpts: map[string]interface{}{
-				utils.RunID: utils.MetaDefault,
+				utils.MetaOriginID: utils.Sha1("sms2", time.Unix(1383813745, 0).UTC().String()),
+				utils.RunID:        utils.MetaDefault,
 			},
 		},
 	}

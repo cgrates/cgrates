@@ -934,9 +934,11 @@ func TestErsOnEvictedNoCacheDumpFields(t *testing.T) {
 					utils.OriginHost:   "local",
 					utils.OriginID:     "123456",
 					utils.ToR:          utils.MetaVoice,
-					utils.MetaOriginID: "1133dc80896edf5049b46aa911cb9085eeb27f4c",
 					utils.Password:     "secure_pass",
 					"Additional_Field": "Additional_Value",
+				},
+				APIOpts: map[string]interface{}{
+					utils.MetaOriginID: "1133dc80896edf5049b46aa911cb9085eeb27f4c",
 				},
 			},
 		},
@@ -963,9 +965,11 @@ func TestErsOnEvictedNoCacheDumpFields(t *testing.T) {
 					utils.Destination:  "1003",
 					utils.OriginID:     "1234567",
 					utils.ToR:          utils.MetaSMS,
-					utils.MetaOriginID: "1133dc80896edf5049b46aa911cb9085eeb27f4d",
 					utils.Password:     "secure_password",
 					"Additional_Field": "Additional_Value2",
+				},
+				APIOpts: map[string]interface{}{
+					utils.MetaOriginID: "1133dc80896edf5049b46aa911cb9085eeb27f4d",
 				},
 			},
 		},
@@ -1039,9 +1043,12 @@ func TestERsOnEvictedDumpToJSON(t *testing.T) {
 					utils.OriginHost:   "local",
 					utils.OriginID:     "123456",
 					utils.ToR:          utils.MetaVoice,
-					utils.MetaOriginID: "1133dc80896edf5049b46aa911cb9085eeb27f4c",
+
 					utils.Password:     "secure_pass",
 					"Additional_Field": "Additional_Value",
+				},
+				APIOpts: map[string]interface{}{
+					utils.MetaOriginID: "1133dc80896edf5049b46aa911cb9085eeb27f4c",
 				},
 			},
 		},
@@ -1123,9 +1130,12 @@ func TestErsOnEvictedDumpToJSONNoPath(t *testing.T) {
 					utils.OriginHost:   "local",
 					utils.OriginID:     "123456",
 					utils.ToR:          utils.MetaVoice,
-					utils.MetaOriginID: "1133dc80896edf5049b46aa911cb9085eeb27f4c",
+
 					utils.Password:     "secure_pass",
 					"Additional_Field": "Additional_Value",
+				},
+				APIOpts: map[string]interface{}{
+					utils.MetaOriginID: "1133dc80896edf5049b46aa911cb9085eeb27f4c",
 				},
 			},
 		},
@@ -1182,10 +1192,13 @@ func TestErsOnEvictedDumpToJSONMergeError(t *testing.T) {
 					utils.OriginHost:   "local",
 					utils.OriginID:     "123456",
 					utils.ToR:          utils.MetaVoice,
-					utils.MetaOriginID: "1133dc80896edf5049b46aa911cb9085eeb27f4c",
+
 					utils.Password:     "secure_pass",
 					"Additional_Field": "Additional_Value",
 					utils.AnswerTime:   time.Date(2021, 6, 1, 12, 0, 0, 0, time.UTC),
+				},
+				APIOpts: map[string]interface{}{
+					utils.MetaOriginID: "1133dc80896edf5049b46aa911cb9085eeb27f4c",
 				},
 			},
 			{
@@ -1263,9 +1276,12 @@ func TestERsOnEvictedDumpToJSONWithCacheDumpFieldsErrPrefix(t *testing.T) {
 					utils.OriginHost:   "local",
 					utils.OriginID:     "123456",
 					utils.ToR:          utils.MetaVoice,
-					utils.MetaOriginID: "1133dc80896edf5049b46aa911cb9085eeb27f4c",
+
 					utils.Password:     "secure_pass",
 					"Additional_Field": "Additional_Value",
+				},
+				APIOpts: map[string]interface{}{
+					utils.MetaOriginID: "1133dc80896edf5049b46aa911cb9085eeb27f4c",
 				},
 			},
 		},
@@ -1334,9 +1350,12 @@ func TestERsOnEvictedDumpToJSONWithCacheDumpFields(t *testing.T) {
 					utils.OriginHost:   "local",
 					utils.OriginID:     "123456",
 					utils.ToR:          utils.MetaVoice,
-					utils.MetaOriginID: "1133dc80896edf5049b46aa911cb9085eeb27f4c",
+
 					utils.Password:     "secure_pass",
 					"Additional_Field": "Additional_Value",
+				},
+				APIOpts: map[string]interface{}{
+					utils.MetaOriginID: "1133dc80896edf5049b46aa911cb9085eeb27f4c",
 				},
 			},
 		},
@@ -1432,9 +1451,12 @@ func TestErsOnEvictedDumpToJSONInvalidPath(t *testing.T) {
 					utils.OriginHost:   "local",
 					utils.OriginID:     "123456",
 					utils.ToR:          utils.MetaVoice,
-					utils.MetaOriginID: "1133dc80896edf5049b46aa911cb9085eeb27f4c",
+
 					utils.Password:     "secure_pass",
 					"Additional_Field": "Additional_Value",
+				},
+				APIOpts: map[string]interface{}{
+					utils.MetaOriginID: "1133dc80896edf5049b46aa911cb9085eeb27f4c",
 				},
 			},
 		},
@@ -1496,12 +1518,15 @@ func TestErsOnEvictedDumpToJSONEncodeErr(t *testing.T) {
 					utils.OriginHost:   "local",
 					utils.OriginID:     "123456",
 					utils.ToR:          utils.MetaVoice,
-					utils.MetaOriginID: "1133dc80896edf5049b46aa911cb9085eeb27f4c",
+
 					utils.Password:     "secure_pass",
 					"Additional_Field": "Additional_Value",
 					"EncodeErr": func() {
 
 					},
+				},
+				APIOpts: map[string]interface{}{
+					utils.MetaOriginID: "1133dc80896edf5049b46aa911cb9085eeb27f4c",
 				},
 			},
 		},
