@@ -437,28 +437,35 @@ func (cdrS *CDRServer) eeSProcessEvent(cgrEv *utils.CGREventWithEeIDs) (err erro
 
 // processEvent processes a CGREvent based on arguments
 // in case of partially executed, both error and evs will be returned
-func (cdrS *CDRServer) processEvent(ev *utils.CGREvent,
-	chrgS, attrS, refund, ralS, store, reRate, export, thdS, stS bool) (evs []*utils.EventWithFlags, err error) {
+func (cdrS *CDRServer) processEvents(evs []*utils.CGREvent,
+	chrgS, attrS, refund, ralS, store, reRate, export, thdS, stS bool) (outEvs []*utils.EventWithFlags, err error) {
 	if attrS {
-		if err = cdrS.attrSProcessEvent(ev); err != nil {
-			utils.Logger.Warning(
-				fmt.Sprintf("<%s> error: <%s> processing event %+v with %s",
-					utils.CDRs, err.Error(), utils.ToJSON(ev), utils.AttributeS))
-			err = utils.ErrPartiallyExecuted
-			return
+		for _, ev := range evs {
+			if err = cdrS.attrSProcessEvent(ev); err != nil {
+				utils.Logger.Warning(
+					fmt.Sprintf("<%s> error: <%s> processing event %+v with %s",
+						utils.CDRs, err.Error(), utils.ToJSON(ev), utils.AttributeS))
+				err = utils.ErrPartiallyExecuted
+				return
+			}
 		}
 	}
 	var cgrEvs []*utils.CGREvent
 	if chrgS {
-		if cgrEvs, err = cdrS.chrgrSProcessEvent(ev); err != nil {
-			utils.Logger.Warning(
-				fmt.Sprintf("<%s> error: <%s> processing event %+v with %s",
-					utils.CDRs, err.Error(), utils.ToJSON(ev), utils.ChargerS))
-			err = utils.ErrPartiallyExecuted
-			return
+		for _, ev := range evs {
+			var chrgEvs []*utils.CGREvent
+			if chrgEvs, err = cdrS.chrgrSProcessEvent(ev); err != nil {
+				utils.Logger.Warning(
+					fmt.Sprintf("<%s> error: <%s> processing event %+v with %s",
+						utils.CDRs, err.Error(), utils.ToJSON(ev), utils.ChargerS))
+				err = utils.ErrPartiallyExecuted
+				return
+			} else {
+				cgrEvs = append(cgrEvs, chrgEvs...)
+			}
 		}
 	} else { // ChargerS not requested, charge the original event
-		cgrEvs = []*utils.CGREvent{ev}
+		cgrEvs = evs
 	}
 	// Check if the unique ID was not already processed
 	if !refund {
@@ -521,7 +528,7 @@ func (cdrS *CDRServer) processEvent(ev *utils.CGREvent,
 			for j, rtCDR := range cdrS.rateCDRWithErr(
 				&CDRWithAPIOpts{
 					CDR:     cdr,
-					APIOpts: ev.APIOpts,
+					APIOpts: cgrEvs[i].APIOpts,
 				}) {
 				cgrEv := rtCDR.AsCGREvent()
 				cgrEv.APIOpts = cgrEvs[i].APIOpts
@@ -620,9 +627,9 @@ func (cdrS *CDRServer) processEvent(ev *utils.CGREvent,
 	if partiallyExecuted {
 		err = utils.ErrPartiallyExecuted
 	}
-	evs = make([]*utils.EventWithFlags, len(cgrEvs))
+	outEvs = make([]*utils.EventWithFlags, len(cgrEvs))
 	for i, cgrEv := range cgrEvs {
-		evs[i] = &utils.EventWithFlags{
+		outEvs[i] = &utils.EventWithFlags{
 			Flags: procFlgs[i].AsSlice(),
 			Event: cgrEv.Event,
 		}
@@ -699,7 +706,7 @@ func (cdrS *CDRServer) V1ProcessCDR(cdr *CDRWithAPIOpts, reply *string) (err err
 	cgrEv := cdr.AsCGREvent()
 	cgrEv.APIOpts = cdr.APIOpts
 
-	if _, err = cdrS.processEvent(cgrEv,
+	if _, err = cdrS.processEvents([]*utils.CGREvent{cgrEv},
 		len(cdrS.cgrCfg.CdrsCfg().ChargerSConns) != 0 && !cdr.PreRated,
 		len(cdrS.cgrCfg.CdrsCfg().AttributeSConns) != 0,
 		false,
@@ -820,7 +827,7 @@ func (cdrS *CDRServer) V1ProcessEvent(arg *ArgV1ProcessEvent, reply *string) (er
 	}
 	// end of processing options
 
-	if _, err = cdrS.processEvent(&arg.CGREvent, chrgS, attrS, refund,
+	if _, err = cdrS.processEvents([]*utils.CGREvent{&arg.CGREvent}, chrgS, attrS, refund,
 		ralS, store, reRate, export, thdS, stS); err != nil {
 		return
 	}
@@ -897,7 +904,7 @@ func (cdrS *CDRServer) V2ProcessEvent(arg *ArgV1ProcessEvent, evs *[]*utils.Even
 	// end of processing options
 
 	var procEvs []*utils.EventWithFlags
-	if procEvs, err = cdrS.processEvent(&arg.CGREvent, chrgS, attrS, refund,
+	if procEvs, err = cdrS.processEvents([]*utils.CGREvent{&arg.CGREvent}, chrgS, attrS, refund,
 		ralS, store, reRate, export, thdS, stS); err != nil {
 		return
 	}
@@ -1057,15 +1064,17 @@ func (cdrS *CDRServer) V1RateCDRs(arg *ArgRateCDRs, reply *string) (err error) {
 	if chrgS && len(cdrS.cgrCfg.CdrsCfg().ChargerSConns) == 0 {
 		return utils.NewErrNotConnected(utils.ChargerS)
 	}
-	for _, cdr := range cdrs {
+	cgrEvs := make([]*utils.CGREvent, len(cdrs))
+	for i, cdr := range cdrs {
 		cdr.Cost = -1 // the cost will be recalculated
-		cgrEv := cdr.AsCGREvent()
-		cgrEv.APIOpts = arg.APIOpts
-		if _, err = cdrS.processEvent(cgrEv, chrgS, attrS, false,
-			true, store, true, export, thdS, statS); err != nil {
-			return utils.NewErrServerError(err)
-		}
+		cgrEvs[i] = cdr.AsCGREvent()
+		cgrEvs[i].APIOpts = arg.APIOpts
 	}
+	if _, err = cdrS.processEvents(cgrEvs, chrgS, attrS, false,
+		true, store, true, export, thdS, statS); err != nil {
+		return utils.NewErrServerError(err)
+	}
+
 	*reply = utils.OK
 	return
 }
