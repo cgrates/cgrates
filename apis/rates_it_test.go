@@ -49,7 +49,7 @@ var (
 		testRateSResetStorDb,
 		testRateSStartEngine,
 		testRateSRPCConn,
-		/* testGetRateProfileBeforeSet,
+		testGetRateProfileBeforeSet,
 		testGetRateProfilesBeforeSet,
 		testRateSetRateProfile,
 		testRateGetRateProfileIDs,
@@ -67,13 +67,15 @@ var (
 		testRateSetAttributeProfileBrokenReference,
 		testRateRemoveRateProfileRates,
 		testRateSetRateProfileRates,
-		testRateSetRateProfilesWithPrefix, */
+		testRateSetRateProfilesWithPrefix,
 		// here we will tests better the create,read,update and delte for the rates inside of a RateProfile
 		testRateProfileWithMultipleRates,
+		testRateProfileRateIDsAndCount,
 		testRateProfileUpdateRates,
 		testRateProfileRemoveMultipleRates,
 		testRateProfileSetMultipleRatesInProfile,
 		testRateProfileUpdateProfile,
+
 		testRateSKillEngine,
 	}
 )
@@ -1262,6 +1264,43 @@ func testRateProfileWithMultipleRates(t *testing.T) {
 		t.Error(err)
 	} else if len(result.Rates) != 5 {
 		t.Errorf("Unexpected reply returned")
+	}
+}
+
+func testRateProfileRateIDsAndCount(t *testing.T) {
+	// we will get all the rates from MultipleRates rate profile with the prefix RT_T
+	expected := []string{"RT_THUESDAY", "RT_THURSDAY"}
+	var result []string
+	if err := rateSRPC.Call(context.Background(), utils.AdminSv1GetRateProfileRateIDs,
+		&utils.ArgsSubItemIDs{
+			Tenant:      "cgrates.org",
+			ProfileID:   "MultipleRates",
+			ItemsPrefix: "RT_T",
+		}, &result); err != nil {
+		t.Error(err)
+	} else {
+		sort.Slice(expected, func(i, j int) bool {
+			return expected[i] < expected[j]
+		})
+		sort.Slice(expected, func(i, j int) bool {
+			return result[i] < result[j]
+		})
+		if !reflect.DeepEqual(expected, result) {
+			t.Errorf("Expected %v, received %v", expected, result)
+		}
+
+	}
+
+	// we will count all the rates from MultipleRates rate profile. The prefix is missing, so it will count all the rates
+	var reply int
+	if err := rateSRPC.Call(context.Background(), utils.AdminSv1GetRateProfileRateCount,
+		&utils.ArgsSubItemIDs{
+			Tenant:    "cgrates.org",
+			ProfileID: "MultipleRates",
+		}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != 5 {
+		t.Errorf("Unexpected reply returned: %v", reply)
 	}
 }
 
