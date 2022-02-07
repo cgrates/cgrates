@@ -214,7 +214,7 @@ func (alS *AttributeS) processEvent(ctx *context.Context, tnt string, args *util
 
 // V1GetAttributeForEvent returns the AttributeProfile that matches the event
 func (alS *AttributeS) V1GetAttributeForEvent(ctx *context.Context, args *utils.CGREvent,
-	attrPrfl *APIAttributeProfile) (err error) {
+	attrPrfl *AttributeProfile) (err error) {
 	if args == nil {
 		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
 	}
@@ -245,7 +245,7 @@ func (alS *AttributeS) V1GetAttributeForEvent(ctx *context.Context, args *utils.
 		}
 		return err
 	}
-	*attrPrfl = *(NewAPIAttributeProfile(attrPrf))
+	*attrPrfl = *attrPrf
 	return
 }
 

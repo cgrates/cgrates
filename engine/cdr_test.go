@@ -160,7 +160,7 @@ func TestCDRAsMapStringIface(t *testing.T) {
 func TestCDRNewCDRFromSQL(t *testing.T) {
 	extraFields := map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}
 	cdrSQL := &CDRsql{
-		ID:          123,
+		ID: 123,
 		// Cgrid:       "abecd993d06672714c4218a6dcf8278e0589a171",
 		RunID:       utils.MetaDefault,
 		OriginID:    "dsafdsaf",

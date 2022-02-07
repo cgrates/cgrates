@@ -302,21 +302,21 @@ func testV1FIdxSetAttributeSProfileWithFltr(t *testing.T) {
 	}
 
 	//we will set an AttributeProfile with our filter and check the indexes
-	attrPrf := &engine.APIAttributeProfileWithAPIOpts{
-		APIAttributeProfile: &engine.APIAttributeProfile{
+	attrPrf := &engine.AttributeProfileWithAPIOpts{
+		AttributeProfile: &engine.AttributeProfile{
 			Tenant:    utils.CGRateSorg,
 			ID:        "TEST_ATTRIBUTES_IT_TEST",
 			FilterIDs: []string{"fltr_for_attr", "*string:~*opts.*context:*sessions"},
-			Attributes: []*engine.ExternalAttribute{
+			Attributes: []*engine.Attribute{
 				{
 					Path:  utils.AccountField,
 					Type:  utils.MetaConstant,
-					Value: "1002",
+					Value: config.NewRSRParsersMustCompile("1002", utils.InfieldSep),
 				},
 				{
 					Path:  "*tenant",
 					Type:  utils.MetaConstant,
-					Value: "cgrates.itsyscom",
+					Value: config.NewRSRParsersMustCompile("cgrates.itsyscom", utils.InfieldSep),
 				},
 			},
 		},
@@ -405,22 +405,22 @@ func testV1FIdxSetAttributeSMoreFltrsMoreIndexing(t *testing.T) {
 	}
 
 	// update our Attribute with our filters
-	attrPrf := &engine.APIAttributeProfileWithAPIOpts{
-		APIAttributeProfile: &engine.APIAttributeProfile{
+	attrPrf := &engine.AttributeProfileWithAPIOpts{
+		AttributeProfile: &engine.AttributeProfile{
 			Tenant: utils.CGRateSorg,
 			ID:     "TEST_ATTRIBUTES_IT_TEST",
 			FilterIDs: []string{"fltr_for_attr", "fltr_for_attr2",
 				"fltr_for_attr3", "*string:~*opts.*context:*sessions"},
-			Attributes: []*engine.ExternalAttribute{
+			Attributes: []*engine.Attribute{
 				{
 					Path:  utils.AccountField,
 					Type:  utils.MetaConstant,
-					Value: "1002",
+					Value: config.NewRSRParsersMustCompile("1002", utils.InfieldSep),
 				},
 				{
 					Path:  "*tenant",
 					Type:  utils.MetaConstant,
-					Value: "cgrates.itsyscom",
+					Value: config.NewRSRParsersMustCompile("cgrates.itsyscom", utils.InfieldSep),
 				},
 			},
 		},
@@ -513,30 +513,30 @@ func testV1FIdxAttributeComputeIndexes(t *testing.T) {
 
 func testV1FIdxAttributeMoreProfilesForFilters(t *testing.T) {
 	//we will add more attributes with different context for matching filters
-	attrPrf2 := &engine.APIAttributeProfileWithAPIOpts{
-		APIAttributeProfile: &engine.APIAttributeProfile{
+	attrPrf2 := &engine.AttributeProfileWithAPIOpts{
+		AttributeProfile: &engine.AttributeProfile{
 			Tenant:    utils.CGRateSorg,
 			ID:        "TEST_ATTRIBUTES_new_fltr",
 			FilterIDs: []string{"fltr_for_attr2", "fltr_for_attr3", "*string:~*opts.*context:*chargers"},
-			Attributes: []*engine.ExternalAttribute{
+			Attributes: []*engine.Attribute{
 				{
 					Path:  utils.AccountField,
 					Type:  utils.MetaConstant,
-					Value: "1002",
+					Value: config.NewRSRParsersMustCompile("1002", utils.InfieldSep),
 				},
 			},
 		},
 	}
-	attrPrf3 := &engine.APIAttributeProfileWithAPIOpts{
-		APIAttributeProfile: &engine.APIAttributeProfile{
+	attrPrf3 := &engine.AttributeProfileWithAPIOpts{
+		AttributeProfile: &engine.AttributeProfile{
 			Tenant:    utils.CGRateSorg,
 			ID:        "TEST_ATTRIBUTE3",
 			FilterIDs: []string{"fltr_for_attr3", "*string:~*opts.*context:*sessions"},
-			Attributes: []*engine.ExternalAttribute{
+			Attributes: []*engine.Attribute{
 				{
 					Path:  "*req.Destinations",
 					Type:  utils.MetaConstant,
-					Value: "1008",
+					Value: config.NewRSRParsersMustCompile("1008", utils.InfieldSep),
 				},
 			},
 		},
@@ -4220,7 +4220,7 @@ func testV1FIdxSetStatSProfileWithFltr(t *testing.T) {
 					MetricID: utils.MetaASR,
 				},
 			},
-			Stored:       true,
+			Stored: true,
 			Weights: utils.DynamicWeights{
 				{
 					Weight: 30,
@@ -4325,7 +4325,7 @@ func testV1FIdxSetStatSMoreFltrsMoreIndexing(t *testing.T) {
 					MetricID: utils.MetaASR,
 				},
 			},
-			Stored:       true,
+			Stored: true,
 			Weights: utils.DynamicWeights{
 				{
 					Weight: 30,
@@ -4436,7 +4436,7 @@ func testV1FIdxStatSMoreProfilesForFltrs(t *testing.T) {
 					MetricID: utils.MetaACD,
 				},
 			},
-			Stored:       true,
+			Stored: true,
 			Weights: utils.DynamicWeights{
 				{
 					Weight: 30,

@@ -135,7 +135,7 @@ func testAttributeSRPCConn(t *testing.T) {
 }
 
 func testGetAttributeProfileBeforeSet(t *testing.T) {
-	var reply *engine.APIAttributeProfile
+	var reply *engine.AttributeProfile
 	if err := attrSRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfile,
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{
@@ -148,7 +148,7 @@ func testGetAttributeProfileBeforeSet(t *testing.T) {
 }
 
 func testGetAttributeProfilesBeforeSet(t *testing.T) {
-	var reply *engine.APIAttributeProfile
+	var reply *engine.AttributeProfile
 	if err := attrSRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfiles,
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{
@@ -161,24 +161,28 @@ func testGetAttributeProfilesBeforeSet(t *testing.T) {
 }
 
 func testAttributeSetAttributeProfile(t *testing.T) {
-	attrPrf := &engine.APIAttributeProfileWithAPIOpts{
-		APIAttributeProfile: &engine.APIAttributeProfile{
+	attrPrf := &engine.AttributeProfileWithAPIOpts{
+		AttributeProfile: &engine.AttributeProfile{
 			Tenant:    utils.CGRateSorg,
 			ID:        "TEST_ATTRIBUTES_IT_TEST",
 			FilterIDs: []string{"*string:~*req.Account:1002", "*exists:~*opts.*usage:"},
-			Attributes: []*engine.ExternalAttribute{
+			Attributes: []*engine.Attribute{
 				{
 					Path:  utils.AccountField,
 					Type:  utils.MetaConstant,
-					Value: "1002",
+					Value: config.NewRSRParsersMustCompile("1002", utils.InfieldSep),
 				},
 				{
 					Path:  "*tenant",
 					Type:  utils.MetaConstant,
-					Value: "cgrates.itsyscom",
+					Value: config.NewRSRParsersMustCompile("cgrates.itsyscom", utils.InfieldSep),
 				},
 			},
-			Weights: ";20",
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
 		},
 	}
 	var reply string
@@ -189,25 +193,29 @@ func testAttributeSetAttributeProfile(t *testing.T) {
 		t.Error(err)
 	}
 
-	expectedAttr := &engine.APIAttributeProfile{
+	expectedAttr := &engine.AttributeProfile{
 		Tenant:    utils.CGRateSorg,
 		ID:        "TEST_ATTRIBUTES_IT_TEST",
 		FilterIDs: []string{"*string:~*req.Account:1002", "*exists:~*opts.*usage:"},
-		Attributes: []*engine.ExternalAttribute{
+		Attributes: []*engine.Attribute{
 			{
 				Path:  utils.AccountField,
 				Type:  utils.MetaConstant,
-				Value: "1002",
+				Value: config.NewRSRParsersMustCompile("1002", utils.InfieldSep),
 			},
 			{
 				Path:  "*tenant",
 				Type:  utils.MetaConstant,
-				Value: "cgrates.itsyscom",
+				Value: config.NewRSRParsersMustCompile("cgrates.itsyscom", utils.InfieldSep),
 			},
 		},
-		Weights: ";20",
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 	}
-	var result *engine.APIAttributeProfile
+	var result *engine.AttributeProfile
 	if err := attrSRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfile,
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{
@@ -236,26 +244,30 @@ func testAttributeGetAttributeIDs(t *testing.T) {
 }
 
 func testAttributeGetAttributes(t *testing.T) {
-	var reply []*engine.APIAttributeProfile
+	var reply []*engine.AttributeProfile
 	var args *utils.ArgsItemIDs
-	expected := []*engine.APIAttributeProfile{
+	expected := []*engine.AttributeProfile{
 		{
 			Tenant:    utils.CGRateSorg,
 			ID:        "TEST_ATTRIBUTES_IT_TEST",
 			FilterIDs: []string{"*string:~*req.Account:1002", "*exists:~*opts.*usage:"},
-			Attributes: []*engine.ExternalAttribute{
+			Attributes: []*engine.Attribute{
 				{
 					Path:  utils.AccountField,
 					Type:  utils.MetaConstant,
-					Value: "1002",
+					Value: config.NewRSRParsersMustCompile("1002", utils.InfieldSep),
 				},
 				{
 					Path:  "*tenant",
 					Type:  utils.MetaConstant,
-					Value: "cgrates.itsyscom",
+					Value: config.NewRSRParsersMustCompile("cgrates.itsyscom", utils.InfieldSep),
 				},
 			},
-			Weights: ";20",
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
 		},
 	}
 	if err := attrSRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfiles,
@@ -282,7 +294,7 @@ func testAttributeGetAttributeCount(t *testing.T) {
 }
 
 func testGetAttributeProfileBeforeSet2(t *testing.T) {
-	var reply *engine.APIAttributeProfile
+	var reply *engine.AttributeProfile
 	if err := attrSRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfile,
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{
@@ -295,16 +307,16 @@ func testGetAttributeProfileBeforeSet2(t *testing.T) {
 }
 
 func testAttributeSetAttributeProfile2(t *testing.T) {
-	attrPrf := &engine.APIAttributeProfileWithAPIOpts{
-		APIAttributeProfile: &engine.APIAttributeProfile{
+	attrPrf := &engine.AttributeProfileWithAPIOpts{
+		AttributeProfile: &engine.AttributeProfile{
 			Tenant:    utils.CGRateSorg,
 			ID:        "TEST_ATTRIBUTES_IT_TEST_SECOND",
 			FilterIDs: []string{"*string:~*opts.*context:*sessions", "*exists:~*opts.*usage:"},
-			Attributes: []*engine.ExternalAttribute{
+			Attributes: []*engine.Attribute{
 				{
 					Path:  "*tenant",
 					Type:  utils.MetaConstant,
-					Value: "cgrates.itsyscom",
+					Value: config.NewRSRParsersMustCompile("cgrates.itsyscom", utils.InfieldSep),
 				},
 			},
 		},
@@ -317,19 +329,19 @@ func testAttributeSetAttributeProfile2(t *testing.T) {
 		t.Error(err)
 	}
 
-	expectedAttr := &engine.APIAttributeProfile{
+	expectedAttr := &engine.AttributeProfile{
 		Tenant:    utils.CGRateSorg,
 		ID:        "TEST_ATTRIBUTES_IT_TEST_SECOND",
 		FilterIDs: []string{"*string:~*opts.*context:*sessions", "*exists:~*opts.*usage:"},
-		Attributes: []*engine.ExternalAttribute{
+		Attributes: []*engine.Attribute{
 			{
 				Path:  "*tenant",
 				Type:  utils.MetaConstant,
-				Value: "cgrates.itsyscom",
+				Value: config.NewRSRParsersMustCompile("cgrates.itsyscom", utils.InfieldSep),
 			},
 		},
 	}
-	var result *engine.APIAttributeProfile
+	var result *engine.AttributeProfile
 	if err := attrSRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfile,
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{
@@ -344,36 +356,40 @@ func testAttributeSetAttributeProfile2(t *testing.T) {
 }
 
 func testAttributeGetAttributes2(t *testing.T) {
-	var reply *[]*engine.APIAttributeProfile
+	var reply *[]*engine.AttributeProfile
 	var args *utils.ArgsItemIDs
-	expected := []*engine.APIAttributeProfile{
+	expected := []*engine.AttributeProfile{
 		{
 			Tenant:    utils.CGRateSorg,
 			ID:        "TEST_ATTRIBUTES_IT_TEST",
 			FilterIDs: []string{"*string:~*req.Account:1002", "*exists:~*opts.*usage:"},
-			Attributes: []*engine.ExternalAttribute{
+			Attributes: []*engine.Attribute{
 				{
 					Path:  utils.AccountField,
 					Type:  utils.MetaConstant,
-					Value: "1002",
+					Value: config.NewRSRParsersMustCompile("1002", utils.InfieldSep),
 				},
 				{
 					Path:  "*tenant",
 					Type:  utils.MetaConstant,
-					Value: "cgrates.itsyscom",
+					Value: config.NewRSRParsersMustCompile("cgrates.itsyscom", utils.InfieldSep),
 				},
 			},
-			Weights: ";20",
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
 		},
 		{
 			Tenant:    utils.CGRateSorg,
 			ID:        "TEST_ATTRIBUTES_IT_TEST_SECOND",
 			FilterIDs: []string{"*string:~*opts.*context:*sessions", "*exists:~*opts.*usage:"},
-			Attributes: []*engine.ExternalAttribute{
+			Attributes: []*engine.Attribute{
 				{
 					Path:  "*tenant",
 					Type:  utils.MetaConstant,
-					Value: "cgrates.itsyscom",
+					Value: config.NewRSRParsersMustCompile("cgrates.itsyscom", utils.InfieldSep),
 				},
 			},
 		},
@@ -435,7 +451,7 @@ func testAttributeRemoveAttributeProfile(t *testing.T) {
 	}
 
 	//nothing to get from db
-	var result *engine.APIAttributeProfile
+	var result *engine.AttributeProfile
 	if err := attrSRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfile,
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{
@@ -448,26 +464,30 @@ func testAttributeRemoveAttributeProfile(t *testing.T) {
 }
 
 func testAttributeGetAttributesAfterRemove(t *testing.T) {
-	var reply *[]*engine.APIAttributeProfile
+	var reply *[]*engine.AttributeProfile
 	var args *utils.ArgsItemIDs
-	expected := []*engine.APIAttributeProfile{
+	expected := []*engine.AttributeProfile{
 		{
 			Tenant:    utils.CGRateSorg,
 			ID:        "TEST_ATTRIBUTES_IT_TEST",
 			FilterIDs: []string{"*string:~*req.Account:1002", "*exists:~*opts.*usage:"},
-			Attributes: []*engine.ExternalAttribute{
+			Attributes: []*engine.Attribute{
 				{
 					Path:  utils.AccountField,
 					Type:  utils.MetaConstant,
-					Value: "1002",
+					Value: config.NewRSRParsersMustCompile("1002", utils.InfieldSep),
 				},
 				{
 					Path:  "*tenant",
 					Type:  utils.MetaConstant,
-					Value: "cgrates.itsyscom",
+					Value: config.NewRSRParsersMustCompile("cgrates.itsyscom", utils.InfieldSep),
 				},
 			},
-			Weights: ";20",
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
 		},
 	}
 	if err := attrSRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfiles,
@@ -481,16 +501,16 @@ func testAttributeGetAttributesAfterRemove(t *testing.T) {
 }
 
 func testAttributeSGetAttributesWithPrefix(t *testing.T) {
-	attrPrf := &engine.APIAttributeProfileWithAPIOpts{
-		APIAttributeProfile: &engine.APIAttributeProfile{
+	attrPrf := &engine.AttributeProfileWithAPIOpts{
+		AttributeProfile: &engine.AttributeProfile{
 			Tenant:    utils.CGRateSorg,
 			ID:        "aTEST_ATTRIBUTES_IT_TEST_SECOND",
 			FilterIDs: []string{"*string:~*opts.*context:*sessions"},
-			Attributes: []*engine.ExternalAttribute{
+			Attributes: []*engine.Attribute{
 				{
 					Path:  "*tenant",
 					Type:  utils.MetaConstant,
-					Value: "cgrates.itsyscom",
+					Value: config.NewRSRParsersMustCompile("cgrates.itsyscom", utils.InfieldSep),
 				},
 			},
 		},
@@ -503,19 +523,19 @@ func testAttributeSGetAttributesWithPrefix(t *testing.T) {
 		t.Error(err)
 	}
 
-	expectedAttr := &engine.APIAttributeProfile{
+	expectedAttr := &engine.AttributeProfile{
 		Tenant:    utils.CGRateSorg,
 		ID:        "aTEST_ATTRIBUTES_IT_TEST_SECOND",
 		FilterIDs: []string{"*string:~*opts.*context:*sessions"},
-		Attributes: []*engine.ExternalAttribute{
+		Attributes: []*engine.Attribute{
 			{
 				Path:  "*tenant",
 				Type:  utils.MetaConstant,
-				Value: "cgrates.itsyscom",
+				Value: config.NewRSRParsersMustCompile("cgrates.itsyscom", utils.InfieldSep),
 			},
 		},
 	}
-	var result *engine.APIAttributeProfile
+	var result *engine.AttributeProfile
 	if err := attrSRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfile,
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{
@@ -528,21 +548,25 @@ func testAttributeSGetAttributesWithPrefix(t *testing.T) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expectedAttr), utils.ToJSON(result))
 	}
 
-	var reply2 *[]*engine.APIAttributeProfile
+	var reply2 *[]*engine.AttributeProfile
 	var args *utils.ArgsItemIDs
-	expected := []*engine.APIAttributeProfile{
+	expected := []*engine.AttributeProfile{
 		{
 			Tenant:    utils.CGRateSorg,
 			ID:        "aTEST_ATTRIBUTES_IT_TEST_SECOND",
 			FilterIDs: []string{"*string:~*opts.*context:*sessions"},
-			Attributes: []*engine.ExternalAttribute{
+			Attributes: []*engine.Attribute{
 				{
 					Path:  "*tenant",
 					Type:  utils.MetaConstant,
-					Value: "cgrates.itsyscom",
+					Value: config.NewRSRParsersMustCompile("cgrates.itsyscom", utils.InfieldSep),
 				},
 			},
-			Weights: ";20.0",
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
 		},
 	}
 	if err := attrSRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfiles,
@@ -558,16 +582,16 @@ func testAttributeSGetAttributesWithPrefix(t *testing.T) {
 }
 
 func testAttributeSetAttributeProfileBrokenReference(t *testing.T) {
-	attrPrf := &engine.APIAttributeProfileWithAPIOpts{
-		APIAttributeProfile: &engine.APIAttributeProfile{
+	attrPrf := &engine.AttributeProfileWithAPIOpts{
+		AttributeProfile: &engine.AttributeProfile{
 			Tenant:    utils.CGRateSorg,
 			ID:        "TEST_ATTRIBUTES_IT_TEST_SECOND",
 			FilterIDs: []string{"invalid_filter_format", "*string:~*opts.*context:*sessions"},
-			Attributes: []*engine.ExternalAttribute{
+			Attributes: []*engine.Attribute{
 				{
 					Path:  "*tenant",
 					Type:  utils.MetaConstant,
-					Value: "cgrates.itsyscom",
+					Value: config.NewRSRParsersMustCompile("cgrates.itsyscom", utils.InfieldSep),
 				},
 			},
 		},
@@ -603,19 +627,23 @@ func testAttributeSGetAttributeForEventAnyContext(t *testing.T) {
 			utils.OptsContext: utils.MetaCDRs,
 		},
 	}
-	eAttrPrf2 := &engine.APIAttributeProfileWithAPIOpts{
-		APIAttributeProfile: &engine.APIAttributeProfile{
+	eAttrPrf2 := &engine.AttributeProfileWithAPIOpts{
+		AttributeProfile: &engine.AttributeProfile{
 			Tenant:    ev.Tenant,
 			ID:        "ATTR_2",
 			FilterIDs: []string{"*string:~*req.Account:dan", "*prefix:~*req.Destination:+4915", "*exists:~*opts.*usage:", "*notexists:~*req.RequestType:"},
-			Attributes: []*engine.ExternalAttribute{
+			Attributes: []*engine.Attribute{
 				{
 					Path:  utils.MetaReq + utils.NestingSep + utils.AccountField,
 					Type:  utils.MetaConstant,
-					Value: "1001",
+					Value: config.NewRSRParsersMustCompile("1001", utils.InfieldSep),
 				},
 			},
-			Weights: ";10",
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				},
+			},
 		},
 	}
 	var result string
@@ -625,32 +653,36 @@ func testAttributeSGetAttributeForEventAnyContext(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	var reply *engine.APIAttributeProfile
+	var reply *engine.AttributeProfile
 	if err := attrSRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfile,
 		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_2"}}, &reply); err != nil {
 		t.Fatal(err)
 	}
-	if !reflect.DeepEqual(eAttrPrf2.APIAttributeProfile, reply) {
-		t.Errorf("Expecting : %+v, received: %+v", eAttrPrf2.APIAttributeProfile, reply)
+	if !reflect.DeepEqual(eAttrPrf2.AttributeProfile, reply) {
+		t.Errorf("Expecting : %+v, received: %+v", eAttrPrf2.AttributeProfile, reply)
 	}
-	var attrReply *engine.APIAttributeProfile
+	var attrReply *engine.AttributeProfile
 	if err := attrSRPC.Call(context.Background(), utils.AttributeSv1GetAttributeForEvent,
 		ev, &attrReply); err != nil {
 		t.Fatal(err)
 	}
 
-	expAttrFromEv := &engine.APIAttributeProfile{
+	expAttrFromEv := &engine.AttributeProfile{
 		Tenant:    ev.Tenant,
 		ID:        "ATTR_2",
 		FilterIDs: []string{"*string:~*req.Account:dan", "*prefix:~*req.Destination:+4915", "*exists:~*opts.*usage:", "*notexists:~*req.RequestType:"},
-		Attributes: []*engine.ExternalAttribute{
+		Attributes: []*engine.Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + utils.AccountField,
 				Type:  utils.MetaConstant,
-				Value: "1001",
+				Value: config.NewRSRParsersMustCompile("1001", utils.InfieldSep),
 			},
 		},
-		Weights: ";10",
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 	}
 	if !reflect.DeepEqual(expAttrFromEv, attrReply) {
 		t.Errorf("Expecting: %s, received: %s", utils.ToJSON(expAttrFromEv), utils.ToJSON(attrReply))
@@ -669,24 +701,28 @@ func testAttributeSGetAttributeForEventSameAnyContext(t *testing.T) {
 			utils.MetaUsage: 10 * time.Second,
 		},
 	}
-	var attrReply *engine.APIAttributeProfile
+	var attrReply *engine.AttributeProfile
 	if err := attrSRPC.Call(context.Background(), utils.AttributeSv1GetAttributeForEvent,
 		ev, &attrReply); err != nil {
 		t.Fatal(err)
 	}
 
-	expAttrFromEv := &engine.APIAttributeProfile{
+	expAttrFromEv := &engine.AttributeProfile{
 		Tenant:    ev.Tenant,
 		ID:        "ATTR_2",
 		FilterIDs: []string{"*string:~*req.Account:dan", "*prefix:~*req.Destination:+4915", "*exists:~*opts.*usage:", "*notexists:~*req.RequestType:"},
-		Attributes: []*engine.ExternalAttribute{
+		Attributes: []*engine.Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + utils.AccountField,
 				Type:  utils.MetaConstant,
-				Value: "1001",
+				Value: config.NewRSRParsersMustCompile("1001", utils.InfieldSep),
 			},
 		},
-		Weights: ";10",
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 	}
 	if !reflect.DeepEqual(expAttrFromEv, attrReply) {
 		t.Errorf("Expecting: %s, received: %s", utils.ToJSON(expAttrFromEv), utils.ToJSON(attrReply))
@@ -705,7 +741,7 @@ func testAttributeSGetAttributeForEventNotFound(t *testing.T) {
 			utils.OptsContext: utils.MetaCDRs,
 		},
 	}
-	var attrReply *engine.APIAttributeProfile
+	var attrReply *engine.AttributeProfile
 	if err := attrSRPC.Call(context.Background(), utils.AttributeSv1GetAttributeForEvent,
 		ev, &attrReply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
@@ -726,51 +762,59 @@ func testAttributeSGetAttributeForEvent(t *testing.T) {
 		},
 	}
 
-	eAttrPrf := &engine.APIAttributeProfile{
+	eAttrPrf := &engine.AttributeProfile{
 		Tenant:    ev.Tenant,
 		ID:        "ATTR_1",
 		FilterIDs: []string{"*string:~*req.Account:1007", "*string:~*opts.*context:*cdrs|*sessions", "*exists:~*opts.*usage:"},
-		Attributes: []*engine.ExternalAttribute{
+		Attributes: []*engine.Attribute{
 			{
 				Path:      utils.MetaReq + utils.NestingSep + utils.AccountField,
-				Value:     "1001",
+				Value:     config.NewRSRParsersMustCompile("1001", utils.InfieldSep),
 				Type:      utils.MetaConstant,
 				FilterIDs: []string{},
 			},
 			{
 				Path:      utils.MetaReq + utils.NestingSep + utils.Subject,
-				Value:     "1001",
+				Value:     config.NewRSRParsersMustCompile("1001", utils.InfieldSep),
 				Type:      utils.MetaConstant,
 				FilterIDs: []string{},
 			},
 		},
-		Weights: ";10",
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 	}
 	if *encoding == utils.MetaGOB {
 		eAttrPrf.Attributes[0].FilterIDs = nil
 		eAttrPrf.Attributes[1].FilterIDs = nil
 	}
 	var result string
-	eAttrPrfApi := &engine.APIAttributeProfileWithAPIOpts{
-		APIAttributeProfile: &engine.APIAttributeProfile{
+	eAttrPrfApi := &engine.AttributeProfileWithAPIOpts{
+		AttributeProfile: &engine.AttributeProfile{
 			Tenant:    ev.Tenant,
 			ID:        "ATTR_1",
 			FilterIDs: []string{"*string:~*req.Account:1007", "*string:~*opts.*context:*cdrs|*sessions", "*exists:~*opts.*usage:"},
-			Attributes: []*engine.ExternalAttribute{
+			Attributes: []*engine.Attribute{
 				{
 					Path:      utils.MetaReq + utils.NestingSep + utils.AccountField,
-					Value:     "1001",
+					Value:     config.NewRSRParsersMustCompile("1001", utils.InfieldSep),
 					Type:      utils.MetaConstant,
 					FilterIDs: []string{},
 				},
 				{
 					Path:      utils.MetaReq + utils.NestingSep + utils.Subject,
-					Value:     "1001",
+					Value:     config.NewRSRParsersMustCompile("1001", utils.InfieldSep),
 					Type:      utils.MetaConstant,
 					FilterIDs: []string{},
 				},
 			},
-			Weights: ";10",
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				},
+			},
 		},
 	}
 	if err := attrSRPC.Call(context.Background(), utils.AdminSv1SetAttributeProfile,
@@ -780,7 +824,7 @@ func testAttributeSGetAttributeForEvent(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 
-	var attrReply *engine.APIAttributeProfile
+	var attrReply *engine.AttributeProfile
 	if err := attrSRPC.Call(context.Background(), utils.AttributeSv1GetAttributeForEvent,
 		ev, &attrReply); err != nil {
 		t.Fatal(err)
@@ -791,7 +835,7 @@ func testAttributeSGetAttributeForEvent(t *testing.T) {
 
 	ev.Tenant = utils.EmptyString
 	ev.ID = "randomID"
-	var attrPrf *engine.APIAttributeProfile
+	var attrPrf *engine.AttributeProfile
 	if err := attrSRPC.Call(context.Background(), utils.AttributeSv1GetAttributeForEvent,
 		ev, &attrPrf); err != nil {
 		t.Fatal(err)
@@ -804,7 +848,7 @@ func testAttributeSGetAttributeForEvent(t *testing.T) {
 }
 
 func testAttributeProcessEvent(t *testing.T) {
-	var reply *engine.APIAttributeProfile
+	var reply *engine.AttributeProfile
 	if err := attrSRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfile,
 		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_1"}}, &reply); err != nil {
 		t.Fatal(err)
@@ -848,19 +892,23 @@ func testAttributeProcessEvent(t *testing.T) {
 }
 
 func testAttributeProcessEventWithSearchAndReplace(t *testing.T) {
-	attrPrf1 := &engine.APIAttributeProfileWithAPIOpts{
-		APIAttributeProfile: &engine.APIAttributeProfile{
+	attrPrf1 := &engine.AttributeProfileWithAPIOpts{
+		AttributeProfile: &engine.AttributeProfile{
 			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:        "ATTR_Search_and_replace",
 			FilterIDs: []string{"*string:~*req.Category:call", "*string:~*opts.*context:*sessions", "*exists:~*opts.*usage:"},
-			Attributes: []*engine.ExternalAttribute{
+			Attributes: []*engine.Attribute{
 				{
 					Path:  utils.MetaReq + utils.NestingSep + "Category",
-					Value: "~*req.Category:s/(.*)/${1}_suffix/",
+					Value: config.NewRSRParsersMustCompile("~*req.Category:s/(.*)/${1}_suffix/", utils.InfieldSep),
 				},
 			},
 			Blocker: true,
-			Weights: ";10",
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				},
+			},
 		},
 	}
 	var result string
@@ -907,46 +955,58 @@ func testAttributeProcessEventWithSearchAndReplace(t *testing.T) {
 }
 
 func testAttributeSProcessWithMultipleRuns(t *testing.T) {
-	attrPrf1 := &engine.APIAttributeProfileWithAPIOpts{
-		APIAttributeProfile: &engine.APIAttributeProfile{
+	attrPrf1 := &engine.AttributeProfileWithAPIOpts{
+		AttributeProfile: &engine.AttributeProfile{
 			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:        "ATTR_1",
 			FilterIDs: []string{"*string:~*req.InitialField:InitialValue", "*string:~*opts.*context:*sessions", "*exists:~*opts.*usage:"},
-			Attributes: []*engine.ExternalAttribute{
+			Attributes: []*engine.Attribute{
 				{
 					Path:  utils.MetaReq + utils.NestingSep + "Field1",
-					Value: "Value1",
+					Value: config.NewRSRParsersMustCompile("Value1", utils.InfieldSep),
 				},
 			},
-			Weights: ";10",
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				},
+			},
 		},
 	}
-	attrPrf2 := &engine.APIAttributeProfileWithAPIOpts{
-		APIAttributeProfile: &engine.APIAttributeProfile{
+	attrPrf2 := &engine.AttributeProfileWithAPIOpts{
+		AttributeProfile: &engine.AttributeProfile{
 			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:        "ATTR_2",
 			FilterIDs: []string{"*string:~*req.Field1:Value1", "*string:~*opts.*context:*sessions", "*exists:~*opts.*usage:"},
-			Attributes: []*engine.ExternalAttribute{
+			Attributes: []*engine.Attribute{
 				{
 					Path:  utils.MetaReq + utils.NestingSep + "Field2",
-					Value: "Value2",
+					Value: config.NewRSRParsersMustCompile("Value2", utils.InfieldSep),
 				},
 			},
-			Weights: ";20",
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
 		},
 	}
-	attrPrf3 := &engine.APIAttributeProfileWithAPIOpts{
-		APIAttributeProfile: &engine.APIAttributeProfile{
+	attrPrf3 := &engine.AttributeProfileWithAPIOpts{
+		AttributeProfile: &engine.AttributeProfile{
 			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:        "ATTR_3",
 			FilterIDs: []string{"*string:~*req.NotFound:NotFound", "*string:~*opts.*context:*sessions", "*exists:~*opts.*usage:"},
-			Attributes: []*engine.ExternalAttribute{
+			Attributes: []*engine.Attribute{
 				{
 					Path:  utils.MetaReq + utils.NestingSep + "Field3",
-					Value: "Value3",
+					Value: config.NewRSRParsersMustCompile("Value3", utils.InfieldSep),
 				},
 			},
-			Weights: ";30",
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 30,
+				},
+			},
 		},
 	}
 	// Add attribute in DM
@@ -1011,46 +1071,58 @@ func testAttributeSProcessWithMultipleRuns(t *testing.T) {
 }
 
 func testAttributeSProcessWithMultipleRuns2(t *testing.T) {
-	attrPrf1 := &engine.APIAttributeProfileWithAPIOpts{
-		APIAttributeProfile: &engine.APIAttributeProfile{
+	attrPrf1 := &engine.AttributeProfileWithAPIOpts{
+		AttributeProfile: &engine.AttributeProfile{
 			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:        "ATTR_1",
 			FilterIDs: []string{"*string:~*req.InitialField:InitialValue", "*string:~*opts.*context:*sessions", "*exists:~*opts.*usage:"},
-			Attributes: []*engine.ExternalAttribute{
+			Attributes: []*engine.Attribute{
 				{
 					Path:  utils.MetaReq + utils.NestingSep + "Field1",
-					Value: "Value1",
+					Value: config.NewRSRParsersMustCompile("Value1", utils.InfieldSep),
 				},
 			},
-			Weights: ";10",
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				},
+			},
 		},
 	}
-	attrPrf2 := &engine.APIAttributeProfileWithAPIOpts{
-		APIAttributeProfile: &engine.APIAttributeProfile{
+	attrPrf2 := &engine.AttributeProfileWithAPIOpts{
+		AttributeProfile: &engine.AttributeProfile{
 			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:        "ATTR_2",
 			FilterIDs: []string{"*string:~*req.Field1:Value1", "*string:~*opts.*context:*sessions", "*exists:~*opts.*usage:"},
-			Attributes: []*engine.ExternalAttribute{
+			Attributes: []*engine.Attribute{
 				{
 					Path:  utils.MetaReq + utils.NestingSep + "Field2",
-					Value: "Value2",
+					Value: config.NewRSRParsersMustCompile("Value2", utils.InfieldSep),
 				},
 			},
-			Weights: ";20",
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
 		},
 	}
-	attrPrf3 := &engine.APIAttributeProfileWithAPIOpts{
-		APIAttributeProfile: &engine.APIAttributeProfile{
+	attrPrf3 := &engine.AttributeProfileWithAPIOpts{
+		AttributeProfile: &engine.AttributeProfile{
 			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:        "ATTR_3",
 			FilterIDs: []string{"*string:~*req.Field2:Value2", "*string:~*opts.*context:*sessions", "*exists:~*opts.*usage:"},
-			Attributes: []*engine.ExternalAttribute{
+			Attributes: []*engine.Attribute{
 				{
 					Path:  utils.MetaReq + utils.NestingSep + "Field3",
-					Value: "Value3",
+					Value: config.NewRSRParsersMustCompile("Value3", utils.InfieldSep),
 				},
 			},
-			Weights: ";30",
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 30,
+				},
+			},
 		},
 	}
 	// Add attributeProfiles
@@ -1208,7 +1280,7 @@ func testAttributeRemoveRemainAttributeProfiles(t *testing.T) {
 }
 
 func testAttributeGetAttributeProfileAfterRemove(t *testing.T) {
-	var reply *engine.APIAttributeProfile
+	var reply *engine.AttributeProfile
 	if err := attrSRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfile,
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{

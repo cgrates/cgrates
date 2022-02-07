@@ -807,15 +807,19 @@ func TestFiltersSetFilterReloadCache(t *testing.T) {
 		t.Error(err)
 	}
 
-	attrPrf := &engine.APIAttributeProfileWithAPIOpts{
-		APIAttributeProfile: &engine.APIAttributeProfile{
+	attrPrf := &engine.AttributeProfileWithAPIOpts{
+		AttributeProfile: &engine.AttributeProfile{
 			FilterIDs: []string{"FLTR_ID"},
 			ID:        "ATTR_ID",
-			Weights:   ";10",
-			Attributes: []*engine.ExternalAttribute{
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				},
+			},
+			Attributes: []*engine.Attribute{
 				{
 					Path:  "*req.Account",
-					Value: "1003",
+					Value: config.NewRSRParsersMustCompile("1003", utils.InfieldSep),
 					Type:  utils.MetaConstant,
 				},
 			},
@@ -968,15 +972,19 @@ func TestFiltersSetFilterClearCache(t *testing.T) {
 		t.Error(err)
 	}
 
-	attrPrf := &engine.APIAttributeProfileWithAPIOpts{
-		APIAttributeProfile: &engine.APIAttributeProfile{
+	attrPrf := &engine.AttributeProfileWithAPIOpts{
+		AttributeProfile: &engine.AttributeProfile{
 			FilterIDs: []string{"FLTR_ID"},
 			ID:        "ATTR_ID",
-			Weights:   ";10",
-			Attributes: []*engine.ExternalAttribute{
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				},
+			},
+			Attributes: []*engine.Attribute{
 				{
 					Path:  "*req.Account",
-					Value: "1003",
+					Value: config.NewRSRParsersMustCompile("1003", utils.InfieldSep),
 					Type:  utils.MetaConstant,
 				},
 			},
