@@ -1221,7 +1221,7 @@ func (ms *MongoStorage) GetRateProfileDrv(ctx *context.Context, tenant, id strin
 	return utils.NewRateProfileFromMapDataDBMap(tenant, id, mapRP, ms.ms)
 }
 
-func (ms *MongoStorage) GetRateProfileRateIDsDrv(ctx *context.Context, key, prefix string) (rateIDs []string, err error) {
+func (ms *MongoStorage) GetRateProfileRateIDsDrv(ctx *context.Context, key, prefix, argsPrefix string) (rateIDs []string, err error) {
 	return
 }
 

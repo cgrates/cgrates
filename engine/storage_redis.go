@@ -748,7 +748,12 @@ func (rs *RedisStorage) GetRateProfileDrv(ctx *context.Context, tenant, id strin
 	return utils.NewRateProfileFromMapDataDBMap(tenant, id, mapRP, rs.ms)
 }
 
-func (rs *RedisStorage) GetRateProfileRateIDsDrv(ctx *context.Context, key, prefix string) (rateIDs []string, err error) {
+func (rs *RedisStorage) GetRateProfileRateIDsDrv(ctx *context.Context, tnt, profileID, prefixArgs string) (rateIDs []string, err error) {
+	key := utils.RateProfilePrefix + utils.ConcatenatedKey(tnt, profileID)
+	prefix := utils.Rates + utils.ConcatenatedKeySep
+	if prefixArgs != utils.EmptyString {
+		prefix = utils.ConcatenatedKey(utils.Rates, prefixArgs)
+	}
 	var rateField string
 	scan := radix.NewScanner(rs.client, radix.ScanOpts{
 		Command: redisHSCAN,
