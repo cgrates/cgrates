@@ -139,6 +139,26 @@ func (admS *AdminSv1) GetRateProfileCount(ctx *context.Context, args *utils.Args
 	return
 }
 
+// GetRateProfileRateCount count the rates from a specific RateProfile  registered for a tenant. The number of rates is returned back by matching a pattern given by ItemPrefix. If the ItemPrefix is not there, it will be counted all the rates.
+func (admS *AdminSv1) GetRateProfileRateCount(ctx *context.Context, args *utils.ArgsSubItemIDs, countIDs *int) (err error) {
+	if args.ProfileID == utils.EmptyString {
+		return utils.NewErrMandatoryIeMissing(args.ProfileID)
+	}
+	if args.Tenant == utils.EmptyString {
+		args.Tenant = admS.cfg.GeneralCfg().DefaultTenant
+	}
+
+	var ids []string
+	if ids, err = admS.dm.GetRateProfileRateIDs(ctx, args); err != nil {
+		return
+	}
+	if len(ids) == 0 {
+		return utils.ErrNotFound
+	}
+	*countIDs = len(ids)
+	return
+}
+
 // SetRateProfile add/update a new Rate Profile
 func (admS *AdminSv1) SetRateProfile(ctx *context.Context, args *utils.APIRateProfile, reply *string) error {
 	if missing := utils.MissingStructFields(args, []string{utils.ID, utils.Rates}); len(missing) != 0 {
