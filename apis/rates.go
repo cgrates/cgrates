@@ -48,7 +48,7 @@ func (admS *AdminSv1) GetRateProfile(ctx *context.Context, arg *utils.TenantIDWi
 }
 
 // GetRateProfileIDs returns a list of rate profile IDs registered for a tenant
-func (admS *AdminSv1) GetRateProfileIDs(ctx *context.Context, args *utils.ArgsItemIDs, attrPrfIDs *[]string) (err error) {
+func (admS *AdminSv1) GetRateProfileIDs(ctx *context.Context, args *utils.ArgsItemIDs, ratePrfIDs *[]string) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = admS.cfg.GeneralCfg().DefaultTenant
@@ -71,7 +71,30 @@ func (admS *AdminSv1) GetRateProfileIDs(ctx *context.Context, args *utils.ArgsIt
 	if limit, offset, maxItems, err = utils.GetPaginateOpts(args.APIOpts); err != nil {
 		return
 	}
-	*attrPrfIDs, err = utils.Paginate(retIDs, limit, offset, maxItems)
+	*ratePrfIDs, err = utils.Paginate(retIDs, limit, offset, maxItems)
+	return
+}
+
+// GetRateProfileRateIDs returns a list of rates from a specific RateProfile  registered for a tenant. RateIDs are returned back by matching a pattern given by ItemPrefix. If the ItemPrefix is not there, it will be returned all RateIDs.
+func (admS *AdminSv1) GetRateProfileRateIDs(ctx *context.Context, args *utils.ArgsSubItemIDs, rateIDs *[]string) (err error) {
+	if args.ProfileID == utils.EmptyString {
+		return utils.NewErrMandatoryIeMissing(args.ProfileID)
+	}
+	if args.Tenant == utils.EmptyString {
+		args.Tenant = admS.cfg.GeneralCfg().DefaultTenant
+	}
+	var ids []string
+	if ids, err = admS.dm.GetRateProfileRateIDs(ctx, args); err != nil {
+		return
+	}
+	if len(ids) == 0 {
+		return utils.ErrNotFound
+	}
+	var limit, offset, maxItems int
+	if limit, offset, maxItems, err = utils.GetPaginateOpts(args.APIOpts); err != nil {
+		return
+	}
+	*rateIDs, err = utils.Paginate(ids, limit, offset, maxItems)
 	return
 }
 

@@ -26,7 +26,13 @@ import (
 
 type ArgsItemIDs struct {
 	Tenant      string
-	ID          string
+	APIOpts     map[string]interface{}
+	ItemsPrefix string
+}
+
+type ArgsSubItemIDs struct {
+	Tenant      string
+	ProfileID   string
 	APIOpts     map[string]interface{}
 	ItemsPrefix string
 }
