@@ -1944,12 +1944,10 @@ func (dm *DataManager) GetRateProfile(ctx *context.Context, tenant, id string, c
 }
 
 func (dm *DataManager) GetRateProfileRateIDs(ctx *context.Context, args *utils.ArgsSubItemIDs) (rateIDs []string, err error) {
-	key := utils.RateProfilePrefix + utils.ConcatenatedKey(args.Tenant, args.ProfileID)
-	prefix := utils.Rates + utils.ConcatenatedKeySep
-	if args.ItemsPrefix != utils.EmptyString {
-		prefix = utils.ConcatenatedKey(utils.Rates, args.ItemsPrefix)
+	if dm == nil {
+		return nil, utils.ErrNoDatabaseConn
 	}
-	return dm.DataDB().GetRateProfileRateIDsDrv(ctx, key, prefix)
+	return dm.DataDB().GetRateProfileRateIDsDrv(ctx, args.Tenant, args.ProfileID, args.ItemsPrefix)
 }
 
 func (dm *DataManager) SetRateProfile(ctx *context.Context, rpp *utils.RateProfile, withIndex bool) (err error) {

@@ -27,7 +27,7 @@ type DataDBMock struct {
 	RemoveRateProfileDrvF      func(ctx *context.Context, str1 string, str2 string, rateIDs *[]string) error
 	SetRateProfileDrvF         func(*context.Context, *utils.RateProfile) error
 	GetRateProfileDrvF         func(*context.Context, string, string) (*utils.RateProfile, error)
-	GetRateProfileRateidSDrvF  func(*context.Context, string, string) ([]string, error)
+	GetRateProfileRateidSDrvF  func(*context.Context, string, string, string) ([]string, error)
 	GetKeysForPrefixF          func(*context.Context, string) ([]string, error)
 	GetIndexesDrvF             func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error)
 	SetIndexesDrvF             func(ctx *context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error)
@@ -376,9 +376,9 @@ func (dbM *DataDBMock) GetRateProfileDrv(ctx *context.Context, tnt string, id st
 	return nil, utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) GetRateProfileRateIDsDrv(ctx *context.Context, tnt string, id string) ([]string, error) {
+func (dbM *DataDBMock) GetRateProfileRateIDsDrv(ctx *context.Context, tnt string, id string, prefixArgs string) ([]string, error) {
 	if dbM.GetRateProfileRateidSDrvF != nil {
-		return dbM.GetRateProfileRateIDsDrv(ctx, tnt, id)
+		return dbM.GetRateProfileRateIDsDrv(ctx, tnt, id, prefixArgs)
 	}
 	return nil, utils.ErrNotImplemented
 }

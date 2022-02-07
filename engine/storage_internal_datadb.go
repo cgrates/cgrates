@@ -476,7 +476,16 @@ func (iDB *InternalDB) GetRateProfileDrv(_ *context.Context, tenant, id string) 
 	return x.(*utils.RateProfile), nil
 }
 
-func (iDB *InternalDB) GetRateProfileRateIDsDrv(ctx *context.Context, key, prefix string) (rateIDs []string, err error) {
+func (iDB *InternalDB) GetRateProfileRateIDsDrv(ctx *context.Context, tenant, profileID, prefixArgs string) (rateIDs []string, err error) {
+	x, ok := iDB.db.Get(utils.CacheRateProfiles, utils.ConcatenatedKey(tenant, profileID))
+	if !ok || x == nil {
+		return nil, utils.ErrNotFound
+	}
+	for key := range x.(*utils.RateProfile).Rates {
+		if strings.HasPrefix(key, prefixArgs) {
+			rateIDs = append(rateIDs, key)
+		}
+	}
 	return
 }
 
