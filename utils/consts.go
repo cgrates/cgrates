@@ -1474,14 +1474,16 @@ const (
 
 // RateProfile APIs
 const (
-	AdminSv1SetRateProfile         = "AdminSv1.SetRateProfile"
-	AdminSv1GetRateProfile         = "AdminSv1.GetRateProfile"
-	AdminSv1GetRateProfiles        = "AdminSv1.GetRateProfiles"
-	AdminSv1GetRateProfileIDs      = "AdminSv1.GetRateProfileIDs"
-	AdminSv1GetRateProfileCount    = "AdminSv1.GetRateProfileCount"
-	AdminSv1SetRateProfileRates    = "AdminSv1.SetRateProfileRates"
-	AdminSv1RemoveRateProfile      = "AdminSv1.RemoveRateProfile"
-	AdminSv1RemoveRateProfileRates = "AdminSv1.RemoveRateProfileRates"
+	AdminSv1SetRateProfile          = "AdminSv1.SetRateProfile"
+	AdminSv1GetRateProfile          = "AdminSv1.GetRateProfile"
+	AdminSv1GetRateProfiles         = "AdminSv1.GetRateProfiles"
+	AdminSv1GetRateProfileIDs       = "AdminSv1.GetRateProfileIDs"
+	AdminSv1GetRateProfileCount     = "AdminSv1.GetRateProfileCount"
+	AdminSv1GetRateProfileRateCount = "AdminSv1.GetRateProfileRateCount"
+	AdminSv1GetRateProfileRateIDs   = "AdminSv1.GetRateProfileRateIDs"
+	AdminSv1SetRateProfileRates     = "AdminSv1.SetRateProfileRates"
+	AdminSv1RemoveRateProfile       = "AdminSv1.RemoveRateProfile"
+	AdminSv1RemoveRateProfileRates  = "AdminSv1.RemoveRateProfileRates"
 )
 
 // AnalyzerS APIs

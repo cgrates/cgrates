@@ -476,6 +476,10 @@ func (iDB *InternalDB) GetRateProfileDrv(_ *context.Context, tenant, id string) 
 	return x.(*utils.RateProfile), nil
 }
 
+func (iDB *InternalDB) GetRateProfileRateIDsDrv(ctx *context.Context, key, prefix string) (rateIDs []string, err error) {
+	return
+}
+
 func (iDB *InternalDB) SetRateProfileDrv(_ *context.Context, rpp *utils.RateProfile) (err error) {
 	if err = rpp.Compile(); err != nil {
 		return

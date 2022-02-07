@@ -65,6 +65,7 @@ const (
 	redisRENAME   = "RENAME"
 	redisHMSET    = "HMSET"
 	redisHSET     = "HSET"
+	redisHSCAN    = "HSCAN"
 
 	redisLoadError = "Redis is loading the dataset in memory"
 	RedisLimit     = 524287 // https://github.com/StackExchange/StackExchange.Redis/issues/201#issuecomment-98639005
@@ -745,6 +746,24 @@ func (rs *RedisStorage) GetRateProfileDrv(ctx *context.Context, tenant, id strin
 		return
 	}
 	return utils.NewRateProfileFromMapDataDBMap(tenant, id, mapRP, rs.ms)
+}
+
+func (rs *RedisStorage) GetRateProfileRateIDsDrv(ctx *context.Context, key, prefix string) (rateIDs []string, err error) {
+	var rateField string
+	scan := radix.NewScanner(rs.client, radix.ScanOpts{
+		Command: redisHSCAN,
+		Key:     key,
+		Pattern: prefix + utils.Meta,
+	})
+	for scan.Next(&rateField) {
+		if strings.HasPrefix(rateField, prefix) {
+			rateIDs = append(rateIDs, strings.TrimPrefix(rateField, utils.Rates+utils.ConcatenatedKeySep))
+		}
+	}
+	if err = scan.Close(); err != nil {
+		return nil, err
+	}
+	return
 }
 
 func (rs *RedisStorage) RemoveRateProfileDrv(ctx *context.Context, tenant, id string, rateIDs *[]string) (err error) {
