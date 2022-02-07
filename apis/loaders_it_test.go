@@ -572,49 +572,57 @@ func testLoadersGetActionProfiles(t *testing.T) {
 }
 
 func testLoadersGetAttributeProfiles(t *testing.T) {
-	expAttrs := []*engine.APIAttributeProfile{
+	expAttrs := []*engine.AttributeProfile{
 		{
 			Tenant:    "cgrates.org",
 			ID:        "ALS1",
 			FilterIDs: []string{"*string:~*req.Account:1001", "*string:~*opts.*context:con1", "*string:~*opts.*context:con2|con3"},
-			Attributes: []*engine.ExternalAttribute{
+			Attributes: []*engine.Attribute{
 				{
 					FilterIDs: []string{"*string:~*req.Field1:Initial"},
 					Path:      utils.MetaReq + utils.NestingSep + "Field1",
 					Type:      utils.MetaVariable,
-					Value:     "Sub1",
+					Value:     config.NewRSRParsersMustCompile("Sub1", utils.InfieldSep),
 				},
 				{
 					Path:  utils.MetaReq + utils.NestingSep + "Field2",
 					Type:  utils.MetaVariable,
-					Value: "Sub2",
+					Value: config.NewRSRParsersMustCompile("Sub2", utils.InfieldSep),
 				},
 			},
 			Blocker: true,
-			Weights: ";20;;20",
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
 		},
 		{
 			Tenant:    "cgrates.org",
 			ID:        "ALS2",
 			FilterIDs: []string{"*string:~*opts.*context:con2|con3", "*string:~*req.Account:1002", "*string:~*opts.*context:con1"},
-			Attributes: []*engine.ExternalAttribute{
+			Attributes: []*engine.Attribute{
 				{
 					Path:  utils.MetaReq + utils.NestingSep + "Field2",
 					Type:  utils.MetaVariable,
-					Value: "Sub2",
+					Value: config.NewRSRParsersMustCompile("Sub2", utils.InfieldSep),
 				},
 				{
 					FilterIDs: []string{"*string:~*req.Field1:Initial"},
 					Path:      utils.MetaReq + utils.NestingSep + "Field1",
 					Type:      utils.MetaVariable,
-					Value:     "Sub1",
+					Value:     config.NewRSRParsersMustCompile("Sub1", utils.InfieldSep),
 				},
 			},
 			Blocker: true,
-			Weights: ";20;;20",
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
 		},
 	}
-	var attrs []*engine.APIAttributeProfile
+	var attrs []*engine.AttributeProfile
 	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfiles,
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
@@ -1299,7 +1307,7 @@ func testLoadersGetAttributeProfileAfterRemove(t *testing.T) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	}
 
-	var rplyAttrPrf engine.APIAttributeProfile
+	var rplyAttrPrf engine.AttributeProfile
 	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfile,
 		utils.TenantID{
 			Tenant: "cgrates.org",

@@ -184,13 +184,16 @@ func TestAttributesV1GetAttributeForEventProfileIgnoreOpts(t *testing.T) {
 			utils.MetaProfileIgnoreFilters:  false,
 		},
 	}
-	rply := &APIAttributeProfile{}
-	expected := &APIAttributeProfile{
-		Tenant:     "cgrates.org",
-		ID:         "AC1",
-		FilterIDs:  []string{"*string:~*req.Attribute:testAttrValue"},
-		Attributes: []*ExternalAttribute{},
-		Weights:    ";20",
+	rply := &AttributeProfile{}
+	expected := &AttributeProfile{
+		Tenant:    "cgrates.org",
+		ID:        "AC1",
+		FilterIDs: []string{"*string:~*req.Attribute:testAttrValue"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 	}
 
 	err = aA.V1GetAttributeForEvent(context.Background(), ev, rply)
@@ -213,13 +216,16 @@ func TestAttributesV1GetAttributeForEventProfileIgnoreOpts(t *testing.T) {
 			utils.MetaProfileIgnoreFilters:  true,
 		},
 	}
-	rply2 := &APIAttributeProfile{}
-	expected2 := &APIAttributeProfile{
-		Tenant:     "cgrates.org",
-		ID:         "AC1",
-		FilterIDs:  []string{"*string:~*req.Attribute:testAttrValue"},
-		Attributes: []*ExternalAttribute{},
-		Weights:    ";20",
+	rply2 := &AttributeProfile{}
+	expected2 := &AttributeProfile{
+		Tenant:    "cgrates.org",
+		ID:        "AC1",
+		FilterIDs: []string{"*string:~*req.Attribute:testAttrValue"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 	}
 	// with ignore filters on true and with bad filter
 	err = aA.V1GetAttributeForEvent(context.Background(), ev2, rply2)
@@ -300,7 +306,7 @@ func TestAttributesV1GetAttributeForEventErr(t *testing.T) {
 
 	alS := NewAttributeService(dm, filterS, cfg)
 	var ev utils.CGREvent
-	rply := &APIAttributeProfile{}
+	rply := &AttributeProfile{}
 	alS.Shutdown()
 	err = alS.V1GetAttributeForEvent(context.Background(), &ev, rply)
 	if err == nil || err != utils.ErrNotFound {
@@ -4392,29 +4398,33 @@ func TestAttributesV1GetAttributeForEvent(t *testing.T) {
 			utils.OptsAttributesProcessRuns: 2,
 		},
 	}
-	rply := &APIAttributeProfile{}
-	expected := &APIAttributeProfile{
+	rply := &AttributeProfile{}
+	expected := &AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ATTR_CHANGE_TENANT_FROM_USER",
 		FilterIDs: []string{"*string:~*req.Account:dan@itsyscom.com|adrian@itsyscom.com"},
-		Attributes: []*ExternalAttribute{
+		Attributes: []*Attribute{
 			{
 				Path:  "*tenant",
 				Type:  "*variable",
-				Value: "~*req.Account:s/(.*)@(.*)/${1}.${2}/",
+				Value: config.NewRSRParsersMustCompile("~*req.Account:s/(.*)@(.*)/${1}.${2}/", utils.InfieldSep),
 			},
 			{
 				Path:  "*req.Account",
 				Type:  "*variable",
-				Value: "~*req.Account:s/(dan)@(.*)/${1}.${2}/:s/(adrian)@(.*)/andrei.${2}/",
+				Value: config.NewRSRParsersMustCompile("~*req.Account:s/(dan)@(.*)/${1}.${2}/:s/(adrian)@(.*)/andrei.${2}/", utils.InfieldSep),
 			},
 			{
 				Path:  "*tenant",
 				Type:  "*composed",
-				Value: ".co.uk",
+				Value: config.NewRSRParsersMustCompile(".co.uk", utils.InfieldSep),
 			},
 		},
-		Weights: ";20",
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 	}
 
 	err = alS.V1GetAttributeForEvent(context.Background(), ev, rply)
@@ -4505,7 +4515,7 @@ func TestAttributesV1GetAttributeForEventErrorBoolOpts(t *testing.T) {
 			utils.MetaProfileIgnoreFilters:  time.Second,
 		},
 	}
-	rply := &APIAttributeProfile{}
+	rply := &AttributeProfile{}
 
 	err = alS.V1GetAttributeForEvent(context.Background(), ev, rply)
 	if err == nil || err.Error() != "cannot convert field: 1s to bool" {
@@ -4582,7 +4592,7 @@ func TestAttributesV1GetAttributeForEventErrorNil(t *testing.T) {
 	}
 
 	alS := NewAttributeService(dm, filterS, cfg)
-	rply := &APIAttributeProfile{}
+	rply := &AttributeProfile{}
 
 	err = alS.V1GetAttributeForEvent(context.Background(), nil, rply)
 	if err == nil || err.Error() != "MANDATORY_IE_MISSING: [CGREvent]" {
@@ -4670,7 +4680,7 @@ func TestAttributesV1GetAttributeForEventErrOptsI(t *testing.T) {
 			utils.OptsAttributesProfileIDs:  time.Second,
 		},
 	}
-	rply := &APIAttributeProfile{}
+	rply := &AttributeProfile{}
 
 	err = alS.V1GetAttributeForEvent(context.Background(), ev, rply)
 	if err == nil || err.Error() != "cannot convert field: 1s to []string" {

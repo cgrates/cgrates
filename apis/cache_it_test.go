@@ -121,21 +121,21 @@ func testCacheSRpcConn(t *testing.T) {
 
 //Set an attribute profile and rate profile to test cache's apis
 func testCacheSSetAttributeProfile(t *testing.T) {
-	attrPrf := &engine.APIAttributeProfileWithAPIOpts{
-		APIAttributeProfile: &engine.APIAttributeProfile{
+	attrPrf := &engine.AttributeProfileWithAPIOpts{
+		AttributeProfile: &engine.AttributeProfile{
 			Tenant:    utils.CGRateSorg,
 			ID:        "TEST_ATTRIBUTES_IT_TEST",
 			FilterIDs: []string{"*string:~*req.Account:1002"},
-			Attributes: []*engine.ExternalAttribute{
+			Attributes: []*engine.Attribute{
 				{
 					Path:  utils.AccountField,
 					Type:  utils.MetaConstant,
-					Value: "1002",
+					Value: config.NewRSRParsersMustCompile("1002", utils.InfieldSep),
 				},
 				{
 					Path:  "*tenant",
 					Type:  utils.MetaConstant,
-					Value: "cgrates.itsyscom",
+					Value: config.NewRSRParsersMustCompile("cgrates.itsyscom", utils.InfieldSep),
 				},
 			},
 		},
@@ -235,24 +235,24 @@ func testCacheSHasItemAttributeProfile(t *testing.T) {
 		t.Errorf("Expected %+v, received %+v", utils.ErrNotFound, err)
 	}
 
-	expectedAttr := &engine.APIAttributeProfile{
+	expectedAttr := &engine.AttributeProfile{
 		Tenant:    utils.CGRateSorg,
 		ID:        "TEST_ATTRIBUTES_IT_TEST",
 		FilterIDs: []string{"*string:~*req.Account:1002"},
-		Attributes: []*engine.ExternalAttribute{
+		Attributes: []*engine.Attribute{
 			{
 				Path:  utils.AccountField,
 				Type:  utils.MetaConstant,
-				Value: "1002",
+				Value: config.NewRSRParsersMustCompile("1002", utils.InfieldSep),
 			},
 			{
 				Path:  "*tenant",
 				Type:  utils.MetaConstant,
-				Value: "cgrates.itsyscom",
+				Value: config.NewRSRParsersMustCompile("cgrates.itsyscom", utils.InfieldSep),
 			},
 		},
 	}
-	var resultAtr *engine.APIAttributeProfile
+	var resultAtr *engine.AttributeProfile
 	if err := chcRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfile,
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{
@@ -438,46 +438,58 @@ func testCacheSRemoveItemsAndReloadCache(t *testing.T) {
 }
 
 func testCacheSSetMoreAttributeProfiles(t *testing.T) {
-	attrPrf1 := &engine.APIAttributeProfileWithAPIOpts{
-		APIAttributeProfile: &engine.APIAttributeProfile{
+	attrPrf1 := &engine.AttributeProfileWithAPIOpts{
+		AttributeProfile: &engine.AttributeProfile{
 			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:        "ATTR_1",
 			FilterIDs: []string{"*string:~*req.InitialField:InitialValue", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z", "*string:~*opts.*context:*sessions"},
-			Attributes: []*engine.ExternalAttribute{
+			Attributes: []*engine.Attribute{
 				{
 					Path:  utils.MetaReq + utils.NestingSep + "Field1",
-					Value: "Value1",
+					Value: config.NewRSRParsersMustCompile("Value1", utils.InfieldSep),
 				},
 			},
-			Weights: ";10",
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				},
+			},
 		},
 	}
-	attrPrf2 := &engine.APIAttributeProfileWithAPIOpts{
-		APIAttributeProfile: &engine.APIAttributeProfile{
+	attrPrf2 := &engine.AttributeProfileWithAPIOpts{
+		AttributeProfile: &engine.AttributeProfile{
 			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:        "ATTR_2",
 			FilterIDs: []string{"*string:~*req.Field1:Value1", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z", "*string:~*opts.*context:*sessions"},
-			Attributes: []*engine.ExternalAttribute{
+			Attributes: []*engine.Attribute{
 				{
 					Path:  utils.MetaReq + utils.NestingSep + "Field2",
-					Value: "Value2",
+					Value: config.NewRSRParsersMustCompile("Value2", utils.InfieldSep),
 				},
 			},
-			Weights: ";20",
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
 		},
 	}
-	attrPrf3 := &engine.APIAttributeProfileWithAPIOpts{
-		APIAttributeProfile: &engine.APIAttributeProfile{
+	attrPrf3 := &engine.AttributeProfileWithAPIOpts{
+		AttributeProfile: &engine.AttributeProfile{
 			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:        "ATTR_3",
 			FilterIDs: []string{"*string:~*req.Field2:Value2", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z", "*string:~*opts.*context:*sessions"},
-			Attributes: []*engine.ExternalAttribute{
+			Attributes: []*engine.Attribute{
 				{
 					Path:  utils.MetaReq + utils.NestingSep + "Field3",
-					Value: "Value3",
+					Value: config.NewRSRParsersMustCompile("Value3", utils.InfieldSep),
 				},
 			},
-			Weights: ";30",
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 30,
+				},
+			},
 		},
 	}
 	// Add attributeProfiles

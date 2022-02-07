@@ -40,14 +40,14 @@ func TestAttributesSetGetAttributeProfile(t *testing.T) {
 		dm:  dm,
 	}
 
-	attrPrf := &engine.APIAttributeProfileWithAPIOpts{
-		APIAttributeProfile: &engine.APIAttributeProfile{
+	attrPrf := &engine.AttributeProfileWithAPIOpts{
+		AttributeProfile: &engine.AttributeProfile{
 			ID: "TestGetAttributeProfile",
-			Attributes: []*engine.ExternalAttribute{
+			Attributes: []*engine.Attribute{
 				{
 					Path:  "*req.RequestType",
 					Type:  utils.MetaConstant,
-					Value: utils.MetaPrepaid,
+					Value: config.NewRSRParsersMustCompile(utils.MetaPrepaid, utils.InfieldSep),
 				},
 			},
 		},
@@ -58,7 +58,7 @@ func TestAttributesSetGetAttributeProfile(t *testing.T) {
 		t.Error(err)
 	}
 	//get after set
-	var rcv engine.APIAttributeProfile
+	var rcv engine.AttributeProfile
 	if err := admS.GetAttributeProfile(context.Background(),
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{
@@ -67,8 +67,8 @@ func TestAttributesSetGetAttributeProfile(t *testing.T) {
 		t.Error(err)
 	} else {
 		newRcv := &rcv
-		if !reflect.DeepEqual(newRcv, attrPrf.APIAttributeProfile) {
-			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(attrPrf.APIAttributeProfile), utils.ToJSON(newRcv))
+		if !reflect.DeepEqual(newRcv, attrPrf.AttributeProfile) {
+			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(attrPrf.AttributeProfile), utils.ToJSON(newRcv))
 		}
 	}
 
@@ -111,13 +111,13 @@ func TestAttributesSetAttributeProfileCheckErrors(t *testing.T) {
 		dm:  dm,
 	}
 
-	attrPrf := &engine.APIAttributeProfileWithAPIOpts{
-		APIAttributeProfile: &engine.APIAttributeProfile{
-			Attributes: []*engine.ExternalAttribute{
+	attrPrf := &engine.AttributeProfileWithAPIOpts{
+		AttributeProfile: &engine.AttributeProfile{
+			Attributes: []*engine.Attribute{
 				{
 					Path:  "*req.RequestType",
 					Type:  utils.MetaConstant,
-					Value: utils.MetaConstant,
+					Value: config.NewRSRParsersMustCompile(utils.MetaConstant, utils.InfieldSep),
 				},
 			},
 		},
@@ -193,7 +193,7 @@ func TestAttributesGetAttributeProfileCheckErrors(t *testing.T) {
 		dm:  dm,
 	}
 
-	var rcv engine.APIAttributeProfile
+	var rcv engine.AttributeProfile
 	expected := "MANDATORY_IE_MISSING: [ID]"
 	if err := admS.GetAttributeProfile(context.Background(),
 		&utils.TenantIDWithAPIOpts{
@@ -226,14 +226,14 @@ func TestAttributesRemoveAttributeProfileCheckErrors(t *testing.T) {
 		dm:  dm,
 	}
 
-	attrPrf := &engine.APIAttributeProfileWithAPIOpts{
-		APIAttributeProfile: &engine.APIAttributeProfile{
+	attrPrf := &engine.AttributeProfileWithAPIOpts{
+		AttributeProfile: &engine.AttributeProfile{
 			ID: "TestGetAttributeProfile",
-			Attributes: []*engine.ExternalAttribute{
+			Attributes: []*engine.Attribute{
 				{
 					Path:  "*req.RequestType",
 					Type:  utils.MetaConstant,
-					Value: utils.MetaConstant,
+					Value: config.NewRSRParsersMustCompile(utils.MetaConstant, utils.InfieldSep),
 				},
 			},
 		},
@@ -261,7 +261,7 @@ func TestAttributesRemoveAttributeProfileCheckErrors(t *testing.T) {
 	cancel()
 	admS.cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 
-	var rcv engine.APIAttributeProfile
+	var rcv engine.AttributeProfile
 	if err := admS.GetAttributeProfile(context.Background(),
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{
@@ -472,16 +472,16 @@ func TestAttributesGetAttributeForEvent(t *testing.T) {
 		dm:  dm,
 		cfg: cfg,
 	}
-	attrPrf := &engine.APIAttributeProfileWithAPIOpts{
-		APIAttributeProfile: &engine.APIAttributeProfile{
+	attrPrf := &engine.AttributeProfileWithAPIOpts{
+		AttributeProfile: &engine.AttributeProfile{
 			Tenant:    "cgrates.org",
 			ID:        "TestGetAttributeProfile",
 			FilterIDs: []string{"*string:~*req.Account:1002"},
-			Attributes: []*engine.ExternalAttribute{
+			Attributes: []*engine.Attribute{
 				{
 					Path:  "*req.RequestType",
 					Type:  utils.MetaConstant,
-					Value: utils.MetaPrepaid,
+					Value: config.NewRSRParsersMustCompile(utils.MetaPrepaid, utils.InfieldSep),
 				},
 			},
 		},
@@ -498,17 +498,17 @@ func TestAttributesGetAttributeForEvent(t *testing.T) {
 			utils.AccountField: "1002",
 		},
 	}
-	var reply engine.APIAttributeProfile
+	var reply engine.AttributeProfile
 
-	expAttrPrf := &engine.APIAttributeProfile{
+	expAttrPrf := &engine.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "TestGetAttributeProfile",
 		FilterIDs: []string{"*string:~*req.Account:1002"},
-		Attributes: []*engine.ExternalAttribute{
+		Attributes: []*engine.Attribute{
 			{
 				Path:  "*req.RequestType",
 				Type:  utils.MetaConstant,
-				Value: utils.MetaPrepaid,
+				Value: config.NewRSRParsersMustCompile(utils.MetaPrepaid, utils.InfieldSep),
 			},
 		},
 	}

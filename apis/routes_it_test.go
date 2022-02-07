@@ -333,46 +333,70 @@ func testRouteSSetRoute3(t *testing.T) {
 }
 
 func testFilterSGetRoutes(t *testing.T) {
-	var reply []*engine.APIRouteProfile
+	var reply []*engine.RouteProfile
 	args := &utils.ArgsItemIDs{}
-	expected := []*engine.APIRouteProfile{
+	expected := []*engine.RouteProfile{
 
 		{
-			ID:                "PrefixROUTE_ACNT_1002",
-			Tenant:            "cgrates.org",
-			Weights:           ";10",
+			ID:     "PrefixROUTE_ACNT_1002",
+			Tenant: "cgrates.org",
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				},
+			},
 			Sorting:           utils.MetaWeight,
 			SortingParameters: []string{},
-			Routes: []*engine.ExternalRoute{
+			Routes: []*engine.Route{
 				{
-					ID:      "route1",
-					Weights: ";20",
+					ID: "route1",
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 20,
+						},
+					},
 				},
 			},
 		},
 		{
-			ID:                "PrefixROUTE_ACNT_1003",
-			Tenant:            "cgrates.org",
-			Weights:           ";10",
+			ID:     "PrefixROUTE_ACNT_1003",
+			Tenant: "cgrates.org",
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				},
+			},
 			Sorting:           utils.MetaWeight,
 			SortingParameters: []string{},
-			Routes: []*engine.ExternalRoute{
+			Routes: []*engine.Route{
 				{
-					ID:      "route1",
-					Weights: ";20",
+					ID: "route1",
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 20,
+						},
+					},
 				},
 			},
 		},
 		{
-			ID:                "ROUTE_ACNT_1001",
-			Tenant:            "cgrates.org",
-			Weights:           ";10",
+			ID:     "ROUTE_ACNT_1001",
+			Tenant: "cgrates.org",
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				},
+			},
 			Sorting:           utils.MetaWeight,
 			SortingParameters: []string{},
-			Routes: []*engine.ExternalRoute{
+			Routes: []*engine.Route{
 				{
-					ID:      "route1",
-					Weights: ";20",
+					ID: "route1",
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 20,
+						},
+					},
 				},
 			},
 		},
@@ -389,34 +413,50 @@ func testFilterSGetRoutes(t *testing.T) {
 	}
 }
 func testFilterSGetRoutesWithPrefix(t *testing.T) {
-	var reply []*engine.APIRouteProfile
+	var reply []*engine.RouteProfile
 	args := &utils.ArgsItemIDs{
 		ItemsPrefix: "PrefixROUTE",
 	}
-	expected := []*engine.APIRouteProfile{
+	expected := []*engine.RouteProfile{
 		{
-			ID:                "PrefixROUTE_ACNT_1002",
-			Tenant:            "cgrates.org",
-			Weights:           ";10",
+			ID:     "PrefixROUTE_ACNT_1002",
+			Tenant: "cgrates.org",
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				},
+			},
 			Sorting:           utils.MetaWeight,
 			SortingParameters: []string{},
-			Routes: []*engine.ExternalRoute{
+			Routes: []*engine.Route{
 				{
-					ID:      "route1",
-					Weights: ";20",
+					ID: "route1",
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 20,
+						},
+					},
 				},
 			},
 		},
 		{
-			ID:                "PrefixROUTE_ACNT_1003",
-			Tenant:            "cgrates.org",
-			Weights:           ";10",
+			ID:     "PrefixROUTE_ACNT_1003",
+			Tenant: "cgrates.org",
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				},
+			},
 			Sorting:           utils.MetaWeight,
 			SortingParameters: []string{},
-			Routes: []*engine.ExternalRoute{
+			Routes: []*engine.Route{
 				{
-					ID:      "route1",
-					Weights: ";20",
+					ID: "route1",
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 20,
+						},
+					},
 				},
 			},
 		},
