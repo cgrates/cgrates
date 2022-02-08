@@ -632,6 +632,9 @@ func testLoadersGetAttributeProfiles(t *testing.T) {
 		sort.Slice(attrs, func(i, j int) bool {
 			return attrs[i].ID < attrs[j].ID
 		})
+		for _, ap := range attrs {
+			ap.Compile()
+		}
 		if !reflect.DeepEqual(attrs, expAttrs) {
 			t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ToJSON(expAttrs), utils.ToJSON(attrs))
 		}
