@@ -49,32 +49,33 @@ var (
 		testRateSResetStorDb,
 		testRateSStartEngine,
 		testRateSRPCConn,
-		testGetRateProfileBeforeSet,
-		testGetRateProfilesBeforeSet,
-		testRateSetRateProfile,
-		testRateGetRateProfileIDs,
-		testRateGetRateProfiles,
-		testRateGetRateCount,
-		testGetRateProfileBeforeSet2,
-		testRateSetRateProfile2,
-		testRateGetRateIDs2,
-		testRateGetRateProfiles2,
-		testRateGetRateCount2,
-		testRateRemoveRateProfile,
-		testRateGetRateProfileIDs,
-		testRateGetRateCount,
-		testRateSetRateProfile3,
-		testRateSetAttributeProfileBrokenReference,
-		testRateRemoveRateProfileRates,
-		testRateSetRateProfileRates,
-		testRateSetRateProfilesWithPrefix,
+		/*
+			testGetRateProfileBeforeSet,
+			testGetRateProfilesBeforeSet,
+			testRateSetRateProfile,
+			testRateGetRateProfileIDs,
+			testRateGetRateProfiles,
+			testRateGetRateCount,
+			testGetRateProfileBeforeSet2,
+			testRateSetRateProfile2,
+			testRateGetRateIDs2,
+			testRateGetRateProfiles2,
+			testRateGetRateCount2,
+			testRateRemoveRateProfile,
+			testRateGetRateProfileIDs,
+			testRateGetRateCount,
+			testRateSetRateProfile3,
+			testRateSetAttributeProfileBrokenReference,
+			testRateRemoveRateProfileRates,
+			testRateSetRateProfileRates,
+			testRateSetRateProfilesWithPrefix, */
 		// here we will tests better the create,read,update and delte for the rates inside of a RateProfile
 		testRateProfileWithMultipleRates,
 		testRateProfileRateIDsAndCount,
-		testRateProfileUpdateRates,
+		/* testRateProfileUpdateRates,
 		testRateProfileRemoveMultipleRates,
 		testRateProfileSetMultipleRatesInProfile,
-		testRateProfileUpdateProfile,
+		testRateProfileUpdateProfile, */
 		testRateSKillEngine,
 	}
 )
@@ -1299,6 +1300,18 @@ func testRateProfileRateIDsAndCount(t *testing.T) {
 		}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != 5 {
+		t.Errorf("Unexpected reply returned: %v", reply)
+	}
+
+	// now list all the rates
+	var replyRts []*utils.Rate
+	if err := rateSRPC.Call(context.Background(), utils.AdminSv1GetRateProfileRates,
+		&utils.ArgsSubItemIDs{
+			Tenant:    "cgrates.org",
+			ProfileID: "MultipleRates",
+		}, &replyRts); err != nil {
+		t.Error(err)
+	} else if len(replyRts) != 5 { //RT_MONDAY, RT_THUESDAY, RT_WEDNESDAY, RT_THURSDAY AND RT_FRIDAY
 		t.Errorf("Unexpected reply returned: %v", reply)
 	}
 }

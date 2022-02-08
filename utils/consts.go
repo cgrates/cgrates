@@ -1477,6 +1477,7 @@ const (
 	AdminSv1SetRateProfile          = "AdminSv1.SetRateProfile"
 	AdminSv1GetRateProfile          = "AdminSv1.GetRateProfile"
 	AdminSv1GetRateProfiles         = "AdminSv1.GetRateProfiles"
+	AdminSv1GetRateProfileRates     = "AdminSv1.GetRateProfileRates"
 	AdminSv1GetRateProfileIDs       = "AdminSv1.GetRateProfileIDs"
 	AdminSv1GetRateProfileCount     = "AdminSv1.GetRateProfileCount"
 	AdminSv1GetRateProfileRateCount = "AdminSv1.GetRateProfileRateCount"
