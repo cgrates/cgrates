@@ -182,7 +182,11 @@ func testThresholdsSetThresholdProfiles(t *testing.T) {
 			ActionProfileIDs: []string{"actPrfID"},
 			MaxHits:          5,
 			MinHits:          1,
-			Weight:           10,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				},
+			},
 		},
 	}
 
@@ -202,7 +206,11 @@ func testThresholdsSetThresholdProfiles(t *testing.T) {
 			ActionProfileIDs: []string{"actPrfID"},
 			MaxHits:          7,
 			MinHits:          0,
-			Weight:           20,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				},
+			},
 		},
 	}
 
@@ -228,7 +236,11 @@ func testThresholdsGetThresholdAfterSet(t *testing.T) {
 		ActionProfileIDs: []string{"actPrfID"},
 		MaxHits:          5,
 		MinHits:          1,
-		Weight:           10,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 	}
 
 	if err := thRPC.Call(context.Background(), utils.ThresholdSv1GetThreshold,
@@ -266,7 +278,11 @@ func testThresholdsGetThresholdAfterSet(t *testing.T) {
 		ActionProfileIDs: []string{"actPrfID"},
 		MaxHits:          7,
 		MinHits:          0,
-		Weight:           20,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 	}
 
 	if err := thRPC.Call(context.Background(), utils.ThresholdSv1GetThreshold,
@@ -335,7 +351,11 @@ func testThresholdsGetThresholdProfiles(t *testing.T) {
 			ActionProfileIDs: []string{"actPrfID"},
 			MaxHits:          5,
 			MinHits:          1,
-			Weight:           10,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				},
+			},
 		},
 		{
 			Tenant:           "cgrates.org",
@@ -344,7 +364,11 @@ func testThresholdsGetThresholdProfiles(t *testing.T) {
 			ActionProfileIDs: []string{"actPrfID"},
 			MaxHits:          7,
 			MinHits:          0,
-			Weight:           20,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
 		},
 	}
 	var ths []*engine.ThresholdProfile
@@ -372,7 +396,11 @@ func testThresholdsGetThresholdProfilesWithPrefix(t *testing.T) {
 			ActionProfileIDs: []string{"actPrfID"},
 			MaxHits:          7,
 			MinHits:          0,
-			Weight:           20,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
 		},
 	}
 	var ths []*engine.ThresholdProfile
@@ -519,8 +547,12 @@ func testThresholdsSetThresholdProfilesBeforeProcessEv(t *testing.T) {
 			ActionProfileIDs: []string{"actPrfID"},
 			MaxHits:          5,
 			MinHits:          3,
-			Weight:           10,
-			Async:            true,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				},
+			},
+			Async: true,
 		},
 	}
 
@@ -540,8 +572,12 @@ func testThresholdsSetThresholdProfilesBeforeProcessEv(t *testing.T) {
 			ActionProfileIDs: []string{"actPrfID"},
 			MaxHits:          3,
 			MinHits:          2,
-			Weight:           20,
-			Async:            true,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
+			Async: true,
 		},
 	}
 

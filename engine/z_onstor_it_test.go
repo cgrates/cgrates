@@ -466,13 +466,17 @@ func testOnStorITThresholdProfile(t *testing.T) {
 		},
 	}
 	th := &ThresholdProfile{
-		Tenant:           "cgrates.org",
-		ID:               "test",
-		FilterIDs:        []string{"TestFilter2"},
-		MaxHits:          12,
-		MinSleep:         0,
-		Blocker:          true,
-		Weight:           1.4,
+		Tenant:    "cgrates.org",
+		ID:        "test",
+		FilterIDs: []string{"TestFilter2"},
+		MaxHits:   12,
+		MinSleep:  0,
+		Blocker:   true,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 1.4,
+			},
+		},
 		ActionProfileIDs: []string{"Action1"},
 	}
 	if err := onStor.SetFilter(context.TODO(), fp, true); err != nil {

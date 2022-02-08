@@ -1669,3 +1669,55 @@ func TestStatQueueProfileMerge(t *testing.T) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(sqp))
 	}
 }
+
+func TestStatQueueProfile_Set(t *testing.T) {
+	type fields struct {
+		Tenant       string
+		ID           string
+		FilterIDs    []string
+		QueueLength  int
+		TTL          time.Duration
+		MinItems     int
+		Metrics      []*MetricWithFilters
+		Stored       bool
+		Blocker      bool
+		Weights      utils.DynamicWeights
+		ThresholdIDs []string
+		lkID         string
+	}
+	type args struct {
+		path      []string
+		val       interface{}
+		newBranch bool
+		in3       string
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		wantErr bool
+	}{
+		// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			sqp := &StatQueueProfile{
+				Tenant:       tt.fields.Tenant,
+				ID:           tt.fields.ID,
+				FilterIDs:    tt.fields.FilterIDs,
+				QueueLength:  tt.fields.QueueLength,
+				TTL:          tt.fields.TTL,
+				MinItems:     tt.fields.MinItems,
+				Metrics:      tt.fields.Metrics,
+				Stored:       tt.fields.Stored,
+				Blocker:      tt.fields.Blocker,
+				Weights:      tt.fields.Weights,
+				ThresholdIDs: tt.fields.ThresholdIDs,
+				lkID:         tt.fields.lkID,
+			}
+			if err := sqp.Set(tt.args.path, tt.args.val, tt.args.newBranch, tt.args.in3); (err != nil) != tt.wantErr {
+				t.Errorf("StatQueueProfile.Set() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}

@@ -4711,7 +4711,11 @@ func testV1FIdxSetThresholdProfileWithFltr(t *testing.T) {
 			ID:     "THD_ACNT_1001",
 			FilterIDs: []string{"fltr_for_attr",
 				"*string:~*req.Account:1001"},
-			Weight:           10,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				},
+			},
 			MaxHits:          -1,
 			MinHits:          0,
 			ActionProfileIDs: []string{"TOPUP_MONETARY_10"},
@@ -4804,7 +4808,11 @@ func testV1FIdxSetThresholdSMoreFltrsMoreIndexing(t *testing.T) {
 			FilterIDs: []string{"fltr_for_attr",
 				"fltr_for_attr2", "fltr_for_attr3",
 				"*string:~*req.Account:1001"},
-			Weight:           10,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				},
+			},
 			MaxHits:          -1,
 			MinHits:          0,
 			ActionProfileIDs: []string{"TOPUP_MONETARY_10"},
@@ -4873,7 +4881,7 @@ func testV1FIdxThresholdSProfileComputeIndexes(t *testing.T) {
 	}
 	var replyIdx []string
 
-	//matching indexes
+	//Weightsng indexes
 	expectedIDx := []string{"*string:*req.Subject:1004:THD_ACNT_1001",
 		"*string:*req.Subject:6774:THD_ACNT_1001",
 		"*string:*req.Subject:22312:THD_ACNT_1001",
@@ -4905,7 +4913,11 @@ func testV1FIdxThresholdsSMoreProfilesForFltrs(t *testing.T) {
 			ID:     "THD_ACNT_1002",
 			FilterIDs: []string{"fltr_for_attr2", "fltr_for_attr3",
 				"*string:~*req.Account:1001"},
-			Weight:           20,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
 			MaxHits:          4,
 			MinHits:          0,
 			ActionProfileIDs: []string{"ADDBAL"},
@@ -4917,7 +4929,11 @@ func testV1FIdxThresholdsSMoreProfilesForFltrs(t *testing.T) {
 			ID:     "THD_ACNT_1003",
 			FilterIDs: []string{"fltr_for_attr",
 				"*string:~*req.Account:1001"},
-			Weight:           150,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 150,
+				},
+			},
 			MaxHits:          4,
 			MinHits:          2,
 			ActionProfileIDs: []string{"reset_Bal_10"},

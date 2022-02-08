@@ -258,8 +258,8 @@ type TPThresholdProfile struct {
 	MaxHits          int
 	MinHits          int
 	MinSleep         string
-	Blocker          bool    // blocker flag to stop processing on filters matched
-	Weight           float64 // Weight to sort the thresholds
+	Blocker          bool   // blocker flag to stop processing on filters matched
+	Weights          string // Weight to sort the thresholds
 	ActionProfileIDs []string
 	Async            bool
 }

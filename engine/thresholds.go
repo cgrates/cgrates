@@ -45,8 +45,8 @@ type ThresholdProfile struct {
 	MaxHits          int
 	MinHits          int
 	MinSleep         time.Duration
-	Blocker          bool    // blocker flag to stop processing on filters matched
-	Weight           float64 // Weight to sort the thresholds
+	Blocker          bool                 // blocker flag to stop processing on filters matched
+	Weights          utils.DynamicWeights // Weight to sort the thresholds
 	ActionProfileIDs []string
 	Async            bool
 
@@ -101,9 +101,10 @@ type Threshold struct {
 	Hits   int       // number of hits for this threshold
 	Snooze time.Time // prevent threshold to run too early
 
-	lkID  string // ID of the lock used when matching the threshold
-	tPrfl *ThresholdProfile
-	dirty *bool // needs save
+	lkID   string // ID of the lock used when matching the threshold
+	tPrfl  *ThresholdProfile
+	dirty  *bool // needs save
+	weight float64
 }
 
 // TenantID returns the concatenated key beteen tenant and ID
@@ -187,7 +188,7 @@ type Thresholds []*Threshold
 
 // Sort sorts based on Weight
 func (ts Thresholds) Sort() {
-	sort.Slice(ts, func(i, j int) bool { return ts[i].tPrfl.Weight > ts[j].tPrfl.Weight })
+	sort.Slice(ts, func(i, j int) bool { return ts[i].weight > ts[j].weight })
 }
 
 // unlock will unlock thresholds part of this slice
@@ -403,7 +404,12 @@ func (tS *ThresholdS) matchingThresholdsForEvent(ctx *context.Context, tnt strin
 		if t.dirty == nil || tPrfl.MaxHits == -1 || t.Hits < tPrfl.MaxHits {
 			t.dirty = utils.BoolPointer(false)
 		}
+
 		t.tPrfl = tPrfl
+		if t.weight, err = WeightFromDynamics(ctx, tPrfl.Weights,
+			tS.fltrS, tnt, evNm); err != nil {
+			return
+		}
 		ts = append(ts, t)
 	}
 	// All good, convert from Map to Slice so we can sort
@@ -608,7 +614,7 @@ func (tp *ThresholdProfile) Set(path []string, val interface{}, _ bool, _ string
 		tp.Blocker, err = utils.IfaceAsBool(val)
 	case utils.Weight:
 		if val != utils.EmptyString {
-			tp.Weight, err = utils.IfaceAsFloat64(val)
+			tp.Weights, err = utils.NewDynamicWeightsFromString(utils.IfaceAsString(val), utils.InfieldSep, utils.ANDSep)
 		}
 	case utils.FilterIDs:
 		var valA []string
@@ -650,9 +656,7 @@ func (tp *ThresholdProfile) Merge(v2 interface{}) {
 	if vi.Async {
 		tp.Async = vi.Async
 	}
-	if vi.Weight != 0 {
-		tp.Weight = vi.Weight
-	}
+	tp.Weights = append(tp.Weights, vi.Weights...)
 	if vi.MaxHits != 0 {
 		tp.MaxHits = vi.MaxHits
 	}
@@ -699,7 +703,7 @@ func (tp *ThresholdProfile) FieldAsInterface(fldPath []string) (_ interface{}, e
 	case utils.FilterIDs:
 		return tp.FilterIDs, nil
 	case utils.Weight:
-		return tp.Weight, nil
+		return tp.Weights, nil
 	case utils.ActionProfileIDs:
 		return tp.ActionProfileIDs, nil
 	case utils.MaxHits:

@@ -406,7 +406,7 @@ func TestTPThresholdsAsTPThreshold(t *testing.T) {
 			MinHits:          10,
 			MinSleep:         "1s",
 			Blocker:          false,
-			Weight:           20.0,
+			Weights:          ";20",
 			ActionProfileIDs: "WARN3",
 		},
 	}
@@ -419,7 +419,7 @@ func TestTPThresholdsAsTPThreshold(t *testing.T) {
 			MaxHits:          tps[0].MaxHits,
 			MinHits:          tps[0].MinHits,
 			Blocker:          tps[0].Blocker,
-			Weight:           tps[0].Weight,
+			Weights:          tps[0].Weights,
 			ActionProfileIDs: []string{"WARN3"},
 		},
 		{
@@ -430,7 +430,7 @@ func TestTPThresholdsAsTPThreshold(t *testing.T) {
 			MaxHits:          tps[0].MaxHits,
 			MinHits:          tps[0].MinHits,
 			Blocker:          tps[0].Blocker,
-			Weight:           tps[0].Weight,
+			Weights:          tps[0].Weights,
 			ActionProfileIDs: []string{"WARN3"},
 		},
 	}
@@ -462,7 +462,7 @@ func TestAPItoModelTPThreshold(t *testing.T) {
 		MinHits:          10,
 		MinSleep:         "1s",
 		Blocker:          false,
-		Weight:           20.0,
+		Weights:          ";20",
 		ActionProfileIDs: []string{"WARN3"},
 	}
 	models := ThresholdMdls{
@@ -475,7 +475,7 @@ func TestAPItoModelTPThreshold(t *testing.T) {
 			MinHits:          10,
 			MinSleep:         "1s",
 			Blocker:          false,
-			Weight:           20.0,
+			Weights:          ";20",
 			ActionProfileIDs: "WARN3",
 		},
 		{
@@ -501,7 +501,7 @@ func TestAPItoModelTPThreshold2(t *testing.T) {
 		MinHits:          10,
 		MinSleep:         "1s",
 		Blocker:          false,
-		Weight:           20.0,
+		Weights:          ";20",
 		ActionProfileIDs: []string{"WARN3"},
 	}
 	models := ThresholdMdls{
@@ -514,7 +514,7 @@ func TestAPItoModelTPThreshold2(t *testing.T) {
 			MinHits:          10,
 			MinSleep:         "1s",
 			Blocker:          false,
-			Weight:           20.0,
+			Weights:          ";20",
 			ActionProfileIDs: "WARN3",
 		},
 		{
@@ -546,7 +546,7 @@ func TestAPItoModelTPThreshold3(t *testing.T) {
 		MinHits:          10,
 		MinSleep:         "1s",
 		Blocker:          false,
-		Weight:           20.0,
+		Weights:          ";20",
 		ActionProfileIDs: []string{"WARN3", "LOG"},
 	}
 	models := ThresholdMdls{
@@ -559,7 +559,7 @@ func TestAPItoModelTPThreshold3(t *testing.T) {
 			MinHits:          10,
 			MinSleep:         "1s",
 			Blocker:          false,
-			Weight:           20.0,
+			Weights:          ";20",
 			ActionProfileIDs: "WARN3",
 		},
 		{
@@ -586,7 +586,7 @@ func TestAPItoModelTPThreshold4(t *testing.T) {
 		MinHits:          10,
 		MinSleep:         "1s",
 		Blocker:          false,
-		Weight:           20.0,
+		Weights:          ";20",
 		ActionProfileIDs: []string{"WARN3", "LOG"},
 	}
 	models := ThresholdMdls{
@@ -599,7 +599,7 @@ func TestAPItoModelTPThreshold4(t *testing.T) {
 			MinHits:          10,
 			MinSleep:         "1s",
 			Blocker:          false,
-			Weight:           20.0,
+			Weights:          ";20",
 			ActionProfileIDs: "WARN3",
 		},
 		{
@@ -625,7 +625,7 @@ func TestAPItoModelTPThreshold5(t *testing.T) {
 		MinHits:          10,
 		MinSleep:         "1s",
 		Blocker:          false,
-		Weight:           20.0,
+		Weights:          ";20",
 		ActionProfileIDs: []string{},
 	}
 	rcv := APItoModelTPThreshold(th)
@@ -643,7 +643,7 @@ func TestAPItoTPThreshold(t *testing.T) {
 		MinHits:          10,
 		MinSleep:         "1s",
 		Blocker:          false,
-		Weight:           20.0,
+		Weights:          ";20",
 		ActionProfileIDs: []string{"WARN3"},
 	}
 
@@ -652,9 +652,12 @@ func TestAPItoTPThreshold(t *testing.T) {
 		MaxHits:          tps.MaxHits,
 		Blocker:          tps.Blocker,
 		MinHits:          tps.MinHits,
-		Weight:           tps.Weight,
 		FilterIDs:        tps.FilterIDs,
 		ActionProfileIDs: []string{"WARN3"},
+	}
+	eTPs.Weights, err = utils.NewDynamicWeightsFromString(utils.IfaceAsString(tps.Weights), utils.InfieldSep, utils.ANDSep)
+	if err != nil {
+		t.Errorf("Got error: %+v", err)
 	}
 	if eTPs.MinSleep, err = utils.ParseDurationWithNanosecs(tps.MinSleep); err != nil {
 		t.Errorf("Got error: %+v", err)
@@ -674,18 +677,22 @@ func TestThresholdProfileToAPI(t *testing.T) {
 		MaxHits:          12,
 		MinHits:          10,
 		MinSleep:         "1s",
-		Weight:           20.0,
+		Weights:          ";20",
 		ActionProfileIDs: []string{"WARN3"},
 	}
 
 	thPrf := &ThresholdProfile{
-		Tenant:           "cgrates.org",
-		ID:               "TH1",
-		FilterIDs:        []string{"FilterID1", "FilterID2", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z"},
-		MaxHits:          12,
-		MinHits:          10,
-		MinSleep:         time.Second,
-		Weight:           20.0,
+		Tenant:    "cgrates.org",
+		ID:        "TH1",
+		FilterIDs: []string{"FilterID1", "FilterID2", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z"},
+		MaxHits:   12,
+		MinHits:   10,
+		MinSleep:  time.Second,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20.0,
+			},
+		},
 		ActionProfileIDs: []string{"WARN3"},
 	}
 
@@ -4129,7 +4136,7 @@ func TestModelHelpersAPItoThresholdProfileError1(t *testing.T) {
 		MinHits:          0,
 		MinSleep:         "cat",
 		Blocker:          false,
-		Weight:           0,
+		Weights:          ";0",
 		ActionProfileIDs: nil,
 		Async:            false,
 	}
@@ -4149,7 +4156,7 @@ func TestModelHelpersAPItoModelTPThresholdExpTime1(t *testing.T) {
 		MinHits:          10,
 		MinSleep:         "1s",
 		Blocker:          false,
-		Weight:           20.0,
+		Weights:          ";20",
 		ActionProfileIDs: []string{"WARN3", "LOG"},
 	}
 	expStruct := ThresholdMdls{
@@ -4162,7 +4169,7 @@ func TestModelHelpersAPItoModelTPThresholdExpTime1(t *testing.T) {
 			MinHits:          10,
 			MinSleep:         "1s",
 			Blocker:          false,
-			Weight:           20.0,
+			Weights:          ";20",
 			ActionProfileIDs: "WARN3",
 		},
 		{
@@ -4189,7 +4196,7 @@ func TestModelHelpersAPItoModelTPThresholdExpTime2(t *testing.T) {
 		MinHits:          10,
 		MinSleep:         "1s",
 		Blocker:          false,
-		Weight:           20.0,
+		Weights:          ";20",
 		ActionProfileIDs: []string{"WARN3"},
 	}
 	expStruct := ThresholdMdls{
@@ -4202,7 +4209,7 @@ func TestModelHelpersAPItoModelTPThresholdExpTime2(t *testing.T) {
 			MinHits:          10,
 			MinSleep:         "1s",
 			Blocker:          false,
-			Weight:           20.0,
+			Weights:          ";20",
 			ActionProfileIDs: "WARN3",
 		},
 		{
@@ -4230,7 +4237,7 @@ func TestThresholdMdlsAsTPThresholdActivationTime(t *testing.T) {
 			MinHits:          0,
 			MinSleep:         "",
 			Blocker:          false,
-			Weight:           0,
+			Weights:          ";0",
 			ActionProfileIDs: "",
 			Async:            false,
 		},
@@ -4245,7 +4252,7 @@ func TestThresholdMdlsAsTPThresholdActivationTime(t *testing.T) {
 			MinHits:   0,
 			MinSleep:  "",
 			Blocker:   false,
-			Weight:    0,
+			Weights:   ";0",
 			Async:     false,
 		},
 	}

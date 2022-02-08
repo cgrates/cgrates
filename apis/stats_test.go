@@ -556,11 +556,15 @@ func TestStatsAPIs(t *testing.T) {
 
 	thPrf := &engine.ThresholdProfileWithAPIOpts{
 		ThresholdProfile: &engine.ThresholdProfile{
-			Tenant:           "cgrates.org",
-			ID:               "thdID",
-			FilterIDs:        []string{"*string:~*req.Account:1002"},
-			MaxHits:          10,
-			Weight:           10,
+			Tenant:    "cgrates.org",
+			ID:        "thdID",
+			FilterIDs: []string{"*string:~*req.Account:1002"},
+			MaxHits:   10,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				},
+			},
 			ActionProfileIDs: []string{"actPrfID"},
 		},
 	}

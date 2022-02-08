@@ -838,7 +838,11 @@ func TestFiltersSetFilterReloadCache(t *testing.T) {
 			ID:        "THD_ID",
 			FilterIDs: []string{"FLTR_ID"},
 			MaxHits:   10,
-			Weight:    10,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				},
+			},
 		},
 		APIOpts: map[string]interface{}{
 			utils.MetaCache: utils.MetaNone,
@@ -1003,7 +1007,11 @@ func TestFiltersSetFilterClearCache(t *testing.T) {
 			ID:        "THD_ID",
 			FilterIDs: []string{"FLTR_ID"},
 			MaxHits:   10,
-			Weight:    10,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				},
+			},
 		},
 		APIOpts: map[string]interface{}{
 			utils.MetaCache: utils.MetaNone,

@@ -649,10 +649,14 @@ func testCgrLdrGetStatQueueAfterLoad(t *testing.T) {
 
 func testCgrLdrGetThresholdProfileAfterLoad(t *testing.T) {
 	expThPrf := &engine.ThresholdProfile{
-		Tenant:           utils.CGRateSorg,
-		ID:               "THD_ACNT_1001",
-		FilterIDs:        []string{"FLTR_ACCOUNT_1001"},
-		Weight:           10,
+		Tenant:    utils.CGRateSorg,
+		ID:        "THD_ACNT_1001",
+		FilterIDs: []string{"FLTR_ACCOUNT_1001"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 		MaxHits:          -1,
 		MinHits:          0,
 		ActionProfileIDs: []string{"TOPUP_MONETARY_10"},

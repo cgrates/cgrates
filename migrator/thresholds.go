@@ -197,13 +197,17 @@ type v2Threshold struct {
 
 func (v2T v2Threshold) V2toV3Threshold() (th *engine.ThresholdProfile) {
 	th = &engine.ThresholdProfile{
-		Tenant:           v2T.Tenant,
-		ID:               v2T.ID,
-		FilterIDs:        v2T.FilterIDs,
-		MinHits:          v2T.MinHits,
-		MinSleep:         v2T.MinSleep,
-		Blocker:          v2T.Blocker,
-		Weight:           v2T.Weight,
+		Tenant:    v2T.Tenant,
+		ID:        v2T.ID,
+		FilterIDs: v2T.FilterIDs,
+		MinHits:   v2T.MinHits,
+		MinSleep:  v2T.MinSleep,
+		Blocker:   v2T.Blocker,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: v2T.Weight,
+			},
+		},
 		ActionProfileIDs: v2T.ActionIDs,
 		Async:            v2T.Async,
 	}

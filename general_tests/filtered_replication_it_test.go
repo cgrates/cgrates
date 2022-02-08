@@ -388,7 +388,11 @@ func testFltrRplThresholdProfile(t *testing.T) {
 			ID:        thID,
 			FilterIDs: []string{"*string:~*req.Account:dan"},
 			MaxHits:   -1,
-			Weight:    20,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
 		},
 	}
 	th := engine.Threshold{
@@ -472,7 +476,11 @@ func testFltrRplThresholdProfile(t *testing.T) {
 	}
 
 	replyPrfl = nil
-	thPrfl.Weight = 10
+	thPrfl.Weights = utils.DynamicWeights{
+		{
+			Weight: 20,
+		},
+	}
 	if err := fltrRplInternalRPC.Call(context.Background(), utils.AdminSv1SetThresholdProfile, thPrfl, &result); err != nil {
 		t.Fatal(err)
 	} else if result != utils.OK {
