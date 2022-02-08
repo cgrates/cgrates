@@ -75,7 +75,6 @@ var (
 		testRateProfileRemoveMultipleRates,
 		testRateProfileSetMultipleRatesInProfile,
 		testRateProfileUpdateProfile,
-
 		testRateSKillEngine,
 	}
 )
