@@ -689,6 +689,40 @@ func (dS *DispatcherService) AdminSv1GetRateProfileIDs(ctx *context.Context, arg
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaAdminS, utils.AdminSv1GetRateProfileIDs, args, reply)
 }
+func (dS *DispatcherService) AdminSv1GetRateProfileRateCount(ctx *context.Context, args *utils.ArgsSubItemIDs, reply *int) (err error) {
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args != nil && len(args.Tenant) != 0 {
+		tnt = args.Tenant
+	}
+	ev := make(map[string]interface{})
+	opts := make(map[string]interface{})
+	if args != nil {
+		opts = args.APIOpts
+	}
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
+		if err = dS.authorize(ctx, utils.AdminSv1GetRateProfileRateCount, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
+			return
+		}
+	}
+	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaAdminS, utils.AdminSv1GetRateProfileRateCount, args, reply)
+}
+func (dS *DispatcherService) AdminSv1GetRateProfileRateIDs(ctx *context.Context, args *utils.ArgsSubItemIDs, reply *[]string) (err error) {
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args != nil && len(args.Tenant) != 0 {
+		tnt = args.Tenant
+	}
+	ev := make(map[string]interface{})
+	opts := make(map[string]interface{})
+	if args != nil {
+		opts = args.APIOpts
+	}
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
+		if err = dS.authorize(ctx, utils.AdminSv1GetRateProfileRateIDs, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
+			return
+		}
+	}
+	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaAdminS, utils.AdminSv1GetRateProfileRateIDs, args, reply)
+}
 func (dS *DispatcherService) AdminSv1GetRateProfiles(ctx *context.Context, args *utils.ArgsItemIDs, reply *[]*utils.RateProfile) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args != nil && len(args.Tenant) != 0 {
@@ -1355,10 +1389,10 @@ func (dS *DispatcherService) AdminSv1RemoveThresholdProfile(ctx *context.Context
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaAdminS, utils.AdminSv1RemoveThresholdProfile, args, reply)
 }
-func (dS *DispatcherService) AdminSv1SetAccount(ctx *context.Context, args *apis.APIAccountWithAPIOpts, reply *string) (err error) {
+func (dS *DispatcherService) AdminSv1SetAccount(ctx *context.Context, args *utils.AccountWithAPIOpts, reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
-	if args != nil && (args.APIAccount != nil && len(args.APIAccount.Tenant) != 0) {
-		tnt = args.APIAccount.Tenant
+	if args != nil && (args.Account != nil && len(args.Account.Tenant) != 0) {
+		tnt = args.Account.Tenant
 	}
 	ev := make(map[string]interface{})
 	opts := make(map[string]interface{})

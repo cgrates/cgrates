@@ -193,7 +193,7 @@ func testAttributeSetAttributeProfile(t *testing.T) {
 		t.Error(err)
 	}
 
-	expectedAttr := &engine.AttributeProfile{
+	expectedAttr := engine.AttributeProfile{
 		Tenant:    utils.CGRateSorg,
 		ID:        "TEST_ATTRIBUTES_IT_TEST",
 		FilterIDs: []string{"*string:~*req.Account:1002", "*exists:~*opts.*usage:"},
@@ -215,7 +215,7 @@ func testAttributeSetAttributeProfile(t *testing.T) {
 			},
 		},
 	}
-	var result *engine.AttributeProfile
+	var result engine.AttributeProfile
 	if err := attrSRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfile,
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{

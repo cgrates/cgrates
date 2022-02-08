@@ -120,6 +120,9 @@ func (adms *AdminSv1) SetRouteProfile(ctx *context.Context, args *engine.RoutePr
 	if args.Tenant == utils.EmptyString {
 		args.Tenant = adms.cfg.GeneralCfg().DefaultTenant
 	}
+	if len(args.Routes) == 0 {
+		return utils.NewErrMandatoryIeMissing("Routes")
+	}
 	if err := adms.dm.SetRouteProfile(ctx, args.RouteProfile, true); err != nil {
 		return utils.APIErrorHandler(err)
 	}

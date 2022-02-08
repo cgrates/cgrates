@@ -150,30 +150,38 @@ func testGetAccProfilesBeforeSet(t *testing.T) {
 }
 
 func testAccSetAccProfile(t *testing.T) {
-	accPrf := &APIAccountWithAPIOpts{
-		APIAccount: &utils.APIAccount{
+	args := &utils.AccountWithAPIOpts{
+		Account: &utils.Account{
 			Tenant: "cgrates.org",
 			ID:     "TEST_ACC_IT_TEST",
 			Opts:   map[string]interface{}{},
-			Balances: map[string]*utils.APIBalance{
+			Balances: map[string]*utils.Balance{
 				"VoiceBalance": {
 					ID:        "VoiceBalance",
 					FilterIDs: []string{"*string:~*req.Account:1001"},
-					Weights:   ";12",
-					Type:      "*abstract",
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 12,
+						},
+					},
+					Type: "*abstract",
 					Opts: map[string]interface{}{
 						"Destination": "10",
 					},
-					Units: "0",
+					Units: utils.NewDecimal(0, 0),
 				},
 			},
-			Weights: ";10",
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				},
+			},
 		},
 		APIOpts: nil,
 	}
 	var reply string
 	if err := accSRPC.Call(context.Background(), utils.AdminSv1SetAccount,
-		accPrf, &reply); err != nil {
+		args, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error(err)
@@ -305,30 +313,38 @@ func testGetAccBeforeSet2(t *testing.T) {
 }
 
 func testAccSetAcc2(t *testing.T) {
-	accPrf := &APIAccountWithAPIOpts{
-		APIAccount: &utils.APIAccount{
+	args := &utils.AccountWithAPIOpts{
+		Account: &utils.Account{
 			Tenant: "cgrates.org",
 			ID:     "TEST_ACC_IT_TEST2",
 			Opts:   map[string]interface{}{},
-			Balances: map[string]*utils.APIBalance{
+			Balances: map[string]*utils.Balance{
 				"VoiceBalance": {
 					ID:        "VoiceBalance",
 					FilterIDs: []string{"*string:~*req.Account:1001"},
-					Weights:   ";12",
-					Type:      "*abstract",
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 12,
+						},
+					},
+					Type: "*abstract",
 					Opts: map[string]interface{}{
 						"Destination": "10",
 					},
-					Units: "0",
+					Units: utils.NewDecimal(0, 0),
 				},
 			},
-			Weights: ";10",
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				},
+			},
 		},
 		APIOpts: nil,
 	}
 	var reply string
 	if err := accSRPC.Call(context.Background(), utils.AdminSv1SetAccount,
-		accPrf, &reply); err != nil {
+		args, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error(err)
@@ -548,30 +564,38 @@ func testAccGetAccs3(t *testing.T) {
 	}
 }
 func testAccGetAccsWithPrefix(t *testing.T) {
-	accPrf := &APIAccountWithAPIOpts{
-		APIAccount: &utils.APIAccount{
+	acc := &utils.AccountWithAPIOpts{
+		Account: &utils.Account{
 			Tenant: "cgrates.org",
 			ID:     "aTEST_ACC_IT_TEST2",
 			Opts:   map[string]interface{}{},
-			Balances: map[string]*utils.APIBalance{
+			Balances: map[string]*utils.Balance{
 				"VoiceBalance": {
 					ID:        "VoiceBalance",
 					FilterIDs: []string{"*string:~*req.Account:1001"},
-					Weights:   ";12",
-					Type:      "*abstract",
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 12,
+						},
+					},
+					Type: "*abstract",
 					Opts: map[string]interface{}{
 						"Destination": "10",
 					},
-					Units: "0",
+					Units: utils.NewDecimal(0, 0),
 				},
 			},
-			Weights: ";10",
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				},
+			},
 		},
 		APIOpts: nil,
 	}
 	var reply string
 	if err := accSRPC.Call(context.Background(), utils.AdminSv1SetAccount,
-		accPrf, &reply); err != nil {
+		acc, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error(err)
@@ -711,36 +735,48 @@ func testAccGetAccountsForEvent(t *testing.T) {
 }
 
 func testAccMaxAbstracts(t *testing.T) {
-	accPrf := APIAccountWithAPIOpts{
-		APIAccount: &utils.APIAccount{
-			Tenant:    "cgrates.org",
-			ID:        "TEST_ACC_IT_TEST4",
-			Weights:   ";0",
+	acc := &utils.AccountWithAPIOpts{
+		Account: &utils.Account{
+			Tenant: "cgrates.org",
+			ID:     "TEST_ACC_IT_TEST4",
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 0,
+				},
+			},
 			FilterIDs: []string{"*string:~*req.Account:1004"},
-			Balances: map[string]*utils.APIBalance{
+			Balances: map[string]*utils.Balance{
 				"AbstractBalance1": {
-					ID:      "AbstractBalance1",
-					Weights: ";25",
-					Type:    utils.MetaAbstract,
-					Units:   "40s",
-					CostIncrements: []*utils.APICostIncrement{
+					ID: "AbstractBalance1",
+					Weights: utils.DynamicWeights{
 						{
-							Increment:    "1s",
-							FixedFee:     utils.Float64Pointer(0),
-							RecurrentFee: utils.Float64Pointer(0),
+							Weight: 25,
+						},
+					},
+					Type:  utils.MetaAbstract,
+					Units: utils.NewDecimal(int64(40*time.Second), 0),
+					CostIncrements: []*utils.CostIncrement{
+						{
+							Increment:    utils.NewDecimal(int64(time.Second), 0),
+							FixedFee:     utils.NewDecimal(0, 0),
+							RecurrentFee: utils.NewDecimal(0, 0),
 						},
 					},
 				},
 				"ConcreteBalance2": {
-					ID:      "ConcreteBalance2",
-					Weights: ";20",
-					Type:    utils.MetaConcrete,
-					Units:   "213",
-					CostIncrements: []*utils.APICostIncrement{
+					ID: "ConcreteBalance2",
+					Weights: utils.DynamicWeights{
 						{
-							Increment:    "1s",
-							FixedFee:     utils.Float64Pointer(0),
-							RecurrentFee: utils.Float64Pointer(0),
+							Weight: 20,
+						},
+					},
+					Type:  utils.MetaConcrete,
+					Units: utils.NewDecimal(213, 0),
+					CostIncrements: []*utils.CostIncrement{
+						{
+							Increment:    utils.NewDecimal(int64(time.Second), 0),
+							FixedFee:     utils.NewDecimal(0, 0),
+							RecurrentFee: utils.NewDecimal(0, 0),
 						},
 					},
 				},
@@ -749,7 +785,7 @@ func testAccMaxAbstracts(t *testing.T) {
 	}
 	var reply string
 	if err := accSRPC.Call(context.Background(), utils.AdminSv1SetAccount,
-		accPrf, &reply); err != nil {
+		acc, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error(err)
@@ -862,38 +898,50 @@ func testAccMaxAbstracts(t *testing.T) {
 }
 
 func testAccDebitAbstracts(t *testing.T) {
-	accPrf := APIAccountWithAPIOpts{
-		APIAccount: &utils.APIAccount{
-			Tenant:    "cgrates.org",
-			ID:        "TEST_ACC_IT_TEST5",
-			Weights:   ";0",
+	args := &utils.AccountWithAPIOpts{
+		Account: &utils.Account{
+			Tenant: "cgrates.org",
+			ID:     "TEST_ACC_IT_TEST5",
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 0,
+				},
+			},
 			FilterIDs: []string{"*string:~*req.Account:1004"},
-			Balances: map[string]*utils.APIBalance{
+			Balances: map[string]*utils.Balance{
 				"AbstractBalance1": {
-					ID:      "AbstractBalance1",
-					Weights: ";25",
-					Type:    utils.MetaAbstract,
-					Units:   "40s",
-					CostIncrements: []*utils.APICostIncrement{
+					ID: "AbstractBalance1",
+					Weights: utils.DynamicWeights{
 						{
-							Increment:    "1s",
-							FixedFee:     utils.Float64Pointer(0),
-							RecurrentFee: utils.Float64Pointer(0),
+							Weight: 25,
+						},
+					},
+					Type:  utils.MetaAbstract,
+					Units: utils.NewDecimal(int64(40*time.Second), 0),
+					CostIncrements: []*utils.CostIncrement{
+						{
+							Increment:    utils.NewDecimal(int64(time.Second), 0),
+							FixedFee:     utils.NewDecimal(0, 0),
+							RecurrentFee: utils.NewDecimal(0, 0),
 						},
 					},
 				},
 				"ConcreteBalance2": {
-					ID:      "ConcreteBalance2",
-					Weights: ";20",
-					Type:    utils.MetaConcrete,
-					Units:   "213",
+					ID: "ConcreteBalance2",
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 20,
+						},
+					},
+					Type:  utils.MetaConcrete,
+					Units: utils.NewDecimal(213, 0),
 				},
 			},
 		},
 	}
 	var reply string
 	if err := accSRPC.Call(context.Background(), utils.AdminSv1SetAccount,
-		accPrf, &reply); err != nil {
+		args, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error(err)
@@ -1001,38 +1049,50 @@ func testAccDebitAbstracts(t *testing.T) {
 }
 
 func testAccMaxConcretes(t *testing.T) {
-	accPrf := APIAccountWithAPIOpts{
-		APIAccount: &utils.APIAccount{
-			Tenant:    "cgrates.org",
-			ID:        "TEST_ACC_IT_TEST6",
-			Weights:   ";0",
+	acc := &utils.AccountWithAPIOpts{
+		Account: &utils.Account{
+			Tenant: "cgrates.org",
+			ID:     "TEST_ACC_IT_TEST6",
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 0,
+				},
+			},
 			FilterIDs: []string{"*string:~*req.Account:1004"},
-			Balances: map[string]*utils.APIBalance{
+			Balances: map[string]*utils.Balance{
 				"AbstractBalance1": {
-					ID:      "AbstractBalance1",
-					Weights: ";25",
-					Type:    utils.MetaAbstract,
-					Units:   "40s",
-					CostIncrements: []*utils.APICostIncrement{
+					ID: "AbstractBalance1",
+					Weights: utils.DynamicWeights{
 						{
-							Increment:    "1s",
-							FixedFee:     utils.Float64Pointer(0),
-							RecurrentFee: utils.Float64Pointer(0),
+							Weight: 25,
+						},
+					},
+					Type:  utils.MetaAbstract,
+					Units: utils.NewDecimal(int64(40*time.Second), 0),
+					CostIncrements: []*utils.CostIncrement{
+						{
+							Increment:    utils.NewDecimal(int64(time.Second), 0),
+							FixedFee:     utils.NewDecimal(0, 0),
+							RecurrentFee: utils.NewDecimal(0, 0),
 						},
 					},
 				},
 				"ConcreteBalance2": {
-					ID:      "ConcreteBalance2",
-					Weights: ";20",
-					Type:    utils.MetaConcrete,
-					Units:   "213",
+					ID: "ConcreteBalance2",
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 20,
+						},
+					},
+					Type:  utils.MetaConcrete,
+					Units: utils.NewDecimal(213, 0),
 				},
 			},
 		},
 	}
 	var reply string
 	if err := accSRPC.Call(context.Background(), utils.AdminSv1SetAccount,
-		accPrf, &reply); err != nil {
+		acc, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error(err)
@@ -1151,38 +1211,50 @@ func testAccMaxConcretes(t *testing.T) {
 }
 
 func testAccDebitConcretes(t *testing.T) {
-	accPrf := APIAccountWithAPIOpts{
-		APIAccount: &utils.APIAccount{
-			Tenant:    "cgrates.org",
-			ID:        "TEST_ACC_IT_TEST7",
-			Weights:   ";0",
+	acc := &utils.AccountWithAPIOpts{
+		Account: &utils.Account{
+			Tenant: "cgrates.org",
+			ID:     "TEST_ACC_IT_TEST7",
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 0,
+				},
+			},
 			FilterIDs: []string{"*string:~*req.Account:1004"},
-			Balances: map[string]*utils.APIBalance{
+			Balances: map[string]*utils.Balance{
 				"AbstractBalance1": {
-					ID:      "AbstractBalance1",
-					Weights: ";25",
-					Type:    utils.MetaAbstract,
-					Units:   "40s",
-					CostIncrements: []*utils.APICostIncrement{
+					ID: "AbstractBalance1",
+					Weights: utils.DynamicWeights{
 						{
-							Increment:    "1s",
-							FixedFee:     utils.Float64Pointer(0),
-							RecurrentFee: utils.Float64Pointer(0),
+							Weight: 25,
+						},
+					},
+					Type:  utils.MetaAbstract,
+					Units: utils.NewDecimal(int64(40*time.Second), 0),
+					CostIncrements: []*utils.CostIncrement{
+						{
+							Increment:    utils.NewDecimal(int64(time.Second), 0),
+							FixedFee:     utils.NewDecimal(0, 0),
+							RecurrentFee: utils.NewDecimal(0, 0),
 						},
 					},
 				},
 				"ConcreteBalance2": {
-					ID:      "ConcreteBalance2",
-					Weights: ";20",
-					Type:    utils.MetaConcrete,
-					Units:   "213",
+					ID: "ConcreteBalance2",
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 20,
+						},
+					},
+					Type:  utils.MetaConcrete,
+					Units: utils.NewDecimal(213, 0),
 				},
 			},
 		},
 	}
 	var reply string
 	if err := accSRPC.Call(context.Background(), utils.AdminSv1SetAccount,
-		accPrf, &reply); err != nil {
+		acc, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error(err)
@@ -1300,48 +1372,60 @@ func testAccDebitConcretes(t *testing.T) {
 
 func testAccRefundCharges(t *testing.T) {
 	// we will set an account, we will debit it (with debitAbtracts), and after that we will call refundCharges to get back our cost
-	accPrf := APIAccountWithAPIOpts{
-		APIAccount: &utils.APIAccount{
-			Tenant:    "cgrates.org",
-			ID:        "AccountRefundCharges",
-			Weights:   ";0",
+	acc := &utils.AccountWithAPIOpts{
+		Account: &utils.Account{
+			Tenant: "cgrates.org",
+			ID:     "AccountRefundCharges",
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 0,
+				},
+			},
 			FilterIDs: []string{"*exists:~*opts.*acntUsage:", "*string:~*req.Destination:1004"},
-			Balances: map[string]*utils.APIBalance{
+			Balances: map[string]*utils.Balance{
 				"AB": {
-					ID:      "AB",
-					Weights: ";10",
-					Type:    utils.MetaAbstract,
-					Units:   "5m", // 300s
-					UnitFactors: []*utils.APIUnitFactor{
+					ID: "AB",
+					Weights: utils.DynamicWeights{
 						{
-							Factor: 10,
+							Weight: 10,
+						},
+					},
+					Type:  utils.MetaAbstract,
+					Units: utils.NewDecimal(int64(5*time.Minute), 0), // 300s
+					UnitFactors: []*utils.UnitFactor{
+						{
+							Factor: utils.NewDecimal(10, 0),
 						},
 					},
 					Opts: map[string]interface{}{
 						utils.MetaBalanceLimit: -100.0,
 					},
-					CostIncrements: []*utils.APICostIncrement{
+					CostIncrements: []*utils.CostIncrement{
 						{
-							Increment:    "1s",
-							FixedFee:     utils.Float64Pointer(0.6),
-							RecurrentFee: utils.Float64Pointer(0.1),
+							Increment:    utils.NewDecimal(int64(time.Second), 0),
+							FixedFee:     utils.NewDecimal(6, 1),
+							RecurrentFee: utils.NewDecimal(1, 1),
 						},
 					},
 				},
 				"CB": {
-					ID:      "CB",
-					Weights: ";5",
-					Type:    utils.MetaConcrete,
-					Units:   "50.0",
-					UnitFactors: []*utils.APIUnitFactor{
+					ID: "CB",
+					Weights: utils.DynamicWeights{
 						{
-							Factor: 15,
+							Weight: 5,
 						},
 					},
-					CostIncrements: []*utils.APICostIncrement{
+					Type:  utils.MetaConcrete,
+					Units: utils.NewDecimal(500, 1),
+					UnitFactors: []*utils.UnitFactor{
 						{
-							Increment:    "1s",
-							RecurrentFee: utils.Float64Pointer(0.1),
+							Factor: utils.NewDecimal(15, 0),
+						},
+					},
+					CostIncrements: []*utils.CostIncrement{
+						{
+							Increment:    utils.NewDecimal(int64(time.Second), 0),
+							RecurrentFee: utils.NewDecimal(1, 1),
 						},
 					},
 				},
@@ -1350,7 +1434,7 @@ func testAccRefundCharges(t *testing.T) {
 	}
 	var replyStr string
 	if err := accSRPC.Call(context.Background(), utils.AdminSv1SetAccount,
-		accPrf, &replyStr); err != nil {
+		acc, &replyStr); err != nil {
 		t.Error(err)
 	} else if replyStr != utils.OK {
 		t.Error(err)
@@ -1430,41 +1514,45 @@ func testAccRefundCharges(t *testing.T) {
 		}, &result); err != nil {
 		t.Error(err)
 	} else {
-		expAccPrf, err := accPrf.AsAccount() // this is the initally account that we set in the beginning of this sub-test
-		if err != nil {
-			t.Error(err)
-		}
-		if !reflect.DeepEqual(result, expAccPrf) {
-			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expAccPrf), utils.ToJSON(result))
+		if !reflect.DeepEqual(result, acc.Account) {
+			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(acc.Account), utils.ToJSON(result))
 		}
 	}
 }
 
 func testAccActionSetRmvBalance(t *testing.T) {
-	accPrf := APIAccountWithAPIOpts{
-		APIAccount: &utils.APIAccount{
+	acc := &utils.AccountWithAPIOpts{
+		Account: &utils.Account{
 			Tenant: "cgrates.org",
 			ID:     "TEST_ACC_IT_TEST8",
 			Opts:   map[string]interface{}{},
-			Balances: map[string]*utils.APIBalance{
+			Balances: map[string]*utils.Balance{
 				"VoiceBalance": {
 					ID:        "VoiceBalance",
 					FilterIDs: []string{"*string:~*req.Account:1001"},
-					Weights:   ";12",
-					Type:      "*abstract",
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 12,
+						},
+					},
+					Type: "*abstract",
 					Opts: map[string]interface{}{
 						"Destination": "10",
 					},
-					Units: "0",
+					Units: utils.NewDecimal(0, 0),
 				},
 			},
-			Weights: ";10",
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				},
+			},
 		},
 		APIOpts: nil,
 	}
 	var reply string
 	if err := accSRPC.Call(context.Background(), utils.AdminSv1SetAccount,
-		accPrf, &reply); err != nil {
+		acc, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error(err)

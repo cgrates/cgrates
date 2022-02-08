@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package console
 
 import (
-	"github.com/cgrates/cgrates/apis"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -27,7 +26,7 @@ func init() {
 	c := &CmdSetAccount{
 		name:      "account_set",
 		rpcMethod: utils.AdminSv1SetAccount,
-		rpcParams: &apis.APIAccountWithAPIOpts{},
+		rpcParams: &utils.AccountWithAPIOpts{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -36,7 +35,7 @@ func init() {
 type CmdSetAccount struct {
 	name      string
 	rpcMethod string
-	rpcParams *apis.APIAccountWithAPIOpts
+	rpcParams *utils.AccountWithAPIOpts
 	*CommandExecuter
 }
 
@@ -50,7 +49,7 @@ func (self *CmdSetAccount) RpcMethod() string {
 
 func (self *CmdSetAccount) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &apis.APIAccountWithAPIOpts{APIAccount: new(utils.APIAccount)}
+		self.rpcParams = &utils.AccountWithAPIOpts{Account: new(utils.Account)}
 	}
 	return self.rpcParams
 }

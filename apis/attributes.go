@@ -120,6 +120,9 @@ func (admS *AdminSv1) SetAttributeProfile(ctx *context.Context, arg *engine.Attr
 	if arg.Tenant == utils.EmptyString {
 		arg.Tenant = admS.cfg.GeneralCfg().DefaultTenant
 	}
+	if len(arg.Attributes) == 0 {
+		return utils.NewErrMandatoryIeMissing("Attributes")
+	}
 	if err := admS.dm.SetAttributeProfile(ctx, arg.AttributeProfile, true); err != nil {
 		return utils.APIErrorHandler(err)
 	}

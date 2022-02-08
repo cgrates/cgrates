@@ -262,7 +262,7 @@ func testCacheSHasItemAttributeProfile(t *testing.T) {
 		}, &resultAtr); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(resultAtr, expectedAttr) {
-		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expectedAttr), utils.ToJSON(result))
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expectedAttr), utils.ToJSON(resultAtr))
 	}
 
 	args = &utils.ArgsGetCacheItemWithAPIOpts{

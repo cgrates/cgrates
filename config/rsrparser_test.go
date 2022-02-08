@@ -894,3 +894,11 @@ func TestRSRParsersClone(t *testing.T) {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
 }
+
+func TestRSRParsersCompare(t *testing.T) {
+	rsr1 := NewRSRParsersMustCompile("cgrates.itsyscom", utils.InfieldSep)
+	rsr2 := NewRSRParsersMustCompile("cgrates.itsyscom", utils.InfieldSep)
+	if !reflect.DeepEqual(rsr1, rsr2) {
+		t.Error("PICA TESTU")
+	}
+}
