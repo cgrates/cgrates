@@ -224,8 +224,11 @@ func testAttributeSetAttributeProfile(t *testing.T) {
 			},
 		}, &result); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(result, expectedAttr) {
-		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expectedAttr), utils.ToJSON(result))
+	} else {
+		result.Compile()
+		if !reflect.DeepEqual(result, expectedAttr) {
+			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expectedAttr), utils.ToJSON(result))
+		}
 	}
 }
 
@@ -273,8 +276,13 @@ func testAttributeGetAttributes(t *testing.T) {
 	if err := attrSRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfiles,
 		args, &reply); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(reply, expected) {
-		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(reply))
+	} else {
+		for _, ap := range reply {
+			ap.Compile()
+		}
+		if !reflect.DeepEqual(reply, expected) {
+			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(reply))
+		}
 	}
 }
 
@@ -329,7 +337,7 @@ func testAttributeSetAttributeProfile2(t *testing.T) {
 		t.Error(err)
 	}
 
-	expectedAttr := &engine.AttributeProfile{
+	expectedAttr := engine.AttributeProfile{
 		Tenant:    utils.CGRateSorg,
 		ID:        "TEST_ATTRIBUTES_IT_TEST_SECOND",
 		FilterIDs: []string{"*string:~*opts.*context:*sessions", "*exists:~*opts.*usage:"},
@@ -341,7 +349,7 @@ func testAttributeSetAttributeProfile2(t *testing.T) {
 			},
 		},
 	}
-	var result *engine.AttributeProfile
+	var result engine.AttributeProfile
 	if err := attrSRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfile,
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{
@@ -350,13 +358,16 @@ func testAttributeSetAttributeProfile2(t *testing.T) {
 			},
 		}, &result); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(result, expectedAttr) {
-		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expectedAttr), utils.ToJSON(result))
+	} else {
+		result.Compile()
+		if !reflect.DeepEqual(result, expectedAttr) {
+			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expectedAttr), utils.ToJSON(result))
+		}
 	}
 }
 
 func testAttributeGetAttributes2(t *testing.T) {
-	var reply *[]*engine.AttributeProfile
+	var reply []*engine.AttributeProfile
 	var args *utils.ArgsItemIDs
 	expected := []*engine.AttributeProfile{
 		{
@@ -398,10 +409,13 @@ func testAttributeGetAttributes2(t *testing.T) {
 		args, &reply); err != nil {
 		t.Error(err)
 	}
-	sort.Slice(*reply, func(i, j int) bool {
-		return (*reply)[i].ID < (*reply)[j].ID
+	for _, ap := range reply {
+		ap.Compile()
+	}
+	sort.Slice(reply, func(i, j int) bool {
+		return reply[i].ID < reply[j].ID
 	})
-	if !reflect.DeepEqual(reply, &expected) {
+	if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(reply))
 	}
 }
@@ -464,7 +478,7 @@ func testAttributeRemoveAttributeProfile(t *testing.T) {
 }
 
 func testAttributeGetAttributesAfterRemove(t *testing.T) {
-	var reply *[]*engine.AttributeProfile
+	var reply []*engine.AttributeProfile
 	var args *utils.ArgsItemIDs
 	expected := []*engine.AttributeProfile{
 		{
@@ -494,8 +508,11 @@ func testAttributeGetAttributesAfterRemove(t *testing.T) {
 		args, &reply); err != nil {
 		t.Error(err)
 	}
+	for _, ap := range reply {
+		ap.Compile()
+	}
 
-	if !reflect.DeepEqual(reply, &expected) {
+	if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(reply))
 	}
 }
@@ -653,21 +670,18 @@ func testAttributeSGetAttributeForEventAnyContext(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	var reply *engine.AttributeProfile
+	var reply engine.AttributeProfile
 	if err := attrSRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfile,
 		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_2"}}, &reply); err != nil {
 		t.Fatal(err)
 	}
-	if !reflect.DeepEqual(eAttrPrf2.AttributeProfile, reply) {
-		t.Errorf("Expecting : %+v, received: %+v", eAttrPrf2.AttributeProfile, reply)
-	}
-	var attrReply *engine.AttributeProfile
-	if err := attrSRPC.Call(context.Background(), utils.AttributeSv1GetAttributeForEvent,
-		ev, &attrReply); err != nil {
-		t.Fatal(err)
+	reply.Compile()
+
+	if !reflect.DeepEqual(*eAttrPrf2.AttributeProfile, reply) {
+		t.Errorf("Expecting : %+v, received: %+v", *eAttrPrf2.AttributeProfile, reply)
 	}
 
-	expAttrFromEv := &engine.AttributeProfile{
+	expAttrFromEv := engine.AttributeProfile{
 		Tenant:    ev.Tenant,
 		ID:        "ATTR_2",
 		FilterIDs: []string{"*string:~*req.Account:dan", "*prefix:~*req.Destination:+4915", "*exists:~*opts.*usage:", "*notexists:~*req.RequestType:"},
@@ -684,6 +698,14 @@ func testAttributeSGetAttributeForEventAnyContext(t *testing.T) {
 			},
 		},
 	}
+
+	var attrReply engine.AttributeProfile
+	if err := attrSRPC.Call(context.Background(), utils.AttributeSv1GetAttributeForEvent,
+		ev, &attrReply); err != nil {
+		t.Fatal(err)
+	}
+	attrReply.Compile()
+
 	if !reflect.DeepEqual(expAttrFromEv, attrReply) {
 		t.Errorf("Expecting: %s, received: %s", utils.ToJSON(expAttrFromEv), utils.ToJSON(attrReply))
 	}
@@ -701,13 +723,8 @@ func testAttributeSGetAttributeForEventSameAnyContext(t *testing.T) {
 			utils.MetaUsage: 10 * time.Second,
 		},
 	}
-	var attrReply *engine.AttributeProfile
-	if err := attrSRPC.Call(context.Background(), utils.AttributeSv1GetAttributeForEvent,
-		ev, &attrReply); err != nil {
-		t.Fatal(err)
-	}
 
-	expAttrFromEv := &engine.AttributeProfile{
+	expAttrFromEv := engine.AttributeProfile{
 		Tenant:    ev.Tenant,
 		ID:        "ATTR_2",
 		FilterIDs: []string{"*string:~*req.Account:dan", "*prefix:~*req.Destination:+4915", "*exists:~*opts.*usage:", "*notexists:~*req.RequestType:"},
@@ -724,6 +741,14 @@ func testAttributeSGetAttributeForEventSameAnyContext(t *testing.T) {
 			},
 		},
 	}
+
+	var attrReply engine.AttributeProfile
+	if err := attrSRPC.Call(context.Background(), utils.AttributeSv1GetAttributeForEvent,
+		ev, &attrReply); err != nil {
+		t.Fatal(err)
+	}
+	attrReply.Compile()
+
 	if !reflect.DeepEqual(expAttrFromEv, attrReply) {
 		t.Errorf("Expecting: %s, received: %s", utils.ToJSON(expAttrFromEv), utils.ToJSON(attrReply))
 	}
@@ -829,6 +854,7 @@ func testAttributeSGetAttributeForEvent(t *testing.T) {
 		ev, &attrReply); err != nil {
 		t.Fatal(err)
 	}
+	attrReply.Compile()
 	if !reflect.DeepEqual(eAttrPrf, attrReply) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eAttrPrf), utils.ToJSON(attrReply))
 	}
@@ -840,7 +866,7 @@ func testAttributeSGetAttributeForEvent(t *testing.T) {
 		ev, &attrPrf); err != nil {
 		t.Fatal(err)
 	}
-
+	attrPrf.Compile()
 	// Populate private variables in RSRParsers
 	if !reflect.DeepEqual(eAttrPrf, attrPrf) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eAttrPrf), utils.ToJSON(attrPrf))
