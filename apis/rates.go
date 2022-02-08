@@ -55,7 +55,7 @@ func (admS *AdminSv1) GetRateProfileRates(ctx *context.Context, args *utils.Args
 	if args.Tenant == utils.EmptyString {
 		args.Tenant = admS.cfg.GeneralCfg().DefaultTenant
 	}
-	rates, err := admS.dm.GetRateProfileRates(ctx, args)
+	_, rates, err := admS.dm.GetRateProfileRates(ctx, args, false)
 	if err != nil {
 		return
 	}
@@ -103,7 +103,8 @@ func (admS *AdminSv1) GetRateProfileRateIDs(ctx *context.Context, args *utils.Ar
 		args.Tenant = admS.cfg.GeneralCfg().DefaultTenant
 	}
 	var ids []string
-	if ids, err = admS.dm.GetRateProfileRateIDs(ctx, args); err != nil {
+	ids, _, err = admS.dm.GetRateProfileRates(ctx, args, true)
+	if err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -168,7 +169,8 @@ func (admS *AdminSv1) GetRateProfileRateCount(ctx *context.Context, args *utils.
 	}
 
 	var ids []string
-	if ids, err = admS.dm.GetRateProfileRateIDs(ctx, args); err != nil {
+	ids, _, err = admS.dm.GetRateProfileRates(ctx, args, true)
+	if err != nil {
 		return
 	}
 	if len(ids) == 0 {

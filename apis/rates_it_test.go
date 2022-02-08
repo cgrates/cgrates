@@ -1314,6 +1314,7 @@ func testRateProfileRateIDsAndCount(t *testing.T) {
 	} else if len(replyRts) != 5 { //RT_MONDAY, RT_THUESDAY, RT_WEDNESDAY, RT_THURSDAY AND RT_FRIDAY
 		t.Errorf("Unexpected reply returned: %v", reply)
 	}
+
 }
 
 func testRateProfileUpdateRates(t *testing.T) {

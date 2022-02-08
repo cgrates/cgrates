@@ -1943,18 +1943,11 @@ func (dm *DataManager) GetRateProfile(ctx *context.Context, tenant, id string, c
 	return
 }
 
-func (dm *DataManager) GetRateProfileRateIDs(ctx *context.Context, args *utils.ArgsSubItemIDs) (rateIDs []string, err error) {
+func (dm *DataManager) GetRateProfileRates(ctx *context.Context, args *utils.ArgsSubItemIDs, needIDs bool) (rateIDs []string, rates []*utils.Rate, err error) {
 	if dm == nil {
-		return nil, utils.ErrNoDatabaseConn
+		return nil, nil, utils.ErrNoDatabaseConn
 	}
-	return dm.DataDB().GetRateProfileRateIDsDrv(ctx, args.Tenant, args.ProfileID, args.ItemsPrefix)
-}
-
-func (dm *DataManager) GetRateProfileRates(ctx *context.Context, args *utils.ArgsSubItemIDs) (rateIDs []*utils.Rate, err error) {
-	if dm == nil {
-		return nil, utils.ErrNoDatabaseConn
-	}
-	return dm.DataDB().GetRateProfileRatesDrv(ctx, args.Tenant, args.ProfileID, args.ItemsPrefix)
+	return dm.DataDB().GetRateProfileRatesDrv(ctx, args.Tenant, args.ProfileID, args.ItemsPrefix, needIDs)
 }
 
 func (dm *DataManager) SetRateProfile(ctx *context.Context, rpp *utils.RateProfile, withIndex bool) (err error) {
