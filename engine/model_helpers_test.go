@@ -4252,7 +4252,7 @@ func TestThresholdMdlsAsTPThresholdActivationTime(t *testing.T) {
 			MinHits:   0,
 			MinSleep:  "",
 			Blocker:   false,
-			Weights:   ";0",
+			Weights:   "",
 			Async:     false,
 		},
 	}
