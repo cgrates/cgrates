@@ -215,8 +215,8 @@ cgrates.org,ONE_TIME_ACT,,,,,,TOPUP_TEST_VOICE,,false,0s,*add_balance,,*balance.
 	if err := writeFile(utils.AttributesCsv, `
 #Tenant,ID,FilterIDs,Weights,AttributeFilterIDs,Path,Type,Value,Blocker
 cgrates.org,ALS1,*string:~*req.Account:1001;*string:~*opts.*context:con1,;20,*string:~*req.Field1:Initial,*req.Field1,*variable,Sub1,true
-cgrates.org,ALS1,*string:~*opts.*context:con2|con3,;20,,*req.Field2,*variable,Sub2,true
-cgrates.org,ALS2,*string:~*opts.*context:con2|con3,;20,,*req.Field2,*variable,Sub2,true
+cgrates.org,ALS1,*string:~*opts.*context:con2|con3,,,*req.Field2,*variable,Sub2,true
+cgrates.org,ALS2,*string:~*opts.*context:con2|con3,,,*req.Field2,*variable,Sub2,true
 cgrates.org,ALS2,*string:~*req.Account:1002;*string:~*opts.*context:con1,;20,*string:~*req.Field1:Initial,*req.Field1,*variable,Sub1,
 `); err != nil {
 		t.Fatal(err)
@@ -309,11 +309,11 @@ cgrates.org,RoutePrf2,*string:~*req.Account:1002,;20,*lc,,route1,fltr3,Account3;
 	if err := writeFile(utils.StatsCsv, `
 #Tenant[0],Id[1],FilterIDs[2],Weights[3],QueueLength[4],TTL[5],MinItems[6],Metrics[7],MetricFilterIDs[8],Stored[9],Blocker[10],ThresholdIDs[11]
 cgrates.org,TestStats,*string:~*req.Account:1001,;20,100,1s,2,*sum#~*req.Value;*average#~*req.Value,fltr1;fltr2,true,true,Th1;Th2
-cgrates.org,TestStats,,;20,,,2,*sum#~*req.Usage,,,,
-cgrates.org,TestStats2,*string:~*req.Account:1002,20,100,1s,2,*sum#~*req.Value;*sum#~*req.Usage;*average#~*req.Value;*average#~*req.Usage,,true,true,Th
+cgrates.org,TestStats,,,,,2,*sum#~*req.Usage,,,,
+cgrates.org,TestStats2,*string:~*req.Account:1002,,100,1s,2,*sum#~*req.Value;*sum#~*req.Usage;*average#~*req.Value;*average#~*req.Usage,,true,true,Th
 cgrates.org,TestStats2,,;20,,,2,*sum#~*req.Cost;*average#~*req.Cost,,true,true,
 cgrates.org,TestStats3,,,,,,,,,,
-cgrates.org,TestStats3,*string:~*req.Account:1003,20,100,1s,2,*sum#~*req.Value;*average#~*req.Value,,true,true,Th1;Th2
+cgrates.org,TestStats3,*string:~*req.Account:1003,;20,100,1s,2,*sum#~*req.Value;*average#~*req.Value,,true,true,Th1;Th2
 `); err != nil {
 		t.Fatal(err)
 	}

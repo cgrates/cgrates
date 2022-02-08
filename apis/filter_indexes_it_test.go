@@ -806,23 +806,31 @@ func testV1FIdxSetAccountWithFltr(t *testing.T) {
 	}
 
 	//we will set an Account with our filter and check the indexes
-	accPrf := &APIAccountWithAPIOpts{
-		APIAccount: &utils.APIAccount{
-			Tenant:    "cgrates.org",
-			ID:        "ACCOUNT_FILTER_INDEXES",
-			Weights:   ";0",
+	acc := &utils.AccountWithAPIOpts{
+		Account: &utils.Account{
+			Tenant: "cgrates.org",
+			ID:     "ACCOUNT_FILTER_INDEXES",
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 0,
+				},
+			},
 			FilterIDs: []string{"fltr_for_attr", "*string:~*opts.*context:*sessions"},
-			Balances: map[string]*utils.APIBalance{
+			Balances: map[string]*utils.Balance{
 				"AbstractBalance1": {
-					ID:      "AbstractBalance1",
-					Weights: ";15",
-					Type:    utils.MetaAbstract,
-					Units:   "40s",
-					CostIncrements: []*utils.APICostIncrement{
+					ID: "AbstractBalance1",
+					Weights: utils.DynamicWeights{
 						{
-							Increment:    "1s",
-							FixedFee:     utils.Float64Pointer(0),
-							RecurrentFee: utils.Float64Pointer(1),
+							Weight: 15,
+						},
+					},
+					Type:  utils.MetaAbstract,
+					Units: utils.NewDecimal(int64(40*time.Second), 0),
+					CostIncrements: []*utils.CostIncrement{
+						{
+							Increment:    utils.NewDecimal(int64(time.Second), 0),
+							FixedFee:     utils.NewDecimal(0, 0),
+							RecurrentFee: utils.NewDecimal(1, 0),
 						},
 					},
 				},
@@ -830,7 +838,7 @@ func testV1FIdxSetAccountWithFltr(t *testing.T) {
 		},
 	}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1SetAccount,
-		accPrf, &reply); err != nil {
+		acc, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error(err)
@@ -909,24 +917,32 @@ func testVF1FIdxSetAccountMoreFltrsMoreIndexing(t *testing.T) {
 	}
 
 	// update our Account with our filters
-	accPrf := &APIAccountWithAPIOpts{
-		APIAccount: &utils.APIAccount{
-			Tenant:  "cgrates.org",
-			ID:      "ACCOUNT_FILTER_INDEXES",
-			Weights: ";0",
+	acc := &utils.AccountWithAPIOpts{
+		Account: &utils.Account{
+			Tenant: "cgrates.org",
+			ID:     "ACCOUNT_FILTER_INDEXES",
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 0,
+				},
+			},
 			FilterIDs: []string{"fltr_for_attr", "fltr_for_attr2",
 				"fltr_for_attr3", "*string:~*opts.*context:*sessions"},
-			Balances: map[string]*utils.APIBalance{
+			Balances: map[string]*utils.Balance{
 				"AbstractBalance1": {
-					ID:      "AbstractBalance1",
-					Weights: ";15",
-					Type:    utils.MetaAbstract,
-					Units:   "40s",
-					CostIncrements: []*utils.APICostIncrement{
+					ID: "AbstractBalance1",
+					Weights: utils.DynamicWeights{
 						{
-							Increment:    "1s",
-							FixedFee:     utils.Float64Pointer(0),
-							RecurrentFee: utils.Float64Pointer(1),
+							Weight: 15,
+						},
+					},
+					Type:  utils.MetaAbstract,
+					Units: utils.NewDecimal(int64(40*time.Second), 0),
+					CostIncrements: []*utils.CostIncrement{
+						{
+							Increment:    utils.NewDecimal(int64(time.Second), 0),
+							FixedFee:     utils.NewDecimal(0, 0),
+							RecurrentFee: utils.NewDecimal(1, 0),
 						},
 					},
 				},
@@ -934,7 +950,7 @@ func testVF1FIdxSetAccountMoreFltrsMoreIndexing(t *testing.T) {
 		},
 	}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1SetAccount,
-		accPrf, &reply); err != nil {
+		acc, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error(err)
@@ -1023,47 +1039,63 @@ func testV1FIdxAccountComputeIndexes(t *testing.T) {
 
 func testV1FIdxAccountsMoreProfilesForFilters(t *testing.T) {
 	// more accounts with our filters
-	accPrf2 := &APIAccountWithAPIOpts{
-		APIAccount: &utils.APIAccount{
-			Tenant:    "cgrates.org",
-			ID:        "ACCOUNT_FILTER_INDEXES2",
-			Weights:   ";0",
+	acc2 := &utils.AccountWithAPIOpts{
+		Account: &utils.Account{
+			Tenant: "cgrates.org",
+			ID:     "ACCOUNT_FILTER_INDEXES2",
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 0,
+				},
+			},
 			FilterIDs: []string{"fltr_for_attr2", "fltr_for_attr3"},
-			Balances: map[string]*utils.APIBalance{
+			Balances: map[string]*utils.Balance{
 				"ConcreteBalance1": {
-					ID:      "ConcreteBalance1",
-					Weights: ";15",
-					Type:    utils.MetaConcrete,
-					Units:   "40s",
+					ID: "ConcreteBalance1",
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 15,
+						},
+					},
+					Type:  utils.MetaConcrete,
+					Units: utils.NewDecimal(int64(40*time.Second), 0),
 				},
 			},
 		},
 	}
-	accPrf3 := &APIAccountWithAPIOpts{
-		APIAccount: &utils.APIAccount{
-			Tenant:    "cgrates.org",
-			ID:        "ACCOUNT_FILTER_INDEXES3",
-			Weights:   ";0",
+	acc3 := &utils.AccountWithAPIOpts{
+		Account: &utils.Account{
+			Tenant: "cgrates.org",
+			ID:     "ACCOUNT_FILTER_INDEXES3",
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 0,
+				},
+			},
 			FilterIDs: []string{"fltr_for_attr", "*string:~*opts.*context:*sessions"},
-			Balances: map[string]*utils.APIBalance{
+			Balances: map[string]*utils.Balance{
 				"ConcreteBalance1": {
-					ID:      "ConcreteBalance1",
-					Weights: ";15",
-					Type:    utils.MetaConcrete,
-					Units:   "40s",
+					ID: "ConcreteBalance1",
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 15,
+						},
+					},
+					Type:  utils.MetaConcrete,
+					Units: utils.NewDecimal(int64(40*time.Second), 0),
 				},
 			},
 		},
 	}
 	var reply string
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1SetAccount,
-		accPrf2, &reply); err != nil {
+		acc2, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error(err)
 	}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1SetAccount,
-		accPrf3, &reply); err != nil {
+		acc3, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error(err)

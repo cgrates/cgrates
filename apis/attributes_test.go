@@ -137,11 +137,6 @@ func TestAttributesSetAttributeProfileCheckErrors(t *testing.T) {
 	}
 	attrPrf.FilterIDs = []string{}
 
-	attrPrf.Attributes[0].Path = utils.EmptyString
-	expected = "SERVER_ERROR: MANDATORY_IE_MISSING: [Path]"
-	if err := admS.SetAttributeProfile(context.Background(), attrPrf, &reply); err == nil || err.Error() != expected {
-		t.Errorf("Expected %+v, received %+v", expected, err)
-	}
 	attrPrf.Attributes[0].Path = "*req.RequestType"
 
 	admS.connMgr = engine.NewConnManager(cfg)

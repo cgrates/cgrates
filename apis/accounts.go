@@ -115,32 +115,23 @@ func (admS *AdminSv1) GetAccountCount(ctx *context.Context, args *utils.ArgsItem
 	return
 }
 
-type APIAccountWithAPIOpts struct {
-	*utils.APIAccount
-	APIOpts map[string]interface{}
-}
-
 //SetAccount add/update a new Account
-func (admS *AdminSv1) SetAccount(ctx *context.Context, extAp *APIAccountWithAPIOpts, reply *string) error {
-	if missing := utils.MissingStructFields(extAp.APIAccount, []string{utils.ID}); len(missing) != 0 {
+func (admS *AdminSv1) SetAccount(ctx *context.Context, args *utils.AccountWithAPIOpts, reply *string) error {
+	if missing := utils.MissingStructFields(args.Account, []string{utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if extAp.Tenant == utils.EmptyString {
-		extAp.Tenant = admS.cfg.GeneralCfg().DefaultTenant
+	if args.Tenant == utils.EmptyString {
+		args.Tenant = admS.cfg.GeneralCfg().DefaultTenant
 	}
-	ap, err := extAp.AsAccount()
-	if err != nil {
-		return err
-	}
-	if err := admS.dm.SetAccount(ctx, ap, true); err != nil {
+	if err := admS.dm.SetAccount(ctx, args.Account, true); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//generate a loadID for CacheAccountProfiles and store it in database
 	if err := admS.dm.SetLoadIDs(ctx, map[string]int64{utils.CacheAccounts: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
-	if err := admS.CallCache(ctx, utils.IfaceAsString(extAp.APIOpts[utils.MetaCache]), ap.Tenant, utils.CacheAccounts,
-		ap.TenantID(), &ap.FilterIDs, extAp.APIOpts); err != nil {
+	if err := admS.CallCache(ctx, utils.IfaceAsString(args.APIOpts[utils.MetaCache]), args.Tenant, utils.CacheAccounts,
+		args.TenantID(), &args.FilterIDs, args.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
