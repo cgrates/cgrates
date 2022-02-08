@@ -33,52 +33,20 @@ import (
 
 func TestThresholdsSort(t *testing.T) {
 	ts := Thresholds{
-		&Threshold{tPrfl: &ThresholdProfile{ID: "FIRST", Weights: utils.DynamicWeights{
-			{
-				Weight: 40.0,
-			},
-		}}},
-		&Threshold{tPrfl: &ThresholdProfile{ID: "SECOND", Weights: utils.DynamicWeights{
-			{
-				Weight: 40.0,
-			},
-		}}},
-		&Threshold{tPrfl: &ThresholdProfile{ID: "THIRD", Weights: utils.DynamicWeights{
-			{
-				Weight: 30.0,
-			},
-		}}},
-		&Threshold{tPrfl: &ThresholdProfile{ID: "FOURTH", Weights: utils.DynamicWeights{
-			{
-				Weight: 35.0,
-			},
-		}}},
+		&Threshold{weight: 30.0, tPrfl: &ThresholdProfile{ID: "FIRST"}},
+		&Threshold{weight: 40.0, tPrfl: &ThresholdProfile{ID: "SECOND"}},
+		&Threshold{weight: 30.0, tPrfl: &ThresholdProfile{ID: "THIRD"}},
+		&Threshold{weight: 35.0, tPrfl: &ThresholdProfile{ID: "FOURTH"}},
 	}
 	ts.Sort()
 	eInst := Thresholds{
-		&Threshold{tPrfl: &ThresholdProfile{ID: "SECOND", Weights: utils.DynamicWeights{
-			{
-				Weight: 40.0,
-			},
-		}}},
-		&Threshold{tPrfl: &ThresholdProfile{ID: "FOURTH", Weights: utils.DynamicWeights{
-			{
-				Weight: 35.0,
-			},
-		}}},
-		&Threshold{tPrfl: &ThresholdProfile{ID: "FIRST", Weights: utils.DynamicWeights{
-			{
-				Weight: 30.0,
-			},
-		}}},
-		&Threshold{tPrfl: &ThresholdProfile{ID: "THIRD", Weights: utils.DynamicWeights{
-			{
-				Weight: 30.0,
-			},
-		}}},
+		&Threshold{weight: 40.0, tPrfl: &ThresholdProfile{ID: "SECOND"}},
+		&Threshold{weight: 35.0, tPrfl: &ThresholdProfile{ID: "FOURTH"}},
+		&Threshold{weight: 30.0, tPrfl: &ThresholdProfile{ID: "FIRST"}},
+		&Threshold{weight: 30.0, tPrfl: &ThresholdProfile{ID: "THIRD"}},
 	}
 	if !reflect.DeepEqual(eInst, ts) {
-		t.Errorf("expecting: %+v, received: %+v", eInst, ts)
+		t.Errorf("expecting: %+v, received: %+v", utils.ToJSON(eInst), utils.ToJSON(ts))
 	}
 }
 
@@ -1504,6 +1472,7 @@ func TestThresholdsProcessEventStoreThOK(t *testing.T) {
 		t.Error(err)
 	} else {
 		rcv.tPrfl = nil
+		rcv.weight = 0
 		rcv.dirty = nil
 		rcv.Snooze = time.Time{}
 		if !reflect.DeepEqual(rcv, exp) {
@@ -2494,13 +2463,14 @@ func TestThresholdsV1GetThresholdsForEventOK(t *testing.T) {
 			ID:     "TH1",
 			tPrfl:  thPrf,
 			dirty:  utils.BoolPointer(false),
+			weight: 10,
 		},
 	}
 	var reply Thresholds
 	if err := tS.V1GetThresholdsForEvent(context.Background(), args, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, exp) {
-		t.Errorf("expected: <%+v>, \nreceived: <%+v>", exp, reply)
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", exp[0], reply[0])
 	}
 }
 
@@ -3226,7 +3196,7 @@ func TestThresholdProfileSet(t *testing.T) {
 	if err := th.Set([]string{utils.FilterIDs}, "fltr1;*string:~*req.Account:1001", false, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
-	if err := th.Set([]string{utils.Weight}, 10, false, utils.EmptyString); err != nil {
+	if err := th.Set([]string{utils.Weights}, ";10", false, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
 	if err := th.Set([]string{utils.MaxHits}, 10, false, utils.EmptyString); err != nil {

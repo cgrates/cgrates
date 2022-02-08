@@ -66,7 +66,7 @@ CREATE TABLE tp_thresholds (
   "min_hits" INTEGER NOT NULL,
   "min_sleep" varchar(16) NOT NULL,
   "blocker" BOOLEAN NOT NULL,
-  "weight" decimal(8,2) NOT NULL,
+  "weights" varchar(64) NOT NULL,
   "action_profile_ids" varchar(64) NOT NULL,
   "async" BOOLEAN NOT NULL,
   "created_at" TIMESTAMP WITH TIME ZONE

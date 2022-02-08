@@ -612,7 +612,7 @@ func (tp *ThresholdProfile) Set(path []string, val interface{}, _ bool, _ string
 		tp.ID = utils.IfaceAsString(val)
 	case utils.Blocker:
 		tp.Blocker, err = utils.IfaceAsBool(val)
-	case utils.Weight:
+	case utils.Weights:
 		if val != utils.EmptyString {
 			tp.Weights, err = utils.NewDynamicWeightsFromString(utils.IfaceAsString(val), utils.InfieldSep, utils.ANDSep)
 		}
