@@ -693,7 +693,11 @@ func testStatsSetThresholdProfilesBeforeProcessEv(t *testing.T) {
 			ActionProfileIDs: []string{"actPrfID"},
 			MaxHits:          2,
 			MinHits:          0,
-			Weight:           10,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				},
+			},
 		},
 	}
 
@@ -718,7 +722,11 @@ func testStatsSetThresholdProfilesBeforeProcessEv(t *testing.T) {
 		ActionProfileIDs: []string{"actPrfID"},
 		MaxHits:          2,
 		MinHits:          0,
-		Weight:           10,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 	}
 
 	if err := sqRPC.Call(context.Background(), utils.ThresholdSv1GetThreshold,

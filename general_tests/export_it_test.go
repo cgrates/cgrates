@@ -227,14 +227,18 @@ func testExpVerifyFilters(t *testing.T) {
 func testExpVerifyThresholds(t *testing.T) {
 	tPrfl := &engine.ThresholdProfileWithAPIOpts{
 		ThresholdProfile: &engine.ThresholdProfile{
-			Tenant:           "cgrates.org",
-			ID:               "THD_ACNT_1001",
-			FilterIDs:        []string{"FLTR_ACCOUNT_1001", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z"},
-			MaxHits:          -1,
-			MinHits:          0,
-			MinSleep:         0,
-			Blocker:          false,
-			Weight:           10.0,
+			Tenant:    "cgrates.org",
+			ID:        "THD_ACNT_1001",
+			FilterIDs: []string{"FLTR_ACCOUNT_1001", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z"},
+			MaxHits:   -1,
+			MinHits:   0,
+			MinSleep:  0,
+			Blocker:   false,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10.0,
+				},
+			},
 			ActionProfileIDs: []string{"TOPUP_MONETARY_10"},
 			Async:            false,
 		},

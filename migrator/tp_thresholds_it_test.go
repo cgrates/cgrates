@@ -116,7 +116,7 @@ func testTpTresITPopulate(t *testing.T) {
 			MaxHits:          -1,
 			MinSleep:         "1s",
 			Blocker:          true,
-			Weight:           10,
+			Weights:          ";10",
 			ActionProfileIDs: []string{"Thresh1", "Thresh2"},
 			Async:            true,
 		},

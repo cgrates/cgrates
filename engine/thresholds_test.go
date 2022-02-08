@@ -33,17 +33,49 @@ import (
 
 func TestThresholdsSort(t *testing.T) {
 	ts := Thresholds{
-		&Threshold{tPrfl: &ThresholdProfile{ID: "FIRST", Weight: 30.0}},
-		&Threshold{tPrfl: &ThresholdProfile{ID: "SECOND", Weight: 40.0}},
-		&Threshold{tPrfl: &ThresholdProfile{ID: "THIRD", Weight: 30.0}},
-		&Threshold{tPrfl: &ThresholdProfile{ID: "FOURTH", Weight: 35.0}},
+		&Threshold{tPrfl: &ThresholdProfile{ID: "FIRST", Weights: utils.DynamicWeights{
+			{
+				Weight: 40.0,
+			},
+		}}},
+		&Threshold{tPrfl: &ThresholdProfile{ID: "SECOND", Weights: utils.DynamicWeights{
+			{
+				Weight: 40.0,
+			},
+		}}},
+		&Threshold{tPrfl: &ThresholdProfile{ID: "THIRD", Weights: utils.DynamicWeights{
+			{
+				Weight: 30.0,
+			},
+		}}},
+		&Threshold{tPrfl: &ThresholdProfile{ID: "FOURTH", Weights: utils.DynamicWeights{
+			{
+				Weight: 35.0,
+			},
+		}}},
 	}
 	ts.Sort()
 	eInst := Thresholds{
-		&Threshold{tPrfl: &ThresholdProfile{ID: "SECOND", Weight: 40.0}},
-		&Threshold{tPrfl: &ThresholdProfile{ID: "FOURTH", Weight: 35.0}},
-		&Threshold{tPrfl: &ThresholdProfile{ID: "FIRST", Weight: 30.0}},
-		&Threshold{tPrfl: &ThresholdProfile{ID: "THIRD", Weight: 30.0}},
+		&Threshold{tPrfl: &ThresholdProfile{ID: "SECOND", Weights: utils.DynamicWeights{
+			{
+				Weight: 40.0,
+			},
+		}}},
+		&Threshold{tPrfl: &ThresholdProfile{ID: "FOURTH", Weights: utils.DynamicWeights{
+			{
+				Weight: 35.0,
+			},
+		}}},
+		&Threshold{tPrfl: &ThresholdProfile{ID: "FIRST", Weights: utils.DynamicWeights{
+			{
+				Weight: 30.0,
+			},
+		}}},
+		&Threshold{tPrfl: &ThresholdProfile{ID: "THIRD", Weights: utils.DynamicWeights{
+			{
+				Weight: 30.0,
+			},
+		}}},
 	}
 	if !reflect.DeepEqual(eInst, ts) {
 		t.Errorf("expecting: %+v, received: %+v", eInst, ts)
@@ -54,34 +86,46 @@ func TestThresholdsCache(t *testing.T) {
 	var dmTH *DataManager
 	tPrfls := []*ThresholdProfile{
 		{
-			Tenant:           "cgrates.org",
-			ID:               "TH_1",
-			FilterIDs:        []string{"FLTR_TH_1", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z"},
-			MaxHits:          12,
-			Blocker:          false,
-			Weight:           20.0,
+			Tenant:    "cgrates.org",
+			ID:        "TH_1",
+			FilterIDs: []string{"FLTR_TH_1", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z"},
+			MaxHits:   12,
+			Blocker:   false,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20.0,
+				},
+			},
 			ActionProfileIDs: []string{"ACT_1", "ACT_2"},
 			Async:            false,
 		},
 		{
-			Tenant:           "cgrates.org",
-			ID:               "TH_2",
-			FilterIDs:        []string{"FLTR_TH_2", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z"},
-			MaxHits:          12,
-			MinSleep:         5 * time.Minute,
-			Blocker:          false,
-			Weight:           20.0,
+			Tenant:    "cgrates.org",
+			ID:        "TH_2",
+			FilterIDs: []string{"FLTR_TH_2", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z"},
+			MaxHits:   12,
+			MinSleep:  5 * time.Minute,
+			Blocker:   false,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20.0,
+				},
+			},
 			ActionProfileIDs: []string{"ACT_1", "ACT_2"},
 			Async:            false,
 		},
 		{
-			Tenant:           "cgrates.org",
-			ID:               "TH_3",
-			FilterIDs:        []string{"FLTR_TH_3", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z"},
-			MaxHits:          12,
-			MinSleep:         5 * time.Minute,
-			Blocker:          false,
-			Weight:           20.0,
+			Tenant:    "cgrates.org",
+			ID:        "TH_3",
+			FilterIDs: []string{"FLTR_TH_3", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z"},
+			MaxHits:   12,
+			MinSleep:  5 * time.Minute,
+			Blocker:   false,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20.0,
+				},
+			},
 			ActionProfileIDs: []string{"ACT_1", "ACT_2"},
 			Async:            false,
 		},
@@ -193,34 +237,46 @@ func TestThresholdsmatchingThresholdsForEvent(t *testing.T) {
 	var thServ *ThresholdS
 	var tPrfls = []*ThresholdProfile{
 		{
-			Tenant:           "cgrates.org",
-			ID:               "TH_1",
-			FilterIDs:        []string{"FLTR_TH_1", "*ai:*now:2014-07-14T14:35:00Z"},
-			MaxHits:          12,
-			Blocker:          false,
-			Weight:           20.0,
+			Tenant:    "cgrates.org",
+			ID:        "TH_1",
+			FilterIDs: []string{"FLTR_TH_1", "*ai:*now:2014-07-14T14:35:00Z"},
+			MaxHits:   12,
+			Blocker:   false,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20.0,
+				},
+			},
 			ActionProfileIDs: []string{"ACT_1", "ACT_2"},
 			Async:            false,
 		},
 		{
-			Tenant:           "cgrates.org",
-			ID:               "TH_2",
-			FilterIDs:        []string{"FLTR_TH_2", "*ai:*now:2014-07-14T14:35:00Z"},
-			MaxHits:          12,
-			MinSleep:         5 * time.Minute,
-			Blocker:          false,
-			Weight:           20.0,
+			Tenant:    "cgrates.org",
+			ID:        "TH_2",
+			FilterIDs: []string{"FLTR_TH_2", "*ai:*now:2014-07-14T14:35:00Z"},
+			MaxHits:   12,
+			MinSleep:  5 * time.Minute,
+			Blocker:   false,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20.0,
+				},
+			},
 			ActionProfileIDs: []string{"ACT_1", "ACT_2"},
 			Async:            false,
 		},
 		{
-			Tenant:           "cgrates.org",
-			ID:               "TH_3",
-			FilterIDs:        []string{"FLTR_TH_3", "*ai:*now:2014-07-14T14:35:00Z"},
-			MaxHits:          12,
-			MinSleep:         5 * time.Minute,
-			Blocker:          false,
-			Weight:           20.0,
+			Tenant:    "cgrates.org",
+			ID:        "TH_3",
+			FilterIDs: []string{"FLTR_TH_3", "*ai:*now:2014-07-14T14:35:00Z"},
+			MaxHits:   12,
+			MinSleep:  5 * time.Minute,
+			Blocker:   false,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20.0,
+				},
+			},
 			ActionProfileIDs: []string{"ACT_1", "ACT_2"},
 			Async:            false,
 		},
@@ -1145,12 +1201,16 @@ func TestThresholdsProcessEventAsyncExecErr(t *testing.T) {
 	connMgr := NewConnManager(cfg)
 
 	thPrf := &ThresholdProfile{
-		Tenant:           "cgrates.org",
-		ID:               "TH1",
-		FilterIDs:        []string{"*string:~*req.Account:1001"},
-		MinHits:          2,
-		MaxHits:          5,
-		Weight:           10,
+		Tenant:    "cgrates.org",
+		ID:        "TH1",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		MinHits:   2,
+		MaxHits:   5,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10.0,
+			},
+		},
 		ActionProfileIDs: []string{"actPrfID"},
 		Async:            true,
 	}
@@ -1407,8 +1467,12 @@ func TestThresholdsProcessEventStoreThOK(t *testing.T) {
 		FilterIDs: []string{"*string:~*req.Account:1001"},
 		MinHits:   2,
 		MaxHits:   5,
-		Weight:    10,
-		Blocker:   true,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
+		Blocker: true,
 	}
 
 	if err := dm.SetThresholdProfile(context.Background(), thPrf, true); err != nil {
@@ -1476,12 +1540,16 @@ func TestThresholdsProcessEventMaxHitsDMErr(t *testing.T) {
 		utils.Logger = tmpLogger
 	}()
 	thPrf := &ThresholdProfile{
-		Tenant:           "cgrates.org",
-		ID:               "TH3",
-		FilterIDs:        []string{"*string:~*req.Account:1001"},
-		MinHits:          2,
-		MaxHits:          5,
-		Weight:           10,
+		Tenant:    "cgrates.org",
+		ID:        "TH3",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		MinHits:   2,
+		MaxHits:   5,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10.0,
+			},
+		},
 		ActionProfileIDs: []string{utils.MetaNone},
 		Blocker:          true,
 	}
@@ -1541,8 +1609,12 @@ func TestThresholdsProcessEventNotFound(t *testing.T) {
 		FilterIDs: []string{"*string:~*req.Account:1001"},
 		MinHits:   2,
 		MaxHits:   5,
-		Weight:    10,
-		Blocker:   true,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
+		Blocker: true,
 	}
 	th := &Threshold{
 		Tenant: "cgrates.org",
@@ -1596,8 +1668,12 @@ func TestThresholdsV1ProcessEventOK(t *testing.T) {
 		ActionProfileIDs: []string{utils.MetaNone},
 		MinHits:          2,
 		MaxHits:          5,
-		Weight:           10,
-		Blocker:          true,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10.0,
+			},
+		},
+		Blocker: true,
 	}
 	if err := dm.SetThresholdProfile(context.Background(), thPrf1, true); err != nil {
 		t.Error(err)
@@ -1610,8 +1686,12 @@ func TestThresholdsV1ProcessEventOK(t *testing.T) {
 		ActionProfileIDs: []string{utils.MetaNone},
 		MinHits:          0,
 		MaxHits:          7,
-		Weight:           20,
-		Blocker:          false,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
+		Blocker: false,
 	}
 	if err := dm.SetThresholdProfile(context.Background(), thPrf2, true); err != nil {
 		t.Error(err)
@@ -1659,8 +1739,12 @@ func TestThresholdsV1ProcessEventPartExecErr(t *testing.T) {
 		FilterIDs: []string{"*string:~*req.Account:1001"},
 		MinHits:   2,
 		MaxHits:   5,
-		Weight:    10,
-		Blocker:   true,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
+		Blocker: true,
 	}
 	if err := dm.SetThresholdProfile(context.Background(), thPrf1, true); err != nil {
 		t.Error(err)
@@ -1672,8 +1756,12 @@ func TestThresholdsV1ProcessEventPartExecErr(t *testing.T) {
 		FilterIDs: []string{"*string:~*req.Account:1001"},
 		MinHits:   0,
 		MaxHits:   7,
-		Weight:    20,
-		Blocker:   false,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
+		Blocker: false,
 	}
 	if err := dm.SetThresholdProfile(context.Background(), thPrf2, true); err != nil {
 		t.Error(err)
@@ -1717,8 +1805,12 @@ func TestThresholdsV1ProcessEventMissingArgs(t *testing.T) {
 		FilterIDs: []string{"*string:~*req.Account:1001"},
 		MinHits:   2,
 		MaxHits:   5,
-		Weight:    10,
-		Blocker:   true,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
+		Blocker: true,
 	}
 	if err := dm.SetThresholdProfile(context.Background(), thPrf1, true); err != nil {
 		t.Error(err)
@@ -1730,8 +1822,12 @@ func TestThresholdsV1ProcessEventMissingArgs(t *testing.T) {
 		FilterIDs: []string{"*string:~*req.Account:1001"},
 		MinHits:   0,
 		MaxHits:   7,
-		Weight:    20,
-		Blocker:   false,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
+		Blocker: false,
 	}
 	if err := dm.SetThresholdProfile(context.Background(), thPrf2, true); err != nil {
 		t.Error(err)
@@ -1793,8 +1889,12 @@ func TestThresholdsV1GetThresholdOK(t *testing.T) {
 		FilterIDs: []string{"*string:~*req.Account:1001"},
 		MinHits:   2,
 		MaxHits:   5,
-		Weight:    10,
-		Blocker:   true,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
+		Blocker: true,
 	}
 	if err := dm.SetThresholdProfile(context.Background(), thPrf, true); err != nil {
 		t.Error(err)
@@ -1842,8 +1942,12 @@ func TestThresholdsV1GetThresholdNotFoundErr(t *testing.T) {
 		FilterIDs: []string{"*string:~*req.Account:1001"},
 		MinHits:   2,
 		MaxHits:   5,
-		Weight:    10,
-		Blocker:   true,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
+		Blocker: true,
 	}
 	if err := dm.SetThresholdProfile(context.Background(), thPrf, true); err != nil {
 		t.Error(err)
@@ -1876,9 +1980,13 @@ func TestThresholdMatchingThresholdForEventLocks(t *testing.T) {
 	ids := utils.StringSet{}
 	for i := 0; i < 10; i++ {
 		rPrf := &ThresholdProfile{
-			Tenant:  "cgrates.org",
-			ID:      fmt.Sprintf("TH%d", i),
-			Weight:  20.00,
+			Tenant: "cgrates.org",
+			ID:     fmt.Sprintf("TH%d", i),
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20.00,
+				},
+			},
 			MaxHits: 5,
 		}
 		dm.SetThresholdProfile(context.Background(), rPrf, true)
@@ -1932,9 +2040,13 @@ func TestThresholdMatchingThresholdForEventLocks2(t *testing.T) {
 	ids := utils.StringSet{}
 	for i := 0; i < 10; i++ {
 		rPrf := &ThresholdProfile{
-			Tenant:  "cgrates.org",
-			ID:      fmt.Sprintf("TH%d", i),
-			Weight:  20.00,
+			Tenant: "cgrates.org",
+			ID:     fmt.Sprintf("TH%d", i),
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20.00,
+				},
+			},
 			MaxHits: 5,
 		}
 		dm.SetThresholdProfile(context.Background(), rPrf, true)
@@ -1945,8 +2057,12 @@ func TestThresholdMatchingThresholdForEventLocks2(t *testing.T) {
 		Tenant:    "cgrates.org",
 		ID:        "TH20",
 		FilterIDs: []string{"FLTR_RES_201"},
-		Weight:    20.00,
-		MaxHits:   5,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20.00,
+			},
+		},
+		MaxHits: 5,
 	}
 	err = db.SetThresholdProfileDrv(context.Background(), rPrf)
 	if err != nil {
@@ -1996,9 +2112,13 @@ func TestThresholdMatchingThresholdForEventLocksBlocker(t *testing.T) {
 	ids := utils.StringSet{}
 	for i := 0; i < 10; i++ {
 		rPrf := &ThresholdProfile{
-			Tenant:  "cgrates.org",
-			ID:      fmt.Sprintf("TH%d", i),
-			Weight:  float64(10 - i),
+			Tenant: "cgrates.org",
+			ID:     fmt.Sprintf("TH%d", i),
+			Weights: utils.DynamicWeights{
+				{
+					Weight: float64(10 - i),
+				},
+			},
 			Blocker: i == 4,
 			MaxHits: 5,
 		}
@@ -2056,7 +2176,11 @@ func TestThresholdMatchingThresholdForEventLocks3(t *testing.T) {
 				Tenant:  "cgrates.org",
 				ID:      id,
 				MaxHits: 5,
-				Weight:  20.00,
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 20.00,
+					},
+				},
 			}
 			Cache.Set(ctx, utils.CacheThresholds, rPrf.TenantID(), &Threshold{
 				Tenant: rPrf.Tenant,
@@ -2111,9 +2235,13 @@ func TestThresholdMatchingThresholdForEventLocks4(t *testing.T) {
 	ids := utils.StringSet{}
 	for i := 0; i < 10; i++ {
 		rPrf := &ThresholdProfile{
-			Tenant:  "cgrates.org",
-			ID:      fmt.Sprintf("TH%d", i),
-			Weight:  20.00,
+			Tenant: "cgrates.org",
+			ID:     fmt.Sprintf("TH%d", i),
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20.00,
+				},
+			},
 			MaxHits: 5,
 		}
 		dm.SetThresholdProfile(context.Background(), rPrf, true)
@@ -2169,9 +2297,13 @@ func TestThresholdMatchingThresholdForEventLocks5(t *testing.T) {
 	ids := utils.StringSet{}
 	for i := 0; i < 10; i++ {
 		rPrf := &ThresholdProfile{
-			Tenant:  "cgrates.org",
-			ID:      fmt.Sprintf("TH%d", i),
-			Weight:  20.00,
+			Tenant: "cgrates.org",
+			ID:     fmt.Sprintf("TH%d", i),
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20.00,
+				},
+			},
 			MaxHits: 5,
 		}
 		dm.SetThresholdProfile(context.Background(), rPrf, true)
@@ -2338,8 +2470,12 @@ func TestThresholdsV1GetThresholdsForEventOK(t *testing.T) {
 		FilterIDs: []string{"*string:~*req.Account:1001"},
 		MinHits:   2,
 		MaxHits:   5,
-		Weight:    10,
-		Blocker:   true,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
+		Blocker: true,
 	}
 	if err := dm.SetThresholdProfile(context.Background(), thPrf, true); err != nil {
 		t.Error(err)
@@ -2389,8 +2525,12 @@ func TestThresholdsV1GetThresholdsForEventMissingArgs(t *testing.T) {
 		FilterIDs: []string{"*string:~*req.Account:1001"},
 		MinHits:   2,
 		MaxHits:   5,
-		Weight:    10,
-		Blocker:   true,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
+		Blocker: true,
 	}
 	if err := dm.SetThresholdProfile(context.Background(), thPrf, true); err != nil {
 		t.Error(err)
@@ -2451,8 +2591,12 @@ func TestThresholdsV1GetThresholdIDsOK(t *testing.T) {
 		FilterIDs: []string{"*string:~*req.Account:1001"},
 		MinHits:   2,
 		MaxHits:   5,
-		Weight:    10,
-		Blocker:   true,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
+		Blocker: true,
 	}
 	if err := dm.SetThresholdProfile(context.Background(), thPrf1, true); err != nil {
 		t.Error(err)
@@ -2463,7 +2607,11 @@ func TestThresholdsV1GetThresholdIDsOK(t *testing.T) {
 		ID:      "TH2",
 		MinHits: 0,
 		MaxHits: 7,
-		Weight:  20,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 		Blocker: true,
 	}
 	if err := dm.SetThresholdProfile(context.Background(), thPrf2, true); err != nil {
@@ -2525,8 +2673,12 @@ func TestThresholdsV1ResetThresholdOK(t *testing.T) {
 		FilterIDs: []string{"*string:~*req.Account:1001"},
 		MinHits:   2,
 		MaxHits:   5,
-		Weight:    10,
-		Blocker:   true,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
+		Blocker: true,
 	}
 
 	th := &Threshold{
@@ -2580,8 +2732,12 @@ func TestThresholdsV1ResetThresholdErrNotFound(t *testing.T) {
 		FilterIDs: []string{"*string:~*req.Account:1001"},
 		MinHits:   2,
 		MaxHits:   5,
-		Weight:    10,
-		Blocker:   true,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
+		Blocker: true,
 	}
 
 	th := &Threshold{
@@ -2627,8 +2783,12 @@ func TestThresholdsV1ResetThresholdNegativeStoreIntervalOK(t *testing.T) {
 		FilterIDs: []string{"*string:~*req.Account:1001"},
 		MinHits:   2,
 		MaxHits:   5,
-		Weight:    10,
-		Blocker:   true,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
+		Blocker: true,
 	}
 
 	th := &Threshold{
@@ -2678,8 +2838,12 @@ func TestThresholdsV1ResetThresholdNegativeStoreIntervalErr(t *testing.T) {
 		FilterIDs: []string{"*string:~*req.Account:1001"},
 		MinHits:   2,
 		MaxHits:   5,
-		Weight:    10,
-		Blocker:   true,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
+		Blocker: true,
 	}
 
 	th := &Threshold{
@@ -2705,9 +2869,13 @@ func TestThresholdsV1ResetThresholdNegativeStoreIntervalErr(t *testing.T) {
 
 func TestThresholdsLockUnlockThresholdProfiles(t *testing.T) {
 	thPrf := &ThresholdProfile{
-		Tenant:  "cgrates.org",
-		ID:      "TH1",
-		Weight:  10,
+		Tenant: "cgrates.org",
+		ID:     "TH1",
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 		MaxHits: 5,
 		MinHits: 2,
 	}
@@ -2795,8 +2963,12 @@ func TestThresholdsMatchingThresholdsForEventNotFoundErr(t *testing.T) {
 		FilterIDs: []string{"*string:~*req.Account:1001"},
 		MinHits:   2,
 		MaxHits:   5,
-		Weight:    10,
-		Blocker:   true,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
+		Blocker: true,
 	}
 	if err := dm.SetThresholdProfile(context.Background(), thPrf1, true); err != nil {
 		t.Error(err)
@@ -2878,8 +3050,12 @@ func TestThreholdsMatchingThresholdsForEventDoesNotPass(t *testing.T) {
 		FilterIDs: []string{"*string:~*req.Account:1001"},
 		MinHits:   2,
 		MaxHits:   5,
-		Weight:    10,
-		Blocker:   true,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
+		Blocker: true,
 	}
 	if err := dm.SetThresholdProfile(context.Background(), thPrf1, true); err != nil {
 		t.Error(err)
@@ -3016,10 +3192,14 @@ func TestThresholdsProcessEventIgnoreFiltersErr(t *testing.T) {
 func TestThresholdProfileSet(t *testing.T) {
 	th := ThresholdProfile{}
 	exp := ThresholdProfile{
-		Tenant:           "cgrates.org",
-		ID:               "ID",
-		FilterIDs:        []string{"fltr1", "*string:~*req.Account:1001"},
-		Weight:           10,
+		Tenant:    "cgrates.org",
+		ID:        "ID",
+		FilterIDs: []string{"fltr1", "*string:~*req.Account:1001"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10.0,
+			},
+		},
 		MaxHits:          10,
 		MinHits:          10,
 		MinSleep:         10,
@@ -3075,10 +3255,14 @@ func TestThresholdProfileSet(t *testing.T) {
 
 func TestThresholdProfileAsInterface(t *testing.T) {
 	tp := ThresholdProfile{
-		Tenant:           "cgrates.org",
-		ID:               "ID",
-		FilterIDs:        []string{"fltr1", "*string:~*req.Account:1001"},
-		Weight:           10,
+		Tenant:    "cgrates.org",
+		ID:        "ID",
+		FilterIDs: []string{"fltr1", "*string:~*req.Account:1001"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10.0,
+			},
+		},
 		MaxHits:          10,
 		MinHits:          10,
 		MinSleep:         10,
@@ -3117,7 +3301,7 @@ func TestThresholdProfileAsInterface(t *testing.T) {
 	}
 	if val, err := tp.FieldAsInterface([]string{utils.Weight}); err != nil {
 		t.Fatal(err)
-	} else if exp := tp.Weight; !reflect.DeepEqual(exp, val) {
+	} else if exp := tp.Weights; !reflect.DeepEqual(exp, val) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
 	}
 	if val, err := tp.FieldAsInterface([]string{utils.ActionProfileIDs}); err != nil {
@@ -3173,10 +3357,14 @@ func TestThresholdProfileAsInterface(t *testing.T) {
 func TestThresholdProfileMerge(t *testing.T) {
 	dp := &ThresholdProfile{}
 	exp := &ThresholdProfile{
-		Tenant:           "cgrates.org",
-		ID:               "ID",
-		FilterIDs:        []string{"fltr1", "*string:~*req.Account:1001"},
-		Weight:           10,
+		Tenant:    "cgrates.org",
+		ID:        "ID",
+		FilterIDs: []string{"fltr1", "*string:~*req.Account:1001"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10.0,
+			},
+		},
 		MaxHits:          10,
 		MinHits:          10,
 		MinSleep:         10,
@@ -3185,10 +3373,14 @@ func TestThresholdProfileMerge(t *testing.T) {
 		ActionProfileIDs: []string{"acc1"},
 	}
 	if dp.Merge(&ThresholdProfile{
-		Tenant:           "cgrates.org",
-		ID:               "ID",
-		FilterIDs:        []string{"fltr1", "*string:~*req.Account:1001"},
-		Weight:           10,
+		Tenant:    "cgrates.org",
+		ID:        "ID",
+		FilterIDs: []string{"fltr1", "*string:~*req.Account:1001"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10.0,
+			},
+		},
 		MaxHits:          10,
 		MinHits:          10,
 		MinSleep:         10,

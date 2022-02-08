@@ -55,7 +55,11 @@ func TestThresholdsSetGetRemThresholdProfile(t *testing.T) {
 			ID:        "thdID",
 			FilterIDs: []string{"*string:~*req.Account:1001"},
 			MaxHits:   10,
-			Weight:    10,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				},
+			},
 		},
 	}
 
@@ -228,7 +232,11 @@ func TestThresholdsRemoveThresholdProfileCheckErrors(t *testing.T) {
 			ID:      "TestThresholdsRemoveThresholdProfileCheckErrors",
 			Tenant:  "cgrates.org",
 			MaxHits: 10,
-			Weight:  10,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				},
+			},
 		},
 	}
 	var reply string
@@ -537,11 +545,15 @@ func TestThresholdsAPIs(t *testing.T) {
 
 	thPrf1 := &engine.ThresholdProfileWithAPIOpts{
 		ThresholdProfile: &engine.ThresholdProfile{
-			Tenant:           "cgrates.org",
-			ID:               "thd1",
-			FilterIDs:        []string{"*string:~*req.Account:1001"},
-			MaxHits:          10,
-			Weight:           10,
+			Tenant:    "cgrates.org",
+			ID:        "thd1",
+			FilterIDs: []string{"*string:~*req.Account:1001"},
+			MaxHits:   10,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				},
+			},
 			ActionProfileIDs: []string{"actPrfID"},
 		},
 	}
@@ -554,10 +566,14 @@ func TestThresholdsAPIs(t *testing.T) {
 
 	thPrf2 := &engine.ThresholdProfileWithAPIOpts{
 		ThresholdProfile: &engine.ThresholdProfile{
-			Tenant:           "cgrates.org",
-			ID:               "thd2",
-			MaxHits:          10,
-			Weight:           10,
+			Tenant:  "cgrates.org",
+			ID:      "thd2",
+			MaxHits: 10,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				},
+			},
 			ActionProfileIDs: []string{"actPrfID"},
 		},
 	}

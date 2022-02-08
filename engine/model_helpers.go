@@ -558,8 +558,8 @@ func (tps ThresholdMdls) AsTPThreshold() (result []*utils.TPThresholdProfile) {
 			}
 			actionMap[tenID].AddSlice(strings.Split(tp.ActionProfileIDs, utils.InfieldSep))
 		}
-		if tp.Weight != 0 {
-			th.Weight = tp.Weight
+		if tp.Weights != ";0" {
+			th.Weights = tp.Weights
 		}
 		if tp.FilterIDs != utils.EmptyString {
 			if _, has := filterMap[tenID]; !has {
@@ -598,7 +598,7 @@ func APItoModelTPThreshold(th *utils.TPThresholdProfile) (mdls ThresholdMdls) {
 			}
 			if i == 0 {
 				mdl.Blocker = th.Blocker
-				mdl.Weight = th.Weight
+				mdl.Weights = th.Weights
 				mdl.MaxHits = th.MaxHits
 				mdl.MinHits = th.MinHits
 				mdl.MinSleep = th.MinSleep
@@ -629,7 +629,7 @@ func APItoModelTPThreshold(th *utils.TPThresholdProfile) (mdls ThresholdMdls) {
 				}
 				if min == 0 && i == 0 {
 					mdl.Blocker = th.Blocker
-					mdl.Weight = th.Weight
+					mdl.Weights = th.Weights
 					mdl.MaxHits = th.MaxHits
 					mdl.MinHits = th.MinHits
 					mdl.MinSleep = th.MinSleep
@@ -649,11 +649,15 @@ func APItoThresholdProfile(tpTH *utils.TPThresholdProfile, timezone string) (th 
 		ID:               tpTH.ID,
 		MaxHits:          tpTH.MaxHits,
 		MinHits:          tpTH.MinHits,
-		Weight:           tpTH.Weight,
 		Blocker:          tpTH.Blocker,
 		Async:            tpTH.Async,
 		ActionProfileIDs: make([]string, len(tpTH.ActionProfileIDs)),
 		FilterIDs:        make([]string, len(tpTH.FilterIDs)),
+	}
+	if tpTH.Weights != utils.EmptyString {
+		if th.Weights, err = utils.NewDynamicWeightsFromString(tpTH.Weights, utils.InfieldSep, utils.ANDSep); err != nil {
+			return
+		}
 	}
 	if tpTH.MinSleep != utils.EmptyString {
 		if th.MinSleep, err = utils.ParseDurationWithNanosecs(tpTH.MinSleep); err != nil {
@@ -678,7 +682,7 @@ func ThresholdProfileToAPI(th *ThresholdProfile) (tpTH *utils.TPThresholdProfile
 		MaxHits:          th.MaxHits,
 		MinHits:          th.MinHits,
 		Blocker:          th.Blocker,
-		Weight:           th.Weight,
+		Weights:          th.Weights.String(utils.InfieldSep, utils.ANDSep),
 		ActionProfileIDs: make([]string, len(th.ActionProfileIDs)),
 		Async:            th.Async,
 	}
