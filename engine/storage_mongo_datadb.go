@@ -1221,7 +1221,27 @@ func (ms *MongoStorage) GetRateProfileDrv(ctx *context.Context, tenant, id strin
 	return utils.NewRateProfileFromMapDataDBMap(tenant, id, mapRP, ms.ms)
 }
 
-func (ms *MongoStorage) GetRateProfileRateIDsDrv(ctx *context.Context, key, prefix, argsPrefix string) (rateIDs []string, err error) {
+func (ms *MongoStorage) GetRateProfileRateIDsDrv(ctx *context.Context, tenant, profileID, prefixArgs string) (rateIDs []string, err error) {
+	prefix := utils.Rates + utils.ConcatenatedKeySep
+	if prefixArgs != utils.EmptyString {
+		prefix = utils.ConcatenatedKey(utils.Rates, prefixArgs)
+	}
+	mapRP := make(map[string]interface{})
+	err = ms.query(ctx, func(sctx mongo.SessionContext) (err error) {
+		cur := ms.getCol(ColRpp).FindOne(sctx, bson.M{"tenant": tenant, "id": profileID})
+		if err := cur.Decode(mapRP); err != nil {
+			if err == mongo.ErrNoDocuments {
+				return utils.ErrNotFound
+			}
+			return err
+		}
+		return nil
+	})
+	for key := range mapRP {
+		if strings.HasPrefix(key, prefix) {
+			rateIDs = append(rateIDs, strings.TrimPrefix(key, utils.Rates+utils.ConcatenatedKeySep))
+		}
+	}
 	return
 }
 
