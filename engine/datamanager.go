@@ -1950,6 +1950,13 @@ func (dm *DataManager) GetRateProfileRateIDs(ctx *context.Context, args *utils.A
 	return dm.DataDB().GetRateProfileRateIDsDrv(ctx, args.Tenant, args.ProfileID, args.ItemsPrefix)
 }
 
+func (dm *DataManager) GetRateProfileRates(ctx *context.Context, args *utils.ArgsSubItemIDs) (rateIDs []*utils.Rate, err error) {
+	if dm == nil {
+		return nil, utils.ErrNoDatabaseConn
+	}
+	return dm.DataDB().GetRateProfileRatesDrv(ctx, args.Tenant, args.ProfileID, args.ItemsPrefix)
+}
+
 func (dm *DataManager) SetRateProfile(ctx *context.Context, rpp *utils.RateProfile, withIndex bool) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn

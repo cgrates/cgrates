@@ -748,6 +748,7 @@ func (rs *RedisStorage) GetRateProfileDrv(ctx *context.Context, tenant, id strin
 	return utils.NewRateProfileFromMapDataDBMap(tenant, id, mapRP, rs.ms)
 }
 
+// GetRateProfileRateIDsDrv will return back all the rate IDs from a profile
 func (rs *RedisStorage) GetRateProfileRateIDsDrv(ctx *context.Context, tnt, profileID, prefixArgs string) (rateIDs []string, err error) {
 	key := utils.RateProfilePrefix + utils.ConcatenatedKey(tnt, profileID)
 	prefix := utils.Rates + utils.ConcatenatedKeySep
@@ -763,6 +764,37 @@ func (rs *RedisStorage) GetRateProfileRateIDsDrv(ctx *context.Context, tnt, prof
 	for scan.Next(&rateField) {
 		if strings.HasPrefix(rateField, prefix) {
 			rateIDs = append(rateIDs, strings.TrimPrefix(rateField, utils.Rates+utils.ConcatenatedKeySep))
+		}
+	}
+	if err = scan.Close(); err != nil {
+		return nil, err
+	}
+	return
+}
+
+// GetRateProfileRatesDrv will return back all the rates from a profile
+func (rs *RedisStorage) GetRateProfileRatesDrv(ctx *context.Context, tnt, profileID, prefixArgs string) (rates []*utils.Rate, err error) {
+	key := utils.RateProfilePrefix + utils.ConcatenatedKey(tnt, profileID)
+	prefix := utils.Rates + utils.ConcatenatedKeySep
+	if prefixArgs != utils.EmptyString {
+		prefix = utils.ConcatenatedKey(utils.Rates, prefixArgs)
+	}
+	var rateField string
+	scan := radix.NewScanner(rs.client, radix.ScanOpts{
+		Command: redisHSCAN,
+		Key:     key,
+		Pattern: prefix + utils.Meta,
+	})
+	for scan.Next(&rateField) {
+		if strings.HasPrefix(rateField, prefix) {
+			rtToAppend := new(utils.Rate)
+			var rate string
+			if ok := scan.Next(&rate); ok {
+				if err = rs.ms.Unmarshal([]byte(rate), rtToAppend); err != nil {
+					return nil, err
+				}
+			}
+			rates = append(rates, rtToAppend)
 		}
 	}
 	if err = scan.Close(); err != nil {

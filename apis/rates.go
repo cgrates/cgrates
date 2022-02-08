@@ -47,6 +47,25 @@ func (admS *AdminSv1) GetRateProfile(ctx *context.Context, arg *utils.TenantIDWi
 	return nil
 }
 
+// GetRateProfile returns the rates of a profile based on their profile. Those rates will be returned back by matching a prefix.
+func (admS *AdminSv1) GetRateProfileRates(ctx *context.Context, args *utils.ArgsSubItemIDs, reply *[]*utils.Rate) (err error) {
+	if missing := utils.MissingStructFields(args, []string{utils.ProfileID}); len(missing) != 0 { //Params missing
+		return utils.NewErrMandatoryIeMissing(missing...)
+	}
+	if args.Tenant == utils.EmptyString {
+		args.Tenant = admS.cfg.GeneralCfg().DefaultTenant
+	}
+	rates, err := admS.dm.GetRateProfileRates(ctx, args)
+	if err != nil {
+		return
+	}
+	if len(rates) == 0 {
+		return utils.ErrNotFound
+	}
+	*reply = rates
+	return
+}
+
 // GetRateProfileIDs returns a list of rate profile IDs registered for a tenant
 func (admS *AdminSv1) GetRateProfileIDs(ctx *context.Context, args *utils.ArgsItemIDs, ratePrfIDs *[]string) (err error) {
 	tnt := args.Tenant
@@ -77,8 +96,8 @@ func (admS *AdminSv1) GetRateProfileIDs(ctx *context.Context, args *utils.ArgsIt
 
 // GetRateProfileRateIDs returns a list of rates from a specific RateProfile  registered for a tenant. RateIDs are returned back by matching a pattern given by ItemPrefix. If the ItemPrefix is not there, it will be returned all RateIDs.
 func (admS *AdminSv1) GetRateProfileRateIDs(ctx *context.Context, args *utils.ArgsSubItemIDs, rateIDs *[]string) (err error) {
-	if args.ProfileID == utils.EmptyString {
-		return utils.NewErrMandatoryIeMissing(args.ProfileID)
+	if missing := utils.MissingStructFields(args, []string{utils.ProfileID}); len(missing) != 0 { //Params missing
+		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if args.Tenant == utils.EmptyString {
 		args.Tenant = admS.cfg.GeneralCfg().DefaultTenant
