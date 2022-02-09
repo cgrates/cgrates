@@ -558,7 +558,7 @@ func (tps ThresholdMdls) AsTPThreshold() (result []*utils.TPThresholdProfile) {
 			}
 			actionMap[tenID].AddSlice(strings.Split(tp.ActionProfileIDs, utils.InfieldSep))
 		}
-		if tp.Weights != ";0" {
+		if tp.Weights != "" {
 			th.Weights = tp.Weights
 		}
 		if tp.FilterIDs != utils.EmptyString {

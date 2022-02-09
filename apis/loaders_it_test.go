@@ -200,8 +200,8 @@ cgrates.org,1002,,;30,,VoiceBalance,,;10,*voice,14,fltr3&fltr4;150;fltr5;250,,fl
 
 	// Create and populate ActionProfiles.csv
 	if err := writeFile(utils.ActionsCsv, `
-#Tenant,ID,FilterIDs,Weight,Schedule,TargetType,TargetIDs,ActionID,ActionFilterIDs,ActionBlocker,ActionTTL,ActionType,ActionOpts,ActionPath,ActionValue
-cgrates.org,ONE_TIME_ACT,,10,*asap,*accounts,1001;1002,TOPUP,,false,0s,*add_balance,,*balance.TestBalance.Value,10
+#Tenant,ID,FilterIDs,Weights,Schedule,TargetType,TargetIDs,ActionID,ActionFilterIDs,ActionBlocker,ActionTTL,ActionType,ActionOpts,ActionPath,ActionValue
+cgrates.org,ONE_TIME_ACT,,;10,*asap,*accounts,1001;1002,TOPUP,,false,0s,*add_balance,,*balance.TestBalance.Value,10
 cgrates.org,ONE_TIME_ACT,,,,,,SET_BALANCE_TEST_DATA,,false,0s,*set_balance,,*balance.TestDataBalance.Type,*data
 cgrates.org,ONE_TIME_ACT,,,,,,TOPUP_TEST_DATA,,false,0s,*add_balance,,*balance.TestDataBalance.Value,1024
 cgrates.org,ONE_TIME_ACT,,,,,,SET_BALANCE_TEST_VOICE,,false,0s,*set_balance,,*balance.TestVoiceBalance.Type,*voice
@@ -324,7 +324,7 @@ cgrates.org,TestStats3,*string:~*req.Account:1003,;20,100,1s,2,*sum#~*req.Value;
 cgrates.org,TH1,*string:~*req.Account:1001;*string:~*req.RunID:*default,;10,12,10,1s,true,ACT_PRF1,true
 cgrates.org,TH1,,,,,,,,
 cgrates.org,TH2,,,,,,,,
-cgrates.org,TH2,*string:~*req.Account:1002,5,,,,true,,true
+cgrates.org,TH2,*string:~*req.Account:1002,,,,,true,,true
 cgrates.org,TH2,,;5,10,8,1s,true,ACT_PRF2,true
 `); err != nil {
 		t.Fatal(err)

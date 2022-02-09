@@ -146,7 +146,7 @@ func testAttributeSetProfile(t *testing.T) {
 			FilterIDs: []string{"FLTR_1"},
 			Attributes: []*engine.Attribute{{
 				Path:  "*req.FL1",
-				Value: config.NewRSRParsersMustCompile("Ali1", utils.InfieldSep),
+				Value: config.NewRSRParsersMustCompile("Al1", utils.InfieldSep),
 			}},
 			Weights: utils.DynamicWeights{
 				{
