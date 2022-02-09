@@ -1108,8 +1108,12 @@ func testOnStorITActionProfile(t *testing.T) {
 		Tenant:    "cgrates.org",
 		ID:        "TEST_ID1",
 		FilterIDs: []string{"*string:~*req.Account:1001"},
-		Weight:    20,
-		Schedule:  utils.MetaASAP,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
+		Schedule: utils.MetaASAP,
 		Targets: map[string]utils.StringSet{
 			utils.MetaAccounts: utils.NewStringSet([]string{"acc1", "acc2", "acc3"}),
 		},

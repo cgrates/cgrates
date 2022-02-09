@@ -226,7 +226,7 @@ func testStorDBitCRUDTPActionProfiles(t *testing.T) {
 			TPid:      "TEST_ID1",
 			ID:        "sub_id1",
 			FilterIDs: []string{"*string:~*req.Account:1001"},
-			Weight:    20,
+			Weights:   ";20",
 			Schedule:  utils.MetaASAP,
 			Actions: []*utils.TPAPAction{
 				{
@@ -243,7 +243,7 @@ func testStorDBitCRUDTPActionProfiles(t *testing.T) {
 			TPid:      "TEST_ID1",
 			ID:        "sub_id2",
 			FilterIDs: []string{"*string:~*req.Destination:10"},
-			Weight:    10,
+			Weights:   ";10",
 			Schedule:  utils.MetaASAP,
 			Actions: []*utils.TPAPAction{
 				{
@@ -269,7 +269,7 @@ func testStorDBitCRUDTPActionProfiles(t *testing.T) {
 
 	//UPDATE AND READ
 	actPrf[0].FilterIDs = []string{"*string:~*req.Account:1007"}
-	actPrf[1].Weight = 20
+	actPrf[1].Weights = ";20"
 	if err := storDB.SetTPActionProfiles(actPrf); err != nil {
 		t.Error(err)
 	} else if rcv, err := storDB.GetTPActionProfiles(actPrf[0].TPid,

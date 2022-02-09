@@ -53,9 +53,13 @@ func TestActionsSetGetRemActionProfile(t *testing.T) {
 
 	actPrf := &engine.ActionProfileWithAPIOpts{
 		ActionProfile: &engine.ActionProfile{
-			Tenant:  "cgrates.org",
-			ID:      "actID",
-			Weight:  10,
+			Tenant: "cgrates.org",
+			ID:     "actID",
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				},
+			},
 			Actions: make([]*engine.APAction, 1),
 		},
 	}
@@ -227,9 +231,13 @@ func TestActionsRemoveActionProfileCheckErrors(t *testing.T) {
 
 	actPrf := &engine.ActionProfileWithAPIOpts{
 		ActionProfile: &engine.ActionProfile{
-			ID:      "TestActionsRemoveActionProfileCheckErrors",
-			Tenant:  "cgrates.org",
-			Weight:  10,
+			ID:     "TestActionsRemoveActionProfileCheckErrors",
+			Tenant: "cgrates.org",
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				},
+			},
 			Actions: make([]*engine.APAction, 1),
 		},
 	}

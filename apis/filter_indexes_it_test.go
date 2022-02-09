@@ -1305,9 +1305,13 @@ func testV1FIdxSetActionProfileWithFltr(t *testing.T) {
 			Tenant:    "cgrates.org",
 			ID:        "REM_ACC",
 			FilterIDs: []string{"fltr_for_attr", "*string:~*req.Account:1001"},
-			Weight:    0,
-			Targets:   map[string]utils.StringSet{utils.MetaAccounts: {"1001": {}}},
-			Schedule:  utils.MetaASAP,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 0,
+				},
+			},
+			Targets:  map[string]utils.StringSet{utils.MetaAccounts: {"1001": {}}},
+			Schedule: utils.MetaASAP,
 			Actions: []*engine.APAction{
 				{
 					ID:   "REM_BAL",
@@ -1412,7 +1416,11 @@ func testV1FIdxSetActionProfileMoreFltrsMoreIndexing(t *testing.T) {
 			ID:     "REM_ACC",
 			FilterIDs: []string{"fltr_for_attr", "*string:~*req.Account:1001",
 				"fltr_for_attr3", "fltr_for_attr2"},
-			Weight:   0,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 0,
+				},
+			},
 			Targets:  map[string]utils.StringSet{utils.MetaAccounts: {"1001": {}}},
 			Schedule: utils.MetaASAP,
 			Actions: []*engine.APAction{
@@ -1526,7 +1534,11 @@ func testV1FIdxActionMoreProfileForFilters(t *testing.T) {
 			ID:     "TOPUP_ACC",
 			FilterIDs: []string{"fltr_for_attr3", "fltr_for_attr2",
 				"*string:~*req.Account:1001"},
-			Weight:   0,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 0,
+				},
+			},
 			Targets:  map[string]utils.StringSet{utils.MetaAccounts: {"1001": {}}},
 			Schedule: utils.MetaASAP,
 			Actions: []*engine.APAction{
@@ -1549,7 +1561,11 @@ func testV1FIdxActionMoreProfileForFilters(t *testing.T) {
 			ID:     "SET_BAL",
 			FilterIDs: []string{"fltr_for_attr",
 				"*string:~*req.Account:1001"},
-			Weight:   0,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 0,
+				},
+			},
 			Targets:  map[string]utils.StringSet{utils.MetaAccounts: {"1001": {}}},
 			Schedule: utils.MetaASAP,
 			Actions: []*engine.APAction{

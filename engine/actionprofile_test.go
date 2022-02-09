@@ -31,35 +31,59 @@ func TestActionProfileSort(t *testing.T) {
 		{
 			Tenant: "test_tenantA",
 			ID:     "test_idA",
-			Weight: 1,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 1,
+				},
+			},
 		},
 		{
 			Tenant: "test_tenantB",
 			ID:     "test_idB",
-			Weight: 2,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 2,
+				},
+			},
 		},
 		{
 			Tenant: "test_tenantC",
 			ID:     "test_idC",
-			Weight: 3,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 3,
+				},
+			},
 		},
 	}
 	expStruct := &ActionProfiles{
 		{
 			Tenant: "test_tenantC",
 			ID:     "test_idC",
-			Weight: 3,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 3,
+				},
+			},
 		},
 
 		{
 			Tenant: "test_tenantB",
 			ID:     "test_idB",
-			Weight: 2,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 2,
+				},
+			},
 		},
 		{
 			Tenant: "test_tenantA",
 			ID:     "test_idA",
-			Weight: 1,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 1,
+				},
+			},
 		},
 	}
 	testStruct.Sort()
@@ -137,7 +161,11 @@ func TestActionProfileSet(t *testing.T) {
 		ID:        "ID",
 		FilterIDs: []string{"fltr1", "*string:~*req.Account:1001"},
 		Schedule:  utils.MetaNow,
-		Weight:    10,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 		Targets: map[string]utils.StringSet{
 			utils.MetaAccounts:   utils.NewStringSet([]string{"1001", "1002"}),
 			utils.MetaThresholds: utils.NewStringSet([]string{"TH1", "TH2"}),
@@ -253,7 +281,11 @@ func TestActionProfileFieldAsInterface(t *testing.T) {
 		ID:        "ID",
 		FilterIDs: []string{"fltr1", "*string:~*req.Account:1001"},
 		Schedule:  utils.MetaNow,
-		Weight:    10,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 		Targets: map[string]utils.StringSet{
 			utils.MetaAccounts:   utils.NewStringSet([]string{"1001", "1002"}),
 			utils.MetaThresholds: utils.NewStringSet([]string{"TH1", "TH2"}),
@@ -307,7 +339,7 @@ func TestActionProfileFieldAsInterface(t *testing.T) {
 	}
 	if val, err := ap.FieldAsInterface([]string{utils.Weight}); err != nil {
 		t.Fatal(err)
-	} else if exp := ap.Weight; !reflect.DeepEqual(exp, val) {
+	} else if exp := ap.Weights; !reflect.DeepEqual(exp, val) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
 	}
 	if val, err := ap.FieldAsInterface([]string{utils.Actions}); err != nil {
@@ -501,19 +533,27 @@ func TestActionProfileMerge(t *testing.T) {
 		Tenant:    "cgrates.org",
 		ID:        "ID",
 		FilterIDs: []string{"fltr1"},
-		Weight:    65,
-		Schedule:  "* * * * *",
-		Targets:   map[string]utils.StringSet{utils.MetaAccounts: {"1001": {}}},
-		Actions:   []*APAction{{}},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 65,
+			},
+		},
+		Schedule: "* * * * *",
+		Targets:  map[string]utils.StringSet{utils.MetaAccounts: {"1001": {}}},
+		Actions:  []*APAction{{}},
 	}
 	if acc.Merge(&ActionProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ID",
 		FilterIDs: []string{"fltr1"},
-		Weight:    65,
-		Schedule:  "* * * * *",
-		Targets:   map[string]utils.StringSet{utils.MetaAccounts: {"1001": {}}},
-		Actions:   []*APAction{{}},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 65,
+			},
+		},
+		Schedule: "* * * * *",
+		Targets:  map[string]utils.StringSet{utils.MetaAccounts: {"1001": {}}},
+		Actions:  []*APAction{{}},
 	}); !reflect.DeepEqual(exp, acc) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(acc))
 	}

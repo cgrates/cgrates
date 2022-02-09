@@ -184,6 +184,9 @@ func (aS *ActionS) matchingActionProfilesForEvent(ctx *context.Context, tnt stri
 				continue
 			}
 		}
+		if err = aPf.GetWeightFromDynamics(ctx, aS.fltrS, tnt, evNm); err != nil {
+			return
+		}
 		aPfs = append(aPfs, aPf)
 	}
 	if len(aPfs) == 0 {

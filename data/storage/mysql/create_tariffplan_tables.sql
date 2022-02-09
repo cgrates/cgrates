@@ -278,7 +278,7 @@ CREATE TABLE tp_action_profiles (
   `id` varchar(64) NOT NULL,
   `filter_ids` varchar(64) NOT NULL,
   `activation_interval` varchar(64) NOT NULL,
-  `weight` decimal(8,2) NOT NULL,
+  `weights` varchar(64)  NOT NULL,
   `schedule` varchar(64) NOT NULL,
   `target_type` varchar(64) NOT NULL,
   `target_ids` varchar(64) NOT NULL,

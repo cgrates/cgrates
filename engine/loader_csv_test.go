@@ -574,7 +574,7 @@ func TestLoadActionProfiles(t *testing.T) {
 		TPid:     testTPID,
 		Tenant:   "cgrates.org",
 		ID:       "ONE_TIME_ACT",
-		Weight:   10,
+		Weights:  ";10",
 		Schedule: utils.MetaASAP,
 		Targets: []*utils.TPActionTarget{
 			{

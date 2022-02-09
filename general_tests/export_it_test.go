@@ -470,8 +470,12 @@ func testExpVerifyActionProfiles(t *testing.T) {
 		Tenant:    "cgrates.org",
 		ID:        "ONE_TIME_ACT",
 		FilterIDs: []string{},
-		Weight:    10,
-		Schedule:  utils.MetaASAP,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
+		Schedule: utils.MetaASAP,
 		Targets: map[string]utils.StringSet{
 			utils.MetaAccounts: {"1001": {}, "1002": {}},
 		},

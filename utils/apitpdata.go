@@ -654,7 +654,7 @@ type TPActionProfile struct {
 	Tenant    string
 	ID        string
 	FilterIDs []string
-	Weight    float64
+	Weights   string
 	Schedule  string
 	Targets   []*TPActionTarget
 	Actions   []*TPAPAction

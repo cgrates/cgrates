@@ -2025,8 +2025,8 @@ func (apm ActionProfileMdls) AsTPActionProfile() (result []*utils.TPActionProfil
 			}
 			filterIDsMap[tenID].AddSlice(strings.Split(tp.FilterIDs, utils.InfieldSep))
 		}
-		if tp.Weight != 0 {
-			aPrf.Weight = tp.Weight
+		if tp.Weights != "" {
+			aPrf.Weights = tp.Weights
 		}
 		if tp.Schedule != utils.EmptyString {
 			aPrf.Schedule = tp.Schedule
@@ -2092,7 +2092,7 @@ func APItoModelTPActionProfile(tPrf *utils.TPActionProfile) (mdls ActionProfileM
 		if i == 0 {
 			mdl.FilterIDs = strings.Join(tPrf.FilterIDs, utils.InfieldSep)
 
-			mdl.Weight = tPrf.Weight
+			mdl.Weights = tPrf.Weights
 			mdl.Schedule = tPrf.Schedule
 			for _, target := range tPrf.Targets {
 				mdl.TargetType = target.TargetType
@@ -2129,10 +2129,14 @@ func APItoActionProfile(tpAp *utils.TPActionProfile, timezone string) (ap *Actio
 		Tenant:    tpAp.Tenant,
 		ID:        tpAp.ID,
 		FilterIDs: make([]string, len(tpAp.FilterIDs)),
-		Weight:    tpAp.Weight,
 		Schedule:  tpAp.Schedule,
 		Targets:   make(map[string]utils.StringSet),
 		Actions:   make([]*APAction, len(tpAp.Actions)),
+	}
+	if tpAp.Weights != utils.EmptyString {
+		if ap.Weights, err = utils.NewDynamicWeightsFromString(tpAp.Weights, utils.InfieldSep, utils.ANDSep); err != nil {
+			return
+		}
 	}
 	for i, stp := range tpAp.FilterIDs {
 		ap.FilterIDs[i] = stp
@@ -2179,7 +2183,7 @@ func ActionProfileToAPI(ap *ActionProfile) (tpAp *utils.TPActionProfile) {
 		Tenant:    ap.Tenant,
 		ID:        ap.ID,
 		FilterIDs: make([]string, len(ap.FilterIDs)),
-		Weight:    ap.Weight,
+		Weights:   ap.Weights.String(utils.InfieldSep, utils.ANDSep),
 		Schedule:  ap.Schedule,
 		Targets:   make([]*utils.TPActionTarget, 0, len(ap.Targets)),
 		Actions:   make([]*utils.TPAPAction, len(ap.Actions)),
