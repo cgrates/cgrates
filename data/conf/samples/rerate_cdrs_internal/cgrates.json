@@ -1,13 +1,8 @@
-{
-    // CGRateS Configuration file
-    //
-    
-    
+  {
     "general": {
         "log_level": 7,
         "reply_timeout": "50s",
     },
-    
     
     "listen": {
         "rpc_json": ":2012",
@@ -15,28 +10,23 @@
         "http": ":2080",
     },
     
-    "data_db": {								// database used to store runtime data (eg: accounts, cdr stats)
-        "db_type": "redis",						// data_db type: <redis|mongo>
-        "db_port": 6379, 						// data_db port to reach the database
-        "db_name": "10", 						// data_db database name to connect to
+    "data_db": {								
+        "db_type": "*internal"
     },
     
     "stor_db": {
-        "db_password": "CGRateS.org",
+        "db_type": "*internal"
     },
-    
     
     "rals": {
         "enabled": true,
         "max_increments":3000000,
     },
     
-    
     "cdrs": {
         "enabled": true,
         "rals_conns": ["*localhost"],
     },
-    
     
     "sessions": {
         "enabled": true,
@@ -44,12 +34,7 @@
         "cdrs_conns": ["*localhost"],
     },
     
-    
     "apiers": {
         "enabled": true,
     },
-    
-
-    
-    }
-    
+}

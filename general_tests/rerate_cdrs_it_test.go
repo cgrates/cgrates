@@ -21,8 +21,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package general_tests
 
 import (
+	"math"
 	"net/rpc"
 	"path"
+	"reflect"
 	"testing"
 	"time"
 
@@ -32,89 +34,94 @@ import (
 )
 
 var (
-	psCdrsCfgPath string
-	psCdrsCfg     *config.CGRConfig
-	psCdrsRPC     *rpc.Client
-	psCdrsConfDIR string //run tests for specific configuration
-	psCdrsDelay   int
-	psCdrsUUID    = utils.GenUUID()
+	rrCdrsCfgPath string
+	rrCdrsCfg     *config.CGRConfig
+	rrCdrsRPC     *rpc.Client
+	rrCdrsConfDIR string //run tests for specific configuration
+	rrCdrsDelay   int
+	rrCdrsUUID    = utils.GenUUID()
 
-	psCdrsTests = []func(t *testing.T){
-		testPsCDRsLoadConfig,
-		testPsCDRsInitDataDb,
-		testPsCDRsResetStorDb,
-		testPsCDRsStartEngine,
-		testPsCDRsRPCConn,
-		testPsCDRsLoadTP,
-		testPsCDRsSetBalance,
-		testPsCDRsProcessEventCDR1,
-		testPsCDRsProcessEventCDR2,
-		testPsCDRsGetAccount1,
-		testPsCDRsRerateCDRs,
-		testPsCDRsGetAccount2,
-		testPsCDRsStopEngine,
+	rrCdrsTests = []func(t *testing.T){
+		testRerateCDRsLoadConfig,
+		testRerateCDRsInitDataDb,
+		testRerateCDRsResetStorDb,
+		testRerateCDRsStartEngine,
+		testRerateCDRsRPCConn,
+		testRerateCDRsLoadTP,
+		testRerateCDRsSetBalance,
+		testRerateCDRsGetAccountAfterBalanceSet,
+		testRerateCDRsProcessEventCDR1,
+		testRerateCDRsCheckCDRCostAfterProcessEvent1,
+		testRerateCDRsGetAccountAfterProcessEvent1,
+		testRerateCDRsProcessEventCDR2,
+		testRerateCDRsCheckCDRCostAfterProcessEvent2,
+		testRerateCDRsGetAccountAfterProcessEvent2,
+		testRerateCDRsRerateCDRs,
+		testRerateCDRsCheckCDRCostsAfterRerate,
+		testRerateCDRsGetAccountAfterRerate,
+		testRerateCDRsStopEngine,
 	}
 )
 
 // Test start here
-func TestPsCDRs(t *testing.T) {
+func TestRerateCDRs(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
-		t.SkipNow()
+		rrCdrsConfDIR = "rerate_cdrs_internal"
 	case utils.MetaMySQL:
-		psCdrsConfDIR = "rerate_cdrs_mysql"
+		rrCdrsConfDIR = "rerate_cdrs_mysql"
 	case utils.MetaMongo:
-		t.SkipNow()
+		rrCdrsConfDIR = "rerate_cdrs_mongo"
 	case utils.MetaPostgres:
 		t.SkipNow()
 	default:
 		t.Fatal("Unknown Database type")
 	}
 
-	for _, stest := range psCdrsTests {
-		t.Run(psCdrsConfDIR, stest)
+	for _, stest := range rrCdrsTests {
+		t.Run(rrCdrsConfDIR, stest)
 	}
 }
 
-func testPsCDRsLoadConfig(t *testing.T) {
+func testRerateCDRsLoadConfig(t *testing.T) {
 	var err error
-	psCdrsCfgPath = path.Join(*dataDir, "conf", "samples", psCdrsConfDIR)
-	if psCdrsCfg, err = config.NewCGRConfigFromPath(psCdrsCfgPath); err != nil {
+	rrCdrsCfgPath = path.Join(*dataDir, "conf", "samples", rrCdrsConfDIR)
+	if rrCdrsCfg, err = config.NewCGRConfigFromPath(rrCdrsCfgPath); err != nil {
 		t.Error(err)
 	}
-	psCdrsDelay = 1000
+	rrCdrsDelay = 1000
 }
 
-func testPsCDRsInitDataDb(t *testing.T) {
-	if err := engine.InitDataDb(psCdrsCfg); err != nil {
+func testRerateCDRsInitDataDb(t *testing.T) {
+	if err := engine.InitDataDb(rrCdrsCfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
-func testPsCDRsResetStorDb(t *testing.T) {
-	if err := engine.InitStorDb(psCdrsCfg); err != nil {
+func testRerateCDRsResetStorDb(t *testing.T) {
+	if err := engine.InitStorDb(rrCdrsCfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
-func testPsCDRsStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(psCdrsCfgPath, psCdrsDelay); err != nil {
+func testRerateCDRsStartEngine(t *testing.T) {
+	if _, err := engine.StopStartEngine(rrCdrsCfgPath, rrCdrsDelay); err != nil {
 		t.Fatal(err)
 	}
 }
 
-func testPsCDRsRPCConn(t *testing.T) {
+func testRerateCDRsRPCConn(t *testing.T) {
 	var err error
-	psCdrsRPC, err = newRPCClient(psCdrsCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
+	rrCdrsRPC, err = newRPCClient(rrCdrsCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
 }
 
-func testPsCDRsLoadTP(t *testing.T) {
+func testRerateCDRsLoadTP(t *testing.T) {
 	var reply string
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "reratecdrs")}
-	if err := psCdrsRPC.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
+	if err := rrCdrsRPC.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply returned", reply)
@@ -122,13 +129,13 @@ func testPsCDRsLoadTP(t *testing.T) {
 	time.Sleep(200 * time.Millisecond)
 }
 
-func testPsCDRsStopEngine(t *testing.T) {
-	if err := engine.KillEngine(psCdrsDelay); err != nil {
+func testRerateCDRsStopEngine(t *testing.T) {
+	if err := engine.KillEngine(rrCdrsDelay); err != nil {
 		t.Error(err)
 	}
 }
 
-func testPsCDRsSetBalance(t *testing.T) {
+func testRerateCDRsSetBalance(t *testing.T) {
 	attrSetBalance := utils.AttrSetBalance{
 		Tenant:      "cgrates.org",
 		Account:     "1001",
@@ -139,14 +146,39 @@ func testPsCDRsSetBalance(t *testing.T) {
 		},
 	}
 	var reply string
-	if err := psCdrsRPC.Call(utils.APIerSv2SetBalance, attrSetBalance, &reply); err != nil {
+	if err := rrCdrsRPC.Call(utils.APIerSv2SetBalance, attrSetBalance, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Received: %s", reply)
 	}
 }
 
-func testPsCDRsProcessEventCDR1(t *testing.T) {
+func testRerateCDRsGetAccountAfterBalanceSet(t *testing.T) {
+	expAcnt := engine.Account{
+		ID: "cgrates.org:1001",
+		BalanceMap: map[string]engine.Balances{
+			utils.MetaVoice: {
+				{
+					ID:    "1001",
+					Value: float64(time.Minute),
+				},
+			},
+		},
+	}
+	var acnt engine.Account
+	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
+	if err := rrCdrsRPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
+		t.Error(err)
+	} else {
+		expAcnt.UpdateTime = acnt.UpdateTime
+		expAcnt.BalanceMap[utils.MetaVoice][0].Uuid = acnt.BalanceMap[utils.MetaVoice][0].Uuid
+		if !reflect.DeepEqual(acnt, expAcnt) {
+			t.Errorf("expected: <%+v>,\nreceived: <%+v>", utils.ToJSON(expAcnt), utils.ToJSON(acnt))
+		}
+	}
+}
+
+func testRerateCDRsProcessEventCDR1(t *testing.T) {
 	argsEv := &engine.ArgV1ProcessEvent{
 		Flags: []string{utils.MetaRALs},
 		CGREvent: utils.CGREvent{
@@ -154,7 +186,7 @@ func testPsCDRsProcessEventCDR1(t *testing.T) {
 			ID:     "event1",
 			Event: map[string]interface{}{
 				utils.RunID:        "run_1",
-				utils.CGRID:        psCdrsUUID,
+				utils.CGRID:        rrCdrsUUID,
 				utils.Tenant:       "cgrates.org",
 				utils.Category:     "call",
 				utils.ToR:          utils.MetaVoice,
@@ -170,26 +202,62 @@ func testPsCDRsProcessEventCDR1(t *testing.T) {
 		},
 	}
 	var reply string
-	if err := psCdrsRPC.Call(utils.CDRsV1ProcessEvent, argsEv, &reply); err != nil {
+	if err := rrCdrsRPC.Call(utils.CDRsV1ProcessEvent, argsEv, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)
 	}
+
+}
+
+func testRerateCDRsCheckCDRCostAfterProcessEvent1(t *testing.T) {
 	var cdrs []*engine.CDR
-	if err := psCdrsRPC.Call(utils.CDRsV1GetCDRs, &utils.RPCCDRsFilterWithAPIOpts{
+	if err := rrCdrsRPC.Call(utils.CDRsV1GetCDRs, &utils.RPCCDRsFilterWithAPIOpts{
 		RPCCDRsFilter: &utils.RPCCDRsFilter{
 			RunIDs: []string{"run_1"},
 		}}, &cdrs); err != nil {
 		t.Error(err)
+	} else if cdrs[0].Usage != 2*time.Minute {
+		t.Errorf("expected usage to be <%+v>, received <%+v>", 2*time.Minute, cdrs[0].Usage)
 	} else if cdrs[0].Cost != 0.6 {
 		t.Errorf("expected cost to be <%+v>, received <%+v>", 0.6, cdrs[0].Cost)
 	}
-	// else {
-	// 	fmt.Println("=================1", utils.ToJSON(cdrs))
-	// }
 }
 
-func testPsCDRsProcessEventCDR2(t *testing.T) {
+func testRerateCDRsGetAccountAfterProcessEvent1(t *testing.T) {
+	expAcnt := engine.Account{
+		ID: "cgrates.org:1001",
+		BalanceMap: map[string]engine.Balances{
+			utils.MetaVoice: {
+				{
+					ID:    "1001",
+					Value: 0,
+				},
+			},
+			utils.MetaMonetary: {
+				{
+					ID:    utils.MetaDefault,
+					Value: -0.6,
+				},
+			},
+		},
+	}
+	var acnt engine.Account
+	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
+	if err := rrCdrsRPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
+		t.Error(err)
+	} else {
+		expAcnt.UpdateTime = acnt.UpdateTime
+		expAcnt.BalanceMap[utils.MetaVoice][0].Uuid = acnt.BalanceMap[utils.MetaVoice][0].Uuid
+		expAcnt.BalanceMap[utils.MetaMonetary][0].Uuid = acnt.BalanceMap[utils.MetaMonetary][0].Uuid
+		acnt.BalanceMap[utils.MetaMonetary][0].Value = math.Round(acnt.BalanceMap[utils.MetaMonetary][0].Value*10) / 10
+		if !reflect.DeepEqual(acnt, expAcnt) {
+			t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ToJSON(expAcnt), utils.ToJSON(acnt))
+		}
+	}
+}
+
+func testRerateCDRsProcessEventCDR2(t *testing.T) {
 	argsEv := &engine.ArgV1ProcessEvent{
 		Flags: []string{utils.MetaRALs},
 		CGREvent: utils.CGREvent{
@@ -197,7 +265,7 @@ func testPsCDRsProcessEventCDR2(t *testing.T) {
 			ID:     "event2",
 			Event: map[string]interface{}{
 				utils.RunID:        "run_2",
-				utils.CGRID:        psCdrsUUID,
+				utils.CGRID:        rrCdrsUUID,
 				utils.Tenant:       "cgrates.org",
 				utils.Category:     "call",
 				utils.ToR:          utils.MetaVoice,
@@ -213,52 +281,80 @@ func testPsCDRsProcessEventCDR2(t *testing.T) {
 		},
 	}
 	var reply string
-	if err := psCdrsRPC.Call(utils.CDRsV1ProcessEvent, argsEv, &reply); err != nil {
+	if err := rrCdrsRPC.Call(utils.CDRsV1ProcessEvent, argsEv, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)
 	}
+
+}
+
+func testRerateCDRsCheckCDRCostAfterProcessEvent2(t *testing.T) {
 	var cdrs []*engine.CDR
-	if err := psCdrsRPC.Call(utils.CDRsV1GetCDRs, &utils.RPCCDRsFilterWithAPIOpts{
+	if err := rrCdrsRPC.Call(utils.CDRsV1GetCDRs, &utils.RPCCDRsFilterWithAPIOpts{
 		RPCCDRsFilter: &utils.RPCCDRsFilter{
 			RunIDs: []string{"run_2"},
 		}}, &cdrs); err != nil {
 		t.Error(err)
+	} else if cdrs[0].Usage != 2*time.Minute {
+		t.Errorf("expected usage to be <%+v>, received <%+v>", 2*time.Minute, cdrs[0].Usage)
 	} else if cdrs[0].Cost != 1.2 {
 		t.Errorf("expected cost to be <%+v>, received <%+v>", 1.2, cdrs[0].Cost)
 	}
-	// else {
-	// 	fmt.Println("=================2", utils.ToJSON(cdrs))
-	// }
 }
 
-func testPsCDRsGetAccount1(t *testing.T) {
-	var acnt *engine.Account
-	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
-	if err := psCdrsRPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
-		t.Error(err)
+func testRerateCDRsGetAccountAfterProcessEvent2(t *testing.T) {
+	expAcnt := engine.Account{
+		ID: "cgrates.org:1001",
+		BalanceMap: map[string]engine.Balances{
+			utils.MetaVoice: {
+				{
+					ID:    "1001",
+					Value: 0,
+				},
+			},
+			utils.MetaMonetary: {
+				{
+					ID:    utils.MetaDefault,
+					Value: -1.8,
+				},
+			},
+		},
 	}
-	// else {
-	// 	fmt.Println("=================4", utils.ToJSON(acnt))
-	// }
+	var acnt engine.Account
+	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
+	if err := rrCdrsRPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
+		t.Error(err)
+	} else {
+		expAcnt.UpdateTime = acnt.UpdateTime
+		expAcnt.BalanceMap[utils.MetaVoice][0].Uuid = acnt.BalanceMap[utils.MetaVoice][0].Uuid
+		expAcnt.BalanceMap[utils.MetaMonetary][0].Uuid = acnt.BalanceMap[utils.MetaMonetary][0].Uuid
+		acnt.BalanceMap[utils.MetaMonetary][0].Value = math.Round(acnt.BalanceMap[utils.MetaMonetary][0].Value*10) / 10
+		if !reflect.DeepEqual(acnt, expAcnt) {
+			t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ToJSON(expAcnt), utils.ToJSON(acnt))
+		}
+	}
 }
 
-func testPsCDRsRerateCDRs(t *testing.T) {
+func testRerateCDRsRerateCDRs(t *testing.T) {
 	var reply string
-	if err := psCdrsRPC.Call(utils.CDRsV1RateCDRs, &engine.ArgRateCDRs{
-		Flags: []string{utils.MetaRerate, utils.MetaRALs},
+	if err := rrCdrsRPC.Call(utils.CDRsV1RateCDRs, &engine.ArgRateCDRs{
+		Flags: []string{utils.MetaRALs},
 		RPCCDRsFilter: utils.RPCCDRsFilter{
-			CGRIDs: []string{psCdrsUUID},
+			OrderBy: utils.AnswerTime,
+			CGRIDs:  []string{rrCdrsUUID},
 		}}, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)
 	}
+}
 
+func testRerateCDRsCheckCDRCostsAfterRerate(t *testing.T) {
 	var cdrs []*engine.CDR
-	if err := psCdrsRPC.Call(utils.CDRsV1GetCDRs, &utils.RPCCDRsFilterWithAPIOpts{
+	if err := rrCdrsRPC.Call(utils.CDRsV1GetCDRs, &utils.RPCCDRsFilterWithAPIOpts{
 		RPCCDRsFilter: &utils.RPCCDRsFilter{
-			CGRIDs:  []string{psCdrsUUID},
+			CGRIDs:  []string{rrCdrsUUID},
 			OrderBy: utils.AnswerTime,
 		}}, &cdrs); err != nil {
 		t.Error(err)
@@ -267,18 +363,37 @@ func testPsCDRsRerateCDRs(t *testing.T) {
 	} else if cdrs[1].Cost != 1.2 {
 		t.Errorf("expected cost to be <%+v>, received <%+v>", 1.2, cdrs[1].Cost)
 	}
-	// else {
-	// 	fmt.Println("=================3", utils.ToJSON(cdrs))
-	// }
 }
 
-func testPsCDRsGetAccount2(t *testing.T) {
-	var acnt *engine.Account
-	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
-	if err := psCdrsRPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
-		t.Error(err)
+func testRerateCDRsGetAccountAfterRerate(t *testing.T) {
+	expAcnt := engine.Account{
+		ID: "cgrates.org:1001",
+		BalanceMap: map[string]engine.Balances{
+			utils.MetaVoice: {
+				{
+					ID:    "1001",
+					Value: 0,
+				},
+			},
+			utils.MetaMonetary: {
+				{
+					ID:    utils.MetaDefault,
+					Value: -1.8,
+				},
+			},
+		},
 	}
-	// else {
-	// 	fmt.Println("=================5", utils.ToJSON(acnt))
-	// }
+	var acnt engine.Account
+	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
+	if err := rrCdrsRPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
+		t.Error(err)
+	} else {
+		expAcnt.UpdateTime = acnt.UpdateTime
+		expAcnt.BalanceMap[utils.MetaVoice][0].Uuid = acnt.BalanceMap[utils.MetaVoice][0].Uuid
+		expAcnt.BalanceMap[utils.MetaMonetary][0].Uuid = acnt.BalanceMap[utils.MetaMonetary][0].Uuid
+		acnt.BalanceMap[utils.MetaMonetary][0].Value = math.Round(acnt.BalanceMap[utils.MetaMonetary][0].Value*10) / 10
+		if !reflect.DeepEqual(acnt, expAcnt) {
+			t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ToJSON(expAcnt), utils.ToJSON(acnt))
+		}
+	}
 }
