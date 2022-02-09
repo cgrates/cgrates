@@ -208,7 +208,7 @@ func testThresholdsSetThresholdProfiles(t *testing.T) {
 			MinHits:          0,
 			Weights: utils.DynamicWeights{
 				{
-					Weight: 10,
+					Weight: 20,
 				},
 			},
 		},
@@ -280,7 +280,7 @@ func testThresholdsGetThresholdAfterSet(t *testing.T) {
 		MinHits:          0,
 		Weights: utils.DynamicWeights{
 			{
-				Weight: 10,
+				Weight: 20,
 			},
 		},
 	}
@@ -382,7 +382,7 @@ func testThresholdsGetThresholdProfiles(t *testing.T) {
 			return (ths)[i].ID < (ths)[j].ID
 		})
 		if !reflect.DeepEqual(ths, exp) {
-			t.Errorf("expected: <%+v>, \nreceived: <%+v>", exp, ths)
+			t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ToJSON(exp), utils.ToJSON(ths))
 		}
 	}
 }
