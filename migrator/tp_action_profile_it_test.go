@@ -112,7 +112,7 @@ func testTpACtPrfPopulate(t *testing.T) {
 			TPid:      "TEST_ID1",
 			ID:        "sub_id1",
 			FilterIDs: []string{"*string:~*req.Account:1001"},
-			Weight:    20,
+			Weights:   ";20",
 			Schedule:  utils.MetaASAP,
 			Actions: []*utils.TPAPAction{
 				{

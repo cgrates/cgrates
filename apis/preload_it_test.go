@@ -290,9 +290,13 @@ func testPreloadITVerifyAccounts(t *testing.T) {
 func testPreloadITVerifyActionProfiles(t *testing.T) {
 	var reply *engine.ActionProfile
 	expected := &engine.ActionProfile{
-		Tenant:   "cgrates.org",
-		ID:       "ONE_TIME_ACT",
-		Weight:   10,
+		Tenant: "cgrates.org",
+		ID:     "ONE_TIME_ACT",
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 		Schedule: utils.MetaASAP,
 		Targets: map[string]utils.StringSet{
 			"*accounts": {

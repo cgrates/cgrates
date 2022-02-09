@@ -24,6 +24,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -33,11 +34,12 @@ type ActionProfile struct {
 	Tenant    string
 	ID        string
 	FilterIDs []string
-	Weight    float64
+	Weights   utils.DynamicWeights
 	Schedule  string
 	Targets   map[string]utils.StringSet
 
 	Actions []*APAction
+	weight  float64
 }
 
 func (aP *ActionProfile) TenantID() string {
@@ -49,7 +51,15 @@ type ActionProfiles []*ActionProfile
 
 // Sort is part of sort interface, sort based on Weight
 func (aps ActionProfiles) Sort() {
-	sort.Slice(aps, func(i, j int) bool { return aps[i].Weight > aps[j].Weight })
+	sort.Slice(aps, func(i, j int) bool { return aps[i].weight > aps[j].weight })
+}
+
+func (ap *ActionProfile) GetWeightFromDynamics(ctx *context.Context,
+	fltrS *FilterS, tnt string, ev utils.DataProvider) (err error) {
+	if ap.weight, err = WeightFromDynamics(ctx, ap.Weights, fltrS, tnt, ev); err != nil {
+		return
+	}
+	return
 }
 
 // APAction defines action related information used within a ActionProfile
@@ -111,7 +121,7 @@ func (aP *ActionProfile) Set(path []string, val interface{}, newBranch bool, _ s
 			aP.FilterIDs = append(aP.FilterIDs, valA...)
 		case utils.Weight:
 			if val != utils.EmptyString {
-				aP.Weight, err = utils.IfaceAsFloat64(val)
+				aP.Weights, err = utils.NewDynamicWeightsFromString(utils.IfaceAsString(val), utils.InfieldSep, utils.ANDSep)
 			}
 		}
 		return
@@ -229,9 +239,7 @@ func (ap *ActionProfile) Merge(v2 interface{}) {
 		equal = false
 	}
 
-	if vi.Weight != 0 {
-		ap.Weight = vi.Weight
-	}
+	ap.Weights = append(ap.Weights, vi.Weights...)
 	if len(vi.Schedule) != 0 {
 		ap.Schedule = vi.Schedule
 	}
@@ -308,7 +316,7 @@ func (ap *ActionProfile) FieldAsInterface(fldPath []string) (_ interface{}, err 
 		case utils.FilterIDs:
 			return ap.FilterIDs, nil
 		case utils.Weight:
-			return ap.Weight, nil
+			return ap.Weights, nil
 		case utils.Actions:
 			return ap.Actions, nil
 		case utils.Schedule:

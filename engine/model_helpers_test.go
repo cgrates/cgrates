@@ -3690,7 +3690,7 @@ func TestActionProfileMdlsAsTPActionProfileTimeLen1(t *testing.T) {
 			Tenant:          "cgrates.org",
 			ID:              "RP1",
 			FilterIDs:       "*string:~*req.Subject:1001;*ai:~*req.AnswerTime:2014-07-29T15:00:00Z",
-			Weight:          1,
+			Weights:         ";1",
 			Schedule:        "test_schedule",
 			ActionID:        "test_action_id",
 			ActionFilterIDs: "test_action_filter_ids",
@@ -3702,7 +3702,7 @@ func TestActionProfileMdlsAsTPActionProfileTimeLen1(t *testing.T) {
 			Tenant:    "cgrates.org",
 			ID:        "RP1",
 			FilterIDs: []string{"*ai:~*req.AnswerTime:2014-07-29T15:00:00Z", "*string:~*req.Subject:1001"},
-			Weight:    1,
+			Weights:   ";1",
 			Schedule:  "test_schedule",
 			Actions: []*utils.TPAPAction{
 				{
@@ -3727,7 +3727,7 @@ func TestActionProfileMdlsAsTPActionProfile(t *testing.T) {
 			Tenant:          "cgrates.org",
 			ID:              "RP1",
 			FilterIDs:       "*string:~*req.Subject:1001;*ai:~*req.AnswerTime:2014-07-29T15:00:00Z|2014-08-29T15:00:00Z",
-			Weight:          1,
+			Weights:         ";1",
 			Schedule:        "test_schedule",
 			TargetType:      utils.MetaAccounts,
 			TargetIDs:       "test_account_id1;test_account_id2",
@@ -3741,7 +3741,7 @@ func TestActionProfileMdlsAsTPActionProfile(t *testing.T) {
 			Tenant:    "cgrates.org",
 			ID:        "RP1",
 			FilterIDs: []string{"*ai:~*req.AnswerTime:2014-07-29T15:00:00Z|2014-08-29T15:00:00Z", "*string:~*req.Subject:1001"},
-			Weight:    1,
+			Weights:   ";1",
 			Schedule:  "test_schedule",
 			Targets: []*utils.TPActionTarget{
 				&utils.TPActionTarget{
@@ -3784,7 +3784,7 @@ func TestAPItoModelTPActionProfileTPActionProfile(t *testing.T) {
 		Tenant:    "cgrates.org",
 		ID:        "RP1",
 		FilterIDs: []string{"*string:~*req.Subject:1001", "*string:~*req.Subject:1002", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z|2014-08-29T15:00:00Z"},
-		Weight:    1,
+		Weights:   ";1",
 		Schedule:  "test_schedule",
 		Targets: []*utils.TPActionTarget{{
 			TargetType: utils.MetaAccounts,
@@ -3804,7 +3804,7 @@ func TestAPItoModelTPActionProfileTPActionProfile(t *testing.T) {
 		Tenant:          "cgrates.org",
 		ID:              "RP1",
 		FilterIDs:       "*string:~*req.Subject:1001;*string:~*req.Subject:1002;*ai:~*req.AnswerTime:2014-07-29T15:00:00Z|2014-08-29T15:00:00Z",
-		Weight:          1,
+		Weights:         ";1",
 		Schedule:        "test_schedule",
 		TargetType:      utils.MetaAccounts,
 		TargetIDs:       "test_account_id1;test_account_id2",
@@ -3822,7 +3822,7 @@ func TestModelHelpersAPItoActionProfile(t *testing.T) {
 		Tenant:    "cgrates.org",
 		ID:        "RP1",
 		FilterIDs: []string{"*string:~*req.Subject:1001", "*string:~*req.Subject:1002", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z|2014-07-15T14:25:00Z"},
-		Weight:    1,
+		Weights:   ";1",
 		Schedule:  "test_schedule",
 		Targets: []*utils.TPActionTarget{
 			&utils.TPActionTarget{
@@ -3850,8 +3850,12 @@ func TestModelHelpersAPItoActionProfile(t *testing.T) {
 		Tenant:    "cgrates.org",
 		ID:        "RP1",
 		FilterIDs: []string{"*ai:~*req.AnswerTime:2014-07-14T14:25:00Z|2014-07-15T14:25:00Z", "*string:~*req.Subject:1001", "*string:~*req.Subject:1002"},
-		Weight:    1,
-		Schedule:  "test_schedule",
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 1,
+			},
+		},
+		Schedule: "test_schedule",
 		Targets: map[string]utils.StringSet{
 			utils.MetaAccounts:  utils.NewStringSet([]string{"test_account_id1", "test_account_id2"}),
 			utils.MetaResources: utils.NewStringSet([]string{"test_ID1", "test_ID2"}),
@@ -3883,7 +3887,7 @@ func TestModelHelpersAPItoActionProfileError3(t *testing.T) {
 		Tenant:    "cgrates.org",
 		ID:        "RP1",
 		FilterIDs: []string{"*string:~*req.Subject:1001", "*string:~*req.Subject:1002", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z|2014-07-15T14:25:00Z"},
-		Weight:    1,
+		Weights:   ";1",
 		Schedule:  "test_schedule",
 		Actions: []*utils.TPAPAction{
 			{
@@ -3908,7 +3912,7 @@ func TestModelHelpersAPItoActionProfileError4(t *testing.T) {
 		Tenant:    "cgrates.org",
 		ID:        "RP1",
 		FilterIDs: []string{"*string:~*req.Subject:1001", "*string:~*req.Subject:1002", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z|2014-07-15T14:25:00Z"},
-		Weight:    1,
+		Weights:   ";1",
 		Schedule:  "test_schedule",
 		Actions: []*utils.TPAPAction{
 			{
@@ -3933,8 +3937,12 @@ func TestModelHelpersActionProfileToAPI(t *testing.T) {
 		Tenant:    "cgrates.org",
 		ID:        "RP1",
 		FilterIDs: []string{"*string:~*req.Subject:1001", "*string:~*req.Subject:1002", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z|2014-07-15T14:25:00Z"},
-		Weight:    1,
-		Schedule:  "test_schedule",
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 1,
+			},
+		},
+		Schedule: "test_schedule",
 		Actions: []*APAction{
 			{
 				ID:        "test_action_id",
@@ -3953,7 +3961,7 @@ func TestModelHelpersActionProfileToAPI(t *testing.T) {
 		Tenant:    "cgrates.org",
 		ID:        "RP1",
 		FilterIDs: []string{"*string:~*req.Subject:1001", "*string:~*req.Subject:1002", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z|2014-07-15T14:25:00Z"},
-		Weight:    1,
+		Weights:   ";1",
 		Schedule:  "test_schedule",
 		Targets:   []*utils.TPActionTarget{},
 		Actions: []*utils.TPAPAction{
@@ -4936,7 +4944,7 @@ func TestModelHelpersActionProfileToAPICase2(t *testing.T) {
 		Tenant:    "cgrates.org",
 		ID:        "RP1",
 		FilterIDs: []string{"*string:~*req.Subject:1001", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z|2014-07-15T14:25:00Z"},
-		Weight:    1,
+		Weights:   ";1",
 		Schedule:  "test_schedule",
 		Targets: []*utils.TPActionTarget{
 			&utils.TPActionTarget{
@@ -4960,7 +4968,7 @@ func TestModelHelpersActionProfileToAPICase2(t *testing.T) {
 		Tenant:    "cgrates.org",
 		ID:        "RP1",
 		FilterIDs: []string{"*string:~*req.Subject:1001", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z|2014-07-15T14:25:00Z"},
-		Weight:    1,
+		Weights:   ";1",
 		Schedule:  "test_schedule",
 		Targets: []*utils.TPActionTarget{
 			&utils.TPActionTarget{

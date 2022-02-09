@@ -121,9 +121,13 @@ func testAccActionsSetActionProfile(t *testing.T) {
 			Tenant:    "cgrates.org",
 			ID:        "CREATE_ACC",
 			FilterIDs: []string{"*string:~*req.Account:1001"},
-			Weight:    0,
-			Targets:   map[string]utils.StringSet{utils.MetaAccounts: {"1001": {}}},
-			Schedule:  utils.MetaASAP,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 0,
+				},
+			},
+			Targets:  map[string]utils.StringSet{utils.MetaAccounts: {"1001": {}}},
+			Schedule: utils.MetaASAP,
 			Actions: []*engine.APAction{
 				{
 					ID:        "SET_NEW_BAL",
@@ -283,9 +287,13 @@ func testAccActionsSetActionProfile2(t *testing.T) {
 			Tenant:    "cgrates.org",
 			ID:        "REM_ACC",
 			FilterIDs: []string{"*string:~*req.Account:1001"},
-			Weight:    0,
-			Targets:   map[string]utils.StringSet{utils.MetaAccounts: {"1001": {}}},
-			Schedule:  utils.MetaASAP,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 0,
+				},
+			},
+			Targets:  map[string]utils.StringSet{utils.MetaAccounts: {"1001": {}}},
+			Schedule: utils.MetaASAP,
 			Actions: []*engine.APAction{
 				{
 					ID:   "REM_BAL",
