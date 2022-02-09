@@ -119,7 +119,7 @@ func (aP *ActionProfile) Set(path []string, val interface{}, newBranch bool, _ s
 			var valA []string
 			valA, err = utils.IfaceAsStringSlice(val)
 			aP.FilterIDs = append(aP.FilterIDs, valA...)
-		case utils.Weight:
+		case utils.Weights:
 			if val != utils.EmptyString {
 				aP.Weights, err = utils.NewDynamicWeightsFromString(utils.IfaceAsString(val), utils.InfieldSep, utils.ANDSep)
 			}

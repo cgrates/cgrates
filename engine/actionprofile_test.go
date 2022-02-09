@@ -36,6 +36,7 @@ func TestActionProfileSort(t *testing.T) {
 					Weight: 1,
 				},
 			},
+			weight: 1,
 		},
 		{
 			Tenant: "test_tenantB",
@@ -45,6 +46,7 @@ func TestActionProfileSort(t *testing.T) {
 					Weight: 2,
 				},
 			},
+			weight: 2,
 		},
 		{
 			Tenant: "test_tenantC",
@@ -54,6 +56,7 @@ func TestActionProfileSort(t *testing.T) {
 					Weight: 3,
 				},
 			},
+			weight: 3,
 		},
 	}
 	expStruct := &ActionProfiles{
@@ -65,6 +68,7 @@ func TestActionProfileSort(t *testing.T) {
 					Weight: 3,
 				},
 			},
+			weight: 3,
 		},
 
 		{
@@ -75,6 +79,7 @@ func TestActionProfileSort(t *testing.T) {
 					Weight: 2,
 				},
 			},
+			weight: 2,
 		},
 		{
 			Tenant: "test_tenantA",
@@ -84,6 +89,7 @@ func TestActionProfileSort(t *testing.T) {
 					Weight: 1,
 				},
 			},
+			weight: 1,
 		},
 	}
 	testStruct.Sort()
@@ -210,7 +216,7 @@ func TestActionProfileSet(t *testing.T) {
 	if err := ap.Set([]string{utils.Schedule}, utils.MetaNow, false, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
-	if err := ap.Set([]string{utils.Weight}, 10, false, utils.EmptyString); err != nil {
+	if err := ap.Set([]string{utils.Weights}, ";10", false, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
 	if err := ap.Set([]string{utils.Targets + "[" + utils.MetaAccounts + "]"}, "1001;1002", false, utils.EmptyString); err != nil {
