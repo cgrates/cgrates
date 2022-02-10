@@ -208,13 +208,14 @@ func testAttributeSProcessEventWithAccount(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	var replyAttr *engine.AttributeProfile
+	var replyAttr engine.AttributeProfile
 	if err := attrRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfile,
 		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_ACCOUNT"}}, &replyAttr); err != nil {
 		t.Fatal(err)
 	}
-	if !reflect.DeepEqual(alsPrf.AttributeProfile, replyAttr) {
-		t.Errorf("Expecting : %+v, received: %+v", alsPrf.AttributeProfile, replyAttr)
+	replyAttr.Compile()
+	if !reflect.DeepEqual(*alsPrf.AttributeProfile, replyAttr) {
+		t.Errorf("Expecting : %+v, received: %+v", *alsPrf.AttributeProfile, replyAttr)
 	}
 
 	ev := &utils.CGREvent{
@@ -279,13 +280,14 @@ func testAttributeSProcessEventWithAccountFull(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	var replyAttr *engine.AttributeProfile
+	var replyAttr engine.AttributeProfile
 	if err := attrRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfile,
 		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_ACCOUNT2"}}, &replyAttr); err != nil {
 		t.Fatal(err)
 	}
-	if !reflect.DeepEqual(alsPrf.AttributeProfile, replyAttr) {
-		t.Errorf("Expecting : %+v, received: %+v", alsPrf.AttributeProfile, replyAttr)
+	replyAttr.Compile()
+	if !reflect.DeepEqual(*alsPrf.AttributeProfile, replyAttr) {
+		t.Errorf("Expecting : %+v, received: %+v", *alsPrf.AttributeProfile, replyAttr)
 	}
 
 	ev := &utils.CGREvent{
@@ -391,13 +393,14 @@ func testAttributeSProcessEventWithStat(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	var replyAttr *engine.AttributeProfile
+	var replyAttr engine.AttributeProfile
 	if err := attrRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfile,
 		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_STATS"}}, &replyAttr); err != nil {
 		t.Fatal(err)
 	}
-	if !reflect.DeepEqual(alsPrf.AttributeProfile, replyAttr) {
-		t.Errorf("Expecting : %+v, received: %+v", alsPrf.AttributeProfile, replyAttr)
+	replyAttr.Compile()
+	if !reflect.DeepEqual(*alsPrf.AttributeProfile, replyAttr) {
+		t.Errorf("Expecting : %+v, received: %+v", *alsPrf.AttributeProfile, replyAttr)
 	}
 
 	ev := &utils.CGREvent{
@@ -463,13 +466,14 @@ func testAttributeSProcessEventWithStatFull(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	var replyAttr *engine.AttributeProfile
+	var replyAttr engine.AttributeProfile
 	if err := attrRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfile,
 		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_STATS2"}}, &replyAttr); err != nil {
 		t.Fatal(err)
 	}
-	if !reflect.DeepEqual(alsPrf.AttributeProfile, replyAttr) {
-		t.Errorf("Expecting : %+v, received: %+v", alsPrf.AttributeProfile, replyAttr)
+	replyAttr.Compile()
+	if !reflect.DeepEqual(*alsPrf.AttributeProfile, replyAttr) {
+		t.Errorf("Expecting : %+v, received: %+v", *alsPrf.AttributeProfile, replyAttr)
 	}
 
 	ev := &utils.CGREvent{
@@ -598,13 +602,14 @@ func testAttributeSProcessEventWithResource(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	var replyAttr *engine.AttributeProfile
+	var replyAttr engine.AttributeProfile
 	if err := attrRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfile,
 		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_RESOURCE"}}, &replyAttr); err != nil {
 		t.Fatal(err)
 	}
-	if !reflect.DeepEqual(alsPrf.AttributeProfile, replyAttr) {
-		t.Errorf("Expecting : %+v, received: %+v", alsPrf.AttributeProfile, replyAttr)
+	replyAttr.Compile()
+	if !reflect.DeepEqual(*alsPrf.AttributeProfile, replyAttr) {
+		t.Errorf("Expecting : %+v, received: %+v", *alsPrf.AttributeProfile, replyAttr)
 	}
 
 	ev := &utils.CGREvent{
@@ -674,13 +679,14 @@ func testAttributeSProcessEventWithResourceFull(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	var replyAttr *engine.AttributeProfile
+	var replyAttr engine.AttributeProfile
 	if err := attrRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfile,
 		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_RESOURCE2"}}, &replyAttr); err != nil {
 		t.Fatal(err)
 	}
-	if !reflect.DeepEqual(alsPrf.AttributeProfile, replyAttr) {
-		t.Errorf("Expecting : %+v, received: %+v", alsPrf.AttributeProfile, replyAttr)
+	replyAttr.Compile()
+	if !reflect.DeepEqual(*alsPrf.AttributeProfile, replyAttr) {
+		t.Errorf("Expecting : %+v, received: %+v", *alsPrf.AttributeProfile, replyAttr)
 	}
 
 	ev := &utils.CGREvent{
@@ -758,13 +764,14 @@ func testAttributeSProcessEventWithLibPhoneNumber(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	var replyAttr *engine.AttributeProfile
+	var replyAttr engine.AttributeProfile
 	if err := attrRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfile,
 		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_LIBPHONENUMBER2"}}, &replyAttr); err != nil {
 		t.Fatal(err)
 	}
-	if !reflect.DeepEqual(alsPrf.AttributeProfile, replyAttr) {
-		t.Errorf("Expecting : %+v, received: %+v", alsPrf.AttributeProfile, replyAttr)
+	replyAttr.Compile()
+	if !reflect.DeepEqual(*alsPrf.AttributeProfile, replyAttr) {
+		t.Errorf("Expecting : %+v, received: %+v", *alsPrf.AttributeProfile, replyAttr)
 	}
 
 	ev := &utils.CGREvent{
@@ -846,13 +853,14 @@ func testAttributeSProcessEventWithLibPhoneNumberComposed(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	var replyAttr *engine.AttributeProfile
+	var replyAttr engine.AttributeProfile
 	if err := attrRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfile,
 		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_LIBPHONENUMBER_COMPOSED"}}, &replyAttr); err != nil {
 		t.Fatal(err)
 	}
-	if !reflect.DeepEqual(alsPrf.AttributeProfile, replyAttr) {
-		t.Errorf("Expecting : %+v, received: %+v", alsPrf.AttributeProfile, replyAttr)
+	replyAttr.Compile()
+	if !reflect.DeepEqual(*alsPrf.AttributeProfile, replyAttr) {
+		t.Errorf("Expecting : %+v, received: %+v", *alsPrf.AttributeProfile, replyAttr)
 	}
 
 	ev := &utils.CGREvent{
@@ -924,13 +932,14 @@ func testAttributeSProcessEventWithLibPhoneNumberFull(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	var replyAttr *engine.AttributeProfile
+	var replyAttr engine.AttributeProfile
 	if err := attrRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfile,
 		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_LIBPHONENUMBER"}}, &replyAttr); err != nil {
 		t.Fatal(err)
 	}
-	if !reflect.DeepEqual(alsPrf.AttributeProfile, replyAttr) {
-		t.Errorf("Expecting : %+v, received: %+v", alsPrf.AttributeProfile, replyAttr)
+	replyAttr.Compile()
+	if !reflect.DeepEqual(*alsPrf.AttributeProfile, replyAttr) {
+		t.Errorf("Expecting : %+v, received: %+v", *alsPrf.AttributeProfile, replyAttr)
 	}
 
 	ev := &utils.CGREvent{
