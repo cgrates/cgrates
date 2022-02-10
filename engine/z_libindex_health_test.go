@@ -279,7 +279,11 @@ func TestHealthIndexCharger(t *testing.T) {
 			"*suffix:BrokenFilter:Invalid"}, // invalid (2 static types)
 		RunID:        "raw",
 		AttributeIDs: []string{"*constant:*req.RequestType:*none"},
-		Weight:       20,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 	}
 	if err := dm.SetChargerProfile(context.Background(), chPrf, false); err != nil {
 		t.Error(err)
@@ -350,7 +354,11 @@ func TestHealthIndexCharger(t *testing.T) {
 			"FLTR_1_DOES_NOT_EXIST_CHRGR"},
 		RunID:        "raw",
 		AttributeIDs: []string{"*constant:*req.RequestType:*none"},
-		Weight:       20,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 	}
 	if err := dm.SetChargerProfile(context.Background(), chPrf, false); err != nil {
 		t.Error(err)
@@ -400,7 +408,10 @@ func TestHealthIndexResources(t *testing.T) {
 		AllocationMessage: "MessageAllocation",
 		Blocker:           true,
 		Stored:            true,
-		Weight:            20,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			}},
 	}
 	if err := dm.SetResourceProfile(context.Background(), rsPrf, false); err != nil {
 		t.Error(err)
@@ -476,7 +487,10 @@ func TestHealthIndexResources(t *testing.T) {
 		AllocationMessage: "MessageAllocation",
 		Blocker:           true,
 		Stored:            true,
-		Weight:            20,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			}},
 	}
 	if err := dm.SetResourceProfile(context.Background(), rsPrf, false); err != nil {
 		t.Error(err)
@@ -1013,7 +1027,11 @@ func TestIndexHealthMultipleProfiles(t *testing.T) {
 			"*suffix:BrokenFilter:Invalid"},
 		RunID:        "raw",
 		AttributeIDs: []string{"*constant:*req.RequestType:*none"},
-		Weight:       20,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 	}
 	chPrf2 := &ChargerProfile{
 		Tenant: "cgrates.org",
@@ -1025,8 +1043,12 @@ func TestIndexHealthMultipleProfiles(t *testing.T) {
 			"*string:~*req.Account:1234",
 			"FLTR_1_NOT_EXIST2",
 		},
-		RunID:  "*default",
-		Weight: 10,
+		RunID: "*default",
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 	}
 	chPrf3 := &ChargerProfile{
 		Tenant: "cgrates.org",
@@ -1039,7 +1061,11 @@ func TestIndexHealthMultipleProfiles(t *testing.T) {
 		},
 		AttributeIDs: []string{"Attr1"},
 		RunID:        "*attribute",
-		Weight:       0,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 0,
+			},
+		},
 	}
 	if err := dm.SetChargerProfile(context.Background(), chPrf1, false); err != nil {
 		t.Error(err)
@@ -1102,7 +1128,11 @@ func TestIndexHealthReverseChecking(t *testing.T) {
 		},
 		RunID:        "raw",
 		AttributeIDs: []string{"*constant:*req.RequestType:*none"},
-		Weight:       20,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 	}
 	if err := dm.SetChargerProfile(context.Background(), chPrf1, false); err != nil {
 		t.Error(err)
@@ -1273,7 +1303,11 @@ func TestIndexHealthMissingReverseIndexes(t *testing.T) {
 		},
 		RunID:        "raw",
 		AttributeIDs: []string{"*constant:*req.RequestType:*none"},
-		Weight:       20,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 	}
 	if err := dm.SetChargerProfile(context.Background(), chPrf1, false); err != nil {
 		t.Error(err)
@@ -1330,7 +1364,11 @@ func TestIndexHealthMissingReverseIndexes(t *testing.T) {
 		},
 		RunID:        "raw",
 		AttributeIDs: []string{"*constant:*req.RequestType:*none"},
-		Weight:       20,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 	}
 	// now we set the charger with indexing and check the reverse indexes health
 	if err := dm.SetChargerProfile(context.Background(), chPrf1, false); err != nil {

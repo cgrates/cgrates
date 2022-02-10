@@ -1399,13 +1399,21 @@ func testITChargerProfileIndexes(t *testing.T) {
 		Tenant:    "cgrates.org",
 		ID:        "CHARGER_PRF1",
 		FilterIDs: []string{"CHARGER_FLTR"},
-		Weight:    10,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 	}
 	chrgr2 := &ChargerProfile{
 		Tenant:    "cgrates.org",
 		ID:        "CHARGER_PRF2",
 		FilterIDs: []string{"CHARGER_FLTR", "*string:~*req.Usage:~*req.Debited"},
-		Weight:    10,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 	}
 	if err := dataManager.SetChargerProfile(context.Background(), chrgr1, true); err != nil {
 		t.Error(err)

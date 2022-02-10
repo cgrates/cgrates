@@ -155,7 +155,11 @@ func testChgrsSetGetChargerProfile(t *testing.T) {
 			ID:           "TEST_CHARGERS_IT_TEST",
 			RunID:        utils.MetaDefault,
 			AttributeIDs: []string{"*none"},
-			Weight:       20,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
 		},
 		APIOpts: nil,
 	}
@@ -172,7 +176,11 @@ func testChgrsSetGetChargerProfile(t *testing.T) {
 		ID:           "TEST_CHARGERS_IT_TEST",
 		RunID:        utils.MetaDefault,
 		AttributeIDs: []string{"*none"},
-		Weight:       20,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 	}
 	var result *engine.ChargerProfile
 	if err := chgrsSRPC.Call(context.Background(), utils.AdminSv1GetChargerProfile,
@@ -211,7 +219,11 @@ func testChgrsGetChargerProfiles(t *testing.T) {
 			ID:           "TEST_CHARGERS_IT_TEST",
 			RunID:        utils.MetaDefault,
 			AttributeIDs: []string{"*none"},
-			Weight:       20,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
 		},
 	}
 	if err := chgrsSRPC.Call(context.Background(), utils.AdminSv1GetChargerProfiles,
@@ -239,7 +251,11 @@ func testChgrsSetGetChargerProfile2(t *testing.T) {
 			ID:           "TEST_CHARGERS_IT_TEST2",
 			RunID:        utils.MetaDefault,
 			AttributeIDs: []string{"*none"},
-			Weight:       20,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
 		},
 		APIOpts: nil,
 	}
@@ -256,7 +272,11 @@ func testChgrsSetGetChargerProfile2(t *testing.T) {
 		ID:           "TEST_CHARGERS_IT_TEST2",
 		RunID:        utils.MetaDefault,
 		AttributeIDs: []string{"*none"},
-		Weight:       20,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 	}
 	var result *engine.ChargerProfile
 	if err := chgrsSRPC.Call(context.Background(), utils.AdminSv1GetChargerProfile,
@@ -295,14 +315,22 @@ func testChgrsGetChargerProfiles2(t *testing.T) {
 			ID:           "TEST_CHARGERS_IT_TEST",
 			RunID:        utils.MetaDefault,
 			AttributeIDs: []string{"*none"},
-			Weight:       20,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
 		},
 		{
 			Tenant:       "cgrates.org",
 			ID:           "TEST_CHARGERS_IT_TEST2",
 			RunID:        utils.MetaDefault,
 			AttributeIDs: []string{"*none"},
-			Weight:       20,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
 		},
 	}
 	if err := chgrsSRPC.Call(context.Background(), utils.AdminSv1GetChargerProfiles,
@@ -335,7 +363,11 @@ func testChgrsSetGetChargerProfile3(t *testing.T) {
 			ID:           "TEST_CHARGERS_IT_TEST3",
 			RunID:        utils.MetaDefault,
 			AttributeIDs: []string{"*none"},
-			Weight:       20,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
 		},
 		APIOpts: nil,
 	}
@@ -352,7 +384,11 @@ func testChgrsSetGetChargerProfile3(t *testing.T) {
 		ID:           "TEST_CHARGERS_IT_TEST3",
 		RunID:        utils.MetaDefault,
 		AttributeIDs: []string{"*none"},
-		Weight:       20,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 	}
 	var result *engine.ChargerProfile
 	if err := chgrsSRPC.Call(context.Background(), utils.AdminSv1GetChargerProfile,
@@ -391,21 +427,33 @@ func testChgrsGetChargerProfiles3(t *testing.T) {
 			ID:           "TEST_CHARGERS_IT_TEST",
 			RunID:        utils.MetaDefault,
 			AttributeIDs: []string{"*none"},
-			Weight:       20,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
 		},
 		{
 			Tenant:       "cgrates.org",
 			ID:           "TEST_CHARGERS_IT_TEST2",
 			RunID:        utils.MetaDefault,
 			AttributeIDs: []string{"*none"},
-			Weight:       20,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
 		},
 		{
 			Tenant:       "cgrates.org",
 			ID:           "TEST_CHARGERS_IT_TEST3",
 			RunID:        utils.MetaDefault,
 			AttributeIDs: []string{"*none"},
-			Weight:       20,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
 		},
 	}
 	if err := chgrsSRPC.Call(context.Background(), utils.AdminSv1GetChargerProfiles,
@@ -468,14 +516,22 @@ func testChgrsGetChargerProfilesAfterRemove(t *testing.T) {
 			ID:           "TEST_CHARGERS_IT_TEST",
 			RunID:        utils.MetaDefault,
 			AttributeIDs: []string{"*none"},
-			Weight:       20,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
 		},
 		{
 			Tenant:       "cgrates.org",
 			ID:           "TEST_CHARGERS_IT_TEST2",
 			RunID:        utils.MetaDefault,
 			AttributeIDs: []string{"*none"},
-			Weight:       20,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
 		},
 	}
 	if err := chgrsSRPC.Call(context.Background(), utils.AdminSv1GetChargerProfiles,
@@ -568,7 +624,11 @@ func testChgrsGetChargerProfilesWithPrefix(t *testing.T) {
 			ID:           "aTEST_CHARGERS_IT_TEST",
 			RunID:        utils.MetaDefault,
 			AttributeIDs: []string{"*none"},
-			Weight:       20,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
 		},
 		APIOpts: nil,
 	}
@@ -585,7 +645,11 @@ func testChgrsGetChargerProfilesWithPrefix(t *testing.T) {
 		ID:           "aTEST_CHARGERS_IT_TEST",
 		RunID:        utils.MetaDefault,
 		AttributeIDs: []string{"*none"},
-		Weight:       20,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 	}
 	var result *engine.ChargerProfile
 	if err := chgrsSRPC.Call(context.Background(), utils.AdminSv1GetChargerProfile,
@@ -607,7 +671,11 @@ func testChgrsGetChargerProfilesWithPrefix(t *testing.T) {
 			ID:           "aTEST_CHARGERS_IT_TEST",
 			RunID:        utils.MetaDefault,
 			AttributeIDs: []string{"*none"},
-			Weight:       20,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
 		},
 	}
 	if err := chgrsSRPC.Call(context.Background(), utils.AdminSv1GetChargerProfiles,
@@ -629,7 +697,11 @@ func testChgrsSetGetChargerProfileEvent(t *testing.T) {
 			ID:           "TEST_CHARGERS_IT_TEST",
 			RunID:        utils.MetaDefault,
 			AttributeIDs: []string{"*none"},
-			Weight:       20,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
 		},
 		APIOpts: nil,
 	}
@@ -646,7 +718,11 @@ func testChgrsSetGetChargerProfileEvent(t *testing.T) {
 		ID:           "TEST_CHARGERS_IT_TEST",
 		RunID:        utils.MetaDefault,
 		AttributeIDs: []string{"*none"},
-		Weight:       20,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 	}
 	var result *engine.ChargerProfile
 	if err := chgrsSRPC.Call(context.Background(), utils.AdminSv1GetChargerProfile,
@@ -667,7 +743,11 @@ func testChgrsGetChargersForEvent(t *testing.T) {
 			ID:           "TEST_CHARGERS_IT_TEST",
 			RunID:        utils.MetaDefault,
 			AttributeIDs: []string{"*none"},
-			Weight:       20,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
 		},
 	}
 	cgrEv := &utils.CGREvent{

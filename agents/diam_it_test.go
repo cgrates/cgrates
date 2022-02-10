@@ -1476,7 +1476,10 @@ func testDiamItEmulateTerminate(t *testing.T) {
 			ID:           "CustomCharger",
 			RunID:        "CustomCharger",
 			AttributeIDs: []string{"*constant:*req.Category:custom_charger"},
-			Weight:       20,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				}},
 		},
 	}
 
@@ -1492,7 +1495,10 @@ func testDiamItEmulateTerminate(t *testing.T) {
 			ID:           "Default",
 			RunID:        "*default",
 			AttributeIDs: []string{"*none"},
-			Weight:       20,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				}},
 		},
 	}
 

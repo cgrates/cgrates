@@ -119,7 +119,7 @@ func testTpResITPopulate(t *testing.T) {
 			AllocationMessage: "",
 			Blocker:           true,
 			Stored:            true,
-			Weight:            20,
+			Weights:           ";20",
 			ThresholdIDs:      []string{"ValOne", "ValTwo"},
 		},
 	}

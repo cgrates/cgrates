@@ -274,10 +274,13 @@ func TestResourceRecordUsage(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "RL1",
 		rPrf: &ResourceProfile{
-			Tenant:       "cgrates.org",
-			ID:           "RL1",
-			FilterIDs:    []string{"FLTR_RES_RL1", "*ai:~*req.AnswerTime:2014-07-03T13:43:00Z|2014-07-03T13:44:00Z"},
-			Weight:       100,
+			Tenant:    "cgrates.org",
+			ID:        "RL1",
+			FilterIDs: []string{"FLTR_RES_RL1", "*ai:~*req.AnswerTime:2014-07-03T13:43:00Z|2014-07-03T13:44:00Z"},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 100,
+				}},
 			Limit:        2,
 			ThresholdIDs: []string{"TEST_ACTIONS"},
 
@@ -328,10 +331,13 @@ func TestResourceRemoveExpiredUnits(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "RL1",
 		rPrf: &ResourceProfile{
-			Tenant:       "cgrates.org",
-			ID:           "RL1",
-			FilterIDs:    []string{"FLTR_RES_RL1", "*ai:~*req.AnswerTime:2014-07-03T13:43:00Z|2014-07-03T13:44:00Z"},
-			Weight:       100,
+			Tenant:    "cgrates.org",
+			ID:        "RL1",
+			FilterIDs: []string{"FLTR_RES_RL1", "*ai:~*req.AnswerTime:2014-07-03T13:43:00Z|2014-07-03T13:44:00Z"},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 100,
+				}},
 			Limit:        2,
 			ThresholdIDs: []string{"TEST_ACTIONS"},
 
@@ -397,10 +403,13 @@ func TestResourceUsedUnits(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "RL1",
 		rPrf: &ResourceProfile{
-			Tenant:       "cgrates.org",
-			ID:           "RL1",
-			FilterIDs:    []string{"FLTR_RES_RL1", "*ai:~*req.AnswerTime:2014-07-03T13:43:00Z|2014-07-03T13:44:00Z"},
-			Weight:       100,
+			Tenant:    "cgrates.org",
+			ID:        "RL1",
+			FilterIDs: []string{"FLTR_RES_RL1", "*ai:~*req.AnswerTime:2014-07-03T13:43:00Z|2014-07-03T13:44:00Z"},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 100,
+				}},
 			Limit:        2,
 			ThresholdIDs: []string{"TEST_ACTIONS"},
 
@@ -460,10 +469,13 @@ func TestResourceSort(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "RL1",
 		rPrf: &ResourceProfile{
-			Tenant:       "cgrates.org",
-			ID:           "RL1",
-			FilterIDs:    []string{"FLTR_RES_RL1", "*ai:~*req.AnswerTime:2014-07-03T13:43:00Z|2014-07-03T13:44:00Z"},
-			Weight:       100,
+			Tenant:    "cgrates.org",
+			ID:        "RL1",
+			FilterIDs: []string{"FLTR_RES_RL1", "*ai:~*req.AnswerTime:2014-07-03T13:43:00Z|2014-07-03T13:44:00Z"},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 100,
+				}},
 			Limit:        2,
 			ThresholdIDs: []string{"TEST_ACTIONS"},
 
@@ -475,6 +487,7 @@ func TestResourceSort(t *testing.T) {
 		},
 		TTLIdx: []string{ru1.ID},
 		tUsage: utils.Float64Pointer(2),
+		weight: 100,
 	}
 
 	if err := r1.recordUsage(ru2); err != nil {
@@ -494,9 +507,12 @@ func TestResourceSort(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "RL2",
 		rPrf: &ResourceProfile{
-			ID:           "RL2",
-			FilterIDs:    []string{"FLTR_RES_RL2", "*ai:~*req.AnswerTime:2014-07-03T13:43:00Z|2014-07-03T13:44:00Z"},
-			Weight:       50,
+			ID:        "RL2",
+			FilterIDs: []string{"FLTR_RES_RL2", "*ai:~*req.AnswerTime:2014-07-03T13:43:00Z|2014-07-03T13:44:00Z"},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 50,
+				}},
 			Limit:        2,
 			ThresholdIDs: []string{"TEST_ACTIONS"},
 			UsageTTL:     time.Millisecond,
@@ -506,6 +522,7 @@ func TestResourceSort(t *testing.T) {
 			ru2.ID: ru2,
 		},
 		tUsage: utils.Float64Pointer(2),
+		weight: 50,
 	}
 
 	rs = Resources{r2, r1}
@@ -539,10 +556,13 @@ func TestResourceClearUsage(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "RL1",
 		rPrf: &ResourceProfile{
-			Tenant:       "cgrates.org",
-			ID:           "RL1",
-			FilterIDs:    []string{"FLTR_RES_RL1", "*ai:~*req.AnswerTime:2014-07-03T13:43:00Z|2014-07-03T13:44:00Z"},
-			Weight:       100,
+			Tenant:    "cgrates.org",
+			ID:        "RL1",
+			FilterIDs: []string{"FLTR_RES_RL1", "*ai:~*req.AnswerTime:2014-07-03T13:43:00Z|2014-07-03T13:44:00Z"},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 100,
+				}},
 			Limit:        2,
 			ThresholdIDs: []string{"TEST_ACTIONS"},
 
@@ -554,6 +574,7 @@ func TestResourceClearUsage(t *testing.T) {
 		},
 		TTLIdx: []string{ru1.ID},
 		tUsage: utils.Float64Pointer(2),
+		weight: 100,
 	}
 
 	if err := r1.recordUsage(ru2); err != nil {
@@ -573,9 +594,12 @@ func TestResourceClearUsage(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "RL2",
 		rPrf: &ResourceProfile{
-			ID:           "RL2",
-			FilterIDs:    []string{"FLTR_RES_RL2", "*ai:~*req.AnswerTime:2014-07-03T13:43:00Z|2014-07-03T13:44:00Z"},
-			Weight:       50,
+			ID:        "RL2",
+			FilterIDs: []string{"FLTR_RES_RL2", "*ai:~*req.AnswerTime:2014-07-03T13:43:00Z|2014-07-03T13:44:00Z"},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 50,
+				}},
 			Limit:        2,
 			ThresholdIDs: []string{"TEST_ACTIONS"},
 			UsageTTL:     time.Millisecond,
@@ -585,6 +609,7 @@ func TestResourceClearUsage(t *testing.T) {
 			ru2.ID: ru2,
 		},
 		tUsage: utils.Float64Pointer(2),
+		weight: 50,
 	}
 
 	rs := Resources{r2, r1}
@@ -635,10 +660,13 @@ func TestResourceRecordUsages(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "RL1",
 		rPrf: &ResourceProfile{
-			Tenant:       "cgrates.org",
-			ID:           "RL1",
-			FilterIDs:    []string{"FLTR_RES_RL1", "*ai:~*req.AnswerTime:2014-07-03T13:43:00Z|2014-07-03T13:44:00Z"},
-			Weight:       100,
+			Tenant:    "cgrates.org",
+			ID:        "RL1",
+			FilterIDs: []string{"FLTR_RES_RL1", "*ai:~*req.AnswerTime:2014-07-03T13:43:00Z|2014-07-03T13:44:00Z"},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 100,
+				}},
 			Limit:        2,
 			ThresholdIDs: []string{"TEST_ACTIONS"},
 
@@ -650,6 +678,7 @@ func TestResourceRecordUsages(t *testing.T) {
 		},
 		TTLIdx: []string{ru1.ID},
 		tUsage: utils.Float64Pointer(2),
+		weight: 100,
 	}
 
 	if err := r1.recordUsage(ru2); err != nil {
@@ -669,9 +698,12 @@ func TestResourceRecordUsages(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "RL2",
 		rPrf: &ResourceProfile{
-			ID:           "RL2",
-			FilterIDs:    []string{"FLTR_RES_RL2", "*ai:~*req.AnswerTime:2014-07-03T13:43:00Z|2014-07-03T13:44:00Z"},
-			Weight:       50,
+			ID:        "RL2",
+			FilterIDs: []string{"FLTR_RES_RL2", "*ai:~*req.AnswerTime:2014-07-03T13:43:00Z|2014-07-03T13:44:00Z"},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 50,
+				}},
 			Limit:        2,
 			ThresholdIDs: []string{"TEST_ACTIONS"},
 			UsageTTL:     time.Millisecond,
@@ -681,6 +713,7 @@ func TestResourceRecordUsages(t *testing.T) {
 			ru2.ID: ru2,
 		},
 		tUsage: utils.Float64Pointer(2),
+		weight: 50,
 	}
 
 	rs := Resources{r2, r1}
@@ -723,10 +756,13 @@ func TestResourceAllocateResource(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "RL1",
 		rPrf: &ResourceProfile{
-			Tenant:       "cgrates.org",
-			ID:           "RL1",
-			FilterIDs:    []string{"FLTR_RES_RL1", "*ai:~*req.AnswerTime:2014-07-03T13:43:00Z|2014-07-03T13:44:00Z"},
-			Weight:       100,
+			Tenant:    "cgrates.org",
+			ID:        "RL1",
+			FilterIDs: []string{"FLTR_RES_RL1", "*ai:~*req.AnswerTime:2014-07-03T13:43:00Z|2014-07-03T13:44:00Z"},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 100,
+				}},
 			Limit:        2,
 			ThresholdIDs: []string{"TEST_ACTIONS"},
 
@@ -738,6 +774,7 @@ func TestResourceAllocateResource(t *testing.T) {
 		},
 		TTLIdx: []string{ru1.ID},
 		tUsage: utils.Float64Pointer(2),
+		weight: 100,
 	}
 
 	if err := r1.recordUsage(ru2); err != nil {
@@ -757,9 +794,12 @@ func TestResourceAllocateResource(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "RL2",
 		rPrf: &ResourceProfile{
-			ID:           "RL2",
-			FilterIDs:    []string{"FLTR_RES_RL2", "*ai:~*req.AnswerTime:2014-07-03T13:43:00Z|2014-07-03T13:44:00Z"},
-			Weight:       50,
+			ID:        "RL2",
+			FilterIDs: []string{"FLTR_RES_RL2", "*ai:~*req.AnswerTime:2014-07-03T13:43:00Z|2014-07-03T13:44:00Z"},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 50,
+				}},
 			Limit:        2,
 			ThresholdIDs: []string{"TEST_ACTIONS"},
 			UsageTTL:     time.Millisecond,
@@ -769,6 +809,7 @@ func TestResourceAllocateResource(t *testing.T) {
 			ru2.ID: ru2,
 		},
 		tUsage: utils.Float64Pointer(2),
+		weight: 50,
 	}
 
 	rs := Resources{r2, r1}
@@ -835,10 +876,13 @@ func TestRSCacheSetGet(t *testing.T) {
 			ID:                "RL",
 			FilterIDs:         []string{"FLTR_RES_RL", "*ai:~*req.AnswerTime:2014-07-03T13:43:00Z|2014-07-03T13:44:00Z"},
 			AllocationMessage: "ALLOC_RL",
-			Weight:            50,
-			Limit:             2,
-			ThresholdIDs:      []string{"TEST_ACTIONS"},
-			UsageTTL:          time.Millisecond,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 50,
+				}},
+			Limit:        2,
+			ThresholdIDs: []string{"TEST_ACTIONS"},
+			UsageTTL:     time.Millisecond,
 		},
 		Usages: map[string]*ResourceUsage{
 			"RU2": {
@@ -979,8 +1023,11 @@ func TestResourceAddResourceProfile(t *testing.T) {
 			UsageTTL:          10 * time.Second,
 			Limit:             10.00,
 			AllocationMessage: "AllocationMessage",
-			Weight:            20.00,
-			ThresholdIDs:      []string{""},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20.00,
+				}},
+			ThresholdIDs: []string{""},
 		},
 		{
 			Tenant:            config.CgrConfig().GeneralCfg().DefaultTenant,
@@ -989,8 +1036,11 @@ func TestResourceAddResourceProfile(t *testing.T) {
 			UsageTTL:          10 * time.Second,
 			Limit:             10.00,
 			AllocationMessage: "AllocationMessage",
-			Weight:            20.00,
-			ThresholdIDs:      []string{""},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20.00,
+				}},
+			ThresholdIDs: []string{""},
 		},
 		{
 			Tenant:            config.CgrConfig().GeneralCfg().DefaultTenant,
@@ -999,8 +1049,11 @@ func TestResourceAddResourceProfile(t *testing.T) {
 			UsageTTL:          10 * time.Second,
 			Limit:             10.00,
 			AllocationMessage: "AllocationMessage",
-			Weight:            20.00,
-			ThresholdIDs:      []string{""},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20.00,
+				}},
+			ThresholdIDs: []string{""},
 		},
 	}
 	resourceTest := Resources{
@@ -1127,8 +1180,11 @@ func TestResourceMatchingResourcesForEvent(t *testing.T) {
 			UsageTTL:          10 * time.Second,
 			Limit:             10.00,
 			AllocationMessage: "AllocationMessage",
-			Weight:            20.00,
-			ThresholdIDs:      []string{""},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20.00,
+				}},
+			ThresholdIDs: []string{""},
 		},
 		{
 			Tenant:            config.CgrConfig().GeneralCfg().DefaultTenant,
@@ -1137,8 +1193,11 @@ func TestResourceMatchingResourcesForEvent(t *testing.T) {
 			UsageTTL:          10 * time.Second,
 			Limit:             10.00,
 			AllocationMessage: "AllocationMessage",
-			Weight:            20.00,
-			ThresholdIDs:      []string{""},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20.00,
+				}},
+			ThresholdIDs: []string{""},
 		},
 		{
 			Tenant:            config.CgrConfig().GeneralCfg().DefaultTenant,
@@ -1147,8 +1206,11 @@ func TestResourceMatchingResourcesForEvent(t *testing.T) {
 			UsageTTL:          10 * time.Second,
 			Limit:             10.00,
 			AllocationMessage: "AllocationMessage",
-			Weight:            20.00,
-			ThresholdIDs:      []string{""},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20.00,
+				}},
+			ThresholdIDs: []string{""},
 		},
 	}
 	resourceTest := Resources{
@@ -1269,8 +1331,11 @@ func TestResourceUsageTTLCase1(t *testing.T) {
 			UsageTTL:          10 * time.Second,
 			Limit:             10.00,
 			AllocationMessage: "AllocationMessage",
-			Weight:            20.00,
-			ThresholdIDs:      []string{""},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20.00,
+				}},
+			ThresholdIDs: []string{""},
 		},
 		{
 			Tenant:            config.CgrConfig().GeneralCfg().DefaultTenant,
@@ -1279,8 +1344,11 @@ func TestResourceUsageTTLCase1(t *testing.T) {
 			UsageTTL:          10 * time.Second,
 			Limit:             10.00,
 			AllocationMessage: "AllocationMessage",
-			Weight:            20.00,
-			ThresholdIDs:      []string{""},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20.00,
+				}},
+			ThresholdIDs: []string{""},
 		},
 		{
 			Tenant:            config.CgrConfig().GeneralCfg().DefaultTenant,
@@ -1289,8 +1357,11 @@ func TestResourceUsageTTLCase1(t *testing.T) {
 			UsageTTL:          10 * time.Second,
 			Limit:             10.00,
 			AllocationMessage: "AllocationMessage",
-			Weight:            20.00,
-			ThresholdIDs:      []string{""},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20.00,
+				}},
+			ThresholdIDs: []string{""},
 		},
 	}
 	resourceTest := Resources{
@@ -1466,8 +1537,11 @@ func TestResourceUsageTTLCase2(t *testing.T) {
 			UsageTTL:          10 * time.Second,
 			Limit:             10.00,
 			AllocationMessage: "AllocationMessage",
-			Weight:            20.00,
-			ThresholdIDs:      []string{""},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20.00,
+				}},
+			ThresholdIDs: []string{""},
 		},
 		{
 			Tenant:            config.CgrConfig().GeneralCfg().DefaultTenant,
@@ -1476,8 +1550,11 @@ func TestResourceUsageTTLCase2(t *testing.T) {
 			UsageTTL:          10 * time.Second,
 			Limit:             10.00,
 			AllocationMessage: "AllocationMessage",
-			Weight:            20.00,
-			ThresholdIDs:      []string{""},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20.00,
+				}},
+			ThresholdIDs: []string{""},
 		},
 		{
 			Tenant:            config.CgrConfig().GeneralCfg().DefaultTenant,
@@ -1486,8 +1563,11 @@ func TestResourceUsageTTLCase2(t *testing.T) {
 			UsageTTL:          10 * time.Second,
 			Limit:             10.00,
 			AllocationMessage: "AllocationMessage",
-			Weight:            20.00,
-			ThresholdIDs:      []string{""},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20.00,
+				}},
+			ThresholdIDs: []string{""},
 		},
 	}
 	resourceTest := Resources{
@@ -1660,8 +1740,11 @@ func TestResourceUsageTTLCase3(t *testing.T) {
 			UsageTTL:          10 * time.Second,
 			Limit:             10.00,
 			AllocationMessage: "AllocationMessage",
-			Weight:            20.00,
-			ThresholdIDs:      []string{""},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20.00,
+				}},
+			ThresholdIDs: []string{""},
 		},
 		{
 			Tenant:            config.CgrConfig().GeneralCfg().DefaultTenant,
@@ -1670,8 +1753,11 @@ func TestResourceUsageTTLCase3(t *testing.T) {
 			UsageTTL:          10 * time.Second,
 			Limit:             10.00,
 			AllocationMessage: "AllocationMessage",
-			Weight:            20.00,
-			ThresholdIDs:      []string{""},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20.00,
+				}},
+			ThresholdIDs: []string{""},
 		},
 		{
 			Tenant:            config.CgrConfig().GeneralCfg().DefaultTenant,
@@ -1680,8 +1766,11 @@ func TestResourceUsageTTLCase3(t *testing.T) {
 			UsageTTL:          10 * time.Second,
 			Limit:             10.00,
 			AllocationMessage: "AllocationMessage",
-			Weight:            20.00,
-			ThresholdIDs:      []string{""},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20.00,
+				}},
+			ThresholdIDs: []string{""},
 		},
 	}
 	resourceTest := Resources{
@@ -1855,8 +1944,11 @@ func TestResourceUsageTTLCase4(t *testing.T) {
 			UsageTTL:          10 * time.Second,
 			Limit:             10.00,
 			AllocationMessage: "AllocationMessage",
-			Weight:            20.00,
-			ThresholdIDs:      []string{""},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20.00,
+				}},
+			ThresholdIDs: []string{""},
 		},
 		{
 			Tenant:            config.CgrConfig().GeneralCfg().DefaultTenant,
@@ -1865,8 +1957,11 @@ func TestResourceUsageTTLCase4(t *testing.T) {
 			UsageTTL:          10 * time.Second,
 			Limit:             10.00,
 			AllocationMessage: "AllocationMessage",
-			Weight:            20.00,
-			ThresholdIDs:      []string{""},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20.00,
+				}},
+			ThresholdIDs: []string{""},
 		},
 		{
 			Tenant:            config.CgrConfig().GeneralCfg().DefaultTenant,
@@ -1875,8 +1970,11 @@ func TestResourceUsageTTLCase4(t *testing.T) {
 			UsageTTL:          10 * time.Second,
 			Limit:             10.00,
 			AllocationMessage: "AllocationMessage",
-			Weight:            20.00,
-			ThresholdIDs:      []string{""},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20.00,
+				}},
+			ThresholdIDs: []string{""},
 		},
 	}
 	resourceTest := Resources{
@@ -2050,8 +2148,11 @@ func TestResourceResIDsMp(t *testing.T) {
 			UsageTTL:          10 * time.Second,
 			Limit:             10.00,
 			AllocationMessage: "AllocationMessage",
-			Weight:            20.00,
-			ThresholdIDs:      []string{""},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20.00,
+				}},
+			ThresholdIDs: []string{""},
 		},
 		{
 			Tenant:            config.CgrConfig().GeneralCfg().DefaultTenant,
@@ -2060,8 +2161,11 @@ func TestResourceResIDsMp(t *testing.T) {
 			UsageTTL:          10 * time.Second,
 			Limit:             10.00,
 			AllocationMessage: "AllocationMessage",
-			Weight:            20.00,
-			ThresholdIDs:      []string{""},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20.00,
+				}},
+			ThresholdIDs: []string{""},
 		},
 		{
 			Tenant:            config.CgrConfig().GeneralCfg().DefaultTenant,
@@ -2070,8 +2174,11 @@ func TestResourceResIDsMp(t *testing.T) {
 			UsageTTL:          10 * time.Second,
 			Limit:             10.00,
 			AllocationMessage: "AllocationMessage",
-			Weight:            20.00,
-			ThresholdIDs:      []string{""},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20.00,
+				}},
+			ThresholdIDs: []string{""},
 		},
 	}
 	resourceTest := Resources{
@@ -2192,8 +2299,11 @@ func TestResourceMatchWithIndexFalse(t *testing.T) {
 			UsageTTL:          10 * time.Second,
 			Limit:             10.00,
 			AllocationMessage: "AllocationMessage",
-			Weight:            20.00,
-			ThresholdIDs:      []string{""},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20.00,
+				}},
+			ThresholdIDs: []string{""},
 		},
 		{
 			Tenant:            config.CgrConfig().GeneralCfg().DefaultTenant,
@@ -2202,8 +2312,11 @@ func TestResourceMatchWithIndexFalse(t *testing.T) {
 			UsageTTL:          10 * time.Second,
 			Limit:             10.00,
 			AllocationMessage: "AllocationMessage",
-			Weight:            20.00,
-			ThresholdIDs:      []string{""},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20.00,
+				}},
+			ThresholdIDs: []string{""},
 		},
 		{
 			Tenant:            config.CgrConfig().GeneralCfg().DefaultTenant,
@@ -2212,8 +2325,11 @@ func TestResourceMatchWithIndexFalse(t *testing.T) {
 			UsageTTL:          10 * time.Second,
 			Limit:             10.00,
 			AllocationMessage: "AllocationMessage",
-			Weight:            20.00,
-			ThresholdIDs:      []string{""},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20.00,
+				}},
+			ThresholdIDs: []string{""},
 		},
 	}
 	resourceTest := Resources{
@@ -2347,8 +2463,11 @@ func TestResourceCaching(t *testing.T) {
 		UsageTTL:          -1,
 		Limit:             10.00,
 		AllocationMessage: "AllocationMessage",
-		Weight:            20.00,
-		ThresholdIDs:      []string{utils.MetaNone},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20.00,
+			}},
+		ThresholdIDs: []string{utils.MetaNone},
 	}
 
 	if err := Cache.Set(context.TODO(), utils.CacheResourceProfiles, "cgrates.org:ResourceProfileCached",
@@ -2650,10 +2769,13 @@ func TestResourcesRecordUsageClearErr(t *testing.T) {
 
 func TestResourceAllocateResourceOtherDB(t *testing.T) {
 	rProf := &ResourceProfile{
-		Tenant:       "cgrates.org",
-		ID:           "RL_DB",
-		FilterIDs:    []string{"*string:~*opts.Resource:RL_DB"},
-		Weight:       100,
+		Tenant:    "cgrates.org",
+		ID:        "RL_DB",
+		FilterIDs: []string{"*string:~*opts.Resource:RL_DB"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 100,
+			}},
 		Limit:        2,
 		ThresholdIDs: []string{utils.MetaNone},
 		UsageTTL:     -time.Nanosecond,
@@ -3347,9 +3469,12 @@ func TestResourcesV1ResourcesForEventOK(t *testing.T) {
 		FilterIDs:         []string{"*string:~*req.Account:1001"},
 		ThresholdIDs:      []string{utils.MetaNone},
 		AllocationMessage: "Approved",
-		Weight:            10,
-		Limit:             10,
-		UsageTTL:          time.Minute,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			}},
+		Limit:    10,
+		UsageTTL: time.Minute,
 	}
 	rs := &Resource{
 		rPrf:   rsPrf,
@@ -3366,6 +3491,7 @@ func TestResourcesV1ResourcesForEventOK(t *testing.T) {
 		tUsage: utils.Float64Pointer(10),
 		ttl:    utils.DurationPointer(time.Minute),
 		TTLIdx: []string{},
+		weight: 10,
 	}
 	err := dm.SetResourceProfile(context.Background(), rsPrf, true)
 	if err != nil {
@@ -3405,6 +3531,7 @@ func TestResourcesV1ResourcesForEventOK(t *testing.T) {
 			tUsage: utils.Float64Pointer(10),
 			ttl:    utils.DurationPointer(72 * time.Hour),
 			TTLIdx: []string{},
+			weight: 10,
 		},
 	}
 	var reply Resources
@@ -3426,9 +3553,12 @@ func TestResourcesV1ResourcesForEventNotFound(t *testing.T) {
 		ID:           "RES1",
 		FilterIDs:    []string{"*string:~*req.Account:1001"},
 		ThresholdIDs: []string{utils.MetaNone},
-		Weight:       10,
-		Limit:        10,
-		UsageTTL:     time.Minute,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			}},
+		Limit:    10,
+		UsageTTL: time.Minute,
 	}
 	rs := &Resource{
 		rPrf:   rsPrf,
@@ -3482,9 +3612,12 @@ func TestResourcesV1ResourcesForEventMissingParameters(t *testing.T) {
 		ID:           "RES1",
 		FilterIDs:    []string{"*string:~*req.Account:1001"},
 		ThresholdIDs: []string{utils.MetaNone},
-		Weight:       10,
-		Limit:        10,
-		UsageTTL:     time.Minute,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			}},
+		Limit:    10,
+		UsageTTL: time.Minute,
 	}
 	rs := &Resource{
 		rPrf:   rsPrf,
@@ -3583,9 +3716,12 @@ func TestResourcesV1ResourcesForEventCacheReplyExists(t *testing.T) {
 		FilterIDs:         []string{"*string:~*req.Account:1001"},
 		ThresholdIDs:      []string{utils.MetaNone},
 		AllocationMessage: "Approved",
-		Weight:            10,
-		Limit:             10,
-		UsageTTL:          time.Minute,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			}},
+		Limit:    10,
+		UsageTTL: time.Minute,
 	}
 	rs := &Resource{
 		rPrf:   rsPrf,
@@ -3678,9 +3814,12 @@ func TestResourcesV1ResourcesForEventCacheReplySet(t *testing.T) {
 		FilterIDs:         []string{"*string:~*req.Account:1001"},
 		ThresholdIDs:      []string{utils.MetaNone},
 		AllocationMessage: "Approved",
-		Weight:            10,
-		Limit:             10,
-		UsageTTL:          time.Minute,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			}},
+		Limit:    10,
+		UsageTTL: time.Minute,
 	}
 	rs := &Resource{
 		rPrf:   rsPrf,
@@ -3697,6 +3836,7 @@ func TestResourcesV1ResourcesForEventCacheReplySet(t *testing.T) {
 		tUsage: utils.Float64Pointer(10),
 		ttl:    utils.DurationPointer(time.Minute),
 		TTLIdx: []string{},
+		weight: 10,
 	}
 	err := dm.SetResourceProfile(context.Background(), rsPrf, true)
 	if err != nil {
@@ -3736,6 +3876,7 @@ func TestResourcesV1ResourcesForEventCacheReplySet(t *testing.T) {
 			tUsage: utils.Float64Pointer(10),
 			ttl:    utils.DurationPointer(72 * time.Hour),
 			TTLIdx: []string{},
+			weight: 10,
 		},
 	}
 	var reply Resources
@@ -3774,9 +3915,12 @@ func TestResourcesV1GetResourceOK(t *testing.T) {
 		FilterIDs:         []string{"*string:~*req.Account:1001"},
 		ThresholdIDs:      []string{utils.MetaNone},
 		AllocationMessage: "Approved",
-		Weight:            10,
-		Limit:             10,
-		UsageTTL:          time.Minute,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			}},
+		Limit:    10,
+		UsageTTL: time.Minute,
 	}
 	rs := &Resource{
 		rPrf:   rsPrf,
@@ -3851,9 +3995,12 @@ func TestResourcesV1GetResourceNotFound(t *testing.T) {
 		FilterIDs:         []string{"*string:~*req.Account:1001"},
 		ThresholdIDs:      []string{utils.MetaNone},
 		AllocationMessage: "Approved",
-		Weight:            10,
-		Limit:             10,
-		UsageTTL:          time.Minute,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			}},
+		Limit:    10,
+		UsageTTL: time.Minute,
 	}
 	rs := &Resource{
 		rPrf:   rsPrf,
@@ -3910,9 +4057,12 @@ func TestResourcesV1GetResourceMissingParameters(t *testing.T) {
 		FilterIDs:         []string{"*string:~*req.Account:1001"},
 		ThresholdIDs:      []string{utils.MetaNone},
 		AllocationMessage: "Approved",
-		Weight:            10,
-		Limit:             10,
-		UsageTTL:          time.Minute,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			}},
+		Limit:    10,
+		UsageTTL: time.Minute,
 	}
 	rs := &Resource{
 		rPrf:   rsPrf,
@@ -3968,9 +4118,12 @@ func TestResourcesV1GetResourceWithConfigOK(t *testing.T) {
 		FilterIDs:         []string{"*string:~*req.Account:1001"},
 		ThresholdIDs:      []string{utils.MetaNone},
 		AllocationMessage: "Approved",
-		Weight:            10,
-		Limit:             10,
-		UsageTTL:          time.Minute,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			}},
+		Limit:    10,
+		UsageTTL: time.Minute,
 	}
 	rs := &Resource{
 		rPrf:   rsPrf,
@@ -4048,9 +4201,12 @@ func TestResourcesV1GetResourceWithConfigNilrPrfOK(t *testing.T) {
 		FilterIDs:         []string{"*string:~*req.Account:1001"},
 		ThresholdIDs:      []string{utils.MetaNone},
 		AllocationMessage: "Approved",
-		Weight:            10,
-		Limit:             10,
-		UsageTTL:          time.Minute,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			}},
+		Limit:    10,
+		UsageTTL: time.Minute,
 	}
 	err := dm.SetResourceProfile(context.Background(), rsPrf, true)
 	if err != nil {
@@ -4131,9 +4287,12 @@ func TestResourcesV1GetResourceWithConfigNilrPrfProfileNotFound(t *testing.T) {
 		FilterIDs:         []string{"*string:~*req.Account:1001"},
 		ThresholdIDs:      []string{utils.MetaNone},
 		AllocationMessage: "Approved",
-		Weight:            10,
-		Limit:             10,
-		UsageTTL:          time.Minute,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			}},
+		Limit:    10,
+		UsageTTL: time.Minute,
 	}
 	err := dm.SetResourceProfile(context.Background(), rsPrf, true)
 	if err != nil {
@@ -4192,9 +4351,12 @@ func TestResourcesV1GetResourceWithConfigResourceNotFound(t *testing.T) {
 		FilterIDs:         []string{"*string:~*req.Account:1001"},
 		ThresholdIDs:      []string{utils.MetaNone},
 		AllocationMessage: "Approved",
-		Weight:            10,
-		Limit:             10,
-		UsageTTL:          time.Minute,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			}},
+		Limit:    10,
+		UsageTTL: time.Minute,
 	}
 	rs := &Resource{
 		rPrf:   rsPrf,
@@ -4249,9 +4411,12 @@ func TestResourcesV1GetResourceWithConfigMissingParameters(t *testing.T) {
 		FilterIDs:         []string{"*string:~*req.Account:1001"},
 		ThresholdIDs:      []string{utils.MetaNone},
 		AllocationMessage: "Approved",
-		Weight:            10,
-		Limit:             10,
-		UsageTTL:          time.Minute,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			}},
+		Limit:    10,
+		UsageTTL: time.Minute,
 	}
 	rs := &Resource{
 		rPrf:   rsPrf,
@@ -4305,9 +4470,12 @@ func TestResourcesV1AuthorizeResourcesOK(t *testing.T) {
 		FilterIDs:         []string{"*string:~*req.Account:1001"},
 		ThresholdIDs:      []string{utils.MetaNone},
 		AllocationMessage: "Approved",
-		Weight:            10,
-		Limit:             10,
-		UsageTTL:          time.Minute,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			}},
+		Limit:    10,
+		UsageTTL: time.Minute,
 	}
 
 	err := dm.SetResourceProfile(context.Background(), rsPrf, true)
@@ -4356,9 +4524,12 @@ func TestResourcesV1AuthorizeResourcesNotAuthorized(t *testing.T) {
 		FilterIDs:         []string{"*string:~*req.Account:1001"},
 		ThresholdIDs:      []string{utils.MetaNone},
 		AllocationMessage: "Approved",
-		Weight:            10,
-		Limit:             0,
-		UsageTTL:          time.Minute,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			}},
+		Limit:    0,
+		UsageTTL: time.Minute,
 	}
 
 	err := dm.SetResourceProfile(context.Background(), rsPrf, true)
@@ -4407,9 +4578,12 @@ func TestResourcesV1AuthorizeResourcesNoMatch(t *testing.T) {
 		FilterIDs:         []string{"*string:~*req.Account:1001"},
 		ThresholdIDs:      []string{utils.MetaNone},
 		AllocationMessage: "Approved",
-		Weight:            10,
-		Limit:             10,
-		UsageTTL:          time.Minute,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			}},
+		Limit:    10,
+		UsageTTL: time.Minute,
 	}
 
 	err := dm.SetResourceProfile(context.Background(), rsPrf, true)
@@ -4458,9 +4632,12 @@ func TestResourcesV1AuthorizeResourcesNilCGREvent(t *testing.T) {
 		FilterIDs:         []string{"*string:~*req.Account:1001"},
 		ThresholdIDs:      []string{utils.MetaNone},
 		AllocationMessage: "Approved",
-		Weight:            10,
-		Limit:             10,
-		UsageTTL:          time.Minute,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			}},
+		Limit:    10,
+		UsageTTL: time.Minute,
 	}
 
 	err := dm.SetResourceProfile(context.Background(), rsPrf, true)
@@ -4498,9 +4675,12 @@ func TestResourcesV1AuthorizeResourcesMissingUsageID(t *testing.T) {
 		FilterIDs:         []string{"*string:~*req.Account:1001"},
 		ThresholdIDs:      []string{utils.MetaNone},
 		AllocationMessage: "Approved",
-		Weight:            10,
-		Limit:             10,
-		UsageTTL:          time.Minute,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			}},
+		Limit:    10,
+		UsageTTL: time.Minute,
 	}
 
 	err := dm.SetResourceProfile(context.Background(), rsPrf, true)
@@ -4550,9 +4730,12 @@ func TestResourcesV1AuthorizeResourcesCacheReplyExists(t *testing.T) {
 		FilterIDs:         []string{"*string:~*req.Account:1001"},
 		ThresholdIDs:      []string{utils.MetaNone},
 		AllocationMessage: "Approved",
-		Weight:            10,
-		Limit:             10,
-		UsageTTL:          time.Minute,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			}},
+		Limit:    10,
+		UsageTTL: time.Minute,
 	}
 	rs := &Resource{
 		rPrf:   rsPrf,
@@ -4631,9 +4814,12 @@ func TestResourcesV1AuthorizeResourcesCacheReplySet(t *testing.T) {
 		FilterIDs:         []string{"*string:~*req.Account:1001"},
 		ThresholdIDs:      []string{utils.MetaNone},
 		AllocationMessage: "Approved",
-		Weight:            10,
-		Limit:             -1,
-		UsageTTL:          time.Minute,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			}},
+		Limit:    -1,
+		UsageTTL: time.Minute,
 	}
 	rs := &Resource{
 		rPrf:   rsPrf,
@@ -4712,9 +4898,12 @@ func TestResourcesV1AllocateResourcesOK(t *testing.T) {
 		FilterIDs:         []string{"*string:~*req.Account:1001"},
 		ThresholdIDs:      []string{utils.MetaNone},
 		AllocationMessage: "Approved",
-		Weight:            10,
-		Limit:             10,
-		UsageTTL:          time.Minute,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			}},
+		Limit:    10,
+		UsageTTL: time.Minute,
 	}
 
 	err := dm.SetResourceProfile(context.Background(), rsPrf, true)
@@ -4763,9 +4952,12 @@ func TestResourcesV1AllocateResourcesNoMatch(t *testing.T) {
 		FilterIDs:         []string{"*string:~*req.Account:1001"},
 		ThresholdIDs:      []string{utils.MetaNone},
 		AllocationMessage: "Approved",
-		Weight:            10,
-		Limit:             10,
-		UsageTTL:          time.Minute,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			}},
+		Limit:    10,
+		UsageTTL: time.Minute,
 	}
 
 	err := dm.SetResourceProfile(context.Background(), rsPrf, true)
@@ -4813,9 +5005,12 @@ func TestResourcesV1AllocateResourcesMissingParameters(t *testing.T) {
 		FilterIDs:         []string{"*string:~*req.Account:1001"},
 		ThresholdIDs:      []string{utils.MetaNone},
 		AllocationMessage: "Approved",
-		Weight:            10,
-		Limit:             10,
-		UsageTTL:          time.Minute,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			}},
+		Limit:    10,
+		UsageTTL: time.Minute,
 	}
 
 	err := dm.SetResourceProfile(context.Background(), rsPrf, true)
@@ -4903,9 +5098,12 @@ func TestResourcesV1AllocateResourcesCacheReplyExists(t *testing.T) {
 		FilterIDs:         []string{"*string:~*req.Account:1001"},
 		ThresholdIDs:      []string{utils.MetaNone},
 		AllocationMessage: "Approved",
-		Weight:            10,
-		Limit:             -1,
-		UsageTTL:          time.Minute,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			}},
+		Limit:    -1,
+		UsageTTL: time.Minute,
 	}
 	rs := &Resource{
 		rPrf:   rsPrf,
@@ -4984,9 +5182,12 @@ func TestResourcesV1AllocateResourcesCacheReplySet(t *testing.T) {
 		FilterIDs:         []string{"*string:~*req.Account:1001"},
 		ThresholdIDs:      []string{utils.MetaNone},
 		AllocationMessage: "Approved",
-		Weight:            10,
-		Limit:             -1,
-		UsageTTL:          time.Minute,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			}},
+		Limit:    -1,
+		UsageTTL: time.Minute,
 	}
 	rs := &Resource{
 		rPrf:   rsPrf,
@@ -5065,9 +5266,12 @@ func TestResourcesV1AllocateResourcesResAllocErr(t *testing.T) {
 		FilterIDs:         []string{"*string:~*req.Account:1001"},
 		ThresholdIDs:      []string{utils.MetaNone},
 		AllocationMessage: "",
-		Weight:            10,
-		Limit:             -1,
-		UsageTTL:          time.Minute,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			}},
+		Limit:    -1,
+		UsageTTL: time.Minute,
 	}
 	err := dm.SetResourceProfile(context.Background(), rsPrf, true)
 	if err != nil {
@@ -5116,9 +5320,12 @@ func TestResourcesV1AllocateResourcesProcessThErr(t *testing.T) {
 		FilterIDs:         []string{"*string:~*req.Account:1001"},
 		ThresholdIDs:      []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)},
 		AllocationMessage: "Approved",
-		Weight:            10,
-		Limit:             -1,
-		UsageTTL:          time.Minute,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			}},
+		Limit:    -1,
+		UsageTTL: time.Minute,
 	}
 	rs := &Resource{
 		rPrf:   rsPrf,
@@ -5198,9 +5405,12 @@ func TestResourcesV1ReleaseResourcesOK(t *testing.T) {
 		FilterIDs:         []string{"*string:~*req.Account:1001"},
 		ThresholdIDs:      []string{utils.MetaNone},
 		AllocationMessage: "Approved",
-		Weight:            10,
-		Limit:             10,
-		UsageTTL:          time.Minute,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			}},
+		Limit:    10,
+		UsageTTL: time.Minute,
 	}
 
 	err := dm.SetResourceProfile(context.Background(), rsPrf, true)
@@ -5254,9 +5464,12 @@ func TestResourcesV1ReleaseResourcesUsageNotFound(t *testing.T) {
 		FilterIDs:         []string{"*string:~*req.Account:1001"},
 		ThresholdIDs:      []string{utils.MetaNone},
 		AllocationMessage: "Approved",
-		Weight:            10,
-		Limit:             10,
-		UsageTTL:          0,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			}},
+		Limit:    10,
+		UsageTTL: 0,
 	}
 
 	err := dm.SetResourceProfile(context.Background(), rsPrf, true)
@@ -5322,9 +5535,12 @@ func TestResourcesV1ReleaseResourcesNoMatch(t *testing.T) {
 		FilterIDs:         []string{"*string:~*req.Account:1001"},
 		ThresholdIDs:      []string{utils.MetaNone},
 		AllocationMessage: "Approved",
-		Weight:            10,
-		Limit:             10,
-		UsageTTL:          time.Minute,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			}},
+		Limit:    10,
+		UsageTTL: time.Minute,
 	}
 
 	err := dm.SetResourceProfile(context.Background(), rsPrf, true)
@@ -5372,9 +5588,12 @@ func TestResourcesV1ReleaseResourcesMissingParameters(t *testing.T) {
 		FilterIDs:         []string{"*string:~*req.Account:1001"},
 		ThresholdIDs:      []string{utils.MetaNone},
 		AllocationMessage: "Approved",
-		Weight:            10,
-		Limit:             10,
-		UsageTTL:          time.Minute,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			}},
+		Limit:    10,
+		UsageTTL: time.Minute,
 	}
 
 	err := dm.SetResourceProfile(context.Background(), rsPrf, true)
@@ -5462,9 +5681,12 @@ func TestResourcesV1ReleaseResourcesCacheReplyExists(t *testing.T) {
 		FilterIDs:         []string{"*string:~*req.Account:1001"},
 		ThresholdIDs:      []string{utils.MetaNone},
 		AllocationMessage: "Approved",
-		Weight:            10,
-		Limit:             -1,
-		UsageTTL:          time.Minute,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			}},
+		Limit:    -1,
+		UsageTTL: time.Minute,
 	}
 	rs := &Resource{
 		rPrf:   rsPrf,
@@ -5543,9 +5765,12 @@ func TestResourcesV1ReleaseResourcesCacheReplySet(t *testing.T) {
 		FilterIDs:         []string{"*string:~*req.Account:1001"},
 		ThresholdIDs:      []string{utils.MetaNone},
 		AllocationMessage: "Approved",
-		Weight:            10,
-		Limit:             -1,
-		UsageTTL:          time.Minute,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			}},
+		Limit:    -1,
+		UsageTTL: time.Minute,
 	}
 	rs := &Resource{
 		rPrf:   rsPrf,
@@ -5637,9 +5862,12 @@ func TestResourcesV1ReleaseResourcesProcessThErr(t *testing.T) {
 		FilterIDs:         []string{"*string:~*req.Account:1001"},
 		ThresholdIDs:      []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)},
 		AllocationMessage: "Approved",
-		Weight:            10,
-		Limit:             -1,
-		UsageTTL:          time.Minute,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			}},
+		Limit:    -1,
+		UsageTTL: time.Minute,
 	}
 	rs := &Resource{
 		rPrf:   rsPrf,
@@ -5722,10 +5950,13 @@ func TestResourcesStoreResourceError(t *testing.T) {
 		FilterIDs:         []string{"*string:~*req.Account:1001"},
 		ThresholdIDs:      []string{utils.MetaNone},
 		AllocationMessage: "Approved",
-		Weight:            10,
-		Limit:             10,
-		UsageTTL:          time.Minute,
-		Stored:            true,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			}},
+		Limit:    10,
+		UsageTTL: time.Minute,
+		Stored:   true,
 	}
 
 	err := dm.SetResourceProfile(context.Background(), rsPrf, true)
@@ -5819,8 +6050,11 @@ func TestResourceMatchingResourcesForEventLocks(t *testing.T) {
 			UsageTTL:          10 * time.Second,
 			Limit:             10.00,
 			AllocationMessage: "AllocationMessage",
-			Weight:            20.00,
-			ThresholdIDs:      []string{utils.MetaNone},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20.00,
+				}},
+			ThresholdIDs: []string{utils.MetaNone},
 		}
 		dm.SetResourceProfile(context.Background(), rPrf, true)
 		prfs = append(prfs, rPrf)
@@ -5869,8 +6103,11 @@ func TestResourceMatchingResourcesForEventLocks2(t *testing.T) {
 			UsageTTL:          10 * time.Second,
 			Limit:             10.00,
 			AllocationMessage: "AllocationMessage",
-			Weight:            20.00,
-			ThresholdIDs:      []string{utils.MetaNone},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20.00,
+				}},
+			ThresholdIDs: []string{utils.MetaNone},
 		}
 		dm.SetResourceProfile(context.Background(), rPrf, true)
 		prfs = append(prfs, rPrf)
@@ -5883,8 +6120,11 @@ func TestResourceMatchingResourcesForEventLocks2(t *testing.T) {
 		UsageTTL:          10 * time.Second,
 		Limit:             10.00,
 		AllocationMessage: "AllocationMessage",
-		Weight:            20.00,
-		ThresholdIDs:      []string{utils.MetaNone},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20.00,
+			}},
+		ThresholdIDs: []string{utils.MetaNone},
 	}
 	err = db.SetResourceProfileDrv(context.Background(), rPrf)
 	if err != nil {
@@ -5934,9 +6174,12 @@ func TestResourceMatchingResourcesForEventLocksBlocker(t *testing.T) {
 			UsageTTL:          10 * time.Second,
 			Limit:             10.00,
 			AllocationMessage: "AllocationMessage",
-			Weight:            float64(10 - i),
-			Blocker:           i == 4,
-			ThresholdIDs:      []string{utils.MetaNone},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: float64(10 - i),
+				}},
+			Blocker:      i == 4,
+			ThresholdIDs: []string{utils.MetaNone},
 		}
 		dm.SetResourceProfile(context.Background(), rPrf, true)
 		prfs = append(prfs, rPrf)
@@ -5989,8 +6232,11 @@ func TestResourceMatchingResourcesForEventLocks3(t *testing.T) {
 				UsageTTL:          10 * time.Second,
 				Limit:             10.00,
 				AllocationMessage: "AllocationMessage",
-				Weight:            20.00,
-				ThresholdIDs:      []string{utils.MetaNone},
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 20.00,
+					}},
+				ThresholdIDs: []string{utils.MetaNone},
 			}
 			Cache.Set(context.Background(), utils.CacheResources, rPrf.TenantID(), &Resource{
 				Tenant: rPrf.Tenant,
@@ -6032,8 +6278,11 @@ func TestResourcesLockUnlockResourceProfiles(t *testing.T) {
 		ID:                "RES1",
 		Limit:             10,
 		AllocationMessage: "Approved",
-		Weight:            10,
-		ThresholdIDs:      []string{utils.MetaNone},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			}},
+		ThresholdIDs: []string{utils.MetaNone},
 	}
 
 	//lock profile with empty lkID parameter
@@ -6332,10 +6581,13 @@ func TestResourcesMatchingResourcesForEventFinalCacheSetErr(t *testing.T) {
 		FilterIDs:         []string{"*string:~*req.Account:1001"},
 		ThresholdIDs:      []string{utils.MetaNone},
 		AllocationMessage: "Approved",
-		Weight:            10,
-		Limit:             10,
-		UsageTTL:          time.Minute,
-		Stored:            true,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			}},
+		Limit:    10,
+		UsageTTL: time.Minute,
+		Stored:   true,
 	}
 
 	err := dm.SetResourceProfile(context.Background(), rsPrf, true)
@@ -6359,6 +6611,7 @@ func TestResourcesMatchingResourcesForEventFinalCacheSetErr(t *testing.T) {
 		Usages: make(map[string]*ResourceUsage),
 		ttl:    utils.DurationPointer(10 * time.Second),
 		dirty:  utils.BoolPointer(false),
+		weight: 10,
 	}
 
 	if rcv, err := rS.matchingResourcesForEvent(context.Background(), "cgrates.org", ev, ev.ID,
@@ -6745,10 +6998,13 @@ func TestResourcesV1ReleaseResourcesErrRetrieveUsageTTL(t *testing.T) {
 func TestResourceProfileSet(t *testing.T) {
 	cp := ResourceProfile{}
 	exp := ResourceProfile{
-		Tenant:            "cgrates.org",
-		ID:                "ID",
-		FilterIDs:         []string{"fltr1", "*string:~*req.Account:1001"},
-		Weight:            10,
+		Tenant:    "cgrates.org",
+		ID:        "ID",
+		FilterIDs: []string{"fltr1", "*string:~*req.Account:1001"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			}},
 		UsageTTL:          10,
 		Limit:             10,
 		AllocationMessage: "new",
@@ -6775,7 +7031,7 @@ func TestResourceProfileSet(t *testing.T) {
 	if err := cp.Set([]string{utils.FilterIDs}, "fltr1;*string:~*req.Account:1001", false, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
-	if err := cp.Set([]string{utils.Weight}, 10, false, utils.EmptyString); err != nil {
+	if err := cp.Set([]string{utils.Weights}, ";10", false, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
 	if err := cp.Set([]string{utils.UsageTTL}, 10, false, utils.EmptyString); err != nil {
@@ -6804,10 +7060,13 @@ func TestResourceProfileSet(t *testing.T) {
 
 func TestResourceProfileAsInterface(t *testing.T) {
 	rp := ResourceProfile{
-		Tenant:            "cgrates.org",
-		ID:                "ID",
-		FilterIDs:         []string{"fltr1", "*string:~*req.Account:1001"},
-		Weight:            10,
+		Tenant:    "cgrates.org",
+		ID:        "ID",
+		FilterIDs: []string{"fltr1", "*string:~*req.Account:1001"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			}},
 		UsageTTL:          10,
 		Limit:             10,
 		AllocationMessage: "new",
@@ -6846,7 +7105,7 @@ func TestResourceProfileAsInterface(t *testing.T) {
 	}
 	if val, err := rp.FieldAsInterface([]string{utils.Weight}); err != nil {
 		t.Fatal(err)
-	} else if exp := rp.Weight; !reflect.DeepEqual(exp, val) {
+	} else if exp := rp.Weights; !reflect.DeepEqual(exp, val) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
 	}
 	if val, err := rp.FieldAsInterface([]string{utils.ThresholdIDs}); err != nil {
@@ -6903,10 +7162,13 @@ func TestResourceProfileAsInterface(t *testing.T) {
 func TestResourceProfileMerge(t *testing.T) {
 	dp := &ResourceProfile{}
 	exp := &ResourceProfile{
-		Tenant:            "cgrates.org",
-		ID:                "ID",
-		FilterIDs:         []string{"fltr1", "*string:~*req.Account:1001"},
-		Weight:            10,
+		Tenant:    "cgrates.org",
+		ID:        "ID",
+		FilterIDs: []string{"fltr1", "*string:~*req.Account:1001"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			}},
 		UsageTTL:          10,
 		Limit:             10,
 		AllocationMessage: "new",
@@ -6915,10 +7177,13 @@ func TestResourceProfileMerge(t *testing.T) {
 		ThresholdIDs:      []string{"TH1"},
 	}
 	if dp.Merge(&ResourceProfile{
-		Tenant:            "cgrates.org",
-		ID:                "ID",
-		FilterIDs:         []string{"fltr1", "*string:~*req.Account:1001"},
-		Weight:            10,
+		Tenant:    "cgrates.org",
+		ID:        "ID",
+		FilterIDs: []string{"fltr1", "*string:~*req.Account:1001"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			}},
 		UsageTTL:          10,
 		Limit:             10,
 		AllocationMessage: "new",

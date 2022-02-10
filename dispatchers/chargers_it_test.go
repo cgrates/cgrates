@@ -121,7 +121,11 @@ func testDspCppGetChtgFailover(t *testing.T) {
 			FilterIDs:    []string{},
 			RunID:        utils.MetaDefault,
 			AttributeIDs: []string{"*none"},
-			Weight:       0,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 0,
+				},
+			},
 		},
 	}
 	if *encoding == utils.MetaGOB {
@@ -143,7 +147,11 @@ func testDspCppGetChtgFailover(t *testing.T) {
 			FilterIDs:    []string{},
 			RunID:        utils.MetaRaw,
 			AttributeIDs: []string{"*constant:*req.RequestType:*none"},
-			Weight:       0,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 0,
+				},
+			},
 		},
 	)
 	if *encoding == utils.MetaGOB {
@@ -219,7 +227,11 @@ func testDspCppTestAuthKey2(t *testing.T) {
 			FilterIDs:    []string{},
 			RunID:        utils.MetaDefault,
 			AttributeIDs: []string{"*none"},
-			Weight:       0,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 0,
+				},
+			},
 		},
 		&engine.ChargerProfile{
 			Tenant:       "cgrates.org",
@@ -227,7 +239,11 @@ func testDspCppTestAuthKey2(t *testing.T) {
 			FilterIDs:    []string{},
 			RunID:        utils.MetaRaw,
 			AttributeIDs: []string{"*constant:*req.RequestType:*none"},
-			Weight:       0,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 0,
+				},
+			},
 		},
 	}
 	if *encoding == utils.MetaGOB {
@@ -266,7 +282,11 @@ func testDspCppGetChtgRoundRobin(t *testing.T) {
 			FilterIDs:    []string{},
 			RunID:        utils.MetaDefault,
 			AttributeIDs: []string{"*none"},
-			Weight:       0,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 0,
+				},
+			},
 		},
 	}
 	if *encoding == utils.MetaGOB {
@@ -288,7 +308,11 @@ func testDspCppGetChtgRoundRobin(t *testing.T) {
 			FilterIDs:    []string{},
 			RunID:        utils.MetaRaw,
 			AttributeIDs: []string{"*constant:*req.RequestType:*none"},
-			Weight:       0,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 0,
+				},
+			},
 		},
 	)
 	if *encoding == utils.MetaGOB {

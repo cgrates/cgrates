@@ -65,7 +65,6 @@ func (cS *ChargerS) matchingChargerProfilesForEvent(ctx *context.Context, tnt st
 	if err != nil {
 		return nil, err
 	}
-	matchingCPs := make(map[string]*ChargerProfile)
 	for cpID := range cpIDs {
 		cP, err := cS.dm.GetChargerProfile(ctx, tnt, cpID, true, true, utils.NonTransactional)
 		if err != nil {
@@ -80,17 +79,15 @@ func (cS *ChargerS) matchingChargerProfilesForEvent(ctx *context.Context, tnt st
 		} else if !pass {
 			continue
 		}
-		matchingCPs[cpID] = cP
+		if cP.weight, err = WeightFromDynamics(ctx, cP.Weights, cS.fltrS, tnt, evNm); err != nil {
+			return nil, err
+		}
+		cPs = append(cPs, cP)
 	}
-	if len(matchingCPs) == 0 {
+	if len(cPs) == 0 {
 		return nil, utils.ErrNotFound
 	}
-	cPs = make(ChargerProfiles, len(matchingCPs))
-	i := 0
-	for _, cP := range matchingCPs {
-		cPs[i] = cP
-		i++
-	}
+
 	cPs.Sort()
 	return
 }

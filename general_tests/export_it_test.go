@@ -254,14 +254,17 @@ func testExpVerifyThresholds(t *testing.T) {
 
 func testExpVerifyResources(t *testing.T) {
 	rPrf := &engine.ResourceProfile{
-		Tenant:       "cgrates.org",
-		ID:           "RES_ACNT_1001",
-		FilterIDs:    []string{"FLTR_ACCOUNT_1001"},
-		UsageTTL:     time.Hour,
-		Limit:        1,
-		Blocker:      false,
-		Stored:       false,
-		Weight:       10,
+		Tenant:    "cgrates.org",
+		ID:        "RES_ACNT_1001",
+		FilterIDs: []string{"FLTR_ACCOUNT_1001"},
+		UsageTTL:  time.Hour,
+		Limit:     1,
+		Blocker:   false,
+		Stored:    false,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			}},
 		ThresholdIDs: []string{},
 	}
 	if *encoding == utils.MetaGOB {

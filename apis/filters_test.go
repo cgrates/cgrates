@@ -857,7 +857,10 @@ func TestFiltersSetFilterReloadCache(t *testing.T) {
 		ResourceProfile: &engine.ResourceProfile{
 			ID:        "RES_ID",
 			FilterIDs: []string{"FLTR_ID"},
-			Weight:    10,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				}},
 		},
 		APIOpts: map[string]interface{}{
 			utils.MetaCache: utils.MetaNone,
@@ -1026,7 +1029,10 @@ func TestFiltersSetFilterClearCache(t *testing.T) {
 		ResourceProfile: &engine.ResourceProfile{
 			ID:        "RES_ID",
 			FilterIDs: []string{"FLTR_ID"},
-			Weight:    10,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				}},
 		},
 		APIOpts: map[string]interface{}{
 			utils.MetaCache: utils.MetaNone,

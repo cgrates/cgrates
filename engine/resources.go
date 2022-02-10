@@ -42,14 +42,15 @@ type ResourceProfile struct {
 	ID                string // identifier of this resource
 	FilterIDs         []string
 	UsageTTL          time.Duration // auto-expire the usage after this duration
-	Limit             float64       // limit value
+	Limit             float64       // limixt value
 	AllocationMessage string        // message returned by the winning resource on allocation
 	Blocker           bool          // blocker flag to stop processing on filters matched
 	Stored            bool
-	Weight            float64  // Weight to sort the resources
-	ThresholdIDs      []string // Thresholds to check after changing Limit
+	Weights           utils.DynamicWeights // Weight to sort the resources
+	ThresholdIDs      []string             // Thresholds to check after changing Limit
 
 	lkID string // holds the reference towards guardian lock key
+
 }
 
 // ResourceProfileWithAPIOpts is used in replicatorV1 for dispatcher
@@ -130,6 +131,7 @@ type Resource struct {
 	tUsage *float64         // sum of all usages
 	dirty  *bool            // the usages were modified, needs save, *bool so we only save if enabled in config
 	rPrf   *ResourceProfile // for ordering purposes
+	weight float64
 }
 
 // resourceLockKey returns the ID used to lock a resource with guardian
@@ -274,7 +276,7 @@ type Resources []*Resource
 
 // Sort sorts based on Weight
 func (rs Resources) Sort() {
-	sort.Slice(rs, func(i, j int) bool { return rs[i].rPrf.Weight > rs[j].rPrf.Weight })
+	sort.Slice(rs, func(i, j int) bool { return rs[i].weight > rs[j].weight })
 }
 
 // unlock will unlock resources part of this slice
@@ -644,6 +646,10 @@ func (rS *ResourceS) matchingResourcesForEvent(ctx *context.Context, tnt string,
 			r.ttl = utils.DurationPointer(rPrf.UsageTTL)
 		}
 		r.rPrf = rPrf
+		if r.weight, err = WeightFromDynamics(ctx, rPrf.Weights,
+			rS.fltrS, tnt, evNm); err != nil {
+			return
+		}
 		rs = append(rs, r)
 	}
 
@@ -1051,9 +1057,9 @@ func (rp *ResourceProfile) Set(path []string, val interface{}, _ bool, _ string)
 		rp.Blocker, err = utils.IfaceAsBool(val)
 	case utils.Stored:
 		rp.Stored, err = utils.IfaceAsBool(val)
-	case utils.Weight:
+	case utils.Weights:
 		if val != utils.EmptyString {
-			rp.Weight, err = utils.IfaceAsFloat64(val)
+			rp.Weights, err = utils.NewDynamicWeightsFromString(utils.IfaceAsString(val), utils.InfieldSep, utils.ANDSep)
 		}
 	case utils.ThresholdIDs:
 		var valA []string
@@ -1088,9 +1094,7 @@ func (rp *ResourceProfile) Merge(v2 interface{}) {
 	if vi.Stored {
 		rp.Stored = vi.Stored
 	}
-	if vi.Weight != 0 {
-		rp.Weight = vi.Weight
-	}
+	rp.Weights = append(rp.Weights, vi.Weights...)
 }
 
 func (rp *ResourceProfile) String() string { return utils.ToJSON(rp) }
@@ -1138,7 +1142,7 @@ func (rp *ResourceProfile) FieldAsInterface(fldPath []string) (_ interface{}, er
 	case utils.Stored:
 		return rp.Stored, nil
 	case utils.Weight:
-		return rp.Weight, nil
+		return rp.Weights, nil
 	case utils.ThresholdIDs:
 		return rp.ThresholdIDs, nil
 	}

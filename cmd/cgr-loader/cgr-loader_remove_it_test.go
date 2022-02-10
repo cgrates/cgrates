@@ -507,10 +507,13 @@ func testCgrLdrGetRateProfileAfterLoad(t *testing.T) {
 
 func testCgrLdrGetResourceProfileAfterLoad(t *testing.T) {
 	expREsPrf := &engine.ResourceProfile{
-		Tenant:       utils.CGRateSorg,
-		ID:           "RES_ACNT_1001",
-		FilterIDs:    []string{"FLTR_ACCOUNT_1001"},
-		Weight:       10,
+		Tenant:    utils.CGRateSorg,
+		ID:        "RES_ACNT_1001",
+		FilterIDs: []string{"FLTR_ACCOUNT_1001"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			}},
 		UsageTTL:     time.Hour,
 		Limit:        1,
 		ThresholdIDs: []string{},

@@ -31,7 +31,8 @@ type ChargerProfile struct {
 	FilterIDs    []string
 	RunID        string
 	AttributeIDs []string // perform data aliasing based on these Attributes
-	Weight       float64
+	Weights      utils.DynamicWeights
+	weight       float64
 }
 
 // ChargerProfileWithAPIOpts is used in replicatorV1 for dispatcher
@@ -49,7 +50,7 @@ type ChargerProfiles []*ChargerProfile
 
 // Sort is part of sort interface, sort based on Weight
 func (cps ChargerProfiles) Sort() {
-	sort.Slice(cps, func(i, j int) bool { return cps[i].Weight > cps[j].Weight })
+	sort.Slice(cps, func(i, j int) bool { return cps[i].weight > cps[j].weight })
 }
 
 func (cp *ChargerProfile) Set(path []string, val interface{}, newBranch bool, _ string) (err error) {
@@ -73,9 +74,9 @@ func (cp *ChargerProfile) Set(path []string, val interface{}, newBranch bool, _ 
 		var valA []string
 		valA, err = utils.IfaceAsStringSlice(val)
 		cp.AttributeIDs = append(cp.AttributeIDs, valA...)
-	case utils.Weight:
+	case utils.Weights:
 		if val != utils.EmptyString {
-			cp.Weight, err = utils.IfaceAsFloat64(val)
+			cp.Weights, err = utils.NewDynamicWeightsFromString(utils.IfaceAsString(val), utils.InfieldSep, utils.ANDSep)
 		}
 	}
 	return
@@ -94,9 +95,7 @@ func (cp *ChargerProfile) Merge(v2 interface{}) {
 	}
 	cp.FilterIDs = append(cp.FilterIDs, vi.FilterIDs...)
 	cp.AttributeIDs = append(cp.AttributeIDs, vi.AttributeIDs...)
-	if vi.Weight != 0 {
-		cp.Weight = vi.Weight
-	}
+	cp.Weights = append(cp.Weights, vi.Weights...)
 }
 
 func (cp *ChargerProfile) String() string { return utils.ToJSON(cp) }
@@ -134,7 +133,7 @@ func (cp *ChargerProfile) FieldAsInterface(fldPath []string) (_ interface{}, err
 	case utils.FilterIDs:
 		return cp.FilterIDs, nil
 	case utils.Weight:
-		return cp.Weight, nil
+		return cp.Weights, nil
 	case utils.AttributeIDs:
 		return cp.AttributeIDs, nil
 	case utils.RunID:

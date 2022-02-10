@@ -50,11 +50,6 @@ type StatQueueProfile struct {
 	lkID string // holds the reference towards guardian lock key
 }
 
-type statprfWithWeight struct {
-	*StatQueueProfile
-	weight float64
-}
-
 // StatQueueProfileWithAPIOpts is used in replicatorV1 for dispatcher
 type StatQueueProfileWithAPIOpts struct {
 	*StatQueueProfile

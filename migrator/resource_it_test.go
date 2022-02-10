@@ -181,12 +181,15 @@ func testResITFlush(t *testing.T) {
 
 func testResITMigrateAndMove(t *testing.T) {
 	resPrfl := &engine.ResourceProfile{
-		Tenant:       "cgrates.org",
-		ID:           "RES1",
-		FilterIDs:    []string{"*string:~*req.Account:1001"},
-		UsageTTL:     time.Second,
-		Limit:        1,
-		Weight:       10,
+		Tenant:    "cgrates.org",
+		ID:        "RES1",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		UsageTTL:  time.Second,
+		Limit:     1,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			}},
 		ThresholdIDs: []string{"TH1"},
 	}
 	switch resAction {

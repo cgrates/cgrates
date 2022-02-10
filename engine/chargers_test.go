@@ -41,7 +41,12 @@ func TestChargerSetChargerProfiles(t *testing.T) {
 			FilterIDs:    []string{"FLTR_CP_1", "FLTR_CP_4", "*string:~*opts.*subsys:*chargers", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
 			RunID:        "TestRunID",
 			AttributeIDs: []string{"*none"},
-			Weight:       20,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
+			weight: 20,
 		},
 		&ChargerProfile{
 			Tenant:       "cgrates.org",
@@ -49,7 +54,12 @@ func TestChargerSetChargerProfiles(t *testing.T) {
 			FilterIDs:    []string{"FLTR_CP_2", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
 			RunID:        "*rated",
 			AttributeIDs: []string{"ATTR_1"},
-			Weight:       20,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
+			weight: 20,
 		},
 		&ChargerProfile{
 			Tenant:       "cgrates.org",
@@ -57,7 +67,12 @@ func TestChargerSetChargerProfiles(t *testing.T) {
 			FilterIDs:    []string{"FLTR_CP_3", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
 			RunID:        "*rated",
 			AttributeIDs: []string{"ATTR_1"},
-			Weight:       20,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
+			weight: 20,
 		},
 	}
 	cfg := config.NewDefaultCGRConfig()
@@ -147,7 +162,11 @@ func TestChargerMatchingChargerProfilesForEvent(t *testing.T) {
 			FilterIDs:    []string{"FLTR_CP_1", "FLTR_CP_4", "*string:~*opts.*subsys:*chargers", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
 			RunID:        "TestRunID",
 			AttributeIDs: []string{"*none"},
-			Weight:       20,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
 		},
 		&ChargerProfile{
 			Tenant:       "cgrates.org",
@@ -155,7 +174,11 @@ func TestChargerMatchingChargerProfilesForEvent(t *testing.T) {
 			FilterIDs:    []string{"FLTR_CP_2", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
 			RunID:        "*rated",
 			AttributeIDs: []string{"ATTR_1"},
-			Weight:       20,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
 		},
 		&ChargerProfile{
 			Tenant:       "cgrates.org",
@@ -163,7 +186,11 @@ func TestChargerMatchingChargerProfilesForEvent(t *testing.T) {
 			FilterIDs:    []string{"FLTR_CP_3", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
 			RunID:        "*rated",
 			AttributeIDs: []string{"ATTR_1"},
-			Weight:       20,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
 		},
 	}
 	chargerEvents := []*utils.CGREvent{
@@ -305,7 +332,12 @@ func TestChargerProcessEvent(t *testing.T) {
 			FilterIDs:    []string{"FLTR_CP_1", "FLTR_CP_4", "*string:~*opts.*subsys:*chargers", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
 			RunID:        "TestRunID",
 			AttributeIDs: []string{"*none"},
-			Weight:       20,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
+			weight: 20,
 		},
 		&ChargerProfile{
 			Tenant:       "cgrates.org",
@@ -313,7 +345,12 @@ func TestChargerProcessEvent(t *testing.T) {
 			FilterIDs:    []string{"FLTR_CP_2", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
 			RunID:        "*rated",
 			AttributeIDs: []string{"ATTR_1"},
-			Weight:       20,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
+			weight: 20,
 		},
 		&ChargerProfile{
 			Tenant:       "cgrates.org",
@@ -321,7 +358,12 @@ func TestChargerProcessEvent(t *testing.T) {
 			FilterIDs:    []string{"FLTR_CP_3", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
 			RunID:        "*rated",
 			AttributeIDs: []string{"ATTR_1"},
-			Weight:       20,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
+			weight: 20,
 		},
 	}
 	chargerEvents := []*utils.CGREvent{
@@ -429,7 +471,7 @@ func TestChargerProcessEvent(t *testing.T) {
 			true, false, utils.NonTransactional); err != nil {
 			t.Errorf("Error: %+v", err)
 		} else if !reflect.DeepEqual(cp, tempCp) {
-			t.Errorf("Expecting: %+v, received: %+v", cp, tempCp)
+			t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(cp), utils.ToJSON(tempCp))
 		}
 	}
 

@@ -653,7 +653,11 @@ func testLoadersGetChargerProfiles(t *testing.T) {
 			FilterIDs:    []string{"*string:~*req.Account:1001"},
 			RunID:        "*rated",
 			AttributeIDs: []string{"ATTR_1001_SIMPLEAUTH"},
-			Weight:       20,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
 		},
 		{
 			Tenant:       "cgrates.org",
@@ -661,7 +665,11 @@ func testLoadersGetChargerProfiles(t *testing.T) {
 			FilterIDs:    []string{"*string:~*req.Account:1002"},
 			RunID:        "*rated",
 			AttributeIDs: []string{"ATTR_1002_SIMPLEAUTH"},
-			Weight:       15,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 15,
+				},
+			},
 		},
 	}
 	var chrgs []*engine.ChargerProfile
@@ -975,10 +983,13 @@ func testLoadersGetResourceProfiles(t *testing.T) {
 			FilterIDs:         []string{"*string:~*req.Account:1001"},
 			UsageTTL:          time.Second,
 			AllocationMessage: "call",
-			Weight:            10,
-			Limit:             2,
-			Blocker:           true,
-			Stored:            true,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				}},
+			Limit:   2,
+			Blocker: true,
+			Stored:  true,
 		},
 		{
 			Tenant:            "cgrates.org",
@@ -988,8 +999,11 @@ func testLoadersGetResourceProfiles(t *testing.T) {
 			AllocationMessage: "premium_call",
 			Blocker:           true,
 			Stored:            true,
-			Weight:            10,
-			Limit:             2,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				}},
+			Limit: 2,
 		},
 	}
 	var rsPrfs []*engine.ResourceProfile

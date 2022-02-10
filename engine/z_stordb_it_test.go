@@ -823,7 +823,7 @@ func testStorDBitCRUDTPChargers(t *testing.T) {
 			FilterIDs:    []string{"*string:~*req.Account:1002"},
 			AttributeIDs: make([]string, 0),
 			RunID:        utils.MetaDefault,
-			Weight:       20,
+			Weights:      ";20",
 		},
 		{
 			TPid:         "TP_id",
@@ -832,7 +832,7 @@ func testStorDBitCRUDTPChargers(t *testing.T) {
 			FilterIDs:    []string{"*string:~*req.Destination:10"},
 			AttributeIDs: make([]string, 0),
 			RunID:        utils.MetaDefault,
-			Weight:       10,
+			Weights:      ";10",
 		},
 	}
 	if err := storDB.SetTPChargers(tpChargers); err != nil {
@@ -882,7 +882,7 @@ func testStorDBitCRUDTpResources(t *testing.T) {
 		{
 			TPid:         "testTPid",
 			ID:           "testTag1",
-			Weight:       0.0,
+			Weights:      ";0",
 			Limit:        "test",
 			ThresholdIDs: []string{"1x", "2x"},
 			FilterIDs:    []string{"FILTR_RES_1"},
@@ -892,7 +892,7 @@ func testStorDBitCRUDTpResources(t *testing.T) {
 		{
 			TPid:         "testTPid",
 			ID:           "testTag2",
-			Weight:       0.0,
+			Weights:      ";0",
 			Limit:        "test",
 			ThresholdIDs: []string{"1x", "2x"},
 			FilterIDs:    []string{"FLTR_RES_2"},
@@ -913,8 +913,8 @@ func testStorDBitCRUDTpResources(t *testing.T) {
 		if !(reflect.DeepEqual(snd[0].ID, rcv[0].ID) || reflect.DeepEqual(snd[0].ID, rcv[1].ID)) {
 			t.Errorf("Expecting: %+v, received: %+v || %+v", snd[0].ID, rcv[0].ID, rcv[1].ID)
 		}
-		if !(reflect.DeepEqual(snd[0].Weight, rcv[0].Weight) || reflect.DeepEqual(snd[0].Weight, rcv[1].Weight)) {
-			t.Errorf("Expecting: %+v, received: %+v || %+v", snd[0].Weight, rcv[0].Weight, rcv[1].Weight)
+		if !(reflect.DeepEqual(snd[0].Weights, rcv[0].Weights) || reflect.DeepEqual(snd[0].Weights, rcv[1].Weights)) {
+			t.Errorf("Expecting: %+v, received: %+v || %+v", snd[0].Weights, rcv[0].Weights, rcv[1].Weights)
 		}
 		if !(reflect.DeepEqual(snd[0].Limit, rcv[0].Limit) || reflect.DeepEqual(snd[0].Limit, rcv[1].Limit)) {
 			t.Errorf("Expecting: %+v, received: %+v || %+v", snd[0].Limit, rcv[0].Limit, rcv[1].Limit)
@@ -926,8 +926,8 @@ func testStorDBitCRUDTpResources(t *testing.T) {
 		}
 	}
 	// UPDATE
-	snd[0].Weight = 2.1
-	snd[1].Weight = 2.1
+	snd[0].Weights = ";2.1"
+	snd[1].Weights = ";2.1"
 	if err := storDB.SetTPResources(snd); err != nil {
 		t.Error(err)
 	}
@@ -941,8 +941,8 @@ func testStorDBitCRUDTpResources(t *testing.T) {
 		if !(reflect.DeepEqual(snd[0].ID, rcv[0].ID) || reflect.DeepEqual(snd[0].ID, rcv[1].ID)) {
 			t.Errorf("Expecting: %+v, received: %+v || %+v", snd[0].ID, rcv[0].ID, rcv[1].ID)
 		}
-		if !(reflect.DeepEqual(snd[0].Weight, rcv[0].Weight) || reflect.DeepEqual(snd[0].Weight, rcv[1].Weight)) {
-			t.Errorf("Expecting: %+v, received: %+v || %+v", snd[0].Weight, rcv[0].Weight, rcv[1].Weight)
+		if !(reflect.DeepEqual(snd[0].Weights, rcv[0].Weights) || reflect.DeepEqual(snd[0].Weights, rcv[1].Weights)) {
+			t.Errorf("Expecting: %+v, received: %+v || %+v", snd[0].Weights, rcv[0].Weights, rcv[1].Weights)
 		}
 		if !(reflect.DeepEqual(snd[0].Limit, rcv[0].Limit) || reflect.DeepEqual(snd[0].Limit, rcv[1].Limit)) {
 			t.Errorf("Expecting: %+v, received: %+v || %+v", snd[0].Limit, rcv[0].Limit, rcv[1].Limit)

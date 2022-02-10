@@ -180,8 +180,11 @@ func testResourceSSetResourceProfiles(t *testing.T) {
 			FilterIDs:         []string{"*string:~*req.Account:1001"},
 			Limit:             10,
 			AllocationMessage: "Approved",
-			Weight:            20,
-			ThresholdIDs:      []string{utils.MetaNone},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				}},
+			ThresholdIDs: []string{utils.MetaNone},
 		},
 	}
 
@@ -200,8 +203,11 @@ func testResourceSSetResourceProfiles(t *testing.T) {
 			FilterIDs:         []string{"*string:~*req.Account:1001"},
 			Limit:             10,
 			AllocationMessage: "Approved",
-			Weight:            10,
-			ThresholdIDs:      []string{utils.MetaNone},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				}},
+			ThresholdIDs: []string{utils.MetaNone},
 		},
 	}
 
@@ -227,8 +233,11 @@ func testResourceSGetResourceAfterSet(t *testing.T) {
 		FilterIDs:         []string{"*string:~*req.Account:1001"},
 		Limit:             10,
 		AllocationMessage: "Approved",
-		Weight:            20,
-		ThresholdIDs:      []string{utils.MetaNone},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			}},
+		ThresholdIDs: []string{utils.MetaNone},
 	}
 
 	if err := rsRPC.Call(context.Background(), utils.ResourceSv1GetResource,
@@ -264,8 +273,11 @@ func testResourceSGetResourceAfterSet(t *testing.T) {
 		FilterIDs:         []string{"*string:~*req.Account:1001"},
 		Limit:             10,
 		AllocationMessage: "Approved",
-		Weight:            10,
-		ThresholdIDs:      []string{utils.MetaNone},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			}},
+		ThresholdIDs: []string{utils.MetaNone},
 	}
 
 	if err := rsRPC.Call(context.Background(), utils.ResourceSv1GetResource,
@@ -305,8 +317,11 @@ func testResourceSGetResourceWithConfigAfterSet(t *testing.T) {
 			FilterIDs:         []string{"*string:~*req.Account:1001"},
 			Limit:             10,
 			AllocationMessage: "Approved",
-			Weight:            10,
-			ThresholdIDs:      []string{utils.MetaNone},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				}},
+			ThresholdIDs: []string{utils.MetaNone},
 		},
 	}
 
@@ -347,8 +362,11 @@ func testResourceSGetResourceProfiles(t *testing.T) {
 			FilterIDs:         []string{"*string:~*req.Account:1001"},
 			Limit:             10,
 			AllocationMessage: "Approved",
-			Weight:            20,
-			ThresholdIDs:      []string{utils.MetaNone},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				}},
+			ThresholdIDs: []string{utils.MetaNone},
 		},
 		{
 			Tenant:            "cgrates.org",
@@ -356,8 +374,11 @@ func testResourceSGetResourceProfiles(t *testing.T) {
 			FilterIDs:         []string{"*string:~*req.Account:1001"},
 			Limit:             10,
 			AllocationMessage: "Approved",
-			Weight:            10,
-			ThresholdIDs:      []string{utils.MetaNone},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				}},
+			ThresholdIDs: []string{utils.MetaNone},
 		},
 	}
 	if err := rsRPC.Call(context.Background(), utils.AdminSv1GetResourceProfiles,
@@ -735,8 +756,11 @@ func testResourceSGetResourceProfilesWithPrefix(t *testing.T) {
 			FilterIDs:         []string{"*string:~*req.Account:1001"},
 			Limit:             10,
 			AllocationMessage: "Approved",
-			Weight:            20,
-			ThresholdIDs:      []string{utils.MetaNone},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				}},
+			ThresholdIDs: []string{utils.MetaNone},
 		},
 	}
 
@@ -755,8 +779,11 @@ func testResourceSGetResourceProfilesWithPrefix(t *testing.T) {
 			FilterIDs:         []string{"*string:~*req.Account:1001"},
 			Limit:             10,
 			AllocationMessage: "Approved",
-			Weight:            10,
-			ThresholdIDs:      []string{utils.MetaNone},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				}},
+			ThresholdIDs: []string{utils.MetaNone},
 		},
 	}
 
@@ -778,8 +805,11 @@ func testResourceSGetResourceProfilesWithPrefix(t *testing.T) {
 			FilterIDs:         []string{"*string:~*req.Account:1001"},
 			Limit:             10,
 			AllocationMessage: "Approved",
-			Weight:            20,
-			ThresholdIDs:      []string{utils.MetaNone},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				}},
+			ThresholdIDs: []string{utils.MetaNone},
 		},
 	}
 	if err := rsRPC.Call(context.Background(), utils.AdminSv1GetResourceProfiles,
