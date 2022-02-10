@@ -1563,7 +1563,7 @@ func TestV1DebitAbstractsEventCharges(t *testing.T) {
 			}},
 	}
 	for _, rtPfl := range rtPflls {
-		if err := dm.SetRateProfile(context.Background(), rtPfl, true); err != nil {
+		if err := dm.SetRateProfile(context.Background(), rtPfl, map[string]interface{}{}, true); err != nil {
 			t.Error(err)
 		}
 	}
@@ -2075,7 +2075,7 @@ func TestV1DebitAbstractsEventChargesWithRefundCharges(t *testing.T) {
 			}},
 	}
 	for _, rtPfl := range rtPflls {
-		if err := dm.SetRateProfile(context.Background(), rtPfl, true); err != nil {
+		if err := dm.SetRateProfile(context.Background(), rtPfl, map[string]interface{}{}, true); err != nil {
 			t.Error(err)
 		}
 	}
@@ -2629,7 +2629,7 @@ func TestDebitAbstractUsingRatesWithRoundByIncrement(t *testing.T) {
 			},
 		},
 	}
-	if err := dm.SetRateProfile(context.Background(), rtPrf, true); err != nil {
+	if err := dm.SetRateProfile(context.Background(), rtPrf, map[string]interface{}{}, true); err != nil {
 		t.Error(err)
 	}
 

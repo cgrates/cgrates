@@ -1950,7 +1950,7 @@ func (dm *DataManager) GetRateProfileRates(ctx *context.Context, args *utils.Arg
 	return dm.DataDB().GetRateProfileRatesDrv(ctx, args.Tenant, args.ProfileID, args.ItemsPrefix, needIDs)
 }
 
-func (dm *DataManager) SetRateProfile(ctx *context.Context, rpp *utils.RateProfile, withIndex bool) (err error) {
+func (dm *DataManager) SetRateProfile(ctx *context.Context, rpp *utils.RateProfile, opts map[string]interface{}, withIndex bool) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
@@ -1968,34 +1968,46 @@ func (dm *DataManager) SetRateProfile(ctx *context.Context, rpp *utils.RateProfi
 			}
 		}
 	}
+	rpp.Sort()
+	// get the old RateProfile in case of updating fields
 	oldRpp, err := dm.GetRateProfile(ctx, rpp.Tenant, rpp.ID, true, false, utils.NonTransactional)
 	if err != nil && err != utils.ErrNotFound {
 		return err
 	}
-	rpp.Sort()
-	if err = dm.DataDB().SetRateProfileDrv(ctx, rpp); err != nil {
-		return err
-	}
-	if withIndex {
-		var oldFiltersIDs *[]string
-		if oldRpp != nil {
-			oldFiltersIDs = &oldRpp.FilterIDs
+	// check if we want to overwrite our profile already existing in database
+	var overwrite bool
+	if _, has := opts[utils.MetaRateSOverwrite]; has {
+		overwrite, err = utils.IfaceAsBool(opts[utils.MetaRateSOverwrite])
+		if err != nil {
+			return
 		}
-		if err := updatedIndexes(ctx, dm, utils.CacheRateProfilesFilterIndexes, rpp.Tenant,
-			utils.EmptyString, rpp.ID, oldFiltersIDs, rpp.FilterIDs, false); err != nil {
+	}
+	// in case of overwriting, we will remove the old indexes and the old profile/rates, and will be set the new one, also the fields of the profile are changed too in case of the same tenantID
+	if overwrite && oldRpp != nil && oldRpp.TenantID() == rpp.TenantID() {
+		// remove indexes for old rates if the rates does not exist in new  rate profile
+		for key, rate := range oldRpp.Rates {
+			if err = removeIndexFiltersItem(ctx, dm, utils.CacheRateFilterIndexes, oldRpp.Tenant, utils.ConcatenatedKey(key, oldRpp.ID), rate.FilterIDs); err != nil {
+				return
+			}
+			if err = removeItemFromFilterIndex(ctx, dm, utils.CacheRateFilterIndexes,
+				rpp.Tenant, rpp.ID, key, rate.FilterIDs); err != nil {
+				return
+			}
+		}
+		if err = dm.DataDB().RemoveRateProfileDrv(ctx, oldRpp.Tenant, oldRpp.ID, nil); err != nil {
 			return err
 		}
-		// remove indexes for old rates
+	}
+
+	if withIndex {
+		var oldRpFltrs *[]string
 		if oldRpp != nil {
-			for key, rate := range oldRpp.Rates {
-				if _, has := rpp.Rates[key]; has {
-					continue
-				}
-				if err = removeItemFromFilterIndex(ctx, dm, utils.CacheRateFilterIndexes,
-					rpp.Tenant, rpp.ID, key, rate.FilterIDs); err != nil {
-					return
-				}
-			}
+			oldRpFltrs = &oldRpp.FilterIDs
+		}
+		// create index for our profile
+		if err := updatedIndexes(ctx, dm, utils.CacheRateProfilesFilterIndexes, rpp.Tenant,
+			utils.EmptyString, rpp.ID, oldRpFltrs, rpp.FilterIDs, false); err != nil {
+			return err
 		}
 		// create index for each rate
 		for key, rate := range rpp.Rates {
@@ -2011,7 +2023,10 @@ func (dm *DataManager) SetRateProfile(ctx *context.Context, rpp *utils.RateProfi
 				return err
 			}
 		}
-
+	}
+	// if not overwriting, we will add the rates in case the profile is already in database, also the fields of the profile are changed too in case of the same tenantID
+	if err = dm.DataDB().SetRateProfileDrv(ctx, rpp); err != nil {
+		return err
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaRateProfiles]; itm.Replicate {
 		err = replicate(ctx, dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,

@@ -2192,7 +2192,7 @@ func testITIndexRateProfileRateIndexes(t *testing.T) {
 			},
 		},
 	}
-	if err := dataManager.SetRateProfile(context.Background(), rPrf, true); err != nil {
+	if err := dataManager.SetRateProfile(context.Background(), rPrf, map[string]interface{}{}, true); err != nil {
 		t.Error(err)
 	}
 	eIdxes := map[string]utils.StringSet{
@@ -2257,7 +2257,10 @@ func testITIndexRateProfileRateIndexes(t *testing.T) {
 			},
 		},
 	}
-	if err := dataManager.SetRateProfile(context.Background(), rPrf, true); err != nil {
+	opts := map[string]interface{}{
+		utils.MetaRateSOverwrite: true,
+	}
+	if err := dataManager.SetRateProfile(context.Background(), rPrf, opts, true); err != nil {
 		t.Error(err)
 	}
 	eIdxes = map[string]utils.StringSet{
@@ -2322,7 +2325,7 @@ func testITIndexRateProfileRateIndexes(t *testing.T) {
 			},
 		},
 	}
-	if err := dataManager.SetRateProfile(context.Background(), rPrf2, true); err != nil {
+	if err := dataManager.SetRateProfile(context.Background(), rPrf2, map[string]interface{}{}, true); err != nil {
 		t.Error(err)
 	}
 	eIdxes = map[string]utils.StringSet{
@@ -2447,9 +2450,9 @@ func testITIndexRateProfileIndexes(t *testing.T) {
 			},
 		},
 	}
-	if err := dataManager.SetRateProfile(context.Background(), rPrf1, true); err != nil {
+	if err := dataManager.SetRateProfile(context.Background(), rPrf1, map[string]interface{}{}, true); err != nil {
 		t.Error(err)
-	} else if err := dataManager.SetRateProfile(context.Background(), rPrf2, true); err != nil {
+	} else if err := dataManager.SetRateProfile(context.Background(), rPrf2, map[string]interface{}{}, true); err != nil {
 		t.Error(err)
 	}
 

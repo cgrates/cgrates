@@ -473,6 +473,7 @@ func (iDB *InternalDB) GetRateProfileDrv(_ *context.Context, tenant, id string) 
 	if !ok || x == nil {
 		return nil, utils.ErrNotFound
 	}
+
 	return x.(*utils.RateProfile), nil
 }
 
@@ -482,7 +483,11 @@ func (iDB *InternalDB) GetRateProfileRatesDrv(ctx *context.Context, tenant, prof
 		return nil, nil, utils.ErrNotFound
 	}
 	for key, rt := range x.(*utils.RateProfile).Rates {
-		if strings.HasPrefix(key, rtPrfx) {
+		if key[:len(rtPrfx)] == rtPrfx {
+			if needIDs {
+				rateIDs = append(rateIDs, key)
+				continue
+			}
 			rates = append(rates, rt)
 		}
 	}
@@ -492,6 +497,17 @@ func (iDB *InternalDB) GetRateProfileRatesDrv(ctx *context.Context, tenant, prof
 func (iDB *InternalDB) SetRateProfileDrv(_ *context.Context, rpp *utils.RateProfile) (err error) {
 	if err = rpp.Compile(); err != nil {
 		return
+	}
+	// in case of add new rates into our profile
+	x, ok := iDB.db.Get(utils.CacheRateProfiles, utils.ConcatenatedKey(rpp.Tenant, rpp.ID))
+	if ok || x != nil {
+		// mix the old and new rates, in order to add new rates into our profile
+		oldRp := x.(*utils.RateProfile)
+		for key, rate := range oldRp.Rates {
+			if _, has := rpp.Rates[key]; !has {
+				rpp.Rates[key] = rate
+			}
+		}
 	}
 	iDB.db.Set(utils.CacheRateProfiles, rpp.TenantID(), rpp, nil,
 		true, utils.NonTransactional)
