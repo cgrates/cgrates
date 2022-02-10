@@ -519,6 +519,7 @@ func (cdrS *CDRServer) processEvents(evs []*utils.CGREvent,
 					fmt.Sprintf("<%s> error: <%s> refunding CDR %+v",
 						utils.CDRs, errRfd.Error(), utils.ToJSON(cdr)))
 			} else if rfnd {
+				cdr.CostDetails = nil
 				procFlgs[i].Add(utils.MetaRefund)
 			}
 		}
@@ -553,30 +554,12 @@ func (cdrS *CDRServer) processEvents(evs []*utils.CGREvent,
 				}
 			}
 		}
-		for i, cdr := range cdrs {
+		for _, cdr := range cdrs {
 			if err = cdrS.cdrDb.SetCDR(cdr, false); err != nil {
 				if err != utils.ErrExists || !reRate {
 					refundCDRCosts()
 					return
 				}
-				// CDR was found in StorDB
-				// reRate is allowed, refund the previous CDR
-				var prevCDRs []*CDR // only one should be returned
-				if prevCDRs, _, err = cdrS.cdrDb.GetCDRs(
-					&utils.CDRsFilter{CGRIDs: []string{cdr.CGRID},
-						RunIDs: []string{cdr.RunID}}, false); err != nil {
-					refundCDRCosts()
-					return
-				}
-				var rfnd bool
-				if rfnd, err = cdrS.refundEventCost(prevCDRs[0].CostDetails,
-					cdr.RequestType, cdr.ToR); err != nil {
-					refundCDRCosts()
-					return
-				} else if rfnd {
-					procFlgs[i].Add(utils.MetaRefund)
-				}
-				// after refund we can force update
 				if err = cdrS.cdrDb.SetCDR(cdr, true); err != nil {
 					utils.Logger.Warning(
 						fmt.Sprintf("<%s> error: <%s> updating CDR %+v",
@@ -1070,7 +1053,7 @@ func (cdrS *CDRServer) V1RateCDRs(arg *ArgRateCDRs, reply *string) (err error) {
 		cgrEvs[i] = cdr.AsCGREvent()
 		cgrEvs[i].APIOpts = arg.APIOpts
 	}
-	if _, err = cdrS.processEvents(cgrEvs, chrgS, attrS, false,
+	if _, err = cdrS.processEvents(cgrEvs, chrgS, attrS, true,
 		true, store, true, export, thdS, statS); err != nil {
 		return utils.NewErrServerError(err)
 	}

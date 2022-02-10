@@ -679,7 +679,6 @@ func testV1CDRsV2ProcessEventRalS(t *testing.T) {
 	if err := pecdrsRpc.Call(utils.CDRsV2ProcessEvent, argsEv, &reply); err != nil {
 		t.Error(err)
 	}
-	expRply[0].Flags = []string{utils.MetaRefund}
 	expRply[0].Event["Usage"] = 60000000000.
 	expRply[0].Event["Cost"] = 0.0102
 	reply[0].Event["CostDetails"] = nil
