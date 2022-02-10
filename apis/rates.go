@@ -43,6 +43,7 @@ func (admS *AdminSv1) GetRateProfile(ctx *context.Context, arg *utils.TenantIDWi
 		}
 		return err
 	}
+
 	*reply = *rPrf
 	return nil
 }
@@ -188,7 +189,7 @@ func (admS *AdminSv1) SetRateProfile(ctx *context.Context, args *utils.APIRatePr
 	if args.Tenant == utils.EmptyString {
 		args.Tenant = admS.cfg.GeneralCfg().DefaultTenant
 	}
-	if err := admS.dm.SetRateProfile(ctx, args.RateProfile, true); err != nil {
+	if err := admS.dm.SetRateProfile(ctx, args.RateProfile, args.APIOpts, true); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//generate a loadID for CacheRateProfiles and store it in database
@@ -196,29 +197,6 @@ func (admS *AdminSv1) SetRateProfile(ctx *context.Context, args *utils.APIRatePr
 		return utils.APIErrorHandler(err)
 	}
 	if err := admS.CallCache(ctx, utils.IfaceAsString(args.APIOpts[utils.MetaCache]), args.Tenant, utils.CacheRateProfiles,
-		args.TenantID(), &args.FilterIDs, args.APIOpts); err != nil {
-		return utils.APIErrorHandler(err)
-	}
-	*reply = utils.OK
-	return nil
-}
-
-// SetRateProfileRates add/update Rates from existing RateProfiles
-func (admS *AdminSv1) SetRateProfileRates(ctx *context.Context, args *utils.APIRateProfile, reply *string) (err error) {
-	if missing := utils.MissingStructFields(args, []string{utils.ID, utils.Rates}); len(missing) != 0 {
-		return utils.NewErrMandatoryIeMissing(missing...)
-	}
-	if args.Tenant == utils.EmptyString {
-		args.Tenant = admS.cfg.GeneralCfg().DefaultTenant
-	}
-	if err = admS.dm.SetRateProfileRates(ctx, args.RateProfile, true); err != nil {
-		return utils.APIErrorHandler(err)
-	}
-	//generate a loadID for CacheRateProfiles and store it in database
-	if err = admS.dm.SetLoadIDs(ctx, map[string]int64{utils.CacheRateProfiles: time.Now().UnixNano()}); err != nil {
-		return utils.APIErrorHandler(err)
-	}
-	if err = admS.CallCache(ctx, utils.IfaceAsString(args.APIOpts[utils.MetaCache]), args.Tenant, utils.CacheRateProfiles,
 		args.TenantID(), &args.FilterIDs, args.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}

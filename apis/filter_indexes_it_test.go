@@ -2997,7 +2997,7 @@ func testV1FIdxRateProfileRatesMoreRatesForFilters(t *testing.T) {
 		},
 	}
 	var reply string
-	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1SetRateProfileRates,
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1SetRateProfile,
 		rtPrf, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {

@@ -1525,23 +1525,7 @@ func (dS *DispatcherService) AdminSv1SetRateProfile(ctx *context.Context, args *
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaAdminS, utils.AdminSv1SetRateProfile, args, reply)
 }
-func (dS *DispatcherService) AdminSv1SetRateProfileRates(ctx *context.Context, args *utils.APIRateProfile, reply *string) (err error) {
-	tnt := dS.cfg.GeneralCfg().DefaultTenant
-	if args != nil && (args.RateProfile != nil && len(args.RateProfile.Tenant) != 0) {
-		tnt = args.RateProfile.Tenant
-	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
-	if args != nil {
-		opts = args.APIOpts
-	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.AdminSv1SetRateProfileRates, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
-	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaAdminS, utils.AdminSv1SetRateProfileRates, args, reply)
-}
+
 func (dS *DispatcherService) AdminSv1SetResourceProfile(ctx *context.Context, args *engine.ResourceProfileWithAPIOpts, reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args != nil && (args.ResourceProfile != nil && len(args.ResourceProfile.Tenant) != 0) {
