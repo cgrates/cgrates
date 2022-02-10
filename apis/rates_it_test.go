@@ -49,33 +49,32 @@ var (
 		testRateSResetStorDb,
 		testRateSStartEngine,
 		testRateSRPCConn,
-		/*
-			testGetRateProfileBeforeSet,
-			testGetRateProfilesBeforeSet,
-			testRateSetRateProfile,
-			testRateGetRateProfileIDs,
-			testRateGetRateProfiles,
-			testRateGetRateCount,
-			testGetRateProfileBeforeSet2,
-			testRateSetRateProfile2,
-			testRateGetRateIDs2,
-			testRateGetRateProfiles2,
-			testRateGetRateCount2,
-			testRateRemoveRateProfile,
-			testRateGetRateProfileIDs,
-			testRateGetRateCount,
-			testRateSetRateProfile3,
-			testRateSetAttributeProfileBrokenReference,
-			testRateRemoveRateProfileRates,
-			testRateSetRateProfileRates,
-			testRateSetRateProfilesWithPrefix, */
+		testGetRateProfileBeforeSet,
+		testGetRateProfilesBeforeSet,
+		testRateSetRateProfile,
+		testRateGetRateProfileIDs,
+		testRateGetRateProfiles,
+		testRateGetRateCount,
+		testGetRateProfileBeforeSet2,
+		testRateSetRateProfile2,
+		testRateGetRateIDs2,
+		testRateGetRateProfiles2,
+		testRateGetRateCount2,
+		testRateRemoveRateProfile,
+		testRateGetRateProfileIDs,
+		testRateGetRateCount,
+		testRateSetRateProfile3,
+		testRateSetAttributeProfileBrokenReference,
+		testRateRemoveRateProfileRates,
+		testRateSetRateProfileRates,
+		testRateSetRateProfilesWithPrefix,
 		// here we will tests better the create,read,update and delte for the rates inside of a RateProfile
 		testRateProfileWithMultipleRates,
 		testRateProfileRateIDsAndCount,
-		/* testRateProfileUpdateRates,
+		testRateProfileUpdateRates,
 		testRateProfileRemoveMultipleRates,
 		testRateProfileSetMultipleRatesInProfile,
-		testRateProfileUpdateProfile, */
+		testRateProfileUpdateProfileRatesOverwrite,
 		testRateSKillEngine,
 	}
 )
@@ -827,8 +826,11 @@ func testRateRemoveRateProfileRates(t *testing.T) {
 				},
 			},
 		},
+		APIOpts: map[string]interface{}{
+			utils.MetaRateSOverwrite: true,
+		},
 	}
-	if err := rateSRPC.Call(context.Background(), utils.AdminSv1SetRateProfileRates,
+	if err := rateSRPC.Call(context.Background(), utils.AdminSv1SetRateProfile,
 		argsRate, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -891,7 +893,7 @@ func testRateSetRateProfileRates(t *testing.T) {
 		},
 	}
 	var result *string
-	if err := rateSRPC.Call(context.Background(), utils.AdminSv1SetRateProfileRates,
+	if err := rateSRPC.Call(context.Background(), utils.AdminSv1SetRateProfile,
 		argsRate, &result); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(result, utils.StringPointer("OK")) {
@@ -1307,14 +1309,14 @@ func testRateProfileRateIDsAndCount(t *testing.T) {
 	var replyRts []*utils.Rate
 	if err := rateSRPC.Call(context.Background(), utils.AdminSv1GetRateProfileRates,
 		&utils.ArgsSubItemIDs{
-			Tenant:    "cgrates.org",
-			ProfileID: "MultipleRates",
+			Tenant:      "cgrates.org",
+			ProfileID:   "MultipleRates",
+			ItemsPrefix: "RT_",
 		}, &replyRts); err != nil {
 		t.Error(err)
 	} else if len(replyRts) != 5 { //RT_MONDAY, RT_THUESDAY, RT_WEDNESDAY, RT_THURSDAY AND RT_FRIDAY
 		t.Errorf("Unexpected reply returned: %v", reply)
 	}
-
 }
 
 func testRateProfileUpdateRates(t *testing.T) {
@@ -1375,14 +1377,14 @@ func testRateProfileUpdateRates(t *testing.T) {
 		},
 	}
 	var result *string
-	if err := rateSRPC.Call(context.Background(), utils.AdminSv1SetRateProfileRates,
+	if err := rateSRPC.Call(context.Background(), utils.AdminSv1SetRateProfile,
 		argsRate, &result); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(result, utils.StringPointer("OK")) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON("OK"), utils.ToJSON(result))
 	}
 
-	// so, RT_MONDAY, RT_FRIDAY were update
+	// so, RT_MONDAY, RT_FRIDAY were updated
 	// RT_THURSDAY, RT_WEDNESDAY AND RATE_THUESDAY are the same
 	expectedRate := &utils.RateProfile{
 		Tenant:    utils.CGRateSorg,
@@ -1681,7 +1683,7 @@ func testRateProfileSetMultipleRatesInProfile(t *testing.T) {
 		},
 	}
 	var result *string
-	if err := rateSRPC.Call(context.Background(), utils.AdminSv1SetRateProfileRates,
+	if err := rateSRPC.Call(context.Background(), utils.AdminSv1SetRateProfile,
 		argsRate, &result); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(result, utils.StringPointer("OK")) {
@@ -1808,7 +1810,7 @@ func testRateProfileSetMultipleRatesInProfile(t *testing.T) {
 
 }
 
-func testRateProfileUpdateProfile(t *testing.T) {
+func testRateProfileUpdateProfileRatesOverwrite(t *testing.T) {
 	ratePrf := &utils.APIRateProfile{
 		RateProfile: &utils.RateProfile{
 			Tenant:    utils.CGRateSorg,
@@ -1873,8 +1875,8 @@ func testRateProfileUpdateProfile(t *testing.T) {
 			FilterIDs: []string{"*string:~*req.CGRID:123sdf75623t5y"},
 			MaxCost:   utils.NewDecimal(100, 0),
 			Rates: map[string]*utils.Rate{
-				"RT_WEEK": {
-					ID: "RT_WEEK",
+				"RT_2": {
+					ID: "RT_2",
 					Weights: utils.DynamicWeights{
 						{
 							Weight: 0,
@@ -1889,6 +1891,9 @@ func testRateProfileUpdateProfile(t *testing.T) {
 				},
 			},
 		},
+		APIOpts: map[string]interface{}{
+			utils.MetaRateSOverwrite: true,
+		},
 	}
 	if err := rateSRPC.Call(context.Background(), utils.AdminSv1SetRateProfile,
 		ratePrf, &reply); err != nil {
@@ -1897,16 +1902,17 @@ func testRateProfileUpdateProfile(t *testing.T) {
 		t.Error(err)
 	}
 
+	var result3 *utils.RateProfile
 	if err := rateSRPC.Call(context.Background(), utils.AdminSv1GetRateProfile,
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{
 				Tenant: utils.CGRateSorg,
 				ID:     "FirstNoUpdate",
 			},
-		}, &result2); err != nil {
+		}, &result3); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(result2, ratePrf.RateProfile) {
-		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(ratePrf.RateProfile), utils.ToJSON(result2))
+	} else if !reflect.DeepEqual(result3, ratePrf.RateProfile) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(ratePrf.RateProfile), utils.ToJSON(result3))
 	}
 
 }

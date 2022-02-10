@@ -380,6 +380,7 @@ const (
 	MetaGuardian             = "*guardians"
 	MetaEEs                  = "*ees"
 	MetaRateS                = "*rates"
+	MetaRateSOverwrite       = "*rateSOverwrite"
 	MetaContinue             = "*continue"
 	MetaUp                   = "*up"
 	Migrator                 = "migrator"

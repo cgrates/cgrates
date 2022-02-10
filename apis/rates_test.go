@@ -924,7 +924,7 @@ func TestRatesSetRateProfileRates(t *testing.T) {
 		},
 	}
 	expected := "OK"
-	err = admS.SetRateProfileRates(context.Background(), ext2, &rtRply)
+	err = admS.SetRateProfile(context.Background(), ext2, &rtRply)
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
@@ -997,7 +997,7 @@ func TestRatesSetRateProfileRatesNoTenant(t *testing.T) {
 		},
 	}
 	expected := "OK"
-	err = admS.SetRateProfileRates(context.Background(), ext2, &rtRply)
+	err = admS.SetRateProfile(context.Background(), ext2, &rtRply)
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
@@ -1052,7 +1052,7 @@ func TestRatesSetRateProfileRatesMissingField(t *testing.T) {
 	}
 	var rtRply string
 	expected := ""
-	err := admS.SetRateProfileRates(context.Background(), ext2, &rtRply)
+	err := admS.SetRateProfile(context.Background(), ext2, &rtRply)
 	if err == nil || err.Error() != "MANDATORY_IE_MISSING: [ID]" {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "MANDATORY_IE_MISSING: [ID]", err)
 	}
@@ -1085,7 +1085,7 @@ func TestRatesSetRateProfileRatesErr(t *testing.T) {
 	}
 	var rtRply string
 	expected := ""
-	err := admS.SetRateProfileRates(context.Background(), ext2, &rtRply)
+	err := admS.SetRateProfile(context.Background(), ext2, &rtRply)
 	if err == nil || err.Error() != "SERVER_ERROR: NOT_IMPLEMENTED" {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "SERVER_ERROR: NOT_IMPLEMENTED", err)
 	}
@@ -1133,7 +1133,7 @@ func TestRatesRemoveRateProfileRate(t *testing.T) {
 		},
 	}
 	expected := "OK"
-	err = admS.SetRateProfileRates(context.Background(), ext2, &rtRply)
+	err = admS.SetRateProfile(context.Background(), ext2, &rtRply)
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
@@ -1201,23 +1201,7 @@ func TestRatesRemoveRateProfileRateEmptyTenant(t *testing.T) {
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
-	ext2 := &utils.APIRateProfile{
-		RateProfile: &utils.RateProfile{
-			ID:        "2",
-			FilterIDs: []string{"*string:~*req.Subject:1001"},
-			Rates: map[string]*utils.Rate{
-				"RT_WEEK": {
-					ID:              "RT_WEEK",
-					ActivationTimes: "* * * * *",
-				},
-			},
-		},
-	}
 	expected := "OK"
-	err = admS.SetRateProfileRates(context.Background(), ext2, &rtRply)
-	if err != nil {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
-	}
 	if !reflect.DeepEqual(utils.ToJSON(rtRply), utils.ToJSON(expected)) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ToJSON(expected), utils.ToJSON(rtRply))
 	}
@@ -1383,7 +1367,7 @@ func TestRatesSetRateProfileRatesErrorSetLoadIDs(t *testing.T) {
 	}
 	var rtRply string
 	expected := "SERVER_ERROR: NOT_IMPLEMENTED"
-	err := admS.SetRateProfileRates(context.Background(), ext, &rtRply)
+	err := admS.SetRateProfile(context.Background(), ext, &rtRply)
 	if err == nil || err.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
 	}
@@ -1570,7 +1554,7 @@ func TestRatesSetRateProfileRatesErrorCache(t *testing.T) {
 	}
 	var rtRply string
 	expected := "SERVER_ERROR: MANDATORY_IE_MISSING: [connIDs]"
-	err := admS.SetRateProfileRates(context.Background(), ext, &rtRply)
+	err := admS.SetRateProfile(context.Background(), ext, &rtRply)
 	if err == nil || err.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
 	}
@@ -1720,8 +1704,7 @@ func TestRatesCostForEventRateIDxSelects(t *testing.T) {
 			},
 		},
 	}
-	if err := dm.SetRateProfile(context.Background(), rtPrf,
-		true); err != nil {
+	if err := dm.SetRateProfile(context.Background(), rtPrf, map[string]interface{}{}, true); err != nil {
 		t.Error(err)
 	}
 
