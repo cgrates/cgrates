@@ -128,7 +128,7 @@ func testLoadersIDBIdxItLoad(t *testing.T) {
 }
 
 func testLoadersIDBIdxCheckAttributes(t *testing.T) {
-	exp := &engine.AttributeProfile{
+	exp := engine.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ATTR_1001_SIMPLEAUTH",
 		FilterIDs: []string{"*string:~*opts.*context:simpleauth", "*string:~*req.Account:1001"},
@@ -144,7 +144,7 @@ func testLoadersIDBIdxCheckAttributes(t *testing.T) {
 		},
 	}
 
-	var reply *engine.AttributeProfile
+	var reply engine.AttributeProfile
 	if err := loadersIDBIdxRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfile,
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{
@@ -153,8 +153,11 @@ func testLoadersIDBIdxCheckAttributes(t *testing.T) {
 			},
 		}, &reply); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(exp, reply) {
-		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(exp), utils.ToJSON(reply))
+	} else {
+		reply.Compile()
+		if !reflect.DeepEqual(exp, reply) {
+			t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(exp), utils.ToJSON(reply))
+		}
 	}
 }
 

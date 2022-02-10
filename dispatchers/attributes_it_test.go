@@ -262,7 +262,7 @@ func testDspAttrGetAttrFailover(t *testing.T) {
 		},
 	}
 
-	var attrReply *engine.AttributeProfile
+	var attrReply engine.AttributeProfile
 	var rplyEv engine.AttrSProcessEventReply
 	if err := dispEngine.RPC.Call(utils.AttributeSv1GetAttributeForEvent,
 		ev, &attrReply); err == nil || err.Error() != utils.ErrNotFound.Error() {
@@ -272,9 +272,9 @@ func testDspAttrGetAttrFailover(t *testing.T) {
 	if err := dispEngine.RPC.Call(utils.AttributeSv1ProcessEvent,
 		ev, &rplyEv); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
-	} else if reflect.DeepEqual(eRply, &rplyEv) {
+	} else if reflect.DeepEqual(*eRply, &rplyEv) {
 		t.Errorf("Expecting: %s, received: %s",
-			utils.ToJSON(eRply), utils.ToJSON(rplyEv))
+			utils.ToJSON(*eRply), utils.ToJSON(rplyEv))
 	}
 
 	allEngine2.stopEngine(t)
@@ -283,10 +283,11 @@ func testDspAttrGetAttrFailover(t *testing.T) {
 		ev, &attrReply); err != nil {
 		t.Error(err)
 	}
+	attrReply.Compile()
 	sort.Strings(eAttrPrf.FilterIDs)
 	sort.Strings(attrReply.FilterIDs)
-	if !reflect.DeepEqual(eAttrPrf, attrReply) {
-		t.Errorf("Expecting: %s, received: %s", utils.ToJSON(eAttrPrf), utils.ToJSON(attrReply))
+	if !reflect.DeepEqual(*eAttrPrf, attrReply) {
+		t.Errorf("Expecting: %s, received: %s", utils.ToJSON(*eAttrPrf), utils.ToJSON(attrReply))
 	}
 
 	if err := dispEngine.RPC.Call(utils.AttributeSv1ProcessEvent,
@@ -426,15 +427,16 @@ func testDspAttrTestAuthKey2(t *testing.T) {
 	if *encoding == utils.MetaGOB {
 		eAttrPrf.Attributes[0].FilterIDs = nil // empty slice are nil in gob
 	}
-	var attrReply *engine.AttributeProfile
+	var attrReply engine.AttributeProfile
 	if err := dispEngine.RPC.Call(utils.AttributeSv1GetAttributeForEvent,
 		ev, &attrReply); err != nil {
 		t.Error(err)
 	}
+	attrReply.Compile()
 	sort.Strings(eAttrPrf.FilterIDs)
 	sort.Strings(attrReply.FilterIDs)
-	if !reflect.DeepEqual(eAttrPrf, attrReply) {
-		t.Errorf("Expecting: %s, received: %s", utils.ToJSON(eAttrPrf), utils.ToJSON(attrReply))
+	if !reflect.DeepEqual(*eAttrPrf, attrReply) {
+		t.Errorf("Expecting: %s, received: %s", utils.ToJSON(*eAttrPrf), utils.ToJSON(attrReply))
 	}
 
 	eRply := &engine.AttrSProcessEventReply{
@@ -536,7 +538,7 @@ func testDspAttrGetAttrRoundRobin(t *testing.T) {
 		},
 	}
 
-	var attrReply *engine.AttributeProfile
+	var attrReply engine.AttributeProfile
 	var rplyEv engine.AttrSProcessEventReply
 	// To ALL2
 	if err := dispEngine.RPC.Call(utils.AttributeSv1GetAttributeForEvent,
@@ -550,10 +552,11 @@ func testDspAttrGetAttrRoundRobin(t *testing.T) {
 		t.Error(err)
 	}
 
+	attrReply.Compile()
 	sort.Strings(eAttrPrf.FilterIDs)
 	sort.Strings(attrReply.FilterIDs)
-	if !reflect.DeepEqual(eAttrPrf, attrReply) {
-		t.Errorf("Expecting: %s, received: %s", utils.ToJSON(eAttrPrf), utils.ToJSON(attrReply))
+	if !reflect.DeepEqual(*eAttrPrf, attrReply) {
+		t.Errorf("Expecting: %s, received: %s", utils.ToJSON(*eAttrPrf), utils.ToJSON(attrReply))
 	}
 
 	// To ALL2

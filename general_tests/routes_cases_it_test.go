@@ -193,11 +193,6 @@ func testV1RtsCaseGetRoutesAfterLoading(t *testing.T) {
 				},
 			},
 		},
-		Weights: utils.DynamicWeights{
-			{
-				Weight: 0,
-			},
-		},
 	}
 	var reply *engine.RouteProfile
 	if err := rtsCaseSv1BiRpc.Call(context.Background(), utils.AdminSv1GetRouteProfile,
