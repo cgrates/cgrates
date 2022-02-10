@@ -53,7 +53,10 @@ func TestResourcesSetGetRemResourceProfile(t *testing.T) {
 			ID:                "RES_1",
 			AllocationMessage: "Approved",
 			Limit:             5,
-			Weight:            10,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				}},
 		},
 	}
 	if err := adms.SetResourceProfile(context.Background(), resPrf, &reply); err != nil {
@@ -228,10 +231,13 @@ func TestResourcesRemoveResourceProfileCheckErrors(t *testing.T) {
 
 	resPrf := &engine.ResourceProfileWithAPIOpts{
 		ResourceProfile: &engine.ResourceProfile{
-			ID:                "TestResourcesRemoveResourceProfileCheckErrors",
-			Tenant:            "cgrates.org",
-			Limit:             5,
-			Weight:            10,
+			ID:     "TestResourcesRemoveResourceProfileCheckErrors",
+			Tenant: "cgrates.org",
+			Limit:  5,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				}},
 			AllocationMessage: "Approved",
 		},
 	}
@@ -499,7 +505,10 @@ func TestResourcesGetResource(t *testing.T) {
 			FilterIDs:         []string{"*string:~*req.Account:1001"},
 			Limit:             5,
 			AllocationMessage: "Approved",
-			Weight:            10,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				}},
 		},
 	}
 
@@ -604,7 +613,10 @@ func TestResourcesAuthorizeAllocateReleaseResource(t *testing.T) {
 			FilterIDs:         []string{"*string:~*req.Account:1001"},
 			Limit:             5,
 			AllocationMessage: "Approved",
-			Weight:            10,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				}},
 		},
 	}
 

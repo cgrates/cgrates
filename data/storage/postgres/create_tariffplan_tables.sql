@@ -16,7 +16,7 @@ CREATE TABLE tp_resources (
   "allocation_message" varchar(64) NOT NULL,
   "blocker" BOOLEAN NOT NULL,
   "stored" BOOLEAN NOT NULL,
-  "weight" NUMERIC(8,2) NOT NULL,
+  "weights" varchar(32) NOT NULL,
   "threshold_ids" varchar(64) NOT NULL,
   "created_at" TIMESTAMP WITH TIME ZONE
 );
@@ -162,7 +162,7 @@ CREATE INDEX tp_routes_unique ON tp_routes  ("tpid",  "tenant", "id",
     "activation_interval" varchar(64) NOT NULL,
     "run_id" varchar(64) NOT NULL,
     "attribute_ids" varchar(64) NOT NULL,
-    "weight" decimal(8,2) NOT NULL,
+    "weights" varchar(64) NOT NULL,
     "created_at" TIMESTAMP WITH TIME ZONE
   );
   CREATE INDEX tp_chargers_ids ON tp_chargers (tpid);

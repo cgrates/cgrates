@@ -173,8 +173,8 @@ func (tps ResourceMdls) AsTPResources() (result []*utils.TPResourceProfile) {
 		if tp.UsageTTL != utils.EmptyString {
 			rl.UsageTTL = tp.UsageTTL
 		}
-		if tp.Weight != 0 {
-			rl.Weight = tp.Weight
+		if tp.Weights != "" {
+			rl.Weights = tp.Weights
 		}
 		if tp.Limit != utils.EmptyString {
 			rl.Limit = tp.Limit
@@ -222,7 +222,7 @@ func APItoModelResource(rl *utils.TPResourceProfile) (mdls ResourceMdls) {
 			Blocker:           rl.Blocker,
 			Stored:            rl.Stored,
 			UsageTTL:          rl.UsageTTL,
-			Weight:            rl.Weight,
+			Weights:           rl.Weights,
 			Limit:             rl.Limit,
 			AllocationMessage: rl.AllocationMessage,
 		}
@@ -244,7 +244,7 @@ func APItoModelResource(rl *utils.TPResourceProfile) (mdls ResourceMdls) {
 		}
 		if i == 0 {
 			mdl.UsageTTL = rl.UsageTTL
-			mdl.Weight = rl.Weight
+			mdl.Weights = rl.Weights
 			mdl.Limit = rl.Limit
 			mdl.AllocationMessage = rl.AllocationMessage
 			for i, val := range rl.ThresholdIDs {
@@ -264,12 +264,17 @@ func APItoResource(tpRL *utils.TPResourceProfile, timezone string) (rp *Resource
 	rp = &ResourceProfile{
 		Tenant:            tpRL.Tenant,
 		ID:                tpRL.ID,
-		Weight:            tpRL.Weight,
 		Blocker:           tpRL.Blocker,
 		Stored:            tpRL.Stored,
 		AllocationMessage: tpRL.AllocationMessage,
 		ThresholdIDs:      make([]string, len(tpRL.ThresholdIDs)),
 		FilterIDs:         make([]string, len(tpRL.FilterIDs)),
+	}
+	if tpRL.Weights != utils.EmptyString {
+		rp.Weights, err = utils.NewDynamicWeightsFromString(tpRL.Weights, utils.InfieldSep, utils.ANDSep)
+		if err != nil {
+			return
+		}
 	}
 	if tpRL.UsageTTL != utils.EmptyString {
 		if rp.UsageTTL, err = utils.ParseDurationWithNanosecs(tpRL.UsageTTL); err != nil {
@@ -299,7 +304,7 @@ func ResourceProfileToAPI(rp *ResourceProfile) (tpRL *utils.TPResourceProfile) {
 		AllocationMessage: rp.AllocationMessage,
 		Blocker:           rp.Blocker,
 		Stored:            rp.Stored,
-		Weight:            rp.Weight,
+		Weights:           rp.Weights.String(utils.InfieldSep, utils.ANDSep),
 		ThresholdIDs:      make([]string, len(rp.ThresholdIDs)),
 	}
 	if rp.UsageTTL != time.Duration(0) {
@@ -1218,8 +1223,8 @@ func (tps ChargerMdls) AsTPChargers() (result []*utils.TPChargerProfile) {
 				ID:     tp.ID,
 			}
 		}
-		if tp.Weight != 0 {
-			tpCPP.Weight = tp.Weight
+		if tp.Weights != "" {
+			tpCPP.Weights = tp.Weights
 		}
 		if tp.FilterIDs != utils.EmptyString {
 			if _, has := filterMap[tntID]; !has {
@@ -1279,11 +1284,11 @@ func APItoModelTPCharger(tpCPP *utils.TPChargerProfile) (mdls ChargerMdls) {
 		}
 		if min == 0 {
 			mdl := &ChargerMdl{
-				Tenant: tpCPP.Tenant,
-				Tpid:   tpCPP.TPid,
-				ID:     tpCPP.ID,
-				Weight: tpCPP.Weight,
-				RunID:  tpCPP.RunID,
+				Tenant:  tpCPP.Tenant,
+				Tpid:    tpCPP.TPid,
+				ID:      tpCPP.ID,
+				Weights: tpCPP.Weights,
+				RunID:   tpCPP.RunID,
 			}
 			if isFilter && len(tpCPP.AttributeIDs) > 0 {
 				mdl.AttributeIDs = tpCPP.AttributeIDs[0]
@@ -1300,7 +1305,7 @@ func APItoModelTPCharger(tpCPP *utils.TPChargerProfile) (mdls ChargerMdls) {
 					ID:     tpCPP.ID,
 				}
 				if i == 0 {
-					mdl.Weight = tpCPP.Weight
+					mdl.Weights = tpCPP.Weights
 					mdl.RunID = tpCPP.RunID
 				}
 				mdl.AttributeIDs = tpCPP.AttributeIDs[i]
@@ -1339,10 +1344,16 @@ func APItoChargerProfile(tpCPP *utils.TPChargerProfile, timezone string) (cpp *C
 	cpp = &ChargerProfile{
 		Tenant:       tpCPP.Tenant,
 		ID:           tpCPP.ID,
-		Weight:       tpCPP.Weight,
 		RunID:        tpCPP.RunID,
 		FilterIDs:    make([]string, len(tpCPP.FilterIDs)),
 		AttributeIDs: make([]string, len(tpCPP.AttributeIDs)),
+	}
+	if tpCPP.Weights != utils.EmptyString {
+		var err error
+		cpp.Weights, err = utils.NewDynamicWeightsFromString(tpCPP.Weights, utils.InfieldSep, utils.ANDSep)
+		if err != nil {
+			return
+		}
 	}
 	for i, fli := range tpCPP.FilterIDs {
 		cpp.FilterIDs[i] = fli
@@ -1360,7 +1371,7 @@ func ChargerProfileToAPI(chargerPrf *ChargerProfile) (tpCharger *utils.TPCharger
 		FilterIDs:    make([]string, len(chargerPrf.FilterIDs)),
 		RunID:        chargerPrf.RunID,
 		AttributeIDs: make([]string, len(chargerPrf.AttributeIDs)),
-		Weight:       chargerPrf.Weight,
+		Weights:      chargerPrf.Weights.String(utils.InfieldSep, utils.ANDSep),
 	}
 	for i, fli := range chargerPrf.FilterIDs {
 		tpCharger.FilterIDs[i] = fli

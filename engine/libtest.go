@@ -86,9 +86,9 @@ TOPUP_RST_GNR_1000,*topup_reset,"{""*voice"": 60.0,""*data"":1024.0,""*sms"":1.0
 `
 
 	ResourcesCSVContent = `
-#Tenant[0],Id[1],FilterIDs[2],Weight[3],TTL[4],Limit[5],AllocationMessage[6],Blocker[7],Stored[8],Thresholds[9]
-cgrates.org,ResGroup21,*string:~*req.Account:1001,10,1s,2,call,true,true,
-cgrates.org,ResGroup22,*string:~*req.Account:dan,10,3600s,2,premium_call,true,true,
+#Tenant[0],Id[1],FilterIDs[2],Weights[3],TTL[4],Limit[5],AllocationMessage[6],Blocker[7],Stored[8],Thresholds[9]
+cgrates.org,ResGroup21,*string:~*req.Account:1001,;10,1s,2,call,true,true,
+cgrates.org,ResGroup22,*string:~*req.Account:dan,;10,3600s,2,premium_call,true,true,
 `
 	StatsCSVContent = `
 #Tenant[0],Id[1],FilterIDs[2],Weights[3],QueueLength[4],TTL[5],MinItems[6],Metrics[7],MetricFilterIDs[8],Stored[9],Blocker[10],ThresholdIDs[11]
@@ -126,8 +126,8 @@ cgrates.org,ALS1,*string:~*req.Account:1001;*string:~*opts.*context:con1,;20,*st
 cgrates.org,ALS1,*string:~*opts.*context:con2|con3,;20,,*req.Field2,*variable,Sub2,true
 `
 	ChargersCSVContent = `
-#Tenant,ID,FilterIDs,Weight,RunID,AttributeIDs
-cgrates.org,Charger1,*string:~*req.Account:1001,20,*rated,ATTR_1001_SIMPLEAUTH
+#Tenant,ID,FilterIDs,Weights,RunID,AttributeIDs
+cgrates.org,Charger1,*string:~*req.Account:1001,;20,*rated,ATTR_1001_SIMPLEAUTH
 `
 	DispatcherCSVContent = `
 #Tenant,ID,FilterIDs,Weight,Strategy,StrategyParameters,ConnID,ConnFilterIDs,ConnWeight,ConnBlocker,ConnParameters

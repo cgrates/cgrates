@@ -145,7 +145,11 @@ func testSessionSRplcApierSetChargerS(t *testing.T) {
 			ID:           "Default",
 			RunID:        utils.MetaDefault,
 			AttributeIDs: []string{"*none"},
-			Weight:       20,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
 		},
 	}
 	var result1 string
@@ -161,7 +165,11 @@ func testSessionSRplcApierSetChargerS(t *testing.T) {
 			ID:           "Default",
 			RunID:        utils.MetaDefault,
 			AttributeIDs: []string{"*none"},
-			Weight:       20,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
 		},
 	}
 	var result2 string

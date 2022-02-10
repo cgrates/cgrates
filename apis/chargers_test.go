@@ -44,7 +44,11 @@ func TestChargerSSetGetChargerProfile(t *testing.T) {
 			RunID:        utils.MetaDefault,
 			FilterIDs:    []string{"*string:~*req.Account:1001"},
 			AttributeIDs: []string{"*none"},
-			Weight:       20,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
 		},
 		APIOpts: nil,
 	}
@@ -75,7 +79,11 @@ func TestChargerSSetGetChargerProfile(t *testing.T) {
 		RunID:        utils.MetaDefault,
 		FilterIDs:    []string{"*string:~*req.Account:1001"},
 		AttributeIDs: []string{"*none"},
-		Weight:       20,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 	}
 	if !reflect.DeepEqual(getRply, expectedGet) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ToJSON(expectedGet), utils.ToJSON(getRply))
@@ -97,7 +105,11 @@ func TestChargerSSetGetChargerProfileErrMissingID(t *testing.T) {
 			RunID:        utils.MetaDefault,
 			FilterIDs:    []string{"*string:~*req.Account:1001"},
 			AttributeIDs: []string{"*none"},
-			Weight:       20,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
 		},
 		APIOpts: nil,
 	}
@@ -138,7 +150,11 @@ func TestChargerSSetGetChargerProfileErrNotFound(t *testing.T) {
 			RunID:        utils.MetaDefault,
 			FilterIDs:    []string{"*string:~*req.Account:1001"},
 			AttributeIDs: []string{"*none"},
-			Weight:       20,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
 		},
 		APIOpts: nil,
 	}
@@ -179,7 +195,11 @@ func TestChargerSSetChargerProfileErrMissingID(t *testing.T) {
 			RunID:        utils.MetaDefault,
 			FilterIDs:    []string{"*string:~*req.Account:1001"},
 			AttributeIDs: []string{"*none"},
-			Weight:       20,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
 		},
 		APIOpts: nil,
 	}
@@ -210,7 +230,11 @@ func TestChargerSDmSetChargerProfileErr(t *testing.T) {
 			RunID:        utils.MetaDefault,
 			FilterIDs:    []string{"*string:~*req.Account:1001"},
 			AttributeIDs: []string{"*none"},
-			Weight:       20,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
 		},
 		APIOpts: nil,
 	}
@@ -256,7 +280,11 @@ func TestChargerSSetChargerProfileSetLoadIDsErr(t *testing.T) {
 			RunID:        utils.MetaDefault,
 			FilterIDs:    []string{"*string:~*req.Account:1001"},
 			AttributeIDs: []string{"*none"},
-			Weight:       20,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
 		},
 		APIOpts: nil,
 	}
@@ -309,7 +337,11 @@ func TestChargerSSetChargerProfileCallCacheErr(t *testing.T) {
 			RunID:        utils.MetaDefault,
 			FilterIDs:    []string{"*string:~*req.Account:1001"},
 			AttributeIDs: []string{"*none"},
-			Weight:       20,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
 		},
 		APIOpts: nil,
 	}
@@ -339,7 +371,11 @@ func TestChargerSSetGetChargerProfileIDs(t *testing.T) {
 			RunID:        utils.MetaDefault,
 			FilterIDs:    []string{"*string:~*req.Account:1001"},
 			AttributeIDs: []string{"*none"},
-			Weight:       20,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
 		},
 		APIOpts: nil,
 	}
@@ -370,7 +406,11 @@ func TestChargerSSetGetChargerProfileIDs(t *testing.T) {
 			RunID:        utils.MetaDefault,
 			FilterIDs:    []string{"*string:~*req.Account:1001"},
 			AttributeIDs: []string{"*none"},
-			Weight:       20,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
 		},
 		APIOpts: nil,
 	}
@@ -457,7 +497,11 @@ func TestChargerSSetGetRmvGetChargerProfile(t *testing.T) {
 			RunID:        utils.MetaDefault,
 			FilterIDs:    []string{"*string:~*req.Account:1001"},
 			AttributeIDs: []string{"*none"},
-			Weight:       20,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
 		},
 		APIOpts: nil,
 	}
@@ -487,7 +531,11 @@ func TestChargerSSetGetRmvGetChargerProfile(t *testing.T) {
 		RunID:        utils.MetaDefault,
 		FilterIDs:    []string{"*string:~*req.Account:1001"},
 		AttributeIDs: []string{"*none"},
-		Weight:       20,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 	}
 	if !reflect.DeepEqual(getRply, expectedGet) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ToJSON(expectedGet), utils.ToJSON(getRply))
@@ -538,7 +586,11 @@ func TestChargerSSetGetRmvGetChargerProfileNoTenant(t *testing.T) {
 			RunID:        utils.MetaDefault,
 			FilterIDs:    []string{"*string:~*req.Account:1001"},
 			AttributeIDs: []string{"*none"},
-			Weight:       20,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
 		},
 		APIOpts: nil,
 	}
@@ -568,7 +620,11 @@ func TestChargerSSetGetRmvGetChargerProfileNoTenant(t *testing.T) {
 		RunID:        utils.MetaDefault,
 		FilterIDs:    []string{"*string:~*req.Account:1001"},
 		AttributeIDs: []string{"*none"},
-		Weight:       20,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 	}
 	if !reflect.DeepEqual(getRply, expectedGet) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ToJSON(expectedGet), utils.ToJSON(getRply))

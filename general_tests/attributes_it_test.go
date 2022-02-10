@@ -524,8 +524,11 @@ func testAttributeSProcessEventWithResource(t *testing.T) {
 		Limit:             10,
 		AllocationMessage: "MessageAllocation",
 		Stored:            true,
-		Weight:            20,
-		ThresholdIDs:      []string{utils.MetaNone},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			}},
+		ThresholdIDs: []string{utils.MetaNone},
 	}
 
 	var result string

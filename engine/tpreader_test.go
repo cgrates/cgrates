@@ -408,7 +408,7 @@ func TestTPReaderGetLoadedIdsResourceProfiles(t *testing.T) {
 				FilterIDs:         []string{"*string:~*req.Account:1001", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z"},
 				UsageTTL:          "1s",
 				AllocationMessage: "call",
-				Weight:            10,
+				Weights:           ";10",
 				Limit:             "2",
 				Blocker:           true,
 				Stored:            true,

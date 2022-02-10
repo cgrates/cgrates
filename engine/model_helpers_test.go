@@ -38,7 +38,7 @@ func TestTpResourcesAsTpResources(t *testing.T) {
 			FilterIDs:    "FLTR_RES_GR1;*ai:~*req.AnswerTime:2014-07-29T15:00:00Z",
 			Stored:       false,
 			Blocker:      false,
-			Weight:       10.0,
+			Weights:      ";10",
 			Limit:        "45",
 			ThresholdIDs: "WARN_RES1;WARN_RES1"},
 		{
@@ -54,7 +54,7 @@ func TestTpResourcesAsTpResources(t *testing.T) {
 			FilterIDs: "FLTR_RES_GR2;*ai:~*req.AnswerTime:2014-07-29T15:00:00Z",
 			Stored:    false,
 			Blocker:   false,
-			Weight:    10.0,
+			Weights:   ";10",
 			Limit:     "20"},
 	}
 	eTPs := []*utils.TPResourceProfile{
@@ -65,7 +65,7 @@ func TestTpResourcesAsTpResources(t *testing.T) {
 			FilterIDs:    []string{"FLTR_RES_GR1", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z"},
 			Stored:       tps[0].Stored,
 			Blocker:      tps[0].Blocker,
-			Weight:       tps[0].Weight,
+			Weights:      tps[0].Weights,
 			Limit:        tps[0].Limit,
 			ThresholdIDs: []string{"WARN_RES1", "WARN3"},
 		},
@@ -76,7 +76,7 @@ func TestTpResourcesAsTpResources(t *testing.T) {
 			FilterIDs: []string{"FLTR_RES_GR2", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z"},
 			Stored:    tps[2].Stored,
 			Blocker:   tps[2].Blocker,
-			Weight:    tps[2].Weight,
+			Weights:   tps[2].Weights,
 			Limit:     tps[2].Limit,
 		},
 	}
@@ -94,7 +94,7 @@ func TestAPItoResource(t *testing.T) {
 		FilterIDs:         []string{"FLTR_RES_GR_1", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z"},
 		Stored:            false,
 		Blocker:           false,
-		Weight:            10,
+		Weights:           ";10",
 		Limit:             "2",
 		ThresholdIDs:      []string{"TRes1"},
 		AllocationMessage: "asd",
@@ -104,11 +104,13 @@ func TestAPItoResource(t *testing.T) {
 		ID:                tpRL.ID,
 		Stored:            tpRL.Stored,
 		Blocker:           tpRL.Blocker,
-		Weight:            tpRL.Weight,
 		FilterIDs:         []string{"FLTR_RES_GR_1", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z"},
 		ThresholdIDs:      []string{"TRes1"},
 		AllocationMessage: tpRL.AllocationMessage,
 		Limit:             2,
+	}
+	if tpRL.Weights != utils.EmptyString {
+		eRL.Weights, err = utils.NewDynamicWeightsFromString(utils.IfaceAsString(tpRL.Weights), utils.InfieldSep, utils.ANDSep)
 	}
 	if rl, err := APItoResource(tpRL, "UTC"); err != nil {
 		t.Error(err)
@@ -122,15 +124,18 @@ func TestResourceProfileToAPI(t *testing.T) {
 		Tenant:            "cgrates.org",
 		ID:                "ResGroup1",
 		FilterIDs:         []string{"FLTR_RES_GR_1", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z"},
-		Weight:            10,
+		Weights:           ";10",
 		Limit:             "2",
 		ThresholdIDs:      []string{"TRes1"},
 		AllocationMessage: "asd",
 	}
 	rp := &ResourceProfile{
-		Tenant:            "cgrates.org",
-		ID:                "ResGroup1",
-		Weight:            10,
+		Tenant: "cgrates.org",
+		ID:     "ResGroup1",
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			}},
 		FilterIDs:         []string{"FLTR_RES_GR_1", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z"},
 		ThresholdIDs:      []string{"TRes1"},
 		AllocationMessage: "asd",
@@ -148,7 +153,7 @@ func TestAPItoModelResource(t *testing.T) {
 		TPid:              testTPID,
 		ID:                "ResGroup1",
 		FilterIDs:         []string{"*ai:~*req.AnswerTime:2014-07-29T15:00:00Z"},
-		Weight:            10,
+		Weights:           ";10",
 		Limit:             "2",
 		ThresholdIDs:      []string{"TRes1"},
 		AllocationMessage: "test",
@@ -158,7 +163,7 @@ func TestAPItoModelResource(t *testing.T) {
 		Tenant:            "cgrates.org",
 		ID:                "ResGroup1",
 		FilterIDs:         "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z",
-		Weight:            10.0,
+		Weights:           ";10",
 		Limit:             "2",
 		ThresholdIDs:      "TRes1",
 		AllocationMessage: "test",
@@ -1348,7 +1353,7 @@ func TestAPItoChargerProfile(t *testing.T) {
 		FilterIDs:    []string{"FLTR_ACNT_dan", "FLTR_DST_DE", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z"},
 		RunID:        "*rated",
 		AttributeIDs: []string{"ATTR1", "ATTR2"},
-		Weight:       20,
+		Weights:      ";20",
 	}
 
 	expected := &ChargerProfile{
@@ -1357,7 +1362,11 @@ func TestAPItoChargerProfile(t *testing.T) {
 		FilterIDs:    []string{"FLTR_ACNT_dan", "FLTR_DST_DE", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z"},
 		RunID:        "*rated",
 		AttributeIDs: []string{"ATTR1", "ATTR2"},
-		Weight:       20,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 	}
 	if rcv := APItoChargerProfile(tpCPP, "UTC"); !reflect.DeepEqual(expected, rcv) {
 		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(expected), utils.ToJSON(rcv))
@@ -1371,7 +1380,7 @@ func TestChargerProfileToAPI(t *testing.T) {
 		FilterIDs:    []string{"FLTR_ACNT_dan", "FLTR_DST_DE", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z|2014-07-15T14:36:00Z"},
 		RunID:        "*rated",
 		AttributeIDs: []string{"ATTR1", "ATTR2"},
-		Weight:       20,
+		Weights:      ";20",
 	}
 
 	chargerPrf := &ChargerProfile{
@@ -1380,7 +1389,11 @@ func TestChargerProfileToAPI(t *testing.T) {
 		FilterIDs:    []string{"FLTR_ACNT_dan", "FLTR_DST_DE", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z|2014-07-15T14:36:00Z"},
 		RunID:        "*rated",
 		AttributeIDs: []string{"ATTR1", "ATTR2"},
-		Weight:       20,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 	}
 	if rcv := ChargerProfileToAPI(chargerPrf); err != nil {
 		t.Error(err)
@@ -1398,7 +1411,7 @@ func TestAPItoModelTPCharger(t *testing.T) {
 		FilterIDs:    []string{"FLTR_ACNT_dan", "FLTR_DST_DE", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z|2014-07-15T14:35:00Z"},
 		RunID:        "*rated",
 		AttributeIDs: []string{"ATTR1", "ATTR2"},
-		Weight:       20,
+		Weights:      ";20",
 	}
 	expected := ChargerMdls{
 		&ChargerMdl{
@@ -1408,7 +1421,7 @@ func TestAPItoModelTPCharger(t *testing.T) {
 			FilterIDs:    "FLTR_ACNT_dan",
 			RunID:        "*rated",
 			AttributeIDs: "ATTR1",
-			Weight:       20,
+			Weights:      ";20",
 		},
 		&ChargerMdl{
 			Tpid:         "TP1",
@@ -1440,7 +1453,7 @@ func TestAPItoModelTPCharger2(t *testing.T) {
 		FilterIDs:    []string{"FLTR_ACNT_dan", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z|2014-07-15T14:35:00Z"},
 		RunID:        "*rated",
 		AttributeIDs: []string{"ATTR1", "ATTR2"},
-		Weight:       20,
+		Weights:      ";20",
 	}
 	expected := ChargerMdls{
 		&ChargerMdl{
@@ -1450,7 +1463,7 @@ func TestAPItoModelTPCharger2(t *testing.T) {
 			FilterIDs:    "FLTR_ACNT_dan",
 			RunID:        "*rated",
 			AttributeIDs: "ATTR1",
-			Weight:       20,
+			Weights:      ";20",
 		},
 		&ChargerMdl{
 			Tpid:         "TP1",
@@ -1475,7 +1488,7 @@ func TestAPItoModelTPCharger3(t *testing.T) {
 		FilterIDs:    []string{"FLTR_ACNT_dan", "FLTR_DST_DE", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z"},
 		RunID:        "*rated",
 		AttributeIDs: []string{"ATTR1"},
-		Weight:       20,
+		Weights:      ";20",
 	}
 	expected := ChargerMdls{
 		&ChargerMdl{
@@ -1485,7 +1498,7 @@ func TestAPItoModelTPCharger3(t *testing.T) {
 			FilterIDs:    "FLTR_ACNT_dan",
 			RunID:        "*rated",
 			AttributeIDs: "ATTR1",
-			Weight:       20,
+			Weights:      ";20",
 		},
 		&ChargerMdl{
 			Tpid:      "TP1",
@@ -1514,7 +1527,7 @@ func TestAPItoModelTPCharger4(t *testing.T) {
 		ID:        "Charger1",
 		FilterIDs: []string{"FLTR_ACNT_dan", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z|2014-07-15T14:35:00Z"},
 		RunID:     "*rated",
-		Weight:    20,
+		Weights:   ";20",
 	}
 	expected := ChargerMdls{
 		&ChargerMdl{
@@ -1523,7 +1536,7 @@ func TestAPItoModelTPCharger4(t *testing.T) {
 			ID:        "Charger1",
 			FilterIDs: "FLTR_ACNT_dan",
 			RunID:     "*rated",
-			Weight:    20,
+			Weights:   ";20",
 		},
 		&ChargerMdl{
 			Tpid:      "TP1",
@@ -1531,7 +1544,7 @@ func TestAPItoModelTPCharger4(t *testing.T) {
 			ID:        "Charger1",
 			FilterIDs: "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z|2014-07-15T14:35:00Z",
 			RunID:     "",
-			Weight:    0,
+			Weights:   "",
 		},
 	}
 	rcv := APItoModelTPCharger(tpCharger)
@@ -1549,7 +1562,7 @@ func TestAPItoModelTPCharger5(t *testing.T) {
 		FilterIDs:    []string{"*ai:~*req.AnswerTime:2014-07-14T14:35:00Z"},
 		RunID:        "*rated",
 		AttributeIDs: []string{"ATTR1"},
-		Weight:       20,
+		Weights:      ";20",
 	}
 	expected := ChargerMdls{
 		&ChargerMdl{
@@ -1559,7 +1572,7 @@ func TestAPItoModelTPCharger5(t *testing.T) {
 			RunID:        "*rated",
 			AttributeIDs: "ATTR1",
 			FilterIDs:    "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z",
-			Weight:       20,
+			Weights:      ";20",
 		},
 	}
 	rcv := APItoModelTPCharger(tpCharger)
@@ -1576,7 +1589,7 @@ func TestAPItoModelTPCharger6(t *testing.T) {
 		ID:        "Charger1",
 		RunID:     "*rated",
 		FilterIDs: []string{"*ai:~*req.AnswerTime:2014-07-14T14:35:00Z"},
-		Weight:    20,
+		Weights:   ";20",
 	}
 	expected := ChargerMdls{
 		&ChargerMdl{
@@ -1585,7 +1598,7 @@ func TestAPItoModelTPCharger6(t *testing.T) {
 			ID:        "Charger1",
 			RunID:     "*rated",
 			FilterIDs: "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z",
-			Weight:    20,
+			Weights:   ";20",
 		},
 	}
 	rcv := APItoModelTPCharger(tpCharger)
@@ -1603,7 +1616,7 @@ func TestModelAsTPChargers(t *testing.T) {
 			FilterIDs:    "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z;FLTR_ACNT_dan;FLTR_DST_DE",
 			RunID:        "*rated",
 			AttributeIDs: "ATTR1",
-			Weight:       20,
+			Weights:      ";20",
 		},
 	}
 	expected := &utils.TPChargerProfile{
@@ -1613,7 +1626,7 @@ func TestModelAsTPChargers(t *testing.T) {
 		FilterIDs:    []string{"*ai:~*req.AnswerTime:2014-07-14T14:35:00Z", "FLTR_ACNT_dan", "FLTR_DST_DE"},
 		RunID:        "*rated",
 		AttributeIDs: []string{"ATTR1"},
-		Weight:       20,
+		Weights:      ";20",
 	}
 	expected2 := &utils.TPChargerProfile{
 		TPid:         "TP1",
@@ -1622,7 +1635,7 @@ func TestModelAsTPChargers(t *testing.T) {
 		FilterIDs:    []string{"*ai:~*req.AnswerTime:2014-07-14T14:35:00Z", "FLTR_DST_DE", "FLTR_ACNT_dan"},
 		RunID:        "*rated",
 		AttributeIDs: []string{"ATTR1"},
-		Weight:       20,
+		Weights:      ";20",
 	}
 	rcv := models.AsTPChargers()
 	sort.Strings(rcv[0].FilterIDs)
@@ -1640,7 +1653,7 @@ func TestModelAsTPChargers2(t *testing.T) {
 			FilterIDs:    "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z;FLTR_ACNT_dan;FLTR_DST_DE",
 			RunID:        "*rated",
 			AttributeIDs: "*constant:*req.RequestType:*rated;*constant:*req.Category:call;ATTR1;*constant:*req.Category:call",
-			Weight:       20,
+			Weights:      ";20",
 		},
 	}
 	expected := &utils.TPChargerProfile{
@@ -1650,7 +1663,7 @@ func TestModelAsTPChargers2(t *testing.T) {
 		FilterIDs:    []string{"*ai:~*req.AnswerTime:2014-07-14T14:35:00Z", "FLTR_ACNT_dan", "FLTR_DST_DE"},
 		RunID:        "*rated",
 		AttributeIDs: []string{"*constant:*req.RequestType:*rated;*constant:*req.Category:call", "ATTR1", "*constant:*req.Category:call"},
-		Weight:       20,
+		Weights:      ";20",
 	}
 	rcv := models.AsTPChargers()
 	sort.Strings(rcv[0].FilterIDs)
@@ -1668,7 +1681,7 @@ func TestModelAsTPChargers3(t *testing.T) {
 			FilterIDs:    "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z|2014-07-15T14:35:00Z;FLTR_ACNT_dan;FLTR_DST_DE",
 			RunID:        "*rated",
 			AttributeIDs: "*constant:*req.RequestType:*rated;*constant:*req.Category:call;ATTR1;*constant:*req.Category:call&<~*req.OriginID;_suf>",
-			Weight:       20,
+			Weights:      ";20",
 		},
 	}
 	expected := &utils.TPChargerProfile{
@@ -1678,7 +1691,7 @@ func TestModelAsTPChargers3(t *testing.T) {
 		FilterIDs:    []string{"*ai:~*req.AnswerTime:2014-07-14T14:35:00Z|2014-07-15T14:35:00Z", "FLTR_ACNT_dan", "FLTR_DST_DE"},
 		RunID:        "*rated",
 		AttributeIDs: []string{"*constant:*req.RequestType:*rated;*constant:*req.Category:call", "ATTR1", "*constant:*req.Category:call&<~*req.OriginID;_suf>"},
-		Weight:       20,
+		Weights:      ";20",
 	}
 	rcv := models.AsTPChargers()
 	sort.Strings(rcv[0].FilterIDs)
@@ -3177,7 +3190,7 @@ func TestAPItoModelResourceCase2(t *testing.T) {
 		ID:                "ResGroup1",
 		FilterIDs:         []string{"*ai:~*req.AnswerTime:2014-07-29T15:00:00Z|2015-07-29T15:00:00Z"},
 		UsageTTL:          "Test_TTL",
-		Weight:            10,
+		Weights:           ";10",
 		Limit:             "2",
 		ThresholdIDs:      []string{"TRes1", "TRes2"},
 		AllocationMessage: "test",
@@ -3189,7 +3202,7 @@ func TestAPItoModelResourceCase2(t *testing.T) {
 			ID:                "ResGroup1",
 			FilterIDs:         "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z|2015-07-29T15:00:00Z",
 			UsageTTL:          "Test_TTL",
-			Weight:            10,
+			Weights:           ";10",
 			Limit:             "2",
 			ThresholdIDs:      "TRes1;TRes2",
 			AllocationMessage: "test",
@@ -3208,7 +3221,7 @@ func TestAPItoModelResourceCase3(t *testing.T) {
 		ID:                "ResGroup1",
 		FilterIDs:         []string{"FilterID1", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z|2015-07-29T15:00:00Z"},
 		UsageTTL:          "Test_TTL",
-		Weight:            10,
+		Weights:           ";10",
 		Limit:             "2",
 		ThresholdIDs:      []string{"TRes1", "TRes2"},
 		AllocationMessage: "test",
@@ -3220,7 +3233,7 @@ func TestAPItoModelResourceCase3(t *testing.T) {
 			ID:                "ResGroup1",
 			FilterIDs:         "FilterID1",
 			UsageTTL:          "Test_TTL",
-			Weight:            10,
+			Weights:           ";10",
 			Limit:             "2",
 			ThresholdIDs:      "TRes1;TRes2",
 			AllocationMessage: "test",
@@ -3231,7 +3244,7 @@ func TestAPItoModelResourceCase3(t *testing.T) {
 			ID:                "ResGroup1",
 			FilterIDs:         "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z|2015-07-29T15:00:00Z",
 			UsageTTL:          "",
-			Weight:            0,
+			Weights:           "",
 			Limit:             "",
 			ThresholdIDs:      "",
 			AllocationMessage: "",
@@ -3494,7 +3507,11 @@ func TestChargerProfileToAPILastCase(t *testing.T) {
 		FilterIDs:    []string{"*string:~*opts.*subsys:*chargers", "FLTR_CP_1", "FLTR_CP_4", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
 		RunID:        "TestRunID",
 		AttributeIDs: []string{"*none"},
-		Weight:       20,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 	}
 
 	expStruct := &utils.TPChargerProfile{
@@ -3503,7 +3520,7 @@ func TestChargerProfileToAPILastCase(t *testing.T) {
 		FilterIDs:    []string{"*ai:~*req.AnswerTime:2014-07-14T14:25:00Z", "*string:~*opts.*subsys:*chargers", "FLTR_CP_1", "FLTR_CP_4"},
 		AttributeIDs: []string{"*none"},
 		RunID:        "TestRunID",
-		Weight:       20,
+		Weights:      ";20",
 	}
 
 	result := ChargerProfileToAPI(testStruct)
@@ -3636,7 +3653,7 @@ func ModelHelpersTestStatMdlsCSVHeader(t *testing.T) {
 			FilterIDs:    "FLTR_RES_GR1;*ai:~*req.AnswerTime:2014-07-29T15:00:00Z",
 			Stored:       false,
 			Blocker:      false,
-			Weight:       10.0,
+			Weights:      ";10",
 			Limit:        "45",
 			ThresholdIDs: "WARN_RES1;WARN_RES1",
 		},
@@ -4432,8 +4449,12 @@ func TestModelHelpersResourceProfileToAPICase2(t *testing.T) {
 		AllocationMessage: "",
 		Blocker:           false,
 		Stored:            false,
-		Weight:            0,
-		ThresholdIDs:      []string{"test_threshold_id"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 0,
+			},
+		},
+		ThresholdIDs: []string{"test_threshold_id"},
 	}
 	expStruct := &utils.TPResourceProfile{
 		TPid:              "",
@@ -4445,7 +4466,7 @@ func TestModelHelpersResourceProfileToAPICase2(t *testing.T) {
 		AllocationMessage: "",
 		Blocker:           false,
 		Stored:            false,
-		Weight:            0,
+		Weights:           ";0",
 		ThresholdIDs:      []string{"test_threshold_id"},
 	}
 	result := ResourceProfileToAPI(testStruct)
@@ -4465,7 +4486,7 @@ func TestModelHelpersAPItoResourceError1(t *testing.T) {
 		AllocationMessage: "",
 		Blocker:           false,
 		Stored:            false,
-		Weight:            0,
+		Weights:           ";0",
 		ThresholdIDs:      nil,
 	}
 	_, err := APItoResource(testStruct, "")
@@ -4485,7 +4506,7 @@ func TestModelHelpersAPItoResourceError3(t *testing.T) {
 		AllocationMessage: "",
 		Blocker:           false,
 		Stored:            false,
-		Weight:            0,
+		Weights:           ";0",
 		ThresholdIDs:      nil,
 	}
 	_, err := APItoResource(testStruct, "")

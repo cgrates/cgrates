@@ -1802,7 +1802,11 @@ func testV1FIdxSetChargerSProfileWithFltr(t *testing.T) {
 			FilterIDs: []string{"fltr_for_attr",
 				"*string:~*req.Account:1001"},
 			AttributeIDs: []string{"*none"},
-			Weight:       20,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
 		},
 		APIOpts: nil,
 	}
@@ -1895,7 +1899,11 @@ func testV1FIdxSetChargerProfileMoreFltrsMoreIndexing(t *testing.T) {
 				"*string:~*req.Account:1001",
 				"fltr_for_attr3", "fltr_for_attr2"},
 			AttributeIDs: []string{"*none"},
-			Weight:       20,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
 		},
 		APIOpts: nil,
 	}
@@ -1995,7 +2003,11 @@ func testV1FIdxChargerMoreProfileForFilters(t *testing.T) {
 			RunID: "NEW_ID",
 			FilterIDs: []string{"*string:~*req.Account:1001",
 				"fltr_for_attr3", "fltr_for_attr2"},
-			Weight: 40,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 40,
+				},
+			},
 		},
 		APIOpts: nil,
 	}
@@ -2005,7 +2017,11 @@ func testV1FIdxChargerMoreProfileForFilters(t *testing.T) {
 			RunID: "NEW_ID2",
 			FilterIDs: []string{"*string:~*req.Account:1001",
 				"fltr_for_attr"},
-			Weight: 40,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 40,
+				},
+			},
 		},
 		APIOpts: nil,
 	}
@@ -3328,9 +3344,12 @@ func testV1FIdxSetResourceSProfileWithFltr(t *testing.T) {
 			ID:     "RESOURCE1",
 			FilterIDs: []string{"*string:~*req.Account:1001",
 				"fltr_for_attr"},
-			UsageTTL:     time.Second,
-			Limit:        1,
-			Weight:       10,
+			UsageTTL: time.Second,
+			Limit:    1,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				}},
 			ThresholdIDs: []string{"TH1"},
 		},
 	}
@@ -3422,9 +3441,12 @@ func testV1FIdxSetResourceSMoreFltrsMoreIndexing(t *testing.T) {
 			FilterIDs: []string{"*string:~*req.Account:1001",
 				"fltr_for_attr",
 				"fltr_for_attr3", "fltr_for_attr2"},
-			UsageTTL:     time.Second,
-			Limit:        1,
-			Weight:       10,
+			UsageTTL: time.Second,
+			Limit:    1,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				}},
 			ThresholdIDs: []string{"TH1"},
 		},
 	}
@@ -3526,7 +3548,10 @@ func testV1FIdxResourceSMoreProfilesForFltrs(t *testing.T) {
 				"fltr_for_attr3", "fltr_for_attr2"},
 			UsageTTL: time.Second,
 			Limit:    8,
-			Weight:   20,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				}},
 		},
 	}
 	resPrfl2 := &engine.ResourceProfileWithAPIOpts{
@@ -3537,7 +3562,10 @@ func testV1FIdxResourceSMoreProfilesForFltrs(t *testing.T) {
 				"fltr_for_attr"},
 			UsageTTL: time.Second,
 			Limit:    4,
-			Weight:   150,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 150,
+				}},
 		},
 	}
 	var reply string

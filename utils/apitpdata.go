@@ -148,7 +148,7 @@ type TPResourceProfile struct {
 	AllocationMessage string
 	Blocker           bool // blocker flag to stop processing on filters matched
 	Stored            bool
-	Weight            float64  // Weight to sort the ResourceLimits
+	Weights           string   // Weight to sort the ResourceLimits
 	ThresholdIDs      []string // Thresholds to check after changing Limit
 }
 
@@ -331,7 +331,7 @@ type TPChargerProfile struct {
 	FilterIDs    []string
 	RunID        string
 	AttributeIDs []string
-	Weight       float64
+	Weights      string
 }
 
 type TPTntID struct {

@@ -185,14 +185,22 @@ func testChrgITMigrateAndMove(t *testing.T) {
 		ID:           "CHRG_1",
 		FilterIDs:    []string{"*string:Accont:1001", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z|2014-07-14T14:25:00Z"},
 		AttributeIDs: []string{"ATTR_1"},
-		Weight:       20,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 	}
 	chrgPrf2 := &engine.ChargerProfile{
 		Tenant:       "cgrates.com",
 		ID:           "CHRG_1",
 		FilterIDs:    []string{"*string:Accont:1001", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z|2014-07-14T14:25:00Z"},
 		AttributeIDs: []string{"ATTR_1"},
-		Weight:       20,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 	}
 	switch chrgAction {
 	case utils.Migrate: // for the momment only one version of chargers exists

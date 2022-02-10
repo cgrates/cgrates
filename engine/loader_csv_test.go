@@ -94,7 +94,7 @@ func TestLoadResourceProfiles(t *testing.T) {
 			FilterIDs:         []string{"*string:~*req.Account:1001"},
 			UsageTTL:          "1s",
 			AllocationMessage: "call",
-			Weight:            10,
+			Weights:           ";10",
 			Limit:             "2",
 			Blocker:           true,
 			Stored:            true,
@@ -108,7 +108,7 @@ func TestLoadResourceProfiles(t *testing.T) {
 			AllocationMessage: "premium_call",
 			Blocker:           true,
 			Stored:            true,
-			Weight:            10,
+			Weights:           ";10",
 			Limit:             "2",
 		},
 	}
@@ -441,7 +441,7 @@ func TestLoadChargerProfiles(t *testing.T) {
 			FilterIDs:    []string{"*string:~*req.Account:1001"},
 			RunID:        "*rated",
 			AttributeIDs: []string{"ATTR_1001_SIMPLEAUTH"},
-			Weight:       20,
+			Weights:      ";20",
 		},
 	}
 	cppKey := utils.TenantID{Tenant: "cgrates.org", ID: "Charger1"}

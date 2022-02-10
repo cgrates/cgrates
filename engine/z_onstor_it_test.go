@@ -130,9 +130,12 @@ func testOnStorITIsDBEmpty(t *testing.T) {
 
 func testOnStorITResourceProfile(t *testing.T) {
 	rL := &ResourceProfile{
-		Tenant:       "cgrates.org",
-		ID:           "RL_TEST2",
-		Weight:       10,
+		Tenant: "cgrates.org",
+		ID:     "RL_TEST2",
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			}},
 		FilterIDs:    []string{"*string:~*req.Account:1001", "*ai:~*req.AnswerTime:2014-07-03T13:43:00Z|2014-07-03T13:44:00Z"},
 		Limit:        1,
 		ThresholdIDs: []string{"TEST_ACTIONS"},
@@ -923,7 +926,11 @@ func testOnStorITChargerProfile(t *testing.T) {
 		FilterIDs:    []string{"*string:~*req.Account:1001", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
 		RunID:        "*rated",
 		AttributeIDs: []string{"ATTR_1"},
-		Weight:       20,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 	}
 	if _, rcvErr := onStor.GetChargerProfile(context.Background(), "cgrates.org", "CPP_1",
 		true, false, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {

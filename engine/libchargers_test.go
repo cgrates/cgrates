@@ -28,10 +28,14 @@ import (
 func TestChargerProfileSet(t *testing.T) {
 	cp := ChargerProfile{}
 	exp := ChargerProfile{
-		Tenant:       "cgrates.org",
-		ID:           "ID",
-		FilterIDs:    []string{"fltr1", "*string:~*req.Account:1001"},
-		Weight:       10,
+		Tenant:    "cgrates.org",
+		ID:        "ID",
+		FilterIDs: []string{"fltr1", "*string:~*req.Account:1001"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 		RunID:        utils.MetaDefault,
 		AttributeIDs: []string{"attr1"},
 	}
@@ -54,7 +58,7 @@ func TestChargerProfileSet(t *testing.T) {
 	if err := cp.Set([]string{utils.FilterIDs}, "fltr1;*string:~*req.Account:1001", false, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
-	if err := cp.Set([]string{utils.Weight}, 10, false, utils.EmptyString); err != nil {
+	if err := cp.Set([]string{utils.Weights}, ";10", false, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
 	if err := cp.Set([]string{utils.RunID}, utils.MetaDefault, false, utils.EmptyString); err != nil {
@@ -70,8 +74,18 @@ func TestChargerProfileSet(t *testing.T) {
 }
 
 func TestChargerProfilesSort(t *testing.T) {
-	cp := ChargerProfiles{{}, {Weight: 10}}
-	exp := ChargerProfiles{{Weight: 10}, {}}
+	cp := ChargerProfiles{{}, {Weights: utils.DynamicWeights{
+		{
+			Weight: 20,
+		},
+	},
+		weight: 20}}
+	exp := ChargerProfiles{{Weights: utils.DynamicWeights{
+		{
+			Weight: 20,
+		},
+	},
+		weight: 20}, {}}
 	cp.Sort()
 	if !reflect.DeepEqual(exp, cp) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(cp))
@@ -80,10 +94,14 @@ func TestChargerProfilesSort(t *testing.T) {
 
 func TestChargerProfileAsInterface(t *testing.T) {
 	cp := ChargerProfile{
-		Tenant:       "cgrates.org",
-		ID:           "ID",
-		FilterIDs:    []string{"fltr1", "*string:~*req.Account:1001"},
-		Weight:       10,
+		Tenant:    "cgrates.org",
+		ID:        "ID",
+		FilterIDs: []string{"fltr1", "*string:~*req.Account:1001"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 		RunID:        utils.MetaDefault,
 		AttributeIDs: []string{"attr1"},
 	}
@@ -118,7 +136,7 @@ func TestChargerProfileAsInterface(t *testing.T) {
 	}
 	if val, err := cp.FieldAsInterface([]string{utils.Weight}); err != nil {
 		t.Fatal(err)
-	} else if exp := cp.Weight; !reflect.DeepEqual(exp, val) {
+	} else if exp := cp.Weights; !reflect.DeepEqual(exp, val) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
 	}
 	if val, err := cp.FieldAsInterface([]string{utils.RunID}); err != nil {
@@ -154,18 +172,26 @@ func TestChargerProfileAsInterface(t *testing.T) {
 func TestChargerProfileMerge(t *testing.T) {
 	dp := &ChargerProfile{}
 	exp := &ChargerProfile{
-		Tenant:       "cgrates.org",
-		ID:           "ID",
-		FilterIDs:    []string{"fltr1", "*string:~*req.Account:1001"},
-		Weight:       10,
+		Tenant:    "cgrates.org",
+		ID:        "ID",
+		FilterIDs: []string{"fltr1", "*string:~*req.Account:1001"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 		RunID:        utils.MetaDefault,
 		AttributeIDs: []string{"attr1"},
 	}
 	if dp.Merge(&ChargerProfile{
-		Tenant:       "cgrates.org",
-		ID:           "ID",
-		FilterIDs:    []string{"fltr1", "*string:~*req.Account:1001"},
-		Weight:       10,
+		Tenant:    "cgrates.org",
+		ID:        "ID",
+		FilterIDs: []string{"fltr1", "*string:~*req.Account:1001"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 		RunID:        utils.MetaDefault,
 		AttributeIDs: []string{"attr1"},
 	}); !reflect.DeepEqual(exp, dp) {

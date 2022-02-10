@@ -164,7 +164,11 @@ func TestFilterIndexesCheckingDynamicPathToNotIndexLibphNmbr(t *testing.T) {
 		},
 		RunID:        "RAW",
 		AttributeIDs: []string{"attr_1"},
-		Weight:       10,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 	}
 
 	if err := dm.SetChargerProfile(context.Background(), cghPfr, true); err != nil {
