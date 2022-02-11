@@ -93,9 +93,9 @@ func (admS *AdminSv1) GetStatQueueProfiles(ctx *context.Context, args *utils.Arg
 	return
 }
 
-// GetStatQueueProfileCount returns the total number of StatQueueProfileIDs registered for a tenant
+// GetStatQueueProfilesCount returns the total number of StatQueueProfileIDs registered for a tenant
 // returns ErrNotFound in case of 0 StatQueueProfileIDs
-func (admS *AdminSv1) GetStatQueueProfileCount(ctx *context.Context, args *utils.ArgsItemIDs, reply *int) (err error) {
+func (admS *AdminSv1) GetStatQueueProfilesCount(ctx *context.Context, args *utils.ArgsItemIDs, reply *int) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = admS.cfg.GeneralCfg().DefaultTenant

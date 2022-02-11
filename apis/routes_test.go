@@ -86,7 +86,7 @@ func TestRoutesSetGetRemRouteProfile(t *testing.T) {
 
 	var rplyCount int
 
-	if err := adms.GetRouteProfileCount(context.Background(), &utils.ArgsItemIDs{},
+	if err := adms.GetRouteProfilesCount(context.Background(), &utils.ArgsItemIDs{},
 		&rplyCount); err != nil {
 		t.Error(err)
 	} else if rplyCount != len(rtPrfIDs) {
@@ -395,7 +395,7 @@ func TestRoutesGetRouteProfileIDsErrKeys(t *testing.T) {
 	dm.DataDB().Flush(utils.EmptyString)
 }
 
-func TestRoutesGetRouteProfileCountErrMock(t *testing.T) {
+func TestRoutesGetRouteProfilesCountErrMock(t *testing.T) {
 	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
@@ -422,7 +422,7 @@ func TestRoutesGetRouteProfileCountErrMock(t *testing.T) {
 
 	var reply int
 
-	if err := adms.GetRouteProfileCount(context.Background(),
+	if err := adms.GetRouteProfilesCount(context.Background(),
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
 		}, &reply); err == nil || err != utils.ErrNotImplemented {
@@ -430,7 +430,7 @@ func TestRoutesGetRouteProfileCountErrMock(t *testing.T) {
 	}
 }
 
-func TestRoutesGetRouteProfileCountErrKeys(t *testing.T) {
+func TestRoutesGetRouteProfilesCountErrKeys(t *testing.T) {
 	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
@@ -447,7 +447,7 @@ func TestRoutesGetRouteProfileCountErrKeys(t *testing.T) {
 
 	var reply int
 
-	if err := adms.GetRouteProfileCount(context.Background(),
+	if err := adms.GetRouteProfilesCount(context.Background(),
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
 		}, &reply); err == nil || err != utils.ErrNotFound {

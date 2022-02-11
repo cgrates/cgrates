@@ -88,7 +88,7 @@ func TestThresholdsSetGetRemThresholdProfile(t *testing.T) {
 
 	var rplyCount int
 
-	if err := adms.GetThresholdProfileCount(context.Background(), &utils.ArgsItemIDs{},
+	if err := adms.GetThresholdProfilesCount(context.Background(), &utils.ArgsItemIDs{},
 		&rplyCount); err != nil {
 		t.Error(err)
 	} else if rplyCount != len(thPrfIDs) {
@@ -397,7 +397,7 @@ func TestThresholdsGetThresholdProfileIDsErrKeys(t *testing.T) {
 	dm.DataDB().Flush(utils.EmptyString)
 }
 
-func TestThresholdsGetThresholdProfileCountErrMock(t *testing.T) {
+func TestThresholdsGetThresholdProfilesCountErrMock(t *testing.T) {
 	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
@@ -424,7 +424,7 @@ func TestThresholdsGetThresholdProfileCountErrMock(t *testing.T) {
 
 	var reply int
 
-	if err := adms.GetThresholdProfileCount(context.Background(),
+	if err := adms.GetThresholdProfilesCount(context.Background(),
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
 		}, &reply); err == nil || err != utils.ErrNotImplemented {
@@ -432,7 +432,7 @@ func TestThresholdsGetThresholdProfileCountErrMock(t *testing.T) {
 	}
 }
 
-func TestThresholdsGetThresholdProfileCountErrKeys(t *testing.T) {
+func TestThresholdsGetThresholdProfilesCountErrKeys(t *testing.T) {
 	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
@@ -449,7 +449,7 @@ func TestThresholdsGetThresholdProfileCountErrKeys(t *testing.T) {
 
 	var reply int
 
-	if err := adms.GetThresholdProfileCount(context.Background(),
+	if err := adms.GetThresholdProfilesCount(context.Background(),
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
 		}, &reply); err == nil || err != utils.ErrNotFound {

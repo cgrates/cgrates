@@ -158,9 +158,9 @@ func (adms *AdminSv1) RemoveFilter(ctx *context.Context, arg *utils.TenantIDWith
 	return nil
 }
 
-// GetFilterCount returns the total number of FilterIDs registered for a tenant
+// GetFiltersCount returns the total number of FilterIDs registered for a tenant
 // returns ErrNotFound in case of 0 FilterIDs
-func (admS *AdminSv1) GetFilterCount(ctx *context.Context, args *utils.ArgsItemIDs, reply *int) (err error) {
+func (admS *AdminSv1) GetFiltersCount(ctx *context.Context, args *utils.ArgsItemIDs, reply *int) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = admS.cfg.GeneralCfg().DefaultTenant

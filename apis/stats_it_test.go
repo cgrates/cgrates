@@ -60,7 +60,7 @@ var (
 		testStatsGetStatQueueProfileIDs,
 		testStatsGetStatQueueProfiles1,
 		testStatsGetStatQueueProfilesWithPrefix,
-		testStatsGetStatQueueProfileCount,
+		testStatsGetStatQueueProfilesCount,
 		testStatsRemoveStatQueueProfiles,
 		testStatsGetStatQueuesAfterRemove,
 		// check if stats, thresholds and actions subsystems function properly together
@@ -570,9 +570,9 @@ func testStatsGetStatQueueProfilesWithPrefix(t *testing.T) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", exp, reply)
 	}
 }
-func testStatsGetStatQueueProfileCount(t *testing.T) {
+func testStatsGetStatQueueProfilesCount(t *testing.T) {
 	var reply int
-	if err := sqRPC.Call(context.Background(), utils.AdminSv1GetStatQueueProfileCount,
+	if err := sqRPC.Call(context.Background(), utils.AdminSv1GetStatQueueProfilesCount,
 		&utils.TenantWithAPIOpts{
 			Tenant: "cgrates.org",
 		}, &reply); err != nil {

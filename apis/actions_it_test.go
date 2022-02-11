@@ -54,12 +54,12 @@ var (
 		testActionsGetActionProfileBeforeSet,
 		testActionsGetActionProfilesBeforeSet,
 		testActionsGetActionProfileIDsBeforeSet,
-		testActionsGetActionProfileCountBeforeSet,
+		testActionsGetActionProfilesCountBeforeSet,
 		testActionsSetActionProfile,
 		testActionsGetActionProfileAfterSet,
 		testActionsGetActionProfilesAfterSet,
 		testActionsGetActionProfileIDsAfterSet,
-		testActionsGetActionProfileCountAfterSet,
+		testActionsGetActionProfilesCountAfterSet,
 		testActionsRemoveActionProfile,
 		testActionsGetActionProfileAfterRemove,
 		testActionsGetActionProfilesAfterRemove,
@@ -192,9 +192,9 @@ func testActionsGetActionProfileIDsBeforeSet(t *testing.T) {
 	}
 }
 
-func testActionsGetActionProfileCountBeforeSet(t *testing.T) {
+func testActionsGetActionProfilesCountBeforeSet(t *testing.T) {
 	var rplyCount int
-	if err := actRPC.Call(context.Background(), utils.AdminSv1GetActionProfileCount,
+	if err := actRPC.Call(context.Background(), utils.AdminSv1GetActionProfilesCount,
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{
 				Tenant: "cgrates.org",
@@ -301,9 +301,9 @@ func testActionsGetActionProfilesAfterSet(t *testing.T) {
 	}
 }
 
-func testActionsGetActionProfileCountAfterSet(t *testing.T) {
+func testActionsGetActionProfilesCountAfterSet(t *testing.T) {
 	var rplyCount int
-	if err := actRPC.Call(context.Background(), utils.AdminSv1GetActionProfileCount,
+	if err := actRPC.Call(context.Background(), utils.AdminSv1GetActionProfilesCount,
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{
 				Tenant: "cgrates.org",

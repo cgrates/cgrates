@@ -95,7 +95,7 @@ var (
 				utils.Weight:     "20.0",
 			},
 			APIOpts: map[string]interface{}{
-				utils.OptsRoutesProfileCount: 1,
+				utils.OptsRoutesProfilesCount: 1,
 			},
 		},
 		{ //matching RouteProfile2
@@ -109,7 +109,7 @@ var (
 				utils.Weight:     "20.0",
 			},
 			APIOpts: map[string]interface{}{
-				utils.OptsRoutesProfileCount: 1,
+				utils.OptsRoutesProfilesCount: 1,
 			},
 		},
 		{ //matching RouteProfilePrefix
@@ -119,7 +119,7 @@ var (
 				"Route": "RouteProfilePrefix",
 			},
 			APIOpts: map[string]interface{}{
-				utils.OptsRoutesProfileCount: 1,
+				utils.OptsRoutesProfilesCount: 1,
 			},
 		},
 		{ //matching
@@ -130,7 +130,7 @@ var (
 				"PddInterval":   "1s",
 			},
 			APIOpts: map[string]interface{}{
-				utils.OptsRoutesProfileCount: 1,
+				utils.OptsRoutesProfilesCount: 1,
 			},
 		},
 	}
@@ -626,7 +626,7 @@ func TestRoutesSortedForEventWithLimitAndOffset2(t *testing.T) {
 		Tenant:  "cgrates.org",
 		ID:      "utils.CGREvent1",
 		Event:   map[string]interface{}{},
-		APIOpts: map[string]interface{}{utils.OptsRoutesProfileCount: 3},
+		APIOpts: map[string]interface{}{utils.OptsRoutesProfilesCount: 3},
 	}
 
 	cfg := config.NewDefaultCGRConfig()
