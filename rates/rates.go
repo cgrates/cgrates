@@ -267,6 +267,61 @@ func (rS *RateS) V1RateProfilesForEvent(ctx *context.Context, args *utils.CGREve
 	return
 }
 
+// RateProfilesForEvent returns the list of rates that are matching the event from a specific profile
+func (rS *RateS) V1RateProfileRatesForEvent(ctx *context.Context, args *utils.CGREvent, rtIDs *[]string) (err error) {
+	if args == nil {
+		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
+	}
+	if _, has := args.APIOpts[utils.MetaRateProfileID]; !has {
+		return utils.NewErrMandatoryIeMissing(utils.MetaRateProfileID)
+	}
+	rpID := utils.IfaceAsString(args.APIOpts[utils.MetaRateProfileID])
+	tnt := args.Tenant
+	if tnt == utils.EmptyString {
+		tnt = rS.cfg.GeneralCfg().DefaultTenant
+	}
+	evNM := args.AsDataProvider()
+	var rateIDs utils.StringSet
+	if rateIDs, err = engine.MatchingItemIDsForEvent(ctx,
+		evNM,
+		rS.cfg.RateSCfg().RateStringIndexedFields,
+		rS.cfg.RateSCfg().RatePrefixIndexedFields,
+		rS.cfg.RateSCfg().RateSuffixIndexedFields,
+		rS.cfg.RateSCfg().RateExistsIndexedFields,
+		rS.cfg.RateSCfg().RateNotExistsIndexedFields,
+		rS.dm,
+		utils.CacheRateFilterIndexes,
+		utils.ConcatenatedKey(tnt, rpID),
+		rS.cfg.RateSCfg().RateIndexedSelects,
+		rS.cfg.RateSCfg().RateNestedFields,
+	); err != nil {
+		return
+	}
+	if len(rateIDs) == 0 {
+		return utils.ErrNotFound
+	}
+	var ratesMtched []string
+	for _, rateID := range rateIDs.AsSlice() {
+		var rp *utils.RateProfile
+		if rp, err = rS.dm.GetRateProfile(ctx, tnt, rpID, true, true, utils.NonTransactional); err != nil {
+			return
+		}
+		rate := rp.Rates[rateID]
+		var pass bool
+		if pass, err = rS.fltrS.Pass(ctx, tnt, rate.FilterIDs, evNM); err != nil {
+			return
+		} else if !pass {
+			continue
+		}
+		ratesMtched = append(ratesMtched, rateID)
+	}
+	if len(ratesMtched) == 0 {
+		return utils.ErrNotFound
+	}
+	*rtIDs = ratesMtched
+	return
+}
+
 // V1CostForEvent will be called to calculate the cost for an event
 func (rS *RateS) V1CostForEvent(ctx *context.Context, args *utils.CGREvent, rpCost *utils.RateProfileCost) (err error) {
 	var rPfIDs []string

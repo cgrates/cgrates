@@ -107,7 +107,7 @@
             {"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
             {"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
             {"tag": "FilterIDs", "path": "FilterIDs", "type": "*variable", "value": "~*req.2"},
-            {"tag": "Weight", "path": "Weight", "type": "*variable", "value": "~*req.3"},
+            {"tag": "Weights", "path": "Weights", "type": "*variable", "value": "~*req.3"},
             {"tag": "Schedule", "path": "Schedule", "type": "*variable", "value": "~*req.4"},
             // {"tag": "TargetType", "path": "TargetType", "type": "*variable", "value": "~*req.5"},
             {"tag": "TargetIDs", "path": "Targets[<~*req.5>]", "type": "*variable", "value": "~*req.6"},
