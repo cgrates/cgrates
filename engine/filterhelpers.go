@@ -52,7 +52,7 @@ func MatchingItemIDsForEvent(ctx *context.Context, ev utils.MapStorage, stringFl
 		}
 		stringFieldVals := map[string]string{utils.MetaAny: utils.MetaAny}                                                                        // cache here field string values, start with default one
 		filterIndexTypes := []string{utils.MetaString, utils.MetaPrefix, utils.MetaSuffix, utils.MetaExists, utils.MetaNotExists, utils.MetaNone} // the MetaNone is used for all items that do not have filters
-		for i, fieldIDs := range []*[]string{stringFldIDs, prefixFldIDs, suffixFldIDs, existsFldIDs, notExistsFldIDs, {utils.MetaAny}} {          // same routine for both string and prefix filter types
+		for i, fieldIDs := range []*[]string{stringFldIDs, prefixFldIDs, suffixFldIDs, existsFldIDs, notExistsFldIDs, {utils.MetaAny}} {          // same routine for  filter indexes types
 			if fieldIDs == nil {
 				fieldIDs = &allFieldIDs
 			}
@@ -80,7 +80,7 @@ func MatchingItemIDsForEvent(ctx *context.Context, ev utils.MapStorage, stringFl
 				case utils.MetaExists:
 					fldVals = []string{utils.MetaAny} // for *exists, we will use *any value
 				case utils.MetaNotExists:
-					fldVals = []string{utils.MetaNone} // for *notexists, we will use *notexists
+					fldVals = []string{utils.MetaNone} // for *notexists, we will use *none
 				}
 				for _, val := range fldVals {
 					var dbIndexes map[string]utils.StringSet // list of items matched in DB

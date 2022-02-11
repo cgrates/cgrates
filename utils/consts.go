@@ -1297,9 +1297,10 @@ const (
 )
 
 const (
-	RateSv1             = "RateSv1"
-	RateSv1CostForEvent = "RateSv1.CostForEvent"
-	RateSv1Ping         = "RateSv1.Ping"
+	RateSv1                     = "RateSv1"
+	RateSv1CostForEvent         = "RateSv1.CostForEvent"
+	RateSv1RateProfilesForEvent = "RateSv1.RateProfilesForEvent"
+	RateSv1Ping                 = "RateSv1.Ping"
 )
 
 const (

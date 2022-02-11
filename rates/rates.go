@@ -217,6 +217,56 @@ func (rS *RateS) rateProfileCostForEvent(ctx *context.Context, rtPfl *utils.Rate
 	return
 }
 
+// V1RateProfilesForEvent will be called to list the RateProfilesIDs that are matching the event
+func (rS *RateS) V1RateProfilesForEvent(ctx *context.Context, args *utils.CGREvent, rpIDs *[]string) (err error) {
+	if args == nil {
+		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
+	}
+	tnt := args.Tenant
+	if tnt == utils.EmptyString {
+		tnt = rS.cfg.GeneralCfg().DefaultTenant
+	}
+	evNm := args.AsDataProvider()
+	var ratePrfs utils.StringSet
+	if ratePrfs, err = engine.MatchingItemIDsForEvent(ctx,
+		evNm,
+		rS.cfg.RateSCfg().StringIndexedFields,
+		rS.cfg.RateSCfg().PrefixIndexedFields,
+		rS.cfg.RateSCfg().SuffixIndexedFields,
+		rS.cfg.RateSCfg().ExistsIndexedFields,
+		rS.cfg.RateSCfg().NotExistsIndexedFields,
+		rS.dm,
+		utils.CacheRateProfilesFilterIndexes,
+		tnt,
+		rS.cfg.RateSCfg().IndexedSelects,
+		rS.cfg.RateSCfg().NestedFields,
+	); err != nil {
+		return
+	}
+	if len(ratePrfs) == 0 {
+		return utils.ErrNotFound
+	}
+	var profilesMtched []string
+	for _, ratePrf := range ratePrfs.AsSlice() {
+		var rp *utils.RateProfile
+		if rp, err = rS.dm.GetRateProfile(ctx, tnt, ratePrf, true, true, utils.NonTransactional); err != nil {
+			return
+		}
+		var pass bool
+		if pass, err = rS.fltrS.Pass(ctx, tnt, rp.FilterIDs, evNm); err != nil {
+			return
+		} else if !pass {
+			continue
+		}
+		profilesMtched = append(profilesMtched, ratePrf)
+	}
+	if len(profilesMtched) == 0 {
+		return utils.ErrNotFound
+	}
+	*rpIDs = profilesMtched
+	return
+}
+
 // V1CostForEvent will be called to calculate the cost for an event
 func (rS *RateS) V1CostForEvent(ctx *context.Context, args *utils.CGREvent, rpCost *utils.RateProfileCost) (err error) {
 	var rPfIDs []string

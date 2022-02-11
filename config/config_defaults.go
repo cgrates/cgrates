@@ -1549,7 +1549,7 @@ const CGRATES_CFG_JSON = `
 "admins": {
 	"enabled": false,
 	"caches_conns":["*internal"],
-	"actions_conns": [],					// connections to ActionS for reloads
+	"actions_conns": [],		 			// connections to ActionS for reloads
 	"attributes_conns": [],					// connections to AttributeS for CDRExporter
 	"ees_conns": [],						// connections to EEs
 },
