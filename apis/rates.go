@@ -268,6 +268,11 @@ func (rSv1 *RateSv1) RateProfilesForEvent(ctx *context.Context, args *utils.CGRE
 	return rSv1.rS.V1RateProfilesForEvent(ctx, args, rpIDs)
 }
 
+// RateProfilesForEvent returns the list of rates that are matching the event from a specific profile
+func (rSv1 *RateSv1) RateProfileRatesForEvent(ctx *context.Context, args *utils.CGREvent, rateIDs *[]string) (err error) {
+	return rSv1.rS.V1RateProfileRatesForEvent(ctx, args, rateIDs)
+}
+
 // CostForEvent returs the costs for the event and all the rate profile information
 func (rSv1 *RateSv1) CostForEvent(ctx *context.Context, args *utils.CGREvent, rpCost *utils.RateProfileCost) (err error) {
 	return rSv1.rS.V1CostForEvent(ctx, args, rpCost)

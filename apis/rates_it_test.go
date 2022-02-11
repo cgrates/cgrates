@@ -76,6 +76,7 @@ var (
 		testRateProfileSetMultipleRatesInProfile,
 		testRateProfileUpdateProfileRatesOverwrite,
 		testRateProfilesForEventMatchingEvents,
+		testRateProfileRatesForEventMatchingEvents,
 		testRateSKillEngine,
 	}
 )
@@ -1999,21 +2000,18 @@ func testRateProfilesForEventMatchingEvents(t *testing.T) {
 	}
 	ratePrf4 := &utils.APIRateProfile{
 		RateProfile: &utils.RateProfile{
-			Tenant:          utils.CGRateSorg,
-			ID:              "RT_104",
-			FilterIDs:       []string{"*exists:~*req.Destination:"},
-			MinCost:         utils.NewDecimal(22, 2),
-			MaxCost:         utils.NewDecimal(500000, 6),
-			MaxCostStrategy: "*free",
+			Tenant:    utils.CGRateSorg,
+			ID:        "RT_104",
+			FilterIDs: []string{"*exists:~*req.Destination:"},
 			Rates: map[string]*utils.Rate{
-				"RT_Destination": {
-					ID: "RT_Destination",
+				"RT_Everytime": {
+					ID: "RT_Everytime",
 					Weights: utils.DynamicWeights{
 						{
 							Weight: 0,
 						},
 					},
-					ActivationTimes: "* 16 * * *",
+					ActivationTimes: "* 14 * * *",
 					IntervalRates: []*utils.IntervalRate{
 						{
 							IntervalStart: utils.NewDecimal(0, 0),
@@ -2147,6 +2145,135 @@ func testRateProfilesForEventMatchingEvents(t *testing.T) {
 			t.Errorf("Expected %+v, received %+v", expected, rtPrfIDs)
 		}
 	}
+}
+
+func testRateProfileRatesForEventMatchingEvents(t *testing.T) {
+	// now for 2 of our profiles, we will set some rates and see what rates are matching our event
+	ratePrf1 := &utils.APIRateProfile{
+		RateProfile: &utils.RateProfile{
+			Tenant: utils.CGRateSorg,
+			ID:     "RT_CGR202",
+			//FilterIDs: []string{"*lte:~*opts.*usage:2m"},
+			Rates: map[string]*utils.Rate{
+				"RT_ALWAYS": {
+					ID:              "RT_ALWAYS",
+					FilterIDs:       []string{"*prefix:~*req.Destination:2023", "*string:~*opts.*usage:1m"},
+					ActivationTimes: "* * * * *",
+					IntervalRates: []*utils.IntervalRate{
+						{
+							IntervalStart: utils.NewDecimal(0, 0),
+							FixedFee:      utils.NewDecimal(22, 2),
+							Increment:     utils.NewDecimal(int64(5*time.Second), 0),
+							RecurrentFee:  utils.NewDecimal(int64(5*time.Second), 0),
+							Unit:          utils.NewDecimal(int64(time.Minute), 0),
+						},
+					},
+				},
+				"RT_WEEKEND": {
+					ID:              "RT_WEEKEND",
+					ActivationTimes: "* * * * 5-6",
+					FilterIDs:       []string{"*prefix:~*req.Destination:2023"},
+					IntervalRates: []*utils.IntervalRate{
+						{
+							IntervalStart: utils.NewDecimal(0, 0),
+							Increment:     utils.NewDecimal(int64(time.Second), 0),
+							RecurrentFee:  utils.NewDecimal(int64(time.Second), 0),
+							Unit:          utils.NewDecimal(int64(time.Minute), 0),
+						},
+					},
+				},
+				"RT_SPECIAL": {
+					ID:              "RT_SPECIAL",
+					ActivationTimes: "* 12 * * *",
+					FilterIDs: []string{"*string:~*req.Account:2021",
+						"*string:~*req.Destination:2023"},
+					IntervalRates: []*utils.IntervalRate{
+						{
+							IntervalStart: utils.NewDecimal(int64(50*time.Second), 0),
+							Increment:     utils.NewDecimal(int64(2*time.Second), 0),
+							RecurrentFee:  utils.NewDecimal(int64(2*time.Second), 0),
+							Unit:          utils.NewDecimal(int64(time.Minute), 0),
+						},
+					},
+				},
+				"RT_DIFFERENT": {
+					ID:              "RT_DIFFERENT",
+					ActivationTimes: "10 12 * * *",
+					//FilterIDs:       []string{"*lte:~*opts.*usage:2m"},
+					IntervalRates: []*utils.IntervalRate{
+						{
+							IntervalStart: utils.NewDecimal(int64(50*time.Second), 0),
+							Increment:     utils.NewDecimal(int64(2*time.Second), 0),
+							RecurrentFee:  utils.NewDecimal(int64(2*time.Second), 0),
+							Unit:          utils.NewDecimal(int64(time.Minute), 0),
+						},
+					},
+				},
+			},
+		},
+	}
+	var reply string
+	if err := rateSRPC.Call(context.Background(), utils.AdminSv1SetRateProfile,
+		ratePrf1, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error(err)
+	}
+
+	expected := []string{"RT_DIFFERENT"}
+	var rateIDs []string
+	if err := rateSRPC.Call(context.Background(), utils.RateSv1RateProfileRatesForEvent,
+		&utils.CGREvent{
+			Tenant: "cgrates.org",
+			Event: map[string]interface{}{
+				"Account": "2021",
+			},
+			APIOpts: map[string]interface{}{
+				utils.MetaRateProfileID: "RT_CGR202",
+				utils.MetaUsage:         "1m",
+			},
+		}, &rateIDs); err != nil {
+		t.Error(err)
+	} else {
+		sort.Slice(expected, func(i, j int) bool {
+			return expected[i] < expected[j]
+		})
+		sort.Slice(rateIDs, func(i, j int) bool {
+			return rateIDs[i] < rateIDs[j]
+		})
+		if !reflect.DeepEqual(expected, rateIDs) {
+			t.Errorf("Expected %+v, received %+v", expected, rateIDs)
+		}
+	}
+
+	/*
+		expected := []string{"RT_DIFFERENT"}
+		var rateIDs []string
+		if err := rateSRPC.Call(context.Background(), utils.RateSv1RateProfileRatesForEvent,
+			&utils.CGREvent{
+				Tenant: "cgrates.org",
+				Event: map[string]interface{}{
+					"Account":         "2021",
+					utils.Destination: "2023",
+				},
+				APIOpts: map[string]interface{}{
+					utils.MetaRateProfileID: "RT_CGR202",
+					utils.MetaUsage:         "1m",
+				},
+			}, &rateIDs); err != nil {
+			t.Error(err)
+		} else {
+			sort.Slice(expected, func(i, j int) bool {
+				return expected[i] < expected[j]
+			})
+			sort.Slice(rateIDs, func(i, j int) bool {
+				return rateIDs[i] < rateIDs[j]
+			})
+			if !reflect.DeepEqual(expected, rateIDs) {
+				t.Errorf("Expected %+v, received %+v", expected, rateIDs)
+			}
+		}
+	*/
 }
 
 //Kill the engine when it is about to be finished

@@ -381,6 +381,7 @@ const (
 	MetaEEs                  = "*ees"
 	MetaRateS                = "*rates"
 	MetaRateSOverwrite       = "*rateSOverwrite"
+	MetaRateProfileID        = "*rateProfileID"
 	MetaContinue             = "*continue"
 	MetaUp                   = "*up"
 	Migrator                 = "migrator"
@@ -1297,10 +1298,11 @@ const (
 )
 
 const (
-	RateSv1                     = "RateSv1"
-	RateSv1CostForEvent         = "RateSv1.CostForEvent"
-	RateSv1RateProfilesForEvent = "RateSv1.RateProfilesForEvent"
-	RateSv1Ping                 = "RateSv1.Ping"
+	RateSv1                         = "RateSv1"
+	RateSv1CostForEvent             = "RateSv1.CostForEvent"
+	RateSv1RateProfilesForEvent     = "RateSv1.RateProfilesForEvent"
+	RateSv1RateProfileRatesForEvent = "RateSv1.RateProfileRatesForEvent"
+	RateSv1Ping                     = "RateSv1.Ping"
 )
 
 const (
