@@ -87,7 +87,7 @@ func TestStatsSetGetRemStatQueueProfile(t *testing.T) {
 
 	var rplyCount int
 
-	if err := adms.GetStatQueueProfileCount(context.Background(), &utils.ArgsItemIDs{},
+	if err := adms.GetStatQueueProfilesCount(context.Background(), &utils.ArgsItemIDs{},
 		&rplyCount); err != nil {
 		t.Error(err)
 	} else if rplyCount != len(sqPrfIDs) {
@@ -395,7 +395,7 @@ func TestStatsGetStatQueueProfileIDsErrKeys(t *testing.T) {
 	dm.DataDB().Flush(utils.EmptyString)
 }
 
-func TestStatsGetStatQueueProfileCountErrMock(t *testing.T) {
+func TestStatsGetStatQueueProfilesCountErrMock(t *testing.T) {
 	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
@@ -422,7 +422,7 @@ func TestStatsGetStatQueueProfileCountErrMock(t *testing.T) {
 
 	var reply int
 
-	if err := adms.GetStatQueueProfileCount(context.Background(),
+	if err := adms.GetStatQueueProfilesCount(context.Background(),
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
 		}, &reply); err == nil || err != utils.ErrNotImplemented {
@@ -430,7 +430,7 @@ func TestStatsGetStatQueueProfileCountErrMock(t *testing.T) {
 	}
 }
 
-func TestStatsGetStatQueueProfileCountErrKeys(t *testing.T) {
+func TestStatsGetStatQueueProfilesCountErrKeys(t *testing.T) {
 	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
@@ -447,7 +447,7 @@ func TestStatsGetStatQueueProfileCountErrKeys(t *testing.T) {
 
 	var reply int
 
-	if err := adms.GetStatQueueProfileCount(context.Background(),
+	if err := adms.GetStatQueueProfilesCount(context.Background(),
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
 		}, &reply); err == nil || err != utils.ErrNotFound {

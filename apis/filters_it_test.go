@@ -52,7 +52,7 @@ var (
 		testFilterSSetFltr,
 		testFilterSGetFilterIDs,
 		testFilterSGetFilters,
-		testFilterSGetFilterCount,
+		testFilterSGetFiltersCount,
 		testGetFilterBeforeSet2,
 		testFilterSSetFilter2,
 		testFilterSGetFilterSIDs2,
@@ -252,14 +252,14 @@ func testFilterSGetFilters(t *testing.T) {
 	}
 }
 
-func testFilterSGetFilterCount(t *testing.T) {
+func testFilterSGetFiltersCount(t *testing.T) {
 	var reply int
 	args := &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{
 			Tenant: utils.CGRateSorg,
 		},
 	}
-	if err := fltrSRPC.Call(context.Background(), utils.AdminSv1GetFilterCount,
+	if err := fltrSRPC.Call(context.Background(), utils.AdminSv1GetFiltersCount,
 		args, &reply); err != nil {
 		t.Error(err)
 	} else if reply != 1 {
@@ -427,7 +427,7 @@ func testFilterSGetFilterSCount2(t *testing.T) {
 			Tenant: utils.CGRateSorg,
 		},
 	}
-	if err := fltrSRPC.Call(context.Background(), utils.AdminSv1GetFilterCount,
+	if err := fltrSRPC.Call(context.Background(), utils.AdminSv1GetFiltersCount,
 		args, &reply); err != nil {
 		t.Error(err)
 	} else if reply != 2 {

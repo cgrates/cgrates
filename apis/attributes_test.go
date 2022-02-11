@@ -74,7 +74,7 @@ func TestAttributesSetGetAttributeProfile(t *testing.T) {
 
 	//count the IDs
 	var nmbr int
-	if err := admS.GetAttributeProfileCount(context.Background(), &utils.ArgsItemIDs{}, &nmbr); err != nil {
+	if err := admS.GetAttributeProfilesCount(context.Background(), &utils.ArgsItemIDs{}, &nmbr); err != nil {
 		t.Error(err)
 	} else if nmbr != 1 {
 		t.Errorf("Expected just one ID")
@@ -402,7 +402,7 @@ func TestAttributesGetAttributeProfileIDsMockErrKeys(t *testing.T) {
 	dm.DataDB().Flush(utils.EmptyString)
 }
 
-func TestAttributesGetAttributeProfileCountMockErr(t *testing.T) {
+func TestAttributesGetAttributeProfilesCountMockErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	dbMock := &engine.DataDBMock{
@@ -431,7 +431,7 @@ func TestAttributesGetAttributeProfileCountMockErr(t *testing.T) {
 
 	var reply int
 	expected := "NOT_IMPLEMENTED"
-	if err := admS.GetAttributeProfileCount(context.Background(),
+	if err := admS.GetAttributeProfilesCount(context.Background(),
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
 		}, &reply); err == nil || err.Error() != expected {
@@ -445,7 +445,7 @@ func TestAttributesGetAttributeProfileCountMockErr(t *testing.T) {
 	}
 	expected = "NOT_FOUND"
 	admS.dm = engine.NewDataManager(dbMockNew, cfg.CacheCfg(), nil)
-	if err := admS.GetAttributeProfileCount(context.Background(),
+	if err := admS.GetAttributeProfilesCount(context.Background(),
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
 		}, &reply); err == nil || err.Error() != expected {

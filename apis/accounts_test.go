@@ -604,7 +604,7 @@ func TestAccountSetGetAccountIDs(t *testing.T) {
 	}
 
 	var getRplyCount int
-	err = admS.GetAccountCount(context.Background(),
+	err = admS.GetAccountsCount(context.Background(),
 		&utils.ArgsItemIDs{
 			Tenant: "testTenant",
 		}, &getRplyCount)
@@ -667,7 +667,7 @@ func TestAccountSetGetAccountIDs(t *testing.T) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ToJSON(expectedGet3), utils.ToJSON(getRply3))
 	}
 	var getRply4 int
-	err = admS.GetAccountCount(context.Background(),
+	err = admS.GetAccountsCount(context.Background(),
 		&utils.ArgsItemIDs{
 			Tenant: "testTenant",
 		}, &getRply4)
@@ -695,7 +695,7 @@ func TestAccountSetGetAccountIDs(t *testing.T) {
 	}
 
 	var getRplyCount2 int
-	err = admS.GetAccountCount(context.Background(),
+	err = admS.GetAccountsCount(context.Background(),
 		&utils.ArgsItemIDs{
 			Tenant: "testTenant",
 		}, &getRplyCount2)
@@ -748,7 +748,7 @@ func TestAccountSetGetAccountIDs(t *testing.T) {
 	}
 
 	var getRplyCount3 int
-	err = admS.GetAccountCount(context.Background(),
+	err = admS.GetAccountsCount(context.Background(),
 		&utils.ArgsItemIDs{
 			Tenant: "testTenant",
 		}, &getRplyCount3)
@@ -766,7 +766,7 @@ func TestAccountSetGetAccountIDs(t *testing.T) {
 	}
 }
 
-func TestAccountGetAccountCountError(t *testing.T) {
+func TestAccountGetAccountsCountError(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg)
@@ -774,7 +774,7 @@ func TestAccountGetAccountCountError(t *testing.T) {
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
 	admS := NewAdminSv1(cfg, dm, connMgr)
 	var getRplyCount3 int
-	err := admS.GetAccountCount(context.Background(),
+	err := admS.GetAccountsCount(context.Background(),
 		&utils.ArgsItemIDs{}, &getRplyCount3)
 	if err == nil || err != utils.ErrNotImplemented {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ErrNotImplemented, err)

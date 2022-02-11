@@ -89,7 +89,7 @@ func TestActionsSetGetRemActionProfile(t *testing.T) {
 
 	var rplyCount int
 
-	if err := adms.GetActionProfileCount(context.Background(), &utils.ArgsItemIDs{},
+	if err := adms.GetActionProfilesCount(context.Background(), &utils.ArgsItemIDs{},
 		&rplyCount); err != nil {
 		t.Error(err)
 	} else if rplyCount != len(actPrfIDs) {
@@ -394,7 +394,7 @@ func TestActionsGetActionProfileIDsErrKeys(t *testing.T) {
 	dm.DataDB().Flush(utils.EmptyString)
 }
 
-func TestActionsGetActionProfileCountErrMock(t *testing.T) {
+func TestActionsGetActionProfilesCountErrMock(t *testing.T) {
 	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
@@ -421,7 +421,7 @@ func TestActionsGetActionProfileCountErrMock(t *testing.T) {
 
 	var reply int
 
-	if err := adms.GetActionProfileCount(context.Background(),
+	if err := adms.GetActionProfilesCount(context.Background(),
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
 		}, &reply); err == nil || err != utils.ErrNotImplemented {
@@ -429,7 +429,7 @@ func TestActionsGetActionProfileCountErrMock(t *testing.T) {
 	}
 }
 
-func TestActionsGetActionProfileCountErrKeys(t *testing.T) {
+func TestActionsGetActionProfilesCountErrKeys(t *testing.T) {
 	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
@@ -446,7 +446,7 @@ func TestActionsGetActionProfileCountErrKeys(t *testing.T) {
 
 	var reply int
 
-	if err := adms.GetActionProfileCount(context.Background(),
+	if err := adms.GetActionProfilesCount(context.Background(),
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
 		}, &reply); err == nil || err != utils.ErrNotFound {

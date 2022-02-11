@@ -60,7 +60,7 @@ var (
 		testResourceSGetResourceWithConfigAfterSet,
 		testResourceSGetResourceProfileIDs,
 		testResourceSGetResourceProfiles,
-		testResourceSGetResourceProfileCount,
+		testResourceSGetResourceProfilesCount,
 		testResourceSGetResourcesForEvent,
 		testResourceSAllocateResources,
 		testResourceSAuthorizeResourcesBeforeRelease,
@@ -393,9 +393,9 @@ func testResourceSGetResourceProfiles(t *testing.T) {
 	}
 }
 
-func testResourceSGetResourceProfileCount(t *testing.T) {
+func testResourceSGetResourceProfilesCount(t *testing.T) {
 	var reply int
-	if err := rsRPC.Call(context.Background(), utils.AdminSv1GetResourceProfileCount,
+	if err := rsRPC.Call(context.Background(), utils.AdminSv1GetResourceProfilesCount,
 		&utils.TenantWithAPIOpts{Tenant: "cgrates.org"}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != 2 {

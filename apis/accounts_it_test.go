@@ -291,7 +291,7 @@ func testAccGetAccIDsCount(t *testing.T) {
 			Tenant: utils.CGRateSorg,
 		},
 	}
-	if err := accSRPC.Call(context.Background(), utils.AdminSv1GetAccountCount,
+	if err := accSRPC.Call(context.Background(), utils.AdminSv1GetAccountsCount,
 		args, &reply); err != nil {
 		t.Error(err)
 	} else if reply != 1 {
@@ -487,7 +487,7 @@ func testAccGetAccIDsCount2(t *testing.T) {
 			Tenant: utils.CGRateSorg,
 		},
 	}
-	if err := accSRPC.Call(context.Background(), utils.AdminSv1GetAccountCount,
+	if err := accSRPC.Call(context.Background(), utils.AdminSv1GetAccountsCount,
 		args, &reply); err != nil {
 		t.Error(err)
 	} else if reply != 2 {

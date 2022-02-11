@@ -95,9 +95,9 @@ func (admS *AdminSv1) GetDispatcherProfiles(ctx *context.Context, args *utils.Ar
 	return
 }
 
-// GetDispatcherProfileCount returns the total number of DispatcherProfiles registered for a tenant
+// GetDispatcherProfilesCount returns the total number of DispatcherProfiles registered for a tenant
 // returns ErrNotFound in case of 0 DispatcherProfiles
-func (admS *AdminSv1) GetDispatcherProfileCount(ctx *context.Context, args *utils.ArgsItemIDs, reply *int) (err error) {
+func (admS *AdminSv1) GetDispatcherProfilesCount(ctx *context.Context, args *utils.ArgsItemIDs, reply *int) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = admS.cfg.GeneralCfg().DefaultTenant
@@ -238,9 +238,9 @@ func (admS *AdminSv1) GetDispatcherHosts(ctx *context.Context, args *utils.ArgsI
 	return
 }
 
-// GetDispatcherHostCount returns the total number of DispatcherHosts registered for a tenant
+// GetDispatcherHostsCount returns the total number of DispatcherHosts registered for a tenant
 // returns ErrNotFound in case of 0 DispatcherHosts
-func (admS *AdminSv1) GetDispatcherHostCount(ctx *context.Context, args *utils.ArgsItemIDs, reply *int) (err error) {
+func (admS *AdminSv1) GetDispatcherHostsCount(ctx *context.Context, args *utils.ArgsItemIDs, reply *int) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = admS.cfg.GeneralCfg().DefaultTenant

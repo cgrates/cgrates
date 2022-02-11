@@ -310,7 +310,7 @@ func testRateGetRateCount(t *testing.T) {
 			Tenant: utils.CGRateSorg,
 		},
 	}
-	if err := rateSRPC.Call(context.Background(), utils.AdminSv1GetRateProfileCount,
+	if err := rateSRPC.Call(context.Background(), utils.AdminSv1GetRateProfilesCount,
 		args, &reply); err != nil {
 		t.Error(err)
 	} else if reply != 1 {
@@ -517,7 +517,7 @@ func testRateGetRateCount2(t *testing.T) {
 			Tenant: utils.CGRateSorg,
 		},
 	}
-	if err := rateSRPC.Call(context.Background(), utils.AdminSv1GetRateProfileCount,
+	if err := rateSRPC.Call(context.Background(), utils.AdminSv1GetRateProfilesCount,
 		args, &reply); err != nil {
 		t.Error(err)
 	} else if reply != 2 {
@@ -1293,7 +1293,7 @@ func testRateProfileRateIDsAndCount(t *testing.T) {
 
 	// we will count all the rates from MultipleRates rate profile. The prefix is missing, so it will count all the rates
 	var reply int
-	if err := rateSRPC.Call(context.Background(), utils.AdminSv1GetRateProfileRateCount,
+	if err := rateSRPC.Call(context.Background(), utils.AdminSv1GetRateProfileRatesCount,
 		&utils.ArgsSubItemIDs{
 			Tenant:    "cgrates.org",
 			ProfileID: "MultipleRates",

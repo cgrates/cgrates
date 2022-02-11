@@ -96,9 +96,9 @@ func (admS *AdminSv1) GetAccounts(ctx *context.Context, args *utils.ArgsItemIDs,
 	return
 }
 
-// GetAccountCount sets in reply var the total number of AccountIDs registered for a tenant
+// GetAccountsCount sets in reply var the total number of AccountIDs registered for a tenant
 // returns ErrNotFound in case of 0 AccountIDs
-func (admS *AdminSv1) GetAccountCount(ctx *context.Context, args *utils.ArgsItemIDs, reply *int) (err error) {
+func (admS *AdminSv1) GetAccountsCount(ctx *context.Context, args *utils.ArgsItemIDs, reply *int) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = admS.cfg.GeneralCfg().DefaultTenant

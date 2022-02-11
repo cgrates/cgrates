@@ -94,9 +94,9 @@ func (admS *AdminSv1) GetChargerProfiles(ctx *context.Context, args *utils.ArgsI
 	return
 }
 
-// GetChargerProfileCount returns the total number of ChargerProfiles registered for a tenant
+// GetChargerProfilesCount returns the total number of ChargerProfiles registered for a tenant
 // returns ErrNotFound in case of 0 ChargerProfiles
-func (admS *AdminSv1) GetChargerProfileCount(ctx *context.Context, args *utils.ArgsItemIDs, reply *int) (err error) {
+func (admS *AdminSv1) GetChargerProfilesCount(ctx *context.Context, args *utils.ArgsItemIDs, reply *int) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = admS.cfg.GeneralCfg().DefaultTenant

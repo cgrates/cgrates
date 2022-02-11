@@ -255,7 +255,7 @@ func TestRatesGetRateProfileErr2(t *testing.T) {
 	}
 }
 
-func TestRatesGetRateProfileCount(t *testing.T) {
+func TestRatesGetRateProfilesCount(t *testing.T) {
 	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
@@ -286,7 +286,7 @@ func TestRatesGetRateProfileCount(t *testing.T) {
 	}
 	result := utils.IntPointer(0)
 	expected := utils.IntPointer(1)
-	err = admS.GetRateProfileCount(context.Background(), args, result)
+	err = admS.GetRateProfilesCount(context.Background(), args, result)
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
@@ -295,7 +295,7 @@ func TestRatesGetRateProfileCount(t *testing.T) {
 	}
 }
 
-func TestRatesGetRateProfileCountEmptyTenant(t *testing.T) {
+func TestRatesGetRateProfilesCountEmptyTenant(t *testing.T) {
 	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
@@ -325,7 +325,7 @@ func TestRatesGetRateProfileCountEmptyTenant(t *testing.T) {
 	args := &utils.ArgsItemIDs{}
 	result := utils.IntPointer(0)
 	expected := utils.IntPointer(1)
-	err = admS.GetRateProfileCount(context.Background(), args, result)
+	err = admS.GetRateProfilesCount(context.Background(), args, result)
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
@@ -334,7 +334,7 @@ func TestRatesGetRateProfileCountEmptyTenant(t *testing.T) {
 	}
 }
 
-func TestRatesGetRateProfileCountGetKeysError(t *testing.T) {
+func TestRatesGetRateProfilesCountGetKeysError(t *testing.T) {
 	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
@@ -344,13 +344,13 @@ func TestRatesGetRateProfileCountGetKeysError(t *testing.T) {
 	admS := NewAdminSv1(cfg, dm, connMgr)
 	args := &utils.ArgsItemIDs{}
 	result := utils.IntPointer(0)
-	err := admS.GetRateProfileCount(context.Background(), args, result)
+	err := admS.GetRateProfilesCount(context.Background(), args, result)
 	if err == nil || err != utils.ErrNotImplemented {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ErrNotImplemented, err)
 	}
 }
 
-func TestRatesGetRateProfileCountKeysLenError(t *testing.T) {
+func TestRatesGetRateProfilesCountKeysLenError(t *testing.T) {
 	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
@@ -364,7 +364,7 @@ func TestRatesGetRateProfileCountKeysLenError(t *testing.T) {
 	admS := NewAdminSv1(cfg, dm, connMgr)
 	args := &utils.ArgsItemIDs{}
 	result := utils.IntPointer(0)
-	err := admS.GetRateProfileCount(context.Background(), args, result)
+	err := admS.GetRateProfilesCount(context.Background(), args, result)
 	if err == nil || err != utils.ErrNotFound {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ErrNotFound, err)
 	}

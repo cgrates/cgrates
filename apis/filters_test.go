@@ -74,7 +74,7 @@ func TestFiltersSetGetGetCountFilters(t *testing.T) {
 	argsCnt := &utils.ArgsItemIDs{
 		Tenant: utils.CGRateSorg,
 	}
-	err = admS.GetFilterCount(context.Background(), argsCnt, &replyCnt)
+	err = admS.GetFiltersCount(context.Background(), argsCnt, &replyCnt)
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
@@ -96,7 +96,7 @@ func TestFiltersSetGetGetCountFilters(t *testing.T) {
 	argsCnt2 := &utils.ArgsItemIDs{
 		Tenant: utils.CGRateSorg,
 	}
-	err = admS.GetFilterCount(context.Background(), argsCnt2, &replyCnt2)
+	err = admS.GetFiltersCount(context.Background(), argsCnt2, &replyCnt2)
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
@@ -134,7 +134,7 @@ func TestFiltersSetGetGetCountFilters(t *testing.T) {
 	argsCnt3 := &utils.ArgsItemIDs{
 		Tenant: utils.CGRateSorg,
 	}
-	err = admS.GetFilterCount(context.Background(), argsCnt3, &replyCnt3)
+	err = admS.GetFiltersCount(context.Background(), argsCnt3, &replyCnt3)
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
@@ -170,7 +170,7 @@ func TestFiltersSetGetGetCountFilters(t *testing.T) {
 
 	var replyCnt4 int
 	argsCnt4 := &utils.ArgsItemIDs{}
-	err = admS.GetFilterCount(context.Background(), argsCnt4, &replyCnt4)
+	err = admS.GetFiltersCount(context.Background(), argsCnt4, &replyCnt4)
 	if err == nil || err != utils.ErrNotFound {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ErrNotFound, err)
 	}
@@ -671,7 +671,7 @@ func TestFiltersGetFilterGetFilterError(t *testing.T) {
 
 }
 
-func TestFiltersGetFilterCountError(t *testing.T) {
+func TestFiltersGetFiltersCountError(t *testing.T) {
 	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
@@ -686,7 +686,7 @@ func TestFiltersGetFilterCountError(t *testing.T) {
 	var reply int
 	args := &utils.ArgsItemIDs{}
 
-	err := admS.GetFilterCount(context.Background(), args, &reply)
+	err := admS.GetFiltersCount(context.Background(), args, &reply)
 	if err == nil || err.Error() != "NOT_IMPLEMENTED" {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "NOT_IMPLEMENTED", err)
 	}

@@ -1730,12 +1730,12 @@ func testFltrRplThresholdProfile(t *testing.T) {
 // 	var replyPrfl *engine.Account
 // 	var rplyCount int
 // 	// empty
-// 	if err := fltrRplEngine1RPC.Call(context.Background(), utils.AdminSv1GetAccountCount, &utils.ArgsItemIDs{}, &rplyCount); err != nil {
+// 	if err := fltrRplEngine1RPC.Call(context.Background(), utils.AdminSv1GetAccountsCount, &utils.ArgsItemIDs{}, &rplyCount); err != nil {
 // 		t.Fatal(err)
 // 	} else if rplyCount != 0 {
 // 		t.Fatal("Expected no accounts")
 // 	}
-// 	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetAccountCount, &utils.ArgsItemIDs{}, &rplyCount); err != nil {
+// 	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetAccountsCount, &utils.ArgsItemIDs{}, &rplyCount); err != nil {
 // 		t.Fatal(err)
 // 	} else if rplyCount != 0 {
 // 		t.Fatal("Expected no accounts")
@@ -1759,12 +1759,12 @@ func testFltrRplThresholdProfile(t *testing.T) {
 // 	}
 // 	replyPrfl = nil
 
-// 	if err := fltrRplEngine1RPC.Call(context.Background(), utils.AdminSv1GetAccountCount, &utils.ArgsItemIDs{}, &rplyCount); err != nil {
+// 	if err := fltrRplEngine1RPC.Call(context.Background(), utils.AdminSv1GetAccountsCount, &utils.ArgsItemIDs{}, &rplyCount); err != nil {
 // 		t.Fatal(err)
 // 	} else if rplyCount != 0 {
 // 		t.Fatal("Expected no accounts")
 // 	}
-// 	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetAccountCount, &utils.ArgsItemIDs{}, &rplyCount); err != nil {
+// 	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetAccountsCount, &utils.ArgsItemIDs{}, &rplyCount); err != nil {
 // 		t.Fatal(err)
 // 	} else if rplyCount != 0 {
 // 		t.Fatal("Expected no accounts")
@@ -1817,7 +1817,7 @@ func testFltrRplThresholdProfile(t *testing.T) {
 // 		t.Errorf("Expecting : %s, received: %s", utils.ToJSON(expPrf), utils.ToJSON(replyPrfl))
 // 	}
 
-// 	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetAccountCount, &utils.ArgsItemIDs{}, &rplyCount); err != nil {
+// 	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetAccountsCount, &utils.ArgsItemIDs{}, &rplyCount); err != nil {
 // 		t.Fatal(err)
 // 	} else if rplyCount != 0 {
 // 		t.Fatal("Expected no accounts")

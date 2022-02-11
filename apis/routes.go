@@ -93,9 +93,9 @@ func (admS *AdminSv1) GetRouteProfiles(ctx *context.Context, args *utils.ArgsIte
 	return
 }
 
-// GetRouteProfileCount sets in reply var the total number of RouteProfileIDs registered for the received tenant
+// GetRouteProfilesCount sets in reply var the total number of RouteProfileIDs registered for the received tenant
 // returns ErrNotFound in case of 0 RouteProfileIDs
-func (adms *AdminSv1) GetRouteProfileCount(ctx *context.Context, args *utils.ArgsItemIDs, reply *int) (err error) {
+func (adms *AdminSv1) GetRouteProfilesCount(ctx *context.Context, args *utils.ArgsItemIDs, reply *int) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = adms.cfg.GeneralCfg().DefaultTenant

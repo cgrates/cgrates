@@ -93,9 +93,9 @@ func (admS *AdminSv1) GetThresholdProfiles(ctx *context.Context, args *utils.Arg
 	return
 }
 
-// GetThresholdProfileCount sets in reply var the total number of ThresholdProfileIDs registered for the received tenant
+// GetThresholdProfilesCount sets in reply var the total number of ThresholdProfileIDs registered for the received tenant
 // returns ErrNotFound in case of 0 ThresholdProfileIDs
-func (adms *AdminSv1) GetThresholdProfileCount(ctx *context.Context, args *utils.ArgsItemIDs, reply *int) (err error) {
+func (adms *AdminSv1) GetThresholdProfilesCount(ctx *context.Context, args *utils.ArgsItemIDs, reply *int) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = adms.cfg.GeneralCfg().DefaultTenant

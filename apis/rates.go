@@ -140,9 +140,9 @@ func (admS *AdminSv1) GetRateProfiles(ctx *context.Context, args *utils.ArgsItem
 	return
 }
 
-// GetRateProfileCount returns the total number of RateProfileIDs registered for a tenant
+// GetRateProfilesCount returns the total number of RateProfileIDs registered for a tenant
 // returns ErrNotFound in case of 0 RateProfileIDs
-func (admS *AdminSv1) GetRateProfileCount(ctx *context.Context, args *utils.ArgsItemIDs, reply *int) (err error) {
+func (admS *AdminSv1) GetRateProfilesCount(ctx *context.Context, args *utils.ArgsItemIDs, reply *int) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = admS.cfg.GeneralCfg().DefaultTenant
@@ -159,8 +159,8 @@ func (admS *AdminSv1) GetRateProfileCount(ctx *context.Context, args *utils.Args
 	return
 }
 
-// GetRateProfileRateCount count the rates from a specific RateProfile  registered for a tenant. The number of rates is returned back by matching a pattern given by ItemPrefix. If the ItemPrefix is not there, it will be counted all the rates.
-func (admS *AdminSv1) GetRateProfileRateCount(ctx *context.Context, args *utils.ArgsSubItemIDs, countIDs *int) (err error) {
+// GetRateProfileRatesCount count the rates from a specific RateProfile  registered for a tenant. The number of rates is returned back by matching a pattern given by ItemPrefix. If the ItemPrefix is not there, it will be counted all the rates.
+func (admS *AdminSv1) GetRateProfileRatesCount(ctx *context.Context, args *utils.ArgsSubItemIDs, countIDs *int) (err error) {
 	if args.ProfileID == utils.EmptyString {
 		return utils.NewErrMandatoryIeMissing(args.ProfileID)
 	}

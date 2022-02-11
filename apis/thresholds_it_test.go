@@ -55,7 +55,7 @@ var (
 		testThresholdsGetThresholdProfileIDs,
 		testThresholdsGetThresholdProfiles,
 		testThresholdsGetThresholdProfilesWithPrefix,
-		testThresholdsGetThresholdProfileCount,
+		testThresholdsGetThresholdProfilesCount,
 		testThresholdsGetThresholdsForEvent,
 		testThresholdsRemoveThresholdProfiles,
 		testThresholdsGetThresholdsAfterRemove,
@@ -420,9 +420,9 @@ func testThresholdsGetThresholdProfilesWithPrefix(t *testing.T) {
 	}
 }
 
-func testThresholdsGetThresholdProfileCount(t *testing.T) {
+func testThresholdsGetThresholdProfilesCount(t *testing.T) {
 	var reply int
-	if err := thRPC.Call(context.Background(), utils.AdminSv1GetThresholdProfileCount,
+	if err := thRPC.Call(context.Background(), utils.AdminSv1GetThresholdProfilesCount,
 		&utils.TenantWithAPIOpts{
 			Tenant: "cgrates.org",
 		}, &reply); err != nil {

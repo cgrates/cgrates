@@ -93,9 +93,9 @@ func (admS *AdminSv1) GetAttributeProfiles(ctx *context.Context, args *utils.Arg
 	return
 }
 
-// GetAttributeProfileCount returns the total number of AttributeProfileIDs registered for a tenant
+// GetAttributeProfilesCount returns the total number of AttributeProfileIDs registered for a tenant
 // returns ErrNotFound in case of 0 AttributeProfileIDs
-func (admS *AdminSv1) GetAttributeProfileCount(ctx *context.Context, args *utils.ArgsItemIDs, reply *int) (err error) {
+func (admS *AdminSv1) GetAttributeProfilesCount(ctx *context.Context, args *utils.ArgsItemIDs, reply *int) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = admS.cfg.GeneralCfg().DefaultTenant
