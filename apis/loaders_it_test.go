@@ -224,11 +224,11 @@ cgrates.org,ALS2,*string:~*req.Account:1002;*string:~*opts.*context:con1,;20,*st
 
 	// Create and populate Chargers.csv
 	if err := writeFile(utils.ChargersCsv, `
-#Tenant,ID,FilterIDs,Weight,RunID,AttributeIDs
-cgrates.org,Charger1,*string:~*req.Account:1001,20,,
+#Tenant,ID,FilterIDs,Weights,RunID,AttributeIDs
+cgrates.org,Charger1,*string:~*req.Account:1001,;20,,
 cgrates.org,Charger1,,,*rated,ATTR_1001_SIMPLEAUTH
 cgrates.org,Charger2,,,*rated,ATTR_1002_SIMPLEAUTH
-cgrates.org,Charger2,*string:~*req.Account:1002,15,,
+cgrates.org,Charger2,*string:~*req.Account:1002,;15,,
 `); err != nil {
 		t.Fatal(err)
 	}
@@ -282,11 +282,11 @@ cgrates.org,RP2,*string:~*req.Subject:1002,;10,0.2,0.4,*free,RT_WEEK,,"* * * * 1
 
 	// Create and populate Resources.csv
 	if err := writeFile(utils.ResourcesCsv, `
-#Tenant[0],Id[1],FilterIDs[2],Weight[3],TTL[4],Limit[5],AllocationMessage[6],Blocker[7],Stored[8],Thresholds[9]
-cgrates.org,ResGroup21,*string:~*req.Account:1001,10,1s,2,call,true,true,
+#Tenant[0],Id[1],FilterIDs[2],Weights[3],TTL[4],Limit[5],AllocationMessage[6],Blocker[7],Stored[8],Thresholds[9]
+cgrates.org,ResGroup21,*string:~*req.Account:1001,;10,1s,2,call,true,true,
 cgrates.org,ResGroup21,,,,,,,,
 cgrates.org,ResGroup22,,,,,,,,
-cgrates.org,ResGroup22,*string:~*req.Account:dan,10,3600s,2,premium_call,true,true,
+cgrates.org,ResGroup22,*string:~*req.Account:dan,;10,3600s,2,premium_call,true,true,
 `); err != nil {
 		t.Fatal(err)
 	}
