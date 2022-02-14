@@ -126,7 +126,7 @@ func (cdrS *CDRServer) rateSCostForEvent(ctx *context.Context, cgrEv *utils.CGRE
 		cgrEv, &rpCost); err != nil {
 		return
 	}
-	cgrEv.Event[utils.MetaRateSCost] = rpCost
+	cgrEv.APIOpts[utils.MetaRateSCost] = rpCost
 	return
 }
 
@@ -137,7 +137,7 @@ func (cdrS *CDRServer) accountSDebitEvent(ctx *context.Context, cgrEv *utils.CGR
 		utils.AccountSv1DebitAbstracts, cgrEv, acntCost); err != nil {
 		return
 	}
-	cgrEv.Event[utils.MetaAccountSCost] = acntCost
+	cgrEv.APIOpts[utils.MetaAccountSCost] = acntCost
 	return
 }
 
@@ -258,7 +258,7 @@ func (cdrS *CDRServer) processEvent(ctx *context.Context, ev *utils.CGREvent) (e
 			return
 		}
 		if acntS {
-			if ecCostIface, wasCharged := cgrEv.Event[utils.MetaAccountSCost]; wasCharged {
+			if ecCostIface, wasCharged := cgrEv.APIOpts[utils.MetaAccountSCost]; wasCharged {
 				// before converting into EventChargers, we must get the JSON encoding and Unmarshal it into an EventChargers
 				var btsEvCh []byte
 				btsEvCh, err = json.Marshal(ecCostIface.(map[string]interface{}))

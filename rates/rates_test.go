@@ -1147,6 +1147,8 @@ func TestCDRProcessRatesCostForEvent(t *testing.T) {
 		ID:     "TestCDRProcessRatesCostForEvent",
 		Event: map[string]interface{}{
 			utils.AccountField: "1001",
+		},
+		APIOpts: map[string]interface{}{
 			utils.MetaRateSCost: utils.RateProfileCost{
 				ID:   "TEST_RATE_PROCESS_CDR",
 				Cost: utils.NewDecimal(int64(15*time.Second)/10, 0),
@@ -1155,7 +1157,7 @@ func TestCDRProcessRatesCostForEvent(t *testing.T) {
 						Increments: []*utils.RateSIncrementCost{
 							{
 								Usage:             utils.NewDecimal(int64(15*time.Second), 0),
-								RateID:            cgrEv.Event[utils.MetaRateSCost].(utils.RateProfileCost).CostIntervals[0].Increments[0].RateID,
+								RateID:            cgrEv.APIOpts[utils.MetaRateSCost].(utils.RateProfileCost).CostIntervals[0].Increments[0].RateID,
 								RateIntervalIndex: 0,
 								CompressFactor:    150,
 							},
@@ -1164,7 +1166,7 @@ func TestCDRProcessRatesCostForEvent(t *testing.T) {
 					},
 				},
 				Rates: map[string]*utils.IntervalRate{
-					cgrEv.Event[utils.MetaRateSCost].(utils.RateProfileCost).CostIntervals[0].Increments[0].RateID: {
+					cgrEv.APIOpts[utils.MetaRateSCost].(utils.RateProfileCost).CostIntervals[0].Increments[0].RateID: {
 						IntervalStart: utils.NewDecimal(0, 0),
 						RecurrentFee:  utils.NewDecimal(1, 1),
 						Unit:          utils.NewDecimal(1, 0),
@@ -1172,8 +1174,6 @@ func TestCDRProcessRatesCostForEvent(t *testing.T) {
 					},
 				},
 			},
-		},
-		APIOpts: map[string]interface{}{
 			utils.MetaUsage: 15 * time.Second,
 		},
 	}
