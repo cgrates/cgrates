@@ -239,7 +239,7 @@ func testHTTPExportEvent(t *testing.T) {
 	time.Sleep(10 * time.Millisecond)
 	// verify HTTPValues for eventVoice
 	for key, strVal := range map[string]string{
-		utils.MetaOriginID: utils.IfaceAsString(eventVoice.Event[utils.MetaOriginID]),
+		utils.MetaOriginID: utils.IfaceAsString(eventVoice.APIOpts[utils.MetaOriginID]),
 		utils.ToR:          utils.IfaceAsString(eventVoice.Event[utils.ToR]),
 		utils.Category:     utils.IfaceAsString(eventVoice.Event[utils.Category]),
 		utils.AccountField: utils.IfaceAsString(eventVoice.Event[utils.AccountField]),
@@ -262,7 +262,7 @@ func testHTTPExportEvent(t *testing.T) {
 	time.Sleep(10 * time.Millisecond)
 	// verify HTTPValues for eventData
 	for key, strVal := range map[string]string{
-		utils.MetaOriginID: utils.IfaceAsString(eventData.Event[utils.MetaOriginID]),
+		utils.MetaOriginID: utils.IfaceAsString(eventData.APIOpts[utils.MetaOriginID]),
 		utils.ToR:          utils.IfaceAsString(eventData.Event[utils.ToR]),
 		utils.Category:     utils.IfaceAsString(eventData.Event[utils.Category]),
 		utils.AccountField: utils.IfaceAsString(eventData.Event[utils.AccountField]),
@@ -285,7 +285,7 @@ func testHTTPExportEvent(t *testing.T) {
 	time.Sleep(10 * time.Millisecond)
 	// verify HTTPValues for eventSMS
 	for key, strVal := range map[string]string{
-		utils.MetaOriginID: utils.IfaceAsString(eventSMS.Event[utils.MetaOriginID]),
+		utils.MetaOriginID: utils.IfaceAsString(eventSMS.APIOpts[utils.MetaOriginID]),
 		utils.ToR:          utils.IfaceAsString(eventSMS.Event[utils.ToR]),
 		utils.Category:     utils.IfaceAsString(eventSMS.Event[utils.Category]),
 		utils.AccountField: utils.IfaceAsString(eventSMS.Event[utils.AccountField]),
