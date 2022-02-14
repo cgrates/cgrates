@@ -1299,3 +1299,364 @@ func TestAccountChargeID(t *testing.T) {
 		t.Errorf("Expected %v \n but received \n %v", "", rcv)
 	}
 }
+
+func TestECChargeEntryCloneEmpty(t *testing.T) {
+	ce := &ChargeEntry{}
+	if rcv := ce.Clone(); !reflect.DeepEqual(rcv, ce) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
+			ToJSON(ce), ToJSON(rcv))
+	}
+}
+
+func TestECChargeEntryClone(t *testing.T) {
+	ce := &ChargeEntry{
+		ChargingID:     "Charging1",
+		CompressFactor: 1,
+	}
+	if rcv := ce.Clone(); !reflect.DeepEqual(rcv, ce) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
+			ToJSON(ce), ToJSON(rcv))
+	}
+}
+
+func TestECAccountChargeCloneEmpty(t *testing.T) {
+	ac := &AccountCharge{}
+	if rcv := ac.Clone(); !reflect.DeepEqual(rcv, ac) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
+			ToJSON(ac), ToJSON(rcv))
+	}
+}
+
+func TestECAccountChargeClone(t *testing.T) {
+	ac := &AccountCharge{
+		AccountID:       "Acc1",
+		BalanceID:       "Blnc1",
+		Units:           NewDecimalFromFloat64(0.1),
+		BalanceLimit:    NewDecimalFromFloat64(1.2),
+		UnitFactorID:    "UF1",
+		AttributeIDs:    []string{"ATTR1", "ATTR2"},
+		RatingID:        "Rating1",
+		JoinedChargeIDs: []string{"JC1", "JC2"},
+	}
+	if rcv := ac.Clone(); !reflect.DeepEqual(rcv, ac) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
+			ToJSON(ac), ToJSON(rcv))
+	}
+}
+
+func TestECEventChargesCloneEmpty(t *testing.T) {
+	ec := &EventCharges{}
+	if rcv := ec.Clone(); !reflect.DeepEqual(rcv, ec) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
+			ToJSON(ec), ToJSON(rcv))
+	}
+}
+
+func TestECEventChargesClone(t *testing.T) {
+	ec := &EventCharges{
+		Abstracts: NewDecimalFromFloat64(0.1),
+		Concretes: NewDecimalFromFloat64(2.3),
+		Charges: []*ChargeEntry{
+			{
+				ChargingID:     "Charging1",
+				CompressFactor: 1,
+			},
+			{
+				ChargingID:     "Charging2",
+				CompressFactor: 2,
+			},
+		},
+		Accounting: map[string]*AccountCharge{
+			"Acc1": {
+				AccountID:       "Acc1",
+				BalanceID:       "Blnc1",
+				Units:           NewDecimalFromFloat64(0.1),
+				BalanceLimit:    NewDecimalFromFloat64(1.2),
+				UnitFactorID:    "UF1",
+				AttributeIDs:    []string{"ATTR1", "ATTR2"},
+				RatingID:        "Rating1",
+				JoinedChargeIDs: []string{"JC1", "JC2"},
+			},
+			"Acc2": {
+				AccountID:       "Acc2",
+				BalanceID:       "Blnc2",
+				Units:           NewDecimalFromFloat64(0.2),
+				BalanceLimit:    NewDecimalFromFloat64(2.3),
+				UnitFactorID:    "UF2",
+				AttributeIDs:    []string{"ATTR3", "ATTR4"},
+				RatingID:        "Rating2",
+				JoinedChargeIDs: []string{"JC3", "JC4"},
+			},
+		},
+		UnitFactors: map[string]*UnitFactor{
+			"UF1": {
+				FilterIDs: []string{"FLTR1", "FLTR2"},
+				Factor:    NewDecimalFromFloat64(1.234),
+			},
+			"UF2": {
+				FilterIDs: []string{"FLTR3", "FLTR4"},
+				Factor:    NewDecimalFromFloat64(432.1),
+			},
+		},
+		Rating: map[string]*RateSInterval{
+			"RateSInterval1": {
+				IntervalStart: NewDecimalFromFloat64(1.234),
+				Increments: []*RateSIncrement{
+					{
+						IncrementStart:    NewDecimalFromFloat64(1.234),
+						RateIntervalIndex: 1,
+						RateID:            "Rate1",
+						CompressFactor:    1,
+						Usage:             NewDecimalFromFloat64(-321),
+						cost:              decimal.New(4321, 5),
+					},
+					{
+						IncrementStart:    NewDecimalFromFloat64(4.321),
+						RateIntervalIndex: 1,
+						RateID:            "Rate2",
+						CompressFactor:    1,
+						Usage:             NewDecimalFromFloat64(-123),
+						cost:              decimal.New(123, 1),
+					},
+				},
+				CompressFactor: 1,
+				cost:           decimal.New(4321, 5),
+			},
+			"RateSInterval2": {
+				IntervalStart: NewDecimalFromFloat64(2.34),
+				Increments: []*RateSIncrement{
+					{
+						IncrementStart:    NewDecimalFromFloat64(1.234),
+						RateIntervalIndex: 2,
+						RateID:            "Rate1",
+						CompressFactor:    2,
+						Usage:             NewDecimalFromFloat64(-321),
+						cost:              decimal.New(3456, 5),
+					},
+					{
+						IncrementStart:    NewDecimalFromFloat64(4.321),
+						RateIntervalIndex: 2,
+						RateID:            "Rate2",
+						CompressFactor:    2,
+						Usage:             NewDecimalFromFloat64(-123),
+						cost:              decimal.New(321, 1),
+					},
+				},
+				CompressFactor: 1,
+				cost:           decimal.New(345, 2),
+			},
+		},
+		Rates: map[string]*IntervalRate{
+			"IvalRate1": {
+				IntervalStart: NewDecimalFromFloat64(1.2),
+				FixedFee:      NewDecimalFromFloat64(1.234),
+				RecurrentFee:  NewDecimalFromFloat64(0.5),
+				Unit:          NewDecimalFromFloat64(7.1),
+				Increment:     NewDecimalFromFloat64(-321),
+			},
+			"IvalRate2": {
+				IntervalStart: NewDecimalFromFloat64(123.1),
+				FixedFee:      NewDecimalFromFloat64(12.34),
+				RecurrentFee:  NewDecimalFromFloat64(0.05),
+				Unit:          NewDecimalFromFloat64(5.1),
+				Increment:     NewDecimalFromFloat64(-357),
+			},
+		},
+		Accounts: map[string]*Account{
+			"Account1": {
+				Tenant:    "cgrates.org",
+				ID:        "Account1",
+				FilterIDs: []string{"FLTR1", "FLTR2"},
+				Weights: DynamicWeights{
+					{
+						Weight: 10,
+					},
+					{
+						FilterIDs: []string{"FLTR3"},
+						Weight:    20,
+					},
+				},
+				Opts: map[string]interface{}{
+					"optName": "optValue",
+				},
+				Balances: map[string]*Balance{
+					"Blnc1": {
+						ID:        "Blnc1",
+						FilterIDs: []string{"FLTR1"},
+						Weights: DynamicWeights{
+							{
+								Weight: 10,
+							},
+							{
+								FilterIDs: []string{"FLTR3"},
+								Weight:    20,
+							},
+						},
+						Type:  MetaMonetary,
+						Units: NewDecimalFromFloat64(0.1),
+						UnitFactors: []*UnitFactor{
+							{
+								FilterIDs: []string{"FLTR1", "FLTR2"},
+								Factor:    NewDecimalFromFloat64(1.234),
+							},
+							{
+								FilterIDs: []string{"FLTR3", "FLTR4"},
+								Factor:    NewDecimalFromFloat64(123.4),
+							},
+						},
+						Opts: map[string]interface{}{
+							"optName": "optValue",
+						},
+						CostIncrements: []*CostIncrement{
+							{
+								FilterIDs:    []string{"FLTR3"},
+								Increment:    NewDecimalFromFloat64(1.2),
+								FixedFee:     NewDecimalFromFloat64(23.4),
+								RecurrentFee: NewDecimalFromFloat64(3.21),
+							},
+						},
+						AttributeIDs:   []string{"ATTR1", "ATTR2"},
+						RateProfileIDs: []string{"RatePrf1", "RatePrf2"},
+					},
+					"Blnc2": {
+						ID:        "Blnc2",
+						FilterIDs: []string{"FLTR2"},
+						Weights: DynamicWeights{
+							{
+								Weight: 10,
+							},
+							{
+								FilterIDs: []string{"FLTR4"},
+								Weight:    20,
+							},
+						},
+						Type:  MetaVoice,
+						Units: NewDecimalFromFloat64(0.1),
+						UnitFactors: []*UnitFactor{
+							{
+								FilterIDs: []string{"FLTR3", "FLTR4"},
+								Factor:    NewDecimalFromFloat64(1.234),
+							},
+							{
+								FilterIDs: []string{"FLTR2"},
+								Factor:    NewDecimalFromFloat64(123.4),
+							},
+						},
+						Opts: map[string]interface{}{
+							"optName": "optValue",
+						},
+						CostIncrements: []*CostIncrement{
+							{
+								FilterIDs:    []string{"FLTR3"},
+								Increment:    NewDecimalFromFloat64(1.2),
+								FixedFee:     NewDecimalFromFloat64(23.4),
+								RecurrentFee: NewDecimalFromFloat64(3.21),
+							},
+						},
+						AttributeIDs:   []string{"ATTR1", "ATTR2"},
+						RateProfileIDs: []string{"RatePrf1", "RatePrf2"},
+					},
+				},
+			},
+			"Account2": {
+				Tenant:    "cgrates.org",
+				ID:        "Account2",
+				FilterIDs: []string{"FLTR3", "FLTR4"},
+				Weights: DynamicWeights{
+					{
+						Weight: 15,
+					},
+					{
+						FilterIDs: []string{"FLTR5"},
+						Weight:    25,
+					},
+				},
+				Opts: map[string]interface{}{
+					"optName": "optValue",
+				},
+				Balances: map[string]*Balance{
+					"Blnc1": {
+						ID:        "Blnc1",
+						FilterIDs: []string{"FLTR1"},
+						Weights: DynamicWeights{
+							{
+								Weight: 10,
+							},
+							{
+								FilterIDs: []string{"FLTR3"},
+								Weight:    20,
+							},
+						},
+						Type:  MetaMonetary,
+						Units: NewDecimalFromFloat64(0.1),
+						UnitFactors: []*UnitFactor{
+							{
+								FilterIDs: []string{"FLTR1", "FLTR2"},
+								Factor:    NewDecimalFromFloat64(1.234),
+							},
+							{
+								FilterIDs: []string{"FLTR3", "FLTR4"},
+								Factor:    NewDecimalFromFloat64(123.4),
+							},
+						},
+						Opts: map[string]interface{}{
+							"optName": "optValue",
+						},
+						CostIncrements: []*CostIncrement{
+							{
+								FilterIDs:    []string{"FLTR3"},
+								Increment:    NewDecimalFromFloat64(1.2),
+								FixedFee:     NewDecimalFromFloat64(23.4),
+								RecurrentFee: NewDecimalFromFloat64(3.21),
+							},
+						},
+						AttributeIDs:   []string{"ATTR1", "ATTR2"},
+						RateProfileIDs: []string{"RatePrf1", "RatePrf2"},
+					},
+					"Blnc2": {
+						ID:        "Blnc2",
+						FilterIDs: []string{"FLTR2"},
+						Weights: DynamicWeights{
+							{
+								Weight: 10,
+							},
+							{
+								FilterIDs: []string{"FLTR4"},
+								Weight:    20,
+							},
+						},
+						Type:  MetaVoice,
+						Units: NewDecimalFromFloat64(0.1),
+						UnitFactors: []*UnitFactor{
+							{
+								FilterIDs: []string{"FLTR3", "FLTR4"},
+								Factor:    NewDecimalFromFloat64(1.234),
+							},
+							{
+								FilterIDs: []string{"FLTR2"},
+								Factor:    NewDecimalFromFloat64(123.4),
+							},
+						},
+						Opts: map[string]interface{}{
+							"optName": "optValue",
+						},
+						CostIncrements: []*CostIncrement{
+							{
+								FilterIDs:    []string{"FLTR3"},
+								Increment:    NewDecimalFromFloat64(1.2),
+								FixedFee:     NewDecimalFromFloat64(23.4),
+								RecurrentFee: NewDecimalFromFloat64(3.21),
+							},
+						},
+						AttributeIDs:   []string{"ATTR1", "ATTR2"},
+						RateProfileIDs: []string{"RatePrf1", "RatePrf2"},
+					},
+				},
+			},
+		},
+	}
+	if rcv := ec.Clone(); !reflect.DeepEqual(rcv, ec) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
+			ToJSON(ec), ToJSON(rcv))
+	}
+}
