@@ -2182,3 +2182,86 @@ func TestRateProfileMerge(t *testing.T) {
 	}
 
 }
+
+func TestLibratesIntervalRateCloneEmpty(t *testing.T) {
+	iR := &IntervalRate{}
+	if rcv := iR.Clone(); !reflect.DeepEqual(rcv, iR) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
+			ToJSON(iR), ToJSON(rcv))
+	}
+}
+
+func TestLibratesIntervalRateClone(t *testing.T) {
+	iR := &IntervalRate{
+		IntervalStart: NewDecimalFromFloat64(1.2),
+		FixedFee:      NewDecimalFromFloat64(1.234),
+		RecurrentFee:  NewDecimalFromFloat64(0.5),
+		Unit:          NewDecimalFromFloat64(7.1),
+		Increment:     NewDecimalFromFloat64(-321),
+	}
+	if rcv := iR.Clone(); !reflect.DeepEqual(rcv, iR) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
+			ToJSON(iR), ToJSON(rcv))
+	}
+}
+
+func TestLibratesRateSIntervalCloneEmpty(t *testing.T) {
+	ri := &RateSInterval{}
+	if rcv := ri.Clone(); !reflect.DeepEqual(rcv, ri) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
+			ToJSON(ri), ToJSON(rcv))
+	}
+}
+
+func TestLibratesRateSIntervalClone(t *testing.T) {
+	ri := &RateSInterval{
+		IntervalStart: NewDecimalFromFloat64(1.234),
+		Increments: []*RateSIncrement{
+			{
+				IncrementStart:    NewDecimalFromFloat64(1.234),
+				RateIntervalIndex: 1,
+				RateID:            "Rate1",
+				CompressFactor:    1,
+				Usage:             NewDecimalFromFloat64(-321),
+				cost:              decimal.New(4321, 5),
+			},
+			{
+				IncrementStart:    NewDecimalFromFloat64(4.321),
+				RateIntervalIndex: 1,
+				RateID:            "Rate2",
+				CompressFactor:    1,
+				Usage:             NewDecimalFromFloat64(-123),
+				cost:              decimal.New(123, 1),
+			},
+		},
+		CompressFactor: 1,
+		cost:           decimal.New(4321, 5),
+	}
+	if rcv := ri.Clone(); !reflect.DeepEqual(rcv, ri) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
+			ToJSON(ri), ToJSON(rcv))
+	}
+}
+
+func TestLibratesRateSIncrementCloneEmpty(t *testing.T) {
+	ri := &RateSIncrement{}
+	if rcv := ri.Clone(); !reflect.DeepEqual(rcv, ri) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
+			ToJSON(ri), ToJSON(rcv))
+	}
+}
+
+func TestLibratesRateSIncrementClone(t *testing.T) {
+	ri := &RateSIncrement{
+		IncrementStart:    NewDecimalFromFloat64(1.234),
+		RateIntervalIndex: 1,
+		RateID:            "testRateID",
+		CompressFactor:    1,
+		Usage:             NewDecimalFromFloat64(-321),
+		cost:              decimal.New(4321, 5),
+	}
+	if rcv := ri.Clone(); !reflect.DeepEqual(rcv, ri) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
+			ToJSON(ri), ToJSON(rcv))
+	}
+}

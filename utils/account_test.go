@@ -1542,3 +1542,22 @@ func TestAccountMerge(t *testing.T) {
 	}
 
 }
+
+func TestAccountUnitFactorCloneEmpty(t *testing.T) {
+	uF := &UnitFactor{}
+	if rcv := uF.Clone(); !reflect.DeepEqual(rcv, uF) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
+			ToJSON(uF), ToJSON(rcv))
+	}
+}
+
+func TestAccountUnitFactorClone(t *testing.T) {
+	uF := &UnitFactor{
+		FilterIDs: []string{"FLTR1", "FLTR2"},
+		Factor:    NewDecimalFromFloat64(1.234),
+	}
+	if rcv := uF.Clone(); !reflect.DeepEqual(rcv, uF) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
+			ToJSON(uF), ToJSON(rcv))
+	}
+}
