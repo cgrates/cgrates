@@ -81,6 +81,27 @@ type IntervalRate struct {
 	Increment     *Decimal // RateIncrement
 }
 
+// Clone returns a copy of iR
+func (iR *IntervalRate) Clone() *IntervalRate {
+	cln := new(IntervalRate)
+	if iR.IntervalStart != nil {
+		cln.IntervalStart = iR.IntervalStart.Clone()
+	}
+	if iR.FixedFee != nil {
+		cln.FixedFee = iR.FixedFee.Clone()
+	}
+	if iR.RecurrentFee != nil {
+		cln.RecurrentFee = iR.RecurrentFee.Clone()
+	}
+	if iR.Unit != nil {
+		cln.Unit = iR.Unit.Clone()
+	}
+	if iR.Increment != nil {
+		cln.Increment = iR.Increment.Clone()
+	}
+	return cln
+}
+
 // Equals returns the equality between two IntervalRate
 func (iR *IntervalRate) Equals(inRt *IntervalRate) (eq bool) {
 	if iR == nil && inRt == nil {
@@ -165,6 +186,27 @@ type RateSInterval struct {
 	cost *decimal.Big // unexported total interval cost
 }
 
+// Clone returns a copy of rI
+func (rI *RateSInterval) Clone() *RateSInterval {
+	cln := &RateSInterval{
+		CompressFactor: rI.CompressFactor,
+	}
+	if rI.IntervalStart != nil {
+		cln.IntervalStart = rI.IntervalStart.Clone()
+	}
+	if rI.Increments != nil {
+		cln.Increments = make([]*RateSIncrement, len(rI.Increments))
+		for i, value := range rI.Increments {
+			cln.Increments[i] = value.Clone()
+		}
+	}
+	if rI.cost != nil {
+		tmp := &decimal.Big{}
+		cln.cost = tmp.Copy(rI.cost)
+	}
+	return cln
+}
+
 // AsRatesIntervalsCost converts RateSInterval to RateSIntervalCost
 // The difference between this 2 is that RateSIntervalCost don't need IntervalStart
 func (rI *RateSInterval) AsRatesIntervalsCost() (rIc *RateSIntervalCost) {
@@ -188,6 +230,26 @@ type RateSIncrement struct {
 	Usage             *Decimal
 
 	cost *decimal.Big // unexported total increment cost
+}
+
+// Clone returns a copy of rI
+func (rI *RateSIncrement) Clone() *RateSIncrement {
+	cln := &RateSIncrement{
+		RateIntervalIndex: rI.RateIntervalIndex,
+		RateID:            rI.RateID,
+		CompressFactor:    rI.CompressFactor,
+	}
+	if rI.IncrementStart != nil {
+		cln.IncrementStart = rI.IncrementStart.Clone()
+	}
+	if rI.Usage != nil {
+		cln.Usage = rI.Usage.Clone()
+	}
+	if rI.cost != nil {
+		tmp := &decimal.Big{}
+		cln.cost = tmp.Copy(rI.cost)
+	}
+	return cln
 }
 
 // Equals compares two RateSIntervals

@@ -237,19 +237,16 @@ func (cI *CostIncrement) Clone() (cIcln *CostIncrement) {
 	return
 }
 
-// Clone return a copy of the UnitFactor
-func (uF *UnitFactor) Clone() (untFct *UnitFactor) {
-	untFct = new(UnitFactor)
+// Clone returns a copy of uF
+func (uF *UnitFactor) Clone() *UnitFactor {
+	cln := new(UnitFactor)
 	if uF.FilterIDs != nil {
-		untFct.FilterIDs = make([]string, len(uF.FilterIDs))
-		for i, value := range uF.FilterIDs {
-			untFct.FilterIDs[i] = value
-		}
+		cln.FilterIDs = CloneStringSlice(uF.FilterIDs)
 	}
 	if uF.Factor != nil {
-		untFct.Factor = uF.Factor.Clone()
+		cln.Factor = uF.Factor.Clone()
 	}
-	return
+	return cln
 }
 
 // UnitFactor is a multiplicator for the usage received
