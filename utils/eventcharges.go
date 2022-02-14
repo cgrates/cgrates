@@ -44,10 +44,67 @@ type EventCharges struct {
 	Accounts    map[string]*Account
 }
 
+// Clone returns a copy of ec
+func (ec *EventCharges) Clone() *EventCharges {
+	cln := new(EventCharges)
+	if ec.Abstracts != nil {
+		cln.Abstracts = ec.Abstracts.Clone()
+	}
+	if ec.Concretes != nil {
+		cln.Concretes = ec.Concretes.Clone()
+	}
+	if ec.Charges != nil {
+		cln.Charges = make([]*ChargeEntry, len(ec.Charges))
+		for i, value := range ec.Charges {
+			cln.Charges[i] = value.Clone()
+		}
+	}
+	if ec.Accounting != nil {
+		cln.Accounting = make(map[string]*AccountCharge)
+		for key, value := range ec.Accounting {
+			cln.Accounting[key] = value.Clone()
+		}
+	}
+	if ec.UnitFactors != nil {
+		cln.UnitFactors = make(map[string]*UnitFactor)
+		for key, value := range ec.UnitFactors {
+			cln.UnitFactors[key] = value.Clone()
+		}
+	}
+	if ec.Rating != nil {
+		cln.Rating = make(map[string]*RateSInterval)
+		for key, value := range ec.Rating {
+			cln.Rating[key] = value.Clone()
+		}
+	}
+	if ec.Rates != nil {
+		cln.Rates = make(map[string]*IntervalRate)
+		for key, value := range ec.Rates {
+			cln.Rates[key] = value.Clone()
+		}
+	}
+	if ec.Accounts != nil {
+		cln.Accounts = make(map[string]*Account)
+		for key, value := range ec.Accounts {
+			cln.Accounts[key] = value.Clone()
+		}
+	}
+
+	return cln
+}
+
 // ChargeEntry is a reference towards Accounting or Rating ID (depending on request type)
 type ChargeEntry struct {
 	ChargingID     string
 	CompressFactor int
+}
+
+// Clone returns a copy of ce
+func (ce *ChargeEntry) Clone() *ChargeEntry {
+	return &ChargeEntry{
+		ChargingID:     ce.ChargingID,
+		CompressFactor: ce.CompressFactor,
+	}
 }
 
 // Merge will merge the event charges into existing
@@ -256,6 +313,29 @@ type AccountCharge struct {
 	AttributeIDs    []string // list of attribute profiles matched
 	RatingID        string   // identificator in cost increments
 	JoinedChargeIDs []string // identificator of extra account charges
+}
+
+// Clone returns a copy of ac
+func (ac *AccountCharge) Clone() *AccountCharge {
+	cln := &AccountCharge{
+		AccountID:    ac.AccountID,
+		BalanceID:    ac.BalanceID,
+		UnitFactorID: ac.UnitFactorID,
+		RatingID:     ac.RatingID,
+	}
+	if ac.Units != nil {
+		cln.Units = ac.Units.Clone()
+	}
+	if ac.BalanceLimit != nil {
+		cln.BalanceLimit = ac.BalanceLimit.Clone()
+	}
+	if ac.AttributeIDs != nil {
+		cln.AttributeIDs = CloneStringSlice(ac.AttributeIDs)
+	}
+	if ac.JoinedChargeIDs != nil {
+		cln.JoinedChargeIDs = CloneStringSlice(ac.JoinedChargeIDs)
+	}
+	return cln
 }
 
 // Equals compares two AccountCharges
