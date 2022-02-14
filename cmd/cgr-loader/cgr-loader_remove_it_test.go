@@ -397,7 +397,7 @@ func testCgrLdrGetActionProfileAfterLoad(t *testing.T) {
 }
 
 func testCgrLdrGetAttributeProfileAfterLoad(t *testing.T) {
-	extAttrPrf := &engine.AttributeProfile{
+	expected := engine.AttributeProfile{
 		Tenant:    utils.CGRateSorg,
 		ID:        "ATTR_ACNT_1001",
 		FilterIDs: []string{"*string:~*opts.*context:*sessions", "FLTR_ACCOUNT_1001"},
@@ -415,16 +415,17 @@ func testCgrLdrGetAttributeProfileAfterLoad(t *testing.T) {
 			},
 		},
 	}
-	var replyAttr *engine.AttributeProfile
+	var replyAttr engine.AttributeProfile
 	if err := cgrLdrBIRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfile,
 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_ACNT_1001"}},
 		&replyAttr); err != nil {
 		t.Error(err)
 	} else {
-		sort.Strings(extAttrPrf.FilterIDs)
+		sort.Strings(expected.FilterIDs)
 		sort.Strings(replyAttr.FilterIDs)
-		if !reflect.DeepEqual(extAttrPrf, replyAttr) {
-			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(extAttrPrf), utils.ToJSON(replyAttr))
+		replyAttr.Compile()
+		if !reflect.DeepEqual(expected, replyAttr) {
+			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(replyAttr))
 		}
 	}
 }

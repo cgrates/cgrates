@@ -319,9 +319,9 @@ func testCsvVerifyComposedExports(t *testing.T) {
 	if len(files) != 1 {
 		t.Errorf("Expected %+v, received: %+v", 1, len(files))
 	}
-	eCnt := "NumberOfEvent,RunID,ToR,OriginID,RequestType,Tenant,Category,Account,Subject,Destination,SetupTime,AnswerTime,Usage,Cost" + "\n" +
-		"1,*default,*voice,dsafdsaf,*rated,cgrates.org,call,1001,1001,1002,2013-11-07T08:42:25Z,2013-11-07T08:42:26Z,10000000000,1.0164" + "\n" +
-		"2,2*default,*sms,sdfwer,*rated,cgrates.org,call,1001,1001,1002,2013-11-07T08:42:25Z,2013-11-07T08:42:26Z,1,0.1555" + "\n" +
+	eCnt := "NumberOfEvent,*originID,RunID,ToR,OriginID,RequestType,Tenant,Category,Account,Subject,Destination,SetupTime,AnswerTime,Usage,Cost" + "\n" +
+		"1,dbafe9c8614c785a65aabd116dd3959c3c56f7f6,*default,*voice,dsafdsaf,*rated,cgrates.org,call,1001,1001,1002,2013-11-07T08:42:25Z,2013-11-07T08:42:26Z,10000000000,1.0164" + "\n" +
+		"2,2478e9f18ebcd3c684f3c14596b8bfeab2b0d6d4,*default,*sms,sdfwer,*rated,cgrates.org,call,1001,1001,1002,2013-11-07T08:42:25Z,2013-11-07T08:42:26Z,1,0.1555" + "\n" +
 		"2,10s,1ns,1.1718" + "\n"
 	if outContent1, err := os.ReadFile(files[0]); err != nil {
 		t.Error(err)
@@ -340,7 +340,7 @@ func testCsvExportBufferedEvent(t *testing.T) {
 		Events: []*utils.EventsWithOpts{
 			{
 				Event: map[string]interface{}{
-					//utils.MetaOriginID:  utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()),
+
 					utils.ToR:           utils.MetaVoice,
 					"ComposedOriginID1": "dsaf",
 					"ComposedOriginID2": "dsaf",
@@ -360,13 +360,14 @@ func testCsvExportBufferedEvent(t *testing.T) {
 						"extra2": "val_extra2", "extra3": "val_extra3"},
 				},
 				Opts: map[string]interface{}{
+					utils.MetaOriginID: utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()),
 					utils.MetaChargers: true,
 					utils.MetaRunID:    "random_runID",
 				},
 			},
 			{
 				Event: map[string]interface{}{
-					//utils.MetaOriginID: utils.Sha1("abcdef", time.Unix(1383813745, 0).UTC().String()),
+
 					utils.ToR:          utils.MetaData,
 					utils.OriginHost:   "192.168.1.1",
 					utils.RequestType:  utils.MetaRated,
@@ -384,13 +385,14 @@ func testCsvExportBufferedEvent(t *testing.T) {
 						"extra2": "val_extra2", "extra3": "val_extra3"},
 				},
 				Opts: map[string]interface{}{
-					utils.MetaUsage: 200 * time.Second,
+					utils.MetaOriginID: utils.Sha1("abcdef", time.Unix(1383813745, 0).UTC().String()),
+					utils.MetaUsage:    200 * time.Second,
 				},
 			},
 			// this one will not match, because opts got another another ExporterID and it will be changed from the initial opt
 			{
 				Event: map[string]interface{}{
-					//utils.MetaOriginID: utils.Sha1("qwertyiopuu", time.Unix(1383813745, 0).UTC().String()),
+
 					utils.AccountField: "1005",
 					utils.Subject:      "1005",
 					utils.Destination:  "103",
@@ -399,12 +401,13 @@ func testCsvExportBufferedEvent(t *testing.T) {
 					utils.Cost:         0,
 				},
 				Opts: map[string]interface{}{
+					utils.MetaOriginID:   utils.Sha1("qwertyiopuu", time.Unix(1383813745, 0).UTC().String()),
 					utils.MetaExporterID: "CSVExporterBuffered_CHanged",
 				},
 			},
 			{
 				Event: map[string]interface{}{
-					//utils.MetaOriginID:  utils.Sha1("nlllo", time.Unix(1383813745, 0).UTC().String()),
+
 					utils.ToR:           utils.MetaData,
 					"ComposedOriginID1": "abcdefghh",
 					utils.RequestType:   utils.MetaNone,
@@ -422,12 +425,13 @@ func testCsvExportBufferedEvent(t *testing.T) {
 						"extra2": "val_extra2", "extra3": "val_extra3"},
 				},
 				Opts: map[string]interface{}{
-					utils.MetaRateS: true,
+					utils.MetaOriginID: utils.Sha1("nlllo", time.Unix(1383813745, 0).UTC().String()),
+					utils.MetaRateS:    true,
 				},
 			},
 			{
 				Event: map[string]interface{}{
-					//utils.MetaOriginID: utils.Sha1("qwert", time.Unix(1383813745, 0).UTC().String()),
+
 					utils.OriginHost:   "127.0.0.1",
 					utils.RequestType:  utils.MetaPrepaid,
 					utils.Tenant:       "dispatchers.org",
@@ -442,6 +446,7 @@ func testCsvExportBufferedEvent(t *testing.T) {
 					utils.Cost:         1.442234,
 				},
 				Opts: map[string]interface{}{
+					utils.MetaOriginID:  utils.Sha1("qwert", time.Unix(1383813745, 0).UTC().String()),
 					utils.MetaStartTime: time.Date(2020, time.January, 7, 16, 60, 0, 0, time.UTC),
 				},
 			},
@@ -473,11 +478,11 @@ func testCsvExportBufferedEvent(t *testing.T) {
 	}
 
 	expected := [][]string{
-		{"NumberOfEvent", "RunID", "ToR", "OriginID", "RequestType", "Tenant", "Category", "Account", "Subject", "Destination", "SetupTime", "AnswerTime", "Usage", "Cost"},
-		{"1", "*default", "*voice", "dsafdsaf", "*rated", "cgrates.org", "call", "1005", "1001", "1002", "2013-11-07T08:42:25Z", "2013-11-07T08:42:26Z", "10000000000", "1.0164"},
-		{"2", "*default", "*data", "", "*rated", "AnotherTenant", "call", "1005", "1001", "1002", "2013-11-07T08:42:25Z", "2013-11-07T08:42:26Z", "10", "0.012"},
-		{"3", "raw", "*data", "abcdefghh", "*none", "phone.org", "sms", "1005", "User2001", "User2002", "2013-11-07T08:42:25Z", "2013-11-07T08:42:26Z", "10", "44.5"},
-		{"4", "Default_charging_id", "", "", "*prepaid", "dispatchers.org", "photo", "1005", "1005", "1000", "2679-04-25T22:02:25Z", "2679-04-25T22:02:40Z", "10", "1.4422"},
+		{"NumberOfEvent", "*originID", "RunID", "ToR", "OriginID", "RequestType", "Tenant", "Category", "Account", "Subject", "Destination", "SetupTime", "AnswerTime", "Usage", "Cost"},
+		{"1", "dbafe9c8614c785a65aabd116dd3959c3c56f7f6", "*default", "*voice", "dsafdsaf", "*rated", "cgrates.org", "call", "1005", "1001", "1002", "2013-11-07T08:42:25Z", "2013-11-07T08:42:26Z", "10000000000", "1.0164"},
+		{"2", "ea1f1968cc207859672c332364fc7614c86b04c5", "*default", "*data", "", "*rated", "AnotherTenant", "call", "1005", "1001", "1002", "2013-11-07T08:42:25Z", "2013-11-07T08:42:26Z", "10", "0.012"},
+		{"3", "9e0b2a4b23e0843efe522e8a611b092a16ecfba1", "raw", "*data", "abcdefghh", "*none", "phone.org", "sms", "1005", "User2001", "User2002", "2013-11-07T08:42:25Z", "2013-11-07T08:42:26Z", "10", "44.5"},
+		{"4", "cd8112998c2abb0e4a7cd3a94c74817cd5fe67d3", "Default_charging_id", "", "", "*prepaid", "dispatchers.org", "photo", "1005", "1005", "1000", "2679-04-25T22:02:25Z", "2679-04-25T22:02:40Z", "10", "1.4422"},
 		{"4", "10s", "46.9706"},
 	}
 	if !reflect.DeepEqual(expected, csvRply) {
@@ -518,7 +523,7 @@ func testCsvExportBufferedEventNoExports(t *testing.T) {
 		Events: []*utils.EventsWithOpts{
 			{
 				Event: map[string]interface{}{
-					//utils.MetaOriginID:  utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()),
+
 					utils.ToR:           utils.MetaVoice,
 					"ComposedOriginID1": "dsaf",
 					"ComposedOriginID2": "dsaf",
@@ -528,16 +533,22 @@ func testCsvExportBufferedEventNoExports(t *testing.T) {
 					utils.Category:      "call",
 					utils.AccountField:  "DifferentAccount12",
 				},
+				Opts: map[string]interface{}{
+					utils.MetaOriginID: utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()),
+				},
 			},
 			{
 				Event: map[string]interface{}{
-					//utils.MetaOriginID: utils.Sha1("abcdef", time.Unix(1383813745, 0).UTC().String()),
+
 					utils.ToR:          utils.MetaData,
 					utils.OriginHost:   "192.168.1.1",
 					utils.RequestType:  utils.MetaRated,
 					utils.Tenant:       "AnotherTenant",
 					utils.Category:     "call", //for data CDR use different Tenant
 					utils.AccountField: "DifferentAccount10",
+				},
+				Opts: map[string]interface{}{
+					utils.MetaOriginID: utils.Sha1("abcdef", time.Unix(1383813745, 0).UTC().String()),
 				},
 			},
 		},
@@ -666,11 +677,11 @@ func testCsvVerifyExportsWithInflateTemplate(t *testing.T) {
 	if len(files) != 1 {
 		t.Errorf("Expected %+v, received: %+v", 1, len(files))
 	}
-	eCnt := "*default,*voice,dsafdsaf,*rated,cgrates.org,call,1001,1001,1002,2013-11-07T08:42:25Z,2013-11-07T08:42:26Z,10000000000,1.01" +
+	eCnt := "dbafe9c8614c785a65aabd116dd3959c3c56f7f6,*default,*voice,dsafdsaf,*rated,cgrates.org,call,1001,1001,1002,2013-11-07T08:42:25Z,2013-11-07T08:42:26Z,10000000000,1.01" +
 		"\n" +
-		"*default,*data,abcdef,*rated,AnotherTenant,call,1001,1001,1002,2013-11-07T08:42:25Z,2013-11-07T08:42:26Z,10,0.012" +
+		"ea1f1968cc207859672c332364fc7614c86b04c5,*default,*data,abcdef,*rated,AnotherTenant,call,1001,1001,1002,2013-11-07T08:42:25Z,2013-11-07T08:42:26Z,10,0.012" +
 		"\n" +
-		"*default,*sms,sdfwer,*rated,cgrates.org,call,1001,1001,1002,2013-11-07T08:42:25Z,2013-11-07T08:42:26Z,1,0.15" +
+		"2478e9f18ebcd3c684f3c14596b8bfeab2b0d6d4,*default,*sms,sdfwer,*rated,cgrates.org,call,1001,1001,1002,2013-11-07T08:42:25Z,2013-11-07T08:42:26Z,1,0.15" +
 		"\n"
 	if outContent1, err := os.ReadFile(files[0]); err != nil {
 		t.Error(err)
