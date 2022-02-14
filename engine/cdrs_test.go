@@ -711,17 +711,18 @@ func TestCDRsRateProcessEventMock(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "testID",
 		Event: map[string]interface{}{
-			utils.MetaRateSCost: utils.RateProfileCost{},
-			"Resources":         "ResourceProfile1",
-			utils.AnswerTime:    time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
-			"UsageInterval":     "1s",
-			"PddInterval":       "1s",
-			utils.Weight:        "20.0",
-			utils.Usage:         135 * time.Second,
-			utils.Cost:          123.0,
+
+			"Resources":      "ResourceProfile1",
+			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
+			"UsageInterval":  "1s",
+			"PddInterval":    "1s",
+			utils.Weight:     "20.0",
+			utils.Usage:      135 * time.Second,
+			utils.Cost:       123.0,
 		},
 		APIOpts: map[string]interface{}{
-			utils.Subsys: utils.MetaRateS,
+			utils.MetaRateSCost: utils.RateProfileCost{},
+			utils.Subsys:        utils.MetaRateS,
 		},
 	}
 	if !reflect.DeepEqual(expected, cgrEv) {
@@ -768,17 +769,18 @@ func TestCDRsAccountProcessEventMock(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "testID",
 		Event: map[string]interface{}{
-			utils.MetaAccountSCost: &utils.EventCharges{},
-			"Resources":            "ResourceProfile1",
-			utils.AnswerTime:       time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
-			"UsageInterval":        "1s",
-			"PddInterval":          "1s",
-			utils.Weight:           "20.0",
-			utils.Usage:            135 * time.Second,
-			utils.Cost:             123.0,
+
+			"Resources":      "ResourceProfile1",
+			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
+			"UsageInterval":  "1s",
+			"PddInterval":    "1s",
+			utils.Weight:     "20.0",
+			utils.Usage:      135 * time.Second,
+			utils.Cost:       123.0,
 		},
 		APIOpts: map[string]interface{}{
-			utils.Subsys: utils.MetaAccounts,
+			utils.MetaAccountSCost: &utils.EventCharges{},
+			utils.Subsys:           utils.MetaAccounts,
 		},
 	}
 	err := newCDRSrv.accountSDebitEvent(context.Background(), cgrEv)
@@ -789,17 +791,18 @@ func TestCDRsAccountProcessEventMock(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "testID",
 		Event: map[string]interface{}{
-			utils.MetaAccountSCost: cgrEv.Event[utils.MetaAccountSCost],
-			"Resources":            "ResourceProfile1",
-			utils.AnswerTime:       time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
-			"UsageInterval":        "1s",
-			"PddInterval":          "1s",
-			utils.Weight:           "20.0",
-			utils.Usage:            135 * time.Second,
-			utils.Cost:             123.0,
+
+			"Resources":      "ResourceProfile1",
+			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
+			"UsageInterval":  "1s",
+			"PddInterval":    "1s",
+			utils.Weight:     "20.0",
+			utils.Usage:      135 * time.Second,
+			utils.Cost:       123.0,
 		},
 		APIOpts: map[string]interface{}{
-			utils.Subsys: utils.MetaAccounts,
+			utils.MetaAccountSCost: cgrEv.APIOpts[utils.MetaAccountSCost],
+			utils.Subsys:           utils.MetaAccounts,
 		},
 	}
 	if !reflect.DeepEqual(expected, cgrEv) {

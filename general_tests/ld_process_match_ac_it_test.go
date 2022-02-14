@@ -186,6 +186,16 @@ func testLdPrMatchAcCDRSProcessEvent(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "TestEv1",
 			Event: map[string]interface{}{
+
+				"Account":     "1001",
+				"Destination": "1002",
+				"OriginID":    "TestEv1",
+				"RequestType": "*prepaid",
+				"Subject":     "1001",
+				"ToR":         "*voice",
+			},
+
+			APIOpts: map[string]interface{}{
 				utils.MetaAccountSCost: map[string]interface{}{
 					"Abstracts":  0,
 					"Accounting": map[string]interface{}{},
@@ -224,15 +234,6 @@ func testLdPrMatchAcCDRSProcessEvent(t *testing.T) {
 					"Rating":      map[string]interface{}{},
 					"UnitFactors": map[string]interface{}{},
 				},
-				"Account":     "1001",
-				"Destination": "1002",
-				"OriginID":    "TestEv1",
-				"RequestType": "*prepaid",
-				"Subject":     "1001",
-				"ToR":         "*voice",
-			},
-
-			APIOpts: map[string]interface{}{
 				utils.MetaUsage:      2 * time.Minute,
 				utils.OptsCDRsExport: true,
 				utils.OptsRateS:      false,

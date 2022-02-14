@@ -179,14 +179,23 @@ func testLdPrMatchRtCDRSProcessEvent(t *testing.T) {
 	if testRPCrt1.Event == nil {
 		t.Fatal("The rpc was not called")
 	}
-	costIntervalRatesID := testRPCrt1.Event.Event["*rateSCost"].(map[string]interface{})["CostIntervals"].([]interface{})[0].(map[string]interface{})["Increments"].([]interface{})[0].(map[string]interface{})["RateID"]
+	costIntervalRatesID := testRPCrt1.Event.APIOpts[utils.MetaRateSCost].(map[string]interface{})["CostIntervals"].([]interface{})[0].(map[string]interface{})["Increments"].([]interface{})[0].(map[string]interface{})["RateID"]
 	expected2 := &utils.CGREventWithEeIDs{
 		EeIDs: nil,
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestEv1",
 			Event: map[string]interface{}{
-				"*rateSCost": map[string]interface{}{
+				"Account":     "1001",
+				"Destination": "1002",
+				"OriginID":    "TestEv1",
+				"RequestType": "*prepaid",
+				"Subject":     "1001",
+				"ToR":         "*voice",
+				"Usage":       60000000000,
+			},
+			APIOpts: map[string]interface{}{
+				utils.MetaRateSCost: map[string]interface{}{
 					"Altered":  nil,
 					utils.Cost: 0.4,
 					"CostIntervals": []map[string]interface{}{
@@ -216,15 +225,6 @@ func testLdPrMatchRtCDRSProcessEvent(t *testing.T) {
 						},
 					},
 				},
-				"Account":     "1001",
-				"Destination": "1002",
-				"OriginID":    "TestEv1",
-				"RequestType": "*prepaid",
-				"Subject":     "1001",
-				"ToR":         "*voice",
-				"Usage":       60000000000,
-			},
-			APIOpts: map[string]interface{}{
 				utils.OptsRateS:      true,
 				utils.OptsCDRsExport: true,
 				utils.OptsAccountS:   false,
