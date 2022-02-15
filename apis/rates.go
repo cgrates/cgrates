@@ -269,7 +269,7 @@ func (rSv1 *RateSv1) RateProfilesForEvent(ctx *context.Context, args *utils.CGRE
 }
 
 // RateProfilesForEvent returns the list of rates that are matching the event from a specific profile
-func (rSv1 *RateSv1) RateProfileRatesForEvent(ctx *context.Context, args *utils.CGREvent, rateIDs *[]string) (err error) {
+func (rSv1 *RateSv1) RateProfileRatesForEvent(ctx *context.Context, args *utils.CGREventWithRateProfile, rateIDs *[]string) (err error) {
 	return rSv1.rS.V1RateProfileRatesForEvent(ctx, args, rateIDs)
 }
 
