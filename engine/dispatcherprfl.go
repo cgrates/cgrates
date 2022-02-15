@@ -289,9 +289,13 @@ func (dH *DispatcherHost) Set(path []string, val interface{}, newBranch bool, _ 
 	case utils.CaCertificate:
 		dH.CaCertificate = utils.IfaceAsString(val)
 	case utils.ConnectAttempts:
-		dH.ConnectAttempts, err = utils.IfaceAsTInt(val)
+		if val != utils.EmptyString {
+			dH.ConnectAttempts, err = utils.IfaceAsTInt(val)
+		}
 	case utils.Reconnects:
-		dH.Reconnects, err = utils.IfaceAsTInt(val)
+		if val != utils.EmptyString {
+			dH.Reconnects, err = utils.IfaceAsTInt(val)
+		}
 	case utils.ConnectTimeout:
 		dH.ConnectTimeout, err = utils.IfaceAsDuration(val)
 	case utils.ReplyTimeout:
@@ -311,6 +315,9 @@ func (dP *DispatcherProfile) Merge(v2 interface{}) {
 		dP.ID = vi.ID
 	}
 	dP.FilterIDs = append(dP.FilterIDs, vi.FilterIDs...)
+	if len(dP.Hosts) == 1 && dP.Hosts[0].ID == utils.EmptyString {
+		dP.Hosts = dP.Hosts[:0]
+	}
 	var equal bool
 	for _, hostV2 := range vi.Hosts {
 		for _, host := range dP.Hosts {
@@ -320,12 +327,11 @@ func (dP *DispatcherProfile) Merge(v2 interface{}) {
 				break
 			}
 		}
-		if !equal {
+		if !equal && hostV2.ID != utils.EmptyString {
 			dP.Hosts = append(dP.Hosts, hostV2)
 		}
 		equal = false
 	}
-	// dP.Hosts = append(dP.Hosts, vi.Hosts...)
 	if vi.Weight != 0 {
 		dP.Weight = vi.Weight
 	}

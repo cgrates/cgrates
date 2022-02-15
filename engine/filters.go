@@ -307,7 +307,7 @@ func (fltr *FilterRule) CompileValues() (err error) {
 	if fltr.rsrElement, err = config.NewRSRParser(fltr.Element); err != nil {
 		return
 	} else if fltr.rsrElement == nil {
-		return fmt.Errorf("emtpy RSRParser in rule: <%s>", fltr.Element)
+		return fmt.Errorf("empty RSRParser in rule: <%s>", fltr.Element)
 	}
 	return
 }
@@ -746,7 +746,11 @@ func (fltr *Filter) Merge(v2 interface{}) {
 	if len(vi.ID) != 0 {
 		fltr.ID = vi.ID
 	}
-	fltr.Rules = append(fltr.Rules, vi.Rules...)
+	for _, rule := range vi.Rules {
+		if rule.Type != utils.EmptyString {
+			fltr.Rules = append(fltr.Rules, rule)
+		}
+	}
 }
 
 func (fltr *Filter) String() string { return utils.ToJSON(fltr) }

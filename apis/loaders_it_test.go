@@ -190,7 +190,10 @@ func testLoadersWriteCSVs(t *testing.T) {
 	// Create and populate Accounts.csv
 	if err := writeFile(utils.AccountsCsv, `
 #Tenant,ID,FilterIDs,Weights,Opts,BalanceID,BalanceFilterIDs,BalanceWeights,BalanceType,BalanceUnits,BalanceUnitFactors,BalanceOpts,BalanceCostIncrements,BalanceAttributeIDs,BalanceRateProfileIDs,ThresholdIDs
-cgrates.org,1001,,;20,,MonetaryBalance,,;10,*monetary,14,fltr1&fltr2;100;fltr3;200,,fltr1&fltr2;1.3;2.3;3.3,attr1;attr2,,*none
+cgrates.org,1001,,,,,,,,,,,,,,
+cgrates.org,1001,,;20,,,,,,,,,,,,
+cgrates.org,1001,,,,MonetaryBalance,,;10,*monetary,14,fltr1&fltr2;100;fltr3;200,,fltr1&fltr2;1.3;2.3;3.3,attr1;attr2,,*none
+cgrates.org,1001,,,,,,,,,,,,,,
 cgrates.org,1001,,,,VoiceBalance,,;10,*voice,1h,,,,,,
 cgrates.org,1002,,,,MonetaryBalance,,;20,*monetary,1h,,,,,,
 cgrates.org,1002,,;30,,VoiceBalance,,;10,*voice,14,fltr3&fltr4;150;fltr5;250,,fltr3&fltr4;1.3;2.3;3.3,attr3;attr4,,*none
@@ -201,7 +204,11 @@ cgrates.org,1002,,;30,,VoiceBalance,,;10,*voice,14,fltr3&fltr4;150;fltr5;250,,fl
 	// Create and populate ActionProfiles.csv
 	if err := writeFile(utils.ActionsCsv, `
 #Tenant,ID,FilterIDs,Weights,Schedule,TargetType,TargetIDs,ActionID,ActionFilterIDs,ActionBlocker,ActionTTL,ActionType,ActionOpts,ActionPath,ActionValue
-cgrates.org,ONE_TIME_ACT,,;10,*asap,*accounts,1001;1002,TOPUP,,false,0s,*add_balance,,*balance.TestBalance.Value,10
+cgrates.org,ONE_TIME_ACT,,,,,,,,,,,,,
+cgrates.org,ONE_TIME_ACT,,;10,*asap,*accounts,1001;1002,,,,,,,,
+cgrates.org,ONE_TIME_ACT,,,,,,TOPUP,,false,0s,*add_balance,,,
+cgrates.org,ONE_TIME_ACT,,,*asap,*accounts,1001;1002,,,,,,,,
+cgrates.org,ONE_TIME_ACT,,,,,,TOPUP,,,,,,*balance.TestBalance.Value,10
 cgrates.org,ONE_TIME_ACT,,,,,,SET_BALANCE_TEST_DATA,,false,0s,*set_balance,,*balance.TestDataBalance.Type,*data
 cgrates.org,ONE_TIME_ACT,,,,,,TOPUP_TEST_DATA,,false,0s,*add_balance,,*balance.TestDataBalance.Value,1024
 cgrates.org,ONE_TIME_ACT,,,,,,SET_BALANCE_TEST_VOICE,,false,0s,*set_balance,,*balance.TestVoiceBalance.Type,*voice
@@ -214,7 +221,8 @@ cgrates.org,ONE_TIME_ACT,,,,,,TOPUP_TEST_VOICE,,false,0s,*add_balance,,*balance.
 	// Create and populate Attributes.csv
 	if err := writeFile(utils.AttributesCsv, `
 #Tenant,ID,FilterIDs,Weights,AttributeFilterIDs,Path,Type,Value,Blocker
-cgrates.org,ALS1,*string:~*req.Account:1001;*string:~*opts.*context:con1,;20,*string:~*req.Field1:Initial,*req.Field1,*variable,Sub1,true
+cgrates.org,ALS1,*string:~*req.Account:1001;*string:~*opts.*context:con1,;20,,,,,
+cgrates.org,ALS1,,,*string:~*req.Field1:Initial,*req.Field1,*variable,Sub1,true
 cgrates.org,ALS1,*string:~*opts.*context:con2|con3,,,*req.Field2,*variable,Sub2,true
 cgrates.org,ALS2,*string:~*opts.*context:con2|con3,,,*req.Field2,*variable,Sub2,true
 cgrates.org,ALS2,*string:~*req.Account:1002;*string:~*opts.*context:con1,;20,*string:~*req.Field1:Initial,*req.Field1,*variable,Sub1,
@@ -236,10 +244,13 @@ cgrates.org,Charger2,*string:~*req.Account:1002,;15,,
 	// Create and populate DispatcherProfiles.csv
 	if err := writeFile(utils.DispatcherProfilesCsv, `
 #Tenant,ID,FilterIDs,Weight,Strategy,StrategyParameters,ConnID,ConnFilterIDs,ConnWeight,ConnBlocker,ConnParameters
-cgrates.org,D1,*string:~*req.Account:1001,20,*first,,C1,fltr1,10,true,*ratio:1;param1:value1
-cgrates.org,D1,,,*first,,C1,fltr2;fltr4,,false,param2:value2
+cgrates.org,D1,,,,,,,,,
+cgrates.org,D1,*string:~*req.Account:1001,20,*first,,,,,,
+cgrates.org,D1,,,,,C1,fltr1,10,true,*ratio:1;param1:value1
+cgrates.org,D1,,,,,,,,,
+cgrates.org,D1,,,,,C1,fltr2;fltr4,,false,param2:value2
 cgrates.org,D2,,,*first,,C3,fltr2,20,true,
-cgrates.org,D2,*string:~*req.Account:1002,20,*first,,C2,fltr3,10,,param3:value3
+cgrates.org,D2,*string:~*req.Account:1002,20,,,C2,fltr3,10,,param3:value3
 `); err != nil {
 		t.Fatal(err)
 	}
@@ -247,6 +258,7 @@ cgrates.org,D2,*string:~*req.Account:1002,20,*first,,C2,fltr3,10,,param3:value3
 	// Create and populate DispatcherHosts.csv
 	if err := writeFile(utils.DispatcherHostsCsv, `
 #Tenant[0],ID[1],Address[2],Transport[3],ConnectAttempts[4],Reconnects[5],ConnectTimeout[6],ReplyTimeout[7],Tls[8],ClientKey[9],ClientCertificate[10],CaCertificate[11]
+cgrates.org,ALL,,,,,,,,,,
 cgrates.org,ALL,127.0.0.1:6012,,1,3,1m,2m,true,,,
 cgrates.org,ALL,,*json,1,3,1m,2m,false,,,
 `); err != nil {
@@ -256,7 +268,9 @@ cgrates.org,ALL,,*json,1,3,1m,2m,false,,,
 	// Create and populate Filters.csv
 	if err := writeFile(utils.FiltersCsv, `
 #Tenant[0],ID[1],Type[2],Element[3],Values[4]
+cgrates.org,FLTR_ACCOUNT_1001,,,
 cgrates.org,FLTR_ACCOUNT_1001,*string,~*req.Account,1001;1002
+cgrates.org,FLTR_ACCOUNT_1001,,,
 cgrates.org,FLTR_ACCOUNT_1001,*prefix,~*req.Destination,10;20
 cgrates.org,FLTR_ACCOUNT_1001,*rsr,~*req.Subject,~^1.*1$
 cgrates.org,FLTR_ACCOUNT_1001,*rsr,~*req.Destination,1002
@@ -268,7 +282,9 @@ cgrates.org,FLTR_ACNT_dan,*string,~*req.Account,dan
 	// Create and populate RateProfiles.csv
 	if err := writeFile(utils.RatesCsv, `
 #Tenant,ID,FilterIDs,Weights,MinCost,MaxCost,MaxCostStrategy,RateID,RateFilterIDs,RateActivationStart,RateWeights,RateBlocker,RateIntervalStart,RateFixedFee,RateRecurrentFee,RateUnit,RateIncrement
-cgrates.org,RP1,*string:~*req.Subject:1001,;0,0.1,0.6,*free,RT_WEEK,,"* * * * 1-5",;0,false,0s,0,0.12,1m,1m
+cgrates.org,RP1,,,,,,,,,,,,,,,
+cgrates.org,RP1,*string:~*req.Subject:1001,;0,0.1,0.6,*free,,,,,,,,,,
+cgrates.org,RP1,,,,,,RT_WEEK,,"* * * * 1-5",;0,false,0s,0,0.12,1m,1m
 cgrates.org,RP1,,,,,,RT_WEEK,,,,,1m,1.234,0.06,1m,1s
 cgrates.org,RP1,,,,,,RT_WEEKEND,,,,true,,0.067,0.03,,
 cgrates.org,RP1,,,,,,RT_WEEKEND,,"* * * * 0,6",;10,false,0s,0.089,0.06,1m,1s
@@ -294,7 +310,10 @@ cgrates.org,ResGroup22,*string:~*req.Account:dan,;10,3600s,2,premium_call,true,t
 	// Create and populate Routes.csv
 	if err := writeFile(utils.RoutesCsv, `
 #Tenant[0],ID[1],FilterIDs[2],Weights[3],Sorting[4],SortingParameters[5],RouteID[6],RouteFilterIDs[7],RouteAccountIDs[8],RouteRateProfileIDs[9],RouteResourceIDs[10],RouteStatIDs[11],RouteWeights[12],RouteBlocker[13],RouteParameters[14]
-cgrates.org,RoutePrf1,*string:~*req.Account:1001,;20,*lc,,route1,fltr1,Account1;Account2,RPL_1,ResGroup1,Stat1,,true,param1
+cgrates.org,RoutePrf1,,,,,,,,,,,,,
+cgrates.org,RoutePrf1,*string:~*req.Account:1001,;20,*lc,,,,,,,,,,
+cgrates.org,RoutePrf1,,,,,route1,fltr1,Account1;Account2,RPL_1,ResGroup1,Stat1,,true,param1
+cgrates.org,RoutePrf1,,,,,,,,,,,,,
 cgrates.org,RoutePrf1,,,,,route1,,,RPL_2,ResGroup2,,;10,,
 cgrates.org,RoutePrf1,,,,,route1,fltr2,,RPL_3,ResGroup3,Stat2,,,param2
 cgrates.org,RoutePrf1,,,,,route1,,,,ResGroup4,Stat3,,,

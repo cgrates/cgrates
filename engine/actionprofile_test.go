@@ -21,6 +21,7 @@ package engine
 import (
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
@@ -562,5 +563,280 @@ func TestActionProfileMerge(t *testing.T) {
 		Actions:  []*APAction{{}},
 	}); !reflect.DeepEqual(exp, acc) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(acc))
+	}
+}
+
+func TestActionProfileMergeAPActionMerge(t *testing.T) {
+	acc := &ActionProfile{
+		Tenant:    "cgrates.org",
+		ID:        "ID",
+		FilterIDs: []string{"fltr1"},
+		Weights: utils.DynamicWeights{
+			{
+				FilterIDs: []string{"fltr2"},
+				Weight:    40,
+			},
+		},
+		Schedule: "* * * * 1-5",
+		Targets:  map[string]utils.StringSet{utils.MetaAccounts: {"1002": {}}},
+		Actions: []*APAction{
+			{
+				ID:        "APAct1",
+				FilterIDs: []string{"FLTR1", "FLTR2", "FLTR3"},
+				Blocker:   true,
+				TTL:       time.Minute,
+				Type:      "type2",
+				Opts: map[string]interface{}{
+					"key1": "value1",
+					"key2": "value2",
+				},
+				Diktats: []*APDiktat{},
+			},
+		},
+	}
+	exp := &ActionProfile{
+		Tenant:    "cgrates.org",
+		ID:        "ID",
+		FilterIDs: []string{"fltr1", "fltr2"},
+		Weights: utils.DynamicWeights{
+			{
+				FilterIDs: []string{"fltr2"},
+				Weight:    40,
+			},
+			{
+				Weight: 65,
+			},
+		},
+		Schedule: "* * * * *",
+		Targets:  map[string]utils.StringSet{utils.MetaAccounts: {"1001": {}}},
+		Actions: []*APAction{
+			{
+				ID:        "APAct1",
+				FilterIDs: []string{"FLTR1", "FLTR2", "FLTR3", "FLTR4"},
+				Blocker:   true,
+				TTL:       time.Minute,
+				Type:      "type2",
+				Opts: map[string]interface{}{
+					"key1": "value1",
+					"key2": "value3",
+				},
+				Diktats: []*APDiktat{
+					{
+						Path:  "path2",
+						Value: "value2",
+					},
+				},
+			},
+		},
+	}
+	if acc.Merge(&ActionProfile{
+		Tenant:    "cgrates.org",
+		ID:        "ID",
+		FilterIDs: []string{"fltr2"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 65,
+			},
+		},
+		Schedule: "* * * * *",
+		Targets: map[string]utils.StringSet{
+			utils.MetaAccounts: {
+				"1001": {},
+			},
+			"": {},
+		},
+		Actions: []*APAction{
+			{
+				ID:        "APAct1",
+				FilterIDs: []string{"FLTR4"},
+				Blocker:   false,
+				Type:      "",
+				Opts: map[string]interface{}{
+					"key2": "value3",
+				},
+				Diktats: []*APDiktat{
+					{
+						Path:  "path2",
+						Value: "value2",
+					},
+				},
+			},
+		},
+	}); !reflect.DeepEqual(exp, acc) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(acc))
+	}
+}
+
+func TestActionProfileAPActionMergeEmptyV2(t *testing.T) {
+	apAct := &APAction{
+		ID:        "APAct1",
+		FilterIDs: []string{"FLTR1"},
+		Blocker:   true,
+		TTL:       time.Second,
+		Type:      "type",
+		Opts: map[string]interface{}{
+			"key": "value",
+		},
+		Diktats: []*APDiktat{
+			{
+				Path:  "path",
+				Value: "value",
+			},
+		},
+	}
+	expected := &APAction{
+		ID:        "APAct1",
+		FilterIDs: []string{"FLTR1"},
+		Blocker:   true,
+		TTL:       time.Second,
+		Type:      "type",
+		Opts: map[string]interface{}{
+			"key": "value",
+		},
+		Diktats: []*APDiktat{
+			{
+				Path:  "path",
+				Value: "value",
+			},
+		},
+	}
+
+	apAct.Merge(&APAction{})
+	if !reflect.DeepEqual(apAct, expected) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
+			utils.ToJSON(expected), utils.ToJSON(apAct))
+	}
+}
+
+func TestActionProfileAPActionMergeEmptyV1(t *testing.T) {
+	apAct := &APAction{
+		Opts: make(map[string]interface{}),
+	}
+	expected := &APAction{
+		ID:        "APAct1",
+		FilterIDs: []string{"FLTR1"},
+		Blocker:   true,
+		TTL:       time.Second,
+		Type:      "type",
+		Opts: map[string]interface{}{
+			"key": "value",
+		},
+		Diktats: []*APDiktat{
+			{
+				Path:  "path",
+				Value: "value",
+			},
+		},
+	}
+
+	apAct.Merge(&APAction{
+		ID:        "APAct1",
+		FilterIDs: []string{"FLTR1"},
+		Blocker:   true,
+		TTL:       time.Second,
+		Type:      "type",
+		Opts: map[string]interface{}{
+			"key": "value",
+		},
+		Diktats: []*APDiktat{
+			{
+				Path:  "path",
+				Value: "value",
+			},
+		},
+	})
+	if !reflect.DeepEqual(apAct, expected) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
+			utils.ToJSON(expected), utils.ToJSON(apAct))
+	}
+}
+
+func TestActionProfileAPActionMerge(t *testing.T) {
+	apAct := &APAction{
+		ID:        "APAct1",
+		FilterIDs: []string{"FLTR1"},
+		Blocker:   true,
+		TTL:       time.Second,
+		Type:      "type1",
+		Opts: map[string]interface{}{
+			"key1": "value1",
+		},
+		Diktats: []*APDiktat{
+			{
+				Path:  "",
+				Value: "",
+			},
+		},
+	}
+	expected := &APAction{
+		ID:        "APAct1",
+		FilterIDs: []string{"FLTR1", "FLTR2", "FLTR3"},
+		Blocker:   true,
+		TTL:       time.Minute,
+		Type:      "type2",
+		Opts: map[string]interface{}{
+			"key1": "value1",
+			"key2": "value2",
+		},
+		Diktats: []*APDiktat{},
+	}
+
+	apAct.Merge(&APAction{
+		ID:        "APAct1",
+		FilterIDs: []string{"FLTR2", "FLTR3"},
+		Blocker:   false,
+		TTL:       time.Minute,
+		Type:      "type2",
+		Opts: map[string]interface{}{
+			"key2": "value2",
+		},
+		Diktats: []*APDiktat{
+			{
+				Path:  "",
+				Value: "value1",
+			},
+		},
+	})
+	if !reflect.DeepEqual(apAct, expected) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
+			utils.ToJSON(expected), utils.ToJSON(apAct))
+	}
+
+	expected = &APAction{
+		ID:        "APAct1",
+		FilterIDs: []string{"FLTR1", "FLTR2", "FLTR3", "FLTR4"},
+		Blocker:   true,
+		TTL:       time.Minute,
+		Type:      "type2",
+		Opts: map[string]interface{}{
+			"key1": "value1",
+			"key2": "value3",
+		},
+		Diktats: []*APDiktat{
+			{
+				Path:  "path2",
+				Value: "value2",
+			},
+		},
+	}
+
+	apAct.Merge(&APAction{
+		ID:        "APAct1",
+		FilterIDs: []string{"FLTR4"},
+		Blocker:   false,
+		Type:      "",
+		Opts: map[string]interface{}{
+			"key2": "value3",
+		},
+		Diktats: []*APDiktat{
+			{
+				Path:  "path2",
+				Value: "value2",
+			},
+		},
+	})
+	if !reflect.DeepEqual(apAct, expected) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
+			utils.ToJSON(expected), utils.ToJSON(apAct))
 	}
 }

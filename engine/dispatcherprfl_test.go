@@ -626,7 +626,24 @@ func TestDispatcherProfileMerge(t *testing.T) {
 		Weight:         65,
 		Strategy:       utils.MetaLoad,
 		StrategyParams: map[string]interface{}{"k": "v"},
-		Hosts:          DispatcherHostProfiles{{}},
+		Hosts: DispatcherHostProfiles{
+			{
+				ID:        "C3",
+				FilterIDs: []string{"fltr2"},
+				Weight:    20,
+				Params:    map[string]interface{}{},
+				Blocker:   true,
+			},
+			{
+				ID:        "C2",
+				FilterIDs: []string{"fltr3"},
+				Weight:    10,
+				Params: map[string]interface{}{
+					"param3": "value3",
+				},
+				Blocker: false,
+			},
+		},
 	}
 	if dp.Merge(&DispatcherProfile{
 		Tenant:         "cgrates.org",
@@ -635,7 +652,24 @@ func TestDispatcherProfileMerge(t *testing.T) {
 		Weight:         65,
 		Strategy:       utils.MetaLoad,
 		StrategyParams: map[string]interface{}{"k": "v"},
-		Hosts:          DispatcherHostProfiles{{}},
+		Hosts: DispatcherHostProfiles{
+			{
+				ID:        "C3",
+				FilterIDs: []string{"fltr2"},
+				Weight:    20,
+				Params:    map[string]interface{}{},
+				Blocker:   true,
+			},
+			{
+				ID:        "C2",
+				FilterIDs: []string{"fltr3"},
+				Weight:    10,
+				Params: map[string]interface{}{
+					"param3": "value3",
+				},
+				Blocker: false,
+			},
+		},
 	}); !reflect.DeepEqual(exp, dp) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(dp))
 	}

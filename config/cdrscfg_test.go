@@ -163,7 +163,7 @@ func TestExtraFieldsinloadFromJsonCfg(t *testing.T) {
 	cfgJSON := &CdrsJsonCfg{
 		Extra_fields: &[]string{utils.EmptyString},
 	}
-	expectedErrMessage := "emtpy RSRParser in rule: <>"
+	expectedErrMessage := "empty RSRParser in rule: <>"
 	jsonCfg := NewDefaultCGRConfig()
 	if err = jsonCfg.cdrsCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != expectedErrMessage {
 		t.Errorf("Expected %+v, received %+v", expectedErrMessage, err)

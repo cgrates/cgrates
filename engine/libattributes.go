@@ -170,7 +170,11 @@ func (ap *AttributeProfile) Merge(v2 interface{}) {
 		ap.ID = vi.ID
 	}
 	ap.FilterIDs = append(ap.FilterIDs, vi.FilterIDs...)
-	ap.Attributes = append(ap.Attributes, vi.Attributes...)
+	for _, attr := range vi.Attributes {
+		if attr.Type != utils.EmptyString {
+			ap.Attributes = append(ap.Attributes, attr)
+		}
+	}
 	if vi.Blocker {
 		ap.Blocker = true
 	}
