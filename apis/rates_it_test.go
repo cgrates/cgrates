@@ -49,7 +49,7 @@ var (
 		testRateSResetStorDb,
 		testRateSStartEngine,
 		testRateSRPCConn,
-		/* 	testGetRateProfileBeforeSet,
+		testGetRateProfileBeforeSet,
 		testGetRateProfilesBeforeSet,
 		testRateSetRateProfile,
 		testRateGetRateProfileIDs,
@@ -67,18 +67,16 @@ var (
 		testRateSetAttributeProfileBrokenReference,
 		testRateRemoveRateProfileRates,
 		testRateSetRateProfileRates,
-		testRateSetRateProfilesWithPrefix, */
+		testRateSetRateProfilesWithPrefix,
 		// here we will tests better the create,read,update and delte for the rates inside of a RateProfile
 		testRateProfileWithMultipleRates,
 		testRateProfileRateIDsAndCount,
-		/*
-			testRateProfileUpdateRates,
-			testRateProfileRemoveMultipleRates,
-			testRateProfileSetMultipleRatesInProfile,
-			testRateProfileUpdateProfileRatesOverwrite,
-			testRateProfilesForEventMatchingEvents,
-			testRateProfileRatesForEventMatchingEvents,
-		*/
+		testRateProfileUpdateRates,
+		testRateProfileRemoveMultipleRates,
+		testRateProfileSetMultipleRatesInProfile,
+		testRateProfileUpdateProfileRatesOverwrite,
+		testRateProfilesForEventMatchingEvents,
+		testRateProfileRatesForEventMatchingEvents,
 		testRateSKillEngine,
 	}
 )
