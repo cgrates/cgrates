@@ -268,7 +268,14 @@ func (apAct *APAction) Merge(v2 *APAction) {
 		apAct.Opts[key] = value
 	}
 	apAct.FilterIDs = append(apAct.FilterIDs, v2.FilterIDs...)
-	apAct.Diktats = append(apAct.Diktats, v2.Diktats...)
+	if len(apAct.Diktats) == 1 && apAct.Diktats[0].Path == utils.EmptyString {
+		apAct.Diktats = apAct.Diktats[:0]
+	}
+	for _, diktat := range v2.Diktats {
+		if diktat.Path != utils.EmptyString {
+			apAct.Diktats = append(apAct.Diktats, diktat)
+		}
+	}
 }
 
 func (ap *ActionProfile) String() string { return utils.ToJSON(ap) }

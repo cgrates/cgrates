@@ -147,7 +147,7 @@ func TestDryRun(t *testing.T) {
 		t.Errorf("Expected %+q, received %+q", expLog, rplyLog)
 	}
 
-	expErrMsg := `emtpy RSRParser in rule: <>`
+	expErrMsg := `empty RSRParser in rule: <>`
 	if _, err := testDryRunWithData(utils.MetaFilters, &engine.Filter{
 		Tenant: "cgrates.org",
 		ID:     "ID",
@@ -199,7 +199,7 @@ func TestSetToDBWithDBError(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	expErrMsg := `emtpy RSRParser in rule: <>`
+	expErrMsg := `empty RSRParser in rule: <>`
 	if err := setToDB(context.Background(), nil, utils.MetaFilters, &engine.Filter{Rules: []*engine.FilterRule{{Type: "*"}}}, true, false); err == nil || err.Error() != expErrMsg {
 		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
 	}
