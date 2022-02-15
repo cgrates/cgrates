@@ -19,10 +19,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"fmt"
 	"reflect"
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -548,7 +550,7 @@ func TestActionProfileMerge(t *testing.T) {
 		Schedule: "* * * * *",
 		Targets:  map[string]utils.StringSet{utils.MetaAccounts: {"1001": {}}},
 		Actions:  []*APAction{{}},
-	}
+	}cgrates/cg
 	if acc.Merge(&ActionProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ID",
@@ -838,5 +840,28 @@ func TestActionProfileAPActionMerge(t *testing.T) {
 	if !reflect.DeepEqual(apAct, expected) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
 			utils.ToJSON(expected), utils.ToJSON(apAct))
+	}
+}
+func TestFilterHelpersGetWeightFromDynamics(t *testing.T) {
+	var expected float64
+	expected = 64
+	ap := &ActionProfile{
+		Weights: []*utils.DynamicWeight{
+			{
+				Weight: 64,
+			},
+		},
+		weight: 64,
+	}
+	ctx := context.Background()
+	fltrs := &FilterS{}
+	tnt := utils.CGRateSorg
+	ev := utils.MapStorage{}
+	err := ap.GetWeightFromDynamics(ctx, fltrs, tnt, ev)
+	if err != nil {
+		t.Error(err)
+	}
+	if !reflect.DeepEqual(ap.weight, expected) {
+		fmt.Printf("\nExpected <%+v>, \nReceived <%+v>", expected, ap.weight)
 	}
 }
