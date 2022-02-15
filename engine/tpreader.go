@@ -536,7 +536,7 @@ func (tpr *TpReader) WriteToDatabase(verbose, disableReverse bool) (err error) {
 		if th, err = APItoRateProfile(tpTH, tpr.timezone); err != nil {
 			return
 		}
-		if err = tpr.dm.SetRateProfile(context.Background(), th, map[string]interface{}{}, true); err != nil {
+		if err = tpr.dm.SetRateProfile(context.Background(), th, false, true); err != nil {
 			return
 		}
 		if verbose {

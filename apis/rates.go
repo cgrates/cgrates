@@ -182,14 +182,22 @@ func (admS *AdminSv1) GetRateProfileRatesCount(ctx *context.Context, args *utils
 }
 
 // SetRateProfile add/update a new Rate Profile
-func (admS *AdminSv1) SetRateProfile(ctx *context.Context, args *utils.APIRateProfile, reply *string) error {
+func (admS *AdminSv1) SetRateProfile(ctx *context.Context, args *utils.APIRateProfile, reply *string) (err error) {
 	if missing := utils.MissingStructFields(args, []string{utils.ID, utils.Rates}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if args.Tenant == utils.EmptyString {
 		args.Tenant = admS.cfg.GeneralCfg().DefaultTenant
 	}
-	if err := admS.dm.SetRateProfile(ctx, args.RateProfile, args.APIOpts, true); err != nil {
+	// check if we want to overwrite our profile already existing in database
+	var optOverwrite bool
+	if _, has := args.APIOpts[utils.MetaRateSOverwrite]; has {
+		optOverwrite, err = utils.IfaceAsBool(args.APIOpts[utils.MetaRateSOverwrite])
+		if err != nil {
+			return
+		}
+	}
+	if err := admS.dm.SetRateProfile(ctx, args.RateProfile, optOverwrite, true); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//generate a loadID for CacheRateProfiles and store it in database

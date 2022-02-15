@@ -1222,31 +1222,39 @@ func (ms *MongoStorage) GetRateProfileDrv(ctx *context.Context, tenant, id strin
 }
 
 func (ms *MongoStorage) GetRateProfileRatesDrv(ctx *context.Context, tenant, profileID, rtPrfx string, needIDs bool) (rateIDs []string, rates []*utils.Rate, err error) {
-	/*
-		prefix := utils.Rates + utils.ConcatenatedKeySep
-		if rtPrfx != utils.EmptyString {
-			prefix = utils.ConcatenatedKey(utils.Rates, rtPrfx)
-		}
-		mapRP := make(map[string]interface{})
-		err = ms.query(ctx, func(sctx mongo.SessionContext) (err error) {
-			cur := ms.getCol(ColRpp).FindOne(sctx, bson.M{"tenant": tenant, "id": profileID})
-			if err := cur.Decode(mapRP); err != nil {
-				if err == mongo.ErrNoDocuments {
-					return utils.ErrNotFound
-				}
-				return err
-			}
-			return nil
-		})
+	prefix := utils.Rates + utils.ConcatenatedKeySep
+	if rtPrfx != utils.EmptyString {
+		prefix = utils.ConcatenatedKey(utils.Rates, rtPrfx)
+	}
 
-			for key := range mapRP {
-				if strings.HasPrefix(key, prefix) {
-					rtToAppend := new(utils.RateProfile)
-					err = ms.ms.Unmarshal([]byte())
-					rates = append(rates, strings.TrimPrefix(key, utils.Rates+utils.ConcatenatedKeySep))
-				}
+	matchStage, queryStage := newAggregateStages(profileID, tenant, prefix)
+	var result []bson.M
+	if err = ms.query(ctx, func(sctx mongo.SessionContext) (err error) {
+		cur, err := ms.getCol(ColRpp).Aggregate(sctx,
+			mongo.Pipeline{matchStage, queryStage}, options.Aggregate().SetMaxTime(2*time.Second))
+		if err != nil {
+			return
+		}
+		if err = cur.All(sctx, &result); err != nil {
+			return err
+		}
+		return nil
+	}); err != nil {
+		return
+	}
+	for _, doc := range result {
+		for key, rate := range doc {
+			if needIDs {
+				rateIDs = append(rateIDs, key[6:])
+				continue
 			}
-	*/
+			rtToAppend := new(utils.Rate)
+			if err = ms.ms.Unmarshal([]byte(utils.IfaceAsString(rate)), rtToAppend); err != nil {
+				return nil, nil, err
+			}
+			rates = append(rates, rtToAppend)
+		}
+	}
 	return
 }
 
@@ -1487,4 +1495,33 @@ func (ms *MongoStorage) RemoveAccountDrv(ctx *context.Context, tenant, id string
 		}
 		return err
 	})
+}
+
+func newAggregateStages(profileID, tenant, prefix string) (match, query bson.D) {
+	match = bson.D{{
+		"$match", bson.M{
+			"id":     profileID,
+			"tenant": tenant,
+		}},
+	}
+	query = bson.D{{
+		"$replaceRoot", bson.D{{
+			"newRoot", bson.D{{
+				"$arrayToObject", bson.D{{
+					"$filter", bson.D{
+						{"input", bson.M{
+							"$objectToArray": "$$ROOT",
+						}},
+						{"cond", bson.D{{
+							"$regexFind", bson.M{
+								"input": "$$this.k",
+								"regex": prefix,
+							},
+						}}},
+					},
+				}},
+			}},
+		}},
+	}}
+	return
 }

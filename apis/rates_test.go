@@ -1704,7 +1704,7 @@ func TestRatesCostForEventRateIDxSelects(t *testing.T) {
 			},
 		},
 	}
-	if err := dm.SetRateProfile(context.Background(), rtPrf, map[string]interface{}{}, true); err != nil {
+	if err := dm.SetRateProfile(context.Background(), rtPrf, false, true); err != nil {
 		t.Error(err)
 	}
 

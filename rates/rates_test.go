@@ -108,7 +108,7 @@ func TestRateProfileCostForEvent(t *testing.T) {
 		t.Error(err)
 	}
 
-	if err := rateS.dm.SetRateProfile(context.Background(), rPrf, map[string]interface{}{}, true); err != nil {
+	if err := rateS.dm.SetRateProfile(context.Background(), rPrf, false, true); err != nil {
 		t.Error(err)
 	}
 
@@ -242,7 +242,7 @@ func TestRateProfileCostForEventUnmatchEvent(t *testing.T) {
 		},
 	}
 
-	if err := rateS.dm.SetRateProfile(context.Background(), rPrf, map[string]interface{}{}, true); err != nil {
+	if err := rateS.dm.SetRateProfile(context.Background(), rPrf, false, true); err != nil {
 		t.Error(err)
 	}
 
@@ -297,7 +297,7 @@ func TestMatchingRateProfileEvent(t *testing.T) {
 		},
 		FilterIDs: []string{"*string:~*req.Account:1001|1002|1003", "*prefix:~*req.Destination:10"},
 	}
-	err := dm.SetRateProfile(context.Background(), rpp, map[string]interface{}{}, true)
+	err := dm.SetRateProfile(context.Background(), rpp, false, true)
 	if err != nil {
 		t.Error(err)
 	}
@@ -442,7 +442,7 @@ func TestV1CostForEventError(t *testing.T) {
 		},
 	}
 
-	if err := rateS.dm.SetRateProfile(context.Background(), rPrf, map[string]interface{}{}, true); err != nil {
+	if err := rateS.dm.SetRateProfile(context.Background(), rPrf, false, true); err != nil {
 		t.Error(err)
 	}
 	rcv, err := rateS.rateProfileCostForEvent(context.Background(), rPrf, &utils.CGREvent{
@@ -557,7 +557,7 @@ func BenchmarkRateS_V1CostForEvent(b *testing.B) {
 			},
 		},
 	}
-	if err := dm.SetRateProfile(context.Background(), rPrf, map[string]interface{}{}, true); err != nil {
+	if err := dm.SetRateProfile(context.Background(), rPrf, false, true); err != nil {
 		b.Error(err)
 	}
 	if err := rPrf.Compile(); err != nil {
@@ -646,7 +646,7 @@ func BenchmarkRateS_V1CostForEventSingleRate(b *testing.B) {
 			},
 		},
 	}
-	if err := dm.SetRateProfile(context.Background(), rPrf, map[string]interface{}{}, true); err != nil {
+	if err := dm.SetRateProfile(context.Background(), rPrf, false, true); err != nil {
 		b.Error(err)
 	}
 	if err := rPrf.Compile(); err != nil {
@@ -729,7 +729,7 @@ func TestRateProfileCostForEventInvalidUsage(t *testing.T) {
 		},
 	}
 
-	if err := rateS.dm.SetRateProfile(context.Background(), rPrf, map[string]interface{}{}, true); err != nil {
+	if err := rateS.dm.SetRateProfile(context.Background(), rPrf, false, true); err != nil {
 		t.Error(err)
 	}
 
@@ -803,7 +803,7 @@ func TestRateProfileCostForEventZeroIncrement(t *testing.T) {
 		},
 	}
 
-	if err := rateS.dm.SetRateProfile(context.Background(), rPrf, map[string]interface{}{}, true); err != nil {
+	if err := rateS.dm.SetRateProfile(context.Background(), rPrf, false, true); err != nil {
 		t.Error(err)
 	}
 
@@ -863,7 +863,7 @@ func TestRateProfileCostForEventMaximumIterations(t *testing.T) {
 			},
 		},
 	}
-	if err := rateS.dm.SetRateProfile(context.Background(), rPrf, map[string]interface{}{}, true); err != nil {
+	if err := rateS.dm.SetRateProfile(context.Background(), rPrf, false, true); err != nil {
 		t.Error(err)
 	}
 	rateS.cfg.RateSCfg().Verbosity = 10
@@ -909,7 +909,7 @@ func TestRateSMatchingRateProfileForEventErrFltr(t *testing.T) {
 		FilterIDs: []string{"*ai:~*req.AnswerTime:2020-07-21T00:00:00Z|9999-07-21T10:00:00Z"},
 	}
 
-	err := dm.SetRateProfile(context.Background(), rPrf, map[string]interface{}{}, true)
+	err := dm.SetRateProfile(context.Background(), rPrf, false, true)
 	if err != nil {
 		t.Error(err)
 	}
@@ -979,7 +979,7 @@ func TestRateSRateProfileCostForEventErrFltr(t *testing.T) {
 		t.Error(err)
 	}
 
-	if err := rateS.dm.SetRateProfile(context.Background(), rPrf, map[string]interface{}{}, true); err != nil {
+	if err := rateS.dm.SetRateProfile(context.Background(), rPrf, false, true); err != nil {
 		t.Error(err)
 	}
 
@@ -1033,7 +1033,7 @@ func TestRateSRateProfileCostForEventErrInterval(t *testing.T) {
 		},
 	}
 
-	if err := rateS.dm.SetRateProfile(context.Background(), rPrf, map[string]interface{}{}, true); err != nil {
+	if err := rateS.dm.SetRateProfile(context.Background(), rPrf, false, true); err != nil {
 		t.Error(err)
 	}
 	expected := "can't convert <wrongValue> to decimal"
@@ -1118,7 +1118,7 @@ func TestCDRProcessRatesCostForEvent(t *testing.T) {
 			},
 		},
 	}
-	err = dm.SetRateProfile(context.Background(), ratePrf, map[string]interface{}{}, true)
+	err = dm.SetRateProfile(context.Background(), ratePrf, false, true)
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
@@ -1239,7 +1239,7 @@ func TestRateProfileCostForEventProfileIgnoreFilters(t *testing.T) {
 		t.Error(err)
 	}
 
-	if err := rateS.dm.SetRateProfile(context.Background(), rPrf, map[string]interface{}{}, true); err != nil {
+	if err := rateS.dm.SetRateProfile(context.Background(), rPrf, false, true); err != nil {
 		t.Error(err)
 	}
 

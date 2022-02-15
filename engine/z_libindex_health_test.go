@@ -109,7 +109,7 @@ func TestHealthReverseFilter(t *testing.T) {
 				FilterIDs: []string{"Fltr3"},
 			},
 		},
-	}, map[string]interface{}{}, false); err != nil {
+	}, false, false); err != nil {
 		t.Fatal(err)
 	}
 
