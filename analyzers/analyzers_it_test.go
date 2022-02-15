@@ -177,7 +177,7 @@ func testAnalyzerSChargerSv1ProcessEvent(t *testing.T) {
 	processedEv := []*engine.ChrgSProcessEventReply{
 		{
 			ChargerSProfile: "DEFAULT",
-			AlteredFields:   []string{"*opts.*runID"},
+			AlteredFields:   []string{"*opts.*runID", "*opts.*chargeID"},
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "event1",
@@ -187,15 +187,16 @@ func testAnalyzerSChargerSv1ProcessEvent(t *testing.T) {
 					"Subject":     "Something_inter",
 				},
 				APIOpts: map[string]interface{}{
-					"*subsys": "*chargers",
-					"*runID":  "*default",
+					"*chargeID": "51d52496c3d63ffd60ba91e69aa532d89cc5bd79",
+					"*subsys":   "*chargers",
+					"*runID":    "*default",
 				},
 			},
 		},
 		{
 			ChargerSProfile:    "Raw",
 			AttributeSProfiles: []string{"*constant:*req.RequestType:*none"},
-			AlteredFields:      []string{"*opts.*runID", "*req.RequestType"},
+			AlteredFields:      []string{"*opts.*runID", "*opts.*chargeID", "*req.RequestType"},
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "event1",
@@ -206,6 +207,7 @@ func testAnalyzerSChargerSv1ProcessEvent(t *testing.T) {
 					"Subject":     "Something_inter",
 				},
 				APIOpts: map[string]interface{}{
+					"*chargeID":       "94e6cdc358e52bd7061f224a4bcf5faa57735989",
 					"*runID":          "*raw",
 					"*attrProfileIDs": []interface{}{"*constant:*req.RequestType:*none"},
 					"*context":        "*chargers",

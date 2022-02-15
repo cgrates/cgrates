@@ -157,13 +157,14 @@ func testRPCChargerSWithAttr(t *testing.T) {
 	processedEv := []*engine.ChrgSProcessEventReply{
 		{
 			ChargerSProfile: "CustomerCharges",
-			AlteredFields:   []string{"*opts.*runID"},
+			AlteredFields:   []string{"*opts.*runID", "*opts.*chargeID"},
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
 				Event: map[string]interface{}{
 					"Account": "1010",
 				},
 				APIOpts: map[string]interface{}{
+					"*chargeID":        "908bd346b2203977a829c917ba25d1cd784842be",
 					"*attrProcessRuns": 1.,
 					"*subsys":          "*chargers",
 					"*runID":           "CustomerCharges",
@@ -172,7 +173,7 @@ func testRPCChargerSWithAttr(t *testing.T) {
 		}, {
 			ChargerSProfile:    "Raw",
 			AttributeSProfiles: []string{"*constant:*req.RequestType:*none"},
-			AlteredFields:      []string{"*opts.*runID", "*req.RequestType"},
+			AlteredFields:      []string{"*opts.*runID", "*opts.*chargeID", "*req.RequestType"},
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
 				Event: map[string]interface{}{
@@ -180,6 +181,7 @@ func testRPCChargerSWithAttr(t *testing.T) {
 					"RequestType": "*none",
 				},
 				APIOpts: map[string]interface{}{
+					"*chargeID":        "ce15802a8c5e8e9db0ffaf10130ef265296e9ea4",
 					"*attrProcessRuns": 1.,
 					"*subsys":          "*chargers",
 					"*runID":           "raw",
@@ -190,7 +192,7 @@ func testRPCChargerSWithAttr(t *testing.T) {
 		}, {
 			ChargerSProfile:    "SupplierCharges",
 			AttributeSProfiles: []string{"cgrates.org:ATTR_SUPPLIER1"},
-			AlteredFields:      []string{"*opts.*runID", "*req.Subject"},
+			AlteredFields:      []string{"*opts.*runID", "*opts.*chargeID", "*req.Subject"},
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
 				Event: map[string]interface{}{
@@ -198,11 +200,12 @@ func testRPCChargerSWithAttr(t *testing.T) {
 					"Subject": "SUPPLIER1",
 				},
 				APIOpts: map[string]interface{}{
+					"*chargeID":        "c0766c230f77b0ee496629be7efa0db24e208cfe",
+					"*context":         "*chargers",
 					"*attrProcessRuns": 1.,
 					"*subsys":          "*chargers",
 					"*runID":           "SupplierCharges",
 					"*attrProfileIDs":  []interface{}{"ATTR_SUPPLIER1"},
-					"*context":         "*chargers",
 				},
 			},
 		},
