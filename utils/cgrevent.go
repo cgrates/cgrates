@@ -110,6 +110,12 @@ func (cgrEv *CGREvent) AsDataProvider() (ev MapStorage) {
 	}
 }
 
+// CGREventWithRateProfile is used to get the rates prom a specific RatePRofileID that is matching our Event
+type CGREventWithRateProfile struct {
+	RateProfileID string
+	*CGREvent
+}
+
 type EventsWithOpts struct {
 	Event map[string]interface{}
 	Opts  map[string]interface{}
