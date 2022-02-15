@@ -242,7 +242,7 @@ func testRatePrfITMigrateAndMove(t *testing.T) {
 	switch ratePrfAction {
 	case utils.Migrate: //QQ for the moment only one version of rate profiles exists
 	case utils.Move:
-		if err := ratePrfMigrator.dmIN.DataManager().SetRateProfile(context.TODO(), rPrf, map[string]interface{}{}, true); err != nil {
+		if err := ratePrfMigrator.dmIN.DataManager().SetRateProfile(context.TODO(), rPrf, false, true); err != nil {
 			t.Error(err)
 		}
 		currentVersion := engine.CurrentDataDBVersions()

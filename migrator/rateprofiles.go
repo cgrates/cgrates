@@ -45,7 +45,7 @@ func (m *Migrator) migrateCurrentRateProfiles() (err error) {
 		if rp == nil || m.dryRun {
 			continue
 		}
-		if err := m.dmOut.DataManager().SetRateProfile(context.TODO(), rp, map[string]interface{}{}, true); err != nil {
+		if err := m.dmOut.DataManager().SetRateProfile(context.TODO(), rp, false, true); err != nil {
 			return err
 		}
 		if err := m.dmIN.DataManager().RemoveRateProfile(context.TODO(), tntID[0], tntID[1], false); err != nil {

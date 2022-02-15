@@ -107,7 +107,7 @@ func setToDB(ctx *context.Context, dm *engine.DataManager, lType string, data pr
 		if ratesPartial {
 			err = dm.SetRateProfileRates(ctx, rpl, true)
 		} else {
-			err = dm.SetRateProfile(ctx, rpl, map[string]interface{}{}, true)
+			err = dm.SetRateProfile(ctx, rpl, false, true)
 		}
 	case utils.MetaActionProfiles:
 		return dm.SetActionProfile(ctx, data.(*engine.ActionProfile), withIndex)

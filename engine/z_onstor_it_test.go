@@ -1067,7 +1067,7 @@ func testOnStorITRateProfile(t *testing.T) {
 		true, false, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
-	if err := onStor.SetRateProfile(context.TODO(), rPrf, map[string]interface{}{}, false); err != nil {
+	if err := onStor.SetRateProfile(context.TODO(), rPrf, false, false); err != nil {
 		t.Error(err)
 	}
 	if err = rPrf.Compile(); err != nil {
@@ -1088,7 +1088,7 @@ func testOnStorITRateProfile(t *testing.T) {
 	}
 	//update
 	rPrf.FilterIDs = []string{"*string:~*req.Accout:1001", "*prefix:~*req.Destination:10"}
-	if err := onStor.SetRateProfile(context.TODO(), rPrf, map[string]interface{}{}, false); err != nil {
+	if err := onStor.SetRateProfile(context.TODO(), rPrf, false, false); err != nil {
 		t.Error(err)
 	}
 
