@@ -182,13 +182,13 @@ package general_tests
 // }
 
 // func testFilterUpdateSetAttrProfileE1(t *testing.T) {
-// 	attrPrf := &engine.AttributeProfileWithAPIOpts{
-// 		AttributeProfile: &engine.AttributeProfile{
+// 	attrPrf := &engine.APIAttributeProfileWithAPIOpts{
+// 		APIAttributeProfile: &engine.APIAttributeProfile{
 // 			FilterIDs: []string{"FLTR_ID"},
 // 			ID:        "ATTR_ID",
 // 			Tenant:    "cgrates.org",
 // 			Weight:    10,
-// 			Attributes: []*engine.Attribute{
+// 			Attributes: []*engine.ExternalAttribute{
 // 				{
 // 					Path:  "*req.Account",
 // 					Value: "1003",
@@ -207,23 +207,23 @@ package general_tests
 // 	} else if reply != utils.OK {
 // 		t.Error("Unexpected reply returned", reply)
 // 	}
-// 	var result *engine.AttributeProfile
+// 	var result *engine.APIAttributeProfile
 // 	if err := fltrUpdateRPC1.Call(context.Background(), utils.AdminSv1GetAttributeProfile,
 // 		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_ID"}}, &result); err != nil {
 // 		t.Fatal(err)
 // 	}
-// 	if !reflect.DeepEqual(attrPrf.AttributeProfile, result) {
-// 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ToJSON(attrPrf.AttributeProfile), utils.ToJSON(result))
+// 	if !reflect.DeepEqual(attrPrf.APIAttributeProfile, result) {
+// 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ToJSON(attrPrf.APIAttributeProfile), utils.ToJSON(result))
 // 	}
 // }
 
 // func testFilterUpdateGetAttrProfileForEventEv1E1(t *testing.T) {
-// 	eAttrPrf := &engine.AttributeProfile{
+// 	eAttrPrf := &engine.APIAttributeProfile{
 // 		Tenant:    "cgrates.org",
 // 		FilterIDs: []string{"FLTR_ID"},
 // 		ID:        "ATTR_ID",
 // 		Weight:    10,
-// 		Attributes: []*engine.Attribute{
+// 		Attributes: []*engine.ExternalAttribute{
 // 			{
 // 				Path:  "*req.Account",
 // 				Value: "1003",
@@ -232,7 +232,7 @@ package general_tests
 // 		},
 // 	}
 
-// 	var attrReply *engine.AttributeProfile
+// 	var attrReply *engine.APIAttributeProfile
 // 	if err := fltrUpdateRPC1.Call(context.Background(), utils.AttributeSv1GetAttributeForEvent,
 // 		ev1, &attrReply); err != nil {
 // 		t.Fatal(err)
@@ -243,12 +243,12 @@ package general_tests
 // }
 
 // func testFilterUpdateGetAttrProfileForEventEv1E2(t *testing.T) {
-// 	eAttrPrf := &engine.AttributeProfile{
+// 	eAttrPrf := &engine.APIAttributeProfile{
 // 		Tenant:    "cgrates.org",
 // 		FilterIDs: []string{"FLTR_ID"},
 // 		ID:        "ATTR_ID",
 // 		Weight:    10,
-// 		Attributes: []*engine.Attribute{
+// 		Attributes: []*engine.ExternalAttribute{
 // 			{
 // 				Path:  "*req.Account",
 // 				Value: "1003",
@@ -257,7 +257,7 @@ package general_tests
 // 		},
 // 	}
 
-// 	var attrReply *engine.AttributeProfile
+// 	var attrReply *engine.APIAttributeProfile
 // 	if err := fltrUpdateRPC2.Call(context.Background(), utils.AttributeSv1GetAttributeForEvent,
 // 		ev1, &attrReply); err != nil {
 // 		t.Fatal(err)
@@ -268,12 +268,12 @@ package general_tests
 // }
 
 // func testFilterUpdateGetAttrProfileForEventEv2E1(t *testing.T) {
-// 	eAttrPrf := &engine.AttributeProfile{
+// 	eAttrPrf := &engine.APIAttributeProfile{
 // 		Tenant:    "cgrates.org",
 // 		FilterIDs: []string{"FLTR_ID"},
 // 		ID:        "ATTR_ID",
 // 		Weight:    10,
-// 		Attributes: []*engine.Attribute{
+// 		Attributes: []*engine.ExternalAttribute{
 // 			{
 // 				Path:  "*req.Account",
 // 				Value: "1003",
@@ -282,7 +282,7 @@ package general_tests
 // 		},
 // 	}
 
-// 	var attrReply *engine.AttributeProfile
+// 	var attrReply *engine.APIAttributeProfile
 // 	if err := fltrUpdateRPC1.Call(context.Background(), utils.AttributeSv1GetAttributeForEvent,
 // 		ev2, &attrReply); err != nil {
 // 		t.Fatal(err)
@@ -293,12 +293,12 @@ package general_tests
 // }
 
 // func testFilterUpdateGetAttrProfileForEventEv2E2(t *testing.T) {
-// 	eAttrPrf := &engine.AttributeProfile{
+// 	eAttrPrf := &engine.APIAttributeProfile{
 // 		Tenant:    "cgrates.org",
 // 		FilterIDs: []string{"FLTR_ID"},
 // 		ID:        "ATTR_ID",
 // 		Weight:    10,
-// 		Attributes: []*engine.Attribute{
+// 		Attributes: []*engine.ExternalAttribute{
 // 			{
 // 				Path:  "*req.Account",
 // 				Value: "1003",
@@ -307,7 +307,7 @@ package general_tests
 // 		},
 // 	}
 
-// 	var attrReply *engine.AttributeProfile
+// 	var attrReply *engine.APIAttributeProfile
 // 	if err := fltrUpdateRPC2.Call(context.Background(), utils.AttributeSv1GetAttributeForEvent,
 // 		ev2, &attrReply); err != nil {
 // 		t.Fatal(err)
@@ -352,7 +352,7 @@ package general_tests
 // }
 
 // func testFilterUpdateGetAttrProfileForEventEv1E1NotMatching(t *testing.T) {
-// 	var attrReply *engine.AttributeProfile
+// 	var attrReply *engine.APIAttributeProfile
 // 	if err := fltrUpdateRPC1.Call(context.Background(), utils.AttributeSv1GetAttributeForEvent,
 // 		ev1, &attrReply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 // 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
@@ -360,7 +360,7 @@ package general_tests
 // }
 
 // func testFilterUpdateGetAttrProfileForEventEv1E2NotMatching(t *testing.T) {
-// 	var attrReply *engine.AttributeProfile
+// 	var attrReply *engine.APIAttributeProfile
 // 	if err := fltrUpdateRPC2.Call(context.Background(), utils.AttributeSv1GetAttributeForEvent,
 // 		ev1, &attrReply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 // 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
@@ -368,7 +368,7 @@ package general_tests
 // }
 
 // func testFilterUpdateGetAttrProfileForEventEv2E1NotMatching(t *testing.T) {
-// 	var attrReply *engine.AttributeProfile
+// 	var attrReply *engine.APIAttributeProfile
 // 	if err := fltrUpdateRPC1.Call(context.Background(), utils.AttributeSv1GetAttributeForEvent,
 // 		ev2, &attrReply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 // 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
@@ -376,7 +376,7 @@ package general_tests
 // }
 
 // func testFilterUpdateGetAttrProfileForEventEv2E2NotMatching(t *testing.T) {
-// 	var attrReply *engine.AttributeProfile
+// 	var attrReply *engine.APIAttributeProfile
 // 	if err := fltrUpdateRPC2.Call(context.Background(), utils.AttributeSv1GetAttributeForEvent,
 // 		ev2, &attrReply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 // 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)

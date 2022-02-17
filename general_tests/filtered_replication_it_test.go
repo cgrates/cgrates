@@ -157,27 +157,23 @@ func testFltrRplRPCConn(t *testing.T) {
 
 func testFltrRplAttributeProfile(t *testing.T) {
 	attrID := "ATTR1"
-	attrPrf := &engine.AttributeProfileWithAPIOpts{
-		AttributeProfile: &engine.AttributeProfile{
+	attrPrf := &engine.APIAttributeProfileWithAPIOpts{
+		APIAttributeProfile: &engine.APIAttributeProfile{
 			Tenant:    "cgrates.org",
 			ID:        attrID,
 			FilterIDs: []string{"*string:~*req.Account:dan"},
-			Attributes: []*engine.Attribute{
+			Attributes: []*engine.ExternalAttribute{
 				{
 					Path:  "*req.Category",
 					Type:  utils.MetaVoice,
-					Value: config.NewRSRParsersMustCompile(utils.InfieldSep, utils.InfieldSep),
+					Value: utils.InfieldSep,
 				},
 			},
-			Weights: utils.DynamicWeights{
-				{
-					Weight: 10,
-				},
-			},
+			Weights: ";10",
 		},
 	}
 	var result string
-	var replyPrfl *engine.AttributeProfile
+	var replyPrfl *engine.APIAttributeProfile
 	var rplyIDs []string
 	// empty
 	if err := fltrRplEngine1RPC.Call(context.Background(), utils.AdminSv1GetAttributeProfileIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
@@ -199,8 +195,8 @@ func testFltrRplAttributeProfile(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if !reflect.DeepEqual(attrPrf.AttributeProfile, replyPrfl) {
-		t.Errorf("Expecting : %s, received: %s", utils.ToJSON(attrPrf.AttributeProfile), utils.ToJSON(replyPrfl))
+	if !reflect.DeepEqual(attrPrf.APIAttributeProfile, replyPrfl) {
+		t.Errorf("Expecting : %s, received: %s", utils.ToJSON(attrPrf.APIAttributeProfile), utils.ToJSON(replyPrfl))
 	}
 	replyPrfl = nil
 
@@ -218,15 +214,11 @@ func testFltrRplAttributeProfile(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if !reflect.DeepEqual(attrPrf.AttributeProfile, replyPrfl) {
-		t.Errorf("Expecting : %s, received: %s", utils.ToJSON(attrPrf.AttributeProfile), utils.ToJSON(replyPrfl))
+	if !reflect.DeepEqual(attrPrf.APIAttributeProfile, replyPrfl) {
+		t.Errorf("Expecting : %s, received: %s", utils.ToJSON(attrPrf.APIAttributeProfile), utils.ToJSON(replyPrfl))
 	}
 	replyPrfl = nil
-	attrPrf.Weights = utils.DynamicWeights{
-		{
-			Weight: 15,
-		},
-	}
+	attrPrf.Weights = ";15"
 	if err := fltrRplInternalRPC.Call(context.Background(), utils.AdminSv1SetAttributeProfile, attrPrf, &result); err != nil {
 		t.Fatal(err)
 	} else if result != utils.OK {
@@ -237,8 +229,8 @@ func testFltrRplAttributeProfile(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if !reflect.DeepEqual(attrPrf.AttributeProfile, replyPrfl) {
-		t.Errorf("Expecting : %s, received: %s", utils.ToJSON(attrPrf.AttributeProfile), utils.ToJSON(replyPrfl))
+	if !reflect.DeepEqual(attrPrf.APIAttributeProfile, replyPrfl) {
+		t.Errorf("Expecting : %s, received: %s", utils.ToJSON(attrPrf.APIAttributeProfile), utils.ToJSON(replyPrfl))
 	}
 	replyPrfl = nil
 
@@ -248,8 +240,8 @@ func testFltrRplAttributeProfile(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if !reflect.DeepEqual(attrPrf.AttributeProfile, replyPrfl) {
-		t.Errorf("Expecting : %s, received: %s", utils.ToJSON(attrPrf.AttributeProfile), utils.ToJSON(replyPrfl))
+	if !reflect.DeepEqual(attrPrf.APIAttributeProfile, replyPrfl) {
+		t.Errorf("Expecting : %s, received: %s", utils.ToJSON(attrPrf.APIAttributeProfile), utils.ToJSON(replyPrfl))
 	}
 
 	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetAttributeProfileIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||

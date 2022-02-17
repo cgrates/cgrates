@@ -27,6 +27,82 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+func TestConvertExternalToProfile(t *testing.T) {
+	external := &APIAttributeProfile{
+		Tenant:    "cgrates.org",
+		ID:        "ATTR_ID",
+		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE", "*string:~*opts.*context:*sessions|*cdrs"},
+		Attributes: []*ExternalAttribute{
+			{
+				Path:  utils.MetaReq + utils.NestingSep + "Account",
+				Value: "1001",
+			},
+		},
+		Weights: ";20",
+	}
+
+	expAttr := &AttributeProfile{
+		Tenant:    "cgrates.org",
+		ID:        "ATTR_ID",
+		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE", "*string:~*opts.*context:*sessions|*cdrs"},
+		Attributes: []*Attribute{
+			{
+				Path:  utils.MetaReq + utils.NestingSep + "Account",
+				Value: config.NewRSRParsersMustCompile("1001", utils.InfieldSep),
+			},
+		},
+		Weights: make(utils.DynamicWeights, 1),
+	}
+	expAttr.Weights[0] = &utils.DynamicWeight{
+		Weight: 20,
+	}
+	rcv, err := external.AsAttributeProfile()
+	if err != nil {
+		t.Error(err)
+	}
+	rcv.Compile()
+
+	if !reflect.DeepEqual(expAttr, rcv) {
+		t.Errorf("Expecting : %+v, received: %+v", expAttr, rcv)
+	}
+}
+
+func TestConvertExternalToProfileMissing(t *testing.T) {
+	external := &APIAttributeProfile{
+		Tenant:     "cgrates.org",
+		ID:         "ATTR_ID",
+		FilterIDs:  []string{"FLTR_ACNT_dan", "FLTR_DST_DE", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z|2014-07-14T14:36:00Z", "*string:~*opts.*context:*sessions|*cdrs"},
+		Attributes: []*ExternalAttribute{},
+		Weights:    ";20",
+	}
+
+	_, err := external.AsAttributeProfile()
+	if err == nil || err.Error() != "MANDATORY_IE_MISSING: [Attributes]" {
+		t.Error(err)
+	}
+
+}
+
+func TestConvertExternalToProfileMissing2(t *testing.T) {
+	external := &APIAttributeProfile{
+		Tenant:    "cgrates.org",
+		ID:        "ATTR_ID",
+		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z|2014-07-14T14:36:00Z", "*string:~*opts.*context:*sessions|*cdrs"},
+		Attributes: []*ExternalAttribute{
+			{
+				Path: utils.MetaReq + utils.NestingSep + "Account",
+			},
+		},
+		Weights: ";20",
+	}
+
+	_, err := external.AsAttributeProfile()
+	if err == nil || err.Error() != "MANDATORY_IE_MISSING: [Value]" {
+		t.Error(err)
+	}
+
+}
+
 func TestNewAttributeFromInline(t *testing.T) {
 	attrID := "*sum:*req.Field2:10&~*req.NumField&20;*sum:*req.Field3:10&~*req.NumField4&20"
 	expAttrPrf1 := &AttributeProfile{

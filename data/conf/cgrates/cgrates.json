@@ -1233,7 +1233,7 @@
 // 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
 // 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
 // 					{"tag": "FilterIDs", "path": "FilterIDs", "type": "*variable", "value": "~*req.2"},
-// 					{"tag": "Weight", "path": "Weight", "type": "*variable", "value": "~*req.3"},
+// 					{"tag": "Weights", "path": "Weights", "type": "*variable", "value": "~*req.3"},
 // 					{"tag": "TTL", "path": "UsageTTL", "type": "*variable", "value": "~*req.4"},
 // 					{"tag": "Limit", "path": "Limit", "type": "*variable", "value": "~*req.5"},
 // 					{"tag": "AllocationMessage", "path": "AllocationMessage", "type": "*variable", "value": "~*req.6"},
@@ -1267,7 +1267,7 @@
 // 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
 // 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
 // 					{"tag": "FilterIDs", "path": "FilterIDs", "type": "*variable", "value": "~*req.2"},
-// 					{"tag": "Weight", "path": "Weight", "type": "*variable", "value": "~*req.3"},
+// 					{"tag": "Weights", "path": "Weights", "type": "*variable", "value": "~*req.3"},
 // 					{"tag": "MaxHits", "path": "MaxHits", "type": "*variable", "value": "~*req.4"},
 // 					{"tag": "MinHits", "path": "MinHits", "type": "*variable", "value": "~*req.5"},
 // 					{"tag": "MinSleep", "path": "MinSleep", "type": "*variable", "value": "~*req.6"},
@@ -1304,7 +1304,7 @@
 // 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
 // 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
 // 					{"tag": "FilterIDs", "path": "FilterIDs", "type": "*variable", "value": "~*req.2"},
-// 					{"tag": "Weight", "path": "Weight", "type": "*variable", "value": "~*req.3"},
+// 					{"tag": "Weights", "path": "Weights", "type": "*variable", "value": "~*req.3"},
 // 					{"tag": "RunID", "path": "RunID", "type": "*variable", "value": "~*req.4"},
 // 					{"tag": "AttributeIDs", "path": "AttributeIDs", "type": "*variable", "value": "~*req.5"},
 // 				],
@@ -1374,7 +1374,7 @@
 // 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
 // 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
 // 					{"tag": "FilterIDs", "path": "FilterIDs", "type": "*variable", "value": "~*req.2"},
-// 					{"tag": "Weight", "path": "Weight", "type": "*variable", "value": "~*req.3"},
+// 					{"tag": "Weights", "path": "Weights", "type": "*variable", "value": "~*req.3"},
 // 					{"tag": "Schedule", "path": "Schedule", "type": "*variable", "value": "~*req.4"},
 // 					// {"tag": "TargetType", "path": "TargetType", "type": "*variable", "value": "~*req.5"},
 // 					{"tag": "TargetIDs", "path": "Targets[<~*req.5>]", "type": "*variable", "value": "~*req.6"},
@@ -1527,7 +1527,7 @@
 // "admins": {
 // 	"enabled": false,
 // 	"caches_conns":["*internal"],
-// 	"actions_conns": [],					// connections to ActionS for reloads
+// 	"actions_conns": [],		 			// connections to ActionS for reloads
 // 	"attributes_conns": [],					// connections to AttributeS for CDRExporter
 // 	"ees_conns": [],						// connections to EEs
 // },

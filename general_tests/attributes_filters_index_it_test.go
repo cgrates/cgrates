@@ -139,20 +139,16 @@ func testAttributeSetFltr1(t *testing.T) {
 
 func testAttributeSetProfile(t *testing.T) {
 	var result string
-	alsPrf := &engine.AttributeProfileWithAPIOpts{
-		AttributeProfile: &engine.AttributeProfile{
+	alsPrf := &engine.APIAttributeProfileWithAPIOpts{
+		APIAttributeProfile: &engine.APIAttributeProfile{
 			Tenant:    "cgrates.org",
 			ID:        "ApierTest",
 			FilterIDs: []string{"FLTR_1"},
-			Attributes: []*engine.Attribute{{
+			Attributes: []*engine.ExternalAttribute{{
 				Path:  "*req.FL1",
-				Value: config.NewRSRParsersMustCompile("Al1", utils.InfieldSep),
+				Value: "Al1",
 			}},
-			Weights: utils.DynamicWeights{
-				{
-					Weight: 20,
-				},
-			},
+			Weights: ";20",
 		},
 	}
 	if err := attrFltrRPC.Call(context.Background(), utils.AdminSv1SetAttributeProfile, alsPrf, &result); err != nil {

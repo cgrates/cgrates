@@ -61,6 +61,6 @@ func (self *CmdGetAttributes) PostprocessRpcParams() error {
 }
 
 func (self *CmdGetAttributes) RpcResult() interface{} {
-	var atr []*engine.AttributeProfile
+	var atr []*engine.APIAttributeProfile
 	return &atr
 }

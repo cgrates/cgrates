@@ -27,7 +27,7 @@ func init() {
 	c := &CmdSetAttributeProfile{
 		name:      "attribute_profile_set",
 		rpcMethod: utils.AdminSv1SetAttributeProfile,
-		rpcParams: &engine.AttributeProfileWithAPIOpts{},
+		rpcParams: &engine.APIAttributeProfileWithAPIOpts{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -36,7 +36,7 @@ func init() {
 type CmdSetAttributeProfile struct {
 	name      string
 	rpcMethod string
-	rpcParams *engine.AttributeProfileWithAPIOpts
+	rpcParams *engine.APIAttributeProfileWithAPIOpts
 	*CommandExecuter
 }
 
@@ -50,7 +50,7 @@ func (self *CmdSetAttributeProfile) RpcMethod() string {
 
 func (self *CmdSetAttributeProfile) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &engine.AttributeProfileWithAPIOpts{AttributeProfile: new(engine.AttributeProfile)}
+		self.rpcParams = &engine.APIAttributeProfileWithAPIOpts{APIAttributeProfile: new(engine.APIAttributeProfile)}
 	}
 	return self.rpcParams
 }

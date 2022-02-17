@@ -302,21 +302,21 @@ func testV1FIdxSetAttributeSProfileWithFltr(t *testing.T) {
 	}
 
 	//we will set an AttributeProfile with our filter and check the indexes
-	attrPrf := &engine.AttributeProfileWithAPIOpts{
-		AttributeProfile: &engine.AttributeProfile{
+	attrPrf := &engine.APIAttributeProfileWithAPIOpts{
+		APIAttributeProfile: &engine.APIAttributeProfile{
 			Tenant:    utils.CGRateSorg,
 			ID:        "TEST_ATTRIBUTES_IT_TEST",
 			FilterIDs: []string{"fltr_for_attr", "*string:~*opts.*context:*sessions"},
-			Attributes: []*engine.Attribute{
+			Attributes: []*engine.ExternalAttribute{
 				{
 					Path:  utils.AccountField,
 					Type:  utils.MetaConstant,
-					Value: config.NewRSRParsersMustCompile("1002", utils.InfieldSep),
+					Value: "1002",
 				},
 				{
 					Path:  "*tenant",
 					Type:  utils.MetaConstant,
-					Value: config.NewRSRParsersMustCompile("cgrates.itsyscom", utils.InfieldSep),
+					Value: "cgrates.itsyscom",
 				},
 			},
 		},
@@ -405,22 +405,22 @@ func testV1FIdxSetAttributeSMoreFltrsMoreIndexing(t *testing.T) {
 	}
 
 	// update our Attribute with our filters
-	attrPrf := &engine.AttributeProfileWithAPIOpts{
-		AttributeProfile: &engine.AttributeProfile{
+	attrPrf := &engine.APIAttributeProfileWithAPIOpts{
+		APIAttributeProfile: &engine.APIAttributeProfile{
 			Tenant: utils.CGRateSorg,
 			ID:     "TEST_ATTRIBUTES_IT_TEST",
 			FilterIDs: []string{"fltr_for_attr", "fltr_for_attr2",
 				"fltr_for_attr3", "*string:~*opts.*context:*sessions"},
-			Attributes: []*engine.Attribute{
+			Attributes: []*engine.ExternalAttribute{
 				{
 					Path:  utils.AccountField,
 					Type:  utils.MetaConstant,
-					Value: config.NewRSRParsersMustCompile("1002", utils.InfieldSep),
+					Value: "1002",
 				},
 				{
 					Path:  "*tenant",
 					Type:  utils.MetaConstant,
-					Value: config.NewRSRParsersMustCompile("cgrates.itsyscom", utils.InfieldSep),
+					Value: "cgrates.itsyscom",
 				},
 			},
 		},
@@ -513,30 +513,30 @@ func testV1FIdxAttributeComputeIndexes(t *testing.T) {
 
 func testV1FIdxAttributeMoreProfilesForFilters(t *testing.T) {
 	//we will add more attributes with different context for matching filters
-	attrPrf2 := &engine.AttributeProfileWithAPIOpts{
-		AttributeProfile: &engine.AttributeProfile{
+	attrPrf2 := &engine.APIAttributeProfileWithAPIOpts{
+		APIAttributeProfile: &engine.APIAttributeProfile{
 			Tenant:    utils.CGRateSorg,
 			ID:        "TEST_ATTRIBUTES_new_fltr",
 			FilterIDs: []string{"fltr_for_attr2", "fltr_for_attr3", "*string:~*opts.*context:*chargers"},
-			Attributes: []*engine.Attribute{
+			Attributes: []*engine.ExternalAttribute{
 				{
 					Path:  utils.AccountField,
 					Type:  utils.MetaConstant,
-					Value: config.NewRSRParsersMustCompile("1002", utils.InfieldSep),
+					Value: "1002",
 				},
 			},
 		},
 	}
-	attrPrf3 := &engine.AttributeProfileWithAPIOpts{
-		AttributeProfile: &engine.AttributeProfile{
+	attrPrf3 := &engine.APIAttributeProfileWithAPIOpts{
+		APIAttributeProfile: &engine.APIAttributeProfile{
 			Tenant:    utils.CGRateSorg,
 			ID:        "TEST_ATTRIBUTE3",
 			FilterIDs: []string{"fltr_for_attr3", "*string:~*opts.*context:*sessions"},
-			Attributes: []*engine.Attribute{
+			Attributes: []*engine.ExternalAttribute{
 				{
 					Path:  "*req.Destinations",
 					Type:  utils.MetaConstant,
-					Value: config.NewRSRParsersMustCompile("1008", utils.InfieldSep),
+					Value: "1008",
 				},
 			},
 		},
