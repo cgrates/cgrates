@@ -10,19 +10,19 @@ steps:
   pull: never
   image: cgrates-integration
   commands:
-  - docker-entrypoint.sh
+#  - docker-entrypoint.sh
   - ./test.sh
-- name: notify
-  pull: never
-  image: trial97/drone-email
-  settings:
-    from: cgrates.test01@gmail.com
-    credentials:
-      from_secret: credentials
-    token:
-      from_secret: token
-  when:
-    status: [ changed, failure ]
+# - name: notify
+#   pull: never
+#   image: trial97/drone-email
+#   settings:
+#     from: cgrates.test01@gmail.com
+#     credentials:
+#       from_secret: credentials
+#     token:
+#       from_secret: token
+#   when:
+#     status: [ changed, failure ]
 
 
 # ---
