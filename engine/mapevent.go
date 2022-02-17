@@ -19,10 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"fmt"
 	"time"
 
-	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -191,80 +189,6 @@ func (me MapEvent) AsMapString(ignoredFlds utils.StringSet) (mp map[string]strin
 			continue
 		}
 		mp[k] = utils.IfaceAsString(v)
-	}
-	return
-}
-
-// AsCDR exports the MapEvent as CDR
-func (me MapEvent) AsCDR(cfg *config.CGRConfig, tnt, tmz string) (cdr *CDR, err error) {
-	cdr = &CDR{Tenant: tnt, Cost: -1.0, ExtraFields: make(map[string]string)}
-	for k, v := range me {
-		if !utils.MainCDRFields.Has(k) { // not primary field, populate extra ones
-			cdr.ExtraFields[k] = utils.IfaceAsString(v)
-			continue
-		}
-		switch k {
-		default:
-			// for the momment this return can not be reached because we implemented a case for every MainCDRField
-			return nil, fmt.Errorf("unimplemented CDR field: <%s>", k)
-		case utils.RunID:
-			cdr.RunID = utils.IfaceAsString(v)
-		case utils.OriginHost:
-			cdr.OriginHost = utils.IfaceAsString(v)
-		case utils.Source:
-			cdr.Source = utils.IfaceAsString(v)
-		case utils.OriginID:
-			cdr.OriginID = utils.IfaceAsString(v)
-		case utils.ToR:
-			cdr.ToR = utils.IfaceAsString(v)
-		case utils.RequestType:
-			cdr.RequestType = utils.IfaceAsString(v)
-		case utils.Tenant:
-			cdr.Tenant = utils.IfaceAsString(v)
-		case utils.Category:
-			cdr.Category = utils.IfaceAsString(v)
-		case utils.AccountField:
-			cdr.Account = utils.IfaceAsString(v)
-		case utils.Subject:
-			cdr.Subject = utils.IfaceAsString(v)
-		case utils.Destination:
-			cdr.Destination = utils.IfaceAsString(v)
-		case utils.SetupTime:
-			if cdr.SetupTime, err = utils.IfaceAsTime(v, tmz); err != nil {
-				return nil, err
-			}
-		case utils.AnswerTime:
-			if cdr.AnswerTime, err = utils.IfaceAsTime(v, tmz); err != nil {
-				return nil, err
-			}
-		case utils.Usage:
-			if cdr.Usage, err = utils.IfaceAsDuration(v); err != nil {
-				return nil, err
-			}
-		case utils.Partial:
-			if cdr.Partial, err = utils.IfaceAsBool(v); err != nil {
-				return nil, err
-			}
-		case utils.PreRated:
-			if cdr.PreRated, err = utils.IfaceAsBool(v); err != nil {
-				return nil, err
-			}
-		case utils.CostSource:
-			cdr.CostSource = utils.IfaceAsString(v)
-		case utils.Cost:
-			if cdr.Cost, err = utils.IfaceAsFloat64(v); err != nil {
-				return nil, err
-			}
-		case utils.ExtraInfo:
-			cdr.ExtraInfo = utils.IfaceAsString(v)
-		case utils.OrderID:
-			if cdr.OrderID, err = utils.IfaceAsTInt64(v); err != nil {
-				return nil, err
-			}
-		}
-	}
-	if cfg != nil {
-		cdr.AddDefaults(cfg)
 	}
 	return
 }
