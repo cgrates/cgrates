@@ -595,57 +595,49 @@ func testLoadersGetActionProfiles(t *testing.T) {
 }
 
 func testLoadersGetAttributeProfiles(t *testing.T) {
-	expAttrs := []*engine.AttributeProfile{
+	expAttrs := []*engine.APIAttributeProfile{
 		{
 			Tenant:    "cgrates.org",
 			ID:        "ALS1",
 			FilterIDs: []string{"*string:~*req.Account:1001", "*string:~*opts.*context:con1", "*string:~*opts.*context:con2|con3"},
-			Attributes: []*engine.Attribute{
+			Attributes: []*engine.ExternalAttribute{
 				{
 					FilterIDs: []string{"*string:~*req.Field1:Initial"},
 					Path:      utils.MetaReq + utils.NestingSep + "Field1",
 					Type:      utils.MetaVariable,
-					Value:     config.NewRSRParsersMustCompile("Sub1", utils.InfieldSep),
+					Value:     "Sub1",
 				},
 				{
 					Path:  utils.MetaReq + utils.NestingSep + "Field2",
 					Type:  utils.MetaVariable,
-					Value: config.NewRSRParsersMustCompile("Sub2", utils.InfieldSep),
+					Value: "Sub2",
 				},
 			},
 			Blocker: true,
-			Weights: utils.DynamicWeights{
-				{
-					Weight: 20,
-				},
-			},
+			Weights: ";20",
 		},
 		{
 			Tenant:    "cgrates.org",
 			ID:        "ALS2",
 			FilterIDs: []string{"*string:~*opts.*context:con2|con3", "*string:~*req.Account:1002", "*string:~*opts.*context:con1"},
-			Attributes: []*engine.Attribute{
+			Attributes: []*engine.ExternalAttribute{
 				{
 					Path:  utils.MetaReq + utils.NestingSep + "Field2",
 					Type:  utils.MetaVariable,
-					Value: config.NewRSRParsersMustCompile("Sub2", utils.InfieldSep),
+					Value: "Sub2",
 				},
 				{
 					FilterIDs: []string{"*string:~*req.Field1:Initial"},
 					Path:      utils.MetaReq + utils.NestingSep + "Field1",
 					Type:      utils.MetaVariable,
-					Value:     config.NewRSRParsersMustCompile("Sub1", utils.InfieldSep),
+					Value:     "Sub1",
 				},
 			},
 			Blocker: true,
-			Weights: utils.DynamicWeights{
-				{
-					Weight: 20,
-				},
-			},
+			Weights: ";20",
 		},
 	}
-	var attrs []*engine.AttributeProfile
+	var attrs []*engine.APIAttributeProfile
 	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfiles,
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
@@ -655,9 +647,6 @@ func testLoadersGetAttributeProfiles(t *testing.T) {
 		sort.Slice(attrs, func(i, j int) bool {
 			return attrs[i].ID < attrs[j].ID
 		})
-		for _, ap := range attrs {
-			ap.Compile()
-		}
 		if !reflect.DeepEqual(attrs, expAttrs) {
 			t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ToJSON(expAttrs), utils.ToJSON(attrs))
 		}

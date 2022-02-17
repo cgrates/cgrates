@@ -142,7 +142,7 @@ func testCgrLdrGetSubsystemsNotLoadedLoad(t *testing.T) {
 	}
 
 	//attributesPrf
-	var replyAttr *engine.AttributeProfile
+	var replyAttr *engine.APIAttributeProfile
 	if err := cgrLdrBIRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfile,
 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_ACNT_1001"}},
 		&replyAttr); err == nil || err.Error() != utils.ErrNotFound.Error() {
@@ -397,35 +397,30 @@ func testCgrLdrGetActionProfileAfterLoad(t *testing.T) {
 }
 
 func testCgrLdrGetAttributeProfileAfterLoad(t *testing.T) {
-	expected := engine.AttributeProfile{
+	extAttrPrf := &engine.APIAttributeProfile{
 		Tenant:    utils.CGRateSorg,
 		ID:        "ATTR_ACNT_1001",
 		FilterIDs: []string{"*string:~*opts.*context:*sessions", "FLTR_ACCOUNT_1001"},
-		Weights: utils.DynamicWeights{
-			{
-				Weight: 10,
-			},
-		},
-		Attributes: []*engine.Attribute{
+		Weights:   ";10",
+		Attributes: []*engine.ExternalAttribute{
 			{
 				FilterIDs: []string{},
 				Path:      "*req.OfficeGroup",
 				Type:      utils.MetaConstant,
-				Value:     config.NewRSRParsersMustCompile("Marketing", utils.InfieldSep),
+				Value:     "Marketing",
 			},
 		},
 	}
-	var replyAttr engine.AttributeProfile
+	var replyAttr *engine.APIAttributeProfile
 	if err := cgrLdrBIRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfile,
 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_ACNT_1001"}},
 		&replyAttr); err != nil {
 		t.Error(err)
 	} else {
-		sort.Strings(expected.FilterIDs)
+		sort.Strings(extAttrPrf.FilterIDs)
 		sort.Strings(replyAttr.FilterIDs)
-		replyAttr.Compile()
-		if !reflect.DeepEqual(expected, replyAttr) {
-			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(replyAttr))
+		if !reflect.DeepEqual(extAttrPrf, replyAttr) {
+			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(extAttrPrf), utils.ToJSON(replyAttr))
 		}
 	}
 }
@@ -514,7 +509,8 @@ func testCgrLdrGetResourceProfileAfterLoad(t *testing.T) {
 		Weights: utils.DynamicWeights{
 			{
 				Weight: 10,
-			}},
+			},
+		},
 		UsageTTL:     time.Hour,
 		Limit:        1,
 		ThresholdIDs: []string{},

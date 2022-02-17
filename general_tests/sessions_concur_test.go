@@ -125,11 +125,11 @@ func testSCncrLoadTP(t *testing.T) {
 		t.Error(err)
 	}
 	attrPrfl := &v2.AttributeWithAPIOpts{
-		AttributeProfile: &engine.AttributeProfile{
+		ExternalAttributeProfile: &engine.ExternalAttributeProfile{
 			Tenant:   "cgrates.org",
 			ID:       "AttrConcurrentSessions",
 			Contexts: []string{utils.MetaAny},
-			Attributes: []*engine.Attribute{
+			Attributes: []*engine.ExternalAttribute{
 				{
 					Path:  utils.MetaReq + utils.NestingSep + "TestType",
 					Value: "ConcurrentSessions",
