@@ -401,7 +401,11 @@ func testCgrLdrGetAttributeProfileAfterLoad(t *testing.T) {
 		Tenant:    utils.CGRateSorg,
 		ID:        "ATTR_ACNT_1001",
 		FilterIDs: []string{"*string:~*opts.*context:*sessions", "FLTR_ACCOUNT_1001"},
-		Weights:   ";10",
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 		Attributes: []*engine.ExternalAttribute{
 			{
 				FilterIDs: []string{},

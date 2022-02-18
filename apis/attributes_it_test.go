@@ -178,7 +178,11 @@ func testAttributeSetAttributeProfile(t *testing.T) {
 					Value: "cgrates.itsyscom",
 				},
 			},
-			Weights: ";20",
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
 		},
 	}
 	var reply string
@@ -205,7 +209,11 @@ func testAttributeSetAttributeProfile(t *testing.T) {
 				Value: "cgrates.itsyscom",
 			},
 		},
-		Weights: ";20",
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 	}
 	var result engine.APIAttributeProfile
 	if err := attrSRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfile,
@@ -255,7 +263,11 @@ func testAttributeGetAttributes(t *testing.T) {
 					Value: "cgrates.itsyscom",
 				},
 			},
-			Weights: ";20",
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
 		},
 	}
 	if err := attrSRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfiles,
@@ -363,7 +375,11 @@ func testAttributeGetAttributes2(t *testing.T) {
 					Value: "cgrates.itsyscom",
 				},
 			},
-			Weights: ";20",
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
 		},
 		{
 			Tenant:    utils.CGRateSorg,
@@ -467,7 +483,11 @@ func testAttributeGetAttributesAfterRemove(t *testing.T) {
 					Value: "cgrates.itsyscom",
 				},
 			},
-			Weights: ";20",
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
 		},
 	}
 	if err := attrSRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfiles,
@@ -542,7 +562,11 @@ func testAttributeSGetAttributesWithPrefix(t *testing.T) {
 					Value: "cgrates.itsyscom",
 				},
 			},
-			Weights: ";20",
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
 		},
 	}
 	if err := attrSRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfiles,
@@ -615,7 +639,11 @@ func testAttributeSGetAttributeForEventAnyContext(t *testing.T) {
 					Value: "1001",
 				},
 			},
-			Weights: ";20",
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
 		},
 	}
 	var result string
@@ -650,7 +678,11 @@ func testAttributeSGetAttributeForEventAnyContext(t *testing.T) {
 				Value: "1001",
 			},
 		},
-		Weights: ";20",
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 	}
 	if !reflect.DeepEqual(expAttrFromEv, attrReply) {
 		t.Errorf("Expecting: %s, received: %s", utils.ToJSON(expAttrFromEv), utils.ToJSON(attrReply))
@@ -686,7 +718,11 @@ func testAttributeSGetAttributeForEventSameAnyContext(t *testing.T) {
 				Value: "1001",
 			},
 		},
-		Weights: ";20",
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 	}
 	if !reflect.DeepEqual(expAttrFromEv, attrReply) {
 		t.Errorf("Expecting: %s, received: %s", utils.ToJSON(expAttrFromEv), utils.ToJSON(attrReply))
@@ -744,7 +780,11 @@ func testAttributeSGetAttributeForEvent(t *testing.T) {
 				FilterIDs: []string{},
 			},
 		},
-		Weights: ";20",
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 	}
 	if *encoding == utils.MetaGOB {
 		eAttrPrf.Attributes[0].FilterIDs = nil
@@ -770,7 +810,11 @@ func testAttributeSGetAttributeForEvent(t *testing.T) {
 					FilterIDs: []string{},
 				},
 			},
-			Weights: ";20",
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
 		},
 	}
 	if err := attrSRPC.Call(context.Background(), utils.AdminSv1SetAttributeProfile,
@@ -860,7 +904,11 @@ func testAttributeProcessEventWithSearchAndReplace(t *testing.T) {
 				},
 			},
 			Blocker: true,
-			Weights: ";20",
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
 		},
 	}
 	var result string
@@ -918,7 +966,11 @@ func testAttributeSProcessWithMultipleRuns(t *testing.T) {
 					Value: "Value1",
 				},
 			},
-			Weights: ";20",
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
 		},
 	}
 	attrPrf2 := &engine.APIAttributeProfileWithAPIOpts{
@@ -932,7 +984,11 @@ func testAttributeSProcessWithMultipleRuns(t *testing.T) {
 					Value: "Value2",
 				},
 			},
-			Weights: ";20",
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
 		},
 	}
 	attrPrf3 := &engine.APIAttributeProfileWithAPIOpts{
@@ -946,7 +1002,11 @@ func testAttributeSProcessWithMultipleRuns(t *testing.T) {
 					Value: "Value3",
 				},
 			},
-			Weights: ";20",
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
 		},
 	}
 	// Add attribute in DM
@@ -1022,7 +1082,11 @@ func testAttributeSProcessWithMultipleRuns2(t *testing.T) {
 					Value: "Value1",
 				},
 			},
-			Weights: ";20",
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
 		},
 	}
 	attrPrf2 := &engine.APIAttributeProfileWithAPIOpts{
@@ -1036,7 +1100,11 @@ func testAttributeSProcessWithMultipleRuns2(t *testing.T) {
 					Value: "Value2",
 				},
 			},
-			Weights: ";20",
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
 		},
 	}
 	attrPrf3 := &engine.APIAttributeProfileWithAPIOpts{
@@ -1050,7 +1118,11 @@ func testAttributeSProcessWithMultipleRuns2(t *testing.T) {
 					Value: "Value3",
 				},
 			},
-			Weights: ";20",
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
 		},
 	}
 	// Add attributeProfiles

@@ -169,7 +169,11 @@ func testFltrRplAttributeProfile(t *testing.T) {
 					Value: utils.InfieldSep,
 				},
 			},
-			Weights: ";10",
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				},
+			},
 		},
 	}
 	var result string
@@ -218,7 +222,11 @@ func testFltrRplAttributeProfile(t *testing.T) {
 		t.Errorf("Expecting : %s, received: %s", utils.ToJSON(attrPrf.APIAttributeProfile), utils.ToJSON(replyPrfl))
 	}
 	replyPrfl = nil
-	attrPrf.Weights = ";15"
+	attrPrf.Weights = utils.DynamicWeights{
+		{
+			Weight: 10,
+		},
+	}
 	if err := fltrRplInternalRPC.Call(context.Background(), utils.AdminSv1SetAttributeProfile, attrPrf, &result); err != nil {
 		t.Fatal(err)
 	} else if result != utils.OK {
