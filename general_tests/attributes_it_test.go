@@ -196,7 +196,11 @@ func testAttributeSProcessEventWithAccount(t *testing.T) {
 				},
 			},
 			Blocker: false,
-			Weights: ";10",
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				},
+			},
 		},
 	}
 	if err := attrRPC.Call(context.Background(), utils.AdminSv1SetAttributeProfile, alsPrf, &result); err != nil {
@@ -263,7 +267,11 @@ func testAttributeSProcessEventWithAccountFull(t *testing.T) {
 				},
 			},
 			Blocker: false,
-			Weights: ";10",
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				},
+			},
 		},
 	}
 	if err := attrRPC.Call(context.Background(), utils.AdminSv1SetAttributeProfile, alsPrf, &result); err != nil {
@@ -370,7 +378,11 @@ func testAttributeSProcessEventWithStat(t *testing.T) {
 				},
 			},
 			Blocker: false,
-			Weights: ";10",
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				},
+			},
 		},
 	}
 	var result string
@@ -438,7 +450,11 @@ func testAttributeSProcessEventWithStatFull(t *testing.T) {
 				},
 			},
 			Blocker: false,
-			Weights: ";10",
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				},
+			},
 		},
 	}
 	var result string
@@ -573,7 +589,11 @@ func testAttributeSProcessEventWithResource(t *testing.T) {
 				},
 			},
 			Blocker: false,
-			Weights: ";10",
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				},
+			},
 		},
 	}
 	if err := attrRPC.Call(context.Background(), utils.AdminSv1SetAttributeProfile, alsPrf, &result); err != nil {
@@ -645,7 +665,11 @@ func testAttributeSProcessEventWithResourceFull(t *testing.T) {
 				},
 			},
 			Blocker: false,
-			Weights: ";10",
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				},
+			},
 		},
 	}
 	if err := attrRPC.Call(context.Background(), utils.AdminSv1SetAttributeProfile, alsPrf, &result); err != nil {
@@ -725,7 +749,11 @@ func testAttributeSProcessEventWithLibPhoneNumber(t *testing.T) {
 				},
 			},
 			Blocker: false,
-			Weights: ";10",
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				},
+			},
 		},
 	}
 	if err := attrRPC.Call(context.Background(), utils.AdminSv1SetAttributeProfile, alsPrf, &result); err != nil {
@@ -809,7 +837,11 @@ func testAttributeSProcessEventWithLibPhoneNumberComposed(t *testing.T) {
 				},
 			},
 			Blocker: false,
-			Weights: ";10",
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				},
+			},
 		},
 	}
 	if err := attrRPC.Call(context.Background(), utils.AdminSv1SetAttributeProfile, alsPrf, &result); err != nil {
@@ -883,7 +915,11 @@ func testAttributeSProcessEventWithLibPhoneNumberFull(t *testing.T) {
 				},
 			},
 			Blocker: false,
-			Weights: ";10",
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				},
+			},
 		},
 	}
 	if err := attrRPC.Call(context.Background(), utils.AdminSv1SetAttributeProfile, alsPrf, &result); err != nil {

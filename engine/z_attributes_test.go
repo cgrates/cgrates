@@ -186,10 +186,14 @@ func TestAttributesV1GetAttributeForEventProfileIgnoreOpts(t *testing.T) {
 	}
 	rply := &APIAttributeProfile{}
 	expected := &APIAttributeProfile{
-		Tenant:     "cgrates.org",
-		ID:         "AC1",
-		FilterIDs:  []string{"*string:~*req.Attribute:testAttrValue"},
-		Weights:    ";20",
+		Tenant:    "cgrates.org",
+		ID:        "AC1",
+		FilterIDs: []string{"*string:~*req.Attribute:testAttrValue"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 		Attributes: []*ExternalAttribute{},
 	}
 
@@ -219,7 +223,11 @@ func TestAttributesV1GetAttributeForEventProfileIgnoreOpts(t *testing.T) {
 		ID:         "AC1",
 		FilterIDs:  []string{"*string:~*req.Attribute:testAttrValue"},
 		Attributes: []*ExternalAttribute{},
-		Weights:    ";20",
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 	}
 	// with ignore filters on true and with bad filter
 	err = aA.V1GetAttributeForEvent(context.Background(), ev2, rply2)
@@ -4414,7 +4422,11 @@ func TestAttributesV1GetAttributeForEvent(t *testing.T) {
 				Value: ".co.uk",
 			},
 		},
-		Weights: ";20",
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 	}
 
 	err = alS.V1GetAttributeForEvent(context.Background(), ev, rply)

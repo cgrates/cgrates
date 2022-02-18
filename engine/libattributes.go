@@ -100,7 +100,7 @@ type APIAttributeProfile struct {
 	FilterIDs  []string
 	Attributes []*ExternalAttribute
 	Blocker    bool // blocker flag to stop processing on multiple runs
-	Weights    string
+	Weights    utils.DynamicWeights
 }
 
 type APIAttributeProfileWithAPIOpts struct {
@@ -115,7 +115,7 @@ func NewAPIAttributeProfile(attr *AttributeProfile) (ext *APIAttributeProfile) {
 		FilterIDs:  attr.FilterIDs,
 		Attributes: make([]*ExternalAttribute, len(attr.Attributes)),
 		Blocker:    attr.Blocker,
-		Weights:    attr.Weights.String(utils.InfieldSep, utils.ANDSep),
+		Weights:    attr.Weights,
 	}
 	for i, at := range attr.Attributes {
 		ext.Attributes[i] = &ExternalAttribute{
@@ -133,11 +133,6 @@ func (ext *APIAttributeProfile) AsAttributeProfile() (attr *AttributeProfile, er
 	attr = new(AttributeProfile)
 	if len(ext.Attributes) == 0 {
 		return nil, utils.NewErrMandatoryIeMissing("Attributes")
-	}
-	if ext.Weights != utils.EmptyString {
-		if attr.Weights, err = utils.NewDynamicWeightsFromString(ext.Weights, utils.InfieldSep, utils.ANDSep); err != nil {
-			return
-		}
 	}
 	attr.Attributes = make([]*Attribute, len(ext.Attributes))
 	for i, extAttr := range ext.Attributes {
@@ -158,6 +153,7 @@ func (ext *APIAttributeProfile) AsAttributeProfile() (attr *AttributeProfile, er
 	attr.Tenant = ext.Tenant
 	attr.ID = ext.ID
 	attr.FilterIDs = ext.FilterIDs
+	attr.Weights = ext.Weights
 	return
 }
 

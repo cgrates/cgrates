@@ -449,7 +449,11 @@ func testCacheSSetMoreAttributeProfiles(t *testing.T) {
 					Value: "Value1",
 				},
 			},
-			Weights: ";10",
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				},
+			},
 		},
 	}
 	attrPrf2 := &engine.APIAttributeProfileWithAPIOpts{
@@ -463,7 +467,11 @@ func testCacheSSetMoreAttributeProfiles(t *testing.T) {
 					Value: "Value2",
 				},
 			},
-			Weights: ";20",
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
 		},
 	}
 	attrPrf3 := &engine.APIAttributeProfileWithAPIOpts{
@@ -477,7 +485,11 @@ func testCacheSSetMoreAttributeProfiles(t *testing.T) {
 					Value: "Value3",
 				},
 			},
-			Weights: ";30",
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 30,
+				},
+			},
 		},
 	}
 	// Add attributeProfiles

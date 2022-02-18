@@ -614,7 +614,11 @@ func testLoadersGetAttributeProfiles(t *testing.T) {
 				},
 			},
 			Blocker: true,
-			Weights: ";20",
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
 		},
 		{
 			Tenant:    "cgrates.org",
@@ -634,7 +638,11 @@ func testLoadersGetAttributeProfiles(t *testing.T) {
 				},
 			},
 			Blocker: true,
-			Weights: ";20",
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
 		},
 	}
 	var attrs []*engine.APIAttributeProfile

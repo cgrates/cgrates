@@ -38,7 +38,11 @@ func TestConvertExternalToProfile(t *testing.T) {
 				Value: "1001",
 			},
 		},
-		Weights: ";20",
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 	}
 
 	expAttr := &AttributeProfile{
@@ -73,7 +77,11 @@ func TestConvertExternalToProfileMissing(t *testing.T) {
 		ID:         "ATTR_ID",
 		FilterIDs:  []string{"FLTR_ACNT_dan", "FLTR_DST_DE", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z|2014-07-14T14:36:00Z", "*string:~*opts.*context:*sessions|*cdrs"},
 		Attributes: []*ExternalAttribute{},
-		Weights:    ";20",
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 	}
 
 	_, err := external.AsAttributeProfile()
@@ -93,7 +101,11 @@ func TestConvertExternalToProfileMissing2(t *testing.T) {
 				Path: utils.MetaReq + utils.NestingSep + "Account",
 			},
 		},
-		Weights: ";20",
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 	}
 
 	_, err := external.AsAttributeProfile()

@@ -137,7 +137,11 @@ func testLoadersIDBIdxCheckAttributes(t *testing.T) {
 			Type:  utils.MetaConstant,
 			Value: "CGRateS.org",
 		}},
-		Weights: ";20",
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 	}
 
 	var reply *engine.APIAttributeProfile
