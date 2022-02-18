@@ -550,7 +550,7 @@ func TestActionProfileMerge(t *testing.T) {
 		Schedule: "* * * * *",
 		Targets:  map[string]utils.StringSet{utils.MetaAccounts: {"1001": {}}},
 		Actions:  []*APAction{{}},
-	}cgrates/cg
+	}
 	if acc.Merge(&ActionProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ID",
