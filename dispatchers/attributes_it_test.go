@@ -26,7 +26,6 @@ import (
 	"sort"
 	"testing"
 
-	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -224,21 +223,17 @@ func testDspAttrGetAttrFailover(t *testing.T) {
 			utils.OptsContext: "simpleauth",
 		},
 	}
-	eAttrPrf := &engine.AttributeProfile{
+	eAttrPrf := &engine.APIAttributeProfile{
 		Tenant:    ev.Tenant,
 		ID:        "ATTR_1002_SIMPLEAUTH",
 		FilterIDs: []string{"*string:~*req.Account:1002", "*string:~*opts.*context:simpleauth"},
-		Attributes: []*engine.Attribute{{
+		Attributes: []*engine.ExternalAttribute{{
 			FilterIDs: []string{},
 			Path:      utils.MetaReq + utils.NestingSep + "Password",
 			Type:      utils.MetaConstant,
-			Value:     config.NewRSRParsersMustCompile("CGRateS.org", utils.InfieldSep),
+			Value:     "CGRateS.org",
 		}},
-		Weights: utils.DynamicWeights{
-			{
-				Weight: 20,
-			},
-		},
+		Weights: ";20",
 	}
 	if *encoding == utils.MetaGOB {
 		eAttrPrf.Attributes[0].FilterIDs = nil // empty slice are nil in gob
@@ -262,7 +257,7 @@ func testDspAttrGetAttrFailover(t *testing.T) {
 		},
 	}
 
-	var attrReply engine.AttributeProfile
+	var attrReply engine.APIAttributeProfile
 	var rplyEv engine.AttrSProcessEventReply
 	if err := dispEngine.RPC.Call(utils.AttributeSv1GetAttributeForEvent,
 		ev, &attrReply); err == nil || err.Error() != utils.ErrNotFound.Error() {
@@ -283,7 +278,6 @@ func testDspAttrGetAttrFailover(t *testing.T) {
 		ev, &attrReply); err != nil {
 		t.Error(err)
 	}
-	attrReply.Compile()
 	sort.Strings(eAttrPrf.FilterIDs)
 	sort.Strings(attrReply.FilterIDs)
 	if !reflect.DeepEqual(*eAttrPrf, attrReply) {
@@ -408,31 +402,26 @@ func testDspAttrTestAuthKey2(t *testing.T) {
 			utils.OptsContext: "simpleauth",
 		},
 	}
-	eAttrPrf := &engine.AttributeProfile{
+	eAttrPrf := &engine.APIAttributeProfile{
 		Tenant:    ev.Tenant,
 		ID:        "ATTR_1001_SIMPLEAUTH",
 		FilterIDs: []string{"*string:~*req.Account:1001", "*string:~*opts.*context:simpleauth"},
-		Attributes: []*engine.Attribute{{
+		Attributes: []*engine.ExternalAttribute{{
 			FilterIDs: []string{},
 			Path:      utils.MetaReq + utils.NestingSep + "Password",
 			Type:      utils.MetaConstant,
-			Value:     config.NewRSRParsersMustCompile("CGRateS.org", utils.InfieldSep),
+			Value:     "CGRateS.org",
 		}},
-		Weights: utils.DynamicWeights{
-			{
-				Weight: 20,
-			},
-		},
+		Weights: ";20",
 	}
 	if *encoding == utils.MetaGOB {
 		eAttrPrf.Attributes[0].FilterIDs = nil // empty slice are nil in gob
 	}
-	var attrReply engine.AttributeProfile
+	var attrReply engine.APIAttributeProfile
 	if err := dispEngine.RPC.Call(utils.AttributeSv1GetAttributeForEvent,
 		ev, &attrReply); err != nil {
 		t.Error(err)
 	}
-	attrReply.Compile()
 	sort.Strings(eAttrPrf.FilterIDs)
 	sort.Strings(attrReply.FilterIDs)
 	if !reflect.DeepEqual(*eAttrPrf, attrReply) {
@@ -500,21 +489,17 @@ func testDspAttrGetAttrRoundRobin(t *testing.T) {
 			utils.OptsContext: "simpleauth",
 		},
 	}
-	eAttrPrf := &engine.AttributeProfile{
+	eAttrPrf := &engine.APIAttributeProfile{
 		Tenant:    ev.Tenant,
 		ID:        "ATTR_1002_SIMPLEAUTH",
 		FilterIDs: []string{"*string:~*req.Account:1002", "*string:~*opts.*context:simpleauth"},
-		Attributes: []*engine.Attribute{{
+		Attributes: []*engine.ExternalAttribute{{
 			FilterIDs: []string{},
 			Path:      utils.MetaReq + utils.NestingSep + "Password",
 			Type:      utils.MetaConstant,
-			Value:     config.NewRSRParsersMustCompile("CGRateS.org", utils.InfieldSep),
+			Value:     "CGRateS.org",
 		}},
-		Weights: utils.DynamicWeights{
-			{
-				Weight: 20,
-			},
-		},
+		Weights: ";20",
 	}
 	if *encoding == utils.MetaGOB {
 		eAttrPrf.Attributes[0].FilterIDs = nil // empty slice are nil in gob
@@ -538,7 +523,7 @@ func testDspAttrGetAttrRoundRobin(t *testing.T) {
 		},
 	}
 
-	var attrReply engine.AttributeProfile
+	var attrReply engine.APIAttributeProfile
 	var rplyEv engine.AttrSProcessEventReply
 	// To ALL2
 	if err := dispEngine.RPC.Call(utils.AttributeSv1GetAttributeForEvent,
@@ -552,7 +537,6 @@ func testDspAttrGetAttrRoundRobin(t *testing.T) {
 		t.Error(err)
 	}
 
-	attrReply.Compile()
 	sort.Strings(eAttrPrf.FilterIDs)
 	sort.Strings(attrReply.FilterIDs)
 	if !reflect.DeepEqual(*eAttrPrf, attrReply) {
