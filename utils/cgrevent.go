@@ -196,12 +196,6 @@ func GetRoutePaginatorFromOpts(ev map[string]interface{}) (args Paginator, err e
 	return
 }
 
-// CGREventWithEeIDs is the CGREventWithOpts with EventExporterIDs
-type CGREventWithEeIDs struct {
-	EeIDs []string
-	*CGREvent
-}
-
 // NMAsCGREvent builds a CGREvent considering Time as time.Now()
 // and Event as linear map[string]interface{} with joined paths
 // treats particular case when the value of map is []*NMItem - used in agents/AgentRequest

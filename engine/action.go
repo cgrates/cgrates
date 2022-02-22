@@ -979,7 +979,7 @@ func export(ub *Account, a *Action, acs Actions, _ *FilterS, extraData interface
 	default:
 		return // nothing to post
 	}
-	args := &utils.CGREventWithEeIDs{
+	args := &CGREventWithEeIDs{
 		EeIDs:    strings.Split(a.ExtraParameters, utils.InfieldSep),
 		CGREvent: cgrEv,
 	}

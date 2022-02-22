@@ -115,7 +115,7 @@ func testHTTPStartHTTPServer(t *testing.T) {
 }
 
 func testHTTPExportEvent(t *testing.T) {
-	eventVoice := &utils.CGREventWithEeIDs{
+	eventVoice := &engine.CGREventWithEeIDs{
 		EeIDs: []string{"HTTPPostExporter"},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
@@ -143,7 +143,7 @@ func testHTTPExportEvent(t *testing.T) {
 		},
 	}
 
-	eventData := &utils.CGREventWithEeIDs{
+	eventData := &engine.CGREventWithEeIDs{
 		EeIDs: []string{"HTTPPostExporter"},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
@@ -171,7 +171,7 @@ func testHTTPExportEvent(t *testing.T) {
 		},
 	}
 
-	eventSMS := &utils.CGREventWithEeIDs{
+	eventSMS := &engine.CGREventWithEeIDs{
 		EeIDs: []string{"HTTPPostExporter"},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
@@ -199,7 +199,7 @@ func testHTTPExportEvent(t *testing.T) {
 		},
 	}
 
-	eventSMSNoFields := &utils.CGREventWithEeIDs{
+	eventSMSNoFields := &engine.CGREventWithEeIDs{
 		EeIDs: []string{"HTTPPostExporterWithNoFields"},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
