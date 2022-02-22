@@ -237,6 +237,8 @@ const (
 	MetaReqRunID            = "*req.RunID"
 	Cost                    = "Cost"
 	CostDetails             = "CostDetails"
+	EventCost               = "EventCost"
+	EeIDs                   = "EeIDs"
 	Rated                   = "rated"
 	Partial                 = "Partial"
 	PreRated                = "PreRated"

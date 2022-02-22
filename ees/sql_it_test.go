@@ -143,7 +143,7 @@ func testSqlEeRPCConn(t *testing.T) {
 }
 
 func testSqlEeExportEventFull(t *testing.T) {
-	eventVoice := &utils.CGREventWithEeIDs{
+	eventVoice := &engine.CGREventWithEeIDs{
 		EeIDs: []string{"SQLExporterFull"},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
@@ -179,7 +179,7 @@ func testSqlEeExportEventFull(t *testing.T) {
 }
 
 func testSqlEeExportEventPartial(t *testing.T) {
-	eventVoice := &utils.CGREventWithEeIDs{
+	eventVoice := &engine.CGREventWithEeIDs{
 		EeIDs: []string{"SQLExporterPartial"},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",

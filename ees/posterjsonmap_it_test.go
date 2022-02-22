@@ -112,7 +112,7 @@ func testHTTPJsonMapStartHTTPServer(t *testing.T) {
 }
 
 func testHTTPJsonMapExportEvent(t *testing.T) {
-	eventVoice := &utils.CGREventWithEeIDs{
+	eventVoice := &engine.CGREventWithEeIDs{
 		EeIDs: []string{"HTTPJsonMapExporter"},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
@@ -143,7 +143,7 @@ func testHTTPJsonMapExportEvent(t *testing.T) {
 		},
 	}
 
-	eventData := &utils.CGREventWithEeIDs{
+	eventData := &engine.CGREventWithEeIDs{
 		EeIDs: []string{"HTTPJsonMapExporter"},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
@@ -174,7 +174,7 @@ func testHTTPJsonMapExportEvent(t *testing.T) {
 		},
 	}
 
-	eventSMS := &utils.CGREventWithEeIDs{
+	eventSMS := &engine.CGREventWithEeIDs{
 		EeIDs: []string{"HTTPJsonMapExporter"},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
@@ -206,7 +206,7 @@ func testHTTPJsonMapExportEvent(t *testing.T) {
 		},
 	}
 
-	eventSMSNoFields := &utils.CGREventWithEeIDs{
+	eventSMSNoFields := &engine.CGREventWithEeIDs{
 		EeIDs: []string{"HTTPJsonMapExporterWithNoFields"},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",

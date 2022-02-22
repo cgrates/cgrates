@@ -1899,7 +1899,7 @@ func (apierSv1 *APIerSv1) ExportCDRs(args *utils.ArgExportCDRs, reply *map[strin
 	withErros := false
 	var rplyCdr map[string]map[string]interface{}
 	for _, cdr := range cdrs {
-		argCdr := &utils.CGREventWithEeIDs{
+		argCdr := &engine.CGREventWithEeIDs{
 			EeIDs:    args.ExporterIDs,
 			CGREvent: cdr.AsCGREvent(),
 		}

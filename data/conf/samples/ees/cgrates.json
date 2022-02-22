@@ -80,7 +80,7 @@
 			"attempts": 1,
 			"field_separator": ",",
 			"fields":[
-				{"tag": "Number", "path": "*hdr.Number", "type": "*constant", "value": "NumberOfEvent"},
+			    {"tag": "Number", "path": "*hdr.Number", "type": "*constant", "value": "NumberOfEvent"},
 				{"tag": "CGRID", "path": "*hdr.CGRID", "type": "*constant", "value": "CGRID"},
 				{"tag": "RunID", "path": "*hdr.RunID", "type": "*constant", "value": "RunID"},
 				{"tag": "ToR", "path": "*hdr.ToR", "type": "*constant", "value": "ToR"},
@@ -94,7 +94,9 @@
 				{"tag": "SetupTime", "path": "*hdr.SetupTime", "type": "*constant", "value": "SetupTime", "layout": "2006-01-02T15:04:05Z07:00"},
 				{"tag": "AnswerTime", "path": "*hdr.AnswerTime", "type": "*constant", "value": "AnswerTime", "layout": "2006-01-02T15:04:05Z07:00"},
 				{"tag": "Usage", "path": "*hdr.Usage", "type": "*constant", "value": "Usage"},
-				{"tag": "Cost", "path": "*hdr.Cost", "type": "*constant", "value": "Cost"},
+				{"tag": "Cost", "path": "*hdr.Cost", "type": "*constant", "value": "Cost"}, 
+				{"tag": "RatingPlan", "path": "*hdr.RatingPlan", "type": "*constant", "value": "RatingPlan"},
+				{"tag": "RatingPlanSubject", "path": "*hdr.RatingPlanSubject", "type": "*constant", "value": "RatingPlanSubject"},
 
 				{"tag": "Number", "path": "*exp.Number", "type": "*variable", "value": "~*dc.NumberOfEvents"},
 				{"tag": "CGRID", "path": "*exp.CGRID", "type": "*variable", "value": "~*req.CGRID"},
@@ -112,6 +114,8 @@
 				{"tag": "AnswerTime", "path": "*exp.AnswerTime", "type": "*variable", "value": "~*req.AnswerTime", "layout": "2006-01-02T15:04:05Z07:00"},
 				{"tag": "Usage", "path": "*exp.Usage", "type": "*variable", "value": "~*req.Usage"},
 				{"tag": "Cost", "path": "*exp.Cost", "type": "*variable", "value": "~*req.Cost{*round:4}"},
+				{"tag": "RatingPlan", "path": "*exp.RatingPlan", "type": "*variable", "value": "~*ec.EventCost.Charges[0].Rating.RatingFilter.RatingPlanID"},
+				{"tag": "RatingPlanSubject", "path": "*exp.RatingPlanSubject", "type": "*variable", "value": "~*ec.EventCost.Charges[0].Rating.RatingFilter.Subject"},
 
 				{"tag": "NumberOfEvents", "path": "*trl.NumberOfEvents", "type": "*variable", "value": "~*dc.NumberOfEvents"},
 				{"tag": "TotalDuration", "path": "*trl.TotalDuration", "type": "*variable", "value": "~*dc.TotalDuration"},

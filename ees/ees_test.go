@@ -173,7 +173,7 @@ func TestV1ProcessEvent(t *testing.T) {
 	newDM := engine.NewDataManager(newIDb, cfg.CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, newDM)
 	eeS := NewEventExporterS(cfg, filterS, nil)
-	cgrEv := &utils.CGREventWithEeIDs{
+	cgrEv := &engine.CGREventWithEeIDs{
 		EeIDs: []string{"SQLExporterFull"},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
@@ -223,7 +223,7 @@ func TestV1ProcessEvent2(t *testing.T) {
 	newDM := engine.NewDataManager(newIDb, cfg.CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, newDM)
 	eeS := NewEventExporterS(cfg, filterS, nil)
-	cgrEv := &utils.CGREventWithEeIDs{
+	cgrEv := &engine.CGREventWithEeIDs{
 		EeIDs: []string{"SQLExporterFull"},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
@@ -263,7 +263,7 @@ func TestV1ProcessEvent3(t *testing.T) {
 	newDM := engine.NewDataManager(newIDb, cfg.CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, newDM)
 	eeS := NewEventExporterS(cfg, filterS, nil)
-	cgrEv := &utils.CGREventWithEeIDs{
+	cgrEv := &engine.CGREventWithEeIDs{
 		EeIDs: []string{"SQLExporterFull"},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
@@ -297,7 +297,7 @@ func TestV1ProcessEvent4(t *testing.T) {
 		t.Error(err)
 	}
 	eeS.eesChs[utils.MetaHTTPPost].Set("SQLExporterFull", newEeS, []string{"grp1"})
-	cgrEv := &utils.CGREventWithEeIDs{
+	cgrEv := &engine.CGREventWithEeIDs{
 		EeIDs: []string{"SQLExporterFull"},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
@@ -359,7 +359,7 @@ func TestV1ProcessEventMockMetrics(t *testing.T) {
 			time.Second, false, onCacheEvicted),
 	}
 	eeS.eesChs[utils.MetaHTTPPost].Set("SQLExporterFull", mEe, []string{"grp1"})
-	cgrEv := &utils.CGREventWithEeIDs{
+	cgrEv := &engine.CGREventWithEeIDs{
 		EeIDs: []string{"SQLExporterFull"},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
@@ -388,7 +388,7 @@ func TestV1ProcessEvent5(t *testing.T) {
 			Type: "invalid_type",
 		},
 	}
-	cgrEv := &utils.CGREventWithEeIDs{
+	cgrEv := &engine.CGREventWithEeIDs{
 		EeIDs: []string{"SQLExporterFull"},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
@@ -419,7 +419,7 @@ func TestV1ProcessEvent6(t *testing.T) {
 	newDM := engine.NewDataManager(newIDb, cfg.CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, newDM)
 	eeS := NewEventExporterS(cfg, filterS, nil)
-	cgrEv := &utils.CGREventWithEeIDs{
+	cgrEv := &engine.CGREventWithEeIDs{
 		EeIDs: []string{"SQLExporterFull"},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",

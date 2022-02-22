@@ -119,7 +119,7 @@ func testElasticStartElasticsearch(t *testing.T) {
 }
 
 func testElasticExportEvents(t *testing.T) {
-	eventVoice := &utils.CGREventWithEeIDs{
+	eventVoice := &engine.CGREventWithEeIDs{
 		EeIDs: []string{"ElasticsearchExporter"},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
@@ -147,7 +147,7 @@ func testElasticExportEvents(t *testing.T) {
 		},
 	}
 
-	eventData := &utils.CGREventWithEeIDs{
+	eventData := &engine.CGREventWithEeIDs{
 		EeIDs: []string{"ElasticsearchExporter"},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
@@ -175,7 +175,7 @@ func testElasticExportEvents(t *testing.T) {
 		},
 	}
 
-	eventSMS := &utils.CGREventWithEeIDs{
+	eventSMS := &engine.CGREventWithEeIDs{
 		EeIDs: []string{"ElasticsearchExporter"},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
@@ -203,7 +203,7 @@ func testElasticExportEvents(t *testing.T) {
 		},
 	}
 
-	eventSMSNoFields := &utils.CGREventWithEeIDs{
+	eventSMSNoFields := &engine.CGREventWithEeIDs{
 		EeIDs: []string{"ElasticExporterWithNoFields"},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
