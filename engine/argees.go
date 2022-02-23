@@ -50,8 +50,8 @@ func (cgr *CGREventWithEeIDs) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	cgr.CGREvent = cgrEv
-	// check if we have EventCost and modify it's type (by default it was map[string]interface{} by unrmarshaling, now it will be EventCost)
-	if ecEv, has := cgrEv.Event[utils.EventCost]; has {
+	// check if we have CostDetails and modify it's type (by default it was map[string]interface{} by unrmarshaling, now it will be EventCost)
+	if ecEv, has := cgrEv.Event[utils.CostDetails]; has {
 		ec := new(EventCost)
 		bts, err := json.Marshal(ecEv)
 		if err != nil {
@@ -60,7 +60,7 @@ func (cgr *CGREventWithEeIDs) UnmarshalJSON(data []byte) error {
 		if err := json.Unmarshal(bts, &ec); err != nil {
 			return err
 		}
-		cgr.Event[utils.EventCost] = ec
+		cgr.Event[utils.CostDetails] = ec
 	}
 	return nil
 }
