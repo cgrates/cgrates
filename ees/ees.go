@@ -270,7 +270,7 @@ func exportEventWithExporter(exp EventExporter, ev *utils.CGREvent, oneTime bool
 			utils.MetaDC:   exp.GetMetrics(),
 			utils.MetaOpts: utils.MapStorage(ev.APIOpts),
 			utils.MetaCfg:  cfg.GetDataProvider(),
-			utils.MetaEC:   utils.MapStorage{utils.EventCost: ev.Event[utils.EventCost]},
+			utils.MetaEC:   utils.MapStorage{utils.CostDetails: ev.Event[utils.CostDetails]},
 		}, utils.FirstNonEmpty(ev.Tenant, cfg.GeneralCfg().DefaultTenant),
 			filterS,
 			map[string]*utils.OrderedNavigableMap{utils.MetaExp: expNM}).SetFields(exp.Cfg().ContentFields())
