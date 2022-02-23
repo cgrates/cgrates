@@ -217,7 +217,7 @@ func testSesRoutesAuthorizeEvent(t *testing.T) {
 			},
 		},
 		}}
-
+	// now we will set the maxCOst to be 1 in order to match route3 and route1
 	args = sessions.NewV1AuthorizeArgs(false, []string{},
 		false, []string{}, false, []string{}, false, false,
 		true, false, false, cgrEv, utils.Paginator{}, false, "1")
@@ -263,7 +263,9 @@ func testSesRoutesProcessMessage(t *testing.T) {
 			utils.SetupTime:    time.Date(2018, 8, 24, 16, 00, 00, 0, time.UTC),
 			utils.Usage:        time.Minute,
 		},
-		APIOpts: map[string]interface{}{utils.OptsRoutesProfileCount: 1},
+		APIOpts: map[string]interface{}{
+			utils.OptsRoutesProfileCount: 1,
+		},
 	}
 	args := sessions.NewV1ProcessMessageArgs(false, []string{},
 		false, []string{}, false, []string{}, false, false,
@@ -350,7 +352,7 @@ func testSesRoutesProcessMessage(t *testing.T) {
 			},
 		},
 		}}
-
+	// now we will set the maxCOst to be 1 in order to match route3 and route1
 	args = sessions.NewV1ProcessMessageArgs(false, []string{},
 		false, []string{}, false, []string{}, false, false,
 		true, false, false, cgrEv, utils.Paginator{}, false, "1")
@@ -396,7 +398,9 @@ func testSesRoutesProcessEvent(t *testing.T) {
 			utils.SetupTime:    time.Date(2018, 8, 24, 16, 00, 00, 0, time.UTC),
 			utils.Usage:        time.Minute,
 		},
-		APIOpts: map[string]interface{}{utils.OptsRoutesProfileCount: 1},
+		APIOpts: map[string]interface{}{
+			utils.OptsRoutesProfileCount: 1,
+		},
 	}
 	args := sessions.V1ProcessEventArgs{
 		Flags:     []string{"*routes"},
@@ -448,7 +452,7 @@ func testSesRoutesProcessEvent(t *testing.T) {
 	}
 
 	args = sessions.V1ProcessEventArgs{
-		Flags:     []string{"*routes:*maxcost:2"},
+		Flags:     []string{"*routes"},
 		CGREvent:  cgrEv,
 		Paginator: utils.Paginator{},
 	}
@@ -490,12 +494,13 @@ func testSesRoutesProcessEvent(t *testing.T) {
 			},
 			},
 		}}
-
+	// now we will set the routes max cost to be 1 in case of matching just route3 and route 1
 	args = sessions.V1ProcessEventArgs{
 		Flags:     []string{"*routes:*maxcost:1"},
 		CGREvent:  cgrEv,
 		Paginator: utils.Paginator{},
 	}
+	args.CGREvent.APIOpts[utils.OptsRoutesMaxCost] = "1"
 	rply = sessions.V1ProcessEventReply{}
 	if err := sesRoutesRPC.Call(utils.SessionSv1ProcessEvent,
 		args, &rply); err != nil {
