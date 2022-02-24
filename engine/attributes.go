@@ -116,8 +116,7 @@ func (alS *AttributeS) attributeProfileForEvent(ctx *context.Context, tnt string
 
 // AttrSProcessEventReply reply used for proccess event
 type AttrSProcessEventReply struct {
-	MatchedProfiles []string
-	AlteredFields   []string
+	AlteredFields []*FieldsAltered
 	*utils.CGREvent
 	blocker bool // internally used to stop further processRuns
 }
@@ -125,18 +124,26 @@ type AttrSProcessEventReply struct {
 // Digest returns serialized version of alteredFields in AttrSProcessEventReply
 // format fldName1:fldVal1,fldName2:fldVal2
 func (attrReply *AttrSProcessEventReply) Digest() (rplyDigest string) {
-	for i, fld := range attrReply.AlteredFields {
-		fld = strings.TrimPrefix(fld, utils.MetaReq+utils.NestingSep)
-		if _, has := attrReply.CGREvent.Event[fld]; !has {
-			continue //maybe removed
+	for idx, altered := range attrReply.AlteredFields {
+		for idxFlds, fldName := range altered.AlteredFields {
+			fldName = strings.TrimPrefix(fldName, utils.MetaReq+utils.NestingSep)
+			if _, has := attrReply.CGREvent.Event[fldName]; !has {
+				continue //maybe removed
+			}
+			if idx != 0 || idxFlds != 0 {
+				rplyDigest += utils.FieldsSep
+			}
+			fldStrVal, _ := attrReply.CGREvent.FieldAsString(fldName)
+			rplyDigest += fldName + utils.InInFieldSep + fldStrVal
 		}
-		if i != 0 {
-			rplyDigest += utils.FieldsSep
-		}
-		fldStrVal, _ := attrReply.CGREvent.FieldAsString(fld)
-		rplyDigest += fld + utils.InInFieldSep + fldStrVal
+
 	}
 	return
+}
+
+type FieldsAltered struct {
+	MatchedProfileID string
+	AlteredFields    []string
 }
 
 // processEvent will match event with attribute profile and do the necessary replacements
@@ -157,9 +164,12 @@ func (alS *AttributeS) processEvent(ctx *context.Context, tnt string, args *util
 		return
 	}
 	rply = &AttrSProcessEventReply{
-		MatchedProfiles: []string{attrPrf.TenantIDInline()},
-		CGREvent:        args,
-		blocker:         attrPrf.Blocker,
+		AlteredFields: []*FieldsAltered{{
+			MatchedProfileID: attrPrf.TenantIDInline(),
+			AlteredFields:    []string{},
+		}},
+		CGREvent: args,
+		blocker:  attrPrf.Blocker,
 	}
 	rply.Tenant = tnt
 	for _, attribute := range attrPrf.Attributes {
@@ -180,8 +190,8 @@ func (alS *AttributeS) processEvent(ctx *context.Context, tnt string, args *util
 		}
 		substitute := utils.IfaceAsString(out)
 		//add only once the Path in AlteredFields
-		if !utils.IsSliceMember(rply.AlteredFields, attribute.Path) {
-			rply.AlteredFields = append(rply.AlteredFields, attribute.Path)
+		if !utils.IsSliceMember(rply.AlteredFields[0].AlteredFields, attribute.Path) {
+			rply.AlteredFields[0].AlteredFields = append(rply.AlteredFields[0].AlteredFields, attribute.Path)
 		}
 		if attribute.Path == utils.MetaTenant {
 			if attribute.Type == utils.MetaComposed {
@@ -286,8 +296,7 @@ func (alS *AttributeS) V1ProcessEvent(ctx *context.Context, args *utils.CGREvent
 	}
 
 	var lastID string
-	matchedIDs := make([]string, 0, processRuns)
-	alteredFields := make(utils.StringSet)
+	matchedIDs := []*FieldsAltered{}
 	dynDP := newDynamicDP(ctx, alS.cfg.AttributeSCfg().ResourceSConns,
 		alS.cfg.AttributeSCfg().StatSConns, alS.cfg.AttributeSCfg().AccountSConns, args.Tenant, eNV)
 	for i := 0; i < processRuns; i++ {
@@ -304,13 +313,18 @@ func (alS *AttributeS) V1ProcessEvent(ctx *context.Context, args *utils.CGREvent
 		}
 		args.Tenant = evRply.CGREvent.Tenant
 		tnt = evRply.CGREvent.Tenant
-		lastID = evRply.MatchedProfiles[0]
-		matchedIDs = append(matchedIDs, lastID)
+
+		lastID = evRply.AlteredFields[0].MatchedProfileID
+		altered := &FieldsAltered{
+			MatchedProfileID: lastID,
+			AlteredFields:    make([]string, len(evRply.AlteredFields[0].AlteredFields)),
+		}
 		processedPrf.Add(lastID)
 		processedPrfNo[lastID] = processedPrfNo[lastID] + 1
-		for _, fldName := range evRply.AlteredFields {
-			alteredFields.Add(fldName)
+		for idx, fldName := range evRply.AlteredFields[0].AlteredFields {
+			altered.AlteredFields[idx] = fldName
 		}
+		matchedIDs = append(matchedIDs, altered)
 		if evRply.blocker {
 			break
 		}
@@ -329,9 +343,8 @@ func (alS *AttributeS) V1ProcessEvent(ctx *context.Context, args *utils.CGREvent
 	}
 
 	*reply = AttrSProcessEventReply{
-		MatchedProfiles: matchedIDs,
-		AlteredFields:   alteredFields.AsSlice(),
-		CGREvent:        args,
+		AlteredFields: matchedIDs,
+		CGREvent:      args,
 	}
 	return
 }

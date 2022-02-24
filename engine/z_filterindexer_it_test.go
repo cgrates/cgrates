@@ -2257,7 +2257,7 @@ func testITIndexRateProfileRateIndexes(t *testing.T) {
 			},
 		},
 	}
-	if err := dataManager.SetRateProfile(context.Background(), rPrf, true, true); err != nil {
+	if err := dataManager.SetRateProfile(context.Background(), rPrf, false, true); err != nil {
 		t.Error(err)
 	}
 	eIdxes = map[string]utils.StringSet{
@@ -2277,7 +2277,7 @@ func testITIndexRateProfileRateIndexes(t *testing.T) {
 		t.Error(err)
 	} else {
 		if !reflect.DeepEqual(eIdxes, rcvIdx) {
-			t.Errorf("Expecting %+v, received: %+v", eIdxes, rcvIdx)
+			t.Errorf("Expecting %+v, received: %+v", utils.ToJSON(eIdxes), utils.ToJSON(rcvIdx))
 		}
 	}
 

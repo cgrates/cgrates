@@ -182,20 +182,22 @@ func (sma *AsteriskAgent) handleStasisStart(ev *SMAsteriskEvent) {
 		return
 	}
 	if authReply.Attributes != nil {
-		for _, fldName := range authReply.Attributes.AlteredFields {
-			fldName = strings.TrimPrefix(fldName, utils.MetaReq+utils.NestingSep)
-			if _, has := authReply.Attributes.CGREvent.Event[fldName]; !has {
-				continue //maybe removed
-			}
-			fldVal, err := authReply.Attributes.CGREvent.FieldAsString(fldName)
-			if err != nil {
-				utils.Logger.Warning(
-					fmt.Sprintf(
-						"<%s> error <%s> extracting attribute field: <%s>",
-						utils.AsteriskAgent, err.Error(), fldName))
-			}
-			if !sma.setChannelVar(ev.ChannelID(), fldName, fldVal) {
-				return
+		for _, altered := range authReply.Attributes.AlteredFields {
+			for _, fldName := range altered.AlteredFields {
+				fldName = strings.TrimPrefix(fldName, utils.MetaReq+utils.NestingSep)
+				if _, has := authReply.Attributes.CGREvent.Event[fldName]; !has {
+					continue //maybe removed
+				}
+				fldVal, err := authReply.Attributes.CGREvent.FieldAsString(fldName)
+				if err != nil {
+					utils.Logger.Warning(
+						fmt.Sprintf(
+							"<%s> error <%s> extracting attribute field: <%s>",
+							utils.AsteriskAgent, err.Error(), fldName))
+				}
+				if !sma.setChannelVar(ev.ChannelID(), fldName, fldVal) {
+					return
+				}
 			}
 		}
 	}

@@ -309,10 +309,12 @@ func (v1Rply *V1ProcessEventReply) AsNavigableMap() map[string]*utils.DataNode {
 		atts := &utils.DataNode{Type: utils.NMMapType, Map: make(map[string]*utils.DataNode)}
 		for k, att := range v1Rply.Attributes {
 			attrs := &utils.DataNode{Type: utils.NMMapType, Map: make(map[string]*utils.DataNode)}
-			for _, fldName := range att.AlteredFields {
-				fldName = strings.TrimPrefix(fldName, utils.MetaReq+utils.NestingSep)
-				if att.CGREvent.HasField(fldName) {
-					attrs.Map[fldName] = utils.NewLeafNode(att.CGREvent.Event[fldName])
+			for _, altered := range att.AlteredFields {
+				for _, fldName := range altered.AlteredFields {
+					fldName = strings.TrimPrefix(fldName, utils.MetaReq+utils.NestingSep)
+					if att.CGREvent.HasField(fldName) {
+						attrs.Map[fldName] = utils.NewLeafNode(att.CGREvent.Event[fldName])
+					}
 				}
 			}
 			atts.Map[k] = attrs
@@ -398,10 +400,13 @@ func (v1Rply *V1ProcessMessageReply) AsNavigableMap() map[string]*utils.DataNode
 	}
 	if v1Rply.Attributes != nil {
 		attrs := &utils.DataNode{Type: utils.NMMapType, Map: make(map[string]*utils.DataNode)}
-		for _, fldName := range v1Rply.Attributes.AlteredFields {
-			fldName = strings.TrimPrefix(fldName, utils.MetaReq+utils.NestingSep)
-			if v1Rply.Attributes.CGREvent.HasField(fldName) {
-				attrs.Map[fldName] = utils.NewLeafNode(v1Rply.Attributes.CGREvent.Event[fldName])
+
+		for _, altered := range v1Rply.Attributes.AlteredFields {
+			for _, fldName := range altered.AlteredFields {
+				fldName = strings.TrimPrefix(fldName, utils.MetaReq+utils.NestingSep)
+				if v1Rply.Attributes.CGREvent.HasField(fldName) {
+					attrs.Map[fldName] = utils.NewLeafNode(v1Rply.Attributes.CGREvent.Event[fldName])
+				}
 			}
 		}
 		cgrReply[utils.CapAttributes] = attrs
@@ -452,10 +457,12 @@ func (v1AuthReply *V1AuthorizeReply) AsNavigableMap() map[string]*utils.DataNode
 	cgrReply := make(map[string]*utils.DataNode)
 	if v1AuthReply.Attributes != nil {
 		attrs := &utils.DataNode{Type: utils.NMMapType, Map: make(map[string]*utils.DataNode)}
-		for _, fldName := range v1AuthReply.Attributes.AlteredFields {
-			fldName = strings.TrimPrefix(fldName, utils.MetaReq+utils.NestingSep)
-			if v1AuthReply.Attributes.CGREvent.HasField(fldName) {
-				attrs.Map[fldName] = utils.NewLeafNode(v1AuthReply.Attributes.CGREvent.Event[fldName])
+		for _, altered := range v1AuthReply.Attributes.AlteredFields {
+			for _, fldName := range altered.AlteredFields {
+				fldName = strings.TrimPrefix(fldName, utils.MetaReq+utils.NestingSep)
+				if v1AuthReply.Attributes.CGREvent.HasField(fldName) {
+					attrs.Map[fldName] = utils.NewLeafNode(v1AuthReply.Attributes.CGREvent.Event[fldName])
+				}
 			}
 		}
 		cgrReply[utils.CapAttributes] = attrs
@@ -525,10 +532,12 @@ func (v1Rply *V1InitSessionReply) AsNavigableMap() map[string]*utils.DataNode {
 	cgrReply := make(map[string]*utils.DataNode)
 	if v1Rply.Attributes != nil {
 		attrs := &utils.DataNode{Type: utils.NMMapType, Map: make(map[string]*utils.DataNode)}
-		for _, fldName := range v1Rply.Attributes.AlteredFields {
-			fldName = strings.TrimPrefix(fldName, utils.MetaReq+utils.NestingSep)
-			if v1Rply.Attributes.CGREvent.HasField(fldName) {
-				attrs.Map[fldName] = utils.NewLeafNode(v1Rply.Attributes.CGREvent.Event[fldName])
+		for _, altered := range v1Rply.Attributes.AlteredFields {
+			for _, fldName := range altered.AlteredFields {
+				fldName = strings.TrimPrefix(fldName, utils.MetaReq+utils.NestingSep)
+				if v1Rply.Attributes.CGREvent.HasField(fldName) {
+					attrs.Map[fldName] = utils.NewLeafNode(v1Rply.Attributes.CGREvent.Event[fldName])
+				}
 			}
 		}
 		cgrReply[utils.CapAttributes] = attrs
@@ -590,10 +599,12 @@ func (v1Rply *V1UpdateSessionReply) AsNavigableMap() map[string]*utils.DataNode 
 	cgrReply := make(map[string]*utils.DataNode)
 	if v1Rply.Attributes != nil {
 		attrs := &utils.DataNode{Type: utils.NMMapType, Map: make(map[string]*utils.DataNode)}
-		for _, fldName := range v1Rply.Attributes.AlteredFields {
-			fldName = strings.TrimPrefix(fldName, utils.MetaReq+utils.NestingSep)
-			if v1Rply.Attributes.CGREvent.HasField(fldName) {
-				attrs.Map[fldName] = utils.NewLeafNode(v1Rply.Attributes.CGREvent.Event[fldName])
+		for _, altered := range v1Rply.Attributes.AlteredFields {
+			for _, fldName := range altered.AlteredFields {
+				fldName = strings.TrimPrefix(fldName, utils.MetaReq+utils.NestingSep)
+				if v1Rply.Attributes.CGREvent.HasField(fldName) {
+					attrs.Map[fldName] = utils.NewLeafNode(v1Rply.Attributes.CGREvent.Event[fldName])
+				}
 			}
 		}
 		cgrReply[utils.CapAttributes] = attrs
