@@ -49,8 +49,8 @@ func (vEe *LogEE) ExportEvent(mp interface{}, _ string) error {
 }
 func (vEe *LogEE) Close() error                      { return nil }
 func (vEe *LogEE) GetMetrics() *utils.SafeMapStorage { return vEe.dc }
-func (vEe *LogEE) PrepareMap(mp map[string]interface{}) (interface{}, error) {
-	return mp, nil
+func (vEe *LogEE) PrepareMap(mp *utils.CGREvent) (interface{}, error) {
+	return mp.Event, nil
 }
 func (vEe *LogEE) PrepareOrderMap(mp *utils.OrderedNavigableMap) (interface{}, error) {
 	valMp := make(map[string]interface{})

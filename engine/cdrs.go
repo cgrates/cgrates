@@ -771,6 +771,11 @@ func (cdrS *CDRServer) V1ProcessEvent(arg *ArgV1ProcessEvent, reply *string) (er
 	// processing options
 	flgs := utils.FlagsWithParamsFromSlice(arg.Flags)
 	attrS := len(cdrS.cgrCfg.CdrsCfg().AttributeSConns) != 0
+	if v, has := arg.APIOpts[utils.OptsAttributeS]; has {
+		if attrS, err = utils.IfaceAsBool(v); err != nil {
+			return
+		}
+	}
 	if flgs.Has(utils.MetaAttributes) {
 		attrS = flgs.GetBool(utils.MetaAttributes)
 	}
@@ -783,28 +788,58 @@ func (cdrS *CDRServer) V1ProcessEvent(arg *ArgV1ProcessEvent, reply *string) (er
 		export = flgs.GetBool(utils.MetaExport)
 	}
 	thdS := len(cdrS.cgrCfg.CdrsCfg().ThresholdSConns) != 0
+	if v, has := arg.APIOpts[utils.OptsThresholdS]; has {
+		if attrS, err = utils.IfaceAsBool(v); err != nil {
+			return
+		}
+	}
 	if flgs.Has(utils.MetaThresholds) {
 		thdS = flgs.GetBool(utils.MetaThresholds)
 	}
 	stS := len(cdrS.cgrCfg.CdrsCfg().StatSConns) != 0
+	if v, has := arg.APIOpts[utils.OptsStatS]; has {
+		if attrS, err = utils.IfaceAsBool(v); err != nil {
+			return
+		}
+	}
 	if flgs.Has(utils.MetaStats) {
 		stS = flgs.GetBool(utils.MetaStats)
 	}
 	chrgS := len(cdrS.cgrCfg.CdrsCfg().ChargerSConns) != 0 // activate charging for the Event
+	if v, has := arg.APIOpts[utils.OptsChargerS]; has {
+		if attrS, err = utils.IfaceAsBool(v); err != nil {
+			return
+		}
+	}
 	if flgs.Has(utils.MetaChargers) {
 		chrgS = flgs.GetBool(utils.MetaChargers)
 	}
 	var ralS bool // activate single rating for the CDR
+	if v, has := arg.APIOpts[utils.OptsRALs]; has {
+		if attrS, err = utils.IfaceAsBool(v); err != nil {
+			return
+		}
+	}
 	if flgs.Has(utils.MetaRALs) {
 		ralS = flgs.GetBool(utils.MetaRALs)
 	}
 	var reRate bool
+	if v, has := arg.APIOpts[utils.OptsRerate]; has {
+		if attrS, err = utils.IfaceAsBool(v); err != nil {
+			return
+		}
+	}
 	if flgs.Has(utils.MetaRerate) {
 		if reRate = flgs.GetBool(utils.MetaRerate); reRate {
 			ralS = true
 		}
 	}
 	var refund bool
+	if v, has := arg.APIOpts[utils.OptsRefund]; has {
+		if attrS, err = utils.IfaceAsBool(v); err != nil {
+			return
+		}
+	}
 	if flgs.Has(utils.MetaRefund) {
 		refund = flgs.GetBool(utils.MetaRefund)
 	}
