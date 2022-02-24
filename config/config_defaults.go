@@ -562,6 +562,7 @@ const CGRATES_CFG_JSON = `
 				// "connIDs": [],  								// connections for connManager to this exporter
 				// "rpcConnTimeout" : "1s", 					// connection unsuccesfull on timeout
 				// "rpcReplyTimeout":"2s", 						// connection down at replies if taking longer that this value
+				// "rpcAPIOpts": {},
 			},													// extra options for exporter
 			"timezone": "",										// timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
 			"filters": [],										// limit parsing based on the filters

@@ -87,7 +87,11 @@ func TestHttpPostExportEvent2(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	vals, err := httpPost.PrepareMap(map[string]interface{}{"2": "*req.field2"})
+	vals, err := httpPost.PrepareMap(&utils.CGREvent{
+		Event: map[string]interface{}{
+			"2": "*req.field2",
+		},
+	})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -126,9 +130,11 @@ func TestHttpPostSync(t *testing.T) {
 		t.Error(err)
 	}
 
-	vals, err := exp.PrepareMap(map[string]interface{}{
-		"Account":     "1001",
-		"Destination": "1002",
+	vals, err := exp.PrepareMap(&utils.CGREvent{
+		Event: map[string]interface{}{
+			"Account":     "1001",
+			"Destination": "1002",
+		},
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -179,9 +185,11 @@ func TestHttpPostSyncLimit(t *testing.T) {
 		t.Error(err)
 	}
 
-	vals, err := exp.PrepareMap(map[string]interface{}{
-		"Account":     "1001",
-		"Destination": "1002",
+	vals, err := exp.PrepareMap(&utils.CGREvent{
+		Event: map[string]interface{}{
+			"Account":     "1001",
+			"Destination": "1002",
+		},
 	})
 	if err != nil {
 		t.Fatal(err)

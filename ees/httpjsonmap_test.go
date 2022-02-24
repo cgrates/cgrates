@@ -204,7 +204,9 @@ func TestHTTPJsonMapPrepareMap(t *testing.T) {
 	valMp := map[string]interface{}{
 		"*req.*tenant": "value1",
 	}
-	rcv, err := httpEE.PrepareMap(valMp)
+	rcv, err := httpEE.PrepareMap(&utils.CGREvent{
+		Event: valMp,
+	})
 	if err != nil {
 		t.Error(err)
 	}

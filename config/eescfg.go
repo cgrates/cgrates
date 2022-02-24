@@ -201,6 +201,7 @@ type EventExporterOpts struct {
 	ConnIDs                  *[]string
 	RPCConnTimeout           *time.Duration
 	RPCReplyTimeout          *time.Duration
+	RPCAPIOpts               map[string]interface{}
 }
 
 // EventExporterCfg the config for a Event Exporter
@@ -389,6 +390,10 @@ func (eeOpts *EventExporterOpts) loadFromJSONCfg(jsnCfg *EventExporterOptsJson) 
 			return
 		}
 		eeOpts.RPCReplyTimeout = utils.DurationPointer(rpcReplyTimeout)
+	}
+	if jsnCfg.RPCAPIOpts != nil {
+		eeOpts.RPCAPIOpts = make(map[string]interface{})
+		eeOpts.RPCAPIOpts = jsnCfg.RPCAPIOpts
 	}
 	return
 }
@@ -634,6 +639,10 @@ func (eeOpts *EventExporterOpts) Clone() *EventExporterOpts {
 	if eeOpts.RPCReplyTimeout != nil {
 		cln.RPCReplyTimeout = utils.DurationPointer(*eeOpts.RPCReplyTimeout)
 	}
+	if eeOpts.RPCAPIOpts != nil {
+		cln.RPCAPIOpts = make(map[string]interface{})
+		cln.RPCAPIOpts = eeOpts.RPCAPIOpts
+	}
 	return cln
 }
 
@@ -828,6 +837,9 @@ func (eeC *EventExporterCfg) AsMapInterface(separator string) (initialMP map[str
 	}
 	if eeC.Opts.RPCReplyTimeout != nil {
 		opts[utils.RpcReplyTimeout] = eeC.Opts.RPCReplyTimeout.String()
+	}
+	if eeC.Opts.RPCAPIOpts != nil {
+		opts[utils.RPCAPIOpts] = eeC.Opts.RPCAPIOpts
 	}
 
 	flgs := eeC.Flags.SliceFlags()

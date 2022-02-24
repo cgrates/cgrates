@@ -179,9 +179,9 @@ func TestRPCPrepareMap(t *testing.T) {
 		},
 	}
 
-	exp := cgrEv.Event
+	exp := cgrEv
 
-	rcv, err := rpcEe.PrepareMap(cgrEv.Event)
+	rcv, err := rpcEe.PrepareMap(cgrEv)
 	if err != nil {
 		t.Error(err)
 	}

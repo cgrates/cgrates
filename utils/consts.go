@@ -2428,7 +2428,8 @@ var CGROptionsSet = NewStringSet([]string{OptsSessionsTTL,
 	OptsRoutesProfileCount, OptsDispatchersProfilesCount, OptsAttributesProfileRuns,
 	OptsAttributesProfileIgnoreFilters, OptsStatsProfileIDs, OptsStatsProfileIgnoreFilters,
 	OptsThresholdsProfileIDs, OptsThresholdsProfileIgnoreFilters, OptsResourcesUsageID, OptsResourcesUsageTTL,
-	OptsResourcesUnits})
+	OptsResourcesUnits, OptsAttributeS, OptsThresholdS, OptsChargerS, OptsStatS, OptsRALs, OptsRerate,
+	OptsRefund})
 
 // EventExporter metrics
 const (
@@ -2489,6 +2490,14 @@ const (
 	// Thresholds
 	OptsThresholdsProfileIDs           = "*thdProfileIDs"
 	OptsThresholdsProfileIgnoreFilters = "*thdProfileIgnoreFilters"
+	//CDRs and Sessions
+	OptsAttributeS = "*attributeS"
+	OptsChargerS   = "*chargerS"
+	OptsStatS      = "*statS"
+	OptsThresholdS = "*thresholdS"
+	OptsRALs       = "*ralS"
+	OptsRerate     = "*rerate"
+	OptsRefund     = "*refund"
 	// Others
 	OptsContext                        = "*context"
 	Subsys                             = "*subsys"
@@ -2628,6 +2637,7 @@ const (
 	ConnIDs         = "connIDs"
 	RpcConnTimeout  = "rpcConnTimeout"
 	RpcReplyTimeout = "rpcReplyTimeout"
+	RPCAPIOpts      = "rpcAPIOpts"
 
 	// processed opts
 	AMQPQueueIDProcessedCfg      = "amqpQueueIDProcessed"
