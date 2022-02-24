@@ -52,12 +52,11 @@ var (
 		testLoaderStartEngine,
 		testLoaderRPCConn,
 
-		testLoaderResetDataDB,
+		//testLoaderResetDataDB,
 		populateData("/tmp/In"),
 		runLoader("CustomLoader"),
 		verifyOutput("/tmp/Out"),
 		testLoaderCheckAttributes,
-
 		testLoaderResetDataDB,
 		populateData("/tmp/LoaderIn"),
 		runLoader("WithoutMoveToOut"),

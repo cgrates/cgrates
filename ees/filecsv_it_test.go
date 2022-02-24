@@ -240,7 +240,6 @@ func testCsvExportComposedEvent(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "voiceEvent",
 			Event: map[string]interface{}{
-
 				utils.ToR:           utils.MetaVoice,
 				"ComposedOriginID1": "dsaf",
 				"ComposedOriginID2": "dsaf",
@@ -271,7 +270,6 @@ func testCsvExportComposedEvent(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "SMSEvent",
 			Event: map[string]interface{}{
-
 				utils.ToR:           utils.MetaSMS,
 				"ComposedOriginID1": "sdf",
 				"ComposedOriginID2": "wer",

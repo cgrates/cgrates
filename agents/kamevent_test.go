@@ -175,8 +175,12 @@ func TestKamEvAsKamAuthReply(t *testing.T) {
 	}
 	authRply = &sessions.V1AuthorizeReply{
 		Attributes: &engine.AttrSProcessEventReply{
-			MatchedProfiles: []string{"ATTR_1001_ACCOUNT_PROFILE"},
-			AlteredFields:   []string{"*req.Password", utils.MetaReq + utils.NestingSep + utils.RequestType},
+			AlteredFields: []*engine.FieldsAltered{
+				{
+					MatchedProfileID: "ATTR_1001_ACCOUNT_PROFILE",
+					AlteredFields:    []string{"*req.Password", utils.MetaReq + utils.NestingSep + utils.RequestType},
+				},
+			},
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "TestKamEvAsKamAuthReply",
@@ -244,8 +248,12 @@ func TestKamEvAsKamProcessEventReply(t *testing.T) {
 	}
 	procEvhRply = &sessions.V1ProcessMessageReply{
 		Attributes: &engine.AttrSProcessEventReply{
-			MatchedProfiles: []string{"ATTR_1001_ACCOUNT_PROFILE"},
-			AlteredFields:   []string{"*req.Password", utils.MetaReq + utils.NestingSep + utils.RequestType},
+			AlteredFields: []*engine.FieldsAltered{
+				{
+					MatchedProfileID: "ATTR_1001_ACCOUNT_PROFILE",
+					AlteredFields:    []string{"*req.Password", utils.MetaReq + utils.NestingSep + utils.RequestType},
+				},
+			},
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "TestKamEvAsKamAuthReply",

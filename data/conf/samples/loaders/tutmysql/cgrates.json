@@ -61,7 +61,16 @@
 				"type": "*attributes",						
 				"file_name": "Attributes.csv",				
 				"fields": [
-					{"tag": "AttributesFields","type": "*template", "value": "attrTemplateLoader"}
+					//{"tag": "AttributesFields","type": "*template", "value": "attrTemplateLoader"}
+					{"tag": "TenantID", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
+					{"tag": "ProfileID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
+					{"tag": "FilterIDs", "path": "FilterIDs", "type": "*variable", "value": "~*req.2"},
+					{"tag": "Weights", "path": "Weights", "type": "*variable", "value": "~*req.3"},
+					{"tag": "AttributeFilterIDs", "path": "Attributes.FilterIDs", "type": "*variable", "value": "~*req.4","new_branch":true},
+					{"tag": "Path", "path": "Attributes.Path", "type": "*variable", "value": "~*req.5"},
+					{"tag": "Type", "path": "Attributes.Type", "type": "*variable", "value": "~*req.6"},
+					{"tag": "Value", "path": "Attributes.Value", "type": "*variable", "value": "~*req.7"},
+					{"tag": "Blocker", "path": "Blocker", "type": "*variable", "value": "~*req.8"},
 
 				],
 			},
