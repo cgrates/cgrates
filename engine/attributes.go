@@ -116,7 +116,7 @@ func (alS *AttributeS) attributeProfileForEvent(ctx *context.Context, tnt string
 
 // AttrSProcessEventReply reply used for proccess event
 type AttrSProcessEventReply struct {
-	AlteredFields []*FieldsAltered
+	Fields []*FieldsAltered
 	*utils.CGREvent
 	blocker bool // internally used to stop further processRuns
 }
@@ -124,7 +124,7 @@ type AttrSProcessEventReply struct {
 // Digest returns serialized version of alteredFields in AttrSProcessEventReply
 // format fldName1:fldVal1,fldName2:fldVal2
 func (attrReply *AttrSProcessEventReply) Digest() (rplyDigest string) {
-	for idx, altered := range attrReply.AlteredFields {
+	for idx, altered := range attrReply.Fields {
 		for idxFlds, fldName := range altered.AlteredFields {
 			fldName = strings.TrimPrefix(fldName, utils.MetaReq+utils.NestingSep)
 			if _, has := attrReply.CGREvent.Event[fldName]; !has {
@@ -136,7 +136,6 @@ func (attrReply *AttrSProcessEventReply) Digest() (rplyDigest string) {
 			fldStrVal, _ := attrReply.CGREvent.FieldAsString(fldName)
 			rplyDigest += fldName + utils.InInFieldSep + fldStrVal
 		}
-
 	}
 	return
 }
@@ -164,7 +163,7 @@ func (alS *AttributeS) processEvent(ctx *context.Context, tnt string, args *util
 		return
 	}
 	rply = &AttrSProcessEventReply{
-		AlteredFields: []*FieldsAltered{{
+		Fields: []*FieldsAltered{{
 			MatchedProfileID: attrPrf.TenantIDInline(),
 			AlteredFields:    []string{},
 		}},
@@ -190,8 +189,8 @@ func (alS *AttributeS) processEvent(ctx *context.Context, tnt string, args *util
 		}
 		substitute := utils.IfaceAsString(out)
 		//add only once the Path in AlteredFields
-		if !utils.IsSliceMember(rply.AlteredFields[0].AlteredFields, attribute.Path) {
-			rply.AlteredFields[0].AlteredFields = append(rply.AlteredFields[0].AlteredFields, attribute.Path)
+		if !utils.IsSliceMember(rply.Fields[0].AlteredFields, attribute.Path) {
+			rply.Fields[0].AlteredFields = append(rply.Fields[0].AlteredFields, attribute.Path)
 		}
 		if attribute.Path == utils.MetaTenant {
 			if attribute.Type == utils.MetaComposed {
@@ -314,14 +313,14 @@ func (alS *AttributeS) V1ProcessEvent(ctx *context.Context, args *utils.CGREvent
 		args.Tenant = evRply.CGREvent.Tenant
 		tnt = evRply.CGREvent.Tenant
 
-		lastID = evRply.AlteredFields[0].MatchedProfileID
+		lastID = evRply.Fields[0].MatchedProfileID
 		altered := &FieldsAltered{
 			MatchedProfileID: lastID,
-			AlteredFields:    make([]string, len(evRply.AlteredFields[0].AlteredFields)),
+			AlteredFields:    make([]string, len(evRply.Fields[0].AlteredFields)),
 		}
 		processedPrf.Add(lastID)
 		processedPrfNo[lastID] = processedPrfNo[lastID] + 1
-		for idx, fldName := range evRply.AlteredFields[0].AlteredFields {
+		for idx, fldName := range evRply.Fields[0].AlteredFields {
 			altered.AlteredFields[idx] = fldName
 		}
 		matchedIDs = append(matchedIDs, altered)
@@ -343,8 +342,8 @@ func (alS *AttributeS) V1ProcessEvent(ctx *context.Context, args *utils.CGREvent
 	}
 
 	*reply = AttrSProcessEventReply{
-		AlteredFields: matchedIDs,
-		CGREvent:      args,
+		Fields:   matchedIDs,
+		CGREvent: args,
 	}
 	return
 }
