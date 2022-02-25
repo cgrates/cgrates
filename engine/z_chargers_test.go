@@ -110,7 +110,7 @@ func TestChargersprocessEventCallNilErr(t *testing.T) {
 		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
 			utils.AttributeSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
 				rply := AttrSProcessEventReply{
-					AlteredFields: []*FieldsAltered{{
+					Fields: []*FieldsAltered{{
 						MatchedProfileID: "attr1",
 						AlteredFields:    []string{utils.MetaReq + utils.NestingSep + utils.AccountField},
 					}},
@@ -283,7 +283,7 @@ func TestChargersV1ProcessEventErrNotFound(t *testing.T) {
 		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
 			utils.AttributeSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
 				rply := AttrSProcessEventReply{
-					AlteredFields: []*FieldsAltered{{
+					Fields: []*FieldsAltered{{
 						AlteredFields: []string{utils.AccountField},
 					}},
 					CGREvent: &utils.CGREvent{
@@ -355,7 +355,7 @@ func TestChargersV1ProcessEventErrOther(t *testing.T) {
 		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
 			"invalidMethod": func(ctx *context.Context, args, reply interface{}) error {
 				rply := AttrSProcessEventReply{
-					AlteredFields: []*FieldsAltered{{
+					Fields: []*FieldsAltered{{
 						AlteredFields: []string{utils.AccountField},
 					}},
 					CGREvent: &utils.CGREvent{
@@ -433,7 +433,7 @@ func TestChargersV1ProcessEvent(t *testing.T) {
 		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
 			utils.AttributeSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
 				rply := AttrSProcessEventReply{
-					AlteredFields: []*FieldsAltered{{
+					Fields: []*FieldsAltered{{
 						MatchedProfileID: "attr2",
 						AlteredFields:    []string{utils.MetaReq + utils.NestingSep + utils.AccountField},
 					}},

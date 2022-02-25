@@ -282,7 +282,7 @@ func (rpS *RouteS) V1GetRoutes(ctx *context.Context, args *utils.CGREvent, reply
 		args.APIOpts[utils.OptsContext] = context
 		var rplyEv AttrSProcessEventReply
 		if err := rpS.connMgr.Call(ctx, rpS.cfg.RouteSCfg().AttributeSConns,
-			utils.AttributeSv1ProcessEvent, args, &rplyEv); err == nil && len(rplyEv.AlteredFields) != 0 {
+			utils.AttributeSv1ProcessEvent, args, &rplyEv); err == nil && len(rplyEv.Fields) != 0 {
 			args = rplyEv.CGREvent
 			args.APIOpts = rplyEv.APIOpts
 		} else if err = utils.CastRPCErr(err); err != utils.ErrNotFound {
