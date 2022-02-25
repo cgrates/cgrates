@@ -843,9 +843,6 @@ func (cdrS *CDRServer) V1ProcessEvent(arg *ArgV1ProcessEvent, reply *string) (er
 	if flgs.Has(utils.MetaRefund) {
 		refund = flgs.GetBool(utils.MetaRefund)
 	}
-	utils.Logger.Crit(fmt.Sprintf("ralS: <%+v>", ralS))
-	utils.Logger.Crit(fmt.Sprintf("chargers: <%+v>", chrgS))
-	utils.Logger.Crit(fmt.Sprintf("export: <%+v>", export))
 	// end of processing options
 
 	if _, err = cdrS.processEvents([]*utils.CGREvent{&arg.CGREvent}, chrgS, attrS, refund,
