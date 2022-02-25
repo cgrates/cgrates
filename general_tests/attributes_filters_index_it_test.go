@@ -216,7 +216,7 @@ func testAttributeSetFltr2(t *testing.T) {
 		APIOpts: map[string]interface{}{},
 	}
 	exp := engine.AttrSProcessEventReply{
-		AlteredFields: []*engine.FieldsAltered{
+		Fields: []*engine.FieldsAltered{
 			{
 				MatchedProfileID: "cgrates.org:ApierTest",
 				AlteredFields:    []string{"*req.FL1"},
