@@ -196,7 +196,7 @@ func TestProcessRequest(t *testing.T) {
 			}
 			*prply = sessions.V1InitSessionReply{
 				Attributes: &engine.AttrSProcessEventReply{
-					AlteredFields: []*engine.FieldsAltered{
+					Fields: []*engine.FieldsAltered{
 						{
 							MatchedProfileID: "ATTR_1001_SESSIONAUTH",
 							AlteredFields:    []string{"*req.Password", "*req.PaypalAccount", "*req.RequestType", "*req.LCRProfile"},
@@ -263,7 +263,7 @@ func TestProcessRequest(t *testing.T) {
 			}
 			*prply = sessions.V1UpdateSessionReply{
 				Attributes: &engine.AttrSProcessEventReply{
-					AlteredFields: []*engine.FieldsAltered{
+					Fields: []*engine.FieldsAltered{
 						{
 							MatchedProfileID: "ATTR_1001_SESSIONAUTH",
 							AlteredFields:    []string{"*req.Password", "*req.PaypalAccount", "*req.RequestType", "*req.LCRProfile"},
@@ -403,7 +403,7 @@ func TestProcessRequest(t *testing.T) {
 			}
 			*prply = sessions.V1ProcessMessageReply{
 				Attributes: &engine.AttrSProcessEventReply{
-					AlteredFields: []*engine.FieldsAltered{
+					Fields: []*engine.FieldsAltered{
 						{
 							MatchedProfileID: "ATTR_1001_SESSIONAUTH",
 							AlteredFields:    []string{"*req.Password", "*req.PaypalAccount", "*req.RequestType", "*req.LCRProfile"},

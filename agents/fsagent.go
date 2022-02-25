@@ -161,22 +161,24 @@ func (fsa *FSsessions) onChannelPark(fsev FSEvent, connIdx int) {
 		return
 	}
 	if authReply.Attributes != nil {
-		for _, altered := range authReply.Attributes.AlteredFields {
-			for _, fldName := range altered.AlteredFields {
-				fldName = strings.TrimPrefix(fldName, utils.MetaReq+utils.NestingSep)
-				if _, has := authReply.Attributes.CGREvent.Event[fldName]; !has {
-					continue //maybe removed
-				}
-				if _, err := fsa.conns[connIdx].SendApiCmd(
-					fmt.Sprintf("uuid_setvar %s %s %s\n\n", fsev.GetUUID(), fldName,
-						authReply.Attributes.CGREvent.Event[fldName])); err != nil {
-					utils.Logger.Info(
-						fmt.Sprintf("<%s> error %s setting channel variabile: %s",
-							utils.FreeSWITCHAgent, err.Error(), fldName))
-					fsa.unparkCall(fsev.GetUUID(), connIdx,
-						fsev.GetCallDestNr(utils.MetaDefault), err.Error())
-					return
-				}
+		var altrFlds utils.StringSet
+		for _, altered := range authReply.Attributes.Fields {
+			altrFlds.AddSlice(altered.AlteredFields)
+		}
+		for fldName := range altrFlds {
+			fldName = strings.TrimPrefix(fldName, utils.MetaReq+utils.NestingSep)
+			if _, has := authReply.Attributes.CGREvent.Event[fldName]; !has {
+				continue //maybe removed
+			}
+			if _, err := fsa.conns[connIdx].SendApiCmd(
+				fmt.Sprintf("uuid_setvar %s %s %s\n\n", fsev.GetUUID(), fldName,
+					authReply.Attributes.CGREvent.Event[fldName])); err != nil {
+				utils.Logger.Info(
+					fmt.Sprintf("<%s> error %s setting channel variabile: %s",
+						utils.FreeSWITCHAgent, err.Error(), fldName))
+				fsa.unparkCall(fsev.GetUUID(), connIdx,
+					fsev.GetCallDestNr(utils.MetaDefault), err.Error())
+				return
 			}
 		}
 	}

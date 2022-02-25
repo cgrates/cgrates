@@ -114,6 +114,18 @@ func (alS *AttributeS) attributeProfileForEvent(ctx *context.Context, tnt string
 	return apWw.AttributeProfile, nil
 }
 
+type FieldsAltered struct {
+	MatchedProfileID string
+	AlteredFields    []string
+}
+
+func (flds *FieldsAltered) UniqueAlteredFields() (unFlds utils.StringSet) {
+	for _, fldName := range flds.AlteredFields {
+		unFlds.Add(fldName)
+	}
+	return
+}
+
 // AttrSProcessEventReply reply used for proccess event
 type AttrSProcessEventReply struct {
 	Fields []*FieldsAltered
@@ -138,11 +150,6 @@ func (attrReply *AttrSProcessEventReply) Digest() (rplyDigest string) {
 		}
 	}
 	return
-}
-
-type FieldsAltered struct {
-	MatchedProfileID string
-	AlteredFields    []string
 }
 
 // processEvent will match event with attribute profile and do the necessary replacements

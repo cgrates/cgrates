@@ -864,7 +864,7 @@ func testAttributeProcessEvent(t *testing.T) {
 		},
 	}
 	expEvReply := &engine.AttrSProcessEventReply{
-		AlteredFields: []*engine.FieldsAltered{
+		Fields: []*engine.FieldsAltered{
 			{
 				MatchedProfileID: "cgrates.org:TEST_ATTRIBUTES_IT_TEST",
 				AlteredFields:    []string{"*tenant", utils.AccountField},
@@ -887,8 +887,8 @@ func testAttributeProcessEvent(t *testing.T) {
 		args, &evRply); err != nil {
 		t.Error(err)
 	} else {
-		sort.Strings(expEvReply.AlteredFields[0].AlteredFields)
-		sort.Strings(evRply.AlteredFields[0].AlteredFields)
+		sort.Strings(expEvReply.Fields[0].AlteredFields)
+		sort.Strings(evRply.Fields[0].AlteredFields)
 		if !reflect.DeepEqual(evRply, expEvReply) {
 			t.Errorf("Expected %+v, received %+v", expEvReply, evRply)
 		}
@@ -934,7 +934,7 @@ func testAttributeProcessEventWithSearchAndReplace(t *testing.T) {
 		},
 	}
 	eRply := &engine.AttrSProcessEventReply{
-		AlteredFields: []*engine.FieldsAltered{
+		Fields: []*engine.FieldsAltered{
 			{
 				MatchedProfileID: "cgrates.org:ATTR_Search_and_replace",
 				AlteredFields:    []string{"*req.Category"},
@@ -1050,7 +1050,7 @@ func testAttributeSProcessWithMultipleRuns(t *testing.T) {
 		},
 	}
 	eRply := &engine.AttrSProcessEventReply{
-		AlteredFields: []*engine.FieldsAltered{
+		Fields: []*engine.FieldsAltered{
 			{
 				MatchedProfileID: "cgrates.org:ATTR_1",
 				AlteredFields:    []string{"*req.Field1"},
@@ -1084,8 +1084,8 @@ func testAttributeSProcessWithMultipleRuns(t *testing.T) {
 		attrArgs, &rplyEv); err != nil {
 		t.Fatal(err)
 	}
-	if !reflect.DeepEqual(eRply.AlteredFields, rplyEv.AlteredFields) {
-		t.Errorf("Expecting %+v, received: %+v", eRply.AlteredFields, rplyEv.AlteredFields)
+	if !reflect.DeepEqual(eRply.Fields, rplyEv.Fields) {
+		t.Errorf("Expecting %+v, received: %+v", eRply.Fields, rplyEv.Fields)
 	} else if !reflect.DeepEqual(eRply.CGREvent.Event, rplyEv.CGREvent.Event) {
 		t.Errorf("Expecting %+v, received: %+v", eRply.CGREvent.Event, rplyEv.CGREvent.Event)
 	}
@@ -1179,7 +1179,7 @@ func testAttributeSProcessWithMultipleRuns2(t *testing.T) {
 		},
 	}
 	eRply := &engine.AttrSProcessEventReply{
-		AlteredFields: []*engine.FieldsAltered{
+		Fields: []*engine.FieldsAltered{
 			{
 				MatchedProfileID: "cgrates.org:ATTR_1",
 				AlteredFields:    []string{"*req.Field1"},
@@ -1219,11 +1219,11 @@ func testAttributeSProcessWithMultipleRuns2(t *testing.T) {
 		attrArgs, &rplyEv); err != nil {
 		t.Fatal(err)
 	}
-	sort.Slice(rplyEv.AlteredFields, func(i, j int) bool {
-		return rplyEv.AlteredFields[i].MatchedProfileID < rplyEv.AlteredFields[j].MatchedProfileID
+	sort.Slice(rplyEv.Fields, func(i, j int) bool {
+		return rplyEv.Fields[i].MatchedProfileID < rplyEv.Fields[j].MatchedProfileID
 	})
-	if !reflect.DeepEqual(eRply.AlteredFields, rplyEv.AlteredFields) {
-		t.Errorf("Expecting %+v, received: %+v", utils.ToJSON(eRply.AlteredFields), utils.ToJSON(rplyEv.AlteredFields))
+	if !reflect.DeepEqual(eRply.Fields, rplyEv.Fields) {
+		t.Errorf("Expecting %+v, received: %+v", utils.ToJSON(eRply.Fields), utils.ToJSON(rplyEv.Fields))
 	} else if !reflect.DeepEqual(eRply.CGREvent.Event, rplyEv.CGREvent.Event) {
 		t.Errorf("Expecting %+v, received: %+v", eRply.CGREvent.Event, rplyEv.CGREvent.Event)
 	}

@@ -114,7 +114,7 @@ func (eeS *EeS) attrSProcessEvent(ctx *context.Context, cgrEv *utils.CGREvent, a
 	if err = eeS.connMgr.Call(ctx,
 		eeS.cfg.EEsNoLksCfg().AttributeSConns,
 		utils.AttributeSv1ProcessEvent,
-		cgrEv, &rplyEv); err == nil && len(rplyEv.AlteredFields) != 0 {
+		cgrEv, &rplyEv); err == nil && len(rplyEv.Fields) != 0 {
 	} else if err != nil &&
 		err.Error() == utils.ErrNotFound.Error() {
 		err = nil // cancel ErrNotFound
