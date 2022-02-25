@@ -789,7 +789,7 @@ func (cdrS *CDRServer) V1ProcessEvent(arg *ArgV1ProcessEvent, reply *string) (er
 	}
 	thdS := len(cdrS.cgrCfg.CdrsCfg().ThresholdSConns) != 0
 	if v, has := arg.APIOpts[utils.OptsThresholdS]; has {
-		if attrS, err = utils.IfaceAsBool(v); err != nil {
+		if thdS, err = utils.IfaceAsBool(v); err != nil {
 			return
 		}
 	}
@@ -798,7 +798,7 @@ func (cdrS *CDRServer) V1ProcessEvent(arg *ArgV1ProcessEvent, reply *string) (er
 	}
 	stS := len(cdrS.cgrCfg.CdrsCfg().StatSConns) != 0
 	if v, has := arg.APIOpts[utils.OptsStatS]; has {
-		if attrS, err = utils.IfaceAsBool(v); err != nil {
+		if stS, err = utils.IfaceAsBool(v); err != nil {
 			return
 		}
 	}
@@ -807,7 +807,7 @@ func (cdrS *CDRServer) V1ProcessEvent(arg *ArgV1ProcessEvent, reply *string) (er
 	}
 	chrgS := len(cdrS.cgrCfg.CdrsCfg().ChargerSConns) != 0 // activate charging for the Event
 	if v, has := arg.APIOpts[utils.OptsChargerS]; has {
-		if attrS, err = utils.IfaceAsBool(v); err != nil {
+		if chrgS, err = utils.IfaceAsBool(v); err != nil {
 			return
 		}
 	}
@@ -816,7 +816,7 @@ func (cdrS *CDRServer) V1ProcessEvent(arg *ArgV1ProcessEvent, reply *string) (er
 	}
 	var ralS bool // activate single rating for the CDR
 	if v, has := arg.APIOpts[utils.OptsRALs]; has {
-		if attrS, err = utils.IfaceAsBool(v); err != nil {
+		if ralS, err = utils.IfaceAsBool(v); err != nil {
 			return
 		}
 	}
@@ -825,7 +825,7 @@ func (cdrS *CDRServer) V1ProcessEvent(arg *ArgV1ProcessEvent, reply *string) (er
 	}
 	var reRate bool
 	if v, has := arg.APIOpts[utils.OptsRerate]; has {
-		if attrS, err = utils.IfaceAsBool(v); err != nil {
+		if reRate, err = utils.IfaceAsBool(v); err != nil {
 			return
 		}
 	}
@@ -836,13 +836,16 @@ func (cdrS *CDRServer) V1ProcessEvent(arg *ArgV1ProcessEvent, reply *string) (er
 	}
 	var refund bool
 	if v, has := arg.APIOpts[utils.OptsRefund]; has {
-		if attrS, err = utils.IfaceAsBool(v); err != nil {
+		if refund, err = utils.IfaceAsBool(v); err != nil {
 			return
 		}
 	}
 	if flgs.Has(utils.MetaRefund) {
 		refund = flgs.GetBool(utils.MetaRefund)
 	}
+	utils.Logger.Crit(fmt.Sprintf("ralS: <%+v>", ralS))
+	utils.Logger.Crit(fmt.Sprintf("chargers: <%+v>", chrgS))
+	utils.Logger.Crit(fmt.Sprintf("export: <%+v>", export))
 	// end of processing options
 
 	if _, err = cdrS.processEvents([]*utils.CGREvent{&arg.CGREvent}, chrgS, attrS, refund,
