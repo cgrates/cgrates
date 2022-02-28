@@ -1497,6 +1497,18 @@ func (ms *MongoStorage) RemoveAccountDrv(ctx *context.Context, tenant, id string
 	})
 }
 
+func (ms *MongoStorage) GetConfigSectionsDrv(ctx *context.Context, tenant, nodeID string, sectionIDs []string) (map[string][]byte, error) {
+	return nil, utils.ErrNotImplemented
+}
+
+func (ms *MongoStorage) SetConfigSectionsDrv(ctx *context.Context, tenant, nodeID string, sectionsData map[string][]byte) error {
+	return utils.ErrNotImplemented
+}
+
+func (ms *MongoStorage) RemoveConfigSectionsDrv(ctx *context.Context, tenant, nodeID string, sectionIDs []string) error {
+	return utils.ErrNotImplemented
+}
+
 func newAggregateStages(profileID, tenant, prefix string) (match, query bson.D) {
 	match = bson.D{{
 		"$match", bson.M{

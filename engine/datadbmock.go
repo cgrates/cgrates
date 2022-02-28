@@ -446,3 +446,15 @@ func (dbM *DataDBMock) SetVersions(vrs Versions, overwrite bool) (err error) {
 func (dbM *DataDBMock) RemoveRatingProfileDrv(string) error {
 	return utils.ErrNotImplemented
 }
+
+func (dbM *DataDBMock) GetConfigSectionsDrv(ctx *context.Context, tenant, nodeID string, sectionIDs []string) (map[string][]byte, error) {
+	return nil, utils.ErrNotImplemented
+}
+
+func (dbM *DataDBMock) SetConfigSectionsDrv(ctx *context.Context, tenant, nodeID string, sectionsData map[string][]byte) error {
+	return utils.ErrNotImplemented
+}
+
+func (dbM *DataDBMock) RemoveConfigSectionsDrv(ctx *context.Context, tenant, nodeID string, sectionIDs []string) error {
+	return utils.ErrNotImplemented
+}

@@ -261,6 +261,7 @@ const (
 
 	MetaVoice                 = "*voice"
 	ACD                       = "ACD"
+	ConfigPrefix              = "cfg_"
 	ResourcesPrefix           = "res_"
 	ResourceProfilesPrefix    = "rsp_"
 	ThresholdPrefix           = "thd_"
