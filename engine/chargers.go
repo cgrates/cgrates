@@ -133,11 +133,11 @@ func (cS *ChargerS) processEvent(ctx *context.Context, tnt string, cgrEv *utils.
 			}
 			err = nil
 		}
-		for idx, alteredPrf := range evReply.Fields {
-			rply[i].AttributeSProfiles = make([]string, len(evReply.Fields))
+		for idx, alteredPrf := range evReply.AlteredFields {
+			rply[i].AttributeSProfiles = make([]string, len(evReply.AlteredFields))
 			rply[i].AttributeSProfiles[idx] = alteredPrf.MatchedProfileID
-			if len(alteredPrf.AlteredFields) != 0 {
-				rply[i].AlteredFields = append(rply[i].AlteredFields, alteredPrf.AlteredFields...)
+			if len(alteredPrf.Fields) != 0 {
+				rply[i].AlteredFields = append(rply[i].AlteredFields, alteredPrf.Fields...)
 				rply[i].CGREvent = evReply.CGREvent
 			}
 		}

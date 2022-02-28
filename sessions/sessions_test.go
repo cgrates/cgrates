@@ -32,10 +32,10 @@ import (
 )
 
 var attrs = &engine.AttrSProcessEventReply{
-	Fields: []*engine.FieldsAltered{
+	AlteredFields: []*engine.FieldsAltered{
 		{
 			MatchedProfileID: "ATTR_ACNT_1001",
-			AlteredFields:    []string{"*req.OfficeGroup"},
+			Fields:           []string{"*req.OfficeGroup"},
 		},
 	},
 	CGREvent: &utils.CGREvent{

@@ -354,7 +354,7 @@ func TestCDRsAttrSProcessEventMock(t *testing.T) {
 		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
 			utils.AttributeSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
 				*reply.(*AttrSProcessEventReply) = AttrSProcessEventReply{
-					Fields: []*FieldsAltered{},
+					AlteredFields: []*FieldsAltered{},
 				}
 				return nil
 			},
@@ -433,8 +433,8 @@ func TestCDRsAttrSProcessEventMockNotFoundErr(t *testing.T) {
 		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
 			utils.AttributeSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
 				*reply.(*AttrSProcessEventReply) = AttrSProcessEventReply{
-					Fields: []*FieldsAltered{{
-						AlteredFields: []string{},
+					AlteredFields: []*FieldsAltered{{
+						Fields: []string{},
 					}},
 				}
 				return utils.ErrNotFound
@@ -514,8 +514,8 @@ func TestCDRsAttrSProcessEventMockNotEmptyAF(t *testing.T) {
 		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
 			utils.AttributeSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
 				*reply.(*AttrSProcessEventReply) = AttrSProcessEventReply{
-					Fields: []*FieldsAltered{{
-						AlteredFields: []string{utils.AccountField},
+					AlteredFields: []*FieldsAltered{{
+						Fields: []string{utils.AccountField},
 					}},
 					CGREvent: &utils.CGREvent{
 						Tenant: "cgrates.org",

@@ -222,7 +222,7 @@ func maxDebitAbstractsFromConcretes(ctx *context.Context, aUnits *decimal.Big,
 			attributeIDs); err != nil {
 			return
 		}
-		if len(rplyAttrS.Fields) != 0 { // event was altered
+		if len(rplyAttrS.AlteredFields) != 0 { // event was altered
 			cgrEv = rplyAttrS.CGREvent
 		}
 	}

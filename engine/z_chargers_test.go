@@ -110,9 +110,9 @@ func TestChargersprocessEventCallNilErr(t *testing.T) {
 		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
 			utils.AttributeSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
 				rply := AttrSProcessEventReply{
-					Fields: []*FieldsAltered{{
+					AlteredFields: []*FieldsAltered{{
 						MatchedProfileID: "attr1",
-						AlteredFields:    []string{utils.MetaReq + utils.NestingSep + utils.AccountField},
+						Fields:           []string{utils.MetaReq + utils.NestingSep + utils.AccountField},
 					}},
 					CGREvent: &utils.CGREvent{
 						Tenant: "cgrates.org",
@@ -283,8 +283,8 @@ func TestChargersV1ProcessEventErrNotFound(t *testing.T) {
 		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
 			utils.AttributeSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
 				rply := AttrSProcessEventReply{
-					Fields: []*FieldsAltered{{
-						AlteredFields: []string{utils.AccountField},
+					AlteredFields: []*FieldsAltered{{
+						Fields: []string{utils.AccountField},
 					}},
 					CGREvent: &utils.CGREvent{
 						Tenant: "cgrates.org",
@@ -355,8 +355,8 @@ func TestChargersV1ProcessEventErrOther(t *testing.T) {
 		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
 			"invalidMethod": func(ctx *context.Context, args, reply interface{}) error {
 				rply := AttrSProcessEventReply{
-					Fields: []*FieldsAltered{{
-						AlteredFields: []string{utils.AccountField},
+					AlteredFields: []*FieldsAltered{{
+						Fields: []string{utils.AccountField},
 					}},
 					CGREvent: &utils.CGREvent{
 						Tenant: "cgrates.org",
@@ -433,9 +433,9 @@ func TestChargersV1ProcessEvent(t *testing.T) {
 		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
 			utils.AttributeSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
 				rply := AttrSProcessEventReply{
-					Fields: []*FieldsAltered{{
+					AlteredFields: []*FieldsAltered{{
 						MatchedProfileID: "attr2",
-						AlteredFields:    []string{utils.MetaReq + utils.NestingSep + utils.AccountField},
+						Fields:           []string{utils.MetaReq + utils.NestingSep + utils.AccountField},
 					}},
 					CGREvent: &utils.CGREvent{
 						Tenant: "cgrates.org",

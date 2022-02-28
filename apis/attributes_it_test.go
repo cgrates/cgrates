@@ -864,10 +864,10 @@ func testAttributeProcessEvent(t *testing.T) {
 		},
 	}
 	expEvReply := &engine.AttrSProcessEventReply{
-		Fields: []*engine.FieldsAltered{
+		AlteredFields: []*engine.FieldsAltered{
 			{
 				MatchedProfileID: "cgrates.org:TEST_ATTRIBUTES_IT_TEST",
-				AlteredFields:    []string{"*tenant", utils.AccountField},
+				Fields:           []string{"*tenant", utils.AccountField},
 			},
 		},
 		CGREvent: &utils.CGREvent{
@@ -887,8 +887,8 @@ func testAttributeProcessEvent(t *testing.T) {
 		args, &evRply); err != nil {
 		t.Error(err)
 	} else {
-		sort.Strings(expEvReply.Fields[0].AlteredFields)
-		sort.Strings(evRply.Fields[0].AlteredFields)
+		sort.Strings(expEvReply.AlteredFields[0].Fields)
+		sort.Strings(evRply.AlteredFields[0].Fields)
 		if !reflect.DeepEqual(evRply, expEvReply) {
 			t.Errorf("Expected %+v, received %+v", expEvReply, evRply)
 		}
@@ -934,10 +934,10 @@ func testAttributeProcessEventWithSearchAndReplace(t *testing.T) {
 		},
 	}
 	eRply := &engine.AttrSProcessEventReply{
-		Fields: []*engine.FieldsAltered{
+		AlteredFields: []*engine.FieldsAltered{
 			{
 				MatchedProfileID: "cgrates.org:ATTR_Search_and_replace",
-				AlteredFields:    []string{"*req.Category"},
+				Fields:           []string{"*req.Category"},
 			},
 		},
 		CGREvent: &utils.CGREvent{
@@ -1050,22 +1050,22 @@ func testAttributeSProcessWithMultipleRuns(t *testing.T) {
 		},
 	}
 	eRply := &engine.AttrSProcessEventReply{
-		Fields: []*engine.FieldsAltered{
+		AlteredFields: []*engine.FieldsAltered{
 			{
 				MatchedProfileID: "cgrates.org:ATTR_1",
-				AlteredFields:    []string{"*req.Field1"},
+				Fields:           []string{"*req.Field1"},
 			},
 			{
 				MatchedProfileID: "cgrates.org:ATTR_2",
-				AlteredFields:    []string{"*req.Field2"},
+				Fields:           []string{"*req.Field2"},
 			},
 			{
 				MatchedProfileID: "cgrates.org:ATTR_1",
-				AlteredFields:    []string{"*req.Field1"},
+				Fields:           []string{"*req.Field1"},
 			},
 			{
 				MatchedProfileID: "cgrates.org:ATTR_2",
-				AlteredFields:    []string{"*req.Field2"},
+				Fields:           []string{"*req.Field2"},
 			},
 		},
 		CGREvent: &utils.CGREvent{
@@ -1084,8 +1084,8 @@ func testAttributeSProcessWithMultipleRuns(t *testing.T) {
 		attrArgs, &rplyEv); err != nil {
 		t.Fatal(err)
 	}
-	if !reflect.DeepEqual(eRply.Fields, rplyEv.Fields) {
-		t.Errorf("Expecting %+v, received: %+v", eRply.Fields, rplyEv.Fields)
+	if !reflect.DeepEqual(eRply.AlteredFields, rplyEv.AlteredFields) {
+		t.Errorf("Expecting %+v, received: %+v", eRply.AlteredFields, rplyEv.AlteredFields)
 	} else if !reflect.DeepEqual(eRply.CGREvent.Event, rplyEv.CGREvent.Event) {
 		t.Errorf("Expecting %+v, received: %+v", eRply.CGREvent.Event, rplyEv.CGREvent.Event)
 	}
@@ -1179,22 +1179,22 @@ func testAttributeSProcessWithMultipleRuns2(t *testing.T) {
 		},
 	}
 	eRply := &engine.AttrSProcessEventReply{
-		Fields: []*engine.FieldsAltered{
+		AlteredFields: []*engine.FieldsAltered{
 			{
 				MatchedProfileID: "cgrates.org:ATTR_1",
-				AlteredFields:    []string{"*req.Field1"},
+				Fields:           []string{"*req.Field1"},
 			},
 			{
 				MatchedProfileID: "cgrates.org:ATTR_2",
-				AlteredFields:    []string{"*req.Field2"},
+				Fields:           []string{"*req.Field2"},
 			},
 			{
 				MatchedProfileID: "cgrates.org:ATTR_2",
-				AlteredFields:    []string{"*req.Field2"},
+				Fields:           []string{"*req.Field2"},
 			},
 			{
 				MatchedProfileID: "cgrates.org:ATTR_3",
-				AlteredFields:    []string{"*req.Field3"},
+				Fields:           []string{"*req.Field3"},
 			},
 		},
 		CGREvent: &utils.CGREvent{
@@ -1219,11 +1219,11 @@ func testAttributeSProcessWithMultipleRuns2(t *testing.T) {
 		attrArgs, &rplyEv); err != nil {
 		t.Fatal(err)
 	}
-	sort.Slice(rplyEv.Fields, func(i, j int) bool {
-		return rplyEv.Fields[i].MatchedProfileID < rplyEv.Fields[j].MatchedProfileID
+	sort.Slice(rplyEv.AlteredFields, func(i, j int) bool {
+		return rplyEv.AlteredFields[i].MatchedProfileID < rplyEv.AlteredFields[j].MatchedProfileID
 	})
-	if !reflect.DeepEqual(eRply.Fields, rplyEv.Fields) {
-		t.Errorf("Expecting %+v, received: %+v", utils.ToJSON(eRply.Fields), utils.ToJSON(rplyEv.Fields))
+	if !reflect.DeepEqual(eRply.AlteredFields, rplyEv.AlteredFields) {
+		t.Errorf("Expecting %+v, received: %+v", utils.ToJSON(eRply.AlteredFields), utils.ToJSON(rplyEv.AlteredFields))
 	} else if !reflect.DeepEqual(eRply.CGREvent.Event, rplyEv.CGREvent.Event) {
 		t.Errorf("Expecting %+v, received: %+v", eRply.CGREvent.Event, rplyEv.CGREvent.Event)
 	}
