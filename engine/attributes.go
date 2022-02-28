@@ -116,19 +116,20 @@ func (alS *AttributeS) attributeProfileForEvent(ctx *context.Context, tnt string
 
 type FieldsAltered struct {
 	MatchedProfileID string
-	AlteredFields    []string
+	Fields           []string
 }
 
-func (flds *FieldsAltered) UniqueAlteredFields() (unFlds utils.StringSet) {
-	for _, fldName := range flds.AlteredFields {
-		unFlds.Add(fldName)
+// UniqueAlteredFields will return all altered fields without duplicates
+func (flds *AttrSProcessEventReply) UniqueAlteredFields() (unFlds utils.StringSet) {
+	for _, altered := range flds.AlteredFields {
+		unFlds.AddSlice(altered.Fields)
 	}
 	return
 }
 
 // AttrSProcessEventReply reply used for proccess event
 type AttrSProcessEventReply struct {
-	Fields []*FieldsAltered
+	AlteredFields []*FieldsAltered
 	*utils.CGREvent
 	blocker bool // internally used to stop further processRuns
 }
@@ -136,8 +137,8 @@ type AttrSProcessEventReply struct {
 // Digest returns serialized version of alteredFields in AttrSProcessEventReply
 // format fldName1:fldVal1,fldName2:fldVal2
 func (attrReply *AttrSProcessEventReply) Digest() (rplyDigest string) {
-	for idx, altered := range attrReply.Fields {
-		for idxFlds, fldName := range altered.AlteredFields {
+	for idx, altered := range attrReply.AlteredFields {
+		for idxFlds, fldName := range altered.Fields {
 			fldName = strings.TrimPrefix(fldName, utils.MetaReq+utils.NestingSep)
 			if _, has := attrReply.CGREvent.Event[fldName]; !has {
 				continue //maybe removed
@@ -170,9 +171,9 @@ func (alS *AttributeS) processEvent(ctx *context.Context, tnt string, args *util
 		return
 	}
 	rply = &AttrSProcessEventReply{
-		Fields: []*FieldsAltered{{
+		AlteredFields: []*FieldsAltered{{
 			MatchedProfileID: attrPrf.TenantIDInline(),
-			AlteredFields:    []string{},
+			Fields:           []string{},
 		}},
 		CGREvent: args,
 		blocker:  attrPrf.Blocker,
@@ -196,8 +197,8 @@ func (alS *AttributeS) processEvent(ctx *context.Context, tnt string, args *util
 		}
 		substitute := utils.IfaceAsString(out)
 		//add only once the Path in AlteredFields
-		if !utils.IsSliceMember(rply.Fields[0].AlteredFields, attribute.Path) {
-			rply.Fields[0].AlteredFields = append(rply.Fields[0].AlteredFields, attribute.Path)
+		if !utils.IsSliceMember(rply.AlteredFields[0].Fields, attribute.Path) {
+			rply.AlteredFields[0].Fields = append(rply.AlteredFields[0].Fields, attribute.Path)
 		}
 		if attribute.Path == utils.MetaTenant {
 			if attribute.Type == utils.MetaComposed {
@@ -320,15 +321,15 @@ func (alS *AttributeS) V1ProcessEvent(ctx *context.Context, args *utils.CGREvent
 		args.Tenant = evRply.CGREvent.Tenant
 		tnt = evRply.CGREvent.Tenant
 
-		lastID = evRply.Fields[0].MatchedProfileID
+		lastID = evRply.AlteredFields[0].MatchedProfileID
 		altered := &FieldsAltered{
 			MatchedProfileID: lastID,
-			AlteredFields:    make([]string, len(evRply.Fields[0].AlteredFields)),
+			Fields:           make([]string, len(evRply.AlteredFields[0].Fields)),
 		}
 		processedPrf.Add(lastID)
 		processedPrfNo[lastID] = processedPrfNo[lastID] + 1
-		for idx, fldName := range evRply.Fields[0].AlteredFields {
-			altered.AlteredFields[idx] = fldName
+		for idx, fldName := range evRply.AlteredFields[0].Fields {
+			altered.Fields[idx] = fldName
 		}
 		matchedIDs = append(matchedIDs, altered)
 		if evRply.blocker {
@@ -349,8 +350,8 @@ func (alS *AttributeS) V1ProcessEvent(ctx *context.Context, args *utils.CGREvent
 	}
 
 	*reply = AttrSProcessEventReply{
-		Fields:   matchedIDs,
-		CGREvent: args,
+		AlteredFields: matchedIDs,
+		CGREvent:      args,
 	}
 	return
 }

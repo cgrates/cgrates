@@ -87,8 +87,8 @@ func TestAttrSProcessEvent(t *testing.T) {
 		calls: map[string]func(_ *context.Context, _, _ interface{}) error{
 			utils.AttributeSv1ProcessEvent: func(_ *context.Context, args, reply interface{}) error {
 				rplyEv := &engine.AttrSProcessEventReply{
-					Fields: []*engine.FieldsAltered{{
-						AlteredFields: []string{"testcase"},
+					AlteredFields: []*engine.FieldsAltered{{
+						Fields: []string{"testcase"},
 					}},
 				}
 				*reply.(*engine.AttrSProcessEventReply) = *rplyEv

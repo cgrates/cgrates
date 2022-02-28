@@ -175,10 +175,10 @@ func TestKamEvAsKamAuthReply(t *testing.T) {
 	}
 	authRply = &sessions.V1AuthorizeReply{
 		Attributes: &engine.AttrSProcessEventReply{
-			Fields: []*engine.FieldsAltered{
+			AlteredFields: []*engine.FieldsAltered{
 				{
 					MatchedProfileID: "ATTR_1001_ACCOUNT_PROFILE",
-					AlteredFields:    []string{"*req.Password", utils.MetaReq + utils.NestingSep + utils.RequestType},
+					Fields:           []string{"*req.Password", utils.MetaReq + utils.NestingSep + utils.RequestType},
 				},
 			},
 			CGREvent: &utils.CGREvent{
@@ -248,10 +248,10 @@ func TestKamEvAsKamProcessEventReply(t *testing.T) {
 	}
 	procEvhRply = &sessions.V1ProcessMessageReply{
 		Attributes: &engine.AttrSProcessEventReply{
-			Fields: []*engine.FieldsAltered{
+			AlteredFields: []*engine.FieldsAltered{
 				{
 					MatchedProfileID: "ATTR_1001_ACCOUNT_PROFILE",
-					AlteredFields:    []string{"*req.Password", utils.MetaReq + utils.NestingSep + utils.RequestType},
+					Fields:           []string{"*req.Password", utils.MetaReq + utils.NestingSep + utils.RequestType},
 				},
 			},
 			CGREvent: &utils.CGREvent{
