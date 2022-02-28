@@ -934,3 +934,35 @@ func (rs *RedisStorage) SetAccountDrv(ctx *context.Context, ap *utils.Account) (
 func (rs *RedisStorage) RemoveAccountDrv(ctx *context.Context, tenant, id string) (err error) {
 	return rs.Cmd(nil, redisDEL, utils.AccountPrefix+utils.ConcatenatedKey(tenant, id))
 }
+
+func (rs *RedisStorage) GetConfigSectionsDrv(ctx *context.Context, tenant, nodeID string, sectionIDs []string) (sectionMap map[string][]byte, err error) {
+	sectionMap = make(map[string][]byte)
+	for _, sectionID := range sectionIDs {
+		var value []byte
+		if err = rs.Cmd(&value, redisGET, utils.ConfigPrefix+sectionID); err != nil {
+			return
+		}
+		if value != nil {
+			sectionMap[sectionID] = value
+		}
+	}
+	return
+}
+
+func (rs *RedisStorage) SetConfigSectionsDrv(ctx *context.Context, tenant, nodeID string, sectionsData map[string][]byte) (err error) {
+	for sectionID, sectionData := range sectionsData {
+		if err = rs.Cmd(nil, redisSET, utils.ConfigPrefix+sectionID, string(sectionData)); err != nil {
+			return
+		}
+	}
+	return
+}
+
+func (rs *RedisStorage) RemoveConfigSectionsDrv(ctx *context.Context, tenant, nodeID string, sectionIDs []string) (err error) {
+	for _, sectionID := range sectionIDs {
+		if err = rs.Cmd(nil, redisDEL, utils.ConfigPrefix+sectionID); err != nil {
+			return
+		}
+	}
+	return
+}

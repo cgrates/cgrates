@@ -651,3 +651,15 @@ func (iDB *InternalDB) RemoveAccountDrv(_ *context.Context, tenant, id string) (
 		true, utils.NonTransactional)
 	return
 }
+
+func (iDB *InternalDB) GetConfigSectionsDrv(ctx *context.Context, tenant, nodeID string, sectionIDs []string) (map[string][]byte, error) {
+	return nil, utils.ErrNotImplemented
+}
+
+func (iDB *InternalDB) SetConfigSectionsDrv(ctx *context.Context, tenant, nodeID string, sectionsData map[string][]byte) error {
+	return utils.ErrNotImplemented
+}
+
+func (iDB *InternalDB) RemoveConfigSectionsDrv(ctx *context.Context, tenant, nodeID string, sectionIDs []string) error {
+	return utils.ErrNotImplemented
+}
