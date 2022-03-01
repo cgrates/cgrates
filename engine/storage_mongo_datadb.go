@@ -1497,16 +1497,72 @@ func (ms *MongoStorage) RemoveAccountDrv(ctx *context.Context, tenant, id string
 	})
 }
 
-func (ms *MongoStorage) GetConfigSectionsDrv(ctx *context.Context, tenant, nodeID string, sectionIDs []string) (map[string][]byte, error) {
-	return nil, utils.ErrNotImplemented
+func (ms *MongoStorage) GetConfigSectionsDrv(ctx *context.Context, tenant, nodeID string, sectionIDs []string) (sectionMap map[string][]byte, err error) {
+	sectionMap = make(map[string][]byte)
+	for _, sectionID := range sectionIDs {
+		if err = ms.query(context.TODO(), func(sctx mongo.SessionContext) (err error) {
+			cur := ms.getCol(ColCfg).FindOne(sctx, bson.M{
+				"tenant":  tenant,
+				"nodeID":  nodeID,
+				"section": sectionID,
+			}, options.FindOne().SetProjection(bson.M{"cfgData": 1, "_id": 0}))
+			cfgMap := make(map[string][]byte)
+			if err = cur.Decode(&cfgMap); err != nil {
+				if err == mongo.ErrNoDocuments {
+					err = nil
+					return
+				}
+				return
+			}
+			sectionMap[sectionID] = cfgMap["cfgData"]
+			return
+		}); err != nil {
+			return
+		}
+	}
+	if len(sectionMap) == 0 {
+		err = utils.ErrNotFound
+		return
+	}
+	return
 }
 
-func (ms *MongoStorage) SetConfigSectionsDrv(ctx *context.Context, tenant, nodeID string, sectionsData map[string][]byte) error {
-	return utils.ErrNotImplemented
+func (ms *MongoStorage) SetConfigSectionsDrv(ctx *context.Context, tenant, nodeID string, sectionsData map[string][]byte) (err error) {
+	for sectionID, sectionData := range sectionsData {
+		if err = ms.query(ctx, func(sctx mongo.SessionContext) (err error) {
+			_, err = ms.getCol(ColCfg).UpdateOne(sctx, bson.M{
+				"tenant":  tenant,
+				"nodeID":  nodeID,
+				"section": sectionID,
+			}, bson.M{"$set": bson.M{
+				"tenant":  tenant,
+				"nodeID":  nodeID,
+				"section": sectionID,
+				"cfgData": sectionData}},
+				options.Update().SetUpsert(true),
+			)
+			return err
+		}); err != nil {
+			return
+		}
+	}
+	return
 }
 
-func (ms *MongoStorage) RemoveConfigSectionsDrv(ctx *context.Context, tenant, nodeID string, sectionIDs []string) error {
-	return utils.ErrNotImplemented
+func (ms *MongoStorage) RemoveConfigSectionsDrv(ctx *context.Context, tenant, nodeID string, sectionIDs []string) (err error) {
+	for _, sectionID := range sectionIDs {
+		if err = ms.query(ctx, func(sctx mongo.SessionContext) (err error) {
+			_, err = ms.getCol(ColCfg).DeleteOne(sctx, bson.M{
+				"tenant":  tenant,
+				"nodeID":  nodeID,
+				"section": sectionID,
+			})
+			return err
+		}); err != nil {
+			return
+		}
+	}
+	return
 }
 
 func newAggregateStages(profileID, tenant, prefix string) (match, query bson.D) {

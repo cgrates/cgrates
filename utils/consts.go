@@ -1633,6 +1633,7 @@ const (
 
 // Cache Name
 const (
+	CacheConfig                      = "*config"
 	CacheResources                   = "*resources"
 	CacheResourceProfiles            = "*resource_profiles"
 	CacheEventResources              = "*event_resources"

@@ -652,14 +652,35 @@ func (iDB *InternalDB) RemoveAccountDrv(_ *context.Context, tenant, id string) (
 	return
 }
 
-func (iDB *InternalDB) GetConfigSectionsDrv(ctx *context.Context, tenant, nodeID string, sectionIDs []string) (map[string][]byte, error) {
-	return nil, utils.ErrNotImplemented
+func (iDB *InternalDB) GetConfigSectionsDrv(ctx *context.Context, tenant, nodeID string, sectionIDs []string) (sectionMap map[string][]byte, err error) {
+	sectionMap = make(map[string][]byte)
+	for _, sectionID := range sectionIDs {
+		x, ok := iDB.db.Get(utils.CacheConfig, utils.ConcatenatedKey(tenant, nodeID, sectionID))
+		if !ok || x == nil {
+			utils.Logger.Warning(fmt.Sprintf("<%+v> Could not find any data for section <%+v>",
+				utils.ConcatenatedKey(tenant, nodeID), sectionID))
+			continue
+		}
+		sectionMap[sectionID] = x.([]byte)
+	}
+	if len(sectionMap) == 0 {
+		err = utils.ErrNotFound
+		return
+	}
+	return
 }
 
-func (iDB *InternalDB) SetConfigSectionsDrv(ctx *context.Context, tenant, nodeID string, sectionsData map[string][]byte) error {
-	return utils.ErrNotImplemented
+func (iDB *InternalDB) SetConfigSectionsDrv(ctx *context.Context, tenant, nodeID string, sectionsData map[string][]byte) (err error) {
+	for sectionID, sectionData := range sectionsData {
+		iDB.db.Set(utils.CacheConfig, utils.ConcatenatedKey(tenant, nodeID, sectionID),
+			sectionData, nil, true, utils.NonTransactional)
+	}
+	return
 }
 
-func (iDB *InternalDB) RemoveConfigSectionsDrv(ctx *context.Context, tenant, nodeID string, sectionIDs []string) error {
-	return utils.ErrNotImplemented
+func (iDB *InternalDB) RemoveConfigSectionsDrv(ctx *context.Context, tenant, nodeID string, sectionIDs []string) (err error) {
+	for _, sectionID := range sectionIDs {
+		iDB.db.Remove(utils.CacheConfig, utils.ConcatenatedKey(tenant, nodeID, sectionID), true, utils.NonTransactional)
+	}
+	return
 }
