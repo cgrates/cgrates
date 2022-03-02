@@ -127,4 +127,8 @@
 	"accounts_conns": ["*internal"],
 },
 
+"tpes": {
+	"enabled": true
+},
+
 }
