@@ -935,7 +935,7 @@ func (rs *RedisStorage) RemoveAccountDrv(ctx *context.Context, tenant, id string
 	return rs.Cmd(nil, redisDEL, utils.AccountPrefix+utils.ConcatenatedKey(tenant, id))
 }
 
-func (rs *RedisStorage) GetConfigSectionsDrv(ctx *context.Context, tenant, nodeID string, sectionIDs []string) (sectionMap map[string][]byte, err error) {
+func (rs *RedisStorage) GetConfigSectionsDrv(ctx *context.Context, nodeID string, sectionIDs []string) (sectionMap map[string][]byte, err error) {
 	sectionMap = make(map[string][]byte)
 	if len(sectionIDs) == 0 {
 		if err = rs.Cmd(&sectionMap, redisHGETALL, utils.ConfigPrefix+nodeID); err != nil {
@@ -959,14 +959,14 @@ func (rs *RedisStorage) GetConfigSectionsDrv(ctx *context.Context, tenant, nodeI
 	return
 }
 
-func (rs *RedisStorage) SetConfigSectionsDrv(ctx *context.Context, tenant, nodeID string, sectionsData map[string][]byte) (err error) {
+func (rs *RedisStorage) SetConfigSectionsDrv(ctx *context.Context, nodeID string, sectionsData map[string][]byte) (err error) {
 	if err = rs.FlatCmd(nil, redisHSET, utils.ConfigPrefix+nodeID, sectionsData); err != nil {
 		return
 	}
 	return
 }
 
-func (rs *RedisStorage) RemoveConfigSectionsDrv(ctx *context.Context, tenant, nodeID string, sectionIDs []string) (err error) {
+func (rs *RedisStorage) RemoveConfigSectionsDrv(ctx *context.Context, nodeID string, sectionIDs []string) (err error) {
 	if err = rs.FlatCmd(nil, redisHDEL, utils.ConfigPrefix+nodeID, sectionIDs); err != nil {
 		return
 	}

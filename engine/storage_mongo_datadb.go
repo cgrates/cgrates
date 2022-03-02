@@ -1497,12 +1497,11 @@ func (ms *MongoStorage) RemoveAccountDrv(ctx *context.Context, tenant, id string
 	})
 }
 
-func (ms *MongoStorage) GetConfigSectionsDrv(ctx *context.Context, tenant, nodeID string, sectionIDs []string) (sectionMap map[string][]byte, err error) {
+func (ms *MongoStorage) GetConfigSectionsDrv(ctx *context.Context, nodeID string, sectionIDs []string) (sectionMap map[string][]byte, err error) {
 	sectionMap = make(map[string][]byte)
 	for _, sectionID := range sectionIDs {
 		if err = ms.query(context.TODO(), func(sctx mongo.SessionContext) (err error) {
 			cur := ms.getCol(ColCfg).FindOne(sctx, bson.M{
-				"tenant":  tenant,
 				"nodeID":  nodeID,
 				"section": sectionID,
 			}, options.FindOne().SetProjection(bson.M{"cfgData": 1, "_id": 0}))
@@ -1527,15 +1526,13 @@ func (ms *MongoStorage) GetConfigSectionsDrv(ctx *context.Context, tenant, nodeI
 	return
 }
 
-func (ms *MongoStorage) SetConfigSectionsDrv(ctx *context.Context, tenant, nodeID string, sectionsData map[string][]byte) (err error) {
+func (ms *MongoStorage) SetConfigSectionsDrv(ctx *context.Context, nodeID string, sectionsData map[string][]byte) (err error) {
 	for sectionID, sectionData := range sectionsData {
 		if err = ms.query(ctx, func(sctx mongo.SessionContext) (err error) {
 			_, err = ms.getCol(ColCfg).UpdateOne(sctx, bson.M{
-				"tenant":  tenant,
 				"nodeID":  nodeID,
 				"section": sectionID,
 			}, bson.M{"$set": bson.M{
-				"tenant":  tenant,
 				"nodeID":  nodeID,
 				"section": sectionID,
 				"cfgData": sectionData}},
@@ -1549,11 +1546,10 @@ func (ms *MongoStorage) SetConfigSectionsDrv(ctx *context.Context, tenant, nodeI
 	return
 }
 
-func (ms *MongoStorage) RemoveConfigSectionsDrv(ctx *context.Context, tenant, nodeID string, sectionIDs []string) (err error) {
+func (ms *MongoStorage) RemoveConfigSectionsDrv(ctx *context.Context, nodeID string, sectionIDs []string) (err error) {
 	for _, sectionID := range sectionIDs {
 		if err = ms.query(ctx, func(sctx mongo.SessionContext) (err error) {
 			_, err = ms.getCol(ColCfg).DeleteOne(sctx, bson.M{
-				"tenant":  tenant,
 				"nodeID":  nodeID,
 				"section": sectionID,
 			})
