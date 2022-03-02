@@ -2531,6 +2531,7 @@ const (
 	ConnIDs         = "connIDs"
 	RpcConnTimeout  = "rpcConnTimeout"
 	RpcReplyTimeout = "rpcReplyTimeout"
+	RPCAPIOpts      = "rpcAPIOpts"
 
 	// processed opts
 	AMQPQueueIDProcessedCfg      = "amqpQueueIDProcessed"
