@@ -86,6 +86,9 @@ func (e *RPCee) GetMetrics() (mp *utils.SafeMapStorage) {
 }
 
 func (e *RPCee) PrepareMap(mp *utils.CGREvent) (interface{}, error) {
+	for i, v := range e.Cfg().Opts.RPCAPIOpts {
+		mp.APIOpts[i] = v
+	}
 	return mp, nil
 }
 
