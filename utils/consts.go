@@ -370,6 +370,7 @@ const (
 	MetaServiceManager       = "*servicemanager"
 	MetaChargers             = "*chargers"
 	MetaConfig               = "*config"
+	MetaTpes                 = "*tpes"
 	MetaDispatchers          = "*dispatchers"
 	MetaDispatcherHosts      = "*dispatcher_hosts"
 	MetaFilters              = "*filters"
@@ -921,6 +922,7 @@ const (
 	RegistrarC  = "RegistrarC"
 	LoaderS     = "LoaderS"
 	ChargerS    = "ChargerS"
+	TpeS        = "TpeS"
 	CacheS      = "CacheS"
 	AnalyzerS   = "AnalyzerS"
 	CDRServer   = "CDRServer"
@@ -1250,24 +1252,12 @@ const (
 	// APIerSv1GetLoadIDs               = "APIerSv1.GetLoadIDs"
 	// APIerSv1GetLoadTimes             = "APIerSv1.GetLoadTimes"
 	AdminSv1GetAttributeProfilesCount = "AdminSv1.GetAttributeProfilesCount"
-	// APIerSv1GetTPActionProfile       = "APIerSv1.GetTPActionProfile"
-	// APIerSv1SetTPActionProfile       = "APIerSv1.SetTPActionProfile"
-	// APIerSv1GetTPActionProfileIDs    = "APIerSv1.GetTPActionProfileIDs"
-	// APIerSv1RemoveTPActionProfile    = "APIerSv1.RemoveTPActionProfile"
-	// APIerSv1GetTPRateProfile         = "APIerSv1.GetTPRateProfile"
-	// APIerSv1SetTPRateProfile         = "APIerSv1.SetTPRateProfile"
-	// APIerSv1GetTPRateProfileIds      = "APIerSv1.GetTPRateProfileIds"
-	// APIerSv1RemoveTPRateProfile      = "APIerSv1.RemoveTPRateProfile"
-	AdminSv1SetAccount       = "AdminSv1.SetAccount"
-	AdminSv1GetAccount       = "AdminSv1.GetAccount"
-	AdminSv1GetAccounts      = "AdminSv1.GetAccounts"
-	AdminSv1GetAccountIDs    = "AdminSv1.GetAccountIDs"
-	AdminSv1RemoveAccount    = "AdminSv1.RemoveAccount"
-	AdminSv1GetAccountsCount = "AdminSv1.GetAccountsCount"
-	// APIerSv1GetTPAccountIDs          = "APIerSv1.GetTPAccountIDs"
-	// APIerSv1GetTPAccount             = "APIerSv1.GetTPAccount"
-	// APIerSv1SetTPAccount             = "APIerSv1.SetTPAccount"
-	// APIerSv1RemoveTPAccount          = "APIerSv1.RemoveTPAccount"
+	AdminSv1SetAccount                = "AdminSv1.SetAccount"
+	AdminSv1GetAccount                = "AdminSv1.GetAccount"
+	AdminSv1GetAccounts               = "AdminSv1.GetAccounts"
+	AdminSv1GetAccountIDs             = "AdminSv1.GetAccountIDs"
+	AdminSv1RemoveAccount             = "AdminSv1.RemoveAccount"
+	AdminSv1GetAccountsCount          = "AdminSv1.GetAccountsCount"
 )
 
 // APIerSv1 TP APIs
@@ -1282,6 +1272,12 @@ const (
 	ServiceManagerV1StopService   = "ServiceManagerV1.StopService"
 	ServiceManagerV1ServiceStatus = "ServiceManagerV1.ServiceStatus"
 	ServiceManagerV1Ping          = "ServiceManagerV1.Ping"
+)
+
+// TpeSv1 APIs
+const (
+	TpeSv1     = "TpeSv1"
+	TpeSv1Ping = "TpeSv1.Ping"
 )
 
 // ConfigSv1 APIs

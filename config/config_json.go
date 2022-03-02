@@ -45,6 +45,7 @@ const (
 	ResourceSJSON       = "resources"
 	StatSJSON           = "stats"
 	ThresholdSJSON      = "thresholds"
+	TpeSJSON            = "tpes"
 	RouteSJSON          = "routes"
 	LoaderSJSON         = "loaders"
 	SureTaxJSON         = "suretax"
@@ -104,6 +105,7 @@ var (
 		AccountSJSON:        utils.AccountS,
 		ActionSJSON:         utils.ActionS,
 		CoreSJSON:           utils.CoreS,
+		TpeSJSON:            utils.TpeS,
 		RPCConnsJSON:        RPCConnsJSON,
 	}
 )
@@ -192,6 +194,7 @@ func newSections(cfg *CGRConfig) Sections {
 		cfg.apiBanCfg,
 		cfg.configDBCfg,
 		cfg.sureTaxCfg,
+		cfg.tpeSCfg,
 	}
 }
 

@@ -1822,5 +1822,9 @@ const CGRATES_CFG_JSON = `
 	}
 },
 
+"tpes": {
+    "enabled": false,
+},
+
 
 }`

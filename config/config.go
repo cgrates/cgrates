@@ -203,6 +203,7 @@ func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 			MaxItems:     []*utils.DynamicIntPointerOpt{},
 			Usage:        []*utils.DynamicDecimalBigOpt{},
 		}},
+		tpeSCfg:        new(TpeSCfg),
 		sureTaxCfg:     new(SureTaxCfg),
 		dispatcherSCfg: new(DispatcherSCfg),
 		registrarCCfg: &RegistrarCCfgs{
@@ -352,6 +353,7 @@ type CGRConfig struct {
 	apiBanCfg        *APIBanCfg        // APIBan config
 	coreSCfg         *CoreSCfg         // CoreS config
 	accountSCfg      *AccountSCfg      // AccountS config
+	tpeSCfg          *TpeSCfg          // TpeS config
 	configDBCfg      *ConfigDBCfg      // ConfigDB conifg
 
 	cacheDP    utils.MapStorage
@@ -685,6 +687,13 @@ func (cfg *CGRConfig) AccountSCfg() *AccountSCfg {
 	cfg.lks[AccountSJSON].RLock()
 	defer cfg.lks[AccountSJSON].RUnlock()
 	return cfg.accountSCfg
+}
+
+// TpeSCfg reads the TpeS configuration
+func (cfg *CGRConfig) TpeSCfg() *TpeSCfg {
+	cfg.Lock(TpeSJSON)
+	defer cfg.Unlock(TpeSJSON)
+	return cfg.tpeSCfg
 }
 
 // SIPAgentCfg reads the Apier configuration
@@ -1037,6 +1046,7 @@ func (cfg *CGRConfig) Clone() (cln *CGRConfig) {
 		coreSCfg:         cfg.coreSCfg.Clone(),
 		actionSCfg:       cfg.actionSCfg.Clone(),
 		accountSCfg:      cfg.accountSCfg.Clone(),
+		tpeSCfg:          cfg.tpeSCfg.Clone(),
 		configDBCfg:      cfg.configDBCfg.Clone(),
 		rldCh:            make(chan string),
 		cacheDP:          make(utils.MapStorage),
