@@ -447,14 +447,14 @@ func (dbM *DataDBMock) RemoveRatingProfileDrv(string) error {
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) GetConfigSectionsDrv(ctx *context.Context, tenant, nodeID string, sectionIDs []string) (map[string][]byte, error) {
+func (dbM *DataDBMock) GetConfigSectionsDrv(ctx *context.Context, nodeID string, sectionIDs []string) (map[string][]byte, error) {
 	return nil, utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) SetConfigSectionsDrv(ctx *context.Context, tenant, nodeID string, sectionsData map[string][]byte) error {
+func (dbM *DataDBMock) SetConfigSectionsDrv(ctx *context.Context, nodeID string, sectionsData map[string][]byte) error {
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) RemoveConfigSectionsDrv(ctx *context.Context, tenant, nodeID string, sectionIDs []string) error {
+func (dbM *DataDBMock) RemoveConfigSectionsDrv(ctx *context.Context, nodeID string, sectionIDs []string) error {
 	return utils.ErrNotImplemented
 }

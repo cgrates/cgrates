@@ -44,7 +44,7 @@ func TestSetGetRemoveConfigSectionsDrvRedis(t *testing.T) {
 	expected := make(map[string][]byte)
 
 	// Try to retrieve the values before setting them (should receive an empty map)
-	if rcv, err := db.GetConfigSectionsDrv(context.Background(), "cgrates.org", "1234", sectionIDs); err == nil ||
+	if rcv, err := db.GetConfigSectionsDrv(context.Background(), "1234", sectionIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	} else if !reflect.DeepEqual(rcv, expected) {
@@ -119,11 +119,11 @@ func TestSetGetRemoveConfigSectionsDrvRedis(t *testing.T) {
 		"resources":  rsJsnCfg,
 	}
 
-	if err := db.SetConfigSectionsDrv(context.Background(), "cgrates.org", "1234", sectData); err != nil {
+	if err := db.SetConfigSectionsDrv(context.Background(), "1234", sectData); err != nil {
 		t.Error(err)
 	}
 
-	if rcv, err := db.GetConfigSectionsDrv(context.Background(), "cgrates.org", "1234", sectionIDs); err != nil {
+	if rcv, err := db.GetConfigSectionsDrv(context.Background(), "1234", sectionIDs); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcv, sectData) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ToJSON(sectData), utils.ToJSON(rcv))
@@ -140,11 +140,11 @@ func TestSetGetRemoveConfigSectionsDrvRedis(t *testing.T) {
 		}
 	}
 
-	if err := db.RemoveConfigSectionsDrv(context.Background(), "cgrates.org", "1234", sectionIDs); err != nil {
+	if err := db.RemoveConfigSectionsDrv(context.Background(), "1234", sectionIDs); err != nil {
 		t.Error(err)
 	}
 
-	if rcv, err := db.GetConfigSectionsDrv(context.Background(), "cgrates.org", "1234", sectionIDs); err == nil ||
+	if rcv, err := db.GetConfigSectionsDrv(context.Background(), "1234", sectionIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	} else if !reflect.DeepEqual(rcv, expected) {
@@ -164,7 +164,7 @@ func TestSetGetRemoveConfigSectionsDrvMongo(t *testing.T) {
 	expected := make(map[string][]byte)
 
 	// Try to retrieve the values before setting them (should receive an empty map)
-	if rcv, err := db.GetConfigSectionsDrv(context.Background(), "cgrates.org", "1234", sectionIDs); err == nil ||
+	if rcv, err := db.GetConfigSectionsDrv(context.Background(), "1234", sectionIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	} else if !reflect.DeepEqual(rcv, expected) {
@@ -239,11 +239,11 @@ func TestSetGetRemoveConfigSectionsDrvMongo(t *testing.T) {
 		"resources":  rsJsnCfg,
 	}
 
-	if err := db.SetConfigSectionsDrv(context.Background(), "cgrates.org", "1234", sectData); err != nil {
+	if err := db.SetConfigSectionsDrv(context.Background(), "1234", sectData); err != nil {
 		t.Error(err)
 	}
 
-	if rcv, err := db.GetConfigSectionsDrv(context.Background(), "cgrates.org", "1234", sectionIDs); err != nil {
+	if rcv, err := db.GetConfigSectionsDrv(context.Background(), "1234", sectionIDs); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcv, sectData) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ToJSON(sectData), utils.ToJSON(rcv))
@@ -260,11 +260,11 @@ func TestSetGetRemoveConfigSectionsDrvMongo(t *testing.T) {
 		}
 	}
 
-	if err := db.RemoveConfigSectionsDrv(context.Background(), "cgrates.org", "1234", sectionIDs); err != nil {
+	if err := db.RemoveConfigSectionsDrv(context.Background(), "1234", sectionIDs); err != nil {
 		t.Error(err)
 	}
 
-	if rcv, err := db.GetConfigSectionsDrv(context.Background(), "cgrates.org", "1234", sectionIDs); err == nil ||
+	if rcv, err := db.GetConfigSectionsDrv(context.Background(), "1234", sectionIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	} else if !reflect.DeepEqual(rcv, expected) {
@@ -282,7 +282,7 @@ func TestSetGetRemoveConfigSectionsDrvInternal(t *testing.T) {
 	expected := make(map[string][]byte)
 
 	// Try to retrieve the values before setting them (should receive an empty map)
-	if rcv, err := db.GetConfigSectionsDrv(context.Background(), "cgrates.org", "1234", sectionIDs); err == nil ||
+	if rcv, err := db.GetConfigSectionsDrv(context.Background(), "1234", sectionIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	} else if !reflect.DeepEqual(rcv, expected) {
@@ -357,11 +357,11 @@ func TestSetGetRemoveConfigSectionsDrvInternal(t *testing.T) {
 		"resources":  rsJsnCfg,
 	}
 
-	if err := db.SetConfigSectionsDrv(context.Background(), "cgrates.org", "1234", sectData); err != nil {
+	if err := db.SetConfigSectionsDrv(context.Background(), "1234", sectData); err != nil {
 		t.Error(err)
 	}
 
-	if rcv, err := db.GetConfigSectionsDrv(context.Background(), "cgrates.org", "1234", sectionIDs); err != nil {
+	if rcv, err := db.GetConfigSectionsDrv(context.Background(), "1234", sectionIDs); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcv, sectData) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ToJSON(sectData), utils.ToJSON(rcv))
@@ -378,11 +378,11 @@ func TestSetGetRemoveConfigSectionsDrvInternal(t *testing.T) {
 		}
 	}
 
-	if err := db.RemoveConfigSectionsDrv(context.Background(), "cgrates.org", "1234", sectionIDs); err != nil {
+	if err := db.RemoveConfigSectionsDrv(context.Background(), "1234", sectionIDs); err != nil {
 		t.Error(err)
 	}
 
-	if rcv, err := db.GetConfigSectionsDrv(context.Background(), "cgrates.org", "1234", sectionIDs); err == nil ||
+	if rcv, err := db.GetConfigSectionsDrv(context.Background(), "1234", sectionIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	} else if !reflect.DeepEqual(rcv, expected) {

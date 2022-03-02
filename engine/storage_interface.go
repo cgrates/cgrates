@@ -95,9 +95,9 @@ type DataDB interface {
 	GetAccountDrv(*context.Context, string, string) (*utils.Account, error)
 	SetAccountDrv(ctx *context.Context, profile *utils.Account) error
 	RemoveAccountDrv(*context.Context, string, string) error
-	GetConfigSectionsDrv(*context.Context, string, string, []string) (map[string][]byte, error)
-	SetConfigSectionsDrv(*context.Context, string, string, map[string][]byte) error
-	RemoveConfigSectionsDrv(*context.Context, string, string, []string) error
+	GetConfigSectionsDrv(*context.Context, string, []string) (map[string][]byte, error)
+	SetConfigSectionsDrv(*context.Context, string, map[string][]byte) error
+	RemoveConfigSectionsDrv(*context.Context, string, []string) error
 }
 
 // DataDBDriver used as a DataDB but also as a ConfigProvider
