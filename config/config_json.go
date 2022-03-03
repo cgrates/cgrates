@@ -45,7 +45,7 @@ const (
 	ResourceSJSON       = "resources"
 	StatSJSON           = "stats"
 	ThresholdSJSON      = "thresholds"
-	TpeSJSON            = "tpes"
+	TPeSJSON            = "tpes"
 	RouteSJSON          = "routes"
 	LoaderSJSON         = "loaders"
 	SureTaxJSON         = "suretax"
@@ -105,7 +105,7 @@ var (
 		AccountSJSON:        utils.AccountS,
 		ActionSJSON:         utils.ActionS,
 		CoreSJSON:           utils.CoreS,
-		TpeSJSON:            utils.TpeS,
+		TPeSJSON:            utils.TPeS,
 		RPCConnsJSON:        RPCConnsJSON,
 	}
 )

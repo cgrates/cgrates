@@ -19,11 +19,11 @@ import (
 	"github.com/cgrates/cgrates/tpes"
 )
 
-func NewTpeSv1(tpes *tpes.TpeS) *TpeSv1 {
-	return &TpeSv1{tpes: tpes}
+func NewTPeSv1(tpes *tpes.TPeS) *TPeSv1 {
+	return &TPeSv1{tpes: tpes}
 }
 
-type TpeSv1 struct {
-	tpes *tpes.TpeS
+type TPeSv1 struct {
+	tpes *tpes.TPeS
 	ping
 }

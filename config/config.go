@@ -691,8 +691,8 @@ func (cfg *CGRConfig) AccountSCfg() *AccountSCfg {
 
 // TpeSCfg reads the TpeS configuration
 func (cfg *CGRConfig) TpeSCfg() *TpeSCfg {
-	cfg.Lock(TpeSJSON)
-	defer cfg.Unlock(TpeSJSON)
+	cfg.Lock(TPeSJSON)
+	defer cfg.Unlock(TPeSJSON)
 	return cfg.tpeSCfg
 }
 

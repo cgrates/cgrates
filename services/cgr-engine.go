@@ -79,7 +79,7 @@ func NewCGREngine(cfg *config.CGRConfig, cM *engine.ConnManager, shdWg *sync.Wai
 			utils.ThresholdS:      new(sync.WaitGroup),
 			utils.ActionS:         new(sync.WaitGroup),
 			utils.AccountS:        new(sync.WaitGroup),
-			utils.TpeS:            new(sync.WaitGroup),
+			utils.TPeS:            new(sync.WaitGroup),
 		},
 		iFilterSCh: make(chan *engine.FilterS, 1),
 	}
@@ -250,7 +250,7 @@ func (cgr *CGREngine) InitServices(httpPrfPath string, cpuPrfFl io.Closer, memPr
 			cgr.server, iRateSCh, cgr.anzS, cgr.srvDep),
 		NewActionService(cgr.cfg, cgr.dmS, cgr.cacheS, cgr.iFilterSCh, cgr.cM, cgr.server, iActionSCh, cgr.anzS, cgr.srvDep),
 		NewAccountService(cgr.cfg, cgr.dmS, cgr.cacheS, cgr.iFilterSCh, cgr.cM, cgr.server, iAccountSCh, cgr.anzS, cgr.srvDep),
-		NewTpeService(cgr.cfg, cgr.cM, cgr.server, cgr.srvDep),
+		NewTPeService(cgr.cfg, cgr.cM, cgr.server, cgr.srvDep),
 	)
 
 	return

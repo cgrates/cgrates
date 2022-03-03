@@ -923,7 +923,7 @@ const (
 	RegistrarC  = "RegistrarC"
 	LoaderS     = "LoaderS"
 	ChargerS    = "ChargerS"
-	TpeS        = "TpeS"
+	TPeS        = "TPeS"
 	CacheS      = "CacheS"
 	AnalyzerS   = "AnalyzerS"
 	CDRServer   = "CDRServer"
