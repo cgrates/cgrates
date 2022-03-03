@@ -20,15 +20,15 @@ import (
 	"github.com/cgrates/cgrates/engine"
 )
 
-func NewTpeS(cfg *config.CGRConfig, cm *engine.ConnManager) *TpeS {
-	return &TpeS{
+func NewTPeS(cfg *config.CGRConfig, cm *engine.ConnManager) *TPeS {
+	return &TPeS{
 		cfg:     cfg,
 		connMgr: cm,
 	}
 }
 
-// TpeS is managing the TariffPlanExporter
-type TpeS struct {
+// TPeS is managing the TariffPlanExporter
+type TPeS struct {
 	cfg     *config.CGRConfig
 	connMgr *engine.ConnManager
 	fltr    *engine.FilterS

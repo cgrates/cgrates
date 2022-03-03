@@ -29,7 +29,7 @@ type TpeSCfgJson struct {
 	Enabled *bool
 }
 
-func (TpeSCfg) SName() string { return TpeSJSON }
+func (TpeSCfg) SName() string { return TPeSJSON }
 
 func (tp *TpeSCfg) Load(ctx *context.Context, db ConfigDB, _ *CGRConfig) (err error) {
 	jsn := new(TpeSCfgJson)
