@@ -376,7 +376,7 @@ func testCsvExportComposedEvent(t *testing.T) {
 				utils.Cost:          1.016374,
 				"ExtraFields": map[string]string{"extra1": "val_extra1",
 					"extra2": "val_extra2", "extra3": "val_extra3"},
-				utils.CostDetails: cd,
+				utils.CostDetails: utils.ToJSON(cd),
 			},
 		},
 	}

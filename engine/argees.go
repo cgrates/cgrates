@@ -32,35 +32,50 @@ type CGREventWithEeIDs struct {
 	*utils.CGREvent
 }
 
-func (cgr *CGREventWithEeIDs) UnmarshalJSON(data []byte) error {
+func (cgr *CGREventWithEeIDs) UnmarshalJSON(data []byte) (err error) {
 	// firstly, we will unamrshall the entire data into raw bytes
 	ids := make(map[string]json.RawMessage)
-	if err := json.Unmarshal(data, &ids); err != nil {
-		return err
+	if err = json.Unmarshal(data, &ids); err != nil {
+		return
 	}
 	// populate eeids in case of it's existance
 	eeIDs := make([]string, len(ids[utils.EeIDs]))
-	if err := json.Unmarshal(ids[utils.EeIDs], &eeIDs); err != nil {
-		return err
+	if err = json.Unmarshal(ids[utils.EeIDs], &eeIDs); err != nil {
+		return
 	}
 	cgr.EeIDs = eeIDs
 	// populate the entire CGRevent struct in case of it's existance
 	var cgrEv *utils.CGREvent
-	if err := json.Unmarshal(data, &cgrEv); err != nil {
-		return err
+	if err = json.Unmarshal(data, &cgrEv); err != nil {
+		return
 	}
 	cgr.CGREvent = cgrEv
 	// check if we have CostDetails and modify it's type (by default it was map[string]interface{} by unrmarshaling, now it will be EventCost)
 	if ecEv, has := cgrEv.Event[utils.CostDetails]; has {
-		ec := new(EventCost)
-		bts, err := json.Marshal(ecEv)
-		if err != nil {
-			return err
+		// ee
+		var bts []byte
+		switch ecEv.(type) {
+		case string:
+			btsToStr, err := json.Marshal(ecEv)
+			if err != nil {
+				return err
+			}
+			var toString string
+			if err = json.Unmarshal(btsToStr, &toString); err != nil {
+				return err
+			}
+			bts = []byte(toString)
+		default:
+			bts, err = json.Marshal(ecEv)
+			if err != nil {
+				return err
+			}
 		}
-		if err := json.Unmarshal(bts, &ec); err != nil {
+		ec := new(EventCost)
+		if err = json.Unmarshal(bts, &ec); err != nil {
 			return err
 		}
 		cgr.Event[utils.CostDetails] = ec
 	}
-	return nil
+	return
 }
