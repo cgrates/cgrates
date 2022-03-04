@@ -10,12 +10,17 @@
         "http": ":22080"
     },
     
-    "data_db": {								
-        "db_type": "*internal"
+    "data_db": {
+        "db_type": "mongo",
+        "db_name": "10",
+        "db_port": 27017
     },
     
+    
     "stor_db": {
-        "db_type": "*internal"
+        "db_type": "mongo",
+        "db_name": "cgrates",
+        "db_port": 27017
     },
 
     "thresholds": {
