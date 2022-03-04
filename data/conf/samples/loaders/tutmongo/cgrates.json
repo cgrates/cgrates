@@ -102,7 +102,6 @@
 				"file_name": "Attributes.csv",				
 				"fields": [
 					{"tag": "AttributesFields","type": "*template", "value": "attrTemplateLoader"}
-
 				],
 			},
 		],
@@ -247,7 +246,7 @@
 		{"path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
 		{"path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
 		{"path": "FilterIDs", "type": "*variable", "value": "~*req.2"},
-		{"path": "Weight", "type": "*variable", "value": "~*req.3"},
+		{"path": "Weights", "type": "*variable", "value": "~*req.3"},
 		{"path": "Attributes.FilterIDs", "type": "*variable", "value": "~*req.4","new_branch":true},
 		{"path": "Attributes.Path", "type": "*variable", "value": "~*req.5"},
 		{"path": "Attributes.Type", "type": "*variable", "value": "~*req.6"},
