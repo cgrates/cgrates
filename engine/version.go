@@ -1,17 +1,14 @@
 /*
 Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
 Copyright (C) ITsysCOM GmbH
-
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
-
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
-
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
@@ -84,6 +81,7 @@ func isDataDB(storage Storage) bool {
 
 func setDBVersions(storage Storage, overwrite bool) (err error) {
 	x := CurrentDBVersions(storage.GetStorageType(), isDataDB(storage))
+	// no data, write version
 	if err = storage.SetVersions(x, overwrite); err != nil {
 		utils.Logger.Warning(fmt.Sprintf("Could not write current version to db: %v", err))
 		return err
@@ -109,7 +107,6 @@ func (vers Versions) Compare(curent Versions, storType string, isDataDB bool) st
 		message = dataDBVers
 	case utils.Internal:
 		message = allVers
-
 	case utils.Redis:
 		message = dataDBVers
 	}
@@ -155,7 +152,9 @@ func CurrentAllDBVersions() Versions {
 func CurrentDBVersions(storType string, isDataDB bool) Versions {
 	switch storType {
 	case utils.Mongo:
-		return CurrentDataDBVersions()
+		if isDataDB {
+			return CurrentDataDBVersions()
+		}
 	case utils.Internal:
 		return CurrentAllDBVersions()
 	case utils.Redis:
