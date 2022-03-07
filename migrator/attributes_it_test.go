@@ -219,11 +219,11 @@ func testAttrITConnect(t *testing.T) {
 	}
 
 	if reflect.DeepEqual(attrPathIn, attrPathOut) {
-		attrMigrator, err = NewMigrator(dataDBIn, dataDBOut, nil, nil,
-			false, true, false, false)
+		attrMigrator, err = NewMigrator(dataDBIn, dataDBOut,
+			false, true)
 	} else {
-		attrMigrator, err = NewMigrator(dataDBIn, dataDBOut, nil, nil,
-			false, false, false, false)
+		attrMigrator, err = NewMigrator(dataDBIn, dataDBOut,
+			false, false)
 	}
 	if err != nil {
 		log.Fatal(err)

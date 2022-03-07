@@ -125,11 +125,11 @@ func testStsITConnect(t *testing.T) {
 		log.Fatal(err)
 	}
 	if stsPathIn == stsPathOut {
-		stsMigrator, err = NewMigrator(dataDBIn, dataDBOut, nil, nil,
-			false, true, false, false)
+		stsMigrator, err = NewMigrator(dataDBIn, dataDBOut,
+			false, true)
 	} else {
-		stsMigrator, err = NewMigrator(dataDBIn, dataDBOut, nil, nil,
-			false, false, false, false)
+		stsMigrator, err = NewMigrator(dataDBIn, dataDBOut,
+			false, false)
 	}
 	if err != nil {
 		log.Fatal(err)

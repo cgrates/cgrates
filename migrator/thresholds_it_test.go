@@ -161,11 +161,11 @@ func testTrsITConnect(t *testing.T) {
 		log.Fatal(err)
 	}
 	if reflect.DeepEqual(trsPathIn, trsPathOut) {
-		trsMigrator, err = NewMigrator(dataDBIn, dataDBOut, nil, nil,
-			false, true, false, false)
+		trsMigrator, err = NewMigrator(dataDBIn, dataDBOut,
+			false, true)
 	} else {
-		trsMigrator, err = NewMigrator(dataDBIn, dataDBOut, nil, nil,
-			false, false, false, false)
+		trsMigrator, err = NewMigrator(dataDBIn, dataDBOut,
+			false, false)
 	}
 
 	if err != nil {

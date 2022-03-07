@@ -20,7 +20,6 @@ package migrator
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -81,11 +80,7 @@ func NewMigratorStorDB(db_type, host, port, name, user, pass, marshaler string,
 	return
 }
 func (m *Migrator) getVersions(str string) (vrs engine.Versions, err error) {
-	if str == utils.CDRs || str == utils.SessionSCosts || strings.HasPrefix(str, "Tp") {
-		vrs, err = m.storDBIn.StorDB().GetVersions(utils.EmptyString)
-	} else {
-		vrs, err = m.dmIN.DataManager().DataDB().GetVersions(utils.EmptyString)
-	}
+	vrs, err = m.dmIN.DataManager().DataDB().GetVersions(utils.EmptyString)
 	if err != nil {
 		return nil, utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,
@@ -101,18 +96,13 @@ func (m *Migrator) getVersions(str string) (vrs engine.Versions, err error) {
 }
 
 func (m *Migrator) setVersions(str string) (err error) {
-	if str == utils.CDRs || str == utils.SessionSCosts || strings.HasPrefix(str, "Tp") {
-		vrs := engine.Versions{str: engine.CurrentStorDBVersions()[str]}
-		err = m.storDBOut.StorDB().SetVersions(vrs, false)
-	} else {
-		vrs := engine.Versions{str: engine.CurrentDataDBVersions()[str]}
-		err = m.dmOut.DataManager().DataDB().SetVersions(vrs, false)
-	}
+	vrs := engine.Versions{str: engine.CurrentDataDBVersions()[str]}
+	err = m.dmOut.DataManager().DataDB().SetVersions(vrs, false)
 	if err != nil {
 		err = utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,
 			err.Error(),
-			fmt.Sprintf("error: <%s> when updating %s version into StorDB", err.Error(), str))
+			fmt.Sprintf("error: <%s> when updating %s version into DataDB", err.Error(), str))
 	}
 	return
 }

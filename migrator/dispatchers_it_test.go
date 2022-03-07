@@ -139,11 +139,11 @@ func testDspITConnect(t *testing.T) {
 		log.Fatal(err)
 	}
 	if reflect.DeepEqual(dspPathIn, dspPathOut) {
-		dspMigrator, err = NewMigrator(dataDBIn, dataDBOut, nil, nil,
-			false, true, false, false)
+		dspMigrator, err = NewMigrator(dataDBIn, dataDBOut,
+			false, true)
 	} else {
-		dspMigrator, err = NewMigrator(dataDBIn, dataDBOut, nil, nil,
-			false, false, false, false)
+		dspMigrator, err = NewMigrator(dataDBIn, dataDBOut,
+			false, false)
 	}
 	if err != nil {
 		log.Fatal(err)

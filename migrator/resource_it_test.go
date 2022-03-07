@@ -143,11 +143,11 @@ func testResITConnect(t *testing.T) {
 		log.Fatal(err)
 	}
 	if reflect.DeepEqual(resPathIn, resPathOut) {
-		resMigrator, err = NewMigrator(dataDBIn, dataDBOut, nil, nil,
-			false, true, false, false)
+		resMigrator, err = NewMigrator(dataDBIn, dataDBOut,
+			false, true)
 	} else {
-		resMigrator, err = NewMigrator(dataDBIn, dataDBOut, nil, nil,
-			false, false, false, false)
+		resMigrator, err = NewMigrator(dataDBIn, dataDBOut,
+			false, false)
 	}
 	if err != nil {
 		log.Fatal(err)

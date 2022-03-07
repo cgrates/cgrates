@@ -142,11 +142,11 @@ func testSupITConnect(t *testing.T) {
 		log.Fatal(err)
 	}
 	if reflect.DeepEqual(supPathIn, supPathOut) {
-		supMigrator, err = NewMigrator(dataDBIn, dataDBOut, nil, nil,
-			false, true, false, false)
+		supMigrator, err = NewMigrator(dataDBIn, dataDBOut,
+			false, true)
 	} else {
-		supMigrator, err = NewMigrator(dataDBIn, dataDBOut, nil, nil,
-			false, false, false, false)
+		supMigrator, err = NewMigrator(dataDBIn, dataDBOut,
+			false, false)
 	}
 	if err != nil {
 		log.Fatal(err)

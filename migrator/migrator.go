@@ -27,18 +27,13 @@ import (
 )
 
 func NewMigrator(dmIN, dmOut MigratorDataDB,
-	storDBIn, storDBOut MigratorStorDB,
-	dryRun, sameDataDB, sameStorDB, sameOutDB bool) (m *Migrator, err error) {
+	dryRun, sameDataDB bool) (m *Migrator, err error) {
 	stats := make(map[string]int)
 	m = &Migrator{
 		dmOut:      dmOut,
 		dmIN:       dmIN,
-		storDBIn:   storDBIn,
-		storDBOut:  storDBOut,
 		dryRun:     dryRun,
 		sameDataDB: sameDataDB,
-		sameStorDB: sameStorDB,
-		sameOutDB:  sameOutDB,
 		stats:      stats,
 	}
 	return m, err
@@ -47,12 +42,8 @@ func NewMigrator(dmIN, dmOut MigratorDataDB,
 type Migrator struct {
 	dmIN       MigratorDataDB
 	dmOut      MigratorDataDB
-	storDBIn   MigratorStorDB
-	storDBOut  MigratorStorDB
 	dryRun     bool
 	sameDataDB bool
-	sameStorDB bool
-	sameOutDB  bool // needed in case we set version and we use same DataDB as StorDB to store the versions without overwriting them
 	stats      map[string]int
 }
 
@@ -76,24 +67,11 @@ func (m *Migrator) Migrate(taskIDs []string) (err error, stats map[string]int) {
 				return utils.NewCGRError(utils.Migrator, utils.ServerErrorCaps, err.Error(),
 					fmt.Sprintf("error: <%s> when seting versions for DataDB", err.Error())), nil
 			}
-			if m.sameOutDB {
-				err = engine.SetDBVersions(m.storDBOut.StorDB())
-			} else {
-				err = engine.OverwriteDBVersions(m.storDBOut.StorDB())
-			}
 			if err != nil {
 				return utils.NewCGRError(utils.Migrator, utils.ServerErrorCaps, err.Error(),
 					fmt.Sprintf("error: <%s> when seting versions for StorDB", err.Error())), nil
 			}
 		case utils.MetaEnsureIndexes:
-			if m.storDBOut.StorDB().GetStorageType() == utils.Mongo {
-				mgo := m.storDBOut.StorDB().(*engine.MongoStorage)
-				if err = mgo.EnsureIndexes(); err != nil {
-					return
-				}
-			} else {
-				log.Printf("The StorDB type has to be %s .\n ", utils.Mongo)
-			}
 
 			if m.dmOut.DataManager().DataDB().GetStorageType() == utils.Mongo {
 				mgo := m.dmOut.DataManager().DataDB().(*engine.MongoStorage)
@@ -130,24 +108,6 @@ func (m *Migrator) Migrate(taskIDs []string) (err error, stats map[string]int) {
 		case utils.MetaDispatchers:
 			err = m.migrateDispatchers()
 			//TPs
-		case utils.MetaTpFilters:
-			err = m.migrateTPfilters()
-		case utils.MetaTpThresholds:
-			err = m.migrateTPthresholds()
-		case utils.MetaTpRoutes:
-			err = m.migrateTPRoutes()
-		case utils.MetaTpStats:
-			err = m.migrateTPstats()
-		case utils.MetaTpRateProfiles:
-			err = m.migrateTPRateProfiles()
-		case utils.MetaTpActionProfiles:
-			err = m.migrateTPActionProfiles()
-		case utils.MetaTpResources:
-			err = m.migrateTPresources()
-		case utils.MetaTpChargers:
-			err = m.migrateTPChargers()
-		case utils.MetaTpDispatchers:
-			err = m.migrateTPDispatchers()
 		case utils.MetaLoadIDs:
 			err = m.migrateLoadIDs()
 			//DATADB ALL
@@ -180,30 +140,7 @@ func (m *Migrator) Migrate(taskIDs []string) (err error, stats map[string]int) {
 				log.Print("ERROR: ", utils.MetaLoadIDs, " ", err)
 			}
 			err = nil
-			//STORDB ALL
-		case utils.MetaStorDB:
-			if err := m.migrateTPfilters(); err != nil {
-				log.Print("ERROR: ", utils.MetaTpFilters, " ", err)
-			}
-			if err := m.migrateTPthresholds(); err != nil {
-				log.Print("ERROR: ", utils.MetaTpThresholds, " ", err)
-			}
-			if err := m.migrateTPRoutes(); err != nil {
-				log.Print("ERROR: ", utils.MetaTpRoutes, " ", err)
-			}
-			if err := m.migrateTPstats(); err != nil {
-				log.Print("ERROR: ", utils.MetaTpStats, " ", err)
-			}
-			if err := m.migrateTPresources(); err != nil {
-				log.Print("ERROR: ", utils.MetaTpResources, " ", err)
-			}
-			if err := m.migrateTPChargers(); err != nil {
-				log.Print("ERROR: ", utils.MetaTpChargers, " ", err)
-			}
-			if err := m.migrateTPDispatchers(); err != nil {
-				log.Print("ERROR: ", utils.MetaTpDispatchers, " ", err)
-			}
-			err = nil
+
 		}
 	}
 	for k, v := range m.stats {
@@ -220,14 +157,6 @@ func (m *Migrator) ensureIndexesDataDB(cols ...string) error {
 	return mgo.EnsureIndexes(cols...)
 }
 
-func (m *Migrator) ensureIndexesStorDB(cols ...string) error {
-	if m.storDBOut.StorDB().GetStorageType() != utils.Mongo {
-		return nil
-	}
-	mgo := m.storDBOut.StorDB().(*engine.MongoStorage)
-	return mgo.EnsureIndexes(cols...)
-}
-
 // closes all opened DBs
 func (m *Migrator) Close() {
 	if m.dmIN != nil {
@@ -235,11 +164,5 @@ func (m *Migrator) Close() {
 	}
 	if m.dmOut != nil {
 		m.dmOut.close()
-	}
-	if m.storDBIn != nil {
-		m.storDBIn.close()
-	}
-	if m.storDBOut != nil {
-		m.storDBOut.close()
 	}
 }

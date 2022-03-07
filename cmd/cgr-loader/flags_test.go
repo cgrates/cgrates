@@ -126,12 +126,6 @@ func TestCGRLoaderFlags(t *testing.T) {
 		t.Errorf("Expected /path/to/CACertificate, received %+v", *dbRedisCACertificate)
 	}
 
-	if err := cgrLoaderFlags.Parse([]string{"-stordb_port", "6533"}); err != nil {
-		t.Error(err)
-	} else if *storDBPort != "6533" {
-		t.Errorf("Expected 6533, received %+v", *storDBPort)
-	}
-
 	if err := cgrLoaderFlags.Parse([]string{"-caching", "*none"}); err != nil {
 		t.Error(err)
 	} else if *cachingArg != "*none" {
