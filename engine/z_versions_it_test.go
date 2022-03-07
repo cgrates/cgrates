@@ -4,17 +4,14 @@
 /*
 Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
 Copyright (C) ITsysCOM GmbH
-
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
-
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
-
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
@@ -34,7 +31,6 @@ import (
 )
 
 var (
-	storageDb         Storage
 	dm3               *DataManager
 	versionsConfigDIR string
 	vrsCfg            *config.CGRConfig
@@ -83,6 +79,9 @@ func testInitDataDB(t *testing.T) {
 	}
 	dm3 = NewDataManager(dbConn, vrsCfg.CacheCfg(), nil)
 
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func testVersionsFlush(t *testing.T) {
@@ -90,7 +89,7 @@ func testVersionsFlush(t *testing.T) {
 	if err != nil {
 		t.Error("Error when flushing Mongo ", err.Error())
 	}
-	SetDBVersions(storageDb)
+
 }
 
 func testVersion(t *testing.T) {
@@ -146,38 +145,16 @@ func testVersion(t *testing.T) {
 	if err = dm3.DataDB().RemoveVersions(testVersion); err != nil {
 		t.Error(err)
 	}
-	storType = storageDb.GetStorageType()
 	switch storType {
 	case utils.Internal:
 		currentVersion = allVersions
 		testVersion = allVersions
 		testVersion[utils.Accounts] = 1
 		test = "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*accounts>"
-	}
-	//storageDb
-
-	if err := CheckVersions(storageDb); err != nil {
-		t.Error(err)
-	}
-	if rcv, err := storageDb.GetVersions(""); err != nil {
-		t.Error(err)
-	} else if len(currentVersion) != len(rcv) {
-		t.Errorf("Expecting: %v, received: %v", currentVersion, rcv)
-	}
-	if err = storageDb.RemoveVersions(currentVersion); err != nil {
-		t.Error(err)
-	}
-	if _, rcvErr := storageDb.GetVersions(""); rcvErr != utils.ErrNotFound {
-		t.Error(rcvErr)
-	}
-	if err := storageDb.SetVersions(testVersion, false); err != nil {
-		t.Error(err)
-	}
-	if err := CheckVersions(storageDb); err != nil && err.Error() != test {
-		t.Error(err)
-	}
-	if err = storageDb.RemoveVersions(testVersion); err != nil {
-		t.Error(err)
+	case utils.Mongo, utils.Postgres, utils.MySQL:
+		testVersion = allVersions
+		testVersion[utils.CostDetails] = 1
+		test = "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*cost_details>"
 	}
 
 }
