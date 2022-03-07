@@ -112,9 +112,6 @@ func TestLoadConfig(t *testing.T) {
 	if ldrCfg.GeneralCfg().DefaultTimezone != utils.Local {
 		t.Errorf("Expected %s received %s", utils.Local, ldrCfg.GeneralCfg().DefaultTimezone)
 	}
-	if !reflect.DeepEqual(ldrCfg.StorDbCfg(), expStorDB) {
-		t.Errorf("Expected %s received %s", utils.ToJSON(expStorDB), utils.ToJSON(ldrCfg.StorDbCfg()))
-	}
 	if !ldrCfg.LoaderCgrCfg().DisableReverse {
 		t.Errorf("Expected %v received %v", true, ldrCfg.LoaderCgrCfg().DisableReverse)
 	}

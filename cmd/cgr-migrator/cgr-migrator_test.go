@@ -161,66 +161,7 @@ func TestFlags(t *testing.T) {
 	} else if *outDataDBRedisSentinel != "true" {
 		t.Errorf("Expected true received:%v ", *outDataDBRedisSentinel)
 	}
-	if err := cgrMigratorFlags.Parse([]string{"-stordb_type", "true"}); err != nil {
-		t.Fatal(err)
-	} else if *inStorDBType != "true" {
-		t.Errorf("Expected true received:%v ", *inStorDBType)
-	}
-	if err := cgrMigratorFlags.Parse([]string{"-stordb_host", "true"}); err != nil {
-		t.Fatal(err)
-	} else if *inStorDBHost != "true" {
-		t.Errorf("Expected true received:%v ", *inStorDBHost)
-	}
-	if err := cgrMigratorFlags.Parse([]string{"-stordb_port", "true"}); err != nil {
-		t.Fatal(err)
-	} else if *inStorDBPort != "true" {
-		t.Errorf("Expected true received:%v ", *inStorDBPort)
-	}
-	if err := cgrMigratorFlags.Parse([]string{"-stordb_name", "true"}); err != nil {
-		t.Fatal(err)
-	} else if *inStorDBName != "true" {
-		t.Errorf("Expected true received:%v ", *inStorDBName)
-	}
-	if err := cgrMigratorFlags.Parse([]string{"-stordb_user", "true"}); err != nil {
-		t.Fatal(err)
-	} else if *inStorDBUser != "true" {
-		t.Errorf("Expected true received:%v ", *inStorDBUser)
-	}
-	if err := cgrMigratorFlags.Parse([]string{"-stordb_passwd", "true"}); err != nil {
-		t.Fatal(err)
-	} else if *inStorDBPass != "true" {
-		t.Errorf("Expected true received:%v ", *inStorDBPass)
-	}
-	if err := cgrMigratorFlags.Parse([]string{"-out_stordb_type", "true"}); err != nil {
-		t.Fatal(err)
-	} else if *outStorDBType != "true" {
-		t.Errorf("Expected true received:%v ", *outStorDBType)
-	}
-	if err := cgrMigratorFlags.Parse([]string{"-out_stordb_host", "true"}); err != nil {
-		t.Fatal(err)
-	} else if *outStorDBHost != "true" {
-		t.Errorf("Expected true received:%v ", *outStorDBHost)
-	}
-	if err := cgrMigratorFlags.Parse([]string{"-out_stordb_port", "true"}); err != nil {
-		t.Fatal(err)
-	} else if *outStorDBPort != "true" {
-		t.Errorf("Expected true received:%v ", *outStorDBPort)
-	}
-	if err := cgrMigratorFlags.Parse([]string{"-out_stordb_name", "true"}); err != nil {
-		t.Fatal(err)
-	} else if *outStorDBName != "true" {
-		t.Errorf("Expected true received:%v ", *outStorDBName)
-	}
-	if err := cgrMigratorFlags.Parse([]string{"-out_stordb_user", "true"}); err != nil {
-		t.Fatal(err)
-	} else if *outStorDBUser != "true" {
-		t.Errorf("Expected true received:%v ", *outStorDBUser)
-	}
-	if err := cgrMigratorFlags.Parse([]string{"-out_stordb_password", "true"}); err != nil {
-		t.Fatal(err)
-	} else if *outStorDBPass != "true" {
-		t.Errorf("Expected true received:%v ", *outStorDBPass)
-	}
+
 	if err := cgrMigratorFlags.Parse([]string{"-dry_run", "true"}); err != nil {
 		t.Fatal(err)
 	} else if !*dryRun {

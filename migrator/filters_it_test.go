@@ -119,11 +119,11 @@ func testFltrITConnect(t *testing.T) {
 		log.Fatal(err)
 	}
 	if reflect.DeepEqual(inPath, outPath) {
-		fltrMigrator, err = NewMigrator(dataDBIn, dataDBOut, nil, nil,
-			false, true, false, false)
+		fltrMigrator, err = NewMigrator(dataDBIn, dataDBOut,
+			false, true)
 	} else {
-		fltrMigrator, err = NewMigrator(dataDBIn, dataDBOut, nil, nil,
-			false, false, false, false)
+		fltrMigrator, err = NewMigrator(dataDBIn, dataDBOut,
+			false, false)
 	}
 	if err != nil {
 		log.Fatal(err)

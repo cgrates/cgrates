@@ -142,11 +142,11 @@ func testRatePrfITConnect(t *testing.T) {
 		log.Fatal(err)
 	}
 	if reflect.DeepEqual(ratePrfPathIn, ratePrfPathOut) {
-		ratePrfMigrator, err = NewMigrator(dataDBIn, dataDBOut, nil, nil,
-			false, true, false, false)
+		ratePrfMigrator, err = NewMigrator(dataDBIn, dataDBOut,
+			false, true)
 	} else {
-		ratePrfMigrator, err = NewMigrator(dataDBIn, dataDBOut, nil, nil,
-			false, false, false, false)
+		ratePrfMigrator, err = NewMigrator(dataDBIn, dataDBOut,
+			false, false)
 	}
 	if err != nil {
 		log.Fatal(err)
