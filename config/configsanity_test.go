@@ -1540,20 +1540,6 @@ func TestConfigSanityRegistrarCDispatcher(t *testing.T) {
 	}
 }
 
-func TestConfigSanityStorDB(t *testing.T) {
-	cfg = NewDefaultCGRConfig()
-	cfg.storDbCfg = &StorDbCfg{
-		Type: utils.Postgres,
-		Opts: &StorDBOpts{
-			SSLMode: "wrongSSLMode",
-		},
-	}
-	expected := "<stor_db> unsupported sslmode for storDB"
-	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
-		t.Errorf("Expecting: %+q  received: %+q", expected, err)
-	}
-}
-
 func TestConfigSanityAnalyzer(t *testing.T) {
 	cfg := NewDefaultCGRConfig()
 

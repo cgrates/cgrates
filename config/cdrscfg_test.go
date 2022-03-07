@@ -27,7 +27,6 @@ import (
 func TestCdrsCfgloadFromJsonCfg(t *testing.T) {
 	jsonCfg := &CdrsJsonCfg{
 		Enabled:              utils.BoolPointer(true),
-		Store_cdrs:           utils.BoolPointer(true),
 		Session_cost_retries: utils.IntPointer(1),
 		Chargers_conns:       &[]string{utils.MetaInternal, "*conn1"},
 		Attributes_conns:     &[]string{utils.MetaInternal, "*conn1"},
@@ -40,8 +39,8 @@ func TestCdrsCfgloadFromJsonCfg(t *testing.T) {
 		Accounts_conns:       &[]string{utils.MetaInternal, "*conn1"},
 	}
 	expected := &CdrsCfg{
-		Enabled:          true,
-		StoreCdrs:        true,
+		Enabled: true,
+
 		SMCostRetries:    1,
 		ChargerSConns:    []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers), "*conn1"},
 		AttributeSConns:  []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), "*conn1"},
@@ -175,7 +174,7 @@ func TestCdrsCfgAsMapInterface(t *testing.T) {
 	"cdrs": {
 		"enabled": true,						
 		"extra_fields": ["~*req.PayPalAccount", "~*req.LCRProfile", "~*req.ResourceID"],
-		"store_cdrs": true,						
+					
 		"session_cost_retries": 5,				
 		"chargers_conns":["*internal:*chargers","*conn1"],			
 		"attributes_conns": ["*internal:*attributes","*conn1"],					
@@ -261,8 +260,8 @@ func TestCdrsCfgAsMapInterface2(t *testing.T) {
 
 func TestCdrsCfgClone(t *testing.T) {
 	ban := &CdrsCfg{
-		Enabled:          true,
-		StoreCdrs:        true,
+		Enabled: true,
+
 		SMCostRetries:    1,
 		ChargerSConns:    []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers), "*conn1"},
 		AttributeSConns:  []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), "*conn1"},
@@ -312,7 +311,7 @@ func TestDiffCdrsJsonCfg(t *testing.T) {
 				Rules: "Rule1",
 			},
 		},
-		StoreCdrs:        false,
+
 		SMCostRetries:    2,
 		ChargerSConns:    []string{"*localhost"},
 		AttributeSConns:  []string{"*localhost"},
@@ -376,7 +375,7 @@ func TestDiffCdrsJsonCfg(t *testing.T) {
 				Rules: "Rule2",
 			},
 		},
-		StoreCdrs:        true,
+
 		SMCostRetries:    1,
 		ChargerSConns:    []string{"*birpc"},
 		AttributeSConns:  []string{"*birpc"},
@@ -436,7 +435,6 @@ func TestDiffCdrsJsonCfg(t *testing.T) {
 	expected := &CdrsJsonCfg{
 		Enabled:              utils.BoolPointer(true),
 		Extra_fields:         &[]string{"Rule2"},
-		Store_cdrs:           utils.BoolPointer(true),
 		Session_cost_retries: utils.IntPointer(1),
 		Chargers_conns:       &[]string{"*birpc"},
 		Attributes_conns:     &[]string{"*birpc"},
@@ -517,7 +515,6 @@ func TestCdrsCfgCloneSection(t *testing.T) {
 				Rules: "Rule1",
 			},
 		},
-		StoreCdrs:        false,
 		SMCostRetries:    2,
 		ChargerSConns:    []string{"*localhost"},
 		AttributeSConns:  []string{"*localhost"},
@@ -536,7 +533,6 @@ func TestCdrsCfgCloneSection(t *testing.T) {
 				Rules: "Rule1",
 			},
 		},
-		StoreCdrs:        false,
 		SMCostRetries:    2,
 		ChargerSConns:    []string{"*localhost"},
 		AttributeSConns:  []string{"*localhost"},

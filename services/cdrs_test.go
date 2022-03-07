@@ -37,11 +37,9 @@ func TestCdrsCoverage(t *testing.T) {
 	server := cores.NewServer(nil)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	db := NewDataDBService(cfg, nil, srvDep)
-	cfg.StorDbCfg().Type = utils.Internal
-	stordb := NewStorDBService(cfg, srvDep)
 	anz := NewAnalyzerService(cfg, server, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
 	cdrsRPC := make(chan birpc.ClientConnector, 1)
-	cdrS := NewCDRServer(cfg, db, stordb, filterSChan, server,
+	cdrS := NewCDRServer(cfg, db, filterSChan, server,
 		cdrsRPC, nil, anz, srvDep)
 	if cdrS.IsRunning() {
 		t.Errorf("Expected service to be down")
@@ -51,7 +49,6 @@ func TestCdrsCoverage(t *testing.T) {
 		RWMutex:     sync.RWMutex{},
 		cfg:         cfg,
 		dm:          db,
-		storDB:      stordb,
 		filterSChan: filterSChan,
 		server:      server,
 		connChan:    make(chan birpc.ClientConnector, 1),

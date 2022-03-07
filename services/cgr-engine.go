@@ -101,7 +101,6 @@ type CGREngine struct {
 	// services
 	gvS    servmanager.Service
 	dmS    *DataDBService
-	sdbS   *StorDBService
 	anzS   *AnalyzerService
 	coreS  *CoreService
 	cacheS *CacheService
@@ -190,7 +189,6 @@ func (cgr *CGREngine) InitServices(httpPrfPath string, cpuPrfFl io.Closer, memPr
 
 	cgr.gvS = NewGlobalVarS(cgr.cfg, cgr.srvDep)
 	cgr.dmS = NewDataDBService(cgr.cfg, cgr.cM, cgr.srvDep)
-	cgr.sdbS = NewStorDBService(cgr.cfg, cgr.srvDep)
 	cgr.anzS = NewAnalyzerService(cgr.cfg, cgr.server,
 		cgr.iFilterSCh, iAnalyzerSCh, cgr.srvDep) // init AnalyzerS
 
@@ -212,8 +210,8 @@ func (cgr *CGREngine) InitServices(httpPrfPath string, cpuPrfFl io.Closer, memPr
 		iLoaderSCh, cgr.cM, cgr.anzS, cgr.srvDep)
 
 	cgr.srvManager.AddServices(cgr.gvS, cgr.coreS, cgr.cacheS,
-		cgr.ldrs, cgr.anzS, dspS, cgr.dmS, cgr.sdbS,
-		NewAdminSv1Service(cgr.cfg, cgr.dmS, cgr.sdbS, cgr.iFilterSCh, cgr.server,
+		cgr.ldrs, cgr.anzS, dspS, cgr.dmS,
+		NewAdminSv1Service(cgr.cfg, cgr.dmS, cgr.iFilterSCh, cgr.server,
 			iAdminSCh, cgr.cM, cgr.anzS, cgr.srvDep),
 		NewSessionService(cgr.cfg, cgr.dmS, cgr.iFilterSCh, cgr.server, iSessionSCh, cgr.cM, cgr.anzS, cgr.srvDep),
 		NewAttributeService(cgr.cfg, cgr.dmS, cgr.cacheS, cgr.iFilterSCh, cgr.server, iAttributeSCh,
@@ -241,7 +239,7 @@ func (cgr *CGREngine) InitServices(httpPrfPath string, cpuPrfFl io.Closer, memPr
 
 		NewEventExporterService(cgr.cfg, cgr.iFilterSCh,
 			cgr.cM, cgr.server, iEEsCh, cgr.anzS, cgr.srvDep),
-		NewCDRServer(cgr.cfg, cgr.dmS, cgr.sdbS, cgr.iFilterSCh, cgr.server, iCDRServerCh,
+		NewCDRServer(cgr.cfg, cgr.dmS, cgr.iFilterSCh, cgr.server, iCDRServerCh,
 			cgr.cM, cgr.anzS, cgr.srvDep),
 
 		NewRegistrarCService(cgr.cfg, cgr.server, cgr.cM, cgr.anzS, cgr.srvDep),
@@ -270,13 +268,6 @@ func (cgr *CGREngine) StartServices(ctx *context.Context, shtDw context.CancelFu
 	if cgr.dmS.ShouldRun() { // Some services can run without db, ie:  ERs
 		cgr.shdWg.Add(1)
 		if err = cgr.dmS.Start(ctx, shtDw); err != nil {
-			cgr.shdWg.Done()
-			return
-		}
-	}
-	if cgr.sdbS.ShouldRun() { // Some services can run without db, ie:  ERs
-		cgr.shdWg.Add(1)
-		if err = cgr.sdbS.Start(ctx, shtDw); err != nil {
 			cgr.shdWg.Done()
 			return
 		}

@@ -181,7 +181,6 @@ func TestConfigV1SetConfigFromJSONWithDBErr(t *testing.T) {
 		Config: `{
 			"cdrs":{
 				"enabled": false,
-				"store_cdrs": true,
 			}
 		}
 		`,
@@ -379,20 +378,6 @@ func TestStoreDiffSectionHTTP(t *testing.T) {
 
 	cgrCfgV2 := NewDefaultCGRConfig()
 	cgrCfgV2.httpCfg = &HTTPCfg{}
-
-	if err := storeDiffSection(context.Background(), section, new(mockDb), cgrCfgV1, cgrCfgV2); err != utils.ErrNotImplemented || err == nil {
-		t.Error(err)
-	}
-}
-
-func TestStoreDiffSectionStorDB(t *testing.T) {
-	section := StorDBJSON
-
-	cgrCfgV1 := NewDefaultCGRConfig()
-	cgrCfgV1.storDbCfg = &StorDbCfg{}
-
-	cgrCfgV2 := NewDefaultCGRConfig()
-	cgrCfgV2.storDbCfg = &StorDbCfg{}
 
 	if err := storeDiffSection(context.Background(), section, new(mockDb), cgrCfgV1, cgrCfgV2); err != utils.ErrNotImplemented || err == nil {
 		t.Error(err)
@@ -956,9 +941,9 @@ func TestV1SetConfigErr2(t *testing.T) {
 	args := &SetConfigArgs{
 		Config: map[string]interface{}{
 			"cdrs": map[string]interface{}{
-				"enabled":              false,
-				"extra_fields":         []string{},
-				"store_cdrs":           true,
+				"enabled":      false,
+				"extra_fields": []string{},
+
 				"session_cost_retries": 5,
 				"chargers_conns":       []string{},
 				"attributes_conns":     []string{},
@@ -987,7 +972,6 @@ func TestV1SetConfigErr3(t *testing.T) {
 			"cdrs": map[string]interface{}{
 				"enabled":              false,
 				"extra_fields":         []string{},
-				"store_cdrs":           true,
 				"session_cost_retries": 5,
 				"chargers_conns":       []string{},
 				"attributes_conns":     []string{},

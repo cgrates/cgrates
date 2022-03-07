@@ -25,7 +25,6 @@ import (
 	"net/rpc/jsonrpc"
 	"os"
 	"os/exec"
-	"path"
 	"time"
 
 	"github.com/cgrates/birpc/context"
@@ -179,29 +178,6 @@ func InitDataDB(cfg *config.CGRConfig) error {
 	//	Write version before starting
 	if err := OverwriteDBVersions(dm.dataDB); err != nil {
 		return err
-	}
-	return nil
-}
-
-func InitStorDB(cfg *config.CGRConfig) error {
-	storDB, err := NewStorDBConn(cfg.StorDbCfg().Type,
-		cfg.StorDbCfg().Host, cfg.StorDbCfg().Port,
-		cfg.StorDbCfg().Name, cfg.StorDbCfg().User,
-		cfg.StorDbCfg().Password, cfg.GeneralCfg().DBDataEncoding,
-		cfg.StorDbCfg().StringIndexedFields, cfg.StorDbCfg().PrefixIndexedFields,
-		cfg.StorDbCfg().Opts, cfg.StorDbCfg().Items)
-	if err != nil {
-		return err
-	}
-	if err := storDB.Flush(path.Join(cfg.DataFolderPath, "storage",
-		cfg.StorDbCfg().Type)); err != nil {
-		return err
-	}
-	if utils.IsSliceMember([]string{utils.Mongo, utils.MySQL, utils.Postgres},
-		cfg.StorDbCfg().Type) {
-		if err := SetDBVersions(storDB); err != nil {
-			return err
-		}
 	}
 	return nil
 }
