@@ -139,17 +139,11 @@ func (acS *AccountSCfg) loadFromJSONCfg(jsnCfg *AccountSJsonCfg) (err error) {
 
 // AsMapInterface returns the config as a map[string]interface{}
 func (acS AccountSCfg) AsMapInterface(string) interface{} {
-	opts := map[string]interface{}{
-		utils.MetaProfileIDs:           acS.Opts.ProfileIDs,
-		utils.MetaUsage:                acS.Opts.Usage,
-		utils.MetaProfileIgnoreFilters: acS.Opts.ProfileIgnoreFilters,
-	}
 	mp := map[string]interface{}{
 		utils.EnabledCfg:        acS.Enabled,
 		utils.IndexedSelectsCfg: acS.IndexedSelects,
 		utils.NestedFieldsCfg:   acS.NestedFields,
 		utils.MaxIterations:     acS.MaxIterations,
-		utils.OptsCfg:           opts,
 	}
 	if acS.AttributeSConns != nil {
 		mp[utils.AttributeSConnsCfg] = getInternalJSONConns(acS.AttributeSConns)
@@ -159,21 +153,6 @@ func (acS AccountSCfg) AsMapInterface(string) interface{} {
 	}
 	if acS.ThresholdSConns != nil {
 		mp[utils.ThresholdSConnsCfg] = getInternalJSONConns(acS.ThresholdSConns)
-	}
-	if acS.StringIndexedFields != nil {
-		mp[utils.StringIndexedFieldsCfg] = utils.CloneStringSlice(*acS.StringIndexedFields)
-	}
-	if acS.PrefixIndexedFields != nil {
-		mp[utils.PrefixIndexedFieldsCfg] = utils.CloneStringSlice(*acS.PrefixIndexedFields)
-	}
-	if acS.SuffixIndexedFields != nil {
-		mp[utils.SuffixIndexedFieldsCfg] = utils.CloneStringSlice(*acS.SuffixIndexedFields)
-	}
-	if acS.ExistsIndexedFields != nil {
-		mp[utils.ExistsIndexedFieldsCfg] = utils.CloneStringSlice(*acS.ExistsIndexedFields)
-	}
-	if acS.NotExistsIndexedFields != nil {
-		mp[utils.NotExistsIndexedFieldsCfg] = utils.CloneStringSlice(*acS.NotExistsIndexedFields)
 	}
 	if acS.MaxUsage != nil {
 		mp[utils.MaxUsage] = acS.MaxUsage.String()

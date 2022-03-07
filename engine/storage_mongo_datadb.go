@@ -237,7 +237,7 @@ type MongoStorage struct {
 	ctxTTL      time.Duration
 	ctxTTLMutex sync.RWMutex // used for TTL reload
 	db          string
-	storageType string // datadb, stordb
+	storageType string // datadb
 	ms          utils.Marshaler
 	cdrsIndexes []string
 	cnter       *utils.Counter
@@ -322,13 +322,7 @@ func (ms *MongoStorage) ensureIndexesForCol(col string) (err error) { // exporte
 		if err = ms.enusureIndex(col, true, "id"); err != nil {
 			return
 		}
-		//StorDB
-	case utils.TBLTPStats, utils.TBLTPResources, utils.TBLTPDispatchers,
-		utils.TBLTPDispatcherHosts, utils.TBLTPChargers,
-		utils.TBLTPRoutes, utils.TBLTPThresholds:
-		if err = ms.enusureIndex(col, true, "tpid", "id"); err != nil {
-			return
-		}
+
 	case utils.CDRsTBL:
 		if err = ms.enusureIndex(col, true, MetaOriginLow, RunIDLow,
 			OriginIDLow); err != nil {
@@ -371,16 +365,6 @@ func (ms *MongoStorage) EnsureIndexes(cols ...string) (err error) {
 			ColRpl, ColDst, ColRds, ColLht, ColIndx, ColRsP, ColRes, ColSqs, ColSqp,
 			ColTps, ColThs, ColRts, ColAttr, ColFlt, ColCpp, ColDpp, ColRpp, ColApp,
 			ColRpf, ColShg, ColAcc, ColAnp} {
-			if err = ms.ensureIndexesForCol(col); err != nil {
-				return
-			}
-		}
-	}
-	if ms.storageType == utils.StorDB {
-		for _, col := range []string{utils.TBLTPStats, utils.TBLTPResources, utils.TBLTPDispatchers,
-			utils.TBLTPDispatcherHosts, utils.TBLTPChargers,
-			utils.TBLTPRoutes, utils.TBLTPThresholds,
-			utils.CDRsTBL, utils.SessionCostsTBL} {
 			if err = ms.ensureIndexesForCol(col); err != nil {
 				return
 			}

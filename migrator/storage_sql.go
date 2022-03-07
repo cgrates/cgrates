@@ -23,19 +23,10 @@ import (
 	"fmt"
 
 	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/utils"
 	_ "github.com/go-sql-driver/mysql"
 )
 
-func newMigratorSQL(stor engine.StorDB) (sqlMig *migratorSQL) {
-	return &migratorSQL{
-		storDB:     &stor,
-		sqlStorage: stor.(*engine.SQLStorage),
-	}
-}
-
 type migratorSQL struct {
-	storDB     *engine.StorDB
 	sqlStorage *engine.SQLStorage
 	rowIter    *sql.Rows
 }
@@ -44,15 +35,8 @@ func (sqlMig *migratorSQL) close() {
 	sqlMig.sqlStorage.Close()
 }
 
-func (sqlMig *migratorSQL) StorDB() engine.StorDB {
-	return *sqlMig.storDB
-}
-
 func (mgSQL *migratorSQL) renameV1SMCosts() (err error) {
 	qry := "RENAME TABLE sm_costs TO session_costs;"
-	if mgSQL.StorDB().GetStorageType() == utils.Postgres {
-		qry = "ALTER TABLE sm_costs RENAME TO session_costs"
-	}
 	if _, err := mgSQL.sqlStorage.DB.Exec(qry); err != nil {
 		return err
 	}
@@ -61,22 +45,7 @@ func (mgSQL *migratorSQL) renameV1SMCosts() (err error) {
 
 func (mgSQL *migratorSQL) createV1SMCosts() (err error) {
 	qry := fmt.Sprint("CREATE TABLE sm_costs (  id int(11) NOT NULL AUTO_INCREMENT,    run_id  varchar(64) NOT NULL,  origin_host varchar(64) NOT NULL,  origin_id varchar(128) NOT NULL,  cost_source varchar(64) NOT NULL,  `usage` BIGINT NOT NULL,  cost_details MEDIUMTEXT,  created_at TIMESTAMP NULL,deleted_at TIMESTAMP NULL,  PRIMARY KEY (`id`),UNIQUE KEY costid ( run_id),KEY origin_idx (origin_host, origin_id),KEY run_origin_idx (run_id, origin_id),KEY deleted_at_idx (deleted_at));")
-	if mgSQL.StorDB().GetStorageType() == utils.Postgres {
-		qry = `
-	CREATE TABLE sm_costs (
-	  id SERIAL PRIMARY KEY,
-	  run_id  VARCHAR(64) NOT NULL,
-	  origin_host VARCHAR(64) NOT NULL,
-	  origin_id VARCHAR(128) NOT NULL,
-	  cost_source VARCHAR(64) NOT NULL,
-	  usage BIGINT NOT NULL,
-	  cost_details jsonb,
-	  created_at TIMESTAMP WITH TIME ZONE,
-	  deleted_at TIMESTAMP WITH TIME ZONE NULL,
-	  UNIQUE ( run_id)
-	);
-		`
-	}
+
 	if _, err := mgSQL.sqlStorage.DB.Exec("DROP TABLE IF EXISTS session_costs;"); err != nil {
 		return err
 	}

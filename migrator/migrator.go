@@ -67,10 +67,6 @@ func (m *Migrator) Migrate(taskIDs []string) (err error, stats map[string]int) {
 				return utils.NewCGRError(utils.Migrator, utils.ServerErrorCaps, err.Error(),
 					fmt.Sprintf("error: <%s> when seting versions for DataDB", err.Error())), nil
 			}
-			if err != nil {
-				return utils.NewCGRError(utils.Migrator, utils.ServerErrorCaps, err.Error(),
-					fmt.Sprintf("error: <%s> when seting versions for StorDB", err.Error())), nil
-			}
 		case utils.MetaEnsureIndexes:
 
 			if m.dmOut.DataManager().DataDB().GetStorageType() == utils.Mongo {

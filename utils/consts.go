@@ -45,13 +45,8 @@ var (
 		CacheActionProfilesFilterIndexes, CacheAccountsFilterIndexes, CacheReverseFilterIndexes,
 		CacheAccounts})
 
-	storDBPartition = NewStringSet([]string{
-		CacheTBLTPResources, CacheTBLTPStats, CacheTBLTPThresholds, CacheTBLTPFilters, CacheSessionCostsTBL, CacheCDRsTBL,
-		CacheTBLTPRoutes, CacheTBLTPAttributes, CacheTBLTPChargers, CacheTBLTPDispatchers,
-		CacheTBLTPDispatcherHosts, CacheTBLTPRateProfiles, CacheTBLTPActionProfiles, CacheTBLTPAccounts, CacheVersions})
-
 	// CachePartitions enables creation of cache partitions
-	CachePartitions = JoinStringSet(extraDBPartition, DataDBPartitions /*,storDBPartition*/)
+	CachePartitions = JoinStringSet(extraDBPartition, DataDBPartitions)
 
 	CacheInstanceToPrefix = map[string]string{
 		CacheResourceProfiles:            ResourceProfilesPrefix,
@@ -112,23 +107,6 @@ var (
 		CacheActionProfiles:     CacheActionProfilesFilterIndexes,
 		CacheFilters:            CacheReverseFilterIndexes,
 		CacheAccounts:           CacheAccountsFilterIndexes,
-	}
-
-	CacheStorDBPartitions = map[string]string{
-		TBLTPResources:       CacheTBLTPResources,
-		TBLTPStats:           CacheTBLTPStats,
-		TBLTPThresholds:      CacheTBLTPThresholds,
-		TBLTPFilters:         CacheTBLTPFilters,
-		SessionCostsTBL:      CacheSessionCostsTBL,
-		CDRsTBL:              CacheCDRsTBL,
-		TBLTPRoutes:          CacheTBLTPRoutes,
-		TBLTPAttributes:      CacheTBLTPAttributes,
-		TBLTPChargers:        CacheTBLTPChargers,
-		TBLTPDispatchers:     CacheTBLTPDispatchers,
-		TBLTPDispatcherHosts: CacheTBLTPDispatcherHosts,
-		TBLTPRateProfiles:    CacheTBLTPRateProfiles,
-		TBLTPActionProfiles:  CacheTBLTPActionProfiles,
-		TBLTPAccounts:        CacheTBLTPAccounts,
 	}
 
 	// ProtectedSFlds are the fields that sessions should not alter
@@ -352,7 +330,6 @@ const (
 	MetaDumpToJSON           = "*dump_to_json"
 	NonTransactional         = ""
 	DataDB                   = "data_db"
-	StorDB                   = "stor_db"
 	NotFoundCaps             = "NOT_FOUND"
 	ServerErrorCaps          = "SERVER_ERROR"
 	MandatoryIEMissingCaps   = "MANDATORY_IE_MISSING"
@@ -490,7 +467,6 @@ const (
 	Subscribers   = "Subscribers"
 	//Destinations             = "Destinations"
 	MetaSubscribers          = "*subscribers"
-	MetaStorDB               = "*stordb"
 	MetaDataDB               = "*datadb"
 	MetaWeight               = "*weight"
 	MetaLC                   = "*lc"
@@ -1188,11 +1164,11 @@ const (
 	AdminSv1GetFiltersCount     = "AdminSv1.GetFiltersCount"
 	AdminSv1GetFilters          = "AdminSv1.GetFilters"
 	// APIerSv1SetDataDBVersions   = "APIerSv1.SetDataDBVersions"
-	// APIerSv1SetStorDBVersions   = "APIerSv1.SetStorDBVersions"
+
 	// APIerSv1GetActions          = "APIerSv1.GetActions"
 
 	// APIerSv1GetDataDBVersions        = "APIerSv1.GetDataDBVersions"
-	// APIerSv1GetStorDBVersions        = "APIerSv1.GetStorDBVersions"
+
 	// APIerSv1GetCDRs                  = "APIerSv1.GetCDRs"
 	// APIerSv1GetTPActions             = "APIerSv1.GetTPActions"
 	// APIerSv1GetTPAttributeProfile    = "APIerSv1.GetTPAttributeProfile"
@@ -1263,7 +1239,7 @@ const (
 
 // APIerSv1 TP APIs
 const (
-// APIerSv1LoadTariffPlanFromStorDb = "APIerSv1.LoadTariffPlanFromStorDb"
+
 // APIerSv1RemoveTPFromFolder       = "APIerSv1.RemoveTPFromFolder"
 )
 
@@ -1678,20 +1654,8 @@ const (
 
 	// storDB
 
-	CacheTBLTPResources       = "*tp_resources"
-	CacheTBLTPStats           = "*tp_stats"
-	CacheTBLTPThresholds      = "*tp_thresholds"
-	CacheTBLTPFilters         = "*tp_filters"
-	CacheSessionCostsTBL      = "*session_costs"
-	CacheCDRsTBL              = "*cdrs"
-	CacheTBLTPRoutes          = "*tp_routes"
-	CacheTBLTPAttributes      = "*tp_attributes"
-	CacheTBLTPChargers        = "*tp_chargers"
-	CacheTBLTPDispatchers     = "*tp_dispatcher_profiles"
-	CacheTBLTPDispatcherHosts = "*tp_dispatcher_hosts"
-	CacheTBLTPRateProfiles    = "*tp_rate_profiles"
-	CacheTBLTPActionProfiles  = "*tp_action_profiles"
-	CacheTBLTPAccounts        = "*tp_accounts"
+	CacheSessionCostsTBL = "*session_costs"
+	CacheCDRsTBL         = "*cdrs"
 )
 
 // Prefix for indexing
@@ -1726,16 +1690,6 @@ const (
 const (
 	MetaGoogleAPI             = "*gapi"
 	GoogleCredentialsFileName = "credentials.json"
-)
-
-// StorDB
-var (
-	PostgressSSLModeDisable    = "disable"
-	PostgressSSLModeAllow      = "allow"
-	PostgressSSLModePrefer     = "prefer"
-	PostgressSSLModeRequire    = "require"
-	PostgressSSLModeVerifyCa   = "verify-ca"
-	PostgressSSLModeVerifyFull = "verify-full"
 )
 
 // GeneralCfg
@@ -2171,13 +2125,6 @@ const (
 	OutDataDBPasswordCfg   = "out_datadb_password"
 	OutDataDBEncodingCfg   = "out_datadb_encoding"
 	OutDataDBRedisSentinel = "out_redis_sentinel"
-	OutStorDBTypeCfg       = "out_stordb_type"
-	OutStorDBHostCfg       = "out_stordb_host"
-	OutStorDBPortCfg       = "out_stordb_port"
-	OutStorDBNameCfg       = "out_stordb_name"
-	OutStorDBUserCfg       = "out_stordb_user"
-	OutStorDBPasswordCfg   = "out_stordb_password"
-	OutStorDBOptsCfg       = "out_stordb_opts"
 	OutDataDBOptsCfg       = "out_datadb_opts"
 	UsersFiltersCfg        = "users_filters"
 )
@@ -2630,20 +2577,11 @@ const (
 	CpuPathCgr           = "cpu.prof"
 	//Cgr loader
 	CgrLoader         = "cgr-loader"
-	StorDBTypeCgr     = "stordb_type"
-	StorDBHostCgr     = "stordb_host"
-	StorDBPortCgr     = "stordb_port"
-	StorDBNameCgr     = "stordb_name"
-	StorDBUserCgr     = "stordb_user"
-	StorDBPasswdCgr   = "stordb_passwd"
 	CachingArgCgr     = "caching"
 	FieldSepCgr       = "field_sep"
 	ImportIDCgr       = "import_id"
 	DisableReverseCgr = "disable_reverse_mappings"
-	FlushStorDB       = "flush_stordb"
 	RemoveCgr         = "remove"
-	FromStorDBCgr     = "from_stordb"
-	ToStorDBcgr       = "to_stordb"
 	CacheSAddress     = "caches_address"
 	SchedulerAddress  = "scheduler_address"
 	//Cgr migrator

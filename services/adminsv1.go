@@ -82,11 +82,6 @@ func (apiService *AdminSv1Service) Start(ctx *context.Context, _ context.CancelF
 		return
 	}
 
-	// apiService.stopChan = make(chan struct{})
-	// storDBChan := make(chan engine.StorDB, 1)
-	// apiService.storDB.RegisterSyncChan(storDBChan)
-	// stordb := <-storDBChan
-
 	apiService.Lock()
 	defer apiService.Unlock()
 
