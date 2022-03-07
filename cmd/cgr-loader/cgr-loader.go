@@ -36,7 +36,6 @@ import (
 
 var (
 	dataDB engine.DataDB
-	storDB engine.LoadStorage
 
 	cgrLoaderFlags = flag.NewFlagSet(utils.CgrLoader, flag.ContinueOnError)
 	dfltCfg        = config.CgrConfig()
@@ -71,19 +70,6 @@ var (
 	dbRedisClientKey         = cgrLoaderFlags.String(utils.RedisClientKeyCfg, utils.EmptyString, "Path to the client key")
 	dbRedisCACertificate     = cgrLoaderFlags.String(utils.RedisCACertificateCfg, utils.EmptyString, "Path to the CA certificate")
 
-	storDBType = cgrLoaderFlags.String(utils.StorDBTypeCgr, dfltCfg.StorDbCfg().Type,
-		"The type of the storDb database <*mysql|*postgres|*mongo>")
-	storDBHost = cgrLoaderFlags.String(utils.StorDBHostCgr, dfltCfg.StorDbCfg().Host,
-		"The storDb host to connect to.")
-	storDBPort = cgrLoaderFlags.String(utils.StorDBPortCgr, dfltCfg.StorDbCfg().Port,
-		"The storDb port to bind to.")
-	storDBName = cgrLoaderFlags.String(utils.StorDBNameCgr, dfltCfg.StorDbCfg().Name,
-		"The name/number of the storDb to connect to.")
-	storDBUser = cgrLoaderFlags.String(utils.StorDBUserCgr, dfltCfg.StorDbCfg().User,
-		"The storDb user to sign in as.")
-	storDBPasswd = cgrLoaderFlags.String(utils.StorDBPasswdCgr, dfltCfg.StorDbCfg().Password,
-		"The storDb user's password.")
-
 	cachingArg = cgrLoaderFlags.String(utils.CachingArgCgr, utils.EmptyString,
 		"Caching strategy used when loading TP")
 	tpid = cgrLoaderFlags.String(utils.TpIDCfg, dfltCfg.LoaderCgrCfg().TpID,
@@ -102,14 +88,11 @@ var (
 	importID       = cgrLoaderFlags.String(utils.ImportIDCgr, utils.EmptyString, "Uniquely identify an import/load, postpended to some automatic fields")
 	timezone       = cgrLoaderFlags.String(utils.TimezoneCfg, dfltCfg.GeneralCfg().DefaultTimezone, `Timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>`)
 	disableReverse = cgrLoaderFlags.Bool(utils.DisableReverseCgr, false, "Will disable reverse mappings rebuilding")
-	flushStorDB    = cgrLoaderFlags.Bool(utils.FlushStorDB, false, "Remove tariff plan data for id from the database")
 	remove         = cgrLoaderFlags.Bool(utils.RemoveCgr, false, "Will remove instead of adding data from DB")
 	apiKey         = cgrLoaderFlags.String(utils.APIKeyCfg, utils.EmptyString, "Api Key used to comosed ArgDispatcher")
 	routeID        = cgrLoaderFlags.String(utils.RouteIDCfg, utils.EmptyString, "RouteID used to comosed ArgDispatcher")
 	tenant         = cgrLoaderFlags.String(utils.TenantCfg, dfltCfg.GeneralCfg().DefaultTenant, "If set, will overwrite the default tenant")
 
-	fromStorDB    = cgrLoaderFlags.Bool(utils.FromStorDBCgr, false, "Load the tariff plan from storDb to dataDb")
-	toStorDB      = cgrLoaderFlags.Bool(utils.ToStorDBcgr, false, "Import the tariff plan from files to storDb")
 	cacheSAddress = cgrLoaderFlags.String(utils.CacheSAddress, dfltCfg.LoaderCgrCfg().CachesConns[0],
 		"CacheS component to contact for cache reloads, empty to disable automatic cache reloads")
 	schedulerAddress = cgrLoaderFlags.String(utils.SchedulerAddress, dfltCfg.LoaderCgrCfg().ActionSConns[0], "")
@@ -199,31 +182,6 @@ func loadConfig() (ldrCfg *config.CGRConfig) {
 		ldrCfg.GeneralCfg().DBDataEncoding = *dbDataEncoding
 	}
 
-	// Data for StorDB
-	if *storDBType != dfltCfg.StorDbCfg().Type {
-		ldrCfg.StorDbCfg().Type = strings.TrimPrefix(*storDBType, utils.Meta)
-	}
-
-	if *storDBHost != dfltCfg.StorDbCfg().Host {
-		ldrCfg.StorDbCfg().Host = *storDBHost
-	}
-
-	if *storDBPort != dfltCfg.StorDbCfg().Port {
-		ldrCfg.StorDbCfg().Port = *storDBPort
-	}
-
-	if *storDBName != dfltCfg.StorDbCfg().Name {
-		ldrCfg.StorDbCfg().Name = *storDBName
-	}
-
-	if *storDBUser != dfltCfg.StorDbCfg().User {
-		ldrCfg.StorDbCfg().User = *storDBUser
-	}
-
-	if *storDBPasswd != dfltCfg.StorDbCfg().Password {
-		ldrCfg.StorDbCfg().Password = *storDBPasswd
-	}
-
 	if *tpid != dfltCfg.LoaderCgrCfg().TpID {
 		ldrCfg.LoaderCgrCfg().TpID = *tpid
 	}
@@ -292,14 +250,8 @@ func importData(cfg *config.CGRConfig) (err error) {
 	if cfg.LoaderCgrCfg().TpID == utils.EmptyString {
 		return errors.New("TPid required")
 	}
-	if *flushStorDB {
-		if err = storDB.RemTpData(utils.EmptyString, cfg.LoaderCgrCfg().TpID, map[string]string{}); err != nil {
-			return
-		}
-	}
 	csvImporter := engine.TPCSVImporter{
 		TPid:     cfg.LoaderCgrCfg().TpID,
-		StorDB:   storDB,
 		DirPath:  *dataPath,
 		Sep:      cfg.LoaderCgrCfg().FieldSeparator,
 		Verbose:  *verbose,
@@ -309,10 +261,7 @@ func importData(cfg *config.CGRConfig) (err error) {
 }
 
 func getLoader(cfg *config.CGRConfig) (loader engine.LoadReader, err error) {
-	if *fromStorDB { // Load Tariff Plan from storDb into dataDb
-		loader = storDB
-		return
-	}
+
 	if gprefix := utils.MetaGoogleAPI + utils.ConcatenatedKeySep; strings.HasPrefix(*dataPath, gprefix) { // Default load from csv files to dataDb
 		return engine.NewGoogleCSVStorage(cfg.LoaderCgrCfg().FieldSeparator, strings.TrimPrefix(*dataPath, gprefix))
 	}
@@ -342,35 +291,15 @@ func main() {
 	// we initialize connManager here with nil for InternalChannels
 	engine.NewConnManager(ldrCfg)
 
-	if !*toStorDB {
-		if dataDB, err = engine.NewDataDBConn(ldrCfg.DataDbCfg().Type,
-			ldrCfg.DataDbCfg().Host, ldrCfg.DataDbCfg().Port,
-			ldrCfg.DataDbCfg().Name, ldrCfg.DataDbCfg().User,
-			ldrCfg.DataDbCfg().Password, ldrCfg.GeneralCfg().DBDataEncoding,
-			ldrCfg.DataDbCfg().Opts, ldrCfg.DataDbCfg().Items); err != nil {
-			log.Fatalf("Coud not open dataDB connection: %s", err.Error())
-		}
-		defer dataDB.Close()
+	if dataDB, err = engine.NewDataDBConn(ldrCfg.DataDbCfg().Type,
+		ldrCfg.DataDbCfg().Host, ldrCfg.DataDbCfg().Port,
+		ldrCfg.DataDbCfg().Name, ldrCfg.DataDbCfg().User,
+		ldrCfg.DataDbCfg().Password, ldrCfg.GeneralCfg().DBDataEncoding,
+		ldrCfg.DataDbCfg().Opts, ldrCfg.DataDbCfg().Items); err != nil {
+		log.Fatalf("Coud not open dataDB connection: %s", err.Error())
 	}
+	defer dataDB.Close()
 
-	if *fromStorDB || *toStorDB {
-		if storDB, err = engine.NewStorDBConn(ldrCfg.StorDbCfg().Type,
-			ldrCfg.StorDbCfg().Host, ldrCfg.StorDbCfg().Port,
-			ldrCfg.StorDbCfg().Name, ldrCfg.StorDbCfg().User,
-			ldrCfg.StorDbCfg().Password, ldrCfg.GeneralCfg().DBDataEncoding,
-			ldrCfg.StorDbCfg().StringIndexedFields, ldrCfg.StorDbCfg().PrefixIndexedFields,
-			ldrCfg.StorDbCfg().Opts, ldrCfg.StorDbCfg().Items); err != nil {
-			log.Fatalf("Coud not open storDB connection: %s", err.Error())
-		}
-		defer storDB.Close()
-	}
-
-	if !*dryRun && *toStorDB { // Import files from a directory into storDb
-		if err = importData(ldrCfg); err != nil {
-			log.Fatal(err)
-		}
-		return
-	}
 	var loader engine.LoadReader
 	if loader, err = getLoader(ldrCfg); err != nil {
 		log.Fatal(err)

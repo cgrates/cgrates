@@ -126,40 +126,10 @@ func TestCGRLoaderFlags(t *testing.T) {
 		t.Errorf("Expected /path/to/CACertificate, received %+v", *dbRedisCACertificate)
 	}
 
-	if err := cgrLoaderFlags.Parse([]string{"-stordb_type", "*mongo"}); err != nil {
-		t.Error(err)
-	} else if *storDBType != "*mongo" {
-		t.Errorf("Expected *mongo, received %+v", *storDBType)
-	}
-
-	if err := cgrLoaderFlags.Parse([]string{"-stordb_host", "CGRATES"}); err != nil {
-		t.Error(err)
-	} else if *storDBHost != "CGRATES" {
-		t.Errorf("Expected CGRATES, received %+v", *storDBHost)
-	}
-
 	if err := cgrLoaderFlags.Parse([]string{"-stordb_port", "6533"}); err != nil {
 		t.Error(err)
 	} else if *storDBPort != "6533" {
 		t.Errorf("Expected 6533, received %+v", *storDBPort)
-	}
-
-	if err := cgrLoaderFlags.Parse([]string{"-stordb_name", "stordb"}); err != nil {
-		t.Error(err)
-	} else if *storDBName != "stordb" {
-		t.Errorf("Expected stordb, received %+v", *storDBName)
-	}
-
-	if err := cgrLoaderFlags.Parse([]string{"-stordb_user", "cgrates_user"}); err != nil {
-		t.Error(err)
-	} else if *storDBUser != "cgrates_user" {
-		t.Errorf("Expected cgrates_user, received %+v", *storDBUser)
-	}
-
-	if err := cgrLoaderFlags.Parse([]string{"-stordb_passwd", "cgrates.org"}); err != nil {
-		t.Error(err)
-	} else if *storDBPasswd != "cgrates.org" {
-		t.Errorf("Expected cgrates.org, received %+v", *storDBPasswd)
 	}
 
 	if err := cgrLoaderFlags.Parse([]string{"-caching", "*none"}); err != nil {
@@ -222,12 +192,6 @@ func TestCGRLoaderFlags(t *testing.T) {
 		t.Errorf("Expected true, received %+v", *disableReverse)
 	}
 
-	if err := cgrLoaderFlags.Parse([]string{"-flush_stordb", "true"}); err != nil {
-		t.Error(err)
-	} else if *flushStorDB != true {
-		t.Errorf("Expected true, received %+v", *flushStorDB)
-	}
-
 	if err := cgrLoaderFlags.Parse([]string{"-remove", "true"}); err != nil {
 		t.Error(err)
 	} else if *remove != true {
@@ -244,18 +208,6 @@ func TestCGRLoaderFlags(t *testing.T) {
 		t.Error(err)
 	} else if *routeID != "route_idss" {
 		t.Errorf("Expected route_idss, received %+v", *routeID)
-	}
-
-	if err := cgrLoaderFlags.Parse([]string{"-from_stordb", "true"}); err != nil {
-		t.Error(err)
-	} else if *fromStorDB != true {
-		t.Errorf("Expected true, received %+v", *fromStorDB)
-	}
-
-	if err := cgrLoaderFlags.Parse([]string{"-to_stordb", "true"}); err != nil {
-		t.Error(err)
-	} else if *toStorDB != true {
-		t.Errorf("Expected true, received %+v", *toStorDB)
 	}
 
 	if err := cgrLoaderFlags.Parse([]string{"-caches_address", "*internal"}); err != nil {

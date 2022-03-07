@@ -89,32 +89,6 @@ func TestLoadConfig(t *testing.T) {
 		RmtConns: []string{},
 		RplConns: []string{},
 	}
-	// StorDB
-	*storDBType = utils.MetaPostgres
-	*storDBHost = "localhost"
-	*storDBPort = "2012"
-	*storDBName = "cgrates2"
-	*storDBUser = "10"
-	*storDBPasswd = "toor"
-	expStorDB := &config.StorDbCfg{
-		Type:                utils.Postgres,
-		Host:                "localhost",
-		Port:                "2012",
-		Name:                "cgrates2",
-		User:                "10",
-		Password:            "toor",
-		StringIndexedFields: []string{},
-		PrefixIndexedFields: []string{},
-		Opts: &config.StorDBOpts{
-			SQLConnMaxLifetime: 0,
-			MongoQueryTimeout:  10 * time.Second,
-			SQLMaxOpenConns:    100,
-			SQLMaxIdleConns:    10,
-			SSLMode:            "disable",
-			MySQLLocation:      "Local",
-			SQLDSNParams:       make(map[string]string),
-		},
-	}
 	// Loader
 	*tpid = "1"
 	*disableReverse = true
