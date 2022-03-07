@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"reflect"
 	"testing"
 	"time"
 
@@ -566,6 +567,560 @@ func TestLibFiltersGetIntOptsReturnOptFromAPIOpts(t *testing.T) {
 		config.AttributesProcessRunsDftOpt, "nonExistingAPIOpt", utils.OptsAttributesProcessRuns); err != nil {
 		t.Error(err)
 	} else if rcv != expected {
+		t.Errorf("expected: <%+v>,\nreceived: <%+v>", expected, rcv)
+	}
+}
+
+func TestLibFiltersGetTimeOptsReturnConfigOpt(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	dataDB := NewInternalDB(nil, nil, nil)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	fS := NewFilterS(cfg, nil, dm)
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "TestEvent",
+		Event: map[string]interface{}{
+			utils.AccountField: 1001,
+		},
+		APIOpts: map[string]interface{}{},
+	}
+	dynOpts := []*utils.DynamicStringOpt{
+		// tenant will not be recognized, will ignore this opt
+		{
+			FilterIDs: []string{"*string:~*req.Account:1001"},
+			Tenant:    "cgrates.net",
+			Value:     "2022-03-07T15:04:05",
+		},
+		// filter will not pass, will ignore this opt
+		{
+			FilterIDs: []string{"*string:~*req.Account:1002"},
+			Tenant:    "cgrates.org",
+			Value:     "*daily",
+		},
+		{
+			FilterIDs: []string{"*string:~*req.Account:1001"},
+			Tenant:    "cgrates.org",
+			Value:     "*monthly",
+		},
+	}
+
+	expected := time.Now().AddDate(0, 1, 0)
+	if rcv, err := GetTimeOpts(context.Background(), "cgrates.org", ev, fS, dynOpts,
+		cfg.GeneralCfg().DefaultTimezone, config.RatesStartTimeDftOpt, utils.OptsRatesStartTime); err != nil {
+		t.Error(err)
+	} else if !dateEqual(rcv, expected) {
+		t.Errorf("expected: <%+v>,\nreceived: <%+v>", expected, rcv)
+	}
+}
+
+func TestLibFiltersGetTimeOptsFilterCheckErr(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	dataDB := NewInternalDB(nil, nil, nil)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	fS := NewFilterS(cfg, nil, dm)
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "TestEvent",
+		Event: map[string]interface{}{
+			utils.AccountField: 1001,
+		},
+		APIOpts: map[string]interface{}{},
+	}
+	dynOpts := []*utils.DynamicStringOpt{
+		// function will return error after trying to parse the filter
+		{
+			FilterIDs: []string{"*string.invalid:filter"},
+			Tenant:    "cgrates.org",
+			Value:     "*daily",
+		},
+	}
+
+	experr := `inline parse error for string: <*string.invalid:filter>`
+	if _, err := GetTimeOpts(context.Background(), "cgrates.org", ev, fS, dynOpts,
+		cfg.GeneralCfg().DefaultTimezone, config.RatesStartTimeDftOpt, utils.OptsRatesStartTime); err == nil ||
+		err.Error() != experr {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+}
+
+func TestLibFiltersGetTimeOptsReturnDefaultOpt(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	dataDB := NewInternalDB(nil, nil, nil)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	fS := NewFilterS(cfg, nil, dm)
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "TestEvent",
+		Event: map[string]interface{}{
+			utils.AccountField: 1001,
+		},
+		APIOpts: map[string]interface{}{},
+	}
+	dynOpts := []*utils.DynamicStringOpt{
+		// filter will not pass, will ignore this opt
+		{
+			FilterIDs: []string{"*string:~*req.Account:1002"},
+			Tenant:    "cgrates.org",
+			Value:     "*daily",
+		},
+	}
+
+	expected, err := utils.ParseTimeDetectLayout(config.RatesStartTimeDftOpt, cfg.GeneralCfg().DefaultTimezone)
+	if err != nil {
+		t.Error(err)
+	}
+	if rcv, err := GetTimeOpts(context.Background(), "cgrates.org", ev, fS, dynOpts,
+		cfg.GeneralCfg().DefaultTimezone, config.RatesStartTimeDftOpt, utils.OptsRatesStartTime); err != nil {
+		t.Error(err)
+	} else if !dateEqual(rcv, expected) {
+		t.Errorf("expected: <%+v>,\nreceived: <%+v>", expected, rcv)
+	}
+}
+
+func TestLibFiltersGetTimeOptsReturnOptFromAPIOpts(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	dataDB := NewInternalDB(nil, nil, nil)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	fS := NewFilterS(cfg, nil, dm)
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "TestEvent",
+		Event: map[string]interface{}{
+			utils.AccountField: 1001,
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsRatesStartTime: "*yearly",
+		},
+	}
+	dynOpts := []*utils.DynamicStringOpt{
+		// will never get to this opt because it will return once it
+		// finds the one set in APIOpts
+		{
+			FilterIDs: []string{"*string:~*req.Account:1001"},
+			Tenant:    "cgrates.org",
+			Value:     "*monthly",
+		},
+	}
+
+	expected := time.Now().AddDate(1, 0, 0)
+	if rcv, err := GetTimeOpts(context.Background(), "cgrates.org", ev, fS, dynOpts,
+		cfg.GeneralCfg().DefaultTimezone, config.RatesStartTimeDftOpt, "nonExistingAPIOpt", utils.OptsRatesStartTime); err != nil {
+		t.Error(err)
+	} else if !dateEqual(rcv, expected) {
+		t.Errorf("expected: <%+v>,\nreceived: <%+v>", expected, rcv)
+	}
+}
+
+func dateEqual(date1, date2 time.Time) bool {
+	y1, m1, d1 := date1.Date()
+	y2, m2, d2 := date2.Date()
+	return y1 == y2 && m1 == m2 && d1 == d2
+}
+
+func TestLibFiltersGetBoolOptsReturnConfigOpt(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	dataDB := NewInternalDB(nil, nil, nil)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	fS := NewFilterS(cfg, nil, dm)
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "TestEvent",
+		Event: map[string]interface{}{
+			utils.AccountField: 1001,
+		},
+		APIOpts: map[string]interface{}{},
+	}
+	dynOpts := []*utils.DynamicBoolOpt{
+		// tenant will not be recognized, will ignore this opt
+		{
+			FilterIDs: []string{"*string:~*req.Account:1001"},
+			Tenant:    "cgrates.net",
+			Value:     false,
+		},
+		// filter will not pass, will ignore this opt
+		{
+			FilterIDs: []string{"*string:~*req.Account:1002"},
+			Tenant:    "cgrates.org",
+			Value:     false,
+		},
+		{
+			FilterIDs: []string{"*string:~*req.Account:1001"},
+			Tenant:    "cgrates.org",
+			Value:     true,
+		},
+	}
+
+	expected := true
+	if rcv, err := GetBoolOpts(context.Background(), "cgrates.org", ev, fS, dynOpts,
+		config.ThresholdsProfileIgnoreFiltersDftOpt, utils.MetaProfileIgnoreFilters); err != nil {
+		t.Error(err)
+	} else if rcv != expected {
+		t.Errorf("expected: <%+v>,\nreceived: <%+v>", expected, rcv)
+	}
+}
+
+func TestLibFiltersGetBoolOptsFilterCheckErr(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	dataDB := NewInternalDB(nil, nil, nil)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	fS := NewFilterS(cfg, nil, dm)
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "TestEvent",
+		Event: map[string]interface{}{
+			utils.AccountField: 1001,
+		},
+		APIOpts: map[string]interface{}{},
+	}
+	dynOpts := []*utils.DynamicBoolOpt{
+		// function will return error after trying to parse the filter
+		{
+			FilterIDs: []string{"*string.invalid:filter"},
+			Tenant:    "cgrates.org",
+			Value:     false,
+		},
+	}
+
+	experr := `inline parse error for string: <*string.invalid:filter>`
+	if _, err := GetBoolOpts(context.Background(), "cgrates.org", ev, fS, dynOpts,
+		config.ThresholdsProfileIgnoreFiltersDftOpt, utils.MetaProfileIgnoreFilters); err == nil ||
+		err.Error() != experr {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+}
+
+func TestLibFiltersGetBoolOptsReturnDefaultOpt(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	dataDB := NewInternalDB(nil, nil, nil)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	fS := NewFilterS(cfg, nil, dm)
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "TestEvent",
+		Event: map[string]interface{}{
+			utils.AccountField: 1001,
+		},
+		APIOpts: map[string]interface{}{},
+	}
+	dynOpts := []*utils.DynamicBoolOpt{
+		// filter will not pass, will ignore this opt
+		{
+			FilterIDs: []string{"*string:~*req.Account:1002"},
+			Tenant:    "cgrates.org",
+			Value:     true,
+		},
+	}
+
+	if rcv, err := GetBoolOpts(context.Background(), "cgrates.org", ev, fS, dynOpts,
+		config.ThresholdsProfileIgnoreFiltersDftOpt, utils.MetaProfileIgnoreFilters); err != nil {
+		t.Error(err)
+	} else if rcv != config.ThresholdsProfileIgnoreFiltersDftOpt {
+		t.Errorf("expected: <%+v>,\nreceived: <%+v>", config.ThresholdsProfileIgnoreFiltersDftOpt, rcv)
+	}
+}
+
+func TestLibFiltersGetBoolOptsReturnOptFromAPIOpts(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	dataDB := NewInternalDB(nil, nil, nil)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	fS := NewFilterS(cfg, nil, dm)
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "TestEvent",
+		Event: map[string]interface{}{
+			utils.AccountField: 1001,
+		},
+		APIOpts: map[string]interface{}{
+			utils.MetaProfileIgnoreFilters: true,
+		},
+	}
+	dynOpts := []*utils.DynamicBoolOpt{
+		// will never get to this opt because it will return once it
+		// finds the one set in APIOpts
+		{
+			FilterIDs: []string{"*string:~*req.Account:1001"},
+			Tenant:    "cgrates.org",
+			Value:     false,
+		},
+	}
+
+	expected := true
+	if rcv, err := GetBoolOpts(context.Background(), "cgrates.org", ev, fS, dynOpts,
+		config.ThresholdsProfileIgnoreFiltersDftOpt, "nonExistingAPIOpt", utils.MetaProfileIgnoreFilters); err != nil {
+		t.Error(err)
+	} else if rcv != expected {
+		t.Errorf("expected: <%+v>,\nreceived: <%+v>", expected, rcv)
+	}
+}
+
+func TestLibFiltersGetInterfaceOptsReturnConfigOpt(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	dataDB := NewInternalDB(nil, nil, nil)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	fS := NewFilterS(cfg, nil, dm)
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "TestEvent",
+		Event: map[string]interface{}{
+			utils.AccountField: 1001,
+		},
+		APIOpts: map[string]interface{}{},
+	}
+	dynOpts := []*utils.DynamicInterfaceOpt{
+		// tenant will not be recognized, will ignore this opt
+		{
+			FilterIDs: []string{"*string:~*req.Account:1001"},
+			Tenant:    "cgrates.net",
+			Value:     1,
+		},
+		// filter will not pass, will ignore this opt
+		{
+			FilterIDs: []string{"*string:~*req.Account:1002"},
+			Tenant:    "cgrates.org",
+			Value:     "value2",
+		},
+		{
+			FilterIDs: []string{"*string:~*req.Account:1001"},
+			Tenant:    "cgrates.org",
+			Value:     "value3",
+		},
+	}
+
+	expected := "value3"
+	if rcv, err := GetInterfaceOpts(context.Background(), "cgrates.org", ev, fS, dynOpts,
+		config.RoutesMaxCostDftOpt, utils.OptsRoutesMaxCost); err != nil {
+		t.Error(err)
+	} else if rcv != expected {
+		t.Errorf("expected: <%+v>,\nreceived: <%+v>", expected, rcv)
+	}
+}
+
+func TestLibFiltersGetInterfaceOptsFilterCheckErr(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	dataDB := NewInternalDB(nil, nil, nil)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	fS := NewFilterS(cfg, nil, dm)
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "TestEvent",
+		Event: map[string]interface{}{
+			utils.AccountField: 1001,
+		},
+		APIOpts: map[string]interface{}{},
+	}
+	dynOpts := []*utils.DynamicInterfaceOpt{
+		// function will return error after trying to parse the filter
+		{
+			FilterIDs: []string{"*string.invalid:filter"},
+			Tenant:    "cgrates.org",
+			Value:     2,
+		},
+	}
+
+	experr := `inline parse error for string: <*string.invalid:filter>`
+	if _, err := GetInterfaceOpts(context.Background(), "cgrates.org", ev, fS, dynOpts,
+		config.RoutesMaxCostDftOpt, utils.OptsRoutesMaxCost); err == nil ||
+		err.Error() != experr {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+}
+
+func TestLibFiltersGetInterfaceOptsReturnDefaultOpt(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	dataDB := NewInternalDB(nil, nil, nil)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	fS := NewFilterS(cfg, nil, dm)
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "TestEvent",
+		Event: map[string]interface{}{
+			utils.AccountField: 1001,
+		},
+		APIOpts: map[string]interface{}{},
+	}
+	dynOpts := []*utils.DynamicInterfaceOpt{
+		// filter will not pass, will ignore this opt
+		{
+			FilterIDs: []string{"*string:~*req.Account:1002"},
+			Tenant:    "cgrates.org",
+			Value:     2,
+		},
+	}
+
+	if rcv, err := GetInterfaceOpts(context.Background(), "cgrates.org", ev, fS, dynOpts,
+		config.RoutesMaxCostDftOpt, utils.OptsRoutesMaxCost); err != nil {
+		t.Error(err)
+	} else if rcv != config.RoutesMaxCostDftOpt {
+		t.Errorf("expected: <%+v>,\nreceived: <%+v>", config.RoutesMaxCostDftOpt, rcv)
+	}
+}
+
+func TestLibFiltersGetInterfaceOptsReturnOptFromAPIOpts(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	dataDB := NewInternalDB(nil, nil, nil)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	fS := NewFilterS(cfg, nil, dm)
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "TestEvent",
+		Event: map[string]interface{}{
+			utils.AccountField: 1001,
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsRoutesMaxCost: 4,
+		},
+	}
+	dynOpts := []*utils.DynamicInterfaceOpt{
+		// will never get to this opt because it will return once it
+		// finds the one set in APIOpts
+		{
+			FilterIDs: []string{"*string:~*req.Account:1001"},
+			Tenant:    "cgrates.org",
+			Value:     "value3",
+		},
+	}
+
+	expected := 4
+	if rcv, err := GetInterfaceOpts(context.Background(), "cgrates.org", ev, fS, dynOpts,
+		config.RoutesMaxCostDftOpt, "nonExistingAPIOpt", utils.OptsRoutesMaxCost); err != nil {
+		t.Error(err)
+	} else if rcv != expected {
+		t.Errorf("expected: <%+v>,\nreceived: <%+v>", expected, rcv)
+	}
+}
+
+func TestLibFiltersGetStringSliceOptsReturnConfigOpt(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	dataDB := NewInternalDB(nil, nil, nil)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	fS := NewFilterS(cfg, nil, dm)
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "TestEvent",
+		Event: map[string]interface{}{
+			utils.AccountField: 1001,
+		},
+		APIOpts: map[string]interface{}{},
+	}
+	dynOpts := []*utils.DynamicStringSliceOpt{
+		// tenant will not be recognized, will ignore this opt
+		{
+			FilterIDs: []string{"*string:~*req.Account:1001"},
+			Tenant:    "cgrates.net",
+			Value:     []string{"value1"},
+		},
+		// filter will not pass, will ignore this opt
+		{
+			FilterIDs: []string{"*string:~*req.Account:1002"},
+			Tenant:    "cgrates.org",
+			Value:     []string{"value2"},
+		},
+		{
+			FilterIDs: []string{"*string:~*req.Account:1001"},
+			Tenant:    "cgrates.org",
+			Value:     []string{"value3"},
+		},
+	}
+
+	expected := []string{"value3"}
+	if rcv, err := GetStringSliceOpts(context.Background(), "cgrates.org", ev, fS, dynOpts,
+		config.AttributesProfileIDsDftOpt, utils.OptsAttributesProfileIDs); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("expected: <%+v>,\nreceived: <%+v>", expected, rcv)
+	}
+}
+
+func TestLibFiltersGetStringSliceOptsFilterCheckErr(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	dataDB := NewInternalDB(nil, nil, nil)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	fS := NewFilterS(cfg, nil, dm)
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "TestEvent",
+		Event: map[string]interface{}{
+			utils.AccountField: 1001,
+		},
+		APIOpts: map[string]interface{}{},
+	}
+	dynOpts := []*utils.DynamicStringSliceOpt{
+		// function will return error after trying to parse the filter
+		{
+			FilterIDs: []string{"*string.invalid:filter"},
+			Tenant:    "cgrates.org",
+			Value:     []string{"value2"},
+		},
+	}
+
+	experr := `inline parse error for string: <*string.invalid:filter>`
+	if _, err := GetStringSliceOpts(context.Background(), "cgrates.org", ev, fS, dynOpts,
+		config.AttributesProfileIDsDftOpt, utils.OptsAttributesProfileIDs); err == nil ||
+		err.Error() != experr {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+}
+
+func TestLibFiltersGetStringSliceOptsReturnDefaultOpt(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	dataDB := NewInternalDB(nil, nil, nil)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	fS := NewFilterS(cfg, nil, dm)
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "TestEvent",
+		Event: map[string]interface{}{
+			utils.AccountField: 1001,
+		},
+		APIOpts: map[string]interface{}{},
+	}
+	dynOpts := []*utils.DynamicStringSliceOpt{
+		// filter will not pass, will ignore this opt
+		{
+			FilterIDs: []string{"*string:~*req.Account:1002"},
+			Tenant:    "cgrates.org",
+			Value:     []string{"value2"},
+		},
+	}
+
+	if rcv, err := GetStringSliceOpts(context.Background(), "cgrates.org", ev, fS, dynOpts,
+		config.AttributesProfileIDsDftOpt, utils.OptsAttributesProfileIDs); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcv, config.AttributesProfileIDsDftOpt) {
+		t.Errorf("expected: <%+v>,\nreceived: <%+v>", config.AttributesProfileIDsDftOpt, rcv)
+	}
+}
+
+func TestLibFiltersGetStringSliceOptsReturnOptFromAPIOpts(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	dataDB := NewInternalDB(nil, nil, nil)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	fS := NewFilterS(cfg, nil, dm)
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "TestEvent",
+		Event: map[string]interface{}{
+			utils.AccountField: 1001,
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsAttributesProfileIDs: []string{"value4"},
+		},
+	}
+	dynOpts := []*utils.DynamicStringSliceOpt{
+		// will never get to this opt because it will return once it
+		// finds the one set in APIOpts
+		{
+			FilterIDs: []string{"*string:~*req.Account:1001"},
+			Tenant:    "cgrates.org",
+			Value:     []string{"value3"},
+		},
+	}
+
+	expected := []string{"value4"}
+	if rcv, err := GetStringSliceOpts(context.Background(), "cgrates.org", ev, fS, dynOpts,
+		config.AttributesProfileIDsDftOpt, "nonExistingAPIOpt", utils.OptsAttributesProfileIDs); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcv, expected) {
 		t.Errorf("expected: <%+v>,\nreceived: <%+v>", expected, rcv)
 	}
 }
