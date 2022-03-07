@@ -75,6 +75,7 @@ var (
 	ErrMaxConcurentRPCExceeded       = errors.New("MAX_CONCURENT_RPC_EXCEEDED") // but the codec will rewrite it with this one to be sure that we corectly dealocate the request
 	ErrMaxIterationsReached          = errors.New("maximum iterations reached")
 	ErrNegative                      = errors.New("NEGATIVE")
+	ErrUnsupportedTPExporterType     = errors.New("UNSUPPORTED_TPEXPORTER_TYPE")
 
 	ErrMap = map[string]error{
 		ErrNoMoreData.Error():              ErrNoMoreData,
