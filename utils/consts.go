@@ -1651,11 +1651,6 @@ const (
 	CacheVersions                    = "*versions"
 	CacheCapsEvents                  = "*caps_events"
 	CacheReplicationHosts            = "*replication_hosts"
-
-	// storDB
-
-	CacheSessionCostsTBL = "*session_costs"
-	CacheCDRsTBL         = "*cdrs"
 )
 
 // Prefix for indexing
@@ -1724,7 +1719,6 @@ const (
 	DecimalRoundingModeCfg = "decimal_rounding_mode"
 )
 
-// StorDbCfg
 const (
 	TypeCfg                   = "type"
 	SQLMaxOpenConnsCfg        = "sqlMaxOpenConns"

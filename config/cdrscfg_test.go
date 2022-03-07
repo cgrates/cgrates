@@ -190,7 +190,6 @@ func TestCdrsCfgAsMapInterface(t *testing.T) {
 	eMap := map[string]interface{}{
 		utils.EnabledCfg:          true,
 		utils.ExtraFieldsCfg:      []string{"~*req.PayPalAccount", "~*req.LCRProfile", "~*req.ResourceID"},
-		utils.StoreCdrsCfg:        true,
 		utils.SessionCostRetires:  5,
 		utils.ChargerSConnsCfg:    []string{utils.MetaInternal, "*conn1"},
 		utils.AttributeSConnsCfg:  []string{utils.MetaInternal, "*conn1"},
@@ -230,7 +229,6 @@ func TestCdrsCfgAsMapInterface2(t *testing.T) {
 	eMap := map[string]interface{}{
 		utils.EnabledCfg:          true,
 		utils.ExtraFieldsCfg:      []string{},
-		utils.StoreCdrsCfg:        true,
 		utils.SessionCostRetires:  5,
 		utils.ChargerSConnsCfg:    []string{"conn1", "conn2"},
 		utils.AttributeSConnsCfg:  []string{"*internal"},

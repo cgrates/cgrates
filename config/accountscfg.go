@@ -1,17 +1,14 @@
 /*
 Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
 Copyright (C) ITsysCOM GmbH
-
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
-
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
-
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
@@ -139,11 +136,17 @@ func (acS *AccountSCfg) loadFromJSONCfg(jsnCfg *AccountSJsonCfg) (err error) {
 
 // AsMapInterface returns the config as a map[string]interface{}
 func (acS AccountSCfg) AsMapInterface(string) interface{} {
+	opts := map[string]interface{}{
+		utils.MetaProfileIDs:           acS.Opts.ProfileIDs,
+		utils.MetaUsage:                acS.Opts.Usage,
+		utils.MetaProfileIgnoreFilters: acS.Opts.ProfileIgnoreFilters,
+	}
 	mp := map[string]interface{}{
 		utils.EnabledCfg:        acS.Enabled,
 		utils.IndexedSelectsCfg: acS.IndexedSelects,
 		utils.NestedFieldsCfg:   acS.NestedFields,
 		utils.MaxIterations:     acS.MaxIterations,
+		utils.OptsCfg:           opts,
 	}
 	if acS.AttributeSConns != nil {
 		mp[utils.AttributeSConnsCfg] = getInternalJSONConns(acS.AttributeSConns)
@@ -153,6 +156,21 @@ func (acS AccountSCfg) AsMapInterface(string) interface{} {
 	}
 	if acS.ThresholdSConns != nil {
 		mp[utils.ThresholdSConnsCfg] = getInternalJSONConns(acS.ThresholdSConns)
+	}
+	if acS.StringIndexedFields != nil {
+		mp[utils.StringIndexedFieldsCfg] = utils.CloneStringSlice(*acS.StringIndexedFields)
+	}
+	if acS.PrefixIndexedFields != nil {
+		mp[utils.PrefixIndexedFieldsCfg] = utils.CloneStringSlice(*acS.PrefixIndexedFields)
+	}
+	if acS.SuffixIndexedFields != nil {
+		mp[utils.SuffixIndexedFieldsCfg] = utils.CloneStringSlice(*acS.SuffixIndexedFields)
+	}
+	if acS.ExistsIndexedFields != nil {
+		mp[utils.ExistsIndexedFieldsCfg] = utils.CloneStringSlice(*acS.ExistsIndexedFields)
+	}
+	if acS.NotExistsIndexedFields != nil {
+		mp[utils.NotExistsIndexedFieldsCfg] = utils.CloneStringSlice(*acS.NotExistsIndexedFields)
 	}
 	if acS.MaxUsage != nil {
 		mp[utils.MaxUsage] = acS.MaxUsage.String()
