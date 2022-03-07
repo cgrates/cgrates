@@ -44,7 +44,7 @@ package general_tests
 // 	sTestTutSMG = []func(t *testing.T){
 // 		testTutSMGInitCfg,
 // 		testTutSMGResetDataDb,
-// 		testTutSMGResetStorDb,
+
 // 		testTutSMGStartEngine,
 // 		testTutSMGRpcConn,
 // 		testTutSMGLoadTariffPlanFromFolder,
@@ -85,13 +85,6 @@ package general_tests
 // // Remove data in both rating and accounting db
 // func testTutSMGResetDataDb(t *testing.T) {
 // 	if err := engine.InitDataDB(tutSMGCfg); err != nil {
-// 		t.Fatal(err)
-// 	}
-// }
-
-// // Wipe out the cdr database
-// func testTutSMGResetStorDb(t *testing.T) {
-// 	if err := engine.InitStorDB(tutSMGCfg); err != nil {
 // 		t.Fatal(err)
 // 	}
 // }

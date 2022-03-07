@@ -78,9 +78,7 @@ func testSeSRplPrepaidResetDB(t *testing.T) {
 	if err := engine.InitDataDb(sesRplPrePaidCfg); err != nil {
 		t.Fatal(err)
 	}
-	if err := engine.InitStorDb(sesRplPrePaidCfg); err != nil {
-		t.Fatal(err)
-	}
+
 }
 
 // Start CGR Engine

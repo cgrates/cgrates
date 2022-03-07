@@ -43,7 +43,6 @@ package general_tests
 // 	sTestsRPCMethods = []func(t *testing.T){
 // 		testRPCMethodsLoadConfig,
 // 		testRPCMethodsInitDataDb,
-// 		testRPCMethodsResetStorDb,
 // 		testRPCMethodsStartEngine,
 // 		testRPCMethodsRpcConn,
 // 		testRPCMethodsFromFolder,
@@ -54,14 +53,13 @@ package general_tests
 // 		testRPCMethodsTerminateSession,
 // 		testRPCMethodsProcessCDR,
 // 		testRPCMethodsProcessEvent,
-// 		// reset the storDB and dataDB
+
 // 		testRPCMethodsInitDataDb,
-// 		testRPCMethodsResetStorDb,
+
 // 		testRPCMethodsCdrsProcessCDR,
-// 		testRPCMethodsCdrsStoreSessionCost,
-// 		//reset the storDB and dataDB
+
 // 		testRPCMethodsInitDataDb,
-// 		testRPCMethodsResetStorDb,
+
 // 		testRPCMethodsLoadData,
 // 		testRPCMethodsResponderDebit,
 // 		testRPCMethodsResponderMaxDebit,
@@ -99,13 +97,6 @@ package general_tests
 
 // func testRPCMethodsInitDataDb(t *testing.T) {
 // 	if err := engine.InitDataDB(rpcCfg); err != nil {
-// 		t.Fatal(err)
-// 	}
-// }
-
-// // Wipe out the cdr database
-// func testRPCMethodsResetStorDb(t *testing.T) {
-// 	if err := engine.InitStorDB(rpcCfg); err != nil {
 // 		t.Fatal(err)
 // 	}
 // }

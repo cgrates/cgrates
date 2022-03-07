@@ -42,7 +42,6 @@ package general_tests
 // 	sTestsData = []func(t *testing.T){
 // 		testV1DataLoadConfig,
 // 		testV1DataInitDataDb,
-// 		testV1DataResetStorDb,
 // 		testV1DataStartEngine,
 // 		testV1DataRpcConn,
 // 		testV1DataLoadTarrifPlans,
@@ -89,12 +88,6 @@ package general_tests
 
 // func testV1DataInitDataDb(t *testing.T) {
 // 	if err := engine.InitDataDB(dataCfg); err != nil {
-// 		t.Fatal(err)
-// 	}
-// }
-
-// func testV1DataResetStorDb(t *testing.T) {
-// 	if err := engine.InitStorDB(dataCfg); err != nil {
 // 		t.Fatal(err)
 // 	}
 // }

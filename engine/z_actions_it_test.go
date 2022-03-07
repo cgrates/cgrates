@@ -80,14 +80,7 @@ func testActionsitInitCfg(t *testing.T) {
 	}
 }
 
-func testActionsitInitCdrDb(t *testing.T) {
-	if err := InitDataDB(actsLclCfg); err != nil { // need it for versions
-		t.Fatal(err)
-	}
-	if err := InitStorDB(actsLclCfg); err != nil {
-		t.Fatal(err)
-	}
-}
+
 
 // Finds cgr-engine executable and starts it with default configuration
 func testActionsitStartEngine(t *testing.T) {

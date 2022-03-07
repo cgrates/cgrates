@@ -47,7 +47,7 @@ var (
 		testCreateDirs,
 		testLdro2nRtLoadConfig,
 		testLdro2nRtResetDataDB,
-		testLdro2nRtResetStorDb,
+
 		testLdro2nRtStartEngine,
 		testLdro2nRtRPCConn,
 		testLdro2nRtLoadTP,
@@ -101,12 +101,6 @@ func testLdro2nRtLoadConfig(t *testing.T) {
 
 func testLdro2nRtResetDataDB(t *testing.T) {
 	if err := engine.InitDataDB(testLdro2nRtCfg); err != nil {
-		t.Fatal(err)
-	}
-}
-
-func testLdro2nRtResetStorDb(t *testing.T) {
-	if err := engine.InitStorDB(testLdro2nRtCfg); err != nil {
 		t.Fatal(err)
 	}
 }

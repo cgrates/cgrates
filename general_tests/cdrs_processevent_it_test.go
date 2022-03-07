@@ -97,12 +97,6 @@ package general_tests
 // 	}
 // }
 
-// func testV1CDRsInitCdrDb(t *testing.T) {
-// 	if err := engine.InitStorDB(pecdrsCfg); err != nil {
-// 		t.Fatal(err)
-// 	}
-// }
-
 // func testV1CDRsStartEngine(t *testing.T) {
 // 	if _, err := engine.StopStartEngine(pecdrsCfgPath, *waitRater); err != nil {
 // 		t.Fatal(err)

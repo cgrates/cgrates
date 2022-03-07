@@ -43,7 +43,7 @@ package general_tests
 // 	sesTntChngCdrsTests = []func(t *testing.T){
 // 		testSesTntChngCdrsLoadConfig,
 // 		testSesTntChngCdrsResetDataDB,
-// 		testSesTntChngCdrsResetStorDb,
+
 // 		testSesTntChngCdrsStartEngine,
 // 		testSesTntChngCdrsRPCConn,
 // 		testSesTntChngCdrsSetChargerProfile1,
@@ -80,12 +80,6 @@ package general_tests
 
 // func testSesTntChngCdrsResetDataDB(t *testing.T) {
 // 	if err := engine.InitDataDb(sesTntChngCfg); err != nil {
-// 		t.Fatal(err)
-// 	}
-// }
-
-// func testSesTntChngCdrsResetStorDb(t *testing.T) {
-// 	if err := engine.InitStorDb(sesTntChngCfg); err != nil {
 // 		t.Fatal(err)
 // 	}
 // }

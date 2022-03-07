@@ -44,7 +44,7 @@ package general_tests
 // 	sesPauseTests = []func(t *testing.T){
 // 		testSesPauseItLoadConfig,
 // 		testSesPauseItResetDataDB,
-// 		testSesPauseItResetStorDb,
+
 // 		testSesPauseItStartEngine,
 // 		testSesPauseItRPCConn,
 // 		testSesPauseItLoadFromFolder,
@@ -85,12 +85,6 @@ package general_tests
 
 // func testSesPauseItResetDataDB(t *testing.T) {
 // 	if err := engine.InitDataDB(sesPauseCfg); err != nil {
-// 		t.Fatal(err)
-// 	}
-// }
-
-// func testSesPauseItResetStorDb(t *testing.T) {
-// 	if err := engine.InitStorDB(sesPauseCfg); err != nil {
 // 		t.Fatal(err)
 // 	}
 // }

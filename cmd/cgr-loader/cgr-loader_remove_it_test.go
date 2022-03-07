@@ -46,7 +46,6 @@ var (
 	cgrLdrTests   = []func(t *testing.T){
 		testCgrLdrInitCfg,
 		testCgrLdrInitDataDB,
-		testCgrLdrInitStorDB,
 		testCgrLdrStartEngine,
 		testCgrLdrRPCConn,
 		testCgrLdrGetSubsystemsNotLoadedLoad,
@@ -100,12 +99,6 @@ func testCgrLdrInitCfg(t *testing.T) {
 
 func testCgrLdrInitDataDB(t *testing.T) {
 	if err := engine.InitDataDB(cgrLdrCfg); err != nil {
-		t.Fatal(err)
-	}
-}
-
-func testCgrLdrInitStorDB(t *testing.T) {
-	if err := engine.InitStorDB(cgrLdrCfg); err != nil {
 		t.Fatal(err)
 	}
 }

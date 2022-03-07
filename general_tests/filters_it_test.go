@@ -43,7 +43,6 @@ package general_tests
 // 	sTestsFltr = []func(t *testing.T){
 // 		testV1FltrLoadConfig,
 // 		testV1FltrInitDataDb,
-// 		testV1FltrResetStorDb,
 // 		testV1FltrStartEngine,
 // 		testV1FltrRpcConn,
 // 		testV1FltrLoadTarrifPlans,
@@ -96,12 +95,6 @@ package general_tests
 
 // func testV1FltrInitDataDb(t *testing.T) {
 // 	if err := engine.InitDataDB(fltrCfg); err != nil {
-// 		t.Fatal(err)
-// 	}
-// }
-
-// func testV1FltrResetStorDb(t *testing.T) {
-// 	if err := engine.InitStorDB(fltrCfg); err != nil {
 // 		t.Fatal(err)
 // 	}
 // }

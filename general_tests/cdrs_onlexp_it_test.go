@@ -108,12 +108,7 @@ package general_tests
 // 	if err := engine.InitDataDB(cdrsSlaveCfg); err != nil {
 // 		t.Fatal(err)
 // 	}
-// 	if err := engine.InitStorDB(cdrsMasterCfg); err != nil {
-// 		t.Fatal(err)
-// 	}
-// 	if err := engine.InitStorDB(cdrsSlaveCfg); err != nil {
-// 		t.Fatal(err)
-// 	}
+
 // 	if err := os.RemoveAll(cdrsMasterCfg.GeneralCfg().FailedPostsDir); err != nil {
 // 		t.Fatal("Error removing folder: ", cdrsMasterCfg.GeneralCfg().FailedPostsDir, err)
 // 	}

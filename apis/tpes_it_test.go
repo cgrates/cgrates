@@ -41,7 +41,7 @@ var (
 	sTestTpes = []func(t *testing.T){
 		testTpeSInitCfg,
 		testTpeSInitDataDb,
-		testTpeSResetStorDb,
+
 		testTpeSStartEngine,
 		testTpeSRPCConn,
 		testTpeSPing,
@@ -78,12 +78,6 @@ func testTpeSInitCfg(t *testing.T) {
 
 func testTpeSInitDataDb(t *testing.T) {
 	if err := engine.InitDataDB(tpesCfg); err != nil {
-		t.Fatal(err)
-	}
-}
-
-func testTpeSResetStorDb(t *testing.T) {
-	if err := engine.InitStorDB(tpesCfg); err != nil {
 		t.Fatal(err)
 	}
 }

@@ -45,14 +45,12 @@ var (
 	sTestsExp = []func(t *testing.T){
 		testExpLoadConfig,
 		testExpResetDataDB,
-		testExpResetStorDb,
 		testExpStartEngine,
 		testExpRPCConn,
 		testExpLoadTPFromFolder,
 		// testExpExportToFolder,
 		// testExpStopCgrEngine, // restart the engine and reset the database
 		// testExpResetDataDB,
-		// testExpResetStorDb,
 		// testExpStartEngine,
 		// testExpRPCConn,
 		// testExpLoadTPFromExported,
@@ -98,12 +96,6 @@ func testExpLoadConfig(t *testing.T) {
 
 func testExpResetDataDB(t *testing.T) {
 	if err := engine.InitDataDB(expCfg); err != nil {
-		t.Fatal(err)
-	}
-}
-
-func testExpResetStorDb(t *testing.T) {
-	if err := engine.InitStorDB(expCfg); err != nil {
 		t.Fatal(err)
 	}
 }

@@ -90,12 +90,6 @@ func testCGRLoaderInitDataDb(t *testing.T) {
 	}
 }
 
-func testCGRLoaderInitCdrDb(t *testing.T) {
-	if err := engine.InitStorDB(cgrloaderCfg); err != nil {
-		t.Fatal(err)
-	}
-}
-
 func testCGRLoaderStartEngine(t *testing.T) {
 	if _, err := engine.StopStartEngine(cgrloaderCfgPath, *waitRater); err != nil {
 		t.Fatal(err)

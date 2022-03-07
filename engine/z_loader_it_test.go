@@ -47,11 +47,9 @@ var (
 	loaderTests = []func(t *testing.T){
 		testLoaderITInitConfig,
 		testLoaderITInitDataDB,
-		testLoaderITInitStoreDB,
 		testLoaderITRemoveLoad,
 		testLoaderITLoadFromCSV,
 		testLoaderITWriteToDatabase,
-		testLoaderITImportToStorDb,
 		testLoaderITInitDataDB,
 		testLoaderITInitDataDB,
 	}
@@ -112,29 +110,6 @@ func testLoaderITInitDataDB(t *testing.T) {
 	cacheChan <- srv
 	connMgr = NewConnManager(lCfg)
 	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches), utils.CacheSv1, cacheChan)
-}
-
-// Create/reset storage tariff plan tables, used as database connectin establishment also
-func testLoaderITInitStoreDB(t *testing.T) {
-	// NewStorDBConn
-	db, err := NewStorDBConn(lCfg.StorDbCfg().Type,
-		lCfg.StorDbCfg().Host, lCfg.StorDbCfg().Port, lCfg.StorDbCfg().Name,
-		lCfg.StorDbCfg().User, lCfg.StorDbCfg().Password, lCfg.GeneralCfg().DBDataEncoding,
-		lCfg.StorDbCfg().StringIndexedFields, lCfg.StorDbCfg().PrefixIndexedFields,
-		lCfg.StorDbCfg().Opts, lCfg.StorDbCfg().Items)
-	if err != nil {
-		t.Fatal("Error on opening database connection: ", err)
-	}
-	storDb = db
-	// Creating the table serves also as reset since there is a drop prior to create
-	dbdir := "mysql"
-	if *dbType == utils.MetaPostgres {
-		dbdir = "postgres"
-	}
-	if err := db.Flush(path.Join(*dataDir, "storage", dbdir)); err != nil {
-		t.Error("Error on db creation: ", err.Error())
-		return // No point in going further
-	}
 }
 
 // Loads data from csv files in tp scenario to dataDbCsv
@@ -350,25 +325,6 @@ func testLoaderITWriteToDatabase(t *testing.T) {
 		if !reflect.DeepEqual(dp, rcv) {
 			t.Errorf("Expecting: %v, received: %v", dp, rcv)
 		}
-	}
-}
-
-// Imports data from csv files in tpScenario to storDb
-func testLoaderITImportToStorDb(t *testing.T) {
-	csvImporter := TPCSVImporter{
-		TPid:     utils.TestSQL,
-		StorDB:   storDb,
-		DirPath:  path.Join(*dataDir, "tariffplans", *tpCsvScenario),
-		Sep:      utils.CSVSep,
-		Verbose:  false,
-		ImportID: utils.TestSQL}
-	if err := csvImporter.Run(); err != nil {
-		t.Error("Error when importing tpdata to storDb: ", err)
-	}
-	if tpids, err := storDb.GetTpIds(""); err != nil {
-		t.Error("Error when querying storDb for imported data: ", err)
-	} else if len(tpids) != 1 || tpids[0] != utils.TestSQL {
-		t.Errorf("Data in storDb is different than expected %v", tpids)
 	}
 }
 

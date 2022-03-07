@@ -49,7 +49,7 @@ var (
 var sTestsTwoEnginesIT = []func(t *testing.T){
 	testTwoEnginesInitConfig,
 	testTwoEnginesInitDataDB,
-	testTwoEnginesInitStorDB,
+
 	testTwoEnginesStartEngine,
 	testTwoEnginesRPC,
 	testTwoEnginesCheckCacheBeforeSet,
@@ -81,11 +81,7 @@ func testTwoEnginesInitDataDB(t *testing.T) {
 		t.Fatal(err)
 	}
 }
-func testTwoEnginesInitStorDB(t *testing.T) {
-	if err := engine.InitStorDB(engineOneCfg); err != nil {
-		t.Fatal(err)
-	}
-}
+
 func testTwoEnginesStartEngine(t *testing.T) {
 	if _, err := engine.StopStartEngine(engineOneCfgPath, *waitRater); err != nil {
 		t.Fatal(err)

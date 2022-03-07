@@ -31,7 +31,6 @@ package general_tests
 // 	sTestsSupplierSV1 = []func(t *testing.T){
 // 		testV1SplSLoadConfig,
 // 		testV1SplSInitDataDb,
-// 		testV1SplSResetStorDb,
 // 		testV1SplSStartEngine,
 // 		testV1SplSRpcConn,
 // 		testV1SplSSetSupplierProfilesWithoutRateProfileIDs,
@@ -79,13 +78,6 @@ package general_tests
 
 // func testV1SplSInitDataDb(t *testing.T) {
 // 	if err := engine.InitDataDB(splSv1Cfg); err != nil {
-// 		t.Fatal(err)
-// 	}
-// }
-
-// // Wipe out the cdr database
-// func testV1SplSResetStorDb(t *testing.T) {
-// 	if err := engine.InitStorDB(splSv1Cfg); err != nil {
 // 		t.Fatal(err)
 // 	}
 // }

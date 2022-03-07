@@ -33,7 +33,7 @@ var sTestsActions = []func(t *testing.T){
 	testActionsInitCfg,
 	testActionsInitCdrsStore,
 	testActionsInitDataDb,
-	testActionsResetStorDb,
+
 	testActionsStartEngine,
 	testActionsRPCConn,
 	testActionsSetSMCosts,

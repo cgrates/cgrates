@@ -47,7 +47,6 @@ var (
 		testCreateDirectory,
 		testVirtLoadConfig,
 		testVirtResetDataDB,
-		testVirtResetStorDb,
 		testVirtStartEngine,
 		testVirtRPCConn,
 		testVirtExportSupplierEvent,
@@ -75,12 +74,6 @@ func testVirtLoadConfig(t *testing.T) {
 
 func testVirtResetDataDB(t *testing.T) {
 	if err := engine.InitDataDB(virtCfg); err != nil {
-		t.Fatal(err)
-	}
-}
-
-func testVirtResetStorDb(t *testing.T) {
-	if err := engine.InitStorDB(virtCfg); err != nil {
 		t.Fatal(err)
 	}
 }

@@ -44,7 +44,7 @@ var (
 	sTestsRtsCaseSV1 = []func(t *testing.T){
 		testV1RtsCaseLoadConfig,
 		testV1RtsCaseInitDataDb,
-		testV1RtsCaseResetStorDb,
+
 		testV1RtsCaseStartEngine,
 		testV1RtsCaseRpcConn,
 		testV1RtsCaseFromFolder,
@@ -107,13 +107,6 @@ func testV1RtsCaseLoadConfig(t *testing.T) {
 
 func testV1RtsCaseInitDataDb(t *testing.T) {
 	if err := engine.InitDataDB(rtsCaseSv1Cfg); err != nil {
-		t.Fatal(err)
-	}
-}
-
-// Wipe out the cdr database
-func testV1RtsCaseResetStorDb(t *testing.T) {
-	if err := engine.InitStorDB(rtsCaseSv1Cfg); err != nil {
 		t.Fatal(err)
 	}
 }

@@ -52,7 +52,7 @@ var (
 		testCreateDirectory,
 		testCsvLoadConfig,
 		testCsvResetDataDB,
-		testCsvResetStorDb,
+
 		testCsvStartEngine,
 		testCsvRPCConn,
 		testCsvExportEvent,
@@ -86,12 +86,6 @@ func testCsvLoadConfig(t *testing.T) {
 
 func testCsvResetDataDB(t *testing.T) {
 	if err := engine.InitDataDB(csvCfg); err != nil {
-		t.Fatal(err)
-	}
-}
-
-func testCsvResetStorDb(t *testing.T) {
-	if err := engine.InitStorDB(csvCfg); err != nil {
 		t.Fatal(err)
 	}
 }

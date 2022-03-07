@@ -48,7 +48,6 @@ var (
 		testCreateDirectory,
 		testHTTPJsonMapLoadConfig,
 		testHTTPJsonMapResetDataDB,
-		testHTTPJsonMapResetStorDb,
 		testHTTPJsonMapStartEngine,
 		testHTTPJsonMapRPCConn,
 		testHTTPJsonMapStartHTTPServer,
@@ -75,12 +74,6 @@ func testHTTPJsonMapLoadConfig(t *testing.T) {
 
 func testHTTPJsonMapResetDataDB(t *testing.T) {
 	if err := engine.InitDataDB(httpJSONMapCfg); err != nil {
-		t.Fatal(err)
-	}
-}
-
-func testHTTPJsonMapResetStorDb(t *testing.T) {
-	if err := engine.InitStorDB(httpJSONMapCfg); err != nil {
 		t.Fatal(err)
 	}
 }

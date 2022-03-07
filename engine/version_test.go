@@ -19,7 +19,6 @@ package engine
 
 import (
 	"reflect"
-	"strings"
 	"testing"
 
 	"github.com/cgrates/cgrates/utils"
@@ -59,14 +58,7 @@ func TestCurrentDBVersions(t *testing.T) {
 		utils.Dispatchers: 2, utils.LoadIDsVrs: 1, utils.RateProfiles: 1,
 		utils.ActionProfiles: 1,
 	}
-	expVersStorDB := Versions{
-		utils.CostDetails: 2, utils.SessionSCosts: 3, utils.CDRs: 2,
-		utils.TpFilters: 1, utils.TpThresholds: 1, utils.TpRoutes: 1,
-		utils.TpStats: 1, utils.TpResources: 1,
-		utils.TpResource: 1,
-		utils.TpChargers: 1, utils.TpDispatchers: 1,
-		utils.TpRateProfiles: 1, utils.TpActionProfiles: 1,
-	}
+
 	if vrs := CurrentDBVersions(utils.Mongo, true); !reflect.DeepEqual(expVersDataDB, vrs) {
 		t.Errorf("Expectred %+v, received %+v", expVersDataDB, vrs)
 	}
@@ -79,9 +71,4 @@ func TestCurrentDBVersions(t *testing.T) {
 		t.Error(vrs)
 	}
 
-	//Compare AllVersions
-	expStr := "cgr-migrator"
-	if rcv := expVersDataDB.Compare(expVersStorDB, utils.Internal, true); !strings.Contains(rcv, expStr) {
-		t.Errorf("Expected %+v, received %+v", expStr, rcv)
-	}
 }

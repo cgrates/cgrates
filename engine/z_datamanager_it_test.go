@@ -23,7 +23,6 @@ package engine
 
 import (
 	"fmt"
-	"path"
 	"reflect"
 	"testing"
 	"time"
@@ -57,20 +56,6 @@ func TestDMitinitDB(t *testing.T) {
 			utils.RedisMaxConns, utils.RedisMaxAttempts, "", false, 0, 0, false, utils.EmptyString, utils.EmptyString, utils.EmptyString)
 		if err != nil {
 			t.Fatal("Could not connect to Redis", err.Error())
-		}
-	case utils.MetaMongo:
-		cdrsMongoCfgPath := path.Join(*dataDir, "conf", "samples", "tutmongo")
-		mgoITCfg, err := config.NewCGRConfigFromPath(context.Background(), cdrsMongoCfgPath)
-		if err != nil {
-			t.Fatal(err)
-		}
-		dataDB, err = NewMongoStorage(mgoITCfg.StorDbCfg().Host,
-			mgoITCfg.StorDbCfg().Port, mgoITCfg.StorDbCfg().Name,
-			mgoITCfg.StorDbCfg().User, mgoITCfg.StorDbCfg().Password,
-			mgoITCfg.GeneralCfg().DBDataEncoding,
-			utils.StorDB, nil, 10*time.Second)
-		if err != nil {
-			t.Fatal("Could not connect to Mongo", err.Error())
 		}
 	case utils.MetaPostgres:
 		t.SkipNow()

@@ -93,16 +93,7 @@ package general_tests
 // 	if err := engine.InitDataDB(dspCfg); err != nil {
 // 		t.Fatal(err)
 // 	}
-// 	if err := engine.InitStorDB(auCfg); err != nil {
-// 		t.Fatal(err)
-// 	}
-// 	if err := engine.InitStorDB(usCfg); err != nil {
-// 		t.Fatal(err)
-// 	}
-// 	if err := engine.InitStorDB(dspCfg); err != nil {
-// 		t.Fatal(err)
-// 	}
-// 	// give some time to flush DataDB and StorDB for all 3 engines
+
 // }
 
 // // Start CGR Engine

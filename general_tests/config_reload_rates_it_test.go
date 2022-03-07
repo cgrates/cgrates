@@ -40,7 +40,7 @@ var (
 	testRateTests = []func(t *testing.T){
 		testRateLoadConfig,
 		testRateResetDataDB,
-		testRateResetStorDb,
+
 		testRateStartEngine,
 		testRateRPCConn,
 		testRateConfigSReloadRates,
@@ -76,12 +76,6 @@ func testRateLoadConfig(t *testing.T) {
 
 func testRateResetDataDB(t *testing.T) {
 	if err := engine.InitDataDB(testRateCfg); err != nil {
-		t.Fatal(err)
-	}
-}
-
-func testRateResetStorDb(t *testing.T) {
-	if err := engine.InitStorDB(testRateCfg); err != nil {
 		t.Fatal(err)
 	}
 }

@@ -42,7 +42,7 @@ package general_tests
 // 	sesNoneReqTypeTests = []func(t *testing.T){
 // 		testSesNoneReqTypeItLoadConfig,
 // 		testSesNoneReqTypeItResetDataDB,
-// 		testSesNoneReqTypeItResetStorDb,
+
 // 		testSesNoneReqTypeItStartEngine,
 // 		testSesNoneReqTypeItRPCConn,
 
@@ -80,12 +80,6 @@ package general_tests
 
 // func testSesNoneReqTypeItResetDataDB(t *testing.T) {
 // 	if err := engine.InitDataDb(sesNoneReqTypeCfg); err != nil {
-// 		t.Fatal(err)
-// 	}
-// }
-
-// func testSesNoneReqTypeItResetStorDb(t *testing.T) {
-// 	if err := engine.InitStorDb(sesNoneReqTypeCfg); err != nil {
 // 		t.Fatal(err)
 // 	}
 // }

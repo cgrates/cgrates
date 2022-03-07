@@ -39,7 +39,7 @@ package general_tests
 // 	sTestsRLSV1 = []func(t *testing.T){
 // 		testV1RsLoadConfig,
 // 		testV1RsInitDataDb,
-// 		testV1RsResetStorDb,
+
 // 		testV1RsStartEngine,
 // 		testV1RsRpcConn,
 // 		testV1RsSetProfile,
@@ -78,13 +78,6 @@ package general_tests
 
 // func testV1RsInitDataDb(t *testing.T) {
 // 	if err := engine.InitDataDB(rlsV1Cfg); err != nil {
-// 		t.Fatal(err)
-// 	}
-// }
-
-// // Wipe out the cdr database
-// func testV1RsResetStorDb(t *testing.T) {
-// 	if err := engine.InitStorDB(rlsV1Cfg); err != nil {
 // 		t.Fatal(err)
 // 	}
 // }

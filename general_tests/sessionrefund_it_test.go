@@ -43,7 +43,7 @@ package general_tests
 // 	sTestSrIt = []func(t *testing.T){
 // 		testSrItLoadConfig,
 // 		testSrItResetDataDB,
-// 		testSrItResetStorDb,
+
 // 		testSrItStartEngine,
 // 		testSrItRPCConn,
 // 		testSrItLoadFromFolder,
@@ -84,12 +84,6 @@ package general_tests
 
 // func testSrItResetDataDB(t *testing.T) {
 // 	if err := engine.InitDataDB(srCfg); err != nil {
-// 		t.Fatal(err)
-// 	}
-// }
-
-// func testSrItResetStorDb(t *testing.T) {
-// 	if err := engine.InitStorDB(srCfg); err != nil {
 // 		t.Fatal(err)
 // 	}
 // }

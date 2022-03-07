@@ -66,7 +66,6 @@ func TestVersionITMongo(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	vrsCfg.StorDbCfg().Name = vrsCfg.DataDbCfg().Name
 	vrsSameOutDB = true
 	for _, stest := range sTestsVrsIT {
 		t.Run("TestVrsionITMigrateMongo", stest)

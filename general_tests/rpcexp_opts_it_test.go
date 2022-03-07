@@ -41,7 +41,7 @@ var (
 	rrTests = []func(t *testing.T){
 		testRPCExpLoadConfig,
 		testRPCExpInitDataDb,
-		testRPCExpResetStorDb,
+
 		testRPCExpStartEngine,
 		testRPCExpRPCConn,
 		testRPCExpSetThresholdProfilesBeforeProcessEv,
@@ -95,15 +95,6 @@ func testRPCExpInitDataDb(t *testing.T) {
 		t.Fatal(err)
 	}
 	if err := engine.InitDataDB(ng2Cfg); err != nil {
-		t.Fatal(err)
-	}
-}
-
-func testRPCExpResetStorDb(t *testing.T) {
-	if err := engine.InitStorDB(ng1Cfg); err != nil {
-		t.Fatal(err)
-	}
-	if err := engine.InitStorDB(ng2Cfg); err != nil {
 		t.Fatal(err)
 	}
 }

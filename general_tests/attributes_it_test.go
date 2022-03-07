@@ -43,7 +43,7 @@ var (
 	sTestsAlsPrf    = []func(t *testing.T){
 		testAttributeSInitCfg,
 		testAttributeSInitDataDb,
-		testAttributeSResetStorDb,
+
 		testAttributeSStartEngine,
 		testAttributeSRPCConn,
 		testAttributeSLoadFromFolder,
@@ -91,13 +91,6 @@ func testAttributeSInitCfg(t *testing.T) {
 
 func testAttributeSInitDataDb(t *testing.T) {
 	if err := engine.InitDataDB(attrCfg); err != nil {
-		t.Fatal(err)
-	}
-}
-
-// Wipe out the cdr database
-func testAttributeSResetStorDb(t *testing.T) {
-	if err := engine.InitStorDB(attrCfg); err != nil {
 		t.Fatal(err)
 	}
 }

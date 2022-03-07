@@ -43,7 +43,6 @@ package general_tests
 // 	sTestSesIt = []func(t *testing.T){
 // 		testSesItLoadConfig,
 // 		testSesItResetDataDB,
-// 		testSesItResetStorDb,
 // 		testSesItStartEngine,
 // 		testSesItRPCConn,
 // 		testSesItLoadFromFolder,
@@ -82,12 +81,6 @@ package general_tests
 
 // func testSesItResetDataDB(t *testing.T) {
 // 	if err := engine.InitDataDB(sesCfg); err != nil {
-// 		t.Fatal(err)
-// 	}
-// }
-
-// func testSesItResetStorDb(t *testing.T) {
-// 	if err := engine.InitStorDB(sesCfg); err != nil {
 // 		t.Fatal(err)
 // 	}
 // }

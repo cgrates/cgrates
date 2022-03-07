@@ -44,7 +44,6 @@ var (
 	sTestsAccPrf = []func(t *testing.T){
 		testAccActionsInitCfg,
 		testAccActionsInitDataDb,
-		testAccActionsResetStorDb,
 		testAccActionsStartEngine,
 		testAccActionsRPCConn,
 		testAccActionsSetActionProfile,
@@ -88,13 +87,6 @@ func testAccActionsInitCfg(t *testing.T) {
 
 func testAccActionsInitDataDb(t *testing.T) {
 	if err := engine.InitDataDB(accPrfCfg); err != nil {
-		t.Fatal(err)
-	}
-}
-
-// Wipe out the cdr database
-func testAccActionsResetStorDb(t *testing.T) {
-	if err := engine.InitStorDB(accPrfCfg); err != nil {
 		t.Fatal(err)
 	}
 }

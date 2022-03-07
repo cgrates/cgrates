@@ -97,9 +97,7 @@ func testDsphInitDB(t *testing.T) {
 	if err := engine.InitDataDB(dspCfg); err != nil {
 		t.Fatal(err)
 	}
-	if err := engine.InitStorDB(dspCfg); err != nil {
-		t.Fatal(err)
-	}
+
 }
 
 func testDsphStartEngine(t *testing.T) {

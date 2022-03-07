@@ -725,7 +725,7 @@ func testDspSessionProcessEvent2(t *testing.T) {
 
 func testDspSessionReplicate(t *testing.T) {
 	allEngine.initDataDb(t)
-	allEngine.resetStorDb(t)
+
 	var reply string
 	// reload cache  in order to corectly cahce the indexes
 	if err := allEngine.RPC.Call(utils.CacheSv1Clear, &utils.AttrCacheIDsWithAPIOpts{
@@ -866,7 +866,7 @@ func testDspSessionPassive(t *testing.T) {
 func testDspSessionForceDisconect(t *testing.T) {
 	allEngine.startEngine(t)
 	allEngine.initDataDb(t)
-	allEngine.resetStorDb(t)
+
 	allEngine.loadData(t, path.Join(*dataDir, "tariffplans", "testit"))
 	testDspSessionAddBalacne(t)
 	testDspSessionAuthorize(t)

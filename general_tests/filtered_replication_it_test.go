@@ -113,17 +113,10 @@ func testFltrRplInitDBs(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if err := engine.InitStorDB(fltrRplEngine1Cfg); err != nil {
-		t.Fatal(err)
-	}
-
 	if err := engine.InitDataDB(fltrRplEngine2Cfg); err != nil {
 		t.Fatal(err)
 	}
 
-	if err := engine.InitStorDB(fltrRplEngine2Cfg); err != nil {
-		t.Fatal(err)
-	}
 }
 
 func testFltrRplStartEngine(t *testing.T) {

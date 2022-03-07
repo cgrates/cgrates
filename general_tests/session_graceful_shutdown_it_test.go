@@ -100,9 +100,7 @@ func testSessionSRplcResetDB(t *testing.T) {
 	if err := engine.InitDataDB(smgRplCfg1); err != nil {
 		t.Fatal(err)
 	}
-	if err := engine.InitStorDB(smgRplCfg1); err != nil {
-		t.Fatal(err)
-	}
+
 }
 
 // Start CGR Engine

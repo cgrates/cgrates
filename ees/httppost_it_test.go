@@ -48,7 +48,7 @@ var (
 		testCreateDirectory,
 		testHTTPPostLoadConfig,
 		testHTTPPostResetDataDB,
-		testHTTPPostResetStorDb,
+
 		testHTTPPostStartEngine,
 		testHTTPPostRPCConn,
 		testHTTPStartHTTPServer,
@@ -75,12 +75,6 @@ func testHTTPPostLoadConfig(t *testing.T) {
 
 func testHTTPPostResetDataDB(t *testing.T) {
 	if err := engine.InitDataDB(httpPostCfg); err != nil {
-		t.Fatal(err)
-	}
-}
-
-func testHTTPPostResetStorDb(t *testing.T) {
-	if err := engine.InitStorDB(httpPostCfg); err != nil {
 		t.Fatal(err)
 	}
 }

@@ -94,13 +94,6 @@ package general_tests
 // 	}
 // }
 
-// // InitDb so we can rely on count
-// func testCDRsPostFailoverInitCdrDb(t *testing.T) {
-// 	if err := engine.InitStorDB(cdrsPostFailCfg); err != nil {
-// 		t.Fatal(err)
-// 	}
-// }
-
 // func testCDRsPostFailoverStartEngine(t *testing.T) {
 // 	if _, err := engine.StopStartEngine(cdrsPostFailCfgPath, *waitRater); err != nil {
 // 		t.Fatal(err)
