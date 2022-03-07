@@ -32,31 +32,10 @@ func TestVersionCompare(t *testing.T) {
 	y := Versions{utils.Accounts: 1, utils.Actions: 2,
 		utils.Attributes: 2, utils.Chargers: 2,
 		utils.CostDetails: 2}
-	c := Versions{utils.CostDetails: 1}
-	a := Versions{utils.Accounts: 2, utils.Actions: 2,
-		utils.Attributes: 2, utils.Chargers: 2,
-		utils.CostDetails:   2,
-		utils.SessionSCosts: 1}
-	b := Versions{utils.Accounts: 2, utils.Actions: 2,
-		utils.Attributes: 2, utils.Chargers: 2,
-		utils.CostDetails:   2,
-		utils.SessionSCosts: 2}
 
 	message1 := y.Compare(x, utils.Mongo, true)
 	if message1 != "cgr-migrator -exec=*accounts" {
 		t.Errorf("Error failed to compare to curent version expected: %s received: %s", "cgr-migrator -exec=*accounts", message1)
-	}
-	message4 := c.Compare(x, utils.Mongo, false)
-	if message4 != "cgr-migrator -exec=*cost_details" {
-		t.Errorf("Error failed to compare to curent version expected: %s received: %s", "cgr-migrator -exec=*cost_details", message4)
-	}
-	message5 := a.Compare(b, utils.MySQL, false)
-	if message5 != "cgr-migrator -exec=*sessions_costs" {
-		t.Errorf("Error failed to compare to curent version expected: %s received: %s", "cgr-migrator -exec=*sessions_costs", message5)
-	}
-	message6 := a.Compare(b, utils.Postgres, false)
-	if message6 != "cgr-migrator -exec=*sessions_costs" {
-		t.Errorf("Error failed to compare to curent version expected: %s received: %s", "cgr-migrator -exec=*sessions_costs", message6)
 	}
 	message7 := y.Compare(x, utils.Redis, true)
 	if message7 != "cgr-migrator -exec=*accounts" {
@@ -90,14 +69,6 @@ func TestCurrentDBVersions(t *testing.T) {
 	}
 	if vrs := CurrentDBVersions(utils.Mongo, true); !reflect.DeepEqual(expVersDataDB, vrs) {
 		t.Errorf("Expectred %+v, received %+v", expVersDataDB, vrs)
-	}
-
-	if vrs := CurrentDBVersions(utils.Mongo, false); !reflect.DeepEqual(expVersStorDB, vrs) {
-		t.Errorf("Expectred %+v, received %+v", expVersStorDB, vrs)
-	}
-
-	if vrs := CurrentDBVersions(utils.Postgres, false); !reflect.DeepEqual(expVersStorDB, vrs) {
-		t.Errorf("Expectred %+v, received %+v", expVersStorDB, vrs)
 	}
 
 	if vrs := CurrentDBVersions(utils.Redis, true); !reflect.DeepEqual(expVersDataDB, vrs) {
