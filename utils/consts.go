@@ -1839,7 +1839,6 @@ const (
 // CdrsCfg
 const (
 	ExtraFieldsCfg         = "extra_fields"
-	StoreCdrsCfg           = "store_cdrs"
 	SMCostRetriesCfg       = "session_cost_retries"
 	ChargerSConnsCfg       = "chargers_conns"
 	AttributeSConnsCfg     = "attributes_conns"

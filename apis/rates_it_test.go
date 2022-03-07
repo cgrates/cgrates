@@ -46,7 +46,7 @@ var (
 	sTestsRatePrf = []func(t *testing.T){
 		testRateSInitCfg,
 		testRateSInitDataDb,
-		testRateSResetStorDb,
+
 		testRateSStartEngine,
 		testRateSRPCConn,
 		testGetRateProfileBeforeSet,
@@ -110,12 +110,6 @@ func testRateSInitCfg(t *testing.T) {
 
 func testRateSInitDataDb(t *testing.T) {
 	if err := engine.InitDataDB(ratePrfCfg); err != nil {
-		t.Fatal(err)
-	}
-}
-
-func testRateSResetStorDb(t *testing.T) {
-	if err := engine.InitStorDB(ratePrfCfg); err != nil {
 		t.Fatal(err)
 	}
 }

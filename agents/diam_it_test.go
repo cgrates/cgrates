@@ -59,7 +59,6 @@ var (
 	sTestsDiam = []func(t *testing.T){
 		testDiamItInitCfg,
 		testDiamItResetDataDb,
-		testDiamItResetStorDb,
 		testDiamItStartEngine,
 		testDiamItConnectDiameterClient,
 		testDiamItApierRpcConn,
@@ -221,9 +220,6 @@ func testDiamItResetAllDB(t *testing.T) {
 	if err := engine.InitDataDB(allCfg); err != nil {
 		t.Fatal(err)
 	}
-	if err := engine.InitStorDB(allCfg); err != nil {
-		t.Fatal(err)
-	}
 
 	cfgPath2 := path.Join(*dataDir, "conf", "samples", "dispatchers", "all2")
 	allCfg2, err := config.NewCGRConfigFromPath(context.Background(), cfgPath2)
@@ -233,21 +229,12 @@ func testDiamItResetAllDB(t *testing.T) {
 	if err := engine.InitDataDB(allCfg2); err != nil {
 		t.Fatal(err)
 	}
-	if err := engine.InitStorDB(allCfg2); err != nil {
-		t.Fatal(err)
-	}
+
 }
 
 // Remove data in both rating and accounting db
 func testDiamItResetDataDb(t *testing.T) {
 	if err := engine.InitDataDB(daCfg); err != nil {
-		t.Fatal(err)
-	}
-}
-
-// Wipe out the cdr database
-func testDiamItResetStorDb(t *testing.T) {
-	if err := engine.InitStorDB(daCfg); err != nil {
 		t.Fatal(err)
 	}
 }

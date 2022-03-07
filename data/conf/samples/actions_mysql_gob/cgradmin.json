@@ -30,9 +30,7 @@
 	"db_name": "10", 						
 },
 
-"stor_db": {
-	"db_password": "CGRateS.org",
-},
+
 
 "rals": {
 	"enabled": true,						// enable Rater service: <true|false>

@@ -48,7 +48,6 @@ var (
 	sTestsRadius = []func(t *testing.T){
 		testRAitInitCfg,
 		testRAitResetDataDb,
-		testRAitResetStorDb,
 		testRAitStartEngine,
 		testRAitApierRpcConn,
 		testRAitTPFromFolder,
@@ -128,21 +127,12 @@ func testRadiusitResetAllDB(t *testing.T) {
 	if err := engine.InitDataDB(allCfg); err != nil {
 		t.Fatal(err)
 	}
-	if err := engine.InitStorDB(allCfg); err != nil {
-		t.Fatal(err)
-	}
+
 }
 
 // Remove data in both rating and accounting db
 func testRAitResetDataDb(t *testing.T) {
 	if err := engine.InitDataDB(raCfg); err != nil {
-		t.Fatal(err)
-	}
-}
-
-// Wipe out the cdr database
-func testRAitResetStorDb(t *testing.T) {
-	if err := engine.InitStorDB(raCfg); err != nil {
 		t.Fatal(err)
 	}
 }

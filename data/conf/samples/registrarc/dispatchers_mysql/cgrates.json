@@ -19,9 +19,6 @@
 	"http": ":2080",
 },
 
-"stor_db": {
-	"db_type":"*internal",
-},
 
 "caches":{
 	"partitions": {

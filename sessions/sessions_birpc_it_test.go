@@ -42,7 +42,6 @@ var (
 	sessionsTests        = []func(t *testing.T){
 		testSessionsBiRPCInitCfg,
 		testSessionsBiRPCResetDataDb,
-		testSessionsBiRPCResetStorDb,
 		testSessionsBiRPCStartEngine,
 		testSessionsBiRPCApierRpcConn,
 		// testSessionsBiRPCTPFromFolder,
@@ -90,13 +89,6 @@ func testSessionsBiRPCInitCfg(t *testing.T) {
 // Remove data in both rating and accounting db
 func testSessionsBiRPCResetDataDb(t *testing.T) {
 	if err := engine.InitDataDB(sessionsBiRPCCfg); err != nil {
-		t.Fatal(err)
-	}
-}
-
-// Wipe out the cdr database
-func testSessionsBiRPCResetStorDb(t *testing.T) {
-	if err := engine.InitStorDB(sessionsBiRPCCfg); err != nil {
 		t.Fatal(err)
 	}
 }

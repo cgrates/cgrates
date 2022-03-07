@@ -10,11 +10,7 @@
 	"db_name": "10", 						// data_db database name to connect to
 },
 
-"stor_db": {
-	"db_type": "postgres",					// stor database type to use: <mysql|postgres>
-	"db_port": 5432, 						// the port to reach the stordb
-	"db_password": "CGRateS.org",
-},
+
 
 "rals": {
 	"enabled": true

@@ -21,9 +21,7 @@
 	"db_name": "10", 						
 },
 
-"stor_db": {
-	"db_password": "CGRateS.org",
-},
+
 
 "rpc_conns": {
 	"regConn": {
@@ -106,9 +104,7 @@
 	"out_datadb_type": "mongo",
 	"out_datadb_port": "27017",
 	"out_datadb_name": "10",
-	"out_stordb_type": "mongo",
-	"out_stordb_port": "27017",
-	"out_stordb_name": "cgrates",
+
 	"users_filters":["Account"],
 },
 

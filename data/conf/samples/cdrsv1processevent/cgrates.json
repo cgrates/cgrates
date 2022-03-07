@@ -14,10 +14,6 @@
 },
 
 
-"stor_db": {
-	"db_type": "*internal"
-},
-
 "attributes": {								
 	"enabled": true,
 },

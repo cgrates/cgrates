@@ -21,9 +21,6 @@
 	"db_name": "11", 						// data_db database name to connect to
 },
 
-"stor_db": {
-	"db_password": "CGRateS.org",
-},
 
 
 "rpc_conns": {

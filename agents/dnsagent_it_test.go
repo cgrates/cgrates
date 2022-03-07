@@ -90,9 +90,7 @@ func testDNSitResetDB(t *testing.T) {
 	if err := engine.InitDataDB(dnsCfg); err != nil {
 		t.Fatal(err)
 	}
-	if err := engine.InitStorDB(dnsCfg); err != nil {
-		t.Fatal(err)
-	}
+
 }
 
 // Start CGR Engine

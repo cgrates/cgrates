@@ -34,10 +34,7 @@
 },
 
 
-"stor_db": {
-	"db_host": "mariadb",					// the host to connect to
-	"db_password": "CGRateS.org",
-},
+
 
 
 "rals": {

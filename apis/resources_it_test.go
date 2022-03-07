@@ -50,7 +50,7 @@ var (
 	sTestsRs = []func(t *testing.T){
 		testResourceSInitCfg,
 		testResourceSInitDataDB,
-		testResourceSResetStorDB,
+
 		testResourceSStartEngine,
 		testResourceSRPCConn,
 		testResourceSGetResourceBeforeSet,
@@ -75,7 +75,7 @@ var (
 		// check threshold behaviour after allocation/release of resources
 		testResourceSInitCfg,
 		testResourceSInitDataDB,
-		testResourceSResetStorDB,
+
 		testResourceSStartEngine,
 		testResourceSRPCConn,
 		testResourceSStartServer,
@@ -119,12 +119,6 @@ func testResourceSInitCfg(t *testing.T) {
 
 func testResourceSInitDataDB(t *testing.T) {
 	if err := engine.InitDataDB(rsCfg); err != nil {
-		t.Fatal(err)
-	}
-}
-
-func testResourceSResetStorDB(t *testing.T) {
-	if err := engine.InitStorDB(rsCfg); err != nil {
 		t.Fatal(err)
 	}
 }

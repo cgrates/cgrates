@@ -21,9 +21,7 @@
 	"db_name": "10", 						// data_db database name to connect to
 },
 
-"stor_db": {
-	"db_password": "CGRateS.org",
-},
+
 
 "cdrs": {
 	"enabled": true,
@@ -85,7 +83,6 @@
 
 
 "migrator":{
-	"out_stordb_password": "CGRateS.org",
 	"users_filters":["Account"],
 },
 

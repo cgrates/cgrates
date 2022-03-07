@@ -25,14 +25,6 @@
 },
 
 
-"stor_db": {
-	"db_type": "mongo",						// data_db type: <redis|mongo>
-	"db_host": "192.168.56.202:27017,192.168.56.203:27017,192.168.56.204",					// data_db host address
-	"db_port": 27017, 						// data_db port to reach the database
-	"db_name": "teoOffline?replicaSet=rs0&authSource=admin",
-	"db_user": "cgrates", 					// username to use when connecting to data_db
-	"db_password": "CGRateS.org", 						// password to use when connecting to data_db
-},
 
 
 "rals": {

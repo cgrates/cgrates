@@ -27,9 +27,7 @@
 		
 	},
 	
-	"stor_db": {
-		"db_password": "CGRateS.org",
-	},
+
 	
 	"caches":{
 		"partitions": {

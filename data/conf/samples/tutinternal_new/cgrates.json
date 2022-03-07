@@ -22,10 +22,6 @@
 },
 
 
-"stor_db": {
-	"db_type": "*internal",	
-},
-
 
 "rals": {
 	"enabled": true,
