@@ -65,7 +65,7 @@ type testDispatcher struct {
 	cmd     *exec.Cmd
 }
 
-func newTestEngine(t *testing.T, cfgPath string, initDataDB, intitStoreDB bool) (d *testDispatcher) {
+func newTestEngine(t *testing.T, cfgPath string, initDataDB bool) (d *testDispatcher) {
 	d = new(testDispatcher)
 	d.CfgPath = cfgPath
 	var err error
@@ -79,9 +79,6 @@ func newTestEngine(t *testing.T, cfgPath string, initDataDB, intitStoreDB bool) 
 		d.initDataDb(t)
 	}
 
-	if intitStoreDB {
-		d.resetStorDb(t)
-	}
 	d.startEngine(t)
 	return d
 }
@@ -110,13 +107,6 @@ func (d *testDispatcher) stopEngine(t *testing.T) {
 
 func (d *testDispatcher) initDataDb(t *testing.T) {
 	if err := engine.InitDataDB(d.Cfg); err != nil {
-		t.Fatalf("Error at DataDB init:%v\n", err)
-	}
-}
-
-// Wipe out the cdr database
-func (d *testDispatcher) resetStorDb(t *testing.T) {
-	if err := engine.InitStorDB(d.Cfg); err != nil {
 		t.Fatalf("Error at DataDB init:%v\n", err)
 	}
 }
@@ -153,9 +143,9 @@ func (d *testDispatcher) loadData2(t *testing.T, path string) {
 
 func testDsp(t *testing.T, tests []func(t *testing.T), testName, all, all2, disp, allTF, all2TF, attrTF string) {
 	// engine.KillEngine(0)
-	allEngine = newTestEngine(t, path.Join(*dataDir, "conf", "samples", "dispatchers", all), true, true)
-	allEngine2 = newTestEngine(t, path.Join(*dataDir, "conf", "samples", "dispatchers", all2), true, true)
-	dispEngine = newTestEngine(t, path.Join(*dataDir, "conf", "samples", "dispatchers", disp), true, true)
+	allEngine = newTestEngine(t, path.Join(*dataDir, "conf", "samples", "dispatchers", all), true)
+	allEngine2 = newTestEngine(t, path.Join(*dataDir, "conf", "samples", "dispatchers", all2), true)
+	dispEngine = newTestEngine(t, path.Join(*dataDir, "conf", "samples", "dispatchers", disp), true)
 	dispEngine.loadData2(t, path.Join(*dataDir, "tariffplans", attrTF))
 	allEngine.loadData2(t, path.Join(*dataDir, "tariffplans", allTF))
 	allEngine2.loadData2(t, path.Join(*dataDir, "tariffplans", all2TF))

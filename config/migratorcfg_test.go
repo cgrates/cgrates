@@ -34,18 +34,9 @@ func TestMigratorCgrCfgloadFromJsonCfg(t *testing.T) {
 		Out_dataDB_user:     utils.StringPointer(utils.CGRateSLwr),
 		Out_dataDB_password: utils.StringPointer(utils.EmptyString),
 		Out_dataDB_encoding: utils.StringPointer(utils.MsgPack),
-		Out_storDB_type:     utils.StringPointer(utils.MySQL),
-		Out_storDB_host:     utils.StringPointer("127.0.0.1"),
-		Out_storDB_port:     utils.StringPointer("3306"),
-		Out_storDB_name:     utils.StringPointer(utils.CGRateSLwr),
-		Out_storDB_user:     utils.StringPointer(utils.CGRateSLwr),
-		Out_storDB_password: utils.StringPointer(utils.EmptyString),
 		Out_dataDB_opts: &DBOptsJson{
 			RedisCluster:     utils.BoolPointer(true),
 			RedisClusterSync: utils.StringPointer("10s"),
-		},
-		Out_storDB_opts: &DBOptsJson{
-			RedisSentinel: utils.StringPointer(utils.EmptyString),
 		},
 	}
 	expected := &MigratorCgrCfg{
@@ -56,17 +47,11 @@ func TestMigratorCgrCfgloadFromJsonCfg(t *testing.T) {
 		OutDataDBUser:     utils.CGRateSLwr,
 		OutDataDBPassword: utils.EmptyString,
 		OutDataDBEncoding: utils.MsgPack,
-		OutStorDBType:     utils.MySQL,
-		OutStorDBHost:     "127.0.0.1",
-		OutStorDBPort:     "3306",
-		OutStorDBName:     utils.CGRateSLwr,
-		OutStorDBUser:     utils.CGRateSLwr,
-		OutStorDBPassword: utils.EmptyString,
+
 		OutDataDBOpts: &DataDBOpts{
 			RedisCluster:     true,
 			RedisClusterSync: 10 * time.Second,
 		},
-		OutStorDBOpts: &StorDBOpts{},
 	}
 	cfg := NewDefaultCGRConfig()
 	if err = cfg.migratorCgrCfg.loadFromJSONCfg(cfgJSON); err != nil {
@@ -86,17 +71,13 @@ func TestMigratorCgrCfgAsMapInterface(t *testing.T) {
 		"out_datadb_host": "127.0.0.19",
 		"out_datadb_port": "8865",
 		"out_datadb_name": "12",
-		"out_stordb_host": "127.0.0.19",
-		"out_stordb_port": "1234",
+
         "users_filters":["users","filters","Account"],
         "out_datadb_opts":{	
 		   "redisCluster": true,					
 		   "redisClusterSync": "2s",					
 		   "redisClusterOndownDelay": "1",	
 		},
-		"out_stordb_opts":{	
-			"redisCluster": true,					
-		 },
 	},
 }`
 	eMap := map[string]interface{}{
@@ -107,21 +88,9 @@ func TestMigratorCgrCfgAsMapInterface(t *testing.T) {
 		utils.OutDataDBUserCfg:     "cgrates",
 		utils.OutDataDBPasswordCfg: "",
 		utils.OutDataDBEncodingCfg: "msgpack",
-		utils.OutStorDBTypeCfg:     "mysql",
-		utils.OutStorDBHostCfg:     "127.0.0.19",
-		utils.OutStorDBPortCfg:     "1234",
-		utils.OutStorDBNameCfg:     "cgrates",
-		utils.OutStorDBUserCfg:     "cgrates",
-		utils.OutStorDBPasswordCfg: "",
-		utils.UsersFiltersCfg:      []string{"users", "filters", "Account"},
-		utils.OutStorDBOptsCfg: map[string]interface{}{
-			utils.MongoQueryTimeoutCfg:  "0s",
-			utils.MysqlLocation:         utils.EmptyString,
-			utils.SQLConnMaxLifetimeCfg: "0s",
-			utils.SQLMaxIdleConnsCfg:    0,
-			utils.SQLMaxOpenConnsCfg:    0,
-			utils.SSLModeCfg:            utils.EmptyString,
-		},
+
+		utils.UsersFiltersCfg: []string{"users", "filters", "Account"},
+
 		utils.OutDataDBOptsCfg: map[string]interface{}{
 			utils.RedisSentinelNameCfg:       "",
 			utils.RedisClusterCfg:            true,
@@ -143,7 +112,6 @@ func TestMigratorCgrCfgAsMapInterface(t *testing.T) {
 func TestMigratorCgrCfgAsMapInterface1(t *testing.T) {
 	cfgJSONStr := `{
 		"migrator": {
-			"out_stordb_password": "out_stordb_password",
 			"users_filters":["users","filters","Account"],
 			"out_datadb_opts": {
 				"redisSentinel": "out_datadb_redis_sentinel",
@@ -158,21 +126,9 @@ func TestMigratorCgrCfgAsMapInterface1(t *testing.T) {
 		utils.OutDataDBUserCfg:     "cgrates",
 		utils.OutDataDBPasswordCfg: "",
 		utils.OutDataDBEncodingCfg: "msgpack",
-		utils.OutStorDBTypeCfg:     "mysql",
-		utils.OutStorDBHostCfg:     "127.0.0.1",
-		utils.OutStorDBPortCfg:     "3306",
-		utils.OutStorDBNameCfg:     "cgrates",
-		utils.OutStorDBUserCfg:     "cgrates",
-		utils.OutStorDBPasswordCfg: "out_stordb_password",
-		utils.UsersFiltersCfg:      []string{"users", "filters", "Account"},
-		utils.OutStorDBOptsCfg: map[string]interface{}{
-			utils.MongoQueryTimeoutCfg:  "0s",
-			utils.MysqlLocation:         utils.EmptyString,
-			utils.SQLConnMaxLifetimeCfg: "0s",
-			utils.SQLMaxIdleConnsCfg:    0,
-			utils.SQLMaxOpenConnsCfg:    0,
-			utils.SSLModeCfg:            utils.EmptyString,
-		},
+
+		utils.UsersFiltersCfg: []string{"users", "filters", "Account"},
+
 		utils.OutDataDBOptsCfg: map[string]interface{}{
 			utils.MongoQueryTimeoutCfg:       "0s",
 			utils.RedisSentinelNameCfg:       "out_datadb_redis_sentinel",
@@ -204,21 +160,9 @@ func TestMigratorCgrCfgAsMapInterface2(t *testing.T) {
 		utils.OutDataDBUserCfg:     "cgrates",
 		utils.OutDataDBPasswordCfg: "",
 		utils.OutDataDBEncodingCfg: "msgpack",
-		utils.OutStorDBTypeCfg:     "mysql",
-		utils.OutStorDBHostCfg:     "127.0.0.1",
-		utils.OutStorDBPortCfg:     "3306",
-		utils.OutStorDBNameCfg:     "cgrates",
-		utils.OutStorDBUserCfg:     "cgrates",
-		utils.OutStorDBPasswordCfg: "",
-		utils.UsersFiltersCfg:      []string(nil),
-		utils.OutStorDBOptsCfg: map[string]interface{}{
-			utils.MongoQueryTimeoutCfg:  "0s",
-			utils.MysqlLocation:         utils.EmptyString,
-			utils.SQLConnMaxLifetimeCfg: "0s",
-			utils.SQLMaxIdleConnsCfg:    0,
-			utils.SQLMaxOpenConnsCfg:    0,
-			utils.SSLModeCfg:            utils.EmptyString,
-		},
+
+		utils.UsersFiltersCfg: []string(nil),
+
 		utils.OutDataDBOptsCfg: map[string]interface{}{
 			utils.RedisSentinelNameCfg:       "",
 			utils.RedisClusterCfg:            false,
@@ -248,18 +192,11 @@ func TestMigratorCgrCfgClone(t *testing.T) {
 		OutDataDBUser:     utils.CGRateSLwr,
 		OutDataDBPassword: utils.EmptyString,
 		OutDataDBEncoding: utils.MsgPack,
-		OutStorDBType:     utils.MySQL,
-		OutStorDBHost:     "127.0.0.1",
-		OutStorDBPort:     "3306",
-		OutStorDBName:     utils.CGRateSLwr,
-		OutStorDBUser:     utils.CGRateSLwr,
-		OutStorDBPassword: utils.EmptyString,
 		UsersFilters:      []string{utils.AccountField},
 		OutDataDBOpts: &DataDBOpts{
 			RedisCluster:     true,
 			RedisClusterSync: 10 * time.Second,
 		},
-		OutStorDBOpts: &StorDBOpts{},
 	}
 	rcv := sa.Clone()
 	if !reflect.DeepEqual(sa, rcv) {
@@ -284,24 +221,13 @@ func TestDiffMigratorCfgJson(t *testing.T) {
 		OutDataDBUser:     "cgrates_user",
 		OutDataDBPassword: "CGRateS.org",
 		OutDataDBEncoding: "utf-8",
-		OutStorDBType:     "redis",
-		OutStorDBHost:     "127.0.0.1",
-		OutStorDBPort:     "4037",
-		OutStorDBName:     "cgrates_redis",
-		OutStorDBUser:     "cgrates_redis_user",
-		OutStorDBPassword: "CGRateS.org_redis",
 		OutDataDBOpts:     &DataDBOpts{},
-		OutStorDBOpts:     &StorDBOpts{},
-		UsersFilters:      []string{},
+
+		UsersFilters: []string{},
 	}
 
 	v2 := &MigratorCgrCfg{
-		OutStorDBType:     "postgres",
-		OutStorDBHost:     "0.0.0.0",
-		OutStorDBPort:     "8080",
-		OutStorDBName:     "cgrates",
-		OutStorDBUser:     "cgrates_user",
-		OutStorDBPassword: "CGRateS.org",
+
 		OutDataDBEncoding: "utf-16",
 		OutDataDBType:     "redis",
 		OutDataDBHost:     "0.0.0.0",
@@ -312,17 +238,11 @@ func TestDiffMigratorCfgJson(t *testing.T) {
 		OutDataDBOpts: &DataDBOpts{
 			RedisCluster: true,
 		},
-		OutStorDBOpts: &StorDBOpts{},
-		UsersFilters:  []string{"cgrates_redis_user"},
+		UsersFilters: []string{"cgrates_redis_user"},
 	}
 
 	expected := &MigratorCfgJson{
-		Out_storDB_type:     utils.StringPointer("postgres"),
-		Out_storDB_host:     utils.StringPointer("0.0.0.0"),
-		Out_storDB_port:     utils.StringPointer("8080"),
-		Out_storDB_name:     utils.StringPointer("cgrates"),
-		Out_storDB_user:     utils.StringPointer("cgrates_user"),
-		Out_storDB_password: utils.StringPointer("CGRateS.org"),
+
 		Out_dataDB_encoding: utils.StringPointer("utf-16"),
 		Out_dataDB_type:     utils.StringPointer("redis"),
 		Out_dataDB_host:     utils.StringPointer("0.0.0.0"),
@@ -333,8 +253,8 @@ func TestDiffMigratorCfgJson(t *testing.T) {
 		Out_dataDB_opts: &DBOptsJson{
 			RedisCluster: utils.BoolPointer(true),
 		},
-		Out_storDB_opts: &DBOptsJson{},
-		Users_filters:   &[]string{"cgrates_redis_user"},
+
+		Users_filters: &[]string{"cgrates_redis_user"},
 	}
 
 	rcv := diffMigratorCfgJson(d, v1, v2)
@@ -345,7 +265,6 @@ func TestDiffMigratorCfgJson(t *testing.T) {
 	v1 = v2
 	expected = &MigratorCfgJson{
 		Out_dataDB_opts: &DBOptsJson{},
-		Out_storDB_opts: &DBOptsJson{},
 	}
 	rcv = diffMigratorCfgJson(d, v1, v2)
 	if !reflect.DeepEqual(rcv, expected) {
@@ -362,15 +281,10 @@ func TestMigratorCloneSection(t *testing.T) {
 		OutDataDBUser:     "cgrates_user",
 		OutDataDBPassword: "CGRateS.org",
 		OutDataDBEncoding: "utf-8",
-		OutStorDBType:     "redis",
-		OutStorDBHost:     "127.0.0.1",
-		OutStorDBPort:     "4037",
-		OutStorDBName:     "cgrates_redis",
-		OutStorDBUser:     "cgrates_redis_user",
-		OutStorDBPassword: "CGRateS.org_redis",
-		OutDataDBOpts:     &DataDBOpts{},
-		OutStorDBOpts:     &StorDBOpts{},
-		UsersFilters:      []string{},
+
+		OutDataDBOpts: &DataDBOpts{},
+
+		UsersFilters: []string{},
 	}
 
 	exp := &MigratorCgrCfg{
@@ -381,15 +295,10 @@ func TestMigratorCloneSection(t *testing.T) {
 		OutDataDBUser:     "cgrates_user",
 		OutDataDBPassword: "CGRateS.org",
 		OutDataDBEncoding: "utf-8",
-		OutStorDBType:     "redis",
-		OutStorDBHost:     "127.0.0.1",
-		OutStorDBPort:     "4037",
-		OutStorDBName:     "cgrates_redis",
-		OutStorDBUser:     "cgrates_redis_user",
-		OutStorDBPassword: "CGRateS.org_redis",
-		OutDataDBOpts:     &DataDBOpts{},
-		OutStorDBOpts:     &StorDBOpts{},
-		UsersFilters:      []string{},
+
+		OutDataDBOpts: &DataDBOpts{},
+
+		UsersFilters: []string{},
 	}
 
 	rcv := mgrCfg.CloneSection()

@@ -1259,12 +1259,7 @@ func testApisLoadFromPath(t *testing.T) {
 		"data_db": {
 			"db_type": "*internal"
 		},
-		
-		
-		"stor_db": {
-			"db_type": "*internal"
-		},
-		
+			
 		
 		"rals": {
 			"enabled": true,

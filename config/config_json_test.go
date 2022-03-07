@@ -510,150 +510,10 @@ func TestDfDataDbJsonCfg(t *testing.T) {
 	}
 }
 
-func TestDfStorDBJsonCfg(t *testing.T) {
-	eCfg := &DbJsonCfg{
-		Db_type:               utils.StringPointer("*mysql"),
-		Db_host:               utils.StringPointer("127.0.0.1"),
-		Db_port:               utils.IntPointer(3306),
-		Db_name:               utils.StringPointer("cgrates"),
-		Db_user:               utils.StringPointer("cgrates"),
-		Db_password:           utils.StringPointer(""),
-		String_indexed_fields: &[]string{},
-		Prefix_indexed_fields: &[]string{},
-		Opts: &DBOptsJson{
-			MongoQueryTimeout:  utils.StringPointer("10s"),
-			SQLMaxOpenConns:    utils.IntPointer(100),
-			SQLMaxIdleConns:    utils.IntPointer(10),
-			SQLConnMaxLifetime: utils.StringPointer("0"),
-			MYSQLDSNParams:     make(map[string]string),
-			SSLMode:            utils.StringPointer(utils.PostgressSSLModeDisable),
-			MySQLLocation:      utils.StringPointer("Local"),
-		},
-		Items: map[string]*ItemOptsJson{
-			utils.CacheTBLTPResources: {
-				Limit:      utils.IntPointer(-1),
-				Ttl:        utils.StringPointer(utils.EmptyString),
-				Static_ttl: utils.BoolPointer(false),
-				Replicate:  utils.BoolPointer(false),
-				Remote:     utils.BoolPointer(false),
-			},
-			utils.CacheTBLTPStats: {
-				Limit:      utils.IntPointer(-1),
-				Ttl:        utils.StringPointer(utils.EmptyString),
-				Static_ttl: utils.BoolPointer(false),
-				Replicate:  utils.BoolPointer(false),
-				Remote:     utils.BoolPointer(false),
-			},
-			utils.CacheTBLTPThresholds: {
-				Limit:      utils.IntPointer(-1),
-				Ttl:        utils.StringPointer(utils.EmptyString),
-				Static_ttl: utils.BoolPointer(false),
-				Replicate:  utils.BoolPointer(false),
-				Remote:     utils.BoolPointer(false),
-			},
-			utils.CacheTBLTPFilters: {
-				Limit:      utils.IntPointer(-1),
-				Ttl:        utils.StringPointer(utils.EmptyString),
-				Static_ttl: utils.BoolPointer(false),
-				Replicate:  utils.BoolPointer(false),
-				Remote:     utils.BoolPointer(false),
-			},
-			utils.CacheSessionCostsTBL: {
-				Limit:      utils.IntPointer(-1),
-				Ttl:        utils.StringPointer(utils.EmptyString),
-				Static_ttl: utils.BoolPointer(false),
-				Replicate:  utils.BoolPointer(false),
-				Remote:     utils.BoolPointer(false),
-			},
-			utils.CacheTBLTPRoutes: {
-				Limit:      utils.IntPointer(-1),
-				Ttl:        utils.StringPointer(utils.EmptyString),
-				Static_ttl: utils.BoolPointer(false),
-				Replicate:  utils.BoolPointer(false),
-				Remote:     utils.BoolPointer(false),
-			},
-			utils.CacheTBLTPAttributes: {
-				Limit:      utils.IntPointer(-1),
-				Ttl:        utils.StringPointer(utils.EmptyString),
-				Static_ttl: utils.BoolPointer(false),
-				Replicate:  utils.BoolPointer(false),
-				Remote:     utils.BoolPointer(false),
-			},
-			utils.CacheTBLTPChargers: {
-				Limit:      utils.IntPointer(-1),
-				Ttl:        utils.StringPointer(utils.EmptyString),
-				Static_ttl: utils.BoolPointer(false),
-				Replicate:  utils.BoolPointer(false),
-				Remote:     utils.BoolPointer(false),
-			},
-			utils.CacheTBLTPDispatchers: {
-				Limit:      utils.IntPointer(-1),
-				Ttl:        utils.StringPointer(utils.EmptyString),
-				Static_ttl: utils.BoolPointer(false),
-				Replicate:  utils.BoolPointer(false),
-				Remote:     utils.BoolPointer(false),
-			},
-			utils.CacheTBLTPRateProfiles: {
-				Limit:      utils.IntPointer(-1),
-				Ttl:        utils.StringPointer(utils.EmptyString),
-				Static_ttl: utils.BoolPointer(false),
-				Replicate:  utils.BoolPointer(false),
-				Remote:     utils.BoolPointer(false),
-			},
-			utils.CacheTBLTPDispatcherHosts: {
-				Limit:      utils.IntPointer(-1),
-				Ttl:        utils.StringPointer(utils.EmptyString),
-				Static_ttl: utils.BoolPointer(false),
-				Replicate:  utils.BoolPointer(false),
-				Remote:     utils.BoolPointer(false),
-			},
-			utils.CacheTBLTPActionProfiles: {
-				Limit:      utils.IntPointer(-1),
-				Ttl:        utils.StringPointer(utils.EmptyString),
-				Static_ttl: utils.BoolPointer(false),
-				Replicate:  utils.BoolPointer(false),
-				Remote:     utils.BoolPointer(false),
-			},
-			utils.CacheTBLTPAccounts: {
-				Limit:      utils.IntPointer(-1),
-				Ttl:        utils.StringPointer(utils.EmptyString),
-				Static_ttl: utils.BoolPointer(false),
-				Replicate:  utils.BoolPointer(false),
-				Remote:     utils.BoolPointer(false),
-			},
-			utils.CacheCDRsTBL: {
-				Limit:      utils.IntPointer(-1),
-				Ttl:        utils.StringPointer(utils.EmptyString),
-				Static_ttl: utils.BoolPointer(false),
-				Replicate:  utils.BoolPointer(false),
-				Remote:     utils.BoolPointer(false),
-			},
-			utils.CacheVersions: {
-				Limit:      utils.IntPointer(-1),
-				Ttl:        utils.StringPointer(utils.EmptyString),
-				Static_ttl: utils.BoolPointer(false),
-				Replicate:  utils.BoolPointer(false),
-				Remote:     utils.BoolPointer(false),
-			},
-		},
-	}
-	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
-	if err != nil {
-		t.Error(err)
-	}
-	cfg := new(DbJsonCfg)
-	if err := dfCgrJSONCfg.GetSection(context.Background(), StorDBJSON, cfg); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(eCfg, cfg) {
-		t.Errorf("Expected : %+v,\n Received: %+v", utils.ToJSON(eCfg), utils.ToJSON(cfg))
-	}
-}
-
 func TestDfCdrsJsonCfg(t *testing.T) {
 	eCfg := &CdrsJsonCfg{
 		Enabled:              utils.BoolPointer(false),
 		Extra_fields:         &[]string{},
-		Store_cdrs:           utils.BoolPointer(true),
 		Session_cost_retries: utils.IntPointer(5),
 		Chargers_conns:       &[]string{},
 		Attributes_conns:     &[]string{},
@@ -1996,14 +1856,7 @@ func TestDfMigratorCfg(t *testing.T) {
 		Out_dataDB_password: utils.StringPointer(""),
 		Out_dataDB_encoding: utils.StringPointer("msgpack"),
 
-		Out_storDB_type:     utils.StringPointer("mysql"),
-		Out_storDB_host:     utils.StringPointer("127.0.0.1"),
-		Out_storDB_port:     utils.StringPointer("3306"),
-		Out_storDB_name:     utils.StringPointer("cgrates"),
-		Out_storDB_user:     utils.StringPointer("cgrates"),
-		Out_storDB_password: utils.StringPointer(""),
-		Users_filters:       &[]string{},
-		Out_storDB_opts:     &DBOptsJson{},
+		Users_filters: &[]string{},
 		Out_dataDB_opts: &DBOptsJson{
 			RedisClusterSync:        utils.StringPointer("5s"),
 			RedisClusterOndownDelay: utils.StringPointer("0"),

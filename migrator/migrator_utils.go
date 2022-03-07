@@ -56,29 +56,6 @@ func NewMigratorDataDB(db_type, host, port, name, user, pass,
 	return d, nil
 }
 
-func NewMigratorStorDB(db_type, host, port, name, user, pass, marshaler string,
-	stringIndexedFields, prefixIndexedFields []string,
-	opts *config.StorDBOpts, itmsCfg map[string]*config.ItemOpts) (db MigratorStorDB, err error) {
-	storDb, err := engine.NewStorDBConn(db_type, host, port, name, user,
-		pass, marshaler, stringIndexedFields, prefixIndexedFields, opts, itmsCfg)
-	if err != nil {
-		return nil, err
-	}
-	switch db_type {
-	case utils.Mongo:
-		db = newMongoStorDBMigrator(storDb)
-	case utils.MySQL:
-		db = newMigratorSQL(storDb)
-	case utils.Postgres:
-		db = newMigratorSQL(storDb)
-	case utils.Internal:
-		db = newInternalStorDBMigrator(storDb)
-	default:
-		err = fmt.Errorf("Unknown db '%s' valid options are [%s, %s, %s, %s]",
-			db_type, utils.MySQL, utils.Mongo, utils.Postgres, utils.Internal)
-	}
-	return
-}
 func (m *Migrator) getVersions(str string) (vrs engine.Versions, err error) {
 	vrs, err = m.dmIN.DataManager().DataDB().GetVersions(utils.EmptyString)
 	if err != nil {

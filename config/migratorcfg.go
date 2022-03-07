@@ -34,15 +34,8 @@ type MigratorCgrCfg struct {
 	OutDataDBUser     string
 	OutDataDBPassword string
 	OutDataDBEncoding string
-	OutStorDBType     string
-	OutStorDBHost     string
-	OutStorDBPort     string
-	OutStorDBName     string
-	OutStorDBUser     string
-	OutStorDBPassword string
 	UsersFilters      []string
 	OutDataDBOpts     *DataDBOpts
-	OutStorDBOpts     *StorDBOpts
 }
 
 // loadMigratorCgrCfg loads the Migrator section of the configuration
@@ -79,32 +72,11 @@ func (mg *MigratorCgrCfg) loadFromJSONCfg(jsnCfg *MigratorCfgJson) (err error) {
 	if jsnCfg.Out_dataDB_encoding != nil {
 		mg.OutDataDBEncoding = strings.TrimPrefix(*jsnCfg.Out_dataDB_encoding, "*")
 	}
-	if jsnCfg.Out_storDB_type != nil {
-		mg.OutStorDBType = *jsnCfg.Out_storDB_type
-	}
-	if jsnCfg.Out_storDB_host != nil {
-		mg.OutStorDBHost = *jsnCfg.Out_storDB_host
-	}
-	if jsnCfg.Out_storDB_port != nil {
-		mg.OutStorDBPort = *jsnCfg.Out_storDB_port
-	}
-	if jsnCfg.Out_storDB_name != nil {
-		mg.OutStorDBName = *jsnCfg.Out_storDB_name
-	}
-	if jsnCfg.Out_storDB_user != nil {
-		mg.OutStorDBUser = *jsnCfg.Out_storDB_user
-	}
-	if jsnCfg.Out_storDB_password != nil {
-		mg.OutStorDBPassword = *jsnCfg.Out_storDB_password
-	}
 	if jsnCfg.Users_filters != nil && len(*jsnCfg.Users_filters) != 0 {
 		mg.UsersFilters = utils.CloneStringSlice(*jsnCfg.Users_filters)
 	}
 	if jsnCfg.Out_dataDB_opts != nil {
 		err = mg.OutDataDBOpts.loadFromJSONCfg(jsnCfg.Out_dataDB_opts)
-	}
-	if jsnCfg.Out_storDB_opts != nil {
-		err = mg.OutStorDBOpts.loadFromJSONCfg(jsnCfg.Out_storDB_opts)
 	}
 	return nil
 }
@@ -122,14 +94,6 @@ func (mg MigratorCgrCfg) AsMapInterface(string) interface{} {
 		utils.RedisClientKeyCfg:          mg.OutDataDBOpts.RedisClientKey,
 		utils.RedisCACertificateCfg:      mg.OutDataDBOpts.RedisCACertificate,
 	}
-	outStorDBOpts := map[string]interface{}{
-		utils.SQLMaxOpenConnsCfg:   mg.OutStorDBOpts.SQLMaxOpenConns,
-		utils.SQLMaxIdleConnsCfg:   mg.OutStorDBOpts.SQLMaxIdleConns,
-		utils.SQLConnMaxLifetime:   mg.OutStorDBOpts.SQLConnMaxLifetime.String(),
-		utils.MongoQueryTimeoutCfg: mg.OutStorDBOpts.MongoQueryTimeout.String(),
-		utils.SSLModeCfg:           mg.OutStorDBOpts.SSLMode,
-		utils.MysqlLocation:        mg.OutStorDBOpts.MySQLLocation,
-	}
 	return map[string]interface{}{
 		utils.OutDataDBTypeCfg:     mg.OutDataDBType,
 		utils.OutDataDBHostCfg:     mg.OutDataDBHost,
@@ -138,14 +102,7 @@ func (mg MigratorCgrCfg) AsMapInterface(string) interface{} {
 		utils.OutDataDBUserCfg:     mg.OutDataDBUser,
 		utils.OutDataDBPasswordCfg: mg.OutDataDBPassword,
 		utils.OutDataDBEncodingCfg: mg.OutDataDBEncoding,
-		utils.OutStorDBTypeCfg:     mg.OutStorDBType,
-		utils.OutStorDBHostCfg:     mg.OutStorDBHost,
-		utils.OutStorDBPortCfg:     mg.OutStorDBPort,
-		utils.OutStorDBNameCfg:     mg.OutStorDBName,
-		utils.OutStorDBUserCfg:     mg.OutStorDBUser,
-		utils.OutStorDBPasswordCfg: mg.OutStorDBPassword,
 		utils.OutDataDBOptsCfg:     outDataDBOpts,
-		utils.OutStorDBOptsCfg:     outStorDBOpts,
 		utils.UsersFiltersCfg:      utils.CloneStringSlice(mg.UsersFilters),
 	}
 }
@@ -163,14 +120,8 @@ func (mg MigratorCgrCfg) Clone() (cln *MigratorCgrCfg) {
 		OutDataDBUser:     mg.OutDataDBUser,
 		OutDataDBPassword: mg.OutDataDBPassword,
 		OutDataDBEncoding: mg.OutDataDBEncoding,
-		OutStorDBType:     mg.OutStorDBType,
-		OutStorDBHost:     mg.OutStorDBHost,
-		OutStorDBPort:     mg.OutStorDBPort,
-		OutStorDBName:     mg.OutStorDBName,
-		OutStorDBUser:     mg.OutStorDBUser,
-		OutStorDBPassword: mg.OutStorDBPassword,
-		OutDataDBOpts:     mg.OutDataDBOpts.Clone(),
-		OutStorDBOpts:     mg.OutStorDBOpts.Clone(),
+
+		OutDataDBOpts: mg.OutDataDBOpts.Clone(),
 	}
 	if mg.UsersFilters != nil {
 		cln.UsersFilters = utils.CloneStringSlice(mg.UsersFilters)
@@ -186,15 +137,8 @@ type MigratorCfgJson struct {
 	Out_dataDB_user     *string
 	Out_dataDB_password *string
 	Out_dataDB_encoding *string
-	Out_storDB_type     *string
-	Out_storDB_host     *string
-	Out_storDB_port     *string
-	Out_storDB_name     *string
-	Out_storDB_user     *string
-	Out_storDB_password *string
 	Users_filters       *[]string
 	Out_dataDB_opts     *DBOptsJson
-	Out_storDB_opts     *DBOptsJson
 }
 
 func diffMigratorCfgJson(d *MigratorCfgJson, v1, v2 *MigratorCgrCfg) *MigratorCfgJson {
@@ -222,28 +166,10 @@ func diffMigratorCfgJson(d *MigratorCfgJson, v1, v2 *MigratorCgrCfg) *MigratorCf
 	if v1.OutDataDBEncoding != v2.OutDataDBEncoding {
 		d.Out_dataDB_encoding = utils.StringPointer(v2.OutDataDBEncoding)
 	}
-	if v1.OutStorDBType != v2.OutStorDBType {
-		d.Out_storDB_type = utils.StringPointer(v2.OutStorDBType)
-	}
-	if v1.OutStorDBHost != v2.OutStorDBHost {
-		d.Out_storDB_host = utils.StringPointer(v2.OutStorDBHost)
-	}
-	if v1.OutStorDBPort != v2.OutStorDBPort {
-		d.Out_storDB_port = utils.StringPointer(v2.OutStorDBPort)
-	}
-	if v1.OutStorDBName != v2.OutStorDBName {
-		d.Out_storDB_name = utils.StringPointer(v2.OutStorDBName)
-	}
-	if v1.OutStorDBUser != v2.OutStorDBUser {
-		d.Out_storDB_user = utils.StringPointer(v2.OutStorDBUser)
-	}
-	if v1.OutStorDBPassword != v2.OutStorDBPassword {
-		d.Out_storDB_password = utils.StringPointer(v2.OutStorDBPassword)
-	}
+
 	if !utils.SliceStringEqual(v1.UsersFilters, v2.UsersFilters) {
 		d.Users_filters = utils.SliceStringPointer(utils.CloneStringSlice(v2.UsersFilters))
 	}
 	d.Out_dataDB_opts = diffDataDBOptsJsonCfg(d.Out_dataDB_opts, v1.OutDataDBOpts, v2.OutDataDBOpts)
-	d.Out_storDB_opts = diffStorDBOptsJsonCfg(d.Out_storDB_opts, v1.OutStorDBOpts, v2.OutStorDBOpts)
 	return d
 }

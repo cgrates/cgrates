@@ -33,7 +33,7 @@ import (
 
 // NewAPIerSv1Service returns the APIerSv1 Service
 func NewAdminSv1Service(cfg *config.CGRConfig, dm *DataDBService,
-	storDB *StorDBService, filterSChan chan *engine.FilterS,
+	filterSChan chan *engine.FilterS,
 	server *cores.Server,
 	internalAPIerSv1Chan chan birpc.ClientConnector,
 	connMgr *engine.ConnManager, anz *AnalyzerService,
@@ -42,7 +42,6 @@ func NewAdminSv1Service(cfg *config.CGRConfig, dm *DataDBService,
 		connChan:    internalAPIerSv1Chan,
 		cfg:         cfg,
 		dm:          dm,
-		storDB:      storDB,
 		filterSChan: filterSChan,
 		server:      server,
 		connMgr:     connMgr,
@@ -56,7 +55,6 @@ type AdminSv1Service struct {
 	sync.RWMutex
 	cfg         *config.CGRConfig
 	dm          *DataDBService
-	storDB      *StorDBService
 	filterSChan chan *engine.FilterS
 	server      *cores.Server
 	connMgr     *engine.ConnManager

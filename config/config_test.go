@@ -162,40 +162,8 @@ func TestCgrCfgDataDBPortWithDymanic(t *testing.T) {
 	}
 }
 
-func TestCgrCfgStorDBPortWithoutDynamic(t *testing.T) {
-	jsnCfg := `
-{
-"stor_db": {
-	"db_type": "mongo",
-	}
-}`
 
-	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(jsnCfg); err != nil {
-		t.Error(err)
-	} else if cgrCfg.StorDbCfg().Type != utils.Mongo {
-		t.Errorf("Expected: %+v, received: %+v", cgrCfg.StorDbCfg().Type, utils.Mongo)
-	} else if cgrCfg.StorDbCfg().Port != "3306" {
-		t.Errorf("Expected: %+v, received: %+v", cgrCfg.StorDbCfg().Port, "3306")
-	}
-}
 
-func TestCgrCfgStorDBPortWithDymanic(t *testing.T) {
-	jsnCfg := `
-{
-"stor_db": {
-	"db_type": "mongo",
-	"db_port": -1,
-	}
-}`
-
-	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(jsnCfg); err != nil {
-		t.Error(err)
-	} else if cgrCfg.StorDbCfg().Type != utils.Mongo {
-		t.Errorf("Expected: %+v, received: %+v", cgrCfg.StorDbCfg().Type, utils.Mongo)
-	} else if cgrCfg.StorDbCfg().Port != "27017" {
-		t.Errorf("Expected: %+v, received: %+v", cgrCfg.StorDbCfg().Port, "27017")
-	}
-}
 
 func TestCgrCfgListener(t *testing.T) {
 	jsnCfg := `
@@ -358,43 +326,9 @@ func TestCgrCfgJSONDefaultsjsnDataDb(t *testing.T) {
 	}
 }
 
-func TestCgrCfgJSONDefaultsStorDB(t *testing.T) {
-	if cgrCfg.StorDbCfg().Type != "mysql" {
-		t.Errorf("Expecting: mysql , received: %+v", cgrCfg.StorDbCfg().Type)
-	}
-	if cgrCfg.StorDbCfg().Host != "127.0.0.1" {
-		t.Errorf("Expecting: 127.0.0.1 , received: %+v", cgrCfg.StorDbCfg().Host)
-	}
-	if cgrCfg.StorDbCfg().Port != "3306" {
-		t.Errorf("Expecting: 3306 , received: %+v", cgrCfg.StorDbCfg().Port)
-	}
-	if cgrCfg.StorDbCfg().Name != "cgrates" {
-		t.Errorf("Expecting: cgrates , received: %+v", cgrCfg.StorDbCfg().Name)
-	}
-	if cgrCfg.StorDbCfg().User != "cgrates" {
-		t.Errorf("Expecting: cgrates , received: %+v", cgrCfg.StorDbCfg().User)
-	}
-	if cgrCfg.StorDbCfg().Password != "" {
-		t.Errorf("Expecting: , received: %+v", cgrCfg.StorDbCfg().Password)
-	}
-	if cgrCfg.StorDbCfg().Opts.SQLMaxOpenConns != 100 {
-		t.Errorf("Expecting: 100 , received: %+v", cgrCfg.StorDbCfg().Opts.SQLMaxOpenConns)
-	}
-	if cgrCfg.StorDbCfg().Opts.SQLMaxIdleConns != 10 {
-		t.Errorf("Expecting: 10 , received: %+v", cgrCfg.StorDbCfg().Opts.SQLMaxIdleConns)
-	}
-	if !reflect.DeepEqual(cgrCfg.StorDbCfg().StringIndexedFields, []string{}) {
-		t.Errorf("Expecting: %+v , received: %+v", []string{}, cgrCfg.StorDbCfg().StringIndexedFields)
-	}
-	if !reflect.DeepEqual(cgrCfg.StorDbCfg().PrefixIndexedFields, []string{}) {
-		t.Errorf("Expecting: %+v , received: %+v", []string{}, cgrCfg.StorDbCfg().PrefixIndexedFields)
-	}
-}
-
 func TestCgrCfgJSONDefaultsCDRS(t *testing.T) {
 	eCdrsCfg := &CdrsCfg{
 		Enabled:         false,
-		StoreCdrs:       true,
 		SMCostRetries:   5,
 		ChargerSConns:   []string{},
 		AttributeSConns: []string{},
@@ -1086,24 +1020,6 @@ func TestLoadDataDBCfgErrorCase2(t *testing.T) {
 	}
 }
 
-func TestLoadStorDbCfgError(t *testing.T) {
-	cfgJSONStr := `{
-"stor_db": {
-	"db_type": "*internal",
-	"db_port": "-1",
-	}
-}`
-	expected := "json: cannot unmarshal string into Go struct field DbJsonCfg.Db_port of type int"
-	cgrConfig := NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
-	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
-		t.Error(err)
-	} else if err := cgrConfig.storDbCfg.Load(context.Background(), cgrCfgJSON, cgrCfg); err == nil || err.Error() != expected {
-		t.Errorf("Expected %+v, received %+v", expected, err)
-	}
-}
 
 func TestLoadFilterSCfgError(t *testing.T) {
 	cfgJSONStr := `{
@@ -3533,16 +3449,9 @@ func TestCgrMigratorCfgDefault(t *testing.T) {
 		OutDataDBUser:     "cgrates",
 		OutDataDBPassword: "",
 		OutDataDBEncoding: "msgpack",
-		OutStorDBType:     "mysql",
-		OutStorDBHost:     "127.0.0.1",
-		OutStorDBPort:     "3306",
-		OutStorDBName:     "cgrates",
-		OutStorDBUser:     "cgrates",
-		OutStorDBPassword: "",
 		OutDataDBOpts: &DataDBOpts{
 			RedisClusterSync: 5 * time.Second,
 		},
-		OutStorDBOpts: &StorDBOpts{},
 	}
 	if !reflect.DeepEqual(cgrCfg.MigratorCgrCfg(), eMgrCfg) {
 		t.Errorf("expected: %+v, received: %+v", utils.ToJSON(eMgrCfg), utils.ToJSON(cgrCfg.MigratorCgrCfg()))
@@ -3560,12 +3469,6 @@ func TestCgrMigratorCfg2(t *testing.T) {
 	"out_datadb_user": "cgrates",
 	"out_datadb_password": "",
 	"out_datadb_encoding" : "msgpack",
-	"out_stordb_type": "mysql",
-	"out_stordb_host": "0.0.0.0",
-	"out_stordb_port": "9999",
-	"out_stordb_name": "cgrates",
-	"out_stordb_user": "cgrates",
-	"out_stordb_password": "",
 },
 }`
 
@@ -3910,46 +3813,6 @@ func TestV1GetConfigDataDB(t *testing.T) {
 	}
 }
 
-func TestV1GetConfigStorDB(t *testing.T) {
-	var reply map[string]interface{}
-	var empty []string
-	expected := map[string]interface{}{
-		utils.DataDbTypeCfg:          "*mysql",
-		utils.DataDbHostCfg:          "127.0.0.1",
-		utils.DataDbPortCfg:          3306,
-		utils.DataDbNameCfg:          "cgrates",
-		utils.DataDbUserCfg:          "cgrates",
-		utils.DataDbPassCfg:          "",
-		utils.StringIndexedFieldsCfg: []string{},
-		utils.PrefixIndexedFieldsCfg: []string{},
-		utils.RemoteConnsCfg:         empty,
-		utils.ReplicationConnsCfg:    empty,
-		utils.OptsCfg: map[string]interface{}{
-			utils.SQLMaxOpenConnsCfg:    100,
-			utils.SQLMaxIdleConnsCfg:    10,
-			utils.SQLConnMaxLifetimeCfg: "0s",
-			utils.MYSQLDSNParams:        make(map[string]string),
-			utils.MongoQueryTimeoutCfg:  "10s",
-			utils.SSLModeCfg:            "disable",
-			utils.MysqlLocation:         "Local",
-		},
-		utils.ItemsCfg: map[string]interface{}{},
-	}
-	expected = map[string]interface{}{
-		StorDBJSON: expected,
-	}
-	cfgCgr := NewDefaultCGRConfig()
-	if err := cfgCgr.V1GetConfig(context.Background(), &SectionWithAPIOpts{Sections: []string{StorDBJSON}}, &reply); err != nil {
-		t.Error(err)
-	} else if mp, can := reply[StorDBJSON].(map[string]interface{}); !can {
-		t.Errorf("Unexpected type: %t", reply[StorDBJSON])
-	} else {
-		mp[utils.ItemsCfg] = map[string]interface{}{}
-		if !reflect.DeepEqual(reply, expected) {
-			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(reply))
-		}
-	}
-}
 
 func TestV1GetConfigTLS(t *testing.T) {
 	var reply map[string]interface{}
@@ -4647,21 +4510,7 @@ func TestV1GetConfigSectionMigrator(t *testing.T) {
 			utils.OutDataDBUserCfg:     "cgrates",
 			utils.OutDataDBPasswordCfg: "",
 			utils.OutDataDBEncodingCfg: "msgpack",
-			utils.OutStorDBTypeCfg:     "mysql",
-			utils.OutStorDBHostCfg:     "127.0.0.1",
-			utils.OutStorDBPortCfg:     "3306",
-			utils.OutStorDBNameCfg:     "cgrates",
-			utils.OutStorDBUserCfg:     "cgrates",
-			utils.OutStorDBPasswordCfg: "",
 			utils.UsersFiltersCfg:      []string(nil),
-			utils.OutStorDBOptsCfg: map[string]interface{}{
-				utils.MongoQueryTimeoutCfg:  "0s",
-				utils.MysqlLocation:         utils.EmptyString,
-				utils.SQLConnMaxLifetimeCfg: "0s",
-				utils.SQLMaxIdleConnsCfg:    0,
-				utils.SQLMaxOpenConnsCfg:    0,
-				utils.SSLModeCfg:            utils.EmptyString,
-			},
 			utils.OutDataDBOptsCfg: map[string]interface{}{
 				utils.MongoQueryTimeoutCfg:       "0s",
 				utils.RedisSentinelNameCfg:       "",
@@ -5090,17 +4939,6 @@ func TestV1GetConfigAsJSONDataDB(t *testing.T) {
 	expected := `{"data_db":{"db_host":"127.0.0.1","db_name":"10","db_password":"","db_port":6379,"db_type":"*redis","db_user":"cgrates","items":{"*account_filter_indexes":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*accounts":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*action_profile_filter_indexes":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*action_profiles":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*actions":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*attribute_filter_indexes":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*attribute_profiles":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*charger_filter_indexes":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*charger_profiles":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*dispatcher_filter_indexes":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*dispatcher_hosts":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*dispatcher_profiles":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*filters":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*load_ids":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*rate_filter_indexes":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*rate_profile_filter_indexes":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*rate_profiles":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*resource_filter_indexes":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*resource_profiles":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*resources":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*reverse_filter_indexes":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*route_filter_indexes":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*route_profiles":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*stat_filter_indexes":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*statqueue_profiles":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*statqueues":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*threshold_filter_indexes":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*threshold_profiles":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*thresholds":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*versions":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false}},"opts":{"mongoQueryTimeout":"10s","redisCACertificate":"","redisClientCertificate":"","redisClientKey":"","redisCluster":false,"redisClusterOndownDelay":"0s","redisClusterSync":"5s","redisSentinel":"","redisTLS":false},"remote_conn_id":"","remote_conns":[],"replication_cache":"","replication_conns":[],"replication_filtered":false}}`
 	cfgCgr := NewDefaultCGRConfig()
 	if err := cfgCgr.V1GetConfigAsJSON(context.Background(), &SectionWithAPIOpts{Sections: []string{DataDBJSON}}, &reply); err != nil {
-		t.Error(err)
-	} else if expected != reply {
-		t.Errorf("Expected %+v,\n received %+v", expected, reply)
-	}
-}
-
-func TestV1GetConfigAsJSONStorDB(t *testing.T) {
-	var reply string
-	expected := `{"stor_db":{"db_host":"127.0.0.1","db_name":"cgrates","db_password":"","db_port":3306,"db_type":"*mysql","db_user":"cgrates","items":{"*cdrs":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*session_costs":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*tp_accounts":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*tp_action_profiles":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*tp_attributes":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*tp_chargers":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*tp_dispatcher_hosts":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*tp_dispatcher_profiles":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*tp_filters":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*tp_rate_profiles":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*tp_resources":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*tp_routes":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*tp_stats":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*tp_thresholds":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*versions":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false}},"opts":{"mongoQueryTimeout":"10s","mysqlDSNParams":{},"mysqlLocation":"Local","sqlConnMaxLifetime":"0s","sqlMaxIdleConns":10,"sqlMaxOpenConns":100,"sslMode":"disable"},"prefix_indexed_fields":[],"remote_conns":null,"replication_conns":null,"string_indexed_fields":[]}}`
-	cfgCgr := NewDefaultCGRConfig()
-	if err := cfgCgr.V1GetConfigAsJSON(context.Background(), &SectionWithAPIOpts{Sections: []string{StorDBJSON}}, &reply); err != nil {
 		t.Error(err)
 	} else if expected != reply {
 		t.Errorf("Expected %+v,\n received %+v", expected, reply)
@@ -5846,9 +5684,6 @@ func TestCGRConfigClone(t *testing.T) {
 	}
 	if !reflect.DeepEqual(cfg.dataDbCfg, rcv.dataDbCfg) {
 		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(cfg.dataDbCfg), utils.ToJSON(rcv.dataDbCfg))
-	}
-	if !reflect.DeepEqual(cfg.storDbCfg, rcv.storDbCfg) {
-		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(cfg.storDbCfg), utils.ToJSON(rcv.storDbCfg))
 	}
 	if !reflect.DeepEqual(cfg.tlsCfg, rcv.tlsCfg) {
 		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(cfg.tlsCfg), utils.ToJSON(rcv.tlsCfg))

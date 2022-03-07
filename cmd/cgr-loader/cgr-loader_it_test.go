@@ -102,7 +102,6 @@ func TestLoadConfig(t *testing.T) {
 	*timezone = utils.Local
 	ldrCfg := loadConfig()
 	ldrCfg.DataDbCfg().Items = nil
-	ldrCfg.StorDbCfg().Items = nil
 	if !reflect.DeepEqual(ldrCfg.DataDbCfg(), expDBcfg) {
 		t.Errorf("Expected %s received %s", utils.ToJSON(expDBcfg), utils.ToJSON(ldrCfg.DataDbCfg()))
 	}
