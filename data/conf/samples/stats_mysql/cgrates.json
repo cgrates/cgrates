@@ -17,10 +17,6 @@
       "http": ":2080",				// HTTP listening address
     },
   
-    "stor_db": {
-      "db_password": "CGRateS.org",
-    },
-
     "actions": {
         "enabled": true,
         "thresholds_conns": ["*internal"],

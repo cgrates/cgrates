@@ -44,7 +44,6 @@ var (
 	sTestsAccPrf = []func(t *testing.T){
 		testAccSInitCfg,
 		testAccSInitDataDb,
-		testAccSResetStorDb,
 		testAccSStartEngine,
 		testAccSRPCConn,
 		testGetAccProfileBeforeSet,
@@ -102,12 +101,6 @@ func testAccSInitCfg(t *testing.T) {
 
 func testAccSInitDataDb(t *testing.T) {
 	if err := engine.InitDataDB(accPrfCfg); err != nil {
-		t.Fatal(err)
-	}
-}
-
-func testAccSResetStorDb(t *testing.T) {
-	if err := engine.InitStorDB(accPrfCfg); err != nil {
 		t.Fatal(err)
 	}
 }

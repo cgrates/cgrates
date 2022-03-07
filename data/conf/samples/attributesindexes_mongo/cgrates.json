@@ -5,10 +5,7 @@
       "log_level": 7,
     },
   
-    "stor_db": {
-      "db_password": "CGRateS.org"
-    },
-  
+ 
     "admins": {
       "enabled": true,
     },

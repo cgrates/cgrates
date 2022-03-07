@@ -27,9 +27,7 @@
 },
 
 
-"stor_db": {
-	"db_type": "*internal",	
-},
+
 
 
 "rals": {
@@ -97,9 +95,6 @@
 	"out_datadb_type": "mongo",
 	"out_datadb_port": "27017",
 	"out_datadb_name": "10",
-	"out_stordb_type": "mongo",
-	"out_stordb_port": "27017",
-	"out_stordb_name": "cgrates",
 },
 
 

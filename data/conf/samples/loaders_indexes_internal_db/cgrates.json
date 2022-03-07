@@ -65,9 +65,6 @@
     }
 },
 
-"stor_db": {
-    "db_type": "*internal"
-},
 
 "loaders": [{
     "id": "*default",

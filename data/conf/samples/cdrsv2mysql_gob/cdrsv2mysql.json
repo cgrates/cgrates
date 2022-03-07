@@ -15,11 +15,7 @@
 		"conns": [{"address": "127.0.0.1:2013", "transport":"*gob"}],
 	},
 },
-
-
-"stor_db": {
-	"db_password": "CGRateS.org",
-},
+,
 
 
 "rals": {

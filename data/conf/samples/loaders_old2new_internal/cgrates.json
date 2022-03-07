@@ -11,9 +11,7 @@
 },
 
 
-"stor_db": {
-	"db_type": "*internal"
-},
+
 
 "loaders": [
 	{

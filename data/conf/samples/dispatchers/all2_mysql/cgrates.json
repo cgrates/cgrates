@@ -21,9 +21,6 @@
 	"db_name": "12", 						// data_db database name to connect to
 },
 
-"stor_db": {
-	"db_type":"*internal",
-},
 
 
 "rpc_conns": {

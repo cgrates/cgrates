@@ -45,7 +45,7 @@ var (
 	sTestsSIP = []func(t *testing.T){
 		testSAitInitCfg,
 		testSAitResetDataDb,
-		testSAitResetStorDb,
+
 		testSAitStartEngine,
 		testSAitApierRpcConn,
 		testSAitTPFromFolder,
@@ -93,13 +93,6 @@ func testSAitInitCfg(t *testing.T) {
 // Remove data in both rating and accounting db
 func testSAitResetDataDb(t *testing.T) {
 	if err := engine.InitDataDB(saCfg); err != nil {
-		t.Fatal(err)
-	}
-}
-
-// Wipe out the cdr database
-func testSAitResetStorDb(t *testing.T) {
-	if err := engine.InitStorDB(saCfg); err != nil {
 		t.Fatal(err)
 	}
 }

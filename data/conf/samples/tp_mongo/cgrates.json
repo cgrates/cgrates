@@ -22,12 +22,6 @@
 },
 
 
-"stor_db": {
-	"db_type": "mongo",
-	"db_name": "cgrates",
-	"db_port": 27017,
-},
-
 
 "rals": {
 	"enabled": true,
@@ -107,9 +101,6 @@
 	"out_datadb_type": "mongo",
 	"out_datadb_port": "27017",
 	"out_datadb_name": "10",
-	"out_stordb_type": "mongo",
-	"out_stordb_port": "27017",
-	"out_stordb_name": "cgrates",
 	"users_filters":["Account"],
 },
 

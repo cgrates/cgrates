@@ -159,9 +159,6 @@ func testHAitResetDB(t *testing.T) {
 	if err := engine.InitDataDB(haCfg); err != nil {
 		t.Fatal(err)
 	}
-	if err := engine.InitStorDB(haCfg); err != nil {
-		t.Fatal(err)
-	}
 }
 
 // Start CGR Engine

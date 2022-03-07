@@ -40,7 +40,6 @@ var (
 	SessionsDataTests = []func(t *testing.T){
 		testSessionsDataInitCfg,
 		testSessionsDataResetDataDb,
-		testSessionsDataResetStorDb,
 		testSessionsDataStartEngine,
 		testSessionsDataApierRpcConn,
 		/*
@@ -90,13 +89,6 @@ func testSessionsDataInitCfg(t *testing.T) {
 // Remove data in both rating and accounting db
 func testSessionsDataResetDataDb(t *testing.T) {
 	if err := engine.InitDataDB(dataCfg); err != nil {
-		t.Fatal(err)
-	}
-}
-
-// Wipe out the cdr database
-func testSessionsDataResetStorDb(t *testing.T) {
-	if err := engine.InitStorDB(dataCfg); err != nil {
 		t.Fatal(err)
 	}
 }

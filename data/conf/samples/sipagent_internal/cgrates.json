@@ -23,9 +23,7 @@
 	"db_type": "*internal",					// stor database type to use: <mysql|postgres>
 },
 
-"stor_db": {
-	"db_type": "*internal",					// stor database type to use: <mysql|postgres>
-},
+
 
 "schedulers": {
 	"enabled": true,

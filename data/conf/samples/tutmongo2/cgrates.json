@@ -22,10 +22,6 @@
 },
 
 
-"stor_db": {
-	"db_type": "mongo",
-	"db_port": 27017,
-},
 
 
 
@@ -46,7 +42,6 @@
 	"enabled": true,
 	"extra_fields": ["~*req.PayPalAccount", "~*req.LCRProfile", "~*req.ResourceID"],
 	"chargers_conns":["*localhost"],
-	"store_cdrs": true,
 	"online_cdr_exports": [],
 	"ees_conns": ["*localhost"]
 },

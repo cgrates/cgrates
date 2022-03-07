@@ -16,10 +16,6 @@
 },
 
 
-"stor_db": {
-	"db_password": "CGRateS.org",
-},
-
 
 "schedulers": {
 	"enabled": true,
@@ -38,7 +34,6 @@
 	"enabled": true,
 	"extra_fields": ["~*req.PayPalAccount", "~*req.LCRProfile", "~*req.ResourceID"],
 	"chargers_conns":["*localhost"],
-	"store_cdrs": true,
 	"online_cdr_exports": []
 },
 

@@ -44,7 +44,7 @@ var (
 	sTestsAlsPrf = []func(t *testing.T){
 		testAttributeSInitCfg,
 		testAttributeSInitDataDb,
-		testAttributeSResetStorDb,
+
 		testAttributeSStartEngine,
 		testAttributeSRPCConn,
 		testGetAttributeProfileBeforeSet,
@@ -109,12 +109,6 @@ func testAttributeSInitCfg(t *testing.T) {
 
 func testAttributeSInitDataDb(t *testing.T) {
 	if err := engine.InitDataDB(alsPrfCfg); err != nil {
-		t.Fatal(err)
-	}
-}
-
-func testAttributeSResetStorDb(t *testing.T) {
-	if err := engine.InitStorDB(alsPrfCfg); err != nil {
 		t.Fatal(err)
 	}
 }

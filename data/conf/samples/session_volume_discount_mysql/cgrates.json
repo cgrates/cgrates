@@ -14,9 +14,7 @@
         "db_name": "10", 						// data_db database name to connect to
     },
     
-    "stor_db": {
-        "db_password": "CGRateS.org",
-    },
+
           
     "sessions": {
         "enabled": true,

@@ -18,12 +18,6 @@
 },
 
 
-"stor_db": {
-	"db_type": "*internal",	
-	"items":{
-		"*cdrs": {"limit": -1, "ttl": "1s"}, 		
-	}
-},
 
 
 "rals": {

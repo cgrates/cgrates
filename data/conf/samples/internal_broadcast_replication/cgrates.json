@@ -31,11 +31,6 @@
 },
 
 
-"stor_db": {
-	"db_type": "*internal",	
-},
-
-
 "rals": {
 	"enabled": true,
 	"thresholds_conns": ["broadcast_conn"],

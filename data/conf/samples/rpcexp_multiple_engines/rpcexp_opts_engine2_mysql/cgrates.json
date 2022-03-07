@@ -16,9 +16,7 @@
         "db_name": "10"					
     },
     
-    "stor_db": {
-        "db_password": "CGRateS.org"
-    },
+
 
     "thresholds": {
         "enabled":true,

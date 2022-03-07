@@ -43,7 +43,7 @@ var (
 	sTestsChgrsPrf = []func(t *testing.T){
 		testChgrsSInitCfg,
 		testChgrsSInitDataDb,
-		testChgrsSResetStorDb,
+
 		testChgrsSStartEngine,
 		testChgrsSRPCConn,
 		testGetChgrsProfileBeforeSet,
@@ -101,12 +101,6 @@ func testChgrsSInitCfg(t *testing.T) {
 
 func testChgrsSInitDataDb(t *testing.T) {
 	if err := engine.InitDataDB(chgrsPrfCfg); err != nil {
-		t.Fatal(err)
-	}
-}
-
-func testChgrsSResetStorDb(t *testing.T) {
-	if err := engine.InitStorDB(chgrsPrfCfg); err != nil {
 		t.Fatal(err)
 	}
 }

@@ -22,11 +22,7 @@
 	"db_name": "10", 						
 },
 
-"stor_db": {
-	"db_type": "postgres",					
-	"db_port": 5432, 						
-	"db_password": "CGRateS.org",
-},
+
 
 
 "rals": {

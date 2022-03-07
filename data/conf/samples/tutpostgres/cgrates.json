@@ -19,13 +19,6 @@
 },
 
 
-"stor_db": {
-	"db_type": "postgres",					// stor database type to use: <mysql|postgres>
-	"db_port": 5432, 						// the port to reach the stordb
-	"db_password": "CGRateS.org",
-},
-
-
 "rals": {
 	"enabled": true,
 	"thresholds_conns": ["*internal"],
