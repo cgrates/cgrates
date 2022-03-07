@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package main
 
 import (
-	"errors"
 	"flag"
 	"fmt"
 	"log"
@@ -244,20 +243,6 @@ func loadConfig() (ldrCfg *config.CGRConfig) {
 		ldrCfg.GeneralCfg().DefaultCaching = *cachingArg
 	}
 	return
-}
-
-func importData(cfg *config.CGRConfig) (err error) {
-	if cfg.LoaderCgrCfg().TpID == utils.EmptyString {
-		return errors.New("TPid required")
-	}
-	csvImporter := engine.TPCSVImporter{
-		TPid:     cfg.LoaderCgrCfg().TpID,
-		DirPath:  *dataPath,
-		Sep:      cfg.LoaderCgrCfg().FieldSeparator,
-		Verbose:  *verbose,
-		ImportID: *importID,
-	}
-	return csvImporter.Run()
 }
 
 func getLoader(cfg *config.CGRConfig) (loader engine.LoadReader, err error) {

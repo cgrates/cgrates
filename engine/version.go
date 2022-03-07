@@ -34,19 +34,12 @@ var (
 		utils.RQF:        "cgr-migrator -exec=*filters",
 		utils.Routes:     "cgr-migrator -exec=*routes",
 	}
-	storDBVers = map[string]string{
-		utils.CostDetails:   "cgr-migrator -exec=*cost_details",
-		utils.SessionSCosts: "cgr-migrator -exec=*sessions_costs",
-	}
 	allVers map[string]string // init will fill this with a merge of data+stor
 )
 
 func init() {
 	allVers = make(map[string]string)
 	for k, v := range dataDBVers {
-		allVers[k] = v
-	}
-	for k, v := range storDBVers {
 		allVers[k] = v
 	}
 }
@@ -114,15 +107,10 @@ func (vers Versions) Compare(curent Versions, storType string, isDataDB bool) st
 	var message map[string]string
 	switch storType {
 	case utils.Mongo:
-		if isDataDB {
-			message = dataDBVers
-		} else {
-			message = storDBVers
-		}
+		message = dataDBVers
 	case utils.Internal:
 		message = allVers
-	case utils.Postgres, utils.MySQL:
-		message = storDBVers
+
 	case utils.Redis:
 		message = dataDBVers
 	}
@@ -154,34 +142,11 @@ func CurrentDataDBVersions() Versions {
 	}
 }
 
-// CurrentStorDBVersions returns the needed StorDB versions
-func CurrentStorDBVersions() Versions {
-	return Versions{
-		utils.CostDetails:      2,
-		utils.SessionSCosts:    3,
-		utils.CDRs:             2,
-		utils.TpFilters:        1,
-		utils.TpThresholds:     1,
-		utils.TpRoutes:         1,
-		utils.TpStats:          1,
-		utils.TpResources:      1,
-		utils.TpResource:       1,
-		utils.TpChargers:       1,
-		utils.TpDispatchers:    1,
-		utils.TpRateProfiles:   1,
-		utils.TpActionProfiles: 1,
-	}
-}
-
-// CurrentAllDBVersions returns the both DataDB and StorDB versions
+// CurrentAllDBVersions returns the both DataDB
 func CurrentAllDBVersions() Versions {
 	dataDBVersions := CurrentDataDBVersions()
-	storDBVersions := CurrentStorDBVersions()
 	allVersions := make(Versions)
 	for k, v := range dataDBVersions {
-		allVersions[k] = v
-	}
-	for k, v := range storDBVersions {
 		allVersions[k] = v
 	}
 	return allVersions
@@ -191,14 +156,9 @@ func CurrentAllDBVersions() Versions {
 func CurrentDBVersions(storType string, isDataDB bool) Versions {
 	switch storType {
 	case utils.Mongo:
-		if isDataDB {
-			return CurrentDataDBVersions()
-		}
-		return CurrentStorDBVersions()
+		return CurrentDataDBVersions()
 	case utils.Internal:
 		return CurrentAllDBVersions()
-	case utils.Postgres, utils.MySQL:
-		return CurrentStorDBVersions()
 	case utils.Redis:
 		return CurrentDataDBVersions()
 	}

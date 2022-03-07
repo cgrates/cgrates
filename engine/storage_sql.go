@@ -40,7 +40,6 @@ type SQLImpl interface {
 type SQLStorage struct {
 	DB *sql.DB
 	db *gorm.DB
-	StorDB
 	SQLImpl
 }
 

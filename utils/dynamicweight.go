@@ -24,7 +24,7 @@ import (
 	"strings"
 )
 
-// NewDynamicWeightsFromString creates a DynamicWeight list based on the string received from .csv/StorDB
+// NewDynamicWeightsFromString creates a DynamicWeight list based on the string received from .csv
 func NewDynamicWeightsFromString(s, dWSep, fltrSep string) (dWs DynamicWeights, err error) {
 	if len(s) == 0 {
 		return DynamicWeights{{}}, nil

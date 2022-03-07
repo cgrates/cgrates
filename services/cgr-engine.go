@@ -75,7 +75,6 @@ func NewCGREngine(cfg *config.CGRConfig, cM *engine.ConnManager, shdWg *sync.Wai
 			utils.SessionS:        new(sync.WaitGroup),
 			utils.SIPAgent:        new(sync.WaitGroup),
 			utils.StatS:           new(sync.WaitGroup),
-			utils.StorDB:          new(sync.WaitGroup),
 			utils.ThresholdS:      new(sync.WaitGroup),
 			utils.ActionS:         new(sync.WaitGroup),
 			utils.AccountS:        new(sync.WaitGroup),
