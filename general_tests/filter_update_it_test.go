@@ -113,9 +113,6 @@ package general_tests
 // 	if err := engine.InitDataDB(fltrUpdateCfg1); err != nil {
 // 		t.Fatal(err)
 // 	}
-// 	if err := engine.InitStorDB(fltrUpdateCfg1); err != nil {
-// 		t.Fatal(err)
-// 	}
 // }
 
 // // Start CGR Engine

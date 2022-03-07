@@ -42,7 +42,6 @@ package general_tests
 // 		//testGenerateCsv,
 // 		// testDblTpDifDestLoadConfig,
 // 		// testDblTpDifDestResetDataDB,
-// 		// testDblTpDifDestResetStorDb,
 // 		// //testDblTpDifDestStartEngine,
 // 		// testDblTpDifDestRPCConn,
 // 		// testDblTpDifDestLoadersLoad,
@@ -78,12 +77,6 @@ package general_tests
 
 // func testDblTpDifDestResetDataDB(t *testing.T) {
 // 	if err := engine.InitDataDB(testDblTpDifDestCfg); err != nil {
-// 		t.Fatal(err)
-// 	}
-// }
-
-// func testDblTpDifDestResetStorDb(t *testing.T) {
-// 	if err := engine.InitStorDB(testDblTpDifDestCfg); err != nil {
 // 		t.Fatal(err)
 // 	}
 // }

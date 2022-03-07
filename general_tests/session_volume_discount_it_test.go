@@ -47,7 +47,7 @@ var (
 	tSessVolDiscITtests = []func(t *testing.T){
 		testSessVolDiscInitCfg,
 		testSessVolDiscResetDataDb,
-		testSessVolDiscResetStorDb,
+
 		testSessVolDiscStartEngine,
 		testSessVolDiscApierRpcConn,
 		testSessVolDiscLoadersLoad,
@@ -104,13 +104,6 @@ func testSessVolDiscInitCfg(t *testing.T) {
 // Remove data in both rating and accounting db
 func testSessVolDiscResetDataDb(t *testing.T) {
 	if err := engine.InitDataDB(tSessVolDiscCfg); err != nil {
-		t.Fatal(err)
-	}
-}
-
-// Wipe out the cdr database
-func testSessVolDiscResetStorDb(t *testing.T) {
-	if err := engine.InitStorDB(tSessVolDiscCfg); err != nil {
 		t.Fatal(err)
 	}
 }

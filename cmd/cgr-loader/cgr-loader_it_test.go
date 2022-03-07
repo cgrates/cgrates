@@ -197,7 +197,7 @@ var (
 	ldrItTests = []func(t *testing.T){
 		testLoadItLoadConfig,
 		testLoadItResetDataDB,
-		testLoadItResetStorDb,
+
 		testLoadItStartLoader,
 		testLoadItCheckTenantFlag,
 		testLoadItStartLoaderWithTenant,
@@ -207,14 +207,9 @@ var (
 		testLoadItStartLoaderRemove,
 		testLoadItCheckAttributes2,
 
-		testLoadItStartLoaderToStorDB,
-		testLoadItStartLoaderFlushStorDB,
-		testLoadItStartLoaderFromStorDB,
 		testLoadItCheckAttributes2,
 
-		testLoadItStartLoaderToStorDB,
 		testLoadItCheckAttributes2,
-		testLoadItStartLoaderFromStorDB,
 		testLoadItCheckAttributes,
 	}
 )
@@ -247,12 +242,6 @@ func testLoadItLoadConfig(t *testing.T) {
 
 func testLoadItResetDataDB(t *testing.T) {
 	if err := engine.InitDataDB(ldrItCfg); err != nil {
-		t.Fatal(err)
-	}
-}
-
-func testLoadItResetStorDb(t *testing.T) {
-	if err := engine.InitStorDB(ldrItCfg); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -332,34 +321,6 @@ func testLoadItCheckAttributes2(t *testing.T) {
 	}
 }
 
-func testLoadItStartLoaderToStorDB(t *testing.T) {
-	cmd := exec.Command("cgr-loader", "-config_path="+ldrItCfgPath, "-path="+path.Join(*dataDir, "tariffplans", "tutorial"), "-caches_address=", "-scheduler_address=", "-to_stordb", "-tpid=TPID")
-	output := bytes.NewBuffer(nil)
-	outerr := bytes.NewBuffer(nil)
-	cmd.Stdout = output
-	cmd.Stderr = outerr
-	if err := cmd.Run(); err != nil {
-		t.Log(cmd.Args)
-		t.Log(output.String())
-		t.Log(outerr.String())
-		t.Fatal(err)
-	}
-}
-
-func testLoadItStartLoaderFromStorDB(t *testing.T) {
-	cmd := exec.Command("cgr-loader", "-config_path="+ldrItCfgPath, "-caches_address=", "-scheduler_address=", "-from_stordb", "-tpid=TPID")
-	output := bytes.NewBuffer(nil)
-	outerr := bytes.NewBuffer(nil)
-	cmd.Stdout = output
-	cmd.Stderr = outerr
-	if err := cmd.Run(); err != nil {
-		t.Log(cmd.Args)
-		t.Log(output.String())
-		t.Log(outerr.String())
-		t.Fatal(err)
-	}
-}
-
 func testLoadItStartLoaderWithTenant(t *testing.T) {
 	cmd := exec.Command("cgr-loader", "-config_path="+ldrItCfgPath, "-path="+path.Join(*dataDir, "tariffplans", "tutorial"), fmt.Sprintf("-caches_address=%s", address), "-scheduler_address=", `-tenant="tenant.com"`, "-verbose")
 	output := bytes.NewBuffer(nil)
@@ -414,18 +375,4 @@ func testLoadItCheckTenantFlag(t *testing.T) {
 			go birpc.ServeCodec(jsonrpc.NewServerCodec(conn))
 		}
 	}()
-}
-
-func testLoadItStartLoaderFlushStorDB(t *testing.T) {
-	cmd := exec.Command("cgr-loader", "-config_path="+ldrItCfgPath, "-path="+path.Join(*dataDir, "tariffplans", "dispatchers"), "-caches_address=", "-scheduler_address=", "-to_stordb", "-flush_stordb", "-tpid=TPID")
-	output := bytes.NewBuffer(nil)
-	outerr := bytes.NewBuffer(nil)
-	cmd.Stdout = output
-	cmd.Stderr = outerr
-	if err := cmd.Run(); err != nil {
-		t.Log(cmd.Args)
-		t.Log(output.String())
-		t.Log(outerr.String())
-		t.Fatal(err)
-	}
 }

@@ -51,7 +51,7 @@ var (
 	cnslItTests   = []func(t *testing.T){
 		testConsoleItLoadConfig,
 		testConsoleItInitDataDB,
-		testConsoleItInitStorDB,
+
 		testConsoleItStartEngine,
 		testConsoleItLoadTP,
 		testConsoleItCacheClear,
@@ -127,12 +127,6 @@ func testConsoleItLoadConfig(t *testing.T) {
 
 func testConsoleItInitDataDB(t *testing.T) {
 	if err := engine.InitDataDB(cnslItCfg); err != nil {
-		t.Fatal(err)
-	}
-}
-
-func testConsoleItInitStorDB(t *testing.T) {
-	if err := engine.InitStorDB(cnslItCfg); err != nil {
 		t.Fatal(err)
 	}
 }

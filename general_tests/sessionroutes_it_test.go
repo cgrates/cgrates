@@ -43,7 +43,7 @@ package general_tests
 // 	sesRoutesTests = []func(t *testing.T){
 // 		testSesRoutesItLoadConfig,
 // 		testSesRoutesItResetDataDB,
-// 		testSesRoutesItResetStorDb,
+
 // 		testSesRoutesItStartEngine,
 // 		testSesRoutesItRPCConn,
 // 		testSesRoutesItLoadFromFolder,
@@ -83,12 +83,6 @@ package general_tests
 
 // func testSesRoutesItResetDataDB(t *testing.T) {
 // 	if err := engine.InitDataDB(sesRoutesCfg); err != nil {
-// 		t.Fatal(err)
-// 	}
-// }
-
-// func testSesRoutesItResetStorDb(t *testing.T) {
-// 	if err := engine.InitStorDB(sesRoutesCfg); err != nil {
 // 		t.Fatal(err)
 // 	}
 // }

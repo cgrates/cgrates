@@ -34,7 +34,7 @@ var optConf string
 var sTestsCalls = []func(t *testing.T){
 	testCallInitCfg,
 	testCallResetDataDb,
-	testCallResetStorDb,
+
 	testCallStartFS,
 	testCallStartEngine,
 	testCallRestartFS,
@@ -135,12 +135,7 @@ func testCallResetDataDb(t *testing.T) {
 	}
 }
 
-// Wipe out the cdr database
-func testCallResetStorDb(t *testing.T) {
-	if err := engine.InitStorDb(tutorialCallsCfg); err != nil {
-		t.Fatal(err)
-	}
-}
+
 
 // start FS server
 func testCallStartFS(t *testing.T) {

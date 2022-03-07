@@ -45,7 +45,7 @@ var (
 	testLdPrMatchAcTests = []func(t *testing.T){
 		testLdPrMatchAcLoadConfig,
 		testLdPrMatchAcResetDataDB,
-		testLdPrMatchAcResetStorDb,
+
 		testLdPrMatchAcStartEngine,
 		testLdPrMatchAcRPCConn,
 		testLdPrMatchAcLoadTP,
@@ -109,12 +109,6 @@ func testLdPrMatchAcLoadConfig(t *testing.T) {
 
 func testLdPrMatchAcResetDataDB(t *testing.T) {
 	if err := engine.InitDataDB(testLdPrMatchAcCfg); err != nil {
-		t.Fatal(err)
-	}
-}
-
-func testLdPrMatchAcResetStorDb(t *testing.T) {
-	if err := engine.InitStorDB(testLdPrMatchAcCfg); err != nil {
 		t.Fatal(err)
 	}
 }

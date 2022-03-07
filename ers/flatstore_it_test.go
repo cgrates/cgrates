@@ -126,13 +126,6 @@ package ers
 // 	}
 // }
 
-// // InitDb so we can rely on count
-// func testFlatstoreITInitCdrDb(t *testing.T) {
-// 	if err := engine.InitStorDB(flatstoreCfg); err != nil {
-// 		t.Fatal(err)
-// 	}
-// }
-
 // // Remove data in both rating and accounting db
 // func testFlatstoreITResetDataDb(t *testing.T) {
 // 	if err := engine.InitDataDB(flatstoreCfg); err != nil {

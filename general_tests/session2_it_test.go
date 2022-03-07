@@ -44,7 +44,7 @@ var (
 	ses2Tests = []func(t *testing.T){
 		testSes2ItLoadConfig,
 		testSes2ItResetDataDB,
-		testSes2ItResetStorDb,
+
 		testSes2ItStartEngine,
 		testSes2ItRPCConn,
 		testSes2ItLoadFromFolder,
@@ -85,12 +85,6 @@ func testSes2ItLoadConfig(t *testing.T) {
 
 func testSes2ItResetDataDB(t *testing.T) {
 	if err := engine.InitDataDB(ses2Cfg); err != nil {
-		t.Fatal(err)
-	}
-}
-
-func testSes2ItResetStorDb(t *testing.T) {
-	if err := engine.InitStorDB(ses2Cfg); err != nil {
 		t.Fatal(err)
 	}
 }

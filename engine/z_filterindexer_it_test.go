@@ -22,7 +22,6 @@ package engine
 
 import (
 	"fmt"
-	"path"
 	"reflect"
 	"testing"
 	"time"
@@ -111,23 +110,6 @@ func TestFilterIndexerIT(t *testing.T) {
 		cfgDBName = cfg.DataDbCfg().Name
 		defer redisDB.Close()
 		dataManager = NewDataManager(redisDB, config.CgrConfig().CacheCfg(), nil)
-	case utils.MetaMongo:
-		cdrsMongoCfgPath := path.Join(*dataDir, "conf", "samples", "tutmongo")
-		mgoITCfg, err := config.NewCGRConfigFromPath(context.Background(), cdrsMongoCfgPath)
-		if err != nil {
-			t.Fatal(err)
-		}
-		mongoDB, err := NewMongoStorage(mgoITCfg.DataDbCfg().Host,
-			mgoITCfg.DataDbCfg().Port, mgoITCfg.DataDbCfg().Name,
-			mgoITCfg.DataDbCfg().User, mgoITCfg.DataDbCfg().Password,
-			mgoITCfg.GeneralCfg().DBDataEncoding,
-			utils.StorDB, nil, 10*time.Second)
-		if err != nil {
-			t.Fatal(err)
-		}
-		cfgDBName = mgoITCfg.DataDbCfg().Name
-		defer mongoDB.Close()
-		dataManager = NewDataManager(mongoDB, config.CgrConfig().CacheCfg(), nil)
 	case utils.MetaPostgres:
 		t.SkipNow()
 	default:

@@ -45,7 +45,7 @@ package general_tests
 // 	sTestsA1it = []func(t *testing.T){
 // 		testA1itLoadConfig,
 // 		testA1itResetDataDB,
-// 		testA1itResetStorDb,
+
 // 		testA1itStartEngine,
 // 		testA1itRPCConn,
 // 		testA1itLoadTPFromFolder,
@@ -84,12 +84,6 @@ package general_tests
 
 // func testA1itResetDataDB(t *testing.T) {
 // 	if err := engine.InitDataDB(a1Cfg); err != nil {
-// 		t.Fatal(err)
-// 	}
-// }
-
-// func testA1itResetStorDb(t *testing.T) {
-// 	if err := engine.InitStorDB(a1Cfg); err != nil {
 // 		t.Fatal(err)
 // 	}
 // }

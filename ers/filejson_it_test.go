@@ -91,12 +91,6 @@ func testJSONInitConfig(t *testing.T) {
 	}
 }
 
-// InitDb so we can rely on count
-func testJSONInitCdrDb(t *testing.T) {
-	if err := engine.InitStorDB(jsonCfg); err != nil {
-		t.Fatal(err)
-	}
-}
 
 // Remove data in both rating and accounting db
 func testJSONResetDataDb(t *testing.T) {

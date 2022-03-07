@@ -115,13 +115,6 @@ func testV2CDRsInitDataDb(t *testing.T) {
 	}
 }
 
-// InitDb so we can rely on count
-func testV2CDRsInitCdrDb(t *testing.T) {
-	if err := engine.InitStorDB(cdrsCfg); err != nil {
-		t.Fatal(err)
-	}
-}
-
 func testV2CDRsStartEngine(t *testing.T) {
 	if _, err := engine.StopStartEngine(cdrsCfgPath, *waitRater); err != nil {
 		t.Fatal(err)

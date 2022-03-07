@@ -109,13 +109,6 @@ package ers
 // 	}
 // }
 
-// // InitDb so we can rely on count
-// func testCsvITInitCdrDb(t *testing.T) {
-// 	if err := engine.InitStorDB(csvCfg); err != nil {
-// 		t.Fatal(err)
-// 	}
-// }
-
 // // Remove data in both rating and accounting db
 // func testCsvITResetDataDb(t *testing.T) {
 // 	if err := engine.InitDataDB(csvCfg); err != nil {

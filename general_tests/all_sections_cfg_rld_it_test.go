@@ -40,13 +40,13 @@ var (
 	testSectTests = []func(t *testing.T){
 		testSectLoadConfig,
 		testSectResetDataDB,
-		testSectResetStorDb,
+
 		testSectStartEngine,
 		testSectRPCConn,
 		testSectConfigSReloadGeneral,
 		testSectConfigSReloadCores,
 		testSectConfigSReloadRPCConns,
-		testSectConfigSReloadStorDB,
+
 		testSectConfigSReloadListen,
 		testSectConfigSReloadTLS,
 		testSectConfigSReloadHTTP,
@@ -111,12 +111,6 @@ func testSectLoadConfig(t *testing.T) {
 
 func testSectResetDataDB(t *testing.T) {
 	if err := engine.InitDataDB(testSectCfg); err != nil {
-		t.Fatal(err)
-	}
-}
-
-func testSectResetStorDb(t *testing.T) {
-	if err := engine.InitStorDB(testSectCfg); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -230,28 +224,6 @@ func testSectConfigSReloadDataDB(t *testing.T) {
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:   "cgrates.org",
 		Sections: []string{config.DataDBJSON},
-	}, &rpl); err != nil {
-		t.Error(err)
-	} else if cfgStr != rpl {
-		t.Errorf("\nExpected %+v ,\n received: %+v", utils.ToIJSON(cfgStr), utils.ToIJSON(rpl))
-	}
-}
-
-func testSectConfigSReloadStorDB(t *testing.T) {
-	var reply string
-	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1SetConfigFromJSON, &config.SetConfigFromJSONArgs{
-		Tenant: "cgrates.org",
-		Config: "{\"stor_db\":{\"db_host\":\"127.0.0.1\",\"db_name\":\"cgrates\",\"db_password\":\"CGRateS.org\",\"db_port\":3306,\"db_type\":\"*internal\",\"db_user\":\"cgrates\",\"items\":{\"*cdrs\":{\"remote\":false,\"replicate\":false},\"*session_costs\":{\"remote\":false,\"replicate\":false},\"*tp_account_actions\":{\"remote\":false,\"replicate\":false},\"*tp_action_plans\":{\"remote\":false,\"replicate\":false},\"*tp_action_triggers\":{\"remote\":false,\"replicate\":false},\"*tp_actions\":{\"remote\":false,\"replicate\":false},\"*tp_attributes\":{\"remote\":false,\"replicate\":false},\"*tp_chargers\":{\"remote\":false,\"replicate\":false},\"*tp_destination_rates\":{\"remote\":false,\"replicate\":false},\"*tp_destinations\":{\"remote\":false,\"replicate\":false},\"*tp_dispatcher_hosts\":{\"remote\":false,\"replicate\":false},\"*tp_dispatcher_profiles\":{\"remote\":false,\"replicate\":false},\"*tp_filters\":{\"remote\":false,\"replicate\":false},\"*tp_rates\":{\"remote\":false,\"replicate\":false},\"*tp_rating_plans\":{\"remote\":false,\"replicate\":false},\"*tp_resources\":{\"remote\":false,\"replicate\":false},\"*tp_routes\":{\"remote\":false,\"replicate\":false},\"*tp_stats\":{\"remote\":false,\"replicate\":false},\"*tp_thresholds\":{\"remote\":false,\"replicate\":false},\"*tp_timings\":{\"remote\":false,\"replicate\":false},\"*versions\":{\"remote\":false,\"replicate\":false}},\"opts\":{\"mongoQueryTimeout\":\"10s\",\"mysqlLocation\":\"Local\",\"postgresSSLMode\":\"disable\",\"sqlConnMaxLifetime\":\"0\",\"sqlMaxIdleConns\":10,\"sqlMaxOpenConns\":100},\"prefix_indexed_fields\":[],\"remote_conns\":null,\"replication_conns\":null,\"string_indexed_fields\":[]}}",
-	}, &reply); err != nil {
-		t.Error(err)
-	} else if reply != utils.OK {
-		t.Errorf("Expected OK received: %+v", reply)
-	}
-	cfgStr := "{\"stor_db\":{\"db_host\":\"127.0.0.1\",\"db_name\":\"cgrates\",\"db_password\":\"CGRateS.org\",\"db_port\":3306,\"db_type\":\"*internal\",\"db_user\":\"cgrates\",\"items\":{\"*cdrs\":{\"limit\":0,\"remote\":false,\"replicate\":false,\"static_ttl\":false},\"*session_costs\":{\"limit\":0,\"remote\":false,\"replicate\":false,\"static_ttl\":false},\"*tp_account_actions\":{\"limit\":0,\"remote\":false,\"replicate\":false,\"static_ttl\":false},\"*tp_accounts\":{\"limit\":-1,\"remote\":false,\"replicate\":false,\"static_ttl\":false},\"*tp_action_plans\":{\"limit\":0,\"remote\":false,\"replicate\":false,\"static_ttl\":false},\"*tp_action_profiles\":{\"limit\":-1,\"remote\":false,\"replicate\":false,\"static_ttl\":false},\"*tp_action_triggers\":{\"limit\":0,\"remote\":false,\"replicate\":false,\"static_ttl\":false},\"*tp_actions\":{\"limit\":0,\"remote\":false,\"replicate\":false,\"static_ttl\":false},\"*tp_attributes\":{\"limit\":0,\"remote\":false,\"replicate\":false,\"static_ttl\":false},\"*tp_chargers\":{\"limit\":0,\"remote\":false,\"replicate\":false,\"static_ttl\":false},\"*tp_destination_rates\":{\"limit\":0,\"remote\":false,\"replicate\":false,\"static_ttl\":false},\"*tp_destinations\":{\"limit\":0,\"remote\":false,\"replicate\":false,\"static_ttl\":false},\"*tp_dispatcher_hosts\":{\"limit\":0,\"remote\":false,\"replicate\":false,\"static_ttl\":false},\"*tp_dispatcher_profiles\":{\"limit\":0,\"remote\":false,\"replicate\":false,\"static_ttl\":false},\"*tp_filters\":{\"limit\":0,\"remote\":false,\"replicate\":false,\"static_ttl\":false},\"*tp_rate_profiles\":{\"limit\":-1,\"remote\":false,\"replicate\":false,\"static_ttl\":false},\"*tp_rates\":{\"limit\":0,\"remote\":false,\"replicate\":false,\"static_ttl\":false},\"*tp_rating_plans\":{\"limit\":0,\"remote\":false,\"replicate\":false,\"static_ttl\":false},\"*tp_resources\":{\"limit\":0,\"remote\":false,\"replicate\":false,\"static_ttl\":false},\"*tp_routes\":{\"limit\":0,\"remote\":false,\"replicate\":false,\"static_ttl\":false},\"*tp_stats\":{\"limit\":0,\"remote\":false,\"replicate\":false,\"static_ttl\":false},\"*tp_thresholds\":{\"limit\":0,\"remote\":false,\"replicate\":false,\"static_ttl\":false},\"*tp_timings\":{\"limit\":0,\"remote\":false,\"replicate\":false,\"static_ttl\":false},\"*versions\":{\"limit\":0,\"remote\":false,\"replicate\":false,\"static_ttl\":false}},\"opts\":{\"mongoQueryTimeout\":\"10s\",\"mysqlDSNParams\":{},\"mysqlLocation\":\"Local\",\"sqlConnMaxLifetime\":\"0s\",\"sqlMaxIdleConns\":10,\"sqlMaxOpenConns\":100,\"sslMode\":\"disable\"},\"prefix_indexed_fields\":[],\"remote_conns\":null,\"replication_conns\":null,\"string_indexed_fields\":[]}}"
-	var rpl string
-	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
-		Tenant:   "cgrates.org",
-		Sections: []string{config.StorDBJSON},
 	}, &rpl); err != nil {
 		t.Error(err)
 	} else if cfgStr != rpl {

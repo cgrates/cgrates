@@ -22,7 +22,6 @@ package engine
 
 import (
 	"fmt"
-	"path"
 	"reflect"
 	"testing"
 	"time"
@@ -86,21 +85,6 @@ func TestOnStorIT(t *testing.T) {
 		}
 		onStorCfg = cfg.DataDbCfg().Name
 		onStor = NewDataManager(rdsITdb, config.CgrConfig().CacheCfg(), nil)
-	case utils.MetaMongo:
-		cdrsMongoCfgPath := path.Join(*dataDir, "conf", "samples", "cdrsv2mongo")
-		mgoITCfg, err := config.NewCGRConfigFromPath(context.Background(), cdrsMongoCfgPath)
-		if err != nil {
-			t.Fatal(err)
-		}
-		if mgoITdb, err = NewMongoStorage(mgoITCfg.StorDbCfg().Host,
-			mgoITCfg.StorDbCfg().Port, mgoITCfg.StorDbCfg().Name,
-			mgoITCfg.StorDbCfg().User, mgoITCfg.StorDbCfg().Password,
-			mgoITCfg.GeneralCfg().DBDataEncoding,
-			utils.StorDB, nil, 10*time.Second); err != nil {
-			t.Fatal(err)
-		}
-		onStorCfg = mgoITCfg.StorDbCfg().Name
-		onStor = NewDataManager(mgoITdb, config.CgrConfig().CacheCfg(), nil)
 	case utils.MetaPostgres:
 		t.SkipNow()
 	default:

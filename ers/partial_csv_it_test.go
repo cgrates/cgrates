@@ -95,13 +95,6 @@ package ers
 // 	}
 // }
 
-// // InitDb so we can rely on count
-// func testPartITInitCdrDb(t *testing.T) {
-// 	if err := engine.InitStorDB(partCfg); err != nil {
-// 		t.Fatal(err)
-// 	}
-// }
-
 // // Remove data in both rating and accounting db
 // func testPartITResetDataDb(t *testing.T) {
 // 	if err := engine.InitDataDB(partCfg); err != nil {

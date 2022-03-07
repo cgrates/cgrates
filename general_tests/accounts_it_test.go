@@ -43,7 +43,6 @@ var (
 	sTestsAcc = []func(t *testing.T){
 		testV1AccLoadConfig,
 		testV1AccInitDataDb,
-		testAccResetStorDb,
 		testV1AccStartEngine,
 		testV1AccRpcConn,
 		testV1AccGetAccountBeforeSet,
@@ -92,12 +91,6 @@ func testV1AccLoadConfig(t *testing.T) {
 
 func testV1AccInitDataDb(t *testing.T) {
 	if err := engine.InitDataDB(accCfg); err != nil {
-		t.Fatal(err)
-	}
-}
-
-func testAccResetStorDb(t *testing.T) {
-	if err := engine.InitStorDB(accCfg); err != nil {
 		t.Fatal(err)
 	}
 }

@@ -43,7 +43,7 @@ var (
 	sTestsAlsFltrPrf    = []func(t *testing.T){
 		testAttributeFltrSInitCfg,
 		testAttributeFltrSInitDataDb,
-		testAttributeFltrSResetStorDb,
+
 		testAttributeFltrSStartEngine,
 		testAttributeFltrSRPCConn,
 
@@ -83,13 +83,6 @@ func testAttributeFltrSInitCfg(t *testing.T) {
 
 func testAttributeFltrSInitDataDb(t *testing.T) {
 	if err := engine.InitDataDB(attrFltrCfg); err != nil {
-		t.Fatal(err)
-	}
-}
-
-// Wipe out the cdr database
-func testAttributeFltrSResetStorDb(t *testing.T) {
-	if err := engine.InitStorDB(attrFltrCfg); err != nil {
 		t.Fatal(err)
 	}
 }

@@ -44,7 +44,7 @@ package general_tests
 // 	sTestBrodcastIt = []func(t *testing.T){
 // 		testbrodcastItLoadConfig,
 // 		testbrodcastItResetDataDB,
-// 		testbrodcastItResetStorDb,
+
 // 		testbrodcastItStartEngine,
 // 		testbrodcastItRPCConn,
 // 		testbrodcastItLoadFromFolder,
@@ -90,12 +90,6 @@ package general_tests
 
 // func testbrodcastItResetDataDB(t *testing.T) {
 // 	if err := engine.InitDataDB(brodcastInternalCfg); err != nil {
-// 		t.Fatal(err)
-// 	}
-// }
-
-// func testbrodcastItResetStorDb(t *testing.T) {
-// 	if err := engine.InitStorDB(brodcastInternalCfg); err != nil {
 // 		t.Fatal(err)
 // 	}
 // }

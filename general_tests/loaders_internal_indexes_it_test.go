@@ -87,9 +87,7 @@ func testLoadersIDBIdxItDB(t *testing.T) {
 	if err := engine.InitDataDB(loadersIDBIdxCfg); err != nil {
 		t.Fatal(err)
 	}
-	if err := engine.InitStorDB(loadersIDBIdxCfg); err != nil {
-		t.Fatal(err)
-	}
+
 }
 
 func testLoadersIDBIdxItStartEngines(t *testing.T) {

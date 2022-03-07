@@ -84,7 +84,6 @@ func isDataDB(storage Storage) bool {
 
 func setDBVersions(storage Storage, overwrite bool) (err error) {
 	x := CurrentDBVersions(storage.GetStorageType(), isDataDB(storage))
-	// no data, write version
 	if err = storage.SetVersions(x, overwrite); err != nil {
 		utils.Logger.Warning(fmt.Sprintf("Could not write current version to db: %v", err))
 		return err

@@ -49,7 +49,6 @@ var (
 	sTestSTI = []func(t *testing.T){
 		testSTIInitCfg,
 		testSTIResetDataDb,
-		testSTIResetStorDb,
 		testSTIStartEngine,
 		testSTIRpcConn,
 		testSTILoadTariffPlanFromFolder,
@@ -82,12 +81,6 @@ func testSTIResetDataDb(t *testing.T) {
 	}
 }
 
-// Wipe out the cdr database
-func testSTIResetStorDb(t *testing.T) {
-	if err := engine.InitStorDb(stiCfg); err != nil {
-		t.Fatal(err)
-	}
-}
 
 // Start CGR Engine
 func testSTIStartEngine(t *testing.T) {

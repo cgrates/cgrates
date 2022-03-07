@@ -94,9 +94,7 @@ package general_tests
 // 	if err := engine.InitDataDB(pstrCfg); err != nil { // need it for versions
 // 		t.Fatal(err)
 // 	}
-// 	if err := engine.InitStorDB(pstrCfg); err != nil {
-// 		t.Fatal(err)
-// 	}
+
 // }
 
 // func testPosterITStartEngine(t *testing.T) {

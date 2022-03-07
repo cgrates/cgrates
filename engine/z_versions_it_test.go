@@ -83,24 +83,12 @@ func testInitDataDB(t *testing.T) {
 	}
 	dm3 = NewDataManager(dbConn, vrsCfg.CacheCfg(), nil)
 
-	storageDb, err = NewStorDBConn(vrsCfg.StorDbCfg().Type,
-		vrsCfg.StorDbCfg().Host, vrsCfg.StorDbCfg().Port,
-		vrsCfg.StorDbCfg().Name, vrsCfg.StorDbCfg().User,
-		vrsCfg.StorDbCfg().Password, vrsCfg.GeneralCfg().DBDataEncoding,
-		vrsCfg.StorDbCfg().StringIndexedFields, vrsCfg.StorDbCfg().PrefixIndexedFields,
-		vrsCfg.StorDbCfg().Opts, vrsCfg.StorDbCfg().Items)
-	if err != nil {
-		log.Fatal(err)
-	}
 }
 
 func testVersionsFlush(t *testing.T) {
 	err := dm3.DataDB().Flush("")
 	if err != nil {
 		t.Error("Error when flushing Mongo ", err.Error())
-	}
-	if err := storageDb.Flush(path.Join(vrsCfg.DataFolderPath, "storage", vrsCfg.StorDbCfg().Type)); err != nil {
-		t.Error(err)
 	}
 	SetDBVersions(storageDb)
 }
@@ -110,13 +98,9 @@ func testVersion(t *testing.T) {
 	var currentVersion Versions
 	var testVersion Versions
 	dataDbVersions := CurrentDataDBVersions()
-	storDbVersions := CurrentStorDBVersions()
 
 	allVersions := make(Versions)
 	for k, v := range dataDbVersions {
-		allVersions[k] = v
-	}
-	for k, v := range storDbVersions {
 		allVersions[k] = v
 	}
 
@@ -169,11 +153,6 @@ func testVersion(t *testing.T) {
 		testVersion = allVersions
 		testVersion[utils.Accounts] = 1
 		test = "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*accounts>"
-	case utils.Mongo, utils.Postgres, utils.MySQL:
-		currentVersion = storDbVersions
-		testVersion = allVersions
-		testVersion[utils.CostDetails] = 1
-		test = "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*cost_details>"
 	}
 	//storageDb
 
@@ -457,67 +436,6 @@ func testUpdateVersionsThresholds(t *testing.T) {
 		t.Fatal(err)
 	}
 	errExpect := "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*thresholds>\n"
-	if output.String() != errExpect {
-		t.Fatalf("Expected %q \n but received: \n %q", errExpect, output.String())
-	}
-}
-
-//Tests for StorDB
-func testUpdateVersionsCostDetails(t *testing.T) {
-	newVersions := CurrentStorDBVersions()
-	newVersions[utils.CostDetails] = 1
-	if err := storageDb.SetVersions(newVersions, true); err != nil {
-		t.Fatal(err)
-	}
-	cmd := exec.Command("cgr-engine", fmt.Sprintf(`-config_path=/usr/share/cgrates/conf/samples/%s`, versionsConfigDIR), `-scheduled_shutdown=4ms`)
-	output := bytes.NewBuffer(nil)
-	cmd.Stdout = output
-	if err := cmd.Run(); err != nil {
-		t.Log(cmd.Args)
-		t.Log(output.String())
-		t.Fatal(err)
-	}
-	errExpect := "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*cost_details>\n"
-	if output.String() != errExpect {
-		t.Fatalf("Expected %q \n but received: \n %q", errExpect, output.String())
-	}
-}
-
-func testUpdateVersionsSessionSCosts(t *testing.T) {
-	newVersions := CurrentStorDBVersions()
-	newVersions[utils.SessionSCosts] = 2
-	if err := storageDb.SetVersions(newVersions, true); err != nil {
-		t.Fatal(err)
-	}
-	cmd := exec.Command("cgr-engine", fmt.Sprintf(`-config_path=/usr/share/cgrates/conf/samples/%s`, versionsConfigDIR), `-scheduled_shutdown=4ms`)
-	output := bytes.NewBuffer(nil)
-	cmd.Stdout = output
-	if err := cmd.Run(); err != nil {
-		t.Log(cmd.Args)
-		t.Log(output.String())
-		t.Fatal(err)
-	}
-	errExpect := "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*sessions_costs>\n"
-	if output.String() != errExpect {
-		t.Fatalf("Expected %q \n but received: \n %q", errExpect, output.String())
-	}
-}
-
-func testUpdateVersionsCDRs(t *testing.T) {
-	newVersions := CurrentStorDBVersions()
-	newVersions[utils.CDRs] = 1
-	if err := storageDb.SetVersions(newVersions, true); err != nil {
-		t.Fatal(err)
-	}
-	cmd := exec.Command("cgr-engine", fmt.Sprintf(`-config_path=/usr/share/cgrates/conf/samples/%s`, versionsConfigDIR), `-scheduled_shutdown=4ms`)
-	output := bytes.NewBuffer(nil)
-	cmd.Stdout = output
-	if err := cmd.Run(); err != nil {
-		t.Log(cmd.Args)
-		t.Log(output.String())
-		t.Fatal(err)
-	}
-	errExpect := "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*cdrs>\n"
 	if output.String() != errExpect {
 		t.Fatalf("Expected %q \n but received: \n %q", errExpect, output.String())
 	}

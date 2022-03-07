@@ -68,7 +68,7 @@ func TestSCncrJSON(t *testing.T) {
 var sTestsSCncrIT = []func(t *testing.T){
 	testSCncrInitConfig,
 	testSCncrInitDataDB,
-	testSCncrInitStorDB,
+	
 	testSCncrStartEngine,
 	testSCncrRPCConn,
 	testSCncrLoadTP,
@@ -89,12 +89,7 @@ func testSCncrInitDataDB(t *testing.T) {
 	}
 }
 
-// InitDb so we can rely on count
-func testSCncrInitStorDB(t *testing.T) {
-	if err := engine.InitStorDb(sCncrCfg); err != nil {
-		t.Fatal(err)
-	}
-}
+
 
 func testSCncrStartEngine(t *testing.T) {
 	if _, err := engine.StopStartEngine(sCncrCfgPath, *waitRater); err != nil {

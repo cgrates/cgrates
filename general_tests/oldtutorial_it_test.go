@@ -59,13 +59,6 @@ package general_tests
 // 	}
 // }
 
-// // Wipe out the cdr database
-// func TestTutITResetStorDb(t *testing.T) {
-// 	if err := engine.InitStorDb(tutFsLocalCfg); err != nil {
-// 		t.Fatal(err)
-// 	}
-// }
-
 // // Start CGR Engine
 // func TestTutITStartEngine(t *testing.T) {
 // 	if _, err := engine.StopStartEngine(tutLocalCfgPath, **waitRater); err != nil {
