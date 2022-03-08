@@ -19,8 +19,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package tpes
 
 import (
-	"context"
 	"fmt"
+
+	"github.com/cgrates/birpc/context"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -60,19 +61,23 @@ type ArgsExportTP struct {
 }
 
 // V1ExportTariffPlan is the API executed to export tariff plan items
-func (tpE *TPeS) V1ExportTariffPlan(ctx *context.Context, args *ArgsExportTP, reply *utils.Account) (err error) {
+func (tpE *TPeS) V1ExportTariffPlan(ctx *context.Context, args *ArgsExportTP, reply map[string][]byte) (err error) {
+	if args.Tenant == utils.EmptyString {
+		args.Tenant = tpE.cfg.GeneralCfg().DefaultTenant
+	}
 	for eType := range args.ExportItems {
 		if _, has := tpE.exps[eType]; !has {
 			return utils.ErrPrefix(utils.ErrUnsupportedTPExporterType, eType)
 		}
 	}
-	/*
-		code to export to zip comes here
-		for expType, expItms := range  args.ExportItems {
-			if expCnt, err = tpE.exps[expType].exportItems(expItms); err != nil {
-				return utils.NewErrServerError(err)
-			}
+
+	expotedItems := make(map[string][]byte, len(tpE.exps))
+	// code to export to zip comes here
+	for expType, expItms := range args.ExportItems {
+		if expotedItems[expType], err = tpE.exps[expType].exportItems(ctx, args.Tenant, expItms); err != nil {
+			return utils.NewErrServerError(err)
 		}
-	*/
+	}
+	reply = expotedItems
 	return
 }

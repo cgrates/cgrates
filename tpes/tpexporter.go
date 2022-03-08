@@ -19,13 +19,17 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package tpes
 
 import (
+	"bytes"
+	"encoding/csv"
+
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
 var tpExporterTypes = utils.NewStringSet([]string{
 	utils.MetaAttributes,
-	utils.MetaResources,
+	/* utils.MetaResources,
 	utils.MetaFilters,
 	utils.MetaStats,
 	utils.MetaThresholds,
@@ -35,20 +39,37 @@ var tpExporterTypes = utils.NewStringSet([]string{
 	utils.MetaDispatcherHosts,
 	utils.MetaRateProfiles,
 	utils.MetaActions,
-	utils.MetaAccounts})
+	utils.MetaAccounts */})
 
 // tpExporter is the interface implementing exports of tariff plan items
 type tpExporter interface {
-	exportItems(tnt string, itmIDs []string) (expContent []byte, err error)
+	exportItems(ctx *context.Context, tnt string, itmIDs []string) (expContent []byte, err error)
 }
 
 // newTPExporter constructs tpExporters
 func newTPExporter(expType string, dm *engine.DataManager) (tpE tpExporter, err error) {
 	switch expType {
 	case utils.MetaAttributes:
-		return //newTPAttributes()
+		return newTPAttributes(dm), nil
 	default:
 		return nil, utils.ErrPrefix(utils.ErrUnsupportedTPExporterType, expType)
 	}
-	return
+}
+
+func writeOut(fileName string, tpData []interface{}) error {
+	buff := new(bytes.Buffer)
+
+	csvWriter := csv.NewWriter(buff)
+	for _, tpItem := range tpData {
+		record, err := engine.CsvDump(tpItem)
+		if err != nil {
+			return err
+		}
+		if err := csvWriter.Write(record); err != nil {
+			return err
+		}
+	}
+
+	utils.Logger.Debug(buff.String())
+	return nil
 }
