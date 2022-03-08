@@ -32,7 +32,7 @@ import (
 	"github.com/cgrates/ltcache"
 )
 
-func NewLoaderService(cfg *config.CGRConfig, dm *engine.DataManager,
+func NewLoaders(cfg *config.CGRConfig, dm *engine.DataManager,
 	filterS *engine.FilterS,
 	connMgr *engine.ConnManager) (ldrS *LoaderS) {
 	ldrS = &LoaderS{cfg: cfg, cache: make(map[string]*ltcache.Cache)}

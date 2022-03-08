@@ -20,25 +20,27 @@ package tpes
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewTPeS(cfg *config.CGRConfig, cm *engine.ConnManager) (tpE *TPeS) {
+func NewTPeS(cfg *config.CGRConfig, dm *engine.DataManager, cm *engine.ConnManager) (tpE *TPeS) {
 	tpE = &TPeS{
 		cfg:     cfg,
 		connMgr: cm,
+		dm:      dm,
 		exps:    make(map[string]tpExporter),
 	}
-	/*
-		for expType := range tpExporterTypes {
-			if tpE[expType], err = newTPExporter(expType, dm); err != nil {
-				return nil, err
-			}
+
+	var err error
+	for expType := range tpExporterTypes {
+		if tpE.exps[expType], err = newTPExporter(expType, dm); err != nil {
+			utils.Logger.Warning(fmt.Sprintf("<%s> cannot create exporter of type <%s>", utils.TPeS, expType))
 		}
-	*/
+	}
 	return
 }
 
@@ -46,6 +48,7 @@ func NewTPeS(cfg *config.CGRConfig, cm *engine.ConnManager) (tpE *TPeS) {
 type TPeS struct {
 	cfg     *config.CGRConfig
 	connMgr *engine.ConnManager
+	dm      *engine.DataManager
 	fltr    *engine.FilterS
 	exps    map[string]tpExporter
 }
