@@ -19,6 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package tpes
 
 import (
+	"bytes"
+	"encoding/csv"
 	"fmt"
 
 	"github.com/cgrates/birpc/context"
@@ -50,12 +52,29 @@ func (tpAttr TPAttributes) exportItems(ctx *context.Context, tnt string, itmIDs 
 			}
 			return nil, err
 		}
-		var attrMdl []interface{}
-		attrMdl = engine.APItoModelTPAttribute(engine.AttributeProfileToAPI(attrPrf))
+
+		attrMdl := engine.APItoModelTPAttribute(engine.AttributeProfileToAPI(attrPrf))
 		if err := writeOut(utils.AttributesCsv, attrMdl); err != nil {
 			return nil, err
 		}
 
 	}
 	return
+}
+
+func writeOut(fileName string, tpData engine.AttributeMdls) error {
+	buff := new(bytes.Buffer)
+
+	csvWriter := csv.NewWriter(buff)
+	for _, tpItem := range tpData {
+		record, err := engine.CsvDump(tpItem)
+		if err != nil {
+			return err
+		}
+		if err := csvWriter.Write(record); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }

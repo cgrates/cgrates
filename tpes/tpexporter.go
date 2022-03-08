@@ -19,9 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package tpes
 
 import (
-	"bytes"
-	"encoding/csv"
-
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -54,22 +51,4 @@ func newTPExporter(expType string, dm *engine.DataManager) (tpE tpExporter, err 
 	default:
 		return nil, utils.ErrPrefix(utils.ErrUnsupportedTPExporterType, expType)
 	}
-}
-
-func writeOut(fileName string, tpData []interface{}) error {
-	buff := new(bytes.Buffer)
-
-	csvWriter := csv.NewWriter(buff)
-	for _, tpItem := range tpData {
-		record, err := engine.CsvDump(tpItem)
-		if err != nil {
-			return err
-		}
-		if err := csvWriter.Write(record); err != nil {
-			return err
-		}
-	}
-
-	utils.Logger.Debug(buff.String())
-	return nil
 }
