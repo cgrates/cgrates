@@ -74,31 +74,6 @@ func testActionsInitCfg(t *testing.T) {
 	}
 }
 
-func testActionsInitCdrsStore(t *testing.T) {
-	switch *dbType {
-	case utils.MetaInternal:
-		actsCdrStore = NewInternalDB(actsCfg.StorDbCfg().StringIndexedFields, actsCfg.StorDbCfg().PrefixIndexedFields, true)
-	case utils.MetaMySQL:
-		if actsCdrStore, err = NewMySQLStorage(actsCfg.StorDbCfg().Host,
-			actsCfg.StorDbCfg().Port, actsCfg.StorDbCfg().Name,
-			actsCfg.StorDbCfg().User, actsCfg.StorDbCfg().Password,
-			100, 10, 0, "UTC"); err != nil {
-			t.Fatal("Could not connect to mysql", err.Error())
-		}
-	case utils.MetaMongo:
-		if actsCdrStore, err = NewMongoStorage(actsCfg.StorDbCfg().Host,
-			actsCfg.StorDbCfg().Port, actsCfg.StorDbCfg().Name,
-			actsCfg.StorDbCfg().User, actsCfg.StorDbCfg().Password,
-			actsCfg.GeneralCfg().DBDataEncoding,
-			utils.StorDB, nil, 10*time.Second); err != nil {
-			t.Fatal("Could not connect to mongo", err.Error())
-		}
-	case utils.MetaPostgres:
-		t.SkipNow()
-	default:
-		t.Fatal("Unknown Database type")
-	}
-}
 
 func testActionsInitDataDb(t *testing.T) {
 	if err := InitDataDB(actsCfg); err != nil {
@@ -106,12 +81,6 @@ func testActionsInitDataDb(t *testing.T) {
 	}
 }
 
-// Wipe out the cdr database
-func testActionsResetStorDb(t *testing.T) {
-	if err := InitStorDB(actsCfg); err != nil {
-		t.Fatal(err)
-	}
-}
 
 // Start CGR Engine
 func testActionsStartEngine(t *testing.T) {
