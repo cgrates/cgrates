@@ -262,7 +262,7 @@ func GetIntPointerOpts(ctx *context.Context, tnt string, ev *utils.CGREvent, fS 
 			return opt.Value, nil
 		}
 	}
-	return nil, nil // return NOT_FOUND if there are no options and none of the filters pass
+	return nil, utils.ErrNotFound // return NOT_FOUND if there are no options and none of the filters pass
 }
 
 // GetDurationPointerOptsFromMultipleMaps checks the specified option names in order among the keys in APIOpts, then in startOpts, returning the first value it finds as *time.Duration,
