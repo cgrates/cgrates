@@ -33,11 +33,12 @@ import (
 )
 
 // NewTPeService is the constructor for the TpeService
-func NewTPeService(cfg *config.CGRConfig, connMgr *engine.ConnManager,
+func NewTPeService(cfg *config.CGRConfig, connMgr *engine.ConnManager, dm *DataDBService,
 	server *cores.Server, srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &TPeService{
 		cfg:     cfg,
 		srvDep:  srvDep,
+		dm:      dm,
 		connMgr: connMgr,
 		server:  server,
 	}
@@ -51,6 +52,7 @@ type TPeService struct {
 	server   *cores.Server
 	connMgr  *engine.ConnManager
 	tpes     *tpes.TPeS
+	dm       *DataDBService
 	srv      *birpc.Service
 	stopChan chan struct{}
 
@@ -59,7 +61,12 @@ type TPeService struct {
 
 // Start should handle the service start
 func (tpSrv *TPeService) Start(ctx *context.Context, _ context.CancelFunc) (err error) {
-	tpSrv.tpes = tpes.NewTPeS(tpSrv.cfg, tpSrv.connMgr)
+	var datadb *engine.DataManager
+	if datadb, err = tpSrv.dm.WaitForDM(ctx); err != nil {
+		return
+	}
+
+	tpSrv.tpes = tpes.NewTPeS(tpSrv.cfg, datadb, tpSrv.connMgr)
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.TPeS))
 	tpSrv.stopChan = make(chan struct{})
 	tpSrv.srv, _ = birpc.NewService(apis.NewTPeSv1(tpSrv.tpes), utils.EmptyString, false)

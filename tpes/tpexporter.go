@@ -23,18 +23,30 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-var tpExporterTypes = utils.NewStringSet([]string{utils.MetaAttributes, utils.MetaResources, utils.MetaFilters, utils.MetaStats,
-	utils.MetaThresholds, utils.MetaRoutes, utils.MetaChargers, utils.MetaDispatchers, utils.MetaDispatcherHosts,
-	utils.MetaRateProfiles, utils.MetaActions, utils.MetaAccounts})
+var tpExporterTypes = utils.NewStringSet([]string{
+	utils.MetaAttributes,
+	utils.MetaResources,
+	utils.MetaFilters,
+	utils.MetaStats,
+	utils.MetaThresholds,
+	utils.MetaRoutes,
+	utils.MetaChargers,
+	utils.MetaDispatchers,
+	utils.MetaDispatcherHosts,
+	utils.MetaRateProfiles,
+	utils.MetaActions,
+	utils.MetaAccounts})
 
 // tpExporter is the interface implementing exports of tariff plan items
 type tpExporter interface {
-	exportItems(itmIDs []string) (expContent []byte, err error)
+	exportItems(tnt string, itmIDs []string) (expContent []byte, err error)
 }
 
 // newTPExporter constructs tpExporters
 func newTPExporter(expType string, dm *engine.DataManager) (tpE tpExporter, err error) {
 	switch expType {
+	case utils.MetaAttributes:
+		return //newTPAttributes()
 	default:
 		return nil, utils.ErrPrefix(utils.ErrUnsupportedTPExporterType, expType)
 	}

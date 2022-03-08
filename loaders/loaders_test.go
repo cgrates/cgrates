@@ -48,7 +48,7 @@ func TestNewLoaderService(t *testing.T) {
 	for k, cfg := range cfg.LoaderCfg()[0].Cache {
 		cache[k] = ltcache.NewCache(cfg.Limit, cfg.TTL, cfg.StaticTTL, nil)
 	}
-	ld := NewLoaderService(cfg, dm, fS, cM)
+	ld := NewLoaders(cfg, dm, fS, cM)
 	if exp := (&LoaderS{
 		cfg:   cfg,
 		cache: cache,
@@ -146,7 +146,7 @@ func TestLoaderServiceV1Run(t *testing.T) {
 	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items), cfg.CacheCfg(), cM)
 	fS := engine.NewFilterS(cfg, cM, dm)
 
-	ld := NewLoaderService(cfg, dm, fS, cM)
+	ld := NewLoaders(cfg, dm, fS, cM)
 	var rply string
 	if err := ld.V1Run(context.Background(), &ArgsProcessFolder{
 		APIOpts: map[string]interface{}{
@@ -222,7 +222,7 @@ func TestLoaderServiceV1RunErrors(t *testing.T) {
 	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items), cfg.CacheCfg(), cM)
 	fS := engine.NewFilterS(cfg, cM, dm)
 
-	ld := NewLoaderService(cfg, dm, fS, cM)
+	ld := NewLoaders(cfg, dm, fS, cM)
 	var rply string
 
 	expErrMsg := "SERVER_ERROR: inline parse error for string: <*string>"
@@ -340,7 +340,7 @@ func TestLoaderServiceV1ImportZip(t *testing.T) {
 	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items), cfg.CacheCfg(), cM)
 	fS := engine.NewFilterS(cfg, cM, dm)
 
-	ld := NewLoaderService(cfg, dm, fS, cM)
+	ld := NewLoaders(cfg, dm, fS, cM)
 	var rply string
 	if err := ld.V1ImportZip(context.Background(), &ArgsProcessZip{
 		Data: buf.Bytes(),
@@ -396,7 +396,7 @@ func TestLoaderServiceV1ImportZipErrors(t *testing.T) {
 	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items), cfg.CacheCfg(), cM)
 	fS := engine.NewFilterS(cfg, cM, dm)
 
-	ld := NewLoaderService(cfg, dm, fS, cM)
+	ld := NewLoaders(cfg, dm, fS, cM)
 	var rply string
 
 	expErrMsg := "SERVER_ERROR: inline parse error for string: <*string>"
