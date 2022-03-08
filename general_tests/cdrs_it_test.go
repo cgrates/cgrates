@@ -44,7 +44,6 @@ var (
 	sTestsCDRsIT = []func(t *testing.T){
 		testV2CDRsInitConfig,
 		testV2CDRsInitDataDb,
-		testV2CDRsInitCdrDb,
 		testV2CDRsStartEngine,
 		testV2CDRsRpcConn,
 		testV2CDRsLoadTariffPlanFromFolder,

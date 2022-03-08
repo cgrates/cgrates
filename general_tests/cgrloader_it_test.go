@@ -44,7 +44,6 @@ var (
 	sTestsCGRLoaders = []func(t *testing.T){
 		testCGRLoaderInitConfig,
 		testCGRLoaderInitDataDb,
-		testCGRLoaderInitCdrDb,
 		testCGRLoaderStartEngine,
 		testCGRLoaderRpcConn,
 		testCGRLoaderLoadData,
