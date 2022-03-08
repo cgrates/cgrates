@@ -26,6 +26,7 @@ import (
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/ericlagergren/decimal"
 )
 
 func TestLibFiltersGetFloat64OptsReturnConfigOpt(t *testing.T) {
@@ -423,6 +424,7 @@ func TestLibFiltersGetDurationOptsReturnOptFromAPIOpts(t *testing.T) {
 		{
 			FilterIDs: []string{"*string:~*req.Account:1001"},
 			Tenant:    "cgrates.org",
+			Value:     time.Minute,
 		},
 	}
 
@@ -537,7 +539,7 @@ func TestLibFiltersGetIntOptsReturnDefaultOpt(t *testing.T) {
 	}
 }
 
-func TestLibFiltersGetIntOptsReturnOptFromAPIOpts(t *testing.T) {
+func TestLibFiltersGetIntOptsReturnOptFromAPIOptsOK(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	dataDB := NewInternalDB(nil, nil, nil)
 	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
@@ -568,6 +570,38 @@ func TestLibFiltersGetIntOptsReturnOptFromAPIOpts(t *testing.T) {
 		t.Error(err)
 	} else if rcv != expected {
 		t.Errorf("expected: <%+v>,\nreceived: <%+v>", expected, rcv)
+	}
+}
+
+func TestLibFiltersGetIntOptsReturnOptFromAPIOptsErr(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	dataDB := NewInternalDB(nil, nil, nil)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	fS := NewFilterS(cfg, nil, dm)
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "TestEvent",
+		Event: map[string]interface{}{
+			utils.AccountField: 1001,
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsAttributesProcessRuns: true,
+		},
+	}
+	dynOpts := []*utils.DynamicIntOpt{
+		// will never get to this opt because it will return once it
+		// finds the one set in APIOpts
+		{
+			FilterIDs: []string{"*string:~*req.Account:1001"},
+			Tenant:    "cgrates.org",
+			Value:     5,
+		},
+	}
+
+	experr := `cannot convert field<bool>: true to int`
+	if _, err := GetIntOpts(context.Background(), "cgrates.org", ev, fS, dynOpts, config.AttributesProcessRunsDftOpt,
+		"nonExistingAPIOpt", utils.OptsAttributesProcessRuns); err == nil || err.Error() != experr {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 }
 
@@ -1122,5 +1156,731 @@ func TestLibFiltersGetStringSliceOptsReturnOptFromAPIOpts(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcv, expected) {
 		t.Errorf("expected: <%+v>,\nreceived: <%+v>", expected, rcv)
+	}
+}
+
+func TestLibFiltersGetDecimalBigOptsReturnConfigOpt(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	dataDB := NewInternalDB(nil, nil, nil)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	fS := NewFilterS(cfg, nil, dm)
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "TestEvent",
+		Event: map[string]interface{}{
+			utils.AccountField: 1001,
+		},
+		APIOpts: map[string]interface{}{},
+	}
+	dynOpts := []*utils.DynamicDecimalBigOpt{
+		// tenant will not be recognized, will ignore this opt
+		{
+			FilterIDs: []string{"*string:~*req.Account:1001"},
+			Tenant:    "cgrates.net",
+			Value:     decimal.New(42, 0),
+		},
+		// filter will not pass, will ignore this opt
+		{
+			FilterIDs: []string{"*string:~*req.Account:1002"},
+			Tenant:    "cgrates.org",
+			Value:     decimal.New(-1, 0),
+		},
+		{
+			FilterIDs: []string{"*string:~*req.Account:1001"},
+			Tenant:    "cgrates.org",
+			Value:     decimal.New(1234, 3),
+		},
+	}
+
+	expected := decimal.New(1234, 3)
+	if rcv, err := GetDecimalBigOpts(context.Background(), "cgrates.org", ev, fS, dynOpts,
+		config.RatesUsageDftOpt, utils.OptsRatesUsage); err != nil {
+		t.Error(err)
+	} else if rcv.Cmp(expected) != 0 {
+		t.Errorf("expected: <%+v>,\nreceived: <%+v>", expected, rcv)
+	}
+}
+
+func TestLibFiltersGetDecimalBigOptsFilterCheckErr(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	dataDB := NewInternalDB(nil, nil, nil)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	fS := NewFilterS(cfg, nil, dm)
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "TestEvent",
+		Event: map[string]interface{}{
+			utils.AccountField: 1001,
+		},
+		APIOpts: map[string]interface{}{},
+	}
+	dynOpts := []*utils.DynamicDecimalBigOpt{
+		// function will return error after trying to parse the filter
+		{
+			FilterIDs: []string{"*string.invalid:filter"},
+			Tenant:    "cgrates.org",
+			Value:     decimal.New(-1, 0),
+		},
+	}
+
+	experr := `inline parse error for string: <*string.invalid:filter>`
+	if _, err := GetDecimalBigOpts(context.Background(), "cgrates.org", ev, fS, dynOpts,
+		config.RatesUsageDftOpt, utils.OptsRatesUsage); err == nil ||
+		err.Error() != experr {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+}
+
+func TestLibFiltersGetDecimalBigOptsReturnDefaultOpt(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	dataDB := NewInternalDB(nil, nil, nil)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	fS := NewFilterS(cfg, nil, dm)
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "TestEvent",
+		Event: map[string]interface{}{
+			utils.AccountField: 1001,
+		},
+		APIOpts: map[string]interface{}{},
+	}
+	dynOpts := []*utils.DynamicDecimalBigOpt{
+		// filter will not pass, will ignore this opt
+		{
+			FilterIDs: []string{"*string:~*req.Account:1002"},
+			Tenant:    "cgrates.org",
+			Value:     decimal.New(-1, 0),
+		},
+	}
+
+	if rcv, err := GetDecimalBigOpts(context.Background(), "cgrates.org", ev, fS, dynOpts,
+		config.RatesUsageDftOpt, utils.OptsRatesUsage); err != nil {
+		t.Error(err)
+	} else if rcv.Cmp(config.RatesUsageDftOpt) != 0 {
+		t.Errorf("expected: <%+v>,\nreceived: <%+v>", config.RatesUsageDftOpt, rcv)
+	}
+}
+
+func TestLibFiltersGetDecimalBigOptsReturnOptFromAPIOpts(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	dataDB := NewInternalDB(nil, nil, nil)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	fS := NewFilterS(cfg, nil, dm)
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "TestEvent",
+		Event: map[string]interface{}{
+			utils.AccountField: 1001,
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsRatesUsage: decimal.New(4321, 5),
+		},
+	}
+	dynOpts := []*utils.DynamicDecimalBigOpt{
+		// will never get to this opt because it will return once it
+		// finds the one set in APIOpts
+		{
+			FilterIDs: []string{"*string:~*req.Account:1001"},
+			Tenant:    "cgrates.org",
+			Value:     decimal.New(1234, 3),
+		},
+	}
+
+	expected := decimal.New(4321, 5)
+	if rcv, err := GetDecimalBigOpts(context.Background(), "cgrates.org", ev, fS, dynOpts,
+		config.RatesUsageDftOpt, "nonExistingAPIOpt", utils.OptsRatesUsage); err != nil {
+		t.Error(err)
+	} else if rcv.Cmp(expected) != 0 {
+		t.Errorf("expected: <%+v>,\nreceived: <%+v>", expected, rcv)
+	}
+}
+
+func TestLibFiltersGetIntPointerOptsReturnConfigOpt(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	dataDB := NewInternalDB(nil, nil, nil)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	fS := NewFilterS(cfg, nil, dm)
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "TestEvent",
+		Event: map[string]interface{}{
+			utils.AccountField: 1001,
+		},
+		APIOpts: map[string]interface{}{},
+	}
+	dynOpts := []*utils.DynamicIntPointerOpt{
+		// tenant will not be recognized, will ignore this opt
+		{
+			FilterIDs: []string{"*string:~*req.Account:1001"},
+			Tenant:    "cgrates.net",
+			Value:     utils.IntPointer(3),
+		},
+		// filter will not pass, will ignore this opt
+		{
+			FilterIDs: []string{"*string:~*req.Account:1002"},
+			Tenant:    "cgrates.org",
+			Value:     utils.IntPointer(4),
+		},
+		{
+			FilterIDs: []string{"*string:~*req.Account:1001"},
+			Tenant:    "cgrates.org",
+			Value:     utils.IntPointer(5),
+		},
+	}
+
+	expected := 5
+	if rcv, err := GetIntPointerOpts(context.Background(), "cgrates.org", ev, fS, dynOpts,
+		utils.OptsRoutesProfilesCount); err != nil {
+		t.Error(err)
+	} else if *rcv != expected {
+		t.Errorf("expected: <%+v>,\nreceived: <%+v>", expected, *rcv)
+	}
+}
+
+func TestLibFiltersGetIntPointerOptsFilterCheckErr(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	dataDB := NewInternalDB(nil, nil, nil)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	fS := NewFilterS(cfg, nil, dm)
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "TestEvent",
+		Event: map[string]interface{}{
+			utils.AccountField: 1001,
+		},
+		APIOpts: map[string]interface{}{},
+	}
+	dynOpts := []*utils.DynamicIntPointerOpt{
+		// function will return error after trying to parse the filter
+		{
+			FilterIDs: []string{"*string.invalid:filter"},
+			Tenant:    "cgrates.org",
+			Value:     utils.IntPointer(4),
+		},
+	}
+
+	experr := `inline parse error for string: <*string.invalid:filter>`
+	if _, err := GetIntPointerOpts(context.Background(), "cgrates.org", ev, fS, dynOpts,
+		utils.OptsRoutesProfilesCount); err == nil ||
+		err.Error() != experr {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+}
+
+func TestLibFiltersGetIntPointerOptsErrNotFound(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	dataDB := NewInternalDB(nil, nil, nil)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	fS := NewFilterS(cfg, nil, dm)
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "TestEvent",
+		Event: map[string]interface{}{
+			utils.AccountField: 1001,
+		},
+		APIOpts: map[string]interface{}{},
+	}
+	dynOpts := []*utils.DynamicIntPointerOpt{
+		// filter will not pass, will ignore this opt
+		{
+			FilterIDs: []string{"*string:~*req.Account:1002"},
+			Tenant:    "cgrates.org",
+			Value:     utils.IntPointer(4),
+		},
+	}
+
+	if _, err := GetIntPointerOpts(context.Background(), "cgrates.org", ev, fS, dynOpts,
+		utils.OptsRoutesProfilesCount); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
+	}
+}
+
+func TestLibFiltersGetIntPointerOptsReturnOptFromAPIOptsOK(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	dataDB := NewInternalDB(nil, nil, nil)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	fS := NewFilterS(cfg, nil, dm)
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "TestEvent",
+		Event: map[string]interface{}{
+			utils.AccountField: 1001,
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsRoutesProfilesCount: 6,
+		},
+	}
+	dynOpts := []*utils.DynamicIntPointerOpt{
+		// will never get to this opt because it will return once it
+		// finds the one set in APIOpts
+		{
+			FilterIDs: []string{"*string:~*req.Account:1001"},
+			Tenant:    "cgrates.org",
+			Value:     utils.IntPointer(5),
+		},
+	}
+
+	expected := 6
+	if rcv, err := GetIntPointerOpts(context.Background(), "cgrates.org", ev, fS, dynOpts,
+		"nonExistingAPIOpt", utils.OptsRoutesProfilesCount); err != nil {
+		t.Error(err)
+	} else if *rcv != expected {
+		t.Errorf("expected: <%+v>,\nreceived: <%+v>", expected, rcv)
+	}
+}
+
+func TestLibFiltersGetIntPointerOptsReturnOptFromAPIOptsErr(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	dataDB := NewInternalDB(nil, nil, nil)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	fS := NewFilterS(cfg, nil, dm)
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "TestEvent",
+		Event: map[string]interface{}{
+			utils.AccountField: 1001,
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsRoutesProfilesCount: true,
+		},
+	}
+	dynOpts := []*utils.DynamicIntPointerOpt{
+		// will never get to this opt because it will return once it
+		// finds the one set in APIOpts
+		{
+			FilterIDs: []string{"*string:~*req.Account:1001"},
+			Tenant:    "cgrates.org",
+			Value:     utils.IntPointer(5),
+		},
+	}
+
+	experr := `cannot convert field<bool>: true to int`
+	if _, err := GetIntPointerOpts(context.Background(), "cgrates.org", ev, fS, dynOpts,
+		"nonExistingAPIOpt", utils.OptsRoutesProfilesCount); err == nil || err.Error() != experr {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+}
+
+func TestLibFiltersGetDurationOptsFromMultipleMapsReturnConfigOpt(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	dataDB := NewInternalDB(nil, nil, nil)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	fS := NewFilterS(cfg, nil, dm)
+	eventStart := map[string]interface{}{
+		utils.AccountField: 1001,
+	}
+	apiOpts := map[string]interface{}{}
+	startOpts := map[string]interface{}{}
+	dynOpts := []*utils.DynamicDurationOpt{
+		// tenant will not be recognized, will ignore this opt
+		{
+			FilterIDs: []string{"*string:~*req.Account:1001"},
+			Tenant:    "cgrates.net",
+			Value:     time.Millisecond,
+		},
+		// filter will not pass, will ignore this opt
+		{
+			FilterIDs: []string{"*string:~*req.Account:1002"},
+			Tenant:    "cgrates.org",
+			Value:     time.Second,
+		},
+		{
+			FilterIDs: []string{"*string:~*req.Account:1001"},
+			Tenant:    "cgrates.org",
+			Value:     time.Minute,
+		},
+	}
+
+	expected := time.Minute
+	if rcv, err := GetDurationOptsFromMultipleMaps(context.Background(), "cgrates.org", eventStart, apiOpts, startOpts, fS, dynOpts,
+		config.SessionsTTLDftOpt, utils.OptsSesTTL); err != nil {
+		t.Error(err)
+	} else if rcv != expected {
+		t.Errorf("expected: <%+v>,\nreceived: <%+v>", expected, rcv)
+	}
+}
+
+func TestLibFiltersGetDurationOptsFromMultipleMapsFilterCheckErr(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	dataDB := NewInternalDB(nil, nil, nil)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	fS := NewFilterS(cfg, nil, dm)
+	eventStart := map[string]interface{}{
+		utils.AccountField: 1001,
+	}
+	apiOpts := map[string]interface{}{}
+	startOpts := map[string]interface{}{}
+	dynOpts := []*utils.DynamicDurationOpt{
+		// function will return error after trying to parse the filter
+		{
+			FilterIDs: []string{"*string.invalid:filter"},
+			Tenant:    "cgrates.org",
+			Value:     time.Second,
+		},
+	}
+
+	experr := `inline parse error for string: <*string.invalid:filter>`
+	if _, err := GetDurationOptsFromMultipleMaps(context.Background(), "cgrates.org", eventStart, apiOpts, startOpts, fS, dynOpts,
+		config.SessionsTTLDftOpt, utils.OptsSesTTL); err == nil ||
+		err.Error() != experr {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+}
+
+func TestLibFiltersGetDurationOptsFromMultipleMapsErrNotFound(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	dataDB := NewInternalDB(nil, nil, nil)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	fS := NewFilterS(cfg, nil, dm)
+	eventStart := map[string]interface{}{
+		utils.AccountField: 1001,
+	}
+	apiOpts := map[string]interface{}{}
+	startOpts := map[string]interface{}{}
+	dynOpts := []*utils.DynamicDurationOpt{
+		// filter will not pass, will ignore this opt
+		{
+			FilterIDs: []string{"*string:~*req.Account:1002"},
+			Tenant:    "cgrates.org",
+			Value:     time.Second,
+		},
+	}
+
+	if rcv, err := GetDurationOptsFromMultipleMaps(context.Background(), "cgrates.org", eventStart, apiOpts, startOpts, fS, dynOpts,
+		config.SessionsTTLDftOpt, utils.OptsSesTTL); err != nil {
+		t.Error(err)
+	} else if rcv != config.SessionsTTLDftOpt {
+		t.Errorf("expected: <%+v>,\nreceived: <%+v>", config.SessionsTTLDftOpt, rcv)
+	}
+}
+
+func TestLibFiltersGetDurationOptsFromMultipleMapsReturnOptFromAPIOptsOK(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	dataDB := NewInternalDB(nil, nil, nil)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	fS := NewFilterS(cfg, nil, dm)
+	eventStart := map[string]interface{}{
+		utils.AccountField: 1001,
+	}
+	apiOpts := map[string]interface{}{
+		utils.OptsSesTTL: time.Hour,
+	}
+	startOpts := map[string]interface{}{}
+	dynOpts := []*utils.DynamicDurationOpt{
+		// will never get to this opt because it will return once it
+		// finds the one set in APIOpts
+		{
+			FilterIDs: []string{"*string:~*req.Account:1001"},
+			Tenant:    "cgrates.org",
+			Value:     time.Minute,
+		},
+	}
+
+	expected := time.Hour
+	if rcv, err := GetDurationOptsFromMultipleMaps(context.Background(), "cgrates.org", eventStart, apiOpts, startOpts, fS, dynOpts,
+		config.SessionsTTLDftOpt, utils.OptsSesTTL); err != nil {
+		t.Error(err)
+	} else if rcv != expected {
+		t.Errorf("expected: <%+v>,\nreceived: <%+v>", expected, rcv)
+	}
+}
+
+func TestLibFiltersGetDurationOptsFromMultipleMapsReturnOptFromAPIOptsErr(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	dataDB := NewInternalDB(nil, nil, nil)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	fS := NewFilterS(cfg, nil, dm)
+	eventStart := map[string]interface{}{
+		utils.AccountField: 1001,
+	}
+	apiOpts := map[string]interface{}{
+		utils.OptsSesTTL: true,
+	}
+	startOpts := map[string]interface{}{}
+	dynOpts := []*utils.DynamicDurationOpt{
+		// will never get to this opt because it will return once it
+		// finds the one set in APIOpts
+		{
+			FilterIDs: []string{"*string:~*req.Account:1001"},
+			Tenant:    "cgrates.org",
+			Value:     time.Minute,
+		},
+	}
+
+	experr := `cannot convert field: true to time.Duration`
+	if _, err := GetDurationOptsFromMultipleMaps(context.Background(), "cgrates.org", eventStart, apiOpts, startOpts, fS, dynOpts,
+		config.SessionsTTLDftOpt, utils.OptsSesTTL); err == nil || err.Error() != experr {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+}
+
+func TestLibFiltersGetDurationOptsFromMultipleMapsReturnOptFromStartOptsOK(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	dataDB := NewInternalDB(nil, nil, nil)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	fS := NewFilterS(cfg, nil, dm)
+	eventStart := map[string]interface{}{
+		utils.AccountField: 1001,
+	}
+	apiOpts := map[string]interface{}{}
+	startOpts := map[string]interface{}{
+		utils.OptsSesTTL: time.Hour,
+	}
+	dynOpts := []*utils.DynamicDurationOpt{
+		// will never get to this opt because it will return once it
+		// finds the one set in APIOpts
+		{
+			FilterIDs: []string{"*string:~*req.Account:1001"},
+			Tenant:    "cgrates.org",
+			Value:     time.Minute,
+		},
+	}
+
+	expected := time.Hour
+	if rcv, err := GetDurationOptsFromMultipleMaps(context.Background(), "cgrates.org", eventStart, apiOpts, startOpts, fS, dynOpts,
+		config.SessionsTTLDftOpt, utils.OptsSesTTL); err != nil {
+		t.Error(err)
+	} else if rcv != expected {
+		t.Errorf("expected: <%+v>,\nreceived: <%+v>", expected, rcv)
+	}
+}
+
+func TestLibFiltersGetDurationOptsFromMultipleMapsReturnOptFromStartOptsErr(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	dataDB := NewInternalDB(nil, nil, nil)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	fS := NewFilterS(cfg, nil, dm)
+	eventStart := map[string]interface{}{
+		utils.AccountField: 1001,
+	}
+	apiOpts := map[string]interface{}{}
+	startOpts := map[string]interface{}{
+		utils.OptsSesTTL: true,
+	}
+	dynOpts := []*utils.DynamicDurationOpt{
+		// will never get to this opt because it will return once it
+		// finds the one set in APIOpts
+		{
+			FilterIDs: []string{"*string:~*req.Account:1001"},
+			Tenant:    "cgrates.org",
+			Value:     time.Minute,
+		},
+	}
+
+	experr := `cannot convert field: true to time.Duration`
+	if _, err := GetDurationOptsFromMultipleMaps(context.Background(), "cgrates.org", eventStart, apiOpts, startOpts, fS, dynOpts,
+		config.SessionsTTLDftOpt, utils.OptsSesTTL); err == nil || err.Error() != experr {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+}
+
+func TestLibFiltersGetDurationPointerOptsFromMultipleMapsReturnConfigOpt(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	dataDB := NewInternalDB(nil, nil, nil)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	fS := NewFilterS(cfg, nil, dm)
+	eventStart := map[string]interface{}{
+		utils.AccountField: 1001,
+	}
+	apiOpts := map[string]interface{}{}
+	startOpts := map[string]interface{}{}
+	dynOpts := []*utils.DynamicDurationPointerOpt{
+		// tenant will not be recognized, will ignore this opt
+		{
+			FilterIDs: []string{"*string:~*req.Account:1001"},
+			Tenant:    "cgrates.net",
+			Value:     utils.DurationPointer(time.Millisecond),
+		},
+		// filter will not pass, will ignore this opt
+		{
+			FilterIDs: []string{"*string:~*req.Account:1002"},
+			Tenant:    "cgrates.org",
+			Value:     utils.DurationPointer(time.Second),
+		},
+		{
+			FilterIDs: []string{"*string:~*req.Account:1001"},
+			Tenant:    "cgrates.org",
+			Value:     utils.DurationPointer(time.Minute),
+		},
+	}
+
+	expected := time.Minute
+	if rcv, err := GetDurationPointerOptsFromMultipleMaps(context.Background(), "cgrates.org", eventStart, apiOpts, startOpts, fS, dynOpts,
+		utils.OptsSesTTLUsage); err != nil {
+		t.Error(err)
+	} else if *rcv != expected {
+		t.Errorf("expected: <%+v>,\nreceived: <%+v>", expected, rcv)
+	}
+}
+
+func TestLibFiltersGetDurationPointerOptsFromMultipleMapsFilterCheckErr(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	dataDB := NewInternalDB(nil, nil, nil)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	fS := NewFilterS(cfg, nil, dm)
+	eventStart := map[string]interface{}{
+		utils.AccountField: 1001,
+	}
+	apiOpts := map[string]interface{}{}
+	startOpts := map[string]interface{}{}
+	dynOpts := []*utils.DynamicDurationPointerOpt{
+		// function will return error after trying to parse the filter
+		{
+			FilterIDs: []string{"*string.invalid:filter"},
+			Tenant:    "cgrates.org",
+			Value:     utils.DurationPointer(time.Second),
+		},
+	}
+
+	experr := `inline parse error for string: <*string.invalid:filter>`
+	if _, err := GetDurationPointerOptsFromMultipleMaps(context.Background(), "cgrates.org", eventStart, apiOpts, startOpts, fS, dynOpts,
+		utils.OptsSesTTLUsage); err == nil ||
+		err.Error() != experr {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+}
+
+func TestLibFiltersGetDurationPointerOptsFromMultipleMapsErrNotFound(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	dataDB := NewInternalDB(nil, nil, nil)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	fS := NewFilterS(cfg, nil, dm)
+	eventStart := map[string]interface{}{
+		utils.AccountField: 1001,
+	}
+	apiOpts := map[string]interface{}{}
+	startOpts := map[string]interface{}{}
+	dynOpts := []*utils.DynamicDurationPointerOpt{
+		// filter will not pass, will ignore this opt
+		{
+			FilterIDs: []string{"*string:~*req.Account:1002"},
+			Tenant:    "cgrates.org",
+			Value:     utils.DurationPointer(time.Second),
+		},
+	}
+
+	if _, err := GetDurationPointerOptsFromMultipleMaps(context.Background(), "cgrates.org", eventStart, apiOpts, startOpts, fS, dynOpts,
+		utils.OptsSesTTLUsage); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
+	}
+}
+
+func TestLibFiltersGetDurationPointerOptsFromMultipleMapsReturnOptFromAPIOptsOK(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	dataDB := NewInternalDB(nil, nil, nil)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	fS := NewFilterS(cfg, nil, dm)
+	eventStart := map[string]interface{}{
+		utils.AccountField: 1001,
+	}
+	apiOpts := map[string]interface{}{
+		utils.OptsSesTTLUsage: time.Hour,
+	}
+	startOpts := map[string]interface{}{}
+	dynOpts := []*utils.DynamicDurationPointerOpt{
+		// will never get to this opt because it will return once it
+		// finds the one set in APIOpts
+		{
+			FilterIDs: []string{"*string:~*req.Account:1001"},
+			Tenant:    "cgrates.org",
+			Value:     utils.DurationPointer(time.Minute),
+		},
+	}
+
+	expected := time.Hour
+	if rcv, err := GetDurationPointerOptsFromMultipleMaps(context.Background(), "cgrates.org", eventStart, apiOpts, startOpts, fS, dynOpts,
+		utils.OptsSesTTLUsage); err != nil {
+		t.Error(err)
+	} else if *rcv != expected {
+		t.Errorf("expected: <%+v>,\nreceived: <%+v>", expected, rcv)
+	}
+}
+
+func TestLibFiltersGetDurationPointerOptsFromMultipleMapsReturnOptFromAPIOptsErr(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	dataDB := NewInternalDB(nil, nil, nil)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	fS := NewFilterS(cfg, nil, dm)
+	eventStart := map[string]interface{}{
+		utils.AccountField: 1001,
+	}
+	apiOpts := map[string]interface{}{
+		utils.OptsSesTTLUsage: true,
+	}
+	startOpts := map[string]interface{}{}
+	dynOpts := []*utils.DynamicDurationPointerOpt{
+		// will never get to this opt because it will return once it
+		// finds the one set in APIOpts
+		{
+			FilterIDs: []string{"*string:~*req.Account:1001"},
+			Tenant:    "cgrates.org",
+			Value:     utils.DurationPointer(time.Minute),
+		},
+	}
+
+	experr := `cannot convert field: true to time.Duration`
+	if _, err := GetDurationPointerOptsFromMultipleMaps(context.Background(), "cgrates.org", eventStart, apiOpts, startOpts, fS, dynOpts,
+		utils.OptsSesTTLUsage); err == nil || err.Error() != experr {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+}
+
+func TestLibFiltersGetDurationPointerOptsFromMultipleMapsReturnOptFromStartOptsOK(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	dataDB := NewInternalDB(nil, nil, nil)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	fS := NewFilterS(cfg, nil, dm)
+	eventStart := map[string]interface{}{
+		utils.AccountField: 1001,
+	}
+	apiOpts := map[string]interface{}{}
+	startOpts := map[string]interface{}{
+		utils.OptsSesTTLUsage: time.Hour,
+	}
+	dynOpts := []*utils.DynamicDurationPointerOpt{
+		// will never get to this opt because it will return once it
+		// finds the one set in APIOpts
+		{
+			FilterIDs: []string{"*string:~*req.Account:1001"},
+			Tenant:    "cgrates.org",
+			Value:     utils.DurationPointer(time.Minute),
+		},
+	}
+
+	expected := time.Hour
+	if rcv, err := GetDurationPointerOptsFromMultipleMaps(context.Background(), "cgrates.org", eventStart, apiOpts, startOpts, fS, dynOpts,
+		utils.OptsSesTTLUsage); err != nil {
+		t.Error(err)
+	} else if *rcv != expected {
+		t.Errorf("expected: <%+v>,\nreceived: <%+v>", expected, rcv)
+	}
+}
+
+func TestLibFiltersGetDurationPointerOptsFromMultipleMapsReturnOptFromStartOptsErr(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	dataDB := NewInternalDB(nil, nil, nil)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	fS := NewFilterS(cfg, nil, dm)
+	eventStart := map[string]interface{}{
+		utils.AccountField: 1001,
+	}
+	apiOpts := map[string]interface{}{}
+	startOpts := map[string]interface{}{
+		utils.OptsSesTTLUsage: true,
+	}
+	dynOpts := []*utils.DynamicDurationPointerOpt{
+		// will never get to this opt because it will return once it
+		// finds the one set in APIOpts
+		{
+			FilterIDs: []string{"*string:~*req.Account:1001"},
+			Tenant:    "cgrates.org",
+			Value:     utils.DurationPointer(time.Minute),
+		},
+	}
+
+	experr := `cannot convert field: true to time.Duration`
+	if _, err := GetDurationPointerOptsFromMultipleMaps(context.Background(), "cgrates.org", eventStart, apiOpts, startOpts, fS, dynOpts,
+		utils.OptsSesTTLUsage); err == nil || err.Error() != experr {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 }
