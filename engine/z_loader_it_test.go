@@ -36,7 +36,6 @@ import (
 var (
 	// Globals used
 	dataDbCsv       *DataManager // Each dataDb will have it's own sources to collect data
-	storDb          LoadStorage
 	lCfg            *config.CGRConfig
 	loader          *TpReader
 	loaderConfigDIR string

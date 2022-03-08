@@ -37,35 +37,6 @@
 					},
 					"response": []
 				},
-				{
-					"name": "LoadTariffPlanFromStorDb --> OnlineDB",
-					"request": {
-						"auth": {
-							"type": "noauth"
-						},
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"id\": 6,\n    \"method\": \"APIerSv1.LoadTariffPlanFromStorDb\",\n    \"params\": [\n        {\n            \"TPid\": \"CGR_API_TESTS\"\n        }\n    ]\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/jsonrpc",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"jsonrpc"
-							]
-						}
-					},
-					"response": []
-				}
 			],
 			"event": [
 				{
@@ -6745,35 +6716,6 @@
 									},
 									"response": []
 								},
-								{
-									"name": "6. LoadTariffPlanFromStorDb --> OnlineDB Copy SOS Copy",
-									"request": {
-										"auth": {
-											"type": "noauth"
-										},
-										"method": "POST",
-										"header": [
-											{
-												"key": "Content-Type",
-												"value": "application/json"
-											}
-										],
-										"body": {
-											"mode": "raw",
-											"raw": "{\n    \"id\": 6,\n    \"method\": \"APIerSv1.LoadTariffPlanFromStorDb\",\n    \"params\": [\n        {\n            \"TPid\": \"CGR_SPL_TESTSUPPLIER1_2019_01\"\n        }\n    ]\n}"
-										},
-										"url": {
-											"raw": "{{base_url}}/jsonrpc",
-											"host": [
-												"{{base_url}}"
-											],
-											"path": [
-												"jsonrpc"
-											]
-										}
-									},
-									"response": []
-								}
 							],
 							"protocolProfileBehavior": {},
 							"_postman_isSubFolder": true
@@ -6985,35 +6927,7 @@
 									},
 									"response": []
 								},
-								{
-									"name": "6. LoadTariffPlanFromStorDb --> OnlineDB Copy SOS",
-									"request": {
-										"auth": {
-											"type": "noauth"
-										},
-										"method": "POST",
-										"header": [
-											{
-												"key": "Content-Type",
-												"value": "application/json"
-											}
-										],
-										"body": {
-											"mode": "raw",
-											"raw": "{\n    \"id\": 6,\n    \"method\": \"APIerSv1.LoadTariffPlanFromStorDb\",\n    \"params\": [\n        {\n            \"TPid\": \"TPID_VL_INTERNAL_INBOUND_CALLS\"\n        }\n    ]\n}"
-										},
-										"url": {
-											"raw": "{{base_url}}/jsonrpc",
-											"host": [
-												"{{base_url}}"
-											],
-											"path": [
-												"jsonrpc"
-											]
-										}
-									},
-									"response": []
-								}
+
 							],
 							"protocolProfileBehavior": {},
 							"_postman_isSubFolder": true
