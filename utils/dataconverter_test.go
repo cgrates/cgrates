@@ -1223,3 +1223,52 @@ func TestDomainNameFromNAPTRConverter(t *testing.T) {
 		t.Errorf("received: <%s>", dName)
 	}
 }
+
+type structWithFuncField struct {
+	ID       string
+	Function func(int) bool
+}
+
+func TestDataConverterConvertJSONErrUnsupportedType(t *testing.T) {
+	dc, err := NewDataConverter(MetaJSON)
+	if err != nil {
+		t.Error(err)
+	}
+
+	obj := structWithFuncField{
+		ID: "testStruct",
+		Function: func(i int) bool {
+			return i != 0
+		},
+	}
+
+	experr := `json: unsupported type: func(int) bool`
+	if _, err := dc.Convert(obj); err == nil || err.Error() != experr {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+}
+
+func TestDataConverterConvertJSONOK(t *testing.T) {
+	dc, err := NewDataConverter(MetaJSON)
+	if err != nil {
+		t.Error(err)
+	}
+
+	obj := &CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "TestCGREv",
+		Event: map[string]interface{}{
+			AccountField: "1001",
+		},
+		APIOpts: map[string]interface{}{
+			"opt": "value",
+		},
+	}
+
+	exp := ToJSON(obj)
+	if rcv, err := dc.Convert(obj); err != nil {
+		t.Error(err)
+	} else if rcv.(string) != exp {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", exp, rcv)
+	}
+}

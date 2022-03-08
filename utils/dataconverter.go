@@ -75,6 +75,8 @@ func NewDataConverter(params string) (conv DataConverter, err error) {
 			return NewDivideConverter(EmptyString)
 		}
 		return NewDivideConverter(params[len(MetaDivide)+1:])
+	case params == MetaJSON:
+		return new(JSONConverter), nil
 	case params == MetaDuration:
 		return NewDurationConverter(EmptyString)
 	case params == MetaIP2Hex:
@@ -572,4 +574,15 @@ func (e164Converter) Convert(in interface{}) (interface{}, error) {
 	}
 	return ReverseString(
 		strings.Replace(name[:i], ".", "", -1)), nil
+}
+
+// JSONConverter converts an object to json string
+type JSONConverter struct{}
+
+func (jsnC JSONConverter) Convert(in interface{}) (interface{}, error) {
+	b, err := json.Marshal(in)
+	if err != nil {
+		return in, err
+	}
+	return string(b), nil
 }
