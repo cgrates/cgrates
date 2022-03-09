@@ -1243,8 +1243,10 @@ func TestDataConverterConvertJSONErrUnsupportedType(t *testing.T) {
 	}
 
 	experr := `json: unsupported type: func(int) bool`
-	if _, err := dc.Convert(obj); err == nil || err.Error() != experr {
+	if rcv, err := dc.Convert(obj); err == nil || err.Error() != experr {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
+	} else if rcv != EmptyString {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", EmptyString, rcv)
 	}
 }
 
