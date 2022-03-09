@@ -582,7 +582,7 @@ type JSONConverter struct{}
 func (jsnC JSONConverter) Convert(in interface{}) (interface{}, error) {
 	b, err := json.Marshal(in)
 	if err != nil {
-		return in, err
+		return EmptyString, err
 	}
 	return string(b), nil
 }
