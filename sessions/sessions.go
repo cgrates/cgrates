@@ -243,34 +243,28 @@ func (sS *SessionS) setSTerminator(ctx *context.Context, s *Session, opts engine
 	var ttlLastUsed *time.Duration
 	if ttlLastUsed, err = engine.GetDurationPointerOptsFromMultipleMaps(ctx, s.Tenant, s.EventStart, opts, s.OptsStart, sS.fltrS,
 		sS.cfg.SessionSCfg().Opts.TTLLastUsed, utils.OptsSesTTLLastUsed); err != nil {
-		if err != utils.ErrNotFound {
-			utils.Logger.Warning(
-				fmt.Sprintf("<%s>, cannot extract <%s> for session:<%s>, from its options: <%s>, err: <%s>",
-					utils.SessionS, utils.OptsSesTTLLastUsed, s.OptsStart[utils.MetaOriginID], opts.String(), err.Error()))
-			return
-		}
+		utils.Logger.Warning(
+			fmt.Sprintf("<%s>, cannot extract <%s> for session:<%s>, from its options: <%s>, err: <%s>",
+				utils.SessionS, utils.OptsSesTTLLastUsed, s.OptsStart[utils.MetaOriginID], opts.String(), err.Error()))
+		return
 	}
 	// LastUsage
 	var ttlLastUsage *time.Duration
 	if ttlLastUsage, err = engine.GetDurationPointerOptsFromMultipleMaps(ctx, s.Tenant, s.EventStart, opts, s.OptsStart, sS.fltrS,
 		sS.cfg.SessionSCfg().Opts.TTLLastUsage, utils.OptsSesTTLLastUsage); err != nil {
-		if err != utils.ErrNotFound {
-			utils.Logger.Warning(
-				fmt.Sprintf("<%s>, cannot extract <%s> for session:<%s>, from its options: <%s>, err: <%s>",
-					utils.SessionS, utils.OptsSesTTLLastUsage, s.OptsStart[utils.MetaOriginID], opts.String(), err.Error()))
-			return
-		}
+		utils.Logger.Warning(
+			fmt.Sprintf("<%s>, cannot extract <%s> for session:<%s>, from its options: <%s>, err: <%s>",
+				utils.SessionS, utils.OptsSesTTLLastUsage, s.OptsStart[utils.MetaOriginID], opts.String(), err.Error()))
+		return
 	}
 	// TTLUsage
 	var ttlUsage *time.Duration
 	if ttlUsage, err = engine.GetDurationPointerOptsFromMultipleMaps(ctx, s.Tenant, s.EventStart, opts, s.OptsStart, sS.fltrS,
 		sS.cfg.SessionSCfg().Opts.TTLUsage, utils.OptsSesTTLUsage); err != nil {
-		if err != utils.ErrNotFound {
-			utils.Logger.Warning(
-				fmt.Sprintf("<%s>, cannot extract <%s> for session:<%s>, from its options: <%s>, err: <%s>",
-					utils.SessionS, utils.OptsSesTTLUsage, s.OptsStart[utils.MetaOriginID], opts.String(), err.Error()))
-			return
-		}
+		utils.Logger.Warning(
+			fmt.Sprintf("<%s>, cannot extract <%s> for session:<%s>, from its options: <%s>, err: <%s>",
+				utils.SessionS, utils.OptsSesTTLUsage, s.OptsStart[utils.MetaOriginID], opts.String(), err.Error()))
+		return
 	}
 	// previously defined, reset
 	if s.sTerminator != nil {

@@ -1367,7 +1367,7 @@ func TestLibFiltersGetIntPointerOptsFilterCheckErr(t *testing.T) {
 	}
 }
 
-func TestLibFiltersGetIntPointerOptsErrNotFound(t *testing.T) {
+func TestLibFiltersGetIntPointerOptsReturnDft(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	dataDB := NewInternalDB(nil, nil, nil)
 	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
@@ -1390,8 +1390,8 @@ func TestLibFiltersGetIntPointerOptsErrNotFound(t *testing.T) {
 	}
 
 	if _, err := GetIntPointerOpts(context.Background(), "cgrates.org", ev, fS, dynOpts,
-		utils.OptsRoutesProfilesCount); err == nil || err.Error() != utils.ErrNotFound.Error() {
-		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
+		utils.OptsRoutesProfilesCount); err != nil {
+		t.Error(err)
 	}
 }
 
@@ -1740,7 +1740,7 @@ func TestLibFiltersGetDurationPointerOptsFromMultipleMapsFilterCheckErr(t *testi
 	}
 }
 
-func TestLibFiltersGetDurationPointerOptsFromMultipleMapsErrNotFound(t *testing.T) {
+func TestLibFiltersGetDurationPointerOptsFromMultipleMapsReturnDft(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	dataDB := NewInternalDB(nil, nil, nil)
 	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
@@ -1760,8 +1760,8 @@ func TestLibFiltersGetDurationPointerOptsFromMultipleMapsErrNotFound(t *testing.
 	}
 
 	if _, err := GetDurationPointerOptsFromMultipleMaps(context.Background(), "cgrates.org", eventStart, apiOpts, startOpts, fS, dynOpts,
-		utils.OptsSesTTLUsage); err == nil || err.Error() != utils.ErrNotFound.Error() {
-		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
+		utils.OptsSesTTLUsage); err != nil {
+		t.Error(err)
 	}
 }
 
