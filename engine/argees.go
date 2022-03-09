@@ -52,7 +52,6 @@ func (cgr *CGREventWithEeIDs) UnmarshalJSON(data []byte) (err error) {
 	cgr.CGREvent = cgrEv
 	// check if we have CostDetails and modify it's type (by default it was map[string]interface{} by unrmarshaling, now it will be EventCost)
 	if ecEv, has := cgrEv.Event[utils.CostDetails]; has {
-		// ee
 		var bts []byte
 		switch ecEv.(type) {
 		case string:
