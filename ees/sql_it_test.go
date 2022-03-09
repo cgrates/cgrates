@@ -71,10 +71,11 @@ func TestSqlEeExport(t *testing.T) {
 
 // create a struct serve as model for *sql exporter
 type testModelSql struct {
-	Cgrid      string
-	AnswerTime time.Time
-	Usage      int64
-	Cost       float64
+	Cgrid       string
+	AnswerTime  time.Time
+	Usage       int64
+	Cost        float64
+	CostDetails string
 }
 
 func (*testModelSql) TableName() string {
@@ -143,6 +144,132 @@ func testSqlEeRPCConn(t *testing.T) {
 }
 
 func testSqlEeExportEventFull(t *testing.T) {
+	cd := &engine.EventCost{
+		Cost:  utils.Float64Pointer(0.264933),
+		CGRID: "d8534def2b7067f4f5ad4f7ec7bbcc94bb46111a",
+		Rates: engine.ChargedRates{
+			"3db483c": engine.RateGroups{
+				{
+					Value:              0.1574,
+					RateUnit:           60000000000,
+					RateIncrement:      30000000000,
+					GroupIntervalStart: 0,
+				},
+				{
+					Value:              0.1574,
+					RateUnit:           60000000000,
+					RateIncrement:      1000000000,
+					GroupIntervalStart: 30000000000,
+				},
+			},
+		},
+		RunID: "*default",
+		Usage: utils.DurationPointer(101 * time.Second),
+		Rating: engine.Rating{
+			"7f3d423": &engine.RatingUnit{
+				MaxCost:          40,
+				RatesID:          "3db483c",
+				TimingID:         "128e970",
+				ConnectFee:       0,
+				RoundingMethod:   "*up",
+				MaxCostStrategy:  "*disconnect",
+				RatingFiltersID:  "f8e95f2",
+				RoundingDecimals: 4,
+			},
+		},
+		Charges: []*engine.ChargingInterval{
+			{
+				RatingID: "7f3d423",
+				Increments: []*engine.ChargingIncrement{
+					{
+						Cost:           0.0787,
+						Usage:          30000000000,
+						AccountingID:   "fee8a3a",
+						CompressFactor: 1,
+					},
+				},
+				CompressFactor: 1,
+			},
+			{
+				RatingID: "7f3d423",
+				Increments: []*engine.ChargingIncrement{
+					{
+						Cost:           0.002623,
+						Usage:          1000000000,
+						AccountingID:   "3463957",
+						CompressFactor: 71,
+					},
+				},
+				CompressFactor: 1,
+			},
+		},
+		Timings: engine.ChargedTimings{
+			"128e970": &engine.ChargedTiming{
+				StartTime: "00:00:00",
+			},
+		},
+		StartTime: time.Date(2019, 12, 06, 11, 57, 32, 0, time.UTC),
+		Accounting: engine.Accounting{
+			"3463957": &engine.BalanceCharge{
+				Units:         0.002623,
+				RatingID:      "",
+				AccountID:     "cgrates.org:1001",
+				BalanceUUID:   "154419f2-45e0-4629-a203-06034ccb493f",
+				ExtraChargeID: "",
+			},
+			"fee8a3a": &engine.BalanceCharge{
+				Units:         0.0787,
+				RatingID:      "",
+				AccountID:     "cgrates.org:1001",
+				BalanceUUID:   "154419f2-45e0-4629-a203-06034ccb493f",
+				ExtraChargeID: "",
+			},
+		},
+		RatingFilters: engine.RatingFilters{
+			"f8e95f2": engine.RatingMatchedFilters{
+				"Subject":           "*out:cgrates.org:mo_call_UK_Mobile_O2_GBRCN:*any",
+				"RatingPlanID":      "RP_MO_CALL_44800",
+				"DestinationID":     "DST_44800",
+				"DestinationPrefix": "44800",
+			},
+		},
+		AccountSummary: &engine.AccountSummary{
+			ID:            "234189200129930",
+			Tenant:        "cgrates.org",
+			Disabled:      false,
+			AllowNegative: false,
+			BalanceSummaries: engine.BalanceSummaries{
+				&engine.BalanceSummary{
+					ID:       "MOBILE_DATA",
+					Type:     "*data",
+					UUID:     "08a05723-5849-41b9-b6a9-8ee362539280",
+					Value:    3221225472,
+					Disabled: false,
+				},
+				&engine.BalanceSummary{
+					ID:       "MOBILE_SMS",
+					Type:     "*sms",
+					UUID:     "06a87f20-3774-4eeb-826e-a79c5f175fd3",
+					Value:    247,
+					Disabled: false,
+				},
+				&engine.BalanceSummary{
+					ID:       "MOBILE_VOICE",
+					Type:     "*voice",
+					UUID:     "4ad16621-6e22-4e35-958e-5e1ff93ad7b7",
+					Value:    14270000000000,
+					Disabled: false,
+				},
+				&engine.BalanceSummary{
+					ID:       "MONETARY_POSTPAID",
+					Type:     "*monetary",
+					UUID:     "154419f2-45e0-4629-a203-06034ccb493f",
+					Value:    50,
+					Disabled: false,
+				},
+			},
+		},
+	}
 	eventVoice := &engine.CGREventWithEeIDs{
 		EeIDs: []string{"SQLExporterFull"},
 		CGREvent: &utils.CGREvent{
@@ -165,6 +292,7 @@ func testSqlEeExportEventFull(t *testing.T) {
 				utils.Usage:        10 * time.Second,
 				utils.RunID:        utils.MetaDefault,
 				utils.Cost:         1.01,
+				utils.CostDetails:  utils.ToJSON(cd),
 				"ExtraFields": map[string]string{"extra1": "val_extra1",
 					"extra2": "val_extra2", "extra3": "val_extra3"},
 			},
