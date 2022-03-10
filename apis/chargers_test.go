@@ -801,3 +801,108 @@ func TestChargerSRmvChargerProfileErrRemoveCallCache(t *testing.T) {
 	dm.DataDB().Flush(utils.EmptyString)
 	engine.Cache = cacheInit
 }
+
+func TestChargersGetChargerProfilesOK(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	connMgr := engine.NewConnManager(cfg)
+	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(dataDB, nil, connMgr)
+	admS := NewAdminSv1(cfg, dm, connMgr)
+	args1 := &ChargerWithAPIOpts{
+		ChargerProfile: &engine.ChargerProfile{
+			Tenant: "cgrates.org",
+			ID:     "test_ID1",
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				},
+			},
+		},
+		APIOpts: nil,
+	}
+
+	var setReply string
+	if err := admS.SetChargerProfile(context.Background(), args1, &setReply); err != nil {
+		t.Error(err)
+	} else if setReply != "OK" {
+		t.Error("Unexpected reply returned:", setReply)
+	}
+
+	args2 := &ChargerWithAPIOpts{
+		ChargerProfile: &engine.ChargerProfile{
+			Tenant: "cgrates.org",
+			ID:     "test_ID2",
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				},
+			},
+		},
+		APIOpts: nil,
+	}
+
+	if err := admS.SetChargerProfile(context.Background(), args2, &setReply); err != nil {
+		t.Error(err)
+	} else if setReply != "OK" {
+		t.Error("Unexpected reply returned:", setReply)
+	}
+
+	// this profile will not match
+	args3 := &ChargerWithAPIOpts{
+		ChargerProfile: &engine.ChargerProfile{
+			Tenant: "cgrates.org",
+			ID:     "test2_ID1",
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				},
+			},
+		},
+		APIOpts: nil,
+	}
+
+	if err := admS.SetChargerProfile(context.Background(), args3, &setReply); err != nil {
+		t.Error(err)
+	} else if setReply != "OK" {
+		t.Error("Unexpected reply returned:", setReply)
+	}
+
+	argsGet := &utils.ArgsItemIDs{
+		Tenant:      "cgrates.org",
+		ItemsPrefix: "test_ID",
+	}
+	exp := []*engine.ChargerProfile{
+		{
+			Tenant: "cgrates.org",
+			ID:     "test_ID1",
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				},
+			},
+		},
+		{
+			Tenant: "cgrates.org",
+			ID:     "test_ID2",
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				},
+			},
+		},
+	}
+
+	var getReply []*engine.ChargerProfile
+	if err := admS.GetChargerProfiles(context.Background(), argsGet, &getReply); err != nil {
+		t.Error(err)
+	} else {
+		sort.Slice(getReply, func(i, j int) bool {
+			return getReply[i].ID < getReply[j].ID
+		})
+		if !reflect.DeepEqual(getReply, exp) {
+			t.Errorf("expected: <%+v>, \nreceived: <%+v>",
+				utils.ToJSON(exp), utils.ToJSON(getReply))
+		}
+	}
+}
