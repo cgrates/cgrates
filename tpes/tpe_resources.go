@@ -29,41 +29,36 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-type TPAttributes struct {
+type TPResources struct {
 	dm *engine.DataManager
 }
 
-// newTPAttributes is the constructor for TPAttributes
-func newTPAttributes(dm *engine.DataManager) *TPAttributes {
-	return &TPAttributes{
+// newTPResources is the constructor for TPResources
+func newTPResources(dm *engine.DataManager) *TPResources {
+	return &TPResources{
 		dm: dm,
 	}
 }
 
-// exportItems for TPAttributes will implement the imethod for tpExporter interface
-func (tpAttr TPAttributes) exportItems(ctx *context.Context, tnt string, itmIDs []string) (expContent []byte, err error) {
+// exportItems for TPResources will implement the imethod for tpExporter interface
+func (tpAttr TPResources) exportItems(ctx *context.Context, tnt string, itmIDs []string) (expContent []byte, err error) {
 	expContent = make([]byte, len(itmIDs))
 
 	for _, attrID := range itmIDs {
-		var attrPrf *engine.AttributeProfile
-		attrPrf, err = tpAttr.dm.GetAttributeProfile(ctx, tnt, attrID, true, true, utils.NonTransactional)
+		resPrf, err := tpAttr.dm.GetResourceProfile(ctx, tnt, attrID, true, true, utils.NonTransactional)
 		if err != nil {
 			if err.Error() == utils.ErrNotFound.Error() {
-				utils.Logger.Warning(fmt.Sprintf("<%s> cannot find AttributeProfile with id: <%v>", utils.TPeS, attrID))
+				utils.Logger.Warning(fmt.Sprintf("<%s> cannot find ResourceProfile with id: <%v>", utils.TPeS, attrID))
 				continue
 			}
 			return nil, err
 		}
-		attrMdl := engine.APItoModelTPAttribute(engine.AttributeProfileToAPI(attrPrf))
-		if len(attrMdl) == 0 {
-			return
-		}
+		resMdl := engine.APItoModelResource(engine.ResourceProfileToAPI(resPrf))
 		// for every profile, convert it into model to be writable in csv format
 		buff := new(bytes.Buffer) // the info will be stored into a buffer
 		csvWriter := csv.NewWriter(buff)
 		csvWriter.Comma = utils.CSVSep
-		for _, tpItem := range attrMdl {
-			// transform every record into a []string
+		for _, tpItem := range resMdl {
 			record, err := engine.CsvDump(tpItem)
 			if err != nil {
 				return nil, err

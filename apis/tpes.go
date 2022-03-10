@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package apis
 
 import (
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/tpes"
 )
 
@@ -29,4 +30,8 @@ func NewTPeSv1(tpes *tpes.TPeS) *TPeSv1 {
 type TPeSv1 struct {
 	tpes *tpes.TPeS
 	ping
+}
+
+func (tpE *TPeSv1) ExportTariffPlan(ctx *context.Context, args *tpes.ArgsExportTP, reply *[]byte) error {
+	return tpE.tpes.V1ExportTariffPlan(ctx, args, reply)
 }

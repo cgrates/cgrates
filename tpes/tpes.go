@@ -19,7 +19,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package tpes
 
 import (
+	"archive/zip"
+	"bytes"
 	"fmt"
+	"io"
+	"time"
 
 	"github.com/cgrates/birpc/context"
 
@@ -61,7 +65,7 @@ type ArgsExportTP struct {
 }
 
 // V1ExportTariffPlan is the API executed to export tariff plan items
-func (tpE *TPeS) V1ExportTariffPlan(ctx *context.Context, args *ArgsExportTP, reply map[string][]byte) (err error) {
+func (tpE *TPeS) V1ExportTariffPlan(ctx *context.Context, args *ArgsExportTP, reply *[]byte) (err error) {
 	if args.Tenant == utils.EmptyString {
 		args.Tenant = tpE.cfg.GeneralCfg().DefaultTenant
 	}
@@ -71,13 +75,31 @@ func (tpE *TPeS) V1ExportTariffPlan(ctx *context.Context, args *ArgsExportTP, re
 		}
 	}
 
-	expotedItems := make(map[string][]byte, len(tpE.exps))
-	// code to export to zip comes here
+	buff := new(bytes.Buffer)
+	zBuff := zip.NewWriter(buff)
 	for expType, expItms := range args.ExportItems {
-		if expotedItems[expType], err = tpE.exps[expType].exportItems(ctx, args.Tenant, expItms); err != nil {
+		var wrtr io.Writer
+		//here we will create all the header for each subsystem type for the csv
+		if wrtr, err = zBuff.CreateHeader(&zip.FileHeader{
+			Method:   zip.Deflate, // to be compressed
+			Name:     getFileName(expType),
+			Modified: time.Now(),
+		}); err != nil {
+			return
+		}
+		var expBts []byte
+		// expBts will containt the bytes with all profiles in CSV format
+		if expBts, err = tpE.exps[expType].exportItems(ctx, args.Tenant, expItms); err != nil {
 			return utils.NewErrServerError(err)
 		}
+		// write all the bytes into our zip
+		if _, err = wrtr.Write(expBts); err != nil {
+			return
+		}
 	}
-	reply = expotedItems
+	if err = zBuff.Close(); err != nil {
+		return err
+	}
+	*reply = buff.Bytes()
 	return
 }

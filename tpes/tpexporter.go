@@ -26,17 +26,18 @@ import (
 
 var tpExporterTypes = utils.NewStringSet([]string{
 	utils.MetaAttributes,
-	/* utils.MetaResources,
-	utils.MetaFilters,
-	utils.MetaStats,
-	utils.MetaThresholds,
-	utils.MetaRoutes,
-	utils.MetaChargers,
-	utils.MetaDispatchers,
-	utils.MetaDispatcherHosts,
-	utils.MetaRateProfiles,
-	utils.MetaActions,
-	utils.MetaAccounts */})
+	utils.MetaResources,
+	/*
+		utils.MetaFilters,
+		utils.MetaStats,
+		utils.MetaThresholds,
+		utils.MetaRoutes,
+		utils.MetaChargers,
+		utils.MetaDispatchers,
+		utils.MetaDispatcherHosts,
+		utils.MetaRateProfiles,
+		utils.MetaActions,
+		utils.MetaAccounts */})
 
 // tpExporter is the interface implementing exports of tariff plan items
 type tpExporter interface {
@@ -48,7 +49,43 @@ func newTPExporter(expType string, dm *engine.DataManager) (tpE tpExporter, err 
 	switch expType {
 	case utils.MetaAttributes:
 		return newTPAttributes(dm), nil
+	case utils.MetaResources:
+		return newTPResources(dm), nil
 	default:
 		return nil, utils.ErrPrefix(utils.ErrUnsupportedTPExporterType, expType)
 	}
 }
+
+func getFileName(subsystem string) string {
+	switch subsystem {
+	case utils.MetaAttributes:
+		return utils.AttributesCsv
+	case utils.MetaResources:
+		return utils.ResourcesCsv
+	default:
+		return utils.EmptyString
+	}
+}
+
+/*
+func writeOut(tpData []interface{}) (csvBts []byte, err error) {
+	if len(tpData) == 0 {
+		return
+	}
+	buff := new(bytes.Buffer)
+	csvWriter := csv.NewWriter(buff)
+	csvWriter.Comma = utils.CSVSep
+	for _, tpItem := range tpData {
+		record, err := engine.CsvDump(tpItem)
+		if err != nil {
+			return nil, err
+		}
+		if err := csvWriter.Write(record); err != nil {
+			return nil, err
+		}
+	}
+
+	csvWriter.Flush()
+	return buff.Bytes(), nil
+}
+*/

@@ -44,7 +44,6 @@ var (
 	sTestsAlsPrf = []func(t *testing.T){
 		testAttributeSInitCfg,
 		testAttributeSInitDataDb,
-
 		testAttributeSStartEngine,
 		testAttributeSRPCConn,
 		testGetAttributeProfileBeforeSet,
