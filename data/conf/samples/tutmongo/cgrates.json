@@ -21,10 +21,6 @@
 	"db_port": 27017,
 },
 
-
-
-
-
 "rals": {
 	"enabled": true,
 	"thresholds_conns": ["*internal"],

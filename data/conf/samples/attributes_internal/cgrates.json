@@ -17,5 +17,9 @@
 
   "admins": {
     "enabled": true,
+  },
+
+  "tpes": {
+    "enabled": true,
   }
 }

@@ -1251,10 +1251,11 @@ const (
 	ServiceManagerV1Ping          = "ServiceManagerV1.Ping"
 )
 
-// TpeSv1 APIs
+// TPeSv1 APIs
 const (
-	TpeSv1     = "TpeSv1"
-	TpeSv1Ping = "TpeSv1.Ping"
+	TPeSv1                 = "TPeSv1"
+	TPeSv1Ping             = "TPeSv1.Ping"
+	TPeSv1ExportTariffPlan = "TPeSv1.ExportTariffPlan"
 )
 
 // ConfigSv1 APIs

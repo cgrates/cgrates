@@ -41,7 +41,6 @@ var (
 	reloadTests = []func(t *testing.T){
 		testReloadITCreateCdrDirs,
 		testReloadITInitConfig,
-		testReloadITInitCdrDb,
 		testReloadITResetDataDb,
 		testReloadITStartEngine,
 		testReloadITRpcConn,

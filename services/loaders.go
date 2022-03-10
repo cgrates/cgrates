@@ -83,7 +83,7 @@ func (ldrs *LoaderService) Start(ctx *context.Context, _ context.CancelFunc) (er
 	ldrs.Lock()
 	defer ldrs.Unlock()
 
-	ldrs.ldrs = loaders.NewLoaders(ldrs.cfg, datadb, filterS, ldrs.connMgr)
+	ldrs.ldrs = loaders.NewLoaderS(ldrs.cfg, datadb, filterS, ldrs.connMgr)
 
 	if !ldrs.ldrs.Enabled() {
 		return
