@@ -20,6 +20,7 @@ package apis
 
 import (
 	"reflect"
+	"sort"
 	"testing"
 
 	"github.com/cgrates/birpc/context"
@@ -1766,5 +1767,135 @@ func TestRatesCostForEventRateIDxSelects(t *testing.T) {
 		t.Error(err)
 	} else if !rpCost.Equals(expRpCost) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expRpCost), utils.ToJSON(rpCost))
+	}
+}
+
+func TestRatesGetRateProfilesOK(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	connMgr := engine.NewConnManager(cfg)
+	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(dataDB, nil, connMgr)
+	admS := NewAdminSv1(cfg, dm, connMgr)
+	args1 := &utils.APIRateProfile{
+		RateProfile: &utils.RateProfile{
+			Tenant: "cgrates.org",
+			ID:     "test_ID1",
+			Rates: map[string]*utils.Rate{
+				"RATE1": {
+					ID: "RATE1",
+				},
+			},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				},
+			},
+		},
+		APIOpts: nil,
+	}
+
+	var setReply string
+	if err := admS.SetRateProfile(context.Background(), args1, &setReply); err != nil {
+		t.Error(err)
+	} else if setReply != "OK" {
+		t.Error("Unexpected reply returned:", setReply)
+	}
+
+	args2 := &utils.APIRateProfile{
+		RateProfile: &utils.RateProfile{
+			Tenant: "cgrates.org",
+			ID:     "test_ID2",
+			Rates: map[string]*utils.Rate{
+				"RATE2": {
+					ID: "RATE2",
+				},
+			},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
+		},
+		APIOpts: nil,
+	}
+
+	if err := admS.SetRateProfile(context.Background(), args2, &setReply); err != nil {
+		t.Error(err)
+	} else if setReply != "OK" {
+		t.Error("Unexpected reply returned:", setReply)
+	}
+
+	// this profile will not match
+	args3 := &utils.APIRateProfile{
+		RateProfile: &utils.RateProfile{
+			Tenant: "cgrates.org",
+			ID:     "test2_ID1",
+			Rates: map[string]*utils.Rate{
+				"RATE1": {
+					ID: "RATE1",
+				},
+			},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				},
+			},
+		},
+		APIOpts: nil,
+	}
+
+	if err := admS.SetRateProfile(context.Background(), args3, &setReply); err != nil {
+		t.Error(err)
+	} else if setReply != "OK" {
+		t.Error("Unexpected reply returned:", setReply)
+	}
+
+	argsGet := &utils.ArgsItemIDs{
+		Tenant:      "cgrates.org",
+		ItemsPrefix: "test_ID",
+	}
+	exp := []*utils.RateProfile{
+		{
+			Tenant: "cgrates.org",
+			ID:     "test_ID1",
+			Rates: map[string]*utils.Rate{
+				"RATE1": {
+					ID: "RATE1",
+				},
+			},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				},
+			},
+		},
+		{
+			Tenant: "cgrates.org",
+			ID:     "test_ID2",
+			Rates: map[string]*utils.Rate{
+				"RATE2": {
+					ID: "RATE2",
+				},
+			},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
+		},
+	}
+
+	var getReply []*utils.RateProfile
+	if err := admS.GetRateProfiles(context.Background(), argsGet, &getReply); err != nil {
+		t.Error(err)
+	} else {
+		sort.Slice(getReply, func(i, j int) bool {
+			return getReply[i].ID < getReply[j].ID
+		})
+		if utils.ToJSON(getReply) != utils.ToJSON(exp) {
+			t.Errorf("expected: <%+v>, \nreceived: <%+v>",
+				utils.ToJSON(exp), utils.ToJSON(getReply))
+		}
 	}
 }

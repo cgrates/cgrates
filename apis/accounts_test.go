@@ -32,7 +32,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func TestAccountSetGetAccount(t *testing.T) {
+func TestAccountsSetGetAccount(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg)
@@ -122,7 +122,7 @@ func TestAccountSetGetAccount(t *testing.T) {
 	}
 }
 
-func TestAccountGetAccountErrorMissingID(t *testing.T) {
+func TestAccountsGetAccountErrorMissingID(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg)
@@ -180,7 +180,7 @@ func TestAccountGetAccountErrorMissingID(t *testing.T) {
 	}
 }
 
-func TestAccountGetAccountErrorNotFound(t *testing.T) {
+func TestAccountsGetAccountErrorNotFound(t *testing.T) {
 	cacheInit := engine.Cache
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
@@ -205,7 +205,7 @@ func TestAccountGetAccountErrorNotFound(t *testing.T) {
 	engine.Cache = cacheInit
 }
 
-func TestAccountGetAccountErrorGetAccount(t *testing.T) {
+func TestAccountsGetAccountErrorGetAccount(t *testing.T) {
 	cacheInit := engine.Cache
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
@@ -230,7 +230,7 @@ func TestAccountGetAccountErrorGetAccount(t *testing.T) {
 	engine.Cache = cacheInit
 }
 
-func TestAccountSetGetAccountNoTenant(t *testing.T) {
+func TestAccountsSetGetAccountNoTenant(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg)
@@ -319,7 +319,7 @@ func TestAccountSetGetAccountNoTenant(t *testing.T) {
 	}
 }
 
-func TestAccountSetGetAccountErrorMissingID(t *testing.T) {
+func TestAccountsSetGetAccountErrorMissingID(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg)
@@ -364,7 +364,7 @@ func TestAccountSetGetAccountErrorMissingID(t *testing.T) {
 	}
 }
 
-func TestAccountSetGetAccountErrorBadFilter(t *testing.T) {
+func TestAccountsSetGetAccountErrorBadFilter(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg)
@@ -413,7 +413,7 @@ func TestAccountSetGetAccountErrorBadFilter(t *testing.T) {
 	}
 }
 
-func TestAccountSetGetAccountErrorSetLoadIDs(t *testing.T) {
+func TestAccountsSetGetAccountErrorSetLoadIDs(t *testing.T) {
 	cacheInit := engine.Cache
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
@@ -477,7 +477,7 @@ func TestAccountSetGetAccountErrorSetLoadIDs(t *testing.T) {
 	engine.Cache = cacheInit
 }
 
-func TestAccountSetGetAccountErrorCallCache(t *testing.T) {
+func TestAccountsSetGetAccountErrorCallCache(t *testing.T) {
 	cacheInit := engine.Cache
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = "123"
@@ -545,7 +545,7 @@ func TestAccountSetGetAccountErrorCallCache(t *testing.T) {
 	engine.Cache = cacheInit
 }
 
-func TestAccountSetGetAccountIDs(t *testing.T) {
+func TestAccountsSetGetAccountIDs(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg)
@@ -766,7 +766,7 @@ func TestAccountSetGetAccountIDs(t *testing.T) {
 	}
 }
 
-func TestAccountGetAccountsCountError(t *testing.T) {
+func TestAccountsGetAccountsCountError(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg)
@@ -781,7 +781,7 @@ func TestAccountGetAccountsCountError(t *testing.T) {
 	}
 }
 
-func TestAccountGetAccountIDSError(t *testing.T) {
+func TestAccountsGetAccountIDSError(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg)
@@ -796,7 +796,7 @@ func TestAccountGetAccountIDSError(t *testing.T) {
 	}
 }
 
-func TestAccountRemoveAccountErrorMissingID(t *testing.T) {
+func TestAccountsRemoveAccountErrorMissingID(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg)
@@ -817,7 +817,7 @@ func TestAccountRemoveAccountErrorMissingID(t *testing.T) {
 	}
 }
 
-func TestAccountRemoveAccountErrorRmvAccount(t *testing.T) {
+func TestAccountsRemoveAccountErrorRmvAccount(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg)
@@ -838,7 +838,7 @@ func TestAccountRemoveAccountErrorRmvAccount(t *testing.T) {
 	}
 }
 
-func TestAccountRemoveAccountErrorSetLoadIDs(t *testing.T) {
+func TestAccountsRemoveAccountErrorSetLoadIDs(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg)
@@ -875,7 +875,7 @@ func TestAccountRemoveAccountErrorSetLoadIDs(t *testing.T) {
 	}
 }
 
-func TestAccountRemoveAccountErrorCallCache(t *testing.T) {
+func TestAccountsRemoveAccountErrorCallCache(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = "123"
 	cfg.AdminSCfg().CachesConns = []string{}
@@ -932,7 +932,7 @@ func TestAccountNewAccountSv1(t *testing.T) {
 	}
 }
 
-func TestAccountAccountsForEvent(t *testing.T) {
+func TestAccountsAccountsForEvent(t *testing.T) {
 	cacheInit := engine.Cache
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
@@ -1078,7 +1078,7 @@ func TestAccountAccountsForEvent(t *testing.T) {
 	engine.Cache = cacheInit
 }
 
-func TestAccountMaxAbstracts(t *testing.T) {
+func TestAccountsMaxAbstracts(t *testing.T) {
 	cacheInit := engine.Cache
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
@@ -1271,7 +1271,7 @@ func TestAccountMaxAbstracts(t *testing.T) {
 	engine.Cache = cacheInit
 }
 
-func TestAccountDebitAbstracts(t *testing.T) {
+func TestAccountsDebitAbstracts(t *testing.T) {
 	cacheInit := engine.Cache
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
@@ -1463,7 +1463,7 @@ func TestAccountDebitAbstracts(t *testing.T) {
 	engine.Cache = cacheInit
 }
 
-func TestAccountActionSetBalance(t *testing.T) {
+func TestAccountsActionSetBalance(t *testing.T) {
 	cacheInit := engine.Cache
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
@@ -1655,7 +1655,7 @@ func TestAccountActionSetBalance(t *testing.T) {
 	engine.Cache = cacheInit
 }
 
-func TestAccountActionRemoveBalance(t *testing.T) {
+func TestAccountsActionRemoveBalance(t *testing.T) {
 	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
@@ -1702,7 +1702,7 @@ func TestAccountActionRemoveBalance(t *testing.T) {
 	}
 }
 
-func TestAccountMaxConcretes(t *testing.T) {
+func TestAccountsMaxConcretes(t *testing.T) {
 	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
@@ -1954,7 +1954,7 @@ func TestAccountMaxConcretes(t *testing.T) {
 	}
 }
 
-func TestAccountDebitConcretes(t *testing.T) {
+func TestAccountsDebitConcretes(t *testing.T) {
 	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
@@ -2044,4 +2044,139 @@ func TestAccountDebitConcretes(t *testing.T) {
 		t.Errorf("Expected %+v, received %+v", nil, err)
 	}
 
+}
+
+func TestAccountsGetAccountsOK(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	connMgr := engine.NewConnManager(cfg)
+	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(dataDB, nil, connMgr)
+	admS := NewAdminSv1(cfg, dm, connMgr)
+	args1 := &utils.AccountWithAPIOpts{
+		Account: &utils.Account{
+			Tenant: "cgrates.org",
+			ID:     "test_ID1",
+			Opts:   map[string]interface{}{},
+			Balances: map[string]*utils.Balance{
+				"VoiceBalance": {
+					ID: "VoiceBalance",
+				},
+			},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				},
+			},
+		},
+		APIOpts: nil,
+	}
+
+	var setReply string
+	if err := admS.SetAccount(context.Background(), args1, &setReply); err != nil {
+		t.Error(err)
+	} else if setReply != "OK" {
+		t.Error("Unexpected reply returned:", setReply)
+	}
+
+	args2 := &utils.AccountWithAPIOpts{
+		Account: &utils.Account{
+			Tenant: "cgrates.org",
+			ID:     "test_ID2",
+			Opts:   map[string]interface{}{},
+			Balances: map[string]*utils.Balance{
+				"VoiceBalance": {
+					ID: "VoiceBalance",
+				},
+			},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
+		},
+		APIOpts: nil,
+	}
+
+	if err := admS.SetAccount(context.Background(), args2, &setReply); err != nil {
+		t.Error(err)
+	} else if setReply != "OK" {
+		t.Error("Unexpected reply returned:", setReply)
+	}
+
+	// this profile will not match
+	args3 := &utils.AccountWithAPIOpts{
+		Account: &utils.Account{
+			Tenant: "cgrates.org",
+			ID:     "test2_ID1",
+			Opts:   map[string]interface{}{},
+			Balances: map[string]*utils.Balance{
+				"VoiceBalance": {
+					ID: "VoiceBalance",
+				},
+			},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				},
+			},
+		},
+		APIOpts: nil,
+	}
+
+	if err := admS.SetAccount(context.Background(), args3, &setReply); err != nil {
+		t.Error(err)
+	} else if setReply != "OK" {
+		t.Error("Unexpected reply returned:", setReply)
+	}
+
+	argsGet := &utils.ArgsItemIDs{
+		Tenant:      "cgrates.org",
+		ItemsPrefix: "test_ID",
+	}
+	exp := []*utils.Account{
+		{
+			Tenant: "cgrates.org",
+			ID:     "test_ID1",
+			Opts:   map[string]interface{}{},
+			Balances: map[string]*utils.Balance{
+				"VoiceBalance": {
+					ID: "VoiceBalance",
+				},
+			},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				},
+			},
+		},
+		{
+			Tenant: "cgrates.org",
+			ID:     "test_ID2",
+			Opts:   map[string]interface{}{},
+			Balances: map[string]*utils.Balance{
+				"VoiceBalance": {
+					ID: "VoiceBalance",
+				},
+			},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
+		},
+	}
+
+	var getReply []*utils.Account
+	if err := admS.GetAccounts(context.Background(), argsGet, &getReply); err != nil {
+		t.Error(err)
+	} else {
+		sort.Slice(getReply, func(i, j int) bool {
+			return getReply[i].ID < getReply[j].ID
+		})
+		if !reflect.DeepEqual(getReply, exp) {
+			t.Errorf("expected: <%+v>, \nreceived: <%+v>",
+				utils.ToJSON(exp), utils.ToJSON(getReply))
+		}
+	}
 }
