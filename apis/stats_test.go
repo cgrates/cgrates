@@ -752,3 +752,156 @@ func TestStatsAPIs(t *testing.T) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.OK, reply)
 	}
 }
+
+func TestStatQueuesGetStatQueueProfilesOK(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	connMgr := engine.NewConnManager(cfg)
+	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(dataDB, nil, connMgr)
+	admS := NewAdminSv1(cfg, dm, connMgr)
+	args1 := &engine.StatQueueProfileWithAPIOpts{
+		StatQueueProfile: &engine.StatQueueProfile{
+			Tenant:       "cgrates.org",
+			ID:           "test_ID1",
+			QueueLength:  10,
+			MinItems:     2,
+			ThresholdIDs: []string{utils.MetaNone},
+			Metrics: []*engine.MetricWithFilters{
+				{
+					MetricID: utils.MetaACD,
+				},
+			},
+			Stored: true,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				},
+			},
+		},
+		APIOpts: nil,
+	}
+
+	var setReply string
+	if err := admS.SetStatQueueProfile(context.Background(), args1, &setReply); err != nil {
+		t.Error(err)
+	} else if setReply != "OK" {
+		t.Error("Unexpected reply returned:", setReply)
+	}
+
+	args2 := &engine.StatQueueProfileWithAPIOpts{
+		StatQueueProfile: &engine.StatQueueProfile{
+			Tenant:       "cgrates.org",
+			ID:           "test_ID2",
+			QueueLength:  15,
+			MinItems:     3,
+			ThresholdIDs: []string{utils.MetaNone},
+			Metrics: []*engine.MetricWithFilters{
+				{
+					MetricID: utils.MetaTCD,
+				},
+			},
+			Stored: false,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				},
+			},
+		},
+		APIOpts: nil,
+	}
+
+	if err := admS.SetStatQueueProfile(context.Background(), args2, &setReply); err != nil {
+		t.Error(err)
+	} else if setReply != "OK" {
+		t.Error("Unexpected reply returned:", setReply)
+	}
+
+	// this profile will not match
+	args3 := &engine.StatQueueProfileWithAPIOpts{
+		StatQueueProfile: &engine.StatQueueProfile{
+			Tenant:       "cgrates.org",
+			ID:           "test2_ID1",
+			QueueLength:  10,
+			MinItems:     2,
+			ThresholdIDs: []string{utils.MetaNone},
+			Metrics: []*engine.MetricWithFilters{
+				{
+					MetricID: utils.MetaACD,
+				},
+				{
+					MetricID: utils.MetaTCD,
+				},
+			},
+			Stored: false,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				},
+			},
+		},
+		APIOpts: nil,
+	}
+
+	if err := admS.SetStatQueueProfile(context.Background(), args3, &setReply); err != nil {
+		t.Error(err)
+	} else if setReply != "OK" {
+		t.Error("Unexpected reply returned:", setReply)
+	}
+
+	argsGet := &utils.ArgsItemIDs{
+		Tenant:      "cgrates.org",
+		ItemsPrefix: "test_ID",
+	}
+	exp := []*engine.StatQueueProfile{
+		{
+			Tenant:       "cgrates.org",
+			ID:           "test_ID1",
+			QueueLength:  10,
+			MinItems:     2,
+			ThresholdIDs: []string{utils.MetaNone},
+			Metrics: []*engine.MetricWithFilters{
+				{
+					MetricID: utils.MetaACD,
+				},
+			},
+			Stored: true,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				},
+			},
+		},
+		{
+			Tenant:       "cgrates.org",
+			ID:           "test_ID2",
+			QueueLength:  15,
+			MinItems:     3,
+			ThresholdIDs: []string{utils.MetaNone},
+			Metrics: []*engine.MetricWithFilters{
+				{
+					MetricID: utils.MetaTCD,
+				},
+			},
+			Stored: false,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				},
+			},
+		},
+	}
+
+	var getReply []*engine.StatQueueProfile
+	if err := admS.GetStatQueueProfiles(context.Background(), argsGet, &getReply); err != nil {
+		t.Error(err)
+	} else {
+		sort.Slice(getReply, func(i, j int) bool {
+			return getReply[i].ID < getReply[j].ID
+		})
+		if !reflect.DeepEqual(getReply, exp) {
+			t.Errorf("expected: <%+v>, \nreceived: <%+v>",
+				utils.ToJSON(exp), utils.ToJSON(getReply))
+		}
+	}
+}

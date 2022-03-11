@@ -671,3 +671,123 @@ func TestThresholdsAPIs(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestThresholdsGetThresholdProfilesOK(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	connMgr := engine.NewConnManager(cfg)
+	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(dataDB, nil, connMgr)
+	admS := NewAdminSv1(cfg, dm, connMgr)
+	args1 := &engine.ThresholdProfileWithAPIOpts{
+		ThresholdProfile: &engine.ThresholdProfile{
+			Tenant:           "cgrates.org",
+			ID:               "test_ID1",
+			MaxHits:          5,
+			MinHits:          1,
+			ActionProfileIDs: []string{utils.MetaNone},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				},
+			},
+		},
+		APIOpts: nil,
+	}
+
+	var setReply string
+	if err := admS.SetThresholdProfile(context.Background(), args1, &setReply); err != nil {
+		t.Error(err)
+	} else if setReply != "OK" {
+		t.Error("Unexpected reply returned:", setReply)
+	}
+
+	args2 := &engine.ThresholdProfileWithAPIOpts{
+		ThresholdProfile: &engine.ThresholdProfile{
+			Tenant:           "cgrates.org",
+			ID:               "test_ID2",
+			MaxHits:          4,
+			MinHits:          2,
+			ActionProfileIDs: []string{utils.MetaNone},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				},
+			},
+		},
+		APIOpts: nil,
+	}
+
+	if err := admS.SetThresholdProfile(context.Background(), args2, &setReply); err != nil {
+		t.Error(err)
+	} else if setReply != "OK" {
+		t.Error("Unexpected reply returned:", setReply)
+	}
+
+	// this profile will not match
+	args3 := &engine.ThresholdProfileWithAPIOpts{
+		ThresholdProfile: &engine.ThresholdProfile{
+			Tenant:           "cgrates.org",
+			ID:               "test2_ID1",
+			MaxHits:          5,
+			MinHits:          1,
+			ActionProfileIDs: []string{utils.MetaNone},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				},
+			},
+		},
+		APIOpts: nil,
+	}
+
+	if err := admS.SetThresholdProfile(context.Background(), args3, &setReply); err != nil {
+		t.Error(err)
+	} else if setReply != "OK" {
+		t.Error("Unexpected reply returned:", setReply)
+	}
+
+	argsGet := &utils.ArgsItemIDs{
+		Tenant:      "cgrates.org",
+		ItemsPrefix: "test_ID",
+	}
+	exp := []*engine.ThresholdProfile{
+		{
+			Tenant:           "cgrates.org",
+			ID:               "test_ID1",
+			MaxHits:          5,
+			MinHits:          1,
+			ActionProfileIDs: []string{utils.MetaNone},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				},
+			},
+		},
+		{
+			Tenant:           "cgrates.org",
+			ID:               "test_ID2",
+			MaxHits:          4,
+			MinHits:          2,
+			ActionProfileIDs: []string{utils.MetaNone},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				},
+			},
+		},
+	}
+
+	var getReply []*engine.ThresholdProfile
+	if err := admS.GetThresholdProfiles(context.Background(), argsGet, &getReply); err != nil {
+		t.Error(err)
+	} else {
+		sort.Slice(getReply, func(i, j int) bool {
+			return getReply[i].ID < getReply[j].ID
+		})
+		if !reflect.DeepEqual(getReply, exp) {
+			t.Errorf("expected: <%+v>, \nreceived: <%+v>",
+				utils.ToJSON(exp), utils.ToJSON(getReply))
+		}
+	}
+}
