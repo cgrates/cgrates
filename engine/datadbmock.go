@@ -24,46 +24,52 @@ import (
 )
 
 type DataDBMock struct {
-	RemoveRateProfileDrvF      func(ctx *context.Context, str1 string, str2 string, rateIDs *[]string) error
-	SetRateProfileDrvF         func(*context.Context, *utils.RateProfile) error
-	GetRateProfileDrvF         func(*context.Context, string, string) (*utils.RateProfile, error)
-	GetRateProfileRatesDrvF    func(*context.Context, string, string, string, bool) ([]string, []*utils.Rate, error)
-	GetKeysForPrefixF          func(*context.Context, string) ([]string, error)
-	GetIndexesDrvF             func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error)
-	SetIndexesDrvF             func(ctx *context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error)
-	GetAttributeProfileDrvF    func(ctx *context.Context, str1 string, str2 string) (*AttributeProfile, error)
-	SetAttributeProfileDrvF    func(ctx *context.Context, attr *AttributeProfile) error
-	RemoveAttributeProfileDrvF func(ctx *context.Context, str1 string, str2 string) error
-	SetLoadIDsDrvF             func(ctx *context.Context, loadIDs map[string]int64) error
-	GetFilterDrvF              func(ctx *context.Context, str1 string, str2 string) (*Filter, error)
-	GetChargerProfileDrvF      func(ctx *context.Context, tnt, id string) (*ChargerProfile, error)
-	SetChargerProfileDrvF      func(ctx *context.Context, chr *ChargerProfile) (err error)
-	GetThresholdProfileDrvF    func(ctx *context.Context, tenant, id string) (tp *ThresholdProfile, err error)
-	SetThresholdProfileDrvF    func(ctx *context.Context, tp *ThresholdProfile) (err error)
-	RemThresholdProfileDrvF    func(ctx *context.Context, tenant, id string) (err error)
-	GetThresholdDrvF           func(ctx *context.Context, tenant, id string) (*Threshold, error)
-	RemoveThresholdDrvF        func(ctx *context.Context, tnt, id string) error
-	GetResourceProfileDrvF     func(ctx *context.Context, tnt, id string) (*ResourceProfile, error)
-	SetResourceProfileDrvF     func(ctx *context.Context, rp *ResourceProfile) error
-	RemoveResourceProfileDrvF  func(ctx *context.Context, tnt, id string) error
-	RemoveResourceDrvF         func(ctx *context.Context, tnt, id string) error
-	SetResourceDrvF            func(ctx *context.Context, r *Resource) error
-	GetStatQueueProfileDrvF    func(ctx *context.Context, tenant, id string) (sq *StatQueueProfile, err error)
-	SetStatQueueProfileDrvF    func(ctx *context.Context, sq *StatQueueProfile) (err error)
-	RemStatQueueProfileDrvF    func(ctx *context.Context, tenant, id string) (err error)
-	RemStatQueueDrvF           func(ctx *context.Context, tenant, id string) (err error)
-	SetFilterDrvF              func(ctx *context.Context, fltr *Filter) error
-	GetActionProfileDrvF       func(ctx *context.Context, tenant string, ID string) (*ActionProfile, error)
-	SetActionProfileDrvF       func(ctx *context.Context, ap *ActionProfile) error
-	RemoveActionProfileDrvF    func(ctx *context.Context, tenant string, ID string) error
-	RemoveFilterDrvF           func(ctx *context.Context, str1 string, str2 string) error
-	SetAccountDrvF             func(ctx *context.Context, profile *utils.Account) error
-	GetAccountDrvF             func(ctx *context.Context, str1 string, str2 string) (*utils.Account, error)
-	RemoveAccountDrvF          func(ctx *context.Context, str1 string, str2 string) error
-	GetRouteProfileDrvF        func(ctx *context.Context, tnt, id string) (*RouteProfile, error)
-	SetRouteProfileDrvF        func(ctx *context.Context, rtPrf *RouteProfile) error
-	RemoveRouteProfileDrvF     func(ctx *context.Context, tnt, id string) error
-	RemoveChargerProfileDrvF   func(ctx *context.Context, chr string, rpl string) error
+	RemoveRateProfileDrvF       func(ctx *context.Context, str1 string, str2 string, rateIDs *[]string) error
+	SetRateProfileDrvF          func(*context.Context, *utils.RateProfile) error
+	GetRateProfileDrvF          func(*context.Context, string, string) (*utils.RateProfile, error)
+	GetRateProfileRatesDrvF     func(*context.Context, string, string, string, bool) ([]string, []*utils.Rate, error)
+	GetKeysForPrefixF           func(*context.Context, string) ([]string, error)
+	GetIndexesDrvF              func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error)
+	SetIndexesDrvF              func(ctx *context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error)
+	GetAttributeProfileDrvF     func(ctx *context.Context, str1 string, str2 string) (*AttributeProfile, error)
+	SetAttributeProfileDrvF     func(ctx *context.Context, attr *AttributeProfile) error
+	RemoveAttributeProfileDrvF  func(ctx *context.Context, str1 string, str2 string) error
+	SetLoadIDsDrvF              func(ctx *context.Context, loadIDs map[string]int64) error
+	GetFilterDrvF               func(ctx *context.Context, str1 string, str2 string) (*Filter, error)
+	GetChargerProfileDrvF       func(ctx *context.Context, tnt, id string) (*ChargerProfile, error)
+	SetChargerProfileDrvF       func(ctx *context.Context, chr *ChargerProfile) (err error)
+	GetThresholdProfileDrvF     func(ctx *context.Context, tenant, id string) (tp *ThresholdProfile, err error)
+	SetThresholdProfileDrvF     func(ctx *context.Context, tp *ThresholdProfile) (err error)
+	RemThresholdProfileDrvF     func(ctx *context.Context, tenant, id string) (err error)
+	GetThresholdDrvF            func(ctx *context.Context, tenant, id string) (*Threshold, error)
+	RemoveThresholdDrvF         func(ctx *context.Context, tnt, id string) error
+	GetResourceProfileDrvF      func(ctx *context.Context, tnt, id string) (*ResourceProfile, error)
+	SetResourceProfileDrvF      func(ctx *context.Context, rp *ResourceProfile) error
+	RemoveResourceProfileDrvF   func(ctx *context.Context, tnt, id string) error
+	RemoveResourceDrvF          func(ctx *context.Context, tnt, id string) error
+	SetResourceDrvF             func(ctx *context.Context, r *Resource) error
+	GetStatQueueProfileDrvF     func(ctx *context.Context, tenant, id string) (sq *StatQueueProfile, err error)
+	SetStatQueueProfileDrvF     func(ctx *context.Context, sq *StatQueueProfile) (err error)
+	RemStatQueueProfileDrvF     func(ctx *context.Context, tenant, id string) (err error)
+	RemStatQueueDrvF            func(ctx *context.Context, tenant, id string) (err error)
+	SetFilterDrvF               func(ctx *context.Context, fltr *Filter) error
+	GetActionProfileDrvF        func(ctx *context.Context, tenant string, ID string) (*ActionProfile, error)
+	SetActionProfileDrvF        func(ctx *context.Context, ap *ActionProfile) error
+	RemoveActionProfileDrvF     func(ctx *context.Context, tenant string, ID string) error
+	RemoveFilterDrvF            func(ctx *context.Context, str1 string, str2 string) error
+	SetAccountDrvF              func(ctx *context.Context, profile *utils.Account) error
+	GetAccountDrvF              func(ctx *context.Context, str1 string, str2 string) (*utils.Account, error)
+	RemoveAccountDrvF           func(ctx *context.Context, str1 string, str2 string) error
+	GetRouteProfileDrvF         func(ctx *context.Context, tnt, id string) (*RouteProfile, error)
+	SetRouteProfileDrvF         func(ctx *context.Context, rtPrf *RouteProfile) error
+	RemoveRouteProfileDrvF      func(ctx *context.Context, tnt, id string) error
+	RemoveChargerProfileDrvF    func(ctx *context.Context, chr string, rpl string) error
+	GetDispatcherProfileDrvF    func(*context.Context, string, string) (*DispatcherProfile, error)
+	SetDispatcherProfileDrvF    func(*context.Context, *DispatcherProfile) error
+	RemoveDispatcherProfileDrvF func(*context.Context, string, string) error
+	GetDispatcherHostDrvF       func(*context.Context, string, string) (*DispatcherHost, error)
+	SetDispatcherHostDrvF       func(*context.Context, *DispatcherHost) error
+	RemoveDispatcherHostDrvF    func(*context.Context, string, string) error
 }
 
 //Storage methods
@@ -330,15 +336,24 @@ func (dbM *DataDBMock) RemoveChargerProfileDrv(ctx *context.Context, chr string,
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) GetDispatcherProfileDrv(*context.Context, string, string) (*DispatcherProfile, error) {
+func (dbM *DataDBMock) GetDispatcherProfileDrv(ctx *context.Context, tnt, id string) (*DispatcherProfile, error) {
+	if dbM.GetDispatcherProfileDrvF != nil {
+		return dbM.GetDispatcherProfileDrvF(ctx, tnt, id)
+	}
 	return nil, utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) SetDispatcherProfileDrv(*context.Context, *DispatcherProfile) error {
+func (dbM *DataDBMock) SetDispatcherProfileDrv(ctx *context.Context, dP *DispatcherProfile) error {
+	if dbM.GetDispatcherProfileDrvF != nil {
+		return dbM.SetDispatcherProfileDrvF(ctx, dP)
+	}
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) RemoveDispatcherProfileDrv(*context.Context, string, string) error {
+func (dbM *DataDBMock) RemoveDispatcherProfileDrv(ctx *context.Context, tnt, id string) error {
+	if dbM.RemoveDispatcherProfileDrvF != nil {
+		return dbM.RemoveDispatcherProfileDrvF(ctx, tnt, id)
+	}
 	return utils.ErrNotImplemented
 }
 
@@ -357,15 +372,24 @@ func (dbM *DataDBMock) RemoveLoadIDsDrv() error {
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) GetDispatcherHostDrv(*context.Context, string, string) (*DispatcherHost, error) {
+func (dbM *DataDBMock) GetDispatcherHostDrv(ctx *context.Context, tnt, id string) (*DispatcherHost, error) {
+	if dbM.GetDispatcherHostDrvF != nil {
+		return dbM.GetDispatcherHostDrvF(ctx, tnt, id)
+	}
 	return nil, utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) SetDispatcherHostDrv(*context.Context, *DispatcherHost) error {
+func (dbM *DataDBMock) SetDispatcherHostDrv(ctx *context.Context, dH *DispatcherHost) error {
+	if dbM.GetDispatcherHostDrvF != nil {
+		return dbM.SetDispatcherHostDrvF(ctx, dH)
+	}
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) RemoveDispatcherHostDrv(*context.Context, string, string) error {
+func (dbM *DataDBMock) RemoveDispatcherHostDrv(ctx *context.Context, tnt, id string) error {
+	if dbM.RemoveDispatcherHostDrvF != nil {
+		return dbM.RemoveDispatcherHostDrvF(ctx, tnt, id)
+	}
 	return utils.ErrNotImplemented
 }
 
