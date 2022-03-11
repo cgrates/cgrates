@@ -7,7 +7,8 @@ export KAFKA_HEAP_OPTS="-Xmx100M -Xms100M"
 /kafka/bin/kafka-server-start.sh -daemon /kafka/config/server.properties
 
 rsyslogd -f /etc/rsyslogd.conf 
-pg_ctlcluster 13 main start &
+version=$(ls /var/lib/postgresql)
+pg_ctlcluster $version main start &
 mongod --bind_ip 127.0.0.1  --logpath /logs/mongodb.log &
 redis-server /etc/redis/redis.conf &
 MYSQL_ROOT_PASSWORD="CGRateS.org" /scripts/mariadb-ep.sh mysqld > /logs/mariadb_script.log 2>&1
@@ -56,4 +57,4 @@ mysql -u root -pCGRateS.org -h localhost < /scripts/mysql/create_db_with_users_e
 mysql -u root -pCGRateS.org -h localhost -D cgrates < /scripts/mysql/create_cdrs_tables.sql > /dev/null 2>&1
 mysql -u root -pCGRateS.org -h localhost -D cgrates < /scripts/mysql/create_tariffplan_tables.sql > /dev/null 2>&1
 
-ln -s /cgrates/data /usr/share/cgrates
+cp -r data/. /usr/share/cgrates
