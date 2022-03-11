@@ -19,9 +19,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package tpes
 
 import (
-	"bytes"
 	"encoding/csv"
 	"fmt"
+	"io"
 
 	"github.com/cgrates/birpc/context"
 
@@ -40,10 +40,10 @@ func newTPAttributes(dm *engine.DataManager) *TPAttributes {
 	}
 }
 
-// exportItems for TPAttributes will implement the imethod for tpExporter interface
-func (tpAttr TPAttributes) exportItems(ctx *context.Context, tnt string, itmIDs []string) (expContent []byte, err error) {
-	expContent = make([]byte, len(itmIDs))
-
+// exportItems for TPAttributes will implement the method for tpExporter interface
+func (tpAttr TPAttributes) exportItems(ctx *context.Context, wrtr io.Writer, tnt string, itmIDs []string) (err error) {
+	csvWriter := csv.NewWriter(wrtr)
+	csvWriter.Comma = utils.CSVSep
 	for _, attrID := range itmIDs {
 		var attrPrf *engine.AttributeProfile
 		attrPrf, err = tpAttr.dm.GetAttributeProfile(ctx, tnt, attrID, true, true, utils.NonTransactional)
@@ -52,30 +52,25 @@ func (tpAttr TPAttributes) exportItems(ctx *context.Context, tnt string, itmIDs 
 				utils.Logger.Warning(fmt.Sprintf("<%s> cannot find AttributeProfile with id: <%v>", utils.TPeS, attrID))
 				continue
 			}
-			return nil, err
+			return err
 		}
 		attrMdl := engine.APItoModelTPAttribute(engine.AttributeProfileToAPI(attrPrf))
 		if len(attrMdl) == 0 {
 			return
 		}
 		// for every profile, convert it into model to be writable in csv format
-		buff := new(bytes.Buffer) // the info will be stored into a buffer
-		csvWriter := csv.NewWriter(buff)
-		csvWriter.Comma = utils.CSVSep
 		for _, tpItem := range attrMdl {
 			// transform every record into a []string
 			record, err := engine.CsvDump(tpItem)
 			if err != nil {
-				return nil, err
+				return err
 			}
 			// record is a line of a csv file
 			if err := csvWriter.Write(record); err != nil {
-				return nil, err
+				return err
 			}
 		}
-		csvWriter.Flush()
-		// append our bytes stored in buffer for every profile
-		expContent = append(expContent, buff.Bytes()...)
 	}
+	csvWriter.Flush()
 	return
 }

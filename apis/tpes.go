@@ -32,6 +32,7 @@ type TPeSv1 struct {
 	ping
 }
 
+// ExportTariffPlan is the API executed to export tariff plan items
 func (tpE *TPeSv1) ExportTariffPlan(ctx *context.Context, args *tpes.ArgsExportTP, reply *[]byte) error {
 	return tpE.tpes.V1ExportTariffPlan(ctx, args, reply)
 }
