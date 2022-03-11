@@ -85,21 +85,22 @@ func TestLibengineNewRPCConnection(t *testing.T) {
 		TLS:             true,
 		ClientKey:       "key1",
 	}
-	expectedErr := "dial tcp [::1]:6012: connect: connection refused"
+	expectedErr1 := "dial tcp [::1]:6012: connect: connection refused"
+	expectedErr2 := "dial tcp 127.0.0.1:6012: connect: connection refused"
 	cM := NewConnManager(config.NewDefaultCGRConfig(), nil)
 	exp, err := rpcclient.NewRPCClient(utils.TCP, cfg.Address, cfg.TLS, cfg.ClientKey, cM.cfg.TLSCfg().ClientCerificate,
 		cM.cfg.TLSCfg().CaCertificate, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
 		cfg.Transport, nil, false, nil)
 
-	if err.Error() != expectedErr {
-		t.Errorf("Expected %v \n but received \n %v", expectedErr, err)
+	if err.Error() != expectedErr1 && err.Error() != expectedErr2 {
+		t.Errorf("Expected %v or %v \n but received \n %v", expectedErr1, expectedErr2, err)
 	}
 
 	conn, err := NewRPCConnection(cfg, cM.cfg.TLSCfg().ClientKey, cM.cfg.TLSCfg().ClientCerificate, cM.cfg.TLSCfg().CaCertificate,
 		cM.cfg.GeneralCfg().ConnectAttempts, cM.cfg.GeneralCfg().Reconnects, cM.cfg.GeneralCfg().ConnectTimeout, cM.cfg.GeneralCfg().ReplyTimeout,
 		nil, false, nil, "*localhost", "a4f3f", new(ltcache.Cache))
-	if err.Error() != expectedErr {
-		t.Errorf("Expected %v \n but received \n %v", expectedErr, err)
+	if err.Error() != expectedErr1 && err.Error() != expectedErr2 {
+		t.Errorf("Expected %v or %v \n but received \n %v", expectedErr1, expectedErr2, err)
 	}
 	if !reflect.DeepEqual(exp, conn) {
 		t.Error("Connections don't match")
