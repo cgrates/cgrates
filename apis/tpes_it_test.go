@@ -22,7 +22,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package apis
 
 import (
+	"archive/zip"
+	"bytes"
+	"encoding/csv"
 	"path"
+	"reflect"
 	"testing"
 
 	"github.com/cgrates/birpc"
@@ -45,6 +49,9 @@ var (
 		testTPeSStartEngine,
 		testTPeSRPCConn,
 		testTPeSPing,
+		testTPeSSetAttributeProfile,
+		testTPeSSetResourceProfile,
+		testTPeSetFilters,
 		testTPeSExportTariffPlan,
 		testTPeSKillEngine,
 	}
@@ -99,7 +106,7 @@ func testTPeSPing(t *testing.T) {
 	}
 }
 
-func testTPeSExportTariffPlan(t *testing.T) {
+func testTPeSSetAttributeProfile(t *testing.T) {
 	attrPrf := &engine.APIAttributeProfileWithAPIOpts{
 		APIAttributeProfile: &engine.APIAttributeProfile{
 			Tenant:    utils.CGRateSorg,
@@ -152,6 +159,9 @@ func testTPeSExportTariffPlan(t *testing.T) {
 	} else if reply1 != utils.OK {
 		t.Error(err)
 	}
+}
+
+func testTPeSSetResourceProfile(t *testing.T) {
 	rsPrf1 := &engine.ResourceProfileWithAPIOpts{
 		ResourceProfile: &engine.ResourceProfile{
 			Tenant:            "cgrates.org",
@@ -179,9 +189,9 @@ func testTPeSExportTariffPlan(t *testing.T) {
 		ResourceProfile: &engine.ResourceProfile{
 			Tenant:            "cgrates.org",
 			ID:                "ResGroup2",
-			FilterIDs:         []string{"*string:~*req.Account:1001"},
-			Limit:             10,
-			AllocationMessage: "Approved",
+			FilterIDs:         []string{"*string:~*req.Account:1002"},
+			Limit:             5,
+			AllocationMessage: "Declined",
 			Weights: utils.DynamicWeights{
 				{
 					Weight: 10,
@@ -189,46 +199,135 @@ func testTPeSExportTariffPlan(t *testing.T) {
 			ThresholdIDs: []string{utils.MetaNone},
 		},
 	}
-
 	if err := tpeSRPC.Call(context.Background(), utils.AdminSv1SetResourceProfile,
 		rsPrf2, &replystr); err != nil {
 		t.Error(err)
 	} else if replystr != utils.OK {
 		t.Error("Unexpected reply returned", replystr)
 	}
+}
+
+func testTPeSetFilters(t *testing.T) {
+	fltr1 := &engine.FilterWithAPIOpts{
+		Filter: &engine.Filter{
+			Tenant: utils.CGRateSorg,
+			ID:     "fltr_for_prf",
+			Rules: []*engine.FilterRule{
+				{
+					Type:    utils.MetaString,
+					Element: "~*req.Subject",
+					Values:  []string{"1004", "6774", "22312"},
+				},
+				{
+					Type:    utils.MetaString,
+					Element: "~*opts.Subsystems",
+					Values:  []string{"*attributes"},
+				},
+				{
+					Type:    utils.MetaPrefix,
+					Element: "~*req.Destinations",
+					Values:  []string{"+0775", "+442"},
+				},
+				{
+					Type:    utils.MetaExists,
+					Element: "~*req.NumberOfEvents",
+				},
+			},
+		},
+	}
+	fltr2 := &engine.FilterWithAPIOpts{
+		Filter: &engine.Filter{
+			Tenant: utils.CGRateSorg,
+			ID:     "fltr_changed2",
+			Rules: []*engine.FilterRule{
+				{
+					Type:    utils.MetaString,
+					Element: "~*opts.*originID",
+					Values:  []string{"QWEASDZXC", "IOPJKLBNM"},
+				},
+				{
+					Type:    utils.MetaString,
+					Element: "~*opts.Subsystems",
+					Values:  []string{"*attributes"},
+				},
+				{
+					Type:    utils.MetaNotExists,
+					Element: "~*opts.*rateS",
+				},
+			},
+		},
+	}
+	var reply string
+	if err := tpeSRPC.Call(context.Background(), utils.AdminSv1SetFilter,
+		fltr1, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply result", reply)
+	}
+	if err := tpeSRPC.Call(context.Background(), utils.AdminSv1SetFilter,
+		fltr2, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply result", reply)
+	}
+}
+
+func testTPeSExportTariffPlan(t *testing.T) {
 	var replyBts []byte
 	if err := tpeSRPC.Call(context.Background(), utils.TPeSv1ExportTariffPlan, &tpes.ArgsExportTP{
 		Tenant: "cgrates.org",
 		ExportItems: map[string][]string{
 			utils.MetaAttributes: {"TEST_ATTRIBUTES_IT_TEST", "TEST_ATTRIBUTES_IT_TEST_SECOND"},
 			utils.MetaResources:  {"ResGroup1", "ResGroup2"},
+			utils.MetaFilters:    {"fltr_for_prf", "fltr_changed2"},
 		},
 	}, &replyBts); err != nil {
 		t.Error(err)
-	} /*
-		t.Errorf("received: %v", string(replyBts))
+	}
 
-		rdr, err := zip.NewReader(bytes.NewReader(replyBts), int64(len(reply)))
+	rdr, err := zip.NewReader(bytes.NewReader(replyBts), int64(len(replyBts)))
+	if err != nil {
+		t.Error(err)
+	}
+	csvRply := make(map[string][][]string, 6)
+	for _, f := range rdr.File {
+		rc, err := f.Open()
+		if err != nil {
+			t.Fatal(err)
+		}
+		info := csv.NewReader(rc)
+		//info.FieldsPerRecord = -1
+		csvFile, err := info.ReadAll()
 		if err != nil {
 			t.Error(err)
 		}
-		csvRply := make([][]string, 6)
-		for _, f := range rdr.File {
-			rc, err := f.Open()
-			if err != nil {
-				t.Fatal(err)
-			}
-			info := csv.NewReader(rc)
-			//info.FieldsPerRecord = -1
-			csvRply, err = info.ReadAll()
-			if err != nil {
-				t.Error(err)
-			}
-			rc.Close()
-		}
-		t.Errorf("received: %v", utils.ToJSON(csvRply))
-	*/
+		csvRply[f.Name] = append(csvRply[f.Name], csvFile...)
+		rc.Close()
+	}
 
+	expected := map[string][][]string{
+		utils.AttributesCsv: {
+			{"cgrates.org", "TEST_ATTRIBUTES_IT_TEST", "*string:~*req.Account:1002;*exists:~*opts.*usage:", ";20", "", "Account", "*constant", "1002", "false"},
+			{"cgrates.org", "TEST_ATTRIBUTES_IT_TEST", "", "", "", "*tenant", "*constant", "cgrates.itsyscom", "false"},
+			{"cgrates.org", "TEST_ATTRIBUTES_IT_TEST_SECOND", "*string:~*opts.*context:*sessions;*exists:~*opts.*usage:", "", "", "*tenant", "*constant", "cgrates.itsyscom", "false"},
+		},
+		utils.ResourcesCsv: {
+			{"cgrates.org", "ResGroup1", "*string:~*req.Account:1001", ";20", "", "10", "Approved", "false", "false", "*none"},
+			{"cgrates.org", "ResGroup2", "*string:~*req.Account:1002", ";10", "", "5", "Declined", "false", "false", "*none"},
+		},
+		utils.FiltersCsv: {
+			{"cgrates.org", "fltr_for_prf", "*string", "~*req.Subject", "1004;6774;22312"},
+			{"cgrates.org", "fltr_for_prf", "*string", "~*opts.Subsystems", "*attributes"},
+			{"cgrates.org", "fltr_for_prf", "*prefix", "~*req.Destinations", "+0775;+442"},
+			{"cgrates.org", "fltr_for_prf", "*exists", "~*req.NumberOfEvents", ""},
+			{"cgrates.org", "fltr_changed2", "*string", "~*opts.*originID", "QWEASDZXC;IOPJKLBNM"},
+			{"cgrates.org", "fltr_changed2", "*string", "~*opts.Subsystems", "*attributes"},
+			{"cgrates.org", "fltr_changed2", "*notexists", "~*opts.*rateS", ""},
+		},
+	}
+	if !reflect.DeepEqual(expected, csvRply) {
+		t.Errorf("Expected %+v \n received %+v", utils.ToJSON(expected), utils.ToJSON(csvRply))
+	}
 }
 
 func testTPeSRPCConn(t *testing.T) {

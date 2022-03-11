@@ -19,6 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package tpes
 
 import (
+	"io"
+
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -27,21 +29,36 @@ import (
 var tpExporterTypes = utils.NewStringSet([]string{
 	utils.MetaAttributes,
 	utils.MetaResources,
+	utils.MetaFilters,
 	/*
-		utils.MetaFilters,
 		utils.MetaStats,
-		utils.MetaThresholds,
+		utils.MetaThresholds, //
 		utils.MetaRoutes,
 		utils.MetaChargers,
-		utils.MetaDispatchers,
-		utils.MetaDispatcherHosts,
+		utils.MetaDispatchers, //
+		utils.MetaDispatcherHosts, //
 		utils.MetaRateProfiles,
-		utils.MetaActions,
+		utils.MetaActions, //
 		utils.MetaAccounts */})
+
+var exportFileName = map[string]string{
+	utils.MetaAttributes:      utils.AttributesCsv,
+	utils.MetaResources:       utils.ResourcesCsv,
+	utils.MetaFilters:         utils.FiltersCsv,
+	utils.MetaStats:           utils.StatsCsv,
+	utils.MetaThresholds:      utils.ThresholdsCsv,
+	utils.MetaRoutes:          utils.RoutesCsv,
+	utils.MetaChargers:        utils.ChargersCsv,
+	utils.MetaDispatchers:     utils.DispatcherProfilesCsv,
+	utils.MetaDispatcherHosts: utils.DispatcherHostsCsv,
+	utils.MetaRateProfiles:    utils.RatesCsv,
+	utils.MetaActions:         utils.ActionsCsv,
+	utils.MetaAccounts:        utils.AccountsCsv,
+}
 
 // tpExporter is the interface implementing exports of tariff plan items
 type tpExporter interface {
-	exportItems(ctx *context.Context, tnt string, itmIDs []string) (expContent []byte, err error)
+	exportItems(ctx *context.Context, wrtr io.Writer, tnt string, itmIDs []string) (err error)
 }
 
 // newTPExporter constructs tpExporters
@@ -51,41 +68,9 @@ func newTPExporter(expType string, dm *engine.DataManager) (tpE tpExporter, err 
 		return newTPAttributes(dm), nil
 	case utils.MetaResources:
 		return newTPResources(dm), nil
+	case utils.MetaFilters:
+		return newTPFilters(dm), nil
 	default:
 		return nil, utils.ErrPrefix(utils.ErrUnsupportedTPExporterType, expType)
 	}
 }
-
-func getFileName(subsystem string) string {
-	switch subsystem {
-	case utils.MetaAttributes:
-		return utils.AttributesCsv
-	case utils.MetaResources:
-		return utils.ResourcesCsv
-	default:
-		return utils.EmptyString
-	}
-}
-
-/*
-func writeOut(tpData []interface{}) (csvBts []byte, err error) {
-	if len(tpData) == 0 {
-		return
-	}
-	buff := new(bytes.Buffer)
-	csvWriter := csv.NewWriter(buff)
-	csvWriter.Comma = utils.CSVSep
-	for _, tpItem := range tpData {
-		record, err := engine.CsvDump(tpItem)
-		if err != nil {
-			return nil, err
-		}
-		if err := csvWriter.Write(record); err != nil {
-			return nil, err
-		}
-	}
-
-	csvWriter.Flush()
-	return buff.Bytes(), nil
-}
-*/

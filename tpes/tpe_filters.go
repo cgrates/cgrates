@@ -29,37 +29,37 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-type TPResources struct {
+type TPFilters struct {
 	dm *engine.DataManager
 }
 
-// newTPResources is the constructor for TPResources
-func newTPResources(dm *engine.DataManager) *TPResources {
-	return &TPResources{
+// newTPFilters is the constructor for TPFilters
+func newTPFilters(dm *engine.DataManager) *TPFilters {
+	return &TPFilters{
 		dm: dm,
 	}
 }
 
-// exportItems for TPResources will implement the method for tpExporter interface
-func (tpRes TPResources) exportItems(ctx *context.Context, wrtr io.Writer, tnt string, itmIDs []string) (err error) {
+// exportItems for TPFilters will implement the method for tpExporter interface
+func (tpFltr TPFilters) exportItems(ctx *context.Context, wrtr io.Writer, tnt string, itmIDs []string) (err error) {
 	csvWriter := csv.NewWriter(wrtr)
 	csvWriter.Comma = utils.CSVSep
-	for _, resID := range itmIDs {
-		var resPrf *engine.ResourceProfile
-		resPrf, err = tpRes.dm.GetResourceProfile(ctx, tnt, resID, true, true, utils.NonTransactional)
+	for _, fltrID := range itmIDs {
+		var fltr *engine.Filter
+		fltr, err = tpFltr.dm.GetFilter(ctx, tnt, fltrID, true, true, utils.NonTransactional)
 		if err != nil {
 			if err.Error() == utils.ErrNotFound.Error() {
-				utils.Logger.Warning(fmt.Sprintf("<%s> cannot find ResourceProfile with id: <%v>", utils.TPeS, resID))
+				utils.Logger.Warning(fmt.Sprintf("<%s> cannot find Filters with id: <%v>", utils.TPeS, fltrID))
 				continue
 			}
 			return err
 		}
-		resMdl := engine.APItoModelResource(engine.ResourceProfileToAPI(resPrf))
-		if len(resMdl) == 0 {
+		fltrMdls := engine.APItoModelTPFilter(engine.FilterToTPFilter(fltr))
+		if len(fltrMdls) == 0 {
 			return
 		}
 		// for every profile, convert it into model to be writable in csv format
-		for _, tpItem := range resMdl {
+		for _, tpItem := range fltrMdls {
 			// transform every record into a []string
 			record, err := engine.CsvDump(tpItem)
 			if err != nil {

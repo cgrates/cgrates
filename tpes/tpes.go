@@ -74,7 +74,6 @@ func (tpE *TPeS) V1ExportTariffPlan(ctx *context.Context, args *ArgsExportTP, re
 			return utils.ErrPrefix(utils.ErrUnsupportedTPExporterType, eType)
 		}
 	}
-
 	buff := new(bytes.Buffer)
 	zBuff := zip.NewWriter(buff)
 	for expType, expItms := range args.ExportItems {
@@ -82,19 +81,14 @@ func (tpE *TPeS) V1ExportTariffPlan(ctx *context.Context, args *ArgsExportTP, re
 		//here we will create all the header for each subsystem type for the csv
 		if wrtr, err = zBuff.CreateHeader(&zip.FileHeader{
 			Method:   zip.Deflate, // to be compressed
-			Name:     getFileName(expType),
+			Name:     exportFileName[expType],
 			Modified: time.Now(),
 		}); err != nil {
 			return
 		}
-		var expBts []byte
-		// expBts will containt the bytes with all profiles in CSV format
-		if expBts, err = tpE.exps[expType].exportItems(ctx, args.Tenant, expItms); err != nil {
+		// our buffer will containt the bytes with all profiles in CSV format
+		if err = tpE.exps[expType].exportItems(ctx, wrtr, args.Tenant, expItms); err != nil {
 			return utils.NewErrServerError(err)
-		}
-		// write all the bytes into our zip
-		if _, err = wrtr.Write(expBts); err != nil {
-			return
 		}
 	}
 	if err = zBuff.Close(); err != nil {
