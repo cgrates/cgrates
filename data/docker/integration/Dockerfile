@@ -4,7 +4,7 @@ RUN groupadd -r mongodb && useradd -r -g mongodb mongodb
 RUN groupadd -r redis && useradd -r -g redis redis 
 RUN groupadd -r kafka && useradd -r -g kafka kafka 
 
-RUN mkdir -p /usr/share/man/man1 /var/spool/cgrates/ers/in /var/spool/cgrates/ers/out /var/spool/cgrates/cdre/csv /var/spool/cgrates/cdre/fwv /var/spool/cgrates/tpe /var/spool/cgrates/failed_posts /var/spool/cgrates/analyzers /run /data/configdb /data/db /kafka /logs
+RUN mkdir -p /usr/share/cgrates/conf /usr/share/man/man1 /var/spool/cgrates/ers/in /var/spool/cgrates/ers/out /var/spool/cgrates/cdre/csv /var/spool/cgrates/cdre/fwv /var/spool/cgrates/tpe /var/spool/cgrates/failed_posts /var/spool/cgrates/analyzers /run /data/configdb /data/db /kafka /logs
 
 RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
 
@@ -18,8 +18,11 @@ RUN echo "deb http://repo.mongodb.org/apt/debian buster/mongodb-org/4.4 main" | 
 RUN wget -qO - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -
 RUN echo "deb http://apt.postgresql.org/pub/repos/apt buster-pgdg main" | tee /etc/apt/sources.list.d/pgdg.list
 
-RUN wget -qO - https://github.com/rabbitmq/signing-keys/releases/download/2.0/rabbitmq-release-signing-key.asc | apt-key add -
-RUN printf "deb https://dl.bintray.com/rabbitmq-erlang/debian buster erlang\ndeb https://dl.bintray.com/rabbitmq/debian buster main" | tee /etc/apt/sources.list.d/bintray.rabbitmq.list
+RUN wget https://packages.erlang-solutions.com/erlang-solutions_1.0_all.deb
+RUN dpkg -i erlang-solutions_1.0_all.deb
+RUN apt-get update
+RUN apt-get install -y erlang erlang-nox
+RUN curl -s https://packagecloud.io/install/repositories/rabbitmq/rabbitmq-server/script.deb.sh | bash
 
 RUN apt-get update
 RUN apt-get install -y mongodb-org postgresql rabbitmq-server
@@ -27,9 +30,9 @@ RUN apt-get install -y mongodb-org postgresql rabbitmq-server
 
 WORKDIR /kafka
 
-RUN wget "https://archive.apache.org/dist/kafka/2.1.1/kafka_2.11-2.1.1.tgz" 
-RUN tar -xvzf ./kafka_2.11-2.1.1.tgz --strip 1
-RUN rm kafka_2.11-2.1.1.tgz
+RUN wget "https://archive.apache.org/dist/kafka/2.1.0/kafka_2.11-2.1.0.tgz" 
+RUN tar -xvzf ./kafka_2.11-2.1.0.tgz --strip 1
+RUN rm kafka_2.11-2.1.0.tgz
 COPY ./conf/server.properties /kafka/config/server.properties
 WORKDIR /
 
@@ -50,7 +53,7 @@ RUN set -ex; \
 	echo '[mysqld]\nskip-host-cache\nskip-name-resolve' > /etc/mysql/conf.d/docker.cnf
 
 
-RUN wget -O go.tgz "https://storage.googleapis.com/golang/go1.15.7.linux-amd64.tar.gz" --progress=dot:giga
+RUN wget -O go.tgz "https://storage.googleapis.com/golang/go1.17.7.linux-amd64.tar.gz" --progress=dot:giga
 RUN tar -C /usr/local -xzf go.tgz
 RUN rm go.tgz
 
