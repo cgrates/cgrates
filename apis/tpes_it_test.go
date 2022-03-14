@@ -55,6 +55,10 @@ var (
 		testTPeSetFilters,
 		testTPeSetRateProfiles,
 		testTPeSetChargerProfiles,
+		testTPeSetRouteProfiles,
+		testTPeSetAccount,
+		testTPeSetStatQueueProfile,
+		testTPeSetActions,
 		testTPeSExportTariffPlan,
 		testTPeSKillEngine,
 	}
@@ -515,6 +519,359 @@ func testTPeSetChargerProfiles(t *testing.T) {
 	}
 }
 
+func testTPeSetRouteProfiles(t *testing.T) {
+	prf := &engine.RouteProfileWithAPIOpts{
+		RouteProfile: &engine.RouteProfile{
+			ID:     "ROUTE_2003",
+			Tenant: "cgrates.org",
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				},
+			},
+			Sorting:           utils.MetaWeight,
+			SortingParameters: []string{},
+			Routes: []*engine.Route{
+				{
+					ID: "route1",
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 20,
+						},
+					},
+				},
+			},
+		},
+	}
+	var reply string
+	if err := tpeSRPC.Call(context.Background(), utils.AdminSv1SetRouteProfile,
+		prf, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error(err)
+	}
+	rt2 := &engine.RouteProfileWithAPIOpts{
+		RouteProfile: &engine.RouteProfile{
+			ID:        "ROUTE_ACNT_1001",
+			Tenant:    "cgrates.org",
+			FilterIDs: []string{"*string:~*req.Account:1001"},
+			Sorting:   "*weight",
+			Routes: []*engine.Route{
+				{
+					ID:        "vendor1",
+					FilterIDs: []string{"FLTR_DEST_1003"},
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 10,
+						},
+					},
+				},
+				{
+					ID:        "vendor2",
+					FilterIDs: []string{"*gte:~*accounts.1001.Balance[Concrete1].Units:10"},
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 20,
+						},
+					},
+				},
+				{
+					ID:        "vendor3",
+					FilterIDs: []string{"FLTR_DEST_1003", "*prefix:~*req.Account:10"},
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 40,
+						},
+					},
+				},
+				{
+					ID: "vendor4",
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 35,
+						},
+					},
+				},
+			},
+		},
+	}
+	if err := tpeSRPC.Call(context.Background(), utils.AdminSv1SetRouteProfile,
+		rt2, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error(err)
+	}
+}
+
+func testTPeSetAccount(t *testing.T) {
+	args := &utils.AccountWithAPIOpts{
+		Account: &utils.Account{
+			Tenant: "cgrates.org",
+			ID:     "Account_simple",
+			Opts:   map[string]interface{}{},
+			Balances: map[string]*utils.Balance{
+				"VoiceBalance": {
+					ID:        "VoiceBalance",
+					FilterIDs: []string{"*string:~*req.Account:1001"},
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 12,
+						},
+					},
+					Type: "*abstract",
+					Opts: map[string]interface{}{
+						"Destination": "10",
+					},
+					Units: utils.NewDecimal(0, 0),
+				},
+			},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				},
+			},
+		},
+		APIOpts: nil,
+	}
+	var reply string
+	if err := tpeSRPC.Call(context.Background(), utils.AdminSv1SetAccount,
+		args, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error(err)
+	}
+	acnt1 := &utils.AccountWithAPIOpts{
+		Account: &utils.Account{
+			Tenant: utils.CGRateSorg,
+			ID:     "Account_balances",
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				},
+			},
+			Balances: map[string]*utils.Balance{
+				"AB1": {
+					ID:   "AB1",
+					Type: utils.MetaAbstract,
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 40,
+						},
+					},
+					CostIncrements: []*utils.CostIncrement{
+						{
+							Increment:    utils.NewDecimal(int64(time.Minute), 0),
+							FixedFee:     utils.NewDecimal(4, 1), // 0.4
+							RecurrentFee: utils.NewDecimal(2, 1), // 0.2 per minute
+						},
+					},
+					Units: utils.NewDecimal(int64(130*time.Second), 0),
+				},
+				"CB1": {
+					ID:   "CB1",
+					Type: utils.MetaConcrete,
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 30,
+						},
+					},
+					Opts: map[string]interface{}{
+						utils.MetaBalanceLimit: -200.0,
+					},
+					CostIncrements: []*utils.CostIncrement{
+						{
+							Increment:    utils.NewDecimal(int64(time.Second), 0),
+							RecurrentFee: utils.NewDecimal(1, 1), // 0.1 per second
+						},
+					},
+					UnitFactors: []*utils.UnitFactor{
+						{
+							Factor: utils.NewDecimal(100, 0), // EuroCents
+						},
+					},
+					Units: utils.NewDecimal(80, 0),
+				},
+				"ab2": {
+					ID:   "ab2",
+					Type: utils.MetaAbstract,
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 20,
+						},
+					},
+					CostIncrements: []*utils.CostIncrement{
+						{
+							Increment:    utils.NewDecimal(int64(time.Second), 0),
+							RecurrentFee: utils.NewDecimal(0, 0)},
+					},
+					Units: utils.NewDecimal(int64(1*time.Minute), 0), // 1 Minute,
+				},
+				"ab3": {
+					ID:        "ab3",
+					Type:      utils.MetaAbstract,
+					FilterIDs: []string{"*string:*~req.Account:AnotherAccount"},
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 10,
+						},
+					},
+					CostIncrements: []*utils.CostIncrement{
+						{
+							Increment:    utils.NewDecimal(int64(time.Second), 0),
+							RecurrentFee: utils.NewDecimal(1, 0)},
+					},
+					Units: utils.NewDecimal(int64(60*time.Second), 0), // 1 Minute
+				},
+				"cb2": {
+					ID:   "cb2",
+					Type: utils.MetaConcrete,
+					CostIncrements: []*utils.CostIncrement{
+						{
+							Increment: utils.NewDecimal(int64(time.Second), 0),
+						},
+					},
+					AttributeIDs: []string{utils.MetaNone},
+					Units:        utils.NewDecimal(125, 2), // 1.25
+				},
+			},
+		},
+	}
+	if err := tpeSRPC.Call(context.Background(), utils.AdminSv1SetAccount,
+		acnt1, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error(err)
+	}
+}
+
+func testTPeSetStatQueueProfile(t *testing.T) {
+	sqPrf := &engine.StatQueueProfileWithAPIOpts{
+		StatQueueProfile: &engine.StatQueueProfile{
+			Tenant: "cgrates.org",
+			ID:     "SQ_2",
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
+			QueueLength: 14,
+			Metrics: []*engine.MetricWithFilters{
+				{
+					MetricID: utils.MetaASR,
+				},
+				{
+					MetricID: utils.MetaTCD,
+				},
+				{
+					MetricID: utils.MetaPDD,
+				},
+				{
+					MetricID: utils.MetaTCC,
+				},
+				{
+					MetricID: utils.MetaTCD,
+				},
+			},
+			ThresholdIDs: []string{utils.MetaNone},
+		},
+	}
+
+	var reply string
+	if err := tpeSRPC.Call(context.Background(), utils.AdminSv1SetStatQueueProfile,
+		sqPrf, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned:", reply)
+	}
+
+	sqPrf2 := &engine.StatQueueProfileWithAPIOpts{
+		StatQueueProfile: &engine.StatQueueProfile{
+			Tenant:   "cgrates.org",
+			ID:       "SQ_basic",
+			TTL:      0,
+			Blocker:  true,
+			MinItems: 3,
+			Stored:   true,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				},
+			},
+			Metrics: []*engine.MetricWithFilters{
+				{
+					MetricID: utils.MetaTCD,
+				},
+			},
+			ThresholdIDs: []string{utils.MetaNone},
+		},
+	}
+	if err := tpeSRPC.Call(context.Background(), utils.AdminSv1SetStatQueueProfile,
+		sqPrf2, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned:", reply)
+	}
+}
+
+func testTPeSetActions(t *testing.T) {
+	actPrf := &engine.ActionProfileWithAPIOpts{
+		ActionProfile: &engine.ActionProfile{
+			Tenant: "cgrates.org",
+			ID:     "SET_BAL",
+			FilterIDs: []string{
+				"*string:~*req.Account:1001"},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 0,
+				},
+			},
+			Targets:  map[string]utils.StringSet{utils.MetaAccounts: {"1001": {}}},
+			Schedule: utils.MetaASAP,
+			Actions: []*engine.APAction{
+				{
+					ID:   "SET_BAL",
+					Type: utils.MetaSetBalance,
+					Diktats: []*engine.APDiktat{
+						{
+							Path:  "MONETARY",
+							Value: "10",
+						}},
+				},
+			},
+		},
+		APIOpts: map[string]interface{}{},
+	}
+	var reply string
+	if err := tpeSRPC.Call(context.Background(), utils.AdminSv1SetActionProfile,
+		actPrf, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error(err)
+	}
+	actPrf2 := &engine.ActionProfileWithAPIOpts{
+		ActionProfile: &engine.ActionProfile{
+			Tenant: "cgrates.org",
+			ID:     "Execute_thd",
+			Actions: []*engine.APAction{
+				{
+					ID:   "actID",
+					Type: utils.MetaResetThreshold,
+				},
+			},
+			Targets: map[string]utils.StringSet{
+				utils.MetaThresholds: {
+					"THD_1": struct{}{},
+					"THD_2": struct{}{},
+				},
+			},
+		},
+	}
+	if err := tpeSRPC.Call(context.Background(), utils.AdminSv1SetActionProfile,
+		actPrf2, &reply); err != nil {
+		t.Error(err)
+	}
+}
+
 func testTPeSExportTariffPlan(t *testing.T) {
 	var replyBts []byte
 	if err := tpeSRPC.Call(context.Background(), utils.TPeSv1ExportTariffPlan, &tpes.ArgsExportTP{
@@ -525,6 +882,10 @@ func testTPeSExportTariffPlan(t *testing.T) {
 			utils.MetaFilters:    {"fltr_for_prf", "fltr_changed2"},
 			utils.MetaRateS:      {"MultipleRates", "TEST_RATE_IT_TEST"},
 			utils.MetaChargers:   {"Chargers1", "DifferentCharger"},
+			utils.MetaRoutes:     {"ROUTE_2003", "ROUTE_ACNT_1001"},
+			utils.MetaAccounts:   {"Account_balances", "Account_simple"},
+			utils.MetaStats:      {"SQ_basic", "SQ_2"},
+			utils.MetaActions:    {"Execute_thd", "SET_BAL"},
 		},
 	}, &replyBts); err != nil {
 		t.Error(err)
@@ -591,8 +952,38 @@ func testTPeSExportTariffPlan(t *testing.T) {
 			{"cgrates.org", "Chargers1", "", ";20", "*default", "*none"},
 			{"cgrates.org", "DifferentCharger", "", ";0", "Raw", "ATTR1"},
 		},
+		utils.RoutesCsv: {
+			{"#Tenant", "ID", "FilterIDs", "Weights", "Sorting", "SortingParameters", "RouteID", "RouteFilterIDs", "RouteAccountIDs", "RouteRateProfileIDs", "RouteResourceIDs", "RouteStatIDs", "RouteWeights", "RouteBlocker", "RouteParameters"},
+			{"cgrates.org", "ROUTE_2003", "", ";10", "*weight", "", "route1", "", "", "", "", "", ";20", "false", ""},
+			{"cgrates.org", "ROUTE_ACNT_1001", "*string:~*req.Account:1001", "", "*weight", "", "vendor1", "FLTR_DEST_1003", "", "", "", "", ";10", "false", ""},
+			{"cgrates.org", "ROUTE_ACNT_1001", "", "", "", "", "vendor2", "*gte:~*accounts.1001.Balance[Concrete1].Units:10", "", "", "", "", ";20", "false", ""},
+			{"cgrates.org", "ROUTE_ACNT_1001", "", "", "", "", "vendor3", "FLTR_DEST_1003;*prefix:~*req.Account:10", "", "", "", "", ";40", "false", ""},
+			{"cgrates.org", "ROUTE_ACNT_1001", "", "", "", "", "vendor4", "", "", "", "", "", ";35", "false", ""},
+		},
+		utils.AccountsCsv: {
+			{"#Tenant", "ID", "FilterIDs", "Weights", "Opts", "BalanceID", "BalanceFilterIDs", "BalanceWeights", "BalanceType", "BalanceUnits", "BalanceUnitFactors", "BalanceOpts", "BalanceCostIncrements", "BalanceAttributeIDs", "BalanceRateProfileIDs", "ThresholdIDs"},
+			{"cgrates.org", "Account_balances", "", ";10", "", "ab2", "", ";20", "*abstract", "60000000000", "", "", ";1000000000;;0", "", "", ""},
+			{"cgrates.org", "Account_balances", "", "", "", "ab3", "*string:*~req.Account:AnotherAccount", ";10", "*abstract", "60000000000", "", "", ";1000000000;;1", "", "", ""},
+			{"cgrates.org", "Account_balances", "", "", "", "cb2", "", "", "*concrete", "1.25", "", "", ";1000000000;;", "*none", "", ""},
+			{"cgrates.org", "Account_balances", "", "", "", "AB1", "", ";40", "*abstract", "130000000000", "", "", ";60000000000;0.4;0.2", "", "", ""},
+			{"cgrates.org", "Account_balances", "", "", "", "CB1", "", ";30", "*concrete", "80", ";100", "*balanceLimit:-200", ";1000000000;;0.1", "", "", ""},
+			{"cgrates.org", "Account_simple", "", ";10", "", "VoiceBalance", "*string:~*req.Account:1001", ";12", "*abstract", "0", "", "Destination:10", "", "", "", ""},
+		},
+		utils.StatsCsv: {
+			{"#Tenant", "ID", "FilterIDs", "Weights", "QueueLength", "TTL", "MinItems", "Metrics", "MetricFilterIDs", "Stored", "Blocker", "ThresholdIDs"},
+			{"cgrates.org", "SQ_basic", "", ";10", "0", "", "3", "*tcd", "", "true", "true", "*none"},
+			{"cgrates.org", "SQ_2", "", ";20", "14", "", "0", "*asr", "", "false", "false", "*none"},
+			{"cgrates.org", "SQ_2", "", "", "0", "", "0", "*tcd", "", "false", "false", ""},
+			{"cgrates.org", "SQ_2", "", "", "0", "", "0", "*pdd", "", "false", "false", ""},
+			{"cgrates.org", "SQ_2", "", "", "0", "", "0", "*tcc", "", "false", "false", ""},
+			{"cgrates.org", "SQ_2", "", "", "0", "", "0", "*tcd", "", "false", "false", ""},
+		},
+		utils.ActionsCsv: {
+			{"#Tenant", "ID", "FilterIDs", "Weights", "Schedule", "TargetType", "TargetIDs", "ActionID", "ActionFilterIDs", "ActionBlocker", "ActionTTL", "ActionType", "ActionOpts", "ActionPath", "ActionValue"},
+		},
 	}
 	expected[utils.RatesCsv] = csvRply[utils.RatesCsv]
+	expected[utils.AccountsCsv] = csvRply[utils.AccountsCsv]
 
 	if !reflect.DeepEqual(expected, csvRply) {
 		t.Errorf("Expected %+v \n received %+v", utils.ToJSON(expected), utils.ToJSON(csvRply))
