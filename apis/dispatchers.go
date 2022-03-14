@@ -59,17 +59,15 @@ func (admS *AdminSv1) GetDispatcherProfileIDs(ctx *context.Context, args *utils.
 	if len(keys) == 0 {
 		return utils.ErrNotFound
 	}
+	retIDs := make([]string, len(keys))
+	for i, key := range keys {
+		retIDs[i] = key[lenPrfx:]
+	}
 	var limit, offset, maxItems int
 	if limit, offset, maxItems, err = utils.GetPaginateOpts(args.APIOpts); err != nil {
 		return
 	}
-	if keys, err = utils.Paginate(keys, limit, offset, maxItems); err != nil {
-		return
-	}
-	*dPrfIDs = make([]string, len(keys))
-	for i, key := range keys {
-		(*dPrfIDs)[i] = key[lenPrfx:]
-	}
+	*dPrfIDs, err = utils.Paginate(retIDs, limit, offset, maxItems)
 	return
 }
 
@@ -187,7 +185,7 @@ func (admS *AdminSv1) GetDispatcherHost(ctx *context.Context, arg *utils.TenantI
 }
 
 // GetDispatcherHostIDs returns list of dispatcherHost IDs registered for a tenant
-func (admS *AdminSv1) GetDispatcherHostIDs(ctx *context.Context, args *utils.ArgsItemIDs, dPrfIDs *[]string) (err error) {
+func (admS *AdminSv1) GetDispatcherHostIDs(ctx *context.Context, args *utils.ArgsItemIDs, dspHostIDs *[]string) (err error) {
 	tenant := args.Tenant
 	if tenant == utils.EmptyString {
 		tenant = admS.cfg.GeneralCfg().DefaultTenant
@@ -202,17 +200,15 @@ func (admS *AdminSv1) GetDispatcherHostIDs(ctx *context.Context, args *utils.Arg
 	if len(keys) == 0 {
 		return utils.ErrNotFound
 	}
+	retIDs := make([]string, len(keys))
+	for i, key := range keys {
+		retIDs[i] = key[lenPrfx:]
+	}
 	var limit, offset, maxItems int
 	if limit, offset, maxItems, err = utils.GetPaginateOpts(args.APIOpts); err != nil {
 		return
 	}
-	if keys, err = utils.Paginate(keys, limit, offset, maxItems); err != nil {
-		return
-	}
-	*dPrfIDs = make([]string, len(keys))
-	for i, key := range keys {
-		(*dPrfIDs)[i] = key[lenPrfx:]
-	}
+	*dspHostIDs, err = utils.Paginate(retIDs, limit, offset, maxItems)
 	return
 }
 

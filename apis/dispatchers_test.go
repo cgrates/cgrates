@@ -444,6 +444,224 @@ func TestDispatchersRemoveDispatcherProfileCheckErrors(t *testing.T) {
 	dm.DataDB().Flush(utils.EmptyString)
 }
 
+func TestDispatchersGetDispatcherProfileIDsErrMock(t *testing.T) {
+	engine.Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	dbMock := &engine.DataDBMock{
+		GetDispatcherProfileDrvF: func(*context.Context, string, string) (*engine.DispatcherProfile, error) {
+			dspPrf := &engine.DispatcherProfile{
+				Tenant: "cgrates.org",
+				ID:     "TEST",
+			}
+			return dspPrf, nil
+		},
+		SetDispatcherProfileDrvF: func(*context.Context, *engine.DispatcherProfile) error {
+			return nil
+		},
+		RemoveDispatcherProfileDrvF: func(*context.Context, string, string) error {
+			return nil
+		},
+	}
+
+	dm := engine.NewDataManager(dbMock, cfg.CacheCfg(), nil)
+	adms := &AdminSv1{
+		cfg: cfg,
+		dm:  dm,
+	}
+
+	var reply []string
+	experr := "NOT_IMPLEMENTED"
+
+	if err := adms.GetDispatcherProfileIDs(context.Background(),
+		&utils.ArgsItemIDs{
+			Tenant: "cgrates.org",
+		}, &reply); err == nil || err.Error() != experr {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+
+	dm.DataDB().Flush(utils.EmptyString)
+}
+
+func TestDispatchersGetDispatcherProfileIDsErrKeys(t *testing.T) {
+	engine.Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	dbMock := &engine.DataDBMock{
+		GetKeysForPrefixF: func(c *context.Context, s string) ([]string, error) {
+			return []string{}, nil
+		},
+	}
+	dm := engine.NewDataManager(dbMock, cfg.CacheCfg(), nil)
+	adms := &AdminSv1{
+		cfg: cfg,
+		dm:  dm,
+	}
+
+	var reply []string
+
+	if err := adms.GetDispatcherProfileIDs(context.Background(),
+		&utils.ArgsItemIDs{
+			Tenant: "cgrates.org",
+		}, &reply); err == nil || err != utils.ErrNotFound {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
+	}
+
+	dm.DataDB().Flush(utils.EmptyString)
+}
+
+func TestDispatchersGetDispatcherProfilesCountErrMock(t *testing.T) {
+	engine.Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	dbMock := &engine.DataDBMock{
+		GetDispatcherProfileDrvF: func(*context.Context, string, string) (*engine.DispatcherProfile, error) {
+			dspPrf := &engine.DispatcherProfile{
+				Tenant: "cgrates.org",
+				ID:     "TEST",
+			}
+			return dspPrf, nil
+		},
+		SetDispatcherProfileDrvF: func(*context.Context, *engine.DispatcherProfile) error {
+			return nil
+		},
+		RemoveDispatcherProfileDrvF: func(*context.Context, string, string) error {
+			return nil
+		},
+	}
+	dm := engine.NewDataManager(dbMock, cfg.CacheCfg(), nil)
+	adms := &AdminSv1{
+		cfg: cfg,
+		dm:  dm,
+	}
+
+	var reply int
+
+	if err := adms.GetDispatcherProfilesCount(context.Background(),
+		&utils.ArgsItemIDs{
+			Tenant: "cgrates.org",
+		}, &reply); err == nil || err != utils.ErrNotImplemented {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", utils.ErrNotImplemented, err)
+	}
+}
+
+func TestDispatchersGetDispatcherProfilesCountErrKeys(t *testing.T) {
+	engine.Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	dbMock := &engine.DataDBMock{
+		GetKeysForPrefixF: func(c *context.Context, s string) ([]string, error) {
+			return []string{}, nil
+		},
+	}
+	dm := engine.NewDataManager(dbMock, cfg.CacheCfg(), nil)
+	adms := &AdminSv1{
+		cfg: cfg,
+		dm:  dm,
+	}
+
+	var reply int
+
+	if err := adms.GetDispatcherProfilesCount(context.Background(),
+		&utils.ArgsItemIDs{
+			Tenant: "cgrates.org",
+		}, &reply); err == nil || err != utils.ErrNotFound {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
+	}
+}
+
+func TestDispatchersGetDispatcherProfileIDsGetOptsErr(t *testing.T) {
+	engine.Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	dbMock := &engine.DataDBMock{
+		GetDispatcherProfileDrvF: func(*context.Context, string, string) (*engine.DispatcherProfile, error) {
+			dspPrf := &engine.DispatcherProfile{
+				Tenant: "cgrates.org",
+				ID:     "TEST",
+			}
+			return dspPrf, nil
+		},
+		SetDispatcherProfileDrvF: func(*context.Context, *engine.DispatcherProfile) error {
+			return nil
+		},
+		RemoveDispatcherProfileDrvF: func(*context.Context, string, string) error {
+			return nil
+		},
+		GetKeysForPrefixF: func(c *context.Context, s string) ([]string, error) {
+			return []string{"dpp_cgrates.org:key1", "dpp_cgrates.org:key2", "dpp_cgrates.org:key3"}, nil
+		},
+	}
+
+	dm := engine.NewDataManager(dbMock, cfg.CacheCfg(), nil)
+	adms := &AdminSv1{
+		cfg: cfg,
+		dm:  dm,
+	}
+
+	var reply []string
+	experr := "cannot convert field<bool>: true to int"
+
+	if err := adms.GetDispatcherProfileIDs(context.Background(),
+		&utils.ArgsItemIDs{
+			Tenant: "cgrates.org",
+			APIOpts: map[string]interface{}{
+				utils.PageLimitOpt: true,
+			},
+		}, &reply); err == nil || err.Error() != experr {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+
+	dm.DataDB().Flush(utils.EmptyString)
+}
+
+func TestDispatchersGetDispatcherProfileIDsPaginateErr(t *testing.T) {
+	engine.Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	dbMock := &engine.DataDBMock{
+		GetDispatcherProfileDrvF: func(*context.Context, string, string) (*engine.DispatcherProfile, error) {
+			dspPrf := &engine.DispatcherProfile{
+				Tenant: "cgrates.org",
+				ID:     "TEST",
+			}
+			return dspPrf, nil
+		},
+		SetDispatcherProfileDrvF: func(*context.Context, *engine.DispatcherProfile) error {
+			return nil
+		},
+		RemoveDispatcherProfileDrvF: func(*context.Context, string, string) error {
+			return nil
+		},
+		GetKeysForPrefixF: func(c *context.Context, s string) ([]string, error) {
+			return []string{"dpp_cgrates.org:key1", "dpp_cgrates.org:key2", "dpp_cgrates.org:key3"}, nil
+		},
+	}
+
+	dm := engine.NewDataManager(dbMock, cfg.CacheCfg(), nil)
+	adms := &AdminSv1{
+		cfg: cfg,
+		dm:  dm,
+	}
+
+	var reply []string
+	experr := `SERVER_ERROR: maximum number of items exceeded`
+
+	if err := adms.GetDispatcherProfileIDs(context.Background(),
+		&utils.ArgsItemIDs{
+			Tenant: "cgrates.org",
+			APIOpts: map[string]interface{}{
+				utils.PageLimitOpt:    2,
+				utils.PageOffsetOpt:   4,
+				utils.PageMaxItemsOpt: 5,
+			},
+		}, &reply); err == nil || err.Error() != experr {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+
+	dm.DataDB().Flush(utils.EmptyString)
+}
+
 func TestDispatchersGetDispatcherHostsOK(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
@@ -727,7 +945,7 @@ func TestDispatchersRemoveDispatcherHostCheckErrors(t *testing.T) {
 		dm:  dm,
 	}
 
-	dspPrf := &engine.DispatcherHostWithAPIOpts{
+	dspHost := &engine.DispatcherHostWithAPIOpts{
 		DispatcherHost: &engine.DispatcherHost{
 			RemoteHost: &config.RemoteHost{
 				ID: "TestDispatchersRemoveDispatcherHostCheckErrors",
@@ -737,7 +955,7 @@ func TestDispatchersRemoveDispatcherHostCheckErrors(t *testing.T) {
 	}
 	var reply string
 
-	if err := adms.SetDispatcherHost(context.Background(), dspPrf, &reply); err != nil {
+	if err := adms.SetDispatcherHost(context.Background(), dspHost, &reply); err != nil {
 		t.Error(err)
 	}
 
@@ -789,13 +1007,13 @@ func TestDispatchersRemoveDispatcherHostCheckErrors(t *testing.T) {
 
 	dbMock := &engine.DataDBMock{
 		GetDispatcherHostDrvF: func(*context.Context, string, string) (*engine.DispatcherHost, error) {
-			dspPrf := &engine.DispatcherHost{
+			dspHost := &engine.DispatcherHost{
 				Tenant: "cgrates.org",
 				RemoteHost: &config.RemoteHost{
 					ID: "TEST",
 				},
 			}
-			return dspPrf, nil
+			return dspHost, nil
 		},
 		SetDispatcherHostDrvF: func(*context.Context, *engine.DispatcherHost) error {
 			return nil
@@ -827,4 +1045,230 @@ func TestDispatchersRemoveDispatcherHostCheckErrors(t *testing.T) {
 	}
 
 	dm.DataDB().Flush(utils.EmptyString)
+}
+
+func TestDispatchersGetDispatcherHostIDsErrMock(t *testing.T) {
+	engine.Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	dbMock := &engine.DataDBMock{
+		GetDispatcherHostDrvF: func(*context.Context, string, string) (*engine.DispatcherHost, error) {
+			thPrf := &engine.DispatcherHost{
+				Tenant: "cgrates.org",
+				RemoteHost: &config.RemoteHost{
+					ID: "TEST",
+				},
+			}
+			return thPrf, nil
+		},
+		SetDispatcherHostDrvF: func(*context.Context, *engine.DispatcherHost) error {
+			return nil
+		},
+		RemoveDispatcherHostDrvF: func(*context.Context, string, string) error {
+			return nil
+		},
+	}
+
+	dm := engine.NewDataManager(dbMock, cfg.CacheCfg(), nil)
+	adms := &AdminSv1{
+		cfg: cfg,
+		dm:  dm,
+	}
+
+	var reply []string
+	experr := "NOT_IMPLEMENTED"
+
+	if err := adms.GetDispatcherHostIDs(context.Background(),
+		&utils.ArgsItemIDs{
+			Tenant: "cgrates.org",
+		}, &reply); err == nil || err.Error() != experr {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+
+	dm.DataDB().Flush(utils.EmptyString)
+}
+
+func TestDispatchersGetDispatcherHostIDsErrKeys(t *testing.T) {
+	engine.Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	dbMock := &engine.DataDBMock{
+		GetKeysForPrefixF: func(c *context.Context, s string) ([]string, error) {
+			return []string{}, nil
+		},
+	}
+	dm := engine.NewDataManager(dbMock, cfg.CacheCfg(), nil)
+	adms := &AdminSv1{
+		cfg: cfg,
+		dm:  dm,
+	}
+
+	var reply []string
+
+	if err := adms.GetDispatcherHostIDs(context.Background(),
+		&utils.ArgsItemIDs{
+			Tenant: "cgrates.org",
+		}, &reply); err == nil || err != utils.ErrNotFound {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
+	}
+
+	dm.DataDB().Flush(utils.EmptyString)
+}
+
+func TestDispatchersGetDispatcherHostIDsGetOptsErr(t *testing.T) {
+	engine.Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	dbMock := &engine.DataDBMock{
+		GetDispatcherHostDrvF: func(*context.Context, string, string) (*engine.DispatcherHost, error) {
+			dspHost := &engine.DispatcherHost{
+				Tenant: "cgrates.org",
+				RemoteHost: &config.RemoteHost{
+					ID: "TEST",
+				},
+			}
+			return dspHost, nil
+		},
+		SetDispatcherHostDrvF: func(*context.Context, *engine.DispatcherHost) error {
+			return nil
+		},
+		RemoveDispatcherHostDrvF: func(*context.Context, string, string) error {
+			return nil
+		},
+		GetKeysForPrefixF: func(c *context.Context, s string) ([]string, error) {
+			return []string{"dpp_cgrates.org:key1", "dpp_cgrates.org:key2", "dpp_cgrates.org:key3"}, nil
+		},
+	}
+
+	dm := engine.NewDataManager(dbMock, cfg.CacheCfg(), nil)
+	adms := &AdminSv1{
+		cfg: cfg,
+		dm:  dm,
+	}
+
+	var reply []string
+	experr := "cannot convert field<bool>: true to int"
+
+	if err := adms.GetDispatcherHostIDs(context.Background(),
+		&utils.ArgsItemIDs{
+			Tenant: "cgrates.org",
+			APIOpts: map[string]interface{}{
+				utils.PageLimitOpt: true,
+			},
+		}, &reply); err == nil || err.Error() != experr {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+
+	dm.DataDB().Flush(utils.EmptyString)
+}
+
+func TestDispatchersGetDispatcherHostIDsPaginateErr(t *testing.T) {
+	engine.Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	dbMock := &engine.DataDBMock{
+		GetDispatcherHostDrvF: func(*context.Context, string, string) (*engine.DispatcherHost, error) {
+			dspHost := &engine.DispatcherHost{
+				Tenant: "cgrates.org",
+				RemoteHost: &config.RemoteHost{
+					ID: "TEST",
+				},
+			}
+			return dspHost, nil
+		},
+		SetDispatcherHostDrvF: func(*context.Context, *engine.DispatcherHost) error {
+			return nil
+		},
+		RemoveDispatcherHostDrvF: func(*context.Context, string, string) error {
+			return nil
+		},
+		GetKeysForPrefixF: func(c *context.Context, s string) ([]string, error) {
+			return []string{"dpp_cgrates.org:key1", "dpp_cgrates.org:key2", "dpp_cgrates.org:key3"}, nil
+		},
+	}
+
+	dm := engine.NewDataManager(dbMock, cfg.CacheCfg(), nil)
+	adms := &AdminSv1{
+		cfg: cfg,
+		dm:  dm,
+	}
+
+	var reply []string
+	experr := `SERVER_ERROR: maximum number of items exceeded`
+
+	if err := adms.GetDispatcherHostIDs(context.Background(),
+		&utils.ArgsItemIDs{
+			Tenant: "cgrates.org",
+			APIOpts: map[string]interface{}{
+				utils.PageLimitOpt:    2,
+				utils.PageOffsetOpt:   4,
+				utils.PageMaxItemsOpt: 5,
+			},
+		}, &reply); err == nil || err.Error() != experr {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+
+	dm.DataDB().Flush(utils.EmptyString)
+}
+
+func TestDispatchersGetDispatcherHostsCountErrMock(t *testing.T) {
+	engine.Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	dbMock := &engine.DataDBMock{
+		GetDispatcherHostDrvF: func(*context.Context, string, string) (*engine.DispatcherHost, error) {
+			thPrf := &engine.DispatcherHost{
+				Tenant: "cgrates.org",
+				RemoteHost: &config.RemoteHost{
+					ID: "TEST",
+				},
+			}
+			return thPrf, nil
+		},
+		SetDispatcherHostDrvF: func(*context.Context, *engine.DispatcherHost) error {
+			return nil
+		},
+		RemoveDispatcherHostDrvF: func(*context.Context, string, string) error {
+			return nil
+		},
+	}
+	dm := engine.NewDataManager(dbMock, cfg.CacheCfg(), nil)
+	adms := &AdminSv1{
+		cfg: cfg,
+		dm:  dm,
+	}
+
+	var reply int
+
+	if err := adms.GetDispatcherHostsCount(context.Background(),
+		&utils.ArgsItemIDs{
+			Tenant: "cgrates.org",
+		}, &reply); err == nil || err != utils.ErrNotImplemented {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", utils.ErrNotImplemented, err)
+	}
+}
+
+func TestDispatchersGetDispatcherHostsCountErrKeys(t *testing.T) {
+	engine.Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	dbMock := &engine.DataDBMock{
+		GetKeysForPrefixF: func(c *context.Context, s string) ([]string, error) {
+			return []string{}, nil
+		},
+	}
+	dm := engine.NewDataManager(dbMock, cfg.CacheCfg(), nil)
+	adms := &AdminSv1{
+		cfg: cfg,
+		dm:  dm,
+	}
+
+	var reply int
+
+	if err := adms.GetDispatcherHostsCount(context.Background(),
+		&utils.ArgsItemIDs{
+			Tenant: "cgrates.org",
+		}, &reply); err == nil || err != utils.ErrNotFound {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
+	}
 }
