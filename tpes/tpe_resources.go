@@ -62,7 +62,7 @@ func (tpRes TPResources) exportItems(ctx *context.Context, wrtr io.Writer, tnt s
 		if len(resMdl) == 0 {
 			return
 		}
-		// for every profile, convert it into model to be writable in csv format
+		// for every profile, convert it into model to be compatible in csv format
 		for _, tpItem := range resMdl {
 			// transform every record into a []string
 			record, err := engine.CsvDump(tpItem)

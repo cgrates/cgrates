@@ -62,7 +62,7 @@ func (tpFltr TPFilters) exportItems(ctx *context.Context, wrtr io.Writer, tnt st
 		if len(fltrMdls) == 0 {
 			return
 		}
-		// for every profile, convert it into model to be writable in csv format
+		// for every profile, convert it into model to be compatible in csv format
 		for _, tpItem := range fltrMdls {
 			// transform every record into a []string
 			record, err := engine.CsvDump(tpItem)
