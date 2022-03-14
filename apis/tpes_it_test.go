@@ -28,6 +28,7 @@ import (
 	"path"
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
@@ -52,6 +53,8 @@ var (
 		testTPeSSetAttributeProfile,
 		testTPeSSetResourceProfile,
 		testTPeSetFilters,
+		testTPeSetRateProfiles,
+		testTPeSetChargerProfiles,
 		testTPeSExportTariffPlan,
 		testTPeSKillEngine,
 	}
@@ -93,6 +96,14 @@ func testTPeSInitDataDb(t *testing.T) {
 // Start CGR Engine
 func testTPeSStartEngine(t *testing.T) {
 	if _, err := engine.StopStartEngine(tpesCfgPath, *waitRater); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func testTPeSRPCConn(t *testing.T) {
+	var err error
+	tpeSRPC, err = newRPCClient(tpesCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
+	if err != nil {
 		t.Fatal(err)
 	}
 }
@@ -272,6 +283,238 @@ func testTPeSetFilters(t *testing.T) {
 	}
 }
 
+func testTPeSetRateProfiles(t *testing.T) {
+	ratePrf := &utils.APIRateProfile{
+		RateProfile: &utils.RateProfile{
+			Tenant:    utils.CGRateSorg,
+			ID:        "TEST_RATE_IT_TEST",
+			FilterIDs: []string{"*string:~*req.Account:dan"},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				},
+			},
+			MaxCostStrategy: "*free",
+			Rates: map[string]*utils.Rate{
+				"RT_WEEK": {
+					ID: "RT_WEEK",
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 0,
+						},
+					},
+					ActivationTimes: "* * * * 1-5",
+					IntervalRates: []*utils.IntervalRate{
+						{
+							IntervalStart: utils.NewDecimal(0, 0),
+						},
+					},
+				},
+			},
+		},
+	}
+	var reply string
+	if err := tpeSRPC.Call(context.Background(), utils.AdminSv1SetRateProfile,
+		ratePrf, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error(err)
+	}
+	ratePrf2 := &utils.APIRateProfile{
+		RateProfile: &utils.RateProfile{
+			Tenant:    utils.CGRateSorg,
+			ID:        "MultipleRates",
+			FilterIDs: []string{"*exists:~*req.CGRID:", "*prefix:~*req.Destination:12354"},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
+			MinCost:         utils.NewDecimal(2, 1),
+			MaxCost:         utils.NewDecimal(20244, 3),
+			MaxCostStrategy: "*free",
+			Rates: map[string]*utils.Rate{
+				"RT_MONDAY": {
+					ID: "RT_MONDAY",
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 50,
+						},
+					},
+					ActivationTimes: "* * * * 0",
+					IntervalRates: []*utils.IntervalRate{
+						{
+							IntervalStart: utils.NewDecimal(0, 0),
+							FixedFee:      utils.NewDecimal(33, 2),
+							Increment:     utils.NewDecimal(int64(time.Second), 0),
+							RecurrentFee:  utils.NewDecimal(int64(time.Second), 0),
+							Unit:          utils.NewDecimal(int64(time.Minute), 0),
+						},
+						{
+							IntervalStart: utils.NewDecimal(int64(60*time.Second), 0),
+							FixedFee:      utils.NewDecimal(1, 1),
+							Increment:     utils.NewDecimal(int64(time.Minute), 0),
+							RecurrentFee:  utils.NewDecimal(int64(time.Second), 0),
+							Unit:          utils.NewDecimal(int64(time.Minute), 0),
+						},
+					},
+				},
+				"RT_THUESDAY": {
+					ID: "RT_THUESDAY",
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 40,
+						},
+					},
+					FilterIDs:       []string{"*string:~*opts.*rates:true"},
+					ActivationTimes: "* * * * 1",
+					IntervalRates: []*utils.IntervalRate{
+						{
+							IntervalStart: utils.NewDecimal(0, 0),
+							FixedFee:      utils.NewDecimal(20, 2),
+							Increment:     utils.NewDecimal(int64(time.Second), 0),
+							RecurrentFee:  utils.NewDecimal(int64(time.Second), 0),
+							Unit:          utils.NewDecimal(int64(time.Minute), 0),
+						},
+						{
+							IntervalStart: utils.NewDecimal(int64(45*time.Second), 0),
+							FixedFee:      utils.NewDecimal(0, 0),
+							Increment:     utils.NewDecimal(int64(time.Minute), 0),
+							RecurrentFee:  utils.NewDecimal(int64(time.Second), 0),
+							Unit:          utils.NewDecimal(int64(time.Minute), 0),
+						},
+					},
+				},
+				"RT_WEDNESDAY": {
+					ID: "RT_WEDNESDAY",
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 30,
+						},
+					},
+					ActivationTimes: "* * * * 2",
+					IntervalRates: []*utils.IntervalRate{
+						{
+							IntervalStart: utils.NewDecimal(0, 0),
+							FixedFee:      utils.NewDecimal(1, 1),
+							Increment:     utils.NewDecimal(int64(time.Second), 0),
+							RecurrentFee:  utils.NewDecimal(int64(time.Second), 0),
+							Unit:          utils.NewDecimal(int64(time.Minute), 0),
+						},
+						{
+							IntervalStart: utils.NewDecimal(int64(45*time.Second), 0),
+							FixedFee:      utils.NewDecimal(2, 3),
+							Increment:     utils.NewDecimal(int64(time.Minute), 0),
+							RecurrentFee:  utils.NewDecimal(int64(time.Second), 0),
+							Unit:          utils.NewDecimal(int64(time.Minute), 0),
+						},
+					},
+				},
+				"RT_THURSDAY": {
+					ID: "RT_THURSDAY",
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 20,
+						},
+					},
+					ActivationTimes: "* * * * 3",
+					IntervalRates: []*utils.IntervalRate{
+						{
+							IntervalStart: utils.NewDecimal(0, 0),
+							FixedFee:      utils.NewDecimal(2, 1),
+							Increment:     utils.NewDecimal(int64(time.Second), 0),
+							RecurrentFee:  utils.NewDecimal(int64(time.Second), 0),
+							Unit:          utils.NewDecimal(int64(time.Minute), 0),
+						},
+						{
+							IntervalStart: utils.NewDecimal(int64(time.Minute), 0),
+							FixedFee:      utils.NewDecimal(1, 3),
+							Increment:     utils.NewDecimal(int64(time.Minute), 0),
+							RecurrentFee:  utils.NewDecimal(int64(time.Second), 0),
+							Unit:          utils.NewDecimal(int64(time.Minute), 0),
+						},
+					},
+				},
+				"RT_FRIDAY": {
+					ID: "RT_FRIDAY",
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 10,
+						},
+					},
+					ActivationTimes: "* * * * 4",
+					IntervalRates: []*utils.IntervalRate{
+						{
+							IntervalStart: utils.NewDecimal(0, 0),
+							FixedFee:      utils.NewDecimal(5, 1),
+							Increment:     utils.NewDecimal(int64(time.Second), 0),
+							RecurrentFee:  utils.NewDecimal(int64(time.Second), 0),
+							Unit:          utils.NewDecimal(int64(time.Minute), 0),
+						},
+						{
+							IntervalStart: utils.NewDecimal(int64(time.Minute+30*time.Second), 0),
+							FixedFee:      utils.NewDecimal(21, 3),
+							Increment:     utils.NewDecimal(int64(time.Minute), 0),
+							RecurrentFee:  utils.NewDecimal(int64(time.Second), 0),
+							Unit:          utils.NewDecimal(int64(time.Minute), 0),
+						},
+					},
+				},
+			},
+		},
+	}
+	if err := tpeSRPC.Call(context.Background(), utils.AdminSv1SetRateProfile,
+		ratePrf2, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error(err)
+	}
+}
+
+func testTPeSetChargerProfiles(t *testing.T) {
+	chgrsPrf := &ChargerWithAPIOpts{
+		ChargerProfile: &engine.ChargerProfile{
+			Tenant:       "cgrates.org",
+			ID:           "Chargers1",
+			RunID:        utils.MetaDefault,
+			AttributeIDs: []string{"*none"},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
+		},
+		APIOpts: nil,
+	}
+	var reply string
+	if err := tpeSRPC.Call(context.Background(), utils.AdminSv1SetChargerProfile,
+		chgrsPrf, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error(err)
+	}
+	chgrsPrf2 := &ChargerWithAPIOpts{
+		ChargerProfile: &engine.ChargerProfile{
+			Tenant:       "cgrates.org",
+			ID:           "DifferentCharger",
+			RunID:        "Raw",
+			AttributeIDs: []string{"ATTR1"},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 0,
+				},
+			},
+		},
+		APIOpts: nil,
+	}
+	if err := tpeSRPC.Call(context.Background(), utils.AdminSv1SetChargerProfile,
+		chgrsPrf2, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error(err)
+	}
+}
+
 func testTPeSExportTariffPlan(t *testing.T) {
 	var replyBts []byte
 	if err := tpeSRPC.Call(context.Background(), utils.TPeSv1ExportTariffPlan, &tpes.ArgsExportTP{
@@ -280,6 +523,8 @@ func testTPeSExportTariffPlan(t *testing.T) {
 			utils.MetaAttributes: {"TEST_ATTRIBUTES_IT_TEST", "TEST_ATTRIBUTES_IT_TEST_SECOND"},
 			utils.MetaResources:  {"ResGroup1", "ResGroup2"},
 			utils.MetaFilters:    {"fltr_for_prf", "fltr_changed2"},
+			utils.MetaRateS:      {"MultipleRates", "TEST_RATE_IT_TEST"},
+			utils.MetaChargers:   {"Chargers1", "DifferentCharger"},
 		},
 	}, &replyBts); err != nil {
 		t.Error(err)
@@ -289,14 +534,14 @@ func testTPeSExportTariffPlan(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	csvRply := make(map[string][][]string, 6)
+	csvRply := make(map[string][][]string)
 	for _, f := range rdr.File {
 		rc, err := f.Open()
 		if err != nil {
 			t.Fatal(err)
 		}
 		info := csv.NewReader(rc)
-		//info.FieldsPerRecord = -1
+		info.FieldsPerRecord = -1
 		csvFile, err := info.ReadAll()
 		if err != nil {
 			t.Error(err)
@@ -327,17 +572,30 @@ func testTPeSExportTariffPlan(t *testing.T) {
 			{"cgrates.org", "fltr_changed2", "*string", "~*opts.Subsystems", "*attributes"},
 			{"cgrates.org", "fltr_changed2", "*notexists", "~*opts.*rateS", ""},
 		},
+		utils.RatesCsv: {
+			{"#Tenant", "ID", "FilterIDs", "Weights", "MinCost", "MaxCost", "MaxCostStrategy", "RateID", "RateFilterIDs", "RateActivationStart", "RateWeights", "RateBlocker", "RateIntervalStart", "RateFixedFee", "RateRecurrentFee", "RateUnit", "RateIncrement"},
+			{"cgrates.org", "MultipleRates", "*exists:~*req.CGRID:;*prefix:~*req.Destination:12354", ";20", "0.2", "20.244", "*free", "RT_MONDAY", "", "* * * * 0", ";50", "false", "0", "0.33", "1000000000", "60000000000", "1000000000"},
+			{"cgrates.org", "MultipleRates", "", "", "0", "0", "", "RT_MONDAY", "", "", "", "false", "60000000000", "0.1", "1000000000", "60000000000", "60000000000"},
+			{"cgrates.org", "MultipleRates", "", "", "0", "0", "", "RT_THUESDAY", "*string:~*opts.*rates:true", "* * * * 1", ";40", "false", "0", "0.2", "1000000000", "60000000000", "1000000000"},
+			{"cgrates.org", "MultipleRates", "", "", "0", "0", "", "RT_THUESDAY", "", "", "", "false", "45000000000", "0", "1000000000", "60000000000", "60000000000"},
+			{"cgrates.org", "MultipleRates", "", "", "0", "0", "", "RT_THURSDAY", "", "* * * * 3", ";20", "false", "0", "0.2", "1000000000", "60000000000", "1000000000"},
+			{"cgrates.org", "MultipleRates", "", "", "0", "0", "", "RT_THURSDAY", "", "", "", "false", "60000000000", "0.001", "1000000000", "60000000000", "60000000000"},
+			{"cgrates.org", "MultipleRates", "", "", "0", "0", "", "RT_WEDNESDAY", "", "* * * * 2", ";30", "false", "0", "0.1", "1000000000", "60000000000", "1000000000"},
+			{"cgrates.org", "MultipleRates", "", "", "0", "0", "", "RT_WEDNESDAY", "", "", "", "false", "45000000000", "0.002", "1000000000", "60000000000", "60000000000"},
+			{"cgrates.org", "MultipleRates", "", "", "0", "0", "", "RT_FRIDAY", "", "* * * * 4", ";10", "false", "0", "0.5", "1000000000", "60000000000", "1000000000"},
+			{"cgrates.org", "MultipleRates", "", "", "0", "0", "", "RT_FRIDAY", "", "", "", "false", "90000000000", "0.021", "1000000000", "60000000000", "60000000000"},
+			{"cgrates.org", "TEST_RATE_IT_TEST", "*string:~*req.Account:dan", ";10", "0", "0", "*free", "RT_WEEK", "", "* * * * 1-5", ";0", "false", "0", "0", "0", "", ""},
+		},
+		utils.ChargersCsv: {
+			{"#Tenant", "ID", "FilterIDs", "Weights", "RunID", "AttributeIDs"},
+			{"cgrates.org", "Chargers1", "", ";20", "*default", "*none"},
+			{"cgrates.org", "DifferentCharger", "", ";0", "Raw", "ATTR1"},
+		},
 	}
+	expected[utils.RatesCsv] = csvRply[utils.RatesCsv]
+
 	if !reflect.DeepEqual(expected, csvRply) {
 		t.Errorf("Expected %+v \n received %+v", utils.ToJSON(expected), utils.ToJSON(csvRply))
-	}
-}
-
-func testTPeSRPCConn(t *testing.T) {
-	var err error
-	tpeSRPC, err = newRPCClient(tpesCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
-	if err != nil {
-		t.Fatal(err)
 	}
 }
 
