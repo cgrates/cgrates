@@ -44,6 +44,10 @@ func newTPFilters(dm *engine.DataManager) *TPFilters {
 func (tpFltr TPFilters) exportItems(ctx *context.Context, wrtr io.Writer, tnt string, itmIDs []string) (err error) {
 	csvWriter := csv.NewWriter(wrtr)
 	csvWriter.Comma = utils.CSVSep
+	// before writing the profiles, we must write the headers
+	if err = csvWriter.Write([]string{"#Tenant", "ID", "Type", "Path", "Values"}); err != nil {
+		return
+	}
 	for _, fltrID := range itmIDs {
 		var fltr *engine.Filter
 		fltr, err = tpFltr.dm.GetFilter(ctx, tnt, fltrID, true, true, utils.NonTransactional)

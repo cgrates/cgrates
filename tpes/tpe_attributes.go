@@ -44,6 +44,10 @@ func newTPAttributes(dm *engine.DataManager) *TPAttributes {
 func (tpAttr TPAttributes) exportItems(ctx *context.Context, wrtr io.Writer, tnt string, itmIDs []string) (err error) {
 	csvWriter := csv.NewWriter(wrtr)
 	csvWriter.Comma = utils.CSVSep
+	// before writing the profiles, we must write the headers
+	if err = csvWriter.Write([]string{"#Tenant", "ID", "FilterIDs", "Weights", "AttributeFilterIDs", "Path", "Type", "Value", "Blocker"}); err != nil {
+		return
+	}
 	for _, attrID := range itmIDs {
 		var attrPrf *engine.AttributeProfile
 		attrPrf, err = tpAttr.dm.GetAttributeProfile(ctx, tnt, attrID, true, true, utils.NonTransactional)
