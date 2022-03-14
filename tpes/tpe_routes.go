@@ -29,41 +29,41 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-type TPRates struct {
+type TPRoutes struct {
 	dm *engine.DataManager
 }
 
-// newTPRates is the constructor for TPRates
-func newTPRates(dm *engine.DataManager) *TPRates {
-	return &TPRates{
+// newTPRoutes is the constructor for TPRoutes
+func newTPRoutes(dm *engine.DataManager) *TPRoutes {
+	return &TPRoutes{
 		dm: dm,
 	}
 }
 
-// exportItems for TPRates will implement the method for tpExporter interface
-func (tpRts TPRates) exportItems(ctx *context.Context, wrtr io.Writer, tnt string, itmIDs []string) (err error) {
+// exportItems for TPRoutes will implement the method for tpExporter interface
+func (tpRoutes TPRoutes) exportItems(ctx *context.Context, wrtr io.Writer, tnt string, itmIDs []string) (err error) {
 	csvWriter := csv.NewWriter(wrtr)
 	csvWriter.Comma = utils.CSVSep
 	// before writing the profiles, we must write the headers
-	if err = csvWriter.Write([]string{"#Tenant", "ID", "FilterIDs", "Weights", "MinCost", "MaxCost", "MaxCostStrategy", "RateID", "RateFilterIDs", "RateActivationStart", "RateWeights", "RateBlocker", "RateIntervalStart", "RateFixedFee", "RateRecurrentFee", "RateUnit", "RateIncrement"}); err != nil {
+	if err = csvWriter.Write([]string{"#Tenant", "ID", "FilterIDs", "Weights", "Sorting", "SortingParameters", "RouteID", "RouteFilterIDs", "RouteAccountIDs", "RouteRateProfileIDs", "RouteResourceIDs", "RouteStatIDs", "RouteWeights", "RouteBlocker", "RouteParameters"}); err != nil {
 		return
 	}
-	for _, rateID := range itmIDs {
-		var ratePrf *utils.RateProfile
-		ratePrf, err = tpRts.dm.GetRateProfile(ctx, tnt, rateID, true, true, utils.NonTransactional)
+	for _, routeID := range itmIDs {
+		var routePrf *engine.RouteProfile
+		routePrf, err = tpRoutes.dm.GetRouteProfile(ctx, tnt, routeID, true, true, utils.NonTransactional)
 		if err != nil {
 			if err.Error() == utils.ErrNotFound.Error() {
-				utils.Logger.Warning(fmt.Sprintf("<%s> cannot find RateProfile with id: <%v>", utils.TPeS, rateID))
+				utils.Logger.Warning(fmt.Sprintf("<%s> cannot find RouteProfile with id: <%v>", utils.TPeS, routeID))
 				continue
 			}
 			return err
 		}
-		ratePrfMdls := engine.APItoModelTPRateProfile(engine.RateProfileToAPI(ratePrf))
-		if len(ratePrfMdls) == 0 {
+		routeMdls := engine.APItoModelTPRoutes(engine.RouteProfileToAPI(routePrf))
+		if len(routeMdls) == 0 {
 			return
 		}
 		// for every profile, convert it into model to be compatible in csv format
-		for _, tpItem := range ratePrfMdls {
+		for _, tpItem := range routeMdls {
 			// transform every record into a []string
 			record, err := engine.CsvDump(tpItem)
 			if err != nil {
