@@ -44,6 +44,10 @@ func newTPResources(dm *engine.DataManager) *TPResources {
 func (tpRes TPResources) exportItems(ctx *context.Context, wrtr io.Writer, tnt string, itmIDs []string) (err error) {
 	csvWriter := csv.NewWriter(wrtr)
 	csvWriter.Comma = utils.CSVSep
+	// before writing the profiles, we must write the headers
+	if err = csvWriter.Write([]string{"#Tenant", "ID", "FIlterIDs", "Weights", "TTL", "Limit", "AlocationMessage", "Blocker", "Stored", "ThresholdIDs"}); err != nil {
+		return
+	}
 	for _, resID := range itmIDs {
 		var resPrf *engine.ResourceProfile
 		resPrf, err = tpRes.dm.GetResourceProfile(ctx, tnt, resID, true, true, utils.NonTransactional)
