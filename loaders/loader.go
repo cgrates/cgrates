@@ -237,7 +237,6 @@ func (l *loader) process(ctx *context.Context, obj profile, lType, action, cachi
 		cacheArgs[utils.CacheActionProfiles] = []string{tntId}
 	case utils.MetaAccounts:
 		cacheIDs = []string{utils.CacheAccounts, utils.CacheAccountsFilterIndexes}
-
 	}
 
 	return engine.CallCache(l.connMgr, ctx, l.cacheConns, caching, cacheArgs, cacheIDs, nil, false, l.ldrCfg.Tenant)
@@ -367,7 +366,6 @@ func (l *loader) moveUnprocessedFiles() (err error) {
 				return
 			}
 		}
-
 	}
 	return
 }
