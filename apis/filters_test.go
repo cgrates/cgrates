@@ -43,6 +43,13 @@ func TestFiltersSetGetGetCountFilters(t *testing.T) {
 		Filter: &engine.Filter{
 			Tenant: utils.CGRateSorg,
 			ID:     "fltr_for_attr",
+			Rules: []*engine.FilterRule{
+				{
+					Type:    utils.MetaString,
+					Element: "~*req.Account",
+					Values:  []string{"1001"},
+				},
+			},
 		},
 	}
 	var reply string
@@ -85,6 +92,13 @@ func TestFiltersSetGetGetCountFilters(t *testing.T) {
 		Filter: &engine.Filter{
 			Tenant: utils.CGRateSorg,
 			ID:     "fltr_for_attr2",
+			Rules: []*engine.FilterRule{
+				{
+					Type:    utils.MetaString,
+					Element: "~*req.Account",
+					Values:  []string{"1002"},
+				},
+			},
 		},
 	}
 	var reply2 string
@@ -218,6 +232,13 @@ func TestFiltersSetFiltersTenantEmpty(t *testing.T) {
 	fltr := &engine.FilterWithAPIOpts{
 		Filter: &engine.Filter{
 			ID: "fltr_for_attr",
+			Rules: []*engine.FilterRule{
+				{
+					Type:    utils.MetaString,
+					Element: "~*req.Account",
+					Values:  []string{"1002"},
+				},
+			},
 		},
 	}
 	var reply string
@@ -262,6 +283,13 @@ func TestFiltersSetFiltersGetFilterError(t *testing.T) {
 		Filter: &engine.Filter{
 			Tenant: utils.CGRateSorg,
 			ID:     "fltr_for_attr",
+			Rules: []*engine.FilterRule{
+				{
+					Type:    utils.MetaString,
+					Element: "~*req.Account",
+					Values:  []string{"1002"},
+				},
+			},
 		},
 	}
 	var reply string
@@ -582,6 +610,13 @@ func TestFiltersGetFilterNoTenant(t *testing.T) {
 	fltr := &engine.FilterWithAPIOpts{
 		Filter: &engine.Filter{
 			ID: "fltr_for_attr",
+			Rules: []*engine.FilterRule{
+				{
+					Type:    utils.MetaString,
+					Element: "~*req.Account",
+					Values:  []string{"1002"},
+				},
+			},
 		},
 	}
 	var reply string
@@ -621,6 +656,13 @@ func TestFiltersGetFilterMissingField(t *testing.T) {
 	fltr := &engine.FilterWithAPIOpts{
 		Filter: &engine.Filter{
 			ID: "fltr_for_attr",
+			Rules: []*engine.FilterRule{
+				{
+					Type:    utils.MetaString,
+					Element: "~*req.Account",
+					Values:  []string{"1002"},
+				},
+			},
 		},
 	}
 	var reply string
