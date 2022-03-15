@@ -53,8 +53,7 @@ func (tpActs TPActions) exportItems(ctx *context.Context, wrtr io.Writer, tnt st
 		actsPrf, err = tpActs.dm.GetActionProfile(ctx, tnt, actsID, true, true, utils.NonTransactional)
 		if err != nil {
 			if err.Error() == utils.ErrNotFound.Error() {
-				utils.Logger.Warning(fmt.Sprintf("<%s> cannot find Actions with id: <%v>", utils.TPeS, actsID))
-				continue
+				return fmt.Errorf("<%s> cannot find Actions id: <%v>", err, actsID)
 			}
 			return err
 		}

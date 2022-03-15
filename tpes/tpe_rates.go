@@ -53,8 +53,7 @@ func (tpRts TPRates) exportItems(ctx *context.Context, wrtr io.Writer, tnt strin
 		ratePrf, err = tpRts.dm.GetRateProfile(ctx, tnt, rateID, true, true, utils.NonTransactional)
 		if err != nil {
 			if err.Error() == utils.ErrNotFound.Error() {
-				utils.Logger.Warning(fmt.Sprintf("<%s> cannot find RateProfile with id: <%v>", utils.TPeS, rateID))
-				continue
+				return fmt.Errorf("<%s> cannot find RateProfile with id: <%v>", err, rateID)
 			}
 			return err
 		}

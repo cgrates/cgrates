@@ -53,8 +53,7 @@ func (tpFltr TPFilters) exportItems(ctx *context.Context, wrtr io.Writer, tnt st
 		fltr, err = tpFltr.dm.GetFilter(ctx, tnt, fltrID, true, true, utils.NonTransactional)
 		if err != nil {
 			if err.Error() == utils.ErrNotFound.Error() {
-				utils.Logger.Warning(fmt.Sprintf("<%s> cannot find Filters with id: <%v>", utils.TPeS, fltrID))
-				continue
+				return fmt.Errorf("<%s> cannot find Filters with id: <%v>", err, fltrID)
 			}
 			return err
 		}

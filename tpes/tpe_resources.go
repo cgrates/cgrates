@@ -53,8 +53,7 @@ func (tpRes TPResources) exportItems(ctx *context.Context, wrtr io.Writer, tnt s
 		resPrf, err = tpRes.dm.GetResourceProfile(ctx, tnt, resID, true, true, utils.NonTransactional)
 		if err != nil {
 			if err.Error() == utils.ErrNotFound.Error() {
-				utils.Logger.Warning(fmt.Sprintf("<%s> cannot find ResourceProfile with id: <%v>", utils.TPeS, resID))
-				continue
+				return fmt.Errorf("<%s> cannot find ResourceProfile with id: <%v>", err, resID)
 			}
 			return err
 		}

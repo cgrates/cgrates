@@ -53,8 +53,7 @@ func (tpSts TPStats) exportItems(ctx *context.Context, wrtr io.Writer, tnt strin
 		statPrf, err = tpSts.dm.GetStatQueueProfile(ctx, tnt, statsID, true, true, utils.NonTransactional)
 		if err != nil {
 			if err.Error() == utils.ErrNotFound.Error() {
-				utils.Logger.Warning(fmt.Sprintf("<%s> cannot find StatQueueProfile with id: <%v>", utils.TPeS, statsID))
-				continue
+				return fmt.Errorf("<%s> cannot find StatQueueProfile with id: <%v>", err, statsID)
 			}
 			return err
 		}
