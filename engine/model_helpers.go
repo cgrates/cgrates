@@ -2129,8 +2129,8 @@ func APItoModelTPActionProfile(tPrf *utils.TPActionProfile) (mdls ActionProfileM
 			}
 			mdl.ActionPath = actD.Path
 			mdl.ActionValue = actD.Value
-			mdls = append(mdls, mdl)
 		}
+		mdls = append(mdls, mdl)
 	}
 	return
 }

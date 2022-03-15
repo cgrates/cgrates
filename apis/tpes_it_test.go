@@ -822,7 +822,7 @@ func testTPeSetActions(t *testing.T) {
 				"*string:~*req.Account:1001"},
 			Weights: utils.DynamicWeights{
 				{
-					Weight: 0,
+					Weight: 10,
 				},
 			},
 			Targets:  map[string]utils.StringSet{utils.MetaAccounts: {"1001": {}}},
@@ -852,6 +852,11 @@ func testTPeSetActions(t *testing.T) {
 		ActionProfile: &engine.ActionProfile{
 			Tenant: "cgrates.org",
 			ID:     "Execute_thd",
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
 			Actions: []*engine.APAction{
 				{
 					ID:   "actID",
@@ -861,7 +866,6 @@ func testTPeSetActions(t *testing.T) {
 			Targets: map[string]utils.StringSet{
 				utils.MetaThresholds: {
 					"THD_1": struct{}{},
-					"THD_2": struct{}{},
 				},
 			},
 		},
@@ -980,6 +984,8 @@ func testTPeSExportTariffPlan(t *testing.T) {
 		},
 		utils.ActionsCsv: {
 			{"#Tenant", "ID", "FilterIDs", "Weights", "Schedule", "TargetType", "TargetIDs", "ActionID", "ActionFilterIDs", "ActionBlocker", "ActionTTL", "ActionType", "ActionOpts", "ActionPath", "ActionValue"},
+			{"cgrates.org", "Execute_thd", "", ";20", "", "*thresholds", "THD_1", "actID", "", "false", "0s", "*reset_threshold", "", "", ""},
+			{"cgrates.org", "SET_BAL", "*string:~*req.Account:1001", ";10", "*asap", "*accounts", "1001", "SET_BAL", "", "false", "0s", "*set_balance", "", "MONETARY", "10"},
 		},
 	}
 	expected[utils.RatesCsv] = csvRply[utils.RatesCsv]
