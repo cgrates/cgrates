@@ -218,19 +218,19 @@ func (fltr *Filter) Compile() (err error) {
 
 var supportedFiltersType utils.StringSet = utils.NewStringSet([]string{
 	utils.MetaString, utils.MetaPrefix, utils.MetaSuffix,
-	utils.MetaCronExp, utils.MetaRSR,
-	utils.MetaEmpty, utils.MetaExists, utils.MetaLessThan, utils.MetaLessOrEqual,
+	utils.MetaCronExp, utils.MetaRSR, utils.MetaEmpty,
+	utils.MetaExists, utils.MetaLessThan, utils.MetaLessOrEqual,
 	utils.MetaGreaterThan, utils.MetaGreaterOrEqual, utils.MetaEqual,
 	utils.MetaIPNet, utils.MetaAPIBan, utils.MetaActivationInterval,
-	utils.MetaRegex, utils.MetaNever, utils.MetaCronExp})
+	utils.MetaRegex, utils.MetaNever})
 var needsFieldName utils.StringSet = utils.NewStringSet([]string{
 	utils.MetaString, utils.MetaPrefix, utils.MetaSuffix,
 	utils.MetaCronExp, utils.MetaRSR, utils.MetaLessThan,
 	utils.MetaEmpty, utils.MetaExists, utils.MetaLessOrEqual, utils.MetaGreaterThan,
 	utils.MetaGreaterOrEqual, utils.MetaEqual, utils.MetaIPNet, utils.MetaAPIBan,
 	utils.MetaActivationInterval, utils.MetaRegex})
-var needsValues utils.StringSet = utils.NewStringSet([]string{utils.MetaString, utils.MetaPrefix,
-	utils.MetaSuffix, utils.MetaCronExp, utils.MetaRSR,
+var needsValues utils.StringSet = utils.NewStringSet([]string{
+	utils.MetaString, utils.MetaPrefix, utils.MetaSuffix, utils.MetaCronExp, utils.MetaRSR,
 	utils.MetaLessThan, utils.MetaLessOrEqual, utils.MetaGreaterThan, utils.MetaGreaterOrEqual,
 	utils.MetaEqual, utils.MetaIPNet, utils.MetaAPIBan, utils.MetaActivationInterval,
 	utils.MetaRegex})
@@ -277,6 +277,23 @@ type FilterRule struct {
 	negative    *bool
 }
 
+// IsValid checks whether a filter rule is valid or not
+func (fltr *FilterRule) IsValid() bool {
+	// Type must be specified
+	if fltr.Type == utils.EmptyString {
+		return false
+	}
+	// Element must be specified only when the type is different from *never
+	if fltr.Element == utils.EmptyString && fltr.Type != utils.MetaNever {
+		return fltr.Type == utils.MetaNever
+	}
+	if len(fltr.Values) == 0 && !utils.IsSliceMember([]string{utils.MetaExists, utils.MetaNotExists,
+		utils.MetaEmpty, utils.MetaNotEmpty}, fltr.Type) {
+		return false
+	}
+	return true
+}
+
 // CompileValues compiles RSR fields
 func (fltr *FilterRule) CompileValues() (err error) {
 	switch fltr.Type {
@@ -291,7 +308,7 @@ func (fltr *FilterRule) CompileValues() (err error) {
 		if fltr.rsrFilters, err = utils.ParseRSRFiltersFromSlice(fltr.Values); err != nil {
 			return
 		}
-	case utils.MetaExists, utils.MetaNotExists, utils.MetaEmpty, utils.MetaNotEmpty: // only the element is builded
+	case utils.MetaExists, utils.MetaNotExists, utils.MetaEmpty, utils.MetaNotEmpty: // only the element is built
 	case utils.MetaActivationInterval, utils.MetaNotActivationInterval:
 		fltr.rsrValues = make(config.RSRParsers, len(fltr.Values))
 		for i, strVal := range fltr.Values {
@@ -299,6 +316,8 @@ func (fltr *FilterRule) CompileValues() (err error) {
 				return
 			}
 		}
+	case utils.MetaNever: //return since there is not need for the values to be compiled in this case
+		return
 	default:
 		if fltr.rsrValues, err = config.NewRSRParsersFromSlice(fltr.Values); err != nil {
 			return

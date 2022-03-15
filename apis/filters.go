@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package apis
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/cgrates/birpc/context"
@@ -26,10 +27,25 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+func validateFilterRules(rules []*engine.FilterRule) error {
+	for _, rule := range rules {
+		if !rule.IsValid() {
+			return fmt.Errorf("there exists at least one filter rule that is not valid")
+		}
+	}
+	return nil
+}
+
 //SetFilter add a new Filter
 func (adms *AdminSv1) SetFilter(ctx *context.Context, arg *engine.FilterWithAPIOpts, reply *string) (err error) {
 	if missing := utils.MissingStructFields(arg.Filter, []string{utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
+	}
+	if len(arg.Rules) == 0 {
+		return utils.NewErrMandatoryIeMissing("Filter Rules")
+	}
+	if err = validateFilterRules(arg.Rules); err != nil {
+		return utils.APIErrorHandler(err)
 	}
 	if arg.Tenant == utils.EmptyString {
 		arg.Tenant = adms.cfg.GeneralCfg().DefaultTenant
@@ -62,7 +78,7 @@ func (adms *AdminSv1) SetFilter(ctx *context.Context, arg *engine.FilterWithAPIO
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
-	return nil
+	return
 }
 
 //GetFilter returns a Filter
