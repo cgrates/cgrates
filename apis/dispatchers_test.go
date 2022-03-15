@@ -1272,3 +1272,160 @@ func TestDispatchersGetDispatcherHostsCountErrKeys(t *testing.T) {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	}
 }
+
+func TestDispatchersGetDispatcherProfilesGetIDsErr(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	connMgr := engine.NewConnManager(cfg)
+	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(dataDB, nil, connMgr)
+	admS := NewAdminSv1(cfg, dm, connMgr)
+	args := &DispatcherWithAPIOpts{
+		DispatcherProfile: &engine.DispatcherProfile{
+			Tenant: "cgrates.org",
+			ID:     "test_ID1",
+			Hosts: engine.DispatcherHostProfiles{
+				{
+					ID: "Host1",
+				},
+			},
+			Weight: 10,
+		},
+		APIOpts: nil,
+	}
+
+	var setReply string
+	if err := admS.SetDispatcherProfile(context.Background(), args, &setReply); err != nil {
+		t.Error(err)
+	} else if setReply != "OK" {
+		t.Error("Unexpected reply returned:", setReply)
+	}
+
+	argsGet := &utils.ArgsItemIDs{
+		Tenant:      "cgrates.org",
+		ItemsPrefix: "test_ID",
+		APIOpts: map[string]interface{}{
+			utils.PageLimitOpt:    2,
+			utils.PageOffsetOpt:   4,
+			utils.PageMaxItemsOpt: 5,
+		},
+	}
+
+	experr := `SERVER_ERROR: maximum number of items exceeded`
+	var getReply []*engine.DispatcherProfile
+	if err := admS.GetDispatcherProfiles(context.Background(), argsGet, &getReply); err == nil || err.Error() != experr {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+}
+
+func TestDispatchersGetDispatcherProfilesGetProfileErr(t *testing.T) {
+	engine.Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	dbMock := &engine.DataDBMock{
+		SetDispatcherProfileDrvF: func(*context.Context, *engine.DispatcherProfile) error {
+			return nil
+		},
+		RemoveDispatcherProfileDrvF: func(*context.Context, string, string) error {
+			return nil
+		},
+		GetKeysForPrefixF: func(c *context.Context, s string) ([]string, error) {
+			return []string{"dpp_cgrates.org:TEST"}, nil
+		},
+	}
+
+	dm := engine.NewDataManager(dbMock, cfg.CacheCfg(), nil)
+	adms := &AdminSv1{
+		cfg: cfg,
+		dm:  dm,
+	}
+
+	var reply []*engine.DispatcherProfile
+	experr := "SERVER_ERROR: NOT_IMPLEMENTED"
+
+	if err := adms.GetDispatcherProfiles(context.Background(),
+		&utils.ArgsItemIDs{
+			ItemsPrefix: "TEST",
+		}, &reply); err == nil || err.Error() != experr {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+
+	dm.DataDB().Flush(utils.EmptyString)
+}
+
+func TestDispatchersGetDispatcherHostsGetIDsErr(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	connMgr := engine.NewConnManager(cfg)
+	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(dataDB, nil, connMgr)
+	admS := NewAdminSv1(cfg, dm, connMgr)
+	args := &engine.DispatcherHostWithAPIOpts{
+		DispatcherHost: &engine.DispatcherHost{
+			Tenant: "cgrates.org",
+			RemoteHost: &config.RemoteHost{
+				ID:         "test_ID1",
+				Reconnects: -1,
+			},
+		},
+		APIOpts: nil,
+	}
+
+	var setReply string
+	if err := admS.SetDispatcherHost(context.Background(), args, &setReply); err != nil {
+		t.Error(err)
+	} else if setReply != "OK" {
+		t.Error("Unexpected reply returned:", setReply)
+	}
+
+	argsGet := &utils.ArgsItemIDs{
+		Tenant:      "cgrates.org",
+		ItemsPrefix: "test_ID",
+		APIOpts: map[string]interface{}{
+			utils.PageLimitOpt:    2,
+			utils.PageOffsetOpt:   4,
+			utils.PageMaxItemsOpt: 5,
+		},
+	}
+
+	experr := `SERVER_ERROR: maximum number of items exceeded`
+	var getReply []*engine.DispatcherHost
+	if err := admS.GetDispatcherHosts(context.Background(), argsGet, &getReply); err == nil || err.Error() != experr {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+}
+
+func TestDispatchersGetDispatcherHostsGetHostErr(t *testing.T) {
+	engine.Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	dbMock := &engine.DataDBMock{
+		SetDispatcherHostDrvF: func(*context.Context, *engine.DispatcherHost) error {
+			return nil
+		},
+		RemoveDispatcherHostDrvF: func(*context.Context, string, string) error {
+			return nil
+		},
+		GetKeysForPrefixF: func(c *context.Context, s string) ([]string, error) {
+			return []string{"dph_cgrates.org:TEST"}, nil
+		},
+	}
+
+	dm := engine.NewDataManager(dbMock, cfg.CacheCfg(), nil)
+	adms := &AdminSv1{
+		cfg: cfg,
+		dm:  dm,
+	}
+
+	var reply []*engine.DispatcherHost
+	experr := "SERVER_ERROR: NOT_IMPLEMENTED"
+
+	if err := adms.GetDispatcherHosts(context.Background(),
+		&utils.ArgsItemIDs{
+			ItemsPrefix: "TEST",
+		}, &reply); err == nil || err.Error() != experr {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+
+	dm.DataDB().Flush(utils.EmptyString)
+}
