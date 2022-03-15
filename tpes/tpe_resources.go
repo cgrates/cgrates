@@ -42,6 +42,24 @@ func newTPResources(dm *engine.DataManager) *TPResources {
 
 // exportItems for TPResources will implement the method for tpExporter interface
 func (tpRes TPResources) exportItems(ctx *context.Context, wrtr io.Writer, tnt string, itmIDs []string) (err error) {
+	if len(itmIDs) == 0 {
+		prfx := utils.ResourceProfilesPrefix + tnt + utils.ConcatenatedKeySep
+		// dbKeys will contain the full name of the key, but we will need just the IDs e.g. "acn_cgrates.org:RES_1" -- just RES_1
+		var dbKeys []string
+		if dbKeys, err = tpRes.dm.DataDB().GetKeysForPrefix(ctx, prfx); err != nil {
+			return err
+		}
+		profileIDs := make([]string, 0, len(dbKeys))
+		for _, key := range dbKeys {
+			profileIDs = append(profileIDs, key[len(prfx):])
+		}
+		// if there are not any profiles in db, we do not write in our zip
+		if len(profileIDs) == 0 {
+			return
+		}
+		// the map e.g. : *filters: {"RES_1", "RES_1"}
+		itmIDs = profileIDs
+	}
 	csvWriter := csv.NewWriter(wrtr)
 	csvWriter.Comma = utils.CSVSep
 	// before writing the profiles, we must write the headers
@@ -64,12 +82,13 @@ func (tpRes TPResources) exportItems(ctx *context.Context, wrtr io.Writer, tnt s
 		// for every profile, convert it into model to be compatible in csv format
 		for _, tpItem := range resMdl {
 			// transform every record into a []string
-			record, err := engine.CsvDump(tpItem)
+			var record []string
+			record, err = engine.CsvDump(tpItem)
 			if err != nil {
 				return err
 			}
 			// record is a line of a csv file
-			if err := csvWriter.Write(record); err != nil {
+			if err = csvWriter.Write(record); err != nil {
 				return err
 			}
 		}

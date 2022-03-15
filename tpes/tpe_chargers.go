@@ -42,6 +42,24 @@ func newTPChargers(dm *engine.DataManager) *TPChargers {
 
 // exportItems for TPChargers will implement the method for tpExporter interface
 func (tpChrg TPChargers) exportItems(ctx *context.Context, wrtr io.Writer, tnt string, itmIDs []string) (err error) {
+	if len(itmIDs) == 0 {
+		prfx := utils.ChargerProfilePrefix + tnt + utils.ConcatenatedKeySep
+		// dbKeys will contain the full name of the key, but we will need just the IDs e.g. "acn_cgrates.org:CHRG_1" -- just CHRG_1
+		var dbKeys []string
+		if dbKeys, err = tpChrg.dm.DataDB().GetKeysForPrefix(ctx, prfx); err != nil {
+			return err
+		}
+		profileIDs := make([]string, 0, len(dbKeys))
+		for _, key := range dbKeys {
+			profileIDs = append(profileIDs, key[len(prfx):])
+		}
+		// if there are not any profiles in db, we do not write in our zip
+		if len(profileIDs) == 0 {
+			return
+		}
+		// the map e.g. : *filters: {"CHRG_1", "CHRG_2"}
+		itmIDs = profileIDs
+	}
 	csvWriter := csv.NewWriter(wrtr)
 	csvWriter.Comma = utils.CSVSep
 	// before writing the profiles, we must write the headers

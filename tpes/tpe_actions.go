@@ -42,6 +42,24 @@ func newTPActions(dm *engine.DataManager) *TPActions {
 
 // exportItems for TPActions will implement the method for tpExporter interface
 func (tpActs TPActions) exportItems(ctx *context.Context, wrtr io.Writer, tnt string, itmIDs []string) (err error) {
+	if len(itmIDs) == 0 {
+		prfx := utils.ActionProfilePrefix + tnt + utils.ConcatenatedKeySep
+		// dbKeys will contain the full name of the key, but we will need just the IDs e.g. "acn_cgrates.org:ACCTS_1" -- just ACCTS_1
+		var dbKeys []string
+		if dbKeys, err = tpActs.dm.DataDB().GetKeysForPrefix(ctx, prfx); err != nil {
+			return err
+		}
+		profileIDs := make([]string, 0, len(dbKeys))
+		for _, key := range dbKeys {
+			profileIDs = append(profileIDs, key[len(prfx):])
+		}
+		// if there are not any profiles in db, we do not write in our zip
+		if len(profileIDs) == 0 {
+			return
+		}
+		// the map e.g. : *filters: {"ACCTS_1", "ACCTS_1"}
+		itmIDs = profileIDs
+	}
 	csvWriter := csv.NewWriter(wrtr)
 	csvWriter.Comma = utils.CSVSep
 	// before writing the profiles, we must write the headers
@@ -64,7 +82,8 @@ func (tpActs TPActions) exportItems(ctx *context.Context, wrtr io.Writer, tnt st
 		// for every profile, convert it into model to be compatible in csv format
 		for _, tpItem := range actsMdls {
 			// transform every record into a []string
-			record, err := engine.CsvDump(tpItem)
+			var record []string
+			record, err = engine.CsvDump(tpItem)
 			if err != nil {
 				return err
 			}
