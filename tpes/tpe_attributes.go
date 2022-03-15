@@ -53,8 +53,7 @@ func (tpAttr TPAttributes) exportItems(ctx *context.Context, wrtr io.Writer, tnt
 		attrPrf, err = tpAttr.dm.GetAttributeProfile(ctx, tnt, attrID, true, true, utils.NonTransactional)
 		if err != nil {
 			if err.Error() == utils.ErrNotFound.Error() {
-				utils.Logger.Warning(fmt.Sprintf("<%s> cannot find AttributeProfile with id: <%v>", utils.TPeS, attrID))
-				continue
+				return fmt.Errorf("<%s> cannot find AttributeProfile with id: <%v>", err, attrID)
 			}
 			return err
 		}

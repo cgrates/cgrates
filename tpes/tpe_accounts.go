@@ -53,8 +53,7 @@ func (tpAcc TPAccounts) exportItems(ctx *context.Context, wrtr io.Writer, tnt st
 		acc, err = tpAcc.dm.GetAccount(ctx, tnt, accID)
 		if err != nil {
 			if err.Error() == utils.ErrNotFound.Error() {
-				utils.Logger.Warning(fmt.Sprintf("<%s> cannot find Account with id: <%v>", utils.TPeS, accID))
-				continue
+				return fmt.Errorf("<%s> cannot find Account with id: <%v>", err, accID)
 			}
 			return err
 		}

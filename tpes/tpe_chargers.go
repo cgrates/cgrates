@@ -53,8 +53,7 @@ func (tpChrg TPChargers) exportItems(ctx *context.Context, wrtr io.Writer, tnt s
 		chrgPrf, err = tpChrg.dm.GetChargerProfile(ctx, tnt, chrgID, true, true, utils.NonTransactional)
 		if err != nil {
 			if err.Error() == utils.ErrNotFound.Error() {
-				utils.Logger.Warning(fmt.Sprintf("<%s> cannot find ChargerProfile with id: <%v>", utils.TPeS, chrgID))
-				continue
+				return fmt.Errorf("<%s> cannot find ChargerProfile with id: <%v>", err, chrgID)
 			}
 			return err
 		}

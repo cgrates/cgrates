@@ -53,8 +53,7 @@ func (tpRoutes TPRoutes) exportItems(ctx *context.Context, wrtr io.Writer, tnt s
 		routePrf, err = tpRoutes.dm.GetRouteProfile(ctx, tnt, routeID, true, true, utils.NonTransactional)
 		if err != nil {
 			if err.Error() == utils.ErrNotFound.Error() {
-				utils.Logger.Warning(fmt.Sprintf("<%s> cannot find RouteProfile with id: <%v>", utils.TPeS, routeID))
-				continue
+				return fmt.Errorf("<%s> cannot find RouteProfile with id: <%v>", err, routeID)
 			}
 			return err
 		}
