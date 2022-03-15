@@ -69,9 +69,18 @@ func (tpE *TPeS) V1ExportTariffPlan(ctx *context.Context, args *ArgsExportTP, re
 	if args.Tenant == utils.EmptyString {
 		args.Tenant = tpE.cfg.GeneralCfg().DefaultTenant
 	}
-	for eType := range args.ExportItems {
-		if _, has := tpE.exps[eType]; !has {
-			return utils.ErrPrefix(utils.ErrUnsupportedTPExporterType, eType)
+	// in case the export items are empty, export all tariffplans for every subsystem from database in zip format and containing CSV files
+	if len(args.ExportItems) == 0 {
+		args.ExportItems = make(map[string][]string)
+		for expName := range tpE.exps {
+			args.ExportItems[expName] = []string{}
+		}
+	} else {
+		// else export just the wanted IDs
+		for eType := range args.ExportItems {
+			if _, has := tpE.exps[eType]; !has {
+				return utils.ErrPrefix(utils.ErrUnsupportedTPExporterType, eType)
+			}
 		}
 	}
 	buff := new(bytes.Buffer)

@@ -36,8 +36,8 @@ var tpExporterTypes = utils.NewStringSet([]string{
 	utils.MetaAccounts,
 	utils.MetaStats,
 	utils.MetaActions,
+	//utils.MetaThresholds,
 	/*
-		utils.MetaThresholds, //
 		utils.MetaDispatchers, //
 		utils.MetaDispatcherHosts, //
 	*/})
