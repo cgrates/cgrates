@@ -464,7 +464,7 @@ func TestThresholdsGetThresholdProfileIDsPaginateErr(t *testing.T) {
 			return nil
 		},
 		GetKeysForPrefixF: func(c *context.Context, s string) ([]string, error) {
-			return []string{"dpp_cgrates.org:key1", "dpp_cgrates.org:key2", "dpp_cgrates.org:key3"}, nil
+			return []string{"rpp_cgrates.org:key1", "rpp_cgrates.org:key2", "rpp_cgrates.org:key3"}, nil
 		},
 	}
 
@@ -894,7 +894,7 @@ func TestThresholdsGetThresholdProfilesGetIDsErr(t *testing.T) {
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
 	admS := NewAdminSv1(cfg, dm, connMgr)
-	args1 := &engine.ThresholdProfileWithAPIOpts{
+	args := &engine.ThresholdProfileWithAPIOpts{
 		ThresholdProfile: &engine.ThresholdProfile{
 			Tenant:           "cgrates.org",
 			ID:               "test_ID1",
@@ -911,7 +911,7 @@ func TestThresholdsGetThresholdProfilesGetIDsErr(t *testing.T) {
 	}
 
 	var setReply string
-	if err := admS.SetThresholdProfile(context.Background(), args1, &setReply); err != nil {
+	if err := admS.SetThresholdProfile(context.Background(), args, &setReply); err != nil {
 		t.Error(err)
 	} else if setReply != "OK" {
 		t.Error("Unexpected reply returned:", setReply)
@@ -932,4 +932,39 @@ func TestThresholdsGetThresholdProfilesGetIDsErr(t *testing.T) {
 	if err := admS.GetThresholdProfiles(context.Background(), argsGet, &getReply); err == nil || err.Error() != experr {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
+}
+
+func TestThresholdsGetThresholdProfilesGetProfileErr(t *testing.T) {
+	engine.Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	dbMock := &engine.DataDBMock{
+		SetThresholdProfileDrvF: func(*context.Context, *engine.ThresholdProfile) error {
+			return nil
+		},
+		RemThresholdProfileDrvF: func(*context.Context, string, string) error {
+			return nil
+		},
+		GetKeysForPrefixF: func(c *context.Context, s string) ([]string, error) {
+			return []string{"thp_cgrates.org:TEST"}, nil
+		},
+	}
+
+	dm := engine.NewDataManager(dbMock, cfg.CacheCfg(), nil)
+	adms := &AdminSv1{
+		cfg: cfg,
+		dm:  dm,
+	}
+
+	var reply []*engine.ThresholdProfile
+	experr := "SERVER_ERROR: NOT_IMPLEMENTED"
+
+	if err := adms.GetThresholdProfiles(context.Background(),
+		&utils.ArgsItemIDs{
+			ItemsPrefix: "TEST",
+		}, &reply); err == nil || err.Error() != experr {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+
+	dm.DataDB().Flush(utils.EmptyString)
 }

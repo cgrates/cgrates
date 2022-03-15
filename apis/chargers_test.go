@@ -29,158 +29,6 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func TestChargerSSetGetChargerProfile(t *testing.T) {
-	engine.Cache.Clear(nil)
-	cfg := config.NewDefaultCGRConfig()
-	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	connMgr := engine.NewConnManager(cfg)
-	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	admS := NewAdminSv1(cfg, dm, connMgr)
-	ext := &ChargerWithAPIOpts{
-		ChargerProfile: &engine.ChargerProfile{
-			Tenant:       "cgrates.org",
-			ID:           "1001",
-			RunID:        utils.MetaDefault,
-			FilterIDs:    []string{"*string:~*req.Account:1001"},
-			AttributeIDs: []string{"*none"},
-			Weights: utils.DynamicWeights{
-				{
-					Weight: 20,
-				},
-			},
-		},
-		APIOpts: nil,
-	}
-
-	var setRply string
-	err := admS.SetChargerProfile(context.Background(), ext, &setRply)
-	if err != nil {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
-	}
-	if !reflect.DeepEqual(setRply, `OK`) {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", `OK`, utils.ToJSON(setRply))
-	}
-	var getRply engine.ChargerProfile
-	err = admS.GetChargerProfile(context.Background(),
-		&utils.TenantIDWithAPIOpts{
-			TenantID: &utils.TenantID{
-				Tenant: "cgrates.org",
-				ID:     "1001",
-			},
-			APIOpts: map[string]interface{}{},
-		}, &getRply)
-	if err != nil {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
-	}
-	expectedGet := engine.ChargerProfile{
-		Tenant:       "cgrates.org",
-		ID:           "1001",
-		RunID:        utils.MetaDefault,
-		FilterIDs:    []string{"*string:~*req.Account:1001"},
-		AttributeIDs: []string{"*none"},
-		Weights: utils.DynamicWeights{
-			{
-				Weight: 20,
-			},
-		},
-	}
-	if !reflect.DeepEqual(getRply, expectedGet) {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ToJSON(expectedGet), utils.ToJSON(getRply))
-	}
-}
-
-func TestChargerSSetGetChargerProfileErrMissingID(t *testing.T) {
-	engine.Cache.Clear(nil)
-	cfg := config.NewDefaultCGRConfig()
-	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	connMgr := engine.NewConnManager(cfg)
-	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	admS := NewAdminSv1(cfg, dm, connMgr)
-	ext := &ChargerWithAPIOpts{
-		ChargerProfile: &engine.ChargerProfile{
-			Tenant:       "cgrates.org",
-			ID:           "1001",
-			RunID:        utils.MetaDefault,
-			FilterIDs:    []string{"*string:~*req.Account:1001"},
-			AttributeIDs: []string{"*none"},
-			Weights: utils.DynamicWeights{
-				{
-					Weight: 20,
-				},
-			},
-		},
-		APIOpts: nil,
-	}
-
-	var setRply string
-	err := admS.SetChargerProfile(context.Background(), ext, &setRply)
-	if err != nil {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
-	}
-	if !reflect.DeepEqual(setRply, `OK`) {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", `OK`, utils.ToJSON(setRply))
-	}
-	var getRply engine.ChargerProfile
-	err = admS.GetChargerProfile(context.Background(),
-		&utils.TenantIDWithAPIOpts{
-			TenantID: &utils.TenantID{
-				Tenant: "cgrates.org",
-				ID:     "1001",
-			},
-			APIOpts: map[string]interface{}{},
-		}, &getRply)
-	if err != nil {
-		t.Error(err)
-	}
-}
-
-func TestChargerSSetGetChargerProfileErrNotFound(t *testing.T) {
-	engine.Cache.Clear(nil)
-	cfg := config.NewDefaultCGRConfig()
-	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	connMgr := engine.NewConnManager(cfg)
-	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	admS := NewAdminSv1(cfg, dm, connMgr)
-	ext := &ChargerWithAPIOpts{
-		ChargerProfile: &engine.ChargerProfile{
-			ID:           "1001",
-			RunID:        utils.MetaDefault,
-			FilterIDs:    []string{"*string:~*req.Account:1001"},
-			AttributeIDs: []string{"*none"},
-			Weights: utils.DynamicWeights{
-				{
-					Weight: 20,
-				},
-			},
-		},
-		APIOpts: nil,
-	}
-
-	var setRply string
-	err := admS.SetChargerProfile(context.Background(), ext, &setRply)
-	if err != nil {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
-	}
-	if !reflect.DeepEqual(setRply, `OK`) {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", `OK`, utils.ToJSON(setRply))
-	}
-	var getRply engine.ChargerProfile
-	err = admS.GetChargerProfile(context.Background(),
-		&utils.TenantIDWithAPIOpts{
-			TenantID: &utils.TenantID{
-				Tenant: "cgrates.org",
-				ID:     "1001",
-			},
-			APIOpts: map[string]interface{}{},
-		}, &getRply)
-	if err != nil {
-		t.Error(err)
-	}
-}
-
 func TestChargerSSetChargerProfileErrMissingID(t *testing.T) {
 	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
@@ -905,4 +753,345 @@ func TestChargersGetChargerProfilesOK(t *testing.T) {
 				utils.ToJSON(exp), utils.ToJSON(getReply))
 		}
 	}
+}
+
+func TestChargersGetChargerProfilesGetIDsErr(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	connMgr := engine.NewConnManager(cfg)
+	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(dataDB, nil, connMgr)
+	admS := NewAdminSv1(cfg, dm, connMgr)
+	args := &ChargerWithAPIOpts{
+		ChargerProfile: &engine.ChargerProfile{
+			Tenant: "cgrates.org",
+			ID:     "test_ID1",
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				},
+			},
+		},
+		APIOpts: nil,
+	}
+
+	var setReply string
+	if err := admS.SetChargerProfile(context.Background(), args, &setReply); err != nil {
+		t.Error(err)
+	} else if setReply != "OK" {
+		t.Error("Unexpected reply returned:", setReply)
+	}
+
+	argsGet := &utils.ArgsItemIDs{
+		Tenant:      "cgrates.org",
+		ItemsPrefix: "test_ID",
+		APIOpts: map[string]interface{}{
+			utils.PageLimitOpt:    2,
+			utils.PageOffsetOpt:   4,
+			utils.PageMaxItemsOpt: 5,
+		},
+	}
+
+	experr := `SERVER_ERROR: maximum number of items exceeded`
+	var getReply []*engine.ChargerProfile
+	if err := admS.GetChargerProfiles(context.Background(), argsGet, &getReply); err == nil || err.Error() != experr {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+}
+
+func TestChargersGetChargerProfilesGetProfileErr(t *testing.T) {
+	engine.Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	dbMock := &engine.DataDBMock{
+		SetChargerProfileDrvF: func(*context.Context, *engine.ChargerProfile) error {
+			return nil
+		},
+		RemoveChargerProfileDrvF: func(*context.Context, string, string) error {
+			return nil
+		},
+		GetKeysForPrefixF: func(c *context.Context, s string) ([]string, error) {
+			return []string{"chp_cgrates.org:TEST"}, nil
+		},
+	}
+
+	dm := engine.NewDataManager(dbMock, cfg.CacheCfg(), nil)
+	adms := &AdminSv1{
+		cfg: cfg,
+		dm:  dm,
+	}
+
+	var reply []*engine.ChargerProfile
+	experr := "SERVER_ERROR: NOT_IMPLEMENTED"
+
+	if err := adms.GetChargerProfiles(context.Background(),
+		&utils.ArgsItemIDs{
+			ItemsPrefix: "TEST",
+		}, &reply); err == nil || err.Error() != experr {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+
+	dm.DataDB().Flush(utils.EmptyString)
+}
+
+func TestChargersGetChargerProfileIDsGetOptsErr(t *testing.T) {
+	engine.Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	dbMock := &engine.DataDBMock{
+		GetChargerProfileDrvF: func(*context.Context, string, string) (*engine.ChargerProfile, error) {
+			chrgPrf := &engine.ChargerProfile{
+				Tenant: "cgrates.org",
+				ID:     "TEST",
+			}
+			return chrgPrf, nil
+		},
+		SetChargerProfileDrvF: func(*context.Context, *engine.ChargerProfile) error {
+			return nil
+		},
+		RemoveChargerProfileDrvF: func(*context.Context, string, string) error {
+			return nil
+		},
+		GetKeysForPrefixF: func(c *context.Context, s string) ([]string, error) {
+			return []string{"cpp_cgrates.org:key1", "cpp_cgrates.org:key2", "cpp_cgrates.org:key3"}, nil
+		},
+	}
+
+	dm := engine.NewDataManager(dbMock, cfg.CacheCfg(), nil)
+	adms := &AdminSv1{
+		cfg: cfg,
+		dm:  dm,
+	}
+
+	var reply []string
+	experr := "cannot convert field<bool>: true to int"
+
+	if err := adms.GetChargerProfileIDs(context.Background(),
+		&utils.ArgsItemIDs{
+			Tenant: "cgrates.org",
+			APIOpts: map[string]interface{}{
+				utils.PageLimitOpt: true,
+			},
+		}, &reply); err == nil || err.Error() != experr {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+
+	dm.DataDB().Flush(utils.EmptyString)
+}
+
+func TestChargersGetChargerProfileIDsPaginateErr(t *testing.T) {
+	engine.Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	dbMock := &engine.DataDBMock{
+		GetChargerProfileDrvF: func(*context.Context, string, string) (*engine.ChargerProfile, error) {
+			chrgPrf := &engine.ChargerProfile{
+				Tenant: "cgrates.org",
+				ID:     "TEST",
+			}
+			return chrgPrf, nil
+		},
+		SetChargerProfileDrvF: func(*context.Context, *engine.ChargerProfile) error {
+			return nil
+		},
+		RemoveChargerProfileDrvF: func(*context.Context, string, string) error {
+			return nil
+		},
+		GetKeysForPrefixF: func(c *context.Context, s string) ([]string, error) {
+			return []string{"cpp_cgrates.org:key1", "cpp_cgrates.org:key2", "cpp_cgrates.org:key3"}, nil
+		},
+	}
+
+	dm := engine.NewDataManager(dbMock, cfg.CacheCfg(), nil)
+	adms := &AdminSv1{
+		cfg: cfg,
+		dm:  dm,
+	}
+
+	var reply []string
+	experr := `SERVER_ERROR: maximum number of items exceeded`
+
+	if err := adms.GetChargerProfileIDs(context.Background(),
+		&utils.ArgsItemIDs{
+			Tenant: "cgrates.org",
+			APIOpts: map[string]interface{}{
+				utils.PageLimitOpt:    2,
+				utils.PageOffsetOpt:   4,
+				utils.PageMaxItemsOpt: 5,
+			},
+		}, &reply); err == nil || err.Error() != experr {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+
+	dm.DataDB().Flush(utils.EmptyString)
+}
+
+func TestChargersGetChargerProfilesCountErrMock(t *testing.T) {
+	engine.Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	dbMock := &engine.DataDBMock{
+		GetChargerProfileDrvF: func(*context.Context, string, string) (*engine.ChargerProfile, error) {
+			chrgPrf := &engine.ChargerProfile{
+				Tenant: "cgrates.org",
+				ID:     "TEST",
+			}
+			return chrgPrf, nil
+		},
+		SetChargerProfileDrvF: func(*context.Context, *engine.ChargerProfile) error {
+			return nil
+		},
+		RemoveChargerProfileDrvF: func(*context.Context, string, string) error {
+			return nil
+		},
+	}
+	dm := engine.NewDataManager(dbMock, cfg.CacheCfg(), nil)
+	adms := &AdminSv1{
+		cfg: cfg,
+		dm:  dm,
+	}
+
+	var reply int
+
+	if err := adms.GetChargerProfilesCount(context.Background(),
+		&utils.ArgsItemIDs{
+			Tenant: "cgrates.org",
+		}, &reply); err == nil || err != utils.ErrNotImplemented {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotImplemented, err)
+	}
+}
+
+func TestChargersGetChargerProfilesCountErrKeys(t *testing.T) {
+	engine.Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	dbMock := &engine.DataDBMock{
+		GetKeysForPrefixF: func(c *context.Context, s string) ([]string, error) {
+			return []string{}, nil
+		},
+	}
+	dm := engine.NewDataManager(dbMock, cfg.CacheCfg(), nil)
+	adms := &AdminSv1{
+		cfg: cfg,
+		dm:  dm,
+	}
+
+	var reply int
+
+	if err := adms.GetChargerProfilesCount(context.Background(),
+		&utils.ArgsItemIDs{
+			Tenant: "cgrates.org",
+		}, &reply); err == nil || err != utils.ErrNotFound {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
+	}
+}
+
+func TestChargersSetGetRemChargerProfile(t *testing.T) {
+	engine.Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	adms := &AdminSv1{
+		cfg: cfg,
+		dm:  dm,
+	}
+	arg := &utils.TenantIDWithAPIOpts{
+		TenantID: &utils.TenantID{
+			ID: "chrgPrf",
+		},
+	}
+	var result engine.ChargerProfile
+	var reply string
+
+	chrgPrf := &ChargerWithAPIOpts{
+		ChargerProfile: &engine.ChargerProfile{
+			Tenant:    "cgrates.org",
+			ID:        "chrgPrf",
+			FilterIDs: []string{"*string:~*req.Account:1001"},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				},
+			},
+		},
+	}
+
+	if err := adms.SetChargerProfile(context.Background(), chrgPrf, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("expected: <%+v>, received: <%+v>", utils.OK, reply)
+	}
+
+	if err := adms.GetChargerProfile(context.Background(), arg, &result); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(result, *chrgPrf.ChargerProfile) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
+			utils.ToJSON(chrgPrf.ChargerProfile), utils.ToJSON(result))
+	}
+
+	var thPrfIDs []string
+	expThPrfIDs := []string{"chrgPrf"}
+
+	if err := adms.GetChargerProfileIDs(context.Background(), &utils.ArgsItemIDs{},
+		&thPrfIDs); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(thPrfIDs, expThPrfIDs) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", expThPrfIDs, thPrfIDs)
+	}
+
+	var rplyCount int
+
+	if err := adms.GetChargerProfilesCount(context.Background(), &utils.ArgsItemIDs{},
+		&rplyCount); err != nil {
+		t.Error(err)
+	} else if rplyCount != len(thPrfIDs) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", len(thPrfIDs), rplyCount)
+	}
+
+	if err := adms.RemoveChargerProfile(context.Background(), arg, &reply); err != nil {
+		t.Error(err)
+	}
+
+	engine.Cache.Clear(nil)
+	if err := adms.GetChargerProfile(context.Background(), arg, &result); err == nil ||
+		err != utils.ErrNotFound {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
+	}
+
+	dm.DataDB().Flush(utils.EmptyString)
+}
+
+func TestChargersGetChargerProfileCheckErrors(t *testing.T) {
+	engine.Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	adms := &AdminSv1{
+		cfg: cfg,
+		dm:  dm,
+	}
+	var rcv engine.ChargerProfile
+	experr := "MANDATORY_IE_MISSING: [ID]"
+
+	if err := adms.GetChargerProfile(context.Background(), &utils.TenantIDWithAPIOpts{}, &rcv); err == nil ||
+		err.Error() != experr {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+
+	adms.dm = nil
+	experr = "SERVER_ERROR: NO_DATABASE_CONNECTION"
+
+	arg := &utils.TenantIDWithAPIOpts{
+		TenantID: &utils.TenantID{
+			ID: "TestChargersGetChargerProfileCheckErrors",
+		},
+	}
+
+	if err := adms.GetChargerProfile(context.Background(), arg, &rcv); err == nil || err.Error() != experr {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+
+	dm.DataDB().Flush(utils.EmptyString)
 }
