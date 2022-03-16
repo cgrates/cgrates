@@ -47,7 +47,7 @@ var (
 	sTestTpes = []func(t *testing.T){
 		testTPeSInitCfg,
 		testTPeSInitDataDb,
-		//testTPeSStartEngine,
+		testTPeSStartEngine,
 		testTPeSRPCConn,
 		testTPeSPing,
 		testTPeSSetAttributeProfile,
@@ -59,12 +59,13 @@ var (
 		testTPeSetAccount,
 		testTPeSetStatQueueProfile,
 		testTPeSetActions,
-		//testTPeSExportTariffPlanHalfTariffPlan,
-		//testTPeSExportTariffPlanAllTariffPlan,
+		testTPeSetThresholds,
+		testTPeSExportTariffPlanHalfTariffPlan,
+		testTPeSExportTariffPlanAllTariffPlan,
 		// export again after we will flush the database
 		testTPeSInitDataDb,
 		testTPeSExportAfterFlush,
-		//testTPeSKillEngine,
+		testTPeSKillEngine,
 	}
 )
 
@@ -880,6 +881,54 @@ func testTPeSetActions(t *testing.T) {
 	}
 }
 
+func testTPeSetThresholds(t *testing.T) {
+	thPrf2 := &engine.ThresholdProfileWithAPIOpts{
+		ThresholdProfile: &engine.ThresholdProfile{
+			Tenant:           "cgrates.org",
+			ID:               "THD_2",
+			FilterIDs:        []string{"*string:~*req.Account:1001"},
+			ActionProfileIDs: []string{"actPrfID"},
+			MaxHits:          7,
+			MinHits:          0,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
+			Async: true,
+		},
+	}
+
+	var reply string
+	if err := tpeSRPC.Call(context.Background(), utils.AdminSv1SetThresholdProfile,
+		thPrf2, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned:", reply)
+	}
+	tPrfl := &engine.ThresholdProfileWithAPIOpts{
+		ThresholdProfile: &engine.ThresholdProfile{
+			Tenant:    "cgrates.org",
+			ID:        "TH_Stats1",
+			FilterIDs: []string{"*string:~*req.Account:1010", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z|2014-07-14T14:36:00Z", "*string:~*req.Destination:1011"},
+			MaxHits:   -1,
+			MinSleep:  time.Millisecond,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				},
+			},
+			ActionProfileIDs: []string{"LOG"},
+			Async:            true,
+		},
+	}
+	if err := tpeSRPC.Call(context.Background(), utils.AdminSv1SetThresholdProfile, tPrfl, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned", reply)
+	}
+}
+
 func testTPeSExportTariffPlanHalfTariffPlan(t *testing.T) {
 	var replyBts []byte
 	// we will get only the wantes tariff plans in the csv format
@@ -895,6 +944,7 @@ func testTPeSExportTariffPlanHalfTariffPlan(t *testing.T) {
 			utils.MetaAccounts:   {"Account_balances"},
 			utils.MetaStats:      {"SQ_basic"},
 			utils.MetaActions:    {"Execute_thd"},
+			utils.MetaThresholds: {"TH_Stats1"},
 		},
 	}, &replyBts); err != nil {
 		t.Error(err)
@@ -974,6 +1024,12 @@ func testTPeSExportTariffPlanHalfTariffPlan(t *testing.T) {
 			{"#Tenant", "ID", "FilterIDs", "Weights", "Schedule", "TargetType", "TargetIDs", "ActionID", "ActionFilterIDs", "ActionBlocker", "ActionTTL", "ActionType", "ActionOpts", "ActionPath", "ActionValue"},
 			{"cgrates.org", "Execute_thd", "", ";20", "", "*thresholds", "THD_1", "actID", "", "false", "0s", "*reset_threshold", "", "", ""},
 		},
+		utils.ThresholdsCsv: {
+			{"#Tenant", "ID", "FilterIDs", "Weights", "MaxHits", "MinHits", "MinSleep", "Blocker", "ActionProfileIDs", "Async"},
+			{"cgrates.org", "TH_Stats1", "*string:~*req.Account:1010", ";10", "-1", "0", "1ms", "false", "LOG", "true"},
+			{"cgrates.org", "TH_Stats1", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z|2014-07-14T14:36:00Z", "", "0", "0", "", "false", "", "false"},
+			{"cgrates.org", "TH_Stats1", "*string:~*req.Destination:1011", "", "0", "0", "", "false", "", "false"},
+		},
 	}
 	expected[utils.RatesCsv] = csvRply[utils.RatesCsv]
 	expected[utils.AccountsCsv] = csvRply[utils.AccountsCsv]
@@ -998,6 +1054,7 @@ func testTPeSExportTariffPlanAllTariffPlan(t *testing.T) {
 			utils.MetaAccounts:   {"Account_balances", "Account_simple"},
 			utils.MetaStats:      {"SQ_basic", "SQ_2"},
 			utils.MetaActions:    {"Execute_thd", "SET_BAL"},
+			utils.MetaThresholds: {"TH_Stats1", "THD_2"},
 		},
 	}, &replyBts); err != nil {
 		t.Error(err)
@@ -1095,6 +1152,13 @@ func testTPeSExportTariffPlanAllTariffPlan(t *testing.T) {
 			{"cgrates.org", "Execute_thd", "", ";20", "", "*thresholds", "THD_1", "actID", "", "false", "0s", "*reset_threshold", "", "", ""},
 			{"cgrates.org", "SET_BAL", "*string:~*req.Account:1001", ";10", "*asap", "*accounts", "1001", "SET_BAL", "", "false", "0s", "*set_balance", "", "MONETARY", "10"},
 		},
+		utils.ThresholdsCsv: {
+			{"#Tenant", "ID", "FilterIDs", "Weights", "MaxHits", "MinHits", "MinSleep", "Blocker", "ActionProfileIDs", "Async"},
+			{"cgrates.org", "TH_Stats1", "*string:~*req.Account:1010", ";10", "-1", "0", "1ms", "false", "LOG", "true"},
+			{"cgrates.org", "TH_Stats1", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z|2014-07-14T14:36:00Z", "", "0", "0", "", "false", "", "false"},
+			{"cgrates.org", "TH_Stats1", "*string:~*req.Destination:1011", "", "0", "0", "", "false", "", "false"},
+			{"cgrates.org", "THD_2", "*string:~*req.Account:1001", ";20", "7", "0", "", "false", "actPrfID", "true"},
+		},
 	}
 	expected[utils.RatesCsv] = csvRply[utils.RatesCsv]
 	expected[utils.AccountsCsv] = csvRply[utils.AccountsCsv]
@@ -1144,8 +1208,6 @@ func testTPeSExportAfterFlush(t *testing.T) {
 		Tenant: "cgrates.org",
 	}, &replyBts); err != nil {
 		t.Error(err)
-	} else if len(replyBts) != 0 {
-		t.Errorf("Unexpected length of bytes, expected to be 0, no exports were nedeed")
 	}
 
 	rdr, err := zip.NewReader(bytes.NewReader(replyBts), int64(len(replyBts)))
@@ -1167,8 +1229,10 @@ func testTPeSExportAfterFlush(t *testing.T) {
 		csvRply[f.Name] = append(csvRply[f.Name], csvFile...)
 		rc.Close()
 	}
-
-	t.Errorf("csvRply: %v", utils.ToJSON(csvRply))
+	// empty exporters, nothing in database to export
+	if len(csvRply) != 0 {
+		t.Errorf("Unexpected length, expected to be 0, no exports were nedeed")
+	}
 }
 
 //Kill the engine when it is about to be finished
