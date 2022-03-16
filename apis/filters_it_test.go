@@ -63,6 +63,7 @@ var (
 		testFilterSGetFilters3,
 		testFilterSSetGetFilterWithPrefix,
 		testFilterSGetFiltersWithPrefix,
+		testFilterSSetInvalidFilter,
 		testFilterSKillEngine,
 	}
 )
@@ -679,6 +680,37 @@ func testFilterSGetFiltersWithPrefix(t *testing.T) {
 	})
 	if !reflect.DeepEqual(reply, expectedFltr) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expectedFltr), utils.ToJSON(reply))
+	}
+}
+
+func testFilterSSetInvalidFilter(t *testing.T) {
+	fltrPrf := &engine.FilterWithAPIOpts{
+		Filter: &engine.Filter{
+			Tenant: utils.CGRateSorg,
+			ID:     "invalid_filter",
+			Rules: []*engine.FilterRule{
+				{
+					Type:    utils.MetaString,
+					Element: "",
+					Values:  []string{},
+				},
+			},
+		},
+	}
+	experr := `SERVER_ERROR: there exists at least one filter rule that is not valid`
+	var reply string
+	if err := fltrSRPC.Call(context.Background(), utils.AdminSv1SetFilter,
+		fltrPrf, &reply); err == nil || err.Error() != experr {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+
+	var result *engine.Filter
+	if err := fltrSRPC.Call(context.Background(), utils.AdminSv1GetFilter,
+		&utils.TenantID{
+			Tenant: utils.CGRateSorg,
+			ID:     "invalid_filter",
+		}, &result); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	}
 }
 
