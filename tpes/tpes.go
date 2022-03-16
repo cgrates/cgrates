@@ -64,16 +64,60 @@ type ArgsExportTP struct {
 	ExportItems map[string][]string // map[expType][]string{"itemID1", "itemID2"}
 }
 
+func getTariffPlansKeys(ctx *context.Context, dm *engine.DataManager, tnt, expType string) (profileIDs []string, err error) {
+	var prfx string
+	switch expType {
+	case utils.MetaAttributes:
+		prfx = utils.AttributeProfilePrefix + tnt + utils.ConcatenatedKeySep
+	case utils.MetaActions:
+		prfx = utils.ActionProfilePrefix + tnt + utils.ConcatenatedKeySep
+	case utils.MetaAccounts:
+		prfx = utils.AccountPrefix + tnt + utils.ConcatenatedKeySep
+	case utils.MetaChargers:
+		prfx = utils.ChargerProfilePrefix + tnt + utils.ConcatenatedKeySep
+	case utils.MetaFilters:
+		prfx = utils.FilterPrefix + tnt + utils.ConcatenatedKeySep
+	case utils.MetaRateS:
+		prfx = utils.RateProfilePrefix + tnt + utils.ConcatenatedKeySep
+	case utils.MetaResources:
+		prfx = utils.ResourceProfilesPrefix + tnt + utils.ConcatenatedKeySep
+	case utils.MetaRoutes:
+		prfx = utils.RouteProfilePrefix + tnt + utils.ConcatenatedKeySep
+	case utils.MetaStats:
+		prfx = utils.StatQueueProfilePrefix + tnt + utils.ConcatenatedKeySep
+	case utils.MetaThresholds:
+		prfx = utils.ThresholdProfilePrefix + tnt + utils.ConcatenatedKeySep
+	}
+	// dbKeys will contain the full name of the key, but we will need just the IDs e.g. "alp_cgrates.org:ATTR_1" -- just ATTR_1
+	var dbKeys []string
+	if dbKeys, err = dm.DataDB().GetKeysForPrefix(ctx, prfx); err != nil {
+		return nil, err
+	}
+	profileIDs = make([]string, 0, len(dbKeys))
+	for _, key := range dbKeys {
+		profileIDs = append(profileIDs, key[len(prfx):])
+	}
+	return
+}
+
 // V1ExportTariffPlan is the API executed to export tariff plan items
 func (tpE *TPeS) V1ExportTariffPlan(ctx *context.Context, args *ArgsExportTP, reply *[]byte) (err error) {
 	if args.Tenant == utils.EmptyString {
 		args.Tenant = tpE.cfg.GeneralCfg().DefaultTenant
 	}
+	/*
+	  IMPORTANT!!
+	*/
 	// in case the export items are empty, export all tariffplans for every subsystem from database in zip format and containing CSV files
 	if len(args.ExportItems) == 0 {
 		args.ExportItems = make(map[string][]string)
-		for expName := range tpE.exps {
-			args.ExportItems[expName] = []string{}
+		for subsystem := range tpExporterTypes {
+			var itemIDs []string
+			if itemIDs, err = getTariffPlansKeys(ctx, tpE.dm, args.Tenant, subsystem); err != nil {
+				return
+			}
+			// the map e.g. : *filters: {"ATTR_1", "ATTR_1"}
+			args.ExportItems[subsystem] = itemIDs
 		}
 	} else {
 		// else export just the wanted IDs
@@ -86,8 +130,12 @@ func (tpE *TPeS) V1ExportTariffPlan(ctx *context.Context, args *ArgsExportTP, re
 	buff := new(bytes.Buffer)
 	zBuff := zip.NewWriter(buff)
 	for expType, expItms := range args.ExportItems {
+		// if there are not items to be exported, continue with the next subsystem
+		if len(expItms) == 0 {
+			continue
+		}
 		var wrtr io.Writer
-		//here we will create all the header for each subsystem type for the csv
+		// here we will create all the header for each subsystem type for the csv
 		if wrtr, err = zBuff.CreateHeader(&zip.FileHeader{
 			Method:   zip.Deflate, // to be compressed
 			Name:     exportFileName[expType],
@@ -95,7 +143,7 @@ func (tpE *TPeS) V1ExportTariffPlan(ctx *context.Context, args *ArgsExportTP, re
 		}); err != nil {
 			return
 		}
-		// our buffer will containt the bytes with all profiles in CSV format
+		// our buffer will contain the bytes with all profiles in CSV format
 		if err = tpE.exps[expType].exportItems(ctx, wrtr, args.Tenant, expItms); err != nil {
 			return utils.NewErrServerError(err)
 		}

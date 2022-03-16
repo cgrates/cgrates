@@ -42,28 +42,10 @@ func newTPThresholds(dm *engine.DataManager) *TPThresholds {
 
 // exportItems for TPThresholds will implement the method for tpExporter interface
 func (tpThd TPThresholds) exportItems(ctx *context.Context, wrtr io.Writer, tnt string, itmIDs []string) (err error) {
-	if len(itmIDs) == 0 {
-		prfx := utils.ThresholdProfilePrefix + tnt + utils.ConcatenatedKeySep
-		// dbKeys will contain the full name of the key, but we will need just the IDs e.g. "acn_cgrates.org:THD_1" -- just THD_1
-		var dbKeys []string
-		if dbKeys, err = tpThd.dm.DataDB().GetKeysForPrefix(ctx, prfx); err != nil {
-			return err
-		}
-		profileIDs := make([]string, 0, len(dbKeys))
-		for _, key := range dbKeys {
-			profileIDs = append(profileIDs, key[len(prfx):])
-		}
-		// if there are not any profiles in db, we do not write in our zip
-		if len(profileIDs) == 0 {
-			return
-		}
-		// the map e.g. : *filters: {"THD_1", "THD_1"}
-		itmIDs = profileIDs
-	}
 	csvWriter := csv.NewWriter(wrtr)
 	csvWriter.Comma = utils.CSVSep
 	// before writing the profiles, we must write the headers
-	if err = csvWriter.Write([]string{"#Tenant", "ID", "FilterIDs", "Weights", "Schedule", "TargetType", "TargetIDs", "ActionID", "ActionFilterIDs", "ActionBlocker", "ActionTTL", "ActionType", "ActionOpts", "ActionPath", "ActionValue"}); err != nil {
+	if err = csvWriter.Write([]string{"#Tenant", "ID", "FilterIDs", "Weights", "MaxHits", "MinHits", "MinSleep", "Blocker", "ActionProfileIDs", "Async"}); err != nil {
 		return
 	}
 	for _, thdID := range itmIDs {
