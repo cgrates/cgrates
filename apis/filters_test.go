@@ -1241,5 +1241,54 @@ func TestFiltersGetFilterIDs(t *testing.T) {
 	if err == nil || err.Error() != "NOT_IMPLEMENTED" {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "NOT_IMPLEMENTED", err)
 	}
+}
 
+func TestFiltersValidateFilterRuleOK(t *testing.T) {
+	fltrRules := []*engine.FilterRule{
+		{
+			Type:    utils.MetaString,
+			Element: "~*req.Subject",
+			Values:  []string{"1004", "6774", "22312"},
+		},
+		{
+			Type:    utils.MetaString,
+			Element: "~*opts.Subsystems",
+			Values:  []string{"*attributes"},
+		},
+		{
+			Type:    utils.MetaPrefix,
+			Element: "~*req.Destinations",
+			Values:  []string{"+0775", "+442"},
+		},
+	}
+
+	if err := validateFilterRules(fltrRules); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestFiltersValidateFilterRuleErr(t *testing.T) {
+	fltrRules := []*engine.FilterRule{
+		{
+			Type:    utils.MetaString,
+			Element: "~*req.Subject",
+			Values:  []string{"1004", "6774", "22312"},
+		},
+		{
+			Type:    utils.MetaString,
+			Element: "~*opts.Subsystems",
+			Values:  []string{"*attributes"},
+		},
+		{
+			Type:    utils.MetaString,
+			Element: "",
+			Values:  []string{},
+		},
+	}
+
+	experr := `there exists at least one filter rule that is not valid`
+	if err := validateFilterRules(fltrRules); err == nil ||
+		err.Error() != experr {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
 }

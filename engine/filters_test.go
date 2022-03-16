@@ -1487,3 +1487,509 @@ func TestFilterMerge(t *testing.T) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(dp))
 	}
 }
+
+func TestFiltersFilterRuleIsValid(t *testing.T) {
+	fltr := &FilterRule{
+		Type:    utils.EmptyString,
+		Element: "~*req.Element",
+		Values:  []string{"value1", "value2"},
+	}
+	if isValid := fltr.IsValid(); isValid != false {
+		t.Error("filter should not be valid")
+	}
+
+	fltr = &FilterRule{
+		Type:    utils.MetaNever,
+		Element: "",
+		Values:  []string{},
+	}
+	if isValid := fltr.IsValid(); isValid != true {
+		t.Error("filter should be valid")
+	}
+
+	fltr = &FilterRule{
+		Type:    utils.MetaExists,
+		Element: "",
+		Values:  []string{},
+	}
+	if isValid := fltr.IsValid(); isValid != false {
+		t.Error("filter should not be valid")
+	}
+
+	fltr = &FilterRule{
+		Type:    utils.MetaExists,
+		Element: "~*req.Element",
+		Values:  []string{},
+	}
+	if isValid := fltr.IsValid(); isValid != true {
+		t.Error("filter should be valid")
+	}
+
+	fltr = &FilterRule{
+		Type:    utils.MetaExists,
+		Element: "~*req.Element",
+		Values:  []string{"value1"},
+	}
+	if isValid := fltr.IsValid(); isValid != true {
+		t.Error("filter should be valid")
+	}
+
+	fltr = &FilterRule{
+		Type:    utils.MetaNotExists,
+		Element: "~*req.Element",
+		Values:  []string{},
+	}
+	if isValid := fltr.IsValid(); isValid != true {
+		t.Error("filter should be valid")
+	}
+
+	fltr = &FilterRule{
+		Type:    utils.MetaEmpty,
+		Element: "~*req.Element",
+		Values:  []string{},
+	}
+	if isValid := fltr.IsValid(); isValid != true {
+		t.Error("filter should be valid")
+	}
+
+	fltr = &FilterRule{
+		Type:    utils.MetaNotEmpty,
+		Element: "~*req.Element",
+		Values:  []string{},
+	}
+	if isValid := fltr.IsValid(); isValid != true {
+		t.Error("filter should be valid")
+	}
+
+	fltr = &FilterRule{
+		Type:    utils.MetaString,
+		Element: "~*req.Element",
+		Values:  []string{},
+	}
+	if isValid := fltr.IsValid(); isValid != false {
+		t.Error("filter should not be valid")
+	}
+
+	fltr = &FilterRule{
+		Type:    utils.MetaNotString,
+		Element: "~*req.Element",
+		Values:  []string{},
+	}
+	if isValid := fltr.IsValid(); isValid != false {
+		t.Error("filter should not be valid")
+	}
+
+	fltr = &FilterRule{
+		Type:    utils.MetaPrefix,
+		Element: "~*req.Element",
+		Values:  []string{},
+	}
+	if isValid := fltr.IsValid(); isValid != false {
+		t.Error("filter should not be valid")
+	}
+
+	fltr = &FilterRule{
+		Type:    utils.MetaNotPrefix,
+		Element: "~*req.Element",
+		Values:  []string{},
+	}
+	if isValid := fltr.IsValid(); isValid != false {
+		t.Error("filter should not be valid")
+	}
+
+	fltr = &FilterRule{
+		Type:    utils.MetaSuffix,
+		Element: "~*req.Element",
+		Values:  []string{},
+	}
+	if isValid := fltr.IsValid(); isValid != false {
+		t.Error("filter should not be valid")
+	}
+
+	fltr = &FilterRule{
+		Type:    utils.MetaNotSuffix,
+		Element: "~*req.Element",
+		Values:  []string{},
+	}
+	if isValid := fltr.IsValid(); isValid != false {
+		t.Error("filter should not be valid")
+	}
+
+	fltr = &FilterRule{
+		Type:    utils.MetaCronExp,
+		Element: "~*req.Element",
+		Values:  []string{},
+	}
+	if isValid := fltr.IsValid(); isValid != false {
+		t.Error("filter should not be valid")
+	}
+
+	fltr = &FilterRule{
+		Type:    utils.MetaNotCronExp,
+		Element: "~*req.Element",
+		Values:  []string{},
+	}
+	if isValid := fltr.IsValid(); isValid != false {
+		t.Error("filter should not be valid")
+	}
+
+	fltr = &FilterRule{
+		Type:    utils.MetaRSR,
+		Element: "~*req.Element",
+		Values:  []string{},
+	}
+	if isValid := fltr.IsValid(); isValid != false {
+		t.Error("filter should not be valid")
+	}
+
+	fltr = &FilterRule{
+		Type:    utils.MetaNotRSR,
+		Element: "~*req.Element",
+		Values:  []string{},
+	}
+	if isValid := fltr.IsValid(); isValid != false {
+		t.Error("filter should not be valid")
+	}
+
+	fltr = &FilterRule{
+		Type:    utils.MetaLessThan,
+		Element: "~*req.Element",
+		Values:  []string{},
+	}
+	if isValid := fltr.IsValid(); isValid != false {
+		t.Error("filter should not be valid")
+	}
+
+	fltr = &FilterRule{
+		Type:    utils.MetaLessOrEqual,
+		Element: "~*req.Element",
+		Values:  []string{},
+	}
+	if isValid := fltr.IsValid(); isValid != false {
+		t.Error("filter should not be valid")
+	}
+
+	fltr = &FilterRule{
+		Type:    utils.MetaGreaterThan,
+		Element: "~*req.Element",
+		Values:  []string{},
+	}
+	if isValid := fltr.IsValid(); isValid != false {
+		t.Error("filter should not be valid")
+	}
+
+	fltr = &FilterRule{
+		Type:    utils.MetaGreaterOrEqual,
+		Element: "~*req.Element",
+		Values:  []string{},
+	}
+	if isValid := fltr.IsValid(); isValid != false {
+		t.Error("filter should not be valid")
+	}
+
+	fltr = &FilterRule{
+		Type:    utils.MetaEqual,
+		Element: "~*req.Element",
+		Values:  []string{},
+	}
+	if isValid := fltr.IsValid(); isValid != false {
+		t.Error("filter should not be valid")
+	}
+
+	fltr = &FilterRule{
+		Type:    utils.MetaNotEqual,
+		Element: "~*req.Element",
+		Values:  []string{},
+	}
+	if isValid := fltr.IsValid(); isValid != false {
+		t.Error("filter should not be valid")
+	}
+
+	fltr = &FilterRule{
+		Type:    utils.MetaIPNet,
+		Element: "~*req.Element",
+		Values:  []string{},
+	}
+	if isValid := fltr.IsValid(); isValid != false {
+		t.Error("filter should not be valid")
+	}
+
+	fltr = &FilterRule{
+		Type:    utils.MetaNotIPNet,
+		Element: "~*req.Element",
+		Values:  []string{},
+	}
+	if isValid := fltr.IsValid(); isValid != false {
+		t.Error("filter should not be valid")
+	}
+
+	fltr = &FilterRule{
+		Type:    utils.MetaAPIBan,
+		Element: "~*req.Element",
+		Values:  []string{},
+	}
+	if isValid := fltr.IsValid(); isValid != false {
+		t.Error("filter should not be valid")
+	}
+
+	fltr = &FilterRule{
+		Type:    utils.MetaNotAPIBan,
+		Element: "~*req.Element",
+		Values:  []string{},
+	}
+	if isValid := fltr.IsValid(); isValid != false {
+		t.Error("filter should not be valid")
+	}
+
+	fltr = &FilterRule{
+		Type:    utils.MetaActivationInterval,
+		Element: "~*req.Element",
+		Values:  []string{},
+	}
+	if isValid := fltr.IsValid(); isValid != false {
+		t.Error("filter should not be valid")
+	}
+
+	fltr = &FilterRule{
+		Type:    utils.MetaNotActivationInterval,
+		Element: "~*req.Element",
+		Values:  []string{},
+	}
+	if isValid := fltr.IsValid(); isValid != false {
+		t.Error("filter should not be valid")
+	}
+
+	fltr = &FilterRule{
+		Type:    utils.MetaRegex,
+		Element: "~*req.Element",
+		Values:  []string{},
+	}
+	if isValid := fltr.IsValid(); isValid != false {
+		t.Error("filter should not be valid")
+	}
+
+	fltr = &FilterRule{
+		Type:    utils.MetaNotRegex,
+		Element: "~*req.Element",
+		Values:  []string{},
+	}
+	if isValid := fltr.IsValid(); isValid != false {
+		t.Error("filter should not be valid")
+	}
+
+	fltr = &FilterRule{
+		Type:    utils.MetaString,
+		Element: "~*req.Element",
+		Values:  []string{"value1", "value2"},
+	}
+	if isValid := fltr.IsValid(); isValid != true {
+		t.Error("filter should be valid")
+	}
+
+	fltr = &FilterRule{
+		Type:    utils.MetaNotString,
+		Element: "~*req.Element",
+		Values:  []string{"value1", "value2"},
+	}
+	if isValid := fltr.IsValid(); isValid != true {
+		t.Error("filter should be valid")
+	}
+
+	fltr = &FilterRule{
+		Type:    utils.MetaPrefix,
+		Element: "~*req.Element",
+		Values:  []string{"value1", "value2"},
+	}
+	if isValid := fltr.IsValid(); isValid != true {
+		t.Error("filter should be valid")
+	}
+
+	fltr = &FilterRule{
+		Type:    utils.MetaNotPrefix,
+		Element: "~*req.Element",
+		Values:  []string{"value1", "value2"},
+	}
+	if isValid := fltr.IsValid(); isValid != true {
+		t.Error("filter should be valid")
+	}
+
+	fltr = &FilterRule{
+		Type:    utils.MetaSuffix,
+		Element: "~*req.Element",
+		Values:  []string{"value1", "value2"},
+	}
+	if isValid := fltr.IsValid(); isValid != true {
+		t.Error("filter should be valid")
+	}
+
+	fltr = &FilterRule{
+		Type:    utils.MetaNotSuffix,
+		Element: "~*req.Element",
+		Values:  []string{"value1", "value2"},
+	}
+	if isValid := fltr.IsValid(); isValid != true {
+		t.Error("filter should be valid")
+	}
+
+	fltr = &FilterRule{
+		Type:    utils.MetaCronExp,
+		Element: "~*req.Element",
+		Values:  []string{"value1", "value2"},
+	}
+	if isValid := fltr.IsValid(); isValid != true {
+		t.Error("filter should be valid")
+	}
+
+	fltr = &FilterRule{
+		Type:    utils.MetaNotCronExp,
+		Element: "~*req.Element",
+		Values:  []string{"value1", "value2"},
+	}
+	if isValid := fltr.IsValid(); isValid != true {
+		t.Error("filter should be valid")
+	}
+
+	fltr = &FilterRule{
+		Type:    utils.MetaRSR,
+		Element: "~*req.Element",
+		Values:  []string{"value1", "value2"},
+	}
+	if isValid := fltr.IsValid(); isValid != true {
+		t.Error("filter should be valid")
+	}
+
+	fltr = &FilterRule{
+		Type:    utils.MetaNotRSR,
+		Element: "~*req.Element",
+		Values:  []string{"value1", "value2"},
+	}
+	if isValid := fltr.IsValid(); isValid != true {
+		t.Error("filter should be valid")
+	}
+
+	fltr = &FilterRule{
+		Type:    utils.MetaLessThan,
+		Element: "~*req.Element",
+		Values:  []string{"value1", "value2"},
+	}
+	if isValid := fltr.IsValid(); isValid != true {
+		t.Error("filter should be valid")
+	}
+
+	fltr = &FilterRule{
+		Type:    utils.MetaLessOrEqual,
+		Element: "~*req.Element",
+		Values:  []string{"value1", "value2"},
+	}
+	if isValid := fltr.IsValid(); isValid != true {
+		t.Error("filter should be valid")
+	}
+
+	fltr = &FilterRule{
+		Type:    utils.MetaGreaterThan,
+		Element: "~*req.Element",
+		Values:  []string{"value1", "value2"},
+	}
+	if isValid := fltr.IsValid(); isValid != true {
+		t.Error("filter should be valid")
+	}
+
+	fltr = &FilterRule{
+		Type:    utils.MetaGreaterOrEqual,
+		Element: "~*req.Element",
+		Values:  []string{"value1", "value2"},
+	}
+	if isValid := fltr.IsValid(); isValid != true {
+		t.Error("filter should be valid")
+	}
+
+	fltr = &FilterRule{
+		Type:    utils.MetaEqual,
+		Element: "~*req.Element",
+		Values:  []string{"value1", "value2"},
+	}
+	if isValid := fltr.IsValid(); isValid != true {
+		t.Error("filter should be valid")
+	}
+
+	fltr = &FilterRule{
+		Type:    utils.MetaNotEqual,
+		Element: "~*req.Element",
+		Values:  []string{"value1", "value2"},
+	}
+	if isValid := fltr.IsValid(); isValid != true {
+		t.Error("filter should be valid")
+	}
+
+	fltr = &FilterRule{
+		Type:    utils.MetaIPNet,
+		Element: "~*req.Element",
+		Values:  []string{"value1", "value2"},
+	}
+	if isValid := fltr.IsValid(); isValid != true {
+		t.Error("filter should be valid")
+	}
+
+	fltr = &FilterRule{
+		Type:    utils.MetaNotIPNet,
+		Element: "~*req.Element",
+		Values:  []string{"value1", "value2"},
+	}
+	if isValid := fltr.IsValid(); isValid != true {
+		t.Error("filter should be valid")
+	}
+
+	fltr = &FilterRule{
+		Type:    utils.MetaAPIBan,
+		Element: "~*req.Element",
+		Values:  []string{"value1", "value2"},
+	}
+	if isValid := fltr.IsValid(); isValid != true {
+		t.Error("filter should be valid")
+	}
+
+	fltr = &FilterRule{
+		Type:    utils.MetaNotAPIBan,
+		Element: "~*req.Element",
+		Values:  []string{"value1", "value2"},
+	}
+	if isValid := fltr.IsValid(); isValid != true {
+		t.Error("filter should be valid")
+	}
+
+	fltr = &FilterRule{
+		Type:    utils.MetaActivationInterval,
+		Element: "~*req.Element",
+		Values:  []string{"value1", "value2"},
+	}
+	if isValid := fltr.IsValid(); isValid != true {
+		t.Error("filter should be valid")
+	}
+
+	fltr = &FilterRule{
+		Type:    utils.MetaNotActivationInterval,
+		Element: "~*req.Element",
+		Values:  []string{"value1", "value2"},
+	}
+	if isValid := fltr.IsValid(); isValid != true {
+		t.Error("filter should be valid")
+	}
+
+	fltr = &FilterRule{
+		Type:    utils.MetaRegex,
+		Element: "~*req.Element",
+		Values:  []string{"value1", "value2"},
+	}
+	if isValid := fltr.IsValid(); isValid != true {
+		t.Error("filter should be valid")
+	}
+
+	fltr = &FilterRule{
+		Type:    utils.MetaNotRegex,
+		Element: "~*req.Element",
+		Values:  []string{"value1", "value2"},
+	}
+	if isValid := fltr.IsValid(); isValid != true {
+		t.Error("filter should be valid")
+	}
+}
