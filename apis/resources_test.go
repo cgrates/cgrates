@@ -317,6 +317,9 @@ func TestResourcesRemoveResourceProfileCheckErrors(t *testing.T) {
 		RemoveResourceDrvF: func(ctx *context.Context, tnt, id string) error {
 			return nil
 		},
+		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
+			return map[string]utils.StringSet{}, nil
+		},
 	}
 
 	adms.dm = engine.NewDataManager(dbMock, cfg.CacheCfg(), nil)
@@ -775,4 +778,178 @@ func TestResourcesGetResourceProfilesOK(t *testing.T) {
 				utils.ToJSON(exp), utils.ToJSON(getReply))
 		}
 	}
+}
+
+func TestResourcesGetResourceProfilesGetIDsErr(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	connMgr := engine.NewConnManager(cfg)
+	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(dataDB, nil, connMgr)
+	admS := NewAdminSv1(cfg, dm, connMgr)
+	args := &engine.ResourceProfileWithAPIOpts{
+		ResourceProfile: &engine.ResourceProfile{
+			Tenant:            "cgrates.org",
+			ID:                "test_ID1",
+			Limit:             10,
+			AllocationMessage: "Approved",
+			Stored:            true,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				},
+			},
+		},
+		APIOpts: nil,
+	}
+
+	var setReply string
+	if err := admS.SetResourceProfile(context.Background(), args, &setReply); err != nil {
+		t.Error(err)
+	} else if setReply != "OK" {
+		t.Error("Unexpected reply returned:", setReply)
+	}
+
+	argsGet := &utils.ArgsItemIDs{
+		Tenant:      "cgrates.org",
+		ItemsPrefix: "test_ID",
+		APIOpts: map[string]interface{}{
+			utils.PageLimitOpt:    2,
+			utils.PageOffsetOpt:   4,
+			utils.PageMaxItemsOpt: 5,
+		},
+	}
+
+	experr := `SERVER_ERROR: maximum number of items exceeded`
+	var getReply []*engine.ResourceProfile
+	if err := admS.GetResourceProfiles(context.Background(), argsGet, &getReply); err == nil || err.Error() != experr {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+}
+
+func TestResourcesGetResourceProfilesGetProfileErr(t *testing.T) {
+	engine.Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	dbMock := &engine.DataDBMock{
+		SetResourceProfileDrvF: func(*context.Context, *engine.ResourceProfile) error {
+			return nil
+		},
+		RemoveResourceProfileDrvF: func(*context.Context, string, string) error {
+			return nil
+		},
+		GetKeysForPrefixF: func(c *context.Context, s string) ([]string, error) {
+			return []string{"rsp_cgrates.org:TEST"}, nil
+		},
+	}
+
+	dm := engine.NewDataManager(dbMock, cfg.CacheCfg(), nil)
+	adms := &AdminSv1{
+		cfg: cfg,
+		dm:  dm,
+	}
+
+	var reply []*engine.ResourceProfile
+	experr := "SERVER_ERROR: NOT_IMPLEMENTED"
+
+	if err := adms.GetResourceProfiles(context.Background(),
+		&utils.ArgsItemIDs{
+			ItemsPrefix: "TEST",
+		}, &reply); err == nil || err.Error() != experr {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+
+	dm.DataDB().Flush(utils.EmptyString)
+}
+
+func TestResourcesGetResourceProfileIDsGetOptsErr(t *testing.T) {
+	engine.Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	dbMock := &engine.DataDBMock{
+		GetResourceProfileDrvF: func(*context.Context, string, string) (*engine.ResourceProfile, error) {
+			rsPrf := &engine.ResourceProfile{
+				Tenant: "cgrates.org",
+				ID:     "TEST",
+			}
+			return rsPrf, nil
+		},
+		SetResourceProfileDrvF: func(*context.Context, *engine.ResourceProfile) error {
+			return nil
+		},
+		RemoveResourceProfileDrvF: func(*context.Context, string, string) error {
+			return nil
+		},
+		GetKeysForPrefixF: func(c *context.Context, s string) ([]string, error) {
+			return []string{"rsp_cgrates.org:key1", "rsp_cgrates.org:key2", "rsp_cgrates.org:key3"}, nil
+		},
+	}
+
+	dm := engine.NewDataManager(dbMock, cfg.CacheCfg(), nil)
+	adms := &AdminSv1{
+		cfg: cfg,
+		dm:  dm,
+	}
+
+	var reply []string
+	experr := "cannot convert field<bool>: true to int"
+
+	if err := adms.GetResourceProfileIDs(context.Background(),
+		&utils.ArgsItemIDs{
+			Tenant: "cgrates.org",
+			APIOpts: map[string]interface{}{
+				utils.PageLimitOpt: true,
+			},
+		}, &reply); err == nil || err.Error() != experr {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+
+	dm.DataDB().Flush(utils.EmptyString)
+}
+
+func TestResourcesGetResourceProfileIDsPaginateErr(t *testing.T) {
+	engine.Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	dbMock := &engine.DataDBMock{
+		GetResourceProfileDrvF: func(*context.Context, string, string) (*engine.ResourceProfile, error) {
+			rsPrf := &engine.ResourceProfile{
+				Tenant: "cgrates.org",
+				ID:     "TEST",
+			}
+			return rsPrf, nil
+		},
+		SetResourceProfileDrvF: func(*context.Context, *engine.ResourceProfile) error {
+			return nil
+		},
+		RemoveResourceProfileDrvF: func(*context.Context, string, string) error {
+			return nil
+		},
+		GetKeysForPrefixF: func(c *context.Context, s string) ([]string, error) {
+			return []string{"rsp_cgrates.org:key1", "rsp_cgrates.org:key2", "rsp_cgrates.org:key3"}, nil
+		},
+	}
+
+	dm := engine.NewDataManager(dbMock, cfg.CacheCfg(), nil)
+	adms := &AdminSv1{
+		cfg: cfg,
+		dm:  dm,
+	}
+
+	var reply []string
+	experr := `SERVER_ERROR: maximum number of items exceeded`
+
+	if err := adms.GetResourceProfileIDs(context.Background(),
+		&utils.ArgsItemIDs{
+			Tenant: "cgrates.org",
+			APIOpts: map[string]interface{}{
+				utils.PageLimitOpt:    2,
+				utils.PageOffsetOpt:   4,
+				utils.PageMaxItemsOpt: 5,
+			},
+		}, &reply); err == nil || err.Error() != experr {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+
+	dm.DataDB().Flush(utils.EmptyString)
 }
