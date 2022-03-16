@@ -284,7 +284,7 @@ func (fltr *FilterRule) IsValid() bool {
 		return false
 	}
 	// Element must be specified only when the type is different from *never
-	if fltr.Element == utils.EmptyString && fltr.Type != utils.MetaNever {
+	if fltr.Element == utils.EmptyString {
 		return fltr.Type == utils.MetaNever
 	}
 	if len(fltr.Values) == 0 && !utils.IsSliceMember([]string{utils.MetaExists, utils.MetaNotExists,
