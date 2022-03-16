@@ -37,8 +37,8 @@ var tpExporterTypes = utils.NewStringSet([]string{
 	utils.MetaStats,
 	utils.MetaActions,
 	utils.MetaThresholds,
+	utils.MetaDispatchers,
 	/*
-		utils.MetaDispatchers, //
 		utils.MetaDispatcherHosts, //
 	*/})
 
@@ -85,6 +85,8 @@ func newTPExporter(expType string, dm *engine.DataManager) (tpE tpExporter, err 
 		return newTPActions(dm), nil
 	case utils.MetaThresholds:
 		return newTPThresholds(dm), nil
+	case utils.MetaDispatchers:
+		return newTPDispatchers(dm), nil
 	default:
 		return nil, utils.ErrPrefix(utils.ErrUnsupportedTPExporterType, expType)
 	}

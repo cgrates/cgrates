@@ -87,6 +87,10 @@ func getTariffPlansKeys(ctx *context.Context, dm *engine.DataManager, tnt, expTy
 		prfx = utils.StatQueueProfilePrefix + tnt + utils.ConcatenatedKeySep
 	case utils.MetaThresholds:
 		prfx = utils.ThresholdProfilePrefix + tnt + utils.ConcatenatedKeySep
+	case utils.MetaDispatchers:
+		prfx = utils.DispatcherProfilePrefix + tnt + utils.ConcatenatedKeySep
+	default:
+		return nil, fmt.Errorf("Unsuported exporter type")
 	}
 	// dbKeys will contain the full name of the key, but we will need just the IDs e.g. "alp_cgrates.org:ATTR_1" -- just ATTR_1
 	var dbKeys []string
