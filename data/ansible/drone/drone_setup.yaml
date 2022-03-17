@@ -1,0 +1,56 @@
+- hosts: localhost
+  vars:
+    drone_server_host: 5fd0-86-125-244-213.ngrok.io
+  tasks:
+    # We need docker first
+    # - name: Configure docker 
+    #   include: docker.yaml
+
+    # We will use this image in order to spin up the drone server
+    - name: Pull drone image
+      become: yes  
+      shell: docker pull drone/drone:2
+
+    # We will use this image in order to run builds whenever an event occurs. (ie. pull request)
+    - name: Pull drone runner image
+      become: yes
+      shell: docker pull drone/drone-runner-docker:1
+
+    # We need to generate a secret in order to parse it to the drone server configuration
+    - name:  generate RPCSecret
+      shell: "openssl rand -hex 16"
+      register: drone_secret
+
+    # Start drone server with proper configuration
+    - name: Start drone server 
+      become: yes
+      shell: >
+        docker run \
+          --volume=/var/lib/drone:/data \
+          --env=DRONE_GITHUB_CLIENT_ID={{ drone_github_client_id }} \
+          --env=DRONE_GITHUB_CLIENT_SECRET={{ drone_github_client_secret }} \
+          --env=DRONE_RPC_SECRET={{ drone_secret.stdout }} \
+          --env=DRONE_SERVER_HOST={{ drone_server_host }} \
+          --env=DRONE_SERVER_PROTO=https \
+          --publish=80:80 \
+          --publish=443:443 \
+          --restart=always \
+          --detach=true \
+          --name=drone \
+          drone/drone:2
+
+    # Start drone runner with prper configuration
+    - name: Start drone runner
+      become: yes
+      shell: >
+        docker run --detach \
+          --volume=/var/run/docker.sock:/var/run/docker.sock \
+          --env=DRONE_RPC_PROTO=https \
+          --env=DRONE_RPC_HOST={{ drone_server_host }} \
+          --env=DRONE_RPC_SECRET={{ drone_secret.stdout }} \
+          --env=DRONE_RUNNER_CAPACITY=2 \
+          --env=DRONE_RUNNER_NAME=drone-runner \
+          --publish=3000:3000 \
+          --restart=always \
+          --name=drone-runner \
+          drone/drone-runner-docker:1
