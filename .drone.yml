@@ -2,56 +2,217 @@ kind: pipeline
 type: docker
 name: unit
 
+
 workspace:
   path: /cgrates
 
 steps:
 - name: unit
   pull: never
-  image: cgrates-integration
+  image: cgrates-it-entrypoint
   commands:
   - docker-entrypoint.sh
   - ./test.sh
 - name: notify
   pull: never
-  image: trial97/drone-email
+  image: drillster/drone-email
   settings:
     from: cgrates.test01@gmail.com
-    credentials:
-      from_secret: credentials
-    token:
-      from_secret: token
+    host: smtp.gmail.com
+    username: 
+      from_secret: email_username
+    password:
+      from_secret: email_password
+    subject: >
+      [{{ build.status }}]
+      {{ repo.owner }}/{{ repo.name }}
+      ({{ commit.branch }})
+    body: >
+      Build number: # {{ build.number }}
+      Build link: {{ build.link }}
+      Build started: {{ build.started }}
+      Build ended: {{ build.finished }}
+      Commit author: {{ commit.author.name }}
+      Commit message: {{ commit.message }}
+      Commit branch: {{ commit.branch }}
+      Commit link: {{ commit.link }}
+    recipients_file: recipients
+    recipients_only: true
   when:
-    status: [ changed, failure ]
+    status: failure
+
+---
+kind: pipeline
+type: docker
+name: integration-internal
 
 
-# ---
-# kind: pipeline
-# type: docker
-# name: default
+workspace:
+  path: /cgrates
 
-# workspace:
-#   path: /cgrates
+steps:
+- name: integration-internal
+  pull: never
+  image: cgrates-it-entrypoint
+  commands:
+  - docker-entrypoint.sh
+  - ./integration_test.sh -dbtype=*internal
+- name: notify
+  pull: never
+  image: drillster/drone-email
+  settings:
+    from: cgrates.test01@gmail.com
+    host: smtp.gmail.com
+    username: 
+      from_secret: email_username
+    password:
+      from_secret: email_password
+    subject: >
+      [{{ build.status }}]
+      {{ repo.owner }}/{{ repo.name }}
+      ({{ commit.branch }})
+    body: >
+      Build number: # {{ build.number }}
+      Build link: {{ build.link }}
+      Build started: {{ build.started }}
+      Build ended: {{ build.finished }}
+      Commit author: {{ commit.author.name }}
+      Commit message: {{ commit.message }}
+      Commit branch: {{ commit.branch }}
+      Commit link: {{ commit.link }}
+    recipients_file: recipients
+    recipients_only: true
+  when:
+    status: failure 
 
-# steps:
-# - name: integration
-#   pull: never
-#   image: cgrates-integration
-#   commands:
-#   - docker-entrypoint.sh
-#   - ./integration_test.sh
+---
+kind: pipeline
+type: docker
+name: integration-mysql
 
-# - name: notify
-#   pull: never
-#   image: trial97/drone-email
-#   settings:
-#     from: cgrates.test01@gmail.com
-#     credentials:
-#       from_secret: credentials
-#     token:
-#       from_secret: token
-#   when:
-#     status: [ changed, failure ]
 
-# depends_on:
-# - unit
+workspace:
+  path: /cgrates
+
+steps:
+- name: integration-mysql
+  pull: never
+  image: cgrates-it-entrypoint
+  commands:
+  - docker-entrypoint.sh
+  - ./integration_test.sh -dbtype=*mysql
+- name: notify
+  pull: never
+  image: drillster/drone-email
+  settings:
+    from: cgrates.test01@gmail.com
+    host: smtp.gmail.com
+    username: 
+      from_secret: email_username
+    password:
+      from_secret: email_password
+    subject: >
+      [{{ build.status }}]
+      {{ repo.owner }}/{{ repo.name }}
+      ({{ commit.branch }})
+    body: >
+      Build number: # {{ build.number }}
+      Build link: {{ build.link }}
+      Build started: {{ build.started }}
+      Build ended: {{ build.finished }}
+      Commit author: {{ commit.author.name }}
+      Commit message: {{ commit.message }}
+      Commit branch: {{ commit.branch }}
+      Commit link: {{ commit.link }}
+    recipients_file: recipients
+    recipients_only: true
+  when:
+    status: failure
+
+---
+kind: pipeline
+type: docker
+name: integration-mongo
+
+
+workspace:
+  path: /cgrates
+
+steps:
+- name: integration-mongo
+  pull: never
+  image: cgrates-it-entrypoint
+  commands:
+  - docker-entrypoint.sh
+  - ./integration_test.sh -dbtype=*mongo
+- name: notify
+  pull: never
+  image: drillster/drone-email
+  settings:
+    from: cgrates.test01@gmail.com
+    host: smtp.gmail.com
+    username: 
+      from_secret: email_username
+    password:
+      from_secret: email_password
+    subject: >
+      [{{ build.status }}]
+      {{ repo.owner }}/{{ repo.name }}
+      ({{ commit.branch }})
+    body: >
+      Build number: # {{ build.number }}
+      Build link: {{ build.link }}
+      Build started: {{ build.started }}
+      Build ended: {{ build.finished }}
+      Commit author: {{ commit.author.name }}
+      Commit message: {{ commit.message }}
+      Commit branch: {{ commit.branch }}
+      Commit link: {{ commit.link }}
+    recipients_file: recipients
+    recipients_only: true
+  when:
+    status: failure
+
+---
+kind: pipeline
+type: docker
+name: integration-postgres
+
+
+workspace:
+  path: /cgrates
+
+steps:
+- name: integration-postgres
+  pull: never
+  image: cgrates-it-entrypoint
+  commands:
+  - docker-entrypoint.sh
+  - ./integration_test.sh -dbtype=*postgres
+- name: notify
+  pull: never
+  image: drillster/drone-email
+  settings:
+    from: cgrates.test01@gmail.com
+    host: smtp.gmail.com
+    username: 
+      from_secret: email_username
+    password:
+      from_secret: email_password
+    subject: >
+      [{{ build.status }}]
+      {{ repo.owner }}/{{ repo.name }}
+      ({{ commit.branch }})
+    body: >
+      Build number: # {{ build.number }}
+      Build link: {{ build.link }}
+      Build started: {{ build.started }}
+      Build ended: {{ build.finished }}
+      Commit author: {{ commit.author.name }}
+      Commit message: {{ commit.message }}
+      Commit branch: {{ commit.branch }}
+      Commit link: {{ commit.link }}
+    recipients_file: recipients
+    recipients_only: true
+  when:
+    status: failure
