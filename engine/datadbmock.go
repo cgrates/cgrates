@@ -402,7 +402,7 @@ func (dbM *DataDBMock) GetRateProfileDrv(ctx *context.Context, tnt string, id st
 
 func (dbM *DataDBMock) GetRateProfileRatesDrv(ctx *context.Context, tnt string, id string, rtPrfx string, needIDs bool) ([]string, []*utils.Rate, error) {
 	if dbM.GetRateProfileRatesDrvF != nil {
-		return dbM.GetRateProfileRatesDrv(ctx, tnt, id, rtPrfx, needIDs)
+		return dbM.GetRateProfileRatesDrvF(ctx, tnt, id, rtPrfx, needIDs)
 	}
 	return nil, nil, utils.ErrNotImplemented
 }
