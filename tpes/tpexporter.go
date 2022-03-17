@@ -38,9 +38,8 @@ var tpExporterTypes = utils.NewStringSet([]string{
 	utils.MetaActions,
 	utils.MetaThresholds,
 	utils.MetaDispatchers,
-	/*
-		utils.MetaDispatcherHosts, //
-	*/})
+	utils.MetaDispatcherHosts,
+})
 
 var exportFileName = map[string]string{
 	utils.MetaAttributes:      utils.AttributesCsv,
@@ -87,6 +86,8 @@ func newTPExporter(expType string, dm *engine.DataManager) (tpE tpExporter, err 
 		return newTPThresholds(dm), nil
 	case utils.MetaDispatchers:
 		return newTPDispatchers(dm), nil
+	case utils.MetaDispatcherHosts:
+		return newTPDispatcherHosts(dm), nil
 	default:
 		return nil, utils.ErrPrefix(utils.ErrUnsupportedTPExporterType, expType)
 	}
