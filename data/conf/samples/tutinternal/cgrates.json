@@ -20,13 +20,6 @@
 	"db_type": "*internal"
 },
 
-
-"schedulers": {
-	"enabled": true,
-	"cdrs_conns": ["*internal"],
-	"stats_conns": ["*localhost"]
-},
-
 "cdrs": {
 	"enabled": true,
 	"chargers_conns":["*internal"]

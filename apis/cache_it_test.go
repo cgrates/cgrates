@@ -216,7 +216,7 @@ func testCacheSHasItemAttributeProfile(t *testing.T) {
 		t.Errorf("Unexpected reply result")
 	}
 
-	//also cannot take any itemIDs
+	// also cannot take any itemIDs
 	argsIds := &utils.ArgsGetCacheItemIDsWithAPIOpts{
 		ArgsGetCacheItemIDs: utils.ArgsGetCacheItemIDs{
 			CacheID: utils.CacheAttributeProfiles,
@@ -264,7 +264,7 @@ func testCacheSHasItemAttributeProfile(t *testing.T) {
 			ItemID:  "cgrates.org:TEST_ATTRIBUTES_IT_TEST",
 		},
 	}
-	//Getting an profile from db will set it in cache
+	// Getting an profile from db will set it in cache
 	if err := chcRPC.Call(context.Background(), utils.CacheSv1HasItem,
 		args, &reply); err != nil {
 		t.Error(err)
@@ -382,7 +382,7 @@ func testCacheSRemoveItemsAndReloadCache(t *testing.T) {
 		t.Errorf("Unexpected reply return")
 	}
 
-	//as we removed the items, we cannot take it from cache
+	// as we removed the items, we cannot take it from cache
 	if err := chcRPC.Call(context.Background(), utils.CacheSv1GetItemIDs,
 		argsIds, &result); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expected %+v, received %+v", utils.ErrNotFound, result)

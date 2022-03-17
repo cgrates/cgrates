@@ -119,9 +119,10 @@ func (tpE *TPeS) V1ExportTariffPlan(ctx *context.Context, args *ArgsExportTP, re
 			var itemIDs []string
 			if itemIDs, err = getTariffPlansKeys(ctx, tpE.dm, args.Tenant, subsystem); err != nil {
 				return
+			} else if len(itemIDs) != 0 {
+				// the map e.g. : *filters: {"ATTR_1", "ATTR_1"}
+				args.ExportItems[subsystem] = itemIDs
 			}
-			// the map e.g. : *filters: {"ATTR_1", "ATTR_1"}
-			args.ExportItems[subsystem] = itemIDs
 		}
 	} else {
 		// else export just the wanted IDs
