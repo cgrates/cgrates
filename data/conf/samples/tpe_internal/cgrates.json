@@ -1,0 +1,49 @@
+{
+// CGRateS Configuration file
+//
+
+
+"general": {
+	"log_level": 7,
+	"reply_timeout": "50s"
+},
+
+
+"data_db": {
+	"db_type": "*internal"
+},
+
+"sessions": {
+	"enabled": true,
+},
+
+
+"admins": {
+	"enabled": true,
+},
+
+
+"tpes": {
+	"enabled": true
+},
+
+"caches":{
+	"partitions": {
+		"*resource_profiles": {"limit": 0, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},		// control resource profiles caching
+		// control resources caching
+		"*statqueue_profiles": {"limit": 0, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},	// statqueue profiles
+		"*threshold_profiles": {"limit": 0, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},	// control threshold profiles caching
+		"*filters": {"limit": 0, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},				// control filters caching
+		"*route_profiles": {"limit": 0, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},		// control route profile caching
+		"*attribute_profiles": {"limit": 0, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},	// control attribute profile caching
+		"*charger_profiles": {"limit": 0, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},		// control charger profile caching
+		"*dispatcher_profiles": {"limit": 0, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},	// control dispatcher profile caching
+		"*dispatcher_hosts": {"limit": 0, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},		// control dispatcher hosts caching
+		"*rate_profiles": {"limit": 0, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},			// control rate profile caching
+		"*action_profiles": {"limit": 0, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},		// control action profile caching
+		"*accounts": {"limit": 0, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},		// control account profile caching
+	},
+	"replication_conns": [],
+},
+
+}
