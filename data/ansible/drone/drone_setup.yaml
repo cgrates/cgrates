@@ -1,7 +1,5 @@
 - hosts: localhost
   vars:
-    github_client_id: f378ce41a211899bb672
-    github_client_secret: 6557b7ff2b69ab4fcfed44172b98e89d30733341
     drone_server_host: 5fd0-86-125-244-213.ngrok.io
   tasks:
     # We need docker first
@@ -29,8 +27,8 @@
       shell: >
         docker run \
           --volume=/var/lib/drone:/data \
-          --env=DRONE_GITHUB_CLIENT_ID={{ github_client_id }} \
-          --env=DRONE_GITHUB_CLIENT_SECRET={{ github_client_secret }} \
+          --env=DRONE_GITHUB_CLIENT_ID={{ drone_github_client_id }} \
+          --env=DRONE_GITHUB_CLIENT_SECRET={{ drone_github_client_secret }} \
           --env=DRONE_RPC_SECRET={{ drone_secret.stdout }} \
           --env=DRONE_SERVER_HOST={{ drone_server_host }} \
           --env=DRONE_SERVER_PROTO=https \
