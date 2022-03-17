@@ -65,6 +65,11 @@ var (
 		testTPeSExportTariffPlanAllTariffPlan,
 		// export again after we will flush the database
 		testTPeSInitDataDb,
+		testTPeSKillEngine,
+
+		testTPeSInitCfg,
+		testTPeSStartEngine,
+		testTPeSRPCConn,
 		testTPeSExportAfterFlush,
 		testTPeSKillEngine,
 	}
@@ -159,6 +164,7 @@ func testTPeSSetAttributeProfile(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Error(err)
 	}
+
 	attrPrf1 := &engine.APIAttributeProfileWithAPIOpts{
 		APIAttributeProfile: &engine.APIAttributeProfile{
 			Tenant:    utils.CGRateSorg,
@@ -1089,7 +1095,7 @@ func testTPeSExportTariffPlanHalfTariffPlan(t *testing.T) {
 		},
 		utils.DispatcherProfilesCsv: {
 			{"#Tenant", "ID", "FilterIDs", "Weight", "Strategy", "StrategyParameters", "ConnID", "ConnFilterIDs", "ConnWeight", "ConnBlocker", "ConnParameters"},
-			{"cgrates.org", "Dsp1", "*string:~*req.Account:1001;*ai:~*req.AnswerTime:2014-07-14T14:25:00Z", "20", "*first", "false", "C1", "", "10", "false", "*ratio:2;192.168.54.203"},
+			{"cgrates.org", "Dsp1", "*string:~*req.Account:1001;*ai:~*req.AnswerTime:2014-07-14T14:25:00Z", "20", "*first", "false", "C1", "", "10", "false", "192.168.54.203"},
 		},
 	}
 	expected[utils.RatesCsv] = csvRply[utils.RatesCsv]
@@ -1223,7 +1229,7 @@ func testTPeSExportTariffPlanAllTariffPlan(t *testing.T) {
 		},
 		utils.DispatcherProfilesCsv: {
 			{"#Tenant", "ID", "FilterIDs", "Weight", "Strategy", "StrategyParameters", "ConnID", "ConnFilterIDs", "ConnWeight", "ConnBlocker", "ConnParameters"},
-			{"cgrates.org", "Dsp1", "*string:~*req.Account:1001;*ai:~*req.AnswerTime:2014-07-14T14:25:00Z", "20", "*first", "false", "C1", "", "10", "false", "*ratio:2;192.168.54.203"},
+			{"cgrates.org", "Dsp1", "*string:~*req.Account:1001;*ai:~*req.AnswerTime:2014-07-14T14:25:00Z", "20", "*first", "false", "C1", "", "10", "false", "192.168.54.203"},
 			{"cgrates.org", "Dsp2", "*string:~*opts.EventType:LoadDispatcher", "10", "*weight", "", "Conn2", "*suffix:~*opts.*answerTime:45T", "0", "false", "*ratio:1"},
 		},
 	}
@@ -1297,7 +1303,7 @@ func testTPeSExportAfterFlush(t *testing.T) {
 	}
 	// empty exporters, nothing in database to export
 	if len(csvRply) != 0 {
-		t.Errorf("Unexpected length, expected to be 0, no exports were nedeed and got zip containing: %v", utils.ToJSON(csvRply))
+		t.Errorf("Unexpected length, expected to be 0, no exports were nedeed and got zip containing: \n %v", utils.ToJSON(csvRply))
 	}
 }
 
