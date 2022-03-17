@@ -693,3 +693,206 @@ func TestAttributesGetAttributeProfilesOK(t *testing.T) {
 		}
 	}
 }
+
+func TestAttributesGetAttributeProfilesGetIDsErr(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	connMgr := engine.NewConnManager(cfg)
+	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(dataDB, nil, connMgr)
+	admS := NewAdminSv1(cfg, dm, connMgr)
+	args := &engine.APIAttributeProfileWithAPIOpts{
+		APIAttributeProfile: &engine.APIAttributeProfile{
+			Tenant: "cgrates.org",
+			ID:     "test_ID1",
+			Attributes: []*engine.ExternalAttribute{
+				{
+					Path:  "*req.RequestType",
+					Type:  utils.MetaConstant,
+					Value: utils.MetaPrepaid,
+				},
+			},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				},
+			},
+		},
+		APIOpts: nil,
+	}
+
+	var setReply string
+	if err := admS.SetAttributeProfile(context.Background(), args, &setReply); err != nil {
+		t.Error(err)
+	} else if setReply != "OK" {
+		t.Error("Unexpected reply returned:", setReply)
+	}
+
+	argsGet := &utils.ArgsItemIDs{
+		Tenant:      "cgrates.org",
+		ItemsPrefix: "test_ID",
+		APIOpts: map[string]interface{}{
+			utils.PageLimitOpt:    2,
+			utils.PageOffsetOpt:   4,
+			utils.PageMaxItemsOpt: 5,
+		},
+	}
+
+	experr := `SERVER_ERROR: maximum number of items exceeded`
+	var getReply []*engine.APIAttributeProfile
+	if err := admS.GetAttributeProfiles(context.Background(), argsGet, &getReply); err == nil || err.Error() != experr {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+}
+
+func TestAttributesGetAttributeProfilesGetProfileErr(t *testing.T) {
+	engine.Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	dbMock := &engine.DataDBMock{
+		SetAttributeProfileDrvF: func(*context.Context, *engine.AttributeProfile) error {
+			return nil
+		},
+		RemoveAttributeProfileDrvF: func(*context.Context, string, string) error {
+			return nil
+		},
+		GetKeysForPrefixF: func(c *context.Context, s string) ([]string, error) {
+			return []string{"alp_cgrates.org:TEST"}, nil
+		},
+	}
+
+	dm := engine.NewDataManager(dbMock, cfg.CacheCfg(), nil)
+	adms := &AdminSv1{
+		cfg: cfg,
+		dm:  dm,
+	}
+
+	var reply []*engine.APIAttributeProfile
+	experr := "SERVER_ERROR: NOT_IMPLEMENTED"
+
+	if err := adms.GetAttributeProfiles(context.Background(),
+		&utils.ArgsItemIDs{
+			ItemsPrefix: "TEST",
+		}, &reply); err == nil || err.Error() != experr {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+
+	dm.DataDB().Flush(utils.EmptyString)
+}
+
+func TestAttributesGetAttributeProfileIDsGetOptsErr(t *testing.T) {
+	engine.Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	dbMock := &engine.DataDBMock{
+		GetAttributeProfileDrvF: func(*context.Context, string, string) (*engine.AttributeProfile, error) {
+			attrPrf := &engine.AttributeProfile{
+				Tenant: "cgrates.org",
+				ID:     "TEST",
+			}
+			return attrPrf, nil
+		},
+		SetAttributeProfileDrvF: func(*context.Context, *engine.AttributeProfile) error {
+			return nil
+		},
+		RemoveAttributeProfileDrvF: func(*context.Context, string, string) error {
+			return nil
+		},
+		GetKeysForPrefixF: func(c *context.Context, s string) ([]string, error) {
+			return []string{"alp_cgrates.org:key1", "alp_cgrates.org:key2", "alp_cgrates.org:key3"}, nil
+		},
+	}
+
+	dm := engine.NewDataManager(dbMock, cfg.CacheCfg(), nil)
+	adms := &AdminSv1{
+		cfg: cfg,
+		dm:  dm,
+	}
+
+	var reply []string
+	experr := "cannot convert field<bool>: true to int"
+
+	if err := adms.GetAttributeProfileIDs(context.Background(),
+		&utils.ArgsItemIDs{
+			Tenant: "cgrates.org",
+			APIOpts: map[string]interface{}{
+				utils.PageLimitOpt: true,
+			},
+		}, &reply); err == nil || err.Error() != experr {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+
+	dm.DataDB().Flush(utils.EmptyString)
+}
+
+func TestAttributesGetAttributeProfileIDsPaginateErr(t *testing.T) {
+	engine.Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	dbMock := &engine.DataDBMock{
+		GetAttributeProfileDrvF: func(*context.Context, string, string) (*engine.AttributeProfile, error) {
+			attrPrf := &engine.AttributeProfile{
+				Tenant: "cgrates.org",
+				ID:     "TEST",
+			}
+			return attrPrf, nil
+		},
+		SetAttributeProfileDrvF: func(*context.Context, *engine.AttributeProfile) error {
+			return nil
+		},
+		RemoveAttributeProfileDrvF: func(*context.Context, string, string) error {
+			return nil
+		},
+		GetKeysForPrefixF: func(c *context.Context, s string) ([]string, error) {
+			return []string{"alp_cgrates.org:key1", "alp_cgrates.org:key2", "alp_cgrates.org:key3"}, nil
+		},
+	}
+
+	dm := engine.NewDataManager(dbMock, cfg.CacheCfg(), nil)
+	adms := &AdminSv1{
+		cfg: cfg,
+		dm:  dm,
+	}
+
+	var reply []string
+	experr := `SERVER_ERROR: maximum number of items exceeded`
+
+	if err := adms.GetAttributeProfileIDs(context.Background(),
+		&utils.ArgsItemIDs{
+			Tenant: "cgrates.org",
+			APIOpts: map[string]interface{}{
+				utils.PageLimitOpt:    2,
+				utils.PageOffsetOpt:   4,
+				utils.PageMaxItemsOpt: 5,
+			},
+		}, &reply); err == nil || err.Error() != experr {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+
+	dm.DataDB().Flush(utils.EmptyString)
+}
+
+func TestAttributesSetAttributeProfileAsAttrPrfErr(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	admS := &AdminSv1{
+		cfg: cfg,
+		dm:  dm,
+	}
+
+	attrPrf := &engine.APIAttributeProfileWithAPIOpts{
+		APIAttributeProfile: &engine.APIAttributeProfile{
+			ID:         "TestGetAttributeProfile",
+			Attributes: []*engine.ExternalAttribute{},
+		},
+	}
+	var reply string
+
+	experr := `SERVER_ERROR: MANDATORY_IE_MISSING: [Attributes]`
+	if err := admS.SetAttributeProfile(context.Background(), attrPrf, &reply); err == nil ||
+		err.Error() != experr {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+}

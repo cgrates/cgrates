@@ -1899,3 +1899,421 @@ func TestRatesGetRateProfilesOK(t *testing.T) {
 		}
 	}
 }
+
+func TestRatesGetRateProfilesGetIDsErr(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	connMgr := engine.NewConnManager(cfg)
+	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(dataDB, nil, connMgr)
+	admS := NewAdminSv1(cfg, dm, connMgr)
+	args := &utils.APIRateProfile{
+		RateProfile: &utils.RateProfile{
+			Tenant: "cgrates.org",
+			ID:     "test_ID1",
+			Rates: map[string]*utils.Rate{
+				"RATE1": {
+					ID: "RATE1",
+				},
+			},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				},
+			},
+		},
+		APIOpts: nil,
+	}
+
+	var setReply string
+	if err := admS.SetRateProfile(context.Background(), args, &setReply); err != nil {
+		t.Error(err)
+	} else if setReply != "OK" {
+		t.Error("Unexpected reply returned:", setReply)
+	}
+
+	argsGet := &utils.ArgsItemIDs{
+		Tenant:      "cgrates.org",
+		ItemsPrefix: "test_ID",
+		APIOpts: map[string]interface{}{
+			utils.PageLimitOpt:    2,
+			utils.PageOffsetOpt:   4,
+			utils.PageMaxItemsOpt: 5,
+		},
+	}
+
+	experr := `SERVER_ERROR: maximum number of items exceeded`
+	var getReply []*utils.RateProfile
+	if err := admS.GetRateProfiles(context.Background(), argsGet, &getReply); err == nil || err.Error() != experr {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+}
+
+func TestRatesGetRateProfilesGetProfileErr(t *testing.T) {
+	engine.Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	dbMock := &engine.DataDBMock{
+		SetRateProfileDrvF: func(*context.Context, *utils.RateProfile) error {
+			return nil
+		},
+		RemoveRateProfileDrvF: func(*context.Context, string, string, *[]string) error {
+			return nil
+		},
+		GetKeysForPrefixF: func(c *context.Context, s string) ([]string, error) {
+			return []string{"rtp_cgrates.org:TEST"}, nil
+		},
+	}
+
+	dm := engine.NewDataManager(dbMock, cfg.CacheCfg(), nil)
+	adms := &AdminSv1{
+		cfg: cfg,
+		dm:  dm,
+	}
+
+	var reply []*utils.RateProfile
+	experr := "SERVER_ERROR: NOT_IMPLEMENTED"
+
+	if err := adms.GetRateProfiles(context.Background(),
+		&utils.ArgsItemIDs{
+			ItemsPrefix: "TEST",
+		}, &reply); err == nil || err.Error() != experr {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+
+	dm.DataDB().Flush(utils.EmptyString)
+}
+
+func TestRatesGetRateProfileIDsGetOptsErr(t *testing.T) {
+	engine.Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	dbMock := &engine.DataDBMock{
+		GetRateProfileDrvF: func(*context.Context, string, string) (*utils.RateProfile, error) {
+			ratePrf := &utils.RateProfile{
+				Tenant: "cgrates.org",
+				ID:     "TEST",
+			}
+			return ratePrf, nil
+		},
+		SetRateProfileDrvF: func(*context.Context, *utils.RateProfile) error {
+			return nil
+		},
+		RemoveRateProfileDrvF: func(*context.Context, string, string, *[]string) error {
+			return nil
+		},
+		GetKeysForPrefixF: func(c *context.Context, s string) ([]string, error) {
+			return []string{"rtp_cgrates.org:key1", "rtp_cgrates.org:key2", "rtp_cgrates.org:key3"}, nil
+		},
+	}
+
+	dm := engine.NewDataManager(dbMock, cfg.CacheCfg(), nil)
+	adms := &AdminSv1{
+		cfg: cfg,
+		dm:  dm,
+	}
+
+	var reply []string
+	experr := "cannot convert field<bool>: true to int"
+
+	if err := adms.GetRateProfileIDs(context.Background(),
+		&utils.ArgsItemIDs{
+			Tenant: "cgrates.org",
+			APIOpts: map[string]interface{}{
+				utils.PageLimitOpt: true,
+			},
+		}, &reply); err == nil || err.Error() != experr {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+
+	dm.DataDB().Flush(utils.EmptyString)
+}
+
+func TestRatesGetRateProfileIDsPaginateErr(t *testing.T) {
+	engine.Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	dbMock := &engine.DataDBMock{
+		GetRateProfileDrvF: func(*context.Context, string, string) (*utils.RateProfile, error) {
+			ratePrf := &utils.RateProfile{
+				Tenant: "cgrates.org",
+				ID:     "TEST",
+			}
+			return ratePrf, nil
+		},
+		SetRateProfileDrvF: func(*context.Context, *utils.RateProfile) error {
+			return nil
+		},
+		RemoveRateProfileDrvF: func(*context.Context, string, string, *[]string) error {
+			return nil
+		},
+		GetKeysForPrefixF: func(c *context.Context, s string) ([]string, error) {
+			return []string{"rtp_cgrates.org:key1", "rtp_cgrates.org:key2", "rtp_cgrates.org:key3"}, nil
+		},
+	}
+
+	dm := engine.NewDataManager(dbMock, cfg.CacheCfg(), nil)
+	adms := &AdminSv1{
+		cfg: cfg,
+		dm:  dm,
+	}
+
+	var reply []string
+	experr := `SERVER_ERROR: maximum number of items exceeded`
+
+	if err := adms.GetRateProfileIDs(context.Background(),
+		&utils.ArgsItemIDs{
+			Tenant: "cgrates.org",
+			APIOpts: map[string]interface{}{
+				utils.PageLimitOpt:    2,
+				utils.PageOffsetOpt:   4,
+				utils.PageMaxItemsOpt: 5,
+			},
+		}, &reply); err == nil || err.Error() != experr {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+
+	dm.DataDB().Flush(utils.EmptyString)
+}
+
+func TestRatesSetGetRemRateProfileRates(t *testing.T) {
+	engine.Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	adms := &AdminSv1{
+		cfg: cfg,
+		dm:  dm,
+	}
+	arg := &utils.ArgsSubItemIDs{
+		Tenant:      "cgrates.org",
+		ProfileID:   "test_ID1",
+		ItemsPrefix: "RATE",
+	}
+	var result []*utils.Rate
+	var reply string
+
+	ratePrf := &utils.APIRateProfile{
+		RateProfile: &utils.RateProfile{
+			Tenant: "cgrates.org",
+			ID:     "test_ID1",
+			Rates: map[string]*utils.Rate{
+				"RATE1": {
+					ID: "RATE1",
+				},
+				"RATE2": {
+					ID: "RATE2",
+				},
+				"RATE3": {
+					ID: "RATE3",
+				},
+				"INVALID": {
+					ID: "INVALID",
+				},
+			},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				},
+			},
+		},
+		APIOpts: nil,
+	}
+
+	if err := adms.SetRateProfile(context.Background(), ratePrf, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("expected: <%+v>, received: <%+v>", utils.OK, reply)
+	}
+
+	exp := []*utils.Rate{
+		{
+			ID: "RATE1",
+		},
+		{
+			ID: "RATE2",
+		},
+		{
+			ID: "RATE3",
+		},
+	}
+	if err := adms.GetRateProfileRates(context.Background(), arg, &result); err != nil {
+		t.Error(err)
+	} else {
+		sort.Slice(result, func(i, j int) bool {
+			return result[i].ID < result[j].ID
+		})
+		if utils.ToJSON(result) != utils.ToJSON(exp) {
+			t.Errorf("expected: <%+v>, \nreceived: <%+v>",
+				utils.ToJSON(exp), utils.ToJSON(result))
+		}
+	}
+
+	var rateIDs []string
+	expRateIDs := []string{"RATE1", "RATE2", "RATE3"}
+
+	if err := adms.GetRateProfileRateIDs(context.Background(), &utils.ArgsSubItemIDs{
+		Tenant:      "cgrates.org",
+		ProfileID:   "test_ID1",
+		ItemsPrefix: "RATE",
+	},
+		&rateIDs); err != nil {
+		t.Error(err)
+	} else {
+		sort.Slice(rateIDs, func(i, j int) bool {
+			return rateIDs[i] < rateIDs[j]
+		})
+		if !reflect.DeepEqual(rateIDs, expRateIDs) {
+			t.Errorf("expected: <%+v>, \nreceived: <%+v>", expRateIDs, rateIDs)
+		}
+	}
+
+	var rplyCount int
+
+	if err := adms.GetRateProfileRatesCount(context.Background(), &utils.ArgsSubItemIDs{
+		Tenant:      "cgrates.org",
+		ProfileID:   "test_ID1",
+		ItemsPrefix: "RATE",
+	},
+		&rplyCount); err != nil {
+		t.Error(err)
+	} else if rplyCount != len(rateIDs) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", len(rateIDs), rplyCount)
+	}
+
+	argsRemove := &utils.RemoveRPrfRates{
+		Tenant:  "cgrates.org",
+		ID:      "test_ID1",
+		RateIDs: []string{"RATE1", "RATE2", "RATE3"},
+	}
+
+	if err := adms.RemoveRateProfileRates(context.Background(), argsRemove, &reply); err != nil {
+		t.Error(err)
+	}
+
+	engine.Cache.Clear(nil)
+	if err := adms.GetRateProfileRates(context.Background(), arg, &result); err == nil ||
+		err != utils.ErrNotFound {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
+	}
+
+	dm.DataDB().Flush(utils.EmptyString)
+}
+
+func TestRatesGetRateProfileRatesCheckErrors(t *testing.T) {
+	engine.Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	adms := &AdminSv1{
+		cfg: cfg,
+		dm:  dm,
+	}
+	var rcv []*utils.Rate
+	experr := "MANDATORY_IE_MISSING: [ProfileID]"
+
+	if err := adms.GetRateProfileRates(context.Background(), &utils.ArgsSubItemIDs{
+		Tenant: "cgrates.org",
+	}, &rcv); err == nil ||
+		err.Error() != experr {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+
+	adms.dm = nil
+	experr = "NO_DATABASE_CONNECTION"
+
+	arg := &utils.ArgsSubItemIDs{
+		ProfileID: "RatePrf1",
+	}
+
+	if err := adms.GetRateProfileRates(context.Background(), arg, &rcv); err == nil ||
+		err.Error() != experr {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+
+	dm.DataDB().Flush(utils.EmptyString)
+}
+
+func TestRatesGetRateProfileRatesCountErrMock(t *testing.T) {
+	engine.Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	dbMock := &engine.DataDBMock{
+		GetRateProfileDrvF: func(*context.Context, string, string) (*utils.RateProfile, error) {
+			ratePrf := &utils.RateProfile{
+				Tenant: "cgrates.org",
+				ID:     "TEST",
+			}
+			return ratePrf, nil
+		},
+		SetRateProfileDrvF: func(*context.Context, *utils.RateProfile) error {
+			return nil
+		},
+		RemoveRateProfileDrvF: func(*context.Context, string, string, *[]string) error {
+			return nil
+		},
+	}
+	dm := engine.NewDataManager(dbMock, cfg.CacheCfg(), nil)
+	adms := &AdminSv1{
+		cfg: cfg,
+		dm:  dm,
+	}
+
+	var reply int
+
+	if err := adms.GetRateProfileRatesCount(context.Background(),
+		&utils.ArgsSubItemIDs{
+			Tenant:    "cgrates.org",
+			ProfileID: "prfID",
+		}, &reply); err == nil || err != utils.ErrNotImplemented {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotImplemented, err)
+	}
+}
+
+func TestRatesGetRateProfileRatesCountErrKeys(t *testing.T) {
+	engine.Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	dbMock := &engine.DataDBMock{
+		GetRateProfileRatesDrvF: func(*context.Context, string, string, string, bool) ([]string, []*utils.Rate, error) {
+			return []string{}, nil, nil
+		},
+	}
+	dm := engine.NewDataManager(dbMock, cfg.CacheCfg(), nil)
+	adms := &AdminSv1{
+		cfg: cfg,
+		dm:  dm,
+	}
+
+	var reply int
+
+	if err := adms.GetRateProfileRatesCount(context.Background(),
+		&utils.ArgsSubItemIDs{
+			ProfileID: "prfID",
+		}, &reply); err == nil || err != utils.ErrNotFound {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
+	}
+}
+
+func TestRatesGetRateProfileRatesCountErrMissing(t *testing.T) {
+	engine.Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	dataDB := engine.NewInternalDB(nil, nil, nil)
+	dm := engine.NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	adms := &AdminSv1{
+		cfg: cfg,
+		dm:  dm,
+	}
+
+	experr := `MANDATORY_IE_MISSING: [ProfileID]`
+	var reply int
+	if err := adms.GetRateProfileRatesCount(context.Background(),
+		&utils.ArgsSubItemIDs{
+			Tenant: "cgrates.org",
+		}, &reply); err == nil || err.Error() != experr {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+}
