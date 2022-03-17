@@ -1,6 +1,6 @@
 - hosts: localhost
   vars:
-    drone_server_host: 5fd0-86-125-244-213.ngrok.io
+    drone_server_host: ci.cgrates.net
   tasks:
     # We need docker first
     # - name: Configure docker 
