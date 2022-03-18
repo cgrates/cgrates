@@ -53,7 +53,7 @@ func (tpThd TPThresholds) exportItems(ctx *context.Context, wrtr io.Writer, tnt 
 		thdPrf, err = tpThd.dm.GetThresholdProfile(ctx, tnt, thdID, true, true, utils.NonTransactional)
 		if err != nil {
 			if err.Error() == utils.ErrNotFound.Error() {
-				return fmt.Errorf("<%s> cannot find Actions id: <%v>", err, thdID)
+				return fmt.Errorf("<%s> cannot find ThresholdProfile with id: <%v>", err, thdID)
 			}
 			return err
 		}
