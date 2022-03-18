@@ -19,10 +19,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package apis
 
 import (
+	"fmt"
 	"reflect"
 	"sort"
 	"testing"
 
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -1094,4 +1096,235 @@ func TestChargersGetChargerProfileCheckErrors(t *testing.T) {
 	}
 
 	dm.DataDB().Flush(utils.EmptyString)
+}
+
+func TestChargersNewChargerSv1(t *testing.T) {
+	engine.Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	chS := engine.NewChargerService(dm, nil, cfg, nil)
+
+	exp := &ChargerSv1{
+		cS: chS,
+	}
+	rcv := NewChargerSv1(chS)
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", exp, rcv)
+	}
+}
+
+func TestChargersAPIs(t *testing.T) {
+	engine.Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	cfg.ChargerSCfg().AttributeSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}
+	cfg.AttributeSCfg().Opts.ProcessRuns = []*utils.DynamicIntOpt{
+		{
+			Value: 2,
+		},
+	}
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	fltrs := engine.NewFilterS(cfg, nil, dm)
+
+	expEv := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "EventTest",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsAttributesProfileIDs: []string{"ATTR1", "ATTR2"},
+			utils.MetaChargeID:             "",
+			utils.OptsContext:              utils.MetaChargers,
+			utils.Subsys:                   utils.MetaChargers,
+			utils.MetaRunID:                "run_1",
+		},
+	}
+
+	mCC := &mockClientConn{
+		calls: map[string]func(*context.Context, interface{}, interface{}) error{
+			utils.AttributeSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
+				expEv.APIOpts[utils.MetaChargeID] = args.(*utils.CGREvent).APIOpts[utils.MetaChargeID]
+				if !reflect.DeepEqual(args, expEv) {
+					return fmt.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ToJSON(expEv), utils.ToJSON(args))
+				}
+				return nil
+			},
+		},
+	}
+	rpcInternal := make(chan birpc.ClientConnector, 1)
+	rpcInternal <- mCC
+	cM := engine.NewConnManager(cfg)
+	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), utils.AttributeSv1, rpcInternal)
+
+	adms := &AdminSv1{
+		dm:  dm,
+		cfg: cfg,
+	}
+
+	argsCharger1 := &ChargerWithAPIOpts{
+		ChargerProfile: &engine.ChargerProfile{
+			Tenant: "cgrates.org",
+			ID:     "CHARGER1",
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				},
+			},
+			RunID:        "run_1",
+			AttributeIDs: []string{"ATTR1", "ATTR2"},
+			FilterIDs:    []string{"*string:~*req.Account:1001"},
+		},
+		APIOpts: nil,
+	}
+
+	var setReply string
+	if err := adms.SetChargerProfile(context.Background(), argsCharger1, &setReply); err != nil {
+		t.Error(err)
+	} else if setReply != "OK" {
+		t.Error("Unexpected reply returned:", setReply)
+	}
+
+	argsCharger2 := &ChargerWithAPIOpts{
+		ChargerProfile: &engine.ChargerProfile{
+			Tenant: "cgrates.org",
+			ID:     "CHARGER2",
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
+			RunID:        "run_2",
+			AttributeIDs: []string{"ATTR3"},
+			FilterIDs:    []string{"*string:~*req.Account:1001"},
+		},
+		APIOpts: nil,
+	}
+
+	if err := adms.SetChargerProfile(context.Background(), argsCharger2, &setReply); err != nil {
+		t.Error(err)
+	} else if setReply != "OK" {
+		t.Error("Unexpected reply returned:", setReply)
+	}
+
+	cS := engine.NewChargerService(dm, fltrs, cfg, cM)
+	cSv1 := NewChargerSv1(cS)
+
+	argsGetForEvent := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "EventTest",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+		},
+		APIOpts: map[string]interface{}{},
+	}
+	exp := engine.ChargerProfiles{
+		{
+
+			Tenant: "cgrates.org",
+			ID:     "CHARGER2",
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
+			RunID:        "run_2",
+			AttributeIDs: []string{"ATTR3"},
+			FilterIDs:    []string{"*string:~*req.Account:1001"},
+		},
+		{
+			Tenant: "cgrates.org",
+			ID:     "CHARGER1",
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				},
+			},
+			RunID:        "run_1",
+			AttributeIDs: []string{"ATTR1", "ATTR2"},
+			FilterIDs:    []string{"*string:~*req.Account:1001"},
+		},
+	}
+	var reply engine.ChargerProfiles
+	if err := cSv1.GetChargersForEvent(context.Background(), argsGetForEvent, &reply); err != nil {
+		t.Error(err)
+	} else {
+		if utils.ToJSON(reply) != utils.ToJSON(exp) {
+			t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ToJSON(exp), utils.ToJSON(reply))
+		}
+	}
+
+	argsCharger2 = &ChargerWithAPIOpts{
+		ChargerProfile: &engine.ChargerProfile{
+			Tenant: "cgrates.org",
+			ID:     "CHARGER2",
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
+			RunID:        "run_2",
+			AttributeIDs: []string{"ATTR3"},
+			FilterIDs:    []string{"*string:~*req.Account:1002"},
+		},
+		APIOpts: nil,
+	}
+
+	if err := adms.SetChargerProfile(context.Background(), argsCharger2, &setReply); err != nil {
+		t.Error(err)
+	} else if setReply != "OK" {
+		t.Error("Unexpected reply returned:", setReply)
+	}
+
+	argsProcessEv := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "EventTest",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+		},
+		APIOpts: map[string]interface{}{},
+	}
+	expProcessEv := []*engine.ChrgSProcessEventReply{
+		{
+			ChargerSProfile: "CHARGER1",
+			AlteredFields:   []string{"*opts.*runID", "*opts.*chargeID"},
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "EventTest",
+				Event: map[string]interface{}{
+					utils.AccountField: "1001",
+				},
+				APIOpts: map[string]interface{}{
+					utils.OptsAttributesProfileIDs: []string{"ATTR1", "ATTR2"},
+					utils.MetaChargeID:             "",
+					utils.OptsContext:              utils.MetaChargers,
+					utils.Subsys:                   utils.MetaChargers,
+					utils.MetaRunID:                "run_1",
+				},
+			},
+		},
+	}
+	var replyProcessEv []*engine.ChrgSProcessEventReply
+	if err := cSv1.ProcessEvent(context.Background(), argsProcessEv, &replyProcessEv); err != nil {
+		t.Error(err)
+	} else {
+		expProcessEv[0].CGREvent.APIOpts[utils.MetaChargeID] = replyProcessEv[0].CGREvent.APIOpts[utils.MetaChargeID]
+		if !reflect.DeepEqual(replyProcessEv, expProcessEv) {
+			t.Errorf("expected: <%+v>, \nreceived: <%+v>",
+				utils.ToJSON(expProcessEv), utils.ToJSON(replyProcessEv))
+		}
+	}
+}
+
+func TestChargersSv1Ping(t *testing.T) {
+	cSv1 := new(ChargerSv1)
+	var reply string
+	if err := cSv1.Ping(nil, nil, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.Pong {
+		t.Errorf("Unexpected reply error")
+	}
 }

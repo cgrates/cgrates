@@ -1429,3 +1429,29 @@ func TestDispatchersGetDispatcherHostsGetHostErr(t *testing.T) {
 
 	dm.DataDB().Flush(utils.EmptyString)
 }
+
+func TestDispatchersSetDispatcherHostErr(t *testing.T) {
+	engine.Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	adms := &AdminSv1{
+		cfg: cfg,
+	}
+
+	dspHost := &engine.DispatcherHostWithAPIOpts{
+		DispatcherHost: &engine.DispatcherHost{
+			RemoteHost: &config.RemoteHost{
+				ID: "TEST",
+			},
+		},
+	}
+
+	var reply string
+	experr := "SERVER_ERROR: NO_DATABASE_CONNECTION"
+
+	if err := adms.SetDispatcherHost(context.Background(), dspHost, &reply); err == nil ||
+		err.Error() != experr {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+
+}
