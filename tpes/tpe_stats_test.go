@@ -127,6 +127,47 @@ func TestTPEExportStats(t *testing.T) {
 	}
 }
 
+func TestTPEExportItemsStatsNoDbConn(t *testing.T) {
+	engine.Cache.Clear(nil)
+	wrtr := new(bytes.Buffer)
+	tpStq := TPStats{
+		dm: nil,
+	}
+	stq := &engine.StatQueueProfile{
+		Tenant: "cgrates.org",
+		ID:     "SQ_2",
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
+		QueueLength: 14,
+		Metrics: []*engine.MetricWithFilters{
+			{
+				MetricID: utils.MetaASR,
+			},
+			{
+				MetricID: utils.MetaTCD,
+			},
+			{
+				MetricID: utils.MetaPDD,
+			},
+			{
+				MetricID: utils.MetaTCC,
+			},
+			{
+				MetricID: utils.MetaTCD,
+			},
+		},
+		ThresholdIDs: []string{utils.MetaNone},
+	}
+	tpStq.dm.SetStatQueueProfile(context.Background(), stq, false)
+	err := tpStq.exportItems(context.Background(), wrtr, "cgrates.org", []string{"SQ_2"})
+	if err != utils.ErrNoDatabaseConn {
+		t.Errorf("Expected %v\n but received %v", utils.ErrNoDatabaseConn, err)
+	}
+}
+
 func TestTPEExportItemsStatsIDNotFound(t *testing.T) {
 	wrtr := new(bytes.Buffer)
 	cfg := config.NewDefaultCGRConfig()

@@ -93,6 +93,30 @@ func TestTPEExportItemsChargers(t *testing.T) {
 	}
 }
 
+func TestTPEExportItemsChargersNoDbConn(t *testing.T) {
+	engine.Cache.Clear(nil)
+	wrtr := new(bytes.Buffer)
+	tpChgr := TPChargers{
+		dm: nil,
+	}
+	chgr := &engine.ChargerProfile{
+		Tenant:       "cgrates.org",
+		ID:           "Chargers1",
+		RunID:        utils.MetaDefault,
+		AttributeIDs: []string{"*none"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
+	}
+	tpChgr.dm.SetChargerProfile(context.Background(), chgr, false)
+	err := tpChgr.exportItems(context.Background(), wrtr, "cgrates.org", []string{"Chargers1"})
+	if err != utils.ErrNoDatabaseConn {
+		t.Errorf("Expected %v\n but received %v", utils.ErrNoDatabaseConn, err)
+	}
+}
+
 func TestTPEExportItemsChargersIDNotFound(t *testing.T) {
 	wrtr := new(bytes.Buffer)
 	cfg := config.NewDefaultCGRConfig()

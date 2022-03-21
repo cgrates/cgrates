@@ -113,6 +113,40 @@ func TestTPEExportRoutes(t *testing.T) {
 	}
 }
 
+func TestTPEExportItemsRoutesNoDbConn(t *testing.T) {
+	engine.Cache.Clear(nil)
+	wrtr := new(bytes.Buffer)
+	tpRte := TPRoutes{
+		dm: nil,
+	}
+	rte := &engine.RouteProfile{
+		ID:     "ROUTE_2003",
+		Tenant: "cgrates.org",
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
+		Sorting:           utils.MetaWeight,
+		SortingParameters: []string{},
+		Routes: []*engine.Route{
+			{
+				ID: "route1",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 20,
+					},
+				},
+			},
+		},
+	}
+	tpRte.dm.SetRouteProfile(context.Background(), rte, false)
+	err := tpRte.exportItems(context.Background(), wrtr, "cgrates.org", []string{"ROUTE_2003"})
+	if err != utils.ErrNoDatabaseConn {
+		t.Errorf("Expected %v\n but received %v", utils.ErrNoDatabaseConn, err)
+	}
+}
+
 func TestTPEExportItemsRoutesIDNotFound(t *testing.T) {
 	wrtr := new(bytes.Buffer)
 	cfg := config.NewDefaultCGRConfig()

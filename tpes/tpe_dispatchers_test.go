@@ -109,6 +109,38 @@ func TestTPEExportItemsDispatchers(t *testing.T) {
 	}
 }
 
+func TestTPEExportItemsDispatchersNoDbConn(t *testing.T) {
+	engine.Cache.Clear(nil)
+	wrtr := new(bytes.Buffer)
+	tpDsp := TPDispatchers{
+		dm: nil,
+	}
+	dsp := &engine.DispatcherProfile{
+		Tenant:    "cgrates.org",
+		ID:        "Dsp1",
+		FilterIDs: []string{"*string:~*req.Account:1001", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
+		Strategy:  utils.MetaFirst,
+		StrategyParams: map[string]interface{}{
+			utils.MetaDefaultRatio: "false",
+		},
+		Weight: 20,
+		Hosts: engine.DispatcherHostProfiles{
+			{
+				ID:        "C1",
+				FilterIDs: []string{},
+				Weight:    10,
+				Params:    map[string]interface{}{"0": "192.168.54.203"},
+				Blocker:   false,
+			},
+		},
+	}
+	tpDsp.dm.SetDispatcherProfile(context.Background(), dsp, false)
+	err := tpDsp.exportItems(context.Background(), wrtr, "cgrates.org", []string{"Dsp1"})
+	if err != utils.ErrNoDatabaseConn {
+		t.Errorf("Expected %v\n but received %v", utils.ErrNoDatabaseConn, err)
+	}
+}
+
 func TestTPEExportItemsDispatchersIDNotFound(t *testing.T) {
 	wrtr := new(bytes.Buffer)
 	cfg := config.NewDefaultCGRConfig()
