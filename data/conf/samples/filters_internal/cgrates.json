@@ -1,42 +1,36 @@
 {
-// CGRateS Configuration file
-//
-
 
 "general": {
 	"log_level": 7,
-	"node_id": "CGRFilterS",
+	"node_id": "CGRFilterS"
 },
 
 
 "listen": {
 	"rpc_json": ":2012",
 	"rpc_gob": ":2013",
-	"http": ":2080",
+	"http": ":2080"
 },
 
 
 "data_db": {
-	"db_type": "*internal",	
+	"db_type": "*internal"
 },
-
-
-
 
 
 "rals": {
 	"enabled": true,
-	"thresholds_conns": ["*localhost"],
+	"thresholds_conns": ["*localhost"]
 },
 
 "schedulers": {
-	"enabled": true,				
+	"enabled": true				
 },
 
 "filters": {								
 	"stats_conns": ["*localhost"],
 	"resources_conns": ["*localhost"],
-	"accounts_conns": ["*localhost"],
+	"accounts_conns": ["*localhost"]
 },
 
 "accounts": {
@@ -46,42 +40,58 @@
 "resources": {
 	"enabled": true,
 	"indexed_selects":false,					
-	"store_interval": "-1",
+	"store_interval": "-1"
 },
 
 
 "stats": {
 	"enabled": true,
 	"indexed_selects":false,					
-	"store_interval": "-1",
+	"store_interval": "-1"
 },
 
 
 "thresholds": {
 	"enabled": true,
 	"indexed_selects":false,					
-	"store_interval": "-1",
+	"actions_conns": ["*localhost"],					
+	"store_interval": "-1"
+},
+
+"actions": {
+	"enabled": true
 },
 
 
 "attributes": {
 	"enabled": true,
-	"prefix_indexed_fields": ["*req.CustomField"],
+	"prefix_indexed_fields": ["*req.CustomField"]
 },
 
 
 "chargers": {
 	"enabled": true,
 	"suffix_indexed_fields": ["*req.Subject"],
-	"attributes_conns": ["*internal"],
+	"attributes_conns": ["*internal"]
 },
 
 
 "admins": {
 	"enabled": true,
 	"caches_conns":["*localhost"],
-	"scheduler_conns": ["*internal"],
+	"scheduler_conns": ["*internal"]
 },
+
+"loaders": [
+	{
+		"id": "*default",
+		"enabled": true,
+		"tenant": "cgrates.org",
+		"lockfile_path": ".cgr.lck",
+		"tp_in_dir": "/usr/share/cgrates/tariffplans/testit",
+		"tp_out_dir": ""
+	}
+]
 
 
 }

@@ -1,25 +1,22 @@
 {
-// CGRateS Configuration file
-//
-
 
 "general": {
 	"log_level": 7,
-	"node_id": "CGRFilterS",
+	"node_id": "CGRFilterS"
 },
 
 
 "listen": {
 	"rpc_json": ":2012",
 	"rpc_gob": ":2013",
-	"http": ":2080",
+	"http": ":2080"
 },
 
 
-"data_db": {								// database used to store runtime data (eg: accounts, cdr stats)
-	"db_type": "redis",						// data_db type: <redis|mongo>
-	"db_port": 6379, 						// data_db port to reach the database
-	"db_name": "10", 						// data_db database name to connect to
+"data_db": {								
+	"db_type": "redis",						
+	"db_port": 6379, 						
+	"db_name": "10"							
 },
 
 
@@ -27,17 +24,17 @@
 
 "rals": {
 	"enabled": true,
-	"thresholds_conns": ["*localhost"],
+	"thresholds_conns": ["*localhost"]
 },
 
 "schedulers": {
-	"enabled": true,				
+	"enabled": true			
 },
 
 "filters": {								
 	"stats_conns": ["*localhost"],
 	"resources_conns": ["*localhost"],
-	"accounts_conns": ["*localhost"],
+	"accounts_conns": ["*localhost"]
 },
 	
 "accounts": {
@@ -48,42 +45,58 @@
 "resources": {
 	"enabled": true,
 	"indexed_selects":false,					
-	"store_interval": "1s",
+	"store_interval": "1s"
 },
 
 
 "stats": {
 	"enabled": true,
 	"indexed_selects":false,					
-	"store_interval": "1s",
+	"store_interval": "1s"
 },
 
 
 "thresholds": {
 	"enabled": true,
-	"indexed_selects":false,					
-	"store_interval": "1s",
+	"indexed_selects":false,
+	"actions_conns": ["*localhost"],					
+	"store_interval": "1s"
+},
+
+"actions": {
+	"enabled": true
 },
 
 
 "attributes": {
 	"enabled": true,
-	"prefix_indexed_fields": ["*req.CustomField"],
+	"prefix_indexed_fields": ["*req.CustomField"]
 },
 
 
 "chargers": {
 	"enabled": true,
 	"suffix_indexed_fields": ["*req.Subject"],
-	"attributes_conns": ["*internal"],
+	"attributes_conns": ["*internal"]
 },
 
 
 "admins": {
 	"enabled": true,
 	"caches_conns":["*localhost"],
-	"scheduler_conns": ["*internal"],
+	"scheduler_conns": ["*internal"]
 },
+
+"loaders": [
+	{
+		"id": "*default",
+		"enabled": true,
+		"tenant": "cgrates.org",
+		"lockfile_path": ".cgr.lck",
+		"tp_in_dir": "/usr/share/cgrates/tariffplans/testit",
+		"tp_out_dir": ""
+	}
+]
 
 
 }
