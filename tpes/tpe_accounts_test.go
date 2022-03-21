@@ -123,6 +123,44 @@ func TestTPEExportItemsAccount(t *testing.T) {
 	}
 }
 
+func TestTPEExportItemsAccountNoDbConn(t *testing.T) {
+	wrtr := new(bytes.Buffer)
+	tpAcc := TPAccounts{
+		dm: nil,
+	}
+	acc := &utils.Account{
+		Tenant: "cgrates.org",
+		ID:     "Account_simple",
+		Opts:   map[string]interface{}{},
+		Balances: map[string]*utils.Balance{
+			"VoiceBalance": {
+				ID:        "VoiceBalance",
+				FilterIDs: []string{"*string:~*req.Account:1001"},
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 12,
+					},
+				},
+				Type: "*abstract",
+				Opts: map[string]interface{}{
+					"Destination": "10",
+				},
+				Units: utils.NewDecimal(0, 0),
+			},
+		},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
+	}
+	tpAcc.dm.SetAccount(context.Background(), acc, false)
+	err := tpAcc.exportItems(context.Background(), wrtr, "cgrates.org", []string{"Account_simple"})
+	if err != utils.ErrNoDatabaseConn {
+		t.Errorf("Expected %v\n but received %v", utils.ErrNoDatabaseConn, err)
+	}
+}
+
 // type mockWrtr struct {
 // 	io.Writer
 // }

@@ -121,6 +121,44 @@ func TestTPEExportItemsFilters(t *testing.T) {
 	}
 }
 
+func TestTPEExportItemsFiltersNoDbConn(t *testing.T) {
+	engine.Cache.Clear(nil)
+	wrtr := new(bytes.Buffer)
+	tpFltr := TPFilters{
+		dm: nil,
+	}
+	fltr := &engine.Filter{
+		Tenant: utils.CGRateSorg,
+		ID:     "fltr_for_prf",
+		Rules: []*engine.FilterRule{
+			{
+				Type:    utils.MetaString,
+				Element: "~*req.Subject",
+				Values:  []string{"1004", "6774", "22312"},
+			},
+			{
+				Type:    utils.MetaString,
+				Element: "~*opts.Subsystems",
+				Values:  []string{"*attributes"},
+			},
+			{
+				Type:    utils.MetaPrefix,
+				Element: "~*req.Destinations",
+				Values:  []string{"+0775", "+442"},
+			},
+			{
+				Type:    utils.MetaExists,
+				Element: "~*req.NumberOfEvents",
+			},
+		},
+	}
+	tpFltr.dm.SetFilter(context.Background(), fltr, false)
+	err := tpFltr.exportItems(context.Background(), wrtr, "cgrates.org", []string{"fltr_for_prf"})
+	if err != utils.ErrNoDatabaseConn {
+		t.Errorf("Expected %v\n but received %v", utils.ErrNoDatabaseConn, err)
+	}
+}
+
 func TestTPEExportItemsFiltersIDNotFound(t *testing.T) {
 	wrtr := new(bytes.Buffer)
 	cfg := config.NewDefaultCGRConfig()

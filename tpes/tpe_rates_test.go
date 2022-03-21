@@ -125,6 +125,46 @@ func TestTPEExportItemsRates(t *testing.T) {
 	}
 }
 
+func TestTPEExportItemsRatesNoDbConn(t *testing.T) {
+	engine.Cache.Clear(nil)
+	wrtr := new(bytes.Buffer)
+	tpRt := TPRates{
+		dm: nil,
+	}
+	rt := &utils.RateProfile{
+		Tenant:    utils.CGRateSorg,
+		ID:        "TEST_RATE_TEST",
+		FilterIDs: []string{"*string:~*req.Account:dan"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
+		MaxCostStrategy: "*free",
+		Rates: map[string]*utils.Rate{
+			"RT_WEEK": {
+				ID: "RT_WEEK",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 0,
+					},
+				},
+				ActivationTimes: "* * * * 1-5",
+				IntervalRates: []*utils.IntervalRate{
+					{
+						IntervalStart: utils.NewDecimal(0, 0),
+					},
+				},
+			},
+		},
+	}
+	tpRt.dm.SetRateProfile(context.Background(), rt, false, false)
+	err := tpRt.exportItems(context.Background(), wrtr, "cgrates.org", []string{"fltr_for_prf"})
+	if err != utils.ErrNoDatabaseConn {
+		t.Errorf("Expected %v\n but received %v", utils.ErrNoDatabaseConn, err)
+	}
+}
+
 func TestTPEExportItemsRatesIDNotFound(t *testing.T) {
 	wrtr := new(bytes.Buffer)
 	cfg := config.NewDefaultCGRConfig()

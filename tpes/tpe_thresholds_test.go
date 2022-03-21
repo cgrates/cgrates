@@ -99,6 +99,33 @@ func TestTPEExportThresholds(t *testing.T) {
 	}
 }
 
+func TestTPEExportItemsThresholdsNoDbConn(t *testing.T) {
+	engine.Cache.Clear(nil)
+	wrtr := new(bytes.Buffer)
+	tpThd := TPThresholds{
+		dm: nil,
+	}
+	thd := &engine.ThresholdProfile{
+		Tenant:           "cgrates.org",
+		ID:               "THD_2",
+		FilterIDs:        []string{"*string:~*req.Account:1001"},
+		ActionProfileIDs: []string{"actPrfID"},
+		MaxHits:          7,
+		MinHits:          0,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
+		Async: true,
+	}
+	tpThd.dm.SetThresholdProfile(context.Background(), thd, false)
+	err := tpThd.exportItems(context.Background(), wrtr, "cgrates.org", []string{"THD_2"})
+	if err != utils.ErrNoDatabaseConn {
+		t.Errorf("Expected %v\n but received %v", utils.ErrNoDatabaseConn, err)
+	}
+}
+
 func TestTPEExportItemsThresholdsIDNotFound(t *testing.T) {
 	wrtr := new(bytes.Buffer)
 	cfg := config.NewDefaultCGRConfig()

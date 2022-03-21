@@ -21,6 +21,7 @@ package tpes
 import (
 	"bytes"
 	"testing"
+	"time"
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
@@ -28,38 +29,37 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func TestTPEnewTPResources(t *testing.T) {
+func TestTPEnewTPDispatchersHost(t *testing.T) {
 	// dataDB := &engine.DataDBM
 	// dm := &engine.NewDataManager()
 	cfg := config.NewDefaultCGRConfig()
 	connMng := engine.NewConnManager(cfg)
 	dm := engine.NewDataManager(&engine.DataDBMock{
-		GetResourceProfileDrvF: func(ctx *context.Context, tnt string, id string) (*engine.ResourceProfile, error) {
-			rsc := &engine.ResourceProfile{
-				Tenant:            "cgrates.org",
-				ID:                "ResGroup1",
-				FilterIDs:         []string{"*string:~*req.Account:1001"},
-				Limit:             10,
-				AllocationMessage: "Approved",
-				Weights: utils.DynamicWeights{
-					{
-						Weight: 20,
-					}},
-				ThresholdIDs: []string{utils.MetaNone},
+		GetDispatcherHostDrvF: func(ctx *context.Context, str1 string, str2 string) (*engine.DispatcherHost, error) {
+			dsph := &engine.DispatcherHost{
+				Tenant: "cgrates.org",
+				RemoteHost: &config.RemoteHost{
+					ID:              "DSH1",
+					Address:         "*internal",
+					ConnectAttempts: 1,
+					Reconnects:      3,
+					ConnectTimeout:  time.Minute,
+					ReplyTimeout:    2 * time.Minute,
+				},
 			}
-			return rsc, nil
+			return dsph, nil
 		},
 	}, nil, connMng)
-	exp := &TPResources{
+	exp := &TPDispatcherHosts{
 		dm: dm,
 	}
-	rcv := newTPResources(dm)
+	rcv := newTPDispatcherHosts(dm)
 	if rcv.dm != exp.dm {
 		t.Errorf("Expected %v \nbut received %v", exp, rcv)
 	}
 }
 
-func TestTPEExportItemsResources(t *testing.T) {
+func TestTPEExportItemsDispatchersHost(t *testing.T) {
 	wrtr := new(bytes.Buffer)
 	cfg := config.NewDefaultCGRConfig()
 	connMng := engine.NewConnManager(cfg)
@@ -73,54 +73,52 @@ func TestTPEExportItemsResources(t *testing.T) {
 	}
 	defer dataDB.Close()
 	dm := engine.NewDataManager(dataDB, config.CgrConfig().CacheCfg(), connMng)
-	tpRsc := TPResources{
+	tpDsph := TPDispatcherHosts{
 		dm: dm,
 	}
-	rsc := &engine.ResourceProfile{
-		Tenant:            "cgrates.org",
-		ID:                "ResGroup1",
-		FilterIDs:         []string{"*string:~*req.Account:1001"},
-		Limit:             10,
-		AllocationMessage: "Approved",
-		Weights: utils.DynamicWeights{
-			{
-				Weight: 20,
-			}},
-		ThresholdIDs: []string{utils.MetaNone},
+	dsph := &engine.DispatcherHost{
+		Tenant: "cgrates.org",
+		RemoteHost: &config.RemoteHost{
+			ID:              "DSH1",
+			Address:         "*internal",
+			ConnectAttempts: 1,
+			Reconnects:      3,
+			ConnectTimeout:  time.Minute,
+			ReplyTimeout:    2 * time.Minute,
+		},
 	}
-	tpRsc.dm.SetResourceProfile(context.Background(), rsc, false)
-	err = tpRsc.exportItems(context.Background(), wrtr, "cgrates.org", []string{"ResGroup1"})
+	tpDsph.dm.SetDispatcherHost(context.Background(), dsph)
+	err = tpDsph.exportItems(context.Background(), wrtr, "cgrates.org", []string{"DSH1"})
 	if err != nil {
 		t.Errorf("Expected nil\n but received %v", err)
 	}
 }
 
-func TestTPEExportItemsResourcesNoDbConn(t *testing.T) {
+func TestTPEExportItemsDispatcherHostsNoDbConn(t *testing.T) {
 	engine.Cache.Clear(nil)
 	wrtr := new(bytes.Buffer)
-	tpRsc := TPResources{
+	tpDsph := TPDispatcherHosts{
 		dm: nil,
 	}
-	rsc := &engine.ResourceProfile{
-		Tenant:            "cgrates.org",
-		ID:                "ResGroup1",
-		FilterIDs:         []string{"*string:~*req.Account:1001"},
-		Limit:             10,
-		AllocationMessage: "Approved",
-		Weights: utils.DynamicWeights{
-			{
-				Weight: 20,
-			}},
-		ThresholdIDs: []string{utils.MetaNone},
+	dsph := &engine.DispatcherHost{
+		Tenant: "cgrates.org",
+		RemoteHost: &config.RemoteHost{
+			ID:              "DSH1",
+			Address:         "*internal",
+			ConnectAttempts: 1,
+			Reconnects:      3,
+			ConnectTimeout:  time.Minute,
+			ReplyTimeout:    2 * time.Minute,
+		},
 	}
-	tpRsc.dm.SetResourceProfile(context.Background(), rsc, false)
-	err := tpRsc.exportItems(context.Background(), wrtr, "cgrates.org", []string{"ResGroup1"})
+	tpDsph.dm.SetDispatcherHost(context.Background(), dsph)
+	err := tpDsph.exportItems(context.Background(), wrtr, "cgrates.org", []string{"DSH1"})
 	if err != utils.ErrNoDatabaseConn {
 		t.Errorf("Expected %v\n but received %v", utils.ErrNoDatabaseConn, err)
 	}
 }
 
-func TestTPEExportItemsResourcesIDNotFound(t *testing.T) {
+func TestTPEExportItemsDispatchersIDNotFoundHost(t *testing.T) {
 	wrtr := new(bytes.Buffer)
 	cfg := config.NewDefaultCGRConfig()
 	connMng := engine.NewConnManager(cfg)
@@ -134,24 +132,23 @@ func TestTPEExportItemsResourcesIDNotFound(t *testing.T) {
 	}
 	defer dataDB.Close()
 	dm := engine.NewDataManager(dataDB, config.CgrConfig().CacheCfg(), connMng)
-	tpRsc := TPResources{
+	tpDsph := TPDispatcherHosts{
 		dm: dm,
 	}
-	rsc := &engine.ResourceProfile{
-		Tenant:            "cgrates.org",
-		ID:                "ResGroup1",
-		FilterIDs:         []string{"*string:~*req.Account:1001"},
-		Limit:             10,
-		AllocationMessage: "Approved",
-		Weights: utils.DynamicWeights{
-			{
-				Weight: 20,
-			}},
-		ThresholdIDs: []string{utils.MetaNone},
+	dsph := &engine.DispatcherHost{
+		Tenant: "cgrates.org",
+		RemoteHost: &config.RemoteHost{
+			ID:              "DSH1",
+			Address:         "*internal",
+			ConnectAttempts: 1,
+			Reconnects:      3,
+			ConnectTimeout:  time.Minute,
+			ReplyTimeout:    2 * time.Minute,
+		},
 	}
-	tpRsc.dm.SetResourceProfile(context.Background(), rsc, false)
-	err = tpRsc.exportItems(context.Background(), wrtr, "cgrates.org", []string{"ResGroup2"})
-	errExpect := "<NOT_FOUND> cannot find ResourceProfile with id: <ResGroup2>"
+	tpDsph.dm.SetDispatcherHost(context.Background(), dsph)
+	err = tpDsph.exportItems(context.Background(), wrtr, "cgrates.org", []string{"DSH2"})
+	errExpect := "<NOT_FOUND> cannot find DispatcherHost with id: <DSH2>"
 	if err.Error() != errExpect {
 		t.Errorf("Expected %v\n but received %v", errExpect, err)
 	}

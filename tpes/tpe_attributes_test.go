@@ -115,6 +115,41 @@ func TestTPEExportItemsAttributes(t *testing.T) {
 	}
 }
 
+func TestTPEExportItemsAttributesNoDbConn(t *testing.T) {
+	engine.Cache.Clear(nil)
+	wrtr := new(bytes.Buffer)
+	tpAttr := TPAttributes{
+		dm: nil,
+	}
+	attr := &engine.AttributeProfile{
+		Tenant:    utils.CGRateSorg,
+		ID:        "TEST_ATTRIBUTES_TEST",
+		FilterIDs: []string{"*string:~*req.Account:1002", "*exists:~*opts.*usage:"},
+		Attributes: []*engine.Attribute{
+			{
+				Path:  utils.AccountField,
+				Type:  utils.MetaConstant,
+				Value: nil,
+			},
+			{
+				Path:  "*tenant",
+				Type:  utils.MetaConstant,
+				Value: nil,
+			},
+		},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
+	}
+	tpAttr.dm.SetAttributeProfile(context.Background(), attr, false)
+	err := tpAttr.exportItems(context.Background(), wrtr, "cgrates.org", []string{"TEST_ATTRIBUTES_TEST"})
+	if err != utils.ErrNoDatabaseConn {
+		t.Errorf("Expected %v\n but received %v", utils.ErrNoDatabaseConn, err)
+	}
+}
+
 func TestTPEExportItemsAttributesIDNotFound(t *testing.T) {
 	wrtr := new(bytes.Buffer)
 	cfg := config.NewDefaultCGRConfig()

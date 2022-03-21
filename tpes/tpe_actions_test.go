@@ -119,6 +119,68 @@ func TestTPEExportItemsActions(t *testing.T) {
 	}
 }
 
+func TestTPEExportItemsActionsEmpty(t *testing.T) {
+	wrtr := new(bytes.Buffer)
+	cfg := config.NewDefaultCGRConfig()
+	connMng := engine.NewConnManager(cfg)
+	dataDB, err := engine.NewDataDBConn(cfg.DataDbCfg().Type,
+		cfg.DataDbCfg().Host, cfg.DataDbCfg().Port,
+		cfg.DataDbCfg().Name, cfg.DataDbCfg().User,
+		cfg.DataDbCfg().Password, cfg.GeneralCfg().DBDataEncoding,
+		cfg.DataDbCfg().Opts, cfg.DataDbCfg().Items)
+	if err != nil {
+		t.Error(err)
+	}
+	defer dataDB.Close()
+	dm := engine.NewDataManager(dataDB, config.CgrConfig().CacheCfg(), connMng)
+	tpAct := TPActions{
+		dm: dm,
+	}
+	act := &engine.ActionProfile{}
+	tpAct.dm.SetActionProfile(context.Background(), act, false)
+	err = tpAct.exportItems(context.Background(), wrtr, "cgrates.org", []string{})
+	if err != nil {
+		t.Errorf("Expected nil\n but received %v", err)
+	}
+}
+
+func TestTPEExportItemsActionsNoDbConn(t *testing.T) {
+	engine.Cache.Clear(nil)
+	wrtr := new(bytes.Buffer)
+	tpAct := TPActions{
+		dm: nil,
+	}
+	act := &engine.ActionProfile{
+		Tenant: "cgrates.org",
+		ID:     "SET_BAL",
+		FilterIDs: []string{
+			"*string:~*req.Account:1001"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
+		Targets:  map[string]utils.StringSet{utils.MetaAccounts: {"1001": {}}},
+		Schedule: utils.MetaASAP,
+		Actions: []*engine.APAction{
+			{
+				ID:   "SET_BAL",
+				Type: utils.MetaSetBalance,
+				Diktats: []*engine.APDiktat{
+					{
+						Path:  "MONETARY",
+						Value: "10",
+					}},
+			},
+		},
+	}
+	tpAct.dm.SetActionProfile(context.Background(), act, false)
+	err := tpAct.exportItems(context.Background(), wrtr, "cgrates.org", []string{"SET_BAL"})
+	if err != utils.ErrNoDatabaseConn {
+		t.Errorf("Expected %v\n but received %v", utils.ErrNoDatabaseConn, err)
+	}
+}
+
 func TestTPEExportItemsActionsIDNotFound(t *testing.T) {
 	wrtr := new(bytes.Buffer)
 	cfg := config.NewDefaultCGRConfig()
