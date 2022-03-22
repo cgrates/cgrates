@@ -1,7 +1,4 @@
 {
-// CGRateS Configuration file
-//
-
 
 "general": {
 	"log_level": 7,
@@ -63,6 +60,7 @@
 	"prefix_indexed_fields":["*req.Destination"],
 	"stats_conns": ["*internal"],
 	"resources_conns": ["*internal"],
+	"rates_conns": ["*internal"]
 },
 
 
@@ -77,7 +75,7 @@
 
 
 "admins": {
-	"enabled": true,
+	"enabled": true
 },
 
 
@@ -100,11 +98,11 @@
 "filters": {
 	"stats_conns": ["*internal"],
 	"resources_conns": ["*internal"],
-	"accounts_conns": ["*internal"],
+	"accounts_conns": ["*internal"]
 },
 
 "tpes": {
 	"enabled": true
-},
+}
 
 }
