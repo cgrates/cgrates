@@ -68,3 +68,481 @@ func TestDatamanagerCacheDataFromDBMetaAPIBanErr(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestDatamanagerCacheDataFromDBMustBeCached(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	dm := NewDataManager(nil, cfg.CacheCfg(), nil)
+	dm.cacheCfg.Partitions = map[string]*config.CacheParamCfg{
+		utils.CachePrefixToInstance[utils.AttributeProfilePrefix]: {
+			Limit: 1,
+		},
+	}
+	err := dm.CacheDataFromDB(context.Background(), utils.AttributeProfilePrefix, []string{utils.MetaAny}, true)
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func TestDatamanagerCacheDataFromDBNotCachedResourceProfiles(t *testing.T) {
+	// cfg := config.NewDefaultCGRConfig()
+	// dm := NewDataManager(nil, cfg.CacheCfg(), nil)
+	cfg := config.NewDefaultCGRConfig()
+	connMng := NewConnManager(cfg)
+	dataDB, err := NewDataDBConn(cfg.DataDbCfg().Type,
+		cfg.DataDbCfg().Host, cfg.DataDbCfg().Port,
+		cfg.DataDbCfg().Name, cfg.DataDbCfg().User,
+		cfg.DataDbCfg().Password, cfg.GeneralCfg().DBDataEncoding,
+		cfg.DataDbCfg().Opts, cfg.DataDbCfg().Items)
+	if err != nil {
+		t.Error(err)
+	}
+	defer dataDB.Close()
+	dm := NewDataManager(dataDB, config.CgrConfig().CacheCfg(), connMng)
+	dm.cacheCfg.Partitions = map[string]*config.CacheParamCfg{
+		utils.CachePrefixToInstance[utils.ResourceProfilesPrefix]: {
+			Limit: 1,
+		},
+		utils.CacheRPCResponses: {
+			Limit: 1,
+		},
+	}
+	err = dm.CacheDataFromDB(context.Background(), utils.ResourceProfilesPrefix, []string{utils.MetaAny}, false)
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func TestDatamanagerCacheDataFromDBNotCachedResources(t *testing.T) {
+	// cfg := config.NewDefaultCGRConfig()
+	// dm := NewDataManager(nil, cfg.CacheCfg(), nil)
+	cfg := config.NewDefaultCGRConfig()
+	connMng := NewConnManager(cfg)
+	dataDB, err := NewDataDBConn(cfg.DataDbCfg().Type,
+		cfg.DataDbCfg().Host, cfg.DataDbCfg().Port,
+		cfg.DataDbCfg().Name, cfg.DataDbCfg().User,
+		cfg.DataDbCfg().Password, cfg.GeneralCfg().DBDataEncoding,
+		cfg.DataDbCfg().Opts, cfg.DataDbCfg().Items)
+	if err != nil {
+		t.Error(err)
+	}
+	defer dataDB.Close()
+	dm := NewDataManager(dataDB, config.CgrConfig().CacheCfg(), connMng)
+	dm.cacheCfg.Partitions = map[string]*config.CacheParamCfg{
+		utils.CachePrefixToInstance[utils.ResourcesPrefix]: {
+			Limit: 1,
+		},
+		utils.CacheRPCResponses: {
+			Limit: 1,
+		},
+	}
+	err = dm.CacheDataFromDB(context.Background(), utils.ResourcesPrefix, []string{utils.MetaAny}, false)
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func TestDatamanagerCacheDataFromDBNotCachedStatQueueProfiles(t *testing.T) {
+	// cfg := config.NewDefaultCGRConfig()
+	// dm := NewDataManager(nil, cfg.CacheCfg(), nil)
+	cfg := config.NewDefaultCGRConfig()
+	connMng := NewConnManager(cfg)
+	dataDB, err := NewDataDBConn(cfg.DataDbCfg().Type,
+		cfg.DataDbCfg().Host, cfg.DataDbCfg().Port,
+		cfg.DataDbCfg().Name, cfg.DataDbCfg().User,
+		cfg.DataDbCfg().Password, cfg.GeneralCfg().DBDataEncoding,
+		cfg.DataDbCfg().Opts, cfg.DataDbCfg().Items)
+	if err != nil {
+		t.Error(err)
+	}
+	defer dataDB.Close()
+	dm := NewDataManager(dataDB, config.CgrConfig().CacheCfg(), connMng)
+	dm.cacheCfg.Partitions = map[string]*config.CacheParamCfg{
+		utils.CachePrefixToInstance[utils.StatQueueProfilePrefix]: {
+			Limit: 1,
+		},
+		utils.CacheRPCResponses: {
+			Limit: 1,
+		},
+	}
+	err = dm.CacheDataFromDB(context.Background(), utils.StatQueueProfilePrefix, []string{utils.MetaAny}, false)
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func TestDatamanagerCacheDataFromDBNotCachedStatQueuePrefix(t *testing.T) {
+	// cfg := config.NewDefaultCGRConfig()
+	// dm := NewDataManager(nil, cfg.CacheCfg(), nil)
+	cfg := config.NewDefaultCGRConfig()
+	connMng := NewConnManager(cfg)
+	dataDB, err := NewDataDBConn(cfg.DataDbCfg().Type,
+		cfg.DataDbCfg().Host, cfg.DataDbCfg().Port,
+		cfg.DataDbCfg().Name, cfg.DataDbCfg().User,
+		cfg.DataDbCfg().Password, cfg.GeneralCfg().DBDataEncoding,
+		cfg.DataDbCfg().Opts, cfg.DataDbCfg().Items)
+	if err != nil {
+		t.Error(err)
+	}
+	defer dataDB.Close()
+	dm := NewDataManager(dataDB, config.CgrConfig().CacheCfg(), connMng)
+	dm.cacheCfg.Partitions = map[string]*config.CacheParamCfg{
+		utils.CachePrefixToInstance[utils.StatQueuePrefix]: {
+			Limit: 1,
+		},
+		utils.CacheRPCResponses: {
+			Limit: 1,
+		},
+	}
+	err = dm.CacheDataFromDB(context.Background(), utils.StatQueuePrefix, []string{utils.MetaAny}, false)
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func TestDatamanagerCacheDataFromDBNotCachedThresholdProfilePrefix(t *testing.T) {
+	// cfg := config.NewDefaultCGRConfig()
+	// dm := NewDataManager(nil, cfg.CacheCfg(), nil)
+	cfg := config.NewDefaultCGRConfig()
+	connMng := NewConnManager(cfg)
+	dataDB, err := NewDataDBConn(cfg.DataDbCfg().Type,
+		cfg.DataDbCfg().Host, cfg.DataDbCfg().Port,
+		cfg.DataDbCfg().Name, cfg.DataDbCfg().User,
+		cfg.DataDbCfg().Password, cfg.GeneralCfg().DBDataEncoding,
+		cfg.DataDbCfg().Opts, cfg.DataDbCfg().Items)
+	if err != nil {
+		t.Error(err)
+	}
+	defer dataDB.Close()
+	dm := NewDataManager(dataDB, config.CgrConfig().CacheCfg(), connMng)
+	dm.cacheCfg.Partitions = map[string]*config.CacheParamCfg{
+		utils.CachePrefixToInstance[utils.ThresholdProfilePrefix]: {
+			Limit: 1,
+		},
+		utils.CacheRPCResponses: {
+			Limit: 1,
+		},
+	}
+	err = dm.CacheDataFromDB(context.Background(), utils.ThresholdProfilePrefix, []string{utils.MetaAny}, false)
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func TestDatamanagerCacheDataFromDBNotCachedThresholdPrefix(t *testing.T) {
+	// cfg := config.NewDefaultCGRConfig()
+	// dm := NewDataManager(nil, cfg.CacheCfg(), nil)
+	cfg := config.NewDefaultCGRConfig()
+	connMng := NewConnManager(cfg)
+	dataDB, err := NewDataDBConn(cfg.DataDbCfg().Type,
+		cfg.DataDbCfg().Host, cfg.DataDbCfg().Port,
+		cfg.DataDbCfg().Name, cfg.DataDbCfg().User,
+		cfg.DataDbCfg().Password, cfg.GeneralCfg().DBDataEncoding,
+		cfg.DataDbCfg().Opts, cfg.DataDbCfg().Items)
+	if err != nil {
+		t.Error(err)
+	}
+	defer dataDB.Close()
+	dm := NewDataManager(dataDB, config.CgrConfig().CacheCfg(), connMng)
+	dm.cacheCfg.Partitions = map[string]*config.CacheParamCfg{
+		utils.CachePrefixToInstance[utils.ThresholdPrefix]: {
+			Limit: 1,
+		},
+		utils.CacheRPCResponses: {
+			Limit: 1,
+		},
+	}
+	err = dm.CacheDataFromDB(context.Background(), utils.ThresholdPrefix, []string{utils.MetaAny}, false)
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func TestDatamanagerCacheDataFromDBNotCachedFilterPrefix(t *testing.T) {
+	// cfg := config.NewDefaultCGRConfig()
+	// dm := NewDataManager(nil, cfg.CacheCfg(), nil)
+	cfg := config.NewDefaultCGRConfig()
+	connMng := NewConnManager(cfg)
+	dataDB, err := NewDataDBConn(cfg.DataDbCfg().Type,
+		cfg.DataDbCfg().Host, cfg.DataDbCfg().Port,
+		cfg.DataDbCfg().Name, cfg.DataDbCfg().User,
+		cfg.DataDbCfg().Password, cfg.GeneralCfg().DBDataEncoding,
+		cfg.DataDbCfg().Opts, cfg.DataDbCfg().Items)
+	if err != nil {
+		t.Error(err)
+	}
+	defer dataDB.Close()
+	dm := NewDataManager(dataDB, config.CgrConfig().CacheCfg(), connMng)
+	dm.cacheCfg.Partitions = map[string]*config.CacheParamCfg{
+		utils.CachePrefixToInstance[utils.FilterPrefix]: {
+			Limit: 1,
+		},
+		utils.CacheRPCResponses: {
+			Limit: 1,
+		},
+	}
+	err = dm.CacheDataFromDB(context.Background(), utils.FilterPrefix, []string{utils.MetaAny}, false)
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func TestDatamanagerCacheDataFromDBNotCachedRouteProfilePrefix(t *testing.T) {
+	// cfg := config.NewDefaultCGRConfig()
+	// dm := NewDataManager(nil, cfg.CacheCfg(), nil)
+	cfg := config.NewDefaultCGRConfig()
+	connMng := NewConnManager(cfg)
+	dataDB, err := NewDataDBConn(cfg.DataDbCfg().Type,
+		cfg.DataDbCfg().Host, cfg.DataDbCfg().Port,
+		cfg.DataDbCfg().Name, cfg.DataDbCfg().User,
+		cfg.DataDbCfg().Password, cfg.GeneralCfg().DBDataEncoding,
+		cfg.DataDbCfg().Opts, cfg.DataDbCfg().Items)
+	if err != nil {
+		t.Error(err)
+	}
+	defer dataDB.Close()
+	dm := NewDataManager(dataDB, config.CgrConfig().CacheCfg(), connMng)
+	dm.cacheCfg.Partitions = map[string]*config.CacheParamCfg{
+		utils.CachePrefixToInstance[utils.RouteProfilePrefix]: {
+			Limit: 1,
+		},
+		utils.CacheRPCResponses: {
+			Limit: 1,
+		},
+	}
+	err = dm.CacheDataFromDB(context.Background(), utils.RouteProfilePrefix, []string{utils.MetaAny}, false)
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func TestDatamanagerCacheDataFromDBNotCachedAttributeProfilePrefix(t *testing.T) {
+	// cfg := config.NewDefaultCGRConfig()
+	// dm := NewDataManager(nil, cfg.CacheCfg(), nil)
+	cfg := config.NewDefaultCGRConfig()
+	connMng := NewConnManager(cfg)
+	dataDB, err := NewDataDBConn(cfg.DataDbCfg().Type,
+		cfg.DataDbCfg().Host, cfg.DataDbCfg().Port,
+		cfg.DataDbCfg().Name, cfg.DataDbCfg().User,
+		cfg.DataDbCfg().Password, cfg.GeneralCfg().DBDataEncoding,
+		cfg.DataDbCfg().Opts, cfg.DataDbCfg().Items)
+	if err != nil {
+		t.Error(err)
+	}
+	defer dataDB.Close()
+	dm := NewDataManager(dataDB, config.CgrConfig().CacheCfg(), connMng)
+	dm.cacheCfg.Partitions = map[string]*config.CacheParamCfg{
+		utils.CachePrefixToInstance[utils.AttributeProfilePrefix]: {
+			Limit: 1,
+		},
+		utils.CacheRPCResponses: {
+			Limit: 1,
+		},
+	}
+	err = dm.CacheDataFromDB(context.Background(), utils.AttributeProfilePrefix, []string{utils.MetaAny}, false)
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func TestDatamanagerCacheDataFromDBNotCachedChargerProfilePrefix(t *testing.T) {
+	// cfg := config.NewDefaultCGRConfig()
+	// dm := NewDataManager(nil, cfg.CacheCfg(), nil)
+	cfg := config.NewDefaultCGRConfig()
+	connMng := NewConnManager(cfg)
+	dataDB, err := NewDataDBConn(cfg.DataDbCfg().Type,
+		cfg.DataDbCfg().Host, cfg.DataDbCfg().Port,
+		cfg.DataDbCfg().Name, cfg.DataDbCfg().User,
+		cfg.DataDbCfg().Password, cfg.GeneralCfg().DBDataEncoding,
+		cfg.DataDbCfg().Opts, cfg.DataDbCfg().Items)
+	if err != nil {
+		t.Error(err)
+	}
+	defer dataDB.Close()
+	dm := NewDataManager(dataDB, config.CgrConfig().CacheCfg(), connMng)
+	dm.cacheCfg.Partitions = map[string]*config.CacheParamCfg{
+		utils.CachePrefixToInstance[utils.ChargerProfilePrefix]: {
+			Limit: 1,
+		},
+		utils.CacheRPCResponses: {
+			Limit: 1,
+		},
+	}
+	err = dm.CacheDataFromDB(context.Background(), utils.ChargerProfilePrefix, []string{utils.MetaAny}, false)
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func TestDatamanagerCacheDataFromDBNotCachedDispatcherProfilePrefix(t *testing.T) {
+	// cfg := config.NewDefaultCGRConfig()
+	// dm := NewDataManager(nil, cfg.CacheCfg(), nil)
+	cfg := config.NewDefaultCGRConfig()
+	connMng := NewConnManager(cfg)
+	dataDB, err := NewDataDBConn(cfg.DataDbCfg().Type,
+		cfg.DataDbCfg().Host, cfg.DataDbCfg().Port,
+		cfg.DataDbCfg().Name, cfg.DataDbCfg().User,
+		cfg.DataDbCfg().Password, cfg.GeneralCfg().DBDataEncoding,
+		cfg.DataDbCfg().Opts, cfg.DataDbCfg().Items)
+	if err != nil {
+		t.Error(err)
+	}
+	defer dataDB.Close()
+	dm := NewDataManager(dataDB, config.CgrConfig().CacheCfg(), connMng)
+	dm.cacheCfg.Partitions = map[string]*config.CacheParamCfg{
+		utils.CachePrefixToInstance[utils.DispatcherProfilePrefix]: {
+			Limit: 1,
+		},
+		utils.CacheRPCResponses: {
+			Limit: 1,
+		},
+	}
+	err = dm.CacheDataFromDB(context.Background(), utils.DispatcherProfilePrefix, []string{utils.MetaAny}, false)
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func TestDatamanagerCacheDataFromDBNotCachedDispatcherHostPrefix(t *testing.T) {
+	// cfg := config.NewDefaultCGRConfig()
+	// dm := NewDataManager(nil, cfg.CacheCfg(), nil)
+	cfg := config.NewDefaultCGRConfig()
+	connMng := NewConnManager(cfg)
+	dataDB, err := NewDataDBConn(cfg.DataDbCfg().Type,
+		cfg.DataDbCfg().Host, cfg.DataDbCfg().Port,
+		cfg.DataDbCfg().Name, cfg.DataDbCfg().User,
+		cfg.DataDbCfg().Password, cfg.GeneralCfg().DBDataEncoding,
+		cfg.DataDbCfg().Opts, cfg.DataDbCfg().Items)
+	if err != nil {
+		t.Error(err)
+	}
+	defer dataDB.Close()
+	dm := NewDataManager(dataDB, config.CgrConfig().CacheCfg(), connMng)
+	dm.cacheCfg.Partitions = map[string]*config.CacheParamCfg{
+		utils.CachePrefixToInstance[utils.DispatcherHostPrefix]: {
+			Limit: 1,
+		},
+		utils.CacheRPCResponses: {
+			Limit: 1,
+		},
+	}
+	err = dm.CacheDataFromDB(context.Background(), utils.DispatcherHostPrefix, []string{utils.MetaAny}, false)
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func TestDatamanagerCacheDataFromDBNotCachedAccountFilterIndexPrfx(t *testing.T) {
+	// cfg := config.NewDefaultCGRConfig()
+	// dm := NewDataManager(nil, cfg.CacheCfg(), nil)
+	cfg := config.NewDefaultCGRConfig()
+	connMng := NewConnManager(cfg)
+	dataDB, err := NewDataDBConn(cfg.DataDbCfg().Type,
+		cfg.DataDbCfg().Host, cfg.DataDbCfg().Port,
+		cfg.DataDbCfg().Name, cfg.DataDbCfg().User,
+		cfg.DataDbCfg().Password, cfg.GeneralCfg().DBDataEncoding,
+		cfg.DataDbCfg().Opts, cfg.DataDbCfg().Items)
+	if err != nil {
+		t.Error(err)
+	}
+	defer dataDB.Close()
+	dm := NewDataManager(dataDB, config.CgrConfig().CacheCfg(), connMng)
+	dm.cacheCfg.Partitions = map[string]*config.CacheParamCfg{
+		utils.CachePrefixToInstance[utils.AccountFilterIndexPrfx]: {
+			Limit: 1,
+		},
+		utils.CacheRPCResponses: {
+			Limit: 1,
+		},
+	}
+	err = dm.CacheDataFromDB(context.Background(), utils.AccountFilterIndexPrfx, []string{utils.MetaAny}, false)
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func TestDatamanagerCacheDataFromDBNotCachedAccountPrefix(t *testing.T) {
+	// cfg := config.NewDefaultCGRConfig()
+	// dm := NewDataManager(nil, cfg.CacheCfg(), nil)
+	cfg := config.NewDefaultCGRConfig()
+	connMng := NewConnManager(cfg)
+	dataDB, err := NewDataDBConn(cfg.DataDbCfg().Type,
+		cfg.DataDbCfg().Host, cfg.DataDbCfg().Port,
+		cfg.DataDbCfg().Name, cfg.DataDbCfg().User,
+		cfg.DataDbCfg().Password, cfg.GeneralCfg().DBDataEncoding,
+		cfg.DataDbCfg().Opts, cfg.DataDbCfg().Items)
+	if err != nil {
+		t.Error(err)
+	}
+	defer dataDB.Close()
+	dm := NewDataManager(dataDB, config.CgrConfig().CacheCfg(), connMng)
+	dm.cacheCfg.Partitions = map[string]*config.CacheParamCfg{
+		utils.CachePrefixToInstance[utils.AccountPrefix]: {
+			Limit: 1,
+		},
+		utils.CacheRPCResponses: {
+			Limit: 1,
+		},
+	}
+	err = dm.CacheDataFromDB(context.Background(), utils.AccountPrefix, []string{utils.MetaAny}, false)
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func TestDatamanagerCacheDataFromDBNotCachedRateProfilePrefix(t *testing.T) {
+	// cfg := config.NewDefaultCGRConfig()
+	// dm := NewDataManager(nil, cfg.CacheCfg(), nil)
+	cfg := config.NewDefaultCGRConfig()
+	connMng := NewConnManager(cfg)
+	dataDB, err := NewDataDBConn(cfg.DataDbCfg().Type,
+		cfg.DataDbCfg().Host, cfg.DataDbCfg().Port,
+		cfg.DataDbCfg().Name, cfg.DataDbCfg().User,
+		cfg.DataDbCfg().Password, cfg.GeneralCfg().DBDataEncoding,
+		cfg.DataDbCfg().Opts, cfg.DataDbCfg().Items)
+	if err != nil {
+		t.Error(err)
+	}
+	defer dataDB.Close()
+	dm := NewDataManager(dataDB, config.CgrConfig().CacheCfg(), connMng)
+	dm.cacheCfg.Partitions = map[string]*config.CacheParamCfg{
+		utils.CachePrefixToInstance[utils.RateProfilePrefix]: {
+			Limit: 1,
+		},
+		utils.CacheRPCResponses: {
+			Limit: 1,
+		},
+	}
+	err = dm.CacheDataFromDB(context.Background(), utils.RateProfilePrefix, []string{utils.MetaAny}, false)
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func TestDatamanagerCacheDataFromDBNotCachedActionProfilePrefix(t *testing.T) {
+	// cfg := config.NewDefaultCGRConfig()
+	// dm := NewDataManager(nil, cfg.CacheCfg(), nil)
+	cfg := config.NewDefaultCGRConfig()
+	connMng := NewConnManager(cfg)
+	dataDB, err := NewDataDBConn(cfg.DataDbCfg().Type,
+		cfg.DataDbCfg().Host, cfg.DataDbCfg().Port,
+		cfg.DataDbCfg().Name, cfg.DataDbCfg().User,
+		cfg.DataDbCfg().Password, cfg.GeneralCfg().DBDataEncoding,
+		cfg.DataDbCfg().Opts, cfg.DataDbCfg().Items)
+	if err != nil {
+		t.Error(err)
+	}
+	defer dataDB.Close()
+	dm := NewDataManager(dataDB, config.CgrConfig().CacheCfg(), connMng)
+	dm.cacheCfg.Partitions = map[string]*config.CacheParamCfg{
+		utils.CachePrefixToInstance[utils.ActionProfilePrefix]: {
+			Limit: 1,
+		},
+		utils.CacheRPCResponses: {
+			Limit: 1,
+		},
+	}
+	err = dm.CacheDataFromDB(context.Background(), utils.ActionProfilePrefix, []string{utils.MetaAny}, false)
+	if err != nil {
+		t.Error(err)
+	}
+}
