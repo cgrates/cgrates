@@ -269,10 +269,10 @@ func (rpS *RouteS) V1GetRoutes(ctx *context.Context, args *utils.CGREvent, reply
 	if tnt == utils.EmptyString {
 		tnt = rpS.cfg.GeneralCfg().DefaultTenant
 	}
+	if args.APIOpts == nil {
+		args.APIOpts = make(map[string]interface{})
+	}
 	if len(rpS.cfg.RouteSCfg().AttributeSConns) != 0 {
-		if args.APIOpts == nil {
-			args.APIOpts = make(map[string]interface{})
-		}
 		args.APIOpts[utils.Subsys] = utils.MetaRoutes
 		var context string
 		if context, err = GetStringOpts(ctx, tnt, args, rpS.fltrS, rpS.cfg.RouteSCfg().Opts.Context,
