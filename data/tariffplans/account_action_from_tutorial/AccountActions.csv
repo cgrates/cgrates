@@ -1,2 +1,0 @@
-#Tenant,Account,ActionPlanId,ActionTriggersId,AllowNegative,Disabled
-cgrates.org,AccountWithAPFromTutorial,AP_PACKAGE_10,,,
