@@ -33,6 +33,7 @@ type EeSv1 struct {
 	ping
 }
 
+// ProcessEvent triggers exports on EEs side
 func (cS *EeSv1) ProcessEvent(ctx *context.Context, cgrEv *utils.CGREventWithEeIDs, rply *map[string]map[string]interface{}) error {
 	return cS.ees.V1ProcessEvent(ctx, cgrEv, rply)
 }

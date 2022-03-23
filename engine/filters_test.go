@@ -30,6 +30,82 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+func TestRatesCostFiltering(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dmFilterPass := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	filterS := FilterS{
+		cfg: cfg,
+		dm:  dmFilterPass,
+	}
+	cgrEv := &utils.CGREventWithEeIDs{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "TestEv1",
+			Event: map[string]interface{}{
+				"Account":     "1001",
+				"Destination": "1002",
+				"OriginID":    "TestEv1",
+				"RequestType": "*prepaid",
+				"Subject":     "1001",
+				"ToR":         "*voice",
+				"Usage":       60000000000,
+			},
+			APIOpts: map[string]interface{}{
+				utils.MetaRateSCost: map[string]interface{}{
+					utils.Cost: 0.4,
+					"CostIntervals": []map[string]interface{}{
+						{
+							"CompressFactor": 1,
+							"Increments": []map[string]interface{}{
+								{
+									"CompressFactor":    2,
+									"RateID":            "Rate1",
+									"RateIntervalIndex": 0,
+									"Usage":             60000000000,
+								},
+							},
+						},
+					},
+					"ID": "RT_RETAIL1",
+					"Rates": map[string]interface{}{
+						"Rate1": map[string]interface{}{
+							"Increment":     30000000000,
+							"IntervalStart": 0,
+							"RecurrentFee":  0.4,
+							"Unit":          60000000000,
+						},
+					},
+				},
+				utils.OptsRateS:      true,
+				utils.OptsCDRsExport: true,
+				utils.OptsAccountS:   false,
+			},
+		},
+	}
+	cgrDP := cgrEv.AsDataProvider()
+	if pass, err := filterS.Pass(context.Background(), "cgrates.org", []string{"*gt:~*opts.*rateSCost.Cost:0"}, cgrDP); err != nil {
+		t.Error(err)
+	} else if !pass {
+		t.Errorf("Expected to pass")
+	}
+	if pass, err := filterS.Pass(context.Background(), "cgrates.org", []string{"*gt:~*opts.*rateSCost.Cost:0.5"}, cgrDP); err != nil {
+		t.Error(err)
+	} else if pass {
+		t.Errorf("Expected to fail")
+	}
+	if pass, err := filterS.Pass(context.Background(), "cgrates.org", []string{"*string:~*opts.*rateSCost.CostIntervals[0].Increments[0].RateID:Rate1"}, cgrDP); err != nil {
+		t.Error(err)
+	} else if !pass {
+		t.Errorf("Expected to pass")
+	}
+	if pass, err := filterS.Pass(context.Background(), "cgrates.org", []string{"*eq:~*opts.*rateSCost.Rates[Rate1].RecurrentFee:0.4"}, cgrDP); err != nil {
+		t.Error(err)
+	} else if !pass {
+		t.Errorf("Expected to pass")
+	}
+}
+
 func TestFilterPassGreaterThan(t *testing.T) {
 	rf, err := NewFilterRule(utils.MetaLessThan, "~ASR", []string{"40"})
 	if err != nil {

@@ -1564,9 +1564,8 @@ func testAccActionSetRmvBalance(t *testing.T) {
 	if err := accSRPC.Call(context.Background(), utils.AccountSv1ActionSetBalance,
 		args2, &reply3); err != nil {
 		t.Error(err)
-	}
-	if !reflect.DeepEqual(reply3, `OK`) {
-		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(`OK`), utils.ToJSON(reply3))
+	} else if reply3 != utils.OK {
+		t.Errorf("Expected %+v \n, received %+v", utils.OK, utils.OK)
 	}
 
 	expectedAcc := utils.Account{
@@ -1575,13 +1574,9 @@ func testAccActionSetRmvBalance(t *testing.T) {
 		Opts:   map[string]interface{}{},
 		Balances: map[string]*utils.Balance{
 			"AbstractBalance3": {
-				ID:          "AbstractBalance3",
-				FilterIDs:   nil,
-				Weights:     nil,
-				Type:        "*concrete",
-				Units:       utils.NewDecimal(10, 0),
-				UnitFactors: nil,
-				Opts:        nil,
+				ID:    "AbstractBalance3",
+				Type:  "*concrete",
+				Units: utils.NewDecimal(10, 0),
 				CostIncrements: []*utils.CostIncrement{
 					{
 						FilterIDs:    []string{"*string:~*req.ToR:*voice"},
@@ -1600,7 +1595,6 @@ func testAccActionSetRmvBalance(t *testing.T) {
 					},
 				},
 			},
-
 			"VoiceBalance": {
 				ID:        "VoiceBalance",
 				FilterIDs: []string{"*string:~*req.Account:1001"},
