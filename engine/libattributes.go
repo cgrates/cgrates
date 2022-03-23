@@ -153,6 +153,7 @@ func (ext *APIAttributeProfile) AsAttributeProfile() (attr *AttributeProfile, er
 	attr.Tenant = ext.Tenant
 	attr.ID = ext.ID
 	attr.FilterIDs = ext.FilterIDs
+	attr.Blocker = ext.Blocker
 	attr.Weights = ext.Weights
 	return
 }
