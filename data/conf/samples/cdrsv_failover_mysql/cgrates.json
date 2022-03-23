@@ -83,12 +83,24 @@
 				// "awsToken": "sessionToken",
 			},
 			"attempts": 1,
+			"failed_posts_dir": "/tmp/failed_posts",
 			"fields":[
 				{"tag": "*originID", "path": "*exp.*originID", "type": "*variable", "value": "~*opts.*originID"},
 			],
 		}
 	]
 },
+
+"loaders": [
+	{
+		"id": "*default",
+		"enabled": true,
+		"tenant": "cgrates.org",
+		"lockfile_path": ".cgr.lck",
+		"tp_in_dir": "/usr/share/cgrates/tariffplans/testit",
+		"tp_out_dir": ""
+	}
+]
 
 
 },

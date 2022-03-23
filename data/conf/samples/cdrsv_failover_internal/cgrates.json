@@ -1,86 +1,90 @@
 {
-// CGRateS Configuration file
-//
-// Used in apier_local_tests
-// Starts rater, cdrs and mediator connecting over internal channel
 
-"general": {
-	"log_level": 7,
-	"node_id": "TestFailCDRS",
-	"poster_attempts": 1,					// number of attempts before considering post request failed (eg: *httpPost, CDR exports)
-	"failed_posts_ttl": "1s",				// time to wait before writing the failed posts in a single file
-	"failed_posts_dir": "/tmp/failed_posts"	// directory path where we store failed requests
-},
+	"general": {
+		"log_level": 7,
+		"node_id": "TestFailCDRS",
+		"poster_attempts": 1,					
+		"failed_posts_ttl": "1s",				
+		"failed_posts_dir": "/tmp/failed_posts"	
+	},
 
 
-"rals": {
-	"enabled": true,						// enable Rater service: <true|false>
-	"thresholds_conns": ["*localhost"],
-},
+	"rals": {
+		"enabled": true,						
+		"thresholds_conns": ["*localhost"]
+	},
 
-"schedulers": {
-	"enabled": true,
-},
+	"schedulers": {
+		"enabled": true
+	},
 
-"cdrs": {
-	"enabled": true,
-	"attributes_conns":["*internal"],
-	"chargers_conns":["*localhost"],
-	"rals_conns": ["*localhost"],
-	"stats_conns": ["*localhost"],
-	"thresholds_conns": ["*localhost"],
-	"online_cdr_exports": ["s3_test_file"],
-	"ees_conns": ["*localhost"]
-},
+	"cdrs": {
+		"enabled": true,
+		"attributes_conns":["*internal"],
+		"chargers_conns":["*localhost"],
+		"rals_conns": ["*localhost"],
+		"stats_conns": ["*localhost"],
+		"thresholds_conns": ["*localhost"],
+		"online_cdr_exports": ["s3_test_file"],
+		"ees_conns": ["*localhost"]
+	},
 
-"attributes": {
-	"enabled": true,
-},
+	"attributes": {
+		"enabled": true
+	},
 
-"stats": {
-	"enabled": true,
-	"store_interval": "1s",
-	"thresholds_conns": ["*internal"],
-},
+	"stats": {
+		"enabled": true,
+		"store_interval": "1s",
+		"thresholds_conns": ["*internal"]
+	},
 
-"thresholds": {
-	"enabled": true,
-	"store_interval": "1s",
-},
+	"thresholds": {
+		"enabled": true,
+		"store_interval": "1s"
+	},
 
-"chargers": {
-	"enabled": true,
-	"attributes_conns": ["*internal"],
-},
+	"chargers": {
+		"enabled": true,
+		"attributes_conns": ["*internal"]
+	},
 
-"admins": {
-	"enabled": true,
-	"scheduler_conns": ["*internal"],
-},
+	"admins": {
+		"enabled": true,
+		"scheduler_conns": ["*internal"]
+	},
 
-"ees": {
-	"enabled": true,
-	"attributes_conns": ["*internal"],
-	"exporters": [
+	"ees": {
+		"enabled": true,
+		"attributes_conns": ["*internal"],
+		"exporters": [
+			{
+				"id": "s3_test_file",
+				"type": "*s3JSONMap",
+				"export_path": "http://s3.us-east-2.amazonaws.com/",
+				"opts": {
+					"awsRegion": "eu-west-2",
+					"awsKey": "testkey",
+					"awsSecret": "testsecret",
+					"s3BucketID": "cgrates-cdrs"
+				},
+				"attempts": 1,
+				"failed_posts_dir": "/tmp/failed_posts",
+				"fields":[
+					{"tag": "*originID", "path": "*exp.*originID", "type": "*variable", "value": "~*opts.*originID"}
+				]
+			}
+		]
+	},
+
+	"loaders": [
 		{
-			"id": "s3_test_file",
-			"type": "*s3JSONMap",
-			// export_path for s3:  "endpoint"
-			"export_path": "http://s3.us-east-2.amazonaws.com/",
-			"opts": {
-				// posible options for s3:
-				"awsRegion": "eu-west-2",
-				"awsKey": "testkey",
-				"awsSecret": "testsecret",
-				"s3BucketID": "cgrates-cdrs",
-				// "awsToken": "sessionToken",
-			},
-			"attempts": 1,
-			"fields":[
-				{"tag": "*originID", "path": "*exp.*originID", "type": "*variable", "value": "~*opts.*originID"},
-			],
-		},
+			"id": "*default",
+			"enabled": true,
+			"tenant": "cgrates.org",
+			"lockfile_path": ".cgr.lck",
+			"tp_in_dir": "/usr/share/cgrates/tariffplans/testit",
+			"tp_out_dir": ""
+		}
 	]
-},
-
 }
