@@ -1,0 +1,74 @@
+{
+    "general": {
+        "log_level": 7,
+        "reply_timeout": "50s"
+    },
+    
+    
+    "listen": {
+        "rpc_json": ":2012",
+        "rpc_gob": ":2013",
+        "http": ":2080"
+    },
+    
+    "data_db": {
+        "db_type": "mongo",
+        "db_name": "10",
+        "db_port": 27017
+    },
+    
+    "resources": {
+        "enabled": true,
+        "store_interval": "1s",
+        "thresholds_conns": ["*internal"]
+    },
+    
+    
+    "stats": {
+        "enabled": true,
+        "store_interval": "1s",
+        "thresholds_conns": ["*internal"]
+    },
+    
+    
+    "thresholds": {
+        "enabled": true,
+        "store_interval": "1s"
+    },
+    
+    
+    "routes": {
+        "enabled": true,
+        "stats_conns": ["*internal"],
+        "resources_conns": ["*internal"],
+        "rates_conns": ["*internal"],
+        "accounts_conns": ["*internal"]
+    },
+
+    "admins": {
+        "enabled": true,
+        "scheduler_conns": ["*internal"]
+    },
+    
+    
+    "rates": {
+        "enabled": true
+    },
+    
+    
+    "accounts": {
+        "enabled": true
+    },
+
+    "loaders": [
+        {
+            "id": "*default",
+            "enabled": true,
+            "tenant": "cgrates.org",
+            "lockfile_path": ".cgr.lck",
+            "tp_in_dir": "/usr/share/cgrates/tariffplans/testit",
+            "tp_out_dir": ""
+        }
+    ]
+    
+}
