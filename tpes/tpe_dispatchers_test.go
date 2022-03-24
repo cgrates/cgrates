@@ -69,17 +69,8 @@ func TestTPEnewTPDispatchers(t *testing.T) {
 func TestTPEExportItemsDispatchers(t *testing.T) {
 	wrtr := new(bytes.Buffer)
 	cfg := config.NewDefaultCGRConfig()
-	connMng := engine.NewConnManager(cfg)
-	dataDB, err := engine.NewDataDBConn(cfg.DataDbCfg().Type,
-		cfg.DataDbCfg().Host, cfg.DataDbCfg().Port,
-		cfg.DataDbCfg().Name, cfg.DataDbCfg().User,
-		cfg.DataDbCfg().Password, cfg.GeneralCfg().DBDataEncoding,
-		cfg.DataDbCfg().Opts, cfg.DataDbCfg().Items)
-	if err != nil {
-		t.Error(err)
-	}
-	defer dataDB.Close()
-	dm := engine.NewDataManager(dataDB, config.CgrConfig().CacheCfg(), connMng)
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
 	tpDsp := TPDispatchers{
 		dm: dm,
 	}
@@ -103,7 +94,7 @@ func TestTPEExportItemsDispatchers(t *testing.T) {
 		},
 	}
 	tpDsp.dm.SetDispatcherProfile(context.Background(), dsp, false)
-	err = tpDsp.exportItems(context.Background(), wrtr, "cgrates.org", []string{"Dsp1"})
+	err := tpDsp.exportItems(context.Background(), wrtr, "cgrates.org", []string{"Dsp1"})
 	if err != nil {
 		t.Errorf("Expected nil\n but received %v", err)
 	}
@@ -144,17 +135,8 @@ func TestTPEExportItemsDispatchersNoDbConn(t *testing.T) {
 func TestTPEExportItemsDispatchersIDNotFound(t *testing.T) {
 	wrtr := new(bytes.Buffer)
 	cfg := config.NewDefaultCGRConfig()
-	connMng := engine.NewConnManager(cfg)
-	dataDB, err := engine.NewDataDBConn(cfg.DataDbCfg().Type,
-		cfg.DataDbCfg().Host, cfg.DataDbCfg().Port,
-		cfg.DataDbCfg().Name, cfg.DataDbCfg().User,
-		cfg.DataDbCfg().Password, cfg.GeneralCfg().DBDataEncoding,
-		cfg.DataDbCfg().Opts, cfg.DataDbCfg().Items)
-	if err != nil {
-		t.Error(err)
-	}
-	defer dataDB.Close()
-	dm := engine.NewDataManager(dataDB, config.CgrConfig().CacheCfg(), connMng)
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
 	tpDsp := TPDispatchers{
 		dm: dm,
 	}
@@ -178,7 +160,7 @@ func TestTPEExportItemsDispatchersIDNotFound(t *testing.T) {
 		},
 	}
 	tpDsp.dm.SetDispatcherProfile(context.Background(), dsp, false)
-	err = tpDsp.exportItems(context.Background(), wrtr, "cgrates.org", []string{"Dsp2"})
+	err := tpDsp.exportItems(context.Background(), wrtr, "cgrates.org", []string{"Dsp2"})
 	errExpect := "<NOT_FOUND> cannot find DispatcherProfile with id: <Dsp2>"
 	if err.Error() != errExpect {
 		t.Errorf("Expected %v\n but received %v", errExpect, err)

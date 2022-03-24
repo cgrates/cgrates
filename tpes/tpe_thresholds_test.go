@@ -64,17 +64,8 @@ func TestTPEnewTPThresholds(t *testing.T) {
 func TestTPEExportThresholds(t *testing.T) {
 	wrtr := new(bytes.Buffer)
 	cfg := config.NewDefaultCGRConfig()
-	connMng := engine.NewConnManager(cfg)
-	dataDB, err := engine.NewDataDBConn(cfg.DataDbCfg().Type,
-		cfg.DataDbCfg().Host, cfg.DataDbCfg().Port,
-		cfg.DataDbCfg().Name, cfg.DataDbCfg().User,
-		cfg.DataDbCfg().Password, cfg.GeneralCfg().DBDataEncoding,
-		cfg.DataDbCfg().Opts, cfg.DataDbCfg().Items)
-	if err != nil {
-		t.Error(err)
-	}
-	defer dataDB.Close()
-	dm := engine.NewDataManager(dataDB, config.CgrConfig().CacheCfg(), connMng)
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
 	tpThd := TPThresholds{
 		dm: dm,
 	}
@@ -93,7 +84,7 @@ func TestTPEExportThresholds(t *testing.T) {
 		Async: true,
 	}
 	tpThd.dm.SetThresholdProfile(context.Background(), thd, false)
-	err = tpThd.exportItems(context.Background(), wrtr, "cgrates.org", []string{"THD_2"})
+	err := tpThd.exportItems(context.Background(), wrtr, "cgrates.org", []string{"THD_2"})
 	if err != nil {
 		t.Errorf("Expected nil\n but received %v", err)
 	}
@@ -129,17 +120,8 @@ func TestTPEExportItemsThresholdsNoDbConn(t *testing.T) {
 func TestTPEExportItemsThresholdsIDNotFound(t *testing.T) {
 	wrtr := new(bytes.Buffer)
 	cfg := config.NewDefaultCGRConfig()
-	connMng := engine.NewConnManager(cfg)
-	dataDB, err := engine.NewDataDBConn(cfg.DataDbCfg().Type,
-		cfg.DataDbCfg().Host, cfg.DataDbCfg().Port,
-		cfg.DataDbCfg().Name, cfg.DataDbCfg().User,
-		cfg.DataDbCfg().Password, cfg.GeneralCfg().DBDataEncoding,
-		cfg.DataDbCfg().Opts, cfg.DataDbCfg().Items)
-	if err != nil {
-		t.Error(err)
-	}
-	defer dataDB.Close()
-	dm := engine.NewDataManager(dataDB, config.CgrConfig().CacheCfg(), connMng)
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
 	tpThd := TPThresholds{
 		dm: dm,
 	}
@@ -158,7 +140,7 @@ func TestTPEExportItemsThresholdsIDNotFound(t *testing.T) {
 		Async: true,
 	}
 	tpThd.dm.SetThresholdProfile(context.Background(), thd, false)
-	err = tpThd.exportItems(context.Background(), wrtr, "cgrates.org", []string{"THD_3"})
+	err := tpThd.exportItems(context.Background(), wrtr, "cgrates.org", []string{"THD_3"})
 	errExpect := "<NOT_FOUND> cannot find ThresholdProfile with id: <THD_3>"
 	if err.Error() != errExpect {
 		t.Errorf("Expected %v\n but received %v", errExpect, err)

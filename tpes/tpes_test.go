@@ -21,6 +21,7 @@ package tpes
 import (
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
@@ -31,16 +32,8 @@ import (
 func TestNewTPeS(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	connMng := engine.NewConnManager(cfg)
-	dataDB, err := engine.NewDataDBConn(cfg.DataDbCfg().Type,
-		cfg.DataDbCfg().Host, cfg.DataDbCfg().Port,
-		cfg.DataDbCfg().Name, cfg.DataDbCfg().User,
-		cfg.DataDbCfg().Password, cfg.GeneralCfg().DBDataEncoding,
-		cfg.DataDbCfg().Opts, cfg.DataDbCfg().Items)
-	if err != nil {
-		t.Error(err)
-	}
-	defer dataDB.Close()
-	dm := engine.NewDataManager(dataDB, config.CgrConfig().CacheCfg(), connMng)
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
 	tpExporterTypes.Add("not_valid")
 	// utils.Logger, err = utils.NewLogger(utils.MetaStdLog, utils.EmptyString, 6)
 	// if err != nil {
@@ -59,19 +52,33 @@ func TestNewTPeS(t *testing.T) {
 
 func TestGetTariffPlansKeys(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	connMng := engine.NewConnManager(cfg)
-	dataDB, err := engine.NewDataDBConn(cfg.DataDbCfg().Type,
-		cfg.DataDbCfg().Host, cfg.DataDbCfg().Port,
-		cfg.DataDbCfg().Name, cfg.DataDbCfg().User,
-		cfg.DataDbCfg().Password, cfg.GeneralCfg().DBDataEncoding,
-		cfg.DataDbCfg().Opts, cfg.DataDbCfg().Items)
-	if err != nil {
-		t.Error(err)
-	}
-	defer dataDB.Close()
-	dm := engine.NewDataManager(dataDB, config.CgrConfig().CacheCfg(), connMng)
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
 
 	//Attributes
+	attr := &engine.AttributeProfile{
+		Tenant:    utils.CGRateSorg,
+		ID:        "TEST_ATTRIBUTES_TEST",
+		FilterIDs: []string{"*string:~*req.Account:1002", "*exists:~*opts.*usage:"},
+		Attributes: []*engine.Attribute{
+			{
+				Path:  utils.AccountField,
+				Type:  utils.MetaConstant,
+				Value: nil,
+			},
+			{
+				Path:  "*tenant",
+				Type:  utils.MetaConstant,
+				Value: nil,
+			},
+		},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
+	}
+	dm.SetAttributeProfile(context.Background(), attr, false)
 	rcv, _ := getTariffPlansKeys(context.Background(), dm, "cgrates.org", utils.MetaAttributes)
 	exp := []string{"TEST_ATTRIBUTES_TEST"}
 	if !reflect.DeepEqual(rcv, exp) {
@@ -79,6 +86,31 @@ func TestGetTariffPlansKeys(t *testing.T) {
 	}
 
 	//Actions
+	act := &engine.ActionProfile{
+		Tenant: "cgrates.org",
+		ID:     "SET_BAL",
+		FilterIDs: []string{
+			"*string:~*req.Account:1001"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
+		Targets:  map[string]utils.StringSet{utils.MetaAccounts: {"1001": {}}},
+		Schedule: utils.MetaASAP,
+		Actions: []*engine.APAction{
+			{
+				ID:   "SET_BAL",
+				Type: utils.MetaSetBalance,
+				Diktats: []*engine.APDiktat{
+					{
+						Path:  "MONETARY",
+						Value: "10",
+					}},
+			},
+		},
+	}
+	dm.SetActionProfile(context.Background(), act, false)
 	rcv, _ = getTariffPlansKeys(context.Background(), dm, "cgrates.org", utils.MetaActions)
 	exp = []string{"SET_BAL"}
 	if !reflect.DeepEqual(rcv, exp) {
@@ -86,13 +118,52 @@ func TestGetTariffPlansKeys(t *testing.T) {
 	}
 
 	//Accounts
+	acc := &utils.Account{
+		Tenant: "cgrates.org",
+		ID:     "Account_simple",
+		Opts:   map[string]interface{}{},
+		Balances: map[string]*utils.Balance{
+			"VoiceBalance": {
+				ID:        "VoiceBalance",
+				FilterIDs: []string{"*string:~*req.Account:1001"},
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 12,
+					},
+				},
+				Type: "*abstract",
+				Opts: map[string]interface{}{
+					"Destination": "10",
+				},
+				Units: utils.NewDecimal(0, 0),
+			},
+		},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
+	}
+	dm.SetAccount(context.Background(), acc, false)
 	rcv, _ = getTariffPlansKeys(context.Background(), dm, "cgrates.org", utils.MetaAccounts)
-	exp = []string{"Account_simple", "Account_complicated"}
+	exp = []string{"Account_simple"}
 	if !reflect.DeepEqual(rcv, exp) {
 		t.Errorf("Expected %v\n but received %v", exp, rcv)
 	}
 
 	//Chargers
+	chgr := &engine.ChargerProfile{
+		Tenant:       "cgrates.org",
+		ID:           "Chargers1",
+		RunID:        utils.MetaDefault,
+		AttributeIDs: []string{"*none"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
+	}
+	dm.SetChargerProfile(context.Background(), chgr, false)
 	rcv, _ = getTariffPlansKeys(context.Background(), dm, "cgrates.org", utils.MetaChargers)
 	exp = []string{"Chargers1"}
 	if !reflect.DeepEqual(rcv, exp) {
@@ -100,6 +171,32 @@ func TestGetTariffPlansKeys(t *testing.T) {
 	}
 
 	//Filters
+	fltr := &engine.Filter{
+		Tenant: utils.CGRateSorg,
+		ID:     "fltr_for_prf",
+		Rules: []*engine.FilterRule{
+			{
+				Type:    utils.MetaString,
+				Element: "~*req.Subject",
+				Values:  []string{"1004", "6774", "22312"},
+			},
+			{
+				Type:    utils.MetaString,
+				Element: "~*opts.Subsystems",
+				Values:  []string{"*attributes"},
+			},
+			{
+				Type:    utils.MetaPrefix,
+				Element: "~*req.Destinations",
+				Values:  []string{"+0775", "+442"},
+			},
+			{
+				Type:    utils.MetaExists,
+				Element: "~*req.NumberOfEvents",
+			},
+		},
+	}
+	dm.SetFilter(context.Background(), fltr, false)
 	rcv, _ = getTariffPlansKeys(context.Background(), dm, "cgrates.org", utils.MetaFilters)
 	exp = []string{"fltr_for_prf"}
 	if !reflect.DeepEqual(rcv, exp) {
@@ -107,13 +204,54 @@ func TestGetTariffPlansKeys(t *testing.T) {
 	}
 
 	//Rates
+	rt := &utils.RateProfile{
+		Tenant:    utils.CGRateSorg,
+		ID:        "TEST_RATE_TEST",
+		FilterIDs: []string{"*string:~*req.Account:dan"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
+		MaxCostStrategy: "*free",
+		Rates: map[string]*utils.Rate{
+			"RT_WEEK": {
+				ID: "RT_WEEK",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 0,
+					},
+				},
+				ActivationTimes: "* * * * 1-5",
+				IntervalRates: []*utils.IntervalRate{
+					{
+						IntervalStart: utils.NewDecimal(0, 0),
+					},
+				},
+			},
+		},
+	}
+	dm.SetRateProfileRates(context.Background(), rt, false)
 	rcv, _ = getTariffPlansKeys(context.Background(), dm, "cgrates.org", utils.MetaRateS)
-	exp = []string{"TEST_RATE_TEST"}
+	exp = []string{}
 	if !reflect.DeepEqual(rcv, exp) {
 		t.Errorf("Expected %v\n but received %v", exp, rcv)
 	}
 
 	//Resources
+	rsc := &engine.ResourceProfile{
+		Tenant:            "cgrates.org",
+		ID:                "ResGroup1",
+		FilterIDs:         []string{"*string:~*req.Account:1001"},
+		Limit:             10,
+		AllocationMessage: "Approved",
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			}},
+		ThresholdIDs: []string{utils.MetaNone},
+	}
+	dm.SetResourceProfile(context.Background(), rsc, false)
 	rcv, _ = getTariffPlansKeys(context.Background(), dm, "cgrates.org", utils.MetaResources)
 	exp = []string{"ResGroup1"}
 	if !reflect.DeepEqual(rcv, exp) {
@@ -121,6 +259,28 @@ func TestGetTariffPlansKeys(t *testing.T) {
 	}
 
 	//Routes
+	rte := &engine.RouteProfile{
+		ID:     "ROUTE_2003",
+		Tenant: "cgrates.org",
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
+		Sorting:           utils.MetaWeight,
+		SortingParameters: []string{},
+		Routes: []*engine.Route{
+			{
+				ID: "route1",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 20,
+					},
+				},
+			},
+		},
+	}
+	dm.SetRouteProfile(context.Background(), rte, false)
 	rcv, _ = getTariffPlansKeys(context.Background(), dm, "cgrates.org", utils.MetaRoutes)
 	exp = []string{"ROUTE_2003"}
 	if !reflect.DeepEqual(rcv, exp) {
@@ -128,6 +288,35 @@ func TestGetTariffPlansKeys(t *testing.T) {
 	}
 
 	//Stats
+	stq := &engine.StatQueueProfile{
+		Tenant: "cgrates.org",
+		ID:     "SQ_2",
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
+		QueueLength: 14,
+		Metrics: []*engine.MetricWithFilters{
+			{
+				MetricID: utils.MetaASR,
+			},
+			{
+				MetricID: utils.MetaTCD,
+			},
+			{
+				MetricID: utils.MetaPDD,
+			},
+			{
+				MetricID: utils.MetaTCC,
+			},
+			{
+				MetricID: utils.MetaTCD,
+			},
+		},
+		ThresholdIDs: []string{utils.MetaNone},
+	}
+	dm.SetStatQueueProfile(context.Background(), stq, false)
 	rcv, _ = getTariffPlansKeys(context.Background(), dm, "cgrates.org", utils.MetaStats)
 	exp = []string{"SQ_2"}
 	if !reflect.DeepEqual(rcv, exp) {
@@ -135,6 +324,21 @@ func TestGetTariffPlansKeys(t *testing.T) {
 	}
 
 	//Thresholds
+	thd := &engine.ThresholdProfile{
+		Tenant:           "cgrates.org",
+		ID:               "THD_2",
+		FilterIDs:        []string{"*string:~*req.Account:1001"},
+		ActionProfileIDs: []string{"actPrfID"},
+		MaxHits:          7,
+		MinHits:          0,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
+		Async: true,
+	}
+	dm.SetThresholdProfile(context.Background(), thd, false)
 	rcv, _ = getTariffPlansKeys(context.Background(), dm, "cgrates.org", utils.MetaThresholds)
 	exp = []string{"THD_2"}
 	if !reflect.DeepEqual(rcv, exp) {
@@ -142,13 +346,45 @@ func TestGetTariffPlansKeys(t *testing.T) {
 	}
 
 	//Dispatchers
+	dsp := &engine.DispatcherProfile{
+		Tenant:    "cgrates.org",
+		ID:        "Dsp1",
+		FilterIDs: []string{"*string:~*req.Account:1001", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
+		Strategy:  utils.MetaFirst,
+		StrategyParams: map[string]interface{}{
+			utils.MetaDefaultRatio: "false",
+		},
+		Weight: 20,
+		Hosts: engine.DispatcherHostProfiles{
+			{
+				ID:        "C1",
+				FilterIDs: []string{},
+				Weight:    10,
+				Params:    map[string]interface{}{"0": "192.168.54.203"},
+				Blocker:   false,
+			},
+		},
+	}
+	dm.SetDispatcherProfile(context.Background(), dsp, false)
 	rcv, _ = getTariffPlansKeys(context.Background(), dm, "cgrates.org", utils.MetaDispatchers)
 	exp = []string{"Dsp1"}
 	if !reflect.DeepEqual(rcv, exp) {
 		t.Errorf("Expected %v\n but received %v", exp, rcv)
 	}
 
-	//Dispatchers
+	//DispatcherHosts
+	dsph := &engine.DispatcherHost{
+		Tenant: "cgrates.org",
+		RemoteHost: &config.RemoteHost{
+			ID:              "DSH1",
+			Address:         "*internal",
+			ConnectAttempts: 1,
+			Reconnects:      3,
+			ConnectTimeout:  time.Minute,
+			ReplyTimeout:    2 * time.Minute,
+		},
+	}
+	dm.SetDispatcherHost(context.Background(), dsph)
 	rcv, _ = getTariffPlansKeys(context.Background(), dm, "cgrates.org", utils.MetaDispatcherHosts)
 	exp = []string{"DSH1"}
 	if !reflect.DeepEqual(rcv, exp) {
@@ -156,7 +392,7 @@ func TestGetTariffPlansKeys(t *testing.T) {
 	}
 
 	//Unsupported
-	_, err = getTariffPlansKeys(context.Background(), dm, "cgrates.org", "not_valid")
+	_, err := getTariffPlansKeys(context.Background(), dm, "cgrates.org", "not_valid")
 	errExpect := "Unsuported exporter type"
 	if err.Error() != errExpect {
 		t.Errorf("Expected %v\n but received %v", errExpect, err.Error())
@@ -166,16 +402,31 @@ func TestGetTariffPlansKeys(t *testing.T) {
 func TestV1ExportTariffPlan(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	connMng := engine.NewConnManager(cfg)
-	dataDB, err := engine.NewDataDBConn(cfg.DataDbCfg().Type,
-		cfg.DataDbCfg().Host, cfg.DataDbCfg().Port,
-		cfg.DataDbCfg().Name, cfg.DataDbCfg().User,
-		cfg.DataDbCfg().Password, cfg.GeneralCfg().DBDataEncoding,
-		cfg.DataDbCfg().Opts, cfg.DataDbCfg().Items)
-	if err != nil {
-		t.Error(err)
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	attr := &engine.AttributeProfile{
+		Tenant:    utils.CGRateSorg,
+		ID:        "TEST_ATTRIBUTES_TEST",
+		FilterIDs: []string{"*string:~*req.Account:1002", "*exists:~*opts.*usage:"},
+		Attributes: []*engine.Attribute{
+			{
+				Path:  utils.AccountField,
+				Type:  utils.MetaConstant,
+				Value: nil,
+			},
+			{
+				Path:  "*tenant",
+				Type:  utils.MetaConstant,
+				Value: nil,
+			},
+		},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 	}
-	defer dataDB.Close()
-	dm := engine.NewDataManager(dataDB, config.CgrConfig().CacheCfg(), connMng)
+	dm.SetAttributeProfile(context.Background(), attr, false)
 	tpE := NewTPeS(cfg, dm, connMng)
 	var reply []byte
 	args := &ArgsExportTP{
@@ -184,7 +435,7 @@ func TestV1ExportTariffPlan(t *testing.T) {
 			utils.MetaAttributes: {"TEST_ATTRIBUTES_TEST"},
 		},
 	}
-	err = tpE.V1ExportTariffPlan(context.Background(), args, &reply)
+	err := tpE.V1ExportTariffPlan(context.Background(), args, &reply)
 	if err != nil {
 		t.Error(err)
 	}
@@ -193,23 +444,15 @@ func TestV1ExportTariffPlan(t *testing.T) {
 func TestV1ExportTariffPlanZeroExp(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	connMng := engine.NewConnManager(cfg)
-	dataDB, err := engine.NewDataDBConn(cfg.DataDbCfg().Type,
-		cfg.DataDbCfg().Host, cfg.DataDbCfg().Port,
-		cfg.DataDbCfg().Name, cfg.DataDbCfg().User,
-		cfg.DataDbCfg().Password, cfg.GeneralCfg().DBDataEncoding,
-		cfg.DataDbCfg().Opts, cfg.DataDbCfg().Items)
-	if err != nil {
-		t.Error(err)
-	}
-	defer dataDB.Close()
-	dm := engine.NewDataManager(dataDB, config.CgrConfig().CacheCfg(), connMng)
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
 	tpE := NewTPeS(cfg, dm, connMng)
 	var reply []byte
 	args := &ArgsExportTP{
 		Tenant:      utils.EmptyString,
 		ExportItems: map[string][]string{},
 	}
-	err = tpE.V1ExportTariffPlan(context.Background(), args, &reply)
+	err := tpE.V1ExportTariffPlan(context.Background(), args, &reply)
 	if err != nil {
 		t.Error(err)
 	}
@@ -218,16 +461,8 @@ func TestV1ExportTariffPlanZeroExp(t *testing.T) {
 func TestV1ExportTariffPlanZeroIDs(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	connMng := engine.NewConnManager(cfg)
-	dataDB, err := engine.NewDataDBConn(cfg.DataDbCfg().Type,
-		cfg.DataDbCfg().Host, cfg.DataDbCfg().Port,
-		cfg.DataDbCfg().Name, cfg.DataDbCfg().User,
-		cfg.DataDbCfg().Password, cfg.GeneralCfg().DBDataEncoding,
-		cfg.DataDbCfg().Opts, cfg.DataDbCfg().Items)
-	if err != nil {
-		t.Error(err)
-	}
-	defer dataDB.Close()
-	dm := engine.NewDataManager(dataDB, config.CgrConfig().CacheCfg(), connMng)
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
 	tpE := NewTPeS(cfg, dm, connMng)
 	var reply []byte
 	args := &ArgsExportTP{
@@ -236,7 +471,7 @@ func TestV1ExportTariffPlanZeroIDs(t *testing.T) {
 			utils.MetaAttributes: {},
 		},
 	}
-	err = tpE.V1ExportTariffPlan(context.Background(), args, &reply)
+	err := tpE.V1ExportTariffPlan(context.Background(), args, &reply)
 	if err != nil {
 		t.Error(err)
 	}
@@ -245,16 +480,8 @@ func TestV1ExportTariffPlanZeroIDs(t *testing.T) {
 func TestV1ExportTariffPlanInvalidExpType(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	connMng := engine.NewConnManager(cfg)
-	dataDB, err := engine.NewDataDBConn(cfg.DataDbCfg().Type,
-		cfg.DataDbCfg().Host, cfg.DataDbCfg().Port,
-		cfg.DataDbCfg().Name, cfg.DataDbCfg().User,
-		cfg.DataDbCfg().Password, cfg.GeneralCfg().DBDataEncoding,
-		cfg.DataDbCfg().Opts, cfg.DataDbCfg().Items)
-	if err != nil {
-		t.Error(err)
-	}
-	defer dataDB.Close()
-	dm := engine.NewDataManager(dataDB, config.CgrConfig().CacheCfg(), connMng)
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
 	tpE := NewTPeS(cfg, dm, connMng)
 	var reply []byte
 	args := &ArgsExportTP{
@@ -263,7 +490,7 @@ func TestV1ExportTariffPlanInvalidExpType(t *testing.T) {
 			"not_valid": {},
 		},
 	}
-	err = tpE.V1ExportTariffPlan(context.Background(), args, &reply)
+	err := tpE.V1ExportTariffPlan(context.Background(), args, &reply)
 	errExp := "UNSUPPORTED_TPEXPORTER_TYPE:not_valid"
 	if err.Error() != errExp {
 		t.Errorf("Expected %v\n but received %v", errExp, err.Error())

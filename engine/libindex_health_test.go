@@ -25,22 +25,32 @@ import (
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/ltcache"
 )
 
 func TestGetFltrIdxHealthForRateRates(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	connMng := NewConnManager(cfg)
-	dataDB, err := NewDataDBConn(cfg.DataDbCfg().Type,
-		cfg.DataDbCfg().Host, cfg.DataDbCfg().Port,
-		cfg.DataDbCfg().Name, cfg.DataDbCfg().User,
-		cfg.DataDbCfg().Password, cfg.GeneralCfg().DBDataEncoding,
-		cfg.DataDbCfg().Opts, cfg.DataDbCfg().Items)
-	if err != nil {
-		t.Error(err)
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	rt := &utils.RateProfile{
+		Tenant:          utils.CGRateSorg,
+		ID:              "TEST_RATE_TEST",
+		FilterIDs:       []string{"*string:~*req.Account:dan"},
+		MaxCostStrategy: "*free",
+		Rates: map[string]*utils.Rate{
+			"RT_WEEK": {
+				ID:              "RT_WEEK",
+				ActivationTimes: "* * * * 1-5",
+				IntervalRates: []*utils.IntervalRate{
+					{
+						IntervalStart: utils.NewDecimal(0, 0),
+					},
+				},
+			},
+		},
 	}
-	defer dataDB.Close()
-	dm := NewDataManager(dataDB, config.CgrConfig().CacheCfg(), connMng)
+	dm.SetRateProfileRates(context.Background(), rt, false)
 	rply, err := GetFltrIdxHealthForRateRates(context.Background(), dm, ltcache.NewCache(50, 60*time.Second, true, nil),
 		ltcache.NewCache(40, 30*time.Second, false, nil),
 		ltcache.NewCache(20, 20*time.Second, true, nil))
@@ -49,9 +59,7 @@ func TestGetFltrIdxHealthForRateRates(t *testing.T) {
 	}
 	exp := &FilterIHReply{
 		MissingObjects: nil,
-		MissingIndexes: map[string][]string{
-			"cgrates.org:TEST_RATE_TEST:*none:*any:*any": {"RT_WEEK"},
-		},
+		MissingIndexes: map[string][]string{},
 		BrokenIndexes:  make(map[string][]string),
 		MissingFilters: make(map[string][]string),
 	}

@@ -77,17 +77,8 @@ func TestTPEnewTPRates(t *testing.T) {
 func TestTPEExportItemsRates(t *testing.T) {
 	wrtr := new(bytes.Buffer)
 	cfg := config.NewDefaultCGRConfig()
-	connMng := engine.NewConnManager(cfg)
-	dataDB, err := engine.NewDataDBConn(cfg.DataDbCfg().Type,
-		cfg.DataDbCfg().Host, cfg.DataDbCfg().Port,
-		cfg.DataDbCfg().Name, cfg.DataDbCfg().User,
-		cfg.DataDbCfg().Password, cfg.GeneralCfg().DBDataEncoding,
-		cfg.DataDbCfg().Opts, cfg.DataDbCfg().Items)
-	if err != nil {
-		t.Error(err)
-	}
-	defer dataDB.Close()
-	dm := engine.NewDataManager(dataDB, config.CgrConfig().CacheCfg(), connMng)
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
 	tpRt := TPRates{
 		dm: dm,
 	}
@@ -119,7 +110,7 @@ func TestTPEExportItemsRates(t *testing.T) {
 		},
 	}
 	tpRt.dm.SetRateProfile(context.Background(), rt, false, false)
-	err = tpRt.exportItems(context.Background(), wrtr, "cgrates.org", []string{"TEST_RATE_TEST"})
+	err := tpRt.exportItems(context.Background(), wrtr, "cgrates.org", []string{"TEST_RATE_TEST"})
 	if err != nil {
 		t.Errorf("Expected nil\n but received %v", err)
 	}
@@ -168,17 +159,8 @@ func TestTPEExportItemsRatesNoDbConn(t *testing.T) {
 func TestTPEExportItemsRatesIDNotFound(t *testing.T) {
 	wrtr := new(bytes.Buffer)
 	cfg := config.NewDefaultCGRConfig()
-	connMng := engine.NewConnManager(cfg)
-	dataDB, err := engine.NewDataDBConn(cfg.DataDbCfg().Type,
-		cfg.DataDbCfg().Host, cfg.DataDbCfg().Port,
-		cfg.DataDbCfg().Name, cfg.DataDbCfg().User,
-		cfg.DataDbCfg().Password, cfg.GeneralCfg().DBDataEncoding,
-		cfg.DataDbCfg().Opts, cfg.DataDbCfg().Items)
-	if err != nil {
-		t.Error(err)
-	}
-	defer dataDB.Close()
-	dm := engine.NewDataManager(dataDB, config.CgrConfig().CacheCfg(), connMng)
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
 	tpRt := TPRates{
 		dm: dm,
 	}
@@ -210,7 +192,7 @@ func TestTPEExportItemsRatesIDNotFound(t *testing.T) {
 		},
 	}
 	tpRt.dm.SetRateProfileRates(context.Background(), rt, false)
-	err = tpRt.exportItems(context.Background(), wrtr, "cgrates.org", []string{"TEST_RATE"})
+	err := tpRt.exportItems(context.Background(), wrtr, "cgrates.org", []string{"TEST_RATE"})
 	errExpect := "<NOT_FOUND> cannot find RateProfile with id: <TEST_RATE>"
 	if err.Error() != errExpect {
 		t.Errorf("Expected %v\n but received %v", errExpect, err)

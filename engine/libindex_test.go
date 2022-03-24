@@ -51,17 +51,23 @@ func TestSplitFilterIndexesWrongFormat(t *testing.T) {
 
 func TestComputeIndexes(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	connMng := NewConnManager(cfg)
-	dataDB, err := NewDataDBConn(cfg.DataDbCfg().Type,
-		cfg.DataDbCfg().Host, cfg.DataDbCfg().Port,
-		cfg.DataDbCfg().Name, cfg.DataDbCfg().User,
-		cfg.DataDbCfg().Password, cfg.GeneralCfg().DBDataEncoding,
-		cfg.DataDbCfg().Opts, cfg.DataDbCfg().Items)
-	if err != nil {
-		t.Error(err)
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	thd := &ThresholdProfile{
+		Tenant:           "cgrates.org",
+		ID:               "THD_2",
+		FilterIDs:        []string{"*string:~*req.Account:1001"},
+		ActionProfileIDs: []string{"actPrfID"},
+		MaxHits:          7,
+		MinHits:          0,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
+		Async: true,
 	}
-	defer dataDB.Close()
-	dm := NewDataManager(dataDB, config.CgrConfig().CacheCfg(), connMng)
+	dm.SetThresholdProfile(context.Background(), thd, false)
 	transactionID := utils.GenUUID()
 	indexes, err := ComputeIndexes(context.Background(), dm, "cgrates.org", utils.EmptyString, utils.CacheThresholdFilterIndexes,
 		nil, transactionID, func(tnt, id, grp string) (*[]string, error) {
@@ -83,17 +89,23 @@ func TestComputeIndexes(t *testing.T) {
 
 func TestComputeIndexesIDsNotNil(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	connMng := NewConnManager(cfg)
-	dataDB, err := NewDataDBConn(cfg.DataDbCfg().Type,
-		cfg.DataDbCfg().Host, cfg.DataDbCfg().Port,
-		cfg.DataDbCfg().Name, cfg.DataDbCfg().User,
-		cfg.DataDbCfg().Password, cfg.GeneralCfg().DBDataEncoding,
-		cfg.DataDbCfg().Opts, cfg.DataDbCfg().Items)
-	if err != nil {
-		t.Error(err)
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	thd := &ThresholdProfile{
+		Tenant:           "cgrates.org",
+		ID:               "THD_2",
+		FilterIDs:        []string{"*string:~*req.Account:1001"},
+		ActionProfileIDs: []string{"actPrfID"},
+		MaxHits:          7,
+		MinHits:          0,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
+		Async: true,
 	}
-	defer dataDB.Close()
-	dm := NewDataManager(dataDB, config.CgrConfig().CacheCfg(), connMng)
+	dm.SetThresholdProfile(context.Background(), thd, false)
 	transactionID := utils.GenUUID()
 	_, err = ComputeIndexes(context.Background(), dm, "cgrates.org", utils.EmptyString, utils.CacheThresholdFilterIndexes,
 		&[]string{utils.CacheThresholdFilterIndexes, utils.CacheAccountsFilterIndexes}, transactionID, func(tnt, id, grp string) (*[]string, error) {
@@ -110,17 +122,24 @@ func TestComputeIndexesIDsNotNil(t *testing.T) {
 
 func TestRemoveIndexFiltersItem(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	connMng := NewConnManager(cfg)
-	dataDB, err := NewDataDBConn(cfg.DataDbCfg().Type,
-		cfg.DataDbCfg().Host, cfg.DataDbCfg().Port,
-		cfg.DataDbCfg().Name, cfg.DataDbCfg().User,
-		cfg.DataDbCfg().Password, cfg.GeneralCfg().DBDataEncoding,
-		cfg.DataDbCfg().Opts, cfg.DataDbCfg().Items)
-	if err != nil {
-		t.Error(err)
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	thd := &ThresholdProfile{
+		Tenant:           "cgrates.org",
+		ID:               "THD_2",
+		FilterIDs:        []string{"*string:~*req.Account:1001"},
+		ActionProfileIDs: []string{"actPrfID"},
+		MaxHits:          7,
+		MinHits:          0,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
+		Async: true,
 	}
-	defer dataDB.Close()
-	dm := NewDataManager(dataDB, config.CgrConfig().CacheCfg(), connMng)
+	dm.SetThresholdProfile(context.Background(), thd, false)
+	// dm := NewDataManager(dataDB, config.CgrConfig().CacheCfg(), connMng)
 	if err := removeIndexFiltersItem(context.Background(), dm, utils.CacheThresholdFilterIndexes, "cgrates.org", "", []string{"account"}); err != nil {
 		t.Error(err)
 	}
@@ -128,19 +147,26 @@ func TestRemoveIndexFiltersItem(t *testing.T) {
 
 func TestRemoveFilterIndexesForFilter(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	connMng := NewConnManager(cfg)
-	dataDB, err := NewDataDBConn(cfg.DataDbCfg().Type,
-		cfg.DataDbCfg().Host, cfg.DataDbCfg().Port,
-		cfg.DataDbCfg().Name, cfg.DataDbCfg().User,
-		cfg.DataDbCfg().Password, cfg.GeneralCfg().DBDataEncoding,
-		cfg.DataDbCfg().Opts, cfg.DataDbCfg().Items)
-	if err != nil {
-		t.Error(err)
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	thd := &ThresholdProfile{
+		Tenant:           "cgrates.org",
+		ID:               "THD_2",
+		FilterIDs:        []string{"*string:~*req.Account:1001"},
+		ActionProfileIDs: []string{"actPrfID"},
+		MaxHits:          7,
+		MinHits:          0,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
+		Async: true,
 	}
-	defer dataDB.Close()
+	dm.SetThresholdProfile(context.Background(), thd, false)
 	exp := make(utils.StringSet)
 	exp.Add(utils.ConcatenatedKey("cgrates.org", "*string:*req.Account:1001"))
-	dm := NewDataManager(dataDB, config.CgrConfig().CacheCfg(), connMng)
+	// dm := NewDataManager(dataDB, config.CgrConfig().CacheCfg(), connMng)
 	if err := removeFilterIndexesForFilter(context.Background(), dm, utils.CacheThresholdFilterIndexes, "cgrates.org", []string{""}, exp); err != nil {
 		t.Error(err)
 	}

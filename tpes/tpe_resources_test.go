@@ -62,17 +62,8 @@ func TestTPEnewTPResources(t *testing.T) {
 func TestTPEExportItemsResources(t *testing.T) {
 	wrtr := new(bytes.Buffer)
 	cfg := config.NewDefaultCGRConfig()
-	connMng := engine.NewConnManager(cfg)
-	dataDB, err := engine.NewDataDBConn(cfg.DataDbCfg().Type,
-		cfg.DataDbCfg().Host, cfg.DataDbCfg().Port,
-		cfg.DataDbCfg().Name, cfg.DataDbCfg().User,
-		cfg.DataDbCfg().Password, cfg.GeneralCfg().DBDataEncoding,
-		cfg.DataDbCfg().Opts, cfg.DataDbCfg().Items)
-	if err != nil {
-		t.Error(err)
-	}
-	defer dataDB.Close()
-	dm := engine.NewDataManager(dataDB, config.CgrConfig().CacheCfg(), connMng)
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
 	tpRsc := TPResources{
 		dm: dm,
 	}
@@ -89,7 +80,7 @@ func TestTPEExportItemsResources(t *testing.T) {
 		ThresholdIDs: []string{utils.MetaNone},
 	}
 	tpRsc.dm.SetResourceProfile(context.Background(), rsc, false)
-	err = tpRsc.exportItems(context.Background(), wrtr, "cgrates.org", []string{"ResGroup1"})
+	err := tpRsc.exportItems(context.Background(), wrtr, "cgrates.org", []string{"ResGroup1"})
 	if err != nil {
 		t.Errorf("Expected nil\n but received %v", err)
 	}
@@ -123,17 +114,8 @@ func TestTPEExportItemsResourcesNoDbConn(t *testing.T) {
 func TestTPEExportItemsResourcesIDNotFound(t *testing.T) {
 	wrtr := new(bytes.Buffer)
 	cfg := config.NewDefaultCGRConfig()
-	connMng := engine.NewConnManager(cfg)
-	dataDB, err := engine.NewDataDBConn(cfg.DataDbCfg().Type,
-		cfg.DataDbCfg().Host, cfg.DataDbCfg().Port,
-		cfg.DataDbCfg().Name, cfg.DataDbCfg().User,
-		cfg.DataDbCfg().Password, cfg.GeneralCfg().DBDataEncoding,
-		cfg.DataDbCfg().Opts, cfg.DataDbCfg().Items)
-	if err != nil {
-		t.Error(err)
-	}
-	defer dataDB.Close()
-	dm := engine.NewDataManager(dataDB, config.CgrConfig().CacheCfg(), connMng)
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
 	tpRsc := TPResources{
 		dm: dm,
 	}
@@ -150,7 +132,7 @@ func TestTPEExportItemsResourcesIDNotFound(t *testing.T) {
 		ThresholdIDs: []string{utils.MetaNone},
 	}
 	tpRsc.dm.SetResourceProfile(context.Background(), rsc, false)
-	err = tpRsc.exportItems(context.Background(), wrtr, "cgrates.org", []string{"ResGroup2"})
+	err := tpRsc.exportItems(context.Background(), wrtr, "cgrates.org", []string{"ResGroup2"})
 	errExpect := "<NOT_FOUND> cannot find ResourceProfile with id: <ResGroup2>"
 	if err.Error() != errExpect {
 		t.Errorf("Expected %v\n but received %v", errExpect, err)

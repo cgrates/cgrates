@@ -74,17 +74,8 @@ func TestTPEnewTPActions(t *testing.T) {
 func TestTPEExportItemsActions(t *testing.T) {
 	wrtr := new(bytes.Buffer)
 	cfg := config.NewDefaultCGRConfig()
-	connMng := engine.NewConnManager(cfg)
-	dataDB, err := engine.NewDataDBConn(cfg.DataDbCfg().Type,
-		cfg.DataDbCfg().Host, cfg.DataDbCfg().Port,
-		cfg.DataDbCfg().Name, cfg.DataDbCfg().User,
-		cfg.DataDbCfg().Password, cfg.GeneralCfg().DBDataEncoding,
-		cfg.DataDbCfg().Opts, cfg.DataDbCfg().Items)
-	if err != nil {
-		t.Error(err)
-	}
-	defer dataDB.Close()
-	dm := engine.NewDataManager(dataDB, config.CgrConfig().CacheCfg(), connMng)
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
 	tpAct := TPActions{
 		dm: dm,
 	}
@@ -113,7 +104,7 @@ func TestTPEExportItemsActions(t *testing.T) {
 		},
 	}
 	tpAct.dm.SetActionProfile(context.Background(), act, false)
-	err = tpAct.exportItems(context.Background(), wrtr, "cgrates.org", []string{"SET_BAL"})
+	err := tpAct.exportItems(context.Background(), wrtr, "cgrates.org", []string{"SET_BAL"})
 	if err != nil {
 		t.Errorf("Expected nil\n but received %v", err)
 	}
@@ -122,23 +113,14 @@ func TestTPEExportItemsActions(t *testing.T) {
 func TestTPEExportItemsActionsEmpty(t *testing.T) {
 	wrtr := new(bytes.Buffer)
 	cfg := config.NewDefaultCGRConfig()
-	connMng := engine.NewConnManager(cfg)
-	dataDB, err := engine.NewDataDBConn(cfg.DataDbCfg().Type,
-		cfg.DataDbCfg().Host, cfg.DataDbCfg().Port,
-		cfg.DataDbCfg().Name, cfg.DataDbCfg().User,
-		cfg.DataDbCfg().Password, cfg.GeneralCfg().DBDataEncoding,
-		cfg.DataDbCfg().Opts, cfg.DataDbCfg().Items)
-	if err != nil {
-		t.Error(err)
-	}
-	defer dataDB.Close()
-	dm := engine.NewDataManager(dataDB, config.CgrConfig().CacheCfg(), connMng)
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
 	tpAct := TPActions{
 		dm: dm,
 	}
 	act := &engine.ActionProfile{}
 	tpAct.dm.SetActionProfile(context.Background(), act, false)
-	err = tpAct.exportItems(context.Background(), wrtr, "cgrates.org", []string{})
+	err := tpAct.exportItems(context.Background(), wrtr, "cgrates.org", []string{})
 	if err != nil {
 		t.Errorf("Expected nil\n but received %v", err)
 	}
@@ -184,17 +166,8 @@ func TestTPEExportItemsActionsNoDbConn(t *testing.T) {
 func TestTPEExportItemsActionsIDNotFound(t *testing.T) {
 	wrtr := new(bytes.Buffer)
 	cfg := config.NewDefaultCGRConfig()
-	connMng := engine.NewConnManager(cfg)
-	dataDB, err := engine.NewDataDBConn(cfg.DataDbCfg().Type,
-		cfg.DataDbCfg().Host, cfg.DataDbCfg().Port,
-		cfg.DataDbCfg().Name, cfg.DataDbCfg().User,
-		cfg.DataDbCfg().Password, cfg.GeneralCfg().DBDataEncoding,
-		cfg.DataDbCfg().Opts, cfg.DataDbCfg().Items)
-	if err != nil {
-		t.Error(err)
-	}
-	defer dataDB.Close()
-	dm := engine.NewDataManager(dataDB, config.CgrConfig().CacheCfg(), connMng)
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
 	tpAct := TPActions{
 		dm: dm,
 	}
@@ -223,7 +196,7 @@ func TestTPEExportItemsActionsIDNotFound(t *testing.T) {
 		},
 	}
 	tpAct.dm.SetActionProfile(context.Background(), act, false)
-	err = tpAct.exportItems(context.Background(), wrtr, "cgrates.org", []string{"UNSET_BAL"})
+	err := tpAct.exportItems(context.Background(), wrtr, "cgrates.org", []string{"UNSET_BAL"})
 	errExpect := "<NOT_FOUND> cannot find Actions id: <UNSET_BAL>"
 	if err.Error() != errExpect {
 		t.Errorf("Expected %v\n but received %v", errExpect, err)
