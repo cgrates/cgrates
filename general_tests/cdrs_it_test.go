@@ -23,6 +23,8 @@ package general_tests
 
 import (
 	"path"
+	"reflect"
+	"sort"
 	"testing"
 	"time"
 
@@ -42,38 +44,35 @@ var (
 
 	// subtests to be executed for each confDIR
 	sTestsCDRsIT = []func(t *testing.T){
-		testV2CDRsInitConfig,
-		testV2CDRsInitDataDb,
-		testV2CDRsStartEngine,
-		testV2CDRsRpcConn,
-		testV2CDRsLoadTariffPlanFromFolder,
+		testCDRsInitConfig,
+		testCDRsInitDataDb,
+		testCDRsStartEngine,
+		testCDRsRpcConn,
+		testCDRsLoadTariffPlanFromFolder,
 		//default process
-		testV2CDRsProcessCDR,
-		// testV2CDRsGetCdrs,
+		testCDRsProcessCDR,
+		// testCDRsGetCdrs,
 		// //custom process
-		// testV2CDRsProcessCDR2,
-		// testV2CDRsGetCdrs2,
-		// testV2CDRsProcessCDR3,
-		// testV2CDRsGetCdrs3,
+		testCDRsProcessCDR2,
+		// testCDRsGetCdrs2,
+		testCDRsProcessCDR3,
+		// testCDRsGetCdrs3,
 
-		// testV2CDRsProcessCDR4,
-		// testV2CDRsGetCdrs4,
+		testCDRsSetStats,
+		testCDRsSetThresholdProfile,
 
-		// testV2CDRsSetStats,
-		// testV2CDRsSetThresholdProfile,
+		testCDRsProcessCDR4,
+		// testCDRsGetCdrs5,
+		testCDRsGetStats1,
+		testCDRsGetThreshold1,
+		testCDRsProcessCDR5,
+		// testCDRsGetCdrs5,
+		testCDRsGetStats2,
+		testCDRsGetThreshold2,
+		// testCDRsProcessCDR7,
+		// testCDRsGetCdrs7,
 
-		// testV2CDRsProcessCDR5,
-		// testV2CDRsGetCdrs5,
-		// testV2CDRsGetStats1,
-		// testV2CDRsGetThreshold1,
-		// testV2CDRsProcessCDR6,
-		// testV2CDRsGetCdrs5,
-		// testV2CDRsGetStats2,
-		// testV2CDRsGetThreshold2,
-		// testV2CDRsProcessCDR7,
-		// testV2CDRsGetCdrs7,
-
-		testV2CDRsKillEngine,
+		testCDRsKillEngine,
 	}
 )
 
@@ -97,7 +96,7 @@ func TestCDRsIT(t *testing.T) {
 	}
 }
 
-func testV2CDRsInitConfig(t *testing.T) {
+func testCDRsInitConfig(t *testing.T) {
 	var err error
 	cdrsCfgPath = path.Join(*dataDir, "conf", "samples", cdrsConfDIR)
 	if *encoding == utils.MetaGOB {
@@ -108,27 +107,27 @@ func testV2CDRsInitConfig(t *testing.T) {
 	}
 }
 
-func testV2CDRsInitDataDb(t *testing.T) {
+func testCDRsInitDataDb(t *testing.T) {
 	if err := engine.InitDataDB(cdrsCfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
-func testV2CDRsStartEngine(t *testing.T) {
+func testCDRsStartEngine(t *testing.T) {
 	if _, err := engine.StopStartEngine(cdrsCfgPath, *waitRater); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Connect rpc client to rater
-func testV2CDRsRpcConn(t *testing.T) {
+func testCDRsRpcConn(t *testing.T) {
 	cdrsRpc, err = newRPCClient(cdrsCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
 }
 
-func testV2CDRsLoadTariffPlanFromFolder(t *testing.T) {
+func testCDRsLoadTariffPlanFromFolder(t *testing.T) {
 	caching := utils.MetaReload
 	var rpl string
 	if err := cdrsRpc.Call(context.Background(), utils.LoaderSv1Run,
@@ -158,16 +157,16 @@ func testV2CDRsLoadTariffPlanFromFolder(t *testing.T) {
 	}
 }
 
-func testV2CDRsProcessCDR(t *testing.T) {
+func testCDRsProcessCDR(t *testing.T) {
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		Event: map[string]interface{}{
-			utils.OriginID:     "testV2CDRsProcessCDR1",
+			utils.OriginID:     "testCDRsProcessCDR1",
 			utils.OriginHost:   "192.168.1.1",
-			utils.Source:       "testV2CDRsProcessCDR",
+			utils.Source:       "testCDRsProcessCDR",
 			utils.RequestType:  utils.MetaRated,
 			utils.Category:     "call",
-			utils.AccountField: "testV2CDRsProcessCDR",
+			utils.AccountField: "testCDRsProcessCDR",
 			utils.Subject:      "ANY2CNT",
 			utils.Destination:  "+4986517174963",
 			utils.AnswerTime:   time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
@@ -176,21 +175,44 @@ func testV2CDRsProcessCDR(t *testing.T) {
 			"fieldextr2":       "valextr2",
 		},
 		APIOpts: map[string]interface{}{
-			utils.OptsRateS:      false,
+			utils.OptsAttributeS: true,
+			utils.OptsChargerS:   true,
+			utils.OptsRateS:      true,
 			utils.OptsCDRsExport: false,
 			utils.OptsAccountS:   false,
 		},
 	}
 
-	var reply string
-	if err := cdrsRpc.Call(context.Background(), utils.CDRsV1ProcessEvent, args, &reply); err != nil {
+	var reply []*utils.EventsWithOpts
+	if err := cdrsRpc.Call(context.Background(), utils.CDRsV1ProcessEventWithGet, args,
+		&reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
-	} else if reply != utils.OK {
-		t.Error("Unexpected reply received: ", reply)
+	} else if len(reply) != 2 {
+		t.Error("Unexpected number of CDRs returned: ", len(reply))
+	} else {
+		sort.Slice(reply, func(i, j int) bool {
+			return utils.IfaceAsString(reply[i].Opts[utils.MetaRunID]) >
+				utils.IfaceAsString(reply[j].Opts[utils.MetaRunID])
+		})
+		// fmt.Println(utils.ToJSON(reply))
+		// if reply[0].Cost != -1.0 {
+		// 	t.Errorf("Unexpected cost for CDR: %f", reply[0].Cost)
+		// }
+		if reply[0].Event["PayPalAccount"] != "paypal@cgrates.org" {
+			t.Errorf("PayPalAccount should be added by AttributeS, have: %s",
+				reply[0].Event["PayPalAccount"])
+		}
+		// if cdrs[0].Cost != 0.0198 {
+		// 	t.Errorf("Unexpected cost for CDR: %f", cdrs[0].Cost)
+		// }
+		if reply[1].Event["PayPalAccount"] != "paypal@cgrates.org" {
+			t.Errorf("PayPalAccount should be added by AttributeS, have: %s",
+				reply[1].Event["PayPalAccount"])
+		}
 	}
 }
 
-// func testV2CDRsGetCdrs(t *testing.T) {
+// func testCDRsGetCdrs(t *testing.T) {
 // 	var cdrCnt int64
 // 	req := utils.AttrGetCdrs{}
 // 	if err := cdrsRpc.Call(utils.APIerSv2CountCDRs, &req, &cdrCnt); err != nil {
@@ -229,45 +251,73 @@ func testV2CDRsProcessCDR(t *testing.T) {
 // 	}
 // }
 
-// //Disable Attributes process
-// func testV2CDRsProcessCDR2(t *testing.T) {
-// 	args := &utils.CGREvent{
-// 		Flags:  []string{"*attributes:false", utils.MetaRALs},
-// 		Tenant: "cgrates.org",
-// 		Event: map[string]interface{}{
-// 			utils.OriginID:     "testV2CDRsProcessCDR2",
-// 			utils.OriginHost:   "192.168.1.1",
-// 			utils.Source:       "testV2CDRsProcessCDR2",
-// 			utils.RequestType:  utils.MetaRated,
-// 			utils.Category:     "call",
-// 			utils.AccountField: "testV2CDRsProcessCDR2",
-// 			utils.Subject:      "ANY2CNT",
-// 			utils.Destination:  "+4986517174963",
-// 			utils.AnswerTime:   time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
-// 			utils.Usage:        time.Minute,
-// 			"field_extr1":      "val_extr1",
-// 			"fieldextr2":       "valextr2",
-// 		},
-// 	}
+//Disable Attributes process
+func testCDRsProcessCDR2(t *testing.T) {
+	args := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		Event: map[string]interface{}{
+			utils.OriginID:     "testCDRsProcessCDR2",
+			utils.OriginHost:   "192.168.1.1",
+			utils.Source:       "testCDRsProcessCDR2",
+			utils.RequestType:  utils.MetaRated,
+			utils.Category:     "call",
+			utils.AccountField: "testCDRsProcessCDR2",
+			utils.Subject:      "ANY2CNT",
+			utils.Destination:  "+4986517174963",
+			utils.AnswerTime:   time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
+			utils.Usage:        time.Minute,
+			"field_extr1":      "val_extr1",
+			"fieldextr2":       "valextr2",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsAttributeS: false,
+			utils.OptsChargerS:   true,
+			utils.OptsRateS:      true,
+			utils.OptsCDRsExport: false,
+			utils.OptsAccountS:   false,
+		},
+	}
 
-// 	var reply string
-// 	if err := cdrsRpc.Call(utils.CDRsV1ProcessEvent, args, &reply); err != nil {
-// 		t.Error("Unexpected error: ", err.Error())
-// 	} else if reply != utils.OK {
-// 		t.Error("Unexpected reply received: ", reply)
-// 	}
-// }
+	var reply []*utils.EventsWithOpts
+	if err := cdrsRpc.Call(context.Background(), utils.CDRsV1ProcessEventWithGet, args, &reply); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if len(reply) != 2 {
+		t.Error("Unexpected number of CDRs returned: ", len(reply))
+	} else {
+		sort.Slice(reply, func(i, j int) bool {
+			return utils.IfaceAsString(reply[i].Opts[utils.MetaRunID]) >
+				utils.IfaceAsString(reply[j].Opts[utils.MetaRunID])
+		})
+		// fmt.Println(utils.ToJSON(reply))
+		// if reply[0].Cost != -1.0 {
+		// 	t.Errorf("Unexpected cost for CDR: %f", reply[0].Cost)
+		// }
+		// we disable the connection to AttributeS and PayPalAccount shouldn't be present
+		if _, has := reply[0].Event["PayPalAccount"]; has {
+			t.Errorf("PayPalAccount should NOT be added by AttributeS, have: %s",
+				reply[0].Event["PayPalAccount"])
+		}
+		// if cdrs[0].Cost != 0.0198 {
+		// 	t.Errorf("Unexpected cost for CDR: %f", cdrs[0].Cost)
+		// }
+		//we disable the connection to AttributeS and PayPalAccount shouldn't be present
+		if _, has := reply[1].Event["PayPalAccount"]; has {
+			t.Errorf("PayPalAccount should NOT be added by AttributeS, have: %s",
+				reply[1].Event["PayPalAccount"])
+		}
+	}
+}
 
-// func testV2CDRsGetCdrs2(t *testing.T) {
+// func testCDRsGetCdrs2(t *testing.T) {
 // 	var cdrCnt int64
-// 	req := utils.AttrGetCdrs{Accounts: []string{"testV2CDRsProcessCDR2"}}
+// 	req := utils.AttrGetCdrs{Accounts: []string{"testCDRsProcessCDR2"}}
 // 	if err := cdrsRpc.Call(utils.APIerSv2CountCDRs, &req, &cdrCnt); err != nil {
 // 		t.Error("Unexpected error: ", err.Error())
 // 	} else if cdrCnt != 2 {
 // 		t.Error("Unexpected number of CDRs returned: ", cdrCnt)
 // 	}
 // 	var cdrs []*engine.ExternalCDR
-// 	args := utils.RPCCDRsFilter{RunIDs: []string{"raw"}, OriginIDs: []string{"testV2CDRsProcessCDR2"}}
+// 	args := utils.RPCCDRsFilter{RunIDs: []string{"raw"}, OriginIDs: []string{"testCDRsProcessCDR2"}}
 // 	if err := cdrsRpc.Call(utils.APIerSv2GetCDRs, &args, &cdrs); err != nil {
 // 		t.Error("Unexpected error: ", err.Error())
 // 	} else if len(cdrs) != 1 {
@@ -282,7 +332,7 @@ func testV2CDRsProcessCDR(t *testing.T) {
 // 				cdrs[0].ExtraFields["PayPalAccount"])
 // 		}
 // 	}
-// 	args = utils.RPCCDRsFilter{RunIDs: []string{"CustomerCharges"}, OriginIDs: []string{"testV2CDRsProcessCDR2"}}
+// 	args = utils.RPCCDRsFilter{RunIDs: []string{"CustomerCharges"}, OriginIDs: []string{"testCDRsProcessCDR2"}}
 // 	if err := cdrsRpc.Call(utils.APIerSv2GetCDRs, &args, &cdrs); err != nil {
 // 		t.Error("Unexpected error: ", err.Error())
 // 	} else if len(cdrs) != 1 {
@@ -299,45 +349,65 @@ func testV2CDRsProcessCDR(t *testing.T) {
 // 	}
 // }
 
-// //Disable Attributes and Charger process
-// func testV2CDRsProcessCDR3(t *testing.T) {
-// 	args := &utils.CGREvent{
-// 		Flags:  []string{"*attributes:false", "*chargers:false"},
-// 		Tenant: "cgrates.org",
-// 		Event: map[string]interface{}{
-// 			utils.OriginID:     "testV2CDRsProcessCDR3",
-// 			utils.OriginHost:   "192.168.1.1",
-// 			utils.Source:       "testV2CDRsProcessCDR3",
-// 			utils.RequestType:  utils.MetaRated,
-// 			utils.Category:     "call",
-// 			utils.AccountField: "testV2CDRsProcessCDR3",
-// 			utils.Subject:      "ANY2CNT",
-// 			utils.Destination:  "+4986517174963",
-// 			utils.AnswerTime:   time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
-// 			utils.Usage:        time.Minute,
-// 			"field_extr1":      "val_extr1",
-// 			"fieldextr2":       "valextr2",
-// 		},
-// 	}
+//Disable Attributes and Charger process
+func testCDRsProcessCDR3(t *testing.T) {
+	args := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		Event: map[string]interface{}{
+			utils.OriginID:     "testCDRsProcessCDR3",
+			utils.OriginHost:   "192.168.1.1",
+			utils.Source:       "testCDRsProcessCDR3",
+			utils.RequestType:  utils.MetaRated,
+			utils.Category:     "call",
+			utils.AccountField: "testCDRsProcessCDR3",
+			utils.Subject:      "ANY2CNT",
+			utils.Destination:  "+4986517174963",
+			utils.AnswerTime:   time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
+			utils.Usage:        time.Minute,
+			"field_extr1":      "val_extr1",
+			"fieldextr2":       "valextr2",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsAttributeS: false,
+			utils.OptsChargerS:   false,
+			utils.OptsRateS:      true,
+			utils.OptsCDRsExport: false,
+			utils.OptsAccountS:   false,
+		},
+	}
 
-// 	var reply string
-// 	if err := cdrsRpc.Call(utils.CDRsV1ProcessEvent, args, &reply); err != nil {
-// 		t.Error("Unexpected error: ", err.Error())
-// 	} else if reply != utils.OK {
-// 		t.Error("Unexpected reply received: ", reply)
-// 	}
-// }
+	var reply []*utils.EventsWithOpts
+	if err := cdrsRpc.Call(context.Background(), utils.CDRsV1ProcessEventWithGet, args, &reply); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if len(reply) != 1 {
+		t.Error("Unexpected number of CDRs returned: ", len(reply))
+	} else {
+		sort.Slice(reply, func(i, j int) bool {
+			return utils.IfaceAsString(reply[i].Opts[utils.MetaRunID]) >
+				utils.IfaceAsString(reply[j].Opts[utils.MetaRunID])
+		})
+		// fmt.Println(utils.ToJSON(reply))
+		// if reply[0].Cost != -1.0 {
+		// 	t.Errorf("Unexpected cost for CDR: %f", reply[0].Cost)
+		// }
+		// we disable the connection to AttributeS and PayPalAccount shouldn't be present
+		if _, has := reply[0].Event["PayPalAccount"]; has {
+			t.Errorf("PayPalAccount should NOT be added by AttributeS, have: %s",
+				reply[0].Event["PayPalAccount"])
+		}
+	}
+}
 
-// func testV2CDRsGetCdrs3(t *testing.T) {
+// func testCDRsGetCdrs3(t *testing.T) {
 // 	var cdrCnt int64
-// 	req := utils.AttrGetCdrs{Accounts: []string{"testV2CDRsProcessCDR3"}}
+// 	req := utils.AttrGetCdrs{Accounts: []string{"testCDRsProcessCDR3"}}
 // 	if err := cdrsRpc.Call(utils.APIerSv2CountCDRs, &req, &cdrCnt); err != nil {
 // 		t.Error("Unexpected error: ", err.Error())
 // 	} else if cdrCnt != 1 {
 // 		t.Error("Unexpected number of CDRs returned: ", cdrCnt)
 // 	}
 // 	var cdrs []*engine.ExternalCDR
-// 	args := utils.RPCCDRsFilter{RunIDs: []string{utils.MetaDefault}, OriginIDs: []string{"testV2CDRsProcessCDR3"}}
+// 	args := utils.RPCCDRsFilter{RunIDs: []string{utils.MetaDefault}, OriginIDs: []string{"testCDRsProcessCDR3"}}
 // 	if err := cdrsRpc.Call(utils.APIerSv2GetCDRs, &args, &cdrs); err != nil {
 // 		t.Error("Unexpected error: ", err.Error())
 // 	} else if len(cdrs) != 1 {
@@ -352,89 +422,15 @@ func testV2CDRsProcessCDR(t *testing.T) {
 // 				cdrs[0].ExtraFields["PayPalAccount"])
 // 		}
 // 	}
-// 	args = utils.RPCCDRsFilter{RunIDs: []string{"CustomerCharges"}, OriginIDs: []string{"testV2CDRsProcessCDR3"}}
+// 	args = utils.RPCCDRsFilter{RunIDs: []string{"CustomerCharges"}, OriginIDs: []string{"testCDRsProcessCDR3"}}
 // 	if err := cdrsRpc.Call(utils.APIerSv2GetCDRs, &args, &cdrs); err == nil || err.Error() != utils.ErrNotFound.Error() {
 // 		t.Error("Unexpected error: ", err)
 // 	}
 // }
 
-// // Enable Attributes process
-// func testV2CDRsProcessCDR4(t *testing.T) {
-// 	args := &utils.CGREvent{
-// 		Flags:  []string{utils.MetaAttributes, utils.MetaRALs},
-// 		Tenant: "cgrates.org",
-// 		Event: map[string]interface{}{
-// 			utils.OriginID:     "testV2CDRsProcessCDR4",
-// 			utils.OriginHost:   "192.168.1.1",
-// 			utils.Source:       "testV2CDRsProcessCDR4",
-// 			utils.RequestType:  utils.MetaRated,
-// 			utils.Category:     "call",
-// 			utils.AccountField: "testV2CDRsProcessCDR4",
-// 			utils.Subject:      "ANY2CNT",
-// 			utils.Destination:  "+4986517174963",
-// 			utils.AnswerTime:   time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
-// 			utils.Usage:        time.Minute,
-// 			"field_extr1":      "val_extr1",
-// 			"fieldextr2":       "valextr2",
-// 		},
-// 	}
-
-// 	var reply string
-// 	if err := cdrsRpc.Call(utils.CDRsV1ProcessEvent, args, &reply); err != nil {
-// 		t.Error("Unexpected error: ", err.Error())
-// 	} else if reply != utils.OK {
-// 		t.Error("Unexpected reply received: ", reply)
-// 	}
-// }
-
-// func testV2CDRsGetCdrs4(t *testing.T) {
+// func testCDRsGetCdrs5(t *testing.T) {
 // 	var cdrCnt int64
-// 	req := utils.AttrGetCdrs{Accounts: []string{"testV2CDRsProcessCDR4"}}
-// 	if err := cdrsRpc.Call(utils.APIerSv2CountCDRs, &req, &cdrCnt); err != nil {
-// 		t.Error("Unexpected error: ", err.Error())
-// 	} else if cdrCnt != 2 {
-// 		t.Error("Unexpected number of CDRs returned: ", cdrCnt)
-// 	}
-// 	var cdrs []*engine.ExternalCDR
-// 	args := utils.RPCCDRsFilter{
-// 		RunIDs:    []string{"raw"},
-// 		OriginIDs: []string{"testV2CDRsProcessCDR4"},
-// 	}
-// 	if err := cdrsRpc.Call(utils.APIerSv2GetCDRs, &args, &cdrs); err != nil {
-// 		t.Fatal("Unexpected error: ", err.Error())
-// 	}
-// 	if len(cdrs) != 1 {
-// 		t.Fatal("Unexpected number of CDRs returned: ", len(cdrs))
-// 	}
-// 	if cdrs[0].Cost != -1.0 {
-// 		t.Errorf("Unexpected cost for CDR: %f", cdrs[0].Cost)
-// 	}
-// 	if rply, has := cdrs[0].ExtraFields["PayPalAccount"]; !has || rply != "paypal@cgrates.org" {
-// 		t.Errorf("PayPalAccount should be added by AttributeS as: paypal@cgrates.org, have: %s",
-// 			cdrs[0].ExtraFields["PayPalAccount"])
-// 	}
-// 	args = utils.RPCCDRsFilter{
-// 		RunIDs:    []string{"CustomerCharges"},
-// 		OriginIDs: []string{"testV2CDRsProcessCDR4"},
-// 	}
-// 	if err := cdrsRpc.Call(utils.APIerSv2GetCDRs, &args, &cdrs); err != nil {
-// 		t.Fatal("Unexpected error: ", err.Error())
-// 	}
-// 	if len(cdrs) != 1 {
-// 		t.Fatal("Unexpected number of CDRs returned: ", len(cdrs))
-// 	}
-// 	if cdrs[0].Cost != 0.0198 {
-// 		t.Errorf("Unexpected cost for CDR: %f", cdrs[0].Cost)
-// 	}
-// 	if rply, has := cdrs[0].ExtraFields["PayPalAccount"]; !has || rply != "paypal@cgrates.org" {
-// 		t.Errorf("PayPalAccount should be added by AttributeS as: paypal@cgrates.org, have: %s",
-// 			cdrs[0].ExtraFields["PayPalAccount"])
-// 	}
-// }
-
-// func testV2CDRsGetCdrs5(t *testing.T) {
-// 	var cdrCnt int64
-// 	req := utils.RPCCDRsFilter{Accounts: []string{"testV2CDRsProcessCDR5"}}
+// 	req := utils.RPCCDRsFilter{Accounts: []string{"testCDRsProcessCDR4"}}
 // 	if err := cdrsRpc.Call(utils.APIerSv2CountCDRs, &req, &cdrCnt); err != nil {
 // 		t.Error("Unexpected error: ", err.Error())
 // 	} else if cdrCnt != 0 {
@@ -443,303 +439,270 @@ func testV2CDRsProcessCDR(t *testing.T) {
 // 	var cdrs []*engine.ExternalCDR
 // 	args := utils.RPCCDRsFilter{
 // 		RunIDs:    []string{"raw"},
-// 		OriginIDs: []string{"testV2CDRsProcessCDR5"},
+// 		OriginIDs: []string{"testCDRsProcessCDR4"},
 // 	}
 // 	if err := cdrsRpc.Call(utils.APIerSv2GetCDRs, &args, &cdrs); err == nil || err.Error() != utils.ErrNotFound.Error() {
 // 		t.Fatal("Unexpected error: ", err)
 // 	}
 // 	args = utils.RPCCDRsFilter{
 // 		RunIDs:    []string{"CustomerCharges"},
-// 		OriginIDs: []string{"testV2CDRsProcessCDR5"},
+// 		OriginIDs: []string{"testCDRsProcessCDR4"},
 // 	}
 // 	if err := cdrsRpc.Call(utils.APIerSv2GetCDRs, &args, &cdrs); err == nil || err.Error() != utils.ErrNotFound.Error() {
 // 		t.Fatal("Unexpected error: ", err.Error())
 // 	}
 // }
 
-// func testV2CDRsSetStats(t *testing.T) {
-// 	var reply *engine.StatQueueProfile
-// 	if err := cdrsRpc.Call(utils.AdminSv1GetStatQueueProfile,
-// 		&utils.TenantID{Tenant: "cgrates.org", ID: "STS_PoccessCDR"}, &reply); err == nil ||
-// 		err.Error() != utils.ErrNotFound.Error() {
-// 		t.Error(err)
-// 	}
-// 	statConfig := &engine.StatQueueProfileWithAPIOpts{
-// 		StatQueueProfile: &engine.StatQueueProfile{
-// 			Tenant:    "cgrates.org",
-// 			ID:        "STS_PoccessCDR",
-// 			FilterIDs: []string{"*string:~*req.OriginID:testV2CDRsProcessCDR5"},
-// 			// QueueLength: 10,
-// 			Metrics: []*engine.MetricWithFilters{{
-// 				MetricID: "*sum#~*req.Usage",
-// 			}},
-// 			ThresholdIDs: []string{utils.MetaNone},
-// 			Blocker:      true,
-// 			Stored:       true,
-// 			Weight:       20,
-// 			MinItems:     0,
-// 		},
-// 	}
-// 	var result string
-// 	if err := cdrsRpc.Call(utils.AdminSv1SetStatQueueProfile, statConfig, &result); err != nil {
-// 		t.Error(err)
-// 	} else if result != utils.OK {
-// 		t.Error("Unexpected reply returned", result)
-// 	}
-// 	if err := cdrsRpc.Call(utils.AdminSv1GetStatQueueProfile,
-// 		&utils.TenantID{Tenant: "cgrates.org", ID: "STS_PoccessCDR"}, &reply); err != nil {
-// 		t.Error(err)
-// 	} else if !reflect.DeepEqual(statConfig.StatQueueProfile, reply) {
-// 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(statConfig.StatQueueProfile), utils.ToJSON(reply))
-// 	}
-// }
+func testCDRsSetStats(t *testing.T) {
+	var reply *engine.StatQueueProfile
+	if err := cdrsRpc.Call(context.Background(), utils.AdminSv1GetStatQueueProfile,
+		&utils.TenantID{Tenant: "cgrates.org", ID: "STS_ProcessCDR"}, &reply); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+	statConfig := &engine.StatQueueProfileWithAPIOpts{
+		StatQueueProfile: &engine.StatQueueProfile{
+			Tenant:    "cgrates.org",
+			ID:        "STS_ProcessCDR",
+			FilterIDs: []string{"*string:~*req.OriginID:testCDRsProcessCDR4"},
+			// QueueLength: 10,
+			Metrics: []*engine.MetricWithFilters{{
+				MetricID: "*sum#~*req.Usage",
+			}},
+			ThresholdIDs: []string{utils.MetaNone},
+			Blocker:      true,
+			Stored:       true,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
+			MinItems: 0,
+		},
+	}
+	var result string
+	if err := cdrsRpc.Call(context.Background(), utils.AdminSv1SetStatQueueProfile, statConfig, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+	if err := cdrsRpc.Call(context.Background(), utils.AdminSv1GetStatQueueProfile,
+		&utils.TenantID{Tenant: "cgrates.org", ID: "STS_ProcessCDR"}, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(statConfig.StatQueueProfile, reply) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(statConfig.StatQueueProfile), utils.ToJSON(reply))
+	}
+}
 
-// func testV2CDRsSetThresholdProfile(t *testing.T) {
-// 	var actreply string
+func testCDRsSetThresholdProfile(t *testing.T) {
+	// Set Action
+	var reply1 string
+	actPrf := &engine.ActionProfileWithAPIOpts{
+		ActionProfile: &engine.ActionProfile{
+			Tenant: "cgrates.org",
+			ID:     "ACT_THD_ProcessCDR",
+			Actions: []*engine.APAction{
+				{
+					Type: utils.MetaLog,
+				},
+			},
+		},
+	}
+	if err := cdrsRpc.Call(context.Background(), utils.AdminSv1SetActionProfile, actPrf, &reply1); err != nil &&
+		err.Error() != utils.ErrExists.Error() {
+		t.Error("Got error on AdminSv1.SetActionProfile: ", err.Error())
+	} else if reply1 != utils.OK {
+		t.Errorf("Calling AdminSv1.SetActionProfile received: %s", reply1)
+	}
 
-// 	// Set Action
-// 	attrsAA := &utils.AttrSetActions{ActionsId: "ACT_THD_PoccessCDR", Actions: []*utils.TPAction{{Identifier: utils.MetaLog}}}
-// 	if err := cdrsRpc.Call(utils.APIerSv2SetActions, attrsAA, &actreply); err != nil && err.Error() != utils.ErrExists.Error() {
-// 		t.Error("Got error on APIerSv2.SetActions: ", err.Error())
-// 	} else if actreply != utils.OK {
-// 		t.Errorf("Calling APIerSv2.SetActions received: %s", actreply)
-// 	}
+	// Set Account
+	var reply2 string
+	accnt := &utils.AccountWithAPIOpts{
+		Account: &utils.Account{
+			Tenant: "cgrates.org",
+			ID:     "testCDRsProcessCDR4",
+		},
+	}
+	if err := cdrsRpc.Call(context.Background(), utils.AdminSv1SetAccount, accnt, &reply2); err != nil {
+		t.Error("Got error on AdminSv1.SetAccount: ", err.Error())
+	} else if reply2 != utils.OK {
+		t.Errorf("Calling AdminSv1.SetAccount received: %s", reply2)
+	}
 
-// 	// Set Account
-// 	attrsSetAccount := &utils.AttrSetAccount{Tenant: "cgrates.org", Account: "testV2CDRsProcessCDR5"}
-// 	if err := cdrsRpc.Call(utils.APIerSv1SetAccount, attrsSetAccount, &actreply); err != nil {
-// 		t.Error("Got error on APIerSv1.SetAccount: ", err.Error())
-// 	} else if actreply != utils.OK {
-// 		t.Errorf("Calling APIerSv1.SetAccount received: %s", actreply)
-// 	}
+	// Set Threshold
+	var reply *engine.ThresholdProfile
+	var result string
+	if err := cdrsRpc.Call(context.Background(), utils.AdminSv1GetThresholdProfile,
+		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_ProcessCDR"}, &reply); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+	tPrfl := &engine.ThresholdProfileWithAPIOpts{
+		ThresholdProfile: &engine.ThresholdProfile{
+			Tenant:    "cgrates.org",
+			ID:        "THD_ProcessCDR",
+			FilterIDs: []string{"*string:~*req.OriginID:testCDRsProcessCDR4"},
+			MaxHits:   -1,
+			Blocker:   false,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
+			ActionProfileIDs: []string{"ACT_THD_ProcessCDR"},
+			Async:            false,
+		},
+	}
+	if err := cdrsRpc.Call(context.Background(), utils.AdminSv1SetThresholdProfile, tPrfl, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+	if err := cdrsRpc.Call(context.Background(), utils.AdminSv1GetThresholdProfile,
+		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_ProcessCDR"}, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(tPrfl.ThresholdProfile, reply) {
+		t.Errorf("Expecting: %+v, received: %+v", tPrfl.ThresholdProfile, reply)
+	}
+}
 
-// 	// Set Threshold
-// 	var reply *engine.ThresholdProfile
-// 	var result string
-// 	if err := cdrsRpc.Call(utils.APIerSv1GetThresholdProfile,
-// 		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_PoccessCDR"}, &reply); err == nil ||
-// 		err.Error() != utils.ErrNotFound.Error() {
-// 		t.Error(err)
-// 	}
-// 	tPrfl := &engine.ThresholdProfileWithAPIOpts{
-// 		ThresholdProfile: &engine.ThresholdProfile{
-// 			Tenant:           "cgrates.org",
-// 			ID:               "THD_PoccessCDR",
-// 			FilterIDs:        []string{"*string:~*req.OriginID:testV2CDRsProcessCDR5"},
-// 			MaxHits:          -1,
-// 			Blocker:          false,
-// 			Weight:           20.0,
-// 			ActionProfileIDs: []string{"ACT_THD_PoccessCDR"},
-// 			Async:            false,
-// 		},
-// 	}
-// 	if err := cdrsRpc.Call(utils.APIerSv1SetThresholdProfile, tPrfl, &result); err != nil {
-// 		t.Error(err)
-// 	} else if result != utils.OK {
-// 		t.Error("Unexpected reply returned", result)
-// 	}
-// 	if err := cdrsRpc.Call(utils.APIerSv1GetThresholdProfile,
-// 		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_PoccessCDR"}, &reply); err != nil {
-// 		t.Error(err)
-// 	} else if !reflect.DeepEqual(tPrfl.ThresholdProfile, reply) {
-// 		t.Errorf("Expecting: %+v, received: %+v", tPrfl.ThresholdProfile, reply)
-// 	}
-// }
+func testCDRsProcessCDR4(t *testing.T) {
+	args := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		Event: map[string]interface{}{
+			utils.OriginID:     "testCDRsProcessCDR4",
+			utils.OriginHost:   "192.168.1.1",
+			utils.Source:       "testCDRsProcessCDR4",
+			utils.RequestType:  utils.MetaRated,
+			utils.Category:     "call",
+			utils.AccountField: "testCDRsProcessCDR4",
+			utils.Subject:      "ANY2CNT2",
+			utils.Destination:  "+4986517174963",
+			utils.AnswerTime:   time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
+			utils.Usage:        time.Minute,
+			"field_extr1":      "val_extr1",
+			"fieldextr2":       "valextr2",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsAttributeS: true,
+			utils.OptsChargerS:   true,
+			utils.OptsRateS:      true,
+			utils.OptsCDRsExport: false,
+			utils.OptsAccountS:   false,
+			utils.OptsStatS:      false,
+			utils.OptsThresholdS: false,
+		},
+	}
 
-// func testV2CDRsProcessCDR5(t *testing.T) {
-// 	args := &utils.CGREvent{
-// 		Flags:  []string{"*store:false", "*stats:false", "*thresholds:false"},
-// 		Tenant: "cgrates.org",
-// 		Event: map[string]interface{}{
-// 			utils.OriginID:     "testV2CDRsProcessCDR5",
-// 			utils.OriginHost:   "192.168.1.1",
-// 			utils.Source:       "testV2CDRsProcessCDR5",
-// 			utils.RequestType:  utils.MetaRated,
-// 			utils.Category:     "call",
-// 			utils.AccountField: "testV2CDRsProcessCDR5",
-// 			utils.Subject:      "ANY2CNT2",
-// 			utils.Destination:  "+4986517174963",
-// 			utils.AnswerTime:   time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
-// 			utils.Usage:        time.Minute,
-// 			"field_extr1":      "val_extr1",
-// 			"fieldextr2":       "valextr2",
-// 		},
-// 	}
+	var reply string
+	if err := cdrsRpc.Call(context.Background(), utils.CDRsV1ProcessEvent, args, &reply); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply received: ", reply)
+	}
+}
 
-// 	var reply string
-// 	if err := cdrsRpc.Call(utils.CDRsV1ProcessEvent, args, &reply); err != nil {
-// 		t.Error("Unexpected error: ", err.Error())
-// 	} else if reply != utils.OK {
-// 		t.Error("Unexpected reply received: ", reply)
-// 	}
-// }
+func testCDRsGetStats1(t *testing.T) {
+	expectedIDs := []string{"STS_ProcessCDR"}
+	var metrics map[string]string
+	expectedMetrics := map[string]string{
+		utils.MetaSum + utils.HashtagSep + utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Usage: utils.NotAvailable,
+	}
+	if err := cdrsRpc.Call(context.Background(), utils.StatSv1GetQueueStringMetrics,
+		&utils.TenantIDWithAPIOpts{
+			TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: expectedIDs[0]},
+		}, &metrics); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expectedMetrics, metrics) {
+		t.Errorf("expecting: %+v, received reply: %s", expectedMetrics, metrics)
+	}
+}
 
-// func testV2CDRsGetStats1(t *testing.T) {
-// 	expectedIDs := []string{"STS_PoccessCDR"}
-// 	var metrics map[string]string
-// 	expectedMetrics := map[string]string{
-// 		utils.MetaSum + utils.HashtagSep + utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Usage: utils.NotAvailable,
-// 	}
-// 	if err := cdrsRpc.Call(utils.StatSv1GetQueueStringMetrics,
-// 		&utils.TenantIDWithAPIOpts{
-// 			TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: expectedIDs[0]},
-// 		}, &metrics); err != nil {
-// 		t.Error(err)
-// 	} else if !reflect.DeepEqual(expectedMetrics, metrics) {
-// 		t.Errorf("expecting: %+v, received reply: %s", expectedMetrics, metrics)
-// 	}
-// }
+func testCDRsGetThreshold1(t *testing.T) {
+	expected := []string{"THD_ACNT_1001", "THD_ProcessCDR"}
+	var result []string
+	if err := cdrsRpc.Call(context.Background(), utils.AdminSv1GetThresholdProfileIDs,
+		&utils.ArgsItemIDs{Tenant: "cgrates.org"}, &result); err != nil {
+		t.Error(err)
+	} else if len(expected) != len(result) {
+		t.Errorf("Expecting : %+v, received: %+v", expected, result)
+	}
+	var td engine.Threshold
+	if err := cdrsRpc.Call(context.Background(), utils.ThresholdSv1GetThreshold,
+		&utils.TenantIDWithAPIOpts{
+			TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "THD_ProcessCDR"},
+		}, &td); err != nil {
+		t.Error(err)
+	} else if td.Hits != 0 {
+		t.Errorf("received: %+v", td)
+	}
+}
 
-// func testV2CDRsGetThreshold1(t *testing.T) {
-// 	expected := []string{"THD_ACNT_1001", "THD_PoccessCDR"}
-// 	var result []string
-// 	if err := cdrsRpc.Call(utils.APIerSv1GetThresholdProfileIDs,
-// 		&utils.ArgsItemIDs{Tenant: "cgrates.org"}, &result); err != nil {
-// 		t.Error(err)
-// 	} else if len(expected) != len(result) {
-// 		t.Errorf("Expecting : %+v, received: %+v", expected, result)
-// 	}
-// 	var td engine.Threshold
-// 	if err := cdrsRpc.Call(utils.ThresholdSv1GetThreshold,
-// 		&utils.TenantIDWithAPIOpts{
-// 			TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "THD_PoccessCDR"},
-// 		}, &td); err != nil {
-// 		t.Error(err)
-// 	} else if td.Hits != 0 {
-// 		t.Errorf("received: %+v", td)
-// 	}
-// }
+func testCDRsProcessCDR5(t *testing.T) {
+	args := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		Event: map[string]interface{}{
+			utils.OriginID:     "testCDRsProcessCDR4",
+			utils.OriginHost:   "192.168.1.2",
+			utils.Source:       "testCDRsProcessCDR5",
+			utils.RequestType:  utils.MetaRated,
+			utils.Category:     "call",
+			utils.AccountField: "testCDRsProcessCDR5",
+			utils.Subject:      "ANY2CNT",
+			utils.Destination:  "+4986517174963",
+			utils.AnswerTime:   time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
+			utils.Usage:        time.Minute,
+			"field_extr1":      "val_extr1",
+			"fieldextr2":       "valextr2",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsAttributeS: true,
+			utils.OptsChargerS:   true,
+			utils.OptsRateS:      true,
+			utils.OptsCDRsExport: false,
+			utils.OptsAccountS:   false,
+			utils.OptsStatS:      true,
+			utils.OptsThresholdS: true,
+		},
+	}
 
-// func testV2CDRsProcessCDR6(t *testing.T) {
-// 	args := &utils.CGREvent{
-// 		Flags:  []string{"*store:false", "*stats:true", "*thresholds:true"},
-// 		Tenant: "cgrates.org",
-// 		Event: map[string]interface{}{
-// 			utils.OriginID:     "testV2CDRsProcessCDR5",
-// 			utils.OriginHost:   "192.168.1.2",
-// 			utils.Source:       "testV2CDRsProcessCDR6",
-// 			utils.RequestType:  utils.MetaRated,
-// 			utils.Category:     "call",
-// 			utils.AccountField: "testV2CDRsProcessCDR6",
-// 			utils.Subject:      "ANY2CNT",
-// 			utils.Destination:  "+4986517174963",
-// 			utils.AnswerTime:   time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
-// 			utils.Usage:        time.Minute,
-// 			"field_extr1":      "val_extr1",
-// 			"fieldextr2":       "valextr2",
-// 		},
-// 	}
+	var reply string
+	if err := cdrsRpc.Call(context.Background(), utils.CDRsV1ProcessEvent, args, &reply); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply received: ", reply)
+	}
+}
 
-// 	var reply string
-// 	if err := cdrsRpc.Call(utils.CDRsV1ProcessEvent, args, &reply); err != nil {
-// 		t.Error("Unexpected error: ", err.Error())
-// 	} else if reply != utils.OK {
-// 		t.Error("Unexpected reply received: ", reply)
-// 	}
-// }
+func testCDRsGetStats2(t *testing.T) {
+	expectedIDs := []string{"STS_ProcessCDR"}
+	var metrics map[string]string
+	expectedMetrics := map[string]string{
+		utils.MetaSum + utils.HashtagSep + utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Usage: "120000000000",
+	}
+	if err := cdrsRpc.Call(context.Background(), utils.StatSv1GetQueueStringMetrics,
+		&utils.TenantIDWithAPIOpts{
+			TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: expectedIDs[0]},
+		}, &metrics); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expectedMetrics, metrics) {
+		t.Errorf("expecting: %+v, received reply: %s", expectedMetrics, metrics)
+	}
+}
 
-// func testV2CDRsGetStats2(t *testing.T) {
-// 	expectedIDs := []string{"STS_PoccessCDR"}
-// 	var metrics map[string]string
-// 	expectedMetrics := map[string]string{
-// 		utils.MetaSum + utils.HashtagSep + utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Usage: "120000000000",
-// 	}
-// 	if err := cdrsRpc.Call(utils.StatSv1GetQueueStringMetrics,
-// 		&utils.TenantIDWithAPIOpts{
-// 			TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: expectedIDs[0]},
-// 		}, &metrics); err != nil {
-// 		t.Error(err)
-// 	} else if !reflect.DeepEqual(expectedMetrics, metrics) {
-// 		t.Errorf("expecting: %+v, received reply: %s", expectedMetrics, metrics)
-// 	}
-// }
+func testCDRsGetThreshold2(t *testing.T) {
+	var td engine.Threshold
+	if err := cdrsRpc.Call(context.Background(), utils.ThresholdSv1GetThreshold,
+		&utils.TenantIDWithAPIOpts{
+			TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "THD_ProcessCDR"},
+		}, &td); err != nil {
+		t.Error(err)
+	} else if td.Hits != 2 { // 2 Chargers
+		t.Errorf("received: %+v", td)
+	}
+}
 
-// func testV2CDRsGetThreshold2(t *testing.T) {
-// 	var td engine.Threshold
-// 	if err := cdrsRpc.Call(utils.ThresholdSv1GetThreshold,
-// 		&utils.TenantIDWithAPIOpts{
-// 			TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "THD_PoccessCDR"},
-// 		}, &td); err != nil {
-// 		t.Error(err)
-// 	} else if td.Hits != 2 { // 2 Chargers
-// 		t.Errorf("received: %+v", td)
-// 	}
-// }
-
-// func testV2CDRsProcessCDR7(t *testing.T) {
-// 	args := &utils.CGREvent{
-// 		Flags:  []string{utils.MetaStore, utils.MetaRALs},
-// 		Tenant: "cgrates.org",
-// 		Event: map[string]interface{}{
-// 			utils.OriginID:     "testV2CDRsProcessCDR7",
-// 			utils.OriginHost:   "192.168.1.1",
-// 			utils.Source:       "testV2CDRsProcessCDR7",
-// 			utils.RequestType:  utils.MetaRated,
-// 			utils.Category:     "call",
-// 			utils.AccountField: "testV2CDRsProcessCDR7",
-// 			utils.Subject:      "ANY2CNT",
-// 			utils.Destination:  "+4986517174963",
-// 			utils.AnswerTime:   time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
-// 			utils.Usage:        time.Minute,
-// 			"field_extr1":      "val_extr1",
-// 			"fieldextr2":       "valextr2",
-// 		},
-// 	}
-
-// 	var reply string
-// 	if err := cdrsRpc.Call(utils.CDRsV1ProcessEvent, args, &reply); err != nil {
-// 		t.Error("Unexpected error: ", err.Error())
-// 	} else if reply != utils.OK {
-// 		t.Error("Unexpected reply received: ", reply)
-// 	}
-// }
-
-// func testV2CDRsGetCdrs7(t *testing.T) {
-// 	var cdrCnt int64
-// 	req := utils.AttrGetCdrs{Accounts: []string{"testV2CDRsProcessCDR7"}}
-// 	if err := cdrsRpc.Call(utils.APIerSv2CountCDRs, &req, &cdrCnt); err != nil {
-// 		t.Error("Unexpected error: ", err.Error())
-// 	} else if cdrCnt != 2 {
-// 		t.Error("Unexpected number of CDRs returned: ", cdrCnt)
-// 	}
-// 	var cdrs []*engine.ExternalCDR
-// 	args := utils.RPCCDRsFilter{
-// 		RunIDs:    []string{"raw"},
-// 		OriginIDs: []string{"testV2CDRsProcessCDR7"},
-// 	}
-// 	if err := cdrsRpc.Call(utils.APIerSv2GetCDRs, &args, &cdrs); err != nil {
-// 		t.Fatal("Unexpected error: ", err.Error())
-// 	}
-// 	if len(cdrs) != 1 {
-// 		t.Fatal("Unexpected number of CDRs returned: ", len(cdrs))
-// 	}
-// 	if cdrs[0].Cost != -1 {
-// 		t.Errorf("Unexpected cost for CDR: %f", cdrs[0].Cost)
-// 	}
-// 	if rply, has := cdrs[0].ExtraFields["PayPalAccount"]; !has || rply != "paypal@cgrates.org" {
-// 		t.Errorf("PayPalAccount should be added by AttributeS as: paypal@cgrates.org, have: %s",
-// 			cdrs[0].ExtraFields["PayPalAccount"])
-// 	}
-// 	args = utils.RPCCDRsFilter{
-// 		RunIDs:    []string{"CustomerCharges"},
-// 		OriginIDs: []string{"testV2CDRsProcessCDR7"},
-// 	}
-// 	if err := cdrsRpc.Call(utils.APIerSv2GetCDRs, &args, &cdrs); err != nil {
-// 		t.Fatal("Unexpected error: ", err.Error())
-// 	}
-// 	if len(cdrs) != 1 {
-// 		t.Fatal("Unexpected number of CDRs returned: ", len(cdrs))
-// 	}
-// 	if cdrs[0].Cost != 0.0198 {
-// 		t.Errorf("Unexpected cost for CDR: %f", cdrs[0].Cost)
-// 	}
-// 	if rply, has := cdrs[0].ExtraFields["PayPalAccount"]; !has || rply != "paypal@cgrates.org" {
-// 		t.Errorf("PayPalAccount should be added by AttributeS as: paypal@cgrates.org, have: %s",
-// 			cdrs[0].ExtraFields["PayPalAccount"])
-// 	}
-// }
-
-func testV2CDRsKillEngine(t *testing.T) {
+func testCDRsKillEngine(t *testing.T) {
 	if err := engine.KillEngine(*waitRater); err != nil {
 		t.Error(err)
 	}
