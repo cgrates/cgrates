@@ -1,65 +1,74 @@
 {
-// CGRateS Configuration file
-//
-// Used in apier_local_tests
-// Starts rater, cdrs and mediator connecting over internal channel
-
-"general": {
-    "log_level": 7,
-},
-
-
-"rpc_conns": {
-	"conn1": {
-		"strategy": "*first",
-		"conns": [{"address": "127.0.0.1:2013", "transport":"*gob"}],
+	"general": {
+		"log_level": 7
 	},
-},
 
-"rals": {
-	"enabled": true,
-	"thresholds_conns": ["conn1"],
-	"dynaprepaid_actionplans": ["PACKAGE_1001"],
-},
 
-"schedulers": {
-	"enabled": true,
-	"thresholds_conns": ["conn1"],
-},
+	"rpc_conns": {
+		"conn1": {
+			"strategy": "*first",
+			"conns": [{"address": "127.0.0.1:2013", "transport":"*gob"}]
+		}
+	},
 
-"cdrs": {
-	"enabled": true,
-	"attributes_conns":["*internal"],
-	"chargers_conns":["conn1"],
-	"rals_conns": ["conn1"],
-	"stats_conns": ["conn1"],
-	"thresholds_conns": ["conn1"],
-	"scheduler_conns": ["conn1"],
-},
+	"rates": {
+		"enabled": true
+	},
 
-"attributes": {
-	"enabled": true,
-},
+	"schedulers": {
+		"enabled": true,
+		"thresholds_conns": ["conn1"]
+	},
 
-"stats": {
-	"enabled": true,
-	"store_interval": "1s",
-	"thresholds_conns": ["*internal"],
-},
+	"cdrs": {
+		"enabled": true,
+		"attributes_conns":["*internal"],
+		"chargers_conns":["conn1"],
+		"rates_conns": ["conn1"],
+		"stats_conns": ["conn1"],
+		"thresholds_conns": ["conn1"],
+		"scheduler_conns": ["conn1"]
+	},
 
-"thresholds": {
-	"enabled": true,
-	"store_interval": "1s",
-},
+	"attributes": {
+		"enabled": true
+	},
 
-"chargers": {
-	"enabled": true,
-	"attributes_conns": ["*internal"],
-},
+	"stats": {
+		"enabled": true,
+		"store_interval": "1s",
+		"thresholds_conns": ["*internal"]
+	},
 
-"admins": {
-	"enabled": true,
-	"scheduler_conns": ["*internal"],
-},
+	"thresholds": {
+		"enabled": true,
+		"actions_conns": ["*localhost"],
+		"store_interval": "1s"
+	},
+
+	"chargers": {
+		"enabled": true,
+		"attributes_conns": ["*internal"]
+	},
+
+	"admins": {
+		"enabled": true,
+		"scheduler_conns": ["*internal"]
+	},
+
+	"actions": {
+		"enabled": true
+	},
+
+	"loaders": [
+		{
+			"id": "*default",
+			"enabled": true,
+			"tenant": "cgrates.org",
+			"lockfile_path": ".cgr.lck",
+			"tp_in_dir": "/usr/share/cgrates/tariffplans/testit",
+			"tp_out_dir": ""
+		}
+	]
 
 }
