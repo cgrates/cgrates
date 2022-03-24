@@ -75,17 +75,8 @@ func TestTPEnewTPFilters(t *testing.T) {
 func TestTPEExportItemsFilters(t *testing.T) {
 	wrtr := new(bytes.Buffer)
 	cfg := config.NewDefaultCGRConfig()
-	connMng := engine.NewConnManager(cfg)
-	dataDB, err := engine.NewDataDBConn(cfg.DataDbCfg().Type,
-		cfg.DataDbCfg().Host, cfg.DataDbCfg().Port,
-		cfg.DataDbCfg().Name, cfg.DataDbCfg().User,
-		cfg.DataDbCfg().Password, cfg.GeneralCfg().DBDataEncoding,
-		cfg.DataDbCfg().Opts, cfg.DataDbCfg().Items)
-	if err != nil {
-		t.Error(err)
-	}
-	defer dataDB.Close()
-	dm := engine.NewDataManager(dataDB, config.CgrConfig().CacheCfg(), connMng)
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
 	tpFltr := TPFilters{
 		dm: dm,
 	}
@@ -115,7 +106,7 @@ func TestTPEExportItemsFilters(t *testing.T) {
 		},
 	}
 	tpFltr.dm.SetFilter(context.Background(), fltr, false)
-	err = tpFltr.exportItems(context.Background(), wrtr, "cgrates.org", []string{"fltr_for_prf"})
+	err := tpFltr.exportItems(context.Background(), wrtr, "cgrates.org", []string{"fltr_for_prf"})
 	if err != nil {
 		t.Errorf("Expected nil\n but received %v", err)
 	}
@@ -162,17 +153,8 @@ func TestTPEExportItemsFiltersNoDbConn(t *testing.T) {
 func TestTPEExportItemsFiltersIDNotFound(t *testing.T) {
 	wrtr := new(bytes.Buffer)
 	cfg := config.NewDefaultCGRConfig()
-	connMng := engine.NewConnManager(cfg)
-	dataDB, err := engine.NewDataDBConn(cfg.DataDbCfg().Type,
-		cfg.DataDbCfg().Host, cfg.DataDbCfg().Port,
-		cfg.DataDbCfg().Name, cfg.DataDbCfg().User,
-		cfg.DataDbCfg().Password, cfg.GeneralCfg().DBDataEncoding,
-		cfg.DataDbCfg().Opts, cfg.DataDbCfg().Items)
-	if err != nil {
-		t.Error(err)
-	}
-	defer dataDB.Close()
-	dm := engine.NewDataManager(dataDB, config.CgrConfig().CacheCfg(), connMng)
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
 	tpFltr := TPFilters{
 		dm: dm,
 	}
@@ -202,7 +184,7 @@ func TestTPEExportItemsFiltersIDNotFound(t *testing.T) {
 		},
 	}
 	tpFltr.dm.SetFilter(context.Background(), fltr, false)
-	err = tpFltr.exportItems(context.Background(), wrtr, "cgrates.org", []string{"fltr_not_for_prf"})
+	err := tpFltr.exportItems(context.Background(), wrtr, "cgrates.org", []string{"fltr_not_for_prf"})
 	errExpect := "<NOT_FOUND> cannot find Filters with id: <fltr_not_for_prf>"
 	if err.Error() != errExpect {
 		t.Errorf("Expected %v\n but received %v", errExpect, err)
