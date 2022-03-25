@@ -75,6 +75,18 @@ var (
 		testAttributeGetAttributeProfileAllCount,
 		testAttributeRemoveRemainAttributeProfiles,
 		testAttributeGetAttributeProfileAfterRemove,
+
+		// Testing index behaviour
+		testAttributeSSetNonIndexedTypeFilter,
+		testAttributeSSetIndexedTypeFilter,
+		testAttributeSClearIndexes,
+		testAttributeSCheckIndexesSetAttributeProfileWithoutFilters,
+		// testAttributeSCheckIndexesAddNonIndexedFilter,
+		testAttributeSCheckIndexesAddIndexedFilters,
+		testAttributeSCheckIndexesModifyIndexedFilter,
+		testAttributeSCheckIndexesRemoveAnIndexedFilter,
+		testAttributeSCheckIndexesRemoveAttributeProfile,
+
 		testAttributeSKillEngine,
 	}
 )
@@ -1349,6 +1361,314 @@ func testAttributeGetAttributeProfileAfterRemove(t *testing.T) {
 			},
 		}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
+	}
+}
+
+func testAttributeSSetNonIndexedTypeFilter(t *testing.T) {
+	filter := &engine.FilterWithAPIOpts{
+		Filter: &engine.Filter{
+			Tenant: "cgrates.org",
+			ID:     "NONINDEXED_FLTR_TYPE",
+			Rules: []*engine.FilterRule{
+				{
+					Type:    utils.MetaGreaterThan,
+					Element: utils.Cost,
+					Values:  []string{"10"},
+				},
+			},
+		},
+	}
+	var reply string
+	if err := attrSRPC.Call(context.Background(), utils.AdminSv1SetFilter, filter,
+		&reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply: ", reply)
+	}
+}
+
+func testAttributeSSetIndexedTypeFilter(t *testing.T) {
+	filter := &engine.FilterWithAPIOpts{
+		Filter: &engine.Filter{
+			Tenant: "cgrates.org",
+			ID:     "INDEXED_FLTR_TYPE",
+			Rules: []*engine.FilterRule{
+				{
+					Type:    utils.MetaPrefix,
+					Element: "~*req.Account",
+					Values:  []string{"10"},
+				},
+			},
+		},
+	}
+	var reply string
+	if err := attrSRPC.Call(context.Background(), utils.AdminSv1SetFilter, filter,
+		&reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply: ", reply)
+	}
+}
+
+func testAttributeSClearIndexes(t *testing.T) {
+	args := &AttrRemFilterIndexes{
+		Tenant:   "cgrates.org",
+		ItemType: utils.MetaAttributes,
+	}
+	var reply string
+	if err := attrSRPC.Call(context.Background(), utils.AdminSv1RemoveFilterIndexes,
+		args, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply: ", reply)
+	}
+}
+
+func testAttributeSCheckIndexesSetAttributeProfileWithoutFilters(t *testing.T) {
+	attrPrf := &engine.APIAttributeProfileWithAPIOpts{
+		APIAttributeProfile: &engine.APIAttributeProfile{
+			Tenant: "cgrates.org",
+			ID:     "ATTR_TEST",
+			Attributes: []*engine.ExternalAttribute{
+				{
+					Type:  utils.MetaConstant,
+					Path:  "~*req.Account",
+					Value: "1002",
+				},
+			},
+		},
+	}
+
+	var reply string
+	if err := attrSRPC.Call(context.Background(), utils.AdminSv1SetAttributeProfile,
+		attrPrf, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error(err)
+	}
+
+	expIdx := []string{"*none:*any:*any:ATTR_TEST"}
+	args := &AttrGetFilterIndexes{
+		Tenant:   "cgrates.org",
+		ItemType: utils.MetaAttributes,
+	}
+	var replyIdx []string
+	if err := attrSRPC.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
+		args, &replyIdx); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(replyIdx, expIdx) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ToJSON(expIdx), utils.ToJSON(replyIdx))
+	}
+}
+
+// func testAttributeSCheckIndexesAddNonIndexedFilter(t *testing.T) {
+// 	attrPrf := &engine.APIAttributeProfileWithAPIOpts{
+// 		APIAttributeProfile: &engine.APIAttributeProfile{
+// 			Tenant:    "cgrates.org",
+// 			ID:        "ATTR_TEST",
+// 			FilterIDs: []string{"NONINDEXED_FLTR_TYPE"},
+// 			Attributes: []*engine.ExternalAttribute{
+// 				{
+// 					Type:  utils.MetaConstant,
+// 					Path:  "~*req.Account",
+// 					Value: "1002",
+// 				},
+// 			},
+// 		},
+// 	}
+
+// 	var reply string
+// 	if err := attrSRPC.Call(context.Background(), utils.AdminSv1SetAttributeProfile,
+// 		attrPrf, &reply); err != nil {
+// 		t.Error(err)
+// 	} else if reply != utils.OK {
+// 		t.Error(err)
+// 	}
+
+// 	expIdx := []string{"*none:*any:*any:ATTR_TEST"}
+// 	args := &AttrGetFilterIndexes{
+// 		Tenant:   "cgrates.org",
+// 		ItemType: utils.MetaAttributes,
+// 	}
+// 	var replyIdx []string
+// 	if err := attrSRPC.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
+// 		args, &replyIdx); err != nil {
+// 		t.Error(err)
+// 	} else if !reflect.DeepEqual(replyIdx, expIdx) {
+// 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ToJSON(expIdx), utils.ToJSON(replyIdx))
+// 	}
+// }
+
+func testAttributeSCheckIndexesAddIndexedFilters(t *testing.T) {
+	attrPrf := &engine.APIAttributeProfileWithAPIOpts{
+		APIAttributeProfile: &engine.APIAttributeProfile{
+			Tenant:    "cgrates.org",
+			ID:        "ATTR_TEST",
+			FilterIDs: []string{"NONINDEXED_FLTR_TYPE", "INDEXED_FLTR_TYPE"},
+			Attributes: []*engine.ExternalAttribute{
+				{
+					Type:  utils.MetaConstant,
+					Path:  "~*req.Account",
+					Value: "1002",
+				},
+			},
+		},
+	}
+
+	var reply string
+	if err := attrSRPC.Call(context.Background(), utils.AdminSv1SetAttributeProfile,
+		attrPrf, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error(err)
+	}
+
+	expIdx := []string{"*prefix:*req.Account:10:ATTR_TEST"}
+	args := &AttrGetFilterIndexes{
+		Tenant:   "cgrates.org",
+		ItemType: utils.MetaAttributes,
+	}
+	var replyIdx []string
+	if err := attrSRPC.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
+		args, &replyIdx); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(replyIdx, expIdx) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ToJSON(expIdx), utils.ToJSON(replyIdx))
+	}
+
+	attrPrf = &engine.APIAttributeProfileWithAPIOpts{
+		APIAttributeProfile: &engine.APIAttributeProfile{
+			Tenant:    "cgrates.org",
+			ID:        "ATTR_TEST",
+			FilterIDs: []string{"NONINDEXED_FLTR_TYPE", "INDEXED_FLTR_TYPE", "*string:~*req.Category:call"},
+			Attributes: []*engine.ExternalAttribute{
+				{
+					Type:  utils.MetaConstant,
+					Path:  "~*req.Account",
+					Value: "1002",
+				},
+			},
+		},
+	}
+
+	if err := attrSRPC.Call(context.Background(), utils.AdminSv1SetAttributeProfile,
+		attrPrf, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error(err)
+	}
+
+	expIdx = []string{"*prefix:*req.Account:10:ATTR_TEST", "*string:*req.Category:call:ATTR_TEST"}
+	if err := attrSRPC.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
+		args, &replyIdx); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(replyIdx)
+		if !reflect.DeepEqual(replyIdx, expIdx) {
+			t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ToJSON(expIdx), utils.ToJSON(replyIdx))
+		}
+	}
+}
+
+func testAttributeSCheckIndexesModifyIndexedFilter(t *testing.T) {
+	filter := &engine.FilterWithAPIOpts{
+		Filter: &engine.Filter{
+			Tenant: "cgrates.org",
+			ID:     "INDEXED_FLTR_TYPE",
+			Rules: []*engine.FilterRule{
+				{
+					Type:    utils.MetaSuffix,
+					Element: "~*req.Subject",
+					Values:  []string{"01"},
+				},
+			},
+		},
+	}
+	var reply string
+	if err := attrSRPC.Call(context.Background(), utils.AdminSv1SetFilter, filter,
+		&reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply: ", reply)
+	}
+
+	expIdx := []string{"*string:*req.Category:call:ATTR_TEST", "*suffix:*req.Subject:01:ATTR_TEST"}
+	args := &AttrGetFilterIndexes{
+		Tenant:   "cgrates.org",
+		ItemType: utils.MetaAttributes,
+	}
+	var replyIdx []string
+	if err := attrSRPC.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
+		args, &replyIdx); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(replyIdx)
+		if !reflect.DeepEqual(replyIdx, expIdx) {
+			t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ToJSON(expIdx), utils.ToJSON(replyIdx))
+		}
+	}
+}
+
+func testAttributeSCheckIndexesRemoveAnIndexedFilter(t *testing.T) {
+	attrPrf := &engine.APIAttributeProfileWithAPIOpts{
+		APIAttributeProfile: &engine.APIAttributeProfile{
+			Tenant:    "cgrates.org",
+			ID:        "ATTR_TEST",
+			FilterIDs: []string{"NONINDEXED_FLTR_TYPE", "INDEXED_FLTR_TYPE"},
+			Attributes: []*engine.ExternalAttribute{
+				{
+					Type:  utils.MetaConstant,
+					Path:  "~*req.Account",
+					Value: "1002",
+				},
+			},
+		},
+	}
+
+	var reply string
+	if err := attrSRPC.Call(context.Background(), utils.AdminSv1SetAttributeProfile,
+		attrPrf, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error(err)
+	}
+
+	expIdx := []string{"*suffix:*req.Subject:01:ATTR_TEST"}
+	args := &AttrGetFilterIndexes{
+		Tenant:   "cgrates.org",
+		ItemType: utils.MetaAttributes,
+	}
+	var replyIdx []string
+	if err := attrSRPC.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
+		args, &replyIdx); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(replyIdx, expIdx) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ToJSON(expIdx), utils.ToJSON(replyIdx))
+	}
+}
+func testAttributeSCheckIndexesRemoveAttributeProfile(t *testing.T) {
+	argsRem := &utils.TenantIDWithAPIOpts{
+		TenantID: &utils.TenantID{
+			Tenant: "cgrates.org",
+			ID:     "ATTR_TEST",
+		},
+	}
+	var reply string
+	if err := attrSRPC.Call(context.Background(), utils.AdminSv1RemoveAttributeProfile,
+		argsRem, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error(err)
+	}
+
+	args := &AttrGetFilterIndexes{
+		Tenant:   "cgrates.org",
+		ItemType: utils.MetaAttributes,
+	}
+	var replyIdx []string
+	if err := attrSRPC.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
+		args, &replyIdx); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	}
 }
 
