@@ -122,6 +122,9 @@ func (dDP *dynamicDP) fieldAsInterface(fldPath []string) (val interface{}, err e
 			return nil, err
 		}
 		for k, v := range statValues {
+			// if v == utils.DecimalNaN {
+			// 	v = utils.NewDecimal(-1, 0)
+			// }
 			dDP.cache.Set([]string{utils.MetaStats, fldPath[1], k}, v)
 		}
 		return dDP.cache.FieldAsInterface(fldPath)
