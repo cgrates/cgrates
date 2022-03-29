@@ -2174,6 +2174,39 @@ func TestReplicatorRemoveThreshold(t *testing.T) {
 	}
 }
 
+func TestReplicatorRemoveThresholdErr(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	v1 := &AdminSv1{
+		cfg:     cfg,
+		dm:      dm,
+		connMgr: engine.NewConnManager(cfg),
+		ping:    struct{}{},
+	}
+	cfg.AdminSCfg().CachesConns = []string{"*internal"}
+	var reply string
+	rp := NewReplicatorSv1(dm, v1)
+	thd := &engine.Threshold{
+		Tenant: "cgrates.org",
+		ID:     "THD_2",
+		Hits:   0,
+	}
+	if err := rp.dm.SetThreshold(context.Background(), thd); err != nil {
+		t.Error(err)
+	}
+	args := &utils.TenantIDWithAPIOpts{
+		TenantID: utils.NewTenantID("cgrates.org:THD_2"),
+		APIOpts: map[string]interface{}{
+			utils.MetaCache: utils.OK,
+		},
+	}
+	errExpect := "nil rpc in argument method:  in: <nil> out"
+	if err := rp.RemoveThreshold(context.Background(), args, &reply); !strings.Contains(err.Error(), errExpect) {
+		t.Errorf("Expected error to include %v", errExpect)
+	}
+}
+
 func TestReplicatorRemoveAccount(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
@@ -2270,6 +2303,42 @@ func TestReplicatorRemoveStatQueue(t *testing.T) {
 	}
 }
 
+func TestReplicatorRemoveStatQueueErr(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	v1 := &AdminSv1{
+		cfg:     cfg,
+		dm:      dm,
+		connMgr: engine.NewConnManager(cfg),
+		ping:    struct{}{},
+	}
+	cfg.AdminSCfg().CachesConns = []string{"*internal"}
+	var reply string
+	rp := NewReplicatorSv1(dm, v1)
+	sq := &engine.StatQueue{
+		Tenant: "cgrates.org",
+		ID:     "sq11",
+		SQMetrics: map[string]engine.StatMetric{
+			utils.MetaACD: engine.NewACD(0, "", nil),
+			utils.MetaTCD: engine.NewTCD(0, "", nil),
+		},
+	}
+	if err := rp.dm.SetStatQueue(context.Background(), sq); err != nil {
+		t.Error(err)
+	}
+	args := &utils.TenantIDWithAPIOpts{
+		TenantID: utils.NewTenantID("cgrates.org:sq11"),
+		APIOpts: map[string]interface{}{
+			utils.MetaCache: utils.OK,
+		},
+	}
+	errExpect := "nil rpc in argument method:  in: <nil> out"
+	if err := rp.RemoveStatQueue(context.Background(), args, &reply); !strings.Contains(err.Error(), errExpect) {
+		t.Errorf("Expected error to include %v", errExpect)
+	}
+}
+
 func TestReplicatorRemoveFilter(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
@@ -2326,6 +2395,59 @@ func TestReplicatorRemoveFilter(t *testing.T) {
 	}
 }
 
+func TestReplicatorRemoveFilterErr(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	v1 := &AdminSv1{
+		cfg:     cfg,
+		dm:      dm,
+		connMgr: engine.NewConnManager(cfg),
+		ping:    struct{}{},
+	}
+	cfg.AdminSCfg().CachesConns = []string{"*internal"}
+	var reply string
+	rp := NewReplicatorSv1(dm, v1)
+	fltr := &engine.Filter{
+		Tenant: utils.CGRateSorg,
+		ID:     "fltr_for_prf",
+		Rules: []*engine.FilterRule{
+			{
+				Type:    utils.MetaString,
+				Element: "~*req.Subject",
+				Values:  []string{"1004", "6774", "22312"},
+			},
+			{
+				Type:    utils.MetaString,
+				Element: "~*opts.Subsystems",
+				Values:  []string{"*attributes"},
+			},
+			{
+				Type:    utils.MetaPrefix,
+				Element: "~*req.Destinations",
+				Values:  []string{"+0775", "+442"},
+			},
+			{
+				Type:    utils.MetaExists,
+				Element: "~*req.NumberOfEvents",
+			},
+		},
+	}
+	if err := rp.dm.SetFilter(context.Background(), fltr, false); err != nil {
+		t.Error(err)
+	}
+	args := &utils.TenantIDWithAPIOpts{
+		TenantID: utils.NewTenantID("cgrates.org:fltr_for_prf"),
+		APIOpts: map[string]interface{}{
+			utils.MetaCache: utils.OK,
+		},
+	}
+	errExpect := "nil rpc in argument method:  in: <nil> out"
+	if err := rp.RemoveFilter(context.Background(), args, &reply); !strings.Contains(err.Error(), errExpect) {
+		t.Errorf("Expected error to include %v", errExpect)
+	}
+}
+
 func TestReplicatorRemoveThresholdProfile(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
@@ -2368,6 +2490,48 @@ func TestReplicatorRemoveThresholdProfile(t *testing.T) {
 	}
 	if reply != utils.OK {
 		t.Errorf("Expected %v\n but received %v", utils.OK, reply)
+	}
+}
+
+func TestReplicatorRemoveThresholdProfileErr(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	v1 := &AdminSv1{
+		cfg:     cfg,
+		dm:      dm,
+		connMgr: engine.NewConnManager(cfg),
+		ping:    struct{}{},
+	}
+	cfg.AdminSCfg().CachesConns = []string{"*internal"}
+	var reply string
+	rp := NewReplicatorSv1(dm, v1)
+	thd := &engine.ThresholdProfile{
+		Tenant:           "cgrates.org",
+		ID:               "THD_2",
+		FilterIDs:        []string{"*string:~*req.Account:1001"},
+		ActionProfileIDs: []string{"actPrfID"},
+		MaxHits:          7,
+		MinHits:          0,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
+		Async: true,
+	}
+	if err := rp.dm.SetThresholdProfile(context.Background(), thd, false); err != nil {
+		t.Error(err)
+	}
+	args := &utils.TenantIDWithAPIOpts{
+		TenantID: utils.NewTenantID("cgrates.org:THD_2"),
+		APIOpts: map[string]interface{}{
+			utils.MetaCache: utils.OK,
+		},
+	}
+	errExpect := "nil rpc in argument method:  in: <nil> out"
+	if err := rp.RemoveThresholdProfile(context.Background(), args, &reply); !strings.Contains(err.Error(), errExpect) {
+		t.Errorf("Expected error to include %v", errExpect)
 	}
 }
 
@@ -2430,6 +2594,62 @@ func TestReplicatorRemoveStatQueueProfile(t *testing.T) {
 	}
 }
 
+func TestReplicatorRemoveStatQueueProfileErr(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	v1 := &AdminSv1{
+		cfg:     cfg,
+		dm:      dm,
+		connMgr: engine.NewConnManager(cfg),
+		ping:    struct{}{},
+	}
+	cfg.AdminSCfg().CachesConns = []string{"*internal"}
+	var reply string
+	rp := NewReplicatorSv1(dm, v1)
+	sq := &engine.StatQueueProfile{
+		Tenant: "cgrates.org",
+		ID:     "SQ_20",
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
+		QueueLength: 14,
+		Metrics: []*engine.MetricWithFilters{
+			{
+				MetricID: utils.MetaASR,
+			},
+			{
+				MetricID: utils.MetaTCD,
+			},
+			{
+				MetricID: utils.MetaPDD,
+			},
+			{
+				MetricID: utils.MetaTCC,
+			},
+			{
+				MetricID: utils.MetaTCD,
+			},
+		},
+		ThresholdIDs: []string{utils.MetaNone},
+	}
+	if err := rp.dm.SetStatQueueProfile(context.Background(), sq, false); err != nil {
+		t.Error(err)
+	}
+	args := &utils.TenantIDWithAPIOpts{
+		TenantID: utils.NewTenantID("cgrates.org:SQ_20"),
+		APIOpts: map[string]interface{}{
+			utils.MetaCache: utils.OK,
+		},
+	}
+	errExpect := "nil rpc in argument method:  in: <nil> out"
+	if err := rp.RemoveStatQueueProfile(context.Background(), args, &reply); !strings.Contains(err.Error(), errExpect) {
+		t.Errorf("Expected error to include %v", errExpect)
+	}
+}
+
 func TestReplicatorRemoveResource(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
@@ -2463,6 +2683,40 @@ func TestReplicatorRemoveResource(t *testing.T) {
 	}
 	if reply != utils.OK {
 		t.Errorf("Expected %v\n but received %v", utils.OK, reply)
+	}
+}
+
+func TestReplicatorRemoveResourceErr(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	v1 := &AdminSv1{
+		cfg:     cfg,
+		dm:      dm,
+		connMgr: engine.NewConnManager(cfg),
+		ping:    struct{}{},
+	}
+	cfg.AdminSCfg().CachesConns = []string{"*internal"}
+	var reply string
+	rp := NewReplicatorSv1(dm, v1)
+	rsc := &engine.Resource{
+		Tenant: "cgrates.org",
+		ID:     "ResGroup2",
+		Usages: make(map[string]*engine.ResourceUsage),
+	}
+	if err := rp.dm.SetResource(context.Background(), rsc); err != nil {
+		t.Error(err)
+	}
+	args := &utils.TenantIDWithAPIOpts{
+		TenantID: utils.NewTenantID("cgrates.org:ResGroup2"),
+		APIOpts: map[string]interface{}{
+			utils.MetaCache: utils.OK,
+		},
+	}
+
+	errExpect := "nil rpc in argument method:  in: <nil> out"
+	if err := rp.RemoveResource(context.Background(), args, &reply); !strings.Contains(err.Error(), errExpect) {
+		t.Errorf("Expected error to include %v", errExpect)
 	}
 }
 
@@ -2506,6 +2760,47 @@ func TestReplicatorRemoveResourceProfile(t *testing.T) {
 	}
 	if reply != utils.OK {
 		t.Errorf("Expected %v\n but received %v", utils.OK, reply)
+	}
+}
+
+func TestReplicatorRemoveResourceProfileErr(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	v1 := &AdminSv1{
+		cfg:     cfg,
+		dm:      dm,
+		connMgr: engine.NewConnManager(cfg),
+		ping:    struct{}{},
+	}
+	cfg.AdminSCfg().CachesConns = []string{"*internal"}
+	var reply string
+	rp := NewReplicatorSv1(dm, v1)
+	rscPrf := &engine.ResourceProfile{
+		Tenant:            "cgrates.org",
+		ID:                "ResGroup1",
+		FilterIDs:         []string{"*string:~*req.Account:1001"},
+		Limit:             10,
+		AllocationMessage: "Approved",
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			}},
+		ThresholdIDs: []string{utils.MetaNone},
+	}
+	if err := rp.dm.SetResourceProfile(context.Background(), rscPrf, false); err != nil {
+		t.Error(err)
+	}
+	args := &utils.TenantIDWithAPIOpts{
+		TenantID: utils.NewTenantID("cgrates.org:ResGroup1"),
+		APIOpts: map[string]interface{}{
+			utils.MetaCache: utils.OK,
+		},
+	}
+
+	errExpect := "nil rpc in argument method:  in: <nil> out"
+	if err := rp.RemoveResourceProfile(context.Background(), args, &reply); !strings.Contains(err.Error(), errExpect) {
+		t.Errorf("Expected error to include %v", errExpect)
 	}
 }
 
@@ -2558,6 +2853,56 @@ func TestReplicatorRemoveRouteProfile(t *testing.T) {
 	}
 	if reply != utils.OK {
 		t.Errorf("Expected %v\n but received %v", utils.OK, reply)
+	}
+}
+
+func TestReplicatorRemoveRouteProfileErr(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	v1 := &AdminSv1{
+		cfg:     cfg,
+		dm:      dm,
+		connMgr: engine.NewConnManager(cfg),
+		ping:    struct{}{},
+	}
+	cfg.AdminSCfg().CachesConns = []string{"*internal"}
+	var reply string
+	rp := NewReplicatorSv1(dm, v1)
+	rtPf := &engine.RouteProfile{
+		ID:     "ROUTE_2003",
+		Tenant: "cgrates.org",
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
+		Sorting:           utils.MetaWeight,
+		SortingParameters: []string{},
+		Routes: []*engine.Route{
+			{
+				ID: "route1",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 20,
+					},
+				},
+			},
+		},
+	}
+	if err := rp.dm.SetRouteProfile(context.Background(), rtPf, false); err != nil {
+		t.Error(err)
+	}
+	args := &utils.TenantIDWithAPIOpts{
+		TenantID: utils.NewTenantID("cgrates.org:ROUTE_2003"),
+		APIOpts: map[string]interface{}{
+			utils.MetaCache: utils.OK,
+		},
+	}
+
+	errExpect := "nil rpc in argument method:  in: <nil> out"
+	if err := rp.RemoveRouteProfile(context.Background(), args, &reply); !strings.Contains(err.Error(), errExpect) {
+		t.Errorf("Expected error to include %v", errExpect)
 	}
 }
 
@@ -2614,6 +2959,57 @@ func TestReplicatorRemoveAttributeProfile(t *testing.T) {
 	}
 }
 
+func TestReplicatorRemoveAttributeProfileErr(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	v1 := &AdminSv1{
+		cfg:     cfg,
+		dm:      dm,
+		connMgr: engine.NewConnManager(cfg),
+		ping:    struct{}{},
+	}
+	cfg.AdminSCfg().CachesConns = []string{"*internal"}
+	var reply string
+	rp := NewReplicatorSv1(dm, v1)
+	attrPrf := &engine.AttributeProfile{
+		Tenant:    utils.CGRateSorg,
+		ID:        "TEST_ATTRIBUTES_TEST",
+		FilterIDs: []string{"*string:~*req.Account:1002", "*exists:~*opts.*usage:"},
+		Attributes: []*engine.Attribute{
+			{
+				Path:  utils.AccountField,
+				Type:  utils.MetaConstant,
+				Value: nil,
+			},
+			{
+				Path:  "*tenant",
+				Type:  utils.MetaConstant,
+				Value: nil,
+			},
+		},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
+	}
+	if err := rp.dm.SetAttributeProfile(context.Background(), attrPrf, false); err != nil {
+		t.Error(err)
+	}
+	args := &utils.TenantIDWithAPIOpts{
+		TenantID: utils.NewTenantID("cgrates.org:TEST_ATTRIBUTES_TEST"),
+		APIOpts: map[string]interface{}{
+			utils.MetaCache: utils.OK,
+		},
+	}
+
+	errExpect := "nil rpc in argument method:  in: <nil> out"
+	if err := rp.RemoveAttributeProfile(context.Background(), args, &reply); !strings.Contains(err.Error(), errExpect) {
+		t.Errorf("Expected error to include %v", errExpect)
+	}
+}
+
 func TestReplicatorRemoveChargerProfile(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
@@ -2653,6 +3049,46 @@ func TestReplicatorRemoveChargerProfile(t *testing.T) {
 	}
 	if reply != utils.OK {
 		t.Errorf("Expected %v\n but received %v", utils.OK, reply)
+	}
+}
+
+func TestReplicatorRemoveChargerProfileErr(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	v1 := &AdminSv1{
+		cfg:     cfg,
+		dm:      dm,
+		connMgr: engine.NewConnManager(cfg),
+		ping:    struct{}{},
+	}
+	cfg.AdminSCfg().CachesConns = []string{"*internal"}
+	var reply string
+	rp := NewReplicatorSv1(dm, v1)
+	chgrPrf := &engine.ChargerProfile{
+		Tenant:       "cgrates.org",
+		ID:           "Chargers1",
+		RunID:        utils.MetaDefault,
+		AttributeIDs: []string{"*none"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
+	}
+	if err := rp.dm.SetChargerProfile(context.Background(), chgrPrf, false); err != nil {
+		t.Error(err)
+	}
+	args := &utils.TenantIDWithAPIOpts{
+		TenantID: utils.NewTenantID("cgrates.org:Chargers1"),
+		APIOpts: map[string]interface{}{
+			utils.MetaCache: utils.OK,
+		},
+	}
+
+	errExpect := "nil rpc in argument method:  in: <nil> out"
+	if err := rp.RemoveChargerProfile(context.Background(), args, &reply); !strings.Contains(err.Error(), errExpect) {
+		t.Errorf("Expected error to include %v", errExpect)
 	}
 }
 
@@ -2706,6 +3142,54 @@ func TestReplicatorRemoveDispatcherProfile(t *testing.T) {
 	}
 }
 
+func TestReplicatorRemoveDispatcherProfileErr(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	v1 := &AdminSv1{
+		cfg:     cfg,
+		dm:      dm,
+		connMgr: engine.NewConnManager(cfg),
+		ping:    struct{}{},
+	}
+	cfg.AdminSCfg().CachesConns = []string{"*internal"}
+	var reply string
+	rp := NewReplicatorSv1(dm, v1)
+	dsp := &engine.DispatcherProfile{
+		Tenant:    "cgrates.org",
+		ID:        "Dsp1",
+		FilterIDs: []string{"*string:~*req.Account:1001", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
+		Strategy:  utils.MetaFirst,
+		StrategyParams: map[string]interface{}{
+			utils.MetaDefaultRatio: "false",
+		},
+		Weight: 20,
+		Hosts: engine.DispatcherHostProfiles{
+			{
+				ID:        "C1",
+				FilterIDs: []string{},
+				Weight:    10,
+				Params:    map[string]interface{}{"0": "192.168.54.203"},
+				Blocker:   false,
+			},
+		},
+	}
+	if err := rp.dm.SetDispatcherProfile(context.Background(), dsp, false); err != nil {
+		t.Error(err)
+	}
+	args := &utils.TenantIDWithAPIOpts{
+		TenantID: utils.NewTenantID("cgrates.org:Dsp1"),
+		APIOpts: map[string]interface{}{
+			utils.MetaCache: utils.OK,
+		},
+	}
+
+	errExpect := "nil rpc in argument method:  in: <nil> out"
+	if err := rp.RemoveDispatcherProfile(context.Background(), args, &reply); !strings.Contains(err.Error(), errExpect) {
+		t.Errorf("Expected error to include %v", errExpect)
+	}
+}
+
 func TestReplicatorRemoveDispatcherHost(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
@@ -2745,6 +3229,46 @@ func TestReplicatorRemoveDispatcherHost(t *testing.T) {
 	}
 	if reply != utils.OK {
 		t.Errorf("Expected %v\n but received %v", utils.OK, reply)
+	}
+}
+
+func TestReplicatorRemoveDispatcherHostErr(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	v1 := &AdminSv1{
+		cfg:     cfg,
+		dm:      dm,
+		connMgr: engine.NewConnManager(cfg),
+		ping:    struct{}{},
+	}
+	cfg.AdminSCfg().CachesConns = []string{"*internal"}
+	var reply string
+	rp := NewReplicatorSv1(dm, v1)
+	dspH := &engine.DispatcherHost{
+		Tenant: "cgrates.org",
+		RemoteHost: &config.RemoteHost{
+			ID:              "DSH1",
+			Address:         "*internal",
+			ConnectAttempts: 1,
+			Reconnects:      3,
+			ConnectTimeout:  time.Minute,
+			ReplyTimeout:    2 * time.Minute,
+		},
+	}
+	if err := rp.dm.SetDispatcherHost(context.Background(), dspH); err != nil {
+		t.Error(err)
+	}
+	args := &utils.TenantIDWithAPIOpts{
+		TenantID: utils.NewTenantID("cgrates.org:DSH1"),
+		APIOpts: map[string]interface{}{
+			utils.MetaCache: utils.OK,
+		},
+	}
+
+	errExpect := "nil rpc in argument method:  in: <nil> out"
+	if err := rp.RemoveDispatcherHost(context.Background(), args, &reply); !strings.Contains(err.Error(), errExpect) {
+		t.Errorf("Expected error to include %v", errExpect)
 	}
 }
 
@@ -2814,6 +3338,69 @@ func TestReplicatorGetRateProfile(t *testing.T) {
 	}
 }
 
+func TestReplicatorGetRateProfileErr(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	v1 := &AdminSv1{
+		cfg:     cfg,
+		dm:      dm,
+		connMgr: engine.NewConnManager(cfg),
+		ping:    struct{}{},
+	}
+	cfg.AdminSCfg().CachesConns = []string{"*internal"}
+	var reply utils.RateProfile
+	rp := NewReplicatorSv1(dm, v1)
+	rtPrf := &utils.RateProfile{
+		Tenant:    "cgrates.org",
+		ID:        "RP1",
+		FilterIDs: []string{"*string:~*req.Subject:1001"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 0,
+			},
+		},
+		MinCost:         utils.NewDecimal(1, 1),
+		MaxCost:         utils.NewDecimal(6, 1),
+		MaxCostStrategy: "*free",
+		Rates: map[string]*utils.Rate{
+			"RT_WEEK": {
+				ID: "RT_WEEK",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 0,
+					},
+				},
+				ActivationTimes: "* * * * 1-5",
+				IntervalRates: []*utils.IntervalRate{
+					{
+						IntervalStart: utils.NewDecimal(int64(0*time.Second), 0),
+						FixedFee:      utils.NewDecimal(0, 0),
+						RecurrentFee:  utils.NewDecimal(12, 2),
+						Unit:          utils.NewDecimal(int64(time.Minute), 0),
+						Increment:     utils.NewDecimal(int64(time.Minute), 0),
+					},
+					{
+						IntervalStart: utils.NewDecimal(int64(time.Minute), 0),
+						FixedFee:      utils.NewDecimal(1234, 3),
+						RecurrentFee:  utils.NewDecimal(6, 2),
+						Unit:          utils.NewDecimal(int64(time.Minute), 0),
+						Increment:     utils.NewDecimal(int64(time.Second), 0),
+					},
+				},
+			},
+		},
+	}
+	rp.dm.SetRateProfile(context.Background(), rtPrf, false, false)
+	tntID := &utils.TenantIDWithAPIOpts{
+		TenantID: utils.NewTenantID("cgrates.org:RP2"),
+	}
+
+	if err := rp.GetRateProfile(context.Background(), tntID, &reply); err == nil || err != utils.ErrNotFound {
+		t.Errorf("Expected %v\n but received %v", utils.ErrNotFound, err)
+	}
+}
+
 func TestReplicatorGetActionProfile(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
@@ -2853,6 +3440,45 @@ func TestReplicatorGetActionProfile(t *testing.T) {
 	}
 	if !reflect.DeepEqual(actPrf, &reply) {
 		t.Errorf("Expected %v\n but received %v", actPrf, reply)
+	}
+}
+
+func TestReplicatorGetActionProfileErr(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	v1 := &AdminSv1{
+		cfg:     cfg,
+		dm:      dm,
+		connMgr: engine.NewConnManager(cfg),
+		ping:    struct{}{},
+	}
+	cfg.AdminSCfg().CachesConns = []string{"*internal"}
+	var reply engine.ActionProfile
+	rp := NewReplicatorSv1(dm, v1)
+	actPrf := &engine.ActionProfile{
+		Tenant:    "cgrates.org",
+		ID:        "AP1",
+		FilterIDs: []string{"*string:~*req.Account:1001|1002|1003", "*prefix:~*req.Destination:10"},
+		Actions: []*engine.APAction{
+			{
+				ID:        "TOPUP",
+				FilterIDs: []string{},
+				Type:      "*topup",
+				Diktats: []*engine.APDiktat{{
+					Path:  "~*balance.TestBalance.Value",
+					Value: "10",
+				}},
+			},
+		},
+	}
+	rp.dm.SetActionProfile(context.Background(), actPrf, false)
+	tntID := &utils.TenantIDWithAPIOpts{
+		TenantID: utils.NewTenantID("cgrates.org:AP2"),
+	}
+
+	if err := rp.GetActionProfile(context.Background(), tntID, &reply); err == nil || err != utils.ErrNotFound {
+		t.Errorf("Expected %v\n but received %v", utils.ErrNotFound, err)
 	}
 }
 
@@ -2926,6 +3552,71 @@ func TestReplicatorSetRateProfile(t *testing.T) {
 	}
 }
 
+func TestReplicatorSetRateProfileErr(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	v1 := &AdminSv1{
+		cfg:     cfg,
+		dm:      dm,
+		connMgr: engine.NewConnManager(cfg),
+		ping:    struct{}{},
+	}
+	cfg.AdminSCfg().CachesConns = []string{"*internal"}
+	var reply string
+	rp := NewReplicatorSv1(dm, v1)
+	rpp := &utils.RateProfileWithAPIOpts{
+		RateProfile: &utils.RateProfile{
+			Tenant:    "cgrates.org",
+			ID:        "RP1",
+			FilterIDs: []string{"*string:~*req.Subject:1001"},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 0,
+				},
+			},
+			MinCost:         utils.NewDecimal(1, 1),
+			MaxCost:         utils.NewDecimal(6, 1),
+			MaxCostStrategy: "*free",
+			Rates: map[string]*utils.Rate{
+				"RT_WEEK": {
+					ID: "RT_WEEK",
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 0,
+						},
+					},
+					ActivationTimes: "* * * * 1-5",
+					IntervalRates: []*utils.IntervalRate{
+						{
+							IntervalStart: utils.NewDecimal(int64(0*time.Second), 0),
+							FixedFee:      utils.NewDecimal(0, 0),
+							RecurrentFee:  utils.NewDecimal(12, 2),
+							Unit:          utils.NewDecimal(int64(time.Minute), 0),
+							Increment:     utils.NewDecimal(int64(time.Minute), 0),
+						},
+						{
+							IntervalStart: utils.NewDecimal(int64(time.Minute), 0),
+							FixedFee:      utils.NewDecimal(1234, 3),
+							RecurrentFee:  utils.NewDecimal(6, 2),
+							Unit:          utils.NewDecimal(int64(time.Minute), 0),
+							Increment:     utils.NewDecimal(int64(time.Second), 0),
+						},
+					},
+				},
+			},
+		},
+		APIOpts: map[string]interface{}{
+			utils.MetaCache: utils.OK,
+		},
+	}
+
+	errExpect := "nil rpc in argument method:  in: <nil> out"
+	if err := rp.SetRateProfile(context.Background(), rpp, &reply); !strings.Contains(err.Error(), errExpect) {
+		t.Errorf("Expected error to include %v", errExpect)
+	}
+}
+
 func TestReplicatorSetActionProfile(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
@@ -2969,6 +3660,46 @@ func TestReplicatorSetActionProfile(t *testing.T) {
 	}
 	if !reflect.DeepEqual(rcv, actPrf.ActionProfile) {
 		t.Errorf("Expected %v\n but received %v", actPrf.ActionProfile, rcv)
+	}
+}
+
+func TestReplicatorSetActionProfileErr(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	v1 := &AdminSv1{
+		cfg:     cfg,
+		dm:      dm,
+		connMgr: engine.NewConnManager(cfg),
+		ping:    struct{}{},
+	}
+	cfg.AdminSCfg().CachesConns = []string{"*internal"}
+	var reply string
+	rp := NewReplicatorSv1(dm, v1)
+	actPrf := &engine.ActionProfileWithAPIOpts{
+		ActionProfile: &engine.ActionProfile{
+			Tenant:    "cgrates.org",
+			ID:        "AP1",
+			FilterIDs: []string{"*string:~*req.Account:1001|1002|1003", "*prefix:~*req.Destination:10"},
+			Actions: []*engine.APAction{
+				{
+					ID:        "TOPUP",
+					FilterIDs: []string{},
+					Type:      "*topup",
+					Diktats: []*engine.APDiktat{{
+						Path:  "~*balance.TestBalance.Value",
+						Value: "10",
+					}},
+				},
+			},
+		},
+		APIOpts: map[string]interface{}{
+			utils.MetaCache: utils.OK,
+		},
+	}
+	errExpect := "nil rpc in argument method:  in: <nil> out"
+	if err := rp.SetActionProfile(context.Background(), actPrf, &reply); !strings.Contains(err.Error(), errExpect) {
+		t.Errorf("Expected error to include %v", errExpect)
 	}
 }
 
@@ -3043,6 +3774,75 @@ func TestReplicatorRemoveRateProfile(t *testing.T) {
 	}
 }
 
+func TestReplicatorRemoveRateProfileErr(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	v1 := &AdminSv1{
+		cfg:     cfg,
+		dm:      dm,
+		connMgr: engine.NewConnManager(cfg),
+		ping:    struct{}{},
+	}
+	cfg.AdminSCfg().CachesConns = []string{"*internal"}
+	var reply string
+	rp := NewReplicatorSv1(dm, v1)
+	rtp := &utils.RateProfile{
+		Tenant:    "cgrates.org",
+		ID:        "RP1",
+		FilterIDs: []string{"*string:~*req.Subject:1001"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 0,
+			},
+		},
+		MinCost:         utils.NewDecimal(1, 1),
+		MaxCost:         utils.NewDecimal(6, 1),
+		MaxCostStrategy: "*free",
+		Rates: map[string]*utils.Rate{
+			"RT_WEEK": {
+				ID: "RT_WEEK",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 0,
+					},
+				},
+				ActivationTimes: "* * * * 1-5",
+				IntervalRates: []*utils.IntervalRate{
+					{
+						IntervalStart: utils.NewDecimal(int64(0*time.Second), 0),
+						FixedFee:      utils.NewDecimal(0, 0),
+						RecurrentFee:  utils.NewDecimal(12, 2),
+						Unit:          utils.NewDecimal(int64(time.Minute), 0),
+						Increment:     utils.NewDecimal(int64(time.Minute), 0),
+					},
+					{
+						IntervalStart: utils.NewDecimal(int64(time.Minute), 0),
+						FixedFee:      utils.NewDecimal(1234, 3),
+						RecurrentFee:  utils.NewDecimal(6, 2),
+						Unit:          utils.NewDecimal(int64(time.Minute), 0),
+						Increment:     utils.NewDecimal(int64(time.Second), 0),
+					},
+				},
+			},
+		},
+	}
+	if err := rp.dm.SetRateProfile(context.Background(), rtp, false, false); err != nil {
+		t.Error(err)
+	}
+	args := &utils.TenantIDWithAPIOpts{
+		TenantID: utils.NewTenantID("cgrates.org:RP1"),
+		APIOpts: map[string]interface{}{
+			utils.MetaCache: utils.OK,
+		},
+	}
+
+	errExpect := "nil rpc in argument method:  in: <nil> out"
+	if err := rp.RemoveRateProfile(context.Background(), args, &reply); !strings.Contains(err.Error(), errExpect) {
+		t.Errorf("Expected error to include %v", errExpect)
+	}
+}
+
 func TestReplicatorRemoveActionProfile(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
@@ -3087,5 +3887,50 @@ func TestReplicatorRemoveActionProfile(t *testing.T) {
 	}
 	if reply != utils.OK {
 		t.Errorf("Expected %v\n but received %v", utils.OK, reply)
+	}
+}
+
+func TestReplicatorRemoveActionProfileErr(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	v1 := &AdminSv1{
+		cfg:     cfg,
+		dm:      dm,
+		connMgr: engine.NewConnManager(cfg),
+		ping:    struct{}{},
+	}
+	cfg.AdminSCfg().CachesConns = []string{"*internal"}
+	var reply string
+	rp := NewReplicatorSv1(dm, v1)
+	actPrf := &engine.ActionProfile{
+		Tenant:    "cgrates.org",
+		ID:        "AP1",
+		FilterIDs: []string{"*string:~*req.Account:1001|1002|1003", "*prefix:~*req.Destination:10"},
+		Actions: []*engine.APAction{
+			{
+				ID:        "TOPUP",
+				FilterIDs: []string{},
+				Type:      "*topup",
+				Diktats: []*engine.APDiktat{{
+					Path:  "~*balance.TestBalance.Value",
+					Value: "10",
+				}},
+			},
+		},
+	}
+	if err := rp.dm.SetActionProfile(context.Background(), actPrf, false); err != nil {
+		t.Error(err)
+	}
+	args := &utils.TenantIDWithAPIOpts{
+		TenantID: utils.NewTenantID("cgrates.org:AP1"),
+		APIOpts: map[string]interface{}{
+			utils.MetaCache: utils.OK,
+		},
+	}
+
+	errExpect := "nil rpc in argument method:  in: <nil> out"
+	if err := rp.RemoveActionProfile(context.Background(), args, &reply); !strings.Contains(err.Error(), errExpect) {
+		t.Errorf("Expected error to include %v", errExpect)
 	}
 }
