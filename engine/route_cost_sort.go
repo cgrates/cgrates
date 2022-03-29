@@ -71,6 +71,9 @@ func populateCostForRoutes(ctx *context.Context, cfg *config.CGRConfig,
 			if acntCost.Concretes != nil {
 				cost = acntCost.Concretes
 			}
+			if costFloat64, _ := cost.Float64(); extraOpts.maxCost != 0 && costFloat64 > extraOpts.maxCost {
+				continue
+			}
 			acntIDs := make([]string, 0, len(acntCost.Accounts))
 			for acntID := range acntCost.Accounts {
 				acntIDs = append(acntIDs, acntID)
@@ -94,6 +97,9 @@ func populateCostForRoutes(ctx *context.Context, cfg *config.CGRConfig,
 				return
 			}
 			cost = rpCost.Cost
+			if costFloat64, _ := cost.Float64(); extraOpts.maxCost != 0 && costFloat64 > extraOpts.maxCost {
+				continue
+			}
 			srtRoute.SortingData[utils.RatingPlanID] = rpCost.ID
 
 		}
