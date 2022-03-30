@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package apis
 
 import (
+	"sort"
 	"time"
 
 	"github.com/cgrates/birpc/context"
@@ -28,7 +29,7 @@ import (
 )
 
 // GetRateProfile returns a Rate Profile based on tenant and id
-func (admS *AdminSv1) GetRateProfile(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *utils.RateProfile) error {
+func (admS *AdminSv1) GetRateProfile(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *utils.RateProfile) (err error) {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -36,16 +37,48 @@ func (admS *AdminSv1) GetRateProfile(ctx *context.Context, arg *utils.TenantIDWi
 	if tnt == utils.EmptyString {
 		tnt = admS.cfg.GeneralCfg().DefaultTenant
 	}
-	rPrf, err := admS.dm.GetRateProfile(ctx, tnt, arg.ID, true, true, utils.NonTransactional)
+	var rPrf *utils.RateProfile
+	rPrf, err = admS.dm.GetRateProfile(ctx, tnt, arg.ID, true, true, utils.NonTransactional)
 	if err != nil {
 		if err.Error() != utils.ErrNotFound.Error() {
 			err = utils.NewErrServerError(err)
 		}
-		return err
+		return
 	}
-
+	rateIDs := make([]string, len(rPrf.Rates))
+	i := 0
+	for rateID := range rPrf.Rates {
+		rateIDs[i] = rateID
+		i++
+	}
+	sort.Strings(rateIDs)
+	var limit, offset, maxItems int
+	// if limit, err = engine.GetIntOpts(ctx, tnt, nil, nil, admS.cfg.RateSCfg().Opts.Limit,
+	// 	config.RatesLimitDftOpt, utils.OptsRatesLimit); err != nil {
+	// 	return
+	// }
+	// if offset, err = engine.GetIntOpts(ctx, tnt, nil, nil, admS.cfg.RateSCfg().Opts.Offset,
+	// 	config.RatesLimitDftOpt, utils.OptsRatesOffset); err != nil {
+	// 	return
+	// }
+	// if maxItems, err = engine.GetIntOpts(ctx, tnt, nil, nil, admS.cfg.RateSCfg().Opts.Limit,
+	// 	config.RatesLimitDftOpt, utils.OptsRatesMaxItems); err != nil {
+	// 	return
+	// }
+	if limit, offset, maxItems, err = utils.GetPaginateOpts(arg.APIOpts); err != nil {
+		return
+	}
+	rateIDs, err = utils.Paginate(rateIDs, limit, offset, maxItems)
+	if err != nil {
+		return
+	}
+	paginatedRates := make(map[string]*utils.Rate)
+	for _, rateID := range rateIDs {
+		paginatedRates[rateID] = rPrf.Rates[rateID]
+	}
+	rPrf.Rates = paginatedRates
 	*reply = *rPrf
-	return nil
+	return
 }
 
 // GetRateProfile returns the rates of a profile based on their profile. Those rates will be returned back by matching a prefix.

@@ -35,6 +35,9 @@ var (
 const (
 	RatesStartTimeDftOpt            = "*now"
 	RatesProfileIgnoreFiltersDftOpt = false
+	RatesLimitDftOpt                = 0
+	RatesOffsetDftOpt               = 0
+	RatesMaxItemsDftOpt             = 0
 )
 
 type RatesOpts struct {
@@ -43,6 +46,9 @@ type RatesOpts struct {
 	Usage                []*utils.DynamicDecimalBigOpt
 	IntervalStart        []*utils.DynamicDecimalBigOpt
 	ProfileIgnoreFilters []*utils.DynamicBoolOpt
+	Limit                []*utils.DynamicIntOpt
+	Offset               []*utils.DynamicIntOpt
+	MaxItems             []*utils.DynamicIntOpt
 }
 
 // RateSCfg the rates config section
@@ -101,6 +107,15 @@ func (rateOpts *RatesOpts) loadFromJSONCfg(jsnCfg *RatesOptsJson) (err error) {
 	}
 	if jsnCfg.ProfileIgnoreFilters != nil {
 		rateOpts.ProfileIgnoreFilters = append(rateOpts.ProfileIgnoreFilters, jsnCfg.ProfileIgnoreFilters...)
+	}
+	if jsnCfg.Limit != nil {
+		rateOpts.Limit = append(rateOpts.Limit, jsnCfg.Limit...)
+	}
+	if jsnCfg.Offset != nil {
+		rateOpts.Offset = append(rateOpts.Offset, jsnCfg.Offset...)
+	}
+	if jsnCfg.MaxItems != nil {
+		rateOpts.MaxItems = append(rateOpts.MaxItems, jsnCfg.MaxItems...)
 	}
 	return
 }
@@ -172,6 +187,9 @@ func (rCfg RateSCfg) AsMapInterface(string) interface{} {
 		utils.MetaUsage:                rCfg.Opts.Usage,
 		utils.MetaIntervalStartCfg:     rCfg.Opts.IntervalStart,
 		utils.MetaProfileIgnoreFilters: rCfg.Opts.ProfileIgnoreFilters,
+		utils.MetaLimitCfg:             rCfg.Opts.Limit,
+		utils.MetaOffsetCfg:            rCfg.Opts.Offset,
+		utils.MetaMaxItemsCfg:          rCfg.Opts.MaxItems,
 	}
 	mp := map[string]interface{}{
 		utils.EnabledCfg:            rCfg.Enabled,
@@ -239,12 +257,27 @@ func (rateOpts *RatesOpts) Clone() *RatesOpts {
 	if rateOpts.ProfileIgnoreFilters != nil {
 		profileIgnoreFilters = utils.CloneDynamicBoolOpt(rateOpts.ProfileIgnoreFilters)
 	}
+	var limit []*utils.DynamicIntOpt
+	if rateOpts.Limit != nil {
+		limit = utils.CloneDynamicIntOpt(rateOpts.Limit)
+	}
+	var offset []*utils.DynamicIntOpt
+	if rateOpts.Offset != nil {
+		offset = utils.CloneDynamicIntOpt(rateOpts.Offset)
+	}
+	var maxItems []*utils.DynamicIntOpt
+	if rateOpts.MaxItems != nil {
+		maxItems = utils.CloneDynamicIntOpt(rateOpts.MaxItems)
+	}
 	return &RatesOpts{
 		ProfileIDs:           ratePrfIDs,
 		StartTime:            startTime,
 		Usage:                usage,
 		IntervalStart:        intervalStart,
 		ProfileIgnoreFilters: profileIgnoreFilters,
+		Limit:                limit,
+		Offset:               offset,
+		MaxItems:             maxItems,
 	}
 }
 
@@ -298,6 +331,9 @@ type RatesOptsJson struct {
 	Usage                []*utils.DynamicStringOpt      `json:"*usage"`
 	IntervalStart        []*utils.DynamicStringOpt      `json:"*intervalStart"`
 	ProfileIgnoreFilters []*utils.DynamicBoolOpt        `json:"*profileIgnoreFilters"`
+	Limit                []*utils.DynamicIntOpt         `json:"*limit"`
+	Offset               []*utils.DynamicIntOpt         `json:"*offset"`
+	MaxItems             []*utils.DynamicIntOpt         `json:"*maxItems"`
 }
 
 type RateSJsonCfg struct {
@@ -338,6 +374,15 @@ func diffRatesOptsJsonCfg(d *RatesOptsJson, v1, v2 *RatesOpts) *RatesOptsJson {
 	}
 	if !utils.DynamicBoolOptEqual(v1.ProfileIgnoreFilters, v2.ProfileIgnoreFilters) {
 		d.ProfileIgnoreFilters = v2.ProfileIgnoreFilters
+	}
+	if !utils.DynamicIntOptEqual(v1.Limit, v2.Limit) {
+		d.Limit = v2.Limit
+	}
+	if !utils.DynamicIntOptEqual(v1.Offset, v2.Offset) {
+		d.Offset = v2.Offset
+	}
+	if !utils.DynamicIntOptEqual(v1.MaxItems, v2.MaxItems) {
+		d.MaxItems = v2.MaxItems
 	}
 	return d
 }

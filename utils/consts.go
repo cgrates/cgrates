@@ -2281,6 +2281,9 @@ const (
 	OptsRatesStartTime     = "*rtsStartTime"
 	OptsRatesUsage         = "*rtsUsage"
 	OptsRatesIntervalStart = "*rtsIntervalStart"
+	OptsRatesLimit         = "*rtsLimit"
+	OptsRatesOffset        = "*rtsOffset"
+	OptsRatesMaxItems      = "*rtsMaxItems"
 
 	// Resources
 	OptsResourcesUnits    = "*rsUnits"
