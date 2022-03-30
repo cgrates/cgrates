@@ -258,3 +258,301 @@ func TestProcessEvent(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestGetActiveSessions(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	connMgr := engine.NewConnManager(cfg)
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	cfg.SessionSCfg().CDRsConns = []string{"*internal"}
+	ssv1 := &SessionSv1{
+		ping: struct{}{},
+		sS:   sessions.NewSessionS(cfg, dm, engine.NewFilterS(cfg, connMgr, dm), connMgr),
+	}
+
+	var reply []*sessions.ExternalSession
+	args := &utils.SessionFilter{
+		Limit:   utils.IntPointer(2),
+		Filters: []string{},
+		Tenant:  "cgrates.org",
+		APIOpts: map[string]interface{}{},
+	}
+	if err := ssv1.GetActiveSessions(context.Background(), args, &reply); err != utils.ErrNotFound {
+		t.Errorf("Expected %v\n but received %v", utils.ErrNotFound, err)
+	}
+}
+
+func TestGetActiveSessionsCount(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	connMgr := engine.NewConnManager(cfg)
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	cfg.SessionSCfg().CDRsConns = []string{"*internal"}
+	ssv1 := &SessionSv1{
+		ping: struct{}{},
+		sS:   sessions.NewSessionS(cfg, dm, engine.NewFilterS(cfg, connMgr, dm), connMgr),
+	}
+
+	var reply int
+	args := &utils.SessionFilter{
+		Limit:   utils.IntPointer(2),
+		Filters: []string{},
+		Tenant:  "cgrates.org",
+		APIOpts: map[string]interface{}{},
+	}
+	if err := ssv1.GetActiveSessionsCount(context.Background(), args, &reply); err != nil {
+		t.Error(err)
+	}
+	if reply != 0 {
+		t.Errorf("Expected 0")
+	}
+}
+
+func TestForceDisconnect(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	connMgr := engine.NewConnManager(cfg)
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	cfg.SessionSCfg().CDRsConns = []string{"*internal"}
+	ssv1 := &SessionSv1{
+		ping: struct{}{},
+		sS:   sessions.NewSessionS(cfg, dm, engine.NewFilterS(cfg, connMgr, dm), connMgr),
+	}
+
+	var reply string
+	args := &utils.SessionFilter{
+		Limit:   utils.IntPointer(2),
+		Filters: []string{},
+		Tenant:  "cgrates.org",
+		APIOpts: map[string]interface{}{},
+	}
+	if err := ssv1.ForceDisconnect(context.Background(), args, &reply); err != utils.ErrNotFound {
+		t.Errorf("Expected %v\n but received %v", utils.ErrNotFound, err)
+	}
+}
+
+func TestGetPassiveSessions(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	connMgr := engine.NewConnManager(cfg)
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	cfg.SessionSCfg().CDRsConns = []string{"*internal"}
+	ssv1 := &SessionSv1{
+		ping: struct{}{},
+		sS:   sessions.NewSessionS(cfg, dm, engine.NewFilterS(cfg, connMgr, dm), connMgr),
+	}
+
+	var reply []*sessions.ExternalSession
+	args := &utils.SessionFilter{
+		Limit:   utils.IntPointer(2),
+		Filters: []string{},
+		Tenant:  "cgrates.org",
+		APIOpts: map[string]interface{}{},
+	}
+	if err := ssv1.GetPassiveSessions(context.Background(), args, &reply); err != utils.ErrNotFound {
+		t.Errorf("Expected %v\n but received %v", utils.ErrNotFound, err)
+	}
+}
+
+func TestGetPassiveSessionsCount(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	connMgr := engine.NewConnManager(cfg)
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	cfg.SessionSCfg().CDRsConns = []string{"*internal"}
+	ssv1 := &SessionSv1{
+		ping: struct{}{},
+		sS:   sessions.NewSessionS(cfg, dm, engine.NewFilterS(cfg, connMgr, dm), connMgr),
+	}
+
+	var reply int
+	args := &utils.SessionFilter{
+		Limit:   utils.IntPointer(2),
+		Filters: []string{},
+		Tenant:  "cgrates.org",
+		APIOpts: map[string]interface{}{},
+	}
+	if err := ssv1.GetPassiveSessionsCount(context.Background(), args, &reply); err != nil {
+		t.Error(err)
+	}
+	if reply != 0 {
+		t.Errorf("Expected 0")
+	}
+}
+
+func TestSetPassiveSession(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	connMgr := engine.NewConnManager(cfg)
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	cfg.SessionSCfg().CDRsConns = []string{"*internal"}
+	ssv1 := &SessionSv1{
+		ping: struct{}{},
+		sS:   sessions.NewSessionS(cfg, dm, engine.NewFilterS(cfg, connMgr, dm), connMgr),
+	}
+
+	var reply string
+	args := &sessions.Session{
+		Tenant: "cgrates.org",
+	}
+	if err := ssv1.SetPassiveSession(context.Background(), args, &reply); err != utils.ErrNotFound {
+		t.Errorf("Expected %v\n but received %v", utils.ErrNotFound, err)
+	}
+}
+
+func TestActivateSessions(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	connMgr := engine.NewConnManager(cfg)
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	cfg.SessionSCfg().CDRsConns = []string{"*internal"}
+	ssv1 := &SessionSv1{
+		ping: struct{}{},
+		sS:   sessions.NewSessionS(cfg, dm, engine.NewFilterS(cfg, connMgr, dm), connMgr),
+	}
+
+	var reply string
+	args := &utils.SessionIDsWithAPIOpts{
+		IDs: []string{"TestMatchingAccountsForEvent"},
+	}
+	if err := ssv1.ActivateSessions(context.Background(), args, &reply); err != utils.ErrPartiallyExecuted {
+		t.Errorf("Expected %v\n but received %v", utils.ErrPartiallyExecuted, err)
+	}
+}
+
+func TestDeactivateSessions(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	connMgr := engine.NewConnManager(cfg)
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	cfg.SessionSCfg().CDRsConns = []string{"*internal"}
+	ssv1 := &SessionSv1{
+		ping: struct{}{},
+		sS:   sessions.NewSessionS(cfg, dm, engine.NewFilterS(cfg, connMgr, dm), connMgr),
+	}
+
+	var reply string
+	args := &utils.SessionIDsWithAPIOpts{
+		IDs: []string{"TestMatchingAccountsForEvent"},
+	}
+	if err := ssv1.DeactivateSessions(context.Background(), args, &reply); err != utils.ErrPartiallyExecuted {
+		t.Errorf("Expected %v\n but received %v", utils.ErrPartiallyExecuted, err)
+	}
+}
+
+func TestReAuthorize(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	connMgr := engine.NewConnManager(cfg)
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	cfg.SessionSCfg().CDRsConns = []string{"*internal"}
+	ssv1 := &SessionSv1{
+		ping: struct{}{},
+		sS:   sessions.NewSessionS(cfg, dm, engine.NewFilterS(cfg, connMgr, dm), connMgr),
+	}
+
+	var reply string
+	args := &utils.SessionFilter{
+		Limit:   utils.IntPointer(2),
+		Filters: []string{},
+		Tenant:  "cgrates.org",
+		APIOpts: map[string]interface{}{},
+	}
+	if err := ssv1.ReAuthorize(context.Background(), args, &reply); err != utils.ErrNotFound {
+		t.Errorf("Expected %v\n but received %v", utils.ErrNotFound, err)
+	}
+}
+
+func TestDisconnectPeer(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	connMgr := engine.NewConnManager(cfg)
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	cfg.SessionSCfg().CDRsConns = []string{"*internal"}
+	ssv1 := &SessionSv1{
+		ping: struct{}{},
+		sS:   sessions.NewSessionS(cfg, dm, engine.NewFilterS(cfg, connMgr, dm), connMgr),
+	}
+
+	var reply string
+
+	args := &utils.DPRArgs{
+		OriginHost:      "origin_host",
+		OriginRealm:     "origin_realm",
+		DisconnectCause: 2,
+	}
+
+	if err := ssv1.DisconnectPeer(context.Background(), args, &reply); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestSTIRAuthenticate(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	connMgr := engine.NewConnManager(cfg)
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	cfg.SessionSCfg().CDRsConns = []string{"*internal"}
+	ssv1 := &SessionSv1{
+		ping: struct{}{},
+		sS:   sessions.NewSessionS(cfg, dm, engine.NewFilterS(cfg, connMgr, dm), connMgr),
+	}
+
+	var reply string
+
+	args := &sessions.V1STIRAuthenticateArgs{
+		DestinationTn: "dest_tn",
+		Identity:      "identity",
+	}
+	errExpect := "*stir_authenticate: missing parts of the message header"
+	if err := ssv1.STIRAuthenticate(context.Background(), args, &reply); err.Error() != errExpect {
+		t.Errorf("Expected %v\n but received %v", errExpect, err)
+	}
+}
+
+func TestSTIRIdentity(t *testing.T) {
+
+	cfg := config.NewDefaultCGRConfig()
+	connMgr := engine.NewConnManager(cfg)
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	cfg.SessionSCfg().CDRsConns = []string{"*internal"}
+	ssv1 := &SessionSv1{
+		ping: struct{}{},
+		sS:   sessions.NewSessionS(cfg, dm, engine.NewFilterS(cfg, connMgr, dm), connMgr),
+	}
+
+	var reply string
+
+	args := &sessions.V1STIRIdentityArgs{
+		PublicKeyPath:  "PKP",
+		PrivateKeyPath: "PKP_PRIVATE",
+		Payload: &utils.PASSporTPayload{
+			ATTest: "at_Test",
+		},
+	}
+	errExpect := "*stir_authenticate: open PKP_PRIVATE: no such file or directory"
+	if err := ssv1.STIRIdentity(context.Background(), args, &reply); err.Error() != errExpect {
+		t.Errorf("Expected %v\n but received %v", errExpect, err)
+	}
+}
+
+func TestRegisterInternalBiJSONConn(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	connMgr := engine.NewConnManager(cfg)
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	cfg.SessionSCfg().CDRsConns = []string{"*internal"}
+	ssv1 := &SessionSv1{
+		ping: struct{}{},
+		sS:   sessions.NewSessionS(cfg, dm, engine.NewFilterS(cfg, connMgr, dm), connMgr),
+	}
+
+	var reply string
+
+	args := "*internal"
+
+	if err := ssv1.RegisterInternalBiJSONConn(context.Background(), args, &reply); err != nil {
+		t.Error(err)
+	}
+}
