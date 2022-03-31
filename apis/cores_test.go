@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package apis
 
 import (
+	"sync"
 	"testing"
 	"time"
 
@@ -75,5 +76,73 @@ func TestCoreSShutdown(t *testing.T) {
 	}
 	if !closed {
 		t.Error("Did not stop the engine")
+	}
+}
+
+func TestStartCPUProfiling(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	caps := engine.NewCaps(2, utils.MetaTopUp)
+	coreService := cores.NewCoreService(cfg, caps, nil, utils.EmptyString, make(chan struct{}), nil, nil, nil)
+	cS := NewCoreSv1(coreService)
+	args := &utils.DirectoryArgs{
+		DirPath: "dir_path",
+		APIOpts: map[string]interface{}{},
+		Tenant:  "cgrates.org",
+	}
+
+	var reply string
+	errExp := "could not create CPU profile: open dir_path/cpu.prof: no such file or directory"
+	if err := cS.StartCPUProfiling(context.Background(), args, &reply); err.Error() != errExp {
+		t.Errorf("Expected %v\n but received %v", errExp, err)
+	}
+}
+
+func TestStopCPUProfiling(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	caps := engine.NewCaps(2, utils.MetaTopUp)
+	coreService := cores.NewCoreService(cfg, caps, nil, utils.EmptyString, make(chan struct{}), nil, nil, nil)
+	cS := NewCoreSv1(coreService)
+	args := &utils.TenantWithAPIOpts{
+		Tenant:  "cgrates.org",
+		APIOpts: map[string]interface{}{},
+	}
+	var reply string
+	errExp := " cannot stop because CPUProfiling is not active"
+	if err := cS.StopCPUProfiling(context.Background(), args, &reply); err.Error() != errExp {
+		t.Errorf("Expected %v\n but received %v", errExp, err)
+	}
+}
+
+// func TestStartMemoryProfiling(t *testing.T) {
+// 	cfg := config.NewDefaultCGRConfig()
+// 	caps := engine.NewCaps(2, utils.MetaTopUp)
+// 	coreService := cores.NewCoreService(cfg, caps, nil, utils.EmptyString, make(chan struct{}), nil, new(sync.WaitGroup), nil)
+// 	cS := NewCoreSv1(coreService)
+// 	args := &utils.MemoryPrf{
+// 		Tenant:   "cgrates.org",
+// 		DirPath:  "dir_path",
+// 		Interval: 4 * time.Millisecond,
+// 		NrFiles:  2,
+// 	}
+
+// 	var reply string
+// 	if err := cS.StartMemoryProfiling(context.Background(), args, &reply); err != nil {
+// 		t.Error(err)
+// 	}
+// }
+
+func TestStopMemoryProfiling(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	caps := engine.NewCaps(2, utils.MetaTopUp)
+	coreService := cores.NewCoreService(cfg, caps, nil, utils.EmptyString, make(chan struct{}), nil, new(sync.WaitGroup), nil)
+	cS := NewCoreSv1(coreService)
+	args := &utils.TenantWithAPIOpts{
+		Tenant:  "cgrates.org",
+		APIOpts: map[string]interface{}{},
+	}
+	var reply string
+	errExp := " Memory Profiling is not started"
+	if err := cS.StopMemoryProfiling(context.Background(), args, &reply); err.Error() != errExp {
+		t.Errorf("Expected %v\n but received %v", errExp, err)
 	}
 }
