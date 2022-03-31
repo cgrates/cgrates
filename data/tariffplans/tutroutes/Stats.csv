@@ -3,3 +3,10 @@ cgrates.org,STATS_VENDOR_1,*string:~*req.Category:vendor1,,100,-1,,*acd;*tcd;*ac
 cgrates.org,STATS_VENDOR_2,*string:~*req.Category:vendor2,,100,-1,,*acd;*tcd;*acc;*tcc;*sum#1;*distinct#~*req.Usage,,,,,*none
 cgrates.org,STATS_TCC1,,,100,-1,,*tcc,,,,,*none
 cgrates.org,STATS_TCC2,Fltr_tcc,,100,-1,,*tcc,,,,,*none
+
+cgrates.org,STATS_TOP1,*string:~*req.Account:1010,,100,-1,,*asr;*acd,,,,,*none
+cgrates.org,STATS_TOP2,*string:~*req.Destination:1021,,100,-1,,*asr;*acd,,,,,*none
+cgrates.org,STATS_TOP3,*string:~*req.Category:call,,100,-1,,*asr;*acd,,,,,*none
+
+
+

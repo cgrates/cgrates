@@ -26,3 +26,12 @@ cgrates.org,ROUTE_HC1,Fltr_tcc,,*hc,,route1,*gte:~*resources.RES_GRP2.Available:
 cgrates.org,ROUTE_HC1,,,,,route2,*gte:~*resources.RES_GRP1.TotalUsage:9,,RP_VENDOR1,RES_GRP1,,;20,,,
 cgrates.org,ROUTE_HC1,,,,,route3,,,RP_VENDOR1,RES_GRP2,,;10,,,
 
+
+cgrates.org,ROUTE_QOS_STATS,*prefix:~*req.Destination:+3342,,*qos,*asr;*acd,route1,,,,,STATS_TOP1,;20,,,
+cgrates.org,ROUTE_QOS_STATS,,,,,route2,,,,,STATS_TOP2,;10,,,
+
+cgrates.org,ROUTE_LCR,*prefix:~*req.Destination:+2273,,*lc,,route1,*gte:~*stats.STATS_TOP3.*acd:1m;*lte:~*stats.STATS_TOP2.*asr:50,,RP_VENDOR1,,,;20,,,
+cgrates.org,ROUTE_LCR,,,,,route2,*eq:~*stats.STATS_TOP3.*asr:100,,RP_STANDARD,,,;15,,,
+cgrates.org,ROUTE_LCR,,,,,route3,*gt:~*stats.STATS_TOP1.*acd:30s,,RP_VENDOR2,,,;10,,,
+
+
