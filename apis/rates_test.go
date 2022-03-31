@@ -2506,3 +2506,172 @@ func TestRatesSetRateProfileErrConvertOverwriteOpt(t *testing.T) {
 		t.Errorf("expected <%+v>, \nreceived <%+v>", expected, err)
 	}
 }
+
+func TestRatesGetRateProfilePagination(t *testing.T) {
+	engine.Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	connMgr := engine.NewConnManager(cfg)
+	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(dataDB, nil, connMgr)
+	admS := NewAdminSv1(cfg, dm, connMgr)
+	ratePrf := &utils.APIRateProfile{
+		RateProfile: &utils.RateProfile{
+			ID:        "RATE_PROFILE",
+			Tenant:    "cgrates.org",
+			FilterIDs: []string{"*string:~*req.Account:1001"},
+			Rates: map[string]*utils.Rate{
+				"RateE": {
+					ID: "RateE",
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 10,
+						},
+					},
+				},
+				"RateA": {
+					ID: "RateA",
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 25,
+						},
+					},
+				},
+				"RateC": {
+					ID: "RateC",
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 15,
+						},
+					},
+				},
+				"RateB": {
+					ID: "RateB",
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 5,
+						},
+					},
+				},
+				"RateF": {
+					ID: "RateF",
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 30,
+						},
+					},
+				},
+				"RateD": {
+					ID: "RateD",
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 20,
+						},
+					},
+				},
+			},
+		},
+	}
+
+	var reply string
+	if err := admS.SetRateProfile(context.Background(), ratePrf, &reply); err != nil {
+		t.Error(err)
+	}
+	args := &utils.TenantIDWithAPIOpts{
+		TenantID: &utils.TenantID{
+			ID: "RATE_PROFILE",
+		},
+		APIOpts: map[string]interface{}{
+			utils.PageLimitOpt:  4,
+			utils.PageOffsetOpt: 1,
+		},
+	}
+
+	expected := utils.RateProfile{
+		ID:        "RATE_PROFILE",
+		Tenant:    "cgrates.org",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		Rates: map[string]*utils.Rate{
+			"RateB": {
+				ID: "RateB",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 5,
+					},
+				},
+			},
+			"RateC": {
+				ID: "RateC",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 15,
+					},
+				},
+			},
+			"RateD": {
+				ID: "RateD",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 20,
+					},
+				},
+			},
+			"RateE": {
+				ID: "RateE",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 10,
+					},
+				},
+			},
+		},
+	}
+	var replyRatePrf utils.RateProfile
+	if err := admS.GetRateProfile(context.Background(), args, &replyRatePrf); err != nil {
+		t.Error(err)
+	} else if len(replyRatePrf.Rates) != len(expected.Rates) {
+		t.Errorf("expected: <%+v> Rates, \nreceived: <%+v> Rates",
+			len(expected.Rates), len(replyRatePrf.Rates))
+	} else {
+		for rateID := range expected.Rates {
+			if _, ok := replyRatePrf.Rates[rateID]; !ok {
+				t.Errorf("expected: <%+v>, \nreceived: <%+v>",
+					utils.ToJSON(expected), utils.ToJSON(replyRatePrf))
+				t.Fatalf("rate <%+v> could not be found in reply", rateID)
+			}
+		}
+	}
+
+	args = &utils.TenantIDWithAPIOpts{
+		TenantID: &utils.TenantID{
+			ID: "RATE_PROFILE",
+		},
+		APIOpts: map[string]interface{}{
+			utils.PageLimitOpt:    4,
+			utils.PageOffsetOpt:   1,
+			utils.PageMaxItemsOpt: 4,
+		},
+	}
+
+	experr := `SERVER_ERROR: maximum number of items exceeded`
+	if err := admS.GetRateProfile(context.Background(), args, &replyRatePrf); err == nil ||
+		err.Error() != experr {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err.Error())
+	}
+
+	args = &utils.TenantIDWithAPIOpts{
+		TenantID: &utils.TenantID{
+			ID: "RATE_PROFILE",
+		},
+		APIOpts: map[string]interface{}{
+			utils.PageLimitOpt:  true,
+			utils.PageOffsetOpt: 1,
+		},
+	}
+
+	experr = `cannot convert field<bool>: true to int`
+	if err := admS.GetRateProfile(context.Background(), args, &replyRatePrf); err == nil ||
+		err.Error() != experr {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err.Error())
+	}
+}

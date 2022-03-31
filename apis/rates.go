@@ -53,18 +53,6 @@ func (admS *AdminSv1) GetRateProfile(ctx *context.Context, arg *utils.TenantIDWi
 	}
 	sort.Strings(rateIDs)
 	var limit, offset, maxItems int
-	// if limit, err = engine.GetIntOpts(ctx, tnt, nil, nil, admS.cfg.RateSCfg().Opts.Limit,
-	// 	config.RatesLimitDftOpt, utils.OptsRatesLimit); err != nil {
-	// 	return
-	// }
-	// if offset, err = engine.GetIntOpts(ctx, tnt, nil, nil, admS.cfg.RateSCfg().Opts.Offset,
-	// 	config.RatesLimitDftOpt, utils.OptsRatesOffset); err != nil {
-	// 	return
-	// }
-	// if maxItems, err = engine.GetIntOpts(ctx, tnt, nil, nil, admS.cfg.RateSCfg().Opts.Limit,
-	// 	config.RatesLimitDftOpt, utils.OptsRatesMaxItems); err != nil {
-	// 	return
-	// }
 	if limit, offset, maxItems, err = utils.GetPaginateOpts(arg.APIOpts); err != nil {
 		return
 	}

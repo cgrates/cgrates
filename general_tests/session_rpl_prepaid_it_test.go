@@ -220,7 +220,7 @@ func testSeSRplPrepaidActivateSessions(t *testing.T) {
 				RatingFilters: engine.RatingFilters{"d24bb65": {
 					"DestinationID":     utils.MetaAny,
 					"DestinationPrefix": "1004",
-					"RatingPlanID":      utils.MetaNone,
+					utils.RateProfileID:      utils.MetaNone,
 					"Subject":           "dc88acfb-18c7-4658-9d36-056b74b84b57",
 				}},
 				Rates: engine.ChargedRates{"5dad4b7": {{

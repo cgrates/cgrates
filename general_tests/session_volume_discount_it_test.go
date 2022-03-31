@@ -158,25 +158,25 @@ func testSessVolDiscAuthorizeEventSortRoutes1Min30Sec(t *testing.T) {
 					{
 						RouteID: "supplier2",
 						SortingData: map[string]interface{}{
-							"Cost":         float64(1.200000000000001),
-							"RatingPlanID": "RP_SUPPLIER2",
-							"Weight":       float64(0),
+							"Cost":              float64(1.200000000000001),
+							utils.RateProfileID: "RP_SUPPLIER2",
+							"Weight":            float64(0),
 						},
 					},
 					{
 						RouteID: "supplier4",
 						SortingData: map[string]interface{}{
-							"Cost":         float64(1.365),
-							"RatingPlanID": "RP_SUPPLIER4",
-							"Weight":       float64(0),
+							"Cost":              float64(1.365),
+							utils.RateProfileID: "RP_SUPPLIER4",
+							"Weight":            float64(0),
 						},
 					},
 					{
 						RouteID: "supplier3",
 						SortingData: map[string]interface{}{
-							"Cost":         float64(1.425000000000001),
-							"RatingPlanID": "RP_SUPPLIER3",
-							"Weight":       float64(0),
+							"Cost":              float64(1.425000000000001),
+							utils.RateProfileID: "RP_SUPPLIER3",
+							"Weight":            float64(0),
 						},
 					},
 				},
@@ -225,25 +225,25 @@ func testSessVolDiscAuthorizeEventSortRoutes11Min10Sec(t *testing.T) {
 					{
 						RouteID: "supplier2",
 						SortingData: map[string]interface{}{
-							"Cost":         float64(8.933333333333337),
-							"RatingPlanID": "RP_SUPPLIER2",
-							"Weight":       float64(0),
+							"Cost":              float64(8.933333333333337),
+							utils.RateProfileID: "RP_SUPPLIER2",
+							"Weight":            float64(0),
 						},
 					},
 					{
 						RouteID: "supplier4",
 						SortingData: map[string]interface{}{
-							"Cost":         float64(10.16166666666667),
-							"RatingPlanID": "RP_SUPPLIER4",
-							"Weight":       float64(0),
+							"Cost":              float64(10.16166666666667),
+							utils.RateProfileID: "RP_SUPPLIER4",
+							"Weight":            float64(0),
 						},
 					},
 					{
 						RouteID: "supplier3",
 						SortingData: map[string]interface{}{
-							"Cost":         float64(10.60833333333334),
-							"RatingPlanID": "RP_SUPPLIER3",
-							"Weight":       float64(0),
+							"Cost":              float64(10.60833333333334),
+							utils.RateProfileID: "RP_SUPPLIER3",
+							"Weight":            float64(0),
 						},
 					},
 				},
@@ -284,9 +284,9 @@ func testSessVolDiscAuthorizeEventSortRoutes20Min(t *testing.T) {
 					{
 						RouteID: "supplier2",
 						SortingData: map[string]interface{}{
-							"RatingPlanID": "RP_SUPPLIER2",
-							"Cost":         float64(16.00000000000001), // returns from accounts null concretes, so the cost will be null,
-							"Weight":       float64(0),
+							utils.RateProfileID: "RP_SUPPLIER2",
+							"Cost":              float64(16.00000000000001), // returns from accounts null concretes, so the cost will be null,
+							"Weight":            float64(0),
 						},
 					},
 					{
@@ -300,17 +300,17 @@ func testSessVolDiscAuthorizeEventSortRoutes20Min(t *testing.T) {
 					{
 						RouteID: "supplier4",
 						SortingData: map[string]interface{}{
-							"Cost":         float64(18.2),
-							"RatingPlanID": "RP_SUPPLIER4",
-							"Weight":       float64(0),
+							"Cost":              float64(18.2),
+							utils.RateProfileID: "RP_SUPPLIER4",
+							"Weight":            float64(0),
 						},
 					},
 					{
 						RouteID: "supplier3",
 						SortingData: map[string]interface{}{
-							"Cost":         float64(19.00000000000001),
-							"RatingPlanID": "RP_SUPPLIER3",
-							"Weight":       float64(0),
+							"Cost":              float64(19.00000000000001),
+							utils.RateProfileID: "RP_SUPPLIER3",
+							"Weight":            float64(0),
 						},
 					},
 				},
@@ -479,25 +479,25 @@ func testSessVolDiscAuthorizeEventSortRoutes1Min30SecAfterDebiting(t *testing.T)
 					{
 						RouteID: "supplier2",
 						SortingData: map[string]interface{}{
-							"Cost":         float64(1.200000000000001),
-							"RatingPlanID": "RP_SUPPLIER2",
-							"Weight":       float64(0),
+							"Cost":              float64(1.200000000000001),
+							utils.RateProfileID: "RP_SUPPLIER2",
+							"Weight":            float64(0),
 						},
 					},
 					{
 						RouteID: "supplier4",
 						SortingData: map[string]interface{}{
-							"Cost":         float64(1.365),
-							"RatingPlanID": "RP_SUPPLIER4",
-							"Weight":       float64(0),
+							"Cost":              float64(1.365),
+							utils.RateProfileID: "RP_SUPPLIER4",
+							"Weight":            float64(0),
 						},
 					},
 					{
 						RouteID: "supplier3",
 						SortingData: map[string]interface{}{
-							"Cost":         float64(1.425000000000001),
-							"RatingPlanID": "RP_SUPPLIER3",
-							"Weight":       float64(0),
+							"Cost":              float64(1.425000000000001),
+							utils.RateProfileID: "RP_SUPPLIER3",
+							"Weight":            float64(0),
 						},
 					},
 					{

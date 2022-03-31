@@ -100,7 +100,7 @@ func populateCostForRoutes(ctx *context.Context, cfg *config.CGRConfig,
 			if costFloat64, _ := cost.Float64(); extraOpts.maxCost != 0 && costFloat64 > extraOpts.maxCost {
 				continue
 			}
-			srtRoute.SortingData[utils.RatingPlanID] = rpCost.ID
+			srtRoute.SortingData[utils.RateProfileID] = rpCost.ID
 
 		}
 
