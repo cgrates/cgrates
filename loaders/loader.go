@@ -104,8 +104,6 @@ func setToDB(ctx *context.Context, dm *engine.DataManager, lType string, data pr
 		return dm.SetDispatcherHost(ctx, data.(*engine.DispatcherHost))
 	case utils.MetaRateProfiles:
 		rpl := data.(*utils.RateProfile)
-		utils.Logger.Crit(fmt.Sprintf("ratesPartial: %v", ratesPartial))
-		utils.Logger.Crit(fmt.Sprintf("rpl: %v", rpl))
 		if ratesPartial {
 			err = dm.SetRateProfile(ctx, rpl, false, true)
 		} else {
