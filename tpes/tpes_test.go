@@ -231,14 +231,16 @@ func TestGetTariffPlansKeys(t *testing.T) {
 			},
 		},
 	}
-	dm.SetRateProfileRates(context.Background(), rt, false)
+	if err := dm.SetRateProfile(context.Background(), rt, false, true); err != nil {
+		t.Error(err)
+	}
 	rcv, _ = getTariffPlansKeys(context.Background(), dm, "cgrates.org", utils.MetaRateS)
-	exp = []string{}
+	exp = []string{"TEST_RATE_TEST"}
 	if !reflect.DeepEqual(rcv, exp) {
 		t.Errorf("Expected %v\n but received %v", exp, rcv)
 	}
 
-	//Resources
+	// Resources
 	rsc := &engine.ResourceProfile{
 		Tenant:            "cgrates.org",
 		ID:                "ResGroup1",

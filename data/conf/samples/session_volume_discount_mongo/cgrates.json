@@ -13,9 +13,6 @@
         "db_name": "10",
         "db_port": 27017,
     },
-    
-    
- 
           
     "sessions": {
         "enabled": true,

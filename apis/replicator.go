@@ -603,7 +603,15 @@ func (rplSv1 *ReplicatorSv1) GetActionProfile(ctx *context.Context, tntID *utils
 }
 
 func (rplSv1 *ReplicatorSv1) SetRateProfile(ctx *context.Context, sp *utils.RateProfileWithAPIOpts, reply *string) (err error) {
-	if err = rplSv1.dm.DataDB().SetRateProfileDrv(ctx, sp.RateProfile); err != nil {
+	// check if we want to overwrite our profile already existing in database
+	var optOverwrite bool
+	if _, has := sp.APIOpts[utils.MetaRateSOverwrite]; has {
+		optOverwrite, err = utils.IfaceAsBool(sp.APIOpts[utils.MetaRateSOverwrite])
+		if err != nil {
+			return
+		}
+	}
+	if err = rplSv1.dm.DataDB().SetRateProfileDrv(ctx, sp.RateProfile, optOverwrite); err != nil {
 		return
 	}
 	if err = rplSv1.v1.CallCache(ctx, utils.IfaceAsString(sp.APIOpts[utils.MetaCache]),

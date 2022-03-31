@@ -25,7 +25,7 @@ import (
 
 type DataDBMock struct {
 	RemoveRateProfileDrvF       func(ctx *context.Context, str1 string, str2 string, rateIDs *[]string) error
-	SetRateProfileDrvF          func(*context.Context, *utils.RateProfile) error
+	SetRateProfileDrvF          func(*context.Context, *utils.RateProfile, bool) error
 	GetRateProfileDrvF          func(*context.Context, string, string) (*utils.RateProfile, error)
 	GetRateProfileRatesDrvF     func(*context.Context, string, string, string, bool) ([]string, []*utils.Rate, error)
 	GetKeysForPrefixF           func(*context.Context, string) ([]string, error)
@@ -407,9 +407,9 @@ func (dbM *DataDBMock) GetRateProfileRatesDrv(ctx *context.Context, tnt string, 
 	return nil, nil, utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) SetRateProfileDrv(ctx *context.Context, rt *utils.RateProfile) error {
+func (dbM *DataDBMock) SetRateProfileDrv(ctx *context.Context, rt *utils.RateProfile, optOverwrite bool) error {
 	if dbM.SetRateProfileDrvF != nil {
-		return dbM.SetRateProfileDrvF(ctx, rt)
+		return dbM.SetRateProfileDrvF(ctx, rt, optOverwrite)
 	}
 	return utils.ErrNotImplemented
 }
