@@ -480,18 +480,20 @@ func (iDB *InternalDB) GetRateProfileRatesDrv(ctx *context.Context, tenant, prof
 	return
 }
 
-func (iDB *InternalDB) SetRateProfileDrv(_ *context.Context, rpp *utils.RateProfile) (err error) {
+func (iDB *InternalDB) SetRateProfileDrv(_ *context.Context, rpp *utils.RateProfile, optOverwrite bool) (err error) {
 	if err = rpp.Compile(); err != nil {
 		return
 	}
-	// in case of add new rates into our profile
-	x, ok := iDB.db.Get(utils.CacheRateProfiles, utils.ConcatenatedKey(rpp.Tenant, rpp.ID))
-	if ok || x != nil {
-		// mix the old and new rates, in order to add new rates into our profile
-		oldRp := x.(*utils.RateProfile)
-		for key, rate := range oldRp.Rates {
-			if _, has := rpp.Rates[key]; !has {
-				rpp.Rates[key] = rate
+	if !optOverwrite {
+		// in case of add new rates into our profile
+		x, ok := iDB.db.Get(utils.CacheRateProfiles, utils.ConcatenatedKey(rpp.Tenant, rpp.ID))
+		if ok || x != nil {
+			// mix the old and new rates, in order to add new rates into our profile
+			oldRp := x.(*utils.RateProfile)
+			for key, rate := range oldRp.Rates {
+				if _, has := rpp.Rates[key]; !has {
+					rpp.Rates[key] = rate
+				}
 			}
 		}
 	}

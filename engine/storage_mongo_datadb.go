@@ -1242,12 +1242,17 @@ func (ms *MongoStorage) GetRateProfileRatesDrv(ctx *context.Context, tenant, pro
 	return
 }
 
-func (ms *MongoStorage) SetRateProfileDrv(ctx *context.Context, rpp *utils.RateProfile) (err error) {
+func (ms *MongoStorage) SetRateProfileDrv(ctx *context.Context, rpp *utils.RateProfile, optOverwrite bool) (err error) {
 	rpMap, err := rpp.AsDataDBMap(ms.ms)
 	if err != nil {
 		return
 	}
 	return ms.query(ctx, func(sctx mongo.SessionContext) (err error) {
+		if optOverwrite {
+			if _, err = ms.getCol(ColRpp).DeleteOne(sctx, bson.M{"tenant": rpp.Tenant, "id": rpp.ID}); err != nil {
+				return
+			}
+		}
 		_, err = ms.getCol(ColRpp).UpdateOne(sctx, bson.M{"tenant": rpp.Tenant, "id": rpp.ID},
 			bson.M{"$set": rpMap},
 			options.Update().SetUpsert(true),

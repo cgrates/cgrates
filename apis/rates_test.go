@@ -1293,7 +1293,7 @@ func TestRatesSetRateProfileErrorSetLoadIDs(t *testing.T) {
 		GetRateProfileDrvF: func(c *context.Context, s string, s2 string) (*utils.RateProfile, error) {
 			return nil, utils.ErrNotFound
 		},
-		SetRateProfileDrvF: func(c *context.Context, profile *utils.RateProfile) error {
+		SetRateProfileDrvF: func(c *context.Context, profile *utils.RateProfile, overWrite bool) error {
 			return nil
 		},
 		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
@@ -1341,7 +1341,7 @@ func TestRatesSetRateProfileRatesErrorSetLoadIDs(t *testing.T) {
 				Rates:     map[string]*utils.Rate{},
 			}, nil
 		},
-		SetRateProfileDrvF: func(c *context.Context, profile *utils.RateProfile) error {
+		SetRateProfileDrvF: func(c *context.Context, profile *utils.RateProfile, overWrite bool) error {
 			return nil
 		},
 		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
@@ -1389,7 +1389,7 @@ func TestRatesRemoveRateProfileRatesErrorSetLoadIDs(t *testing.T) {
 				Tenant: "tenant",
 			}, nil
 		},
-		SetRateProfileDrvF: func(c *context.Context, profile *utils.RateProfile) error {
+		SetRateProfileDrvF: func(c *context.Context, profile *utils.RateProfile, overWrite bool) error {
 			return nil
 		},
 		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
@@ -1429,7 +1429,7 @@ func TestRatesRemoveRateProfileErrorSetLoadIDs(t *testing.T) {
 				Tenant: "tenant",
 			}, nil
 		},
-		SetRateProfileDrvF: func(c *context.Context, profile *utils.RateProfile) error {
+		SetRateProfileDrvF: func(c *context.Context, profile *utils.RateProfile, overWrite bool) error {
 			return nil
 		},
 		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
@@ -1466,7 +1466,7 @@ func TestRatesSetRateProfileErrorCache(t *testing.T) {
 		GetRateProfileDrvF: func(c *context.Context, s string, s2 string) (*utils.RateProfile, error) {
 			return nil, utils.ErrNotFound
 		},
-		SetRateProfileDrvF: func(c *context.Context, profile *utils.RateProfile) error {
+		SetRateProfileDrvF: func(c *context.Context, profile *utils.RateProfile, overWrite bool) error {
 			return nil
 		},
 		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
@@ -1525,7 +1525,7 @@ func TestRatesSetRateProfileRatesErrorCache(t *testing.T) {
 				Rates:     map[string]*utils.Rate{},
 			}, nil
 		},
-		SetRateProfileDrvF: func(c *context.Context, profile *utils.RateProfile) error {
+		SetRateProfileDrvF: func(c *context.Context, profile *utils.RateProfile, overWrite bool) error {
 			return nil
 		},
 		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
@@ -1577,7 +1577,7 @@ func TestRatesRemoveRateProfileRatesErrorCache(t *testing.T) {
 				Tenant: "tenant",
 			}, nil
 		},
-		SetRateProfileDrvF: func(c *context.Context, profile *utils.RateProfile) error {
+		SetRateProfileDrvF: func(c *context.Context, profile *utils.RateProfile, overWrite bool) error {
 			return nil
 		},
 		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
@@ -1621,7 +1621,7 @@ func TestRatesRemoveRateProfileErrorSetCache(t *testing.T) {
 				Tenant: "tenant",
 			}, nil
 		},
-		SetRateProfileDrvF: func(c *context.Context, profile *utils.RateProfile) error {
+		SetRateProfileDrvF: func(c *context.Context, profile *utils.RateProfile, overWrite bool) error {
 			return nil
 		},
 		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
@@ -1954,7 +1954,7 @@ func TestRatesGetRateProfilesGetProfileErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	dbMock := &engine.DataDBMock{
-		SetRateProfileDrvF: func(*context.Context, *utils.RateProfile) error {
+		SetRateProfileDrvF: func(*context.Context, *utils.RateProfile, bool) error {
 			return nil
 		},
 		RemoveRateProfileDrvF: func(*context.Context, string, string, *[]string) error {
@@ -1996,7 +1996,7 @@ func TestRatesGetRateProfileIDsGetOptsErr(t *testing.T) {
 			}
 			return ratePrf, nil
 		},
-		SetRateProfileDrvF: func(*context.Context, *utils.RateProfile) error {
+		SetRateProfileDrvF: func(*context.Context, *utils.RateProfile, bool) error {
 			return nil
 		},
 		RemoveRateProfileDrvF: func(*context.Context, string, string, *[]string) error {
@@ -2041,7 +2041,7 @@ func TestRatesGetRateProfileIDsPaginateErr(t *testing.T) {
 			}
 			return ratePrf, nil
 		},
-		SetRateProfileDrvF: func(*context.Context, *utils.RateProfile) error {
+		SetRateProfileDrvF: func(*context.Context, *utils.RateProfile, bool) error {
 			return nil
 		},
 		RemoveRateProfileDrvF: func(*context.Context, string, string, *[]string) error {
@@ -2248,7 +2248,7 @@ func TestRatesGetRateProfileRatesCountErrMock(t *testing.T) {
 			}
 			return ratePrf, nil
 		},
-		SetRateProfileDrvF: func(*context.Context, *utils.RateProfile) error {
+		SetRateProfileDrvF: func(*context.Context, *utils.RateProfile, bool) error {
 			return nil
 		},
 		RemoveRateProfileDrvF: func(*context.Context, string, string, *[]string) error {

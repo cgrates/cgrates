@@ -729,10 +729,13 @@ func (rs *RedisStorage) RemoveLoadIDsDrv() (err error) {
 	return rs.Cmd(nil, redisDEL, utils.LoadIDs)
 }
 
-func (rs *RedisStorage) SetRateProfileDrv(ctx *context.Context, rpp *utils.RateProfile) (err error) {
+func (rs *RedisStorage) SetRateProfileDrv(ctx *context.Context, rpp *utils.RateProfile, optOverwrite bool) (err error) {
 	rpMap, err := rpp.AsDataDBMap(rs.ms)
 	if err != nil {
 		return
+	}
+	if optOverwrite {
+		rs.Cmd(nil, redisDEL, utils.RateProfilePrefix+utils.ConcatenatedKey(rpp.Tenant, rpp.ID))
 	}
 	return rs.FlatCmd(nil, redisHSET, utils.RateProfilePrefix+utils.ConcatenatedKey(rpp.Tenant, rpp.ID), rpMap)
 }

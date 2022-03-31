@@ -50,7 +50,9 @@ func TestGetFltrIdxHealthForRateRates(t *testing.T) {
 			},
 		},
 	}
-	dm.SetRateProfileRates(context.Background(), rt, false)
+	if err := dm.SetRateProfile(context.Background(), rt, false, true); err != nil {
+		t.Error(err)
+	}
 	rply, err := GetFltrIdxHealthForRateRates(context.Background(), dm, ltcache.NewCache(50, 60*time.Second, true, nil),
 		ltcache.NewCache(40, 30*time.Second, false, nil),
 		ltcache.NewCache(20, 20*time.Second, true, nil))

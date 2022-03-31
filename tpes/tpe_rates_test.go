@@ -191,7 +191,9 @@ func TestTPEExportItemsRatesIDNotFound(t *testing.T) {
 			},
 		},
 	}
-	tpRt.dm.SetRateProfileRates(context.Background(), rt, false)
+	if err := tpRt.dm.SetRateProfile(context.Background(), rt, false, true); err != nil {
+		t.Error(err)
+	}
 	err := tpRt.exportItems(context.Background(), wrtr, "cgrates.org", []string{"TEST_RATE"})
 	errExpect := "<NOT_FOUND> cannot find RateProfile with id: <TEST_RATE>"
 	if err.Error() != errExpect {
