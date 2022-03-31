@@ -1,21 +1,15 @@
 {
-    // CGRateS Configuration file
-     // this config is used for general_tests/routes_cases_it_test.go
-    
-    
     "general": {
         "log_level": 7,
         "reply_timeout": "50s"
     },
       
-    "data_db": {								// database used to store runtime data (eg: accounts, cdr stats)
-    	"db_type": "redis",						// data_db type: <redis|mongo>
-	    "db_port": 6379, 						// data_db port to reach the database
-	    "db_name": "10", 						// data_db database name to connect to
+    "data_db": {								
+    	"db_type": "redis",						
+	    "db_port": 6379, 						
+	    "db_name": "10" 						
     },
 
- 
-  
     "attributes": {
         "enabled": true,
         "stats_conns": ["*localhost"],
@@ -30,12 +24,12 @@
     },
 
     "cdrs": {
-        "enabled": true,
+        "enabled": true
     },
     
     "resources": {
         "enabled": true,
-        "store_interval": "-1",
+        "store_interval": "-1"
     },
     
     "loaders": [
@@ -45,8 +39,8 @@
             "tenant": "cgrates.org",
             "tp_in_dir": "/usr/share/cgrates/tariffplans/tutroutes",
             "tp_out_dir": "",
-            "lockfile_path": "",
-        },
+            "lockfile_path": ""
+        }
     ],
     
     "stats": {
@@ -57,7 +51,7 @@
     
     "thresholds": {
         "enabled": true,
-        "store_interval": "-1",
+        "store_interval": "-1"
     },
     
     
@@ -81,11 +75,9 @@
         "chargers_conns": ["*internal"]
     },
     
-    
     "admins": {
-        "enabled": true,
+        "enabled": true
     },
-    
     
     "rates": {
         "enabled": true
@@ -97,7 +89,6 @@
         "accounts_conns": ["*localhost"]
     },
     
-    
     "accounts": {
         "enabled": true
     },
@@ -106,8 +97,8 @@
     "filters": {
         "stats_conns": ["*internal"],
         "resources_conns": ["*internal"],
-        "accounts_conns": ["*localhost"],
-    },
+        "accounts_conns": ["*localhost"]
+    }
     
     }
     

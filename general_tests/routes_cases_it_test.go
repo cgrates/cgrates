@@ -69,10 +69,10 @@ var (
 		testV1RtsCasesSortingRoutesReasAllRoutes,
 		testV1RtsCasesRoutesProcessStatsForLoadRtsSorting,
 		testV1RtsCasesRoutesLoadRtsSorting,
-		// testV1RtsCasesSortRoutesHigherCostV2V3,
+		testV1RtsCasesSortRoutesHigherCostV2V3,
 		testV1RtsCasesSortRoutesHigherCostAllocateRes,
-		// testV1RtsCasesSortRoutesHigherCostV1V3,
-		// testV1RtsCasesSortRoutesHigherCostAllRoutes,
+		testV1RtsCasesSortRoutesHigherCostV1V3,
+		testV1RtsCasesSortRoutesHigherCostAllRoutes,
 
 		testV1RtsCaseStopEngine,
 	}
@@ -635,17 +635,17 @@ func testV1RtsCasesSortingRoutesLowestCost(t *testing.T) {
 				{
 					RouteID: "vendor3",
 					SortingData: map[string]interface{}{
-						utils.Cost:         0.125,
-						utils.RatingPlanID: "RP_VENDOR2",
-						utils.Weight:       10.,
+						utils.Cost:          0.125,
+						utils.RateProfileID: "RP_VENDOR2",
+						utils.Weight:        10.,
 					},
 				},
 				{
 					RouteID: "vendor1",
 					SortingData: map[string]interface{}{
-						utils.Cost:         0.25,
-						utils.RatingPlanID: "RP_VENDOR1",
-						utils.Weight:       0.,
+						utils.Cost:          0.25,
+						utils.RateProfileID: "RP_VENDOR1",
+						utils.Weight:        0.,
 					},
 				},
 			},
@@ -681,25 +681,25 @@ func testV1RtsCasesSortingRoutesLowestCostDefaultUsage(t *testing.T) {
 				{
 					RouteID: "vendor3",
 					SortingData: map[string]interface{}{
-						utils.Cost:         0.05,
-						utils.RatingPlanID: "RP_VENDOR2",
-						utils.Weight:       10.,
+						utils.Cost:          0.05,
+						utils.RateProfileID: "RP_VENDOR2",
+						utils.Weight:        10.,
 					},
 				},
 				{
 					RouteID: "vendor1",
 					SortingData: map[string]interface{}{
-						utils.Cost:         0.1,
-						utils.RatingPlanID: "RP_VENDOR1",
-						utils.Weight:       0.,
+						utils.Cost:          0.1,
+						utils.RateProfileID: "RP_VENDOR1",
+						utils.Weight:        0.,
 					},
 				},
 				{
 					RouteID: "vendor4",
 					SortingData: map[string]interface{}{
-						utils.Cost:         0.6,
-						utils.RatingPlanID: "RP_STANDARD",
-						utils.Weight:       30.,
+						utils.Cost:          0.6,
+						utils.RateProfileID: "RP_STANDARD",
+						utils.Weight:        30.,
 					},
 				},
 			},
@@ -788,25 +788,25 @@ func testV1RtsCasesSortingRoutesLowestCostStats(t *testing.T) {
 				{
 					RouteID: "vendor3",
 					SortingData: map[string]interface{}{
-						utils.Cost:         0.125,
-						utils.RatingPlanID: "RP_VENDOR2",
-						utils.Weight:       10.,
+						utils.Cost:          0.125,
+						utils.RateProfileID: "RP_VENDOR2",
+						utils.Weight:        10.,
 					},
 				},
 				{
 					RouteID: "vendor2",
 					SortingData: map[string]interface{}{
-						utils.Cost:         0.125,
-						utils.RatingPlanID: "RP_VENDOR2",
-						utils.Weight:       0.,
+						utils.Cost:          0.125,
+						utils.RateProfileID: "RP_VENDOR2",
+						utils.Weight:        0.,
 					},
 				},
 				{
 					RouteID: "vendor4",
 					SortingData: map[string]interface{}{
-						utils.Cost:         1.5,
-						utils.RatingPlanID: "RP_STANDARD",
-						utils.Weight:       30.,
+						utils.Cost:          1.5,
+						utils.RateProfileID: "RP_STANDARD",
+						utils.Weight:        30.,
 					},
 				},
 			},
@@ -864,33 +864,33 @@ func testV1RtsCasesSortingRoutesLowestCosMatchingAllRoutes(t *testing.T) {
 				{
 					RouteID: "vendor3",
 					SortingData: map[string]interface{}{
-						utils.Cost:         0.125,
-						utils.RatingPlanID: "RP_VENDOR2",
-						utils.Weight:       10.,
+						utils.Cost:          0.125,
+						utils.RateProfileID: "RP_VENDOR2",
+						utils.Weight:        10.,
 					},
 				},
 				{
 					RouteID: "vendor2",
 					SortingData: map[string]interface{}{
-						utils.Cost:         0.125,
-						utils.RatingPlanID: "RP_VENDOR2",
-						utils.Weight:       0.,
+						utils.Cost:          0.125,
+						utils.RateProfileID: "RP_VENDOR2",
+						utils.Weight:        0.,
 					},
 				},
 				{
 					RouteID: "vendor1",
 					SortingData: map[string]interface{}{
-						utils.Cost:         0.25,
-						utils.RatingPlanID: "RP_VENDOR1",
-						utils.Weight:       0.,
+						utils.Cost:          0.25,
+						utils.RateProfileID: "RP_VENDOR1",
+						utils.Weight:        0.,
 					},
 				},
 				{
 					RouteID: "vendor4",
 					SortingData: map[string]interface{}{
-						utils.Cost:         1.5,
-						utils.RatingPlanID: "RP_STANDARD",
-						utils.Weight:       30.,
+						utils.Cost:          1.5,
+						utils.RateProfileID: "RP_STANDARD",
+						utils.Weight:        30.,
 					},
 				},
 			},
@@ -929,25 +929,25 @@ func testV1RtsCasesSortingRoutesLowestCosMaxCost(t *testing.T) {
 				{
 					RouteID: "vendor3",
 					SortingData: map[string]interface{}{
-						utils.Cost:         0.125,
-						utils.RatingPlanID: "RP_VENDOR2",
-						utils.Weight:       10.,
+						utils.Cost:          0.125,
+						utils.RateProfileID: "RP_VENDOR2",
+						utils.Weight:        10.,
 					},
 				},
 				{
 					RouteID: "vendor2",
 					SortingData: map[string]interface{}{
-						utils.Cost:         0.125,
-						utils.RatingPlanID: "RP_VENDOR2",
-						utils.Weight:       0.,
+						utils.Cost:          0.125,
+						utils.RateProfileID: "RP_VENDOR2",
+						utils.Weight:        0.,
 					},
 				},
 				{
 					RouteID: "vendor1",
 					SortingData: map[string]interface{}{
-						utils.Cost:         0.25,
-						utils.RatingPlanID: "RP_VENDOR1",
-						utils.Weight:       0.,
+						utils.Cost:          0.25,
+						utils.RateProfileID: "RP_VENDOR1",
+						utils.Weight:        0.,
 					},
 				},
 			},
@@ -1524,18 +1524,16 @@ func testV1RtsCasesSortRoutesHigherCostV2V3(t *testing.T) {
 				{
 					RouteID: "route2",
 					SortingData: map[string]interface{}{
-						utils.Cost:          0.34235,
-						utils.RatingPlanID:  "RP_VENDOR1",
-						utils.ResourceUsage: 9.,
+						utils.Cost:          0.3416666666666667,
+						utils.RateProfileID: "RP_VENDOR1",
 						utils.Weight:        20.,
 					},
 				},
 				{
 					RouteID: "route3",
 					SortingData: map[string]interface{}{
-						utils.Cost:          0.34235,
-						utils.RatingPlanID:  "RP_VENDOR1",
-						utils.ResourceUsage: 7.,
+						utils.Cost:          0.3416666666666667,
+						utils.RateProfileID: "RP_VENDOR1",
 						utils.Weight:        10.,
 					},
 				},
@@ -1651,18 +1649,16 @@ func testV1RtsCasesSortRoutesHigherCostV1V3(t *testing.T) {
 				{
 					RouteID: "route3",
 					SortingData: map[string]interface{}{
-						utils.Cost:          0.34235,
-						utils.RatingPlanID:  "RP_VENDOR1",
-						utils.ResourceUsage: 1.,
+						utils.Cost:          0.3416666666666667,
+						utils.RateProfileID: "RP_VENDOR1",
 						utils.Weight:        10.,
 					},
 				},
 				{
 					RouteID: "route1",
 					SortingData: map[string]interface{}{
-						utils.Cost:          0.17015,
-						utils.RatingPlanID:  "RP_VENDOR2",
-						utils.ResourceUsage: 1.,
+						utils.Cost:          0.1708333333333333,
+						utils.RateProfileID: "RP_VENDOR2",
 						utils.Weight:        20.,
 					},
 				},
@@ -1719,27 +1715,24 @@ func testV1RtsCasesSortRoutesHigherCostAllRoutes(t *testing.T) {
 				{
 					RouteID: "route2",
 					SortingData: map[string]interface{}{
-						utils.Cost:          0.34235,
-						utils.RatingPlanID:  "RP_VENDOR1",
-						utils.ResourceUsage: 9.,
+						utils.Cost:          0.3416666666666667,
+						utils.RateProfileID: "RP_VENDOR1",
 						utils.Weight:        20.,
 					},
 				},
 				{
 					RouteID: "route3",
 					SortingData: map[string]interface{}{
-						utils.Cost:          0.34235,
-						utils.RatingPlanID:  "RP_VENDOR1",
-						utils.ResourceUsage: 1.,
+						utils.Cost:          0.3416666666666667,
+						utils.RateProfileID: "RP_VENDOR1",
 						utils.Weight:        10.,
 					},
 				},
 				{
 					RouteID: "route1",
 					SortingData: map[string]interface{}{
-						utils.Cost:          0.17015,
-						utils.RatingPlanID:  "RP_VENDOR2",
-						utils.ResourceUsage: 1.,
+						utils.Cost:          0.1708333333333333,
+						utils.RateProfileID: "RP_VENDOR2",
 						utils.Weight:        20.,
 					},
 				},

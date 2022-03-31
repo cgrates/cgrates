@@ -483,7 +483,6 @@ const (
 	Categories               = "Categories"
 	Blocker                  = "Blocker"
 	Params                   = "Params"
-	RatingPlanID             = "RatingPlanID"
 	StartTime                = "StartTime"
 	AccountSummary           = "AccountSummary"
 	RatingFilters            = "RatingFilters"
@@ -2281,9 +2280,6 @@ const (
 	OptsRatesStartTime     = "*rtsStartTime"
 	OptsRatesUsage         = "*rtsUsage"
 	OptsRatesIntervalStart = "*rtsIntervalStart"
-	OptsRatesLimit         = "*rtsLimit"
-	OptsRatesOffset        = "*rtsOffset"
-	OptsRatesMaxItems      = "*rtsMaxItems"
 
 	// Resources
 	OptsResourcesUnits    = "*rsUnits"

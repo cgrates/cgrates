@@ -341,7 +341,7 @@ package general_tests
 // 			utils.MetaPause: {
 // 				utils.DestinationID:         "",
 // 				utils.DestinationPrefixName: "",
-// 				utils.RatingPlanID:          utils.MetaPause,
+// 				utils.RateProfileID:          utils.MetaPause,
 // 				utils.Subject:               "",
 // 			},
 // 		},
@@ -493,13 +493,13 @@ package general_tests
 // 			utils.MetaPause: {
 // 				utils.DestinationID:         "",
 // 				utils.DestinationPrefixName: "",
-// 				utils.RatingPlanID:          utils.MetaPause,
+// 				utils.RateProfileID:          utils.MetaPause,
 // 				utils.Subject:               "",
 // 			},
 // 			"00eaefb": {
 // 				utils.DestinationID:         "DST_1002",
 // 				utils.DestinationPrefixName: "1002",
-// 				utils.RatingPlanID:          "RP_1001",
+// 				utils.RateProfileID:          "RP_1001",
 // 				utils.Subject:               "*out:cgrates.org:call:1001",
 // 			},
 // 		},
@@ -681,13 +681,13 @@ package general_tests
 // 			utils.MetaPause: {
 // 				utils.DestinationID:         "",
 // 				utils.DestinationPrefixName: "",
-// 				utils.RatingPlanID:          utils.MetaPause,
+// 				utils.RateProfileID:          utils.MetaPause,
 // 				utils.Subject:               "",
 // 			},
 // 			"00eaefb": {
 // 				utils.DestinationID:         "DST_1002",
 // 				utils.DestinationPrefixName: "1002",
-// 				utils.RatingPlanID:          "RP_1001",
+// 				utils.RateProfileID:          "RP_1001",
 // 				utils.Subject:               "*out:cgrates.org:call:1001",
 // 			},
 // 		},
@@ -877,13 +877,13 @@ package general_tests
 // 			utils.MetaPause: {
 // 				utils.DestinationID:         "",
 // 				utils.DestinationPrefixName: "",
-// 				utils.RatingPlanID:          utils.MetaPause,
+// 				utils.RateProfileID:          utils.MetaPause,
 // 				utils.Subject:               "",
 // 			},
 // 			"00eaefb": {
 // 				utils.DestinationID:         "DST_1002",
 // 				utils.DestinationPrefixName: "1002",
-// 				utils.RatingPlanID:          "RP_1001",
+// 				utils.RateProfileID:          "RP_1001",
 // 				utils.Subject:               "*out:cgrates.org:call:1001",
 // 			},
 // 		},

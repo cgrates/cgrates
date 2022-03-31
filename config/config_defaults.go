@@ -1564,28 +1564,7 @@ const CGRATES_CFG_JSON = `
 			// 	"FilterIDs": [],
 			// 	"Value": false,
 			// },
-		],		
-		// "*limit": [						
-		// 	{
-		// 		"Tenant": "*any",
-		// 		"FilterIDs": [],
-		// 		"Value": 1,
-		// 	},
-		// ],
-		// "*offset": [						
-		// 	{
-		// 		"Tenant": "*any",
-		// 		"FilterIDs": [],
-		// 		"Value": 1,
-		// 	},
-		// ],
-		// "*maxItems": [						
-		// 	{
-		// 		"Tenant": "*any",
-		// 		"FilterIDs": [],
-		// 		"Value": 1,
-		// 	},
-		// ],							
+		],									
 	},
 },
 
