@@ -227,7 +227,7 @@ func TestRemoveFilterIndexes(t *testing.T) {
 	if reply != utils.OK {
 		t.Error("Expected OK")
 	}
-	if args.ItemType != utils.DispatcherFilterIndexes {
+	if args.ItemType != utils.CacheDispatcherFilterIndexes {
 		t.Errorf("Expected %v\n but received %v", utils.DispatcherFilterIndexes, args.ItemType)
 	}
 
@@ -246,7 +246,7 @@ func TestRemoveFilterIndexes(t *testing.T) {
 	if reply != utils.OK {
 		t.Error("Expected OK")
 	}
-	if args.ItemType != utils.AttributeFilterIndexes {
+	if args.ItemType != utils.CacheAttributeFilterIndexes {
 		t.Errorf("Expected %v\n but received %v", utils.AttributeFilterIndexes, args.ItemType)
 	}
 }
