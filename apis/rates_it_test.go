@@ -77,6 +77,12 @@ var (
 		testRateProfileUpdateProfileRatesOverwrite,
 		testRateProfilesForEventMatchingEvents,
 		testRateProfileRatesForEventMatchingEvents,
+
+		// pagination tests
+		testRateSPaginateSetRateProfile,
+		testRateSPaginateGetRateProfile1,
+		testRateSPaginateGetRateProfile2,
+		testRateSPaginateGetRateProfile3,
 		testRateSKillEngine,
 	}
 )
@@ -2372,6 +2378,316 @@ func testRateProfileRatesForEventMatchingEvents(t *testing.T) {
 		})
 		if !reflect.DeepEqual(expected, rateIDs) {
 			t.Errorf("Expected %+v, received %+v", expected, rateIDs)
+		}
+	}
+}
+
+func testRateSPaginateSetRateProfile(t *testing.T) {
+	ratePrf := &utils.APIRateProfile{
+		RateProfile: &utils.RateProfile{
+			ID:        "RATE_PROFILE",
+			Tenant:    "cgrates.org",
+			FilterIDs: []string{"*string:~*req.Account:1001"},
+			Rates: map[string]*utils.Rate{
+				"RateA1": {
+					ID: "RateA1",
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 35,
+						},
+					},
+				},
+				"RateA2": {
+					ID: "RateA2",
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 5,
+						},
+					},
+				},
+				"RateA3": {
+					ID: "RateA3",
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 40,
+						},
+					},
+				},
+				"RateB5": {
+					ID: "RateB5",
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 10,
+						},
+					},
+				},
+				"RateB1": {
+					ID: "RateB1",
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 25,
+						},
+					},
+				},
+				"RateB3": {
+					ID: "RateB3",
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 15,
+						},
+					},
+				},
+				"RateB2": {
+					ID: "RateB2",
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 5,
+						},
+					},
+				},
+				"RateB6": {
+					ID: "RateB6",
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 30,
+						},
+					},
+				},
+				"RateB4": {
+					ID: "RateB4",
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 20,
+						},
+					},
+				},
+			},
+		},
+	}
+
+	var reply string
+	if err := rateSRPC.Call(context.Background(), utils.AdminSv1SetRateProfile,
+		ratePrf, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned: ", reply)
+	}
+}
+
+func testRateSPaginateGetRateProfile1(t *testing.T) {
+	args := &utils.TenantIDWithAPIOpts{
+		TenantID: &utils.TenantID{
+			ID: "RATE_PROFILE",
+		},
+		APIOpts: map[string]interface{}{
+			utils.PageLimitOpt:   4,
+			utils.PageOffsetOpt:  1,
+			utils.ItemsPrefixOpt: "RateB",
+		},
+	}
+
+	expected := utils.RateProfile{
+		ID:        "RATE_PROFILE",
+		Tenant:    "cgrates.org",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		Rates: map[string]*utils.Rate{
+			"RateB2": {
+				ID: "RateB2",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 5,
+					},
+				},
+			},
+			"RateB3": {
+				ID: "RateB3",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 15,
+					},
+				},
+			},
+			"RateB4": {
+				ID: "RateB4",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 20,
+					},
+				},
+			},
+			"RateB5": {
+				ID: "RateB5",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 10,
+					},
+				},
+			},
+		},
+	}
+
+	var reply *utils.RateProfile
+	if err := rateSRPC.Call(context.Background(), utils.AdminSv1GetRateProfile,
+		args, &reply); err != nil {
+		t.Error(err)
+	} else {
+		for rateID := range expected.Rates {
+			if _, ok := reply.Rates[rateID]; !ok {
+				t.Errorf("expected: <%+v>, \nreceived: <%+v>",
+					utils.ToJSON(expected), utils.ToJSON(reply))
+				t.Fatalf("rate <%+v> could not be found in reply", rateID)
+			}
+		}
+	}
+}
+
+func testRateSPaginateGetRateProfile2(t *testing.T) {
+	args := &utils.TenantIDWithAPIOpts{
+		TenantID: &utils.TenantID{
+			ID: "RATE_PROFILE",
+		},
+		APIOpts: map[string]interface{}{
+			utils.PageLimitOpt:   4,
+			utils.PageOffsetOpt:  1,
+			utils.ItemsPrefixOpt: "RateA",
+		},
+	}
+
+	expected := utils.RateProfile{
+		ID:        "RATE_PROFILE",
+		Tenant:    "cgrates.org",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		Rates: map[string]*utils.Rate{
+			"RateA2": {
+				ID: "RateA2",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 5,
+					},
+				},
+			},
+			"RateA3": {
+				ID: "RateA3",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 40,
+					},
+				},
+			},
+		},
+	}
+
+	var reply *utils.RateProfile
+	if err := rateSRPC.Call(context.Background(), utils.AdminSv1GetRateProfile,
+		args, &reply); err != nil {
+		t.Error(err)
+	} else if len(reply.Rates) != len(expected.Rates) {
+		t.Errorf("expected: %+v Rates, \nreceived: %+v Rates",
+			len(expected.Rates), len(reply.Rates))
+	} else {
+		for rateID := range expected.Rates {
+			if _, ok := reply.Rates[rateID]; !ok {
+				t.Errorf("expected: <%+v>, \nreceived: <%+v>",
+					utils.ToJSON(expected), utils.ToJSON(reply))
+				t.Fatalf("rate <%+v> could not be found in reply", rateID)
+			}
+		}
+	}
+}
+
+func testRateSPaginateGetRateProfile3(t *testing.T) {
+	args := &utils.TenantIDWithAPIOpts{
+		TenantID: &utils.TenantID{
+			ID: "RATE_PROFILE",
+		},
+		APIOpts: map[string]interface{}{
+			utils.PageOffsetOpt: 1,
+		},
+	}
+
+	expected := utils.RateProfile{
+		ID:        "RATE_PROFILE",
+		Tenant:    "cgrates.org",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		Rates: map[string]*utils.Rate{
+			"RateA2": {
+				ID: "RateA2",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 5,
+					},
+				},
+			},
+			"RateA3": {
+				ID: "RateA3",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 40,
+					},
+				},
+			},
+			"RateB5": {
+				ID: "RateB5",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 10,
+					},
+				},
+			},
+			"RateB1": {
+				ID: "RateB1",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 25,
+					},
+				},
+			},
+			"RateB3": {
+				ID: "RateB3",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 15,
+					},
+				},
+			},
+			"RateB2": {
+				ID: "RateB2",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 5,
+					},
+				},
+			},
+			"RateB6": {
+				ID: "RateB6",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 30,
+					},
+				},
+			},
+			"RateB4": {
+				ID: "RateB4",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 20,
+					},
+				},
+			},
+		},
+	}
+
+	var reply *utils.RateProfile
+	if err := rateSRPC.Call(context.Background(), utils.AdminSv1GetRateProfile,
+		args, &reply); err != nil {
+		t.Error(err)
+	} else {
+		for rateID := range expected.Rates {
+			if _, ok := reply.Rates[rateID]; !ok {
+				t.Errorf("expected: <%+v>, \nreceived: <%+v>",
+					utils.ToJSON(expected), utils.ToJSON(reply))
+				t.Fatalf("rate <%+v> could not be found in reply", rateID)
+			}
 		}
 	}
 }

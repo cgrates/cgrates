@@ -2510,6 +2510,7 @@ const (
 	PageLimitOpt    = "*pageLimit"
 	PageOffsetOpt   = "*pageOffset"
 	PageMaxItemsOpt = "*pageMaxItems"
+	ItemsPrefixOpt  = "*itemsPrefix"
 )
 
 // Analyzers constants
