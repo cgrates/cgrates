@@ -20,6 +20,7 @@ package apis
 
 import (
 	"sort"
+	"strings"
 	"time"
 
 	"github.com/cgrates/birpc/context"
@@ -45,11 +46,12 @@ func (admS *AdminSv1) GetRateProfile(ctx *context.Context, arg *utils.TenantIDWi
 		}
 		return
 	}
-	rateIDs := make([]string, len(rPrf.Rates))
-	i := 0
+	rateIDs := make([]string, 0, len(rPrf.Rates))
+	prefix := utils.IfaceAsString(arg.APIOpts[utils.ItemsPrefixOpt])
 	for rateID := range rPrf.Rates {
-		rateIDs[i] = rateID
-		i++
+		if strings.HasPrefix(rateID, prefix) {
+			rateIDs = append(rateIDs, rateID)
+		}
 	}
 	sort.Strings(rateIDs)
 	var limit, offset, maxItems int
@@ -64,8 +66,17 @@ func (admS *AdminSv1) GetRateProfile(ctx *context.Context, arg *utils.TenantIDWi
 	for _, rateID := range rateIDs {
 		paginatedRates[rateID] = rPrf.Rates[rateID]
 	}
-	rPrf.Rates = paginatedRates
-	*reply = *rPrf
+	paginatedRatePrf := &utils.RateProfile{
+		Tenant:          rPrf.Tenant,
+		ID:              rPrf.ID,
+		FilterIDs:       rPrf.FilterIDs,
+		Weights:         rPrf.Weights,
+		MinCost:         rPrf.MinCost,
+		MaxCost:         rPrf.MaxCost,
+		MaxCostStrategy: rPrf.MaxCostStrategy,
+	}
+	paginatedRatePrf.Rates = paginatedRates
+	*reply = *paginatedRatePrf
 	return
 }
 
