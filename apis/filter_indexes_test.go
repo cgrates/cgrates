@@ -426,3 +426,643 @@ func TestComputeFilterIndexes(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestComputeFilterIndexIDs(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	connMgr := engine.NewConnManager(cfg)
+	cfg.AdminSCfg().CachesConns = []string{"*internal"}
+	adms := &AdminSv1{
+		cfg:     cfg,
+		dm:      dm,
+		connMgr: connMgr,
+		ping:    struct{}{},
+	}
+
+	var reply string
+
+	//ThresholdProfile
+	args := &utils.ArgsComputeFilterIndexIDs{
+		Tenant: "cgrates.org",
+		APIOpts: map[string]interface{}{
+			utils.MetaCache: utils.MetaNone,
+		},
+		ThresholdIDs: []string{""},
+	}
+
+	if err := adms.ComputeFilterIndexIDs(context.Background(), args, &reply); err != nil {
+		t.Error(err)
+	}
+
+	//StatQueueProfile
+	args = &utils.ArgsComputeFilterIndexIDs{
+		Tenant: "cgrates.org",
+		APIOpts: map[string]interface{}{
+			utils.MetaCache: utils.MetaNone,
+		},
+		StatIDs: []string{""},
+	}
+
+	if err := adms.ComputeFilterIndexIDs(context.Background(), args, &reply); err != nil {
+		t.Error(err)
+	}
+
+	//ResourceProfile
+	args = &utils.ArgsComputeFilterIndexIDs{
+		Tenant: "cgrates.org",
+		APIOpts: map[string]interface{}{
+			utils.MetaCache: utils.MetaNone,
+		},
+		ResourceIDs: []string{""},
+	}
+
+	if err := adms.ComputeFilterIndexIDs(context.Background(), args, &reply); err != nil {
+		t.Error(err)
+	}
+
+	//RouteProfile
+	args = &utils.ArgsComputeFilterIndexIDs{
+		Tenant: "cgrates.org",
+		APIOpts: map[string]interface{}{
+			utils.MetaCache: utils.MetaNone,
+		},
+		RouteIDs: []string{""},
+	}
+
+	if err := adms.ComputeFilterIndexIDs(context.Background(), args, &reply); err != nil {
+		t.Error(err)
+	}
+
+	//AttributeProfile
+	args = &utils.ArgsComputeFilterIndexIDs{
+		Tenant: "cgrates.org",
+		APIOpts: map[string]interface{}{
+			utils.MetaCache: utils.MetaNone,
+		},
+		AttributeIDs: []string{""},
+	}
+
+	if err := adms.ComputeFilterIndexIDs(context.Background(), args, &reply); err != nil {
+		t.Error(err)
+	}
+
+	//ChargerProfile
+	args = &utils.ArgsComputeFilterIndexIDs{
+		Tenant: "cgrates.org",
+		APIOpts: map[string]interface{}{
+			utils.MetaCache: utils.MetaNone,
+		},
+		ChargerIDs: []string{""},
+	}
+
+	if err := adms.ComputeFilterIndexIDs(context.Background(), args, &reply); err != nil {
+		t.Error(err)
+	}
+
+	//Account
+	args = &utils.ArgsComputeFilterIndexIDs{
+		Tenant: "cgrates.org",
+		APIOpts: map[string]interface{}{
+			utils.MetaCache: utils.MetaNone,
+		},
+		AccountIDs: []string{""},
+	}
+
+	if err := adms.ComputeFilterIndexIDs(context.Background(), args, &reply); err != nil {
+		t.Error(err)
+	}
+
+	//ActionProfile
+	args = &utils.ArgsComputeFilterIndexIDs{
+		Tenant: "cgrates.org",
+		APIOpts: map[string]interface{}{
+			utils.MetaCache: utils.MetaNone,
+		},
+		ActionProfileIDs: []string{""},
+	}
+
+	if err := adms.ComputeFilterIndexIDs(context.Background(), args, &reply); err != nil {
+		t.Error(err)
+	}
+
+	//RateProfile
+	args = &utils.ArgsComputeFilterIndexIDs{
+		Tenant: "cgrates.org",
+		APIOpts: map[string]interface{}{
+			utils.MetaCache: utils.MetaNone,
+		},
+		ActionProfileIDs: []string{""},
+	}
+
+	if err := adms.ComputeFilterIndexIDs(context.Background(), args, &reply); err != nil {
+		t.Error(err)
+	}
+
+	//DispatcherProfile
+	args = &utils.ArgsComputeFilterIndexIDs{
+		Tenant: "cgrates.org",
+		APIOpts: map[string]interface{}{
+			utils.MetaCache: utils.MetaNone,
+		},
+		DispatcherIDs: []string{""},
+	}
+
+	if err := adms.ComputeFilterIndexIDs(context.Background(), args, &reply); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestGetFilterIndexes(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	connMgr := engine.NewConnManager(cfg)
+	cfg.AdminSCfg().CachesConns = []string{"*internal"}
+	adms := &AdminSv1{
+		cfg:     cfg,
+		dm:      dm,
+		connMgr: connMgr,
+		ping:    struct{}{},
+	}
+
+	var reply []string
+
+	//Thresholds
+	args := &AttrGetFilterIndexes{
+		Tenant:   "cgrates.org",
+		Context:  "cgrates",
+		ItemType: utils.MetaThresholds,
+		APIOpts: map[string]interface{}{
+			utils.MetaCache: utils.MetaNone,
+		},
+	}
+
+	if err := adms.GetFilterIndexes(context.Background(), args, &reply); err != utils.ErrNotFound {
+		t.Errorf("Expected %v\n but received %v", utils.ErrNotFound, err)
+	}
+
+	//Routes
+	args = &AttrGetFilterIndexes{
+		Tenant:   "cgrates.org",
+		Context:  "cgrates",
+		ItemType: utils.MetaRoutes,
+		APIOpts: map[string]interface{}{
+			utils.MetaCache: utils.MetaNone,
+		},
+	}
+
+	if err := adms.GetFilterIndexes(context.Background(), args, &reply); err != utils.ErrNotFound {
+		t.Errorf("Expected %v\n but received %v", utils.ErrNotFound, err)
+	}
+
+	//Stats
+	args = &AttrGetFilterIndexes{
+		Tenant:   "cgrates.org",
+		Context:  "cgrates",
+		ItemType: utils.MetaStats,
+		APIOpts: map[string]interface{}{
+			utils.MetaCache: utils.MetaNone,
+		},
+	}
+
+	if err := adms.GetFilterIndexes(context.Background(), args, &reply); err != utils.ErrNotFound {
+		t.Errorf("Expected %v\n but received %v", utils.ErrNotFound, err)
+	}
+
+	//Resources
+	args = &AttrGetFilterIndexes{
+		Tenant:   "cgrates.org",
+		Context:  "cgrates",
+		ItemType: utils.MetaResources,
+		APIOpts: map[string]interface{}{
+			utils.MetaCache: utils.MetaNone,
+		},
+	}
+
+	if err := adms.GetFilterIndexes(context.Background(), args, &reply); err != utils.ErrNotFound {
+		t.Errorf("Expected %v\n but received %v", utils.ErrNotFound, err)
+	}
+
+	//Chargers
+	args = &AttrGetFilterIndexes{
+		Tenant:   "cgrates.org",
+		Context:  "cgrates",
+		ItemType: utils.MetaChargers,
+		APIOpts: map[string]interface{}{
+			utils.MetaCache: utils.MetaNone,
+		},
+	}
+
+	if err := adms.GetFilterIndexes(context.Background(), args, &reply); err != utils.ErrNotFound {
+		t.Errorf("Expected %v\n but received %v", utils.ErrNotFound, err)
+	}
+
+	//Accounts
+	args = &AttrGetFilterIndexes{
+		Tenant:   "cgrates.org",
+		Context:  "cgrates",
+		ItemType: utils.MetaAccounts,
+		APIOpts: map[string]interface{}{
+			utils.MetaCache: utils.MetaNone,
+		},
+	}
+
+	if err := adms.GetFilterIndexes(context.Background(), args, &reply); err != utils.ErrNotFound {
+		t.Errorf("Expected %v\n but received %v", utils.ErrNotFound, err)
+	}
+
+	//Actions
+	args = &AttrGetFilterIndexes{
+		Tenant:   "cgrates.org",
+		Context:  "cgrates",
+		ItemType: utils.MetaActions,
+		APIOpts: map[string]interface{}{
+			utils.MetaCache: utils.MetaNone,
+		},
+	}
+
+	if err := adms.GetFilterIndexes(context.Background(), args, &reply); err != utils.ErrNotFound {
+		t.Errorf("Expected %v\n but received %v", utils.ErrNotFound, err)
+	}
+
+	//RateProfile
+	args = &AttrGetFilterIndexes{
+		Tenant:   "cgrates.org",
+		Context:  "cgrates",
+		ItemType: utils.MetaRateProfiles,
+		APIOpts: map[string]interface{}{
+			utils.MetaCache: utils.MetaNone,
+		},
+	}
+
+	if err := adms.GetFilterIndexes(context.Background(), args, &reply); err != utils.ErrNotFound {
+		t.Errorf("Expected %v\n but received %v", utils.ErrNotFound, err)
+	}
+
+	//RateProfileRates
+	args = &AttrGetFilterIndexes{
+		Tenant:   "cgrates.org",
+		Context:  "cgrates",
+		ItemType: utils.MetaRateProfileRates,
+		APIOpts: map[string]interface{}{
+			utils.MetaCache: utils.MetaNone,
+		},
+	}
+
+	if err := adms.GetFilterIndexes(context.Background(), args, &reply); err != utils.ErrNotFound {
+		t.Errorf("Expected %v\n but received %v", utils.ErrNotFound, err)
+	}
+
+	//Dispatchers
+	args = &AttrGetFilterIndexes{
+		Tenant:   "cgrates.org",
+		Context:  "cgrates",
+		ItemType: utils.MetaDispatchers,
+		APIOpts: map[string]interface{}{
+			utils.MetaCache: utils.MetaNone,
+		},
+	}
+
+	if err := adms.GetFilterIndexes(context.Background(), args, &reply); err != utils.ErrNotFound {
+		t.Errorf("Expected %v\n but received %v", utils.ErrNotFound, err)
+	}
+
+	//Attributes
+	args = &AttrGetFilterIndexes{
+		Tenant:   "cgrates.org",
+		Context:  "cgrates",
+		ItemType: utils.MetaAttributes,
+		APIOpts: map[string]interface{}{
+			utils.MetaCache: utils.MetaNone,
+		},
+	}
+
+	if err := adms.GetFilterIndexes(context.Background(), args, &reply); err != utils.ErrNotFound {
+		t.Errorf("Expected %v\n but received %v", utils.ErrNotFound, err)
+	}
+}
+
+func TestGetReverseFilterHealth(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	connMgr := engine.NewConnManager(cfg)
+	cfg.AdminSCfg().CachesConns = []string{"*internal"}
+	adms := &AdminSv1{
+		cfg:     cfg,
+		dm:      dm,
+		connMgr: connMgr,
+		ping:    struct{}{},
+	}
+
+	var reply map[string]*engine.ReverseFilterIHReply
+
+	args := &engine.IndexHealthArgs{
+		Tenant: "cgrates.org",
+		APIOpts: map[string]interface{}{
+			utils.MetaCache: utils.MetaNone,
+		},
+	}
+
+	if err := adms.GetReverseFilterHealth(context.Background(), args, &reply); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestGetThresholdsIndexesHealth(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	connMgr := engine.NewConnManager(cfg)
+	cfg.AdminSCfg().CachesConns = []string{"*internal"}
+	adms := &AdminSv1{
+		cfg:     cfg,
+		dm:      dm,
+		connMgr: connMgr,
+		ping:    struct{}{},
+	}
+
+	var reply engine.FilterIHReply
+
+	args := &engine.IndexHealthArgs{
+		Tenant: "cgrates.org",
+		APIOpts: map[string]interface{}{
+			utils.MetaCache: utils.MetaNone,
+		},
+	}
+
+	if err := adms.GetThresholdsIndexesHealth(context.Background(), args, &reply); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestGetResourcesIndexesHealth(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	connMgr := engine.NewConnManager(cfg)
+	cfg.AdminSCfg().CachesConns = []string{"*internal"}
+	adms := &AdminSv1{
+		cfg:     cfg,
+		dm:      dm,
+		connMgr: connMgr,
+		ping:    struct{}{},
+	}
+
+	var reply engine.FilterIHReply
+
+	args := &engine.IndexHealthArgs{
+		Tenant: "cgrates.org",
+		APIOpts: map[string]interface{}{
+			utils.MetaCache: utils.MetaNone,
+		},
+	}
+
+	if err := adms.GetResourcesIndexesHealth(context.Background(), args, &reply); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestGetStatsIndexesHealth(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	connMgr := engine.NewConnManager(cfg)
+	cfg.AdminSCfg().CachesConns = []string{"*internal"}
+	adms := &AdminSv1{
+		cfg:     cfg,
+		dm:      dm,
+		connMgr: connMgr,
+		ping:    struct{}{},
+	}
+
+	var reply engine.FilterIHReply
+
+	args := &engine.IndexHealthArgs{
+		Tenant: "cgrates.org",
+		APIOpts: map[string]interface{}{
+			utils.MetaCache: utils.MetaNone,
+		},
+	}
+
+	if err := adms.GetStatsIndexesHealth(context.Background(), args, &reply); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestGetRoutesIndexesHealth(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	connMgr := engine.NewConnManager(cfg)
+	cfg.AdminSCfg().CachesConns = []string{"*internal"}
+	adms := &AdminSv1{
+		cfg:     cfg,
+		dm:      dm,
+		connMgr: connMgr,
+		ping:    struct{}{},
+	}
+
+	var reply engine.FilterIHReply
+
+	args := &engine.IndexHealthArgs{
+		Tenant: "cgrates.org",
+		APIOpts: map[string]interface{}{
+			utils.MetaCache: utils.MetaNone,
+		},
+	}
+
+	if err := adms.GetRoutesIndexesHealth(context.Background(), args, &reply); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestGetAttributesIndexHealth(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	connMgr := engine.NewConnManager(cfg)
+	cfg.AdminSCfg().CachesConns = []string{"*internal"}
+	adms := &AdminSv1{
+		cfg:     cfg,
+		dm:      dm,
+		connMgr: connMgr,
+		ping:    struct{}{},
+	}
+
+	var reply engine.FilterIHReply
+
+	args := &engine.IndexHealthArgs{
+		Tenant: "cgrates.org",
+		APIOpts: map[string]interface{}{
+			utils.MetaCache: utils.MetaNone,
+		},
+	}
+
+	if err := adms.GetAttributesIndexesHealth(context.Background(), args, &reply); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestGetChargersIndexHealth(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	connMgr := engine.NewConnManager(cfg)
+	cfg.AdminSCfg().CachesConns = []string{"*internal"}
+	adms := &AdminSv1{
+		cfg:     cfg,
+		dm:      dm,
+		connMgr: connMgr,
+		ping:    struct{}{},
+	}
+
+	var reply engine.FilterIHReply
+
+	args := &engine.IndexHealthArgs{
+		Tenant: "cgrates.org",
+		APIOpts: map[string]interface{}{
+			utils.MetaCache: utils.MetaNone,
+		},
+	}
+
+	if err := adms.GetChargersIndexesHealth(context.Background(), args, &reply); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestGetDispatchersIndexesHealth(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	connMgr := engine.NewConnManager(cfg)
+	cfg.AdminSCfg().CachesConns = []string{"*internal"}
+	adms := &AdminSv1{
+		cfg:     cfg,
+		dm:      dm,
+		connMgr: connMgr,
+		ping:    struct{}{},
+	}
+
+	var reply engine.FilterIHReply
+
+	args := &engine.IndexHealthArgs{
+		Tenant: "cgrates.org",
+		APIOpts: map[string]interface{}{
+			utils.MetaCache: utils.MetaNone,
+		},
+	}
+
+	if err := adms.GetDispatchersIndexesHealth(context.Background(), args, &reply); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestGetRateProfilesIndexesHealth(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	connMgr := engine.NewConnManager(cfg)
+	cfg.AdminSCfg().CachesConns = []string{"*internal"}
+	adms := &AdminSv1{
+		cfg:     cfg,
+		dm:      dm,
+		connMgr: connMgr,
+		ping:    struct{}{},
+	}
+
+	var reply engine.FilterIHReply
+
+	args := &engine.IndexHealthArgs{
+		Tenant: "cgrates.org",
+		APIOpts: map[string]interface{}{
+			utils.MetaCache: utils.MetaNone,
+		},
+	}
+
+	if err := adms.GetRateProfilesIndexesHealth(context.Background(), args, &reply); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestGetActionsIndexesHealth(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	connMgr := engine.NewConnManager(cfg)
+	cfg.AdminSCfg().CachesConns = []string{"*internal"}
+	adms := &AdminSv1{
+		cfg:     cfg,
+		dm:      dm,
+		connMgr: connMgr,
+		ping:    struct{}{},
+	}
+
+	var reply engine.FilterIHReply
+
+	args := &engine.IndexHealthArgs{
+		Tenant: "cgrates.org",
+		APIOpts: map[string]interface{}{
+			utils.MetaCache: utils.MetaNone,
+		},
+	}
+
+	if err := adms.GetActionsIndexesHealth(context.Background(), args, &reply); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestGetAccountsIndexesHealth(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	connMgr := engine.NewConnManager(cfg)
+	cfg.AdminSCfg().CachesConns = []string{"*internal"}
+	adms := &AdminSv1{
+		cfg:     cfg,
+		dm:      dm,
+		connMgr: connMgr,
+		ping:    struct{}{},
+	}
+
+	var reply engine.FilterIHReply
+
+	args := &engine.IndexHealthArgs{
+		Tenant: "cgrates.org",
+		APIOpts: map[string]interface{}{
+			utils.MetaCache: utils.MetaNone,
+		},
+	}
+
+	if err := adms.GetAccountsIndexesHealth(context.Background(), args, &reply); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestGetRateRatesIndexesHealth(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	connMgr := engine.NewConnManager(cfg)
+	cfg.AdminSCfg().CachesConns = []string{"*internal"}
+	adms := &AdminSv1{
+		cfg:     cfg,
+		dm:      dm,
+		connMgr: connMgr,
+		ping:    struct{}{},
+	}
+
+	var reply engine.FilterIHReply
+
+	args := &engine.IndexHealthArgs{
+		Tenant: "cgrates.org",
+		APIOpts: map[string]interface{}{
+			utils.MetaCache: utils.MetaNone,
+		},
+	}
+
+	if err := adms.GetRateRatesIndexesHealth(context.Background(), args, &reply); err != nil {
+		t.Error(err)
+	}
+}
