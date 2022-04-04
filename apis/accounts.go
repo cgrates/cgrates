@@ -224,5 +224,5 @@ func (aSv1 *AccountSv1) ActionRemoveBalances(ctx *context.Context, args *utils.A
 
 // GetAccount returns an Account
 func (aSv1 *AccountSv1) GetAccount(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *utils.Account) error {
-	return aSv1.aS.V1GetAccount(ctx, arg, reply)
+	return nil
 }

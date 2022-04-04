@@ -1289,7 +1289,6 @@ const (
 	AccountSv1RefundCharges       = "AccountSv1.RefundCharges"
 	AccountSv1ActionSetBalances   = "AccountSv1.ActionSetBalances"
 	AccountSv1ActionRemoveBalance = "AccountSv1.ActionRemoveBalance"
-	AccountSv1GetAccount          = "AccountSv1.GetAccount"
 )
 
 const (

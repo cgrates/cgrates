@@ -129,11 +129,11 @@ func (dS *DispatcherService) AccountSv1GetAccount(ctx *context.Context, args *ut
 		opts = args.APIOpts
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.AccountSv1GetAccount, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
+		if err = dS.authorize(ctx, utils.AdminSv1GetAccount, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
-	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaAccounts, utils.AccountSv1GetAccount, args, reply)
+	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaAccounts, utils.AdminSv1GetAccount, args, reply)
 }
 func (dS *DispatcherService) AccountSv1MaxAbstracts(ctx *context.Context, args *utils.CGREvent, reply *utils.EventCharges) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
