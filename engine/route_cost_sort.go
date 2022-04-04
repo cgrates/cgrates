@@ -70,9 +70,9 @@ func populateCostForRoutes(ctx *context.Context, cfg *config.CGRConfig,
 			}
 			if acntCost.Concretes != nil {
 				cost = acntCost.Concretes
-			}
-			if costFloat64, _ := cost.Float64(); extraOpts.maxCost != 0 && costFloat64 > extraOpts.maxCost {
-				continue
+				if costFloat64, _ := cost.Float64(); extraOpts.maxCost != 0 && costFloat64 > extraOpts.maxCost {
+					continue
+				}
 			}
 			acntIDs := make([]string, 0, len(acntCost.Accounts))
 			for acntID := range acntCost.Accounts {
