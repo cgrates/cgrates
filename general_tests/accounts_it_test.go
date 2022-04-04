@@ -326,7 +326,7 @@ func testV1AccSendToThreshold(t *testing.T) {
 			},
 		},
 	}
-	if err := accRpc.Call(context.Background(), utils.AccountSv1ActionSetBalance, attrs, &reply); err != nil {
+	if err := accRpc.Call(context.Background(), utils.AccountSv1ActionSetBalances, attrs, &reply); err != nil {
 		t.Error("Got error on APIerSv1.SetBalance: ", err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Calling APIerSv1.SetBalance received: %s", reply)

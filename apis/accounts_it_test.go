@@ -1561,7 +1561,7 @@ func testAccActionSetRmvBalance(t *testing.T) {
 			},
 		},
 	}
-	if err := accSRPC.Call(context.Background(), utils.AccountSv1ActionSetBalance,
+	if err := accSRPC.Call(context.Background(), utils.AccountSv1ActionSetBalances,
 		args2, &reply3); err != nil {
 		t.Error(err)
 	} else if reply3 != utils.OK {

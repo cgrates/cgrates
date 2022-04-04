@@ -46,8 +46,8 @@ func (admS *AdminSv1) GetAccount(ctx *context.Context, arg *utils.TenantIDWithAP
 	return nil
 }
 
-// GetAccountIDs returns list of account profile IDs registered for a tenant
-func (admS *AdminSv1) GetAccountIDs(ctx *context.Context, args *utils.ArgsItemIDs, actPrfIDs *[]string) (err error) {
+// GetAccountsIDs returns list of account profile IDs registered for a tenant
+func (admS *AdminSv1) GetAccountsIDs(ctx *context.Context, args *utils.ArgsItemIDs, actPrfIDs *[]string) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = admS.cfg.GeneralCfg().DefaultTenant
@@ -81,7 +81,7 @@ func (admS *AdminSv1) GetAccounts(ctx *context.Context, args *utils.ArgsItemIDs,
 		tnt = admS.cfg.GeneralCfg().DefaultTenant
 	}
 	var accIDs []string
-	if err = admS.GetAccountIDs(ctx, args, &accIDs); err != nil {
+	if err = admS.GetAccountsIDs(ctx, args, &accIDs); err != nil {
 		return
 	}
 	*accs = make([]*utils.Account, 0, len(accIDs))
@@ -216,8 +216,8 @@ func (aSv1 *AccountSv1) ActionSetBalance(ctx *context.Context, args *utils.ArgsA
 	return aSv1.aS.V1ActionSetBalance(ctx, args, eEc)
 }
 
-// ActionRemoveBalance removes a blance from an account
-func (aSv1 *AccountSv1) ActionRemoveBalance(ctx *context.Context, args *utils.ArgsActRemoveBalances,
+// ActionRemoveBalances removes a blance from an account
+func (aSv1 *AccountSv1) ActionRemoveBalances(ctx *context.Context, args *utils.ArgsActRemoveBalances,
 	eEc *string) (err error) {
 	return aSv1.aS.V1ActionRemoveBalance(ctx, args, eEc)
 }

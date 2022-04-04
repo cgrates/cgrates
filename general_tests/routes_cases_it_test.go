@@ -564,7 +564,7 @@ func testV1RtsCasesSortingRoutesWeightNotMatchingValue(t *testing.T) {
 		Reset: true,
 	}
 	var result string
-	if err := rtsCaseSv1BiRpc.Call(context.Background(), utils.AccountSv1ActionSetBalance, argsBal,
+	if err := rtsCaseSv1BiRpc.Call(context.Background(), utils.AccountSv1ActionSetBalances, argsBal,
 		&result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {

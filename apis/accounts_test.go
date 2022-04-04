@@ -591,7 +591,7 @@ func TestAccountsSetGetAccountIDs(t *testing.T) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", `OK`, utils.ToJSON(setRply))
 	}
 	var getRply []string
-	err = admS.GetAccountIDs(context.Background(),
+	err = admS.GetAccountsIDs(context.Background(),
 		&utils.ArgsItemIDs{
 			Tenant: "testTenant",
 		}, &getRply)
@@ -654,7 +654,7 @@ func TestAccountsSetGetAccountIDs(t *testing.T) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", `OK`, utils.ToJSON(setRply2))
 	}
 	var getRply3 []string
-	err = admS.GetAccountIDs(context.Background(),
+	err = admS.GetAccountsIDs(context.Background(),
 		&utils.ArgsItemIDs{
 			Tenant: "testTenant",
 		}, &getRply3)
@@ -707,7 +707,7 @@ func TestAccountsSetGetAccountIDs(t *testing.T) {
 	}
 
 	var getRplyID []string
-	err = admS.GetAccountIDs(context.Background(),
+	err = admS.GetAccountsIDs(context.Background(),
 		&utils.ArgsItemIDs{
 			Tenant: "testTenant",
 		}, &getRplyID)
@@ -757,7 +757,7 @@ func TestAccountsSetGetAccountIDs(t *testing.T) {
 	}
 
 	var getRplyID2 []string
-	err = admS.GetAccountIDs(context.Background(),
+	err = admS.GetAccountsIDs(context.Background(),
 		&utils.ArgsItemIDs{
 			Tenant: "testTenant",
 		}, &getRplyID2)
@@ -789,7 +789,7 @@ func TestAccountsGetAccountIDSError(t *testing.T) {
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
 	admS := NewAdminSv1(cfg, dm, connMgr, nil)
 	var getRplyCount3 []string
-	err := admS.GetAccountIDs(context.Background(),
+	err := admS.GetAccountsIDs(context.Background(),
 		&utils.ArgsItemIDs{}, &getRplyCount3)
 	if err == nil || err != utils.ErrNotImplemented {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ErrNotImplemented, err)
@@ -1686,18 +1686,18 @@ func TestAccountsActionRemoveBalance(t *testing.T) {
 	args := &utils.ArgsActRemoveBalances{}
 
 	expected := "MANDATORY_IE_MISSING: [AccountID]"
-	if err := accSv1.ActionRemoveBalance(context.Background(), args, &reply); err == nil || err.Error() != expected {
+	if err := accSv1.ActionRemoveBalances(context.Background(), args, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 	args.AccountID = "TestV1ActionRemoveBalance"
 
 	expected = "MANDATORY_IE_MISSING: [BalanceIDs]"
-	if err := accSv1.ActionRemoveBalance(context.Background(), args, &reply); err == nil || err.Error() != expected {
+	if err := accSv1.ActionRemoveBalances(context.Background(), args, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 	args.BalanceIDs = []string{"AbstractBalance1"}
 
-	if err := accSv1.ActionRemoveBalance(context.Background(), args, &reply); err != nil {
+	if err := accSv1.ActionRemoveBalances(context.Background(), args, &reply); err != nil {
 		t.Errorf("Expected %+v, received %+v", nil, err)
 	}
 }
@@ -2298,7 +2298,7 @@ func TestAccountsGetAccountIDsGetOptsErr(t *testing.T) {
 	var reply []string
 	experr := "cannot convert field<bool>: true to int"
 
-	if err := adms.GetAccountIDs(context.Background(),
+	if err := adms.GetAccountsIDs(context.Background(),
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
 			APIOpts: map[string]interface{}{
@@ -2343,7 +2343,7 @@ func TestAccountsGetAccountIDsPaginateErr(t *testing.T) {
 	var reply []string
 	experr := `SERVER_ERROR: maximum number of items exceeded`
 
-	if err := adms.GetAccountIDs(context.Background(),
+	if err := adms.GetAccountsIDs(context.Background(),
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
 			APIOpts: map[string]interface{}{

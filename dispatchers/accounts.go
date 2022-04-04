@@ -72,11 +72,11 @@ func (dS *DispatcherService) AccountSv1ActionSetBalance(ctx *context.Context, ar
 		opts = args.APIOpts
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.AccountSv1ActionSetBalance, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
+		if err = dS.authorize(ctx, utils.AccountSv1ActionSetBalances, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
-	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaAccounts, utils.AccountSv1ActionSetBalance, args, reply)
+	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaAccounts, utils.AccountSv1ActionSetBalances, args, reply)
 }
 func (dS *DispatcherService) AccountSv1DebitAbstracts(ctx *context.Context, args *utils.CGREvent, reply *utils.EventCharges) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant

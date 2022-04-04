@@ -74,7 +74,7 @@ func (aL *actSetBalance) execute(ctx *context.Context, data utils.MapStorage, tr
 	}
 	var rply string
 	return aL.connMgr.Call(ctx, aL.config.ActionSCfg().AccountSConns,
-		utils.AccountSv1ActionSetBalance, args, &rply)
+		utils.AccountSv1ActionSetBalances, args, &rply)
 }
 
 // actRemBalance will remove multiple balances from account

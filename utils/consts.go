@@ -1231,7 +1231,7 @@ const (
 	AdminSv1SetAccount                = "AdminSv1.SetAccount"
 	AdminSv1GetAccount                = "AdminSv1.GetAccount"
 	AdminSv1GetAccounts               = "AdminSv1.GetAccounts"
-	AdminSv1GetAccountIDs             = "AdminSv1.GetAccountIDs"
+	AdminSv1GetAccountIDs             = "AdminSv1.GetAccountsIDs"
 	AdminSv1RemoveAccount             = "AdminSv1.RemoveAccount"
 	AdminSv1GetAccountsCount          = "AdminSv1.GetAccountsCount"
 )
@@ -1287,7 +1287,7 @@ const (
 	AccountSv1MaxConcretes        = "AccountSv1.MaxConcretes"
 	AccountSv1DebitConcretes      = "AccountSv1.DebitConcretes"
 	AccountSv1RefundCharges       = "AccountSv1.RefundCharges"
-	AccountSv1ActionSetBalance    = "AccountSv1.ActionSetBalance"
+	AccountSv1ActionSetBalances   = "AccountSv1.ActionSetBalances"
 	AccountSv1ActionRemoveBalance = "AccountSv1.ActionRemoveBalance"
 	AccountSv1GetAccount          = "AccountSv1.GetAccount"
 )

@@ -917,7 +917,7 @@ func TestActionsExecuteActionsSetBalance(t *testing.T) {
 	var executed bool
 	cc := &mockClientConn{
 		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.AccountSv1ActionSetBalance: func(ctx *context.Context, args, reply interface{}) error {
+			utils.AccountSv1ActionSetBalances: func(ctx *context.Context, args, reply interface{}) error {
 				if !reflect.DeepEqual(args, expArgs) {
 					return fmt.Errorf("expected: <%+v>,\nreceived: <%+v>",
 						utils.ToJSON(expArgs), utils.ToJSON(args))
@@ -1104,7 +1104,7 @@ func TestActionsExecuteActionsAddBalance(t *testing.T) {
 	var executed bool
 	cc := &mockClientConn{
 		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.AccountSv1ActionSetBalance: func(ctx *context.Context, args, reply interface{}) error {
+			utils.AccountSv1ActionSetBalances: func(ctx *context.Context, args, reply interface{}) error {
 				if !reflect.DeepEqual(args, expArgs) {
 					return fmt.Errorf("expected: <%+v>,\nreceived: <%+v>",
 						utils.ToJSON(expArgs), utils.ToJSON(args))
