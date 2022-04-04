@@ -188,6 +188,11 @@ func NewFilterFromInline(tenant, inlnRule string) (f *Filter, err error) {
 	return
 }
 
+type ArgsFiltersMatch struct {
+	*utils.CGREvent
+	FilterIDs []string
+}
+
 // Filter structure to define a basic filter
 type Filter struct {
 	Tenant string
