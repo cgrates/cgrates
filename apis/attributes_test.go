@@ -561,7 +561,7 @@ func TestAttributesGetAttributeProfilesOK(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	admS := NewAdminSv1(cfg, dm, connMgr)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil)
 	args1 := &engine.APIAttributeProfileWithAPIOpts{
 		APIAttributeProfile: &engine.APIAttributeProfile{
 			Tenant: "cgrates.org",
@@ -701,7 +701,7 @@ func TestAttributesGetAttributeProfilesGetIDsErr(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	admS := NewAdminSv1(cfg, dm, connMgr)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil)
 	args := &engine.APIAttributeProfileWithAPIOpts{
 		APIAttributeProfile: &engine.APIAttributeProfile{
 			Tenant: "cgrates.org",

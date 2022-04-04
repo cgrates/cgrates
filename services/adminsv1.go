@@ -75,8 +75,11 @@ func (apiService *AdminSv1Service) Start(ctx *context.Context, _ context.CancelF
 		return utils.ErrServiceAlreadyRunning
 	}
 
-	// filterS := <-apiService.filterSChan
-	// apiService.filterSChan <- filterS
+	var filterS *engine.FilterS
+	if filterS, err = waitForFilterS(ctx, apiService.filterSChan); err != nil {
+		return
+	}
+
 	var datadb *engine.DataManager
 	if datadb, err = apiService.dm.WaitForDM(ctx); err != nil {
 		return
@@ -85,7 +88,7 @@ func (apiService *AdminSv1Service) Start(ctx *context.Context, _ context.CancelF
 	apiService.Lock()
 	defer apiService.Unlock()
 
-	apiService.api = apis.NewAdminSv1(apiService.cfg, datadb, apiService.connMgr)
+	apiService.api = apis.NewAdminSv1(apiService.cfg, datadb, apiService.connMgr, filterS)
 
 	// go apiService.api.ListenAndServe(apiService.stopChan)
 	// runtime.Gosched()

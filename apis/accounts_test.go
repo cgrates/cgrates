@@ -38,7 +38,7 @@ func TestAccountsSetGetAccount(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	admS := NewAdminSv1(cfg, dm, connMgr)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil)
 	args := &utils.AccountWithAPIOpts{
 		Account: &utils.Account{
 			Tenant: "cgrates.org",
@@ -128,7 +128,7 @@ func TestAccountsGetAccountErrorMissingID(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	admS := NewAdminSv1(cfg, dm, connMgr)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil)
 	args := &utils.AccountWithAPIOpts{
 		Account: &utils.Account{
 			Tenant: "cgrates.org",
@@ -189,7 +189,7 @@ func TestAccountsGetAccountErrorNotFound(t *testing.T) {
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
 	newCache := engine.NewCacheS(cfg, dm, nil)
 	engine.Cache = newCache
-	admS := NewAdminSv1(cfg, dm, connMgr)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil)
 	var getRply utils.Account
 	err := admS.GetAccount(context.Background(),
 		&utils.TenantIDWithAPIOpts{
@@ -214,7 +214,7 @@ func TestAccountsGetAccountErrorGetAccount(t *testing.T) {
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
 	newCache := engine.NewCacheS(cfg, dm, nil)
 	engine.Cache = newCache
-	admS := NewAdminSv1(cfg, dm, connMgr)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil)
 	var getRply utils.Account
 	err := admS.GetAccount(context.Background(),
 		&utils.TenantIDWithAPIOpts{
@@ -236,7 +236,7 @@ func TestAccountsSetGetAccountNoTenant(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	admS := NewAdminSv1(cfg, dm, connMgr)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil)
 	args := &utils.AccountWithAPIOpts{
 		Account: &utils.Account{
 			ID:   "test_ID1",
@@ -325,7 +325,7 @@ func TestAccountsSetGetAccountErrorMissingID(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	admS := NewAdminSv1(cfg, dm, connMgr)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil)
 	args := &utils.AccountWithAPIOpts{
 		Account: &utils.Account{
 			Opts: map[string]interface{}{},
@@ -370,7 +370,7 @@ func TestAccountsSetGetAccountErrorBadFilter(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	admS := NewAdminSv1(cfg, dm, connMgr)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil)
 	args := &utils.AccountWithAPIOpts{
 		Account: &utils.Account{
 			Tenant:    "",
@@ -433,7 +433,7 @@ func TestAccountsSetGetAccountErrorSetLoadIDs(t *testing.T) {
 		},
 	}
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	admS := NewAdminSv1(cfg, dm, connMgr)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil)
 	newCache := engine.NewCacheS(cfg, dm, nil)
 	engine.Cache = newCache
 	args := &utils.AccountWithAPIOpts{
@@ -501,7 +501,7 @@ func TestAccountsSetGetAccountErrorCallCache(t *testing.T) {
 		},
 	}
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	admS := NewAdminSv1(cfg, dm, connMgr)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil)
 	newCache := engine.NewCacheS(cfg, dm, nil)
 	engine.Cache = newCache
 	args := &utils.AccountWithAPIOpts{
@@ -551,7 +551,7 @@ func TestAccountsSetGetAccountIDs(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	admS := NewAdminSv1(cfg, dm, connMgr)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil)
 	args := &utils.AccountWithAPIOpts{
 		Account: &utils.Account{
 			Tenant: "testTenant",
@@ -772,7 +772,7 @@ func TestAccountsGetAccountsCountError(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := &engine.DataDBMock{}
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	admS := NewAdminSv1(cfg, dm, connMgr)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil)
 	var getRplyCount3 int
 	err := admS.GetAccountsCount(context.Background(),
 		&utils.ArgsItemIDs{}, &getRplyCount3)
@@ -787,7 +787,7 @@ func TestAccountsGetAccountIDSError(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := &engine.DataDBMock{}
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	admS := NewAdminSv1(cfg, dm, connMgr)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil)
 	var getRplyCount3 []string
 	err := admS.GetAccountIDs(context.Background(),
 		&utils.ArgsItemIDs{}, &getRplyCount3)
@@ -802,7 +802,7 @@ func TestAccountsRemoveAccountErrorMissingID(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	admS := NewAdminSv1(cfg, dm, connMgr)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil)
 	var getRplyRmv string
 	err := admS.RemoveAccount(context.Background(),
 		&utils.TenantIDWithAPIOpts{
@@ -823,7 +823,7 @@ func TestAccountsRemoveAccountErrorRmvAccount(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := &engine.DataDBMock{}
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	admS := NewAdminSv1(cfg, dm, connMgr)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil)
 	var getRplyRmv string
 	err := admS.RemoveAccount(context.Background(),
 		&utils.TenantIDWithAPIOpts{
@@ -860,7 +860,7 @@ func TestAccountsRemoveAccountErrorSetLoadIDs(t *testing.T) {
 		},
 	}
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	admS := NewAdminSv1(cfg, dm, connMgr)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil)
 	var getRplyRmv string
 	err := admS.RemoveAccount(context.Background(),
 		&utils.TenantIDWithAPIOpts{
@@ -901,7 +901,7 @@ func TestAccountsRemoveAccountErrorCallCache(t *testing.T) {
 		},
 	}
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	admS := NewAdminSv1(cfg, dm, connMgr)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil)
 	var getRplyRmv string
 	err := admS.RemoveAccount(context.Background(),
 		&utils.TenantIDWithAPIOpts{
@@ -939,7 +939,7 @@ func TestAccountsAccountsForEvent(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	admS := NewAdminSv1(cfg, dm, connMgr)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil)
 	newCache := engine.NewCacheS(cfg, dm, nil)
 	engine.Cache = newCache
 	args := &utils.AccountWithAPIOpts{
@@ -1086,7 +1086,7 @@ func TestAccountsMaxAbstracts(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	admS := NewAdminSv1(cfg, dm, connMgr)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil)
 	newCache := engine.NewCacheS(cfg, dm, nil)
 	engine.Cache = newCache
 	args := &utils.AccountWithAPIOpts{
@@ -1279,7 +1279,7 @@ func TestAccountsDebitAbstracts(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	admS := NewAdminSv1(cfg, dm, connMgr)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil)
 	newCache := engine.NewCacheS(cfg, dm, nil)
 	engine.Cache = newCache
 	args := &utils.AccountWithAPIOpts{
@@ -1471,7 +1471,7 @@ func TestAccountsActionSetBalance(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	admS := NewAdminSv1(cfg, dm, connMgr)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil)
 	newCache := engine.NewCacheS(cfg, dm, nil)
 	engine.Cache = newCache
 	args := &utils.AccountWithAPIOpts{
@@ -1711,7 +1711,7 @@ func TestAccountsMaxConcretes(t *testing.T) {
 	fltr := engine.NewFilterS(cfg, nil, dm)
 	accnts := accounts.NewAccountS(cfg, fltr, nil, dm)
 	accSv1 := NewAccountSv1(accnts)
-	admS := NewAdminSv1(cfg, dm, nil)
+	admS := NewAdminSv1(cfg, dm, nil, nil)
 	args := &utils.AccountWithAPIOpts{
 		Account: &utils.Account{
 			Tenant:    "cgrates.org",
@@ -1963,7 +1963,7 @@ func TestAccountsDebitConcretes(t *testing.T) {
 	fltr := engine.NewFilterS(cfg, nil, dm)
 	accnts := accounts.NewAccountS(cfg, fltr, nil, dm)
 	accSv1 := NewAccountSv1(accnts)
-	admS := NewAdminSv1(cfg, dm, nil)
+	admS := NewAdminSv1(cfg, dm, nil, nil)
 	args := &utils.AccountWithAPIOpts{
 		Account: &utils.Account{
 
@@ -2052,7 +2052,7 @@ func TestAccountsGetAccountsOK(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	admS := NewAdminSv1(cfg, dm, connMgr)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil)
 	args1 := &utils.AccountWithAPIOpts{
 		Account: &utils.Account{
 			Tenant: "cgrates.org",
@@ -2187,7 +2187,7 @@ func TestAccountsGetAccountsGetIDsErr(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	admS := NewAdminSv1(cfg, dm, connMgr)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil)
 	args := &utils.AccountWithAPIOpts{
 		Account: &utils.Account{
 			Tenant: "cgrates.org",

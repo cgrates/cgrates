@@ -38,7 +38,7 @@ func TestChargerSSetChargerProfileErrMissingID(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	admS := NewAdminSv1(cfg, dm, connMgr)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil)
 	var setRply string
 	ext := &ChargerWithAPIOpts{
 		ChargerProfile: &engine.ChargerProfile{
@@ -72,7 +72,7 @@ func TestChargerSDmSetChargerProfileErr(t *testing.T) {
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
 	newCache := engine.NewCacheS(cfg, dm, nil)
 	engine.Cache = newCache
-	admS := NewAdminSv1(cfg, dm, connMgr)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil)
 	var setRply string
 	ext := &ChargerWithAPIOpts{
 		ChargerProfile: &engine.ChargerProfile{
@@ -122,7 +122,7 @@ func TestChargerSSetChargerProfileSetLoadIDsErr(t *testing.T) {
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
 	newCache := engine.NewCacheS(cfg, dm, nil)
 	engine.Cache = newCache
-	admS := NewAdminSv1(cfg, dm, connMgr)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil)
 	var setRply string
 	ext := &ChargerWithAPIOpts{
 		ChargerProfile: &engine.ChargerProfile{
@@ -179,7 +179,7 @@ func TestChargerSSetChargerProfileCallCacheErr(t *testing.T) {
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
 	newCache := engine.NewCacheS(cfg, dm, nil)
 	engine.Cache = newCache
-	admS := NewAdminSv1(cfg, dm, connMgr)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil)
 	var setRply string
 	ext := &ChargerWithAPIOpts{
 		ChargerProfile: &engine.ChargerProfile{
@@ -213,7 +213,7 @@ func TestChargerSSetGetChargerProfileIDs(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	admS := NewAdminSv1(cfg, dm, connMgr)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil)
 	ext := &ChargerWithAPIOpts{
 		ChargerProfile: &engine.ChargerProfile{
 			Tenant:       "cgrates.org",
@@ -298,7 +298,7 @@ func TestChargerSSetGetChargerProfileIDsErr(t *testing.T) {
 		},
 	}
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	admS := NewAdminSv1(cfg, dm, connMgr)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil)
 	newCache := engine.NewCacheS(cfg, dm, nil)
 	engine.Cache = newCache
 	var getRply []string
@@ -319,7 +319,7 @@ func TestChargerSSetGetChargerProfileIDsErr2(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := &engine.DataDBMock{}
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	admS := NewAdminSv1(cfg, dm, connMgr)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil)
 	newCache := engine.NewCacheS(cfg, dm, nil)
 	engine.Cache = newCache
 	var getRply []string
@@ -339,7 +339,7 @@ func TestChargerSSetGetRmvGetChargerProfile(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	admS := NewAdminSv1(cfg, dm, connMgr)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil)
 	ext := &ChargerWithAPIOpts{
 		ChargerProfile: &engine.ChargerProfile{
 			Tenant:       "cgrates.org",
@@ -429,7 +429,7 @@ func TestChargerSSetGetRmvGetChargerProfileNoTenant(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	admS := NewAdminSv1(cfg, dm, connMgr)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil)
 	ext := &ChargerWithAPIOpts{
 		ChargerProfile: &engine.ChargerProfile{
 			ID:           "1001",
@@ -517,7 +517,7 @@ func TestChargerSRmvChargerProfileErr(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	admS := NewAdminSv1(cfg, dm, connMgr)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil)
 	var rmvRply string
 	err := admS.RemoveChargerProfile(context.Background(),
 		&utils.TenantIDWithAPIOpts{
@@ -540,7 +540,7 @@ func TestChargerSRmvChargerProfileErrRemoveChargerProfile(t *testing.T) {
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
 	newCache := engine.NewCacheS(cfg, dm, nil)
 	engine.Cache = newCache
-	admS := NewAdminSv1(cfg, dm, connMgr)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil)
 	var rmvRply string
 	err := admS.RemoveChargerProfile(context.Background(),
 		&utils.TenantIDWithAPIOpts{
@@ -584,7 +584,7 @@ func TestChargerSRmvChargerProfileErrSetLoadIDs(t *testing.T) {
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
 	newCache := engine.NewCacheS(cfg, dm, nil)
 	engine.Cache = newCache
-	admS := NewAdminSv1(cfg, dm, connMgr)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil)
 	var rmvRply string
 	err := admS.RemoveChargerProfile(context.Background(),
 		&utils.TenantIDWithAPIOpts{
@@ -636,7 +636,7 @@ func TestChargerSRmvChargerProfileErrRemoveCallCache(t *testing.T) {
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
 	newCache := engine.NewCacheS(cfg, dm, nil)
 	engine.Cache = newCache
-	admS := NewAdminSv1(cfg, dm, connMgr)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil)
 	var rmvRply string
 	err := admS.RemoveChargerProfile(context.Background(),
 		&utils.TenantIDWithAPIOpts{
@@ -658,7 +658,7 @@ func TestChargersGetChargerProfilesOK(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	admS := NewAdminSv1(cfg, dm, connMgr)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil)
 	args1 := &ChargerWithAPIOpts{
 		ChargerProfile: &engine.ChargerProfile{
 			Tenant: "cgrates.org",
@@ -763,7 +763,7 @@ func TestChargersGetChargerProfilesGetIDsErr(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	admS := NewAdminSv1(cfg, dm, connMgr)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil)
 	args := &ChargerWithAPIOpts{
 		ChargerProfile: &engine.ChargerProfile{
 			Tenant: "cgrates.org",
