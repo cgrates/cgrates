@@ -64,6 +64,8 @@ var (
 		testFilterSSetGetFilterWithPrefix,
 		testFilterSGetFiltersWithPrefix,
 		testFilterSSetInvalidFilter,
+		testFilterSFiltersMatchTrue,
+		testFilterSFiltersMatchFalse,
 		testFilterSKillEngine,
 	}
 )
@@ -711,6 +713,56 @@ func testFilterSSetInvalidFilter(t *testing.T) {
 			ID:     "invalid_filter",
 		}, &result); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
+	}
+}
+
+func testFilterSFiltersMatchTrue(t *testing.T) {
+	args := &engine.ArgsFiltersMatch{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "EventTest",
+			Event: map[string]interface{}{
+				utils.AccountField: "1001",
+				utils.Destination:  "1002",
+			},
+		},
+		FilterIDs: []string{
+			"*string:~*req.Account:1001",
+			"*prefix:~*req.Destination:10",
+		},
+	}
+
+	var reply bool
+	if err := fltrSRPC.Call(context.Background(), utils.AdminSv1FiltersMatch, args,
+		&reply); err != nil {
+		t.Error(err)
+	} else if reply != true {
+		t.Error("expected reply to be", true)
+	}
+}
+
+func testFilterSFiltersMatchFalse(t *testing.T) {
+	args := &engine.ArgsFiltersMatch{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "EventTest",
+			Event: map[string]interface{}{
+				utils.AccountField: "1001",
+				utils.Destination:  "2002",
+			},
+		},
+		FilterIDs: []string{
+			"*string:~*req.Account:1001",
+			"*prefix:~*req.Destination:10",
+		},
+	}
+
+	var reply bool
+	if err := fltrSRPC.Call(context.Background(), utils.AdminSv1FiltersMatch, args,
+		&reply); err != nil {
+		t.Error(err)
+	} else if reply != false {
+		t.Error("expected reply to be", false)
 	}
 }
 

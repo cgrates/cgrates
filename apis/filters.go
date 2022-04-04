@@ -192,3 +192,19 @@ func (admS *AdminSv1) GetFiltersCount(ctx *context.Context, args *utils.ArgsItem
 	*reply = len(keys)
 	return
 }
+
+// FiltersMatch checks whether a set of filter IDs passes for the provided CGREvent
+func (admS *AdminSv1) FiltersMatch(ctx *context.Context, args *engine.ArgsFiltersMatch, reply *bool) (err error) {
+	tnt := args.Tenant
+	if tnt == utils.EmptyString {
+		tnt = admS.cfg.GeneralCfg().DefaultTenant
+	}
+	evDP := args.CGREvent.AsDataProvider()
+	var pass bool
+	if pass, err = admS.fltrS.Pass(ctx, tnt, args.FilterIDs, evDP); err != nil {
+		return
+	} else if pass {
+		*reply = true
+	}
+	return
+}
