@@ -1162,6 +1162,7 @@ const (
 	AdminSv1GetFilterIDs        = "AdminSv1.GetFilterIDs"
 	AdminSv1GetFiltersCount     = "AdminSv1.GetFiltersCount"
 	AdminSv1GetFilters          = "AdminSv1.GetFilters"
+	AdminSv1FiltersMatch        = "AdminSv1.FiltersMatch"
 	// APIerSv1SetDataDBVersions   = "APIerSv1.SetDataDBVersions"
 
 	// APIerSv1GetActions          = "APIerSv1.GetActions"
