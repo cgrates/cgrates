@@ -62,10 +62,6 @@ func (admS *AdminSv1) GetRateProfile(ctx *context.Context, arg *utils.TenantIDWi
 	if err != nil {
 		return
 	}
-	paginatedRates := make(map[string]*utils.Rate)
-	for _, rateID := range rateIDs {
-		paginatedRates[rateID] = rPrf.Rates[rateID]
-	}
 	paginatedRatePrf := &utils.RateProfile{
 		Tenant:          rPrf.Tenant,
 		ID:              rPrf.ID,
@@ -75,7 +71,10 @@ func (admS *AdminSv1) GetRateProfile(ctx *context.Context, arg *utils.TenantIDWi
 		MaxCost:         rPrf.MaxCost,
 		MaxCostStrategy: rPrf.MaxCostStrategy,
 	}
-	paginatedRatePrf.Rates = paginatedRates
+	paginatedRatePrf.Rates = make(map[string]*utils.Rate)
+	for _, rateID := range rateIDs {
+		paginatedRatePrf.Rates[rateID] = rPrf.Rates[rateID].Clone()
+	}
 	*reply = *paginatedRatePrf
 	return
 }

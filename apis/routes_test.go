@@ -505,7 +505,7 @@ func TestRoutesGetRouteProfilesOK(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	admS := NewAdminSv1(cfg, dm, connMgr)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil)
 	args1 := &engine.RouteProfileWithAPIOpts{
 		RouteProfile: &engine.RouteProfile{
 			Tenant:  "cgrates.org",
@@ -640,7 +640,7 @@ func TestRoutesGetRouteProfilesGetIDsErr(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	admS := NewAdminSv1(cfg, dm, connMgr)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil)
 	args := &engine.RouteProfileWithAPIOpts{
 		RouteProfile: &engine.RouteProfile{
 			Tenant:  "cgrates.org",
