@@ -68,6 +68,33 @@ type Rate struct {
 	uID   string
 }
 
+// Clone returns a copy of rt
+func (rt *Rate) Clone() *Rate {
+	cln := &Rate{
+		ID:              rt.ID,
+		ActivationTimes: rt.ActivationTimes,
+		Blocker:         rt.Blocker,
+		uID:             rt.uID,
+		sched:           rt.sched,
+	}
+	if rt.FilterIDs != nil {
+		cln.FilterIDs = make([]string, len(rt.FilterIDs))
+		for i, value := range rt.FilterIDs {
+			cln.FilterIDs[i] = value
+		}
+	}
+	if rt.Weights != nil {
+		cln.Weights = rt.Weights.Clone()
+	}
+	if rt.IntervalRates != nil {
+		cln.IntervalRates = make([]*IntervalRate, len(rt.IntervalRates))
+		for i, value := range rt.IntervalRates {
+			cln.IntervalRates[i] = value.Clone()
+		}
+	}
+	return cln
+}
+
 // UID returns system wide unique identifier
 func (rt *Rate) UID() string {
 	return rt.uID
