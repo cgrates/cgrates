@@ -80,7 +80,7 @@ func TestDspCacheSv1GetItemIDsError(t *testing.T) {
 	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
 	CGREvent := &utils.ArgsGetCacheItemIDsWithAPIOpts{}
 	var reply *[]string
-	result := dspSrv.CacheSv1GetItemIDs(context.Background(), CGREvent, reply)
+	result := dspSrv.CacheSv1GetItemsIDs(context.Background(), CGREvent, reply)
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -94,7 +94,7 @@ func TestDspCacheSv1GetItemIDsErrorArgsNil(t *testing.T) {
 		Tenant: "tenant",
 	}
 	var reply *[]string
-	result := dspSrv.CacheSv1GetItemIDs(context.Background(), CGREvent, reply)
+	result := dspSrv.CacheSv1GetItemsIDs(context.Background(), CGREvent, reply)
 	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -323,7 +323,7 @@ func TestDspCacheSv1GetGroupItemIDsError(t *testing.T) {
 	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
 	CGREvent := &utils.ArgsGetGroupWithAPIOpts{}
 	var reply *[]string
-	result := dspSrv.CacheSv1GetGroupItemIDs(context.Background(), CGREvent, reply)
+	result := dspSrv.CacheSv1GetGroupItemsIDs(context.Background(), CGREvent, reply)
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -337,7 +337,7 @@ func TestDspCacheSv1GetGroupItemIDsArgsNil(t *testing.T) {
 		Tenant: "tenant",
 	}
 	var reply *[]string
-	result := dspSrv.CacheSv1GetGroupItemIDs(context.Background(), CGREvent, reply)
+	result := dspSrv.CacheSv1GetGroupItemsIDs(context.Background(), CGREvent, reply)
 	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -431,7 +431,7 @@ func TestDspCacheSv1ReplicateRemoveError(t *testing.T) {
 	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
 	CGREvent := &utils.ArgCacheReplicateRemove{}
 	var reply *string
-	result := dspSrv.CacheSv1ReplicateRemove(context.Background(), CGREvent, reply)
+	result := dspSrv.CacheSv1ReplicateRemoveItem(context.Background(), CGREvent, reply)
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -445,7 +445,7 @@ func TestDspCacheSv1ReplicateRemoveNil(t *testing.T) {
 		Tenant: "tenant",
 	}
 	var reply *string
-	result := dspSrv.CacheSv1ReplicateRemove(context.Background(), CGREvent, reply)
+	result := dspSrv.CacheSv1ReplicateRemoveItem(context.Background(), CGREvent, reply)
 	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -458,7 +458,7 @@ func TestDspCacheSv1ReplicateSetError(t *testing.T) {
 	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
 	CGREvent := &utils.ArgCacheReplicateSet{}
 	var reply *string
-	result := dspSrv.CacheSv1ReplicateSet(context.Background(), CGREvent, reply)
+	result := dspSrv.CacheSv1ReplicateSetItem(context.Background(), CGREvent, reply)
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -472,7 +472,7 @@ func TestDspCacheSv1ReplicateSetNil(t *testing.T) {
 		Tenant: "tenant",
 	}
 	var reply *string
-	result := dspSrv.CacheSv1ReplicateSet(context.Background(), CGREvent, reply)
+	result := dspSrv.CacheSv1ReplicateSetItem(context.Background(), CGREvent, reply)
 	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)

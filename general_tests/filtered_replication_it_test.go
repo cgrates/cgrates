@@ -284,11 +284,11 @@ func testFltrRplFilters(t *testing.T) {
 	var replyPrfl *engine.Filter
 	var rplyIDs []string
 	// empty
-	if err := fltrRplEngine1RPC.Call(context.Background(), utils.AdminSv1GetFilterIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
+	if err := fltrRplEngine1RPC.Call(context.Background(), utils.AdminSv1GetFiltersIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
-	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetFilterIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
+	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetFiltersIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
@@ -308,11 +308,11 @@ func testFltrRplFilters(t *testing.T) {
 	}
 	replyPrfl = nil
 
-	if err := fltrRplEngine1RPC.Call(context.Background(), utils.AdminSv1GetFilterIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
+	if err := fltrRplEngine1RPC.Call(context.Background(), utils.AdminSv1GetFiltersIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
-	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetFilterIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
+	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetFiltersIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
@@ -352,7 +352,7 @@ func testFltrRplFilters(t *testing.T) {
 		t.Errorf("Expecting : %s, received: %s", utils.ToJSON(fltr.Filter), utils.ToJSON(replyPrfl))
 	}
 
-	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetFilterIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
+	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetFiltersIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
@@ -363,11 +363,11 @@ func testFltrRplFilters(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := fltrRplEngine1RPC.Call(context.Background(), utils.AdminSv1GetFilterIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
+	if err := fltrRplEngine1RPC.Call(context.Background(), utils.AdminSv1GetFiltersIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
-	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetFilterIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
+	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetFiltersIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}

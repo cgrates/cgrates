@@ -113,8 +113,8 @@ func (chSv1 *CacheSv1) LoadCache(ctx *context.Context, args *utils.AttrReloadCac
 }
 
 // ReplicateSetItem replicate an item
-func (chSv1 *CacheSv1) ReplicateSet(ctx *context.Context, args *utils.ArgCacheReplicateSet, reply *string) (err error) { //
-	return chSv1.cacheS.V1ReplicateSet(ctx, args, reply)
+func (chSv1 *CacheSv1) ReplicateSetItem(ctx *context.Context, args *utils.ArgCacheReplicateSet, reply *string) (err error) { //
+	return chSv1.cacheS.V1ReplicateSetItem(ctx, args, reply)
 }
 
 // ReplicateRemoveItem remove an item

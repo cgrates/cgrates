@@ -167,7 +167,7 @@ func testAnalyzerSSearchCall2(t *testing.T) {
 
 func testAnalyzerSGetFilterIDs(t *testing.T) {
 	var filterIDs []string
-	if err := anzBiRPC.Call(context.Background(), utils.AdminSv1GetFilterIDs,
+	if err := anzBiRPC.Call(context.Background(), utils.AdminSv1GetFiltersIDs,
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
 		}, &filterIDs); err != nil {

@@ -87,7 +87,7 @@ func TestDspAttributeSv1GetAttributeForEventError(t *testing.T) {
 	ev := &utils.CGREvent{}
 
 	var reply *engine.APIAttributeProfile
-	err := dspSrv.AttributeSv1GetAttributeForEvent(context.Background(), ev, reply)
+	err := dspSrv.AttributeSv1GetAttributesForEvent(context.Background(), ev, reply)
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
 	if err == nil || err.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
@@ -102,7 +102,7 @@ func TestDspAttributeSv1GetAttributeForEventErrorTenant(t *testing.T) {
 		Tenant: "tenant",
 	}
 	var reply *engine.APIAttributeProfile
-	err := dspSrv.AttributeSv1GetAttributeForEvent(context.Background(), ev, reply)
+	err := dspSrv.AttributeSv1GetAttributesForEvent(context.Background(), ev, reply)
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
 	if err == nil || err.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
@@ -117,7 +117,7 @@ func TestDspAttributeSv1GetAttributeForEventErrorAttributeS(t *testing.T) {
 	}
 
 	var reply *engine.APIAttributeProfile
-	err := dspSrv.AttributeSv1GetAttributeForEvent(context.Background(), ev, reply)
+	err := dspSrv.AttributeSv1GetAttributesForEvent(context.Background(), ev, reply)
 	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if err == nil || err.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)

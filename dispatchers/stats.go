@@ -25,74 +25,6 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func (dS *DispatcherService) StatSv1GetQueueDecimalMetrics(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *map[string]*utils.Decimal) (err error) {
-	tnt := dS.cfg.GeneralCfg().DefaultTenant
-	if args != nil && (args.TenantID != nil && len(args.TenantID.Tenant) != 0) {
-		tnt = args.TenantID.Tenant
-	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
-	if args != nil {
-		opts = args.APIOpts
-	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.StatSv1GetStatQueueDecimalMetrics, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
-	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaStats, utils.StatSv1GetStatQueueDecimalMetrics, args, reply)
-}
-func (dS *DispatcherService) StatSv1GetQueueFloatMetrics(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *map[string]float64) (err error) {
-	tnt := dS.cfg.GeneralCfg().DefaultTenant
-	if args != nil && (args.TenantID != nil && len(args.TenantID.Tenant) != 0) {
-		tnt = args.TenantID.Tenant
-	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
-	if args != nil {
-		opts = args.APIOpts
-	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.StatSv1GetStatQueueFloatMetrics, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
-	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaStats, utils.StatSv1GetStatQueueFloatMetrics, args, reply)
-}
-func (dS *DispatcherService) StatSv1GetQueueIDs(ctx *context.Context, args *utils.TenantWithAPIOpts, reply *[]string) (err error) {
-	tnt := dS.cfg.GeneralCfg().DefaultTenant
-	if args != nil && len(args.Tenant) != 0 {
-		tnt = args.Tenant
-	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
-	if args != nil {
-		opts = args.APIOpts
-	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.StatSv1GetStatQueuesIDs, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
-	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaStats, utils.StatSv1GetStatQueuesIDs, args, reply)
-}
-func (dS *DispatcherService) StatSv1GetQueueStringMetrics(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *map[string]string) (err error) {
-	tnt := dS.cfg.GeneralCfg().DefaultTenant
-	if args != nil && (args.TenantID != nil && len(args.TenantID.Tenant) != 0) {
-		tnt = args.TenantID.Tenant
-	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
-	if args != nil {
-		opts = args.APIOpts
-	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.StatSv1GetStatQueueStringMetrics, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
-	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaStats, utils.StatSv1GetStatQueueStringMetrics, args, reply)
-}
 func (dS *DispatcherService) StatSv1GetStatQueue(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *engine.StatQueue) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args != nil && (args.TenantID != nil && len(args.TenantID.Tenant) != 0) {
@@ -109,6 +41,57 @@ func (dS *DispatcherService) StatSv1GetStatQueue(ctx *context.Context, args *uti
 		}
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaStats, utils.StatSv1GetStatQueue, args, reply)
+}
+func (dS *DispatcherService) StatSv1GetStatQueueDecimalMetrics(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *map[string]*utils.Decimal) (err error) {
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args != nil && (args.TenantID != nil && len(args.TenantID.Tenant) != 0) {
+		tnt = args.TenantID.Tenant
+	}
+	ev := make(map[string]interface{})
+	opts := make(map[string]interface{})
+	if args != nil {
+		opts = args.APIOpts
+	}
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
+		if err = dS.authorize(ctx, utils.StatSv1GetStatQueueDecimalMetrics, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
+			return
+		}
+	}
+	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaStats, utils.StatSv1GetStatQueueDecimalMetrics, args, reply)
+}
+func (dS *DispatcherService) StatSv1GetStatQueueFloatMetrics(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *map[string]float64) (err error) {
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args != nil && (args.TenantID != nil && len(args.TenantID.Tenant) != 0) {
+		tnt = args.TenantID.Tenant
+	}
+	ev := make(map[string]interface{})
+	opts := make(map[string]interface{})
+	if args != nil {
+		opts = args.APIOpts
+	}
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
+		if err = dS.authorize(ctx, utils.StatSv1GetStatQueueFloatMetrics, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
+			return
+		}
+	}
+	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaStats, utils.StatSv1GetStatQueueFloatMetrics, args, reply)
+}
+func (dS *DispatcherService) StatSv1GetStatQueueStringMetrics(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *map[string]string) (err error) {
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args != nil && (args.TenantID != nil && len(args.TenantID.Tenant) != 0) {
+		tnt = args.TenantID.Tenant
+	}
+	ev := make(map[string]interface{})
+	opts := make(map[string]interface{})
+	if args != nil {
+		opts = args.APIOpts
+	}
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
+		if err = dS.authorize(ctx, utils.StatSv1GetStatQueueStringMetrics, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
+			return
+		}
+	}
+	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaStats, utils.StatSv1GetStatQueueStringMetrics, args, reply)
 }
 func (dS *DispatcherService) StatSv1GetStatQueuesForEvent(ctx *context.Context, args *utils.CGREvent, reply *[]string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
@@ -129,6 +112,23 @@ func (dS *DispatcherService) StatSv1GetStatQueuesForEvent(ctx *context.Context, 
 		}
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaStats, utils.StatSv1GetStatQueuesForEvent, args, reply)
+}
+func (dS *DispatcherService) StatSv1GetStatQueuesIDs(ctx *context.Context, args *utils.TenantWithAPIOpts, reply *[]string) (err error) {
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args != nil && len(args.Tenant) != 0 {
+		tnt = args.Tenant
+	}
+	ev := make(map[string]interface{})
+	opts := make(map[string]interface{})
+	if args != nil {
+		opts = args.APIOpts
+	}
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
+		if err = dS.authorize(ctx, utils.StatSv1GetStatQueuesIDs, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
+			return
+		}
+	}
+	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaStats, utils.StatSv1GetStatQueuesIDs, args, reply)
 }
 func (dS *DispatcherService) StatSv1Ping(ctx *context.Context, args *utils.CGREvent, reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant

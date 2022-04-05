@@ -1300,7 +1300,7 @@ func testLoadersRemove(t *testing.T) {
 
 func testLoadersGetAccountAfterRemove(t *testing.T) {
 	var accIDs []string
-	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetAccountIDs,
+	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetAccountsIDs,
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
 		}, &accIDs); err == nil || err.Error() != utils.ErrNotFound.Error() {
@@ -1414,7 +1414,7 @@ func testLoadersGetDispatcherHostAfterRemove(t *testing.T) {
 
 func testLoadersGetFilterAfterRemove(t *testing.T) {
 	var fltrIDs []string
-	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetFilterIDs,
+	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetFiltersIDs,
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
 		}, &fltrIDs); err == nil || err.Error() != utils.ErrNotFound.Error() {

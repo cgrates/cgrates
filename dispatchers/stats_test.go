@@ -105,7 +105,7 @@ func TestDspStatSv1GetQueueStringMetricsNil(t *testing.T) {
 		},
 	}
 	var reply *map[string]string
-	result := dspSrv.StatSv1GetQueueStringMetrics(context.Background(), CGREvent, reply)
+	result := dspSrv.StatSv1GetStatQueueStringMetrics(context.Background(), CGREvent, reply)
 	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -122,7 +122,7 @@ func TestDspStatSv1GetQueueStringMetricsErrorNil(t *testing.T) {
 		},
 	}
 	var reply *map[string]string
-	result := dspSrv.StatSv1GetQueueStringMetrics(context.Background(), CGREvent, reply)
+	result := dspSrv.StatSv1GetStatQueueStringMetrics(context.Background(), CGREvent, reply)
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -167,7 +167,7 @@ func TestDspStatSv1GetQueueFloatMetricsNil(t *testing.T) {
 		},
 	}
 	var reply *map[string]float64
-	result := dspSrv.StatSv1GetQueueFloatMetrics(context.Background(), CGREvent, reply)
+	result := dspSrv.StatSv1GetStatQueueFloatMetrics(context.Background(), CGREvent, reply)
 	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -184,7 +184,7 @@ func TestDspStatSv1GetQueueFloatMetricsErrorNil(t *testing.T) {
 		},
 	}
 	var reply *map[string]float64
-	result := dspSrv.StatSv1GetQueueFloatMetrics(context.Background(), CGREvent, reply)
+	result := dspSrv.StatSv1GetStatQueueFloatMetrics(context.Background(), CGREvent, reply)
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -198,7 +198,7 @@ func TestDspStatSv1GetQueueIDsNil(t *testing.T) {
 		Tenant: "tenant",
 	}
 	var reply *[]string
-	result := dspSrv.StatSv1GetQueueIDs(context.Background(), CGREvent, reply)
+	result := dspSrv.StatSv1GetStatQueuesIDs(context.Background(), CGREvent, reply)
 	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -213,7 +213,7 @@ func TestDspStatSv1GetQueueIDsErrorNil(t *testing.T) {
 		Tenant: "tenant",
 	}
 	var reply *[]string
-	result := dspSrv.StatSv1GetQueueIDs(context.Background(), CGREvent, reply)
+	result := dspSrv.StatSv1GetStatQueuesIDs(context.Background(), CGREvent, reply)
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)

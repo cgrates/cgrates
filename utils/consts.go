@@ -1158,7 +1158,7 @@ const (
 	AdminSv1RemoveFilterIndexes = "AdminSv1.RemoveFilterIndexes"
 	AdminSv1RemoveFilter        = "AdminSv1.RemoveFilter"
 	AdminSv1SetFilter           = "AdminSv1.SetFilter"
-	AdminSv1GetFilterIDs        = "AdminSv1.GetFiltersIDs"
+	AdminSv1GetFiltersIDs       = "AdminSv1.GetFiltersIDs"
 	AdminSv1GetFiltersCount     = "AdminSv1.GetFiltersCount"
 	AdminSv1GetFilters          = "AdminSv1.GetFilters"
 	AdminSv1FiltersMatch        = "AdminSv1.FiltersMatch"
@@ -1231,7 +1231,7 @@ const (
 	AdminSv1SetAccount                = "AdminSv1.SetAccount"
 	AdminSv1GetAccount                = "AdminSv1.GetAccount"
 	AdminSv1GetAccounts               = "AdminSv1.GetAccounts"
-	AdminSv1GetAccountIDs             = "AdminSv1.GetAccountsIDs"
+	AdminSv1GetAccountsIDs            = "AdminSv1.GetAccountsIDs"
 	AdminSv1RemoveAccount             = "AdminSv1.RemoveAccount"
 	AdminSv1GetAccountsCount          = "AdminSv1.GetAccountsCount"
 )
@@ -1271,11 +1271,11 @@ const (
 )
 
 const (
-	RateSv1                     = "RateSv1"
-	RateSv1CostForEvent         = "RateSv1.CostForEvent"
-	RateSv1RateProfilesForEvent = "RateSv1.GetRateProfilesIDsForEvent"
-	RateSv1GetRatesIDsForEvent  = "RateSv1.GetRatesIDsForEvent"
-	RateSv1Ping                 = "RateSv1.Ping"
+	RateSv1                           = "RateSv1"
+	RateSv1CostForEvent               = "RateSv1.CostForEvent"
+	RateSv1GetRateProfilesIDsForEvent = "RateSv1.GetRateProfilesIDsForEvent"
+	RateSv1GetRatesIDsForEvent        = "RateSv1.GetRatesIDsForEvent"
+	RateSv1Ping                       = "RateSv1.Ping"
 )
 
 const (
@@ -1324,7 +1324,7 @@ const (
 	AdminSv1GetAttributeProfiles      = "AdminSv1.GetAttributeProfiles"
 	AdminSv1GetAttributeProfilesIDs   = "AdminSv1.GetAttributeProfilesIDs"
 	AdminSv1RemoveAttributeProfile    = "AdminSv1.RemoveAttributeProfile"
-	AttributeSv1GetAttributesForEvent = "AttributeSv1.AttributeSv1.GetAttributesForEvent"
+	AttributeSv1GetAttributesForEvent = "AttributeSv1.GetAttributesForEvent"
 	AttributeSv1ProcessEvent          = "AttributeSv1.ProcessEvent"
 	AttributeSv1Ping                  = "AttributeSv1.Ping"
 )
@@ -1495,7 +1495,7 @@ const (
 	CacheSv1ReloadCache         = "CacheSv1.ReloadCache"
 	CacheSv1LoadCache           = "CacheSv1.LoadCache"
 	CacheSv1Ping                = "CacheSv1.Ping"
-	CacheSv1ReplicateSet        = "CacheSv1.ReplicateSetItem"
+	CacheSv1ReplicateSetItem    = "CacheSv1.ReplicateSetItem"
 	CacheSv1ReplicateRemoveItem = "CacheSv1.ReplicateRemoveItem"
 )
 

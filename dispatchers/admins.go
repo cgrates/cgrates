@@ -97,23 +97,6 @@ func (dS *DispatcherService) AdminSv1GetAccount(ctx *context.Context, args *util
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaAdminS, utils.AdminSv1GetAccount, args, reply)
 }
-func (dS *DispatcherService) AdminSv1GetAccountIDs(ctx *context.Context, args *utils.ArgsItemIDs, reply *[]string) (err error) {
-	tnt := dS.cfg.GeneralCfg().DefaultTenant
-	if args != nil && len(args.Tenant) != 0 {
-		tnt = args.Tenant
-	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
-	if args != nil {
-		opts = args.APIOpts
-	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.AdminSv1GetAccountIDs, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
-	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaAdminS, utils.AdminSv1GetAccountIDs, args, reply)
-}
 func (dS *DispatcherService) AdminSv1GetAccounts(ctx *context.Context, args *utils.ArgsItemIDs, reply *[]*utils.Account) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args != nil && len(args.Tenant) != 0 {
@@ -147,6 +130,23 @@ func (dS *DispatcherService) AdminSv1GetAccountsCount(ctx *context.Context, args
 		}
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaAdminS, utils.AdminSv1GetAccountsCount, args, reply)
+}
+func (dS *DispatcherService) AdminSv1GetAccountsIDs(ctx *context.Context, args *utils.ArgsItemIDs, reply *[]string) (err error) {
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args != nil && len(args.Tenant) != 0 {
+		tnt = args.Tenant
+	}
+	ev := make(map[string]interface{})
+	opts := make(map[string]interface{})
+	if args != nil {
+		opts = args.APIOpts
+	}
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
+		if err = dS.authorize(ctx, utils.AdminSv1GetAccountsIDs, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
+			return
+		}
+	}
+	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaAdminS, utils.AdminSv1GetAccountsIDs, args, reply)
 }
 func (dS *DispatcherService) AdminSv1GetAccountsIndexesHealth(ctx *context.Context, args *engine.IndexHealthArgs, reply *engine.FilterIHReply) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
@@ -182,23 +182,6 @@ func (dS *DispatcherService) AdminSv1GetActionProfile(ctx *context.Context, args
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaAdminS, utils.AdminSv1GetActionProfile, args, reply)
 }
-func (dS *DispatcherService) AdminSv1GetActionProfileIDs(ctx *context.Context, args *utils.ArgsItemIDs, reply *[]string) (err error) {
-	tnt := dS.cfg.GeneralCfg().DefaultTenant
-	if args != nil && len(args.Tenant) != 0 {
-		tnt = args.Tenant
-	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
-	if args != nil {
-		opts = args.APIOpts
-	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.AdminSv1GetActionProfilesIDs, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
-	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaAdminS, utils.AdminSv1GetActionProfilesIDs, args, reply)
-}
 func (dS *DispatcherService) AdminSv1GetActionProfiles(ctx *context.Context, args *utils.ArgsItemIDs, reply *[]*engine.ActionProfile) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args != nil && len(args.Tenant) != 0 {
@@ -232,6 +215,23 @@ func (dS *DispatcherService) AdminSv1GetActionProfilesCount(ctx *context.Context
 		}
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaAdminS, utils.AdminSv1GetActionProfilesCount, args, reply)
+}
+func (dS *DispatcherService) AdminSv1GetActionProfilesIDs(ctx *context.Context, args *utils.ArgsItemIDs, reply *[]string) (err error) {
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args != nil && len(args.Tenant) != 0 {
+		tnt = args.Tenant
+	}
+	ev := make(map[string]interface{})
+	opts := make(map[string]interface{})
+	if args != nil {
+		opts = args.APIOpts
+	}
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
+		if err = dS.authorize(ctx, utils.AdminSv1GetActionProfilesIDs, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
+			return
+		}
+	}
+	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaAdminS, utils.AdminSv1GetActionProfilesIDs, args, reply)
 }
 func (dS *DispatcherService) AdminSv1GetActionsIndexesHealth(ctx *context.Context, args *engine.IndexHealthArgs, reply *engine.FilterIHReply) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
@@ -267,23 +267,6 @@ func (dS *DispatcherService) AdminSv1GetAttributeProfile(ctx *context.Context, a
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaAdminS, utils.AdminSv1GetAttributeProfile, args, reply)
 }
-func (dS *DispatcherService) AdminSv1GetAttributeProfileIDs(ctx *context.Context, args *utils.ArgsItemIDs, reply *[]string) (err error) {
-	tnt := dS.cfg.GeneralCfg().DefaultTenant
-	if args != nil && len(args.Tenant) != 0 {
-		tnt = args.Tenant
-	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
-	if args != nil {
-		opts = args.APIOpts
-	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.AdminSv1GetAttributeProfilesIDs, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
-	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaAdminS, utils.AdminSv1GetAttributeProfilesIDs, args, reply)
-}
 func (dS *DispatcherService) AdminSv1GetAttributeProfiles(ctx *context.Context, args *utils.ArgsItemIDs, reply *[]*engine.APIAttributeProfile) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args != nil && len(args.Tenant) != 0 {
@@ -317,6 +300,23 @@ func (dS *DispatcherService) AdminSv1GetAttributeProfilesCount(ctx *context.Cont
 		}
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaAdminS, utils.AdminSv1GetAttributeProfilesCount, args, reply)
+}
+func (dS *DispatcherService) AdminSv1GetAttributeProfilesIDs(ctx *context.Context, args *utils.ArgsItemIDs, reply *[]string) (err error) {
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args != nil && len(args.Tenant) != 0 {
+		tnt = args.Tenant
+	}
+	ev := make(map[string]interface{})
+	opts := make(map[string]interface{})
+	if args != nil {
+		opts = args.APIOpts
+	}
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
+		if err = dS.authorize(ctx, utils.AdminSv1GetAttributeProfilesIDs, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
+			return
+		}
+	}
+	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaAdminS, utils.AdminSv1GetAttributeProfilesIDs, args, reply)
 }
 func (dS *DispatcherService) AdminSv1GetAttributesIndexesHealth(ctx *context.Context, args *engine.IndexHealthArgs, reply *engine.FilterIHReply) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
@@ -352,23 +352,6 @@ func (dS *DispatcherService) AdminSv1GetChargerProfile(ctx *context.Context, arg
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaAdminS, utils.AdminSv1GetChargerProfile, args, reply)
 }
-func (dS *DispatcherService) AdminSv1GetChargerProfileIDs(ctx *context.Context, args *utils.ArgsItemIDs, reply *[]string) (err error) {
-	tnt := dS.cfg.GeneralCfg().DefaultTenant
-	if args != nil && len(args.Tenant) != 0 {
-		tnt = args.Tenant
-	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
-	if args != nil {
-		opts = args.APIOpts
-	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.AdminSv1GetChargerProfilesIDs, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
-	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaAdminS, utils.AdminSv1GetChargerProfilesIDs, args, reply)
-}
 func (dS *DispatcherService) AdminSv1GetChargerProfiles(ctx *context.Context, args *utils.ArgsItemIDs, reply *[]*engine.ChargerProfile) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args != nil && len(args.Tenant) != 0 {
@@ -402,6 +385,23 @@ func (dS *DispatcherService) AdminSv1GetChargerProfilesCount(ctx *context.Contex
 		}
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaAdminS, utils.AdminSv1GetChargerProfilesCount, args, reply)
+}
+func (dS *DispatcherService) AdminSv1GetChargerProfilesIDs(ctx *context.Context, args *utils.ArgsItemIDs, reply *[]string) (err error) {
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args != nil && len(args.Tenant) != 0 {
+		tnt = args.Tenant
+	}
+	ev := make(map[string]interface{})
+	opts := make(map[string]interface{})
+	if args != nil {
+		opts = args.APIOpts
+	}
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
+		if err = dS.authorize(ctx, utils.AdminSv1GetChargerProfilesIDs, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
+			return
+		}
+	}
+	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaAdminS, utils.AdminSv1GetChargerProfilesIDs, args, reply)
 }
 func (dS *DispatcherService) AdminSv1GetChargersIndexesHealth(ctx *context.Context, args *engine.IndexHealthArgs, reply *engine.FilterIHReply) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
@@ -590,23 +590,6 @@ func (dS *DispatcherService) AdminSv1GetFilter(ctx *context.Context, args *utils
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaAdminS, utils.AdminSv1GetFilter, args, reply)
 }
-func (dS *DispatcherService) AdminSv1GetFilterIDs(ctx *context.Context, args *utils.ArgsItemIDs, reply *[]string) (err error) {
-	tnt := dS.cfg.GeneralCfg().DefaultTenant
-	if args != nil && len(args.Tenant) != 0 {
-		tnt = args.Tenant
-	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
-	if args != nil {
-		opts = args.APIOpts
-	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.AdminSv1GetFilterIDs, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
-	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaAdminS, utils.AdminSv1GetFilterIDs, args, reply)
-}
 func (dS *DispatcherService) AdminSv1GetFilterIndexes(ctx *context.Context, args *apis.AttrGetFilterIndexes, reply *[]string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args != nil && len(args.Tenant) != 0 {
@@ -658,6 +641,23 @@ func (dS *DispatcherService) AdminSv1GetFiltersCount(ctx *context.Context, args 
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaAdminS, utils.AdminSv1GetFiltersCount, args, reply)
 }
+func (dS *DispatcherService) AdminSv1GetFiltersIDs(ctx *context.Context, args *utils.ArgsItemIDs, reply *[]string) (err error) {
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args != nil && len(args.Tenant) != 0 {
+		tnt = args.Tenant
+	}
+	ev := make(map[string]interface{})
+	opts := make(map[string]interface{})
+	if args != nil {
+		opts = args.APIOpts
+	}
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
+		if err = dS.authorize(ctx, utils.AdminSv1GetFiltersIDs, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
+			return
+		}
+	}
+	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaAdminS, utils.AdminSv1GetFiltersIDs, args, reply)
+}
 func (dS *DispatcherService) AdminSv1GetRateProfile(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *utils.RateProfile) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args != nil && (args.TenantID != nil && len(args.TenantID.Tenant) != 0) {
@@ -674,40 +674,6 @@ func (dS *DispatcherService) AdminSv1GetRateProfile(ctx *context.Context, args *
 		}
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaAdminS, utils.AdminSv1GetRateProfile, args, reply)
-}
-func (dS *DispatcherService) AdminSv1GetRateProfileIDs(ctx *context.Context, args *utils.ArgsItemIDs, reply *[]string) (err error) {
-	tnt := dS.cfg.GeneralCfg().DefaultTenant
-	if args != nil && len(args.Tenant) != 0 {
-		tnt = args.Tenant
-	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
-	if args != nil {
-		opts = args.APIOpts
-	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.AdminSv1GetRateProfilesIDs, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
-	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaAdminS, utils.AdminSv1GetRateProfilesIDs, args, reply)
-}
-func (dS *DispatcherService) AdminSv1GetRateProfileRateIDs(ctx *context.Context, args *utils.ArgsSubItemIDs, reply *[]string) (err error) {
-	tnt := dS.cfg.GeneralCfg().DefaultTenant
-	if args != nil && len(args.Tenant) != 0 {
-		tnt = args.Tenant
-	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
-	if args != nil {
-		opts = args.APIOpts
-	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.AdminSv1GetRateProfileRatesIDs, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
-	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaAdminS, utils.AdminSv1GetRateProfileRatesIDs, args, reply)
 }
 func (dS *DispatcherService) AdminSv1GetRateProfileRates(ctx *context.Context, args *utils.ArgsSubItemIDs, reply *[]*utils.Rate) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
@@ -743,6 +709,23 @@ func (dS *DispatcherService) AdminSv1GetRateProfileRatesCount(ctx *context.Conte
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaAdminS, utils.AdminSv1GetRateProfileRatesCount, args, reply)
 }
+func (dS *DispatcherService) AdminSv1GetRateProfileRatesIDs(ctx *context.Context, args *utils.ArgsSubItemIDs, reply *[]string) (err error) {
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args != nil && len(args.Tenant) != 0 {
+		tnt = args.Tenant
+	}
+	ev := make(map[string]interface{})
+	opts := make(map[string]interface{})
+	if args != nil {
+		opts = args.APIOpts
+	}
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
+		if err = dS.authorize(ctx, utils.AdminSv1GetRateProfileRatesIDs, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
+			return
+		}
+	}
+	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaAdminS, utils.AdminSv1GetRateProfileRatesIDs, args, reply)
+}
 func (dS *DispatcherService) AdminSv1GetRateProfiles(ctx *context.Context, args *utils.ArgsItemIDs, reply *[]*utils.RateProfile) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args != nil && len(args.Tenant) != 0 {
@@ -776,6 +759,23 @@ func (dS *DispatcherService) AdminSv1GetRateProfilesCount(ctx *context.Context, 
 		}
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaAdminS, utils.AdminSv1GetRateProfilesCount, args, reply)
+}
+func (dS *DispatcherService) AdminSv1GetRateProfilesIDs(ctx *context.Context, args *utils.ArgsItemIDs, reply *[]string) (err error) {
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args != nil && len(args.Tenant) != 0 {
+		tnt = args.Tenant
+	}
+	ev := make(map[string]interface{})
+	opts := make(map[string]interface{})
+	if args != nil {
+		opts = args.APIOpts
+	}
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
+		if err = dS.authorize(ctx, utils.AdminSv1GetRateProfilesIDs, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
+			return
+		}
+	}
+	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaAdminS, utils.AdminSv1GetRateProfilesIDs, args, reply)
 }
 func (dS *DispatcherService) AdminSv1GetRateProfilesIndexesHealth(ctx *context.Context, args *engine.IndexHealthArgs, reply *engine.FilterIHReply) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
@@ -828,23 +828,6 @@ func (dS *DispatcherService) AdminSv1GetResourceProfile(ctx *context.Context, ar
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaAdminS, utils.AdminSv1GetResourceProfile, args, reply)
 }
-func (dS *DispatcherService) AdminSv1GetResourceProfileIDs(ctx *context.Context, args *utils.ArgsItemIDs, reply *[]string) (err error) {
-	tnt := dS.cfg.GeneralCfg().DefaultTenant
-	if args != nil && len(args.Tenant) != 0 {
-		tnt = args.Tenant
-	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
-	if args != nil {
-		opts = args.APIOpts
-	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.AdminSv1GetResourceProfilesIDs, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
-	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaAdminS, utils.AdminSv1GetResourceProfilesIDs, args, reply)
-}
 func (dS *DispatcherService) AdminSv1GetResourceProfiles(ctx *context.Context, args *utils.ArgsItemIDs, reply *[]*engine.ResourceProfile) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args != nil && len(args.Tenant) != 0 {
@@ -878,6 +861,23 @@ func (dS *DispatcherService) AdminSv1GetResourceProfilesCount(ctx *context.Conte
 		}
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaAdminS, utils.AdminSv1GetResourceProfilesCount, args, reply)
+}
+func (dS *DispatcherService) AdminSv1GetResourceProfilesIDs(ctx *context.Context, args *utils.ArgsItemIDs, reply *[]string) (err error) {
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args != nil && len(args.Tenant) != 0 {
+		tnt = args.Tenant
+	}
+	ev := make(map[string]interface{})
+	opts := make(map[string]interface{})
+	if args != nil {
+		opts = args.APIOpts
+	}
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
+		if err = dS.authorize(ctx, utils.AdminSv1GetResourceProfilesIDs, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
+			return
+		}
+	}
+	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaAdminS, utils.AdminSv1GetResourceProfilesIDs, args, reply)
 }
 func (dS *DispatcherService) AdminSv1GetResourcesIndexesHealth(ctx *context.Context, args *engine.IndexHealthArgs, reply *engine.FilterIHReply) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
@@ -930,23 +930,6 @@ func (dS *DispatcherService) AdminSv1GetRouteProfile(ctx *context.Context, args 
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaAdminS, utils.AdminSv1GetRouteProfile, args, reply)
 }
-func (dS *DispatcherService) AdminSv1GetRouteProfileIDs(ctx *context.Context, args *utils.ArgsItemIDs, reply *[]string) (err error) {
-	tnt := dS.cfg.GeneralCfg().DefaultTenant
-	if args != nil && len(args.Tenant) != 0 {
-		tnt = args.Tenant
-	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
-	if args != nil {
-		opts = args.APIOpts
-	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.AdminSv1GetRouteProfilesIDs, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
-	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaAdminS, utils.AdminSv1GetRouteProfilesIDs, args, reply)
-}
 func (dS *DispatcherService) AdminSv1GetRouteProfiles(ctx *context.Context, args *utils.ArgsItemIDs, reply *[]*engine.RouteProfile) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args != nil && len(args.Tenant) != 0 {
@@ -980,6 +963,23 @@ func (dS *DispatcherService) AdminSv1GetRouteProfilesCount(ctx *context.Context,
 		}
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaAdminS, utils.AdminSv1GetRouteProfilesCount, args, reply)
+}
+func (dS *DispatcherService) AdminSv1GetRouteProfilesIDs(ctx *context.Context, args *utils.ArgsItemIDs, reply *[]string) (err error) {
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args != nil && len(args.Tenant) != 0 {
+		tnt = args.Tenant
+	}
+	ev := make(map[string]interface{})
+	opts := make(map[string]interface{})
+	if args != nil {
+		opts = args.APIOpts
+	}
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
+		if err = dS.authorize(ctx, utils.AdminSv1GetRouteProfilesIDs, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
+			return
+		}
+	}
+	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaAdminS, utils.AdminSv1GetRouteProfilesIDs, args, reply)
 }
 func (dS *DispatcherService) AdminSv1GetRoutesIndexesHealth(ctx *context.Context, args *engine.IndexHealthArgs, reply *engine.FilterIHReply) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
@@ -1015,23 +1015,6 @@ func (dS *DispatcherService) AdminSv1GetStatQueueProfile(ctx *context.Context, a
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaAdminS, utils.AdminSv1GetStatQueueProfile, args, reply)
 }
-func (dS *DispatcherService) AdminSv1GetStatQueueProfileIDs(ctx *context.Context, args *utils.ArgsItemIDs, reply *[]string) (err error) {
-	tnt := dS.cfg.GeneralCfg().DefaultTenant
-	if args != nil && len(args.Tenant) != 0 {
-		tnt = args.Tenant
-	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
-	if args != nil {
-		opts = args.APIOpts
-	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.AdminSv1GetStatQueueProfilesIDs, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
-	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaAdminS, utils.AdminSv1GetStatQueueProfilesIDs, args, reply)
-}
 func (dS *DispatcherService) AdminSv1GetStatQueueProfiles(ctx *context.Context, args *utils.ArgsItemIDs, reply *[]*engine.StatQueueProfile) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args != nil && len(args.Tenant) != 0 {
@@ -1065,6 +1048,23 @@ func (dS *DispatcherService) AdminSv1GetStatQueueProfilesCount(ctx *context.Cont
 		}
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaAdminS, utils.AdminSv1GetStatQueueProfilesCount, args, reply)
+}
+func (dS *DispatcherService) AdminSv1GetStatQueueProfilesIDs(ctx *context.Context, args *utils.ArgsItemIDs, reply *[]string) (err error) {
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args != nil && len(args.Tenant) != 0 {
+		tnt = args.Tenant
+	}
+	ev := make(map[string]interface{})
+	opts := make(map[string]interface{})
+	if args != nil {
+		opts = args.APIOpts
+	}
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
+		if err = dS.authorize(ctx, utils.AdminSv1GetStatQueueProfilesIDs, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
+			return
+		}
+	}
+	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaAdminS, utils.AdminSv1GetStatQueueProfilesIDs, args, reply)
 }
 func (dS *DispatcherService) AdminSv1GetStatsIndexesHealth(ctx *context.Context, args *engine.IndexHealthArgs, reply *engine.FilterIHReply) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
@@ -1100,23 +1100,6 @@ func (dS *DispatcherService) AdminSv1GetThresholdProfile(ctx *context.Context, a
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaAdminS, utils.AdminSv1GetThresholdProfile, args, reply)
 }
-func (dS *DispatcherService) AdminSv1GetThresholdProfileIDs(ctx *context.Context, args *utils.ArgsItemIDs, reply *[]string) (err error) {
-	tnt := dS.cfg.GeneralCfg().DefaultTenant
-	if args != nil && len(args.Tenant) != 0 {
-		tnt = args.Tenant
-	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
-	if args != nil {
-		opts = args.APIOpts
-	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.AdminSv1GetThresholdProfilesIDs, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
-	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaAdminS, utils.AdminSv1GetThresholdProfilesIDs, args, reply)
-}
 func (dS *DispatcherService) AdminSv1GetThresholdProfiles(ctx *context.Context, args *utils.ArgsItemIDs, reply *[]*engine.ThresholdProfile) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args != nil && len(args.Tenant) != 0 {
@@ -1150,6 +1133,23 @@ func (dS *DispatcherService) AdminSv1GetThresholdProfilesCount(ctx *context.Cont
 		}
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaAdminS, utils.AdminSv1GetThresholdProfilesCount, args, reply)
+}
+func (dS *DispatcherService) AdminSv1GetThresholdProfilesIDs(ctx *context.Context, args *utils.ArgsItemIDs, reply *[]string) (err error) {
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args != nil && len(args.Tenant) != 0 {
+		tnt = args.Tenant
+	}
+	ev := make(map[string]interface{})
+	opts := make(map[string]interface{})
+	if args != nil {
+		opts = args.APIOpts
+	}
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
+		if err = dS.authorize(ctx, utils.AdminSv1GetThresholdProfilesIDs, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
+			return
+		}
+	}
+	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaAdminS, utils.AdminSv1GetThresholdProfilesIDs, args, reply)
 }
 func (dS *DispatcherService) AdminSv1GetThresholdsIndexesHealth(ctx *context.Context, args *engine.IndexHealthArgs, reply *engine.FilterIHReply) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant

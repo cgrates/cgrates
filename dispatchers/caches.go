@@ -60,7 +60,7 @@ func (dS *DispatcherService) CacheSv1GetCacheStats(ctx *context.Context, args *u
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaCaches, utils.CacheSv1GetCacheStats, args, reply)
 }
-func (dS *DispatcherService) CacheSv1GetGroupItemIDs(ctx *context.Context, args *utils.ArgsGetGroupWithAPIOpts, reply *[]string) (err error) {
+func (dS *DispatcherService) CacheSv1GetGroupItemsIDs(ctx *context.Context, args *utils.ArgsGetGroupWithAPIOpts, reply *[]string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
@@ -94,7 +94,7 @@ func (dS *DispatcherService) CacheSv1GetItemExpiryTime(ctx *context.Context, arg
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaCaches, utils.CacheSv1GetItemExpiryTime, args, reply)
 }
-func (dS *DispatcherService) CacheSv1GetItemIDs(ctx *context.Context, args *utils.ArgsGetCacheItemIDsWithAPIOpts, reply *[]string) (err error) {
+func (dS *DispatcherService) CacheSv1GetItemsIDs(ctx *context.Context, args *utils.ArgsGetCacheItemIDsWithAPIOpts, reply *[]string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
@@ -267,7 +267,7 @@ func (dS *DispatcherService) CacheSv1RemoveItems(ctx *context.Context, args *uti
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaCaches, utils.CacheSv1RemoveItems, args, reply)
 }
-func (dS *DispatcherService) CacheSv1ReplicateRemove(ctx *context.Context, args *utils.ArgCacheReplicateRemove, reply *string) (err error) {
+func (dS *DispatcherService) CacheSv1ReplicateRemoveItem(ctx *context.Context, args *utils.ArgCacheReplicateRemove, reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
@@ -284,7 +284,7 @@ func (dS *DispatcherService) CacheSv1ReplicateRemove(ctx *context.Context, args 
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaCaches, utils.CacheSv1ReplicateRemoveItem, args, reply)
 }
-func (dS *DispatcherService) CacheSv1ReplicateSet(ctx *context.Context, args *utils.ArgCacheReplicateSet, reply *string) (err error) {
+func (dS *DispatcherService) CacheSv1ReplicateSetItem(ctx *context.Context, args *utils.ArgCacheReplicateSet, reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
@@ -295,9 +295,9 @@ func (dS *DispatcherService) CacheSv1ReplicateSet(ctx *context.Context, args *ut
 		opts = args.APIOpts
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.CacheSv1ReplicateSet, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
+		if err = dS.authorize(ctx, utils.CacheSv1ReplicateSetItem, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
-	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaCaches, utils.CacheSv1ReplicateSet, args, reply)
+	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaCaches, utils.CacheSv1ReplicateSetItem, args, reply)
 }

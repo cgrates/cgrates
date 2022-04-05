@@ -390,7 +390,7 @@ func (chS *CacheS) ReplicateSet(ctx *context.Context, chID, itmID string, value 
 		return
 	}
 	var reply string
-	return connMgr.Call(ctx, chS.cfg.CacheCfg().ReplicationConns, utils.CacheSv1ReplicateSet,
+	return connMgr.Call(ctx, chS.cfg.CacheCfg().ReplicationConns, utils.CacheSv1ReplicateSetItem,
 		&utils.ArgCacheReplicateSet{
 			CacheID: chID,
 			ItemID:  itmID,
@@ -399,7 +399,7 @@ func (chS *CacheS) ReplicateSet(ctx *context.Context, chID, itmID string, value 
 }
 
 // V1ReplicateSetItem replicate an item
-func (chS *CacheS) V1ReplicateSet(_ *context.Context, args *utils.ArgCacheReplicateSet, reply *string) (err error) {
+func (chS *CacheS) V1ReplicateSetItem(_ *context.Context, args *utils.ArgCacheReplicateSet, reply *string) (err error) {
 	if cmp, canCast := args.Value.(utils.Compiler); canCast {
 		if err = cmp.Compile(); err != nil {
 			return

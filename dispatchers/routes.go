@@ -25,7 +25,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func (dS *DispatcherService) RouteSv1GetRouteProfilesForEvent(ctx *context.Context, args *utils.CGREvent, reply *[]*engine.RouteProfile) (err error) {
+func (dS *DispatcherService) RouteSv1GetRoutesForEvent(ctx *context.Context, args *utils.CGREvent, reply *[]*engine.RouteProfile) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
@@ -44,26 +44,6 @@ func (dS *DispatcherService) RouteSv1GetRouteProfilesForEvent(ctx *context.Conte
 		}
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaRoutes, utils.RouteSv1GetRoutesForEvent, args, reply)
-}
-func (dS *DispatcherService) RouteSv1GetRoutes(ctx *context.Context, args *utils.CGREvent, reply *engine.SortedRoutesList) (err error) {
-	tnt := dS.cfg.GeneralCfg().DefaultTenant
-	if args != nil && len(args.Tenant) != 0 {
-		tnt = args.Tenant
-	}
-	ev := make(map[string]interface{})
-	if args != nil {
-		ev = args.Event
-	}
-	opts := make(map[string]interface{})
-	if args != nil {
-		opts = args.APIOpts
-	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.RouteSv1ProcessEvent, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
-	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaRoutes, utils.RouteSv1ProcessEvent, args, reply)
 }
 func (dS *DispatcherService) RouteSv1GetRoutesList(ctx *context.Context, args *utils.CGREvent, reply *[]string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
@@ -104,4 +84,24 @@ func (dS *DispatcherService) RouteSv1Ping(ctx *context.Context, args *utils.CGRE
 		}
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaRoutes, utils.RouteSv1Ping, args, reply)
+}
+func (dS *DispatcherService) RouteSv1ProcessEvent(ctx *context.Context, args *utils.CGREvent, reply *engine.SortedRoutesList) (err error) {
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args != nil && len(args.Tenant) != 0 {
+		tnt = args.Tenant
+	}
+	ev := make(map[string]interface{})
+	if args != nil {
+		ev = args.Event
+	}
+	opts := make(map[string]interface{})
+	if args != nil {
+		opts = args.APIOpts
+	}
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
+		if err = dS.authorize(ctx, utils.RouteSv1ProcessEvent, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
+			return
+		}
+	}
+	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaRoutes, utils.RouteSv1ProcessEvent, args, reply)
 }

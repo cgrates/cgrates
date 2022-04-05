@@ -44,7 +44,7 @@ func (dS *DispatcherService) AccountSv1AccountsForEvent(ctx *context.Context, ar
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaAccounts, utils.AccountSv1AccountsForEvent, args, reply)
 }
-func (dS *DispatcherService) AccountSv1ActionRemoveBalance(ctx *context.Context, args *utils.ArgsActRemoveBalances, reply *string) (err error) {
+func (dS *DispatcherService) AccountSv1ActionRemoveBalances(ctx *context.Context, args *utils.ArgsActRemoveBalances, reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
@@ -61,7 +61,7 @@ func (dS *DispatcherService) AccountSv1ActionRemoveBalance(ctx *context.Context,
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaAccounts, utils.AccountSv1ActionRemoveBalances, args, reply)
 }
-func (dS *DispatcherService) AccountSv1ActionSetBalance(ctx *context.Context, args *utils.ArgsActSetBalance, reply *string) (err error) {
+func (dS *DispatcherService) AccountSv1ActionSetBalances(ctx *context.Context, args *utils.ArgsActSetBalance, reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
@@ -117,23 +117,6 @@ func (dS *DispatcherService) AccountSv1DebitConcretes(ctx *context.Context, args
 		}
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaAccounts, utils.AccountSv1DebitConcretes, args, reply)
-}
-func (dS *DispatcherService) AccountSv1GetAccount(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *utils.Account) (err error) {
-	tnt := dS.cfg.GeneralCfg().DefaultTenant
-	if args != nil && (args.TenantID != nil && len(args.TenantID.Tenant) != 0) {
-		tnt = args.TenantID.Tenant
-	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
-	if args != nil {
-		opts = args.APIOpts
-	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.AdminSv1GetAccount, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
-	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaAccounts, utils.AdminSv1GetAccount, args, reply)
 }
 func (dS *DispatcherService) AccountSv1MaxAbstracts(ctx *context.Context, args *utils.CGREvent, reply *utils.EventCharges) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant

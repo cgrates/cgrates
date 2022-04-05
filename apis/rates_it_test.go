@@ -2155,7 +2155,7 @@ func testRateProfilesForEventMatchingEvents(t *testing.T) {
 
 	var rtPrfIDs []string
 	expected := []string{"RT_103", "RT_104"}
-	if err := rateSRPC.Call(context.Background(), utils.RateSv1RateProfilesForEvent,
+	if err := rateSRPC.Call(context.Background(), utils.RateSv1GetRateProfilesIDsForEvent,
 		&utils.CGREvent{
 			Tenant: "cgrates.org",
 			Event: map[string]interface{}{
@@ -2176,7 +2176,7 @@ func testRateProfilesForEventMatchingEvents(t *testing.T) {
 	}
 
 	expected = []string{"RT_103", "RT_104", "RT_105"}
-	if err := rateSRPC.Call(context.Background(), utils.RateSv1RateProfilesForEvent,
+	if err := rateSRPC.Call(context.Background(), utils.RateSv1GetRateProfilesIDsForEvent,
 		&utils.CGREvent{
 			Tenant: "cgrates.org",
 			Event: map[string]interface{}{
@@ -2198,7 +2198,7 @@ func testRateProfilesForEventMatchingEvents(t *testing.T) {
 	}
 
 	expected = []string{"RT_101", "RT_102", "RT_103", "RT_104", "RT_105"}
-	if err := rateSRPC.Call(context.Background(), utils.RateSv1RateProfilesForEvent,
+	if err := rateSRPC.Call(context.Background(), utils.RateSv1GetRateProfilesIDsForEvent,
 		&utils.CGREvent{
 			Tenant: "cgrates.org",
 			Event: map[string]interface{}{

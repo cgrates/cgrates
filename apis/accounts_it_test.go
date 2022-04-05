@@ -228,7 +228,7 @@ func testAccGetAccIDs(t *testing.T) {
 		Tenant: "cgrates.org",
 	}
 	expected := []string{"TEST_ACC_IT_TEST"}
-	if err := accSRPC.Call(context.Background(), utils.AdminSv1GetAccountIDs,
+	if err := accSRPC.Call(context.Background(), utils.AdminSv1GetAccountsIDs,
 		args, &reply); err != nil {
 		t.Error(err)
 	} else if len(reply) != len(expected) {
@@ -391,7 +391,7 @@ func testAccGetAccIDs2(t *testing.T) {
 		Tenant: "cgrates.org",
 	}
 	expected := []string{"TEST_ACC_IT_TEST", "TEST_ACC_IT_TEST2"}
-	if err := accSRPC.Call(context.Background(), utils.AdminSv1GetAccountIDs,
+	if err := accSRPC.Call(context.Background(), utils.AdminSv1GetAccountsIDs,
 		args, &reply); err != nil {
 		t.Error(err)
 	} else if len(reply) != len(expected) {

@@ -207,7 +207,7 @@ func testFilterSGetFilterIDs(t *testing.T) {
 	var reply []string
 	args := &engine.FilterWithAPIOpts{}
 	expected := []string{"fltr_for_attr"}
-	if err := fltrSRPC.Call(context.Background(), utils.AdminSv1GetFilterIDs,
+	if err := fltrSRPC.Call(context.Background(), utils.AdminSv1GetFiltersIDs,
 		args, &reply); err != nil {
 		t.Error(err)
 	} else if len(reply) != len(expected) {
@@ -350,7 +350,7 @@ func testFilterSGetFilterSIDs2(t *testing.T) {
 		Tenant: "cgrates.org",
 	}
 	expected := []string{"fltr_for_attr", "fltr_for_attr2"}
-	if err := fltrSRPC.Call(context.Background(), utils.AdminSv1GetFilterIDs,
+	if err := fltrSRPC.Call(context.Background(), utils.AdminSv1GetFiltersIDs,
 		args, &reply); err != nil {
 		t.Error(err)
 	} else if len(reply) != len(expected) {
