@@ -20,11 +20,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package dispatchers
 
 import (
-	"time"
-
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/ltcache"
+	"time"
 )
 
 func (dS *DispatcherService) CacheSv1Clear(ctx *context.Context, args *utils.AttrCacheIDsWithAPIOpts, reply *string) (err error) {
