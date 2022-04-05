@@ -334,25 +334,25 @@ func testV1RtStatsGetRoutesLowestCostStrategy(t *testing.T) {
 				{
 					RouteID: "route3",
 					SortingData: map[string]interface{}{
-						utils.Cost:         0.05,
-						utils.RatingPlanID: "RP_VENDOR2",
-						utils.Weight:       10.,
+						utils.Cost:          0.05,
+						utils.RateProfileID: "RP_VENDOR2",
+						utils.Weight:        10.,
 					},
 				},
 				{
 					RouteID: "route1",
 					SortingData: map[string]interface{}{
-						utils.Cost:         0.1,
-						utils.RatingPlanID: "RP_VENDOR1",
-						utils.Weight:       20.,
+						utils.Cost:          0.1,
+						utils.RateProfileID: "RP_VENDOR1",
+						utils.Weight:        20.,
 					},
 				},
 				{
 					RouteID: "route2",
 					SortingData: map[string]interface{}{
-						utils.Cost:         0.6,
-						utils.RatingPlanID: "RP_STANDARD",
-						utils.Weight:       15.,
+						utils.Cost:          0.6,
+						utils.RateProfileID: "RP_STANDARD",
+						utils.Weight:        15.,
 					},
 				},
 			},
