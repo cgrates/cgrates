@@ -1384,3 +1384,343 @@ func TestFiltersFiltersMatchErr(t *testing.T) {
 		t.Errorf("expected reply to be <%+v>", false)
 	}
 }
+
+func TestFiltersGetFiltersOK(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	connMgr := engine.NewConnManager(cfg)
+	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(dataDB, nil, connMgr)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil)
+	args1 := &engine.FilterWithAPIOpts{
+		Filter: &engine.Filter{
+			Tenant: "cgrates.org",
+			ID:     "test_ID1",
+			Rules: []*engine.FilterRule{
+				{
+					Type:    utils.MetaString,
+					Element: "~*req.Account",
+					Values:  []string{"1002"},
+				},
+			},
+		},
+		APIOpts: nil,
+	}
+
+	var setReply string
+	if err := admS.SetFilter(context.Background(), args1, &setReply); err != nil {
+		t.Error(err)
+	} else if setReply != "OK" {
+		t.Error("Unexpected reply returned:", setReply)
+	}
+
+	args2 := &engine.FilterWithAPIOpts{
+		Filter: &engine.Filter{
+			Tenant: "cgrates.org",
+			ID:     "test_ID2",
+			Rules: []*engine.FilterRule{
+				{
+					Type:    utils.MetaPrefix,
+					Element: "~*req.Destination",
+					Values:  []string{"10"},
+				},
+			},
+		},
+		APIOpts: nil,
+	}
+
+	if err := admS.SetFilter(context.Background(), args2, &setReply); err != nil {
+		t.Error(err)
+	} else if setReply != "OK" {
+		t.Error("Unexpected reply returned:", setReply)
+	}
+
+	// this profile will not match
+	args3 := &engine.FilterWithAPIOpts{
+		Filter: &engine.Filter{
+			Tenant: "cgrates.org",
+			ID:     "test2_ID1",
+			Rules: []*engine.FilterRule{
+				{
+					Type:    utils.MetaString,
+					Element: "~*req.Account",
+					Values:  []string{"1001"},
+				},
+			},
+		},
+		APIOpts: nil,
+	}
+
+	if err := admS.SetFilter(context.Background(), args3, &setReply); err != nil {
+		t.Error(err)
+	} else if setReply != "OK" {
+		t.Error("Unexpected reply returned:", setReply)
+	}
+
+	argsGet := &utils.ArgsItemIDs{
+		Tenant:      "cgrates.org",
+		ItemsPrefix: "test_ID",
+	}
+	exp := []*engine.Filter{
+		{
+			Tenant: "cgrates.org",
+			ID:     "test_ID1",
+			Rules: []*engine.FilterRule{
+				{
+					Type:    utils.MetaString,
+					Element: "~*req.Account",
+					Values:  []string{"1002"},
+				},
+			},
+		},
+		{
+			Tenant: "cgrates.org",
+			ID:     "test_ID2",
+			Rules: []*engine.FilterRule{
+				{
+					Type:    utils.MetaPrefix,
+					Element: "~*req.Destination",
+					Values:  []string{"10"},
+				},
+			},
+		},
+	}
+
+	var getReply []*engine.Filter
+	if err := admS.GetFilters(context.Background(), argsGet, &getReply); err != nil {
+		t.Error(err)
+	} else {
+		sort.Slice(getReply, func(i, j int) bool {
+			return getReply[i].ID < getReply[j].ID
+		})
+		for _, val := range exp {
+			val.Compile()
+		}
+		if !reflect.DeepEqual(getReply, exp) {
+			t.Errorf("expected: <%+v>, \nreceived: <%+v>",
+				utils.ToJSON(exp), utils.ToJSON(getReply))
+		}
+	}
+}
+
+func TestFiltersGetFiltersGetIDsErr(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	connMgr := engine.NewConnManager(cfg)
+	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(dataDB, nil, connMgr)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil)
+	args := &engine.FilterWithAPIOpts{
+		Filter: &engine.Filter{
+			Tenant: "cgrates.org",
+			ID:     "test_ID1",
+			Rules: []*engine.FilterRule{
+				{
+					Type:    utils.MetaString,
+					Element: "~*req.Account",
+					Values:  []string{"1002"},
+				},
+			},
+		},
+		APIOpts: nil,
+	}
+
+	var setReply string
+	if err := admS.SetFilter(context.Background(), args, &setReply); err != nil {
+		t.Error(err)
+	} else if setReply != "OK" {
+		t.Error("Unexpected reply returned:", setReply)
+	}
+
+	argsGet := &utils.ArgsItemIDs{
+		Tenant:      "cgrates.org",
+		ItemsPrefix: "test_ID",
+		APIOpts: map[string]interface{}{
+			utils.PageLimitOpt:    2,
+			utils.PageOffsetOpt:   4,
+			utils.PageMaxItemsOpt: 5,
+		},
+	}
+
+	experr := `SERVER_ERROR: maximum number of items exceeded`
+	var getReply []*engine.Filter
+	if err := admS.GetFilters(context.Background(), argsGet, &getReply); err == nil || err.Error() != experr {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+}
+
+func TestFiltersGetFiltersGetProfileErr(t *testing.T) {
+	engine.Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	dbMock := &engine.DataDBMock{
+		SetFilterDrvF: func(*context.Context, *engine.Filter) error {
+			return nil
+		},
+		RemoveFilterDrvF: func(*context.Context, string, string) error {
+			return nil
+		},
+		GetKeysForPrefixF: func(c *context.Context, s string) ([]string, error) {
+			return []string{"ftr_cgrates.org:TEST"}, nil
+		},
+	}
+
+	dm := engine.NewDataManager(dbMock, cfg.CacheCfg(), nil)
+	adms := &AdminSv1{
+		cfg: cfg,
+		dm:  dm,
+	}
+
+	var reply []*engine.Filter
+	experr := "SERVER_ERROR: NOT_IMPLEMENTED"
+
+	if err := adms.GetFilters(context.Background(),
+		&utils.ArgsItemIDs{
+			ItemsPrefix: "TEST",
+		}, &reply); err == nil || err.Error() != experr {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+
+	dm.DataDB().Flush(utils.EmptyString)
+}
+
+func TestFiltersGetFilterIDsGetOptsErr(t *testing.T) {
+	engine.Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	dbMock := &engine.DataDBMock{
+		GetFilterDrvF: func(*context.Context, string, string) (*engine.Filter, error) {
+			fltr := &engine.Filter{
+				Tenant: "cgrates.org",
+				ID:     "TEST",
+			}
+			return fltr, nil
+		},
+		SetFilterDrvF: func(*context.Context, *engine.Filter) error {
+			return nil
+		},
+		RemoveFilterDrvF: func(*context.Context, string, string) error {
+			return nil
+		},
+		GetKeysForPrefixF: func(c *context.Context, s string) ([]string, error) {
+			return []string{"ftr_cgrates.org:key1", "ftr_cgrates.org:key2", "ftr_cgrates.org:key3"}, nil
+		},
+	}
+
+	dm := engine.NewDataManager(dbMock, cfg.CacheCfg(), nil)
+	adms := &AdminSv1{
+		cfg: cfg,
+		dm:  dm,
+	}
+
+	var reply []string
+	experr := "cannot convert field<bool>: true to int"
+
+	if err := adms.GetFilterIDs(context.Background(),
+		&utils.ArgsItemIDs{
+			Tenant: "cgrates.org",
+			APIOpts: map[string]interface{}{
+				utils.PageLimitOpt: true,
+			},
+		}, &reply); err == nil || err.Error() != experr {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+
+	dm.DataDB().Flush(utils.EmptyString)
+}
+
+func TestFiltersGetFilterIDsPaginateErr(t *testing.T) {
+	engine.Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	dbMock := &engine.DataDBMock{
+		GetFilterDrvF: func(*context.Context, string, string) (*engine.Filter, error) {
+			fltr := &engine.Filter{
+				Tenant: "cgrates.org",
+				ID:     "TEST",
+			}
+			return fltr, nil
+		},
+		SetFilterDrvF: func(*context.Context, *engine.Filter) error {
+			return nil
+		},
+		RemoveFilterDrvF: func(*context.Context, string, string) error {
+			return nil
+		},
+		GetKeysForPrefixF: func(c *context.Context, s string) ([]string, error) {
+			return []string{"ftr_cgrates.org:key1", "ftr_cgrates.org:key2", "ftr_cgrates.org:key3"}, nil
+		},
+	}
+
+	dm := engine.NewDataManager(dbMock, cfg.CacheCfg(), nil)
+	adms := &AdminSv1{
+		cfg: cfg,
+		dm:  dm,
+	}
+
+	var reply []string
+	experr := `SERVER_ERROR: maximum number of items exceeded`
+
+	if err := adms.GetFilterIDs(context.Background(),
+		&utils.ArgsItemIDs{
+			Tenant: "cgrates.org",
+			APIOpts: map[string]interface{}{
+				utils.PageLimitOpt:    2,
+				utils.PageOffsetOpt:   4,
+				utils.PageMaxItemsOpt: 5,
+			},
+		}, &reply); err == nil || err.Error() != experr {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+
+	dm.DataDB().Flush(utils.EmptyString)
+}
+
+func TestFiltersSetFilterNoRulesErr(t *testing.T) {
+	engine.Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	connMgr := engine.NewConnManager(cfg)
+	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(dataDB, nil, connMgr)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil)
+	fltr := &engine.FilterWithAPIOpts{
+		Filter: &engine.Filter{
+			ID:    "fltr_for_attr",
+			Rules: []*engine.FilterRule{},
+		},
+	}
+	experr := `MANDATORY_IE_MISSING: [Filter Rules]`
+	var reply string
+	if err := admS.SetFilter(context.Background(), fltr, &reply); err == nil ||
+		err.Error() != experr {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+}
+
+func TestFiltersSetFilterInvalidRulesErr(t *testing.T) {
+	engine.Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	connMgr := engine.NewConnManager(cfg)
+	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(dataDB, nil, connMgr)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil)
+	fltr := &engine.FilterWithAPIOpts{
+		Filter: &engine.Filter{
+			ID: "fltr_for_attr",
+			Rules: []*engine.FilterRule{
+				{
+					Type:    utils.MetaString,
+					Element: "~*req.Account",
+				},
+			},
+		},
+	}
+	experr := `SERVER_ERROR: there exists at least one filter rule that is not valid`
+	var reply string
+	if err := admS.SetFilter(context.Background(), fltr, &reply); err == nil ||
+		err.Error() != experr {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+}
