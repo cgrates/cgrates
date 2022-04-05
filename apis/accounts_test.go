@@ -2357,3 +2357,94 @@ func TestAccountsGetAccountIDsPaginateErr(t *testing.T) {
 
 	dm.DataDB().Flush(utils.EmptyString)
 }
+
+func TestAccountsRefundCharges(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	connMgr := engine.NewConnManager(cfg)
+	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(dataDB, nil, connMgr)
+	acc := accounts.NewAccountS(cfg, &engine.FilterS{}, connMgr, dm)
+	accS := NewAccountSv1(acc)
+
+	var reply string
+
+	args := &utils.APIEventCharges{
+		Tenant: "cgrates.org",
+		EventCharges: &utils.EventCharges{
+			Abstracts: nil,
+		},
+	}
+
+	if err := accS.RefundCharges(context.Background(), args, &reply); err != nil {
+		t.Error(err)
+	}
+	if reply != utils.OK {
+		t.Errorf("Expected %v\n but received %v", utils.OK, reply)
+	}
+}
+
+func TestAccountsGetAccount(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	connMgr := engine.NewConnManager(cfg)
+	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(dataDB, nil, connMgr)
+	acc := accounts.NewAccountS(cfg, &engine.FilterS{}, connMgr, dm)
+	accS := NewAccountSv1(acc)
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	admS := NewAdminSv1(cfg, dm, nil)
+	acc_args := &utils.AccountWithAPIOpts{
+		Account: &utils.Account{
+			Tenant: "cgrates.org",
+			ID:     "test_ID1",
+			Opts:   map[string]interface{}{},
+			Balances: map[string]*utils.Balance{
+				"VoiceBalance": {
+					ID: "VoiceBalance",
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 12,
+						},
+					},
+					Type: "*abstract",
+					Opts: map[string]interface{}{
+						"Destination": 10,
+					},
+					CostIncrements: []*utils.CostIncrement{
+						{
+							RecurrentFee: utils.NewDecimal(1, 0),
+							Increment:    utils.NewDecimal(1, 1),
+						},
+					},
+					Units: utils.NewDecimal(0, 0),
+				},
+			},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				},
+			},
+		},
+		APIOpts: nil,
+	}
+
+	var setRply string
+	err := admS.SetAccount(context.Background(), acc_args, &setRply)
+	if err != nil {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
+	}
+
+	var reply utils.Account
+
+	args := &utils.TenantIDWithAPIOpts{
+		TenantID: utils.NewTenantID("cgrates.org:test_ID1"),
+	}
+
+	if err := accS.GetAccount(context.Background(), args, &reply); err != nil {
+		t.Error(err)
+	}
+	if !reflect.DeepEqual(&reply, acc_args.Account) {
+		t.Errorf("Expected %v\n but received %v", reply, acc_args.Account)
+	}
+}
