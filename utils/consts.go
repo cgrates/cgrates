@@ -754,7 +754,6 @@ const (
 	RateSlots               = "RateSlots"
 	RatingPlanBindings      = "RatingPlanBindings"
 	RatingPlanActivations   = "RatingPlanActivations"
-	RatingProfileID         = "RatingProfileID"
 	Time                    = "Time"
 	TargetIDs               = "TargetIDs"
 	TargetType              = "TargetType"
