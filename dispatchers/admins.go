@@ -60,6 +60,26 @@ func (dS *DispatcherService) AdminSv1ComputeFilterIndexes(ctx *context.Context, 
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaAdminS, utils.AdminSv1ComputeFilterIndexes, args, reply)
 }
+func (dS *DispatcherService) AdminSv1FiltersMatch(ctx *context.Context, args *engine.ArgsFiltersMatch, reply *bool) (err error) {
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args != nil && (args.CGREvent != nil && len(args.CGREvent.Tenant) != 0) {
+		tnt = args.CGREvent.Tenant
+	}
+	ev := make(map[string]interface{})
+	if args != nil && args.CGREvent != nil {
+		ev = args.CGREvent.Event
+	}
+	opts := make(map[string]interface{})
+	if args != nil && args.CGREvent != nil {
+		opts = args.CGREvent.APIOpts
+	}
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
+		if err = dS.authorize(ctx, utils.AdminSv1FiltersMatch, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
+			return
+		}
+	}
+	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaAdminS, utils.AdminSv1FiltersMatch, args, reply)
+}
 func (dS *DispatcherService) AdminSv1GetAccount(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *utils.Account) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args != nil && (args.TenantID != nil && len(args.TenantID.Tenant) != 0) {
