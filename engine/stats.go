@@ -440,8 +440,8 @@ func (sS *StatS) V1GetStatQueue(ctx *context.Context, args *utils.TenantIDWithAP
 	return
 }
 
-// V1GetQueueStringMetrics returns the metrics of a Queue as string values
-func (sS *StatS) V1GetQueueStringMetrics(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *map[string]string) (err error) {
+// V1GetStatQueueStringMetrics returns the metrics of a Queue as string values
+func (sS *StatS) V1GetStatQueueStringMetrics(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *map[string]string) (err error) {
 	if missing := utils.MissingStructFields(args, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -475,8 +475,8 @@ func (sS *StatS) V1GetQueueStringMetrics(ctx *context.Context, args *utils.Tenan
 	return
 }
 
-// V1GetQueueFloatMetrics returns the metrics as float64 values
-func (sS *StatS) V1GetQueueFloatMetrics(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *map[string]float64) (err error) {
+// V1GetStatQueueFloatMetrics returns the metrics as float64 values
+func (sS *StatS) V1GetStatQueueFloatMetrics(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *map[string]float64) (err error) {
 	if missing := utils.MissingStructFields(args, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -508,8 +508,8 @@ func (sS *StatS) V1GetQueueFloatMetrics(ctx *context.Context, args *utils.Tenant
 	return
 }
 
-// V1GetQueueDecimalMetrics returns the metrics as decimal values
-func (sS *StatS) V1GetQueueDecimalMetrics(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *map[string]*utils.Decimal) (err error) {
+// V1GetStatQueueDecimalMetrics returns the metrics as decimal values
+func (sS *StatS) V1GetStatQueueDecimalMetrics(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *map[string]*utils.Decimal) (err error) {
 	if missing := utils.MissingStructFields(args, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -537,8 +537,8 @@ func (sS *StatS) V1GetQueueDecimalMetrics(ctx *context.Context, args *utils.Tena
 	return
 }
 
-// V1GetQueueIDs returns list of queueIDs registered for a tenant
-func (sS *StatS) V1GetQueueIDs(ctx *context.Context, args *utils.TenantWithAPIOpts, qIDs *[]string) (err error) {
+// V1GetStatQueuesIDs returns list of queueIDs registered for a tenant
+func (sS *StatS) V1GetStatQueuesIDs(ctx *context.Context, args *utils.TenantWithAPIOpts, qIDs *[]string) (err error) {
 	tenant := args.Tenant
 	if tenant == utils.EmptyString {
 		tenant = sS.cfg.GeneralCfg().DefaultTenant

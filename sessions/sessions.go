@@ -3001,7 +3001,7 @@ func (sS *SessionS) getRoutes(ctx *context.Context, cgrEv *utils.CGREvent) (rout
 	if acd, has := cgrEv.Event[utils.ACD]; has {
 		cgrEv.Event[utils.Usage] = acd
 	}
-	if err = sS.connMgr.Call(ctx, sS.cfg.SessionSCfg().RouteSConns, utils.RouteSv1GetRoutes,
+	if err = sS.connMgr.Call(ctx, sS.cfg.SessionSCfg().RouteSConns, utils.RouteSv1ProcessEvent,
 		cgrEv, &routesReply); err != nil {
 		return routesReply, utils.NewErrRouteS(err)
 	}

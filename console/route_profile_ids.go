@@ -25,7 +25,7 @@ import (
 func init() {
 	c := &CmdGetRouteProfileIDs{
 		name:      "route_profile_ids",
-		rpcMethod: utils.AdminSv1GetRouteProfileIDs,
+		rpcMethod: utils.AdminSv1GetRouteProfilesIDs,
 		rpcParams: &utils.ArgsItemIDs{},
 	}
 	commands[c.Name()] = c

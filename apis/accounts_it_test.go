@@ -1635,7 +1635,7 @@ func testAccActionSetRmvBalance(t *testing.T) {
 		AccountID:  "TEST_ACC_IT_TEST8",
 		BalanceIDs: []string{"AbstractBalance3"},
 	}
-	if err := accSRPC.Call(context.Background(), utils.AccountSv1ActionRemoveBalance,
+	if err := accSRPC.Call(context.Background(), utils.AccountSv1ActionRemoveBalances,
 		args3, &reply4); err != nil {
 		t.Error(err)
 	}

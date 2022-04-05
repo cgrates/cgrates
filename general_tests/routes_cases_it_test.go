@@ -492,7 +492,7 @@ func testV1RtsCasesSortingRoutesWeightAccountValue(t *testing.T) {
 		},
 	}
 	var reply *engine.SortedRoutesList
-	if err := rtsCaseSv1BiRpc.Call(context.Background(), utils.RouteSv1GetRoutes,
+	if err := rtsCaseSv1BiRpc.Call(context.Background(), utils.RouteSv1ProcessEvent,
 		ev, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expSrtdRoutes, reply) {
@@ -542,7 +542,7 @@ func testV1RtsCasesSortingRoutesWeightAllRoutes(t *testing.T) {
 		},
 	}
 	var reply *engine.SortedRoutesList
-	if err := rtsCaseSv1BiRpc.Call(context.Background(), utils.RouteSv1GetRoutes,
+	if err := rtsCaseSv1BiRpc.Call(context.Background(), utils.RouteSv1ProcessEvent,
 		ev, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expSrtdRoutes, reply) {
@@ -606,7 +606,7 @@ func testV1RtsCasesSortingRoutesWeightNotMatchingValue(t *testing.T) {
 		},
 	}
 	var reply *engine.SortedRoutesList
-	if err := rtsCaseSv1BiRpc.Call(context.Background(), utils.RouteSv1GetRoutes,
+	if err := rtsCaseSv1BiRpc.Call(context.Background(), utils.RouteSv1ProcessEvent,
 		ev, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expSrtdRoutes, reply) {
@@ -653,7 +653,7 @@ func testV1RtsCasesSortingRoutesLowestCost(t *testing.T) {
 	}
 	var reply *engine.SortedRoutesList
 	//gonna match one route because the totalUsage by ne-allocated resources is 0
-	if err := rtsCaseSv1BiRpc.Call(context.Background(), utils.RouteSv1GetRoutes,
+	if err := rtsCaseSv1BiRpc.Call(context.Background(), utils.RouteSv1ProcessEvent,
 		ev, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expSrtdRoutes, reply) {
@@ -707,7 +707,7 @@ func testV1RtsCasesSortingRoutesLowestCostDefaultUsage(t *testing.T) {
 	}
 	var reply *engine.SortedRoutesList
 	//gonna match one route because the totalUsage by ne-allocated resources is 0
-	if err := rtsCaseSv1BiRpc.Call(context.Background(), utils.RouteSv1GetRoutes,
+	if err := rtsCaseSv1BiRpc.Call(context.Background(), utils.RouteSv1ProcessEvent,
 		ev, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expSrtdRoutes, reply) {
@@ -814,7 +814,7 @@ func testV1RtsCasesSortingRoutesLowestCostStats(t *testing.T) {
 	}
 	var reply *engine.SortedRoutesList
 	//gonna match one route because the totalUsage by ne-allocated resources is 0
-	if err := rtsCaseSv1BiRpc.Call(context.Background(), utils.RouteSv1GetRoutes,
+	if err := rtsCaseSv1BiRpc.Call(context.Background(), utils.RouteSv1ProcessEvent,
 		ev, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expSrtdRoutes, reply) {
@@ -897,7 +897,7 @@ func testV1RtsCasesSortingRoutesLowestCosMatchingAllRoutes(t *testing.T) {
 		},
 	}
 	var reply *engine.SortedRoutesList
-	if err := rtsCaseSv1BiRpc.Call(context.Background(), utils.RouteSv1GetRoutes,
+	if err := rtsCaseSv1BiRpc.Call(context.Background(), utils.RouteSv1ProcessEvent,
 		ev, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expSrtdRoutes, reply) {
@@ -954,7 +954,7 @@ func testV1RtsCasesSortingRoutesLowestCosMaxCost(t *testing.T) {
 		},
 	}
 	var reply *engine.SortedRoutesList
-	if err := rtsCaseSv1BiRpc.Call(context.Background(), utils.RouteSv1GetRoutes,
+	if err := rtsCaseSv1BiRpc.Call(context.Background(), utils.RouteSv1ProcessEvent,
 		ev, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expSrtdRoutes, reply) {
@@ -979,7 +979,7 @@ func testV1RtsCasesSortingRoutesLowestCosMaxCostNotMatch(t *testing.T) {
 		},
 	}
 	var reply *engine.SortedRoutesList
-	if err := rtsCaseSv1BiRpc.Call(context.Background(), utils.RouteSv1GetRoutes,
+	if err := rtsCaseSv1BiRpc.Call(context.Background(), utils.RouteSv1ProcessEvent,
 		ev, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expected %+v, received %+v", utils.ErrNotFound, err)
 	}
@@ -1107,7 +1107,7 @@ func testV1RtsCasesSortingRoutesQOS(t *testing.T) {
 		},
 	}
 	var reply *engine.SortedRoutesList
-	if err := rtsCaseSv1BiRpc.Call(context.Background(), utils.RouteSv1GetRoutes,
+	if err := rtsCaseSv1BiRpc.Call(context.Background(), utils.RouteSv1ProcessEvent,
 		ev, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expSrtdRoutes) {
@@ -1194,7 +1194,7 @@ func testV1RtsCasesSortingRoutesQOSAllRoutes(t *testing.T) {
 		},
 	}
 	var reply *engine.SortedRoutesList
-	if err := rtsCaseSv1BiRpc.Call(context.Background(), utils.RouteSv1GetRoutes,
+	if err := rtsCaseSv1BiRpc.Call(context.Background(), utils.RouteSv1ProcessEvent,
 		ev, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expSrtdRoutes) {
@@ -1218,7 +1218,7 @@ func testV1RtsCasesSortingRoutesQOSNotFound(t *testing.T) {
 		},
 	}
 	var reply *engine.SortedRoutesList
-	if err := rtsCaseSv1BiRpc.Call(context.Background(), utils.RouteSv1GetRoutes,
+	if err := rtsCaseSv1BiRpc.Call(context.Background(), utils.RouteSv1ProcessEvent,
 		ev, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expected %+v, received %+v", utils.ErrNotFound, err)
 	}
@@ -1295,7 +1295,7 @@ func testV1RtsCasesSortingRoutesReasNotAllRoutes(t *testing.T) {
 		},
 	}
 	var reply *engine.SortedRoutesList
-	if err := rtsCaseSv1BiRpc.Call(context.Background(), utils.RouteSv1GetRoutes,
+	if err := rtsCaseSv1BiRpc.Call(context.Background(), utils.RouteSv1ProcessEvent,
 		ev, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expSrtdRoutes) {
@@ -1361,7 +1361,7 @@ func testV1RtsCasesSortingRoutesReasAllRoutes(t *testing.T) {
 		},
 	}
 	var reply *engine.SortedRoutesList
-	if err := rtsCaseSv1BiRpc.Call(context.Background(), utils.RouteSv1GetRoutes,
+	if err := rtsCaseSv1BiRpc.Call(context.Background(), utils.RouteSv1ProcessEvent,
 		ev, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expSrtdRoutes) {
@@ -1494,7 +1494,7 @@ func testV1RtsCasesRoutesLoadRtsSorting(t *testing.T) {
 		},
 	}
 	var reply *engine.SortedRoutesList
-	if err := rtsCaseSv1BiRpc.Call(context.Background(), utils.RouteSv1GetRoutes,
+	if err := rtsCaseSv1BiRpc.Call(context.Background(), utils.RouteSv1ProcessEvent,
 		ev, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expSrtdRoutes) {
@@ -1541,7 +1541,7 @@ func testV1RtsCasesSortRoutesHigherCostV2V3(t *testing.T) {
 		},
 	}
 	var reply *engine.SortedRoutesList
-	if err := rtsCaseSv1BiRpc.Call(context.Background(), utils.RouteSv1GetRoutes,
+	if err := rtsCaseSv1BiRpc.Call(context.Background(), utils.RouteSv1ProcessEvent,
 		ev, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expSrtdRoutes) {
@@ -1666,7 +1666,7 @@ func testV1RtsCasesSortRoutesHigherCostV1V3(t *testing.T) {
 		},
 	}
 	var reply *engine.SortedRoutesList
-	if err := rtsCaseSv1BiRpc.Call(context.Background(), utils.RouteSv1GetRoutes,
+	if err := rtsCaseSv1BiRpc.Call(context.Background(), utils.RouteSv1ProcessEvent,
 		ev, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expSrtdRoutes) {
@@ -1740,7 +1740,7 @@ func testV1RtsCasesSortRoutesHigherCostAllRoutes(t *testing.T) {
 		},
 	}
 	var reply *engine.SortedRoutesList
-	if err := rtsCaseSv1BiRpc.Call(context.Background(), utils.RouteSv1GetRoutes,
+	if err := rtsCaseSv1BiRpc.Call(context.Background(), utils.RouteSv1ProcessEvent,
 		ev, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expSrtdRoutes) {

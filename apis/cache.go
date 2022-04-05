@@ -37,10 +37,10 @@ func NewCacheSv1(cacheS *engine.CacheS) *CacheSv1 {
 	return &CacheSv1{cacheS: cacheS}
 }
 
-// GetItemIDs returns the IDs for cacheID with given prefix
-func (chSv1 *CacheSv1) GetItemIDs(ctx *context.Context, args *utils.ArgsGetCacheItemIDsWithAPIOpts,
+// GetItemsIDs returns the IDs for cacheID with given prefix
+func (chSv1 *CacheSv1) GetItemsIDs(ctx *context.Context, args *utils.ArgsGetCacheItemIDsWithAPIOpts,
 	reply *[]string) error {
-	return chSv1.cacheS.V1GetItemIDs(ctx, args, reply)
+	return chSv1.cacheS.V1GetItemsIDs(ctx, args, reply)
 }
 
 // HasItem verifies the existence of an Item in cache
@@ -90,10 +90,10 @@ func (chSv1 *CacheSv1) HasGroup(ctx *context.Context, args *utils.ArgsGetGroupWi
 	return chSv1.cacheS.V1HasGroup(ctx, args, rply)
 }
 
-// GetGroupItemIDs returns a list of itemIDs in a cache group
-func (chSv1 *CacheSv1) GetGroupItemIDs(ctx *context.Context, args *utils.ArgsGetGroupWithAPIOpts, //
+// GetGroupItemsIDs returns a list of itemIDs in a cache group
+func (chSv1 *CacheSv1) GetGroupItemsIDs(ctx *context.Context, args *utils.ArgsGetGroupWithAPIOpts, //
 	rply *[]string) (err error) {
-	return chSv1.cacheS.V1GetGroupItemIDs(ctx, args, rply)
+	return chSv1.cacheS.V1GetGroupItemsIDs(ctx, args, rply)
 }
 
 // RemoveGroup will remove a group and all items belonging to it from cache
@@ -112,12 +112,12 @@ func (chSv1 *CacheSv1) LoadCache(ctx *context.Context, args *utils.AttrReloadCac
 	return chSv1.cacheS.V1LoadCache(ctx, args, reply)
 }
 
-// ReplicateSet replicate an item
+// ReplicateSetItem replicate an item
 func (chSv1 *CacheSv1) ReplicateSet(ctx *context.Context, args *utils.ArgCacheReplicateSet, reply *string) (err error) { //
 	return chSv1.cacheS.V1ReplicateSet(ctx, args, reply)
 }
 
-// ReplicateRemove remove an item
+// ReplicateRemoveItem remove an item
 func (chSv1 *CacheSv1) ReplicateRemove(ctx *context.Context, args *utils.ArgCacheReplicateRemove, reply *string) (err error) { //
-	return chSv1.cacheS.V1ReplicateRemove(ctx, args, reply)
+	return chSv1.cacheS.V1ReplicateRemoveItem(ctx, args, reply)
 }

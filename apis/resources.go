@@ -43,8 +43,8 @@ func (adms *AdminSv1) GetResourceProfile(ctx *context.Context, arg *utils.Tenant
 	return nil
 }
 
-// GetResourceProfileIDs returns list of resourceProfile IDs registered for a tenant
-func (adms *AdminSv1) GetResourceProfileIDs(ctx *context.Context, args *utils.ArgsItemIDs, rsPrfIDs *[]string) (err error) {
+// GetResourceProfilesIDs returns list of resourceProfile IDs registered for a tenant
+func (adms *AdminSv1) GetResourceProfilesIDs(ctx *context.Context, args *utils.ArgsItemIDs, rsPrfIDs *[]string) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = adms.cfg.GeneralCfg().DefaultTenant
@@ -78,7 +78,7 @@ func (admS *AdminSv1) GetResourceProfiles(ctx *context.Context, args *utils.Args
 		tnt = admS.cfg.GeneralCfg().DefaultTenant
 	}
 	var rsPrfIDs []string
-	if err = admS.GetResourceProfileIDs(ctx, args, &rsPrfIDs); err != nil {
+	if err = admS.GetResourceProfilesIDs(ctx, args, &rsPrfIDs); err != nil {
 		return
 	}
 	*rsPrfs = make([]*engine.ResourceProfile, 0, len(rsPrfIDs))

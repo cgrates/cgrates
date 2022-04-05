@@ -197,7 +197,7 @@ func TestAttributesV1GetAttributeForEventProfileIgnoreOpts(t *testing.T) {
 		Attributes: []*ExternalAttribute{},
 	}
 
-	err = aA.V1GetAttributeForEvent(context.Background(), ev, rply)
+	err = aA.V1GetAttributesForEvent(context.Background(), ev, rply)
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
@@ -230,7 +230,7 @@ func TestAttributesV1GetAttributeForEventProfileIgnoreOpts(t *testing.T) {
 		},
 	}
 	// with ignore filters on true and with bad filter
-	err = aA.V1GetAttributeForEvent(context.Background(), ev2, rply2)
+	err = aA.V1GetAttributesForEvent(context.Background(), ev2, rply2)
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
@@ -310,7 +310,7 @@ func TestAttributesV1GetAttributeForEventErr(t *testing.T) {
 	var ev utils.CGREvent
 	rply := &APIAttributeProfile{}
 	alS.Shutdown()
-	err = alS.V1GetAttributeForEvent(context.Background(), &ev, rply)
+	err = alS.V1GetAttributesForEvent(context.Background(), &ev, rply)
 	if err == nil || err != utils.ErrNotFound {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ErrNotFound, err)
 	}
@@ -4629,7 +4629,7 @@ func TestAttributesV1GetAttributeForEvent(t *testing.T) {
 		},
 	}
 
-	err = alS.V1GetAttributeForEvent(context.Background(), ev, rply)
+	err = alS.V1GetAttributesForEvent(context.Background(), ev, rply)
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
@@ -4719,7 +4719,7 @@ func TestAttributesV1GetAttributeForEventErrorBoolOpts(t *testing.T) {
 	}
 	rply := &APIAttributeProfile{}
 
-	err = alS.V1GetAttributeForEvent(context.Background(), ev, rply)
+	err = alS.V1GetAttributesForEvent(context.Background(), ev, rply)
 	if err == nil || err.Error() != "cannot convert field: 1s to bool" {
 		t.Errorf("\nExpected <cannot convert field: 1s to bool>, \nReceived <%+v>", err)
 	}
@@ -4796,7 +4796,7 @@ func TestAttributesV1GetAttributeForEventErrorNil(t *testing.T) {
 	alS := NewAttributeService(dm, filterS, cfg)
 	rply := &APIAttributeProfile{}
 
-	err = alS.V1GetAttributeForEvent(context.Background(), nil, rply)
+	err = alS.V1GetAttributesForEvent(context.Background(), nil, rply)
 	if err == nil || err.Error() != "MANDATORY_IE_MISSING: [CGREvent]" {
 		t.Errorf("\nExpected <MANDATORY_IE_MISSING: [CGREvent]>, \nReceived <%+v>", err)
 	}
@@ -4884,7 +4884,7 @@ func TestAttributesV1GetAttributeForEventErrOptsI(t *testing.T) {
 	}
 	rply := &APIAttributeProfile{}
 
-	err = alS.V1GetAttributeForEvent(context.Background(), ev, rply)
+	err = alS.V1GetAttributesForEvent(context.Background(), ev, rply)
 	if err == nil || err.Error() != "cannot convert field: 1s to []string" {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "cannot convert field: 1s to []string", err)
 	}

@@ -110,5 +110,5 @@ func (aL *actRemBalance) execute(ctx *context.Context, data utils.MapStorage, tr
 	}
 	var rply string
 	return aL.connMgr.Call(ctx, aL.config.ActionSCfg().AccountSConns,
-		utils.AccountSv1ActionRemoveBalance, args, &rply)
+		utils.AccountSv1ActionRemoveBalances, args, &rply)
 }

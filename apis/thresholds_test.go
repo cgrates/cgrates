@@ -79,7 +79,7 @@ func TestThresholdsSetGetRemThresholdProfile(t *testing.T) {
 	var thPrfIDs []string
 	expThPrfIDs := []string{"thdID"}
 
-	if err := adms.GetThresholdProfileIDs(context.Background(), &utils.ArgsItemIDs{},
+	if err := adms.GetThresholdProfilesIDs(context.Background(), &utils.ArgsItemIDs{},
 		&thPrfIDs); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(thPrfIDs, expThPrfIDs) {
@@ -363,7 +363,7 @@ func TestThresholdsGetThresholdProfileIDsErrMock(t *testing.T) {
 	var reply []string
 	experr := "NOT_IMPLEMENTED"
 
-	if err := adms.GetThresholdProfileIDs(context.Background(),
+	if err := adms.GetThresholdProfilesIDs(context.Background(),
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
 		}, &reply); err == nil || err.Error() != experr {
@@ -390,7 +390,7 @@ func TestThresholdsGetThresholdProfileIDsErrKeys(t *testing.T) {
 
 	var reply []string
 
-	if err := adms.GetThresholdProfileIDs(context.Background(),
+	if err := adms.GetThresholdProfilesIDs(context.Background(),
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
 		}, &reply); err == nil || err != utils.ErrNotFound {
@@ -432,7 +432,7 @@ func TestThresholdsGetThresholdProfileIDsGetOptsErr(t *testing.T) {
 	var reply []string
 	experr := "cannot convert field<bool>: true to int"
 
-	if err := adms.GetThresholdProfileIDs(context.Background(),
+	if err := adms.GetThresholdProfilesIDs(context.Background(),
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
 			APIOpts: map[string]interface{}{
@@ -477,7 +477,7 @@ func TestThresholdsGetThresholdProfileIDsPaginateErr(t *testing.T) {
 	var reply []string
 	experr := `SERVER_ERROR: maximum number of items exceeded`
 
-	if err := adms.GetThresholdProfileIDs(context.Background(),
+	if err := adms.GetThresholdProfilesIDs(context.Background(),
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
 			APIOpts: map[string]interface{}{
@@ -601,7 +601,7 @@ func TestThresholdsAPIs(t *testing.T) {
 	}
 	mCC := &mockClientConn{
 		calls: map[string]func(*context.Context, interface{}, interface{}) error{
-			utils.ActionSv1ExecuteActions: func(ctx *context.Context, args, reply interface{}) error {
+			utils.ActionSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
 				if !reflect.DeepEqual(args, expEv) {
 					return fmt.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ToJSON(expEv), utils.ToJSON(args))
 				}

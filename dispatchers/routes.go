@@ -39,11 +39,11 @@ func (dS *DispatcherService) RouteSv1GetRouteProfilesForEvent(ctx *context.Conte
 		opts = args.APIOpts
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.RouteSv1GetRouteProfilesForEvent, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
+		if err = dS.authorize(ctx, utils.RouteSv1GetRoutesForEvent, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
-	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaRoutes, utils.RouteSv1GetRouteProfilesForEvent, args, reply)
+	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaRoutes, utils.RouteSv1GetRoutesForEvent, args, reply)
 }
 func (dS *DispatcherService) RouteSv1GetRoutes(ctx *context.Context, args *utils.CGREvent, reply *engine.SortedRoutesList) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
@@ -59,11 +59,11 @@ func (dS *DispatcherService) RouteSv1GetRoutes(ctx *context.Context, args *utils
 		opts = args.APIOpts
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.RouteSv1GetRoutes, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
+		if err = dS.authorize(ctx, utils.RouteSv1ProcessEvent, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
-	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaRoutes, utils.RouteSv1GetRoutes, args, reply)
+	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaRoutes, utils.RouteSv1ProcessEvent, args, reply)
 }
 func (dS *DispatcherService) RouteSv1GetRoutesList(ctx *context.Context, args *utils.CGREvent, reply *[]string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant

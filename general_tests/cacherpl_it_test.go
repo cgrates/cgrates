@@ -359,7 +359,7 @@ func testCacheRplCheckReplication(t *testing.T) {
 			CacheID: utils.CacheDispatcherRoutes,
 		},
 	}
-	if err := dspEngine2RPC.Call(context.Background(), utils.CacheSv1GetItemIDs, argsAPI, &rcvKeys); err != nil {
+	if err := dspEngine2RPC.Call(context.Background(), utils.CacheSv1GetItemsIDs, argsAPI, &rcvKeys); err != nil {
 		t.Error(err.Error())
 	}
 	sort.Strings(rcvKeys)
@@ -390,11 +390,11 @@ func testCacheRplAACheckReplication(t *testing.T) {
 			CacheID: utils.CacheDispatcherRoutes,
 		},
 	}
-	if err := dspEngine1RPC.Call(context.Background(), utils.CacheSv1GetItemIDs, argsAPI, &rcvKeys); err == nil ||
+	if err := dspEngine1RPC.Call(context.Background(), utils.CacheSv1GetItemsIDs, argsAPI, &rcvKeys); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	if err := dspEngine2RPC.Call(context.Background(), utils.CacheSv1GetItemIDs, argsAPI, &rcvKeys); err == nil ||
+	if err := dspEngine2RPC.Call(context.Background(), utils.CacheSv1GetItemsIDs, argsAPI, &rcvKeys); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
@@ -425,7 +425,7 @@ func testCacheRplAACheckReplication(t *testing.T) {
 
 	expKeys := []string{"testRouteFromDispatcher2:*attributes", "testRouteFromDispatcher1:*attributes"}
 
-	if err := dspEngine2RPC.Call(context.Background(), utils.CacheSv1GetItemIDs, argsAPI, &rcvKeys); err != nil {
+	if err := dspEngine2RPC.Call(context.Background(), utils.CacheSv1GetItemsIDs, argsAPI, &rcvKeys); err != nil {
 		t.Error(err.Error())
 	}
 	sort.Strings(rcvKeys)
@@ -434,7 +434,7 @@ func testCacheRplAACheckReplication(t *testing.T) {
 		t.Errorf("Expected: %+v, received: %+v", expKeys, rcvKeys)
 	}
 
-	if err := dspEngine1RPC.Call(context.Background(), utils.CacheSv1GetItemIDs, argsAPI, &rcvKeys); err != nil {
+	if err := dspEngine1RPC.Call(context.Background(), utils.CacheSv1GetItemsIDs, argsAPI, &rcvKeys); err != nil {
 		t.Error(err.Error())
 	}
 	sort.Strings(rcvKeys)
@@ -453,11 +453,11 @@ func testCacheRplAACheckLoadReplication(t *testing.T) {
 			CacheID: utils.CacheDispatcherLoads,
 		},
 	}
-	if err := dspEngine2RPC.Call(context.Background(), utils.CacheSv1GetItemIDs, argsAPI, &rcvKeys); err == nil ||
+	if err := dspEngine2RPC.Call(context.Background(), utils.CacheSv1GetItemsIDs, argsAPI, &rcvKeys); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	if err := dspEngine1RPC.Call(context.Background(), utils.CacheSv1GetItemIDs, argsAPI, &rcvKeys); err == nil ||
+	if err := dspEngine1RPC.Call(context.Background(), utils.CacheSv1GetItemsIDs, argsAPI, &rcvKeys); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
@@ -522,7 +522,7 @@ func testCacheRplAACheckLoadReplication(t *testing.T) {
 			CacheID: utils.CacheDispatcherRoutes,
 		},
 	}
-	if err := dspEngine2RPC.Call(context.Background(), utils.CacheSv1GetItemIDs, argsAPI, &rcvKeys); err != nil {
+	if err := dspEngine2RPC.Call(context.Background(), utils.CacheSv1GetItemsIDs, argsAPI, &rcvKeys); err != nil {
 		t.Error(err.Error())
 	}
 	sort.Strings(rcvKeys)
@@ -530,7 +530,7 @@ func testCacheRplAACheckLoadReplication(t *testing.T) {
 	if !reflect.DeepEqual(expKeys, rcvKeys) {
 		t.Errorf("Expected: %+v, received: %+v", expKeys, rcvKeys)
 	}
-	if err := dspEngine1RPC.Call(context.Background(), utils.CacheSv1GetItemIDs, argsAPI, &rcvKeys); err != nil {
+	if err := dspEngine1RPC.Call(context.Background(), utils.CacheSv1GetItemsIDs, argsAPI, &rcvKeys); err != nil {
 		t.Error(err.Error())
 	}
 	sort.Strings(rcvKeys)
@@ -546,7 +546,7 @@ func testCacheRplAACheckLoadReplication(t *testing.T) {
 			CacheID: utils.CacheDispatcherLoads,
 		},
 	}
-	if err := dspEngine2RPC.Call(context.Background(), utils.CacheSv1GetItemIDs, argsAPI, &rcvKeys); err != nil {
+	if err := dspEngine2RPC.Call(context.Background(), utils.CacheSv1GetItemsIDs, argsAPI, &rcvKeys); err != nil {
 		t.Error(err.Error())
 	}
 	sort.Strings(rcvKeys)
@@ -554,7 +554,7 @@ func testCacheRplAACheckLoadReplication(t *testing.T) {
 	if !reflect.DeepEqual(expKeys, rcvKeys) {
 		t.Errorf("Expected: %+v, received: %+v", expKeys, rcvKeys)
 	}
-	if err := dspEngine1RPC.Call(context.Background(), utils.CacheSv1GetItemIDs, argsAPI, &rcvKeys); err != nil {
+	if err := dspEngine1RPC.Call(context.Background(), utils.CacheSv1GetItemsIDs, argsAPI, &rcvKeys); err != nil {
 		t.Error(err.Error())
 	}
 	sort.Strings(rcvKeys)
@@ -572,7 +572,7 @@ func testCacheRplCheckLoadReplication(t *testing.T) {
 			CacheID: utils.CacheDispatcherLoads,
 		},
 	}
-	if err := dspEngine2RPC.Call(context.Background(), utils.CacheSv1GetItemIDs, argsAPI, &rcvKeys); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := dspEngine2RPC.Call(context.Background(), utils.CacheSv1GetItemsIDs, argsAPI, &rcvKeys); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 
@@ -610,7 +610,7 @@ func testCacheRplCheckLoadReplication(t *testing.T) {
 			CacheID: utils.CacheDispatcherRoutes,
 		},
 	}
-	if err := dspEngine2RPC.Call(context.Background(), utils.CacheSv1GetItemIDs, argsAPI, &rcvKeys); err != nil {
+	if err := dspEngine2RPC.Call(context.Background(), utils.CacheSv1GetItemsIDs, argsAPI, &rcvKeys); err != nil {
 		t.Error(err.Error())
 	}
 	sort.Strings(rcvKeys)
@@ -626,7 +626,7 @@ func testCacheRplCheckLoadReplication(t *testing.T) {
 			CacheID: utils.CacheDispatcherLoads,
 		},
 	}
-	if err := dspEngine2RPC.Call(context.Background(), utils.CacheSv1GetItemIDs, argsAPI, &rcvKeys); err != nil {
+	if err := dspEngine2RPC.Call(context.Background(), utils.CacheSv1GetItemsIDs, argsAPI, &rcvKeys); err != nil {
 		t.Error(err.Error())
 	}
 	sort.Strings(rcvKeys)

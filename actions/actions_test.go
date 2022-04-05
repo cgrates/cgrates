@@ -438,14 +438,14 @@ func TestV1ExecuteActions(t *testing.T) {
 		t.Error(err)
 	}
 
-	if err := acts.V1ExecuteActions(context.Background(), ev, &reply); err != nil {
+	if err := acts.V1ProcessEvent(context.Background(), ev, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Unexpected reply %+v", reply)
 	}
 
 	ev.APIOpts[utils.OptsActionsProfileIDs] = []string{"invalid_id"}
-	if err := acts.V1ExecuteActions(context.Background(), ev, &reply); err == nil || err != utils.ErrNotFound {
+	if err := acts.V1ProcessEvent(context.Background(), ev, &reply); err == nil || err != utils.ErrNotFound {
 		t.Errorf("Expected %+v, received %+v", utils.ErrNotFound, err)
 	}
 
@@ -453,7 +453,7 @@ func TestV1ExecuteActions(t *testing.T) {
 	newDm := engine.NewDataManager(newData, cfg.CacheCfg(), nil)
 	newActs := NewActionS(cfg, filters, newDm, nil)
 	ev.APIOpts[utils.OptsActionsProfileIDs] = []string{}
-	if err := newActs.V1ExecuteActions(context.Background(), ev, &reply); err == nil || err != utils.ErrPartiallyExecuted {
+	if err := newActs.V1ProcessEvent(context.Background(), ev, &reply); err == nil || err != utils.ErrPartiallyExecuted {
 		t.Errorf("Expected %+v, received %+v", utils.ErrPartiallyExecuted, err)
 	}
 
@@ -1224,7 +1224,7 @@ func TestV1ExecuteActionsProfileIgnoreFilters(t *testing.T) {
 		t.Error(err)
 	}
 
-	if err := acts.V1ExecuteActions(context.Background(), ev, &reply); err != nil {
+	if err := acts.V1ProcessEvent(context.Background(), ev, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Unexpected reply %+v", reply)

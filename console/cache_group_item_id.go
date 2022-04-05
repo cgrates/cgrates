@@ -25,7 +25,7 @@ import (
 func init() {
 	c := &CmdCacheGetGroupItemIDs{
 		name:      "cache_group_item_ids",
-		rpcMethod: utils.CacheSv1GetGroupItemIDs,
+		rpcMethod: utils.CacheSv1GetGroupItemsIDs,
 		rpcParams: &utils.ArgsGetGroupWithAPIOpts{},
 	}
 	commands[c.Name()] = c

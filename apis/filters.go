@@ -105,7 +105,7 @@ func (adms *AdminSv1) GetFilters(ctx *context.Context, args *utils.ArgsItemIDs, 
 		tnt = adms.cfg.GeneralCfg().DefaultTenant
 	}
 	var fltrIDs []string
-	if err = adms.GetFilterIDs(ctx, args, &fltrIDs); err != nil {
+	if err = adms.GetFiltersIDs(ctx, args, &fltrIDs); err != nil {
 		return
 	}
 	*fltrs = make([]*engine.Filter, 0, len(fltrIDs))
@@ -119,8 +119,8 @@ func (adms *AdminSv1) GetFilters(ctx *context.Context, args *utils.ArgsItemIDs, 
 	return
 }
 
-// GetFilterIDs returns list of Filter IDs registered for a tenant
-func (adms *AdminSv1) GetFilterIDs(ctx *context.Context, args *utils.ArgsItemIDs, fltrIDs *[]string) (err error) {
+// GetFiltersIDs returns list of Filter IDs registered for a tenant
+func (adms *AdminSv1) GetFiltersIDs(ctx *context.Context, args *utils.ArgsItemIDs, fltrIDs *[]string) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = adms.cfg.GeneralCfg().DefaultTenant

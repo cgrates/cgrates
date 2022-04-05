@@ -196,7 +196,7 @@ func testAccActionsSetActionProfile(t *testing.T) {
 
 func testAccActionsExecuteAction(t *testing.T) {
 	var reply string
-	if err := accSRPC.Call(context.Background(), utils.ActionSv1ExecuteActions, &utils.CGREvent{
+	if err := accSRPC.Call(context.Background(), utils.ActionSv1ProcessEvent, &utils.CGREvent{
 		Tenant: "cgrates.org",
 		Event: map[string]interface{}{
 			"Account": 1001,
@@ -214,7 +214,7 @@ func testAccActionsExecuteAction(t *testing.T) {
 
 func testAccActionsExecuteAction2(t *testing.T) {
 	var reply string
-	if err := accSRPC.Call(context.Background(), utils.ActionSv1ExecuteActions, &utils.CGREvent{
+	if err := accSRPC.Call(context.Background(), utils.ActionSv1ProcessEvent, &utils.CGREvent{
 		Tenant: "cgrates.org",
 		Event: map[string]interface{}{
 			"Account": 1001,
@@ -320,7 +320,7 @@ func testAccActionsSetActionProfile2(t *testing.T) {
 
 func testAccActionsExecuteAction3(t *testing.T) {
 	var reply string
-	if err := accSRPC.Call(context.Background(), utils.ActionSv1ExecuteActions, &utils.CGREvent{
+	if err := accSRPC.Call(context.Background(), utils.ActionSv1ProcessEvent, &utils.CGREvent{
 		Tenant: "cgrates.org",
 		Event: map[string]interface{}{
 			"Account": 1001,

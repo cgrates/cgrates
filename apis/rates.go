@@ -98,8 +98,8 @@ func (admS *AdminSv1) GetRateProfileRates(ctx *context.Context, args *utils.Args
 	return
 }
 
-// GetRateProfileIDs returns a list of rate profile IDs registered for a tenant
-func (admS *AdminSv1) GetRateProfileIDs(ctx *context.Context, args *utils.ArgsItemIDs, ratePrfIDs *[]string) (err error) {
+// GetRateProfilesIDs returns a list of rate profile IDs registered for a tenant
+func (admS *AdminSv1) GetRateProfilesIDs(ctx *context.Context, args *utils.ArgsItemIDs, ratePrfIDs *[]string) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = admS.cfg.GeneralCfg().DefaultTenant
@@ -126,8 +126,8 @@ func (admS *AdminSv1) GetRateProfileIDs(ctx *context.Context, args *utils.ArgsIt
 	return
 }
 
-// GetRateProfileRateIDs returns a list of rates from a specific RateProfile  registered for a tenant. RateIDs are returned back by matching a pattern given by ItemPrefix. If the ItemPrefix is not there, it will be returned all RateIDs.
-func (admS *AdminSv1) GetRateProfileRateIDs(ctx *context.Context, args *utils.ArgsSubItemIDs, rateIDs *[]string) (err error) {
+// GetRateProfileRatesIDs returns a list of rates from a specific RateProfile  registered for a tenant. RateIDs are returned back by matching a pattern given by ItemPrefix. If the ItemPrefix is not there, it will be returned all RateIDs.
+func (admS *AdminSv1) GetRateProfileRatesIDs(ctx *context.Context, args *utils.ArgsSubItemIDs, rateIDs *[]string) (err error) {
 	if missing := utils.MissingStructFields(args, []string{utils.ProfileID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -157,7 +157,7 @@ func (admS *AdminSv1) GetRateProfiles(ctx *context.Context, args *utils.ArgsItem
 		tnt = admS.cfg.GeneralCfg().DefaultTenant
 	}
 	var ratePrfIDs []string
-	if err = admS.GetRateProfileIDs(ctx, args, &ratePrfIDs); err != nil {
+	if err = admS.GetRateProfilesIDs(ctx, args, &ratePrfIDs); err != nil {
 		return
 	}
 	*ratePrfs = make([]*utils.RateProfile, 0, len(ratePrfIDs))
@@ -302,14 +302,14 @@ type RateSv1 struct {
 	rS *rates.RateS
 }
 
-// RateProfilesForEvent returns the list of RateProfilesIDs that are matching the event
-func (rSv1 *RateSv1) RateProfilesForEvent(ctx *context.Context, args *utils.CGREvent, rpIDs *[]string) (err error) {
-	return rSv1.rS.V1RateProfilesForEvent(ctx, args, rpIDs)
+// GetRateProfilesIDsForEvent returns the list of RateProfilesIDs that are matching the event
+func (rSv1 *RateSv1) GetRateProfilesIDsForEvent(ctx *context.Context, args *utils.CGREvent, rpIDs *[]string) (err error) {
+	return rSv1.rS.V1GetRateProfilesIDsForEvent(ctx, args, rpIDs)
 }
 
 // RateProfilesForEvent returns the list of rates that are matching the event from a specific profile
-func (rSv1 *RateSv1) RateProfileRatesForEvent(ctx *context.Context, args *utils.CGREventWithRateProfile, rateIDs *[]string) (err error) {
-	return rSv1.rS.V1RateProfileRatesForEvent(ctx, args, rateIDs)
+func (rSv1 *RateSv1) GetRatesIDsForEvent(ctx *context.Context, args *utils.CGREventWithRateProfile, rateIDs *[]string) (err error) {
+	return rSv1.rS.V1GetRatesIDsForEvent(ctx, args, rateIDs)
 }
 
 // CostForEvent returs the costs for the event and all the rate profile information

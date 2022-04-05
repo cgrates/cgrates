@@ -178,7 +178,7 @@ func testActionsGetActionProfilesBeforeSet(t *testing.T) {
 
 func testActionsGetActionProfileIDsBeforeSet(t *testing.T) {
 	var rplyActIDs []string
-	if err := actRPC.Call(context.Background(), utils.AdminSv1GetActionProfileIDs,
+	if err := actRPC.Call(context.Background(), utils.AdminSv1GetActionProfilesIDs,
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
 		}, &rplyActIDs); err == nil || err.Error() != utils.ErrNotFound.Error() {
@@ -263,7 +263,7 @@ func testActionsGetActionProfileIDsAfterSet(t *testing.T) {
 	expActIDs := []string{"actPrfID"}
 
 	var rplyActIDs []string
-	if err := actRPC.Call(context.Background(), utils.AdminSv1GetActionProfileIDs,
+	if err := actRPC.Call(context.Background(), utils.AdminSv1GetActionProfilesIDs,
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
 		}, &rplyActIDs); err != nil {
@@ -471,7 +471,7 @@ func testActionsExecuteActionsHTTPPost(t *testing.T) {
 
 	expBody := `{"*opts":{"*actProfileIDs":["actPrfID"]},"*req":{"Account":"1001"}}`
 	var reply string
-	if err := actRPC.Call(context.Background(), utils.ActionSv1ExecuteActions,
+	if err := actRPC.Call(context.Background(), utils.ActionSv1ProcessEvent,
 		ev, &reply); err != nil {
 		t.Error(err)
 	}
@@ -598,7 +598,7 @@ func testActionsGetStatQueuesBeforeReset(t *testing.T) {
 	}
 
 	rplyFloatMetrics := make(map[string]float64)
-	if err := actRPC.Call(context.Background(), utils.StatSv1GetQueueFloatMetrics,
+	if err := actRPC.Call(context.Background(), utils.StatSv1GetStatQueueFloatMetrics,
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{
 				Tenant: "cgrates.org",
@@ -637,7 +637,7 @@ func testActionsGetStatQueueAfterReset(t *testing.T) {
 	}
 
 	rplyFloatMetrics := make(map[string]float64)
-	if err := actRPC.Call(context.Background(), utils.StatSv1GetQueueFloatMetrics,
+	if err := actRPC.Call(context.Background(), utils.StatSv1GetStatQueueFloatMetrics,
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{
 				Tenant: "cgrates.org",

@@ -238,7 +238,7 @@ func testFilterUpdateGetAttrProfileForEventEv1E1(t *testing.T) {
 	}
 
 	var attrReply *engine.APIAttributeProfile
-	if err := fltrUpdateRPC1.Call(context.Background(), utils.AttributeSv1GetAttributeForEvent,
+	if err := fltrUpdateRPC1.Call(context.Background(), utils.AttributeSv1GetAttributesForEvent,
 		ev1, &attrReply); err != nil {
 		t.Fatal(err)
 	}
@@ -267,7 +267,7 @@ func testFilterUpdateGetAttrProfileForEventEv1E2(t *testing.T) {
 	}
 
 	var attrReply *engine.APIAttributeProfile
-	if err := fltrUpdateRPC2.Call(context.Background(), utils.AttributeSv1GetAttributeForEvent,
+	if err := fltrUpdateRPC2.Call(context.Background(), utils.AttributeSv1GetAttributesForEvent,
 		ev1, &attrReply); err != nil {
 		t.Fatal(err)
 	}
@@ -296,7 +296,7 @@ func testFilterUpdateGetAttrProfileForEventEv2E1(t *testing.T) {
 	}
 
 	var attrReply *engine.APIAttributeProfile
-	if err := fltrUpdateRPC1.Call(context.Background(), utils.AttributeSv1GetAttributeForEvent,
+	if err := fltrUpdateRPC1.Call(context.Background(), utils.AttributeSv1GetAttributesForEvent,
 		ev2, &attrReply); err != nil {
 		t.Fatal(err)
 	}
@@ -325,7 +325,7 @@ func testFilterUpdateGetAttrProfileForEventEv2E2(t *testing.T) {
 	}
 
 	var attrReply *engine.APIAttributeProfile
-	if err := fltrUpdateRPC2.Call(context.Background(), utils.AttributeSv1GetAttributeForEvent,
+	if err := fltrUpdateRPC2.Call(context.Background(), utils.AttributeSv1GetAttributesForEvent,
 		ev2, &attrReply); err != nil {
 		t.Fatal(err)
 	}
@@ -370,7 +370,7 @@ func testFilterUpdateSetFilterAfterAttrE1(t *testing.T) {
 
 func testFilterUpdateGetAttrProfileForEventEv1E1NotMatching(t *testing.T) {
 	var attrReply *engine.APIAttributeProfile
-	if err := fltrUpdateRPC1.Call(context.Background(), utils.AttributeSv1GetAttributeForEvent,
+	if err := fltrUpdateRPC1.Call(context.Background(), utils.AttributeSv1GetAttributesForEvent,
 		ev1, &attrReply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	}
@@ -378,7 +378,7 @@ func testFilterUpdateGetAttrProfileForEventEv1E1NotMatching(t *testing.T) {
 
 func testFilterUpdateGetAttrProfileForEventEv1E2NotMatching(t *testing.T) {
 	var attrReply *engine.APIAttributeProfile
-	if err := fltrUpdateRPC2.Call(context.Background(), utils.AttributeSv1GetAttributeForEvent,
+	if err := fltrUpdateRPC2.Call(context.Background(), utils.AttributeSv1GetAttributesForEvent,
 		ev1, &attrReply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	}
@@ -386,7 +386,7 @@ func testFilterUpdateGetAttrProfileForEventEv1E2NotMatching(t *testing.T) {
 
 func testFilterUpdateGetAttrProfileForEventEv2E1NotMatching(t *testing.T) {
 	var attrReply *engine.APIAttributeProfile
-	if err := fltrUpdateRPC1.Call(context.Background(), utils.AttributeSv1GetAttributeForEvent,
+	if err := fltrUpdateRPC1.Call(context.Background(), utils.AttributeSv1GetAttributesForEvent,
 		ev2, &attrReply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	}
@@ -394,7 +394,7 @@ func testFilterUpdateGetAttrProfileForEventEv2E1NotMatching(t *testing.T) {
 
 func testFilterUpdateGetAttrProfileForEventEv2E2NotMatching(t *testing.T) {
 	var attrReply *engine.APIAttributeProfile
-	if err := fltrUpdateRPC2.Call(context.Background(), utils.AttributeSv1GetAttributeForEvent,
+	if err := fltrUpdateRPC2.Call(context.Background(), utils.AttributeSv1GetAttributesForEvent,
 		ev2, &attrReply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	}

@@ -297,7 +297,7 @@ func testStatsGetStatQueueAfterSet(t *testing.T) {
 	}
 
 	rplyStrMetrics := make(map[string]string)
-	if err := sqRPC.Call(context.Background(), utils.StatSv1GetQueueStringMetrics,
+	if err := sqRPC.Call(context.Background(), utils.StatSv1GetStatQueueStringMetrics,
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{
 				Tenant: "cgrates.org",
@@ -311,7 +311,7 @@ func testStatsGetStatQueueAfterSet(t *testing.T) {
 	}
 
 	rplyFloatMetrics := make(map[string]float64)
-	if err := sqRPC.Call(context.Background(), utils.StatSv1GetQueueFloatMetrics,
+	if err := sqRPC.Call(context.Background(), utils.StatSv1GetStatQueueFloatMetrics,
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{
 				Tenant: "cgrates.org",
@@ -376,7 +376,7 @@ func testStatsGetStatQueueAfterSet(t *testing.T) {
 	}
 
 	rplyStrMetrics = map[string]string{}
-	if err := sqRPC.Call(context.Background(), utils.StatSv1GetQueueStringMetrics,
+	if err := sqRPC.Call(context.Background(), utils.StatSv1GetStatQueueStringMetrics,
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{
 				Tenant: "cgrates.org",
@@ -390,7 +390,7 @@ func testStatsGetStatQueueAfterSet(t *testing.T) {
 	}
 
 	rplyFloatMetrics = make(map[string]float64)
-	if err := sqRPC.Call(context.Background(), utils.StatSv1GetQueueFloatMetrics,
+	if err := sqRPC.Call(context.Background(), utils.StatSv1GetStatQueueFloatMetrics,
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{
 				Tenant: "cgrates.org",
@@ -418,7 +418,7 @@ func testStatsGetStatQueueAfterSet(t *testing.T) {
 func testStatsGetStatQueueIDs(t *testing.T) {
 	expIDs := []string{"SQ_1", "SQ_2"}
 	var sqIDs []string
-	if err := sqRPC.Call(context.Background(), utils.StatSv1GetQueueIDs,
+	if err := sqRPC.Call(context.Background(), utils.StatSv1GetStatQueuesIDs,
 		&utils.TenantWithAPIOpts{
 			Tenant: "cgrates.org",
 		}, &sqIDs); err != nil {
@@ -434,7 +434,7 @@ func testStatsGetStatQueueIDs(t *testing.T) {
 func testStatsGetStatQueueProfileIDs(t *testing.T) {
 	expIDs := []string{"SQ_1", "SQ_2"}
 	var sqIDs []string
-	if err := sqRPC.Call(context.Background(), utils.AdminSv1GetStatQueueProfileIDs,
+	if err := sqRPC.Call(context.Background(), utils.AdminSv1GetStatQueueProfilesIDs,
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
 		}, &sqIDs); err != nil {
@@ -843,7 +843,7 @@ func testStatsGetStatQueuesAfterProcessEv(t *testing.T) {
 	}
 
 	rplyFloatMetrics := make(map[string]float64)
-	if err := sqRPC.Call(context.Background(), utils.StatSv1GetQueueFloatMetrics,
+	if err := sqRPC.Call(context.Background(), utils.StatSv1GetStatQueueFloatMetrics,
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{
 				Tenant: "cgrates.org",

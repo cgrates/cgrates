@@ -78,7 +78,7 @@ func TestRoutesSetGetRemRouteProfile(t *testing.T) {
 	var rtPrfIDs []string
 	exprtPrfIDs := []string{"routeID"}
 
-	if err := adms.GetRouteProfileIDs(context.Background(), &utils.ArgsItemIDs{},
+	if err := adms.GetRouteProfilesIDs(context.Background(), &utils.ArgsItemIDs{},
 		&rtPrfIDs); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rtPrfIDs, exprtPrfIDs) {
@@ -375,7 +375,7 @@ func TestRoutesGetRouteProfileIDsErrMock(t *testing.T) {
 	var reply []string
 	experr := "NOT_IMPLEMENTED"
 
-	if err := adms.GetRouteProfileIDs(context.Background(),
+	if err := adms.GetRouteProfilesIDs(context.Background(),
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
 		}, &reply); err == nil || err.Error() != experr {
@@ -402,7 +402,7 @@ func TestRoutesGetRouteProfileIDsErrKeys(t *testing.T) {
 
 	var reply []string
 
-	if err := adms.GetRouteProfileIDs(context.Background(),
+	if err := adms.GetRouteProfilesIDs(context.Background(),
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
 		}, &reply); err == nil || err != utils.ErrNotFound {
@@ -751,7 +751,7 @@ func TestRoutesGetRouteProfileIDsGetOptsErr(t *testing.T) {
 	var reply []string
 	experr := "cannot convert field<bool>: true to int"
 
-	if err := adms.GetRouteProfileIDs(context.Background(),
+	if err := adms.GetRouteProfilesIDs(context.Background(),
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
 			APIOpts: map[string]interface{}{
@@ -796,7 +796,7 @@ func TestRoutesGetRouteProfileIDsPaginateErr(t *testing.T) {
 	var reply []string
 	experr := `SERVER_ERROR: maximum number of items exceeded`
 
-	if err := adms.GetRouteProfileIDs(context.Background(),
+	if err := adms.GetRouteProfilesIDs(context.Background(),
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
 			APIOpts: map[string]interface{}{

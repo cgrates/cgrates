@@ -1319,7 +1319,7 @@ func testLoadersGetAccountAfterRemove(t *testing.T) {
 
 func testLoadersGetActionProfileAfterRemove(t *testing.T) {
 	var actIDs []string
-	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetActionProfileIDs,
+	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetActionProfilesIDs,
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
 		}, &actIDs); err == nil || utils.ErrNotFound.Error() != err.Error() {
@@ -1338,7 +1338,7 @@ func testLoadersGetActionProfileAfterRemove(t *testing.T) {
 
 func testLoadersGetAttributeProfileAfterRemove(t *testing.T) {
 	var attrIDs []string
-	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfileIDs,
+	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfilesIDs,
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
 		}, &attrIDs); err == nil || err.Error() != utils.ErrNotFound.Error() {
@@ -1357,7 +1357,7 @@ func testLoadersGetAttributeProfileAfterRemove(t *testing.T) {
 
 func testLoadersGetChargerProfileAfterRemove(t *testing.T) {
 	var chgIDs []string
-	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetChargerProfileIDs,
+	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetChargerProfilesIDs,
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
 		}, &chgIDs); err == nil || err.Error() != utils.ErrNotFound.Error() {
@@ -1433,7 +1433,7 @@ func testLoadersGetFilterAfterRemove(t *testing.T) {
 
 func testLoadersGetRateProfileAfterRemove(t *testing.T) {
 	var rateIDs []string
-	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetRateProfileIDs,
+	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetRateProfilesIDs,
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
 		}, &rateIDs); err == nil || err.Error() != utils.ErrNotFound.Error() {
@@ -1452,7 +1452,7 @@ func testLoadersGetRateProfileAfterRemove(t *testing.T) {
 
 func testLoadersGetResourceProfileAfterRemove(t *testing.T) {
 	var rsIDs []string
-	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetResourceProfileIDs,
+	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetResourceProfilesIDs,
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
 		}, &rsIDs); err == nil || err.Error() != utils.ErrNotFound.Error() {
@@ -1471,7 +1471,7 @@ func testLoadersGetResourceProfileAfterRemove(t *testing.T) {
 
 func testLoadersGetRouteProfileAfterRemove(t *testing.T) {
 	var rtIDs []string
-	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetRouteProfileIDs,
+	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetRouteProfilesIDs,
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
 		}, &rtIDs); err == nil || err.Error() != utils.ErrNotFound.Error() {
@@ -1490,7 +1490,7 @@ func testLoadersGetRouteProfileAfterRemove(t *testing.T) {
 
 func testLoadersGetStatQueueProfileAfterRemove(t *testing.T) {
 	var sqIDs []string
-	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetStatQueueProfileIDs,
+	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetStatQueueProfilesIDs,
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
 		}, &sqIDs); err == nil || err.Error() != utils.ErrNotFound.Error() {
@@ -1509,7 +1509,7 @@ func testLoadersGetStatQueueProfileAfterRemove(t *testing.T) {
 
 func testLoadersGetThresholdProfileAfterRemove(t *testing.T) {
 	var thIDs []string
-	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetThresholdProfileIDs,
+	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetThresholdProfilesIDs,
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
 		}, &thIDs); err == nil || err.Error() != utils.ErrNotFound.Error() {

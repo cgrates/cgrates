@@ -116,7 +116,7 @@ func (dDP *dynamicDP) fieldAsInterface(fldPath []string) (val interface{}, err e
 		// sample of fieldName : ~*stats.StatID.*acd
 		var statValues map[string]*utils.Decimal
 
-		if err := connMgr.Call(dDP.ctx, dDP.stsConns, utils.StatSv1GetQueueDecimalMetrics,
+		if err := connMgr.Call(dDP.ctx, dDP.stsConns, utils.StatSv1GetStatQueueDecimalMetrics,
 			&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: dDP.tenant, ID: fldPath[1]}},
 			&statValues); err != nil {
 			return nil, err

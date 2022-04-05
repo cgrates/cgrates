@@ -59,7 +59,7 @@ func TestCacheHasItemAndGetItem(t *testing.T) {
 	}
 	var reply []string
 	expectedRPly := []string{"cgrates.org:TestGetAttributeProfile"}
-	if err := cache.GetItemIDs(nil, argsGetItem, &reply); err != nil {
+	if err := cache.GetItemsIDs(nil, argsGetItem, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedRPly, reply) {
 		t.Errorf("Expected %+v, received %+v", expectedRPly, reply)
@@ -119,7 +119,7 @@ func TestCacheSetAndRemoveItem(t *testing.T) {
 		},
 	}
 	var replyStr []string
-	if err := cache.GetItemIDs(nil, argsGetItem, &replyStr); err == nil || err != utils.ErrNotFound {
+	if err := cache.GetItemsIDs(nil, argsGetItem, &replyStr); err == nil || err != utils.ErrNotFound {
 		t.Errorf("Expected %+v, received %+v", utils.ErrNotFound, err)
 	}
 }
@@ -177,7 +177,7 @@ func TestCacheSetAndRemoveItems(t *testing.T) {
 		},
 	}
 	var replyStr []string
-	if err := cache.GetItemIDs(nil, argsGetItem, &replyStr); err == nil || err != utils.ErrNotFound {
+	if err := cache.GetItemsIDs(nil, argsGetItem, &replyStr); err == nil || err != utils.ErrNotFound {
 		t.Errorf("Expected %+v, received %+v", utils.ErrNotFound, err)
 	}
 }
@@ -208,7 +208,7 @@ func TestCacheClear(t *testing.T) {
 		},
 	}
 	var replyStr []string
-	if err := cache.GetItemIDs(nil, argsGetItem, &replyStr); err == nil || err != utils.ErrNotFound {
+	if err := cache.GetItemsIDs(nil, argsGetItem, &replyStr); err == nil || err != utils.ErrNotFound {
 		t.Errorf("Expected %+v, received %+v", utils.ErrNotFound, err)
 	}
 
@@ -217,7 +217,7 @@ func TestCacheClear(t *testing.T) {
 			CacheID: utils.CacheRateProfiles,
 		},
 	}
-	if err := cache.GetItemIDs(nil, argsGetItem, &replyStr); err == nil || err != utils.ErrNotFound {
+	if err := cache.GetItemsIDs(nil, argsGetItem, &replyStr); err == nil || err != utils.ErrNotFound {
 		t.Errorf("Expected %+v, received %+v", utils.ErrNotFound, err)
 	}
 }
@@ -244,7 +244,7 @@ func TestCacheLoadCache(t *testing.T) {
 		},
 	}
 	var replyStr []string
-	if err := cache.GetItemIDs(nil, argsGetItem,
+	if err := cache.GetItemsIDs(nil, argsGetItem,
 		&replyStr); err == nil || err != utils.ErrNotFound {
 		t.Errorf("Expected %+v, received %+v", utils.ErrNotFound, err)
 	}
@@ -272,7 +272,7 @@ func TestCacheReloadCache(t *testing.T) {
 		},
 	}
 	var replyStr []string
-	if err := cache.GetItemIDs(nil, argsGetItem,
+	if err := cache.GetItemsIDs(nil, argsGetItem,
 		&replyStr); err == nil || err != utils.ErrNotFound {
 		t.Errorf("Expected %+v, received %+v", utils.ErrNotFound, err)
 	}

@@ -118,7 +118,7 @@ func testTwoEnginesCheckCacheBeforeSet(t *testing.T) {
 	argGetItemIDs := utils.ArgsGetCacheItemIDs{
 		CacheID: utils.CacheThresholdProfiles,
 	}
-	if err := engineOneRpc.Call(context.Background(), utils.CacheSv1GetItemIDs, argGetItemIDs, &rcvKeys); err == nil ||
+	if err := engineOneRpc.Call(context.Background(), utils.CacheSv1GetItemsIDs, argGetItemIDs, &rcvKeys); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Expected error: %s received error: %s and reply: %v ", utils.ErrNotFound, err.Error(), rcvKeys)
 	}
@@ -128,7 +128,7 @@ func testTwoEnginesCheckCacheBeforeSet(t *testing.T) {
 	} else if reply {
 		t.Errorf("Expected: false , received: %v ", reply)
 	}
-	if err := engineTwoRpc.Call(context.Background(), utils.CacheSv1GetItemIDs, argGetItemIDs, &rcvKeys); err == nil ||
+	if err := engineTwoRpc.Call(context.Background(), utils.CacheSv1GetItemsIDs, argGetItemIDs, &rcvKeys); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Expected error: %s received error: %s and reply: %v ", utils.ErrNotFound, err.Error(), rcvKeys)
 	}
@@ -190,7 +190,7 @@ func testTwoEnginesCheckCacheAfterSet(t *testing.T) {
 	argGetItemIDs := utils.ArgsGetCacheItemIDs{
 		CacheID: utils.CacheThresholdProfiles,
 	}
-	if err := engineOneRpc.Call(context.Background(), utils.CacheSv1GetItemIDs, argGetItemIDs, &rcvKeys); err != nil {
+	if err := engineOneRpc.Call(context.Background(), utils.CacheSv1GetItemsIDs, argGetItemIDs, &rcvKeys); err != nil {
 		t.Fatalf("Got error on APIerSv1.GetCacheStats: %s ", err.Error())
 	} else if !reflect.DeepEqual(expKeys, rcvKeys) {
 		t.Errorf("Expected: %+v, received: %+v", expKeys, rcvKeys)
@@ -201,7 +201,7 @@ func testTwoEnginesCheckCacheAfterSet(t *testing.T) {
 	} else if !reply {
 		t.Errorf("Expected: %v , received:%v", expected, reply)
 	}
-	if err := engineTwoRpc.Call(context.Background(), utils.CacheSv1GetItemIDs, argGetItemIDs, &rcvKeys); err != nil {
+	if err := engineTwoRpc.Call(context.Background(), utils.CacheSv1GetItemsIDs, argGetItemIDs, &rcvKeys); err != nil {
 		t.Fatalf("Got error on APIerSv1.GetCacheStats: %s ", err.Error())
 	} else if !reflect.DeepEqual(expKeys, rcvKeys) {
 		t.Errorf("Expected: %+v, received: %+v", expKeys, rcvKeys)

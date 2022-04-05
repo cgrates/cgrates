@@ -76,7 +76,7 @@ func TestResourcesSetGetRemResourceProfile(t *testing.T) {
 	var rsPrfIDs []string
 	expRsPrfIDs := []string{"RES_1"}
 
-	if err := adms.GetResourceProfileIDs(context.Background(), &utils.ArgsItemIDs{},
+	if err := adms.GetResourceProfilesIDs(context.Background(), &utils.ArgsItemIDs{},
 		&rsPrfIDs); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rsPrfIDs, expRsPrfIDs) {
@@ -365,7 +365,7 @@ func TestResourcesGetResourceProfileIDsErrMock(t *testing.T) {
 	var reply []string
 	experr := "NOT_IMPLEMENTED"
 
-	if err := adms.GetResourceProfileIDs(context.Background(),
+	if err := adms.GetResourceProfilesIDs(context.Background(),
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
 		}, &reply); err == nil || err.Error() != experr {
@@ -392,7 +392,7 @@ func TestResourcesGetResourceProfileIDsErrKeys(t *testing.T) {
 
 	var reply []string
 
-	if err := adms.GetResourceProfileIDs(context.Background(),
+	if err := adms.GetResourceProfilesIDs(context.Background(),
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
 		}, &reply); err == nil || err != utils.ErrNotFound {
@@ -894,7 +894,7 @@ func TestResourcesGetResourceProfileIDsGetOptsErr(t *testing.T) {
 	var reply []string
 	experr := "cannot convert field<bool>: true to int"
 
-	if err := adms.GetResourceProfileIDs(context.Background(),
+	if err := adms.GetResourceProfilesIDs(context.Background(),
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
 			APIOpts: map[string]interface{}{
@@ -939,7 +939,7 @@ func TestResourcesGetResourceProfileIDsPaginateErr(t *testing.T) {
 	var reply []string
 	experr := `SERVER_ERROR: maximum number of items exceeded`
 
-	if err := adms.GetResourceProfileIDs(context.Background(),
+	if err := adms.GetResourceProfilesIDs(context.Background(),
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
 			APIOpts: map[string]interface{}{

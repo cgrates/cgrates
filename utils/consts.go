@@ -1158,7 +1158,7 @@ const (
 	AdminSv1RemoveFilterIndexes = "AdminSv1.RemoveFilterIndexes"
 	AdminSv1RemoveFilter        = "AdminSv1.RemoveFilter"
 	AdminSv1SetFilter           = "AdminSv1.SetFilter"
-	AdminSv1GetFilterIDs        = "AdminSv1.GetFilterIDs"
+	AdminSv1GetFilterIDs        = "AdminSv1.GetFiltersIDs"
 	AdminSv1GetFiltersCount     = "AdminSv1.GetFiltersCount"
 	AdminSv1GetFilters          = "AdminSv1.GetFilters"
 	AdminSv1FiltersMatch        = "AdminSv1.FiltersMatch"
@@ -1271,24 +1271,24 @@ const (
 )
 
 const (
-	RateSv1                         = "RateSv1"
-	RateSv1CostForEvent             = "RateSv1.CostForEvent"
-	RateSv1RateProfilesForEvent     = "RateSv1.RateProfilesForEvent"
-	RateSv1RateProfileRatesForEvent = "RateSv1.RateProfileRatesForEvent"
-	RateSv1Ping                     = "RateSv1.Ping"
+	RateSv1                     = "RateSv1"
+	RateSv1CostForEvent         = "RateSv1.CostForEvent"
+	RateSv1RateProfilesForEvent = "RateSv1.GetRateProfilesIDsForEvent"
+	RateSv1GetRatesIDsForEvent  = "RateSv1.GetRatesIDsForEvent"
+	RateSv1Ping                 = "RateSv1.Ping"
 )
 
 const (
-	AccountSv1                    = "AccountSv1"
-	AccountSv1Ping                = "AccountSv1.Ping"
-	AccountSv1AccountsForEvent    = "AccountSv1.AccountsForEvent"
-	AccountSv1MaxAbstracts        = "AccountSv1.MaxAbstracts"
-	AccountSv1DebitAbstracts      = "AccountSv1.DebitAbstracts"
-	AccountSv1MaxConcretes        = "AccountSv1.MaxConcretes"
-	AccountSv1DebitConcretes      = "AccountSv1.DebitConcretes"
-	AccountSv1RefundCharges       = "AccountSv1.RefundCharges"
-	AccountSv1ActionSetBalances   = "AccountSv1.ActionSetBalances"
-	AccountSv1ActionRemoveBalance = "AccountSv1.ActionRemoveBalance"
+	AccountSv1                     = "AccountSv1"
+	AccountSv1Ping                 = "AccountSv1.Ping"
+	AccountSv1AccountsForEvent     = "AccountSv1.AccountsForEvent"
+	AccountSv1MaxAbstracts         = "AccountSv1.MaxAbstracts"
+	AccountSv1DebitAbstracts       = "AccountSv1.DebitAbstracts"
+	AccountSv1MaxConcretes         = "AccountSv1.MaxConcretes"
+	AccountSv1DebitConcretes       = "AccountSv1.DebitConcretes"
+	AccountSv1RefundCharges        = "AccountSv1.RefundCharges"
+	AccountSv1ActionSetBalances    = "AccountSv1.ActionSetBalances"
+	AccountSv1ActionRemoveBalances = "AccountSv1.ActionRemoveBalances"
 )
 
 const (
@@ -1306,27 +1306,27 @@ const (
 
 // RouteS APIs
 const (
-	RouteSv1GetRoutes                = "RouteSv1.GetRoutes"
-	RouteSv1GetRoutesList            = "RouteSv1.GetRoutesList"
-	RouteSv1GetRouteProfilesForEvent = "RouteSv1.GetRouteProfilesForEvent"
-	RouteSv1Ping                     = "RouteSv1.Ping"
-	AdminSv1GetRouteProfile          = "AdminSv1.GetRouteProfile"
-	AdminSv1GetRouteProfiles         = "AdminSv1.GetRouteProfiles"
-	AdminSv1GetRouteProfileIDs       = "AdminSv1.GetRouteProfileIDs"
-	AdminSv1RemoveRouteProfile       = "AdminSv1.RemoveRouteProfile"
-	AdminSv1SetRouteProfile          = "AdminSv1.SetRouteProfile"
+	RouteSv1ProcessEvent        = "RouteSv1.ProcessEvent"
+	RouteSv1GetRoutesList       = "RouteSv1.GetRoutesList"
+	RouteSv1GetRoutesForEvent   = "RouteSv1.GetRoutesForEvent"
+	RouteSv1Ping                = "RouteSv1.Ping"
+	AdminSv1GetRouteProfile     = "AdminSv1.GetRouteProfile"
+	AdminSv1GetRouteProfiles    = "AdminSv1.GetRouteProfiles"
+	AdminSv1GetRouteProfilesIDs = "AdminSv1.GetRouteProfilesIDs"
+	AdminSv1RemoveRouteProfile  = "AdminSv1.RemoveRouteProfile"
+	AdminSv1SetRouteProfile     = "AdminSv1.SetRouteProfile"
 )
 
 // AttributeS APIs
 const (
-	AdminSv1SetAttributeProfile      = "AdminSv1.SetAttributeProfile"
-	AdminSv1GetAttributeProfile      = "AdminSv1.GetAttributeProfile"
-	AdminSv1GetAttributeProfiles     = "AdminSv1.GetAttributeProfiles"
-	AdminSv1GetAttributeProfileIDs   = "AdminSv1.GetAttributeProfileIDs"
-	AdminSv1RemoveAttributeProfile   = "AdminSv1.RemoveAttributeProfile"
-	AttributeSv1GetAttributeForEvent = "AttributeSv1.GetAttributeForEvent"
-	AttributeSv1ProcessEvent         = "AttributeSv1.ProcessEvent"
-	AttributeSv1Ping                 = "AttributeSv1.Ping"
+	AdminSv1SetAttributeProfile       = "AdminSv1.SetAttributeProfile"
+	AdminSv1GetAttributeProfile       = "AdminSv1.GetAttributeProfile"
+	AdminSv1GetAttributeProfiles      = "AdminSv1.GetAttributeProfiles"
+	AdminSv1GetAttributeProfilesIDs   = "AdminSv1.GetAttributeProfilesIDs"
+	AdminSv1RemoveAttributeProfile    = "AdminSv1.RemoveAttributeProfile"
+	AttributeSv1GetAttributesForEvent = "AttributeSv1.AttributeSv1.GetAttributesForEvent"
+	AttributeSv1ProcessEvent          = "AttributeSv1.ProcessEvent"
+	AttributeSv1Ping                  = "AttributeSv1.Ping"
 )
 
 // ChargerS APIs
@@ -1338,7 +1338,7 @@ const (
 	AdminSv1GetChargerProfiles    = "AdminSv1.GetChargerProfiles"
 	AdminSv1RemoveChargerProfile  = "AdminSv1.RemoveChargerProfile"
 	AdminSv1SetChargerProfile     = "AdminSv1.SetChargerProfile"
-	AdminSv1GetChargerProfileIDs  = "AdminSv1.GetChargerProfileIDs"
+	AdminSv1GetChargerProfilesIDs = "AdminSv1.GetChargerProfilesIDs"
 )
 
 // ThresholdS APIs
@@ -1349,7 +1349,7 @@ const (
 	ThresholdSv1GetThresholdIDs       = "ThresholdSv1.GetThresholdIDs"
 	ThresholdSv1Ping                  = "ThresholdSv1.Ping"
 	ThresholdSv1GetThresholdsForEvent = "ThresholdSv1.GetThresholdsForEvent"
-	AdminSv1GetThresholdProfileIDs    = "AdminSv1.GetThresholdProfileIDs"
+	AdminSv1GetThresholdProfilesIDs   = "AdminSv1.GetThresholdProfilesIDs"
 	AdminSv1GetThresholdProfilesCount = "AdminSv1.GetThresholdProfilesCount"
 	AdminSv1GetThresholdProfile       = "AdminSv1.GetThresholdProfile"
 	AdminSv1GetThresholdProfiles      = "AdminSv1.GetThresholdProfiles"
@@ -1360,10 +1360,10 @@ const (
 // StatS APIs
 const (
 	StatSv1ProcessEvent               = "StatSv1.ProcessEvent"
-	StatSv1GetQueueIDs                = "StatSv1.GetQueueIDs"
-	StatSv1GetQueueStringMetrics      = "StatSv1.GetQueueStringMetrics"
-	StatSv1GetQueueFloatMetrics       = "StatSv1.GetQueueFloatMetrics"
-	StatSv1GetQueueDecimalMetrics     = "StatSv1.GetQueueDecimalMetrics"
+	StatSv1GetStatQueuesIDs           = "StatSv1.GetStatQueuesIDs"
+	StatSv1GetStatQueueStringMetrics  = "StatSv1.GetStatQueueStringMetrics"
+	StatSv1GetStatQueueFloatMetrics   = "StatSv1.GetStatQueueFloatMetrics"
+	StatSv1GetStatQueueDecimalMetrics = "StatSv1.GetStatQueueDecimalMetrics"
 	StatSv1Ping                       = "StatSv1.Ping"
 	StatSv1GetStatQueuesForEvent      = "StatSv1.GetStatQueuesForEvent"
 	StatSv1GetStatQueue               = "StatSv1.GetStatQueue"
@@ -1372,7 +1372,7 @@ const (
 	AdminSv1RemoveStatQueueProfile    = "AdminSv1.RemoveStatQueueProfile"
 	AdminSv1SetStatQueueProfile       = "AdminSv1.SetStatQueueProfile"
 	AdminSv1GetStatQueueProfiles      = "AdminSv1.GetStatQueueProfiles"
-	AdminSv1GetStatQueueProfileIDs    = "AdminSv1.GetStatQueueProfileIDs"
+	AdminSv1GetStatQueueProfilesIDs   = "AdminSv1.GetStatQueueProfilesIDs"
 	AdminSv1GetStatQueueProfilesCount = "AdminSv1.GetStatQueueProfilesCount"
 )
 
@@ -1390,7 +1390,7 @@ const (
 	AdminSv1GetResourceProfiles      = "AdminSv1.GetResourceProfiles"
 	AdminSv1RemoveResourceProfile    = "AdminSv1.RemoveResourceProfile"
 	AdminSv1GetResourceProfile       = "AdminSv1.GetResourceProfile"
-	AdminSv1GetResourceProfileIDs    = "AdminSv1.GetResourceProfileIDs"
+	AdminSv1GetResourceProfilesIDs   = "AdminSv1.GetResourceProfilesIDs"
 	AdminSv1GetResourceProfilesCount = "AdminSv1.GetResourceProfilesCount"
 )
 
@@ -1454,10 +1454,10 @@ const (
 	AdminSv1GetRateProfile           = "AdminSv1.GetRateProfile"
 	AdminSv1GetRateProfiles          = "AdminSv1.GetRateProfiles"
 	AdminSv1GetRateProfileRates      = "AdminSv1.GetRateProfileRates"
-	AdminSv1GetRateProfileIDs        = "AdminSv1.GetRateProfileIDs"
+	AdminSv1GetRateProfilesIDs       = "AdminSv1.GetRateProfilesIDs"
 	AdminSv1GetRateProfilesCount     = "AdminSv1.GetRateProfilesCount"
 	AdminSv1GetRateProfileRatesCount = "AdminSv1.GetRateProfileRatesCount"
-	AdminSv1GetRateProfileRateIDs    = "AdminSv1.GetRateProfileRateIDs"
+	AdminSv1GetRateProfileRatesIDs   = "AdminSv1.GetRateProfileRatesIDs"
 	AdminSv1SetRateProfileRates      = "AdminSv1.SetRateProfileRates"
 	AdminSv1RemoveRateProfile        = "AdminSv1.RemoveRateProfile"
 	AdminSv1RemoveRateProfileRates   = "AdminSv1.RemoveRateProfileRates"
@@ -1480,23 +1480,23 @@ const (
 
 // CacheS APIs
 const (
-	CacheSv1                  = "CacheSv1"
-	CacheSv1GetCacheStats     = "CacheSv1.GetCacheStats"
-	CacheSv1GetItemIDs        = "CacheSv1.GetItemIDs"
-	CacheSv1HasItem           = "CacheSv1.HasItem"
-	CacheSv1GetItemExpiryTime = "CacheSv1.GetItemExpiryTime"
-	CacheSv1RemoveItem        = "CacheSv1.RemoveItem"
-	CacheSv1RemoveItems       = "CacheSv1.RemoveItems"
-	CacheSv1PrecacheStatus    = "CacheSv1.PrecacheStatus"
-	CacheSv1HasGroup          = "CacheSv1.HasGroup"
-	CacheSv1GetGroupItemIDs   = "CacheSv1.GetGroupItemIDs"
-	CacheSv1RemoveGroup       = "CacheSv1.RemoveGroup"
-	CacheSv1Clear             = "CacheSv1.Clear"
-	CacheSv1ReloadCache       = "CacheSv1.ReloadCache"
-	CacheSv1LoadCache         = "CacheSv1.LoadCache"
-	CacheSv1Ping              = "CacheSv1.Ping"
-	CacheSv1ReplicateSet      = "CacheSv1.ReplicateSet"
-	CacheSv1ReplicateRemove   = "CacheSv1.ReplicateRemove"
+	CacheSv1                    = "CacheSv1"
+	CacheSv1GetCacheStats       = "CacheSv1.GetCacheStats"
+	CacheSv1GetItemsIDs         = "CacheSv1.GetItemsIDs"
+	CacheSv1HasItem             = "CacheSv1.HasItem"
+	CacheSv1GetItemExpiryTime   = "CacheSv1.GetItemExpiryTime"
+	CacheSv1RemoveItem          = "CacheSv1.RemoveItem"
+	CacheSv1RemoveItems         = "CacheSv1.RemoveItems"
+	CacheSv1PrecacheStatus      = "CacheSv1.PrecacheStatus"
+	CacheSv1HasGroup            = "CacheSv1.HasGroup"
+	CacheSv1GetGroupItemsIDs    = "CacheSv1.GetGroupItemsIDs"
+	CacheSv1RemoveGroup         = "CacheSv1.RemoveGroup"
+	CacheSv1Clear               = "CacheSv1.Clear"
+	CacheSv1ReloadCache         = "CacheSv1.ReloadCache"
+	CacheSv1LoadCache           = "CacheSv1.LoadCache"
+	CacheSv1Ping                = "CacheSv1.Ping"
+	CacheSv1ReplicateSet        = "CacheSv1.ReplicateSetItem"
+	CacheSv1ReplicateRemoveItem = "CacheSv1.ReplicateRemoveItem"
 )
 
 // GuardianS APIs
@@ -1538,7 +1538,7 @@ const (
 	AdminSv1SetActionProfile       = "AdminSv1.SetActionProfile"
 	AdminSv1GetActionProfile       = "AdminSv1.GetActionProfile"
 	AdminSv1GetActionProfiles      = "AdminSv1.GetActionProfiles"
-	AdminSv1GetActionProfileIDs    = "AdminSv1.GetActionProfileIDs"
+	AdminSv1GetActionProfilesIDs   = "AdminSv1.GetActionProfilesIDs"
 	AdminSv1GetActionProfilesCount = "AdminSv1.GetActionProfilesCount"
 	AdminSv1RemoveActionProfile    = "AdminSv1.RemoveActionProfile"
 )
@@ -2595,7 +2595,7 @@ const (
 	ActionSv1                = "ActionSv1"
 	ActionSv1Ping            = "ActionSv1.Ping"
 	ActionSv1ScheduleActions = "ActionSv1.ScheduleActions"
-	ActionSv1ExecuteActions  = "ActionSv1.ExecuteActions"
+	ActionSv1ProcessEvent    = "ActionSv1.ProcessEvent"
 )
 
 // StringTmplType a string set used, by agentRequest and eventRequest to determine if the returned template type is string

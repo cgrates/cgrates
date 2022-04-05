@@ -25,7 +25,7 @@ import (
 func init() {
 	c := &CmdGetStatQueueStringMetrics{
 		name:      "stats_metrics",
-		rpcMethod: utils.StatSv1GetQueueStringMetrics,
+		rpcMethod: utils.StatSv1GetStatQueueStringMetrics,
 		rpcParams: &utils.TenantIDWithAPIOpts{},
 	}
 	commands[c.Name()] = c

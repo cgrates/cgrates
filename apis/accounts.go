@@ -210,16 +210,16 @@ func (aSv1 *AccountSv1) RefundCharges(ctx *context.Context,
 	return aSv1.aS.V1RefundCharges(ctx, args, rply)
 }
 
-// ActionSetBalance performs a set balance action
-func (aSv1 *AccountSv1) ActionSetBalance(ctx *context.Context, args *utils.ArgsActSetBalance,
+// ActionSetBalances performs a set balance action
+func (aSv1 *AccountSv1) ActionSetBalances(ctx *context.Context, args *utils.ArgsActSetBalance,
 	eEc *string) (err error) {
-	return aSv1.aS.V1ActionSetBalance(ctx, args, eEc)
+	return aSv1.aS.V1ActionSetBalances(ctx, args, eEc)
 }
 
 // ActionRemoveBalances removes a blance from an account
 func (aSv1 *AccountSv1) ActionRemoveBalances(ctx *context.Context, args *utils.ArgsActRemoveBalances,
 	eEc *string) (err error) {
-	return aSv1.aS.V1ActionRemoveBalance(ctx, args, eEc)
+	return aSv1.aS.V1ActionRemoveBalances(ctx, args, eEc)
 }
 
 // GetAccount returns an Account

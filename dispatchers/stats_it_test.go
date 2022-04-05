@@ -137,7 +137,7 @@ func testDspStsGetStatFailover(t *testing.T) {
 		},
 	}
 	allEngine.stopEngine(t)
-	if err := dispEngine.RPC.Call(utils.StatSv1GetQueueStringMetrics,
+	if err := dispEngine.RPC.Call(utils.StatSv1GetStatQueueStringMetrics,
 		args2, &metrics); err != nil {
 		t.Error(err)
 	}
@@ -145,7 +145,7 @@ func testDspStsGetStatFailover(t *testing.T) {
 	allEngine.startEngine(t)
 	allEngine2.stopEngine(t)
 
-	if err := dispEngine.RPC.Call(utils.StatSv1GetQueueStringMetrics,
+	if err := dispEngine.RPC.Call(utils.StatSv1GetStatQueueStringMetrics,
 		args2, &metrics); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expected error NOT_FOUND but received %v and reply %v\n", err, reply)
 	}
@@ -202,7 +202,7 @@ func testDspStsTestAuthKey(t *testing.T) {
 	}
 
 	var metrics map[string]string
-	if err := dispEngine.RPC.Call(utils.StatSv1GetQueueStringMetrics,
+	if err := dispEngine.RPC.Call(utils.StatSv1GetStatQueueStringMetrics,
 		args2, &metrics); err == nil || err.Error() != utils.ErrUnauthorizedApi.Error() {
 		t.Error(err)
 	}
@@ -246,7 +246,7 @@ func testDspStsTestAuthKey2(t *testing.T) {
 		utils.MetaTCD: "2m15s",
 	}
 
-	if err := dispEngine.RPC.Call(utils.StatSv1GetQueueStringMetrics,
+	if err := dispEngine.RPC.Call(utils.StatSv1GetStatQueueStringMetrics,
 		args2, &metrics); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedMetrics, metrics) {
@@ -278,7 +278,7 @@ func testDspStsTestAuthKey2(t *testing.T) {
 		utils.MetaTCC: "133",
 		utils.MetaTCD: "3m0s",
 	}
-	if err := dispEngine.RPC.Call(utils.StatSv1GetQueueStringMetrics,
+	if err := dispEngine.RPC.Call(utils.StatSv1GetStatQueueStringMetrics,
 		args2, &metrics); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedMetrics, metrics) {
@@ -304,7 +304,7 @@ func testDspStsTestAuthKey3(t *testing.T) {
 		utils.MetaTCD: 180 * 1e9,
 	}
 
-	if err := dispEngine.RPC.Call(utils.StatSv1GetQueueFloatMetrics,
+	if err := dispEngine.RPC.Call(utils.StatSv1GetStatQueueFloatMetrics,
 		args2, &metrics); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedMetrics, metrics) {
@@ -312,7 +312,7 @@ func testDspStsTestAuthKey3(t *testing.T) {
 	}
 
 	estats := []string{"Stats2", "Stats2_1"}
-	if err := dispEngine.RPC.Call(utils.StatSv1GetQueueIDs,
+	if err := dispEngine.RPC.Call(utils.StatSv1GetStatQueuesIDs,
 		&utils.TenantWithAPIOpts{
 			Tenant: "cgrates.org",
 			APIOpts: map[string]interface{}{

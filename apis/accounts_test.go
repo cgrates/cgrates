@@ -1676,7 +1676,7 @@ func TestAccountsActionRemoveBalance(t *testing.T) {
 	}
 	var reply string
 
-	if err := accSv1.ActionSetBalance(context.Background(), argsSet, &reply); err != nil {
+	if err := accSv1.ActionSetBalances(context.Background(), argsSet, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected status reply", reply)

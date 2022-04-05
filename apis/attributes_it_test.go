@@ -240,7 +240,7 @@ func testAttributeGetAttributeIDs(t *testing.T) {
 		Tenant: "cgrates.org",
 	}
 	expected := []string{"TEST_ATTRIBUTES_IT_TEST"}
-	if err := attrSRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfileIDs,
+	if err := attrSRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfilesIDs,
 		args, &reply); err != nil {
 		t.Error(err)
 	} else if len(reply) != len(expected) {
@@ -417,7 +417,7 @@ func testAttributeGetAttributeIDs2(t *testing.T) {
 		Tenant: "cgrates.org",
 	}
 	expected := []string{"TEST_ATTRIBUTES_IT_TEST", "TEST_ATTRIBUTES_IT_TEST_SECOND"}
-	if err := attrSRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfileIDs,
+	if err := attrSRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfilesIDs,
 		args, &reply); err != nil {
 		t.Error(err)
 	} else if len(reply) != len(expected) {
@@ -667,7 +667,7 @@ func testAttributeSGetAttributeForEventAnyContext(t *testing.T) {
 		t.Errorf("Expecting : %+v, received: %+v", eAttrPrf2.APIAttributeProfile, reply)
 	}
 	var attrReply *engine.APIAttributeProfile
-	if err := attrSRPC.Call(context.Background(), utils.AttributeSv1GetAttributeForEvent,
+	if err := attrSRPC.Call(context.Background(), utils.AttributeSv1GetAttributesForEvent,
 		ev, &attrReply); err != nil {
 		t.Fatal(err)
 	}
@@ -707,7 +707,7 @@ func testAttributeSGetAttributeForEventSameAnyContext(t *testing.T) {
 		},
 	}
 	var attrReply *engine.APIAttributeProfile
-	if err := attrSRPC.Call(context.Background(), utils.AttributeSv1GetAttributeForEvent,
+	if err := attrSRPC.Call(context.Background(), utils.AttributeSv1GetAttributesForEvent,
 		ev, &attrReply); err != nil {
 		t.Fatal(err)
 	}
@@ -747,7 +747,7 @@ func testAttributeSGetAttributeForEventNotFound(t *testing.T) {
 		},
 	}
 	var attrReply *engine.APIAttributeProfile
-	if err := attrSRPC.Call(context.Background(), utils.AttributeSv1GetAttributeForEvent,
+	if err := attrSRPC.Call(context.Background(), utils.AttributeSv1GetAttributesForEvent,
 		ev, &attrReply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
@@ -830,7 +830,7 @@ func testAttributeSGetAttributeForEvent(t *testing.T) {
 	}
 
 	var attrReply *engine.APIAttributeProfile
-	if err := attrSRPC.Call(context.Background(), utils.AttributeSv1GetAttributeForEvent,
+	if err := attrSRPC.Call(context.Background(), utils.AttributeSv1GetAttributesForEvent,
 		ev, &attrReply); err != nil {
 		t.Fatal(err)
 	}
@@ -841,7 +841,7 @@ func testAttributeSGetAttributeForEvent(t *testing.T) {
 	ev.Tenant = utils.EmptyString
 	ev.ID = "randomID"
 	var attrPrf *engine.APIAttributeProfile
-	if err := attrSRPC.Call(context.Background(), utils.AttributeSv1GetAttributeForEvent,
+	if err := attrSRPC.Call(context.Background(), utils.AttributeSv1GetAttributesForEvent,
 		ev, &attrPrf); err != nil {
 		t.Fatal(err)
 	}
@@ -1238,7 +1238,7 @@ func testAttributeGetAttributeProfileAllIDs(t *testing.T) {
 	var rply []string
 	expectedIds := []string{"ATTR_1", "ATTR_2", "ATTR_3", "ATTR_Search_and_replace",
 		"TEST_ATTRIBUTES_IT_TEST"} //"TEST_ATTRIBUTES_IT_TEST_SECOND"}
-	if err := attrSRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfileIDs,
+	if err := attrSRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfilesIDs,
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
 		}, &rply); err != nil {

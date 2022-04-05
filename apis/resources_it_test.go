@@ -333,7 +333,7 @@ func testResourceSGetResourceWithConfigAfterSet(t *testing.T) {
 func testResourceSGetResourceProfileIDs(t *testing.T) {
 	var reply []string
 	exp := []string{"ResGroup1", "ResGroup2"}
-	if err := rsRPC.Call(context.Background(), utils.AdminSv1GetResourceProfileIDs,
+	if err := rsRPC.Call(context.Background(), utils.AdminSv1GetResourceProfilesIDs,
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
 		}, &reply); err != nil {

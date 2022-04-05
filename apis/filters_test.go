@@ -120,7 +120,7 @@ func TestFiltersSetGetGetCountFilters(t *testing.T) {
 
 	args5 := &utils.ArgsItemIDs{}
 	var reply5 []string
-	err = admS.GetFilterIDs(context.Background(), args5, &reply5)
+	err = admS.GetFiltersIDs(context.Background(), args5, &reply5)
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
@@ -158,7 +158,7 @@ func TestFiltersSetGetGetCountFilters(t *testing.T) {
 
 	args6 := &utils.ArgsItemIDs{}
 	var reply6 []string
-	err = admS.GetFilterIDs(context.Background(), args6, &reply6)
+	err = admS.GetFiltersIDs(context.Background(), args6, &reply6)
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
@@ -191,7 +191,7 @@ func TestFiltersSetGetGetCountFilters(t *testing.T) {
 
 	args7 := &utils.ArgsItemIDs{}
 	var reply7 []string
-	err = admS.GetFilterIDs(context.Background(), args7, &reply7)
+	err = admS.GetFiltersIDs(context.Background(), args7, &reply7)
 	if err == nil || err != utils.ErrNotFound {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ErrNotFound, err)
 	}
@@ -1237,7 +1237,7 @@ func TestFiltersGetFilterIDs(t *testing.T) {
 
 	args6 := &utils.ArgsItemIDs{}
 	var reply6 []string
-	err := admS.GetFilterIDs(context.Background(), args6, &reply6)
+	err := admS.GetFiltersIDs(context.Background(), args6, &reply6)
 	if err == nil || err.Error() != "NOT_IMPLEMENTED" {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "NOT_IMPLEMENTED", err)
 	}

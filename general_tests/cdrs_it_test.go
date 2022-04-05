@@ -458,7 +458,7 @@ func testCDRsGetStats1(t *testing.T) {
 	expectedMetrics := map[string]string{
 		utils.MetaSum + utils.HashtagSep + utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Usage: utils.NotAvailable,
 	}
-	if err := cdrsRpc.Call(context.Background(), utils.StatSv1GetQueueStringMetrics,
+	if err := cdrsRpc.Call(context.Background(), utils.StatSv1GetStatQueueStringMetrics,
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: expectedIDs[0]},
 		}, &metrics); err != nil {
@@ -471,7 +471,7 @@ func testCDRsGetStats1(t *testing.T) {
 func testCDRsGetThreshold1(t *testing.T) {
 	expected := []string{"THD_ACNT_1001", "THD_ProcessCDR"}
 	var result []string
-	if err := cdrsRpc.Call(context.Background(), utils.AdminSv1GetThresholdProfileIDs,
+	if err := cdrsRpc.Call(context.Background(), utils.AdminSv1GetThresholdProfilesIDs,
 		&utils.ArgsItemIDs{Tenant: "cgrates.org"}, &result); err != nil {
 		t.Error(err)
 	} else if len(expected) != len(result) {
@@ -531,7 +531,7 @@ func testCDRsGetStats2(t *testing.T) {
 	expectedMetrics := map[string]string{
 		utils.MetaSum + utils.HashtagSep + utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Usage: "142000000000",
 	}
-	if err := cdrsRpc.Call(context.Background(), utils.StatSv1GetQueueStringMetrics,
+	if err := cdrsRpc.Call(context.Background(), utils.StatSv1GetStatQueueStringMetrics,
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: expectedIDs[0]},
 		}, &metrics); err != nil {

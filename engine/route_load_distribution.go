@@ -115,7 +115,7 @@ func populateStatsForLoadRoute(ctx *context.Context, cfg *config.CGRConfig,
 		var metrics map[string]*utils.Decimal
 		if err = connMgr.Call(ctx,
 			cfg.RouteSCfg().StatSConns,
-			utils.StatSv1GetQueueDecimalMetrics,
+			utils.StatSv1GetStatQueueDecimalMetrics,
 			&utils.TenantIDWithAPIOpts{
 				TenantID: &utils.TenantID{
 					Tenant: tenant, ID: statWithMetric[0]}},

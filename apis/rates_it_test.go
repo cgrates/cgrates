@@ -248,7 +248,7 @@ func testRateGetRateProfileIDs(t *testing.T) {
 		Tenant: "cgrates.org",
 	}
 	expected := []string{"TEST_RATE_IT_TEST"}
-	if err := rateSRPC.Call(context.Background(), utils.AdminSv1GetRateProfileIDs,
+	if err := rateSRPC.Call(context.Background(), utils.AdminSv1GetRateProfilesIDs,
 		args, &reply); err != nil {
 		t.Error(err)
 	} else if len(reply) != len(expected) {
@@ -423,7 +423,7 @@ func testRateGetRateIDs2(t *testing.T) {
 		Tenant: "cgrates.org",
 	}
 	expected := []string{"TEST_RATE_IT_TEST", "TEST_RATE_IT_TEST_SECOND"}
-	if err := rateSRPC.Call(context.Background(), utils.AdminSv1GetRateProfileIDs,
+	if err := rateSRPC.Call(context.Background(), utils.AdminSv1GetRateProfilesIDs,
 		args, &reply); err != nil {
 		t.Error(err)
 	} else if len(reply) != len(expected) {
@@ -1349,7 +1349,7 @@ func testRateProfileRateIDsAndCount(t *testing.T) {
 	// we will get all the rates from MultipleRates rate profile with the prefix RT_T
 	expected := []string{"RT_THUESDAY", "RT_THURSDAY"}
 	var result []string
-	if err := rateSRPC.Call(context.Background(), utils.AdminSv1GetRateProfileRateIDs,
+	if err := rateSRPC.Call(context.Background(), utils.AdminSv1GetRateProfileRatesIDs,
 		&utils.ArgsSubItemIDs{
 			Tenant:      "cgrates.org",
 			ProfileID:   "MultipleRates",
@@ -2296,7 +2296,7 @@ func testRateProfileRatesForEventMatchingEvents(t *testing.T) {
 
 	expected := []string{"RT_DIFFERENT"}
 	var rateIDs []string
-	if err := rateSRPC.Call(context.Background(), utils.RateSv1RateProfileRatesForEvent,
+	if err := rateSRPC.Call(context.Background(), utils.RateSv1GetRatesIDsForEvent,
 		&utils.CGREventWithRateProfile{
 			RateProfileID: "RT_CGR202",
 			CGREvent: &utils.CGREvent{
@@ -2324,7 +2324,7 @@ func testRateProfileRatesForEventMatchingEvents(t *testing.T) {
 	}
 
 	expected = []string{"RT_SPECIAL", "RT_WEEKEND"}
-	if err := rateSRPC.Call(context.Background(), utils.RateSv1RateProfileRatesForEvent,
+	if err := rateSRPC.Call(context.Background(), utils.RateSv1GetRatesIDsForEvent,
 		&utils.CGREventWithRateProfile{
 			RateProfileID: "RT_CGR202",
 			CGREvent: &utils.CGREvent{
@@ -2353,7 +2353,7 @@ func testRateProfileRatesForEventMatchingEvents(t *testing.T) {
 	}
 
 	expected = []string{"RT_SPECIAL", "RT_WEEKEND", "RT_DIFFERENT", "RT_ALWAYS"}
-	if err := rateSRPC.Call(context.Background(), utils.RateSv1RateProfileRatesForEvent,
+	if err := rateSRPC.Call(context.Background(), utils.RateSv1GetRatesIDsForEvent,
 		&utils.CGREventWithRateProfile{
 			RateProfileID: "RT_CGR202",
 			CGREvent: &utils.CGREvent{

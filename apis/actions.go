@@ -47,8 +47,8 @@ func (admS *AdminSv1) GetActionProfile(ctx *context.Context, arg *utils.TenantID
 	return nil
 }
 
-// GetActionProfileIDs returns list of action profile IDs registered for a tenant
-func (admS *AdminSv1) GetActionProfileIDs(ctx *context.Context, args *utils.ArgsItemIDs, actPrfIDs *[]string) (err error) {
+// GetActionProfilesIDs returns list of action profile IDs registered for a tenant
+func (admS *AdminSv1) GetActionProfilesIDs(ctx *context.Context, args *utils.ArgsItemIDs, actPrfIDs *[]string) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = admS.cfg.GeneralCfg().DefaultTenant
@@ -82,7 +82,7 @@ func (admS *AdminSv1) GetActionProfiles(ctx *context.Context, args *utils.ArgsIt
 		tnt = admS.cfg.GeneralCfg().DefaultTenant
 	}
 	var actPrfIDs []string
-	if err = admS.GetActionProfileIDs(ctx, args, &actPrfIDs); err != nil {
+	if err = admS.GetActionProfilesIDs(ctx, args, &actPrfIDs); err != nil {
 		return
 	}
 	*actPrfs = make([]*engine.ActionProfile, 0, len(actPrfIDs))
@@ -181,7 +181,7 @@ func (aSv1 *ActionSv1) ScheduleActions(ctx *context.Context, args *utils.CGREven
 	return aSv1.aS.V1ScheduleActions(ctx, args, rpl)
 }
 
-// ExecuteActions will be called to execute ASAP action profiles, ignoring their Schedule field
-func (aSv1 *ActionSv1) ExecuteActions(ctx *context.Context, args *utils.CGREvent, rpl *string) error {
-	return aSv1.aS.V1ExecuteActions(ctx, args, rpl)
+// ProcessEvent will be called to execute ASAP action profiles, ignoring their Schedule field
+func (aSv1 *ActionSv1) ProcessEvent(ctx *context.Context, args *utils.CGREvent, rpl *string) error {
+	return aSv1.aS.V1ProcessEvent(ctx, args, rpl)
 }

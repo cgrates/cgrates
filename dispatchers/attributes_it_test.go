@@ -267,7 +267,7 @@ func testDspAttrGetAttrFailover(t *testing.T) {
 
 	var attrReply engine.APIAttributeProfile
 	var rplyEv engine.AttrSProcessEventReply
-	if err := dispEngine.RPC.Call(utils.AttributeSv1GetAttributeForEvent,
+	if err := dispEngine.RPC.Call(utils.AttributeSv1GetAttributesForEvent,
 		ev, &attrReply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
@@ -282,7 +282,7 @@ func testDspAttrGetAttrFailover(t *testing.T) {
 
 	allEngine2.stopEngine(t)
 
-	if err := dispEngine.RPC.Call(utils.AttributeSv1GetAttributeForEvent,
+	if err := dispEngine.RPC.Call(utils.AttributeSv1GetAttributesForEvent,
 		ev, &attrReply); err != nil {
 		t.Error(err)
 	}
@@ -337,7 +337,7 @@ func testDspAttrTestMissingArgDispatcher(t *testing.T) {
 		},
 	}
 	var attrReply *engine.AttributeProfile
-	if err := dispEngine.RPC.Call(utils.AttributeSv1GetAttributeForEvent,
+	if err := dispEngine.RPC.Call(utils.AttributeSv1GetAttributesForEvent,
 		ev, &attrReply); err == nil || err.Error() != utils.NewErrMandatoryIeMissing(utils.APIKey).Error() {
 		t.Errorf("Error:%v rply=%s", err, utils.ToJSON(attrReply))
 	}
@@ -355,7 +355,7 @@ func testDspAttrTestMissingApiKey(t *testing.T) {
 		},
 	}
 	var attrReply *engine.AttributeProfile
-	if err := dispEngine.RPC.Call(utils.AttributeSv1GetAttributeForEvent,
+	if err := dispEngine.RPC.Call(utils.AttributeSv1GetAttributesForEvent,
 		ev, &attrReply); err == nil || err.Error() != utils.NewErrMandatoryIeMissing(utils.APIKey).Error() {
 		t.Errorf("Error:%v rply=%s", err, utils.ToJSON(attrReply))
 	}
@@ -373,7 +373,7 @@ func testDspAttrTestUnknownApiKey(t *testing.T) {
 		},
 	}
 	var attrReply *engine.AttributeProfile
-	if err := dispEngine.RPC.Call(utils.AttributeSv1GetAttributeForEvent,
+	if err := dispEngine.RPC.Call(utils.AttributeSv1GetAttributesForEvent,
 		ev, &attrReply); err == nil || err.Error() != utils.ErrUnknownApiKey.Error() {
 		t.Error(err)
 	}
@@ -392,7 +392,7 @@ func testDspAttrTestAuthKey(t *testing.T) {
 		},
 	}
 	var attrReply *engine.AttributeProfile
-	if err := dispEngine.RPC.Call(utils.AttributeSv1GetAttributeForEvent,
+	if err := dispEngine.RPC.Call(utils.AttributeSv1GetAttributesForEvent,
 		ev, &attrReply); err == nil || err.Error() != utils.ErrUnauthorizedApi.Error() {
 		t.Error(err)
 	}
@@ -430,7 +430,7 @@ func testDspAttrTestAuthKey2(t *testing.T) {
 		eAttrPrf.Attributes[0].FilterIDs = nil // empty slice are nil in gob
 	}
 	var attrReply engine.APIAttributeProfile
-	if err := dispEngine.RPC.Call(utils.AttributeSv1GetAttributeForEvent,
+	if err := dispEngine.RPC.Call(utils.AttributeSv1GetAttributesForEvent,
 		ev, &attrReply); err != nil {
 		t.Error(err)
 	}
@@ -485,7 +485,7 @@ func testDspAttrTestAuthKey3(t *testing.T) {
 		},
 	}
 	var attrReply *engine.AttributeProfile
-	if err := dispEngine.RPC.Call(utils.AttributeSv1GetAttributeForEvent,
+	if err := dispEngine.RPC.Call(utils.AttributeSv1GetAttributesForEvent,
 		ev, &attrReply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
@@ -549,13 +549,13 @@ func testDspAttrGetAttrRoundRobin(t *testing.T) {
 	var attrReply engine.APIAttributeProfile
 	var rplyEv engine.AttrSProcessEventReply
 	// To ALL2
-	if err := dispEngine.RPC.Call(utils.AttributeSv1GetAttributeForEvent,
+	if err := dispEngine.RPC.Call(utils.AttributeSv1GetAttributesForEvent,
 		ev, &attrReply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 
 	// To ALL
-	if err := dispEngine.RPC.Call(utils.AttributeSv1GetAttributeForEvent,
+	if err := dispEngine.RPC.Call(utils.AttributeSv1GetAttributesForEvent,
 		ev, &attrReply); err != nil {
 		t.Error(err)
 	}

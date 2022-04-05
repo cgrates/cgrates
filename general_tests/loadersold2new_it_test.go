@@ -174,7 +174,7 @@ func testLdro2nRtCheckData(t *testing.T) {
 	expIDs := []string{"call*any", "data*any", "callSPECIAL_1002", "generic*any", "call1001"}
 	sort.Strings(expIDs)
 	var rateIDs []string
-	if err := testLdro2nRtRPC.Call(context.Background(), utils.AdminSv1GetRateProfileIDs,
+	if err := testLdro2nRtRPC.Call(context.Background(), utils.AdminSv1GetRateProfilesIDs,
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
 		}, &rateIDs); err != nil {

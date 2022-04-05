@@ -178,14 +178,14 @@ func testDspSupGetSupFailover(t *testing.T) {
 			utils.OptsAPIKey: "sup12345",
 		},
 	}
-	if err := dispEngine.RPC.Call(utils.RouteSv1GetRoutes,
+	if err := dispEngine.RPC.Call(utils.RouteSv1ProcessEvent,
 		args, &rpl); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eRpl1, rpl) {
 		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(eRpl1), utils.ToJSON(rpl))
 	}
 	allEngine2.stopEngine(t)
-	if err := dispEngine.RPC.Call(utils.RouteSv1GetRoutes,
+	if err := dispEngine.RPC.Call(utils.RouteSv1ProcessEvent,
 		args, &rpl); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eRpl, rpl) {
@@ -210,7 +210,7 @@ func testDspSupTestAuthKey(t *testing.T) {
 			utils.OptsAPIKey: "12345",
 		},
 	}
-	if err := dispEngine.RPC.Call(utils.RouteSv1GetRoutes,
+	if err := dispEngine.RPC.Call(utils.RouteSv1ProcessEvent,
 		args, &rpl); err == nil || err.Error() != utils.ErrUnauthorizedApi.Error() {
 		t.Error(err)
 	}
@@ -257,7 +257,7 @@ func testDspSupTestAuthKey2(t *testing.T) {
 			utils.OptsAPIKey: "sup12345",
 		},
 	}
-	if err := dispEngine.RPC.Call(utils.RouteSv1GetRoutes,
+	if err := dispEngine.RPC.Call(utils.RouteSv1ProcessEvent,
 		args, &rpl); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eRpl, rpl) {
@@ -320,13 +320,13 @@ func testDspSupGetSupRoundRobin(t *testing.T) {
 			utils.OptsAPIKey: "sup12345",
 		},
 	}
-	if err := dispEngine.RPC.Call(utils.RouteSv1GetRoutes,
+	if err := dispEngine.RPC.Call(utils.RouteSv1ProcessEvent,
 		args, &rpl); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eRpl1, rpl) {
 		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(eRpl1), utils.ToJSON(rpl))
 	}
-	if err := dispEngine.RPC.Call(utils.RouteSv1GetRoutes,
+	if err := dispEngine.RPC.Call(utils.RouteSv1ProcessEvent,
 		args, &rpl); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eRpl, rpl) {
@@ -386,7 +386,7 @@ func testDspSupGetSupplierForEvent(t *testing.T) {
 		expected.SortingParameters = nil // empty slices are nil in gob
 	}
 	var supProf []*engine.RouteProfile
-	if err := dispEngine.RPC.Call(utils.RouteSv1GetRouteProfilesForEvent,
+	if err := dispEngine.RPC.Call(utils.RouteSv1GetRoutesForEvent,
 		ev, &supProf); err != nil {
 		t.Fatal(err)
 	}

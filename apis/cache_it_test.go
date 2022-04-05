@@ -223,7 +223,7 @@ func testCacheSHasItemAttributeProfile(t *testing.T) {
 		},
 	}
 	var result []string
-	if err := chcRPC.Call(context.Background(), utils.CacheSv1GetItemIDs,
+	if err := chcRPC.Call(context.Background(), utils.CacheSv1GetItemsIDs,
 		argsIds, &result); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expected %+v, received %+v", utils.ErrNotFound, err)
 	}
@@ -279,7 +279,7 @@ func testCacheSHasItemAttributeProfile(t *testing.T) {
 			CacheID: utils.CacheAttributeProfiles,
 		},
 	}
-	if err := chcRPC.Call(context.Background(), utils.CacheSv1GetItemIDs,
+	if err := chcRPC.Call(context.Background(), utils.CacheSv1GetItemsIDs,
 		argsIds, &result); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedResult, result) {
@@ -325,7 +325,7 @@ func testCacheSRemoveItemAttributeProfile(t *testing.T) {
 		},
 	}
 	var resultIDs []string
-	if err := chcRPC.Call(context.Background(), utils.CacheSv1GetItemIDs,
+	if err := chcRPC.Call(context.Background(), utils.CacheSv1GetItemsIDs,
 		argsIds, &resultIDs); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expected %+v, received %+v", utils.ErrNotFound, err)
 	}
@@ -363,7 +363,7 @@ func testCacheSRemoveItemsAndReloadCache(t *testing.T) {
 			CacheID: utils.CacheAttributeProfiles,
 		},
 	}
-	if err := chcRPC.Call(context.Background(), utils.CacheSv1GetItemIDs,
+	if err := chcRPC.Call(context.Background(), utils.CacheSv1GetItemsIDs,
 		argsIds, &result); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedResult, result) {
@@ -383,7 +383,7 @@ func testCacheSRemoveItemsAndReloadCache(t *testing.T) {
 	}
 
 	// as we removed the items, we cannot take it from cache
-	if err := chcRPC.Call(context.Background(), utils.CacheSv1GetItemIDs,
+	if err := chcRPC.Call(context.Background(), utils.CacheSv1GetItemsIDs,
 		argsIds, &result); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expected %+v, received %+v", utils.ErrNotFound, result)
 	}
@@ -422,7 +422,7 @@ func testCacheSRemoveItemsAndReloadCache(t *testing.T) {
 			CacheID: utils.CacheAttributeProfiles,
 		},
 	}
-	if err := chcRPC.Call(context.Background(), utils.CacheSv1GetItemIDs,
+	if err := chcRPC.Call(context.Background(), utils.CacheSv1GetItemsIDs,
 		argsIds, &result); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedResult, result) {

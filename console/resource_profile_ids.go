@@ -25,7 +25,7 @@ import (
 func init() {
 	c := &CmdGetResourceProfileIDs{
 		name:      "resource_profile_ids",
-		rpcMethod: utils.AdminSv1GetResourceProfileIDs,
+		rpcMethod: utils.AdminSv1GetResourceProfilesIDs,
 		rpcParams: &utils.ArgsItemIDs{},
 	}
 	commands[c.Name()] = c

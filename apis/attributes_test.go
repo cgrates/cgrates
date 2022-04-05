@@ -85,7 +85,7 @@ func TestAttributesSetGetAttributeProfile(t *testing.T) {
 	//get the IDs
 	var ids []string
 	expected := []string{"TestGetAttributeProfile"}
-	if err := admS.GetAttributeProfileIDs(context.Background(),
+	if err := admS.GetAttributeProfilesIDs(context.Background(),
 		&utils.ArgsItemIDs{}, &ids); err != nil {
 		t.Error(err)
 	} else if len(ids) != len(expected) {
@@ -368,7 +368,7 @@ func TestAttributesGetAttributeProfileIDsMockErr(t *testing.T) {
 
 	var reply []string
 	expected := "NOT_IMPLEMENTED"
-	if err := admS.GetAttributeProfileIDs(context.Background(),
+	if err := admS.GetAttributeProfilesIDs(context.Background(),
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
 		}, &reply); err == nil || err.Error() != expected {
@@ -394,7 +394,7 @@ func TestAttributesGetAttributeProfileIDsMockErrKeys(t *testing.T) {
 
 	var reply []string
 	expected := "NOT_FOUND"
-	if err := admS.GetAttributeProfileIDs(context.Background(),
+	if err := admS.GetAttributeProfilesIDs(context.Background(),
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
 		}, &reply); err == nil || err.Error() != expected {
@@ -510,7 +510,7 @@ func TestAttributesGetAttributeForEvent(t *testing.T) {
 		},
 	}
 
-	if err := attsv1.GetAttributeForEvent(context.Background(), ev, &reply); err != nil {
+	if err := attsv1.GetAttributesForEvent(context.Background(), ev, &reply); err != nil {
 		t.Error(err)
 	} else {
 		rplyPntr := &reply
@@ -813,7 +813,7 @@ func TestAttributesGetAttributeProfileIDsGetOptsErr(t *testing.T) {
 	var reply []string
 	experr := "cannot convert field<bool>: true to int"
 
-	if err := adms.GetAttributeProfileIDs(context.Background(),
+	if err := adms.GetAttributeProfilesIDs(context.Background(),
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
 			APIOpts: map[string]interface{}{
@@ -858,7 +858,7 @@ func TestAttributesGetAttributeProfileIDsPaginateErr(t *testing.T) {
 	var reply []string
 	experr := `SERVER_ERROR: maximum number of items exceeded`
 
-	if err := adms.GetAttributeProfileIDs(context.Background(),
+	if err := adms.GetAttributeProfilesIDs(context.Background(),
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
 			APIOpts: map[string]interface{}{

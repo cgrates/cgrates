@@ -456,8 +456,8 @@ func (aS *AccountS) V1RefundCharges(ctx *context.Context, args *utils.APIEventCh
 	return
 }
 
-// V1ActionSetBalance performs an update for a specific balance in account
-func (aS *AccountS) V1ActionSetBalance(ctx *context.Context, args *utils.ArgsActSetBalance, rply *string) (err error) {
+// V1ActionSetBalances performs an update for a specific balances in account
+func (aS *AccountS) V1ActionSetBalances(ctx *context.Context, args *utils.ArgsActSetBalance, rply *string) (err error) {
 	if args.AccountID == utils.EmptyString {
 		return utils.NewErrMandatoryIeMissing(utils.AccountID)
 	}
@@ -479,8 +479,8 @@ func (aS *AccountS) V1ActionSetBalance(ctx *context.Context, args *utils.ArgsAct
 	return
 }
 
-// V1RemoveBalance removes a balance for a specific account
-func (aS *AccountS) V1ActionRemoveBalance(ctx *context.Context, args *utils.ArgsActRemoveBalances, rply *string) (err error) {
+// V1RemoveBalances removes a balance for a specific account
+func (aS *AccountS) V1ActionRemoveBalances(ctx *context.Context, args *utils.ArgsActRemoveBalances, rply *string) (err error) {
 	if args.AccountID == utils.EmptyString {
 		return utils.NewErrMandatoryIeMissing(utils.AccountID)
 	}

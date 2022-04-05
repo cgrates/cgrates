@@ -1347,13 +1347,13 @@ func TestV1ActionSetBalance(t *testing.T) {
 
 	args.AccountID = ""
 	expected := "MANDATORY_IE_MISSING: [AccountID]"
-	if err := accnts.V1ActionSetBalance(context.Background(), args, &reply); err == nil || err.Error() != expected {
+	if err := accnts.V1ActionSetBalances(context.Background(), args, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 	args.AccountID = "TestV1ActionSetBalance"
 
 	expected = "MANDATORY_IE_MISSING: [Diktats]"
-	if err := accnts.V1ActionSetBalance(context.Background(), args, &reply); err == nil || err.Error() != expected {
+	if err := accnts.V1ActionSetBalances(context.Background(), args, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 	args.Diktats = []*utils.BalDiktat{
@@ -1364,7 +1364,7 @@ func TestV1ActionSetBalance(t *testing.T) {
 	}
 
 	expected = "WRONG_PATH"
-	if err := accnts.V1ActionSetBalance(context.Background(), args, &reply); err == nil || err.Error() != expected {
+	if err := accnts.V1ActionSetBalances(context.Background(), args, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 
@@ -1375,7 +1375,7 @@ func TestV1ActionSetBalance(t *testing.T) {
 		},
 	}
 	args.Tenant = "cgrates.org"
-	if err := accnts.V1ActionSetBalance(context.Background(), args, &reply); err != nil {
+	if err := accnts.V1ActionSetBalances(context.Background(), args, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected status reply", reply)
@@ -1438,7 +1438,7 @@ func TestV1ActionRemoveBalance(t *testing.T) {
 	}
 	var reply string
 
-	if err := accnts.V1ActionSetBalance(context.Background(), argsSet, &reply); err != nil {
+	if err := accnts.V1ActionSetBalances(context.Background(), argsSet, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected status reply", reply)
@@ -1448,25 +1448,25 @@ func TestV1ActionRemoveBalance(t *testing.T) {
 	args := &utils.ArgsActRemoveBalances{}
 
 	expected := "MANDATORY_IE_MISSING: [AccountID]"
-	if err := accnts.V1ActionRemoveBalance(context.Background(), args, &reply); err == nil || err.Error() != expected {
+	if err := accnts.V1ActionRemoveBalances(context.Background(), args, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 	args.AccountID = "TestV1ActionRemoveBalance"
 
 	expected = "MANDATORY_IE_MISSING: [BalanceIDs]"
-	if err := accnts.V1ActionRemoveBalance(context.Background(), args, &reply); err == nil || err.Error() != expected {
+	if err := accnts.V1ActionRemoveBalances(context.Background(), args, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 	args.BalanceIDs = []string{"AbstractBalance1"}
 
 	expected = utils.ErrNoDatabaseConn.Error()
 	accnts.dm = nil
-	if err := accnts.V1ActionRemoveBalance(context.Background(), args, &reply); err == nil || err.Error() != expected {
+	if err := accnts.V1ActionRemoveBalances(context.Background(), args, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 	accnts.dm = engine.NewDataManager(data, cfg.CacheCfg(), nil)
 
-	if err := accnts.V1ActionRemoveBalance(context.Background(), args, &reply); err != nil {
+	if err := accnts.V1ActionRemoveBalances(context.Background(), args, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected status reply", reply)

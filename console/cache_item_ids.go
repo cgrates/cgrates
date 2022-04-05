@@ -25,7 +25,7 @@ import (
 func init() {
 	c := &CmdCacheGetItemIDs{
 		name:      "cache_item_ids",
-		rpcMethod: utils.CacheSv1GetItemIDs,
+		rpcMethod: utils.CacheSv1GetItemsIDs,
 		rpcParams: &utils.ArgsGetCacheItemIDsWithAPIOpts{},
 	}
 	commands[c.Name()] = c

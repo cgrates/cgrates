@@ -26,7 +26,7 @@ import (
 func init() {
 	c := &CmdRoutesSort{
 		name:      "routes",
-		rpcMethod: utils.RouteSv1GetRoutes,
+		rpcMethod: utils.RouteSv1ProcessEvent,
 		rpcParams: &utils.CGREvent{},
 	}
 	commands[c.Name()] = c

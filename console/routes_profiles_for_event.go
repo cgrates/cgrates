@@ -26,7 +26,7 @@ import (
 func init() {
 	c := &CmdGetRouteForEvent{
 		name:      "routes_profiles_for_event",
-		rpcMethod: utils.RouteSv1GetRouteProfilesForEvent,
+		rpcMethod: utils.RouteSv1GetRoutesForEvent,
 		rpcParams: &utils.CGREvent{},
 	}
 	commands[c.Name()] = c

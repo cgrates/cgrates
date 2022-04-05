@@ -239,7 +239,7 @@ func TestChargerSSetGetChargerProfileIDs(t *testing.T) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", `OK`, utils.ToJSON(setRply))
 	}
 	var getRply []string
-	err = admS.GetChargerProfileIDs(context.Background(),
+	err = admS.GetChargerProfilesIDs(context.Background(),
 		&utils.ArgsItemIDs{}, &getRply)
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
@@ -274,7 +274,7 @@ func TestChargerSSetGetChargerProfileIDs(t *testing.T) {
 	}
 
 	var getRply2 []string
-	err = admS.GetChargerProfileIDs(context.Background(),
+	err = admS.GetChargerProfilesIDs(context.Background(),
 		&utils.ArgsItemIDs{}, &getRply2)
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
@@ -302,7 +302,7 @@ func TestChargerSSetGetChargerProfileIDsErr(t *testing.T) {
 	newCache := engine.NewCacheS(cfg, dm, nil)
 	engine.Cache = newCache
 	var getRply []string
-	err := admS.GetChargerProfileIDs(context.Background(),
+	err := admS.GetChargerProfilesIDs(context.Background(),
 		&utils.ArgsItemIDs{}, &getRply)
 	if err == nil || err.Error() != "NOT_FOUND" {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "NOT_FOUND", err)
@@ -323,7 +323,7 @@ func TestChargerSSetGetChargerProfileIDsErr2(t *testing.T) {
 	newCache := engine.NewCacheS(cfg, dm, nil)
 	engine.Cache = newCache
 	var getRply []string
-	err := admS.GetChargerProfileIDs(context.Background(),
+	err := admS.GetChargerProfilesIDs(context.Background(),
 		&utils.ArgsItemIDs{}, &getRply)
 	if err == nil || err.Error() != "NOT_IMPLEMENTED" {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "NOT_IMPLEMENTED", err)
@@ -868,7 +868,7 @@ func TestChargersGetChargerProfileIDsGetOptsErr(t *testing.T) {
 	var reply []string
 	experr := "cannot convert field<bool>: true to int"
 
-	if err := adms.GetChargerProfileIDs(context.Background(),
+	if err := adms.GetChargerProfilesIDs(context.Background(),
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
 			APIOpts: map[string]interface{}{
@@ -913,7 +913,7 @@ func TestChargersGetChargerProfileIDsPaginateErr(t *testing.T) {
 	var reply []string
 	experr := `SERVER_ERROR: maximum number of items exceeded`
 
-	if err := adms.GetChargerProfileIDs(context.Background(),
+	if err := adms.GetChargerProfilesIDs(context.Background(),
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
 			APIOpts: map[string]interface{}{
@@ -1035,7 +1035,7 @@ func TestChargersSetGetRemChargerProfile(t *testing.T) {
 	var thPrfIDs []string
 	expThPrfIDs := []string{"chrgPrf"}
 
-	if err := adms.GetChargerProfileIDs(context.Background(), &utils.ArgsItemIDs{},
+	if err := adms.GetChargerProfilesIDs(context.Background(), &utils.ArgsItemIDs{},
 		&thPrfIDs); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(thPrfIDs, expThPrfIDs) {

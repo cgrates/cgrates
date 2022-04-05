@@ -217,8 +217,8 @@ func (rS *RateS) rateProfileCostForEvent(ctx *context.Context, rtPfl *utils.Rate
 	return
 }
 
-// V1RateProfilesForEvent will be called to list the RateProfilesIDs that are matching the event
-func (rS *RateS) V1RateProfilesForEvent(ctx *context.Context, args *utils.CGREvent, rpIDs *[]string) (err error) {
+// V1GetRateProfilesIDsForEvent will be called to list the RateProfilesIDs that are matching the event
+func (rS *RateS) V1GetRateProfilesIDsForEvent(ctx *context.Context, args *utils.CGREvent, rpIDs *[]string) (err error) {
 	if args == nil {
 		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
 	}
@@ -268,7 +268,7 @@ func (rS *RateS) V1RateProfilesForEvent(ctx *context.Context, args *utils.CGREve
 }
 
 // RateProfilesForEvent returns the list of rates that are matching the event from a specific profile
-func (rS *RateS) V1RateProfileRatesForEvent(ctx *context.Context, args *utils.CGREventWithRateProfile, rtIDs *[]string) (err error) {
+func (rS *RateS) V1GetRatesIDsForEvent(ctx *context.Context, args *utils.CGREventWithRateProfile, rtIDs *[]string) (err error) {
 	if args == nil {
 		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
 	}

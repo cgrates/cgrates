@@ -81,7 +81,7 @@ func TestActionsSetGetRemActionProfile(t *testing.T) {
 	var actPrfIDs []string
 	expactPrfIDs := []string{"actID"}
 
-	if err := adms.GetActionProfileIDs(context.Background(), &utils.ArgsItemIDs{},
+	if err := adms.GetActionProfilesIDs(context.Background(), &utils.ArgsItemIDs{},
 		&actPrfIDs); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(actPrfIDs, expactPrfIDs) {
@@ -361,7 +361,7 @@ func TestActionsGetActionProfileIDsErrMock(t *testing.T) {
 	var reply []string
 	experr := "NOT_IMPLEMENTED"
 
-	if err := adms.GetActionProfileIDs(context.Background(),
+	if err := adms.GetActionProfilesIDs(context.Background(),
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
 		}, &reply); err == nil || err.Error() != experr {
@@ -388,7 +388,7 @@ func TestActionsGetActionProfileIDsErrKeys(t *testing.T) {
 
 	var reply []string
 
-	if err := adms.GetActionProfileIDs(context.Background(),
+	if err := adms.GetActionProfilesIDs(context.Background(),
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
 		}, &reply); err == nil || err != utils.ErrNotFound {
@@ -534,7 +534,7 @@ func TestActionsAPIs(t *testing.T) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.OK, reply)
 	}
 
-	if err := aSv1.ExecuteActions(context.Background(), ev, &reply); err != nil {
+	if err := aSv1.ProcessEvent(context.Background(), ev, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.OK, reply)
@@ -623,7 +623,7 @@ func TestActionsExecuteActionsResetTH(t *testing.T) {
 		},
 	}
 
-	if err := aSv1.ExecuteActions(context.Background(), ev,
+	if err := aSv1.ProcessEvent(context.Background(), ev,
 		&reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -719,7 +719,7 @@ func TestActionsExecuteActionsResetSQ(t *testing.T) {
 		},
 	}
 
-	if err := aSv1.ExecuteActions(context.Background(), ev,
+	if err := aSv1.ProcessEvent(context.Background(), ev,
 		&reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -791,7 +791,7 @@ func TestActionsExecuteActionsLog(t *testing.T) {
 		},
 	}
 
-	if err := aSv1.ExecuteActions(context.Background(), ev,
+	if err := aSv1.ProcessEvent(context.Background(), ev,
 		&reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -884,7 +884,7 @@ func TestActionsExecuteActionsLogCDRs(t *testing.T) {
 		},
 	}
 
-	if err := aSv1.ExecuteActions(context.Background(), ev,
+	if err := aSv1.ProcessEvent(context.Background(), ev,
 		&reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -978,7 +978,7 @@ func TestActionsExecuteActionsSetBalance(t *testing.T) {
 		},
 	}
 
-	if err := aSv1.ExecuteActions(context.Background(), ev,
+	if err := aSv1.ProcessEvent(context.Background(), ev,
 		&reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -1010,7 +1010,7 @@ func TestActionsExecuteActionsRemBalance(t *testing.T) {
 	var executed bool
 	cc := &mockClientConn{
 		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.AccountSv1ActionRemoveBalance: func(ctx *context.Context, args, reply interface{}) error {
+			utils.AccountSv1ActionRemoveBalances: func(ctx *context.Context, args, reply interface{}) error {
 				if !reflect.DeepEqual(args, expArgs) {
 					return fmt.Errorf("expected: <%+v>,\nreceived: <%+v>",
 						utils.ToJSON(expArgs), utils.ToJSON(args))
@@ -1071,7 +1071,7 @@ func TestActionsExecuteActionsRemBalance(t *testing.T) {
 		},
 	}
 
-	if err := aSv1.ExecuteActions(context.Background(), ev,
+	if err := aSv1.ProcessEvent(context.Background(), ev,
 		&reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -1165,7 +1165,7 @@ func TestActionsExecuteActionsAddBalance(t *testing.T) {
 		},
 	}
 
-	if err := aSv1.ExecuteActions(context.Background(), ev,
+	if err := aSv1.ProcessEvent(context.Background(), ev,
 		&reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -1426,7 +1426,7 @@ func TestActionsGetActionProfileIDsGetOptsErr(t *testing.T) {
 	var reply []string
 	experr := "cannot convert field<bool>: true to int"
 
-	if err := adms.GetActionProfileIDs(context.Background(),
+	if err := adms.GetActionProfilesIDs(context.Background(),
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
 			APIOpts: map[string]interface{}{
@@ -1471,7 +1471,7 @@ func TestActionsGetActionProfileIDsPaginateErr(t *testing.T) {
 	var reply []string
 	experr := `SERVER_ERROR: maximum number of items exceeded`
 
-	if err := adms.GetActionProfileIDs(context.Background(),
+	if err := adms.GetActionProfilesIDs(context.Background(),
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
 			APIOpts: map[string]interface{}{

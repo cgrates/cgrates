@@ -230,7 +230,7 @@ func testDspChcGetItemIDs(t *testing.T) {
 		},
 		Tenant: "cgrates.org",
 	}
-	if err := dispEngine.RPC.Call(utils.CacheSv1GetItemIDs, argsAPI, &rcvKeys); err != nil {
+	if err := dispEngine.RPC.Call(utils.CacheSv1GetItemsIDs, argsAPI, &rcvKeys); err != nil {
 		t.Fatalf("Got error on APIerSv1.GetCacheStats: %s ", err.Error())
 	}
 	sort.Strings(rcvKeys)

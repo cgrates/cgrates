@@ -193,7 +193,7 @@ func testV1SplSSetSupplierProfilesWithoutRateProfileIDs(t *testing.T) {
 	}
 	experr := `SERVER_ERROR: ACCOUNTS_ERROR:NOT_FOUND`
 	var suplsReply engine.SortedRoutesList
-	if err := splSv1Rpc.Call(context.Background(), utils.RouteSv1GetRoutes,
+	if err := splSv1Rpc.Call(context.Background(), utils.RouteSv1ProcessEvent,
 		ev, &suplsReply); err == nil || err.Error() != experr {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
@@ -474,7 +474,7 @@ func testV1SplSGetSortedSuppliers(t *testing.T) {
 	}
 	expSupplierIDs := []string{"route3", "route2", "route1"}
 	var suplsReply engine.SortedRoutesList
-	if err := splSv1Rpc.Call(context.Background(), utils.RouteSv1GetRoutes,
+	if err := splSv1Rpc.Call(context.Background(), utils.RouteSv1ProcessEvent,
 		ev, &suplsReply); err != nil {
 		t.Error(err)
 	} else {
@@ -572,7 +572,7 @@ func testV1SplSGetSortedSuppliers2(t *testing.T) {
 	}
 	expSupplierIDs := []string{"route1", "route3", "route2"}
 	var suplsReply engine.SortedRoutesList
-	if err := splSv1Rpc.Call(context.Background(), utils.RouteSv1GetRoutes,
+	if err := splSv1Rpc.Call(context.Background(), utils.RouteSv1ProcessEvent,
 		ev, &suplsReply); err != nil {
 		t.Error(err)
 	} else {
@@ -629,7 +629,7 @@ func testV1SplSPopulateStats(t *testing.T) {
 	expectedMetrics := map[string]string{
 		utils.MetaSum + utils.HashtagSep + utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + "LoadReq": "2",
 	}
-	if err := splSv1Rpc.Call(context.Background(), utils.StatSv1GetQueueStringMetrics,
+	if err := splSv1Rpc.Call(context.Background(), utils.StatSv1GetStatQueueStringMetrics,
 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "Stat_Supplier1"}},
 		&metrics); err != nil {
 		t.Error(err)
@@ -667,7 +667,7 @@ func testV1SplSPopulateStats(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
 	}
 
-	if err := splSv1Rpc.Call(context.Background(), utils.StatSv1GetQueueStringMetrics,
+	if err := splSv1Rpc.Call(context.Background(), utils.StatSv1GetStatQueueStringMetrics,
 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "Stat_Supplier2"}},
 		&metrics); err != nil {
 		t.Error(err)
@@ -724,7 +724,7 @@ func testV1SplSPopulateStats(t *testing.T) {
 		utils.MetaSum + utils.HashtagSep + utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + "LoadReq": "3",
 	}
 
-	if err := splSv1Rpc.Call(context.Background(), utils.StatSv1GetQueueStringMetrics,
+	if err := splSv1Rpc.Call(context.Background(), utils.StatSv1GetStatQueueStringMetrics,
 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "Stat_Supplier3"}},
 		&metrics); err != nil {
 		t.Error(err)
@@ -770,7 +770,7 @@ func testV1SplSGetSoredSuppliersWithLoad(t *testing.T) {
 	}
 
 	var suplsReply engine.SortedRoutesList
-	if err := splSv1Rpc.Call(context.Background(), utils.RouteSv1GetRoutes,
+	if err := splSv1Rpc.Call(context.Background(), utils.RouteSv1ProcessEvent,
 		ev, &suplsReply); err != nil {
 		t.Error(err)
 	} else {

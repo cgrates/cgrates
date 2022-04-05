@@ -78,11 +78,11 @@ func (dS *DispatcherService) RateSv1RateProfileRatesForEvent(ctx *context.Contex
 		opts = args.CGREvent.APIOpts
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.RateSv1RateProfileRatesForEvent, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
+		if err = dS.authorize(ctx, utils.RateSv1GetRatesIDsForEvent, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
-	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.RateS, utils.RateSv1RateProfileRatesForEvent, args, reply)
+	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.RateS, utils.RateSv1GetRatesIDsForEvent, args, reply)
 }
 func (dS *DispatcherService) RateSv1RateProfilesForEvent(ctx *context.Context, args *utils.CGREvent, reply *[]string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant

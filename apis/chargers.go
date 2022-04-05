@@ -44,8 +44,8 @@ func (adms *AdminSv1) GetChargerProfile(ctx *context.Context, arg *utils.TenantI
 	return nil
 }
 
-// GetChargerProfileIDs returns list of chargerProfile IDs registered for a tenant
-func (adms *AdminSv1) GetChargerProfileIDs(ctx *context.Context, args *utils.ArgsItemIDs, chPrfIDs *[]string) (err error) {
+//  GetChargerProfilesIDs returns list of chargerProfile IDs registered for a tenant
+func (adms *AdminSv1) GetChargerProfilesIDs(ctx *context.Context, args *utils.ArgsItemIDs, chPrfIDs *[]string) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = adms.cfg.GeneralCfg().DefaultTenant
@@ -79,7 +79,7 @@ func (admS *AdminSv1) GetChargerProfiles(ctx *context.Context, args *utils.ArgsI
 		tnt = admS.cfg.GeneralCfg().DefaultTenant
 	}
 	var chrgPrfIDs []string
-	if err = admS.GetChargerProfileIDs(ctx, args, &chrgPrfIDs); err != nil {
+	if err = admS.GetChargerProfilesIDs(ctx, args, &chrgPrfIDs); err != nil {
 		return
 	}
 	*chrgPrfs = make([]*engine.ChargerProfile, 0, len(chrgPrfIDs))

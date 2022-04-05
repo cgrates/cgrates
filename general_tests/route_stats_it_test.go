@@ -230,7 +230,7 @@ func testV1RtStatsGetMetrics(t *testing.T) {
 		utils.MetaASR: 60,
 	}
 	rplyFloatMetrics := make(map[string]float64)
-	if err := RtStatsSv1BiRpc.Call(context.Background(), utils.StatSv1GetQueueFloatMetrics,
+	if err := RtStatsSv1BiRpc.Call(context.Background(), utils.StatSv1GetStatQueueFloatMetrics,
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{
 				Tenant: "cgrates.org",
@@ -246,7 +246,7 @@ func testV1RtStatsGetMetrics(t *testing.T) {
 		utils.MetaACD: 44000000000,
 		utils.MetaASR: 33.33333333333333,
 	}
-	if err := RtStatsSv1BiRpc.Call(context.Background(), utils.StatSv1GetQueueFloatMetrics,
+	if err := RtStatsSv1BiRpc.Call(context.Background(), utils.StatSv1GetStatQueueFloatMetrics,
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{
 				Tenant: "cgrates.org",
@@ -262,7 +262,7 @@ func testV1RtStatsGetMetrics(t *testing.T) {
 		utils.MetaACD: 60000000000,
 		utils.MetaASR: 100,
 	}
-	if err := RtStatsSv1BiRpc.Call(context.Background(), utils.StatSv1GetQueueFloatMetrics,
+	if err := RtStatsSv1BiRpc.Call(context.Background(), utils.StatSv1GetStatQueueFloatMetrics,
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{
 				Tenant: "cgrates.org",
@@ -309,7 +309,7 @@ func testV1RtStatsGetRoutesQOSStrategy(t *testing.T) {
 		},
 	}
 	var reply *engine.SortedRoutesList
-	if err := RtStatsSv1BiRpc.Call(context.Background(), utils.RouteSv1GetRoutes,
+	if err := RtStatsSv1BiRpc.Call(context.Background(), utils.RouteSv1ProcessEvent,
 		ev, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expSrtdRoutes) {
@@ -359,7 +359,7 @@ func testV1RtStatsGetRoutesLowestCostStrategy(t *testing.T) {
 		},
 	}
 	var reply *engine.SortedRoutesList
-	if err := RtStatsSv1BiRpc.Call(context.Background(), utils.RouteSv1GetRoutes,
+	if err := RtStatsSv1BiRpc.Call(context.Background(), utils.RouteSv1ProcessEvent,
 		ev, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expSrtdRoutes) {

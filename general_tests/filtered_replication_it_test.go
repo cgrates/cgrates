@@ -173,11 +173,11 @@ func testFltrRplAttributeProfile(t *testing.T) {
 	var replyPrfl *engine.APIAttributeProfile
 	var rplyIDs []string
 	// empty
-	if err := fltrRplEngine1RPC.Call(context.Background(), utils.AdminSv1GetAttributeProfileIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
+	if err := fltrRplEngine1RPC.Call(context.Background(), utils.AdminSv1GetAttributeProfilesIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
-	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetAttributeProfileIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
+	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetAttributeProfilesIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
@@ -197,11 +197,11 @@ func testFltrRplAttributeProfile(t *testing.T) {
 	}
 	replyPrfl = nil
 
-	if err := fltrRplEngine1RPC.Call(context.Background(), utils.AdminSv1GetAttributeProfileIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
+	if err := fltrRplEngine1RPC.Call(context.Background(), utils.AdminSv1GetAttributeProfilesIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
-	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetAttributeProfileIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
+	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetAttributeProfilesIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
@@ -245,7 +245,7 @@ func testFltrRplAttributeProfile(t *testing.T) {
 		t.Errorf("Expecting : %s, received: %s", utils.ToJSON(attrPrf.APIAttributeProfile), utils.ToJSON(replyPrfl))
 	}
 
-	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetAttributeProfileIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
+	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetAttributeProfilesIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
@@ -256,11 +256,11 @@ func testFltrRplAttributeProfile(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := fltrRplEngine1RPC.Call(context.Background(), utils.AdminSv1GetAttributeProfileIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
+	if err := fltrRplEngine1RPC.Call(context.Background(), utils.AdminSv1GetAttributeProfilesIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
-	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetAttributeProfileIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
+	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetAttributeProfilesIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
@@ -404,11 +404,11 @@ func testFltrRplThresholdProfile(t *testing.T) {
 		},
 	}
 	// empty
-	if err := fltrRplEngine1RPC.Call(context.Background(), utils.AdminSv1GetThresholdProfileIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
+	if err := fltrRplEngine1RPC.Call(context.Background(), utils.AdminSv1GetThresholdProfilesIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
-	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetThresholdProfileIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
+	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetThresholdProfilesIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
@@ -436,11 +436,11 @@ func testFltrRplThresholdProfile(t *testing.T) {
 	}
 	replyPrfl = nil
 
-	if err := fltrRplEngine1RPC.Call(context.Background(), utils.AdminSv1GetThresholdProfileIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
+	if err := fltrRplEngine1RPC.Call(context.Background(), utils.AdminSv1GetThresholdProfilesIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
-	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetThresholdProfileIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
+	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetThresholdProfilesIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
@@ -497,7 +497,7 @@ func testFltrRplThresholdProfile(t *testing.T) {
 		t.Errorf("Expecting : %s, received: %s", utils.ToJSON(thPrfl.ThresholdProfile), utils.ToJSON(replyPrfl))
 	}
 
-	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetThresholdProfileIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
+	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetThresholdProfilesIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
@@ -532,11 +532,11 @@ func testFltrRplThresholdProfile(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := fltrRplEngine1RPC.Call(context.Background(), utils.AdminSv1GetThresholdProfileIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
+	if err := fltrRplEngine1RPC.Call(context.Background(), utils.AdminSv1GetThresholdProfilesIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
-	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetThresholdProfileIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
+	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetThresholdProfilesIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}

@@ -44,8 +44,8 @@ func (admS *AdminSv1) GetAttributeProfile(ctx *context.Context, arg *utils.Tenan
 	return nil
 }
 
-// GetAttributeProfileIDs returns list of attributeProfile IDs registered for a tenant
-func (admS *AdminSv1) GetAttributeProfileIDs(ctx *context.Context, args *utils.ArgsItemIDs, attrPrfIDs *[]string) (err error) {
+// GetAttributeProfilesIDs returns list of attributeProfile IDs registered for a tenant
+func (admS *AdminSv1) GetAttributeProfilesIDs(ctx *context.Context, args *utils.ArgsItemIDs, attrPrfIDs *[]string) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = admS.cfg.GeneralCfg().DefaultTenant
@@ -79,7 +79,7 @@ func (admS *AdminSv1) GetAttributeProfiles(ctx *context.Context, args *utils.Arg
 		tnt = admS.cfg.GeneralCfg().DefaultTenant
 	}
 	var attrPrfIDs []string
-	if err = admS.GetAttributeProfileIDs(ctx, args, &attrPrfIDs); err != nil {
+	if err = admS.GetAttributeProfilesIDs(ctx, args, &attrPrfIDs); err != nil {
 		return
 	}
 	*attrPrfs = make([]*engine.APIAttributeProfile, 0, len(attrPrfIDs))
@@ -178,10 +178,10 @@ type AttributeSv1 struct {
 	attrS *engine.AttributeS
 }
 
-// GetAttributeForEvent returns matching AttributeProfile for Event
-func (alSv1 *AttributeSv1) GetAttributeForEvent(ctx *context.Context, args *utils.CGREvent,
+// GetAttributesForEvent returns matching AttributeProfile for Event
+func (alSv1 *AttributeSv1) GetAttributesForEvent(ctx *context.Context, args *utils.CGREvent,
 	reply *engine.APIAttributeProfile) (err error) {
-	return alSv1.attrS.V1GetAttributeForEvent(ctx, args, reply)
+	return alSv1.attrS.V1GetAttributesForEvent(ctx, args, reply)
 }
 
 // ProcessEvent will replace event fields with the ones in matching AttributeProfile

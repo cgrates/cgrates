@@ -194,7 +194,7 @@ func testChgrsGetChargerProfileIDs(t *testing.T) {
 		Tenant: "cgrates.org",
 	}
 	expected := []string{"TEST_CHARGERS_IT_TEST"}
-	if err := chgrsSRPC.Call(context.Background(), utils.AdminSv1GetChargerProfileIDs,
+	if err := chgrsSRPC.Call(context.Background(), utils.AdminSv1GetChargerProfilesIDs,
 		args, &reply); err != nil {
 		t.Error(err)
 	} else if len(reply) != len(expected) {
@@ -290,7 +290,7 @@ func testChgrsGetChargerProfileIDs2(t *testing.T) {
 		Tenant: "cgrates.org",
 	}
 	expected := []string{"TEST_CHARGERS_IT_TEST", "TEST_CHARGERS_IT_TEST2"}
-	if err := chgrsSRPC.Call(context.Background(), utils.AdminSv1GetChargerProfileIDs,
+	if err := chgrsSRPC.Call(context.Background(), utils.AdminSv1GetChargerProfilesIDs,
 		args, &reply); err != nil {
 		t.Error(err)
 	} else if len(reply) != len(expected) {
@@ -402,7 +402,7 @@ func testChgrsGetChargerProfileIDs3(t *testing.T) {
 		Tenant: "cgrates.org",
 	}
 	expected := []string{"TEST_CHARGERS_IT_TEST", "TEST_CHARGERS_IT_TEST2", "TEST_CHARGERS_IT_TEST3"}
-	if err := chgrsSRPC.Call(context.Background(), utils.AdminSv1GetChargerProfileIDs,
+	if err := chgrsSRPC.Call(context.Background(), utils.AdminSv1GetChargerProfilesIDs,
 		args, &reply); err != nil {
 		t.Error(err)
 	} else if len(reply) != len(expected) {
@@ -491,7 +491,7 @@ func testChgrsRmvChargerProfile(t *testing.T) {
 		Tenant: "cgrates.org",
 	}
 	expected2 := []string{"TEST_CHARGERS_IT_TEST", "TEST_CHARGERS_IT_TEST2"}
-	if err := chgrsSRPC.Call(context.Background(), utils.AdminSv1GetChargerProfileIDs,
+	if err := chgrsSRPC.Call(context.Background(), utils.AdminSv1GetChargerProfilesIDs,
 		args2, &reply3); err != nil {
 		t.Error(err)
 	} else if len(reply) != len(expected) {
@@ -569,7 +569,7 @@ func testChgrsRmvChargerProfile2(t *testing.T) {
 		Tenant: "cgrates.org",
 	}
 	expected2 := []string{"TEST_CHARGERS_IT_TEST"}
-	if err := chgrsSRPC.Call(context.Background(), utils.AdminSv1GetChargerProfileIDs,
+	if err := chgrsSRPC.Call(context.Background(), utils.AdminSv1GetChargerProfilesIDs,
 		args2, &reply3); err != nil {
 		t.Error(err)
 	} else if len(reply) != len(expected) {
@@ -605,7 +605,7 @@ func testChgrsRmvChargerProfile3(t *testing.T) {
 	args2 := &utils.ArgsItemIDs{
 		Tenant: "cgrates.org",
 	}
-	if err := chgrsSRPC.Call(context.Background(), utils.AdminSv1GetChargerProfileIDs,
+	if err := chgrsSRPC.Call(context.Background(), utils.AdminSv1GetChargerProfilesIDs,
 		args2, &reply3); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}

@@ -166,7 +166,7 @@ func TestRatesGetRateProfileIDs(t *testing.T) {
 	args := &utils.ArgsItemIDs{}
 	result := &[]string{}
 	expected := &[]string{"RP1"}
-	err = admS.GetRateProfileIDs(context.Background(), args, result)
+	err = admS.GetRateProfilesIDs(context.Background(), args, result)
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
@@ -207,7 +207,7 @@ func TestRatesGetRateProfile2(t *testing.T) {
 	}
 	result := &[]string{}
 	expected := &[]string{"RP2"}
-	err = admS.GetRateProfileIDs(context.Background(), args, result)
+	err = admS.GetRateProfilesIDs(context.Background(), args, result)
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
@@ -228,7 +228,7 @@ func TestRatesGetRateProfileErr(t *testing.T) {
 		Tenant: "tenant",
 	}
 	result := &[]string{}
-	err := admS.GetRateProfileIDs(context.Background(), args, result)
+	err := admS.GetRateProfilesIDs(context.Background(), args, result)
 	if err == nil || err != utils.ErrNotImplemented {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ErrNotImplemented, err)
 	}
@@ -250,7 +250,7 @@ func TestRatesGetRateProfileErr2(t *testing.T) {
 		Tenant: "tenant",
 	}
 	result := &[]string{}
-	err := admS.GetRateProfileIDs(context.Background(), args, result)
+	err := admS.GetRateProfilesIDs(context.Background(), args, result)
 	if err == nil || err != utils.ErrNotFound {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ErrNotFound, err)
 	}
@@ -2016,7 +2016,7 @@ func TestRatesGetRateProfileIDsGetOptsErr(t *testing.T) {
 	var reply []string
 	experr := "cannot convert field<bool>: true to int"
 
-	if err := adms.GetRateProfileIDs(context.Background(),
+	if err := adms.GetRateProfilesIDs(context.Background(),
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
 			APIOpts: map[string]interface{}{
@@ -2061,7 +2061,7 @@ func TestRatesGetRateProfileIDsPaginateErr(t *testing.T) {
 	var reply []string
 	experr := `SERVER_ERROR: maximum number of items exceeded`
 
-	if err := adms.GetRateProfileIDs(context.Background(),
+	if err := adms.GetRateProfilesIDs(context.Background(),
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
 			APIOpts: map[string]interface{}{
@@ -2153,7 +2153,7 @@ func TestRatesSetGetRemRateProfileRates(t *testing.T) {
 	var rateIDs []string
 	expRateIDs := []string{"RATE1", "RATE2", "RATE3"}
 
-	if err := adms.GetRateProfileRateIDs(context.Background(), &utils.ArgsSubItemIDs{
+	if err := adms.GetRateProfileRatesIDs(context.Background(), &utils.ArgsSubItemIDs{
 		Tenant:      "cgrates.org",
 		ProfileID:   "test_ID1",
 		ItemsPrefix: "RATE",
@@ -2331,7 +2331,7 @@ func TestRatesGetRateProfileRateIDsErrNotFound(t *testing.T) {
 
 	var reply []string
 
-	if err := adms.GetRateProfileRateIDs(context.Background(),
+	if err := adms.GetRateProfileRatesIDs(context.Background(),
 		&utils.ArgsSubItemIDs{
 			Tenant:    "cgrates.org",
 			ProfileID: "prfID",
@@ -2359,7 +2359,7 @@ func TestRatesGetRateProfileRateIDsErrKeys(t *testing.T) {
 
 	var reply []string
 
-	if err := adms.GetRateProfileRateIDs(context.Background(),
+	if err := adms.GetRateProfileRatesIDs(context.Background(),
 		&utils.ArgsSubItemIDs{
 			Tenant:    "cgrates.org",
 			ProfileID: "prfID",
@@ -2396,7 +2396,7 @@ func TestRatesGetRateProfileRateIDsGetOptsErr(t *testing.T) {
 	var reply []string
 	experr := "cannot convert field<bool>: true to int"
 
-	if err := adms.GetRateProfileRateIDs(context.Background(),
+	if err := adms.GetRateProfileRatesIDs(context.Background(),
 		&utils.ArgsSubItemIDs{
 			Tenant:    "cgrates.org",
 			ProfileID: "prfID",
@@ -2436,7 +2436,7 @@ func TestRatesGetRateProfileRateIDsPaginateErr(t *testing.T) {
 	var reply []string
 	experr := `SERVER_ERROR: maximum number of items exceeded`
 
-	if err := adms.GetRateProfileRateIDs(context.Background(),
+	if err := adms.GetRateProfileRatesIDs(context.Background(),
 		&utils.ArgsSubItemIDs{
 			ProfileID: "prfID",
 			APIOpts: map[string]interface{}{
@@ -2465,7 +2465,7 @@ func TestRatesGetRateProfileRateIDsErrMissing(t *testing.T) {
 	var reply []string
 	experr := `MANDATORY_IE_MISSING: [ProfileID]`
 
-	if err := adms.GetRateProfileRateIDs(context.Background(),
+	if err := adms.GetRateProfileRatesIDs(context.Background(),
 		&utils.ArgsSubItemIDs{
 			Tenant: "cgrates.org",
 		}, &reply); err == nil || err.Error() != experr {

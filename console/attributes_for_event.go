@@ -26,7 +26,7 @@ import (
 func init() {
 	c := &CmdGetAttributeForEvent{
 		name:      "attributes_for_event",
-		rpcMethod: utils.AttributeSv1GetAttributeForEvent,
+		rpcMethod: utils.AttributeSv1GetAttributesForEvent,
 		rpcParams: &utils.CGREvent{},
 	}
 	commands[c.Name()] = c

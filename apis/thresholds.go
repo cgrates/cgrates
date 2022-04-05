@@ -43,8 +43,8 @@ func (adms *AdminSv1) GetThresholdProfile(ctx *context.Context, arg *utils.Tenan
 	return
 }
 
-// GetThresholdProfileIDs returns list of thresholdProfile IDs registered for a tenant
-func (adms *AdminSv1) GetThresholdProfileIDs(ctx *context.Context, args *utils.ArgsItemIDs, thPrfIDs *[]string) (err error) {
+// GetThresholdProfilesIDs returns list of thresholdProfile IDs registered for a tenant
+func (adms *AdminSv1) GetThresholdProfilesIDs(ctx *context.Context, args *utils.ArgsItemIDs, thPrfIDs *[]string) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = adms.cfg.GeneralCfg().DefaultTenant
@@ -78,7 +78,7 @@ func (admS *AdminSv1) GetThresholdProfiles(ctx *context.Context, args *utils.Arg
 		tnt = admS.cfg.GeneralCfg().DefaultTenant
 	}
 	var thdPrfIDs []string
-	if err = admS.GetThresholdProfileIDs(ctx, args, &thdPrfIDs); err != nil {
+	if err = admS.GetThresholdProfilesIDs(ctx, args, &thdPrfIDs); err != nil {
 		return
 	}
 	*thdPrfs = make([]*engine.ThresholdProfile, 0, len(thdPrfIDs))

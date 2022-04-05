@@ -258,8 +258,8 @@ type optsGetRoutes struct {
 	sortingStrategy   string
 }
 
-// V1GetRoutes returns the list of valid routes
-func (rpS *RouteS) V1GetRoutes(ctx *context.Context, args *utils.CGREvent, reply *SortedRoutesList) (err error) {
+// V1ProcessEvent returns the list of valid routes
+func (rpS *RouteS) V1ProcessEvent(ctx *context.Context, args *utils.CGREvent, reply *SortedRoutesList) (err error) {
 	if missing := utils.MissingStructFields(args, []string{utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	} else if args.Event == nil {
@@ -300,8 +300,8 @@ func (rpS *RouteS) V1GetRoutes(ctx *context.Context, args *utils.CGREvent, reply
 	return
 }
 
-// V1GetRouteProfilesForEvent returns the list of valid route profiles
-func (rpS *RouteS) V1GetRouteProfilesForEvent(ctx *context.Context, args *utils.CGREvent, reply *[]*RouteProfile) (_ error) {
+// V1GetRoutesForEvent returns the list of valid route profiles
+func (rpS *RouteS) V1GetRoutesForEvent(ctx *context.Context, args *utils.CGREvent, reply *[]*RouteProfile) (_ error) {
 	if missing := utils.MissingStructFields(args, []string{utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	} else if args.Event == nil {
@@ -461,7 +461,7 @@ func (rpS *RouteS) sortedRoutesForEvent(ctx *context.Context, tnt string, args *
 // V1GetRoutesList returns the list of valid routes
 func (rpS *RouteS) V1GetRoutesList(ctx *context.Context, args *utils.CGREvent, reply *[]string) (err error) {
 	sR := new(SortedRoutesList)
-	if err = rpS.V1GetRoutes(ctx, args, sR); err != nil {
+	if err = rpS.V1ProcessEvent(ctx, args, sR); err != nil {
 		return
 	}
 	*reply = sR.RoutesWithParams()

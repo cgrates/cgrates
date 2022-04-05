@@ -43,8 +43,8 @@ func (adms *AdminSv1) GetRouteProfile(ctx *context.Context, arg *utils.TenantIDW
 	return nil
 }
 
-// GetRouteProfileIDs returns list of routeProfile IDs registered for a tenant
-func (adms *AdminSv1) GetRouteProfileIDs(ctx *context.Context, args *utils.ArgsItemIDs, sppPrfIDs *[]string) (err error) {
+// GetRouteProfilesIDs returns list of routeProfile IDs registered for a tenant
+func (adms *AdminSv1) GetRouteProfilesIDs(ctx *context.Context, args *utils.ArgsItemIDs, sppPrfIDs *[]string) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = adms.cfg.GeneralCfg().DefaultTenant
@@ -78,7 +78,7 @@ func (admS *AdminSv1) GetRouteProfiles(ctx *context.Context, args *utils.ArgsIte
 		tnt = admS.cfg.GeneralCfg().DefaultTenant
 	}
 	var rouPrfIDs []string
-	if err = admS.GetRouteProfileIDs(ctx, args, &rouPrfIDs); err != nil {
+	if err = admS.GetRouteProfilesIDs(ctx, args, &rouPrfIDs); err != nil {
 		return
 	}
 	*rouPrfs = make([]*engine.RouteProfile, 0, len(rouPrfIDs))
@@ -174,14 +174,14 @@ type RouteSv1 struct {
 	rS *engine.RouteS
 }
 
-// GetRoutes returns sorted list of routes for Event
-func (rS *RouteSv1) GetRoutes(ctx *context.Context, args *utils.CGREvent, reply *engine.SortedRoutesList) error {
-	return rS.rS.V1GetRoutes(ctx, args, reply)
+// ProcessEvent returns sorted list of routes for Event
+func (rS *RouteSv1) ProcessEvent(ctx *context.Context, args *utils.CGREvent, reply *engine.SortedRoutesList) error {
+	return rS.rS.V1ProcessEvent(ctx, args, reply)
 }
 
-// GetRouteProfilesForEvent returns a list of route profiles that match for Event
-func (rS *RouteSv1) GetRouteProfilesForEvent(ctx *context.Context, args *utils.CGREvent, reply *[]*engine.RouteProfile) error {
-	return rS.rS.V1GetRouteProfilesForEvent(ctx, args, reply)
+// GetRoutesForEvent returns a list of route profiles that match for Event
+func (rS *RouteSv1) GetRoutesForEvent(ctx *context.Context, args *utils.CGREvent, reply *[]*engine.RouteProfile) error {
+	return rS.rS.V1GetRoutesForEvent(ctx, args, reply)
 }
 
 // GetRoutesList returns sorted list of routes for Event as a string slice

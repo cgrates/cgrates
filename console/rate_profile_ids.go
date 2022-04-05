@@ -25,7 +25,7 @@ import (
 func init() {
 	c := &CmdGetRateProfileIDs{
 		name:      "rate_profile_ids",
-		rpcMethod: utils.AdminSv1GetRateProfileIDs,
+		rpcMethod: utils.AdminSv1GetRateProfilesIDs,
 		rpcParams: &utils.ArgsItemIDs{},
 	}
 	commands[c.Name()] = c

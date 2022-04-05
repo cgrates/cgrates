@@ -78,7 +78,7 @@ func TestStatsSetGetRemStatQueueProfile(t *testing.T) {
 	var sqPrfIDs []string
 	expsqPrfIDs := []string{"sqID"}
 
-	if err := adms.GetStatQueueProfileIDs(context.Background(), &utils.ArgsItemIDs{},
+	if err := adms.GetStatQueueProfilesIDs(context.Background(), &utils.ArgsItemIDs{},
 		&sqPrfIDs); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(sqPrfIDs, expsqPrfIDs) {
@@ -361,7 +361,7 @@ func TestStatsGetStatQueueProfileIDsErrMock(t *testing.T) {
 	var reply []string
 	experr := "NOT_IMPLEMENTED"
 
-	if err := adms.GetStatQueueProfileIDs(context.Background(),
+	if err := adms.GetStatQueueProfilesIDs(context.Background(),
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
 		}, &reply); err == nil || err.Error() != experr {
@@ -388,7 +388,7 @@ func TestStatsGetStatQueueProfileIDsErrKeys(t *testing.T) {
 
 	var reply []string
 
-	if err := adms.GetStatQueueProfileIDs(context.Background(),
+	if err := adms.GetStatQueueProfilesIDs(context.Background(),
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
 		}, &reply); err == nil || err != utils.ErrNotFound {
@@ -430,7 +430,7 @@ func TestStatQueuesGetStatQueueProfileIDsGetOptsErr(t *testing.T) {
 	var reply []string
 	experr := "cannot convert field<bool>: true to int"
 
-	if err := adms.GetStatQueueProfileIDs(context.Background(),
+	if err := adms.GetStatQueueProfilesIDs(context.Background(),
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
 			APIOpts: map[string]interface{}{
@@ -475,7 +475,7 @@ func TestStatQueuesGetStatQueueProfileIDsPaginateErr(t *testing.T) {
 	var reply []string
 	experr := `SERVER_ERROR: maximum number of items exceeded`
 
-	if err := adms.GetStatQueueProfileIDs(context.Background(),
+	if err := adms.GetStatQueueProfilesIDs(context.Background(),
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
 			APIOpts: map[string]interface{}{
@@ -738,7 +738,7 @@ func TestStatsAPIs(t *testing.T) {
 
 	expIDs := []string{"sq1", "sq2"}
 	var qIDs []string
-	if err := stV1.GetQueueIDs(context.Background(), &utils.TenantWithAPIOpts{
+	if err := stV1.GetStatQueuesIDs(context.Background(), &utils.TenantWithAPIOpts{
 		Tenant: "cgrates.org",
 	}, &qIDs); err != nil {
 		t.Error(err)
@@ -806,7 +806,7 @@ func TestStatsAPIs(t *testing.T) {
 		utils.MetaTCD: "3µs",
 	}
 	rplyStrMetrics := make(map[string]string)
-	if err := stV1.GetQueueStringMetrics(context.Background(), &utils.TenantIDWithAPIOpts{
+	if err := stV1.GetStatQueueStringMetrics(context.Background(), &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{
 			Tenant: "cgrates.org",
 			ID:     "sq2",
@@ -824,7 +824,7 @@ func TestStatsAPIs(t *testing.T) {
 		utils.MetaTCD: 3000,
 	}
 	rplyFloatMetrics := make(map[string]float64)
-	if err := stV1.GetQueueFloatMetrics(context.Background(), &utils.TenantIDWithAPIOpts{
+	if err := stV1.GetStatQueueFloatMetrics(context.Background(), &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{
 			Tenant: "cgrates.org",
 			ID:     "sq2",

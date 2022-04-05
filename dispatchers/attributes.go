@@ -39,11 +39,11 @@ func (dS *DispatcherService) AttributeSv1GetAttributeForEvent(ctx *context.Conte
 		opts = args.APIOpts
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.AttributeSv1GetAttributeForEvent, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
+		if err = dS.authorize(ctx, utils.AttributeSv1GetAttributesForEvent, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
-	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaAttributes, utils.AttributeSv1GetAttributeForEvent, args, reply)
+	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaAttributes, utils.AttributeSv1GetAttributesForEvent, args, reply)
 }
 func (dS *DispatcherService) AttributeSv1Ping(ctx *context.Context, args *utils.CGREvent, reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant

@@ -639,7 +639,7 @@ func testCgrLdrGetStatQueueAfterLoad(t *testing.T) {
 		"*asr": "N/A",
 	}
 	replyStQue := make(map[string]string)
-	if err := cgrLdrBIRPC.Call(context.Background(), utils.StatSv1GetQueueStringMetrics,
+	if err := cgrLdrBIRPC.Call(context.Background(), utils.StatSv1GetStatQueueStringMetrics,
 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "Stat_1"}},
 		&replyStQue); err != nil {
 		t.Error(err)

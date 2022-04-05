@@ -323,7 +323,7 @@ func testThresholdsGetThresholdIDs(t *testing.T) {
 func testThresholdsGetThresholdProfileIDs(t *testing.T) {
 	expIDs := []string{"THD_1", "THD_2"}
 	var tIDs []string
-	if err := thRPC.Call(context.Background(), utils.AdminSv1GetThresholdProfileIDs,
+	if err := thRPC.Call(context.Background(), utils.AdminSv1GetThresholdProfilesIDs,
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
 		}, &tIDs); err != nil {
