@@ -21,11 +21,13 @@ package apis
 import (
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/ltcache"
 )
 
 func TestCacheHasItemAndGetItem(t *testing.T) {
@@ -273,5 +275,206 @@ func TestCacheReloadCache(t *testing.T) {
 	if err := cache.GetItemIDs(nil, argsGetItem,
 		&replyStr); err == nil || err != utils.ErrNotFound {
 		t.Errorf("Expected %+v, received %+v", utils.ErrNotFound, err)
+	}
+}
+
+func TestGetCacheStats(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cfg.AdminSCfg().CachesConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	ch := engine.NewCacheS(cfg, dm, nil)
+	cache := NewCacheSv1(ch)
+	ch.SetWithoutReplicate(utils.CacheAttributeProfiles, "cgrates.org:TestGetCacheStats", nil, nil, true, utils.NonTransactional)
+	var reply map[string]*ltcache.CacheStats
+
+	args := &utils.AttrCacheIDsWithAPIOpts{
+		Tenant:   "cgrates.org",
+		APIOpts:  map[string]interface{}{},
+		CacheIDs: []string{utils.CacheAttributeProfiles},
+	}
+	if err := cache.GetCacheStats(context.Background(), args, &reply); err != nil {
+		t.Error(err)
+	}
+	if reply[utils.CacheAttributeProfiles].Items != 1 {
+		t.Errorf("Expected 1\n but received %v", reply[utils.CacheAttributeProfiles].Items)
+	}
+}
+
+func TestPrecacheStatus(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cfg.AdminSCfg().CachesConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	ch := engine.NewCacheS(cfg, dm, nil)
+	cache := NewCacheSv1(ch)
+
+	var reply map[string]string
+
+	args := &utils.AttrCacheIDsWithAPIOpts{
+		Tenant:   "cgrates.org",
+		APIOpts:  map[string]interface{}{},
+		CacheIDs: []string{utils.CacheAttributeProfiles},
+	}
+	if err := cache.PrecacheStatus(context.Background(), args, &reply); err != nil {
+		t.Error(err)
+	}
+	exp := map[string]string{
+		utils.CacheAttributeProfiles: utils.MetaPrecaching,
+	}
+	if !reflect.DeepEqual(reply, exp) {
+		t.Errorf("Expected %v\n but received %v", exp, reply)
+	}
+	// fmt.Println(reply)
+}
+
+func TestHasGroup(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cfg.AdminSCfg().CachesConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	ch := engine.NewCacheS(cfg, dm, nil)
+	cache := NewCacheSv1(ch)
+
+	var reply bool
+
+	args := &utils.ArgsGetGroupWithAPIOpts{
+		Tenant:  "cgrates.org",
+		APIOpts: map[string]interface{}{},
+		ArgsGetGroup: utils.ArgsGetGroup{
+			CacheID: utils.CacheAttributeProfiles,
+			GroupID: "Group",
+		},
+	}
+	if err := cache.HasGroup(context.Background(), args, &reply); err != nil {
+		t.Error(err)
+	}
+	if reply {
+		t.Error("Expected false")
+	}
+}
+
+func TestGetGroupItemIDs(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cfg.AdminSCfg().CachesConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	ch := engine.NewCacheS(cfg, dm, nil)
+	cache := NewCacheSv1(ch)
+
+	ch.SetWithoutReplicate(utils.CacheAttributeProfiles, "cgrates.org:TestGetCacheStats", nil, []string{"AttrGroup"}, true, utils.NonTransactional)
+
+	var reply []string
+
+	args := &utils.ArgsGetGroupWithAPIOpts{
+		Tenant:  "cgrates.org",
+		APIOpts: map[string]interface{}{},
+		ArgsGetGroup: utils.ArgsGetGroup{
+			CacheID: utils.CacheAttributeProfiles,
+			GroupID: "AttrGroup",
+		},
+	}
+
+	if err := cache.GetGroupItemIDs(context.Background(), args, &reply); err != nil {
+		t.Error(err)
+	}
+	exp := []string{"cgrates.org:TestGetCacheStats"}
+	if !reflect.DeepEqual(reply, exp) {
+		t.Errorf("Expected %v\n but received %v", exp, reply)
+	}
+}
+
+func TestRemoveGroup(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cfg.AdminSCfg().CachesConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	ch := engine.NewCacheS(cfg, dm, nil)
+	cache := NewCacheSv1(ch)
+
+	var reply string
+
+	args := &utils.ArgsGetGroupWithAPIOpts{
+		Tenant:  "cgrates.org",
+		APIOpts: map[string]interface{}{},
+		ArgsGetGroup: utils.ArgsGetGroup{
+			CacheID: utils.CacheAttributeProfiles,
+			GroupID: "AttrGroup",
+		},
+	}
+
+	if err := cache.RemoveGroup(context.Background(), args, &reply); err != nil {
+		t.Error(err)
+	}
+	if reply != utils.OK {
+		t.Errorf("Expected OK\n but received %v", reply)
+	}
+}
+
+func TestReplicateSet(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cfg.AdminSCfg().CachesConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	ch := engine.NewCacheS(cfg, dm, nil)
+	cache := NewCacheSv1(ch)
+
+	var reply string
+
+	args := &utils.ArgCacheReplicateSet{
+		CacheID: utils.CacheAttributeProfiles,
+		Tenant:  "cgrates.org",
+	}
+
+	if err := cache.ReplicateSet(context.Background(), args, &reply); err != nil {
+		t.Error(err)
+	}
+	if reply != utils.OK {
+		t.Errorf("Expected OK\n but received %v", reply)
+	}
+}
+
+func TestReplicateRemove(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cfg.AdminSCfg().CachesConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	ch := engine.NewCacheS(cfg, dm, nil)
+	cache := NewCacheSv1(ch)
+
+	var reply string
+
+	args := &utils.ArgCacheReplicateRemove{
+		CacheID: utils.CacheAttributeProfiles,
+		Tenant:  "cgrates.org",
+	}
+
+	if err := cache.ReplicateRemove(context.Background(), args, &reply); err != nil {
+		t.Error(err)
+	}
+	if reply != utils.OK {
+		t.Errorf("Expected OK\n but received %v", reply)
+	}
+}
+
+func TestGetItemExpiryTime(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cfg.AdminSCfg().CachesConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	ch := engine.NewCacheS(cfg, dm, nil)
+	cache := NewCacheSv1(ch)
+
+	var reply time.Time
+
+	args := &utils.ArgsGetCacheItemWithAPIOpts{
+		Tenant: "cgrates.org",
+		ArgsGetCacheItem: utils.ArgsGetCacheItem{
+			CacheID: utils.CacheAttributeProfiles,
+		},
+	}
+
+	if err := cache.GetItemExpiryTime(context.Background(), args, &reply); err == nil || err != utils.ErrNotFound {
+		t.Errorf("Expected %v\n but received %v", utils.ErrNotFound, err)
 	}
 }

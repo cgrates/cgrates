@@ -88,3 +88,34 @@ func TestEeSProcessEvent(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestArchiveEventsInReply(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	// cfg.EEsCfg().Exporters[0].Type = "*fileCSV"
+	cfg.EEsCfg().Exporters[0].ID = "SQLExporterFull"
+	newIDb := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	newDM := engine.NewDataManager(newIDb, cfg.CacheCfg(), nil)
+	filterS := engine.NewFilterS(cfg, nil, newDM)
+	eeS := ees.NewEventExporterS(cfg, filterS, nil)
+	cS := NewEeSv1(eeS)
+
+	args := &ees.ArchiveEventsArgs{
+		Tenant: "cgrates.org",
+		APIOpts: map[string]interface{}{
+			utils.MetaExporterID: "SQLExporterFull",
+		},
+		Events: []*utils.EventsWithOpts{
+			{
+				Event: map[string]interface{}{
+					"Account": "1001",
+				},
+			},
+		},
+	}
+
+	var reply []byte
+	errExp := "exporter with ID: SQLExporterFull is not synchronous"
+	if err := cS.ArchiveEventsInReply(context.Background(), args, &reply); err.Error() != errExp {
+		t.Errorf("Expected %v\n but received %v", errExp, err)
+	}
+}

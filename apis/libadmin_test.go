@@ -102,3 +102,141 @@ func TestCallCacheForFilter(t *testing.T) {
 		t.Errorf("Expected %s ,received: %s", utils.ToJSON(exp), utils.ToJSON(rpl))
 	}
 }
+
+func TestCallCache(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	connMgr := engine.NewConnManager(cfg)
+	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(dataDB, nil, connMgr)
+	admS := NewAdminSv1(cfg, dm, connMgr)
+	admS.cfg.AdminSCfg().CachesConns = []string{"*internal"}
+	opts := map[string]interface{}{
+		utils.MetaCache: utils.MetaNone,
+	}
+	errExp := "UNSUPPORTED_SERVICE_METHOD"
+
+	// Reload
+	if err := admS.CallCache(context.Background(), utils.MetaReload, "cgrates.org", "", "", nil, opts); err == nil || err.Error() != errExp {
+		t.Errorf("Expected %v\n but received %v", errExp, err)
+	}
+
+	// Load
+	if err := admS.CallCache(context.Background(), utils.MetaLoad, "cgrates.org", "", "", nil, opts); err == nil || err.Error() != errExp {
+		t.Errorf("Expected %v\n but received %v", errExp, err)
+	}
+
+	// Clear - Thresholds
+	if err := admS.CallCache(context.Background(), utils.MetaClear, "cgrates.org", utils.CacheThresholdProfiles, "", nil, opts); err == nil || err.Error() != errExp {
+		t.Errorf("Expected %v\n but received %v", errExp, err)
+	}
+
+	// Clear - Resources
+	if err := admS.CallCache(context.Background(), utils.MetaClear, "cgrates.org", utils.CacheResourceProfiles, "", nil, opts); err == nil || err.Error() != errExp {
+		t.Errorf("Expected %v\n but received %v", errExp, err)
+	}
+
+	// Clear - Stats
+	if err := admS.CallCache(context.Background(), utils.MetaClear, "cgrates.org", utils.CacheStatQueueProfiles, "", nil, opts); err == nil || err.Error() != errExp {
+		t.Errorf("Expected %v\n but received %v", errExp, err)
+	}
+}
+
+func TestCallCacheForRemoveIndexes(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	connMgr := engine.NewConnManager(cfg)
+	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(dataDB, nil, connMgr)
+	admS := NewAdminSv1(cfg, dm, connMgr)
+	admS.cfg.AdminSCfg().CachesConns = []string{"*internal"}
+	opts := map[string]interface{}{
+		utils.MetaCache: utils.MetaNone,
+	}
+	errExp := "UNSUPPORTED_SERVICE_METHOD"
+
+	// Reload
+	if err := admS.callCacheForRemoveIndexes(context.Background(), utils.MetaReload, "cgrates.org", "", nil, opts); err == nil || err.Error() != errExp {
+		t.Errorf("Expected %v\n but received %v", errExp, err)
+	}
+
+	// Load
+	if err := admS.callCacheForRemoveIndexes(context.Background(), utils.MetaLoad, "cgrates.org", "", nil, opts); err == nil || err.Error() != errExp {
+		t.Errorf("Expected %v\n but received %v", errExp, err)
+	}
+
+	// Remove
+	if err := admS.callCacheForRemoveIndexes(context.Background(), utils.MetaRemove, "cgrates.org", "", nil, opts); err == nil || err.Error() != errExp {
+		t.Errorf("Expected %v\n but received %v", errExp, err)
+	}
+
+	if err := admS.callCacheForRemoveIndexes(context.Background(), utils.MetaClear, "cgrates.org", "", nil, opts); err == nil || err.Error() != errExp {
+		t.Errorf("Expected %v\n but received %v", errExp, err)
+	}
+}
+
+func TestCallCacheForComputeIndexes(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	connMgr := engine.NewConnManager(cfg)
+	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(dataDB, nil, connMgr)
+	admS := NewAdminSv1(cfg, dm, connMgr)
+	admS.cfg.AdminSCfg().CachesConns = []string{"*internal"}
+	opts := map[string]interface{}{
+		utils.MetaCache: utils.MetaNone,
+	}
+	errExp := "UNSUPPORTED_SERVICE_METHOD"
+
+	// Reload
+	if err := admS.callCacheForComputeIndexes(context.Background(), utils.MetaReload, "cgrates.org", nil, opts); err == nil || err.Error() != errExp {
+		t.Errorf("Expected %v\n but received %v", errExp, err)
+	}
+
+	// Load
+	if err := admS.callCacheForComputeIndexes(context.Background(), utils.MetaLoad, "cgrates.org", nil, opts); err == nil || err.Error() != errExp {
+		t.Errorf("Expected %v\n but received %v", errExp, err)
+	}
+
+	// Remove
+	if err := admS.callCacheForComputeIndexes(context.Background(), utils.MetaRemove, "cgrates.org", nil, opts); err == nil || err.Error() != errExp {
+		t.Errorf("Expected %v\n but received %v", errExp, err)
+	}
+
+	if err := admS.callCacheForComputeIndexes(context.Background(), utils.MetaClear, "cgrates.org", nil, opts); err == nil || err.Error() != errExp {
+		t.Errorf("Expected %v\n but received %v", errExp, err)
+	}
+}
+
+func TestCallCacheMultiple(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	connMgr := engine.NewConnManager(cfg)
+	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(dataDB, nil, connMgr)
+	admS := NewAdminSv1(cfg, dm, connMgr)
+	admS.cfg.AdminSCfg().CachesConns = []string{"*internal"}
+	opts := map[string]interface{}{
+		utils.MetaCache: utils.MetaNone,
+	}
+	errExp := "UNSUPPORTED_SERVICE_METHOD"
+
+	// Reload
+	if err := admS.callCacheMultiple(context.Background(), utils.MetaReload, "cgrates.org", "", []string{"itemID"}, opts); err == nil || err.Error() != errExp {
+		t.Errorf("Expected %v\n but received %v", errExp, err)
+	}
+
+	// Load
+	if err := admS.callCacheMultiple(context.Background(), utils.MetaLoad, "cgrates.org", "", []string{"itemID"}, opts); err == nil || err.Error() != errExp {
+		t.Errorf("Expected %v\n but received %v", errExp, err)
+	}
+
+	// Remove
+	if err := admS.callCacheMultiple(context.Background(), utils.MetaRemove, "cgrates.org", "", []string{"itemID"}, opts); err == nil || err.Error() != errExp {
+		t.Errorf("Expected %v\n but received %v", errExp, err)
+	}
+
+	if err := admS.callCacheMultiple(context.Background(), utils.MetaClear, "cgrates.org", "", []string{"itemID"}, opts); err == nil || err.Error() != errExp {
+		t.Errorf("Expected %v\n but received %v", errExp, err)
+	}
+}
