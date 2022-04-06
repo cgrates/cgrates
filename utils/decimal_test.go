@@ -236,6 +236,21 @@ func TestUnmarshalMarshalBinary(t *testing.T) {
 	}
 }
 
+func TestDecimalCompareNaN(t *testing.T) {
+	dec1 := NewDecimal(2, 0)
+	if comp := dec1.Compare(DecimalNaN); comp <= 0 {
+		t.Errorf("%v is higher than %v, means comp is: %v", dec1, DecimalNaN, comp)
+	}
+	if comp := DecimalNaN.Compare(dec1); comp >= 0 {
+		t.Errorf("%v is lower than %v, means comp is: %v", DecimalNaN, dec1, comp)
+	}
+
+	dec1 = DecimalNaN
+	if comp := dec1.Compare(DecimalNaN); comp != 0 {
+		t.Errorf("%v is equal to %v, means comp is: %v", dec1, DecimalNaN, comp)
+	}
+}
+
 func TestUnmarshalJSON(t *testing.T) {
 	dec1 := new(Decimal)
 	expected := NewDecimal(0, 0)
