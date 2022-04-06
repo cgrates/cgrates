@@ -20,6 +20,7 @@ package engine
 
 import (
 	"fmt"
+	"math"
 
 	"github.com/nyaruka/phonenumbers"
 
@@ -123,6 +124,9 @@ func (dDP *dynamicDP) fieldAsInterface(fldPath []string) (val interface{}, err e
 			return nil, err
 		}
 		for k, v := range statValues {
+			if v == utils.DecimalNaN {
+				v = utils.NewDecimal(int64(math.NaN()), 0)
+			}
 			dDP.cache.Set([]string{utils.MetaStats, fldPath[1], k}, v)
 		}
 		return dDP.cache.FieldAsInterface(fldPath)
