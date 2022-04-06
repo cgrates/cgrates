@@ -205,13 +205,20 @@ func (d *Decimal) UnmarshalJSON(data []byte) (err error) {
 	if d.Big == nil {
 		d.Big = decimal.WithContext(DecimalContext)
 	}
+	// json Unmarshal does not support NaN
+	if bytes.Equal(data, []byte(DecNaN)) {
+		*d = *DecimalNaN
+		return
+	}
 	return d.Big.UnmarshalText(data)
 }
 
 // MarshalJSON implements the method for jsonMarshal for JSON encoding
 func (d *Decimal) MarshalJSON() ([]byte, error) {
-	x, err := d.MarshalText()
-	return bytes.Trim(x, `"`), err
+	if d.IsNaN(0) { // json Unmarshal does not support NaN
+		return []byte(DecNaN), nil
+	}
+	return d.MarshalText()
 }
 
 // Clone returns a copy of the Decimal

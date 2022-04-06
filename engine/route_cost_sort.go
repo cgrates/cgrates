@@ -79,9 +79,7 @@ func populateCostForRoutes(ctx *context.Context, cfg *config.CGRConfig,
 				acntIDs = append(acntIDs, acntID)
 			}
 			srtRoute.SortingData[utils.AccountIDs] = acntIDs
-
 		} else { // query RateS for cost
-
 			ev.APIOpts[utils.OptsRatesProfileIDs] = utils.CloneStringSlice(route.RateProfileIDs)
 			var rpCost utils.RateProfileCost
 			if err = connMgr.Call(ctx, cfg.RouteSCfg().RateSConns,
@@ -101,9 +99,7 @@ func populateCostForRoutes(ctx *context.Context, cfg *config.CGRConfig,
 				continue
 			}
 			srtRoute.SortingData[utils.RateProfileID] = rpCost.ID
-
 		}
-
 		if cost != nil {
 			srtRoute.sortingDataDecimal[utils.Cost] = cost
 		}

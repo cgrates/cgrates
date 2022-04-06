@@ -12,7 +12,7 @@
 
     "attributes": {
         "enabled": true,
-        "stats_conns": ["*localhost"],
+        "stats_conns": ["*internal"],
         "resources_conns": ["*localhost"],
         "accounts_conns": ["*localhost"]
     },

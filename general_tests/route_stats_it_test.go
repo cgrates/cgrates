@@ -26,6 +26,7 @@ import (
 	"reflect"
 	"sort"
 	"testing"
+	"time"
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
@@ -225,53 +226,53 @@ func testV1RtStatsProcessStatsNotAnswered(t *testing.T) {
 }
 
 func testV1RtStatsGetMetrics(t *testing.T) {
-	expMetrics := map[string]float64{
-		utils.MetaACD: 46400000000,
-		utils.MetaASR: 60,
+	expDecimals := map[string]*utils.Decimal{
+		utils.MetaACD: utils.NewDecimal(4.64e+10, 0),
+		utils.MetaASR: utils.NewDecimal(60, 0),
 	}
-	rplyFloatMetrics := make(map[string]float64)
-	if err := RtStatsSv1BiRpc.Call(context.Background(), utils.StatSv1GetQueueFloatMetrics,
+	var rplyDec map[string]*utils.Decimal
+	if err := RtStatsSv1BiRpc.Call(context.Background(), utils.StatSv1GetQueueDecimalMetrics,
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{
 				Tenant: "cgrates.org",
 				ID:     "STATS_TOP1",
 			},
-		}, &rplyFloatMetrics); err != nil {
+		}, &rplyDec); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(rplyFloatMetrics, expMetrics) {
-		t.Errorf("Expected %v, received %v", utils.ToJSON(expMetrics), utils.ToJSON(rplyFloatMetrics))
+	} else if !reflect.DeepEqual(rplyDec, expDecimals) {
+		t.Errorf("Expected %v, received %v", utils.ToJSON(expDecimals), utils.ToJSON(rplyDec))
 	}
 
-	expMetrics = map[string]float64{
-		utils.MetaACD: 44000000000,
-		utils.MetaASR: 33.33333333333333,
+	expDecimals = map[string]*utils.Decimal{
+		utils.MetaACD: utils.NewDecimal(4.4e+10, 0),
+		utils.MetaASR: utils.NewDecimal(3333333333333333, 14),
 	}
-	if err := RtStatsSv1BiRpc.Call(context.Background(), utils.StatSv1GetQueueFloatMetrics,
+	if err := RtStatsSv1BiRpc.Call(context.Background(), utils.StatSv1GetQueueDecimalMetrics,
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{
 				Tenant: "cgrates.org",
 				ID:     "STATS_TOP2",
 			},
-		}, &rplyFloatMetrics); err != nil {
+		}, &rplyDec); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(rplyFloatMetrics, expMetrics) {
-		t.Errorf("Expected %v, received %v", utils.ToJSON(expMetrics), utils.ToJSON(rplyFloatMetrics))
+	} else if !reflect.DeepEqual(expDecimals, rplyDec) {
+		t.Errorf("Expected %v, received %v", utils.ToJSON(expDecimals), utils.ToJSON(rplyDec))
 	}
 
-	expMetrics = map[string]float64{
-		utils.MetaACD: 60000000000,
-		utils.MetaASR: 100,
+	expDecimals = map[string]*utils.Decimal{
+		utils.MetaACD: utils.NewDecimal(int64(time.Minute), 0),
+		utils.MetaASR: utils.NewDecimal(100, 0),
 	}
-	if err := RtStatsSv1BiRpc.Call(context.Background(), utils.StatSv1GetQueueFloatMetrics,
+	if err := RtStatsSv1BiRpc.Call(context.Background(), utils.StatSv1GetQueueDecimalMetrics,
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{
 				Tenant: "cgrates.org",
 				ID:     "STATS_TOP3",
 			},
-		}, &rplyFloatMetrics); err != nil {
+		}, &rplyDec); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(rplyFloatMetrics, expMetrics) {
-		t.Errorf("Expected %v, received %v", utils.ToJSON(expMetrics), utils.ToJSON(rplyFloatMetrics))
+	} else if !reflect.DeepEqual(rplyDec, expDecimals) {
+		t.Errorf("Expected %v, received %v", utils.ToJSON(expDecimals), utils.ToJSON(rplyDec))
 	}
 }
 
