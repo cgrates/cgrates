@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 import (
+	"fmt"
 	"reflect"
 	"testing"
 	"time"
@@ -392,4 +393,17 @@ func TestDecimalDuration(t *testing.T) {
 	} else if rcv != time.Nanosecond*3 {
 		t.Errorf("Expected 3ns")
 	}
+}
+
+func TestMarshalUnmarshalNA(t *testing.T) {
+	mrsh, err := DecimalNaN.MarshalJSON()
+	if err != nil {
+		t.Error(err)
+	}
+	var dec2 Decimal
+	if err := dec2.UnmarshalJSON(mrsh); err != nil {
+		t.Error(err)
+	}
+	fmt.Printf("dec2 is NaN: %v\n", dec2.IsNaN(0))
+
 }
