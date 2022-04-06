@@ -1,28 +1,27 @@
 {
-
   "general": {
     "log_level": 7,
-    "node_id": "US_SITE",
+    "node_id": "US_SITE"
   },
 
   "listen": {
     "rpc_json": ":4012",
     "rpc_gob": ":4013",
-    "http": ":4080",
+    "http": ":4080"
   },
 
   "rpc_conns": {
     "conn1": {
       "strategy": "*first",
-      "conns": [{"address": "127.0.0.1:4012", "transport":"*json"}],
+      "conns": [{"address": "127.0.0.1:4012", "transport":"*json"}]
     },
     "rplConn": {
       "strategy": "*first",
-      "conns": [{"address": "127.0.0.1:3013", "transport":"*gob"}],
+      "conns": [{"address": "127.0.0.1:3013", "transport":"*gob"}]
     },
     "*internal": {
       "strategy": "*first",
-      "conns": [{"address": "*internal"}],
+      "conns": [{"address": "*internal"}]
     }
   },
 
@@ -52,27 +51,27 @@
 
  
 
-  "rals": {
+  "rates": {
     "enabled": true,
-    "max_increments":3000000,
+    "max_increments":3000000
   },
 
 
   "schedulers": {
     "enabled": true,
-    "cdrs_conns": ["conn1"],
+    "cdrs_conns": ["conn1"]
   },
 
 
   "cdrs": {
     "enabled": true,
     "chargers_conns":["conn1"],
-    "rals_conns": ["*internal"],
+    "rals_conns": ["*internal"]
   },
 
 
   "chargers": {
-    "enabled": true,
+    "enabled": true
   },
 
 
@@ -81,15 +80,18 @@
     "listen_bijson": ":4014",
     "rals_conns": ["*internal"],
     "cdrs_conns": ["*internal"],
-    "chargers_conns": ["*internal"],
+    "chargers_conns": ["*internal"]
   },
 
 
   "admins": {
     "enabled": true,
     "caches_conns":["conn1"],
-    "scheduler_conns": ["conn1"],
+    "scheduler_conns": ["conn1"]
   },
 
+  "accounts": {
+    "enabled": true
+  }
 
 }
