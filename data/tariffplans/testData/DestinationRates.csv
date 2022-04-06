@@ -1,3 +1,0 @@
-#ID,DestinationsID,RatesID,RoundingMethod,RoundingDecimals,MaxCost,MaxCostStrategy
-DR_ANY_10000_1,*any,RT_10000_1,*up,4,,
-
