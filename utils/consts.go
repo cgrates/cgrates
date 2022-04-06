@@ -159,6 +159,7 @@ const (
 	FilterValStart           = "("
 	FilterValEnd             = ")"
 	PlusChar                 = "+"
+	DecNaN                   = `"NaN"`
 	JSON                     = "json"
 	JSONCaps                 = "JSON"
 	GOBCaps                  = "GOB"

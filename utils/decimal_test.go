@@ -19,13 +19,34 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 import (
-	"fmt"
+	"encoding/json"
 	"reflect"
 	"testing"
 	"time"
 
 	"github.com/ericlagergren/decimal"
 )
+
+func TestUnmarshalInvalidSyntax(t *testing.T) {
+	x := map[string]*Decimal{
+		"*asr": DecimalNaN,
+		"*abc": NewDecimal(2, 0),
+		"*acd": DecimalNaN,
+	}
+	var bts []byte
+	var err error
+	if bts, err = json.Marshal(x); err != nil {
+
+		t.Error(err)
+	}
+
+	var reply map[string]*Decimal
+	if err = json.Unmarshal(bts, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(reply, x) {
+		t.Errorf("Expected %v, received %v", x, reply)
+	}
+}
 
 func TestConvertDecimalToFloat(t *testing.T) {
 	decm := NewDecimal(9999000000000000, 13)
@@ -224,8 +245,8 @@ func TestUnmarshalJSON(t *testing.T) {
 		t.Errorf("Expected %+v, received %+v", expected, dec1)
 	}
 
-	dec1 = nil
-	if err := dec1.UnmarshalJSON([]byte(`0`)); err != nil {
+	var dec2 Decimal
+	if err := dec2.UnmarshalJSON([]byte(`0`)); err != nil {
 		t.Error(err)
 	}
 }
@@ -404,6 +425,7 @@ func TestMarshalUnmarshalNA(t *testing.T) {
 	if err := dec2.UnmarshalJSON(mrsh); err != nil {
 		t.Error(err)
 	}
-	fmt.Printf("dec2 is NaN: %v\n", dec2.IsNaN(0))
-
+	if dec2.Compare(DecimalNaN) != 0 {
+		t.Errorf("%v and %v are different", dec2, DecimalNaN)
+	}
 }

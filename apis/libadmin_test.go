@@ -109,7 +109,8 @@ func TestCallCache(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	admS := NewAdminSv1(cfg, dm, connMgr)
+	fltrs := engine.NewFilterS(cfg, connMgr, dm)
+	admS := NewAdminSv1(cfg, dm, connMgr, fltrs)
 	admS.cfg.AdminSCfg().CachesConns = []string{"*internal"}
 	opts := map[string]interface{}{
 		utils.MetaCache: utils.MetaNone,
@@ -148,7 +149,8 @@ func TestCallCacheForRemoveIndexes(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	admS := NewAdminSv1(cfg, dm, connMgr)
+	fltrs := engine.NewFilterS(cfg, connMgr, dm)
+	admS := NewAdminSv1(cfg, dm, connMgr, fltrs)
 	admS.cfg.AdminSCfg().CachesConns = []string{"*internal"}
 	opts := map[string]interface{}{
 		utils.MetaCache: utils.MetaNone,
@@ -181,7 +183,8 @@ func TestCallCacheForComputeIndexes(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	admS := NewAdminSv1(cfg, dm, connMgr)
+	fltrs := engine.NewFilterS(cfg, connMgr, dm)
+	admS := NewAdminSv1(cfg, dm, connMgr, fltrs)
 	admS.cfg.AdminSCfg().CachesConns = []string{"*internal"}
 	opts := map[string]interface{}{
 		utils.MetaCache: utils.MetaNone,
@@ -214,7 +217,8 @@ func TestCallCacheMultiple(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	admS := NewAdminSv1(cfg, dm, connMgr)
+	fltrs := engine.NewFilterS(cfg, connMgr, dm)
+	admS := NewAdminSv1(cfg, dm, connMgr, fltrs)
 	admS.cfg.AdminSCfg().CachesConns = []string{"*internal"}
 	opts := map[string]interface{}{
 		utils.MetaCache: utils.MetaNone,

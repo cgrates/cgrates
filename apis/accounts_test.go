@@ -2392,8 +2392,9 @@ func TestAccountsGetAccount(t *testing.T) {
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
 	acc := accounts.NewAccountS(cfg, &engine.FilterS{}, connMgr, dm)
 	accS := NewAccountSv1(acc)
+	fltrs := engine.NewFilterS(cfg, connMgr, dm)
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	admS := NewAdminSv1(cfg, dm, nil)
+	admS := NewAdminSv1(cfg, dm, nil, fltrs)
 	acc_args := &utils.AccountWithAPIOpts{
 		Account: &utils.Account{
 			Tenant: "cgrates.org",
