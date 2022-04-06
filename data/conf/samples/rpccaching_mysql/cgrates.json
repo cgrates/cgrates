@@ -1,73 +1,69 @@
 {
-
-"general": {
-	"log_level": 7,
-	"reply_timeout": "10s",									// consider connection down for replies taking longer than this value
-},
-
-"listen": {
-	"rpc_json": ":2012",
-	"rpc_gob": ":2013",
-	"http": ":2080",
-},
-
-
-
-
-
-"caches":{
-	"partitions": {
-		"*rpc_responses": {"limit": -1, "ttl": "500ms"}
+	"general": {
+		"log_level": 7,
+		"reply_timeout": "10s"								
 	},
-},
 
+	"listen": {
+		"rpc_json": ":2012",
+		"rpc_gob": ":2013",
+		"http": ":2080"
+	},
 
-"rals": {
-	"enabled": true,
-},
+	"caches":{
+		"partitions": {
+			"*rpc_responses": {"limit": -1, "ttl": "500ms"}
+		}
+	},
 
+	"rates": {
+		"enabled": true
+	},
 
-"schedulers": {
-	"enabled": true,
-},
+	"schedulers": {
+		"enabled": true
+	},
 
+	"cdrs": {
+		"enabled": true,
+		"session_cost_retries": 2			
+	},
 
-"cdrs": {
-	"enabled": true,
-	"session_cost_retries": 2,				// number of queries to session_costs before recalculating CDR
-},
+	"attributes": {
+		"enabled": true
+	},
 
+	"chargers": {
+		"enabled": true,
+		"attributes_conns": ["*internal"]
+	},
 
-"attributes": {
-	"enabled": true,
-},
+	"thresholds": {
+		"enabled": true,
+		"store_interval": "1s"
+	},
 
+	"sessions": {
+		"enabled": true,
+		"chargers_conns": ["*internal"],
+		"rates_conns": ["*internal"],
+		"cdrs_conns": ["*internal"],
+		"attributes_conns": ["*internal"]
+	},
 
-"chargers": {
-	"enabled": true,
-	"attributes_conns": ["*internal"],
-},
+	"admins": {
+		"enabled": true,
+		"scheduler_conns": ["*internal"]
+	},
 
-
-"thresholds": {
-	"enabled": true,
-	"store_interval": "1s",
-},
-
-
-"sessions": {
-	"enabled": true,
-	"chargers_conns": ["*internal"],
-	"rals_conns": ["*internal"],
-	"cdrs_conns": ["*internal"],
-	"attributes_conns": ["*internal"],
-},
-
-
-"admins": {
-	"enabled": true,
-	"scheduler_conns": ["*internal"],
-},
-
-
+	"loaders": [
+        {
+            "id": "*default",
+            "enabled": true,
+            "tenant": "cgrates.org",
+            "tp_in_dir": "/usr/share/cgrates/tariffplans/testit",
+            "tp_out_dir": "",
+            "lockfile_path": ""
+        }
+    ]
 }
