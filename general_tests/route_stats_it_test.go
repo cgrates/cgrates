@@ -303,7 +303,7 @@ func testV1RtStatsGetRoutesQOSStrategy(t *testing.T) {
 					SortingData: map[string]interface{}{
 						utils.MetaACD: 44000000000.,
 						utils.MetaASR: 33.33333333333333,
-						utils.Weight:  10.,
+						utils.Weight:  50.,
 					},
 				},
 			},
