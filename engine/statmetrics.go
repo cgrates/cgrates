@@ -96,17 +96,25 @@ func (asr *StatASR) GetValue() (val *utils.Decimal) {
 }
 
 // AddEvent is part of StatMetric interface
-func (asr *StatASR) AddEvent(evID string, ev utils.DataProvider) error {
+func (asr *StatASR) AddEvent(evID string, ev utils.DataProvider) (err error) {
 	var answered int
-	if val, err := ev.FieldAsInterface([]string{utils.MetaReq, utils.AnswerTime}); err != nil {
-		if err != utils.ErrNotFound {
-			return err
+	var val interface{}
+	if val, err = ev.FieldAsInterface([]string{utils.MetaReq, utils.AnswerTime}); err != nil {
+		if err == utils.ErrNotFound {
+			if val, err = ev.FieldAsInterface([]string{utils.MetaOpts, utils.MetaStartTime}); err != nil {
+				if err != utils.ErrNotFound {
+					return utils.ErrPrefix(err, utils.MetaStartTime)
+				}
+			}
 		}
-	} else if at, err := utils.IfaceAsTime(val,
-		config.CgrConfig().GeneralCfg().DefaultTimezone); err != nil {
-		return err
-	} else if !at.IsZero() {
-		answered = 1
+	}
+	if val != nil {
+		if at, err := utils.IfaceAsTime(val,
+			config.CgrConfig().GeneralCfg().DefaultTimezone); err != nil {
+			return err
+		} else if !at.IsZero() {
+			answered = 1
+		}
 	}
 	return asr.addEvent(evID, answered)
 }
@@ -162,13 +170,19 @@ func (acd *StatACD) GetValue() *utils.Decimal {
 	return acd.getAvgValue()
 }
 
-func (acd *StatACD) AddEvent(evID string, ev utils.DataProvider) error {
-	ival, err := ev.FieldAsInterface([]string{utils.MetaReq, utils.Usage})
-	if err != nil {
+func (acd *StatACD) AddEvent(evID string, ev utils.DataProvider) (err error) {
+	var ival interface{}
+	if ival, err = ev.FieldAsInterface([]string{utils.MetaReq, utils.Usage}); err != nil {
 		if err == utils.ErrNotFound {
-			err = utils.ErrPrefix(err, utils.Usage)
+			if ival, err = ev.FieldAsInterface([]string{utils.MetaOpts, utils.MetaUsage}); err != nil {
+				if err == utils.ErrNotFound {
+					return utils.ErrPrefix(err, utils.MetaUsage)
+				}
+				return err
+			}
+		} else {
+			return err
 		}
-		return err
 	}
 	return acd.addEvent(evID, ival)
 }
@@ -196,13 +210,19 @@ func (sum *StatTCD) GetStringValue(rounding int) string {
 	return v.String()
 }
 
-func (sum *StatTCD) AddEvent(evID string, ev utils.DataProvider) error {
-	ival, err := ev.FieldAsInterface([]string{utils.MetaReq, utils.Usage})
-	if err != nil {
+func (sum *StatTCD) AddEvent(evID string, ev utils.DataProvider) (err error) {
+	var ival interface{}
+	if ival, err = ev.FieldAsInterface([]string{utils.MetaReq, utils.Usage}); err != nil {
 		if err == utils.ErrNotFound {
-			err = utils.ErrPrefix(err, utils.Usage)
+			if ival, err = ev.FieldAsInterface([]string{utils.MetaOpts, utils.MetaUsage}); err != nil {
+				if err == utils.ErrNotFound {
+					return utils.ErrPrefix(err, utils.MetaUsage)
+				}
+				return err
+			}
+		} else {
+			return err
 		}
-		return err
 	}
 	return sum.addEvent(evID, ival)
 }
@@ -230,13 +250,19 @@ func (acc *StatACC) GetValue() *utils.Decimal {
 	return acc.getAvgValue()
 }
 
-func (acc *StatACC) AddEvent(evID string, ev utils.DataProvider) error {
-	ival, err := ev.FieldAsInterface([]string{utils.MetaReq, utils.Cost})
-	if err != nil {
+func (acc *StatACC) AddEvent(evID string, ev utils.DataProvider) (err error) {
+	var ival interface{}
+	if ival, err = ev.FieldAsInterface([]string{utils.MetaReq, utils.Cost}); err != nil {
 		if err == utils.ErrNotFound {
-			err = utils.ErrPrefix(err, utils.Cost)
+			if ival, err = ev.FieldAsInterface([]string{utils.MetaOpts, utils.MetaCost}); err != nil {
+				if err == utils.ErrNotFound {
+					return utils.ErrPrefix(err, utils.MetaUsage)
+				}
+				return err
+			}
+		} else {
+			return err
 		}
-		return err
 	}
 	val, err := utils.IfaceAsBig(ival)
 	if err != nil {
@@ -263,13 +289,19 @@ type StatTCC struct {
 	*Metric
 }
 
-func (tcc *StatTCC) AddEvent(evID string, ev utils.DataProvider) error {
-	ival, err := ev.FieldAsInterface([]string{utils.MetaReq, utils.Cost})
-	if err != nil {
+func (tcc *StatTCC) AddEvent(evID string, ev utils.DataProvider) (err error) {
+	var ival interface{}
+	if ival, err = ev.FieldAsInterface([]string{utils.MetaReq, utils.Cost}); err != nil {
 		if err == utils.ErrNotFound {
-			err = utils.ErrPrefix(err, utils.Cost)
+			if ival, err = ev.FieldAsInterface([]string{utils.MetaOpts, utils.MetaCost}); err != nil {
+				if err == utils.ErrNotFound {
+					return utils.ErrPrefix(err, utils.MetaUsage)
+				}
+				return err
+			}
+		} else {
+			return err
 		}
-		return err
 	}
 	val, err := utils.IfaceAsBig(ival)
 	if err != nil {
