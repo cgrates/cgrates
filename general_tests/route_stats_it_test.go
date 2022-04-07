@@ -132,11 +132,12 @@ func testV1RtStatsProcessStatsValid(t *testing.T) {
 			utils.Destination:  "1021",
 			utils.Category:     "call",
 			utils.Usage:        "1m20s",
-			utils.AnswerTime:   "2022-04-01T05:00:00Z",
-			utils.Cost:         1.8,
+			//utils.AnswerTime:   "2022-04-01T05:00:00Z",
+			utils.Cost: 1.8,
 		},
 		APIOpts: map[string]interface{}{
-			utils.MetaUsage: "1m20s",
+			utils.MetaStartTime: "2022-04-01T05:00:00Z",
+			utils.MetaUsage:     "1m20s",
 		},
 	}
 	if err := RtStatsSv1BiRpc.Call(context.Background(), utils.StatSv1ProcessEvent, ev1, &reply); err != nil {
@@ -151,12 +152,12 @@ func testV1RtStatsProcessStatsValid(t *testing.T) {
 }
 
 func testV1RtStatsProcessStatsNotAnswered(t *testing.T) {
-	// not answered means that our event does not have AnsweredTime
+	// not answered means that our event does not have AnsweredTime or *startTime
 	var reply []string
 	expected := []string{"STATS_TCC1", "STATS_TOP1", "STATS_TOP2"}
 	ev1 := &utils.CGREvent{
 		Tenant: "cgrates.org",
-		ID:     "event1",
+		ID:     "event2",
 		Event: map[string]interface{}{
 			utils.AccountField: "1010",
 			utils.Destination:  "1021",
@@ -192,7 +193,7 @@ func testV1RtStatsProcessStatsNotAnswered(t *testing.T) {
 	// process again some stats two times
 	ev1 = &utils.CGREvent{
 		Tenant: "cgrates.org",
-		ID:     "event1",
+		ID:     "event3",
 		Event: map[string]interface{}{
 			utils.AccountField: "1010",
 			utils.Category:     "call",
