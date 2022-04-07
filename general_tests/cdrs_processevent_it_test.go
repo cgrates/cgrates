@@ -22,7 +22,6 @@ package general_tests
 
 // import (
 // 	"fmt"
-// 	"net/rpc"
 // 	"os"
 // 	"path"
 // 	"reflect"
@@ -31,6 +30,8 @@ package general_tests
 // 	"testing"
 // 	"time"
 
+// 	"github.com/cgrates/birpc"
+// 	"github.com/cgrates/birpc/context"
 // 	"github.com/cgrates/cgrates/config"
 // 	"github.com/cgrates/cgrates/ees"
 // 	"github.com/cgrates/cgrates/engine"
@@ -41,12 +42,11 @@ package general_tests
 // 	pecdrsCfgPath string
 // 	pecdrsConfDIR string
 // 	pecdrsCfg     *config.CGRConfig
-// 	pecdrsRpc     *rpc.Client
+// 	pecdrsRpc     *birpc.Client
 
 // 	sTestsCDRsIT_ProcessEvent = []func(t *testing.T){
 // 		testV1CDRsInitConfig,
 // 		testV1CDRsInitDataDb,
-// 		testV1CDRsInitCdrDb,
 // 		testV1CDRsStartEngine,
 // 		testV1CDRsRpcConn,
 // 		testV1CDRsLoadTariffPlanFromFolder,
@@ -86,7 +86,7 @@ package general_tests
 // func testV1CDRsInitConfig(t *testing.T) {
 // 	var err error
 // 	pecdrsCfgPath = path.Join(*dataDir, "conf", "samples", pecdrsConfDIR)
-// 	if pecdrsCfg, err = config.NewCGRConfigFromPath(pecdrsCfgPath); err != nil {
+// 	if pecdrsCfg, err = config.NewCGRConfigFromPath(context.Background(), pecdrsCfgPath); err != nil {
 // 		t.Fatal("Got config error: ", err.Error())
 // 	}
 // }
@@ -113,7 +113,7 @@ package general_tests
 
 // func testV1CDRsLoadTariffPlanFromFolder(t *testing.T) {
 // 	var loadInst string
-// 	if err := pecdrsRpc.Call(utils.APIerSv1LoadTariffPlanFromFolder,
+// 	if err := pecdrsRpc.Call(context.Background(), utils.APIerSv1LoadTariffPlanFromFolder,
 // 		&utils.AttrLoadTpFromFolder{FolderPath: path.Join(
 // 			*dataDir, "tariffplans", "testit")}, &loadInst); err != nil {
 // 		t.Error(err)
@@ -122,34 +122,37 @@ package general_tests
 // }
 
 // func testV1CDRsProcessEventAttrS(t *testing.T) {
-// 	var acnt *engine.Account
-// 	acntAttrs := &utils.AttrGetAccount{
-// 		Tenant:  "cgrates.org",
-// 		Account: "test1_processEvent"}
-// 	attrSetBalance := utils.AttrSetBalance{
-// 		Tenant:      acntAttrs.Tenant,
-// 		Account:     acntAttrs.Account,
-// 		BalanceType: utils.MetaVoice,
-// 		Value:       120000000000,
-// 		Balance: map[string]interface{}{
-// 			utils.ID:     "BALANCE1",
-// 			utils.Weight: 20,
+// 	var acnt *utils.Account
+// 	acntAttrs := &utils.TenantIDWithAPIOpts{
+// 		TenantID: &utils.TenantID{
+// 			Tenant: "cgrates.org",
+// 			ID:     "test1_processEvent",
+// 		},
+// 	}
+// 	attrSetBalance := &utils.ArgsActSetBalance{
+// 		Tenant:    acntAttrs.Tenant,
+// 		AccountID: acntAttrs.ID,
+// 		Reset:     true,
+// 		Diktats: []*utils.BalDiktat{
+// 			{
+// 				Path:  "*balance.BALANCE1.Units",
+// 				Value: "120000000000",
+// 			},
 // 		},
 // 	}
 // 	var reply string
-// 	if err := pecdrsRpc.Call(utils.APIerSv1SetBalance, attrSetBalance, &reply); err != nil {
+// 	if err := pecdrsRpc.Call(context.Background(), utils.AccountSv1ActionSetBalance, attrSetBalance, &reply); err != nil {
 // 		t.Error(err)
 // 	} else if reply != utils.OK {
 // 		t.Errorf("received: %s", reply)
 // 	}
 // 	expectedVoice := 120000000000.0
-// 	if err := pecdrsRpc.Call(utils.APIerSv2GetAccount, acntAttrs, &acnt); err != nil {
+// 	if err := pecdrsRpc.Call(context.Background(), utils.AdminSv1GetAccount, acntAttrs, &acnt); err != nil {
 // 		t.Error(err)
 // 	} else if rply := acnt.BalanceMap[utils.MetaVoice].GetTotalValue(); rply != expectedVoice {
 // 		t.Errorf("Expecting: %v, received: %v", expectedVoice, rply)
 // 	}
 // 	argsEv := &utils.CGREvent{
-// 		Flags:  []string{utils.MetaAttributes, utils.MetaStore, "*chargers:false", "*export:false"},
 // 		Tenant: "cgrates.org",
 // 		ID:     "test1",
 // 		Event: map[string]interface{}{
@@ -162,12 +165,18 @@ package general_tests
 // 			utils.AnswerTime:   time.Date(2019, 11, 27, 12, 21, 26, 0, time.UTC),
 // 			utils.Usage:        2 * time.Minute,
 // 		},
+// 		APIOpts: map[string]interface{}{
+// 			utils.MetaUsage:      2 * time.Minute,
+// 			utils.OptsAttributeS: true,
+// 			utils.OptsChargerS:   false,
+// 			utils.OptsCDRsExport: false,
+// 		},
 // 	}
-// 	var cdrs []*engine.CDR
+// 	// var cdrs []*engine.CDR
 // 	alsPrf := &engine.AttributeProfileWithAPIOpts{
 // 		AttributeProfile: &engine.AttributeProfile{
 // 			Tenant:    "cgrates.org",
-// 			ID:        "ApierTest",
+// 			ID:        "APIsTest",
 // 			FilterIDs: []string{"*string:~*req.Account:1001"},
 // 			Attributes: []*engine.Attribute{
 // 				{
@@ -175,32 +184,36 @@ package general_tests
 // 					Value: config.NewRSRParsersMustCompile("1001", utils.InfieldSep),
 // 				},
 // 			},
-// 			Weight: 20,
+// 			Weights: utils.DynamicWeights{
+// 				{
+// 					Weight: 20,
+// 				},
+// 			},
 // 		},
 // 	}
 // 	alsPrf.Compile()
 // 	var result string
-// 	if err := pecdrsRpc.Call(utils.APIerSv1SetAttributeProfile, alsPrf, &result); err != nil {
+// 	if err := pecdrsRpc.Call(context.Background(), utils.AdminSv1SetAttributeProfile, alsPrf, &result); err != nil {
 // 		t.Error(err)
 // 	} else if result != utils.OK {
 // 		t.Error("Unexpected reply returned", result)
 // 	}
 // 	var replyAt *engine.AttributeProfile
-// 	if err := pecdrsRpc.Call(utils.APIerSv1GetAttributeProfile, &utils.TenantIDWithAPIOpts{
-// 		TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"}}, &replyAt); err != nil {
+// 	if err := pecdrsRpc.Call(context.Background(), utils.AdminSv1GetAttributeProfile, &utils.TenantIDWithAPIOpts{
+// 		TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "APIsTest"}}, &replyAt); err != nil {
 // 		t.Fatal(err)
 // 	}
 // 	replyAt.Compile()
 // 	if !reflect.DeepEqual(alsPrf.AttributeProfile, replyAt) {
 // 		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(alsPrf.AttributeProfile), utils.ToJSON(replyAt))
 // 	}
-// 	if err := pecdrsRpc.Call(utils.CDRsV1ProcessEvent, argsEv, &reply); err != nil {
+// 	if err := pecdrsRpc.Call(context.Background(), utils.CDRsV1ProcessEvent, argsEv, &reply); err != nil {
 // 		t.Error(err)
 // 	} else if reply != utils.OK {
 // 		t.Error("Unexpected reply received: ", reply)
 // 	}
 // 	// check if the CDR was correctly processed
-// 	if err := pecdrsRpc.Call(utils.CDRsV1GetCDRs, &utils.RPCCDRsFilterWithAPIOpts{
+// 	if err := pecdrsRpc.Call(context.Background(), utils.CDRsV1GetCDRs, &utils.RPCCDRsFilterWithAPIOpts{
 // 		RPCCDRsFilter: &utils.RPCCDRsFilter{OriginHosts: []string{"OriginHost1"}}}, &cdrs); err != nil {
 // 		t.Fatal("Unexpected error: ", err.Error())
 // 	} else if len(cdrs) != 1 {
@@ -231,7 +244,6 @@ package general_tests
 
 // func testV1CDRsProcessEventChrgS(t *testing.T) {
 // 	argsEv := &utils.CGREvent{
-// 		Flags:  []string{utils.MetaChargers, "*attributes:false", "*export:false"},
 // 		Tenant: "cgrates.org",
 // 		ID:     "test2",
 // 		Event: map[string]interface{}{
@@ -244,15 +256,21 @@ package general_tests
 // 			utils.AnswerTime:   time.Date(2019, 11, 27, 12, 21, 26, 0, time.UTC),
 // 			utils.Usage:        2 * time.Minute,
 // 		},
+// 		APIOpts: map[string]interface{}{
+// 			utils.MetaUsage:      2 * time.Minute,
+// 			utils.OptsChargerS:   true,
+// 			utils.OptsAttributeS: false,
+// 			utils.OptsCDRsExport: false,
+// 		},
 // 	}
 // 	var reply string
-// 	if err := pecdrsRpc.Call(utils.CDRsV1ProcessEvent, argsEv, &reply); err != nil {
+// 	if err := pecdrsRpc.Call(context.Background(), utils.CDRsV1ProcessEvent, argsEv, &reply); err != nil {
 // 		t.Error(err)
 // 	} else if reply != utils.OK {
 // 		t.Error("Unexpected reply received: ", reply)
 // 	}
 // 	var cdrs []*engine.CDR
-// 	if err := pecdrsRpc.Call(utils.CDRsV1GetCDRs, &utils.RPCCDRsFilterWithAPIOpts{
+// 	if err := pecdrsRpc.Call(context.Background(), utils.CDRsV1GetCDRs, &utils.RPCCDRsFilterWithAPIOpts{
 // 		RPCCDRsFilter: &utils.RPCCDRsFilter{OriginHosts: []string{"OriginHost2"}}}, &cdrs); err != nil {
 // 		t.Fatal("Unexpected error: ", err.Error())
 // 	} else if len(cdrs) != 3 {
@@ -272,7 +290,6 @@ package general_tests
 
 // func testV1CDRsProcessEventRalS(t *testing.T) {
 // 	argsEv := &utils.CGREvent{
-// 		Flags:  []string{utils.MetaRALs, "*attributes:false", "*chargers:false", "*export:false"},
 // 		Tenant: "cgrates.org",
 // 		ID:     "test3",
 // 		Event: map[string]interface{}{
@@ -285,15 +302,22 @@ package general_tests
 // 			utils.AnswerTime:   time.Date(2019, 11, 27, 12, 21, 26, 0, time.UTC),
 // 			utils.Usage:        2 * time.Minute,
 // 		},
+// 		APIOpts: map[string]interface{}{
+// 			utils.MetaUsage:      2 * time.Minute,
+// 			utils.OptsRateS:      true,
+// 			utils.OptsChargerS:   false,
+// 			utils.OptsAttributeS: false,
+// 			utils.OptsCDRsExport: false,
+// 		},
 // 	}
 // 	var reply string
-// 	if err := pecdrsRpc.Call(utils.CDRsV1ProcessEvent, argsEv, &reply); err != nil {
+// 	if err := pecdrsRpc.Call(context.Background(), utils.CDRsV1ProcessEvent, argsEv, &reply); err != nil {
 // 		t.Error(err)
 // 	} else if reply != utils.OK {
 // 		t.Error("Unexpected reply received: ", reply)
 // 	}
 // 	var cdrs []*engine.CDR
-// 	if err := pecdrsRpc.Call(utils.CDRsV1GetCDRs, &utils.RPCCDRsFilterWithAPIOpts{
+// 	if err := pecdrsRpc.Call(context.Background(), utils.CDRsV1GetCDRs, &utils.RPCCDRsFilterWithAPIOpts{
 // 		RPCCDRsFilter: &utils.RPCCDRsFilter{OriginHosts: []string{"OriginHost3"}}}, &cdrs); err != nil {
 // 		t.Fatal("Unexpected error: ", err.Error())
 // 	} else if len(cdrs) != 1 {
@@ -305,12 +329,10 @@ package general_tests
 
 // func testV1CDRsProcessEventSts(t *testing.T) {
 // 	argsEv := &utils.CGREvent{
-// 		Flags:  []string{utils.MetaStats, "*rals:false", "*attributes:false", "*chargers:false", "*export:false"},
 // 		Tenant: "cgrates.org",
 // 		ID:     "test4",
 // 		Event: map[string]interface{}{
 // 			utils.RunID:        "testv1",
-// 			utils.CGRID:        "c87609aa1cb6e9529ab1836cfeeebaab7aa7ebaf",
 // 			utils.Tenant:       "cgrates.org",
 // 			utils.Category:     "call",
 // 			utils.ToR:          utils.MetaVoice,
@@ -323,9 +345,18 @@ package general_tests
 // 			utils.AnswerTime:   time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
 // 			utils.Usage:        5 * time.Minute,
 // 		},
+// 		APIOpts: map[string]interface{}{
+// 			utils.MetaOriginID:   "c87609aa1cb6e9529ab1836cfeeebaab7aa7ebaf",
+// 			utils.OptsStatS:      true,
+// 			utils.OptsRateS:      false,
+// 			utils.OptsAttributeS: false,
+// 			utils.OptsChargerS:   false,
+// 			utils.OptsCDRsExport: false,
+// 			utils.MetaUsage:      5 * time.Minute,
+// 		},
 // 	}
 // 	var reply string
-// 	if err := pecdrsRpc.Call(utils.CDRsV1ProcessEvent, argsEv, &reply); err != nil {
+// 	if err := pecdrsRpc.Call(context.Background(), utils.CDRsV1ProcessEvent, argsEv, &reply); err != nil {
 // 		t.Error(err)
 // 	} else if reply != utils.OK {
 // 		t.Error("Unexpected reply received: ", reply)
@@ -358,7 +389,7 @@ package general_tests
 // 			CostDetails: nil,
 // 		},
 // 	}
-// 	if err := pecdrsRpc.Call(utils.CDRsV1GetCDRs, &utils.RPCCDRsFilterWithAPIOpts{
+// 	if err := pecdrsRpc.Call(context.Background(), utils.CDRsV1GetCDRs, &utils.RPCCDRsFilterWithAPIOpts{
 // 		RPCCDRsFilter: &utils.RPCCDRsFilter{OriginHosts: []string{"OriginHost4"}}}, &cdrs); err != nil {
 // 		t.Fatal("Unexpected error: ", err.Error())
 // 	} else if len(cdrs) != 1 {
@@ -377,7 +408,7 @@ package general_tests
 // 		utils.MetaTCD: "15m0s",
 // 	}
 
-// 	if err := pecdrsRpc.Call(utils.StatSv1GetQueueStringMetrics,
+// 	if err := pecdrsRpc.Call(context.Background(), utils.StatSv1GetQueueStringMetrics,
 // 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "Stat_1"}}, &metrics); err != nil {
 // 		t.Error(err)
 // 	}
@@ -388,7 +419,6 @@ package general_tests
 
 // func testV1CDRsProcessEventStore(t *testing.T) {
 // 	argsEv := &utils.CGREvent{
-// 		Flags:  []string{"*store:false", "*attributes:false", "*chargers:false", "*export:false"},
 // 		Tenant: "cgrates.org",
 // 		ID:     "test5",
 // 		Event: map[string]interface{}{
@@ -401,15 +431,21 @@ package general_tests
 // 			utils.AnswerTime:   time.Date(2019, 11, 27, 12, 21, 26, 0, time.UTC),
 // 			utils.Usage:        2 * time.Minute,
 // 		},
+// 		APIOpts: map[string]interface{}{
+// 			utils.MetaUsage:      2 * time.Minute,
+// 			utils.OptsAttributeS: false,
+// 			utils.OptsChargerS:   false,
+// 			utils.OptsCDRsExport: false,
+// 		},
 // 	}
 // 	var reply string
-// 	if err := pecdrsRpc.Call(utils.CDRsV1ProcessEvent, argsEv, &reply); err != nil {
+// 	if err := pecdrsRpc.Call(context.Background(), utils.CDRsV1ProcessEvent, argsEv, &reply); err != nil {
 // 		t.Error(err)
 // 	} else if reply != utils.OK {
 // 		t.Error("Unexpected reply received: ", reply)
 // 	}
 // 	var cdrs []*engine.CDR
-// 	if err := pecdrsRpc.Call(utils.CDRsV1GetCDRs, &utils.RPCCDRsFilterWithAPIOpts{
+// 	if err := pecdrsRpc.Call(context.Background(), utils.CDRsV1GetCDRs, &utils.RPCCDRsFilterWithAPIOpts{
 // 		RPCCDRsFilter: &utils.RPCCDRsFilter{OriginHosts: []string{"OriginHost5"}}}, &cdrs); err == nil ||
 // 		err.Error() != "SERVER_ERROR: NOT_FOUND" {
 // 		t.Fatal("Unexpected error: ", err.Error())
@@ -420,16 +456,32 @@ package general_tests
 
 // func testV1CDRsProcessEventThreshold(t *testing.T) {
 // 	var reply string
-// 	if err := pecdrsRpc.Call(utils.APIerSv2SetActions, &utils.AttrSetActions{
-// 		ActionsId: "ACT_LOG",
-// 		Actions: []*utils.TPAction{
-// 			{Identifier: utils.MetaLog},
-// 			{
-// 				Identifier: utils.MetaTopUpReset, BalanceType: utils.MetaVoice,
-// 				Units: "10", ExpiryTime: "*unlimited",
-// 				DestinationIds: "*any", BalanceWeight: "10", Weight: 10},
+// 	// &utils.AttrSetActions{
+// 	// 	ActionsId: "ACT_LOG",
+// 	// 	Actions: []*utils.TPAction{
+// 	// 		{Identifier: utils.MetaLog},
+// 	// 		{
+// 	// 			Identifier: utils.MetaTopUpReset, BalanceType: utils.MetaVoice,
+// 	// 			Units: "10", ExpiryTime: "*unlimited",
+// 	// 			DestinationIds: "*any", BalanceWeight: "10", Weight: 10},
+// 	// 	},
+// 	// }
+// 	argsAP := &engine.ActionProfileWithAPIOpts{
+// 		ActionProfile: &engine.ActionProfile{
+// 			Tenant: "cgrates.org",
+// 			ID:     "ACT_LOG",
+// 			Actions: []*engine.APAction{
+// 				{
+// 					Type: utils.MetaLog,
+// 				},
+// 				{
+// 					Type: utils.MetaTopUpReset,
+// 				},
+// 			},
 // 		},
-// 	}, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
+// 	}
+// 	if err := pecdrsRpc.Call(context.Background(), utils.AdminSv1SetActionProfile, argsAP,
+// 		&reply); err != nil && err.Error() != utils.ErrExists.Error() {
 // 		t.Error(err)
 // 	} else if reply != utils.OK {
 // 		t.Errorf("Calling APIerSv2.SetActions received: %s", reply)
@@ -442,13 +494,17 @@ package general_tests
 // 				"*lt:~*req.CostDetails.AccountSummary.BalanceSummaries[0].Value:10",
 // 				"*string:~*req.Account:1005", // only for indexes
 // 			},
-// 			MaxHits:          -1,
-// 			Weight:           30,
+// 			MaxHits: -1,
+// 			Weights: utils.DynamicWeights{
+// 				{
+// 					Weight: 30,
+// 				},
+// 			},
 // 			ActionProfileIDs: []string{"ACT_LOG"},
 // 			Async:            true,
 // 		},
 // 	}
-// 	if err := pecdrsRpc.Call(utils.APIerSv1SetThresholdProfile, tPrfl, &reply); err != nil {
+// 	if err := pecdrsRpc.Call(context.Background(), utils.AdminSv1SetThresholdProfile, tPrfl, &reply); err != nil {
 // 		t.Error(err)
 // 	} else if reply != utils.OK {
 // 		t.Error("Unexpected reply returned", reply)
@@ -460,24 +516,34 @@ package general_tests
 // 			utils.AllowNegative: true,
 // 		},
 // 	}
-// 	if err := pecdrsRpc.Call(utils.APIerSv2SetAccount, &attrSetAcnt, &reply); err != nil {
+// 	if err := pecdrsRpc.Call(context.Background(), utils.AdminSv1SetAccount, &attrSetAcnt, &reply); err != nil {
 // 		t.Fatal(err)
 // 	}
-// 	attrs := &utils.AttrSetBalance{
-// 		Tenant:      "cgrates.org",
-// 		Account:     "1005",
-// 		BalanceType: utils.MetaMonetary,
-// 		Value:       1,
-// 		Balance: map[string]interface{}{
-// 			utils.ID:     utils.MetaDefault,
-// 			utils.Weight: 10.0,
+// 	// attrs := &utils.AttrSetBalance{
+// 	// 	Tenant:      "cgrates.org",
+// 	// 	Account:     "1005",
+// 	// 	BalanceType: utils.MetaMonetary,
+// 	// 	Value:       1,
+// 	// 	Balance: map[string]interface{}{
+// 	// 		utils.ID:     utils.MetaDefault,
+// 	// 		utils.Weight: 10.0,
+// 	// 	},
+// 	// }
+// 	attrs := &utils.ArgsActSetBalance{
+// 		Tenant:    "cgrates.org",
+// 		AccountID: "1005",
+// 		Reset:     true,
+// 		Diktats: []*utils.BalDiktat{
+// 			{
+// 				Path:  "*balance.BALANCE1.Units",
+// 				Value: "120000000000",
+// 			},
 // 		},
 // 	}
-// 	if err := pecdrsRpc.Call(utils.APIerSv2SetBalance, attrs, &reply); err != nil {
+// 	if err := pecdrsRpc.Call(context.Background(), utils.AccountSv1ActionSetBalance, attrs, &reply); err != nil {
 // 		t.Fatal(err)
 // 	}
 // 	args := &utils.CGREvent{
-// 		Flags:  []string{utils.MetaThresholds, utils.MetaRALs, utils.ConcatenatedKey(utils.MetaChargers, "false"), "*export:false"},
 // 		Tenant: "cgrates.org",
 // 		Event: map[string]interface{}{
 // 			utils.OriginID:     "testV2CDRsProcessCDRWithThreshold",
@@ -493,34 +559,44 @@ package general_tests
 // 			"field_extr1":      "val_extr1",
 // 			"fieldextr2":       "valextr2",
 // 		},
+// 		APIOpts: map[string]interface{}{
+// 			utils.MetaUsage:      2 * time.Minute,
+// 			utils.OptsThresholdS: true,
+// 			utils.OptsRateS:      true,
+// 			utils.OptsChargerS:   false,
+// 			utils.OptsCDRsExport: false,
+// 		},
 // 	}
-// 	if err := pecdrsRpc.Call(utils.CDRsV1ProcessEvent, args, &reply); err != nil {
+// 	if err := pecdrsRpc.Call(context.Background(), utils.CDRsV1ProcessEvent, args, &reply); err != nil {
 // 		t.Error("Unexpected error: ", err)
 // 	} else if reply != utils.OK {
 // 		t.Error("Unexpected reply received: ", reply)
 // 	}
 
 // 	var cdrs []*engine.CDR
-// 	if err := pecdrsRpc.Call(utils.CDRsV1GetCDRs, &utils.RPCCDRsFilterWithAPIOpts{
+// 	if err := pecdrsRpc.Call(context.Background(), utils.CDRsV1GetCDRs, &utils.RPCCDRsFilterWithAPIOpts{
 // 		RPCCDRsFilter: &utils.RPCCDRsFilter{OriginHosts: []string{"OriginHost6"}}}, &cdrs); err != nil {
 // 		t.Error("Unexpected error: ", err)
 // 	} else if len(cdrs) != 1 {
 // 		t.Errorf("Expecting: 1, received: %+v", len(cdrs))
 // 	}
 // 	var td engine.Threshold
-// 	if err := pecdrsRpc.Call(utils.ThresholdSv1GetThreshold,
+// 	if err := pecdrsRpc.Call(context.Background(), utils.ThresholdSv1GetThreshold,
 // 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "THD_Test"}}, &td); err != nil {
 // 		t.Error(err)
 // 	} else if td.Hits != 1 {
 // 		t.Errorf("Expecting threshold to be hit once received: %v", td.Hits)
 // 	}
-// 	var acnt *engine.Account
-// 	acntAttrs := &utils.AttrGetAccount{
-// 		Tenant:  "cgrates.org",
-// 		Account: "1005"}
+// 	var acnt *utils.Account
+// 	acntAttrs := &utils.TenantIDWithAPIOpts{
+// 		TenantID: &utils.TenantID{
+// 			Tenant: "cgrates.org",
+// 			ID:     "test1_processEvent",
+// 		},
+// 	}
 // 	time.Sleep(50 * time.Millisecond)
 // 	expectedVoice := 10.0
-// 	if err := pecdrsRpc.Call(utils.APIerSv2GetAccount, acntAttrs, &acnt); err != nil {
+// 	if err := pecdrsRpc.Call(context.Background(), utils.AdminSv1GetAccount, acntAttrs, &acnt); err != nil {
 // 		t.Error(err)
 // 	} else if rply := acnt.BalanceMap[utils.MetaVoice].GetTotalValue(); rply != expectedVoice {
 // 		t.Errorf("Expecting: %v, received: %v", expectedVoice, rply)
@@ -529,7 +605,6 @@ package general_tests
 // func testV1CDRsProcessEventExport(t *testing.T) {
 // 	var reply string
 // 	args := &utils.CGREvent{
-// 		Flags:  []string{utils.MetaExport, "*store:false", "*attributes:false", "*chargers:false", "*stats:false", "*thresholds:false"},
 // 		Tenant: "cgrates.org",
 // 		ID:     "test7",
 // 		Event: map[string]interface{}{
@@ -542,8 +617,16 @@ package general_tests
 // 			utils.AnswerTime:   time.Date(2019, 11, 27, 12, 21, 26, 0, time.UTC),
 // 			utils.Usage:        2 * time.Minute,
 // 		},
+// 		APIOpts: map[string]interface{}{
+// 			utils.MetaUsage:      2 * time.Minute,
+// 			utils.OptsThresholdS: false,
+// 			utils.OptsChargerS:   false,
+// 			utils.OptsCDRsExport: true,
+// 			utils.OptsStatS:      false,
+// 			utils.OptsAttributeS: false,
+// 		},
 // 	}
-// 	if err := pecdrsRpc.Call(utils.CDRsV1ProcessEvent, args, &reply); err == nil ||
+// 	if err := pecdrsRpc.Call(context.Background(), utils.CDRsV1ProcessEvent, args, &reply); err == nil ||
 // 		err.Error() != utils.ErrPartiallyExecuted.Error() { // the export should fail as we test if the cdr is corectly writen in file
 // 		t.Error("Unexpected error: ", err)
 // 	}
@@ -580,7 +663,6 @@ package general_tests
 
 // func testV1CDRsV2ProcessEventRalS(t *testing.T) {
 // 	argsEv := &utils.CGREvent{
-// 		Flags:  []string{utils.MetaRALs, "*attributes:false", "*chargers:false", "*export:false"},
 // 		Tenant: "cgrates.org",
 // 		ID:     "test101",
 // 		Event: map[string]interface{}{
@@ -592,6 +674,13 @@ package general_tests
 // 			utils.Destination:  "+4986517174963",
 // 			utils.AnswerTime:   time.Date(2019, 11, 27, 12, 21, 26, 0, time.UTC),
 // 			utils.Usage:        2 * time.Minute,
+// 		},
+// 		APIOpts: map[string]interface{}{
+// 			utils.MetaUsage:      2 * time.Minute,
+// 			utils.OptsChargerS:   false,
+// 			utils.OptsCDRsExport: true,
+// 			utils.OptsAttributeS: false,
+// 			utils.OptsRateS:      true,
 // 		},
 // 	}
 // 	expRply := []*utils.EventWithFlags{
@@ -624,7 +713,7 @@ package general_tests
 // 		},
 // 	}
 // 	var reply []*utils.EventWithFlags
-// 	if err := pecdrsRpc.Call(utils.CDRsV2ProcessEvent, argsEv, &reply); err != nil {
+// 	if err := pecdrsRpc.Call(context.Background(), utils.CDRsV2ProcessEvent, argsEv, &reply); err != nil {
 // 		t.Error(err)
 // 	}
 // 	reply[0].Event["CostDetails"] = nil
@@ -640,7 +729,7 @@ package general_tests
 // 		}
 // 	}
 // 	var cdrs []*engine.CDR
-// 	if err := pecdrsRpc.Call(utils.CDRsV1GetCDRs, &utils.RPCCDRsFilterWithAPIOpts{
+// 	if err := pecdrsRpc.Call(context.Background(), utils.CDRsV1GetCDRs, &utils.RPCCDRsFilterWithAPIOpts{
 // 		RPCCDRsFilter: &utils.RPCCDRsFilter{OriginHosts: []string{"OriginHost101"}}}, &cdrs); err != nil {
 // 		t.Fatal("Unexpected error: ", err.Error())
 // 	} else if len(cdrs) != 1 {
@@ -650,10 +739,10 @@ package general_tests
 // 	}
 
 // 	argsEv.Flags = append(argsEv.Flags, utils.MetaRerate)
-// 	argsEv.CGREvent.ID = "test1002"
-// 	argsEv.CGREvent.Event[utils.Usage] = time.Minute
+// 	argsEv.ID = "test1002"
+// 	argsEv.Event[utils.Usage] = time.Minute
 
-// 	if err := pecdrsRpc.Call(utils.CDRsV2ProcessEvent, argsEv, &reply); err != nil {
+// 	if err := pecdrsRpc.Call(context.Background(), utils.CDRsV2ProcessEvent, argsEv, &reply); err != nil {
 // 		t.Error(err)
 // 	}
 // 	expRply[0].Flags = []string{utils.MetaRefund}
@@ -670,8 +759,8 @@ package general_tests
 // 		}
 // 	}
 
-// 	argsEv.CGREvent.Event[utils.Usage] = 30 * time.Second
-// 	if err := pecdrsRpc.Call(utils.CDRsV2ProcessEvent, argsEv, &reply); err != nil {
+// 	argsEv.Event[utils.Usage] = 30 * time.Second
+// 	if err := pecdrsRpc.Call(context.Background(), utils.CDRsV2ProcessEvent, argsEv, &reply); err != nil {
 // 		t.Error(err)
 // 	}
 // 	reply[0].Event["CostDetails"] = nil
