@@ -20,7 +20,6 @@ package engine
 
 import (
 	"fmt"
-	"math"
 
 	"github.com/nyaruka/phonenumbers"
 
@@ -117,16 +116,12 @@ func (dDP *dynamicDP) fieldAsInterface(fldPath []string) (val interface{}, err e
 	case utils.MetaStats:
 		// sample of fieldName : ~*stats.StatID.*acd
 		var statValues map[string]*utils.Decimal
-
 		if err := connMgr.Call(dDP.ctx, dDP.stsConns, utils.StatSv1GetQueueDecimalMetrics,
 			&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: dDP.tenant, ID: fldPath[1]}},
 			&statValues); err != nil {
 			return nil, err
 		}
 		for k, v := range statValues {
-			if v == utils.DecimalNaN {
-				v = utils.NewDecimal(int64(math.NaN()), 0)
-			}
 			dDP.cache.Set([]string{utils.MetaStats, fldPath[1], k}, v)
 		}
 		return dDP.cache.FieldAsInterface(fldPath)

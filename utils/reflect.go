@@ -37,6 +37,7 @@ func StringToInterface(s string) interface{} {
 		return s
 	}
 	// int64
+	s = strings.Trim(s, `"`)
 	if i, err := strconv.ParseInt(s, 10, 64); err == nil {
 		return i
 	}
