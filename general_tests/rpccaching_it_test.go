@@ -246,6 +246,8 @@ func testRPCMethodsAuthorizeSession(t *testing.T) {
 		},
 		APIOpts: map[string]interface{}{
 			utils.OptsSesMaxUsage: true,
+			utils.MetaUsage:       authUsage,
+			utils.OptsAccountS:    true,
 		},
 	}
 	//authorize the session
@@ -342,6 +344,7 @@ func testRPCMethodsInitSession(t *testing.T) {
 		},
 		APIOpts: map[string]interface{}{
 			utils.OptsSesInitiate: true,
+			utils.MetaUsage:       initUsage,
 		},
 	}
 	var rplyFirst sessions.V1InitSessionReply
@@ -439,6 +442,7 @@ func testRPCMethodsUpdateSession(t *testing.T) {
 		},
 		APIOpts: map[string]interface{}{
 			utils.OptsSesUpdate: true,
+			utils.MetaUsage:     reqUsage,
 		},
 	}
 	var rplyFirst sessions.V1UpdateSessionReply
@@ -534,6 +538,7 @@ func testRPCMethodsTerminateSession(t *testing.T) {
 		},
 		APIOpts: map[string]interface{}{
 			utils.OptsSesTerminate: true,
+			utils.MetaUsage:        10 * time.Minute,
 		},
 	}
 	var rply string
@@ -653,6 +658,7 @@ func testRPCMethodsProcessEvent(t *testing.T) {
 		},
 		APIOpts: map[string]interface{}{
 			utils.OptsSesMessage: true,
+			utils.MetaUsage:      initUsage,
 		},
 	}
 	var rplyFirst sessions.V1ProcessMessageReply
