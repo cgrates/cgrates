@@ -597,6 +597,7 @@ func TestStatsAPIs(t *testing.T) {
 			utils.StatID:    "sq2",
 		},
 		APIOpts: map[string]interface{}{
+			utils.MetaUsage:                3000,
 			utils.MetaEventType:            utils.StatUpdate,
 			utils.OptsThresholdsProfileIDs: []string{"thdID"},
 			utils.OptsStatsProfileIDs:      []string{"sq1", "sq2"},
@@ -754,9 +755,10 @@ func TestStatsAPIs(t *testing.T) {
 		ID:     "StatsEventTest",
 		Event: map[string]interface{}{
 			utils.AccountField: "1002",
-			utils.Usage:        3000,
+			//utils.Usage:        3000,
 		},
 		APIOpts: map[string]interface{}{
+			utils.MetaUsage:           3000,
 			utils.OptsStatsProfileIDs: []string{"sq1", "sq2"},
 		},
 	}

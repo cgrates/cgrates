@@ -84,13 +84,13 @@ func TestStatRemEventWithID(t *testing.T) {
 		t.Errorf("unexpected Events in asrMetric: %+v", asrMetric.Events)
 	}
 	sq.remEventWithID("cgrates.org:TestRemEventWithID_2")
-	if asr := asrMetric.GetValue(); asr.Compare(utils.NewDecimal(-1, 0)) != 0 {
+	if asr := asrMetric.GetValue(); asr.Compare(utils.DecimalNaN) != 0 {
 		t.Errorf("received asrMetric: %v", asrMetric)
 	} else if len(asrMetric.Events) != 0 {
 		t.Errorf("unexpected Events in asrMetric: %+v", asrMetric.Events)
 	}
 	sq.remEventWithID("cgrates.org:TestRemEventWithID_2")
-	if asr := asrMetric.GetValue(); asr.Compare(utils.NewDecimal(-1, 0)) != 0 {
+	if asr := asrMetric.GetValue(); asr.Compare(utils.DecimalNaN) != 0 {
 		t.Errorf("received asrMetric: %v", asrMetric)
 	} else if len(asrMetric.Events) != 0 {
 		t.Errorf("unexpected Events in asrMetric: %+v", asrMetric.Events)
@@ -131,13 +131,13 @@ func TestStatRemEventWithID2(t *testing.T) {
 	}
 	sq.remEventWithID("cgrates.org:TestRemEventWithID_2")
 	sq.remEventWithID("cgrates.org:TestRemEventWithID_1")
-	if asr := asrMetric.GetValue(); asr.Compare(utils.NewDecimal(-1, 0)) != 0 {
+	if asr := asrMetric.GetValue(); asr.Compare(utils.DecimalNaN) != 0 {
 		t.Errorf("received asrMetric: %v", asrMetric)
 	} else if len(asrMetric.Events) != 0 {
 		t.Errorf("unexpected Events in asrMetric: %+v", asrMetric.Events)
 	}
 	sq.remEventWithID("cgrates.org:TestRemEventWithID_2")
-	if asr := asrMetric.GetValue(); asr.Compare(utils.NewDecimal(-1, 0)) != 0 {
+	if asr := asrMetric.GetValue(); asr.Compare(utils.DecimalNaN) != 0 {
 		t.Errorf("received asrMetric: %v", asrMetric)
 	} else if len(asrMetric.Events) != 0 {
 		t.Errorf("unexpected Events in asrMetric: %+v", asrMetric.Events)
@@ -234,15 +234,19 @@ func TestStatAddStatEvent(t *testing.T) {
 		t.Errorf("received ASR: %v", asr)
 	}
 	ev1 := &utils.CGREvent{Tenant: "cgrates.org", ID: "TestStatAddStatEvent_1"}
-	sq.addStatEvent(context.Background(), ev1.Tenant, ev1.ID, nil, utils.MapStorage{utils.MetaReq: ev1.Event})
+	sq.addStatEvent(context.Background(), ev1.Tenant, ev1.ID, nil, utils.MapStorage{utils.MetaOpts: ev1.Event})
 	if asr := asrMetric.GetValue(); asr.Compare(utils.NewDecimalFromFloat64(50)) != 0 {
 		t.Errorf("received ASR: %v", asr)
 	} else if asrMetric.Value.Compare(utils.NewDecimal(1, 0)) != 0 || asrMetric.Count != 2 {
 		t.Errorf("ASR: %v", asrMetric)
 	}
-	ev1.Event = map[string]interface{}{
-		utils.AnswerTime: time.Now()}
-	sq.addStatEvent(context.Background(), ev1.Tenant, ev1.ID, nil, utils.MapStorage{utils.MetaReq: ev1.Event})
+	/*
+		ev1.Event = map[string]interface{}{
+			utils.AnswerTime: time.Now()}
+	*/
+	ev1.APIOpts = map[string]interface{}{
+		utils.MetaStartTime: time.Now()}
+	sq.addStatEvent(context.Background(), ev1.Tenant, ev1.ID, nil, utils.MapStorage{utils.MetaOpts: ev1.APIOpts})
 	if asr := asrMetric.GetValue(); asr.Compare(utils.NewDecimalFromFloat64(66.66666666666667)) != 0 {
 		t.Errorf("received ASR: %v", asr)
 	} else if asrMetric.Value.Compare(utils.NewDecimal(2, 0)) != 0 || asrMetric.Count != 3 {

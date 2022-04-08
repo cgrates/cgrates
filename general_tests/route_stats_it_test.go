@@ -132,10 +132,9 @@ func testV1RtStatsProcessStatsValid(t *testing.T) {
 			utils.Destination:  "1021",
 			utils.Category:     "call",
 			utils.Usage:        "1m20s",
-			//utils.AnswerTime:   "2022-04-01T05:00:00Z",
-			utils.Cost: 1.8,
 		},
 		APIOpts: map[string]interface{}{
+			utils.MetaCost:      1.8,
 			utils.MetaStartTime: "2022-04-01T05:00:00Z",
 			utils.MetaUsage:     "1m20s",
 		},
@@ -162,9 +161,9 @@ func testV1RtStatsProcessStatsNotAnswered(t *testing.T) {
 			utils.AccountField: "1010",
 			utils.Destination:  "1021",
 			utils.Usage:        "26s",
-			utils.Cost:         1.8,
 		},
 		APIOpts: map[string]interface{}{
+			utils.MetaCost:  1.8,
 			utils.MetaUsage: "1m20s",
 		},
 	}
@@ -197,12 +196,11 @@ func testV1RtStatsProcessStatsNotAnswered(t *testing.T) {
 		Event: map[string]interface{}{
 			utils.AccountField: "1010",
 			utils.Category:     "call",
-			utils.Usage:        "50s",
-			utils.AnswerTime:   "2022-04-01T05:00:00Z",
-			utils.Cost:         1.8,
 		},
 		APIOpts: map[string]interface{}{
-			utils.MetaUsage: "1m20s",
+			utils.MetaCost:      1.8,
+			utils.MetaUsage:     "1m20s",
+			utils.MetaStartTime: "2022-04-01T05:00:00Z",
 		},
 	}
 	expected = []string{"STATS_TCC1", "STATS_TOP1", "STATS_TOP3"}
