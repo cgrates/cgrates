@@ -483,7 +483,7 @@ func TestStatQueuesUpdateStatQueue(t *testing.T) {
 		Metrics:     []*MetricWithFilters{{MetricID: utils.MetaTCC}},
 	}
 	sqm := NewTCC(0, utils.EmptyString, nil)
-	if err = sqm.AddEvent("ev1", utils.MapStorage{utils.MetaReq: utils.MapStorage{utils.Cost: 10}}); err != nil {
+	if err = sqm.AddEvent("ev1", utils.MapStorage{utils.MetaOpts: utils.MapStorage{utils.MetaCost: 10}}); err != nil {
 		t.Fatal(err)
 	}
 	sq := &StatQueue{

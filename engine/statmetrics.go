@@ -99,22 +99,15 @@ func (asr *StatASR) GetValue() (val *utils.Decimal) {
 func (asr *StatASR) AddEvent(evID string, ev utils.DataProvider) (err error) {
 	var answered int
 	var val interface{}
-	if val, err = ev.FieldAsInterface([]string{utils.MetaReq, utils.AnswerTime}); err != nil {
-		if err == utils.ErrNotFound {
-			if val, err = ev.FieldAsInterface([]string{utils.MetaOpts, utils.MetaStartTime}); err != nil {
-				if err != utils.ErrNotFound {
-					return utils.ErrPrefix(err, utils.MetaStartTime)
-				}
-			}
-		}
-	}
-	if val != nil {
-		if at, err := utils.IfaceAsTime(val,
-			config.CgrConfig().GeneralCfg().DefaultTimezone); err != nil {
+	if val, err = ev.FieldAsInterface([]string{utils.MetaOpts, utils.MetaStartTime}); err != nil {
+		if err != utils.ErrNotFound {
 			return err
-		} else if !at.IsZero() {
-			answered = 1
 		}
+	} else if at, err := utils.IfaceAsTime(val,
+		config.CgrConfig().GeneralCfg().DefaultTimezone); err != nil {
+		return err
+	} else if !at.IsZero() {
+		answered = 1
 	}
 	return asr.addEvent(evID, answered)
 }
@@ -171,18 +164,12 @@ func (acd *StatACD) GetValue() *utils.Decimal {
 }
 
 func (acd *StatACD) AddEvent(evID string, ev utils.DataProvider) (err error) {
-	var ival interface{}
-	if ival, err = ev.FieldAsInterface([]string{utils.MetaReq, utils.Usage}); err != nil {
+	ival, err := ev.FieldAsInterface([]string{utils.MetaOpts, utils.MetaUsage})
+	if err != nil {
 		if err == utils.ErrNotFound {
-			if ival, err = ev.FieldAsInterface([]string{utils.MetaOpts, utils.MetaUsage}); err != nil {
-				if err == utils.ErrNotFound {
-					return utils.ErrPrefix(err, utils.MetaUsage)
-				}
-				return err
-			}
-		} else {
-			return err
+			err = utils.ErrPrefix(err, utils.MetaUsage)
 		}
+		return err
 	}
 	return acd.addEvent(evID, ival)
 }
@@ -211,18 +198,12 @@ func (sum *StatTCD) GetStringValue(rounding int) string {
 }
 
 func (sum *StatTCD) AddEvent(evID string, ev utils.DataProvider) (err error) {
-	var ival interface{}
-	if ival, err = ev.FieldAsInterface([]string{utils.MetaReq, utils.Usage}); err != nil {
+	ival, err := ev.FieldAsInterface([]string{utils.MetaOpts, utils.MetaUsage})
+	if err != nil {
 		if err == utils.ErrNotFound {
-			if ival, err = ev.FieldAsInterface([]string{utils.MetaOpts, utils.MetaUsage}); err != nil {
-				if err == utils.ErrNotFound {
-					return utils.ErrPrefix(err, utils.MetaUsage)
-				}
-				return err
-			}
-		} else {
-			return err
+			err = utils.ErrPrefix(err, utils.MetaUsage)
 		}
+		return err
 	}
 	return sum.addEvent(evID, ival)
 }
@@ -250,26 +231,20 @@ func (acc *StatACC) GetValue() *utils.Decimal {
 	return acc.getAvgValue()
 }
 
-func (acc *StatACC) AddEvent(evID string, ev utils.DataProvider) (err error) {
-	var ival interface{}
-	if ival, err = ev.FieldAsInterface([]string{utils.MetaReq, utils.Cost}); err != nil {
+func (acc *StatACC) AddEvent(evID string, ev utils.DataProvider) error {
+	ival, err := ev.FieldAsInterface([]string{utils.MetaOpts, utils.MetaCost})
+	if err != nil {
 		if err == utils.ErrNotFound {
-			if ival, err = ev.FieldAsInterface([]string{utils.MetaOpts, utils.MetaCost}); err != nil {
-				if err == utils.ErrNotFound {
-					return utils.ErrPrefix(err, utils.MetaUsage)
-				}
-				return err
-			}
-		} else {
-			return err
+			err = utils.ErrPrefix(err, utils.MetaCost)
 		}
+		return err
 	}
 	val, err := utils.IfaceAsBig(ival)
 	if err != nil {
 		return err
 	}
 	if val.Cmp(decimal.New(0, 0)) < 0 {
-		return utils.ErrPrefix(utils.ErrNegative, utils.Cost)
+		return utils.ErrPrefix(utils.ErrNegative, utils.MetaCost)
 	}
 	return acc.addEvent(evID, val)
 }
@@ -289,26 +264,20 @@ type StatTCC struct {
 	*Metric
 }
 
-func (tcc *StatTCC) AddEvent(evID string, ev utils.DataProvider) (err error) {
-	var ival interface{}
-	if ival, err = ev.FieldAsInterface([]string{utils.MetaReq, utils.Cost}); err != nil {
+func (tcc *StatTCC) AddEvent(evID string, ev utils.DataProvider) error {
+	ival, err := ev.FieldAsInterface([]string{utils.MetaOpts, utils.MetaCost})
+	if err != nil {
 		if err == utils.ErrNotFound {
-			if ival, err = ev.FieldAsInterface([]string{utils.MetaOpts, utils.MetaCost}); err != nil {
-				if err == utils.ErrNotFound {
-					return utils.ErrPrefix(err, utils.MetaUsage)
-				}
-				return err
-			}
-		} else {
-			return err
+			err = utils.ErrPrefix(err, utils.MetaCost)
 		}
+		return err
 	}
 	val, err := utils.IfaceAsBig(ival)
 	if err != nil {
 		return err
 	}
 	if val.Cmp(decimal.New(0, 0)) < 0 {
-		return utils.ErrPrefix(utils.ErrNegative, utils.Cost)
+		return utils.ErrPrefix(utils.ErrNegative, utils.MetaCost)
 	}
 	return tcc.addEvent(evID, val)
 }
@@ -767,8 +736,8 @@ func (dst *StatDistinct) GetValue() *utils.Decimal {
 
 func (dst *StatDistinct) AddEvent(evID string, ev utils.DataProvider) (err error) {
 	var fieldValue string
-	// simply remove the ~*req. prefix and do normal process
-	if !strings.HasPrefix(dst.FieldName, utils.DynamicDataPrefix+utils.MetaReq+utils.NestingSep) {
+	// simply remove the ~*req./~*opts. prefix and do normal process
+	if !strings.HasPrefix(dst.FieldName, utils.DynamicDataPrefix+utils.MetaReq+utils.NestingSep) && !strings.HasPrefix(dst.FieldName, utils.DynamicDataPrefix+utils.MetaOpts+utils.NestingSep) {
 		return fmt.Errorf("Invalid format for field <%s>", dst.FieldName)
 	}
 
