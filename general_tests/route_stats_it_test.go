@@ -131,7 +131,6 @@ func testV1RtStatsProcessStatsValid(t *testing.T) {
 			utils.AccountField: "1010",
 			utils.Destination:  "1021",
 			utils.Category:     "call",
-			utils.Usage:        "1m20s",
 		},
 		APIOpts: map[string]interface{}{
 			utils.MetaCost:      1.8,
@@ -160,11 +159,10 @@ func testV1RtStatsProcessStatsNotAnswered(t *testing.T) {
 		Event: map[string]interface{}{
 			utils.AccountField: "1010",
 			utils.Destination:  "1021",
-			utils.Usage:        "26s",
 		},
 		APIOpts: map[string]interface{}{
 			utils.MetaCost:  1.8,
-			utils.MetaUsage: "1m20s",
+			utils.MetaUsage: "26s",
 		},
 	}
 	// we will process this two times
@@ -199,7 +197,7 @@ func testV1RtStatsProcessStatsNotAnswered(t *testing.T) {
 		},
 		APIOpts: map[string]interface{}{
 			utils.MetaCost:      1.8,
-			utils.MetaUsage:     "1m20s",
+			utils.MetaUsage:     "50s",
 			utils.MetaStartTime: "2022-04-01T05:00:00Z",
 		},
 	}
