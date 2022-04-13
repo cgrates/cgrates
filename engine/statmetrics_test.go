@@ -1584,7 +1584,7 @@ func TestPDDGetStringValue(t *testing.T) {
 	ev5 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_5",
 		Event: map[string]interface{}{utils.PDD: 10 * time.Second},
 	}
-	pdd.AddEvent(ev4.ID, utils.MapStorage{utils.MetaOpts: ev4.APIOpts, utils.MetaReq: ev.Event})
+	pdd.AddEvent(ev4.ID, utils.MapStorage{utils.MetaOpts: ev4.APIOpts, utils.MetaReq: ev4.Event})
 	if strVal := pdd.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong pdd value: %s", strVal)
 	}
@@ -1744,7 +1744,7 @@ func TestPDDGetValue(t *testing.T) {
 			utils.MetaStartTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			utils.MetaUsage:     8 * time.Second}}
 	ev3 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_3"}
-	if err := pdd.AddEvent(ev2.ID, utils.MapStorage{utils.MetaOpts: ev2.APIOpts, utils.MetaReq: ev.Event}); err != nil {
+	if err := pdd.AddEvent(ev2.ID, utils.MapStorage{utils.MetaOpts: ev2.APIOpts, utils.MetaReq: ev2.Event}); err != nil {
 		t.Error(err)
 	}
 	if err := pdd.AddEvent(ev3.ID, utils.MapStorage{utils.MetaOpts: ev3.APIOpts}); err == nil || err.Error() != "NOT_FOUND:PDD" {
@@ -1909,8 +1909,8 @@ func TestDDCGetStringValue(t *testing.T) {
 		Event: map[string]interface{}{utils.Destination: "1001"},
 		APIOpts: map[string]interface{}{
 			utils.MetaStartTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC)}}
-	ddc.AddEvent(ev2.ID, utils.MapStorage{utils.MetaOpts: ev2.APIOpts, utils.MetaReq: ev.Event})
-	ddc.AddEvent(ev3.ID, utils.MapStorage{utils.MetaOpts: ev3.APIOpts, utils.MetaReq: ev.Event})
+	ddc.AddEvent(ev2.ID, utils.MapStorage{utils.MetaOpts: ev2.APIOpts, utils.MetaReq: ev2.Event})
+	ddc.AddEvent(ev3.ID, utils.MapStorage{utils.MetaOpts: ev3.APIOpts, utils.MetaReq: ev3.Event})
 	if strVal := ddc.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != "2" {
 		t.Errorf("wrong ddc value: %s", strVal)
 	}
@@ -1958,11 +1958,11 @@ func TestDDCGetFloat64Value(t *testing.T) {
 			utils.MetaStartTime: time.Date(2015, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 	}
-	ddc.AddEvent(ev4.ID, utils.MapStorage{utils.MetaOpts: ev4.APIOpts, utils.MetaReq: ev.Event})
+	ddc.AddEvent(ev4.ID, utils.MapStorage{utils.MetaOpts: ev4.APIOpts, utils.MetaReq: ev4.Event})
 	if strVal := ddc.GetValue(); strVal.Compare(utils.NewDecimalFromFloat64(2)) != 0 {
 		t.Errorf("wrong ddc value: %v", strVal)
 	}
-	ddc.AddEvent(ev5.ID, utils.MapStorage{utils.MetaOpts: ev5.APIOpts, utils.MetaReq: ev.Event})
+	ddc.AddEvent(ev5.ID, utils.MapStorage{utils.MetaOpts: ev5.APIOpts, utils.MetaReq: ev5.Event})
 	if strVal := ddc.GetValue(); strVal.Compare(utils.NewDecimalFromFloat64(3)) != 0 {
 		t.Errorf("wrong ddc value: %v", strVal)
 	}
@@ -2800,9 +2800,9 @@ func TestStatDistinctCompress(t *testing.T) {
 		Event: map[string]interface{}{utils.Destination: "1001"}}
 	ev3 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_3",
 		Event: map[string]interface{}{utils.Destination: "1002"}}
-	ddc.AddEvent(ev1.ID, utils.MapStorage{utils.MetaEvent: ev1.Event})
-	ddc.AddEvent(ev2.ID, utils.MapStorage{utils.MetaEvent: ev2.Event})
-	ddc.AddEvent(ev3.ID, utils.MapStorage{utils.MetaEvent: ev3.Event})
+	ddc.AddEvent(ev1.ID, utils.MapStorage{utils.MetaReq: ev1.Event})
+	ddc.AddEvent(ev2.ID, utils.MapStorage{utils.MetaReq: ev2.Event})
+	ddc.AddEvent(ev3.ID, utils.MapStorage{utils.MetaReq: ev3.Event})
 	expIDs := []string{"EVENT_1", "EVENT_3"}
 	rply := ddc.Compress(10, "EVENT_3")
 	sort.Strings(rply)

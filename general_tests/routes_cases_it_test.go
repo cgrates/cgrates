@@ -744,7 +744,6 @@ func testV1RtsCasesSortingRoutesLCSetStatsAndResForMatching(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "event1",
 		Event: map[string]interface{}{
-			utils.Usage:        "2m30s",
 			utils.AccountField: "1004",
 			utils.Category:     "vendor2",
 		},
