@@ -123,7 +123,7 @@ func testdoubleRemoveStatQueueProfile(t *testing.T) {
 		StatQueueProfile: &engine.StatQueueProfile{
 			Tenant:      doubleRemoveTenant,
 			ID:          "TEST_PROFILE1",
-			FilterIDs:   []string{"*ai:~*req.AnswerTime:2020-04-18T14:25:00Z|2020-04-18T14:25:00Z"},
+			FilterIDs:   []string{"*ai:~*opts.*startTime:2020-04-18T14:25:00Z|2020-04-18T14:25:00Z"},
 			QueueLength: 10,
 			TTL:         10 * time.Second,
 			Metrics: []*engine.MetricWithFilters{

@@ -121,7 +121,7 @@
 				"fields": [
 					{"path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
 					{"path": "ID", "type": "*variable", "value": "~*req.1;~*req.2", "mandatory": true},
-					{"path": "*tmp.FilterIDs", "type": "*variable", "value": "`*ai:~*req.AnswerTime:`;~*req.3;`;*string:~*req.Category:`;~*req.1", "mandatory": true},
+					{"path": "*tmp.FilterIDs", "type": "*variable", "value": "`*ai:~*opts.*startTime:`;~*req.3;`;*string:~*req.Category:`;~*req.1", "mandatory": true},
 					{"path": "*tmp.FilterIDs", "type": "*composed", "value": "`;*string:~*req.Subject:`;~*req.2", "filters":["*notstring:~*req.2:*any"]},
 					{"path": "FilterIDs", "type": "*variable", "value": "~*tmp.FilterIDs", "mandatory": true},
 					{"path": "*tmp.RatingPlan", "type": "*generic", "value": "~*uch.rate_plans_<~*req.4>", "mandatory": true},
