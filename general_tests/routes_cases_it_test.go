@@ -52,8 +52,8 @@ var (
 		testV1RtsCasesSortingRoutesWeightAccountValue,
 		testV1RtsCasesSortingRoutesWeightAllRoutes,
 		testV1RtsCasesSortingRoutesWeightNotMatchingValue,
-		// testV1RtsCasesSortingRoutesLowestCost,
-		// testV1RtsCasesSortingRoutesLowestCostDefaultUsage,
+		testV1RtsCasesSortingRoutesLowestCost,
+		testV1RtsCasesSortingRoutesLowestCostDefaultUsage,
 		testV1RtsCasesSortingRoutesLCSetStatsAndResForMatching,
 		testV1RtsCasesSortingRoutesLowestCostStats,
 		testV1RtsCasesSortingRoutesLowestCosMatchingAllRoutes,
@@ -238,7 +238,7 @@ func testV1RtsCaseGetRoutesAfterLoading(t *testing.T) {
 			},
 			{
 				ID:             "vendor4",
-				FilterIDs:      []string{"*ai:~*req.AnswerTime:2013-06-01T00:00:00Z|2013-06-01T10:00:00Z"},
+				FilterIDs:      []string{"*ai:~*opts.*startTime:2013-06-01T00:00:00Z|2013-06-01T10:00:00Z"},
 				RateProfileIDs: []string{"RP_STANDARD"},
 				Weights: utils.DynamicWeights{
 					{
@@ -388,7 +388,7 @@ func testV1RtsCaseGetRoutesAfterLoading(t *testing.T) {
 			},
 			{
 				ID:      "vendor3",
-				StatIDs: []string{"STATS_VENDOR_2:*distinct#~*req.Usage"},
+				StatIDs: []string{"STATS_VENDOR_2:*distinct#~*opts.*usage"},
 			},
 		},
 	}
@@ -620,7 +620,6 @@ func testV1RtsCasesSortingRoutesLowestCost(t *testing.T) {
 		Event: map[string]interface{}{
 			utils.AccountField: "1002",
 			utils.Destination:  "1003",
-			utils.SetupTime:    "2013-06-01T00:00:00Z",
 		},
 		APIOpts: map[string]interface{}{
 			utils.MetaUsage: "2m30s",
@@ -668,7 +667,6 @@ func testV1RtsCasesSortingRoutesLowestCostDefaultUsage(t *testing.T) {
 		Event: map[string]interface{}{
 			utils.AccountField: "1002",
 			utils.Destination:  "1003",
-			utils.SetupTime:    "2013-06-01T00:00:00Z",
 		},
 		APIOpts: map[string]interface{}{
 			utils.MetaStartTime: "2013-06-01T05:00:00Z",
@@ -772,7 +770,6 @@ func testV1RtsCasesSortingRoutesLowestCostStats(t *testing.T) {
 		Event: map[string]interface{}{
 			utils.AccountField: "1002",
 			utils.Destination:  "1003",
-			utils.SetupTime:    "2013-06-01T00:00:00Z",
 		},
 		APIOpts: map[string]interface{}{
 			utils.MetaStartTime: "2013-06-01T05:00:00Z",
@@ -848,7 +845,6 @@ func testV1RtsCasesSortingRoutesLowestCosMatchingAllRoutes(t *testing.T) {
 		Event: map[string]interface{}{
 			utils.AccountField: "1002",
 			utils.Destination:  "1003",
-			utils.SetupTime:    "2013-06-01T00:00:00Z",
 		},
 		APIOpts: map[string]interface{}{
 			utils.MetaStartTime: "2013-06-01T05:00:00Z",
@@ -911,7 +907,6 @@ func testV1RtsCasesSortingRoutesLowestCosMaxCost(t *testing.T) {
 		Event: map[string]interface{}{
 			utils.AccountField: "1002",
 			utils.Destination:  "1003",
-			utils.SetupTime:    "2013-06-01T00:00:00Z",
 		},
 		APIOpts: map[string]interface{}{
 			utils.MetaStartTime:     "2013-06-01T05:00:00Z",
@@ -965,10 +960,8 @@ func testV1RtsCasesSortingRoutesLowestCosMaxCostNotMatch(t *testing.T) {
 		ID:     "LC_SORT",
 		Tenant: "cgrates.org",
 		Event: map[string]interface{}{
-			utils.Usage:        "2m30s",
 			utils.AccountField: "1002",
 			utils.Destination:  "1003",
-			utils.SetupTime:    "2013-06-01T00:00:00Z",
 		},
 		APIOpts: map[string]interface{}{
 			utils.MetaStartTime:     "2013-06-01T05:00:00Z",
@@ -991,7 +984,6 @@ func testV1RtsCasesSortingRoutesProcessMetrics(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "event1",
 		Event: map[string]interface{}{
-			utils.Usage:        "2m30s",
 			utils.AccountField: "1004",
 			utils.Category:     "vendor2",
 		},
@@ -1027,7 +1019,6 @@ func testV1RtsCasesSortingRoutesProcessMetrics(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "event1",
 		Event: map[string]interface{}{
-			utils.Usage:        "2m30s",
 			utils.AccountField: "1004",
 			utils.Category:     "vendor1",
 		},
@@ -1063,10 +1054,8 @@ func testV1RtsCasesSortingRoutesQOS(t *testing.T) {
 		ID:     "LC_SORT",
 		Tenant: "cgrates.org",
 		Event: map[string]interface{}{
-			utils.Usage:        "50s",
 			utils.AccountField: "1003",
 			utils.Destination:  "1007",
-			utils.SetupTime:    "2013-06-01T00:00:00Z",
 		},
 		APIOpts: map[string]interface{}{
 			utils.MetaStartTime: "2013-06-01T05:00:00Z",
@@ -1081,13 +1070,13 @@ func testV1RtsCasesSortingRoutesQOS(t *testing.T) {
 				{
 					RouteID: "vendor2",
 					SortingData: map[string]interface{}{
-						utils.MetaACC:           1.,
-						utils.MetaACD:           150. * 1e9,
-						"*sum#1":                3.,
-						"*distinct#~*req.Usage": 1.,
-						utils.MetaTCC:           3.,
-						utils.MetaTCD:           450. * 1e9,
-						utils.Weight:            0.,
+						utils.MetaACC:             1.,
+						utils.MetaACD:             150. * 1e9,
+						"*sum#1":                  3.,
+						"*distinct#~*opts.*usage": 1.,
+						utils.MetaTCC:             3.,
+						utils.MetaTCD:             450. * 1e9,
+						utils.Weight:              0.,
 					},
 				},
 				{
@@ -1119,7 +1108,6 @@ func testV1RtsCasesSortingRoutesQOSAllRoutes(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "event1",
 		Event: map[string]interface{}{
-			utils.Usage:        "2m30s",
 			utils.AccountField: "1004",
 			utils.Category:     "vendor1",
 		},
@@ -1139,10 +1127,8 @@ func testV1RtsCasesSortingRoutesQOSAllRoutes(t *testing.T) {
 		ID:     "LC_SORT",
 		Tenant: "cgrates.org",
 		Event: map[string]interface{}{
-			utils.Usage:        "50s",
 			utils.AccountField: "1003",
 			utils.Destination:  "1007",
-			utils.SetupTime:    "2013-06-01T00:00:00Z",
 		},
 		APIOpts: map[string]interface{}{
 			utils.MetaStartTime: "2013-06-01T05:00:00Z",
@@ -1179,13 +1165,13 @@ func testV1RtsCasesSortingRoutesQOSAllRoutes(t *testing.T) {
 				{
 					RouteID: "vendor2",
 					SortingData: map[string]interface{}{
-						utils.MetaACC:           1.,
-						utils.MetaACD:           150. * 1e9,
-						"*sum#1":                3.,
-						"*distinct#~*req.Usage": 1.,
-						utils.MetaTCC:           3.,
-						utils.MetaTCD:           450. * 1e9,
-						utils.Weight:            0.,
+						utils.MetaACC:             1.,
+						utils.MetaACD:             150. * 1e9,
+						"*sum#1":                  3.,
+						"*distinct#~*opts.*usage": 1.,
+						utils.MetaTCC:             3.,
+						utils.MetaTCD:             450. * 1e9,
+						utils.Weight:              0.,
 					},
 				},
 			},
@@ -1205,10 +1191,8 @@ func testV1RtsCasesSortingRoutesQOSNotFound(t *testing.T) {
 		ID:     "LC_SORT",
 		Tenant: "cgrates.org",
 		Event: map[string]interface{}{
-			utils.Usage:        "50s",
 			utils.AccountField: "1008",
 			utils.Destination:  "1007",
-			utils.SetupTime:    "2013-06-01T00:00:00Z",
 		},
 		APIOpts: map[string]interface{}{
 			utils.MetaStartTime: "2013-06-01T05:00:00Z",
@@ -1375,8 +1359,6 @@ func testV1RtsCasesRoutesProcessStatsForLoadRtsSorting(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "event1",
 		Event: map[string]interface{}{
-			//utils.AccountField: "1004",
-			utils.Usage:    "1m20s",
 			utils.Category: "vendor1",
 		},
 		APIOpts: map[string]interface{}{
@@ -1401,8 +1383,6 @@ func testV1RtsCasesRoutesProcessStatsForLoadRtsSorting(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "event1",
 		Event: map[string]interface{}{
-			//utils.AccountField: "1004",
-			utils.Usage:    "20s",
 			utils.Category: "vendor1",
 		},
 		APIOpts: map[string]interface{}{
@@ -1429,8 +1409,6 @@ func testV1RtsCasesRoutesProcessStatsForLoadRtsSorting(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "event1",
 		Event: map[string]interface{}{
-			//utils.AccountField: "1004",
-			utils.Usage:    "30s",
 			utils.Category: "vendor2",
 		},
 		APIOpts: map[string]interface{}{
@@ -1507,7 +1485,6 @@ func testV1RtsCasesSortRoutesHigherCostV2V3(t *testing.T) {
 		Event: map[string]interface{}{
 			utils.AccountField: "1008",
 			utils.Destination:  "1007",
-			utils.SetupTime:    "2013-06-01T00:00:00Z",
 		},
 		APIOpts: map[string]interface{}{
 			utils.MetaUsage: "3m25s",
@@ -1631,7 +1608,6 @@ func testV1RtsCasesSortRoutesHigherCostV1V3(t *testing.T) {
 		Event: map[string]interface{}{
 			utils.AccountField: "1008",
 			utils.Destination:  "1007",
-			utils.SetupTime:    "2013-06-01T00:00:00Z",
 		},
 		APIOpts: map[string]interface{}{
 			utils.MetaUsage: "3m25s",
@@ -1694,10 +1670,8 @@ func testV1RtsCasesSortRoutesHigherCostAllRoutes(t *testing.T) {
 		ID:     "LC_SORT",
 		Tenant: "cgrates.org",
 		Event: map[string]interface{}{
-			utils.Usage:        "3m25s",
 			utils.AccountField: "1008",
 			utils.Destination:  "1007",
-			utils.SetupTime:    "2013-06-01T00:00:00Z",
 		},
 		APIOpts: map[string]interface{}{
 			utils.MetaUsage: "3m25s",

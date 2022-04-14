@@ -145,9 +145,11 @@ func testV1FltrAddStats(t *testing.T) {
 		ID:     "event1",
 		Event: map[string]interface{}{
 			utils.AccountField: "1001",
-			utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			utils.Usage:        11 * time.Second,
-			utils.Cost:         10.0,
+		},
+		APIOpts: map[string]interface{}{
+			utils.MetaUsage:     11 * time.Second,
+			utils.MetaStartTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			utils.MetaCost:      10.0,
 		},
 	}
 	if err := fltrRpc.Call(context.Background(), utils.StatSv1ProcessEvent, &ev1, &reply); err != nil {
@@ -162,9 +164,11 @@ func testV1FltrAddStats(t *testing.T) {
 		ID:     "event2",
 		Event: map[string]interface{}{
 			utils.AccountField: "1001",
-			utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			utils.Usage:        11 * time.Second,
-			utils.Cost:         10.5,
+		},
+		APIOpts: map[string]interface{}{
+			utils.MetaUsage:     11 * time.Second,
+			utils.MetaStartTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			utils.MetaCost:      10.5,
 		},
 	}
 	if err := fltrRpc.Call(context.Background(), utils.StatSv1ProcessEvent, &ev1, &reply); err != nil {
@@ -179,9 +183,11 @@ func testV1FltrAddStats(t *testing.T) {
 		ID:     "event2",
 		Event: map[string]interface{}{
 			utils.AccountField: "1002",
-			utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			utils.Usage:        5 * time.Second,
-			utils.Cost:         12.5,
+		},
+		APIOpts: map[string]interface{}{
+			utils.MetaUsage:     5 * time.Second,
+			utils.MetaStartTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			utils.MetaCost:      12.5,
 		},
 	}
 	if err := fltrRpc.Call(context.Background(), utils.StatSv1ProcessEvent, &ev1, &reply); err != nil {
@@ -196,9 +202,11 @@ func testV1FltrAddStats(t *testing.T) {
 		ID:     "event2",
 		Event: map[string]interface{}{
 			utils.AccountField: "1002",
-			utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			utils.Usage:        6 * time.Second,
-			utils.Cost:         17.5,
+		},
+		APIOpts: map[string]interface{}{
+			utils.MetaUsage:     6 * time.Second,
+			utils.MetaStartTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			utils.MetaCost:      17.5,
 		},
 	}
 	if err := fltrRpc.Call(context.Background(), utils.StatSv1ProcessEvent, &ev1, &reply); err != nil {
@@ -213,9 +221,11 @@ func testV1FltrAddStats(t *testing.T) {
 		ID:     "event3",
 		Event: map[string]interface{}{
 			utils.AccountField: "1003",
-			utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			utils.Usage:        11 * time.Second,
-			utils.Cost:         12.5,
+		},
+		APIOpts: map[string]interface{}{
+			utils.MetaUsage:     11 * time.Second,
+			utils.MetaStartTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			utils.MetaCost:      12.5,
 		},
 	}
 	if err := fltrRpc.Call(context.Background(), utils.StatSv1ProcessEvent, &ev1, &reply); err != nil {
@@ -229,11 +239,13 @@ func testV1FltrAddStats(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "event3",
 		Event: map[string]interface{}{
-			"Stat":           "Stat1_1",
-			utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			utils.Usage:      11 * time.Second,
-			utils.Cost:       12.5,
-			utils.PDD:        12 * time.Second,
+			"Stat":    "Stat1_1",
+			utils.PDD: 12 * time.Second,
+		},
+		APIOpts: map[string]interface{}{
+			utils.MetaUsage:     11 * time.Second,
+			utils.MetaStartTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			utils.MetaCost:      12.5,
 		},
 	}
 	if err := fltrRpc.Call(context.Background(), utils.StatSv1ProcessEvent, &ev1, &reply); err != nil {
@@ -247,11 +259,13 @@ func testV1FltrAddStats(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "event3",
 		Event: map[string]interface{}{
-			"Stat":           "Stat1_1",
-			utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			utils.Usage:      15 * time.Second,
-			utils.Cost:       15.5,
-			utils.PDD:        15 * time.Second,
+			"Stat":    "Stat1_1",
+			utils.PDD: 15 * time.Second,
+		},
+		APIOpts: map[string]interface{}{
+			utils.MetaUsage:     15 * time.Second,
+			utils.MetaStartTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			utils.MetaCost:      15.5,
 		},
 	}
 	if err := fltrRpc.Call(context.Background(), utils.StatSv1ProcessEvent, &ev1, &reply); err != nil {
@@ -385,7 +399,7 @@ func testV1FltrGetThresholdForEvent2(t *testing.T) {
 		ThresholdProfile: &engine.ThresholdProfile{
 			Tenant:    "cgrates.org",
 			ID:        "TH_Stats1",
-			FilterIDs: []string{"FLTR_TH_Stats1", "*string:~*req.Account:1010", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z|2014-07-14T14:36:00Z"},
+			FilterIDs: []string{"FLTR_TH_Stats1", "*string:~*req.Account:1010", "*ai:~*opts.*startTime:2014-07-14T14:35:00Z|2014-07-14T14:36:00Z"},
 			MaxHits:   -1,
 			MinSleep:  time.Millisecond,
 			Weights: utils.DynamicWeights{

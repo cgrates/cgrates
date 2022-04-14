@@ -156,14 +156,12 @@ func testCDRsProcessCDR(t *testing.T) {
 		Event: map[string]interface{}{
 			utils.OriginID:     "testCDRsProcessCDR1",
 			utils.OriginHost:   "192.168.1.1",
-			utils.Usage:        time.Minute + 11*time.Second,
 			utils.Source:       "testCDRsProcessCDR",
 			utils.RequestType:  utils.MetaRated,
 			utils.Category:     "call",
 			utils.AccountField: "testCDRsProcessCDR",
 			utils.Subject:      "ANY2CNT",
 			utils.Destination:  "+4986517174963",
-			utils.AnswerTime:   time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
 			"field_extr1":      "val_extr1",
 			"fieldextr2":       "valextr2",
 		},
@@ -174,6 +172,7 @@ func testCDRsProcessCDR(t *testing.T) {
 			utils.OptsCDRsExport: false,
 			utils.OptsAccountS:   false,
 			utils.MetaUsage:      time.Minute + 11*time.Second,
+			utils.MetaStartTime:  time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
 		},
 	}
 
@@ -209,14 +208,12 @@ func testCDRsProcessCDR2(t *testing.T) {
 		Event: map[string]interface{}{
 			utils.OriginID:     "testCDRsProcessCDR2",
 			utils.OriginHost:   "192.168.1.1",
-			utils.Usage:        time.Minute + 11*time.Second,
 			utils.Source:       "testCDRsProcessCDR2",
 			utils.RequestType:  utils.MetaRated,
 			utils.Category:     "call",
 			utils.AccountField: "testCDRsProcessCDR2",
 			utils.Subject:      "ANY2CNT",
 			utils.Destination:  "+4986517174963",
-			utils.AnswerTime:   time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
 			"field_extr1":      "val_extr1",
 			"fieldextr2":       "valextr2",
 		},
@@ -227,6 +224,7 @@ func testCDRsProcessCDR2(t *testing.T) {
 			utils.OptsCDRsExport: false,
 			utils.OptsAccountS:   false,
 			utils.MetaUsage:      time.Minute + 11*time.Second,
+			utils.MetaStartTime:  time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
 		},
 	}
 
@@ -263,14 +261,12 @@ func testCDRsProcessCDR3(t *testing.T) {
 		Event: map[string]interface{}{
 			utils.OriginID:     "testCDRsProcessCDR3",
 			utils.OriginHost:   "192.168.1.1",
-			utils.Usage:        time.Minute + 11*time.Second,
 			utils.Source:       "testCDRsProcessCDR3",
 			utils.RequestType:  utils.MetaRated,
 			utils.Category:     "call",
 			utils.AccountField: "testCDRsProcessCDR3",
 			utils.Subject:      "ANY2CNT",
 			utils.Destination:  "+4986517174963",
-			utils.AnswerTime:   time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
 			"field_extr1":      "val_extr1",
 			"fieldextr2":       "valextr2",
 		},
@@ -281,6 +277,7 @@ func testCDRsProcessCDR3(t *testing.T) {
 			utils.OptsCDRsExport: false,
 			utils.OptsAccountS:   false,
 			utils.MetaUsage:      time.Minute + 11*time.Second,
+			utils.MetaStartTime:  time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
 		},
 	}
 
@@ -316,7 +313,7 @@ func testCDRsSetStats(t *testing.T) {
 			FilterIDs: []string{"*string:~*req.OriginID:testCDRsProcessCDR4"},
 			// QueueLength: 10,
 			Metrics: []*engine.MetricWithFilters{{
-				MetricID: "*sum#~*req.Usage",
+				MetricID: "*sum#~*opts.*usage",
 			}},
 			ThresholdIDs: []string{utils.MetaNone},
 			Blocker:      true,
@@ -421,14 +418,12 @@ func testCDRsProcessCDR4(t *testing.T) {
 		Event: map[string]interface{}{
 			utils.OriginID:     "testCDRsProcessCDR4",
 			utils.OriginHost:   "192.168.1.1",
-			utils.Usage:        time.Minute + 11*time.Second,
 			utils.Source:       "testCDRsProcessCDR4",
 			utils.RequestType:  utils.MetaRated,
 			utils.Category:     "call",
 			utils.AccountField: "testCDRsProcessCDR4",
 			utils.Subject:      "ANY2CNT2",
 			utils.Destination:  "+4986517174963",
-			utils.AnswerTime:   time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
 			"field_extr1":      "val_extr1",
 			"fieldextr2":       "valextr2",
 		},
@@ -441,6 +436,7 @@ func testCDRsProcessCDR4(t *testing.T) {
 			utils.OptsStatS:      false,
 			utils.OptsThresholdS: false,
 			utils.MetaUsage:      time.Minute + 11*time.Second,
+			utils.MetaStartTime:  time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
 		},
 	}
 
@@ -456,7 +452,7 @@ func testCDRsGetStats1(t *testing.T) {
 	expectedIDs := []string{"STS_ProcessCDR"}
 	var metrics map[string]string
 	expectedMetrics := map[string]string{
-		utils.MetaSum + utils.HashtagSep + utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Usage: utils.NotAvailable,
+		utils.MetaSum + utils.HashtagSep + utils.DynamicDataPrefix + utils.MetaOpts + utils.NestingSep + utils.MetaUsage: utils.NotAvailable,
 	}
 	if err := cdrsRpc.Call(context.Background(), utils.StatSv1GetQueueStringMetrics,
 		&utils.TenantIDWithAPIOpts{
@@ -494,14 +490,12 @@ func testCDRsProcessCDR5(t *testing.T) {
 		Event: map[string]interface{}{
 			utils.OriginID:     "testCDRsProcessCDR4",
 			utils.OriginHost:   "192.168.1.2",
-			utils.Usage:        time.Minute + 11*time.Second,
 			utils.Source:       "testCDRsProcessCDR5",
 			utils.RequestType:  utils.MetaRated,
 			utils.Category:     "call",
 			utils.AccountField: "testCDRsProcessCDR5",
 			utils.Subject:      "ANY2CNT",
 			utils.Destination:  "+4986517174963",
-			utils.AnswerTime:   time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
 			"field_extr1":      "val_extr1",
 			"fieldextr2":       "valextr2",
 		},
@@ -514,6 +508,7 @@ func testCDRsProcessCDR5(t *testing.T) {
 			utils.OptsStatS:      true,
 			utils.OptsThresholdS: true,
 			utils.MetaUsage:      time.Minute + 11*time.Second,
+			utils.MetaStartTime:  time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
 		},
 	}
 
@@ -529,7 +524,7 @@ func testCDRsGetStats2(t *testing.T) {
 	expectedIDs := []string{"STS_ProcessCDR"}
 	var metrics map[string]string
 	expectedMetrics := map[string]string{
-		utils.MetaSum + utils.HashtagSep + utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Usage: "142000000000",
+		utils.MetaSum + utils.HashtagSep + utils.DynamicDataPrefix + utils.MetaOpts + utils.NestingSep + utils.MetaUsage: "142000000000",
 	}
 	if err := cdrsRpc.Call(context.Background(), utils.StatSv1GetQueueStringMetrics,
 		&utils.TenantIDWithAPIOpts{

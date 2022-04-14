@@ -18,14 +18,11 @@
 },
 
 
-"rals": {
+"rates": {
 	"enabled": true,
 	"thresholds_conns": ["*localhost"]
 },
 
-"schedulers": {
-	"enabled": true				
-},
 
 "filters": {								
 	"stats_conns": ["*localhost"],

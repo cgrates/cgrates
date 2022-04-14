@@ -186,7 +186,7 @@ func testLdro2nRtCheckData(t *testing.T) {
 	expRatePrf := utils.RateProfile{
 		Tenant:    "cgrates.org",
 		ID:        "call*any",
-		FilterIDs: []string{"*ai:~*req.AnswerTime:2014-01-14T00:00:00Z", "*string:~*req.Category:call"},
+		FilterIDs: []string{"*ai:~*opts.*startTime:2014-01-14T00:00:00Z", "*string:~*req.Category:call"},
 		MinCost:   utils.NewDecimal(0, 0),
 		MaxCost:   utils.NewDecimal(0, 0),
 		Rates: map[string]*utils.Rate{

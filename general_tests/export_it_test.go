@@ -221,7 +221,7 @@ func testExpVerifyThresholds(t *testing.T) {
 		ThresholdProfile: &engine.ThresholdProfile{
 			Tenant:    "cgrates.org",
 			ID:        "THD_ACNT_1001",
-			FilterIDs: []string{"FLTR_ACCOUNT_1001", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z"},
+			FilterIDs: []string{"FLTR_ACCOUNT_1001", "*ai:~*opts.*startTime:2014-07-29T15:00:00Z"},
 			MaxHits:   -1,
 			MinHits:   0,
 			MinSleep:  0,
@@ -275,7 +275,7 @@ func testExpVerifyStats(t *testing.T) {
 	sPrf := &engine.StatQueueProfile{
 		Tenant:      "cgrates.org",
 		ID:          "Stat_1",
-		FilterIDs:   []string{"FLTR_STAT_1", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z"},
+		FilterIDs:   []string{"FLTR_STAT_1", "*ai:~*opts.*startTime:2014-07-29T15:00:00Z"},
 		QueueLength: 100,
 		TTL:         10 * time.Second,
 		Metrics: []*engine.MetricWithFilters{
