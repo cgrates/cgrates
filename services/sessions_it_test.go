@@ -75,10 +75,18 @@ func TestSessionSReload1(t *testing.T) {
 			}
 			*rply = []*engine.ChrgSProcessEventReply{
 				{
-					ChargerSProfile:    "raw",
-					AttributeSProfiles: []string{utils.MetaNone},
-					AlteredFields:      []string{"~*req.RunID"},
-					CGREvent:           args.(*utils.CGREvent),
+					ChargerSProfile: "raw",
+					AlteredFields: []*engine.FieldsAltered{
+						{
+							MatchedProfileID: utils.MetaDefault,
+							Fields:           []string{utils.MetaOptsRunID, utils.MetaOpts + utils.NestingSep + utils.MetaChargeID, utils.MetaOpts + utils.NestingSep + utils.MetaSubsys},
+						},
+						{
+							MatchedProfileID: utils.MetaNone,
+							Fields:           []string{"~*req.RunID"},
+						},
+					},
+					CGREvent: args.(*utils.CGREvent),
 				},
 			}
 			return nil

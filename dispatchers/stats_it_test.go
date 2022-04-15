@@ -109,16 +109,14 @@ func testDspStsGetStatFailover(t *testing.T) {
 		Event: map[string]interface{}{
 			utils.EventName:    "Event1",
 			utils.AccountField: "1001",
-			utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			utils.Usage:        135 * time.Second,
-			utils.Cost:         123.0,
-
-			utils.Destination: "1002",
+			utils.Destination:  "1002",
 		},
-
 		APIOpts: map[string]interface{}{
-			utils.OptsAPIKey: "stat12345",
-			utils.MetaRunID:  utils.MetaDefault,
+			utils.MetaStartTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			utils.MetaUsage:     135 * time.Second,
+			utils.MetaCost:      123.0,
+			utils.OptsAPIKey:    "stat12345",
+			utils.MetaRunID:     utils.MetaDefault,
 		},
 	}
 	if err := dispEngine.RPC.Call(utils.StatSv1ProcessEvent, args, &reply); err != nil {

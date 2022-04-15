@@ -131,7 +131,6 @@ func testV1RtStatsProcessStatsValid(t *testing.T) {
 			utils.AccountField: "1010",
 			utils.Destination:  "1021",
 			utils.Category:     "call",
-			utils.Usage:        "1m20s",
 		},
 		APIOpts: map[string]interface{}{
 			utils.MetaCost:      1.8,

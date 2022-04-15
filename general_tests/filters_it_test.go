@@ -1008,10 +1008,17 @@ func testV1FltrChargerSuffix(t *testing.T) {
 
 	processedEv := []*engine.ChrgSProcessEventReply{
 		{
-			ChargerSProfile:    "IntraCharger",
-			AttributeSProfiles: []string{"*constant:*req.Subject:intraState"},
-			AlteredFields:      []string{"*opts.*runID", "*opts.*chargeID", "*req.Subject"},
-
+			ChargerSProfile: "IntraCharger",
+			AlteredFields: []*engine.FieldsAltered{
+				{
+					MatchedProfileID: utils.MetaDefault,
+					Fields:           []string{utils.MetaOptsRunID, utils.MetaOpts + utils.NestingSep + utils.MetaChargeID, utils.MetaOpts + utils.NestingSep + utils.MetaSubsys},
+				},
+				{
+					MatchedProfileID: "*constant:*req.Subject:intraState",
+					Fields:           []string{"*req.Subject"},
+				},
+			},
 			CGREvent: &utils.CGREvent{ // matching Charger1
 				Tenant: "cgrates.org",
 				ID:     "event1",
@@ -1023,7 +1030,7 @@ func testV1FltrChargerSuffix(t *testing.T) {
 				APIOpts: map[string]interface{}{
 					utils.MetaRunID:                "Intra",
 					utils.OptsAttributesProfileIDs: []string{"*constant:*req.Subject:intraState"},
-					utils.Subsys:                   utils.MetaChargers,
+					utils.MetaSubsys:               utils.MetaChargers,
 					utils.OptsContext:              "*chargers",
 				},
 			},
@@ -1050,10 +1057,17 @@ func testV1FltrChargerSuffix(t *testing.T) {
 
 	processedEv = []*engine.ChrgSProcessEventReply{
 		{
-			ChargerSProfile:    "InterCharger",
-			AttributeSProfiles: []string{"*constant:*req.Subject:interState"},
-			AlteredFields:      []string{"*opts.*runID", "*opts.*chargeID", "*req.Subject"},
-
+			ChargerSProfile: "InterCharger",
+			AlteredFields: []*engine.FieldsAltered{
+				{
+					MatchedProfileID: utils.MetaDefault,
+					Fields:           []string{utils.MetaOptsRunID, utils.MetaOpts + utils.NestingSep + utils.MetaChargeID, utils.MetaOpts + utils.NestingSep + utils.MetaSubsys},
+				},
+				{
+					MatchedProfileID: "*constant:*req.Subject:interState",
+					Fields:           []string{"*req.Subject"},
+				},
+			},
 			CGREvent: &utils.CGREvent{ // matching Charger1
 				Tenant: "cgrates.org",
 				ID:     "event1",
@@ -1063,7 +1077,7 @@ func testV1FltrChargerSuffix(t *testing.T) {
 					utils.Destination:  "999",
 				},
 				APIOpts: map[string]interface{}{
-					utils.Subsys:                   utils.MetaChargers,
+					utils.MetaSubsys:               utils.MetaChargers,
 					utils.MetaRunID:                "Inter",
 					utils.OptsContext:              "*chargers",
 					utils.OptsAttributesProfileIDs: []string{"*constant:*req.Subject:interState"},

@@ -549,9 +549,9 @@ func testActionsStatProcessEvent(t *testing.T) {
 		ID:     "StatsEventTest",
 		Event: map[string]interface{}{
 			utils.AccountField: "1001",
-			utils.Usage:        30 * time.Second,
 		},
 		APIOpts: map[string]interface{}{
+			utils.MetaUsage:           30 * time.Second,
 			utils.OptsStatsProfileIDs: []string{"SQ_ID"},
 		},
 	}

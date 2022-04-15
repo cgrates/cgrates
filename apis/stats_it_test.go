@@ -816,14 +816,14 @@ func testStatsProcessEvent(t *testing.T) {
 		ID:     "StatsEventTest",
 		Event: map[string]interface{}{
 			utils.AccountField: "1001",
-			utils.Usage:        30 * time.Second,
 		},
 		APIOpts: map[string]interface{}{
+			utils.MetaUsage:           30 * time.Second,
 			utils.OptsStatsProfileIDs: []string{"SQ_3"},
 		},
 	}
 	expected := []string{"SQ_3"}
-	expBody := `{"*opts":{"*actProfileIDs":["actPrfID"],"*eventType":"StatUpdate","*statsProfileIDs":["SQ_3"],"*thdProfileIDs":["THD_ID"]},"*req":{"*tcd":30000000000,"EventType":"StatUpdate","StatID":"SQ_3"}}`
+	expBody := `{"*opts":{"*actProfileIDs":["actPrfID"],"*eventType":"StatUpdate","*statsProfileIDs":["SQ_3"],"*thdProfileIDs":["THD_ID"],"*usage":30000000000},"*req":{"*tcd":30000000000,"EventType":"StatUpdate","StatID":"SQ_3"}}`
 	var reply []string
 	if err := sqRPC.Call(context.Background(), utils.StatSv1ProcessEvent,
 		args, &reply); err != nil {

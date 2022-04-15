@@ -349,9 +349,11 @@ func testAttributeSProcessEventWithStat(t *testing.T) {
 		ID:     "event2",
 		Event: map[string]interface{}{
 			utils.AccountField: "1001",
-			utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			utils.Usage:        11 * time.Second,
-			utils.Cost:         10.5,
+		},
+		APIOpts: map[string]interface{}{
+			utils.MetaStartTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			utils.MetaUsage:     11 * time.Second,
+			utils.MetaCost:      10.5,
 		},
 	}
 	if err := attrRPC.Call(context.Background(), utils.StatSv1ProcessEvent, &ev1, &reply); err != nil {

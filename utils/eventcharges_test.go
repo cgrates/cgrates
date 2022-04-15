@@ -307,7 +307,7 @@ func TestEventChargesEquals(t *testing.T) {
 					},
 				},
 				Opts: map[string]interface{}{
-					Subsys: MetaSessionS,
+					MetaSubsys: MetaSessionS,
 				},
 				Balances: map[string]*Balance{
 					"bal1": {
@@ -382,7 +382,7 @@ func TestEventChargesEquals(t *testing.T) {
 				},
 				FilterIDs: []string{"*ai:~*req.AnswerTime:2020-10-10T10:00:00Z"},
 				Opts: map[string]interface{}{
-					Subsys: MetaSessionS,
+					MetaSubsys: MetaSessionS,
 				},
 				ThresholdIDs: []string{},
 			},
@@ -484,7 +484,7 @@ func TestEventChargesEquals(t *testing.T) {
 					},
 				},
 				Opts: map[string]interface{}{
-					Subsys: MetaSessionS,
+					MetaSubsys: MetaSessionS,
 				},
 				Balances: map[string]*Balance{
 					"bal1": {
@@ -559,7 +559,7 @@ func TestEventChargesEquals(t *testing.T) {
 				},
 				FilterIDs: []string{"*ai:~*req.AnswerTime:2020-10-10T10:00:00Z"},
 				Opts: map[string]interface{}{
-					Subsys: MetaSessionS,
+					MetaSubsys: MetaSessionS,
 				},
 				ThresholdIDs: []string{},
 			},
@@ -695,7 +695,7 @@ func TestEventChargerMerge(t *testing.T) {
 					},
 				},
 				Opts: map[string]interface{}{
-					Subsys: MetaSessionS,
+					MetaSubsys: MetaSessionS,
 				},
 				Balances: map[string]*Balance{
 					"bal1": {
@@ -770,7 +770,7 @@ func TestEventChargerMerge(t *testing.T) {
 				},
 				FilterIDs: []string{"*ai:~*req.AnswerTime:2020-10-10T10:00:00Z"},
 				Opts: map[string]interface{}{
-					Subsys: MetaSessionS,
+					MetaSubsys: MetaSessionS,
 				},
 				ThresholdIDs: []string{},
 			},
@@ -820,7 +820,7 @@ func TestEventChargerMerge(t *testing.T) {
 				},
 				FilterIDs: []string{"*ai:~*req.AnswerTime:2020-10-10T10:00:00Z"},
 				Opts: map[string]interface{}{
-					Subsys: MetaSessionS,
+					MetaSubsys: MetaSessionS,
 				},
 				ThresholdIDs: []string{},
 			},
@@ -952,7 +952,7 @@ func TestEventChargerMerge(t *testing.T) {
 					},
 				},
 				Opts: map[string]interface{}{
-					Subsys: MetaSessionS,
+					MetaSubsys: MetaSessionS,
 				},
 				Balances: map[string]*Balance{
 					"bal1": {
@@ -1027,7 +1027,7 @@ func TestEventChargerMerge(t *testing.T) {
 				},
 				FilterIDs: []string{"*ai:~*req.AnswerTime:2020-10-10T10:00:00Z"},
 				Opts: map[string]interface{}{
-					Subsys: MetaSessionS,
+					MetaSubsys: MetaSessionS,
 				},
 				ThresholdIDs: []string{},
 			},
@@ -1041,7 +1041,7 @@ func TestEventChargerMerge(t *testing.T) {
 				},
 				FilterIDs: []string{"*ai:~*req.AnswerTime:2020-10-10T10:00:00Z"},
 				Opts: map[string]interface{}{
-					Subsys: MetaSessionS,
+					MetaSubsys: MetaSessionS,
 				},
 				ThresholdIDs: []string{},
 			},
@@ -1098,7 +1098,7 @@ func TestEventChargesAppendChargeEntry(t *testing.T) {
 				},
 				FilterIDs: []string{"*ai:~*req.AnswerTime:2020-10-10T10:00:00Z"},
 				Opts: map[string]interface{}{
-					Subsys: MetaSessionS,
+					MetaSubsys: MetaSessionS,
 				},
 				ThresholdIDs: []string{},
 			},
@@ -1185,7 +1185,7 @@ func TestEventChargesAppendChargeEntryNonEmptyCharges(t *testing.T) {
 				},
 				FilterIDs: []string{"*ai:~*req.AnswerTime:2020-10-10T10:00:00Z"},
 				Opts: map[string]interface{}{
-					Subsys: MetaSessionS,
+					MetaSubsys: MetaSessionS,
 				},
 				ThresholdIDs: []string{},
 			},

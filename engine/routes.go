@@ -273,7 +273,7 @@ func (rpS *RouteS) V1GetRoutes(ctx *context.Context, args *utils.CGREvent, reply
 		args.APIOpts = make(map[string]interface{})
 	}
 	if len(rpS.cfg.RouteSCfg().AttributeSConns) != 0 {
-		args.APIOpts[utils.Subsys] = utils.MetaRoutes
+		args.APIOpts[utils.MetaSubsys] = utils.MetaRoutes
 		var context string
 		if context, err = GetStringOpts(ctx, tnt, args, rpS.fltrS, rpS.cfg.RouteSCfg().Opts.Context,
 			config.RoutesContextDftOpt, utils.OptsContext); err != nil {

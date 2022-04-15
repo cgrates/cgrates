@@ -3016,7 +3016,7 @@ func (sS *SessionS) processAttributes(ctx *context.Context, cgrEv *utils.CGREven
 	if cgrEv.APIOpts == nil {
 		cgrEv.APIOpts = make(engine.MapEvent)
 	}
-	cgrEv.APIOpts[utils.Subsys] = utils.MetaSessionS
+	cgrEv.APIOpts[utils.MetaSubsys] = utils.MetaSessionS
 	cgrEv.APIOpts[utils.OptsContext] = utils.FirstNonEmpty(
 		utils.IfaceAsString(cgrEv.APIOpts[utils.OptsContext]),
 		utils.MetaSessionS)

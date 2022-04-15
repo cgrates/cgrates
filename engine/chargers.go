@@ -94,10 +94,9 @@ func (cS *ChargerS) matchingChargerProfilesForEvent(ctx *context.Context, tnt st
 
 // ChrgSProcessEventReply is the reply to processEvent
 type ChrgSProcessEventReply struct {
-	ChargerSProfile    string
-	AttributeSProfiles []string
-	AlteredFields      []string
-	CGREvent           *utils.CGREvent
+	ChargerSProfile string
+	AlteredFields   []*FieldsAltered
+	CGREvent        *utils.CGREvent
 }
 
 func (cS *ChargerS) processEvent(ctx *context.Context, tnt string, cgrEv *utils.CGREvent) (rply []*ChrgSProcessEventReply, err error) {
@@ -111,12 +110,17 @@ func (cS *ChargerS) processEvent(ctx *context.Context, tnt string, cgrEv *utils.
 		clonedEv := cgrEv.Clone()
 		clonedEv.Tenant = tnt
 		clonedEv.APIOpts[utils.MetaRunID] = cP.RunID
-		clonedEv.APIOpts[utils.Subsys] = utils.MetaChargers
+		clonedEv.APIOpts[utils.MetaSubsys] = utils.MetaChargers
 		clonedEv.APIOpts[utils.MetaChargeID] = utils.Sha1(utils.IfaceAsString(clonedEv.APIOpts[utils.MetaOriginID]), cP.RunID)
 		rply[i] = &ChrgSProcessEventReply{
 			ChargerSProfile: cP.ID,
 			CGREvent:        clonedEv,
-			AlteredFields:   []string{utils.MetaOptsRunID, utils.MetaOpts + utils.NestingSep + utils.MetaChargeID},
+			AlteredFields: []*FieldsAltered{
+				{
+					MatchedProfileID: utils.MetaDefault,
+					Fields:           []string{utils.MetaOptsRunID, utils.MetaOpts + utils.NestingSep + utils.MetaChargeID, utils.MetaOpts + utils.NestingSep + utils.MetaSubsys},
+				},
+			},
 		}
 		if len(cP.AttributeIDs) == 1 && cP.AttributeIDs[0] == utils.MetaNone {
 			continue // AttributeS disabled
@@ -133,13 +137,9 @@ func (cS *ChargerS) processEvent(ctx *context.Context, tnt string, cgrEv *utils.
 			}
 			err = nil
 		}
-		for idx, alteredPrf := range evReply.AlteredFields {
-			rply[i].AttributeSProfiles = make([]string, len(evReply.AlteredFields))
-			rply[i].AttributeSProfiles[idx] = alteredPrf.MatchedProfileID
-			if len(alteredPrf.Fields) != 0 {
-				rply[i].AlteredFields = append(rply[i].AlteredFields, alteredPrf.Fields...)
-				rply[i].CGREvent = evReply.CGREvent
-			}
+		if evReply.AlteredFields != nil {
+			rply[i].AlteredFields = append(rply[i].AlteredFields, evReply.AlteredFields...)
+			rply[i].CGREvent = evReply.CGREvent
 		}
 	}
 	return

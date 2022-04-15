@@ -71,7 +71,7 @@ func TestChargersmatchingChargerProfilesForEventErrPass(t *testing.T) {
 			utils.Weight:     "10.0",
 		},
 		APIOpts: map[string]interface{}{
-			utils.Subsys: utils.MetaChargers,
+			utils.MetaSubsys: utils.MetaChargers,
 		},
 	}
 
@@ -150,9 +150,17 @@ func TestChargersprocessEventCallNilErr(t *testing.T) {
 
 	exp := []*ChrgSProcessEventReply{
 		{
-			ChargerSProfile:    "1001",
-			AttributeSProfiles: []string{"attr1"},
-			AlteredFields:      []string{utils.MetaOptsRunID, utils.MetaOpts + utils.NestingSep + utils.MetaChargeID, utils.MetaReq + utils.NestingSep + utils.AccountField},
+			ChargerSProfile: "1001",
+			AlteredFields: []*FieldsAltered{
+				{
+					MatchedProfileID: utils.MetaDefault,
+					Fields:           []string{utils.MetaOptsRunID, utils.MetaOpts + utils.NestingSep + utils.MetaChargeID, utils.MetaOpts + utils.NestingSep + utils.MetaSubsys},
+				},
+				{
+					MatchedProfileID: "attr1",
+					Fields:           []string{utils.MetaReq + utils.NestingSep + utils.AccountField},
+				},
+			},
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "cgrEvID",
@@ -163,7 +171,6 @@ func TestChargersprocessEventCallNilErr(t *testing.T) {
 		},
 	}
 	rcv, err := cS.processEvent(context.Background(), cgrEv.Tenant, cgrEv)
-
 	if err != nil {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
 	}
@@ -228,7 +235,12 @@ func TestChargersprocessEventCallErr(t *testing.T) {
 	exp := []*ChrgSProcessEventReply{
 		{
 			ChargerSProfile: "1001",
-			AlteredFields:   []string{utils.MetaOptsRunID, utils.MetaOpts + utils.NestingSep + utils.MetaChargeID},
+			AlteredFields: []*FieldsAltered{
+				{
+					MatchedProfileID: utils.MetaDefault,
+					Fields:           []string{utils.MetaOptsRunID, utils.MetaOpts + utils.NestingSep + utils.MetaChargeID, utils.MetaOpts + utils.NestingSep + utils.MetaSubsys},
+				},
+			},
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "cgrEvID",
@@ -236,23 +248,25 @@ func TestChargersprocessEventCallErr(t *testing.T) {
 					utils.AccountField: "1001",
 				},
 				APIOpts: map[string]interface{}{
-					utils.MetaRunID:                utils.MetaDefault,
-					utils.OptsAttributesProfileIDs: []string(nil),
-					utils.Subsys:                   utils.MetaChargers,
-					utils.OptsContext:              utils.MetaChargers,
+					utils.OptsAttributesProfileIDs: []string{},
+					utils.OptsContext:              "*chargers",
+					utils.MetaRunID:                "*default",
+					utils.MetaSubsys:               "*chargers",
 				},
 			},
 		},
 	}
 	rcv, err := cS.processEvent(context.Background(), cgrEv.Tenant, cgrEv)
-
 	if err != nil {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
 	}
 	exp[0].CGREvent.APIOpts[utils.MetaChargeID] = rcv[0].CGREvent.APIOpts[utils.MetaChargeID]
+	exp[0].CGREvent.APIOpts[utils.OptsAttributesProfileIDs] = rcv[0].CGREvent.APIOpts[utils.OptsAttributesProfileIDs]
 	if !reflect.DeepEqual(exp, rcv) {
-		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>",
+		t.Errorf("\nexpected: <%v>, \nreceived: <%v>",
 			utils.ToJSON(exp), utils.ToJSON(rcv))
+		t.Errorf("\nexpected: <%T>, \nreceived: <%T>",
+			exp[0].CGREvent.APIOpts[utils.OptsAttributesProfileIDs], rcv[0].CGREvent.APIOpts[utils.OptsAttributesProfileIDs])
 	}
 
 	if err := dm.DataDB().Flush(""); err != nil {
@@ -441,7 +455,13 @@ func TestChargersV1ProcessEvent(t *testing.T) {
 						Tenant: "cgrates.org",
 						ID:     "cgrEvID",
 						Event: map[string]interface{}{
-							utils.AccountField: "1001",
+							utils.AccountField: "1007",
+						},
+						APIOpts: map[string]interface{}{
+							utils.OptsAttributesProfileIDs: []string{},
+							utils.OptsContext:              "*chargers",
+							utils.MetaRunID:                "*default",
+							utils.MetaSubsys:               "*chargers",
 						},
 					},
 				}
@@ -469,23 +489,38 @@ func TestChargersV1ProcessEvent(t *testing.T) {
 			utils.AccountField: "1001",
 		},
 	}
-	reply := &[]*ChrgSProcessEventReply{}
+	reply := []*ChrgSProcessEventReply{}
 
-	exp := &[]*ChrgSProcessEventReply{
+	exp := []*ChrgSProcessEventReply{
 		{
-			ChargerSProfile:    "1001",
-			AttributeSProfiles: []string{"attr2"},
-			AlteredFields:      []string{utils.MetaOptsRunID, utils.MetaOpts + utils.NestingSep + utils.MetaChargeID, utils.MetaReq + utils.NestingSep + utils.AccountField},
+			ChargerSProfile: "1001",
+			AlteredFields: []*FieldsAltered{
+				{
+					MatchedProfileID: utils.MetaDefault,
+					Fields:           []string{utils.MetaOptsRunID, utils.MetaOpts + utils.NestingSep + utils.MetaChargeID, utils.MetaOpts + utils.NestingSep + utils.MetaSubsys},
+				},
+				{
+					MatchedProfileID: "attr2",
+					Fields:           []string{utils.MetaReq + utils.NestingSep + utils.AccountField},
+				},
+			},
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "cgrEvID",
 				Event: map[string]interface{}{
-					utils.AccountField: "1001",
+					utils.AccountField: "1007",
+				},
+				APIOpts: map[string]interface{}{
+					utils.OptsAttributesProfileIDs: []string{},
+					utils.OptsContext:              "*chargers",
+					utils.MetaRunID:                "*default",
+					utils.MetaSubsys:               "*chargers",
 				},
 			},
 		},
 	}
-	err := cS.V1ProcessEvent(context.Background(), args, reply)
+	//exp[0].CGREvent.APIOpts[utils.MetaChargeID] = reply[0].CGREvent.APIOpts[utils.MetaChargeID]
+	err := cS.V1ProcessEvent(context.Background(), args, &reply)
 
 	if err != nil {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
