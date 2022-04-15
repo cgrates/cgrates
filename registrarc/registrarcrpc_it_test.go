@@ -154,7 +154,12 @@ func testRPCChargerSWithAttr(t *testing.T) {
 	processedEv := []*engine.ChrgSProcessEventReply{
 		{
 			ChargerSProfile: "CustomerCharges",
-			AlteredFields:   []string{"*opts.*runID", "*opts.*chargeID"},
+			AlteredFields: []*engine.FieldsAltered{
+				{
+					MatchedProfileID: utils.MetaDefault,
+					Fields:           []string{utils.MetaOptsRunID, utils.MetaOpts + utils.NestingSep + utils.MetaChargeID, utils.MetaOpts + utils.NestingSep + utils.MetaSubsys},
+				},
+			},
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
 				Event: map[string]interface{}{
@@ -168,9 +173,17 @@ func testRPCChargerSWithAttr(t *testing.T) {
 				},
 			},
 		}, {
-			ChargerSProfile:    "Raw",
-			AttributeSProfiles: []string{"*constant:*req.RequestType:*none"},
-			AlteredFields:      []string{"*opts.*runID", "*opts.*chargeID", "*req.RequestType"},
+			ChargerSProfile: "Raw",
+			AlteredFields: []*engine.FieldsAltered{
+				{
+					MatchedProfileID: utils.MetaDefault,
+					Fields:           []string{utils.MetaOptsRunID, utils.MetaOpts + utils.NestingSep + utils.MetaChargeID, utils.MetaOpts + utils.NestingSep + utils.MetaSubsys},
+				},
+				{
+					MatchedProfileID: "*constant:*req.RequestType:*none",
+					Fields:           []string{"*req.RequestType"},
+				},
+			},
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
 				Event: map[string]interface{}{
@@ -187,9 +200,16 @@ func testRPCChargerSWithAttr(t *testing.T) {
 				},
 			},
 		}, {
-			ChargerSProfile:    "SupplierCharges",
-			AttributeSProfiles: []string{"cgrates.org:ATTR_SUPPLIER1"},
-			AlteredFields:      []string{"*opts.*runID", "*opts.*chargeID", "*req.Subject"},
+			ChargerSProfile: "SupplierCharges", AlteredFields: []*engine.FieldsAltered{
+				{
+					MatchedProfileID: utils.MetaDefault,
+					Fields:           []string{utils.MetaOptsRunID, utils.MetaOpts + utils.NestingSep + utils.MetaChargeID, utils.MetaOpts + utils.NestingSep + utils.MetaSubsys},
+				},
+				{
+					MatchedProfileID: "cgrates.org:ATTR_SUPPLIER1",
+					Fields:           []string{"*req.Subject"},
+				},
+			},
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
 				Event: map[string]interface{}{

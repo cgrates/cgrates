@@ -47,7 +47,7 @@ func TestTPReaderCallCacheNoCaching(t *testing.T) {
 		utils.CacheResources: {},
 	}
 	opts := map[string]interface{}{
-		utils.Subsys: utils.MetaChargers,
+		utils.MetaSubsys: utils.MetaChargers,
 	}
 	ctx := context.Background()
 
@@ -75,7 +75,7 @@ func TestTPReaderCallCacheReloadCacheFirstCallErr(t *testing.T) {
 			utils.CacheSv1ReloadCache: func(_ *context.Context, args, reply interface{}) error {
 				expArgs := &utils.AttrReloadCacheWithAPIOpts{
 					APIOpts: map[string]interface{}{
-						utils.Subsys: utils.MetaChargers,
+						utils.MetaSubsys: utils.MetaChargers,
 					},
 					FilterIDs: []string{"cgrates.org:FLTR_ID1", "cgrates.org:FLTR_ID2"},
 					Tenant:    "cgrates.org",
@@ -101,7 +101,7 @@ func TestTPReaderCallCacheReloadCacheFirstCallErr(t *testing.T) {
 	}
 	cacheIDs := []string{}
 	opts := map[string]interface{}{
-		utils.Subsys: utils.MetaChargers,
+		utils.MetaSubsys: utils.MetaChargers,
 	}
 	ctx := context.Background()
 
@@ -144,7 +144,7 @@ func TestTPReaderCallCacheReloadCacheSecondCallErr(t *testing.T) {
 			utils.CacheSv1Clear: func(_ *context.Context, args, reply interface{}) error {
 				expArgs := &utils.AttrCacheIDsWithAPIOpts{
 					APIOpts: map[string]interface{}{
-						utils.Subsys: utils.MetaChargers,
+						utils.MetaSubsys: utils.MetaChargers,
 					},
 					CacheIDs: []string{"cacheID"},
 					Tenant:   "cgrates.org",
@@ -170,7 +170,7 @@ func TestTPReaderCallCacheReloadCacheSecondCallErr(t *testing.T) {
 	}
 	cacheIDs := []string{"cacheID"}
 	opts := map[string]interface{}{
-		utils.Subsys: utils.MetaChargers,
+		utils.MetaSubsys: utils.MetaChargers,
 	}
 	ctx := context.Background()
 
@@ -222,7 +222,7 @@ func TestTPReaderCallCacheLoadCache(t *testing.T) {
 			utils.CacheSv1LoadCache: func(_ *context.Context, args, reply interface{}) error {
 				expArgs := &utils.AttrReloadCacheWithAPIOpts{
 					APIOpts: map[string]interface{}{
-						utils.Subsys: utils.MetaChargers,
+						utils.MetaSubsys: utils.MetaChargers,
 					},
 					FilterIDs: []string{"cgrates.org:FLTR_ID1", "cgrates.org:FLTR_ID2"},
 					Tenant:    "cgrates.org",
@@ -239,7 +239,7 @@ func TestTPReaderCallCacheLoadCache(t *testing.T) {
 			utils.CacheSv1Clear: func(_ *context.Context, args, reply interface{}) error {
 				expArgs := &utils.AttrCacheIDsWithAPIOpts{
 					APIOpts: map[string]interface{}{
-						utils.Subsys: utils.MetaChargers,
+						utils.MetaSubsys: utils.MetaChargers,
 					},
 					CacheIDs: []string{"cacheID"},
 					Tenant:   "cgrates.org",
@@ -265,7 +265,7 @@ func TestTPReaderCallCacheLoadCache(t *testing.T) {
 	}
 	cacheIDs := []string{"cacheID"}
 	opts := map[string]interface{}{
-		utils.Subsys: utils.MetaChargers,
+		utils.MetaSubsys: utils.MetaChargers,
 	}
 	ctx := context.Background()
 
@@ -292,7 +292,7 @@ func TestTPReaderCallCacheRemoveItems(t *testing.T) {
 			utils.CacheSv1RemoveItems: func(_ *context.Context, args, reply interface{}) error {
 				expArgs := &utils.AttrReloadCacheWithAPIOpts{
 					APIOpts: map[string]interface{}{
-						utils.Subsys: utils.MetaChargers,
+						utils.MetaSubsys: utils.MetaChargers,
 					},
 					FilterIDs: []string{"cgrates.org:FLTR_ID1", "cgrates.org:FLTR_ID2"},
 					Tenant:    "cgrates.org",
@@ -309,7 +309,7 @@ func TestTPReaderCallCacheRemoveItems(t *testing.T) {
 			utils.CacheSv1Clear: func(_ *context.Context, args, reply interface{}) error {
 				expArgs := &utils.AttrCacheIDsWithAPIOpts{
 					APIOpts: map[string]interface{}{
-						utils.Subsys: utils.MetaChargers,
+						utils.MetaSubsys: utils.MetaChargers,
 					},
 					CacheIDs: []string{"cacheID"},
 					Tenant:   "cgrates.org",
@@ -335,7 +335,7 @@ func TestTPReaderCallCacheRemoveItems(t *testing.T) {
 	}
 	cacheIDs := []string{"cacheID"}
 	opts := map[string]interface{}{
-		utils.Subsys: utils.MetaChargers,
+		utils.MetaSubsys: utils.MetaChargers,
 	}
 	ctx := context.Background()
 
@@ -362,7 +362,7 @@ func TestTPReaderCallCacheClear(t *testing.T) {
 			utils.CacheSv1Clear: func(_ *context.Context, args, reply interface{}) error {
 				expArgs := &utils.AttrCacheIDsWithAPIOpts{
 					APIOpts: map[string]interface{}{
-						utils.Subsys: utils.MetaChargers,
+						utils.MetaSubsys: utils.MetaChargers,
 					},
 					Tenant: "cgrates.org",
 				}
@@ -387,7 +387,7 @@ func TestTPReaderCallCacheClear(t *testing.T) {
 	}
 	cacheIDs := []string{}
 	opts := map[string]interface{}{
-		utils.Subsys: utils.MetaChargers,
+		utils.MetaSubsys: utils.MetaChargers,
 	}
 	ctx := context.Background()
 

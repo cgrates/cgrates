@@ -73,7 +73,7 @@ func TestCDRsChrgrSProcessEventErrMsnConnIDs(t *testing.T) {
 			utils.Cost:       123.0,
 		},
 		APIOpts: map[string]interface{}{
-			utils.Subsys:       utils.MetaChargers,
+			utils.MetaSubsys:   utils.MetaChargers,
 			utils.MetaOriginID: "originID",
 		},
 	}
@@ -131,7 +131,7 @@ func TestCDRsAttrSProcessEvent(t *testing.T) {
 			utils.Cost:       123.0,
 		},
 		APIOpts: map[string]interface{}{
-			utils.Subsys: utils.MetaChargers,
+			utils.MetaSubsys: utils.MetaChargers,
 		},
 	}
 	err := newCDRSrv.attrSProcessEvent(context.Background(), cgrEv)
@@ -162,7 +162,7 @@ func TestCDRsRateSCostForEventErr(t *testing.T) {
 			utils.Cost:       123.0,
 		},
 		APIOpts: map[string]interface{}{
-			utils.Subsys: utils.MetaChargers,
+			utils.MetaSubsys: utils.MetaChargers,
 		},
 	}
 	err := newCDRSrv.rateSCostForEvent(context.Background(), cgrEv)
@@ -193,7 +193,7 @@ func TestCDRsAccountSDebitEventErr(t *testing.T) {
 			utils.Cost:       123.0,
 		},
 		APIOpts: map[string]interface{}{
-			utils.Subsys: utils.MetaChargers,
+			utils.MetaSubsys: utils.MetaChargers,
 		},
 	}
 	err := newCDRSrv.accountSDebitEvent(context.Background(), cgrEv)
@@ -253,7 +253,7 @@ func TestCDRsStatSProcessEventErrMsnConnIDs(t *testing.T) {
 			utils.Cost:       123.0,
 		},
 		APIOpts: map[string]interface{}{
-			utils.Subsys: utils.MetaChargers,
+			utils.MetaSubsys: utils.MetaChargers,
 		},
 	}
 	err := newCDRSrv.statSProcessEvent(context.Background(), cgrEv)
@@ -286,7 +286,7 @@ func TestCDRsEESProcessEventErrMsnConnIDs(t *testing.T) {
 				utils.Cost:       123.0,
 			},
 			APIOpts: map[string]interface{}{
-				utils.Subsys: utils.MetaChargers,
+				utils.MetaSubsys: utils.MetaChargers,
 			},
 		},
 	}
@@ -364,7 +364,7 @@ func TestCDRsAttrSProcessEventMock(t *testing.T) {
 			utils.Cost:       123.0,
 		},
 		APIOpts: map[string]interface{}{
-			utils.Subsys: utils.MetaAttributes,
+			utils.MetaSubsys: utils.MetaAttributes,
 		},
 	}
 	err := newCDRSrv.attrSProcessEvent(context.Background(), cgrEv)
@@ -385,7 +385,7 @@ func TestCDRsAttrSProcessEventMock(t *testing.T) {
 		},
 		APIOpts: map[string]interface{}{
 			utils.OptsContext: utils.MetaCDRs,
-			utils.Subsys:      utils.MetaCDRs,
+			utils.MetaSubsys:  utils.MetaCDRs,
 		},
 	}
 	if !reflect.DeepEqual(expected, cgrEv) {
@@ -443,7 +443,7 @@ func TestCDRsAttrSProcessEventMockNotFoundErr(t *testing.T) {
 			utils.Cost:       123.0,
 		},
 		APIOpts: map[string]interface{}{
-			utils.Subsys: utils.MetaAttributes,
+			utils.MetaSubsys: utils.MetaAttributes,
 		},
 	}
 	err := newCDRSrv.attrSProcessEvent(context.Background(), cgrEv)
@@ -464,7 +464,7 @@ func TestCDRsAttrSProcessEventMockNotFoundErr(t *testing.T) {
 		},
 		APIOpts: map[string]interface{}{
 			utils.OptsContext: utils.MetaCDRs,
-			utils.Subsys:      utils.MetaCDRs,
+			utils.MetaSubsys:  utils.MetaCDRs,
 		},
 	}
 	if !reflect.DeepEqual(expected, cgrEv) {
@@ -513,7 +513,7 @@ func TestCDRsAttrSProcessEventMockNotEmptyAF(t *testing.T) {
 							utils.Cost:         123.0,
 						},
 						APIOpts: map[string]interface{}{
-							utils.Subsys:       utils.MetaAttributes,
+							utils.MetaSubsys:   utils.MetaAttributes,
 							utils.AccountField: "1001",
 						},
 					},
@@ -541,7 +541,7 @@ func TestCDRsAttrSProcessEventMockNotEmptyAF(t *testing.T) {
 			utils.Cost:         123.0,
 		},
 		APIOpts: map[string]interface{}{
-			utils.Subsys: utils.MetaAttributes,
+			utils.MetaSubsys: utils.MetaAttributes,
 		},
 	}
 	err := newCDRSrv.attrSProcessEvent(context.Background(), cgrEv)
@@ -563,7 +563,7 @@ func TestCDRsAttrSProcessEventMockNotEmptyAF(t *testing.T) {
 		},
 		APIOpts: map[string]interface{}{
 			utils.AccountField: "1001",
-			utils.Subsys:       utils.MetaAttributes,
+			utils.MetaSubsys:   utils.MetaAttributes,
 		},
 	}
 	if !reflect.DeepEqual(expected, cgrEv) {
@@ -620,7 +620,7 @@ func TestCDRsChrgrSProcessEvent(t *testing.T) {
 			utils.Cost:       123.0,
 		},
 		APIOpts: map[string]interface{}{
-			utils.Subsys: utils.MetaChargers,
+			utils.MetaSubsys: utils.MetaChargers,
 		},
 	}
 	result, err := newCDRSrv.chrgrSProcessEvent(context.Background(), cgrEv)
@@ -683,7 +683,7 @@ func TestCDRsRateProcessEventMock(t *testing.T) {
 			utils.Cost:       123.0,
 		},
 		APIOpts: map[string]interface{}{
-			utils.Subsys: utils.MetaRateS,
+			utils.MetaSubsys: utils.MetaRateS,
 		},
 	}
 	err := newCDRSrv.rateSCostForEvent(context.Background(), cgrEv)
@@ -705,7 +705,7 @@ func TestCDRsRateProcessEventMock(t *testing.T) {
 		},
 		APIOpts: map[string]interface{}{
 			utils.MetaRateSCost: utils.RateProfileCost{},
-			utils.Subsys:        utils.MetaRateS,
+			utils.MetaSubsys:    utils.MetaRateS,
 		},
 	}
 	if !reflect.DeepEqual(expected, cgrEv) {
@@ -761,7 +761,7 @@ func TestCDRsAccountProcessEventMock(t *testing.T) {
 		},
 		APIOpts: map[string]interface{}{
 			utils.MetaAccountSCost: &utils.EventCharges{},
-			utils.Subsys:           utils.MetaAccounts,
+			utils.MetaSubsys:       utils.MetaAccounts,
 		},
 	}
 	err := newCDRSrv.accountSDebitEvent(context.Background(), cgrEv)
@@ -783,7 +783,7 @@ func TestCDRsAccountProcessEventMock(t *testing.T) {
 		},
 		APIOpts: map[string]interface{}{
 			utils.MetaAccountSCost: cgrEv.APIOpts[utils.MetaAccountSCost],
-			utils.Subsys:           utils.MetaAccounts,
+			utils.MetaSubsys:       utils.MetaAccounts,
 		},
 	}
 	if !reflect.DeepEqual(expected, cgrEv) {
@@ -2519,7 +2519,7 @@ func TestCDRsChrgrSProcessEventEmptyChrgrs(t *testing.T) {
 			utils.Cost:       123.0,
 		},
 		APIOpts: map[string]interface{}{
-			utils.Subsys: utils.MetaChargers,
+			utils.MetaSubsys: utils.MetaChargers,
 		},
 	}
 	_, err := newCDRSrv.chrgrSProcessEvent(context.Background(), cgrEv)

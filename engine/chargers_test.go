@@ -204,7 +204,7 @@ func TestChargerMatchingChargerProfilesForEvent(t *testing.T) {
 				utils.Weight:     "200.0",
 			},
 			APIOpts: map[string]interface{}{
-				utils.Subsys: utils.MetaChargers,
+				utils.MetaSubsys: utils.MetaChargers,
 			},
 		},
 		{
@@ -377,7 +377,7 @@ func TestChargerProcessEvent(t *testing.T) {
 				utils.Weight:     "200.0",
 			},
 			APIOpts: map[string]interface{}{
-				utils.Subsys: utils.MetaChargers,
+				utils.MetaSubsys: utils.MetaChargers,
 			},
 		},
 		{
@@ -494,8 +494,13 @@ func TestChargerProcessEvent(t *testing.T) {
 	rpl := []*ChrgSProcessEventReply{
 		{
 			ChargerSProfile: "CPP_1",
-			AlteredFields:   []string{utils.MetaOptsRunID, utils.MetaOpts + utils.NestingSep + utils.MetaChargeID},
-			CGREvent:        chargerEvents[0],
+			AlteredFields: []*FieldsAltered{
+				{
+					MatchedProfileID: utils.MetaDefault,
+					Fields:           []string{utils.MetaOptsRunID, utils.MetaOpts + utils.NestingSep + utils.MetaChargeID, utils.MetaOpts + utils.NestingSep + utils.MetaSubsys},
+				},
+			},
+			CGREvent: chargerEvents[0],
 		},
 	}
 	rpl[0].CGREvent.APIOpts[utils.MetaRunID] = cPPs[0].RunID
@@ -539,7 +544,7 @@ func TestChargersmatchingChargerProfilesForEventChargerProfileNotFound(t *testin
 			utils.Weight:     "10.0",
 		},
 		APIOpts: map[string]interface{}{
-			utils.Subsys: utils.MetaChargers,
+			utils.MetaSubsys: utils.MetaChargers,
 		},
 	}
 
@@ -585,7 +590,7 @@ func TestChargersmatchingChargerProfilesForEventDoesNotPass(t *testing.T) {
 			utils.Weight:     "10.0",
 		},
 		APIOpts: map[string]interface{}{
-			utils.Subsys: utils.MetaChargers,
+			utils.MetaSubsys: utils.MetaChargers,
 		},
 	}
 
@@ -635,7 +640,7 @@ func TestChargersmatchingChargerProfilesForEventErrGetChPrf(t *testing.T) {
 			utils.Weight:     "10.0",
 		},
 		APIOpts: map[string]interface{}{
-			utils.Subsys: utils.MetaChargers,
+			utils.MetaSubsys: utils.MetaChargers,
 		},
 	}
 

@@ -766,7 +766,12 @@ func testChgrsProcessEvent(t *testing.T) {
 	expected := &[]*engine.ChrgSProcessEventReply{
 		{
 			ChargerSProfile: "TEST_CHARGERS_IT_TEST",
-			AlteredFields:   []string{utils.MetaOptsRunID, utils.MetaOpts + utils.NestingSep + utils.MetaChargeID},
+			AlteredFields: []*engine.FieldsAltered{
+				{
+					MatchedProfileID: utils.MetaDefault,
+					Fields:           []string{utils.MetaOptsRunID, utils.MetaOpts + utils.NestingSep + utils.MetaChargeID, utils.MetaOpts + utils.NestingSep + utils.MetaSubsys},
+				},
+			},
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "eventCharger",

@@ -79,7 +79,7 @@ func (dS *DispatcherService) authorize(ctx *context.Context, method, tenant stri
 			utils.APIKey: apiKey,
 		},
 		APIOpts: map[string]interface{}{
-			utils.Subsys:      utils.MetaDispatchers,
+			utils.MetaSubsys:  utils.MetaDispatchers,
 			utils.OptsContext: utils.MetaAuth,
 		},
 	}
@@ -160,7 +160,7 @@ func (dS *DispatcherService) Dispatch(ctx *context.Context, ev *utils.CGREvent, 
 		utils.MetaReq:  ev.Event,
 		utils.MetaOpts: ev.APIOpts,
 		utils.MetaVars: utils.MapStorage{
-			utils.Subsys:     subsys,
+			utils.MetaSubsys: subsys,
 			utils.MetaMethod: serviceMethod,
 		},
 	}
@@ -200,7 +200,7 @@ func (dS *DispatcherService) V1GetProfilesForEvent(ctx *context.Context, ev *uti
 		utils.MetaReq:  ev.Event,
 		utils.MetaOpts: ev.APIOpts,
 		utils.MetaVars: utils.MapStorage{
-			utils.Subsys:     ev.APIOpts[utils.Subsys],
+			utils.MetaSubsys: ev.APIOpts[utils.MetaSubsys],
 			utils.MetaMethod: ev.APIOpts[utils.MetaMethod],
 		},
 	})

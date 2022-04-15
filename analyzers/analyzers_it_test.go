@@ -170,7 +170,12 @@ func testAnalyzerSChargerSv1ProcessEvent(t *testing.T) {
 	processedEv := []*engine.ChrgSProcessEventReply{
 		{
 			ChargerSProfile: "DEFAULT",
-			AlteredFields:   []string{"*opts.*runID", "*opts.*chargeID"},
+			AlteredFields: []*engine.FieldsAltered{
+				{
+					MatchedProfileID: utils.MetaDefault,
+					Fields:           []string{utils.MetaOptsRunID, utils.MetaOpts + utils.NestingSep + utils.MetaChargeID, utils.MetaOpts + utils.NestingSep + utils.MetaSubsys},
+				},
+			},
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "event1",
@@ -187,9 +192,17 @@ func testAnalyzerSChargerSv1ProcessEvent(t *testing.T) {
 			},
 		},
 		{
-			ChargerSProfile:    "Raw",
-			AttributeSProfiles: []string{"*constant:*req.RequestType:*none"},
-			AlteredFields:      []string{"*opts.*runID", "*opts.*chargeID", "*req.RequestType"},
+			ChargerSProfile: "Raw",
+			AlteredFields: []*engine.FieldsAltered{
+				{
+					MatchedProfileID: utils.MetaDefault,
+					Fields:           []string{utils.MetaOptsRunID, utils.MetaOpts + utils.NestingSep + utils.MetaChargeID, utils.MetaOpts + utils.NestingSep + utils.MetaSubsys},
+				},
+				{
+					MatchedProfileID: "*constant:*req.RequestType:*none",
+					Fields:           []string{"*req.RequestType"},
+				},
+			},
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "event1",

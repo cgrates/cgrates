@@ -1139,7 +1139,7 @@ func TestChargersAPIs(t *testing.T) {
 			utils.OptsAttributesProfileIDs: []string{"ATTR1", "ATTR2"},
 			utils.MetaChargeID:             "",
 			utils.OptsContext:              utils.MetaChargers,
-			utils.Subsys:                   utils.MetaChargers,
+			utils.MetaSubsys:               utils.MetaChargers,
 			utils.MetaRunID:                "run_1",
 		},
 	}
@@ -1290,7 +1290,12 @@ func TestChargersAPIs(t *testing.T) {
 	expProcessEv := []*engine.ChrgSProcessEventReply{
 		{
 			ChargerSProfile: "CHARGER1",
-			AlteredFields:   []string{"*opts.*runID", "*opts.*chargeID"},
+			AlteredFields: []*engine.FieldsAltered{
+				{
+					MatchedProfileID: utils.MetaDefault,
+					Fields:           []string{utils.MetaOptsRunID, utils.MetaOpts + utils.NestingSep + utils.MetaChargeID, utils.MetaOpts + utils.NestingSep + utils.MetaSubsys},
+				},
+			},
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "EventTest",
@@ -1301,7 +1306,7 @@ func TestChargersAPIs(t *testing.T) {
 					utils.OptsAttributesProfileIDs: []string{"ATTR1", "ATTR2"},
 					utils.MetaChargeID:             "",
 					utils.OptsContext:              utils.MetaChargers,
-					utils.Subsys:                   utils.MetaChargers,
+					utils.MetaSubsys:               utils.MetaChargers,
 					utils.MetaRunID:                "run_1",
 				},
 			},

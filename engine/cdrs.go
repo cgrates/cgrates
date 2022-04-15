@@ -97,7 +97,7 @@ func (cdrS *CDRServer) attrSProcessEvent(ctx *context.Context, cgrEv *utils.CGRE
 	if cgrEv.APIOpts == nil {
 		cgrEv.APIOpts = make(map[string]interface{})
 	}
-	cgrEv.APIOpts[utils.Subsys] = utils.MetaCDRs
+	cgrEv.APIOpts[utils.MetaSubsys] = utils.MetaCDRs
 	cgrEv.APIOpts[utils.OptsContext] = utils.FirstNonEmpty(
 		utils.IfaceAsString(cgrEv.APIOpts[utils.OptsContext]),
 		utils.MetaCDRs)
