@@ -240,16 +240,17 @@ func (sRs SortedRoutesList) RouteIDs() (rIDs []string) {
 
 // RoutesWithParams returns a list of routes IDs with Parameters
 func (sRs SortedRoutesList) RoutesWithParams() (sPs []string) {
+	routeIDs := make(utils.StringSet)
 	for _, sR := range sRs {
 		for _, spl := range sR.Routes {
 			route := spl.RouteID
-			if spl.RouteParameters != "" {
+			if spl.RouteParameters != utils.EmptyString {
 				route += utils.InInFieldSep + spl.RouteParameters
 			}
-			sPs = append(sPs, route)
+			routeIDs.Add(route)
 		}
 	}
-	return
+	return routeIDs.AsSlice()
 }
 
 // Digest returns list of routeIDs + parameters for easier outside access

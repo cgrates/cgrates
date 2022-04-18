@@ -66,6 +66,7 @@
 
 "sessions": {
 	"enabled": true,
+	"rates_conns": ["*internal"],
 	"routes_conns": ["*internal"],
 	"resources_conns": ["*internal"],
 	"attributes_conns": ["*internal"],
