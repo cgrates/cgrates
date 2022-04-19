@@ -247,10 +247,13 @@ func (sRs SortedRoutesList) RoutesWithParams() (sPs []string) {
 			if spl.RouteParameters != utils.EmptyString {
 				route += utils.InInFieldSep + spl.RouteParameters
 			}
-			routeIDs.Add(route)
+			if !routeIDs.Has(route) {
+				routeIDs.Add(route)
+				sPs = append(sPs, route)
+			}
 		}
 	}
-	return routeIDs.AsSlice()
+	return
 }
 
 // Digest returns list of routeIDs + parameters for easier outside access
