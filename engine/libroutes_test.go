@@ -26,6 +26,41 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+func TestSortedRoutesListDigest(t *testing.T) {
+	sSpls := SortedRoutesList{{
+		ProfileID: "ROUTE_WEIGHT_2",
+		Sorting:   utils.MetaWeight,
+		Routes: []*SortedRoute{
+			{
+				RouteID: "route1",
+			},
+			{
+				RouteID: "route2",
+			},
+			{
+				RouteID: "route5",
+			},
+			{
+				RouteID: "route2",
+			},
+			{
+				RouteID: "route3",
+			},
+			{
+				RouteID: "route0",
+			},
+			{
+				RouteID: "route1",
+			},
+		},
+	}}
+	// digest will join unique RouteID from SortedRoutes
+	expected := "route1,route2,route5,route3,route0"
+	if rcv := sSpls.Digest(); rcv != expected {
+		t.Errorf("Expected %s received %s", expected, rcv)
+	}
+}
+
 func TestLibSuppliersSortCost(t *testing.T) {
 	sSpls := &SortedRoutes{
 		Routes: []*SortedRoute{
