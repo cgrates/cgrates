@@ -24,6 +24,7 @@ package analyzers
 import (
 	"errors"
 	"flag"
+	"fmt"
 	"net"
 	"net/rpc"
 	"net/rpc/jsonrpc"
@@ -69,7 +70,7 @@ var (
 var (
 	dataDir   = flag.String("data_dir", "/usr/share/cgrates", "CGR data dir path here")
 	waitRater = flag.Int("wait_rater", 100, "Number of miliseconds to wait for rater to start and cache")
-	encoding  = flag.String("rpc", utils.MetaJSON, "what encoding whould be uused for rpc comunication")
+	encoding  = flag.String("rpc", utils.MetaJSON, "what encoding whould be used for rpc comunication")
 )
 
 func newRPCClient(cfg *config.ListenCfg) (c *rpc.Client, err error) {
@@ -138,13 +139,7 @@ func testAnalyzerSRPCConn(t *testing.T) {
 
 func testAnalyzerSLoadTarrifPlans(t *testing.T) {
 	var reply string
-	// attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
-	// if err := anzRPC.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
-	// 	t.Error(err)
-	// } else if reply != utils.OK {
-	// 	t.Error("Unexpected reply returned", reply)
-	// }
-	// time.Sleep(100 * time.Millisecond)
+	time.Sleep(100 * time.Millisecond)
 	if err := anzRPC.Call(utils.LoaderSv1Run, &loaders.ArgsProcessFolder{
 		APIOpts: map[string]interface{}{utils.MetaCache: utils.MetaReload},
 	}, &reply); err != nil {
@@ -244,7 +239,7 @@ func testAnalyzerSV1Search(t *testing.T) {
 	} else if len(result) != 1 {
 		t.Errorf("Unexpected result: %s", utils.ToJSON(result))
 	}
-	// fmt.Println(utils.ToJSON(result))
+	fmt.Println(utils.ToJSON(result))
 }
 
 func testAnalyzerSV1Search2(t *testing.T) {
