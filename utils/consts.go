@@ -775,6 +775,7 @@ const (
 	MetaChargeID            = "*chargeID"
 	MetaAsync               = "*async"
 	MetaUsage               = "*usage"
+	MetaDestination         = "*destination"
 	MetaStartTime           = "*startTime"
 	Weights                 = "Weights"
 	ActivationTimes         = "ActivationTimes"

@@ -1889,28 +1889,28 @@ func TestPDDGetCompressFactor(t *testing.T) {
 func TestDDCGetStringValue(t *testing.T) {
 	ddc := NewDDC(2, "", nil)
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
-		Event: map[string]interface{}{utils.Destination: "1002"},
 		APIOpts: map[string]interface{}{
-			utils.MetaStartTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC)}}
+			utils.MetaDestination: "1002",
+			utils.MetaStartTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC)}}
 	if strVal := ddc.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong ddc value: %s", strVal)
 	}
 
-	ddc.AddEvent(ev.ID, utils.MapStorage{utils.MetaOpts: ev.APIOpts, utils.MetaReq: ev.Event})
+	ddc.AddEvent(ev.ID, utils.MapStorage{utils.MetaOpts: ev.APIOpts})
 	if strVal := ddc.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong ddc value: %s", strVal)
 	}
 	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2",
-		Event: map[string]interface{}{utils.Destination: "1002"},
 		APIOpts: map[string]interface{}{
-			utils.MetaStartTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC)}}
+			utils.MetaDestination: "1002",
+			utils.MetaStartTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC)}}
 
 	ev3 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_3",
-		Event: map[string]interface{}{utils.Destination: "1001"},
 		APIOpts: map[string]interface{}{
-			utils.MetaStartTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC)}}
-	ddc.AddEvent(ev2.ID, utils.MapStorage{utils.MetaOpts: ev2.APIOpts, utils.MetaReq: ev2.Event})
-	ddc.AddEvent(ev3.ID, utils.MapStorage{utils.MetaOpts: ev3.APIOpts, utils.MetaReq: ev3.Event})
+			utils.MetaDestination: "1001",
+			utils.MetaStartTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC)}}
+	ddc.AddEvent(ev2.ID, utils.MapStorage{utils.MetaOpts: ev2.APIOpts})
+	ddc.AddEvent(ev3.ID, utils.MapStorage{utils.MetaOpts: ev3.APIOpts})
 	if strVal := ddc.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != "2" {
 		t.Errorf("wrong ddc value: %s", strVal)
 	}
@@ -1931,13 +1931,12 @@ func TestDDCGetStringValue(t *testing.T) {
 func TestDDCGetFloat64Value(t *testing.T) {
 	ddc := NewDDC(2, "", nil)
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
-		Event: map[string]interface{}{
-			utils.Destination: "1002"},
 		APIOpts: map[string]interface{}{
-			utils.MetaPDD:       5 * time.Second,
-			utils.MetaStartTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			utils.MetaUsage:     10 * time.Second}}
-	ddc.AddEvent(ev.ID, utils.MapStorage{utils.MetaOpts: ev.APIOpts, utils.MetaReq: ev.Event})
+			utils.MetaDestination: "1002",
+			utils.MetaPDD:         5 * time.Second,
+			utils.MetaStartTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			utils.MetaUsage:       10 * time.Second}}
+	ddc.AddEvent(ev.ID, utils.MapStorage{utils.MetaOpts: ev.APIOpts})
 	if v := ddc.GetValue(); v != utils.DecimalNaN {
 		t.Errorf("wrong ddc value: %v", v)
 	}
@@ -1947,25 +1946,25 @@ func TestDDCGetFloat64Value(t *testing.T) {
 		t.Errorf("wrong ddc value: %v", v)
 	}
 	ev4 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_4",
-		Event: map[string]interface{}{utils.Destination: "1001"},
 		APIOpts: map[string]interface{}{
-			utils.MetaPDD:       10 * time.Second,
-			utils.MetaUsage:     time.Minute,
-			utils.MetaStartTime: time.Date(2015, 7, 14, 14, 25, 0, 0, time.UTC),
+			utils.MetaDestination: "1001",
+			utils.MetaPDD:         10 * time.Second,
+			utils.MetaUsage:       time.Minute,
+			utils.MetaStartTime:   time.Date(2015, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 	}
 	ev5 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_5",
-		Event: map[string]interface{}{utils.Destination: "1003"},
 		APIOpts: map[string]interface{}{
-			utils.MetaUsage:     time.Minute + 30*time.Second,
-			utils.MetaStartTime: time.Date(2015, 7, 14, 14, 25, 0, 0, time.UTC),
+			utils.MetaDestination: "1003",
+			utils.MetaUsage:       time.Minute + 30*time.Second,
+			utils.MetaStartTime:   time.Date(2015, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 	}
-	ddc.AddEvent(ev4.ID, utils.MapStorage{utils.MetaOpts: ev4.APIOpts, utils.MetaReq: ev4.Event})
+	ddc.AddEvent(ev4.ID, utils.MapStorage{utils.MetaOpts: ev4.APIOpts})
 	if strVal := ddc.GetValue(); strVal.Compare(utils.NewDecimalFromFloat64(2)) != 0 {
 		t.Errorf("wrong ddc value: %v", strVal)
 	}
-	ddc.AddEvent(ev5.ID, utils.MapStorage{utils.MetaOpts: ev5.APIOpts, utils.MetaReq: ev5.Event})
+	ddc.AddEvent(ev5.ID, utils.MapStorage{utils.MetaOpts: ev5.APIOpts})
 	if strVal := ddc.GetValue(); strVal.Compare(utils.NewDecimalFromFloat64(3)) != 0 {
 		t.Errorf("wrong ddc value: %v", strVal)
 	}
@@ -1990,18 +1989,18 @@ func TestDDCGetFloat64Value(t *testing.T) {
 func TestDDCGetStringValue2(t *testing.T) {
 	statDistinct := NewDDC(2, "", nil)
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
-		Event: map[string]interface{}{utils.Destination: "1001"}}
+		APIOpts: map[string]interface{}{utils.MetaDestination: "1001"}}
 	if strVal := statDistinct.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong statDistinct value: %s", strVal)
 	}
 
-	statDistinct.AddEvent(ev.ID, utils.MapStorage{utils.MetaReq: ev.Event})
+	statDistinct.AddEvent(ev.ID, utils.MapStorage{utils.MetaOpts: ev.APIOpts})
 	if strVal := statDistinct.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong statDistinct value: %s", strVal)
 	}
 	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
-		Event: map[string]interface{}{utils.Destination: "1002"}}
-	statDistinct.AddEvent(ev2.ID, utils.MapStorage{utils.MetaReq: ev2.Event})
+		APIOpts: map[string]interface{}{utils.MetaDestination: "1002"}}
+	statDistinct.AddEvent(ev2.ID, utils.MapStorage{utils.MetaOpts: ev2.APIOpts})
 	if strVal := statDistinct.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != "2" {
 		t.Errorf("wrong statDistinct value: %s", strVal)
 	}
@@ -2039,14 +2038,14 @@ func TestDDCCompress(t *testing.T) {
 	}
 	expected.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals)
 	ev1 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
-		Event: map[string]interface{}{utils.Destination: "1001"}}
+		APIOpts: map[string]interface{}{utils.MetaDestination: "1001"}}
 	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
-		Event: map[string]interface{}{utils.Destination: "1001"}}
+		APIOpts: map[string]interface{}{utils.MetaDestination: "1001"}}
 	ev3 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_3",
-		Event: map[string]interface{}{utils.Destination: "1002"}}
-	ddc.AddEvent(ev1.ID, utils.MapStorage{utils.MetaReq: ev1.Event})
-	ddc.AddEvent(ev2.ID, utils.MapStorage{utils.MetaReq: ev2.Event})
-	ddc.AddEvent(ev3.ID, utils.MapStorage{utils.MetaReq: ev3.Event})
+		APIOpts: map[string]interface{}{utils.MetaDestination: "1002"}}
+	ddc.AddEvent(ev1.ID, utils.MapStorage{utils.MetaOpts: ev1.APIOpts})
+	ddc.AddEvent(ev2.ID, utils.MapStorage{utils.MetaOpts: ev2.APIOpts})
+	ddc.AddEvent(ev3.ID, utils.MapStorage{utils.MetaOpts: ev3.APIOpts})
 	expIDs := []string{"EVENT_1", "EVENT_3"}
 	rply := ddc.Compress(10, "EVENT_3")
 	sort.Strings(rply)
@@ -2077,23 +2076,23 @@ func TestDDCGetCompressFactor(t *testing.T) {
 	ddc := NewDDC(2, "", nil)
 
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
-		Event: map[string]interface{}{utils.Destination: "1002"}}
+		APIOpts: map[string]interface{}{utils.MetaDestination: "1002"}}
 	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2",
-		Event: map[string]interface{}{utils.Destination: "1001"}}
+		APIOpts: map[string]interface{}{utils.MetaDestination: "1001"}}
 	ev4 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2",
-		Event: map[string]interface{}{utils.Destination: "1001"}}
+		APIOpts: map[string]interface{}{utils.MetaDestination: "1001"}}
 
-	ddc.AddEvent(ev.ID, utils.MapStorage{utils.MetaReq: ev.Event})
-	ddc.AddEvent(ev2.ID, utils.MapStorage{utils.MetaReq: ev2.Event})
+	ddc.AddEvent(ev.ID, utils.MapStorage{utils.MetaOpts: ev.APIOpts})
+	ddc.AddEvent(ev2.ID, utils.MapStorage{utils.MetaOpts: ev2.APIOpts})
 	if CF = ddc.GetCompressFactor(make(map[string]uint64)); !reflect.DeepEqual(expectedCF, CF) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expectedCF), utils.ToJSON(CF))
 	}
-	ddc.AddEvent(ev2.ID, utils.MapStorage{utils.MetaReq: ev2.Event})
+	ddc.AddEvent(ev2.ID, utils.MapStorage{utils.MetaOpts: ev2.APIOpts})
 	expectedCF["EVENT_2"] = 2
 	if CF = ddc.GetCompressFactor(make(map[string]uint64)); !reflect.DeepEqual(expectedCF, CF) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expectedCF), utils.ToJSON(CF))
 	}
-	ddc.AddEvent(ev4.ID, utils.MapStorage{utils.MetaReq: ev4.Event})
+	ddc.AddEvent(ev4.ID, utils.MapStorage{utils.MetaOpts: ev4.APIOpts})
 	expectedCF["EVENT_2"] = 3
 	CF["EVENT_2"] = 3
 	if CF = ddc.GetCompressFactor(CF); !reflect.DeepEqual(expectedCF, CF) {
@@ -2104,14 +2103,13 @@ func TestDDCGetCompressFactor(t *testing.T) {
 func TestStatSumGetFloat64Value(t *testing.T) {
 	statSum := NewStatSum(2, "~*opts.*cost", nil)
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
-		Event: map[string]interface{}{
-			utils.Destination: "1002"},
 		APIOpts: map[string]interface{}{
-			utils.MetaPDD:       5 * time.Second,
-			utils.MetaCost:      "20",
-			utils.MetaStartTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			utils.MetaUsage:     10 * time.Second}}
-	statSum.AddEvent(ev.ID, utils.MapStorage{utils.MetaOpts: ev.APIOpts, utils.MetaReq: ev.Event})
+			utils.MetaDestination: "1002",
+			utils.MetaPDD:         5 * time.Second,
+			utils.MetaCost:        "20",
+			utils.MetaStartTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			utils.MetaUsage:       10 * time.Second}}
+	statSum.AddEvent(ev.ID, utils.MapStorage{utils.MetaOpts: ev.APIOpts})
 	if v := statSum.GetValue(); v != utils.DecimalNaN {
 		t.Errorf("wrong statSum value: %v", v)
 	}
@@ -2123,29 +2121,27 @@ func TestStatSumGetFloat64Value(t *testing.T) {
 		t.Errorf("wrong statSum value: %v", v)
 	}
 	ev4 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_4",
-		Event: map[string]interface{}{
-			utils.Destination: "1001"},
 		APIOpts: map[string]interface{}{
-			utils.MetaPDD:       10 * time.Second,
-			utils.MetaCost:      "20",
-			utils.MetaUsage:     time.Minute,
-			utils.MetaStartTime: time.Date(2015, 7, 14, 14, 25, 0, 0, time.UTC),
+			utils.MetaDestination: "1001",
+			utils.MetaPDD:         10 * time.Second,
+			utils.MetaCost:        "20",
+			utils.MetaUsage:       time.Minute,
+			utils.MetaStartTime:   time.Date(2015, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 	}
 	ev5 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_5",
-		Event: map[string]interface{}{
-			utils.Destination: "1003"},
 		APIOpts: map[string]interface{}{
-			utils.MetaCost:      "20",
-			utils.MetaUsage:     time.Minute + 30*time.Second,
-			utils.MetaStartTime: time.Date(2015, 7, 14, 14, 25, 0, 0, time.UTC),
+			utils.MetaDestination: "1003",
+			utils.MetaCost:        "20",
+			utils.MetaUsage:       time.Minute + 30*time.Second,
+			utils.MetaStartTime:   time.Date(2015, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 	}
-	statSum.AddEvent(ev4.ID, utils.MapStorage{utils.MetaOpts: ev4.APIOpts, utils.MetaReq: ev.Event})
+	statSum.AddEvent(ev4.ID, utils.MapStorage{utils.MetaOpts: ev4.APIOpts})
 	if strVal := statSum.GetValue(); strVal.Compare(utils.NewDecimalFromFloat64(40)) != 0 {
 		t.Errorf("wrong statSum value: %v", strVal)
 	}
-	statSum.AddEvent(ev5.ID, utils.MapStorage{utils.MetaOpts: ev5.APIOpts, utils.MetaReq: ev.Event})
+	statSum.AddEvent(ev5.ID, utils.MapStorage{utils.MetaOpts: ev5.APIOpts})
 	if strVal := statSum.GetValue(); strVal.Compare(utils.NewDecimalFromFloat64(60)) != 0 {
 		t.Errorf("wrong statSum value: %v", strVal)
 	}
@@ -2170,34 +2166,31 @@ func TestStatSumGetFloat64Value(t *testing.T) {
 func TestStatSumGetStringValue(t *testing.T) {
 	statSum := NewStatSum(2, "~*opts.*cost", nil)
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
-		Event: map[string]interface{}{
-			utils.Destination: "1002"},
 		APIOpts: map[string]interface{}{
-			utils.MetaCost:      "20",
-			utils.MetaStartTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC)}}
+			utils.MetaDestination: "1002",
+			utils.MetaCost:        "20",
+			utils.MetaStartTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC)}}
 	if strVal := statSum.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong ddc value: %s", strVal)
 	}
 
-	statSum.AddEvent(ev.ID, utils.MapStorage{utils.MetaOpts: ev.APIOpts, utils.MetaReq: ev.Event})
+	statSum.AddEvent(ev.ID, utils.MapStorage{utils.MetaOpts: ev.APIOpts})
 	if strVal := statSum.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong statSum value: %s", strVal)
 	}
 	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2",
-		Event: map[string]interface{}{
-			utils.Destination: "1002"},
 		APIOpts: map[string]interface{}{
-			utils.MetaCost:      "20",
-			utils.MetaStartTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC)}}
+			utils.MetaDestination: "1002",
+			utils.MetaCost:        "20",
+			utils.MetaStartTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC)}}
 
 	ev3 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_3",
-		Event: map[string]interface{}{
-			utils.Destination: "1001"},
 		APIOpts: map[string]interface{}{
-			utils.MetaCost:      "20",
-			utils.MetaStartTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC)}}
-	statSum.AddEvent(ev2.ID, utils.MapStorage{utils.MetaOpts: ev2.APIOpts, utils.MetaReq: ev.Event})
-	statSum.AddEvent(ev3.ID, utils.MapStorage{utils.MetaOpts: ev3.APIOpts, utils.MetaReq: ev.Event})
+			utils.MetaDestination: "1001",
+			utils.MetaCost:        "20",
+			utils.MetaStartTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC)}}
+	statSum.AddEvent(ev2.ID, utils.MapStorage{utils.MetaOpts: ev2.APIOpts})
+	statSum.AddEvent(ev3.ID, utils.MapStorage{utils.MetaOpts: ev3.APIOpts})
 	if strVal := statSum.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != "60" {
 		t.Errorf("wrong statSum value: %s", strVal)
 	}
@@ -2389,11 +2382,11 @@ func TestStatAverageGetFloat64Value(t *testing.T) {
 	statAvg := NewStatAverage(2, "~*opts.*cost", nil)
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		APIOpts: map[string]interface{}{
-			utils.MetaCost:      "20",
-			utils.MetaStartTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			utils.MetaUsage:     10 * time.Second,
-			utils.MetaPDD:       5 * time.Second,
-			utils.Destination:   "1002"}}
+			utils.MetaCost:        "20",
+			utils.MetaStartTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			utils.MetaUsage:       10 * time.Second,
+			utils.MetaPDD:         5 * time.Second,
+			utils.MetaDestination: "1002"}}
 	statAvg.AddEvent(ev.ID, utils.MapStorage{utils.MetaOpts: ev.APIOpts})
 	if v := statAvg.GetValue(); v != utils.DecimalNaN {
 		t.Errorf("wrong statAvg value: %v", v)
@@ -2405,19 +2398,19 @@ func TestStatAverageGetFloat64Value(t *testing.T) {
 	}
 	ev4 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_4",
 		APIOpts: map[string]interface{}{
-			utils.MetaCost:      "30",
-			utils.MetaUsage:     time.Minute,
-			utils.MetaStartTime: time.Date(2015, 7, 14, 14, 25, 0, 0, time.UTC),
-			utils.MetaPDD:       10 * time.Second,
-			utils.Destination:   "1001",
+			utils.MetaCost:        "30",
+			utils.MetaUsage:       time.Minute,
+			utils.MetaStartTime:   time.Date(2015, 7, 14, 14, 25, 0, 0, time.UTC),
+			utils.MetaPDD:         10 * time.Second,
+			utils.MetaDestination: "1001",
 		},
 	}
 	ev5 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_5",
 		APIOpts: map[string]interface{}{
-			utils.MetaCost:      "20",
-			utils.MetaUsage:     time.Minute + 30*time.Second,
-			utils.MetaStartTime: time.Date(2015, 7, 14, 14, 25, 0, 0, time.UTC),
-			utils.Destination:   "1003",
+			utils.MetaCost:        "20",
+			utils.MetaUsage:       time.Minute + 30*time.Second,
+			utils.MetaStartTime:   time.Date(2015, 7, 14, 14, 25, 0, 0, time.UTC),
+			utils.MetaDestination: "1003",
 		},
 	}
 	statAvg.AddEvent(ev4.ID, utils.MapStorage{utils.MetaOpts: ev4.APIOpts})
@@ -2450,9 +2443,9 @@ func TestStatAverageGetStringValue(t *testing.T) {
 	statAvg := NewStatAverage(2, "~*opts.*cost", nil)
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		APIOpts: map[string]interface{}{
-			utils.MetaCost:      "20",
-			utils.MetaStartTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			utils.Destination:   "1002"}}
+			utils.MetaCost:        "20",
+			utils.MetaStartTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			utils.MetaDestination: "1002"}}
 	if strVal := statAvg.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong ddc value: %s", strVal)
 	}
@@ -2463,15 +2456,15 @@ func TestStatAverageGetStringValue(t *testing.T) {
 	}
 	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2",
 		APIOpts: map[string]interface{}{
-			utils.MetaCost:      "20",
-			utils.MetaStartTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			utils.Destination:   "1002"}}
+			utils.MetaCost:        "20",
+			utils.MetaStartTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			utils.MetaDestination: "1002"}}
 
 	ev3 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_3",
 		APIOpts: map[string]interface{}{
-			utils.MetaCost:      "20",
-			utils.MetaStartTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			utils.Destination:   "1001"}}
+			utils.MetaCost:        "20",
+			utils.MetaStartTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			utils.MetaDestination: "1001"}}
 	statAvg.AddEvent(ev2.ID, utils.MapStorage{utils.MetaOpts: ev2.APIOpts})
 	statAvg.AddEvent(ev3.ID, utils.MapStorage{utils.MetaOpts: ev3.APIOpts})
 	if strVal := statAvg.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != "20" {
@@ -2775,7 +2768,7 @@ func TestStatDistinctCompress(t *testing.T) {
 		Events:      make(map[string]map[string]uint64),
 		FieldValues: make(map[string]utils.StringSet),
 		MinItems:    2,
-		FieldName:   utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Destination,
+		FieldName:   utils.DynamicDataPrefix + utils.MetaOpts + utils.NestingSep + utils.MetaDestination,
 	}
 	expected := &StatDistinct{
 		Events: map[string]map[string]uint64{
@@ -2795,19 +2788,19 @@ func TestStatDistinctCompress(t *testing.T) {
 			},
 		},
 		MinItems:  2,
-		FieldName: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Destination,
+		FieldName: utils.DynamicDataPrefix + utils.MetaOpts + utils.NestingSep + utils.MetaDestination,
 		Count:     3,
 	}
 	expected.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals)
 	ev1 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
-		Event: map[string]interface{}{utils.Destination: "1001"}}
+		APIOpts: map[string]interface{}{utils.MetaDestination: "1001"}}
 	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
-		Event: map[string]interface{}{utils.Destination: "1001"}}
+		APIOpts: map[string]interface{}{utils.MetaDestination: "1001"}}
 	ev3 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_3",
-		Event: map[string]interface{}{utils.Destination: "1002"}}
-	ddc.AddEvent(ev1.ID, utils.MapStorage{utils.MetaReq: ev1.Event})
-	ddc.AddEvent(ev2.ID, utils.MapStorage{utils.MetaReq: ev2.Event})
-	ddc.AddEvent(ev3.ID, utils.MapStorage{utils.MetaReq: ev3.Event})
+		APIOpts: map[string]interface{}{utils.MetaDestination: "1002"}}
+	ddc.AddEvent(ev1.ID, utils.MapStorage{utils.MetaOpts: ev1.APIOpts})
+	ddc.AddEvent(ev2.ID, utils.MapStorage{utils.MetaOpts: ev2.APIOpts})
+	ddc.AddEvent(ev3.ID, utils.MapStorage{utils.MetaOpts: ev3.APIOpts})
 	expIDs := []string{"EVENT_1", "EVENT_3"}
 	rply := ddc.Compress(10, "EVENT_3")
 	sort.Strings(rply)
@@ -2835,26 +2828,26 @@ func TestStatDistinctGetCompressFactor(t *testing.T) {
 		"EVENT_1": 1,
 		"EVENT_2": 1,
 	}
-	ddc := NewStatDistinct(2, utils.DynamicDataPrefix+utils.MetaReq+utils.NestingSep+utils.Destination, nil)
+	ddc := NewStatDistinct(2, utils.DynamicDataPrefix+utils.MetaOpts+utils.NestingSep+utils.MetaDestination, nil)
 
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
-		Event: map[string]interface{}{utils.Destination: "1002"}}
+		APIOpts: map[string]interface{}{utils.MetaDestination: "1002"}}
 	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2",
-		Event: map[string]interface{}{utils.Destination: "1001"}}
+		APIOpts: map[string]interface{}{utils.MetaDestination: "1001"}}
 	ev4 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2",
-		Event: map[string]interface{}{utils.Destination: "1001"}}
+		APIOpts: map[string]interface{}{utils.MetaDestination: "1001"}}
 
-	ddc.AddEvent(ev.ID, utils.MapStorage{utils.MetaReq: ev.Event})
-	ddc.AddEvent(ev2.ID, utils.MapStorage{utils.MetaReq: ev2.Event})
+	ddc.AddEvent(ev.ID, utils.MapStorage{utils.MetaOpts: ev.APIOpts})
+	ddc.AddEvent(ev2.ID, utils.MapStorage{utils.MetaOpts: ev2.APIOpts})
 	if CF = ddc.GetCompressFactor(make(map[string]uint64)); !reflect.DeepEqual(expectedCF, CF) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expectedCF), utils.ToJSON(CF))
 	}
-	ddc.AddEvent(ev2.ID, utils.MapStorage{utils.MetaReq: ev2.Event})
+	ddc.AddEvent(ev2.ID, utils.MapStorage{utils.MetaOpts: ev2.APIOpts})
 	expectedCF["EVENT_2"] = 2
 	if CF = ddc.GetCompressFactor(make(map[string]uint64)); !reflect.DeepEqual(expectedCF, CF) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expectedCF), utils.ToJSON(CF))
 	}
-	ddc.AddEvent(ev4.ID, utils.MapStorage{utils.MetaReq: ev4.Event})
+	ddc.AddEvent(ev4.ID, utils.MapStorage{utils.MetaOpts: ev4.APIOpts})
 	expectedCF["EVENT_2"] = 3
 	CF["EVENT_2"] = 3
 	if CF = ddc.GetCompressFactor(CF); !reflect.DeepEqual(expectedCF, CF) {
@@ -2990,13 +2983,12 @@ func TestPDDMarshal(t *testing.T) {
 func TestDCCMarshal(t *testing.T) {
 	ddc := NewDDC(2, "", nil)
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
-		Event: map[string]interface{}{
-			utils.Destination: "1002"},
 		APIOpts: map[string]interface{}{
-			utils.MetaPDD:       5 * time.Second,
-			utils.MetaStartTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			utils.MetaUsage:     10 * time.Second}}
-	ddc.AddEvent(ev.ID, utils.MapStorage{utils.MetaOpts: ev.APIOpts, utils.MetaReq: ev.Event})
+			utils.MetaDestination: "1002",
+			utils.MetaPDD:         5 * time.Second,
+			utils.MetaStartTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			utils.MetaUsage:       10 * time.Second}}
+	ddc.AddEvent(ev.ID, utils.MapStorage{utils.MetaOpts: ev.APIOpts})
 	var nddc StatDDC
 	expected := []byte(`{"FieldValues":{"1002":{"EVENT_1":{}}},"Events":{"EVENT_1":{"1002":1}},"MinItems":2,"Count":1,"FilterIDs":null}`)
 	if b, err := jMarshaler.Marshal(ddc); err != nil {
@@ -3013,15 +3005,13 @@ func TestDCCMarshal(t *testing.T) {
 func TestStatSumMarshal(t *testing.T) {
 	statSum := NewStatSum(2, "~*opts.*cost", nil)
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
-		Event: map[string]interface{}{
-			utils.Destination: "1002",
-		},
 		APIOpts: map[string]interface{}{
-			utils.MetaPDD:       5 * time.Second,
-			utils.MetaCost:      "20",
-			utils.MetaStartTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			utils.MetaUsage:     10 * time.Second}}
-	statSum.AddEvent(ev.ID, utils.MapStorage{utils.MetaOpts: ev.APIOpts, utils.MetaReq: ev.Event})
+			utils.MetaDestination: "1002",
+			utils.MetaPDD:         5 * time.Second,
+			utils.MetaCost:        "20",
+			utils.MetaStartTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			utils.MetaUsage:       10 * time.Second}}
+	statSum.AddEvent(ev.ID, utils.MapStorage{utils.MetaOpts: ev.APIOpts})
 	var nstatSum StatSum
 	expected := []byte(`{"Value":20,"Count":1,"Events":{"EVENT_1":{"Stat":20,"CompressFactor":1}},"MinItems":2,"FilterIDs":null,"FieldName":"~*opts.*cost"}`)
 	if b, err := jMarshaler.Marshal(statSum); err != nil {
@@ -3038,15 +3028,13 @@ func TestStatSumMarshal(t *testing.T) {
 func TestStatAverageMarshal(t *testing.T) {
 	statAvg := NewStatAverage(2, "~*opts.*cost", nil)
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
-		Event: map[string]interface{}{
-			utils.Destination: "1002",
-		},
 		APIOpts: map[string]interface{}{
-			utils.MetaPDD:       5 * time.Second,
-			utils.MetaCost:      "20",
-			utils.MetaStartTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			utils.MetaUsage:     10 * time.Second}}
-	statAvg.AddEvent(ev.ID, utils.MapStorage{utils.MetaOpts: ev.APIOpts, utils.MetaReq: ev.Event})
+			utils.MetaDestination: "1002",
+			utils.MetaPDD:         5 * time.Second,
+			utils.MetaCost:        "20",
+			utils.MetaStartTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			utils.MetaUsage:       10 * time.Second}}
+	statAvg.AddEvent(ev.ID, utils.MapStorage{utils.MetaOpts: ev.APIOpts})
 	var nstatAvg StatAverage
 	expected := []byte(`{"Value":20,"Count":1,"Events":{"EVENT_1":{"Stat":20,"CompressFactor":1}},"MinItems":2,"FilterIDs":null,"FieldName":"~*opts.*cost"}`)
 	if b, err := jMarshaler.Marshal(statAvg); err != nil {
@@ -3063,13 +3051,12 @@ func TestStatAverageMarshal(t *testing.T) {
 func TestStatDistrictMarshal(t *testing.T) {
 	statDistinct := NewStatDistinct(2, "~*opts.*usage", nil)
 	statDistinct.AddEvent("EVENT_1", utils.MapStorage{
-		utils.MetaReq: map[string]interface{}{
-			utils.Destination: "1002"},
 		utils.MetaOpts: map[string]interface{}{
-			utils.MetaPDD:       5 * time.Second,
-			utils.MetaCost:      "20",
-			utils.MetaStartTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			utils.MetaUsage:     10 * time.Second}})
+			utils.MetaDestination: "1002",
+			utils.MetaPDD:         5 * time.Second,
+			utils.MetaCost:        "20",
+			utils.MetaStartTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			utils.MetaUsage:       10 * time.Second}})
 	var nStatDistinct StatDistinct
 	expected := []byte(`{"FieldValues":{"10s":{"EVENT_1":{}}},"Events":{"EVENT_1":{"10s":1}},"MinItems":2,"FieldName":"~*opts.*usage","Count":1,"FilterIDs":null}`)
 	if b, err := jMarshaler.Marshal(statDistinct); err != nil {
