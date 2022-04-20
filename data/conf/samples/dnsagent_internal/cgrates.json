@@ -1,66 +1,67 @@
 {
+	"general": {
+		"log_level": 7									
+	},
 
-// Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
-// Copyright (C) ITsysCOM GmbH
-//
-// This file contains the default configuration hardcoded into CGRateS.
-// This is what you get when you load CGRateS with an empty configuration file.
+	"data_db": {
+		"db_type": "*internal"
+	},
 
+	"schedulers": {
+		"enabled": true,
+		"cdrs_conns": ["*internal"]
+	},
 
-"general": {
-	"log_level": 7,											// control the level of messages logged (0-emerg to 7-debug)
-},
+	"sessions": {
+		"enabled": true,
+		"attributes_conns": ["*localhost"],
+		"rals_conns": ["*internal"],
+		"cdrs_conns": ["*internal"],
+		"chargers_conns": ["*internal"],
+		"routes_conns": ["*localhost"]
+	},
 
-"data_db": {
-	"db_type": "*internal",	
-},
+	"rates": {
+		"enabled": true
+	},
 
+	"cdrs": {
+		"enabled": true,
+		"rates_conns": ["*internal"]
+	},
 
-"sessions": {
-	"enabled": true,
-	"attributes_conns": ["*localhost"],
-	"rates_conns": ["*internal"],
-	"cdrs_conns": ["*internal"],
-	"chargers_conns": ["*internal"],
-	"routes_conns": ["*localhost"],
-},
-
-
-"rates": {
-	"enabled": true,
-},
-
-
-
-"cdrs": {
-	"enabled": true,
-	"rates_conns": ["*internal"],
-},
+	"chargers": {
+		"enabled": true
+	},
 
 
-"chargers": {
-	"enabled": true,
-},
+	"attributes": {
+		"enabled": true
+	},
 
+	"routes": {
+		"enabled": true
+	},
 
-"attributes": {
-	"enabled": true,
-},
+	"dns_agent": {
+		"enabled": true,
+		"listen": ":2053",
+		"sessions_conns": ["*localhost"]
+	},
 
+	"admins": {
+		"enabled": true,
+		"scheduler_conns": ["*internal"]
+	},
 
-"routes": {
-	"enabled": true,
-},
-
-
-"dns_agent": {
-	"enabled": true,
-	"listen": ":2053",
-	"sessions_conns": ["*localhost"],
-},
-
-
-"admins": {
-	"enabled": true,
-},
+	"loaders": [
+		{
+			"id": "*default",
+			"enabled": true,
+			"tenant": "cgrates.org",
+			"lockfile_path": ".cgr.lck",
+			"tp_in_dir": "/usr/share/cgrates/tariffplans/dnsagent",
+			"tp_out_dir": ""
+		}
+	]
 }
