@@ -279,6 +279,12 @@ func (cdrS *CDRServer) processEvent(ctx *context.Context, ev *utils.CGREvent) (e
 			}
 		}
 	}
+	// populate cost from accounts or rates for every event
+	for _, cgrEv := range cgrEvs {
+		if cost := populateCost(cgrEv.APIOpts); cost != nil {
+			cgrEv.APIOpts[utils.MetaCost] = cost
+		}
+	}
 	var export bool
 	for _, cgrEv := range cgrEvs {
 		if export, err = GetBoolOpts(ctx, cgrEv.Tenant, cgrEv, cdrS.fltrS, cdrS.cfg.CdrsCfg().Opts.Export,
@@ -413,5 +419,21 @@ func (cdrS *CDRServer) V1ProcessEventWithGet(ctx *context.Context, arg *utils.CG
 		return
 	}
 	*evs = procEvs
+	return nil
+}
+
+func populateCost(cgrOpts map[string]interface{}) *utils.Decimal {
+	// if the cost is already present, get out
+	if _, has := cgrOpts[utils.MetaCost]; has {
+		return nil
+	}
+	// check firstly in accounts
+	if accCost, has := cgrOpts[utils.MetaAccountSCost]; has {
+		return accCost.(*utils.EventCharges).Concretes
+	}
+	// after check in rates
+	if rtCost, has := cgrOpts[utils.MetaRateSCost]; has {
+		return rtCost.(utils.RateProfileCost).Cost
+	}
 	return nil
 }
