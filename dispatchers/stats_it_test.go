@@ -176,12 +176,13 @@ func testDspStsTestAuthKey(t *testing.T) {
 		ID:     "event1",
 		Event: map[string]interface{}{
 			utils.AccountField: "1001",
-			utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			utils.Usage:        135 * time.Second,
-			utils.Cost:         123.0,
-			utils.PDD:          12 * time.Second},
+		},
 		APIOpts: map[string]interface{}{
-			utils.OptsAPIKey: "12345",
+			utils.MetaStartTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			utils.MetaUsage:     135 * time.Second,
+			utils.MetaCost:      123.0,
+			utils.MetaPDD:       12 * time.Second,
+			utils.OptsAPIKey:    "12345",
 		},
 	}
 	if err := dispEngine.RPC.Call(utils.StatSv1ProcessEvent,
