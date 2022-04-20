@@ -1170,6 +1170,7 @@ func TestCDRProcessRatesCostForEvent(t *testing.T) {
 					},
 				},
 			},
+			utils.MetaCost:  utils.NewDecimal(int64(15*time.Second)/10, 0),
 			utils.MetaUsage: 15 * time.Second,
 		},
 	}
