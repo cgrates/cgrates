@@ -737,6 +737,7 @@ const (
 	MetaRounding            = "*rounding"
 	StatsNA                 = -1.0
 	InvalidUsage            = -1
+	Concretes               = "Concretes"
 	ActionS                 = "ActionS"
 	Schedule                = "Schedule"
 	ActionFilterIDs         = "ActionFilterIDs"

@@ -232,7 +232,12 @@ func (acc *StatACC) GetValue() *utils.Decimal {
 }
 
 func (acc *StatACC) AddEvent(evID string, ev utils.DataProvider) error {
-	ival, err := ev.FieldAsInterface([]string{utils.MetaOpts, utils.MetaCost})
+	var newEv utils.DataProvider
+	var err error
+	if newEv, err = populateCost(ev); err != nil {
+		return err
+	}
+	ival, err := newEv.FieldAsInterface([]string{utils.MetaOpts, utils.MetaCost})
 	if err != nil {
 		if err == utils.ErrNotFound {
 			err = utils.ErrPrefix(err, utils.MetaCost)
@@ -265,7 +270,12 @@ type StatTCC struct {
 }
 
 func (tcc *StatTCC) AddEvent(evID string, ev utils.DataProvider) error {
-	ival, err := ev.FieldAsInterface([]string{utils.MetaOpts, utils.MetaCost})
+	var newEv utils.DataProvider
+	var err error
+	if newEv, err = populateCost(ev); err != nil {
+		return err
+	}
+	ival, err := newEv.FieldAsInterface([]string{utils.MetaOpts, utils.MetaCost})
 	if err != nil {
 		if err == utils.ErrNotFound {
 			err = utils.ErrPrefix(err, utils.MetaCost)
@@ -889,4 +899,38 @@ func getStatTenantID(tntID string) (promTntID string, err error) {
 		}
 	}
 	return tntID, nil
+}
+
+func populateCost(ev utils.DataProvider) (newDP utils.DataProvider, err error) {
+	// if the cost is present, no need to change
+	var ival interface{}
+	if ival, err = ev.FieldAsInterface([]string{utils.MetaOpts, utils.MetaCost}); err == nil && ival != nil {
+		return
+	}
+	// if the cost is not present, get it from accounts cost
+	var cost float64
+	if ival, err = ev.FieldAsInterface([]string{utils.MetaOpts, utils.MetaAccountSCost, utils.Concretes}); err != nil && err != utils.ErrNotFound {
+		return
+	} else if ival != nil {
+		if cost, err = utils.IfaceAsFloat64(ival); err != nil {
+			return
+		}
+		if err = ev.(*dynamicDP).initialDP.(utils.MapStorage).Set([]string{utils.MetaOpts, utils.MetaCost}, cost); err != nil {
+			return
+		}
+		return ev, nil
+	}
+	// if the cost is not present in accounts cost, get it from rates cost
+	if ival, err = ev.FieldAsInterface([]string{utils.MetaOpts, utils.MetaRateSCost, utils.Cost}); err != nil && err != utils.ErrNotFound {
+		return
+	} else if ival != nil {
+		if cost, err = utils.IfaceAsFloat64(ival); err != nil {
+			return
+		}
+		if err = ev.(*dynamicDP).initialDP.(utils.MapStorage).Set([]string{utils.MetaOpts, utils.MetaCost}, cost); err != nil {
+			return
+		}
+		return ev, nil
+	}
+	return
 }
