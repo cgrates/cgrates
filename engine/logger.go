@@ -20,6 +20,7 @@ package engine
 
 import (
 	"log/syslog"
+	"time"
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
@@ -61,6 +62,7 @@ func (el *ExportLogger) Close() (_ error) {
 }
 
 func (el *ExportLogger) call(m string, level int) error {
+	timestamp := time.Now()
 	var reply map[string]map[string]interface{}
 	return el.connMgr.Call(context.Background(), el.eesConns, utils.EeSv1ProcessEvent, &utils.CGREventWithEeIDs{
 		CGREvent: &utils.CGREvent{
@@ -69,6 +71,7 @@ func (el *ExportLogger) call(m string, level int) error {
 				utils.NodeID: el.nodeID,
 				"Message":    m,
 				"Severity":   level,
+				"Timestamp":  timestamp.Format("2006-01-02 15:04:05"),
 			}}}, &reply)
 }
 
