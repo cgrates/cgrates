@@ -239,10 +239,10 @@ func testV1FltrAddStats(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "event3",
 		Event: map[string]interface{}{
-			"Stat":    "Stat1_1",
-			utils.PDD: 12 * time.Second,
+			"Stat": "Stat1_1",
 		},
 		APIOpts: map[string]interface{}{
+			utils.MetaPDD:       12 * time.Second,
 			utils.MetaUsage:     11 * time.Second,
 			utils.MetaStartTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			utils.MetaCost:      12.5,
@@ -259,10 +259,10 @@ func testV1FltrAddStats(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "event3",
 		Event: map[string]interface{}{
-			"Stat":    "Stat1_1",
-			utils.PDD: 15 * time.Second,
+			"Stat": "Stat1_1",
 		},
 		APIOpts: map[string]interface{}{
+			utils.MetaPDD:       15 * time.Second,
 			utils.MetaUsage:     15 * time.Second,
 			utils.MetaStartTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			utils.MetaCost:      15.5,

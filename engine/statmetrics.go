@@ -320,10 +320,10 @@ func (pdd *StatPDD) GetValue() *utils.Decimal {
 }
 
 func (pdd *StatPDD) AddEvent(evID string, ev utils.DataProvider) error {
-	ival, err := ev.FieldAsInterface([]string{utils.MetaReq, utils.PDD})
+	ival, err := ev.FieldAsInterface([]string{utils.MetaOpts, utils.MetaPDD})
 	if err != nil {
 		if err == utils.ErrNotFound {
-			err = utils.ErrPrefix(err, utils.PDD)
+			err = utils.ErrPrefix(err, utils.MetaPDD)
 		}
 		return err
 	}
@@ -905,7 +905,7 @@ func populateCost(ev utils.DataProvider) (newDP utils.DataProvider, err error) {
 	// if the cost is present, no need to change
 	var ival interface{}
 	if ival, err = ev.FieldAsInterface([]string{utils.MetaOpts, utils.MetaCost}); err == nil && ival != nil {
-		return
+		return ev, nil
 	}
 	// if the cost is not present, get it from accounts cost
 	var cost float64
