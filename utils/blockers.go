@@ -1,0 +1,78 @@
+/*
+Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
+Copyright (C) ITsysCOM GmbH
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>
+*/
+
+package utils
+
+import (
+	"fmt"
+	"strconv"
+	"strings"
+)
+
+type Blockers []*DynamicBlocker
+
+// NewBlockersFromString will build the Blockers that contains slices of FilterIDs and Blocker from a single value. This process is helped by separators
+func NewBlockersFromString(value, blkSep, fltrSep string) (blkrs Blockers, err error) {
+	if len(value) == 0 {
+		return Blockers{{}}, nil
+	}
+	valSeparated := strings.Split(value, blkSep)
+	lenVals := len(valSeparated)
+	if lenVals%2 != 0 {
+		return nil, fmt.Errorf("invalid DynamicBlocker format for string <%s>", value)
+	}
+	for idx := 0; idx < lenVals; idx += 2 {
+		var fltrIDs []string
+		if len(valSeparated[idx]) != 0 {
+			fltrIDs = strings.Split(valSeparated[idx], fltrSep)
+		}
+		var blocker bool
+		if len(valSeparated[idx+1]) != 0 {
+			if blocker, err = strconv.ParseBool(valSeparated[idx+1]); err != nil {
+				return nil, fmt.Errorf("cannot convert bool with value: <%v> into Blocker", valSeparated[idx+1])
+			}
+		}
+		blkrs = append(blkrs, &DynamicBlocker{FilterIDs: fltrIDs, Blocker: blocker})
+	}
+	return
+}
+
+// String
+func (blkrs Blockers) String(blkSep, fltrSep string) (value string) {
+	if len(blkrs) == 0 {
+		return
+	}
+	strBlockers := make([]string, len(blkrs))
+	for idx, val := range blkrs {
+		strBlockers[idx] = val.String(blkSep, fltrSep)
+	}
+	return strings.Join(strBlockers, blkSep)
+}
+
+type DynamicBlocker struct {
+	FilterIDs []string
+	Blocker   bool
+}
+
+func (blckr DynamicBlocker) String(blkSep, fltrSep string) (out string) {
+	blocker := "false"
+	if blckr.Blocker == true {
+		blocker = "true"
+	}
+	return strings.Join(blckr.FilterIDs, fltrSep) + blkSep + blocker
+}
