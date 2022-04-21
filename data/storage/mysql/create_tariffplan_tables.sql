@@ -146,7 +146,7 @@ CREATE TABLE tp_attributes (
   `path` varchar(64) NOT NULL,
   `type` varchar(64) NOT NULL,
   `value` varchar(64) NOT NULL,
-  `blocker` BOOLEAN NOT NULL,
+  `blockers` varchar(64) NOT NULL,
   `weights` varchar(64) NOT NULL,
   `created_at` TIMESTAMP,
   PRIMARY KEY (`pk`),

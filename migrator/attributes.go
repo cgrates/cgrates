@@ -535,9 +535,10 @@ func (v6AttrPrf v6AttributeProfile) AsAttributeProfile() (attrPrf *engine.Attrib
 		Tenant:     v6AttrPrf.Tenant,
 		ID:         v6AttrPrf.ID,
 		FilterIDs:  v6AttrPrf.FilterIDs,
-		Blocker:    v6AttrPrf.Blocker,
 		Attributes: make([]*engine.Attribute, len(v6AttrPrf.Attributes)),
 	}
+	attrPrf.Blockers = make(utils.Blockers, 1)
+	attrPrf.Blockers[0].Blocker = v6AttrPrf.Blocker
 	attrPrf.Weights = make(utils.DynamicWeights, 1)
 	attrPrf.Weights[0].Weight = v6AttrPrf.Weight
 	if strings.HasSuffix(fltr, utils.PipeSep) {

@@ -319,7 +319,7 @@ type TPAttributeProfile struct {
 	ID         string
 	FilterIDs  []string
 	Attributes []*TPAttribute
-	Blocker    bool
+	Blockers   string
 	Weights    string
 }
 

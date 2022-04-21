@@ -1510,7 +1510,11 @@ func TestV1DebitAbstractsEventCharges(t *testing.T) {
 				Value: config.NewRSRParsersMustCompile("RP_2", utils.InfieldSep),
 			},
 		},
-		Blocker: false,
+		Blockers: utils.Blockers{
+			{
+				Blocker: false,
+			},
+		},
 	}
 	if err := dm.SetAttributeProfile(context.Background(), atrPrfl, true); err != nil {
 		t.Error(err)
@@ -2022,7 +2026,11 @@ func TestV1DebitAbstractsEventChargesWithRefundCharges(t *testing.T) {
 				Value: config.NewRSRParsersMustCompile("RP_2", utils.InfieldSep),
 			},
 		},
-		Blocker: false,
+		Blockers: utils.Blockers{
+			{
+				Blocker: false,
+			},
+		},
 	}
 	if err := dm.SetAttributeProfile(context.Background(), atrPrfl, true); err != nil {
 		t.Error(err)

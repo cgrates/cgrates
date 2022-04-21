@@ -226,7 +226,7 @@ type AttributeMdl struct {
 	Path               string `index:"5" re:""`
 	Type               string `index:"6" re:""`
 	Value              string `index:"7" re:""`
-	Blocker            bool   `index:"8" re:""`
+	Blockers           string `index:"8" re:""`
 	CreatedAt          time.Time
 }
 

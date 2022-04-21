@@ -170,7 +170,11 @@ func testExpVerifyAttributes(t *testing.T) {
 				Value:     config.NewRSRParsersMustCompile("Marketing", utils.InfieldSep),
 			},
 		},
-		Blocker: false,
+		Blockers: utils.Blockers{
+			{
+				Blocker: false,
+			},
+		},
 		Weights: utils.DynamicWeights{
 			{
 				Weight: 10.0,

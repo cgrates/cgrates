@@ -410,8 +410,8 @@ func TestLoadAttributeProfiles(t *testing.T) {
 					Value:     "Sub2",
 				},
 			},
-			Blocker: true,
-			Weights: ";20",
+			Blockers: ";true",
+			Weights:  ";20",
 		},
 	}
 
@@ -427,8 +427,8 @@ func TestLoadAttributeProfiles(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", eAttrProfiles[resKey].FilterIDs, csvr.attributeProfiles[resKey].FilterIDs)
 	} else if !reflect.DeepEqual(eAttrProfiles[resKey].Attributes, csvr.attributeProfiles[resKey].Attributes) {
 		t.Errorf("Expecting: %+v, received: %+v", eAttrProfiles[resKey].Attributes, csvr.attributeProfiles[resKey].Attributes)
-	} else if !reflect.DeepEqual(eAttrProfiles[resKey].Blocker, csvr.attributeProfiles[resKey].Blocker) {
-		t.Errorf("Expecting: %+v, received: %+v", eAttrProfiles[resKey].Blocker, csvr.attributeProfiles[resKey].Blocker)
+	} else if !reflect.DeepEqual(eAttrProfiles[resKey].Blockers, csvr.attributeProfiles[resKey].Blockers) {
+		t.Errorf("Expecting: %+v, received: %+v", eAttrProfiles[resKey].Blockers, csvr.attributeProfiles[resKey].Blockers)
 	}
 }
 

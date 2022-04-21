@@ -1,4 +1,4 @@
-#Tenant,ID,FilterIDs,Weights,AttributeFilterIDs,Path,Type,Value,Blocker
-cgrates.org,ATTR_NAPTR_ADDR,*string:~*req.E164Address:4986517174964,;20,,*req.NAPTRAddress,*constant,sip:\1@172.16.1.1.,false
-cgrates.org,ATTR_NAPTR_SIP_URI,*string:~*req.Origin:cgrates,;20,,*req.SipURI,*variable,sip:cgrates@;~*req.Domanin,false
+#Tenant,ID,FilterIDs,Weights,AttributeFilterIDs,Path,Type,Value,Blockers
+cgrates.org,ATTR_NAPTR_ADDR,*string:~*req.E164Address:4986517174964,;20,,*req.NAPTRAddress,*constant,sip:\1@172.16.1.1.,;false
+cgrates.org,ATTR_NAPTR_SIP_URI,*string:~*req.Origin:cgrates,;20,,*req.SipURI,*variable,sip:cgrates@;~*req.Domanin,;false
 

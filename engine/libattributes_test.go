@@ -245,7 +245,11 @@ func TestAttributeProfileSet(t *testing.T) {
 		Tenant:    "cgrates.org",
 		ID:        "ID",
 		FilterIDs: []string{"fltr1", "*string:~*req.Account:1001"},
-		Blocker:   true,
+		Blockers: utils.Blockers{
+			{
+				Blocker: true,
+			},
+		},
 		Attributes: []*Attribute{{
 			Path:      "*req.Account",
 			Type:      utils.MetaConstant,
@@ -279,7 +283,7 @@ func TestAttributeProfileSet(t *testing.T) {
 	if err := dp.Set([]string{utils.Weights}, ";10", false, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
-	if err := dp.Set([]string{utils.Blocker}, true, false, utils.EmptyString); err != nil {
+	if err := dp.Set([]string{utils.BlockersField}, ";true", false, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
 	if err := dp.Set([]string{utils.Attributes, utils.Path}, "*req.Account", false, utils.EmptyString); err != nil {
@@ -310,7 +314,11 @@ func TestAttributeProfileAsInterface(t *testing.T) {
 		ID:        "ID",
 		FilterIDs: []string{"fltr1", "*string:~*req.Account:1001"},
 		Weights:   make(utils.DynamicWeights, 1),
-		Blocker:   true,
+		Blockers: utils.Blockers{
+			{
+				Blocker: true,
+			},
+		},
 		Attributes: []*Attribute{{
 			Path:      "*req.Account",
 			Type:      utils.MetaConstant,
@@ -355,9 +363,9 @@ func TestAttributeProfileAsInterface(t *testing.T) {
 	} else if exp := ap.Weights; !reflect.DeepEqual(exp, val) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
 	}
-	if val, err := ap.FieldAsInterface([]string{utils.Blocker}); err != nil {
+	if val, err := ap.FieldAsInterface([]string{utils.BlockersField}); err != nil {
 		t.Fatal(err)
-	} else if exp := ap.Blocker; !reflect.DeepEqual(exp, val) {
+	} else if exp := ap.Blockers; !reflect.DeepEqual(exp, val) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
 	}
 	if val, err := ap.FieldAsInterface([]string{utils.Attributes}); err != nil {
@@ -442,7 +450,11 @@ func TestAttributeProfileMerge(t *testing.T) {
 		ID:        "ID",
 		FilterIDs: []string{"fltr1", "*string:~*req.Account:1001"},
 		Weights:   make(utils.DynamicWeights, 1),
-		Blocker:   true,
+		Blockers: utils.Blockers{
+			{
+				Blocker: true,
+			},
+		},
 		Attributes: []*Attribute{{
 			Path:      "*req.Account",
 			Type:      utils.MetaConstant,
@@ -458,7 +470,11 @@ func TestAttributeProfileMerge(t *testing.T) {
 		ID:        "ID",
 		FilterIDs: []string{"fltr1", "*string:~*req.Account:1001"},
 		Weights:   make(utils.DynamicWeights, 1),
-		Blocker:   true,
+		Blockers: utils.Blockers{
+			{
+				Blocker: true,
+			},
+		},
 		Attributes: []*Attribute{{
 			Path:      "*req.Account",
 			Type:      utils.MetaConstant,
