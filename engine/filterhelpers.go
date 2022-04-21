@@ -110,7 +110,7 @@ func MatchingItemIDsForEvent(ctx *context.Context, ev utils.MapStorage, stringFl
 	return
 }
 
-// Weight returns weight of the first matching DynamicWeight
+// Weight returns the weight specified by the first matching DynamicWeight
 func WeightFromDynamics(ctx *context.Context, dWs []*utils.DynamicWeight,
 	fltrS *FilterS, tnt string, ev utils.DataProvider) (wg float64, err error) {
 	for _, dW := range dWs {
