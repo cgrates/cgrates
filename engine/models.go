@@ -199,15 +199,16 @@ type RouteMdl struct {
 	Weights             string `index:"3" re:""`
 	Sorting             string `index:"4" re:""`
 	SortingParameters   string `index:"5" re:""`
-	RouteID             string `index:"6" re:""`
-	RouteFilterIDs      string `index:"7" re:""`
-	RouteAccountIDs     string `index:"8" re:""`
-	RouteRateProfileIDs string `index:"9" re:""`
-	RouteResourceIDs    string `index:"10" re:""`
-	RouteStatIDs        string `index:"11" re:""`
-	RouteWeights        string `index:"12" re:""`
-	RouteBlocker        bool   `index:"13" re:""`
-	RouteParameters     string `index:"14" re:""`
+	Blockers            string `index:"6" re:""`
+	RouteID             string `index:"7" re:""`
+	RouteFilterIDs      string `index:"8" re:""`
+	RouteAccountIDs     string `index:"9" re:""`
+	RouteRateProfileIDs string `index:"10" re:""`
+	RouteResourceIDs    string `index:"11" re:""`
+	RouteStatIDs        string `index:"12" re:""`
+	RouteWeights        string `index:"13" re:""`
+	RouteBlocker        bool   `index:"14" re:""`
+	RouteParameters     string `index:"15" re:""`
 	CreatedAt           time.Time
 }
 

@@ -302,6 +302,7 @@ type TPRouteProfile struct {
 	SortingParameters []string
 	Routes            []*TPRoute
 	Weights           string
+	Blockers          string
 }
 
 // TPAttribute is used in TPAttributeProfile

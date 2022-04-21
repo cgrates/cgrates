@@ -44,7 +44,7 @@ func (adms *AdminSv1) GetRouteProfile(ctx *context.Context, arg *utils.TenantIDW
 }
 
 // GetRouteProfileIDs returns list of routeProfile IDs registered for a tenant
-func (adms *AdminSv1) GetRouteProfileIDs(ctx *context.Context, args *utils.ArgsItemIDs, sppPrfIDs *[]string) (err error) {
+func (adms *AdminSv1) GetRouteProfileIDs(ctx *context.Context, args *utils.ArgsItemIDs, routeProfileIDs *[]string) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = adms.cfg.GeneralCfg().DefaultTenant
@@ -67,7 +67,7 @@ func (adms *AdminSv1) GetRouteProfileIDs(ctx *context.Context, args *utils.ArgsI
 	if limit, offset, maxItems, err = utils.GetPaginateOpts(args.APIOpts); err != nil {
 		return
 	}
-	*sppPrfIDs, err = utils.Paginate(retIDs, limit, offset, maxItems)
+	*routeProfileIDs, err = utils.Paginate(retIDs, limit, offset, maxItems)
 	return
 }
 
