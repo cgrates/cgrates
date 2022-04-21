@@ -9,22 +9,11 @@
 },
 
 
-"rals": {
-	"enabled": true,
-	"thresholds_conns": ["*localhost"],
-	"dynaprepaid_actionplans": ["PACKAGE_1001"],
-},
-
-"schedulers": {
-	"enabled": true,
-	"thresholds_conns": ["*localhost"],
-},
-
 "cdrs": {
 	"enabled": true,
 	"attributes_conns":["*internal"],
 	"chargers_conns":["*localhost"],
-	"rals_conns": ["*localhost"],
+	"rates_conns": ["*localhost"],
 	"stats_conns": ["*localhost"],
 	"thresholds_conns": ["*localhost"],
 	"scheduler_conns": ["*localhost"],
@@ -52,7 +41,6 @@
 
 "admins": {
 	"enabled": true,
-	"scheduler_conns": ["*internal"],
 },
 
 }

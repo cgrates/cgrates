@@ -31,20 +31,6 @@
 },
 
 
-"rals": {
-	"enabled": true,
-	"thresholds_conns": ["*internal"],
-	"max_increments":3000000,
-},
-
-
-"schedulers": {
-	"enabled": true,
-	"cdrs_conns": ["*localhost"],
-	"stats_conns": ["*localhost"],
-},
-
-
 "cdrs": {
 	"enabled": true,
 },
@@ -80,7 +66,7 @@
 	"enabled": true,
 	"stats_conns": ["*localhost"],
 	"resources_conns": ["*localhost"],
-	"rals_conns": ["*internal"],
+	"rates_conns": ["*internal"],
 },
 
 
@@ -94,7 +80,7 @@
 
 "sessions": {
 	"enabled": true,
-	"rals_conns": ["*internal"],
+	"rates_conns": ["*internal"],
 	"cdrs_conns": ["*internal"],
 	"chargers_conns": ["*internal"],
 },
@@ -111,7 +97,6 @@
 
 "admins": {
 	"enabled": true,
-	"scheduler_conns": ["*internal"],
 },
 
 

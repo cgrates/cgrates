@@ -21,13 +21,7 @@
 	"db_name": "10", 						// data_db database name to connect to
 },
 
-
-
-"rals": {
-	"enabled": true,
-},
-
-"schedulers": {
+"rates": {
 	"enabled": true,
 },
 
@@ -49,7 +43,7 @@
 	"enabled": true,
 	"attributes_conns": ["*localhost"],
 	"chargers_conns": ["*localhost"],
-	"rals_conns": ["*localhost"],
+	"rates_conns": ["*localhost"],
 	"cdrs_conns": ["*localhost"],
 },
 
@@ -62,7 +56,6 @@
 
 "admins": {
 	"enabled": true,
-	"scheduler_conns": ["*internal"],
 },
 
 }

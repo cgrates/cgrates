@@ -22,17 +22,8 @@
 },
 
 
-
-
-"rals": {
+"rates": {
 	"enabled": true,
-	"thresholds_conns": ["*internal"],
-},
-
-
-"schedulers": {
-	"enabled": true,
-	"cdrs_conns": ["*localhost"],
 },
 
 
@@ -219,7 +210,7 @@
 
 "sessions": {
 	"enabled": true,
-	"rals_conns": ["*internal"],
+	"rates_conns": ["*internal"],
 	"cdrs_conns": ["*internal"],
 	"chargers_conns": ["*internal"],
 },
@@ -243,13 +234,12 @@
 		{"path": "Attributes.Path", "type": "*variable", "value": "~*req.5"},
 		{"path": "Attributes.Type", "type": "*variable", "value": "~*req.6"},
 		{"path": "Attributes.Value", "type": "*variable", "value": "~*req.7"},
-		{"path": "Blocker", "type": "*variable", "value": "~*req.8"},
+		{"path": "Blockers", "type": "*variable", "value": "~*req.8"},
 	],
 },
 
 
 "admins": {
 	"enabled": true,
-	"scheduler_conns": ["*internal"],
 },
 }

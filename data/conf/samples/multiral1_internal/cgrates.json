@@ -19,10 +19,8 @@
 },
 
 
-
-
-"rals": {
-	"enabled": true,					// enable Rater service: <true|false>
+"rates": {
+	"enabled": true,
 },
 
 }

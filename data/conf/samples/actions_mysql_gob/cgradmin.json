@@ -30,18 +30,6 @@
 	"db_name": "10", 						
 },
 
-
-
-"rals": {
-	"enabled": true,						// enable Rater service: <true|false>
-	"stats_conns": ["conn1"],
-},
-
-"schedulers": {
-	"enabled": true,						// start Scheduler service: <true|false>
-	"cdrs_conns": ["conn1"],
-},
-
 "cdrs": {
 	"enabled": true,						// start the CDR Server service:  <true|false>
 	"chargers_conns":["conn1"],
@@ -118,7 +106,6 @@
 
 "admins": {
 	"enabled": true,
-	"scheduler_conns": ["*internal"],
 	"ees_conns": ["*localhost"]
 },
 

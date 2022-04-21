@@ -110,7 +110,7 @@ func TestFilterIndexerIT(t *testing.T) {
 		cfgDBName = cfg.DataDbCfg().Name
 		defer redisDB.Close()
 		dataManager = NewDataManager(redisDB, config.CgrConfig().CacheCfg(), nil)
-	case utils.MetaPostgres:
+	case utils.MetaPostgres, utils.MetaMongo:
 		t.SkipNow()
 	default:
 		t.Fatal("Unknown Database type")

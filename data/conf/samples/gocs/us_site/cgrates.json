@@ -57,16 +57,10 @@
   },
 
 
-  "schedulers": {
-    "enabled": true,
-    "cdrs_conns": ["conn1"]
-  },
-
-
   "cdrs": {
     "enabled": true,
     "chargers_conns":["conn1"],
-    "rals_conns": ["*internal"]
+    "rates_conns": ["*internal"]
   },
 
 
@@ -78,7 +72,7 @@
   "sessions": {
     "enabled": true,
     "listen_bijson": ":4014",
-    "rals_conns": ["*internal"],
+    "rates_conns": ["*internal"],
     "cdrs_conns": ["*internal"],
     "chargers_conns": ["*internal"]
   },
@@ -87,7 +81,6 @@
   "admins": {
     "enabled": true,
     "caches_conns":["conn1"],
-    "scheduler_conns": ["conn1"]
   },
 
   "accounts": {

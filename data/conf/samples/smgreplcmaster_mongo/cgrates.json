@@ -27,12 +27,7 @@
 	},
 },
 
-
-"rals": {
-	"enabled": true,
-},
-
-"schedulers": {
+"rates": {
 	"enabled": true,
 },
 
@@ -53,14 +48,13 @@
 "sessions": {
 	"enabled": true,
 	"replication_conns": ["rplConn"],
-	"rals_conns": ["*internal"],
+	"rates_conns": ["*internal"],
 	"cdrs_conns": ["*internal"],
 	"chargers_conns": ["*internal"],
 },
 
 "admins": {
 	"enabled": true,
-	"scheduler_conns": ["*internal"],
 },
 
 }

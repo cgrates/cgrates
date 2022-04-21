@@ -31,17 +31,13 @@
 	"enabled": true,				
 },
 
-"rals": {
-	"enabled": true,
-},
-
-"chargers": {
+"rates": {
 	"enabled": true,
 },
 
 "sessions": {
 	"enabled": true,
-	"rals_conns": ["*localhost"],
+	"rates_conns": ["*localhost"],
 	"resources_conns": ["*localhost"],
 	"chargers_conns": ["*localhost"],
 	"listen_bijson": ":3014",
@@ -53,6 +49,5 @@
 
 "admins": {
 	"enabled": true,
-	"scheduler_conns": ["*internal"],
 },
 }

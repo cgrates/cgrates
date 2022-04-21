@@ -16,16 +16,14 @@
 	"db_name": "10", 						
 },
 
-
-
-"rals": {
-	"enabled": true,						// enable Rater service: <true|false>
+"rates": {
+	"enabled": true,
 },
 
 "cdrs": {
 	"enabled": true,						// start the CDR Server service:  <true|false>
 	"chargers_conns":["*internal"],
-	"rals_conns": ["*internal"],
+	"rates_conns": ["*internal"],
 },
 
 "chargers": {

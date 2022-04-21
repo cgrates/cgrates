@@ -29,13 +29,6 @@
 	"db_name": "10",
 },
 
-
-
-"rals": {
-	"enabled": true,
-},
-
-
 "admins": {
 	"enabled": true,
 	"caches_conns":["cacheConn"]

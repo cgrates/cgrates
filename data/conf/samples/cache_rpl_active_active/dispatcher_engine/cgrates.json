@@ -28,13 +28,7 @@
 	"cacheReplication": {
 		"conns": [{"address": "127.0.0.1:3013", "transport":"*gob"}],
 	},
-},
-
-
-"schedulers": {
-	"enabled": true,
-},
-	
+},	
 	
 "dispatchers":{
 	 "enabled": true,
@@ -43,7 +37,6 @@
 	
 "admins": {
 	"enabled": true,
-	"scheduler_conns": ["*internal"],
 },
 
 	

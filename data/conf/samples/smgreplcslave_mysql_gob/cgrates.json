@@ -12,19 +12,14 @@
 	"http": "127.0.0.1:22080",					// HTTP listening address
 },
 
-
-
-"rals": {
-	"enabled": true,					// enable Rater service: <true|false>
+"rates": {
+	"enabled": true,
 },
 
 "cdrs": {
 	"enabled": true,					// start the CDR Server service:  <true|false>
 },
 
-"schedulers": {
-	"enabled": true,
-},
 
 "attributes": {
 	"enabled": true,
@@ -51,14 +46,13 @@
 	"enabled": true,						// starts SessionManager service: <true|false>
 	"listen_bijson": "127.0.0.1:22014",		// address where to listen for bidirectional JSON-RPC requests
 	"replication_conns": ["rplConn"],
-	"rals_conns": ["conn1"],
+	"rates_conns": ["conn1"],
 	"cdrs_conns": ["*internal"],
 	"chargers_conns": ["*internal"],
 },
 
 "admins": {
 	"enabled": true,
-	"scheduler_conns": ["*internal"],
 },
 
 }

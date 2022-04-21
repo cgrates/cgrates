@@ -40,13 +40,6 @@
         "enabled": true
     },
     
-    "rals": {
-        "enabled": true,
-    },
-    
-    "schedulers": {
-        "enabled": true,				
-    },
     
     "chargers": {
         "enabled": true,
@@ -59,7 +52,7 @@
     
     "routes": {
         "enabled": true,
-        "rals_conns": ["*internal"],
+        "rates_conns": ["*internal"],
     },
     
     "stats": {

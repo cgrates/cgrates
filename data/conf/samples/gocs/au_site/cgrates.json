@@ -45,14 +45,7 @@
   },
 
 
-
-  "rals": {
-    "enabled": true,
-    "max_increments":3000000,
-  },
-
-
-  "schedulers": {
+  "rates": {
     "enabled": true,
   },
 
@@ -63,13 +56,12 @@
 
   "sessions": {
     "enabled": true,
-    "rals_conns": ["*internal"],
+    "rates_conns": ["*internal"],
     "chargers_conns": ["*internal"],
   },
 
   "admins": {
     "enabled": true,
     "caches_conns":["conn1"],
-    "scheduler_conns": ["conn1"],
   }
 }

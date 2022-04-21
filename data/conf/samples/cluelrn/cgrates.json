@@ -23,18 +23,6 @@
 },
 
 
-
-
-"rals": {
-	"enabled": true,
-},
-
-
-"schedulers": {
-	"enabled": true,
-},
-
-
 "cdrs": {
 	"enabled": true,
 },
@@ -58,7 +46,6 @@
 
 "admins": {
 	"enabled": true,
-	"scheduler_conns": ["*internal"],
 },
 
 }

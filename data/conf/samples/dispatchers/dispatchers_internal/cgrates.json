@@ -18,26 +18,17 @@
 	"db_type": "*internal",
 },
 
-
-
-	
 "caches":{
 	"partitions": {
 		"*dispatcher_routes": {"limit": -1, "ttl": "2s"}
 	},
 },
 
-
-"schedulers": {
-	"enabled": true,
-},
-
-
 "attributes": {
 	"enabled": true
 },
-	
-"rals": {
+
+"rates": {
 	"enabled": true,
 },
 	
@@ -50,7 +41,7 @@
 "sessions": {
 	"enabled": true,
 	"attributes_conns": ["*localhost"],
-	"rals_conns": ["*localhost"],
+	"rates_conns": ["*localhost"],
 	"resources_conns": ["*localhost"],
 	"chargers_conns": ["*localhost"],
 	"listen_bijson": ":3014",
@@ -58,14 +49,13 @@
 	
 	
 "dispatchers":{
-	 "enabled": true,
-	 "attributes_conns": ["*internal"],
+	"enabled": true,
+	"attributes_conns": ["*internal"],
 },
 	
 	
 "admins": {
 	"enabled": true,
-	"scheduler_conns": ["*internal"],
 },
 
 

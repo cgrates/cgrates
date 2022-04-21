@@ -57,7 +57,7 @@ func TestDMitinitDB(t *testing.T) {
 		if err != nil {
 			t.Fatal("Could not connect to Redis", err.Error())
 		}
-	case utils.MetaPostgres:
+	case utils.MetaPostgres, utils.MetaMongo:
 		t.SkipNow()
 	default:
 		t.Fatal("Unknown Database type")

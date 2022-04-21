@@ -24,16 +24,7 @@
 	"db_port": 27017,
 },
 
-
-
-
-
-"rals": {
-	"enabled": true,
-},
-
-
-"schedulers": {
+"rates": {
 	"enabled": true,
 },
 
@@ -57,7 +48,7 @@
 "cdrs": {
 	"enabled": true,
 	"chargers_conns": ["*localhost"],
-	"rals_conns": ["*internal"],
+	"rates_conns": ["*internal"],
 	"session_cost_retries": 0,
 },
 
@@ -65,7 +56,7 @@
 "sessions": {
 	"enabled": true,
 	"chargers_conns": ["*localhost"],
-	"rals_conns": ["*internal"],
+	"rates_conns": ["*internal"],
 	"cdrs_conns": ["*internal"],
 	"resources_conns": ["*internal"],
 	"attributes_conns": ["*internal"],
@@ -561,7 +552,6 @@
 
 "admins": {
 	"enabled": true,
-	"scheduler_conns": ["*internal"],
 },
 
 

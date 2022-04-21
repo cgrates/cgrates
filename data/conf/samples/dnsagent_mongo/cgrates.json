@@ -18,34 +18,24 @@
 },
 
 
-
-
-
-
-"schedulers": {
-	"enabled": true,
-	"cdrs_conns": ["*internal"],
-},
-
-
 "sessions": {
 	"enabled": true,
 	"attributes_conns": ["*localhost"],
-	"rals_conns": ["*internal"],
+	"rates_conns": ["*internal"],
 	"cdrs_conns": ["*internal"],
 	"chargers_conns": ["*internal"],
 	"routes_conns": ["*localhost"],
 },
 
 
-"rals": {
+"rates": {
 	"enabled": true,
 },
 
 
 "cdrs": {
 	"enabled": true,
-	"rals_conns": ["*internal"],
+	"rates_conns": ["*internal"],
 },
 
 

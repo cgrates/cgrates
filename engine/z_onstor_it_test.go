@@ -85,7 +85,7 @@ func TestOnStorIT(t *testing.T) {
 		}
 		onStorCfg = cfg.DataDbCfg().Name
 		onStor = NewDataManager(rdsITdb, config.CgrConfig().CacheCfg(), nil)
-	case utils.MetaPostgres:
+	case utils.MetaPostgres, utils.MetaMongo:
 		t.SkipNow()
 	default:
 		t.Fatal("Unknown Database type")

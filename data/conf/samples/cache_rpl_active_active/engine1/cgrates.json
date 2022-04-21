@@ -32,15 +32,6 @@
 	"enabled": true
 },
 
-"rals": {
-	"enabled": true,
-},
-
-"schedulers": {
-	"enabled": true,				
-},
-
-
 "chargers": {
 	"enabled": true,
 	"attributes_conns": ["*internal"],
@@ -50,7 +41,6 @@
 "admins": {
 	"enabled": true,
 	"caches_conns":["conn1"],
-	"scheduler_conns": ["*internal"],
 },
 
 }

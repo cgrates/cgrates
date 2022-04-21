@@ -1209,7 +1209,7 @@ const CGRATES_CFG_JSON = `
 					{"tag": "Path", "path": "Attributes.Path", "type": "*variable", "value": "~*req.5"},
 					{"tag": "Type", "path": "Attributes.Type", "type": "*variable", "value": "~*req.6"},
 					{"tag": "Value", "path": "Attributes.Value", "type": "*variable", "value": "~*req.7"},
-					{"tag": "Blocker", "path": "Blocker", "type": "*variable", "value": "~*req.8"},
+					{"tag": "Blockers", "path": "Blockers", "type": "*variable", "value": "~*req.8"},
 				],
 			},
 			{

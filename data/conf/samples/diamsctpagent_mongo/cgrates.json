@@ -22,14 +22,10 @@
 	"db_password": "",
 },
 
-
-"rals": {
+"rates": {
 	"enabled": true,
 },
 
-"schedulers": {
-	"enabled": true,
-},
 
 "cdrs": {
 	"enabled": true,
@@ -49,7 +45,7 @@
 	"enabled": true,
 	"attributes_conns": ["*localhost"],
 	"chargers_conns": ["*localhost"],
-	"rals_conns": ["*localhost"],
+	"rates_conns": ["*localhost"],
 	"cdrs_conns": ["*localhost"],
 },
 
@@ -63,7 +59,6 @@
 
 "admins": {
 	"enabled": true,
-	"scheduler_conns": ["*internal"],
 },
 
 }

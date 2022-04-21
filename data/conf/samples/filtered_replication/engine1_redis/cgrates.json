@@ -48,21 +48,8 @@
 },
 
 
-
-
-
-"rals": {
-	"enabled": true,
-},
-
-
-"schedulers": {
-	"enabled": true,
-},
-
 "admins": {
 	"enabled": true,
-	"scheduler_conns": ["*internal"],
 },
 
 "thresholds": {

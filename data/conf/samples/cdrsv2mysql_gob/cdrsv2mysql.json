@@ -17,7 +17,6 @@
 
 	"schedulers": {
 		"enabled": true,
-		"thresholds_conns": ["*localhost"]
 	},
 
 	"cdrs": {
@@ -53,7 +52,6 @@
 
 	"admins": {
 		"enabled": true,
-		"scheduler_conns": ["*internal"]
 	},
 
 	"actions": {

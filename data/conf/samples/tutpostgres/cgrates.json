@@ -19,17 +19,6 @@
 },
 
 
-"rals": {
-	"enabled": true,
-	"thresholds_conns": ["*internal"],
-},
-
-
-"schedulers": {
-	"enabled": true,					// start Scheduler service: <true|false>
-},
-
-
 "cdrs": {
 	"enabled": true,					// start the CDR Server service:  <true|false>
 },
@@ -81,14 +70,13 @@
 "sessions": {
 	"enabled": true,
 	"chargers_conns": ["*internal"],
-	"rals_conns": ["*internal"],
+	"rates_conns": ["*internal"],
 	"cdrs_conns": ["*internal"],
 },
 
 
 "admins": {
 	"enabled": true,
-	"scheduler_conns": ["*internal"],
 },
 
 

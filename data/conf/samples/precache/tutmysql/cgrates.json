@@ -46,11 +46,6 @@
 	},
 },
 
-"schedulers": {
-	"enabled": true,
-},
-
-
 "migrator":{
 	"users_filters":["Account"],
 },
@@ -58,7 +53,6 @@
 
 "admins": {
 	"enabled": true,
-	"scheduler_conns": ["*internal"],
 },
 
 

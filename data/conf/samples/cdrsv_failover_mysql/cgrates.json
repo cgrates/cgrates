@@ -18,22 +18,11 @@
 	"db_name": "10" 						// data_db database name to connect to
 },
 
-
-
-"rals": {
-	"enabled": true,						// enable Rater service: <true|false>
-	"thresholds_conns": ["*localhost"]
-},
-
-"schedulers": {
-	"enabled": true
-},
-
 "cdrs": {
 	"enabled": true,
 	"attributes_conns":["*internal"],
 	"chargers_conns":["*localhost"],
-	"rals_conns": ["*localhost"],
+	"rates_conns": ["*localhost"],
 	"stats_conns": ["*localhost"],
 	"thresholds_conns": ["*localhost"],
 	"online_cdr_exports": ["s3_test_file"],
@@ -62,7 +51,6 @@
 
 "admins": {
 	"enabled": true,
-	"scheduler_conns": ["*internal"]
 },
 
 "ees": {
@@ -91,6 +79,10 @@
 	]
 },
 
+"rates": {
+	"enabled": true,
+},
+
 "loaders": [
 	{
 		"id": "*default",
@@ -100,7 +92,7 @@
 		"tp_in_dir": "/usr/share/cgrates/tariffplans/testit",
 		"tp_out_dir": ""
 	}
-]
+],
 
 
-},
+}

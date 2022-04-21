@@ -58,13 +58,6 @@
 
 
 
-
-
-"rals": {
-	"enabled": true,
-},
-
-
 "thresholds": {
 	"enabled": true,
 	"store_interval": "-1",
@@ -78,22 +71,12 @@
 },
 
 
-"schedulers": {
-	"enabled": true,
-},
-
 
 "admins": {
 	"enabled": true,
-	"scheduler_conns": ["*internal"],
 },
 
 "stats": {
-	"enabled": true,
-	"store_interval": "-1",
-},
-
-"resources": {
 	"enabled": true,
 	"store_interval": "-1",
 },
