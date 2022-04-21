@@ -22,6 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package apis
 
 import (
+	"fmt"
 	"path"
 	"reflect"
 	"sort"
@@ -54,6 +55,11 @@ var (
 		testRouteSSetRoute3,
 		testFilterSGetRoutes,
 		testFilterSGetRoutesWithPrefix,
+		testRouteSRemoveRouteProfiles,
+
+		// Blocker behaviour test
+		testRouteSSetRouteProfiles,
+		testRouteSGetRouteProfilesForEvent,
 		testRouteSKillEngine,
 	}
 )
@@ -465,6 +471,168 @@ func testFilterSGetRoutesWithPrefix(t *testing.T) {
 	if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(reply))
 	}
+}
+
+func testRouteSRemoveRouteProfiles(t *testing.T) {
+	args := &utils.ArgsItemIDs{
+		Tenant: "cgrates.org",
+	}
+	expected := []string{"PrefixROUTE_ACNT_1002", "PrefixROUTE_ACNT_1003", "ROUTE_ACNT_1001"}
+	var routeProfileIDs []string
+	if err := roRPC.Call(context.Background(), utils.AdminSv1GetRouteProfileIDs, args, &routeProfileIDs); err != nil {
+		t.Fatal(err)
+	} else {
+		sort.Strings(routeProfileIDs)
+		if !utils.SliceStringEqual(routeProfileIDs, expected) {
+			t.Errorf("expected: <%+v>, \nreceived: <%+v>", expected, routeProfileIDs)
+		}
+	}
+	var reply string
+	for _, routeProfileID := range routeProfileIDs {
+		argsRem := utils.TenantIDWithAPIOpts{
+			TenantID: &utils.TenantID{
+				Tenant: "cgrates.org",
+				ID:     routeProfileID,
+			},
+		}
+		if err := roRPC.Call(context.Background(), utils.AdminSv1RemoveRouteProfile, argsRem, &reply); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if err := roRPC.Call(context.Background(), utils.AdminSv1GetRouteProfileIDs, args, &routeProfileIDs); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
+	}
+}
+
+func testRouteSSetRouteProfiles(t *testing.T) {
+	routeProfiles := []*engine.RouteProfileWithAPIOpts{
+		{
+			RouteProfile: &engine.RouteProfile{
+				ID:        "ROUTE_TEST_1",
+				Tenant:    "cgrates.org",
+				FilterIDs: []string{"*string:~*req.TestCase:BlockerBehaviour"},
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 30,
+					},
+				},
+				Blockers: utils.Blockers{
+					{
+						Blocker: true,
+					},
+				},
+				Sorting:           utils.MetaWeight,
+				SortingParameters: []string{},
+				Routes: []*engine.Route{
+					{
+						ID: "routeTest",
+					},
+				},
+			},
+		},
+		{
+			RouteProfile: &engine.RouteProfile{
+				ID:        "ROUTE_TEST_2",
+				Tenant:    "cgrates.org",
+				FilterIDs: []string{"*string:~*req.TestCase:BlockerBehaviour"},
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 10,
+					},
+				},
+				Blockers: utils.Blockers{
+					{
+						Blocker: true,
+					},
+				},
+				Sorting:           utils.MetaWeight,
+				SortingParameters: []string{},
+				Routes: []*engine.Route{
+					{
+						ID: "routeTest",
+					},
+				},
+			},
+		},
+		{
+			RouteProfile: &engine.RouteProfile{
+				ID:        "ROUTE_TEST_3",
+				Tenant:    "cgrates.org",
+				FilterIDs: []string{"*string:~*req.TestCase:BlockerBehaviour"},
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 20,
+					},
+				},
+				Sorting:           utils.MetaWeight,
+				SortingParameters: []string{},
+				Routes: []*engine.Route{
+					{
+						ID: "routeTest",
+					},
+				},
+			},
+		},
+		{
+			RouteProfile: &engine.RouteProfile{
+				ID:        "ROUTE_TEST_4",
+				Tenant:    "cgrates.org",
+				FilterIDs: []string{"*string:~*req.TestCase:BlockerBehaviour"},
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 5,
+					},
+				},
+				Sorting:           utils.MetaWeight,
+				SortingParameters: []string{},
+				Routes: []*engine.Route{
+					{
+						ID: "routeTest",
+					},
+				},
+			},
+		},
+	}
+
+	var reply string
+	for _, routeProfile := range routeProfiles {
+		if err := roRPC.Call(context.Background(), utils.AdminSv1SetRouteProfile,
+			routeProfile, &reply); err != nil {
+			t.Error(err)
+		} else if reply != utils.OK {
+			t.Error(err)
+		}
+	}
+
+	argsGet := &utils.TenantIDWithAPIOpts{
+		TenantID: &utils.TenantID{
+			Tenant: "cgrates.org",
+			ID:     "ROUTE_TEST_1",
+		},
+	}
+	var result engine.RouteProfile
+	if err := roRPC.Call(context.Background(), utils.AdminSv1GetRouteProfile,
+		argsGet, &result); err != nil {
+		t.Error(err)
+	}
+	fmt.Println(utils.ToJSON(result))
+}
+
+func testRouteSGetRouteProfilesForEvent(t *testing.T) {
+	args := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "EventGetRouteProfiles",
+		Event: map[string]interface{}{
+			"TestCase": "BlockerBehaviour",
+		},
+		APIOpts: map[string]interface{}{},
+	}
+	var reply []*engine.RouteProfile
+	if err := roRPC.Call(context.Background(), utils.RouteSv1GetRouteProfilesForEvent, args, &reply); err != nil {
+		t.Error(err)
+	}
+	fmt.Println(utils.ToJSON(reply))
 }
 
 //Kill the engine when it is about to be finished
