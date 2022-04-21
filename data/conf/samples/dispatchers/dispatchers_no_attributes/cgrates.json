@@ -26,13 +26,6 @@
 	},
 },
 
-"schedulers": {
-	"enabled": true,				
-},
-
-"rals": {
-	"enabled": true,
-},
 
 "sessions": {
 	"enabled": true,
@@ -45,6 +38,5 @@
 
 "admins": {
 	"enabled": true,
-	"scheduler_conns": ["*internal"],
 },
 }

@@ -18,10 +18,7 @@
 	"db_type": "*internal",	
 },
 
-
-
-
-"rals": {
+"rates": {
 	"enabled": true,
 },
 

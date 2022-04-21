@@ -42,10 +42,7 @@
 	"db_name": "10", 						// data_db database name to connect to
 },
 
-
-
-
-"rals": {
+"rates": {
 	"enabled": true,
 },
 
@@ -78,7 +75,7 @@
 
 "sessions": {
 	"enabled": true,
-	"rals_conns": ["conn1"],
+	"rates_conns": ["conn1"],
 	"resources_conns": ["conn1"],
 	"attributes_conns": ["conn1"],
 },

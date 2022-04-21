@@ -19,15 +19,6 @@
 	"db_type": "*internal",	
 },
 
-
-"rals": {
-	"enabled": true,
-},
-
-"schedulers": {
-	"enabled": true,
-},
-
 "cdrs": {
 	"enabled": true,
 },
@@ -41,12 +32,15 @@
 	"attributes_conns": ["*internal"],
 },
 
+"rates": {
+	"enabled": true,
+},
 
 "sessions": {
 	"enabled": true,
 	"attributes_conns": ["*localhost"],
 	"chargers_conns": ["*localhost"],
-	"rals_conns": ["*localhost"],
+	"rates_conns": ["*localhost"],
 	"cdrs_conns": ["*localhost"],
 },
 
@@ -59,7 +53,6 @@
 
 "admins": {
 	"enabled": true,
-	"scheduler_conns": ["*internal"],
 },
 
 }

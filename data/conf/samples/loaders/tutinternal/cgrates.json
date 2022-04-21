@@ -20,17 +20,8 @@
 	"db_type": "*internal",
 },
 
-
-
-
-"rals": {
+"rates": {
 	"enabled": true,
-},
-
-
-"schedulers": {
-	"enabled": true,
-	"cdrs_conns": ["*internal"],
 },
 
 
@@ -200,13 +191,12 @@
 		{"path": "Attributes.Path", "type": "*variable", "value": "~*req.5"},
 		{"path": "Attributes.Type", "type": "*variable", "value": "~*req.6"},
 		{"path": "Attributes.Value", "type": "*variable", "value": "~*req.7"},
-		{"path": "Blocker", "type": "*variable", "value": "~*req.8"},
+		{"path": "Blockers", "type": "*variable", "value": "~*req.8"},
 	],
 },
 
 "admins": {
 	"enabled": true,
-	"scheduler_conns": ["*internal"],
 },
 
 

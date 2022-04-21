@@ -15,11 +15,6 @@
 		"enabled": true
 	},
 
-	"schedulers": {
-		"enabled": true,
-		"thresholds_conns": ["conn1"]
-	},
-
 	"cdrs": {
 		"enabled": true,
 		"attributes_conns":["*internal"],
@@ -27,7 +22,6 @@
 		"rates_conns": ["conn1"],
 		"stats_conns": ["conn1"],
 		"thresholds_conns": ["conn1"],
-		"scheduler_conns": ["conn1"]
 	},
 
 	"attributes": {
@@ -53,7 +47,6 @@
 
 	"admins": {
 		"enabled": true,
-		"scheduler_conns": ["*internal"]
 	},
 
 	"actions": {

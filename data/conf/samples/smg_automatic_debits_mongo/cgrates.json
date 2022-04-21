@@ -14,13 +14,8 @@
 	"db_password": "",
 },
 
-
-"rals": {
-	"enabled": true,					// enable Rater service: <true|false>
-},
-
-"schedulers": {
-	"enabled": true,					// start Scheduler service: <true|false>
+"rates": {
+	"enabled": true,
 },
 
 "cdrs": {
@@ -39,7 +34,7 @@
 "sessions": {
 	"enabled": true,
 	"debit_interval": "1ms",					// interval to perform debits on.
-	"rals_conns": ["*internal"],
+	"rates_conns": ["*internal"],
 	"cdrs_conns": ["*internal"],
 	"chargers_conns": ["*internal"],
 },
@@ -47,7 +42,6 @@
 
 "admins": {
 	"enabled": true,
-	"scheduler_conns": ["*internal"],
 },
 
 

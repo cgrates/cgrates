@@ -76,7 +76,6 @@
 "admins": {
 	"enabled": true,
 	"caches_conns":["*localhost"],
-	"scheduler_conns": ["*internal"]
 },
 
 "loaders": [

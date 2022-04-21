@@ -38,13 +38,6 @@
 	"enabled": true
 },
 
-"rals": {
-	"enabled": true,
-},
-
-"schedulers": {
-	"enabled": true,				
-},
 
 "chargers": {
 	"enabled": true,
@@ -88,7 +81,7 @@
 "cdrs": {
 	"enabled": true,	
 	"chargers_conns":["*internal"],
-	"rals_conns": ["*internal"],
+	"rates_conns": ["*internal"],
 },
 
 "sessions": {
@@ -97,7 +90,7 @@
 	"routes_conns": ["*internal"],
 	"resources_conns": ["*internal"],
 	"attributes_conns": ["*internal"],
-	"rals_conns": ["*internal"],
+	"rates_conns": ["*internal"],
 	"chargers_conns": ["*internal"],
 	"cdrs_conns": ["*internal"],
 },
@@ -105,7 +98,6 @@
 "admins": {
 	"enabled": true,
 	"caches_conns":["conn1"],
-	"scheduler_conns": ["*internal"],
 },
 
 }

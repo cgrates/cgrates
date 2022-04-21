@@ -8,21 +8,15 @@
 		"failed_posts_dir": "/tmp/failed_posts"	
 	},
 
-
-	"rals": {
-		"enabled": true,						
-		"thresholds_conns": ["*localhost"]
-	},
-
-	"schedulers": {
-		"enabled": true
+	"rates": {
+		"enabled": true,
 	},
 
 	"cdrs": {
 		"enabled": true,
 		"attributes_conns":["*internal"],
 		"chargers_conns":["*localhost"],
-		"rals_conns": ["*localhost"],
+		"rates_conns": ["*localhost"],
 		"stats_conns": ["*localhost"],
 		"thresholds_conns": ["*localhost"],
 		"online_cdr_exports": ["s3_test_file"],
@@ -51,7 +45,6 @@
 
 	"admins": {
 		"enabled": true,
-		"scheduler_conns": ["*internal"]
 	},
 
 	"ees": {

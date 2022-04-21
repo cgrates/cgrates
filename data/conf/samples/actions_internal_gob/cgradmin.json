@@ -28,17 +28,6 @@
 	"db_type": "*internal",	
 },
 
-
-"rals": {
-	"enabled": true,
-	"stats_conns": ["*internal"],
-},
-
-"schedulers": {
-	"enabled": true,
-	"cdrs_conns": ["conn1"],
-},
-
 "cdrs": {
 	"enabled": true,
 	"chargers_conns":["conn1"],
@@ -117,7 +106,6 @@
 
 "admins": {
 	"enabled": true,
-	"scheduler_conns": ["*internal"],
 	"ees_conns": ["*localhost"]
 },
 

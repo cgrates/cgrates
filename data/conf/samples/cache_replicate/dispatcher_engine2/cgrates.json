@@ -28,12 +28,6 @@
 		"*dispatcher_routes": {"limit": -1, "ttl": "1h"}
 	},
 },
-
-
-"schedulers": {
-	"enabled": true,
-},
-	
 	
 "dispatchers":{
 	 "enabled": true,
@@ -42,7 +36,6 @@
 	
 "admins": {
 	"enabled": true,
-	"scheduler_conns": ["*internal"],
 },
 
 	

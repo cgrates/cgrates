@@ -150,6 +150,11 @@ func testTPeSSetAttributeProfile(t *testing.T) {
 					Value: "cgrates.itsyscom",
 				},
 			},
+			Blockers: utils.Blockers{
+				{
+					Blocker: true,
+				},
+			},
 			Weights: utils.DynamicWeights{
 				{
 					Weight: 20,
@@ -1079,8 +1084,8 @@ func testTPeSExportTariffPlanHalfTariffPlan(t *testing.T) {
 	expected := map[string][][]string{
 		utils.AttributesCsv: {
 			{"#Tenant", "ID", "FilterIDs", "Weights", "AttributeFilterIDs", "Path", "Type", "Value", "Blocker"},
-			{"cgrates.org", "TEST_ATTRIBUTES_IT_TEST", "*string:~*req.Account:1002;*exists:~*opts.*usage:", ";20", "", "Account", "*constant", "1002", "false"},
-			{"cgrates.org", "TEST_ATTRIBUTES_IT_TEST", "", "", "", "*tenant", "*constant", "cgrates.itsyscom", "false"},
+			{"cgrates.org", "TEST_ATTRIBUTES_IT_TEST", "*string:~*req.Account:1002;*exists:~*opts.*usage:", ";20", "", "Account", "*constant", "1002", ";true"},
+			{"cgrates.org", "TEST_ATTRIBUTES_IT_TEST", "", "", "", "*tenant", "*constant", "cgrates.itsyscom", ""},
 		},
 		utils.ResourcesCsv: {
 			{"#Tenant", "ID", "FIlterIDs", "Weights", "TTL", "Limit", "AlocationMessage", "Blocker", "Stored", "ThresholdIDs"},
@@ -1199,9 +1204,9 @@ func testTPeSExportTariffPlanAllTariffPlan(t *testing.T) {
 	expected := map[string][][]string{
 		utils.AttributesCsv: {
 			{"#Tenant", "ID", "FilterIDs", "Weights", "AttributeFilterIDs", "Path", "Type", "Value", "Blocker"},
-			{"cgrates.org", "TEST_ATTRIBUTES_IT_TEST", "*string:~*req.Account:1002;*exists:~*opts.*usage:", ";20", "", "Account", "*constant", "1002", "false"},
-			{"cgrates.org", "TEST_ATTRIBUTES_IT_TEST", "", "", "", "*tenant", "*constant", "cgrates.itsyscom", "false"},
-			{"cgrates.org", "TEST_ATTRIBUTES_IT_TEST_SECOND", "*string:~*opts.*context:*sessions;*exists:~*opts.*usage:", "", "", "*tenant", "*constant", "cgrates.itsyscom", "false"},
+			{"cgrates.org", "TEST_ATTRIBUTES_IT_TEST", "*string:~*req.Account:1002;*exists:~*opts.*usage:", ";20", "", "Account", "*constant", "1002", ";true"},
+			{"cgrates.org", "TEST_ATTRIBUTES_IT_TEST", "", "", "", "*tenant", "*constant", "cgrates.itsyscom", ""},
+			{"cgrates.org", "TEST_ATTRIBUTES_IT_TEST_SECOND", "*string:~*opts.*context:*sessions;*exists:~*opts.*usage:", "", "", "*tenant", "*constant", "cgrates.itsyscom", ""},
 		},
 		utils.ResourcesCsv: {
 			{"#Tenant", "ID", "FIlterIDs", "Weights", "TTL", "Limit", "AlocationMessage", "Blocker", "Stored", "ThresholdIDs"},

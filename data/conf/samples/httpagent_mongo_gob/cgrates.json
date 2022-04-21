@@ -21,15 +21,7 @@
 	},
 },
 
-
-
-"rals": {
-	"enabled": true,
-	"max_increments":3000000,
-},
-
-
-"schedulers": {
+"rates": {
 	"enabled": true,
 },
 
@@ -37,7 +29,7 @@
 "cdrs": {
 	"enabled": true,
 	"chargers_conns": ["*internal"],
-	"rals_conns": ["*internal"],
+	"rates_conns": ["*internal"],
 },
 
 
@@ -55,14 +47,13 @@
 	"enabled": true,
 	"attributes_conns": ["conn1"],
 	"cdrs_conns": ["conn1"],
-	"rals_conns": ["conn1"],
+	"rates_conns": ["conn1"],
 	"chargers_conns": ["*internal"],
 },
 
 
 "admins": {
 	"enabled": true,
-	"scheduler_conns": ["*internal"],
 },
 
 

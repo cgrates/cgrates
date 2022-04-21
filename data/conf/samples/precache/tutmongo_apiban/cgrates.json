@@ -50,16 +50,6 @@
 },
 
 
-"rals": {
-	"enabled": true,
-},
-
-
-"schedulers": {
-	"enabled": true,
-},
-
-
 "migrator": {
 	"out_datadb_type": "mongo",
 	"out_datadb_port": "27017",
@@ -71,7 +61,6 @@
 
 "admins": {
 	"enabled": true,
-	"scheduler_conns": ["*internal"],
 },
 
 

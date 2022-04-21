@@ -24,17 +24,11 @@
 		"enabled": true
 	},
 
-
-	"schedulers": {
-		"enabled": true
-	},
-
-
 	"cdrs": {
 		"enabled": true,
 		"session_cost_retries": 1,
 		"chargers_conns":["*internal"],
-		"rals_conns": ["*internal"]
+		"rates_conns": ["*internal"]
 	},
 
 
@@ -89,7 +83,6 @@
 
 	"admins": {
 		"enabled": true,
-		"scheduler_conns": ["*internal"]
 	},
 
 	"loaders": [

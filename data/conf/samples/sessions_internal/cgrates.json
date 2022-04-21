@@ -20,15 +20,7 @@
 	"db_type": "*internal",	
 },
 
-
-
-
-"rals": {
-	"enabled": true,
-},
-
-
-"schedulers": {
+"rates": {
 	"enabled": true,
 },
 
@@ -37,7 +29,7 @@
 	"enabled": true,
 	"session_cost_retries": 1,
 	"chargers_conns":["*internal"],
-	"rals_conns": ["*internal"],
+	"rates_conns": ["*internal"],
 },
 
 
@@ -80,7 +72,7 @@
 	"enabled": true,
 	"session_ttl": "50ms",
 	"chargers_conns": ["*internal"],
-	"rals_conns": ["*internal"],
+	"rates_conns": ["*internal"],
 	"cdrs_conns": ["*internal"],
 	"resources_conns": ["*internal"],
 	"thresholds_conns": ["*internal"],
@@ -93,7 +85,6 @@
 
 "admins": {
 	"enabled": true,
-	"scheduler_conns": ["*internal"],
 },
 
 

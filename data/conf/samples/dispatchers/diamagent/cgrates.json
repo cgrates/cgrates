@@ -29,14 +29,6 @@
 	"enabled": true
 },
 
-"schedulers": {
-	"enabled": true
-},
-
-"rals": {
-	"enabled": true
-},
-
 "dispatchers":{
  	"enabled": true,
  	"attributes_conns": ["*internal"]
@@ -52,6 +44,5 @@
 
 "admins": {
 	"enabled": true,
-	"scheduler_conns": ["*internal"]
 }
 }

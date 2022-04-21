@@ -29,11 +29,6 @@
 	},
 },
 
-
-"schedulers": {
-	"enabled": true,
-},
-	
 	
 "dispatchers":{
 	 "enabled": true,
@@ -42,7 +37,7 @@
 	
 "admins": {
 	"enabled": true,
-	"scheduler_conns": ["*internal"],
+
 },
 
 	

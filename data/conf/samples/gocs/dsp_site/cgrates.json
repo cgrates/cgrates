@@ -26,16 +26,8 @@
     },
   },
 
-
-
-
-  "rals": {
-    "enabled": true
-  },
-
-
-  "schedulers": {
-    "enabled": true
+  "rates": {
+    "enabled": true,
   },
 
   "dispatchers":{
@@ -44,7 +36,6 @@
 
   "admins": {
     "enabled": true,
-    "scheduler_conns": ["*internal"]
   }
 
 

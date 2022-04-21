@@ -18,24 +18,14 @@
 	"db_type": "*internal",
 },
 
-
-
-
-
-"rals": {
+"rates": {
 	"enabled": true,
 },
-
-
-"schedulers": {
-	"enabled": true,
-},
-
 
 "cdrs": {
 	"enabled": true,
 	"chargers_conns": ["*localhost"],
-	"rals_conns": ["*internal"],
+	"rates_conns": ["*internal"],
 	"session_cost_retries": 0,
 },
 
@@ -141,7 +131,6 @@
 
 "admins": {
 	"enabled": true,
-	"scheduler_conns": ["*internal"],
 	"ees_conns": ["*localhost"],
 },
 

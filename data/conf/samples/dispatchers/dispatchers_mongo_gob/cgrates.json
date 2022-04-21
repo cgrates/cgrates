@@ -34,16 +34,13 @@
 	},
 },
 
-"schedulers": {
-	"enabled": true,				
+"rates": {
+	"enabled": true,
 },
+
 
 "attributes": {
 	"enabled": true
-},
-
-"rals": {
-	"enabled": true,
 },
 
 
@@ -61,7 +58,7 @@
 "sessions": {
 	"enabled": true,
 	"attributes_conns": ["conn1"],
-	"rals_conns": ["conn1"],
+	"rates_conns": ["conn1"],
 	"resources_conns": ["conn1"],
 	"chargers_conns": ["conn1"],
 	"listen_bijson": ":3014",
@@ -76,6 +73,5 @@
 
 "admins": {
 	"enabled": true,
-	"scheduler_conns": ["*internal"],
 },
 }

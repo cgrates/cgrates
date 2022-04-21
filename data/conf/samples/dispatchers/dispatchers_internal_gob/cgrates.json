@@ -24,24 +24,17 @@
 		"db_type": "*internal",	
 	},
 	
-	
-	
-	
 	"caches":{
 		"partitions": {
 			"*dispatcher_routes": {"limit": -1, "ttl": "2s"}
 		},
 	},
 	
-	"schedulers": {
-		"enabled": true,				
-	},
-	
 	"attributes": {
 		"enabled": true
 	},
 	
-	"rals": {
+	"rates": {
 		"enabled": true,
 	},
 	
@@ -60,7 +53,7 @@
 	"sessions": {
 		"enabled": true,
 		"attributes_conns": ["conn1"],
-		"rals_conns": ["conn1"],
+		"rates_conns": ["conn1"],
 		"resources_conns": ["conn1"],
 		"chargers_conns": ["conn1"],
 		"listen_bijson": ":3014",
@@ -75,6 +68,5 @@
 	
 	"admins": {
 		"enabled": true,
-		"scheduler_conns": ["*internal"],
 	},
 	}

@@ -23,18 +23,6 @@
 },
 
 
-
-
-
-"rals": {
-	"enabled": true,
-	"thresholds_conns": ["*localhost"],
-},
-
-"schedulers": {
-	"enabled": true,				
-},
-
 "filters": {								
 	"stats_conns": ["*localhost"],
 	"resources_conns": ["*localhost"],
@@ -81,7 +69,6 @@
 "admins": {
 	"enabled": true,
 	"caches_conns":["*localhost"],
-	"scheduler_conns": ["*internal"],
 },
 
 

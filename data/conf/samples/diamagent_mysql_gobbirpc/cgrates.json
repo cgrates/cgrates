@@ -29,13 +29,10 @@
 	},
 },	
 
-"rals": {
+"rates": {
 	"enabled": true,
 },
 
-"schedulers": {
-	"enabled": true,
-},
 
 "cdrs": {
 	"enabled": true,
@@ -56,7 +53,7 @@
 	"listen_bigob": "127.0.0.1:2015",
 	"attributes_conns": ["*localhost"],
 	"chargers_conns": ["*localhost"],
-	"rals_conns": ["*localhost"],
+	"rates_conns": ["*localhost"],
 	"cdrs_conns": ["*localhost"],
 },
 
@@ -70,7 +67,6 @@
 
 "admins": {
 	"enabled": true,
-	"scheduler_conns": ["*internal"],
 },
 
 }
