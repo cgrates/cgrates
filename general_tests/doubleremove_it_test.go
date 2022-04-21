@@ -329,7 +329,11 @@ func testdoubleRemoveAttributeProfile(t *testing.T) {
 			Tenant:    doubleRemoveTenant,
 			ID:        "ATTR_PROFILE",
 			FilterIDs: []string{"*string:~*req.Account:1001"},
-			Blocker:   false,
+			Blockers: utils.Blockers{
+				{
+					Blocker: false,
+				},
+			},
 			Attributes: []*engine.ExternalAttribute{
 				{
 					Path:  "*req.Destination",

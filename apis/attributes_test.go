@@ -43,8 +43,12 @@ func TestAttributesSetGetAttributeProfile(t *testing.T) {
 
 	attrPrf := &engine.APIAttributeProfileWithAPIOpts{
 		APIAttributeProfile: &engine.APIAttributeProfile{
-			ID:      "TestGetAttributeProfile",
-			Blocker: true,
+			ID: "TestGetAttributeProfile",
+			Blockers: utils.Blockers{
+				{
+					Blocker: true,
+				},
+			},
 			Attributes: []*engine.ExternalAttribute{
 				{
 					Path:  "*req.RequestType",

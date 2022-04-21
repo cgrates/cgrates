@@ -1072,11 +1072,13 @@ func (tps AttributeMdls) AsTPAttributes() (result []*utils.TPAttributeProfile) {
 		th, found := mst[tenID]
 		if !found {
 			th = &utils.TPAttributeProfile{
-				TPid:    tp.Tpid,
-				Tenant:  tp.Tenant,
-				ID:      tp.ID,
-				Blocker: tp.Blocker,
+				TPid:   tp.Tpid,
+				Tenant: tp.Tenant,
+				ID:     tp.ID,
 			}
+		}
+		if tp.Blockers != utils.EmptyString {
+			th.Blockers = tp.Blockers
 		}
 		if tp.Weights != utils.EmptyString {
 			th.Weights = tp.Weights
@@ -1122,12 +1124,14 @@ func APItoModelTPAttribute(ap *utils.TPAttributeProfile) (mdls AttributeMdls) {
 			ID:     ap.ID,
 		}
 		if i == 0 {
-			mdl.Blocker = ap.Blocker
 			for i, val := range ap.FilterIDs {
 				if i != 0 {
 					mdl.FilterIDs += utils.InfieldSep
 				}
 				mdl.FilterIDs += val
+			}
+			if ap.Blockers != utils.EmptyString {
+				mdl.Blockers = ap.Blockers
 			}
 			if ap.Weights != utils.EmptyString {
 				mdl.Weights = ap.Weights
@@ -1147,9 +1151,13 @@ func APItoAttributeProfile(tpAttr *utils.TPAttributeProfile, timezone string) (a
 	attrPrf = &AttributeProfile{
 		Tenant:     tpAttr.Tenant,
 		ID:         tpAttr.ID,
-		Blocker:    tpAttr.Blocker,
 		FilterIDs:  make([]string, len(tpAttr.FilterIDs)),
 		Attributes: make([]*Attribute, len(tpAttr.Attributes)),
+	}
+	if tpAttr.Blockers != utils.EmptyString {
+		if attrPrf.Blockers, err = utils.NewBlockersFromString(tpAttr.Blockers, utils.InfieldSep, utils.ANDSep); err != nil {
+			return
+		}
 	}
 	if tpAttr.Weights != utils.EmptyString {
 		if attrPrf.Weights, err = utils.NewDynamicWeightsFromString(tpAttr.Weights, utils.InfieldSep, utils.ANDSep); err != nil {
@@ -1184,7 +1192,7 @@ func AttributeProfileToAPI(attrPrf *AttributeProfile) (tpAttr *utils.TPAttribute
 		ID:         attrPrf.ID,
 		FilterIDs:  make([]string, len(attrPrf.FilterIDs)),
 		Attributes: make([]*utils.TPAttribute, len(attrPrf.Attributes)),
-		Blocker:    attrPrf.Blocker,
+		Blockers:   attrPrf.Blockers.String(utils.InfieldSep, utils.ANDSep),
 		Weights:    attrPrf.Weights.String(utils.InfieldSep, utils.ANDSep),
 	}
 	for i, fli := range attrPrf.FilterIDs {

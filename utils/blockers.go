@@ -52,7 +52,7 @@ func NewBlockersFromString(value, blkSep, fltrSep string) (blkrs Blockers, err e
 	return
 }
 
-// String
+// String will set the Blockers as a string pattern
 func (blkrs Blockers) String(blkSep, fltrSep string) (value string) {
 	if len(blkrs) == 0 {
 		return
@@ -69,9 +69,10 @@ type DynamicBlocker struct {
 	Blocker   bool
 }
 
+// String will set the DynamicBlocker as a string pattern
 func (blckr DynamicBlocker) String(blkSep, fltrSep string) (out string) {
 	blocker := "false"
-	if blckr.Blocker == true {
+	if blckr.Blocker {
 		blocker = "true"
 	}
 	return strings.Join(blckr.FilterIDs, fltrSep) + blkSep + blocker

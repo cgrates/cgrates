@@ -45,8 +45,9 @@ type AttributeProfile struct {
 	ID         string
 	FilterIDs  []string
 	Attributes []*Attribute
-	Blocker    bool // blocker flag to stop processing on multiple runs
-	Weights    utils.DynamicWeights
+	Blockers   utils.Blockers // Blockers flag to stop processing on multiple runs
+	//Blocker    bool
+	Weights utils.DynamicWeights
 }
 
 // AttributeProfileWithAPIOpts is used in replicatorV1 for dispatcher
@@ -99,8 +100,9 @@ type APIAttributeProfile struct {
 	ID         string
 	FilterIDs  []string
 	Attributes []*ExternalAttribute
-	Blocker    bool // blocker flag to stop processing on multiple runs
-	Weights    utils.DynamicWeights
+	Blockers   utils.Blockers
+	//Blocker    bool // blocker flag to stop processing on multiple runs
+	Weights utils.DynamicWeights
 }
 
 type APIAttributeProfileWithAPIOpts struct {
@@ -114,8 +116,8 @@ func NewAPIAttributeProfile(attr *AttributeProfile) (ext *APIAttributeProfile) {
 		ID:         attr.ID,
 		FilterIDs:  attr.FilterIDs,
 		Attributes: make([]*ExternalAttribute, len(attr.Attributes)),
-		Blocker:    attr.Blocker,
 		Weights:    attr.Weights,
+		Blockers:   attr.Blockers,
 	}
 	for i, at := range attr.Attributes {
 		ext.Attributes[i] = &ExternalAttribute{
@@ -153,7 +155,7 @@ func (ext *APIAttributeProfile) AsAttributeProfile() (attr *AttributeProfile, er
 	attr.Tenant = ext.Tenant
 	attr.ID = ext.ID
 	attr.FilterIDs = ext.FilterIDs
-	attr.Blocker = ext.Blocker
+	attr.Blockers = ext.Blockers
 	attr.Weights = ext.Weights
 	return
 }
@@ -198,8 +200,10 @@ func (ap *AttributeProfile) Set(path []string, val interface{}, newBranch bool, 
 			var valA []string
 			valA, err = utils.IfaceAsStringSlice(val)
 			ap.FilterIDs = append(ap.FilterIDs, valA...)
-		case utils.Blocker:
-			ap.Blocker, err = utils.IfaceAsBool(val)
+		case utils.BlockersField:
+			if val != utils.EmptyString {
+				ap.Blockers, err = utils.NewBlockersFromString(utils.IfaceAsString(val), utils.InfieldSep, utils.ANDSep)
+			}
 		case utils.Weights:
 			if val != utils.EmptyString {
 				ap.Weights, err = utils.NewDynamicWeightsFromString(utils.IfaceAsString(val), utils.InfieldSep, utils.ANDSep)
@@ -248,10 +252,12 @@ func (ap *AttributeProfile) Merge(v2 interface{}) {
 			ap.Attributes = append(ap.Attributes, attr)
 		}
 	}
-	if vi.Blocker {
-		ap.Blocker = true
+	if vi.Blockers != nil {
+		ap.Blockers = append(ap.Blockers, vi.Blockers...)
 	}
-	ap.Weights = append(ap.Weights, vi.Weights...)
+	if vi.Weights != nil {
+		ap.Weights = append(ap.Weights, vi.Weights...)
+	}
 }
 
 func (ap *AttributeProfile) String() string { return utils.ToJSON(ap) }
@@ -286,8 +292,8 @@ func (ap *AttributeProfile) FieldAsInterface(fldPath []string) (_ interface{}, e
 			return ap.ID, nil
 		case utils.FilterIDs:
 			return ap.FilterIDs, nil
-		case utils.Blocker:
-			return ap.Blocker, nil
+		case utils.BlockersField:
+			return ap.Blockers, nil
 		case utils.Weights:
 			return ap.Weights, nil
 		case utils.Attributes:

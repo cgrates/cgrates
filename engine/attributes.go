@@ -170,13 +170,17 @@ func (alS *AttributeS) processEvent(ctx *context.Context, tnt string, args *util
 	if attrPrf, err = alS.attributeProfileForEvent(ctx, tnt, attrIDs, evNm, lastID, processedPrfNo, profileRuns, ignFilters); err != nil {
 		return
 	}
+	var blocker bool
+	if blocker, err = BlockerFromDynamics(ctx, attrPrf.Blockers, alS.fltrS, tnt, evNm); err != nil {
+		return
+	}
 	rply = &AttrSProcessEventReply{
 		AlteredFields: []*FieldsAltered{{
 			MatchedProfileID: attrPrf.TenantIDInline(),
 			Fields:           []string{},
 		}},
 		CGREvent: args,
-		blocker:  attrPrf.Blocker,
+		blocker:  blocker,
 	}
 	rply.Tenant = tnt
 	for _, attribute := range attrPrf.Attributes {

@@ -123,3 +123,17 @@ func WeightFromDynamics(ctx *context.Context, dWs []*utils.DynamicWeight,
 	}
 	return 0.0, nil
 }
+
+// BlockerFromDynamics returns the value of the blocker specified by the first matching DynamicBlocker
+func BlockerFromDynamics(ctx *context.Context, dBs []*utils.DynamicBlocker,
+	fltrS *FilterS, tnt string, ev utils.DataProvider) (blckr bool, err error) {
+	for _, dB := range dBs {
+		var pass bool
+		if pass, err = fltrS.Pass(ctx, tnt, dB.FilterIDs, ev); err != nil {
+			return
+		} else if pass {
+			return dB.Blocker, nil
+		}
+	}
+	return false, nil
+}

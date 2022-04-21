@@ -606,7 +606,11 @@ func testLoadersGetAttributeProfiles(t *testing.T) {
 					Value: "Sub2",
 				},
 			},
-			Blocker: true,
+			Blockers: utils.Blockers{
+				{
+					Blocker: true,
+				},
+			},
 			Weights: utils.DynamicWeights{
 				{
 					Weight: 20,
@@ -630,7 +634,11 @@ func testLoadersGetAttributeProfiles(t *testing.T) {
 					Value:     "Sub1",
 				},
 			},
-			Blocker: true,
+			Blockers: utils.Blockers{
+				{
+					Blocker: true,
+				},
+			},
 			Weights: utils.DynamicWeights{
 				{
 					Weight: 20,

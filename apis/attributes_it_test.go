@@ -912,7 +912,11 @@ func testAttributeProcessEventWithSearchAndReplace(t *testing.T) {
 					Value: "~*req.Category:s/(.*)/${1}_suffix/",
 				},
 			},
-			Blocker: true,
+			Blockers: utils.Blockers{
+				{
+					Blocker: true,
+				},
+			},
 			Weights: utils.DynamicWeights{
 				{
 					Weight: 20,

@@ -189,7 +189,11 @@ func testAttributeSProcessEventWithAccount(t *testing.T) {
 					Value: "10",
 				},
 			},
-			Blocker: false,
+			Blockers: utils.Blockers{
+				{
+					Blocker: false,
+				},
+			},
 			Weights: utils.DynamicWeights{
 				{
 					Weight: 10,
@@ -262,7 +266,11 @@ func testAttributeSProcessEventWithAccountFull(t *testing.T) {
 					Value: "~*accounts.1001",
 				},
 			},
-			Blocker: false,
+			Blockers: utils.Blockers{
+				{
+					Blocker: false,
+				},
+			},
 			Weights: utils.DynamicWeights{
 				{
 					Weight: 10,
@@ -377,7 +385,11 @@ func testAttributeSProcessEventWithStat(t *testing.T) {
 					Value: "~*stats.Stat_1.*acd",
 				},
 			},
-			Blocker: false,
+			Blockers: utils.Blockers{
+				{
+					Blocker: false,
+				},
+			},
 			Weights: utils.DynamicWeights{
 				{
 					Weight: 10,
@@ -451,7 +463,11 @@ func testAttributeSProcessEventWithStatFull(t *testing.T) {
 					Value: "~*stats.Stat_1",
 				},
 			},
-			Blocker: false,
+			Blockers: utils.Blockers{
+				{
+					Blocker: false,
+				},
+			},
 			Weights: utils.DynamicWeights{
 				{
 					Weight: 10,
@@ -592,7 +608,11 @@ func testAttributeSProcessEventWithResource(t *testing.T) {
 					Value: "~*resources.ResTest.TotalUsage",
 				},
 			},
-			Blocker: false,
+			Blockers: utils.Blockers{
+				{
+					Blocker: false,
+				},
+			},
 			Weights: utils.DynamicWeights{
 				{
 					Weight: 10,
@@ -670,7 +690,11 @@ func testAttributeSProcessEventWithResourceFull(t *testing.T) {
 					Value: "~*resources.ResTest",
 				},
 			},
-			Blocker: false,
+			Blockers: utils.Blockers{
+				{
+					Blocker: false,
+				},
+			},
 			Weights: utils.DynamicWeights{
 				{
 					Weight: 10,
@@ -754,7 +778,11 @@ func testAttributeSProcessEventWithLibPhoneNumber(t *testing.T) {
 					Value: "~*libphonenumber.<~*req.Destination>.Carrier",
 				},
 			},
-			Blocker: false,
+			Blockers: utils.Blockers{
+				{
+					Blocker: false,
+				},
+			},
 			Weights: utils.DynamicWeights{
 				{
 					Weight: 10,
@@ -839,7 +867,11 @@ func testAttributeSProcessEventWithLibPhoneNumberComposed(t *testing.T) {
 					Value: "~*libphonenumber.<~*req.Destination>.CountryCode",
 				},
 			},
-			Blocker: false,
+			Blockers: utils.Blockers{
+				{
+					Blocker: false,
+				},
+			},
 			Weights: utils.DynamicWeights{
 				{
 					Weight: 10,
@@ -919,7 +951,11 @@ func testAttributeSProcessEventWithLibPhoneNumberFull(t *testing.T) {
 					Value: "~*libphonenumber.<~*req.Destination>",
 				},
 			},
-			Blocker: false,
+			Blockers: utils.Blockers{
+				{
+					Blocker: false,
+				},
+			},
 			Weights: utils.DynamicWeights{
 				{
 					Weight: 10,
