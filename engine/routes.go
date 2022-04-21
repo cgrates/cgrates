@@ -50,6 +50,7 @@ type RouteProfile struct {
 	FilterIDs         []string
 	Sorting           string // Sorting strategy
 	SortingParameters []string
+	Blockers          utils.Blockers
 	Routes            []*Route
 	Weights           utils.DynamicWeights
 }
@@ -182,6 +183,16 @@ func (rpS *RouteS) matchingRouteProfilesForEvent(ctx *context.Context, tnt strin
 		return nil, utils.ErrNotFound
 	}
 	matchingRPrf.Sort()
+	for i, rp := range matchingRPrf {
+		var blocker bool
+		if blocker, err = BlockerFromDynamics(ctx, rp.Blockers, rpS.fltrS, ev.Tenant, evNm); err != nil {
+			return
+		}
+		if blocker {
+			matchingRPrf = matchingRPrf[0 : i+1]
+			break
+		}
+	}
 	return
 }
 
@@ -496,6 +507,10 @@ func (rp *RouteProfile) Set(path []string, val interface{}, newBranch bool, _ st
 			if val != utils.EmptyString {
 				rp.Weights, err = utils.NewDynamicWeightsFromString(utils.IfaceAsString(val), utils.InfieldSep, utils.ANDSep)
 			}
+		case utils.BlockersField:
+			if val != utils.EmptyString {
+				rp.Blockers, err = utils.NewBlockersFromString(utils.IfaceAsString(val), utils.InfieldSep, utils.ANDSep)
+			}
 		}
 	case 2:
 		if val == utils.EmptyString {
@@ -569,6 +584,7 @@ func (rp *RouteProfile) Merge(v2 interface{}) {
 		equal = false
 	}
 	rp.Weights = append(rp.Weights, vi.Weights...)
+	rp.Blockers = append(rp.Blockers, vi.Blockers...)
 	if len(vi.Sorting) != 0 {
 		rp.Sorting = vi.Sorting
 	}
@@ -634,6 +650,8 @@ func (rp *RouteProfile) FieldAsInterface(fldPath []string) (_ interface{}, err e
 			return rp.SortingParameters, nil
 		case utils.Sorting:
 			return rp.Sorting, nil
+		case utils.BlockersField:
+			return rp.Blockers.String(utils.InfieldSep, utils.ANDSep), nil
 		case utils.Routes:
 			return rp.Routes, nil
 		}

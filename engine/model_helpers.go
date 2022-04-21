@@ -829,14 +829,14 @@ func (tps RouteMdls) CSVHeader() (result []string) {
 
 func (tps RouteMdls) AsTPRouteProfile() (result []*utils.TPRouteProfile) {
 	filterMap := make(map[string]utils.StringSet)
-	mst := make(map[string]*utils.TPRouteProfile)
+	tpRouteProfileMap := make(map[string]*utils.TPRouteProfile)
 	routeMap := make(map[string]map[string]*utils.TPRoute)
 	sortingParameterMap := make(map[string]utils.StringSet)
 	for _, tp := range tps {
 		tenID := (&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()
-		th, found := mst[tenID]
+		tpRouteProfile, found := tpRouteProfileMap[tenID]
 		if !found {
-			th = &utils.TPRouteProfile{
+			tpRouteProfile = &utils.TPRouteProfile{
 				TPid:              tp.Tpid,
 				Tenant:            tp.Tenant,
 				ID:                tp.ID,
@@ -852,9 +852,9 @@ func (tps RouteMdls) AsTPRouteProfile() (result []*utils.TPRouteProfile) {
 				routeID = utils.ConcatenatedKey(routeID,
 					utils.NewStringSet(strings.Split(tp.RouteFilterIDs, utils.InfieldSep)).Sha1())
 			}
-			sup, found := routeMap[tenID][routeID]
+			tpRoute, found := routeMap[tenID][routeID]
 			if !found {
-				sup = &utils.TPRoute{
+				tpRoute = &utils.TPRoute{
 					ID:              tp.RouteID,
 					Weights:         tp.RouteWeights,
 					Blocker:         tp.RouteBlocker,
@@ -862,29 +862,29 @@ func (tps RouteMdls) AsTPRouteProfile() (result []*utils.TPRouteProfile) {
 				}
 			}
 			if tp.RouteFilterIDs != utils.EmptyString {
-				supFilterSplit := strings.Split(tp.RouteFilterIDs, utils.InfieldSep)
-				sup.FilterIDs = append(sup.FilterIDs, supFilterSplit...)
+				routeFilterSplit := strings.Split(tp.RouteFilterIDs, utils.InfieldSep)
+				tpRoute.FilterIDs = append(tpRoute.FilterIDs, routeFilterSplit...)
 			}
 			if tp.RouteRateProfileIDs != utils.EmptyString {
 				ratingPlanSplit := strings.Split(tp.RouteRateProfileIDs, utils.InfieldSep)
-				sup.RateProfileIDs = append(sup.RateProfileIDs, ratingPlanSplit...)
+				tpRoute.RateProfileIDs = append(tpRoute.RateProfileIDs, ratingPlanSplit...)
 			}
 			if tp.RouteResourceIDs != utils.EmptyString {
 				resSplit := strings.Split(tp.RouteResourceIDs, utils.InfieldSep)
-				sup.ResourceIDs = append(sup.ResourceIDs, resSplit...)
+				tpRoute.ResourceIDs = append(tpRoute.ResourceIDs, resSplit...)
 			}
 			if tp.RouteStatIDs != utils.EmptyString {
 				statSplit := strings.Split(tp.RouteStatIDs, utils.InfieldSep)
-				sup.StatIDs = append(sup.StatIDs, statSplit...)
+				tpRoute.StatIDs = append(tpRoute.StatIDs, statSplit...)
 			}
 			if tp.RouteAccountIDs != utils.EmptyString {
 				accSplit := strings.Split(tp.RouteAccountIDs, utils.InfieldSep)
-				sup.AccountIDs = append(sup.AccountIDs, accSplit...)
+				tpRoute.AccountIDs = append(tpRoute.AccountIDs, accSplit...)
 			}
-			routeMap[tenID][routeID] = sup
+			routeMap[tenID][routeID] = tpRoute
 		}
 		if tp.Sorting != utils.EmptyString {
-			th.Sorting = tp.Sorting
+			tpRouteProfile.Sorting = tp.Sorting
 		}
 		if tp.SortingParameters != utils.EmptyString {
 			if _, has := sortingParameterMap[tenID]; !has {
@@ -893,7 +893,10 @@ func (tps RouteMdls) AsTPRouteProfile() (result []*utils.TPRouteProfile) {
 			sortingParameterMap[tenID].AddSlice(strings.Split(tp.SortingParameters, utils.InfieldSep))
 		}
 		if tp.Weights != utils.EmptyString {
-			th.Weights = tp.Weights
+			tpRouteProfile.Weights = tp.Weights
+		}
+		if tp.Blockers != utils.EmptyString {
+			tpRouteProfile.Blockers = tp.Blockers
 		}
 		if tp.FilterIDs != utils.EmptyString {
 			if _, has := filterMap[tenID]; !has {
@@ -901,14 +904,14 @@ func (tps RouteMdls) AsTPRouteProfile() (result []*utils.TPRouteProfile) {
 			}
 			filterMap[tenID].AddSlice(strings.Split(tp.FilterIDs, utils.InfieldSep))
 		}
-		mst[tenID] = th
+		tpRouteProfileMap[tenID] = tpRouteProfile
 	}
-	result = make([]*utils.TPRouteProfile, len(mst))
+	result = make([]*utils.TPRouteProfile, len(tpRouteProfileMap))
 	i := 0
-	for tntID, th := range mst {
-		result[i] = th
-		for _, supData := range routeMap[tntID] {
-			result[i].Routes = append(result[i].Routes, supData)
+	for tntID, tpRouteProfile := range tpRouteProfileMap {
+		result[i] = tpRouteProfile
+		for _, routeData := range routeMap[tntID] {
+			result[i].Routes = append(result[i].Routes, routeData)
 		}
 		result[i].FilterIDs = filterMap[tntID].AsSlice()
 		result[i].SortingParameters = sortingParameterMap[tntID].AsSlice()
@@ -921,7 +924,7 @@ func APItoModelTPRoutes(st *utils.TPRouteProfile) (mdls RouteMdls) {
 	if len(st.Routes) == 0 {
 		return
 	}
-	for i, supl := range st.Routes {
+	for i, route := range st.Routes {
 		mdl := &RouteMdl{
 			Tenant: st.Tenant,
 			Tpid:   st.TPid,
@@ -930,6 +933,7 @@ func APItoModelTPRoutes(st *utils.TPRouteProfile) (mdls RouteMdls) {
 		if i == 0 {
 			mdl.Sorting = st.Sorting
 			mdl.Weights = st.Weights
+			mdl.Blockers = st.Blockers
 			for i, val := range st.FilterIDs {
 				if i != 0 {
 					mdl.FilterIDs += utils.InfieldSep
@@ -943,40 +947,40 @@ func APItoModelTPRoutes(st *utils.TPRouteProfile) (mdls RouteMdls) {
 				mdl.SortingParameters += val
 			}
 		}
-		mdl.RouteID = supl.ID
-		for i, val := range supl.AccountIDs {
+		mdl.RouteID = route.ID
+		for i, val := range route.AccountIDs {
 			if i != 0 {
 				mdl.RouteAccountIDs += utils.InfieldSep
 			}
 			mdl.RouteAccountIDs += val
 		}
-		for i, val := range supl.RateProfileIDs {
+		for i, val := range route.RateProfileIDs {
 			if i != 0 {
 				mdl.RouteRateProfileIDs += utils.InfieldSep
 			}
 			mdl.RouteRateProfileIDs += val
 		}
-		for i, val := range supl.FilterIDs {
+		for i, val := range route.FilterIDs {
 			if i != 0 {
 				mdl.RouteFilterIDs += utils.InfieldSep
 			}
 			mdl.RouteFilterIDs += val
 		}
-		for i, val := range supl.ResourceIDs {
+		for i, val := range route.ResourceIDs {
 			if i != 0 {
 				mdl.RouteResourceIDs += utils.InfieldSep
 			}
 			mdl.RouteResourceIDs += val
 		}
-		for i, val := range supl.StatIDs {
+		for i, val := range route.StatIDs {
 			if i != 0 {
 				mdl.RouteStatIDs += utils.InfieldSep
 			}
 			mdl.RouteStatIDs += val
 		}
-		mdl.RouteWeights = supl.Weights
-		mdl.RouteParameters = supl.RouteParameters
-		mdl.RouteBlocker = supl.Blocker
+		mdl.RouteWeights = route.Weights
+		mdl.RouteParameters = route.RouteParameters
+		mdl.RouteBlocker = route.Blocker
 		mdls = append(mdls, mdl)
 	}
 	return
@@ -992,11 +996,18 @@ func APItoRouteProfile(tpRp *utils.TPRouteProfile, timezone string) (rp *RoutePr
 		FilterIDs:         make([]string, len(tpRp.FilterIDs)),
 	}
 	if tpRp.Weights != utils.EmptyString {
-		weight, err := utils.NewDynamicWeightsFromString(tpRp.Weights, utils.InfieldSep, utils.ANDSep)
+		weights, err := utils.NewDynamicWeightsFromString(tpRp.Weights, utils.InfieldSep, utils.ANDSep)
 		if err != nil {
 			return nil, err
 		}
-		rp.Weights = weight
+		rp.Weights = weights
+	}
+	if tpRp.Blockers != utils.EmptyString {
+		blockers, err := utils.NewBlockersFromString(tpRp.Blockers, utils.InfieldSep, utils.ANDSep)
+		if err != nil {
+			return nil, err
+		}
+		rp.Blockers = blockers
 	}
 	for i, stp := range tpRp.SortingParameters {
 		rp.SortingParameters[i] = stp
@@ -1035,6 +1046,7 @@ func RouteProfileToAPI(rp *RouteProfile) (tpRp *utils.TPRouteProfile) {
 		SortingParameters: make([]string, len(rp.SortingParameters)),
 		Routes:            make([]*utils.TPRoute, len(rp.Routes)),
 		Weights:           rp.Weights.String(utils.InfieldSep, utils.ANDSep),
+		Blockers:          rp.Blockers.String(utils.InfieldSep, utils.ANDSep),
 	}
 
 	for i, route := range rp.Routes {
