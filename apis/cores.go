@@ -68,12 +68,7 @@ func (cS *CoreSv1) StopMemoryProfiling(ctx *context.Context, args *utils.TenantW
 	return cS.cS.V1StopMemoryProfiling(ctx, args, reply)
 }
 
-type PanicMessageArgs struct {
-	Tenant  string
-	APIOpts map[string]interface{}
-	Message string
-}
-
-func (cS *CoreSv1) Panic(args *PanicMessageArgs, _ *string) error {
-	panic(args.Message)
+// Panic is used print the Message sent as a panic
+func (cS *CoreSv1) Panic(ctx *context.Context, args *utils.PanicMessageArgs, reply *string) error {
+	return cS.cS.V1Panic(ctx, args, reply)
 }
