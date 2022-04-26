@@ -45,7 +45,7 @@ func (tpRoutes TPRoutes) exportItems(ctx *context.Context, wrtr io.Writer, tnt s
 	csvWriter := csv.NewWriter(wrtr)
 	csvWriter.Comma = utils.CSVSep
 	// before writing the profiles, we must write the headers
-	if err = csvWriter.Write([]string{"#Tenant", "ID", "FilterIDs", "Weights", "Sorting", "SortingParameters", "RouteID", "RouteFilterIDs", "RouteAccountIDs", "RouteRateProfileIDs", "RouteResourceIDs", "RouteStatIDs", "RouteWeights", "RouteBlocker", "RouteParameters"}); err != nil {
+	if err = csvWriter.Write([]string{"#Tenant", "ID", "FilterIDs", "Weights", "Sorting", "SortingParameters", "Blockers", "RouteID", "RouteFilterIDs", "RouteAccountIDs", "RouteRateProfileIDs", "RouteResourceIDs", "RouteStatIDs", "RouteWeights", "RouteBlocker", "RouteParameters"}); err != nil {
 		return
 	}
 	for _, routeID := range itmIDs {
