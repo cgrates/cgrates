@@ -222,11 +222,11 @@ type AttributeMdl struct {
 	ID                 string `index:"1" re:""`
 	FilterIDs          string `index:"2" re:""`
 	Weights            string `index:"3" re:"\d+\.?\d*"`
-	AttributeFilterIDs string `index:"4" re:""`
-	Path               string `index:"5" re:""`
-	Type               string `index:"6" re:""`
-	Value              string `index:"7" re:""`
-	Blockers           string `index:"8" re:""`
+	Blockers           string `index:"4" re:""`
+	AttributeFilterIDs string `index:"5" re:""`
+	Path               string `index:"6" re:""`
+	Type               string `index:"7" re:""`
+	Value              string `index:"8" re:""`
 	CreatedAt          time.Time
 }
 

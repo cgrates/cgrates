@@ -216,13 +216,14 @@ func testDspStsTestAuthKey2(t *testing.T) {
 		ID:     "event1",
 		Event: map[string]interface{}{
 			utils.AccountField: "1001",
-			utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			utils.Usage:        135 * time.Second,
-			utils.Cost:         123.0,
-			utils.RunID:        utils.MetaDefault,
-			utils.Destination:  "1002"},
+			utils.Destination:  "1002",
+		},
 		APIOpts: map[string]interface{}{
-			utils.OptsAPIKey: "stat12345",
+			utils.MetaStartTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			utils.MetaUsage:     135 * time.Second,
+			utils.MetaCost:      123.0,
+			utils.MetaRunID:     utils.MetaDefault,
+			utils.OptsAPIKey:    "stat12345",
 		},
 	}
 	if err := dispEngine.RPC.Call(utils.StatSv1ProcessEvent, args, &reply); err != nil {
@@ -257,14 +258,14 @@ func testDspStsTestAuthKey2(t *testing.T) {
 		ID:     "event1",
 		Event: map[string]interface{}{
 			utils.AccountField: "1002",
-			utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			utils.Usage:        45 * time.Second,
-			utils.RunID:        utils.MetaDefault,
-			utils.Cost:         10.0,
 			utils.Destination:  "1001",
 		},
 		APIOpts: map[string]interface{}{
-			utils.OptsAPIKey: "stat12345",
+			utils.MetaStartTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			utils.MetaUsage:     45 * time.Second,
+			utils.MetaRunID:     utils.MetaDefault,
+			utils.MetaCost:      10.0,
+			utils.OptsAPIKey:    "stat12345",
 		},
 	}
 	if err := dispEngine.RPC.Call(utils.StatSv1ProcessEvent, args, &reply); err != nil {
@@ -333,15 +334,14 @@ func testDspStsTestAuthKey3(t *testing.T) {
 			ID:     "GetStats",
 			Event: map[string]interface{}{
 				utils.AccountField: "1002",
-				utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-				utils.Usage:        45 * time.Second,
-				utils.RunID:        utils.MetaDefault,
-				utils.Cost:         10.0,
-				utils.Destination:  "1001",
 			},
-
 			APIOpts: map[string]interface{}{
-				utils.OptsAPIKey: "stat12345",
+				utils.MetaStartTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+				utils.MetaUsage:       45 * time.Second,
+				utils.MetaRunID:       utils.MetaDefault,
+				utils.MetaCost:        10.0,
+				utils.MetaDestination: "1001",
+				utils.OptsAPIKey:      "stat12345",
 			},
 		}, &reply); err != nil {
 		t.Error(err)

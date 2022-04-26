@@ -513,7 +513,7 @@ func testAttributeSProcessEventWithStatFull(t *testing.T) {
 			ID:     "testAttributeSProcessEventWithStat",
 			Event: map[string]interface{}{
 				"EventName":  "AddFullStats",
-				"AllMetrics": "{\"*acd\":1.1E+10,\"*asr\":50.0,\"*tcd\":11000000000}",
+				"AllMetrics": "{\"*acd\":1.1E+10,\"*asr\":100,\"*tcd\":22000000000}",
 			},
 			APIOpts: map[string]interface{}{
 				utils.OptsContext: utils.MetaSessionS,

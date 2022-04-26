@@ -426,7 +426,7 @@ func TestLoadAttributeProfiles(t *testing.T) {
 	} else if !reflect.DeepEqual(eAttrProfiles[resKey].FilterIDs, csvr.attributeProfiles[resKey].FilterIDs) {
 		t.Errorf("Expecting: %+v, received: %+v", eAttrProfiles[resKey].FilterIDs, csvr.attributeProfiles[resKey].FilterIDs)
 	} else if !reflect.DeepEqual(eAttrProfiles[resKey].Attributes, csvr.attributeProfiles[resKey].Attributes) {
-		t.Errorf("Expecting: %+v, received: %+v", eAttrProfiles[resKey].Attributes, csvr.attributeProfiles[resKey].Attributes)
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eAttrProfiles[resKey].Attributes), utils.ToJSON(csvr.attributeProfiles[resKey].Attributes))
 	} else if !reflect.DeepEqual(eAttrProfiles[resKey].Blockers, csvr.attributeProfiles[resKey].Blockers) {
 		t.Errorf("Expecting: %+v, received: %+v", eAttrProfiles[resKey].Blockers, csvr.attributeProfiles[resKey].Blockers)
 	}

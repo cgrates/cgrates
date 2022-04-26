@@ -223,12 +223,12 @@ func testV1RtStatsProcessStatsNotAnswered(t *testing.T) {
 }
 
 func testV1RtStatsGetMetrics(t *testing.T) {
-	expDecimals := map[string]*utils.Decimal{
-		utils.MetaACD: utils.NewDecimal(4.64e+10, 0),
-		utils.MetaASR: utils.NewDecimal(60, 0),
+	expDecimals := map[string]float64{
+		utils.MetaACD: 46400000000.,
+		utils.MetaASR: 60.,
 	}
-	var rplyDec map[string]*utils.Decimal
-	if err := RtStatsSv1BiRpc.Call(context.Background(), utils.StatSv1GetQueueDecimalMetrics,
+	var rplyDec map[string]float64
+	if err := RtStatsSv1BiRpc.Call(context.Background(), utils.StatSv1GetQueueFloatMetrics,
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{
 				Tenant: "cgrates.org",
@@ -240,11 +240,11 @@ func testV1RtStatsGetMetrics(t *testing.T) {
 		t.Errorf("Expected %v, received %v", utils.ToJSON(expDecimals), utils.ToJSON(rplyDec))
 	}
 
-	expDecimals = map[string]*utils.Decimal{
-		utils.MetaACD: utils.NewDecimal(4.4e+10, 0),
-		utils.MetaASR: utils.NewDecimal(3333333333333333, 14),
+	expDecimals = map[string]float64{
+		utils.MetaACD: float64(44 * time.Second),
+		utils.MetaASR: 33.33333333333333,
 	}
-	if err := RtStatsSv1BiRpc.Call(context.Background(), utils.StatSv1GetQueueDecimalMetrics,
+	if err := RtStatsSv1BiRpc.Call(context.Background(), utils.StatSv1GetQueueFloatMetrics,
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{
 				Tenant: "cgrates.org",
@@ -256,11 +256,11 @@ func testV1RtStatsGetMetrics(t *testing.T) {
 		t.Errorf("Expected %v, received %v", utils.ToJSON(expDecimals), utils.ToJSON(rplyDec))
 	}
 
-	expDecimals = map[string]*utils.Decimal{
-		utils.MetaACD: utils.NewDecimal(int64(time.Minute), 0),
-		utils.MetaASR: utils.NewDecimal(100, 0),
+	expDecimals = map[string]float64{
+		utils.MetaACD: float64(time.Minute),
+		utils.MetaASR: 100,
 	}
-	if err := RtStatsSv1BiRpc.Call(context.Background(), utils.StatSv1GetQueueDecimalMetrics,
+	if err := RtStatsSv1BiRpc.Call(context.Background(), utils.StatSv1GetQueueFloatMetrics,
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{
 				Tenant: "cgrates.org",

@@ -1,4 +1,4 @@
-#Tenant,ID,FilterIDs,Weights,AttributeFilterIDs,Path,Type,Value,Blockers
-cgrates.org,ATTR_1,*string:~*opts.*context:*sessions|*cdrs;*string:~*req.Account:1007,;10,,*req.Account,*constant,1001,;false
-cgrates.org,ATTR_1,,,,*req.Subject,*constant,1001,
-cgrates.org,ATTR_PASS,*string:~*opts.*context:*sessions;*string:~*req.Account:1001,;10,,*req.PasswordFromAttributes,*constant,CGRateSPassword1,;false
+#Tenant,ID,FilterIDs,Weights,Blockers,AttributeFilterIDs,Path,Type,Value
+cgrates.org,ATTR_1,*string:~*opts.*context:*sessions|*cdrs;*string:~*req.Account:1007,;10,;false,,*req.Account,*constant,1001
+cgrates.org,ATTR_1,,,,,*req.Subject,*constant,1001
+cgrates.org,ATTR_PASS,*string:~*opts.*context:*sessions;*string:~*req.Account:1001,;10,;false,,*req.PasswordFromAttributes,*constant,CGRateSPassword1
