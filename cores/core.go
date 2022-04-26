@@ -258,3 +258,8 @@ func (cS *CoreS) V1StopMemoryProfiling(_ *context.Context, _ *utils.TenantWithAP
 	*reply = utils.OK
 	return nil
 }
+
+// V1Panic is used print the Message sent as a panic
+func (cS *CoreS) V1Panic(_ *context.Context, args *utils.PanicMessageArgs, _ *string) error {
+	panic(args.Message)
+}

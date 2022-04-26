@@ -780,6 +780,12 @@ type MemoryPrf struct {
 	APIOpts  map[string]interface{}
 }
 
+type PanicMessageArgs struct {
+	Tenant  string
+	APIOpts map[string]interface{}
+	Message string
+}
+
 // SetIndexesArg the API arguments needed for seting an index
 type SetIndexesArg struct {
 	IdxItmType string
