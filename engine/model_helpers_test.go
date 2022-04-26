@@ -1241,10 +1241,10 @@ func TestCsvDumpForAttributeModels(t *testing.T) {
 	if !reflect.DeepEqual(expected, rcv) {
 		t.Errorf("Expecting : %+v,\n received: %+v", utils.ToJSON(expected), utils.ToJSON(rcv))
 	}
-	expRecord := []string{"cgrates.org", "ALS1", "FLTR_ACNT_dan;*ai:~*req.AnswerTime:2014-07-14T14:35:00Z;*string:~*opts.*context:con1", ";20", "", "*req.FL1", "", "Al1", ";true"}
+	expRecord := []string{"cgrates.org", "ALS1", "FLTR_ACNT_dan;*ai:~*req.AnswerTime:2014-07-14T14:35:00Z;*string:~*opts.*context:con1", ";20", ";true", "", "*req.FL1", "", "Al1"}
 	for i, model := range rcv {
 		if i == 1 {
-			expRecord = []string{"cgrates.org", "ALS1", "", "", "", "*req.FL2", "", "Al2", ""}
+			expRecord = []string{"cgrates.org", "ALS1", "", "", "", "", "*req.FL2", "", "Al2"}
 		}
 		if csvRecordRcv, _ := CsvDump(model); !reflect.DeepEqual(expRecord, csvRecordRcv) {
 			t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(expRecord), utils.ToJSON(csvRecordRcv))
@@ -1307,9 +1307,11 @@ func TestModelAsTPAttribute(t *testing.T) {
 			Tenant:    "cgrates.org",
 			ID:        "ALS1",
 			FilterIDs: "FLTR_ACNT_dan;FLTR_DST_DE;*ai:~*req.AnswerTime:2014-07-14T14:35:00Z;*string:~*opts.*context:con1",
+			Weights:   ";20",
+			Blockers:  ";true",
+			Type:      utils.MetaConstant,
 			Path:      utils.MetaReq + utils.NestingSep + "FL1",
 			Value:     "Al1",
-			Weights:   ";20",
 		},
 	}
 	expected := &utils.TPAttributeProfile{
@@ -1317,32 +1319,21 @@ func TestModelAsTPAttribute(t *testing.T) {
 		Tenant:    "cgrates.org",
 		ID:        "ALS1",
 		FilterIDs: []string{"*ai:~*req.AnswerTime:2014-07-14T14:35:00Z", "*string:~*opts.*context:con1", "FLTR_ACNT_dan", "FLTR_DST_DE"},
+		Weights:   ";20",
+		Blockers:  ";true",
 		Attributes: []*utils.TPAttribute{
 			{
 				FilterIDs: []string{},
+				Type:      utils.MetaConstant,
 				Path:      utils.MetaReq + utils.NestingSep + "FL1",
 				Value:     "Al1",
 			},
 		},
-		Weights: ";20",
-	}
-	expected2 := &utils.TPAttributeProfile{
-		TPid:      "TP1",
-		Tenant:    "cgrates.org",
-		ID:        "ALS1",
-		FilterIDs: []string{"*ai:~*req.AnswerTime:2014-07-14T14:35:00Z", "*string:~*opts.*context:con1", "FLTR_DST_DE", "FLTR_ACNT_dan"},
-		Attributes: []*utils.TPAttribute{
-			{
-				FilterIDs: []string{},
-				Path:      utils.MetaReq + utils.NestingSep + "FL1",
-				Value:     "Al1",
-			},
-		},
-		Weights: ";20",
 	}
 	rcv := models.AsTPAttributes()
 	sort.Strings(rcv[0].FilterIDs)
-	if !reflect.DeepEqual(expected, rcv[0]) && !reflect.DeepEqual(expected2, rcv[0]) {
+	sort.Strings(expected.FilterIDs)
+	if !reflect.DeepEqual(expected, rcv[0]) {
 		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(expected), utils.ToJSON(rcv[0]))
 	}
 }
@@ -4079,8 +4070,7 @@ func TestAttributeMdlsCSVHeader(t *testing.T) {
 			ID:     "ALS1",
 		},
 	}
-	expStruct := []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs, utils.Weight,
-		utils.AttributeFilterIDs, utils.Path, utils.Type, utils.Value, utils.Blocker}
+	expStruct := []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs, utils.Weights, utils.BlockersField, utils.AttributeFilterIDs, utils.Path, utils.Type, utils.Value}
 	result := testStruct.CSVHeader()
 	if !reflect.DeepEqual(result, expStruct) {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ToJSON(expStruct), utils.ToJSON(result))

@@ -1059,8 +1059,7 @@ type AttributeMdls []*AttributeMdl
 
 // CSVHeader return the header for csv fields as a slice of string
 func (tps AttributeMdls) CSVHeader() (result []string) {
-	return []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs, utils.Weight,
-		utils.AttributeFilterIDs, utils.Path, utils.Type, utils.Value, utils.Blocker}
+	return []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs, utils.Weights, utils.BlockersField, utils.AttributeFilterIDs, utils.Path, utils.Type, utils.Value}
 }
 
 func (tps AttributeMdls) AsTPAttributes() (result []*utils.TPAttributeProfile) {

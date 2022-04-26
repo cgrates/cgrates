@@ -45,9 +45,8 @@ type AttributeProfile struct {
 	ID         string
 	FilterIDs  []string
 	Attributes []*Attribute
+	Weights    utils.DynamicWeights
 	Blockers   utils.Blockers // Blockers flag to stop processing on multiple runs
-	//Blocker    bool
-	Weights utils.DynamicWeights
 }
 
 // AttributeProfileWithAPIOpts is used in replicatorV1 for dispatcher

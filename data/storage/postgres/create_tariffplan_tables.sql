@@ -135,13 +135,12 @@ CREATE INDEX tp_routes_unique ON tp_routes  ("tpid",  "tenant", "id",
     "tenant"varchar(64) NOT NULL,
     "id" varchar(64) NOT NULL,
     "filter_ids" varchar(64) NOT NULL,
-    "activation_interval" varchar(64) NOT NULL,
+    "weights" varchar(64) NOT NULL,
+    "blockers" varchar(64) NOT NULL,
     "attribute_filter_ids" varchar(64) NOT NULL,
     "path" varchar(64) NOT NULL,
     "type" varchar(64) NOT NULL,
     "value" varchar(64) NOT NULL,
-    "blockers" varchar(64) NOT NULL,
-    "weights" varchar(64) NOT NULL,
     "created_at" TIMESTAMP WITH TIME ZONE
   );
   CREATE INDEX tp_attributes_ids ON tp_attributes (tpid);
