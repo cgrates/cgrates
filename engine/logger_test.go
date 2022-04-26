@@ -87,6 +87,7 @@ func TestLoggerExportEmerg(t *testing.T) {
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
 			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
+				delete(args.(*utils.CGREventWithEeIDs).Event, "Timestamp")
 				exp := &utils.CGREventWithEeIDs{
 					CGREvent: &utils.CGREvent{
 						Tenant: "cgrates.org",
@@ -133,6 +134,7 @@ func TestLoggerExportAlert(t *testing.T) {
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
 			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
+				delete(args.(*utils.CGREventWithEeIDs).Event, "Timestamp")
 				exp := &utils.CGREventWithEeIDs{
 					CGREvent: &utils.CGREvent{
 						Tenant: "cgrates.org",
@@ -179,6 +181,7 @@ func TestLoggerExportCrit(t *testing.T) {
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
 			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
+				delete(args.(*utils.CGREventWithEeIDs).Event, "Timestamp")
 				exp := &utils.CGREventWithEeIDs{
 					CGREvent: &utils.CGREvent{
 						Tenant: "cgrates.org",
@@ -225,6 +228,7 @@ func TestLoggerExportErr(t *testing.T) {
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
 			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
+				delete(args.(*utils.CGREventWithEeIDs).Event, "Timestamp")
 				exp := &utils.CGREventWithEeIDs{
 					CGREvent: &utils.CGREvent{
 						Tenant: "cgrates.org",
@@ -271,6 +275,7 @@ func TestLoggerExportWarning(t *testing.T) {
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
 			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
+				delete(args.(*utils.CGREventWithEeIDs).Event, "Timestamp")
 				exp := &utils.CGREventWithEeIDs{
 					CGREvent: &utils.CGREvent{
 						Tenant: "cgrates.org",
@@ -317,6 +322,7 @@ func TestLoggerExportNotice(t *testing.T) {
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
 			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
+				delete(args.(*utils.CGREventWithEeIDs).Event, "Timestamp")
 				exp := &utils.CGREventWithEeIDs{
 					CGREvent: &utils.CGREvent{
 						Tenant: "cgrates.org",
@@ -363,6 +369,7 @@ func TestLoggerExportInfo(t *testing.T) {
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
 			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
+				delete(args.(*utils.CGREventWithEeIDs).Event, "Timestamp")
 				exp := &utils.CGREventWithEeIDs{
 					CGREvent: &utils.CGREvent{
 						Tenant: "cgrates.org",
@@ -409,6 +416,7 @@ func TestLoggerExportDebug(t *testing.T) {
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
 			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
+				delete(args.(*utils.CGREventWithEeIDs).Event, "Timestamp")
 				exp := &utils.CGREventWithEeIDs{
 					CGREvent: &utils.CGREvent{
 						Tenant: "cgrates.org",
@@ -473,6 +481,7 @@ func TestLoggerExportWrite(t *testing.T) {
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
 			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
+				delete(args.(*utils.CGREventWithEeIDs).Event, "Timestamp")
 				exp := &utils.CGREventWithEeIDs{
 					CGREvent: &utils.CGREvent{
 						Tenant: "cgrates.org",
