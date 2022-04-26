@@ -22,7 +22,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package apis
 
 import (
-	"fmt"
 	"path"
 	"reflect"
 	"sort"
@@ -519,7 +518,7 @@ func testRouteSSetRouteProfiles(t *testing.T) {
 				},
 				Blockers: utils.Blockers{
 					{
-						Blocker: true,
+						Blocker: false,
 					},
 				},
 				Sorting:           utils.MetaWeight,
@@ -604,19 +603,6 @@ func testRouteSSetRouteProfiles(t *testing.T) {
 			t.Error(err)
 		}
 	}
-
-	argsGet := &utils.TenantIDWithAPIOpts{
-		TenantID: &utils.TenantID{
-			Tenant: "cgrates.org",
-			ID:     "ROUTE_TEST_1",
-		},
-	}
-	var result engine.RouteProfile
-	if err := roRPC.Call(context.Background(), utils.AdminSv1GetRouteProfile,
-		argsGet, &result); err != nil {
-		t.Error(err)
-	}
-	fmt.Println(utils.ToJSON(result))
 }
 
 func testRouteSGetRouteProfilesForEvent(t *testing.T) {
@@ -628,11 +614,75 @@ func testRouteSGetRouteProfilesForEvent(t *testing.T) {
 		},
 		APIOpts: map[string]interface{}{},
 	}
+	expected := []*engine.RouteProfile{
+		{
+			ID:        "ROUTE_TEST_1",
+			Tenant:    "cgrates.org",
+			FilterIDs: []string{"*string:~*req.TestCase:BlockerBehaviour"},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 30,
+				},
+			},
+			Blockers: utils.Blockers{
+				{
+					Blocker: false,
+				},
+			},
+			Sorting:           utils.MetaWeight,
+			SortingParameters: []string{},
+			Routes: []*engine.Route{
+				{
+					ID: "routeTest",
+				},
+			},
+		},
+		{
+			ID:        "ROUTE_TEST_3",
+			Tenant:    "cgrates.org",
+			FilterIDs: []string{"*string:~*req.TestCase:BlockerBehaviour"},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
+			Sorting:           utils.MetaWeight,
+			SortingParameters: []string{},
+			Routes: []*engine.Route{
+				{
+					ID: "routeTest",
+				},
+			},
+		},
+		{
+			ID:        "ROUTE_TEST_2",
+			Tenant:    "cgrates.org",
+			FilterIDs: []string{"*string:~*req.TestCase:BlockerBehaviour"},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				},
+			},
+			Blockers: utils.Blockers{
+				{
+					Blocker: true,
+				},
+			},
+			Sorting:           utils.MetaWeight,
+			SortingParameters: []string{},
+			Routes: []*engine.Route{
+				{
+					ID: "routeTest",
+				},
+			},
+		},
+	}
 	var reply []*engine.RouteProfile
 	if err := roRPC.Call(context.Background(), utils.RouteSv1GetRouteProfilesForEvent, args, &reply); err != nil {
 		t.Error(err)
+	} else if !reflect.DeepEqual(reply, expected) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ToJSON(expected), utils.ToJSON(reply))
 	}
-	fmt.Println(utils.ToJSON(reply))
 }
 
 //Kill the engine when it is about to be finished
