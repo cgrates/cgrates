@@ -188,7 +188,7 @@ func TestTPStatsAsTPStats(t *testing.T) {
 			MinItems:    2,
 			MetricIDs:   "*asr;*acc;*tcc;*acd;*tcd;*pdd",
 			Stored:      true,
-			Blocker:     true,
+			Blockers:    ";true",
 			Weights:     ";20",
 		},
 		&StatMdl{
@@ -202,7 +202,7 @@ func TestTPStatsAsTPStats(t *testing.T) {
 			MetricIDs:    "*sum#BalanceValue;*average#BalanceValue;*tcc",
 			ThresholdIDs: "THRESH3",
 			Stored:       true,
-			Blocker:      true,
+			Blockers:     ";true",
 			Weights:      ";20",
 		},
 		&StatMdl{
@@ -216,7 +216,7 @@ func TestTPStatsAsTPStats(t *testing.T) {
 			MetricIDs:    "*sum#BalanceValue;*average#BalanceValue;*tcc",
 			ThresholdIDs: "THRESH4",
 			Stored:       true,
-			Blocker:      true,
+			Blockers:     ";true",
 			Weights:      ";20",
 		},
 	}
@@ -258,7 +258,7 @@ func TestAPItoTPStats(t *testing.T) {
 		MinItems:     1,
 		ThresholdIDs: []string{"THRESH1", "THRESH2"},
 		Stored:       false,
-		Blocker:      false,
+		Blockers:     ";false",
 		Weights:      ";20.0",
 	}
 	eTPs := &StatQueueProfile{ID: tps.ID,
@@ -277,7 +277,6 @@ func TestAPItoTPStats(t *testing.T) {
 		ThresholdIDs: []string{"THRESH1", "THRESH2"},
 		FilterIDs:    []string{"FLTR_1", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z"},
 		Stored:       tps.Stored,
-		Blocker:      tps.Blocker,
 		Weights: utils.DynamicWeights{
 			{
 				Weight: 20.0,
@@ -287,6 +286,9 @@ func TestAPItoTPStats(t *testing.T) {
 	}
 	if eTPs.TTL, err = utils.ParseDurationWithNanosecs(tps.TTL); err != nil {
 		t.Errorf("Got error: %+v", err)
+	}
+	if eTPs.Blockers, err = utils.NewBlockersFromString(tps.Blockers, utils.InfieldSep, utils.ANDSep); err != nil {
+		t.Error(err)
 	}
 
 	if st, err := APItoStats(tps, "UTC"); err != nil {
@@ -365,7 +367,7 @@ func TestAPItoModelStats(t *testing.T) {
 				MetricID: "*average#Usage",
 			},
 		},
-		Blocker:      true,
+		Blockers:     ";true",
 		Stored:       true,
 		Weights:      ";20",
 		MinItems:     2,
@@ -383,7 +385,7 @@ func TestAPItoModelStats(t *testing.T) {
 			MinItems:     2,
 			MetricIDs:    "*tcc",
 			Stored:       true,
-			Blocker:      true,
+			Blockers:     ";true",
 			Weights:      ";20",
 			ThresholdIDs: "Th1",
 		},
@@ -4292,8 +4294,8 @@ func TestModelHelpersStatQueueProfileToAPIFilterIds(t *testing.T) {
 			FilterIDs: []string{"test_id"},
 		},
 		},
-		Stored:  false,
-		Blocker: false,
+		Stored:   false,
+		Blockers: utils.Blockers{{Blocker: false}},
 		Weights: utils.DynamicWeights{
 			{
 				Weight: 0,
@@ -4312,7 +4314,7 @@ func TestModelHelpersStatQueueProfileToAPIFilterIds(t *testing.T) {
 				FilterIDs: []string{"test_id"},
 			},
 		},
-		Blocker:      false,
+		Blockers:     ";false",
 		Stored:       false,
 		Weights:      ";0",
 		ThresholdIDs: []string{"threshold_id"},
@@ -4330,7 +4332,7 @@ func TestModelHelpersAPItoStatsError1(t *testing.T) {
 		ID:           "",
 		QueueLength:  0,
 		TTL:          "cat",
-		Blocker:      false,
+		Blockers:     ";false",
 		Stored:       false,
 		Weights:      ";0",
 		MinItems:     0,
@@ -4356,7 +4358,7 @@ func TestModelHelpersAPItoModelStatsCase2(t *testing.T) {
 				MetricID:  "*tcc",
 			},
 		},
-		Blocker:      true,
+		Blockers:     ";true",
 		Stored:       true,
 		Weights:      ";20",
 		MinItems:     2,
@@ -4374,7 +4376,7 @@ func TestModelHelpersAPItoModelStatsCase2(t *testing.T) {
 			MetricIDs:       "*tcc",
 			MetricFilterIDs: "test_filter_id1;test_filter_id2",
 			Stored:          true,
-			Blocker:         true,
+			Blockers:        ";true",
 			Weights:         ";20",
 			ThresholdIDs:    "Th1;Th2",
 		},
@@ -4419,14 +4421,14 @@ func TestStatMdlsCSVHeader(t *testing.T) {
 		MetricIDs:       "",
 		MetricFilterIDs: "",
 		Stored:          false,
-		Blocker:         false,
+		Blockers:        ";false",
 		Weights:         ";0",
 		ThresholdIDs:    "",
 		CreatedAt:       time.Time{},
 	}}
 	expStruct := []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs, utils.Weight,
 		utils.QueueLength, utils.TTL, utils.MinItems, utils.MetricIDs, utils.MetricFilterIDs,
-		utils.Stored, utils.Blocker, utils.ThresholdIDs}
+		utils.Stored, utils.BlockersField, utils.ThresholdIDs}
 	result := testStruct.CSVHeader()
 	if !reflect.DeepEqual(result, expStruct) {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ToJSON(expStruct), utils.ToJSON(result))

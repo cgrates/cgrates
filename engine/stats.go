@@ -233,7 +233,12 @@ func (sS *StatS) matchingStatQueuesForEvent(ctx *context.Context, tnt string, st
 	// All good, convert from Map to Slice so we can sort
 	sqs.Sort()
 	for i, s := range sqs {
-		if s.sqPrfl.Blocker && i != len(sqs)-1 { // blocker will stop processing and we are not at last index
+		// get the dynamic blocker from the profile and check if it pass trough its filters
+		var blocker bool
+		if blocker, err = BlockerFromDynamics(ctx, s.sqPrfl.Blockers, sS.fltrS, tnt, evNm); err != nil {
+			return
+		}
+		if blocker && i != len(sqs)-1 { // blocker will stop processing and we are not at last index
 			StatQueues(sqs[i+1:]).unlock()
 			sqs = sqs[:i+1]
 			break
@@ -345,7 +350,8 @@ func (sS *StatS) processEvent(ctx *context.Context, tnt string, args *utils.CGRE
 	}
 	if sS.processThresholds(ctx, matchSQs, args.APIOpts) != nil ||
 		withErrors {
-		err = utils.ErrPartiallyExecuted
+		return nil, err
+		//err = utils.ErrPartiallyExecuted
 	}
 
 	var promIDs []string

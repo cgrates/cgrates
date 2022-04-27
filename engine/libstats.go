@@ -41,11 +41,11 @@ type StatQueueProfile struct {
 	QueueLength  int
 	TTL          time.Duration
 	MinItems     int
-	Metrics      []*MetricWithFilters // list of metrics to build
 	Stored       bool
-	Blocker      bool // blocker flag to stop processing on filters matched
 	Weights      utils.DynamicWeights
-	ThresholdIDs []string // list of thresholds to be checked after changes
+	Blockers     utils.Blockers       // blocker flag to stop processing on filters matched
+	ThresholdIDs []string             // list of thresholds to be checked after changes
+	Metrics      []*MetricWithFilters // list of metrics to build
 
 	lkID string // holds the reference towards guardian lock key
 }
@@ -567,8 +567,10 @@ func (sqp *StatQueueProfile) Set(path []string, val interface{}, newBranch bool,
 			sqp.TTL, err = utils.IfaceAsDuration(val)
 		case utils.Stored:
 			sqp.Stored, err = utils.IfaceAsBool(val)
-		case utils.Blocker:
-			sqp.Blocker, err = utils.IfaceAsBool(val)
+		case utils.BlockersField:
+			if val != utils.EmptyString {
+				sqp.Blockers, err = utils.NewBlockersFromString(utils.IfaceAsString(val), utils.InfieldSep, utils.ANDSep)
+			}
 		case utils.Weights:
 			if val != utils.EmptyString {
 				sqp.Weights, err = utils.NewDynamicWeightsFromString(utils.IfaceAsString(val), utils.InfieldSep, utils.ANDSep)
@@ -632,13 +634,11 @@ func (sqp *StatQueueProfile) Merge(v2 interface{}) {
 	if vi.MinItems != 0 {
 		sqp.MinItems = vi.MinItems
 	}
-	if vi.Blocker {
-		sqp.Blocker = vi.Blocker
-	}
 	if vi.Stored {
 		sqp.Stored = vi.Stored
 	}
 	sqp.Weights = append(sqp.Weights, vi.Weights...)
+	sqp.Blockers = append(sqp.Blockers, vi.Blockers...)
 }
 
 func (sqp *StatQueueProfile) String() string { return utils.ToJSON(sqp) }
@@ -691,8 +691,8 @@ func (sqp *StatQueueProfile) FieldAsInterface(fldPath []string) (_ interface{}, 
 			return sqp.Metrics, nil
 		case utils.Stored:
 			return sqp.Stored, nil
-		case utils.Blocker:
-			return sqp.Blocker, nil
+		case utils.BlockersField:
+			return sqp.Blockers, nil
 		}
 	}
 	if len(fldPath) == 0 {

@@ -1151,7 +1151,7 @@ func testLoadersGetStatQueueProfiles(t *testing.T) {
 				},
 			},
 			ThresholdIDs: []string{"Th1", "Th2"},
-			Blocker:      true,
+			Blockers:     utils.Blockers{{Blocker: true}},
 			Stored:       true,
 			Weights: utils.DynamicWeights{
 				{
@@ -1187,7 +1187,7 @@ func testLoadersGetStatQueueProfiles(t *testing.T) {
 				},
 			},
 			ThresholdIDs: []string{"Th"},
-			Blocker:      true,
+			Blockers:     utils.Blockers{{Blocker: true}},
 			Stored:       true,
 			Weights: utils.DynamicWeights{
 				{
@@ -1211,7 +1211,7 @@ func testLoadersGetStatQueueProfiles(t *testing.T) {
 				},
 			},
 			ThresholdIDs: []string{"Th1", "Th2"},
-			Blocker:      true,
+			Blockers:     utils.Blockers{{Blocker: true}},
 			Stored:       true,
 
 			Weights: utils.DynamicWeights{

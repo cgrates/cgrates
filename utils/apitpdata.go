@@ -241,12 +241,12 @@ type TPStatProfile struct {
 	FilterIDs    []string
 	QueueLength  int
 	TTL          string
-	Metrics      []*MetricWithFilters
-	Blocker      bool // blocker flag to stop processing on filters matched
-	Stored       bool
-	Weights      string
 	MinItems     int
+	Weights      string
+	Blockers     string // blocker flag to stop processing on filters matched
+	Stored       bool
 	ThresholdIDs []string
+	Metrics      []*MetricWithFilters
 }
 
 // TPThresholdProfile is used in APIs to manage remotely offline ThresholdProfile

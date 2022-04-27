@@ -434,7 +434,7 @@ func TestTPReaderGetLoadedIdsStatQueueProfiles(t *testing.T) {
 				ID:        "ResGroup1",
 				FilterIDs: []string{"*string:~*req.Account:1001", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z"},
 				Weights:   ";10",
-				Blocker:   true,
+				Blockers:  ";true",
 				Stored:    true,
 			},
 		},

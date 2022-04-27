@@ -443,8 +443,8 @@ func testStsITMigrateFromv1(t *testing.T) {
 		t.Errorf("Expecting: '0', received: %+v", statQueueProfile.Weights)
 	} else if !statQueueProfile.Stored {
 		t.Errorf("Expecting: 'true', received: %+v", statQueueProfile.Stored)
-	} else if statQueueProfile.Blocker {
-		t.Errorf("Expecting: 'false', received: %+v", statQueueProfile.Blocker)
+	} else if statQueueProfile.Blockers[0].Blocker {
+		t.Errorf("Expecting: 'false', received: %+v", statQueueProfile.Blockers[0].Blocker)
 	} else if statQueueProfile.QueueLength != 10 {
 		t.Errorf("Expecting: '10', received: %+v", statQueueProfile.QueueLength)
 	} else if statQueueProfile.ID != "test" {

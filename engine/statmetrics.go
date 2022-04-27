@@ -855,13 +855,9 @@ func exportToPrometheus(matchSQs StatQueues, promIDs utils.StringSet) (err error
 		if _, has := promIDs[qos.ID]; !has {
 			continue
 		}
-		tntID, err := getStatTenantID(qos.TenantID())
-		if err != nil {
-			return err
-		}
 		gaugeVal := prometheus.NewGaugeVec(prometheus.GaugeOpts{
 			Subsystem: "stats",
-			Name:      tntID,
+			Name:      getStatTenantID(qos.TenantID()),
 			Help:      "Metrics exported as gauge, depending on metricID's ID.",
 		}, []string{"metricID"})
 		if err = prometheus.Register(gaugeVal); err != nil {
@@ -882,11 +878,11 @@ func exportToPrometheus(matchSQs StatQueues, promIDs utils.StringSet) (err error
 	return
 }
 
-func getStatTenantID(tntID string) (promTntID string, err error) {
+func getStatTenantID(tntID string) string {
 	for _, char := range tntID {
 		if strings.ContainsAny(string(char), `/,.'"\`) {
 			tntID = strings.Replace(tntID, string(char), "_", -1)
 		}
 	}
-	return tntID, nil
+	return tntID
 }

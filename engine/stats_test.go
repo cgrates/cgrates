@@ -46,7 +46,7 @@ var (
 				},
 			},
 			ThresholdIDs: []string{},
-			Blocker:      false,
+			Blockers:     utils.Blockers{{Blocker: false}},
 			Stored:       true,
 			Weights: utils.DynamicWeights{
 				{
@@ -67,7 +67,7 @@ var (
 				},
 			},
 			ThresholdIDs: []string{},
-			Blocker:      false,
+			Blockers:     utils.Blockers{{Blocker: false}},
 			Stored:       true,
 			Weights: utils.DynamicWeights{
 				{
@@ -88,7 +88,7 @@ var (
 				},
 			},
 			ThresholdIDs: []string{},
-			Blocker:      false,
+			Blockers:     utils.Blockers{{Blocker: false}},
 			Stored:       true,
 			Weights: utils.DynamicWeights{
 				{
@@ -822,7 +822,7 @@ func TestStatQueueMatchingStatQueuesForEventLocksBlocker(t *testing.T) {
 					Weight: float64(10 - i),
 				},
 			},
-			Blocker:      i == 4,
+			Blockers:     utils.Blockers{{Blocker: i == 4}},
 			ThresholdIDs: []string{utils.MetaNone},
 		}
 		dm.SetStatQueueProfile(context.Background(), rPrf, true)
@@ -1215,7 +1215,7 @@ func TestStatQueueProcessEventOK(t *testing.T) {
 				Weight: 10,
 			},
 		},
-		Blocker:      true,
+		Blockers:     utils.Blockers{{Blocker: true}},
 		QueueLength:  10,
 		ThresholdIDs: []string{"*none"},
 		MinItems:     5,
@@ -1280,7 +1280,7 @@ func TestStatQueueProcessEventProcessThPartExec(t *testing.T) {
 				Weight: 10,
 			},
 		},
-		Blocker:      true,
+		Blockers:     utils.Blockers{{Blocker: true}},
 		QueueLength:  10,
 		ThresholdIDs: []string{"*none"},
 		MinItems:     5,
@@ -1318,76 +1318,6 @@ func TestStatQueueProcessEventProcessThPartExec(t *testing.T) {
 	}
 }
 
-/*
-func TestStatQueueV1ProcessEventProcessEventErr(t *testing.T) {
-	tmp := Cache
-	tmpC := config.CgrConfig()
-	defer func() {
-		Cache = tmp
-		config.SetCgrConfig(tmpC)
-	}()
-
-	cfg := config.NewDefaultCGRConfig()
-	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(data, cfg.CacheCfg(), nil)
-	Cache = NewCacheS(cfg, dm, nil)
-	filterS := NewFilterS(cfg, nil, dm)
-	sS := NewStatService(dm, cfg, filterS, nil)
-
-	sqPrf := &StatQueueProfile{
-		Tenant:       "cgrates.org",
-		ID:           "SQ1",
-		FilterIDs:    []string{"*string:~*req.Account:1001"},
-		Weight:       10,
-		Blocker:      true,
-		QueueLength:  10,
-		ThresholdIDs: []string{"*none"},
-		MinItems:     5,
-		Metrics: []*MetricWithFilters{
-			{
-				MetricID: utils.MetaTCD,
-			},
-		},
-	}
-	sq := &StatQueue{
-		sqPrfl: sqPrf,
-		Tenant: "cgrates.org",
-		ID:     "SQ1",
-		SQItems: []SQItem{
-			{
-				EventID: "SqProcessEvent",
-			},
-		},
-		SQMetrics: map[string]StatMetric{
-			utils.MetaTCD: &StatTCD{Metric: &Metric{}},
-		},
-	}
-
-	if err := dm.SetStatQueueProfile(context.Background(), sqPrf, true); err != nil {
-		t.Error(err)
-	}
-	if err := dm.SetStatQueue(context.Background(), sq); err != nil {
-		t.Error(err)
-	}
-
-	args := &utils.CGREvent{
-		ID: "SqProcessEvent",
-		Event: map[string]interface{}{
-			utils.AccountField: "1001",
-		},
-		APIOpts: map[string]interface{}{
-			utils.OptsStatsProfileIDs: []string{"SQ1"},
-		},
-	}
-
-	var reply []string
-	if err := sS.V1ProcessEvent(context.Background(), args, &reply); err == nil ||
-		err.Error() != utils.ErrPartiallyExecuted.Error() {
-		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrPartiallyExecuted, err)
-	}
-}
-*/
-
 func TestStatQueueV1ProcessEventMissingArgs(t *testing.T) {
 	tmp := Cache
 	tmpC := config.CgrConfig()
@@ -1412,7 +1342,7 @@ func TestStatQueueV1ProcessEventMissingArgs(t *testing.T) {
 				Weight: 10,
 			},
 		},
-		Blocker:      true,
+		Blockers:     utils.Blockers{{Blocker: true}},
 		QueueLength:  10,
 		ThresholdIDs: []string{"*none"},
 		MinItems:     5,
@@ -1506,7 +1436,7 @@ func TestStatQueueV1GetQueueIDsOK(t *testing.T) {
 				Weight: 10,
 			},
 		},
-		Blocker:      true,
+		Blockers:     utils.Blockers{{Blocker: true}},
 		QueueLength:  10,
 		ThresholdIDs: []string{"*none"},
 		MinItems:     5,
@@ -1614,7 +1544,7 @@ func TestStatQueueV1GetStatQueueOK(t *testing.T) {
 				Weight: 10,
 			},
 		},
-		Blocker:      true,
+		Blockers:     utils.Blockers{{Blocker: true}},
 		QueueLength:  10,
 		ThresholdIDs: []string{"*none"},
 		MinItems:     5,
@@ -1707,7 +1637,7 @@ func TestStatQueueV1GetStatQueueMissingArgs(t *testing.T) {
 				Weight: 10,
 			},
 		},
-		Blocker:      true,
+		Blockers:     utils.Blockers{{Blocker: true}},
 		QueueLength:  10,
 		ThresholdIDs: []string{"*none"},
 		MinItems:     5,
@@ -1771,7 +1701,7 @@ func TestStatQueueV1GetStatQueuesForEventOK(t *testing.T) {
 				Weight: 10,
 			},
 		},
-		Blocker:      true,
+		Blockers:     utils.Blockers{{Blocker: true}},
 		QueueLength:  10,
 		ThresholdIDs: []string{"*none"},
 		MinItems:     5,
@@ -1794,7 +1724,7 @@ func TestStatQueueV1GetStatQueuesForEventOK(t *testing.T) {
 				Weight: 20,
 			},
 		},
-		Blocker:      false,
+		Blockers:     utils.Blockers{{Blocker: false}},
 		QueueLength:  10,
 		ThresholdIDs: []string{"*none"},
 		MinItems:     5,
@@ -1852,7 +1782,7 @@ func TestStatQueueV1GetStatQueuesForEventNotFoundErr(t *testing.T) {
 				Weight: 10,
 			},
 		},
-		Blocker:      true,
+		Blockers:     utils.Blockers{{Blocker: true}},
 		QueueLength:  10,
 		ThresholdIDs: []string{"*none"},
 		MinItems:     5,
@@ -1905,7 +1835,7 @@ func TestStatQueueV1GetStatQueuesForEventMissingArgs(t *testing.T) {
 				Weight: 10,
 			},
 		},
-		Blocker:      true,
+		Blockers:     utils.Blockers{{Blocker: true}},
 		QueueLength:  10,
 		ThresholdIDs: []string{"*none"},
 		MinItems:     5,
@@ -1979,7 +1909,7 @@ func TestStatQueueV1ResetStatQueueOK(t *testing.T) {
 				Weight: 10,
 			},
 		},
-		Blocker:      true,
+		Blockers:     utils.Blockers{{Blocker: true}},
 		QueueLength:  10,
 		ThresholdIDs: []string{"*none"},
 		MinItems:     5,
@@ -2074,7 +2004,7 @@ func TestStatQueueV1ResetStatQueueNotFoundErr(t *testing.T) {
 				Weight: 10,
 			},
 		},
-		Blocker:      true,
+		Blockers:     utils.Blockers{{Blocker: true}},
 		QueueLength:  10,
 		ThresholdIDs: []string{"*none"},
 		MinItems:     5,
@@ -2144,7 +2074,7 @@ func TestStatQueueV1ResetStatQueueMissingArgs(t *testing.T) {
 				Weight: 10,
 			},
 		},
-		Blocker:      true,
+		Blockers:     utils.Blockers{{Blocker: true}},
 		QueueLength:  10,
 		ThresholdIDs: []string{"*none"},
 		MinItems:     5,
@@ -2212,7 +2142,7 @@ func TestStatQueueV1ResetStatQueueUnsupportedMetricType(t *testing.T) {
 				Weight: 10,
 			},
 		},
-		Blocker:      true,
+		Blockers:     utils.Blockers{{Blocker: true}},
 		QueueLength:  10,
 		ThresholdIDs: []string{"*none"},
 		MinItems:     5,
@@ -2287,7 +2217,7 @@ func TestStatQueueProcessThresholdsOKNoThIDs(t *testing.T) {
 				Weight: 10,
 			},
 		},
-		Blocker:      true,
+		Blockers:     utils.Blockers{{Blocker: true}},
 		QueueLength:  10,
 		ThresholdIDs: []string{"*none"},
 		MinItems:     5,
@@ -2390,7 +2320,7 @@ func TestStatQueueProcessThresholdsOK(t *testing.T) {
 				Weight: 10,
 			},
 		},
-		Blocker:      true,
+		Blockers:     utils.Blockers{{Blocker: true}},
 		QueueLength:  10,
 		ThresholdIDs: []string{"TH1"},
 		MinItems:     5,
@@ -2476,7 +2406,7 @@ func TestStatQueueProcessThresholdsErrPartExec(t *testing.T) {
 				Weight: 10,
 			},
 		},
-		Blocker:      true,
+		Blockers:     utils.Blockers{{Blocker: true}},
 		QueueLength:  10,
 		ThresholdIDs: []string{"TH1"},
 		MinItems:     5,
@@ -2549,7 +2479,7 @@ func TestStatQueueV1GetQueueFloatMetricsOK(t *testing.T) {
 				Weight: 10,
 			},
 		},
-		Blocker:      true,
+		Blockers:     utils.Blockers{{Blocker: true}},
 		QueueLength:  10,
 		ThresholdIDs: []string{"*none"},
 		MinItems:     5,
@@ -2622,7 +2552,7 @@ func TestStatQueueV1GetQueueFloatMetricsErrNotFound(t *testing.T) {
 				Weight: 10,
 			},
 		},
-		Blocker:      true,
+		Blockers:     utils.Blockers{{Blocker: true}},
 		QueueLength:  10,
 		ThresholdIDs: []string{"*none"},
 		MinItems:     5,
@@ -2690,7 +2620,7 @@ func TestStatQueueV1GetQueueFloatMetricsMissingArgs(t *testing.T) {
 				Weight: 10,
 			},
 		},
-		Blocker:      true,
+		Blockers:     utils.Blockers{{Blocker: true}},
 		QueueLength:  10,
 		ThresholdIDs: []string{"*none"},
 		MinItems:     5,
@@ -2779,7 +2709,7 @@ func TestStatQueueV1GetQueueStringMetricsOK(t *testing.T) {
 				Weight: 10,
 			},
 		},
-		Blocker:      true,
+		Blockers:     utils.Blockers{{Blocker: true}},
 		QueueLength:  10,
 		ThresholdIDs: []string{"*none"},
 		MinItems:     5,
@@ -2852,7 +2782,7 @@ func TestStatQueueV1GetQueueStringMetricsErrNotFound(t *testing.T) {
 				Weight: 10,
 			},
 		},
-		Blocker:      true,
+		Blockers:     utils.Blockers{{Blocker: true}},
 		QueueLength:  10,
 		ThresholdIDs: []string{"*none"},
 		MinItems:     5,
@@ -2918,7 +2848,7 @@ func TestStatQueueV1GetQueueStringMetricsMissingArgs(t *testing.T) {
 				Weight: 10,
 			},
 		},
-		Blocker:      true,
+		Blockers:     utils.Blockers{{Blocker: true}},
 		QueueLength:  10,
 		ThresholdIDs: []string{"*none"},
 		MinItems:     5,
@@ -3041,7 +2971,7 @@ func TestStatQueueGetStatQueueOK(t *testing.T) {
 				Weight: 10,
 			},
 		},
-		Blocker:      true,
+		Blockers:     utils.Blockers{{Blocker: true}},
 		QueueLength:  10,
 		ThresholdIDs: []string{"*none"},
 		MinItems:     5,
@@ -3246,7 +3176,7 @@ func TestStatQueueV1GetStatQueuesForEventProfileIgnoreFilters(t *testing.T) {
 				Weight: 10,
 			},
 		},
-		Blocker:      true,
+		Blockers:     utils.Blockers{{Blocker: true}},
 		QueueLength:  10,
 		ThresholdIDs: []string{"*none"},
 		MinItems:     5,
