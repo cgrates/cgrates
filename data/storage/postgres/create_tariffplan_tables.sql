@@ -104,26 +104,25 @@ CREATE TABLE tp_routes (
   "tenant"varchar(64) NOT NULL,
   "id" varchar(64) NOT NULL,
   "filter_ids" varchar(64) NOT NULL,
-  "activation_interval" varchar(64) NOT NULL,
+  "weights" varchar(64) NOT NULL,
+  `blockers` varchar(64) NOT NULL,
   "sorting" varchar(32) NOT NULL,
   "sorting_parameters" varchar(64) NOT NULL,
-  `blockers` varchar(64) NOT NULL,
   "route_id" varchar(32) NOT NULL,
   "route_filter_ids" varchar(64) NOT NULL,
   "route_account_ids" varchar(64) NOT NULL,
-  "route_ratingplan_ids" varchar(64) NOT NULL,
+  "route_rate_profile_ids" varchar(64) NOT NULL,
   "route_resource_ids" varchar(64) NOT NULL,
   "route_stat_ids" varchar(64) NOT NULL,
   "route_weights" varchar(64) NOT NULL,
   "route_blocker" BOOLEAN NOT NULL,
   "route_parameters" varchar(64) NOT NULL,
-  "weights" varchar(64) NOT NULL,
   "created_at" TIMESTAMP WITH TIME ZONE
 );
 CREATE INDEX tp_routes_idx ON tp_routes (tpid);
 CREATE INDEX tp_routes_unique ON tp_routes  ("tpid",  "tenant", "id",
   "filter_ids","route_id","route_filter_ids","route_account_ids",
-  "route_ratingplan_ids","route_resource_ids","route_stat_ids");
+  "route_rate_profile_ids","route_resource_ids","route_stat_ids");
 
   --
   -- Table structure for table `tp_attributes`
@@ -266,8 +265,8 @@ CREATE TABLE tp_action_profiles (
   "tenant" varchar(64) NOT NULL,
   "id" varchar(64) NOT NULL,
   "filter_ids" varchar(64) NOT NULL,
-  "activation_interval" varchar(64) NOT NULL,
   "weights" varchar(64) NOT NULL,
+  "blockers" varchar(64) NOT NULL,
   "schedule" varchar(64) NOT NULL,
   "target_type" varchar(64) NOT NULL,
   "target_ids" varchar(64) NOT NULL,

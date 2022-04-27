@@ -1042,11 +1042,11 @@ func RouteProfileToAPI(rp *RouteProfile) (tpRp *utils.TPRouteProfile) {
 		Tenant:            rp.Tenant,
 		ID:                rp.ID,
 		FilterIDs:         make([]string, len(rp.FilterIDs)),
+		Weights:           rp.Weights.String(utils.InfieldSep, utils.ANDSep),
+		Blockers:          rp.Blockers.String(utils.InfieldSep, utils.ANDSep),
 		Sorting:           rp.Sorting,
 		SortingParameters: make([]string, len(rp.SortingParameters)),
 		Routes:            make([]*utils.TPRoute, len(rp.Routes)),
-		Weights:           rp.Weights.String(utils.InfieldSep, utils.ANDSep),
-		Blockers:          rp.Blockers.String(utils.InfieldSep, utils.ANDSep),
 	}
 
 	for i, route := range rp.Routes {
@@ -2066,8 +2066,11 @@ func (apm ActionProfileMdls) AsTPActionProfile() (result []*utils.TPActionProfil
 			}
 			filterIDsMap[tenID].AddSlice(strings.Split(tp.FilterIDs, utils.InfieldSep))
 		}
-		if tp.Weights != "" {
+		if tp.Weights != utils.EmptyString {
 			aPrf.Weights = tp.Weights
+		}
+		if tp.Blockers != utils.EmptyString {
+			aPrf.Blockers = tp.Blockers
 		}
 		if tp.Schedule != utils.EmptyString {
 			aPrf.Schedule = tp.Schedule
@@ -2132,8 +2135,8 @@ func APItoModelTPActionProfile(tPrf *utils.TPActionProfile) (mdls ActionProfileM
 		}
 		if i == 0 {
 			mdl.FilterIDs = strings.Join(tPrf.FilterIDs, utils.InfieldSep)
-
 			mdl.Weights = tPrf.Weights
+			mdl.Blockers = tPrf.Blockers
 			mdl.Schedule = tPrf.Schedule
 			for _, target := range tPrf.Targets {
 				mdl.TargetType = target.TargetType
@@ -2176,6 +2179,11 @@ func APItoActionProfile(tpAp *utils.TPActionProfile, timezone string) (ap *Actio
 	}
 	if tpAp.Weights != utils.EmptyString {
 		if ap.Weights, err = utils.NewDynamicWeightsFromString(tpAp.Weights, utils.InfieldSep, utils.ANDSep); err != nil {
+			return
+		}
+	}
+	if tpAp.Blockers != utils.EmptyString {
+		if ap.Blockers, err = utils.NewBlockersFromString(tpAp.Blockers, utils.InfieldSep, utils.ANDSep); err != nil {
 			return
 		}
 	}
@@ -2225,6 +2233,7 @@ func ActionProfileToAPI(ap *ActionProfile) (tpAp *utils.TPActionProfile) {
 		ID:        ap.ID,
 		FilterIDs: make([]string, len(ap.FilterIDs)),
 		Weights:   ap.Weights.String(utils.InfieldSep, utils.ANDSep),
+		Blockers:  ap.Blockers.String(utils.InfieldSep, utils.ANDSep),
 		Schedule:  ap.Schedule,
 		Targets:   make([]*utils.TPActionTarget, 0, len(ap.Targets)),
 		Actions:   make([]*utils.TPAPAction, len(ap.Actions)),

@@ -1302,6 +1302,7 @@ const (
 	CoreSv1                     = "CoreSv1"
 	CoreSv1Status               = "CoreSv1.Status"
 	CoreSv1Ping                 = "CoreSv1.Ping"
+	CoreSv1Panic                = "CoreSv1.Panic"
 	CoreSv1Shutdown             = "CoreSv1.Shutdown"
 	CoreSv1Sleep                = "CoreSv1.Sleep"
 	CoreSv1StartCPUProfiling    = "CoreSv1.StartCPUProfiling"

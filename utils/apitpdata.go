@@ -298,11 +298,11 @@ type TPRouteProfile struct {
 	Tenant            string
 	ID                string
 	FilterIDs         []string
+	Weights           string
+	Blockers          string
 	Sorting           string
 	SortingParameters []string
 	Routes            []*TPRoute
-	Weights           string
-	Blockers          string
 }
 
 // TPAttribute is used in TPAttributeProfile
@@ -657,6 +657,7 @@ type TPActionProfile struct {
 	ID        string
 	FilterIDs []string
 	Weights   string
+	Blockers  string
 	Schedule  string
 	Targets   []*TPActionTarget
 	Actions   []*TPAPAction
