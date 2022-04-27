@@ -27,6 +27,7 @@ import (
 	"net/http/httptest"
 	"path"
 	"reflect"
+	"sort"
 	"testing"
 	"time"
 
@@ -85,6 +86,11 @@ var (
 		testActionsGetStatQueueAfterReset,
 		testActionsRemoveActionProfile,
 		testActionsGetActionProfileAfterRemove,
+
+		// blocker behaviour test
+		testActionsRemoveActionProfiles,
+		testActionsSetActionProfiles,
+		testActionsExecuteActions,
 
 		testActionsKillEngine,
 	}
@@ -653,4 +659,154 @@ func testActionsGetStatQueueAfterReset(t *testing.T) {
 
 func testActionsSleep(t *testing.T) {
 	time.Sleep(time.Second)
+}
+
+func testActionsRemoveActionProfiles(t *testing.T) {
+	args := &utils.ArgsItemIDs{
+		Tenant: "cgrates.org",
+	}
+	expected := []string{"aactPrfID"}
+	var actionProfileIDs []string
+	if err := actRPC.Call(context.Background(), utils.AdminSv1GetActionProfileIDs, args, &actionProfileIDs); err != nil {
+		t.Fatal(err)
+	} else {
+		sort.Strings(actionProfileIDs)
+		if !utils.SliceStringEqual(actionProfileIDs, expected) {
+			t.Errorf("expected: <%+v>, \nreceived: <%+v>", expected, actionProfileIDs)
+		}
+	}
+	var reply string
+	for _, actionProfileID := range actionProfileIDs {
+		argsRem := utils.TenantIDWithAPIOpts{
+			TenantID: &utils.TenantID{
+				Tenant: "cgrates.org",
+				ID:     actionProfileID,
+			},
+		}
+		if err := actRPC.Call(context.Background(), utils.AdminSv1RemoveActionProfile, argsRem, &reply); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if err := actRPC.Call(context.Background(), utils.AdminSv1GetActionProfileIDs, args, &actionProfileIDs); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
+	}
+}
+
+func testActionsSetActionProfiles(t *testing.T) {
+	actionProfiles := []*engine.ActionProfileWithAPIOpts{
+		{
+			ActionProfile: &engine.ActionProfile{
+				ID:        "ACTION_TEST_1",
+				Tenant:    "cgrates.org",
+				FilterIDs: []string{"*string:~*req.TestCase:BlockerBehaviour"},
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 30,
+					},
+				},
+				Blockers: utils.Blockers{
+					{
+						Blocker: false,
+					},
+				},
+				Schedule: utils.MetaASAP,
+				Actions: []*engine.APAction{
+					{
+						ID:   "action1",
+						Type: utils.MetaLog,
+					},
+				},
+			},
+		},
+		{
+			ActionProfile: &engine.ActionProfile{
+				ID:        "ACTION_TEST_2",
+				Tenant:    "cgrates.org",
+				FilterIDs: []string{"*string:~*req.TestCase:BlockerBehaviour"},
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 10,
+					},
+				},
+				Schedule: utils.MetaASAP,
+				Actions: []*engine.APAction{
+					{
+						ID:   "action2",
+						Type: utils.MetaLog,
+					},
+				},
+			},
+		},
+		{
+			ActionProfile: &engine.ActionProfile{
+				ID:        "ACTION_TEST_3",
+				Tenant:    "cgrates.org",
+				FilterIDs: []string{"*string:~*req.TestCase:BlockerBehaviour"},
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 20,
+					},
+				},
+				Blockers: utils.Blockers{
+					{
+						Blocker: true,
+					},
+				},
+				Schedule: utils.MetaASAP,
+				Actions: []*engine.APAction{
+					{
+						ID:   "action3",
+						Type: utils.MetaLog,
+					},
+				},
+			},
+		},
+		{
+			ActionProfile: &engine.ActionProfile{
+				ID:        "ACTION_TEST_4",
+				Tenant:    "cgrates.org",
+				FilterIDs: []string{"*string:~*req.TestCase:BlockerBehaviour"},
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 5,
+					},
+				},
+				Schedule: utils.MetaASAP,
+				Actions: []*engine.APAction{
+					{
+						ID:   "action4",
+						Type: utils.MetaLog,
+					},
+				},
+			},
+		},
+	}
+
+	var reply string
+	for _, actionProfile := range actionProfiles {
+		if err := actRPC.Call(context.Background(), utils.AdminSv1SetActionProfile,
+			actionProfile, &reply); err != nil {
+			t.Error(err)
+		} else if reply != utils.OK {
+			t.Error(err)
+		}
+	}
+}
+
+func testActionsExecuteActions(t *testing.T) {
+	args := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "EventExecuteActions",
+		Event: map[string]interface{}{
+			"TestCase": "BlockerBehaviour",
+		},
+		APIOpts: map[string]interface{}{},
+	}
+	var reply string
+	if err := actRPC.Call(context.Background(), utils.ActionSv1ExecuteActions, args, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned:", reply)
+	}
 }

@@ -329,18 +329,19 @@ type ActionProfileMdl struct {
 	Tenant          string `index:"0" re:""`
 	ID              string `index:"1" re:""`
 	FilterIDs       string `index:"2" re:""`
-	Weights         string `index:"3" re:"\d+\.?\d*"`
-	Schedule        string `index:"4" re:""`
-	TargetType      string `index:"5" re:""`
-	TargetIDs       string `index:"6" re:""`
-	ActionID        string `index:"7" re:""`
-	ActionFilterIDs string `index:"8" re:""`
-	ActionBlocker   bool   `index:"9" re:""`
-	ActionTTL       string `index:"10" re:""`
-	ActionType      string `index:"11" re:""`
-	ActionOpts      string `index:"12" re:""`
-	ActionPath      string `index:"13" re:""`
-	ActionValue     string `index:"14" re:""`
+	Weights         string `index:"3" re:""`
+	Blockers        string `index:"4" re:""`
+	Schedule        string `index:"5" re:""`
+	TargetType      string `index:"6" re:""`
+	TargetIDs       string `index:"7" re:""`
+	ActionID        string `index:"8" re:""`
+	ActionFilterIDs string `index:"9" re:""`
+	ActionBlocker   bool   `index:"10" re:""`
+	ActionTTL       string `index:"11" re:""`
+	ActionType      string `index:"12" re:""`
+	ActionOpts      string `index:"13" re:""`
+	ActionPath      string `index:"14" re:""`
+	ActionValue     string `index:"15" re:""`
 
 	CreatedAt time.Time
 }
@@ -361,7 +362,7 @@ type AccountMdl struct {
 	BalanceFilterIDs      string `index:"6" re:""`
 	BalanceWeights        string `index:"7" re:""`
 	BalanceType           string `index:"8" re:""`
-	BalanceUnits          string `index:"9" re:"\d+\.?\d*"`
+	BalanceUnits          string `index:"9" re:""`
 	BalanceUnitFactors    string `index:"10" re:""`
 	BalanceOpts           string `index:"11" re:""`
 	BalanceCostIncrements string `index:"12" re:""`

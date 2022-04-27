@@ -35,6 +35,7 @@ type ActionProfile struct {
 	ID        string
 	FilterIDs []string
 	Weights   utils.DynamicWeights
+	Blockers  utils.Blockers
 	Schedule  string
 	Targets   map[string]utils.StringSet
 
@@ -122,6 +123,10 @@ func (aP *ActionProfile) Set(path []string, val interface{}, newBranch bool, _ s
 		case utils.Weights:
 			if val != utils.EmptyString {
 				aP.Weights, err = utils.NewDynamicWeightsFromString(utils.IfaceAsString(val), utils.InfieldSep, utils.ANDSep)
+			}
+		case utils.BlockersField:
+			if val != utils.EmptyString {
+				aP.Blockers, err = utils.NewBlockersFromString(utils.IfaceAsString(val), utils.InfieldSep, utils.ANDSep)
 			}
 		}
 		return
@@ -240,6 +245,7 @@ func (ap *ActionProfile) Merge(v2 interface{}) {
 	}
 
 	ap.Weights = append(ap.Weights, vi.Weights...)
+	ap.Blockers = append(ap.Blockers, vi.Blockers...)
 	if len(vi.Schedule) != 0 {
 		ap.Schedule = vi.Schedule
 	}
@@ -322,8 +328,10 @@ func (ap *ActionProfile) FieldAsInterface(fldPath []string) (_ interface{}, err 
 			return ap.ID, nil
 		case utils.FilterIDs:
 			return ap.FilterIDs, nil
-		case utils.Weight:
+		case utils.Weights:
 			return ap.Weights, nil
+		case utils.BlockersField:
+			return ap.Blockers, nil
 		case utils.Actions:
 			return ap.Actions, nil
 		case utils.Schedule:

@@ -196,17 +196,17 @@ cgrates.org,1002,,;30,,VoiceBalance,,;10,*voice,14,fltr3&fltr4;150;fltr5;250,,fl
 
 	// Create and populate ActionProfiles.csv
 	if err := writeFile(utils.ActionsCsv, `
-#Tenant,ID,FilterIDs,Weights,Schedule,TargetType,TargetIDs,ActionID,ActionFilterIDs,ActionBlocker,ActionTTL,ActionType,ActionOpts,ActionPath,ActionValue
-cgrates.org,ONE_TIME_ACT,,,,,,,,,,,,,
-cgrates.org,ONE_TIME_ACT,,;10,*asap,*accounts,1001;1002,,,,,,,,
-cgrates.org,ONE_TIME_ACT,,,,,,TOPUP,,false,0s,*add_balance,,,
-cgrates.org,ONE_TIME_ACT,,,*asap,*accounts,1001;1002,,,,,,,,
-cgrates.org,ONE_TIME_ACT,,,,,,TOPUP,,,,,,*balance.TestBalance.Value,10
-cgrates.org,ONE_TIME_ACT,,,,,,SET_BALANCE_TEST_DATA,,false,0s,*set_balance,,*balance.TestDataBalance.Type,*data
-cgrates.org,ONE_TIME_ACT,,,,,,TOPUP_TEST_DATA,,false,0s,*add_balance,,*balance.TestDataBalance.Value,1024
-cgrates.org,ONE_TIME_ACT,,,,,,SET_BALANCE_TEST_VOICE,,false,0s,*set_balance,,*balance.TestVoiceBalance.Type,*voice
-cgrates.org,ONE_TIME_ACT,,,,,,TOPUP_TEST_VOICE,,false,0s,*add_balance,,*balance.TestVoiceBalance.Value,15m15s
-cgrates.org,ONE_TIME_ACT,,,,,,TOPUP_TEST_VOICE,,false,0s,*add_balance,,*balance.TestVoiceBalance2.Value,15m15s
+#Tenant,ID,FilterIDs,Weights,Blockers,Schedule,TargetType,TargetIDs,ActionID,ActionFilterIDs,ActionBlocker,ActionTTL,ActionType,ActionOpts,ActionPath,ActionValue
+cgrates.org,ONE_TIME_ACT,,,,,,,,,,,,,,
+cgrates.org,ONE_TIME_ACT,,;10,,*asap,*accounts,1001;1002,,,,,,,,
+cgrates.org,ONE_TIME_ACT,,,,,,,TOPUP,,false,0s,*add_balance,,,
+cgrates.org,ONE_TIME_ACT,,,,*asap,*accounts,1001;1002,,,,,,,,
+cgrates.org,ONE_TIME_ACT,,,,,,,TOPUP,,,,,,*balance.TestBalance.Value,10
+cgrates.org,ONE_TIME_ACT,,,,,,,SET_BALANCE_TEST_DATA,,false,0s,*set_balance,,*balance.TestDataBalance.Type,*data
+cgrates.org,ONE_TIME_ACT,,,,,,,TOPUP_TEST_DATA,,false,0s,*add_balance,,*balance.TestDataBalance.Value,1024
+cgrates.org,ONE_TIME_ACT,,,,,,,SET_BALANCE_TEST_VOICE,,false,0s,*set_balance,,*balance.TestVoiceBalance.Type,*voice
+cgrates.org,ONE_TIME_ACT,,,,,,,TOPUP_TEST_VOICE,,false,0s,*add_balance,,*balance.TestVoiceBalance.Value,15m15s
+cgrates.org,ONE_TIME_ACT,,,,,,,TOPUP_TEST_VOICE,,false,0s,*add_balance,,*balance.TestVoiceBalance2.Value,15m15s
 `); err != nil {
 		t.Fatal(err)
 	}
