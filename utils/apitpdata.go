@@ -307,6 +307,7 @@ type TPRouteProfile struct {
 // TPAttribute is used in TPAttributeProfile
 type TPAttribute struct {
 	FilterIDs []string
+	Blockers  string
 	Path      string
 	Type      string
 	Value     string
@@ -318,9 +319,9 @@ type TPAttributeProfile struct {
 	Tenant     string
 	ID         string
 	FilterIDs  []string
-	Attributes []*TPAttribute
-	Blockers   string
 	Weights    string
+	Blockers   string
+	Attributes []*TPAttribute
 }
 
 // TPChargerProfile is used in APIs to manage remotely offline ChargerProfile

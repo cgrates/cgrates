@@ -1087,6 +1087,10 @@ func TestDfLoaderJsonCfg(t *testing.T) {
 							Path:  utils.StringPointer("Attributes.Value"),
 							Type:  utils.StringPointer(utils.MetaVariable),
 							Value: utils.StringPointer("~*req.8")},
+						{Tag: utils.StringPointer("AttributeBlockers"),
+							Path:  utils.StringPointer("Attributes.Blockers"),
+							Type:  utils.StringPointer(utils.MetaVariable),
+							Value: utils.StringPointer("~*req.9")},
 					},
 				},
 				{

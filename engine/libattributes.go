@@ -34,6 +34,7 @@ type apWithWeight struct {
 // Attribute used by AttributeProfile to describe a single attribute
 type Attribute struct {
 	FilterIDs []string
+	Blockers  utils.Blockers // Blockers flag to stop processing on multiple attributes from a profile
 	Path      string
 	Type      string
 	Value     config.RSRParsers
@@ -44,9 +45,9 @@ type AttributeProfile struct {
 	Tenant     string
 	ID         string
 	FilterIDs  []string
-	Attributes []*Attribute
 	Weights    utils.DynamicWeights
 	Blockers   utils.Blockers // Blockers flag to stop processing on multiple runs
+	Attributes []*Attribute
 }
 
 // AttributeProfileWithAPIOpts is used in replicatorV1 for dispatcher
@@ -88,6 +89,7 @@ type AttributeProfiles []*AttributeProfile
 // ExternalAttribute the attribute for external profile
 type ExternalAttribute struct {
 	FilterIDs []string
+	Blockers  utils.Blockers
 	Path      string
 	Type      string
 	Value     string
@@ -95,13 +97,13 @@ type ExternalAttribute struct {
 
 // APIAttributeProfile used by APIs
 type APIAttributeProfile struct {
-	Tenant     string
-	ID         string
-	FilterIDs  []string
-	Attributes []*ExternalAttribute
-	Blockers   utils.Blockers
+	Tenant    string
+	ID        string
+	FilterIDs []string
+	Blockers  utils.Blockers
 	//Blocker    bool // blocker flag to stop processing on multiple runs
-	Weights utils.DynamicWeights
+	Weights    utils.DynamicWeights
+	Attributes []*ExternalAttribute
 }
 
 type APIAttributeProfileWithAPIOpts struct {
@@ -121,6 +123,7 @@ func NewAPIAttributeProfile(attr *AttributeProfile) (ext *APIAttributeProfile) {
 	for i, at := range attr.Attributes {
 		ext.Attributes[i] = &ExternalAttribute{
 			FilterIDs: at.FilterIDs,
+			Blockers:  at.Blockers,
 			Path:      at.Path,
 			Type:      at.Type,
 			Value:     at.Value.GetRule(utils.InfieldSep),
@@ -147,6 +150,7 @@ func (ext *APIAttributeProfile) AsAttributeProfile() (attr *AttributeProfile, er
 		if attr.Attributes[i].Value, err = config.NewRSRParsers(extAttr.Value, utils.InfieldSep); err != nil {
 			return nil, err
 		}
+		attr.Attributes[i].Blockers = extAttr.Blockers
 		attr.Attributes[i].Type = extAttr.Type
 		attr.Attributes[i].FilterIDs = extAttr.FilterIDs
 		attr.Attributes[i].Path = extAttr.Path
@@ -222,6 +226,10 @@ func (ap *AttributeProfile) Set(path []string, val interface{}, newBranch bool, 
 			var valA []string
 			valA, err = utils.IfaceAsStringSlice(val)
 			ap.Attributes[len(ap.Attributes)-1].FilterIDs = append(ap.Attributes[len(ap.Attributes)-1].FilterIDs, valA...)
+		case utils.BlockersField:
+			if val != utils.EmptyString {
+				ap.Attributes[len(ap.Attributes)-1].Blockers, err = utils.NewBlockersFromString(utils.IfaceAsString(val), utils.InfieldSep, utils.ANDSep)
+			}
 		case utils.Path:
 			ap.Attributes[len(ap.Attributes)-1].Path = utils.IfaceAsString(val)
 		case utils.Type:
@@ -336,6 +344,8 @@ func (at *Attribute) FieldAsInterface(fldPath []string) (_ interface{}, err erro
 		return nil, utils.ErrNotFound
 	case utils.FilterIDs:
 		return at.FilterIDs, nil
+	case utils.BlockersField:
+		return at.Blockers, nil
 	case utils.Path:
 		return at.Path, nil
 	case utils.Type:

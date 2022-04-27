@@ -238,6 +238,7 @@
 		{"path": "Attributes.Path", "type": "*variable", "value": "~*req.6"},
 		{"path": "Attributes.Type", "type": "*variable", "value": "~*req.7"},
 		{"path": "Attributes.Value", "type": "*variable", "value": "~*req.8"},
+		{"path": "Attributes.Blockers", "type": "*variable", "value": "~*req.9"},
 		
 	],
 },

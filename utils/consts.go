@@ -549,6 +549,7 @@ const (
 	ResourceIDs              = "ResourceIDs"
 	RouteFilterIDs           = "RouteFilterIDs"
 	AttributeFilterIDs       = "AttributeFilterIDs"
+	AttributeBlockers        = "AttributeBlockers"
 	QueueLength              = "QueueLength"
 	TTL                      = "TTL"
 	MinItems                 = "MinItems"

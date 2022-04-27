@@ -1,5 +1,5 @@
-#Tenant,ID,FilterIDs,Weights,Blockers,AttributeFilterIDs,Path,Type,Value
+#Tenant,ID,FilterIDs,Weights,Blockers,AttributeFilterIDs,Path,Type,Value,AttributeBlockers
 
-cgrates.org,ATTR_ACCOUNTS,*string:~*req.Account:ACCOUNT1,,;false,,*opts.*accountS,*constant,true
+cgrates.org,ATTR_ACCOUNTS,*string:~*req.Account:ACCOUNT1,,;false,,*opts.*accountS,*constant,true,
 
-cgrates.org,ATTR_RATES,,;10,,,*opts.*rateS,*constant,true
+cgrates.org,ATTR_RATES,,;10,,,*opts.*rateS,*constant,true,

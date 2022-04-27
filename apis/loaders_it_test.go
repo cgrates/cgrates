@@ -213,12 +213,12 @@ cgrates.org,ONE_TIME_ACT,,,,,,TOPUP_TEST_VOICE,,false,0s,*add_balance,,*balance.
 
 	// Create and populate Attributes.csv
 	if err := writeFile(utils.AttributesCsv, `
-#Tenant,ID,FilterIDs,Weights,Blockers,AttributeFilterIDs,Path,Type,Value
-cgrates.org,ALS1,*string:~*req.Account:1001;*string:~*opts.*context:con1,;20,;true,,,,
-cgrates.org,ALS1,,,,*string:~*req.Field1:Initial,*req.Field1,*variable,Sub1
-cgrates.org,ALS1,*string:~*opts.*context:con2|con3,,,,*req.Field2,*variable,Sub2
-cgrates.org,ALS2,*string:~*opts.*context:con2|con3,,;false,,*req.Field2,*variable,Sub2
-cgrates.org,ALS2,*string:~*req.Account:1002;*string:~*opts.*context:con1,;20,,*string:~*req.Field1:Initial,*req.Field1,*variable,Sub1
+#Tenant,ID,FilterIDs,Weights,Blockers,AttributeFilterIDs,Path,Type,Value,AttributeBlockers
+cgrates.org,ALS1,*string:~*req.Account:1001;*string:~*opts.*context:con1,;20,;true,,,,,
+cgrates.org,ALS1,,,,*string:~*req.Field1:Initial,*req.Field1,*variable,Sub1,
+cgrates.org,ALS1,*string:~*opts.*context:con2|con3,,,,*req.Field2,*variable,Sub2,
+cgrates.org,ALS2,*string:~*opts.*context:con2|con3,,;false,,*req.Field2,*variable,Sub2,
+cgrates.org,ALS2,*string:~*req.Account:1002;*string:~*opts.*context:con1,;20,,*string:~*req.Field1:Initial,*req.Field1,*variable,Sub1,
 `); err != nil {
 		t.Fatal(err)
 	}
