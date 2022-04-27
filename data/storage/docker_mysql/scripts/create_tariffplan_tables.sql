@@ -146,6 +146,7 @@ CREATE TABLE tp_attributes (
   `path` varchar(64) NOT NULL,
   `type` varchar(64) NOT NULL,
   `value` varchar(64) NOT NULL,
+  `attribute_blockers` varchar(64) NOT NULL,
   `created_at` TIMESTAMP,
   PRIMARY KEY (`pk`),
   KEY `tpid` (`tpid`),

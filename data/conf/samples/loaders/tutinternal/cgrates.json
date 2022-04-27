@@ -188,10 +188,11 @@
 		{"path": "FilterIDs", "type": "*variable", "value": "~*req.2"},
 		{"path": "Weights", "type": "*variable", "value": "~*req.3"},
 		{"path": "Blockers", "type": "*variable", "value": "~*req.4"},
-		{"path": "Attributes.FilterIDs", "type": "*variable", "value": "~*req.5","new_branch":true},
+		{"path": "Attributes.FilterIDs", "type": "*variable", "value": "~*req.5","new_branch":true},		
 		{"path": "Attributes.Path", "type": "*variable", "value": "~*req.6"},
 		{"path": "Attributes.Type", "type": "*variable", "value": "~*req.7"},
 		{"path": "Attributes.Value", "type": "*variable", "value": "~*req.8"},
+		{"path": "Attributes.Blockers", "type": "*variable", "value": "~*req.9"},
 	],
 },
 

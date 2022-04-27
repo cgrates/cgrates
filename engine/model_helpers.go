@@ -1059,7 +1059,7 @@ type AttributeMdls []*AttributeMdl
 
 // CSVHeader return the header for csv fields as a slice of string
 func (tps AttributeMdls) CSVHeader() (result []string) {
-	return []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs, utils.Weights, utils.BlockersField, utils.AttributeFilterIDs, utils.Path, utils.Type, utils.Value}
+	return []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs, utils.Weights, utils.BlockersField, utils.AttributeFilterIDs, utils.AttributeBlockers, utils.Path, utils.Type, utils.Value}
 }
 
 func (tps AttributeMdls) AsTPAttributes() (result []*utils.TPAttributeProfile) {
@@ -1095,6 +1095,7 @@ func (tps AttributeMdls) AsTPAttributes() (result []*utils.TPAttributeProfile) {
 			}
 			th.Attributes = append(th.Attributes, &utils.TPAttribute{
 				FilterIDs: filterIDs,
+				Blockers:  tp.AttributeBlockers,
 				Type:      tp.Type,
 				Path:      tp.Path,
 				Value:     tp.Value,
@@ -1136,7 +1137,7 @@ func APItoModelTPAttribute(ap *utils.TPAttributeProfile) (mdls AttributeMdls) {
 				mdl.Weights = ap.Weights
 			}
 		}
-
+		mdl.AttributeBlockers = reqAttribute.Blockers
 		mdl.Path = reqAttribute.Path
 		mdl.Value = reqAttribute.Value
 		mdl.Type = reqAttribute.Type
@@ -1181,6 +1182,11 @@ func APItoAttributeProfile(tpAttr *utils.TPAttributeProfile, timezone string) (a
 			Type:      reqAttr.Type,
 			Value:     sbstPrsr,
 		}
+		if reqAttr.Blockers != utils.EmptyString {
+			if attrPrf.Attributes[i].Blockers, err = utils.NewBlockersFromString(reqAttr.Blockers, utils.InfieldSep, utils.ANDSep); err != nil {
+				return nil, err
+			}
+		}
 	}
 	return attrPrf, nil
 }
@@ -1200,6 +1206,7 @@ func AttributeProfileToAPI(attrPrf *AttributeProfile) (tpAttr *utils.TPAttribute
 	for i, attr := range attrPrf.Attributes {
 		tpAttr.Attributes[i] = &utils.TPAttribute{
 			FilterIDs: attr.FilterIDs,
+			Blockers:  attr.Blockers.String(utils.InfieldSep, utils.ANDSep),
 			Path:      attr.Path,
 			Type:      attr.Type,
 			Value:     attr.Value.GetRule(utils.InfieldSep),

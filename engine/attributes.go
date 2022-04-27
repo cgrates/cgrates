@@ -229,6 +229,14 @@ func (alS *AttributeS) processEvent(ctx *context.Context, tnt string, args *util
 			rply = nil
 			return
 		}
+		var blocker bool
+		if blocker, err = BlockerFromDynamics(ctx, attribute.Blockers, alS.fltrS, tnt, evNm); err != nil {
+			rply = nil
+			return
+		}
+		if blocker {
+			break
+		}
 	}
 	return
 }

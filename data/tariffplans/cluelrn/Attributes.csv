@@ -1,8 +1,8 @@
-#Tenant,ID,FilterIDs,Weights,Blockers,AttributeFilterIDs,Path,Type,Value
-cgrates.org,LRN_Dst3125650565,*string:~*opts.*context:lrn;*string:~*req.Destination:3125650565,;10,;false,,*req.Destination,*constant,13128543000
-cgrates.org,LRN_Dst3125650565,,;10,;false,,*req.OriginalDestination,*constant,3125650565
-cgrates.org,LRN_LATA_Dst13128543000,*string:~*opts.*context:lrn;*string:~*req.Destination:13128543000;*notempty:~*req.OriginalDestination:,;20,;false,,*req.DestinationLATA,*constant,358
-cgrates.org,LRN_LATA_Cli9174269000,*string:~*opts.*context:lrn;*string:~*req.Account:9174269000;*notempty:~*req.DestinationLATA:,;30,;false,,*req.CallerLATA,*constant,132
-cgrates.org,LRN_JURISDICTION_NY,*string:~*opts.*context:lrn;FLTR_INTRALATA_NEWYORK,;50,;false,,*req.LRNJurisdiction,*constant,INTRA
-cgrates.org,LRN_JURISDICTION_IL,*string:~*opts.*context:lrn;FLTR_INTRALATA_ILLINOIS,;50,;false,,*req.LRNJurisdiction,*constant,INTRA
-cgrates.org,LRN_JURISDICTION_INTER,*string:~*opts.*context:lrn;*string:~*req.Destination:13128543000;*notempty:~*req.CallerLATA:,;40,;false,,*req.LRNJurisdiction,*constant,INTER
+#Tenant,ID,FilterIDs,Weights,Blockers,AttributeFilterIDs,Path,Type,Value,AttributeBlockers
+cgrates.org,LRN_Dst3125650565,*string:~*opts.*context:lrn;*string:~*req.Destination:3125650565,;10,;false,,*req.Destination,*constant,13128543000,
+cgrates.org,LRN_Dst3125650565,,;10,;false,,*req.OriginalDestination,*constant,3125650565,
+cgrates.org,LRN_LATA_Dst13128543000,*string:~*opts.*context:lrn;*string:~*req.Destination:13128543000;*notempty:~*req.OriginalDestination:,;20,;false,,*req.DestinationLATA,*constant,358,
+cgrates.org,LRN_LATA_Cli9174269000,*string:~*opts.*context:lrn;*string:~*req.Account:9174269000;*notempty:~*req.DestinationLATA:,;30,;false,,*req.CallerLATA,*constant,132,
+cgrates.org,LRN_JURISDICTION_NY,*string:~*opts.*context:lrn;FLTR_INTRALATA_NEWYORK,;50,;false,,*req.LRNJurisdiction,*constant,INTRA,
+cgrates.org,LRN_JURISDICTION_IL,*string:~*opts.*context:lrn;FLTR_INTRALATA_ILLINOIS,;50,;false,,*req.LRNJurisdiction,*constant,INTRA,
+cgrates.org,LRN_JURISDICTION_INTER,*string:~*opts.*context:lrn;*string:~*req.Destination:13128543000;*notempty:~*req.CallerLATA:,;40,;false,,*req.LRNJurisdiction,*constant,INTER,

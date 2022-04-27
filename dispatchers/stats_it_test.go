@@ -110,13 +110,13 @@ func testDspStsGetStatFailover(t *testing.T) {
 			utils.EventName:    "Event1",
 			utils.AccountField: "1001",
 			utils.Destination:  "1002",
+			utils.RunID:        utils.MetaDefault,
 		},
 		APIOpts: map[string]interface{}{
 			utils.MetaStartTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			utils.MetaUsage:     135 * time.Second,
 			utils.MetaCost:      123.0,
 			utils.OptsAPIKey:    "stat12345",
-			utils.MetaRunID:     utils.MetaDefault,
 		},
 	}
 	if err := dispEngine.RPC.Call(utils.StatSv1ProcessEvent, args, &reply); err != nil {
@@ -216,13 +216,13 @@ func testDspStsTestAuthKey2(t *testing.T) {
 		ID:     "event1",
 		Event: map[string]interface{}{
 			utils.AccountField: "1001",
+			utils.RunID:        utils.MetaDefault,
 			utils.Destination:  "1002",
 		},
 		APIOpts: map[string]interface{}{
 			utils.MetaStartTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			utils.MetaUsage:     135 * time.Second,
 			utils.MetaCost:      123.0,
-			utils.MetaRunID:     utils.MetaDefault,
 			utils.OptsAPIKey:    "stat12345",
 		},
 	}
@@ -259,11 +259,11 @@ func testDspStsTestAuthKey2(t *testing.T) {
 		Event: map[string]interface{}{
 			utils.AccountField: "1002",
 			utils.Destination:  "1001",
+			utils.RunID:        utils.MetaDefault,
 		},
 		APIOpts: map[string]interface{}{
 			utils.MetaStartTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			utils.MetaUsage:     45 * time.Second,
-			utils.MetaRunID:     utils.MetaDefault,
 			utils.MetaCost:      10.0,
 			utils.OptsAPIKey:    "stat12345",
 		},
@@ -334,14 +334,14 @@ func testDspStsTestAuthKey3(t *testing.T) {
 			ID:     "GetStats",
 			Event: map[string]interface{}{
 				utils.AccountField: "1002",
+				utils.Destination:  "1001",
+				utils.RunID:        utils.MetaDefault,
 			},
 			APIOpts: map[string]interface{}{
-				utils.MetaStartTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-				utils.MetaUsage:       45 * time.Second,
-				utils.MetaRunID:       utils.MetaDefault,
-				utils.MetaCost:        10.0,
-				utils.MetaDestination: "1001",
-				utils.OptsAPIKey:      "stat12345",
+				utils.MetaStartTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+				utils.MetaUsage:     45 * time.Second,
+				utils.MetaCost:      10.0,
+				utils.OptsAPIKey:    "stat12345",
 			},
 		}, &reply); err != nil {
 		t.Error(err)

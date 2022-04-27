@@ -399,12 +399,14 @@ func TestLoadAttributeProfiles(t *testing.T) {
 			Attributes: []*utils.TPAttribute{
 				{
 					FilterIDs: []string{"*string:~*req.Field1:Initial"},
+					Blockers:  ";true",
 					Path:      utils.MetaReq + utils.NestingSep + "Field1",
 					Type:      utils.MetaVariable,
 					Value:     "Sub1",
 				},
 				{
 					FilterIDs: []string{},
+					Blockers:  "*string:~*req.Account:1002;true",
 					Path:      utils.MetaReq + utils.NestingSep + "Field2",
 					Type:      utils.MetaVariable,
 					Value:     "Sub2",
