@@ -554,7 +554,7 @@ func TestHealthIndexStats(t *testing.T) {
 				MetricID: "*acd",
 			},
 		},
-		Blocker:      true,
+		Blockers:     utils.Blockers{{Blocker: true}},
 		ThresholdIDs: []string{utils.MetaNone},
 	}
 	if err := dm.SetStatQueueProfile(context.Background(), sqPrf, false); err != nil {
@@ -645,7 +645,7 @@ func TestHealthIndexStats(t *testing.T) {
 				MetricID: "*acd",
 			},
 		},
-		Blocker:      true,
+		Blockers:     utils.Blockers{{Blocker: true}},
 		ThresholdIDs: []string{utils.MetaNone},
 	}
 	if err := dm.SetStatQueueProfile(context.Background(), sqPrf, false); err != nil {

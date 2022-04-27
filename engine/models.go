@@ -60,7 +60,7 @@ type StatMdl struct {
 	MetricIDs       string `index:"7" re:""`
 	MetricFilterIDs string `index:"8" re:""`
 	Stored          bool   `index:"9" re:""`
-	Blocker         bool   `index:"10" re:""`
+	Blockers        string `index:"10" re:""`
 	ThresholdIDs    string `index:"11" re:""`
 	CreatedAt       time.Time
 }

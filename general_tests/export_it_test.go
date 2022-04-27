@@ -293,8 +293,8 @@ func testExpVerifyStats(t *testing.T) {
 				MetricID: utils.MetaTCD,
 			},
 		},
-		Blocker: true,
-		Stored:  false,
+		Blockers: utils.Blockers{{Blocker: true}},
+		Stored:   false,
 		Weights: utils.DynamicWeights{
 			{
 				Weight: 40,

@@ -1395,7 +1395,7 @@ func TestStatQueueProfileSet(t *testing.T) {
 		TTL:          10,
 		MinItems:     10,
 		Stored:       true,
-		Blocker:      true,
+		Blockers:     utils.Blockers{{Blocker: true}},
 		ThresholdIDs: []string{"TH1"},
 		Metrics: []*MetricWithFilters{{
 			MetricID: utils.MetaTCD,
@@ -1441,7 +1441,7 @@ func TestStatQueueProfileSet(t *testing.T) {
 	if err := sq.Set([]string{utils.Stored}, true, false, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
-	if err := sq.Set([]string{utils.Blocker}, true, false, utils.EmptyString); err != nil {
+	if err := sq.Set([]string{utils.BlockersField}, ";true", false, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
 	if err := sq.Set([]string{utils.ThresholdIDs}, "TH1", false, utils.EmptyString); err != nil {
@@ -1477,7 +1477,7 @@ func TestStatQueueProfileAsInterface(t *testing.T) {
 		TTL:          10,
 		MinItems:     10,
 		Stored:       true,
-		Blocker:      true,
+		Blockers:     utils.Blockers{{Blocker: true}},
 		ThresholdIDs: []string{"TH1"},
 		Metrics: []*MetricWithFilters{{
 			MetricID: utils.MetaTCD,
@@ -1561,9 +1561,9 @@ func TestStatQueueProfileAsInterface(t *testing.T) {
 	} else if exp := sqp.Stored; exp != val {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
 	}
-	if val, err := sqp.FieldAsInterface([]string{utils.Blocker}); err != nil {
+	if val, err := sqp.FieldAsInterface([]string{utils.BlockersField}); err != nil {
 		t.Fatal(err)
-	} else if exp := sqp.Blocker; exp != val {
+	} else if exp := sqp.Blockers; !reflect.DeepEqual(exp, val) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
 	}
 	if _, err := sqp.FieldAsInterface([]string{utils.Metrics + "[4]"}); err != utils.ErrNotFound {
@@ -1639,7 +1639,7 @@ func TestStatQueueProfileMerge(t *testing.T) {
 		TTL:          10,
 		MinItems:     10,
 		Stored:       true,
-		Blocker:      true,
+		Blockers:     utils.Blockers{{Blocker: true}},
 		ThresholdIDs: []string{"TH1"},
 		Metrics: []*MetricWithFilters{{
 			MetricID: utils.MetaTCD,
@@ -1661,7 +1661,7 @@ func TestStatQueueProfileMerge(t *testing.T) {
 		TTL:          10,
 		MinItems:     10,
 		Stored:       true,
-		Blocker:      true,
+		Blockers:     utils.Blockers{{Blocker: true}},
 		ThresholdIDs: []string{"TH1"},
 		Metrics: []*MetricWithFilters{{
 			MetricID: utils.MetaTCD,
@@ -1714,7 +1714,7 @@ func TestStatQueueProfile_Set(t *testing.T) {
 				MinItems:     tt.fields.MinItems,
 				Metrics:      tt.fields.Metrics,
 				Stored:       tt.fields.Stored,
-				Blocker:      tt.fields.Blocker,
+				Blockers:     utils.Blockers{{Blocker: true}},
 				Weights:      tt.fields.Weights,
 				ThresholdIDs: tt.fields.ThresholdIDs,
 				lkID:         tt.fields.lkID,

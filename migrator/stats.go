@@ -374,7 +374,7 @@ func (v1Sts v1Stat) AsStatQP() (filter *engine.Filter, sq *engine.StatQueue, stq
 		QueueLength:  v1Sts.QueueLength,
 		Metrics:      make([]*engine.MetricWithFilters, 0),
 		Tenant:       config.CgrConfig().GeneralCfg().DefaultTenant,
-		Blocker:      false,
+		Blockers:     utils.Blockers{{Blocker: false}},
 		Stored:       false,
 		ThresholdIDs: []string{},
 		FilterIDs:    []string{v1Sts.Id},

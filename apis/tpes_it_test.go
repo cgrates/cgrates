@@ -815,7 +815,7 @@ func testTPeSetStatQueueProfile(t *testing.T) {
 			Tenant:   "cgrates.org",
 			ID:       "SQ_basic",
 			TTL:      0,
-			Blocker:  true,
+			Blockers: utils.Blockers{{Blocker: true}},
 			MinItems: 3,
 			Stored:   true,
 			Weights: utils.DynamicWeights{
