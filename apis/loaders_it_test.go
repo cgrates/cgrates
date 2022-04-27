@@ -302,9 +302,9 @@ cgrates.org,ResGroup22,*string:~*req.Account:dan,;10,3600s,2,premium_call,true,t
 
 	// Create and populate Routes.csv
 	if err := writeFile(utils.RoutesCsv, `
-#Tenant[0],ID[1],FilterIDs[2],Weights[3],Sorting[4],SortingParameters[5],Blockers[6],RouteID[7],RouteFilterIDs[8],RouteAccountIDs[9],RouteRateProfileIDs[10],RouteResourceIDs[11],RouteStatIDs[12],RouteWeights[13],RouteBlocker[14],RouteParameters[15]
+#Tenant[0],ID[1],FilterIDs[2],Weights[3],Blockers[4],Sorting[5],SortingParameters[6],RouteID[7],RouteFilterIDs[8],RouteAccountIDs[9],RouteRateProfileIDs[10],RouteResourceIDs[11],RouteStatIDs[12],RouteWeights[13],RouteBlocker[14],RouteParameters[15]
 cgrates.org,RoutePrf1,,,,,,,,,,,,,,
-cgrates.org,RoutePrf1,*string:~*req.Account:1001,;20,*lc,,;true,,,,,,,,,
+cgrates.org,RoutePrf1,*string:~*req.Account:1001,;20,;true,*lc,,,,,,,,,,
 cgrates.org,RoutePrf1,,,,,,route1,fltr1,Account1;Account2,RPL_1,ResGroup1,Stat1,,true,param1
 cgrates.org,RoutePrf1,,,,,,,,,,,,,,
 cgrates.org,RoutePrf1,,,,,,route1,,,RPL_2,ResGroup2,,;10,,
@@ -312,7 +312,7 @@ cgrates.org,RoutePrf1,,,,,,route1,fltr2,,RPL_3,ResGroup3,Stat2,,,param2
 cgrates.org,RoutePrf1,,,,,,route1,,,,ResGroup4,Stat3,,,
 cgrates.org,RoutePrf1,,,,,,route2,fltr5,Account1,RPL_1,ResGroup1,Stat1,fltr1;10,true,param1
 cgrates.org,RoutePrf2,,,,,,,,,,,,,,
-cgrates.org,RoutePrf2,*string:~*req.Account:1002,;20,*lc,,,route1,fltr3,Account3;Account4,RPL_2,ResGroup2,Stat2,;10,true,param1
+cgrates.org,RoutePrf2,*string:~*req.Account:1002,;20,,*lc,,route1,fltr3,Account3;Account4,RPL_2,ResGroup2,Stat2,;10,true,param1
 `); err != nil {
 		t.Fatal(err)
 	}

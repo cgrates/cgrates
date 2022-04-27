@@ -48,11 +48,11 @@ type RouteProfile struct {
 	Tenant            string
 	ID                string // LCR Profile ID
 	FilterIDs         []string
+	Weights           utils.DynamicWeights
+	Blockers          utils.Blockers
 	Sorting           string // Sorting strategy
 	SortingParameters []string
-	Blockers          utils.Blockers
 	Routes            []*Route
-	Weights           utils.DynamicWeights
 }
 
 // RouteProfileWithAPIOpts is used in replicatorV1 for dispatcher

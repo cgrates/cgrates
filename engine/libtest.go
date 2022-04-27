@@ -113,8 +113,8 @@ cgrates.org,FLTR_DST_DE,*destinations,~*req.Destination,DST_DE
 cgrates.org,FLTR_DST_NL,*destinations,~*req.Destination,DST_NL
 `
 	RoutesCSVContent = `
-#Tenant[0],ID[1],FilterIDs[2],Weights[3],Sorting[4],SortingParameters[5],Blockers[6],RouteID[7],RouteFilterIDs[8],RouteAccountIDs[9],RouteRateProfileIDs[10],RouteResourceIDs[11],RouteStatIDs[12],RouteWeights[13],RouteBlocker[14],RouteParameters[15]
-cgrates.org,RoutePrf1,*string:~*req.Account:dan,;20,*lc,,,route1,FLTR_ACNT_dan,Account1;Account1_1,RPL_1,ResGroup1,Stat1,;10,true,param1
+#Tenant[0],ID[1],FilterIDs[2],Weights[3],Blockers[4],Sorting[5],SortingParameters[6],RouteID[7],RouteFilterIDs[8],RouteAccountIDs[9],RouteRateProfileIDs[10],RouteResourceIDs[11],RouteStatIDs[12],RouteWeights[13],RouteBlocker[14],RouteParameters[15]
+cgrates.org,RoutePrf1,*string:~*req.Account:dan,;20,,*lc,,route1,FLTR_ACNT_dan,Account1;Account1_1,RPL_1,ResGroup1,Stat1,;10,true,param1
 cgrates.org,RoutePrf1,,,,,,route1,,,RPL_2,ResGroup2,,;10,,
 cgrates.org,RoutePrf1,,,,,,route1,FLTR_DST_DE,Account2,RPL_3,ResGroup3,Stat2,;10,,
 cgrates.org,RoutePrf1,,,,,,route1,,,,ResGroup4,Stat3,;10,,

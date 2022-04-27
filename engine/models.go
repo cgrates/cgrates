@@ -197,9 +197,9 @@ type RouteMdl struct {
 	ID                  string `index:"1" re:""`
 	FilterIDs           string `index:"2" re:""`
 	Weights             string `index:"3" re:""`
-	Sorting             string `index:"4" re:""`
-	SortingParameters   string `index:"5" re:""`
-	Blockers            string `index:"6" re:""`
+	Blockers            string `index:"4" re:""`
+	Sorting             string `index:"5" re:""`
+	SortingParameters   string `index:"6" re:""`
 	RouteID             string `index:"7" re:""`
 	RouteFilterIDs      string `index:"8" re:""`
 	RouteAccountIDs     string `index:"9" re:""`

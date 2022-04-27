@@ -1,6 +1,6 @@
-#Tenant,ID,FilterIDs,Weight,Sorting,SortingParameters,Blockers,RouteID,RouteFilterIDs,RouteAccountIDs,RouteRateProfileIDs,RouteResourceIDs,RouteStatIDs,RouteWeight,RouteBlocker,RouteParameters
+#Tenant,ID,FilterIDs,Weight,Blockers,Sorting,SortingParameters,RouteID,RouteFilterIDs,RouteAccountIDs,RouteRateProfileIDs,RouteResourceIDs,RouteStatIDs,RouteWeight,RouteBlocker,RouteParameters
 
-cgrates.org,LC1,,,*lc,,,,,,,,,,,
+cgrates.org,LC1,,,,*lc,,,,,,,,,,
 cgrates.org,LC1,,,,,,supplier1,,ACNT_VOL1,,,,,,
 cgrates.org,LC1,,,,,,supplier2,,,RP_SUPPLIER2,,,,,
 cgrates.org,LC1,,,,,,supplier3,,,RP_SUPPLIER3,,,,,
