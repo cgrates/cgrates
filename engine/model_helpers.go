@@ -324,8 +324,7 @@ type StatMdls []*StatMdl
 // CSVHeader return the header for csv fields as a slice of string
 func (tps StatMdls) CSVHeader() (result []string) {
 	return []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs, utils.Weight,
-		utils.QueueLength, utils.TTL, utils.MinItems, utils.MetricIDs, utils.MetricFilterIDs,
-		utils.Stored, utils.BlockersField, utils.ThresholdIDs}
+		utils.QueueLength, utils.TTL, utils.MinItems, utils.MetricIDs, utils.MetricFilterIDs, utils.MetricBlockers, utils.Stored, utils.BlockersField, utils.ThresholdIDs}
 }
 
 func (tps StatMdls) AsTPStats() (result []*utils.TPStatProfile) {
@@ -394,6 +393,9 @@ func (tps StatMdls) AsTPStats() (result []*utils.TPStatProfile) {
 					filterIDs := strings.Split(model.MetricFilterIDs, utils.InfieldSep)
 					stsMetric.FilterIDs = append(stsMetric.FilterIDs, filterIDs...)
 				}
+				if model.MetricBlockers != utils.EmptyString {
+					stsMetric.Blockers = model.MetricBlockers
+				}
 				statMetricsMap[key.TenantID()][metricID] = stsMetric
 			}
 		}
@@ -447,6 +449,7 @@ func APItoModelStats(st *utils.TPStatProfile) (mdls StatMdls) {
 				}
 				mdl.MetricFilterIDs += val
 			}
+			mdl.MetricBlockers = metric.Blockers
 			mdl.MetricIDs = metric.MetricID
 			mdls = append(mdls, mdl)
 		}
@@ -456,14 +459,13 @@ func APItoModelStats(st *utils.TPStatProfile) (mdls StatMdls) {
 
 func APItoStats(tpST *utils.TPStatProfile, timezone string) (st *StatQueueProfile, err error) {
 	st = &StatQueueProfile{
-		Tenant:      tpST.Tenant,
-		ID:          tpST.ID,
-		FilterIDs:   make([]string, len(tpST.FilterIDs)),
-		QueueLength: tpST.QueueLength,
-		MinItems:    tpST.MinItems,
-		Metrics:     make([]*MetricWithFilters, len(tpST.Metrics)),
-		Stored:      tpST.Stored,
-
+		Tenant:       tpST.Tenant,
+		ID:           tpST.ID,
+		FilterIDs:    make([]string, len(tpST.FilterIDs)),
+		QueueLength:  tpST.QueueLength,
+		MinItems:     tpST.MinItems,
+		Metrics:      make([]*MetricWithFilters, len(tpST.Metrics)),
+		Stored:       tpST.Stored,
 		ThresholdIDs: make([]string, len(tpST.ThresholdIDs)),
 	}
 	if tpST.Weights != utils.EmptyString {
@@ -485,6 +487,11 @@ func APItoStats(tpST *utils.TPStatProfile, timezone string) (st *StatQueueProfil
 		st.Metrics[i] = &MetricWithFilters{
 			MetricID:  metric.MetricID,
 			FilterIDs: metric.FilterIDs,
+		}
+		if metric.Blockers != utils.EmptyString {
+			if st.Metrics[i].Blockers, err = utils.NewBlockersFromString(metric.Blockers, utils.InfieldSep, utils.ANDSep); err != nil {
+				return
+			}
 		}
 	}
 	for i, trh := range tpST.ThresholdIDs {
@@ -512,6 +519,7 @@ func StatQueueProfileToAPI(st *StatQueueProfile) (tpST *utils.TPStatProfile) {
 	for i, metric := range st.Metrics {
 		tpST.Metrics[i] = &utils.MetricWithFilters{
 			MetricID: metric.MetricID,
+			Blockers: metric.Blockers.String(utils.InfieldSep, utils.ANDSep),
 		}
 		if len(metric.FilterIDs) != 0 {
 			tpST.Metrics[i].FilterIDs = make([]string, len(metric.FilterIDs))
@@ -519,7 +527,6 @@ func StatQueueProfileToAPI(st *StatQueueProfile) (tpST *utils.TPStatProfile) {
 				tpST.Metrics[i].FilterIDs[j] = fltr
 			}
 		}
-
 	}
 	if st.TTL != time.Duration(0) {
 		tpST.TTL = st.TTL.String()

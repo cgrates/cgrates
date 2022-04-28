@@ -38,12 +38,12 @@ type StatQueueProfile struct {
 	Tenant       string
 	ID           string // QueueID
 	FilterIDs    []string
+	Weights      utils.DynamicWeights
+	Blockers     utils.Blockers // blocker flag to stop processing on filters matched
 	QueueLength  int
 	TTL          time.Duration
 	MinItems     int
 	Stored       bool
-	Weights      utils.DynamicWeights
-	Blockers     utils.Blockers       // blocker flag to stop processing on filters matched
 	ThresholdIDs []string             // list of thresholds to be checked after changes
 	Metrics      []*MetricWithFilters // list of metrics to build
 
@@ -91,8 +91,9 @@ func (sqp *StatQueueProfile) isLocked() bool {
 }
 
 type MetricWithFilters struct {
-	FilterIDs []string
 	MetricID  string
+	FilterIDs []string
+	Blockers  utils.Blockers // blocker flag to stop processing for next metric on filters matched
 }
 
 // NewStoredStatQueue initiates a StoredStatQueue out of StatQueue
@@ -586,9 +587,11 @@ func (sqp *StatQueueProfile) Set(path []string, val interface{}, newBranch bool,
 			sqp.ThresholdIDs = append(sqp.ThresholdIDs, valA...)
 		}
 	case 2:
+		// path =[]string{Metrics, MetricID}
 		if path[0] != utils.Metrics {
 			return utils.ErrWrongPath
 		}
+		// val := *acd;*tcd;*asr
 		if val != utils.EmptyString {
 			if len(sqp.Metrics) == 0 || newBranch {
 				sqp.Metrics = append(sqp.Metrics, new(MetricWithFilters))
@@ -604,7 +607,12 @@ func (sqp *StatQueueProfile) Set(path []string, val interface{}, newBranch bool,
 				for _, mID := range valA[1:] { // add the rest of the metrics
 					sqp.Metrics = append(sqp.Metrics, &MetricWithFilters{MetricID: mID})
 				}
-
+			case utils.BlockersField:
+				var blkrs utils.Blockers
+				if blkrs, err = utils.NewBlockersFromString(utils.IfaceAsString(val), utils.InfieldSep, utils.ANDSep); err != nil {
+					return
+				}
+				sqp.Metrics[len(sqp.Metrics)-1].Blockers = append(sqp.Metrics[len(sqp.Metrics)-1].Blockers, blkrs...)
 			default:
 				return utils.ErrWrongPath
 			}
@@ -734,5 +742,7 @@ func (mf *MetricWithFilters) FieldAsInterface(fldPath []string) (_ interface{}, 
 		return mf.MetricID, nil
 	case utils.FilterIDs:
 		return mf.FilterIDs, nil
+	case utils.BlockersField:
+		return mf.Blockers, nil
 	}
 }

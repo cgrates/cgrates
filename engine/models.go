@@ -59,9 +59,10 @@ type StatMdl struct {
 	MinItems        int    `index:"6" re:""`
 	MetricIDs       string `index:"7" re:""`
 	MetricFilterIDs string `index:"8" re:""`
-	Stored          bool   `index:"9" re:""`
-	Blockers        string `index:"10" re:""`
-	ThresholdIDs    string `index:"11" re:""`
+	MetricBlockers  string `index:"9" re:""`
+	Stored          bool   `index:"10" re:""`
+	Blockers        string `index:"11" re:""`
+	ThresholdIDs    string `index:"12" re:""`
 	CreatedAt       time.Time
 }
 

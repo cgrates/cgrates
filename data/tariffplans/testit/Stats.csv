@@ -6,3 +6,5 @@ cgrates.org,Stat_3,FLTR_STAT_3,;30,100,1s,0,*acd;*tcd;*asr,,false,;true,*none
 cgrates.org,Stat_Supplier1,*string:~*req.StatID:Stat_Supplier1,;30,100,1s,0,*sum#~*req.LoadReq,,true,;true,*none
 cgrates.org,Stat_Supplier2,*string:~*req.StatID:Stat_Supplier2,;30,100,1s,0,*sum#~*req.LoadReq,,true,;true,*none
 cgrates.org,Stat_Supplier3,*string:~*req.StatID:Stat_Supplier3,;30,100,1s,0,*sum#~*req.LoadReq,,true,;true,*none
+
+

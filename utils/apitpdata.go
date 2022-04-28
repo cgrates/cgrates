@@ -231,6 +231,7 @@ type AttrDisconnectSession struct {
 type MetricWithFilters struct {
 	FilterIDs []string
 	MetricID  string
+	Blockers  string
 }
 
 // TPStatProfile is used in APIs to manage remotely offline StatProfile
