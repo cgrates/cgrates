@@ -183,8 +183,12 @@ func TestActionProfileSet(t *testing.T) {
 			ID:        "acc1",
 			Type:      "val1",
 			FilterIDs: []string{"fltr1"},
-			Blocker:   true,
-			TTL:       10,
+			Blockers: utils.Blockers{
+				{
+					Blocker: true,
+				},
+			},
+			TTL: 10,
 			Opts: map[string]interface{}{
 				"opt0": "val1",
 				"opt1": "val1",
@@ -261,7 +265,7 @@ func TestActionProfileSet(t *testing.T) {
 	if err := ap.Set([]string{utils.Actions, "acc1", utils.FilterIDs}, "fltr1", false, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
-	if err := ap.Set([]string{utils.Actions, "acc1", utils.Blocker}, "true", false, utils.EmptyString); err != nil {
+	if err := ap.Set([]string{utils.Actions, "acc1", utils.BlockersField}, ";true", false, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
 	if err := ap.Set([]string{utils.Actions, "acc1", utils.TTL}, "10", false, utils.EmptyString); err != nil {
@@ -303,8 +307,12 @@ func TestActionProfileFieldAsInterface(t *testing.T) {
 			ID:        "acc1",
 			Type:      "val1",
 			FilterIDs: []string{"fltr1"},
-			Blocker:   true,
-			TTL:       10,
+			Blockers: utils.Blockers{
+				{
+					Blocker: true,
+				},
+			},
+			TTL: 10,
 			Opts: map[string]interface{}{
 				"opt0": "val1",
 				"opt1": "val1",
@@ -403,9 +411,9 @@ func TestActionProfileFieldAsInterface(t *testing.T) {
 	if _, err := ap.FieldAsInterface([]string{utils.Actions + "[0]", "a"}); err != utils.ErrNotFound {
 		t.Fatal(err)
 	}
-	if val, err := ap.FieldAsInterface([]string{utils.Actions + "[0]", utils.Blocker}); err != nil {
+	if val, err := ap.FieldAsInterface([]string{utils.Actions + "[0]", utils.BlockersField}); err != nil {
 		t.Fatal(err)
-	} else if exp := ap.Actions[0].Blocker; !reflect.DeepEqual(exp, val) {
+	} else if exp := ap.Actions[0].Blockers; !reflect.DeepEqual(exp, val) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
 	}
 	if val, err := ap.FieldAsInterface([]string{utils.Actions + "[0]", utils.ID}); err != nil {
@@ -585,9 +593,13 @@ func TestActionProfileMergeAPActionMerge(t *testing.T) {
 			{
 				ID:        "APAct1",
 				FilterIDs: []string{"FLTR1", "FLTR2", "FLTR3"},
-				Blocker:   true,
-				TTL:       time.Minute,
-				Type:      "type2",
+				Blockers: utils.Blockers{
+					{
+						Blocker: true,
+					},
+				},
+				TTL:  time.Minute,
+				Type: "type2",
 				Opts: map[string]interface{}{
 					"key1": "value1",
 					"key2": "value2",
@@ -615,9 +627,16 @@ func TestActionProfileMergeAPActionMerge(t *testing.T) {
 			{
 				ID:        "APAct1",
 				FilterIDs: []string{"FLTR1", "FLTR2", "FLTR3", "FLTR4"},
-				Blocker:   true,
-				TTL:       time.Minute,
-				Type:      "type2",
+				Blockers: utils.Blockers{
+					{
+						Blocker: true,
+					},
+					{
+						Blocker: false,
+					},
+				},
+				TTL:  time.Minute,
+				Type: "type2",
 				Opts: map[string]interface{}{
 					"key1": "value1",
 					"key2": "value3",
@@ -651,8 +670,12 @@ func TestActionProfileMergeAPActionMerge(t *testing.T) {
 			{
 				ID:        "APAct1",
 				FilterIDs: []string{"FLTR4"},
-				Blocker:   false,
-				Type:      "",
+				Blockers: utils.Blockers{
+					{
+						Blocker: false,
+					},
+				},
+				Type: "",
 				Opts: map[string]interface{}{
 					"key2": "value3",
 				},
@@ -673,9 +696,13 @@ func TestActionProfileAPActionMergeEmptyV2(t *testing.T) {
 	apAct := &APAction{
 		ID:        "APAct1",
 		FilterIDs: []string{"FLTR1"},
-		Blocker:   true,
-		TTL:       time.Second,
-		Type:      "type",
+		Blockers: utils.Blockers{
+			{
+				Blocker: true,
+			},
+		},
+		TTL:  time.Second,
+		Type: "type",
 		Opts: map[string]interface{}{
 			"key": "value",
 		},
@@ -689,9 +716,13 @@ func TestActionProfileAPActionMergeEmptyV2(t *testing.T) {
 	expected := &APAction{
 		ID:        "APAct1",
 		FilterIDs: []string{"FLTR1"},
-		Blocker:   true,
-		TTL:       time.Second,
-		Type:      "type",
+		Blockers: utils.Blockers{
+			{
+				Blocker: true,
+			},
+		},
+		TTL:  time.Second,
+		Type: "type",
 		Opts: map[string]interface{}{
 			"key": "value",
 		},
@@ -717,9 +748,13 @@ func TestActionProfileAPActionMergeEmptyV1(t *testing.T) {
 	expected := &APAction{
 		ID:        "APAct1",
 		FilterIDs: []string{"FLTR1"},
-		Blocker:   true,
-		TTL:       time.Second,
-		Type:      "type",
+		Blockers: utils.Blockers{
+			{
+				Blocker: true,
+			},
+		},
+		TTL:  time.Second,
+		Type: "type",
 		Opts: map[string]interface{}{
 			"key": "value",
 		},
@@ -734,9 +769,13 @@ func TestActionProfileAPActionMergeEmptyV1(t *testing.T) {
 	apAct.Merge(&APAction{
 		ID:        "APAct1",
 		FilterIDs: []string{"FLTR1"},
-		Blocker:   true,
-		TTL:       time.Second,
-		Type:      "type",
+		Blockers: utils.Blockers{
+			{
+				Blocker: true,
+			},
+		},
+		TTL:  time.Second,
+		Type: "type",
 		Opts: map[string]interface{}{
 			"key": "value",
 		},
@@ -757,9 +796,13 @@ func TestActionProfileAPActionMerge(t *testing.T) {
 	apAct := &APAction{
 		ID:        "APAct1",
 		FilterIDs: []string{"FLTR1"},
-		Blocker:   true,
-		TTL:       time.Second,
-		Type:      "type1",
+		Blockers: utils.Blockers{
+			{
+				Blocker: true,
+			},
+		},
+		TTL:  time.Second,
+		Type: "type1",
 		Opts: map[string]interface{}{
 			"key1": "value1",
 		},
@@ -773,9 +816,13 @@ func TestActionProfileAPActionMerge(t *testing.T) {
 	expected := &APAction{
 		ID:        "APAct1",
 		FilterIDs: []string{"FLTR1", "FLTR2", "FLTR3"},
-		Blocker:   true,
-		TTL:       time.Minute,
-		Type:      "type2",
+		Blockers: utils.Blockers{
+			{
+				Blocker: true,
+			},
+		},
+		TTL:  time.Minute,
+		Type: "type2",
 		Opts: map[string]interface{}{
 			"key1": "value1",
 			"key2": "value2",
@@ -786,7 +833,7 @@ func TestActionProfileAPActionMerge(t *testing.T) {
 	apAct.Merge(&APAction{
 		ID:        "APAct1",
 		FilterIDs: []string{"FLTR2", "FLTR3"},
-		Blocker:   false,
+		Blockers:  utils.Blockers{},
 		TTL:       time.Minute,
 		Type:      "type2",
 		Opts: map[string]interface{}{
@@ -807,9 +854,16 @@ func TestActionProfileAPActionMerge(t *testing.T) {
 	expected = &APAction{
 		ID:        "APAct1",
 		FilterIDs: []string{"FLTR1", "FLTR2", "FLTR3", "FLTR4"},
-		Blocker:   true,
-		TTL:       time.Minute,
-		Type:      "type2",
+		Blockers: utils.Blockers{
+			{
+				Blocker: true,
+			},
+			{
+				Blocker: false,
+			},
+		},
+		TTL:  time.Minute,
+		Type: "type2",
 		Opts: map[string]interface{}{
 			"key1": "value1",
 			"key2": "value3",
@@ -825,8 +879,12 @@ func TestActionProfileAPActionMerge(t *testing.T) {
 	apAct.Merge(&APAction{
 		ID:        "APAct1",
 		FilterIDs: []string{"FLTR4"},
-		Blocker:   false,
-		Type:      "",
+		Blockers: utils.Blockers{
+			{
+				Blocker: false,
+			},
+		},
+		Type: "",
 		Opts: map[string]interface{}{
 			"key2": "value3",
 		},
@@ -843,8 +901,7 @@ func TestActionProfileAPActionMerge(t *testing.T) {
 	}
 }
 func TestFilterHelpersGetWeightFromDynamics(t *testing.T) {
-	var expected float64
-	expected = 64
+	var expected float64 = 64
 	ap := &ActionProfile{
 		Weights: []*utils.DynamicWeight{
 			{

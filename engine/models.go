@@ -337,7 +337,7 @@ type ActionProfileMdl struct {
 	TargetIDs       string `index:"7" re:""`
 	ActionID        string `index:"8" re:""`
 	ActionFilterIDs string `index:"9" re:""`
-	ActionBlocker   bool   `index:"10" re:""`
+	ActionBlockers  string `index:"10" re:""`
 	ActionTTL       string `index:"11" re:""`
 	ActionType      string `index:"12" re:""`
 	ActionOpts      string `index:"13" re:""`

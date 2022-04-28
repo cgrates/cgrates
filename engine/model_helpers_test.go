@@ -3687,8 +3687,8 @@ func TestActionProfileMdlsCSVHeader(t *testing.T) {
 		},
 	}
 	expStruct := []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs,
-		utils.Weight, utils.Schedule, utils.TargetType,
-		utils.TargetIDs, utils.ActionID, utils.ActionFilterIDs, utils.ActionBlocker, utils.ActionTTL,
+		utils.Weights, utils.BlockersField, utils.Schedule, utils.TargetType,
+		utils.TargetIDs, utils.ActionID, utils.ActionFilterIDs, utils.ActionBlockers, utils.ActionTTL,
 		utils.ActionType, utils.ActionOpts, utils.ActionPath, utils.ActionValue,
 	}
 	result := testStruct.CSVHeader()

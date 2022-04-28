@@ -272,7 +272,7 @@ CREATE TABLE tp_action_profiles (
   "target_ids" varchar(64) NOT NULL,
   "action_id" varchar(64) NOT NULL,
   "action_filter_ids" varchar(64) NOT NULL,
-  "action_blocker" BOOLEAN NOT NULL,
+  "action_blockers" varchar(64) NOT NULL,
   "action_ttl" varchar(64) NOT NULL,
   "action_type" varchar(64) NOT NULL,
   "action_opts" varchar(256) NOT NULL,

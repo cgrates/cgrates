@@ -1370,7 +1370,7 @@ const CGRATES_CFG_JSON = `
 					{"tag": "TargetIDs", "path": "Targets[<~*req.6>]", "type": "*variable", "value": "~*req.7"},
 					// {"tag": "ActionID", "path": "Actions.ID", "type": "*variable", "value": "~*req.8","new_branch":true},
 					{"tag": "ActionFilterIDs", "path": "Actions[<~*req.8>].FilterIDs", "type": "*variable", "value": "~*req.9", "filters": ["*notempty:~*req.8:"]},
-					{"tag": "ActionBlocker", "path": "Actions[<~*req.8>].Blocker", "type": "*variable", "value": "~*req.10", "filters": ["*notempty:~*req.8:"]},
+					{"tag": "ActionBlockers", "path": "Actions[<~*req.8>].Blockers", "type": "*variable", "value": "~*req.10", "filters": ["*notempty:~*req.8:"]},
 					{"tag": "ActionTTL", "path": "Actions[<~*req.8>].TTL", "type": "*variable", "value": "~*req.11", "filters": ["*notempty:~*req.8:"]},
 					{"tag": "ActionType", "path": "Actions[<~*req.8>].Type", "type": "*variable", "value": "~*req.12", "filters": ["*notempty:~*req.8:"]},
 					{"tag": "ActionOpts", "path": "Actions[<~*req.8>].Opts", "type": "*variable", "value": "~*req.13", "filters": ["*notempty:~*req.8:"]},

@@ -67,7 +67,7 @@ func (ap *ActionProfile) GetWeightFromDynamics(ctx *context.Context,
 type APAction struct {
 	ID        string                 // Action ID
 	FilterIDs []string               // Action FilterIDs
-	Blocker   bool                   // Blocker will stop further actions running in the chain
+	Blockers  utils.Blockers         // Blocker will stop further actions running in the chain
 	TTL       time.Duration          // Cancel Action if not executed within TTL
 	Type      string                 // Type of Action
 	Opts      map[string]interface{} // Extra options to pass depending on action type
@@ -192,8 +192,10 @@ func (aP *APAction) Set(path []string, val interface{}, newBranch bool) (err err
 			var valA []string
 			valA, err = utils.IfaceAsStringSlice(val)
 			aP.FilterIDs = append(aP.FilterIDs, valA...)
-		case utils.Blocker:
-			aP.Blocker, err = utils.IfaceAsBool(val)
+		case utils.BlockersField:
+			if val != utils.EmptyString {
+				aP.Blockers, err = utils.NewBlockersFromString(utils.IfaceAsString(val), utils.InfieldSep, utils.ANDSep)
+			}
 		case utils.TTL:
 			aP.TTL, err = utils.IfaceAsDuration(val)
 		case utils.Opts:
@@ -261,9 +263,6 @@ func (apAct *APAction) Merge(v2 *APAction) {
 	if len(v2.ID) != 0 {
 		apAct.ID = v2.ID
 	}
-	if v2.Blocker {
-		apAct.Blocker = v2.Blocker
-	}
 	if v2.TTL != 0 {
 		apAct.TTL = v2.TTL
 	}
@@ -274,6 +273,7 @@ func (apAct *APAction) Merge(v2 *APAction) {
 		apAct.Opts[key] = value
 	}
 	apAct.FilterIDs = append(apAct.FilterIDs, v2.FilterIDs...)
+	apAct.Blockers = append(apAct.Blockers, v2.Blockers...)
 	if len(apAct.Diktats) == 1 && apAct.Diktats[0].Path == utils.EmptyString {
 		apAct.Diktats = apAct.Diktats[:0]
 	}
@@ -376,7 +376,7 @@ func (a *APAction) FieldAsString(fldPath []string) (_ string, err error) {
 	}
 	return utils.IfaceAsString(val), nil
 }
-func (cp *APAction) FieldAsInterface(fldPath []string) (_ interface{}, err error) {
+func (ap *APAction) FieldAsInterface(fldPath []string) (_ interface{}, err error) {
 	switch len(fldPath) {
 	default:
 		if fld, idxStr := utils.GetPathIndexString(fldPath[0]); fld == utils.Opts {
@@ -384,7 +384,7 @@ func (cp *APAction) FieldAsInterface(fldPath []string) (_ interface{}, err error
 			if idxStr != nil {
 				path = append([]string{*idxStr}, path...)
 			}
-			return utils.MapStorage(cp.Opts).FieldAsInterface(path)
+			return utils.MapStorage(ap.Opts).FieldAsInterface(path)
 		}
 		fallthrough
 	case 0:
@@ -400,36 +400,36 @@ func (cp *APAction) FieldAsInterface(fldPath []string) (_ interface{}, err error
 					if idx, err = strconv.Atoi(*idxStr); err != nil {
 						return
 					}
-					if idx < len(cp.FilterIDs) {
-						return cp.FilterIDs[idx], nil
+					if idx < len(ap.FilterIDs) {
+						return ap.FilterIDs[idx], nil
 					}
 				case utils.Diktats:
 					var idx int
 					if idx, err = strconv.Atoi(*idxStr); err != nil {
 						return
 					}
-					if idx < len(cp.Diktats) {
-						return cp.Diktats[idx], nil
+					if idx < len(ap.Diktats) {
+						return ap.Diktats[idx], nil
 					}
 				case utils.Opts:
-					return utils.MapStorage(cp.Opts).FieldAsInterface([]string{*idxStr})
+					return utils.MapStorage(ap.Opts).FieldAsInterface([]string{*idxStr})
 				}
 			}
 			return nil, utils.ErrNotFound
-		case utils.Blocker:
-			return cp.Blocker, nil
+		case utils.BlockersField:
+			return ap.Blockers, nil
 		case utils.ID:
-			return cp.ID, nil
+			return ap.ID, nil
 		case utils.FilterIDs:
-			return cp.FilterIDs, nil
+			return ap.FilterIDs, nil
 		case utils.TTL:
-			return cp.TTL, nil
+			return ap.TTL, nil
 		case utils.Diktats:
-			return cp.Diktats, nil
+			return ap.Diktats, nil
 		case utils.Type:
-			return cp.Type, nil
+			return ap.Type, nil
 		case utils.Opts:
-			return cp.Opts, nil
+			return ap.Opts, nil
 		}
 	case 2:
 		fld, idxStr := utils.GetPathIndexString(fldPath[0])
@@ -441,7 +441,7 @@ func (cp *APAction) FieldAsInterface(fldPath []string) (_ interface{}, err error
 			if idxStr != nil {
 				path = append([]string{*idxStr}, path...)
 			}
-			return utils.MapStorage(cp.Opts).FieldAsInterface(path)
+			return utils.MapStorage(ap.Opts).FieldAsInterface(path)
 		case utils.Diktats:
 			if idxStr == nil {
 				return nil, utils.ErrNotFound
@@ -450,10 +450,10 @@ func (cp *APAction) FieldAsInterface(fldPath []string) (_ interface{}, err error
 			if idx, err = strconv.Atoi(*idxStr); err != nil {
 				return
 			}
-			if idx >= len(cp.Diktats) {
+			if idx >= len(ap.Diktats) {
 				return nil, utils.ErrNotFound
 			}
-			return cp.Diktats[idx].FieldAsInterface(fldPath[1:])
+			return ap.Diktats[idx].FieldAsInterface(fldPath[1:])
 		}
 	}
 }
