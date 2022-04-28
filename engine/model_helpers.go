@@ -323,8 +323,7 @@ type StatMdls []*StatMdl
 
 // CSVHeader return the header for csv fields as a slice of string
 func (tps StatMdls) CSVHeader() (result []string) {
-	return []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs, utils.Weight,
-		utils.QueueLength, utils.TTL, utils.MinItems, utils.MetricIDs, utils.MetricFilterIDs, utils.MetricBlockers, utils.Stored, utils.BlockersField, utils.ThresholdIDs}
+	return []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs, utils.Weights, utils.BlockersField, utils.QueueLength, utils.TTL, utils.MinItems, utils.Stored, utils.ThresholdIDs, utils.MetricIDs, utils.MetricFilterIDs, utils.MetricBlockers}
 }
 
 func (tps StatMdls) AsTPStats() (result []*utils.TPStatProfile) {

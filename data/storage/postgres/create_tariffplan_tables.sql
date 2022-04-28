@@ -35,16 +35,16 @@ CREATE TABLE tp_stats (
   "tenant"varchar(64) NOT NULL,
   "id" varchar(64) NOT NULL,
   "filter_ids" varchar(64) NOT NULL,
+  "weights" VARCHAR(128) NOT NULL,
+  "blockers" VARCHAR(128) NOT NULL,
   "queue_length" INTEGER NOT NULL,
   "ttl" varchar(32) NOT NULL,
   "min_items" INTEGER NOT NULL,
+  "stored" BOOLEAN NOT NULL,  
+  "threshold_ids" VARCHAR(64) NOT NULL,
   "metric_ids" VARCHAR(128) NOT NULL,
   "metric_filter_ids" VARCHAR(128) NOT NULL,
   "metric_blockers" VARCHAR(128) NOT NULL,
-  "stored" BOOLEAN NOT NULL,  
-  "weights" VARCHAR(128) NOT NULL,
-  "blockers" VARCHAR(128) NOT NULL,
-  "threshold_ids" varchar(64) NOT NULL,
   "created_at" TIMESTAMP WITH TIME ZONE
 );
 CREATE INDEX tp_stats_idx ON tp_stats (tpid);

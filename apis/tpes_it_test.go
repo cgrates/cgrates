@@ -1138,8 +1138,8 @@ func testTPeSExportTariffPlanHalfTariffPlan(t *testing.T) {
 			{"cgrates.org", "Account_balances", "", "", "", "CB1", "", ";30", "*concrete", "80", ";100", "*balanceLimit:-200", ";1000000000;;0.1", "", "", ""},
 		},
 		utils.StatsCsv: {
-			{"#Tenant", "ID", "FilterIDs", "Weights", "QueueLength", "TTL", "MinItems", "Metrics", "MetricFilterIDs", "Stored", "Blockers", "ThresholdIDs"},
-			{"cgrates.org", "SQ_basic", "", ";10", "0", "", "3", "*tcd", "", "true", ";true", "*none"},
+			{"#Tenant", "ID", "FilterIDs", "Weights", "Blockers", "QueueLength", "TTL", "MinItems", "Stored", "ThresholdIDs", "MetricIDs", "MetricFilterIDs", "MetricBlockers"},
+			{"cgrates.org", "SQ_basic", "", ";10", ";true", "0", "", "3", "true", "*none", "*tcd", "", ""},
 		},
 		utils.ActionsCsv: {
 			{"#Tenant", "ID", "FilterIDs", "Weights", "Blockers", "Schedule", "TargetType", "TargetIDs", "ActionID", "ActionFilterIDs", "ActionBlocker", "ActionTTL", "ActionType", "ActionOpts", "ActionPath", "ActionValue"},
@@ -1160,6 +1160,7 @@ func testTPeSExportTariffPlanHalfTariffPlan(t *testing.T) {
 			{"cgrates.org", "DSH1", "*internal", "", "1", "3", "1m0s", "2m0s", "false", "", "", ""},
 		},
 	}
+	// we do this copy of the value one xpected because there are some values in a slice that are hard to concatenate as sorted
 	expected[utils.RatesCsv] = csvRply[utils.RatesCsv]
 	expected[utils.AccountsCsv] = csvRply[utils.AccountsCsv]
 
@@ -1270,13 +1271,13 @@ func testTPeSExportTariffPlanAllTariffPlan(t *testing.T) {
 			{"cgrates.org", "Account_simple", "", ";10", "", "VoiceBalance", "*string:~*req.Account:1001", ";12", "*abstract", "0", "", "Destination:10", "", "", "", ""},
 		},
 		utils.StatsCsv: {
-			{"#Tenant", "ID", "FilterIDs", "Weights", "QueueLength", "TTL", "MinItems", "Metrics", "MetricFilterIDs", "Stored", "Blockers", "ThresholdIDs"},
-			{"cgrates.org", "SQ_basic", "", ";10", "0", "", "3", "*tcd", "", "true", ";true", "*none"},
-			{"cgrates.org", "SQ_2", "", ";20", "14", "", "0", "*asr", "", "false", ";false", "*none"},
-			{"cgrates.org", "SQ_2", "", "", "0", "", "0", "*tcd", "", "false", "", ""},
-			{"cgrates.org", "SQ_2", "", "", "0", "", "0", "*pdd", "", "false", "", ""},
-			{"cgrates.org", "SQ_2", "", "", "0", "", "0", "*tcc", "", "false", "", ""},
-			{"cgrates.org", "SQ_2", "", "", "0", "", "0", "*tcd", "", "false", "", ""},
+			{"#Tenant", "ID", "FilterIDs", "Weights", "Blockers", "QueueLength", "TTL", "MinItems", "Stored", "ThresholdIDs", "MetricIDs", "MetricFilterIDs", "MetricBlockers"},
+			{"cgrates.org", "SQ_basic", "", ";10", ";true", "0", "", "3", "true", "*none", "*tcd", "", ""},
+			{"cgrates.org", "SQ_2", "", ";20", ";false", "14", "", "0", "false", "*none", "*asr", "", ""},
+			{"cgrates.org", "SQ_2", "", "", "", "0", "", "0", "false", "", "*tcd", "", ""},
+			{"cgrates.org", "SQ_2", "", "", "", "0", "", "0", "false", "", "*pdd", "", ""},
+			{"cgrates.org", "SQ_2", "", "", "", "0", "", "0", "false", "", "*tcc", "", ""},
+			{"cgrates.org", "SQ_2", "", "", "", "0", "", "0", "false", "", "*tcd", "", ""},
 		},
 		utils.ActionsCsv: {
 			{"#Tenant", "ID", "FilterIDs", "Weights", "Blockers", "Schedule", "TargetType", "TargetIDs", "ActionID", "ActionFilterIDs", "ActionBlocker", "ActionTTL", "ActionType", "ActionOpts", "ActionPath", "ActionValue"},

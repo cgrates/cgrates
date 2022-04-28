@@ -54,15 +54,15 @@ type StatMdl struct {
 	ID              string `index:"1" re:""`
 	FilterIDs       string `index:"2" re:""`
 	Weights         string `index:"3" re:"\d+\.?\d*"`
-	QueueLength     int    `index:"4" re:""`
-	TTL             string `index:"5" re:""`
-	MinItems        int    `index:"6" re:""`
-	MetricIDs       string `index:"7" re:""`
-	MetricFilterIDs string `index:"8" re:""`
-	MetricBlockers  string `index:"9" re:""`
-	Stored          bool   `index:"10" re:""`
-	Blockers        string `index:"11" re:""`
-	ThresholdIDs    string `index:"12" re:""`
+	Blockers        string `index:"4" re:""`
+	QueueLength     int    `index:"5" re:""`
+	TTL             string `index:"6" re:""`
+	MinItems        int    `index:"7" re:""`
+	Stored          bool   `index:"8" re:""`
+	ThresholdIDs    string `index:"9" re:""`
+	MetricIDs       string `index:"10" re:""`
+	MetricFilterIDs string `index:"11" re:""`
+	MetricBlockers  string `index:"12" re:""`
 	CreatedAt       time.Time
 }
 
