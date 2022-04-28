@@ -316,7 +316,7 @@ func testCDRsSetStats(t *testing.T) {
 				MetricID: "*sum#~*opts.*usage",
 			}},
 			ThresholdIDs: []string{utils.MetaNone},
-			Blockers:      utils.Blockers{{Blocker: true}},
+			Blockers:     utils.Blockers{{Blocker: true}},
 			Stored:       true,
 			Weights: utils.DynamicWeights{
 				{

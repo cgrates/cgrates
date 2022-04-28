@@ -135,7 +135,7 @@ func testdoubleRemoveStatQueueProfile(t *testing.T) {
 				},
 			},
 			ThresholdIDs: []string{"Val1", "Val2"},
-			Blockers:      utils.Blockers{{Blocker: true}},
+			Blockers:     utils.Blockers{{Blocker: true}},
 			Stored:       true,
 			Weights: utils.DynamicWeights{
 				{

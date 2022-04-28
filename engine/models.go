@@ -208,7 +208,7 @@ type RouteMdl struct {
 	RouteResourceIDs    string `index:"11" re:""`
 	RouteStatIDs        string `index:"12" re:""`
 	RouteWeights        string `index:"13" re:""`
-	RouteBlocker        bool   `index:"14" re:""`
+	RouteBlockers       string `index:"14" re:""`
 	RouteParameters     string `index:"15" re:""`
 	CreatedAt           time.Time
 }

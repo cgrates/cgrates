@@ -694,16 +694,24 @@ func TestHealthIndexRoutes(t *testing.T) {
 		SortingParameters: []string{},
 		Routes: []*Route{
 			{
-				ID:              "route1",
-				Weights:         utils.DynamicWeights{{Weight: 10}},
-				Blocker:         false,
+				ID:      "route1",
+				Weights: utils.DynamicWeights{{Weight: 10}},
+				Blockers: utils.Blockers{
+					{
+						Blocker: false,
+					},
+				},
 				RouteParameters: "",
 			},
 			{
 				ID:             "route2",
 				RateProfileIDs: []string{"RP_1002"},
 				Weights:        utils.DynamicWeights{{Weight: 20}},
-				Blocker:        false,
+				Blockers: utils.Blockers{
+					{
+						Blocker: false,
+					},
+				},
 			},
 		},
 		Weights: utils.DynamicWeights{{Weight: 10}},
@@ -800,16 +808,24 @@ func TestHealthIndexRoutes(t *testing.T) {
 		SortingParameters: []string{},
 		Routes: []*Route{
 			{
-				ID:              "route1",
-				Weights:         utils.DynamicWeights{{Weight: 10}},
-				Blocker:         false,
+				ID:      "route1",
+				Weights: utils.DynamicWeights{{Weight: 10}},
+				Blockers: utils.Blockers{
+					{
+						Blocker: false,
+					},
+				},
 				RouteParameters: "",
 			},
 			{
 				ID:             "route2",
 				RateProfileIDs: []string{"RP_1002"},
 				Weights:        utils.DynamicWeights{{Weight: 20}},
-				Blocker:        false,
+				Blockers: utils.Blockers{
+					{
+						Blocker: false,
+					},
+				},
 			},
 		},
 		Weights: utils.DynamicWeights{{Weight: 10}},

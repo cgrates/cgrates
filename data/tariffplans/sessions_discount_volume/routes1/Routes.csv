@@ -1,4 +1,4 @@
-#Tenant,ID,FilterIDs,Weight,Blockers,Sorting,SortingParameters,RouteID,RouteFilterIDs,RouteAccountIDs,RouteRateProfileIDs,RouteResourceIDs,RouteStatIDs,RouteWeight,RouteBlocker,RouteParameters
+#Tenant,ID,FilterIDs,Weight,Blockers,Sorting,SortingParameters,RouteID,RouteFilterIDs,RouteAccountIDs,RouteRateProfileIDs,RouteResourceIDs,RouteStatIDs,RouteWeight,RouteBlockers,RouteParameters
 
 cgrates.org,LC1,,,,*lc,,,,,,,,,,
 cgrates.org,LC1,,,,,,supplier1,,ACNT_VOL1,,,,,,

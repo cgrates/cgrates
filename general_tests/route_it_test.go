@@ -156,7 +156,11 @@ func testV1SplSSetSupplierProfilesWithoutRateProfileIDs(t *testing.T) {
 							Weight: 20,
 						},
 					},
-					Blocker: false,
+					Blockers: utils.Blockers{
+						{
+							Blocker: false,
+						},
+					},
 				},
 			},
 			Weights: utils.DynamicWeights{
@@ -231,7 +235,11 @@ func testV1SplSAddNewSplPrf(t *testing.T) {
 							Weight: 20,
 						},
 					},
-					Blocker: false,
+					Blockers: utils.Blockers{
+						{
+							Blocker: false,
+						},
+					},
 				},
 				//route2 and route3 will have the same ResourceUsage = 7
 				{
@@ -242,7 +250,11 @@ func testV1SplSAddNewSplPrf(t *testing.T) {
 							Weight: 20,
 						},
 					},
-					Blocker: false,
+					Blockers: utils.Blockers{
+						{
+							Blocker: false,
+						},
+					},
 				},
 				{
 					ID:          "route3",
@@ -252,7 +264,11 @@ func testV1SplSAddNewSplPrf(t *testing.T) {
 							Weight: 35,
 						},
 					},
-					Blocker: false,
+					Blockers: utils.Blockers{
+						{
+							Blocker: false,
+						},
+					},
 				},
 			},
 			Weights: utils.DynamicWeights{
@@ -517,7 +533,11 @@ func testV1SplSAddNewSplPrf2(t *testing.T) {
 							Weight: 20,
 						},
 					},
-					Blocker: false,
+					Blockers: utils.Blockers{
+						{
+							Blocker: false,
+						},
+					},
 				},
 				//route2 and route3 will have the same ResourceUsage = 7
 				{
@@ -528,7 +548,11 @@ func testV1SplSAddNewSplPrf2(t *testing.T) {
 							Weight: 20,
 						},
 					},
-					Blocker: false,
+					Blockers: utils.Blockers{
+						{
+							Blocker: false,
+						},
+					},
 				},
 				{
 					ID:          "route3",
@@ -538,7 +562,11 @@ func testV1SplSAddNewSplPrf2(t *testing.T) {
 							Weight: 35,
 						},
 					},
-					Blocker: false,
+					Blockers: utils.Blockers{
+						{
+							Blocker: false,
+						},
+					},
 				},
 			},
 			Weights: utils.DynamicWeights{
