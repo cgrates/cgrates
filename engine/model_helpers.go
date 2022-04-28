@@ -828,7 +828,7 @@ func (tps RouteMdls) CSVHeader() (result []string) {
 	return []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs, utils.Weights,
 		utils.Sorting, utils.SortingParameters, utils.RouteID, utils.RouteFilterIDs,
 		utils.RouteAccountIDs, utils.RouteRateProfileIDs, utils.RouteRateProfileIDs,
-		utils.RouteResourceIDs, utils.RouteStatIDs, utils.RouteWeights, utils.RouteBlocker,
+		utils.RouteResourceIDs, utils.RouteStatIDs, utils.RouteWeights, utils.RouteBlockers,
 		utils.RouteParameters,
 	}
 }
@@ -863,7 +863,7 @@ func (tps RouteMdls) AsTPRouteProfile() (result []*utils.TPRouteProfile) {
 				tpRoute = &utils.TPRoute{
 					ID:              tp.RouteID,
 					Weights:         tp.RouteWeights,
-					Blocker:         tp.RouteBlocker,
+					Blockers:        tp.RouteBlockers,
 					RouteParameters: tp.RouteParameters,
 				}
 			}
@@ -986,7 +986,7 @@ func APItoModelTPRoutes(st *utils.TPRouteProfile) (mdls RouteMdls) {
 		}
 		mdl.RouteWeights = route.Weights
 		mdl.RouteParameters = route.RouteParameters
-		mdl.RouteBlocker = route.Blocker
+		mdl.RouteBlockers = route.Blockers
 		mdls = append(mdls, mdl)
 	}
 	return
@@ -1002,18 +1002,16 @@ func APItoRouteProfile(tpRp *utils.TPRouteProfile, timezone string) (rp *RoutePr
 		FilterIDs:         make([]string, len(tpRp.FilterIDs)),
 	}
 	if tpRp.Weights != utils.EmptyString {
-		weights, err := utils.NewDynamicWeightsFromString(tpRp.Weights, utils.InfieldSep, utils.ANDSep)
+		rp.Weights, err = utils.NewDynamicWeightsFromString(tpRp.Weights, utils.InfieldSep, utils.ANDSep)
 		if err != nil {
 			return nil, err
 		}
-		rp.Weights = weights
 	}
 	if tpRp.Blockers != utils.EmptyString {
-		blockers, err := utils.NewBlockersFromString(tpRp.Blockers, utils.InfieldSep, utils.ANDSep)
+		rp.Blockers, err = utils.NewBlockersFromString(tpRp.Blockers, utils.InfieldSep, utils.ANDSep)
 		if err != nil {
 			return nil, err
 		}
-		rp.Blockers = blockers
 	}
 	for i, stp := range tpRp.SortingParameters {
 		rp.SortingParameters[i] = stp
@@ -1024,7 +1022,6 @@ func APItoRouteProfile(tpRp *utils.TPRouteProfile, timezone string) (rp *RoutePr
 	for i, route := range tpRp.Routes {
 		rp.Routes[i] = &Route{
 			ID:              route.ID,
-			Blocker:         route.Blocker,
 			RateProfileIDs:  route.RateProfileIDs,
 			AccountIDs:      route.AccountIDs,
 			FilterIDs:       route.FilterIDs,
@@ -1033,11 +1030,16 @@ func APItoRouteProfile(tpRp *utils.TPRouteProfile, timezone string) (rp *RoutePr
 			RouteParameters: route.RouteParameters,
 		}
 		if route.Weights != utils.EmptyString {
-			weight, err := utils.NewDynamicWeightsFromString(route.Weights, utils.InfieldSep, utils.ANDSep)
+			rp.Routes[i].Weights, err = utils.NewDynamicWeightsFromString(route.Weights, utils.InfieldSep, utils.ANDSep)
 			if err != nil {
 				return nil, err
 			}
-			rp.Routes[i].Weights = weight
+		}
+		if route.Blockers != utils.EmptyString {
+			rp.Routes[i].Blockers, err = utils.NewBlockersFromString(route.Blockers, utils.InfieldSep, utils.ANDSep)
+			if err != nil {
+				return nil, err
+			}
 		}
 	}
 	return rp, nil
@@ -1064,7 +1066,7 @@ func RouteProfileToAPI(rp *RouteProfile) (tpRp *utils.TPRouteProfile) {
 			ResourceIDs:     route.ResourceIDs,
 			StatIDs:         route.StatIDs,
 			Weights:         route.Weights.String(utils.InfieldSep, utils.ANDSep),
-			Blocker:         route.Blocker,
+			Blockers:        route.Blockers.String(utils.InfieldSep, utils.ANDSep),
 			RouteParameters: route.RouteParameters,
 		}
 	}

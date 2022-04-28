@@ -37,7 +37,7 @@ type Route struct {
 	ResourceIDs     []string // queried in some strategies
 	StatIDs         []string // queried in some strategies
 	Weights         utils.DynamicWeights
-	Blocker         bool // do not process further route after this one
+	Blockers        utils.Blockers // do not process further route after this one
 	RouteParameters string
 
 	cacheRoute map[string]interface{} // cache["*ratio"]=ratio
@@ -547,9 +547,13 @@ func (rp *RouteProfile) Set(path []string, val interface{}, newBranch bool, _ st
 			valA, err = utils.IfaceAsStringSlice(val)
 			rt.StatIDs = append(rt.StatIDs, valA...)
 		case utils.Weights:
-			rt.Weights, err = utils.NewDynamicWeightsFromString(utils.IfaceAsString(val), utils.InfieldSep, utils.ANDSep)
-		case utils.Blocker:
-			rt.Blocker, err = utils.IfaceAsBool(val)
+			if val != utils.EmptyString {
+				rt.Weights, err = utils.NewDynamicWeightsFromString(utils.IfaceAsString(val), utils.InfieldSep, utils.ANDSep)
+			}
+		case utils.BlockersField:
+			if val != utils.EmptyString {
+				rt.Blockers, err = utils.NewBlockersFromString(utils.IfaceAsString(val), utils.InfieldSep, utils.ANDSep)
+			}
 		case utils.RouteParameters:
 			rt.RouteParameters = utils.IfaceAsString(val)
 		default:
@@ -594,13 +598,11 @@ func (route *Route) Merge(v2 *Route) {
 	if len(v2.ID) != 0 {
 		route.ID = v2.ID
 	}
-	if v2.Blocker {
-		route.Blocker = v2.Blocker
-	}
 	if len(v2.RouteParameters) != 0 {
 		route.RouteParameters = v2.RouteParameters
 	}
 	route.Weights = append(route.Weights, v2.Weights...)
+	route.Blockers = append(route.Blockers, v2.Blockers...)
 	route.FilterIDs = append(route.FilterIDs, v2.FilterIDs...)
 	route.AccountIDs = append(route.AccountIDs, v2.AccountIDs...)
 	route.RateProfileIDs = append(route.RateProfileIDs, v2.RateProfileIDs...)
@@ -724,8 +726,8 @@ func (rt *Route) FieldAsInterface(fldPath []string) (_ interface{}, err error) {
 		return rt.StatIDs, nil
 	case utils.Weights:
 		return rt.Weights.String(utils.InfieldSep, utils.ANDSep), nil
-	case utils.Blocker:
-		return rt.Blocker, nil
+	case utils.BlockersField:
+		return rt.Blockers.String(utils.InfieldSep, utils.ANDSep), nil
 	case utils.RouteParameters:
 		return rt.RouteParameters, nil
 	}

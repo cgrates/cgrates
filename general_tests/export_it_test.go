@@ -400,7 +400,11 @@ func testExpVerifyRoutes(t *testing.T) {
 						Weight: 20,
 					},
 				},
-				Blocker:         false,
+				Blockers: utils.Blockers{
+					{
+						Blocker: false,
+					},
+				},
 				RouteParameters: utils.EmptyString,
 			},
 			{
@@ -410,7 +414,11 @@ func testExpVerifyRoutes(t *testing.T) {
 						Weight: 10,
 					},
 				},
-				Blocker:         false,
+				Blockers: utils.Blockers{
+					{
+						Blocker: false,
+					},
+				},
 				RouteParameters: utils.EmptyString,
 			},
 		},
@@ -436,7 +444,11 @@ func testExpVerifyRoutes(t *testing.T) {
 						Weight: 10,
 					},
 				},
-				Blocker:         false,
+				Blockers: utils.Blockers{
+					{
+						Blocker: false,
+					},
+				},
 				RouteParameters: utils.EmptyString,
 			},
 			{
@@ -446,7 +458,11 @@ func testExpVerifyRoutes(t *testing.T) {
 						Weight: 210,
 					},
 				},
-				Blocker:         false,
+				Blockers: utils.Blockers{
+					{
+						Blocker: false,
+					},
+				},
 				RouteParameters: utils.EmptyString,
 			},
 		},

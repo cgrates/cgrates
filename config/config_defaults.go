@@ -1282,7 +1282,7 @@ const CGRATES_CFG_JSON = `
 					{"tag": "RouteResourceIDs", "path": "Routes.ResourceIDs", "type": "*variable", "value": "~*req.11"},
 					{"tag": "RouteStatIDs", "path": "Routes.StatIDs", "type": "*variable", "value": "~*req.12"},
 					{"tag": "RouteWeights", "path": "Routes.Weights", "type": "*variable", "value": "~*req.13"},
-					{"tag": "RouteBlocker", "path": "Routes.Blocker", "type": "*variable", "value": "~*req.14"},
+					{"tag": "RouteBlockers", "path": "Routes.Blockers", "type": "*variable", "value": "~*req.14"},
 					{"tag": "RouteParameters", "path": "Routes.RouteParameters", "type": "*variable", "value": "~*req.15"},
 				],
 			},

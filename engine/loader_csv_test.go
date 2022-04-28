@@ -341,7 +341,7 @@ func TestLoadRouteProfiles(t *testing.T) {
 				ResourceIDs:     []string{"ResGroup1"},
 				StatIDs:         []string{"Stat1"},
 				Weights:         ";10",
-				Blocker:         true,
+				Blockers:        ";true",
 				RouteParameters: "param1",
 			},
 			{
@@ -350,7 +350,6 @@ func TestLoadRouteProfiles(t *testing.T) {
 				ResourceIDs:     []string{"ResGroup2", "ResGroup4"},
 				StatIDs:         []string{"Stat3"},
 				Weights:         ";10",
-				Blocker:         false,
 				RouteParameters: utils.EmptyString,
 			},
 			{
@@ -361,7 +360,6 @@ func TestLoadRouteProfiles(t *testing.T) {
 				ResourceIDs:     []string{"ResGroup3"},
 				StatIDs:         []string{"Stat2"},
 				Weights:         ";10",
-				Blocker:         false,
 				RouteParameters: utils.EmptyString,
 			},
 		},

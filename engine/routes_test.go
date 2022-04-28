@@ -855,14 +855,18 @@ func TestRouteProfileSet(t *testing.T) {
 		Sorting:           utils.MetaQOS,
 		SortingParameters: []string{"param"},
 		Routes: []*Route{{
-			ID:              "RT1",
-			FilterIDs:       []string{"fltr1"},
-			AccountIDs:      []string{"acc1"},
-			RateProfileIDs:  []string{"rp1"},
-			ResourceIDs:     []string{"res1"},
-			StatIDs:         []string{"stat1"},
-			Weights:         utils.DynamicWeights{{}},
-			Blocker:         true,
+			ID:             "RT1",
+			FilterIDs:      []string{"fltr1"},
+			AccountIDs:     []string{"acc1"},
+			RateProfileIDs: []string{"rp1"},
+			ResourceIDs:    []string{"res1"},
+			StatIDs:        []string{"stat1"},
+			Weights:        utils.DynamicWeights{{}},
+			Blockers: utils.Blockers{
+				{
+					Blocker: true,
+				},
+			},
 			RouteParameters: "params",
 		}},
 	}
@@ -919,7 +923,7 @@ func TestRouteProfileSet(t *testing.T) {
 	if err := rp.Set([]string{utils.Routes, utils.Weights}, ";0", false, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
-	if err := rp.Set([]string{utils.Routes, utils.Blocker}, "true", false, utils.EmptyString); err != nil {
+	if err := rp.Set([]string{utils.Routes, utils.BlockersField}, ";true", false, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
 	if err := rp.Set([]string{utils.Routes, utils.RouteParameters}, "params", false, utils.EmptyString); err != nil {
@@ -947,14 +951,18 @@ func TestRouteProfileAsInterface(t *testing.T) {
 		Sorting:           utils.MetaQOS,
 		SortingParameters: []string{"param"},
 		Routes: []*Route{{
-			ID:              "RT1",
-			FilterIDs:       []string{"fltr1"},
-			AccountIDs:      []string{"acc1"},
-			RateProfileIDs:  []string{"rp1"},
-			ResourceIDs:     []string{"res1"},
-			StatIDs:         []string{"stat1"},
-			Weights:         utils.DynamicWeights{{}},
-			Blocker:         true,
+			ID:             "RT1",
+			FilterIDs:      []string{"fltr1"},
+			AccountIDs:     []string{"acc1"},
+			RateProfileIDs: []string{"rp1"},
+			ResourceIDs:    []string{"res1"},
+			StatIDs:        []string{"stat1"},
+			Weights:        utils.DynamicWeights{{}},
+			Blockers: utils.Blockers{
+				{
+					Blocker: true,
+				},
+			},
 			RouteParameters: "params",
 		}},
 	}
@@ -1036,9 +1044,9 @@ func TestRouteProfileAsInterface(t *testing.T) {
 	} else if exp := ";0"; exp != val {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
 	}
-	if val, err := rp.FieldAsInterface([]string{utils.Routes + "[0]", utils.Blocker}); err != nil {
+	if val, err := rp.FieldAsInterface([]string{utils.Routes + "[0]", utils.BlockersField}); err != nil {
 		t.Fatal(err)
-	} else if exp := rp.Routes[0].Blocker; exp != val {
+	} else if exp := ";true"; exp != val {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
 	}
 	if val, err := rp.FieldAsInterface([]string{utils.Routes + "[0]", utils.RouteParameters}); err != nil {
@@ -1132,14 +1140,18 @@ func TestRouteProfileMerge(t *testing.T) {
 		Sorting:           utils.MetaQOS,
 		SortingParameters: []string{"param"},
 		Routes: []*Route{{
-			ID:              "RT1",
-			FilterIDs:       []string{"fltr1"},
-			AccountIDs:      []string{"acc1"},
-			RateProfileIDs:  []string{"rp1"},
-			ResourceIDs:     []string{"res1"},
-			StatIDs:         []string{"stat1"},
-			Weights:         utils.DynamicWeights{{}},
-			Blocker:         true,
+			ID:             "RT1",
+			FilterIDs:      []string{"fltr1"},
+			AccountIDs:     []string{"acc1"},
+			RateProfileIDs: []string{"rp1"},
+			ResourceIDs:    []string{"res1"},
+			StatIDs:        []string{"stat1"},
+			Weights:        utils.DynamicWeights{{}},
+			Blockers: utils.Blockers{
+				{
+					Blocker: true,
+				},
+			},
 			RouteParameters: "params",
 		}},
 	}
@@ -1151,14 +1163,18 @@ func TestRouteProfileMerge(t *testing.T) {
 		Sorting:           utils.MetaQOS,
 		SortingParameters: []string{"param"},
 		Routes: []*Route{{
-			ID:              "RT1",
-			FilterIDs:       []string{"fltr1"},
-			AccountIDs:      []string{"acc1"},
-			RateProfileIDs:  []string{"rp1"},
-			ResourceIDs:     []string{"res1"},
-			StatIDs:         []string{"stat1"},
-			Weights:         utils.DynamicWeights{{}},
-			Blocker:         true,
+			ID:             "RT1",
+			FilterIDs:      []string{"fltr1"},
+			AccountIDs:     []string{"acc1"},
+			RateProfileIDs: []string{"rp1"},
+			ResourceIDs:    []string{"res1"},
+			StatIDs:        []string{"stat1"},
+			Weights:        utils.DynamicWeights{{}},
+			Blockers: utils.Blockers{
+				{
+					Blocker: true,
+				},
+			},
 			RouteParameters: "params",
 		}},
 	}); !reflect.DeepEqual(exp, dp) {

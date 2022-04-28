@@ -289,7 +289,7 @@ type TPRoute struct {
 	ResourceIDs     []string // queried in some strategies
 	StatIDs         []string // queried in some strategies
 	Weights         string
-	Blocker         bool
+	Blockers        string
 	RouteParameters string
 }
 
