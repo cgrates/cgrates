@@ -243,8 +243,8 @@ func TestLoaderSCfgloadFromJsonCfgCase1(t *testing.T) {
 							Type:   utils.MetaVariable,
 							Value:  NewRSRParsersMustCompile("~*req.8", utils.InfieldSep),
 							Layout: time.RFC3339},
-						{Tag: "Blocker",
-							Path:   "Blocker",
+						{Tag: "Blockers",
+							Path:   "Blockers",
 							Type:   utils.MetaVariable,
 							Value:  NewRSRParsersMustCompile("~*req.9", utils.InfieldSep),
 							Layout: time.RFC3339},
@@ -918,18 +918,6 @@ func TestLoaderSCfgloadFromJsonCfgCase1(t *testing.T) {
 	}
 }
 
-// func TestLoaderSCfgloadFromJsonCfgCase2(t *testing.T) {
-// 	cfgJSON := &LoaderJsonCfg{
-// 		Tenant: utils.StringPointer("a{*"),
-// 	}
-// 	expected := "invalid converter terminator in rule: <a{*>"
-// 	jsonCfg := NewDefaultCGRConfig()
-// 	if err = jsonCfg.loaderCfg[0].loadFromJSONCfg(nil, jsonCfg.templates, jsonCfg.generalCfg.RSRSep); err != nil {
-// 		t.Error(err)
-// 	} else if err = jsonCfg.loaderCfg[0].loadFromJSONCfg(cfgJSON, jsonCfg.templates, jsonCfg.generalCfg.RSRSep); err == nil || err.Error() != expected {
-// 		t.Errorf("Expected %+v, received %+v", expected, err)
-// 	}
-// }
 func TestLoaderDataTypeLoadFromJSONNil(t *testing.T) {
 	lData := &LoaderDataType{
 		Type:     "*attributes",
@@ -1334,8 +1322,8 @@ func TestLoaderCfgAsMapInterfaceCase1(t *testing.T) {
 							utils.ValueCfg: "~*req.8",
 						},
 						{
-							utils.TagCfg:   "Blocker",
-							utils.PathCfg:  "Blocker",
+							utils.TagCfg:   "Blockers",
+							utils.PathCfg:  "Blockers",
 							utils.TypeCfg:  "*variable",
 							utils.ValueCfg: "~*req.9",
 						},

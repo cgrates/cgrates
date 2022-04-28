@@ -45,7 +45,7 @@ func (tpSts TPStats) exportItems(ctx *context.Context, wrtr io.Writer, tnt strin
 	csvWriter := csv.NewWriter(wrtr)
 	csvWriter.Comma = utils.CSVSep
 	// before writing the profiles, we must write the headers
-	if err = csvWriter.Write([]string{"#Tenant", "ID", "FilterIDs", "Weights", "QueueLength", "TTL", "MinItems", "Metrics", "MetricFilterIDs", "Stored", "Blocker", "ThresholdIDs"}); err != nil {
+	if err = csvWriter.Write([]string{"#Tenant", "ID", "FilterIDs", "Weights", "QueueLength", "TTL", "MinItems", "Metrics", "MetricFilterIDs", "Stored", "Blockers", "ThresholdIDs"}); err != nil {
 		return
 	}
 	for _, statsID := range itmIDs {

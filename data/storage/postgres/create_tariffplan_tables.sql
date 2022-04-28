@@ -41,9 +41,9 @@ CREATE TABLE tp_stats (
   "min_items" INTEGER NOT NULL,
   "metric_ids" VARCHAR(128) NOT NULL,
   "metric_filter_ids" VARCHAR(128) NOT NULL,
-  "stored" BOOLEAN NOT NULL,
-  "blocker" BOOLEAN NOT NULL,
+  "stored" BOOLEAN NOT NULL,  
   "weights" VARCHAR(128) NOT NULL,
+  "blockers" VARCHAR(128) NOT NULL,
   "threshold_ids" varchar(64) NOT NULL,
   "created_at" TIMESTAMP WITH TIME ZONE
 );

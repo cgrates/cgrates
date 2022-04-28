@@ -780,7 +780,9 @@ func testTPeSetStatQueueProfile(t *testing.T) {
 					Weight: 20,
 				},
 			},
-			QueueLength: 14,
+			QueueLength:  14,
+			ThresholdIDs: []string{utils.MetaNone},
+			Blockers:     utils.Blockers{{Blocker: false}},
 			Metrics: []*engine.MetricWithFilters{
 				{
 					MetricID: utils.MetaASR,
@@ -798,7 +800,6 @@ func testTPeSetStatQueueProfile(t *testing.T) {
 					MetricID: utils.MetaTCD,
 				},
 			},
-			ThresholdIDs: []string{utils.MetaNone},
 		},
 	}
 
@@ -1137,8 +1138,8 @@ func testTPeSExportTariffPlanHalfTariffPlan(t *testing.T) {
 			{"cgrates.org", "Account_balances", "", "", "", "CB1", "", ";30", "*concrete", "80", ";100", "*balanceLimit:-200", ";1000000000;;0.1", "", "", ""},
 		},
 		utils.StatsCsv: {
-			{"#Tenant", "ID", "FilterIDs", "Weights", "QueueLength", "TTL", "MinItems", "Metrics", "MetricFilterIDs", "Stored", "Blocker", "ThresholdIDs"},
-			{"cgrates.org", "SQ_basic", "", ";10", "0", "", "3", "*tcd", "", "true", "true", "*none"},
+			{"#Tenant", "ID", "FilterIDs", "Weights", "QueueLength", "TTL", "MinItems", "Metrics", "MetricFilterIDs", "Stored", "Blockers", "ThresholdIDs"},
+			{"cgrates.org", "SQ_basic", "", ";10", "0", "", "3", "*tcd", "", "true", ";true", "*none"},
 		},
 		utils.ActionsCsv: {
 			{"#Tenant", "ID", "FilterIDs", "Weights", "Blockers", "Schedule", "TargetType", "TargetIDs", "ActionID", "ActionFilterIDs", "ActionBlocker", "ActionTTL", "ActionType", "ActionOpts", "ActionPath", "ActionValue"},
@@ -1269,13 +1270,13 @@ func testTPeSExportTariffPlanAllTariffPlan(t *testing.T) {
 			{"cgrates.org", "Account_simple", "", ";10", "", "VoiceBalance", "*string:~*req.Account:1001", ";12", "*abstract", "0", "", "Destination:10", "", "", "", ""},
 		},
 		utils.StatsCsv: {
-			{"#Tenant", "ID", "FilterIDs", "Weights", "QueueLength", "TTL", "MinItems", "Metrics", "MetricFilterIDs", "Stored", "Blocker", "ThresholdIDs"},
-			{"cgrates.org", "SQ_basic", "", ";10", "0", "", "3", "*tcd", "", "true", "true", "*none"},
-			{"cgrates.org", "SQ_2", "", ";20", "14", "", "0", "*asr", "", "false", "false", "*none"},
-			{"cgrates.org", "SQ_2", "", "", "0", "", "0", "*tcd", "", "false", "false", ""},
-			{"cgrates.org", "SQ_2", "", "", "0", "", "0", "*pdd", "", "false", "false", ""},
-			{"cgrates.org", "SQ_2", "", "", "0", "", "0", "*tcc", "", "false", "false", ""},
-			{"cgrates.org", "SQ_2", "", "", "0", "", "0", "*tcd", "", "false", "false", ""},
+			{"#Tenant", "ID", "FilterIDs", "Weights", "QueueLength", "TTL", "MinItems", "Metrics", "MetricFilterIDs", "Stored", "Blockers", "ThresholdIDs"},
+			{"cgrates.org", "SQ_basic", "", ";10", "0", "", "3", "*tcd", "", "true", ";true", "*none"},
+			{"cgrates.org", "SQ_2", "", ";20", "14", "", "0", "*asr", "", "false", ";false", "*none"},
+			{"cgrates.org", "SQ_2", "", "", "0", "", "0", "*tcd", "", "false", "", ""},
+			{"cgrates.org", "SQ_2", "", "", "0", "", "0", "*pdd", "", "false", "", ""},
+			{"cgrates.org", "SQ_2", "", "", "0", "", "0", "*tcc", "", "false", "", ""},
+			{"cgrates.org", "SQ_2", "", "", "0", "", "0", "*tcd", "", "false", "", ""},
 		},
 		utils.ActionsCsv: {
 			{"#Tenant", "ID", "FilterIDs", "Weights", "Blockers", "Schedule", "TargetType", "TargetIDs", "ActionID", "ActionFilterIDs", "ActionBlocker", "ActionTTL", "ActionType", "ActionOpts", "ActionPath", "ActionValue"},
