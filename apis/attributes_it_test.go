@@ -1642,11 +1642,12 @@ func testAttributeSSetNonIndexedTypeFilter(t *testing.T) {
 			},
 		},
 		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.itsyscom",
+			Tenant: "cgrates.org",
 			Event: map[string]interface{}{
 				utils.ToR:          utils.MetaVoice,
 				utils.AccountField: "10093",
 				"Blockers":         "*exists",
+				utils.Destination:  "44322",
 			},
 			APIOpts: map[string]interface{}{
 				utils.MetaRateS: true,

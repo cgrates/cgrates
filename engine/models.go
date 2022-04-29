@@ -33,7 +33,7 @@ type ResourceMdl struct {
 	Tenant            string `index:"0" re:""`
 	ID                string `index:"1" re:""`
 	FilterIDs         string `index:"2" re:""`
-	Weights           string `index:"3" re:"\d+\.?\d*"`
+	Weights           string `index:"3" re:""`
 	UsageTTL          string `index:"4" re:""`
 	Limit             string `index:"5" re:""`
 	AllocationMessage string `index:"6" re:""`
@@ -53,7 +53,7 @@ type StatMdl struct {
 	Tenant          string `index:"0" re:""`
 	ID              string `index:"1" re:""`
 	FilterIDs       string `index:"2" re:""`
-	Weights         string `index:"3" re:"\d+\.?\d*"`
+	Weights         string `index:"3" re:""`
 	Blockers        string `index:"4" re:""`
 	QueueLength     int    `index:"5" re:""`
 	TTL             string `index:"6" re:""`
@@ -76,7 +76,7 @@ type ThresholdMdl struct {
 	Tenant           string `index:"0" re:""`
 	ID               string `index:"1" re:""`
 	FilterIDs        string `index:"2" re:""`
-	Weights          string `index:"3" re:"\d+\.?\d*"`
+	Weights          string `index:"3" re:""`
 	MaxHits          int    `index:"4" re:""`
 	MinHits          int    `index:"5" re:""`
 	MinSleep         string `index:"6" re:""`
@@ -223,7 +223,7 @@ type AttributeMdl struct {
 	Tenant             string `index:"0" re:""`
 	ID                 string `index:"1" re:""`
 	FilterIDs          string `index:"2" re:""`
-	Weights            string `index:"3" re:"\d+\.?\d*"`
+	Weights            string `index:"3" re:""`
 	Blockers           string `index:"4" re:""`
 	AttributeFilterIDs string `index:"5" re:""`
 	AttributeBlockers  string `index:"6" re:""`
@@ -243,9 +243,10 @@ type ChargerMdl struct {
 	Tenant       string `index:"0" re:""`
 	ID           string `index:"1" re:""`
 	FilterIDs    string `index:"2" re:""`
-	Weights      string `index:"3" re:"\d+\.?\d*"`
-	RunID        string `index:"4" re:""`
-	AttributeIDs string `index:"5" re:""`
+	Weights      string `index:"3" re:""`
+	Blockers     string `index:"4" re:""`
+	RunID        string `index:"5" re:""`
+	AttributeIDs string `index:"6" re:""`
 	CreatedAt    time.Time
 }
 

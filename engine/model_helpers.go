@@ -1244,7 +1244,7 @@ type ChargerMdls []*ChargerMdl
 // CSVHeader return the header for csv fields as a slice of string
 func (tps ChargerMdls) CSVHeader() (result []string) {
 	return []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs, utils.Weights,
-		utils.RunID, utils.AttributeIDs}
+		utils.BlockersField, utils.RunID, utils.AttributeIDs}
 }
 
 func (tps ChargerMdls) AsTPChargers() (result []*utils.TPChargerProfile) {
@@ -1261,8 +1261,11 @@ func (tps ChargerMdls) AsTPChargers() (result []*utils.TPChargerProfile) {
 				ID:     tp.ID,
 			}
 		}
-		if tp.Weights != "" {
+		if tp.Weights != utils.EmptyString {
 			tpCPP.Weights = tp.Weights
+		}
+		if tp.Blockers != utils.EmptyString {
+			tpCPP.Blockers = tp.Blockers
 		}
 		if tp.FilterIDs != utils.EmptyString {
 			if _, has := filterMap[tntID]; !has {
@@ -1322,11 +1325,12 @@ func APItoModelTPCharger(tpCPP *utils.TPChargerProfile) (mdls ChargerMdls) {
 		}
 		if min == 0 {
 			mdl := &ChargerMdl{
-				Tenant:  tpCPP.Tenant,
-				Tpid:    tpCPP.TPid,
-				ID:      tpCPP.ID,
-				Weights: tpCPP.Weights,
-				RunID:   tpCPP.RunID,
+				Tenant:   tpCPP.Tenant,
+				Tpid:     tpCPP.TPid,
+				ID:       tpCPP.ID,
+				Weights:  tpCPP.Weights,
+				Blockers: tpCPP.Blockers,
+				RunID:    tpCPP.RunID,
 			}
 			if isFilter && len(tpCPP.AttributeIDs) > 0 {
 				mdl.AttributeIDs = tpCPP.AttributeIDs[0]
@@ -1344,6 +1348,7 @@ func APItoModelTPCharger(tpCPP *utils.TPChargerProfile) (mdls ChargerMdls) {
 				}
 				if i == 0 {
 					mdl.Weights = tpCPP.Weights
+					mdl.Blockers = tpCPP.Blockers
 					mdl.RunID = tpCPP.RunID
 				}
 				mdl.AttributeIDs = tpCPP.AttributeIDs[i]
@@ -1373,7 +1378,6 @@ func APItoModelTPCharger(tpCPP *utils.TPChargerProfile) (mdls ChargerMdls) {
 				mdls = append(mdls, mdl)
 			}
 		}
-
 	}
 	return
 }
@@ -1393,6 +1397,13 @@ func APItoChargerProfile(tpCPP *utils.TPChargerProfile, timezone string) (cpp *C
 			return
 		}
 	}
+	if tpCPP.Blockers != utils.EmptyString {
+		var err error
+		cpp.Blockers, err = utils.NewBlockersFromString(tpCPP.Blockers, utils.InfieldSep, utils.ANDSep)
+		if err != nil {
+			return
+		}
+	}
 	for i, fli := range tpCPP.FilterIDs {
 		cpp.FilterIDs[i] = fli
 	}
@@ -1407,9 +1418,10 @@ func ChargerProfileToAPI(chargerPrf *ChargerProfile) (tpCharger *utils.TPCharger
 		Tenant:       chargerPrf.Tenant,
 		ID:           chargerPrf.ID,
 		FilterIDs:    make([]string, len(chargerPrf.FilterIDs)),
+		Weights:      chargerPrf.Weights.String(utils.InfieldSep, utils.ANDSep),
+		Blockers:     chargerPrf.Blockers.String(utils.InfieldSep, utils.ANDSep),
 		RunID:        chargerPrf.RunID,
 		AttributeIDs: make([]string, len(chargerPrf.AttributeIDs)),
-		Weights:      chargerPrf.Weights.String(utils.InfieldSep, utils.ANDSep),
 	}
 	for i, fli := range chargerPrf.FilterIDs {
 		tpCharger.FilterIDs[i] = fli

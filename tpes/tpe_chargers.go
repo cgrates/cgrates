@@ -45,7 +45,7 @@ func (tpChrg TPChargers) exportItems(ctx *context.Context, wrtr io.Writer, tnt s
 	csvWriter := csv.NewWriter(wrtr)
 	csvWriter.Comma = utils.CSVSep
 	// before writing the profiles, we must write the headers
-	if err = csvWriter.Write([]string{"#Tenant", "ID", "FilterIDs", "Weights", "RunID", "AttributeIDs"}); err != nil {
+	if err = csvWriter.Write([]string{"#Tenant", "ID", "FilterIDs", "Weights", "Blockers", "RunID", "AttributeIDs"}); err != nil {
 		return
 	}
 	for _, chrgID := range itmIDs {

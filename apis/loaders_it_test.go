@@ -198,7 +198,7 @@ cgrates.org,1002,,;30,,VoiceBalance,,;10,*voice,14,fltr3&fltr4;150;fltr5;250,,fl
 	if err := writeFile(utils.ActionsCsv, `
 #Tenant,ID,FilterIDs,Weights,Blockers,Schedule,TargetType,TargetIDs,ActionID,ActionFilterIDs,ActionBlockers,ActionTTL,ActionType,ActionOpts,ActionPath,ActionValue
 cgrates.org,ONE_TIME_ACT,,,,,,,,,,,,,,
-cgrates.org,ONE_TIME_ACT,,;10,,*asap,*accounts,1001;1002,,,,,,,,
+cgrates.org,ONE_TIME_ACT,,;10,;true,*asap,*accounts,1001;1002,,,,,,,,
 cgrates.org,ONE_TIME_ACT,,,,,,,TOPUP,,;false,0s,*add_balance,,,
 cgrates.org,ONE_TIME_ACT,,,,*asap,*accounts,1001;1002,,,,,,,,
 cgrates.org,ONE_TIME_ACT,,,,,,,TOPUP,,,,,,*balance.TestBalance.Value,10
@@ -206,7 +206,7 @@ cgrates.org,ONE_TIME_ACT,,,,,,,SET_BALANCE_TEST_DATA,,;false,0s,*set_balance,,*b
 cgrates.org,ONE_TIME_ACT,,,,,,,TOPUP_TEST_DATA,,;false,0s,*add_balance,,*balance.TestDataBalance.Value,1024
 cgrates.org,ONE_TIME_ACT,,,,,,,SET_BALANCE_TEST_VOICE,,;false,0s,*set_balance,,*balance.TestVoiceBalance.Type,*voice
 cgrates.org,ONE_TIME_ACT,,,,,,,TOPUP_TEST_VOICE,,;false,0s,*add_balance,,*balance.TestVoiceBalance.Value,15m15s
-cgrates.org,ONE_TIME_ACT,,,,,,,TOPUP_TEST_VOICE,,;false,0s,*add_balance,,*balance.TestVoiceBalance2.Value,15m15s
+cgrates.org,ONE_TIME_ACT,,,,,,,TOPUP_TEST_VOICE,,,0s,*add_balance,,*balance.TestVoiceBalance2.Value,15m15s
 `); err != nil {
 		t.Fatal(err)
 	}
@@ -225,11 +225,11 @@ cgrates.org,ALS2,*string:~*req.Account:1002;*string:~*opts.*context:con1,;20,,*s
 
 	// Create and populate Chargers.csv
 	if err := writeFile(utils.ChargersCsv, `
-#Tenant,ID,FilterIDs,Weights,RunID,AttributeIDs
-cgrates.org,Charger1,*string:~*req.Account:1001,;20,,
-cgrates.org,Charger1,,,*rated,ATTR_1001_SIMPLEAUTH
-cgrates.org,Charger2,,,*rated,ATTR_1002_SIMPLEAUTH
-cgrates.org,Charger2,*string:~*req.Account:1002,;15,,
+#Tenant,ID,FilterIDs,Weights,Blockers,RunID,AttributeIDs
+cgrates.org,Charger1,*string:~*req.Account:1001,;20,;true,,
+cgrates.org,Charger1,,,,*rated,ATTR_1001_SIMPLEAUTH
+cgrates.org,Charger2,,,,*rated,ATTR_1002_SIMPLEAUTH
+cgrates.org,Charger2,*string:~*req.Account:1002,;15,;false,,
 `); err != nil {
 		t.Fatal(err)
 	}
@@ -496,6 +496,11 @@ func testLoadersGetActionProfiles(t *testing.T) {
 					Weight: 10,
 				},
 			},
+			Blockers: utils.Blockers{
+				{
+					Blocker: true,
+				},
+			},
 			Schedule: utils.MetaASAP,
 			Targets: map[string]utils.StringSet{
 				"*accounts": {
@@ -515,6 +520,11 @@ func testLoadersGetActionProfiles(t *testing.T) {
 							Value: "10",
 						},
 					},
+					Blockers: utils.Blockers{
+						{
+							Blocker: false,
+						},
+					},
 				},
 				{
 					ID:   "SET_BALANCE_TEST_DATA",
@@ -525,6 +535,11 @@ func testLoadersGetActionProfiles(t *testing.T) {
 						{
 							Path:  "*balance.TestDataBalance.Type",
 							Value: utils.MetaData,
+						},
+					},
+					Blockers: utils.Blockers{
+						{
+							Blocker: false,
 						},
 					},
 				},
@@ -539,6 +554,11 @@ func testLoadersGetActionProfiles(t *testing.T) {
 							Value: "1024",
 						},
 					},
+					Blockers: utils.Blockers{
+						{
+							Blocker: false,
+						},
+					},
 				},
 				{
 					ID:   "SET_BALANCE_TEST_VOICE",
@@ -549,6 +569,11 @@ func testLoadersGetActionProfiles(t *testing.T) {
 						{
 							Path:  "*balance.TestVoiceBalance.Type",
 							Value: utils.MetaVoice,
+						},
+					},
+					Blockers: utils.Blockers{
+						{
+							Blocker: false,
 						},
 					},
 				},
@@ -565,6 +590,11 @@ func testLoadersGetActionProfiles(t *testing.T) {
 						{
 							Path:  "*balance.TestVoiceBalance2.Value",
 							Value: "15m15s",
+						},
+					},
+					Blockers: utils.Blockers{
+						{
+							Blocker: false,
 						},
 					},
 				},
@@ -675,6 +705,11 @@ func testLoadersGetChargerProfiles(t *testing.T) {
 					Weight: 20,
 				},
 			},
+			Blockers: utils.Blockers{
+				{
+					Blocker: true,
+				},
+			},
 		},
 		{
 			Tenant:       "cgrates.org",
@@ -685,6 +720,11 @@ func testLoadersGetChargerProfiles(t *testing.T) {
 			Weights: utils.DynamicWeights{
 				{
 					Weight: 15,
+				},
+			},
+			Blockers: utils.Blockers{
+				{
+					Blocker: false,
 				},
 			},
 		},

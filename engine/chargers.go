@@ -87,8 +87,17 @@ func (cS *ChargerS) matchingChargerProfilesForEvent(ctx *context.Context, tnt st
 	if len(cPs) == 0 {
 		return nil, utils.ErrNotFound
 	}
-
 	cPs.Sort()
+	for i, cp := range cPs {
+		var blocker bool
+		if blocker, err = BlockerFromDynamics(ctx, cp.Blockers, cS.fltrS, tnt, evNm); err != nil {
+			return
+		}
+		if blocker {
+			cPs = cPs[0 : i+1]
+			break
+		}
+	}
 	return
 }
 

@@ -68,6 +68,12 @@ var (
 		testChgrsGetChargersForEvent,
 		testChgrsProcessEvent,
 		testChgrsGetChargerProfilesWithPrefix,
+
+		// blocker behaviour test
+		testChargersRemoveChargerProfiles,
+		testChargersSetChargerProfiles,
+		testChargersGetChargersForEvent,
+
 		testChgrsSKillEngine,
 	}
 )
@@ -805,6 +811,177 @@ func testChgrsProcessEvent(t *testing.T) {
 		if !reflect.DeepEqual(reply, expected) {
 			t.Errorf("\nExpected %+v, \nreceived %+v", utils.ToJSON(expected), utils.ToJSON(reply))
 		}
+	}
+}
+
+func testChargersRemoveChargerProfiles(t *testing.T) {
+	args := &utils.ArgsItemIDs{
+		Tenant: "cgrates.org",
+	}
+	expected := []string{"TEST_CHARGERS_IT_TEST", "aTEST_CHARGERS_IT_TEST"}
+	var chargerProfileIDs []string
+	if err := chgrsSRPC.Call(context.Background(), utils.AdminSv1GetChargerProfileIDs, args, &chargerProfileIDs); err != nil {
+		t.Fatal(err)
+	} else {
+		sort.Strings(chargerProfileIDs)
+		if !utils.SliceStringEqual(chargerProfileIDs, expected) {
+			t.Errorf("expected: <%+v>, \nreceived: <%+v>", expected, chargerProfileIDs)
+		}
+	}
+	var reply string
+	for _, chargerProfileID := range chargerProfileIDs {
+		argsRem := utils.TenantIDWithAPIOpts{
+			TenantID: &utils.TenantID{
+				Tenant: "cgrates.org",
+				ID:     chargerProfileID,
+			},
+		}
+		if err := chgrsSRPC.Call(context.Background(), utils.AdminSv1RemoveChargerProfile, argsRem, &reply); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if err := chgrsSRPC.Call(context.Background(), utils.AdminSv1GetChargerProfileIDs, args, &chargerProfileIDs); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
+	}
+}
+
+func testChargersSetChargerProfiles(t *testing.T) {
+	chargerProfiles := []*ChargerWithAPIOpts{
+		{
+			ChargerProfile: &engine.ChargerProfile{
+				ID:        "CHARGER_TEST_1",
+				Tenant:    "cgrates.org",
+				FilterIDs: []string{"*string:~*req.TestCase:BlockerBehaviour"},
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 30,
+					},
+				},
+				Blockers: utils.Blockers{
+					{
+						Blocker: false,
+					},
+				},
+				RunID: "run1",
+			},
+		},
+		{
+			ChargerProfile: &engine.ChargerProfile{
+				ID:        "CHARGER_TEST_2",
+				Tenant:    "cgrates.org",
+				FilterIDs: []string{"*string:~*req.TestCase:BlockerBehaviour"},
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 10,
+					},
+				},
+				Blockers: utils.Blockers{
+					{
+						Blocker: true,
+					},
+				},
+				RunID: "run2",
+			},
+		},
+		{
+			ChargerProfile: &engine.ChargerProfile{
+				ID:        "CHARGER_TEST_3",
+				Tenant:    "cgrates.org",
+				FilterIDs: []string{"*string:~*req.TestCase:BlockerBehaviour"},
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 20,
+					},
+				},
+				RunID: "run3",
+			},
+		},
+		{
+			ChargerProfile: &engine.ChargerProfile{
+				ID:        "CHARGER_TEST_4",
+				Tenant:    "cgrates.org",
+				FilterIDs: []string{"*string:~*req.TestCase:BlockerBehaviour"},
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 5,
+					},
+				},
+				RunID: "run4",
+			},
+		},
+	}
+
+	var reply string
+	for _, chargerProfile := range chargerProfiles {
+		if err := chgrsSRPC.Call(context.Background(), utils.AdminSv1SetChargerProfile,
+			chargerProfile, &reply); err != nil {
+			t.Error(err)
+		} else if reply != utils.OK {
+			t.Error(err)
+		}
+	}
+}
+
+func testChargersGetChargersForEvent(t *testing.T) {
+	args := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "EventGetChargerProfiles",
+		Event: map[string]interface{}{
+			"TestCase": "BlockerBehaviour",
+		},
+		APIOpts: map[string]interface{}{},
+	}
+	expected := engine.ChargerProfiles{
+		{
+			ID:        "CHARGER_TEST_1",
+			Tenant:    "cgrates.org",
+			FilterIDs: []string{"*string:~*req.TestCase:BlockerBehaviour"},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 30,
+				},
+			},
+			Blockers: utils.Blockers{
+				{
+					Blocker: false,
+				},
+			},
+			RunID: "run1",
+		},
+		{
+			ID:        "CHARGER_TEST_3",
+			Tenant:    "cgrates.org",
+			FilterIDs: []string{"*string:~*req.TestCase:BlockerBehaviour"},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
+			RunID: "run3",
+		},
+		{
+			ID:        "CHARGER_TEST_2",
+			Tenant:    "cgrates.org",
+			FilterIDs: []string{"*string:~*req.TestCase:BlockerBehaviour"},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				},
+			},
+			Blockers: utils.Blockers{
+				{
+					Blocker: true,
+				},
+			},
+			RunID: "run2",
+		},
+	}
+	var reply engine.ChargerProfiles
+	if err := chgrsSRPC.Call(context.Background(), utils.ChargerSv1GetChargersForEvent, args, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(reply, expected) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ToJSON(expected), utils.ToJSON(reply))
 	}
 }
 

@@ -125,8 +125,8 @@ cgrates.org,ALS1,*string:~*req.Account:1001;*string:~*opts.*context:con1,;20,;tr
 cgrates.org,ALS1,*string:~*opts.*context:con2|con3,,,,*string:~*req.Account:1002;true,*req.Field2,*variable,Sub2
 `
 	ChargersCSVContent = `
-#Tenant,ID,FilterIDs,Weights,RunID,AttributeIDs
-cgrates.org,Charger1,*string:~*req.Account:1001,;20,*rated,ATTR_1001_SIMPLEAUTH
+#Tenant,ID,FilterIDs,Weights,Blockers,RunID,AttributeIDs
+cgrates.org,Charger1,*string:~*req.Account:1001,;20,,*rated,ATTR_1001_SIMPLEAUTH
 `
 	DispatcherCSVContent = `
 #Tenant,ID,FilterIDs,Weight,Strategy,StrategyParameters,ConnID,ConnFilterIDs,ConnWeight,ConnBlocker,ConnParameters

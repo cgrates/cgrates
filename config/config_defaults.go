@@ -1294,8 +1294,9 @@ const CGRATES_CFG_JSON = `
 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
 					{"tag": "FilterIDs", "path": "FilterIDs", "type": "*variable", "value": "~*req.2"},
 					{"tag": "Weights", "path": "Weights", "type": "*variable", "value": "~*req.3"},
-					{"tag": "RunID", "path": "RunID", "type": "*variable", "value": "~*req.4"},
-					{"tag": "AttributeIDs", "path": "AttributeIDs", "type": "*variable", "value": "~*req.5"},
+					{"tag": "Blockers", "path": "Blockers", "type": "*variable", "value": "~*req.4"},
+					{"tag": "RunID", "path": "RunID", "type": "*variable", "value": "~*req.5"},
+					{"tag": "AttributeIDs", "path": "AttributeIDs", "type": "*variable", "value": "~*req.6"},
 				],
 			},
 			{

@@ -193,9 +193,9 @@ func (aS *ActionS) matchingActionProfilesForEvent(ctx *context.Context, tnt stri
 		return nil, utils.ErrNotFound
 	}
 	aPfs.Sort()
-	for i, rp := range aPfs {
+	for i, aPf := range aPfs {
 		var blocker bool
-		if blocker, err = engine.BlockerFromDynamics(ctx, rp.Blockers, aS.fltrS, tnt, evNm); err != nil {
+		if blocker, err = engine.BlockerFromDynamics(ctx, aPf.Blockers, aS.fltrS, tnt, evNm); err != nil {
 			return
 		}
 		if blocker {

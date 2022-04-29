@@ -1122,12 +1122,12 @@ func testTPeSExportTariffPlanHalfTariffPlan(t *testing.T) {
 			{"cgrates.org", "MultipleRates", "", "", "0", "0", "", "RT_FRIDAY", "", "", "", "false", "90000000000", "0.021", "1000000000", "60000000000", "60000000000"},
 		},
 		utils.ChargersCsv: {
-			{"#Tenant", "ID", "FilterIDs", "Weights", "RunID", "AttributeIDs"},
-			{"cgrates.org", "Chargers1", "", ";20", "*default", "*none"},
+			{"#Tenant", "ID", "FilterIDs", "Weights", "Blockers", "RunID", "AttributeIDs"},
+			{"cgrates.org", "Chargers1", "", ";20", "", "*default", "*none"},
 		},
 		utils.RoutesCsv: {
 			{"#Tenant", "ID", "FilterIDs", "Weights", "Blockers", "Sorting", "SortingParameters", "RouteID", "RouteFilterIDs", "RouteAccountIDs", "RouteRateProfileIDs", "RouteResourceIDs", "RouteStatIDs", "RouteWeights", "RouteBlockers", "RouteParameters"},
-			{"cgrates.org", "ROUTE_2003", "", ";10", "", "*weight", "", "route1", "", "", "", "", "", ";20", ";false", ""},
+			{"cgrates.org", "ROUTE_2003", "", ";10", "", "*weight", "", "route1", "", "", "", "", "", ";20", "", ""},
 		},
 		utils.AccountsCsv: {
 			{"#Tenant", "ID", "FilterIDs", "Weights", "Opts", "BalanceID", "BalanceFilterIDs", "BalanceWeights", "BalanceType", "BalanceUnits", "BalanceUnitFactors", "BalanceOpts", "BalanceCostIncrements", "BalanceAttributeIDs", "BalanceRateProfileIDs", "ThresholdIDs"},
@@ -1143,7 +1143,7 @@ func testTPeSExportTariffPlanHalfTariffPlan(t *testing.T) {
 		},
 		utils.ActionsCsv: {
 			{"#Tenant", "ID", "FilterIDs", "Weights", "Blockers", "Schedule", "TargetType", "TargetIDs", "ActionID", "ActionFilterIDs", "ActionBlockers", "ActionTTL", "ActionType", "ActionOpts", "ActionPath", "ActionValue"},
-			{"cgrates.org", "Execute_thd", "", ";20", "", "", "*thresholds", "THD_1", "actID", "", ";false", "0s", "*reset_threshold", "", "", ""},
+			{"cgrates.org", "Execute_thd", "", ";20", "", "", "*thresholds", "THD_1", "actID", "", "", "0s", "*reset_threshold", "", "", ""},
 		},
 		utils.ThresholdsCsv: {
 			{"#Tenant", "ID", "FilterIDs", "Weights", "MaxHits", "MinHits", "MinSleep", "Blocker", "ActionProfileIDs", "Async"},
@@ -1249,17 +1249,17 @@ func testTPeSExportTariffPlanAllTariffPlan(t *testing.T) {
 			{"cgrates.org", "TEST_RATE_IT_TEST", "*string:~*req.Account:dan", ";10", "0", "0", "*free", "RT_WEEK", "", "* * * * 1-5", ";0", "false", "0", "0", "0", "", ""},
 		},
 		utils.ChargersCsv: {
-			{"#Tenant", "ID", "FilterIDs", "Weights", "RunID", "AttributeIDs"},
-			{"cgrates.org", "Chargers1", "", ";20", "*default", "*none"},
-			{"cgrates.org", "DifferentCharger", "", ";0", "Raw", "ATTR1"},
+			{"#Tenant", "ID", "FilterIDs", "Weights", "Blockers", "RunID", "AttributeIDs"},
+			{"cgrates.org", "Chargers1", "", ";20", "", "*default", "*none"},
+			{"cgrates.org", "DifferentCharger", "", ";0", "", "Raw", "ATTR1"},
 		},
 		utils.RoutesCsv: {
 			{"#Tenant", "ID", "FilterIDs", "Weights", "Blockers", "Sorting", "SortingParameters", "RouteID", "RouteFilterIDs", "RouteAccountIDs", "RouteRateProfileIDs", "RouteResourceIDs", "RouteStatIDs", "RouteWeights", "RouteBlockers", "RouteParameters"},
-			{"cgrates.org", "ROUTE_2003", "", ";10", "", "*weight", "", "route1", "", "", "", "", "", ";20", ";false", ""},
-			{"cgrates.org", "ROUTE_ACNT_1001", "*string:~*req.Account:1001", "", "", "*weight", "", "vendor1", "FLTR_DEST_1003", "", "", "", "", ";10", ";false", ""},
-			{"cgrates.org", "ROUTE_ACNT_1001", "", "", "", "", "", "vendor2", "*gte:~*accounts.1001.Balance[Concrete1].Units:10", "", "", "", "", ";20", ";false", ""},
-			{"cgrates.org", "ROUTE_ACNT_1001", "", "", "", "", "", "vendor3", "FLTR_DEST_1003;*prefix:~*req.Account:10", "", "", "", "", ";40", ";false", ""},
-			{"cgrates.org", "ROUTE_ACNT_1001", "", "", "", "", "", "vendor4", "", "", "", "", "", ";35", ";false", ""},
+			{"cgrates.org", "ROUTE_2003", "", ";10", "", "*weight", "", "route1", "", "", "", "", "", ";20", "", ""},
+			{"cgrates.org", "ROUTE_ACNT_1001", "*string:~*req.Account:1001", "", "", "*weight", "", "vendor1", "FLTR_DEST_1003", "", "", "", "", ";10", "", ""},
+			{"cgrates.org", "ROUTE_ACNT_1001", "", "", "", "", "", "vendor2", "*gte:~*accounts.1001.Balance[Concrete1].Units:10", "", "", "", "", ";20", "", ""},
+			{"cgrates.org", "ROUTE_ACNT_1001", "", "", "", "", "", "vendor3", "FLTR_DEST_1003;*prefix:~*req.Account:10", "", "", "", "", ";40", "", ""},
+			{"cgrates.org", "ROUTE_ACNT_1001", "", "", "", "", "", "vendor4", "", "", "", "", "", ";35", "", ""},
 		},
 		utils.AccountsCsv: {
 			{"#Tenant", "ID", "FilterIDs", "Weights", "Opts", "BalanceID", "BalanceFilterIDs", "BalanceWeights", "BalanceType", "BalanceUnits", "BalanceUnitFactors", "BalanceOpts", "BalanceCostIncrements", "BalanceAttributeIDs", "BalanceRateProfileIDs", "ThresholdIDs"},
@@ -1281,8 +1281,8 @@ func testTPeSExportTariffPlanAllTariffPlan(t *testing.T) {
 		},
 		utils.ActionsCsv: {
 			{"#Tenant", "ID", "FilterIDs", "Weights", "Blockers", "Schedule", "TargetType", "TargetIDs", "ActionID", "ActionFilterIDs", "ActionBlockers", "ActionTTL", "ActionType", "ActionOpts", "ActionPath", "ActionValue"},
-			{"cgrates.org", "Execute_thd", "", ";20", "", "", "*thresholds", "THD_1", "actID", "", ";false", "0s", "*reset_threshold", "", "", ""},
-			{"cgrates.org", "SET_BAL", "*string:~*req.Account:1001", ";10", "", "*asap", "*accounts", "1001", "SET_BAL", "", ";false", "0s", "*set_balance", "", "MONETARY", "10"},
+			{"cgrates.org", "Execute_thd", "", ";20", "", "", "*thresholds", "THD_1", "actID", "", "", "0s", "*reset_threshold", "", "", ""},
+			{"cgrates.org", "SET_BAL", "*string:~*req.Account:1001", ";10", "", "*asap", "*accounts", "1001", "SET_BAL", "", "", "0s", "*set_balance", "", "MONETARY", "10"},
 		},
 		utils.ThresholdsCsv: {
 			{"#Tenant", "ID", "FilterIDs", "Weights", "MaxHits", "MinHits", "MinSleep", "Blocker", "ActionProfileIDs", "Async"},
