@@ -21,8 +21,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package general_tests
 
 import (
+	"archive/zip"
+	"bytes"
+	"encoding/csv"
 	"os"
 	"path"
+	"path/filepath"
 	"reflect"
 	"sort"
 	"testing"
@@ -33,11 +37,13 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/loaders"
+	"github.com/cgrates/cgrates/tpes"
 	"github.com/cgrates/cgrates/utils"
 )
 
 var (
 	expCfgDir  string
+	replyBts   []byte
 	expCfgPath string
 	expCfg     *config.CGRConfig
 	expRpc     *birpc.Client
@@ -48,22 +54,23 @@ var (
 		testExpStartEngine,
 		testExpRPCConn,
 		testExpLoadTPFromFolder,
-		// testExpExportToFolder,
-		// testExpStopCgrEngine, // restart the engine and reset the database
-		// testExpResetDataDB,
-		// testExpStartEngine,
-		// testExpRPCConn,
-		// testExpLoadTPFromExported,
-		// testExpVerifyAttributes,
-		// testExpVerifyFilters,
-		// testExpVerifyThresholds,
-		// testExpVerifyResources,
-		// testExpVerifyStats,
-		// testExpVerifyRoutes,
-		// testExpVerifyRateProfiles,
-		// testExpVerifyActionProfiles,
-		// testExpVerifyAccounts,
-		// testExpCleanFiles,
+		//testExpExportToFolder,
+		/* 	testExpCreatDirectoryWithTariffplan,
+		testExpStopCgrEngine, // restart the engine and reset the database
+		testExpResetDataDB,
+		testExpStartEngineChangedLoderDirectory,
+		testExpRPCConn,
+		testExpLoadTPFromExported,
+		testExpVerifyAttributes,
+		testExpVerifyFilters,
+		testExpVerifyThresholds,
+		testExpVerifyResources,
+		testExpVerifyStats,
+		testExpVerifyRoutes,
+		testExpVerifyRateProfiles,
+		testExpVerifyActionProfiles,
+		testExpVerifyAccounts, */
+		testExpCleanFiles,
 		testExpStopCgrEngine,
 	}
 )
@@ -106,6 +113,12 @@ func testExpStartEngine(t *testing.T) {
 	}
 }
 
+func testExpStartEngineChangedLoderDirectory(t *testing.T) {
+	if _, err := engine.StopStartEngine(expCfgPath, *waitRater); err != nil {
+		t.Fatal(err)
+	}
+}
+
 func testExpRPCConn(t *testing.T) {
 	var err error
 	expRpc, err = newRPCClient(expCfg.ListenCfg())
@@ -133,29 +146,83 @@ func testExpLoadTPFromFolder(t *testing.T) {
 	}
 }
 
-/*
 func testExpExportToFolder(t *testing.T) {
-	var reply string
-	arg := &utils.ArgExportToFolder{
-		Path: "/tmp/tp/",
+	arg := &tpes.ArgsExportTP{
+		Tenant:      "cgrates.org",
+		ExportItems: map[string][]string{},
 	}
-	if err := expRpc.Call(context.Background(), utils.APIerSv1ExportToFolder, arg, &reply); err != nil {
+	if err := expRpc.Call(context.Background(), utils.TPeSv1ExportTariffPlan, arg, &replyBts); err != nil {
 		t.Error(err)
-	} else if reply != utils.OK {
-		t.Error(reply)
+	}
+}
+
+func testExpCreatDirectoryWithTariffplan(t *testing.T) {
+	filePath := filepath.Join("/tmp", "archivesTP")
+	if err := os.RemoveAll(filePath); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.MkdirAll(filePath, os.ModePerm); err != nil {
+		t.Error(err)
+	}
+
+	rdr, err := zip.NewReader(bytes.NewReader(replyBts), int64(len(replyBts)))
+	if err != nil {
+		t.Error(err)
+	}
+	for _, f := range rdr.File {
+		// 1
+		newFilePath := filepath.Join(filePath, f.Name)
+		w1, err := os.Create(newFilePath)
+		if err != nil {
+			t.Error(err)
+		}
+		defer w1.Close()
+		wrtr, err := os.OpenFile(newFilePath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, f.Mode())
+		if err != nil {
+			t.Error(err)
+		}
+		defer wrtr.Close()
+
+		// 2
+		f2, err := rdr.Open(f.Name)
+		if err != nil {
+			t.Error(err)
+		}
+		defer f2.Close()
+		info := csv.NewReader(f2)
+		csvFile, err := info.ReadAll()
+		if err != nil {
+			t.Error(err)
+		}
+
+		// 3
+		csvWrtr := csv.NewWriter(wrtr)
+		csvWrtr.Comma = utils.CSVSep
+		if err := csvWrtr.WriteAll(csvFile); err != nil {
+			t.Error(err)
+		}
+		csvWrtr.Flush()
 	}
 }
 
 func testExpLoadTPFromExported(t *testing.T) {
+	caching := utils.MetaReload
+	if expCfg.DataDbCfg().Type == utils.Internal {
+		caching = utils.MetaNone
+	}
 	var reply string
-	attrs := &utils.AttrLoadTpFromFolder{FolderPath: "/tmp/tp/"}
-	if err := expRpc.Call(context.Background(), utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
+	if err := expRpc.Call(context.Background(), utils.LoaderSv1Run,
+		&loaders.ArgsProcessFolder{
+			LoaderID: "exported_ldr",
+			APIOpts: map[string]interface{}{
+				utils.MetaCache: caching,
+			},
+		}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
-		t.Error(reply)
+		t.Error("Unexpected reply returned:", reply)
 	}
 }
-*/
 
 func testExpVerifyAttributes(t *testing.T) {
 	exp := &engine.AttributeProfile{
@@ -612,7 +679,7 @@ func testExpVerifyAccounts(t *testing.T) {
 }
 
 func testExpCleanFiles(t *testing.T) {
-	if err := os.RemoveAll("/tmp/tp/"); err != nil {
+	if err := os.RemoveAll("/tmp/archivesTP"); err != nil {
 		t.Error(err)
 	}
 }

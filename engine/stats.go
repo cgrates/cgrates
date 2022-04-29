@@ -220,6 +220,18 @@ func (sS *StatS) matchingStatQueuesForEvent(ctx *context.Context, tnt string, st
 		if sqPrfl.TTL > 0 {
 			sq.ttl = utils.DurationPointer(sqPrfl.TTL)
 		}
+		// every metrics has a blocker, verify them
+		for idx, metric := range sqPrfl.Metrics {
+			var blocker bool
+			if blocker, err = BlockerFromDynamics(ctx, metric.Blockers, sS.fltrS, tnt, evNm); err != nil {
+				return
+			}
+			// if we have blocker, ignore the rest of the metrics
+			if blocker {
+				sqPrfl.Metrics = sqPrfl.Metrics[:idx+1]
+				break
+			}
+		}
 		sq.sqPrfl = sqPrfl
 		if sq.weight, err = WeightFromDynamics(ctx, sqPrfl.Weights,
 			sS.fltrS, tnt, evNm); err != nil {

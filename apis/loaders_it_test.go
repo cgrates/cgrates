@@ -319,13 +319,13 @@ cgrates.org,RoutePrf2,*string:~*req.Account:1002,;20,,*lc,,route1,fltr3,Account3
 
 	// Create and populate Stats.csv
 	if err := writeFile(utils.StatsCsv, `
-#Tenant[0],Id[1],FilterIDs[2],Weights[3],QueueLength[4],TTL[5],MinItems[6],Metrics[7],MetricFilterIDs[8],Stored[9],Blocker[10],ThresholdIDs[11]
-cgrates.org,TestStats,*string:~*req.Account:1001,;20,100,1s,2,*sum#~*req.Value;*average#~*req.Value,fltr1;fltr2,true,true,Th1;Th2
-cgrates.org,TestStats,,,,,2,*sum#~*req.Usage,,,,
-cgrates.org,TestStats2,*string:~*req.Account:1002,,100,1s,2,*sum#~*req.Value;*sum#~*req.Usage;*average#~*req.Value;*average#~*req.Usage,,true,true,Th
-cgrates.org,TestStats2,,;20,,,2,*sum#~*req.Cost;*average#~*req.Cost,,true,true,
-cgrates.org,TestStats3,,,,,,,,,,
-cgrates.org,TestStats3,*string:~*req.Account:1003,;20,100,1s,2,*sum#~*req.Value;*average#~*req.Value,,true,true,Th1;Th2
+#Tenant[0],ID[1],FilterIDs[2],Weights[3],Blockers[4],QueueLength[5],TTL[6],MinItems[7],Stored[8],ThresholdIDs[9],MetricIDs[10],MetricFilterIDs[11],MetricBlockers[12]
+cgrates.org,TestStats,*string:~*req.Account:1001,;20,;true,100,1s,2,true,Th1;Th2,*sum#~*req.Value;*average#~*req.Value,fltr1;fltr2,
+cgrates.org,TestStats,,,,,,2,,,*sum#~*req.Usage,,*string:~*req.Account:1003&fltr2;true;;false
+cgrates.org,TestStats2,*string:~*req.Account:1002,,;true,100,1s,2,true,Th,*sum#~*req.Value;*sum#~*req.Usage;*average#~*req.Value;*average#~*req.Usage,,
+cgrates.org,TestStats2,,;20,,,,2,true,,*sum#~*req.Cost;*average#~*req.Cost,,;false
+cgrates.org,TestStats3,,,,,,,,,,,
+cgrates.org,TestStats3,*string:~*req.Account:1003,;20,;true,100,1s,2,true,Th1;Th2,*sum#~*req.Value;*average#~*req.Value,,fltr_for_stats;false
 `); err != nil {
 		t.Fatal(err)
 	}
@@ -1153,6 +1153,15 @@ func testLoadersGetStatQueueProfiles(t *testing.T) {
 				},
 				{
 					MetricID: "*sum#~*req.Usage",
+					Blockers: utils.Blockers{
+						{
+							FilterIDs: []string{"*string:~*req.Account:1003", "fltr2"},
+							Blocker:   true,
+						},
+						{
+							Blocker: false,
+						},
+					},
 				},
 			},
 			ThresholdIDs: []string{"Th1", "Th2"},
@@ -1189,6 +1198,7 @@ func testLoadersGetStatQueueProfiles(t *testing.T) {
 				},
 				{
 					MetricID: "*average#~*req.Cost",
+					Blockers: utils.Blockers{{Blocker: false}},
 				},
 			},
 			ThresholdIDs: []string{"Th"},
@@ -1213,18 +1223,22 @@ func testLoadersGetStatQueueProfiles(t *testing.T) {
 				},
 				{
 					MetricID: "*average#~*req.Value",
+					Blockers: utils.Blockers{
+						{
+							FilterIDs: []string{"fltr_for_stats"},
+							Blocker:   false,
+						},
+					},
 				},
 			},
 			ThresholdIDs: []string{"Th1", "Th2"},
 			Blockers:     utils.Blockers{{Blocker: true}},
 			Stored:       true,
-
 			Weights: utils.DynamicWeights{
 				{
 					Weight: 20,
 				},
 			},
-
 			MinItems: 2,
 		},
 	}

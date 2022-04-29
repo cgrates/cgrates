@@ -4292,6 +4292,10 @@ func TestModelHelpersStatQueueProfileToAPIFilterIds(t *testing.T) {
 		MinItems:    0,
 		Metrics: []*MetricWithFilters{{
 			FilterIDs: []string{"test_id"},
+			Blockers: utils.Blockers{{
+				FilterIDs: []string{"fltr2"},
+				Blocker:   false,
+			}},
 		},
 		},
 		Stored:   false,
@@ -4312,6 +4316,7 @@ func TestModelHelpersStatQueueProfileToAPIFilterIds(t *testing.T) {
 		Metrics: []*utils.MetricWithFilters{
 			{
 				FilterIDs: []string{"test_id"},
+				Blockers:  "fltr2;false",
 			},
 		},
 		Blockers:     ";false",
@@ -4356,6 +4361,7 @@ func TestModelHelpersAPItoModelStatsCase2(t *testing.T) {
 			{
 				FilterIDs: []string{"test_filter_id1", "test_filter_id2"},
 				MetricID:  "*tcc",
+				Blockers:  ";false",
 			},
 		},
 		Blockers:     ";true",
@@ -4375,6 +4381,7 @@ func TestModelHelpersAPItoModelStatsCase2(t *testing.T) {
 			MinItems:        2,
 			MetricIDs:       "*tcc",
 			MetricFilterIDs: "test_filter_id1;test_filter_id2",
+			MetricBlockers:  ";false",
 			Stored:          true,
 			Blockers:        ";true",
 			Weights:         ";20",
@@ -4426,9 +4433,7 @@ func TestStatMdlsCSVHeader(t *testing.T) {
 		ThresholdIDs:    "",
 		CreatedAt:       time.Time{},
 	}}
-	expStruct := []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs, utils.Weight,
-		utils.QueueLength, utils.TTL, utils.MinItems, utils.MetricIDs, utils.MetricFilterIDs,
-		utils.Stored, utils.BlockersField, utils.ThresholdIDs}
+	expStruct := []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs, utils.Weights, utils.BlockersField, utils.QueueLength, utils.TTL, utils.MinItems, utils.Stored, utils.ThresholdIDs, utils.MetricIDs, utils.MetricFilterIDs, utils.MetricBlockers}
 	result := testStruct.CSVHeader()
 	if !reflect.DeepEqual(result, expStruct) {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ToJSON(expStruct), utils.ToJSON(result))

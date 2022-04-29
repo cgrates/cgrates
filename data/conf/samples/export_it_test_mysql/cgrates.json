@@ -27,6 +27,9 @@
 	"chargers_conns":["*internal"],
 },
 
+"tpes": {
+	"enabled": true,
+},
 
 "attributes": {
 	"enabled": true,

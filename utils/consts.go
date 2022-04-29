@@ -555,6 +555,7 @@ const (
 	MinItems                 = "MinItems"
 	MetricIDs                = "MetricIDs"
 	MetricFilterIDs          = "MetricFilterIDs"
+	MetricBlockers           = "MetricBlockers"
 	FieldName                = "FieldName"
 	Path                     = "Path"
 	Hosts                    = "Hosts"

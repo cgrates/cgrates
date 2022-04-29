@@ -707,7 +707,9 @@ func testV1FltrPopulateResourcesAvailableUnits(t *testing.T) {
 		ID:     "event_nr2",
 		Event: map[string]interface{}{
 			utils.AccountField: "1001",
-			utils.Usage:        "1",
+		},
+		APIOpts: map[string]interface{}{
+			utils.MetaUsage: "1",
 		},
 	}
 	var ids []string
