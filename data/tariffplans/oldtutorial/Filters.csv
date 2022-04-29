@@ -24,7 +24,7 @@ cgrates.org,FLTR_STATS_3,*string,~*req.StatID,STATS_DAILY_DE
 cgrates.org,FLTR_STATS_3,*gt,~*req.TCD,3h
 cgrates.org,FLTR_RES_1,*string,~*req.EventType,ResourceUpdate
 cgrates.org,FLTR_RES_1,*string,~*req.ResourceID,RES_GRP_1
-cgrates.org,FLTR_RES_1,*gte,~*req.Usage,10.0
+cgrates.org,FLTR_RES_1,*gte,~*opts.*usage,10.0
 cgrates.org,FLTR_DST_FS,*string,~*req.Account,1001;1002;dan
 cgrates.org,FLTR_DST_FS,*destinations,~*req.Destination,DST_FS
 cgrates.org,FLTR_RES_GR3,*string,~*req.Account,3001
