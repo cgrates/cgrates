@@ -227,7 +227,7 @@ func (sS *StatS) matchingStatQueuesForEvent(ctx *context.Context, tnt string, st
 				return
 			}
 			// if we have blocker, ignore the rest of the metrics
-			if blocker {
+			if blocker && idx != len(sqPrfl.Metrics)-1 { // not the last metric
 				sqPrfl.Metrics = sqPrfl.Metrics[:idx+1]
 				break
 			}
@@ -256,7 +256,6 @@ func (sS *StatS) matchingStatQueuesForEvent(ctx *context.Context, tnt string, st
 			break
 		}
 	}
-
 	return
 }
 

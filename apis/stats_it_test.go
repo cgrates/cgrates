@@ -62,6 +62,7 @@ var (
 		testStatsGetStatQueueProfilesCount,
 		testStatsRemoveStatQueueProfiles,
 		testStatsGetStatQueuesAfterRemove,
+		//testStatsProcessEventWithBlockersOnMetrics,
 		// check if stats, thresholds and actions subsystems function properly together
 		testStatsStartServer,
 		testStatsSetActionProfileBeforeProcessEv,
@@ -618,6 +619,104 @@ func testStatsGetStatQueuesAfterRemove(t *testing.T) {
 		args, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	}
+}
+
+func testStatsProcessEventWithBlockersOnMetrics(t *testing.T) {
+	sqPrf := &engine.StatQueueProfileWithAPIOpts{
+		StatQueueProfile: &engine.StatQueueProfile{
+			Tenant:      "cgrates.org",
+			ID:          "SQ_WithBlockers",
+			FilterIDs:   []string{"*string:~*req.StatsMetrics:*exists"},
+			QueueLength: 100,
+			TTL:         time.Duration(1 * time.Minute),
+			MinItems:    0,
+			Metrics: []*engine.MetricWithFilters{
+				{
+					MetricID: utils.MetaTCD,
+				},
+				{
+					MetricID: utils.MetaTCC,
+				},
+				{
+					MetricID: utils.MetaASR,
+					Blockers: utils.Blockers{
+						{
+							FilterIDs: []string{"*prefix:~*req.CallerID:4433"},
+							Blocker:   true,
+						},
+					},
+				},
+				{
+					MetricID: utils.MetaPDD,
+				},
+				{
+					MetricID: utils.MetaACD,
+					Blockers: utils.Blockers{
+						{
+							FilterIDs: []string{"*prefix:~*req.CallerID:44112"},
+							Blocker:   true,
+						},
+					},
+				},
+				{
+					MetricID: utils.MetaDDC,
+				},
+			},
+			ThresholdIDs: []string{"*none"},
+		},
+	}
+
+	var reply string
+	if err := sqRPC.Call(context.Background(), utils.AdminSv1SetStatQueueProfile,
+		sqPrf, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned:", reply)
+	}
+
+	args := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "SQ_WithBlockers_Event",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+			"StatsMetrics":     "*exists",
+			"CallerID":         "443321",
+		},
+		APIOpts: map[string]interface{}{
+			utils.MetaUsage:       30 * time.Second,
+			utils.MetaCost:        102.1,
+			utils.MetaDestination: "332214",
+			utils.MetaStartTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			utils.MetaPDD:         5 * time.Second,
+		},
+	}
+	expected := []string{"SQ_WithBlockers"}
+	var replyStats []string
+	if err := sqRPC.Call(context.Background(), utils.StatSv1ProcessEvent,
+		args, &replyStats); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(replyStats, expected) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", expected, replyStats)
+	}
+
+	/*
+		expFloat := map[string]float64{
+			utils.MetaACD: 46400000000.,
+			utils.MetaASR: 60.,
+		}
+		var rplyDec map[string]float64
+		if err := sqRPC.Call(context.Background(), utils.StatSv1GetQueueFloatMetrics,
+			&utils.TenantIDWithAPIOpts{
+				TenantID: &utils.TenantID{
+					Tenant: "cgrates.org",
+					ID:     "SQ_WithBlockers",
+				},
+			}, &rplyDec); err != nil {
+			t.Error(err)
+		} else if !reflect.DeepEqual(rplyDec, expFloat) {
+			t.Errorf("Expected %v, received %v", utils.ToJSON(expFloat), utils.ToJSON(rplyDec))
+		}
+	*/
 }
 
 func testStatsStartServer(t *testing.T) {

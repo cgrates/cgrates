@@ -46,7 +46,7 @@ var (
 		testAttributeSInitDataDb,
 		testAttributeSStartEngine,
 		testAttributeSRPCConn,
-		/* testGetAttributeProfileBeforeSet,
+		testGetAttributeProfileBeforeSet,
 		testGetAttributeProfilesBeforeSet,
 		testAttributeSetAttributeProfile,
 		testAttributeGetAttributeIDs,
@@ -74,13 +74,13 @@ var (
 		testAttributeGetAttributeProfileAllIDs,
 		testAttributeGetAttributeProfileAllCount,
 		testAttributeRemoveRemainAttributeProfiles,
-		testAttributeGetAttributeProfileAfterRemove, */
+		testAttributeGetAttributeProfileAfterRemove,
 		testAttributeSetAttributeProfileWithAttrBlockers,
 		testAttributeSetAttributeProfileWithAttrBlockers2,
 		testAttributeSetAttributeProfileBlockersBothProfilesProcessRuns,
 
 		// Testing index behaviour
-		/* testAttributeSSetNonIndexedTypeFilter,
+		testAttributeSSetNonIndexedTypeFilter,
 		testAttributeSSetIndexedTypeFilter,
 		testAttributeSClearIndexes,
 		testAttributeSCheckIndexesSetAttributeProfileWithoutFilters,
@@ -88,7 +88,7 @@ var (
 		testAttributeSCheckIndexesAddIndexedFilters,
 		testAttributeSCheckIndexesModifyIndexedFilter,
 		testAttributeSCheckIndexesRemoveAnIndexedFilter,
-		testAttributeSCheckIndexesRemoveAttributeProfile, */
+		testAttributeSCheckIndexesRemoveAttributeProfile,
 
 		testAttributeSKillEngine,
 	}
