@@ -1,3 +1,3 @@
-#Tenant,ID,FilterIDs,Weights,Blockers,AttributeFilterIDs,Path,Type,Value,AttributeBlockers
-cgrates.org,ALS1,*string:~*opts.*context:con1;FLTR_1,;20,;false,*string:~*req.Field1:Initial1,*req.Field1,*constant,Sub1,
-cgrates.org,ALS1,,,,*string:~*req.Field1:Initial2,*req.Field2,*constant,Sub2,
+#Tenant,ID,FilterIDs,Weights,Blockers,AttributeFilterIDs,AttributeBlockers,Path,Type,Value
+cgrates.org,ALS1,*string:~*opts.*context:con1;FLTR_1,;20,;false,*string:~*req.Field1:Initial1,,*req.Field1,*constant,Sub1
+cgrates.org,ALS1,,,,*string:~*req.Field1:Initial2,,*req.Field2,*constant,Sub2
