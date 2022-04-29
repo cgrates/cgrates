@@ -451,7 +451,7 @@ func TestTPThresholdsAsTPThreshold(t *testing.T) {
 func TestCSVHeader(t *testing.T) {
 	var tps ResourceMdls
 	eOut := []string{
-		"#Tenant", "ID", "FilterIDs", "Weight", "UsageTTL", "Limit", "AllocationMessage", "Blocker", "Stored", "ThresholdIDs",
+		"#Tenant", "ID", "FilterIDs", "Weights", "UsageTTL", "Limit", "AllocationMessage", "Blocker", "Stored", "ThresholdIDs",
 	}
 	if rcv := tps.CSVHeader(); !reflect.DeepEqual(eOut, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
@@ -3663,7 +3663,7 @@ func ModelHelpersTestStatMdlsCSVHeader(t *testing.T) {
 			ThresholdIDs: "WARN_RES1;WARN_RES1",
 		},
 	}
-	expStruct := []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs, utils.Weight,
+	expStruct := []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs, utils.Weights,
 		utils.UsageTTL, utils.Limit, utils.AllocationMessage, utils.Blocker, utils.Stored,
 		utils.ThresholdIDs}
 	result := testStruct.CSVHeader()
@@ -3679,7 +3679,7 @@ func TestThresholdMdlsCSVHeader(t *testing.T) {
 			Tenant: "test_tenant",
 		},
 	}
-	expStruct := []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs, utils.Weight,
+	expStruct := []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs, utils.Weights,
 		utils.MaxHits, utils.MinHits, utils.MinSleep,
 		utils.Blocker, utils.ActionProfileIDs, utils.Async}
 	result := testStruct.CSVHeader()
@@ -4012,7 +4012,7 @@ func TestChargerMdlsCSVHeader(t *testing.T) {
 			ID:     "RP1",
 		},
 	}
-	expStruct := []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs, utils.Weight,
+	expStruct := []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs, utils.Weights,
 		utils.RunID, utils.AttributeIDs}
 
 	result := testStruct.CSVHeader()
@@ -4602,9 +4602,8 @@ func TestAccountMdlsCSVHeader(t *testing.T) {
 		ThresholdIDs: "WARN_RES1;WARN_RES1",
 	},
 	}
-	exp := []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs,
-		utils.Weight, utils.BalanceID,
-		utils.BalanceFilterIDs, utils.BalanceWeight, utils.BalanceBlocker,
+	exp := []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs, utils.Weights,
+		utils.BalanceID, utils.BalanceFilterIDs, utils.BalanceWeight, utils.BalanceBlocker,
 		utils.BalanceType, utils.BalanceOpts, utils.BalanceUnits, utils.ThresholdIDs}
 	result := testStruct.CSVHeader()
 	if !reflect.DeepEqual(exp, result) {

@@ -1141,7 +1141,7 @@ func (rp *ResourceProfile) FieldAsInterface(fldPath []string) (_ interface{}, er
 		return rp.Blocker, nil
 	case utils.Stored:
 		return rp.Stored, nil
-	case utils.Weight:
+	case utils.Weights:
 		return rp.Weights, nil
 	case utils.ThresholdIDs:
 		return rp.ThresholdIDs, nil

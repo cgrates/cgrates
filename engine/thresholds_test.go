@@ -3269,7 +3269,7 @@ func TestThresholdProfileAsInterface(t *testing.T) {
 	} else if exp := tp.FilterIDs[0]; exp != val {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
 	}
-	if val, err := tp.FieldAsInterface([]string{utils.Weight}); err != nil {
+	if val, err := tp.FieldAsInterface([]string{utils.Weights}); err != nil {
 		t.Fatal(err)
 	} else if exp := tp.Weights; !reflect.DeepEqual(exp, val) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
