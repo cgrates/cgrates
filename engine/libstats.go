@@ -685,7 +685,7 @@ func (sqp *StatQueueProfile) FieldAsInterface(fldPath []string) (_ interface{}, 
 			return sqp.ID, nil
 		case utils.FilterIDs:
 			return sqp.FilterIDs, nil
-		case utils.Weight:
+		case utils.Weights:
 			return sqp.Weights, nil
 		case utils.ThresholdIDs:
 			return sqp.ThresholdIDs, nil

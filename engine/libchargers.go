@@ -132,7 +132,7 @@ func (cp *ChargerProfile) FieldAsInterface(fldPath []string) (_ interface{}, err
 		return cp.ID, nil
 	case utils.FilterIDs:
 		return cp.FilterIDs, nil
-	case utils.Weight:
+	case utils.Weights:
 		return cp.Weights, nil
 	case utils.AttributeIDs:
 		return cp.AttributeIDs, nil

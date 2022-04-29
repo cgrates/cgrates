@@ -702,7 +702,7 @@ func (tp *ThresholdProfile) FieldAsInterface(fldPath []string) (_ interface{}, e
 		return tp.ID, nil
 	case utils.FilterIDs:
 		return tp.FilterIDs, nil
-	case utils.Weight:
+	case utils.Weights:
 		return tp.Weights, nil
 	case utils.ActionProfileIDs:
 		return tp.ActionProfileIDs, nil

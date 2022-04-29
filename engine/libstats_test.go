@@ -1515,7 +1515,7 @@ func TestStatQueueProfileAsInterface(t *testing.T) {
 	} else if exp := sqp.FilterIDs[0]; exp != val {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
 	}
-	if val, err := sqp.FieldAsInterface([]string{utils.Weight}); err != nil {
+	if val, err := sqp.FieldAsInterface([]string{utils.Weights}); err != nil {
 		t.Fatal(err)
 	} else if exp := sqp.Weights; !reflect.DeepEqual(exp, val) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))

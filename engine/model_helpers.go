@@ -149,7 +149,7 @@ type ResourceMdls []*ResourceMdl
 
 // CSVHeader return the header for csv fields as a slice of string
 func (tps ResourceMdls) CSVHeader() (result []string) {
-	return []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs, utils.Weight,
+	return []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs, utils.Weights,
 		utils.UsageTTL, utils.Limit, utils.AllocationMessage, utils.Blocker, utils.Stored,
 		utils.ThresholdIDs}
 }
@@ -543,7 +543,7 @@ type ThresholdMdls []*ThresholdMdl
 
 // CSVHeader return the header for csv fields as a slice of string
 func (tps ThresholdMdls) CSVHeader() (result []string) {
-	return []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs, utils.Weight,
+	return []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs, utils.Weights,
 		utils.MaxHits, utils.MinHits, utils.MinSleep,
 		utils.Blocker, utils.ActionProfileIDs, utils.Async}
 }
@@ -1243,7 +1243,7 @@ type ChargerMdls []*ChargerMdl
 
 // CSVHeader return the header for csv fields as a slice of string
 func (tps ChargerMdls) CSVHeader() (result []string) {
-	return []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs, utils.Weight,
+	return []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs, utils.Weights,
 		utils.RunID, utils.AttributeIDs}
 }
 
@@ -2287,7 +2287,7 @@ type AccountMdls []*AccountMdl
 // CSVHeader return the header for csv fields as a slice of string
 func (apm AccountMdls) CSVHeader() (result []string) {
 	return []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs,
-		utils.Weight, utils.BalanceID, utils.BalanceFilterIDs, utils.BalanceWeight,
+		utils.Weights, utils.BalanceID, utils.BalanceFilterIDs, utils.BalanceWeight,
 		utils.BalanceBlocker, utils.BalanceType, utils.BalanceOpts, utils.BalanceUnits,
 		utils.ThresholdIDs,
 	}
