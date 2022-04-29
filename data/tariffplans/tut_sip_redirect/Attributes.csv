@@ -1,2 +1,2 @@
-#Tenant,ID,FilterIDs,Weights,Blockers,AttributeFilterIDs,Path,Type,Value,AttributeBlockers
-cgrates.org,ATTR_ROUTE1,*string:~*req.RunID:route1,;10,;false,,*req.P-Charge-Info,*constant,<;sip:1002@route1.com;>,
+#Tenant,ID,FilterIDs,Weights,Blockers,AttributeFilterIDs,AttributeBlockers,Path,Type,Value
+cgrates.org,ATTR_ROUTE1,*string:~*req.RunID:route1,;10,;false,,,*req.P-Charge-Info,*constant,<;sip:1002@route1.com;>

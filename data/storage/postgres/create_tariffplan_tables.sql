@@ -28,7 +28,7 @@ CREATE INDEX tp_resources_unique ON tp_resources  ("tpid",  "tenant", "id", "fil
 -- Table structure for table `tp_stats`
 --
 
-DROP TABLE IF EXISTS tp_stats;
+DROP TABLE IF EXISTS tp_stats; 
 CREATE TABLE tp_stats (
   "pk" SERIAL PRIMARY KEY,
   "tpid" varchar(64) NOT NULL,
@@ -138,10 +138,10 @@ CREATE INDEX tp_routes_unique ON tp_routes  ("tpid",  "tenant", "id",
     "weights" varchar(64) NOT NULL,
     "blockers" varchar(64) NOT NULL,
     "attribute_filter_ids" varchar(64) NOT NULL,
+    "attribute_blockers" varchar(64) NOT NULL,
     "path" varchar(64) NOT NULL,
     "type" varchar(64) NOT NULL,
     "value" varchar(64) NOT NULL,
-    "attribute_blockers" varchar(64) NOT NULL,
     "created_at" TIMESTAMP WITH TIME ZONE
   );
   CREATE INDEX tp_attributes_ids ON tp_attributes (tpid);

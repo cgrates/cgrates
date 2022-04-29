@@ -45,7 +45,8 @@ func (tpAttr TPAttributes) exportItems(ctx *context.Context, wrtr io.Writer, tnt
 	csvWriter := csv.NewWriter(wrtr)
 	csvWriter.Comma = utils.CSVSep
 	// before writing the profiles, we must write the headers
-	if err = csvWriter.Write([]string{"#Tenant", "ID", "FilterIDs", "Weights", "Blockers", "AttributeFilterIDs", "Path", "Type", "Value", "AttributeBlockers"}); err != nil {
+	var attrMdl engine.AttributeMdls
+	if err = csvWriter.Write(attrMdl.CSVHeader()); err != nil {
 		return
 	}
 	for _, attrID := range itmIDs {
@@ -57,7 +58,7 @@ func (tpAttr TPAttributes) exportItems(ctx *context.Context, wrtr io.Writer, tnt
 			}
 			return err
 		}
-		attrMdl := engine.APItoModelTPAttribute(engine.AttributeProfileToAPI(attrPrf))
+		attrMdl = engine.APItoModelTPAttribute(engine.AttributeProfileToAPI(attrPrf))
 		if len(attrMdl) == 0 {
 			return
 		}

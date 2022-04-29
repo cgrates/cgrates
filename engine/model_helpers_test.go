@@ -1245,10 +1245,10 @@ func TestCsvDumpForAttributeModels(t *testing.T) {
 	if !reflect.DeepEqual(expected, rcv) {
 		t.Errorf("Expecting : %+v,\n received: %+v", utils.ToJSON(expected), utils.ToJSON(rcv))
 	}
-	expRecord := []string{"cgrates.org", "ALS1", "FLTR_ACNT_dan;*ai:~*req.AnswerTime:2014-07-14T14:35:00Z;*string:~*opts.*context:con1", ";20", ";true", "", "*req.FL1", "", "Al1", ";false"}
+	expRecord := []string{"cgrates.org", "ALS1", "FLTR_ACNT_dan;*ai:~*req.AnswerTime:2014-07-14T14:35:00Z;*string:~*opts.*context:con1", ";20", ";true", "", ";false", "*req.FL1", "", "Al1"}
 	for i, model := range rcv {
 		if i == 1 {
-			expRecord = []string{"cgrates.org", "ALS1", "", "", "", "", "*req.FL2", "", "Al2", ""}
+			expRecord = []string{"cgrates.org", "ALS1", "", "", "", "", "", "*req.FL2", "", "Al2"}
 		}
 		if csvRecordRcv, _ := CsvDump(model); !reflect.DeepEqual(expRecord, csvRecordRcv) {
 			t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(expRecord), utils.ToJSON(csvRecordRcv))
