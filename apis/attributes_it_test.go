@@ -46,7 +46,7 @@ var (
 		testAttributeSInitDataDb,
 		testAttributeSStartEngine,
 		testAttributeSRPCConn,
-		testGetAttributeProfileBeforeSet,
+		/* testGetAttributeProfileBeforeSet,
 		testGetAttributeProfilesBeforeSet,
 		testAttributeSetAttributeProfile,
 		testAttributeGetAttributeIDs,
@@ -74,10 +74,13 @@ var (
 		testAttributeGetAttributeProfileAllIDs,
 		testAttributeGetAttributeProfileAllCount,
 		testAttributeRemoveRemainAttributeProfiles,
-		testAttributeGetAttributeProfileAfterRemove,
+		testAttributeGetAttributeProfileAfterRemove, */
+		testAttributeSetAttributeProfileWithAttrBlockers,
+		testAttributeSetAttributeProfileWithAttrBlockers2,
+		testAttributeSetAttributeProfileBlockersBothProfilesProcessRuns,
 
 		// Testing index behaviour
-		testAttributeSSetNonIndexedTypeFilter,
+		/* testAttributeSSetNonIndexedTypeFilter,
 		testAttributeSSetIndexedTypeFilter,
 		testAttributeSClearIndexes,
 		testAttributeSCheckIndexesSetAttributeProfileWithoutFilters,
@@ -85,7 +88,7 @@ var (
 		testAttributeSCheckIndexesAddIndexedFilters,
 		testAttributeSCheckIndexesModifyIndexedFilter,
 		testAttributeSCheckIndexesRemoveAnIndexedFilter,
-		testAttributeSCheckIndexesRemoveAttributeProfile,
+		testAttributeSCheckIndexesRemoveAttributeProfile, */
 
 		testAttributeSKillEngine,
 	}
@@ -1368,6 +1371,238 @@ func testAttributeGetAttributeProfileAfterRemove(t *testing.T) {
 	}
 }
 
+func testAttributeSetAttributeProfileWithAttrBlockers(t *testing.T) {
+	// the blocker on the profile is false
+	attrPrf1 := &engine.APIAttributeProfileWithAPIOpts{
+		APIAttributeProfile: &engine.APIAttributeProfile{
+			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
+			ID:        "ATTR_WITH_BLOCKER_TRUE",
+			FilterIDs: []string{"*string:~*req.Blockers:*exists", "*eq:~*opts.*attrProcessRuns:2"},
+			Blockers: utils.Blockers{
+				{
+					Blocker: false,
+				},
+			},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 30,
+				},
+			},
+			Attributes: []*engine.ExternalAttribute{
+				{
+					Path:  utils.MetaReq + utils.NestingSep + "ToR",
+					Value: "*sms",
+				},
+				{
+					Path:  utils.MetaOpts + utils.NestingSep + "*chargerS",
+					Value: "true",
+				},
+				{
+					Blockers: utils.Blockers{
+						{
+							FilterIDs: []string{"*prefix:~*req.Destination:4433"},
+							Blocker:   true,
+						},
+					},
+					Path:  utils.MetaReq + utils.NestingSep + "RequestType",
+					Value: "*rated",
+				},
+				{
+					Path:  utils.MetaOpts + utils.NestingSep + "*usage",
+					Value: "1m",
+				},
+			},
+		},
+	}
+	// here the the blocker on the profile is true
+	attrPrf2 := &engine.APIAttributeProfileWithAPIOpts{
+		APIAttributeProfile: &engine.APIAttributeProfile{
+			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+			ID:     "ATTR_WITH_BLOCKER",
+			FilterIDs: []string{"*string:~*req.Blockers:*exists",
+				"*notexists:~*opts.*usage:"},
+			Blockers: utils.Blockers{
+				{
+					Blocker: true,
+				},
+			},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
+			Attributes: []*engine.ExternalAttribute{
+				{
+					Blockers: utils.Blockers{
+						{
+							FilterIDs: []string{"*prefix:~*req.Destination:4433"},
+							Blocker:   true,
+						},
+					},
+					Path:  utils.MetaReq + utils.NestingSep + "Account",
+					Value: "10093",
+				},
+				{
+					Path:  utils.MetaOpts + utils.NestingSep + "*rates",
+					Value: "true",
+				},
+			},
+		},
+	}
+	// Add attributeProfiles
+	var result string
+	if err := attrSRPC.Call(context.Background(), utils.AdminSv1SetAttributeProfile,
+		attrPrf1, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+	if err := attrSRPC.Call(context.Background(), utils.AdminSv1SetAttributeProfile,
+		attrPrf2, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+	// first we will process the second attribute with true BLOCKER on profile, but true on Attributes if the Destination prefix is 4433(FOR NOW THE DESTINATION WILL BE EMPTY)
+	args := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		Event: map[string]interface{}{
+			utils.ToR:          utils.MetaVoice,
+			utils.AccountField: "1002",
+			"Blockers":         "*exists",
+		},
+		APIOpts: map[string]interface{}{},
+	}
+	expEvReply := &engine.AttrSProcessEventReply{
+		AlteredFields: []*engine.FieldsAltered{
+			{
+				MatchedProfileID: "cgrates.org:ATTR_WITH_BLOCKER",
+				Fields:           []string{"*opts.*rates", "*req.Account"},
+			},
+		},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			Event: map[string]interface{}{
+				utils.ToR:          utils.MetaVoice,
+				utils.AccountField: "10093",
+				"Blockers":         "*exists",
+			},
+			APIOpts: map[string]interface{}{
+				utils.MetaRateS: "true",
+			},
+		},
+	}
+	evRply := &engine.AttrSProcessEventReply{}
+	if err := attrSRPC.Call(context.Background(), utils.AttributeSv1ProcessEvent,
+		args, &evRply); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(expEvReply.AlteredFields[0].Fields)
+		sort.Strings(evRply.AlteredFields[0].Fields)
+		if !reflect.DeepEqual(evRply, expEvReply) {
+			t.Errorf("Expected %+v, received %+v", utils.ToJSON(expEvReply), utils.ToJSON(evRply))
+		}
+	}
+}
+
+func testAttributeSetAttributeProfileWithAttrBlockers2(t *testing.T) {
+	// first we will process the second attribute with true BLOCKER on profile, but true on Attributes if the Destination prefix is 4433(NOW WE WILL POPULATE THE DESTINATION, AND THE BLOCKER WILL STOP THE NEXT ATTRIBUTES)
+	args := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		Event: map[string]interface{}{
+			utils.ToR:          utils.MetaVoice,
+			utils.AccountField: "1002",
+			"Blockers":         "*exists",
+			utils.Destination:  "4433254",
+		},
+		APIOpts: map[string]interface{}{},
+	}
+	expEvReply := &engine.AttrSProcessEventReply{
+		AlteredFields: []*engine.FieldsAltered{
+			{
+				MatchedProfileID: "cgrates.org:ATTR_WITH_BLOCKER",
+				Fields:           []string{"*req.Account"},
+			},
+		},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			Event: map[string]interface{}{
+				utils.ToR:          utils.MetaVoice,
+				utils.AccountField: "10093",
+				"Blockers":         "*exists",
+				utils.Destination:  "4433254",
+			},
+			// now *rates was not processde ebcause the blocker amtched the filter of Destination
+			APIOpts: map[string]interface{}{},
+		},
+	}
+	evRply := &engine.AttrSProcessEventReply{}
+	if err := attrSRPC.Call(context.Background(), utils.AttributeSv1ProcessEvent,
+		args, &evRply); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(expEvReply.AlteredFields[0].Fields)
+		sort.Strings(evRply.AlteredFields[0].Fields)
+		if !reflect.DeepEqual(evRply, expEvReply) {
+			t.Errorf("Expected %+v, received %+v", utils.ToJSON(expEvReply), utils.ToJSON(evRply))
+		}
+	}
+}
+
+func testAttributeSetAttributeProfileBlockersBothProfilesProcessRuns(t *testing.T) {
+	// now we will process both attributes that matched, but blokcers on the attributes will be felt and not all attributes from the list were processed
+	args := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		Event: map[string]interface{}{
+			utils.ToR:          utils.MetaVoice,
+			utils.AccountField: "1002",
+			"Blockers":         "*exists",
+			utils.Destination:  "4433254",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsAttributesProcessRuns: 2,
+		},
+	}
+	expEvReply := &engine.AttrSProcessEventReply{
+		AlteredFields: []*engine.FieldsAltered{
+			{
+				MatchedProfileID: "cgrates.org:ATTR_WITH_BLOCKER_TRUE",
+				Fields:           []string{"*opts.*chargerS", "*req.RequestType", "*req.ToR"},
+			},
+			{
+				MatchedProfileID: "cgrates.org:ATTR_WITH_BLOCKER",
+				Fields:           []string{"*req.Account"},
+			},
+		},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			Event: map[string]interface{}{
+				utils.ToR:          "*sms",
+				utils.AccountField: "10093",
+				"Blockers":         "*exists",
+				utils.Destination:  "4433254",
+				utils.RequestType:  "*rated",
+			},
+			// now *rates was not processde ebcause the blocker amtched the filter of Destination
+			APIOpts: map[string]interface{}{
+				utils.OptsAttributesProcessRuns: 2.,
+				utils.OptsChargerS:              "true",
+			},
+		},
+	}
+	evRply := &engine.AttrSProcessEventReply{}
+	if err := attrSRPC.Call(context.Background(), utils.AttributeSv1ProcessEvent,
+		args, &evRply); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(expEvReply.AlteredFields[0].Fields)
+		sort.Strings(evRply.AlteredFields[0].Fields)
+		if !reflect.DeepEqual(evRply, expEvReply) {
+			t.Errorf("Expected %+v, received %+v", utils.ToJSON(expEvReply), utils.ToJSON(evRply))
+		}
+	}
+}
+
 func testAttributeSSetNonIndexedTypeFilter(t *testing.T) {
 	filter := &engine.FilterWithAPIOpts{
 		Filter: &engine.Filter{
@@ -1387,7 +1622,47 @@ func testAttributeSSetNonIndexedTypeFilter(t *testing.T) {
 		&reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
-		t.Error("Unexpected reply: ", reply)
+		t.Error("Unexpected reply returned")
+	}
+
+	args := &utils.CGREvent{
+		Event: map[string]interface{}{
+			utils.ToR:          utils.MetaVoice,
+			utils.AccountField: "1002",
+			"Blockers":         "*exists",
+			utils.Destination:  "44322",
+		},
+		APIOpts: map[string]interface{}{},
+	}
+	expEvReply := &engine.AttrSProcessEventReply{
+		AlteredFields: []*engine.FieldsAltered{
+			{
+				MatchedProfileID: "cgrates.org:ATTR_WITH_BLOCKER",
+				Fields:           []string{"*opts.*rates", "*req.Account"},
+			},
+		},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.itsyscom",
+			Event: map[string]interface{}{
+				utils.ToR:          utils.MetaVoice,
+				utils.AccountField: "10093",
+				"Blockers":         "*exists",
+			},
+			APIOpts: map[string]interface{}{
+				utils.MetaRateS: true,
+			},
+		},
+	}
+	evRply := &engine.AttrSProcessEventReply{}
+	if err := attrSRPC.Call(context.Background(), utils.AttributeSv1ProcessEvent,
+		args, &evRply); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(expEvReply.AlteredFields[0].Fields)
+		sort.Strings(evRply.AlteredFields[0].Fields)
+		if !reflect.DeepEqual(evRply, expEvReply) {
+			t.Errorf("Expected %+v, received %+v", utils.ToJSON(expEvReply), utils.ToJSON(evRply))
+		}
 	}
 }
 
