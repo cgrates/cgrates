@@ -29,9 +29,10 @@ type ChargerProfile struct {
 	Tenant       string
 	ID           string
 	FilterIDs    []string
+	Weights      utils.DynamicWeights
+	Blockers     utils.Blockers
 	RunID        string
 	AttributeIDs []string // perform data aliasing based on these Attributes
-	Weights      utils.DynamicWeights
 	weight       float64
 }
 
@@ -78,6 +79,10 @@ func (cp *ChargerProfile) Set(path []string, val interface{}, newBranch bool, _ 
 		if val != utils.EmptyString {
 			cp.Weights, err = utils.NewDynamicWeightsFromString(utils.IfaceAsString(val), utils.InfieldSep, utils.ANDSep)
 		}
+	case utils.BlockersField:
+		if val != utils.EmptyString {
+			cp.Blockers, err = utils.NewBlockersFromString(utils.IfaceAsString(val), utils.InfieldSep, utils.ANDSep)
+		}
 	}
 	return
 }
@@ -96,6 +101,7 @@ func (cp *ChargerProfile) Merge(v2 interface{}) {
 	cp.FilterIDs = append(cp.FilterIDs, vi.FilterIDs...)
 	cp.AttributeIDs = append(cp.AttributeIDs, vi.AttributeIDs...)
 	cp.Weights = append(cp.Weights, vi.Weights...)
+	cp.Blockers = append(cp.Blockers, vi.Blockers...)
 }
 
 func (cp *ChargerProfile) String() string { return utils.ToJSON(cp) }
@@ -134,6 +140,8 @@ func (cp *ChargerProfile) FieldAsInterface(fldPath []string) (_ interface{}, err
 		return cp.FilterIDs, nil
 	case utils.Weights:
 		return cp.Weights, nil
+	case utils.BlockersField:
+		return cp.Blockers, nil
 	case utils.AttributeIDs:
 		return cp.AttributeIDs, nil
 	case utils.RunID:

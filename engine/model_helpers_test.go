@@ -4013,7 +4013,7 @@ func TestChargerMdlsCSVHeader(t *testing.T) {
 		},
 	}
 	expStruct := []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs, utils.Weights,
-		utils.RunID, utils.AttributeIDs}
+		utils.BlockersField, utils.RunID, utils.AttributeIDs}
 
 	result := testStruct.CSVHeader()
 	if !reflect.DeepEqual(result, expStruct) {

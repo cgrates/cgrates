@@ -332,9 +332,10 @@ type TPChargerProfile struct {
 	Tenant       string
 	ID           string
 	FilterIDs    []string
+	Weights      string
+	Blockers     string
 	RunID        string
 	AttributeIDs []string
-	Weights      string
 }
 
 type TPTntID struct {
