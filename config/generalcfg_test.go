@@ -44,6 +44,7 @@ func TestGeneralCfgloadFromJsonCfg(t *testing.T) {
 		Digest_separator:     utils.StringPointer(","),
 		Digest_equal:         utils.StringPointer(":"),
 		Failed_posts_ttl:     utils.StringPointer("2"),
+		Opts:                 &GeneralOptsJson{},
 	}
 
 	expected := &GeneralCfg{
@@ -69,6 +70,9 @@ func TestGeneralCfgloadFromJsonCfg(t *testing.T) {
 		RSRSep:           ";",
 		DefaultCaching:   utils.MetaReload,
 		FailedPostsTTL:   2,
+		Opts: &GeneralOpts{
+			ExporterIDs: []*utils.DynamicStringSliceOpt{},
+		},
 	}
 	jsnCfg := NewDefaultCGRConfig()
 	if err = jsnCfg.generalCfg.loadFromJSONCfg(cfgJSON); err != nil {
@@ -174,6 +178,9 @@ func TestGeneralCfgAsMapInterface(t *testing.T) {
 		utils.DecimalMinScaleCfg:     0,
 		utils.DecimalPrecisionCfg:    0,
 		utils.DecimalRoundingModeCfg: "*toNearestEven",
+		utils.OptsCfg: map[string]interface{}{
+			utils.MetaExporterIDs: []*utils.DynamicStringSliceOpt{},
+		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
@@ -221,6 +228,9 @@ func TestGeneralCfgAsMapInterface1(t *testing.T) {
 		utils.DecimalMinScaleCfg:     0,
 		utils.DecimalPrecisionCfg:    0,
 		utils.DecimalRoundingModeCfg: "*toNearestEven",
+		utils.OptsCfg: map[string]interface{}{
+			utils.MetaExporterIDs: []*utils.DynamicStringSliceOpt{},
+		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
@@ -253,6 +263,13 @@ func TestGeneralCfgClone(t *testing.T) {
 		RSRSep:           ";",
 		DefaultCaching:   utils.MetaReload,
 		FailedPostsTTL:   2,
+		Opts: &GeneralOpts{
+			ExporterIDs: []*utils.DynamicStringSliceOpt{
+				{
+					Value: []string{"*ees"},
+				},
+			},
+		},
 	}
 	rcv := ban.Clone()
 	if !reflect.DeepEqual(ban, rcv) {
@@ -289,6 +306,13 @@ func TestDiffGeneralJsonCfg(t *testing.T) {
 		RSRSep:           "",
 		DefaultCaching:   utils.MetaClear,
 		FailedPostsTTL:   5,
+		Opts: &GeneralOpts{
+			ExporterIDs: []*utils.DynamicStringSliceOpt{
+				{
+					Value: []string{"*ees"},
+				},
+			},
+		},
 	}
 
 	v2 := &GeneralCfg{
@@ -315,6 +339,13 @@ func TestDiffGeneralJsonCfg(t *testing.T) {
 		DefaultCaching:   utils.MetaReload,
 		LockingTimeout:   2 * time.Second,
 		FailedPostsTTL:   2,
+		Opts: &GeneralOpts{
+			ExporterIDs: []*utils.DynamicStringSliceOpt{
+				{
+					Value: []string{"*syslog"},
+				},
+			},
+		},
 	}
 
 	expected := &GeneralJsonCfg{
@@ -341,6 +372,13 @@ func TestDiffGeneralJsonCfg(t *testing.T) {
 		Digest_equal:         utils.StringPointer(":"),
 		Failed_posts_ttl:     utils.StringPointer("2ns"),
 		Max_parallel_conns:   utils.IntPointer(100),
+		Opts: &GeneralOptsJson{
+			ExporterIDs: []*utils.DynamicStringSliceOpt{
+				{
+					Value: []string{"*syslog"},
+				},
+			},
+		},
 	}
 
 	rcv := diffGeneralJsonCfg(d, v1, v2)
@@ -349,7 +387,9 @@ func TestDiffGeneralJsonCfg(t *testing.T) {
 	}
 
 	v1 = v2
-	expected = &GeneralJsonCfg{}
+	expected = &GeneralJsonCfg{
+		Opts: &GeneralOptsJson{},
+	}
 
 	rcv = diffGeneralJsonCfg(d, v1, v2)
 	if !reflect.DeepEqual(rcv, expected) {
@@ -381,6 +421,7 @@ func TestGeneralCfgCloneSection(t *testing.T) {
 		RSRSep:           "",
 		DefaultCaching:   utils.MetaClear,
 		FailedPostsTTL:   5,
+		Opts:             &GeneralOpts{},
 	}
 
 	exp := &GeneralCfg{
@@ -406,6 +447,7 @@ func TestGeneralCfgCloneSection(t *testing.T) {
 		RSRSep:           "",
 		DefaultCaching:   utils.MetaClear,
 		FailedPostsTTL:   5,
+		Opts:             &GeneralOpts{},
 	}
 
 	rcv := gnrCfg.CloneSection()
