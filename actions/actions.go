@@ -231,6 +231,13 @@ func (aS *ActionS) scheduledActions(ctx *context.Context, tnt string, cgrEv *uti
 				trgTyp := actionTarget(aCfg.Type)
 				trgActs[trgTyp] = append(trgActs[trgTyp], act)
 			}
+			var blocker bool
+			if blocker, err = engine.BlockerFromDynamics(ctx, aCfg.Blockers, aS.fltrS, tnt, evNm); err != nil {
+				return
+			}
+			if blocker {
+				break
+			}
 		}
 		if partExec {
 			continue // skip this profile from processing further
