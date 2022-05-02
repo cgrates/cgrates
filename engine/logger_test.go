@@ -41,7 +41,7 @@ func TestLoggerNewLoggerExport(t *testing.T) {
 		nodeID:   "123",
 		tenant:   "cgrates.org",
 	}
-	if rcv, err := NewLogger(utils.MetaExportLog, "cgrates.org", "123", 7, cM, []string{eesConn}); err != nil {
+	if rcv, err := NewLogger(utils.MetaEEs, "cgrates.org", "123", 7, cM, []string{eesConn}); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcv.(*ExportLogger), exp) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", exp, rcv)

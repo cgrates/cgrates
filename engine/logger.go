@@ -29,7 +29,7 @@ import (
 func NewLogger(loggerType, tenant, nodeID string, level int, connMgr *ConnManager,
 	eesConns []string) (utils.LoggerInterface, error) {
 	switch loggerType {
-	case utils.MetaExportLog:
+	case utils.MetaEEs:
 		return NewExportLogger(nodeID, tenant, level, connMgr, eesConns), nil
 	default:
 		return utils.NewLogger(loggerType, nodeID, level)
