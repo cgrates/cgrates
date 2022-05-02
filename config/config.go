@@ -96,9 +96,14 @@ func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 	cfg = &CGRConfig{
 		DataFolderPath: "/usr/share/cgrates/",
 
-		rpcConns:   make(RPCConns),
-		templates:  make(FCTemplates),
-		generalCfg: &GeneralCfg{NodeID: utils.UUIDSha1Prefix()},
+		rpcConns:  make(RPCConns),
+		templates: make(FCTemplates),
+		generalCfg: &GeneralCfg{
+			NodeID: utils.UUIDSha1Prefix(),
+			Opts: &GeneralOpts{
+				ExporterIDs: []*utils.DynamicStringSliceOpt{},
+			},
+		},
 		dataDbCfg: &DataDbCfg{
 			Items: make(map[string]*ItemOpts),
 			Opts:  &DataDBOpts{},

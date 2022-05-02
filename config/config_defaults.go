@@ -58,6 +58,15 @@ const CGRATES_CFG_JSON = `
 	"decimal_min_scale": 0,									// the minimum scale for decimal numbers
 	"decimal_precision": 0,									// the precision of the decimal operations
 	"decimal_rounding_mode": "*toNearestEven",				// the rounding mode <*toNearestEven|*toNearestAway|*toZero|*awayFromZero|*toNegativeInf|*toPositiveInf|*toNearestTowardZero>
+	"opts":{												//
+		"*exporterIDs": [					
+			// {
+			// 	"Tenant": "*any",
+			// 	"FilterIDs": [],
+			// 	"Value": [],
+			// },
+		],
+	},	
 },
 
 
