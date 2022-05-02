@@ -375,6 +375,13 @@ func (rpS *RouteS) sortedRoutesForProfile(ctx *context.Context, tnt string, rPrf
 				Weight:         weight,
 			}
 		}
+		var blocker bool
+		if blocker, err = BlockerFromDynamics(ctx, route.Blockers, rpS.fltrS, tnt, nM); err != nil {
+			return
+		}
+		if blocker {
+			break
+		}
 	}
 
 	if sortedRoutes, err = rpS.sorter.SortRoutes(ctx, rPrfl.ID, rPrfl.Sorting,

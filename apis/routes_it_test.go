@@ -54,11 +54,16 @@ var (
 		testRouteSSetRoute3,
 		testFilterSGetRoutes,
 		testFilterSGetRoutesWithPrefix,
-		testRouteSRemoveRouteProfiles,
 
-		// Blocker behaviour test
+		// RouteProfile blocker behaviour test
+		testRouteSRemoveRouteProfiles,
 		testRouteSSetRouteProfiles,
 		testRouteSGetRouteProfilesForEvent,
+
+		// Route blocker behaviour test
+		testRouteSSetRouteProfile,
+		testRouteSGetRoutes,
+
 		testRouteSKillEngine,
 	}
 )
@@ -510,7 +515,7 @@ func testRouteSSetRouteProfiles(t *testing.T) {
 			RouteProfile: &engine.RouteProfile{
 				ID:        "ROUTE_TEST_1",
 				Tenant:    "cgrates.org",
-				FilterIDs: []string{"*string:~*req.TestCase:BlockerBehaviour"},
+				FilterIDs: []string{"*string:~*req.TestCase:RouteProfileBlockerBehaviour"},
 				Weights: utils.DynamicWeights{
 					{
 						Weight: 30,
@@ -534,7 +539,7 @@ func testRouteSSetRouteProfiles(t *testing.T) {
 			RouteProfile: &engine.RouteProfile{
 				ID:        "ROUTE_TEST_2",
 				Tenant:    "cgrates.org",
-				FilterIDs: []string{"*string:~*req.TestCase:BlockerBehaviour"},
+				FilterIDs: []string{"*string:~*req.TestCase:RouteProfileBlockerBehaviour"},
 				Weights: utils.DynamicWeights{
 					{
 						Weight: 10,
@@ -558,7 +563,7 @@ func testRouteSSetRouteProfiles(t *testing.T) {
 			RouteProfile: &engine.RouteProfile{
 				ID:        "ROUTE_TEST_3",
 				Tenant:    "cgrates.org",
-				FilterIDs: []string{"*string:~*req.TestCase:BlockerBehaviour"},
+				FilterIDs: []string{"*string:~*req.TestCase:RouteProfileBlockerBehaviour"},
 				Weights: utils.DynamicWeights{
 					{
 						Weight: 20,
@@ -577,7 +582,7 @@ func testRouteSSetRouteProfiles(t *testing.T) {
 			RouteProfile: &engine.RouteProfile{
 				ID:        "ROUTE_TEST_4",
 				Tenant:    "cgrates.org",
-				FilterIDs: []string{"*string:~*req.TestCase:BlockerBehaviour"},
+				FilterIDs: []string{"*string:~*req.TestCase:RouteProfileBlockerBehaviour"},
 				Weights: utils.DynamicWeights{
 					{
 						Weight: 5,
@@ -610,7 +615,7 @@ func testRouteSGetRouteProfilesForEvent(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "EventGetRouteProfiles",
 		Event: map[string]interface{}{
-			"TestCase": "BlockerBehaviour",
+			"TestCase": "RouteProfileBlockerBehaviour",
 		},
 		APIOpts: map[string]interface{}{},
 	}
@@ -618,7 +623,7 @@ func testRouteSGetRouteProfilesForEvent(t *testing.T) {
 		{
 			ID:        "ROUTE_TEST_1",
 			Tenant:    "cgrates.org",
-			FilterIDs: []string{"*string:~*req.TestCase:BlockerBehaviour"},
+			FilterIDs: []string{"*string:~*req.TestCase:RouteProfileBlockerBehaviour"},
 			Weights: utils.DynamicWeights{
 				{
 					Weight: 30,
@@ -640,7 +645,7 @@ func testRouteSGetRouteProfilesForEvent(t *testing.T) {
 		{
 			ID:        "ROUTE_TEST_3",
 			Tenant:    "cgrates.org",
-			FilterIDs: []string{"*string:~*req.TestCase:BlockerBehaviour"},
+			FilterIDs: []string{"*string:~*req.TestCase:RouteProfileBlockerBehaviour"},
 			Weights: utils.DynamicWeights{
 				{
 					Weight: 20,
@@ -657,7 +662,7 @@ func testRouteSGetRouteProfilesForEvent(t *testing.T) {
 		{
 			ID:        "ROUTE_TEST_2",
 			Tenant:    "cgrates.org",
-			FilterIDs: []string{"*string:~*req.TestCase:BlockerBehaviour"},
+			FilterIDs: []string{"*string:~*req.TestCase:RouteProfileBlockerBehaviour"},
 			Weights: utils.DynamicWeights{
 				{
 					Weight: 10,
@@ -679,6 +684,115 @@ func testRouteSGetRouteProfilesForEvent(t *testing.T) {
 	}
 	var reply []*engine.RouteProfile
 	if err := roRPC.Call(context.Background(), utils.RouteSv1GetRouteProfilesForEvent, args, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(reply, expected) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ToJSON(expected), utils.ToJSON(reply))
+	}
+}
+
+func testRouteSSetRouteProfile(t *testing.T) {
+	routeProfile := &engine.RouteProfileWithAPIOpts{
+		RouteProfile: &engine.RouteProfile{
+			ID:        "ROUTE_BLOCKER_TEST",
+			Tenant:    "cgrates.org",
+			FilterIDs: []string{"*string:~*req.TestCase:RouteBlockerBehaviour"},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 30,
+				},
+			},
+			Blockers: utils.Blockers{
+				{
+					Blocker: false,
+				},
+			},
+			Sorting:           utils.MetaWeight,
+			SortingParameters: []string{},
+			Routes: []*engine.Route{
+				{
+					ID: "route1",
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 10,
+						},
+					},
+				},
+				{
+					ID: "route2",
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 20,
+						},
+					},
+					Blockers: utils.Blockers{
+						{
+							Blocker: true,
+						},
+					},
+				},
+				{
+					ID: "route3",
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 40,
+						},
+					},
+				},
+				{
+					ID: "route4",
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 35,
+						},
+					},
+				},
+			},
+		},
+	}
+
+	var reply string
+	if err := roRPC.Call(context.Background(), utils.AdminSv1SetRouteProfile,
+		routeProfile, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error(err)
+	}
+}
+
+func testRouteSGetRoutes(t *testing.T) {
+	args := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "EventGetRoutes",
+		Event: map[string]interface{}{
+			"TestCase": "RouteBlockerBehaviour",
+		},
+		APIOpts: map[string]interface{}{},
+	}
+	expected := engine.SortedRoutesList{
+		{
+			ProfileID: "ROUTE_BLOCKER_TEST",
+			Sorting:   utils.MetaWeight,
+			Routes: []*engine.SortedRoute{
+				{
+					RouteID:         "route2",
+					RouteParameters: utils.EmptyString,
+					SortingData: map[string]interface{}{
+						utils.Weight: 20.,
+					},
+				},
+				{
+					RouteID:         "route1",
+					RouteParameters: utils.EmptyString,
+					SortingData: map[string]interface{}{
+						utils.Weight: 10.,
+					},
+				},
+			},
+		},
+	}
+
+	var reply engine.SortedRoutesList
+	if err := roRPC.Call(context.Background(), utils.RouteSv1GetRoutes, args, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ToJSON(expected), utils.ToJSON(reply))
