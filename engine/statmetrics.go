@@ -68,6 +68,8 @@ type StatMetric interface {
 	GetCompressFactor(events map[string]uint64) map[string]uint64
 	Clone() StatMetric
 	GetFilterIDs() []string
+	SetBlocker(bool)
+	GetBlocker() bool
 }
 
 func NewASR(minItems uint64, _ string, filterIDs []string) StatMetric {
@@ -341,9 +343,14 @@ type StatDDC struct {
 	MinItems    uint64
 	Count       uint64
 	FilterIDs   []string
+	Blocker     bool
 }
 
 func (ddc *StatDDC) GetFilterIDs() []string { return ddc.FilterIDs }
+
+func (sum *StatDDC) SetBlocker(val bool) { sum.Blocker = val }
+
+func (ddc *StatDDC) GetBlocker() bool { return ddc.Blocker }
 
 func (ddc *StatDDC) GetStringValue(rounding int) (valStr string) {
 	valStr = utils.NotAvailable
@@ -492,9 +499,14 @@ type Metric struct {
 	Events    map[string]*DecimalWithCompress // map[EventTenantID]Cost
 	MinItems  uint64
 	FilterIDs []string
+	Blocker   bool
 }
 
 func (sum *Metric) GetFilterIDs() []string { return sum.FilterIDs }
+
+func (sum *Metric) SetBlocker(val bool) { sum.Blocker = val }
+
+func (sum *Metric) GetBlocker() bool { return sum.Blocker }
 
 func (sum *Metric) getTotalValue() *utils.Decimal {
 	if len(sum.Events) == 0 || sum.Count < sum.MinItems {
@@ -714,9 +726,14 @@ type StatDistinct struct {
 	FieldName   string
 	Count       uint64
 	FilterIDs   []string
+	Blocker     bool
 }
 
 func (dst *StatDistinct) GetFilterIDs() []string { return dst.FilterIDs }
+
+func (sum *StatDistinct) SetBlocker(val bool) { sum.Blocker = val }
+
+func (dst *StatDistinct) GetBlocker() bool { return dst.Blocker }
 
 func (dst *StatDistinct) GetStringValue(rounding int) (valStr string) {
 	valStr = utils.NotAvailable

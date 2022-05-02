@@ -226,10 +226,11 @@ func (sS *StatS) matchingStatQueuesForEvent(ctx *context.Context, tnt string, st
 			if blocker, err = BlockerFromDynamics(ctx, metric.Blockers, sS.fltrS, tnt, evNm); err != nil {
 				return
 			}
-			// if we have blocker, ignore the rest of the metrics
-			if blocker && idx != len(sqPrfl.Metrics)-1 { // not the last metric
-				sqPrfl.Metrics = sqPrfl.Metrics[:idx+1]
-				break
+			if blocker && idx != len(sqPrfl.Metrics)-1 {
+				for newIdx := idx + 1; newIdx < len(sqPrfl.Metrics); newIdx++ {
+					avoidMetric := sqPrfl.Metrics[newIdx].MetricID
+					sq.SQMetrics[avoidMetric].SetBlocker(true)
+				}
 			}
 		}
 		sq.sqPrfl = sqPrfl

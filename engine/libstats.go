@@ -209,7 +209,7 @@ func statQueueLockKey(tnt, id string) string {
 // if lkID is passed as argument, the lock is considered as executed
 func (sq *StatQueue) lock(lkID string) {
 	if lkID == utils.EmptyString {
-		lkID = guardian.Guardian.GuardIDs("",
+		lkID = guardian.Guardian.GuardIDs(utils.EmptyString,
 			config.CgrConfig().GeneralCfg().LockingTimeout,
 			statQueueLockKey(sq.Tenant, sq.ID))
 	}
@@ -315,6 +315,10 @@ func (sq *StatQueue) addStatEvent(ctx *context.Context, tnt, evID string, filter
 			evNm); err != nil {
 			return
 		} else if !pass {
+			continue
+		}
+		if metric.GetBlocker() {
+			metric.SetBlocker(false)
 			continue
 		}
 		if err = metric.AddEvent(evID, dDP); err != nil {
