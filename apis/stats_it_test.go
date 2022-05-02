@@ -51,7 +51,7 @@ var (
 		testStatsInitDataDB,
 		testStatsStartEngine,
 		testStatsRPCConn,
-		testStatsGetStatQueueBeforeSet,
+		/* 	testStatsGetStatQueueBeforeSet,
 		testStatsGetStatQueueProfilesBeforeSet,
 		testStatsSetStatQueueProfiles,
 		testStatsGetStatQueueAfterSet,
@@ -61,10 +61,12 @@ var (
 		testStatsGetStatQueueProfilesWithPrefix,
 		testStatsGetStatQueueProfilesCount,
 		testStatsRemoveStatQueueProfiles,
-		testStatsGetStatQueuesAfterRemove,
-		//testStatsProcessEventWithBlockersOnMetrics,
+		testStatsGetStatQueuesAfterRemove, */
+		testStatsProcessEventWithBlockersOnMetrics,
+		testStatsProcessEventWithBlockersOnMetricsSecond,
+		testStatsProcessEventNoBlockers,
 		// check if stats, thresholds and actions subsystems function properly together
-		testStatsStartServer,
+		/* testStatsStartServer,
 		testStatsSetActionProfileBeforeProcessEv,
 		testStatsSetThresholdProfilesBeforeProcessEv,
 		testStatsSetStatQueueProfileBeforeProcessEv,
@@ -72,7 +74,7 @@ var (
 		testStatsGetStatQueuesAfterProcessEv,
 		testStatsGetThresholdAfterProcessEvent,
 		testStatsStopServer,
-		testStatsPing,
+		testStatsPing, */
 		testStatsKillEngine,
 	}
 )
@@ -630,6 +632,7 @@ func testStatsProcessEventWithBlockersOnMetrics(t *testing.T) {
 			QueueLength: 100,
 			TTL:         time.Duration(1 * time.Minute),
 			MinItems:    0,
+			Stored:      true,
 			Metrics: []*engine.MetricWithFilters{
 				{
 					MetricID: utils.MetaTCD,
@@ -699,24 +702,125 @@ func testStatsProcessEventWithBlockersOnMetrics(t *testing.T) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", expected, replyStats)
 	}
 
-	/*
-		expFloat := map[string]float64{
-			utils.MetaACD: 46400000000.,
-			utils.MetaASR: 60.,
-		}
-		var rplyDec map[string]float64
-		if err := sqRPC.Call(context.Background(), utils.StatSv1GetQueueFloatMetrics,
-			&utils.TenantIDWithAPIOpts{
-				TenantID: &utils.TenantID{
-					Tenant: "cgrates.org",
-					ID:     "SQ_WithBlockers",
-				},
-			}, &rplyDec); err != nil {
-			t.Error(err)
-		} else if !reflect.DeepEqual(rplyDec, expFloat) {
-			t.Errorf("Expected %v, received %v", utils.ToJSON(expFloat), utils.ToJSON(rplyDec))
-		}
-	*/
+	expFloat := map[string]float64{
+		utils.MetaPDD: -1.,
+		utils.MetaACD: -1.,
+		utils.MetaDDC: -1.,
+		utils.MetaTCD: float64(30 * time.Second),
+		utils.MetaTCC: 102.1,
+		utils.MetaASR: 100.,
+	}
+	var rplyDec map[string]float64
+	if err := sqRPC.Call(context.Background(), utils.StatSv1GetQueueFloatMetrics,
+		&utils.TenantIDWithAPIOpts{
+			TenantID: &utils.TenantID{
+				Tenant: "cgrates.org",
+				ID:     "SQ_WithBlockers",
+			},
+		}, &rplyDec); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rplyDec, expFloat) {
+		t.Errorf("Expected %v, received %v", utils.ToJSON(expFloat), utils.ToJSON(rplyDec))
+	}
+
+}
+
+func testStatsProcessEventWithBlockersOnMetricsSecond(t *testing.T) {
+	// we will mach the seecond blocker from metrics, so we have to change the CallerID in order to match
+	args := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "SQ_WithBlockers_Event",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+			"StatsMetrics":     "*exists",
+			"CallerID":         "441123455",
+		},
+		APIOpts: map[string]interface{}{
+			utils.MetaUsage:       30 * time.Second,
+			utils.MetaCost:        102.1,
+			utils.MetaDestination: "332214",
+			utils.MetaStartTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			utils.MetaPDD:         5 * time.Second,
+		},
+	}
+	expected := []string{"SQ_WithBlockers"}
+	var replyStats []string
+	if err := sqRPC.Call(context.Background(), utils.StatSv1ProcessEvent,
+		args, &replyStats); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(replyStats, expected) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", expected, replyStats)
+	}
+
+	expFloat := map[string]float64{
+		utils.MetaDDC: -1.,
+		utils.MetaPDD: float64(5 * time.Second),
+		utils.MetaACD: float64(30 * time.Second),
+		utils.MetaTCD: float64(60 * time.Second),
+		utils.MetaTCC: 204.2,
+		utils.MetaASR: 100.,
+	}
+	var rplyDec map[string]float64
+	if err := sqRPC.Call(context.Background(), utils.StatSv1GetQueueFloatMetrics,
+		&utils.TenantIDWithAPIOpts{
+			TenantID: &utils.TenantID{
+				Tenant: "cgrates.org",
+				ID:     "SQ_WithBlockers",
+			},
+		}, &rplyDec); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rplyDec, expFloat) {
+		t.Errorf("Expected %v, received %v", utils.ToJSON(expFloat), utils.ToJSON(rplyDec))
+	}
+}
+
+func testStatsProcessEventNoBlockers(t *testing.T) {
+	// no blockers will be there, so all the metrics will be processed(CallerID changed)
+	args := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "SQ_WithBlockers_Event",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+			"StatsMetrics":     "*exists",
+			"CallerID":         "differentID",
+		},
+		APIOpts: map[string]interface{}{
+			utils.MetaUsage:       30 * time.Second,
+			utils.MetaCost:        102.1,
+			utils.MetaDestination: "332214",
+			utils.MetaStartTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			utils.MetaPDD:         5 * time.Second,
+		},
+	}
+	expected := []string{"SQ_WithBlockers"}
+	var replyStats []string
+	if err := sqRPC.Call(context.Background(), utils.StatSv1ProcessEvent,
+		args, &replyStats); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(replyStats, expected) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", expected, replyStats)
+	}
+
+	expFloat := map[string]float64{
+		utils.MetaDDC: 1.,
+		utils.MetaPDD: float64(5 * time.Second),
+		utils.MetaACD: float64(30 * time.Second),
+		utils.MetaTCD: float64(90 * time.Second),
+		utils.MetaTCC: 306.3,
+		utils.MetaASR: 100.,
+	}
+	var rplyDec map[string]float64
+	if err := sqRPC.Call(context.Background(), utils.StatSv1GetQueueFloatMetrics,
+		&utils.TenantIDWithAPIOpts{
+			TenantID: &utils.TenantID{
+				Tenant: "cgrates.org",
+				ID:     "SQ_WithBlockers",
+			},
+		}, &rplyDec); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rplyDec, expFloat) {
+		t.Errorf("Expected %v, received %v", utils.ToJSON(expFloat), utils.ToJSON(rplyDec))
+	}
 }
 
 func testStatsStartServer(t *testing.T) {
