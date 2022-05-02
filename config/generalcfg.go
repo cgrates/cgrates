@@ -27,6 +27,10 @@ import (
 	"github.com/ericlagergren/decimal"
 )
 
+type GeneralOpts struct {
+	ExporterIDs []*utils.DynamicStringSliceOpt
+}
+
 // GeneralCfg is the general config section
 type GeneralCfg struct {
 	NodeID           string        // Identifier for this engine instance
@@ -57,6 +61,7 @@ type GeneralCfg struct {
 	DecimalMinScale     int
 	DecimalPrecision    int
 	DecimalRoundingMode decimal.RoundingMode
+	Opts                *GeneralOpts
 }
 
 // loadGeneralCfg loads the General section of the configuration
@@ -66,6 +71,15 @@ func (gencfg *GeneralCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConf
 		return
 	}
 	return gencfg.loadFromJSONCfg(jsnGeneralCfg)
+}
+
+func (generalOpts *GeneralOpts) loadFromJSONCfg(jsnCfg *GeneralOptsJson) {
+	if jsnCfg == nil {
+		return
+	}
+	if jsnCfg.ExporterIDs != nil {
+		generalOpts.ExporterIDs = append(generalOpts.ExporterIDs, jsnCfg.ExporterIDs...)
+	}
 }
 
 // loadFromJSONCfg loads General config from JsonCfg
@@ -164,11 +178,17 @@ func (gencfg *GeneralCfg) loadFromJSONCfg(jsnGeneralCfg *GeneralJsonCfg) (err er
 	if jsnGeneralCfg.Decimal_rounding_mode != nil {
 		gencfg.DecimalRoundingMode, err = utils.NewRoundingMode(*jsnGeneralCfg.Decimal_rounding_mode)
 	}
+	if jsnGeneralCfg.Opts != nil {
+		gencfg.Opts.loadFromJSONCfg(jsnGeneralCfg.Opts)
+	}
 	return
 }
 
 // AsMapInterface returns the config as a map[string]interface{}
 func (gencfg GeneralCfg) AsMapInterface(string) interface{} {
+	opts := map[string]interface{}{
+		utils.MetaExporterIDs: gencfg.Opts.ExporterIDs,
+	}
 	mp := map[string]interface{}{
 		utils.NodeIDCfg:              gencfg.NodeID,
 		utils.LoggerCfg:              gencfg.Logger,
@@ -197,6 +217,7 @@ func (gencfg GeneralCfg) AsMapInterface(string) interface{} {
 		utils.DecimalMinScaleCfg:     gencfg.DecimalMinScale,
 		utils.DecimalPrecisionCfg:    gencfg.DecimalPrecision,
 		utils.DecimalRoundingModeCfg: utils.RoundingModeToString(gencfg.DecimalRoundingMode),
+		utils.OptsCfg:                opts,
 	}
 
 	if gencfg.LockingTimeout != 0 {
@@ -220,6 +241,16 @@ func (gencfg GeneralCfg) AsMapInterface(string) interface{} {
 
 func (GeneralCfg) SName() string                { return GeneralJSON }
 func (gencfg GeneralCfg) CloneSection() Section { return gencfg.Clone() }
+
+func (generalOpts *GeneralOpts) Clone() *GeneralOpts {
+	var thIDs []*utils.DynamicStringSliceOpt
+	if generalOpts.ExporterIDs != nil {
+		thIDs = utils.CloneDynamicStringSliceOpt(generalOpts.ExporterIDs)
+	}
+	return &GeneralOpts{
+		ExporterIDs: thIDs,
+	}
+}
 
 // Clone returns a deep copy of GeneralCfg
 func (gencfg GeneralCfg) Clone() *GeneralCfg {
@@ -251,7 +282,12 @@ func (gencfg GeneralCfg) Clone() *GeneralCfg {
 		DecimalMinScale:     gencfg.DecimalMinScale,
 		DecimalPrecision:    gencfg.DecimalPrecision,
 		DecimalRoundingMode: gencfg.DecimalRoundingMode,
+		Opts:                gencfg.Opts.Clone(),
 	}
+}
+
+type GeneralOptsJson struct {
+	ExporterIDs []*utils.DynamicStringSliceOpt `json:"*exporterIDs"`
 }
 
 // General config section
@@ -284,6 +320,17 @@ type GeneralJsonCfg struct {
 	Decimal_min_scale     *int
 	Decimal_precision     *int
 	Decimal_rounding_mode *string
+	Opts                  *GeneralOptsJson
+}
+
+func diffGeneralOptsJsonCfg(d *GeneralOptsJson, v1, v2 *GeneralOpts) *GeneralOptsJson {
+	if d == nil {
+		d = new(GeneralOptsJson)
+	}
+	if !utils.DynamicStringSliceOptEqual(v1.ExporterIDs, v2.ExporterIDs) {
+		d.ExporterIDs = v2.ExporterIDs
+	}
+	return d
 }
 
 func diffGeneralJsonCfg(d *GeneralJsonCfg, v1, v2 *GeneralCfg) *GeneralJsonCfg {
@@ -372,5 +419,6 @@ func diffGeneralJsonCfg(d *GeneralJsonCfg, v1, v2 *GeneralCfg) *GeneralJsonCfg {
 	if v1.DecimalRoundingMode != v2.DecimalRoundingMode {
 		d.Decimal_rounding_mode = utils.StringPointer(v2.DecimalRoundingMode.String())
 	}
+	d.Opts = diffGeneralOptsJsonCfg(d.Opts, v1.Opts, v2.Opts)
 	return d
 }
