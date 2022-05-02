@@ -46,6 +46,7 @@ func TestConfigV1SetConfigWithDB(t *testing.T) {
 	exp := &GeneralJsonCfg{
 		Node_id:         utils.StringPointer("Test"),
 		Default_caching: utils.StringPointer(utils.MetaClear),
+		Opts:            &GeneralOptsJson{},
 	}
 	rpl := new(GeneralJsonCfg)
 	if err := db.GetSection(context.Background(), GeneralJSON, rpl); err != nil {
@@ -78,6 +79,7 @@ func TestConfigV1StoreCfgInDB(t *testing.T) {
 	exp := &GeneralJsonCfg{
 		Node_id:         utils.StringPointer("Test"),
 		Default_caching: utils.StringPointer(utils.MetaClear),
+		Opts:            &GeneralOptsJson{},
 	}
 	rpl := new(GeneralJsonCfg)
 	if err := db.GetSection(context.Background(), GeneralJSON, rpl); err != nil {
@@ -159,6 +161,7 @@ func TestConfigV1SetConfigFromJSONWithDB(t *testing.T) {
 	exp := &GeneralJsonCfg{
 		Node_id:         utils.StringPointer("Test"),
 		Default_caching: utils.StringPointer(utils.MetaClear),
+		Opts:            &GeneralOptsJson{},
 	}
 	rpl := new(GeneralJsonCfg)
 	if err := db.GetSection(context.Background(), GeneralJSON, rpl); err != nil {
@@ -235,6 +238,9 @@ func TestConfigLoadFromDB(t *testing.T) {
 		MaxParallelConns: 100,
 		RSRSep:           ";",
 		FailedPostsTTL:   5 * time.Second,
+		Opts: &GeneralOpts{
+			ExporterIDs: []*utils.DynamicStringSliceOpt{},
+		},
 	}
 	if !reflect.DeepEqual(expGeneral, cfg.GeneralCfg()) {
 		t.Errorf("Expected: %s ,received: %s", utils.ToJSON(expGeneral), utils.ToJSON(cfg.GeneralCfg()))
@@ -249,6 +255,7 @@ func TestConfigLoadFromDB(t *testing.T) {
 	exp := &GeneralJsonCfg{
 		Node_id:         utils.StringPointer("Test2"),
 		Default_caching: utils.StringPointer(utils.MetaClear),
+		Opts:            &GeneralOptsJson{},
 	}
 	rpl := new(GeneralJsonCfg)
 	if err := db.GetSection(context.Background(), GeneralJSON, rpl); err != nil {

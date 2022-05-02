@@ -58,6 +58,9 @@ func TestDfGeneralJsonCfg(t *testing.T) {
 		Decimal_min_scale:     utils.IntPointer(0),
 		Decimal_precision:     utils.IntPointer(0),
 		Decimal_rounding_mode: utils.StringPointer("*toNearestEven"),
+		Opts: &GeneralOptsJson{
+			ExporterIDs: []*utils.DynamicStringSliceOpt{},
+		},
 	}
 	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
 	if err != nil {
