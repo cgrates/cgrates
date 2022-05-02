@@ -87,10 +87,15 @@ var (
 		testActionsRemoveActionProfile,
 		testActionsGetActionProfileAfterRemove,
 
-		// blocker behaviour test
+		// ActionProfile blocker behaviour test
 		testActionsRemoveActionProfiles,
 		testActionsSetActionProfiles,
 		testActionsExecuteActions,
+
+		// APAction blocker behaviour test
+		testActionsBlockerSetAccount,
+		testActionsBlockerSetActionProfile,
+		testActionsBlockerExecuteActions,
 
 		testActionsKillEngine,
 	}
@@ -699,7 +704,7 @@ func testActionsSetActionProfiles(t *testing.T) {
 			ActionProfile: &engine.ActionProfile{
 				ID:        "ACTION_TEST_1",
 				Tenant:    "cgrates.org",
-				FilterIDs: []string{"*string:~*req.TestCase:BlockerBehaviour"},
+				FilterIDs: []string{"*string:~*req.TestCase:ActionProfileBlockerBehaviour"},
 				Weights: utils.DynamicWeights{
 					{
 						Weight: 30,
@@ -723,7 +728,7 @@ func testActionsSetActionProfiles(t *testing.T) {
 			ActionProfile: &engine.ActionProfile{
 				ID:        "ACTION_TEST_2",
 				Tenant:    "cgrates.org",
-				FilterIDs: []string{"*string:~*req.TestCase:BlockerBehaviour"},
+				FilterIDs: []string{"*string:~*req.TestCase:ActionProfileBlockerBehaviour"},
 				Weights: utils.DynamicWeights{
 					{
 						Weight: 10,
@@ -742,7 +747,7 @@ func testActionsSetActionProfiles(t *testing.T) {
 			ActionProfile: &engine.ActionProfile{
 				ID:        "ACTION_TEST_3",
 				Tenant:    "cgrates.org",
-				FilterIDs: []string{"*string:~*req.TestCase:BlockerBehaviour"},
+				FilterIDs: []string{"*string:~*req.TestCase:ActionProfileBlockerBehaviour"},
 				Weights: utils.DynamicWeights{
 					{
 						Weight: 20,
@@ -766,7 +771,7 @@ func testActionsSetActionProfiles(t *testing.T) {
 			ActionProfile: &engine.ActionProfile{
 				ID:        "ACTION_TEST_4",
 				Tenant:    "cgrates.org",
-				FilterIDs: []string{"*string:~*req.TestCase:BlockerBehaviour"},
+				FilterIDs: []string{"*string:~*req.TestCase:ActionProfileBlockerBehaviour"},
 				Weights: utils.DynamicWeights{
 					{
 						Weight: 5,
@@ -799,7 +804,7 @@ func testActionsExecuteActions(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "EventExecuteActions",
 		Event: map[string]interface{}{
-			"TestCase": "BlockerBehaviour",
+			"TestCase": "ActionProfileBlockerBehaviour",
 		},
 		APIOpts: map[string]interface{}{},
 	}
@@ -808,5 +813,153 @@ func testActionsExecuteActions(t *testing.T) {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply returned:", reply)
+	}
+}
+
+func testActionsBlockerSetAccount(t *testing.T) {
+	args := &utils.AccountWithAPIOpts{
+		Account: &utils.Account{
+			Tenant: "cgrates.org",
+			ID:     "ACCOUNT_BLOCKER_TEST",
+			Opts:   map[string]interface{}{},
+			Balances: map[string]*utils.Balance{
+				"BALANCE_TEST": {
+					ID:        "BALANCE_TEST",
+					FilterIDs: []string{"*string:~*req.TestCase:ActionBlockerBehaviour"},
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 12,
+						},
+					},
+					Type:  utils.MetaConcrete,
+					Units: utils.NewDecimal(0, 0),
+				},
+			},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				},
+			},
+		},
+		APIOpts: nil,
+	}
+	var reply string
+	if err := actRPC.Call(context.Background(), utils.AdminSv1SetAccount,
+		args, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error(err)
+	}
+}
+
+func testActionsBlockerSetActionProfile(t *testing.T) {
+	actionProfile := &engine.ActionProfileWithAPIOpts{
+		ActionProfile: &engine.ActionProfile{
+			ID:        "ACTION_BLOCKER_TEST",
+			Tenant:    "cgrates.org",
+			FilterIDs: []string{"*string:~*req.TestCase:ActionBlockerBehaviour"},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 30,
+				},
+			},
+			Blockers: utils.Blockers{
+				{
+					Blocker: false,
+				},
+			},
+			Targets: map[string]utils.StringSet{
+				utils.MetaAccounts: {
+					"ACCOUNT_BLOCKER_TEST": struct{}{},
+				},
+			},
+			Actions: []*engine.APAction{
+				{
+					ID:   "action1",
+					Type: utils.MetaAddBalance,
+					Diktats: []*engine.APDiktat{
+						{
+							// Path:  "~*accounts.ACCOUNT_BLOCKER_TEST.Balances[BALANCE_TEST].Units",
+							Path:  "*balance.BALANCE_TEST.Units",
+							Value: "1",
+						},
+					},
+				},
+				{
+					ID:   "action2",
+					Type: utils.MetaAddBalance,
+					Diktats: []*engine.APDiktat{
+						{
+							Path:  "*balance.BALANCE_TEST.Units",
+							Value: "2",
+						},
+					},
+					Blockers: utils.Blockers{
+						{
+							Blocker: true,
+						},
+					},
+				},
+				{
+					ID:   "action3",
+					Type: utils.MetaAddBalance,
+					Diktats: []*engine.APDiktat{
+						{
+							Path:  "*balance.BALANCE_TEST.Units",
+							Value: "3",
+						},
+					},
+				},
+				{
+					ID:   "action4",
+					Type: utils.MetaAddBalance,
+					Diktats: []*engine.APDiktat{
+						{
+							Path:  "*balance.BALANCE_TEST.Units",
+							Value: "4",
+						},
+					},
+				},
+			},
+		},
+	}
+
+	var reply string
+	if err := actRPC.Call(context.Background(), utils.AdminSv1SetActionProfile,
+		actionProfile, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error(err)
+	}
+}
+
+func testActionsBlockerExecuteActions(t *testing.T) {
+	args := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "EventExecuteActions",
+		Event: map[string]interface{}{
+			"TestCase": "ActionBlockerBehaviour",
+		},
+		APIOpts: map[string]interface{}{},
+	}
+	var reply string
+	if err := actRPC.Call(context.Background(), utils.ActionSv1ExecuteActions, args, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned:", reply)
+	}
+
+	argsGet := &utils.TenantIDWithAPIOpts{
+		TenantID: &utils.TenantID{
+			Tenant: "cgrates.org",
+			ID:     "ACCOUNT_BLOCKER_TEST",
+		},
+	}
+
+	var replyAcc utils.Account
+	if err := actRPC.Call(context.Background(), utils.AdminSv1GetAccount, argsGet, &replyAcc); err != nil {
+		t.Error(err)
+	} else if replyAcc.Balances["BALANCE_TEST"].Units.Compare(utils.NewDecimal(3, 0)) != 0 {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.NewDecimal(3, 0), replyAcc.Balances["BALANCE_TEST"].Units)
 	}
 }
