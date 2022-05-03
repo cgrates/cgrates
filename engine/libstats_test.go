@@ -780,6 +780,14 @@ func (statMetricMock) GetValue() *utils.Decimal {
 	return nil
 }
 
+func (statMetricMock) GetBlocker() bool {
+	return false
+}
+
+func (statMetricMock) SetBlocker(val bool) {
+	return
+}
+
 func (statMetricMock) GetStringValue(int) (val string) {
 	return
 }
