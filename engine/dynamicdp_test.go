@@ -136,8 +136,7 @@ func TestDynamicDPFieldAsInterface(t *testing.T) {
 }
 
 func TestLibphonenumberDPString(t *testing.T) {
-	var pInt int32
-	pInt = 2
+	var pInt int32 = 2
 	LDP := &libphonenumberDP{
 		pNumber: &phonenumbers.PhoneNumber{
 			CountryCode: &pInt,
@@ -152,8 +151,7 @@ func TestLibphonenumberDPString(t *testing.T) {
 }
 
 func TestLibphonenumberDPFieldAsString(t *testing.T) {
-	var pInt int32
-	pInt = 2
+	var pInt int32 = 2
 	LDP := &libphonenumberDP{
 		pNumber: &phonenumbers.PhoneNumber{
 			CountryCode: &pInt,
@@ -192,8 +190,7 @@ func TestLibphonenumberDPFieldAsStringError(t *testing.T) {
 }
 
 func TestLibphonenumberDPFieldAsInterfaceLen0(t *testing.T) {
-	var pInt int32
-	pInt = 2
+	var pInt int32 = 2
 	LDP := &libphonenumberDP{
 		pNumber: &phonenumbers.PhoneNumber{
 			CountryCode: &pInt,

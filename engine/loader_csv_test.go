@@ -591,7 +591,6 @@ func TestLoadActionProfiles(t *testing.T) {
 					Path:  "*balance.TestBalance.Value",
 					Value: "10",
 				}},
-				Blockers: ";false",
 			},
 			{
 				ID:   "SET_BALANCE_TEST_DATA",
@@ -601,7 +600,6 @@ func TestLoadActionProfiles(t *testing.T) {
 					Path:  "*balance.TestDataBalance.Type",
 					Value: "*data",
 				}},
-				Blockers: ";false",
 			},
 			{
 				ID:   "TOPUP_TEST_DATA",
@@ -611,7 +609,6 @@ func TestLoadActionProfiles(t *testing.T) {
 					Path:  "*balance.TestDataBalance.Value",
 					Value: "1024",
 				}},
-				Blockers: ";false",
 			},
 			{
 				ID:   "SET_BALANCE_TEST_VOICE",
@@ -621,7 +618,6 @@ func TestLoadActionProfiles(t *testing.T) {
 					Path:  "*balance.TestVoiceBalance.Type",
 					Value: "*voice",
 				}},
-				Blockers: ";false",
 			},
 			{
 				ID:   "TOPUP_TEST_VOICE",
@@ -634,7 +630,6 @@ func TestLoadActionProfiles(t *testing.T) {
 					Path:  "*balance.TestVoiceBalance2.Value",
 					Value: "15m15s",
 				}},
-				Blockers: ";false",
 			},
 		},
 	}

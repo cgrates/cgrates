@@ -673,7 +673,6 @@ type TPActionTarget struct {
 type TPAPAction struct {
 	ID        string
 	FilterIDs []string
-	Blockers  string
 	TTL       string
 	Type      string
 	Opts      string

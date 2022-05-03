@@ -196,17 +196,17 @@ cgrates.org,1002,,;30,;false,,VoiceBalance,,;10,,*voice,14,fltr3&fltr4;150;fltr5
 
 	// Create and populate ActionProfiles.csv
 	if err := writeFile(utils.ActionsCsv, `
-#Tenant,ID,FilterIDs,Weights,Blockers,Schedule,TargetType,TargetIDs,ActionID,ActionFilterIDs,ActionBlockers,ActionTTL,ActionType,ActionOpts,ActionPath,ActionValue
-cgrates.org,ONE_TIME_ACT,,,,,,,,,,,,,,
-cgrates.org,ONE_TIME_ACT,,;10,;true,*asap,*accounts,1001;1002,,,,,,,,
-cgrates.org,ONE_TIME_ACT,,,,,,,TOPUP,,;false,0s,*add_balance,,,
-cgrates.org,ONE_TIME_ACT,,,,*asap,*accounts,1001;1002,,,,,,,,
-cgrates.org,ONE_TIME_ACT,,,,,,,TOPUP,,,,,,*balance.TestBalance.Value,10
-cgrates.org,ONE_TIME_ACT,,,,,,,SET_BALANCE_TEST_DATA,,;false,0s,*set_balance,,*balance.TestDataBalance.Type,*data
-cgrates.org,ONE_TIME_ACT,,,,,,,TOPUP_TEST_DATA,,;false,0s,*add_balance,,*balance.TestDataBalance.Value,1024
-cgrates.org,ONE_TIME_ACT,,,,,,,SET_BALANCE_TEST_VOICE,,;false,0s,*set_balance,,*balance.TestVoiceBalance.Type,*voice
-cgrates.org,ONE_TIME_ACT,,,,,,,TOPUP_TEST_VOICE,,;false,0s,*add_balance,,*balance.TestVoiceBalance.Value,15m15s
-cgrates.org,ONE_TIME_ACT,,,,,,,TOPUP_TEST_VOICE,,,0s,*add_balance,,*balance.TestVoiceBalance2.Value,15m15s
+#Tenant,ID,FilterIDs,Weights,Blockers,Schedule,TargetType,TargetIDs,ActionID,ActionFilterIDs,ActionTTL,ActionType,ActionOpts,ActionPath,ActionValue
+cgrates.org,ONE_TIME_ACT,,,,,,,,,,,,,
+cgrates.org,ONE_TIME_ACT,,;10,;true,*asap,*accounts,1001;1002,,,,,,,
+cgrates.org,ONE_TIME_ACT,,,,,,,TOPUP,,0s,*add_balance,,,
+cgrates.org,ONE_TIME_ACT,,,,*asap,*accounts,1001;1002,,,,,,,
+cgrates.org,ONE_TIME_ACT,,,,,,,TOPUP,,,,,*balance.TestBalance.Value,10
+cgrates.org,ONE_TIME_ACT,,,,,,,SET_BALANCE_TEST_DATA,,0s,*set_balance,,*balance.TestDataBalance.Type,*data
+cgrates.org,ONE_TIME_ACT,,,,,,,TOPUP_TEST_DATA,,0s,*add_balance,,*balance.TestDataBalance.Value,1024
+cgrates.org,ONE_TIME_ACT,,,,,,,SET_BALANCE_TEST_VOICE,,0s,*set_balance,,*balance.TestVoiceBalance.Type,*voice
+cgrates.org,ONE_TIME_ACT,,,,,,,TOPUP_TEST_VOICE,,0s,*add_balance,,*balance.TestVoiceBalance.Value,15m15s
+cgrates.org,ONE_TIME_ACT,,,,,,,TOPUP_TEST_VOICE,,0s,*add_balance,,*balance.TestVoiceBalance2.Value,15m15s
 `); err != nil {
 		t.Fatal(err)
 	}
@@ -539,11 +539,6 @@ func testLoadersGetActionProfiles(t *testing.T) {
 							Value: "10",
 						},
 					},
-					Blockers: utils.Blockers{
-						{
-							Blocker: false,
-						},
-					},
 				},
 				{
 					ID:   "SET_BALANCE_TEST_DATA",
@@ -554,11 +549,6 @@ func testLoadersGetActionProfiles(t *testing.T) {
 						{
 							Path:  "*balance.TestDataBalance.Type",
 							Value: utils.MetaData,
-						},
-					},
-					Blockers: utils.Blockers{
-						{
-							Blocker: false,
 						},
 					},
 				},
@@ -573,11 +563,6 @@ func testLoadersGetActionProfiles(t *testing.T) {
 							Value: "1024",
 						},
 					},
-					Blockers: utils.Blockers{
-						{
-							Blocker: false,
-						},
-					},
 				},
 				{
 					ID:   "SET_BALANCE_TEST_VOICE",
@@ -588,11 +573,6 @@ func testLoadersGetActionProfiles(t *testing.T) {
 						{
 							Path:  "*balance.TestVoiceBalance.Type",
 							Value: utils.MetaVoice,
-						},
-					},
-					Blockers: utils.Blockers{
-						{
-							Blocker: false,
 						},
 					},
 				},
@@ -609,11 +589,6 @@ func testLoadersGetActionProfiles(t *testing.T) {
 						{
 							Path:  "*balance.TestVoiceBalance2.Value",
 							Value: "15m15s",
-						},
-					},
-					Blockers: utils.Blockers{
-						{
-							Blocker: false,
 						},
 					},
 				},

@@ -45,7 +45,7 @@ func (tpActs TPActions) exportItems(ctx *context.Context, wrtr io.Writer, tnt st
 	csvWriter := csv.NewWriter(wrtr)
 	csvWriter.Comma = utils.CSVSep
 	// before writing the profiles, we must write the headers
-	if err = csvWriter.Write([]string{"#Tenant", "ID", "FilterIDs", "Weights", "Blockers", "Schedule", "TargetType", "TargetIDs", "ActionID", "ActionFilterIDs", "ActionBlockers", "ActionTTL", "ActionType", "ActionOpts", "ActionPath", "ActionValue"}); err != nil {
+	if err = csvWriter.Write([]string{"#Tenant", "ID", "FilterIDs", "Weights", "Blockers", "Schedule", "TargetType", "TargetIDs", "ActionID", "ActionFilterIDs", "ActionTTL", "ActionType", "ActionOpts", "ActionPath", "ActionValue"}); err != nil {
 		return
 	}
 	for _, actsID := range itmIDs {

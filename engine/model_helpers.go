@@ -2061,7 +2061,7 @@ type ActionProfileMdls []*ActionProfileMdl
 func (apm ActionProfileMdls) CSVHeader() (result []string) {
 	return []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs,
 		utils.Weights, utils.BlockersField, utils.Schedule, utils.TargetType, utils.TargetIDs,
-		utils.ActionID, utils.ActionFilterIDs, utils.ActionBlockers, utils.ActionTTL,
+		utils.ActionID, utils.ActionFilterIDs, utils.ActionTTL,
 		utils.ActionType, utils.ActionOpts, utils.ActionPath, utils.ActionValue,
 	}
 }
@@ -2107,11 +2107,10 @@ func (apm ActionProfileMdls) AsTPActionProfile() (result []*utils.TPActionProfil
 			if lacts := len(aPrf.Actions); lacts == 0 ||
 				aPrf.Actions[lacts-1].ID != tp.ActionID {
 				tpAAction = &utils.TPAPAction{
-					ID:       tp.ActionID,
-					Blockers: tp.ActionBlockers,
-					TTL:      tp.ActionTTL,
-					Type:     tp.ActionType,
-					Opts:     tp.ActionOpts,
+					ID:   tp.ActionID,
+					TTL:  tp.ActionTTL,
+					Type: tp.ActionType,
+					Opts: tp.ActionOpts,
 					Diktats: []*utils.TPAPDiktat{{
 						Path:  tp.ActionPath,
 						Value: tp.ActionValue,
@@ -2165,8 +2164,6 @@ func APItoModelTPActionProfile(tPrf *utils.TPActionProfile) (mdls ActionProfileM
 		}
 		mdl.ActionID = action.ID
 		mdl.ActionFilterIDs = strings.Join(action.FilterIDs, utils.InfieldSep)
-
-		mdl.ActionBlockers = action.Blockers
 		mdl.ActionTTL = action.TTL
 		mdl.ActionType = action.Type
 		mdl.ActionOpts = action.Opts
@@ -2227,11 +2224,6 @@ func APItoActionProfile(tpAp *utils.TPActionProfile, timezone string) (ap *Actio
 			Type:      act.Type,
 			Diktats:   actDs,
 		}
-		if act.Blockers != utils.EmptyString {
-			if ap.Actions[i].Blockers, err = utils.NewBlockersFromString(act.Blockers, utils.InfieldSep, utils.ANDSep); err != nil {
-				return
-			}
-		}
 		if ap.Actions[i].TTL, err = utils.ParseDurationWithNanosecs(act.TTL); err != nil {
 			return
 		}
@@ -2284,7 +2276,6 @@ func ActionProfileToAPI(ap *ActionProfile) (tpAp *utils.TPActionProfile) {
 		tpAp.Actions[i] = &utils.TPAPAction{
 			ID:        act.ID,
 			FilterIDs: act.FilterIDs,
-			Blockers:  act.Blockers.String(utils.InfieldSep, utils.ANDSep),
 			TTL:       act.TTL.String(),
 			Type:      act.Type,
 			Diktats:   actDs,

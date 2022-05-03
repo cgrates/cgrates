@@ -67,7 +67,6 @@ func (ap *ActionProfile) GetWeightFromDynamics(ctx *context.Context,
 type APAction struct {
 	ID        string                 // Action ID
 	FilterIDs []string               // Action FilterIDs
-	Blockers  utils.Blockers         // Blocker will stop further actions running in the chain
 	TTL       time.Duration          // Cancel Action if not executed within TTL
 	Type      string                 // Type of Action
 	Opts      map[string]interface{} // Extra options to pass depending on action type
@@ -192,10 +191,6 @@ func (aP *APAction) Set(path []string, val interface{}, newBranch bool) (err err
 			var valA []string
 			valA, err = utils.IfaceAsStringSlice(val)
 			aP.FilterIDs = append(aP.FilterIDs, valA...)
-		case utils.BlockersField:
-			if val != utils.EmptyString {
-				aP.Blockers, err = utils.NewBlockersFromString(utils.IfaceAsString(val), utils.InfieldSep, utils.ANDSep)
-			}
 		case utils.TTL:
 			aP.TTL, err = utils.IfaceAsDuration(val)
 		case utils.Opts:
@@ -273,7 +268,6 @@ func (apAct *APAction) Merge(v2 *APAction) {
 		apAct.Opts[key] = value
 	}
 	apAct.FilterIDs = append(apAct.FilterIDs, v2.FilterIDs...)
-	apAct.Blockers = append(apAct.Blockers, v2.Blockers...)
 	if len(apAct.Diktats) == 1 && apAct.Diktats[0].Path == utils.EmptyString {
 		apAct.Diktats = apAct.Diktats[:0]
 	}
@@ -416,8 +410,6 @@ func (ap *APAction) FieldAsInterface(fldPath []string) (_ interface{}, err error
 				}
 			}
 			return nil, utils.ErrNotFound
-		case utils.BlockersField:
-			return ap.Blockers, nil
 		case utils.ID:
 			return ap.ID, nil
 		case utils.FilterIDs:
