@@ -58,6 +58,9 @@ func (qos *QOSRouteSorter) SortRoutes(ctx *context.Context, prflID string, route
 			},
 			RouteParameters: route.RouteParameters,
 		}
+		if route.blocker {
+			srtRoute.SortingData[utils.Blocker] = true
+		}
 		var metricSupp map[string]*utils.Decimal
 		if metricSupp, err = populatStatsForQOSRoute(ctx, qos.cfg, qos.connMgr, route.StatIDs, ev.Tenant); err != nil { //create metric map for route
 			if extraOpts.ignoreErrors {

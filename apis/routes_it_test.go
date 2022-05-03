@@ -774,17 +774,25 @@ func testRouteSGetRoutes(t *testing.T) {
 			Sorting:   utils.MetaWeight,
 			Routes: []*engine.SortedRoute{
 				{
-					RouteID:         "route2",
+					RouteID:         "route3",
 					RouteParameters: utils.EmptyString,
 					SortingData: map[string]interface{}{
-						utils.Weight: 20.,
+						utils.Weight: 40.,
 					},
 				},
 				{
-					RouteID:         "route1",
+					RouteID:         "route4",
 					RouteParameters: utils.EmptyString,
 					SortingData: map[string]interface{}{
-						utils.Weight: 10.,
+						utils.Weight: 35.,
+					},
+				},
+				{
+					RouteID:         "route2",
+					RouteParameters: utils.EmptyString,
+					SortingData: map[string]interface{}{
+						utils.Weight:  20.,
+						utils.Blocker: true,
 					},
 				},
 			},

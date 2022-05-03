@@ -216,7 +216,6 @@ func (aS *ActionS) scheduledActions(ctx *context.Context, tnt string, cgrEv *uti
 	}
 
 	for _, aPf := range aPfs {
-		ctx := context.Background()
 		trgActs := map[string][]actioner{} // build here the list of actioners based on the trgKey
 		var partExec bool
 		for _, aCfg := range aPf.Actions { // create actioners and attach them to the right target

@@ -369,24 +369,28 @@ func (rpS *RouteS) sortedRoutesForProfile(ctx *context.Context, tnt string, rPrf
 			return
 		}
 		if prev, has := passedRoutes[route.ID]; !has || prev.Weight < weight {
+			var blocker bool
+			if blocker, err = BlockerFromDynamics(ctx, route.Blockers, rpS.fltrS, tnt, nM); err != nil {
+				return
+			}
 			passedRoutes[route.ID] = &RouteWithWeight{
 				Route:          route,
 				lazyCheckRules: lazyCheckRules,
 				Weight:         weight,
+				blocker:        blocker,
 			}
-		}
-		var blocker bool
-		if blocker, err = BlockerFromDynamics(ctx, route.Blockers, rpS.fltrS, tnt, nM); err != nil {
-			return
-		}
-		if blocker {
-			break
 		}
 	}
 
 	if sortedRoutes, err = rpS.sorter.SortRoutes(ctx, rPrfl.ID, rPrfl.Sorting,
 		passedRoutes, ev, extraOpts); err != nil {
 		return nil, err
+	}
+	for i, sortedRoute := range sortedRoutes.Routes {
+		if _, has := sortedRoute.SortingData[utils.Blocker]; has {
+			sortedRoutes.Routes = sortedRoutes.Routes[:i+1]
+			break
+		}
 	}
 	if pag.Offset != nil {
 		if *pag.Offset <= len(sortedRoutes.Routes) {

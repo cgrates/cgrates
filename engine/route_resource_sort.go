@@ -51,6 +51,9 @@ func populateResourcesForRoutes(ctx *context.Context, cfg *config.CGRConfig,
 			},
 			RouteParameters: route.RouteParameters,
 		}
+		if route.blocker {
+			srtRoute.SortingData[utils.Blocker] = true
+		}
 		var tUsage float64
 		for _, resID := range route.ResourceIDs {
 			var res Resource
