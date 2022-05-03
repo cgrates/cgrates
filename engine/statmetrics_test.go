@@ -2867,7 +2867,7 @@ func TestASRMarshal(t *testing.T) {
 			utils.MetaStartTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC)}}
 	asr.AddEvent(ev.ID, utils.MapStorage{utils.MetaOpts: ev.APIOpts})
 	var nasr StatASR
-	expected := []byte(`{"Value":1,"Count":1,"Events":{"EVENT_1":{"Stat":1,"CompressFactor":1}},"MinItems":2,"FilterIDs":["*string:Account:1001"],"Blocker":false}`)
+	expected := []byte(`{"Value":1,"Count":1,"Events":{"EVENT_1":{"Stat":1,"CompressFactor":1}},"MinItems":2,"FilterIDs":["*string:Account:1001"]}`)
 	if b, err := jMarshaler.Marshal(asr); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, b) {
@@ -2887,7 +2887,7 @@ func TestACDMarshal(t *testing.T) {
 			utils.MetaUsage:     10 * time.Second}}
 	acd.AddEvent(ev.ID, utils.MapStorage{utils.MetaOpts: ev.APIOpts})
 	var nacd StatACD
-	expected := []byte(`{"Value":10000000000,"Count":1,"Events":{"EVENT_1":{"Stat":10000000000,"CompressFactor":1}},"MinItems":2,"FilterIDs":null,"Blocker":false}`)
+	expected := []byte(`{"Value":10000000000,"Count":1,"Events":{"EVENT_1":{"Stat":10000000000,"CompressFactor":1}},"MinItems":2,"FilterIDs":null}`)
 	if b, err := jMarshaler.Marshal(acd); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, b) {
@@ -2907,7 +2907,7 @@ func TestTCDMarshal(t *testing.T) {
 			utils.MetaUsage:     10 * time.Second}}
 	tcd.AddEvent(ev.ID, utils.MapStorage{utils.MetaOpts: ev.APIOpts})
 	var ntcd StatTCD
-	expected := []byte(`{"Value":10000000000,"Count":1,"Events":{"EVENT_1":{"Stat":10000000000,"CompressFactor":1}},"MinItems":2,"FilterIDs":null,"Blocker":false}`)
+	expected := []byte(`{"Value":10000000000,"Count":1,"Events":{"EVENT_1":{"Stat":10000000000,"CompressFactor":1}},"MinItems":2,"FilterIDs":null}`)
 	if b, err := jMarshaler.Marshal(tcd); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, b) {
@@ -2927,7 +2927,7 @@ func TestACCMarshal(t *testing.T) {
 			utils.MetaCost:      "12.3"}}
 	acc.AddEvent(ev.ID, utils.MapStorage{utils.MetaOpts: ev.APIOpts})
 	var nacc StatACC
-	expected := []byte(`{"Value":12.3,"Count":1,"Events":{"EVENT_1":{"Stat":12.3,"CompressFactor":1}},"MinItems":2,"FilterIDs":null,"Blocker":false}`)
+	expected := []byte(`{"Value":12.3,"Count":1,"Events":{"EVENT_1":{"Stat":12.3,"CompressFactor":1}},"MinItems":2,"FilterIDs":null}`)
 	if b, err := jMarshaler.Marshal(acc); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, b) {
@@ -2947,7 +2947,7 @@ func TestTCCMarshal(t *testing.T) {
 			utils.MetaCost:      "12.3"}}
 	tcc.AddEvent(ev.ID, utils.MapStorage{utils.MetaOpts: ev.APIOpts})
 	var ntcc StatTCC
-	expected := []byte(`{"Value":12.3,"Count":1,"Events":{"EVENT_1":{"Stat":12.3,"CompressFactor":1}},"MinItems":2,"FilterIDs":null,"Blocker":false}`)
+	expected := []byte(`{"Value":12.3,"Count":1,"Events":{"EVENT_1":{"Stat":12.3,"CompressFactor":1}},"MinItems":2,"FilterIDs":null}`)
 	if b, err := jMarshaler.Marshal(tcc); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, b) {
@@ -2968,7 +2968,7 @@ func TestPDDMarshal(t *testing.T) {
 			utils.MetaUsage:     10 * time.Second}}
 	pdd.AddEvent(ev.ID, utils.MapStorage{utils.MetaOpts: ev.APIOpts})
 	var ntdd StatPDD
-	expected := []byte(`{"Value":5000000000,"Count":1,"Events":{"EVENT_1":{"Stat":5000000000,"CompressFactor":1}},"MinItems":2,"FilterIDs":null,"Blocker":false}`)
+	expected := []byte(`{"Value":5000000000,"Count":1,"Events":{"EVENT_1":{"Stat":5000000000,"CompressFactor":1}},"MinItems":2,"FilterIDs":null}`)
 	if b, err := jMarshaler.Marshal(pdd); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, b) {
@@ -2990,7 +2990,7 @@ func TestDCCMarshal(t *testing.T) {
 			utils.MetaUsage:       10 * time.Second}}
 	ddc.AddEvent(ev.ID, utils.MapStorage{utils.MetaOpts: ev.APIOpts})
 	var nddc StatDDC
-	expected := []byte(`{"FieldValues":{"1002":{"EVENT_1":{}}},"Events":{"EVENT_1":{"1002":1}},"MinItems":2,"Count":1,"FilterIDs":null,"Blocker":false}`)
+	expected := []byte(`{"FieldValues":{"1002":{"EVENT_1":{}}},"Events":{"EVENT_1":{"1002":1}},"MinItems":2,"Count":1,"FilterIDs":null}`)
 	if b, err := jMarshaler.Marshal(ddc); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, b) {
@@ -3013,7 +3013,7 @@ func TestStatSumMarshal(t *testing.T) {
 			utils.MetaUsage:       10 * time.Second}}
 	statSum.AddEvent(ev.ID, utils.MapStorage{utils.MetaOpts: ev.APIOpts})
 	var nstatSum StatSum
-	expected := []byte(`{"Value":20,"Count":1,"Events":{"EVENT_1":{"Stat":20,"CompressFactor":1}},"MinItems":2,"FilterIDs":null,"Blocker":false,"FieldName":"~*opts.*cost"}`)
+	expected := []byte(`{"Value":20,"Count":1,"Events":{"EVENT_1":{"Stat":20,"CompressFactor":1}},"MinItems":2,"FilterIDs":null,"FieldName":"~*opts.*cost"}`)
 	if b, err := jMarshaler.Marshal(statSum); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, b) {
@@ -3036,7 +3036,7 @@ func TestStatAverageMarshal(t *testing.T) {
 			utils.MetaUsage:       10 * time.Second}}
 	statAvg.AddEvent(ev.ID, utils.MapStorage{utils.MetaOpts: ev.APIOpts})
 	var nstatAvg StatAverage
-	expected := []byte(`{"Value":20,"Count":1,"Events":{"EVENT_1":{"Stat":20,"CompressFactor":1}},"MinItems":2,"FilterIDs":null,"Blocker":false,"FieldName":"~*opts.*cost"}`)
+	expected := []byte(`{"Value":20,"Count":1,"Events":{"EVENT_1":{"Stat":20,"CompressFactor":1}},"MinItems":2,"FilterIDs":null,"FieldName":"~*opts.*cost"}`)
 	if b, err := jMarshaler.Marshal(statAvg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, b) {
@@ -3058,7 +3058,7 @@ func TestStatDistrictMarshal(t *testing.T) {
 			utils.MetaStartTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			utils.MetaUsage:       10 * time.Second}})
 	var nStatDistinct StatDistinct
-	expected := []byte(`{"FieldValues":{"10s":{"EVENT_1":{}}},"Events":{"EVENT_1":{"10s":1}},"MinItems":2,"FieldName":"~*opts.*usage","Count":1,"FilterIDs":null,"Blocker":false}`)
+	expected := []byte(`{"FieldValues":{"10s":{"EVENT_1":{}}},"Events":{"EVENT_1":{"10s":1}},"MinItems":2,"FieldName":"~*opts.*usage","Count":1,"FilterIDs":null}`)
 	if b, err := jMarshaler.Marshal(statDistinct); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, b) {

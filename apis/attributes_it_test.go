@@ -1650,7 +1650,7 @@ func testAttributeSSetNonIndexedTypeFilter(t *testing.T) {
 				utils.Destination:  "44322",
 			},
 			APIOpts: map[string]interface{}{
-				utils.MetaRateS: true,
+				utils.MetaRateS: "true",
 			},
 		},
 	}

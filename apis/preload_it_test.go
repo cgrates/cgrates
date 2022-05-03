@@ -310,6 +310,11 @@ func testPreloadITVerifyActionProfiles(t *testing.T) {
 				TTL:  0,
 				Type: utils.MetaAddBalance,
 				Opts: map[string]interface{}{},
+				Blockers: utils.Blockers{
+					{
+						Blocker: false,
+					},
+				},
 				Diktats: []*engine.APDiktat{
 					{
 						Path:  "*balance.TestBalance.Value",
@@ -322,6 +327,11 @@ func testPreloadITVerifyActionProfiles(t *testing.T) {
 				TTL:  0,
 				Type: utils.MetaSetBalance,
 				Opts: map[string]interface{}{},
+				Blockers: utils.Blockers{
+					{
+						Blocker: false,
+					},
+				},
 				Diktats: []*engine.APDiktat{
 					{
 						Path:  "*balance.TestDataBalance.Type",
@@ -334,6 +344,11 @@ func testPreloadITVerifyActionProfiles(t *testing.T) {
 				TTL:  0,
 				Type: utils.MetaAddBalance,
 				Opts: map[string]interface{}{},
+				Blockers: utils.Blockers{
+					{
+						Blocker: false,
+					},
+				},
 				Diktats: []*engine.APDiktat{
 					{
 						Path:  "*balance.TestDataBalance.Value",
@@ -346,6 +361,11 @@ func testPreloadITVerifyActionProfiles(t *testing.T) {
 				TTL:  0,
 				Type: utils.MetaSetBalance,
 				Opts: map[string]interface{}{},
+				Blockers: utils.Blockers{
+					{
+						Blocker: false,
+					},
+				},
 				Diktats: []*engine.APDiktat{
 					{
 						Path:  "*balance.TestVoiceBalance.Type",
@@ -358,6 +378,11 @@ func testPreloadITVerifyActionProfiles(t *testing.T) {
 				TTL:  0,
 				Type: utils.MetaAddBalance,
 				Opts: map[string]interface{}{},
+				Blockers: utils.Blockers{
+					{
+						Blocker: false,
+					},
+				},
 				Diktats: []*engine.APDiktat{
 					{
 						Path:  "*balance.TestVoiceBalance.Value",

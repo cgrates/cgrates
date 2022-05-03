@@ -99,9 +99,30 @@ var (
 		},
 	}
 	testStatsQ = []*StatQueue{
-		{Tenant: "cgrates.org", ID: "StatQueueProfile1", sqPrfl: testStatsPrfs[0], SQMetrics: make(map[string]StatMetric)},
-		{Tenant: "cgrates.org", ID: "StatQueueProfile2", sqPrfl: testStatsPrfs[1], SQMetrics: make(map[string]StatMetric)},
-		{Tenant: "cgrates.org", ID: "StatQueueProfilePrefix", sqPrfl: testStatsPrfs[2], SQMetrics: make(map[string]StatMetric)},
+		{
+			Tenant: "cgrates.org",
+			ID:     "StatQueueProfile1",
+			sqPrfl: testStatsPrfs[0],
+			SQMetrics: map[string]StatMetric{
+				utils.MetaSum: NewStatSum(1, "~*req.Usage", nil),
+			},
+		},
+		{
+			Tenant: "cgrates.org",
+			ID:     "StatQueueProfile2",
+			sqPrfl: testStatsPrfs[1],
+			SQMetrics: map[string]StatMetric{
+				utils.MetaSum: NewStatSum(1, "~*req.Usage", nil),
+			},
+		},
+		{
+			Tenant: "cgrates.org",
+			ID:     "StatQueueProfilePrefix",
+			sqPrfl: testStatsPrfs[2],
+			SQMetrics: map[string]StatMetric{
+				utils.MetaSum: NewStatSum(1, "~*req.Usage", nil),
+			},
+		},
 	}
 	testStatsArgs = []*utils.CGREvent{
 		{
@@ -214,6 +235,11 @@ func prepareStatsData(t *testing.T, dm *DataManager) {
 		dm.SetStatQueueProfile(context.Background(), statQueueProfile, true)
 	}
 	for _, statQueue := range testStatsQ {
+		statSum, err := NewStatMetric("*sum#~*req.Usage", uint64(statQueue.sqPrfl.MinItems), []string{})
+		if err != nil {
+			t.Fatal(err)
+		}
+		statQueue.SQMetrics[utils.MetaSum] = statSum
 		dm.SetStatQueue(context.Background(), statQueue)
 	}
 	//Test each statQueueProfile from cache
@@ -446,7 +472,11 @@ func TestStatQueuesV1ProcessEvent(t *testing.T) {
 		},
 		MinItems: 1,
 	}
-	sq := &StatQueue{Tenant: "cgrates.org", ID: "StatQueueProfile3", sqPrfl: sqPrf, SQMetrics: make(map[string]StatMetric)}
+	statSum, err := NewStatMetric("*sum#~*req.Usage", uint64(sqPrf.MinItems), []string{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	sq := &StatQueue{Tenant: "cgrates.org", ID: "StatQueueProfile3", sqPrfl: sqPrf, SQMetrics: map[string]StatMetric{utils.MetaSum: statSum}}
 	if err := dmSTS.SetStatQueueProfile(context.TODO(), sqPrf, true); err != nil {
 		t.Error(err)
 	}
@@ -1225,6 +1255,10 @@ func TestStatQueueProcessEventOK(t *testing.T) {
 			},
 		},
 	}
+	stat, err := NewStatMetric("*tcd", uint64(sqPrf.MinItems), []string{})
+	if err != nil {
+		t.Fatal(err)
+	}
 	sq := &StatQueue{
 		sqPrfl: sqPrf,
 		Tenant: "cgrates.org",
@@ -1234,7 +1268,9 @@ func TestStatQueueProcessEventOK(t *testing.T) {
 				EventID: "SqProcessEvent",
 			},
 		},
-		SQMetrics: make(map[string]StatMetric),
+		SQMetrics: map[string]StatMetric{
+			utils.MetaTCD: stat,
+		},
 	}
 
 	if err := dm.SetStatQueueProfile(context.Background(), sqPrf, true); err != nil {
@@ -1251,6 +1287,7 @@ func TestStatQueueProcessEventOK(t *testing.T) {
 			utils.AccountField: "1001",
 		},
 		APIOpts: map[string]interface{}{
+			utils.MetaUsage:           "10s",
 			utils.OptsStatsProfileIDs: []string{"SQ1"},
 		},
 	}
