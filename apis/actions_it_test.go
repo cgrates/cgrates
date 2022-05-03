@@ -879,7 +879,6 @@ func testActionsBlockerSetActionProfile(t *testing.T) {
 					Type: utils.MetaAddBalance,
 					Diktats: []*engine.APDiktat{
 						{
-							// Path:  "~*accounts.ACCOUNT_BLOCKER_TEST.Balances[BALANCE_TEST].Units",
 							Path:  "*balance.BALANCE_TEST.Units",
 							Value: "1",
 						},

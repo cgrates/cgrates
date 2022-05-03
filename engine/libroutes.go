@@ -311,5 +311,6 @@ func routeLazyPass(ctx *context.Context, filters []*FilterRule, ev *utils.CGREve
 type RouteWithWeight struct {
 	*Route
 	Weight         float64
+	blocker        bool
 	lazyCheckRules []*FilterRule
 }

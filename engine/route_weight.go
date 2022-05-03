@@ -51,6 +51,9 @@ func (ws *WeightSorter) SortRoutes(ctx *context.Context, prflID string,
 			},
 			RouteParameters: route.RouteParameters,
 		}
+		if route.blocker {
+			srtRoute.SortingData[utils.Blocker] = true
+		}
 		var pass bool
 		if pass, err = routeLazyPass(ctx, route.lazyCheckRules, ev, srtRoute.SortingData,
 			ws.cfg.FilterSCfg().ResourceSConns,

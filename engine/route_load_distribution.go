@@ -68,6 +68,9 @@ func (ws *LoadDistributionSorter) SortRoutes(ctx *context.Context, prflID string
 			},
 			RouteParameters: route.RouteParameters,
 		}
+		if route.blocker {
+			srtRoute.SortingData[utils.Blocker] = true
+		}
 		var metricSum *utils.Decimal
 		if metricSum, err = populateStatsForLoadRoute(ctx, ws.cfg, ws.connMgr, route.StatIDs, ev.Tenant); err != nil { //create metric map for route
 			if extraOpts.ignoreErrors {

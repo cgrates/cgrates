@@ -51,6 +51,9 @@ func populateCostForRoutes(ctx *context.Context, cfg *config.CGRConfig,
 			},
 			RouteParameters: route.RouteParameters,
 		}
+		if route.blocker {
+			srtRoute.SortingData[utils.Blocker] = true
+		}
 		var cost *utils.Decimal
 		if len(route.AccountIDs) != 0 { // query AccountS for cost
 
