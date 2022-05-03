@@ -51,7 +51,7 @@ var (
 		testStatsInitDataDB,
 		testStatsStartEngine,
 		testStatsRPCConn,
-		/* 	testStatsGetStatQueueBeforeSet,
+		testStatsGetStatQueueBeforeSet,
 		testStatsGetStatQueueProfilesBeforeSet,
 		testStatsSetStatQueueProfiles,
 		testStatsGetStatQueueAfterSet,
@@ -61,12 +61,12 @@ var (
 		testStatsGetStatQueueProfilesWithPrefix,
 		testStatsGetStatQueueProfilesCount,
 		testStatsRemoveStatQueueProfiles,
-		testStatsGetStatQueuesAfterRemove, */
+		testStatsGetStatQueuesAfterRemove,
 		testStatsProcessEventWithBlockersOnMetrics,
 		testStatsProcessEventWithBlockersOnMetricsSecond,
 		testStatsProcessEventNoBlockers,
 		// check if stats, thresholds and actions subsystems function properly together
-		/* testStatsStartServer,
+		testStatsStartServer,
 		testStatsSetActionProfileBeforeProcessEv,
 		testStatsSetThresholdProfilesBeforeProcessEv,
 		testStatsSetStatQueueProfileBeforeProcessEv,
@@ -74,7 +74,7 @@ var (
 		testStatsGetStatQueuesAfterProcessEv,
 		testStatsGetThresholdAfterProcessEvent,
 		testStatsStopServer,
-		testStatsPing, */
+		testStatsPing,
 		testStatsKillEngine,
 	}
 )

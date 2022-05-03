@@ -228,6 +228,13 @@ func TestStatAddStatEvent(t *testing.T) {
 				},
 			},
 		},
+		sqPrfl: &StatQueueProfile{
+			Metrics: []*MetricWithFilters{
+				{
+					MetricID: utils.MetaASR,
+				},
+			},
+		},
 	}
 	asrMetric := sq.SQMetrics[utils.MetaASR].(*StatASR)
 	if asr := asrMetric.GetValue(); asr.Compare(utils.NewDecimalFromFloat64(100)) != 0 {
@@ -780,14 +787,6 @@ func (statMetricMock) GetValue() *utils.Decimal {
 	return nil
 }
 
-func (statMetricMock) GetBlocker() bool {
-	return false
-}
-
-func (statMetricMock) SetBlocker(val bool) {
-	return
-}
-
 func (statMetricMock) GetStringValue(int) (val string) {
 	return
 }
@@ -1092,6 +1091,11 @@ func TestStatQueueProcessEventaddStatEvent(t *testing.T) {
 	sq := &StatQueue{
 		sqPrfl: &StatQueueProfile{
 			QueueLength: 1,
+			Metrics: []*MetricWithFilters{
+				{
+					MetricID: utils.MetaTCD,
+				},
+			},
 		},
 		SQItems: []SQItem{
 			{
@@ -1190,38 +1194,6 @@ func TestStatQueueCompress(t *testing.T) {
 	// }
 }
 
-func TestStatQueueaddStatEventPassErr(t *testing.T) {
-	sq := &StatQueue{
-		SQMetrics: map[string]StatMetric{
-			utils.MetaTCD: statMetricMock("pass error"),
-		},
-	}
-	tnt, evID := "tenant", "eventID"
-	filters := &FilterS{
-		cfg: config.CgrConfig(),
-		dm: &DataManager{
-			dataDB: NewInternalDB(nil, nil, config.CgrConfig().DataDbCfg().Items),
-		},
-		connMgr: &ConnManager{},
-	}
-	evNm := utils.MapStorage{
-		utils.MetaReq: utils.MapStorage{
-			utils.MetaReq: nil,
-		},
-		utils.MetaOpts: nil,
-		utils.MetaVars: utils.MapStorage{
-			utils.OptsAttributesProcessRuns: 0,
-		},
-	}
-
-	experr := "NOT_FOUND:filter1"
-	err := sq.addStatEvent(context.Background(), tnt, evID, filters, evNm)
-
-	if err == nil || err.Error() != experr {
-		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
-	}
-}
-
 func TestStatQueueaddStatEventNoPass(t *testing.T) {
 	sm, err := NewStatMetric(utils.MetaTCD, 0, []string{"*string:~*req.Account:1001"})
 	if err != nil {
@@ -1231,6 +1203,14 @@ func TestStatQueueaddStatEventNoPass(t *testing.T) {
 	sq := &StatQueue{
 		SQMetrics: map[string]StatMetric{
 			utils.MetaTCD: sm,
+		},
+		sqPrfl: &StatQueueProfile{
+			Metrics: []*MetricWithFilters{
+				{
+					FilterIDs: []string{"*string:~*req.Account:1001"},
+					MetricID:  utils.MetaTCD,
+				},
+			},
 		},
 	}
 	sq.lock(utils.EmptyString)
@@ -1262,6 +1242,14 @@ func TestStatQueueaddStatEventNoPass(t *testing.T) {
 				EventID: "eventID",
 			},
 		},
+		sqPrfl: &StatQueueProfile{
+			Metrics: []*MetricWithFilters{
+				{
+					MetricID:  utils.MetaTCD,
+					FilterIDs: []string{"*string:~*req.Account:1001"},
+				},
+			},
+		},
 	}
 	err = sq.addStatEvent(context.Background(), tnt, evID, filters, evNm)
 	sq.unlock()
@@ -1271,7 +1259,7 @@ func TestStatQueueaddStatEventNoPass(t *testing.T) {
 	}
 
 	if !reflect.DeepEqual(sq, exp) {
-		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", exp, sq)
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", exp.sqPrfl, sq.sqPrfl)
 	}
 }
 

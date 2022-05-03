@@ -207,7 +207,7 @@ func (sS *StatS) matchingStatQueuesForEvent(ctx *context.Context, tnt string, st
 			config.CgrConfig().GeneralCfg().LockingTimeout,
 			statQueueLockKey(sqPrfl.Tenant, sqPrfl.ID))
 		var sq *StatQueue
-		if sq, err = sS.dm.GetStatQueue(ctx, sqPrfl.Tenant, sqPrfl.ID, true, true, ""); err != nil {
+		if sq, err = sS.dm.GetStatQueue(ctx, sqPrfl.Tenant, sqPrfl.ID, true, true, utils.EmptyString); err != nil {
 			guardian.Guardian.UnguardIDs(lkID)
 			sqPrfl.unlock()
 			sqs.unlock()
@@ -219,19 +219,6 @@ func (sS *StatS) matchingStatQueuesForEvent(ctx *context.Context, tnt string, st
 		}
 		if sqPrfl.TTL > 0 {
 			sq.ttl = utils.DurationPointer(sqPrfl.TTL)
-		}
-		// every metrics has a blocker, verify them
-		for idx, metric := range sqPrfl.Metrics {
-			var blocker bool
-			if blocker, err = BlockerFromDynamics(ctx, metric.Blockers, sS.fltrS, tnt, evNm); err != nil {
-				return
-			}
-			if blocker && idx != len(sqPrfl.Metrics)-1 {
-				for newIdx := idx + 1; newIdx < len(sqPrfl.Metrics); newIdx++ {
-					avoidMetric := sqPrfl.Metrics[newIdx].MetricID
-					sq.SQMetrics[avoidMetric].SetBlocker(true)
-				}
-			}
 		}
 		sq.sqPrfl = sqPrfl
 		if sq.weight, err = WeightFromDynamics(ctx, sqPrfl.Weights,
@@ -245,6 +232,7 @@ func (sS *StatS) matchingStatQueuesForEvent(ctx *context.Context, tnt string, st
 	}
 	// All good, convert from Map to Slice so we can sort
 	sqs.Sort()
+	// verify the Blockers from the profiles
 	for i, s := range sqs {
 		// get the dynamic blocker from the profile and check if it pass trough its filters
 		var blocker bool

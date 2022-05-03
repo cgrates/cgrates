@@ -310,21 +310,27 @@ func (sq *StatQueue) addStatEvent(ctx *context.Context, tnt, evID string, filter
 	// recreate the request without *opts
 	dDP := newDynamicDP(ctx, config.CgrConfig().FilterSCfg().ResourceSConns, config.CgrConfig().FilterSCfg().StatSConns,
 		config.CgrConfig().FilterSCfg().AccountSConns, tnt, utils.MapStorage{utils.MetaReq: evNm[utils.MetaReq], utils.MetaOpts: evNm[utils.MetaOpts]})
-	for metricID, metric := range sq.SQMetrics {
-		if pass, err = filterS.Pass(ctx, tnt, metric.GetFilterIDs(),
+	for idx, metricCfg := range sq.sqPrfl.Metrics {
+		if pass, err = filterS.Pass(ctx, tnt, metricCfg.FilterIDs,
 			evNm); err != nil {
 			return
 		} else if !pass {
 			continue
 		}
-		if metric.GetBlocker() {
-			metric.SetBlocker(false)
-			continue
-		}
-		if err = metric.AddEvent(evID, dDP); err != nil {
-			utils.Logger.Warning(fmt.Sprintf("<StatQueue> metricID: %s, add eventID: %s, error: %s",
-				metricID, evID, err.Error()))
+		// in case of # metrics type
+		metricSplit := strings.Split(metricCfg.MetricID, utils.HashtagSep)
+		if err = sq.SQMetrics[metricSplit[0]].AddEvent(evID, dDP); err != nil {
+			utils.Logger.Warning(fmt.Sprintf("<StatQueue>: metric: %s, add eventID: %s, error: %s", metricSplit[0],
+				evID, err.Error()))
 			return
+		}
+		// every metric has a blocker, verify them
+		var blocker bool
+		if blocker, err = BlockerFromDynamics(ctx, metricCfg.Blockers, filterS, tnt, evNm); err != nil {
+			return
+		}
+		if blocker && idx != len(sq.sqPrfl.Metrics)-1 {
+			break
 		}
 	}
 	return

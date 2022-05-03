@@ -359,11 +359,7 @@ func testDspSupGetSupplierForEvent(t *testing.T) {
 		Routes: []*engine.Route{
 			{
 				ID:             "route1",
-				FilterIDs:      nil,
-				AccountIDs:     nil,
 				RateProfileIDs: []string{"RP_1002_LOW"},
-				ResourceIDs:    nil,
-				StatIDs:        nil,
 				Weights:        utils.DynamicWeights{{Weight: 10}},
 				Blockers: utils.Blockers{
 					{
@@ -374,11 +370,7 @@ func testDspSupGetSupplierForEvent(t *testing.T) {
 			},
 			{
 				ID:             "route2",
-				FilterIDs:      nil,
-				AccountIDs:     nil,
 				RateProfileIDs: []string{"RP_1002"},
-				ResourceIDs:    nil,
-				StatIDs:        nil,
 				Weights:        utils.DynamicWeights{{Weight: 20}},
 				Blockers: utils.Blockers{
 					{
