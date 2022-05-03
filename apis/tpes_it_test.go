@@ -1165,8 +1165,8 @@ func testTPeSExportTariffPlanHalfTariffPlan(t *testing.T) {
 			{"cgrates.org", "SQ_basic", "", ";10", ";true", "0", "", "3", "true", "*none", "*tcd", "", ""},
 		},
 		utils.ActionsCsv: {
-			{"#Tenant", "ID", "FilterIDs", "Weights", "Blockers", "Schedule", "TargetType", "TargetIDs", "ActionID", "ActionFilterIDs", "ActionBlockers", "ActionTTL", "ActionType", "ActionOpts", "ActionPath", "ActionValue"},
-			{"cgrates.org", "Execute_thd", "", ";20", "", "", "*thresholds", "THD_1", "actID", "", "", "0s", "*reset_threshold", "", "", ""},
+			{"#Tenant", "ID", "FilterIDs", "Weights", "Blockers", "Schedule", "TargetType", "TargetIDs", "ActionID", "ActionFilterIDs", "ActionTTL", "ActionType", "ActionOpts", "ActionPath", "ActionValue"},
+			{"cgrates.org", "Execute_thd", "", ";20", "", "", "*thresholds", "THD_1", "actID", "", "0s", "*reset_threshold", "", "", ""},
 		},
 		utils.ThresholdsCsv: {
 			{"#Tenant", "ID", "FilterIDs", "Weights", "MaxHits", "MinHits", "MinSleep", "Blocker", "ActionProfileIDs", "Async"},
@@ -1303,9 +1303,9 @@ func testTPeSExportTariffPlanAllTariffPlan(t *testing.T) {
 			{"cgrates.org", "SQ_2", "", "", "", "0", "", "0", "false", "", "*tcd", "", ""},
 		},
 		utils.ActionsCsv: {
-			{"#Tenant", "ID", "FilterIDs", "Weights", "Blockers", "Schedule", "TargetType", "TargetIDs", "ActionID", "ActionFilterIDs", "ActionBlockers", "ActionTTL", "ActionType", "ActionOpts", "ActionPath", "ActionValue"},
-			{"cgrates.org", "Execute_thd", "", ";20", "", "", "*thresholds", "THD_1", "actID", "", "", "0s", "*reset_threshold", "", "", ""},
-			{"cgrates.org", "SET_BAL", "*string:~*req.Account:1001", ";10", "", "*asap", "*accounts", "1001", "SET_BAL", "", "", "0s", "*set_balance", "", "MONETARY", "10"},
+			{"#Tenant", "ID", "FilterIDs", "Weights", "Blockers", "Schedule", "TargetType", "TargetIDs", "ActionID", "ActionFilterIDs", "ActionTTL", "ActionType", "ActionOpts", "ActionPath", "ActionValue"},
+			{"cgrates.org", "Execute_thd", "", ";20", "", "", "*thresholds", "THD_1", "actID", "", "0s", "*reset_threshold", "", "", ""},
+			{"cgrates.org", "SET_BAL", "*string:~*req.Account:1001", ";10", "", "*asap", "*accounts", "1001", "SET_BAL", "", "0s", "*set_balance", "", "MONETARY", "10"},
 		},
 		utils.ThresholdsCsv: {
 			{"#Tenant", "ID", "FilterIDs", "Weights", "MaxHits", "MinHits", "MinSleep", "Blocker", "ActionProfileIDs", "Async"},

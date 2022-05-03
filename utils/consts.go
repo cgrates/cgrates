@@ -746,7 +746,6 @@ const (
 	ActionS                 = "ActionS"
 	Schedule                = "Schedule"
 	ActionFilterIDs         = "ActionFilterIDs"
-	ActionBlockers          = "ActionBlockers"
 	ActionTTL               = "ActionTTL"
 	ActionOpts              = "ActionOpts"
 	ActionPath              = "ActionPath"

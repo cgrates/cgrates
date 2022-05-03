@@ -338,12 +338,11 @@ type ActionProfileMdl struct {
 	TargetIDs       string `index:"7" re:""`
 	ActionID        string `index:"8" re:""`
 	ActionFilterIDs string `index:"9" re:""`
-	ActionBlockers  string `index:"10" re:""`
-	ActionTTL       string `index:"11" re:""`
-	ActionType      string `index:"12" re:""`
-	ActionOpts      string `index:"13" re:""`
-	ActionPath      string `index:"14" re:""`
-	ActionValue     string `index:"15" re:""`
+	ActionTTL       string `index:"10" re:""`
+	ActionType      string `index:"11" re:""`
+	ActionOpts      string `index:"12" re:""`
+	ActionPath      string `index:"13" re:""`
+	ActionValue     string `index:"14" re:""`
 
 	CreatedAt time.Time
 }
