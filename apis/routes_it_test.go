@@ -47,13 +47,20 @@ var (
 
 		testRouteSStartEngine,
 		testRouteSRPCConn,
-		testRouteSGetRouteProfileBeforeSet,
-		testRouteSGetRouteProfilesBeforeSet,
-		testRouteSSetRoute,
-		testRouteSSetRoute2,
-		testRouteSSetRoute3,
-		testFilterSGetRoutes,
-		testFilterSGetRoutesWithPrefix,
+		testRoutesGetRouteProfileBeforeSet,
+		testRoutesGetRouteProfileIDsBeforeSet,
+		testRoutesGetRouteProfileCountBeforeSet,
+		testRoutesGetRouteProfilesBeforeSet,
+		testRoutesSetRouteProfiles,
+		testRoutesGetRouteProfileAfterSet,
+		testRoutesGetRouteProfileIDsAfterSet,
+		testRoutesGetRouteProfileCountAfterSet,
+		testRoutesGetRouteProfilesAfterSet,
+		testRoutesRemoveRouteProfile,
+		testRoutesGetRouteProfileAfterRemove,
+		testRoutesGetRouteProfileIDsAfterRemove,
+		testRoutesGetRouteProfileCountAfterRemove,
+		testRoutesGetRouteProfilesAfterRemove,
 
 		// RouteProfile blocker behaviour test
 		testRouteSRemoveRouteProfiles,
@@ -68,10 +75,10 @@ var (
 	}
 )
 
-func TestRouteSIT(t *testing.T) {
+func TestRoutesIT(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
-		t.SkipNow()
+		roConfigDIR = "routes_internal"
 	case utils.MetaMongo:
 		roConfigDIR = "routes_mongo"
 	case utils.MetaMySQL:
@@ -116,364 +123,590 @@ func testRouteSRPCConn(t *testing.T) {
 	}
 }
 
-func testRouteSGetRouteProfileBeforeSet(t *testing.T) {
-	var reply *engine.Filter
+func testRoutesGetRouteProfileBeforeSet(t *testing.T) {
+	var replyRouteProfile engine.RouteProfile
 	if err := roRPC.Call(context.Background(), utils.AdminSv1GetRouteProfile,
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{
-				Tenant: utils.CGRateSorg,
-				ID:     "TEST__IT_TEST",
-			},
-		}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
-		t.Error(err)
+				Tenant: "cgrates.org",
+				ID:     "TestA_Route1",
+			}}, &replyRouteProfile); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	}
 }
 
-func testRouteSGetRouteProfilesBeforeSet(t *testing.T) {
-	var reply []*engine.RouteProfile
-	args := &utils.ArgsItemIDs{}
+func testRoutesGetRouteProfilesBeforeSet(t *testing.T) {
+	var replyRouteProfiles *[]*engine.RouteProfile
 	if err := roRPC.Call(context.Background(), utils.AdminSv1GetRouteProfiles,
-		args, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
-		t.Errorf("Expected %+v \n, received %+v", utils.ErrNotFound, err)
+		&utils.ArgsItemIDs{
+			Tenant: "cgrates.org",
+		}, &replyRouteProfiles); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	}
 }
 
-func testRouteSSetRoute(t *testing.T) {
-	Prf := &engine.RouteProfileWithAPIOpts{
-		RouteProfile: &engine.RouteProfile{
-			ID:     "ROUTE_ACNT_1001",
+func testRoutesGetRouteProfileIDsBeforeSet(t *testing.T) {
+	var replyRouteProfileIDs []string
+	if err := roRPC.Call(context.Background(), utils.AdminSv1GetRouteProfileIDs,
+		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
-			Weights: utils.DynamicWeights{
-				{
-					Weight: 10,
+		}, &replyRouteProfileIDs); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
+	}
+}
+
+func testRoutesGetRouteProfileCountBeforeSet(t *testing.T) {
+	var replyCount int
+	if err := roRPC.Call(context.Background(), utils.AdminSv1GetRouteProfilesCount,
+		&utils.ArgsItemIDs{
+			Tenant: "cgrates.org",
+		}, &replyCount); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
+	} else if replyCount != 0 {
+		t.Errorf("expected <%+v>, \nreceived: <%+v>", 0, replyCount)
+	}
+}
+
+func testRoutesSetRouteProfiles(t *testing.T) {
+	routeProfiles := []*engine.RouteProfileWithAPIOpts{
+		{
+			RouteProfile: &engine.RouteProfile{
+				ID:        "TestA_ROUTE1",
+				Tenant:    "cgrates.org",
+				FilterIDs: []string{"*string:~*req.TestCase:AdminSAPIs"},
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 30,
+					},
+				},
+				Blockers: utils.Blockers{
+					{
+						Blocker: false,
+					},
+				},
+				Sorting:           utils.MetaWeight,
+				SortingParameters: []string{},
+				Routes: []*engine.Route{
+					{
+						ID: "routeTest",
+					},
 				},
 			},
-			Sorting:           utils.MetaWeight,
-			SortingParameters: []string{},
-			Routes: []*engine.Route{
-				{
-					ID: "route1",
-					Weights: utils.DynamicWeights{
-						{
-							Weight: 20,
-						},
+		},
+		{
+			RouteProfile: &engine.RouteProfile{
+				ID:        "TestA_ROUTE2",
+				Tenant:    "cgrates.org",
+				FilterIDs: []string{"*string:~*req.TestCase:AdminSAPIs"},
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 10,
+					},
+				},
+				Blockers: utils.Blockers{
+					{
+						Blocker: true,
+					},
+				},
+				Sorting:           utils.MetaWeight,
+				SortingParameters: []string{},
+				Routes: []*engine.Route{
+					{
+						ID: "routeTest",
+					},
+				},
+			},
+		},
+		{
+			RouteProfile: &engine.RouteProfile{
+				ID:        "TestA_ROUTE3",
+				Tenant:    "cgrates.org",
+				FilterIDs: []string{"*string:~*req.TestCase:AdminSAPIs"},
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 20,
+					},
+				},
+				Sorting:           utils.MetaWeight,
+				SortingParameters: []string{},
+				Routes: []*engine.Route{
+					{
+						ID: "routeTest",
+					},
+				},
+			},
+		},
+		{
+			RouteProfile: &engine.RouteProfile{
+				ID:        "TestB_ROUTE1",
+				Tenant:    "cgrates.org",
+				FilterIDs: []string{"*string:~*req.TestCase:AdminSAPIs"},
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 5,
+					},
+				},
+				Sorting:           utils.MetaWeight,
+				SortingParameters: []string{},
+				Routes: []*engine.Route{
+					{
+						ID: "routeTest",
+					},
+				},
+			},
+		},
+		{
+			RouteProfile: &engine.RouteProfile{
+				ID:        "TestB_ROUTE2",
+				Tenant:    "cgrates.org",
+				FilterIDs: []string{"*string:~*req.TestCase:AdminSAPIs"},
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 25,
+					},
+				},
+				Sorting:           utils.MetaWeight,
+				SortingParameters: []string{},
+				Routes: []*engine.Route{
+					{
+						ID: "routeTest",
 					},
 				},
 			},
 		},
 	}
-	var reply string
-	if err := roRPC.Call(context.Background(), utils.AdminSv1SetRouteProfile,
-		Prf, &reply); err != nil {
-		t.Error(err)
-	} else if reply != utils.OK {
-		t.Error(err)
-	}
 
-	expected := &engine.RouteProfile{
-		ID:     "ROUTE_ACNT_1001",
-		Tenant: "cgrates.org",
+	var reply string
+	for _, routeProfile := range routeProfiles {
+		if err := roRPC.Call(context.Background(), utils.AdminSv1SetRouteProfile,
+			routeProfile, &reply); err != nil {
+			t.Error(err)
+		} else if reply != utils.OK {
+			t.Error(err)
+		}
+	}
+}
+
+func testRoutesGetRouteProfileAfterSet(t *testing.T) {
+	expectedRouteProfile := engine.RouteProfile{
+		ID:        "TestA_ROUTE1",
+		Tenant:    "cgrates.org",
+		FilterIDs: []string{"*string:~*req.TestCase:AdminSAPIs"},
 		Weights: utils.DynamicWeights{
 			{
-				Weight: 10,
+				Weight: 30,
+			},
+		},
+		Blockers: utils.Blockers{
+			{
+				Blocker: false,
 			},
 		},
 		Sorting:           utils.MetaWeight,
 		SortingParameters: []string{},
 		Routes: []*engine.Route{
 			{
-				ID: "route1",
-				Weights: utils.DynamicWeights{
-					{
-						Weight: 20,
-					},
-				},
+				ID: "routeTest",
 			},
 		},
 	}
-	var result *engine.RouteProfile
+	var replyRouteProfile engine.RouteProfile
 	if err := roRPC.Call(context.Background(), utils.AdminSv1GetRouteProfile,
-		utils.TenantIDWithAPIOpts{
+		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{
-				Tenant: utils.CGRateSorg,
-				ID:     "ROUTE_ACNT_1001",
-			},
-		}, &result); err != nil {
+				Tenant: "cgrates.org",
+				ID:     "TestA_ROUTE1",
+			}}, &replyRouteProfile); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(result, expected) {
-		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(result))
+	} else if !reflect.DeepEqual(replyRouteProfile, expectedRouteProfile) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
+			utils.ToJSON(expectedRouteProfile), utils.ToJSON(replyRouteProfile))
 	}
 }
 
-func testRouteSSetRoute2(t *testing.T) {
-	Prf := &engine.RouteProfileWithAPIOpts{
-		RouteProfile: &engine.RouteProfile{
-			ID:     "PrefixROUTE_ACNT_1002",
+func testRoutesGetRouteProfileIDsAfterSet(t *testing.T) {
+	expectedIDs := []string{"TestA_ROUTE1", "TestA_ROUTE2", "TestA_ROUTE3", "TestB_ROUTE1", "TestB_ROUTE2"}
+	var replyRouteProfileIDs []string
+	if err := roRPC.Call(context.Background(), utils.AdminSv1GetRouteProfileIDs,
+		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
+		}, &replyRouteProfileIDs); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(replyRouteProfileIDs)
+		if !utils.SliceStringEqual(replyRouteProfileIDs, expectedIDs) {
+			t.Errorf("expected: <%+v>, \nreceived: <%+v>", expectedIDs, replyRouteProfileIDs)
+		}
+	}
+
+	expectedIDs = []string{"TestA_ROUTE1", "TestA_ROUTE2", "TestA_ROUTE3"}
+	if err := roRPC.Call(context.Background(), utils.AdminSv1GetRouteProfileIDs,
+		&utils.ArgsItemIDs{
+			Tenant:      "cgrates.org",
+			ItemsPrefix: "TestA",
+		}, &replyRouteProfileIDs); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(replyRouteProfileIDs)
+		if !utils.SliceStringEqual(replyRouteProfileIDs, expectedIDs) {
+			t.Errorf("expected: <%+v>, \nreceived: <%+v>", expectedIDs, replyRouteProfileIDs)
+		}
+	}
+
+	expectedIDs = []string{"TestB_ROUTE1", "TestB_ROUTE2"}
+	if err := roRPC.Call(context.Background(), utils.AdminSv1GetRouteProfileIDs,
+		&utils.ArgsItemIDs{
+			Tenant:      "cgrates.org",
+			ItemsPrefix: "TestB",
+		}, &replyRouteProfileIDs); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(replyRouteProfileIDs)
+		if !utils.SliceStringEqual(replyRouteProfileIDs, expectedIDs) {
+			t.Errorf("expected: <%+v>, \nreceived: <%+v>", expectedIDs, replyRouteProfileIDs)
+		}
+	}
+}
+
+func testRoutesGetRouteProfileCountAfterSet(t *testing.T) {
+	var replyCount int
+	if err := roRPC.Call(context.Background(), utils.AdminSv1GetRouteProfilesCount,
+		&utils.ArgsItemIDs{
+			Tenant: "cgrates.org",
+		}, &replyCount); err != nil {
+		t.Error(err)
+	} else if replyCount != 5 {
+		t.Errorf("expected <%+v>, \nreceived: <%+v>", 0, replyCount)
+	}
+
+	if err := roRPC.Call(context.Background(), utils.AdminSv1GetRouteProfilesCount,
+		&utils.ArgsItemIDs{
+			Tenant:      "cgrates.org",
+			ItemsPrefix: "TestA",
+		}, &replyCount); err != nil {
+		t.Error(err)
+	} else if replyCount != 3 {
+		t.Errorf("expected <%+v>, \nreceived: <%+v>", 0, replyCount)
+	}
+
+	if err := roRPC.Call(context.Background(), utils.AdminSv1GetRouteProfilesCount,
+		&utils.ArgsItemIDs{
+			Tenant:      "cgrates.org",
+			ItemsPrefix: "TestB",
+		}, &replyCount); err != nil {
+		t.Error(err)
+	} else if replyCount != 2 {
+		t.Errorf("expected <%+v>, \nreceived: <%+v>", 0, replyCount)
+	}
+}
+
+func testRoutesGetRouteProfilesAfterSet(t *testing.T) {
+	expectedRouteProfiles := []*engine.RouteProfile{
+		{
+			ID:        "TestA_ROUTE1",
+			Tenant:    "cgrates.org",
+			FilterIDs: []string{"*string:~*req.TestCase:AdminSAPIs"},
 			Weights: utils.DynamicWeights{
 				{
-					Weight: 10,
+					Weight: 30,
+				},
+			},
+			Blockers: utils.Blockers{
+				{
+					Blocker: false,
 				},
 			},
 			Sorting:           utils.MetaWeight,
 			SortingParameters: []string{},
 			Routes: []*engine.Route{
 				{
-					ID: "route1",
-					Weights: utils.DynamicWeights{
-						{
-							Weight: 20,
-						},
-					},
+					ID: "routeTest",
+				},
+			},
+		},
+		{
+			ID:        "TestA_ROUTE2",
+			Tenant:    "cgrates.org",
+			FilterIDs: []string{"*string:~*req.TestCase:AdminSAPIs"},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				},
+			},
+			Blockers: utils.Blockers{
+				{
+					Blocker: true,
+				},
+			},
+			Sorting:           utils.MetaWeight,
+			SortingParameters: []string{},
+			Routes: []*engine.Route{
+				{
+					ID: "routeTest",
+				},
+			},
+		},
+		{
+			ID:        "TestA_ROUTE3",
+			Tenant:    "cgrates.org",
+			FilterIDs: []string{"*string:~*req.TestCase:AdminSAPIs"},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
+			Sorting:           utils.MetaWeight,
+			SortingParameters: []string{},
+			Routes: []*engine.Route{
+				{
+					ID: "routeTest",
+				},
+			},
+		},
+		{
+			ID:        "TestB_ROUTE1",
+			Tenant:    "cgrates.org",
+			FilterIDs: []string{"*string:~*req.TestCase:AdminSAPIs"},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 5,
+				},
+			},
+			Sorting:           utils.MetaWeight,
+			SortingParameters: []string{},
+			Routes: []*engine.Route{
+				{
+					ID: "routeTest",
+				},
+			},
+		},
+		{
+			ID:        "TestB_ROUTE2",
+			Tenant:    "cgrates.org",
+			FilterIDs: []string{"*string:~*req.TestCase:AdminSAPIs"},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 25,
+				},
+			},
+			Sorting:           utils.MetaWeight,
+			SortingParameters: []string{},
+			Routes: []*engine.Route{
+				{
+					ID: "routeTest",
 				},
 			},
 		},
 	}
+	var replyRouteProfiles []*engine.RouteProfile
+	if err := roRPC.Call(context.Background(), utils.AdminSv1GetRouteProfiles,
+		&utils.ArgsItemIDs{
+			Tenant: "cgrates.org",
+		}, &replyRouteProfiles); err != nil {
+		t.Error(err)
+	} else {
+		sort.Slice(replyRouteProfiles, func(i, j int) bool {
+			return replyRouteProfiles[i].ID < replyRouteProfiles[j].ID
+		})
+		if !reflect.DeepEqual(replyRouteProfiles, expectedRouteProfiles) {
+			t.Errorf("expected: <%+v>, \nreceived: <%+v>",
+				utils.ToJSON(expectedRouteProfiles), utils.ToJSON(replyRouteProfiles))
+		}
+	}
+}
+
+func testRoutesRemoveRouteProfile(t *testing.T) {
 	var reply string
-	if err := roRPC.Call(context.Background(), utils.AdminSv1SetRouteProfile,
-		Prf, &reply); err != nil {
+	if err := roRPC.Call(context.Background(), utils.AdminSv1RemoveRouteProfile,
+		&utils.TenantIDWithAPIOpts{
+			TenantID: &utils.TenantID{
+				Tenant: "cgrates.org",
+				ID:     "TestA_ROUTE2",
+			}}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
-		t.Error(err)
+		t.Error("Unexpected reply returned:", reply)
 	}
+}
 
-	expected := &engine.RouteProfile{
-		ID:     "PrefixROUTE_ACNT_1002",
-		Tenant: "cgrates.org",
-		Weights: utils.DynamicWeights{
-			{
-				Weight: 10,
-			},
-		},
-		Sorting:           utils.MetaWeight,
-		SortingParameters: []string{},
-		Routes: []*engine.Route{
-			{
-				ID: "route1",
-				Weights: utils.DynamicWeights{
-					{
-						Weight: 20,
-					},
-				},
-			},
-		},
-	}
-	var result *engine.RouteProfile
+func testRoutesGetRouteProfileAfterRemove(t *testing.T) {
+	var replyRouteProfile engine.RouteProfile
 	if err := roRPC.Call(context.Background(), utils.AdminSv1GetRouteProfile,
-		&utils.TenantID{
-			Tenant: utils.CGRateSorg,
-			ID:     "PrefixROUTE_ACNT_1002",
-		}, &result); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(result, expected) {
-		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(result))
+		&utils.TenantIDWithAPIOpts{
+			TenantID: &utils.TenantID{
+				Tenant: "cgrates.org",
+				ID:     "TestA_Route2",
+			}}, &replyRouteProfile); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	}
 }
 
-func testRouteSSetRoute3(t *testing.T) {
-	Prf := &engine.RouteProfileWithAPIOpts{
-		RouteProfile: &engine.RouteProfile{
-			ID:     "PrefixROUTE_ACNT_1003",
+func testRoutesGetRouteProfileIDsAfterRemove(t *testing.T) {
+	expectedIDs := []string{"TestA_ROUTE1", "TestA_ROUTE3", "TestB_ROUTE1", "TestB_ROUTE2"}
+	var replyRouteProfileIDs []string
+	if err := roRPC.Call(context.Background(), utils.AdminSv1GetRouteProfileIDs,
+		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
-			Weights: utils.DynamicWeights{
-				{
-					Weight: 10,
-				},
-			},
-			Sorting:           utils.MetaWeight,
-			SortingParameters: []string{},
-			Routes: []*engine.Route{
-				{
-					ID: "route1",
-					Weights: utils.DynamicWeights{
-						{
-							Weight: 20,
-						},
-					},
-				},
-			},
-		},
-	}
-	var reply string
-	if err := roRPC.Call(context.Background(), utils.AdminSv1SetRouteProfile,
-		Prf, &reply); err != nil {
+		}, &replyRouteProfileIDs); err != nil {
 		t.Error(err)
-	} else if reply != utils.OK {
-		t.Error(err)
+	} else {
+		sort.Strings(replyRouteProfileIDs)
+		if !utils.SliceStringEqual(replyRouteProfileIDs, expectedIDs) {
+			t.Errorf("expected: <%+v>, \nreceived: <%+v>", expectedIDs, replyRouteProfileIDs)
+		}
 	}
 
-	expected := engine.RouteProfile{
-		ID:     "PrefixROUTE_ACNT_1003",
-		Tenant: "cgrates.org",
-		Weights: utils.DynamicWeights{
-			{
-				Weight: 10,
-			},
-		},
-		Sorting:           utils.MetaWeight,
-		SortingParameters: []string{},
-		Routes: []*engine.Route{
-			{
-				ID: "route1",
-				Weights: utils.DynamicWeights{
-					{
-						Weight: 20,
-					},
-				},
-			},
-		},
+	expectedIDs = []string{"TestA_ROUTE1", "TestA_ROUTE3"}
+	if err := roRPC.Call(context.Background(), utils.AdminSv1GetRouteProfileIDs,
+		&utils.ArgsItemIDs{
+			Tenant:      "cgrates.org",
+			ItemsPrefix: "TestA",
+		}, &replyRouteProfileIDs); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(replyRouteProfileIDs)
+		if !utils.SliceStringEqual(replyRouteProfileIDs, expectedIDs) {
+			t.Errorf("expected: <%+v>, \nreceived: <%+v>", expectedIDs, replyRouteProfileIDs)
+		}
 	}
 
-	var result engine.RouteProfile
-	if err := roRPC.Call(context.Background(), utils.AdminSv1GetRouteProfile,
-		&utils.TenantID{
-			Tenant: utils.CGRateSorg,
-			ID:     "PrefixROUTE_ACNT_1003",
-		}, &result); err != nil {
+	expectedIDs = []string{"TestB_ROUTE1", "TestB_ROUTE2"}
+	if err := roRPC.Call(context.Background(), utils.AdminSv1GetRouteProfileIDs,
+		&utils.ArgsItemIDs{
+			Tenant:      "cgrates.org",
+			ItemsPrefix: "TestB",
+		}, &replyRouteProfileIDs); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(result, expected) {
-		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(result))
+	} else {
+		sort.Strings(replyRouteProfileIDs)
+		if !utils.SliceStringEqual(replyRouteProfileIDs, expectedIDs) {
+			t.Errorf("expected: <%+v>, \nreceived: <%+v>", expectedIDs, replyRouteProfileIDs)
+		}
 	}
 }
 
-func testFilterSGetRoutes(t *testing.T) {
-	var reply []*engine.RouteProfile
-	args := &utils.ArgsItemIDs{}
-	expected := []*engine.RouteProfile{
+func testRoutesGetRouteProfileCountAfterRemove(t *testing.T) {
+	var replyCount int
+	if err := roRPC.Call(context.Background(), utils.AdminSv1GetRouteProfilesCount,
+		&utils.ArgsItemIDs{
+			Tenant: "cgrates.org",
+		}, &replyCount); err != nil {
+		t.Error(err)
+	} else if replyCount != 4 {
+		t.Errorf("expected <%+v>, \nreceived: <%+v>", 0, replyCount)
+	}
 
+	if err := roRPC.Call(context.Background(), utils.AdminSv1GetRouteProfilesCount,
+		&utils.ArgsItemIDs{
+			Tenant:      "cgrates.org",
+			ItemsPrefix: "TestA",
+		}, &replyCount); err != nil {
+		t.Error(err)
+	} else if replyCount != 2 {
+		t.Errorf("expected <%+v>, \nreceived: <%+v>", 0, replyCount)
+	}
+
+	if err := roRPC.Call(context.Background(), utils.AdminSv1GetRouteProfilesCount,
+		&utils.ArgsItemIDs{
+			Tenant:      "cgrates.org",
+			ItemsPrefix: "TestB",
+		}, &replyCount); err != nil {
+		t.Error(err)
+	} else if replyCount != 2 {
+		t.Errorf("expected <%+v>, \nreceived: <%+v>", 0, replyCount)
+	}
+}
+
+func testRoutesGetRouteProfilesAfterRemove(t *testing.T) {
+	expectedRouteProfiles := []*engine.RouteProfile{
 		{
-			ID:     "PrefixROUTE_ACNT_1002",
-			Tenant: "cgrates.org",
+			ID:        "TestA_ROUTE1",
+			Tenant:    "cgrates.org",
+			FilterIDs: []string{"*string:~*req.TestCase:AdminSAPIs"},
 			Weights: utils.DynamicWeights{
 				{
-					Weight: 10,
+					Weight: 30,
+				},
+			},
+			Blockers: utils.Blockers{
+				{
+					Blocker: false,
 				},
 			},
 			Sorting:           utils.MetaWeight,
 			SortingParameters: []string{},
 			Routes: []*engine.Route{
 				{
-					ID: "route1",
-					Weights: utils.DynamicWeights{
-						{
-							Weight: 20,
-						},
-					},
+					ID: "routeTest",
 				},
 			},
 		},
 		{
-			ID:     "PrefixROUTE_ACNT_1003",
-			Tenant: "cgrates.org",
+			ID:        "TestA_ROUTE3",
+			Tenant:    "cgrates.org",
+			FilterIDs: []string{"*string:~*req.TestCase:AdminSAPIs"},
 			Weights: utils.DynamicWeights{
 				{
-					Weight: 10,
+					Weight: 20,
 				},
 			},
 			Sorting:           utils.MetaWeight,
 			SortingParameters: []string{},
 			Routes: []*engine.Route{
 				{
-					ID: "route1",
-					Weights: utils.DynamicWeights{
-						{
-							Weight: 20,
-						},
-					},
+					ID: "routeTest",
 				},
 			},
 		},
 		{
-			ID:     "ROUTE_ACNT_1001",
-			Tenant: "cgrates.org",
+			ID:        "TestB_ROUTE1",
+			Tenant:    "cgrates.org",
+			FilterIDs: []string{"*string:~*req.TestCase:AdminSAPIs"},
 			Weights: utils.DynamicWeights{
 				{
-					Weight: 10,
+					Weight: 5,
 				},
 			},
 			Sorting:           utils.MetaWeight,
 			SortingParameters: []string{},
 			Routes: []*engine.Route{
 				{
-					ID: "route1",
-					Weights: utils.DynamicWeights{
-						{
-							Weight: 20,
-						},
-					},
+					ID: "routeTest",
+				},
+			},
+		},
+		{
+			ID:        "TestB_ROUTE2",
+			Tenant:    "cgrates.org",
+			FilterIDs: []string{"*string:~*req.TestCase:AdminSAPIs"},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 25,
+				},
+			},
+			Sorting:           utils.MetaWeight,
+			SortingParameters: []string{},
+			Routes: []*engine.Route{
+				{
+					ID: "routeTest",
 				},
 			},
 		},
 	}
+	var replyRouteProfiles []*engine.RouteProfile
 	if err := roRPC.Call(context.Background(), utils.AdminSv1GetRouteProfiles,
-		args, &reply); err != nil {
-		t.Error(err)
-	}
-	sort.Slice(reply, func(i, j int) bool {
-		return (reply)[i].ID < (reply)[j].ID
-	})
-	if !reflect.DeepEqual(reply, expected) {
-		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(reply))
-	}
-}
-func testFilterSGetRoutesWithPrefix(t *testing.T) {
-	var reply []*engine.RouteProfile
-	args := &utils.ArgsItemIDs{
-		ItemsPrefix: "PrefixROUTE",
-	}
-	expected := []*engine.RouteProfile{
-		{
-			ID:     "PrefixROUTE_ACNT_1002",
+		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
-			Weights: utils.DynamicWeights{
-				{
-					Weight: 10,
-				},
-			},
-			Sorting:           utils.MetaWeight,
-			SortingParameters: []string{},
-			Routes: []*engine.Route{
-				{
-					ID: "route1",
-					Weights: utils.DynamicWeights{
-						{
-							Weight: 20,
-						},
-					},
-				},
-			},
-		},
-		{
-			ID:     "PrefixROUTE_ACNT_1003",
-			Tenant: "cgrates.org",
-			Weights: utils.DynamicWeights{
-				{
-					Weight: 10,
-				},
-			},
-			Sorting:           utils.MetaWeight,
-			SortingParameters: []string{},
-			Routes: []*engine.Route{
-				{
-					ID: "route1",
-					Weights: utils.DynamicWeights{
-						{
-							Weight: 20,
-						},
-					},
-				},
-			},
-		},
-	}
-	if err := roRPC.Call(context.Background(), utils.AdminSv1GetRouteProfiles,
-		args, &reply); err != nil {
+		}, &replyRouteProfiles); err != nil {
 		t.Error(err)
-	}
-	sort.Slice(reply, func(i, j int) bool {
-		return (reply)[i].ID < (reply)[j].ID
-	})
-	if !reflect.DeepEqual(reply, expected) {
-		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(reply))
+	} else {
+		sort.Slice(replyRouteProfiles, func(i, j int) bool {
+			return replyRouteProfiles[i].ID < replyRouteProfiles[j].ID
+		})
+		if !reflect.DeepEqual(replyRouteProfiles, expectedRouteProfiles) {
+			t.Errorf("expected: <%+v>, \nreceived: <%+v>",
+				utils.ToJSON(expectedRouteProfiles), utils.ToJSON(replyRouteProfiles))
+		}
 	}
 }
 
@@ -481,7 +714,7 @@ func testRouteSRemoveRouteProfiles(t *testing.T) {
 	args := &utils.ArgsItemIDs{
 		Tenant: "cgrates.org",
 	}
-	expected := []string{"PrefixROUTE_ACNT_1002", "PrefixROUTE_ACNT_1003", "ROUTE_ACNT_1001"}
+	expected := []string{"TestA_ROUTE1", "TestA_ROUTE3", "TestB_ROUTE1", "TestB_ROUTE2"}
 	var routeProfileIDs []string
 	if err := roRPC.Call(context.Background(), utils.AdminSv1GetRouteProfileIDs, args, &routeProfileIDs); err != nil {
 		t.Fatal(err)

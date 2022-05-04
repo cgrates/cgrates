@@ -2,8 +2,9 @@
 
 	"general": {
 		"log_level": 7,
-		"reply_timeout": "30s"
+		"reply_timeout": "50s"
 	},
+
 
 	"listen": {
 		"rpc_json": ":2012",
@@ -12,17 +13,16 @@
 	},
 
 	"data_db": {
-		"db_type": "mongo",
-		"db_name": "10",
-		"db_port": 27017
-	},
+        "db_type": "*internal"
+    },
 
 	"routes": {
 		"enabled": true
 	},
 
 	"admins": {
-		"enabled": true
+		"enabled": true,
+		"scheduler_conns": ["*internal"]
 	}
 
 }
