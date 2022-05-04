@@ -4602,8 +4602,7 @@ func TestAccountMdlsCSVHeader(t *testing.T) {
 		ThresholdIDs: "WARN_RES1;WARN_RES1",
 	},
 	}
-	exp := []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs, utils.Weights,
-		utils.BalanceID, utils.BalanceFilterIDs, utils.BalanceWeight, utils.BalanceBlocker,
+	exp := []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs, utils.Weights, utils.BlockersField, utils.BalanceID, utils.BalanceFilterIDs, utils.BalanceWeight, utils.BalanceBlocker,
 		utils.BalanceType, utils.BalanceOpts, utils.BalanceUnits, utils.ThresholdIDs}
 	result := testStruct.CSVHeader()
 	if !reflect.DeepEqual(exp, result) {
@@ -4618,7 +4617,8 @@ func TestAccountMdlsAsTPAccount(t *testing.T) {
 		Tenant:                "cgrates.org",
 		ID:                    "ResGroup1",
 		FilterIDs:             "*ai:~*req.AnswerTime:2014-07-24T15:00:00Z|2014-07-25T15:00:00Z;FLTR_RES_GR1",
-		Weights:               "10.0",
+		Weights:               ";10",
+		Blockers:              "*string:~*req.Destination:1003;false",
 		BalanceID:             "VoiceBalance",
 		BalanceFilterIDs:      "FLTR_RES_GR2",
 		BalanceWeights:        "10",
@@ -4634,7 +4634,8 @@ func TestAccountMdlsAsTPAccount(t *testing.T) {
 			Tenant:    "cgrates.org",
 			ID:        "ResGroup1",
 			FilterIDs: []string{"*ai:~*req.AnswerTime:2014-07-24T15:00:00Z|2014-07-25T15:00:00Z", "FLTR_RES_GR1"},
-			Weights:   "10.0",
+			Weights:   ";10",
+			Blockers:  "*string:~*req.Destination:1003;false",
 			Balances: map[string]*utils.TPAccountBalance{
 				"VoiceBalance": {
 					ID:             "VoiceBalance",
@@ -4667,7 +4668,7 @@ func TestAccountMdlsAsTPAccountCase2(t *testing.T) {
 		Tenant:           "cgrates.org",
 		ID:               "ResGroup1",
 		FilterIDs:        "*ai:~*req.AnswerTime:2014-07-24T15:00:00Z;FLTR_RES_GR1",
-		Weights:          "10.0",
+		Weights:          ";10",
 		BalanceID:        "VoiceBalance",
 		BalanceFilterIDs: "FLTR_RES_GR2",
 		BalanceWeights:   "10",
@@ -4682,7 +4683,7 @@ func TestAccountMdlsAsTPAccountCase2(t *testing.T) {
 			Tenant:    "cgrates.org",
 			ID:        "ResGroup1",
 			FilterIDs: []string{"*ai:~*req.AnswerTime:2014-07-24T15:00:00Z", "FLTR_RES_GR1"},
-			Weights:   "10.0",
+			Weights:   ";10",
 			Balances: map[string]*utils.TPAccountBalance{
 				"VoiceBalance": {
 					ID:        "VoiceBalance",
@@ -4748,7 +4749,7 @@ func TestAPItoModelTPAccount(t *testing.T) {
 		Tenant:    "cgrates.org",
 		ID:        "ResGroup1",
 		FilterIDs: []string{"*ai:~*req.AnswerTime:2014-07-24T15:00:00Z|2014-07-25T15:00:00Z", "FLTR_RES_GR1"},
-		Weights:   "10.0",
+		Weights:   ";10",
 		Balances: map[string]*utils.TPAccountBalance{
 			"VoiceBalance": {
 				ID:            "VoiceBalance",
@@ -4766,7 +4767,7 @@ func TestAPItoModelTPAccount(t *testing.T) {
 		Tenant:           "cgrates.org",
 		ID:               "ResGroup1",
 		FilterIDs:        "*ai:~*req.AnswerTime:2014-07-24T15:00:00Z|2014-07-25T15:00:00Z;FLTR_RES_GR1",
-		Weights:          "10.0",
+		Weights:          ";10",
 		BalanceID:        "VoiceBalance",
 		BalanceFilterIDs: "FLTR_RES_GR2",
 		BalanceWeights:   "10",
@@ -4802,12 +4803,12 @@ func TestAPItoModelTPAccountCase2(t *testing.T) {
 		Tenant:    "cgrates.org",
 		ID:        "ResGroup1",
 		FilterIDs: []string{"FLTR_RES_GR1", "FLTR_RES_GR2", "*ai:~*req.AnswerTime:2014-07-24T15:00:00Z|2014-07-25T15:00:00Z"},
-		Weights:   "10.0",
+		Weights:   ";10",
 		Balances: map[string]*utils.TPAccountBalance{
 			"VoiceBalance": {
 				ID:        "VoiceBalance",
 				FilterIDs: []string{"FLTR_RES_GR1", "FLTR_RES_GR2"},
-				Weights:   "10",
+				Weights:   ";10",
 				Type:      utils.MetaVoice,
 				Units:     "1h",
 				CostIncrement: []*utils.TPBalanceCostIncrement{
@@ -4845,10 +4846,10 @@ func TestAPItoModelTPAccountCase2(t *testing.T) {
 		Tenant:                "cgrates.org",
 		ID:                    "ResGroup1",
 		FilterIDs:             "*ai:~*req.AnswerTime:2014-07-24T15:00:00Z|2014-07-25T15:00:00Z;FLTR_RES_GR1;FLTR_RES_GR2",
-		Weights:               "10.0",
+		Weights:               ";10",
 		BalanceID:             "VoiceBalance",
 		BalanceFilterIDs:      "FLTR_RES_GR1;FLTR_RES_GR2",
-		BalanceWeights:        "10",
+		BalanceWeights:        ";10",
 		BalanceType:           utils.MetaVoice,
 		BalanceCostIncrements: "*string:*~req.Account:100;1;20;5;*string:*~req.Destination:10;2;10;7",
 		BalanceAttributeIDs:   "20;30",

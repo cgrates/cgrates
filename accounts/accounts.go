@@ -126,6 +126,18 @@ func (aS *AccountS) matchingAccountsForEvent(ctx *context.Context, tnt string, c
 			return
 		}
 		acnts = append(acnts, &utils.AccountWithWeight{qAcnt, weight, refID})
+		// check for blockers for every profile
+		var blocker bool
+		if blocker, err = engine.BlockerFromDynamics(ctx, qAcnt.Blockers, aS.fltrS, cgrEv.Tenant, evNm); err != nil {
+			guardian.Guardian.UnguardIDs(refID)
+			unlockAccounts(acnts)
+			return
+		}
+		// if blockers active, do not debit from the other accounts
+		if blocker {
+			guardian.Guardian.UnguardIDs(refID)
+			break
+		}
 	}
 	if len(acnts) == 0 {
 		return nil, utils.ErrNotFound

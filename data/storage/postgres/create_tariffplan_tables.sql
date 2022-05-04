@@ -294,6 +294,7 @@ CREATE TABLE tp_accounts (
   "filter_ids" varchar(64) NOT NULL,
   "activation_interval" varchar(64) NOT NULL,
   "weights" varchar(64) NOT NULL,
+  "blockers" varchar(64) NOT NULL,
   "opts" varchar(256) NOT NULL,
   "balance_id" varchar(64) NOT NULL,
   "balance_filter_ids" varchar(64) NOT NULL,

@@ -2299,7 +2299,7 @@ type AccountMdls []*AccountMdl
 // CSVHeader return the header for csv fields as a slice of string
 func (apm AccountMdls) CSVHeader() (result []string) {
 	return []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs,
-		utils.Weights, utils.BalanceID, utils.BalanceFilterIDs, utils.BalanceWeight,
+		utils.Weights, utils.BlockersField, utils.BalanceID, utils.BalanceFilterIDs, utils.BalanceWeight,
 		utils.BalanceBlocker, utils.BalanceType, utils.BalanceOpts, utils.BalanceUnits,
 		utils.ThresholdIDs,
 	}
@@ -2318,6 +2318,7 @@ func (apm AccountMdls) AsTPAccount() (result []*utils.TPAccount, err error) {
 				Tenant:   tp.Tenant,
 				ID:       tp.ID,
 				Weights:  tp.Weights,
+				Blockers: tp.Blockers,
 				Balances: make(map[string]*utils.TPAccountBalance),
 			}
 		}
@@ -2427,6 +2428,7 @@ func APItoModelTPAccount(tPrf *utils.TPAccount) (mdls AccountMdls) {
 				mdl.ThresholdIDs += val
 			}
 			mdl.Weights = tPrf.Weights
+			mdl.Blockers = tPrf.Blockers
 		}
 		mdl.BalanceID = balance.ID
 		for i, val := range balance.FilterIDs {
@@ -2483,6 +2485,13 @@ func APItoAccount(tpAp *utils.TPAccount, timezone string) (ap *utils.Account, er
 			return nil, err
 		}
 		ap.Weights = weight
+	}
+	if tpAp.Blockers != utils.EmptyString {
+		blockers, err := utils.NewBlockersFromString(tpAp.Blockers, utils.InfieldSep, utils.ANDSep)
+		if err != nil {
+			return nil, err
+		}
+		ap.Blockers = blockers
 	}
 	for i, stp := range tpAp.FilterIDs {
 		ap.FilterIDs[i] = stp
@@ -2568,6 +2577,7 @@ func AccountToAPI(ap *utils.Account) (tpAp *utils.TPAccount) {
 		Tenant:       ap.Tenant,
 		ID:           ap.ID,
 		Weights:      ap.Weights.String(utils.InfieldSep, utils.ANDSep),
+		Blockers:     ap.Blockers.String(utils.InfieldSep, utils.ANDSep),
 		FilterIDs:    make([]string, len(ap.FilterIDs)),
 		Balances:     make(map[string]*utils.TPAccountBalance, len(ap.Balances)),
 		ThresholdIDs: make([]string, len(ap.ThresholdIDs)),
