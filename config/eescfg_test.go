@@ -659,6 +659,7 @@ func TestEEsCfgAsMapInterface(t *testing.T) {
 				utils.SynchronousCfg:        false,
 				utils.AttemptsCfg:           1,
 				utils.ConcurrentRequestsCfg: 0,
+				utils.BlockerCfg:            false,
 				utils.FieldsCfg: []map[string]interface{}{
 					{
 						utils.TagCfg:   utils.MetaOriginID,

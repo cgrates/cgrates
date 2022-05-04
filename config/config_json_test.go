@@ -2059,6 +2059,7 @@ func TestDfEventExporterCfg(t *testing.T) {
 				Attribute_ids:       &[]string{},
 				Flags:               &[]string{},
 				Synchronous:         utils.BoolPointer(false),
+				Blocker:             utils.BoolPointer(false),
 				Attempts:            utils.IntPointer(1),
 				Fields:              &[]*FcTemplateJsonCfg{},
 				Opts:                &EventExporterOptsJson{},
