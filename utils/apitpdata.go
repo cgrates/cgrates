@@ -691,6 +691,7 @@ type TPAccount struct {
 	ID           string
 	FilterIDs    []string
 	Weights      string
+	Blockers     string
 	Balances     map[string]*TPAccountBalance
 	ThresholdIDs []string
 }

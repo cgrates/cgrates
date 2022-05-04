@@ -77,3 +77,29 @@ func (blckr DynamicBlocker) String(blkSep, fltrSep string) (out string) {
 	}
 	return strings.Join(blckr.FilterIDs, fltrSep) + blkSep + blocker
 }
+
+// Clone will clone the Blockers
+func (blckrs Blockers) Clone() (clBlkrs Blockers) {
+	if blckrs == nil {
+		return
+	}
+	clBlkrs = make(Blockers, len(blckrs))
+	for i, value := range blckrs {
+		clBlkrs[i] = value.Clone()
+	}
+	return
+}
+
+// Clone will clone the a DynamicBlocker
+func (blckr *DynamicBlocker) Clone() (clBlkr *DynamicBlocker) {
+	clBlkr = &DynamicBlocker{
+		Blocker: blckr.Blocker,
+	}
+	if blckr.FilterIDs != nil {
+		clBlkr.FilterIDs = make([]string, len(blckr.FilterIDs))
+		for idx, value := range blckr.FilterIDs {
+			clBlkr.FilterIDs[idx] = value
+		}
+	}
+	return
+}

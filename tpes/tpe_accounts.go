@@ -44,8 +44,9 @@ func newTPAccounts(dm *engine.DataManager) *TPAccounts {
 func (tpAcc TPAccounts) exportItems(ctx *context.Context, wrtr io.Writer, tnt string, itmIDs []string) (err error) {
 	csvWriter := csv.NewWriter(wrtr)
 	csvWriter.Comma = utils.CSVSep
+	var accMdls engine.AccountMdls
 	// before writing the profiles, we must write the headers
-	if err = csvWriter.Write([]string{"#Tenant", "ID", "FilterIDs", "Weights", "Opts", "BalanceID", "BalanceFilterIDs", "BalanceWeights", "BalanceType", "BalanceUnits", "BalanceUnitFactors", "BalanceOpts", "BalanceCostIncrements", "BalanceAttributeIDs", "BalanceRateProfileIDs", "ThresholdIDs"}); err != nil {
+	if err = csvWriter.Write(accMdls.CSVHeader()); err != nil {
 		return
 	}
 	for _, accID := range itmIDs {
@@ -57,7 +58,7 @@ func (tpAcc TPAccounts) exportItems(ctx *context.Context, wrtr io.Writer, tnt st
 			}
 			return err
 		}
-		accMdls := engine.APItoModelTPAccount(engine.AccountToAPI(acc))
+		accMdls = engine.APItoModelTPAccount(engine.AccountToAPI(acc))
 		if len(accMdls) == 0 {
 			return
 		}

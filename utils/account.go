@@ -34,6 +34,7 @@ type Account struct {
 	ID           string // Account identificator, unique within the tenant
 	FilterIDs    []string
 	Weights      DynamicWeights
+	Blockers     Blockers
 	Opts         map[string]interface{}
 	Balances     map[string]*Balance
 	ThresholdIDs []string
@@ -286,6 +287,9 @@ func (aC *Account) Equals(acnt *Account) (eq bool) {
 		(aC.FilterIDs == nil && acnt.FilterIDs != nil ||
 			aC.FilterIDs != nil && acnt.FilterIDs == nil ||
 			len(aC.FilterIDs) != len(acnt.FilterIDs)) ||
+		(aC.Blockers == nil && acnt.Blockers != nil ||
+			aC.Blockers != nil && acnt.Blockers == nil ||
+			len(aC.Blockers) != len(acnt.Blockers)) ||
 		(aC.Weights == nil && acnt.Weights != nil ||
 			aC.Weights != nil && acnt.Weights == nil ||
 			len(aC.Weights) != len(acnt.Weights)) ||
@@ -331,9 +335,10 @@ func (aC *Account) Equals(acnt *Account) (eq bool) {
 // Clone returns a clone of the Account
 func (aP *Account) Clone() (acnt *Account) {
 	acnt = &Account{
-		Tenant:  aP.Tenant,
-		ID:      aP.ID,
-		Weights: aP.Weights.Clone(),
+		Tenant:   aP.Tenant,
+		ID:       aP.ID,
+		Blockers: aP.Blockers.Clone(),
+		Weights:  aP.Weights.Clone(),
 	}
 	if aP.FilterIDs != nil {
 		acnt.FilterIDs = make([]string, len(aP.FilterIDs))
@@ -557,6 +562,10 @@ func (ap *Account) Set(path []string, val interface{}, newBranch bool, _ string)
 			if val != EmptyString {
 				ap.Weights, err = NewDynamicWeightsFromString(IfaceAsString(val), InfieldSep, ANDSep)
 			}
+		case BlockersField:
+			if val != EmptyString {
+				ap.Blockers, err = NewBlockersFromString(IfaceAsString(val), InfieldSep, ANDSep)
+			}
 		case Opts:
 			ap.Opts, err = NewMapFromCSV(IfaceAsString(val))
 		}
@@ -756,6 +765,7 @@ func (ap *Account) Merge(v2 interface{}) {
 	}
 	ap.FilterIDs = append(ap.FilterIDs, vi.FilterIDs...)
 	ap.Weights = append(ap.Weights, vi.Weights...)
+	ap.Blockers = append(ap.Blockers, vi.Blockers...)
 	ap.ThresholdIDs = append(ap.ThresholdIDs, vi.ThresholdIDs...)
 	for k, v := range vi.Opts {
 		ap.Opts[k] = v
@@ -817,6 +827,8 @@ func (ap *Account) FieldAsInterface(fldPath []string) (_ interface{}, err error)
 			return ap.FilterIDs, nil
 		case Weights:
 			return ap.Weights.String(InfieldSep, ANDSep), nil
+		case BlockersField:
+			return ap.Blockers.String(InfieldSep, ANDSep), nil
 		case ThresholdIDs:
 			return ap.ThresholdIDs, nil
 		case Opts:
