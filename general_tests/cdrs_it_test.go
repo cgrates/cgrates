@@ -134,7 +134,6 @@ func testCDRsLoadTariffPlanFromFolder(t *testing.T) {
 	} else if rpl != utils.OK {
 		t.Error("Unexpected reply returned:", rpl)
 	}
-	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
 	var resp string
 	if err := cdrsRpc.Call(context.Background(), utils.AdminSv1RemoveChargerProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "SupplierCharges"}, &resp); err != nil {

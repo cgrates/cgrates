@@ -318,9 +318,8 @@ func (sq *StatQueue) addStatEvent(ctx *context.Context, tnt, evID string, filter
 			continue
 		}
 		// in case of # metrics type
-		metricSplit := strings.Split(metricCfg.MetricID, utils.HashtagSep)
-		if err = sq.SQMetrics[metricSplit[0]].AddEvent(evID, dDP); err != nil {
-			utils.Logger.Warning(fmt.Sprintf("<StatQueue>: metric: %s, add eventID: %s, error: %s", metricSplit[0],
+		if err = sq.SQMetrics[metricCfg.MetricID].AddEvent(evID, dDP); err != nil {
+			utils.Logger.Warning(fmt.Sprintf("<StatQueue>: metric: %s, add eventID: %s, error: %s", metricCfg.MetricID,
 				evID, err.Error()))
 			return
 		}

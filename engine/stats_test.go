@@ -239,7 +239,7 @@ func prepareStatsData(t *testing.T, dm *DataManager) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		statQueue.SQMetrics[utils.MetaSum] = statSum
+		statQueue.SQMetrics["*sum#~*req.Usage"] = statSum
 		dm.SetStatQueue(context.Background(), statQueue)
 	}
 	//Test each statQueueProfile from cache
@@ -476,7 +476,7 @@ func TestStatQueuesV1ProcessEvent(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	sq := &StatQueue{Tenant: "cgrates.org", ID: "StatQueueProfile3", sqPrfl: sqPrf, SQMetrics: map[string]StatMetric{utils.MetaSum: statSum}}
+	sq := &StatQueue{Tenant: "cgrates.org", ID: "StatQueueProfile3", sqPrfl: sqPrf, SQMetrics: map[string]StatMetric{"*sum#~*req.Usage": statSum}}
 	if err := dmSTS.SetStatQueueProfile(context.TODO(), sqPrf, true); err != nil {
 		t.Error(err)
 	}
