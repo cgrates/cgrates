@@ -122,8 +122,6 @@ func (eeS *EeS) attrSProcessEvent(ctx *context.Context, cgrEv *utils.CGREvent, a
 	return
 }
 
-// V1ProcessEvent will be called each time a new event is received from readers
-// rply -> map[string]map[string]interface{}
 func (eeS *EeS) V1ProcessEvent(ctx *context.Context, cgrEv *utils.CGREventWithEeIDs, rply *map[string]map[string]interface{}) (err error) {
 	eeS.cfg.RLocks(config.EEsJSON)
 	defer eeS.cfg.RUnlocks(config.EEsJSON)
@@ -192,7 +190,7 @@ func (eeS *EeS) V1ProcessEvent(ctx *context.Context, cgrEv *utils.CGREventWithEe
 		} else {
 			ctx = context.Background() // is async so lose the API context
 		}
-		// log the message before starting the gorutine, but still execute the exporter
+		// log the message before starting the goroutine, but still execute the exporter
 		if hasVerbose && !eeCfg.Synchronous {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> with id <%s>, running verbosed exporter with syncronous false",
@@ -211,6 +209,9 @@ func (eeS *EeS) V1ProcessEvent(ctx *context.Context, cgrEv *utils.CGREventWithEe
 				wg.Done()
 			}
 		}(!hasCache, eeCfg.Synchronous, ee)
+		if eeCfg.Blocker {
+			break
+		}
 	}
 	wg.Wait()
 	if withErr {

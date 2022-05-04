@@ -556,6 +556,7 @@ const CGRATES_CFG_JSON = `
 			"attribute_ids": [],								// select Attribute profiles instead of discovering them
 			"attribute_context": "",							// context used to discover matching Attribute profiles
 			"synchronous": false,								// block processing until export has a result
+			"blocker": false,									// stops the processing of the following exporters
 			"attempts": 1,										// export attempts
 			"fields":[],										// import fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
 			"failed_posts_dir": "/var/spool/cgrates/failed_posts",	// directory path where we store failed requests

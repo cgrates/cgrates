@@ -208,6 +208,7 @@ type EventExporterCfg struct {
 	AttributeSIDs      []string // selective AttributeS profiles
 	AttributeSCtx      string   // context to use when querying AttributeS
 	Synchronous        bool
+	Blocker            bool
 	Attempts           int
 	FailedPostsDir     string
 	ConcurrentRequests int
@@ -420,6 +421,9 @@ func (eeC *EventExporterCfg) loadFromJSONCfg(jsnEec *EventExporterJsonCfg, msgTe
 	}
 	if jsnEec.Synchronous != nil {
 		eeC.Synchronous = *jsnEec.Synchronous
+	}
+	if jsnEec.Blocker != nil {
+		eeC.Blocker = *jsnEec.Blocker
 	}
 	if jsnEec.Attempts != nil {
 		eeC.Attempts = *jsnEec.Attempts
@@ -641,6 +645,7 @@ func (eeC EventExporterCfg) Clone() (cln *EventExporterCfg) {
 		Flags:              eeC.Flags.Clone(),
 		AttributeSCtx:      eeC.AttributeSCtx,
 		Synchronous:        eeC.Synchronous,
+		Blocker:            eeC.Blocker,
 		Attempts:           eeC.Attempts,
 		ConcurrentRequests: eeC.ConcurrentRequests,
 		Fields:             make([]*FCTemplate, len(eeC.Fields)),
@@ -835,6 +840,7 @@ func (eeC *EventExporterCfg) AsMapInterface(separator string) (initialMP map[str
 		utils.AttributeContextCfg:   eeC.AttributeSCtx,
 		utils.AttributeIDsCfg:       eeC.AttributeSIDs,
 		utils.SynchronousCfg:        eeC.Synchronous,
+		utils.BlockerCfg:            eeC.Blocker,
 		utils.AttemptsCfg:           eeC.Attempts,
 		utils.ConcurrentRequestsCfg: eeC.ConcurrentRequests,
 		utils.FailedPostsDirCfg:     eeC.FailedPostsDir,
@@ -913,6 +919,7 @@ type EventExporterJsonCfg struct {
 	Attribute_ids       *[]string
 	Attribute_context   *string
 	Synchronous         *bool
+	Blocker             *bool
 	Attempts            *int
 	Concurrent_requests *int
 	Failed_posts_dir    *string
@@ -1340,6 +1347,9 @@ func diffEventExporterJsonCfg(d *EventExporterJsonCfg, v1, v2 *EventExporterCfg,
 	}
 	if v1.Synchronous != v2.Synchronous {
 		d.Synchronous = utils.BoolPointer(v2.Synchronous)
+	}
+	if v1.Blocker != v2.Blocker {
+		d.Blocker = utils.BoolPointer(v2.Blocker)
 	}
 	if v1.Attempts != v2.Attempts {
 		d.Attempts = utils.IntPointer(v2.Attempts)
