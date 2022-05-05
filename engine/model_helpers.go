@@ -2299,8 +2299,7 @@ type AccountMdls []*AccountMdl
 // CSVHeader return the header for csv fields as a slice of string
 func (apm AccountMdls) CSVHeader() (result []string) {
 	return []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs,
-		utils.Weights, utils.BlockersField, utils.BalanceID, utils.BalanceFilterIDs, utils.BalanceWeight,
-		utils.BalanceBlocker, utils.BalanceType, utils.BalanceOpts, utils.BalanceUnits,
+		utils.Weights, utils.BlockersField, utils.Opts, utils.BalanceID, utils.BalanceFilterIDs, utils.BalanceWeights, utils.BalanceType, utils.BalanceUnits, utils.BalanceUnitFactors, utils.BalanceOpts, utils.BalanceCostIncrements, utils.BalanceAttributeIDs, utils.BalanceRateProfileIDs,
 		utils.ThresholdIDs,
 	}
 }

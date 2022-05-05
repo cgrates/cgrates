@@ -62,6 +62,7 @@ func (tpAcc TPAccounts) exportItems(ctx *context.Context, wrtr io.Writer, tnt st
 		if len(accMdls) == 0 {
 			return
 		}
+		utils.Logger.Crit(fmt.Sprintf("accdMdls: %v", utils.ToJSON(accMdls)))
 		// for every profile, convert it into model to be compatible in csv format
 		for _, tpItem := range accMdls {
 			// transform every record into a []string
