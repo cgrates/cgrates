@@ -44,9 +44,10 @@ var (
 	sTestsRo = []func(t *testing.T){
 		testRouteSInitCfg,
 		testRouteSInitDataDB,
+		testRoutesStartEngine,
+		testRoutesRPCConn,
 
-		testRouteSStartEngine,
-		testRouteSRPCConn,
+		// tests for AdminSv1 APIs
 		testRoutesGetRouteProfileBeforeSet,
 		testRoutesGetRouteProfileIDsBeforeSet,
 		testRoutesGetRouteProfileCountBeforeSet,
@@ -63,15 +64,15 @@ var (
 		testRoutesGetRouteProfilesAfterRemove,
 
 		// RouteProfile blocker behaviour test
-		testRouteSRemoveRouteProfiles,
-		testRouteSSetRouteProfiles,
-		testRouteSGetRouteProfilesForEvent,
+		testRoutesBlockerRemoveRouteProfiles,
+		testRoutesBlockerSetRouteProfiles,
+		testRoutesBlockerGetRouteProfilesForEvent,
 
 		// Route blocker behaviour test
-		testRouteSSetRouteProfile,
-		testRouteSGetRoutes,
+		testRoutesBlockerSetRouteProfile,
+		testRoutesBlockerGetRoutes,
 
-		testRouteSKillEngine,
+		testRoutesKillEngine,
 	}
 )
 
@@ -109,13 +110,13 @@ func testRouteSInitDataDB(t *testing.T) {
 }
 
 // Start CGR Engine
-func testRouteSStartEngine(t *testing.T) {
+func testRoutesStartEngine(t *testing.T) {
 	if _, err := engine.StopStartEngine(roCfgPath, *waitRater); err != nil {
 		t.Fatal(err)
 	}
 }
 
-func testRouteSRPCConn(t *testing.T) {
+func testRoutesRPCConn(t *testing.T) {
 	var err error
 	roRPC, err = newRPCClient(roCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
@@ -129,7 +130,7 @@ func testRoutesGetRouteProfileBeforeSet(t *testing.T) {
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{
 				Tenant: "cgrates.org",
-				ID:     "TestA_Route1",
+				ID:     "TestA_ROUTE1",
 			}}, &replyRouteProfile); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	}
@@ -710,7 +711,7 @@ func testRoutesGetRouteProfilesAfterRemove(t *testing.T) {
 	}
 }
 
-func testRouteSRemoveRouteProfiles(t *testing.T) {
+func testRoutesBlockerRemoveRouteProfiles(t *testing.T) {
 	args := &utils.ArgsItemIDs{
 		Tenant: "cgrates.org",
 	}
@@ -742,7 +743,7 @@ func testRouteSRemoveRouteProfiles(t *testing.T) {
 	}
 }
 
-func testRouteSSetRouteProfiles(t *testing.T) {
+func testRoutesBlockerSetRouteProfiles(t *testing.T) {
 	routeProfiles := []*engine.RouteProfileWithAPIOpts{
 		{
 			RouteProfile: &engine.RouteProfile{
@@ -843,7 +844,7 @@ func testRouteSSetRouteProfiles(t *testing.T) {
 	}
 }
 
-func testRouteSGetRouteProfilesForEvent(t *testing.T) {
+func testRoutesBlockerGetRouteProfilesForEvent(t *testing.T) {
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "EventGetRouteProfiles",
@@ -923,7 +924,7 @@ func testRouteSGetRouteProfilesForEvent(t *testing.T) {
 	}
 }
 
-func testRouteSSetRouteProfile(t *testing.T) {
+func testRoutesBlockerSetRouteProfile(t *testing.T) {
 	routeProfile := &engine.RouteProfileWithAPIOpts{
 		RouteProfile: &engine.RouteProfile{
 			ID:        "ROUTE_BLOCKER_TEST",
@@ -992,7 +993,7 @@ func testRouteSSetRouteProfile(t *testing.T) {
 	}
 }
 
-func testRouteSGetRoutes(t *testing.T) {
+func testRoutesBlockerGetRoutes(t *testing.T) {
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "EventGetRoutes",
@@ -1041,7 +1042,7 @@ func testRouteSGetRoutes(t *testing.T) {
 }
 
 //Kill the engine when it is about to be finished
-func testRouteSKillEngine(t *testing.T) {
+func testRoutesKillEngine(t *testing.T) {
 	if err := engine.KillEngine(100); err != nil {
 		t.Error(err)
 	}
