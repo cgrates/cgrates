@@ -4602,7 +4602,7 @@ func TestAccountMdlsCSVHeader(t *testing.T) {
 		ThresholdIDs: "WARN_RES1;WARN_RES1",
 	},
 	}
-	exp := []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs, utils.Weights, utils.BlockersField, utils.BalanceID, utils.BalanceFilterIDs, utils.BalanceWeight, utils.BalanceBlocker,
+	exp := []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs, utils.Weights, utils.BlockersField, utils.BalanceID, utils.BalanceFilterIDs, utils.BalanceWeights, utils.BalanceBlocker,
 		utils.BalanceType, utils.BalanceOpts, utils.BalanceUnits, utils.ThresholdIDs}
 	result := testStruct.CSVHeader()
 	if !reflect.DeepEqual(exp, result) {

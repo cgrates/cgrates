@@ -182,14 +182,14 @@ func testLoadersWriteCSVs(t *testing.T) {
 	}
 	// Create and populate Accounts.csv
 	if err := writeFile(utils.AccountsCsv, `
-#Tenant,ID,FilterIDs,Weights,Opts,BalanceID,BalanceFilterIDs,BalanceWeights,BalanceType,BalanceUnits,BalanceUnitFactors,BalanceOpts,BalanceCostIncrements,BalanceAttributeIDs,BalanceRateProfileIDs,ThresholdIDs
-cgrates.org,1001,,,,,,,,,,,,,,
-cgrates.org,1001,,;20,,,,,,,,,,,,
-cgrates.org,1001,,,,MonetaryBalance,,;10,*monetary,14,fltr1&fltr2;100;fltr3;200,,fltr1&fltr2;1.3;2.3;3.3,attr1;attr2,,*none
-cgrates.org,1001,,,,,,,,,,,,,,
-cgrates.org,1001,,,,VoiceBalance,,;10,*voice,1h,,,,,,
-cgrates.org,1002,,,,MonetaryBalance,,;20,*monetary,1h,,,,,,
-cgrates.org,1002,,;30,,VoiceBalance,,;10,*voice,14,fltr3&fltr4;150;fltr5;250,,fltr3&fltr4;1.3;2.3;3.3,attr3;attr4,,*none
+#Tenant,ID,FilterIDs,Weights,Blockers,Opts,BalanceID,BalanceFilterIDs,BalanceWeights,BalanceType,BalanceUnits,BalanceUnitFactors,BalanceOpts,BalanceCostIncrements,BalanceAttributeIDs,BalanceRateProfileIDs,ThresholdIDs
+cgrates.org,1001,,,,,,,,,,,,,,,
+cgrates.org,1001,,;20,;false,,,,,,,,,,,,
+cgrates.org,1001,,,,,MonetaryBalance,,;10,*monetary,14,fltr1&fltr2;100;fltr3;200,,fltr1&fltr2;1.3;2.3;3.3,attr1;attr2,,*none
+cgrates.org,1001,,,,,,,,,,,,,,,
+cgrates.org,1001,,,,,VoiceBalance,,;10,*voice,1h,,,,,,
+cgrates.org,1002,,,,,MonetaryBalance,,;20,*monetary,1h,,,,,,
+cgrates.org,1002,,;30,;false,,VoiceBalance,,;10,*voice,14,fltr3&fltr4;150;fltr5;250,,fltr3&fltr4;1.3;2.3;3.3,attr3;attr4,,*none
 `); err != nil {
 		t.Fatal(err)
 	}
@@ -368,6 +368,11 @@ func testLoadersGetAccounts(t *testing.T) {
 					Weight: 20,
 				},
 			},
+			Blockers: utils.Blockers{
+				{
+					Blocker: false,
+				},
+			},
 			Opts: make(map[string]interface{}),
 			Balances: map[string]*utils.Balance{
 				"MonetaryBalance": {
@@ -420,6 +425,11 @@ func testLoadersGetAccounts(t *testing.T) {
 			Weights: utils.DynamicWeights{
 				{
 					Weight: 30,
+				},
+			},
+			Blockers: utils.Blockers{
+				{
+					Blocker: false,
 				},
 			},
 			Opts: make(map[string]interface{}),
