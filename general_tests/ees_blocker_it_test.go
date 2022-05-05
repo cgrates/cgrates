@@ -56,13 +56,11 @@ var (
 func TestEEsBlocker(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
-		// eesBlockerConfDIR = "ees_blocker_internal"
-		t.SkipNow()
+		eesBlockerConfDIR = "ees_blocker_internal"
 	case utils.MetaMySQL:
 		eesBlockerConfDIR = "ees_blocker_mysql"
 	case utils.MetaMongo:
-		// eesBlockerConfDIR = "ees_blocker_mongo"
-		t.SkipNow()
+		eesBlockerConfDIR = "ees_blocker_mongo"
 	case utils.MetaPostgres:
 		t.SkipNow()
 	default:

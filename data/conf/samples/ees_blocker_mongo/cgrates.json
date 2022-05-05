@@ -1,0 +1,48 @@
+{
+
+    "general": {
+        "log_level": 7
+    },
+    
+    "listen": {
+        "rpc_json": ":2012",
+        "rpc_gob": ":2013",
+        "http": ":2080"
+    },
+    
+    "data_db": {
+		"db_type": "mongo",
+		"db_name": "10",
+		"db_port": 27017
+	},
+    
+    "ees": {
+        "enabled": true,
+        "cache": {
+            "*fileCSV": {"limit": -1, "ttl": "500ms", "static_ttl": false}
+        },
+        "exporters": [
+            {
+                "id": "CSVExporter1",
+                "type": "*fileCSV",
+                "export_path": "/tmp/CSVFile1",
+                "attempts": 1,
+                "blocker": true,
+                "field_separator": ","
+            },
+            {
+                "id": "CSVExporter2",
+                "type": "*fileCSV",
+                "export_path": "/tmp/CSVFile2",
+                "attempts": 1,
+                "field_separator": ","
+            }
+        ]
+    },
+    
+    
+    "admins": {
+        "enabled": true
+    }
+    
+}
