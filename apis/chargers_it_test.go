@@ -35,589 +35,609 @@ import (
 )
 
 var (
-	chgrsPrfCfgPath   string
-	chgrsPrfCfg       *config.CGRConfig
-	chgrsSRPC         *birpc.Client
-	chgrsPrfConfigDIR string //run tests for specific configuration
+	chargersCfgPath   string
+	chargersCfg       *config.CGRConfig
+	chargersRPC       *birpc.Client
+	chargersConfigDIR string //run tests for specific configuration
 
-	sTestsChgrsPrf = []func(t *testing.T){
-		testChgrsSInitCfg,
-		testChgrsSInitDataDb,
+	sTestsChargers = []func(t *testing.T){
+		testChargersInitCfg,
+		testChargersInitDataDb,
+		testChargersStartEngine,
+		testChargersSRPCConn,
 
-		testChgrsSStartEngine,
-		testChgrsSRPCConn,
-		testGetChgrsProfileBeforeSet,
-		testGetChgrsProfilesBeforeSet,
-		testChgrsSetGetChargerProfile,
-		testChgrsGetChargerProfiles,
-		testChgrsGetChargerProfileIDs,
-		testGetChgrsProfileBeforeSet2,
-		testChgrsSetGetChargerProfile2,
-		testChgrsGetChargerProfileIDs2,
-		testChgrsGetChargerProfiles2,
-		testGetChgrsProfileBeforeSet3,
-		testChgrsSetGetChargerProfile3,
-		testChgrsGetChargerProfiles3,
-		testChgrsGetChargerProfileIDs3,
-		testChgrsRmvChargerProfile,
-		testChgrsGetChargerProfilesAfterRemove,
-		testChgrsRmvChargerProfile2,
-		testChgrsRmvChargerProfile3,
-		testGetChgrsProfileBeforeSet,
-		testChgrsSetGetChargerProfileEvent,
-		testChgrsGetChargersForEvent,
-		testChgrsProcessEvent,
-		testChgrsGetChargerProfilesWithPrefix,
+		// tests for AdminSv1 APIs
+		testChargersGetChargerProfileBeforeSet,
+		testChargersGetChargerProfileIDsBeforeSet,
+		testChargersGetChargerProfileCountBeforeSet,
+		testChargersGetChargerProfilesBeforeSet,
+		testChargersSetChargerProfiles,
+		testChargersGetChargerProfileAfterSet,
+		testChargersGetChargerProfileIDsAfterSet,
+		testChargersGetChargerProfileCountAfterSet,
+		testChargersGetChargerProfilesAfterSet,
+		testChargersRemoveChargerProfile,
+		testChargersGetChargerProfileAfterRemove,
+		testChargersGetChargerProfileIDsAfterRemove,
+		testChargersGetChargerProfileCountAfterRemove,
+		testChargersGetChargerProfilesAfterRemove,
+
+		// tests for ChargerSv1 APIs
+		testChargersSetGetChargerProfileEvent,
+		testChargersGetChargersForEvent,
+		testChargersProcessEvent,
+		testChargersGetChargerProfilesWithPrefix,
 
 		// blocker behaviour test
-		testChargersRemoveChargerProfiles,
-		testChargersSetChargerProfiles,
-		testChargersGetChargersForEvent,
+		testChargersBlockerRemoveChargerProfiles,
+		testChargersBlockerSetChargerProfiles,
+		testChargersBlockerGetChargersForEvent,
 
-		testChgrsSKillEngine,
+		testChargersSKillEngine,
 	}
 )
 
-func TestChgrsSIT(t *testing.T) {
+func TestChargersIT(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
-		chgrsPrfConfigDIR = "apis_chargers_internal"
+		chargersConfigDIR = "apis_chargers_internal"
 	case utils.MetaMongo:
-		chgrsPrfConfigDIR = "apis_chargers_mongo"
+		chargersConfigDIR = "apis_chargers_mongo"
 	case utils.MetaMySQL:
-		chgrsPrfConfigDIR = "apis_chargers_mysql"
+		chargersConfigDIR = "apis_chargers_mysql"
 	case utils.MetaPostgres:
 		t.SkipNow()
 	default:
 		t.Fatal("Unknown Database type")
 	}
-	for _, stest := range sTestsChgrsPrf {
-		t.Run(chgrsPrfConfigDIR, stest)
+	for _, stest := range sTestsChargers {
+		t.Run(chargersConfigDIR, stest)
 	}
 }
 
-func testChgrsSInitCfg(t *testing.T) {
+func testChargersInitCfg(t *testing.T) {
 	var err error
-	chgrsPrfCfgPath = path.Join(*dataDir, "conf", "samples", chgrsPrfConfigDIR)
-	chgrsPrfCfg, err = config.NewCGRConfigFromPath(context.Background(), chgrsPrfCfgPath)
+	chargersCfgPath = path.Join(*dataDir, "conf", "samples", chargersConfigDIR)
+	chargersCfg, err = config.NewCGRConfigFromPath(context.Background(), chargersCfgPath)
 	if err != nil {
 		t.Error(err)
 	}
 }
 
-func testChgrsSInitDataDb(t *testing.T) {
-	if err := engine.InitDataDB(chgrsPrfCfg); err != nil {
+func testChargersInitDataDb(t *testing.T) {
+	if err := engine.InitDataDB(chargersCfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Start CGR Engine
-func testChgrsSStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(chgrsPrfCfgPath, *waitRater); err != nil {
+func testChargersStartEngine(t *testing.T) {
+	if _, err := engine.StopStartEngine(chargersCfgPath, *waitRater); err != nil {
 		t.Fatal(err)
 	}
 }
 
-func testChgrsSRPCConn(t *testing.T) {
+func testChargersSRPCConn(t *testing.T) {
 	var err error
-	chgrsSRPC, err = newRPCClient(chgrsPrfCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
+	chargersRPC, err = newRPCClient(chargersCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}
 }
 
-func testGetChgrsProfileBeforeSet(t *testing.T) {
-	var reply *utils.TenantIDWithAPIOpts
-	if err := chgrsSRPC.Call(context.Background(), utils.AdminSv1GetChargerProfile,
-		&utils.TenantID{
-			Tenant: utils.CGRateSorg,
-			ID:     "TEST_CHARGERS_IT_TEST",
-		}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
-		t.Error(err)
+func testChargersGetChargerProfileBeforeSet(t *testing.T) {
+	var replyChargerProfile engine.ChargerProfile
+	if err := chargersRPC.Call(context.Background(), utils.AdminSv1GetChargerProfile,
+		&utils.TenantIDWithAPIOpts{
+			TenantID: &utils.TenantID{
+				Tenant: "cgrates.org",
+				ID:     "TestA_CHARGER1",
+			}}, &replyChargerProfile); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	}
 }
 
-func testGetChgrsProfilesBeforeSet(t *testing.T) {
-	var reply *utils.TenantIDWithAPIOpts
-	if err := chgrsSRPC.Call(context.Background(), utils.AdminSv1GetChargerProfiles,
-		&utils.TenantID{
-			Tenant: utils.CGRateSorg,
-			ID:     "TEST_CHARGERS_IT_TEST",
-		}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
-		t.Error(err)
+func testChargersGetChargerProfilesBeforeSet(t *testing.T) {
+	var replyChargerProfiles *[]*engine.ChargerProfile
+	if err := chargersRPC.Call(context.Background(), utils.AdminSv1GetChargerProfiles,
+		&utils.ArgsItemIDs{
+			Tenant: "cgrates.org",
+		}, &replyChargerProfiles); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	}
 }
 
-func testChgrsSetGetChargerProfile(t *testing.T) {
-	chgrsPrf := &ChargerWithAPIOpts{
-		ChargerProfile: &engine.ChargerProfile{
-			Tenant:       "cgrates.org",
-			ID:           "TEST_CHARGERS_IT_TEST",
-			RunID:        utils.MetaDefault,
-			AttributeIDs: []string{"*none"},
-			Weights: utils.DynamicWeights{
-				{
-					Weight: 20,
+func testChargersGetChargerProfileIDsBeforeSet(t *testing.T) {
+	var replyChargerProfileIDs []string
+	if err := chargersRPC.Call(context.Background(), utils.AdminSv1GetChargerProfileIDs,
+		&utils.ArgsItemIDs{
+			Tenant: "cgrates.org",
+		}, &replyChargerProfileIDs); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
+	}
+}
+
+func testChargersGetChargerProfileCountBeforeSet(t *testing.T) {
+	var replyCount int
+	if err := chargersRPC.Call(context.Background(), utils.AdminSv1GetChargerProfilesCount,
+		&utils.ArgsItemIDs{
+			Tenant: "cgrates.org",
+		}, &replyCount); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
+	} else if replyCount != 0 {
+		t.Errorf("expected <%+v>, \nreceived: <%+v>", 0, replyCount)
+	}
+}
+
+func testChargersSetChargerProfiles(t *testing.T) {
+	chargerProfiles := []*ChargerWithAPIOpts{
+		{
+			ChargerProfile: &engine.ChargerProfile{
+				ID:        "TestA_CHARGER1",
+				Tenant:    "cgrates.org",
+				FilterIDs: []string{"*string:~*req.TestCase:AdminSAPIs"},
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 30,
+					},
 				},
+				Blockers: utils.Blockers{
+					{
+						Blocker: false,
+					},
+				},
+				RunID:        "run1",
+				AttributeIDs: []string{"ATTR_TEST1"},
 			},
 		},
-		APIOpts: nil,
-	}
-	var reply string
-	if err := chgrsSRPC.Call(context.Background(), utils.AdminSv1SetChargerProfile,
-		chgrsPrf, &reply); err != nil {
-		t.Error(err)
-	} else if reply != utils.OK {
-		t.Error(err)
+		{
+			ChargerProfile: &engine.ChargerProfile{
+				ID:        "TestA_CHARGER2",
+				Tenant:    "cgrates.org",
+				FilterIDs: []string{"*string:~*req.TestCase:AdminSAPIs"},
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 10,
+					},
+				},
+				Blockers: utils.Blockers{
+					{
+						Blocker: true,
+					},
+				},
+				RunID:        "run2",
+				AttributeIDs: []string{"ATTR_TEST2"},
+			},
+		},
+		{
+			ChargerProfile: &engine.ChargerProfile{
+				ID:        "TestA_CHARGER3",
+				Tenant:    "cgrates.org",
+				FilterIDs: []string{"*string:~*req.TestCase:AdminSAPIs"},
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 20,
+					},
+				},
+				RunID:        "run3",
+				AttributeIDs: []string{"ATTR_TEST3"},
+			},
+		},
+		{
+			ChargerProfile: &engine.ChargerProfile{
+				ID:        "TestB_CHARGER1",
+				Tenant:    "cgrates.org",
+				FilterIDs: []string{"*string:~*req.TestCase:AdminSAPIs"},
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 5,
+					},
+				},
+				RunID:        "run4",
+				AttributeIDs: []string{"ATTR_TEST4"},
+			},
+		},
+		{
+			ChargerProfile: &engine.ChargerProfile{
+				ID:        "TestB_CHARGER2",
+				Tenant:    "cgrates.org",
+				FilterIDs: []string{"*string:~*req.TestCase:AdminSAPIs"},
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 25,
+					},
+				},
+				RunID:        "run5",
+				AttributeIDs: []string{"ATTR_TEST5"},
+			},
+		},
 	}
 
-	expectedChargerPrf := &engine.ChargerProfile{
-		Tenant:       "cgrates.org",
-		ID:           "TEST_CHARGERS_IT_TEST",
-		RunID:        utils.MetaDefault,
-		AttributeIDs: []string{"*none"},
+	var reply string
+	for _, chargerProfile := range chargerProfiles {
+		if err := chargersRPC.Call(context.Background(), utils.AdminSv1SetChargerProfile,
+			chargerProfile, &reply); err != nil {
+			t.Error(err)
+		} else if reply != utils.OK {
+			t.Error(err)
+		}
+	}
+}
+
+func testChargersGetChargerProfileAfterSet(t *testing.T) {
+	expectedChargerProfile := engine.ChargerProfile{
+		ID:        "TestA_CHARGER1",
+		Tenant:    "cgrates.org",
+		FilterIDs: []string{"*string:~*req.TestCase:AdminSAPIs"},
 		Weights: utils.DynamicWeights{
 			{
-				Weight: 20,
+				Weight: 30,
 			},
 		},
+		Blockers: utils.Blockers{
+			{
+				Blocker: false,
+			},
+		},
+		RunID:        "run1",
+		AttributeIDs: []string{"ATTR_TEST1"},
 	}
-	var result *engine.ChargerProfile
-	if err := chgrsSRPC.Call(context.Background(), utils.AdminSv1GetChargerProfile,
-		&utils.TenantID{
-			Tenant: utils.CGRateSorg,
-			ID:     "TEST_CHARGERS_IT_TEST",
-		}, &result); err != nil {
+	var replyChargerProfile engine.ChargerProfile
+	if err := chargersRPC.Call(context.Background(), utils.AdminSv1GetChargerProfile,
+		&utils.TenantIDWithAPIOpts{
+			TenantID: &utils.TenantID{
+				Tenant: "cgrates.org",
+				ID:     "TestA_CHARGER1",
+			}}, &replyChargerProfile); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(result, expectedChargerPrf) {
-		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expectedChargerPrf), utils.ToJSON(result))
+	} else if !reflect.DeepEqual(replyChargerProfile, expectedChargerProfile) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
+			utils.ToJSON(expectedChargerProfile), utils.ToJSON(replyChargerProfile))
 	}
 }
 
-func testChgrsGetChargerProfileIDs(t *testing.T) {
-	var reply []string
-	args := &utils.ArgsItemIDs{
-		Tenant: "cgrates.org",
-	}
-	expected := []string{"TEST_CHARGERS_IT_TEST"}
-	if err := chgrsSRPC.Call(context.Background(), utils.AdminSv1GetChargerProfileIDs,
-		args, &reply); err != nil {
+func testChargersGetChargerProfileIDsAfterSet(t *testing.T) {
+	expectedIDs := []string{"TestA_CHARGER1", "TestA_CHARGER2", "TestA_CHARGER3", "TestB_CHARGER1", "TestB_CHARGER2"}
+	var replyChargerProfileIDs []string
+	if err := chargersRPC.Call(context.Background(), utils.AdminSv1GetChargerProfileIDs,
+		&utils.ArgsItemIDs{
+			Tenant: "cgrates.org",
+		}, &replyChargerProfileIDs); err != nil {
 		t.Error(err)
-	} else if len(reply) != len(expected) {
-		t.Errorf("Expected %+v \n, received %+v", expected, reply)
+	} else {
+		sort.Strings(replyChargerProfileIDs)
+		if !utils.SliceStringEqual(replyChargerProfileIDs, expectedIDs) {
+			t.Errorf("expected: <%+v>, \nreceived: <%+v>", expectedIDs, replyChargerProfileIDs)
+		}
+	}
+
+	expectedIDs = []string{"TestA_CHARGER1", "TestA_CHARGER2", "TestA_CHARGER3"}
+	if err := chargersRPC.Call(context.Background(), utils.AdminSv1GetChargerProfileIDs,
+		&utils.ArgsItemIDs{
+			Tenant:      "cgrates.org",
+			ItemsPrefix: "TestA",
+		}, &replyChargerProfileIDs); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(replyChargerProfileIDs)
+		if !utils.SliceStringEqual(replyChargerProfileIDs, expectedIDs) {
+			t.Errorf("expected: <%+v>, \nreceived: <%+v>", expectedIDs, replyChargerProfileIDs)
+		}
+	}
+
+	expectedIDs = []string{"TestB_CHARGER1", "TestB_CHARGER2"}
+	if err := chargersRPC.Call(context.Background(), utils.AdminSv1GetChargerProfileIDs,
+		&utils.ArgsItemIDs{
+			Tenant:      "cgrates.org",
+			ItemsPrefix: "TestB",
+		}, &replyChargerProfileIDs); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(replyChargerProfileIDs)
+		if !utils.SliceStringEqual(replyChargerProfileIDs, expectedIDs) {
+			t.Errorf("expected: <%+v>, \nreceived: <%+v>", expectedIDs, replyChargerProfileIDs)
+		}
 	}
 }
 
-func testChgrsGetChargerProfiles(t *testing.T) {
-	var reply []*engine.ChargerProfile
-	args := &utils.ArgsItemIDs{
-		Tenant: "cgrates.org",
+func testChargersGetChargerProfileCountAfterSet(t *testing.T) {
+	var replyCount int
+	if err := chargersRPC.Call(context.Background(), utils.AdminSv1GetChargerProfilesCount,
+		&utils.ArgsItemIDs{
+			Tenant: "cgrates.org",
+		}, &replyCount); err != nil {
+		t.Error(err)
+	} else if replyCount != 5 {
+		t.Errorf("expected <%+v>, \nreceived: <%+v>", 0, replyCount)
 	}
-	expected := []*engine.ChargerProfile{
+
+	if err := chargersRPC.Call(context.Background(), utils.AdminSv1GetChargerProfilesCount,
+		&utils.ArgsItemIDs{
+			Tenant:      "cgrates.org",
+			ItemsPrefix: "TestA",
+		}, &replyCount); err != nil {
+		t.Error(err)
+	} else if replyCount != 3 {
+		t.Errorf("expected <%+v>, \nreceived: <%+v>", 0, replyCount)
+	}
+
+	if err := chargersRPC.Call(context.Background(), utils.AdminSv1GetChargerProfilesCount,
+		&utils.ArgsItemIDs{
+			Tenant:      "cgrates.org",
+			ItemsPrefix: "TestB",
+		}, &replyCount); err != nil {
+		t.Error(err)
+	} else if replyCount != 2 {
+		t.Errorf("expected <%+v>, \nreceived: <%+v>", 0, replyCount)
+	}
+}
+
+func testChargersGetChargerProfilesAfterSet(t *testing.T) {
+	expectedChargerProfiles := []*engine.ChargerProfile{
 		{
-			Tenant:       "cgrates.org",
-			ID:           "TEST_CHARGERS_IT_TEST",
-			RunID:        utils.MetaDefault,
-			AttributeIDs: []string{"*none"},
+			ID:        "TestA_CHARGER1",
+			Tenant:    "cgrates.org",
+			FilterIDs: []string{"*string:~*req.TestCase:AdminSAPIs"},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 30,
+				},
+			},
+			Blockers: utils.Blockers{
+				{
+					Blocker: false,
+				},
+			},
+			RunID:        "run1",
+			AttributeIDs: []string{"ATTR_TEST1"},
+		},
+		{
+			ID:        "TestA_CHARGER2",
+			Tenant:    "cgrates.org",
+			FilterIDs: []string{"*string:~*req.TestCase:AdminSAPIs"},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				},
+			},
+			Blockers: utils.Blockers{
+				{
+					Blocker: true,
+				},
+			},
+			RunID:        "run2",
+			AttributeIDs: []string{"ATTR_TEST2"},
+		},
+		{
+			ID:        "TestA_CHARGER3",
+			Tenant:    "cgrates.org",
+			FilterIDs: []string{"*string:~*req.TestCase:AdminSAPIs"},
 			Weights: utils.DynamicWeights{
 				{
 					Weight: 20,
 				},
 			},
+			RunID:        "run3",
+			AttributeIDs: []string{"ATTR_TEST3"},
+		},
+		{
+			ID:        "TestB_CHARGER1",
+			Tenant:    "cgrates.org",
+			FilterIDs: []string{"*string:~*req.TestCase:AdminSAPIs"},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 5,
+				},
+			},
+			RunID:        "run4",
+			AttributeIDs: []string{"ATTR_TEST4"},
+		},
+		{
+			ID:        "TestB_CHARGER2",
+			Tenant:    "cgrates.org",
+			FilterIDs: []string{"*string:~*req.TestCase:AdminSAPIs"},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 25,
+				},
+			},
+			RunID:        "run5",
+			AttributeIDs: []string{"ATTR_TEST5"},
 		},
 	}
-	if err := chgrsSRPC.Call(context.Background(), utils.AdminSv1GetChargerProfiles,
-		args, &reply); err != nil {
+	var replyChargerProfiles []*engine.ChargerProfile
+	if err := chargersRPC.Call(context.Background(), utils.AdminSv1GetChargerProfiles,
+		&utils.ArgsItemIDs{
+			Tenant: "cgrates.org",
+		}, &replyChargerProfiles); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(reply, expected) {
-		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(reply))
-	}
-}
-func testGetChgrsProfileBeforeSet2(t *testing.T) {
-	var reply *utils.TenantIDWithAPIOpts
-	if err := chgrsSRPC.Call(context.Background(), utils.AdminSv1GetChargerProfile,
-		&utils.TenantID{
-			Tenant: utils.CGRateSorg,
-			ID:     "TEST_CHARGERS_IT_TEST2",
-		}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
-		t.Error(err)
+	} else {
+		sort.Slice(replyChargerProfiles, func(i, j int) bool {
+			return replyChargerProfiles[i].ID < replyChargerProfiles[j].ID
+		})
+		if !reflect.DeepEqual(replyChargerProfiles, expectedChargerProfiles) {
+			t.Errorf("expected: <%+v>, \nreceived: <%+v>",
+				utils.ToJSON(expectedChargerProfiles), utils.ToJSON(replyChargerProfiles))
+		}
 	}
 }
 
-func testChgrsSetGetChargerProfile2(t *testing.T) {
-	chgrsPrf := &ChargerWithAPIOpts{
-		ChargerProfile: &engine.ChargerProfile{
-			Tenant:       "cgrates.org",
-			ID:           "TEST_CHARGERS_IT_TEST2",
-			RunID:        utils.MetaDefault,
-			AttributeIDs: []string{"*none"},
-			Weights: utils.DynamicWeights{
-				{
-					Weight: 20,
-				},
-			},
-		},
-		APIOpts: nil,
-	}
+func testChargersRemoveChargerProfile(t *testing.T) {
 	var reply string
-	if err := chgrsSRPC.Call(context.Background(), utils.AdminSv1SetChargerProfile,
-		chgrsPrf, &reply); err != nil {
+	if err := chargersRPC.Call(context.Background(), utils.AdminSv1RemoveChargerProfile,
+		&utils.TenantIDWithAPIOpts{
+			TenantID: &utils.TenantID{
+				Tenant: "cgrates.org",
+				ID:     "TestA_CHARGER2",
+			}}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
-		t.Error(err)
-	}
-
-	expectedChargerPrf := &engine.ChargerProfile{
-		Tenant:       "cgrates.org",
-		ID:           "TEST_CHARGERS_IT_TEST2",
-		RunID:        utils.MetaDefault,
-		AttributeIDs: []string{"*none"},
-		Weights: utils.DynamicWeights{
-			{
-				Weight: 20,
-			},
-		},
-	}
-	var result *engine.ChargerProfile
-	if err := chgrsSRPC.Call(context.Background(), utils.AdminSv1GetChargerProfile,
-		&utils.TenantID{
-			Tenant: utils.CGRateSorg,
-			ID:     "TEST_CHARGERS_IT_TEST2",
-		}, &result); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(result, expectedChargerPrf) {
-		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expectedChargerPrf), utils.ToJSON(result))
+		t.Error("Unexpected reply returned:", reply)
 	}
 }
 
-func testChgrsGetChargerProfileIDs2(t *testing.T) {
-	var reply []string
-	args := &utils.ArgsItemIDs{
-		Tenant: "cgrates.org",
-	}
-	expected := []string{"TEST_CHARGERS_IT_TEST", "TEST_CHARGERS_IT_TEST2"}
-	if err := chgrsSRPC.Call(context.Background(), utils.AdminSv1GetChargerProfileIDs,
-		args, &reply); err != nil {
-		t.Error(err)
-	} else if len(reply) != len(expected) {
-		t.Errorf("Expected %+v \n, received %+v", expected, reply)
+func testChargersGetChargerProfileAfterRemove(t *testing.T) {
+	var replyChargerProfile engine.ChargerProfile
+	if err := chargersRPC.Call(context.Background(), utils.AdminSv1GetChargerProfile,
+		&utils.TenantIDWithAPIOpts{
+			TenantID: &utils.TenantID{
+				Tenant: "cgrates.org",
+				ID:     "TestA_Charger2",
+			}}, &replyChargerProfile); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	}
 }
 
-func testChgrsGetChargerProfiles2(t *testing.T) {
-	var reply []*engine.ChargerProfile
-	args := &utils.ArgsItemIDs{
-		Tenant: "cgrates.org",
+func testChargersGetChargerProfileIDsAfterRemove(t *testing.T) {
+	expectedIDs := []string{"TestA_CHARGER1", "TestA_CHARGER3", "TestB_CHARGER1", "TestB_CHARGER2"}
+	var replyChargerProfileIDs []string
+	if err := chargersRPC.Call(context.Background(), utils.AdminSv1GetChargerProfileIDs,
+		&utils.ArgsItemIDs{
+			Tenant: "cgrates.org",
+		}, &replyChargerProfileIDs); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(replyChargerProfileIDs)
+		if !utils.SliceStringEqual(replyChargerProfileIDs, expectedIDs) {
+			t.Errorf("expected: <%+v>, \nreceived: <%+v>", expectedIDs, replyChargerProfileIDs)
+		}
 	}
-	expected := []*engine.ChargerProfile{
+
+	expectedIDs = []string{"TestA_CHARGER1", "TestA_CHARGER3"}
+	if err := chargersRPC.Call(context.Background(), utils.AdminSv1GetChargerProfileIDs,
+		&utils.ArgsItemIDs{
+			Tenant:      "cgrates.org",
+			ItemsPrefix: "TestA",
+		}, &replyChargerProfileIDs); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(replyChargerProfileIDs)
+		if !utils.SliceStringEqual(replyChargerProfileIDs, expectedIDs) {
+			t.Errorf("expected: <%+v>, \nreceived: <%+v>", expectedIDs, replyChargerProfileIDs)
+		}
+	}
+
+	expectedIDs = []string{"TestB_CHARGER1", "TestB_CHARGER2"}
+	if err := chargersRPC.Call(context.Background(), utils.AdminSv1GetChargerProfileIDs,
+		&utils.ArgsItemIDs{
+			Tenant:      "cgrates.org",
+			ItemsPrefix: "TestB",
+		}, &replyChargerProfileIDs); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(replyChargerProfileIDs)
+		if !utils.SliceStringEqual(replyChargerProfileIDs, expectedIDs) {
+			t.Errorf("expected: <%+v>, \nreceived: <%+v>", expectedIDs, replyChargerProfileIDs)
+		}
+	}
+}
+
+func testChargersGetChargerProfileCountAfterRemove(t *testing.T) {
+	var replyCount int
+	if err := chargersRPC.Call(context.Background(), utils.AdminSv1GetChargerProfilesCount,
+		&utils.ArgsItemIDs{
+			Tenant: "cgrates.org",
+		}, &replyCount); err != nil {
+		t.Error(err)
+	} else if replyCount != 4 {
+		t.Errorf("expected <%+v>, \nreceived: <%+v>", 0, replyCount)
+	}
+
+	if err := chargersRPC.Call(context.Background(), utils.AdminSv1GetChargerProfilesCount,
+		&utils.ArgsItemIDs{
+			Tenant:      "cgrates.org",
+			ItemsPrefix: "TestA",
+		}, &replyCount); err != nil {
+		t.Error(err)
+	} else if replyCount != 2 {
+		t.Errorf("expected <%+v>, \nreceived: <%+v>", 0, replyCount)
+	}
+
+	if err := chargersRPC.Call(context.Background(), utils.AdminSv1GetChargerProfilesCount,
+		&utils.ArgsItemIDs{
+			Tenant:      "cgrates.org",
+			ItemsPrefix: "TestB",
+		}, &replyCount); err != nil {
+		t.Error(err)
+	} else if replyCount != 2 {
+		t.Errorf("expected <%+v>, \nreceived: <%+v>", 0, replyCount)
+	}
+}
+
+func testChargersGetChargerProfilesAfterRemove(t *testing.T) {
+	expectedChargerProfiles := []*engine.ChargerProfile{
 		{
-			Tenant:       "cgrates.org",
-			ID:           "TEST_CHARGERS_IT_TEST",
-			RunID:        utils.MetaDefault,
-			AttributeIDs: []string{"*none"},
+			ID:        "TestA_CHARGER1",
+			Tenant:    "cgrates.org",
+			FilterIDs: []string{"*string:~*req.TestCase:AdminSAPIs"},
 			Weights: utils.DynamicWeights{
 				{
-					Weight: 20,
+					Weight: 30,
 				},
 			},
-		},
-		{
-			Tenant:       "cgrates.org",
-			ID:           "TEST_CHARGERS_IT_TEST2",
-			RunID:        utils.MetaDefault,
-			AttributeIDs: []string{"*none"},
-			Weights: utils.DynamicWeights{
+			Blockers: utils.Blockers{
 				{
-					Weight: 20,
+					Blocker: false,
 				},
 			},
-		},
-	}
-	if err := chgrsSRPC.Call(context.Background(), utils.AdminSv1GetChargerProfiles,
-		args, &reply); err != nil {
-		t.Error(err)
-	}
-	sort.Slice(reply, func(i, j int) bool {
-		return (reply)[i].ID < (reply)[j].ID
-	})
-	if !reflect.DeepEqual(reply, expected) {
-		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(reply))
-	}
-}
-
-func testGetChgrsProfileBeforeSet3(t *testing.T) {
-	var reply *utils.TenantIDWithAPIOpts
-	if err := chgrsSRPC.Call(context.Background(), utils.AdminSv1GetChargerProfile,
-		&utils.TenantID{
-			Tenant: utils.CGRateSorg,
-			ID:     "TEST_CHARGERS_IT_TEST3",
-		}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
-		t.Error(err)
-	}
-}
-
-func testChgrsSetGetChargerProfile3(t *testing.T) {
-	chgrsPrf := &ChargerWithAPIOpts{
-		ChargerProfile: &engine.ChargerProfile{
-			Tenant:       "cgrates.org",
-			ID:           "TEST_CHARGERS_IT_TEST3",
-			RunID:        utils.MetaDefault,
-			AttributeIDs: []string{"*none"},
-			Weights: utils.DynamicWeights{
-				{
-					Weight: 20,
-				},
-			},
-		},
-		APIOpts: nil,
-	}
-	var reply string
-	if err := chgrsSRPC.Call(context.Background(), utils.AdminSv1SetChargerProfile,
-		chgrsPrf, &reply); err != nil {
-		t.Error(err)
-	} else if reply != utils.OK {
-		t.Error(err)
-	}
-
-	expectedChargerPrf := &engine.ChargerProfile{
-		Tenant:       "cgrates.org",
-		ID:           "TEST_CHARGERS_IT_TEST3",
-		RunID:        utils.MetaDefault,
-		AttributeIDs: []string{"*none"},
-		Weights: utils.DynamicWeights{
-			{
-				Weight: 20,
-			},
-		},
-	}
-	var result *engine.ChargerProfile
-	if err := chgrsSRPC.Call(context.Background(), utils.AdminSv1GetChargerProfile,
-		&utils.TenantID{
-			Tenant: utils.CGRateSorg,
-			ID:     "TEST_CHARGERS_IT_TEST3",
-		}, &result); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(result, expectedChargerPrf) {
-		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expectedChargerPrf), utils.ToJSON(result))
-	}
-}
-
-func testChgrsGetChargerProfileIDs3(t *testing.T) {
-	var reply []string
-	args := &utils.ArgsItemIDs{
-		Tenant: "cgrates.org",
-	}
-	expected := []string{"TEST_CHARGERS_IT_TEST", "TEST_CHARGERS_IT_TEST2", "TEST_CHARGERS_IT_TEST3"}
-	if err := chgrsSRPC.Call(context.Background(), utils.AdminSv1GetChargerProfileIDs,
-		args, &reply); err != nil {
-		t.Error(err)
-	} else if len(reply) != len(expected) {
-		t.Errorf("Expected %+v \n, received %+v", expected, reply)
-	}
-}
-
-func testChgrsGetChargerProfiles3(t *testing.T) {
-	var reply []*engine.ChargerProfile
-	args := &utils.ArgsItemIDs{
-		Tenant: "cgrates.org",
-	}
-	expected := []*engine.ChargerProfile{
-		{
-			Tenant:       "cgrates.org",
-			ID:           "TEST_CHARGERS_IT_TEST",
-			RunID:        utils.MetaDefault,
-			AttributeIDs: []string{"*none"},
-			Weights: utils.DynamicWeights{
-				{
-					Weight: 20,
-				},
-			},
+			RunID:        "run1",
+			AttributeIDs: []string{"ATTR_TEST1"},
 		},
 		{
-			Tenant:       "cgrates.org",
-			ID:           "TEST_CHARGERS_IT_TEST2",
-			RunID:        utils.MetaDefault,
-			AttributeIDs: []string{"*none"},
+			ID:        "TestA_CHARGER3",
+			Tenant:    "cgrates.org",
+			FilterIDs: []string{"*string:~*req.TestCase:AdminSAPIs"},
 			Weights: utils.DynamicWeights{
 				{
 					Weight: 20,
 				},
 			},
+			RunID:        "run3",
+			AttributeIDs: []string{"ATTR_TEST3"},
 		},
 		{
-			Tenant:       "cgrates.org",
-			ID:           "TEST_CHARGERS_IT_TEST3",
-			RunID:        utils.MetaDefault,
-			AttributeIDs: []string{"*none"},
+			ID:        "TestB_CHARGER1",
+			Tenant:    "cgrates.org",
+			FilterIDs: []string{"*string:~*req.TestCase:AdminSAPIs"},
 			Weights: utils.DynamicWeights{
 				{
-					Weight: 20,
+					Weight: 5,
 				},
 			},
-		},
-	}
-	if err := chgrsSRPC.Call(context.Background(), utils.AdminSv1GetChargerProfiles,
-		args, &reply); err != nil {
-		t.Error(err)
-	}
-	sort.Slice(reply, func(i, j int) bool {
-		return (reply)[i].ID < (reply)[j].ID
-	})
-	if !reflect.DeepEqual(reply, expected) {
-		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(reply))
-	}
-}
-
-func testChgrsRmvChargerProfile(t *testing.T) {
-	var reply string
-	args := &utils.TenantIDWithAPIOpts{
-		TenantID: &utils.TenantID{
-			Tenant: utils.CGRateSorg,
-			ID:     "TEST_CHARGERS_IT_TEST3",
-		},
-		APIOpts: nil,
-	}
-	expected := "OK"
-	if err := chgrsSRPC.Call(context.Background(), utils.AdminSv1RemoveChargerProfile,
-		args, &reply); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(reply, expected) {
-		t.Errorf("Expected %+v \n, received %+v", expected, reply)
-	}
-	var reply2 *utils.TenantIDWithAPIOpts
-	if err := chgrsSRPC.Call(context.Background(), utils.AdminSv1GetChargerProfile,
-		&utils.TenantID{
-			Tenant: utils.CGRateSorg,
-			ID:     "TEST_CHARGERS_IT_TEST3",
-		}, &reply2); err == nil || err.Error() != utils.ErrNotFound.Error() {
-		t.Error(err)
-	}
-	var reply3 []string
-	args2 := &utils.ArgsItemIDs{
-		Tenant: "cgrates.org",
-	}
-	expected2 := []string{"TEST_CHARGERS_IT_TEST", "TEST_CHARGERS_IT_TEST2"}
-	if err := chgrsSRPC.Call(context.Background(), utils.AdminSv1GetChargerProfileIDs,
-		args2, &reply3); err != nil {
-		t.Error(err)
-	} else if len(reply) != len(expected) {
-		t.Errorf("Expected %+v \n, received %+v", expected2, reply3)
-	}
-}
-
-func testChgrsGetChargerProfilesAfterRemove(t *testing.T) {
-	var reply []*engine.ChargerProfile
-	args := &utils.ArgsItemIDs{
-		Tenant: "cgrates.org",
-	}
-	expected := []*engine.ChargerProfile{
-		{
-			Tenant:       "cgrates.org",
-			ID:           "TEST_CHARGERS_IT_TEST",
-			RunID:        utils.MetaDefault,
-			AttributeIDs: []string{"*none"},
-			Weights: utils.DynamicWeights{
-				{
-					Weight: 20,
-				},
-			},
+			RunID:        "run4",
+			AttributeIDs: []string{"ATTR_TEST4"},
 		},
 		{
-			Tenant:       "cgrates.org",
-			ID:           "TEST_CHARGERS_IT_TEST2",
-			RunID:        utils.MetaDefault,
-			AttributeIDs: []string{"*none"},
+			ID:        "TestB_CHARGER2",
+			Tenant:    "cgrates.org",
+			FilterIDs: []string{"*string:~*req.TestCase:AdminSAPIs"},
 			Weights: utils.DynamicWeights{
 				{
-					Weight: 20,
+					Weight: 25,
 				},
 			},
+			RunID:        "run5",
+			AttributeIDs: []string{"ATTR_TEST5"},
 		},
 	}
-	if err := chgrsSRPC.Call(context.Background(), utils.AdminSv1GetChargerProfiles,
-		args, &reply); err != nil {
+	var replyChargerProfiles []*engine.ChargerProfile
+	if err := chargersRPC.Call(context.Background(), utils.AdminSv1GetChargerProfiles,
+		&utils.ArgsItemIDs{
+			Tenant: "cgrates.org",
+		}, &replyChargerProfiles); err != nil {
 		t.Error(err)
-	}
-	sort.Slice(reply, func(i, j int) bool {
-		return (reply)[i].ID < (reply)[j].ID
-	})
-	if !reflect.DeepEqual(reply, expected) {
-		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(reply))
+	} else {
+		sort.Slice(replyChargerProfiles, func(i, j int) bool {
+			return replyChargerProfiles[i].ID < replyChargerProfiles[j].ID
+		})
+		if !reflect.DeepEqual(replyChargerProfiles, expectedChargerProfiles) {
+			t.Errorf("expected: <%+v>, \nreceived: <%+v>",
+				utils.ToJSON(expectedChargerProfiles), utils.ToJSON(replyChargerProfiles))
+		}
 	}
 }
 
-func testChgrsRmvChargerProfile2(t *testing.T) {
-	var reply string
-	args := &utils.TenantIDWithAPIOpts{
-		TenantID: &utils.TenantID{
-			Tenant: utils.CGRateSorg,
-			ID:     "TEST_CHARGERS_IT_TEST2",
-		},
-		APIOpts: nil,
-	}
-	expected := "OK"
-	if err := chgrsSRPC.Call(context.Background(), utils.AdminSv1RemoveChargerProfile,
-		args, &reply); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(reply, expected) {
-		t.Errorf("Expected %+v \n, received %+v", expected, reply)
-	}
-	var reply2 *utils.TenantIDWithAPIOpts
-	if err := chgrsSRPC.Call(context.Background(), utils.AdminSv1GetChargerProfile,
-		&utils.TenantID{
-			Tenant: utils.CGRateSorg,
-			ID:     "TEST_CHARGERS_IT_TEST2",
-		}, &reply2); err == nil || err.Error() != utils.ErrNotFound.Error() {
-		t.Error(err)
-	}
-	var reply3 []string
-	args2 := &utils.ArgsItemIDs{
-		Tenant: "cgrates.org",
-	}
-	expected2 := []string{"TEST_CHARGERS_IT_TEST"}
-	if err := chgrsSRPC.Call(context.Background(), utils.AdminSv1GetChargerProfileIDs,
-		args2, &reply3); err != nil {
-		t.Error(err)
-	} else if len(reply) != len(expected) {
-		t.Errorf("Expected %+v \n, received %+v", expected2, reply3)
-	}
-}
-
-func testChgrsRmvChargerProfile3(t *testing.T) {
-	var reply string
-	args := &utils.TenantIDWithAPIOpts{
-		TenantID: &utils.TenantID{
-			Tenant: utils.CGRateSorg,
-			ID:     "TEST_CHARGERS_IT_TEST",
-		},
-		APIOpts: nil,
-	}
-	expected := "OK"
-	if err := chgrsSRPC.Call(context.Background(), utils.AdminSv1RemoveChargerProfile,
-		args, &reply); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(reply, expected) {
-		t.Errorf("Expected %+v \n, received %+v", expected, reply)
-	}
-	var reply2 *utils.TenantIDWithAPIOpts
-	if err := chgrsSRPC.Call(context.Background(), utils.AdminSv1GetChargerProfile,
-		&utils.TenantID{
-			Tenant: utils.CGRateSorg,
-			ID:     "TEST_CHARGERS_IT_TEST",
-		}, &reply2); err == nil || err.Error() != utils.ErrNotFound.Error() {
-		t.Error(err)
-	}
-	var reply3 []string
-	args2 := &utils.ArgsItemIDs{
-		Tenant: "cgrates.org",
-	}
-	if err := chgrsSRPC.Call(context.Background(), utils.AdminSv1GetChargerProfileIDs,
-		args2, &reply3); err == nil || err.Error() != utils.ErrNotFound.Error() {
-		t.Error(err)
-	}
-}
-
-func testChgrsGetChargerProfilesWithPrefix(t *testing.T) {
+func testChargersGetChargerProfilesWithPrefix(t *testing.T) {
 	chgrsPrf := &ChargerWithAPIOpts{
 		ChargerProfile: &engine.ChargerProfile{
 			Tenant:       "cgrates.org",
@@ -633,7 +653,7 @@ func testChgrsGetChargerProfilesWithPrefix(t *testing.T) {
 		APIOpts: nil,
 	}
 	var reply string
-	if err := chgrsSRPC.Call(context.Background(), utils.AdminSv1SetChargerProfile,
+	if err := chargersRPC.Call(context.Background(), utils.AdminSv1SetChargerProfile,
 		chgrsPrf, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -652,7 +672,7 @@ func testChgrsGetChargerProfilesWithPrefix(t *testing.T) {
 		},
 	}
 	var result *engine.ChargerProfile
-	if err := chgrsSRPC.Call(context.Background(), utils.AdminSv1GetChargerProfile,
+	if err := chargersRPC.Call(context.Background(), utils.AdminSv1GetChargerProfile,
 		&utils.TenantID{
 			Tenant: utils.CGRateSorg,
 			ID:     "aTEST_CHARGERS_IT_TEST",
@@ -678,7 +698,7 @@ func testChgrsGetChargerProfilesWithPrefix(t *testing.T) {
 			},
 		},
 	}
-	if err := chgrsSRPC.Call(context.Background(), utils.AdminSv1GetChargerProfiles,
+	if err := chargersRPC.Call(context.Background(), utils.AdminSv1GetChargerProfiles,
 		args, &reply2); err != nil {
 		t.Error(err)
 	}
@@ -690,7 +710,7 @@ func testChgrsGetChargerProfilesWithPrefix(t *testing.T) {
 	}
 }
 
-func testChgrsSetGetChargerProfileEvent(t *testing.T) {
+func testChargersSetGetChargerProfileEvent(t *testing.T) {
 	chgrsPrf := &ChargerWithAPIOpts{
 		ChargerProfile: &engine.ChargerProfile{
 			Tenant:       "cgrates.org",
@@ -706,7 +726,7 @@ func testChgrsSetGetChargerProfileEvent(t *testing.T) {
 		APIOpts: nil,
 	}
 	var reply string
-	if err := chgrsSRPC.Call(context.Background(), utils.AdminSv1SetChargerProfile,
+	if err := chargersRPC.Call(context.Background(), utils.AdminSv1SetChargerProfile,
 		chgrsPrf, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -725,7 +745,7 @@ func testChgrsSetGetChargerProfileEvent(t *testing.T) {
 		},
 	}
 	var result *engine.ChargerProfile
-	if err := chgrsSRPC.Call(context.Background(), utils.AdminSv1GetChargerProfile,
+	if err := chargersRPC.Call(context.Background(), utils.AdminSv1GetChargerProfile,
 		&utils.TenantID{
 			Tenant: utils.CGRateSorg,
 			ID:     "TEST_CHARGERS_IT_TEST",
@@ -735,7 +755,7 @@ func testChgrsSetGetChargerProfileEvent(t *testing.T) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expectedChargerPrf), utils.ToJSON(result))
 	}
 }
-func testChgrsGetChargersForEvent(t *testing.T) {
+func testChargersGetChargersForEvent(t *testing.T) {
 
 	expected := &engine.ChargerProfiles{
 		{
@@ -760,7 +780,7 @@ func testChgrsGetChargersForEvent(t *testing.T) {
 		APIOpts: map[string]interface{}{},
 	}
 	reply := &engine.ChargerProfiles{}
-	if err := chgrsSRPC.Call(context.Background(), utils.ChargerSv1GetChargersForEvent,
+	if err := chargersRPC.Call(context.Background(), utils.ChargerSv1GetChargersForEvent,
 		cgrEv, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expected) {
@@ -768,7 +788,7 @@ func testChgrsGetChargersForEvent(t *testing.T) {
 	}
 }
 
-func testChgrsProcessEvent(t *testing.T) {
+func testChargersProcessEvent(t *testing.T) {
 	expected := &[]*engine.ChrgSProcessEventReply{
 		{
 			ChargerSProfile: "TEST_CHARGERS_IT_TEST",
@@ -803,7 +823,7 @@ func testChgrsProcessEvent(t *testing.T) {
 		APIOpts: map[string]interface{}{},
 	}
 	reply := &[]*engine.ChrgSProcessEventReply{}
-	if err := chgrsSRPC.Call(context.Background(), utils.ChargerSv1ProcessEvent,
+	if err := chargersRPC.Call(context.Background(), utils.ChargerSv1ProcessEvent,
 		cgrEv, &reply); err != nil {
 		t.Error(err)
 	} else {
@@ -814,13 +834,13 @@ func testChgrsProcessEvent(t *testing.T) {
 	}
 }
 
-func testChargersRemoveChargerProfiles(t *testing.T) {
+func testChargersBlockerRemoveChargerProfiles(t *testing.T) {
 	args := &utils.ArgsItemIDs{
 		Tenant: "cgrates.org",
 	}
-	expected := []string{"TEST_CHARGERS_IT_TEST", "aTEST_CHARGERS_IT_TEST"}
+	expected := []string{"TEST_CHARGERS_IT_TEST", "TestA_CHARGER1", "TestA_CHARGER3", "TestB_CHARGER1", "TestB_CHARGER2", "aTEST_CHARGERS_IT_TEST"}
 	var chargerProfileIDs []string
-	if err := chgrsSRPC.Call(context.Background(), utils.AdminSv1GetChargerProfileIDs, args, &chargerProfileIDs); err != nil {
+	if err := chargersRPC.Call(context.Background(), utils.AdminSv1GetChargerProfileIDs, args, &chargerProfileIDs); err != nil {
 		t.Fatal(err)
 	} else {
 		sort.Strings(chargerProfileIDs)
@@ -836,17 +856,17 @@ func testChargersRemoveChargerProfiles(t *testing.T) {
 				ID:     chargerProfileID,
 			},
 		}
-		if err := chgrsSRPC.Call(context.Background(), utils.AdminSv1RemoveChargerProfile, argsRem, &reply); err != nil {
+		if err := chargersRPC.Call(context.Background(), utils.AdminSv1RemoveChargerProfile, argsRem, &reply); err != nil {
 			t.Fatal(err)
 		}
 	}
-	if err := chgrsSRPC.Call(context.Background(), utils.AdminSv1GetChargerProfileIDs, args, &chargerProfileIDs); err == nil ||
+	if err := chargersRPC.Call(context.Background(), utils.AdminSv1GetChargerProfileIDs, args, &chargerProfileIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	}
 }
 
-func testChargersSetChargerProfiles(t *testing.T) {
+func testChargersBlockerSetChargerProfiles(t *testing.T) {
 	chargerProfiles := []*ChargerWithAPIOpts{
 		{
 			ChargerProfile: &engine.ChargerProfile{
@@ -914,7 +934,7 @@ func testChargersSetChargerProfiles(t *testing.T) {
 
 	var reply string
 	for _, chargerProfile := range chargerProfiles {
-		if err := chgrsSRPC.Call(context.Background(), utils.AdminSv1SetChargerProfile,
+		if err := chargersRPC.Call(context.Background(), utils.AdminSv1SetChargerProfile,
 			chargerProfile, &reply); err != nil {
 			t.Error(err)
 		} else if reply != utils.OK {
@@ -923,7 +943,7 @@ func testChargersSetChargerProfiles(t *testing.T) {
 	}
 }
 
-func testChargersGetChargersForEvent(t *testing.T) {
+func testChargersBlockerGetChargersForEvent(t *testing.T) {
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "EventGetChargerProfiles",
@@ -978,7 +998,7 @@ func testChargersGetChargersForEvent(t *testing.T) {
 		},
 	}
 	var reply engine.ChargerProfiles
-	if err := chgrsSRPC.Call(context.Background(), utils.ChargerSv1GetChargersForEvent, args, &reply); err != nil {
+	if err := chargersRPC.Call(context.Background(), utils.ChargerSv1GetChargersForEvent, args, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ToJSON(expected), utils.ToJSON(reply))
@@ -986,7 +1006,7 @@ func testChargersGetChargersForEvent(t *testing.T) {
 }
 
 //Kill the engine when it is about to be finished
-func testChgrsSKillEngine(t *testing.T) {
+func testChargersSKillEngine(t *testing.T) {
 	if err := engine.KillEngine(100); err != nil {
 		t.Error(err)
 	}
