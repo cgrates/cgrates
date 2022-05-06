@@ -364,14 +364,15 @@ type AccountMdl struct {
 	BalanceID             string `index:"6" re:""`
 	BalanceFilterIDs      string `index:"7" re:""`
 	BalanceWeights        string `index:"8" re:""`
-	BalanceType           string `index:"9" re:""`
-	BalanceUnits          string `index:"10" re:""`
-	BalanceUnitFactors    string `index:"11" re:""`
-	BalanceOpts           string `index:"12" re:""`
-	BalanceCostIncrements string `index:"13" re:""`
-	BalanceAttributeIDs   string `index:"14" re:""`
-	BalanceRateProfileIDs string `index:"15" re:""`
-	ThresholdIDs          string `index:"16" re:""`
+	BalanceBlockers       string `index:"9" re:""`
+	BalanceType           string `index:"10" re:""`
+	BalanceUnits          string `index:"11" re:""`
+	BalanceUnitFactors    string `index:"12" re:""`
+	BalanceOpts           string `index:"13" re:""`
+	BalanceCostIncrements string `index:"14" re:""`
+	BalanceAttributeIDs   string `index:"15" re:""`
+	BalanceRateProfileIDs string `index:"16" re:""`
+	ThresholdIDs          string `index:"17" re:""`
 	CreatedAt             time.Time
 }
 

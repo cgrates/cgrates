@@ -65,6 +65,7 @@ var (
 		testStatsProcessEventWithBlockersOnMetrics,
 		testStatsProcessEventWithBlockersOnMetricsSecond,
 		testStatsProcessEventNoBlockers,
+		testStatsGetStatQueueForEventWithBlockers,
 		// check if stats, thresholds and actions subsystems function properly together
 		testStatsStartServer,
 		testStatsSetActionProfileBeforeProcessEv,
@@ -156,7 +157,7 @@ func testStatsGetStatQueueBeforeSet(t *testing.T) {
 		},
 	}
 
-	var rplySqs engine.StatQueues
+	var rplySqs []string
 	if err := sqRPC.Call(context.Background(), utils.StatSv1GetStatQueuesForEvent,
 		args, &rplySqs); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
@@ -722,7 +723,6 @@ func testStatsProcessEventWithBlockersOnMetrics(t *testing.T) {
 	} else if !reflect.DeepEqual(rplyDec, expFloat) {
 		t.Errorf("Expected %v, received %v", utils.ToJSON(expFloat), utils.ToJSON(rplyDec))
 	}
-
 }
 
 func testStatsProcessEventWithBlockersOnMetricsSecond(t *testing.T) {
@@ -820,6 +820,123 @@ func testStatsProcessEventNoBlockers(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rplyDec, expFloat) {
 		t.Errorf("Expected %v, received %v", utils.ToJSON(expFloat), utils.ToJSON(rplyDec))
+	}
+}
+
+func testStatsGetStatQueueForEventWithBlockers(t *testing.T) {
+	sqPrf := &engine.StatQueueProfileWithAPIOpts{
+		StatQueueProfile: &engine.StatQueueProfile{
+			Tenant:      "cgrates.org",
+			ID:          "SQ_Blockers1",
+			FilterIDs:   []string{"*string:~*req.StatsBlockers:correct"},
+			QueueLength: 100,
+			TTL:         time.Duration(1 * time.Minute),
+			MinItems:    0,
+			Blockers: utils.Blockers{
+				{
+					Blocker: false,
+				},
+			},
+			Stored: true,
+			Metrics: []*engine.MetricWithFilters{
+				{
+					MetricID: utils.MetaTCD,
+				},
+			},
+			ThresholdIDs: []string{"*none"},
+		},
+	}
+	sqPrf2 := &engine.StatQueueProfileWithAPIOpts{
+		StatQueueProfile: &engine.StatQueueProfile{
+			Tenant:    "cgrates.org",
+			ID:        "SQ_Blockers2",
+			FilterIDs: []string{"*string:~*req.StatsBlockers:correct"},
+			Blockers: utils.Blockers{
+				{
+					FilterIDs: []string{"*string:~*opts.*usage:1m"},
+					Blocker:   true,
+				},
+				{
+					Blocker: false,
+				},
+			},
+			QueueLength: 100,
+			TTL:         time.Duration(1 * time.Minute),
+			Stored:      true,
+			Metrics: []*engine.MetricWithFilters{
+				{
+					MetricID: utils.MetaTCD,
+				},
+			},
+			ThresholdIDs: []string{"*none"},
+		},
+	}
+	sqPrf3 := &engine.StatQueueProfileWithAPIOpts{
+		StatQueueProfile: &engine.StatQueueProfile{
+			Tenant:    "cgrates.org",
+			ID:        "SQ_Blockers3",
+			FilterIDs: []string{"*string:~*req.StatsBlockers:correct"},
+			Blockers: utils.Blockers{
+				{
+					Blocker: false,
+				},
+			},
+			QueueLength: 100,
+			TTL:         time.Duration(1 * time.Minute),
+			MinItems:    0,
+			Stored:      true,
+			Metrics: []*engine.MetricWithFilters{
+				{
+					MetricID: utils.MetaTCD,
+				},
+			},
+			ThresholdIDs: []string{"*none"},
+		},
+	}
+
+	var reply string
+	if err := sqRPC.Call(context.Background(), utils.AdminSv1SetStatQueueProfile,
+		sqPrf, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned:", reply)
+	}
+	if err := sqRPC.Call(context.Background(), utils.AdminSv1SetStatQueueProfile,
+		sqPrf2, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned:", reply)
+	}
+	if err := sqRPC.Call(context.Background(), utils.AdminSv1SetStatQueueProfile,
+		sqPrf3, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned:", reply)
+	}
+
+	args := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "StatsEventTest",
+		Event: map[string]interface{}{
+			"StatsBlockers":    "correct",
+			utils.AccountField: "1001",
+		},
+		APIOpts: map[string]interface{}{
+			"*usage": "1m",
+		},
+	}
+
+	var rplySqs []string
+	expected := []string{"SQ_Blockers1", "SQ_Blockers2", "SQ_Blockers3"}
+	if err := sqRPC.Call(context.Background(), utils.StatSv1GetStatQueuesForEvent,
+		args, &rplySqs); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(rplySqs)
+		sort.Strings(expected)
+		if !reflect.DeepEqual(rplySqs, expected) {
+			t.Errorf("Expected %v, received %v", expected, rplySqs)
+		}
 	}
 }
 

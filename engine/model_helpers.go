@@ -2299,9 +2299,8 @@ type AccountMdls []*AccountMdl
 // CSVHeader return the header for csv fields as a slice of string
 func (apm AccountMdls) CSVHeader() (result []string) {
 	return []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs,
-		utils.Weights, utils.BlockersField, utils.Opts, utils.BalanceID, utils.BalanceFilterIDs, utils.BalanceWeights, utils.BalanceType, utils.BalanceUnits, utils.BalanceUnitFactors, utils.BalanceOpts, utils.BalanceCostIncrements, utils.BalanceAttributeIDs, utils.BalanceRateProfileIDs,
-		utils.ThresholdIDs,
-	}
+		utils.Weights, utils.BlockersField, utils.Opts, utils.BalanceID, utils.BalanceFilterIDs, utils.BalanceWeights, utils.BalanceBlockers, utils.BalanceType, utils.BalanceUnits, utils.BalanceUnitFactors, utils.BalanceOpts, utils.BalanceCostIncrements, utils.BalanceAttributeIDs, utils.BalanceRateProfileIDs,
+		utils.ThresholdIDs}
 }
 
 func (apm AccountMdls) AsTPAccount() (result []*utils.TPAccount, err error) {
@@ -2335,11 +2334,12 @@ func (apm AccountMdls) AsTPAccount() (result []*utils.TPAccount, err error) {
 		}
 		if tp.BalanceID != utils.EmptyString {
 			aPrf.Balances[tp.BalanceID] = &utils.TPAccountBalance{
-				ID:      tp.BalanceID,
-				Weights: tp.BalanceWeights,
-				Type:    tp.BalanceType,
-				Opts:    tp.BalanceOpts,
-				Units:   tp.BalanceUnits,
+				ID:       tp.BalanceID,
+				Weights:  tp.BalanceWeights,
+				Blockers: tp.BalanceBlockers,
+				Type:     tp.BalanceType,
+				Opts:     tp.BalanceOpts,
+				Units:    tp.BalanceUnits,
 			}
 
 			if tp.BalanceFilterIDs != utils.EmptyString {
@@ -2437,6 +2437,7 @@ func APItoModelTPAccount(tPrf *utils.TPAccount) (mdls AccountMdls) {
 			mdl.BalanceFilterIDs += val
 		}
 		mdl.BalanceWeights = balance.Weights
+		mdl.BalanceBlockers = balance.Blockers
 		mdl.BalanceType = balance.Type
 		mdl.BalanceOpts = balance.Opts
 		for i, costIncr := range balance.CostIncrement {
@@ -2509,11 +2510,18 @@ func APItoAccount(tpAp *utils.TPAccount, timezone string) (ap *utils.Account, er
 			ap.Balances[id].Units = units
 		}
 		if bal.Weights != utils.EmptyString {
-			weight, err := utils.NewDynamicWeightsFromString(bal.Weights, utils.InfieldSep, utils.ANDSep)
+			weights, err := utils.NewDynamicWeightsFromString(bal.Weights, utils.InfieldSep, utils.ANDSep)
 			if err != nil {
 				return nil, err
 			}
-			ap.Balances[id].Weights = weight
+			ap.Balances[id].Weights = weights
+		}
+		if bal.Blockers != utils.EmptyString {
+			blockers, err := utils.NewBlockersFromString(bal.Blockers, utils.InfieldSep, utils.ANDSep)
+			if err != nil {
+				return nil, err
+			}
+			ap.Balances[id].Blockers = blockers
 		}
 		if bal.UnitFactors != nil {
 			ap.Balances[id].UnitFactors = make([]*utils.UnitFactor, len(bal.UnitFactors))
@@ -2589,6 +2597,7 @@ func AccountToAPI(ap *utils.Account) (tpAp *utils.TPAccount) {
 			ID:             bal.ID,
 			FilterIDs:      make([]string, len(bal.FilterIDs)),
 			Weights:        bal.Weights.String(utils.InfieldSep, utils.ANDSep),
+			Blockers:       bal.Blockers.String(utils.InfieldSep, utils.ANDSep),
 			Type:           bal.Type,
 			Units:          bal.Units.String(),
 			CostIncrement:  make([]*utils.TPBalanceCostIncrement, len(bal.CostIncrements)),

@@ -182,14 +182,14 @@ func testLoadersWriteCSVs(t *testing.T) {
 	}
 	// Create and populate Accounts.csv
 	if err := writeFile(utils.AccountsCsv, `
-#Tenant,ID,FilterIDs,Weights,Blockers,Opts,BalanceID,BalanceFilterIDs,BalanceWeights,BalanceType,BalanceUnits,BalanceUnitFactors,BalanceOpts,BalanceCostIncrements,BalanceAttributeIDs,BalanceRateProfileIDs,ThresholdIDs
-cgrates.org,1001,,,,,,,,,,,,,,,
-cgrates.org,1001,,;20,;false,,,,,,,,,,,,
-cgrates.org,1001,,,,,MonetaryBalance,,;10,*monetary,14,fltr1&fltr2;100;fltr3;200,,fltr1&fltr2;1.3;2.3;3.3,attr1;attr2,,*none
-cgrates.org,1001,,,,,,,,,,,,,,,
-cgrates.org,1001,,,,,VoiceBalance,,;10,*voice,1h,,,,,,
-cgrates.org,1002,,,,,MonetaryBalance,,;20,*monetary,1h,,,,,,
-cgrates.org,1002,,;30,;false,,VoiceBalance,,;10,*voice,14,fltr3&fltr4;150;fltr5;250,,fltr3&fltr4;1.3;2.3;3.3,attr3;attr4,,*none
+#Tenant,ID,FilterIDs,Weights,Blockers,Opts,BalanceID,BalanceFilterIDs,BalanceWeights,BalanceBlockers,BalanceType,BalanceUnits,BalanceUnitFactors,BalanceOpts,BalanceCostIncrements,BalanceAttributeIDs,BalanceRateProfileIDs,ThresholdIDs
+cgrates.org,1001,,,,,,,,,,,,,,,,
+cgrates.org,1001,,;20,;false,,,,,,,,,,,,,
+cgrates.org,1001,,,,,MonetaryBalance,,;10,*string:~*req.Account:1002;true;;false,*monetary,14,fltr1&fltr2;100;fltr3;200,,fltr1&fltr2;1.3;2.3;3.3,attr1;attr2,,*none
+cgrates.org,1001,,,,,,,,,,,,,,,,
+cgrates.org,1001,,,,,VoiceBalance,,;10,,*voice,1h,,,,,,
+cgrates.org,1002,,,,,MonetaryBalance,,;20,,*monetary,1h,,,,,,
+cgrates.org,1002,,;30,;false,,VoiceBalance,,;10,,*voice,14,fltr3&fltr4;150;fltr5;250,,fltr3&fltr4;1.3;2.3;3.3,attr3;attr4,,*none
 `); err != nil {
 		t.Fatal(err)
 	}
@@ -382,6 +382,15 @@ func testLoadersGetAccounts(t *testing.T) {
 							Weight: 10,
 						},
 					},
+					Blockers: utils.Blockers{
+						{
+							FilterIDs: []string{"*string:~*req.Account:1002"},
+							Blocker:   true,
+						},
+						{
+							Blocker: false,
+						},
+					},
 					Type:  utils.MetaMonetary,
 					Units: utils.NewDecimal(14, 0),
 					UnitFactors: []*utils.UnitFactor{
@@ -441,10 +450,10 @@ func testLoadersGetAccounts(t *testing.T) {
 							Weight: 20,
 						},
 					},
+
 					Type:  utils.MetaMonetary,
 					Units: utils.NewDecimal(int64(time.Hour), 0),
-
-					Opts: map[string]interface{}{},
+					Opts:  map[string]interface{}{},
 				},
 				"VoiceBalance": {
 					ID: "VoiceBalance",

@@ -103,7 +103,7 @@ func testDspRPrfCostForEvent(t *testing.T) {
 					IntervalRates: []*utils.IntervalRate{
 						{
 							IntervalStart: utils.NewDecimal(0, 0),
-							RecurrentFee:  utils.NewDecimal(12, 1),
+							RecurrentFee:  utils.NewDecimal(12, 2),
 							Unit:          utils.NewDecimal(int64(time.Minute), 0),
 							Increment:     utils.NewDecimal(int64(time.Minute), 0),
 						},
