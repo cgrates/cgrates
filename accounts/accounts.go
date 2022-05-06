@@ -126,18 +126,6 @@ func (aS *AccountS) matchingAccountsForEvent(ctx *context.Context, tnt string, c
 			return
 		}
 		acnts = append(acnts, &utils.AccountWithWeight{qAcnt, weight, refID})
-		// check for blockers for every profile
-		var blocker bool
-		if blocker, err = engine.BlockerFromDynamics(ctx, qAcnt.Blockers, aS.fltrS, cgrEv.Tenant, evNm); err != nil {
-			guardian.Guardian.UnguardIDs(refID)
-			unlockAccounts(acnts)
-			return
-		}
-		// if blockers active, do not debit from the other accounts
-		if blocker {
-			guardian.Guardian.UnguardIDs(refID)
-			break
-		}
 	}
 	if len(acnts) == 0 {
 		return nil, utils.ErrNotFound
@@ -192,6 +180,15 @@ func (aS *AccountS) accountsDebit(ctx *context.Context, acnts []*utils.AccountWi
 		usage = utils.SubstractBig(usage, used)
 		dbted = utils.SumBig(dbted, used)
 		ec.Merge(ecDbt)
+		// check for blockers for every profile
+		var blocker bool
+		if blocker, err = engine.BlockerFromDynamics(ctx, acnt.Blockers, aS.fltrS, cgrEv.Tenant, cgrEv.AsDataProvider()); err != nil {
+			return
+		}
+		// if blockers active, do not debit from the other accounts
+		if blocker {
+			break
+		}
 	}
 	return
 }
@@ -248,6 +245,15 @@ func (aS *AccountS) accountDebit(ctx *context.Context, acnt *utils.Account, usag
 		dbted = utils.SumBig(dbted, used)
 		ec.Merge(ecDbt)
 		ec.Accounts[acnt.ID] = acnt
+		// check the blocker for every balance in roder to continue debiting from balances or not
+		var blocker bool
+		if blocker, err = engine.BlockerFromDynamics(ctx, blncOper.getBalanceCfg().Blockers, aS.fltrS, cgrEv.Tenant, cgrEv.AsDataProvider()); err != nil {
+			return
+		}
+		// if blockers active, do not debit from the other balances
+		if blocker {
+			break
+		}
 	}
 	return
 }

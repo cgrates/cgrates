@@ -241,6 +241,7 @@ CREATE TABLE tp_accounts (
   `balance_id` varchar(64) NOT NULL,
   `balance_filter_ids` varchar(64) NOT NULL,
   `balance_weights` varchar(64) NOT NULL,
+  `balance_blockers` varchar(64) NOT NULL,
   `balance_type` varchar(64) NOT NULL,
   `balance_units` varchar(64) NOT NULL,
   `balance_unit_factors` varchar(64) NOT NULL,

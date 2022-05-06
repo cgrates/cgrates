@@ -232,19 +232,21 @@ func (sS *StatS) matchingStatQueuesForEvent(ctx *context.Context, tnt string, st
 	}
 	// All good, convert from Map to Slice so we can sort
 	sqs.Sort()
-	// verify the Blockers from the profiles
-	for i, s := range sqs {
-		// get the dynamic blocker from the profile and check if it pass trough its filters
-		var blocker bool
-		if blocker, err = BlockerFromDynamics(ctx, s.sqPrfl.Blockers, sS.fltrS, tnt, evNm); err != nil {
-			return
+	/*
+		// verify the Blockers from the profiles
+		for i, s := range sqs {
+			// get the dynamic blocker from the profile and check if it pass trough its filters
+			var blocker bool
+			if blocker, err = BlockerFromDynamics(ctx, s.sqPrfl.Blockers, sS.fltrS, tnt, evNm); err != nil {
+				return
+			}
+			if blocker && i != len(sqs)-1 { // blocker will stop processing and we are not at last index
+				StatQueues(sqs[i+1:]).unlock()
+				sqs = sqs[:i+1]
+				break
+			}
 		}
-		if blocker && i != len(sqs)-1 { // blocker will stop processing and we are not at last index
-			StatQueues(sqs[i+1:]).unlock()
-			sqs = sqs[:i+1]
-			break
-		}
-	}
+	*/
 	return
 }
 
@@ -339,7 +341,7 @@ func (sS *StatS) processEvent(ctx *context.Context, tnt string, args *utils.CGRE
 
 	statQueueIDs = matchSQs.IDs()
 	var withErrors bool
-	for _, sq := range matchSQs {
+	for idx, sq := range matchSQs {
 		if err = sq.ProcessEvent(ctx, tnt, args.ID, sS.fltrS, evNm); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<StatS> Queue: %s, ignoring event: %s, error: %s",
@@ -347,6 +349,16 @@ func (sS *StatS) processEvent(ctx *context.Context, tnt string, args *utils.CGRE
 			withErrors = true
 		}
 		sS.storeStatQueue(ctx, sq)
+		// verify the Blockers from the profiles
+		// get the dynamic blocker from the profile and check if it pass trough its filters
+		var blocker bool
+		if blocker, err = BlockerFromDynamics(ctx, sq.sqPrfl.Blockers, sS.fltrS, tnt, evNm); err != nil {
+			return
+		}
+		if blocker && idx != len(matchSQs)-1 { // blocker will stop processing and we are not at last index
+			break
+		}
+
 	}
 	if sS.processThresholds(ctx, matchSQs, args.APIOpts) != nil ||
 		withErrors {

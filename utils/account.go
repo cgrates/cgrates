@@ -106,6 +106,7 @@ type Balance struct {
 	ID             string // Balance identificator, unique within an Account
 	FilterIDs      []string
 	Weights        DynamicWeights
+	Blockers       Blockers
 	Type           string
 	Units          *Decimal
 	UnitFactors    []*UnitFactor
@@ -124,6 +125,9 @@ func (bL *Balance) Equals(bal *Balance) (eq bool) {
 		(bL.Weights == nil && bal.Weights != nil ||
 			bL.Weights != nil && bal.Weights == nil ||
 			len(bL.Weights) != len(bal.Weights)) ||
+		(bL.Blockers == nil && bal.Blockers != nil ||
+			bL.Blockers != nil && bal.Blockers == nil ||
+			len(bL.Blockers) != len(bal.Blockers)) ||
 		(bL.Units == nil && bal.Units != nil ||
 			bL.Units != nil && bal.Units == nil ||
 			bL.Units.Compare(bal.Units) != 0) ||
@@ -381,9 +385,10 @@ func (aI *ActivationInterval) Clone() *ActivationInterval {
 //Clone return a clone of the Balance
 func (bL *Balance) Clone() (blnc *Balance) {
 	blnc = &Balance{
-		ID:      bL.ID,
-		Weights: bL.Weights.Clone(),
-		Type:    bL.Type,
+		ID:       bL.ID,
+		Weights:  bL.Weights.Clone(),
+		Blockers: bL.Blockers.Clone(),
+		Type:     bL.Type,
 	}
 	if bL.FilterIDs != nil {
 		blnc.FilterIDs = make([]string, len(bL.FilterIDs))
@@ -633,6 +638,10 @@ func (bL *Balance) Set(path []string, val interface{}, newBranch bool) (err erro
 		case Weights:
 			if val != EmptyString {
 				bL.Weights, err = NewDynamicWeightsFromString(IfaceAsString(val), InfieldSep, ANDSep)
+			}
+		case BlockersField:
+			if val != EmptyString {
+				bL.Blockers, err = NewBlockersFromString(IfaceAsString(val), InfieldSep, ANDSep)
 			}
 		case UnitFactors:
 			if ufStr := IfaceAsString(val); len(ufStr) != 0 {
@@ -934,6 +943,8 @@ func (bL *Balance) FieldAsInterface(fldPath []string) (_ interface{}, err error)
 			return bL.FilterIDs, nil
 		case Weights:
 			return bL.Weights.String(InfieldSep, ANDSep), nil
+		case BlockersField:
+			return bL.Blockers.String(InfieldSep, ANDSep), nil
 		case AttributeIDs:
 			return bL.AttributeIDs, nil
 		case Units:
@@ -1062,6 +1073,7 @@ func (bL *Balance) Merge(vi *Balance) {
 	}
 	bL.FilterIDs = append(bL.FilterIDs, vi.FilterIDs...)
 	bL.Weights = append(bL.Weights, vi.Weights...)
+	bL.Blockers = append(bL.Blockers, vi.Blockers...)
 	bL.UnitFactors = append(bL.UnitFactors, vi.UnitFactors...)
 	bL.CostIncrements = append(bL.CostIncrements, vi.CostIncrements...)
 	bL.AttributeIDs = append(bL.AttributeIDs, vi.AttributeIDs...)

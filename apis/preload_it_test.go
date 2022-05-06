@@ -270,6 +270,15 @@ func testPreloadITVerifyAccounts(t *testing.T) {
 						Weight: 10,
 					},
 				},
+				Blockers: utils.Blockers{
+					{
+						FilterIDs: []string{"*string:~*req.Destination:1002"},
+						Blocker:   true,
+					},
+					{
+						Blocker: false,
+					},
+				},
 				Type:  utils.MetaVoice,
 				Units: utils.NewDecimal(int64(time.Hour), 0),
 				Opts:  map[string]interface{}{},

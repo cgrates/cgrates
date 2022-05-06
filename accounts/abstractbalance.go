@@ -207,3 +207,8 @@ func (aB *abstractBalance) debitConcretes(_ *context.Context, _ *decimal.Big,
 	_ *utils.CGREvent, _ *decimal.Big) (ec *utils.EventCharges, err error) {
 	return nil, utils.ErrNotImplemented
 }
+
+// getBalanceCfg will return the balance
+func (aB *abstractBalance) getBalanceCfg() *utils.Balance {
+	return aB.blnCfg
+}

@@ -4602,8 +4602,9 @@ func TestAccountMdlsCSVHeader(t *testing.T) {
 		ThresholdIDs: "WARN_RES1;WARN_RES1",
 	},
 	}
-	exp := []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs, utils.Weights, utils.BlockersField, utils.BalanceID, utils.BalanceFilterIDs, utils.BalanceWeights, utils.BalanceBlocker,
-		utils.BalanceType, utils.BalanceOpts, utils.BalanceUnits, utils.ThresholdIDs}
+	exp := []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs,
+		utils.Weights, utils.BlockersField, utils.Opts, utils.BalanceID, utils.BalanceFilterIDs, utils.BalanceWeights, utils.BalanceBlockers, utils.BalanceType, utils.BalanceUnits, utils.BalanceUnitFactors, utils.BalanceOpts, utils.BalanceCostIncrements, utils.BalanceAttributeIDs, utils.BalanceRateProfileIDs,
+		utils.ThresholdIDs}
 	result := testStruct.CSVHeader()
 	if !reflect.DeepEqual(exp, result) {
 		t.Errorf("Expecting: %+v,\nreceived: %+v", utils.ToJSON(exp), utils.ToJSON(result))
@@ -4621,7 +4622,8 @@ func TestAccountMdlsAsTPAccount(t *testing.T) {
 		Blockers:              "*string:~*req.Destination:1003;false",
 		BalanceID:             "VoiceBalance",
 		BalanceFilterIDs:      "FLTR_RES_GR2",
-		BalanceWeights:        "10",
+		BalanceWeights:        ";10",
+		BalanceBlockers:       "*string:~*req.Destination:10203;false",
 		BalanceRateProfileIDs: "rt1;rt2",
 		BalanceType:           utils.MetaVoice,
 		BalanceUnits:          "1h",
@@ -4640,7 +4642,8 @@ func TestAccountMdlsAsTPAccount(t *testing.T) {
 				"VoiceBalance": {
 					ID:             "VoiceBalance",
 					FilterIDs:      []string{"FLTR_RES_GR2"},
-					Weights:        "10",
+					Weights:        ";10",
+					Blockers:       "*string:~*req.Destination:10203;false",
 					Type:           utils.MetaVoice,
 					RateProfileIDs: []string{"rt1", "rt2"},
 					Units:          "1h",
@@ -4671,7 +4674,8 @@ func TestAccountMdlsAsTPAccountCase2(t *testing.T) {
 		Weights:          ";10",
 		BalanceID:        "VoiceBalance",
 		BalanceFilterIDs: "FLTR_RES_GR2",
-		BalanceWeights:   "10",
+		BalanceWeights:   ";10",
+		BalanceBlockers:  ";false",
 		BalanceType:      utils.MetaVoice,
 		BalanceUnits:     "1h",
 		ThresholdIDs:     "WARN_RES1",
@@ -4688,7 +4692,8 @@ func TestAccountMdlsAsTPAccountCase2(t *testing.T) {
 				"VoiceBalance": {
 					ID:        "VoiceBalance",
 					FilterIDs: []string{"FLTR_RES_GR2"},
-					Weights:   "10",
+					Weights:   ";10",
+					Blockers:  ";false",
 					Type:      utils.MetaVoice,
 					Units:     "1h",
 				},
@@ -4754,7 +4759,7 @@ func TestAPItoModelTPAccount(t *testing.T) {
 			"VoiceBalance": {
 				ID:            "VoiceBalance",
 				FilterIDs:     []string{"FLTR_RES_GR2"},
-				Weights:       "10",
+				Weights:       ";10",
 				Type:          utils.MetaVoice,
 				Units:         "1h",
 				CostIncrement: []*utils.TPBalanceCostIncrement{},
@@ -4770,7 +4775,7 @@ func TestAPItoModelTPAccount(t *testing.T) {
 		Weights:          ";10",
 		BalanceID:        "VoiceBalance",
 		BalanceFilterIDs: "FLTR_RES_GR2",
-		BalanceWeights:   "10",
+		BalanceWeights:   ";10",
 		BalanceType:      utils.MetaVoice,
 		BalanceUnits:     "1h",
 		ThresholdIDs:     "WARN_RES1",
@@ -4878,6 +4883,7 @@ func TestApitoAccountCase2(t *testing.T) {
 				ID:             "VoiceBalance",
 				FilterIDs:      []string{"FLTR_RES_GR2"},
 				Weights:        ";10",
+				Blockers:       "*string:~*req.Destination:122;true;;false",
 				Type:           utils.MetaVoice,
 				RateProfileIDs: []string{"RTPRF1"},
 				Units:          "1h",
@@ -4902,6 +4908,15 @@ func TestApitoAccountCase2(t *testing.T) {
 				Weights: utils.DynamicWeights{
 					{
 						Weight: 10.0,
+					},
+				},
+				Blockers: utils.Blockers{
+					{
+						FilterIDs: []string{"*string:~*req.Destination:122"},
+						Blocker:   true,
+					},
+					{
+						Blocker: false,
 					},
 				},
 				Type:           utils.MetaVoice,
@@ -4977,7 +4992,7 @@ func TestModelHelpersActionProfileToAPICase2(t *testing.T) {
 		Weights:   ";1",
 		Schedule:  "test_schedule",
 		Targets: []*utils.TPActionTarget{
-			&utils.TPActionTarget{
+			{
 				TargetType: utils.MetaAccounts,
 				TargetIDs:  []string{"test_account_id1", "test_account_id2"},
 			},
@@ -5001,7 +5016,7 @@ func TestModelHelpersActionProfileToAPICase2(t *testing.T) {
 		Weights:   ";1",
 		Schedule:  "test_schedule",
 		Targets: []*utils.TPActionTarget{
-			&utils.TPActionTarget{
+			{
 				TargetType: utils.MetaAccounts,
 				TargetIDs:  []string{"test_account_id1", "test_account_id2"},
 			},

@@ -700,7 +700,7 @@ type TPAccountBalance struct {
 	ID             string
 	FilterIDs      []string
 	Weights        string
-	Blocker        bool
+	Blockers       string
 	Type           string
 	Opts           string
 	CostIncrement  []*TPBalanceCostIncrement

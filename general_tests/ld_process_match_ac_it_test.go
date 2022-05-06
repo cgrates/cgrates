@@ -188,7 +188,6 @@ func testLdPrMatchAcCDRSProcessEvent(t *testing.T) {
 				"Subject":     "1001",
 				"ToR":         "*voice",
 			},
-
 			APIOpts: map[string]interface{}{
 				utils.MetaAccountSCost: map[string]interface{}{
 					"Abstracts":  0,
@@ -198,6 +197,7 @@ func testLdPrMatchAcCDRSProcessEvent(t *testing.T) {
 							"Balances": map[string]interface{}{
 								"VoiceBalance": map[string]interface{}{
 									"AttributeIDs":   nil,
+									"Blockers":       nil,
 									"CostIncrements": nil,
 									"FilterIDs":      nil,
 									"ID":             "VoiceBalance",
@@ -214,6 +214,7 @@ func testLdPrMatchAcCDRSProcessEvent(t *testing.T) {
 									},
 								},
 							},
+							"Blockers":     nil,
 							"FilterIDs":    nil,
 							"ID":           "1001",
 							"Opts":         map[string]interface{}{},
