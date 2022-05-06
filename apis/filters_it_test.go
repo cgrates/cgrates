@@ -36,656 +36,632 @@ import (
 )
 
 var (
-	fltrPrfCfgPath   string
-	fltrPrfCfg       *config.CGRConfig
-	fltrSRPC         *birpc.Client
-	fltrPrfConfigDIR string //run tests for specific configuration
+	fltrCfgPath   string
+	fltrCfg       *config.CGRConfig
+	fltrRPC       *birpc.Client
+	fltrConfigDIR string //run tests for specific configuration
 
-	sTestsFltrPrf = []func(t *testing.T){
-		testFilterSInitCfg,
-		testFilterSInitDataDb,
+	sTestsFltrs = []func(t *testing.T){
+		testFiltersInitCfg,
+		testFiltersInitDataDb,
+		testFiltersStartEngine,
+		testFiltersRPCConn,
 
-		testFilterSStartEngine,
-		testFilterSRPCConn,
-		testFilterSGetFltrBeforeSet,
-		testFilterSGetFiltersBeforeSet,
-		testFilterSSetFltr,
-		testFilterSGetFilterIDs,
-		testFilterSGetFilters,
-		testFilterSGetFiltersCount,
-		testGetFilterBeforeSet2,
-		testFilterSSetFilter2,
-		testFilterSGetFilterSIDs2,
-		testFilterSGetFilters2,
-		testFilterSGetFilterSCount2,
-		testFilterRemoveFilter,
-		testFilterSSetFilterS3,
-		testFilterSGetFilters3,
-		testFilterSSetGetFilterWithPrefix,
-		testFilterSGetFiltersWithPrefix,
-		testFilterSSetInvalidFilter,
-		testFilterSFiltersMatchTrue,
-		testFilterSFiltersMatchFalse,
-		testFilterSKillEngine,
+		// tests for AdminSv1 APIs
+		testFiltersGetFilterBeforeSet,
+		testFiltersGetFilterIDsBeforeSet,
+		testFiltersGetFilterCountBeforeSet,
+		testFiltersGetFiltersBeforeSet,
+		testFiltersSetFilters,
+		testFiltersGetFilterAfterSet,
+		testFiltersGetFilterIDsAfterSet,
+		testFiltersGetFilterCountAfterSet,
+		testFiltersGetFiltersAfterSet,
+		testFiltersRemoveFilter,
+		testFiltersGetFilterAfterRemove,
+		testFiltersGetFilterIDsAfterRemove,
+		testFiltersGetFilterCountAfterRemove,
+		testFiltersGetFiltersAfterRemove,
+
+		// tests for FiltersMatch API
+		testFiltersSetInvalidFilter,
+		testFiltersFiltersMatchTrue,
+		testFiltersFiltersMatchFalse,
+		testFiltersKillEngine,
 	}
 )
 
-func TestFilterSIT(t *testing.T) {
+func TestFiltersIT(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
-		fltrPrfConfigDIR = "tutinternal"
+		fltrConfigDIR = "tutinternal"
 	case utils.MetaMongo:
-		fltrPrfConfigDIR = "tutmongo"
+		fltrConfigDIR = "tutmongo"
 	case utils.MetaMySQL:
-		fltrPrfConfigDIR = "tutmysql"
+		fltrConfigDIR = "tutmysql"
 	case utils.MetaPostgres:
 		t.SkipNow()
 	default:
 		t.Fatal("Unknown Database type")
 	}
-	for _, stest := range sTestsFltrPrf {
-		t.Run(fltrPrfConfigDIR, stest)
+	for _, stest := range sTestsFltrs {
+		t.Run(fltrConfigDIR, stest)
 	}
 }
 
-func testFilterSInitCfg(t *testing.T) {
+func testFiltersInitCfg(t *testing.T) {
 	var err error
-	fltrPrfCfgPath = path.Join(*dataDir, "conf", "samples", fltrPrfConfigDIR)
-	fltrPrfCfg, err = config.NewCGRConfigFromPath(context.Background(), fltrPrfCfgPath)
+	fltrCfgPath = path.Join(*dataDir, "conf", "samples", fltrConfigDIR)
+	fltrCfg, err = config.NewCGRConfigFromPath(context.Background(), fltrCfgPath)
 	if err != nil {
 		t.Error(err)
 	}
 }
 
-func testFilterSInitDataDb(t *testing.T) {
-	if err := engine.InitDataDB(fltrPrfCfg); err != nil {
+func testFiltersInitDataDb(t *testing.T) {
+	if err := engine.InitDataDB(fltrCfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Start CGR Engine
-func testFilterSStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(fltrPrfCfgPath, *waitRater); err != nil {
+func testFiltersStartEngine(t *testing.T) {
+	if _, err := engine.StopStartEngine(fltrCfgPath, *waitRater); err != nil {
 		t.Fatal(err)
 	}
 }
 
-func testFilterSRPCConn(t *testing.T) {
+func testFiltersRPCConn(t *testing.T) {
 	var err error
-	fltrSRPC, err = newRPCClient(fltrPrfCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
+	fltrRPC, err = newRPCClient(fltrCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}
 }
 
-func testFilterSGetFltrBeforeSet(t *testing.T) {
-	var reply *engine.Filter
-	if err := fltrSRPC.Call(context.Background(), utils.AdminSv1GetFilter,
-		&utils.TenantID{
-			Tenant: utils.CGRateSorg,
-			ID:     "TEST_FLTR_IT_TEST",
-		}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
-		t.Error(err)
+func testFiltersGetFilterBeforeSet(t *testing.T) {
+	var replyFilter engine.Filter
+	if err := fltrRPC.Call(context.Background(), utils.AdminSv1GetFilter,
+		&utils.TenantIDWithAPIOpts{
+			TenantID: &utils.TenantID{
+				Tenant: "cgrates.org",
+				ID:     "TestA_FILTER1",
+			}}, &replyFilter); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	}
 }
 
-func testFilterSGetFiltersBeforeSet(t *testing.T) {
-	var reply *[]*engine.Filter
-	args := &utils.ArgsItemIDs{}
-	if err := fltrSRPC.Call(context.Background(), utils.AdminSv1GetFilters,
-		args, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
-		t.Errorf("Expected %+v \n, received %+v", utils.ErrNotFound, err)
+func testFiltersGetFiltersBeforeSet(t *testing.T) {
+	var replyFilters *[]*engine.Filter
+	if err := fltrRPC.Call(context.Background(), utils.AdminSv1GetFilters,
+		&utils.ArgsItemIDs{
+			Tenant: "cgrates.org",
+		}, &replyFilters); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	}
 }
 
-func testFilterSSetFltr(t *testing.T) {
-	fltrPrf := &engine.FilterWithAPIOpts{
-		Filter: &engine.Filter{
-			Tenant: utils.CGRateSorg,
-			ID:     "fltr_for_attr",
-			Rules: []*engine.FilterRule{
-				{
-					Type:    utils.MetaString,
-					Element: "~*req.Subject",
-					Values:  []string{"1004", "6774", "22312"},
-				},
-				{
-					Type:    utils.MetaString,
-					Element: "~*opts.Subsystems",
-					Values:  []string{"*attributes"},
-				},
-				{
-					Type:    utils.MetaPrefix,
-					Element: "~*req.Destinations",
-					Values:  []string{"+0775", "+442"},
-				},
-			},
-		},
-	}
-	var reply string
-	if err := fltrSRPC.Call(context.Background(), utils.AdminSv1SetFilter,
-		fltrPrf, &reply); err != nil {
-		t.Error(err)
-	} else if reply != utils.OK {
-		t.Error(err)
-	}
-
-	expectedFltr := &engine.Filter{
-		Tenant: utils.CGRateSorg,
-		ID:     "fltr_for_attr",
-		Rules: []*engine.FilterRule{
-			{
-				Type:    utils.MetaString,
-				Element: "~*req.Subject",
-				Values:  []string{"1004", "6774", "22312"},
-			},
-			{
-				Type:    utils.MetaString,
-				Element: "~*opts.Subsystems",
-				Values:  []string{"*attributes"},
-			},
-			{
-				Type:    utils.MetaPrefix,
-				Element: "~*req.Destinations",
-				Values:  []string{"+0775", "+442"},
-			},
-		},
-	}
-	var result *engine.Filter
-	if err := fltrSRPC.Call(context.Background(), utils.AdminSv1GetFilter,
-		&utils.TenantID{
-			Tenant: utils.CGRateSorg,
-			ID:     "fltr_for_attr",
-		}, &result); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(result, expectedFltr) {
-		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expectedFltr), utils.ToJSON(result))
+func testFiltersGetFilterIDsBeforeSet(t *testing.T) {
+	var replyFilterIDs []string
+	if err := fltrRPC.Call(context.Background(), utils.AdminSv1GetFilterIDs,
+		&utils.ArgsItemIDs{
+			Tenant: "cgrates.org",
+		}, &replyFilterIDs); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	}
 }
 
-func testFilterSGetFilterIDs(t *testing.T) {
-	var reply []string
-	args := &engine.FilterWithAPIOpts{}
-	expected := []string{"fltr_for_attr"}
-	if err := fltrSRPC.Call(context.Background(), utils.AdminSv1GetFilterIDs,
-		args, &reply); err != nil {
-		t.Error(err)
-	} else if len(reply) != len(expected) {
-		t.Errorf("Expected %+v \n, received %+v", expected, reply)
+func testFiltersGetFilterCountBeforeSet(t *testing.T) {
+	var replyCount int
+	if err := fltrRPC.Call(context.Background(), utils.AdminSv1GetFiltersCount,
+		&utils.ArgsItemIDs{
+			Tenant: "cgrates.org",
+		}, &replyCount); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
+	} else if replyCount != 0 {
+		t.Errorf("expected <%+v>, \nreceived: <%+v>", 0, replyCount)
 	}
 }
 
-func testFilterSGetFilters(t *testing.T) {
-	var reply *[]*engine.Filter
-	args := &utils.ArgsItemIDs{}
-	expectedFltr := &[](*engine.Filter){
+func testFiltersSetFilters(t *testing.T) {
+	filterProfiles := []*engine.FilterWithAPIOpts{
 		{
-			Tenant: utils.CGRateSorg,
-			ID:     "fltr_for_attr",
-			Rules: []*engine.FilterRule{
-				{
-					Type:    utils.MetaString,
-					Element: "~*req.Subject",
-					Values:  []string{"1004", "6774", "22312"},
+			Filter: &engine.Filter{
+				ID:     "TestA_FILTER1",
+				Tenant: "cgrates.org",
+				Rules: []*engine.FilterRule{
+					{
+						Type:    utils.MetaString,
+						Element: "~*req.Account",
+						Values:  []string{"1001"},
+					},
+					{
+						Type:    utils.MetaPrefix,
+						Element: "~*req.Destination",
+						Values:  []string{"10"},
+					},
 				},
-				{
-					Type:    utils.MetaString,
-					Element: "~*opts.Subsystems",
-					Values:  []string{"*attributes"},
+			},
+		},
+		{
+			Filter: &engine.Filter{
+				ID:     "TestA_FILTER2",
+				Tenant: "cgrates.org",
+				Rules: []*engine.FilterRule{
+					{
+						Type:    utils.MetaString,
+						Element: "~*req.Account",
+						Values:  []string{"1002"},
+					},
+					{
+						Type:    utils.MetaPrefix,
+						Element: "~*req.Destination",
+						Values:  []string{"10"},
+					},
 				},
-				{
-					Type:    utils.MetaPrefix,
-					Element: "~*req.Destinations",
-					Values:  []string{"+0775", "+442"},
+			},
+		},
+		{
+			Filter: &engine.Filter{
+				ID:     "TestA_FILTER3",
+				Tenant: "cgrates.org",
+				Rules: []*engine.FilterRule{
+					{
+						Type:    utils.MetaString,
+						Element: "~*req.Account",
+						Values:  []string{"1003"},
+					},
+					{
+						Type:    utils.MetaPrefix,
+						Element: "~*req.Destination",
+						Values:  []string{"10"},
+					},
+				},
+			},
+		},
+		{
+			Filter: &engine.Filter{
+				ID:     "TestB_FILTER1",
+				Tenant: "cgrates.org",
+				Rules: []*engine.FilterRule{
+					{
+						Type:    utils.MetaString,
+						Element: "~*req.Account",
+						Values:  []string{"2001"},
+					},
+					{
+						Type:    utils.MetaPrefix,
+						Element: "~*req.Destination",
+						Values:  []string{"20"},
+					},
+				},
+			},
+		},
+		{
+			Filter: &engine.Filter{
+				ID:     "TestB_FILTER2",
+				Tenant: "cgrates.org",
+				Rules: []*engine.FilterRule{
+					{
+						Type:    utils.MetaString,
+						Element: "~*req.Account",
+						Values:  []string{"2002"},
+					},
+					{
+						Type:    utils.MetaPrefix,
+						Element: "~*req.Destination",
+						Values:  []string{"20"},
+					},
 				},
 			},
 		},
 	}
-	if err := fltrSRPC.Call(context.Background(), utils.AdminSv1GetFilters,
-		args, &reply); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(reply, expectedFltr) {
-		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expectedFltr), utils.ToJSON(reply))
-	}
-}
 
-func testFilterSGetFiltersCount(t *testing.T) {
-	var reply int
-	args := &utils.TenantIDWithAPIOpts{
-		TenantID: &utils.TenantID{
-			Tenant: utils.CGRateSorg,
-		},
-	}
-	if err := fltrSRPC.Call(context.Background(), utils.AdminSv1GetFiltersCount,
-		args, &reply); err != nil {
-		t.Error(err)
-	} else if reply != 1 {
-		t.Errorf("Expected %+v \n, received %+v", 1, reply)
-	}
-}
-
-func testGetFilterBeforeSet2(t *testing.T) {
-	var result *engine.Filter
-	if err := fltrSRPC.Call(context.Background(), utils.AdminSv1GetFilter,
-		&utils.TenantIDWithAPIOpts{
-			TenantID: &utils.TenantID{
-				Tenant: utils.CGRateSorg,
-				ID:     "fltr_for_attr2",
-			},
-		}, &result); err == nil || err.Error() != utils.ErrNotFound.Error() {
-		t.Error(err)
-	}
-}
-
-func testFilterSSetFilter2(t *testing.T) {
-	fltrPrf := &engine.FilterWithAPIOpts{
-		Filter: &engine.Filter{
-			Tenant: utils.CGRateSorg,
-			ID:     "fltr_for_attr2",
-			Rules: []*engine.FilterRule{
-				{
-					Type:    utils.MetaString,
-					Element: "~*req.Subject",
-					Values:  []string{"1004", "6774", "22312"},
-				},
-				{
-					Type:    utils.MetaString,
-					Element: "~*opts.Subsystems",
-					Values:  []string{"*attributes"},
-				},
-				{
-					Type:    utils.MetaPrefix,
-					Element: "~*req.Destinations",
-					Values:  []string{"+0775", "+442"},
-				},
-			},
-		},
-	}
 	var reply string
-	if err := fltrSRPC.Call(context.Background(), utils.AdminSv1SetFilter,
-		fltrPrf, &reply); err != nil {
-		t.Error(err)
-	} else if reply != utils.OK {
-		t.Error(err)
-	}
-
-	expectedFltr := &engine.Filter{
-		Tenant: utils.CGRateSorg,
-		ID:     "fltr_for_attr2",
-		Rules: []*engine.FilterRule{
-			{
-				Type:    utils.MetaString,
-				Element: "~*req.Subject",
-				Values:  []string{"1004", "6774", "22312"},
-			},
-			{
-				Type:    utils.MetaString,
-				Element: "~*opts.Subsystems",
-				Values:  []string{"*attributes"},
-			},
-			{
-				Type:    utils.MetaPrefix,
-				Element: "~*req.Destinations",
-				Values:  []string{"+0775", "+442"},
-			},
-		},
-	}
-	var result *engine.Filter
-	if err := fltrSRPC.Call(context.Background(), utils.AdminSv1GetFilter,
-		&utils.TenantIDWithAPIOpts{
-			TenantID: &utils.TenantID{
-				Tenant: utils.CGRateSorg,
-				ID:     "fltr_for_attr2",
-			},
-		}, &result); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(result, expectedFltr) {
-		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expectedFltr), utils.ToJSON(result))
+	for _, filterProfile := range filterProfiles {
+		if err := fltrRPC.Call(context.Background(), utils.AdminSv1SetFilter,
+			filterProfile, &reply); err != nil {
+			t.Error(err)
+		} else if reply != utils.OK {
+			t.Error(err)
+		}
 	}
 }
 
-func testFilterSGetFilterSIDs2(t *testing.T) {
-	var reply []string
-	args := &utils.ArgsItemIDs{
+func testFiltersGetFilterAfterSet(t *testing.T) {
+	expectedFilter := engine.Filter{
+		ID:     "TestA_FILTER1",
 		Tenant: "cgrates.org",
-	}
-	expected := []string{"fltr_for_attr", "fltr_for_attr2"}
-	if err := fltrSRPC.Call(context.Background(), utils.AdminSv1GetFilterIDs,
-		args, &reply); err != nil {
-		t.Error(err)
-	} else if len(reply) != len(expected) {
-		t.Errorf("Expected %+v \n, received %+v", expected, reply)
-	}
-}
-
-func testFilterSGetFilters2(t *testing.T) {
-	var reply *[]*engine.Filter
-	args := &utils.ArgsItemIDs{}
-	expectedFltr := &[](*engine.Filter){
-		{
-			Tenant: utils.CGRateSorg,
-			ID:     "fltr_for_attr",
-			Rules: []*engine.FilterRule{
-				{
-					Type:    utils.MetaString,
-					Element: "~*req.Subject",
-					Values:  []string{"1004", "6774", "22312"},
-				},
-				{
-					Type:    utils.MetaString,
-					Element: "~*opts.Subsystems",
-					Values:  []string{"*attributes"},
-				},
-				{
-					Type:    utils.MetaPrefix,
-					Element: "~*req.Destinations",
-					Values:  []string{"+0775", "+442"},
-				},
-			},
-		},
-		{
-			Tenant: utils.CGRateSorg,
-			ID:     "fltr_for_attr2",
-			Rules: []*engine.FilterRule{
-				{
-					Type:    utils.MetaString,
-					Element: "~*req.Subject",
-					Values:  []string{"1004", "6774", "22312"},
-				},
-				{
-					Type:    utils.MetaString,
-					Element: "~*opts.Subsystems",
-					Values:  []string{"*attributes"},
-				},
-				{
-					Type:    utils.MetaPrefix,
-					Element: "~*req.Destinations",
-					Values:  []string{"+0775", "+442"},
-				},
-			},
-		},
-	}
-	if err := fltrSRPC.Call(context.Background(), utils.AdminSv1GetFilters,
-		args, &reply); err != nil {
-		t.Error(err)
-	}
-	sort.Slice(*reply, func(i, j int) bool {
-		return (*reply)[i].ID < (*reply)[j].ID
-	})
-	if !reflect.DeepEqual(reply, expectedFltr) {
-		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expectedFltr), utils.ToJSON(reply))
-	}
-}
-
-func testFilterSGetFilterSCount2(t *testing.T) {
-	var reply int
-	args := &utils.TenantIDWithAPIOpts{
-		TenantID: &utils.TenantID{
-			Tenant: utils.CGRateSorg,
-		},
-	}
-	if err := fltrSRPC.Call(context.Background(), utils.AdminSv1GetFiltersCount,
-		args, &reply); err != nil {
-		t.Error(err)
-	} else if reply != 2 {
-		t.Errorf("Expected %+v \n, received %+v", 2, reply)
-	}
-}
-
-func testFilterRemoveFilter(t *testing.T) {
-	var reply string
-	args := &utils.TenantIDWithAPIOpts{
-		TenantID: &utils.TenantID{
-			ID:     "fltr_for_attr",
-			Tenant: utils.CGRateSorg,
-		},
-	}
-	if err := fltrSRPC.Call(context.Background(), utils.AdminSv1RemoveFilter,
-		args, &reply); err != nil {
-		t.Error(err)
-	} else if reply != utils.OK {
-		t.Errorf("Expected %+v \n, received %+v", utils.OK, reply)
-	}
-
-	var result *engine.Filter
-	if err := fltrSRPC.Call(context.Background(), utils.AdminSv1GetFilter,
-		&utils.TenantID{
-			Tenant: utils.CGRateSorg,
-			ID:     "fltr_for_attr",
-		}, &result); err == nil || err.Error() != utils.ErrNotFound.Error() {
-		t.Errorf("Expected %+v \n, received %+v", utils.ErrNotFound, err)
-	}
-}
-
-func testFilterSSetFilterS3(t *testing.T) {
-	fltrPrf := &engine.FilterWithAPIOpts{
-		Filter: &engine.Filter{
-			Tenant: utils.CGRateSorg,
-			ID:     "fltr_for_attr3",
-			Rules: []*engine.FilterRule{
-				{
-					Type:    utils.MetaString,
-					Element: "~*req.Subject",
-					Values:  []string{"1004", "6774", "22312"},
-				},
-				{
-					Type:    utils.MetaString,
-					Element: "~*opts.Subsystems",
-					Values:  []string{"*attributes"},
-				},
-				{
-					Type:    utils.MetaPrefix,
-					Element: "~*req.Destinations",
-					Values:  []string{"+0775", "+442"},
-				},
-			},
-		},
-	}
-	var reply string
-	if err := fltrSRPC.Call(context.Background(), utils.AdminSv1SetFilter,
-		fltrPrf, &reply); err != nil {
-		t.Error(err)
-	} else if reply != utils.OK {
-		t.Error(err)
-	}
-
-	expectedFltr := &engine.Filter{
-		Tenant: utils.CGRateSorg,
-		ID:     "fltr_for_attr3",
 		Rules: []*engine.FilterRule{
 			{
 				Type:    utils.MetaString,
-				Element: "~*req.Subject",
-				Values:  []string{"1004", "6774", "22312"},
-			},
-			{
-				Type:    utils.MetaString,
-				Element: "~*opts.Subsystems",
-				Values:  []string{"*attributes"},
+				Element: "~*req.Account",
+				Values:  []string{"1001"},
 			},
 			{
 				Type:    utils.MetaPrefix,
-				Element: "~*req.Destinations",
-				Values:  []string{"+0775", "+442"},
+				Element: "~*req.Destination",
+				Values:  []string{"10"},
 			},
 		},
 	}
-	var result *engine.Filter
-	if err := fltrSRPC.Call(context.Background(), utils.AdminSv1GetFilter,
-		&utils.TenantID{
-			Tenant: utils.CGRateSorg,
-			ID:     "fltr_for_attr3",
-		}, &result); err != nil {
+	var replyFilter engine.Filter
+	if err := fltrRPC.Call(context.Background(), utils.AdminSv1GetFilter,
+		&utils.TenantIDWithAPIOpts{
+			TenantID: &utils.TenantID{
+				Tenant: "cgrates.org",
+				ID:     "TestA_FILTER1",
+			}}, &replyFilter); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(result, expectedFltr) {
-		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expectedFltr), utils.ToJSON(result))
+	} else if !reflect.DeepEqual(replyFilter, expectedFilter) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
+			utils.ToJSON(expectedFilter), utils.ToJSON(replyFilter))
 	}
 }
 
-func testFilterSGetFilters3(t *testing.T) {
-	var reply *[]*engine.Filter
-	args := &utils.ArgsItemIDs{}
-	expectedFltr := &[](*engine.Filter){
-		{
-			Tenant: utils.CGRateSorg,
-			ID:     "fltr_for_attr2",
-			Rules: []*engine.FilterRule{
-				{
-					Type:    utils.MetaString,
-					Element: "~*req.Subject",
-					Values:  []string{"1004", "6774", "22312"},
-				},
-				{
-					Type:    utils.MetaString,
-					Element: "~*opts.Subsystems",
-					Values:  []string{"*attributes"},
-				},
-				{
-					Type:    utils.MetaPrefix,
-					Element: "~*req.Destinations",
-					Values:  []string{"+0775", "+442"},
-				},
-			},
-		},
-		{
-			Tenant: utils.CGRateSorg,
-			ID:     "fltr_for_attr3",
-			Rules: []*engine.FilterRule{
-				{
-					Type:    utils.MetaString,
-					Element: "~*req.Subject",
-					Values:  []string{"1004", "6774", "22312"},
-				},
-				{
-					Type:    utils.MetaString,
-					Element: "~*opts.Subsystems",
-					Values:  []string{"*attributes"},
-				},
-				{
-					Type:    utils.MetaPrefix,
-					Element: "~*req.Destinations",
-					Values:  []string{"+0775", "+442"},
-				},
-			},
-		},
-	}
-	if err := fltrSRPC.Call(context.Background(), utils.AdminSv1GetFilters,
-		args, &reply); err != nil {
+func testFiltersGetFilterIDsAfterSet(t *testing.T) {
+	expectedIDs := []string{"TestA_FILTER1", "TestA_FILTER2", "TestA_FILTER3", "TestB_FILTER1", "TestB_FILTER2"}
+	var replyFilterIDs []string
+	if err := fltrRPC.Call(context.Background(), utils.AdminSv1GetFilterIDs,
+		&utils.ArgsItemIDs{
+			Tenant: "cgrates.org",
+		}, &replyFilterIDs); err != nil {
 		t.Error(err)
+	} else {
+		sort.Strings(replyFilterIDs)
+		if !utils.SliceStringEqual(replyFilterIDs, expectedIDs) {
+			t.Errorf("expected: <%+v>, \nreceived: <%+v>", expectedIDs, replyFilterIDs)
+		}
 	}
-	sort.Slice(*reply, func(i, j int) bool {
-		return (*reply)[i].ID < (*reply)[j].ID
-	})
-	if !reflect.DeepEqual(reply, expectedFltr) {
-		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expectedFltr), utils.ToJSON(reply))
+
+	expectedIDs = []string{"TestA_FILTER1", "TestA_FILTER2", "TestA_FILTER3"}
+	if err := fltrRPC.Call(context.Background(), utils.AdminSv1GetFilterIDs,
+		&utils.ArgsItemIDs{
+			Tenant:      "cgrates.org",
+			ItemsPrefix: "TestA",
+		}, &replyFilterIDs); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(replyFilterIDs)
+		if !utils.SliceStringEqual(replyFilterIDs, expectedIDs) {
+			t.Errorf("expected: <%+v>, \nreceived: <%+v>", expectedIDs, replyFilterIDs)
+		}
+	}
+
+	expectedIDs = []string{"TestB_FILTER1", "TestB_FILTER2"}
+	if err := fltrRPC.Call(context.Background(), utils.AdminSv1GetFilterIDs,
+		&utils.ArgsItemIDs{
+			Tenant:      "cgrates.org",
+			ItemsPrefix: "TestB",
+		}, &replyFilterIDs); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(replyFilterIDs)
+		if !utils.SliceStringEqual(replyFilterIDs, expectedIDs) {
+			t.Errorf("expected: <%+v>, \nreceived: <%+v>", expectedIDs, replyFilterIDs)
+		}
 	}
 }
-func testFilterSSetGetFilterWithPrefix(t *testing.T) {
-	fltrPrf := &engine.FilterWithAPIOpts{
-		Filter: &engine.Filter{
-			Tenant: utils.CGRateSorg,
-			ID:     "afltr_for_attr",
+
+func testFiltersGetFilterCountAfterSet(t *testing.T) {
+	var replyCount int
+	if err := fltrRPC.Call(context.Background(), utils.AdminSv1GetFiltersCount,
+		&utils.ArgsItemIDs{
+			Tenant: "cgrates.org",
+		}, &replyCount); err != nil {
+		t.Error(err)
+	} else if replyCount != 5 {
+		t.Errorf("expected <%+v>, \nreceived: <%+v>", 0, replyCount)
+	}
+
+	if err := fltrRPC.Call(context.Background(), utils.AdminSv1GetFiltersCount,
+		&utils.ArgsItemIDs{
+			Tenant:      "cgrates.org",
+			ItemsPrefix: "TestA",
+		}, &replyCount); err != nil {
+		t.Error(err)
+	} else if replyCount != 3 {
+		t.Errorf("expected <%+v>, \nreceived: <%+v>", 0, replyCount)
+	}
+
+	if err := fltrRPC.Call(context.Background(), utils.AdminSv1GetFiltersCount,
+		&utils.ArgsItemIDs{
+			Tenant:      "cgrates.org",
+			ItemsPrefix: "TestB",
+		}, &replyCount); err != nil {
+		t.Error(err)
+	} else if replyCount != 2 {
+		t.Errorf("expected <%+v>, \nreceived: <%+v>", 0, replyCount)
+	}
+}
+
+func testFiltersGetFiltersAfterSet(t *testing.T) {
+	expectedFilters := []*engine.Filter{
+		{
+			ID:     "TestA_FILTER1",
+			Tenant: "cgrates.org",
 			Rules: []*engine.FilterRule{
 				{
 					Type:    utils.MetaString,
-					Element: "~*req.Subject",
-					Values:  []string{"1004", "6774", "22312"},
-				},
-				{
-					Type:    utils.MetaString,
-					Element: "~*opts.Subsystems",
-					Values:  []string{"*attributes"},
+					Element: "~*req.Account",
+					Values:  []string{"1001"},
 				},
 				{
 					Type:    utils.MetaPrefix,
-					Element: "~*req.Destinations",
-					Values:  []string{"+0775", "+442"},
+					Element: "~*req.Destination",
+					Values:  []string{"10"},
+				},
+			},
+		},
+		{
+			ID:     "TestA_FILTER2",
+			Tenant: "cgrates.org",
+			Rules: []*engine.FilterRule{
+				{
+					Type:    utils.MetaString,
+					Element: "~*req.Account",
+					Values:  []string{"1002"},
+				},
+				{
+					Type:    utils.MetaPrefix,
+					Element: "~*req.Destination",
+					Values:  []string{"10"},
+				},
+			},
+		},
+		{
+			ID:     "TestA_FILTER3",
+			Tenant: "cgrates.org",
+			Rules: []*engine.FilterRule{
+				{
+					Type:    utils.MetaString,
+					Element: "~*req.Account",
+					Values:  []string{"1003"},
+				},
+				{
+					Type:    utils.MetaPrefix,
+					Element: "~*req.Destination",
+					Values:  []string{"10"},
+				},
+			},
+		},
+		{
+			ID:     "TestB_FILTER1",
+			Tenant: "cgrates.org",
+			Rules: []*engine.FilterRule{
+				{
+					Type:    utils.MetaString,
+					Element: "~*req.Account",
+					Values:  []string{"2001"},
+				},
+				{
+					Type:    utils.MetaPrefix,
+					Element: "~*req.Destination",
+					Values:  []string{"20"},
+				},
+			},
+		},
+		{
+			ID:     "TestB_FILTER2",
+			Tenant: "cgrates.org",
+			Rules: []*engine.FilterRule{
+				{
+					Type:    utils.MetaString,
+					Element: "~*req.Account",
+					Values:  []string{"2002"},
+				},
+				{
+					Type:    utils.MetaPrefix,
+					Element: "~*req.Destination",
+					Values:  []string{"20"},
 				},
 			},
 		},
 	}
+	var replyFilters []*engine.Filter
+	if err := fltrRPC.Call(context.Background(), utils.AdminSv1GetFilters,
+		&utils.ArgsItemIDs{
+			Tenant: "cgrates.org",
+		}, &replyFilters); err != nil {
+		t.Error(err)
+	} else {
+		sort.Slice(replyFilters, func(i, j int) bool {
+			return replyFilters[i].ID < replyFilters[j].ID
+		})
+		if !reflect.DeepEqual(replyFilters, expectedFilters) {
+			t.Errorf("expected: <%+v>, \nreceived: <%+v>",
+				utils.ToJSON(expectedFilters), utils.ToJSON(replyFilters))
+		}
+	}
+}
+
+func testFiltersRemoveFilter(t *testing.T) {
 	var reply string
-	if err := fltrSRPC.Call(context.Background(), utils.AdminSv1SetFilter,
-		fltrPrf, &reply); err != nil {
+	if err := fltrRPC.Call(context.Background(), utils.AdminSv1RemoveFilter,
+		&utils.TenantIDWithAPIOpts{
+			TenantID: &utils.TenantID{
+				Tenant: "cgrates.org",
+				ID:     "TestA_FILTER2",
+			}}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
-		t.Error(err)
-	}
-
-	expectedFltr := &engine.Filter{
-		Tenant: utils.CGRateSorg,
-		ID:     "afltr_for_attr",
-		Rules: []*engine.FilterRule{
-			{
-				Type:    utils.MetaString,
-				Element: "~*req.Subject",
-				Values:  []string{"1004", "6774", "22312"},
-			},
-			{
-				Type:    utils.MetaString,
-				Element: "~*opts.Subsystems",
-				Values:  []string{"*attributes"},
-			},
-			{
-				Type:    utils.MetaPrefix,
-				Element: "~*req.Destinations",
-				Values:  []string{"+0775", "+442"},
-			},
-		},
-	}
-	var result *engine.Filter
-	if err := fltrSRPC.Call(context.Background(), utils.AdminSv1GetFilter,
-		&utils.TenantID{
-			Tenant: utils.CGRateSorg,
-			ID:     "afltr_for_attr",
-		}, &result); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(result, expectedFltr) {
-		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expectedFltr), utils.ToJSON(result))
+		t.Error("Unexpected reply returned:", reply)
 	}
 }
 
-func testFilterSGetFiltersWithPrefix(t *testing.T) {
-	var reply *[]*engine.Filter
-	args := &utils.ArgsItemIDs{
-		ItemsPrefix: "afltr",
+func testFiltersGetFilterAfterRemove(t *testing.T) {
+	var replyFilter engine.Filter
+	if err := fltrRPC.Call(context.Background(), utils.AdminSv1GetFilter,
+		&utils.TenantIDWithAPIOpts{
+			TenantID: &utils.TenantID{
+				Tenant: "cgrates.org",
+				ID:     "TestA_Filter2",
+			}}, &replyFilter); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	}
-	expectedFltr := &[]*engine.Filter{
+}
+
+func testFiltersGetFilterIDsAfterRemove(t *testing.T) {
+	expectedIDs := []string{"TestA_FILTER1", "TestA_FILTER3", "TestB_FILTER1", "TestB_FILTER2"}
+	var replyFilterIDs []string
+	if err := fltrRPC.Call(context.Background(), utils.AdminSv1GetFilterIDs,
+		&utils.ArgsItemIDs{
+			Tenant: "cgrates.org",
+		}, &replyFilterIDs); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(replyFilterIDs)
+		if !utils.SliceStringEqual(replyFilterIDs, expectedIDs) {
+			t.Errorf("expected: <%+v>, \nreceived: <%+v>", expectedIDs, replyFilterIDs)
+		}
+	}
+
+	expectedIDs = []string{"TestA_FILTER1", "TestA_FILTER3"}
+	if err := fltrRPC.Call(context.Background(), utils.AdminSv1GetFilterIDs,
+		&utils.ArgsItemIDs{
+			Tenant:      "cgrates.org",
+			ItemsPrefix: "TestA",
+		}, &replyFilterIDs); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(replyFilterIDs)
+		if !utils.SliceStringEqual(replyFilterIDs, expectedIDs) {
+			t.Errorf("expected: <%+v>, \nreceived: <%+v>", expectedIDs, replyFilterIDs)
+		}
+	}
+
+	expectedIDs = []string{"TestB_FILTER1", "TestB_FILTER2"}
+	if err := fltrRPC.Call(context.Background(), utils.AdminSv1GetFilterIDs,
+		&utils.ArgsItemIDs{
+			Tenant:      "cgrates.org",
+			ItemsPrefix: "TestB",
+		}, &replyFilterIDs); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(replyFilterIDs)
+		if !utils.SliceStringEqual(replyFilterIDs, expectedIDs) {
+			t.Errorf("expected: <%+v>, \nreceived: <%+v>", expectedIDs, replyFilterIDs)
+		}
+	}
+}
+
+func testFiltersGetFilterCountAfterRemove(t *testing.T) {
+	var replyCount int
+	if err := fltrRPC.Call(context.Background(), utils.AdminSv1GetFiltersCount,
+		&utils.ArgsItemIDs{
+			Tenant: "cgrates.org",
+		}, &replyCount); err != nil {
+		t.Error(err)
+	} else if replyCount != 4 {
+		t.Errorf("expected <%+v>, \nreceived: <%+v>", 0, replyCount)
+	}
+
+	if err := fltrRPC.Call(context.Background(), utils.AdminSv1GetFiltersCount,
+		&utils.ArgsItemIDs{
+			Tenant:      "cgrates.org",
+			ItemsPrefix: "TestA",
+		}, &replyCount); err != nil {
+		t.Error(err)
+	} else if replyCount != 2 {
+		t.Errorf("expected <%+v>, \nreceived: <%+v>", 0, replyCount)
+	}
+
+	if err := fltrRPC.Call(context.Background(), utils.AdminSv1GetFiltersCount,
+		&utils.ArgsItemIDs{
+			Tenant:      "cgrates.org",
+			ItemsPrefix: "TestB",
+		}, &replyCount); err != nil {
+		t.Error(err)
+	} else if replyCount != 2 {
+		t.Errorf("expected <%+v>, \nreceived: <%+v>", 0, replyCount)
+	}
+}
+
+func testFiltersGetFiltersAfterRemove(t *testing.T) {
+	expectedFilters := []*engine.Filter{
 		{
-			Tenant: utils.CGRateSorg,
-			ID:     "afltr_for_attr",
+			ID:     "TestA_FILTER1",
+			Tenant: "cgrates.org",
 			Rules: []*engine.FilterRule{
 				{
 					Type:    utils.MetaString,
-					Element: "~*req.Subject",
-					Values:  []string{"1004", "6774", "22312"},
-				},
-				{
-					Type:    utils.MetaString,
-					Element: "~*opts.Subsystems",
-					Values:  []string{"*attributes"},
+					Element: "~*req.Account",
+					Values:  []string{"1001"},
 				},
 				{
 					Type:    utils.MetaPrefix,
-					Element: "~*req.Destinations",
-					Values:  []string{"+0775", "+442"},
+					Element: "~*req.Destination",
+					Values:  []string{"10"},
+				},
+			},
+		},
+		{
+			ID:     "TestA_FILTER3",
+			Tenant: "cgrates.org",
+			Rules: []*engine.FilterRule{
+				{
+					Type:    utils.MetaString,
+					Element: "~*req.Account",
+					Values:  []string{"1003"},
+				},
+				{
+					Type:    utils.MetaPrefix,
+					Element: "~*req.Destination",
+					Values:  []string{"10"},
+				},
+			},
+		},
+		{
+			ID:     "TestB_FILTER1",
+			Tenant: "cgrates.org",
+			Rules: []*engine.FilterRule{
+				{
+					Type:    utils.MetaString,
+					Element: "~*req.Account",
+					Values:  []string{"2001"},
+				},
+				{
+					Type:    utils.MetaPrefix,
+					Element: "~*req.Destination",
+					Values:  []string{"20"},
+				},
+			},
+		},
+		{
+			ID:     "TestB_FILTER2",
+			Tenant: "cgrates.org",
+			Rules: []*engine.FilterRule{
+				{
+					Type:    utils.MetaString,
+					Element: "~*req.Account",
+					Values:  []string{"2002"},
+				},
+				{
+					Type:    utils.MetaPrefix,
+					Element: "~*req.Destination",
+					Values:  []string{"20"},
 				},
 			},
 		},
 	}
-	if err := fltrSRPC.Call(context.Background(), utils.AdminSv1GetFilters,
-		args, &reply); err != nil {
+	var replyFilters []*engine.Filter
+	if err := fltrRPC.Call(context.Background(), utils.AdminSv1GetFilters,
+		&utils.ArgsItemIDs{
+			Tenant: "cgrates.org",
+		}, &replyFilters); err != nil {
 		t.Error(err)
-	}
-	sort.Slice(*reply, func(i, j int) bool {
-		return (*reply)[i].ID < (*reply)[j].ID
-	})
-	if !reflect.DeepEqual(reply, expectedFltr) {
-		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expectedFltr), utils.ToJSON(reply))
+	} else {
+		sort.Slice(replyFilters, func(i, j int) bool {
+			return replyFilters[i].ID < replyFilters[j].ID
+		})
+		if !reflect.DeepEqual(replyFilters, expectedFilters) {
+			t.Errorf("expected: <%+v>, \nreceived: <%+v>",
+				utils.ToJSON(expectedFilters), utils.ToJSON(replyFilters))
+		}
 	}
 }
 
-func testFilterSSetInvalidFilter(t *testing.T) {
+func testFiltersSetInvalidFilter(t *testing.T) {
 	fltrPrf := &engine.FilterWithAPIOpts{
 		Filter: &engine.Filter{
 			Tenant: utils.CGRateSorg,
@@ -701,13 +677,13 @@ func testFilterSSetInvalidFilter(t *testing.T) {
 	}
 	experr := `SERVER_ERROR: there exists at least one filter rule that is not valid`
 	var reply string
-	if err := fltrSRPC.Call(context.Background(), utils.AdminSv1SetFilter,
+	if err := fltrRPC.Call(context.Background(), utils.AdminSv1SetFilter,
 		fltrPrf, &reply); err == nil || err.Error() != experr {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 
 	var result *engine.Filter
-	if err := fltrSRPC.Call(context.Background(), utils.AdminSv1GetFilter,
+	if err := fltrRPC.Call(context.Background(), utils.AdminSv1GetFilter,
 		&utils.TenantID{
 			Tenant: utils.CGRateSorg,
 			ID:     "invalid_filter",
@@ -716,7 +692,7 @@ func testFilterSSetInvalidFilter(t *testing.T) {
 	}
 }
 
-func testFilterSFiltersMatchTrue(t *testing.T) {
+func testFiltersFiltersMatchTrue(t *testing.T) {
 	args := &engine.ArgsFiltersMatch{
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
@@ -733,7 +709,7 @@ func testFilterSFiltersMatchTrue(t *testing.T) {
 	}
 
 	var reply bool
-	if err := fltrSRPC.Call(context.Background(), utils.AdminSv1FiltersMatch, args,
+	if err := fltrRPC.Call(context.Background(), utils.AdminSv1FiltersMatch, args,
 		&reply); err != nil {
 		t.Error(err)
 	} else if reply != true {
@@ -741,7 +717,7 @@ func testFilterSFiltersMatchTrue(t *testing.T) {
 	}
 }
 
-func testFilterSFiltersMatchFalse(t *testing.T) {
+func testFiltersFiltersMatchFalse(t *testing.T) {
 	args := &engine.ArgsFiltersMatch{
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
@@ -758,7 +734,7 @@ func testFilterSFiltersMatchFalse(t *testing.T) {
 	}
 
 	var reply bool
-	if err := fltrSRPC.Call(context.Background(), utils.AdminSv1FiltersMatch, args,
+	if err := fltrRPC.Call(context.Background(), utils.AdminSv1FiltersMatch, args,
 		&reply); err != nil {
 		t.Error(err)
 	} else if reply != false {
@@ -767,7 +743,7 @@ func testFilterSFiltersMatchFalse(t *testing.T) {
 }
 
 //Kill the engine when it is about to be finished
-func testFilterSKillEngine(t *testing.T) {
+func testFiltersKillEngine(t *testing.T) {
 	if err := engine.KillEngine(100); err != nil {
 		t.Error(err)
 	}
