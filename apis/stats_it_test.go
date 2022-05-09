@@ -643,7 +643,7 @@ func testStatsProcessEventWithBlockersOnMetrics(t *testing.T) {
 				},
 				{
 					MetricID: utils.MetaASR,
-					Blockers: utils.Blockers{
+					Blockers: utils.DynamicBlockers{
 						{
 							FilterIDs: []string{"*prefix:~*req.CallerID:4433"},
 							Blocker:   true,
@@ -655,7 +655,7 @@ func testStatsProcessEventWithBlockersOnMetrics(t *testing.T) {
 				},
 				{
 					MetricID: utils.MetaACD,
-					Blockers: utils.Blockers{
+					Blockers: utils.DynamicBlockers{
 						{
 							FilterIDs: []string{"*prefix:~*req.CallerID:44112"},
 							Blocker:   true,
@@ -832,7 +832,7 @@ func testStatsGetStatQueueForEventWithBlockers(t *testing.T) {
 			QueueLength: 100,
 			TTL:         time.Duration(1 * time.Minute),
 			MinItems:    0,
-			Blockers: utils.Blockers{
+			Blockers: utils.DynamicBlockers{
 				{
 					Blocker: false,
 				},
@@ -851,7 +851,7 @@ func testStatsGetStatQueueForEventWithBlockers(t *testing.T) {
 			Tenant:    "cgrates.org",
 			ID:        "SQ_Blockers2",
 			FilterIDs: []string{"*string:~*req.StatsBlockers:correct"},
-			Blockers: utils.Blockers{
+			Blockers: utils.DynamicBlockers{
 				{
 					FilterIDs: []string{"*string:~*opts.*usage:1m"},
 					Blocker:   true,
@@ -876,7 +876,7 @@ func testStatsGetStatQueueForEventWithBlockers(t *testing.T) {
 			Tenant:    "cgrates.org",
 			ID:        "SQ_Blockers3",
 			FilterIDs: []string{"*string:~*req.StatsBlockers:correct"},
-			Blockers: utils.Blockers{
+			Blockers: utils.DynamicBlockers{
 				{
 					Blocker: false,
 				},

@@ -439,7 +439,7 @@ func testConsoleItRoutesProfilesForEvent(t *testing.T) {
 					ResourceIDs:    nil,
 					StatIDs:        nil,
 					Weights:        utils.DynamicWeights{{Weight: 10.}},
-					Blockers: utils.Blockers{
+					Blockers: utils.DynamicBlockers{
 						{
 							Blocker: false,
 						},
@@ -454,7 +454,7 @@ func testConsoleItRoutesProfilesForEvent(t *testing.T) {
 					ResourceIDs:    nil,
 					StatIDs:        nil,
 					Weights:        utils.DynamicWeights{{Weight: 20.}},
-					Blockers: utils.Blockers{
+					Blockers: utils.DynamicBlockers{
 						{
 							Blocker: false,
 						},
@@ -545,7 +545,7 @@ func testConsoleItRoutesProfile(t *testing.T) {
 				ResourceIDs:    nil,
 				StatIDs:        nil,
 				Weights:        utils.DynamicWeights{{Weight: 10.}},
-				Blockers: utils.Blockers{
+				Blockers: utils.DynamicBlockers{
 					{
 						Blocker: false,
 					},
@@ -560,7 +560,7 @@ func testConsoleItRoutesProfile(t *testing.T) {
 				ResourceIDs:    nil,
 				StatIDs:        nil,
 				Weights:        utils.DynamicWeights{{Weight: 20.}},
-				Blockers: utils.Blockers{
+				Blockers: utils.DynamicBlockers{
 					{
 						Blocker: false,
 					},

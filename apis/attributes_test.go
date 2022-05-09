@@ -44,7 +44,7 @@ func TestAttributesSetGetAttributeProfile(t *testing.T) {
 	attrPrf := &engine.APIAttributeProfileWithAPIOpts{
 		APIAttributeProfile: &engine.APIAttributeProfile{
 			ID: "TestGetAttributeProfile",
-			Blockers: utils.Blockers{
+			Blockers: utils.DynamicBlockers{
 				{
 					Blocker: true,
 				},

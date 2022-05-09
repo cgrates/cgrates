@@ -687,7 +687,7 @@ func TestStatsAPIs(t *testing.T) {
 					MetricID: utils.MetaTCD,
 				},
 			},
-			Blockers:     utils.Blockers{{Blocker: true}},
+			Blockers:     utils.DynamicBlockers{{Blocker: true}},
 			ThresholdIDs: []string{utils.MetaNone},
 			Weights: utils.DynamicWeights{
 				{
@@ -721,7 +721,7 @@ func TestStatsAPIs(t *testing.T) {
 					MetricID: utils.MetaASR,
 				},
 			},
-			Blockers:     utils.Blockers{{Blocker: true}},
+			Blockers:     utils.DynamicBlockers{{Blocker: true}},
 			ThresholdIDs: []string{"thdID"},
 			Weights: utils.DynamicWeights{
 				{

@@ -37,7 +37,7 @@ type Route struct {
 	ResourceIDs     []string // queried in some strategies
 	StatIDs         []string // queried in some strategies
 	Weights         utils.DynamicWeights
-	Blockers        utils.Blockers // do not process further route after this one
+	Blockers        utils.DynamicBlockers // do not process further route after this one
 	RouteParameters string
 
 	cacheRoute map[string]interface{} // cache["*ratio"]=ratio
@@ -49,7 +49,7 @@ type RouteProfile struct {
 	ID                string // LCR Profile ID
 	FilterIDs         []string
 	Weights           utils.DynamicWeights
-	Blockers          utils.Blockers
+	Blockers          utils.DynamicBlockers
 	Sorting           string // Sorting strategy
 	SortingParameters []string
 	Routes            []*Route
@@ -518,9 +518,9 @@ func (rp *RouteProfile) Set(path []string, val interface{}, newBranch bool, _ st
 			if val != utils.EmptyString {
 				rp.Weights, err = utils.NewDynamicWeightsFromString(utils.IfaceAsString(val), utils.InfieldSep, utils.ANDSep)
 			}
-		case utils.BlockersField:
+		case utils.Blockers:
 			if val != utils.EmptyString {
-				rp.Blockers, err = utils.NewBlockersFromString(utils.IfaceAsString(val), utils.InfieldSep, utils.ANDSep)
+				rp.Blockers, err = utils.NewDynamicBlockersFromString(utils.IfaceAsString(val), utils.InfieldSep, utils.ANDSep)
 			}
 		}
 	case 2:
@@ -561,9 +561,9 @@ func (rp *RouteProfile) Set(path []string, val interface{}, newBranch bool, _ st
 			if val != utils.EmptyString {
 				rt.Weights, err = utils.NewDynamicWeightsFromString(utils.IfaceAsString(val), utils.InfieldSep, utils.ANDSep)
 			}
-		case utils.BlockersField:
+		case utils.Blockers:
 			if val != utils.EmptyString {
-				rt.Blockers, err = utils.NewBlockersFromString(utils.IfaceAsString(val), utils.InfieldSep, utils.ANDSep)
+				rt.Blockers, err = utils.NewDynamicBlockersFromString(utils.IfaceAsString(val), utils.InfieldSep, utils.ANDSep)
 			}
 		case utils.RouteParameters:
 			rt.RouteParameters = utils.IfaceAsString(val)
@@ -663,7 +663,7 @@ func (rp *RouteProfile) FieldAsInterface(fldPath []string) (_ interface{}, err e
 			return rp.SortingParameters, nil
 		case utils.Sorting:
 			return rp.Sorting, nil
-		case utils.BlockersField:
+		case utils.Blockers:
 			return rp.Blockers.String(utils.InfieldSep, utils.ANDSep), nil
 		case utils.Routes:
 			return rp.Routes, nil
@@ -737,7 +737,7 @@ func (rt *Route) FieldAsInterface(fldPath []string) (_ interface{}, err error) {
 		return rt.StatIDs, nil
 	case utils.Weights:
 		return rt.Weights.String(utils.InfieldSep, utils.ANDSep), nil
-	case utils.BlockersField:
+	case utils.Blockers:
 		return rt.Blockers.String(utils.InfieldSep, utils.ANDSep), nil
 	case utils.RouteParameters:
 		return rt.RouteParameters, nil

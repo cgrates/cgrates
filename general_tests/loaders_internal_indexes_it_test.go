@@ -135,7 +135,7 @@ func testLoadersIDBIdxCheckAttributes(t *testing.T) {
 			Type:  utils.MetaConstant,
 			Value: "CGRateS.org",
 		}},
-		Blockers: utils.Blockers{
+		Blockers: utils.DynamicBlockers{
 			{
 				Blocker: false,
 			},

@@ -1510,7 +1510,7 @@ func TestV1DebitAbstractsEventCharges(t *testing.T) {
 				Value: config.NewRSRParsersMustCompile("RP_2", utils.InfieldSep),
 			},
 		},
-		Blockers: utils.Blockers{
+		Blockers: utils.DynamicBlockers{
 			{
 				Blocker: false,
 			},
@@ -2026,7 +2026,7 @@ func TestV1DebitAbstractsEventChargesWithRefundCharges(t *testing.T) {
 				Value: config.NewRSRParsersMustCompile("RP_2", utils.InfieldSep),
 			},
 		},
-		Blockers: utils.Blockers{
+		Blockers: utils.DynamicBlockers{
 			{
 				Blocker: false,
 			},

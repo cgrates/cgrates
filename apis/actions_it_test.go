@@ -705,7 +705,7 @@ func testActionsSetActionProfiles(t *testing.T) {
 						Weight: 30,
 					},
 				},
-				Blockers: utils.Blockers{
+				Blockers: utils.DynamicBlockers{
 					{
 						Blocker: false,
 					},
@@ -748,7 +748,7 @@ func testActionsSetActionProfiles(t *testing.T) {
 						Weight: 20,
 					},
 				},
-				Blockers: utils.Blockers{
+				Blockers: utils.DynamicBlockers{
 					{
 						Blocker: true,
 					},

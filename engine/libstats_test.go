@@ -1391,7 +1391,7 @@ func TestStatQueueProfileSet(t *testing.T) {
 		TTL:          10,
 		MinItems:     10,
 		Stored:       true,
-		Blockers:     utils.Blockers{{Blocker: true}},
+		Blockers:     utils.DynamicBlockers{{Blocker: true}},
 		ThresholdIDs: []string{"TH1"},
 		Metrics: []*MetricWithFilters{{
 			MetricID: utils.MetaTCD,
@@ -1437,7 +1437,7 @@ func TestStatQueueProfileSet(t *testing.T) {
 	if err := sq.Set([]string{utils.Stored}, true, false, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
-	if err := sq.Set([]string{utils.BlockersField}, ";true", false, utils.EmptyString); err != nil {
+	if err := sq.Set([]string{utils.Blockers}, ";true", false, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
 	if err := sq.Set([]string{utils.ThresholdIDs}, "TH1", false, utils.EmptyString); err != nil {
@@ -1473,7 +1473,7 @@ func TestStatQueueProfileAsInterface(t *testing.T) {
 		TTL:          10,
 		MinItems:     10,
 		Stored:       true,
-		Blockers:     utils.Blockers{{Blocker: true}},
+		Blockers:     utils.DynamicBlockers{{Blocker: true}},
 		ThresholdIDs: []string{"TH1"},
 		Metrics: []*MetricWithFilters{{
 			MetricID: utils.MetaTCD,
@@ -1557,7 +1557,7 @@ func TestStatQueueProfileAsInterface(t *testing.T) {
 	} else if exp := sqp.Stored; exp != val {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
 	}
-	if val, err := sqp.FieldAsInterface([]string{utils.BlockersField}); err != nil {
+	if val, err := sqp.FieldAsInterface([]string{utils.Blockers}); err != nil {
 		t.Fatal(err)
 	} else if exp := sqp.Blockers; !reflect.DeepEqual(exp, val) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
@@ -1635,7 +1635,7 @@ func TestStatQueueProfileMerge(t *testing.T) {
 		TTL:          10,
 		MinItems:     10,
 		Stored:       true,
-		Blockers:     utils.Blockers{{Blocker: true}},
+		Blockers:     utils.DynamicBlockers{{Blocker: true}},
 		ThresholdIDs: []string{"TH1"},
 		Metrics: []*MetricWithFilters{{
 			MetricID: utils.MetaTCD,
@@ -1657,7 +1657,7 @@ func TestStatQueueProfileMerge(t *testing.T) {
 		TTL:          10,
 		MinItems:     10,
 		Stored:       true,
-		Blockers:     utils.Blockers{{Blocker: true}},
+		Blockers:     utils.DynamicBlockers{{Blocker: true}},
 		ThresholdIDs: []string{"TH1"},
 		Metrics: []*MetricWithFilters{{
 			MetricID: utils.MetaTCD,
@@ -1710,7 +1710,7 @@ func TestStatQueueProfile_Set(t *testing.T) {
 				MinItems:     tt.fields.MinItems,
 				Metrics:      tt.fields.Metrics,
 				Stored:       tt.fields.Stored,
-				Blockers:     utils.Blockers{{Blocker: true}},
+				Blockers:     utils.DynamicBlockers{{Blocker: true}},
 				Weights:      tt.fields.Weights,
 				ThresholdIDs: tt.fields.ThresholdIDs,
 				lkID:         tt.fields.lkID,

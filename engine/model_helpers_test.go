@@ -287,7 +287,7 @@ func TestAPItoTPStats(t *testing.T) {
 	if eTPs.TTL, err = utils.ParseDurationWithNanosecs(tps.TTL); err != nil {
 		t.Errorf("Got error: %+v", err)
 	}
-	if eTPs.Blockers, err = utils.NewBlockersFromString(tps.Blockers, utils.InfieldSep, utils.ANDSep); err != nil {
+	if eTPs.Blockers, err = utils.NewDynamicBlockersFromString(tps.Blockers, utils.InfieldSep, utils.ANDSep); err != nil {
 		t.Error(err)
 	}
 
@@ -3695,7 +3695,7 @@ func TestActionProfileMdlsCSVHeader(t *testing.T) {
 		},
 	}
 	expStruct := []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs,
-		utils.Weights, utils.BlockersField, utils.Schedule, utils.TargetType,
+		utils.Weights, utils.Blockers, utils.Schedule, utils.TargetType,
 		utils.TargetIDs, utils.ActionID, utils.ActionFilterIDs, utils.ActionTTL,
 		utils.ActionType, utils.ActionOpts, utils.ActionPath, utils.ActionValue,
 	}
@@ -4013,7 +4013,7 @@ func TestChargerMdlsCSVHeader(t *testing.T) {
 		},
 	}
 	expStruct := []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs, utils.Weights,
-		utils.BlockersField, utils.RunID, utils.AttributeIDs}
+		utils.Blockers, utils.RunID, utils.AttributeIDs}
 
 	result := testStruct.CSVHeader()
 	if !reflect.DeepEqual(result, expStruct) {
@@ -4082,7 +4082,7 @@ func TestAttributeMdlsCSVHeader(t *testing.T) {
 			ID:     "ALS1",
 		},
 	}
-	expStruct := []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs, utils.Weights, utils.BlockersField, utils.AttributeFilterIDs, utils.AttributeBlockers, utils.Path, utils.Type, utils.Value}
+	expStruct := []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs, utils.Weights, utils.Blockers, utils.AttributeFilterIDs, utils.AttributeBlockers, utils.Path, utils.Type, utils.Value}
 	result := testStruct.CSVHeader()
 	if !reflect.DeepEqual(result, expStruct) {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ToJSON(expStruct), utils.ToJSON(result))
@@ -4300,14 +4300,14 @@ func TestModelHelpersStatQueueProfileToAPIFilterIds(t *testing.T) {
 		MinItems:    0,
 		Metrics: []*MetricWithFilters{{
 			FilterIDs: []string{"test_id"},
-			Blockers: utils.Blockers{{
+			Blockers: utils.DynamicBlockers{{
 				FilterIDs: []string{"fltr2"},
 				Blocker:   false,
 			}},
 		},
 		},
 		Stored:   false,
-		Blockers: utils.Blockers{{Blocker: false}},
+		Blockers: utils.DynamicBlockers{{Blocker: false}},
 		Weights: utils.DynamicWeights{
 			{
 				Weight: 0,
@@ -4441,7 +4441,7 @@ func TestStatMdlsCSVHeader(t *testing.T) {
 		ThresholdIDs:    "",
 		CreatedAt:       time.Time{},
 	}}
-	expStruct := []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs, utils.Weights, utils.BlockersField, utils.QueueLength, utils.TTL, utils.MinItems, utils.Stored, utils.ThresholdIDs, utils.MetricIDs, utils.MetricFilterIDs, utils.MetricBlockers}
+	expStruct := []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs, utils.Weights, utils.Blockers, utils.QueueLength, utils.TTL, utils.MinItems, utils.Stored, utils.ThresholdIDs, utils.MetricIDs, utils.MetricFilterIDs, utils.MetricBlockers}
 	result := testStruct.CSVHeader()
 	if !reflect.DeepEqual(result, expStruct) {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ToJSON(expStruct), utils.ToJSON(result))
@@ -4603,7 +4603,7 @@ func TestAccountMdlsCSVHeader(t *testing.T) {
 	},
 	}
 	exp := []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs,
-		utils.Weights, utils.BlockersField, utils.Opts, utils.BalanceID, utils.BalanceFilterIDs, utils.BalanceWeights, utils.BalanceBlockers, utils.BalanceType, utils.BalanceUnits, utils.BalanceUnitFactors, utils.BalanceOpts, utils.BalanceCostIncrements, utils.BalanceAttributeIDs, utils.BalanceRateProfileIDs,
+		utils.Weights, utils.Blockers, utils.Opts, utils.BalanceID, utils.BalanceFilterIDs, utils.BalanceWeights, utils.BalanceBlockers, utils.BalanceType, utils.BalanceUnits, utils.BalanceUnitFactors, utils.BalanceOpts, utils.BalanceCostIncrements, utils.BalanceAttributeIDs, utils.BalanceRateProfileIDs,
 		utils.ThresholdIDs}
 	result := testStruct.CSVHeader()
 	if !reflect.DeepEqual(exp, result) {
@@ -4910,7 +4910,7 @@ func TestApitoAccountCase2(t *testing.T) {
 						Weight: 10.0,
 					},
 				},
-				Blockers: utils.Blockers{
+				Blockers: utils.DynamicBlockers{
 					{
 						FilterIDs: []string{"*string:~*req.Destination:122"},
 						Blocker:   true,

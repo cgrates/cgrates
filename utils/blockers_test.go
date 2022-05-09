@@ -24,7 +24,7 @@ import (
 )
 
 func TestNewBlockersFromString(t *testing.T) {
-	blkrs := Blockers{
+	blkrs := DynamicBlockers{
 		{
 			FilterIDs: []string{"*string:~*opts.*cost:0"},
 			Blocker:   false,
@@ -42,7 +42,7 @@ func TestNewBlockersFromString(t *testing.T) {
 		},
 	}
 	blkrsStr := "*string:~*opts.*cost:0;false;*suffix:~*req.Destination:+4432&eq:~*opts.*usage:10s;false;*notstring:~*req.RequestType:*prepaid;true;;false"
-	if rcv, err := NewBlockersFromString(blkrsStr, InfieldSep, ANDSep); err != nil {
+	if rcv, err := NewDynamicBlockersFromString(blkrsStr, InfieldSep, ANDSep); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcv, blkrs) {
 		t.Errorf("Expected %v \n received %v", ToJSON(blkrs), ToJSON(rcv))
@@ -51,7 +51,7 @@ func TestNewBlockersFromString(t *testing.T) {
 }
 
 func TestNewBlockersFromString2(t *testing.T) {
-	blkrs := Blockers{
+	blkrs := DynamicBlockers{
 		{
 			FilterIDs: []string{"*string:~*opts.*cost:0"},
 			Blocker:   false,
@@ -59,7 +59,7 @@ func TestNewBlockersFromString2(t *testing.T) {
 		{},
 	}
 	blkrsStr := "*string:~*opts.*cost:0;false;;"
-	if rcv, err := NewBlockersFromString(blkrsStr, InfieldSep, ANDSep); err != nil {
+	if rcv, err := NewDynamicBlockersFromString(blkrsStr, InfieldSep, ANDSep); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcv, blkrs) {
 		t.Errorf("Expected %+v \n ,received %+v", ToJSON(blkrs), ToJSON(rcv))
@@ -69,7 +69,7 @@ func TestNewBlockersFromString2(t *testing.T) {
 func TestNewBlockersFromStringErrSeparator(t *testing.T) {
 	blkrsStr := "*string:~*opts.*cost:0;false;;;"
 	exp := "invalid DynamicBlocker format for string <*string:~*opts.*cost:0;false;;;>"
-	if _, err := NewBlockersFromString(blkrsStr, InfieldSep, ANDSep); err.Error() != exp {
+	if _, err := NewDynamicBlockersFromString(blkrsStr, InfieldSep, ANDSep); err.Error() != exp {
 		t.Errorf("Expected %s \n received %s", exp, err.Error())
 	}
 }
@@ -77,7 +77,7 @@ func TestNewBlockersFromStringErrSeparator(t *testing.T) {
 func TestNewBlockersFromStringFormatBool(t *testing.T) {
 	blkrsStr := "*string:~*opts.*cost:0;tttrrruuue"
 	exp := "cannot convert bool with value: <tttrrruuue> into Blocker"
-	if _, err := NewBlockersFromString(blkrsStr, InfieldSep, ANDSep); err.Error() != exp {
+	if _, err := NewDynamicBlockersFromString(blkrsStr, InfieldSep, ANDSep); err.Error() != exp {
 		t.Errorf("Expected %s \n received %s", exp, err.Error())
 	}
 }

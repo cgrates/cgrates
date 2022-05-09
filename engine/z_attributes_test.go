@@ -270,7 +270,7 @@ func TestAttributesV1GetAttributeForEventErr(t *testing.T) {
 				Value:     config.NewRSRParsersMustCompile(".co.uk", utils.InfieldSep),
 			},
 		},
-		Blockers: utils.Blockers{
+		Blockers: utils.DynamicBlockers{
 			{
 				Blocker: false,
 			},
@@ -297,7 +297,7 @@ func TestAttributesV1GetAttributeForEventErr(t *testing.T) {
 				Value:     config.NewRSRParsersMustCompile("CGRATES.ORG", utils.InfieldSep),
 			},
 		},
-		Blockers: utils.Blockers{
+		Blockers: utils.DynamicBlockers{
 			{
 				Blocker: false,
 			},
@@ -1201,7 +1201,7 @@ func TestAttributeMultipleProcessWithBlocker(t *testing.T) {
 				Value: config.NewRSRParsersMustCompile("Value2", utils.InfieldSep),
 			},
 		},
-		Blockers: utils.Blockers{
+		Blockers: utils.DynamicBlockers{
 			{
 				Blocker: true,
 			},
@@ -1303,7 +1303,7 @@ func TestAttributeMultipleProcessWithBlocker2(t *testing.T) {
 				Value: config.NewRSRParsersMustCompile("Value1", utils.InfieldSep),
 			},
 		},
-		Blockers: utils.Blockers{
+		Blockers: utils.DynamicBlockers{
 			{
 				Blocker: true,
 			},
@@ -1416,7 +1416,7 @@ func TestAttributeProcessValue(t *testing.T) {
 				Value: config.NewRSRParsersMustCompile("~*req.Field1", utils.InfieldSep),
 			},
 		},
-		Blockers: utils.Blockers{
+		Blockers: utils.DynamicBlockers{
 			{
 				Blocker: true,
 			},
@@ -1571,7 +1571,7 @@ func TestAttributeProcessEventConstant(t *testing.T) {
 				Value: config.NewRSRParsersMustCompile("ConstVal", utils.InfieldSep),
 			},
 		},
-		Blockers: utils.Blockers{
+		Blockers: utils.DynamicBlockers{
 			{
 				Blocker: true,
 			},
@@ -1651,7 +1651,7 @@ func TestAttributeProcessEventVariable(t *testing.T) {
 				Value: config.NewRSRParsersMustCompile("~*req.TheField", utils.InfieldSep),
 			},
 		},
-		Blockers: utils.Blockers{
+		Blockers: utils.DynamicBlockers{
 			{
 				Blocker: true,
 			},
@@ -1738,7 +1738,7 @@ func TestAttributeProcessEventComposed(t *testing.T) {
 				Value: config.NewRSRParsersMustCompile("~*req.TheField", utils.InfieldSep),
 			},
 		},
-		Blockers: utils.Blockers{
+		Blockers: utils.DynamicBlockers{
 			{
 				Blocker: true,
 			},
@@ -1815,7 +1815,7 @@ func TestAttributeProcessEventSum(t *testing.T) {
 				Value: config.NewRSRParsersMustCompile("10;~*req.NumField;20", utils.InfieldSep),
 			},
 		},
-		Blockers: utils.Blockers{
+		Blockers: utils.DynamicBlockers{
 			{
 				Blocker: true,
 			},
@@ -1894,7 +1894,7 @@ func TestAttributeProcessEventUsageDifference(t *testing.T) {
 				Value: config.NewRSRParsersMustCompile("~*req.UnixTimeStamp;~*req.UnixTimeStamp2", utils.InfieldSep),
 			},
 		},
-		Blockers: utils.Blockers{
+		Blockers: utils.DynamicBlockers{
 			{
 				Blocker: true,
 			},
@@ -1975,7 +1975,7 @@ func TestAttributeProcessEventValueExponent(t *testing.T) {
 				Value: config.NewRSRParsersMustCompile("~*req.Multiplier;~*req.Pow", utils.InfieldSep),
 			},
 		},
-		Blockers: utils.Blockers{
+		Blockers: utils.DynamicBlockers{
 			{
 				Blocker: true,
 			},
@@ -2060,7 +2060,7 @@ func BenchmarkAttributeProcessEventConstant(b *testing.B) {
 				Value: config.NewRSRParsersMustCompile("ConstVal", utils.InfieldSep),
 			},
 		},
-		Blockers: utils.Blockers{
+		Blockers: utils.DynamicBlockers{
 			{
 				Blocker: true,
 			},
@@ -2121,7 +2121,7 @@ func BenchmarkAttributeProcessEventVariable(b *testing.B) {
 				Value: config.NewRSRParsersMustCompile("~*req.Field1", utils.InfieldSep),
 			},
 		},
-		Blockers: utils.Blockers{
+		Blockers: utils.DynamicBlockers{
 			{
 				Blocker: true,
 			},
@@ -3688,7 +3688,7 @@ func TestAttributesV1ProcessEvent(t *testing.T) {
 				Value:     config.NewRSRParsersMustCompile(".co.uk", utils.InfieldSep),
 			},
 		},
-		Blockers: utils.Blockers{
+		Blockers: utils.DynamicBlockers{
 			{
 				Blocker: false,
 			},
@@ -3715,7 +3715,7 @@ func TestAttributesV1ProcessEvent(t *testing.T) {
 				Value:     config.NewRSRParsersMustCompile("CGRATES.ORG", utils.InfieldSep),
 			},
 		},
-		Blockers: utils.Blockers{
+		Blockers: utils.DynamicBlockers{
 			{
 				Blocker: false,
 			},
@@ -3810,7 +3810,7 @@ func TestAttributesV1ProcessEventErrorMetaSum(t *testing.T) {
 				Value:     config.NewRSRParsersMustCompile(".co.uk", utils.InfieldSep),
 			},
 		},
-		Blockers: utils.Blockers{
+		Blockers: utils.DynamicBlockers{
 			{
 				Blocker: false,
 			},
@@ -3837,7 +3837,7 @@ func TestAttributesV1ProcessEventErrorMetaSum(t *testing.T) {
 				Value:     config.NewRSRParsersMustCompile("CGRATES.ORG", utils.InfieldSep),
 			},
 		},
-		Blockers: utils.Blockers{
+		Blockers: utils.DynamicBlockers{
 			{
 				Blocker: false,
 			},
@@ -3905,7 +3905,7 @@ func TestAttributesV1ProcessEventErrorMetaDifference(t *testing.T) {
 				Value:     config.NewRSRParsersMustCompile(".co.uk", utils.InfieldSep),
 			},
 		},
-		Blockers: utils.Blockers{
+		Blockers: utils.DynamicBlockers{
 			{
 				Blocker: false,
 			},
@@ -3932,7 +3932,7 @@ func TestAttributesV1ProcessEventErrorMetaDifference(t *testing.T) {
 				Value:     config.NewRSRParsersMustCompile("CGRATES.ORG", utils.InfieldSep),
 			},
 		},
-		Blockers: utils.Blockers{
+		Blockers: utils.DynamicBlockers{
 			{
 				Blocker: false,
 			},
@@ -4001,7 +4001,7 @@ func TestAttributesV1ProcessEventErrorMetaValueExponent(t *testing.T) {
 				Value:     config.NewRSRParsersMustCompile(".co.uk", utils.InfieldSep),
 			},
 		},
-		Blockers: utils.Blockers{
+		Blockers: utils.DynamicBlockers{
 			{
 				Blocker: false,
 			},
@@ -4028,7 +4028,7 @@ func TestAttributesV1ProcessEventErrorMetaValueExponent(t *testing.T) {
 				Value:     config.NewRSRParsersMustCompile("CGRATES.ORG", utils.InfieldSep),
 			},
 		},
-		Blockers: utils.Blockers{
+		Blockers: utils.DynamicBlockers{
 			{
 				Blocker: false,
 			},
@@ -4637,7 +4637,7 @@ func TestAttributesV1GetAttributeForEvent(t *testing.T) {
 				Value:     config.NewRSRParsersMustCompile(".co.uk", utils.InfieldSep),
 			},
 		},
-		Blockers: utils.Blockers{
+		Blockers: utils.DynamicBlockers{
 			{
 				Blocker: false,
 			},
@@ -4664,7 +4664,7 @@ func TestAttributesV1GetAttributeForEvent(t *testing.T) {
 				Value:     config.NewRSRParsersMustCompile("CGRATES.ORG", utils.InfieldSep),
 			},
 		},
-		Blockers: utils.Blockers{
+		Blockers: utils.DynamicBlockers{
 			{
 				Blocker: false,
 			},
@@ -4714,7 +4714,7 @@ func TestAttributesV1GetAttributeForEvent(t *testing.T) {
 				Value: ".co.uk",
 			},
 		},
-		Blockers: utils.Blockers{
+		Blockers: utils.DynamicBlockers{
 			{
 				Blocker: false,
 			},
@@ -4766,7 +4766,7 @@ func TestAttributesV1GetAttributeForEventErrorBoolOpts(t *testing.T) {
 				Value:     config.NewRSRParsersMustCompile(".co.uk", utils.InfieldSep),
 			},
 		},
-		Blockers: utils.Blockers{
+		Blockers: utils.DynamicBlockers{
 			{
 				Blocker: false,
 			},
@@ -4793,7 +4793,7 @@ func TestAttributesV1GetAttributeForEventErrorBoolOpts(t *testing.T) {
 				Value:     config.NewRSRParsersMustCompile("CGRATES.ORG", utils.InfieldSep),
 			},
 		},
-		Blockers: utils.Blockers{
+		Blockers: utils.DynamicBlockers{
 			{
 				Blocker: false,
 			},
@@ -4862,7 +4862,7 @@ func TestAttributesV1GetAttributeForEventErrorNil(t *testing.T) {
 				Value:     config.NewRSRParsersMustCompile(".co.uk", utils.InfieldSep),
 			},
 		},
-		Blockers: utils.Blockers{
+		Blockers: utils.DynamicBlockers{
 			{
 				Blocker: false,
 			},
@@ -4889,7 +4889,7 @@ func TestAttributesV1GetAttributeForEventErrorNil(t *testing.T) {
 				Value:     config.NewRSRParsersMustCompile("CGRATES.ORG", utils.InfieldSep),
 			},
 		},
-		Blockers: utils.Blockers{
+		Blockers: utils.DynamicBlockers{
 			{
 				Blocker: false,
 			},
@@ -4947,7 +4947,7 @@ func TestAttributesV1GetAttributeForEventErrOptsI(t *testing.T) {
 				Value:     config.NewRSRParsersMustCompile(".co.uk", utils.InfieldSep),
 			},
 		},
-		Blockers: utils.Blockers{
+		Blockers: utils.DynamicBlockers{
 			{
 				Blocker: false,
 			},
@@ -4974,7 +4974,7 @@ func TestAttributesV1GetAttributeForEventErrOptsI(t *testing.T) {
 				Value:     config.NewRSRParsersMustCompile("CGRATES.ORG", utils.InfieldSep),
 			},
 		},
-		Blockers: utils.Blockers{
+		Blockers: utils.DynamicBlockers{
 			{
 				Blocker: false,
 			},

@@ -140,7 +140,7 @@ func testTPeSSetAttributeProfile(t *testing.T) {
 			FilterIDs: []string{"*string:~*req.Account:1002", "*exists:~*opts.*usage:"},
 			Attributes: []*engine.ExternalAttribute{
 				{
-					Blockers: utils.Blockers{
+					Blockers: utils.DynamicBlockers{
 						{
 							FilterIDs: []string{"*string:~*req.Account:1002"},
 							Blocker:   true,
@@ -159,7 +159,7 @@ func testTPeSSetAttributeProfile(t *testing.T) {
 					Value: "cgrates.itsyscom",
 				},
 			},
-			Blockers: utils.Blockers{
+			Blockers: utils.DynamicBlockers{
 				{
 					Blocker: true,
 				},
@@ -644,7 +644,7 @@ func testTPeSetAccount(t *testing.T) {
 							Weight: 12,
 						},
 					},
-					Blockers: utils.Blockers{
+					Blockers: utils.DynamicBlockers{
 						{
 							FilterIDs: []string{"*prefix:~*req.Destination:+443"},
 							Blocker:   true,
@@ -684,7 +684,7 @@ func testTPeSetAccount(t *testing.T) {
 					Weight: 10,
 				},
 			},
-			Blockers: utils.Blockers{
+			Blockers: utils.DynamicBlockers{
 				{
 					FilterIDs: []string{"*string:~*req.Destination:1002"},
 					Blocker:   true,
@@ -702,7 +702,7 @@ func testTPeSetAccount(t *testing.T) {
 							Weight: 40,
 						},
 					},
-					Blockers: utils.Blockers{
+					Blockers: utils.DynamicBlockers{
 						{
 							Blocker: false,
 						},
@@ -805,7 +805,7 @@ func testTPeSetStatQueueProfile(t *testing.T) {
 			},
 			QueueLength:  14,
 			ThresholdIDs: []string{utils.MetaNone},
-			Blockers:     utils.Blockers{{Blocker: false}},
+			Blockers:     utils.DynamicBlockers{{Blocker: false}},
 			Metrics: []*engine.MetricWithFilters{
 				{
 					MetricID: utils.MetaASR,
@@ -839,7 +839,7 @@ func testTPeSetStatQueueProfile(t *testing.T) {
 			Tenant:   "cgrates.org",
 			ID:       "SQ_basic",
 			TTL:      0,
-			Blockers: utils.Blockers{{Blocker: true}},
+			Blockers: utils.DynamicBlockers{{Blocker: true}},
 			MinItems: 3,
 			Stored:   true,
 			Weights: utils.DynamicWeights{

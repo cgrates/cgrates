@@ -233,7 +233,7 @@ func testDspAttrGetAttrFailover(t *testing.T) {
 			Type:      utils.MetaConstant,
 			Value:     "CGRateS.org",
 		}},
-		Blockers: utils.Blockers{
+		Blockers: utils.DynamicBlockers{
 			{
 				Blocker: false,
 			},
@@ -425,7 +425,7 @@ func testDspAttrTestAuthKey2(t *testing.T) {
 			Type:      utils.MetaConstant,
 			Value:     "CGRateS.org",
 		}},
-		Blockers: utils.Blockers{
+		Blockers: utils.DynamicBlockers{
 			{
 				Blocker: false,
 			},
@@ -524,7 +524,7 @@ func testDspAttrGetAttrRoundRobin(t *testing.T) {
 			Type:      utils.MetaConstant,
 			Value:     "CGRateS.org",
 		}},
-		Blockers: utils.Blockers{
+		Blockers: utils.DynamicBlockers{
 			{
 				Blocker: false,
 			},

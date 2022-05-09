@@ -24,12 +24,12 @@ import (
 	"strings"
 )
 
-type Blockers []*DynamicBlocker
+type DynamicBlockers []*DynamicBlocker
 
-// NewBlockersFromString will build the Blockers that contains slices of FilterIDs and Blocker from a single value. This process is helped by separators
-func NewBlockersFromString(value, blkSep, fltrSep string) (blkrs Blockers, err error) {
+// NewDynamicBlockersFromString will build the Blockers that contains slices of FilterIDs and Blocker from a single value. This process is helped by separators
+func NewDynamicBlockersFromString(value, blkSep, fltrSep string) (blkrs DynamicBlockers, err error) {
 	if len(value) == 0 {
-		return Blockers{{}}, nil
+		return DynamicBlockers{{}}, nil
 	}
 	valSeparated := strings.Split(value, blkSep)
 	lenVals := len(valSeparated)
@@ -53,7 +53,7 @@ func NewBlockersFromString(value, blkSep, fltrSep string) (blkrs Blockers, err e
 }
 
 // String will set the Blockers as a string pattern
-func (blkrs Blockers) String(blkSep, fltrSep string) (value string) {
+func (blkrs DynamicBlockers) String(blkSep, fltrSep string) (value string) {
 	if len(blkrs) == 0 {
 		return
 	}
@@ -79,11 +79,11 @@ func (blckr DynamicBlocker) String(blkSep, fltrSep string) (out string) {
 }
 
 // Clone will clone the Blockers
-func (blckrs Blockers) Clone() (clBlkrs Blockers) {
+func (blckrs DynamicBlockers) Clone() (clBlkrs DynamicBlockers) {
 	if blckrs == nil {
 		return
 	}
-	clBlkrs = make(Blockers, len(blckrs))
+	clBlkrs = make(DynamicBlockers, len(blckrs))
 	for i, value := range blckrs {
 		clBlkrs[i] = value.Clone()
 	}

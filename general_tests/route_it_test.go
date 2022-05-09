@@ -156,7 +156,7 @@ func testV1SplSSetSupplierProfilesWithoutRateProfileIDs(t *testing.T) {
 							Weight: 20,
 						},
 					},
-					Blockers: utils.Blockers{
+					Blockers: utils.DynamicBlockers{
 						{
 							Blocker: false,
 						},
@@ -235,7 +235,7 @@ func testV1SplSAddNewSplPrf(t *testing.T) {
 							Weight: 20,
 						},
 					},
-					Blockers: utils.Blockers{
+					Blockers: utils.DynamicBlockers{
 						{
 							Blocker: false,
 						},
@@ -250,7 +250,7 @@ func testV1SplSAddNewSplPrf(t *testing.T) {
 							Weight: 20,
 						},
 					},
-					Blockers: utils.Blockers{
+					Blockers: utils.DynamicBlockers{
 						{
 							Blocker: false,
 						},
@@ -264,7 +264,7 @@ func testV1SplSAddNewSplPrf(t *testing.T) {
 							Weight: 35,
 						},
 					},
-					Blockers: utils.Blockers{
+					Blockers: utils.DynamicBlockers{
 						{
 							Blocker: false,
 						},
@@ -533,7 +533,7 @@ func testV1SplSAddNewSplPrf2(t *testing.T) {
 							Weight: 20,
 						},
 					},
-					Blockers: utils.Blockers{
+					Blockers: utils.DynamicBlockers{
 						{
 							Blocker: false,
 						},
@@ -548,7 +548,7 @@ func testV1SplSAddNewSplPrf2(t *testing.T) {
 							Weight: 20,
 						},
 					},
-					Blockers: utils.Blockers{
+					Blockers: utils.DynamicBlockers{
 						{
 							Blocker: false,
 						},
@@ -562,7 +562,7 @@ func testV1SplSAddNewSplPrf2(t *testing.T) {
 							Weight: 35,
 						},
 					},
-					Blockers: utils.Blockers{
+					Blockers: utils.DynamicBlockers{
 						{
 							Blocker: false,
 						},

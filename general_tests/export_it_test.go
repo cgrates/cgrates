@@ -237,7 +237,7 @@ func testExpVerifyAttributes(t *testing.T) {
 				Value:     config.NewRSRParsersMustCompile("Marketing", utils.InfieldSep),
 			},
 		},
-		Blockers: utils.Blockers{
+		Blockers: utils.DynamicBlockers{
 			{
 				Blocker: false,
 			},
@@ -360,7 +360,7 @@ func testExpVerifyStats(t *testing.T) {
 				MetricID: utils.MetaTCD,
 			},
 		},
-		Blockers: utils.Blockers{{Blocker: true}},
+		Blockers: utils.DynamicBlockers{{Blocker: true}},
 		Stored:   false,
 		Weights: utils.DynamicWeights{
 			{
@@ -400,7 +400,7 @@ func testExpVerifyRoutes(t *testing.T) {
 						Weight: 20,
 					},
 				},
-				Blockers: utils.Blockers{
+				Blockers: utils.DynamicBlockers{
 					{
 						Blocker: false,
 					},
@@ -414,7 +414,7 @@ func testExpVerifyRoutes(t *testing.T) {
 						Weight: 10,
 					},
 				},
-				Blockers: utils.Blockers{
+				Blockers: utils.DynamicBlockers{
 					{
 						Blocker: false,
 					},
@@ -444,7 +444,7 @@ func testExpVerifyRoutes(t *testing.T) {
 						Weight: 10,
 					},
 				},
-				Blockers: utils.Blockers{
+				Blockers: utils.DynamicBlockers{
 					{
 						Blocker: false,
 					},
@@ -458,7 +458,7 @@ func testExpVerifyRoutes(t *testing.T) {
 						Weight: 210,
 					},
 				},
-				Blockers: utils.Blockers{
+				Blockers: utils.DynamicBlockers{
 					{
 						Blocker: false,
 					},

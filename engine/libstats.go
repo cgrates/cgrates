@@ -39,7 +39,7 @@ type StatQueueProfile struct {
 	ID           string // QueueID
 	FilterIDs    []string
 	Weights      utils.DynamicWeights
-	Blockers     utils.Blockers // blocker flag to stop processing on filters matched
+	Blockers     utils.DynamicBlockers // blocker flag to stop processing on filters matched
 	QueueLength  int
 	TTL          time.Duration
 	MinItems     int
@@ -93,7 +93,7 @@ func (sqp *StatQueueProfile) isLocked() bool {
 type MetricWithFilters struct {
 	MetricID  string
 	FilterIDs []string
-	Blockers  utils.Blockers // blocker flag to stop processing for next metric on filters matched
+	Blockers  utils.DynamicBlockers // blocker flag to stop processing for next metric on filters matched
 }
 
 // NewStoredStatQueue initiates a StoredStatQueue out of StatQueue
@@ -577,9 +577,9 @@ func (sqp *StatQueueProfile) Set(path []string, val interface{}, newBranch bool,
 			sqp.TTL, err = utils.IfaceAsDuration(val)
 		case utils.Stored:
 			sqp.Stored, err = utils.IfaceAsBool(val)
-		case utils.BlockersField:
+		case utils.Blockers:
 			if val != utils.EmptyString {
-				sqp.Blockers, err = utils.NewBlockersFromString(utils.IfaceAsString(val), utils.InfieldSep, utils.ANDSep)
+				sqp.Blockers, err = utils.NewDynamicBlockersFromString(utils.IfaceAsString(val), utils.InfieldSep, utils.ANDSep)
 			}
 		case utils.Weights:
 			if val != utils.EmptyString {
@@ -616,9 +616,9 @@ func (sqp *StatQueueProfile) Set(path []string, val interface{}, newBranch bool,
 				for _, mID := range valA[1:] { // add the rest of the metrics
 					sqp.Metrics = append(sqp.Metrics, &MetricWithFilters{MetricID: mID})
 				}
-			case utils.BlockersField:
-				var blkrs utils.Blockers
-				if blkrs, err = utils.NewBlockersFromString(utils.IfaceAsString(val), utils.InfieldSep, utils.ANDSep); err != nil {
+			case utils.Blockers:
+				var blkrs utils.DynamicBlockers
+				if blkrs, err = utils.NewDynamicBlockersFromString(utils.IfaceAsString(val), utils.InfieldSep, utils.ANDSep); err != nil {
 					return
 				}
 				sqp.Metrics[len(sqp.Metrics)-1].Blockers = append(sqp.Metrics[len(sqp.Metrics)-1].Blockers, blkrs...)
@@ -708,7 +708,7 @@ func (sqp *StatQueueProfile) FieldAsInterface(fldPath []string) (_ interface{}, 
 			return sqp.Metrics, nil
 		case utils.Stored:
 			return sqp.Stored, nil
-		case utils.BlockersField:
+		case utils.Blockers:
 			return sqp.Blockers, nil
 		}
 	}
@@ -751,7 +751,7 @@ func (mf *MetricWithFilters) FieldAsInterface(fldPath []string) (_ interface{}, 
 		return mf.MetricID, nil
 	case utils.FilterIDs:
 		return mf.FilterIDs, nil
-	case utils.BlockersField:
+	case utils.Blockers:
 		return mf.Blockers, nil
 	}
 }

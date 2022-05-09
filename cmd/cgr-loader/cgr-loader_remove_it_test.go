@@ -611,7 +611,7 @@ func testCgrLdrGetStatsProfileAfterLoad(t *testing.T) {
 				MetricID: "*acd",
 			},
 		},
-		Blockers:     utils.Blockers{{Blocker: true}},
+		Blockers:     utils.DynamicBlockers{{Blocker: true}},
 		ThresholdIDs: []string{utils.MetaNone},
 	}
 	var replySts *engine.StatQueueProfile

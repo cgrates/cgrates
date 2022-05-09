@@ -323,7 +323,7 @@ type StatMdls []*StatMdl
 
 // CSVHeader return the header for csv fields as a slice of string
 func (tps StatMdls) CSVHeader() (result []string) {
-	return []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs, utils.Weights, utils.BlockersField, utils.QueueLength, utils.TTL, utils.MinItems, utils.Stored, utils.ThresholdIDs, utils.MetricIDs, utils.MetricFilterIDs, utils.MetricBlockers}
+	return []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs, utils.Weights, utils.Blockers, utils.QueueLength, utils.TTL, utils.MinItems, utils.Stored, utils.ThresholdIDs, utils.MetricIDs, utils.MetricFilterIDs, utils.MetricBlockers}
 }
 
 func (tps StatMdls) AsTPStats() (result []*utils.TPStatProfile) {
@@ -473,7 +473,7 @@ func APItoStats(tpST *utils.TPStatProfile, timezone string) (st *StatQueueProfil
 		}
 	}
 	if tpST.Blockers != utils.EmptyString {
-		if st.Blockers, err = utils.NewBlockersFromString(tpST.Blockers, utils.InfieldSep, utils.ANDSep); err != nil {
+		if st.Blockers, err = utils.NewDynamicBlockersFromString(tpST.Blockers, utils.InfieldSep, utils.ANDSep); err != nil {
 			return
 		}
 	}
@@ -488,7 +488,7 @@ func APItoStats(tpST *utils.TPStatProfile, timezone string) (st *StatQueueProfil
 			FilterIDs: metric.FilterIDs,
 		}
 		if metric.Blockers != utils.EmptyString {
-			if st.Metrics[i].Blockers, err = utils.NewBlockersFromString(metric.Blockers, utils.InfieldSep, utils.ANDSep); err != nil {
+			if st.Metrics[i].Blockers, err = utils.NewDynamicBlockersFromString(metric.Blockers, utils.InfieldSep, utils.ANDSep); err != nil {
 				return
 			}
 		}
@@ -1008,7 +1008,7 @@ func APItoRouteProfile(tpRp *utils.TPRouteProfile, timezone string) (rp *RoutePr
 		}
 	}
 	if tpRp.Blockers != utils.EmptyString {
-		rp.Blockers, err = utils.NewBlockersFromString(tpRp.Blockers, utils.InfieldSep, utils.ANDSep)
+		rp.Blockers, err = utils.NewDynamicBlockersFromString(tpRp.Blockers, utils.InfieldSep, utils.ANDSep)
 		if err != nil {
 			return nil, err
 		}
@@ -1036,7 +1036,7 @@ func APItoRouteProfile(tpRp *utils.TPRouteProfile, timezone string) (rp *RoutePr
 			}
 		}
 		if route.Blockers != utils.EmptyString {
-			rp.Routes[i].Blockers, err = utils.NewBlockersFromString(route.Blockers, utils.InfieldSep, utils.ANDSep)
+			rp.Routes[i].Blockers, err = utils.NewDynamicBlockersFromString(route.Blockers, utils.InfieldSep, utils.ANDSep)
 			if err != nil {
 				return nil, err
 			}
@@ -1083,7 +1083,7 @@ type AttributeMdls []*AttributeMdl
 
 // CSVHeader return the header for csv fields as a slice of string
 func (tps AttributeMdls) CSVHeader() (result []string) {
-	return []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs, utils.Weights, utils.BlockersField, utils.AttributeFilterIDs, utils.AttributeBlockers, utils.Path, utils.Type, utils.Value}
+	return []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs, utils.Weights, utils.Blockers, utils.AttributeFilterIDs, utils.AttributeBlockers, utils.Path, utils.Type, utils.Value}
 }
 
 func (tps AttributeMdls) AsTPAttributes() (result []*utils.TPAttributeProfile) {
@@ -1179,7 +1179,7 @@ func APItoAttributeProfile(tpAttr *utils.TPAttributeProfile, timezone string) (a
 		Attributes: make([]*Attribute, len(tpAttr.Attributes)),
 	}
 	if tpAttr.Blockers != utils.EmptyString {
-		if attrPrf.Blockers, err = utils.NewBlockersFromString(tpAttr.Blockers, utils.InfieldSep, utils.ANDSep); err != nil {
+		if attrPrf.Blockers, err = utils.NewDynamicBlockersFromString(tpAttr.Blockers, utils.InfieldSep, utils.ANDSep); err != nil {
 			return
 		}
 	}
@@ -1207,7 +1207,7 @@ func APItoAttributeProfile(tpAttr *utils.TPAttributeProfile, timezone string) (a
 			Value:     sbstPrsr,
 		}
 		if reqAttr.Blockers != utils.EmptyString {
-			if attrPrf.Attributes[i].Blockers, err = utils.NewBlockersFromString(reqAttr.Blockers, utils.InfieldSep, utils.ANDSep); err != nil {
+			if attrPrf.Attributes[i].Blockers, err = utils.NewDynamicBlockersFromString(reqAttr.Blockers, utils.InfieldSep, utils.ANDSep); err != nil {
 				return nil, err
 			}
 		}
@@ -1244,7 +1244,7 @@ type ChargerMdls []*ChargerMdl
 // CSVHeader return the header for csv fields as a slice of string
 func (tps ChargerMdls) CSVHeader() (result []string) {
 	return []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs, utils.Weights,
-		utils.BlockersField, utils.RunID, utils.AttributeIDs}
+		utils.Blockers, utils.RunID, utils.AttributeIDs}
 }
 
 func (tps ChargerMdls) AsTPChargers() (result []*utils.TPChargerProfile) {
@@ -1399,7 +1399,7 @@ func APItoChargerProfile(tpCPP *utils.TPChargerProfile, timezone string) (cpp *C
 	}
 	if tpCPP.Blockers != utils.EmptyString {
 		var err error
-		cpp.Blockers, err = utils.NewBlockersFromString(tpCPP.Blockers, utils.InfieldSep, utils.ANDSep)
+		cpp.Blockers, err = utils.NewDynamicBlockersFromString(tpCPP.Blockers, utils.InfieldSep, utils.ANDSep)
 		if err != nil {
 			return
 		}
@@ -2060,7 +2060,7 @@ type ActionProfileMdls []*ActionProfileMdl
 // CSVHeader return the header for csv fields as a slice of string
 func (apm ActionProfileMdls) CSVHeader() (result []string) {
 	return []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs,
-		utils.Weights, utils.BlockersField, utils.Schedule, utils.TargetType, utils.TargetIDs,
+		utils.Weights, utils.Blockers, utils.Schedule, utils.TargetType, utils.TargetIDs,
 		utils.ActionID, utils.ActionFilterIDs, utils.ActionTTL,
 		utils.ActionType, utils.ActionOpts, utils.ActionPath, utils.ActionValue,
 	}
@@ -2200,7 +2200,7 @@ func APItoActionProfile(tpAp *utils.TPActionProfile, timezone string) (ap *Actio
 		}
 	}
 	if tpAp.Blockers != utils.EmptyString {
-		if ap.Blockers, err = utils.NewBlockersFromString(tpAp.Blockers, utils.InfieldSep, utils.ANDSep); err != nil {
+		if ap.Blockers, err = utils.NewDynamicBlockersFromString(tpAp.Blockers, utils.InfieldSep, utils.ANDSep); err != nil {
 			return
 		}
 	}
@@ -2290,7 +2290,7 @@ type AccountMdls []*AccountMdl
 // CSVHeader return the header for csv fields as a slice of string
 func (apm AccountMdls) CSVHeader() (result []string) {
 	return []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs,
-		utils.Weights, utils.BlockersField, utils.Opts, utils.BalanceID, utils.BalanceFilterIDs, utils.BalanceWeights, utils.BalanceBlockers, utils.BalanceType, utils.BalanceUnits, utils.BalanceUnitFactors, utils.BalanceOpts, utils.BalanceCostIncrements, utils.BalanceAttributeIDs, utils.BalanceRateProfileIDs,
+		utils.Weights, utils.Blockers, utils.Opts, utils.BalanceID, utils.BalanceFilterIDs, utils.BalanceWeights, utils.BalanceBlockers, utils.BalanceType, utils.BalanceUnits, utils.BalanceUnitFactors, utils.BalanceOpts, utils.BalanceCostIncrements, utils.BalanceAttributeIDs, utils.BalanceRateProfileIDs,
 		utils.ThresholdIDs}
 }
 
@@ -2478,7 +2478,7 @@ func APItoAccount(tpAp *utils.TPAccount, timezone string) (ap *utils.Account, er
 		ap.Weights = weight
 	}
 	if tpAp.Blockers != utils.EmptyString {
-		blockers, err := utils.NewBlockersFromString(tpAp.Blockers, utils.InfieldSep, utils.ANDSep)
+		blockers, err := utils.NewDynamicBlockersFromString(tpAp.Blockers, utils.InfieldSep, utils.ANDSep)
 		if err != nil {
 			return nil, err
 		}
@@ -2508,7 +2508,7 @@ func APItoAccount(tpAp *utils.TPAccount, timezone string) (ap *utils.Account, er
 			ap.Balances[id].Weights = weights
 		}
 		if bal.Blockers != utils.EmptyString {
-			blockers, err := utils.NewBlockersFromString(bal.Blockers, utils.InfieldSep, utils.ANDSep)
+			blockers, err := utils.NewDynamicBlockersFromString(bal.Blockers, utils.InfieldSep, utils.ANDSep)
 			if err != nil {
 				return nil, err
 			}

@@ -361,7 +361,7 @@ func testDspSupGetSupplierForEvent(t *testing.T) {
 				ID:             "route1",
 				RateProfileIDs: []string{"RP_1002_LOW"},
 				Weights:        utils.DynamicWeights{{Weight: 10}},
-				Blockers: utils.Blockers{
+				Blockers: utils.DynamicBlockers{
 					{
 						Blocker: false,
 					},
@@ -372,7 +372,7 @@ func testDspSupGetSupplierForEvent(t *testing.T) {
 				ID:             "route2",
 				RateProfileIDs: []string{"RP_1002"},
 				Weights:        utils.DynamicWeights{{Weight: 20}},
-				Blockers: utils.Blockers{
+				Blockers: utils.DynamicBlockers{
 					{
 						Blocker: false,
 					},
