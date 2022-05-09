@@ -862,7 +862,7 @@ func TestRouteProfileSet(t *testing.T) {
 			ResourceIDs:    []string{"res1"},
 			StatIDs:        []string{"stat1"},
 			Weights:        utils.DynamicWeights{{}},
-			Blockers: utils.Blockers{
+			Blockers: utils.DynamicBlockers{
 				{
 					Blocker: true,
 				},
@@ -923,7 +923,7 @@ func TestRouteProfileSet(t *testing.T) {
 	if err := rp.Set([]string{utils.Routes, utils.Weights}, ";0", false, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
-	if err := rp.Set([]string{utils.Routes, utils.BlockersField}, ";true", false, utils.EmptyString); err != nil {
+	if err := rp.Set([]string{utils.Routes, utils.Blockers}, ";true", false, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
 	if err := rp.Set([]string{utils.Routes, utils.RouteParameters}, "params", false, utils.EmptyString); err != nil {
@@ -958,7 +958,7 @@ func TestRouteProfileAsInterface(t *testing.T) {
 			ResourceIDs:    []string{"res1"},
 			StatIDs:        []string{"stat1"},
 			Weights:        utils.DynamicWeights{{}},
-			Blockers: utils.Blockers{
+			Blockers: utils.DynamicBlockers{
 				{
 					Blocker: true,
 				},
@@ -1044,7 +1044,7 @@ func TestRouteProfileAsInterface(t *testing.T) {
 	} else if exp := ";0"; exp != val {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
 	}
-	if val, err := rp.FieldAsInterface([]string{utils.Routes + "[0]", utils.BlockersField}); err != nil {
+	if val, err := rp.FieldAsInterface([]string{utils.Routes + "[0]", utils.Blockers}); err != nil {
 		t.Fatal(err)
 	} else if exp := ";true"; exp != val {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
@@ -1147,7 +1147,7 @@ func TestRouteProfileMerge(t *testing.T) {
 			ResourceIDs:    []string{"res1"},
 			StatIDs:        []string{"stat1"},
 			Weights:        utils.DynamicWeights{{}},
-			Blockers: utils.Blockers{
+			Blockers: utils.DynamicBlockers{
 				{
 					Blocker: true,
 				},
@@ -1170,7 +1170,7 @@ func TestRouteProfileMerge(t *testing.T) {
 			ResourceIDs:    []string{"res1"},
 			StatIDs:        []string{"stat1"},
 			Weights:        utils.DynamicWeights{{}},
-			Blockers: utils.Blockers{
+			Blockers: utils.DynamicBlockers{
 				{
 					Blocker: true,
 				},

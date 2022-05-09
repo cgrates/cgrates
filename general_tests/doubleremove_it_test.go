@@ -135,7 +135,7 @@ func testdoubleRemoveStatQueueProfile(t *testing.T) {
 				},
 			},
 			ThresholdIDs: []string{"Val1", "Val2"},
-			Blockers:     utils.Blockers{{Blocker: true}},
+			Blockers:     utils.DynamicBlockers{{Blocker: true}},
 			Stored:       true,
 			Weights: utils.DynamicWeights{
 				{
@@ -329,7 +329,7 @@ func testdoubleRemoveAttributeProfile(t *testing.T) {
 			Tenant:    doubleRemoveTenant,
 			ID:        "ATTR_PROFILE",
 			FilterIDs: []string{"*string:~*req.Account:1001"},
-			Blockers: utils.Blockers{
+			Blockers: utils.DynamicBlockers{
 				{
 					Blocker: false,
 				},

@@ -485,7 +485,7 @@ const (
 	RatingSubject            = "RatingSubject"
 	Categories               = "Categories"
 	Blocker                  = "Blocker"
-	BlockersField            = "Blockers"
+	Blockers                 = "Blockers"
 	Params                   = "Params"
 	StartTime                = "StartTime"
 	AccountSummary           = "AccountSummary"

@@ -189,7 +189,7 @@ func testAttributeSProcessEventWithAccount(t *testing.T) {
 					Value: "10",
 				},
 			},
-			Blockers: utils.Blockers{
+			Blockers: utils.DynamicBlockers{
 				{
 					Blocker: false,
 				},
@@ -266,7 +266,7 @@ func testAttributeSProcessEventWithAccountFull(t *testing.T) {
 					Value: "~*accounts.1001",
 				},
 			},
-			Blockers: utils.Blockers{
+			Blockers: utils.DynamicBlockers{
 				{
 					Blocker: false,
 				},
@@ -385,7 +385,7 @@ func testAttributeSProcessEventWithStat(t *testing.T) {
 					Value: "~*stats.Stat_1.*acd",
 				},
 			},
-			Blockers: utils.Blockers{
+			Blockers: utils.DynamicBlockers{
 				{
 					Blocker: false,
 				},
@@ -463,7 +463,7 @@ func testAttributeSProcessEventWithStatFull(t *testing.T) {
 					Value: "~*stats.Stat_1",
 				},
 			},
-			Blockers: utils.Blockers{
+			Blockers: utils.DynamicBlockers{
 				{
 					Blocker: false,
 				},
@@ -608,7 +608,7 @@ func testAttributeSProcessEventWithResource(t *testing.T) {
 					Value: "~*resources.ResTest.TotalUsage",
 				},
 			},
-			Blockers: utils.Blockers{
+			Blockers: utils.DynamicBlockers{
 				{
 					Blocker: false,
 				},
@@ -690,7 +690,7 @@ func testAttributeSProcessEventWithResourceFull(t *testing.T) {
 					Value: "~*resources.ResTest",
 				},
 			},
-			Blockers: utils.Blockers{
+			Blockers: utils.DynamicBlockers{
 				{
 					Blocker: false,
 				},
@@ -778,7 +778,7 @@ func testAttributeSProcessEventWithLibPhoneNumber(t *testing.T) {
 					Value: "~*libphonenumber.<~*req.Destination>.Carrier",
 				},
 			},
-			Blockers: utils.Blockers{
+			Blockers: utils.DynamicBlockers{
 				{
 					Blocker: false,
 				},
@@ -867,7 +867,7 @@ func testAttributeSProcessEventWithLibPhoneNumberComposed(t *testing.T) {
 					Value: "~*libphonenumber.<~*req.Destination>.CountryCode",
 				},
 			},
-			Blockers: utils.Blockers{
+			Blockers: utils.DynamicBlockers{
 				{
 					Blocker: false,
 				},
@@ -951,7 +951,7 @@ func testAttributeSProcessEventWithLibPhoneNumberFull(t *testing.T) {
 					Value: "~*libphonenumber.<~*req.Destination>",
 				},
 			},
-			Blockers: utils.Blockers{
+			Blockers: utils.DynamicBlockers{
 				{
 					Blocker: false,
 				},

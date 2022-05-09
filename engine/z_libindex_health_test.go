@@ -554,7 +554,7 @@ func TestHealthIndexStats(t *testing.T) {
 				MetricID: "*acd",
 			},
 		},
-		Blockers:     utils.Blockers{{Blocker: true}},
+		Blockers:     utils.DynamicBlockers{{Blocker: true}},
 		ThresholdIDs: []string{utils.MetaNone},
 	}
 	if err := dm.SetStatQueueProfile(context.Background(), sqPrf, false); err != nil {
@@ -645,7 +645,7 @@ func TestHealthIndexStats(t *testing.T) {
 				MetricID: "*acd",
 			},
 		},
-		Blockers:     utils.Blockers{{Blocker: true}},
+		Blockers:     utils.DynamicBlockers{{Blocker: true}},
 		ThresholdIDs: []string{utils.MetaNone},
 	}
 	if err := dm.SetStatQueueProfile(context.Background(), sqPrf, false); err != nil {
@@ -696,7 +696,7 @@ func TestHealthIndexRoutes(t *testing.T) {
 			{
 				ID:      "route1",
 				Weights: utils.DynamicWeights{{Weight: 10}},
-				Blockers: utils.Blockers{
+				Blockers: utils.DynamicBlockers{
 					{
 						Blocker: false,
 					},
@@ -707,7 +707,7 @@ func TestHealthIndexRoutes(t *testing.T) {
 				ID:             "route2",
 				RateProfileIDs: []string{"RP_1002"},
 				Weights:        utils.DynamicWeights{{Weight: 20}},
-				Blockers: utils.Blockers{
+				Blockers: utils.DynamicBlockers{
 					{
 						Blocker: false,
 					},
@@ -810,7 +810,7 @@ func TestHealthIndexRoutes(t *testing.T) {
 			{
 				ID:      "route1",
 				Weights: utils.DynamicWeights{{Weight: 10}},
-				Blockers: utils.Blockers{
+				Blockers: utils.DynamicBlockers{
 					{
 						Blocker: false,
 					},
@@ -821,7 +821,7 @@ func TestHealthIndexRoutes(t *testing.T) {
 				ID:             "route2",
 				RateProfileIDs: []string{"RP_1002"},
 				Weights:        utils.DynamicWeights{{Weight: 20}},
-				Blockers: utils.Blockers{
+				Blockers: utils.DynamicBlockers{
 					{
 						Blocker: false,
 					},

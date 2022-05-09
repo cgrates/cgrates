@@ -270,7 +270,7 @@ func testPreloadITVerifyAccounts(t *testing.T) {
 						Weight: 10,
 					},
 				},
-				Blockers: utils.Blockers{
+				Blockers: utils.DynamicBlockers{
 					{
 						FilterIDs: []string{"*string:~*req.Destination:1002"},
 						Blocker:   true,

@@ -34,7 +34,7 @@ type Account struct {
 	ID           string // Account identificator, unique within the tenant
 	FilterIDs    []string
 	Weights      DynamicWeights
-	Blockers     Blockers
+	Blockers     DynamicBlockers
 	Opts         map[string]interface{}
 	Balances     map[string]*Balance
 	ThresholdIDs []string
@@ -106,7 +106,7 @@ type Balance struct {
 	ID             string // Balance identificator, unique within an Account
 	FilterIDs      []string
 	Weights        DynamicWeights
-	Blockers       Blockers
+	Blockers       DynamicBlockers
 	Type           string
 	Units          *Decimal
 	UnitFactors    []*UnitFactor
@@ -567,9 +567,9 @@ func (ap *Account) Set(path []string, val interface{}, newBranch bool, _ string)
 			if val != EmptyString {
 				ap.Weights, err = NewDynamicWeightsFromString(IfaceAsString(val), InfieldSep, ANDSep)
 			}
-		case BlockersField:
+		case Blockers:
 			if val != EmptyString {
-				ap.Blockers, err = NewBlockersFromString(IfaceAsString(val), InfieldSep, ANDSep)
+				ap.Blockers, err = NewDynamicBlockersFromString(IfaceAsString(val), InfieldSep, ANDSep)
 			}
 		case Opts:
 			ap.Opts, err = NewMapFromCSV(IfaceAsString(val))
@@ -639,9 +639,9 @@ func (bL *Balance) Set(path []string, val interface{}, newBranch bool) (err erro
 			if val != EmptyString {
 				bL.Weights, err = NewDynamicWeightsFromString(IfaceAsString(val), InfieldSep, ANDSep)
 			}
-		case BlockersField:
+		case Blockers:
 			if val != EmptyString {
-				bL.Blockers, err = NewBlockersFromString(IfaceAsString(val), InfieldSep, ANDSep)
+				bL.Blockers, err = NewDynamicBlockersFromString(IfaceAsString(val), InfieldSep, ANDSep)
 			}
 		case UnitFactors:
 			if ufStr := IfaceAsString(val); len(ufStr) != 0 {
@@ -836,7 +836,7 @@ func (ap *Account) FieldAsInterface(fldPath []string) (_ interface{}, err error)
 			return ap.FilterIDs, nil
 		case Weights:
 			return ap.Weights.String(InfieldSep, ANDSep), nil
-		case BlockersField:
+		case Blockers:
 			return ap.Blockers.String(InfieldSep, ANDSep), nil
 		case ThresholdIDs:
 			return ap.ThresholdIDs, nil
@@ -943,7 +943,7 @@ func (bL *Balance) FieldAsInterface(fldPath []string) (_ interface{}, err error)
 			return bL.FilterIDs, nil
 		case Weights:
 			return bL.Weights.String(InfieldSep, ANDSep), nil
-		case BlockersField:
+		case Blockers:
 			return bL.Blockers.String(InfieldSep, ANDSep), nil
 		case AttributeIDs:
 			return bL.AttributeIDs, nil

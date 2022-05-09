@@ -236,7 +236,7 @@ func testLoaderCheckAttributes(t *testing.T) {
 			Path:      utils.MetaReq + utils.NestingSep + "Field1",
 			Type:      utils.MetaVariable,
 			Value:     "Sub1",
-			Blockers: utils.Blockers{
+			Blockers: utils.DynamicBlockers{
 				{
 					Blocker: true,
 				},
@@ -245,14 +245,14 @@ func testLoaderCheckAttributes(t *testing.T) {
 			Path:  utils.MetaReq + utils.NestingSep + "Field2",
 			Type:  utils.MetaVariable,
 			Value: "Sub2",
-			Blockers: utils.Blockers{
+			Blockers: utils.DynamicBlockers{
 				{
 					FilterIDs: []string{"*string:~*req.Account:1002"},
 					Blocker:   true,
 				},
 			},
 		}},
-		Blockers: utils.Blockers{
+		Blockers: utils.DynamicBlockers{
 			{
 				Blocker: true,
 			},

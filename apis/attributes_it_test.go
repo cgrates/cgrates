@@ -205,7 +205,7 @@ func testAttributesSetAttributeProfiles(t *testing.T) {
 						Weight: 30,
 					},
 				},
-				Blockers: utils.Blockers{
+				Blockers: utils.DynamicBlockers{
 					{
 						Blocker: false,
 					},
@@ -230,7 +230,7 @@ func testAttributesSetAttributeProfiles(t *testing.T) {
 						Weight: 10,
 					},
 				},
-				Blockers: utils.Blockers{
+				Blockers: utils.DynamicBlockers{
 					{
 						Blocker: true,
 					},
@@ -328,7 +328,7 @@ func testAttributesGetAttributeProfileAfterSet(t *testing.T) {
 				Weight: 30,
 			},
 		},
-		Blockers: utils.Blockers{
+		Blockers: utils.DynamicBlockers{
 			{
 				Blocker: false,
 			},
@@ -443,7 +443,7 @@ func testAttributesGetAttributeProfilesAfterSet(t *testing.T) {
 					Weight: 30,
 				},
 			},
-			Blockers: utils.Blockers{
+			Blockers: utils.DynamicBlockers{
 				{
 					Blocker: false,
 				},
@@ -466,7 +466,7 @@ func testAttributesGetAttributeProfilesAfterSet(t *testing.T) {
 					Weight: 10,
 				},
 			},
-			Blockers: utils.Blockers{
+			Blockers: utils.DynamicBlockers{
 				{
 					Blocker: true,
 				},
@@ -665,7 +665,7 @@ func testAttributesGetAttributeProfilesAfterRemove(t *testing.T) {
 					Weight: 30,
 				},
 			},
-			Blockers: utils.Blockers{
+			Blockers: utils.DynamicBlockers{
 				{
 					Blocker: false,
 				},
@@ -1146,7 +1146,7 @@ func testAttributeProcessEventWithSearchAndReplace(t *testing.T) {
 					Value: "~*req.Category:s/(.*)/${1}_suffix/",
 				},
 			},
-			Blockers: utils.Blockers{
+			Blockers: utils.DynamicBlockers{
 				{
 					Blocker: true,
 				},
@@ -1609,7 +1609,7 @@ func testAttributeSetAttributeProfileWithAttrBlockers(t *testing.T) {
 			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:        "ATTR_WITH_BLOCKER_TRUE",
 			FilterIDs: []string{"*string:~*req.Blockers:*exists", "*eq:~*opts.*attrProcessRuns:2"},
-			Blockers: utils.Blockers{
+			Blockers: utils.DynamicBlockers{
 				{
 					Blocker: false,
 				},
@@ -1629,7 +1629,7 @@ func testAttributeSetAttributeProfileWithAttrBlockers(t *testing.T) {
 					Value: "true",
 				},
 				{
-					Blockers: utils.Blockers{
+					Blockers: utils.DynamicBlockers{
 						{
 							FilterIDs: []string{"*prefix:~*req.Destination:4433"},
 							Blocker:   true,
@@ -1652,7 +1652,7 @@ func testAttributeSetAttributeProfileWithAttrBlockers(t *testing.T) {
 			ID:     "ATTR_WITH_BLOCKER",
 			FilterIDs: []string{"*string:~*req.Blockers:*exists",
 				"*notexists:~*opts.*usage:"},
-			Blockers: utils.Blockers{
+			Blockers: utils.DynamicBlockers{
 				{
 					Blocker: true,
 				},
@@ -1664,7 +1664,7 @@ func testAttributeSetAttributeProfileWithAttrBlockers(t *testing.T) {
 			},
 			Attributes: []*engine.ExternalAttribute{
 				{
-					Blockers: utils.Blockers{
+					Blockers: utils.DynamicBlockers{
 						{
 							FilterIDs: []string{"*prefix:~*req.Destination:4433"},
 							Blocker:   true,

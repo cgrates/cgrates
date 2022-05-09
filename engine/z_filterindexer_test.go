@@ -45,7 +45,7 @@ func TestFilterIndexesCheckingDynamicPathToNotIndex(t *testing.T) {
 				Value:     config.NewRSRParsersMustCompile("Sub1", utils.InfieldSep),
 			},
 		},
-		Blockers: utils.Blockers{
+		Blockers: utils.DynamicBlockers{
 			{
 				Blocker: true,
 			},
@@ -68,7 +68,7 @@ func TestFilterIndexesCheckingDynamicPathToNotIndex(t *testing.T) {
 				Value: config.NewRSRParsersMustCompile("admin", utils.InfieldSep),
 			},
 		},
-		Blockers: utils.Blockers{
+		Blockers: utils.DynamicBlockers{
 			{
 				Blocker: true,
 			},
@@ -91,7 +91,7 @@ func TestFilterIndexesCheckingDynamicPathToNotIndex(t *testing.T) {
 				Value: config.NewRSRParsersMustCompile("*rated", utils.InfieldSep),
 			},
 		},
-		Blockers: utils.Blockers{
+		Blockers: utils.DynamicBlockers{
 			{
 				Blocker: true,
 			},
@@ -114,7 +114,7 @@ func TestFilterIndexesCheckingDynamicPathToNotIndex(t *testing.T) {
 				Value: config.NewRSRParsersMustCompile("203", utils.InfieldSep),
 			},
 		},
-		Blockers: utils.Blockers{
+		Blockers: utils.DynamicBlockers{
 			{
 				Blocker: true,
 			},

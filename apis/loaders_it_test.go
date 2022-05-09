@@ -368,7 +368,7 @@ func testLoadersGetAccounts(t *testing.T) {
 					Weight: 20,
 				},
 			},
-			Blockers: utils.Blockers{
+			Blockers: utils.DynamicBlockers{
 				{
 					Blocker: false,
 				},
@@ -382,7 +382,7 @@ func testLoadersGetAccounts(t *testing.T) {
 							Weight: 10,
 						},
 					},
-					Blockers: utils.Blockers{
+					Blockers: utils.DynamicBlockers{
 						{
 							FilterIDs: []string{"*string:~*req.Account:1002"},
 							Blocker:   true,
@@ -436,7 +436,7 @@ func testLoadersGetAccounts(t *testing.T) {
 					Weight: 30,
 				},
 			},
-			Blockers: utils.Blockers{
+			Blockers: utils.DynamicBlockers{
 				{
 					Blocker: false,
 				},
@@ -515,7 +515,7 @@ func testLoadersGetActionProfiles(t *testing.T) {
 					Weight: 10,
 				},
 			},
-			Blockers: utils.Blockers{
+			Blockers: utils.DynamicBlockers{
 				{
 					Blocker: true,
 				},
@@ -630,7 +630,7 @@ func testLoadersGetAttributeProfiles(t *testing.T) {
 					Value: "Sub2",
 				},
 			},
-			Blockers: utils.Blockers{
+			Blockers: utils.DynamicBlockers{
 				{
 					Blocker: true,
 				},
@@ -658,7 +658,7 @@ func testLoadersGetAttributeProfiles(t *testing.T) {
 					Value:     "Sub1",
 				},
 			},
-			Blockers: utils.Blockers{
+			Blockers: utils.DynamicBlockers{
 				{
 					Blocker: false,
 				},
@@ -699,7 +699,7 @@ func testLoadersGetChargerProfiles(t *testing.T) {
 					Weight: 20,
 				},
 			},
-			Blockers: utils.Blockers{
+			Blockers: utils.DynamicBlockers{
 				{
 					Blocker: true,
 				},
@@ -716,7 +716,7 @@ func testLoadersGetChargerProfiles(t *testing.T) {
 					Weight: 15,
 				},
 			},
-			Blockers: utils.Blockers{
+			Blockers: utils.DynamicBlockers{
 				{
 					Blocker: false,
 				},
@@ -1080,7 +1080,7 @@ func testLoadersGetRouteProfiles(t *testing.T) {
 			ID:        "RoutePrf1",
 			FilterIDs: []string{"*string:~*req.Account:1001"},
 			Sorting:   utils.MetaLC,
-			Blockers: utils.Blockers{
+			Blockers: utils.DynamicBlockers{
 				{
 					Blocker: true,
 				},
@@ -1098,7 +1098,7 @@ func testLoadersGetRouteProfiles(t *testing.T) {
 							Weight: 10,
 						},
 					},
-					Blockers: utils.Blockers{
+					Blockers: utils.DynamicBlockers{
 						{
 							Blocker: true,
 						},
@@ -1118,7 +1118,7 @@ func testLoadersGetRouteProfiles(t *testing.T) {
 							Weight:    10,
 						},
 					},
-					Blockers: utils.Blockers{
+					Blockers: utils.DynamicBlockers{
 						{
 							Blocker: true,
 						},
@@ -1150,7 +1150,7 @@ func testLoadersGetRouteProfiles(t *testing.T) {
 							Weight: 10,
 						},
 					},
-					Blockers: utils.Blockers{
+					Blockers: utils.DynamicBlockers{
 						{
 							Blocker: true,
 						},
@@ -1199,7 +1199,7 @@ func testLoadersGetStatQueueProfiles(t *testing.T) {
 				},
 				{
 					MetricID: "*sum#~*req.Usage",
-					Blockers: utils.Blockers{
+					Blockers: utils.DynamicBlockers{
 						{
 							FilterIDs: []string{"*string:~*req.Account:1003", "fltr2"},
 							Blocker:   true,
@@ -1211,7 +1211,7 @@ func testLoadersGetStatQueueProfiles(t *testing.T) {
 				},
 			},
 			ThresholdIDs: []string{"Th1", "Th2"},
-			Blockers:     utils.Blockers{{Blocker: true}},
+			Blockers:     utils.DynamicBlockers{{Blocker: true}},
 			Stored:       true,
 			Weights: utils.DynamicWeights{
 				{
@@ -1244,11 +1244,11 @@ func testLoadersGetStatQueueProfiles(t *testing.T) {
 				},
 				{
 					MetricID: "*average#~*req.Cost",
-					Blockers: utils.Blockers{{Blocker: false}},
+					Blockers: utils.DynamicBlockers{{Blocker: false}},
 				},
 			},
 			ThresholdIDs: []string{"Th"},
-			Blockers:     utils.Blockers{{Blocker: true}},
+			Blockers:     utils.DynamicBlockers{{Blocker: true}},
 			Stored:       true,
 			Weights: utils.DynamicWeights{
 				{
@@ -1269,7 +1269,7 @@ func testLoadersGetStatQueueProfiles(t *testing.T) {
 				},
 				{
 					MetricID: "*average#~*req.Value",
-					Blockers: utils.Blockers{
+					Blockers: utils.DynamicBlockers{
 						{
 							FilterIDs: []string{"fltr_for_stats"},
 							Blocker:   false,
@@ -1278,7 +1278,7 @@ func testLoadersGetStatQueueProfiles(t *testing.T) {
 				},
 			},
 			ThresholdIDs: []string{"Th1", "Th2"},
-			Blockers:     utils.Blockers{{Blocker: true}},
+			Blockers:     utils.DynamicBlockers{{Blocker: true}},
 			Stored:       true,
 			Weights: utils.DynamicWeights{
 				{

@@ -181,7 +181,7 @@ func testChargersSetChargerProfiles(t *testing.T) {
 						Weight: 30,
 					},
 				},
-				Blockers: utils.Blockers{
+				Blockers: utils.DynamicBlockers{
 					{
 						Blocker: false,
 					},
@@ -200,7 +200,7 @@ func testChargersSetChargerProfiles(t *testing.T) {
 						Weight: 10,
 					},
 				},
-				Blockers: utils.Blockers{
+				Blockers: utils.DynamicBlockers{
 					{
 						Blocker: true,
 					},
@@ -274,7 +274,7 @@ func testChargersGetChargerProfileAfterSet(t *testing.T) {
 				Weight: 30,
 			},
 		},
-		Blockers: utils.Blockers{
+		Blockers: utils.DynamicBlockers{
 			{
 				Blocker: false,
 			},
@@ -383,7 +383,7 @@ func testChargersGetChargerProfilesAfterSet(t *testing.T) {
 					Weight: 30,
 				},
 			},
-			Blockers: utils.Blockers{
+			Blockers: utils.DynamicBlockers{
 				{
 					Blocker: false,
 				},
@@ -400,7 +400,7 @@ func testChargersGetChargerProfilesAfterSet(t *testing.T) {
 					Weight: 10,
 				},
 			},
-			Blockers: utils.Blockers{
+			Blockers: utils.DynamicBlockers{
 				{
 					Blocker: true,
 				},
@@ -575,7 +575,7 @@ func testChargersGetChargerProfilesAfterRemove(t *testing.T) {
 					Weight: 30,
 				},
 			},
-			Blockers: utils.Blockers{
+			Blockers: utils.DynamicBlockers{
 				{
 					Blocker: false,
 				},
@@ -878,7 +878,7 @@ func testChargersBlockerSetChargerProfiles(t *testing.T) {
 						Weight: 30,
 					},
 				},
-				Blockers: utils.Blockers{
+				Blockers: utils.DynamicBlockers{
 					{
 						Blocker: false,
 					},
@@ -896,7 +896,7 @@ func testChargersBlockerSetChargerProfiles(t *testing.T) {
 						Weight: 10,
 					},
 				},
-				Blockers: utils.Blockers{
+				Blockers: utils.DynamicBlockers{
 					{
 						Blocker: true,
 					},
@@ -962,7 +962,7 @@ func testChargersBlockerGetChargersForEvent(t *testing.T) {
 					Weight: 30,
 				},
 			},
-			Blockers: utils.Blockers{
+			Blockers: utils.DynamicBlockers{
 				{
 					Blocker: false,
 				},
@@ -989,7 +989,7 @@ func testChargersBlockerGetChargersForEvent(t *testing.T) {
 					Weight: 10,
 				},
 			},
-			Blockers: utils.Blockers{
+			Blockers: utils.DynamicBlockers{
 				{
 					Blocker: true,
 				},

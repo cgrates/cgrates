@@ -180,7 +180,7 @@ func testRoutesSetRouteProfiles(t *testing.T) {
 						Weight: 30,
 					},
 				},
-				Blockers: utils.Blockers{
+				Blockers: utils.DynamicBlockers{
 					{
 						Blocker: false,
 					},
@@ -204,7 +204,7 @@ func testRoutesSetRouteProfiles(t *testing.T) {
 						Weight: 10,
 					},
 				},
-				Blockers: utils.Blockers{
+				Blockers: utils.DynamicBlockers{
 					{
 						Blocker: true,
 					},
@@ -298,7 +298,7 @@ func testRoutesGetRouteProfileAfterSet(t *testing.T) {
 				Weight: 30,
 			},
 		},
-		Blockers: utils.Blockers{
+		Blockers: utils.DynamicBlockers{
 			{
 				Blocker: false,
 			},
@@ -412,7 +412,7 @@ func testRoutesGetRouteProfilesAfterSet(t *testing.T) {
 					Weight: 30,
 				},
 			},
-			Blockers: utils.Blockers{
+			Blockers: utils.DynamicBlockers{
 				{
 					Blocker: false,
 				},
@@ -434,7 +434,7 @@ func testRoutesGetRouteProfilesAfterSet(t *testing.T) {
 					Weight: 10,
 				},
 			},
-			Blockers: utils.Blockers{
+			Blockers: utils.DynamicBlockers{
 				{
 					Blocker: true,
 				},
@@ -629,7 +629,7 @@ func testRoutesGetRouteProfilesAfterRemove(t *testing.T) {
 					Weight: 30,
 				},
 			},
-			Blockers: utils.Blockers{
+			Blockers: utils.DynamicBlockers{
 				{
 					Blocker: false,
 				},
@@ -755,7 +755,7 @@ func testRoutesBlockerSetRouteProfiles(t *testing.T) {
 						Weight: 30,
 					},
 				},
-				Blockers: utils.Blockers{
+				Blockers: utils.DynamicBlockers{
 					{
 						Blocker: false,
 					},
@@ -779,7 +779,7 @@ func testRoutesBlockerSetRouteProfiles(t *testing.T) {
 						Weight: 10,
 					},
 				},
-				Blockers: utils.Blockers{
+				Blockers: utils.DynamicBlockers{
 					{
 						Blocker: true,
 					},
@@ -863,7 +863,7 @@ func testRoutesBlockerGetRouteProfilesForEvent(t *testing.T) {
 					Weight: 30,
 				},
 			},
-			Blockers: utils.Blockers{
+			Blockers: utils.DynamicBlockers{
 				{
 					Blocker: false,
 				},
@@ -902,7 +902,7 @@ func testRoutesBlockerGetRouteProfilesForEvent(t *testing.T) {
 					Weight: 10,
 				},
 			},
-			Blockers: utils.Blockers{
+			Blockers: utils.DynamicBlockers{
 				{
 					Blocker: true,
 				},
@@ -935,7 +935,7 @@ func testRoutesBlockerSetRouteProfile(t *testing.T) {
 					Weight: 30,
 				},
 			},
-			Blockers: utils.Blockers{
+			Blockers: utils.DynamicBlockers{
 				{
 					Blocker: false,
 				},
@@ -958,7 +958,7 @@ func testRoutesBlockerSetRouteProfile(t *testing.T) {
 							Weight: 20,
 						},
 					},
-					Blockers: utils.Blockers{
+					Blockers: utils.DynamicBlockers{
 						{
 							Blocker: true,
 						},

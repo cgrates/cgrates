@@ -34,7 +34,7 @@ type apWithWeight struct {
 // Attribute used by AttributeProfile to describe a single attribute
 type Attribute struct {
 	FilterIDs []string
-	Blockers  utils.Blockers // Blockers flag to stop processing on multiple attributes from a profile
+	Blockers  utils.DynamicBlockers // Blockers flag to stop processing on multiple attributes from a profile
 	Path      string
 	Type      string
 	Value     config.RSRParsers
@@ -46,7 +46,7 @@ type AttributeProfile struct {
 	ID         string
 	FilterIDs  []string
 	Weights    utils.DynamicWeights
-	Blockers   utils.Blockers // Blockers flag to stop processing on multiple runs
+	Blockers   utils.DynamicBlockers // Blockers flag to stop processing on multiple runs
 	Attributes []*Attribute
 }
 
@@ -89,7 +89,7 @@ type AttributeProfiles []*AttributeProfile
 // ExternalAttribute the attribute for external profile
 type ExternalAttribute struct {
 	FilterIDs []string
-	Blockers  utils.Blockers
+	Blockers  utils.DynamicBlockers
 	Path      string
 	Type      string
 	Value     string
@@ -100,7 +100,7 @@ type APIAttributeProfile struct {
 	Tenant    string
 	ID        string
 	FilterIDs []string
-	Blockers  utils.Blockers
+	Blockers  utils.DynamicBlockers
 	//Blocker    bool // blocker flag to stop processing on multiple runs
 	Weights    utils.DynamicWeights
 	Attributes []*ExternalAttribute
@@ -203,9 +203,9 @@ func (ap *AttributeProfile) Set(path []string, val interface{}, newBranch bool, 
 			var valA []string
 			valA, err = utils.IfaceAsStringSlice(val)
 			ap.FilterIDs = append(ap.FilterIDs, valA...)
-		case utils.BlockersField:
+		case utils.Blockers:
 			if val != utils.EmptyString {
-				ap.Blockers, err = utils.NewBlockersFromString(utils.IfaceAsString(val), utils.InfieldSep, utils.ANDSep)
+				ap.Blockers, err = utils.NewDynamicBlockersFromString(utils.IfaceAsString(val), utils.InfieldSep, utils.ANDSep)
 			}
 		case utils.Weights:
 			if val != utils.EmptyString {
@@ -226,9 +226,9 @@ func (ap *AttributeProfile) Set(path []string, val interface{}, newBranch bool, 
 			var valA []string
 			valA, err = utils.IfaceAsStringSlice(val)
 			ap.Attributes[len(ap.Attributes)-1].FilterIDs = append(ap.Attributes[len(ap.Attributes)-1].FilterIDs, valA...)
-		case utils.BlockersField:
+		case utils.Blockers:
 			if val != utils.EmptyString {
-				ap.Attributes[len(ap.Attributes)-1].Blockers, err = utils.NewBlockersFromString(utils.IfaceAsString(val), utils.InfieldSep, utils.ANDSep)
+				ap.Attributes[len(ap.Attributes)-1].Blockers, err = utils.NewDynamicBlockersFromString(utils.IfaceAsString(val), utils.InfieldSep, utils.ANDSep)
 			}
 		case utils.Path:
 			ap.Attributes[len(ap.Attributes)-1].Path = utils.IfaceAsString(val)
@@ -299,7 +299,7 @@ func (ap *AttributeProfile) FieldAsInterface(fldPath []string) (_ interface{}, e
 			return ap.ID, nil
 		case utils.FilterIDs:
 			return ap.FilterIDs, nil
-		case utils.BlockersField:
+		case utils.Blockers:
 			return ap.Blockers, nil
 		case utils.Weights:
 			return ap.Weights, nil
@@ -344,7 +344,7 @@ func (at *Attribute) FieldAsInterface(fldPath []string) (_ interface{}, err erro
 		return nil, utils.ErrNotFound
 	case utils.FilterIDs:
 		return at.FilterIDs, nil
-	case utils.BlockersField:
+	case utils.Blockers:
 		return at.Blockers, nil
 	case utils.Path:
 		return at.Path, nil

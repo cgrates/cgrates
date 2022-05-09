@@ -218,7 +218,7 @@ func convertSupplierToRoute(spp *SupplierProfile) (route *engine.RouteProfile) {
 			ResourceIDs:     supl.ResourceIDs,
 			StatIDs:         supl.StatIDs,
 			Weights:         utils.DynamicWeights{{Weight: supl.Weight}},
-			Blockers:        utils.Blockers{{Blocker: supl.Blocker}},
+			Blockers:        utils.DynamicBlockers{{Blocker: supl.Blocker}},
 			RouteParameters: supl.SupplierParameters,
 		}
 	}

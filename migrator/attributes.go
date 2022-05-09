@@ -537,7 +537,7 @@ func (v6AttrPrf v6AttributeProfile) AsAttributeProfile() (attrPrf *engine.Attrib
 		FilterIDs:  v6AttrPrf.FilterIDs,
 		Attributes: make([]*engine.Attribute, len(v6AttrPrf.Attributes)),
 	}
-	attrPrf.Blockers = make(utils.Blockers, 1)
+	attrPrf.Blockers = make(utils.DynamicBlockers, 1)
 	attrPrf.Blockers[0].Blocker = v6AttrPrf.Blocker
 	attrPrf.Weights = make(utils.DynamicWeights, 1)
 	attrPrf.Weights[0].Weight = v6AttrPrf.Weight
