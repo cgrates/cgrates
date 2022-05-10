@@ -510,12 +510,31 @@
 				{"tag": "CostDetails", "path": "*exp.CostDetails", "type": "*variable", "value": "~*req.CostDetails"}
 			]
 		},
+		{
+			"id": "KafkaExporter",								
+			"type": "*kafkaJSONMap",									
+			"export_path": "127.0.0.1:9092",			
+			"concurrent_requests": 0,							
+			"opts": {
+				"kafkaTopic": "cgrates"						
+			},												
+			"timezone": "",										
+			"filters": [],										
+			"flags": [],										
+			"attribute_ids": [],								
+			"attribute_context": "",							
+			"synchronous": false,								
+			"blocker": false,									
+			"attempts": 1,										
+			"fields":[],										
+			"failed_posts_dir": "/var/spool/cgrates/failed_posts"
+		}
 	]
 },
 
 
 "admins": {
-	"enabled": true,
+	"enabled": true
 },
 
 
