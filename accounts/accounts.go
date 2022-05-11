@@ -245,9 +245,9 @@ func (aS *AccountS) accountDebit(ctx *context.Context, acnt *utils.Account, usag
 		dbted = utils.SumBig(dbted, used)
 		ec.Merge(ecDbt)
 		ec.Accounts[acnt.ID] = acnt
-		// check the blocker for every balance in roder to continue debiting from balances or not
+		// check the blocker for every balance in order to continue debiting from balances or not
 		var blocker bool
-		if blocker, err = engine.BlockerFromDynamics(ctx, blncOper.getBalanceCfg().Blockers, aS.fltrS, cgrEv.Tenant, cgrEv.AsDataProvider()); err != nil {
+		if blocker, err = engine.BlockerFromDynamics(ctx, blncOper.balanceCfg().Blockers, aS.fltrS, cgrEv.Tenant, cgrEv.AsDataProvider()); err != nil {
 			return
 		}
 		// if blockers active, do not debit from the other balances

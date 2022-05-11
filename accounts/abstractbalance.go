@@ -209,6 +209,6 @@ func (aB *abstractBalance) debitConcretes(_ *context.Context, _ *decimal.Big,
 }
 
 // getBalanceCfg will return the balance
-func (aB *abstractBalance) getBalanceCfg() *utils.Balance {
+func (aB *abstractBalance) balanceCfg() *utils.Balance {
 	return aB.blnCfg
 }

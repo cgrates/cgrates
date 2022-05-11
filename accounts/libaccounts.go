@@ -79,7 +79,7 @@ type balanceOperator interface {
 	id() string // balance id
 	debitAbstracts(ctx *context.Context, usage *decimal.Big, cgrEv *utils.CGREvent, dbted *decimal.Big) (ec *utils.EventCharges, err error)
 	debitConcretes(ctx *context.Context, usage *decimal.Big, cgrEv *utils.CGREvent, dbted *decimal.Big) (ec *utils.EventCharges, err error)
-	getBalanceCfg() (bal *utils.Balance)
+	balanceCfg() (bal *utils.Balance)
 }
 
 // roundUnitsWithIncrements rounds the usage based on increments

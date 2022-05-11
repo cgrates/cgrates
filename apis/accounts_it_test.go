@@ -46,7 +46,7 @@ var (
 		testAccSInitDataDb,
 		testAccSStartEngine,
 		testAccSRPCConn,
-		testGetAccProfileBeforeSet,
+		/* 	testGetAccProfileBeforeSet,
 		testGetAccProfilesBeforeSet,
 		testAccSetAccProfile,
 		testAccGetAccIDs,
@@ -67,7 +67,11 @@ var (
 		testAccDebitConcretes,
 		// RefundCharges test
 		testAccRefundCharges,
-		testAccActionSetRmvBalance,
+		testAccActionSetRmvBalance, */
+		// Account with blocker debit
+		testAccDebitAbstractWithoutBlockers,
+		testAccDebitAbstractWithBlockers,
+		testAccDebitAbstractWithBlockersOnBalance,
 		testAccSKillEngine,
 	}
 )
@@ -1364,7 +1368,7 @@ func testAccDebitConcretes(t *testing.T) {
 }
 
 func testAccRefundCharges(t *testing.T) {
-	// we will set an account, we will debit it (with debitAbtracts), and after that we will call refundCharges to get back our cost
+	// we will set an account, we will debit it (with debitAbtracts), and after that we will call refundCharges to get back our units from the cost
 	acc := &utils.AccountWithAPIOpts{
 		Account: &utils.Account{
 			Tenant: "cgrates.org",
@@ -1684,6 +1688,259 @@ func testAccActionSetRmvBalance(t *testing.T) {
 		t.Errorf("\nExpected %+v , \nreceived %+v", utils.ToJSON(expectedAcc2), utils.ToJSON(result2))
 	}
 
+}
+
+func testAccDebitAbstractWithoutBlockers(t *testing.T) {
+	acc1 := &utils.AccountWithAPIOpts{
+		Account: &utils.Account{
+			Tenant: "cgrates.org",
+			ID:     "AccountBlocker1",
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				},
+			},
+			FilterIDs: []string{"*string:~*req.Blockers:*exists"},
+			Blockers: utils.Blockers{
+				{
+					Blocker: false,
+				},
+			},
+			Balances: map[string]*utils.Balance{
+				"AB1": {
+					ID: "AB1",
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 25,
+						},
+					},
+					Type:  utils.MetaAbstract,
+					Units: utils.NewDecimal(int64(70*time.Second), 0),
+					CostIncrements: []*utils.CostIncrement{
+						{
+							Increment:    utils.NewDecimal(int64(time.Second), 0),
+							FixedFee:     utils.NewDecimal(6, 1),
+							RecurrentFee: utils.NewDecimal(int64(time.Second), 0),
+						},
+					},
+				},
+				"CB1": {
+					ID: "CB1",
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 20,
+						},
+					},
+					UnitFactors: []*utils.UnitFactor{
+						{
+							Factor: utils.NewDecimal(10, 0),
+						},
+					},
+					Type:  utils.MetaConcrete,
+					Units: utils.NewDecimal(999, 0),
+					CostIncrements: []*utils.CostIncrement{
+						{
+							Increment:    utils.NewDecimal(2, 0),
+							RecurrentFee: utils.NewDecimal(1, 0),
+						},
+					},
+				},
+			},
+		},
+	}
+	var reply string
+	if err := accSRPC.Call(context.Background(), utils.AdminSv1SetAccount,
+		acc1, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error(err)
+	}
+	acc2 := &utils.AccountWithAPIOpts{
+		Account: &utils.Account{
+			Tenant: "cgrates.org",
+			ID:     "AccountBlocker2",
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 15,
+				},
+			},
+			Blockers: utils.Blockers{
+				{
+					FilterIDs: []string{"*string:~*req.Destination:1002"},
+					Blocker:   true,
+				},
+			},
+			FilterIDs: []string{"*string:~*req.Blockers:*exists"},
+			Balances: map[string]*utils.Balance{
+				"AB_ForBlocker": {
+					ID: "AB_ForBLocker",
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 30,
+						},
+					},
+					Type:  utils.MetaAbstract,
+					Units: utils.NewDecimal(int64(5*time.Second), 0),
+					CostIncrements: []*utils.CostIncrement{
+						{
+							Increment:    utils.NewDecimal(int64(3*time.Second), 0),
+							RecurrentFee: utils.NewDecimal(int64(time.Second), 0),
+						},
+					},
+				},
+				"CB_WIthBlocker": {
+					ID: "CB_WIthBlocker",
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 28,
+						},
+					},
+					Blockers: utils.Blockers{
+						{
+							FilterIDs: []string{"*string:~*req.BlockerAbstract:yes"},
+							Blocker:   true,
+						},
+					},
+					Type:  utils.MetaConcrete,
+					Units: utils.NewDecimal(5, 0),
+					CostIncrements: []*utils.CostIncrement{
+						{
+							Increment:    utils.NewDecimal(1, 0),
+							RecurrentFee: utils.NewDecimal(1, 0),
+						},
+					},
+				},
+				"AB2": {
+					ID: "AB2",
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 25,
+						},
+					},
+					Type:  utils.MetaAbstract,
+					Units: utils.NewDecimal(int64(20*time.Second), 0),
+					CostIncrements: []*utils.CostIncrement{
+						{
+							Increment:    utils.NewDecimal(int64(time.Second), 0),
+							RecurrentFee: utils.NewDecimal(int64(time.Second), 0),
+						},
+					},
+				},
+				"CB2": {
+					ID: "CB2",
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 20,
+						},
+					},
+					Type:  utils.MetaConcrete,
+					Units: utils.NewDecimal(100, 0),
+					CostIncrements: []*utils.CostIncrement{
+						{
+							Increment:    utils.NewDecimal(1, 0),
+							RecurrentFee: utils.NewDecimal(1, 0),
+						},
+					},
+				},
+			},
+		},
+	}
+	if err := accSRPC.Call(context.Background(), utils.AdminSv1SetAccount,
+		acc2, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error(err)
+	}
+	// We will try to use de maxAbstratct to see the cost for from both accounts matched, without blocker for now. In order to match blocker, Destination must be 1002
+	var replyEv *utils.EventCharges
+	ev2 := &utils.CGREvent{
+		Tenant: utils.CGRateSorg,
+		ID:     "testIDEvent",
+		Event: map[string]interface{}{
+			"Blockers":         "*exists",
+			utils.AccountField: "1004",
+			utils.Destination:  "1002",
+		},
+		APIOpts: map[string]interface{}{
+			utils.MetaUsage: 90 * time.Second,
+		},
+	}
+	if err := accSRPC.Call(context.Background(), utils.AccountSv1MaxAbstracts,
+		ev2, &replyEv); err != nil {
+		t.Error(err)
+	} else {
+		// AccountBlocker1 should not be debited!!!
+		if _, has := replyEv.Accounts["AccountBlocker1"]; has {
+			t.Errorf("The accounts %v was not debited", "AccountBlocker1")
+		}
+		if _, has := replyEv.Accounts["AccountBlocker2"]; !has {
+			t.Errorf("The accounts %v was not debited", "AccountBlocker2")
+		}
+	}
+}
+
+func testAccDebitAbstractWithBlockers(t *testing.T) {
+	// we will try to use de maxAbstratct to see the cost for from one account matched, with blocker for now (it will be AccountBlocker2)
+	var replyEv *utils.EventCharges
+	ev2 := &utils.CGREvent{
+		Tenant: utils.CGRateSorg,
+		ID:     "testIDEvent",
+		Event: map[string]interface{}{
+			"Blockers":         "*exists",
+			utils.AccountField: "1004",
+		},
+		APIOpts: map[string]interface{}{
+			utils.MetaUsage: 90 * time.Second,
+		},
+	}
+	if err := accSRPC.Call(context.Background(), utils.AccountSv1MaxAbstracts,
+		ev2, &replyEv); err != nil {
+		t.Error(err)
+	} else {
+		// the debit worked properly, it was debited from both accounts, but the next accoutns from the balance named "CB_WIthBlocker" should not be debited
+		if _, has := replyEv.Accounts["AccountBlocker1"]; !has {
+			t.Errorf("The accounts %v was not debited", "AccountBlocker1")
+		}
+		if _, has := replyEv.Accounts["AccountBlocker2"]; !has {
+			t.Errorf("The accounts %v was not debited", "AccountBlocker2")
+		}
+	}
+}
+
+func testAccDebitAbstractWithBlockersOnBalance(t *testing.T) {
+	// AB_WithBLocker balance from AccountBLocker2 account will be the first balance to be charged, but it has blocker when BlockerAbstract field exist, this will stop deibting the other balances from AccountBLocker2
+	var replyEv *utils.EventCharges
+	ev2 := &utils.CGREvent{
+		Tenant: utils.CGRateSorg,
+		ID:     "testIDEvent",
+		Event: map[string]interface{}{
+			"Blockers":         "*exists",
+			utils.AccountField: "1004",
+			"BlockerAbstract":  "yes",
+		},
+		APIOpts: map[string]interface{}{
+			utils.MetaUsage: 90 * time.Second,
+		},
+	}
+	if err := accSRPC.Call(context.Background(), utils.AccountSv1DebitAbstracts,
+		ev2, &replyEv); err != nil {
+		t.Error(err)
+	} else {
+		// the debit worked properly, it was debited from both accounts
+		if _, has := replyEv.Accounts["AccountBlocker1"]; !has {
+			t.Errorf("The accounts %v was not debited", "AccountBlocker1")
+		}
+		if _, has := replyEv.Accounts["AccountBlocker2"]; !has {
+			t.Errorf("The accounts %v was not debited", "AccountBlocker2")
+		} else {
+			// CB_WithBlocker balance has a blocker, so the next two balances will be skipped
+			for _, acc := range replyEv.Accounting {
+				if acc.BalanceID == "AB2" || acc.BalanceID == "CB2" {
+					t.Errorf("The balance <%s> from <AccountBlocker2> should not be debited", acc.BalanceID)
+				}
+			}
+		}
+	}
 }
 
 //Kill the engine when it is about to be finished
