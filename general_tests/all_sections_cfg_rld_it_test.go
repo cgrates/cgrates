@@ -949,7 +949,7 @@ func testSectConfigSReloadAnalyzer(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Expected OK received: %+v", reply)
 	}
-	cfgStr := "{\"analyzers\":{\"cleanup_interval\":\"1h0m0s\",\"db_path\":\"/var/spool/cgrates/analyzers\",\"enabled\":false,\"index_type\":\"*scorch\",\"ttl\":\"24h0m0s\"}}"
+	cfgStr := "{\"analyzers\":{\"cleanup_interval\":\"1h0m0s\",\"db_path\":\"/var/spool/cgrates/analyzers\",\"ees_conns\":[],\"enabled\":false,\"index_type\":\"*scorch\",\"ttl\":\"24h0m0s\"}}"
 	var rpl string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:   "cgrates.org",

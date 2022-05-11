@@ -34,6 +34,7 @@ func TestAnalyzerSCfgloadFromJsonCfg(t *testing.T) {
 		CleanupInterval: time.Hour,
 		DBPath:          "/var/spool/cgrates/analyzers",
 		IndexType:       utils.MetaScorch,
+		EEsConns:        []string{},
 		TTL:             24 * time.Hour,
 	}
 	jsnCfg := NewDefaultCGRConfig()
@@ -58,12 +59,13 @@ func TestAnalyzerSCfgAsMapInterface(t *testing.T) {
 		utils.CleanupIntervalCfg: "1h0m0s",
 		utils.DBPathCfg:          "/var/spool/cgrates/analyzers",
 		utils.IndexTypeCfg:       utils.MetaScorch,
+		utils.EEsConnsCfg:        []string{},
 		utils.TTLCfg:             "24h0m0s",
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
 	} else if rcv := cgrCfg.analyzerSCfg.AsMapInterface(""); !reflect.DeepEqual(rcv, eMap) {
-		t.Errorf("Expected: %+v , received: %+v", eMap, rcv)
+		t.Errorf("Expected: %+v , received: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }
 
@@ -71,6 +73,7 @@ func TestAnalyzerSCfgAsMapInterface1(t *testing.T) {
 	cfgJSONStr := `{
 		"analyzers":{
             "enabled": true,  
+			"ees_conns": ["*localhost"],
         },
     }
 }`
@@ -79,12 +82,13 @@ func TestAnalyzerSCfgAsMapInterface1(t *testing.T) {
 		utils.CleanupIntervalCfg: "1h0m0s",
 		utils.DBPathCfg:          "/var/spool/cgrates/analyzers",
 		utils.IndexTypeCfg:       utils.MetaScorch,
+		utils.EEsConnsCfg:        []string{"*localhost"},
 		utils.TTLCfg:             "24h0m0s",
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
 	} else if rcv := cgrCfg.analyzerSCfg.AsMapInterface(""); !reflect.DeepEqual(rcv, eMap) {
-		t.Errorf("Expected: %+v , received: %+v", eMap, rcv)
+		t.Errorf("Expected: %+v , received: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }
 
@@ -111,6 +115,7 @@ func TestAnalyzerSCfgClone(t *testing.T) {
 		CleanupInterval: time.Hour,
 		DBPath:          "/var/spool/cgrates/analyzers",
 		IndexType:       utils.MetaScorch,
+		EEsConns:        []string{"*internal"},
 		TTL:             24 * time.Hour,
 	}
 	rcv := cS.Clone()
@@ -138,6 +143,7 @@ func TestDiffAnalyzerSJsonCfg(t *testing.T) {
 		DBPath:          "/var/spool/cgrates/analyzers",
 		IndexType:       utils.MetaString,
 		TTL:             3 * time.Minute,
+		EEsConns:        []string{"*internal"},
 		CleanupInterval: 30 * time.Minute,
 	}
 
@@ -146,6 +152,7 @@ func TestDiffAnalyzerSJsonCfg(t *testing.T) {
 		Db_path:          utils.StringPointer("/var/spool/cgrates/analyzers"),
 		Index_type:       utils.StringPointer(utils.MetaString),
 		Ttl:              utils.StringPointer("3m0s"),
+		Ees_conns:        &[]string{"*internal"},
 		Cleanup_interval: utils.StringPointer("30m0s"),
 	}
 

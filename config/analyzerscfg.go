@@ -31,6 +31,7 @@ type AnalyzerSCfg struct {
 	DBPath          string
 	IndexType       string
 	TTL             time.Duration
+	EEsConns        []string
 	CleanupInterval time.Duration
 }
 
@@ -61,6 +62,9 @@ func (alS *AnalyzerSCfg) loadFromJSONCfg(jsnCfg *AnalyzerSJsonCfg) (err error) {
 			return
 		}
 	}
+	if jsnCfg.Ees_conns != nil {
+		alS.EEsConns = updateInternalConns(*jsnCfg.Ees_conns, utils.MetaEEs)
+	}
 	if jsnCfg.Cleanup_interval != nil {
 		if alS.CleanupInterval, err = time.ParseDuration(*jsnCfg.Cleanup_interval); err != nil {
 			return
@@ -71,27 +75,35 @@ func (alS *AnalyzerSCfg) loadFromJSONCfg(jsnCfg *AnalyzerSJsonCfg) (err error) {
 
 // AsMapInterface returns the config as a map[string]interface{}
 func (alS AnalyzerSCfg) AsMapInterface(string) interface{} {
-	return map[string]interface{}{
+	mp := map[string]interface{}{
 		utils.EnabledCfg:         alS.Enabled,
 		utils.DBPathCfg:          alS.DBPath,
 		utils.IndexTypeCfg:       alS.IndexType,
 		utils.TTLCfg:             alS.TTL.String(),
 		utils.CleanupIntervalCfg: alS.CleanupInterval.String(),
 	}
+	if alS.EEsConns != nil {
+		mp[utils.EEsConnsCfg] = getInternalJSONConns(alS.EEsConns)
+	}
+	return mp
 }
 
 func (AnalyzerSCfg) SName() string             { return AnalyzerSJSON }
 func (alS AnalyzerSCfg) CloneSection() Section { return alS.Clone() }
 
 // Clone returns a deep copy of AnalyzerSCfg
-func (alS AnalyzerSCfg) Clone() *AnalyzerSCfg {
-	return &AnalyzerSCfg{
+func (alS AnalyzerSCfg) Clone() (cln *AnalyzerSCfg) {
+	cln = &AnalyzerSCfg{
 		Enabled:         alS.Enabled,
 		DBPath:          alS.DBPath,
 		IndexType:       alS.IndexType,
 		TTL:             alS.TTL,
 		CleanupInterval: alS.CleanupInterval,
 	}
+	if alS.EEsConns != nil {
+		cln.EEsConns = utils.CloneStringSlice(alS.EEsConns)
+	}
+	return
 }
 
 // Analyzer service json config section
@@ -100,6 +112,7 @@ type AnalyzerSJsonCfg struct {
 	Db_path          *string
 	Index_type       *string
 	Ttl              *string
+	Ees_conns        *[]string
 	Cleanup_interval *string
 }
 
@@ -118,6 +131,9 @@ func diffAnalyzerSJsonCfg(d *AnalyzerSJsonCfg, v1, v2 *AnalyzerSCfg) *AnalyzerSJ
 	}
 	if v1.TTL != v2.TTL {
 		d.Ttl = utils.StringPointer(v2.TTL.String())
+	}
+	if !utils.SliceStringEqual(v1.EEsConns, v2.EEsConns) {
+		d.Ees_conns = utils.SliceStringPointer(getBiRPCInternalJSONConns(v2.EEsConns))
 	}
 	if v1.CleanupInterval != v2.CleanupInterval {
 		d.Cleanup_interval = utils.StringPointer(v2.CleanupInterval.String())
