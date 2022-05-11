@@ -33,6 +33,11 @@ type AnalyzerSCfg struct {
 	TTL             time.Duration
 	EEsConns        []string
 	CleanupInterval time.Duration
+	Opts            *AnalyzerSOpts
+}
+
+type AnalyzerSOpts struct {
+	ExporterIDs []*utils.DynamicStringSliceOpt
 }
 
 // loadAnalyzerCgrCfg loads the Analyzer section of the configuration
@@ -42,6 +47,15 @@ func (alS *AnalyzerSCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfi
 		return
 	}
 	return alS.loadFromJSONCfg(jsnAnalyzerCgrCfg)
+}
+
+func (anzOpts *AnalyzerSOpts) loadFromJSONCfg(jsonAnzOpts *AnalyzerSOptsJson) {
+	if jsonAnzOpts == nil {
+		return
+	}
+	if jsonAnzOpts.ExporterIDs != nil {
+		anzOpts.ExporterIDs = append(anzOpts.ExporterIDs, jsonAnzOpts.ExporterIDs...)
+	}
 }
 
 func (alS *AnalyzerSCfg) loadFromJSONCfg(jsnCfg *AnalyzerSJsonCfg) (err error) {
@@ -70,17 +84,24 @@ func (alS *AnalyzerSCfg) loadFromJSONCfg(jsnCfg *AnalyzerSJsonCfg) (err error) {
 			return
 		}
 	}
+	if jsnCfg.Opts != nil {
+		alS.Opts.loadFromJSONCfg(jsnCfg.Opts)
+	}
 	return nil
 }
 
 // AsMapInterface returns the config as a map[string]interface{}
 func (alS AnalyzerSCfg) AsMapInterface(string) interface{} {
+	opts := map[string]interface{}{
+		utils.MetaExporterIDs: alS.Opts.ExporterIDs,
+	}
 	mp := map[string]interface{}{
 		utils.EnabledCfg:         alS.Enabled,
 		utils.DBPathCfg:          alS.DBPath,
 		utils.IndexTypeCfg:       alS.IndexType,
 		utils.TTLCfg:             alS.TTL.String(),
 		utils.CleanupIntervalCfg: alS.CleanupInterval.String(),
+		utils.OptsCfg:            opts,
 	}
 	if alS.EEsConns != nil {
 		mp[utils.EEsConnsCfg] = getInternalJSONConns(alS.EEsConns)
@@ -99,11 +120,25 @@ func (alS AnalyzerSCfg) Clone() (cln *AnalyzerSCfg) {
 		IndexType:       alS.IndexType,
 		TTL:             alS.TTL,
 		CleanupInterval: alS.CleanupInterval,
+		Opts:            alS.Opts.Clone(),
 	}
 	if alS.EEsConns != nil {
 		cln.EEsConns = utils.CloneStringSlice(alS.EEsConns)
 	}
 	return
+}
+
+func (anzOpts *AnalyzerSOpts) Clone() *AnalyzerSOpts {
+	if anzOpts == nil {
+		return nil
+	}
+	return &AnalyzerSOpts{
+		ExporterIDs: utils.CloneDynamicStringSliceOpt(anzOpts.ExporterIDs),
+	}
+}
+
+type AnalyzerSOptsJson struct {
+	ExporterIDs []*utils.DynamicStringSliceOpt `json:"*exporterIDs"`
 }
 
 // Analyzer service json config section
@@ -114,6 +149,17 @@ type AnalyzerSJsonCfg struct {
 	Ttl              *string
 	Ees_conns        *[]string
 	Cleanup_interval *string
+	Opts             *AnalyzerSOptsJson
+}
+
+func diffAnalyzerSOptsJsonCfg(d *AnalyzerSOptsJson, v1, v2 *AnalyzerSOpts) *AnalyzerSOptsJson {
+	if d == nil {
+		d = new(AnalyzerSOptsJson)
+	}
+	if !utils.DynamicStringSliceOptEqual(v1.ExporterIDs, v2.ExporterIDs) {
+		d.ExporterIDs = v2.ExporterIDs
+	}
+	return d
 }
 
 func diffAnalyzerSJsonCfg(d *AnalyzerSJsonCfg, v1, v2 *AnalyzerSCfg) *AnalyzerSJsonCfg {
@@ -138,5 +184,6 @@ func diffAnalyzerSJsonCfg(d *AnalyzerSJsonCfg, v1, v2 *AnalyzerSCfg) *AnalyzerSJ
 	if v1.CleanupInterval != v2.CleanupInterval {
 		d.Cleanup_interval = utils.StringPointer(v2.CleanupInterval.String())
 	}
+	d.Opts = diffAnalyzerSOptsJsonCfg(d.Opts, v1.Opts, v2.Opts)
 	return d
 }

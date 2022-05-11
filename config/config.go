@@ -125,7 +125,11 @@ func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 			Stats:      []*utils.DynamicBoolOpt{},
 			Thresholds: []*utils.DynamicBoolOpt{},
 		}},
-		analyzerSCfg: new(AnalyzerSCfg),
+		analyzerSCfg: &AnalyzerSCfg{
+			Opts: &AnalyzerSOpts{
+				ExporterIDs: []*utils.DynamicStringSliceOpt{},
+			},
+		},
 		sessionSCfg: &SessionSCfg{
 			STIRCfg:      new(STIRcfg),
 			DefaultUsage: make(map[string]time.Duration),

@@ -243,12 +243,11 @@ func (GeneralCfg) SName() string                { return GeneralJSON }
 func (gencfg GeneralCfg) CloneSection() Section { return gencfg.Clone() }
 
 func (generalOpts *GeneralOpts) Clone() *GeneralOpts {
-	var thIDs []*utils.DynamicStringSliceOpt
-	if generalOpts.ExporterIDs != nil {
-		thIDs = utils.CloneDynamicStringSliceOpt(generalOpts.ExporterIDs)
+	if generalOpts == nil {
+		return nil
 	}
 	return &GeneralOpts{
-		ExporterIDs: thIDs,
+		ExporterIDs: utils.CloneDynamicStringSliceOpt(generalOpts.ExporterIDs),
 	}
 }
 

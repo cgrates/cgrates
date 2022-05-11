@@ -1517,6 +1517,15 @@ const CGRATES_CFG_JSON = `
 	"ttl": "24h",								// time to wait before removing the API capture
 	"ees_conns": [],						    // connections to EEs
 	"cleanup_interval": "1h",					// the interval we clean the db
+	"opts":{												//
+		"*exporterIDs": [					
+			// {
+			// 	"Tenant": "*any",
+			// 	"FilterIDs": [],
+			// 	"Value": [],
+			// },
+		],
+	},
 },
 
 
