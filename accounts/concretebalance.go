@@ -226,6 +226,6 @@ func (cB *concreteBalance) debitConcretes(ctx *context.Context, cUnits *decimal.
 }
 
 // getBalanceCfg will return the balance
-func (cB *concreteBalance) getBalanceCfg() *utils.Balance {
+func (cB *concreteBalance) balanceCfg() *utils.Balance {
 	return cB.blnCfg
 }
