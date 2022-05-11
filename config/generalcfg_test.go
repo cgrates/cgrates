@@ -447,7 +447,9 @@ func TestGeneralCfgCloneSection(t *testing.T) {
 		RSRSep:           "",
 		DefaultCaching:   utils.MetaClear,
 		FailedPostsTTL:   5,
-		Opts:             &GeneralOpts{},
+		Opts: &GeneralOpts{
+			ExporterIDs: []*utils.DynamicStringSliceOpt{},
+		},
 	}
 
 	rcv := gnrCfg.CloneSection()

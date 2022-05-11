@@ -36,6 +36,9 @@ func TestAnalyzerSCfgloadFromJsonCfg(t *testing.T) {
 		IndexType:       utils.MetaScorch,
 		EEsConns:        []string{},
 		TTL:             24 * time.Hour,
+		Opts: &AnalyzerSOpts{
+			ExporterIDs: []*utils.DynamicStringSliceOpt{},
+		},
 	}
 	jsnCfg := NewDefaultCGRConfig()
 	if err = jsnCfg.analyzerSCfg.loadFromJSONCfg(jsonCfg); err != nil {
@@ -61,6 +64,9 @@ func TestAnalyzerSCfgAsMapInterface(t *testing.T) {
 		utils.IndexTypeCfg:       utils.MetaScorch,
 		utils.EEsConnsCfg:        []string{},
 		utils.TTLCfg:             "24h0m0s",
+		utils.OptsCfg: map[string]interface{}{
+			utils.MetaExporterIDs: []*utils.DynamicStringSliceOpt{},
+		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
@@ -84,6 +90,9 @@ func TestAnalyzerSCfgAsMapInterface1(t *testing.T) {
 		utils.IndexTypeCfg:       utils.MetaScorch,
 		utils.EEsConnsCfg:        []string{"*localhost"},
 		utils.TTLCfg:             "24h0m0s",
+		utils.OptsCfg: map[string]interface{}{
+			utils.MetaExporterIDs: []*utils.DynamicStringSliceOpt{},
+		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
@@ -136,6 +145,7 @@ func TestDiffAnalyzerSJsonCfg(t *testing.T) {
 		IndexType:       utils.MetaPrefix,
 		TTL:             2 * time.Minute,
 		CleanupInterval: time.Hour,
+		Opts:            &AnalyzerSOpts{},
 	}
 
 	v2 := &AnalyzerSCfg{
@@ -145,6 +155,7 @@ func TestDiffAnalyzerSJsonCfg(t *testing.T) {
 		TTL:             3 * time.Minute,
 		EEsConns:        []string{"*internal"},
 		CleanupInterval: 30 * time.Minute,
+		Opts:            &AnalyzerSOpts{},
 	}
 
 	expected := &AnalyzerSJsonCfg{
@@ -154,6 +165,7 @@ func TestDiffAnalyzerSJsonCfg(t *testing.T) {
 		Ttl:              utils.StringPointer("3m0s"),
 		Ees_conns:        &[]string{"*internal"},
 		Cleanup_interval: utils.StringPointer("30m0s"),
+		Opts:             &AnalyzerSOptsJson{},
 	}
 
 	rcv := diffAnalyzerSJsonCfg(d, v1, v2)
@@ -162,7 +174,9 @@ func TestDiffAnalyzerSJsonCfg(t *testing.T) {
 	}
 
 	v2 = v1
-	expected2 := &AnalyzerSJsonCfg{}
+	expected2 := &AnalyzerSJsonCfg{
+		Opts: &AnalyzerSOptsJson{},
+	}
 	rcv = diffAnalyzerSJsonCfg(d, v1, v2)
 	if !reflect.DeepEqual(rcv, expected2) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected2), utils.ToJSON(rcv))

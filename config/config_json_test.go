@@ -1937,6 +1937,9 @@ func TestDfAnalyzerCfg(t *testing.T) {
 		Index_type:       utils.StringPointer(utils.MetaScorch),
 		Ees_conns:        &[]string{},
 		Ttl:              utils.StringPointer("24h"),
+		Opts: &AnalyzerSOptsJson{
+			ExporterIDs: []*utils.DynamicStringSliceOpt{},
+		},
 	}
 	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
 	if err != nil {

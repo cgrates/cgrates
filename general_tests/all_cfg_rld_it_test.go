@@ -496,7 +496,7 @@ func testConfigSReload(t *testing.T) {
 	} else if cfgStr != rpl32 {
 		t.Errorf("\nExpected %+v ,\n received: %+v", utils.ToIJSON(cfgStr), utils.ToIJSON(rpl32))
 	}
-	cfgStr = "{\"analyzers\":{\"cleanup_interval\":\"1h0m0s\",\"db_path\":\"/var/spool/cgrates/analyzers\",\"ees_conns\":[],\"enabled\":false,\"index_type\":\"*scorch\",\"ttl\":\"24h0m0s\"}}"
+	cfgStr = "{\"analyzers\":{\"cleanup_interval\":\"1h0m0s\",\"db_path\":\"/var/spool/cgrates/analyzers\",\"ees_conns\":[],\"enabled\":false,\"index_type\":\"*scorch\",\"opts\":{\"*exporterIDs\":[]},\"ttl\":\"24h0m0s\"}}"
 	var rpl33 string
 	if err := testRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:   "cgrates.org",
