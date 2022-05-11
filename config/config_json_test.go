@@ -1935,6 +1935,7 @@ func TestDfAnalyzerCfg(t *testing.T) {
 		Cleanup_interval: utils.StringPointer("1h"),
 		Db_path:          utils.StringPointer("/var/spool/cgrates/analyzers"),
 		Index_type:       utils.StringPointer(utils.MetaScorch),
+		Ees_conns:        &[]string{},
 		Ttl:              utils.StringPointer("24h"),
 	}
 	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))

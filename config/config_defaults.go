@@ -1515,6 +1515,7 @@ const CGRATES_CFG_JSON = `
  	"db_path": "/var/spool/cgrates/analyzers",	// path to the folder where to store the information
 	"index_type": "*scorch",					// the type of index for the storage: <*internal|*scorch|*boltdb|*leveldb|*mossdb>
 	"ttl": "24h",								// time to wait before removing the API capture
+	"ees_conns": [],						    // connections to EEs
 	"cleanup_interval": "1h",					// the interval we clean the db
 },
 

@@ -46,7 +46,7 @@ var (
 		testAccSInitDataDb,
 		testAccSStartEngine,
 		testAccSRPCConn,
-		/* 	testGetAccProfileBeforeSet,
+		testGetAccProfileBeforeSet,
 		testGetAccProfilesBeforeSet,
 		testAccSetAccProfile,
 		testAccGetAccIDs,
@@ -67,7 +67,7 @@ var (
 		testAccDebitConcretes,
 		// RefundCharges test
 		testAccRefundCharges,
-		testAccActionSetRmvBalance, */
+		testAccActionSetRmvBalance,
 		// Account with blocker debit
 		testAccDebitAbstractWithoutBlockers,
 		testAccDebitAbstractWithBlockers,
@@ -1701,7 +1701,7 @@ func testAccDebitAbstractWithoutBlockers(t *testing.T) {
 				},
 			},
 			FilterIDs: []string{"*string:~*req.Blockers:*exists"},
-			Blockers: utils.Blockers{
+			Blockers: utils.DynamicBlockers{
 				{
 					Blocker: false,
 				},
@@ -1764,7 +1764,7 @@ func testAccDebitAbstractWithoutBlockers(t *testing.T) {
 					Weight: 15,
 				},
 			},
-			Blockers: utils.Blockers{
+			Blockers: utils.DynamicBlockers{
 				{
 					FilterIDs: []string{"*string:~*req.Destination:1002"},
 					Blocker:   true,
@@ -1795,7 +1795,7 @@ func testAccDebitAbstractWithoutBlockers(t *testing.T) {
 							Weight: 28,
 						},
 					},
-					Blockers: utils.Blockers{
+					Blockers: utils.DynamicBlockers{
 						{
 							FilterIDs: []string{"*string:~*req.BlockerAbstract:yes"},
 							Blocker:   true,

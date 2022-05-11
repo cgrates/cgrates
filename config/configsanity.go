@@ -1022,6 +1022,14 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 		if cfg.analyzerSCfg.TTL <= 0 {
 			return fmt.Errorf("<%s> the TTL needs to be bigger than 0", utils.AnalyzerS)
 		}
+		for _, connID := range cfg.analyzerSCfg.EEsConns {
+			if strings.HasPrefix(connID, utils.MetaInternal) && !cfg.eesCfg.Enabled {
+				return fmt.Errorf("<%s> not enabled but requested by <%s> component", utils.EEs, utils.AnalyzerS)
+			}
+			if _, has := cfg.rpcConns[connID]; !has && !strings.HasPrefix(connID, utils.MetaInternal) {
+				return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.AnalyzerS, connID)
+			}
+		}
 		if cfg.analyzerSCfg.CleanupInterval <= 0 {
 			return fmt.Errorf("<%s> the CleanupInterval needs to be bigger than 0", utils.AnalyzerS)
 		}
