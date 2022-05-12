@@ -69,6 +69,8 @@ var (
 		testAccRefundCharges,
 		testAccActionSetRmvBalance,
 		// Account with blocker debit
+		testAccSInitDataDb,
+		testAccSCacheClear,
 		testAccDebitAbstractWithoutBlockers,
 		testAccDebitAbstractWithBlockers,
 		testAccDebitAbstractWithBlockersOnBalance,
@@ -1690,6 +1692,16 @@ func testAccActionSetRmvBalance(t *testing.T) {
 
 }
 
+func testAccSCacheClear(t *testing.T) {
+	var reply string
+	if err := accSRPC.Call(context.Background(), utils.CacheSv1Clear,
+		&utils.AttrCacheIDsWithAPIOpts{
+			CacheIDs: nil,
+		}, &reply); err != nil {
+		t.Error(err)
+	}
+}
+
 func testAccDebitAbstractWithoutBlockers(t *testing.T) {
 	acc1 := &utils.AccountWithAPIOpts{
 		Account: &utils.Account{
@@ -1858,7 +1870,7 @@ func testAccDebitAbstractWithoutBlockers(t *testing.T) {
 		ID:     "testIDEvent",
 		Event: map[string]interface{}{
 			"Blockers":         "*exists",
-			utils.AccountField: "1004",
+			utils.AccountField: "101223",
 			utils.Destination:  "1002",
 		},
 		APIOpts: map[string]interface{}{
@@ -1887,7 +1899,7 @@ func testAccDebitAbstractWithBlockers(t *testing.T) {
 		ID:     "testIDEvent",
 		Event: map[string]interface{}{
 			"Blockers":         "*exists",
-			utils.AccountField: "1004",
+			utils.AccountField: "101223",
 		},
 		APIOpts: map[string]interface{}{
 			utils.MetaUsage: 90 * time.Second,
@@ -1915,7 +1927,7 @@ func testAccDebitAbstractWithBlockersOnBalance(t *testing.T) {
 		ID:     "testIDEvent",
 		Event: map[string]interface{}{
 			"Blockers":         "*exists",
-			utils.AccountField: "1004",
+			utils.AccountField: "101223",
 			"BlockerAbstract":  "yes",
 		},
 		APIOpts: map[string]interface{}{
