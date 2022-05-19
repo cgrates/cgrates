@@ -285,10 +285,9 @@ func testAccGetAccs(t *testing.T) {
 
 func testAccGetAccIDsCount(t *testing.T) {
 	var reply int
-	args := &utils.TenantIDWithAPIOpts{
-		TenantID: &utils.TenantID{
-			Tenant: utils.CGRateSorg,
-		},
+	args := &utils.ArgsItemIDs{
+		Tenant:      utils.CGRateSorg,
+		ItemsPrefix: "",
 	}
 	if err := accSRPC.Call(context.Background(), utils.AdminSv1GetAccountsCount,
 		args, &reply); err != nil {
@@ -481,10 +480,9 @@ func testAccGetAccs2(t *testing.T) {
 
 func testAccGetAccIDsCount2(t *testing.T) {
 	var reply int
-	args := &utils.TenantIDWithAPIOpts{
-		TenantID: &utils.TenantID{
-			Tenant: utils.CGRateSorg,
-		},
+	args := &utils.ArgsItemIDs{
+		Tenant:      utils.CGRateSorg,
+		ItemsPrefix: "",
 	}
 	if err := accSRPC.Call(context.Background(), utils.AdminSv1GetAccountsCount,
 		args, &reply); err != nil {
