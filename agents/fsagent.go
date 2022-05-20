@@ -288,7 +288,11 @@ func (fsa *FSsessions) Connect() error {
 	eventFilters := map[string][]string{"Call-Direction": {"inbound"}}
 	errChan := make(chan error)
 	for connIdx, connCfg := range fsa.cfg.EventSocketConns {
-		fSock, err := fsock.NewFSock(connCfg.Address, connCfg.Password, connCfg.Reconnects,
+		maxReconnectInterval, err := utils.ParseDurationWithNanosecs(connCfg.MaxReconnectInterval)
+		if err != nil {
+			return err
+		}
+		fSock, err := fsock.NewFSock(connCfg.Address, connCfg.Password, connCfg.Reconnects, maxReconnectInterval,
 			fsa.createHandlers(), eventFilters, utils.Logger.GetSyslog(), connIdx)
 		if err != nil {
 			return err
