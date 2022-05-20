@@ -34,9 +34,10 @@ func NewDfltKamConnConfig() *KamConnCfg {
 
 // KamConnCfg represents one connection instance towards Kamailio
 type KamConnCfg struct {
-	Alias      string
-	Address    string
-	Reconnects int
+	Alias                string
+	Address              string
+	Reconnects           int
+	MaxReconnectInterval string
 }
 
 func (kamCfg *KamConnCfg) loadFromJSONCfg(jsnCfg *KamConnJsonCfg) error {
@@ -52,24 +53,29 @@ func (kamCfg *KamConnCfg) loadFromJSONCfg(jsnCfg *KamConnJsonCfg) error {
 	if jsnCfg.Reconnects != nil {
 		kamCfg.Reconnects = *jsnCfg.Reconnects
 	}
+	if jsnCfg.MaxReconnectInterval != nil {
+		kamCfg.MaxReconnectInterval = *jsnCfg.MaxReconnectInterval
+	}
 	return nil
 }
 
 // AsMapInterface returns the config as a map[string]interface{}
 func (kamCfg *KamConnCfg) AsMapInterface() map[string]interface{} {
 	return map[string]interface{}{
-		utils.AliasCfg:      kamCfg.Alias,
-		utils.AddressCfg:    kamCfg.Address,
-		utils.ReconnectsCfg: kamCfg.Reconnects,
+		utils.AliasCfg:                kamCfg.Alias,
+		utils.AddressCfg:              kamCfg.Address,
+		utils.ReconnectsCfg:           kamCfg.Reconnects,
+		utils.MaxReconnectIntervalCfg: kamCfg.MaxReconnectInterval,
 	}
 }
 
 // Clone returns a deep copy of KamConnCfg
 func (kamCfg KamConnCfg) Clone() *KamConnCfg {
 	return &KamConnCfg{
-		Alias:      kamCfg.Alias,
-		Address:    kamCfg.Address,
-		Reconnects: kamCfg.Reconnects,
+		Alias:                kamCfg.Alias,
+		Address:              kamCfg.Address,
+		Reconnects:           kamCfg.Reconnects,
+		MaxReconnectInterval: kamCfg.MaxReconnectInterval,
 	}
 }
 
