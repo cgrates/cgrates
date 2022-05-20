@@ -653,7 +653,7 @@ const CGRATES_CFG_JSON = `
 	"create_cdr": false,					// create CDR out of events and sends them to CDRS component
 	"timezone": "",							// timezone of the Kamailio server
 	"evapi_conns":[							// instantiate connections to multiple Kamailio servers
-		{"address": "127.0.0.1:8448", "reconnects": 5}
+		{"address": "127.0.0.1:8448", "reconnects": 5, "max_reconnect_interval": ""}
 	],
 },
 
