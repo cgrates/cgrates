@@ -386,10 +386,11 @@ type FreeswitchAgentJsonCfg struct {
 
 // Represents one connection instance towards FreeSWITCH
 type FsConnJsonCfg struct {
-	Address    *string
-	Password   *string
-	Reconnects *int
-	Alias      *string
+	Address              *string
+	Password             *string
+	Reconnects           *int
+	MaxReconnectInterval *string
+	Alias                *string
 }
 
 type RPCConnsJson struct {

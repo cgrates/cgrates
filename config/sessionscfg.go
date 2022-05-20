@@ -38,10 +38,11 @@ func NewDfltFsConnConfig() *FsConnCfg {
 
 // FsConnCfg one connection to FreeSWITCH server
 type FsConnCfg struct {
-	Address    string
-	Password   string
-	Reconnects int
-	Alias      string
+	Address              string
+	Password             string
+	Reconnects           int
+	MaxReconnectInterval string
+	Alias                string
 }
 
 func (fs *FsConnCfg) loadFromJSONCfg(jsnCfg *FsConnJsonCfg) error {
@@ -57,6 +58,9 @@ func (fs *FsConnCfg) loadFromJSONCfg(jsnCfg *FsConnJsonCfg) error {
 	if jsnCfg.Reconnects != nil {
 		fs.Reconnects = *jsnCfg.Reconnects
 	}
+	if jsnCfg.MaxReconnectInterval != nil {
+		fs.MaxReconnectInterval = *jsnCfg.MaxReconnectInterval
+	}
 	fs.Alias = fs.Address
 	if jsnCfg.Alias != nil && *jsnCfg.Alias != "" {
 		fs.Alias = *jsnCfg.Alias
@@ -68,20 +72,22 @@ func (fs *FsConnCfg) loadFromJSONCfg(jsnCfg *FsConnJsonCfg) error {
 // AsMapInterface returns the config as a map[string]interface{}
 func (fs *FsConnCfg) AsMapInterface() map[string]interface{} {
 	return map[string]interface{}{
-		utils.AddressCfg:    fs.Address,
-		utils.Password:      fs.Password,
-		utils.ReconnectsCfg: fs.Reconnects,
-		utils.AliasCfg:      fs.Alias,
+		utils.AddressCfg:              fs.Address,
+		utils.Password:                fs.Password,
+		utils.ReconnectsCfg:           fs.Reconnects,
+		utils.MaxReconnectIntervalCfg: fs.MaxReconnectInterval,
+		utils.AliasCfg:                fs.Alias,
 	}
 }
 
 // Clone returns a deep copy of AsteriskAgentCfg
 func (fs FsConnCfg) Clone() *FsConnCfg {
 	return &FsConnCfg{
-		Address:    fs.Address,
-		Password:   fs.Password,
-		Reconnects: fs.Reconnects,
-		Alias:      fs.Alias,
+		Address:              fs.Address,
+		Password:             fs.Password,
+		Reconnects:           fs.Reconnects,
+		MaxReconnectInterval: fs.MaxReconnectInterval,
+		Alias:                fs.Alias,
 	}
 }
 
