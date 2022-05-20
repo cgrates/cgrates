@@ -456,9 +456,10 @@ type KamAgentJsonCfg struct {
 
 // Represents one connection instance towards Kamailio
 type KamConnJsonCfg struct {
-	Alias      *string
-	Address    *string
-	Reconnects *int
+	Alias                *string
+	Address              *string
+	Reconnects           *int
+	MaxReconnectInterval *string
 }
 
 // Represents one connection instance towards OpenSIPS
