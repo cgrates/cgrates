@@ -705,12 +705,13 @@ func NewDefaultAsteriskConnCfg() *AsteriskConnCfg {
 
 // AsteriskConnCfg the config for a Asterisk connection
 type AsteriskConnCfg struct {
-	Alias           string
-	Address         string
-	User            string
-	Password        string
-	ConnectAttempts int
-	Reconnects      int
+	Alias                string
+	Address              string
+	User                 string
+	Password             string
+	ConnectAttempts      int
+	Reconnects           int
+	MaxReconnectInterval string
 }
 
 func (aConnCfg *AsteriskConnCfg) loadFromJSONCfg(jsnCfg *AstConnJsonCfg) error {
@@ -735,30 +736,35 @@ func (aConnCfg *AsteriskConnCfg) loadFromJSONCfg(jsnCfg *AstConnJsonCfg) error {
 	if jsnCfg.Reconnects != nil {
 		aConnCfg.Reconnects = *jsnCfg.Reconnects
 	}
+	if jsnCfg.MaxReconnectInterval != nil {
+		aConnCfg.MaxReconnectInterval = *jsnCfg.MaxReconnectInterval
+	}
 	return nil
 }
 
 // AsMapInterface returns the config as a map[string]interface{}
 func (aConnCfg *AsteriskConnCfg) AsMapInterface() map[string]interface{} {
 	return map[string]interface{}{
-		utils.AliasCfg:           aConnCfg.Alias,
-		utils.AddressCfg:         aConnCfg.Address,
-		utils.UserCf:             aConnCfg.User,
-		utils.Password:           aConnCfg.Password,
-		utils.ConnectAttemptsCfg: aConnCfg.ConnectAttempts,
-		utils.ReconnectsCfg:      aConnCfg.Reconnects,
+		utils.AliasCfg:                aConnCfg.Alias,
+		utils.AddressCfg:              aConnCfg.Address,
+		utils.UserCf:                  aConnCfg.User,
+		utils.Password:                aConnCfg.Password,
+		utils.ConnectAttemptsCfg:      aConnCfg.ConnectAttempts,
+		utils.ReconnectsCfg:           aConnCfg.Reconnects,
+		utils.MaxReconnectIntervalCfg: aConnCfg.MaxReconnectInterval,
 	}
 }
 
 // Clone returns a deep copy of AsteriskConnCfg
 func (aConnCfg AsteriskConnCfg) Clone() *AsteriskConnCfg {
 	return &AsteriskConnCfg{
-		Alias:           aConnCfg.Alias,
-		Address:         aConnCfg.Address,
-		User:            aConnCfg.User,
-		Password:        aConnCfg.Password,
-		ConnectAttempts: aConnCfg.ConnectAttempts,
-		Reconnects:      aConnCfg.Reconnects,
+		Alias:                aConnCfg.Alias,
+		Address:              aConnCfg.Address,
+		User:                 aConnCfg.User,
+		Password:             aConnCfg.Password,
+		ConnectAttempts:      aConnCfg.ConnectAttempts,
+		Reconnects:           aConnCfg.Reconnects,
+		MaxReconnectInterval: aConnCfg.MaxReconnectInterval,
 	}
 }
 
