@@ -416,12 +416,13 @@ type RemoteHostJson struct {
 }
 
 type AstConnJsonCfg struct {
-	Alias            *string
-	Address          *string
-	User             *string
-	Password         *string
-	Connect_attempts *int
-	Reconnects       *int
+	Alias                *string
+	Address              *string
+	User                 *string
+	Password             *string
+	Connect_attempts     *int
+	Reconnects           *int
+	MaxReconnectInterval *string
 }
 
 type AsteriskAgentJsonCfg struct {
