@@ -642,7 +642,7 @@ const CGRATES_CFG_JSON = `
 	"empty_balance_ann_file": "",			// file to be played before disconnecting prepaid calls on empty balance (applies only if no context defined)
 	"max_wait_connection": "2s",			// maximum duration to wait for a connection to be retrieved from the pool
 	"event_socket_conns":[					// instantiate connections to multiple FreeSWITCH servers
-		{"address": "127.0.0.1:8021", "password": "ClueCon", "reconnects": 5,"alias":""}
+		{"address": "127.0.0.1:8021", "password": "ClueCon", "reconnects": 5, "max_reconnect_interval": "" ,"alias":""}
 	],
 },
 
