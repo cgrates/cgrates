@@ -1081,20 +1081,20 @@ func TestClone(t *testing.T) {
 
 func TestFib(t *testing.T) {
 	fib := Fib()
-	if tmp := fib(); tmp != 1 {
-		t.Error("Expecting: 1, received ", tmp)
+	if tmp := fib(); tmp != 1*time.Second {
+		t.Error("Expecting: 1s, received ", tmp)
 	}
-	if tmp := fib(); tmp != 1 {
-		t.Error("Expecting: 1, received ", tmp)
+	if tmp := fib(); tmp != 1*time.Second {
+		t.Error("Expecting: 1s, received ", tmp)
 	}
-	if tmp := fib(); tmp != 2 {
-		t.Error("Expecting: 2, received ", tmp)
+	if tmp := fib(); tmp != 2*time.Second {
+		t.Error("Expecting: 2s, received ", tmp)
 	}
-	if tmp := fib(); tmp != 3 {
-		t.Error("Expecting: 3, received ", tmp)
+	if tmp := fib(); tmp != 3*time.Second {
+		t.Error("Expecting: 3s, received ", tmp)
 	}
-	if tmp := fib(); tmp != 5 {
-		t.Error("Expecting: 5, received ", tmp)
+	if tmp := fib(); tmp != 5*time.Second {
+		t.Error("Expecting: 5s, received ", tmp)
 	}
 }
 
