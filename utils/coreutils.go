@@ -479,18 +479,18 @@ func copyFile(rc io.ReadCloser, path string, fm os.FileMode) (err error) {
 	return
 }
 
-// successive Fibonacci numbers.
-func Fib() func() int {
+// Fib returns successive Fibonacci numbers converted to seconds.
+func Fib() func() time.Duration {
 	a, b := 0, 1
-	return func() int {
+	return func() time.Duration {
 		a, b = b, a+b
-		return a
+		return time.Duration(a) * time.Second
 	}
 }
 func FibDuration(mult time.Duration) func() time.Duration {
 	fib := Fib()
 	return func() time.Duration {
-		return time.Duration(fib()) * mult
+		return fib() * mult
 	}
 }
 
