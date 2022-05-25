@@ -560,7 +560,7 @@ func (sS *SessionS) debitLoopSession(s *Session, sRunIdx int,
 				dscReason = err.Error()
 			}
 			// try to disconect the session n times before we force terminate it on our side
-			fib := utils.FibDuration(time.Millisecond)
+			fib := utils.FibDuration(time.Millisecond, 0)
 			for i := 0; i < sS.cgrCfg.SessionSCfg().TerminateAttempts; i++ {
 				if i != 0 { // not the first iteration
 					time.Sleep(fib())
@@ -599,7 +599,7 @@ func (sS *SessionS) debitLoopSession(s *Session, sRunIdx int,
 				s.Lock()
 				defer s.Unlock()
 				// try to disconect the session n times before we force terminate it on our side
-				fib := utils.FibDuration(time.Millisecond)
+				fib := utils.FibDuration(time.Millisecond, 0)
 				for i := 0; i < sS.cgrCfg.SessionSCfg().TerminateAttempts; i++ {
 					if i != 0 { // not the first iteration
 						time.Sleep(fib())
@@ -2663,7 +2663,7 @@ func (sS *SessionS) BiRPCv1TerminateSession(clnt rpcclient.ClientConnector,
 			}
 		}
 		var s *Session
-		fib := utils.FibDuration(time.Millisecond)
+		fib := utils.FibDuration(time.Millisecond, 0)
 		var isMsg bool // one time charging, do not perform indexing and sTerminator
 		for i := 0; i < sS.cgrCfg.SessionSCfg().TerminateAttempts; i++ {
 			if s = sS.getRelocateSession(cgrID,

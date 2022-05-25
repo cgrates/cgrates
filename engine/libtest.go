@@ -341,7 +341,7 @@ func StartEngine(cfgPath string, waitEngine int) (*exec.Cmd, error) {
 	if err != nil {
 		return nil, err
 	}
-	fib := utils.FibDuration(time.Millisecond)
+	fib := utils.FibDuration(time.Millisecond, 0)
 	var connected bool
 	for i := 0; i < 200; i++ {
 		time.Sleep(fib())
@@ -370,7 +370,7 @@ func StartEngineWithContext(ctx context.Context, cfgPath string, waitEngine int)
 	if cfg, err = config.NewCGRConfigFromPath(cfgPath); err != nil {
 		return
 	}
-	fib := utils.FibDuration(time.Millisecond)
+	fib := utils.FibDuration(time.Millisecond, 0)
 	for i := 0; i < 200; i++ {
 		time.Sleep(fib())
 		if _, err = jsonrpc.Dial(utils.TCP, cfg.ListenCfg().RPCJSONListen); err != nil {
