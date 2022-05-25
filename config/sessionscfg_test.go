@@ -575,7 +575,7 @@ func TestFsAgentCfgAsMapInterfaceCase1(t *testing.T) {
 		utils.EmptyBalanceAnnFileCfg: "",
 		utils.MaxWaitConnectionCfg:   "2s",
 		utils.EventSocketConnsCfg: []map[string]interface{}{
-			{utils.AddressCfg: "127.0.0.1:8021", utils.Password: "ClueCon", utils.ReconnectsCfg: 5, utils.AliasCfg: "127.0.0.1:8021"},
+			{utils.AddressCfg: "127.0.0.1:8021", utils.Password: "ClueCon", utils.ReconnectsCfg: 5, utils.MaxReconnectIntervalCfg: "0s", utils.AliasCfg: "127.0.0.1:8021"},
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
@@ -608,7 +608,7 @@ func TestFsAgentCfgAsMapInterfaceCase2(t *testing.T) {
 		utils.EmptyBalanceAnnFileCfg: "",
 		utils.MaxWaitConnectionCfg:   "7s",
 		utils.EventSocketConnsCfg: []map[string]interface{}{
-			{utils.AddressCfg: "127.0.0.1:8000", utils.Password: "ClueCon123", utils.ReconnectsCfg: 8, utils.AliasCfg: "127.0.0.1:8000"},
+			{utils.AddressCfg: "127.0.0.1:8000", utils.Password: "ClueCon123", utils.ReconnectsCfg: 8, utils.MaxReconnectIntervalCfg: "0s", utils.AliasCfg: "127.0.0.1:8000"},
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
@@ -637,7 +637,7 @@ func TestFsAgentCfgAsMapInterfaceCase3(t *testing.T) {
 		utils.EmptyBalanceAnnFileCfg: "",
 		utils.MaxWaitConnectionCfg:   "",
 		utils.EventSocketConnsCfg: []map[string]interface{}{
-			{utils.AddressCfg: "127.0.0.1:8021", utils.Password: "ClueCon", utils.ReconnectsCfg: 5, utils.AliasCfg: "127.0.0.1:8021"},
+			{utils.AddressCfg: "127.0.0.1:8021", utils.Password: "ClueCon", utils.ReconnectsCfg: 5, utils.MaxReconnectIntervalCfg: "0s", utils.AliasCfg: "127.0.0.1:8021"},
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
@@ -750,7 +750,7 @@ func TestAsteriskAgentCfgAsMapInterface(t *testing.T) {
 		utils.SessionSConnsCfg: []string{utils.MetaInternal},
 		utils.CreateCdrCfg:     false,
 		utils.AsteriskConnsCfg: []map[string]interface{}{
-			{utils.AliasCfg: "", utils.AddressCfg: "127.0.0.1:8088", utils.UserCf: "cgrates", utils.Password: "CGRateS.org", utils.ConnectAttemptsCfg: 3, utils.ReconnectsCfg: 5},
+			{utils.AliasCfg: "", utils.AddressCfg: "127.0.0.1:8088", utils.UserCf: "cgrates", utils.Password: "CGRateS.org", utils.ConnectAttemptsCfg: 3, utils.ReconnectsCfg: 5, utils.MaxReconnectIntervalCfg: "0s"},
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
@@ -776,7 +776,7 @@ func TestAsteriskAgentCfgAsMapInterface1(t *testing.T) {
 		utils.SessionSConnsCfg: []string{rpcclient.BiRPCInternal, "*conn1", "*conn2"},
 		utils.CreateCdrCfg:     true,
 		utils.AsteriskConnsCfg: []map[string]interface{}{
-			{utils.AliasCfg: "", utils.AddressCfg: "127.0.0.1:8089", utils.UserCf: "cgrates", utils.Password: "CGRateS.org", utils.ConnectAttemptsCfg: 5, utils.ReconnectsCfg: 8},
+			{utils.AliasCfg: "", utils.AddressCfg: "127.0.0.1:8089", utils.UserCf: "cgrates", utils.Password: "CGRateS.org", utils.ConnectAttemptsCfg: 5, utils.ReconnectsCfg: 8, utils.MaxReconnectIntervalCfg: "0s"},
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {

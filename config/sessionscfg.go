@@ -77,12 +77,12 @@ func (fs *FsConnCfg) AsMapInterface() map[string]interface{} {
 		utils.AddressCfg:              fs.Address,
 		utils.Password:                fs.Password,
 		utils.ReconnectsCfg:           fs.Reconnects,
-		utils.MaxReconnectIntervalCfg: fs.MaxReconnectInterval,
+		utils.MaxReconnectIntervalCfg: fs.MaxReconnectInterval.String(),
 		utils.AliasCfg:                fs.Alias,
 	}
 }
 
-// Clone returns a deep copy of AsteriskAgentCfg
+// Clone returns a deep copy of FsConnCfg
 func (fs FsConnCfg) Clone() *FsConnCfg {
 	return &FsConnCfg{
 		Address:              fs.Address,
