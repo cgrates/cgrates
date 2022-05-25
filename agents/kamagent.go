@@ -77,12 +77,8 @@ func (self *KamailioAgent) Connect() (err error) {
 	errChan := make(chan error)
 	for connIdx, connCfg := range self.cfg.EvapiConns {
 		logger := log.New(utils.Logger, "kamevapi:", 2)
-		var maxReconnectInterval time.Duration
-		if maxReconnectInterval, err = utils.ParseDurationWithNanosecs(connCfg.MaxReconnectInterval); err != nil {
-			return
-		}
-		if self.conns[connIdx], err = kamevapi.NewKamEvapi(connCfg.Address, connIdx, connCfg.Reconnects, maxReconnectInterval,
-			eventHandlers, logger); err != nil {
+		if self.conns[connIdx], err = kamevapi.NewKamEvapi(connCfg.Address, connIdx, connCfg.Reconnects, connCfg.MaxReconnectInterval,
+			utils.FibDuration, eventHandlers, logger); err != nil {
 			return
 		}
 		utils.Logger.Info(fmt.Sprintf("<%s> successfully connected to Kamailio at: <%s>", utils.KamailioAgent, connCfg.Address))
