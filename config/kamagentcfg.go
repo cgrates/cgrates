@@ -19,6 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"time"
+
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
 )
@@ -37,12 +39,12 @@ type KamConnCfg struct {
 	Alias                string
 	Address              string
 	Reconnects           int
-	MaxReconnectInterval string
+	MaxReconnectInterval time.Duration
 }
 
-func (kamCfg *KamConnCfg) loadFromJSONCfg(jsnCfg *KamConnJsonCfg) error {
+func (kamCfg *KamConnCfg) loadFromJSONCfg(jsnCfg *KamConnJsonCfg) (err error) {
 	if jsnCfg == nil {
-		return nil
+		return
 	}
 	if jsnCfg.Address != nil {
 		kamCfg.Address = *jsnCfg.Address
@@ -54,9 +56,11 @@ func (kamCfg *KamConnCfg) loadFromJSONCfg(jsnCfg *KamConnJsonCfg) error {
 		kamCfg.Reconnects = *jsnCfg.Reconnects
 	}
 	if jsnCfg.MaxReconnectInterval != nil {
-		kamCfg.MaxReconnectInterval = *jsnCfg.MaxReconnectInterval
+		if kamCfg.MaxReconnectInterval, err = utils.ParseDurationWithNanosecs(*jsnCfg.MaxReconnectInterval); err != nil {
+			return
+		}
 	}
-	return nil
+	return
 }
 
 // AsMapInterface returns the config as a map[string]interface{}

@@ -41,13 +41,13 @@ type FsConnCfg struct {
 	Address              string
 	Password             string
 	Reconnects           int
-	MaxReconnectInterval string
+	MaxReconnectInterval time.Duration
 	Alias                string
 }
 
-func (fs *FsConnCfg) loadFromJSONCfg(jsnCfg *FsConnJsonCfg) error {
+func (fs *FsConnCfg) loadFromJSONCfg(jsnCfg *FsConnJsonCfg) (err error) {
 	if jsnCfg == nil {
-		return nil
+		return
 	}
 	if jsnCfg.Address != nil {
 		fs.Address = *jsnCfg.Address
@@ -59,14 +59,16 @@ func (fs *FsConnCfg) loadFromJSONCfg(jsnCfg *FsConnJsonCfg) error {
 		fs.Reconnects = *jsnCfg.Reconnects
 	}
 	if jsnCfg.MaxReconnectInterval != nil {
-		fs.MaxReconnectInterval = *jsnCfg.MaxReconnectInterval
+		if fs.MaxReconnectInterval, err = utils.ParseDurationWithNanosecs(*jsnCfg.MaxReconnectInterval); err != nil {
+			return
+		}
 	}
 	fs.Alias = fs.Address
 	if jsnCfg.Alias != nil && *jsnCfg.Alias != "" {
 		fs.Alias = *jsnCfg.Alias
 	}
 
-	return nil
+	return
 }
 
 // AsMapInterface returns the config as a map[string]interface{}
@@ -711,12 +713,12 @@ type AsteriskConnCfg struct {
 	Password             string
 	ConnectAttempts      int
 	Reconnects           int
-	MaxReconnectInterval string
+	MaxReconnectInterval time.Duration
 }
 
-func (aConnCfg *AsteriskConnCfg) loadFromJSONCfg(jsnCfg *AstConnJsonCfg) error {
+func (aConnCfg *AsteriskConnCfg) loadFromJSONCfg(jsnCfg *AstConnJsonCfg) (err error) {
 	if jsnCfg == nil {
-		return nil
+		return
 	}
 	if jsnCfg.Address != nil {
 		aConnCfg.Address = *jsnCfg.Address
@@ -737,9 +739,11 @@ func (aConnCfg *AsteriskConnCfg) loadFromJSONCfg(jsnCfg *AstConnJsonCfg) error {
 		aConnCfg.Reconnects = *jsnCfg.Reconnects
 	}
 	if jsnCfg.MaxReconnectInterval != nil {
-		aConnCfg.MaxReconnectInterval = *jsnCfg.MaxReconnectInterval
+		if aConnCfg.MaxReconnectInterval, err = utils.ParseDurationWithNanosecs(*jsnCfg.MaxReconnectInterval); err != nil {
+			return
+		}
 	}
-	return nil
+	return
 }
 
 // AsMapInterface returns the config as a map[string]interface{}
@@ -751,7 +755,7 @@ func (aConnCfg *AsteriskConnCfg) AsMapInterface() map[string]interface{} {
 		utils.Password:                aConnCfg.Password,
 		utils.ConnectAttemptsCfg:      aConnCfg.ConnectAttempts,
 		utils.ReconnectsCfg:           aConnCfg.Reconnects,
-		utils.MaxReconnectIntervalCfg: aConnCfg.MaxReconnectInterval,
+		utils.MaxReconnectIntervalCfg: aConnCfg.MaxReconnectInterval.String(),
 	}
 }
 
