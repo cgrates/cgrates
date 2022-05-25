@@ -46,6 +46,7 @@ const CGRATES_CFG_JSON = `
 	"max_call_duration": "3h",				                // maximum call duration a prepaid call can last
 	"connect_attempts": 5,									// initial server connect attempts
 	"reconnects": -1,										// number of retries in case of connection lost
+	"max_reconnect_interval": "", 							// time to wait in between reconnect attempts
 	"connect_timeout": "1s",								// consider connection unsuccessful on timeout, 0 to disable the feature
 	"reply_timeout": "2s",									// consider connection down for replies taking longer than this value
 	"locking_timeout": "0",									// timeout internal locks to avoid deadlocks
@@ -973,12 +974,13 @@ const CGRATES_CFG_JSON = `
 					{"tag": "Transport", "path": "Transport", "type": "*variable", "value": "~*req.3"},
 					{"tag": "ConnectAttempts", "path": "ConnectAttempts", "type": "*variable", "value":"~*req.4"},
 					{"tag": "Reconnects", "path": "Reconnects", "type": "*variable", "value":"~*req.5"},
-					{"tag": "ConnectTimeout", "path": "ConnectTimeout", "type": "*variable", "value":"~*req.6"},
-					{"tag": "ReplyTimeout", "path": "ReplyTimeout", "type": "*variable", "value":"~*req.7"},
-					{"tag": "TLS", "path": "TLS", "type": "*variable", "value": "~*req.8"},
-					{"tag": "ClientKey", "path": "ClientKey", "type": "*variable", "value":"~*req.9"},
-					{"tag": "ClientCertificate", "path": "ClientCertificate", "type": "*variable", "value":"~*req.10"},
-					{"tag": "CaCertificate", "path": "CaCertificate", "type": "*variable", "value":"~*req.11"},
+					{"tag": "MaxReconnectInterval", "path": "MaxReconnectInterval", "type": "*variable", "value":"~*req.6"},
+					{"tag": "ConnectTimeout", "path": "ConnectTimeout", "type": "*variable", "value":"~*req.7"},
+					{"tag": "ReplyTimeout", "path": "ReplyTimeout", "type": "*variable", "value":"~*req.8"},
+					{"tag": "TLS", "path": "TLS", "type": "*variable", "value": "~*req.9"},
+					{"tag": "ClientKey", "path": "ClientKey", "type": "*variable", "value":"~*req.10"},
+					{"tag": "ClientCertificate", "path": "ClientCertificate", "type": "*variable", "value":"~*req.11"},
+					{"tag": "CaCertificate", "path": "CaCertificate", "type": "*variable", "value":"~*req.12"},
 				],
 			},
 		],
