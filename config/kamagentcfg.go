@@ -69,7 +69,7 @@ func (kamCfg *KamConnCfg) AsMapInterface() map[string]interface{} {
 		utils.AliasCfg:                kamCfg.Alias,
 		utils.AddressCfg:              kamCfg.Address,
 		utils.ReconnectsCfg:           kamCfg.Reconnects,
-		utils.MaxReconnectIntervalCfg: kamCfg.MaxReconnectInterval,
+		utils.MaxReconnectIntervalCfg: kamCfg.MaxReconnectInterval.String(),
 	}
 }
 

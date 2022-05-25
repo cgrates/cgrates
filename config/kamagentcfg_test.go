@@ -98,7 +98,7 @@ func TestKamAgentCfgAsMapInterface(t *testing.T) {
 		utils.CreateCdrCfg:     true,
 		utils.TimezoneCfg:      "UTC",
 		utils.EvapiConnsCfg: []map[string]interface{}{
-			{utils.AddressCfg: "127.0.0.1:8448", utils.ReconnectsCfg: 5, utils.AliasCfg: ""},
+			{utils.AddressCfg: "127.0.0.1:8448", utils.ReconnectsCfg: 5, utils.MaxReconnectIntervalCfg: "0s", utils.AliasCfg: ""},
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
@@ -118,7 +118,7 @@ func TestKamAgentCfgAsMapInterface1(t *testing.T) {
 		utils.CreateCdrCfg:     false,
 		utils.TimezoneCfg:      "",
 		utils.EvapiConnsCfg: []map[string]interface{}{
-			{utils.AddressCfg: "127.0.0.1:8448", utils.ReconnectsCfg: 5, utils.AliasCfg: ""},
+			{utils.AddressCfg: "127.0.0.1:8448", utils.ReconnectsCfg: 5, utils.MaxReconnectIntervalCfg: "0s", utils.AliasCfg: ""},
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
