@@ -3825,7 +3825,7 @@ func TestAPItoModelTPDispatcher(t *testing.T) {
 
 func TestTPDispatcherHostsCSVHeader(t *testing.T) {
 	tps := &DispatcherHostMdls{}
-	eOut := []string{"#" + utils.Tenant, utils.ID, utils.Address, utils.Transport, utils.SynchronousCfg, utils.ConnectAttemptsCfg, utils.ReconnectsCfg, utils.ConnectTimeoutCfg, utils.ReplyTimeoutCfg, utils.TLS, utils.ClientKeyCfg, utils.ClientCerificateCfg, utils.CaCertificateCfg}
+	eOut := []string{"#" + utils.Tenant, utils.ID, utils.Address, utils.Transport, utils.SynchronousCfg, utils.ConnectAttemptsCfg, utils.ReconnectsCfg, utils.MaxReconnectIntervalCfg, utils.ConnectTimeoutCfg, utils.ReplyTimeoutCfg, utils.TLS, utils.ClientKeyCfg, utils.ClientCerificateCfg, utils.CaCertificateCfg}
 	if rcv := tps.CSVHeader(); !reflect.DeepEqual(rcv, eOut) {
 		t.Errorf("Expecting: %+v,\nReceived: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
 	}
@@ -3987,18 +3987,19 @@ func TestAPItoModelTPDispatcherHost(t *testing.T) {
 		},
 	}
 	eOut := &DispatcherHostMdl{
-		Address:           "Address1",
-		Transport:         "*json",
-		Tenant:            "Tenant",
-		ID:                "ID",
-		ConnectAttempts:   3,
-		Reconnects:        5,
-		ConnectTimeout:    "1m0s",
-		ReplyTimeout:      "2m0s",
-		TLS:               true,
-		ClientKey:         "client_key",
-		ClientCertificate: "client_certificate",
-		CaCertificate:     "ca_certificate",
+		Address:              "Address1",
+		Transport:            "*json",
+		Tenant:               "Tenant",
+		ID:                   "ID",
+		ConnectAttempts:      3,
+		Reconnects:           5,
+		MaxReconnectInterval: "0s",
+		ConnectTimeout:       "1m0s",
+		ReplyTimeout:         "2m0s",
+		TLS:                  true,
+		ClientKey:            "client_key",
+		ClientCertificate:    "client_certificate",
+		CaCertificate:        "ca_certificate",
 	}
 	if rcv := APItoModelTPDispatcherHost(tpDPH); !reflect.DeepEqual(eOut, rcv) {
 		t.Errorf("Expecting: %+v,\nReceived: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
