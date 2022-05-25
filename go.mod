@@ -6,6 +6,12 @@ go 1.18
 
 // replace github.com/cgrates/rpcclient => ../rpcclient
 
+replace github.com/cgrates/fsock => ../fsock
+
+replace github.com/cgrates/kamevapi => ../kamevapi
+
+replace github.com/cgrates/aringo => ../aringo
+
 require (
 	github.com/Azure/go-amqp v0.15.0
 	github.com/antchfx/xmlquery v1.3.3
