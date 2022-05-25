@@ -443,7 +443,7 @@ func testConfigStartEngineFromHTTP(t *testing.T) {
 	if err := engine.Start(); err != nil {
 		t.Error(err)
 	}
-	fib := utils.FibDuration(time.Millisecond)
+	fib := utils.FibDuration(time.Millisecond, 0)
 	var jsonClnt *rpc.Client
 	var connected bool
 	for i := 0; i < 200; i++ {
