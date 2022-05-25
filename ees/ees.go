@@ -293,7 +293,7 @@ func ExportWithAttempts(exp EventExporter, eEv interface{}, key string) (err err
 			}
 		}()
 	}
-	fib := utils.FibDuration(time.Second)
+	fib := utils.FibDuration(time.Second, 0)
 
 	for i := 0; i < exp.Cfg().Attempts; i++ {
 		if err = exp.Connect(); err == nil {
