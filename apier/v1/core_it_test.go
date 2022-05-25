@@ -128,7 +128,7 @@ func testCoreSv1StartEngineByExecWithCPUProfiling(t *testing.T) {
 	if err := engine.Start(); err != nil {
 		t.Error(err)
 	}
-	fib := utils.FibDuration(time.Millisecond)
+	fib := utils.FibDuration(time.Millisecond, 0)
 	var connected bool
 	for i := 0; i < 200; i++ {
 		time.Sleep(fib())
@@ -184,7 +184,7 @@ func testCoreSv1StartEngineByExecWIthMemProfiling(t *testing.T) {
 	if err := engine.Start(); err != nil {
 		t.Error(err)
 	}
-	fib := utils.FibDuration(time.Millisecond)
+	fib := utils.FibDuration(time.Millisecond, 0)
 	var connected bool
 	for i := 0; i < 200; i++ {
 		time.Sleep(fib())
