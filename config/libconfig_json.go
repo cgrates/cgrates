@@ -40,6 +40,7 @@ type GeneralJsonCfg struct {
 	Default_caching      *string
 	Connect_attempts     *int
 	Reconnects           *int
+	MaxReconnectInterval *string
 	Connect_timeout      *string
 	Reply_timeout        *string
 	Locking_timeout      *string

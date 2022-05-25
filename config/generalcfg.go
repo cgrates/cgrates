@@ -27,29 +27,30 @@ import (
 
 // GeneralCfg is the general config section
 type GeneralCfg struct {
-	NodeID           string        // Identifier for this engine instance
-	Logger           string        // dictates the way logs are displayed/stored
-	LogLevel         int           // system wide log level, nothing higher than this will be logged
-	RoundingDecimals int           // Number of decimals to round end prices at
-	DBDataEncoding   string        // The encoding used to store object data in strings: <msgpack|json>
-	TpExportPath     string        // Path towards export folder for offline Tariff Plans
-	PosterAttempts   int           // Time to wait before writing the failed posts in a single file
-	FailedPostsDir   string        // Directory path where we store failed http requests
-	FailedPostsTTL   time.Duration // Directory path where we store failed http requests
-	DefaultReqType   string        // Use this request type if not defined on top
-	DefaultCategory  string        // set default type of record
-	DefaultTenant    string        // set default tenant
-	DefaultTimezone  string        // default timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
-	DefaultCaching   string
-	ConnectAttempts  int           // number of initial connection attempts before giving up
-	Reconnects       int           // number of recconect attempts in case of connection lost <-1 for infinite | nb>
-	ConnectTimeout   time.Duration // timeout for RPC connection attempts
-	ReplyTimeout     time.Duration // timeout replies if not reaching back
-	LockingTimeout   time.Duration // locking mechanism timeout to avoid deadlocks
-	DigestSeparator  string        //
-	DigestEqual      string        //
-	RSRSep           string        // separator used to split RSRParser (by default is used ";")
-	MaxParallelConns int           // the maximum number of connections used by the *parallel strategy
+	NodeID               string        // Identifier for this engine instance
+	Logger               string        // dictates the way logs are displayed/stored
+	LogLevel             int           // system wide log level, nothing higher than this will be logged
+	RoundingDecimals     int           // Number of decimals to round end prices at
+	DBDataEncoding       string        // The encoding used to store object data in strings: <msgpack|json>
+	TpExportPath         string        // Path towards export folder for offline Tariff Plans
+	PosterAttempts       int           // Time to wait before writing the failed posts in a single file
+	FailedPostsDir       string        // Directory path where we store failed http requests
+	FailedPostsTTL       time.Duration // Directory path where we store failed http requests
+	DefaultReqType       string        // Use this request type if not defined on top
+	DefaultCategory      string        // set default type of record
+	DefaultTenant        string        // set default tenant
+	DefaultTimezone      string        // default timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
+	DefaultCaching       string
+	ConnectAttempts      int           // number of initial connection attempts before giving up
+	Reconnects           int           // number of reconnect attempts in case of connection lost <-1 for infinite | nb>
+	MaxReconnectInterval time.Duration // time to wait in between reconnect attempts
+	ConnectTimeout       time.Duration // timeout for RPC connection attempts
+	ReplyTimeout         time.Duration // timeout replies if not reaching back
+	LockingTimeout       time.Duration // locking mechanism timeout to avoid deadlocks
+	DigestSeparator      string        //
+	DigestEqual          string        //
+	RSRSep               string        // separator used to split RSRParser (by default is used ";")
+	MaxParallelConns     int           // the maximum number of connections used by the *parallel strategy
 }
 
 // loadFromJSONCfg loads General config from JsonCfg
@@ -84,6 +85,11 @@ func (gencfg *GeneralCfg) loadFromJSONCfg(jsnGeneralCfg *GeneralJsonCfg) (err er
 	}
 	if jsnGeneralCfg.Reconnects != nil {
 		gencfg.Reconnects = *jsnGeneralCfg.Reconnects
+	}
+	if jsnGeneralCfg.MaxReconnectInterval != nil {
+		if gencfg.MaxReconnectInterval, err = utils.ParseDurationWithNanosecs(*jsnGeneralCfg.MaxReconnectInterval); err != nil {
+			return err
+		}
 	}
 	if jsnGeneralCfg.Connect_timeout != nil {
 		if gencfg.ConnectTimeout, err = utils.ParseDurationWithNanosecs(*jsnGeneralCfg.Connect_timeout); err != nil {
@@ -142,29 +148,34 @@ func (gencfg *GeneralCfg) loadFromJSONCfg(jsnGeneralCfg *GeneralJsonCfg) (err er
 // AsMapInterface returns the config as a map[string]interface{}
 func (gencfg *GeneralCfg) AsMapInterface() (initialMP map[string]interface{}) {
 	initialMP = map[string]interface{}{
-		utils.NodeIDCfg:           gencfg.NodeID,
-		utils.LoggerCfg:           gencfg.Logger,
-		utils.LogLevelCfg:         gencfg.LogLevel,
-		utils.RoundingDecimalsCfg: gencfg.RoundingDecimals,
-		utils.DBDataEncodingCfg:   utils.Meta + gencfg.DBDataEncoding,
-		utils.TpExportPathCfg:     gencfg.TpExportPath,
-		utils.PosterAttemptsCfg:   gencfg.PosterAttempts,
-		utils.FailedPostsDirCfg:   gencfg.FailedPostsDir,
-		utils.DefaultReqTypeCfg:   gencfg.DefaultReqType,
-		utils.DefaultCategoryCfg:  gencfg.DefaultCategory,
-		utils.DefaultTenantCfg:    gencfg.DefaultTenant,
-		utils.DefaultTimezoneCfg:  gencfg.DefaultTimezone,
-		utils.DefaultCachingCfg:   gencfg.DefaultCaching,
-		utils.ConnectAttemptsCfg:  gencfg.ConnectAttempts,
-		utils.ReconnectsCfg:       gencfg.Reconnects,
-		utils.DigestSeparatorCfg:  gencfg.DigestSeparator,
-		utils.DigestEqualCfg:      gencfg.DigestEqual,
-		utils.RSRSepCfg:           gencfg.RSRSep,
-		utils.MaxParallelConnsCfg: gencfg.MaxParallelConns,
-		utils.LockingTimeoutCfg:   "0",
-		utils.FailedPostsTTLCfg:   "0",
-		utils.ConnectTimeoutCfg:   "0",
-		utils.ReplyTimeoutCfg:     "0",
+		utils.NodeIDCfg:               gencfg.NodeID,
+		utils.LoggerCfg:               gencfg.Logger,
+		utils.LogLevelCfg:             gencfg.LogLevel,
+		utils.RoundingDecimalsCfg:     gencfg.RoundingDecimals,
+		utils.DBDataEncodingCfg:       utils.Meta + gencfg.DBDataEncoding,
+		utils.TpExportPathCfg:         gencfg.TpExportPath,
+		utils.PosterAttemptsCfg:       gencfg.PosterAttempts,
+		utils.FailedPostsDirCfg:       gencfg.FailedPostsDir,
+		utils.DefaultReqTypeCfg:       gencfg.DefaultReqType,
+		utils.DefaultCategoryCfg:      gencfg.DefaultCategory,
+		utils.DefaultTenantCfg:        gencfg.DefaultTenant,
+		utils.DefaultTimezoneCfg:      gencfg.DefaultTimezone,
+		utils.DefaultCachingCfg:       gencfg.DefaultCaching,
+		utils.ConnectAttemptsCfg:      gencfg.ConnectAttempts,
+		utils.ReconnectsCfg:           gencfg.Reconnects,
+		utils.MaxReconnectIntervalCfg: "0",
+		utils.DigestSeparatorCfg:      gencfg.DigestSeparator,
+		utils.DigestEqualCfg:          gencfg.DigestEqual,
+		utils.RSRSepCfg:               gencfg.RSRSep,
+		utils.MaxParallelConnsCfg:     gencfg.MaxParallelConns,
+		utils.LockingTimeoutCfg:       "0",
+		utils.FailedPostsTTLCfg:       "0",
+		utils.ConnectTimeoutCfg:       "0",
+		utils.ReplyTimeoutCfg:         "0",
+	}
+
+	if gencfg.MaxReconnectInterval != 0 {
+		initialMP[utils.MaxReconnectIntervalCfg] = gencfg.MaxReconnectInterval.String()
 	}
 
 	if gencfg.LockingTimeout != 0 {
@@ -189,28 +200,29 @@ func (gencfg *GeneralCfg) AsMapInterface() (initialMP map[string]interface{}) {
 // Clone returns a deep copy of GeneralCfg
 func (gencfg GeneralCfg) Clone() *GeneralCfg {
 	return &GeneralCfg{
-		NodeID:           gencfg.NodeID,
-		Logger:           gencfg.Logger,
-		LogLevel:         gencfg.LogLevel,
-		RoundingDecimals: gencfg.RoundingDecimals,
-		DBDataEncoding:   gencfg.DBDataEncoding,
-		TpExportPath:     gencfg.TpExportPath,
-		PosterAttempts:   gencfg.PosterAttempts,
-		FailedPostsDir:   gencfg.FailedPostsDir,
-		FailedPostsTTL:   gencfg.FailedPostsTTL,
-		DefaultReqType:   gencfg.DefaultReqType,
-		DefaultCategory:  gencfg.DefaultCategory,
-		DefaultTenant:    gencfg.DefaultTenant,
-		DefaultTimezone:  gencfg.DefaultTimezone,
-		DefaultCaching:   gencfg.DefaultCaching,
-		ConnectAttempts:  gencfg.ConnectAttempts,
-		Reconnects:       gencfg.Reconnects,
-		ConnectTimeout:   gencfg.ConnectTimeout,
-		ReplyTimeout:     gencfg.ReplyTimeout,
-		LockingTimeout:   gencfg.LockingTimeout,
-		DigestSeparator:  gencfg.DigestSeparator,
-		DigestEqual:      gencfg.DigestEqual,
-		RSRSep:           gencfg.RSRSep,
-		MaxParallelConns: gencfg.MaxParallelConns,
+		NodeID:               gencfg.NodeID,
+		Logger:               gencfg.Logger,
+		LogLevel:             gencfg.LogLevel,
+		RoundingDecimals:     gencfg.RoundingDecimals,
+		DBDataEncoding:       gencfg.DBDataEncoding,
+		TpExportPath:         gencfg.TpExportPath,
+		PosterAttempts:       gencfg.PosterAttempts,
+		FailedPostsDir:       gencfg.FailedPostsDir,
+		FailedPostsTTL:       gencfg.FailedPostsTTL,
+		DefaultReqType:       gencfg.DefaultReqType,
+		DefaultCategory:      gencfg.DefaultCategory,
+		DefaultTenant:        gencfg.DefaultTenant,
+		DefaultTimezone:      gencfg.DefaultTimezone,
+		DefaultCaching:       gencfg.DefaultCaching,
+		ConnectAttempts:      gencfg.ConnectAttempts,
+		Reconnects:           gencfg.Reconnects,
+		MaxReconnectInterval: gencfg.MaxReconnectInterval,
+		ConnectTimeout:       gencfg.ConnectTimeout,
+		ReplyTimeout:         gencfg.ReplyTimeout,
+		LockingTimeout:       gencfg.LockingTimeout,
+		DigestSeparator:      gencfg.DigestSeparator,
+		DigestEqual:          gencfg.DigestEqual,
+		RSRSep:               gencfg.RSRSep,
+		MaxParallelConns:     gencfg.MaxParallelConns,
 	}
 }
