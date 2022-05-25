@@ -72,6 +72,7 @@ const CGRATES_CFG_JSON = `
 				//"transport":"*json",
 				//"connect_attempts": 5,
 				//"reconnects": -1,
+				//"max_reconnect_interval": ""
 				//"connect_timeout":"1s",
 				//"reply_timeout":"2s",
 				//"tls":false,

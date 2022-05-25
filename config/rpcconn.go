@@ -119,17 +119,18 @@ func (rC RPCConn) Clone() (cln *RPCConn) {
 
 // RemoteHost connection config
 type RemoteHost struct {
-	ID                string
-	Address           string
-	Transport         string
-	ConnectAttempts   int
-	Reconnects        int
-	ConnectTimeout    time.Duration
-	ReplyTimeout      time.Duration
-	TLS               bool
-	ClientKey         string
-	ClientCertificate string
-	CaCertificate     string
+	ID                   string
+	Address              string
+	Transport            string
+	ConnectAttempts      int
+	Reconnects           int
+	MaxReconnectInterval time.Duration
+	ConnectTimeout       time.Duration
+	ReplyTimeout         time.Duration
+	TLS                  bool
+	ClientKey            string
+	ClientCertificate    string
+	CaCertificate        string
 }
 
 func (rh *RemoteHost) loadFromJSONCfg(jsnCfg *RemoteHostJson) (err error) {
@@ -165,6 +166,11 @@ func (rh *RemoteHost) loadFromJSONCfg(jsnCfg *RemoteHostJson) (err error) {
 	}
 	if jsnCfg.Reconnects != nil {
 		rh.Reconnects = *jsnCfg.Reconnects
+	}
+	if jsnCfg.MaxReconnectInterval != nil {
+		if rh.MaxReconnectInterval, err = utils.ParseDurationWithNanosecs(*jsnCfg.MaxReconnectInterval); err != nil {
+			return err
+		}
 	}
 	if jsnCfg.Connect_timeout != nil {
 		if rh.ConnectTimeout, err = utils.ParseDurationWithNanosecs(*jsnCfg.Connect_timeout); err != nil {
@@ -206,6 +212,9 @@ func (rh *RemoteHost) AsMapInterface() (mp map[string]interface{}) {
 	if rh.Reconnects != 0 {
 		mp[utils.ReconnectsCfg] = rh.Reconnects
 	}
+	if rh.MaxReconnectInterval != 0 {
+		mp[utils.MaxReconnectIntervalCfg] = rh.MaxReconnectInterval
+	}
 	if rh.ConnectTimeout != 0 {
 		mp[utils.ConnectTimeoutCfg] = rh.ConnectTimeout
 	}
@@ -218,17 +227,18 @@ func (rh *RemoteHost) AsMapInterface() (mp map[string]interface{}) {
 // Clone returns a deep copy of RemoteHost
 func (rh RemoteHost) Clone() (cln *RemoteHost) {
 	return &RemoteHost{
-		ID:                rh.ID,
-		Address:           rh.Address,
-		Transport:         rh.Transport,
-		ConnectAttempts:   rh.ConnectAttempts,
-		Reconnects:        rh.Reconnects,
-		ConnectTimeout:    rh.ConnectTimeout,
-		ReplyTimeout:      rh.ReplyTimeout,
-		TLS:               rh.TLS,
-		ClientKey:         rh.ClientKey,
-		ClientCertificate: rh.ClientCertificate,
-		CaCertificate:     rh.CaCertificate,
+		ID:                   rh.ID,
+		Address:              rh.Address,
+		Transport:            rh.Transport,
+		ConnectAttempts:      rh.ConnectAttempts,
+		Reconnects:           rh.Reconnects,
+		MaxReconnectInterval: rh.MaxReconnectInterval,
+		ConnectTimeout:       rh.ConnectTimeout,
+		ReplyTimeout:         rh.ReplyTimeout,
+		TLS:                  rh.TLS,
+		ClientKey:            rh.ClientKey,
+		ClientCertificate:    rh.ClientCertificate,
+		CaCertificate:        rh.CaCertificate,
 	}
 }
 
@@ -247,6 +257,7 @@ func UpdateRPCCons(rpcConns RPCConns, newHosts map[string]*RemoteHost) (connIDs 
 			rh.Transport = newHost.Transport
 			rh.ConnectAttempts = newHost.ConnectAttempts
 			rh.Reconnects = newHost.Reconnects
+			rh.MaxReconnectInterval = newHost.MaxReconnectInterval
 			rh.ConnectTimeout = newHost.ConnectTimeout
 			rh.ReplyTimeout = newHost.ReplyTimeout
 			rh.TLS = newHost.TLS
@@ -272,6 +283,7 @@ func RemoveRPCCons(rpcConns RPCConns, hosts utils.StringSet) (connIDs utils.Stri
 			rh.Transport = ""
 			rh.ConnectAttempts = 0
 			rh.Reconnects = 0
+			rh.MaxReconnectInterval = 0
 			rh.ConnectTimeout = 0
 			rh.ReplyTimeout = 0
 			rh.TLS = false
