@@ -83,14 +83,10 @@ func (sma *AsteriskAgent) connectAsterisk(stopChan <-chan struct{}) (err error) 
 	connCfg := sma.cgrCfg.AsteriskAgentCfg().AsteriskConns[sma.astConnIdx]
 	sma.astEvChan = make(chan map[string]interface{})
 	sma.astErrChan = make(chan error)
-	var maxReconnectInterval time.Duration
-	if maxReconnectInterval, err = utils.ParseDurationWithNanosecs(connCfg.MaxReconnectInterval); err != nil {
-		return
-	}
 	sma.astConn, err = aringo.NewARInGO(fmt.Sprintf("ws://%s/ari/events?api_key=%s:%s&app=%s",
 		connCfg.Address, connCfg.User, connCfg.Password, CGRAuthAPP), "http://cgrates.org",
 		connCfg.User, connCfg.Password, fmt.Sprintf("%s@%s", utils.CGRateS, utils.Version),
-		sma.astEvChan, sma.astErrChan, stopChan, connCfg.ConnectAttempts, connCfg.Reconnects, maxReconnectInterval)
+		sma.astEvChan, sma.astErrChan, stopChan, connCfg.ConnectAttempts, connCfg.Reconnects, connCfg.MaxReconnectInterval, utils.FibDuration)
 	return
 }
 
