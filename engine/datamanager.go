@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
@@ -3183,7 +3184,7 @@ func (dm *DataManager) GetAPIBan(ip string, apiKeys []string, single, cacheRead,
 		}
 	}
 	if single {
-		if banned, err = baningo.CheckIP(ip, apiKeys...); err != nil {
+		if banned, err = baningo.CheckIP(context.Background(), ip, apiKeys...); err != nil {
 			return
 		}
 		if cacheWrite {
@@ -3194,7 +3195,7 @@ func (dm *DataManager) GetAPIBan(ip string, apiKeys []string, single, cacheRead,
 		return
 	}
 	var bannedIPs []string
-	if bannedIPs, err = baningo.GetBannedIPs(apiKeys...); err != nil {
+	if bannedIPs, err = baningo.GetBannedIPs(context.Background(), apiKeys...); err != nil {
 		return
 	}
 	for _, bannedIP := range bannedIPs {
