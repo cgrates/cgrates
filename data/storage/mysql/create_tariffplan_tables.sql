@@ -463,6 +463,7 @@ CREATE TABLE tp_dispatcher_hosts (
   `transport` varchar(64) NOT NULL,
   `connect_attempts` int(11) NOT NULL,
   `reconnects` int(11) NOT NULL,
+  `max_reconnect_interval` varchar(64) NOT NULL,
   `connect_timeout` varchar(64) NOT NULL,
   `reply_timeout` varchar(64) NOT NULL,
   `tls` BOOLEAN NOT NULL,
