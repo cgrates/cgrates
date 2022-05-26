@@ -40,7 +40,7 @@ type GeneralJsonCfg struct {
 	Default_caching      *string
 	Connect_attempts     *int
 	Reconnects           *int
-	MaxReconnectInterval *string
+	MaxReconnectInterval *string `json:"max_reconnect_interval"`
 	Connect_timeout      *string
 	Reply_timeout        *string
 	Locking_timeout      *string
@@ -390,7 +390,7 @@ type FsConnJsonCfg struct {
 	Address              *string
 	Password             *string
 	Reconnects           *int
-	MaxReconnectInterval *string
+	MaxReconnectInterval *string `json:"max_reconnect_interval"`
 	Alias                *string
 }
 
@@ -412,7 +412,7 @@ type RemoteHostJson struct {
 	Ca_path              *string
 	Conn_attempts        *int
 	Reconnects           *int
-	MaxReconnectInterval *string
+	MaxReconnectInterval *string `json:"max_reconnect_interval"`
 	Connect_timeout      *string
 	Reply_timeout        *string
 }
@@ -424,7 +424,7 @@ type AstConnJsonCfg struct {
 	Password             *string
 	Connect_attempts     *int
 	Reconnects           *int
-	MaxReconnectInterval *string
+	MaxReconnectInterval *string `json:"max_reconnect_interval"`
 }
 
 type AsteriskAgentJsonCfg struct {
@@ -461,7 +461,7 @@ type KamConnJsonCfg struct {
 	Alias                *string
 	Address              *string
 	Reconnects           *int
-	MaxReconnectInterval *string
+	MaxReconnectInterval *string `json:"max_reconnect_interval"`
 }
 
 // Represents one connection instance towards OpenSIPS
