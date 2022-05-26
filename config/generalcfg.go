@@ -86,8 +86,8 @@ func (gencfg *GeneralCfg) loadFromJSONCfg(jsnGeneralCfg *GeneralJsonCfg) (err er
 	if jsnGeneralCfg.Reconnects != nil {
 		gencfg.Reconnects = *jsnGeneralCfg.Reconnects
 	}
-	if jsnGeneralCfg.MaxReconnectInterval != nil {
-		if gencfg.MaxReconnectInterval, err = utils.ParseDurationWithNanosecs(*jsnGeneralCfg.MaxReconnectInterval); err != nil {
+	if jsnGeneralCfg.Max_reconnect_interval != nil {
+		if gencfg.MaxReconnectInterval, err = utils.ParseDurationWithNanosecs(*jsnGeneralCfg.Max_reconnect_interval); err != nil {
 			return err
 		}
 	}
