@@ -58,8 +58,8 @@ func (fs *FsConnCfg) loadFromJSONCfg(jsnCfg *FsConnJsonCfg) (err error) {
 	if jsnCfg.Reconnects != nil {
 		fs.Reconnects = *jsnCfg.Reconnects
 	}
-	if jsnCfg.MaxReconnectInterval != nil {
-		if fs.MaxReconnectInterval, err = utils.ParseDurationWithNanosecs(*jsnCfg.MaxReconnectInterval); err != nil {
+	if jsnCfg.Max_reconnect_interval != nil {
+		if fs.MaxReconnectInterval, err = utils.ParseDurationWithNanosecs(*jsnCfg.Max_reconnect_interval); err != nil {
 			return
 		}
 	}
@@ -738,8 +738,8 @@ func (aConnCfg *AsteriskConnCfg) loadFromJSONCfg(jsnCfg *AstConnJsonCfg) (err er
 	if jsnCfg.Reconnects != nil {
 		aConnCfg.Reconnects = *jsnCfg.Reconnects
 	}
-	if jsnCfg.MaxReconnectInterval != nil {
-		if aConnCfg.MaxReconnectInterval, err = utils.ParseDurationWithNanosecs(*jsnCfg.MaxReconnectInterval); err != nil {
+	if jsnCfg.Max_reconnect_interval != nil {
+		if aConnCfg.MaxReconnectInterval, err = utils.ParseDurationWithNanosecs(*jsnCfg.Max_reconnect_interval); err != nil {
 			return
 		}
 	}

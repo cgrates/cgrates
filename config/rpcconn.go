@@ -167,8 +167,8 @@ func (rh *RemoteHost) loadFromJSONCfg(jsnCfg *RemoteHostJson) (err error) {
 	if jsnCfg.Reconnects != nil {
 		rh.Reconnects = *jsnCfg.Reconnects
 	}
-	if jsnCfg.MaxReconnectInterval != nil {
-		if rh.MaxReconnectInterval, err = utils.ParseDurationWithNanosecs(*jsnCfg.MaxReconnectInterval); err != nil {
+	if jsnCfg.Max_reconnect_interval != nil {
+		if rh.MaxReconnectInterval, err = utils.ParseDurationWithNanosecs(*jsnCfg.Max_reconnect_interval); err != nil {
 			return err
 		}
 	}

@@ -55,8 +55,8 @@ func (kamCfg *KamConnCfg) loadFromJSONCfg(jsnCfg *KamConnJsonCfg) (err error) {
 	if jsnCfg.Reconnects != nil {
 		kamCfg.Reconnects = *jsnCfg.Reconnects
 	}
-	if jsnCfg.MaxReconnectInterval != nil {
-		if kamCfg.MaxReconnectInterval, err = utils.ParseDurationWithNanosecs(*jsnCfg.MaxReconnectInterval); err != nil {
+	if jsnCfg.Max_reconnect_interval != nil {
+		if kamCfg.MaxReconnectInterval, err = utils.ParseDurationWithNanosecs(*jsnCfg.Max_reconnect_interval); err != nil {
 			return
 		}
 	}

@@ -24,30 +24,30 @@ import (
 
 // General config section
 type GeneralJsonCfg struct {
-	Node_id              *string
-	Logger               *string
-	Log_level            *int
-	Rounding_decimals    *int
-	Dbdata_encoding      *string
-	Tpexport_dir         *string
-	Poster_attempts      *int
-	Failed_posts_dir     *string
-	Failed_posts_ttl     *string
-	Default_request_type *string
-	Default_category     *string
-	Default_tenant       *string
-	Default_timezone     *string
-	Default_caching      *string
-	Connect_attempts     *int
-	Reconnects           *int
-	MaxReconnectInterval *string `json:"max_reconnect_interval"`
-	Connect_timeout      *string
-	Reply_timeout        *string
-	Locking_timeout      *string
-	Digest_separator     *string
-	Digest_equal         *string
-	Rsr_separator        *string
-	Max_parallel_conns   *int
+	Node_id                *string
+	Logger                 *string
+	Log_level              *int
+	Rounding_decimals      *int
+	Dbdata_encoding        *string
+	Tpexport_dir           *string
+	Poster_attempts        *int
+	Failed_posts_dir       *string
+	Failed_posts_ttl       *string
+	Default_request_type   *string
+	Default_category       *string
+	Default_tenant         *string
+	Default_timezone       *string
+	Default_caching        *string
+	Connect_attempts       *int
+	Reconnects             *int
+	Max_reconnect_interval *string
+	Connect_timeout        *string
+	Reply_timeout          *string
+	Locking_timeout        *string
+	Digest_separator       *string
+	Digest_equal           *string
+	Rsr_separator          *string
+	Max_parallel_conns     *int
 }
 
 // Listen config section
@@ -387,11 +387,11 @@ type FreeswitchAgentJsonCfg struct {
 
 // Represents one connection instance towards FreeSWITCH
 type FsConnJsonCfg struct {
-	Address              *string
-	Password             *string
-	Reconnects           *int
-	MaxReconnectInterval *string `json:"max_reconnect_interval"`
-	Alias                *string
+	Address                *string
+	Password               *string
+	Reconnects             *int
+	Max_reconnect_interval *string
+	Alias                  *string
 }
 
 type RPCConnsJson struct {
@@ -402,29 +402,29 @@ type RPCConnsJson struct {
 
 // Represents one connection instance towards a rater/cdrs server
 type RemoteHostJson struct {
-	Id                   *string
-	Address              *string
-	Transport            *string
-	Synchronous          *bool
-	Tls                  *bool
-	Key_path             *string
-	Cert_path            *string
-	Ca_path              *string
-	Conn_attempts        *int
-	Reconnects           *int
-	MaxReconnectInterval *string `json:"max_reconnect_interval"`
-	Connect_timeout      *string
-	Reply_timeout        *string
+	Id                     *string
+	Address                *string
+	Transport              *string
+	Synchronous            *bool
+	Tls                    *bool
+	Key_path               *string
+	Cert_path              *string
+	Ca_path                *string
+	Conn_attempts          *int
+	Reconnects             *int
+	Max_reconnect_interval *string
+	Connect_timeout        *string
+	Reply_timeout          *string
 }
 
 type AstConnJsonCfg struct {
-	Alias                *string
-	Address              *string
-	User                 *string
-	Password             *string
-	Connect_attempts     *int
-	Reconnects           *int
-	MaxReconnectInterval *string `json:"max_reconnect_interval"`
+	Alias                  *string
+	Address                *string
+	User                   *string
+	Password               *string
+	Connect_attempts       *int
+	Reconnects             *int
+	Max_reconnect_interval *string
 }
 
 type AsteriskAgentJsonCfg struct {
@@ -458,10 +458,10 @@ type KamAgentJsonCfg struct {
 
 // Represents one connection instance towards Kamailio
 type KamConnJsonCfg struct {
-	Alias                *string
-	Address              *string
-	Reconnects           *int
-	MaxReconnectInterval *string `json:"max_reconnect_interval"`
+	Alias                  *string
+	Address                *string
+	Reconnects             *int
+	Max_reconnect_interval *string
 }
 
 // Represents one connection instance towards OpenSIPS
