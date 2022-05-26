@@ -209,7 +209,7 @@ func testRAitAuthPAPSuccess(t *testing.T) {
 		t.Error(err)
 	}
 	// encode the password as required so we can decode it properly
-	authReq.AVPs[1].RawValue = radigo.EncodeUserPassWord([]byte("CGRateSPassword1"), []byte("CGRateS.org"), authReq.Authenticator[:])
+	authReq.AVPs[1].RawValue = radigo.EncodeUserPassword([]byte("CGRateSPassword1"), []byte("CGRateS.org"), authReq.Authenticator[:])
 	if err := authReq.AddAVPWithName("Service-Type", "SIP-Caller-AVPs", ""); err != nil {
 		t.Error(err)
 	}
@@ -254,7 +254,7 @@ func testRAitAuthPAPFail(t *testing.T) {
 		t.Error(err)
 	}
 	// encode the password as required so we can decode it properly
-	authReq.AVPs[1].RawValue = radigo.EncodeUserPassWord([]byte("CGRateSPassword2"), []byte("CGRateS.org"), authReq.Authenticator[:])
+	authReq.AVPs[1].RawValue = radigo.EncodeUserPassword([]byte("CGRateSPassword2"), []byte("CGRateS.org"), authReq.Authenticator[:])
 	if err := authReq.AddAVPWithName("Service-Type", "SIP-Caller-AVPs", ""); err != nil {
 		t.Error(err)
 	}
@@ -546,7 +546,7 @@ func testRAitChallengeResponse(t *testing.T) {
 		t.Error(err)
 	}
 	// encode the password as required so we can decode it properly
-	authReq.AVPs[1].RawValue = radigo.EncodeUserPassWord([]byte("CGRateSPassword1"), []byte("CGRateS.org"), authReq.Authenticator[:])
+	authReq.AVPs[1].RawValue = radigo.EncodeUserPassword([]byte("CGRateSPassword1"), []byte("CGRateS.org"), authReq.Authenticator[:])
 	if err := authReq.AddAVPWithName("Service-Type", "SIP-Caller-AVPs", ""); err != nil {
 		t.Error(err)
 	}

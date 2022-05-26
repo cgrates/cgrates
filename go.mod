@@ -6,24 +6,24 @@ go 1.18
 
 // replace github.com/cgrates/rpcclient => ../rpcclient
 
-replace github.com/cgrates/fsock => ../fsock
+// replace github.com/cgrates/fsock => ../fsock
 
-replace github.com/cgrates/kamevapi => ../kamevapi
+// replace github.com/cgrates/kamevapi => ../kamevapi
 
-replace github.com/cgrates/aringo => ../aringo
+// replace github.com/cgrates/aringo => ../aringo
 
 require (
 	github.com/Azure/go-amqp v0.15.0
 	github.com/antchfx/xmlquery v1.3.3
 	github.com/aws/aws-sdk-go v1.36.24
 	github.com/blevesearch/bleve v1.0.14
-	github.com/cenkalti/rpc2 v0.0.0-20210220005819-4a29bc83afe1
-	github.com/cgrates/aringo v0.0.0-20201113143849-3b299e4e636d
-	github.com/cgrates/baningo v0.0.0-20201105145354-6e3173f6a91b
-	github.com/cgrates/fsock v0.0.0-20191107070144-e7a331109df7
-	github.com/cgrates/kamevapi v0.0.0-20191001125829-7dbc3ad58817
-	github.com/cgrates/ltcache v0.0.0-20181016092649-92fb7fa77cca
-	github.com/cgrates/radigo v0.0.0-20201113143731-162035428d72
+	github.com/cenkalti/rpc2 v0.0.0-20210604223624-c1acbc6ec984
+	github.com/cgrates/aringo v0.0.0-20220525160735-b5990313d99e
+	github.com/cgrates/baningo v0.0.0-20210413080722-004ffd5e429f
+	github.com/cgrates/fsock v0.0.0-20220525160530-35a725c0140f
+	github.com/cgrates/kamevapi v0.0.0-20220525160402-5b8036487a6c
+	github.com/cgrates/ltcache v0.0.0-20210405185848-da943e80c1ab
+	github.com/cgrates/radigo v0.0.0-20210902121842-ea2f9a730627
 	github.com/cgrates/rpcclient v0.0.0-20210218104959-cc39fa26221e
 	github.com/cgrates/sipingo v1.0.1-0.20200514112313-699ebc1cdb8e
 	github.com/cgrates/ugocodec v0.0.0-20201023092048-df93d0123f60
@@ -39,13 +39,13 @@ require (
 	github.com/miekg/dns v1.1.44-0.20210927135021-1630ffe2ca11
 	github.com/mitchellh/mapstructure v1.4.0
 	github.com/nats-io/nats.go v1.11.0
-	github.com/nyaruka/phonenumbers v1.0.73
+	github.com/nyaruka/phonenumbers v1.0.75
 	github.com/peterh/liner v1.2.1
 	github.com/segmentio/kafka-go v0.4.8
 	github.com/streadway/amqp v1.0.0
 	go.mongodb.org/mongo-driver v1.4.4
-	golang.org/x/crypto v0.0.0-20210921155107-089bfa567519
-	golang.org/x/net v0.0.0-20211015210444-4f30a5c0130f
+	golang.org/x/crypto v0.0.0-20220525230936-793ad666bf5e
+	golang.org/x/net v0.0.0-20220524220425-1d687d428aca
 	golang.org/x/oauth2 v0.0.0-20201208152858-08078c50e5b5
 	google.golang.org/api v0.36.0
 	gorm.io/driver/mysql v1.0.3
@@ -101,7 +101,6 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/rivo/uniseg v0.2.0 // indirect
 	github.com/steveyen/gtreap v0.1.0 // indirect
-	github.com/stretchr/testify v1.7.0 // indirect
 	github.com/syndtr/goleveldb v1.0.0 // indirect
 	github.com/tinylib/msgp v1.1.5 // indirect
 	github.com/willf/bitset v1.1.11 // indirect
@@ -111,12 +110,12 @@ require (
 	go.opencensus.io v0.22.5 // indirect
 	golang.org/x/mod v0.6.0-dev.0.20220106191415-9b9b3d81d5e3 // indirect
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c // indirect
-	golang.org/x/sys v0.0.0-20211019181941-9d821ace8654 // indirect
+	golang.org/x/sys v0.0.0-20211216021012-1d35b9e2eb4e // indirect
 	golang.org/x/text v0.3.7 // indirect
 	golang.org/x/tools v0.1.10 // indirect
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/genproto v0.0.0-20210111234610-22ae2b108f89 // indirect
 	google.golang.org/grpc v1.34.1 // indirect
-	google.golang.org/protobuf v1.27.1 // indirect
+	google.golang.org/protobuf v1.28.0 // indirect
 )
