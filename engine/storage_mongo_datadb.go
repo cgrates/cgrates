@@ -127,7 +127,7 @@ func TimeDecodeValue1(dc bsoncodec.DecodeContext, vr bsonrw.ValueReader, val ref
 func NewMongoStorage(host, port, db, user, pass, mrshlerStr, storageType string, cdrsIndexes []string,
 	isDataDB bool) (ms *MongoStorage, err error) {
 	url := host
-	if port != "" {
+	if port != "0" {
 		url += ":" + port
 	}
 	if user != "" && pass != "" {
