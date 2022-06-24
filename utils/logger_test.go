@@ -251,7 +251,6 @@ func TestDebugLogger(t *testing.T) {
 		if err := newLogger.Debug("debug_panic"); err != nil {
 			t.Error(err)
 		}
-		newLogger.GetSyslog()
 		expected := "GRateS <id_debug> [DEBUG] debug_panic"
 		if rcv := output.String(); !strings.Contains(rcv, expected) {
 			t.Errorf("Expected %+v, received %+v", expected, rcv)
