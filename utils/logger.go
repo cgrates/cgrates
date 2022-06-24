@@ -54,7 +54,6 @@ func Newlogger(loggertype, id string) (lgr LoggerInterface, err error) {
 type LoggerInterface interface {
 	SetSyslog(log *syslog.Writer)
 	SetLogLevel(level int)
-	GetSyslog() *syslog.Writer
 	Close() error
 	Emerg(m string) error
 	Alert(m string) error
@@ -101,11 +100,6 @@ func (sl *StdLogger) Write(p []byte) (n int, err error) {
 //SetSyslog sets the logger for the server
 func (sl *StdLogger) SetSyslog(l *syslog.Writer) {
 	sl.syslog = l
-}
-
-// GetSyslog returns the logger for the server
-func (sl *StdLogger) GetSyslog() *syslog.Writer {
-	return sl.syslog
 }
 
 // SetLogLevel changes the log level
