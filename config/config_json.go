@@ -27,6 +27,7 @@ import (
 
 const (
 	GeneralJSON         = "general"
+	LoggerJSON          = "logger"
 	CacheJSON           = "caches"
 	ListenJSON          = "listen"
 	HTTPJSON            = "http"
@@ -150,6 +151,7 @@ type Section interface {
 func newSections(cfg *CGRConfig) Sections {
 	return Sections{
 		cfg.generalCfg,
+		cfg.loggerCfg,
 		cfg.rpcConns,
 		cfg.dataDbCfg,
 		cfg.listenCfg,
