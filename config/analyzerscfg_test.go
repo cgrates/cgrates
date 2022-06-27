@@ -186,7 +186,7 @@ func TestDiffAnalyzerSJsonCfg(t *testing.T) {
 func TestAnalyzerSCloneSection(t *testing.T) {
 	anlCfg := &AnalyzerSCfg{
 		Enabled:         true,
-		DBPath:          "/var/spool/cgrates/analyze",
+		DBPath:          "/var/spool/cgrates/analyzers",
 		IndexType:       utils.MetaString,
 		TTL:             3 * time.Minute,
 		CleanupInterval: 30 * time.Minute,

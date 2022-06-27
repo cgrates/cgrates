@@ -264,7 +264,7 @@ func InitConfigFromPath(ctx *context.Context, path, nodeID string, lgLevel int) 
 		cfg.GeneralCfg().NodeID = nodeID
 	}
 	if lgLevel != -1 { // Modify the log level if provided by command arguments
-		cfg.GeneralCfg().LogLevel = lgLevel
+		cfg.LoggerCfg().Level = lgLevel
 	}
 	if utils.ConcurrentReqsLimit != 0 { // used as shared variable
 		cfg.CoreSCfg().Caps = utils.ConcurrentReqsLimit
