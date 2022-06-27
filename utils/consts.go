@@ -1729,6 +1729,12 @@ const (
 )
 
 const (
+	LevelCfg      = "level"
+	KafkaConnCfg  = "*kafka_conn"
+	KafkaTopicCfg = "*kafka_topic"
+)
+
+const (
 	TypeCfg                   = "type"
 	SQLMaxOpenConnsCfg        = "sqlMaxOpenConns"
 	SQLMaxIdleConnsCfg        = "sqlMaxIdleConns"

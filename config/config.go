@@ -104,6 +104,9 @@ func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 				ExporterIDs: []*utils.DynamicStringSliceOpt{},
 			},
 		},
+		loggerCfg: &LoggerCfg{
+			Opts: new(LoggerOptsCfg),
+		},
 		dataDbCfg: &DataDbCfg{
 			Items: make(map[string]*ItemOpts),
 			Opts:  &DataDBOpts{},
@@ -320,6 +323,7 @@ type CGRConfig struct {
 	templates    FCTemplates
 
 	generalCfg       *GeneralCfg       // General config
+	loggerCfg        *LoggerCfg        // Logger config
 	dataDbCfg        *DataDbCfg        // Database config
 	tlsCfg           *TLSCfg           // TLS config
 	cacheCfg         *CacheCfg         // Cache config
@@ -601,6 +605,13 @@ func (cfg *CGRConfig) GeneralCfg() *GeneralCfg {
 	cfg.lks[GeneralJSON].Lock()
 	defer cfg.lks[GeneralJSON].Unlock()
 	return cfg.generalCfg
+}
+
+// LoggerCfg returns the General config section
+func (cfg *CGRConfig) LoggerCfg() *LoggerCfg {
+	cfg.lks[LoggerJSON].Lock()
+	defer cfg.lks[LoggerJSON].Unlock()
+	return cfg.loggerCfg
 }
 
 // TLSCfg returns the config for Tls
@@ -998,6 +1009,7 @@ func (cfg *CGRConfig) Clone() (cln *CGRConfig) {
 		rpcConns:         cfg.rpcConns.Clone(),
 		templates:        cfg.templates.Clone(),
 		generalCfg:       cfg.generalCfg.Clone(),
+		loggerCfg:        cfg.loggerCfg.Clone(),
 		dataDbCfg:        cfg.dataDbCfg.Clone(),
 		tlsCfg:           cfg.tlsCfg.Clone(),
 		cacheCfg:         cfg.cacheCfg.Clone(),

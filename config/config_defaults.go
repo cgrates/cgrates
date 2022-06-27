@@ -69,6 +69,15 @@ const CGRATES_CFG_JSON = `
 	},	
 },
 
+"logger": {
+	"type": "*syslog",        // controls the destination of logs <*syslog|*stdout|*kafka>
+	"level": 6,               // system level precision for floats 
+	"opts": {
+		"*kafka_conn": "",    // the connection trough kafka
+		"*kafka_topic": "",   // the topic from where the events are exported
+		"*attempts": 1,        // number of attempts of connecting
+	},
+},
 
 "cores": {
 	"caps": 0,							// maximum concurrent request allowed ( 0 to disabled )
