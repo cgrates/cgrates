@@ -27,21 +27,23 @@ import (
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/segmentio/kafka-go"
 )
 
 func TestLoggerNewLoggerExport(t *testing.T) {
-	eesConn := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs)
 	cfg := config.NewDefaultCGRConfig()
-	cfg.CoreSCfg().EEsConns = []string{eesConn}
-	cM := NewConnManager(cfg)
 	exp := &ExportLogger{
-		connMgr:  cM,
-		eesConns: []string{eesConn},
 		logLevel: 7,
 		nodeID:   "123",
 		tenant:   "cgrates.org",
+		loggOpts: cfg.LoggerCfg().Opts,
+		writer: &kafka.Writer{
+			Addr:        kafka.TCP(cfg.LoggerCfg().Opts.KafkaConn),
+			Topic:       cfg.LoggerCfg().Opts.KafkaTopic,
+			MaxAttempts: cfg.LoggerCfg().Opts.Attempts,
+		},
 	}
-	if rcv, err := NewLogger(utils.MetaEEs, "cgrates.org", "123", 7, cM, []string{eesConn}); err != nil {
+	if rcv, err := NewLogger(utils.MetaEEs, "cgrates.org", "123", nil, nil); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcv.(*ExportLogger), exp) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", exp, rcv)
@@ -50,26 +52,26 @@ func TestLoggerNewLoggerExport(t *testing.T) {
 
 func TestLoggerNewLoggerDefault(t *testing.T) {
 	experr := `unsupported logger: <invalid>`
-	if _, err := NewLogger("invalid", "cgrates.org", "123", 7, nil, nil); err == nil ||
+	if _, err := NewLogger("invalid", "cgrates.org", "123", nil, nil); err == nil ||
 		err.Error() != experr {
 		t.Errorf("expected: <%s>, \nreceived: <%s>", experr, err)
 	}
 }
 
 func TestLoggerNewExportLogger(t *testing.T) {
-	eesConn := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs)
 	cfg := config.NewDefaultCGRConfig()
-	cfg.CoreSCfg().EEsConns = []string{eesConn}
-	cM := NewConnManager(cfg)
 	exp := &ExportLogger{
-		connMgr:  cM,
-		eesConns: []string{eesConn},
 		logLevel: 7,
 		nodeID:   "123",
 		tenant:   "cgrates.org",
+		loggOpts: cfg.LoggerCfg().Opts,
+		writer: &kafka.Writer{
+			Addr:        kafka.TCP(cfg.LoggerCfg().Opts.KafkaConn),
+			Topic:       cfg.LoggerCfg().Opts.KafkaTopic,
+			MaxAttempts: cfg.LoggerCfg().Opts.Attempts,
+		},
 	}
-	if rcv := NewExportLogger("123", "cgrates.org", 7, cM,
-		[]string{eesConn}); !reflect.DeepEqual(rcv, exp) {
+	if rcv := NewExportLogger("123", "cgrates.org", 7, cfg.LoggerCfg().Opts, nil); !reflect.DeepEqual(rcv, exp) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", exp, rcv)
 	}
 }

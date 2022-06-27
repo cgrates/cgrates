@@ -434,6 +434,7 @@ const (
 	Meta        = "*"
 	MetaSysLog  = "*syslog"
 	MetaStdLog  = "*stdout"
+	MetaKafka   = "*kafka"
 	EventSource = "EventSource"
 	AccountID   = "AccountID"
 	AccountIDs  = "AccountIDs"

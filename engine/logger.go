@@ -19,60 +19,94 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"bytes"
+	"encoding/json"
+	"fmt"
 	"log/syslog"
 	"time"
 
 	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/segmentio/kafka-go"
 )
 
-func NewLogger(loggerType, tenant, nodeID string, level int, connMgr *ConnManager,
-	eesConns []string) (utils.LoggerInterface, error) {
+func NewLogger(loggerType, tenant, nodeID string, loggCfg *config.LoggerCfg, ctx *context.Context) (utils.LoggerInterface, error) {
 	switch loggerType {
-	case utils.MetaEEs:
-		return NewExportLogger(nodeID, tenant, level, connMgr, eesConns), nil
+	case utils.MetaKafka:
+		return NewExportLogger(nodeID, tenant, loggCfg.Level, loggCfg.Opts, ctx), nil
 	default:
-		return utils.NewLogger(loggerType, nodeID, level)
+		return utils.NewLogger(loggerType, nodeID, loggCfg.Level)
 	}
 }
 
 // Logs to EEs
 type ExportLogger struct {
-	connMgr  *ConnManager
-	eesConns []string
 	logLevel int
+	loggOpts *config.LoggerOptsCfg
+	writer   *kafka.Writer
+	ctx      *context.Context
 	nodeID   string
 	tenant   string
 }
 
-func NewExportLogger(nodeID, tenant string, level int, connMgr *ConnManager,
-	eesConns []string) (el *ExportLogger) {
+func NewExportLogger(nodeID, tenant string, level int, opts *config.LoggerOptsCfg, ctx *context.Context) (el *ExportLogger) {
 	el = &ExportLogger{
-		connMgr:  connMgr,
-		eesConns: eesConns,
 		logLevel: level,
+		loggOpts: opts,
 		nodeID:   nodeID,
 		tenant:   tenant,
+		writer: &kafka.Writer{
+			Addr:        kafka.TCP(opts.KafkaConn),
+			Topic:       opts.KafkaTopic,
+			MaxAttempts: opts.Attempts,
+		},
+		ctx: ctx,
 	}
 	return
 }
 
-func (el *ExportLogger) Close() (_ error) {
+func (el *ExportLogger) Close() (err error) {
+	if el.writer != nil {
+		err = el.writer.Close()
+		el.writer = nil
+	}
 	return
 }
 
-func (el *ExportLogger) call(m string, level int) error {
-	timestamp := time.Now()
-	var reply map[string]map[string]interface{}
-	return el.connMgr.Call(context.Background(), el.eesConns, utils.EeSv1ProcessEvent, &utils.CGREventWithEeIDs{
-		CGREvent: &utils.CGREvent{
-			Tenant: el.tenant,
-			Event: map[string]interface{}{
-				utils.NodeID: el.nodeID,
-				"Message":    m,
-				"Severity":   level,
-				"Timestamp":  timestamp.Format("2006-01-02 15:04:05"),
-			}}}, &reply)
+func (el *ExportLogger) call(m string, level int) (err error) {
+	eventExport := &utils.CGREvent{
+		Tenant: el.tenant,
+		Event: map[string]interface{}{
+			utils.NodeID: el.nodeID,
+			"Message":    m,
+			"Severity":   level,
+			"Timestamp":  time.Now().Format("2006-01-02 15:04:05"),
+		},
+	}
+	// event will be exported through kafka as json format
+	var content []byte
+	if content, err = getContent(eventExport); err != nil {
+		return err
+	}
+	fmt.Println("content: %v", string(content))
+	if err = el.writer.WriteMessages(el.ctx, kafka.Message{
+		Key:   []byte("KafkaExport" + utils.PipeSep + el.loggOpts.KafkaTopic),
+		Value: content,
+	}); err != nil {
+
+	}
+	return
+}
+
+func getContent(event *utils.CGREvent) (content []byte, err error) {
+	buf := &bytes.Buffer{}
+	enc := json.NewEncoder(buf)
+	enc.SetEscapeHTML(false)
+	if err = enc.Encode(event); err != nil {
+		return
+	}
+	return buf.Bytes(), err
 }
 
 func (el *ExportLogger) Write(p []byte) (n int, err error) {
