@@ -36,7 +36,7 @@ type FsConnCfg struct {
 
 func (fs *FsConnCfg) loadFromJSONCfg(jsnCfg *FsConnJsonCfg) (err error) {
 	if jsnCfg == nil {
-		return nil
+		return
 	}
 	if jsnCfg.Address != nil {
 		fs.Address = *jsnCfg.Address
@@ -57,7 +57,7 @@ func (fs *FsConnCfg) loadFromJSONCfg(jsnCfg *FsConnJsonCfg) (err error) {
 		fs.Alias = *jsnCfg.Alias
 	}
 
-	return nil
+	return
 }
 
 // AsMapInterface returns the config as a map[string]interface{}
