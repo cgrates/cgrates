@@ -663,13 +663,14 @@ func TestLoadDispatcherHosts(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "ALL",
 		Conn: &utils.TPDispatcherHostConn{
-			Address:         "127.0.0.1:6012",
-			Transport:       utils.MetaJSON,
-			ConnectAttempts: 1,
-			Reconnects:      3,
-			ConnectTimeout:  1 * time.Minute,
-			ReplyTimeout:    2 * time.Minute,
-			TLS:             false,
+			Address:              "127.0.0.1:6012",
+			Transport:            utils.MetaJSON,
+			ConnectAttempts:      1,
+			Reconnects:           3,
+			MaxReconnectInterval: 5 * time.Minute,
+			ConnectTimeout:       1 * time.Minute,
+			ReplyTimeout:         2 * time.Minute,
+			TLS:                  false,
 		},
 	}
 

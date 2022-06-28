@@ -276,21 +276,22 @@ func (DispatcherProfileMdl) TableName() string {
 }
 
 type DispatcherHostMdl struct {
-	PK                uint   `gorm:"primary_key"`
-	Tpid              string //
-	Tenant            string `index:"0" re:""`
-	ID                string `index:"1" re:""`
-	Address           string `index:"2" re:""`
-	Transport         string `index:"3" re:""`
-	ConnectAttempts   int    `index:"4" re:""`
-	Reconnects        int    `index:"5" re:""`
-	ConnectTimeout    string `index:"6" re:""`
-	ReplyTimeout      string `index:"7" re:""`
-	TLS               bool   `index:"8" re:""`
-	ClientKey         string `index:"9" re:""`
-	ClientCertificate string `index:"10" re:""`
-	CaCertificate     string `index:"11" re:""`
-	CreatedAt         time.Time
+	PK                   uint   `gorm:"primary_key"`
+	Tpid                 string //
+	Tenant               string `index:"0" re:""`
+	ID                   string `index:"1" re:""`
+	Address              string `index:"2" re:""`
+	Transport            string `index:"3" re:""`
+	ConnectAttempts      int    `index:"4" re:""`
+	Reconnects           int    `index:"5" re:""`
+	MaxReconnectInterval string `index:"6" re:""`
+	ConnectTimeout       string `index:"7" re:""`
+	ReplyTimeout         string `index:"8" re:""`
+	TLS                  bool   `index:"9" re:""`
+	ClientKey            string `index:"10" re:""`
+	ClientCertificate    string `index:"11" re:""`
+	CaCertificate        string `index:"12" re:""`
+	CreatedAt            time.Time
 }
 
 func (DispatcherHostMdl) TableName() string {

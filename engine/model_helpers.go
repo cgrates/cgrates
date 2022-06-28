@@ -1713,6 +1713,11 @@ func (tps DispatcherHostMdls) AsTPDispatcherHosts() (result []*utils.TPDispatche
 				CaCertificate:     tp.CaCertificate,
 			},
 		}
+		if tp.MaxReconnectInterval != utils.EmptyString {
+			if hostsMap[tntId].Conn.MaxReconnectInterval, err = utils.ParseDurationWithNanosecs(tp.MaxReconnectInterval); err != nil {
+				return nil, err
+			}
+		}
 		if tp.ConnectTimeout != utils.EmptyString {
 			if hostsMap[tntId].Conn.ConnectTimeout, err = utils.ParseDurationWithNanosecs(tp.ConnectTimeout); err != nil {
 				return nil, err
@@ -1736,19 +1741,20 @@ func APItoModelTPDispatcherHost(tpDPH *utils.TPDispatcherHost) (mdls *Dispatcher
 		return
 	}
 	return &DispatcherHostMdl{
-		Tpid:              tpDPH.TPid,
-		Tenant:            tpDPH.Tenant,
-		ID:                tpDPH.ID,
-		Address:           tpDPH.Conn.Address,
-		Transport:         tpDPH.Conn.Transport,
-		ConnectAttempts:   tpDPH.Conn.ConnectAttempts,
-		Reconnects:        tpDPH.Conn.Reconnects,
-		ConnectTimeout:    tpDPH.Conn.ConnectTimeout.String(),
-		ReplyTimeout:      tpDPH.Conn.ReplyTimeout.String(),
-		TLS:               tpDPH.Conn.TLS,
-		ClientKey:         tpDPH.Conn.ClientKey,
-		ClientCertificate: tpDPH.Conn.ClientCertificate,
-		CaCertificate:     tpDPH.Conn.CaCertificate,
+		Tpid:                 tpDPH.TPid,
+		Tenant:               tpDPH.Tenant,
+		ID:                   tpDPH.ID,
+		Address:              tpDPH.Conn.Address,
+		Transport:            tpDPH.Conn.Transport,
+		ConnectAttempts:      tpDPH.Conn.ConnectAttempts,
+		Reconnects:           tpDPH.Conn.Reconnects,
+		MaxReconnectInterval: tpDPH.Conn.MaxReconnectInterval.String(),
+		ConnectTimeout:       tpDPH.Conn.ConnectTimeout.String(),
+		ReplyTimeout:         tpDPH.Conn.ReplyTimeout.String(),
+		TLS:                  tpDPH.Conn.TLS,
+		ClientKey:            tpDPH.Conn.ClientKey,
+		ClientCertificate:    tpDPH.Conn.ClientCertificate,
+		CaCertificate:        tpDPH.Conn.CaCertificate,
 	}
 }
 
@@ -1759,17 +1765,18 @@ func APItoDispatcherHost(tpDPH *utils.TPDispatcherHost) (dpp *DispatcherHost) {
 	return &DispatcherHost{
 		Tenant: tpDPH.Tenant,
 		RemoteHost: &config.RemoteHost{
-			ID:                tpDPH.ID,
-			Address:           tpDPH.Conn.Address,
-			Transport:         tpDPH.Conn.Transport,
-			ConnectAttempts:   tpDPH.Conn.ConnectAttempts,
-			Reconnects:        tpDPH.Conn.Reconnects,
-			ConnectTimeout:    tpDPH.Conn.ConnectTimeout,
-			ReplyTimeout:      tpDPH.Conn.ReplyTimeout,
-			TLS:               tpDPH.Conn.TLS,
-			ClientKey:         tpDPH.Conn.ClientKey,
-			ClientCertificate: tpDPH.Conn.ClientCertificate,
-			CaCertificate:     tpDPH.Conn.CaCertificate,
+			ID:                   tpDPH.ID,
+			Address:              tpDPH.Conn.Address,
+			Transport:            tpDPH.Conn.Transport,
+			ConnectAttempts:      tpDPH.Conn.ConnectAttempts,
+			Reconnects:           tpDPH.Conn.Reconnects,
+			MaxReconnectInterval: tpDPH.Conn.MaxReconnectInterval,
+			ConnectTimeout:       tpDPH.Conn.ConnectTimeout,
+			ReplyTimeout:         tpDPH.Conn.ReplyTimeout,
+			TLS:                  tpDPH.Conn.TLS,
+			ClientKey:            tpDPH.Conn.ClientKey,
+			ClientCertificate:    tpDPH.Conn.ClientCertificate,
+			CaCertificate:        tpDPH.Conn.CaCertificate,
 		},
 	}
 }
@@ -1779,16 +1786,17 @@ func DispatcherHostToAPI(dph *DispatcherHost) (tpDPH *utils.TPDispatcherHost) {
 		Tenant: dph.Tenant,
 		ID:     dph.ID,
 		Conn: &utils.TPDispatcherHostConn{
-			Address:           dph.Address,
-			Transport:         dph.Transport,
-			ConnectAttempts:   dph.ConnectAttempts,
-			Reconnects:        dph.Reconnects,
-			ConnectTimeout:    dph.ConnectTimeout,
-			ReplyTimeout:      dph.ReplyTimeout,
-			TLS:               dph.TLS,
-			ClientKey:         dph.ClientKey,
-			ClientCertificate: dph.ClientCertificate,
-			CaCertificate:     dph.CaCertificate,
+			Address:              dph.Address,
+			Transport:            dph.Transport,
+			ConnectAttempts:      dph.ConnectAttempts,
+			Reconnects:           dph.Reconnects,
+			MaxReconnectInterval: dph.MaxReconnectInterval,
+			ConnectTimeout:       dph.ConnectTimeout,
+			ReplyTimeout:         dph.ReplyTimeout,
+			TLS:                  dph.TLS,
+			ClientKey:            dph.ClientKey,
+			ClientCertificate:    dph.ClientCertificate,
+			CaCertificate:        dph.CaCertificate,
 		},
 	}
 }
