@@ -486,6 +486,16 @@ func ToJSON(v interface{}) string {
 	return string(b)
 }
 
+func ToUnescapedJSON(value interface{}) (bts []byte, err error) {
+	buf := &bytes.Buffer{}
+	enc := json.NewEncoder(buf)
+	enc.SetEscapeHTML(false)
+	if err = enc.Encode(value); err != nil {
+		return
+	}
+	return buf.Bytes(), err
+}
+
 // Used as generic function logic for various fields
 
 // Attributes

@@ -70,12 +70,13 @@ const CGRATES_CFG_JSON = `
 },
 
 "logger": {
-	"type": "*syslog",        // controls the destination of logs <*syslog|*stdout|*kafka>
-	"level": 6,               // system level precision for floats 
+	"type": "*syslog",                                            // controls the destination of logs <*syslog|*stdout|*kafka>
+	"level": 6,                                                   // system level precision for floats 
 	"opts": {
-		"*kafka_conn": "",    // the connection trough kafka
-		"*kafka_topic": "",   // the topic from where the events are exported
-		"*attempts": 1,        // number of attempts of connecting
+		"kafka_conn": "",                                        // the connection trough kafka
+		"kafka_topic": "",                                       // the topic from where the events are exported
+		"attempts": 1,                                           // number of attempts of connecting
+		"failed_posts_dir": "/var/spool/cgrates/failed_posts"    // path where fail logs are exported
 	},
 },
 
