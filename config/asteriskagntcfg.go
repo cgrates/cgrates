@@ -75,7 +75,7 @@ func (aConnCfg AsteriskConnCfg) AsMapInterface() map[string]interface{} {
 		utils.Password:                aConnCfg.Password,
 		utils.ConnectAttemptsCfg:      aConnCfg.ConnectAttempts,
 		utils.ReconnectsCfg:           aConnCfg.Reconnects,
-		utils.MaxReconnectIntervalCfg: aConnCfg.MaxReconnectInterval,
+		utils.MaxReconnectIntervalCfg: aConnCfg.MaxReconnectInterval.String(),
 	}
 }
 

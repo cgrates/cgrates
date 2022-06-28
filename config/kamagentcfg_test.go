@@ -93,7 +93,7 @@ func TestKamAgentCfgAsMapInterface(t *testing.T) {
 			"create_cdr": true,
 			"timezone": "UTC",
 			"evapi_conns":[
-				{"address": "127.0.0.1:8448", "reconnects": 5, "alias": ""}
+				{"address": "127.0.0.1:8448", "reconnects": 5, "max_reconnect_interval": "5m", "alias": ""}
 			],
 		},
 	}`
@@ -103,7 +103,11 @@ func TestKamAgentCfgAsMapInterface(t *testing.T) {
 		utils.CreateCdrCfg:     true,
 		utils.TimezoneCfg:      "UTC",
 		utils.EvapiConnsCfg: []map[string]interface{}{
-			{utils.AddressCfg: "127.0.0.1:8448", utils.ReconnectsCfg: 5, utils.AliasCfg: ""},
+			{
+				utils.AddressCfg:              "127.0.0.1:8448",
+				utils.ReconnectsCfg:           5,
+				utils.MaxReconnectIntervalCfg: "5m0s",
+				utils.AliasCfg:                ""},
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
@@ -123,7 +127,12 @@ func TestKamAgentCfgAsMapInterface1(t *testing.T) {
 		utils.CreateCdrCfg:     false,
 		utils.TimezoneCfg:      "",
 		utils.EvapiConnsCfg: []map[string]interface{}{
-			{utils.AddressCfg: "127.0.0.1:8448", utils.ReconnectsCfg: 5, utils.AliasCfg: ""},
+			{
+				utils.AddressCfg:              "127.0.0.1:8448",
+				utils.ReconnectsCfg:           5,
+				utils.MaxReconnectIntervalCfg: "0s",
+				utils.AliasCfg:                "",
+			},
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {

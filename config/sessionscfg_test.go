@@ -795,7 +795,13 @@ func TestFsAgentCfgAsMapInterfaceCase1(t *testing.T) {
 		utils.EmptyBalanceAnnFileCfg: "",
 		utils.MaxWaitConnectionCfg:   "2s",
 		utils.EventSocketConnsCfg: []map[string]interface{}{
-			{utils.AddressCfg: "127.0.0.1:8021", utils.Password: "ClueCon", utils.ReconnectsCfg: 5, utils.AliasCfg: "127.0.0.1:8021"},
+			{
+				utils.AddressCfg:              "127.0.0.1:8021",
+				utils.Password:                "ClueCon",
+				utils.ReconnectsCfg:           5,
+				utils.MaxReconnectIntervalCfg: "0s",
+				utils.AliasCfg:                "127.0.0.1:8021",
+			},
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
@@ -814,7 +820,7 @@ func TestFsAgentCfgAsMapInterfaceCase2(t *testing.T) {
 	      "create_cdr": true,
 	      "max_wait_connection": "7s",			
 	      "event_socket_conns":[					
-		      {"address": "127.0.0.1:8000", "password": "ClueCon123", "reconnects": 8, "alias": "127.0.0.1:8000"}
+		      {"address": "127.0.0.1:8000", "password": "ClueCon123", "reconnects": 8, "max_reconnect_interval": "5m", "alias": "127.0.0.1:8000"}
 	],},
 }`
 	eMap := map[string]interface{}{
@@ -828,7 +834,13 @@ func TestFsAgentCfgAsMapInterfaceCase2(t *testing.T) {
 		utils.EmptyBalanceAnnFileCfg: "",
 		utils.MaxWaitConnectionCfg:   "7s",
 		utils.EventSocketConnsCfg: []map[string]interface{}{
-			{utils.AddressCfg: "127.0.0.1:8000", utils.Password: "ClueCon123", utils.ReconnectsCfg: 8, utils.AliasCfg: "127.0.0.1:8000"},
+			{
+				utils.AddressCfg:              "127.0.0.1:8000",
+				utils.Password:                "ClueCon123",
+				utils.ReconnectsCfg:           8,
+				utils.MaxReconnectIntervalCfg: "5m0s",
+				utils.AliasCfg:                "127.0.0.1:8000",
+			},
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
@@ -857,7 +869,13 @@ func TestFsAgentCfgAsMapInterfaceCase3(t *testing.T) {
 		utils.EmptyBalanceAnnFileCfg: "",
 		utils.MaxWaitConnectionCfg:   "",
 		utils.EventSocketConnsCfg: []map[string]interface{}{
-			{utils.AddressCfg: "127.0.0.1:8021", utils.Password: "ClueCon", utils.ReconnectsCfg: 5, utils.AliasCfg: "127.0.0.1:8021"},
+			{
+				utils.AddressCfg:              "127.0.0.1:8021",
+				utils.Password:                "ClueCon",
+				utils.ReconnectsCfg:           5,
+				utils.MaxReconnectIntervalCfg: "0s",
+				utils.AliasCfg:                "127.0.0.1:8021",
+			},
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
@@ -928,12 +946,13 @@ func TestAsteriskAgentCfgloadFromJsonCfg(t *testing.T) {
 		Create_cdr:     utils.BoolPointer(true),
 		Asterisk_conns: &[]*AstConnJsonCfg{
 			{
-				Alias:            utils.StringPointer("127.0.0.1:8448"),
-				Address:          utils.StringPointer("127.0.0.1:8088"),
-				User:             utils.StringPointer(utils.CGRateSLwr),
-				Password:         utils.StringPointer("CGRateS.org"),
-				Connect_attempts: utils.IntPointer(3),
-				Reconnects:       utils.IntPointer(5),
+				Alias:                  utils.StringPointer("127.0.0.1:8448"),
+				Address:                utils.StringPointer("127.0.0.1:8088"),
+				User:                   utils.StringPointer(utils.CGRateSLwr),
+				Password:               utils.StringPointer("CGRateS.org"),
+				Max_reconnect_interval: utils.StringPointer("5m"),
+				Connect_attempts:       utils.IntPointer(3),
+				Reconnects:             utils.IntPointer(5),
 			},
 		},
 	}
@@ -942,12 +961,13 @@ func TestAsteriskAgentCfgloadFromJsonCfg(t *testing.T) {
 		SessionSConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)},
 		CreateCDR:     true,
 		AsteriskConns: []*AsteriskConnCfg{{
-			Alias:           "127.0.0.1:8448",
-			Address:         "127.0.0.1:8088",
-			User:            "cgrates",
-			Password:        "CGRateS.org",
-			ConnectAttempts: 3,
-			Reconnects:      5,
+			Alias:                "127.0.0.1:8448",
+			Address:              "127.0.0.1:8088",
+			User:                 "cgrates",
+			Password:             "CGRateS.org",
+			ConnectAttempts:      3,
+			Reconnects:           5,
+			MaxReconnectInterval: 5 * time.Minute,
 		}},
 	}
 	jsonCfg := NewDefaultCGRConfig()
@@ -969,7 +989,15 @@ func TestAsteriskAgentCfgAsMapInterface(t *testing.T) {
 		utils.SessionSConnsCfg: []string{utils.MetaInternal},
 		utils.CreateCdrCfg:     false,
 		utils.AsteriskConnsCfg: []map[string]interface{}{
-			{utils.AliasCfg: "", utils.AddressCfg: "127.0.0.1:8088", utils.UserCf: "cgrates", utils.Password: "CGRateS.org", utils.ConnectAttemptsCfg: 3, utils.ReconnectsCfg: 5},
+			{
+				utils.AliasCfg:                "",
+				utils.AddressCfg:              "127.0.0.1:8088",
+				utils.UserCf:                  "cgrates",
+				utils.Password:                "CGRateS.org",
+				utils.ConnectAttemptsCfg:      3,
+				utils.ReconnectsCfg:           5,
+				utils.MaxReconnectIntervalCfg: "0s",
+			},
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
@@ -986,7 +1014,7 @@ func TestAsteriskAgentCfgAsMapInterface1(t *testing.T) {
 		"sessions_conns": ["*birpc_internal", "*conn1","*conn2"],
 		"create_cdr": true,
 		"asterisk_conns":[
-			{"address": "127.0.0.1:8089","connect_attempts": 5,"reconnects": 8}
+			{"address": "127.0.0.1:8089","connect_attempts": 5,"reconnects": 8, "max_reconnect_interval": "5m"}
 		],
 	},
 }`
@@ -995,7 +1023,15 @@ func TestAsteriskAgentCfgAsMapInterface1(t *testing.T) {
 		utils.SessionSConnsCfg: []string{rpcclient.BiRPCInternal, "*conn1", "*conn2"},
 		utils.CreateCdrCfg:     true,
 		utils.AsteriskConnsCfg: []map[string]interface{}{
-			{utils.AliasCfg: "", utils.AddressCfg: "127.0.0.1:8089", utils.UserCf: "cgrates", utils.Password: "CGRateS.org", utils.ConnectAttemptsCfg: 5, utils.ReconnectsCfg: 8},
+			{
+				utils.AliasCfg:                "",
+				utils.AddressCfg:              "127.0.0.1:8089",
+				utils.UserCf:                  "cgrates",
+				utils.Password:                "CGRateS.org",
+				utils.ConnectAttemptsCfg:      5,
+				utils.ReconnectsCfg:           8,
+				utils.MaxReconnectIntervalCfg: "5m0s",
+			},
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
