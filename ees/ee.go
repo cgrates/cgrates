@@ -31,13 +31,14 @@ import (
 )
 
 type EventExporter interface {
-	Cfg() *config.EventExporterCfg                           // return the config
-	Connect() error                                          // called before exporting an event to make sure it is connected
-	ExportEvent(*context.Context, interface{}, string) error // called on each event to be exported
-	Close() error                                            // called when the exporter needs to terminate
-	GetMetrics() *utils.SafeMapStorage                       // called to get metrics
+	Cfg() *config.EventExporterCfg                                                      // return the config
+	Connect() error                                                                     // called before exporting an event to make sure it is connected
+	ExportEvent(ctx *context.Context, content interface{}, extraData interface{}) error // called on each event to be exported
+	Close() error                                                                       // called when the exporter needs to terminate
+	GetMetrics() *utils.SafeMapStorage                                                  // called to get metrics
 	PrepareMap(*utils.CGREvent) (interface{}, error)
 	PrepareOrderMap(*utils.OrderedNavigableMap) (interface{}, error)
+	ExtraData(*utils.CGREvent) interface{}
 }
 
 // NewEventExporter produces exporters

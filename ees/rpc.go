@@ -67,7 +67,7 @@ func (e *RPCee) Connect() (err error) {
 	return
 }
 
-func (e *RPCee) ExportEvent(ctx *context.Context, args interface{}, _ string) (err error) {
+func (e *RPCee) ExportEvent(ctx *context.Context, args, _ interface{}) (err error) {
 	e.Lock()
 	defer e.Unlock()
 	var rply string
@@ -84,6 +84,7 @@ func (e *RPCee) Close() (err error) {
 func (e *RPCee) GetMetrics() (mp *utils.SafeMapStorage) {
 	return e.dc
 }
+func (e *RPCee) ExtraData(ev *utils.CGREvent) interface{} { return nil }
 
 func (e *RPCee) PrepareMap(mp *utils.CGREvent) (interface{}, error) {
 	for i, v := range e.Cfg().Opts.RPCAPIOpts {

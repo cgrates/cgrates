@@ -78,7 +78,7 @@ func (httpEE *HTTPjsonMapEE) Cfg() *config.EventExporterCfg { return httpEE.cfg 
 
 func (httpEE *HTTPjsonMapEE) Connect() (_ error) { return }
 
-func (httpEE *HTTPjsonMapEE) ExportEvent(ctx *context.Context, content interface{}, _ string) (err error) {
+func (httpEE *HTTPjsonMapEE) ExportEvent(ctx *context.Context, content, _ interface{}) (err error) {
 	httpEE.reqs.get()
 	defer httpEE.reqs.done()
 	pReq := content.(*HTTPPosterRequest)
@@ -93,6 +93,8 @@ func (httpEE *HTTPjsonMapEE) ExportEvent(ctx *context.Context, content interface
 func (httpEE *HTTPjsonMapEE) Close() (_ error) { return }
 
 func (httpEE *HTTPjsonMapEE) GetMetrics() *utils.SafeMapStorage { return httpEE.dc }
+
+func (httpEE *HTTPjsonMapEE) ExtraData(ev *utils.CGREvent) interface{} { return nil }
 
 func (httpEE *HTTPjsonMapEE) PrepareMap(mp *utils.CGREvent) (interface{}, error) {
 	body, err := json.Marshal(mp.Event)

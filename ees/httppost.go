@@ -78,7 +78,7 @@ func (httpPost *HTTPPostEE) Cfg() *config.EventExporterCfg { return httpPost.cfg
 
 func (httpPost *HTTPPostEE) Connect() (_ error) { return }
 
-func (httpPost *HTTPPostEE) ExportEvent(ctx *context.Context, content interface{}, _ string) (err error) {
+func (httpPost *HTTPPostEE) ExportEvent(ctx *context.Context, content, _ interface{}) (err error) {
 	httpPost.reqs.get()
 	defer httpPost.reqs.done()
 	pReq := content.(*HTTPPosterRequest)
@@ -93,6 +93,8 @@ func (httpPost *HTTPPostEE) ExportEvent(ctx *context.Context, content interface{
 func (httpPost *HTTPPostEE) Close() (_ error) { return }
 
 func (httpPost *HTTPPostEE) GetMetrics() *utils.SafeMapStorage { return httpPost.dc }
+
+func (httpPost *HTTPPostEE) ExtraData(ev *utils.CGREvent) interface{} { return nil }
 
 func (httpPost *HTTPPostEE) PrepareMap(mp *utils.CGREvent) (interface{}, error) {
 	urlVals := url.Values{}

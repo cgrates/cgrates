@@ -137,7 +137,7 @@ func (pstr *AMQPee) Connect() (err error) {
 	return
 }
 
-func (pstr *AMQPee) ExportEvent(_ *context.Context, content interface{}, _ string) (err error) {
+func (pstr *AMQPee) ExportEvent(_ *context.Context, content, _ interface{}) (err error) {
 	pstr.reqs.get()
 	pstr.RLock()
 	if pstr.postChan == nil {
@@ -175,3 +175,5 @@ func (pstr *AMQPee) Close() (err error) {
 }
 
 func (pstr *AMQPee) GetMetrics() *utils.SafeMapStorage { return pstr.dc }
+
+func (pstr *AMQPee) ExtraData(*utils.CGREvent) interface{} { return nil }

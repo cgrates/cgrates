@@ -130,7 +130,7 @@ func (pstr *SQSee) Connect() (err error) {
 	return
 }
 
-func (pstr *SQSee) ExportEvent(ctx *context.Context, message interface{}, _ string) (err error) {
+func (pstr *SQSee) ExportEvent(ctx *context.Context, message, _ interface{}) (err error) {
 	pstr.reqs.get()
 	pstr.RLock()
 	_, err = pstr.svc.SendMessageWithContext(ctx,
@@ -147,3 +147,5 @@ func (pstr *SQSee) ExportEvent(ctx *context.Context, message interface{}, _ stri
 func (pstr *SQSee) Close() (_ error) { return }
 
 func (pstr *SQSee) GetMetrics() *utils.SafeMapStorage { return pstr.dc }
+
+func (pstr *SQSee) ExtraData(ev *utils.CGREvent) interface{} { return nil }
