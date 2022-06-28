@@ -47,6 +47,7 @@ const CGRATES_CFG_JSON = `
 	"max_call_duration": "3h",				                // maximum call duration a prepaid call can last
 	"connect_attempts": 5,									// initial server connect attempts
 	"reconnects": -1,										// number of retries in case of connection lost
+	"max_reconnect_interval": "", 							// time to wait in between reconnect attempts
 	"connect_timeout": "1s",								// consider connection unsuccessful on timeout, 0 to disable the feature
 	"reply_timeout": "2s",									// consider connection down for replies taking longer than this value
 	"locking_timeout": "0",									// timeout internal locks to avoid deadlocks
