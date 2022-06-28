@@ -153,7 +153,8 @@ func (dH *DispatcherHost) GetConn(ctx *context.Context, cfg *config.CGRConfig, i
 			cfg.TLSCfg().ClientKey,
 			cfg.TLSCfg().ClientCerificate, cfg.TLSCfg().CaCertificate,
 			cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
-			cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
+			cfg.GeneralCfg().MaxReconnectInterval, cfg.GeneralCfg().ConnectTimeout,
+			cfg.GeneralCfg().ReplyTimeout,
 			iPRCCh, false, nil,
 			utils.EmptyString, utils.EmptyString, nil); err != nil {
 			return
