@@ -27,13 +27,14 @@ import (
 
 // FsConnCfg one connection to FreeSWITCH server
 type FsConnCfg struct {
-	Address    string
-	Password   string
-	Reconnects int
-	Alias      string
+	Address              string
+	Password             string
+	Reconnects           int
+	MaxReconnectInterval time.Duration
+	Alias                string
 }
 
-func (fs *FsConnCfg) loadFromJSONCfg(jsnCfg *FsConnJsonCfg) error {
+func (fs *FsConnCfg) loadFromJSONCfg(jsnCfg *FsConnJsonCfg) (err error) {
 	if jsnCfg == nil {
 		return nil
 	}
@@ -46,6 +47,11 @@ func (fs *FsConnCfg) loadFromJSONCfg(jsnCfg *FsConnJsonCfg) error {
 	if jsnCfg.Reconnects != nil {
 		fs.Reconnects = *jsnCfg.Reconnects
 	}
+	if jsnCfg.Max_reconnect_interval != nil {
+		if fs.MaxReconnectInterval, err = utils.ParseDurationWithNanosecs(*jsnCfg.Max_reconnect_interval); err != nil {
+			return
+		}
+	}
 	fs.Alias = fs.Address
 	if jsnCfg.Alias != nil && *jsnCfg.Alias != "" {
 		fs.Alias = *jsnCfg.Alias
@@ -57,20 +63,22 @@ func (fs *FsConnCfg) loadFromJSONCfg(jsnCfg *FsConnJsonCfg) error {
 // AsMapInterface returns the config as a map[string]interface{}
 func (fs FsConnCfg) AsMapInterface() map[string]interface{} {
 	return map[string]interface{}{
-		utils.AddressCfg:    fs.Address,
-		utils.Password:      fs.Password,
-		utils.ReconnectsCfg: fs.Reconnects,
-		utils.AliasCfg:      fs.Alias,
+		utils.AddressCfg:              fs.Address,
+		utils.Password:                fs.Password,
+		utils.ReconnectsCfg:           fs.Reconnects,
+		utils.MaxReconnectIntervalCfg: fs.MaxReconnectInterval,
+		utils.AliasCfg:                fs.Alias,
 	}
 }
 
 // Clone returns a deep copy of AsteriskAgentCfg
 func (fs FsConnCfg) Clone() *FsConnCfg {
 	return &FsConnCfg{
-		Address:    fs.Address,
-		Password:   fs.Password,
-		Reconnects: fs.Reconnects,
-		Alias:      fs.Alias,
+		Address:              fs.Address,
+		Password:             fs.Password,
+		Reconnects:           fs.Reconnects,
+		MaxReconnectInterval: fs.MaxReconnectInterval,
+		Alias:                fs.Alias,
 	}
 }
 
@@ -216,10 +224,11 @@ type FreeswitchAgentJsonCfg struct {
 
 // Represents one connection instance towards FreeSWITCH
 type FsConnJsonCfg struct {
-	Address    *string
-	Password   *string
-	Reconnects *int
-	Alias      *string
+	Address                *string
+	Password               *string
+	Reconnects             *int
+	Max_reconnect_interval *string
+	Alias                  *string
 }
 
 func diffFsConnJsonCfg(v1, v2 *FsConnCfg) (d *FsConnJsonCfg) {
@@ -232,6 +241,9 @@ func diffFsConnJsonCfg(v1, v2 *FsConnCfg) (d *FsConnJsonCfg) {
 	}
 	if v1.Reconnects != v2.Reconnects {
 		d.Reconnects = utils.IntPointer(v2.Reconnects)
+	}
+	if v1.MaxReconnectInterval != v2.MaxReconnectInterval {
+		d.Max_reconnect_interval = utils.StringPointer(v2.MaxReconnectInterval.String())
 	}
 	if v1.Alias != v2.Alias {
 		d.Alias = utils.StringPointer(v2.Alias)
@@ -247,6 +259,7 @@ func equalsFsConnsJsonCfg(v1, v2 []*FsConnCfg) bool {
 		if v1[i].Address != v2[i].Address ||
 			v1[i].Password != v2[i].Password ||
 			v1[i].Reconnects != v2[i].Reconnects ||
+			v1[i].MaxReconnectInterval != v2[i].MaxReconnectInterval ||
 			v1[i].Alias != v2[i].Alias {
 			return false
 		}
