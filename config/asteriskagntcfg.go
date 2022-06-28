@@ -19,23 +19,26 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"time"
+
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // AsteriskConnCfg the config for a Asterisk connection
 type AsteriskConnCfg struct {
-	Alias           string
-	Address         string
-	User            string
-	Password        string
-	ConnectAttempts int
-	Reconnects      int
+	Alias                string
+	Address              string
+	User                 string
+	Password             string
+	ConnectAttempts      int
+	Reconnects           int
+	MaxReconnectInterval time.Duration
 }
 
-func (aConnCfg *AsteriskConnCfg) loadFromJSONCfg(jsnCfg *AstConnJsonCfg) error {
+func (aConnCfg *AsteriskConnCfg) loadFromJSONCfg(jsnCfg *AstConnJsonCfg) (err error) {
 	if jsnCfg == nil {
-		return nil
+		return
 	}
 	if jsnCfg.Address != nil {
 		aConnCfg.Address = *jsnCfg.Address
@@ -55,30 +58,37 @@ func (aConnCfg *AsteriskConnCfg) loadFromJSONCfg(jsnCfg *AstConnJsonCfg) error {
 	if jsnCfg.Reconnects != nil {
 		aConnCfg.Reconnects = *jsnCfg.Reconnects
 	}
-	return nil
+	if jsnCfg.Max_reconnect_interval != nil {
+		if aConnCfg.MaxReconnectInterval, err = utils.ParseDurationWithNanosecs(*jsnCfg.Max_reconnect_interval); err != nil {
+			return
+		}
+	}
+	return
 }
 
 // AsMapInterface returns the config as a map[string]interface{}
 func (aConnCfg AsteriskConnCfg) AsMapInterface() map[string]interface{} {
 	return map[string]interface{}{
-		utils.AliasCfg:           aConnCfg.Alias,
-		utils.AddressCfg:         aConnCfg.Address,
-		utils.UserCf:             aConnCfg.User,
-		utils.Password:           aConnCfg.Password,
-		utils.ConnectAttemptsCfg: aConnCfg.ConnectAttempts,
-		utils.ReconnectsCfg:      aConnCfg.Reconnects,
+		utils.AliasCfg:                aConnCfg.Alias,
+		utils.AddressCfg:              aConnCfg.Address,
+		utils.UserCf:                  aConnCfg.User,
+		utils.Password:                aConnCfg.Password,
+		utils.ConnectAttemptsCfg:      aConnCfg.ConnectAttempts,
+		utils.ReconnectsCfg:           aConnCfg.Reconnects,
+		utils.MaxReconnectIntervalCfg: aConnCfg.MaxReconnectInterval,
 	}
 }
 
 // Clone returns a deep copy of AsteriskConnCfg
 func (aConnCfg AsteriskConnCfg) Clone() *AsteriskConnCfg {
 	return &AsteriskConnCfg{
-		Alias:           aConnCfg.Alias,
-		Address:         aConnCfg.Address,
-		User:            aConnCfg.User,
-		Password:        aConnCfg.Password,
-		ConnectAttempts: aConnCfg.ConnectAttempts,
-		Reconnects:      aConnCfg.Reconnects,
+		Alias:                aConnCfg.Alias,
+		Address:              aConnCfg.Address,
+		User:                 aConnCfg.User,
+		Password:             aConnCfg.Password,
+		ConnectAttempts:      aConnCfg.ConnectAttempts,
+		Reconnects:           aConnCfg.Reconnects,
+		MaxReconnectInterval: aConnCfg.MaxReconnectInterval,
 	}
 }
 
@@ -164,12 +174,13 @@ func (aCfg AsteriskAgentCfg) Clone() (cln *AsteriskAgentCfg) {
 }
 
 type AstConnJsonCfg struct {
-	Alias            *string
-	Address          *string
-	User             *string
-	Password         *string
-	Connect_attempts *int
-	Reconnects       *int
+	Alias                  *string
+	Address                *string
+	User                   *string
+	Password               *string
+	Connect_attempts       *int
+	Reconnects             *int
+	Max_reconnect_interval *string
 }
 
 type AsteriskAgentJsonCfg struct {
@@ -199,6 +210,9 @@ func diffAstConnJsonCfg(v1, v2 *AsteriskConnCfg) (d *AstConnJsonCfg) {
 	if v1.Reconnects != v2.Reconnects {
 		d.Reconnects = utils.IntPointer(v2.Reconnects)
 	}
+	if v1.MaxReconnectInterval != v2.MaxReconnectInterval {
+		d.Max_reconnect_interval = utils.StringPointer(v2.MaxReconnectInterval.String())
+	}
 	return
 }
 
@@ -212,7 +226,8 @@ func equalsAstConnJsonCfg(v1, v2 []*AsteriskConnCfg) bool {
 			v1[i].User != v2[i].User ||
 			v1[i].Password != v2[i].Password ||
 			v1[i].ConnectAttempts != v2[i].ConnectAttempts ||
-			v1[i].Reconnects != v2[i].Reconnects {
+			v1[i].Reconnects != v2[i].Reconnects ||
+			v1[i].MaxReconnectInterval != v2[i].MaxReconnectInterval {
 			return false
 		}
 	}
