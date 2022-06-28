@@ -318,16 +318,22 @@ func (m mockEventExporter) GetMetrics() *utils.SafeMapStorage {
 	return m.dc
 }
 
-func (mockEventExporter) Cfg() *config.EventExporterCfg                           { return new(config.EventExporterCfg) }
-func (mockEventExporter) Connect() error                                          { return nil }
-func (mockEventExporter) ExportEvent(*context.Context, interface{}, string) error { return nil }
+func (mockEventExporter) Cfg() *config.EventExporterCfg                                { return new(config.EventExporterCfg) }
+func (mockEventExporter) Connect() error                                               { return nil }
+func (mockEventExporter) ExportEvent(*context.Context, interface{}, interface{}) error { return nil }
+func (mockEventExporter) ExtraData(*utils.CGREvent) interface{}                        { return nil }
 func (mockEventExporter) Close() error {
 	utils.Logger.Warning("NOT IMPLEMENTED")
 	return nil
 }
 
 func TestV1ProcessEventMockMetrics(t *testing.T) {
-	mEe := newMockEventExporter()
+	mEe := mockEventExporter{dc: &utils.SafeMapStorage{
+		MapStorage: utils.MapStorage{
+			utils.NumberOfEvents:  int64(0),
+			utils.PositiveExports: utils.StringSet{},
+			utils.NegativeExports: 5,
+		}}}
 	cfg := config.NewDefaultCGRConfig()
 	cfg.EEsCfg().Exporters[0].Type = utils.MetaHTTPPost
 	cfg.EEsCfg().Exporters[0].ID = "SQLExporterFull"
