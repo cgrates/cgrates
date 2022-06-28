@@ -130,7 +130,7 @@ func (rdr *AMQPv1ER) readLoop(recv *amqpv1.Receiver) (err error) {
 			rdr.rdrErr <- err
 			return
 		}
-		if err = msg.Accept(ctx); err != nil {
+		if err = recv.AcceptMessage(ctx, msg); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> unable to accept message error: %s",
 					utils.ERs, err.Error()))

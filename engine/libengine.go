@@ -36,7 +36,7 @@ import (
 
 // NewRPCPool returns a new pool of connection with the given configuration
 func NewRPCPool(ctx *context.Context, dispatchStrategy string, keyPath, certPath, caPath string, connAttempts, reconnects int,
-	connectTimeout, replyTimeout time.Duration, rpcConnCfgs []*config.RemoteHost,
+	maxReconnectInterval, connectTimeout, replyTimeout time.Duration, rpcConnCfgs []*config.RemoteHost,
 	internalConnChan chan birpc.ClientConnector, lazyConnect bool,
 	biRPCClient interface{}, poolID string, connCache *ltcache.Cache) (rpcPool *rpcclient.RPCPool, err error) {
 	var rpcClient birpc.ClientConnector
@@ -50,7 +50,7 @@ func NewRPCPool(ctx *context.Context, dispatchStrategy string, keyPath, certPath
 			continue
 		}
 		if rpcClient, err = NewRPCConnection(ctx, rpcConnCfg, keyPath, certPath, caPath, connAttempts, reconnects,
-			connectTimeout, replyTimeout, internalConnChan, lazyConnect, biRPCClient,
+			maxReconnectInterval, connectTimeout, replyTimeout, internalConnChan, lazyConnect, biRPCClient,
 			poolID, rpcConnCfg.ID, connCache); err == rpcclient.ErrUnsupportedCodec {
 			return nil, fmt.Errorf("Unsupported transport: <%s>", rpcConnCfg.Transport)
 		}
@@ -68,7 +68,7 @@ func NewRPCPool(ctx *context.Context, dispatchStrategy string, keyPath, certPath
 // NewRPCConnection creates a new connection based on the RemoteHost structure
 // connCache is used to cache the connection with ID
 func NewRPCConnection(ctx *context.Context, cfg *config.RemoteHost, keyPath, certPath, caPath string, connAttempts, reconnects int,
-	connectTimeout, replyTimeout time.Duration, internalConnChan chan birpc.ClientConnector, lazyConnect bool,
+	maxReconnectInterval, connectTimeout, replyTimeout time.Duration, internalConnChan chan birpc.ClientConnector, lazyConnect bool,
 	biRPCClient interface{}, poolID, connID string, connCache *ltcache.Cache) (client birpc.ClientConnector, err error) {
 	var id string
 	if connID != utils.EmptyString {
@@ -79,12 +79,28 @@ func NewRPCConnection(ctx *context.Context, cfg *config.RemoteHost, keyPath, cer
 	}
 	if cfg.Address == rpcclient.InternalRPC ||
 		cfg.Address == rpcclient.BiRPCInternal {
-		client, err = rpcclient.NewRPCClient(ctx, "", "", cfg.TLS, utils.FirstNonEmpty(cfg.ClientKey, keyPath), utils.FirstNonEmpty(cfg.ClientCertificate, certPath), utils.FirstNonEmpty(cfg.CaCertificate, caPath), utils.FirstIntNonEmpty(cfg.ConnectAttempts, connAttempts),
-			utils.FirstIntNonEmpty(cfg.Reconnects, reconnects), utils.FirstDurationNonEmpty(cfg.ConnectTimeout, connectTimeout), utils.FirstDurationNonEmpty(cfg.ReplyTimeout, replyTimeout), cfg.Address, internalConnChan, lazyConnect, biRPCClient)
-	} else {
-		client, err = rpcclient.NewRPCClient(ctx, utils.TCP, cfg.Address, cfg.TLS, utils.FirstNonEmpty(cfg.ClientKey, keyPath), utils.FirstNonEmpty(cfg.ClientCertificate, certPath), utils.FirstNonEmpty(cfg.CaCertificate, caPath),
+		client, err = rpcclient.NewRPCClient(ctx, "", "", cfg.TLS,
+			utils.FirstNonEmpty(cfg.ClientKey, keyPath),
+			utils.FirstNonEmpty(cfg.ClientCertificate, certPath),
+			utils.FirstNonEmpty(cfg.CaCertificate, caPath),
 			utils.FirstIntNonEmpty(cfg.ConnectAttempts, connAttempts),
-			utils.FirstIntNonEmpty(cfg.Reconnects, reconnects), utils.FirstDurationNonEmpty(cfg.ConnectTimeout, connectTimeout), utils.FirstDurationNonEmpty(cfg.ReplyTimeout, replyTimeout),
+			utils.FirstIntNonEmpty(cfg.Reconnects, reconnects),
+			utils.FirstDurationNonEmpty(cfg.MaxReconnectInterval, maxReconnectInterval),
+			utils.FibDuration,
+			utils.FirstDurationNonEmpty(cfg.ConnectTimeout, connectTimeout),
+			utils.FirstDurationNonEmpty(cfg.ReplyTimeout, replyTimeout),
+			cfg.Address, internalConnChan, lazyConnect, biRPCClient)
+	} else {
+		client, err = rpcclient.NewRPCClient(ctx, utils.TCP, cfg.Address, cfg.TLS,
+			utils.FirstNonEmpty(cfg.ClientKey, keyPath),
+			utils.FirstNonEmpty(cfg.ClientCertificate, certPath),
+			utils.FirstNonEmpty(cfg.CaCertificate, caPath),
+			utils.FirstIntNonEmpty(cfg.ConnectAttempts, connAttempts),
+			utils.FirstIntNonEmpty(cfg.Reconnects, reconnects),
+			utils.FirstDurationNonEmpty(cfg.MaxReconnectInterval, maxReconnectInterval),
+			utils.FibDuration,
+			utils.FirstDurationNonEmpty(cfg.ConnectTimeout, connectTimeout),
+			utils.FirstDurationNonEmpty(cfg.ReplyTimeout, replyTimeout),
 			utils.FirstNonEmpty(cfg.Transport, rpcclient.GOBrpc), nil, lazyConnect, biRPCClient)
 	}
 	if connID != utils.EmptyString &&

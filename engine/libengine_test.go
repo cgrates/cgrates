@@ -52,16 +52,17 @@ func TestLibengineNewRPCConnection(t *testing.T) {
 	}
 	expectedErr := "dial tcp [::1]:6012: connect: connection refused"
 	cM := NewConnManager(config.NewDefaultCGRConfig())
-	exp, err := rpcclient.NewRPCClient(context.Background(), utils.TCP, cfg.Address, cfg.TLS, cfg.ClientKey, cM.cfg.TLSCfg().ClientCerificate,
-		cM.cfg.TLSCfg().CaCertificate, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
-		cfg.Transport, nil, false, nil)
+	exp, err := rpcclient.NewRPCClient(context.Background(), utils.TCP, cfg.Address, cfg.TLS, cfg.ClientKey,
+		cM.cfg.TLSCfg().ClientCerificate, cM.cfg.TLSCfg().CaCertificate, cfg.ConnectAttempts, cfg.Reconnects,
+		cfg.MaxReconnectInterval, utils.FibDuration, cfg.ConnectTimeout, cfg.ReplyTimeout, cfg.Transport, nil, false, nil)
 
 	if err.Error() != expectedErr {
 		t.Errorf("Expected %v \n but received \n %v", expectedErr, err)
 	}
 
-	conn, err := NewRPCConnection(context.Background(), cfg, cM.cfg.TLSCfg().ClientKey, cM.cfg.TLSCfg().ClientCerificate, cM.cfg.TLSCfg().CaCertificate,
-		cM.cfg.GeneralCfg().ConnectAttempts, cM.cfg.GeneralCfg().Reconnects, cM.cfg.GeneralCfg().ConnectTimeout, cM.cfg.GeneralCfg().ReplyTimeout,
+	conn, err := NewRPCConnection(context.Background(), cfg, cM.cfg.TLSCfg().ClientKey, cM.cfg.TLSCfg().ClientCerificate,
+		cM.cfg.TLSCfg().CaCertificate, cM.cfg.GeneralCfg().ConnectAttempts, cM.cfg.GeneralCfg().Reconnects,
+		cM.cfg.GeneralCfg().MaxReconnectInterval, cM.cfg.GeneralCfg().ConnectTimeout, cM.cfg.GeneralCfg().ReplyTimeout,
 		nil, false, nil, "*localhost", "a4f3f", new(ltcache.Cache))
 	if err.Error() != expectedErr {
 		t.Errorf("Expected %v \n but received \n %v", expectedErr, err)
@@ -90,8 +91,8 @@ func TestLibengineNewRPCConnectionInternal(t *testing.T) {
 	}
 	cM := NewConnManager(config.NewDefaultCGRConfig())
 	exp, err := rpcclient.NewRPCClient(context.Background(), "", "", cfg.TLS, cfg.ClientKey, cM.cfg.TLSCfg().ClientCerificate,
-		cM.cfg.TLSCfg().ClientCerificate, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
-		rpcclient.InternalRPC, cM.rpcInternal["a4f3f"], false, nil)
+		cM.cfg.TLSCfg().ClientCerificate, cfg.ConnectAttempts, cfg.Reconnects, cfg.MaxReconnectInterval, utils.FibDuration,
+		cfg.ConnectTimeout, cfg.ReplyTimeout, rpcclient.InternalRPC, cM.rpcInternal["a4f3f"], false, nil)
 
 	// We only want to check if the client loaded with the correct config,
 	// therefore connection is not mandatory
@@ -100,7 +101,7 @@ func TestLibengineNewRPCConnectionInternal(t *testing.T) {
 	}
 
 	conn, err := NewRPCConnection(context.Background(), cfg, cM.cfg.TLSCfg().ClientKey, cM.cfg.TLSCfg().ClientCerificate, cM.cfg.TLSCfg().CaCertificate,
-		cM.cfg.GeneralCfg().ConnectAttempts, cM.cfg.GeneralCfg().Reconnects, cM.cfg.GeneralCfg().ConnectTimeout, cM.cfg.GeneralCfg().ReplyTimeout,
+		cM.cfg.GeneralCfg().ConnectAttempts, cM.cfg.GeneralCfg().Reconnects, cM.cfg.GeneralCfg().MaxReconnectInterval, cM.cfg.GeneralCfg().ConnectTimeout, cM.cfg.GeneralCfg().ReplyTimeout,
 		cM.rpcInternal["a4f3f"], false, nil, "*internal", "a4f3f", new(ltcache.Cache))
 
 	if err != rpcclient.ErrInternallyDisconnected {
