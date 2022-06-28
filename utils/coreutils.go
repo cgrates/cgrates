@@ -424,7 +424,7 @@ func copyFile(rc io.ReadCloser, path string, fm os.FileMode) (err error) {
 	return
 }
 
-// successive Fibonacci numbers.
+// Fib returns successive Fibonacci numbers
 func Fib() func() int {
 	a, b := 0, 1
 	return func() int {
@@ -432,10 +432,17 @@ func Fib() func() int {
 		return a
 	}
 }
-func FibDuration(mult time.Duration) func() time.Duration {
+
+// FibDuration returns successive Fibonacci numbers as time.Duration with the
+// unit specified by durationUnit or maxDuration if it is exceeded
+func FibDuration(durationUnit, maxDuration time.Duration) func() time.Duration {
 	fib := Fib()
 	return func() time.Duration {
-		return time.Duration(fib()) * mult
+		fibNrAsDuration := time.Duration(fib()) * durationUnit
+		if maxDuration > 0 && maxDuration < fibNrAsDuration {
+			return maxDuration
+		}
+		return fibNrAsDuration
 	}
 }
 

@@ -1489,19 +1489,19 @@ func TestFibDuration(t *testing.T) {
 	// if tmp := fib(); tmp != 5 {
 	// 	t.Error("Expecting: 5, received ", tmp)
 	// }
-	if tmp := FibDuration(1 * time.Second); tmp() != 1*time.Second {
+	if tmp := FibDuration(1*time.Second, 0); tmp() != 1*time.Second {
 		t.Error("Expecting: 1, received ", tmp())
 	}
-	if tmp := FibDuration(1 * time.Second); tmp() != 1*time.Second {
+	if tmp := FibDuration(1*time.Second, 0); tmp() != 1*time.Second {
 		t.Error("Expecting: 1, received ", tmp())
 	}
-	if tmp := FibDuration(2 * time.Second); tmp() != 2*time.Second {
+	if tmp := FibDuration(2*time.Second, 0); tmp() != 2*time.Second {
 		t.Error("Expecting: 2, received ", tmp())
 	}
-	if tmp := FibDuration(2 * time.Second); tmp() != 2*time.Second {
+	if tmp := FibDuration(2*time.Second, 0); tmp() != 2*time.Second {
 		t.Error("Expecting: 2, received ", tmp())
 	}
-	if tmp := FibDuration(2 * time.Second); tmp() != 2*time.Second {
+	if tmp := FibDuration(2*time.Second, 0); tmp() != 2*time.Second {
 		t.Error("Expecting: 2, received ", tmp())
 	}
 }
