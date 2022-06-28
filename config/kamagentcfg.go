@@ -19,20 +19,23 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"time"
+
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // KamConnCfg represents one connection instance towards Kamailio
 type KamConnCfg struct {
-	Alias      string
-	Address    string
-	Reconnects int
+	Alias                string
+	Address              string
+	Reconnects           int
+	MaxReconnectInterval time.Duration
 }
 
-func (kamCfg *KamConnCfg) loadFromJSONCfg(jsnCfg *KamConnJsonCfg) error {
+func (kamCfg *KamConnCfg) loadFromJSONCfg(jsnCfg *KamConnJsonCfg) (err error) {
 	if jsnCfg == nil {
-		return nil
+		return
 	}
 	if jsnCfg.Address != nil {
 		kamCfg.Address = *jsnCfg.Address
@@ -43,24 +46,31 @@ func (kamCfg *KamConnCfg) loadFromJSONCfg(jsnCfg *KamConnJsonCfg) error {
 	if jsnCfg.Reconnects != nil {
 		kamCfg.Reconnects = *jsnCfg.Reconnects
 	}
-	return nil
+	if jsnCfg.Max_reconnect_interval != nil {
+		if kamCfg.MaxReconnectInterval, err = utils.ParseDurationWithNanosecs(*jsnCfg.Max_reconnect_interval); err != nil {
+			return
+		}
+	}
+	return
 }
 
 // AsMapInterface returns the config as a map[string]interface{}
 func (kamCfg KamConnCfg) AsMapInterface() map[string]interface{} {
 	return map[string]interface{}{
-		utils.AliasCfg:      kamCfg.Alias,
-		utils.AddressCfg:    kamCfg.Address,
-		utils.ReconnectsCfg: kamCfg.Reconnects,
+		utils.AliasCfg:                kamCfg.Alias,
+		utils.AddressCfg:              kamCfg.Address,
+		utils.ReconnectsCfg:           kamCfg.Reconnects,
+		utils.MaxReconnectIntervalCfg: kamCfg.MaxReconnectInterval,
 	}
 }
 
 // Clone returns a deep copy of KamConnCfg
 func (kamCfg KamConnCfg) Clone() *KamConnCfg {
 	return &KamConnCfg{
-		Alias:      kamCfg.Alias,
-		Address:    kamCfg.Address,
-		Reconnects: kamCfg.Reconnects,
+		Alias:                kamCfg.Alias,
+		Address:              kamCfg.Address,
+		Reconnects:           kamCfg.Reconnects,
+		MaxReconnectInterval: kamCfg.MaxReconnectInterval,
 	}
 }
 
@@ -152,9 +162,10 @@ func (ka KamAgentCfg) Clone() (cln *KamAgentCfg) {
 
 // Represents one connection instance towards Kamailio
 type KamConnJsonCfg struct {
-	Alias      *string
-	Address    *string
-	Reconnects *int
+	Alias                  *string
+	Address                *string
+	Reconnects             *int
+	Max_reconnect_interval *string
 }
 
 func diffKamConnJsonCfg(v1, v2 *KamConnCfg) (d *KamConnJsonCfg) {
@@ -167,6 +178,9 @@ func diffKamConnJsonCfg(v1, v2 *KamConnCfg) (d *KamConnJsonCfg) {
 	}
 	if v1.Reconnects != v2.Reconnects {
 		d.Reconnects = utils.IntPointer(v2.Reconnects)
+	}
+	if v1.MaxReconnectInterval != v2.MaxReconnectInterval {
+		d.Max_reconnect_interval = utils.StringPointer(v2.MaxReconnectInterval.String())
 	}
 	return
 }
@@ -187,7 +201,8 @@ func equalsKamConnsCfg(v1, v2 []*KamConnCfg) bool {
 	for i := range v2 {
 		if v1[i].Alias != v2[i].Alias ||
 			v1[i].Address != v2[i].Address ||
-			v1[i].Reconnects != v2[i].Reconnects {
+			v1[i].Reconnects != v2[i].Reconnects ||
+			v1[i].MaxReconnectInterval != v2[i].MaxReconnectInterval {
 			return false
 		}
 	}
