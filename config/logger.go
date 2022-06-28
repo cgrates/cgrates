@@ -40,7 +40,7 @@ func (loggCfg *LoggerCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConf
 
 // loadFromJSONCfg loads Logger config from JsonCfg
 func (loggCfg *LoggerCfg) loadFromJSONCfg(jsnLoggerCfg *LoggerJsonCfg) (err error) {
-	if loggCfg == nil {
+	if jsnLoggerCfg == nil {
 		return nil
 	}
 	if jsnLoggerCfg.Type != nil && *jsnLoggerCfg.Type != utils.EmptyString {
@@ -65,9 +65,10 @@ func (loggCfg *LoggerCfg) AsMapInterface(string) interface{} {
 }
 
 type LoggerOptsCfg struct {
-	KafkaConn  string `json:"*kakfa_conn"`
-	KafkaTopic string `json:"*kakfa_topic"`
-	Attempts   int    `json:"*attempts"`
+	KafkaConn      string
+	KafkaTopic     string
+	Attempts       int
+	FailedPostsDir string
 }
 
 func (LoggerCfg) SName() string                 { return LoggerJSON }
@@ -96,14 +97,18 @@ func (loggOpts *LoggerOptsCfg) loadFromJSONCfg(jsnCfg *LoggerOptsJson) {
 	if jsnCfg.Attempts != nil {
 		loggOpts.Attempts = *jsnCfg.Attempts
 	}
+	if jsnCfg.Failed_posts_dir != nil {
+		loggOpts.FailedPostsDir = *jsnCfg.Failed_posts_dir
+	}
 }
 
 // AsMapInterface returns the config of logger OPTS as a map[string]interface{}
 func (loggOpts *LoggerOptsCfg) AsMapInterface() interface{} {
 	return map[string]interface{}{
-		utils.KafkaConnCfg:  loggOpts.KafkaConn,
-		utils.KafkaTopicCfg: loggOpts.KafkaTopic,
-		utils.AttemptsCfg:   loggOpts.Attempts,
+		utils.KafkaConnCfg:      loggOpts.KafkaConn,
+		utils.KafkaTopicCfg:     loggOpts.KafkaTopic,
+		utils.AttemptsCfg:       loggOpts.Attempts,
+		utils.FailedPostsDirCfg: loggOpts.FailedPostsDir,
 	}
 }
 
@@ -113,9 +118,10 @@ func (loggerOpts *LoggerOptsCfg) Clone() *LoggerOptsCfg {
 		return nil
 	}
 	return &LoggerOptsCfg{
-		KafkaConn:  loggerOpts.KafkaConn,
-		KafkaTopic: loggerOpts.KafkaTopic,
-		Attempts:   loggerOpts.Attempts,
+		KafkaConn:      loggerOpts.KafkaConn,
+		KafkaTopic:     loggerOpts.KafkaTopic,
+		Attempts:       loggerOpts.Attempts,
+		FailedPostsDir: loggerOpts.FailedPostsDir,
 	}
 }
 
@@ -126,9 +132,10 @@ type LoggerJsonCfg struct {
 }
 
 type LoggerOptsJson struct {
-	Kafka_conn  *string
-	Kafka_topic *string
-	Attempts    *int
+	Kafka_conn       *string `json:"kafka_conn"`
+	Kafka_topic      *string `json:"kafka_topic"`
+	Attempts         *int    `json:"attempts"`
+	Failed_posts_dir *string `json:"failed_posts_dir"`
 }
 
 func diffLoggerJsonCfg(d *LoggerJsonCfg, v1, v2 *LoggerCfg) *LoggerJsonCfg {
@@ -157,6 +164,9 @@ func diffLoggerOptsJsonCfg(d *LoggerOptsJson, v1, v2 *LoggerOptsCfg) *LoggerOpts
 	}
 	if v1.Attempts != v2.Attempts {
 		d.Attempts = utils.IntPointer(v2.Attempts)
+	}
+	if v1.FailedPostsDir != v2.FailedPostsDir {
+		d.Failed_posts_dir = utils.StringPointer(v2.FailedPostsDir)
 	}
 	return d
 }

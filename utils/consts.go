@@ -1731,8 +1731,8 @@ const (
 
 const (
 	LevelCfg      = "level"
-	KafkaConnCfg  = "*kafka_conn"
-	KafkaTopicCfg = "*kafka_topic"
+	KafkaConnCfg  = "kafka_conn"
+	KafkaTopicCfg = "kafka_topic"
 )
 
 const (

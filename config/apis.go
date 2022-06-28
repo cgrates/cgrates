@@ -350,6 +350,12 @@ func storeDiffSection(ctx *context.Context, section string, db ConfigDB, v1, v2 
 			return
 		}
 		return db.SetSection(ctx, section, diffGeneralJsonCfg(jsn, v1.GeneralCfg(), v2.GeneralCfg()))
+	case LoggerJSON:
+		jsn := new(LoggerJsonCfg)
+		if err = db.GetSection(ctx, section, jsn); err != nil {
+			return
+		}
+		return db.SetSection(ctx, section, diffLoggerJsonCfg(jsn, v1.LoggerCfg(), v2.LoggerCfg()))
 	case RPCConnsJSON:
 		jsn := make(RPCConnsJson)
 		if err = db.GetSection(ctx, section, &jsn); err != nil {

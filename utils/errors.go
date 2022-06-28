@@ -65,6 +65,7 @@ var (
 	DispatcherErrorPrefix            = "DISPATCHER_ERROR"
 	RateSErrPrfx                     = "RATES_ERROR"
 	AccountSErrPrfx                  = "ACCOUNTS_ERROR"
+	ErrLoggerChanged                 = errors.New("LOGGER_CHANGED")
 	ErrUnsupportedFormat             = errors.New("UNSUPPORTED_FORMAT")
 	ErrNoDatabaseConn                = errors.New("NO_DATABASE_CONNECTION")
 	ErrMaxIncrementsExceeded         = errors.New("MAX_INCREMENTS_EXCEEDED")
