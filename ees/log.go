@@ -42,14 +42,15 @@ type LogEE struct {
 
 func (vEe *LogEE) Cfg() *config.EventExporterCfg { return vEe.cfg }
 func (vEe *LogEE) Connect() error                { return nil }
-func (vEe *LogEE) ExportEvent(_ *context.Context, mp interface{}, _ string) error {
+func (vEe *LogEE) ExportEvent(_ *context.Context, mp, _ interface{}) error {
 	utils.Logger.Info(
 		fmt.Sprintf("<%s> <%s> exported: <%s>",
 			utils.EEs, vEe.Cfg().ID, utils.ToJSON(mp)))
 	return nil
 }
-func (vEe *LogEE) Close() error                      { return nil }
-func (vEe *LogEE) GetMetrics() *utils.SafeMapStorage { return vEe.dc }
+func (vEe *LogEE) Close() error                             { return nil }
+func (vEe *LogEE) GetMetrics() *utils.SafeMapStorage        { return vEe.dc }
+func (vEe *LogEE) ExtraData(ev *utils.CGREvent) interface{} { return nil }
 func (vEe *LogEE) PrepareMap(mp *utils.CGREvent) (interface{}, error) {
 	return mp.Event, nil
 }

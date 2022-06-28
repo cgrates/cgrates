@@ -274,13 +274,12 @@ func exportEventWithExporter(ctx *context.Context, exp EventExporter, ev *utils.
 			return
 		}
 	}
-	key := utils.ConcatenatedKey(utils.FirstNonEmpty(engine.MapEvent(ev.APIOpts).GetStringIgnoreErrors(utils.MetaOriginID), utils.GenUUID()),
-		utils.FirstNonEmpty(engine.MapEvent(ev.APIOpts).GetStringIgnoreErrors(utils.MetaRunID), utils.MetaDefault))
+	extraData := exp.ExtraData(ev)
 
-	return ExportWithAttempts(ctx, exp, eEv, key)
+	return ExportWithAttempts(ctx, exp, eEv, extraData)
 }
 
-func ExportWithAttempts(ctx *context.Context, exp EventExporter, eEv interface{}, key string) (err error) {
+func ExportWithAttempts(ctx *context.Context, exp EventExporter, eEv interface{}, key interface{}) (err error) {
 	if exp.Cfg().FailedPostsDir != utils.MetaNone {
 		defer func() {
 			if err != nil {

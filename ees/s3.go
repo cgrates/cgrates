@@ -29,6 +29,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -112,16 +113,17 @@ func (pstr *S3EE) Connect() (err error) {
 	return
 }
 
-func (pstr *S3EE) ExportEvent(ctx *context.Context, message interface{}, key string) (err error) {
+func (pstr *S3EE) ExportEvent(ctx *context.Context, message, extraData interface{}) (err error) {
 	pstr.reqs.get()
 	pstr.RLock()
+	sKey := extraData.(string)
 	_, err = pstr.up.UploadWithContext(ctx, &s3manager.UploadInput{
 		Bucket: aws.String(pstr.bucket),
 
 		// Can also use the `filepath` standard library package to modify the
 		// filename as need for an S3 object key. Such as turning absolute path
 		// to a relative path.
-		Key: aws.String(fmt.Sprintf("%s/%s.json", pstr.folderPath, key)),
+		Key: aws.String(fmt.Sprintf("%s/%s.json", pstr.folderPath, sKey)),
 
 		// The file to be uploaded. io.ReadSeeker is preferred as the Uploader
 		// will be able to optimize memory when uploading large content. io.Reader
@@ -137,3 +139,10 @@ func (pstr *S3EE) ExportEvent(ctx *context.Context, message interface{}, key str
 func (pstr *S3EE) Close() (_ error) { return }
 
 func (pstr *S3EE) GetMetrics() *utils.SafeMapStorage { return pstr.dc }
+
+func (pstr *S3EE) ExtraData(ev *utils.CGREvent) interface{} {
+	return utils.ConcatenatedKey(
+		utils.FirstNonEmpty(engine.MapEvent(ev.APIOpts).GetStringIgnoreErrors(utils.MetaOriginID), utils.GenUUID()),
+		utils.FirstNonEmpty(engine.MapEvent(ev.APIOpts).GetStringIgnoreErrors(utils.MetaRunID), utils.MetaDefault),
+	)
+}

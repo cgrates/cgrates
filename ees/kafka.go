@@ -22,6 +22,7 @@ import (
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 	kafka "github.com/segmentio/kafka-go"
 )
@@ -72,7 +73,7 @@ func (pstr *KafkaEE) Connect() (_ error) {
 	return
 }
 
-func (pstr *KafkaEE) ExportEvent(ctx *context.Context, content interface{}, key string) (err error) {
+func (pstr *KafkaEE) ExportEvent(ctx *context.Context, content interface{}, extraData interface{}) (err error) {
 	pstr.reqs.get()
 	pstr.RLock()
 	if pstr.writer == nil {
@@ -80,8 +81,9 @@ func (pstr *KafkaEE) ExportEvent(ctx *context.Context, content interface{}, key 
 		pstr.reqs.done()
 		return utils.ErrDisconnected
 	}
+	kafkaKey := extraData.(string)
 	err = pstr.writer.WriteMessages(ctx, kafka.Message{
-		Key:   []byte(key),
+		Key:   []byte(kafkaKey),
 		Value: content.([]byte),
 	})
 	pstr.RUnlock()
@@ -100,3 +102,9 @@ func (pstr *KafkaEE) Close() (err error) {
 }
 
 func (pstr *KafkaEE) GetMetrics() *utils.SafeMapStorage { return pstr.dc }
+func (pstr *KafkaEE) ExtraData(ev *utils.CGREvent) interface{} {
+	return utils.ConcatenatedKey(
+		utils.FirstNonEmpty(engine.MapEvent(ev.APIOpts).GetStringIgnoreErrors(utils.MetaOriginID), utils.GenUUID()),
+		utils.FirstNonEmpty(engine.MapEvent(ev.APIOpts).GetStringIgnoreErrors(utils.MetaRunID), utils.MetaDefault),
+	)
+}

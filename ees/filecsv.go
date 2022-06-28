@@ -110,7 +110,7 @@ func (fCsv *FileCSVee) Cfg() *config.EventExporterCfg { return fCsv.cfg }
 
 func (fCsv *FileCSVee) Connect() (_ error) { return }
 
-func (fCsv *FileCSVee) ExportEvent(_ *context.Context, ev interface{}, _ string) error {
+func (fCsv *FileCSVee) ExportEvent(_ *context.Context, ev, _ interface{}) error {
 	fCsv.Lock() // make sure that only one event is writen in file at once
 	defer fCsv.Unlock()
 	return fCsv.csvWriter.Write(ev.([]string))
@@ -133,6 +133,8 @@ func (fCsv *FileCSVee) Close() (err error) {
 }
 
 func (fCsv *FileCSVee) GetMetrics() *utils.SafeMapStorage { return fCsv.dc }
+
+func (fCsv *FileCSVee) ExtraData(ev *utils.CGREvent) interface{} { return nil }
 
 // Buffers cannot be closed, they just Reset. We implement our struct and used it for writer field in FileCSVee to be available for WriterCloser interface
 type buffer struct {

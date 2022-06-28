@@ -29,6 +29,7 @@ import (
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 	elasticsearch "github.com/elastic/go-elasticsearch"
 )
@@ -100,7 +101,7 @@ func (eEe *ElasticEE) Connect() (err error) {
 }
 
 // ExportEvent implements EventExporter
-func (eEe *ElasticEE) ExportEvent(ctx *context.Context, ev interface{}, key string) (err error) {
+func (eEe *ElasticEE) ExportEvent(ctx *context.Context, ev, extraData interface{}) (err error) {
 	eEe.reqs.get()
 	eEe.RLock()
 	defer func() {
@@ -110,6 +111,7 @@ func (eEe *ElasticEE) ExportEvent(ctx *context.Context, ev interface{}, key stri
 	if eEe.eClnt == nil {
 		return utils.ErrDisconnected
 	}
+	key := extraData.(string)
 	eReq := esapi.IndexRequest{
 		Index:               eEe.opts.Index,
 		DocumentID:          key,
@@ -151,3 +153,10 @@ func (eEe *ElasticEE) Close() (_ error) {
 }
 
 func (eEe *ElasticEE) GetMetrics() *utils.SafeMapStorage { return eEe.dc }
+
+func (eEE *ElasticEE) ExtraData(ev *utils.CGREvent) interface{} {
+	return utils.ConcatenatedKey(
+		utils.FirstNonEmpty(engine.MapEvent(ev.APIOpts).GetStringIgnoreErrors(utils.MetaOriginID), utils.GenUUID()),
+		utils.FirstNonEmpty(engine.MapEvent(ev.APIOpts).GetStringIgnoreErrors(utils.MetaRunID), utils.MetaDefault),
+	)
+}
