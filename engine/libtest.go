@@ -135,7 +135,7 @@ cgrates.org,D1,,,*first,,C2,*lt:~*req.Usage:10,10,false,192.168.56.204
 `
 	DispatcherHostCSVContent = `
 #Tenant[0],ID[1],Address[2],Transport[3],ConnectAttempts[4],Reconnects[5],MaxReconnectInterval[6],ConnectTimeout[7],ReplyTimeout[8],Tls[9],ClientKey[10],ClientCertificate[11],CaCertificate[12]
-cgrates.org,ALL,127.0.0.1:6012,*json,1,3,,1m,2m,false,,,
+cgrates.org,ALL,127.0.0.1:6012,*json,1,3,5m,1m,2m,false,,,
 `
 	RateProfileCSVContent = `
 #Tenant,ID,FilterIDs,Weights,MinCost,MaxCost,MaxCostStrategy,RateID,RateFilterIDs,RateActivationStart,RateWeights,RateBlocker,RateIntervalStart,RateFixedFee,RateRecurrentFee,RateUnit,RateIncrement

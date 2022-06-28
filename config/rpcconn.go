@@ -256,7 +256,7 @@ func (rh *RemoteHost) AsMapInterface() (mp map[string]interface{}) {
 		mp[utils.ReconnectsCfg] = rh.Reconnects
 	}
 	if rh.MaxReconnectInterval != 0 {
-		mp[utils.MaxReconnectIntervalCfg] = rh.MaxReconnectInterval
+		mp[utils.MaxReconnectIntervalCfg] = rh.MaxReconnectInterval.String()
 	}
 	if rh.ConnectTimeout != 0 {
 		mp[utils.ConnectTimeoutCfg] = rh.ConnectTimeout

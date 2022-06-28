@@ -66,7 +66,7 @@ func (fs FsConnCfg) AsMapInterface() map[string]interface{} {
 		utils.AddressCfg:              fs.Address,
 		utils.Password:                fs.Password,
 		utils.ReconnectsCfg:           fs.Reconnects,
-		utils.MaxReconnectIntervalCfg: fs.MaxReconnectInterval,
+		utils.MaxReconnectIntervalCfg: fs.MaxReconnectInterval.String(),
 		utils.AliasCfg:                fs.Alias,
 	}
 }
