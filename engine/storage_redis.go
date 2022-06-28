@@ -132,7 +132,7 @@ func NewRedisStorage(address string, db int, user, pass, mrshlerStr string,
 }
 
 func redisDial(network, addr string, attempts int, opts ...radix.DialOpt) (conn radix.Conn, err error) {
-	fib := utils.FibDuration(time.Millisecond)
+	fib := utils.FibDuration(time.Millisecond, 0)
 	for i := 0; i < attempts; i++ {
 		if conn, err = radix.Dial(network, addr, opts...); err == nil ||
 			(err != nil && !strings.Contains(err.Error(), redisLoadError)) {
