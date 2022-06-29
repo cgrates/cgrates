@@ -1034,12 +1034,13 @@ func testSeTPeSetDispatcherHosts(t *testing.T) {
 		DispatcherHost: &engine.DispatcherHost{
 			Tenant: "cgrates.org",
 			RemoteHost: &config.RemoteHost{
-				ID:              "DSH1",
-				Address:         "*internal",
-				ConnectAttempts: 1,
-				Reconnects:      3,
-				ConnectTimeout:  time.Minute,
-				ReplyTimeout:    2 * time.Minute,
+				ID:                   "DSH1",
+				Address:              "*internal",
+				ConnectAttempts:      1,
+				Reconnects:           3,
+				MaxReconnectInterval: 5 * time.Minute,
+				ConnectTimeout:       time.Minute,
+				ReplyTimeout:         2 * time.Minute,
 			},
 		},
 	}
@@ -1179,8 +1180,8 @@ func testTPeSExportTariffPlanHalfTariffPlan(t *testing.T) {
 			{"cgrates.org", "Dsp1", "*string:~*req.Account:1001;*ai:~*req.AnswerTime:2014-07-14T14:25:00Z", "20", "*first", "false", "C1", "", "10", "false", "192.168.54.203"},
 		},
 		utils.DispatcherHostsCsv: {
-			{"#Tenant", "ID", "Address", "Transport", "ConnectAttempts", "Reconnects", "ConnectTimeout", "ReplyTimeout", "Tls", "ClientKey", "ClientCertificate", "CaCertificate"},
-			{"cgrates.org", "DSH1", "*internal", "", "1", "3", "1m0s", "2m0s", "false", "", "", ""},
+			{"#Tenant", "ID", "Address", "Transport", "ConnectAttempts", "Reconnects", "MaxReconnectInterval", "ConnectTimeout", "ReplyTimeout", "Tls", "ClientKey", "ClientCertificate", "CaCertificate"},
+			{"cgrates.org", "DSH1", "*internal", "", "1", "3", "5m0s", "1m0s", "2m0s", "false", "", "", ""},
 		},
 	}
 	// we do this copy of the value one xpected because there are some values in a slice that are hard to concatenate as sorted
@@ -1320,9 +1321,9 @@ func testTPeSExportTariffPlanAllTariffPlan(t *testing.T) {
 			{"cgrates.org", "Dsp2", "*string:~*opts.EventType:LoadDispatcher", "10", "*weight", "", "Conn2", "*suffix:~*opts.*answerTime:45T", "0", "false", "*ratio:1"},
 		},
 		utils.DispatcherHostsCsv: {
-			{"#Tenant", "ID", "Address", "Transport", "ConnectAttempts", "Reconnects", "ConnectTimeout", "ReplyTimeout", "Tls", "ClientKey", "ClientCertificate", "CaCertificate"},
-			{"cgrates.org", "DSH1", "*internal", "", "1", "3", "1m0s", "2m0s", "false", "", "", ""},
-			{"cgrates.org", "DSH2", "127.0.0.1:6012", "*json", "1", "3", "1m0s", "2m0s", "false", "", "", ""},
+			{"#Tenant", "ID", "Address", "Transport", "ConnectAttempts", "Reconnects", "MaxReconnectInterval", "ConnectTimeout", "ReplyTimeout", "Tls", "ClientKey", "ClientCertificate", "CaCertificate"},
+			{"cgrates.org", "DSH1", "*internal", "", "1", "3", "5m0s", "1m0s", "2m0s", "false", "", "", ""},
+			{"cgrates.org", "DSH2", "127.0.0.1:6012", "*json", "1", "3", "0s", "1m0s", "2m0s", "false", "", "", ""},
 		},
 	}
 	expected[utils.RatesCsv] = csvRply[utils.RatesCsv]

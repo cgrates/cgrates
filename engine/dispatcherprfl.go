@@ -297,6 +297,10 @@ func (dH *DispatcherHost) Set(path []string, val interface{}, newBranch bool, _ 
 		if val != utils.EmptyString {
 			dH.Reconnects, err = utils.IfaceAsTInt(val)
 		}
+	case utils.MaxReconnectInterval:
+		if val != utils.EmptyString {
+			dH.MaxReconnectInterval, err = utils.IfaceAsDuration(val)
+		}
 	case utils.ConnectTimeout:
 		dH.ConnectTimeout, err = utils.IfaceAsDuration(val)
 	case utils.ReplyTimeout:
@@ -398,6 +402,9 @@ func (dH *DispatcherHost) Merge(v2 interface{}) {
 	if vi.Reconnects != 0 {
 		dH.Reconnects = vi.Reconnects
 	}
+	if vi.MaxReconnectInterval != 0 {
+		dH.MaxReconnectInterval = vi.MaxReconnectInterval
+	}
 }
 
 func (dH *DispatcherHost) String() string { return utils.ToJSON(dH) }
@@ -427,6 +434,8 @@ func (dH *DispatcherHost) FieldAsInterface(fldPath []string) (_ interface{}, err
 		return dH.ConnectAttempts, nil
 	case utils.Reconnects:
 		return dH.Reconnects, nil
+	case utils.MaxReconnectInterval:
+		return dH.MaxReconnectInterval, nil
 	case utils.ConnectTimeout:
 		return dH.ConnectTimeout, nil
 	case utils.ReplyTimeout:

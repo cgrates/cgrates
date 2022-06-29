@@ -45,7 +45,7 @@ func (tpDspHst TPDispatcherHosts) exportItems(ctx *context.Context, wrtr io.Writ
 	csvWriter := csv.NewWriter(wrtr)
 	csvWriter.Comma = utils.CSVSep
 	// before writing the profiles, we must write the headers
-	if err = csvWriter.Write([]string{"#Tenant", "ID", "Address", "Transport", "ConnectAttempts", "Reconnects", "ConnectTimeout", "ReplyTimeout", "Tls", "ClientKey", "ClientCertificate", "CaCertificate"}); err != nil {
+	if err = csvWriter.Write([]string{"#Tenant", "ID", "Address", "Transport", "ConnectAttempts", "Reconnects", "MaxReconnectInterval", "ConnectTimeout", "ReplyTimeout", "Tls", "ClientKey", "ClientCertificate", "CaCertificate"}); err != nil {
 		return
 	}
 	for _, dspHostID := range itmIDs {
