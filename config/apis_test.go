@@ -286,6 +286,8 @@ func TestGetSectionAsMap(t *testing.T) {
 			"redisCluster":            false,
 			"redisClusterSync":        "5s",
 			"redisClusterOndownDelay": "0s",
+			"redisReadTimeout":        "0s",
+			"redisWriteTimeout":       "0s",
 			"mongoQueryTimeout":       "10s",
 			"redisTLS":                false,
 			"redisClientCertificate":  "",
