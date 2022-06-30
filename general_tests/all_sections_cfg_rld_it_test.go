@@ -41,7 +41,7 @@ var (
 		testSectLoadConfig,
 		testSectResetDataDB,
 
-		testSectStartEngine,
+		// testSectStartEngine,
 		testSectRPCConn,
 		testSectConfigSReloadGeneral,
 		testSectConfigSReloadCores,
@@ -80,7 +80,7 @@ var (
 		testSectConfigSReloadConfigs,
 		testSectConfigSReloadAPIBan,
 		testSectConfigSReloadDataDB,
-		testSectStopCgrEngine,
+		// testSectStopCgrEngine,
 	}
 )
 
@@ -882,7 +882,7 @@ func testSectConfigSReloadMigrator(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Expected OK received: %+v", reply)
 	}
-	cfgStr := "{\"migrator\":{\"out_datadb_encoding\":\"msgpack\",\"out_datadb_host\":\"127.0.0.1\",\"out_datadb_name\":\"10\",\"out_datadb_opts\":{\"mongoQueryTimeout\":\"0s\",\"redisCACertificate\":\"\",\"redisClientCertificate\":\"\",\"redisClientKey\":\"\",\"redisCluster\":false,\"redisClusterOndownDelay\":\"0s\",\"redisClusterSync\":\"5s\",\"redisSentinel\":\"\",\"redisTLS\":false},\"out_datadb_password\":\"\",\"out_datadb_port\":\"6379\",\"out_datadb_type\":\"redis\",\"out_datadb_user\":\"cgrates\",\"users_filters\":[\"Account\"]}}"
+	cfgStr := "{\"migrator\":{\"out_datadb_encoding\":\"msgpack\",\"out_datadb_host\":\"127.0.0.1\",\"out_datadb_name\":\"10\",\"out_datadb_opts\":{\"mongoQueryTimeout\":\"0s\",\"redisCACertificate\":\"\",\"redisClientCertificate\":\"\",\"redisClientKey\":\"\",\"redisCluster\":false,\"redisClusterOndownDelay\":\"0s\",\"redisClusterSync\":\"5s\",\"redisReadTimeout\":\"0s\",\"redisSentinel\":\"\",\"redisTLS\":false,\"redisWriteTimeout\":\"0s\"},\"out_datadb_password\":\"\",\"out_datadb_port\":\"6379\",\"out_datadb_type\":\"redis\",\"out_datadb_user\":\"cgrates\",\"users_filters\":[\"Account\"]}}"
 	var rpl string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:   "cgrates.org",

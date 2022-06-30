@@ -287,6 +287,8 @@ func TestDfDataDbJsonCfg(t *testing.T) {
 			RedisSentinel:           utils.StringPointer(utils.EmptyString),
 			MongoQueryTimeout:       utils.StringPointer("10s"),
 			RedisClusterOndownDelay: utils.StringPointer("0"),
+			RedisReadTimeout:        utils.StringPointer("0"),
+			RedisWriteTimeout:       utils.StringPointer("0"),
 			RedisClusterSync:        utils.StringPointer("5s"),
 		},
 		Items: map[string]*ItemOptsJson{
@@ -1896,6 +1898,8 @@ func TestDfMigratorCfg(t *testing.T) {
 		Out_dataDB_opts: &DBOptsJson{
 			RedisClusterSync:        utils.StringPointer("5s"),
 			RedisClusterOndownDelay: utils.StringPointer("0"),
+			RedisReadTimeout:        utils.StringPointer("0"),
+			RedisWriteTimeout:       utils.StringPointer("0"),
 			RedisCACertificate:      utils.StringPointer(utils.EmptyString),
 			RedisClientCertificate:  utils.StringPointer(utils.EmptyString),
 			RedisClientKey:          utils.StringPointer(utils.EmptyString),
