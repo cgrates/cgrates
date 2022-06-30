@@ -46,7 +46,8 @@ func NewDataDBConn(dbType, host, port, name, user,
 		}
 		d, err = NewRedisStorage(host, dbNo, user, pass, marshaler, utils.RedisMaxConns, utils.RedisMaxAttempts,
 			opts.RedisSentinel, opts.RedisCluster, opts.RedisClusterSync, opts.RedisClusterOndownDelay,
-			opts.RedisTLS, opts.RedisClientCertificate, opts.RedisClientKey, opts.RedisCACertificate)
+			opts.RedisReadTimeout, opts.RedisWriteTimeout, opts.RedisTLS, opts.RedisClientCertificate,
+			opts.RedisClientKey, opts.RedisCACertificate)
 	case utils.Mongo:
 		d, err = NewMongoStorage(host, port, name, user, pass, marshaler, utils.DataDB, nil, opts.MongoQueryTimeout)
 	case utils.Internal:
