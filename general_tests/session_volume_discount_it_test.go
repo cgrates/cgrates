@@ -158,7 +158,7 @@ func testSessVolDiscAuthorizeEventSortRoutes1Min30Sec(t *testing.T) {
 					{
 						RouteID: "supplier2",
 						SortingData: map[string]interface{}{
-							"Cost":              float64(1.200000000000001),
+							"Cost":              float64(1.2),
 							utils.RateProfileID: "RP_SUPPLIER2",
 							"Weight":            float64(0),
 						},
@@ -174,7 +174,7 @@ func testSessVolDiscAuthorizeEventSortRoutes1Min30Sec(t *testing.T) {
 					{
 						RouteID: "supplier3",
 						SortingData: map[string]interface{}{
-							"Cost":              float64(1.425000000000001),
+							"Cost":              float64(1.425),
 							utils.RateProfileID: "RP_SUPPLIER3",
 							"Weight":            float64(0),
 						},
@@ -225,7 +225,7 @@ func testSessVolDiscAuthorizeEventSortRoutes11Min10Sec(t *testing.T) {
 					{
 						RouteID: "supplier2",
 						SortingData: map[string]interface{}{
-							"Cost":              float64(8.933333333333337),
+							"Cost":              float64(8.933333333333332),
 							utils.RateProfileID: "RP_SUPPLIER2",
 							"Weight":            float64(0),
 						},
@@ -241,7 +241,7 @@ func testSessVolDiscAuthorizeEventSortRoutes11Min10Sec(t *testing.T) {
 					{
 						RouteID: "supplier3",
 						SortingData: map[string]interface{}{
-							"Cost":              float64(10.60833333333334),
+							"Cost":              float64(10.60833333333333),
 							utils.RateProfileID: "RP_SUPPLIER3",
 							"Weight":            float64(0),
 						},
@@ -285,7 +285,7 @@ func testSessVolDiscAuthorizeEventSortRoutes20Min(t *testing.T) {
 						RouteID: "supplier2",
 						SortingData: map[string]interface{}{
 							utils.RateProfileID: "RP_SUPPLIER2",
-							"Cost":              float64(16.00000000000001), // returns from accounts null concretes, so the cost will be null,
+							"Cost":              float64(16), // returns from accounts null concretes, so the cost will be null,
 							"Weight":            float64(0),
 						},
 					},
@@ -308,7 +308,7 @@ func testSessVolDiscAuthorizeEventSortRoutes20Min(t *testing.T) {
 					{
 						RouteID: "supplier3",
 						SortingData: map[string]interface{}{
-							"Cost":              float64(19.00000000000001),
+							"Cost":              float64(19),
 							utils.RateProfileID: "RP_SUPPLIER3",
 							"Weight":            float64(0),
 						},
@@ -479,7 +479,7 @@ func testSessVolDiscAuthorizeEventSortRoutes1Min30SecAfterDebiting(t *testing.T)
 					{
 						RouteID: "supplier2",
 						SortingData: map[string]interface{}{
-							"Cost":              float64(1.200000000000001),
+							"Cost":              float64(1.2),
 							utils.RateProfileID: "RP_SUPPLIER2",
 							"Weight":            float64(0),
 						},
@@ -495,7 +495,7 @@ func testSessVolDiscAuthorizeEventSortRoutes1Min30SecAfterDebiting(t *testing.T)
 					{
 						RouteID: "supplier3",
 						SortingData: map[string]interface{}{
-							"Cost":              float64(1.425000000000001),
+							"Cost":              float64(1.425),
 							utils.RateProfileID: "RP_SUPPLIER3",
 							"Weight":            float64(0),
 						},

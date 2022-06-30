@@ -407,6 +407,11 @@ func testCgrLdrGetAttributeProfileAfterLoad(t *testing.T) {
 				Value:     "Marketing",
 			},
 		},
+		Blockers: utils.DynamicBlockers{
+			{
+				Blocker: false,
+			},
+		},
 	}
 	var replyAttr *engine.APIAttributeProfile
 	if err := cgrLdrBIRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfile,

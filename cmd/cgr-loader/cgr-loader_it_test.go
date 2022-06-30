@@ -284,6 +284,11 @@ func testLoadItCheckAttributes(t *testing.T) {
 				Value:     config.NewRSRParsersMustCompile("CGRateS.org", utils.InfieldSep),
 			},
 		},
+		Blockers: utils.DynamicBlockers{
+			{
+				Blocker: false,
+			},
+		},
 	}
 	eAttrPrf.Weights = make(utils.DynamicWeights, 1)
 	eAttrPrf.Weights[0] = &utils.DynamicWeight{
