@@ -369,14 +369,9 @@ func testDspSupGetSupplierForEvent(t *testing.T) {
 				RouteParameters: "",
 			},
 			{
-				ID:             "route2",
-				RateProfileIDs: []string{"RP_1002"},
-				Weights:        utils.DynamicWeights{{Weight: 20}},
-				Blockers: utils.DynamicBlockers{
-					{
-						Blocker: false,
-					},
-				},
+				ID:              "route2",
+				RateProfileIDs:  []string{"RP_1002"},
+				Weights:         utils.DynamicWeights{{Weight: 20}},
 				RouteParameters: "",
 			},
 		},
@@ -394,6 +389,6 @@ func testDspSupGetSupplierForEvent(t *testing.T) {
 		return supProf[0].Routes[i].Weights[0].Weight < supProf[0].Routes[j].Weights[0].Weight
 	})
 	if !reflect.DeepEqual(expected, *supProf[0]) {
-		t.Errorf("Expected: %s ,received: %s", utils.ToJSON(expected), utils.ToJSON(supProf))
+		t.Errorf("Expected: %s ,received: %s", utils.ToJSON(expected), utils.ToJSON(*supProf[0]))
 	}
 }
