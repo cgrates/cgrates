@@ -51,6 +51,8 @@ type DataDBOpts struct {
 	RedisCluster            bool
 	RedisClusterSync        time.Duration
 	RedisClusterOndownDelay time.Duration
+	RedisReadTimeout        time.Duration
+	RedisWriteTimeout       time.Duration
 	MongoQueryTimeout       time.Duration
 	RedisTLS                bool
 	RedisClientCertificate  string
@@ -114,6 +116,16 @@ func (dbOpts *DataDBOpts) loadFromJSONCfg(jsnCfg *DBOptsJson) (err error) {
 	}
 	if jsnCfg.RedisClusterOndownDelay != nil {
 		if dbOpts.RedisClusterOndownDelay, err = utils.ParseDurationWithNanosecs(*jsnCfg.RedisClusterOndownDelay); err != nil {
+			return
+		}
+	}
+	if jsnCfg.RedisReadTimeout != nil {
+		if dbOpts.RedisReadTimeout, err = utils.ParseDurationWithNanosecs(*jsnCfg.RedisReadTimeout); err != nil {
+			return
+		}
+	}
+	if jsnCfg.RedisWriteTimeout != nil {
+		if dbOpts.RedisWriteTimeout, err = utils.ParseDurationWithNanosecs(*jsnCfg.RedisWriteTimeout); err != nil {
 			return
 		}
 	}
@@ -218,6 +230,8 @@ func (dbOpts *DataDBOpts) Clone() *DataDBOpts {
 		RedisCluster:            dbOpts.RedisCluster,
 		RedisClusterSync:        dbOpts.RedisClusterSync,
 		RedisClusterOndownDelay: dbOpts.RedisClusterOndownDelay,
+		RedisReadTimeout:        dbOpts.RedisReadTimeout,
+		RedisWriteTimeout:       dbOpts.RedisWriteTimeout,
 		MongoQueryTimeout:       dbOpts.MongoQueryTimeout,
 		RedisTLS:                dbOpts.RedisTLS,
 		RedisClientCertificate:  dbOpts.RedisClientCertificate,
@@ -260,6 +274,8 @@ func (dbcfg DataDbCfg) AsMapInterface(string) interface{} {
 		utils.RedisClusterCfg:            dbcfg.Opts.RedisCluster,
 		utils.RedisClusterSyncCfg:        dbcfg.Opts.RedisClusterSync.String(),
 		utils.RedisClusterOnDownDelayCfg: dbcfg.Opts.RedisClusterOndownDelay.String(),
+		utils.RedisReadTimeoutCfg:        dbcfg.Opts.RedisReadTimeout.String(),
+		utils.RedisWriteTimeoutCfg:       dbcfg.Opts.RedisWriteTimeout.String(),
 		utils.MongoQueryTimeoutCfg:       dbcfg.Opts.MongoQueryTimeout.String(),
 		utils.RedisTLSCfg:                dbcfg.Opts.RedisTLS,
 		utils.RedisClientCertificateCfg:  dbcfg.Opts.RedisClientCertificate,
@@ -435,6 +451,8 @@ type DBOptsJson struct {
 	RedisCluster            *bool             `json:"redisCluster"`
 	RedisClusterSync        *string           `json:"redisClusterSync"`
 	RedisClusterOndownDelay *string           `json:"redisClusterOndownDelay"`
+	RedisReadTimeout        *string           `json:"redisReadTimeout"`
+	RedisWriteTimeout       *string           `json:"redisWriteTimeout"`
 	MongoQueryTimeout       *string           `json:"mongoQueryTimeout"`
 	RedisTLS                *bool             `json:"redisTLS"`
 	RedisClientCertificate  *string           `json:"redisClientCertificate"`
@@ -482,6 +500,12 @@ func diffDataDBOptsJsonCfg(d *DBOptsJson, v1, v2 *DataDBOpts) *DBOptsJson {
 	}
 	if v1.RedisClusterOndownDelay != v2.RedisClusterOndownDelay {
 		d.RedisClusterOndownDelay = utils.StringPointer(v2.RedisClusterOndownDelay.String())
+	}
+	if v1.RedisReadTimeout != v2.RedisReadTimeout {
+		d.RedisReadTimeout = utils.StringPointer(v2.RedisReadTimeout.String())
+	}
+	if v1.RedisWriteTimeout != v2.RedisWriteTimeout {
+		d.RedisWriteTimeout = utils.StringPointer(v2.RedisWriteTimeout.String())
 	}
 	if v1.MongoQueryTimeout != v2.MongoQueryTimeout {
 		d.MongoQueryTimeout = utils.StringPointer(v2.MongoQueryTimeout.String())

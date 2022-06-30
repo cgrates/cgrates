@@ -88,6 +88,8 @@ func (mg MigratorCgrCfg) AsMapInterface(string) interface{} {
 		utils.RedisClusterCfg:            mg.OutDataDBOpts.RedisCluster,
 		utils.RedisClusterSyncCfg:        mg.OutDataDBOpts.RedisClusterSync.String(),
 		utils.RedisClusterOnDownDelayCfg: mg.OutDataDBOpts.RedisClusterOndownDelay.String(),
+		utils.RedisReadTimeoutCfg:        mg.OutDataDBOpts.RedisReadTimeout.String(),
+		utils.RedisWriteTimeoutCfg:       mg.OutDataDBOpts.RedisWriteTimeout.String(),
 		utils.MongoQueryTimeoutCfg:       mg.OutDataDBOpts.MongoQueryTimeout.String(),
 		utils.RedisTLSCfg:                mg.OutDataDBOpts.RedisTLS,
 		utils.RedisClientCertificateCfg:  mg.OutDataDBOpts.RedisClientCertificate,

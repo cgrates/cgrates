@@ -69,6 +69,10 @@ var (
 		"The sync interval for the redis cluster")
 	dbRedisClusterDownDelay = cgrMigratorFlags.Duration(utils.RedisClusterOnDownDelayCfg, dfltCfg.DataDbCfg().Opts.RedisClusterOndownDelay,
 		"The delay before executing the commands if the redis cluster is in the CLUSTERDOWN state")
+	dbRedisReadTimeout = cgrMigratorFlags.Duration(utils.RedisReadTimeoutCfg, dfltCfg.DataDbCfg().Opts.RedisReadTimeout,
+		"The amount of wait time until timeout for reading operations")
+	dbRedisWriteTimeout = cgrMigratorFlags.Duration(utils.RedisWriteTimeoutCfg, dfltCfg.DataDbCfg().Opts.RedisWriteTimeout,
+		"The amount of wait time until timeout for writing operations")
 	dbQueryTimeout = cgrMigratorFlags.Duration(utils.MongoQueryTimeoutCfg, dfltCfg.DataDbCfg().Opts.MongoQueryTimeout,
 		"The timeout for queries")
 	dbRedisTls               = cgrMigratorFlags.Bool(utils.RedisTLSCfg, false, "Enable TLS when connecting to Redis")
@@ -166,6 +170,12 @@ func main() {
 	}
 	if *dbRedisClusterDownDelay != dfltCfg.DataDbCfg().Opts.RedisClusterOndownDelay {
 		mgrCfg.DataDbCfg().Opts.RedisClusterOndownDelay = *dbRedisClusterDownDelay
+	}
+	if *dbRedisReadTimeout != dfltCfg.DataDbCfg().Opts.RedisReadTimeout {
+		mgrCfg.DataDbCfg().Opts.RedisReadTimeout = *dbRedisReadTimeout
+	}
+	if *dbRedisWriteTimeout != dfltCfg.DataDbCfg().Opts.RedisWriteTimeout {
+		mgrCfg.DataDbCfg().Opts.RedisWriteTimeout = *dbRedisWriteTimeout
 	}
 	if *dbQueryTimeout != dfltCfg.DataDbCfg().Opts.MongoQueryTimeout {
 		mgrCfg.DataDbCfg().Opts.MongoQueryTimeout = *dbQueryTimeout

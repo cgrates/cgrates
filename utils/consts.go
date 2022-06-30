@@ -1767,6 +1767,8 @@ const (
 	RedisClusterCfg            = "redisCluster"
 	RedisClusterSyncCfg        = "redisClusterSync"
 	RedisClusterOnDownDelayCfg = "redisClusterOndownDelay"
+	RedisReadTimeoutCfg        = "redisReadTimeout"
+	RedisWriteTimeoutCfg       = "redisWriteTimeout"
 	RedisTLSCfg                = "redisTLS"
 	RedisClientCertificateCfg  = "redisClientCertificate"
 	RedisClientKeyCfg          = "redisClientKey"

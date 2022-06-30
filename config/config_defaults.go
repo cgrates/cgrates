@@ -161,11 +161,13 @@ const CGRATES_CFG_JSON = `
 		"redisCluster": false,					// if enabled the datadb will try to connect to the redis cluster
 		"redisClusterSync": "5s",				// the sync interval for the redis cluster
 		"redisClusterOndownDelay": "0",			// the delay before executing the commands if the redis cluster is in the CLUSTERDOWN state
-		"mongoQueryTimeout":"10s",				// timeout for query when mongo is used
+		"redisReadTimeout": "0",				// the amount of wait time until timeout for reading operations
+		"redisWriteTimeout": "0",   			// the amount of wait time until timeout for writing operations
+		"mongoQueryTimeout": "10s",				// timeout for query when mongo is used
 		"redisTLS": false,						// if true it will use a tls connection and use the redisClientCertificate, redisClientKey and redisCACertificate for tls connection
-		"redisClientCertificate":"",			// path to client certificate
-		"redisClientKey":"",					// path to client key
-		"redisCACertificate":"",				// path to CA certificate (populate for self-signed certificate otherwise let it empty)
+		"redisClientCertificate": "",			// path to client certificate
+		"redisClientKey": "",					// path to client key
+		"redisCACertificate": "",				// path to CA certificate (populate for self-signed certificate otherwise let it empty)
 	}
 },
 
@@ -1486,6 +1488,8 @@ const CGRATES_CFG_JSON = `
 		"redisCluster": false,					
 		"redisClusterSync": "5s",					
 		"redisClusterOndownDelay": "0",
+		"redisReadTimeout": "0",			// the amount of wait time until timeout for reading operations
+		"redisWriteTimeout": "0",   		// the amount of wait time until timeout for writing operations
 		"redisTLS": false,					// enable TLS when connecting to Redis and use the redisClientCertificate, redisClientKey and redisCACertificate for TLS connection
 		"redisClientCertificate":"",		// path to client certificate
 		"redisClientKey":"",				// path to client key
@@ -1810,6 +1814,8 @@ const CGRATES_CFG_JSON = `
 		"redisCluster": false,					// if enabled the datadb will try to connect to the redis cluster
 		"redisClusterSync": "5s",				// the sync interval for the redis cluster
 		"redisClusterOndownDelay": "0",			// the delay before executing the commands if the redis cluster is in the CLUSTERDOWN state
+		"redisReadTimeout": "0",				// the amount of wait time until timeout for reading operations
+		"redisWriteTimeout": "0",   			// the amount of wait time until timeout for writing operations
 		"mongoQueryTimeout":"10s",				// timeout for query when mongo is used
 		"redisTLS": false,						// if true it will use a tls connection and use the redisClientCertificate, redisClientKey and redisCACertificate for tls connection
 		"redisClientCertificate":"",			// path to client certificate
