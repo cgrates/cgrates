@@ -88,7 +88,7 @@
 				"sqlMaxIdleConns": 10, 
 				"sqlMaxOpenConns": 100, 
 				"sqlTableName": "cdrs", 
-				"sslMode": "disable"
+				"pgSSLMode": "disable"
 			}, 
 			"tenant": "", 
 			"timezone": "", 
@@ -117,7 +117,7 @@
 				"sqlMaxIdleConns": 10, 
 				"sqlMaxOpenConns": 100, 
 				"sqlTableName": "cdrs", 
-				"sslMode": "disable"
+				"pgSSLMode": "disable"
 			}, 
 			"tenant": "", 
 			"timezone": "", 
@@ -146,7 +146,7 @@
 				"sqlMaxIdleConns": 10, 
 				"sqlMaxOpenConns": 100, 
 				"sqlTableName": "cdrs", 
-				"sslMode": "disable"
+				"pgSSLMode": "disable"
 			}, 
 			"tenant": "", 
 			"timezone": "", 
@@ -175,7 +175,7 @@
 				"sqlMaxIdleConns": 10, 
 				"sqlMaxOpenConns": 100, 
 				"sqlTableName": "cdrs", 
-				"sslMode": "disable"
+				"pgSSLMode": "disable"
 			}, 
 			"tenant": "", 
 			"timezone": "", 
@@ -204,7 +204,7 @@
 				"sqlMaxIdleConns": 10, 
 				"sqlMaxOpenConns": 100, 
 				"sqlTableName": "cdrs", 
-				"sslMode": "disable"
+				"pgSSLMode": "disable"
 			}, 
 			"tenant": "", 
 			"timezone": "", 
@@ -233,7 +233,7 @@
 				"sqlMaxIdleConns": 10, 
 				"sqlMaxOpenConns": 100, 
 				"sqlTableName": "cdrs", 
-				"sslMode": "disable"
+				"pgSSLMode": "disable"
 			}, 
 			"tenant": "", 
 			"timezone": "", 
@@ -262,7 +262,7 @@
 				"sqlMaxIdleConns": 10, 
 				"sqlMaxOpenConns": 100, 
 				"sqlTableName": "cdrs", 
-				"sslMode": "disable"
+				"pgSSLMode": "disable"
 			}, 
 			"tenant": "", 
 			"timezone": "", 
@@ -291,7 +291,7 @@
 				"sqlMaxIdleConns": 10, 
 				"sqlMaxOpenConns": 100, 
 				"sqlTableName": "cdrs", 
-				"sslMode": "disable"
+				"pgSSLMode": "disable"
 			}, 
 			"tenant": "", 
 			"timezone": "", 
@@ -320,7 +320,7 @@
 				"sqlMaxIdleConns": 10, 
 				"sqlMaxOpenConns": 100, 
 				"sqlTableName": "cdrs", 
-				"sslMode": "disable"
+				"pgSSLMode": "disable"
 			}, 
 			"tenant": "", 
 			"timezone": "", 
@@ -349,7 +349,7 @@
 				"sqlMaxIdleConns": 10, 
 				"sqlMaxOpenConns": 100, 
 				"sqlTableName": "cdrs", 
-				"sslMode": "disable"
+				"pgSSLMode": "disable"
 			}, 
 			"tenant": "", 
 			"timezone": "", 
@@ -378,7 +378,7 @@
 				"sqlMaxIdleConns": 10, 
 				"sqlMaxOpenConns": 100, 
 				"sqlTableName": "cdrs", 
-				"sslMode": "disable"
+				"pgSSLMode": "disable"
 			}, 
 			"tenant": "", 
 			"timezone": "", 
@@ -407,7 +407,7 @@
 				"sqlMaxIdleConns": 10, 
 				"sqlMaxOpenConns": 100, 
 				"sqlTableName": "cdrs", 
-				"sslMode": "disable"
+				"pgSSLMode": "disable"
 			}, 
 			"tenant": "", 
 			"timezone": "", 
@@ -436,7 +436,7 @@
 				"sqlMaxIdleConns": 10, 
 				"sqlMaxOpenConns": 100, 
 				"sqlTableName": "cdrs", 
-				"sslMode": "disable"
+				"pgSSLMode": "disable"
 			}, 
 			"tenant": "", 
 			"timezone": "", 

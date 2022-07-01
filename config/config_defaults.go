@@ -401,12 +401,12 @@ const CGRATES_CFG_JSON = `
 
 				// SQL
 				// "sqlDBName": "cgrates", 						// the name of the database from were the events are read
-				// "sqlTableName": "cdrs",							// the name of the table from were the events are read
-				// "sslMode": "disable",						// the ssl mode for postgres db
+				// "sqlTableName": "cdrs",						// the name of the table from were the events are read
+				// "pgSSLMode": "disable",						// the ssl mode for postgres db
 
-				// "sqlDBNameProcessed": "", 						// the name of the database were the events are sent after they are processed
+				// "sqlDBNameProcessed": "", 					// the name of the database were the events are sent after they are processed
 				// "sqlTableNameProcessed": "",					// the name of the table were the events are sent after they are processed
-				// "sslModeProcessed": "",						// the ssl mode for postgres db
+				// "pgSSLModeProcessed": "",					// the ssl mode for postgres db
 
 				// SQS and S3
 				// "awsRegion": "",
@@ -515,7 +515,7 @@ const CGRATES_CFG_JSON = `
 
 				// "sqlTableName":"cdrs", 						// the name of the table from where the events are exported
 				// "sqlDBName": "cgrates",						// the name of the database from where the events are exported
-				// "sslMode": "disable",						// the postgresSSLMode for postgres            				
+				// "pgSSLMode": "disable",						// the postgresSSLMode for postgres            				
 				
 				
 				// Kafka

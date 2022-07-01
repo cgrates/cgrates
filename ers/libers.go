@@ -161,11 +161,11 @@ func getProcessOptions(erOpts *config.EventReaderOpts) (eeOpts *config.EventExpo
 		}
 		eeOpts.SQSQueueID = erOpts.SQSQueueIDProcessed
 	}
-	if erOpts.SSLModeProcessed != nil {
+	if erOpts.PgSSLModeProcessed != nil {
 		if eeOpts == nil {
 			eeOpts = new(config.EventExporterOpts)
 		}
-		eeOpts.SSLMode = erOpts.SSLModeProcessed
+		eeOpts.PgSSLMode = erOpts.PgSSLModeProcessed
 	}
 	return
 }

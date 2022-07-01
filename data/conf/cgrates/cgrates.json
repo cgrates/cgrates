@@ -25,6 +25,7 @@
 // 	"max_call_duration": "3h",				                // maximum call duration a prepaid call can last
 // 	"connect_attempts": 5,									// initial server connect attempts
 // 	"reconnects": -1,										// number of retries in case of connection lost
+// 	"max_reconnect_interval": "", 							// time to wait in between reconnect attempts
 // 	"connect_timeout": "1s",								// consider connection unsuccessful on timeout, 0 to disable the feature
 // 	"reply_timeout": "2s",									// consider connection down for replies taking longer than this value
 // 	"locking_timeout": "0",									// timeout internal locks to avoid deadlocks
@@ -47,6 +48,16 @@
 // 	},	
 // },
 
+// "logger": {
+// 	"type": "*syslog",                                            // controls the destination of logs <*syslog|*stdout|*kafka>
+// 	"level": 6,                                                   // system level precision for floats 
+// 	"opts": {
+// 		"kafka_conn": "",                                        // the connection trough kafka
+// 		"kafka_topic": "",                                       // the topic from where the events are exported
+// 		"attempts": 1,                                           // number of attempts of connecting
+// 		"failed_posts_dir": "/var/spool/cgrates/failed_posts"    // path where fail logs are exported
+// 	},
+// },
 
 // "cores": {
 // 	"caps": 0,							// maximum concurrent request allowed ( 0 to disabled )
@@ -65,6 +76,7 @@
 // 				//"transport":"*json",
 // 				//"connect_attempts": 5,
 // 				//"reconnects": -1,
+// 				//"max_reconnect_interval": ""
 // 				//"connect_timeout":"1s",
 // 				//"reply_timeout":"2s",
 // 				//"tls":false,
@@ -127,11 +139,13 @@
 // 		"redisCluster": false,					// if enabled the datadb will try to connect to the redis cluster
 // 		"redisClusterSync": "5s",				// the sync interval for the redis cluster
 // 		"redisClusterOndownDelay": "0",			// the delay before executing the commands if the redis cluster is in the CLUSTERDOWN state
-// 		"mongoQueryTimeout":"10s",				// timeout for query when mongo is used
+// 		"redisReadTimeout": "0",				// the amount of wait time until timeout for reading operations
+// 		"redisWriteTimeout": "0",   			// the amount of wait time until timeout for writing operations
+// 		"mongoQueryTimeout": "10s",				// timeout for query when mongo is used
 // 		"redisTLS": false,						// if true it will use a tls connection and use the redisClientCertificate, redisClientKey and redisCACertificate for tls connection
-// 		"redisClientCertificate":"",			// path to client certificate
-// 		"redisClientKey":"",					// path to client key
-// 		"redisCACertificate":"",				// path to CA certificate (populate for self-signed certificate otherwise let it empty)
+// 		"redisClientCertificate": "",			// path to client certificate
+// 		"redisClientKey": "",					// path to client key
+// 		"redisCACertificate": "",				// path to CA certificate (populate for self-signed certificate otherwise let it empty)
 // 	}
 // },
 
@@ -365,12 +379,12 @@
 
 // 				// SQL
 // 				// "sqlDBName": "cgrates", 						// the name of the database from were the events are read
-// 				// "sqlTableName": "cdrs",							// the name of the table from were the events are read
-// 				// "sslMode": "disable",						// the ssl mode for postgres db
+// 				// "sqlTableName": "cdrs",						// the name of the table from were the events are read
+// 				// "pgSSLMode": "disable",						// the ssl mode for postgres db
 
-// 				// "sqlDBNameProcessed": "", 						// the name of the database were the events are sent after they are processed
+// 				// "sqlDBNameProcessed": "", 					// the name of the database were the events are sent after they are processed
 // 				// "sqlTableNameProcessed": "",					// the name of the table were the events are sent after they are processed
-// 				// "sslModeProcessed": "",						// the ssl mode for postgres db
+// 				// "pgSSLModeProcessed": "",					// the ssl mode for postgres db
 
 // 				// SQS and S3
 // 				// "awsRegion": "",
@@ -479,7 +493,7 @@
 
 // 				// "sqlTableName":"cdrs", 						// the name of the table from where the events are exported
 // 				// "sqlDBName": "cgrates",						// the name of the database from where the events are exported
-// 				// "sslMode": "disable",						// the postgresSSLMode for postgres            				
+// 				// "pgSSLMode": "disable",						// the postgresSSLMode for postgres            				
 				
 				
 // 				// Kafka
@@ -534,6 +548,7 @@
 // 			"attribute_ids": [],								// select Attribute profiles instead of discovering them
 // 			"attribute_context": "",							// context used to discover matching Attribute profiles
 // 			"synchronous": false,								// block processing until export has a result
+// 			"blocker": false,									// stops the processing of the following exporters
 // 			"attempts": 1,										// export attempts
 // 			"fields":[],										// import fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
 // 			"failed_posts_dir": "/var/spool/cgrates/failed_posts",	// directory path where we store failed requests
@@ -810,7 +825,7 @@
 // 	"sessions_conns": ["*birpc_internal"],
 // 	"create_cdr": false,					// create CDR out of events and sends it to CDRS component
 // 	"asterisk_conns":[						// instantiate connections to multiple Asterisk servers
-// 		{"address": "127.0.0.1:8088", "user": "cgrates", "password": "CGRateS.org", "connect_attempts": 3,"reconnects": 5}
+// 		{"address": "127.0.0.1:8088", "user": "cgrates", "password": "CGRateS.org", "connect_attempts": 3, "reconnects": 5, "max_reconnect_interval": ""}
 // 	],
 // },
 
@@ -826,7 +841,7 @@
 // 	"empty_balance_ann_file": "",			// file to be played before disconnecting prepaid calls on empty balance (applies only if no context defined)
 // 	"max_wait_connection": "2s",			// maximum duration to wait for a connection to be retrieved from the pool
 // 	"event_socket_conns":[					// instantiate connections to multiple FreeSWITCH servers
-// 		{"address": "127.0.0.1:8021", "password": "ClueCon", "reconnects": 5,"alias":""}
+// 		{"address": "127.0.0.1:8021", "password": "ClueCon", "reconnects": 5, "max_reconnect_interval": "", "alias":""}
 // 	],
 // },
 
@@ -837,7 +852,7 @@
 // 	"create_cdr": false,					// create CDR out of events and sends them to CDRS component
 // 	"timezone": "",							// timezone of the Kamailio server
 // 	"evapi_conns":[							// instantiate connections to multiple Kamailio servers
-// 		{"address": "127.0.0.1:8448", "reconnects": 5}
+// 		{"address": "127.0.0.1:8448", "reconnects": 5, "max_reconnect_interval": ""}
 // 	],
 // },
 
@@ -1313,12 +1328,13 @@
 // 					{"tag": "Transport", "path": "Transport", "type": "*variable", "value": "~*req.3"},
 // 					{"tag": "ConnectAttempts", "path": "ConnectAttempts", "type": "*variable", "value":"~*req.4"},
 // 					{"tag": "Reconnects", "path": "Reconnects", "type": "*variable", "value":"~*req.5"},
-// 					{"tag": "ConnectTimeout", "path": "ConnectTimeout", "type": "*variable", "value":"~*req.6"},
-// 					{"tag": "ReplyTimeout", "path": "ReplyTimeout", "type": "*variable", "value":"~*req.7"},
-// 					{"tag": "TLS", "path": "TLS", "type": "*variable", "value": "~*req.8"},
-// 					{"tag": "ClientKey", "path": "ClientKey", "type": "*variable", "value":"~*req.9"},
-// 					{"tag": "ClientCertificate", "path": "ClientCertificate", "type": "*variable", "value":"~*req.10"},
-// 					{"tag": "CaCertificate", "path": "CaCertificate", "type": "*variable", "value":"~*req.11"},
+// 					{"tag": "MaxReconnectInterval", "path": "MaxReconnectInterval", "type": "*variable", "value":"~*req.6"},
+// 					{"tag": "ConnectTimeout", "path": "ConnectTimeout", "type": "*variable", "value":"~*req.7"},
+// 					{"tag": "ReplyTimeout", "path": "ReplyTimeout", "type": "*variable", "value":"~*req.8"},
+// 					{"tag": "TLS", "path": "TLS", "type": "*variable", "value": "~*req.9"},
+// 					{"tag": "ClientKey", "path": "ClientKey", "type": "*variable", "value":"~*req.10"},
+// 					{"tag": "ClientCertificate", "path": "ClientCertificate", "type": "*variable", "value":"~*req.11"},
+// 					{"tag": "CaCertificate", "path": "CaCertificate", "type": "*variable", "value":"~*req.12"},
 // 				],
 // 			},
 // 			{
@@ -1373,18 +1389,20 @@
 // 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
 // 					{"tag": "FilterIDs", "path": "FilterIDs", "type": "*variable", "value": "~*req.2"},
 // 					{"tag": "Weights", "path": "Weights", "type": "*variable", "value": "~*req.3"},
-// 					{"tag": "Opts", "path": "Opts", "type": "*variable", "value": "~*req.4"},
-// 					// {"tag": "BalanceID", "path": "Balances.ID", "type": "*variable", "value": "~*req.5"},
-// 					{"tag": "BalanceFilterIDs", "path": "Balances[<~*req.5>].FilterIDs", "type": "*variable", "value": "~*req.6","filters": ["*notempty:~*req.5:"]},
-// 					{"tag": "BalanceWeights", "path": "Balances[<~*req.5>].Weights", "type": "*variable", "value": "~*req.7","filters": ["*notempty:~*req.5:"]},
-// 					{"tag": "BalanceType", "path": "Balances[<~*req.5>].Type", "type": "*variable", "value": "~*req.8","filters": ["*notempty:~*req.5:"]},
-// 					{"tag": "BalanceUnits", "path": "Balances[<~*req.5>].Units", "type": "*variable", "value": "~*req.9","filters": ["*notempty:~*req.5:"]},
-// 					{"tag": "BalanceUnitFactors", "path": "Balances[<~*req.5>].UnitFactors", "type": "*variable", "value": "~*req.10","filters": ["*notempty:~*req.5:"]},
-// 					{"tag": "BalanceOpts", "path": "Balances[<~*req.5>].Opts", "type": "*variable", "value": "~*req.11","filters": ["*notempty:~*req.5:"]},
-// 					{"tag": "BalanceCostIncrements", "path": "Balances[<~*req.5>].CostIncrements", "type": "*variable", "value": "~*req.12","filters": ["*notempty:~*req.5:"]},
-// 					{"tag": "BalanceAttributeIDs", "path": "Balances[<~*req.5>].AttributeIDs", "type": "*variable", "value": "~*req.13","filters": ["*notempty:~*req.5:"]},
-// 					{"tag": "BalanceRateProfileIDs", "path": "Balances[<~*req.5>].RateProfileIDs", "type": "*variable", "value": "~*req.14","filters": ["*notempty:~*req.5:"]},
-// 					{"tag": "ThresholdIDs", "path": "ThresholdIDs", "type": "*variable", "value": "~*req.15"},
+// 					{"tag": "Blockers", "path": "Blockers", "type": "*variable", "value": "~*req.4"},
+// 					{"tag": "Opts", "path": "Opts", "type": "*variable", "value": "~*req.5"},
+// 					// {"tag": "BalanceID", "path": "Balances.ID", "type": "*variable", "value": "~*req.6"},
+// 					{"tag": "BalanceFilterIDs", "path": "Balances[<~*req.6>].FilterIDs", "type": "*variable", "value": "~*req.7","filters": ["*notempty:~*req.6:"]},
+// 					{"tag": "BalanceWeights", "path": "Balances[<~*req.6>].Weights", "type": "*variable", "value": "~*req.8","filters": ["*notempty:~*req.6:"]},
+// 					{"tag": "BalanceBlockers", "path": "Balances[<~*req.6>].Blockers", "type": "*variable", "value": "~*req.9","filters": ["*notempty:~*req.6:"]},
+// 					{"tag": "BalanceType", "path": "Balances[<~*req.6>].Type", "type": "*variable", "value": "~*req.10","filters": ["*notempty:~*req.6:"]},
+// 					{"tag": "BalanceUnits", "path": "Balances[<~*req.6>].Units", "type": "*variable", "value": "~*req.11","filters": ["*notempty:~*req.6:"]},
+// 					{"tag": "BalanceUnitFactors", "path": "Balances[<~*req.6>].UnitFactors", "type": "*variable", "value": "~*req.12","filters": ["*notempty:~*req.6:"]},
+// 					{"tag": "BalanceOpts", "path": "Balances[<~*req.6>].Opts", "type": "*variable", "value": "~*req.13","filters": ["*notempty:~*req.6:"]},
+// 					{"tag": "BalanceCostIncrements", "path": "Balances[<~*req.6>].CostIncrements", "type": "*variable", "value": "~*req.14","filters": ["*notempty:~*req.6:"]},
+// 					{"tag": "BalanceAttributeIDs", "path": "Balances[<~*req.6>].AttributeIDs", "type": "*variable", "value": "~*req.15","filters": ["*notempty:~*req.6:"]},
+// 					{"tag": "BalanceRateProfileIDs", "path": "Balances[<~*req.6>].RateProfileIDs", "type": "*variable", "value": "~*req.16","filters": ["*notempty:~*req.6:"]},
+// 					{"tag": "ThresholdIDs", "path": "ThresholdIDs", "type": "*variable", "value": "~*req.17"},
 // 				],
 // 			},
 // 		],
@@ -1448,6 +1466,8 @@
 // 		"redisCluster": false,					
 // 		"redisClusterSync": "5s",					
 // 		"redisClusterOndownDelay": "0",
+// 		"redisReadTimeout": "0",			// the amount of wait time until timeout for reading operations
+// 		"redisWriteTimeout": "0",   		// the amount of wait time until timeout for writing operations
 // 		"redisTLS": false,					// enable TLS when connecting to Redis and use the redisClientCertificate, redisClientKey and redisCACertificate for TLS connection
 // 		"redisClientCertificate":"",		// path to client certificate
 // 		"redisClientKey":"",				// path to client key
@@ -1488,9 +1508,19 @@
 // "analyzers":{									// AnalyzerS config
 // 	"enabled": false,							// starts AnalyzerS service: <true|false>.
 //  	"db_path": "/var/spool/cgrates/analyzers",	// path to the folder where to store the information
-// 	"index_type": "*scorch",					// the type of index for the storage: <*scorch|*boltdb|*leveldb|*mossdb>
+// 	"index_type": "*scorch",					// the type of index for the storage: <*internal|*scorch|*boltdb|*leveldb|*mossdb>
 // 	"ttl": "24h",								// time to wait before removing the API capture
+// 	"ees_conns": [],						    // connections to EEs
 // 	"cleanup_interval": "1h",					// the interval we clean the db
+// 	"opts":{												//
+// 		"*exporterIDs": [					
+// 			// {
+// 			// 	"Tenant": "*any",
+// 			// 	"FilterIDs": [],
+// 			// 	"Value": [],
+// 			// },
+// 		],
+// 	},
 // },
 
 
@@ -1762,6 +1792,8 @@
 // 		"redisCluster": false,					// if enabled the datadb will try to connect to the redis cluster
 // 		"redisClusterSync": "5s",				// the sync interval for the redis cluster
 // 		"redisClusterOndownDelay": "0",			// the delay before executing the commands if the redis cluster is in the CLUSTERDOWN state
+// 		"redisReadTimeout": "0",				// the amount of wait time until timeout for reading operations
+// 		"redisWriteTimeout": "0",   			// the amount of wait time until timeout for writing operations
 // 		"mongoQueryTimeout":"10s",				// timeout for query when mongo is used
 // 		"redisTLS": false,						// if true it will use a tls connection and use the redisClientCertificate, redisClientKey and redisCACertificate for tls connection
 // 		"redisClientCertificate":"",			// path to client certificate
