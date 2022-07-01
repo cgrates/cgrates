@@ -462,7 +462,7 @@ type DBOptsJson struct {
 	SQLMaxIdleConns         *int              `json:"sqlMaxIdleConns"`
 	SQLConnMaxLifetime      *string           `json:"sqlConnMaxLifetime"`
 	MYSQLDSNParams          map[string]string `json:"mysqlDSNParams"`
-	SSLMode                 *string           `json:"sslMode"`
+	PgSSLMode               *string           `json:"pgSSLMode"`
 	MySQLLocation           *string           `json:"mysqlLocation"`
 }
 

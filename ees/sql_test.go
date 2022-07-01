@@ -48,7 +48,7 @@ func TestNewSQLeUrl(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	cgrCfg.EEsCfg().Exporters[0].Opts.SQLTableName = utils.StringPointer("expTable")
 	cgrCfg.EEsCfg().Exporters[0].Opts.SQLDBName = utils.StringPointer("postgres")
-	cgrCfg.EEsCfg().Exporters[0].Opts.SSLMode = utils.StringPointer("test")
+	cgrCfg.EEsCfg().Exporters[0].Opts.PgSSLMode = utils.StringPointer("test")
 	sqlEe := &SQLEe{
 		cfg:  cgrCfg.EEsCfg().Exporters[0],
 		reqs: newConcReq(0),
@@ -87,7 +87,7 @@ func TestNewSQLeUrlPostgres(t *testing.T) {
 		reqs: newConcReq(0),
 	}
 	dialectExpect := postgres.Open(fmt.Sprintf("host=%s port=%s dbname=%s user=%s password=%s sslmode=%s",
-		"127.0.0.1", "3306", "postgres", "cgrates", "CGRateS.org", utils.SQLDefaultSSLMode))
+		"127.0.0.1", "3306", "postgres", "cgrates", "CGRateS.org", utils.SQLDefaultPgSSLMode))
 	if err := sqlEe.initDialector(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(sqlEe.dialect, dialectExpect) {

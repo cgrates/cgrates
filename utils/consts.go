@@ -1748,7 +1748,7 @@ const (
 	ExistsIndexedFieldsCfg    = "exists_indexed_fields"
 	NotExistsIndexedFieldsCfg = "notexists_indexed_fields"
 	MongoQueryTimeoutCfg      = "mongoQueryTimeout"
-	SSLModeCfg                = "sslMode"
+	PgSSLModeCfg              = "pgSSLMode"
 	ItemsCfg                  = "items"
 	OptsCfg                   = "opts"
 	Tenants                   = "tenants"
@@ -2411,8 +2411,8 @@ const (
 	S3FolderPath = "s3FolderPath"
 
 	// sql
-	SQLDefaultDBName  = "cgrates"
-	SQLDefaultSSLMode = "disable"
+	SQLDefaultDBName    = "cgrates"
+	SQLDefaultPgSSLMode = "disable"
 
 	SQLDBNameOpt    = "sqlDBName"
 	SQLTableNameOpt = "sqlTableName"
@@ -2503,7 +2503,7 @@ const (
 
 	SQLDBNameProcessedCfg    = "sqlDBNameProcessed"
 	SQLTableNameProcessedCfg = "sqlTableNameProcessed"
-	SSLModeProcessedCfg      = "sslModeProcessed"
+	PgSSLModeProcessedCfg    = "pgSSLModeProcessed"
 
 	AWSRegionProcessedCfg = "awsRegionProcessed"
 	AWSKeyProcessedCfg    = "awsKeyProcessed"

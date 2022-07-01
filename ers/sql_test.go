@@ -43,11 +43,11 @@ func TestSQLSetURL(t *testing.T) {
 	if err := sql.setURL(inURL, outURL, &config.EventReaderOpts{
 		SQLDBName:    utils.StringPointer("cgrates2"),
 		SQLTableName: utils.StringPointer("cdrs2"),
-		SSLMode:      utils.StringPointer("enabled"),
+		PgSSLMode:    utils.StringPointer("enabled"),
 
 		SQLDBNameProcessed:    utils.StringPointer("cgrates3"),
 		SQLTableNameProcessed: utils.StringPointer("cdrs3"),
-		SSLModeProcessed:      utils.StringPointer("enabled"),
+		PgSSLModeProcessed:    utils.StringPointer("enabled"),
 	}); err != nil {
 		t.Fatal(err)
 	} else if expsql.connString != sql.connString {
@@ -78,11 +78,11 @@ func TestSQLSetURL(t *testing.T) {
 	if err := sql.setURL(inURL, outURL, &config.EventReaderOpts{
 		SQLDBName:    utils.StringPointer("cgrates2"),
 		SQLTableName: utils.StringPointer("cdrs2"),
-		SSLMode:      utils.StringPointer("enabled"),
+		PgSSLMode:    utils.StringPointer("enabled"),
 
 		SQLDBNameProcessed:    utils.StringPointer("cgrates3"),
 		SQLTableNameProcessed: utils.StringPointer("cdrs3"),
-		SSLModeProcessed:      utils.StringPointer("enabled"),
+		PgSSLModeProcessed:    utils.StringPointer("enabled"),
 	}); err != nil {
 		t.Fatal(err)
 	} else if expsql.connString != sql.connString {
@@ -113,11 +113,11 @@ func TestSQLSetURL(t *testing.T) {
 	if err := sql.setURL(inURL, outURL, &config.EventReaderOpts{
 		SQLDBName:    utils.StringPointer("cgrates2"),
 		SQLTableName: utils.StringPointer("cdrs2"),
-		SSLMode:      utils.StringPointer("enabled"),
+		PgSSLMode:    utils.StringPointer("enabled"),
 
 		SQLDBNameProcessed:    utils.StringPointer("cgrates2"),
 		SQLTableNameProcessed: utils.StringPointer("cdrs2"),
-		SSLModeProcessed:      utils.StringPointer("enabled"),
+		PgSSLModeProcessed:    utils.StringPointer("enabled"),
 	}); err != nil {
 		t.Fatal(err)
 	} else if expsql.connString != sql.connString {

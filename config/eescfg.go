@@ -163,7 +163,7 @@ type EventExporterOpts struct {
 	MYSQLDSNParams           map[string]string
 	SQLTableName             *string
 	SQLDBName                *string
-	SSLMode                  *string
+	PgSSLMode                *string
 	KafkaTopic               *string
 	AMQPRoutingKey           *string
 	AMQPQueueID              *string
@@ -282,8 +282,8 @@ func (eeOpts *EventExporterOpts) loadFromJSONCfg(jsnCfg *EventExporterOptsJson) 
 	if jsnCfg.SQLDBName != nil {
 		eeOpts.SQLDBName = jsnCfg.SQLDBName
 	}
-	if jsnCfg.SSLMode != nil {
-		eeOpts.SSLMode = jsnCfg.SSLMode
+	if jsnCfg.PgSSLMode != nil {
+		eeOpts.PgSSLMode = jsnCfg.PgSSLMode
 	}
 	if jsnCfg.KafkaTopic != nil {
 		eeOpts.KafkaTopic = jsnCfg.KafkaTopic
@@ -538,8 +538,8 @@ func (eeOpts *EventExporterOpts) Clone() *EventExporterOpts {
 	if eeOpts.SQLDBName != nil {
 		cln.SQLDBName = utils.StringPointer(*eeOpts.SQLDBName)
 	}
-	if eeOpts.SSLMode != nil {
-		cln.SSLMode = utils.StringPointer(*eeOpts.SSLMode)
+	if eeOpts.PgSSLMode != nil {
+		cln.PgSSLMode = utils.StringPointer(*eeOpts.PgSSLMode)
 	}
 	if eeOpts.KafkaTopic != nil {
 		cln.KafkaTopic = utils.StringPointer(*eeOpts.KafkaTopic)
@@ -732,8 +732,8 @@ func (eeC *EventExporterCfg) AsMapInterface(separator string) (initialMP map[str
 	if eeC.Opts.SQLDBName != nil {
 		opts[utils.SQLDBNameOpt] = *eeC.Opts.SQLDBName
 	}
-	if eeC.Opts.SSLMode != nil {
-		opts[utils.SSLModeCfg] = *eeC.Opts.SSLMode
+	if eeC.Opts.PgSSLMode != nil {
+		opts[utils.PgSSLModeCfg] = *eeC.Opts.PgSSLMode
 	}
 	if eeC.Opts.KafkaTopic != nil {
 		opts[utils.KafkaTopic] = *eeC.Opts.KafkaTopic
@@ -874,7 +874,7 @@ type EventExporterOptsJson struct {
 	MYSQLDSNParams           map[string]string      `json:"mysqlDSNParams"`
 	SQLTableName             *string                `json:"sqlTableName"`
 	SQLDBName                *string                `json:"sqlDBName"`
-	SSLMode                  *string                `json:"sslMode"`
+	PgSSLMode                *string                `json:"pgSSLMode"`
 	KafkaTopic               *string                `json:"kafkaTopic"`
 	AMQPQueueID              *string                `json:"amqpQueueID"`
 	AMQPRoutingKey           *string                `json:"amqpRoutingKey"`
@@ -1065,13 +1065,13 @@ func diffEventExporterOptsJsonCfg(d *EventExporterOptsJson, v1, v2 *EventExporte
 	} else {
 		d.SQLDBName = nil
 	}
-	if v2.SSLMode != nil {
-		if v1.SSLMode == nil ||
-			*v1.SSLMode != *v2.SSLMode {
-			d.SSLMode = v2.SSLMode
+	if v2.PgSSLMode != nil {
+		if v1.PgSSLMode == nil ||
+			*v1.PgSSLMode != *v2.PgSSLMode {
+			d.PgSSLMode = v2.PgSSLMode
 		}
 	} else {
-		d.SSLMode = nil
+		d.PgSSLMode = nil
 	}
 	if v2.KafkaTopic != nil {
 		if v1.KafkaTopic == nil ||

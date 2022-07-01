@@ -76,9 +76,9 @@ func (sqlEe *SQLEe) initDialector() (err error) {
 	if sqlEe.Cfg().Opts.SQLDBName != nil {
 		dbname = *sqlEe.Cfg().Opts.SQLDBName
 	}
-	ssl := utils.SQLDefaultSSLMode
-	if sqlEe.Cfg().Opts.SSLMode != nil {
-		ssl = *sqlEe.Cfg().Opts.SSLMode
+	ssl := utils.SQLDefaultPgSSLMode
+	if sqlEe.Cfg().Opts.PgSSLMode != nil {
+		ssl = *sqlEe.Cfg().Opts.PgSSLMode
 	}
 	// tableName is mandatory in opts
 	if sqlEe.Cfg().Opts.SQLTableName != nil {
