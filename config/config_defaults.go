@@ -157,10 +157,13 @@ const CGRATES_CFG_JSON = `
 
 	},
 	"opts":{
+		"redisMaxConns": 10,					// the connection pool size
+		"redisMaxAttempts": 20,					// the maximum amount of dial attempts
 		"redisSentinel": "",					// the name of sentinel when used
 		"redisCluster": false,					// if enabled the datadb will try to connect to the redis cluster
 		"redisClusterSync": "5s",				// the sync interval for the redis cluster
 		"redisClusterOndownDelay": "0",			// the delay before executing the commands if the redis cluster is in the CLUSTERDOWN state
+		"redisConnectTimeout": "0",				// the amount of wait time until timeout for a connection attempt
 		"redisReadTimeout": "0",				// the amount of wait time until timeout for reading operations
 		"redisWriteTimeout": "0",   			// the amount of wait time until timeout for writing operations
 		"mongoQueryTimeout": "10s",				// timeout for query when mongo is used
@@ -1484,10 +1487,13 @@ const CGRATES_CFG_JSON = `
 	"out_datadb_encoding" : "msgpack",		
 	"users_filters":[],
 	"out_datadb_opts":{
+		"redisMaxConns": 10,				// the connection pool size
+		"redisMaxAttempts": 20,				// the maximum amount of dial attempts
 		"redisSentinel": "",					
 		"redisCluster": false,					
 		"redisClusterSync": "5s",					
 		"redisClusterOndownDelay": "0",
+		"redisConnectTimeout": "0",			// the amount of wait time until timeout for a connection attempt
 		"redisReadTimeout": "0",			// the amount of wait time until timeout for reading operations
 		"redisWriteTimeout": "0",   		// the amount of wait time until timeout for writing operations
 		"redisTLS": false,					// enable TLS when connecting to Redis and use the redisClientCertificate, redisClientKey and redisCACertificate for TLS connection
@@ -1810,10 +1816,13 @@ const CGRATES_CFG_JSON = `
 	"db_user": "",		 					// username to use when connecting to data_db
 	"db_password": "", 						// password to use when connecting to data_db
 	"opts":{
+		"redisMaxConns": 10,					// the connection pool size
+		"redisMaxAttempts": 20,					// the maximum amount of dial attempts
 		"redisSentinel": "",					// the name of sentinel when used
 		"redisCluster": false,					// if enabled the datadb will try to connect to the redis cluster
 		"redisClusterSync": "5s",				// the sync interval for the redis cluster
 		"redisClusterOndownDelay": "0",			// the delay before executing the commands if the redis cluster is in the CLUSTERDOWN state
+		"redisConnectTimeout": "0",				// the amount of wait time until timeout for a connection attempt
 		"redisReadTimeout": "0",				// the amount of wait time until timeout for reading operations
 		"redisWriteTimeout": "0",   			// the amount of wait time until timeout for writing operations
 		"mongoQueryTimeout":"10s",				// timeout for query when mongo is used

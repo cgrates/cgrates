@@ -279,6 +279,8 @@ func TestDfDataDbJsonCfg(t *testing.T) {
 		Remote_conn_id:       utils.StringPointer(""),
 		Replication_cache:    utils.StringPointer(""),
 		Opts: &DBOptsJson{
+			RedisMaxConns:           utils.IntPointer(10),
+			RedisMaxAttempts:        utils.IntPointer(20),
 			RedisCACertificate:      utils.StringPointer(utils.EmptyString),
 			RedisClientCertificate:  utils.StringPointer(utils.EmptyString),
 			RedisClientKey:          utils.StringPointer(utils.EmptyString),
@@ -287,6 +289,7 @@ func TestDfDataDbJsonCfg(t *testing.T) {
 			RedisSentinel:           utils.StringPointer(utils.EmptyString),
 			MongoQueryTimeout:       utils.StringPointer("10s"),
 			RedisClusterOndownDelay: utils.StringPointer("0"),
+			RedisConnectTimeout:     utils.StringPointer("0"),
 			RedisReadTimeout:        utils.StringPointer("0"),
 			RedisWriteTimeout:       utils.StringPointer("0"),
 			RedisClusterSync:        utils.StringPointer("5s"),
@@ -1896,8 +1899,11 @@ func TestDfMigratorCfg(t *testing.T) {
 
 		Users_filters: &[]string{},
 		Out_dataDB_opts: &DBOptsJson{
+			RedisMaxConns:           utils.IntPointer(10),
+			RedisMaxAttempts:        utils.IntPointer(20),
 			RedisClusterSync:        utils.StringPointer("5s"),
 			RedisClusterOndownDelay: utils.StringPointer("0"),
+			RedisConnectTimeout:     utils.StringPointer("0"),
 			RedisReadTimeout:        utils.StringPointer("0"),
 			RedisWriteTimeout:       utils.StringPointer("0"),
 			RedisCACertificate:      utils.StringPointer(utils.EmptyString),

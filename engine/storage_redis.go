@@ -72,15 +72,15 @@ const (
 )
 
 func NewRedisStorage(address string, db int, user, pass, mrshlerStr string,
-	maxConns, attempts int, sentinelName string, isCluster bool, clusterSync,
-	clusterOnDownDelay, readTimeout, writeTimeout time.Duration, tlsConn bool,
+	maxConns, attempts int, sentinelName string, isCluster bool, clusterSync, clusterOnDownDelay,
+	connTimeout, readTimeout, writeTimeout time.Duration, tlsConn bool,
 	tlsClientCert, tlsClientKey, tlsCACert string) (_ *RedisStorage, err error) {
 	var ms utils.Marshaler
 	if ms, err = utils.NewMarshaler(mrshlerStr); err != nil {
 		return
 	}
 
-	dialOpts := make([]radix.DialOpt, 1, 5)
+	dialOpts := make([]radix.DialOpt, 1, 6)
 	dialOpts[0] = radix.DialSelectDB(db)
 	if pass != utils.EmptyString {
 		if user == utils.EmptyString {
@@ -121,7 +121,8 @@ func NewRedisStorage(address string, db int, user, pass, mrshlerStr string,
 
 	dialOpts = append(dialOpts,
 		radix.DialReadTimeout(readTimeout),
-		radix.DialWriteTimeout(writeTimeout))
+		radix.DialWriteTimeout(writeTimeout),
+		radix.DialConnectTimeout(connTimeout))
 
 	var client radix.Client
 	if client, err = newRedisClient(address, sentinelName,

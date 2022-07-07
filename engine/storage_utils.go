@@ -44,10 +44,10 @@ func NewDataDBConn(dbType, host, port, name, user,
 		if port != "" && !strings.Contains(host, ":") {
 			host += ":" + port
 		}
-		d, err = NewRedisStorage(host, dbNo, user, pass, marshaler, utils.RedisMaxConns, utils.RedisMaxAttempts,
+		d, err = NewRedisStorage(host, dbNo, user, pass, marshaler, opts.RedisMaxConns, opts.RedisMaxAttempts,
 			opts.RedisSentinel, opts.RedisCluster, opts.RedisClusterSync, opts.RedisClusterOndownDelay,
-			opts.RedisReadTimeout, opts.RedisWriteTimeout, opts.RedisTLS, opts.RedisClientCertificate,
-			opts.RedisClientKey, opts.RedisCACertificate)
+			opts.RedisConnectTimeout, opts.RedisReadTimeout, opts.RedisWriteTimeout, opts.RedisTLS,
+			opts.RedisClientCertificate, opts.RedisClientKey, opts.RedisCACertificate)
 	case utils.Mongo:
 		d, err = NewMongoStorage(host, port, name, user, pass, marshaler, utils.DataDB, nil, opts.MongoQueryTimeout)
 	case utils.Internal:

@@ -282,10 +282,13 @@ func TestGetSectionAsMap(t *testing.T) {
 		"db_user":     "",
 		"db_password": "",
 		"opts": map[string]interface{}{
+			"redisMaxConns":           10,
+			"redisMaxAttempts":        20,
 			"redisSentinel":           "",
 			"redisCluster":            false,
 			"redisClusterSync":        "5s",
 			"redisClusterOndownDelay": "0s",
+			"redisConnectTimeout":     "0s",
 			"redisReadTimeout":        "0s",
 			"redisWriteTimeout":       "0s",
 			"mongoQueryTimeout":       "10s",

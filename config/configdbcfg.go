@@ -102,10 +102,13 @@ func (dbcfg ConfigDBCfg) Clone() (cln *ConfigDBCfg) {
 // AsMapInterface returns the config as a map[string]interface{}
 func (dbcfg ConfigDBCfg) AsMapInterface(string) interface{} {
 	opts := map[string]interface{}{
+		utils.RedisMaxConnsCfg:           dbcfg.Opts.RedisMaxConns,
+		utils.RedisMaxAttemptsCfg:        dbcfg.Opts.RedisMaxAttempts,
 		utils.RedisSentinelNameCfg:       dbcfg.Opts.RedisSentinel,
 		utils.RedisClusterCfg:            dbcfg.Opts.RedisCluster,
 		utils.RedisClusterSyncCfg:        dbcfg.Opts.RedisClusterSync.String(),
 		utils.RedisClusterOnDownDelayCfg: dbcfg.Opts.RedisClusterOndownDelay.String(),
+		utils.RedisConnectTimeoutCfg:     dbcfg.Opts.RedisConnectTimeout.String(),
 		utils.RedisReadTimeoutCfg:        dbcfg.Opts.RedisReadTimeout.String(),
 		utils.RedisWriteTimeoutCfg:       dbcfg.Opts.RedisWriteTimeout.String(),
 		utils.MongoQueryTimeoutCfg:       dbcfg.Opts.MongoQueryTimeout.String(),
