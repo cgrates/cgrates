@@ -61,6 +61,10 @@ var (
 		"the DataDB password")
 	inDBDataEncoding = cgrMigratorFlags.String(utils.DBDataEncodingCfg, dfltCfg.GeneralCfg().DBDataEncoding,
 		"the encoding used to store object Data in strings")
+	dbRedisMaxConns = cgrMigratorFlags.Int(utils.RedisMaxConnsCfg, dfltCfg.DataDbCfg().Opts.RedisMaxConns,
+		"The connection pool size")
+	dbRedisMaxAttempts = cgrMigratorFlags.Int(utils.RedisMaxAttemptsCfg, dfltCfg.DataDbCfg().Opts.RedisMaxAttempts,
+		"The maximum amount of dial attempts")
 	inDataDBRedisSentinel = cgrMigratorFlags.String(utils.RedisSentinelNameCfg, dfltCfg.DataDbCfg().Opts.RedisSentinel,
 		"the name of redis sentinel")
 	dbRedisCluster = cgrMigratorFlags.Bool(utils.RedisClusterCfg, false,
@@ -69,6 +73,8 @@ var (
 		"The sync interval for the redis cluster")
 	dbRedisClusterDownDelay = cgrMigratorFlags.Duration(utils.RedisClusterOnDownDelayCfg, dfltCfg.DataDbCfg().Opts.RedisClusterOndownDelay,
 		"The delay before executing the commands if the redis cluster is in the CLUSTERDOWN state")
+	dbRedisConnectTimeout = cgrMigratorFlags.Duration(utils.RedisConnectTimeoutCfg, dfltCfg.DataDbCfg().Opts.RedisConnectTimeout,
+		"The amount of wait time until timeout for a connection attempt")
 	dbRedisReadTimeout = cgrMigratorFlags.Duration(utils.RedisReadTimeoutCfg, dfltCfg.DataDbCfg().Opts.RedisReadTimeout,
 		"The amount of wait time until timeout for reading operations")
 	dbRedisWriteTimeout = cgrMigratorFlags.Duration(utils.RedisWriteTimeoutCfg, dfltCfg.DataDbCfg().Opts.RedisWriteTimeout,
@@ -159,6 +165,12 @@ func main() {
 	if *inDBDataEncoding != dfltCfg.GeneralCfg().DBDataEncoding {
 		mgrCfg.GeneralCfg().DBDataEncoding = *inDBDataEncoding
 	}
+	if *dbRedisMaxConns != dfltCfg.DataDbCfg().Opts.RedisMaxConns {
+		mgrCfg.DataDbCfg().Opts.RedisMaxConns = *dbRedisMaxConns
+	}
+	if *dbRedisMaxAttempts != dfltCfg.DataDbCfg().Opts.RedisMaxAttempts {
+		mgrCfg.DataDbCfg().Opts.RedisMaxAttempts = *dbRedisMaxAttempts
+	}
 	if *inDataDBRedisSentinel != dfltCfg.DataDbCfg().Opts.RedisSentinel {
 		mgrCfg.DataDbCfg().Opts.RedisSentinel = *inDataDBRedisSentinel
 	}
@@ -170,6 +182,9 @@ func main() {
 	}
 	if *dbRedisClusterDownDelay != dfltCfg.DataDbCfg().Opts.RedisClusterOndownDelay {
 		mgrCfg.DataDbCfg().Opts.RedisClusterOndownDelay = *dbRedisClusterDownDelay
+	}
+	if *dbRedisConnectTimeout != dfltCfg.DataDbCfg().Opts.RedisConnectTimeout {
+		mgrCfg.DataDbCfg().Opts.RedisConnectTimeout = *dbRedisConnectTimeout
 	}
 	if *dbRedisReadTimeout != dfltCfg.DataDbCfg().Opts.RedisReadTimeout {
 		mgrCfg.DataDbCfg().Opts.RedisReadTimeout = *dbRedisReadTimeout

@@ -121,8 +121,6 @@ const (
 	CGRateSorg               = "cgrates.org"
 	Version                  = "v1.0~dev"
 	DiameterFirmwareRevision = 918
-	RedisMaxConns            = 10
-	RedisMaxAttempts         = 20
 	CGRateSLwr               = "cgrates"
 	Postgres                 = "postgres"
 	MySQL                    = "mysql"
@@ -1763,10 +1761,13 @@ const (
 	DataDbNameCfg              = "db_name"
 	DataDbUserCfg              = "db_user"
 	DataDbPassCfg              = "db_password"
+	RedisMaxConnsCfg           = "redisMaxConns"
+	RedisMaxAttemptsCfg        = "redisMaxAttempts"
 	RedisSentinelNameCfg       = "redisSentinel"
 	RedisClusterCfg            = "redisCluster"
 	RedisClusterSyncCfg        = "redisClusterSync"
 	RedisClusterOnDownDelayCfg = "redisClusterOndownDelay"
+	RedisConnectTimeoutCfg     = "redisConnectTimeout"
 	RedisReadTimeoutCfg        = "redisReadTimeout"
 	RedisWriteTimeoutCfg       = "redisWriteTimeout"
 	RedisTLSCfg                = "redisTLS"

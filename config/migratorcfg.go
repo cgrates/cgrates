@@ -84,10 +84,13 @@ func (mg *MigratorCgrCfg) loadFromJSONCfg(jsnCfg *MigratorCfgJson) (err error) {
 // AsMapInterface returns the config as a map[string]interface{}
 func (mg MigratorCgrCfg) AsMapInterface(string) interface{} {
 	outDataDBOpts := map[string]interface{}{
+		utils.RedisMaxConnsCfg:           mg.OutDataDBOpts.RedisMaxConns,
+		utils.RedisMaxAttemptsCfg:        mg.OutDataDBOpts.RedisMaxAttempts,
 		utils.RedisSentinelNameCfg:       mg.OutDataDBOpts.RedisSentinel,
 		utils.RedisClusterCfg:            mg.OutDataDBOpts.RedisCluster,
 		utils.RedisClusterSyncCfg:        mg.OutDataDBOpts.RedisClusterSync.String(),
 		utils.RedisClusterOnDownDelayCfg: mg.OutDataDBOpts.RedisClusterOndownDelay.String(),
+		utils.RedisConnectTimeoutCfg:     mg.OutDataDBOpts.RedisConnectTimeout.String(),
 		utils.RedisReadTimeoutCfg:        mg.OutDataDBOpts.RedisReadTimeout.String(),
 		utils.RedisWriteTimeoutCfg:       mg.OutDataDBOpts.RedisWriteTimeout.String(),
 		utils.MongoQueryTimeoutCfg:       mg.OutDataDBOpts.MongoQueryTimeout.String(),

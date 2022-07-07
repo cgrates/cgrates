@@ -49,6 +49,8 @@ func TestMigratorCgrCfgloadFromJsonCfg(t *testing.T) {
 		OutDataDBEncoding: utils.MsgPack,
 
 		OutDataDBOpts: &DataDBOpts{
+			RedisMaxConns:    10,
+			RedisMaxAttempts: 20,
 			RedisCluster:     true,
 			RedisClusterSync: 10 * time.Second,
 		},
@@ -77,6 +79,7 @@ func TestMigratorCgrCfgAsMapInterface(t *testing.T) {
 		   "redisCluster": true,					
 		   "redisClusterSync": "2s",					
 		   "redisClusterOndownDelay": "1",	
+		   "redisConnectTimeout": "5s",
 		   "redisReadTimeout": "5s",
 		   "redisWriteTimeout": "5s",
 		},
@@ -94,10 +97,13 @@ func TestMigratorCgrCfgAsMapInterface(t *testing.T) {
 		utils.UsersFiltersCfg: []string{"users", "filters", "Account"},
 
 		utils.OutDataDBOptsCfg: map[string]interface{}{
+			utils.RedisMaxConnsCfg:           10,
+			utils.RedisMaxAttemptsCfg:        20,
 			utils.RedisSentinelNameCfg:       "",
 			utils.RedisClusterCfg:            true,
 			utils.RedisClusterSyncCfg:        "2s",
 			utils.RedisClusterOnDownDelayCfg: "1ns",
+			utils.RedisConnectTimeoutCfg:     "5s",
 			utils.RedisReadTimeoutCfg:        "5s",
 			utils.RedisWriteTimeoutCfg:       "5s",
 			utils.RedisTLSCfg:                false,
@@ -134,11 +140,14 @@ func TestMigratorCgrCfgAsMapInterface1(t *testing.T) {
 		utils.UsersFiltersCfg: []string{"users", "filters", "Account"},
 
 		utils.OutDataDBOptsCfg: map[string]interface{}{
+			utils.RedisMaxConnsCfg:           10,
+			utils.RedisMaxAttemptsCfg:        20,
 			utils.MongoQueryTimeoutCfg:       "0s",
 			utils.RedisSentinelNameCfg:       "out_datadb_redis_sentinel",
 			utils.RedisClusterCfg:            false,
 			utils.RedisClusterSyncCfg:        "5s",
 			utils.RedisClusterOnDownDelayCfg: "0s",
+			utils.RedisConnectTimeoutCfg:     "0s",
 			utils.RedisReadTimeoutCfg:        "0s",
 			utils.RedisWriteTimeoutCfg:       "0s",
 			utils.RedisTLSCfg:                false,
@@ -170,12 +179,15 @@ func TestMigratorCgrCfgAsMapInterface2(t *testing.T) {
 		utils.UsersFiltersCfg: []string(nil),
 
 		utils.OutDataDBOptsCfg: map[string]interface{}{
+			utils.RedisMaxConnsCfg:           10,
+			utils.RedisMaxAttemptsCfg:        20,
 			utils.RedisSentinelNameCfg:       "",
 			utils.RedisClusterCfg:            false,
 			utils.RedisClusterSyncCfg:        "5s",
 			utils.RedisClusterOnDownDelayCfg: "0s",
 			utils.RedisTLSCfg:                false,
 			utils.RedisClientCertificateCfg:  "",
+			utils.RedisConnectTimeoutCfg:     "0s",
 			utils.RedisReadTimeoutCfg:        "0s",
 			utils.RedisWriteTimeoutCfg:       "0s",
 			utils.RedisClientKeyCfg:          "",
