@@ -63,7 +63,7 @@ var (
 		"the encoding used to store object Data in strings")
 	dbRedisMaxConns = cgrMigratorFlags.Int(utils.RedisMaxConnsCfg, dfltCfg.DataDbCfg().Opts.RedisMaxConns,
 		"The connection pool size")
-	dbRedisMaxAttempts = cgrMigratorFlags.Int(utils.RedisMaxAttemptsCfg, dfltCfg.DataDbCfg().Opts.RedisMaxAttempts,
+	dbRedisConnectAttempts = cgrMigratorFlags.Int(utils.RedisConnectAttemptsCfg, dfltCfg.DataDbCfg().Opts.RedisConnectAttempts,
 		"The maximum amount of dial attempts")
 	inDataDBRedisSentinel = cgrMigratorFlags.String(utils.RedisSentinelNameCfg, dfltCfg.DataDbCfg().Opts.RedisSentinel,
 		"the name of redis sentinel")
@@ -168,8 +168,8 @@ func main() {
 	if *dbRedisMaxConns != dfltCfg.DataDbCfg().Opts.RedisMaxConns {
 		mgrCfg.DataDbCfg().Opts.RedisMaxConns = *dbRedisMaxConns
 	}
-	if *dbRedisMaxAttempts != dfltCfg.DataDbCfg().Opts.RedisMaxAttempts {
-		mgrCfg.DataDbCfg().Opts.RedisMaxAttempts = *dbRedisMaxAttempts
+	if *dbRedisConnectAttempts != dfltCfg.DataDbCfg().Opts.RedisConnectAttempts {
+		mgrCfg.DataDbCfg().Opts.RedisConnectAttempts = *dbRedisConnectAttempts
 	}
 	if *inDataDBRedisSentinel != dfltCfg.DataDbCfg().Opts.RedisSentinel {
 		mgrCfg.DataDbCfg().Opts.RedisSentinel = *inDataDBRedisSentinel

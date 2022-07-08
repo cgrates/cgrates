@@ -85,7 +85,7 @@ func (mg *MigratorCgrCfg) loadFromJSONCfg(jsnCfg *MigratorCfgJson) (err error) {
 func (mg MigratorCgrCfg) AsMapInterface(string) interface{} {
 	outDataDBOpts := map[string]interface{}{
 		utils.RedisMaxConnsCfg:           mg.OutDataDBOpts.RedisMaxConns,
-		utils.RedisMaxAttemptsCfg:        mg.OutDataDBOpts.RedisMaxAttempts,
+		utils.RedisConnectAttemptsCfg:    mg.OutDataDBOpts.RedisConnectAttempts,
 		utils.RedisSentinelNameCfg:       mg.OutDataDBOpts.RedisSentinel,
 		utils.RedisClusterCfg:            mg.OutDataDBOpts.RedisCluster,
 		utils.RedisClusterSyncCfg:        mg.OutDataDBOpts.RedisClusterSync.String(),

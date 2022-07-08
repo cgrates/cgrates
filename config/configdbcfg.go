@@ -103,7 +103,7 @@ func (dbcfg ConfigDBCfg) Clone() (cln *ConfigDBCfg) {
 func (dbcfg ConfigDBCfg) AsMapInterface(string) interface{} {
 	opts := map[string]interface{}{
 		utils.RedisMaxConnsCfg:           dbcfg.Opts.RedisMaxConns,
-		utils.RedisMaxAttemptsCfg:        dbcfg.Opts.RedisMaxAttempts,
+		utils.RedisConnectAttemptsCfg:    dbcfg.Opts.RedisConnectAttempts,
 		utils.RedisSentinelNameCfg:       dbcfg.Opts.RedisSentinel,
 		utils.RedisClusterCfg:            dbcfg.Opts.RedisCluster,
 		utils.RedisClusterSyncCfg:        dbcfg.Opts.RedisClusterSync.String(),

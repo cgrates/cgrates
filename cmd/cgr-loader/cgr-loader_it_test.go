@@ -80,7 +80,7 @@ func TestLoadConfig(t *testing.T) {
 		Password: "toor",
 		Opts: &config.DataDBOpts{
 			RedisMaxConns:           10,
-			RedisMaxAttempts:        20,
+			RedisConnectAttempts:    20,
 			RedisSentinel:           "sentinel1",
 			MongoQueryTimeout:       10 * time.Second,
 			RedisClusterSync:        5 * time.Second,

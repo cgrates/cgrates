@@ -155,7 +155,7 @@ const CGRATES_CFG_JSON = `
 	},
 	"opts":{
 		"redisMaxConns": 10,					// the connection pool size
-		"redisMaxAttempts": 20,					// the maximum amount of dial attempts
+		"redisConnectAttempts": 20,				// the maximum amount of dial attempts
 		"redisSentinel": "",					// the name of sentinel when used
 		"redisCluster": false,					// if enabled the datadb will try to connect to the redis cluster
 		"redisClusterSync": "5s",				// the sync interval for the redis cluster
@@ -1491,7 +1491,7 @@ const CGRATES_CFG_JSON = `
 	"users_filters":[],
 	"out_datadb_opts":{
 		"redisMaxConns": 10,				// the connection pool size
-		"redisMaxAttempts": 20,				// the maximum amount of dial attempts
+		"redisConnectAttempts": 20,			// the maximum amount of dial attempts
 		"redisSentinel": "",					
 		"redisCluster": false,					
 		"redisClusterSync": "5s",					
@@ -1820,7 +1820,7 @@ const CGRATES_CFG_JSON = `
 	"db_password": "", 						// password to use when connecting to data_db
 	"opts":{
 		"redisMaxConns": 10,					// the connection pool size
-		"redisMaxAttempts": 20,					// the maximum amount of dial attempts
+		"redisConnectAttempts": 20,				// the maximum amount of dial attempts
 		"redisSentinel": "",					// the name of sentinel when used
 		"redisCluster": false,					// if enabled the datadb will try to connect to the redis cluster
 		"redisClusterSync": "5s",				// the sync interval for the redis cluster

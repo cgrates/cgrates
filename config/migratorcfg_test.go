@@ -49,10 +49,10 @@ func TestMigratorCgrCfgloadFromJsonCfg(t *testing.T) {
 		OutDataDBEncoding: utils.MsgPack,
 
 		OutDataDBOpts: &DataDBOpts{
-			RedisMaxConns:    10,
-			RedisMaxAttempts: 20,
-			RedisCluster:     true,
-			RedisClusterSync: 10 * time.Second,
+			RedisMaxConns:        10,
+			RedisConnectAttempts: 20,
+			RedisCluster:         true,
+			RedisClusterSync:     10 * time.Second,
 		},
 	}
 	cfg := NewDefaultCGRConfig()
@@ -98,7 +98,7 @@ func TestMigratorCgrCfgAsMapInterface(t *testing.T) {
 
 		utils.OutDataDBOptsCfg: map[string]interface{}{
 			utils.RedisMaxConnsCfg:           10,
-			utils.RedisMaxAttemptsCfg:        20,
+			utils.RedisConnectAttemptsCfg:    20,
 			utils.RedisSentinelNameCfg:       "",
 			utils.RedisClusterCfg:            true,
 			utils.RedisClusterSyncCfg:        "2s",
@@ -141,7 +141,7 @@ func TestMigratorCgrCfgAsMapInterface1(t *testing.T) {
 
 		utils.OutDataDBOptsCfg: map[string]interface{}{
 			utils.RedisMaxConnsCfg:           10,
-			utils.RedisMaxAttemptsCfg:        20,
+			utils.RedisConnectAttemptsCfg:    20,
 			utils.MongoQueryTimeoutCfg:       "0s",
 			utils.RedisSentinelNameCfg:       "out_datadb_redis_sentinel",
 			utils.RedisClusterCfg:            false,
@@ -180,7 +180,7 @@ func TestMigratorCgrCfgAsMapInterface2(t *testing.T) {
 
 		utils.OutDataDBOptsCfg: map[string]interface{}{
 			utils.RedisMaxConnsCfg:           10,
-			utils.RedisMaxAttemptsCfg:        20,
+			utils.RedisConnectAttemptsCfg:    20,
 			utils.RedisSentinelNameCfg:       "",
 			utils.RedisClusterCfg:            false,
 			utils.RedisClusterSyncCfg:        "5s",

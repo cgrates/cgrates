@@ -44,7 +44,7 @@ func NewDataDBConn(dbType, host, port, name, user,
 		if port != "" && !strings.Contains(host, ":") {
 			host += ":" + port
 		}
-		d, err = NewRedisStorage(host, dbNo, user, pass, marshaler, opts.RedisMaxConns, opts.RedisMaxAttempts,
+		d, err = NewRedisStorage(host, dbNo, user, pass, marshaler, opts.RedisMaxConns, opts.RedisConnectAttempts,
 			opts.RedisSentinel, opts.RedisCluster, opts.RedisClusterSync, opts.RedisClusterOndownDelay,
 			opts.RedisConnectTimeout, opts.RedisReadTimeout, opts.RedisWriteTimeout, opts.RedisTLS,
 			opts.RedisClientCertificate, opts.RedisClientKey, opts.RedisCACertificate)
