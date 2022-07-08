@@ -278,7 +278,7 @@ func TestGetSectionAsMap(t *testing.T) {
 		"db_password": "",
 		"opts": map[string]interface{}{
 			"redisMaxConns":           10,
-			"redisMaxAttempts":        20,
+			"redisConnectAttempts":    20,
 			"redisSentinel":           "",
 			"redisCluster":            false,
 			"redisClusterSync":        "5s",

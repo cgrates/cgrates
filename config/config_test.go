@@ -3476,9 +3476,9 @@ func TestCgrMigratorCfgDefault(t *testing.T) {
 		OutDataDBPassword: "",
 		OutDataDBEncoding: "msgpack",
 		OutDataDBOpts: &DataDBOpts{
-			RedisMaxConns:    10,
-			RedisMaxAttempts: 20,
-			RedisClusterSync: 5 * time.Second,
+			RedisMaxConns:        10,
+			RedisConnectAttempts: 20,
+			RedisClusterSync:     5 * time.Second,
 		},
 	}
 	if !reflect.DeepEqual(cgrCfg.MigratorCgrCfg(), eMgrCfg) {
@@ -4546,7 +4546,7 @@ func TestV1GetConfigSectionMigrator(t *testing.T) {
 			utils.UsersFiltersCfg:      []string(nil),
 			utils.OutDataDBOptsCfg: map[string]interface{}{
 				utils.RedisMaxConnsCfg:           10,
-				utils.RedisMaxAttemptsCfg:        20,
+				utils.RedisConnectAttemptsCfg:    20,
 				utils.MongoQueryTimeoutCfg:       "0s",
 				utils.RedisSentinelNameCfg:       "",
 				utils.RedisClusterCfg:            false,
@@ -4979,7 +4979,7 @@ func TestV1GetConfigAsJSONGeneral(t *testing.T) {
 
 func TestV1GetConfigAsJSONDataDB(t *testing.T) {
 	var reply string
-	expected := `{"data_db":{"db_host":"127.0.0.1","db_name":"10","db_password":"","db_port":6379,"db_type":"*redis","db_user":"cgrates","items":{"*account_filter_indexes":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*accounts":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*action_profile_filter_indexes":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*action_profiles":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*actions":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*attribute_filter_indexes":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*attribute_profiles":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*charger_filter_indexes":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*charger_profiles":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*dispatcher_filter_indexes":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*dispatcher_hosts":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*dispatcher_profiles":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*filters":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*load_ids":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*rate_filter_indexes":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*rate_profile_filter_indexes":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*rate_profiles":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*resource_filter_indexes":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*resource_profiles":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*resources":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*reverse_filter_indexes":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*route_filter_indexes":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*route_profiles":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*stat_filter_indexes":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*statqueue_profiles":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*statqueues":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*threshold_filter_indexes":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*threshold_profiles":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*thresholds":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*versions":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false}},"opts":{"mongoQueryTimeout":"10s","redisCACertificate":"","redisClientCertificate":"","redisClientKey":"","redisCluster":false,"redisClusterOndownDelay":"0s","redisClusterSync":"5s","redisConnectTimeout":"0s","redisMaxAttempts":20,"redisMaxConns":10,"redisReadTimeout":"0s","redisSentinel":"","redisTLS":false,"redisWriteTimeout":"0s"},"remote_conn_id":"","remote_conns":[],"replication_cache":"","replication_conns":[],"replication_filtered":false}}`
+	expected := `{"data_db":{"db_host":"127.0.0.1","db_name":"10","db_password":"","db_port":6379,"db_type":"*redis","db_user":"cgrates","items":{"*account_filter_indexes":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*accounts":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*action_profile_filter_indexes":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*action_profiles":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*actions":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*attribute_filter_indexes":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*attribute_profiles":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*charger_filter_indexes":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*charger_profiles":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*dispatcher_filter_indexes":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*dispatcher_hosts":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*dispatcher_profiles":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*filters":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*load_ids":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*rate_filter_indexes":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*rate_profile_filter_indexes":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*rate_profiles":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*resource_filter_indexes":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*resource_profiles":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*resources":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*reverse_filter_indexes":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*route_filter_indexes":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*route_profiles":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*stat_filter_indexes":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*statqueue_profiles":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*statqueues":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*threshold_filter_indexes":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*threshold_profiles":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*thresholds":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*versions":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false}},"opts":{"mongoQueryTimeout":"10s","redisCACertificate":"","redisClientCertificate":"","redisClientKey":"","redisCluster":false,"redisClusterOndownDelay":"0s","redisClusterSync":"5s","redisConnectAttempts":20,"redisConnectTimeout":"0s","redisMaxConns":10,"redisReadTimeout":"0s","redisSentinel":"","redisTLS":false,"redisWriteTimeout":"0s"},"remote_conn_id":"","remote_conns":[],"replication_cache":"","replication_conns":[],"replication_filtered":false}}`
 	cfgCgr := NewDefaultCGRConfig()
 	if err := cfgCgr.V1GetConfigAsJSON(context.Background(), &SectionWithAPIOpts{Sections: []string{DataDBJSON}}, &reply); err != nil {
 		t.Error(err)
@@ -5267,7 +5267,7 @@ func TestV1GetConfigAsJSONCgrLoader(t *testing.T) {
 
 func TestV1GetConfigAsJSONCgrMigrator(t *testing.T) {
 	var reply string
-	expected := `{"migrator":{"out_datadb_encoding":"msgpack","out_datadb_host":"127.0.0.1","out_datadb_name":"10","out_datadb_opts":{"mongoQueryTimeout":"0s","redisCACertificate":"","redisClientCertificate":"","redisClientKey":"","redisCluster":false,"redisClusterOndownDelay":"0s","redisClusterSync":"5s","redisConnectTimeout":"0s","redisMaxAttempts":20,"redisMaxConns":10,"redisReadTimeout":"0s","redisSentinel":"","redisTLS":false,"redisWriteTimeout":"0s"},"out_datadb_password":"","out_datadb_port":"6379","out_datadb_type":"redis","out_datadb_user":"cgrates","users_filters":null}}`
+	expected := `{"migrator":{"out_datadb_encoding":"msgpack","out_datadb_host":"127.0.0.1","out_datadb_name":"10","out_datadb_opts":{"mongoQueryTimeout":"0s","redisCACertificate":"","redisClientCertificate":"","redisClientKey":"","redisCluster":false,"redisClusterOndownDelay":"0s","redisClusterSync":"5s","redisConnectAttempts":20,"redisConnectTimeout":"0s","redisMaxConns":10,"redisReadTimeout":"0s","redisSentinel":"","redisTLS":false,"redisWriteTimeout":"0s"},"out_datadb_password":"","out_datadb_port":"6379","out_datadb_type":"redis","out_datadb_user":"cgrates","users_filters":null}}`
 	cgrCfg := NewDefaultCGRConfig()
 	if err := cgrCfg.V1GetConfigAsJSON(context.Background(), &SectionWithAPIOpts{Sections: []string{MigratorJSON}}, &reply); err != nil {
 		t.Error(err)
@@ -6255,7 +6255,7 @@ func TestConfigLoadConfigDBCfg(t *testing.T) {
 		Port: "0",
 		Opts: &DataDBOpts{
 			RedisMaxConns:           10,
-			RedisMaxAttempts:        20,
+			RedisConnectAttempts:    20,
 			RedisCluster:            false,
 			RedisClusterSync:        5 * time.Second,
 			RedisClusterOndownDelay: 0,
@@ -6276,7 +6276,7 @@ func TestConfigDBCfg(t *testing.T) {
 		Port: "0",
 		Opts: &DataDBOpts{
 			RedisMaxConns:           10,
-			RedisMaxAttempts:        20,
+			RedisConnectAttempts:    20,
 			RedisCluster:            false,
 			RedisClusterSync:        5 * time.Second,
 			RedisClusterOndownDelay: 0,

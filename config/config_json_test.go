@@ -275,7 +275,7 @@ func TestDfDataDbJsonCfg(t *testing.T) {
 		Replication_cache:    utils.StringPointer(""),
 		Opts: &DBOptsJson{
 			RedisMaxConns:           utils.IntPointer(10),
-			RedisMaxAttempts:        utils.IntPointer(20),
+			RedisConnectAttempts:    utils.IntPointer(20),
 			RedisCACertificate:      utils.StringPointer(utils.EmptyString),
 			RedisClientCertificate:  utils.StringPointer(utils.EmptyString),
 			RedisClientKey:          utils.StringPointer(utils.EmptyString),
@@ -1895,7 +1895,7 @@ func TestDfMigratorCfg(t *testing.T) {
 		Users_filters: &[]string{},
 		Out_dataDB_opts: &DBOptsJson{
 			RedisMaxConns:           utils.IntPointer(10),
-			RedisMaxAttempts:        utils.IntPointer(20),
+			RedisConnectAttempts:    utils.IntPointer(20),
 			RedisClusterSync:        utils.StringPointer("5s"),
 			RedisClusterOndownDelay: utils.StringPointer("0"),
 			RedisConnectTimeout:     utils.StringPointer("0"),

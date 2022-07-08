@@ -1773,7 +1773,7 @@ const (
 	DataDbUserCfg              = "db_user"
 	DataDbPassCfg              = "db_password"
 	RedisMaxConnsCfg           = "redisMaxConns"
-	RedisMaxAttemptsCfg        = "redisMaxAttempts"
+	RedisConnectAttemptsCfg    = "redisConnectAttempts"
 	RedisSentinelNameCfg       = "redisSentinel"
 	RedisClusterCfg            = "redisCluster"
 	RedisClusterSyncCfg        = "redisClusterSync"

@@ -48,7 +48,7 @@ func defaultDBPort(dbType, port string) string {
 
 type DataDBOpts struct {
 	RedisMaxConns           int
-	RedisMaxAttempts        int
+	RedisConnectAttempts    int
 	RedisSentinel           string
 	RedisCluster            bool
 	RedisClusterSync        time.Duration
@@ -109,8 +109,8 @@ func (dbOpts *DataDBOpts) loadFromJSONCfg(jsnCfg *DBOptsJson) (err error) {
 	if jsnCfg.RedisMaxConns != nil {
 		dbOpts.RedisMaxConns = *jsnCfg.RedisMaxConns
 	}
-	if jsnCfg.RedisMaxAttempts != nil {
-		dbOpts.RedisMaxAttempts = *jsnCfg.RedisMaxAttempts
+	if jsnCfg.RedisConnectAttempts != nil {
+		dbOpts.RedisConnectAttempts = *jsnCfg.RedisConnectAttempts
 	}
 	if jsnCfg.RedisSentinel != nil {
 		dbOpts.RedisSentinel = *jsnCfg.RedisSentinel
@@ -241,7 +241,7 @@ func (dbcfg DataDbCfg) CloneSection() Section { return dbcfg.Clone() }
 func (dbOpts *DataDBOpts) Clone() *DataDBOpts {
 	return &DataDBOpts{
 		RedisMaxConns:           dbOpts.RedisMaxConns,
-		RedisMaxAttempts:        dbOpts.RedisMaxAttempts,
+		RedisConnectAttempts:    dbOpts.RedisConnectAttempts,
 		RedisSentinel:           dbOpts.RedisSentinel,
 		RedisCluster:            dbOpts.RedisCluster,
 		RedisClusterSync:        dbOpts.RedisClusterSync,
@@ -288,7 +288,7 @@ func (dbcfg DataDbCfg) Clone() (cln *DataDbCfg) {
 func (dbcfg DataDbCfg) AsMapInterface(string) interface{} {
 	opts := map[string]interface{}{
 		utils.RedisMaxConnsCfg:           dbcfg.Opts.RedisMaxConns,
-		utils.RedisMaxAttemptsCfg:        dbcfg.Opts.RedisMaxAttempts,
+		utils.RedisConnectAttemptsCfg:    dbcfg.Opts.RedisConnectAttempts,
 		utils.RedisSentinelNameCfg:       dbcfg.Opts.RedisSentinel,
 		utils.RedisClusterCfg:            dbcfg.Opts.RedisCluster,
 		utils.RedisClusterSyncCfg:        dbcfg.Opts.RedisClusterSync.String(),
@@ -468,7 +468,7 @@ func diffMapItemOptJson(d map[string]*ItemOptsJson, v1, v2 map[string]*ItemOpts)
 
 type DBOptsJson struct {
 	RedisMaxConns           *int              `json:"redisMaxConns"`
-	RedisMaxAttempts        *int              `json:"redisMaxAttempts"`
+	RedisConnectAttempts    *int              `json:"redisConnectAttempts"`
 	RedisSentinel           *string           `json:"redisSentinel"`
 	RedisCluster            *bool             `json:"redisCluster"`
 	RedisClusterSync        *string           `json:"redisClusterSync"`
@@ -515,8 +515,8 @@ func diffDataDBOptsJsonCfg(d *DBOptsJson, v1, v2 *DataDBOpts) *DBOptsJson {
 	if v1.RedisMaxConns != v2.RedisMaxConns {
 		d.RedisMaxConns = utils.IntPointer(v2.RedisMaxConns)
 	}
-	if v1.RedisMaxAttempts != v2.RedisMaxAttempts {
-		d.RedisMaxAttempts = utils.IntPointer(v2.RedisMaxAttempts)
+	if v1.RedisConnectAttempts != v2.RedisConnectAttempts {
+		d.RedisConnectAttempts = utils.IntPointer(v2.RedisConnectAttempts)
 	}
 	if v1.RedisSentinel != v2.RedisSentinel {
 		d.RedisSentinel = utils.StringPointer(v2.RedisSentinel)
