@@ -189,6 +189,7 @@ func testLdPrMatchRtCDRSProcessEvent(t *testing.T) {
 				"Usage":       60000000000,
 			},
 			APIOpts: map[string]interface{}{
+				utils.MetaCost: 0.4,
 				utils.MetaRateSCost: map[string]interface{}{
 					"Altered":  nil,
 					utils.Cost: 0.4,
@@ -211,7 +212,7 @@ func testLdPrMatchRtCDRSProcessEvent(t *testing.T) {
 					"MinCost":         0,
 					"Rates": map[string]interface{}{
 						utils.IfaceAsString(costIntervalRatesID): map[string]interface{}{
-							"FixedFee":      nil,
+							"FixedFee":      0,
 							"Increment":     30000000000,
 							"IntervalStart": 0,
 							"RecurrentFee":  0.4,
