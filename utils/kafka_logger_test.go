@@ -16,17 +16,9 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-package engine
+package utils
 
-import (
-	"reflect"
-	"testing"
-
-	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/utils"
-	"github.com/segmentio/kafka-go"
-)
-
+/*
 func TestLoggerNewLoggerExport(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	exp := &ExportLogger{
@@ -56,7 +48,6 @@ func TestLoggerNewLoggerDefault(t *testing.T) {
 	}
 }
 
-/*
 func TestLoggerNewExportLogger(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	exp := &ExportLogger{

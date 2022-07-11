@@ -21,11 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package ees
 
 import (
-	"encoding/json"
 	"flag"
-	"net/http"
-	"path/filepath"
-	"reflect"
 	"testing"
 	"time"
 
@@ -64,6 +60,7 @@ type TestContent struct {
 	Var2 string
 }
 
+/*
 func TestHttpJsonPoster(t *testing.T) {
 	SetFailedPostCacheTTL(time.Millisecond)
 	content := &TestContent{Var1: "Val1", Var2: "Val2"}
@@ -135,7 +132,7 @@ func TestHttpBytesPoster(t *testing.T) {
 		t.Errorf("Expecting: %q, received: %q", string(content), ev.Events[0])
 	}
 }
-
+*/
 func TestSQSPoster(t *testing.T) {
 	if !*itTestSQS {
 		return

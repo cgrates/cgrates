@@ -194,7 +194,7 @@ func IfaceAsInt64(itm interface{}) (i int64, err error) {
 }
 
 // IfaceAsTInt converts interface to type int
-func IfaceAsTInt(itm interface{}) (i int, err error) {
+func IfaceAsInt(itm interface{}) (i int, err error) {
 	switch it := itm.(type) {
 	case int:
 		return it, nil

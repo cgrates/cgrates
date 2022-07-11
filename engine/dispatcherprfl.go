@@ -291,11 +291,11 @@ func (dH *DispatcherHost) Set(path []string, val interface{}, newBranch bool, _ 
 		dH.CaCertificate = utils.IfaceAsString(val)
 	case utils.ConnectAttempts:
 		if val != utils.EmptyString {
-			dH.ConnectAttempts, err = utils.IfaceAsTInt(val)
+			dH.ConnectAttempts, err = utils.IfaceAsInt(val)
 		}
 	case utils.Reconnects:
 		if val != utils.EmptyString {
-			dH.Reconnects, err = utils.IfaceAsTInt(val)
+			dH.Reconnects, err = utils.IfaceAsInt(val)
 		}
 	case utils.MaxReconnectInterval:
 		if val != utils.EmptyString {

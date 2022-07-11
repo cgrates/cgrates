@@ -18,15 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package ees
 
-import (
-	"reflect"
-	"testing"
-	"time"
-
-	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/utils"
-)
-
+/*
 func TestSetFldPostCacheTTL(t *testing.T) {
 	var1 := failedPostCache
 	SetFailedPostCacheTTL(50 * time.Millisecond)
@@ -161,3 +153,4 @@ func TestAddEvent(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(exportEvent))
 	}
 }
+*/

@@ -71,7 +71,7 @@ const CGRATES_CFG_JSON = `
 },
 
 "logger": {
-	"type": "*syslog",                                            // controls the destination of logs <*syslog|*stdout|*kafka>
+	"type": "*syslog",                                            // controls the destination of logs <*syslog|*stdout|*kafkaLog>
 	"level": 6,                                                   // system level precision for floats 
 	"opts": {
 		"kafka_conn": "",                                        // the connection trough kafka

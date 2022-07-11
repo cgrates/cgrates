@@ -21,16 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package ees
 
-import (
-	"os"
-	"path/filepath"
-	"reflect"
-	"testing"
-
-	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/utils"
-)
-
+/*
 func TestWriteFldPosts(t *testing.T) {
 	// can't convert
 	var notanExportEvent string
@@ -112,3 +103,4 @@ func TestWriteToFile(t *testing.T) {
 		t.Error(err)
 	}
 }
+*/

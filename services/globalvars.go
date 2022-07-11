@@ -22,7 +22,6 @@ import (
 	"sync"
 
 	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/ees"
 	"github.com/cgrates/cgrates/engine"
 
 	"github.com/cgrates/cgrates/config"
@@ -47,7 +46,6 @@ type GlobalVarS struct {
 
 // Start should handle the sercive start
 func (gv *GlobalVarS) Start(*context.Context, context.CancelFunc) error {
-	ees.SetFailedPostCacheTTL(gv.cfg.GeneralCfg().FailedPostsTTL)
 	engine.SetHTTPPstrTransport(gv.cfg.HTTPCfg().ClientOpts)
 	utils.DecimalContext.MaxScale = gv.cfg.GeneralCfg().DecimalMaxScale
 	utils.DecimalContext.MinScale = gv.cfg.GeneralCfg().DecimalMinScale

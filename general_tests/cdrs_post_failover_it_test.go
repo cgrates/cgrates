@@ -203,19 +203,19 @@ func testCDRsPostFailoverToFile(t *testing.T) {
 		fileName := file.Name()
 		filePath := path.Join(cdrsPostFailCfg.GeneralCfg().FailedPostsDir, fileName)
 
-		ev, err := ees.NewExportEventsFromFile(filePath)
+		ev, err := ees.NewFailoverPosterFromFile(filePath, utils.EEs)
 		if err != nil {
 			t.Errorf("<%s> for file <%s>", err, fileName)
 			continue
-		} else if len(ev.Events) == 0 {
+		} else if len(ev.(*ees.FailedExportersEEs).Events) == 0 {
 			t.Error("Expected at least one event")
 			continue
 		}
-		if ev.Format != utils.MetaS3jsonMap {
-			t.Errorf("Expected event to use %q received: %q", utils.MetaS3jsonMap, ev.Format)
+		if ev.(*ees.FailedExportersEEs).Format != utils.MetaS3jsonMap {
+			t.Errorf("Expected event to use %q received: %q", utils.MetaS3jsonMap, ev.(*ees.FailedExportersEEs).Format)
 		}
-		if len(ev.Events) != 3 {
-			t.Errorf("Expected all the events to be saved in the same file, ony %v saved in this file.", len(ev.Events))
+		if len(ev.(*ees.FailedExportersEEs).Events) != 3 {
+			t.Errorf("Expected all the events to be saved in the same file, ony %v saved in this file.", len(ev.(*ees.FailedExportersEEs).Events))
 		}
 	}
 }

@@ -35,7 +35,7 @@ func TestLoggerNewLoggerStdoutOK(t *testing.T) {
 			log.New(os.Stderr, EmptyString, log.LstdFlags),
 		},
 	}
-	if rcv, err := NewLogger(MetaStdLog, "1234", 7); err != nil {
+	if rcv, err := NewLogger(MetaStdLog, EmptyString, "1234", 7, 0, EmptyString, EmptyString, EmptyString); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcv, exp) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", exp, rcv)
@@ -46,7 +46,7 @@ func TestLoggerNewLoggerSyslogOK(t *testing.T) {
 	exp := &SysLogger{
 		logLevel: 7,
 	}
-	if rcv, err := NewLogger(MetaSysLog, "1234", 7); err != nil {
+	if rcv, err := NewLogger(MetaSysLog, EmptyString, "1234", 7, 0, EmptyString, EmptyString, EmptyString); err != nil {
 		t.Error(err)
 	} else {
 		exp.syslog = rcv.GetSyslog()
@@ -58,7 +58,7 @@ func TestLoggerNewLoggerSyslogOK(t *testing.T) {
 
 func TestLoggerNewLoggerUnsupported(t *testing.T) {
 	experr := `unsupported logger: <unsupported>`
-	if _, err := NewLogger("unsupported", "1234", 7); err == nil || err.Error() != experr {
+	if _, err := NewLogger("unsupported", EmptyString, "1234", 7, 0, EmptyString, EmptyString, EmptyString); err == nil || err.Error() != experr {
 		t.Errorf("expected: <%s>, \nreceived: <%+v>", experr, err)
 	}
 }
