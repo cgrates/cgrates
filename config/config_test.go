@@ -376,11 +376,11 @@ func TestCgrCfgJSONDefaultsStorDB(t *testing.T) {
 	if cgrCfg.StorDbCfg().Password != "" {
 		t.Errorf("Expecting: , received: %+v", cgrCfg.StorDbCfg().Password)
 	}
-	if cgrCfg.StorDbCfg().Opts[utils.SQLMaxOpenConnsCfg] != 100. {
-		t.Errorf("Expecting: 100 , received: %+v", cgrCfg.StorDbCfg().Opts[utils.SQLMaxOpenConnsCfg])
+	if cgrCfg.StorDbCfg().Opts.SQLMaxOpenConns != 100 {
+		t.Errorf("Expecting: 100 , received: %+v", cgrCfg.StorDbCfg().Opts.SQLMaxOpenConns)
 	}
-	if cgrCfg.StorDbCfg().Opts[utils.SQLMaxIdleConnsCfg] != 10. {
-		t.Errorf("Expecting: 10 , received: %+v", cgrCfg.StorDbCfg().Opts[utils.SQLMaxIdleConnsCfg])
+	if cgrCfg.StorDbCfg().Opts.SQLMaxIdleConns != 10 {
+		t.Errorf("Expecting: 10 , received: %+v", cgrCfg.StorDbCfg().Opts.SQLMaxIdleConns)
 	}
 	if !reflect.DeepEqual(cgrCfg.StorDbCfg().StringIndexedFields, []string{}) {
 		t.Errorf("Expecting: %+v , received: %+v", []string{}, cgrCfg.StorDbCfg().StringIndexedFields)
@@ -3290,17 +3290,16 @@ func TestCgrMigratorCfgDefault(t *testing.T) {
 		OutStorDBName:     "cgrates",
 		OutStorDBUser:     "cgrates",
 		OutStorDBPassword: "",
-		OutDataDBOpts: map[string]interface{}{
-			utils.RedisClusterOnDownDelayCfg: "0",
-			utils.RedisClusterSyncCfg:        "5s",
-			utils.RedisClusterCfg:            false,
-			utils.RedisSentinelNameCfg:       "",
-			utils.RedisTLS:                   false,
-			utils.RedisClientCertificate:     "",
-			utils.RedisClientKey:             "",
-			utils.RedisCACertificate:         "",
+		OutDataDBOpts: &DataDBOpts{
+			RedisMaxConns:           10,
+			RedisConnectAttempts:    20,
+			RedisSentinel:           utils.EmptyString,
+			RedisCluster:            false,
+			RedisClusterSync:        5 * time.Second,
+			RedisClusterOndownDelay: 0,
+			RedisTLS:                false,
 		},
-		OutStorDBOpts: make(map[string]interface{}),
+		OutStorDBOpts: &StorDBOpts{},
 	}
 	if !reflect.DeepEqual(cgrCfg.MigratorCgrCfg(), eMgrCfg) {
 		t.Errorf("expected: %+v, received: %+v", utils.ToJSON(eMgrCfg), utils.ToJSON(cgrCfg.MigratorCgrCfg()))
@@ -3633,7 +3632,7 @@ func TestV1GetConfigStorDB(t *testing.T) {
 			utils.SQLConnMaxLifetimeCfg: 0.,
 			utils.MYSQLDSNParams:        make(map[string]interface{}),
 			utils.MongoQueryTimeoutCfg:  "10s",
-			utils.SSLModeCfg:            "disable",
+			utils.PgSSLModeCfg:          "disable",
 			utils.MysqlLocation:         "Local",
 		},
 		utils.ItemsCfg: map[string]interface{}{},

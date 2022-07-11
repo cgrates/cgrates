@@ -134,10 +134,15 @@ const CGRATES_CFG_JSON = `
 		"*reverse_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
 	},
 	"opts":{
+		"redisMaxConns": 10,					// the connection pool size
+		"redisConnectAttempts": 20,				// the maximum amount of dial attempts
 		"redisSentinel": "",					// the name of sentinel when used
 		"redisCluster": false,					// if enabled the datadb will try to connect to the redis cluster
 		"redisClusterSync": "5s",				// the sync interval for the redis cluster
 		"redisClusterOndownDelay": "0",			// the delay before executing the commands if the redis cluster is in the CLUSTERDOWN state
+		"redisConnectTimeout": "0",				// the amount of wait time until timeout for a connection attempt
+		"redisReadTimeout": "0",				// the amount of wait time until timeout for reading operations
+		"redisWriteTimeout": "0",   			// the amount of wait time until timeout for writing operations
 		"mongoQueryTimeout":"10s",				// timeout for query when mongo is used
 		"redisTLS": false,						// if true it will use a tls connection and use the redisClientCertificate, redisClientKey and redisCACertificate for tls connection
 		"redisClientCertificate":"",			// path to client certificate
@@ -162,7 +167,7 @@ const CGRATES_CFG_JSON = `
 		"sqlConnMaxLifetime": 0, 			// maximum amount of time in seconds a connection may be reused (0 for unlimited), not applying for mongo
 		"mysqlDSNParams": {},               // DSN extra paramss
 		"mongoQueryTimeout":"10s",			// timeout for query when mongo is used
-		"postgresSSLMode":"disable",		// postgresSSLMode in case of *postgres
+		"pgSSLMode":"disable",		 		// pgSSLMode in case of *postgres
 		"mysqlLocation": "Local",			// the location the time from mysql is retrived
 	},
 	"items":{
@@ -404,11 +409,11 @@ const CGRATES_CFG_JSON = `
 				// SQL
 				// "sqlDBName": "cgrates", 						// the name of the database from were the events are read
 				// "sqlTableName": "cdrs",						// the name of the table from were the events are read
-				// "postgresSSLMode": "disable",				// the ssl mode for postgres db
+				// "pgSSLMode": "disable",						// the ssl mode for postgres db
 
 				// "sqlDBNameProcessed": "", 					// the name of the database were the events are sent after they are processed
 				// "sqlTableNameProcessed": "",					// the name of the table were the events are sent after they are processed
-				// "postgresSSLModeProcessed": "",				// the ssl mode for postgres db
+				// "pgSSLModeProcessed": "",					// the ssl mode for postgres db
 
 				// SQS and S3
 				// "awsRegion": "",
@@ -1054,10 +1059,15 @@ const CGRATES_CFG_JSON = `
 	"out_stordb_password": "",
 	"users_filters":[],
 	"out_datadb_opts":{
+		"redisMaxConns": 10,				// the connection pool size
+		"redisConnectAttempts": 20,			// the maximum amount of dial attempts
 		"redisSentinel": "",					
 		"redisCluster": false,					
 		"redisClusterSync": "5s",					
 		"redisClusterOndownDelay": "0",
+		"redisConnectTimeout": "0",			// the amount of wait time until timeout for a connection attempt
+		"redisReadTimeout": "0",			// the amount of wait time until timeout for reading operations
+		"redisWriteTimeout": "0",   		// the amount of wait time until timeout for writing operations
 		"redisTLS": false,					// enable TLS when connecting to Redis and use the redisClientCertificate, redisClientKey and redisCACertificate for TLS connection
 		"redisClientCertificate":"",		// path to client certificate
 		"redisClientKey":"",				// path to client key

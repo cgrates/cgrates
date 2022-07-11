@@ -1673,8 +1673,8 @@ func TestConfigSanityStorDB(t *testing.T) {
 	cfg = NewDefaultCGRConfig()
 	cfg.storDbCfg = &StorDbCfg{
 		Type: utils.Postgres,
-		Opts: map[string]interface{}{
-			utils.SSLModeCfg: "wrongSSLMode",
+		Opts: &StorDBOpts{
+			PgSSLMode: "wrongSSLMode",
 		},
 	}
 	expected := "<stor_db> unsupported sslmode for storDB"

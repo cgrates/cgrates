@@ -107,8 +107,7 @@ func TestStorDBit(t *testing.T) {
 		if storDB, err = NewPostgresStorage(storDBCfg.StorDbCfg().Host,
 			storDBCfg.StorDbCfg().Port, storDBCfg.StorDbCfg().Name,
 			storDBCfg.StorDbCfg().User, storDBCfg.StorDbCfg().Password,
-			utils.IfaceAsString(storDBCfg.StorDbCfg().Opts[utils.SSLModeCfg]),
-			100, 10, 0); err != nil {
+			storDBCfg.StorDbCfg().Opts.PgSSLMode, 100, 10, 0); err != nil {
 			t.Fatal(err)
 		}
 		storDB.(*SQLStorage).db.Config.Logger = logger.Default.LogMode(logger.Silent)

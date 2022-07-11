@@ -20,6 +20,7 @@ package config
 import (
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/cgrates/cgrates/utils"
 )
@@ -46,12 +47,12 @@ func TestStoreDbCfgloadFromJsonCfgCase1(t *testing.T) {
 				Replicate: utils.BoolPointer(false),
 			},
 		},
-		Opts: map[string]interface{}{
-			utils.SQLMaxOpenConnsCfg:    100.,
-			utils.SQLMaxIdleConnsCfg:    10.,
-			utils.SQLConnMaxLifetimeCfg: 0.,
-			utils.MYSQLDSNParams:        make(map[string]string),
-			utils.MysqlLocation:         "UTC",
+		Opts: &DBOptsJson{
+			SQLMaxOpenConns:    utils.IntPointer(100),
+			SQLMaxIdleConns:    utils.IntPointer(10),
+			SQLConnMaxLifetime: utils.StringPointer("0"),
+			MySQLDSNParams:     make(map[string]string),
+			MySQLLocation:      utils.StringPointer("UTC"),
 		},
 	}
 	expected := &StorDbCfg{
@@ -75,14 +76,14 @@ func TestStoreDbCfgloadFromJsonCfgCase1(t *testing.T) {
 				Replicate: false,
 			},
 		},
-		Opts: map[string]interface{}{
-			utils.SQLMaxOpenConnsCfg:    100.,
-			utils.SQLMaxIdleConnsCfg:    10.,
-			utils.SQLConnMaxLifetimeCfg: 0.,
-			utils.MYSQLDSNParams:        make(map[string]string),
-			utils.MongoQueryTimeoutCfg:  "10s",
-			utils.SSLModeCfg:            "disable",
-			utils.MysqlLocation:         "UTC",
+		Opts: &StorDBOpts{
+			SQLMaxOpenConns:    100,
+			SQLMaxIdleConns:    10,
+			SQLConnMaxLifetime: 0,
+			MongoQueryTimeout:  10 * time.Second,
+			PgSSLMode:          "disable",
+			MySQLLocation:      "UTC",
+			MySQLDSNParams:     make(map[string]string),
 		},
 	}
 	jsonCfg := NewDefaultCGRConfig()
@@ -137,10 +138,10 @@ func TestStoreDbCfgloadFromJsonCfgPort(t *testing.T) {
 	"db_type": "mongo",
 	}
 }`
-	dbcfg.Opts = make(map[string]interface{})
+	dbcfg.Opts = &StorDBOpts{}
 	expected := StorDbCfg{
 		Type: "mongo",
-		Opts: make(map[string]interface{}),
+		Opts: &StorDBOpts{},
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
@@ -160,7 +161,7 @@ func TestStoreDbCfgloadFromJsonCfgPort(t *testing.T) {
 	expected = StorDbCfg{
 		Type: "mongo",
 		Port: "27017",
-		Opts: make(map[string]interface{}),
+		Opts: &StorDBOpts{},
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
@@ -180,7 +181,7 @@ func TestStoreDbCfgloadFromJsonCfgPort(t *testing.T) {
 	expected = StorDbCfg{
 		Type: "internal",
 		Port: "internal",
-		Opts: make(map[string]interface{}),
+		Opts: &StorDBOpts{},
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
@@ -239,7 +240,7 @@ func TestStorDbCfgAsMapInterface(t *testing.T) {
 			utils.SQLConnMaxLifetimeCfg: 0.,
 			utils.MYSQLDSNParams:        make(map[string]interface{}),
 			utils.MongoQueryTimeoutCfg:  "10s",
-			utils.SSLModeCfg:            "disable",
+			utils.PgSSLModeCfg:          "disable",
 			utils.MysqlLocation:         "UTC",
 		},
 		utils.ItemsCfg: map[string]interface{}{
@@ -289,12 +290,12 @@ func TestStorDbCfgClone(t *testing.T) {
 				Replicate: false,
 			},
 		},
-		Opts: map[string]interface{}{
-			utils.SQLMaxOpenConnsCfg:    100.,
-			utils.SQLMaxIdleConnsCfg:    10.,
-			utils.SQLConnMaxLifetimeCfg: 0.,
-			utils.MongoQueryTimeoutCfg:  "10s",
-			utils.SSLModeCfg:            "disable",
+		Opts: &StorDBOpts{
+			SQLMaxOpenConns:    100,
+			SQLMaxIdleConns:    10,
+			SQLConnMaxLifetime: 0,
+			MySQLDSNParams:     make(map[string]string),
+			MySQLLocation:      "UTC",
 		},
 	}
 	rcv := ban.Clone()
@@ -318,7 +319,7 @@ func TestStorDbCfgClone(t *testing.T) {
 	if rcv.Items[utils.MetaCDRs].Remote = false; !ban.Items[utils.MetaCDRs].Remote {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
-	if rcv.Opts[utils.SSLModeCfg] = ""; ban.Opts[utils.SSLModeCfg] != "disable" {
+	if rcv.Opts.PgSSLMode = ""; ban.Opts.PgSSLMode != "disable" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
 

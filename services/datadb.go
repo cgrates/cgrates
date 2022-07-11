@@ -21,7 +21,6 @@ package services
 import (
 	"fmt"
 	"sync"
-	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -95,16 +94,12 @@ func (db *DataDBService) Reload() (err error) {
 		return
 	}
 	if db.cfg.DataDbCfg().Type == utils.Mongo {
-		var ttl time.Duration
-		if ttl, err = utils.IfaceAsDuration(db.cfg.DataDbCfg().Opts[utils.MongoQueryTimeoutCfg]); err != nil {
-			return
-		}
 		mgo, canCast := db.dm.DataDB().(*engine.MongoStorage)
 		if !canCast {
 			return fmt.Errorf("can't conver DataDB of type %s to MongoStorage",
 				db.cfg.DataDbCfg().Type)
 		}
-		mgo.SetTTL(ttl)
+		mgo.SetTTL(db.cfg.DataDbCfg().Opts.MongoQueryTimeout)
 	}
 	return
 }
@@ -171,10 +166,15 @@ func (db *DataDBService) needsConnectionReload() bool {
 		}
 	}
 	return db.oldDBCfg.Type == utils.Redis &&
-		(db.oldDBCfg.Opts[utils.RedisSentinelNameCfg] != db.cfg.DataDbCfg().Opts[utils.RedisSentinelNameCfg] ||
-			db.oldDBCfg.Opts[utils.RedisClusterCfg] != db.cfg.DataDbCfg().Opts[utils.RedisClusterCfg] ||
-			db.oldDBCfg.Opts[utils.RedisClusterSyncCfg] != db.cfg.DataDbCfg().Opts[utils.RedisClusterSyncCfg] ||
-			db.oldDBCfg.Opts[utils.RedisClusterOnDownDelayCfg] != db.cfg.DataDbCfg().Opts[utils.RedisClusterOnDownDelayCfg])
+		(db.oldDBCfg.Opts.RedisMaxConns != db.cfg.DataDbCfg().Opts.RedisMaxConns ||
+			db.oldDBCfg.Opts.RedisConnectAttempts != db.cfg.DataDbCfg().Opts.RedisConnectAttempts ||
+			db.oldDBCfg.Opts.RedisSentinel != db.cfg.DataDbCfg().Opts.RedisSentinel ||
+			db.oldDBCfg.Opts.RedisCluster != db.cfg.DataDbCfg().Opts.RedisCluster ||
+			db.oldDBCfg.Opts.RedisClusterSync != db.cfg.DataDbCfg().Opts.RedisClusterSync ||
+			db.oldDBCfg.Opts.RedisClusterOndownDelay != db.cfg.DataDbCfg().Opts.RedisClusterOndownDelay ||
+			db.oldDBCfg.Opts.RedisConnectTimeout != db.cfg.DataDbCfg().Opts.RedisConnectTimeout ||
+			db.oldDBCfg.Opts.RedisReadTimeout != db.cfg.DataDbCfg().Opts.RedisReadTimeout ||
+			db.oldDBCfg.Opts.RedisWriteTimeout != db.cfg.DataDbCfg().Opts.RedisWriteTimeout)
 }
 
 // GetDMChan returns the DataManager chanel

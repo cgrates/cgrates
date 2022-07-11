@@ -788,7 +788,7 @@ func (er *EventReaderCfg) AsMapInterface(separator string) (initialMP map[string
 		opts[utils.SQLTableNameOpt] = *er.Opts.SQLTableName
 	}
 	if er.Opts.SSLMode != nil {
-		opts[utils.SSLModeCfg] = *er.Opts.SSLMode
+		opts[utils.PgSSLModeCfg] = *er.Opts.SSLMode
 	}
 	if er.Opts.SQLDBNameProcessed != nil {
 		opts[utils.SQLDBNameProcessedCfg] = *er.Opts.SQLDBNameProcessed

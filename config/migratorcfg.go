@@ -40,8 +40,8 @@ type MigratorCgrCfg struct {
 	OutStorDBUser     string
 	OutStorDBPassword string
 	UsersFilters      []string
-	OutDataDBOpts     map[string]interface{}
-	OutStorDBOpts     map[string]interface{}
+	OutDataDBOpts     *DataDBOpts
+	OutStorDBOpts     *StorDBOpts
 }
 
 func (mg *MigratorCgrCfg) loadFromJSONCfg(jsnCfg *MigratorCfgJson) (err error) {
@@ -93,33 +93,36 @@ func (mg *MigratorCgrCfg) loadFromJSONCfg(jsnCfg *MigratorCfgJson) (err error) {
 			mg.UsersFilters[i] = v
 		}
 	}
-
 	if jsnCfg.Out_dataDB_opts != nil {
-		for k, v := range jsnCfg.Out_dataDB_opts {
-			mg.OutDataDBOpts[k] = v
-		}
+		err = mg.OutDataDBOpts.loadFromJSONCfg(jsnCfg.Out_dataDB_opts)
 	}
 	if jsnCfg.Out_storDB_opts != nil {
-		for k, v := range jsnCfg.Out_storDB_opts {
-			mg.OutStorDBOpts[k] = v
-		}
+		err = mg.OutStorDBOpts.loadFromJSONCfg(jsnCfg.Out_storDB_opts)
 	}
 	return nil
 }
 
 // AsMapInterface returns the config as a map[string]interface{}
 func (mg *MigratorCgrCfg) AsMapInterface() (initialMP map[string]interface{}) {
-	fltrs := []string{}
-	if mg.UsersFilters != nil {
-		fltrs = mg.UsersFilters
+	outDataDBOpts := map[string]interface{}{
+		utils.RedisSentinelNameCfg:       mg.OutDataDBOpts.RedisSentinel,
+		utils.RedisClusterCfg:            mg.OutDataDBOpts.RedisCluster,
+		utils.RedisClusterSyncCfg:        mg.OutDataDBOpts.RedisClusterSync.String(),
+		utils.RedisClusterOnDownDelayCfg: mg.OutDataDBOpts.RedisClusterOndownDelay.String(),
+		utils.MongoQueryTimeoutCfg:       mg.OutDataDBOpts.MongoQueryTimeout.String(),
+		utils.RedisTLS:                   mg.OutDataDBOpts.RedisTLS,
+		utils.RedisClientCertificate:     mg.OutDataDBOpts.RedisClientCertificate,
+		utils.RedisClientKey:             mg.OutDataDBOpts.RedisClientKey,
+		utils.RedisCACertificate:         mg.OutDataDBOpts.RedisCACertificate,
 	}
-	outDataDBOpts := make(map[string]interface{})
-	for k, v := range mg.OutDataDBOpts {
-		outDataDBOpts[k] = v
-	}
-	outStorDBOpts := make(map[string]interface{})
-	for k, v := range mg.OutStorDBOpts {
-		outStorDBOpts[k] = v
+	outStorDBOpts := map[string]interface{}{
+		utils.SQLMaxOpenConnsCfg:   mg.OutStorDBOpts.SQLMaxOpenConns,
+		utils.SQLMaxIdleConnsCfg:   mg.OutStorDBOpts.SQLMaxIdleConns,
+		utils.SQLConnMaxLifetime:   mg.OutStorDBOpts.SQLConnMaxLifetime.String(),
+		utils.MongoQueryTimeoutCfg: mg.OutStorDBOpts.MongoQueryTimeout.String(),
+		utils.PgSSLModeCfg:         mg.OutStorDBOpts.PgSSLMode,
+		utils.MysqlLocation:        mg.OutStorDBOpts.MySQLLocation,
+		utils.MYSQLDSNParams:       mg.OutStorDBOpts.MySQLDSNParams,
 	}
 	return map[string]interface{}{
 		utils.OutDataDBTypeCfg:     mg.OutDataDBType,
@@ -137,7 +140,7 @@ func (mg *MigratorCgrCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		utils.OutStorDBPasswordCfg: mg.OutStorDBPassword,
 		utils.OutDataDBOptsCfg:     outDataDBOpts,
 		utils.OutStorDBOptsCfg:     outStorDBOpts,
-		utils.UsersFiltersCfg:      fltrs,
+		utils.UsersFiltersCfg:      utils.CloneStringSlice(mg.UsersFilters),
 	}
 }
 
@@ -157,20 +160,11 @@ func (mg MigratorCgrCfg) Clone() (cln *MigratorCgrCfg) {
 		OutStorDBName:     mg.OutStorDBName,
 		OutStorDBUser:     mg.OutStorDBUser,
 		OutStorDBPassword: mg.OutStorDBPassword,
-		OutDataDBOpts:     make(map[string]interface{}),
-		OutStorDBOpts:     make(map[string]interface{}),
+		OutDataDBOpts:     mg.OutDataDBOpts.Clone(),
+		OutStorDBOpts:     mg.OutStorDBOpts.Clone(),
 	}
 	if mg.UsersFilters != nil {
-		cln.UsersFilters = make([]string, len(mg.UsersFilters))
-		for i, f := range mg.UsersFilters {
-			cln.UsersFilters[i] = f
-		}
-	}
-	for k, v := range mg.OutDataDBOpts {
-		cln.OutDataDBOpts[k] = v
-	}
-	for k, v := range mg.OutStorDBOpts {
-		cln.OutStorDBOpts[k] = v
+		cln.UsersFilters = utils.CloneStringSlice(mg.UsersFilters)
 	}
 	return
 }

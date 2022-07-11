@@ -32,6 +32,7 @@ import (
 	"path"
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -56,6 +57,7 @@ func TestLoadConfig(t *testing.T) {
 	*dataDBUser = "cgrates2"
 	*dataDBPasswd = "toor"
 	*dbRedisSentinel = "sentinel1"
+	*dbRedisConnectTimeout = 5 * time.Second
 	expDBcfg := &config.DataDbCfg{
 		Type:     utils.Redis,
 		Host:     "localhost",
@@ -63,16 +65,16 @@ func TestLoadConfig(t *testing.T) {
 		Name:     "100",
 		User:     "cgrates2",
 		Password: "toor",
-		Opts: map[string]interface{}{
-			utils.RedisSentinelNameCfg:       "sentinel1",
-			utils.MongoQueryTimeoutCfg:       "10s",
-			utils.RedisClusterSyncCfg:        "5s",
-			utils.RedisClusterOnDownDelayCfg: "0",
-			utils.RedisClusterCfg:            false,
-			utils.RedisTLS:                   false,
-			utils.RedisClientCertificate:     "",
-			utils.RedisClientKey:             "",
-			utils.RedisCACertificate:         "",
+		Opts: &config.DataDBOpts{
+			RedisMaxConns:           10,
+			RedisConnectAttempts:    20,
+			RedisSentinel:           "sentinel1",
+			RedisCluster:            false,
+			RedisClusterSync:        5 * time.Second,
+			RedisClusterOndownDelay: 0,
+			RedisConnectTimeout:     5 * time.Second,
+			MongoQueryTimeout:       10 * time.Second,
+			RedisTLS:                false,
 		},
 		RmtConns: []string{},
 		RplConns: []string{},
@@ -93,13 +95,14 @@ func TestLoadConfig(t *testing.T) {
 		Password:            "toor",
 		StringIndexedFields: []string{},
 		PrefixIndexedFields: []string{},
-		Opts: map[string]interface{}{
-			utils.SQLConnMaxLifetimeCfg: 0.,
-			utils.MongoQueryTimeoutCfg:  "10s",
-			utils.SQLMaxOpenConnsCfg:    100.,
-			utils.SQLMaxIdleConnsCfg:    10.,
-			utils.SSLModeCfg:            "disable",
-			utils.MysqlLocation:         "Local",
+		Opts: &config.StorDBOpts{
+			SQLMaxOpenConns:    100,
+			SQLMaxIdleConns:    10,
+			SQLConnMaxLifetime: 0,
+			MongoQueryTimeout:  10 * time.Second,
+			PgSSLMode:          "disable",
+			MySQLLocation:      "Local",
+			MySQLDSNParams:     map[string]string{},
 		},
 	}
 	// Loader

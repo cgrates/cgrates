@@ -154,8 +154,6 @@ const (
 	CGRateS                  = "CGRateS"
 	Version                  = "v0.11.0~dev"
 	DiameterFirmwareRevision = 918
-	RedisMaxConns            = 10
-	RedisMaxAttempts         = 20
 	CGRateSLwr               = "cgrates"
 	Postgres                 = "postgres"
 	MySQL                    = "mysql"
@@ -1967,7 +1965,7 @@ const (
 	PrefixIndexedFieldsCfg = "prefix_indexed_fields"
 	SuffixIndexedFieldsCfg = "suffix_indexed_fields"
 	MongoQueryTimeoutCfg   = "mongoQueryTimeout"
-	SSLModeCfg             = "postgresSSLMode"
+	PgSSLModeCfg           = "pgSSLMode"
 	ItemsCfg               = "items"
 	OptsCfg                = "opts"
 	Tenants                = "tenants"
@@ -1983,10 +1981,15 @@ const (
 	DataDbNameCfg              = "db_name"
 	DataDbUserCfg              = "db_user"
 	DataDbPassCfg              = "db_password"
+	RedisMaxConnsCfg           = "redisMaxConns"
+	RedisConnectAttemptsCfg    = "redisConnectAttempts"
 	RedisSentinelNameCfg       = "redisSentinel"
 	RedisClusterCfg            = "redisCluster"
 	RedisClusterSyncCfg        = "redisClusterSync"
 	RedisClusterOnDownDelayCfg = "redisClusterOndownDelay"
+	RedisConnectTimeoutCfg     = "redisConnectTimeout"
+	RedisReadTimeoutCfg        = "redisReadTimeout"
+	RedisWriteTimeoutCfg       = "redisWriteTimeout"
 	RedisTLS                   = "redisTLS"
 	RedisClientCertificate     = "redisClientCertificate"
 	RedisClientKey             = "redisClientKey"

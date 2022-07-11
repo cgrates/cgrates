@@ -99,6 +99,29 @@ type TlsJsonCfg struct {
 	Ca_certificate     *string
 }
 
+type DBOptsJson struct {
+	RedisMaxConns           *int              `json:"redisMaxConns"`
+	RedisConnectAttempts    *int              `json:"redisConnectAttempts"`
+	RedisSentinel           *string           `json:"redisSentinel"`
+	RedisCluster            *bool             `json:"redisCluster"`
+	RedisClusterSync        *string           `json:"redisClusterSync"`
+	RedisClusterOndownDelay *string           `json:"redisClusterOndownDelay"`
+	RedisConnectTimeout     *string           `json:"redisConnectTimeout"`
+	RedisReadTimeout        *string           `json:"redisReadTimeout"`
+	RedisWriteTimeout       *string           `json:"redisWriteTimeout"`
+	MongoQueryTimeout       *string           `json:"mongoQueryTimeout"`
+	RedisTLS                *bool             `json:"redisTLS"`
+	RedisClientCertificate  *string           `json:"redisClientCertificate"`
+	RedisClientKey          *string           `json:"redisClientKey"`
+	RedisCACertificate      *string           `json:"redisCACertificate"`
+	SQLMaxOpenConns         *int              `json:"sqlMaxOpenConns"`
+	SQLMaxIdleConns         *int              `json:"sqlMaxIdleConns"`
+	SQLConnMaxLifetime      *string           `json:"sqlConnMaxLifetime"`
+	MySQLDSNParams          map[string]string `json:"mysqlDSNParams"`
+	PgSSLMode               *string           `json:"pgSSLMode"`
+	MySQLLocation           *string           `json:"mysqlLocation"`
+}
+
 // Database config
 type DbJsonCfg struct {
 	Db_type               *string
@@ -115,7 +138,7 @@ type DbJsonCfg struct {
 	Replication_filtered  *bool
 	Replication_cache     *string
 	Items                 *map[string]*ItemOptJson
-	Opts                  map[string]interface{}
+	Opts                  *DBOptsJson
 }
 
 type ItemOptJson struct {
@@ -753,8 +776,8 @@ type MigratorCfgJson struct {
 	Out_storDB_user     *string
 	Out_storDB_password *string
 	Users_filters       *[]string
-	Out_dataDB_opts     map[string]interface{}
-	Out_storDB_opts     map[string]interface{}
+	Out_dataDB_opts     *DBOptsJson
+	Out_storDB_opts     *DBOptsJson
 }
 
 type FcTemplateJsonCfg struct {

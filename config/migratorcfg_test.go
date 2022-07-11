@@ -20,6 +20,7 @@ package config
 import (
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/cgrates/cgrates/utils"
 )
@@ -39,12 +40,12 @@ func TestMigratorCgrCfgloadFromJsonCfg(t *testing.T) {
 		Out_storDB_name:     utils.StringPointer(utils.CGRateSLwr),
 		Out_storDB_user:     utils.StringPointer(utils.CGRateSLwr),
 		Out_storDB_password: utils.StringPointer(utils.EmptyString),
-		Out_dataDB_opts: map[string]interface{}{
-			utils.RedisClusterCfg:     true,
-			utils.RedisClusterSyncCfg: "10s",
+		Out_dataDB_opts: &DBOptsJson{
+			RedisCluster:     utils.BoolPointer(true),
+			RedisClusterSync: utils.StringPointer("10s"),
 		},
-		Out_storDB_opts: map[string]interface{}{
-			utils.RedisSentinelNameCfg: utils.EmptyString,
+		Out_storDB_opts: &DBOptsJson{
+			SQLMaxOpenConns: utils.IntPointer(100),
 		},
 	}
 	expected := &MigratorCgrCfg{
@@ -61,18 +62,20 @@ func TestMigratorCgrCfgloadFromJsonCfg(t *testing.T) {
 		OutStorDBName:     utils.CGRateSLwr,
 		OutStorDBUser:     utils.CGRateSLwr,
 		OutStorDBPassword: utils.EmptyString,
-		OutDataDBOpts: map[string]interface{}{
-			utils.RedisSentinelNameCfg:       utils.EmptyString,
-			utils.RedisClusterCfg:            true,
-			utils.RedisClusterSyncCfg:        "10s",
-			utils.RedisClusterOnDownDelayCfg: "0",
-			utils.RedisTLS:                   false,
-			utils.RedisClientCertificate:     "",
-			utils.RedisClientKey:             "",
-			utils.RedisCACertificate:         "",
+		OutDataDBOpts: &DataDBOpts{
+			RedisMaxConns:           10,
+			RedisConnectAttempts:    20,
+			RedisSentinel:           utils.EmptyString,
+			RedisCluster:            true,
+			RedisClusterSync:        10 * time.Second,
+			RedisClusterOndownDelay: 0,
+			RedisConnectTimeout:     0,
+			RedisReadTimeout:        0,
+			RedisWriteTimeout:       0,
+			RedisTLS:                false,
 		},
-		OutStorDBOpts: map[string]interface{}{
-			utils.RedisSentinelNameCfg: utils.EmptyString,
+		OutStorDBOpts: &StorDBOpts{
+			SQLMaxOpenConns: 100,
 		},
 	}
 	cfg := NewDefaultCGRConfig()
@@ -202,10 +205,15 @@ func TestMigratorCgrCfgAsMapInterface2(t *testing.T) {
 		utils.UsersFiltersCfg:      []string{},
 		utils.OutStorDBOptsCfg:     map[string]interface{}{},
 		utils.OutDataDBOptsCfg: map[string]interface{}{
+			utils.RedisMaxConnsCfg:           10.,
+			utils.RedisConnectAttemptsCfg:    20.,
 			utils.RedisSentinelNameCfg:       "",
 			utils.RedisClusterCfg:            false,
 			utils.RedisClusterSyncCfg:        "5s",
 			utils.RedisClusterOnDownDelayCfg: "0",
+			utils.RedisConnectTimeoutCfg:     "0",
+			utils.RedisReadTimeoutCfg:        "0",
+			utils.RedisWriteTimeoutCfg:       "0",
 			utils.RedisTLS:                   false,
 			utils.RedisClientCertificate:     "",
 			utils.RedisClientKey:             "",
@@ -236,18 +244,21 @@ func TestMigratorCgrCfgClone(t *testing.T) {
 		OutStorDBUser:     utils.CGRateSLwr,
 		OutStorDBPassword: utils.EmptyString,
 		UsersFilters:      []string{utils.AccountField},
-		OutDataDBOpts: map[string]interface{}{
-			utils.RedisSentinelNameCfg:       utils.EmptyString,
-			utils.RedisClusterCfg:            true,
-			utils.RedisClusterSyncCfg:        "10s",
-			utils.RedisClusterOnDownDelayCfg: "0",
-			utils.RedisTLS:                   false,
-			utils.RedisClientCertificate:     "",
-			utils.RedisClientKey:             "",
-			utils.RedisCACertificate:         "",
+		OutDataDBOpts: &DataDBOpts{
+			RedisMaxConns:           10,
+			RedisConnectAttempts:    20,
+			RedisSentinel:           utils.EmptyString,
+			RedisCluster:            true,
+			RedisClusterSync:        10 * time.Second,
+			RedisClusterOndownDelay: 0,
+			RedisConnectTimeout:     0,
+			RedisReadTimeout:        0,
+			RedisWriteTimeout:       0,
+			MongoQueryTimeout:       10 * time.Second,
+			RedisTLS:                false,
 		},
-		OutStorDBOpts: map[string]interface{}{
-			utils.RedisSentinelNameCfg: utils.EmptyString,
+		OutStorDBOpts: &StorDBOpts{
+			PgSSLMode: "disable",
 		},
 	}
 	rcv := sa.Clone()
@@ -257,10 +268,10 @@ func TestMigratorCgrCfgClone(t *testing.T) {
 	if rcv.UsersFilters[0] = ""; sa.UsersFilters[0] != utils.AccountField {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
-	if rcv.OutDataDBOpts[utils.RedisSentinelNameCfg] = "1"; sa.OutDataDBOpts[utils.RedisSentinelNameCfg] != "" {
+	if rcv.OutDataDBOpts.RedisSentinel = "1"; sa.OutDataDBOpts.RedisSentinel != "" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
-	if rcv.OutStorDBOpts[utils.RedisSentinelNameCfg] = "1"; sa.OutStorDBOpts[utils.RedisSentinelNameCfg] != "" {
+	if rcv.OutStorDBOpts.PgSSLMode = "1"; sa.OutStorDBOpts.PgSSLMode != "" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
 }

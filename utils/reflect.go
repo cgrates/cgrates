@@ -219,6 +219,29 @@ func IfaceAsDuration(itm interface{}) (d time.Duration, err error) {
 	return
 }
 
+// IfaceAsTInt converts interface to type int
+func IfaceAsTInt(itm interface{}) (i int, err error) {
+	switch it := itm.(type) {
+	case int:
+		return it, nil
+	case time.Duration:
+		return int(it.Nanoseconds()), nil
+	case int32:
+		return int(it), nil
+	case int64:
+		return int(it), nil
+	case float32:
+		return int(it), nil
+	case float64:
+		return int(it), nil
+	case string:
+		return strconv.Atoi(it)
+	default:
+		err = fmt.Errorf("cannot convert field<%T>: %+v to int", it, it)
+	}
+	return
+}
+
 func IfaceAsInt64(itm interface{}) (i int64, err error) {
 	switch it := itm.(type) {
 	case int:

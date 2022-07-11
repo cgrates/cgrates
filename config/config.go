@@ -123,10 +123,10 @@ func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 	cfg.generalCfg.NodeID = utils.UUIDSha1Prefix()
 	cfg.dataDbCfg = new(DataDbCfg)
 	cfg.dataDbCfg.Items = make(map[string]*ItemOpt)
-	cfg.dataDbCfg.Opts = make(map[string]interface{})
+	cfg.dataDbCfg.Opts = &DataDBOpts{}
 	cfg.storDbCfg = new(StorDbCfg)
 	cfg.storDbCfg.Items = make(map[string]*ItemOpt)
-	cfg.storDbCfg.Opts = make(map[string]interface{})
+	cfg.storDbCfg.Opts = &StorDBOpts{}
 	cfg.tlsCfg = new(TLSCfg)
 	cfg.cacheCfg = new(CacheCfg)
 	cfg.cacheCfg.Partitions = make(map[string]*CacheParamCfg)
@@ -165,8 +165,8 @@ func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 	cfg.registrarCCfg.Dispatchers.Hosts = make(map[string][]*RemoteHost)
 	cfg.loaderCgrCfg = new(LoaderCgrCfg)
 	cfg.migratorCgrCfg = new(MigratorCgrCfg)
-	cfg.migratorCgrCfg.OutDataDBOpts = make(map[string]interface{})
-	cfg.migratorCgrCfg.OutStorDBOpts = make(map[string]interface{})
+	cfg.migratorCgrCfg.OutDataDBOpts = &DataDBOpts{}
+	cfg.migratorCgrCfg.OutStorDBOpts = &StorDBOpts{}
 	cfg.mailerCfg = new(MailerCfg)
 	cfg.loaderCfg = make(LoaderSCfgs, 0)
 	cfg.apier = new(ApierCfg)
