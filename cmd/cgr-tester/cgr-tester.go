@@ -46,23 +46,33 @@ var (
 	cfgPath = cgrTesterFlags.String("config_path", "",
 		"Configuration directory path.")
 
-	parallel       = cgrTesterFlags.Int("parallel", 0, "run n requests in parallel")
-	datadbType     = cgrTesterFlags.String("datadb_type", cgrConfig.DataDbCfg().Type, "The type of the DataDb database <redis>")
-	datadbHost     = cgrTesterFlags.String("datadb_host", cgrConfig.DataDbCfg().Host, "The DataDb host to connect to.")
-	datadbPort     = cgrTesterFlags.String("datadb_port", cgrConfig.DataDbCfg().Port, "The DataDb port to bind to.")
-	datadbName     = cgrTesterFlags.String("datadb_name", cgrConfig.DataDbCfg().Name, "The name/number of the DataDb to connect to.")
-	datadbUser     = cgrTesterFlags.String("datadb_user", cgrConfig.DataDbCfg().User, "The DataDb user to sign in as.")
-	datadbPass     = cgrTesterFlags.String("datadb_pass", cgrConfig.DataDbCfg().Password, "The DataDb user's password.")
-	dbdataEncoding = cgrTesterFlags.String("dbdata_encoding", cgrConfig.GeneralCfg().DBDataEncoding, "The encoding used to store object data in strings.")
-	redisSentinel  = cgrTesterFlags.String("redisSentinel", utils.IfaceAsString(cgrConfig.DataDbCfg().Opts[utils.RedisSentinelNameCfg]), "The name of redis sentinel")
+	parallel        = cgrTesterFlags.Int("parallel", 0, "run n requests in parallel")
+	datadbType      = cgrTesterFlags.String("datadb_type", cgrConfig.DataDbCfg().Type, "The type of the DataDb database <redis>")
+	datadbHost      = cgrTesterFlags.String("datadb_host", cgrConfig.DataDbCfg().Host, "The DataDb host to connect to.")
+	datadbPort      = cgrTesterFlags.String("datadb_port", cgrConfig.DataDbCfg().Port, "The DataDb port to bind to.")
+	datadbName      = cgrTesterFlags.String("datadb_name", cgrConfig.DataDbCfg().Name, "The name/number of the DataDb to connect to.")
+	datadbUser      = cgrTesterFlags.String("datadb_user", cgrConfig.DataDbCfg().User, "The DataDb user to sign in as.")
+	datadbPass      = cgrTesterFlags.String("datadb_pass", cgrConfig.DataDbCfg().Password, "The DataDb user's password.")
+	dbdataEncoding  = cgrTesterFlags.String("dbdata_encoding", cgrConfig.GeneralCfg().DBDataEncoding, "The encoding used to store object data in strings.")
+	dbRedisMaxConns = cgrTesterFlags.Int(utils.RedisMaxConnsCfg, cgrConfig.DataDbCfg().Opts.RedisMaxConns,
+		"The connection pool size")
+	dbRedisConnectAttempts = cgrTesterFlags.Int(utils.RedisConnectAttemptsCfg, cgrConfig.DataDbCfg().Opts.RedisConnectAttempts,
+		"The maximum amount of dial attempts")
+	redisSentinel  = cgrTesterFlags.String("redisSentinel", cgrConfig.DataDbCfg().Opts.RedisSentinel, "The name of redis sentinel")
 	dbRedisCluster = cgrTesterFlags.Bool("redisCluster", false,
 		"Is the redis datadb a cluster")
-	dbRedisClusterSync = cgrTesterFlags.String("redisClusterSync", utils.IfaceAsString(cgrConfig.DataDbCfg().Opts[utils.RedisClusterSyncCfg]),
+	dbRedisClusterSync = cgrTesterFlags.Duration("redisClusterSync", cgrConfig.DataDbCfg().Opts.RedisClusterSync,
 		"The sync interval for the redis cluster")
-	dbRedisClusterDownDelay = cgrTesterFlags.String("redisClusterOndownDelay", utils.IfaceAsString(cgrConfig.DataDbCfg().Opts[utils.RedisClusterOnDownDelayCfg]),
+	dbRedisClusterDownDelay = cgrTesterFlags.Duration("redisClusterOndownDelay", cgrConfig.DataDbCfg().Opts.RedisClusterOndownDelay,
 		"The delay before executing the commands if the redis cluster is in the CLUSTERDOWN state")
-	dbQueryTimeout = cgrTesterFlags.String("mongoQueryTimeout", utils.IfaceAsString(cgrConfig.DataDbCfg().Opts[utils.MongoQueryTimeoutCfg]),
+	dbQueryTimeout = cgrTesterFlags.Duration("mongoQueryTimeout", cgrConfig.DataDbCfg().Opts.MongoQueryTimeout,
 		"The timeout for queries")
+	dbRedisConnectTimeout = cgrTesterFlags.Duration(utils.RedisConnectTimeoutCfg, cgrConfig.DataDbCfg().Opts.RedisConnectTimeout,
+		"The amount of wait time until timeout for a connection attempt")
+	dbRedisReadTimeout = cgrTesterFlags.Duration(utils.RedisReadTimeoutCfg, cgrConfig.DataDbCfg().Opts.RedisReadTimeout,
+		"The amount of wait time until timeout for reading operations")
+	dbRedisWriteTimeout = cgrTesterFlags.Duration(utils.RedisWriteTimeoutCfg, cgrConfig.DataDbCfg().Opts.RedisWriteTimeout,
+		"The amount of wait time until timeout for writing operations")
 	raterAddress = cgrTesterFlags.String("rater_address", "", "Rater address for remote tests. Empty for internal rater.")
 	tor          = cgrTesterFlags.String("tor", utils.MetaVoice, "The type of record to use in queries.")
 	category     = cgrTesterFlags.String("category", "call", "The Record category to test.")
@@ -200,21 +210,35 @@ func main() {
 	if *dbdataEncoding != "" {
 		tstCfg.GeneralCfg().DBDataEncoding = *dbdataEncoding
 	}
-	if *redisSentinel != utils.IfaceAsString(cgrConfig.DataDbCfg().Opts[utils.RedisSentinelNameCfg]) {
-		tstCfg.DataDbCfg().Opts[utils.RedisSentinelNameCfg] = *redisSentinel
+	if *dbRedisMaxConns != cgrConfig.DataDbCfg().Opts.RedisMaxConns {
+		tstCfg.DataDbCfg().Opts.RedisMaxConns = *dbRedisMaxConns
 	}
-	rdsCls, _ := utils.IfaceAsBool(cgrConfig.DataDbCfg().Opts[utils.RedisClusterCfg])
-	if *dbRedisCluster != rdsCls {
-		tstCfg.DataDbCfg().Opts[utils.RedisClusterCfg] = *dbRedisCluster
+	if *dbRedisConnectAttempts != cgrConfig.DataDbCfg().Opts.RedisConnectAttempts {
+		tstCfg.DataDbCfg().Opts.RedisConnectAttempts = *dbRedisConnectAttempts
 	}
-	if *dbRedisClusterSync != utils.IfaceAsString(cgrConfig.DataDbCfg().Opts[utils.RedisClusterSyncCfg]) {
-		tstCfg.DataDbCfg().Opts[utils.RedisClusterSyncCfg] = *dbRedisClusterSync
+	if *redisSentinel != cgrConfig.DataDbCfg().Opts.RedisSentinel {
+		tstCfg.DataDbCfg().Opts.RedisSentinel = *redisSentinel
 	}
-	if *dbRedisClusterDownDelay != utils.IfaceAsString(cgrConfig.DataDbCfg().Opts[utils.RedisClusterOnDownDelayCfg]) {
-		tstCfg.DataDbCfg().Opts[utils.RedisClusterOnDownDelayCfg] = *dbRedisClusterDownDelay
+	if *dbRedisCluster != cgrConfig.DataDbCfg().Opts.RedisCluster {
+		tstCfg.DataDbCfg().Opts.RedisCluster = *dbRedisCluster
 	}
-	if *dbQueryTimeout != utils.IfaceAsString(cgrConfig.DataDbCfg().Opts[utils.MongoQueryTimeoutCfg]) {
-		tstCfg.DataDbCfg().Opts[utils.MongoQueryTimeoutCfg] = *dbQueryTimeout
+	if *dbRedisClusterSync != cgrConfig.DataDbCfg().Opts.RedisClusterSync {
+		tstCfg.DataDbCfg().Opts.RedisClusterSync = *dbRedisClusterSync
+	}
+	if *dbRedisClusterDownDelay != cgrConfig.DataDbCfg().Opts.RedisClusterOndownDelay {
+		tstCfg.DataDbCfg().Opts.RedisClusterOndownDelay = *dbRedisClusterDownDelay
+	}
+	if *dbRedisConnectTimeout != cgrConfig.DataDbCfg().Opts.RedisConnectTimeout {
+		tstCfg.DataDbCfg().Opts.RedisConnectTimeout = *dbRedisConnectTimeout
+	}
+	if *dbRedisReadTimeout != cgrConfig.DataDbCfg().Opts.RedisReadTimeout {
+		tstCfg.DataDbCfg().Opts.RedisReadTimeout = *dbRedisReadTimeout
+	}
+	if *dbRedisWriteTimeout != cgrConfig.DataDbCfg().Opts.RedisWriteTimeout {
+		tstCfg.DataDbCfg().Opts.RedisWriteTimeout = *dbRedisWriteTimeout
+	}
+	if *dbQueryTimeout != cgrConfig.DataDbCfg().Opts.MongoQueryTimeout {
+		tstCfg.DataDbCfg().Opts.MongoQueryTimeout = *dbQueryTimeout
 	}
 
 	if *cpuprofile != "" {

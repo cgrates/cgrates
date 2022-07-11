@@ -21,7 +21,6 @@ package services
 import (
 	"fmt"
 	"sync"
-	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -101,11 +100,7 @@ func (db *StorDBService) Reload() (err error) {
 			return fmt.Errorf("can't conver StorDB of type %s to MongoStorage",
 				db.cfg.StorDbCfg().Type)
 		}
-		var ttl time.Duration
-		if ttl, err = utils.IfaceAsDuration(db.cfg.StorDbCfg().Opts[utils.MongoQueryTimeoutCfg]); err != nil {
-			return
-		}
-		mgo.SetTTL(ttl)
+		mgo.SetTTL(db.cfg.StorDbCfg().Opts.MongoQueryTimeout)
 	} else if db.cfg.StorDbCfg().Type == utils.Postgres ||
 		db.cfg.StorDbCfg().Type == utils.MySQL {
 		msql, canCast := db.db.(*engine.SQLStorage)
@@ -113,19 +108,9 @@ func (db *StorDBService) Reload() (err error) {
 			return fmt.Errorf("can't conver StorDB of type %s to SQLStorage",
 				db.cfg.StorDbCfg().Type)
 		}
-		var maxConn, maxIdleConn, connMaxLifetime int64
-		if maxConn, err = utils.IfaceAsTInt64(db.cfg.StorDbCfg().Opts[utils.SQLMaxOpenConnsCfg]); err != nil {
-			return
-		}
-		if maxIdleConn, err = utils.IfaceAsTInt64(db.cfg.StorDbCfg().Opts[utils.SQLMaxIdleConnsCfg]); err != nil {
-			return
-		}
-		if connMaxLifetime, err = utils.IfaceAsTInt64(db.cfg.StorDbCfg().Opts[utils.SQLConnMaxLifetimeCfg]); err != nil {
-			return
-		}
-		msql.Db.SetMaxOpenConns(int(maxConn))
-		msql.Db.SetMaxIdleConns(int(maxIdleConn))
-		msql.Db.SetConnMaxLifetime(time.Duration(connMaxLifetime) * time.Second)
+		msql.Db.SetMaxOpenConns(db.cfg.StorDbCfg().Opts.SQLMaxOpenConns)
+		msql.Db.SetMaxIdleConns(db.cfg.StorDbCfg().Opts.SQLMaxIdleConns)
+		msql.Db.SetConnMaxLifetime(db.cfg.StorDbCfg().Opts.SQLConnMaxLifetime)
 	} else if db.cfg.StorDbCfg().Type == utils.Internal {
 		idb, canCast := db.db.(*engine.InternalDB)
 		if !canCast {
@@ -203,5 +188,5 @@ func (db *StorDBService) needsConnectionReload() bool {
 		return true
 	}
 	return db.cfg.StorDbCfg().Type == utils.Postgres &&
-		utils.IfaceAsString(db.oldDBCfg.Opts[utils.SSLModeCfg]) != utils.IfaceAsString(db.cfg.StorDbCfg().Opts[utils.SSLModeCfg])
+		db.oldDBCfg.Opts.PgSSLMode != db.cfg.StorDbCfg().Opts.PgSSLMode
 }

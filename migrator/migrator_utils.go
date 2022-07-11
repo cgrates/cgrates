@@ -33,7 +33,7 @@ var (
 
 func NewMigratorDataDB(db_type, host, port, name, user, pass,
 	marshaler string, cacheCfg *config.CacheCfg,
-	opts map[string]interface{}, itmsCfg map[string]*config.ItemOpt) (db MigratorDataDB, err error) {
+	opts *config.DataDBOpts, itmsCfg map[string]*config.ItemOpt) (db MigratorDataDB, err error) {
 	var dbCon engine.DataDB
 	if dbCon, err = engine.NewDataDBConn(db_type, host,
 		port, name, user, pass, marshaler, opts, nil); err != nil {
@@ -56,7 +56,7 @@ func NewMigratorDataDB(db_type, host, port, name, user, pass,
 
 func NewMigratorStorDB(db_type, host, port, name, user, pass, marshaler string,
 	stringIndexedFields, prefixIndexedFields []string,
-	opts map[string]interface{}, itmsCfg map[string]*config.ItemOpt) (db MigratorStorDB, err error) {
+	opts *config.StorDBOpts, itmsCfg map[string]*config.ItemOpt) (db MigratorStorDB, err error) {
 	var storDb engine.StorDB
 	if storDb, err = engine.NewStorDBConn(db_type, host, port, name, user,
 		pass, marshaler, stringIndexedFields, prefixIndexedFields, opts, itmsCfg); err != nil {
