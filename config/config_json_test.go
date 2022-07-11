@@ -32,8 +32,6 @@ import (
 func TestDfGeneralJsonCfg(t *testing.T) {
 	eCfg := &GeneralJsonCfg{
 		Node_id:                utils.StringPointer(""),
-		Logger:                 utils.StringPointer(utils.MetaSysLog),
-		Log_level:              utils.IntPointer(utils.LOGLEVEL_INFO),
 		Rounding_decimals:      utils.IntPointer(5),
 		Dbdata_encoding:        utils.StringPointer("*msgpack"),
 		Tpexport_dir:           utils.StringPointer("/var/spool/cgrates/tpe"),

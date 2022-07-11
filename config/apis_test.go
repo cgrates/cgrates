@@ -218,8 +218,6 @@ func TestConfigLoadFromDB(t *testing.T) {
 	expGeneral := &GeneralCfg{
 		NodeID:           "Test",
 		DefaultCaching:   utils.MetaClear,
-		Logger:           utils.MetaSysLog,
-		LogLevel:         6,
 		RoundingDecimals: 5,
 		DBDataEncoding:   "msgpack",
 		TpExportPath:     "/var/spool/cgrates/tpe",
@@ -1035,8 +1033,6 @@ func TestV1GetConfig(t *testing.T) {
 	cfg := NewDefaultCGRConfig()
 	cfg.cacheDP[GeneralJSON] = &GeneralJsonCfg{
 		Node_id:              utils.StringPointer("randomID"),
-		Logger:               utils.StringPointer(utils.MetaSysLog),
-		Log_level:            utils.IntPointer(6),
 		Rounding_decimals:    utils.IntPointer(5),
 		Dbdata_encoding:      utils.StringPointer("msgpack"),
 		Tpexport_dir:         utils.StringPointer("/var/spool/cgrates/tpe"),
@@ -1065,8 +1061,6 @@ func TestV1GetConfig(t *testing.T) {
 	var reply map[string]interface{}
 	section := &GeneralJsonCfg{
 		Node_id:              utils.StringPointer("randomID"),
-		Logger:               utils.StringPointer(utils.MetaSysLog),
-		Log_level:            utils.IntPointer(6),
 		Rounding_decimals:    utils.IntPointer(5),
 		Dbdata_encoding:      utils.StringPointer("msgpack"),
 		Tpexport_dir:         utils.StringPointer("/var/spool/cgrates/tpe"),

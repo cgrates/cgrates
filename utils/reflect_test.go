@@ -851,11 +851,11 @@ func TestIfaceAsTInt64Default(t *testing.T) {
 }
 
 func TestIfaceAsTIntDefault(t *testing.T) {
-	if _, err := IfaceAsTInt(true); err == nil || err.Error() != "cannot convert field<bool>: true to int" {
+	if _, err := IfaceAsInt(true); err == nil || err.Error() != "cannot convert field<bool>: true to int" {
 		t.Errorf("Expecting <cannot convert field<bool>: true to int> ,received: <%+v>", err)
 	}
 	var test time.Duration = 2147483647
-	response, _ := IfaceAsTInt(test)
+	response, _ := IfaceAsInt(test)
 	if !reflect.DeepEqual(response, int(test.Nanoseconds())) {
 		t.Errorf("Expected <%+v> ,received: <%+v>", test.Nanoseconds(), response)
 	}

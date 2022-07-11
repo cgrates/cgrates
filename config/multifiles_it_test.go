@@ -56,8 +56,6 @@ func TestMfGeneralItems(t *testing.T) {
 func TestMfEnvReaderITRead(t *testing.T) {
 	expected := GeneralCfg{
 		NodeID:           "d80fac5",
-		Logger:           "*syslog",
-		LogLevel:         6,
 		RoundingDecimals: 5,
 		DBDataEncoding:   "msgpack",
 		TpExportPath:     "/var/spool/cgrates/tpe",

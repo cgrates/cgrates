@@ -29,7 +29,8 @@ import (
 var Logger LoggerInterface
 
 func init() {
-	Logger, _ = NewLogger(MetaStdLog, EmptyString, 0)
+	Logger, _ = NewLogger(MetaStdLog, EmptyString, EmptyString, 0,
+		0, EmptyString, EmptyString, EmptyString)
 }
 
 // log severities following rfc3164
@@ -60,12 +61,15 @@ type LoggerInterface interface {
 	Write(p []byte) (n int, err error)
 }
 
-func NewLogger(loggerType, nodeID string, level int) (l LoggerInterface, err error) {
+func NewLogger(loggerType, tenant, nodeID string, logLvl, attempts int, connOpts,
+	topicOpts, fldPostsDir string) (LoggerInterface, error) {
 	switch loggerType {
+	case MetaKafkaLog:
+		return NewExportLogger(nodeID, tenant, logLvl, connOpts, topicOpts, attempts, fldPostsDir), nil
 	case MetaStdLog:
-		return NewStdLogger(nodeID, level), nil
+		return NewStdLogger(nodeID, logLvl), nil
 	case MetaSysLog:
-		return NewSysLogger(nodeID, level)
+		return NewSysLogger(nodeID, logLvl)
 	default:
 		return nil, fmt.Errorf("unsupported logger: <%+s>", loggerType)
 	}

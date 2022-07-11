@@ -1,7 +1,6 @@
 {
 
 	"general": {
-		"log_level": 7,
 		"reply_timeout": "50s"
 	},
 
@@ -22,6 +21,11 @@
 	"chargers": {
 		"enabled": true,
 		"attributes_conns": ["*internal"]
+	},
+
+	"logger": {
+		"type": "*syslog",        // controls the destination of logs <*syslog|*stdout|*kafka>
+		"level": 7,               // system level precision for floats 
 	},
 
 	"admins": {

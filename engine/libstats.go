@@ -570,9 +570,9 @@ func (sqp *StatQueueProfile) Set(path []string, val interface{}, newBranch bool,
 			sqp.ID = utils.IfaceAsString(val)
 
 		case utils.QueueLength:
-			sqp.QueueLength, err = utils.IfaceAsTInt(val)
+			sqp.QueueLength, err = utils.IfaceAsInt(val)
 		case utils.MinItems:
-			sqp.MinItems, err = utils.IfaceAsTInt(val)
+			sqp.MinItems, err = utils.IfaceAsInt(val)
 		case utils.TTL:
 			sqp.TTL, err = utils.IfaceAsDuration(val)
 		case utils.Stored:

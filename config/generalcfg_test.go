@@ -28,8 +28,6 @@ import (
 func TestGeneralCfgloadFromJsonCfg(t *testing.T) {
 	cfgJSON := &GeneralJsonCfg{
 		Node_id:              utils.StringPointer("randomID"),
-		Logger:               utils.StringPointer(utils.MetaSysLog),
-		Log_level:            utils.IntPointer(6),
 		Rounding_decimals:    utils.IntPointer(5),
 		Dbdata_encoding:      utils.StringPointer("msgpack"),
 		Tpexport_dir:         utils.StringPointer("/var/spool/cgrates/tpe"),
@@ -49,8 +47,6 @@ func TestGeneralCfgloadFromJsonCfg(t *testing.T) {
 
 	expected := &GeneralCfg{
 		NodeID:           "randomID",
-		Logger:           utils.MetaSysLog,
-		LogLevel:         6,
 		RoundingDecimals: 5,
 		DBDataEncoding:   "msgpack",
 		TpExportPath:     "/var/spool/cgrates/tpe",
@@ -125,9 +121,7 @@ func TestGeneralParseDurationCfgloadFromJsonCfg(t *testing.T) {
 func TestGeneralCfgAsMapInterface(t *testing.T) {
 	cfgJSONStr := `{
 		"general": {
-			"node_id": "cgrates",											
-			"logger":"*syslog",										
-			"log_level": 6,											
+			"node_id": "cgrates",																				
 			"rounding_decimals": 5,									
 			"dbdata_encoding": "*msgpack",							
 			"tpexport_dir": "/var/spool/cgrates/tpe",				
@@ -152,8 +146,6 @@ func TestGeneralCfgAsMapInterface(t *testing.T) {
 	}`
 	eMap := map[string]interface{}{
 		utils.NodeIDCfg:               "cgrates",
-		utils.LoggerCfg:               "*syslog",
-		utils.LogLevelCfg:             6,
 		utils.RoundingDecimalsCfg:     5,
 		utils.DBDataEncodingCfg:       "*msgpack",
 		utils.TpExportPathCfg:         "/var/spool/cgrates/tpe",
@@ -166,8 +158,8 @@ func TestGeneralCfgAsMapInterface(t *testing.T) {
 		utils.DefaultTimezoneCfg:      "Local",
 		utils.DefaultCachingCfg:       "*reload",
 		utils.ConnectAttemptsCfg:      5,
-		utils.ReconnectsCfg:           -1,
 		utils.MaxReconnectIntervalCfg: "0",
+		utils.ReconnectsCfg:           -1,
 		utils.ConnectTimeoutCfg:       "1s",
 		utils.ReplyTimeoutCfg:         "2s",
 		utils.LockingTimeoutCfg:       "1s",
@@ -204,8 +196,6 @@ func TestGeneralCfgAsMapInterface1(t *testing.T) {
 }`
 	eMap := map[string]interface{}{
 		utils.NodeIDCfg:               "ENGINE1",
-		utils.LoggerCfg:               "*syslog",
-		utils.LogLevelCfg:             6,
 		utils.RoundingDecimalsCfg:     5,
 		utils.DBDataEncodingCfg:       "*msgpack",
 		utils.TpExportPathCfg:         "/var/spool/cgrates/tpe",
@@ -245,8 +235,6 @@ func TestGeneralCfgAsMapInterface1(t *testing.T) {
 func TestGeneralCfgClone(t *testing.T) {
 	ban := &GeneralCfg{
 		NodeID:           "randomID",
-		Logger:           utils.MetaSysLog,
-		LogLevel:         6,
 		RoundingDecimals: 5,
 		DBDataEncoding:   "msgpack",
 		TpExportPath:     "/var/spool/cgrates/tpe",
@@ -288,8 +276,6 @@ func TestDiffGeneralJsonCfg(t *testing.T) {
 
 	v1 := &GeneralCfg{
 		NodeID:           "randomID2",
-		Logger:           utils.LoggerCfg,
-		LogLevel:         7,
 		RoundingDecimals: 1,
 		DBDataEncoding:   "msgpack2",
 		TpExportPath:     "/var/spool/cgrates/tpe/test",
@@ -320,8 +306,6 @@ func TestDiffGeneralJsonCfg(t *testing.T) {
 
 	v2 := &GeneralCfg{
 		NodeID:           "randomID",
-		Logger:           utils.MetaSysLog,
-		LogLevel:         6,
 		RoundingDecimals: 5,
 		DBDataEncoding:   "msgpack",
 		TpExportPath:     "/var/spool/cgrates/tpe",
@@ -353,8 +337,6 @@ func TestDiffGeneralJsonCfg(t *testing.T) {
 
 	expected := &GeneralJsonCfg{
 		Node_id:              utils.StringPointer("randomID"),
-		Logger:               utils.StringPointer(utils.MetaSysLog),
-		Log_level:            utils.IntPointer(6),
 		Rounding_decimals:    utils.IntPointer(5),
 		Dbdata_encoding:      utils.StringPointer("msgpack"),
 		Tpexport_dir:         utils.StringPointer("/var/spool/cgrates/tpe"),
@@ -403,8 +385,6 @@ func TestDiffGeneralJsonCfg(t *testing.T) {
 func TestGeneralCfgCloneSection(t *testing.T) {
 	gnrCfg := &GeneralCfg{
 		NodeID:           "randomID2",
-		Logger:           utils.LoggerCfg,
-		LogLevel:         7,
 		RoundingDecimals: 1,
 		DBDataEncoding:   "msgpack2",
 		TpExportPath:     "/var/spool/cgrates/tpe/test",
@@ -429,8 +409,6 @@ func TestGeneralCfgCloneSection(t *testing.T) {
 
 	exp := &GeneralCfg{
 		NodeID:           "randomID2",
-		Logger:           utils.LoggerCfg,
-		LogLevel:         7,
 		RoundingDecimals: 1,
 		DBDataEncoding:   "msgpack2",
 		TpExportPath:     "/var/spool/cgrates/tpe/test",

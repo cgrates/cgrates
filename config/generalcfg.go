@@ -34,8 +34,6 @@ type GeneralOpts struct {
 // GeneralCfg is the general config section
 type GeneralCfg struct {
 	NodeID               string        // Identifier for this engine instance
-	Logger               string        // dictates the way logs are displayed/stored
-	LogLevel             int           // system wide log level, nothing higher than this will be logged
 	RoundingDecimals     int           // Number of decimals to round end prices at
 	DBDataEncoding       string        // The encoding used to store object data in strings: <msgpack|json>
 	TpExportPath         string        // Path towards export folder for offline Tariff Plans
@@ -91,13 +89,6 @@ func (gencfg *GeneralCfg) loadFromJSONCfg(jsnGeneralCfg *GeneralJsonCfg) (err er
 	if jsnGeneralCfg.Node_id != nil && *jsnGeneralCfg.Node_id != "" {
 		gencfg.NodeID = *jsnGeneralCfg.Node_id
 	}
-	if jsnGeneralCfg.Logger != nil {
-		gencfg.Logger = *jsnGeneralCfg.Logger
-	}
-	if jsnGeneralCfg.Log_level != nil {
-		gencfg.LogLevel = *jsnGeneralCfg.Log_level
-	}
-
 	if jsnGeneralCfg.Dbdata_encoding != nil {
 		gencfg.DBDataEncoding = strings.TrimPrefix(*jsnGeneralCfg.Dbdata_encoding, "*")
 	}
@@ -197,8 +188,6 @@ func (gencfg GeneralCfg) AsMapInterface(string) interface{} {
 	}
 	mp := map[string]interface{}{
 		utils.NodeIDCfg:               gencfg.NodeID,
-		utils.LoggerCfg:               gencfg.Logger,
-		utils.LogLevelCfg:             gencfg.LogLevel,
 		utils.RoundingDecimalsCfg:     gencfg.RoundingDecimals,
 		utils.DBDataEncodingCfg:       utils.Meta + gencfg.DBDataEncoding,
 		utils.TpExportPathCfg:         gencfg.TpExportPath,
@@ -266,8 +255,6 @@ func (generalOpts *GeneralOpts) Clone() *GeneralOpts {
 func (gencfg GeneralCfg) Clone() *GeneralCfg {
 	return &GeneralCfg{
 		NodeID:               gencfg.NodeID,
-		Logger:               gencfg.Logger,
-		LogLevel:             gencfg.LogLevel,
 		RoundingDecimals:     gencfg.RoundingDecimals,
 		DBDataEncoding:       gencfg.DBDataEncoding,
 		TpExportPath:         gencfg.TpExportPath,
@@ -304,8 +291,6 @@ type GeneralOptsJson struct {
 // General config section
 type GeneralJsonCfg struct {
 	Node_id                *string
-	Logger                 *string
-	Log_level              *int
 	Rounding_decimals      *int
 	Dbdata_encoding        *string
 	Tpexport_dir           *string
@@ -352,12 +337,6 @@ func diffGeneralJsonCfg(d *GeneralJsonCfg, v1, v2 *GeneralCfg) *GeneralJsonCfg {
 
 	if v1.NodeID != v2.NodeID {
 		d.Node_id = utils.StringPointer(v2.NodeID)
-	}
-	if v1.Logger != v2.Logger {
-		d.Logger = utils.StringPointer(v2.Logger)
-	}
-	if v1.LogLevel != v2.LogLevel {
-		d.Log_level = utils.IntPointer(v2.LogLevel)
 	}
 	if v1.RoundingDecimals != v2.RoundingDecimals {
 		d.Rounding_decimals = utils.IntPointer(v2.RoundingDecimals)

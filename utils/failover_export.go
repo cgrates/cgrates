@@ -19,52 +19,182 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 import (
+	"bytes"
 	"encoding/gob"
 	"fmt"
 	"os"
-	"path/filepath"
+	"path"
+	"sync"
+	"time"
+
+	"github.com/cgrates/ltcache"
 )
 
-type FailoverPoster struct {
-	MessageProvider
+var failedPostCache *ltcache.Cache
+
+func init() {
+	failedPostCache = ltcache.NewCache(-1, 5*time.Second, true, writeFailedPosts)
 }
 
-func NewFailoverPoster( /*addMsg *MessageProvider*/ ) *FailoverPoster {
-	return new(FailoverPoster)
+// SetFailedPostCacheTTL recreates the failed cache
+func SetFailedPostCacheTTL(ttl time.Duration) {
+	failedPostCache = ltcache.NewCache(-1, ttl, true, writeFailedPosts)
 }
 
-func (fldPst *FailoverPoster) AddMessage(failedPostDir, kafkaConn,
-	kafkaTopic string, content interface{}) (err error) {
-	filePath := filepath.Join(failedPostDir, kafkaTopic+PipeSep+MetaKafka+GOBSuffix)
-	var fileOut *os.File
-	if _, err = os.Stat(filePath); os.IsNotExist(err) {
-		fileOut, err = os.Create(filePath)
-		if err != nil {
-			return fmt.Errorf(fmt.Sprintf("<Kafka> failed to write logs to file <%s> because <%s>", filePath, err))
-		}
-	} else {
-		fileOut, err = os.OpenFile(filePath, os.O_RDWR|os.O_APPEND, 0755)
-		if err != nil {
-			return err
-		}
+func writeFailedPosts(_ string, value interface{}) {
+	expEv, canConvert := value.(*FailedExportersLogg)
+	if !canConvert {
+		return
 	}
-	enc := gob.NewEncoder(fileOut)
-	if err = enc.Encode(content); err != nil {
+	filePath := expEv.FilePath()
+	expEv.lk.RLock()
+	if err := expEv.WriteToFile(filePath); err != nil {
+		Logger.Warning(fmt.Sprintf("Unable to write failed post to file <%s> because <%s>",
+			filePath, err))
+		expEv.lk.RUnlock()
+		return
+	}
+	expEv.lk.RUnlock()
+}
+
+// FilePath returns the file path it should use for saving the failed events
+func (expEv *FailedExportersLogg) FilePath() string {
+	return path.Join(expEv.FailedPostsDir, expEv.Module+PipeSep+UUIDSha1Prefix()+GOBSuffix)
+}
+
+// WriteToFile writes the events to file
+func (expEv *FailedExportersLogg) WriteToFile(filePath string) (err error) {
+	fileOut, err := os.Create(filePath)
+	if err != nil {
 		return err
 	}
+	encd := gob.NewEncoder(fileOut)
+	gob.Register(new(CGREvent))
+	err = encd.Encode(expEv)
 	fileOut.Close()
 	return
 }
 
-type MessageProvider interface {
-	GetContent() string
-	GetMeta() string
+type FailedExportersLogg struct {
+	lk             sync.RWMutex
+	Path           string
+	Opts           map[string]interface{} // THIS WILL BE META
+	Format         string
+	Events         []interface{}
+	FailedPostsDir string
+	Module         string
 }
 
-func (fldPst *FailoverPoster) GetContent() string {
-	return EmptyString
+func AddFailedMessage(failedPostsDir, expPath, format,
+	module string, ev interface{}, opts map[string]interface{}) {
+	key := ConcatenatedKey(failedPostsDir, expPath, format, module)
+	switch module {
+	case EEs:
+		// also in case of amqp,amqpv1,s3,sqs and kafka also separe them after queue id
+		var amqpQueueID string
+		var s3BucketID string
+		var sqsQueueID string
+		var kafkaTopic string
+		if _, has := opts[AMQPQueueID]; has {
+			amqpQueueID = IfaceAsString(opts[AMQPQueueID])
+		}
+		if _, has := opts[S3Bucket]; has {
+			s3BucketID = IfaceAsString(opts[S3Bucket])
+		}
+		if _, has := opts[SQSQueueID]; has {
+			sqsQueueID = IfaceAsString(opts[SQSQueueID])
+		}
+		if _, has := opts[kafkaTopic]; has {
+			kafkaTopic = IfaceAsString(opts[KafkaTopic])
+		}
+		if qID := FirstNonEmpty(amqpQueueID, s3BucketID,
+			sqsQueueID, kafkaTopic); len(qID) != 0 {
+			key = ConcatenatedKey(key, qID)
+		}
+	case Kafka:
+	}
+	var failedPost *FailedExportersLogg
+	if x, ok := failedPostCache.Get(key); ok {
+		if x != nil {
+			failedPost = x.(*FailedExportersLogg)
+		}
+	}
+	if failedPost == nil {
+		failedPost = &FailedExportersLogg{
+			Path:           expPath,
+			Format:         format,
+			Opts:           opts,
+			Module:         module,
+			FailedPostsDir: failedPostsDir,
+		}
+		failedPostCache.Set(key, failedPost, nil)
+	}
+	failedPost.AddEvent(ev)
 }
 
-func (fldPst *FailoverPoster) GetMeta() string {
-	return EmptyString
+// AddEvent adds one event
+func (expEv *FailedExportersLogg) AddEvent(ev interface{}) {
+	expEv.lk.Lock()
+	expEv.Events = append(expEv.Events, ev)
+	expEv.lk.Unlock()
+}
+
+// NewExportEventsFromFile returns ExportEvents from the file
+// used only on replay failed post
+func NewExportEventsFromFile(filePath string) (expEv *FailedExportersLogg, err error) {
+	var fileContent []byte
+	//err = guardian.Guardian.Guard(context.TODO(), func(_ *context.Context) error {
+	if fileContent, err = os.ReadFile(filePath); err != nil {
+		return nil, err
+	}
+	if err = os.Remove(filePath); err != nil {
+		return nil, err
+	}
+	//	}, config.CgrConfig().GeneralCfg().LockingTimeout, FileLockPrefix+filePath)
+	dec := gob.NewDecoder(bytes.NewBuffer(fileContent))
+	// unmarshall it
+	expEv = new(FailedExportersLogg)
+	err = dec.Decode(&expEv)
+	return
+}
+
+type FailoverPoster interface {
+	ReplayFailedPosts(int) (*FailedExportersLogg, error)
+}
+
+// ReplayFailedPosts tryies to post cdrs again
+func (expEv *FailedExportersLogg) ReplayFailedPosts(attempts int) (failedEvents *FailedExportersLogg, err error) {
+	/* failedEvents = &ExportEvents{
+		Path:   expEv.Path,
+		Opts:   expEv.Opts,
+		Format: expEv.Format,
+	}
+
+	var ee EventExporter
+	if ee, err = NewEventExporter(&config.EventExporterCfg{
+		ID:             "ReplayFailedPosts",
+		Type:           expEv.Format,
+		ExportPath:     expEv.Path,
+		Opts:           expEv.Opts,
+		Attempts:       attempts,
+		FailedPostsDir: MetaNone,
+	}, config.CgrConfig(), nil, nil); err != nil {
+		return
+	}
+	keyFunc := func() string { return EmptyString }
+	if expEv.Format == MetaKafkajsonMap || expEv.Format == MetaS3jsonMap {
+		keyFunc = UUIDSha1Prefix
+	}
+	for _, ev := range expEv.Events {
+		if err = ExportWithAttempts(context.Background(), ee, ev, keyFunc()); err != nil {
+			failedEvents.AddEvent(ev)
+		}
+	}
+	ee.Close()
+	if len(failedEvents.Events) > 0 {
+		err = ErrPartiallyExecuted
+	} else {
+		failedEvents = nil
+	} */
+	return nil, nil
 }

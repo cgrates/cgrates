@@ -21,87 +21,18 @@ package ees
 import (
 	"bytes"
 	"encoding/gob"
-	"fmt"
 	"os"
-	"path"
 	"sync"
-	"time"
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/ltcache"
 )
 
-var failedPostCache *ltcache.Cache
-
-func init() {
-	failedPostCache = ltcache.NewCache(-1, 5*time.Second, false, writeFailedPosts) // configurable  general
-}
-
-// SetFailedPostCacheTTL recreates the failed cache
-func SetFailedPostCacheTTL(ttl time.Duration) {
-	failedPostCache = ltcache.NewCache(-1, ttl, false, writeFailedPosts)
-}
-
-func writeFailedPosts(itmID string, value interface{}) {
-	expEv, canConvert := value.(*ExportEvents)
-	if !canConvert {
-		return
-	}
-	filePath := expEv.FilePath()
-	if err := expEv.WriteToFile(filePath); err != nil {
-		utils.Logger.Warning(fmt.Sprintf("<%s> Failed to write file <%s> because <%s>",
-			utils.CDRs, filePath, err))
-	}
-}
-
-func AddFailedPost(failedPostsDir, expPath, format, module string, ev interface{}, opts *config.EventExporterOpts) {
-	key := utils.ConcatenatedKey(failedPostsDir, expPath, format, module)
-	// also in case of amqp,amqpv1,s3,sqs and kafka also separe them after queue id
-	var amqpQueueID string
-	var s3BucketID string
-	var sqsQueueID string
-	var kafkaTopic string
-	if opts.AMQPQueueID != nil {
-		amqpQueueID = *opts.AMQPQueueID
-	}
-	if opts.S3BucketID != nil {
-		s3BucketID = *opts.S3BucketID
-	}
-	if opts.SQSQueueID != nil {
-		sqsQueueID = *opts.SQSQueueID
-	}
-	if opts.KafkaTopic != nil {
-		kafkaTopic = *opts.KafkaTopic
-	}
-	if qID := utils.FirstNonEmpty(amqpQueueID, s3BucketID,
-		sqsQueueID, kafkaTopic); len(qID) != 0 {
-		key = utils.ConcatenatedKey(key, qID)
-	}
-	var failedPost *ExportEvents
-	if x, ok := failedPostCache.Get(key); ok {
-		if x != nil {
-			failedPost = x.(*ExportEvents)
-		}
-	}
-	if failedPost == nil {
-		failedPost = &ExportEvents{
-			Path:           expPath,
-			Format:         format,
-			Opts:           opts,
-			module:         module,
-			failedPostsDir: failedPostsDir,
-		}
-	}
-	failedPost.AddEvent(ev)
-	failedPostCache.Set(key, failedPost, nil)
-}
-
-// NewExportEventsFromFile returns ExportEvents from the file
+// NewFailoverPosterFromFile returns ExportEvents from the file
 // used only on replay failed post
-func NewExportEventsFromFile(filePath string) (expEv *ExportEvents, err error) {
+func NewFailoverPosterFromFile(filePath, providerType string) (failPoster utils.FailoverPoster, err error) {
 	var fileContent []byte
 	err = guardian.Guardian.Guard(context.TODO(), func(_ *context.Context) error {
 		if fileContent, err = os.ReadFile(filePath); err != nil {
@@ -114,13 +45,230 @@ func NewExportEventsFromFile(filePath string) (expEv *ExportEvents, err error) {
 	}
 	dec := gob.NewDecoder(bytes.NewBuffer(fileContent))
 	// unmarshall it
-	expEv = new(ExportEvents)
+	expEv := new(utils.FailedExportersLogg)
 	err = dec.Decode(&expEv)
+	switch providerType {
+	case utils.EEs:
+		opts, err := AsOptsEESConfig(expEv.Opts)
+		if err != nil {
+			return nil, err
+		}
+		failPoster = &FailedExportersEEs{
+			module:         expEv.Module,
+			failedPostsDir: expEv.FailedPostsDir,
+			Path:           expEv.Path,
+			Opts:           opts,
+			Events:         expEv.Events,
+			Format:         expEv.Format,
+		}
+	case utils.Kafka:
+		failPoster = expEv
+	}
 	return
 }
 
-// ExportEvents used to save the failed post to file
-type ExportEvents struct {
+func AsOptsEESConfig(opts map[string]interface{}) (*config.EventExporterOpts, error) {
+	optsCfg := new(config.EventExporterOpts)
+	if len(opts) == 0 {
+		return optsCfg, nil
+	}
+	if _, has := opts[utils.CSVFieldSepOpt]; has {
+		optsCfg.CSVFieldSeparator = utils.StringPointer(utils.IfaceAsString(utils.CSVFieldSepOpt))
+	}
+	if _, has := opts[utils.ElsIndex]; has {
+		optsCfg.ElsIndex = utils.StringPointer(utils.IfaceAsString(utils.ElsIndex))
+	}
+	if _, has := opts[utils.ElsIfPrimaryTerm]; has {
+		x, err := utils.IfaceAsInt(utils.ElsIfPrimaryTerm)
+		if err != nil {
+			return nil, err
+		}
+		optsCfg.ElsIfPrimaryTerm = utils.IntPointer(x)
+	}
+	if _, has := opts[utils.ElsIfSeqNo]; has {
+		x, err := utils.IfaceAsInt(utils.ElsIfSeqNo)
+		if err != nil {
+			return nil, err
+		}
+		optsCfg.ElsIfSeqNo = utils.IntPointer(x)
+	}
+	if _, has := opts[utils.ElsOpType]; has {
+		optsCfg.ElsOpType = utils.StringPointer(utils.IfaceAsString(utils.ElsOpType))
+	}
+	if _, has := opts[utils.ElsPipeline]; has {
+		optsCfg.ElsPipeline = utils.StringPointer(utils.IfaceAsString(utils.ElsPipeline))
+	}
+	if _, has := opts[utils.ElsRouting]; has {
+		optsCfg.ElsRouting = utils.StringPointer(utils.IfaceAsString(utils.ElsRouting))
+	}
+	if _, has := opts[utils.ElsTimeout]; has {
+		t, err := utils.IfaceAsDuration(utils.ElsTimeout)
+		if err != nil {
+			return nil, err
+		}
+		optsCfg.ElsTimeout = &t
+	}
+	if _, has := opts[utils.ElsVersionLow]; has {
+		x, err := utils.IfaceAsInt(utils.ElsVersionLow)
+		if err != nil {
+			return nil, err
+		}
+		optsCfg.ElsVersion = utils.IntPointer(x)
+	}
+	if _, has := opts[utils.ElsVersionType]; has {
+		optsCfg.ElsVersionType = utils.StringPointer(utils.IfaceAsString(utils.ElsVersionType))
+	}
+	if _, has := opts[utils.ElsWaitForActiveShards]; has {
+		optsCfg.ElsWaitForActiveShards = utils.StringPointer(utils.IfaceAsString(utils.ElsWaitForActiveShards))
+	}
+	if _, has := opts[utils.SQLMaxIdleConnsCfg]; has {
+		x, err := utils.IfaceAsInt(utils.SQLMaxIdleConnsCfg)
+		if err != nil {
+			return nil, err
+		}
+		optsCfg.SQLMaxIdleConns = utils.IntPointer(x)
+	}
+	if _, has := opts[utils.SQLMaxOpenConns]; has {
+		x, err := utils.IfaceAsInt(utils.SQLMaxOpenConns)
+		if err != nil {
+			return nil, err
+		}
+		optsCfg.SQLMaxOpenConns = utils.IntPointer(x)
+	}
+	if _, has := opts[utils.SQLConnMaxLifetime]; has {
+		t, err := utils.IfaceAsDuration(utils.SQLConnMaxLifetime)
+		if err != nil {
+			return nil, err
+		}
+		optsCfg.SQLConnMaxLifetime = &t
+	}
+	if _, has := opts[utils.MYSQLDSNParams]; has {
+		optsCfg.MYSQLDSNParams = opts[utils.SQLConnMaxLifetime].(map[string]string)
+	}
+	if _, has := opts[utils.SQLTableNameOpt]; has {
+		optsCfg.SQLTableName = utils.StringPointer(utils.IfaceAsString(utils.SQLTableNameOpt))
+	}
+	if _, has := opts[utils.SQLDBNameOpt]; has {
+		optsCfg.SQLDBName = utils.StringPointer(utils.IfaceAsString(utils.SQLDBNameOpt))
+	}
+	if _, has := opts[utils.PgSSLModeCfg]; has {
+		optsCfg.PgSSLMode = utils.StringPointer(utils.IfaceAsString(utils.PgSSLModeCfg))
+	}
+	if _, has := opts[utils.KafkaTopic]; has {
+		optsCfg.KafkaTopic = utils.StringPointer(utils.IfaceAsString(utils.KafkaTopic))
+	}
+	if _, has := opts[utils.AMQPQueueID]; has {
+		optsCfg.AMQPQueueID = utils.StringPointer(utils.IfaceAsString(utils.AMQPQueueID))
+	}
+	if _, has := opts[utils.AMQPRoutingKey]; has {
+		optsCfg.AMQPRoutingKey = utils.StringPointer(utils.IfaceAsString(utils.AMQPRoutingKey))
+	}
+	if _, has := opts[utils.AMQPExchange]; has {
+		optsCfg.AMQPExchange = utils.StringPointer(utils.IfaceAsString(utils.AMQPExchange))
+	}
+	if _, has := opts[utils.AMQPExchangeType]; has {
+		optsCfg.AMQPExchangeType = utils.StringPointer(utils.IfaceAsString(utils.AMQPExchangeType))
+	}
+	if _, has := opts[utils.AWSRegion]; has {
+		optsCfg.AWSRegion = utils.StringPointer(utils.IfaceAsString(utils.AWSRegion))
+	}
+	if _, has := opts[utils.AWSKey]; has {
+		optsCfg.AWSKey = utils.StringPointer(utils.IfaceAsString(utils.AWSKey))
+	}
+	if _, has := opts[utils.AWSSecret]; has {
+		optsCfg.AWSSecret = utils.StringPointer(utils.IfaceAsString(utils.AWSSecret))
+	}
+	if _, has := opts[utils.AWSToken]; has {
+		optsCfg.AWSToken = utils.StringPointer(utils.IfaceAsString(utils.AWSToken))
+	}
+	if _, has := opts[utils.SQSQueueID]; has {
+		optsCfg.SQSQueueID = utils.StringPointer(utils.IfaceAsString(utils.SQSQueueID))
+	}
+	if _, has := opts[utils.S3Bucket]; has {
+		optsCfg.S3BucketID = utils.StringPointer(utils.IfaceAsString(utils.S3Bucket))
+	}
+	if _, has := opts[utils.S3FolderPath]; has {
+		optsCfg.S3FolderPath = utils.StringPointer(utils.IfaceAsString(utils.S3FolderPath))
+	}
+	if _, has := opts[utils.NatsJetStream]; has {
+		x, err := utils.IfaceAsBool(utils.NatsJetStream)
+		if err != nil {
+			return nil, err
+		}
+		optsCfg.NATSJetStream = utils.BoolPointer(x)
+	}
+	if _, has := opts[utils.NatsSubject]; has {
+		optsCfg.NATSSubject = utils.StringPointer(utils.IfaceAsString(utils.NatsSubject))
+	}
+	if _, has := opts[utils.NatsJWTFile]; has {
+		optsCfg.NATSJWTFile = utils.StringPointer(utils.IfaceAsString(utils.NatsJWTFile))
+	}
+	if _, has := opts[utils.NatsSeedFile]; has {
+		optsCfg.NATSSeedFile = utils.StringPointer(utils.IfaceAsString(utils.NatsSeedFile))
+	}
+	if _, has := opts[utils.NatsCertificateAuthority]; has {
+		optsCfg.NATSCertificateAuthority = utils.StringPointer(utils.IfaceAsString(utils.NatsCertificateAuthority))
+	}
+	if _, has := opts[utils.NatsClientCertificate]; has {
+		optsCfg.NATSClientCertificate = utils.StringPointer(utils.IfaceAsString(utils.NatsClientCertificate))
+	}
+	if _, has := opts[utils.NatsClientKey]; has {
+		optsCfg.NATSClientKey = utils.StringPointer(utils.IfaceAsString(utils.NatsClientKey))
+	}
+	if _, has := opts[utils.NatsJetStreamMaxWait]; has {
+		t, err := utils.IfaceAsDuration(utils.NatsJetStreamMaxWait)
+		if err != nil {
+			return nil, err
+		}
+		optsCfg.NATSJetStreamMaxWait = &t
+	}
+	if _, has := opts[utils.RpcCodec]; has {
+		optsCfg.RPCCodec = utils.StringPointer(utils.IfaceAsString(utils.RpcCodec))
+	}
+	if _, has := opts[utils.ServiceMethod]; has {
+		optsCfg.ServiceMethod = utils.StringPointer(utils.IfaceAsString(utils.ServiceMethod))
+	}
+	if _, has := opts[utils.KeyPath]; has {
+		optsCfg.KeyPath = utils.StringPointer(utils.IfaceAsString(utils.KeyPath))
+	}
+	if _, has := opts[utils.CertPath]; has {
+		optsCfg.CertPath = utils.StringPointer(utils.IfaceAsString(utils.CertPath))
+	}
+	if _, has := opts[utils.CaPath]; has {
+		optsCfg.CAPath = utils.StringPointer(utils.IfaceAsString(utils.CaPath))
+	}
+	if _, has := opts[utils.Tls]; has {
+		x, err := utils.IfaceAsBool(utils.Tls)
+		if err != nil {
+			return nil, err
+		}
+		optsCfg.TLS = utils.BoolPointer(x)
+	}
+	if _, has := opts[utils.ConnIDs]; has {
+		optsCfg.ConnIDs = opts[utils.ConnIDs].(*[]string)
+	}
+	if _, has := opts[utils.RpcConnTimeout]; has {
+		t, err := utils.IfaceAsDuration(utils.RpcConnTimeout)
+		if err != nil {
+			return nil, err
+		}
+		optsCfg.RPCConnTimeout = &t
+	}
+	if _, has := opts[utils.RpcReplyTimeout]; has {
+		t, err := utils.IfaceAsDuration(utils.RpcReplyTimeout)
+		if err != nil {
+			return nil, err
+		}
+		optsCfg.RPCReplyTimeout = &t
+	}
+	if _, has := opts[utils.RPCAPIOpts]; has {
+		optsCfg.RPCAPIOpts = opts[utils.RPCAPIOpts].(map[string]interface{})
+	}
+	return optsCfg, nil
+}
+
+// FailedExportersEEs used to save the failed post to file
+type FailedExportersEEs struct {
 	lk             sync.RWMutex
 	Path           string
 	Opts           *config.EventExporterOpts
@@ -130,41 +278,16 @@ type ExportEvents struct {
 	module         string
 }
 
-// FilePath returns the file path it should use for saving the failed events
-func (expEv *ExportEvents) FilePath() string {
-	return path.Join(expEv.failedPostsDir, expEv.module+utils.PipeSep+utils.UUIDSha1Prefix()+utils.GOBSuffix)
-}
-
-// SetModule sets the module for this event
-func (expEv *ExportEvents) SetModule(mod string) {
-	expEv.module = mod
-}
-
-// WriteToFile writes the events to file
-func (expEv *ExportEvents) WriteToFile(filePath string) (err error) {
-	err = guardian.Guardian.Guard(context.TODO(), func(_ *context.Context) error {
-		fileOut, err := os.Create(filePath)
-		if err != nil {
-			return err
-		}
-		encd := gob.NewEncoder(fileOut)
-		err = encd.Encode(expEv)
-		fileOut.Close()
-		return err
-	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.FileLockPrefix+filePath)
-	return
-}
-
 // AddEvent adds one event
-func (expEv *ExportEvents) AddEvent(ev interface{}) {
+func (expEv *FailedExportersEEs) AddEvent(ev interface{}) {
 	expEv.lk.Lock()
 	expEv.Events = append(expEv.Events, ev)
 	expEv.lk.Unlock()
 }
 
 // ReplayFailedPosts tryies to post cdrs again
-func (expEv *ExportEvents) ReplayFailedPosts(attempts int) (failedEvents *ExportEvents, err error) {
-	failedEvents = &ExportEvents{
+func (expEv *FailedExportersEEs) ReplayFailedPosts(attempts int) (failedEvents *utils.FailedExportersLogg, err error) {
+	eesFailedEvents := &FailedExportersEEs{
 		Path:   expEv.Path,
 		Opts:   expEv.Opts,
 		Format: expEv.Format,
@@ -187,14 +310,14 @@ func (expEv *ExportEvents) ReplayFailedPosts(attempts int) (failedEvents *Export
 	}
 	for _, ev := range expEv.Events {
 		if err = ExportWithAttempts(context.Background(), ee, ev, keyFunc()); err != nil {
-			failedEvents.AddEvent(ev)
+			eesFailedEvents.AddEvent(ev)
 		}
 	}
 	ee.Close()
-	if len(failedEvents.Events) > 0 {
+	if len(eesFailedEvents.Events) > 0 {
 		err = utils.ErrPartiallyExecuted
 	} else {
-		failedEvents = nil
+		eesFailedEvents = nil
 	}
 	return
 }

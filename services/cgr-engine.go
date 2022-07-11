@@ -349,10 +349,18 @@ func (cgr *CGREngine) Init(ctx *context.Context, shtDw context.CancelFunc, flags
 	}
 
 	// init syslog
-	if utils.Logger, err = engine.NewLogger(utils.FirstNonEmpty(*flags.SysLogger, cgr.cfg.LoggerCfg().Type),
-		cgr.cfg.GeneralCfg().DefaultTenant, cgr.cfg.GeneralCfg().NodeID, cgr.cfg.LoggerCfg()); err != nil {
+	if utils.Logger, err = utils.NewLogger(
+		utils.FirstNonEmpty(*flags.SysLogger, cgr.cfg.LoggerCfg().Type),
+		cgr.cfg.GeneralCfg().DefaultTenant,
+		cgr.cfg.GeneralCfg().NodeID,
+		cgr.cfg.LoggerCfg().Level,
+		cgr.cfg.LoggerCfg().Opts.Attempts,
+		cgr.cfg.LoggerCfg().Opts.KafkaConn,
+		cgr.cfg.LoggerCfg().Opts.KafkaTopic,
+		cgr.cfg.LoggerCfg().Opts.FailedPostsDir); err != nil {
 		return fmt.Errorf("Could not initialize syslog connection, err: <%s>", err)
 	}
+	utils.SetFailedPostCacheTTL(cgr.cfg.GeneralCfg().FailedPostsTTL) // init failedPosts to posts loggers/exporters in case of failing
 	utils.Logger.Info(fmt.Sprintf("<CoreS> starting version <%s><%s>", vers, runtime.Version()))
 	cgr.cfg.LazySanityCheck()
 

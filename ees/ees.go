@@ -283,9 +283,9 @@ func ExportWithAttempts(ctx *context.Context, exp EventExporter, eEv interface{}
 	if exp.Cfg().FailedPostsDir != utils.MetaNone {
 		defer func() {
 			if err != nil {
-				AddFailedPost(exp.Cfg().FailedPostsDir, exp.Cfg().ExportPath,
+				utils.AddFailedMessage(exp.Cfg().FailedPostsDir, exp.Cfg().ExportPath,
 					exp.Cfg().Type, utils.EEs,
-					eEv, exp.Cfg().Opts)
+					eEv, exp.Cfg().Opts.AsMapInterface())
 			}
 		}()
 	}

@@ -987,17 +987,17 @@ func (pgnt Paginator) Clone() Paginator {
 // GetPaginateOpts retrieves paginate options from the APIOpts map
 func GetPaginateOpts(opts map[string]interface{}) (limit, offset, maxItems int, err error) {
 	if limitIface, has := opts[PageLimitOpt]; has {
-		if limit, err = IfaceAsTInt(limitIface); err != nil {
+		if limit, err = IfaceAsInt(limitIface); err != nil {
 			return
 		}
 	}
 	if offsetIface, has := opts[PageOffsetOpt]; has {
-		if offset, err = IfaceAsTInt(offsetIface); err != nil {
+		if offset, err = IfaceAsInt(offsetIface); err != nil {
 			return
 		}
 	}
 	if maxItemsIface, has := opts[PageMaxItemsOpt]; has {
-		if maxItems, err = IfaceAsTInt(maxItemsIface); err != nil {
+		if maxItems, err = IfaceAsInt(maxItemsIface); err != nil {
 			return
 		}
 	}

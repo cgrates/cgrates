@@ -24,25 +24,6 @@ import (
 	"time"
 )
 
-func TestCGREventHasField(t *testing.T) {
-	//empty check
-	cgrEvent := new(CGREvent)
-	rcv := cgrEvent.HasField("")
-	if rcv {
-		t.Error("Expecting: false, received: ", rcv)
-	}
-	//normal check
-	cgrEvent = &CGREvent{
-		Event: map[string]interface{}{
-			Usage: 20 * time.Second,
-		},
-	}
-	rcv = cgrEvent.HasField("Usage")
-	if !rcv {
-		t.Error("Expecting: true, received: ", rcv)
-	}
-}
-
 func TestCGREventCheckMandatoryFields(t *testing.T) {
 	//empty check
 	cgrEvent := new(CGREvent)
