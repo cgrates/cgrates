@@ -166,8 +166,8 @@ const CGRATES_CFG_JSON = `
 		"sqlMaxIdleConns": 10,				// maximum database connections idle, not applying for mongo
 		"sqlConnMaxLifetime": "0", 			// maximum amount of time a connection may be reused (0 for unlimited), not applying for mongo
 		"mysqlDSNParams": {},               // DSN extra paramss
-		"mongoQueryTimeout":"10s",			// timeout for query when mongo is used
-		"pgSSLMode":"disable",		 		// pgSSLMode in case of *postgres
+		"mongoQueryTimeout": "10s",			// timeout for query when mongo is used
+		"pgSSLMode": "disable",		 		// pgSSLMode in case of *postgres
 		"mysqlLocation": "Local",			// the location the time from mysql is retrived
 	},
 	"items":{
