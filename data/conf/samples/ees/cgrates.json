@@ -386,7 +386,7 @@
 			"opts": {
 				"sqlDBName": "cgrates2", // if dbName is not present "cgrates" will be used as default
 				"sqlTableName": "expTable", // tableName is mandatory in opts for sql exporter
-				"postgresSSLMode": "disable",
+				"pgSSLMode": "disable",
 				"sqlMaxIdleConns": 10,
 				"sqlMaxOpenConns": 100,
 				"sqlConnMaxLifetime": "0",
@@ -411,7 +411,7 @@
 			"opts": {
 				"sqlDBName": "cgrates2",
 				"sqlTableName": "expTable",
-				"postgresSSLMode": "disable",
+				"pgSSLMode": "disable",
 				"sqlMaxIdleConns": 10,
 				"sqlMaxOpenConns": 100,
 				"sqlConnMaxLifetime": "0",

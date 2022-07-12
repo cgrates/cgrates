@@ -230,10 +230,10 @@ type EventReaderOptsJson struct {
 	KafkaTopicProcessed               *string `json:"kafkaTopicProcessed"`
 	SQLDBName                         *string `json:"sqlDBName"`
 	SQLTableName                      *string `json:"sqlTableName"`
-	SSLMode                           *string `json:"postgresSSLMode"`
+	PgSSLMode                         *string `json:"pgSSLMode"`
 	SQLDBNameProcessed                *string `json:"sqlDBNameProcessed"`
 	SQLTableNameProcessed             *string `json:"sqlTableNameProcessed"`
-	SSLModeProcessed                  *string `json:"postgresSSLModeProcessed"`
+	PgSSLModeProcessed                *string `json:"pgSSLModeProcessed"`
 	AWSRegion                         *string `json:"awsRegion"`
 	AWSKey                            *string `json:"awsKey"`
 	AWSSecret                         *string `json:"awsSecret"`
@@ -311,7 +311,7 @@ type EventExporterOptsJson struct {
 	MYSQLDSNParams           map[string]string      `json:"mysqlDSNParams"`
 	SQLTableName             *string                `json:"sqlTableName"`
 	SQLDBName                *string                `json:"sqlDBName"`
-	SSLMode                  *string                `json:"sslMode"`
+	PgSSLMode                *string                `json:"pgSSLMode"`
 	KafkaTopic               *string                `json:"kafkaTopic"`
 	AMQPQueueID              *string                `json:"amqpQueueID"`
 	AMQPRoutingKey           *string                `json:"amqpRoutingKey"`

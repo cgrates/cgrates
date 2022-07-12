@@ -2653,7 +2653,7 @@ const (
 
 	SQLDBNameProcessedCfg    = "sqlDBNameProcessed"
 	SQLTableNameProcessedCfg = "sqlTableNameProcessed"
-	SSLModeProcessedCfg      = "sslModeProcessed"
+	PgSSLModeProcessedCfg    = "pgSSLModeProcessed"
 
 	AWSRegionProcessedCfg = "awsRegionProcessed"
 	AWSKeyProcessedCfg    = "awsKeyProcessed"

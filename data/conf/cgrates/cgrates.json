@@ -492,7 +492,7 @@
 
 // 				// "sqlTableName":"cdrs", 						// the name of the table from where the events are exported
 // 				// "sqlDBName": "cgrates",						// the name of the database from where the events are exported
-// 				// "sslMode": "disable",						// the postgresSSLMode for postgres            				
+// 				// "pgSSLMode": "disable",						// the SSLMode for postgres            				
 				
 				
 // 				// Kafka
