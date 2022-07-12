@@ -4,20 +4,22 @@
 	"reply_timeout": "50s"
 },
 
-// "logger": {
-//	"type": "*kafkaLog",        // controls the destination of logs <*syslog|*stdout|*kafka>
-//	"level": 6,               // system level precision for floats 
-//	"opts": {
-//		"kafka_conn": "localhost:9092",    // the connection trough kafka
-//		"kafka_topic": "TutorialTopic",    // the topic from where the events are exported
-//		"attempts": 1,                     // number of attempts of connecting
-//	},
-//}, 
+/*
+ "logger": {
+	"type": "*kafkaLog",        // controls the destination of logs <*syslog|*stdout|*kafka>
+	"level": 6,               // system level precision for floats 
+	"opts": {
+		"kafka_conn": "ldasdas:9092",    // the connection trough kafka
+		"kafka_topic": "TutorialTopic",    // the topic from where the events are exported
+		"attempts": 1,                     // number of attempts of connecting
+	},
+},
+*/ 
 
 "logger": {
 	"type": "*syslog",        // controls the destination of logs <*syslog|*stdout|*kafka>
 	"level": 6,               // system level precision for floats 
-}, 
+},  
 
 "listen": {
 	"rpc_json": ":2012",

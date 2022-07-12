@@ -225,6 +225,8 @@ func (el *ExportLogger) Warning(m string) (err error) {
 
 func (el *ExportLogger) GetMeta() map[string]interface{} {
 	return map[string]interface{}{
+		Tenant:         el.tenant,
+		NodeID:         el.nodeID,
 		Level:          el.logLevel,
 		Format:         el.writer.Topic,
 		Conn:           el.writer.Addr.String(),

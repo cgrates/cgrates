@@ -751,6 +751,9 @@ func (optsEes *EventExporterOpts) AsMapInterface() map[string]interface{} {
 	if optsEes.SQLMaxOpenConns != nil {
 		opts[utils.SQLMaxOpenConns] = *optsEes.SQLMaxOpenConns
 	}
+	if optsEes.MYSQLDSNParams != nil {
+		opts[utils.MYSQLDSNParams] = optsEes.MYSQLDSNParams
+	}
 	if optsEes.SQLConnMaxLifetime != nil {
 		opts[utils.SQLConnMaxLifetime] = optsEes.SQLConnMaxLifetime.String()
 	}
