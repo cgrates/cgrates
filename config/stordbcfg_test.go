@@ -210,10 +210,10 @@ func TestStorDbCfgAsMapInterface(t *testing.T) {
 			"opts": {	
 				"sqlMaxOpenConns": 100,					
 				"sqlMaxIdleConns": 10,					
-				"sqlConnMaxLifetime": 0,
+				"sqlConnMaxLifetime": "0",
 				"mysqlDSNParams": {},  			
 				"mongoQueryTimeout":"10s",
-				"postgresSSLMode":"disable",		
+				"pgSSLMode":"disable",		
 				"mysqlLocation": "UTC",			
 			},
 			"items":{
@@ -235,10 +235,10 @@ func TestStorDbCfgAsMapInterface(t *testing.T) {
 		utils.RemoteConnsCfg:         []string{"*conn1"},
 		utils.ReplicationConnsCfg:    []string{"*conn1"},
 		utils.OptsCfg: map[string]interface{}{
-			utils.SQLMaxOpenConnsCfg:    100.,
-			utils.SQLMaxIdleConnsCfg:    10.,
-			utils.SQLConnMaxLifetimeCfg: 0.,
-			utils.MYSQLDSNParams:        make(map[string]interface{}),
+			utils.SQLMaxOpenConnsCfg:    100,
+			utils.SQLMaxIdleConnsCfg:    10,
+			utils.SQLConnMaxLifetimeCfg: "0s",
+			utils.MYSQLDSNParams:        make(map[string]string),
 			utils.MongoQueryTimeoutCfg:  "10s",
 			utils.PgSSLModeCfg:          "disable",
 			utils.MysqlLocation:         "UTC",
@@ -296,6 +296,7 @@ func TestStorDbCfgClone(t *testing.T) {
 			SQLConnMaxLifetime: 0,
 			MySQLDSNParams:     make(map[string]string),
 			MySQLLocation:      "UTC",
+			PgSSLMode:          "disable",
 		},
 	}
 	rcv := ban.Clone()
