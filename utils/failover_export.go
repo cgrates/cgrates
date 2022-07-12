@@ -27,7 +27,9 @@ import (
 	"sync"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/ltcache"
+	"github.com/segmentio/kafka-go"
 )
 
 var failedPostCache *ltcache.Cache
@@ -143,14 +145,12 @@ func (expEv *FailedExportersLogg) AddEvent(ev interface{}) {
 // used only on replay failed post
 func NewExportEventsFromFile(filePath string) (expEv *FailedExportersLogg, err error) {
 	var fileContent []byte
-	//err = guardian.Guardian.Guard(context.TODO(), func(_ *context.Context) error {
 	if fileContent, err = os.ReadFile(filePath); err != nil {
 		return nil, err
 	}
 	if err = os.Remove(filePath); err != nil {
 		return nil, err
 	}
-	//	}, config.CgrConfig().GeneralCfg().LockingTimeout, FileLockPrefix+filePath)
 	dec := gob.NewDecoder(bytes.NewBuffer(fileContent))
 	// unmarshall it
 	expEv = new(FailedExportersLogg)
@@ -159,42 +159,33 @@ func NewExportEventsFromFile(filePath string) (expEv *FailedExportersLogg, err e
 }
 
 type FailoverPoster interface {
-	ReplayFailedPosts(int) (*FailedExportersLogg, error)
+	ReplayFailedPosts(int) error
 }
 
 // ReplayFailedPosts tryies to post cdrs again
-func (expEv *FailedExportersLogg) ReplayFailedPosts(attempts int) (failedEvents *FailedExportersLogg, err error) {
-	/* failedEvents = &ExportEvents{
-		Path:   expEv.Path,
-		Opts:   expEv.Opts,
-		Format: expEv.Format,
-	}
-
-	var ee EventExporter
-	if ee, err = NewEventExporter(&config.EventExporterCfg{
-		ID:             "ReplayFailedPosts",
-		Type:           expEv.Format,
-		ExportPath:     expEv.Path,
-		Opts:           expEv.Opts,
-		Attempts:       attempts,
-		FailedPostsDir: MetaNone,
-	}, config.CgrConfig(), nil, nil); err != nil {
+func (expEv *FailedExportersLogg) ReplayFailedPosts(attempts int) (err error) {
+	nodeID := IfaceAsString(expEv.Opts[NodeID])
+	tnt := IfaceAsString(expEv.Opts[Tenant])
+	logLvl, err := IfaceAsInt(expEv.Opts[Level])
+	if err != nil {
 		return
 	}
-	keyFunc := func() string { return EmptyString }
-	if expEv.Format == MetaKafkajsonMap || expEv.Format == MetaS3jsonMap {
-		keyFunc = UUIDSha1Prefix
-	}
-	for _, ev := range expEv.Events {
-		if err = ExportWithAttempts(context.Background(), ee, ev, keyFunc()); err != nil {
-			failedEvents.AddEvent(ev)
+	expLogger := NewExportLogger(nodeID, tnt, logLvl,
+		expEv.Path, expEv.Format, attempts, expEv.FailedPostsDir)
+	for _, event := range expEv.Events {
+		var content []byte
+		if content, err = ToUnescapedJSON(event); err != nil {
+			return
+		}
+		if err = expLogger.writer.WriteMessages(context.Background(), kafka.Message{
+			Key:   []byte(GenUUID()),
+			Value: content,
+		}); err != nil {
+			// if there are any errors in kafka, we will post in FailedPostDirectory
+			AddFailedMessage(expLogger.fldPostDir, expLogger.writer.Addr.String(), MetaKafkaLog, Kafka,
+				event, expLogger.GetMeta())
+			return nil
 		}
 	}
-	ee.Close()
-	if len(failedEvents.Events) > 0 {
-		err = ErrPartiallyExecuted
-	} else {
-		failedEvents = nil
-	} */
-	return nil, nil
+	return err
 }

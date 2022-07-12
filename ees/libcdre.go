@@ -286,7 +286,7 @@ func (expEv *FailedExportersEEs) AddEvent(ev interface{}) {
 }
 
 // ReplayFailedPosts tryies to post cdrs again
-func (expEv *FailedExportersEEs) ReplayFailedPosts(attempts int) (failedEvents *utils.FailedExportersLogg, err error) {
+func (expEv *FailedExportersEEs) ReplayFailedPosts(attempts int) (err error) {
 	eesFailedEvents := &FailedExportersEEs{
 		Path:   expEv.Path,
 		Opts:   expEv.Opts,
