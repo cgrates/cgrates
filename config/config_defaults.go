@@ -164,7 +164,7 @@ const CGRATES_CFG_JSON = `
 	"opts": {
 		"sqlMaxOpenConns": 100,				// maximum database connections opened, not applying for mongo
 		"sqlMaxIdleConns": 10,				// maximum database connections idle, not applying for mongo
-		"sqlConnMaxLifetime": 0, 			// maximum amount of time in seconds a connection may be reused (0 for unlimited), not applying for mongo
+		"sqlConnMaxLifetime": "0", 			// maximum amount of time a connection may be reused (0 for unlimited), not applying for mongo
 		"mysqlDSNParams": {},               // DSN extra paramss
 		"mongoQueryTimeout":"10s",			// timeout for query when mongo is used
 		"pgSSLMode":"disable",		 		// pgSSLMode in case of *postgres
@@ -516,13 +516,13 @@ const CGRATES_CFG_JSON = `
 				// SQL
 				// "sqlMaxIdleConns": 0,						// SQLMaxIdleConns    
 				// "sqlMaxOpenConns": 0,						// SQLMaxOpenConns
-				// "sqlConnMaxLifetime": 0,						// SQLConnMaxLifetime 
+				// "sqlConnMaxLifetime": "0",					// SQLConnMaxLifetime 
 				// "mysqlDSNParams": {},                        // DSN params
 
 
 				// "sqlTableName":"cdrs", 						// the name of the table from where the events are exported
 				// "sqlDBName": "cgrates",						// the name of the database from where the events are exported
-				// "sslMode": "disable",						// the postgresSSLMode for postgres            				
+				// "pgSSLMode": "disable",						// the SSLMode for postgres            				
 				
 				
 				// Kafka

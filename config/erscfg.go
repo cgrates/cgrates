@@ -160,10 +160,10 @@ type EventReaderOpts struct {
 	KafkaTopicProcessed               *string
 	SQLDBName                         *string
 	SQLTableName                      *string
-	SSLMode                           *string
+	PgSSLMode                         *string
 	SQLDBNameProcessed                *string
 	SQLTableNameProcessed             *string
-	SSLModeProcessed                  *string
+	PgSSLModeProcessed                *string
 	AWSRegion                         *string
 	AWSKey                            *string
 	AWSSecret                         *string
@@ -295,8 +295,8 @@ func (erOpts *EventReaderOpts) loadFromJSONCfg(jsnCfg *EventReaderOptsJson) (err
 	if jsnCfg.SQLTableName != nil {
 		erOpts.SQLTableName = jsnCfg.SQLTableName
 	}
-	if jsnCfg.SSLMode != nil {
-		erOpts.SSLMode = jsnCfg.SSLMode
+	if jsnCfg.PgSSLMode != nil {
+		erOpts.PgSSLMode = jsnCfg.PgSSLMode
 	}
 	if jsnCfg.SQLDBNameProcessed != nil {
 		erOpts.SQLDBNameProcessed = jsnCfg.SQLDBNameProcessed
@@ -304,8 +304,8 @@ func (erOpts *EventReaderOpts) loadFromJSONCfg(jsnCfg *EventReaderOptsJson) (err
 	if jsnCfg.SQLTableNameProcessed != nil {
 		erOpts.SQLTableNameProcessed = jsnCfg.SQLTableNameProcessed
 	}
-	if jsnCfg.SSLModeProcessed != nil {
-		erOpts.SSLModeProcessed = jsnCfg.SSLModeProcessed
+	if jsnCfg.PgSSLModeProcessed != nil {
+		erOpts.PgSSLModeProcessed = jsnCfg.PgSSLModeProcessed
 	}
 	if jsnCfg.AWSRegion != nil {
 		erOpts.AWSRegion = jsnCfg.AWSRegion
@@ -562,8 +562,8 @@ func (erOpts *EventReaderOpts) Clone() *EventReaderOpts {
 	if erOpts.SQLTableName != nil {
 		cln.SQLTableName = utils.StringPointer(*erOpts.SQLTableName)
 	}
-	if erOpts.SSLMode != nil {
-		cln.SSLMode = utils.StringPointer(*erOpts.SSLMode)
+	if erOpts.PgSSLMode != nil {
+		cln.PgSSLMode = utils.StringPointer(*erOpts.PgSSLMode)
 	}
 	if erOpts.SQLDBNameProcessed != nil {
 		cln.SQLDBNameProcessed = utils.StringPointer(*erOpts.SQLDBNameProcessed)
@@ -571,8 +571,8 @@ func (erOpts *EventReaderOpts) Clone() *EventReaderOpts {
 	if erOpts.SQLTableNameProcessed != nil {
 		cln.SQLTableNameProcessed = utils.StringPointer(*erOpts.SQLTableNameProcessed)
 	}
-	if erOpts.SSLModeProcessed != nil {
-		cln.SSLModeProcessed = utils.StringPointer(*erOpts.SSLModeProcessed)
+	if erOpts.PgSSLModeProcessed != nil {
+		cln.PgSSLModeProcessed = utils.StringPointer(*erOpts.PgSSLModeProcessed)
 	}
 	if erOpts.AWSRegion != nil {
 		cln.AWSRegion = utils.StringPointer(*erOpts.AWSRegion)
@@ -787,8 +787,8 @@ func (er *EventReaderCfg) AsMapInterface(separator string) (initialMP map[string
 	if er.Opts.SQLTableName != nil {
 		opts[utils.SQLTableNameOpt] = *er.Opts.SQLTableName
 	}
-	if er.Opts.SSLMode != nil {
-		opts[utils.PgSSLModeCfg] = *er.Opts.SSLMode
+	if er.Opts.PgSSLMode != nil {
+		opts[utils.PgSSLModeCfg] = *er.Opts.PgSSLMode
 	}
 	if er.Opts.SQLDBNameProcessed != nil {
 		opts[utils.SQLDBNameProcessedCfg] = *er.Opts.SQLDBNameProcessed
@@ -796,8 +796,8 @@ func (er *EventReaderCfg) AsMapInterface(separator string) (initialMP map[string
 	if er.Opts.SQLTableNameProcessed != nil {
 		opts[utils.SQLTableNameProcessedCfg] = *er.Opts.SQLTableNameProcessed
 	}
-	if er.Opts.SSLModeProcessed != nil {
-		opts[utils.SSLModeProcessedCfg] = *er.Opts.SSLModeProcessed
+	if er.Opts.PgSSLModeProcessed != nil {
+		opts[utils.PgSSLModeProcessedCfg] = *er.Opts.PgSSLModeProcessed
 	}
 	if er.Opts.AWSRegion != nil {
 		opts[utils.AWSRegion] = *er.Opts.AWSRegion

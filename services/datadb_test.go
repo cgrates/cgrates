@@ -21,6 +21,7 @@ import (
 	"reflect"
 	"sync"
 	"testing"
+	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -52,16 +53,18 @@ func TestDataDBCoverage(t *testing.T) {
 		Port: "27017",
 		Name: "10",
 		User: "cgrates",
-		Opts: map[string]interface{}{
-			utils.MongoQueryTimeoutCfg:       "10s",
-			utils.RedisClusterOnDownDelayCfg: "0",
-			utils.RedisClusterSyncCfg:        "5s",
-			utils.RedisClusterCfg:            false,
-			utils.RedisSentinelNameCfg:       "",
-			utils.RedisTLS:                   false,
-			utils.RedisClientCertificate:     "",
-			utils.RedisClientKey:             "",
-			utils.RedisCACertificate:         "",
+		Opts: &config.DataDBOpts{
+			RedisMaxConns:           10,
+			RedisConnectAttempts:    20,
+			RedisSentinel:           "",
+			RedisCluster:            false,
+			RedisClusterSync:        5 * time.Second,
+			RedisClusterOndownDelay: 0,
+			RedisConnectTimeout:     0,
+			RedisReadTimeout:        0,
+			RedisWriteTimeout:       0,
+			MongoQueryTimeout:       10 * time.Second,
+			RedisTLS:                false,
 		},
 		RmtConns: []string{},
 		RplConns: []string{},

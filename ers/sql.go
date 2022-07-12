@@ -279,8 +279,8 @@ func (rdr *SQLEventReader) setURL(inURL, outURL string, opts *config.EventReader
 		dbname = *opts.SQLDBName
 	}
 	ssl := utils.SQLDefaultSSLMode
-	if opts.SSLMode != nil {
-		ssl = *opts.SSLMode
+	if opts.PgSSLMode != nil {
+		ssl = *opts.PgSSLMode
 	}
 
 	rdr.tableName = utils.CDRsTBL
@@ -330,8 +330,8 @@ func (rdr *SQLEventReader) setURL(inURL, outURL string, opts *config.EventReader
 		outDBname = *processedOpt.SQLDBName
 	}
 	outSSL = utils.SQLDefaultSSLMode
-	if processedOpt.SSLMode != nil {
-		outSSL = *processedOpt.SSLMode
+	if processedOpt.PgSSLMode != nil {
+		outSSL = *processedOpt.PgSSLMode
 	}
 	rdr.expTableName = utils.CDRsTBL
 	if processedOpt.SQLTableName != nil {
