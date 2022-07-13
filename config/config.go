@@ -234,6 +234,7 @@ func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 			IntervalStart:        []*utils.DynamicDecimalBigOpt{},
 			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
 		}},
+		efsCfg: new(EFsCfg),
 		actionSCfg: &ActionSCfg{Opts: &ActionsOpts{
 			ProfileIDs:           []*utils.DynamicStringSliceOpt{},
 			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
@@ -353,6 +354,7 @@ type CGRConfig struct {
 	admS             *AdminSCfg        // APIer config
 	ersCfg           *ERsCfg           // EventReader config
 	eesCfg           *EEsCfg           // EventExporter config
+	efsCfg           *EFsCfg           // EventFailover config
 	rateSCfg         *RateSCfg         // RateS config
 	actionSCfg       *ActionSCfg       // ActionS config
 	sipAgentCfg      *SIPAgentCfg      // SIPAgent config
@@ -626,6 +628,13 @@ func (cfg *CGRConfig) ListenCfg() *ListenCfg {
 	cfg.lks[ListenJSON].Lock()
 	defer cfg.lks[ListenJSON].Unlock()
 	return cfg.listenCfg
+}
+
+// EFsCfg returns the export failover config
+func (cfg *CGRConfig) EFsCfg() *EFsCfg {
+	cfg.lks[EFsJSON].Lock()
+	defer cfg.lks[EFsJSON].Unlock()
+	return cfg.efsCfg
 }
 
 // HTTPCfg returns the config for HTTP
@@ -1039,6 +1048,7 @@ func (cfg *CGRConfig) Clone() (cln *CGRConfig) {
 		admS:             cfg.admS.Clone(),
 		ersCfg:           cfg.ersCfg.Clone(),
 		eesCfg:           cfg.eesCfg.Clone(),
+		efsCfg:           cfg.efsCfg.Clone(),
 		rateSCfg:         cfg.rateSCfg.Clone(),
 		sipAgentCfg:      cfg.sipAgentCfg.Clone(),
 		configSCfg:       cfg.configSCfg.Clone(),

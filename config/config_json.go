@@ -46,6 +46,7 @@ const (
 	StatSJSON           = "stats"
 	ThresholdSJSON      = "thresholds"
 	TPeSJSON            = "tpes"
+	EFsJSON             = "efs"
 	RouteSJSON          = "routes"
 	LoaderSJSON         = "loaders"
 	SureTaxJSON         = "suretax"
@@ -97,6 +98,7 @@ var (
 		DispatcherSJSON:     utils.DispatcherS,
 		DataDBJSON:          utils.DataDB,
 		EEsJSON:             utils.EEs,
+		EFsJSON:             utils.EFs,
 		RateSJSON:           utils.RateS,
 		SIPAgentJSON:        utils.SIPAgent,
 		RegistrarCJSON:      utils.RegistrarC,
@@ -152,6 +154,7 @@ func newSections(cfg *CGRConfig) Sections {
 	return Sections{
 		cfg.generalCfg,
 		cfg.loggerCfg,
+		cfg.efsCfg,
 		cfg.rpcConns,
 		cfg.dataDbCfg,
 		cfg.listenCfg,

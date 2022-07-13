@@ -63,7 +63,6 @@ type GeneralCfg struct {
 	Opts                *GeneralOpts
 }
 
-// loadGeneralCfg loads the General section of the configuration
 func (gencfg *GeneralCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
 	jsnGeneralCfg := new(GeneralJsonCfg)
 	if err = jsnCfg.GetSection(ctx, GeneralJSON, jsnGeneralCfg); err != nil {
@@ -72,6 +71,7 @@ func (gencfg *GeneralCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConf
 	return gencfg.loadFromJSONCfg(jsnGeneralCfg)
 }
 
+// loadGeneralCfg loads the General opts section of the configuration
 func (generalOpts *GeneralOpts) loadFromJSONCfg(jsnCfg *GeneralOptsJson) {
 	if jsnCfg == nil {
 		return
