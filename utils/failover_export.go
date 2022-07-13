@@ -50,7 +50,7 @@ func writeFailedPosts(_ string, value interface{}) {
 	}
 	filePath := expEv.FilePath()
 	expEv.lk.RLock()
-	if err := expEv.WriteToFile(filePath); err != nil {
+	if err := WriteToFile(filePath, expEv); err != nil {
 		Logger.Warning(fmt.Sprintf("Unable to write failed post to file <%s> because <%s>",
 			filePath, err))
 		expEv.lk.RUnlock()
@@ -65,7 +65,7 @@ func (expEv *FailedExportersLogg) FilePath() string {
 }
 
 // WriteToFile writes the events to file
-func (expEv *FailedExportersLogg) WriteToFile(filePath string) (err error) {
+func WriteToFile(filePath string, expEv FailoverPoster) (err error) {
 	fileOut, err := os.Create(filePath)
 	if err != nil {
 		return err
