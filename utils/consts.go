@@ -685,6 +685,7 @@ const (
 	MetaInit                = "*init"
 	ERs                     = "ERs"
 	EEs                     = "EEs"
+	EFs                     = "EFs"
 	Ratio                   = "Ratio"
 	Load                    = "Load"
 	Slash                   = "/"
