@@ -40,8 +40,8 @@ func newActHTTPPost(cfg *config.CGRConfig, aCfg *engine.APAction) (aL *actHTTPPo
 		aL.pstrs[i], _ = ees.NewHTTPjsonMapEE(&config.EventExporterCfg{
 			ID:             aL.id(),
 			ExportPath:     actD.Path,
-			Attempts:       aL.config.GeneralCfg().PosterAttempts,
-			FailedPostsDir: cfg.GeneralCfg().FailedPostsDir,
+			Attempts:       aL.config.EFsCfg().PosterAttempts,
+			FailedPostsDir: cfg.EFsCfg().FailedPostsDir,
 			Opts:           &config.EventExporterOpts{},
 		}, cfg, nil, nil)
 	}

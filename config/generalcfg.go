@@ -33,17 +33,14 @@ type GeneralOpts struct {
 
 // GeneralCfg is the general config section
 type GeneralCfg struct {
-	NodeID               string        // Identifier for this engine instance
-	RoundingDecimals     int           // Number of decimals to round end prices at
-	DBDataEncoding       string        // The encoding used to store object data in strings: <msgpack|json>
-	TpExportPath         string        // Path towards export folder for offline Tariff Plans
-	PosterAttempts       int           // Time to wait before writing the failed posts in a single file
-	FailedPostsDir       string        // Directory path where we store failed http requests
-	FailedPostsTTL       time.Duration // Directory path where we store failed http requests
-	DefaultReqType       string        // Use this request type if not defined on top
-	DefaultCategory      string        // set default type of record
-	DefaultTenant        string        // set default tenant
-	DefaultTimezone      string        // default timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
+	NodeID               string // Identifier for this engine instance
+	RoundingDecimals     int    // Number of decimals to round end prices at
+	DBDataEncoding       string // The encoding used to store object data in strings: <msgpack|json>
+	TpExportPath         string // Path towards export folder for offline Tariff Plans
+	DefaultReqType       string // Use this request type if not defined on top
+	DefaultCategory      string // set default type of record
+	DefaultTenant        string // set default tenant
+	DefaultTimezone      string // default timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
 	DefaultCaching       string
 	ConnectAttempts      int           // number of initial connection attempts before giving up
 	Reconnects           int           // number of recconect attempts in case of connection lost <-1 for infinite | nb>
@@ -128,17 +125,6 @@ func (gencfg *GeneralCfg) loadFromJSONCfg(jsnGeneralCfg *GeneralJsonCfg) (err er
 	if jsnGeneralCfg.Tpexport_dir != nil {
 		gencfg.TpExportPath = *jsnGeneralCfg.Tpexport_dir
 	}
-	if jsnGeneralCfg.Poster_attempts != nil {
-		gencfg.PosterAttempts = *jsnGeneralCfg.Poster_attempts
-	}
-	if jsnGeneralCfg.Failed_posts_dir != nil {
-		gencfg.FailedPostsDir = *jsnGeneralCfg.Failed_posts_dir
-	}
-	if jsnGeneralCfg.Failed_posts_ttl != nil {
-		if gencfg.FailedPostsTTL, err = utils.ParseDurationWithNanosecs(*jsnGeneralCfg.Failed_posts_ttl); err != nil {
-			return err
-		}
-	}
 	if jsnGeneralCfg.Default_timezone != nil {
 		gencfg.DefaultTimezone = *jsnGeneralCfg.Default_timezone
 	}
@@ -191,8 +177,6 @@ func (gencfg GeneralCfg) AsMapInterface(string) interface{} {
 		utils.RoundingDecimalsCfg:     gencfg.RoundingDecimals,
 		utils.DBDataEncodingCfg:       utils.Meta + gencfg.DBDataEncoding,
 		utils.TpExportPathCfg:         gencfg.TpExportPath,
-		utils.PosterAttemptsCfg:       gencfg.PosterAttempts,
-		utils.FailedPostsDirCfg:       gencfg.FailedPostsDir,
 		utils.DefaultReqTypeCfg:       gencfg.DefaultReqType,
 		utils.DefaultCategoryCfg:      gencfg.DefaultCategory,
 		utils.DefaultTenantCfg:        gencfg.DefaultTenant,
@@ -206,7 +190,6 @@ func (gencfg GeneralCfg) AsMapInterface(string) interface{} {
 		utils.RSRSepCfg:               gencfg.RSRSep,
 		utils.MaxParallelConnsCfg:     gencfg.MaxParallelConns,
 		utils.LockingTimeoutCfg:       "0",
-		utils.FailedPostsTTLCfg:       "0",
 		utils.ConnectTimeoutCfg:       "0",
 		utils.ReplyTimeoutCfg:         "0",
 		utils.DecimalMaxScaleCfg:      gencfg.DecimalMaxScale,
@@ -222,10 +205,6 @@ func (gencfg GeneralCfg) AsMapInterface(string) interface{} {
 
 	if gencfg.LockingTimeout != 0 {
 		mp[utils.LockingTimeoutCfg] = gencfg.LockingTimeout.String()
-	}
-
-	if gencfg.FailedPostsTTL != 0 {
-		mp[utils.FailedPostsTTLCfg] = gencfg.FailedPostsTTL.String()
 	}
 
 	if gencfg.ConnectTimeout != 0 {
@@ -258,9 +237,6 @@ func (gencfg GeneralCfg) Clone() *GeneralCfg {
 		RoundingDecimals:     gencfg.RoundingDecimals,
 		DBDataEncoding:       gencfg.DBDataEncoding,
 		TpExportPath:         gencfg.TpExportPath,
-		PosterAttempts:       gencfg.PosterAttempts,
-		FailedPostsDir:       gencfg.FailedPostsDir,
-		FailedPostsTTL:       gencfg.FailedPostsTTL,
 		DefaultReqType:       gencfg.DefaultReqType,
 		DefaultCategory:      gencfg.DefaultCategory,
 		DefaultTenant:        gencfg.DefaultTenant,
@@ -294,9 +270,6 @@ type GeneralJsonCfg struct {
 	Rounding_decimals      *int
 	Dbdata_encoding        *string
 	Tpexport_dir           *string
-	Poster_attempts        *int
-	Failed_posts_dir       *string
-	Failed_posts_ttl       *string
 	Default_request_type   *string
 	Default_category       *string
 	Default_tenant         *string
@@ -346,15 +319,6 @@ func diffGeneralJsonCfg(d *GeneralJsonCfg, v1, v2 *GeneralCfg) *GeneralJsonCfg {
 	}
 	if v1.TpExportPath != v2.TpExportPath {
 		d.Tpexport_dir = utils.StringPointer(v2.TpExportPath)
-	}
-	if v1.PosterAttempts != v2.PosterAttempts {
-		d.Poster_attempts = utils.IntPointer(v2.PosterAttempts)
-	}
-	if v1.FailedPostsDir != v2.FailedPostsDir {
-		d.Failed_posts_dir = utils.StringPointer(v2.FailedPostsDir)
-	}
-	if v1.FailedPostsTTL != v2.FailedPostsTTL {
-		d.Failed_posts_ttl = utils.StringPointer(v2.FailedPostsTTL.String())
 	}
 	if v1.DefaultReqType != v2.DefaultReqType {
 		d.Default_request_type = utils.StringPointer(v2.DefaultReqType)

@@ -41,7 +41,6 @@ func TestGeneralCfgloadFromJsonCfg(t *testing.T) {
 		Reply_timeout:        utils.StringPointer("2s"),
 		Digest_separator:     utils.StringPointer(","),
 		Digest_equal:         utils.StringPointer(":"),
-		Failed_posts_ttl:     utils.StringPointer("2"),
 		Opts:                 &GeneralOptsJson{},
 	}
 
@@ -50,8 +49,6 @@ func TestGeneralCfgloadFromJsonCfg(t *testing.T) {
 		RoundingDecimals: 5,
 		DBDataEncoding:   "msgpack",
 		TpExportPath:     "/var/spool/cgrates/tpe",
-		PosterAttempts:   3,
-		FailedPostsDir:   "/var/spool/cgrates/failed_posts",
 		DefaultReqType:   utils.MetaRated,
 		DefaultCategory:  utils.Call,
 		DefaultTenant:    "cgrates.org",
@@ -65,7 +62,6 @@ func TestGeneralCfgloadFromJsonCfg(t *testing.T) {
 		MaxParallelConns: 100,
 		RSRSep:           ";",
 		DefaultCaching:   utils.MetaReload,
-		FailedPostsTTL:   2,
 		Opts: &GeneralOpts{
 			ExporterIDs: []*utils.DynamicStringSliceOpt{},
 		},
@@ -100,14 +96,6 @@ func TestGeneralParseDurationCfgloadFromJsonCfg(t *testing.T) {
 		t.Errorf("Expected %+v, received %v", expected, err)
 	}
 
-	cfgJSON2 := &GeneralJsonCfg{
-		Failed_posts_ttl: utils.StringPointer("1ss"),
-	}
-	jsonCfg = NewDefaultCGRConfig()
-	if err = jsonCfg.generalCfg.loadFromJSONCfg(cfgJSON2); err == nil || err.Error() != expected {
-		t.Errorf("Expected %+v, received %v", expected, err)
-	}
-
 	cfgJSON3 := &GeneralJsonCfg{
 		Locking_timeout: utils.StringPointer("1ss"),
 	}
@@ -124,10 +112,7 @@ func TestGeneralCfgAsMapInterface(t *testing.T) {
 			"node_id": "cgrates",																				
 			"rounding_decimals": 5,									
 			"dbdata_encoding": "*msgpack",							
-			"tpexport_dir": "/var/spool/cgrates/tpe",				
-			"poster_attempts": 3,									
-			"failed_posts_dir": "/var/spool/cgrates/failed_posts",	
-			"failed_posts_ttl": "5s",								
+			"tpexport_dir": "/var/spool/cgrates/tpe",											
 			"default_request_type": "*rated",						
 			"default_category": "call",								
 			"default_tenant": "cgrates.org",						
@@ -149,9 +134,6 @@ func TestGeneralCfgAsMapInterface(t *testing.T) {
 		utils.RoundingDecimalsCfg:     5,
 		utils.DBDataEncodingCfg:       "*msgpack",
 		utils.TpExportPathCfg:         "/var/spool/cgrates/tpe",
-		utils.PosterAttemptsCfg:       3,
-		utils.FailedPostsDirCfg:       "/var/spool/cgrates/failed_posts",
-		utils.FailedPostsTTLCfg:       "5s",
 		utils.DefaultReqTypeCfg:       "*rated",
 		utils.DefaultCategoryCfg:      "call",
 		utils.DefaultTenantCfg:        "cgrates.org",
@@ -187,7 +169,6 @@ func TestGeneralCfgAsMapInterface1(t *testing.T) {
       "general": {
             "node_id": "ENGINE1",
             "locking_timeout": "0",
-            "failed_posts_ttl": "0s",
 			"max_reconnect_interval": "5m",
             "connect_timeout": "0s",
             "reply_timeout": "0s",
@@ -199,9 +180,6 @@ func TestGeneralCfgAsMapInterface1(t *testing.T) {
 		utils.RoundingDecimalsCfg:     5,
 		utils.DBDataEncodingCfg:       "*msgpack",
 		utils.TpExportPathCfg:         "/var/spool/cgrates/tpe",
-		utils.PosterAttemptsCfg:       3,
-		utils.FailedPostsDirCfg:       "/var/spool/cgrates/failed_posts",
-		utils.FailedPostsTTLCfg:       "0",
 		utils.DefaultReqTypeCfg:       "*rated",
 		utils.DefaultCategoryCfg:      "call",
 		utils.DefaultTenantCfg:        "cgrates.org",
@@ -238,8 +216,6 @@ func TestGeneralCfgClone(t *testing.T) {
 		RoundingDecimals: 5,
 		DBDataEncoding:   "msgpack",
 		TpExportPath:     "/var/spool/cgrates/tpe",
-		PosterAttempts:   3,
-		FailedPostsDir:   "/var/spool/cgrates/failed_posts",
 		DefaultReqType:   utils.MetaRated,
 		DefaultCategory:  utils.Call,
 		DefaultTenant:    "cgrates.org",
@@ -253,7 +229,6 @@ func TestGeneralCfgClone(t *testing.T) {
 		MaxParallelConns: 100,
 		RSRSep:           ";",
 		DefaultCaching:   utils.MetaReload,
-		FailedPostsTTL:   2,
 		Opts: &GeneralOpts{
 			ExporterIDs: []*utils.DynamicStringSliceOpt{
 				{
@@ -279,8 +254,6 @@ func TestDiffGeneralJsonCfg(t *testing.T) {
 		RoundingDecimals: 1,
 		DBDataEncoding:   "msgpack2",
 		TpExportPath:     "/var/spool/cgrates/tpe/test",
-		PosterAttempts:   5,
-		FailedPostsDir:   "/var/spool/cgrates/failed_posts/test",
 		DefaultReqType:   utils.MetaPrepaid,
 		DefaultCategory:  utils.ForcedDisconnectCfg,
 		DefaultTenant:    "itsyscom.com",
@@ -294,7 +267,6 @@ func TestDiffGeneralJsonCfg(t *testing.T) {
 		MaxParallelConns: 50,
 		RSRSep:           "",
 		DefaultCaching:   utils.MetaClear,
-		FailedPostsTTL:   5,
 		Opts: &GeneralOpts{
 			ExporterIDs: []*utils.DynamicStringSliceOpt{
 				{
@@ -309,8 +281,6 @@ func TestDiffGeneralJsonCfg(t *testing.T) {
 		RoundingDecimals: 5,
 		DBDataEncoding:   "msgpack",
 		TpExportPath:     "/var/spool/cgrates/tpe",
-		PosterAttempts:   3,
-		FailedPostsDir:   "/var/spool/cgrates/failed_posts",
 		DefaultReqType:   utils.MetaRated,
 		DefaultCategory:  utils.Call,
 		DefaultTenant:    "cgrates.org",
@@ -325,7 +295,6 @@ func TestDiffGeneralJsonCfg(t *testing.T) {
 		RSRSep:           ";",
 		DefaultCaching:   utils.MetaReload,
 		LockingTimeout:   2 * time.Second,
-		FailedPostsTTL:   2,
 		Opts: &GeneralOpts{
 			ExporterIDs: []*utils.DynamicStringSliceOpt{
 				{
@@ -340,8 +309,6 @@ func TestDiffGeneralJsonCfg(t *testing.T) {
 		Rounding_decimals:    utils.IntPointer(5),
 		Dbdata_encoding:      utils.StringPointer("msgpack"),
 		Tpexport_dir:         utils.StringPointer("/var/spool/cgrates/tpe"),
-		Failed_posts_dir:     utils.StringPointer("/var/spool/cgrates/failed_posts"),
-		Poster_attempts:      utils.IntPointer(3),
 		Default_request_type: utils.StringPointer(utils.MetaRated),
 		Default_category:     utils.StringPointer(utils.Call),
 		Default_tenant:       utils.StringPointer("cgrates.org"),
@@ -355,7 +322,6 @@ func TestDiffGeneralJsonCfg(t *testing.T) {
 		Digest_separator:     utils.StringPointer(","),
 		Rsr_separator:        utils.StringPointer(";"),
 		Digest_equal:         utils.StringPointer(":"),
-		Failed_posts_ttl:     utils.StringPointer("2ns"),
 		Max_parallel_conns:   utils.IntPointer(100),
 		Opts: &GeneralOptsJson{
 			ExporterIDs: []*utils.DynamicStringSliceOpt{
@@ -388,8 +354,6 @@ func TestGeneralCfgCloneSection(t *testing.T) {
 		RoundingDecimals: 1,
 		DBDataEncoding:   "msgpack2",
 		TpExportPath:     "/var/spool/cgrates/tpe/test",
-		PosterAttempts:   5,
-		FailedPostsDir:   "/var/spool/cgrates/failed_posts/test",
 		DefaultReqType:   utils.MetaPrepaid,
 		DefaultCategory:  utils.ForcedDisconnectCfg,
 		DefaultTenant:    "itsyscom.com",
@@ -403,7 +367,6 @@ func TestGeneralCfgCloneSection(t *testing.T) {
 		MaxParallelConns: 50,
 		RSRSep:           "",
 		DefaultCaching:   utils.MetaClear,
-		FailedPostsTTL:   5,
 		Opts:             &GeneralOpts{},
 	}
 
@@ -412,8 +375,6 @@ func TestGeneralCfgCloneSection(t *testing.T) {
 		RoundingDecimals: 1,
 		DBDataEncoding:   "msgpack2",
 		TpExportPath:     "/var/spool/cgrates/tpe/test",
-		PosterAttempts:   5,
-		FailedPostsDir:   "/var/spool/cgrates/failed_posts/test",
 		DefaultReqType:   utils.MetaPrepaid,
 		DefaultCategory:  utils.ForcedDisconnectCfg,
 		DefaultTenant:    "itsyscom.com",
@@ -427,7 +388,6 @@ func TestGeneralCfgCloneSection(t *testing.T) {
 		MaxParallelConns: 50,
 		RSRSep:           "",
 		DefaultCaching:   utils.MetaClear,
-		FailedPostsTTL:   5,
 		Opts: &GeneralOpts{
 			ExporterIDs: []*utils.DynamicStringSliceOpt{},
 		},

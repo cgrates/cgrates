@@ -32,7 +32,7 @@ import (
 
 func TestACHTTPPostExecute(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	cfg.GeneralCfg().PosterAttempts = 1
+	cfg.EFsCfg().PosterAttempts = 1
 	apAction := &engine.APAction{
 		ID:   "TEST_ACTION_HTTPPOST",
 		Type: utils.CDRLog,
@@ -82,7 +82,7 @@ func TestACHTTPPostExecute(t *testing.T) {
 	}
 	http.aCfg.Opts = make(map[string]interface{})
 	http.aCfg.Opts[utils.MetaAsync] = true
-	http.config.GeneralCfg().FailedPostsDir = utils.MetaNone
+	http.config.EFsCfg().FailedPostsDir = utils.MetaNone
 	if err := http.execute(context.Background(), dataStorage, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
@@ -90,8 +90,8 @@ func TestACHTTPPostExecute(t *testing.T) {
 
 func TestACHTTPPostValues(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	cfg.GeneralCfg().PosterAttempts = 1
-	cfg.GeneralCfg().FailedPostsDir = utils.MetaNone
+	cfg.EFsCfg().PosterAttempts = 1
+	cfg.EFsCfg().FailedPostsDir = utils.MetaNone
 	apAction := &engine.APAction{
 		ID:   "TEST_ACTION_HTTPPostValues",
 		Type: utils.MetaHTTPPost,

@@ -81,10 +81,10 @@ func testCDRsPostFailoverInitConfig(t *testing.T) {
 	if cdrsPostFailCfg, err = config.NewCGRConfigFromPath(context.Background(), cdrsPostFailCfgPath); err != nil {
 		t.Fatal("Got config error: ", err.Error())
 	}
-	if err = os.RemoveAll(cdrsPostFailCfg.GeneralCfg().FailedPostsDir); err != nil {
+	if err = os.RemoveAll(cdrsPostFailCfg.EFsCfg().FailedPostsDir); err != nil {
 		t.Error(err)
 	}
-	if err = os.MkdirAll(cdrsPostFailCfg.GeneralCfg().FailedPostsDir, 0755); err != nil {
+	if err = os.MkdirAll(cdrsPostFailCfg.EFsCfg().FailedPostsDir, 0755); err != nil {
 		t.Error(err)
 	}
 }
@@ -195,13 +195,13 @@ func testCDRsPostFailoverProcessCDR(t *testing.T) {
 
 func testCDRsPostFailoverToFile(t *testing.T) {
 	time.Sleep(2 * time.Second)
-	filesInDir, _ := os.ReadDir(cdrsPostFailCfg.GeneralCfg().FailedPostsDir)
+	filesInDir, _ := os.ReadDir(cdrsPostFailCfg.EFsCfg().FailedPostsDir)
 	if len(filesInDir) == 0 {
-		t.Fatalf("No files in directory: %s", cdrsPostFailCfg.GeneralCfg().FailedPostsDir)
+		t.Fatalf("No files in directory: %s", cdrsPostFailCfg.EFsCfg().FailedPostsDir)
 	}
 	for _, file := range filesInDir { // First file in directory is the one we need, harder to find it's name out of config
 		fileName := file.Name()
-		filePath := path.Join(cdrsPostFailCfg.GeneralCfg().FailedPostsDir, fileName)
+		filePath := path.Join(cdrsPostFailCfg.EFsCfg().FailedPostsDir, fileName)
 
 		ev, err := ees.NewFailoverPosterFromFile(filePath, utils.EEs)
 		if err != nil {
@@ -221,7 +221,7 @@ func testCDRsPostFailoverToFile(t *testing.T) {
 }
 
 func testCDRsPostFailoverKillEngine(t *testing.T) {
-	if err = os.RemoveAll(cdrsPostFailCfg.GeneralCfg().FailedPostsDir); err != nil {
+	if err = os.RemoveAll(cdrsPostFailCfg.EFsCfg().FailedPostsDir); err != nil {
 		t.Error(err)
 	}
 	if err := engine.KillEngine(*waitRater); err != nil {
