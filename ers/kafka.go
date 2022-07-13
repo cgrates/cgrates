@@ -214,8 +214,8 @@ func (rdr *KafkaER) createPoster() {
 	rdr.poster = ees.NewKafkaEE(&config.EventExporterCfg{
 		ID:             rdr.Config().ID,
 		ExportPath:     utils.FirstNonEmpty(rdr.Config().ProcessedPath, rdr.Config().SourcePath),
-		Attempts:       rdr.cgrCfg.GeneralCfg().PosterAttempts,
+		Attempts:       rdr.cgrCfg.EFsCfg().PosterAttempts,
 		Opts:           processedOpt,
-		FailedPostsDir: rdr.cgrCfg.GeneralCfg().FailedPostsDir,
+		FailedPostsDir: rdr.cgrCfg.EFsCfg().FailedPostsDir,
 	}, nil)
 }

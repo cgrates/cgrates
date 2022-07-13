@@ -97,7 +97,7 @@ func (admS *AdminSv1) ReplayFailedPosts(ctx *context.Context, args *ArgsReplyFai
 			failoverPath = path.Join(failedOutDir, file.Name())
 		}
 
-		err = expEv.ReplayFailedPosts(admS.cfg.GeneralCfg().PosterAttempts)
+		err = expEv.ReplayFailedPosts(admS.cfg.EFsCfg().PosterAttempts)
 		if err != nil && failedOutDir != utils.MetaNone { // Got error from HTTPPoster could be that content was not written, we need to write it ourselves
 			if err = utils.WriteToFile(failoverPath, expEv); err != nil {
 				return utils.NewErrServerError(err)

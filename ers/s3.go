@@ -199,9 +199,9 @@ func (rdr *S3ER) createPoster() {
 	rdr.poster = ees.NewS3EE(&config.EventExporterCfg{
 		ID:             rdr.Config().ID,
 		ExportPath:     utils.FirstNonEmpty(rdr.Config().ProcessedPath, rdr.Config().SourcePath),
-		Attempts:       rdr.cgrCfg.GeneralCfg().PosterAttempts,
+		Attempts:       rdr.cgrCfg.EFsCfg().PosterAttempts,
 		Opts:           processedOpt,
-		FailedPostsDir: rdr.cgrCfg.GeneralCfg().FailedPostsDir,
+		FailedPostsDir: rdr.cgrCfg.EFsCfg().FailedPostsDir,
 	}, nil)
 }
 

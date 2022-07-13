@@ -221,8 +221,6 @@ func TestConfigLoadFromDB(t *testing.T) {
 		RoundingDecimals: 5,
 		DBDataEncoding:   "msgpack",
 		TpExportPath:     "/var/spool/cgrates/tpe",
-		PosterAttempts:   3,
-		FailedPostsDir:   "/var/spool/cgrates/failed_posts",
 		DefaultReqType:   utils.MetaRated,
 		DefaultCategory:  utils.Call,
 		DefaultTenant:    "cgrates.org",
@@ -235,7 +233,6 @@ func TestConfigLoadFromDB(t *testing.T) {
 		DigestEqual:      ":",
 		MaxParallelConns: 100,
 		RSRSep:           ";",
-		FailedPostsTTL:   5 * time.Second,
 		Opts: &GeneralOpts{
 			ExporterIDs: []*utils.DynamicStringSliceOpt{},
 		},
@@ -1036,8 +1033,6 @@ func TestV1GetConfig(t *testing.T) {
 		Rounding_decimals:    utils.IntPointer(5),
 		Dbdata_encoding:      utils.StringPointer("msgpack"),
 		Tpexport_dir:         utils.StringPointer("/var/spool/cgrates/tpe"),
-		Failed_posts_dir:     utils.StringPointer("/var/spool/cgrates/failed_posts"),
-		Poster_attempts:      utils.IntPointer(3),
 		Default_request_type: utils.StringPointer(utils.MetaRated),
 		Default_category:     utils.StringPointer(utils.Call),
 		Default_tenant:       utils.StringPointer("cgrates.org"),
@@ -1051,7 +1046,6 @@ func TestV1GetConfig(t *testing.T) {
 		Digest_separator:     utils.StringPointer(","),
 		Rsr_separator:        utils.StringPointer(";"),
 		Digest_equal:         utils.StringPointer(":"),
-		Failed_posts_ttl:     utils.StringPointer("2ns"),
 		Max_parallel_conns:   utils.IntPointer(100),
 	}
 	args := &SectionWithAPIOpts{
@@ -1064,8 +1058,6 @@ func TestV1GetConfig(t *testing.T) {
 		Rounding_decimals:    utils.IntPointer(5),
 		Dbdata_encoding:      utils.StringPointer("msgpack"),
 		Tpexport_dir:         utils.StringPointer("/var/spool/cgrates/tpe"),
-		Failed_posts_dir:     utils.StringPointer("/var/spool/cgrates/failed_posts"),
-		Poster_attempts:      utils.IntPointer(3),
 		Default_request_type: utils.StringPointer(utils.MetaRated),
 		Default_category:     utils.StringPointer(utils.Call),
 		Default_tenant:       utils.StringPointer("cgrates.org"),
@@ -1079,7 +1071,6 @@ func TestV1GetConfig(t *testing.T) {
 		Digest_separator:     utils.StringPointer(","),
 		Rsr_separator:        utils.StringPointer(";"),
 		Digest_equal:         utils.StringPointer(":"),
-		Failed_posts_ttl:     utils.StringPointer("2ns"),
 		Max_parallel_conns:   utils.IntPointer(100),
 	}
 	expected := map[string]interface{}{

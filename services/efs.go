@@ -90,7 +90,7 @@ func (efServ *ExportFailoverService) IsRunning() bool {
 
 // ShouldRun returns if the service should be running
 func (efServ *ExportFailoverService) ShouldRun() bool {
-	return true //EFs service should be always running
+	return efServ.cfg.EFsCfg().Enabled
 }
 
 // ServiceName returns the service name

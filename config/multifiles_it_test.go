@@ -59,8 +59,6 @@ func TestMfEnvReaderITRead(t *testing.T) {
 		RoundingDecimals: 5,
 		DBDataEncoding:   "msgpack",
 		TpExportPath:     "/var/spool/cgrates/tpe",
-		PosterAttempts:   3,
-		FailedPostsDir:   "/var/spool/cgrates/failed_posts",
 		DefaultReqType:   utils.MetaPseudoPrepaid,
 		DefaultCategory:  "call",
 		DefaultTenant:    "cgrates.org",
@@ -75,7 +73,6 @@ func TestMfEnvReaderITRead(t *testing.T) {
 		DigestEqual:      ":",
 		RSRSep:           ";",
 		MaxParallelConns: 100,
-		FailedPostsTTL:   5 * time.Second,
 		Opts: &GeneralOpts{
 			ExporterIDs: []*utils.DynamicStringSliceOpt{},
 		},
