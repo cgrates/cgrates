@@ -1918,12 +1918,12 @@ const (
 
 // StorDB
 var (
-	PostgressSSLModeDisable    = "disable"
-	PostgressSSLModeAllow      = "allow"
-	PostgressSSLModePrefer     = "prefer"
-	PostgressSSLModeRequire    = "require"
-	PostgressSSLModeVerifyCa   = "verify-ca"
-	PostgressSSLModeVerifyFull = "verify-full"
+	PostgresSSLModeDisable    = "disable"
+	PostgressSSLModeAllow     = "allow"
+	PostgresSSLModePrefer     = "prefer"
+	PostgressSSLModeRequire   = "require"
+	PostgresSSLModeVerifyCa   = "verify-ca"
+	PostgresSSLModeVerifyFull = "verify-full"
 )
 
 // GeneralCfg

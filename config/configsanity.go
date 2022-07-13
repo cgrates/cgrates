@@ -892,9 +892,9 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 	}
 	// StorDB sanity checks
 	if cfg.storDbCfg.Type == utils.Postgres {
-		if !utils.IsSliceMember([]string{utils.PostgressSSLModeDisable, utils.PostgressSSLModeAllow,
-			utils.PostgressSSLModePrefer, utils.PostgressSSLModeRequire, utils.PostgressSSLModeVerifyCa,
-			utils.PostgressSSLModeVerifyFull}, cfg.storDbCfg.Opts.PgSSLMode) {
+		if !utils.IsSliceMember([]string{utils.PostgresSSLModeDisable, utils.PostgressSSLModeAllow,
+			utils.PostgresSSLModePrefer, utils.PostgressSSLModeRequire, utils.PostgresSSLModeVerifyCa,
+			utils.PostgresSSLModeVerifyFull}, cfg.storDbCfg.Opts.PgSSLMode) {
 			return fmt.Errorf("<%s> unsupported sslmode for storDB", utils.StorDB)
 		}
 	}
