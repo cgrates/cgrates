@@ -226,9 +226,7 @@ func (cI *CostIncrement) Clone() (cIcln *CostIncrement) {
 	cIcln = new(CostIncrement)
 	if cI.FilterIDs != nil {
 		cIcln.FilterIDs = make([]string, len(cI.FilterIDs))
-		for i, fID := range cI.FilterIDs {
-			cIcln.FilterIDs[i] = fID
-		}
+		copy(cIcln.FilterIDs, cI.FilterIDs)
 	}
 	if cI.Increment != nil {
 		cIcln.Increment = cI.Increment.Clone()
@@ -337,36 +335,32 @@ func (aC *Account) Equals(acnt *Account) (eq bool) {
 }
 
 // Clone returns a clone of the Account
-func (aP *Account) Clone() (acnt *Account) {
-	acnt = &Account{
-		Tenant:   aP.Tenant,
-		ID:       aP.ID,
-		Blockers: aP.Blockers.Clone(),
-		Weights:  aP.Weights.Clone(),
+func (acc *Account) Clone() (cln *Account) {
+	cln = &Account{
+		Tenant:   acc.Tenant,
+		ID:       acc.ID,
+		Blockers: acc.Blockers.Clone(),
+		Weights:  acc.Weights.Clone(),
 	}
-	if aP.FilterIDs != nil {
-		acnt.FilterIDs = make([]string, len(aP.FilterIDs))
-		for i, value := range aP.FilterIDs {
-			acnt.FilterIDs[i] = value
+	if acc.FilterIDs != nil {
+		cln.FilterIDs = make([]string, len(acc.FilterIDs))
+		copy(cln.FilterIDs, acc.FilterIDs)
+	}
+	if acc.Opts != nil {
+		cln.Opts = make(map[string]interface{})
+		for key, value := range acc.Opts {
+			cln.Opts[key] = value
 		}
 	}
-	if aP.Opts != nil {
-		acnt.Opts = make(map[string]interface{})
-		for key, value := range aP.Opts {
-			acnt.Opts[key] = value
+	if acc.Balances != nil {
+		cln.Balances = make(map[string]*Balance, len(acc.Balances))
+		for i, value := range acc.Balances {
+			cln.Balances[i] = value.Clone()
 		}
 	}
-	if aP.Balances != nil {
-		acnt.Balances = make(map[string]*Balance, len(aP.Balances))
-		for i, value := range aP.Balances {
-			acnt.Balances[i] = value.Clone()
-		}
-	}
-	if aP.ThresholdIDs != nil {
-		acnt.ThresholdIDs = make([]string, len(aP.ThresholdIDs))
-		for i, value := range aP.ThresholdIDs {
-			acnt.ThresholdIDs[i] = value
-		}
+	if acc.ThresholdIDs != nil {
+		cln.ThresholdIDs = make([]string, len(acc.ThresholdIDs))
+		copy(cln.ThresholdIDs, acc.ThresholdIDs)
 	}
 	return
 }
@@ -383,51 +377,45 @@ func (aI *ActivationInterval) Clone() *ActivationInterval {
 }
 
 //Clone return a clone of the Balance
-func (bL *Balance) Clone() (blnc *Balance) {
-	blnc = &Balance{
-		ID:       bL.ID,
-		Weights:  bL.Weights.Clone(),
-		Blockers: bL.Blockers.Clone(),
-		Type:     bL.Type,
+func (blnc *Balance) Clone() (cln *Balance) {
+	cln = &Balance{
+		ID:       blnc.ID,
+		Weights:  blnc.Weights.Clone(),
+		Blockers: blnc.Blockers.Clone(),
+		Type:     blnc.Type,
 	}
-	if bL.FilterIDs != nil {
-		blnc.FilterIDs = make([]string, len(bL.FilterIDs))
-		for i, value := range bL.FilterIDs {
-			blnc.FilterIDs[i] = value
+	if blnc.FilterIDs != nil {
+		cln.FilterIDs = make([]string, len(blnc.FilterIDs))
+		copy(cln.FilterIDs, blnc.FilterIDs)
+	}
+	if blnc.Units != nil {
+		cln.Units = blnc.Units.Clone()
+	}
+	if blnc.UnitFactors != nil {
+		cln.UnitFactors = make([]*UnitFactor, len(blnc.UnitFactors))
+		for i, value := range blnc.UnitFactors {
+			cln.UnitFactors[i] = value.Clone()
 		}
 	}
-	if bL.Units != nil {
-		blnc.Units = bL.Units.Clone()
-	}
-	if bL.UnitFactors != nil {
-		blnc.UnitFactors = make([]*UnitFactor, len(bL.UnitFactors))
-		for i, value := range bL.UnitFactors {
-			blnc.UnitFactors[i] = value.Clone()
+	if blnc.Opts != nil {
+		cln.Opts = make(map[string]interface{})
+		for key, value := range blnc.Opts {
+			cln.Opts[key] = value
 		}
 	}
-	if bL.Opts != nil {
-		blnc.Opts = make(map[string]interface{})
-		for key, value := range bL.Opts {
-			blnc.Opts[key] = value
+	if blnc.CostIncrements != nil {
+		cln.CostIncrements = make([]*CostIncrement, len(blnc.CostIncrements))
+		for i, value := range blnc.CostIncrements {
+			cln.CostIncrements[i] = value.Clone()
 		}
 	}
-	if bL.CostIncrements != nil {
-		blnc.CostIncrements = make([]*CostIncrement, len(bL.CostIncrements))
-		for i, value := range bL.CostIncrements {
-			blnc.CostIncrements[i] = value.Clone()
-		}
+	if blnc.AttributeIDs != nil {
+		cln.AttributeIDs = make([]string, len(blnc.AttributeIDs))
+		copy(cln.AttributeIDs, blnc.AttributeIDs)
 	}
-	if bL.AttributeIDs != nil {
-		blnc.AttributeIDs = make([]string, len(bL.AttributeIDs))
-		for i, value := range bL.AttributeIDs {
-			blnc.AttributeIDs[i] = value
-		}
-	}
-	if bL.RateProfileIDs != nil {
-		blnc.RateProfileIDs = make([]string, len(bL.RateProfileIDs))
-		for i, value := range bL.RateProfileIDs {
-			blnc.RateProfileIDs[i] = value
-		}
+	if blnc.RateProfileIDs != nil {
+		cln.RateProfileIDs = make([]string, len(blnc.RateProfileIDs))
+		copy(cln.RateProfileIDs, blnc.RateProfileIDs)
 	}
 	return
 }

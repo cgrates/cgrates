@@ -281,12 +281,8 @@ func APItoResource(tpRL *utils.TPResourceProfile, timezone string) (rp *Resource
 			return nil, err
 		}
 	}
-	for i, fltr := range tpRL.FilterIDs {
-		rp.FilterIDs[i] = fltr
-	}
-	for i, th := range tpRL.ThresholdIDs {
-		rp.ThresholdIDs[i] = th
-	}
+	copy(rp.FilterIDs, tpRL.FilterIDs)
+	copy(rp.ThresholdIDs, tpRL.ThresholdIDs)
 	if tpRL.Limit != utils.EmptyString {
 		if rp.Limit, err = strconv.ParseFloat(tpRL.Limit, 64); err != nil {
 			return nil, err
@@ -310,12 +306,8 @@ func ResourceProfileToAPI(rp *ResourceProfile) (tpRL *utils.TPResourceProfile) {
 	if rp.UsageTTL != time.Duration(0) {
 		tpRL.UsageTTL = rp.UsageTTL.String()
 	}
-	for i, fli := range rp.FilterIDs {
-		tpRL.FilterIDs[i] = fli
-	}
-	for i, fli := range rp.ThresholdIDs {
-		tpRL.ThresholdIDs[i] = fli
-	}
+	copy(tpRL.FilterIDs, rp.FilterIDs)
+	copy(tpRL.ThresholdIDs, rp.ThresholdIDs)
 	return
 }
 
@@ -493,12 +485,8 @@ func APItoStats(tpST *utils.TPStatProfile, timezone string) (st *StatQueueProfil
 			}
 		}
 	}
-	for i, trh := range tpST.ThresholdIDs {
-		st.ThresholdIDs[i] = trh
-	}
-	for i, fltr := range tpST.FilterIDs {
-		st.FilterIDs[i] = fltr
-	}
+	copy(st.ThresholdIDs, tpST.ThresholdIDs)
+	copy(st.FilterIDs, tpST.FilterIDs)
 	return st, nil
 }
 
@@ -522,20 +510,14 @@ func StatQueueProfileToAPI(st *StatQueueProfile) (tpST *utils.TPStatProfile) {
 		}
 		if len(metric.FilterIDs) != 0 {
 			tpST.Metrics[i].FilterIDs = make([]string, len(metric.FilterIDs))
-			for j, fltr := range metric.FilterIDs {
-				tpST.Metrics[i].FilterIDs[j] = fltr
-			}
+			copy(tpST.Metrics[i].FilterIDs, metric.FilterIDs)
 		}
 	}
 	if st.TTL != time.Duration(0) {
 		tpST.TTL = st.TTL.String()
 	}
-	for i, fli := range st.FilterIDs {
-		tpST.FilterIDs[i] = fli
-	}
-	for i, fli := range st.ThresholdIDs {
-		tpST.ThresholdIDs[i] = fli
-	}
+	copy(tpST.FilterIDs, st.FilterIDs)
+	copy(tpST.ThresholdIDs, st.ThresholdIDs)
 	return
 }
 
@@ -679,13 +661,8 @@ func APItoThresholdProfile(tpTH *utils.TPThresholdProfile, timezone string) (th 
 			return nil, err
 		}
 	}
-	for i, ati := range tpTH.ActionProfileIDs {
-		th.ActionProfileIDs[i] = ati
-
-	}
-	for i, fli := range tpTH.FilterIDs {
-		th.FilterIDs[i] = fli
-	}
+	copy(th.ActionProfileIDs, tpTH.ActionProfileIDs)
+	copy(th.FilterIDs, tpTH.FilterIDs)
 	return th, nil
 }
 
@@ -704,12 +681,8 @@ func ThresholdProfileToAPI(th *ThresholdProfile) (tpTH *utils.TPThresholdProfile
 	if th.MinSleep != time.Duration(0) {
 		tpTH.MinSleep = th.MinSleep.String()
 	}
-	for i, fli := range th.FilterIDs {
-		tpTH.FilterIDs[i] = fli
-	}
-	for i, fli := range th.ActionProfileIDs {
-		tpTH.ActionProfileIDs[i] = fli
-	}
+	copy(tpTH.FilterIDs, th.FilterIDs)
+	copy(tpTH.ActionProfileIDs, th.ActionProfileIDs)
 	return
 }
 
@@ -814,9 +787,7 @@ func FilterToTPFilter(f *Filter) (tpFltr *utils.TPFilterProfile) {
 			Element: reqFltr.Element,
 			Values:  make([]string, len(reqFltr.Values)),
 		}
-		for j, val := range reqFltr.Values {
-			tpFltr.Filters[i].Values[j] = val
-		}
+		copy(tpFltr.Filters[i].Values, reqFltr.Values)
 	}
 	return
 }
@@ -1013,12 +984,8 @@ func APItoRouteProfile(tpRp *utils.TPRouteProfile, timezone string) (rp *RoutePr
 			return nil, err
 		}
 	}
-	for i, stp := range tpRp.SortingParameters {
-		rp.SortingParameters[i] = stp
-	}
-	for i, fli := range tpRp.FilterIDs {
-		rp.FilterIDs[i] = fli
-	}
+	copy(rp.SortingParameters, tpRp.SortingParameters)
+	copy(rp.FilterIDs, tpRp.FilterIDs)
 	for i, route := range tpRp.Routes {
 		rp.Routes[i] = &Route{
 			ID:              route.ID,
@@ -1070,12 +1037,8 @@ func RouteProfileToAPI(rp *RouteProfile) (tpRp *utils.TPRouteProfile) {
 			RouteParameters: route.RouteParameters,
 		}
 	}
-	for i, fli := range rp.FilterIDs {
-		tpRp.FilterIDs[i] = fli
-	}
-	for i, fli := range rp.SortingParameters {
-		tpRp.SortingParameters[i] = fli
-	}
+	copy(tpRp.FilterIDs, rp.FilterIDs)
+	copy(tpRp.SortingParameters, rp.SortingParameters)
 	return
 }
 
@@ -1188,9 +1151,7 @@ func APItoAttributeProfile(tpAttr *utils.TPAttributeProfile, timezone string) (a
 			return
 		}
 	}
-	for i, fli := range tpAttr.FilterIDs {
-		attrPrf.FilterIDs[i] = fli
-	}
+	copy(attrPrf.FilterIDs, tpAttr.FilterIDs)
 	for i, reqAttr := range tpAttr.Attributes {
 		if reqAttr.Path == utils.EmptyString { // we do not suppot empty Path in Attributes
 			err = fmt.Errorf("empty path in AttributeProfile <%s>", attrPrf.TenantID())
@@ -1224,9 +1185,7 @@ func AttributeProfileToAPI(attrPrf *AttributeProfile) (tpAttr *utils.TPAttribute
 		Blockers:   attrPrf.Blockers.String(utils.InfieldSep, utils.ANDSep),
 		Weights:    attrPrf.Weights.String(utils.InfieldSep, utils.ANDSep),
 	}
-	for i, fli := range attrPrf.FilterIDs {
-		tpAttr.FilterIDs[i] = fli
-	}
+	copy(tpAttr.FilterIDs, attrPrf.FilterIDs)
 	for i, attr := range attrPrf.Attributes {
 		tpAttr.Attributes[i] = &utils.TPAttribute{
 			FilterIDs: attr.FilterIDs,
@@ -1404,12 +1363,8 @@ func APItoChargerProfile(tpCPP *utils.TPChargerProfile, timezone string) (cpp *C
 			return
 		}
 	}
-	for i, fli := range tpCPP.FilterIDs {
-		cpp.FilterIDs[i] = fli
-	}
-	for i, attribute := range tpCPP.AttributeIDs {
-		cpp.AttributeIDs[i] = attribute
-	}
+	copy(cpp.FilterIDs, tpCPP.FilterIDs)
+	copy(cpp.AttributeIDs, tpCPP.AttributeIDs)
 	return cpp
 }
 
@@ -1423,12 +1378,8 @@ func ChargerProfileToAPI(chargerPrf *ChargerProfile) (tpCharger *utils.TPCharger
 		RunID:        chargerPrf.RunID,
 		AttributeIDs: make([]string, len(chargerPrf.AttributeIDs)),
 	}
-	for i, fli := range chargerPrf.FilterIDs {
-		tpCharger.FilterIDs[i] = fli
-	}
-	for i, fli := range chargerPrf.AttributeIDs {
-		tpCharger.AttributeIDs[i] = fli
-	}
+	copy(tpCharger.FilterIDs, chargerPrf.FilterIDs)
+	copy(tpCharger.AttributeIDs, chargerPrf.AttributeIDs)
 	return
 }
 
@@ -1603,9 +1554,7 @@ func APItoDispatcherProfile(tpDPP *utils.TPDispatcherProfile, timezone string) (
 		StrategyParams: make(map[string]interface{}),
 		Hosts:          make(DispatcherHostProfiles, len(tpDPP.Hosts)),
 	}
-	for i, fli := range tpDPP.FilterIDs {
-		dpp.FilterIDs[i] = fli
-	}
+	copy(dpp.FilterIDs, tpDPP.FilterIDs)
 	for i, param := range tpDPP.StrategyParams {
 		if param != utils.EmptyString {
 			dpp.StrategyParams[strconv.Itoa(i)] = param
@@ -1619,9 +1568,7 @@ func APItoDispatcherProfile(tpDPP *utils.TPDispatcherProfile, timezone string) (
 			FilterIDs: make([]string, len(conn.FilterIDs)),
 			Params:    make(map[string]interface{}),
 		}
-		for j, fltr := range conn.FilterIDs {
-			dpp.Hosts[i].FilterIDs[j] = fltr
-		}
+		copy(dpp.Hosts[i].FilterIDs, conn.FilterIDs)
 		for j, param := range conn.Params {
 			if param == utils.EmptyString {
 				continue
@@ -1647,10 +1594,7 @@ func DispatcherProfileToAPI(dpp *DispatcherProfile) (tpDPP *utils.TPDispatcherPr
 		Weight:         dpp.Weight,
 		Hosts:          make([]*utils.TPDispatcherHostProfile, len(dpp.Hosts)),
 	}
-
-	for i, fli := range dpp.FilterIDs {
-		tpDPP.FilterIDs[i] = fli
-	}
+	copy(tpDPP.FilterIDs, dpp.FilterIDs)
 	for key, val := range dpp.StrategyParams {
 		// here we expect that the key to be an integer because
 		// according to APItoDispatcherProfile when we convert from TP to obj we use index as key
@@ -1970,9 +1914,7 @@ func APItoRateProfile(tpRp *utils.TPRateProfile, timezone string) (rp *utils.Rat
 		}
 		rp.Weights = weight
 	}
-	for i, stp := range tpRp.FilterIDs {
-		rp.FilterIDs[i] = stp
-	}
+	copy(rp.FilterIDs, tpRp.FilterIDs)
 	for key, rate := range tpRp.Rates {
 		rp.Rates[key] = &utils.Rate{
 			ID:              rate.ID,
@@ -2057,9 +1999,7 @@ func RateProfileToAPI(rp *utils.RateProfile) (tpRp *utils.TPRateProfile) {
 			}
 		}
 	}
-	for i, fli := range rp.FilterIDs {
-		tpRp.FilterIDs[i] = fli
-	}
+	copy(tpRp.FilterIDs, rp.FilterIDs)
 	return
 }
 
@@ -2212,9 +2152,7 @@ func APItoActionProfile(tpAp *utils.TPActionProfile, timezone string) (ap *Actio
 			return
 		}
 	}
-	for i, stp := range tpAp.FilterIDs {
-		ap.FilterIDs[i] = stp
-	}
+	copy(ap.FilterIDs, tpAp.FilterIDs)
 	for _, target := range tpAp.Targets {
 		ap.Targets[target.TargetType] = utils.NewStringSet(target.TargetIDs)
 	}
@@ -2262,9 +2200,7 @@ func ActionProfileToAPI(ap *ActionProfile) (tpAp *utils.TPActionProfile) {
 		Targets:   make([]*utils.TPActionTarget, 0, len(ap.Targets)),
 		Actions:   make([]*utils.TPAPAction, len(ap.Actions)),
 	}
-	for i, fli := range ap.FilterIDs {
-		tpAp.FilterIDs[i] = fli
-	}
+	copy(tpAp.FilterIDs, ap.FilterIDs)
 	for targetType, targetIDs := range ap.Targets {
 		tpAp.Targets = append(tpAp.Targets, &utils.TPActionTarget{TargetType: targetType, TargetIDs: targetIDs.AsSlice()})
 	}
@@ -2470,33 +2406,31 @@ func APItoModelTPAccount(tPrf *utils.TPAccount) (mdls AccountMdls) {
 	return
 }
 
-func APItoAccount(tpAp *utils.TPAccount, timezone string) (ap *utils.Account, err error) {
-	ap = &utils.Account{
-		Tenant:       tpAp.Tenant,
-		ID:           tpAp.ID,
-		FilterIDs:    make([]string, len(tpAp.FilterIDs)),
-		Balances:     make(map[string]*utils.Balance, len(tpAp.Balances)),
-		ThresholdIDs: make([]string, len(tpAp.ThresholdIDs)),
+func APItoAccount(tpAcc *utils.TPAccount, timezone string) (acc *utils.Account, err error) {
+	acc = &utils.Account{
+		Tenant:       tpAcc.Tenant,
+		ID:           tpAcc.ID,
+		FilterIDs:    make([]string, len(tpAcc.FilterIDs)),
+		Balances:     make(map[string]*utils.Balance, len(tpAcc.Balances)),
+		ThresholdIDs: make([]string, len(tpAcc.ThresholdIDs)),
 	}
-	if tpAp.Weights != utils.EmptyString {
-		weight, err := utils.NewDynamicWeightsFromString(tpAp.Weights, utils.InfieldSep, utils.ANDSep)
+	if tpAcc.Weights != utils.EmptyString {
+		weight, err := utils.NewDynamicWeightsFromString(tpAcc.Weights, utils.InfieldSep, utils.ANDSep)
 		if err != nil {
 			return nil, err
 		}
-		ap.Weights = weight
+		acc.Weights = weight
 	}
-	if tpAp.Blockers != utils.EmptyString {
-		blockers, err := utils.NewDynamicBlockersFromString(tpAp.Blockers, utils.InfieldSep, utils.ANDSep)
+	if tpAcc.Blockers != utils.EmptyString {
+		blockers, err := utils.NewDynamicBlockersFromString(tpAcc.Blockers, utils.InfieldSep, utils.ANDSep)
 		if err != nil {
 			return nil, err
 		}
-		ap.Blockers = blockers
+		acc.Blockers = blockers
 	}
-	for i, stp := range tpAp.FilterIDs {
-		ap.FilterIDs[i] = stp
-	}
-	for id, bal := range tpAp.Balances {
-		ap.Balances[id] = &utils.Balance{
+	copy(acc.FilterIDs, tpAcc.FilterIDs)
+	for id, bal := range tpAcc.Balances {
+		acc.Balances[id] = &utils.Balance{
 			ID:        bal.ID,
 			FilterIDs: bal.FilterIDs,
 			Type:      bal.Type,
@@ -2506,93 +2440,85 @@ func APItoAccount(tpAp *utils.TPAccount, timezone string) (ap *utils.Account, er
 			if err != nil {
 				return nil, err
 			}
-			ap.Balances[id].Units = units
+			acc.Balances[id].Units = units
 		}
 		if bal.Weights != utils.EmptyString {
 			weights, err := utils.NewDynamicWeightsFromString(bal.Weights, utils.InfieldSep, utils.ANDSep)
 			if err != nil {
 				return nil, err
 			}
-			ap.Balances[id].Weights = weights
+			acc.Balances[id].Weights = weights
 		}
 		if bal.Blockers != utils.EmptyString {
 			blockers, err := utils.NewDynamicBlockersFromString(bal.Blockers, utils.InfieldSep, utils.ANDSep)
 			if err != nil {
 				return nil, err
 			}
-			ap.Balances[id].Blockers = blockers
+			acc.Balances[id].Blockers = blockers
 		}
 		if bal.UnitFactors != nil {
-			ap.Balances[id].UnitFactors = make([]*utils.UnitFactor, len(bal.UnitFactors))
+			acc.Balances[id].UnitFactors = make([]*utils.UnitFactor, len(bal.UnitFactors))
 			for j, unitFactor := range bal.UnitFactors {
-				ap.Balances[id].UnitFactors[j] = &utils.UnitFactor{
+				acc.Balances[id].UnitFactors[j] = &utils.UnitFactor{
 					FilterIDs: unitFactor.FilterIDs,
 					Factor:    utils.NewDecimalFromFloat64(unitFactor.Factor),
 				}
 			}
 		}
 		if bal.Opts != utils.EmptyString {
-			ap.Balances[id].Opts = make(map[string]interface{})
+			acc.Balances[id].Opts = make(map[string]interface{})
 			for _, opt := range strings.Split(bal.Opts, utils.InfieldSep) { // example of opts: key1:val1;key2:val2;key3:val3
 				keyValSls := utils.SplitConcatenatedKey(opt)
 				if len(keyValSls) != 2 {
-					err = fmt.Errorf("malformed option for ActionProfile <%s> for action <%s>", ap.TenantID(), bal.ID)
+					err = fmt.Errorf("malformed option for ActionProfile <%s> for action <%s>", acc.TenantID(), bal.ID)
 					return
 				}
-				ap.Balances[id].Opts[keyValSls[0]] = keyValSls[1]
+				acc.Balances[id].Opts[keyValSls[0]] = keyValSls[1]
 			}
 		}
 		if bal.CostIncrement != nil {
-			ap.Balances[id].CostIncrements = make([]*utils.CostIncrement, len(bal.CostIncrement))
+			acc.Balances[id].CostIncrements = make([]*utils.CostIncrement, len(bal.CostIncrement))
 			for j, costIncrement := range bal.CostIncrement {
-				ap.Balances[id].CostIncrements[j] = &utils.CostIncrement{
+				acc.Balances[id].CostIncrements[j] = &utils.CostIncrement{
 					FilterIDs: costIncrement.FilterIDs,
 				}
 				if costIncrement.Increment != utils.EmptyString {
-					ap.Balances[id].CostIncrements[j].Increment, err = utils.NewDecimalFromUsage(costIncrement.Increment)
+					acc.Balances[id].CostIncrements[j].Increment, err = utils.NewDecimalFromUsage(costIncrement.Increment)
 				}
 				if costIncrement.FixedFee != nil {
-					ap.Balances[id].CostIncrements[j].FixedFee = utils.NewDecimalFromFloat64(*costIncrement.FixedFee)
+					acc.Balances[id].CostIncrements[j].FixedFee = utils.NewDecimalFromFloat64(*costIncrement.FixedFee)
 				}
 				if costIncrement.RecurrentFee != nil {
-					ap.Balances[id].CostIncrements[j].RecurrentFee = utils.NewDecimalFromFloat64(*costIncrement.RecurrentFee)
+					acc.Balances[id].CostIncrements[j].RecurrentFee = utils.NewDecimalFromFloat64(*costIncrement.RecurrentFee)
 				}
 			}
 		}
 		if bal.AttributeIDs != nil {
-			ap.Balances[id].AttributeIDs = make([]string, len(bal.AttributeIDs))
-			for j, costAttribute := range bal.AttributeIDs {
-				ap.Balances[id].AttributeIDs[j] = costAttribute
-			}
+			acc.Balances[id].AttributeIDs = make([]string, len(bal.AttributeIDs))
+			copy(acc.Balances[id].AttributeIDs, bal.AttributeIDs)
 		}
 		if bal.RateProfileIDs != nil {
-			ap.Balances[id].RateProfileIDs = make([]string, len(bal.RateProfileIDs))
-			for j, costAttribute := range bal.RateProfileIDs {
-				ap.Balances[id].RateProfileIDs[j] = costAttribute
-			}
+			acc.Balances[id].RateProfileIDs = make([]string, len(bal.RateProfileIDs))
+			copy(acc.Balances[id].RateProfileIDs, bal.RateProfileIDs)
 		}
 	}
-	for i, stp := range tpAp.ThresholdIDs {
-		ap.ThresholdIDs[i] = stp
-	}
+	copy(acc.ThresholdIDs, tpAcc.ThresholdIDs)
 	return
 }
 
-func AccountToAPI(ap *utils.Account) (tpAp *utils.TPAccount) {
-	tpAp = &utils.TPAccount{
-		Tenant:       ap.Tenant,
-		ID:           ap.ID,
-		Weights:      ap.Weights.String(utils.InfieldSep, utils.ANDSep),
-		Blockers:     ap.Blockers.String(utils.InfieldSep, utils.ANDSep),
-		FilterIDs:    make([]string, len(ap.FilterIDs)),
-		Balances:     make(map[string]*utils.TPAccountBalance, len(ap.Balances)),
-		ThresholdIDs: make([]string, len(ap.ThresholdIDs)),
+func AccountToAPI(acc *utils.Account) (tpAcc *utils.TPAccount) {
+	tpAcc = &utils.TPAccount{
+		Tenant:       acc.Tenant,
+		ID:           acc.ID,
+		Weights:      acc.Weights.String(utils.InfieldSep, utils.ANDSep),
+		Blockers:     acc.Blockers.String(utils.InfieldSep, utils.ANDSep),
+		FilterIDs:    make([]string, len(acc.FilterIDs)),
+		Balances:     make(map[string]*utils.TPAccountBalance, len(acc.Balances)),
+		ThresholdIDs: make([]string, len(acc.ThresholdIDs)),
 	}
-	for i, fli := range ap.FilterIDs {
-		tpAp.FilterIDs[i] = fli
-	}
-	for i, bal := range ap.Balances {
-		tpAp.Balances[i] = &utils.TPAccountBalance{
+	copy(tpAcc.FilterIDs, acc.FilterIDs)
+	for i, bal := range acc.Balances {
+		tpAcc.Balances[i] = &utils.TPAccountBalance{
 			ID:             bal.ID,
 			FilterIDs:      make([]string, len(bal.FilterIDs)),
 			Weights:        bal.Weights.String(utils.InfieldSep, utils.ANDSep),
@@ -2604,56 +2530,44 @@ func AccountToAPI(ap *utils.Account) (tpAp *utils.TPAccount) {
 			RateProfileIDs: make([]string, len(bal.RateProfileIDs)),
 			UnitFactors:    make([]*utils.TPBalanceUnitFactor, len(bal.UnitFactors)),
 		}
-		for k, fli := range bal.FilterIDs {
-			tpAp.Balances[i].FilterIDs[k] = fli
-		}
+		copy(tpAcc.Balances[i].FilterIDs, bal.FilterIDs)
 		//there should not be an invalid value of converting into float64
 		elems := make([]string, 0, len(bal.Opts))
 		for k, v := range bal.Opts {
 			elems = append(elems, utils.ConcatenatedKey(k, utils.IfaceAsString(v)))
 		}
 		for k, cIncrement := range bal.CostIncrements {
-			tpAp.Balances[i].CostIncrement[k] = &utils.TPBalanceCostIncrement{
+			tpAcc.Balances[i].CostIncrement[k] = &utils.TPBalanceCostIncrement{
 				FilterIDs: make([]string, len(cIncrement.FilterIDs)),
 				Increment: cIncrement.Increment.String(),
 			}
-			for kk, fli := range cIncrement.FilterIDs {
-				tpAp.Balances[i].CostIncrement[k].FilterIDs[kk] = fli
-			}
+			copy(tpAcc.Balances[i].CostIncrement[k].FilterIDs, cIncrement.FilterIDs)
 			if cIncrement.FixedFee != nil {
 				//there should not be an invalid value of converting from Decimal into float64
 				fxdFee, _ := cIncrement.FixedFee.Float64()
-				tpAp.Balances[i].CostIncrement[k].FixedFee = &fxdFee
+				tpAcc.Balances[i].CostIncrement[k].FixedFee = &fxdFee
 			}
 			if cIncrement.RecurrentFee != nil {
 				//there should not be an invalid value of converting from Decimal into float64
 				rcrFee, _ := cIncrement.RecurrentFee.Float64()
-				tpAp.Balances[i].CostIncrement[k].RecurrentFee = &rcrFee
+				tpAcc.Balances[i].CostIncrement[k].RecurrentFee = &rcrFee
 			}
 		}
-		for k, attrID := range bal.AttributeIDs {
-			tpAp.Balances[i].AttributeIDs[k] = attrID
-		}
-		for k, ratePrfID := range bal.RateProfileIDs {
-			tpAp.Balances[i].RateProfileIDs[k] = ratePrfID
-		}
+		copy(tpAcc.Balances[i].AttributeIDs, bal.AttributeIDs)
+		copy(tpAcc.Balances[i].RateProfileIDs, bal.RateProfileIDs)
 		for k, uFactor := range bal.UnitFactors {
-			tpAp.Balances[i].UnitFactors[k] = &utils.TPBalanceUnitFactor{
+			tpAcc.Balances[i].UnitFactors[k] = &utils.TPBalanceUnitFactor{
 				FilterIDs: make([]string, len(uFactor.FilterIDs)),
 			}
-			for kk, fli := range uFactor.FilterIDs {
-				tpAp.Balances[i].UnitFactors[k].FilterIDs[kk] = fli
-			}
+			copy(tpAcc.Balances[i].UnitFactors[k].FilterIDs, uFactor.FilterIDs)
 			if uFactor.Factor != nil {
 				//there should not be an invalid value of converting from Decimal into float64
 				untFctr, _ := uFactor.Factor.Float64()
-				tpAp.Balances[i].UnitFactors[k].Factor = untFctr
+				tpAcc.Balances[i].UnitFactors[k].Factor = untFctr
 			}
 		}
-		tpAp.Balances[i].Opts = strings.Join(elems, utils.InfieldSep)
+		tpAcc.Balances[i].Opts = strings.Join(elems, utils.InfieldSep)
 	}
-	for i, fli := range ap.ThresholdIDs {
-		tpAp.ThresholdIDs[i] = fli
-	}
+	copy(tpAcc.ThresholdIDs, acc.ThresholdIDs)
 	return
 }

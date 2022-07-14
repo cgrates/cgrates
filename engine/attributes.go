@@ -340,9 +340,7 @@ func (alS *AttributeS) V1ProcessEvent(ctx *context.Context, args *utils.CGREvent
 		}
 		processedPrf.Add(lastID)
 		processedPrfNo[lastID] = processedPrfNo[lastID] + 1
-		for idx, fldName := range evRply.AlteredFields[0].Fields {
-			altered.Fields[idx] = fldName
-		}
+		copy(altered.Fields, evRply.AlteredFields[0].Fields)
 		matchedIDs = append(matchedIDs, altered)
 		if evRply.blocker {
 			break

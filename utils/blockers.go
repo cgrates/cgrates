@@ -91,15 +91,13 @@ func (blckrs DynamicBlockers) Clone() (clBlkrs DynamicBlockers) {
 }
 
 // Clone will clone the a DynamicBlocker
-func (blckr *DynamicBlocker) Clone() (clBlkr *DynamicBlocker) {
-	clBlkr = &DynamicBlocker{
+func (blckr *DynamicBlocker) Clone() (cln *DynamicBlocker) {
+	cln = &DynamicBlocker{
 		Blocker: blckr.Blocker,
 	}
 	if blckr.FilterIDs != nil {
-		clBlkr.FilterIDs = make([]string, len(blckr.FilterIDs))
-		for idx, value := range blckr.FilterIDs {
-			clBlkr.FilterIDs[idx] = value
-		}
+		cln.FilterIDs = make([]string, len(blckr.FilterIDs))
+		copy(cln.FilterIDs, blckr.FilterIDs)
 	}
 	return
 }

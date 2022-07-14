@@ -306,7 +306,7 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		if *verbose != false {
+		if *verbose {
 			log.Printf("Data migrated: %+v", migrstats)
 		}
 		return

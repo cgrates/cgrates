@@ -172,8 +172,7 @@ func TestLibphonenumberDPFieldAsString(t *testing.T) {
 }
 
 func TestLibphonenumberDPFieldAsStringError(t *testing.T) {
-	var pInt int32
-	pInt = 2
+	var pInt int32 = 2
 	LDP := &libphonenumberDP{
 		pNumber: &phonenumbers.PhoneNumber{
 			CountryCode: &pInt,

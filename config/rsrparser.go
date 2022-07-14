@@ -434,11 +434,9 @@ func (prsr RSRParser) Clone() (cln *RSRParser) {
 	}
 	if prsr.converters != nil {
 		cln.converters = make(utils.DataConverters, len(prsr.converters))
-		for i, cnv := range prsr.converters {
-			// we can't modify the convertor only overwirte it
-			// safe to coppy it's value
-			cln.converters[i] = cnv
-		}
+		// we can't modify the convertor only overwrite it
+		// safe to copy it's value
+		copy(cln.converters, prsr.converters)
 	}
 	return
 }

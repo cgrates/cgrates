@@ -161,7 +161,7 @@ func (fWp FlagsWithParams) GetBool(key string) (b bool) {
 	if v, b = fWp[key]; !b {
 		return // not present means false
 	}
-	if v == nil || len(v) == 0 {
+	if len(v) == 0 {
 		return true // empty map
 	}
 	return v.Has(TrueStr) || !v.Has(FalseStr)

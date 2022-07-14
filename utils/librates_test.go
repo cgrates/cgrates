@@ -780,8 +780,8 @@ func TestRateProfileCostCorrectCost(t *testing.T) {
 		Cost: NewDecimal(234, 3),
 	}
 	rPrfCost.CorrectCost(IntPointer(2), MetaRoundingUp)
-	if rPrfCost.Cost != NewDecimal(24, 2) {
-		//	t.Errorf("Expected: %+v, received: %+v", ToJSON(NewDecimal(24, 2)), ToJSON(rPrfCost.Cost))
+	if rPrfCost.Cost.Compare(NewDecimal(24, 2)) != 0 {
+		t.Errorf("Expected: %+v, received: %+v", ToJSON(NewDecimal(24, 2)), ToJSON(rPrfCost.Cost))
 	}
 	if !reflect.DeepEqual(rPrfCost.Altered, []string{RoundingDecimals}) {
 		t.Errorf("Expected: %+v, received: %+v", []string{RoundingDecimals}, rPrfCost.Altered)
@@ -795,8 +795,8 @@ func TestRateProfileCostCorrectCostMinCost(t *testing.T) {
 		MinCost: NewDecimal(15, 1),
 	}
 	testRPC.CorrectCost(IntPointer(2), "")
-	if testRPC.Cost != NewDecimal(15, 1) {
-		//	t.Errorf("\nExpecting: <1.5>,\n Received: <%+v>", testRPC.Cost)
+	if testRPC.Cost.Compare(NewDecimal(15, 1)) != 0 {
+		t.Errorf("\nExpecting: <1.5>,\n Received: <%+v>", testRPC.Cost)
 	}
 }
 
@@ -806,8 +806,8 @@ func TestRateProfileCostCorrectCostMaxCost(t *testing.T) {
 		MaxCost: NewDecimal(15, 1),
 	}
 	testRPC.CorrectCost(IntPointer(2), "")
-	if testRPC.Cost != NewDecimal(15, 1) {
-		//		t.Errorf("\nExpecting: <1.5>,\n Received: <%+v>", testRPC.Cost)
+	if testRPC.Cost.Compare(NewDecimal(15, 1)) != 0 {
+		t.Errorf("\nExpecting: <1.5>,\n Received: <%+v>", ToJSON(testRPC.Cost))
 	}
 }
 

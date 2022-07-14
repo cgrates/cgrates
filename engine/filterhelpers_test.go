@@ -28,8 +28,7 @@ import (
 )
 
 func TestFilterHelpersWeightFromDynamics(t *testing.T) {
-	var expected float64
-	expected = 64
+	var expected float64 = 64
 	ctx := context.Background()
 	dWs := []*utils.DynamicWeight{
 		{

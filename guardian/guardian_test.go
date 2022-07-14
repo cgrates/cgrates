@@ -50,7 +50,7 @@ func TestGuardianMultipleKeys(t *testing.T) {
 	}
 	sg.Wait()
 	mustExecDur := time.Duration(maxIter*100) * time.Millisecond
-	if execTime := time.Now().Sub(tStart); execTime < mustExecDur ||
+	if execTime := time.Since(tStart); execTime < mustExecDur ||
 		execTime > mustExecDur+100*time.Millisecond {
 		t.Errorf("Execution took: %v", execTime)
 	}
@@ -79,7 +79,7 @@ func TestGuardianTimeout(t *testing.T) {
 	}
 	sg.Wait()
 	mustExecDur := time.Duration(maxIter*10) * time.Millisecond
-	if execTime := time.Now().Sub(tStart); execTime < mustExecDur ||
+	if execTime := time.Since(tStart); execTime < mustExecDur ||
 		execTime > mustExecDur+100*time.Millisecond {
 		t.Errorf("Execution took: %v", execTime)
 	}
@@ -156,7 +156,7 @@ func TestGuardianGuardIDs(t *testing.T) {
 	// test lock  without timer
 	refID := Guardian.GuardIDs("", 0, lockIDs...)
 
-	if totalLockDur := time.Now().Sub(tStart); totalLockDur < lockDur {
+	if totalLockDur := time.Since(tStart); totalLockDur < lockDur {
 		t.Errorf("Lock duration too small")
 	}
 	time.Sleep(30 * time.Millisecond)
