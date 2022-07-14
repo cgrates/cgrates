@@ -121,9 +121,7 @@ func (acS *ActionSCfg) loadFromJSONCfg(jsnCfg *ActionSJsonCfg) (err error) {
 	}
 	if jsnCfg.Dynaprepaid_actionprofile != nil {
 		acS.DynaprepaidActionProfile = make([]string, len(*jsnCfg.Dynaprepaid_actionprofile))
-		for i, val := range *jsnCfg.Dynaprepaid_actionprofile {
-			acS.DynaprepaidActionProfile[i] = val
-		}
+		copy(acS.DynaprepaidActionProfile, *jsnCfg.Dynaprepaid_actionprofile)
 	}
 	if jsnCfg.Opts != nil {
 		acS.Opts.loadFromJSONCfg(jsnCfg.Opts)
@@ -241,9 +239,7 @@ func (acS ActionSCfg) Clone() (cln *ActionSCfg) {
 	}
 	if acS.DynaprepaidActionProfile != nil {
 		cln.DynaprepaidActionProfile = make([]string, len(acS.DynaprepaidActionProfile))
-		for i, con := range acS.DynaprepaidActionProfile {
-			cln.DynaprepaidActionProfile[i] = con
-		}
+		copy(cln.DynaprepaidActionProfile, acS.DynaprepaidActionProfile)
 	}
 	return
 }

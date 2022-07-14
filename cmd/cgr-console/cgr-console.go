@@ -96,15 +96,15 @@ func executeCommand(command string) {
 	if cmd.RpcMethod() != utils.EmptyString {
 		res := cmd.RpcResult()
 		param := cmd.RpcParams(false)
-		switch param.(type) {
+		switch v := param.(type) {
 		case *console.EmptyWrapper:
 			param = utils.EmptyString
 		case *console.StringWrapper:
-			param = param.(*console.StringWrapper).Item
+			param = v.Item
 		case *console.StringSliceWrapper:
-			param = param.(*console.StringSliceWrapper).Items
+			param = v.Items
 		case *console.StringMapWrapper:
-			param = param.(*console.StringMapWrapper).Items
+			param = v.Items
 		}
 
 		if rpcErr := client.Call(context.TODO(), cmd.RpcMethod(), param, res); rpcErr != nil {

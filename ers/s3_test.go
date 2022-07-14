@@ -23,7 +23,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -267,32 +266,4 @@ func TestS3ERIsClosed(t *testing.T) {
 	if rcv := rdr.isClosed(); rcv != true {
 		t.Errorf("Expected %v but received %v", true, false)
 	}
-}
-
-type s3ClientMock struct {
-	ListObjectsV2PagesF func(input *s3.ListObjectsV2Input, fn func(*s3.ListObjectsV2Output, bool) bool) error
-	GetObjectF          func(input *s3.GetObjectInput) (*s3.GetObjectOutput, error)
-	DeleteObjectF       func(input *s3.DeleteObjectInput) (*s3.DeleteObjectOutput, error)
-}
-
-func (s *s3ClientMock) ListObjectsV2Pages(input *s3.ListObjectsV2Input, fn func(*s3.ListObjectsV2Output, bool) bool) error {
-	if s.ListObjectsV2PagesF != nil {
-		return s.ListObjectsV2PagesF(input, fn)
-	}
-	return utils.ErrNotFound
-}
-
-func (s *s3ClientMock) GetObject(input *s3.GetObjectInput) (*s3.GetObjectOutput, error) {
-	if s.GetObjectF != nil {
-		return s.GetObjectF(input)
-	}
-	return nil, utils.ErrNotImplemented
-}
-
-func (s *s3ClientMock) DeleteObject(input *s3.DeleteObjectInput) (*s3.DeleteObjectOutput, error) {
-	// return nil, nil
-	if s.DeleteObjectF != nil {
-		return s.DeleteObjectF(input)
-	}
-	return nil, utils.ErrInvalidPath
 }

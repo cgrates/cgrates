@@ -18,7 +18,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"reflect"
@@ -27,8 +26,6 @@ import (
 	"time"
 
 	"golang.org/x/crypto/bcrypt"
-
-	"github.com/cgrates/birpc"
 )
 
 func TestGetStartTime(t *testing.T) {
@@ -333,7 +330,7 @@ func TestParseTimeDetectLayout(t *testing.T) {
 		t.Errorf("Unexpected time parsed: %v, expecting: %v", fsTm, expectedTime)
 	}
 	fsTmstampStr = "9999999999999999"
-	fsTm, err = ParseTimeDetectLayout(fsTmstampStr, "")
+	_, err = ParseTimeDetectLayout(fsTmstampStr, "")
 	if err == nil {
 		t.Error("Error expected: 'value out of range', received nil")
 	}
@@ -346,7 +343,7 @@ func TestParseTimeDetectLayout(t *testing.T) {
 		t.Errorf("Unexpected time parsed: %v, expecting: %v", fsTm, expectedTime)
 	}
 	fsTmstampStr = "9999999999999999999"
-	fsTm, err = ParseTimeDetectLayout(fsTmstampStr, "")
+	_, err = ParseTimeDetectLayout(fsTmstampStr, "")
 	if err == nil {
 		t.Error("Error expected: 'value out of range', received nil")
 	}
@@ -1376,32 +1373,6 @@ func TestMonthlyEstimated(t *testing.T) {
 	} else if !reflect.DeepEqual(rcv, expectedTime) {
 		t.Errorf("Expected %+v, received %+v", expectedTime, rcv)
 	}
-}
-
-type server struct{}
-
-type client struct{}
-
-func (c client) Call(ctx *context.Context, serviceMethod string, args, reply interface{}) (err error) {
-	err = ErrExists
-	return
-}
-
-func (srv *server) BiRPCv1ValidMethod(cl birpc.ClientConnector, args interface{}, req interface{}) error {
-	return nil
-}
-
-func (srv *server) BiRPCv1MultipleParams(cl birpc.ClientConnector, args interface{}, req interface{}) (int, error) {
-	return 1, nil
-}
-
-func (srv *server) BiRPCv1NoErrorReturn(cl birpc.ClientConnector, args interface{}, req interface{}) int {
-	return 1
-}
-
-func (srv *server) BiRPCv1FinalError(cl birpc.ClientConnector, args interface{}, req interface{}) (err error) {
-	err = ErrExists
-	return
 }
 
 func TestCoreUtilsGenerateDBItemOpts(t *testing.T) {

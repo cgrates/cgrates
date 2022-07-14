@@ -44,7 +44,7 @@ func TestShutDownCoverage(t *testing.T) {
 	cfgRld := make(chan struct{}, 1)
 	cfgRld <- struct{}{}
 	go func() {
-		time.Sleep(10)
+		time.Sleep(10 * time.Millisecond)
 		stopChan <- struct{}{}
 	}()
 
@@ -62,14 +62,6 @@ func TestShutDownCoverage(t *testing.T) {
 	if rcv := buf.String(); !strings.Contains(rcv, expected) {
 		t.Errorf("Expected %+v, received %+v", expected, rcv)
 	}
-}
-
-type dataDBMockErrorNotFound struct {
-	engine.DataDBMock
-}
-
-func (dB *dataDBMockErrorNotFound) GetAccountDrv(*context.Context, string, string) (*utils.Account, error) {
-	return nil, utils.ErrNotFound
 }
 
 func TestMatchingAccountsForEventMockingErrors(t *testing.T) {

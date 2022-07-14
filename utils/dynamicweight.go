@@ -89,17 +89,15 @@ type DynamicWeight struct {
 	Weight    float64
 }
 
-func (dW *DynamicWeight) Clone() (dinWeight *DynamicWeight) {
-	dinWeight = &DynamicWeight{
+func (dW *DynamicWeight) Clone() (cln *DynamicWeight) {
+	cln = &DynamicWeight{
 		Weight: dW.Weight,
 	}
 	if dW.FilterIDs != nil {
-		dinWeight.FilterIDs = make([]string, len(dW.FilterIDs))
-		for i, value := range dW.FilterIDs {
-			dinWeight.FilterIDs[i] = value
-		}
+		cln.FilterIDs = make([]string, len(dW.FilterIDs))
+		copy(cln.FilterIDs, dW.FilterIDs)
 	}
-	return dinWeight
+	return cln
 }
 
 func (dW DynamicWeights) Clone() (dinWeight DynamicWeights) {

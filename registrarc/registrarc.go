@@ -123,7 +123,6 @@ func (dhS *RegistrarCService) registerDispHosts() {
 			}
 		}
 	}
-	return
 }
 
 func (dhS *RegistrarCService) registerRPCHosts() {
@@ -144,7 +143,6 @@ func (dhS *RegistrarCService) registerRPCHosts() {
 			}
 		}
 	}
-	return
 }
 
 func unregisterHosts(connMgr *engine.ConnManager, regCfg *config.RegistrarCCfg, dTnt, method string) {

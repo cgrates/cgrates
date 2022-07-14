@@ -128,7 +128,7 @@ func TestCGREventFieldAsTime(t *testing.T) {
 	if answ != se.Event[AnswerTime] {
 		t.Errorf("Expecting: %+v, received: %+v", se.Event[AnswerTime], answ)
 	}
-	answ, err = seErr.FieldAsTime(AnswerTime, "CET")
+	_, err = seErr.FieldAsTime(AnswerTime, "CET")
 	if err != ErrNotFound {
 		t.Error(err)
 	}

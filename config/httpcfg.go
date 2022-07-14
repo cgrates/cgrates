@@ -344,15 +344,3 @@ func diffHTTPJsonCfg(d *HTTPJsonCfg, v1, v2 *HTTPCfg) *HTTPJsonCfg {
 	d.Client_opts = diffHTTPClientOptsJsonCfgDialer(d.Client_opts, v1.dialer, v2.dialer)
 	return d
 }
-
-func diffMap(d, v1, v2 map[string]interface{}) map[string]interface{} {
-	if d == nil {
-		d = make(map[string]interface{})
-	}
-	for k, v := range v2 {
-		if val, has := v1[k]; !has || val != v {
-			d[k] = v
-		}
-	}
-	return d
-}

@@ -78,7 +78,7 @@ func (mg *MigratorCgrCfg) loadFromJSONCfg(jsnCfg *MigratorCfgJson) (err error) {
 	if jsnCfg.Out_dataDB_opts != nil {
 		err = mg.OutDataDBOpts.loadFromJSONCfg(jsnCfg.Out_dataDB_opts)
 	}
-	return nil
+	return
 }
 
 // AsMapInterface returns the config as a map[string]interface{}

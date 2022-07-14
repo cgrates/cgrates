@@ -180,7 +180,7 @@ func diffRegistrarCJsonCfg(d *RegistrarCJsonCfg, v1, v2 *RegistrarCCfg) *Registr
 			if conn.Address != utils.EmptyString {
 				dConn.Address = utils.StringPointer(conn.Address)
 			}
-			if conn.TLS != false {
+			if conn.TLS {
 				dConn.Tls = utils.BoolPointer(conn.TLS)
 			}
 			if k != utils.MetaDefault {

@@ -105,9 +105,7 @@ func NewStoredStatQueue(sq *StatQueue, ms utils.Marshaler) (sSQ *StoredStatQueue
 		SQItems:    make([]SQItem, len(sq.SQItems)),
 		SQMetrics:  make(map[string][]byte, len(sq.SQMetrics)),
 	}
-	for i, sqItm := range sq.SQItems {
-		sSQ.SQItems[i] = sqItm
-	}
+	copy(sSQ.SQItems, sq.SQItems)
 	for metricID, metric := range sq.SQMetrics {
 		marshaled, err := ms.Marshal(metric)
 		if err != nil {
@@ -148,9 +146,7 @@ func (ssq *StoredStatQueue) AsStatQueue(ms utils.Marshaler) (sq *StatQueue, err 
 		SQItems:   make([]SQItem, len(ssq.SQItems)),
 		SQMetrics: make(map[string]StatMetric, len(ssq.SQMetrics)),
 	}
-	for i, sqItm := range ssq.SQItems {
-		sq.SQItems[i] = sqItm
-	}
+	copy(sq.SQItems, ssq.SQItems)
 	for metricID, marshaled := range ssq.SQMetrics {
 		if metric, err := NewStatMetric(metricID, 0, []string{}); err != nil {
 			return nil, err

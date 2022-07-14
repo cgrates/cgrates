@@ -517,7 +517,7 @@ func TestRatesSetRateProfileError(t *testing.T) {
 	if !reflect.DeepEqual(result.Rates["RT_WEEK"].ActivationTimes, expected.Rates["RT_WEEK"].ActivationTimes) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected.Rates["RT_WEEK"].ActivationTimes, result.Rates["RT_WEEK"].ActivationTimes)
 	}
-	if "cgrates.org:RP6:RT_WEEK" != result.Rates["RT_WEEK"].UID() {
+	if result.Rates["RT_WEEK"].UID() != "cgrates.org:RP6:RT_WEEK" {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "cgrates.org:RP6:RT_WEEK", result.Rates["RT_WEEK"].UID())
 	}
 	result.Rates = nil

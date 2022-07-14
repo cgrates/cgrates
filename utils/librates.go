@@ -79,9 +79,7 @@ func (rt *Rate) Clone() *Rate {
 	}
 	if rt.FilterIDs != nil {
 		cln.FilterIDs = make([]string, len(rt.FilterIDs))
-		for i, value := range rt.FilterIDs {
-			cln.FilterIDs[i] = value
-		}
+		copy(cln.FilterIDs, rt.FilterIDs)
 	}
 	if rt.Weights != nil {
 		cln.Weights = rt.Weights.Clone()
@@ -1007,9 +1005,7 @@ func NewRateProfileFromMapDataDBMap(tnt, id string, mapRP map[string]interface{}
 	if fltrsIDs, has := mapRP[FilterIDs]; has {
 		fltrs := strings.Split(IfaceAsString(fltrsIDs), InfieldSep)
 		rp.FilterIDs = make([]string, len(fltrs))
-		for idx, fltr := range fltrs {
-			rp.FilterIDs[idx] = fltr
-		}
+		copy(rp.FilterIDs, fltrs)
 	}
 	if weights, has := mapRP[Weights]; has {
 		rp.Weights, err = NewDynamicWeightsFromString(IfaceAsString(weights), InfieldSep, ANDSep)
