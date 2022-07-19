@@ -774,21 +774,6 @@ func TestRateProfileRunTimesPassingActivationTIme(t *testing.T) {
 	}
 }
 
-func TestRateProfileCostCorrectCost(t *testing.T) {
-	rPrfCost := &RateProfileCost{
-		ID:   "Test1",
-		Cost: NewDecimal(234, 3),
-	}
-	rPrfCost.CorrectCost(IntPointer(2), MetaRoundingUp)
-	if rPrfCost.Cost.Compare(NewDecimal(24, 2)) != 0 {
-		t.Errorf("Expected: %+v, received: %+v", ToJSON(NewDecimal(24, 2)), ToJSON(rPrfCost.Cost))
-	}
-	if !reflect.DeepEqual(rPrfCost.Altered, []string{RoundingDecimals}) {
-		t.Errorf("Expected: %+v, received: %+v", []string{RoundingDecimals}, rPrfCost.Altered)
-	}
-
-}
-
 func TestRateProfileCostCorrectCostMinCost(t *testing.T) {
 	testRPC := &RateProfileCost{
 		Cost:    NewDecimal(5, 1),
