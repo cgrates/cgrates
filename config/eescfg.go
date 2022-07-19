@@ -211,6 +211,7 @@ type EventExporterCfg struct {
 	Blocker            bool
 	Attempts           int
 	FailedPostsDir     string
+	EFsConns           []string // connection to EFService
 	ConcurrentRequests int
 	Fields             []*FCTemplate
 	headerFields       []*FCTemplate
@@ -446,6 +447,9 @@ func (eeC *EventExporterCfg) loadFromJSONCfg(jsnEec *EventExporterJsonCfg, msgTe
 	if jsnEec.Failed_posts_dir != nil {
 		eeC.FailedPostsDir = *jsnEec.Failed_posts_dir
 	}
+	if jsnEec.Efs_conns != nil {
+		eeC.EFsConns = updateInternalConns(*jsnEec.Efs_conns, utils.MetaEFs)
+	}
 	if jsnEec.Opts != nil {
 		err = eeC.Opts.loadFromJSONCfg(jsnEec.Opts)
 	}
@@ -662,7 +666,9 @@ func (eeC EventExporterCfg) Clone() (cln *EventExporterCfg) {
 	if eeC.AttributeSIDs != nil {
 		cln.AttributeSIDs = utils.CloneStringSlice(eeC.AttributeSIDs)
 	}
-
+	if eeC.EFsConns != nil {
+		cln.EFsConns = utils.CloneStringSlice(eeC.EFsConns)
+	}
 	for idx, fld := range eeC.Fields {
 		cln.Fields[idx] = fld.Clone()
 	}
@@ -699,6 +705,9 @@ func (eeC *EventExporterCfg) AsMapInterface(separator string) (initialMP map[str
 		utils.ConcurrentRequestsCfg: eeC.ConcurrentRequests,
 		utils.FailedPostsDirCfg:     eeC.FailedPostsDir,
 		utils.OptsCfg:               eeC.Opts.AsMapInterface(),
+	}
+	if eeC.EFsConns != nil {
+		initialMP[utils.EFsConnsCfg] = getInternalJSONConns(eeC.EFsConns)
 	}
 	if eeC.Fields != nil {
 		fields := make([]map[string]interface{}, 0, len(eeC.Fields))
@@ -926,6 +935,7 @@ type EventExporterJsonCfg struct {
 	Attempts            *int
 	Concurrent_requests *int
 	Failed_posts_dir    *string
+	Efs_conns           *[]string
 	Fields              *[]*FcTemplateJsonCfg
 }
 
@@ -1370,6 +1380,9 @@ func diffEventExporterJsonCfg(d *EventExporterJsonCfg, v1, v2 *EventExporterCfg,
 	}
 	if v1.FailedPostsDir != v2.FailedPostsDir {
 		d.Failed_posts_dir = utils.StringPointer(v2.FailedPostsDir)
+	}
+	if !utils.SliceStringEqual(v1.EFsConns, v2.EFsConns) {
+		d.Efs_conns = &v2.EFsConns
 	}
 	return d
 }

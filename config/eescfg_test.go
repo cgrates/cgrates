@@ -90,6 +90,7 @@ func TestEESClone(t *testing.T) {
 				trailerFields:  []*FCTemplate{},
 				Opts:           &EventExporterOpts{},
 				FailedPostsDir: "/var/spool/cgrates/failed_posts",
+				EFsConns:       []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEFs)},
 			},
 			{
 				ID:             utils.CGRateSLwr,
@@ -102,6 +103,7 @@ func TestEESClone(t *testing.T) {
 				AttributeSIDs:  []string{"randomID"},
 				Flags:          utils.FlagsWithParams{},
 				FailedPostsDir: "/var/spool/cgrates/failed_posts",
+				EFsConns:       []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEFs)},
 				Fields: []*FCTemplate{
 					{
 						Tag:    utils.MetaOriginID,
@@ -284,6 +286,7 @@ func TestEventExporterSameID(t *testing.T) {
 				headerFields:   []*FCTemplate{},
 				trailerFields:  []*FCTemplate{},
 				Opts:           &EventExporterOpts{},
+				EFsConns:       []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEFs)},
 				FailedPostsDir: "/var/spool/cgrates/failed_posts",
 			},
 			{
@@ -307,6 +310,7 @@ func TestEventExporterSameID(t *testing.T) {
 				trailerFields:  []*FCTemplate{},
 				Opts:           &EventExporterOpts{},
 				FailedPostsDir: "/var/spool/cgrates/failed_posts",
+				EFsConns:       []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEFs)},
 			},
 		},
 	}
@@ -407,6 +411,7 @@ func TestEEsCfgloadFromJsonCfgCase1(t *testing.T) {
 				trailerFields:  []*FCTemplate{},
 				Opts:           &EventExporterOpts{},
 				FailedPostsDir: "/var/spool/cgrates/failed_posts",
+				EFsConns:       []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEFs)},
 			},
 			{
 				ID:            "CSVExporter",
@@ -434,6 +439,7 @@ func TestEEsCfgloadFromJsonCfgCase1(t *testing.T) {
 					{Tag: utils.MetaOriginID, Path: "*exp.*originID", Type: utils.MetaVariable, Value: NewRSRParsersMustCompile("~*opts.*originID", utils.InfieldSep), Layout: time.RFC3339},
 				},
 				FailedPostsDir: "/var/spool/cgrates/failed_posts",
+				EFsConns:       []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEFs)},
 			},
 		},
 	}
@@ -520,6 +526,7 @@ func TestEEsCfgloadFromJsonCfgCase2(t *testing.T) {
 				trailerFields:  []*FCTemplate{},
 				Opts:           &EventExporterOpts{},
 				FailedPostsDir: "/var/spool/cgrates/failed_posts",
+				EFsConns:       []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEFs)},
 			},
 			{
 				ID:            "CSVExporter",
@@ -531,6 +538,7 @@ func TestEEsCfgloadFromJsonCfgCase2(t *testing.T) {
 				Timezone:      "UTC",
 				Synchronous:   true,
 				Attempts:      1,
+				EFsConns:      []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEFs)},
 				headerFields:  []*FCTemplate{},
 				trailerFields: []*FCTemplate{},
 				contentFields: []*FCTemplate{
@@ -669,6 +677,7 @@ func TestEEsCfgAsMapInterface(t *testing.T) {
 					},
 				},
 				utils.FailedPostsDirCfg: "/var/spool/cgrates/failed_posts",
+				utils.EFsConnsCfg:       []string{utils.MetaInternal},
 			},
 		},
 	}

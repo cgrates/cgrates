@@ -24,9 +24,10 @@ import (
 )
 
 type LoggerCfg struct {
-	Type  string
-	Level int
-	Opts  *LoggerOptsCfg
+	Type     string
+	Level    int
+	EFsConns []string
+	Opts     *LoggerOptsCfg
 }
 
 // Load loads the Logger section of the configuration
@@ -49,6 +50,9 @@ func (loggCfg *LoggerCfg) loadFromJSONCfg(jsnLoggerCfg *LoggerJsonCfg) (err erro
 	if jsnLoggerCfg.Level != nil {
 		loggCfg.Level = *jsnLoggerCfg.Level
 	}
+	if jsnLoggerCfg.Efs_conns != nil {
+		loggCfg.EFsConns = updateInternalConns(*jsnLoggerCfg.Efs_conns, utils.MetaEFs)
+	}
 	if jsnLoggerCfg.Opts != nil {
 		loggCfg.Opts.loadFromJSONCfg(jsnLoggerCfg.Opts)
 	}
@@ -57,11 +61,15 @@ func (loggCfg *LoggerCfg) loadFromJSONCfg(jsnLoggerCfg *LoggerJsonCfg) (err erro
 
 // AsMapInterface returns the config of logger as a map[string]interface{}
 func (loggCfg *LoggerCfg) AsMapInterface(string) interface{} {
-	return map[string]interface{}{
+	mp := map[string]interface{}{
 		utils.TypeCfg:  loggCfg.Type,
 		utils.LevelCfg: loggCfg.Level,
 		utils.OptsCfg:  loggCfg.Opts.AsMapInterface(),
 	}
+	if loggCfg.EFsConns != nil {
+		mp[utils.EFsConnsCfg] = getInternalJSONConns(loggCfg.EFsConns)
+	}
+	return mp
 }
 
 type LoggerOptsCfg struct {
@@ -76,11 +84,15 @@ func (loggCfg LoggerCfg) CloneSection() Section { return loggCfg.Clone() }
 
 // Clone returns a deep copy of LoggerCfg
 func (loggCfg LoggerCfg) Clone() *LoggerCfg {
-	return &LoggerCfg{
+	cln := &LoggerCfg{
 		Type:  loggCfg.Type,
 		Level: loggCfg.Level,
 		Opts:  loggCfg.Opts.Clone(),
 	}
+	if loggCfg.EFsConns != nil {
+		cln.EFsConns = *utils.SliceStringPointer(loggCfg.EFsConns)
+	}
+	return cln
 }
 
 // loadFromJSONCfg loads Logger opts config from JsonCfg
@@ -126,9 +138,10 @@ func (loggerOpts *LoggerOptsCfg) Clone() *LoggerOptsCfg {
 }
 
 type LoggerJsonCfg struct {
-	Type  *string
-	Level *int
-	Opts  *LoggerOptsJson
+	Type      *string
+	Level     *int
+	Efs_conns *[]string
+	Opts      *LoggerOptsJson
 }
 
 type LoggerOptsJson struct {
@@ -147,6 +160,9 @@ func diffLoggerJsonCfg(d *LoggerJsonCfg, v1, v2 *LoggerCfg) *LoggerJsonCfg {
 	}
 	if v1.Level != v2.Level {
 		d.Level = utils.IntPointer(v2.Level)
+	}
+	if !utils.SliceStringEqual(v1.EFsConns, v2.EFsConns) {
+		d.Efs_conns = utils.SliceStringPointer(getInternalJSONConns(v2.EFsConns))
 	}
 	d.Opts = diffLoggerOptsJsonCfg(d.Opts, v1.Opts, v2.Opts)
 	return d
