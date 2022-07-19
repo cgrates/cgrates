@@ -299,7 +299,6 @@ func TestStringSetFieldAsInterface(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	// fmt.Println(rcv)
 	_, err = s.FieldAsInterface([]string{"field2"})
 	if err != ErrNotFound {
 		t.Errorf("Expected %v", ErrNotFound)

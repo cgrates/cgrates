@@ -1051,7 +1051,6 @@ func TestEventChargerMerge(t *testing.T) {
 	if !reflect.DeepEqual(expEc, eEvChgs) {
 		t.Errorf("Expected %v \n but received \n %v", ToJSON(expEc), ToJSON(eEvChgs))
 	}
-	// fmt.Println(ToJSON(eEvChgs))
 }
 
 func TestEventChargesAppendChargeEntry(t *testing.T) {

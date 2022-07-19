@@ -26,55 +26,6 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-// func TestAttrProfileForEvent(t *testing.T) {
-// 	cfg := config.NewDefaultCGRConfig()
-// 	connMng := NewConnManager(cfg)
-// 	dataDB, err := NewDataDBConn(cfg.DataDbCfg().Type,
-// 		cfg.DataDbCfg().Host, cfg.DataDbCfg().Port,
-// 		cfg.DataDbCfg().Name, cfg.DataDbCfg().User,
-// 		cfg.DataDbCfg().Password, cfg.GeneralCfg().DBDataEncoding,
-// 		cfg.DataDbCfg().Opts, cfg.DataDbCfg().Items)
-// 	if err != nil {
-// 		t.Error(err)
-// 	}
-// 	defer dataDB.Close()
-// 	dm := NewDataManager(dataDB, config.CgrConfig().CacheCfg(), connMng)
-// 	attr := &AttributeS{
-// 		dm:    dm,
-// 		fltrS: NewFilterS(cfg, connMng, dm),
-// 		cfg:   cfg,
-// 	}
-// 	attrPrf := &AttributeProfile{
-// 		Tenant:    utils.CGRateSorg,
-// 		ID:        "TEST_ATTRIBUTES_TEST",
-// 		FilterIDs: []string{"*string:~*req.Account:1002", "*exists:~*opts.*usage:"},
-// 		Attributes: []*Attribute{
-// 			{
-// 				Path:  utils.AccountField,
-// 				Type:  utils.MetaConstant,
-// 				Value: nil,
-// 			},
-// 			{
-// 				Path:  "*tenant",
-// 				Type:  utils.MetaConstant,
-// 				Value: nil,
-// 			},
-// 		},
-// 		Weights: utils.DynamicWeights{
-// 			{
-// 				FilterIDs: []string{"non_existent"},
-// 				Weight:    20,
-// 			},
-// 		},
-// 	}
-// 	attr.dm.SetAttributeProfile(context.Background(), attrPrf, false)
-// 	rcv, err := attr.attributeProfileForEvent(context.Background(), "cgrates.org", []string{"TEST_ATTRIBUTES_TEST"}, utils.MapStorage{"some": "data"}, "", make(map[string]int), 1, false)
-// 	if err != nil {
-// 		t.Error(err)
-// 	}
-// 	fmt.Println(utils.ToJSON(rcv))
-// }
-
 func TestParseAtributeUsageDiffVal1(t *testing.T) {
 	dp := utils.MapStorage{
 		utils.MetaReq: utils.MapStorage{

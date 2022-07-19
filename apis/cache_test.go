@@ -325,7 +325,6 @@ func TestPrecacheStatus(t *testing.T) {
 	if !reflect.DeepEqual(reply, exp) {
 		t.Errorf("Expected %v\n but received %v", exp, reply)
 	}
-	// fmt.Println(reply)
 }
 
 func TestHasGroup(t *testing.T) {

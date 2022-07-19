@@ -207,7 +207,6 @@ func testAnalyzerSGetFilterIDs(t *testing.T) {
 		t.Errorf("Expected %v \n but received \n %v", expFilter, result)
 	}
 	time.Sleep(50 * time.Millisecond)
-	// fmt.Println(utils.ToJSON(result))
 }
 
 func testAnalyzerSSearchCall3(t *testing.T) {

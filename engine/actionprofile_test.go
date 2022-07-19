@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"fmt"
 	"reflect"
 	"testing"
 	"time"
@@ -839,6 +838,6 @@ func TestFilterHelpersGetWeightFromDynamics(t *testing.T) {
 		t.Error(err)
 	}
 	if !reflect.DeepEqual(ap.weight, expected) {
-		fmt.Printf("\nExpected <%+v>, \nReceived <%+v>", expected, ap.weight)
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, ap.weight)
 	}
 }

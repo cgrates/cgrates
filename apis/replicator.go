@@ -634,7 +634,7 @@ func (rplSv1 *ReplicatorSv1) SetActionProfile(ctx *context.Context, sp *engine.A
 }
 
 func (rplSv1 *ReplicatorSv1) RemoveRateProfile(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *string) (err error) {
-	if err = rplSv1.dm.DataDB().RemoveRateProfileDrv(ctx, args.Tenant, args.ID, &[]string{}); err != nil {
+	if err = rplSv1.dm.DataDB().RemoveRateProfileDrv(ctx, args.Tenant, args.ID, nil); err != nil {
 		return
 	}
 	if err = rplSv1.v1.CallCache(ctx, utils.IfaceAsString(args.APIOpts[utils.MetaCache]),
