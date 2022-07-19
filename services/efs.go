@@ -25,6 +25,7 @@ import (
 	"github.com/cgrates/birpc/context"
 
 	"github.com/cgrates/birpc"
+	"github.com/cgrates/cgrates/apis"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/efs"
@@ -52,7 +53,7 @@ type ExportFailoverService struct {
 func NewExportFailoverService(cfg *config.CGRConfig, connMgr *engine.ConnManager,
 	intConnChan chan birpc.ClientConnector,
 	server *cores.Server, srvDep map[string]*sync.WaitGroup) servmanager.Service {
-	return &EventExporterService{
+	return &ExportFailoverService{
 		cfg:         cfg,
 		server:      server,
 		connMgr:     connMgr,
@@ -63,6 +64,16 @@ func NewExportFailoverService(cfg *config.CGRConfig, connMgr *engine.ConnManager
 
 // Start should handle the service start
 func (efServ *ExportFailoverService) Start(ctx *context.Context, _ context.CancelFunc) (err error) {
+	if efServ.IsRunning() {
+		return utils.ErrServiceAlreadyRunning
+	}
+	efServ.Lock()
+	efServ.efS = efs.NewEfs(efServ.cfg, efServ.connMgr)
+	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.EFs))
+	efServ.stopChan = make(chan struct{})
+	efServ.srv, _ = birpc.NewService(apis.NewEfSv1(efServ.efS, efServ.cfg), utils.EmptyString, false)
+	efServ.server.RpcRegister(efServ.srv)
+	efServ.Unlock()
 	return
 }
 
@@ -75,8 +86,9 @@ func (efServ *ExportFailoverService) Reload(ctx *context.Context, _ context.Canc
 func (efServ *ExportFailoverService) Shutdown() (err error) {
 	efServ.srv = nil
 	close(efServ.stopChan)
-	utils.Logger.Info(fmt.Sprintf("<%s> stopped <%s> subsystem", utils.CoreS, utils.EFs))
+	utils.Logger.Info(fmt.Sprintf("<%s> service shutdown initialized", utils.EFs))
 	// NEXT SHOULD EXPORT ALL THE SHUTDOWN LOGGERS TO WRITE
+	utils.Logger.Info(fmt.Sprintf("<%s> service shutdown complete", utils.EFs))
 	return
 }
 
