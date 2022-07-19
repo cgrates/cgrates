@@ -882,6 +882,7 @@ const (
 	MetaThresholds         = "*thresholds"
 	MetaRoutes             = "*routes"
 	MetaAttributes         = "*attributes"
+	MetaEFs                = "*efs"
 	MetaActionProfiles     = "*action_profiles"
 	MetaLoadIDs            = "*load_ids"
 )
@@ -1862,14 +1863,15 @@ const (
 	CacheSConnsCfg     = "caches_conns"
 )
 
-// SchedulerCfg
+// Efs
 const (
-	CDRsConnsCfg = "cdrs_conns"
-	FiltersCfg   = "filters"
+	EFsConnsCfg = "efs_conns"
 )
 
 // CdrsCfg
 const (
+	CDRsConnsCfg           = "cdrs_conns"
+	FiltersCfg             = "filters"
 	ExtraFieldsCfg         = "extra_fields"
 	SMCostRetriesCfg       = "session_cost_retries"
 	ChargerSConnsCfg       = "chargers_conns"

@@ -2083,6 +2083,7 @@ func TestDfEventExporterCfg(t *testing.T) {
 				Opts:                &EventExporterOptsJson{},
 				Concurrent_requests: utils.IntPointer(0),
 				Failed_posts_dir:    utils.StringPointer("/var/spool/cgrates/failed_posts"),
+				Efs_conns:           &[]string{utils.MetaInternal},
 			},
 		},
 	}
