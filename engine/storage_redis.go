@@ -53,6 +53,7 @@ const (
 	redisEXISTS   = "EXISTS"
 	redisGET      = "GET"
 	redisSET      = "SET"
+	redisSCAN     = "SCAN"
 	redisLRANGE   = "LRANGE"
 	redisLLEN     = "LLEN"
 	redisRPOP     = "RPOP"
@@ -233,10 +234,31 @@ func (rs *RedisStorage) getKeysForFilterIndexesKeys(fkeys []string) (keys []stri
 	return
 }
 
+// func (rs *RedisStorage) GetKeysForPrefix(ctx *context.Context, prefix string) (keys []string, err error) {
+// 	err = rs.Cmd(&keys, redisSCAN, "0", "MATCH", prefix+"*")
+// 	if err != nil {
+// 		return
+// 	}
+// 	if len(keys) != 0 {
+// 		if filterIndexesPrefixMap.Has(prefix) {
+// 			return rs.getKeysForFilterIndexesKeys(keys)
+// 		}
+// 		return
+// 	}
+// 	return nil, nil
+// }
+
 func (rs *RedisStorage) GetKeysForPrefix(ctx *context.Context, prefix string) (keys []string, err error) {
-	err = rs.Cmd(&keys, redisKEYS, prefix+"*")
-	if err != nil {
-		return
+	scan := radix.NewScanner(rs.client, radix.ScanOpts{
+		Command: redisSCAN,
+		Pattern: prefix + utils.Meta,
+	})
+	var key string
+	for scan.Next(&key) {
+		keys = append(keys, key)
+	}
+	if err = scan.Close(); err != nil {
+		return nil, err
 	}
 	if len(keys) != 0 {
 		if filterIndexesPrefixMap.Has(prefix) {

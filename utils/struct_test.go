@@ -18,7 +18,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 import (
-	"fmt"
 	"math/cmplx"
 	"reflect"
 	"testing"
@@ -236,6 +235,6 @@ func TestContentStructFieldByIndexIsEmpty(t *testing.T) {
 		},
 	}
 	if fieldByIndexIsEmpty(reflect.ValueOf(myStruct), []int{1, 0}) {
-		fmt.Printf("%v", myStruct)
+		t.Errorf("%v", myStruct)
 	}
 }

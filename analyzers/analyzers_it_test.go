@@ -24,7 +24,6 @@ package analyzers
 import (
 	"errors"
 	"flag"
-	"fmt"
 	"net"
 	"net/rpc"
 	"net/rpc/jsonrpc"
@@ -239,7 +238,6 @@ func testAnalyzerSV1Search(t *testing.T) {
 	} else if len(result) != 1 {
 		t.Errorf("Unexpected result: %s", utils.ToJSON(result))
 	}
-	fmt.Println(utils.ToJSON(result))
 }
 
 func testAnalyzerSV1Search2(t *testing.T) {

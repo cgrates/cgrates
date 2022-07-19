@@ -1004,8 +1004,10 @@ func TestErsOnEvictedNoCacheDumpFields(t *testing.T) {
 		}
 		return nil
 	})
-	var compare map[int][]string
-	compare = make(map[int][]string, 2)
+	if err != nil {
+		t.Error(err)
+	}
+	compare := make(map[int][]string, 2)
 	for idx, file := range files {
 		data, err := os.ReadFile(file)
 		if err != nil {
@@ -1016,7 +1018,8 @@ func TestErsOnEvictedNoCacheDumpFields(t *testing.T) {
 		compare[idx] = s
 	}
 	if len(compare[0]) != 10 && len(compare[1]) != 9 {
-		t.Error("Expected 10 and 9")
+		t.Errorf("expected <%d> and <%d>, \nreceived: <%d> and <%d>",
+			10, 9, len(compare[0]), len(compare[1]))
 	}
 	if err := os.RemoveAll(dirPath); err != nil {
 		t.Error(err)
@@ -1082,6 +1085,9 @@ func TestERsOnEvictedDumpToJSON(t *testing.T) {
 		}
 		return nil
 	})
+	if err != nil {
+		t.Error(err)
+	}
 
 	var compare map[string]interface{}
 	// compare = make(map[int][]string, 2)
@@ -1106,9 +1112,8 @@ func TestERsOnEvictedDumpToJSON(t *testing.T) {
 		utils.Password:     "secure_pass",
 		"Additional_Field": "Additional_Value",
 	}
-	// fmt.Println(utils.ToJSON(compare))
 	if !reflect.DeepEqual(exp, compare) {
-		t.Errorf("Expected %v \n but received \n %v", exp, compare)
+		t.Errorf("expected <%v>,\nreceived <%v>", utils.ToJSON(exp), utils.ToJSON(compare))
 	}
 	if err := os.RemoveAll(dirPath); err != nil {
 		t.Error(err)
@@ -1211,10 +1216,12 @@ func TestErsOnEvictedDumpToJSONMergeError(t *testing.T) {
 					utils.Destination:  "1003",
 					utils.OriginID:     "1234567",
 					utils.ToR:          utils.MetaSMS,
-					utils.MetaOriginID: "1133dc80896edf5049b46aa911cb9085eeb27f4d",
 					utils.Password:     "secure_password",
 					"Additional_Field": "Additional_Value2",
 					utils.AnswerTime:   time.Date(2021, 6, 1, 13, 0, 0, 0, time.UTC),
+				},
+				APIOpts: map[string]interface{}{
+					utils.MetaOriginID: "1133dc80896edf5049b46aa911cb9085eeb27f4d",
 				},
 			},
 		},
@@ -1237,9 +1244,9 @@ func TestErsOnEvictedDumpToJSONMergeError(t *testing.T) {
 		rdrEvents: make(chan *erEvent, 1),
 		filterS:   fltrS,
 	}
-	expLog := `[WARNING] <ERs> failed posting expired parial events <[{"Tenant":"cgrates.org","ID":"EventErsOnEvicted2","Event":{"Account":"1002","Additional_Field":"Additional_Value2","AnswerTime":"2021-06-01T13:00:00Z","Category":"call","Destination":"1003","OriginID":"1234567","ToR":"*sms","Usage":"12s","password":"secure_password"},"APIOpts":{"*originID":"1133dc80896edf5049b46aa911cb9085eeb27f4d",}},{"Tenant":"cgrates.org","ID":"EventErsOnEvicted","Event":{"Account":"1001","Additional_Field":"Additional_Value","AnswerTime":"2021-06-01T12:00:00Z","Category":"call","Destination":"1002","OriginHost":"local","OriginID":"123456","ToR":"*voice","Usage":"10s","password":"secure_pass"},"APIOpts":{"*originID":"1133dc80896edf5049b46aa911cb9085eeb27f4c",}}]>`
+	expLog := `[WARNING] <ERs> failed posting expired parial events <[{"Tenant":"cgrates.org","ID":"EventErsOnEvicted2","Event":{"Account":"1002","Additional_Field":"Additional_Value2","AnswerTime":"2021-06-01T13:00:00Z","Category":"call","Destination":"1003","OriginID":"1234567","ToR":"*sms","Usage":"12s","password":"secure_password"},"APIOpts":{"*originID":"1133dc80896edf5049b46aa911cb9085eeb27f4d"}},{"Tenant":"cgrates.org","ID":"EventErsOnEvicted","Event":{"Account":"1001","Additional_Field":"Additional_Value","AnswerTime":"2021-06-01T12:00:00Z","Category":"call","Destination":"1002","OriginHost":"local","OriginID":"123456","ToR":"*voice","Usage":"10s","password":"secure_pass"},"APIOpts":{"*originID":"1133dc80896edf5049b46aa911cb9085eeb27f4c"}}]>`
 	erS.onEvicted("ID", value)
-	rcvLog := buf.String()[20:]
+	rcvLog := buf.String()
 	if !strings.Contains(rcvLog, expLog) {
 		t.Errorf("expected <%+v> to be included in: <%+v>", expLog, rcvLog)
 	}

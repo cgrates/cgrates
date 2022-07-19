@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 import (
-	"fmt"
 	"reflect"
 	"testing"
 	"time"
@@ -1549,8 +1548,7 @@ func TestRateSIncrementCostNoID(t *testing.T) {
 
 	cost := rIc.Cost(rts)
 	if cost != nil {
-		fmt.Println(cost)
-		t.Error("Expected to be nil")
+		t.Errorf("expected cost to be nil, received <%+v>", cost)
 	}
 }
 
@@ -1780,7 +1778,7 @@ func TestRateSIntervalCost(t *testing.T) {
 	rcv := rIv.Cost(rts)
 	exp := decimal.WithContext(DecimalContext).SetUint64(2)
 	if !reflect.DeepEqual(rcv, exp) {
-		fmt.Printf("Expected %v \n but received \n %v", exp, rcv)
+		t.Errorf("expected <%v>,\nreceived <%v>", exp, rcv)
 	}
 }
 
