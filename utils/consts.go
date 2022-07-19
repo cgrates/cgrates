@@ -1136,7 +1136,7 @@ const (
 
 // AdminSv1 APIs
 const (
-	AdminSv1ReplayFailedPosts                 = "AdminSv1.ReplayFailedPosts"
+	//AdminSv1ReplayFailedPosts                 = "AdminSv1.ReplayFailedPosts"
 	AdminSv1GetRateRatesIndexesHealth         = "AdminSv1.GetRateRatesIndexesHealth"
 	AdminSv1GetChargerProfilesCount           = "AdminSv1.GetChargerProfilesCount"
 	AdminSv1GetAccountsIndexesHealth          = "AdminSv1.GetAccountsIndexesHealth"
@@ -1256,12 +1256,6 @@ const (
 	AdminSv1GetAccountsCount          = "AdminSv1.GetAccountsCount"
 )
 
-// APIerSv1 TP APIs
-const (
-
-// APIerSv1RemoveTPFromFolder       = "APIerSv1.RemoveTPFromFolder"
-)
-
 const (
 	ServiceManagerV1              = "ServiceManagerV1"
 	ServiceManagerV1StartService  = "ServiceManagerV1.StartService"
@@ -1275,6 +1269,13 @@ const (
 	TPeSv1                 = "TPeSv1"
 	TPeSv1Ping             = "TPeSv1.Ping"
 	TPeSv1ExportTariffPlan = "TPeSv1.ExportTariffPlan"
+)
+
+// EfSv1 APIs
+const (
+	EfSv1             = "EfSv1"
+	EfSv1ProcessEvent = "EfSv1.ProcessEvent"
+	EfSv1ReplayEvents = "EfSv1.ReplayEvents"
 )
 
 // ConfigSv1 APIs

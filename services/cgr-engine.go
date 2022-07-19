@@ -79,6 +79,7 @@ func NewCGREngine(cfg *config.CGRConfig, cM *engine.ConnManager, shdWg *sync.Wai
 			utils.ActionS:         new(sync.WaitGroup),
 			utils.AccountS:        new(sync.WaitGroup),
 			utils.TPeS:            new(sync.WaitGroup),
+			utils.EFs:             new(sync.WaitGroup),
 		},
 		iFilterSCh: make(chan *engine.FilterS, 1),
 	}
@@ -159,6 +160,7 @@ func (cgr *CGREngine) InitServices(httpPrfPath string, cpuPrfFl io.Closer, memPr
 	iActionSCh := make(chan birpc.ClientConnector, 1)
 	iAccountSCh := make(chan birpc.ClientConnector, 1)
 	iTpeSCh := make(chan birpc.ClientConnector, 1)
+	iEFsCh := make(chan birpc.ClientConnector, 1)
 
 	// initialize the connManager before creating the DMService
 	// because we need to pass the connection to it
@@ -185,6 +187,7 @@ func (cgr *CGREngine) InitServices(httpPrfPath string, cpuPrfFl io.Closer, memPr
 	cgr.cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts), utils.AccountSv1, iAccountSCh)
 	cgr.cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaActions), utils.ActionSv1, iActionSCh)
 	cgr.cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaTpes), utils.TPeSv1, iTpeSCh)
+	cgr.cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEFs), utils.EfSv1, iEFsCh)
 
 	cgr.gvS = NewGlobalVarS(cgr.cfg, cgr.srvDep)
 	cgr.dmS = NewDataDBService(cgr.cfg, cgr.cM, cgr.srvDep)
@@ -248,6 +251,7 @@ func (cgr *CGREngine) InitServices(httpPrfPath string, cpuPrfFl io.Closer, memPr
 		NewActionService(cgr.cfg, cgr.dmS, cgr.cacheS, cgr.iFilterSCh, cgr.cM, cgr.server, iActionSCh, cgr.anzS, cgr.srvDep),
 		NewAccountService(cgr.cfg, cgr.dmS, cgr.cacheS, cgr.iFilterSCh, cgr.cM, cgr.server, iAccountSCh, cgr.anzS, cgr.srvDep),
 		NewTPeService(cgr.cfg, cgr.cM, cgr.dmS, cgr.server, cgr.srvDep),
+		NewExportFailoverService(cgr.cfg, cgr.cM, iEFsCh, cgr.server, cgr.srvDep),
 	)
 
 	return
