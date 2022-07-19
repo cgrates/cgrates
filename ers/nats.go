@@ -200,8 +200,8 @@ func (rdr *NatsER) createPoster() (err error) {
 		ExportPath: utils.FirstNonEmpty(
 			rdr.Config().ProcessedPath, rdr.Config().SourcePath),
 		Opts:           processedOpt,
-		Attempts:       rdr.cgrCfg.EFsCfg().PosterAttempts,
-		FailedPostsDir: rdr.cgrCfg.EFsCfg().FailedPostsDir,
+		Attempts:       rdr.cgrCfg.EEsCfg().GetDefaultExporter().Attempts,
+		FailedPostsDir: rdr.cgrCfg.EEsCfg().GetDefaultExporter().FailedPostsDir,
 	}, rdr.cgrCfg.GeneralCfg().NodeID,
 		rdr.cgrCfg.GeneralCfg().ConnectTimeout, nil)
 	return
