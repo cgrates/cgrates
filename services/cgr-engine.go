@@ -32,6 +32,7 @@ import (
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
+	"github.com/cgrates/cgrates/efs"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/registrarc"
 	"github.com/cgrates/cgrates/servmanager"
@@ -364,7 +365,7 @@ func (cgr *CGREngine) Init(ctx *context.Context, shtDw context.CancelFunc, flags
 		cgr.cfg.LoggerCfg().Opts.FailedPostsDir); err != nil {
 		return fmt.Errorf("Could not initialize syslog connection, err: <%s>", err)
 	}
-	utils.SetFailedPostCacheTTL(cgr.cfg.EFsCfg().FailedPostsTTL) // init failedPosts to posts loggers/exporters in case of failing
+	efs.SetFailedPostCacheTTL(cgr.cfg.EFsCfg().FailedPostsTTL) // init failedPosts to posts loggers/exporters in case of failing
 	utils.Logger.Info(fmt.Sprintf("<CoreS> starting version <%s><%s>", vers, runtime.Version()))
 	cgr.cfg.LazySanityCheck()
 

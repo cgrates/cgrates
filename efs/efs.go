@@ -21,8 +21,10 @@ package efs
 import (
 	"sync"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
 )
 
 type EfS struct {
@@ -37,4 +39,64 @@ func NewEfs(cfg *config.CGRConfig, connMgr *engine.ConnManager) *EfS {
 		cfg:     cfg,
 		connMgr: connMgr,
 	}
+}
+
+// V1ProcessEvent will write into gob formnat file the Events that were failed to be exported.
+func (efs *EfS) V1ProcessEvent(ctx *context.Context, args *utils.ArgsFailedPosts, reply *string) error {
+	var format string
+	if _, has := args.APIOpts[utils.Format]; has {
+		format = utils.IfaceAsString(args.APIOpts[utils.Format])
+	}
+	key := utils.ConcatenatedKey(args.FailedDir, args.Path, format, args.Module)
+	switch args.Module {
+	case utils.EEs:
+		// also in case of amqp,amqpv1,s3,sqs and kafka also separe them after queue id
+		var amqpQueueID string
+		var s3BucketID string
+		var sqsQueueID string
+		var kafkaTopic string
+		if _, has := args.APIOpts[utils.AMQPQueueID]; has {
+			amqpQueueID = utils.IfaceAsString(args.APIOpts[utils.AMQPQueueID])
+		}
+		if _, has := args.APIOpts[utils.S3Bucket]; has {
+			s3BucketID = utils.IfaceAsString(args.APIOpts[utils.S3Bucket])
+		}
+		if _, has := args.APIOpts[utils.SQSQueueID]; has {
+			sqsQueueID = utils.IfaceAsString(args.APIOpts[utils.SQSQueueID])
+		}
+		if _, has := args.APIOpts[kafkaTopic]; has {
+			kafkaTopic = utils.IfaceAsString(args.APIOpts[utils.KafkaTopic])
+		}
+		if qID := utils.FirstNonEmpty(amqpQueueID, s3BucketID,
+			sqsQueueID, kafkaTopic); len(qID) != 0 {
+			key = utils.ConcatenatedKey(key, qID)
+		}
+	case utils.Kafka:
+	}
+	var failedPost *FailedExportersLogg
+	if x, ok := failedPostCache.Get(key); ok {
+		if x != nil {
+			failedPost = x.(*FailedExportersLogg)
+		}
+	}
+	if failedPost == nil {
+		failedPost = &FailedExportersLogg{
+			Path:           args.Path,
+			Format:         format,
+			Opts:           args.APIOpts,
+			Module:         args.Module,
+			FailedPostsDir: args.FailedDir,
+		}
+		failedPostCache.Set(key, failedPost, nil)
+	}
+	failedPost.AddEvent(args.Event)
+	return nil
+}
+
+type ArgsReplayFailedPosts struct {
+	Tenant               string
+	TypeProvider         string
+	FailedRequestsInDir  *string  // if defined it will be our source of requests to be replayed
+	FailedRequestsOutDir *string  // if defined it will become our destination for files failing to be replayed, *none to be discarded
+	Modules              []string // list of modules for which replay the requests, nil for all
 }

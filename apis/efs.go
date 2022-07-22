@@ -25,7 +25,6 @@ import (
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/ees"
 	"github.com/cgrates/cgrates/efs"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -44,18 +43,13 @@ type EfSv1 struct {
 	ping
 }
 
-type ArgsReplayFailedPosts struct {
-	TypeProvider         string
-	FailedRequestsInDir  *string  // if defined it will be our source of requests to be replayed
-	FailedRequestsOutDir *string  // if defined it will become our destination for files failing to be replayed, *none to be discarded
-	Modules              []string // list of modules for which replay the requests, nil for all
+// ProcessEvent will write into gob formnat file the Events that were failed to be exported.
+func (efS *EfSv1) ProcessEvent(ctx *context.Context, args *utils.ArgsFailedPosts, reply *string) error {
+	return efS.efs.V1ProcessEvent(ctx, args, reply)
 }
 
-func (efS *EfSv1) ProcessEvent(ctx *context.Context, args *ArgsReplayFailedPosts, reply *string) error {
-	return nil
-}
-
-func (efS *EfSv1) ReplayEvents(ctx *context.Context, args *ArgsReplayFailedPosts, reply *string) error {
+// ReplayEvents will read the Events from gob files that were failed to be exported and try to re-export them again.
+func (efS *EfSv1) ReplayEvents(ctx *context.Context, args *efs.ArgsReplayFailedPosts, reply *string) error {
 	failedPostsDir := efS.cfg.LoggerCfg().Opts.FailedPostsDir
 	if args.FailedRequestsInDir != nil && *args.FailedRequestsInDir != utils.EmptyString {
 		failedPostsDir = *args.FailedRequestsInDir
@@ -87,8 +81,8 @@ func (efS *EfSv1) ReplayEvents(ctx *context.Context, args *ArgsReplayFailedPosts
 			}
 		}
 		filePath := path.Join(failedPostsDir, file.Name())
-		var expEv utils.FailoverPoster
-		if expEv, err = ees.NewFailoverPosterFromFile(filePath, args.TypeProvider); err != nil {
+		var expEv efs.FailoverPoster
+		if expEv, err = efs.NewFailoverPosterFromFile(filePath, args.TypeProvider, efS.efs); err != nil {
 			return err
 		}
 		// check if the failed out dir path is the same as the same in dir in order to export again in case of failure
@@ -97,9 +91,9 @@ func (efS *EfSv1) ReplayEvents(ctx *context.Context, args *ArgsReplayFailedPosts
 			failoverPath = path.Join(failedOutDir, file.Name())
 		}
 
-		err = expEv.ReplayFailedPosts(efS.cfg.EFsCfg().PosterAttempts)
+		err = expEv.ReplayFailedPosts(ctx, efS.cfg.EFsCfg().PosterAttempts, args.Tenant)
 		if err != nil && failedOutDir != utils.MetaNone { // Got error from HTTPPoster could be that content was not written, we need to write it ourselves
-			if err = utils.WriteToFile(failoverPath, expEv); err != nil {
+			if err = efs.WriteToFile(failoverPath, expEv); err != nil {
 				return utils.NewErrServerError(err)
 			}
 		}

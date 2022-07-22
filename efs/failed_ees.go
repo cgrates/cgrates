@@ -16,44 +16,29 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-package ees
+package efs
 
-/*
-// NewFailoverPosterFromFile returns ExportEvents from the file
-// used only on replay failed post
-func NewFailoverPosterFromFile(filePath, providerType string) (failPoster utils.FailoverPoster, err error) {
-	var fileContent []byte
-	err = guardian.Guardian.Guard(context.TODO(), func(_ *context.Context) error {
-		if fileContent, err = os.ReadFile(filePath); err != nil {
-			return err
-		}
-		return os.Remove(filePath)
-	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.FileLockPrefix+filePath)
-	if err != nil {
-		return
-	}
-	dec := gob.NewDecoder(bytes.NewBuffer(fileContent))
-	// unmarshall it
-	expEv := new(utils.FailedExportersLogg)
-	err = dec.Decode(&expEv)
-	switch providerType {
-	case utils.EEs:
-		opts, err := AsOptsEESConfig(expEv.Opts)
-		if err != nil {
-			return nil, err
-		}
-		failPoster = &FailedExportersEEs{
-			module:         expEv.Module,
-			failedPostsDir: expEv.FailedPostsDir,
-			Path:           expEv.Path,
-			Opts:           opts,
-			Events:         expEv.Events,
-			Format:         expEv.Format,
-		}
-	case utils.Kafka:
-		failPoster = expEv
-	}
-	return
+import (
+	"sync"
+
+	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/ees"
+	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
+)
+
+// FailedExportersEEs used to save the failed post to file
+type FailedExportersEEs struct {
+	lk             sync.RWMutex
+	Path           string
+	Opts           *config.EventExporterOpts
+	Format         string
+	Events         []interface{}
+	failedPostsDir string
+	module         string
+
+	connMngr *engine.ConnManager
 }
 
 func AsOptsEESConfig(opts map[string]interface{}) (*config.EventExporterOpts, error) {
@@ -256,17 +241,6 @@ func AsOptsEESConfig(opts map[string]interface{}) (*config.EventExporterOpts, er
 	return optsCfg, nil
 }
 
-// FailedExportersEEs used to save the failed post to file
-type FailedExportersEEs struct {
-	lk             sync.RWMutex
-	Path           string
-	Opts           *config.EventExporterOpts
-	Format         string
-	Events         []interface{}
-	failedPostsDir string
-	module         string
-}
-
 // AddEvent adds one event
 func (expEv *FailedExportersEEs) AddEvent(ev interface{}) {
 	expEv.lk.Lock()
@@ -275,15 +249,15 @@ func (expEv *FailedExportersEEs) AddEvent(ev interface{}) {
 }
 
 // ReplayFailedPosts tryies to post cdrs again
-func (expEv *FailedExportersEEs) ReplayFailedPosts(attempts int) (err error) {
+func (expEv *FailedExportersEEs) ReplayFailedPosts(ctx *context.Context, attempts int, tnt string) (err error) {
 	eesFailedEvents := &FailedExportersEEs{
 		Path:   expEv.Path,
 		Opts:   expEv.Opts,
 		Format: expEv.Format,
 	}
 
-	var ee EventExporter
-	if ee, err = NewEventExporter(&config.EventExporterCfg{
+	var ee ees.EventExporter
+	if ee, err = ees.NewEventExporter(&config.EventExporterCfg{
 		ID:             "ReplayFailedPosts",
 		Type:           expEv.Format,
 		ExportPath:     expEv.Path,
@@ -298,7 +272,7 @@ func (expEv *FailedExportersEEs) ReplayFailedPosts(attempts int) (err error) {
 		keyFunc = utils.UUIDSha1Prefix
 	}
 	for _, ev := range expEv.Events {
-		if err = ExportWithAttempts(context.Background(), ee, ev, keyFunc()); err != nil {
+		if err = ees.ExportWithAttempts(context.Background(), ee, ev, keyFunc(), expEv.connMngr, tnt); err != nil {
 			eesFailedEvents.AddEvent(ev)
 		}
 	}
@@ -310,4 +284,3 @@ func (expEv *FailedExportersEEs) ReplayFailedPosts(attempts int) (err error) {
 	}
 	return
 }
-*/
