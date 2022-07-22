@@ -11,7 +11,7 @@
 	"opts": {
 		"kafka_conn": "ldasdas:9092",    // the connection trough kafka
 		"kafka_topic": "TutorialTopic",    // the topic from where the events are exported
-		"attempts": 1,                     // number of attempts of connecting
+		"kafka_attempts": 1,                     // number of attempts of connecting
 	},
 },
 */ 

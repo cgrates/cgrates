@@ -1743,9 +1743,10 @@ const (
 )
 
 const (
-	LevelCfg      = "level"
-	KafkaConnCfg  = "kafka_conn"
-	KafkaTopicCfg = "kafka_topic"
+	LevelCfg         = "level"
+	KafkaConnCfg     = "kafka_conn"
+	KafkaTopicCfg    = "kafka_topic"
+	KafkaAttemptsCfg = "kafka_attempts"
 )
 
 const (
@@ -2357,6 +2358,7 @@ const (
 	EventType                = "EventType"
 	SchedulerInit            = "SchedulerInit"
 	MetaProfileIgnoreFilters = "*profileIgnoreFilters"
+	MetaPosterAttempts       = "*posterAttempts"
 
 	RemoteHostOpt = "*rmtHost"
 	MetaCache     = "*cache"

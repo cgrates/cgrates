@@ -75,7 +75,7 @@ func (loggCfg *LoggerCfg) AsMapInterface(string) interface{} {
 type LoggerOptsCfg struct {
 	KafkaConn      string
 	KafkaTopic     string
-	Attempts       int
+	KafkaAttempts  int
 	FailedPostsDir string
 }
 
@@ -106,8 +106,8 @@ func (loggOpts *LoggerOptsCfg) loadFromJSONCfg(jsnCfg *LoggerOptsJson) {
 	if jsnCfg.Kafka_topic != nil {
 		loggOpts.KafkaTopic = *jsnCfg.Kafka_topic
 	}
-	if jsnCfg.Attempts != nil {
-		loggOpts.Attempts = *jsnCfg.Attempts
+	if jsnCfg.Kafka_attempts != nil {
+		loggOpts.KafkaAttempts = *jsnCfg.Kafka_attempts
 	}
 	if jsnCfg.Failed_posts_dir != nil {
 		loggOpts.FailedPostsDir = *jsnCfg.Failed_posts_dir
@@ -119,7 +119,7 @@ func (loggOpts *LoggerOptsCfg) AsMapInterface() interface{} {
 	return map[string]interface{}{
 		utils.KafkaConnCfg:      loggOpts.KafkaConn,
 		utils.KafkaTopicCfg:     loggOpts.KafkaTopic,
-		utils.AttemptsCfg:       loggOpts.Attempts,
+		utils.KafkaAttemptsCfg:  loggOpts.KafkaAttempts,
 		utils.FailedPostsDirCfg: loggOpts.FailedPostsDir,
 	}
 }
@@ -132,7 +132,7 @@ func (loggerOpts *LoggerOptsCfg) Clone() *LoggerOptsCfg {
 	return &LoggerOptsCfg{
 		KafkaConn:      loggerOpts.KafkaConn,
 		KafkaTopic:     loggerOpts.KafkaTopic,
-		Attempts:       loggerOpts.Attempts,
+		KafkaAttempts:  loggerOpts.KafkaAttempts,
 		FailedPostsDir: loggerOpts.FailedPostsDir,
 	}
 }
@@ -147,7 +147,7 @@ type LoggerJsonCfg struct {
 type LoggerOptsJson struct {
 	Kafka_conn       *string `json:"kafka_conn"`
 	Kafka_topic      *string `json:"kafka_topic"`
-	Attempts         *int    `json:"attempts"`
+	Kafka_attempts   *int    `json:"kafka_attempts"`
 	Failed_posts_dir *string `json:"failed_posts_dir"`
 }
 
@@ -178,8 +178,8 @@ func diffLoggerOptsJsonCfg(d *LoggerOptsJson, v1, v2 *LoggerOptsCfg) *LoggerOpts
 	if v1.KafkaTopic != v2.KafkaTopic {
 		d.Kafka_topic = utils.StringPointer(v2.KafkaTopic)
 	}
-	if v1.Attempts != v2.Attempts {
-		d.Attempts = utils.IntPointer(v2.Attempts)
+	if v1.KafkaAttempts != v2.KafkaAttempts {
+		d.Kafka_attempts = utils.IntPointer(v2.KafkaAttempts)
 	}
 	if v1.FailedPostsDir != v2.FailedPostsDir {
 		d.Failed_posts_dir = utils.StringPointer(v2.FailedPostsDir)

@@ -238,6 +238,7 @@ func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 		actionSCfg: &ActionSCfg{Opts: &ActionsOpts{
 			ProfileIDs:           []*utils.DynamicStringSliceOpt{},
 			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
+			PosterAttempts:       []*utils.DynamicIntOpt{},
 		}},
 		sipAgentCfg: new(SIPAgentCfg),
 		configSCfg:  new(ConfigSCfg),

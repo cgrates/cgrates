@@ -30,6 +30,7 @@ const ActionsProfileIgnoreFiltersDftOpt = false
 type ActionsOpts struct {
 	ProfileIDs           []*utils.DynamicStringSliceOpt
 	ProfileIgnoreFilters []*utils.DynamicBoolOpt
+	PosterAttempts       []*utils.DynamicIntOpt
 }
 
 // ActionSCfg is the configuration of ActionS
@@ -70,6 +71,9 @@ func (actOpts *ActionsOpts) loadFromJSONCfg(jsnCfg *ActionsOptsJson) {
 	}
 	if jsnCfg.ProfileIgnoreFilters != nil {
 		actOpts.ProfileIgnoreFilters = append(actOpts.ProfileIgnoreFilters, jsnCfg.ProfileIgnoreFilters...)
+	}
+	if jsnCfg.PosterAttempts != nil {
+		actOpts.PosterAttempts = append(actOpts.PosterAttempts, jsnCfg.PosterAttempts...)
 	}
 }
 
@@ -134,6 +138,7 @@ func (acS ActionSCfg) AsMapInterface(string) interface{} {
 	opts := map[string]interface{}{
 		utils.MetaProfileIDs:           acS.Opts.ProfileIDs,
 		utils.MetaProfileIgnoreFilters: acS.Opts.ProfileIgnoreFilters,
+		utils.MetaPosterAttempts:       acS.Opts.PosterAttempts,
 	}
 	mp := map[string]interface{}{
 		utils.EnabledCfg:                acS.Enabled,
@@ -190,9 +195,14 @@ func (actOpts *ActionsOpts) Clone() *ActionsOpts {
 	if actOpts.ProfileIgnoreFilters != nil {
 		profileIgnoreFilters = utils.CloneDynamicBoolOpt(actOpts.ProfileIgnoreFilters)
 	}
+	var posterAttempts []*utils.DynamicIntOpt
+	if actOpts.PosterAttempts != nil {
+		posterAttempts = utils.CloneDynamicIntOpt(actOpts.PosterAttempts)
+	}
 	return &ActionsOpts{
 		ProfileIDs:           actPrfIDs,
 		ProfileIgnoreFilters: profileIgnoreFilters,
+		PosterAttempts:       posterAttempts,
 	}
 }
 
@@ -247,6 +257,7 @@ func (acS ActionSCfg) Clone() (cln *ActionSCfg) {
 type ActionsOptsJson struct {
 	ProfileIDs           []*utils.DynamicStringSliceOpt `json:"*profileIDs"`
 	ProfileIgnoreFilters []*utils.DynamicBoolOpt        `json:"*profileIgnoreFilters"`
+	PosterAttempts       []*utils.DynamicIntOpt         `json:"*posterAttempts"`
 }
 
 // Action service config section
@@ -278,6 +289,9 @@ func diffActionsOptsJsonCfg(d *ActionsOptsJson, v1, v2 *ActionsOpts) *ActionsOpt
 	}
 	if !utils.DynamicBoolOptEqual(v1.ProfileIgnoreFilters, v2.ProfileIgnoreFilters) {
 		d.ProfileIgnoreFilters = v2.ProfileIgnoreFilters
+	}
+	if !utils.DynamicIntOptEqual(v1.PosterAttempts, v2.PosterAttempts) {
+		d.PosterAttempts = v2.PosterAttempts
 	}
 	return d
 }

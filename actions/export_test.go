@@ -43,7 +43,11 @@ func TestACHTTPPostExecute(t *testing.T) {
 			},
 		},
 	}
-	http := newActHTTPPost(cfg, apAction)
+	http, err := newActHTTPPost(context.Background(), "cgrates.org", new(utils.CGREvent),
+		new(engine.FilterS), cfg, apAction)
+	if err != nil {
+		t.Error(err)
+	}
 
 	dataStorage := utils.MapStorage{
 		utils.MetaReq: map[string]interface{}{
@@ -102,7 +106,11 @@ func TestACHTTPPostValues(t *testing.T) {
 			},
 		},
 	}
-	http := newActHTTPPost(cfg, apAction)
+	http, err := newActHTTPPost(context.Background(), "cgrates.org", new(utils.CGREvent),
+		new(engine.FilterS), cfg, apAction)
+	if err != nil {
+		t.Error(err)
+	}
 	dataStorage := utils.MapStorage{
 		utils.MetaReq: map[string]interface{}{
 			utils.AccountField: 1003,
