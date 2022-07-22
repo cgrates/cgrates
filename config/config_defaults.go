@@ -72,7 +72,7 @@ const CGRATES_CFG_JSON = `
 	"opts": {
 		"kafka_conn": "",                                        // the connection trough kafka
 		"kafka_topic": "",                                       // the topic from where the events are exported
-		"attempts": 1,                                           // number of attempts of connecting
+		"kafka_attempts": 1,                                           // number of attempts of connecting
 		"failed_posts_dir": "/var/spool/cgrates/failed_posts"    // path where fail logs are exported
 	},
 },
@@ -1752,7 +1752,7 @@ const CGRATES_CFG_JSON = `
 	"notexists_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"nested_fields": false,					// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
 	"dynaprepaid_actionprofile": [],		//
-	"opts":{								//
+	"opts":{	 		
 		"*profileIDs": [				
 			// {
 			// 	"Tenant": "*any",
@@ -1765,6 +1765,13 @@ const CGRATES_CFG_JSON = `
 			// 	"Tenant": "*any",
 			// 	"FilterIDs": [],
 			// 	"Value": false,
+			// },
+		],
+		"*posterAttempts": [				// poster attempts for HTTPPost action type	
+		    // {
+			// 	"Tenant": "*any",
+			// 	"FilterIDs": [],
+			// 	"Value": 1,
 			// },
 		],									
 	},

@@ -358,7 +358,7 @@ func (cgr *CGREngine) Init(ctx *context.Context, shtDw context.CancelFunc, flags
 		cgr.cfg.GeneralCfg().DefaultTenant,
 		cgr.cfg.GeneralCfg().NodeID,
 		cgr.cfg.LoggerCfg().Level,
-		cgr.cfg.LoggerCfg().Opts.Attempts,
+		cgr.cfg.LoggerCfg().Opts.KafkaAttempts,
 		cgr.cfg.LoggerCfg().Opts.KafkaConn,
 		cgr.cfg.LoggerCfg().Opts.KafkaTopic,
 		cgr.cfg.LoggerCfg().Opts.FailedPostsDir); err != nil {

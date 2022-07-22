@@ -226,11 +226,10 @@ func (rdr *SQSER) createPoster() {
 		processedOpt = new(config.EventExporterOpts)
 	}
 	rdr.poster = ees.NewSQSee(&config.EventExporterCfg{
-		ID:             rdr.Config().ID,
-		ExportPath:     utils.FirstNonEmpty(rdr.Config().ProcessedPath, rdr.Config().SourcePath),
-		Attempts:       rdr.cgrCfg.EEsCfg().GetDefaultExporter().Attempts,
-		Opts:           processedOpt,
-		FailedPostsDir: rdr.cgrCfg.EEsCfg().GetDefaultExporter().FailedPostsDir,
+		ID:         rdr.Config().ID,
+		ExportPath: utils.FirstNonEmpty(rdr.Config().ProcessedPath, rdr.Config().SourcePath),
+		Attempts:   rdr.cgrCfg.EEsCfg().GetDefaultExporter().Attempts,
+		Opts:       processedOpt,
 	}, nil)
 }
 

@@ -219,7 +219,7 @@ func (aS *ActionS) scheduledActions(ctx *context.Context, tnt string, cgrEv *uti
 		trgActs := map[string][]actioner{} // build here the list of actioners based on the trgKey
 		var partExec bool
 		for _, aCfg := range aPf.Actions { // create actioners and attach them to the right target
-			if act, errAct := newActioner(aS.cfg, aS.fltrS, aS.dm, aS.connMgr, aCfg, tnt); errAct != nil {
+			if act, errAct := newActioner(ctx, cgrEv, aS.cfg, aS.fltrS, aS.dm, aS.connMgr, aCfg, tnt); errAct != nil {
 				utils.Logger.Warning(
 					fmt.Sprintf(
 						"<%s> ignoring ActionProfile with id: <%s:%s> creating action: <%s>, error: <%s>",

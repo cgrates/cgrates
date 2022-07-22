@@ -30,17 +30,23 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func newActHTTPPost(cfg *config.CGRConfig, aCfg *engine.APAction) (aL *actHTTPPost) {
+func newActHTTPPost(ctx *context.Context, tnt string, cgrEv *utils.CGREvent,
+	fltrS *engine.FilterS, cfg *config.CGRConfig, aCfg *engine.APAction) (aL *actHTTPPost, err error) {
 	aL = &actHTTPPost{
 		config: cfg,
 		aCfg:   aCfg,
 		pstrs:  make([]*ees.HTTPjsonMapEE, len(aCfg.Diktats)),
 	}
 	for i, actD := range aL.cfg().Diktats {
+		attempts, err := engine.GetIntOpts(ctx, tnt, cgrEv, fltrS, cfg.ActionSCfg().Opts.PosterAttempts,
+			1, utils.MetaPosterAttempts)
+		if err != nil {
+			return nil, err
+		}
 		aL.pstrs[i], _ = ees.NewHTTPjsonMapEE(&config.EventExporterCfg{
 			ID:             aL.id(),
 			ExportPath:     actD.Path,
-			Attempts:       cfg.EEsCfg().GetDefaultExporter().Attempts,
+			Attempts:       attempts,
 			FailedPostsDir: cfg.EEsCfg().GetDefaultExporter().FailedPostsDir,
 			Opts:           &config.EventExporterOpts{},
 		}, cfg, nil, nil)

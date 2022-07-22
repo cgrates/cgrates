@@ -24,6 +24,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 
 	"github.com/cgrates/cgrates/config"
@@ -41,7 +42,7 @@ func TestACExecuteCDRLog(t *testing.T) {
 	}
 
 	expectedErr := "unsupported action type: <not_a_type>"
-	if _, err := newActionersFromActions(cfg, fltr, dm, nil,
+	if _, err := newActionersFromActions(context.Background(), new(utils.CGREvent), cfg, fltr, dm, nil,
 		actCfg, "cgrates.org"); err == nil || err.Error() != expectedErr {
 		t.Errorf("Expected %+v, received %+v", expectedErr, err)
 	}
@@ -57,9 +58,15 @@ func TestACExecuteCDRLog(t *testing.T) {
 		{Type: utils.MetaRemBalance},
 	}
 
+	actHttp, err := newActHTTPPost(context.Background(), cfg.GeneralCfg().DefaultTenant, new(utils.CGREvent), new(engine.FilterS),
+		cfg, &engine.APAction{Type: utils.MetaHTTPPost})
+	if err != nil {
+		t.Error(err)
+	}
+
 	expectedActs := []actioner{
 		&actCDRLog{cfg, fltr, nil, &engine.APAction{Type: utils.CDRLog}},
-		newActHTTPPost(cfg, &engine.APAction{Type: utils.MetaHTTPPost}),
+		actHttp,
 		&actExport{"cgrates.org", cfg, nil, &engine.APAction{Type: utils.MetaExport}},
 		&actResetStat{"cgrates.org", cfg, nil, &engine.APAction{Type: utils.MetaResetStatQueue}},
 		&actResetThreshold{"cgrates.org", cfg, nil, &engine.APAction{Type: utils.MetaResetThreshold}},
@@ -68,7 +75,7 @@ func TestACExecuteCDRLog(t *testing.T) {
 		&actRemBalance{cfg, nil, &engine.APAction{Type: utils.MetaRemBalance}, "cgrates.org"},
 	}
 
-	acts, err := newActionersFromActions(cfg, fltr, dm, nil, actCfg, "cgrates.org")
+	acts, err := newActionersFromActions(context.Background(), new(utils.CGREvent), cfg, fltr, dm, nil, actCfg, "cgrates.org")
 	if err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(acts, expectedActs) {

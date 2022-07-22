@@ -2418,6 +2418,7 @@ func TestDfActionSJsonCfg(t *testing.T) {
 		Opts: &ActionsOptsJson{
 			ProfileIDs:           []*utils.DynamicStringSliceOpt{},
 			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
+			PosterAttempts:       []*utils.DynamicIntOpt{},
 		},
 	}
 	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))

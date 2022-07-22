@@ -62,6 +62,7 @@ func TestActionSCfgLoadFromJSONCfg(t *testing.T) {
 		Opts: &ActionsOpts{
 			ProfileIDs:           []*utils.DynamicStringSliceOpt{},
 			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
+			PosterAttempts:       []*utils.DynamicIntOpt{},
 		},
 	}
 	jsnCfg := NewDefaultCGRConfig()
@@ -125,7 +126,7 @@ func TestActionSCfgAsMapInterface(t *testing.T) {
 	"exists_indexed_fields": ["*req.index1","*req.index2"],		
     "notexists_indexed_fields": ["*req.index1"],
 	"nested_fields": true,	
-    "DynaprepaidActionProfile": [],
+    "dynaprepaid_actionprofile": [],
 	},		
 }`
 
@@ -148,6 +149,7 @@ func TestActionSCfgAsMapInterface(t *testing.T) {
 		utils.OptsCfg: map[string]interface{}{
 			utils.MetaProfileIDs:           []*utils.DynamicStringSliceOpt{},
 			utils.MetaProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
+			utils.MetaPosterAttempts:       []*utils.DynamicIntOpt{},
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
