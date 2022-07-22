@@ -18,20 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package utils
 
-import (
-	"bytes"
-	"encoding/gob"
-	"fmt"
-	"os"
-	"path"
-	"sync"
-	"time"
-
-	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/ltcache"
-	"github.com/segmentio/kafka-go"
-)
-
+/*
 var failedPostCache *ltcache.Cache
 
 func init() {
@@ -159,13 +146,12 @@ func NewExportEventsFromFile(filePath string) (expEv *FailedExportersLogg, err e
 }
 
 type FailoverPoster interface {
-	ReplayFailedPosts(int) error
+	ReplayFailedPosts(int, string) error
 }
 
 // ReplayFailedPosts tryies to post cdrs again
-func (expEv *FailedExportersLogg) ReplayFailedPosts(attempts int) (err error) {
+func (expEv *FailedExportersLogg) ReplayFailedPosts(attempts int, tnt string) (err error) {
 	nodeID := IfaceAsString(expEv.Opts[NodeID])
-	tnt := IfaceAsString(expEv.Opts[Tenant])
 	logLvl, err := IfaceAsInt(expEv.Opts[Level])
 	if err != nil {
 		return
@@ -177,15 +163,16 @@ func (expEv *FailedExportersLogg) ReplayFailedPosts(attempts int) (err error) {
 		if content, err = ToUnescapedJSON(event); err != nil {
 			return
 		}
-		if err = expLogger.writer.WriteMessages(context.Background(), kafka.Message{
+		if err = expLogger.Writer.WriteMessages(context.Background(), kafka.Message{
 			Key:   []byte(GenUUID()),
 			Value: content,
 		}); err != nil {
 			// if there are any errors in kafka, we will post in FailedPostDirectory
-			AddFailedMessage(expLogger.fldPostDir, expLogger.writer.Addr.String(), MetaKafkaLog, Kafka,
+			AddFailedMessage(expLogger.FldPostDir, expLogger.Writer.Addr.String(), MetaKafkaLog, Kafka,
 				event, expLogger.GetMeta())
 			return nil
 		}
 	}
 	return err
 }
+*/

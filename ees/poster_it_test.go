@@ -160,7 +160,7 @@ func TestSQSPoster(t *testing.T) {
 		Attempts:   5,
 		Opts:       opts,
 	}, nil)
-	if err := ExportWithAttempts(context.Background(), pstr, []byte(body), ""); err != nil {
+	if err := ExportWithAttempts(context.Background(), pstr, []byte(body), "", nil, "cgrates.org"); err != nil {
 		t.Fatal(err)
 	}
 
@@ -239,7 +239,7 @@ func TestS3Poster(t *testing.T) {
 		Attempts:   5,
 		Opts:       opts,
 	}, nil)
-	if err := ExportWithAttempts(context.Background(), pstr, []byte(body), key); err != nil {
+	if err := ExportWithAttempts(context.Background(), pstr, []byte(body), key, nil, "cgrates.org"); err != nil {
 		t.Fatal(err)
 	}
 	key += ".json"
@@ -294,7 +294,7 @@ func TestAMQPv1Poster(t *testing.T) {
 		Attempts:   5,
 		Opts:       opts,
 	}, nil)
-	if err := ExportWithAttempts(context.Background(), pstr, []byte(body), ""); err != nil {
+	if err := ExportWithAttempts(context.Background(), pstr, []byte(body), "", nil, "cgrates.org"); err != nil {
 		t.Fatal(err)
 	}
 	// Create client

@@ -780,6 +780,15 @@ func IsURL(path string) bool {
 		strings.HasPrefix(path, "http://")
 }
 
+type ArgsFailedPosts struct {
+	Tenant    string
+	Path      string                 // Path of the exported type
+	Event     interface{}            // Event that must be written in file
+	FailedDir string                 // Directory that contains the file with Failed post
+	Module    string                 // Type of efs <*ees|*kafkaLogger>
+	APIOpts   map[string]interface{} // Specially for the meta
+}
+
 // GetIndexesArg the API argumets to specify an index
 type GetIndexesArg struct {
 	IdxItmType string

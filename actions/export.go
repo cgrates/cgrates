@@ -78,8 +78,10 @@ func (aL *actHTTPPost) execute(ctx *context.Context, data utils.MapStorage, _ st
 	var partExec bool
 	for _, pstr := range aL.pstrs {
 		if async, has := aL.cfg().Opts[utils.MetaAsync]; has && utils.IfaceAsString(async) == utils.TrueStr {
-			go ees.ExportWithAttempts(context.Background(), pstr, &ees.HTTPPosterRequest{Body: body, Header: make(http.Header)}, utils.EmptyString)
-		} else if err = ees.ExportWithAttempts(ctx, pstr, &ees.HTTPPosterRequest{Body: body, Header: make(http.Header)}, utils.EmptyString); err != nil {
+			go ees.ExportWithAttempts(context.Background(), pstr, &ees.HTTPPosterRequest{Body: body, Header: make(http.Header)}, utils.EmptyString,
+				nil, aL.config.GeneralCfg().DefaultTenant)
+		} else if err = ees.ExportWithAttempts(ctx, pstr, &ees.HTTPPosterRequest{Body: body, Header: make(http.Header)}, utils.EmptyString,
+			nil, aL.config.GeneralCfg().DefaultTenant); err != nil {
 			if pstr.Cfg().FailedPostsDir != utils.MetaNone {
 				err = nil
 			} else {

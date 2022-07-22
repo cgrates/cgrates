@@ -106,7 +106,7 @@ func TestNatsEE(t *testing.T) {
 			"Destination": "1002",
 		},
 	}
-	if err := exportEventWithExporter(context.Background(), evExp, cgrEv, true, cgrCfg, new(engine.FilterS)); err != nil {
+	if err := exportEventWithExporter(context.Background(), evExp, nil, cgrEv, true, cgrCfg, new(engine.FilterS), "cgrates.org"); err != nil {
 		t.Fatal(err)
 	}
 	testCleanDirectory(t)
@@ -172,7 +172,7 @@ func TestNatsEE2(t *testing.T) {
 			"Destination": "1002",
 		},
 	}
-	if err := exportEventWithExporter(context.Background(), evExp, cgrEv, true, cgrCfg, new(engine.FilterS)); err != nil {
+	if err := exportEventWithExporter(context.Background(), evExp, nil, cgrEv, true, cgrCfg, new(engine.FilterS), "cgrates.org"); err != nil {
 		t.Fatal(err)
 	}
 	testCleanDirectory(t)

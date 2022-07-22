@@ -31,22 +31,22 @@ import (
 type ExportLogger struct {
 	sync.Mutex
 
-	logLevel   int
-	fldPostDir string
-	writer     *kafka.Writer
-	nodeID     string
-	tenant     string
+	LogLevel   int
+	FldPostDir string
+	Writer     *kafka.Writer
+	NodeID     string
+	Tenant     string
 }
 
 // NewExportLogger will export loggers to kafka
 func NewExportLogger(nodeID, tenant string, level int,
 	connOpts, connTopic string, attempts int, fldPostDir string) (el *ExportLogger) {
 	el = &ExportLogger{
-		logLevel:   level,
-		fldPostDir: fldPostDir,
-		nodeID:     nodeID,
-		tenant:     tenant,
-		writer: &kafka.Writer{
+		LogLevel:   level,
+		FldPostDir: fldPostDir,
+		NodeID:     nodeID,
+		Tenant:     tenant,
+		Writer: &kafka.Writer{
 			Addr:        kafka.TCP(connOpts),
 			Topic:       connTopic,
 			MaxAttempts: attempts,
@@ -56,18 +56,18 @@ func NewExportLogger(nodeID, tenant string, level int,
 }
 
 func (el *ExportLogger) Close() (err error) {
-	if el.writer != nil {
-		err = el.writer.Close()
-		el.writer = nil
+	if el.Writer != nil {
+		err = el.Writer.Close()
+		el.Writer = nil
 	}
 	return
 }
 
 func (el *ExportLogger) call(m string, level int) (err error) {
 	eventExport := &CGREvent{
-		Tenant: el.tenant,
+		Tenant: el.Tenant,
 		Event: map[string]interface{}{
-			NodeID:    el.nodeID,
+			NodeID:    el.NodeID,
 			Message:   m,
 			Severity:  level,
 			Timestamp: time.Now().Format("2006-01-02 15:04:05"),
@@ -78,15 +78,17 @@ func (el *ExportLogger) call(m string, level int) (err error) {
 	if content, err = ToUnescapedJSON(eventExport); err != nil {
 		return
 	}
-	if err = el.writer.WriteMessages(context.Background(), kafka.Message{
+	if err = el.Writer.WriteMessages(context.Background(), kafka.Message{
 		Key:   []byte(GenUUID()),
 		Value: content,
 	}); err != nil {
-		// if there are any errors in kafka, we will post in FailedPostDirectory
-		AddFailedMessage(el.fldPostDir, el.writer.Addr.String(), MetaKafkaLog, Kafka,
-			eventExport, el.GetMeta())
-		// also the content should be printed as a stdout logger type
-		return ErrLoggerChanged
+		/*
+			// if there are any errors in kafka, we will post in FailedPostDirectory
+			AddFailedMessage(el.FldPostDir, el.Writer.Addr.String(), MetaKafkaLog, Kafka,
+				eventExport, el.GetMeta())
+			// also the content should be printed as a stdout logger type
+			return ErrLoggerChanged
+		*/
 	}
 	return
 }
@@ -103,22 +105,22 @@ func (sl *ExportLogger) GetSyslog() *syslog.Writer {
 
 // GetLogLevel() returns the level logger number for the server
 func (el *ExportLogger) GetLogLevel() int {
-	return el.logLevel
+	return el.LogLevel
 }
 
 // SetLogLevel changes the log level
 func (el *ExportLogger) SetLogLevel(level int) {
-	el.logLevel = level
+	el.LogLevel = level
 }
 
 // Alert logs to EEs with alert level
 func (el *ExportLogger) Alert(m string) (err error) {
-	if el.logLevel < LOGLEVEL_ALERT {
+	if el.LogLevel < LOGLEVEL_ALERT {
 		return nil
 	}
 	if err = el.call(m, LOGLEVEL_ALERT); err != nil {
 		if err == ErrLoggerChanged {
-			NewStdLogger(el.nodeID, el.logLevel).Alert(m)
+			NewStdLogger(el.NodeID, el.LogLevel).Alert(m)
 			err = nil
 		}
 	}
@@ -127,12 +129,12 @@ func (el *ExportLogger) Alert(m string) (err error) {
 
 // Crit logs to EEs with critical level
 func (el *ExportLogger) Crit(m string) (err error) {
-	if el.logLevel < LOGLEVEL_CRITICAL {
+	if el.LogLevel < LOGLEVEL_CRITICAL {
 		return nil
 	}
 	if el.call(m, LOGLEVEL_CRITICAL); err != nil {
 		if err == ErrLoggerChanged {
-			NewStdLogger(el.nodeID, el.logLevel).Crit(m)
+			NewStdLogger(el.NodeID, el.LogLevel).Crit(m)
 			err = nil
 		}
 	}
@@ -141,12 +143,12 @@ func (el *ExportLogger) Crit(m string) (err error) {
 
 // Debug logs to EEs with debug level
 func (el *ExportLogger) Debug(m string) (err error) {
-	if el.logLevel < LOGLEVEL_DEBUG {
+	if el.LogLevel < LOGLEVEL_DEBUG {
 		return nil
 	}
 	if err = el.call(m, LOGLEVEL_DEBUG); err != nil {
 		if err == ErrLoggerChanged {
-			NewStdLogger(el.nodeID, el.logLevel).Debug(m)
+			NewStdLogger(el.NodeID, el.LogLevel).Debug(m)
 			err = nil
 		}
 	}
@@ -155,12 +157,12 @@ func (el *ExportLogger) Debug(m string) (err error) {
 
 // Emerg logs to EEs with emergency level
 func (el *ExportLogger) Emerg(m string) (err error) {
-	if el.logLevel < LOGLEVEL_EMERGENCY {
+	if el.LogLevel < LOGLEVEL_EMERGENCY {
 		return nil
 	}
 	if err = el.call(m, LOGLEVEL_EMERGENCY); err != nil {
 		if err == ErrLoggerChanged {
-			NewStdLogger(el.nodeID, el.logLevel).Emerg(m)
+			NewStdLogger(el.NodeID, el.LogLevel).Emerg(m)
 			err = nil
 		}
 	}
@@ -169,12 +171,12 @@ func (el *ExportLogger) Emerg(m string) (err error) {
 
 // Err logs to EEs with error level
 func (el *ExportLogger) Err(m string) (err error) {
-	if el.logLevel < LOGLEVEL_ERROR {
+	if el.LogLevel < LOGLEVEL_ERROR {
 		return nil
 	}
 	if err = el.call(m, LOGLEVEL_ERROR); err != nil {
 		if err == ErrLoggerChanged {
-			NewStdLogger(el.nodeID, el.logLevel).Err(m)
+			NewStdLogger(el.NodeID, el.LogLevel).Err(m)
 			err = nil
 		}
 	}
@@ -183,12 +185,12 @@ func (el *ExportLogger) Err(m string) (err error) {
 
 // Info logs to EEs with info level
 func (el *ExportLogger) Info(m string) (err error) {
-	if el.logLevel < LOGLEVEL_INFO {
+	if el.LogLevel < LOGLEVEL_INFO {
 		return nil
 	}
 	if err = el.call(m, LOGLEVEL_INFO); err != nil {
 		if err == ErrLoggerChanged {
-			NewStdLogger(el.nodeID, el.logLevel).Info(m)
+			NewStdLogger(el.NodeID, el.LogLevel).Info(m)
 			err = nil
 		}
 	}
@@ -197,12 +199,12 @@ func (el *ExportLogger) Info(m string) (err error) {
 
 // Notice logs to EEs with notice level
 func (el *ExportLogger) Notice(m string) (err error) {
-	if el.logLevel < LOGLEVEL_NOTICE {
+	if el.LogLevel < LOGLEVEL_NOTICE {
 		return nil
 	}
 	if err = el.call(m, LOGLEVEL_NOTICE); err != nil {
 		if err == ErrLoggerChanged {
-			NewStdLogger(el.nodeID, el.logLevel).Notice(m)
+			NewStdLogger(el.NodeID, el.LogLevel).Notice(m)
 			err = nil
 		}
 	}
@@ -211,12 +213,12 @@ func (el *ExportLogger) Notice(m string) (err error) {
 
 // Warning logs to EEs with warning level
 func (el *ExportLogger) Warning(m string) (err error) {
-	if el.logLevel < LOGLEVEL_WARNING {
+	if el.LogLevel < LOGLEVEL_WARNING {
 		return nil
 	}
 	if err = el.call(m, LOGLEVEL_WARNING); err != nil {
 		if err == ErrLoggerChanged {
-			NewStdLogger(el.nodeID, el.logLevel).Warning(m)
+			NewStdLogger(el.NodeID, el.LogLevel).Warning(m)
 			err = nil
 		}
 	}
@@ -225,12 +227,12 @@ func (el *ExportLogger) Warning(m string) (err error) {
 
 func (el *ExportLogger) GetMeta() map[string]interface{} {
 	return map[string]interface{}{
-		Tenant:         el.tenant,
-		NodeID:         el.nodeID,
-		Level:          el.logLevel,
-		Format:         el.writer.Topic,
-		Conn:           el.writer.Addr.String(),
-		FailedPostsDir: el.fldPostDir,
-		Attempts:       el.writer.MaxAttempts,
+		Tenant:         el.Tenant,
+		NodeID:         el.NodeID,
+		Level:          el.LogLevel,
+		Format:         el.Writer.Topic,
+		Conn:           el.Writer.Addr.String(),
+		FailedPostsDir: el.FldPostDir,
+		Attempts:       el.Writer.MaxAttempts,
 	}
 }

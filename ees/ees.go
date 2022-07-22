@@ -197,7 +197,7 @@ func (eeS *EeS) V1ProcessEvent(ctx *context.Context, cgrEv *utils.CGREventWithEe
 					utils.EEs, ee.Cfg().ID))
 		}
 		go func(evict, sync bool, ee EventExporter) {
-			if err := exportEventWithExporter(ctx, ee, cgrEv.CGREvent, evict, eeS.cfg, eeS.fltrS); err != nil {
+			if err := exportEventWithExporter(ctx, ee, eeS.connMgr, cgrEv.CGREvent, evict, eeS.cfg, eeS.fltrS, cgrEv.Tenant); err != nil {
 				withErr = true
 			}
 			if sync {
@@ -243,7 +243,8 @@ func (eeS *EeS) V1ProcessEvent(ctx *context.Context, cgrEv *utils.CGREventWithEe
 	return
 }
 
-func exportEventWithExporter(ctx *context.Context, exp EventExporter, ev *utils.CGREvent, oneTime bool, cfg *config.CGRConfig, filterS *engine.FilterS) (err error) {
+func exportEventWithExporter(ctx *context.Context, exp EventExporter, connMngr *engine.ConnManager,
+	ev *utils.CGREvent, oneTime bool, cfg *config.CGRConfig, filterS *engine.FilterS, tnt string) (err error) {
 	defer func() {
 		updateEEMetrics(exp.GetMetrics(), ev.ID, ev.Event, err != nil, utils.FirstNonEmpty(exp.Cfg().Timezone,
 			cfg.GeneralCfg().DefaultTimezone))
@@ -276,16 +277,34 @@ func exportEventWithExporter(ctx *context.Context, exp EventExporter, ev *utils.
 	}
 	extraData := exp.ExtraData(ev)
 
-	return ExportWithAttempts(ctx, exp, eEv, extraData)
+	return ExportWithAttempts(ctx, exp, eEv, extraData, connMngr, tnt)
 }
 
-func ExportWithAttempts(ctx *context.Context, exp EventExporter, eEv interface{}, key interface{}) (err error) {
+func ExportWithAttempts(ctx *context.Context, exp EventExporter, eEv interface{}, key interface{},
+	connMnngr *engine.ConnManager, tnt string) (err error) {
 	if exp.Cfg().FailedPostsDir != utils.MetaNone {
 		defer func() {
 			if err != nil {
-				utils.AddFailedMessage(exp.Cfg().FailedPostsDir, exp.Cfg().ExportPath,
-					exp.Cfg().Type, utils.EEs,
-					eEv, exp.Cfg().Opts.AsMapInterface())
+				args := &utils.ArgsFailedPosts{
+					Tenant:    tnt,
+					Path:      exp.Cfg().ExportPath,
+					Event:     eEv,
+					FailedDir: exp.Cfg().FailedPostsDir,
+					Module:    utils.EEs,
+					APIOpts:   exp.Cfg().Opts.AsMapInterface(),
+				}
+				var reply string
+				if err = connMnngr.Call(ctx, exp.Cfg().EFsConns,
+					utils.EfSv1ProcessEvent, args, &reply); err != nil {
+					utils.Logger.Warning(
+						fmt.Sprintf("<%s> Exporter <%s> could not be written with <%s> service because err: <%s>",
+							utils.EEs, exp.Cfg().ID, utils.EFs, err.Error()))
+					/*
+						utils.AddFailedMessage(exp.Cfg().FailedPostsDir, exp.Cfg().ExportPath,
+							exp.Cfg().Type, utils.EEs,
+							eEv, exp.Cfg().Opts.AsMapInterface())
+					*/
+				}
 			}
 		}()
 	}
@@ -431,7 +450,7 @@ func (eeS *EeS) V1ArchiveEventsInReply(ctx *context.Context, args *ArchiveEvents
 
 		// exported will be true if there will be at least one exporter archived
 		exported = true
-		if err = exportEventWithExporter(ctx, ee, cgrEv, false, eeS.cfg, eeS.fltrS); err != nil {
+		if err = exportEventWithExporter(ctx, ee, eeS.connMgr, cgrEv, false, eeS.cfg, eeS.fltrS, cgrEv.Tenant); err != nil {
 			return err
 		}
 	}

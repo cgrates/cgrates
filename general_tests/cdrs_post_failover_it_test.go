@@ -30,7 +30,7 @@ import (
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/ees"
+	"github.com/cgrates/cgrates/efs"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/loaders"
 	"github.com/cgrates/cgrates/utils"
@@ -203,19 +203,19 @@ func testCDRsPostFailoverToFile(t *testing.T) {
 		fileName := file.Name()
 		filePath := path.Join(cdrsPostFailCfg.EFsCfg().FailedPostsDir, fileName)
 
-		ev, err := ees.NewFailoverPosterFromFile(filePath, utils.EEs)
+		ev, err := efs.NewFailoverPosterFromFile(filePath, utils.EEs)
 		if err != nil {
 			t.Errorf("<%s> for file <%s>", err, fileName)
 			continue
-		} else if len(ev.(*ees.FailedExportersEEs).Events) == 0 {
+		} else if len(ev.(*efs.FailedExportersEEs).Events) == 0 {
 			t.Error("Expected at least one event")
 			continue
 		}
-		if ev.(*ees.FailedExportersEEs).Format != utils.MetaS3jsonMap {
-			t.Errorf("Expected event to use %q received: %q", utils.MetaS3jsonMap, ev.(*ees.FailedExportersEEs).Format)
+		if ev.(*efs.FailedExportersEEs).Format != utils.MetaS3jsonMap {
+			t.Errorf("Expected event to use %q received: %q", utils.MetaS3jsonMap, ev.(*efs.FailedExportersEEs).Format)
 		}
-		if len(ev.(*ees.FailedExportersEEs).Events) != 3 {
-			t.Errorf("Expected all the events to be saved in the same file, ony %v saved in this file.", len(ev.(*ees.FailedExportersEEs).Events))
+		if len(ev.(*efs.FailedExportersEEs).Events) != 3 {
+			t.Errorf("Expected all the events to be saved in the same file, ony %v saved in this file.", len(ev.(*efs.FailedExportersEEs).Events))
 		}
 	}
 }
