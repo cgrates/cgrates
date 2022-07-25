@@ -230,8 +230,9 @@
 			"run_delay":  "-1",
 			"type": "*file_fwv",
 			"source_path": "/tmp/fwvErs/in",
-			"flags": ["*cdrs"],
 			"processed_path": "/tmp/fwvErs/out",
+			"flags": ["*cdrs"],
+			"filters": ["*regex:~*req.0-10:^CDR00000|^CDR00001|^CDR00002"],
 			"fields": [
 				{"tag": "FileName", "path": "*cgreq.CdrFileName", "type": "*variable", "value": "~*hdr.95-135", "padding":"*right"},
 				{"tag": "FileSeqNr", "path": "*cgreq.FileSeqNr", "type": "*variable", "value": "~*hdr.135-141", "padding":"*zeroleft"},

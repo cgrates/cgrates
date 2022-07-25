@@ -186,7 +186,7 @@ func testFWVITAnalyseCDRs(t *testing.T) {
 	var reply []*engine.ExternalCDR
 	if err := fwvRPC.Call(utils.APIerSv2GetCDRs, &utils.RPCCDRsFilter{}, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
-	} else if len(reply) != 34 {
+	} else if len(reply) != 29 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
 	}
 	if err := fwvRPC.Call(utils.APIerSv2GetCDRs, &utils.RPCCDRsFilter{OriginIDs: []string{"CDR0000010"}}, &reply); err != nil {
