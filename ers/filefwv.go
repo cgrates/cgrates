@@ -295,7 +295,7 @@ func (rdr *FWVFileER) processTrailer(file *os.File, rowNr, evsPosted int, absPat
 	record := string(buf)
 	rdr.trailerDP = config.NewFWVProvider(record)
 	agReq := agents.NewAgentRequest(
-		nil, nil, nil, nil, nil,
+		utils.MapStorage{}, nil, nil, nil, nil,
 		rdr.Config().Tenant,
 		rdr.cgrCfg.GeneralCfg().DefaultTenant,
 		utils.FirstNonEmpty(rdr.Config().Timezone,
@@ -337,9 +337,10 @@ func (rdr *FWVFileER) processHeader(file *os.File, rowNr, evsPosted int, absPath
 }
 
 func (rdr *FWVFileER) createHeaderMap(record string, rowNr, evsPosted int, absPath string, hdrFields []*config.FCTemplate) (err error) {
+	rdr.offset += rdr.headerOffset // increase the offset
 	rdr.headerDP = config.NewFWVProvider(record)
 	agReq := agents.NewAgentRequest(
-		nil, nil, nil, nil, nil,
+		utils.MapStorage{}, nil, nil, nil, nil,
 		rdr.Config().Tenant,
 		rdr.cgrCfg.GeneralCfg().DefaultTenant,
 		utils.FirstNonEmpty(rdr.Config().Timezone,
@@ -353,10 +354,8 @@ func (rdr *FWVFileER) createHeaderMap(record string, rowNr, evsPosted int, absPa
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s> reading file: <%s> row <%d>, ignoring due to error: <%s>",
 				utils.ERs, absPath, rowNr, err.Error()))
-		rdr.offset += rdr.lineLen // increase the offset when exit
 		return err
 	}
-	rdr.offset += rdr.headerOffset // increase the offset
 	cgrEv := utils.NMAsCGREvent(agReq.CGRRequest, agReq.Tenant, utils.NestingSep, agReq.Opts)
 	rdrEv := rdr.rdrEvents
 	if _, isPartial := cgrEv.APIOpts[utils.PartialOpt]; isPartial {
