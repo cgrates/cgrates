@@ -38,8 +38,9 @@ import (
 // NewNatsER return a new amqp event reader
 func NewNatsER(cfg *config.CGRConfig, cfgIdx int,
 	rdrEvents, partialEvents chan *erEvent, rdrErr chan error,
-	fltrS *engine.FilterS, rdrExit chan struct{}) (_ EventReader, err error) {
+	fltrS *engine.FilterS, rdrExit chan struct{}, connMgr *engine.ConnManager) (_ EventReader, err error) {
 	rdr := &NatsER{
+		connMgr:       connMgr,
 		cgrCfg:        cfg,
 		cfgIdx:        cfgIdx,
 		fltrS:         fltrS,
@@ -66,9 +67,10 @@ func NewNatsER(cfg *config.CGRConfig, cfgIdx int,
 // NatsER implements EventReader interface for amqp message
 type NatsER struct {
 	// sync.RWMutex
-	cgrCfg *config.CGRConfig
-	cfgIdx int // index of config instance within ERsCfg.Readers
-	fltrS  *engine.FilterS
+	cgrCfg  *config.CGRConfig
+	cfgIdx  int // index of config instance within ERsCfg.Readers
+	fltrS   *engine.FilterS
+	connMgr *engine.ConnManager
 
 	rdrEvents     chan *erEvent // channel to dispatch the events created to
 	partialEvents chan *erEvent // channel to dispatch the partial events created to
@@ -139,7 +141,8 @@ func (rdr *NatsER) Serve() (err error) {
 								utils.ERs, string(msg.Data), err.Error()))
 					}
 					if rdr.poster != nil { // post it
-						if err := ees.ExportWithAttempts(context.Background(), rdr.poster, msg.Data, utils.EmptyString); err != nil {
+						if err := ees.ExportWithAttempts(context.Background(), rdr.poster, msg.Data, utils.EmptyString,
+							rdr.connMgr, rdr.cgrCfg.GeneralCfg().DefaultTenant); err != nil {
 							utils.Logger.Warning(
 								fmt.Sprintf("<%s> writing message %s error: %s",
 									utils.ERs, string(msg.Data), err.Error()))

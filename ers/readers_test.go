@@ -36,7 +36,7 @@ func TestNewInvalidReader(t *testing.T) {
 	if len(cfg.ERsCfg().Readers) != 2 {
 		t.Errorf("Expecting: <2>, received: <%+v>", len(cfg.ERsCfg().Readers))
 	}
-	if _, err := NewEventReader(cfg, 1, nil, nil, nil, &engine.FilterS{}, nil); err == nil || err.Error() != "unsupported reader type: <Invalid>" {
+	if _, err := NewEventReader(cfg, 1, nil, nil, nil, &engine.FilterS{}, nil, nil); err == nil || err.Error() != "unsupported reader type: <Invalid>" {
 		t.Errorf("Expecting: <unsupported reader type: <Invalid>>, received: <%+v>", err)
 	}
 }
@@ -61,7 +61,7 @@ func TestNewCsvReader(t *testing.T) {
 		rdrExit:   nil,
 		conReqs:   nil}
 	var expected EventReader = exp
-	if rcv, err := NewEventReader(cfg, 1, nil, nil, nil, fltr, nil); err != nil {
+	if rcv, err := NewEventReader(cfg, 1, nil, nil, nil, fltr, nil, nil); err != nil {
 		t.Errorf("Expecting: <nil>, received: <%+v>", err)
 	} else {
 		// because we use function make to init the channel when we create the EventReader reflect.DeepEqual
@@ -84,11 +84,11 @@ func TestNewKafkaReader(t *testing.T) {
 	if len(cfg.ERsCfg().Readers) != 2 {
 		t.Errorf("Expecting: <2>, received: <%+v>", len(cfg.ERsCfg().Readers))
 	}
-	expected, err := NewKafkaER(cfg, 1, nil, nil, nil, fltr, nil)
+	expected, err := NewKafkaER(cfg, 1, nil, nil, nil, fltr, nil, nil)
 	if err != nil {
 		t.Errorf("Expecting: <nil>, received: <%+v>", err)
 	}
-	if rcv, err := NewEventReader(cfg, 1, nil, nil, nil, fltr, nil); err != nil {
+	if rcv, err := NewEventReader(cfg, 1, nil, nil, nil, fltr, nil, nil); err != nil {
 		t.Errorf("Expecting: <nil>, received: <%+v>", err)
 	} else if !reflect.DeepEqual(expected, rcv) {
 		t.Errorf("Expecting: <%+v>, received: <%+v>", expected, rcv)
@@ -115,7 +115,7 @@ func TestNewSQLReader(t *testing.T) {
 	if err != nil {
 		t.Errorf("Expecting: <nil>, received: <%+v>", err)
 	}
-	if rcv, err := NewEventReader(cfg, 1, nil, nil, nil, fltr, nil); err != nil {
+	if rcv, err := NewEventReader(cfg, 1, nil, nil, nil, fltr, nil, nil); err != nil {
 		t.Errorf("Expecting: <nil>, received: <%+v>", err)
 	} else if !reflect.DeepEqual(expected, rcv) {
 		t.Errorf("Expecting: <%+v>, received: <%+v>", expected, rcv)
@@ -149,7 +149,7 @@ func TestNewFileXMLReader(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	rcv, err := NewEventReader(cfg, 0, nil, nil, nil, fltr, nil)
+	rcv, err := NewEventReader(cfg, 0, nil, nil, nil, fltr, nil, nil)
 	if err != nil {
 		t.Error(err)
 	} else {
@@ -169,7 +169,7 @@ func TestNewFileFWVReader(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	rcv, err := NewEventReader(cfg, 0, nil, nil, nil, fltr, nil)
+	rcv, err := NewEventReader(cfg, 0, nil, nil, nil, fltr, nil, nil)
 	if err != nil {
 		t.Error(nil)
 	} else {
@@ -189,7 +189,7 @@ func TestNewJSONReader(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	rcv, err := NewEventReader(cfg, 0, nil, nil, nil, fltr, nil)
+	rcv, err := NewEventReader(cfg, 0, nil, nil, nil, fltr, nil, nil)
 	if err != nil {
 		t.Error(err)
 	} else {
@@ -219,7 +219,7 @@ func TestNewAMQPReader(t *testing.T) {
 	exp.setOpts(&config.EventReaderOpts{})
 	exp.createPoster()
 	var expected EventReader = exp
-	rcv, err := NewEventReader(cfg, 0, nil, nil, nil, fltr, nil)
+	rcv, err := NewEventReader(cfg, 0, nil, nil, nil, fltr, nil, nil)
 	if err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, rcv) {
@@ -244,7 +244,7 @@ func TestNewAMQPv1Reader(t *testing.T) {
 	exp.Config().Opts = &config.EventReaderOpts{}
 	exp.createPoster()
 	var expected EventReader = exp
-	rcv, err := NewEventReader(cfg, 0, nil, nil, nil, fltr, nil)
+	rcv, err := NewEventReader(cfg, 0, nil, nil, nil, fltr, nil, nil)
 	if err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, rcv) {
@@ -270,7 +270,7 @@ func TestNewS3Reader(t *testing.T) {
 	exp.Config().Opts = &config.EventReaderOpts{}
 	exp.createPoster()
 	var expected EventReader = exp
-	rcv, err := NewEventReader(cfg, 0, nil, nil, nil, fltr, nil)
+	rcv, err := NewEventReader(cfg, 0, nil, nil, nil, fltr, nil, nil)
 	if err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, rcv) {
@@ -307,7 +307,7 @@ func TestNewSQSReader(t *testing.T) {
 	exp.Config().Opts = &config.EventReaderOpts{}
 	exp.createPoster()
 	var expected EventReader = exp
-	rcv, err := NewEventReader(cfg, 0, nil, nil, nil, fltr, nil)
+	rcv, err := NewEventReader(cfg, 0, nil, nil, nil, fltr, nil, nil)
 	exp.session = rcv.(*SQSER).session
 	if err != nil {
 		t.Error(err)

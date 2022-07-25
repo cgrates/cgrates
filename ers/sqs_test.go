@@ -53,7 +53,7 @@ func TestNewSQSER(t *testing.T) {
 		},
 	}
 	rdr, err := NewSQSER(cfg, 0, nil, nil,
-		nil, nil, nil)
+		nil, nil, nil, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -81,7 +81,7 @@ func TestSQSERServeRunDelay0(t *testing.T) {
 		},
 	}
 	rdr, err := NewSQSER(cfg, 0, nil, nil,
-		nil, nil, nil)
+		nil, nil, nil, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -107,7 +107,7 @@ func TestSQSERServe(t *testing.T) {
 		},
 	}
 	rdr, err := NewSQSER(cfg, 0, nil, nil,
-		nil, nil, nil)
+		nil, nil, nil, nil)
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -281,7 +281,7 @@ func exportEventWithExporter(ctx *context.Context, exp EventExporter, connMngr *
 }
 
 func ExportWithAttempts(ctx *context.Context, exp EventExporter, eEv interface{}, key interface{},
-	connMnngr *engine.ConnManager, tnt string) (err error) {
+	connMngr *engine.ConnManager, tnt string) (err error) {
 	if exp.Cfg().FailedPostsDir != utils.MetaNone {
 		defer func() {
 			if err != nil {
@@ -294,16 +294,11 @@ func ExportWithAttempts(ctx *context.Context, exp EventExporter, eEv interface{}
 					APIOpts:   exp.Cfg().Opts.AsMapInterface(),
 				}
 				var reply string
-				if err = connMnngr.Call(ctx, exp.Cfg().EFsConns,
+				if err = connMngr.Call(ctx, exp.Cfg().EFsConns,
 					utils.EfSv1ProcessEvent, args, &reply); err != nil {
 					utils.Logger.Warning(
 						fmt.Sprintf("<%s> Exporter <%s> could not be written with <%s> service because err: <%s>",
 							utils.EEs, exp.Cfg().ID, utils.EFs, err.Error()))
-					/*
-						utils.AddFailedMessage(exp.Cfg().FailedPostsDir, exp.Cfg().ExportPath,
-							exp.Cfg().Type, utils.EEs,
-							eEv, exp.Cfg().Opts.AsMapInterface())
-					*/
 				}
 			}
 		}()

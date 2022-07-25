@@ -35,7 +35,7 @@ type EventReader interface {
 // NewEventReader instantiates the event reader based on configuration at index
 func NewEventReader(cfg *config.CGRConfig, cfgIdx int,
 	rdrEvents, partialEvents chan *erEvent, rdrErr chan error,
-	fltrS *engine.FilterS, rdrExit chan struct{}) (er EventReader, err error) {
+	fltrS *engine.FilterS, rdrExit chan struct{}, connMgr *engine.ConnManager) (er EventReader, err error) {
 	switch cfg.ERsCfg().Readers[cfgIdx].Type {
 	default:
 		err = fmt.Errorf("unsupported reader type: <%s>", cfg.ERsCfg().Readers[cfgIdx].Type)
@@ -46,21 +46,21 @@ func NewEventReader(cfg *config.CGRConfig, cfgIdx int,
 	case utils.MetaFileFWV:
 		return NewFWVFileER(cfg, cfgIdx, rdrEvents, partialEvents, rdrErr, fltrS, rdrExit)
 	case utils.MetaKafkajsonMap:
-		return NewKafkaER(cfg, cfgIdx, rdrEvents, partialEvents, rdrErr, fltrS, rdrExit)
+		return NewKafkaER(cfg, cfgIdx, rdrEvents, partialEvents, rdrErr, fltrS, rdrExit, connMgr)
 	case utils.MetaSQL:
 		return NewSQLEventReader(cfg, cfgIdx, rdrEvents, partialEvents, rdrErr, fltrS, rdrExit)
 	case utils.MetaFileJSON:
 		return NewJSONFileER(cfg, cfgIdx, rdrEvents, partialEvents, rdrErr, fltrS, rdrExit)
 	case utils.MetaAMQPjsonMap:
-		return NewAMQPER(cfg, cfgIdx, rdrEvents, partialEvents, rdrErr, fltrS, rdrExit)
+		return NewAMQPER(cfg, cfgIdx, rdrEvents, partialEvents, rdrErr, fltrS, rdrExit, connMgr)
 	case utils.MetaS3jsonMap:
-		return NewS3ER(cfg, cfgIdx, rdrEvents, partialEvents, rdrErr, fltrS, rdrExit)
+		return NewS3ER(cfg, cfgIdx, rdrEvents, partialEvents, rdrErr, fltrS, rdrExit, connMgr)
 	case utils.MetaSQSjsonMap:
-		return NewSQSER(cfg, cfgIdx, rdrEvents, partialEvents, rdrErr, fltrS, rdrExit)
+		return NewSQSER(cfg, cfgIdx, rdrEvents, partialEvents, rdrErr, fltrS, rdrExit, connMgr)
 	case utils.MetaAMQPV1jsonMap:
-		return NewAMQPv1ER(cfg, cfgIdx, rdrEvents, partialEvents, rdrErr, fltrS, rdrExit)
+		return NewAMQPv1ER(cfg, cfgIdx, rdrEvents, partialEvents, rdrErr, fltrS, rdrExit, connMgr)
 	case utils.MetaNatsjsonMap:
-		return NewNatsER(cfg, cfgIdx, rdrEvents, partialEvents, rdrErr, fltrS, rdrExit)
+		return NewNatsER(cfg, cfgIdx, rdrEvents, partialEvents, rdrErr, fltrS, rdrExit, connMgr)
 	}
 	return
 }

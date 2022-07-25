@@ -75,7 +75,7 @@ func testCheckNatsJetStream(t *testing.T, cfg *config.CGRConfig) {
 	rdrExit = make(chan struct{}, 1)
 	var err error
 	if rdr, err = NewNatsER(cfg, 1, rdrEvents, make(chan *erEvent, 1),
-		rdrErr, new(engine.FilterS), rdrExit); err != nil {
+		rdrErr, new(engine.FilterS), rdrExit, nil); err != nil {
 		t.Fatal(err)
 	}
 
@@ -162,7 +162,7 @@ func testCheckNatsNormal(t *testing.T, cfg *config.CGRConfig) {
 
 	var err error
 	if rdr, err = NewNatsER(cfg, 1, rdrEvents, make(chan *erEvent, 1),
-		rdrErr, new(engine.FilterS), rdrExit); err != nil {
+		rdrErr, new(engine.FilterS), rdrExit, nil); err != nil {
 		t.Fatal(err)
 	}
 

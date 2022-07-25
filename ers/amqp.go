@@ -35,8 +35,9 @@ import (
 // NewAMQPER return a new amqp event reader
 func NewAMQPER(cfg *config.CGRConfig, cfgIdx int,
 	rdrEvents, partialEvents chan *erEvent, rdrErr chan error,
-	fltrS *engine.FilterS, rdrExit chan struct{}) (er EventReader, err error) {
+	fltrS *engine.FilterS, rdrExit chan struct{}, connMgr *engine.ConnManager) (er EventReader, err error) {
 	rdr := &AMQPER{
+		connMgr:       connMgr,
 		cgrCfg:        cfg,
 		cfgIdx:        cfgIdx,
 		fltrS:         fltrS,
@@ -60,9 +61,10 @@ func NewAMQPER(cfg *config.CGRConfig, cfgIdx int,
 // AMQPER implements EventReader interface for amqp message
 type AMQPER struct {
 	// sync.RWMutex
-	cgrCfg *config.CGRConfig
-	cfgIdx int // index of config instance within ERsCfg.Readers
-	fltrS  *engine.FilterS
+	cgrCfg  *config.CGRConfig
+	cfgIdx  int // index of config instance within ERsCfg.Readers
+	fltrS   *engine.FilterS
+	connMgr *engine.ConnManager
 
 	dialURL      string
 	queueID      string
@@ -167,7 +169,8 @@ func (rdr *AMQPER) readLoop(msgChan <-chan amqp.Delivery) {
 							utils.ERs, msg.MessageId, err.Error()))
 				}
 				if rdr.poster != nil { // post it
-					if err := ees.ExportWithAttempts(context.Background(), rdr.poster, msg.Body, utils.EmptyString); err != nil {
+					if err := ees.ExportWithAttempts(context.Background(), rdr.poster, msg.Body, utils.EmptyString,
+						rdr.connMgr, rdr.cgrCfg.GeneralCfg().DefaultTenant); err != nil {
 						utils.Logger.Warning(
 							fmt.Sprintf("<%s> writing message %s error: %s",
 								utils.ERs, msg.MessageId, err.Error()))

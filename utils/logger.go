@@ -29,8 +29,7 @@ import (
 var Logger LoggerInterface
 
 func init() {
-	Logger, _ = NewLogger(MetaStdLog, EmptyString, EmptyString, 0,
-		0, EmptyString, EmptyString, EmptyString)
+	Logger, _ = NewLogger(MetaStdLog, EmptyString, 0)
 }
 
 // log severities following rfc3164
@@ -61,11 +60,8 @@ type LoggerInterface interface {
 	Write(p []byte) (n int, err error)
 }
 
-func NewLogger(loggerType, tenant, nodeID string, logLvl, attempts int, connOpts,
-	topicOpts, fldPostsDir string) (LoggerInterface, error) {
+func NewLogger(loggerType, nodeID string, logLvl int) (LoggerInterface, error) {
 	switch loggerType {
-	case MetaKafkaLog:
-		return NewExportLogger(nodeID, tenant, logLvl, connOpts, topicOpts, attempts, fldPostsDir), nil
 	case MetaStdLog:
 		return NewStdLogger(nodeID, logLvl), nil
 	case MetaSysLog:
