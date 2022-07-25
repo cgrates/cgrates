@@ -55,13 +55,13 @@ const CGRATES_CFG_JSON = `
 	"decimal_precision": 0,									// the precision of the decimal operations
 	"decimal_rounding_mode": "*toNearestEven",				// the rounding mode <*toNearestEven|*toNearestAway|*toZero|*awayFromZero|*toNegativeInf|*toPositiveInf|*toNearestTowardZero>
 	"opts":{												//
-		"*exporterIDs": [					
-			// {
-			// 	"Tenant": "*any",
-			// 	"FilterIDs": [],
-			// 	"Value": [],
-			// },
-		],
+		// "*exporterIDs": [					
+		// 	{
+		// 		"Tenant": "*any",
+		// 		"FilterIDs": [],
+		// 		"Value": [],
+		// 	},
+		// ],
 	},	
 },
 
@@ -295,55 +295,55 @@ const CGRATES_CFG_JSON = `
 	"rates_conns": [],						// connections to RateS
 	"accounts_conns": [],					// connections to AccountS
 	"opts": {								//
-		"*accountS": [						
-			// {
-			// 	"Tenant": "*any",
-			// 	"FilterIDs": [],
-			// 	"Value": false,
-			// },
-		],
-		"*attributeS": [					
-			// {
-			// 	"Tenant": "*any",
-			// 	"FilterIDs": [],
-			// 	"Value": false,
-			// },
-		],
-		"*chargerS": [						
-			// {
-			// 	"Tenant": "*any",
-			// 	"FilterIDs": [],
-			// 	"Value": false,
-			// },
-		],
-		"*eeS": [							
-			// {
-			// 	"Tenant": "*any",
-			// 	"FilterIDs": [],
-			// 	"Value": false,
-			// },
-		],
-		"*rateS": [							
-			// {
-			// 	"Tenant": "*any",
-			// 	"FilterIDs": [],
-			// 	"Value": false,
-			// },
-		],
-		"*statS": [							
-			// {
-			// 	"Tenant": "*any",
-			// 	"FilterIDs": [],
-			// 	"Value": false,
-			// },
-		],
-		"*thresholdS": [					
-			// {
-			// 	"Tenant": "*any",
-			// 	"FilterIDs": [],
-			// 	"Value": false,
-			// },
-		],
+		// "*accountS": [						
+		// 	{
+		// 		"Tenant": "*any",
+		// 		"FilterIDs": [],
+		// 		"Value": false,
+		// 	},
+		// ],
+		// "*attributeS": [					
+		// 	{
+		// 		"Tenant": "*any",
+		// 		"FilterIDs": [],
+		// 		"Value": false,
+		// 	},
+		// ],
+		// "*chargerS": [						
+		// 	{
+		// 		"Tenant": "*any",
+		// 		"FilterIDs": [],
+		// 		"Value": false,
+		// 	},
+		// ],
+		// "*eeS": [							
+		// 	{
+		// 		"Tenant": "*any",
+		// 		"FilterIDs": [],
+		// 		"Value": false,
+		// 	},
+		// ],
+		// "*rateS": [							
+		// 	{
+		// 		"Tenant": "*any",
+		// 		"FilterIDs": [],
+		// 		"Value": false,
+		// 	},
+		// ],
+		// "*statS": [							
+		// 	{
+		// 		"Tenant": "*any",
+		// 		"FilterIDs": [],
+		// 		"Value": false,
+		// 	},
+		// ],
+		// "*thresholdS": [					
+		// 	{
+		// 		"Tenant": "*any",
+		// 		"FilterIDs": [],
+		// 		"Value": false,
+		// 	},
+		// ],
 	},
 },
 
@@ -627,222 +627,222 @@ const CGRATES_CFG_JSON = `
 	"rates_conns": [], 						// connections to RateS
 	"accounts_conns": [],					// connections to AccountS
 	"opts": {
-		"*accounts": [					
-			// {
-			// 	"Tenant": "*any",
-			// 	"FilterIDs": [],
-			// 	"Value": false,
-			// },
-		],
-		"*attributeS": [					
-			// {
-			// 	"Tenant": "*any",
-			// 	"FilterIDs": [],
-			// 	"Value": false,
-			// },
-		],
-		"*cdrS": [						
-			// {
-			// 	"Tenant": "*any",
-			// 	"FilterIDs": [],
-			// 	"Value": false,
-			// },
-		],
-		"*chargerS": [						
-			// {
-			// 	"Tenant": "*any",
-			// 	"FilterIDs": [],
-			// 	"Value": false,
-			// },
-		],
-		"*resourceS": [						
-			// {
-			// 	"Tenant": "*any",
-			// 	"FilterIDs": [],
-			// 	"Value": false,
-			// },
-		],
-		"*routeS": [						
-			// {
-			// 	"Tenant": "*any",
-			// 	"FilterIDs": [],
-			// 	"Value": false,
-			// },
-		],
-		"*statS": [							
-			// {
-			// 	"Tenant": "*any",
-			// 	"FilterIDs": [],
-			// 	"Value": false,
-			// },
-		],
-		"*thresholdS": [					
-			// {
-			// 	"Tenant": "*any",
-			// 	"FilterIDs": [],
-			// 	"Value": false,
-			// },
-		],
-		"*initiate": [					
-			// {
-			// 	"Tenant": "*any",
-			// 	"FilterIDs": [],
-			// 	"Value": false,
-			// },
-		],
-		"*update": [					
-			// {
-			// 	"Tenant": "*any",
-			// 	"FilterIDs": [],
-			// 	"Value": false,
-			// },
-		],
-		"*terminate": [					
-			// {
-			// 	"Tenant": "*any",
-			// 	"FilterIDs": [],
-			// 	"Value": false,
-			// },
-		],
-		"*message": [					
-			// {
-			// 	"Tenant": "*any",
-			// 	"FilterIDs": [],
-			// 	"Value": false,
-			// },
-		],
-		"*attributesDerivedReply": [					
-			// {
-			// 	"Tenant": "*any",
-			// 	"FilterIDs": [],
-			// 	"Value": false,
-			// },
-		],
-		"*blockerError": [					
-			// {
-			// 	"Tenant": "*any",
-			// 	"FilterIDs": [],
-			// 	"Value": false,
-			// },
-		],
-		"*cdrsDerivedReply": [					
-			// {
-			// 	"Tenant": "*any",
-			// 	"FilterIDs": [],
-			// 	"Value": false,
-			// },
-		],
-		"*resourcesAuthorize": [					
-			// {
-			// 	"Tenant": "*any",
-			// 	"FilterIDs": [],
-			// 	"Value": false,
-			// },
-		],
-		"*resourcesAllocate": [					
-			// {
-			// 	"Tenant": "*any",
-			// 	"FilterIDs": [],
-			// 	"Value": false,
-			// },
-		],
-		"*resourcesRelease": [					
-			// {
-			// 	"Tenant": "*any",
-			// 	"FilterIDs": [],
-			// 	"Value": false,
-			// },
-		],
-		"*resourcesDerivedReply": [					
-			// {
-			// 	"Tenant": "*any",
-			// 	"FilterIDs": [],
-			// 	"Value": false,
-			// },
-		],
-		"*routesDerivedReply": [					
-			// {
-			// 	"Tenant": "*any",
-			// 	"FilterIDs": [],
-			// 	"Value": false,
-			// },
-		],
-		"*statsDerivedReply": [					
-			// {
-			// 	"Tenant": "*any",
-			// 	"FilterIDs": [],
-			// 	"Value": false,
-			// },
-		],
-		"*thresholdsDerivedReply": [					
-			// {
-			// 	"Tenant": "*any",
-			// 	"FilterIDs": [],
-			// 	"Value": false,
-			// },
-		],
-		"*maxUsage": [					
-			// {
-			// 	"Tenant": "*any",
-			// 	"FilterIDs": [],
-			// 	"Value": false,
-			// },
-		],
-		"*forceDuration": [					
-			// {
-			// 	"Tenant": "*any",
-			// 	"FilterIDs": [],
-			// 	"Value": false,
-			// },
-		],
-		"*ttl": [					
-			// {
-			// 	"Tenant": "*any",
-			// 	"FilterIDs": [],
-			// 	"Value": "",
-			// },
-		],
-		"*chargeable": [					
-			// {
-			// 	"Tenant": "*any",
-			// 	"FilterIDs": [],
-			// 	"Value": false,
-			// },
-		],
+		// "*accounts": [					
+		// 	{
+		// 		"Tenant": "*any",
+		// 		"FilterIDs": [],
+		// 		"Value": false,
+		// 	},
+		// ],
+		// "*attributeS": [					
+		// 	{
+		// 		"Tenant": "*any",
+		// 		"FilterIDs": [],
+		// 		"Value": false,
+		// 	},
+		// ],
+		// "*cdrS": [						
+		// 	{
+		// 		"Tenant": "*any",
+		// 		"FilterIDs": [],
+		// 		"Value": false,
+		// 	},
+		// ],
+		// "*chargerS": [						
+		// 	{
+		// 		"Tenant": "*any",
+		// 		"FilterIDs": [],
+		// 		"Value": false,
+		// 	},
+		// ],
+		// "*resourceS": [						
+		// 	{
+		// 		"Tenant": "*any",
+		// 		"FilterIDs": [],
+		// 		"Value": false,
+		// 	},
+		// ],
+		// "*routeS": [						
+		// 	{
+		// 		"Tenant": "*any",
+		// 		"FilterIDs": [],
+		// 		"Value": false,
+		// 	},
+		// ],
+		// "*statS": [							
+		// 	{
+		// 		"Tenant": "*any",
+		// 		"FilterIDs": [],
+		// 		"Value": false,
+		// 	},
+		// ],
+		// "*thresholdS": [					
+		// 	{
+		// 		"Tenant": "*any",
+		// 		"FilterIDs": [],
+		// 		"Value": false,
+		// 	},
+		// ],
+		// "*initiate": [					
+		// 	{
+		// 		"Tenant": "*any",
+		// 		"FilterIDs": [],
+		// 		"Value": false,
+		// 	},
+		// ],
+		// "*update": [					
+		// 	{
+		// 		"Tenant": "*any",
+		// 		"FilterIDs": [],
+		// 		"Value": false,
+		// 	},
+		// ],
+		// "*terminate": [					
+		// 	{
+		// 		"Tenant": "*any",
+		// 		"FilterIDs": [],
+		// 		"Value": false,
+		// 	},
+		// ],
+		// "*message": [					
+		// 	{
+		// 		"Tenant": "*any",
+		// 		"FilterIDs": [],
+		// 		"Value": false,
+		// 	},
+		// ],
+		// "*attributesDerivedReply": [					
+		// 	{
+		// 		"Tenant": "*any",
+		// 		"FilterIDs": [],
+		// 		"Value": false,
+		// 	},
+		// ],
+		// "*blockerError": [					
+		// 	{
+		// 		"Tenant": "*any",
+		// 		"FilterIDs": [],
+		// 		"Value": false,
+		// 	},
+		// ],
+		// "*cdrsDerivedReply": [					
+		// 	{
+		// 		"Tenant": "*any",
+		// 		"FilterIDs": [],
+		// 		"Value": false,
+		// 	},
+		// ],
+		// "*resourcesAuthorize": [					
+		// 	{
+		// 		"Tenant": "*any",
+		// 		"FilterIDs": [],
+		// 		"Value": false,
+		// 	},
+		// ],
+		// "*resourcesAllocate": [					
+		// 	{
+		// 		"Tenant": "*any",
+		// 		"FilterIDs": [],
+		// 		"Value": false,
+		// 	},
+		// ],
+		// "*resourcesRelease": [					
+		// 	{
+		// 		"Tenant": "*any",
+		// 		"FilterIDs": [],
+		// 		"Value": false,
+		// 	},
+		// ],
+		// "*resourcesDerivedReply": [					
+		// 	{
+		// 		"Tenant": "*any",
+		// 		"FilterIDs": [],
+		// 		"Value": false,
+		// 	},
+		// ],
+		// "*routesDerivedReply": [					
+		// 	{
+		// 		"Tenant": "*any",
+		// 		"FilterIDs": [],
+		// 		"Value": false,
+		// 	},
+		// ],
+		// "*statsDerivedReply": [					
+		// 	{
+		// 		"Tenant": "*any",
+		// 		"FilterIDs": [],
+		// 		"Value": false,
+		// 	},
+		// ],
+		// "*thresholdsDerivedReply": [					
+		// 	{
+		// 		"Tenant": "*any",
+		// 		"FilterIDs": [],
+		// 		"Value": false,
+		// 	},
+		// ],
+		// "*maxUsage": [					
+		// 	{
+		// 		"Tenant": "*any",
+		// 		"FilterIDs": [],
+		// 		"Value": false,
+		// 	},
+		// ],
+		// "*forceDuration": [					
+		// 	{
+		// 		"Tenant": "*any",
+		// 		"FilterIDs": [],
+		// 		"Value": false,
+		// 	},
+		// ],
+		// "*ttl": [					
+		// 	{
+		// 		"Tenant": "*any",
+		// 		"FilterIDs": [],
+		// 		"Value": "",
+		// 	},
+		// ],
+		// "*chargeable": [					
+		// 	{
+		// 		"Tenant": "*any",
+		// 		"FilterIDs": [],
+		// 		"Value": false,
+		// 	},
+		// ],
 		// "*ttlLastUsage": [					
-			// {
-			// 	"Tenant": "*any",
-			// 	"FilterIDs": [],
-			// 	"Value": "",
-			// },
+		// 	{
+		// 		"Tenant": "*any",
+		// 		"FilterIDs": [],
+		// 		"Value": "",
+		// 	},
 		// ],
 		// "*ttlLastUsed": [					
-			// {
-			// 	"Tenant": "*any",
-			// 	"FilterIDs": [],
-			// 	"Value": "",
-			// },
+		// 	{
+		// 		"Tenant": "*any",
+		// 		"FilterIDs": [],
+		// 		"Value": "",
+		// 	},
 		// ],
-		"*debitInterval": [					
-			// {
-			// 	"Tenant": "*any",
-			// 	"FilterIDs": [],
-			// 	"Value": "",
-			// },
-		],
+		// "*debitInterval": [					
+		// 	{
+		// 		"Tenant": "*any",
+		// 		"FilterIDs": [],
+		// 		"Value": "",
+		// 	},
+		// ],
 		// "*ttlMaxDelay": [					
-			// {
-			// 	"Tenant": "*any",
-			// 	"FilterIDs": [],
-			// 	"Value": "",
-			// },
+		// 	{
+		// 		"Tenant": "*any",
+		// 		"FilterIDs": [],
+		// 		"Value": "",
+		// 	},
 		// ],
 		// "*ttlUsage": [					
-			// {
-			// 	"Tenant": "*any",
-			// 	"FilterIDs": [],
-			// 	"Value": "",
-			// },
+		// 	{
+		// 		"Tenant": "*any",
+		// 		"FilterIDs": [],
+		// 		"Value": "",
+		// 	},
 		// ],
 	},
 },
@@ -950,34 +950,34 @@ const CGRATES_CFG_JSON = `
 	"notexists_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"nested_fields": false,					// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
 	"opts":{								//
-		"*profileIDs": [					
-			// {
-			// 	"Tenant": "*any",
-			// 	"FilterIDs": [],
-			// 	"Value": [],
-			// },
-		],
-		"*processRuns": [					// number of run loops when processing event
-			// {
-			// 	"Tenant": "*any",
-			// 	"FilterIDs": [],
-			// 	"Value": 1,
-			// },
-		],									
-		"*profileRuns": [					// number of runs a profile will process during the event
-			// {
-			// 	"Tenant": "*any",
-			// 	"FilterIDs": [],
-			// 	"Value": 0,
-			// },
-		],									
-		"*profileIgnoreFilters": [ 			// ignore the filters for attributeIDs	
-			// {
-			// 	"Tenant": "*any",
-			// 	"FilterIDs": [],
-			// 	"Value": false,
-			// },
-		],										
+		// "*profileIDs": [					
+		// 	{
+		// 		"Tenant": "*any",
+		// 		"FilterIDs": [],
+		// 		"Value": [],
+		// 	},
+		// ],
+		// "*processRuns": [				// number of run loops when processing event
+		// 	{
+		// 		"Tenant": "*any",
+		// 		"FilterIDs": [],
+		// 		"Value": 1,
+		// 	},
+		// ],									
+		// "*profileRuns": [				// number of runs a profile will process during the event
+		// 	{
+		// 		"Tenant": "*any",
+		// 		"FilterIDs": [],
+		// 		"Value": 0,
+		// 	},
+		// ],									
+		// "*profileIgnoreFilters": [ 		// ignore the filters for attributeIDs	
+		// 	{
+		// 		"Tenant": "*any",
+		// 		"FilterIDs": [],
+		// 		"Value": false,
+		// 	},
+		// ],										
 	},
 },
 
@@ -1007,27 +1007,27 @@ const CGRATES_CFG_JSON = `
 	"notexists_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"nested_fields": false,					// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
 	"opts":{								//
-		"*usageID": [						
-			// {
-			// 	"Tenant": "*any",
-			// 	"FilterIDs": [],
-			// 	"Value": "",
-			// },
-		],
-		"*usageTTL": [						
-			// {
-			// 	"Tenant": "*any",
-			// 	"FilterIDs": [],
-			// 	"Value": "72h",
-			// },
-		],
-		"*units": [							
-			// {
-			// 	"Tenant": "*any",
-			// 	"FilterIDs": [],
-			// 	"Value": 1,
-			// },
-		],
+		// "*usageID": [						
+		// 	{
+		// 		"Tenant": "*any",
+		// 		"FilterIDs": [],
+		// 		"Value": "",
+		// 	},
+		// ],
+		// "*usageTTL": [						
+		// 	{
+		// 		"Tenant": "*any",
+		// 		"FilterIDs": [],
+		// 		"Value": "72h",
+		// 	},
+		// ],
+		// "*units": [							
+		// 	{
+		// 		"Tenant": "*any",
+		// 		"FilterIDs": [],
+		// 		"Value": 1,
+		// 	},
+		// ],
 	},
 },
 
@@ -1045,34 +1045,34 @@ const CGRATES_CFG_JSON = `
 	"notexists_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"nested_fields": false,					// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
 	"opts": {								//
-		"*profileIDs": [						
-			// {
-			// 	"Tenant": "*any",
-			// 	"FilterIDs": [],
-			// 	"Value": [],
-			// },
-		],	
-		"*profileIgnoreFilters": [			// ignore the filters for statIDs
-			// {
-			// 	"Tenant": "*any",
-			// 	"FilterIDs": [],
-			// 	"Value": false,
-			// },
-		],	
-		"*roundingDecimals": [			// ignore the filters for statIDs
-			// {
-			// 	"Tenant": "*any",
-			// 	"FilterIDs": [],
-			// 	"Value": 5,
-			// },
-		],	
-		"*prometheusStatIDs": [
-			// {
-			// 	"Tenant": "*any",
-			// 	"FilterIDs": [],
-			// 	"Value": [],
-			// },
-		],								
+		// "*profileIDs": [						
+		// 	{
+		// 		"Tenant": "*any",
+		// 		"FilterIDs": [],
+		// 		"Value": [],
+		// 	},
+		// ],	
+		// "*profileIgnoreFilters": [		// ignore the filters for statIDs
+		// 	{
+		// 		"Tenant": "*any",
+		// 		"FilterIDs": [],
+		// 		"Value": false,
+		// 	},
+		// ],	
+		// "*roundingDecimals": [			// ignore the filters for statIDs
+		// 	{
+		// 		"Tenant": "*any",
+		// 		"FilterIDs": [],
+		// 		"Value": 5,
+		// 	},
+		// ],	
+		// "*prometheusStatIDs": [
+		// 	{
+		// 		"Tenant": "*any",
+		// 		"FilterIDs": [],
+		// 		"Value": [],
+		// 	},
+		// ],								
 	},								
 },
 
@@ -1089,20 +1089,20 @@ const CGRATES_CFG_JSON = `
 	"nested_fields": false,					// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
 	"actions_conns": [],					// connections to ActionS to execute the actions
 	"opts":{								//
-		"*thresholdsIDs": [					
-			// {
-			// 	"Tenant": "*any",
-			// 	"FilterIDs": [],
-			// 	"Value": [],
-			// },
-		],
-		"*profileIgnoreFilters": [			// ignore the filters for thresholdIDs
-			// {
-			// 	"Tenant": "*any",
-			// 	"FilterIDs": [],
-			// 	"Value": false,
-			// },
-		],									
+		// "*thresholdsIDs": [					
+		// 	{
+		// 		"Tenant": "*any",
+		// 		"FilterIDs": [],
+		// 		"Value": [],
+		// 	},
+		// ],
+		// "*profileIgnoreFilters": [		// ignore the filters for thresholdIDs
+		// 	{
+		// 		"Tenant": "*any",
+		// 		"FilterIDs": [],
+		// 		"Value": false,
+		// 	},
+		// ],									
 	},								
 },
 
@@ -1123,34 +1123,34 @@ const CGRATES_CFG_JSON = `
 	"accounts_conns": [],					// connections to AccountS
 	"default_ratio":1,						// default ratio used in case of *load strategy
 	"opts":{								//
-		"*context": [						
-			// {
-			// 	"Tenant": "*any",
-			// 	"FilterIDs": [],
-			// 	"Value": "*routes",
-			// },
-		],			
-		"*profileCount": [					
-			// {
-			// 	"Tenant": "*any",
-			// 	"FilterIDs": [],
-			// 	"Value": 1,
-			// },
-		],
-		"*ignoreErrors": [					
-			// {
-			// 	"Tenant": "*any",
-			// 	"FilterIDs": [],
-			// 	"Value": false,
-			// },
-		],
-		"*maxCost": [						
-			// {
-			// 	"Tenant": "*any",
-			// 	"FilterIDs": [],
-			// 	"Value": "",
-			// },
-		],
+		// "*context": [						
+		// 	{
+		// 		"Tenant": "*any",
+		// 		"FilterIDs": [],
+		// 		"Value": "*routes",
+		// 	},
+		// ],			
+		// "*profileCount": [					
+		// 	{
+		// 		"Tenant": "*any",
+		// 		"FilterIDs": [],
+		// 		"Value": 1,
+		// 	},
+		// ],
+		// "*ignoreErrors": [					
+		// 	{
+		// 		"Tenant": "*any",
+		// 		"FilterIDs": [],
+		// 		"Value": false,
+		// 	},
+		// ],
+		// "*maxCost": [						
+		// 	{
+		// 		"Tenant": "*any",
+		// 		"FilterIDs": [],
+		// 		"Value": "",
+		// 	},
+		// ],
 		// "*limit": [						
 		// 	{
 		// 		"Tenant": "*any",
@@ -1172,13 +1172,13 @@ const CGRATES_CFG_JSON = `
 		// 		"Value": 1,
 		// 	},
 		// ],
-		"*usage": [							
-			// {
-			// 	"Tenant": "*any",
-			// 	"FilterIDs": [],
-			// 	"Value": "1m",
-			// },
-		],
+		// "*usage": [							
+		// 	{
+		// 		"Tenant": "*any",
+		// 		"FilterIDs": [],
+		// 		"Value": "1m",
+		// 	},
+		// ],
 	},
 },
 
@@ -1544,13 +1544,13 @@ const CGRATES_CFG_JSON = `
 	"ees_conns": [],						    // connections to EEs
 	"cleanup_interval": "1h",					// the interval we clean the db
 	"opts":{												//
-		"*exporterIDs": [					
-			// {
-			// 	"Tenant": "*any",
-			// 	"FilterIDs": [],
-			// 	"Value": [],
-			// },
-		],
+		// "*exporterIDs": [					
+		// 	{
+		// 		"Tenant": "*any",
+		// 		"FilterIDs": [],
+		// 		"Value": [],
+		// 	},
+		// ],
 	},
 },
 
@@ -1577,46 +1577,46 @@ const CGRATES_CFG_JSON = `
 	//"rate_string_indexed_fields": [],		// query indexes based on these fields for faster processing
 	"rate_prefix_indexed_fields": [],		// query indexes based on these fields for faster processing
 	"rate_suffix_indexed_fields": [],		// query indexes based on these fields for faster processing
-	"rate_exists_indexed_fields": [],			// query indexes based on these fields for faster processing
-	"rate_notexists_indexed_fields": [],			// query indexes based on these fields for faster processing
+	"rate_exists_indexed_fields": [],		// query indexes based on these fields for faster processing
+	"rate_notexists_indexed_fields": [],	// query indexes based on these fields for faster processing
 	"rate_nested_fields": false,			// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
     "verbosity": 1000,                      // number of increment iterations allowed
 	"opts":{								//
-		"*profileIDs": [					// select the rate profiles used for cost calculation
-			// {
-			// 	"Tenant": "*any",
-			// 	"FilterIDs": [],
-			// 	"Value": [],
-			// },
-		],	
-		"*startTime": [						// start time used for cost calculation
-			// {
-			// 	"Tenant": "*any",
-			// 	"FilterIDs": [],
-			// 	"Value": "*now",
-			// },
-		],
-		"*usage": [							// usage used for cost calculation
-			// {
-			// 	"Tenant": "*any",
-			// 	"FilterIDs": [],
-			// 	"Value": "1m",
-			// },
-		],
-		"*intervalStart": [					// event interval start
-			// {
-			// 	"Tenant": "*any",
-			// 	"FilterIDs": [],
-			// 	"Value": "0",
-			// },
-		],
-		"*profileIgnoreFilters": [			// ignore the filters for rateProfileIDs 
-			// {
-			// 	"Tenant": "*any",
-			// 	"FilterIDs": [],
-			// 	"Value": false,
-			// },
-		],									
+		// "*profileIDs": [					// select the rate profiles used for cost calculation
+		// 	{
+		// 		"Tenant": "*any",
+		// 		"FilterIDs": [],
+		// 		"Value": [],
+		// 	},
+		// ],	
+		// "*startTime": [					// start time used for cost calculation
+		// 	{
+		// 		"Tenant": "*any",
+		// 		"FilterIDs": [],
+		// 		"Value": "*now",
+		// 	},
+		// ],
+		// "*usage": [						// usage used for cost calculation
+		// 	{
+		// 		"Tenant": "*any",
+		// 		"FilterIDs": [],
+		// 		"Value": "1m",
+		// 	},
+		// ],
+		// "*intervalStart": [				// event interval start
+		// 	{
+		// 		"Tenant": "*any",
+		// 		"FilterIDs": [],
+		// 		"Value": "0",
+		// 	},
+		// ],
+		// "*profileIgnoreFilters": [		// ignore the filters for rateProfileIDs 
+		// 	{
+		// 		"Tenant": "*any",
+		// 		"FilterIDs": [],
+		// 		"Value": false,
+		// 	},
+		// ],									
 	},
 },
 
@@ -1753,27 +1753,27 @@ const CGRATES_CFG_JSON = `
 	"nested_fields": false,					// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
 	"dynaprepaid_actionprofile": [],		//
 	"opts":{	 		
-		"*profileIDs": [				
-			// {
-			// 	"Tenant": "*any",
-			// 	"FilterIDs": [],
-			// 	"Value": [],
-			// },
-		],
-		"*profileIgnoreFilters": [			// ignore the filters for actionProfileIDs
-			// {
-			// 	"Tenant": "*any",
-			// 	"FilterIDs": [],
-			// 	"Value": false,
-			// },
-		],
-		"*posterAttempts": [				// poster attempts for HTTPPost action type	
-		    // {
-			// 	"Tenant": "*any",
-			// 	"FilterIDs": [],
-			// 	"Value": 1,
-			// },
-		],									
+		// "*profileIDs": [				
+		// 	{
+		// 		"Tenant": "*any",
+		// 		"FilterIDs": [],
+		// 		"Value": [],
+		// 	},
+		// ],
+		// "*profileIgnoreFilters": [			// ignore the filters for actionProfileIDs
+		// 	{
+		// 		"Tenant": "*any",
+		// 		"FilterIDs": [],
+		// 		"Value": false,
+		// 	},
+		// ],
+		// "*posterAttempts": [				// poster attempts for HTTPPost action type	
+		//     {
+		// 		"Tenant": "*any",
+		// 		"FilterIDs": [],
+		// 		"Value": 1,
+		// 	},
+		// ],									
 	},
 },
 
@@ -1793,27 +1793,27 @@ const CGRATES_CFG_JSON = `
     "max_iterations": 1000,                 // maximum number of iterations
     "max_usage": "72h",                     // maximum time of usage
 	"opts":{								//	
-		"*profileIDs": [					//
-			// {
-			// 	"Tenant": "*any",
-			// 	"FilterIDs": [],
-			// 	"Value": [],
-			// },
-		],
-		"*usage": [							//
-			// {
-			// 	"Tenant": "*any",
-			// 	"FilterIDs": [],
-			// 	"Value": "72h",
-			// },
-		],
-		"*profileIgnoreFilters": [			// ignore the filters for accountIDs
-			// {
-			// 	"Tenant": "*any",
-			// 	"FilterIDs": [],
-			// 	"Value": false,
-			// },
-		],	
+		// "*profileIDs": [					//
+		// 	{
+		// 		"Tenant": "*any",
+		// 		"FilterIDs": [],
+		// 		"Value": [],
+		// 	},
+		// ],
+		// "*usage": [						//
+		// 	{
+		// 		"Tenant": "*any",
+		// 		"FilterIDs": [],
+		// 		"Value": "72h",
+		// 	},
+		// ],
+		// "*profileIgnoreFilters": [		// ignore the filters for accountIDs
+		// 	{
+		// 		"Tenant": "*any",
+		// 		"FilterIDs": [],
+		// 		"Value": false,
+		// 	},
+		// ],	
 	},
 },
 
