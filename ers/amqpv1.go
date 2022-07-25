@@ -35,8 +35,9 @@ import (
 // NewAMQPv1ER return a new amqpv1 event reader
 func NewAMQPv1ER(cfg *config.CGRConfig, cfgIdx int,
 	rdrEvents, partialEvents chan *erEvent, rdrErr chan error,
-	fltrS *engine.FilterS, rdrExit chan struct{}) (er EventReader, err error) {
+	fltrS *engine.FilterS, rdrExit chan struct{}, connMgr *engine.ConnManager) (er EventReader, err error) {
 	rdr := &AMQPv1ER{
+		connMgr:       connMgr,
 		cgrCfg:        cfg,
 		cfgIdx:        cfgIdx,
 		fltrS:         fltrS,
@@ -61,9 +62,10 @@ func NewAMQPv1ER(cfg *config.CGRConfig, cfgIdx int,
 // AMQPv1ER implements EventReader interface for amqpv1 message
 type AMQPv1ER struct {
 	// sync.RWMutex
-	cgrCfg *config.CGRConfig
-	cfgIdx int // index of config instance within ERsCfg.Readers
-	fltrS  *engine.FilterS
+	cgrCfg  *config.CGRConfig
+	cfgIdx  int // index of config instance within ERsCfg.Readers
+	fltrS   *engine.FilterS
+	connMgr *engine.ConnManager
 
 	queueID string
 
@@ -145,7 +147,8 @@ func (rdr *AMQPv1ER) readLoop(recv *amqpv1.Receiver) (err error) {
 						utils.ERs, err.Error()))
 			}
 			if rdr.poster != nil { // post it
-				if err := ees.ExportWithAttempts(context.Background(), rdr.poster, body, utils.EmptyString); err != nil {
+				if err := ees.ExportWithAttempts(context.Background(), rdr.poster, body, utils.EmptyString, rdr.connMgr,
+					rdr.cgrCfg.GeneralCfg().DefaultTenant); err != nil {
 					utils.Logger.Warning(
 						fmt.Sprintf("<%s> writing message error: %s",
 							utils.ERs, err.Error()))

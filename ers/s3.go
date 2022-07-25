@@ -39,9 +39,10 @@ import (
 // NewS3ER return a new s3 event reader
 func NewS3ER(cfg *config.CGRConfig, cfgIdx int,
 	rdrEvents, partialEvents chan *erEvent, rdrErr chan error,
-	fltrS *engine.FilterS, rdrExit chan struct{}) (er EventReader, err error) {
+	fltrS *engine.FilterS, rdrExit chan struct{}, connMgr *engine.ConnManager) (er EventReader, err error) {
 
 	rdr := &S3ER{
+		connMgr:       connMgr,
 		cgrCfg:        cfg,
 		cfgIdx:        cfgIdx,
 		fltrS:         fltrS,
@@ -63,9 +64,10 @@ func NewS3ER(cfg *config.CGRConfig, cfgIdx int,
 // S3ER implements EventReader interface for s3 message
 type S3ER struct {
 	// sync.RWMutex
-	cgrCfg *config.CGRConfig
-	cfgIdx int // index of config instance within ERsCfg.Readers
-	fltrS  *engine.FilterS
+	cgrCfg  *config.CGRConfig
+	cfgIdx  int // index of config instance within ERsCfg.Readers
+	fltrS   *engine.FilterS
+	connMgr *engine.ConnManager
 
 	rdrEvents     chan *erEvent // channel to dispatch the events created to
 	partialEvents chan *erEvent // channel to dispatch the partial events created to
@@ -247,7 +249,8 @@ func (rdr *S3ER) readMsg(scv *s3.S3, key string) (err error) {
 	}
 
 	if rdr.poster != nil { // post it
-		if err = ees.ExportWithAttempts(context.Background(), rdr.poster, msg, key); err != nil {
+		if err = ees.ExportWithAttempts(context.Background(), rdr.poster, msg, key,
+			rdr.connMgr, rdr.cgrCfg.GeneralCfg().DefaultTenant); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> writing message %s error: %s",
 					utils.ERs, key, err.Error()))

@@ -25,6 +25,7 @@ import (
 	"sync"
 
 	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/segmentio/kafka-go"
@@ -40,8 +41,8 @@ type FailedExportersLogg struct {
 	FailedPostsDir string
 	Module         string
 
-	efsConns []string
 	connMngr *engine.ConnManager
+	cfg      *config.CGRConfig
 }
 
 // AddEvent adds one event
@@ -75,8 +76,8 @@ func (expEv *FailedExportersLogg) ReplayFailedPosts(ctx *context.Context, attemp
 	if err != nil {
 		return
 	}
-	expLogger := utils.NewExportLogger(nodeID, tnt, logLvl,
-		expEv.Path, expEv.Format, attempts, expEv.FailedPostsDir)
+	expLogger := engine.NewExportLogger(nodeID, tnt, logLvl,
+		expEv.connMngr, expEv.cfg)
 	for _, event := range expEv.Events {
 		var content []byte
 		if content, err = utils.ToUnescapedJSON(event); err != nil {
@@ -88,7 +89,7 @@ func (expEv *FailedExportersLogg) ReplayFailedPosts(ctx *context.Context, attemp
 		}); err != nil {
 			var reply string
 			// if there are any errors in kafka, we will post in FailedPostDirectory
-			if err = expEv.connMngr.Call(ctx, expEv.efsConns, utils.EfSv1ProcessEvent,
+			if err = expEv.connMngr.Call(ctx, expEv.cfg.LoggerCfg().EFsConns, utils.EfSv1ProcessEvent,
 				&utils.ArgsFailedPosts{
 					Tenant:    tnt,
 					Path:      expLogger.Writer.Addr.String(),
@@ -98,11 +99,6 @@ func (expEv *FailedExportersLogg) ReplayFailedPosts(ctx *context.Context, attemp
 					APIOpts:   expLogger.GetMeta(),
 				}, &reply); err != nil {
 				return err
-				/*
-					utils.AddFailedMessage(expLogger.FldPostDir, expLogger.Writer.Addr.String(), utils.
-						MetaKafkaLog, utils.Kafka,
-						event, expLogger.GetMeta())
-				*/
 			}
 			return nil
 		}

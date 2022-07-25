@@ -116,7 +116,7 @@ func NewFailoverPosterFromFile(filePath, providerType string, efs *EfS) (failPos
 			connMngr: efs.connMgr,
 		}
 	case utils.Kafka:
-		expEv.efsConns = efs.cfg.LoggerCfg().EFsConns
+		expEv.cfg = efs.cfg
 		expEv.connMngr = efs.connMgr
 		failPoster = expEv
 	}

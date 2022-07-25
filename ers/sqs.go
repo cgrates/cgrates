@@ -39,9 +39,10 @@ import (
 // NewSQSER return a new sqs event reader
 func NewSQSER(cfg *config.CGRConfig, cfgIdx int,
 	rdrEvents, partialEvents chan *erEvent, rdrErr chan error,
-	fltrS *engine.FilterS, rdrExit chan struct{}) (er EventReader, err error) {
+	fltrS *engine.FilterS, rdrExit chan struct{}, connMgr *engine.ConnManager) (er EventReader, err error) {
 
 	rdr := &SQSER{
+		connMgr:       connMgr,
 		cgrCfg:        cfg,
 		cfgIdx:        cfgIdx,
 		fltrS:         fltrS,
@@ -63,9 +64,10 @@ func NewSQSER(cfg *config.CGRConfig, cfgIdx int,
 // SQSER implements EventReader interface for sqs message
 type SQSER struct {
 	// sync.RWMutex
-	cgrCfg *config.CGRConfig
-	cfgIdx int // index of config instance within ERsCfg.Readers
-	fltrS  *engine.FilterS
+	cgrCfg  *config.CGRConfig
+	cfgIdx  int // index of config instance within ERsCfg.Readers
+	fltrS   *engine.FilterS
+	connMgr *engine.ConnManager
 
 	rdrEvents     chan *erEvent // channel to dispatch the events created to
 	partialEvents chan *erEvent // channel to dispatch the partial events created to
@@ -263,7 +265,8 @@ func (rdr *SQSER) readMsg(scv sqsClient, msg *sqs.Message) (err error) {
 	}
 
 	if rdr.poster != nil { // post it
-		if err = ees.ExportWithAttempts(context.Background(), rdr.poster, body, key); err != nil {
+		if err = ees.ExportWithAttempts(context.Background(), rdr.poster, body, key,
+			rdr.connMgr, rdr.cgrCfg.GeneralCfg().DefaultTenant); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> writing message %s error: %s",
 					utils.ERs, key, err.Error()))

@@ -37,9 +37,10 @@ import (
 // NewKafkaER return a new kafka event reader
 func NewKafkaER(cfg *config.CGRConfig, cfgIdx int,
 	rdrEvents, partialEvents chan *erEvent, rdrErr chan error,
-	fltrS *engine.FilterS, rdrExit chan struct{}) (er EventReader, err error) {
+	fltrS *engine.FilterS, rdrExit chan struct{}, connMgr *engine.ConnManager) (er EventReader, err error) {
 
 	rdr := &KafkaER{
+		connMgr:       connMgr,
 		cgrCfg:        cfg,
 		cfgIdx:        cfgIdx,
 		fltrS:         fltrS,
@@ -65,9 +66,10 @@ func NewKafkaER(cfg *config.CGRConfig, cfgIdx int,
 // KafkaER implements EventReader interface for kafka message
 type KafkaER struct {
 	// sync.RWMutex
-	cgrCfg *config.CGRConfig
-	cfgIdx int // index of config instance within ERsCfg.Readers
-	fltrS  *engine.FilterS
+	cgrCfg  *config.CGRConfig
+	cfgIdx  int // index of config instance within ERsCfg.Readers
+	fltrS   *engine.FilterS
+	connMgr *engine.ConnManager
 
 	dialURL string
 	topic   string
@@ -141,7 +143,8 @@ func (rdr *KafkaER) readLoop(r *kafka.Reader) {
 						utils.ERs, string(msg.Key), err.Error()))
 			}
 			if rdr.poster != nil { // post it
-				if err := ees.ExportWithAttempts(context.Background(), rdr.poster, msg.Value, string(msg.Key)); err != nil {
+				if err := ees.ExportWithAttempts(context.Background(), rdr.poster, msg.Value, string(msg.Key),
+					rdr.connMgr, rdr.cgrCfg.GeneralCfg().DefaultTenant); err != nil {
 					utils.Logger.Warning(
 						fmt.Sprintf("<%s> writing message %s error: %s",
 							utils.ERs, string(msg.Key), err.Error()))

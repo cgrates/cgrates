@@ -111,7 +111,6 @@ func TestAttrSProcessEvent(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), utils.AttributeSv1, clientConn)
 	eeS := NewEventExporterS(cfg, filterS, connMgr)
-	// cgrEv := &utils.CGREvent{}
 	if err := eeS.attrSProcessEvent(context.TODO(), cgrEv, []string{}, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
@@ -263,6 +262,14 @@ func TestV1ProcessEvent3(t *testing.T) {
 }
 
 func TestV1ProcessEvent4(t *testing.T) {
+	testMock := &testMockEvent{
+		calls: map[string]func(_ *context.Context, _, _ interface{}) error{
+			utils.EfSv1ProcessEvent: func(_ *context.Context, args, reply interface{}) error {
+				*reply.(*string) = utils.OK
+				return nil
+			},
+		},
+	}
 	cfg := config.NewDefaultCGRConfig()
 	cfg.EEsCfg().Exporters[0].Type = utils.MetaHTTPPost
 	cfg.EEsCfg().Exporters[0].ID = "SQLExporterFull"
@@ -270,12 +277,17 @@ func TestV1ProcessEvent4(t *testing.T) {
 	newIDb := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	newDM := engine.NewDataManager(newIDb, cfg.CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, newDM)
-	eeS := NewEventExporterS(cfg, filterS, nil)
+	connMngr := engine.NewConnManager(cfg)
+	clientConn := make(chan birpc.ClientConnector, 1)
+	clientConn <- testMock
+	connMgr := engine.NewConnManager(cfg)
+	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEFs), utils.EfSv1, clientConn)
+	eeS := NewEventExporterS(cfg, filterS, connMngr)
 	eeS.eesChs = map[string]*ltcache.Cache{
 		utils.MetaHTTPPost: ltcache.NewCache(1,
 			time.Second, false, onCacheEvicted),
 	}
-	newEeS, err := NewEventExporter(cfg.EEsCfg().Exporters[0], cfg, filterS, nil)
+	newEeS, err := NewEventExporter(cfg.EEsCfg().Exporters[0], cfg, filterS, connMngr)
 	if err != nil {
 		t.Error(err)
 	}

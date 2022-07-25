@@ -75,7 +75,7 @@ func TestKafkaER(t *testing.T) {
 	rdrExit = make(chan struct{}, 1)
 
 	if rdr, err = NewKafkaER(cfg, 1, rdrEvents, make(chan *erEvent, 1),
-		rdrErr, new(engine.FilterS), rdrExit); err != nil {
+		rdrErr, new(engine.FilterS), rdrExit, nil); err != nil {
 		t.Fatal(err)
 	}
 	w := kafka.NewWriter(kafka.WriterConfig{
