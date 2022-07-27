@@ -113,9 +113,9 @@ func (el *ExportLogger) call(m string, level int) (err error) {
 		var reply string
 		if err = el.connMgr.Call(context.Background(), el.cfg.LoggerCfg().EFsConns,
 			utils.EfSv1ProcessEvent, args, &reply); err != nil {
-			utils.Logger.Warning(
-				fmt.Sprintf("<%s> Exporter could not writte failed event with <%s> service because err: <%s>",
-					utils.Logger, utils.EFs, err.Error()))
+			/* utils.Logger.Warning(
+			fmt.Sprintf("<%s> Exporter could not writte failed event with <%s> service because err: <%s>",
+				utils.Logger, utils.EFs, err.Error())) */
 		}
 		// also the content should be printed as a stdout logger type
 		return utils.ErrLoggerChanged

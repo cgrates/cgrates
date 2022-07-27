@@ -19,6 +19,9 @@ along with this program.  If not, see <http://.gnu.org/licenses/>
 package efs
 
 import (
+	"os"
+	"path"
+	"strings"
 	"sync"
 
 	"github.com/cgrates/birpc/context"
@@ -64,7 +67,7 @@ func (efs *EfS) V1ProcessEvent(ctx *context.Context, args *utils.ArgsFailedPosts
 		if _, has := args.APIOpts[utils.SQSQueueID]; has {
 			sqsQueueID = utils.IfaceAsString(args.APIOpts[utils.SQSQueueID])
 		}
-		if _, has := args.APIOpts[kafkaTopic]; has {
+		if _, has := args.APIOpts[utils.KafkaTopic]; has {
 			kafkaTopic = utils.IfaceAsString(args.APIOpts[utils.KafkaTopic])
 		}
 		if qID := utils.FirstNonEmpty(amqpQueueID, s3BucketID,
@@ -85,18 +88,66 @@ func (efs *EfS) V1ProcessEvent(ctx *context.Context, args *utils.ArgsFailedPosts
 			Format:         format,
 			Opts:           args.APIOpts,
 			Module:         args.Module,
-			FailedPostsDir: args.FailedDir,
+			FailedPostsDir: utils.FirstNonEmpty(args.FailedDir, efs.cfg.EFsCfg().FailedPostsDir),
 		}
 		failedPostCache.Set(key, failedPost, nil)
 	}
 	failedPost.AddEvent(args.Event)
+	*reply = utils.OK
 	return nil
 }
 
-type ArgsReplayFailedPosts struct {
-	Tenant               string
-	TypeProvider         string
-	FailedRequestsInDir  *string  // if defined it will be our source of requests to be replayed
-	FailedRequestsOutDir *string  // if defined it will become our destination for files failing to be replayed, *none to be discarded
-	Modules              []string // list of modules for which replay the requests, nil for all
+// V1ReplayEvents will read the Events from gob files that were failed to be exported and try to re-export them again.
+func (efS *EfS) V1ReplayEvents(ctx *context.Context, args *utils.ArgsReplayFailedPosts, reply *string) error {
+	failedPostsDir := efS.cfg.EFsCfg().FailedPostsDir
+	if args.FailedRequestsInDir != nil && *args.FailedRequestsInDir != utils.EmptyString {
+		failedPostsDir = *args.FailedRequestsInDir
+	}
+	failedOutDir := failedPostsDir
+	if args.FailedRequestsOutDir != nil && *args.FailedRequestsOutDir != utils.EmptyString {
+		failedOutDir = *args.FailedRequestsOutDir
+	}
+	// check all the files in the FailedPostsInDirectory
+	filesInDir, err := os.ReadDir(failedPostsDir)
+	if err != nil {
+		return err
+	}
+	if len(filesInDir) == 0 {
+		return utils.ErrNotFound
+	}
+	// check every file and check if any of them match the modules
+	for _, file := range filesInDir {
+		if len(args.Modules) != 0 {
+			var allowedModule bool
+			for _, module := range args.Modules {
+				if strings.HasPrefix(file.Name(), module) {
+					allowedModule = true
+					break
+				}
+			}
+			if !allowedModule {
+				continue
+			}
+		}
+		filePath := path.Join(failedPostsDir, file.Name())
+		var expEv FailoverPoster
+		if expEv, err = NewFailoverPosterFromFile(filePath, args.TypeProvider, efS); err != nil {
+			return err
+		}
+		// check if the failed out dir path is the same as the same in dir in order to export again in case of failure
+		failoverPath := utils.MetaNone
+		if failedOutDir != utils.MetaNone {
+			failoverPath = path.Join(failedOutDir, file.Name())
+		}
+
+		err = expEv.ReplayFailedPosts(ctx, efS.cfg.EFsCfg().PosterAttempts, args.Tenant)
+		if err != nil && failedOutDir != utils.MetaNone { // Got error from HTTPPoster could be that content was not written, we need to write it ourselves
+			if err = WriteToFile(failoverPath, expEv); err != nil {
+				return utils.NewErrServerError(err)
+			}
+		}
+
+	}
+	*reply = utils.OK
+	return nil
 }

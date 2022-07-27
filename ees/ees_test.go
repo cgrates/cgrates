@@ -265,12 +265,13 @@ func TestV1ProcessEvent4(t *testing.T) {
 	testMock := &testMockEvent{
 		calls: map[string]func(_ *context.Context, _, _ interface{}) error{
 			utils.EfSv1ProcessEvent: func(_ *context.Context, args, reply interface{}) error {
-				*reply.(*string) = utils.OK
-				return nil
+				*reply.(*string) = utils.EmptyString
+				return utils.ErrUnsupportedFormat
 			},
 		},
 	}
 	cfg := config.NewDefaultCGRConfig()
+	cfg.EFsCfg().Enabled = true
 	cfg.EEsCfg().Exporters[0].Type = utils.MetaHTTPPost
 	cfg.EEsCfg().Exporters[0].ID = "SQLExporterFull"
 	cfg.EEsCfg().Exporters[0].Synchronous = true
@@ -280,8 +281,7 @@ func TestV1ProcessEvent4(t *testing.T) {
 	connMngr := engine.NewConnManager(cfg)
 	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- testMock
-	connMgr := engine.NewConnManager(cfg)
-	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEFs), utils.EfSv1, clientConn)
+	connMngr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEFs), utils.EfSv1, clientConn)
 	eeS := NewEventExporterS(cfg, filterS, connMngr)
 	eeS.eesChs = map[string]*ltcache.Cache{
 		utils.MetaHTTPPost: ltcache.NewCache(1,

@@ -71,7 +71,7 @@ func (efServ *ExportFailoverService) Start(ctx *context.Context, _ context.Cance
 	efServ.efS = efs.NewEfs(efServ.cfg, efServ.connMgr)
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.EFs))
 	efServ.stopChan = make(chan struct{})
-	efServ.srv, _ = birpc.NewService(apis.NewEfSv1(efServ.efS, efServ.cfg), utils.EmptyString, false)
+	efServ.srv, _ = birpc.NewService(apis.NewEfSv1(efServ.efS), utils.EmptyString, false)
 	efServ.server.RpcRegister(efServ.srv)
 	efServ.Unlock()
 	return
