@@ -29,6 +29,7 @@ import (
 func TestPopulateCostForRoutesConnRefused(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	connMgr := NewConnManager(cfg)
+	fltrS := NewFilterS(cfg, connMgr, nil)
 	routes := map[string]*RouteWithWeight{
 		"RW": {
 			Route: &Route{
@@ -49,7 +50,7 @@ func TestPopulateCostForRoutesConnRefused(t *testing.T) {
 	}
 	extraOpts := &optsGetRoutes{}
 	cfg.RouteSCfg().RateSConns = []string{"*localhost"}
-	_, err := populateCostForRoutes(context.Background(), cfg, connMgr, routes, ev, extraOpts)
+	_, err := populateCostForRoutes(context.Background(), cfg, connMgr, fltrS, routes, ev, extraOpts)
 	errExpect := "RATES_ERROR:dial tcp 127.0.0.1:2012: connect: connection refused"
 	if err.Error() != errExpect {
 		t.Errorf("Expected %v\n but received %v", errExpect, err)

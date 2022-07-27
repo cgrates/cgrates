@@ -22,17 +22,24 @@ import (
 	"fmt"
 
 	"github.com/cgrates/birpc/context"
+	"github.com/ericlagergren/decimal"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
-func populateCostForRoutes(ctx *context.Context, cfg *config.CGRConfig,
-	connMgr *ConnManager, routes map[string]*RouteWithWeight,
-	ev *utils.CGREvent, extraOpts *optsGetRoutes) (sortedRoutes []*SortedRoute, err error) {
+func populateCostForRoutes(ctx *context.Context, cfg *config.CGRConfig, connMgr *ConnManager,
+	fltrS *FilterS, routes map[string]*RouteWithWeight, ev *utils.CGREvent,
+	extraOpts *optsGetRoutes) (sortedRoutes []*SortedRoute, err error) {
 	if len(cfg.RouteSCfg().RateSConns) == 0 {
 		return nil, utils.NewErrMandatoryIeMissing("connIDs")
 	}
+	var usage *decimal.Big
+	if usage, err = GetDecimalBigOpts(ctx, ev.Tenant, ev, fltrS, cfg.RouteSCfg().Opts.Usage,
+		config.RoutesUsageDftOpt, utils.OptsRoutesUsage, utils.MetaUsage); err != nil {
+		return
+	}
+	ev.APIOpts[utils.MetaUsage] = usage
 	sortedRoutes = make([]*SortedRoute, 0, len(routes))
 	for _, route := range routes {
 		if len(route.RateProfileIDs) == 0 && len(route.AccountIDs) == 0 {
@@ -121,20 +128,21 @@ func populateCostForRoutes(ctx *context.Context, cfg *config.CGRConfig,
 	return
 }
 
-func NewHighestCostSorter(cfg *config.CGRConfig, connMgr *ConnManager) *HightCostSorter {
-	return &HightCostSorter{cfg: cfg, connMgr: connMgr}
+func NewHighestCostSorter(cfg *config.CGRConfig, connMgr *ConnManager, fltrS *FilterS) *HightCostSorter {
+	return &HightCostSorter{cfg: cfg, connMgr: connMgr, fltrS: fltrS}
 }
 
 // HightCostSorter sorts routes based on their cost
 type HightCostSorter struct {
 	cfg     *config.CGRConfig
 	connMgr *ConnManager
+	fltrS   *FilterS
 }
 
 func (hcs *HightCostSorter) SortRoutes(ctx *context.Context, prflID string, routes map[string]*RouteWithWeight,
 	ev *utils.CGREvent, extraOpts *optsGetRoutes) (sortedRoutes *SortedRoutes, err error) {
 	var sRoutes []*SortedRoute
-	if sRoutes, err = populateCostForRoutes(ctx, hcs.cfg, hcs.connMgr, routes, ev, extraOpts); err != nil {
+	if sRoutes, err = populateCostForRoutes(ctx, hcs.cfg, hcs.connMgr, hcs.fltrS, routes, ev, extraOpts); err != nil {
 		return
 	}
 
@@ -147,20 +155,21 @@ func (hcs *HightCostSorter) SortRoutes(ctx *context.Context, prflID string, rout
 	return
 }
 
-func NewLeastCostSorter(cfg *config.CGRConfig, connMgr *ConnManager) *LeastCostSorter {
-	return &LeastCostSorter{cfg: cfg, connMgr: connMgr}
+func NewLeastCostSorter(cfg *config.CGRConfig, connMgr *ConnManager, fltrS *FilterS) *LeastCostSorter {
+	return &LeastCostSorter{cfg: cfg, connMgr: connMgr, fltrS: fltrS}
 }
 
 // LeastCostSorter sorts routes based on their cost
 type LeastCostSorter struct {
 	cfg     *config.CGRConfig
 	connMgr *ConnManager
+	fltrS   *FilterS
 }
 
 func (lcs *LeastCostSorter) SortRoutes(ctx *context.Context, prflID string, routes map[string]*RouteWithWeight,
 	ev *utils.CGREvent, extraOpts *optsGetRoutes) (sortedRoutes *SortedRoutes, err error) {
 	var sRoutes []*SortedRoute
-	if sRoutes, err = populateCostForRoutes(ctx, lcs.cfg, lcs.connMgr, routes, ev, extraOpts); err != nil {
+	if sRoutes, err = populateCostForRoutes(ctx, lcs.cfg, lcs.connMgr, lcs.fltrS, routes, ev, extraOpts); err != nil {
 		return
 	}
 	sortedRoutes = &SortedRoutes{
