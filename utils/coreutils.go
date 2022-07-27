@@ -789,6 +789,14 @@ type ArgsFailedPosts struct {
 	APIOpts   map[string]interface{} // Specially for the meta
 }
 
+type ArgsReplayFailedPosts struct {
+	Tenant               string
+	TypeProvider         string
+	FailedRequestsInDir  *string  // if defined it will be our source of requests to be replayed
+	FailedRequestsOutDir *string  // if defined it will become our destination for files failing to be replayed, *none to be discarded
+	Modules              []string // list of modules for which replay the requests, nil for all
+}
+
 // GetIndexesArg the API argumets to specify an index
 type GetIndexesArg struct {
 	IdxItmType string

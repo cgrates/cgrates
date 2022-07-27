@@ -518,7 +518,7 @@
 			"export_path": "localhost:9092",			
 			"concurrent_requests": 0,							
 			"opts": {
-				"kafkaTopic": "TutorialTopic"						
+				"kafkaTopic": "cgrates"						
 			},												
 			"timezone": "",										
 			"filters": [],										
@@ -532,6 +532,11 @@
 			"failed_posts_dir": "/var/spool/cgrates/failed_posts"
 		}
 	]
+},
+
+
+"efs": {                                                    // ExportFailover service
+    "enabled": true,						                // starts the EventReader service: <true|false>
 },
 
 

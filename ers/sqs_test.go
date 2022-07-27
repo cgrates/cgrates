@@ -20,14 +20,17 @@ package ers
 
 import (
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/sqs"
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/ees"
+	"github.com/cgrates/cgrates/efs"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -511,7 +514,15 @@ func TestSQSERReadMsgError2(t *testing.T) {
 
 func TestSQSERReadMsgError3(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	cfg.EFsCfg().Enabled = true
+	cfg.EEsCfg().Enabled = true
+	connMngr := engine.NewConnManager(cfg)
+	efSConn := make(chan birpc.ClientConnector, 1)
+	efsSrv, _ := birpc.NewServiceWithMethodsRename(efs.NewEfs(cfg, connMngr), utils.EfSv1, true, func(key string) (newKey string) { return strings.TrimPrefix(key, utils.V1Prfx) }) // update the name of the functions
+	efSConn <- efsSrv
+	connMngr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEFs), utils.EfSv1, efSConn)
 	rdr := &SQSER{
+		connMgr:   connMngr,
 		cgrCfg:    cfg,
 		cfgIdx:    0,
 		fltrS:     new(engine.FilterS),
@@ -528,6 +539,7 @@ func TestSQSERReadMsgError3(t *testing.T) {
 		poster: ees.NewSQSee(&config.EventExporterCfg{
 			ExportPath: "url",
 			Attempts:   1,
+			EFsConns:   []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEFs)},
 			Opts:       &config.EventExporterOpts{},
 		}, nil),
 	}

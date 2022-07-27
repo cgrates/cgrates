@@ -66,7 +66,7 @@ type ChargerService struct {
 	srvDep   map[string]*sync.WaitGroup
 }
 
-// Start should handle the sercive start
+// Start should handle the service start
 func (chrS *ChargerService) Start(ctx *context.Context, _ context.CancelFunc) (err error) {
 	if chrS.IsRunning() {
 		return utils.ErrServiceAlreadyRunning

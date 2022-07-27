@@ -263,7 +263,6 @@ func (rdr *SQSER) readMsg(scv sqsClient, msg *sqs.Message) (err error) {
 		rdr.rdrErr <- err
 		return
 	}
-
 	if rdr.poster != nil { // post it
 		if err = ees.ExportWithAttempts(context.Background(), rdr.poster, body, key,
 			rdr.connMgr, rdr.cgrCfg.GeneralCfg().DefaultTenant); err != nil {
@@ -273,7 +272,6 @@ func (rdr *SQSER) readMsg(scv sqsClient, msg *sqs.Message) (err error) {
 			return
 		}
 	}
-
 	return
 }
 
