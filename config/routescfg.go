@@ -23,15 +23,18 @@ import (
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/ericlagergren/decimal"
 )
 
-var RoutesProfileCountDftOpt = utils.IntPointer(1)
+var (
+	RoutesProfileCountDftOpt = utils.IntPointer(1)
+	RoutesUsageDftOpt        = decimal.New(int64(time.Minute), 0)
+)
 
 const (
 	RoutesContextDftOpt      = "*routes"
 	RoutesIgnoreErrorsDftOpt = false
 	RoutesMaxCostDftOpt      = utils.EmptyString
-	RoutesUsageDftOpt        = time.Minute
 )
 
 type RoutesOpts struct {
