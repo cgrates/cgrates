@@ -76,7 +76,7 @@ func (expEv *FailedExportersLogg) ReplayFailedPosts(ctx *context.Context, attemp
 	if err != nil {
 		return
 	}
-	expLogger := engine.NewExportLogger(nodeID, tnt, logLvl,
+	expLogger := engine.NewExportLogger(ctx, nodeID, tnt, logLvl,
 		expEv.connMngr, expEv.cfg)
 	for _, event := range expEv.Events {
 		var content []byte
