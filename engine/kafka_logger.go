@@ -20,6 +20,7 @@ package engine
 
 import (
 	"fmt"
+	"log"
 	"log/syslog"
 	"sync"
 	"time"
@@ -30,11 +31,11 @@ import (
 	"github.com/segmentio/kafka-go"
 )
 
-func NewLogger(loggerType, tnt, nodeID string,
+func NewLogger(ctx *context.Context, loggerType, tnt, nodeID string,
 	connMgr *ConnManager, cfg *config.CGRConfig) (utils.LoggerInterface, error) {
 	switch loggerType {
 	case utils.MetaKafkaLog:
-		return NewExportLogger(nodeID, tnt, cfg.LoggerCfg().Level, connMgr, cfg), nil
+		return NewExportLogger(ctx, nodeID, tnt, cfg.LoggerCfg().Level, connMgr, cfg), nil
 	case utils.MetaStdLog, utils.MetaSysLog:
 		return utils.NewLogger(loggerType, nodeID, cfg.LoggerCfg().Level)
 	default:
@@ -47,6 +48,7 @@ type ExportLogger struct {
 	sync.Mutex
 	cfg     *config.CGRConfig
 	connMgr *ConnManager
+	ctx     *context.Context
 
 	LogLevel   int
 	FldPostDir string
@@ -56,9 +58,10 @@ type ExportLogger struct {
 }
 
 // NewExportLogger will export loggers to kafka
-func NewExportLogger(nodeID, tenant string, level int,
+func NewExportLogger(ctx *context.Context, nodeID, tenant string, level int,
 	connMgr *ConnManager, cfg *config.CGRConfig) (el *ExportLogger) {
 	el = &ExportLogger{
+		ctx:        ctx,
 		connMgr:    connMgr,
 		cfg:        cfg,
 		LogLevel:   level,
@@ -97,7 +100,7 @@ func (el *ExportLogger) call(m string, level int) (err error) {
 	if content, err = utils.ToUnescapedJSON(eventExport); err != nil {
 		return
 	}
-	if err = el.Writer.WriteMessages(context.Background(), kafka.Message{
+	if err = el.Writer.WriteMessages(el.ctx, kafka.Message{
 		Key:   []byte(utils.GenUUID()),
 		Value: content,
 	}); err != nil {
@@ -111,8 +114,9 @@ func (el *ExportLogger) call(m string, level int) (err error) {
 			APIOpts:   el.GetMeta(),
 		}
 		var reply string
-		if err = el.connMgr.Call(context.Background(), el.cfg.LoggerCfg().EFsConns,
+		if err = el.connMgr.Call(el.ctx, el.cfg.LoggerCfg().EFsConns,
 			utils.EfSv1ProcessEvent, args, &reply); err != nil {
+			log.Printf("err la sefprocessEvent: %v", err)
 			/* utils.Logger.Warning(
 			fmt.Sprintf("<%s> Exporter could not writte failed event with <%s> service because err: <%s>",
 				utils.Logger, utils.EFs, err.Error())) */

@@ -23,7 +23,6 @@ import (
 	"io"
 	"os"
 	"path"
-	"runtime"
 	"runtime/pprof"
 	"sync"
 	"time"
@@ -106,6 +105,7 @@ type CGREngine struct {
 	coreS  *CoreService
 	cacheS *CacheService
 	ldrs   *LoaderService
+	efs    *ExportFailoverService
 
 	// chans (need to move this as services)
 	iFilterSCh      chan *engine.FilterS
@@ -212,6 +212,8 @@ func (cgr *CGREngine) InitServices(httpPrfPath string, cpuPrfFl io.Closer, memPr
 	cgr.ldrs = NewLoaderService(cgr.cfg, cgr.dmS, cgr.iFilterSCh, cgr.server,
 		iLoaderSCh, cgr.cM, cgr.anzS, cgr.srvDep)
 
+	cgr.efs = NewExportFailoverService(cgr.cfg, cgr.cM, iEFsCh, cgr.server, cgr.srvDep)
+
 	cgr.srvManager.AddServices(cgr.gvS, cgr.coreS, cgr.cacheS,
 		cgr.ldrs, cgr.anzS, dspS, cgr.dmS,
 		NewAdminSv1Service(cgr.cfg, cgr.dmS, cgr.iFilterSCh, cgr.server,
@@ -252,7 +254,6 @@ func (cgr *CGREngine) InitServices(httpPrfPath string, cpuPrfFl io.Closer, memPr
 		NewActionService(cgr.cfg, cgr.dmS, cgr.cacheS, cgr.iFilterSCh, cgr.cM, cgr.server, iActionSCh, cgr.anzS, cgr.srvDep),
 		NewAccountService(cgr.cfg, cgr.dmS, cgr.cacheS, cgr.iFilterSCh, cgr.cM, cgr.server, iAccountSCh, cgr.anzS, cgr.srvDep),
 		NewTPeService(cgr.cfg, cgr.cM, cgr.dmS, cgr.server, cgr.srvDep),
-		NewExportFailoverService(cgr.cfg, cgr.cM, iEFsCh, cgr.server, cgr.srvDep),
 	)
 
 	return
@@ -268,6 +269,13 @@ func (cgr *CGREngine) StartServices(ctx *context.Context, shtDw context.CancelFu
 	if err = cgr.gvS.Start(ctx, shtDw); err != nil {
 		cgr.shdWg.Done()
 		return
+	}
+	if cgr.efs.ShouldRun() { // efs checking first beacause of loggers
+		cgr.shdWg.Add(1)
+		if err = cgr.efs.Start(ctx, shtDw); err != nil {
+			cgr.shdWg.Done()
+			return
+		}
 	}
 	if cgr.dmS.ShouldRun() { // Some services can run without db, ie:  ERs
 		cgr.shdWg.Add(1)
@@ -354,7 +362,7 @@ func (cgr *CGREngine) Init(ctx *context.Context, shtDw context.CancelFunc, flags
 	}
 
 	// init syslog
-	if utils.Logger, err = engine.NewLogger(
+	if utils.Logger, err = engine.NewLogger(ctx,
 		utils.FirstNonEmpty(*flags.SysLogger, cgr.cfg.LoggerCfg().Type),
 		cgr.cfg.GeneralCfg().DefaultTenant,
 		cgr.cfg.GeneralCfg().NodeID,
@@ -362,7 +370,7 @@ func (cgr *CGREngine) Init(ctx *context.Context, shtDw context.CancelFunc, flags
 		return fmt.Errorf("Could not initialize syslog connection, err: <%s>", err)
 	}
 	efs.SetFailedPostCacheTTL(cgr.cfg.EFsCfg().FailedPostsTTL) // init failedPosts to posts loggers/exporters in case of failing
-	utils.Logger.Info(fmt.Sprintf("<CoreS> starting version <%s><%s>", vers, runtime.Version()))
+	//utils.Logger.Info(fmt.Sprintf("<CoreS> starting version <%s><%s>", vers, runtime.Version()))
 	cgr.cfg.LazySanityCheck()
 
 	return cgr.InitServices(*flags.HttpPrfPath, cpuPrfF, *flags.MemPrfDir, memPrfStop)

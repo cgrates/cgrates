@@ -30,7 +30,6 @@ import (
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/efs"
 	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -52,7 +51,7 @@ type ExportFailoverService struct {
 // NewExportFailoverService is the constructor for the TpeService
 func NewExportFailoverService(cfg *config.CGRConfig, connMgr *engine.ConnManager,
 	intConnChan chan birpc.ClientConnector,
-	server *cores.Server, srvDep map[string]*sync.WaitGroup) servmanager.Service {
+	server *cores.Server, srvDep map[string]*sync.WaitGroup) *ExportFailoverService {
 	return &ExportFailoverService{
 		cfg:         cfg,
 		server:      server,
