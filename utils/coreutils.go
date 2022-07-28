@@ -483,7 +483,9 @@ func copyFile(rc io.ReadCloser, path string, fm os.FileMode) (err error) {
 func Fib() func() int {
 	a, b := 0, 1
 	return func() int {
-		a, b = b, a+b
+		if b > 0 {
+			a, b = b, a+b
+		}
 		return a
 	}
 }
@@ -493,7 +495,12 @@ func Fib() func() int {
 func FibDuration(durationUnit, maxDuration time.Duration) func() time.Duration {
 	fib := Fib()
 	return func() time.Duration {
-		fibNrAsDuration := time.Duration(fib()) * durationUnit
+		fibNrAsDuration := time.Duration(fib())
+		if fibNrAsDuration > (AbsoluteMaxDuration / durationUnit) { // check if the current fibonacci nr. in the sequence would exceed the absolute maximum duration if multiplied by the duration unit value
+			fibNrAsDuration = AbsoluteMaxDuration
+		} else {
+			fibNrAsDuration *= durationUnit
+		}
 		if maxDuration > 0 && maxDuration < fibNrAsDuration {
 			return maxDuration
 		}
