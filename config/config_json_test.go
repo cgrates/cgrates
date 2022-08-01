@@ -2347,15 +2347,7 @@ func TestDfActionSJsonCfg(t *testing.T) {
 		Notexists_indexed_fields:  &[]string{},
 		Nested_fields:             utils.BoolPointer(false),
 		Dynaprepaid_actionprofile: &[]string{},
-<<<<<<< HEAD
-		Opts: &ActionsOptsJson{
-			ProfileIDs:           []*utils.DynamicStringSliceOpt{},
-			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
-			PosterAttempts:       []*utils.DynamicIntOpt{},
-		},
-=======
 		Opts:                      &ActionsOptsJson{},
->>>>>>> ad31c20f8 (Stop initializing json opts in config unless specifically set)
 	}
 	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
 	if err != nil {
