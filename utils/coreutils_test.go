@@ -1661,3 +1661,28 @@ func TestAPITPDataGetPaginateOpts(t *testing.T) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 }
+
+func TestCoreUtilsFibSeqNrOverflow(t *testing.T) {
+	fib := Fib()
+	for i := 0; i < 92; i++ { // the 93rd fibonacci number in the sequence would normally overflow
+		fib()
+	}
+	exp := fib()
+	for i := 0; i < 100; i++ {
+		if rcv := fib(); rcv != exp {
+			t.Errorf("expected: <%+v>, \nreceived: <%+v>", exp, rcv)
+		}
+	}
+}
+
+func TestCoreUtilsFibDurationSeqNrOverflow(t *testing.T) {
+	fib := FibDuration(time.Second, 0)
+	for i := 0; i < 49; i++ { // the 50th fibonacci number in the sequence would normally overflow when multiplied with time.Second
+		fib()
+	}
+	for i := 0; i < 100; i++ {
+		if rcv := fib(); rcv != AbsoluteMaxDuration {
+			t.Errorf("expected: <%+v>, \nreceived: <%+v>", AbsoluteMaxDuration, rcv)
+		}
+	}
+}
