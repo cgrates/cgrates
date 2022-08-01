@@ -479,11 +479,11 @@ func copyFile(rc io.ReadCloser, path string, fm os.FileMode) (err error) {
 	return
 }
 
-// Fib returns successive Fibonacci numbers
+// Fib returns successive Fibonacci numbers.
 func Fib() func() int {
 	a, b := 0, 1
 	return func() int {
-		if b > 0 {
+		if b > 0 { // only increment Fibonacci numbers while b doesn't overflow
 			a, b = b, a+b
 		}
 		return a
