@@ -62,6 +62,7 @@ var (
 		testAnalyzerSV1Search2,
 		testAnalyzerSV1SearchWithContentFilters,
 		testAnalyzerSV1BirPCSession,
+		testAnalyzerSv1MultipleQuery,
 		testAnalyzerSKillEngine,
 	}
 )
@@ -231,7 +232,7 @@ func testAnalyzerSChargerSv1ProcessEvent(t *testing.T) {
 
 func testAnalyzerSV1Search(t *testing.T) {
 	// need to wait in order for the log gorutine to execute
-	time.Sleep(10 * time.Millisecond)
+	time.Sleep(50 * time.Millisecond)
 	var result []map[string]interface{}
 	if err := anzRPC.Call(utils.AnalyzerSv1StringQuery, &QueryArgs{HeaderFilters: `+RequestEncoding:\*internal +RequestMethod:AttributeSv1\.ProcessEvent`}, &result); err != nil {
 		t.Error(err)
@@ -269,7 +270,7 @@ func testAnalyzerSV1BirPCSession(t *testing.T) {
 		err.Error() != utils.ErrPartiallyExecuted.Error() {
 		t.Fatal(err)
 	}
-	time.Sleep(10 * time.Second)
+	time.Sleep(50 * time.Millisecond)
 	var result []map[string]interface{}
 	if err := anzRPC.Call(utils.AnalyzerSv1StringQuery, &QueryArgs{HeaderFilters: `+RequestEncoding:\*birpc_json +RequestMethod:"SessionSv1.DisconnectPeer"`}, &result); err != nil {
 		t.Error(err)
@@ -277,6 +278,122 @@ func testAnalyzerSV1BirPCSession(t *testing.T) {
 		t.Errorf("Unexpected result: %s", utils.ToJSON(result))
 	}
 }
+
+func testAnalyzerSv1MultipleQuery(t *testing.T) {
+	filterProfiles := []*engine.FilterWithAPIOpts{
+		{
+			Filter: &engine.Filter{
+				ID:     "TestA_FILTER1",
+				Tenant: "cgrates.org",
+				Rules: []*engine.FilterRule{
+					{
+						Type:    utils.MetaString,
+						Element: "~*req.Account",
+						Values:  []string{"1001"},
+					},
+					{
+						Type:    utils.MetaPrefix,
+						Element: "~*req.Destination",
+						Values:  []string{"10"},
+					},
+				},
+			},
+		},
+		{
+			Filter: &engine.Filter{
+				ID:     "TestA_FILTER2",
+				Tenant: "cgrates.org",
+				Rules: []*engine.FilterRule{
+					{
+						Type:    utils.MetaString,
+						Element: "~*req.Account",
+						Values:  []string{"1002"},
+					},
+					{
+						Type:    utils.MetaPrefix,
+						Element: "~*req.Destination",
+						Values:  []string{"10"},
+					},
+				},
+			},
+		},
+		{
+			Filter: &engine.Filter{
+				ID:     "TestA_FILTER3",
+				Tenant: "cgrates.org",
+				Rules: []*engine.FilterRule{
+					{
+						Type:    utils.MetaString,
+						Element: "~*req.Account",
+						Values:  []string{"1003"},
+					},
+					{
+						Type:    utils.MetaPrefix,
+						Element: "~*req.Destination",
+						Values:  []string{"10"},
+					},
+				},
+			},
+		},
+		{
+			Filter: &engine.Filter{
+				ID:     "TestB_FILTER1",
+				Tenant: "cgrates.org",
+				Rules: []*engine.FilterRule{
+					{
+						Type:    utils.MetaString,
+						Element: "~*req.Account",
+						Values:  []string{"2001"},
+					},
+					{
+						Type:    utils.MetaPrefix,
+						Element: "~*req.Destination",
+						Values:  []string{"20"},
+					},
+				},
+			},
+		},
+		{
+			Filter: &engine.Filter{
+				ID:     "TestB_FILTER2",
+				Tenant: "cgrates.org",
+				Rules: []*engine.FilterRule{
+					{
+						Type:    utils.MetaString,
+						Element: "~*req.Account",
+						Values:  []string{"2002"},
+					},
+					{
+						Type:    utils.MetaPrefix,
+						Element: "~*req.Destination",
+						Values:  []string{"20"},
+					},
+				},
+			},
+		},
+	}
+
+	var reply string
+	for _, filterProfile := range filterProfiles {
+		if err := anzRPC.Call(utils.AdminSv1SetFilter,
+			filterProfile, &reply); err != nil {
+			t.Error(err)
+		} else if reply != utils.OK {
+			t.Error(err)
+		}
+	}
+	time.Sleep(50 * time.Millisecond)
+	var result []map[string]interface{}
+	if err := anzRPC.Call(utils.AnalyzerSv1StringQuery, &QueryArgs{
+		HeaderFilters:  `+RequestMethod:"AdminSv1.SetFilter"`,
+		ContentFilters: []string{"*prefix:~*req.ID:TestA"},
+	}, &result); err != nil {
+		t.Error(err)
+	} else if len(result) != 3 {
+		t.Errorf("Unexpected result: %s", utils.ToJSON(result))
+	}
+}
+
 func testAnalyzerSKillEngine(t *testing.T) {
 	if err := engine.KillEngine(100); err != nil {
 		t.Error(err)
