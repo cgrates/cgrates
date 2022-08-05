@@ -21,8 +21,10 @@ package analyzers
 import (
 	"encoding/json"
 	"fmt"
+	"math/rand"
 	"os"
 	"path"
+	"strconv"
 	"strings"
 	"time"
 
@@ -132,7 +134,7 @@ func (aS *AnalyzerS) logTrafic(id uint64, method string,
 	if strings.HasPrefix(method, utils.AnalyzerSv1) {
 		return nil
 	}
-	return aS.db.Index(utils.ConcatenatedKey(enc, from, to, method, utils.GenUUID()),
+	return aS.db.Index(utils.ConcatenatedKey(enc, from, to, method, strconv.FormatInt(rand.Int63n(100000000000000), 16)),
 		NewInfoRPC(id, method, params, result, err, enc, from, to, sTime, eTime))
 }
 
