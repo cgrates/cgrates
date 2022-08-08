@@ -22,6 +22,8 @@ along with this program.  If not, see <http://.gnu.org/licenses/>
 package efs
 
 import (
+	"bytes"
+	"encoding/gob"
 	"flag"
 	"fmt"
 	"os"
@@ -53,9 +55,37 @@ var (
 		testEfsInitDataDb,
 		testEfsStartEngine,
 		testEfSRPCConn,
+		//testEfsProcessEvent,
 		testEfsSKillEngine,
 	}
 )
+
+func TestDecodeExportEvents(t *testing.T) {
+	dirPath := "/var/spool/cgrates/failed_posts"
+	filesInDir, err := os.ReadDir(dirPath)
+	if err != nil {
+		t.Error(err)
+	}
+	for _, file := range filesInDir {
+		content, err := os.ReadFile(path.Join(dirPath, file.Name()))
+		if err != nil {
+			t.Error(err)
+		}
+		dec := gob.NewDecoder(bytes.NewBuffer(content))
+		gob.Register(new(utils.CGREvent))
+		singleEvent := new(FailedExportersLogg)
+		if err := dec.Decode(&singleEvent); err != nil {
+			t.Error(err)
+		} else {
+			strContent, err := utils.ToUnescapedJSON(singleEvent)
+			if err != nil {
+				t.Error(err)
+			}
+			fmt.Printf("singleEvent: %v \n", string(strContent))
+		}
+	}
+
+}
 
 func TestEfS(t *testing.T) {
 	switch *dbType {
@@ -103,7 +133,6 @@ func testEfsInitDataDb(t *testing.T) {
 
 // Start CGR Engine
 func testEfsStartEngine(t *testing.T) {
-	fmt.Println(efsCfgPath)
 	if _, err := engine.StopStartEngine(efsCfgPath, 100); err != nil {
 		t.Fatal(err)
 	}
@@ -113,12 +142,41 @@ func testEfSRPCConn(t *testing.T) {
 	var err error
 	efsRpc, err = jsonrpc.Dial(utils.TCP, efsCfg.ListenCfg().RPCJSONListen)
 	if err != nil {
-
 		t.Fatal(err)
 	}
 }
 
-//Kill the engine when it is about to be finished
+func testEfsProcessEvent(t *testing.T) {
+	args := &utils.ArgsFailedPosts{
+		Tenant: "cgrates.org",
+		Path:   "localhost:9092",
+		Event: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			Event: map[string]interface{}{
+				utils.AccountField: "1002",
+				utils.Destination:  "1003",
+			},
+		},
+		FailedDir: "/var/spool/cgrates/failed_posts",
+		Module:    utils.Kafka,
+		APIOpts: map[string]interface{}{
+			utils.Level:          efsCfg.LoggerCfg().Level,
+			utils.Format:         "TutorialTopic",
+			utils.Conn:           "localhost:9092",
+			utils.FailedPostsDir: "/var/spool/cgrates/failed_posts",
+			utils.Attempts:       efsCfg.LoggerCfg().Opts.KafkaAttempts,
+		},
+	}
+	var reply string
+	if err := efsRpc.Call(context.Background(), utils.EfSv1ProcessEvent,
+		args, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Unexpected reply returned")
+	}
+}
+
+// Kill the engine when it is about to be finished
 func testEfsSKillEngine(t *testing.T) {
 	time.Sleep(7 * time.Second)
 	if err := engine.KillEngine(100); err != nil {

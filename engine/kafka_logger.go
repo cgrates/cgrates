@@ -105,22 +105,24 @@ func (el *ExportLogger) call(m string, level int) (err error) {
 		Value: content,
 	}); err != nil {
 		// if there are any errors in kafka, we will post in FailedPostDirectory
-		args := &utils.ArgsFailedPosts{
-			Tenant:    el.Tenant,
-			Path:      el.Writer.Addr.String(),
-			Event:     eventExport,
-			FailedDir: el.FldPostDir,
-			Module:    utils.Kafka,
-			APIOpts:   el.GetMeta(),
-		}
-		var reply string
-		if err = el.connMgr.Call(el.ctx, el.cfg.LoggerCfg().EFsConns,
-			utils.EfSv1ProcessEvent, args, &reply); err != nil {
-			log.Printf("err la sefprocessEvent: %v", err)
-			/* utils.Logger.Warning(
-			fmt.Sprintf("<%s> Exporter could not writte failed event with <%s> service because err: <%s>",
-				utils.Logger, utils.EFs, err.Error())) */
-		}
+		go func() {
+			args := &utils.ArgsFailedPosts{
+				Tenant:    el.Tenant,
+				Path:      el.Writer.Addr.String(),
+				Event:     eventExport,
+				FailedDir: el.FldPostDir,
+				Module:    utils.Kafka,
+				APIOpts:   el.GetMeta(),
+			}
+			var reply string
+			if err = el.connMgr.Call(el.ctx, el.cfg.LoggerCfg().EFsConns,
+				utils.EfSv1ProcessEvent, args, &reply); err != nil {
+				log.Printf("err la sefprocessEvent: %v", err)
+				/* utils.Logger.Warning(
+				fmt.Sprintf("<%s> Exporter could not writte failed event with <%s> service because err: <%s>",
+					utils.Logger, utils.EFs, err.Error())) */
+			}
+		}()
 		// also the content should be printed as a stdout logger type
 		return utils.ErrLoggerChanged
 	}
