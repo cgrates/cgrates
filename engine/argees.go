@@ -26,10 +26,31 @@ import (
 
 // CGREventWithEeIDs struct is moved in engine due to importing ciclying packages in order to unmarshalling properly for our EventCost type. This is the API struct argument
 
-// CGREventWithEeIDs is the CGREventWithOpts with EventExporterIDs
+// CGREventWithEeIDs is CGREvent with EventExporterIDs
 type CGREventWithEeIDs struct {
 	EeIDs []string
 	*utils.CGREvent
+	clnb bool
+}
+
+func (attr *CGREventWithEeIDs) Clone() *CGREventWithEeIDs {
+	return &CGREventWithEeIDs{
+		EeIDs:    utils.CloneStringSlice(attr.EeIDs),
+		CGREvent: attr.CGREvent.Clone(),
+	}
+}
+
+// SetCloneable sets if the args should be cloned on internal connections
+func (attr *CGREventWithEeIDs) SetCloneable(clnb bool) {
+	attr.clnb = clnb
+}
+
+// RPCClone implements rpcclient.RPCCloner interface
+func (attr *CGREventWithEeIDs) RPCClone() (interface{}, error) {
+	if !attr.clnb {
+		return attr, nil
+	}
+	return attr.Clone(), nil
 }
 
 func (cgr *CGREventWithEeIDs) UnmarshalJSON(data []byte) (err error) {
