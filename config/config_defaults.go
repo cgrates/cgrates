@@ -514,8 +514,8 @@ const CGRATES_CFG_JSON = `
 				// SQL
 				// "sqlMaxIdleConns": 0,						// SQLMaxIdleConns    
 				// "sqlMaxOpenConns": 0,						// SQLMaxOpenConns
-				// "sqlConnMaxLifetime": "0",						// SQLConnMaxLifetime 
-				// "mysqlDSNParams": {},                           // DSN params
+				// "sqlConnMaxLifetime": "0",					// SQLConnMaxLifetime 
+				// "mysqlDSNParams": {},                        // DSN params
 
 
 				// "sqlTableName":"cdrs", 						// the name of the table from where the events are exported
@@ -525,6 +525,7 @@ const CGRATES_CFG_JSON = `
 				
 				// Kafka
 				// "kafkaTopic": "cgrates",						// the topic from where the events are exported
+				// "kafkaSkipTLSVerification": false,			// if set to true it will skip certificate verification
 				
 				
 				// AMQP
@@ -1517,6 +1518,15 @@ const CGRATES_CFG_JSON = `
 	"notexists_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"nested_fields": false,					// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
 	"attributes_conns": [],					// connections to AttributeS for API authorization, empty to disable auth functionality: <""|*internal|$rpc_conns_id>
+	"opts": {								//
+		// "*dispatcherS": [						
+		// 	{
+		// 		"Tenant": "*any",
+		// 		"FilterIDs": [],
+		// 		"Value": false,
+		// 	},
+		// ],
+	},
 },
 
 

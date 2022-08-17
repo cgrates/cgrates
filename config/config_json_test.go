@@ -1784,6 +1784,7 @@ func TestDfDispatcherSJsonCfg(t *testing.T) {
 		Notexists_indexed_fields: &[]string{},
 		Attributes_conns:         &[]string{},
 		Nested_fields:            utils.BoolPointer(false),
+		Opts:                     &DispatchersOptsJson{},
 	}
 	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
 	if err != nil {

@@ -211,9 +211,11 @@ func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 			MaxItems:     []*utils.DynamicIntPointerOpt{},
 			Usage:        []*utils.DynamicDecimalBigOpt{},
 		}},
-		tpeSCfg:        new(TpeSCfg),
-		sureTaxCfg:     new(SureTaxCfg),
-		dispatcherSCfg: new(DispatcherSCfg),
+		tpeSCfg:    new(TpeSCfg),
+		sureTaxCfg: new(SureTaxCfg),
+		dispatcherSCfg: &DispatcherSCfg{Opts: &DispatchersOpts{
+			Dispatchers: []*utils.DynamicBoolOpt{},
+		}},
 		registrarCCfg: &RegistrarCCfgs{
 			RPC:         &RegistrarCCfg{Hosts: make(map[string][]*RemoteHost)},
 			Dispatchers: &RegistrarCCfg{Hosts: make(map[string][]*RemoteHost)},
