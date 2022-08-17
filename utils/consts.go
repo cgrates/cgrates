@@ -1036,7 +1036,7 @@ const (
 	ArgDispatcherField = "ArgDispatcher"
 )
 
-//Filter types
+// Filter types
 const (
 	MetaNot                = "*not"
 	MetaString             = "*string"
@@ -1572,7 +1572,7 @@ const (
 	AdminSv1 = "AdminSv1"
 )
 
-//cgr_ variables
+// cgr_ variables
 const (
 	CGRAccount         = "cgr_account"
 	CGRRoute           = "cgr_route"
@@ -1589,7 +1589,7 @@ const (
 	CGROpts            = "cgr_opts"
 )
 
-//CSV file name
+// CSV file name
 const (
 	ResourcesCsv          = "Resources.csv"
 	StatsCsv              = "Stats.csv"
@@ -2005,6 +2005,9 @@ const (
 	AttributeContextCfg = "attribute_context"
 	AttributeIDsCfg     = "attribute_ids"
 
+	// DispatcherSCfg
+	MetaDispatcherSCfg = "*dispatcherS"
+
 	//LoaderSCfg
 	DryRunCfg       = "dry_run"
 	LockFilePathCfg = "lockfile_path"
@@ -2231,30 +2234,31 @@ var CGROptionsSet = NewStringSet([]string{OptsRatesProfileIDs, OptsRatesStartTim
 	OptsStirPublicKeyPath, OptsStirPrivateKeyPath, OptsAPIKey, OptsRouteID, OptsContext, OptsAttributesProfileIDs,
 	OptsAttributesProcessRuns, OptsAttributesProfileRuns, OptsRoutesLimit, OptsRoutesOffset, OptsRoutesMaxItems,
 	OptsSesChargeable, RemoteHostOpt, MetaCache, OptsThresholdsProfileIDs, OptsRoutesProfilesCount,
-	OptsDispatchersProfilesCount, OptsAttributeS, OptsSesAttributeSDerivedReply, OptsSesBlockerError, OptsRoutesUsage,
-	OptsCDRs, OptsSesCDRsDerivedReply, OptsChargerS, OptsResourceS, OptsSesResourceSAuthorize,
+	OptsDispatchersProfilesCount, OptsSesAttributeSDerivedReply, OptsSesBlockerError, OptsRoutesUsage,
+	OptsCDRs, OptsSesCDRsDerivedReply, OptsResourceS, OptsSesResourceSAuthorize,
 	OptsSesResourceSAllocate, OptsSesResourceSRelease, OptsSesResourceSDerivedReply, OptsRouteS,
-	OptsSesRouteSDerivedReply, OptsStatS, OptsSesStatSDerivedReply, OptsSesSTIRAuthenticate, OptsSesSTIRDerivedReply,
-	OptsSesSTIRInitiate, OptsThresholdS, OptsSesThresholdSDerivedReply,
+	OptsSesRouteSDerivedReply, OptsSesStatSDerivedReply, OptsSesSTIRAuthenticate, OptsSesSTIRDerivedReply,
+	OptsSesSTIRInitiate, OptsSesThresholdSDerivedReply,
 	OptsSesMaxUsage, OptsSesForceDuration, OptsSesInitiate, OptsSesUpdate, OptsSesTerminate,
 	OptsSesMessage, OptsAttributeS, OptsChargerS, OptsCDRsExport, OptsCDRsRefund,
 	OptsCDRsRerate, OptsStatS, OptsCDRsStore, OptsThresholdS, OptsRateS, OptsAccountS,
 	OptsAccountsUsage, OptsStatsProfileIDs, OptsActionsProfileIDs, MetaProfileIgnoreFilters,
-	OptsRoundingDecimals})
+	OptsRoundingDecimals, OptsDispatchers})
 
 // Event Opts
 const (
 
-	//CDRS and Sessions Opts
-	OptsAccountS   = "*accountS"
-	OptsCDRs       = "*cdrS"
-	OptsRouteS     = "*routeS"
-	OptsResourceS  = "*resourceS"
-	OptsAttributeS = "*attributeS"
-	OptsChargerS   = "*chargerS"
-	OptsStatS      = "*statS"
-	OptsThresholdS = "*thresholdS"
-	OptsRateS      = "*rateS"
+	// CDRs, SessionS and DispatcherS boolean opts
+	OptsAccountS    = "*accountS"
+	OptsCDRs        = "*cdrS"
+	OptsRouteS      = "*routeS"
+	OptsResourceS   = "*resourceS"
+	OptsAttributeS  = "*attributeS"
+	OptsChargerS    = "*chargerS"
+	OptsStatS       = "*statS"
+	OptsThresholdS  = "*thresholdS"
+	OptsRateS       = "*rateS"
+	OptsDispatchers = "*dispatcherS"
 
 	// SessionS
 	OptsSesTTL           = "*sesTTL"
@@ -2566,7 +2570,7 @@ const (
 	Opts             = "Opts"
 )
 
-//CMD constants
+// CMD constants
 const (
 	//Common
 	VerboseCgr      = "verbose"

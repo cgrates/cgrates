@@ -23,6 +23,14 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+const (
+	DispatchersDispatchersDftOpt = false
+)
+
+type DispatchersOpts struct {
+	Dispatchers []*utils.DynamicBoolOpt
+}
+
 // DispatcherSCfg is the configuration of dispatcher service
 type DispatcherSCfg struct {
 	Enabled                bool
@@ -34,6 +42,7 @@ type DispatcherSCfg struct {
 	NotExistsIndexedFields *[]string
 	NestedFields           bool
 	AttributeSConns        []string
+	Opts                   *DispatchersOpts
 }
 
 // loadDispatcherSCfg loads the DispatcherS section of the configuration
@@ -43,6 +52,15 @@ func (dps *DispatcherSCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRCon
 		return
 	}
 	return dps.loadFromJSONCfg(jsnDispatcherSCfg)
+}
+
+func (dspOpts *DispatchersOpts) loadFromJSONCfg(jsnCfg *DispatchersOptsJson) {
+	if jsnCfg == nil {
+		return
+	}
+	if jsnCfg.Dispatchers != nil {
+		dspOpts.Dispatchers = append(dspOpts.Dispatchers, jsnCfg.Dispatchers...)
+	}
 }
 
 func (dps *DispatcherSCfg) loadFromJSONCfg(jsnCfg *DispatcherSJsonCfg) (err error) {
@@ -76,15 +94,22 @@ func (dps *DispatcherSCfg) loadFromJSONCfg(jsnCfg *DispatcherSJsonCfg) (err erro
 	if jsnCfg.Nested_fields != nil {
 		dps.NestedFields = *jsnCfg.Nested_fields
 	}
+	if jsnCfg.Opts != nil {
+		dps.Opts.loadFromJSONCfg(jsnCfg.Opts)
+	}
 	return
 }
 
 // AsMapInterface returns the config as a map[string]interface{}
 func (dps DispatcherSCfg) AsMapInterface(string) interface{} {
+	opts := map[string]interface{}{
+		utils.MetaDispatcherSCfg: dps.Opts.Dispatchers,
+	}
 	mp := map[string]interface{}{
 		utils.EnabledCfg:        dps.Enabled,
 		utils.IndexedSelectsCfg: dps.IndexedSelects,
 		utils.NestedFieldsCfg:   dps.NestedFields,
+		utils.OptsCfg:           opts,
 	}
 	if dps.StringIndexedFields != nil {
 		mp[utils.StringIndexedFieldsCfg] = utils.CloneStringSlice(*dps.StringIndexedFields)
@@ -110,12 +135,23 @@ func (dps DispatcherSCfg) AsMapInterface(string) interface{} {
 func (DispatcherSCfg) SName() string             { return DispatcherSJSON }
 func (dps DispatcherSCfg) CloneSection() Section { return dps.Clone() }
 
+func (dspOpts *DispatchersOpts) Clone() *DispatchersOpts {
+	var dpS []*utils.DynamicBoolOpt
+	if dspOpts.Dispatchers != nil {
+		dpS = utils.CloneDynamicBoolOpt(dspOpts.Dispatchers)
+	}
+	return &DispatchersOpts{
+		Dispatchers: dpS,
+	}
+}
+
 // Clone returns a deep copy of DispatcherSCfg
 func (dps DispatcherSCfg) Clone() (cln *DispatcherSCfg) {
 	cln = &DispatcherSCfg{
 		Enabled:        dps.Enabled,
 		IndexedSelects: dps.IndexedSelects,
 		NestedFields:   dps.NestedFields,
+		Opts:           dps.Opts.Clone(),
 	}
 
 	if dps.AttributeSConns != nil {
@@ -139,6 +175,10 @@ func (dps DispatcherSCfg) Clone() (cln *DispatcherSCfg) {
 	return
 }
 
+type DispatchersOptsJson struct {
+	Dispatchers []*utils.DynamicBoolOpt `json:"*dispatcherS"`
+}
+
 type DispatcherSJsonCfg struct {
 	Enabled                  *bool
 	Indexed_selects          *bool
@@ -149,6 +189,17 @@ type DispatcherSJsonCfg struct {
 	Notexists_indexed_fields *[]string
 	Nested_fields            *bool // applies when indexed fields is not defined
 	Attributes_conns         *[]string
+	Opts                     *DispatchersOptsJson
+}
+
+func diffDispatchersOptsJsonCfg(d *DispatchersOptsJson, v1, v2 *DispatchersOpts) *DispatchersOptsJson {
+	if d == nil {
+		d = new(DispatchersOptsJson)
+	}
+	if !utils.DynamicBoolOptEqual(v1.Dispatchers, v2.Dispatchers) {
+		d.Dispatchers = v2.Dispatchers
+	}
+	return d
 }
 
 func diffDispatcherSJsonCfg(d *DispatcherSJsonCfg, v1, v2 *DispatcherSCfg) *DispatcherSJsonCfg {
@@ -172,5 +223,6 @@ func diffDispatcherSJsonCfg(d *DispatcherSJsonCfg, v1, v2 *DispatcherSCfg) *Disp
 	if !utils.SliceStringEqual(v1.AttributeSConns, v2.AttributeSConns) {
 		d.Attributes_conns = utils.SliceStringPointer(getInternalJSONConns(v2.AttributeSConns))
 	}
+	d.Opts = diffDispatchersOptsJsonCfg(d.Opts, v1.Opts, v2.Opts)
 	return d
 }
