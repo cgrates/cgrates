@@ -97,12 +97,12 @@ func StartCPUProfiling(path string) (file io.WriteCloser, err error) {
 func MemProfFile(memProfPath string) bool {
 	f, err := os.Create(memProfPath)
 	if err != nil {
-		utils.Logger.Crit(fmt.Sprintf("<memProfile>could not create memory profile file: %s", err))
+		utils.Logger.Crit(fmt.Sprintf("<memProfile> could not create memory profile file: %s", err))
 		return false
 	}
 	runtime.GC() // get up-to-date statistics
 	if err := pprof.WriteHeapProfile(f); err != nil {
-		utils.Logger.Crit(fmt.Sprintf("<memProfile>could not write memory profile: %s", err))
+		utils.Logger.Crit(fmt.Sprintf("<memProfile> could not write memory profile: %s", err))
 		f.Close()
 		return false
 	}
