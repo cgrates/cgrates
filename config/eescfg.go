@@ -165,6 +165,8 @@ type EventExporterOpts struct {
 	SQLDBName                *string
 	PgSSLMode                *string
 	KafkaTopic               *string
+	KafkaCAPath              *string
+	KafkaSkipTLSVerify       *bool
 	AMQPRoutingKey           *string
 	AMQPQueueID              *string
 	AMQPExchange             *string
@@ -288,6 +290,12 @@ func (eeOpts *EventExporterOpts) loadFromJSONCfg(jsnCfg *EventExporterOptsJson) 
 	}
 	if jsnCfg.KafkaTopic != nil {
 		eeOpts.KafkaTopic = jsnCfg.KafkaTopic
+	}
+	if jsnCfg.KafkaCAPath != nil {
+		eeOpts.KafkaCAPath = jsnCfg.KafkaCAPath
+	}
+	if jsnCfg.KafkaSkipTLSVerify != nil {
+		eeOpts.KafkaSkipTLSVerify = jsnCfg.KafkaSkipTLSVerify
 	}
 	if jsnCfg.AMQPQueueID != nil {
 		eeOpts.AMQPQueueID = jsnCfg.AMQPQueueID
@@ -548,6 +556,12 @@ func (eeOpts *EventExporterOpts) Clone() *EventExporterOpts {
 	if eeOpts.KafkaTopic != nil {
 		cln.KafkaTopic = utils.StringPointer(*eeOpts.KafkaTopic)
 	}
+	if eeOpts.KafkaCAPath != nil {
+		cln.KafkaCAPath = utils.StringPointer(*eeOpts.KafkaCAPath)
+	}
+	if eeOpts.KafkaSkipTLSVerify != nil {
+		cln.KafkaSkipTLSVerify = utils.BoolPointer(*eeOpts.KafkaSkipTLSVerify)
+	}
 	if eeOpts.AMQPQueueID != nil {
 		cln.AMQPQueueID = utils.StringPointer(*eeOpts.AMQPQueueID)
 	}
@@ -778,6 +792,12 @@ func (optsEes *EventExporterOpts) AsMapInterface() map[string]interface{} {
 	if optsEes.KafkaTopic != nil {
 		opts[utils.KafkaTopic] = *optsEes.KafkaTopic
 	}
+	if optsEes.KafkaCAPath != nil {
+		opts[utils.KafkaCAPath] = *optsEes.KafkaCAPath
+	}
+	if optsEes.KafkaSkipTLSVerify != nil {
+		opts[utils.KafkaSkipTLSVerify] = *optsEes.KafkaSkipTLSVerify
+	}
 	if optsEes.AMQPQueueID != nil {
 		opts[utils.AMQPQueueID] = *optsEes.AMQPQueueID
 	}
@@ -888,6 +908,8 @@ type EventExporterOptsJson struct {
 	SQLDBName                *string                `json:"sqlDBName"`
 	PgSSLMode                *string                `json:"pgSSLMode"`
 	KafkaTopic               *string                `json:"kafkaTopic"`
+	KafkaCAPath              *string                `json:"kafkaCAPath"`
+	KafkaSkipTLSVerify       *bool                  `json:"kafkaSkipTLSVerify"`
 	AMQPQueueID              *string                `json:"amqpQueueID"`
 	AMQPRoutingKey           *string                `json:"amqpRoutingKey"`
 	AMQPExchange             *string                `json:"amqpExchange"`
@@ -1093,6 +1115,22 @@ func diffEventExporterOptsJsonCfg(d *EventExporterOptsJson, v1, v2 *EventExporte
 		}
 	} else {
 		d.KafkaTopic = nil
+	}
+	if v2.KafkaCAPath != nil {
+		if v1.KafkaCAPath == nil ||
+			*v1.KafkaCAPath != *v2.KafkaCAPath {
+			d.KafkaCAPath = v2.KafkaCAPath
+		}
+	} else {
+		d.KafkaCAPath = nil
+	}
+	if v2.KafkaSkipTLSVerify != nil {
+		if v1.KafkaSkipTLSVerify == nil ||
+			*v1.KafkaSkipTLSVerify != *v2.KafkaSkipTLSVerify {
+			d.KafkaSkipTLSVerify = v2.KafkaSkipTLSVerify
+		}
+	} else {
+		d.KafkaSkipTLSVerify = nil
 	}
 	if v2.AMQPQueueID != nil {
 		if v1.AMQPQueueID == nil ||
