@@ -49,7 +49,7 @@ var sTestsDspRpl = []func(t *testing.T){
 	testDspRplActionProfile,
 }
 
-//Test start here
+// Test start here
 func TestDspReplicator(t *testing.T) {
 	var config1, config2, config3 string
 	switch *dbType {

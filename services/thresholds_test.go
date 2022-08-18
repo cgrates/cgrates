@@ -30,7 +30,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-//TestThresholdSCoverage for cover testing
+// TestThresholdSCoverage for cover testing
 func TestThresholdSCoverage(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	filterSChan := make(chan *engine.FilterS, 1)

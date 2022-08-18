@@ -28,7 +28,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-//TestCdrsCoverage for cover testing
+// TestCdrsCoverage for cover testing
 func TestCdrsCoverage(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	filterSChan := make(chan *engine.FilterS, 1)

@@ -200,7 +200,7 @@ func testCDRsProcessCDR(t *testing.T) {
 	}
 }
 
-//Disable Attributes process
+// Disable Attributes process
 func testCDRsProcessCDR2(t *testing.T) {
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
@@ -253,7 +253,7 @@ func testCDRsProcessCDR2(t *testing.T) {
 	}
 }
 
-//Disable Attributes and Charger process
+// Disable Attributes and Charger process
 func testCDRsProcessCDR3(t *testing.T) {
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",

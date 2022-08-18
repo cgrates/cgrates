@@ -32,7 +32,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-//TestAccountSCoverage for cover testing
+// TestAccountSCoverage for cover testing
 func TestAccountSCoverage(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	filterSChan := make(chan *engine.FilterS, 1)

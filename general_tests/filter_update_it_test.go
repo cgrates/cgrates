@@ -95,7 +95,7 @@ func TestFilterUpdateIT(t *testing.T) {
 	}
 }
 
-//Init Config
+// Init Config
 func testFilterUpdateInitCfg(t *testing.T) {
 	var err error
 	fltrUpdateCfgPath1 = path.Join(*dataDir, "conf", "samples", "cache_replicate", fltrUpdateCfgDIR1)

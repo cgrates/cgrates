@@ -118,7 +118,7 @@ type ChargerWithAPIOpts struct {
 	APIOpts map[string]interface{}
 }
 
-//SetChargerProfile add/update a new Charger Profile
+// SetChargerProfile add/update a new Charger Profile
 func (adms *AdminSv1) SetChargerProfile(ctx *context.Context, arg *ChargerWithAPIOpts, reply *string) error {
 	if missing := utils.MissingStructFields(arg.ChargerProfile, []string{utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
@@ -142,7 +142,7 @@ func (adms *AdminSv1) SetChargerProfile(ctx *context.Context, arg *ChargerWithAP
 	return nil
 }
 
-//RemoveChargerProfile remove a specific Charger Profile
+// RemoveChargerProfile remove a specific Charger Profile
 func (adms *AdminSv1) RemoveChargerProfile(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *string) error {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)

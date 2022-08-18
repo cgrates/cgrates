@@ -117,7 +117,7 @@ type DispatcherWithAPIOpts struct {
 	APIOpts map[string]interface{}
 }
 
-//SetDispatcherProfile add/update a new Dispatcher Profile
+// SetDispatcherProfile add/update a new Dispatcher Profile
 func (admS *AdminSv1) SetDispatcherProfile(ctx *context.Context, args *DispatcherWithAPIOpts, reply *string) error {
 	if missing := utils.MissingStructFields(args.DispatcherProfile, []string{utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
@@ -141,7 +141,7 @@ func (admS *AdminSv1) SetDispatcherProfile(ctx *context.Context, args *Dispatche
 	return nil
 }
 
-//RemoveDispatcherProfile remove a specific Dispatcher Profile
+// RemoveDispatcherProfile remove a specific Dispatcher Profile
 func (admS *AdminSv1) RemoveDispatcherProfile(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *string) error {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
@@ -253,7 +253,7 @@ func (admS *AdminSv1) GetDispatcherHostsCount(ctx *context.Context, args *utils.
 	return
 }
 
-//SetDispatcherHost add/update a new Dispatcher Host
+// SetDispatcherHost add/update a new Dispatcher Host
 func (admS *AdminSv1) SetDispatcherHost(ctx *context.Context, args *engine.DispatcherHostWithAPIOpts, reply *string) error {
 	if missing := utils.MissingStructFields(args.DispatcherHost, []string{utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
@@ -277,7 +277,7 @@ func (admS *AdminSv1) SetDispatcherHost(ctx *context.Context, args *engine.Dispa
 	return nil
 }
 
-//RemoveDispatcherHost remove a specific Dispatcher Host
+// RemoveDispatcherHost remove a specific Dispatcher Host
 func (admS *AdminSv1) RemoveDispatcherHost(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *string) error {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)

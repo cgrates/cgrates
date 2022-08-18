@@ -36,7 +36,7 @@ func validateFilterRules(rules []*engine.FilterRule) error {
 	return nil
 }
 
-//SetFilter add a new Filter
+// SetFilter add a new Filter
 func (adms *AdminSv1) SetFilter(ctx *context.Context, arg *engine.FilterWithAPIOpts, reply *string) (err error) {
 	if missing := utils.MissingStructFields(arg.Filter, []string{utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
@@ -81,7 +81,7 @@ func (adms *AdminSv1) SetFilter(ctx *context.Context, arg *engine.FilterWithAPIO
 	return
 }
 
-//GetFilter returns a Filter
+// GetFilter returns a Filter
 func (adms *AdminSv1) GetFilter(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *engine.Filter) error {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
@@ -147,7 +147,7 @@ func (adms *AdminSv1) GetFilterIDs(ctx *context.Context, args *utils.ArgsItemIDs
 	return
 }
 
-//RemoveFilter  remove a specific filter
+// RemoveFilter  remove a specific filter
 func (adms *AdminSv1) RemoveFilter(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *string) error {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)

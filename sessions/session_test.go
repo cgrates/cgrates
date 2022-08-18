@@ -317,165 +317,165 @@ func TestSessionAsExternalSessions(t *testing.T) {
 }
 
 /*
-func TestSessionAsExternalSessions2(t *testing.T) {
-	startEv := map[string]interface{}{
-		utils.EventName:    "TEST_EVENT",
-		utils.ToR:          utils.MetaVoice,
-		utils.OriginID:     "123451",
-		utils.AccountField: "1001",
-		utils.Subject:      "1001",
-		utils.Destination:  "1004",
-		utils.Category:     "call",
-		utils.Tenant:       "cgrates.org",
-		utils.RequestType:  utils.MetaPrepaid,
-		utils.SetupTime:    time.Date(2016, time.January, 5, 18, 30, 59, 0, time.UTC),
-		utils.AnswerTime:   time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
-		utils.Usage:        2 * time.Second,
-		utils.Cost:         12.12,
-	}
-	ev := map[string]interface{}{
-		utils.EventName:    "TEST_EVENT2",
-		utils.ToR:          utils.MetaVoice,
-		utils.OriginID:     "123451",
-		utils.AccountField: "1001",
-		utils.Subject:      "1001",
-		utils.Destination:  "1004",
-		utils.Category:     "call",
-		utils.RunID:        utils.MetaDefault,
-		utils.Tenant:       "cgrates.org",
-		utils.RequestType:  utils.MetaPrepaid,
-		utils.SetupTime:    time.Date(2016, time.January, 5, 18, 30, 59, 0, time.UTC),
-		utils.AnswerTime:   time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
-		utils.Usage:        2 * time.Second,
-		utils.Cost:         12.13,
-	}
-	s := &Session{
-		OptsStart: map[string]interface{}{
-			utils.MetaOriginID: "RandomoriginID",
-		},
-		Tenant:        "cgrates.org",
-		EventStart:    engine.NewMapEvent(startEv),
-		DebitInterval: time.Second,
-		SRuns: []*SRun{{
-			Event:      engine.NewMapEvent(ev),
-			TotalUsage: 2 * time.Second,
-		}},
-	}
-	exp := []*ExternalSession{{
-		//CGRID:    "RandomCGRID",
-		RunID:    utils.MetaDefault,
-		ToR:      utils.MetaVoice,
-		OriginID: "123451",
-		// OriginHost:  s.EventStart.GetStringIgnoreErrors(utils.OriginHost),
-		Source:      utils.SessionS + "_" + "TEST_EVENT",
-		RequestType: utils.MetaPrepaid,
-		Tenant:      "cgrates.org",
-		Category:    "call",
-		Account:     "1001",
-		Subject:     "1001",
-		Destination: "1004",
-		SetupTime:   time.Date(2016, time.January, 5, 18, 30, 59, 0, time.UTC),
-		AnswerTime:  time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
-		Usage:       2 * time.Second,
-		ExtraFields: map[string]string{
-			utils.EventName: "TEST_EVENT2",
-		},
-		NodeID:        "ALL",
-		DebitInterval: time.Second,
-		LoopIndex:     10,
-		DurationIndex: 3 * time.Second,
-		MaxRate:       11,
-		MaxRateUnit:   30 * time.Second,
-		MaxCostSoFar:  20,
-	}}
-	//check for some fields if populated correct
-	rply := s.AsExternalSessions("", "ALL")
-	if !reflect.DeepEqual(exp, rply) {
-		t.Errorf("Expecting: %s, received: %s", utils.ToJSON(exp), utils.ToJSON(rply))
-	}
+	func TestSessionAsExternalSessions2(t *testing.T) {
+		startEv := map[string]interface{}{
+			utils.EventName:    "TEST_EVENT",
+			utils.ToR:          utils.MetaVoice,
+			utils.OriginID:     "123451",
+			utils.AccountField: "1001",
+			utils.Subject:      "1001",
+			utils.Destination:  "1004",
+			utils.Category:     "call",
+			utils.Tenant:       "cgrates.org",
+			utils.RequestType:  utils.MetaPrepaid,
+			utils.SetupTime:    time.Date(2016, time.January, 5, 18, 30, 59, 0, time.UTC),
+			utils.AnswerTime:   time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
+			utils.Usage:        2 * time.Second,
+			utils.Cost:         12.12,
+		}
+		ev := map[string]interface{}{
+			utils.EventName:    "TEST_EVENT2",
+			utils.ToR:          utils.MetaVoice,
+			utils.OriginID:     "123451",
+			utils.AccountField: "1001",
+			utils.Subject:      "1001",
+			utils.Destination:  "1004",
+			utils.Category:     "call",
+			utils.RunID:        utils.MetaDefault,
+			utils.Tenant:       "cgrates.org",
+			utils.RequestType:  utils.MetaPrepaid,
+			utils.SetupTime:    time.Date(2016, time.January, 5, 18, 30, 59, 0, time.UTC),
+			utils.AnswerTime:   time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
+			utils.Usage:        2 * time.Second,
+			utils.Cost:         12.13,
+		}
+		s := &Session{
+			OptsStart: map[string]interface{}{
+				utils.MetaOriginID: "RandomoriginID",
+			},
+			Tenant:        "cgrates.org",
+			EventStart:    engine.NewMapEvent(startEv),
+			DebitInterval: time.Second,
+			SRuns: []*SRun{{
+				Event:      engine.NewMapEvent(ev),
+				TotalUsage: 2 * time.Second,
+			}},
+		}
+		exp := []*ExternalSession{{
+			//CGRID:    "RandomCGRID",
+			RunID:    utils.MetaDefault,
+			ToR:      utils.MetaVoice,
+			OriginID: "123451",
+			// OriginHost:  s.EventStart.GetStringIgnoreErrors(utils.OriginHost),
+			Source:      utils.SessionS + "_" + "TEST_EVENT",
+			RequestType: utils.MetaPrepaid,
+			Tenant:      "cgrates.org",
+			Category:    "call",
+			Account:     "1001",
+			Subject:     "1001",
+			Destination: "1004",
+			SetupTime:   time.Date(2016, time.January, 5, 18, 30, 59, 0, time.UTC),
+			AnswerTime:  time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
+			Usage:       2 * time.Second,
+			ExtraFields: map[string]string{
+				utils.EventName: "TEST_EVENT2",
+			},
+			NodeID:        "ALL",
+			DebitInterval: time.Second,
+			LoopIndex:     10,
+			DurationIndex: 3 * time.Second,
+			MaxRate:       11,
+			MaxRateUnit:   30 * time.Second,
+			MaxCostSoFar:  20,
+		}}
+		//check for some fields if populated correct
+		rply := s.AsExternalSessions("", "ALL")
+		if !reflect.DeepEqual(exp, rply) {
+			t.Errorf("Expecting: %s, received: %s", utils.ToJSON(exp), utils.ToJSON(rply))
+		}
 
 }
 
-func TestSessionAsExternalSessions3(t *testing.T) {
-	startEv := map[string]interface{}{
-		utils.EventName:    "TEST_EVENT",
-		utils.ToR:          utils.MetaVoice,
-		utils.OriginID:     "123451",
-		utils.AccountField: "1001",
-		utils.Subject:      "1001",
-		utils.Destination:  "1004",
-		utils.Category:     "call",
-		utils.Tenant:       "cgrates.org",
-		utils.RequestType:  utils.MetaPrepaid,
-		utils.SetupTime:    time.Date(2016, time.January, 5, 18, 30, 59, 0, time.UTC),
-		utils.AnswerTime:   time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
-		utils.Usage:        2 * time.Second,
-		utils.Cost:         12.12,
-	}
-	ev := map[string]interface{}{
-		utils.EventName:    "TEST_EVENT2",
-		utils.ToR:          utils.MetaVoice,
-		utils.OriginID:     "123451",
-		utils.AccountField: "1001",
-		utils.Subject:      "1001",
-		utils.Destination:  "1004",
-		utils.Category:     "call",
-		utils.RunID:        utils.MetaDefault,
-		utils.Tenant:       "cgrates.org",
-		utils.RequestType:  utils.MetaPrepaid,
-		utils.SetupTime:    time.Date(2016, time.January, 5, 18, 30, 59, 0, time.UTC),
-		utils.AnswerTime:   time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
-		utils.Usage:        2 * time.Second,
-		utils.Cost:         12.13,
-	}
-	tTime := time.Date(2020, time.April, 18, 23, 0, 0, 0, time.UTC)
+	func TestSessionAsExternalSessions3(t *testing.T) {
+		startEv := map[string]interface{}{
+			utils.EventName:    "TEST_EVENT",
+			utils.ToR:          utils.MetaVoice,
+			utils.OriginID:     "123451",
+			utils.AccountField: "1001",
+			utils.Subject:      "1001",
+			utils.Destination:  "1004",
+			utils.Category:     "call",
+			utils.Tenant:       "cgrates.org",
+			utils.RequestType:  utils.MetaPrepaid,
+			utils.SetupTime:    time.Date(2016, time.January, 5, 18, 30, 59, 0, time.UTC),
+			utils.AnswerTime:   time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
+			utils.Usage:        2 * time.Second,
+			utils.Cost:         12.12,
+		}
+		ev := map[string]interface{}{
+			utils.EventName:    "TEST_EVENT2",
+			utils.ToR:          utils.MetaVoice,
+			utils.OriginID:     "123451",
+			utils.AccountField: "1001",
+			utils.Subject:      "1001",
+			utils.Destination:  "1004",
+			utils.Category:     "call",
+			utils.RunID:        utils.MetaDefault,
+			utils.Tenant:       "cgrates.org",
+			utils.RequestType:  utils.MetaPrepaid,
+			utils.SetupTime:    time.Date(2016, time.January, 5, 18, 30, 59, 0, time.UTC),
+			utils.AnswerTime:   time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
+			utils.Usage:        2 * time.Second,
+			utils.Cost:         12.13,
+		}
+		tTime := time.Date(2020, time.April, 18, 23, 0, 0, 0, time.UTC)
 
-	s := &Session{
-		OptsStart: map[string]interface{}{
-			utils.MetaOriginID: "RandomCGRID",
-		},
-		Tenant:        "cgrates.org",
-		EventStart:    engine.NewMapEvent(startEv),
-		DebitInterval: time.Second,
-		SRuns: []*SRun{{
-			Event:         engine.NewMapEvent(ev),
-			TotalUsage:    2 * time.Second,
-			NextAutoDebit: &tTime,
-		}},
-	}
-	exp := &ExternalSession{
-		CGRID:    "RandomCGRID",
-		RunID:    utils.MetaDefault,
-		ToR:      utils.MetaVoice,
-		OriginID: "123451",
-		// OriginHost:  s.EventStart.GetStringIgnoreErrors(utils.OriginHost),
-		Source:      utils.SessionS + "_" + "TEST_EVENT",
-		RequestType: utils.MetaPrepaid,
-		Tenant:      "cgrates.org",
-		Category:    "call",
-		Account:     "1001",
-		Subject:     "1001",
-		Destination: "1004",
-		SetupTime:   time.Date(2016, time.January, 5, 18, 30, 59, 0, time.UTC),
-		AnswerTime:  time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
-		Usage:       2 * time.Second,
-		ExtraFields: map[string]string{
-			utils.EventName: "TEST_EVENT2",
-		},
-		NodeID:        "ALL",
-		DebitInterval: time.Second,
-		LoopIndex:     10,
-		DurationIndex: 3 * time.Second,
-		MaxRate:       11,
-		MaxRateUnit:   30 * time.Second,
-		MaxCostSoFar:  20,
-		NextAutoDebit: tTime,
-	}
-	//check for some fields if populated correct
-	rply := s.AsExternalSession(s.SRuns[0], "", "ALL")
-	if !reflect.DeepEqual(exp, rply) {
-		t.Errorf("Expecting: %s, received: %s", utils.ToJSON(exp), utils.ToJSON(rply))
-	}
+		s := &Session{
+			OptsStart: map[string]interface{}{
+				utils.MetaOriginID: "RandomCGRID",
+			},
+			Tenant:        "cgrates.org",
+			EventStart:    engine.NewMapEvent(startEv),
+			DebitInterval: time.Second,
+			SRuns: []*SRun{{
+				Event:         engine.NewMapEvent(ev),
+				TotalUsage:    2 * time.Second,
+				NextAutoDebit: &tTime,
+			}},
+		}
+		exp := &ExternalSession{
+			CGRID:    "RandomCGRID",
+			RunID:    utils.MetaDefault,
+			ToR:      utils.MetaVoice,
+			OriginID: "123451",
+			// OriginHost:  s.EventStart.GetStringIgnoreErrors(utils.OriginHost),
+			Source:      utils.SessionS + "_" + "TEST_EVENT",
+			RequestType: utils.MetaPrepaid,
+			Tenant:      "cgrates.org",
+			Category:    "call",
+			Account:     "1001",
+			Subject:     "1001",
+			Destination: "1004",
+			SetupTime:   time.Date(2016, time.January, 5, 18, 30, 59, 0, time.UTC),
+			AnswerTime:  time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
+			Usage:       2 * time.Second,
+			ExtraFields: map[string]string{
+				utils.EventName: "TEST_EVENT2",
+			},
+			NodeID:        "ALL",
+			DebitInterval: time.Second,
+			LoopIndex:     10,
+			DurationIndex: 3 * time.Second,
+			MaxRate:       11,
+			MaxRateUnit:   30 * time.Second,
+			MaxCostSoFar:  20,
+			NextAutoDebit: tTime,
+		}
+		//check for some fields if populated correct
+		rply := s.AsExternalSession(s.SRuns[0], "", "ALL")
+		if !reflect.DeepEqual(exp, rply) {
+			t.Errorf("Expecting: %s, received: %s", utils.ToJSON(exp), utils.ToJSON(rply))
+		}
 
 }
 */

@@ -115,7 +115,7 @@ func (admS *AdminSv1) GetAccountsCount(ctx *context.Context, args *utils.ArgsIte
 	return
 }
 
-//SetAccount add/update a new Account
+// SetAccount add/update a new Account
 func (admS *AdminSv1) SetAccount(ctx *context.Context, args *utils.AccountWithAPIOpts, reply *string) error {
 	if missing := utils.MissingStructFields(args.Account, []string{utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)

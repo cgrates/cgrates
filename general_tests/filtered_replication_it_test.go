@@ -73,7 +73,7 @@ var (
 	}
 )
 
-//Test start here
+// Test start here
 func TestFilteredReplication(t *testing.T) {
 	switch *dbType {
 	case utils.MetaMySQL:

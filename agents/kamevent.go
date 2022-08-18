@@ -276,8 +276,8 @@ func (kev KamEvent) AsKamProcessMessageEmptyReply() (kar *KamReply) {
 	return
 }
 
-//KamReply will be used to send back to kamailio from
-//Authrization,ProcessEvent and ProcessEvent empty (pingPong)
+// KamReply will be used to send back to kamailio from
+// Authrization,ProcessEvent and ProcessEvent empty (pingPong)
 type KamReply struct {
 	Event              string // Kamailio will use this to differentiate between requests and replies
 	TransactionIndex   string // Original transaction index

@@ -112,7 +112,7 @@ func testCacheSRpcConn(t *testing.T) {
 	}
 }
 
-//Set an attribute profile and rate profile to test cache's apis
+// Set an attribute profile and rate profile to test cache's apis
 func testCacheSSetAttributeProfile(t *testing.T) {
 	attrPrf := &engine.APIAttributeProfileWithAPIOpts{
 		APIAttributeProfile: &engine.APIAttributeProfile{

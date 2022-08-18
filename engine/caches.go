@@ -371,7 +371,7 @@ func (chS *CacheS) cacheDataFromDB(ctx *context.Context, attrs *utils.AttrReload
 	return
 }
 
-//populateCacheLoadIDs populate cacheLoadIDs based on attrs
+// populateCacheLoadIDs populate cacheLoadIDs based on attrs
 func populateCacheLoadIDs(loadIDs map[string]int64, attrs map[string][]string) (cacheLoadIDs map[string]int64) {
 	cacheLoadIDs = make(map[string]int64)
 	//based on IDs of each type populate cacheLoadIDs and add into cache

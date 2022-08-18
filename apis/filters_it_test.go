@@ -742,7 +742,7 @@ func testFiltersFiltersMatchFalse(t *testing.T) {
 	}
 }
 
-//Kill the engine when it is about to be finished
+// Kill the engine when it is about to be finished
 func testFiltersKillEngine(t *testing.T) {
 	if err := engine.KillEngine(100); err != nil {
 		t.Error(err)

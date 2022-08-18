@@ -41,8 +41,8 @@ func (iDBMig *internalMigrator) DataManager() *engine.DataManager {
 	return iDBMig.dm
 }
 
-//Stats methods
-//get
+// Stats methods
+// get
 func (iDBMig *internalMigrator) getV1Stats() (v1st *v1Stat, err error) {
 	return nil, utils.ErrNotImplemented
 }
@@ -51,7 +51,7 @@ func (iDBMig *internalMigrator) getV3Stats() (v1st *engine.StatQueueProfile, err
 	return nil, utils.ErrNotImplemented
 }
 
-//set
+// set
 func (iDBMig *internalMigrator) setV1Stats(x *v1Stat) (err error) {
 	return utils.ErrNotImplemented
 }
@@ -60,24 +60,24 @@ func (iDBMig *internalMigrator) getV2Stats() (v2 *engine.StatQueue, err error) {
 	return nil, utils.ErrNotImplemented
 }
 
-//set
+// set
 func (iDBMig *internalMigrator) setV2Stats(v2 *engine.StatQueue) (err error) {
 	return utils.ErrNotImplemented
 }
 
-//AttributeProfile methods
-//get
+// AttributeProfile methods
+// get
 func (iDBMig *internalMigrator) getV1AttributeProfile() (v1attrPrf *v1AttributeProfile, err error) {
 	return nil, utils.ErrNotImplemented
 }
 
-//set
+// set
 func (iDBMig *internalMigrator) setV1AttributeProfile(x *v1AttributeProfile) (err error) {
 	return utils.ErrNotImplemented
 }
 
-//ThresholdProfile methods
-//get
+// ThresholdProfile methods
+// get
 func (iDBMig *internalMigrator) getV2ThresholdProfile() (v2T *v2Threshold, err error) {
 	return nil, utils.ErrNotImplemented
 }
@@ -86,50 +86,50 @@ func (iDBMig *internalMigrator) getV3ThresholdProfile() (v2T *engine.ThresholdPr
 	return nil, utils.ErrNotImplemented
 }
 
-//set
+// set
 func (iDBMig *internalMigrator) setV2ThresholdProfile(x *v2Threshold) (err error) {
 	return utils.ErrNotImplemented
 }
 
-//rem
+// rem
 func (iDBMig *internalMigrator) remV2ThresholdProfile(tenant, id string) (err error) {
 	return utils.ErrNotImplemented
 }
 
-//AttributeProfile methods
-//get
+// AttributeProfile methods
+// get
 func (iDBMig *internalMigrator) getV2AttributeProfile() (v2attrPrf *v2AttributeProfile, err error) {
 	return nil, utils.ErrNotImplemented
 }
 
-//set
+// set
 func (iDBMig *internalMigrator) setV2AttributeProfile(x *v2AttributeProfile) (err error) {
 	return utils.ErrNotImplemented
 }
 
-//rem
+// rem
 func (iDBMig *internalMigrator) remV2AttributeProfile(tenant, id string) (err error) {
 	return utils.ErrNotImplemented
 }
 
-//AttributeProfile methods
-//get
+// AttributeProfile methods
+// get
 func (iDBMig *internalMigrator) getV3AttributeProfile() (v3attrPrf *v3AttributeProfile, err error) {
 	return nil, utils.ErrNotImplemented
 }
 
-//set
+// set
 func (iDBMig *internalMigrator) setV3AttributeProfile(x *v3AttributeProfile) (err error) {
 	return utils.ErrNotImplemented
 }
 
-//rem
+// rem
 func (iDBMig *internalMigrator) remV3AttributeProfile(tenant, id string) (err error) {
 	return utils.ErrNotImplemented
 }
 
-//AttributeProfile methods
-//get
+// AttributeProfile methods
+// get
 func (iDBMig *internalMigrator) getV4AttributeProfile() (v4attrPrf *v4AttributeProfile, err error) {
 	return nil, utils.ErrNotImplemented
 }
@@ -137,18 +137,18 @@ func (iDBMig *internalMigrator) getV5AttributeProfile() (v4attrPrf *v6AttributeP
 	return nil, utils.ErrNotImplemented
 }
 
-//set
+// set
 func (iDBMig *internalMigrator) setV4AttributeProfile(x *v4AttributeProfile) (err error) {
 	return utils.ErrNotImplemented
 }
 
-//rem
+// rem
 func (iDBMig *internalMigrator) remV4AttributeProfile(tenant, id string) (err error) {
 	return utils.ErrNotImplemented
 }
 
 // Filter Methods
-//get
+// get
 func (iDBMig *internalMigrator) getV1Filter() (v1Fltr *v1Filter, err error) {
 	return nil, utils.ErrNotImplemented
 }
@@ -157,28 +157,28 @@ func (iDBMig *internalMigrator) getV4Filter() (v1Fltr *engine.Filter, err error)
 	return nil, utils.ErrNotImplemented
 }
 
-//set
+// set
 func (iDBMig *internalMigrator) setV1Filter(x *v1Filter) (err error) {
 	return utils.ErrNotImplemented
 }
 
-//rem
+// rem
 func (iDBMig *internalMigrator) remV1Filter(tenant, id string) (err error) {
 	return utils.ErrNotImplemented
 }
 
 // Supplier Methods
-//get
+// get
 func (iDBMig *internalMigrator) getSupplier() (spl *SupplierProfile, err error) {
 	return nil, utils.ErrNotImplemented
 }
 
-//set
+// set
 func (iDBMig *internalMigrator) setSupplier(spl *SupplierProfile) (err error) {
 	return utils.ErrNotImplemented
 }
 
-//rem
+// rem
 func (iDBMig *internalMigrator) remSupplier(tenant, id string) (err error) {
 	return utils.ErrNotImplemented
 }

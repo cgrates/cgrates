@@ -116,7 +116,7 @@ func (admS *AdminSv1) GetActionProfilesCount(ctx *context.Context, args *utils.A
 	return
 }
 
-//SetActionProfile add/update a new Action Profile
+// SetActionProfile add/update a new Action Profile
 func (admS *AdminSv1) SetActionProfile(ctx *context.Context, ap *engine.ActionProfileWithAPIOpts, reply *string) error {
 	if missing := utils.MissingStructFields(ap.ActionProfile, []string{utils.ID, utils.Actions}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)

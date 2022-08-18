@@ -394,7 +394,7 @@ func TestLibRoutesSortHighestCost(t *testing.T) {
 	}
 }
 
-//sort based on *acd and *tcd
+// sort based on *acd and *tcd
 func TestLibRoutesSortQOS(t *testing.T) {
 	sSpls := &SortedRoutes{
 		Routes: []*SortedRoute{
@@ -463,7 +463,7 @@ func TestLibRoutesSortQOS(t *testing.T) {
 	}
 }
 
-//sort based on *acd and *tcd
+// sort based on *acd and *tcd
 func TestLibRoutesSortQOS2(t *testing.T) {
 	sSpls := &SortedRoutes{
 		Routes: []*SortedRoute{
@@ -527,7 +527,7 @@ func TestLibRoutesSortQOS2(t *testing.T) {
 	}
 }
 
-//sort based on *pdd
+// sort based on *pdd
 func TestLibRoutesSortQOS3(t *testing.T) {
 	sSpls := &SortedRoutes{
 		Routes: []*SortedRoute{

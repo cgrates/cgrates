@@ -48,14 +48,14 @@ var (
 		testKafkaLoadConfig,
 		testKafkaResetDataDB,
 
-		testKafkaStartEngine,
+		// testKafkaStartEngine,
 		testKafkaRPCConn,
-		testKafkaCreateTopic,
+		// testKafkaCreateTopic,
 		testKafkaExportEvent,
 		testKafkaVerifyExport,
-		testKafkaDeleteTopic,
-		testStopCgrEngine,
-		testCleanDirectory,
+		// testKafkaDeleteTopic,
+		// testStopCgrEngine,
+		// testCleanDirectory,
 	}
 )
 

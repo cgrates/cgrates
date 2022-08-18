@@ -365,7 +365,7 @@ func (acc *Account) Clone() (cln *Account) {
 	return
 }
 
-//Clone returns a clone of the ActivationInterval
+// Clone returns a clone of the ActivationInterval
 func (aI *ActivationInterval) Clone() *ActivationInterval {
 	if aI == nil {
 		return nil
@@ -376,7 +376,7 @@ func (aI *ActivationInterval) Clone() *ActivationInterval {
 	}
 }
 
-//Clone return a clone of the Balance
+// Clone return a clone of the Balance
 func (blnc *Balance) Clone() (cln *Balance) {
 	cln = &Balance{
 		ID:       blnc.ID,

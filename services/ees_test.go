@@ -30,7 +30,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-//TestEventExporterSCoverage for cover testing
+// TestEventExporterSCoverage for cover testing
 func TestEventExporterSCoverage(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()

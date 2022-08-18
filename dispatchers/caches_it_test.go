@@ -44,7 +44,7 @@ var sTestsDspChc = []func(t *testing.T){
 	testDspChcClear,
 }
 
-//Test start here
+// Test start here
 func TestDspCacheSv1(t *testing.T) {
 	var config1, config2, config3 string
 	switch *dbType {

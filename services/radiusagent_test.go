@@ -28,7 +28,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-//TestLoaderSCoverage for cover testing
+// TestLoaderSCoverage for cover testing
 func TestRadiusAgentCoverage(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.SessionSCfg().Enabled = true

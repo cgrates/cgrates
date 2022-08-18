@@ -72,7 +72,7 @@ type DataDBMock struct {
 	RemoveDispatcherHostDrvF    func(*context.Context, string, string) error
 }
 
-//Storage methods
+// Storage methods
 func (dbM *DataDBMock) Close() {}
 
 func (dbM *DataDBMock) Flush(string) error {
@@ -106,7 +106,7 @@ func (dbM *DataDBMock) IsDBEmpty() (resp bool, err error) {
 	return false, utils.ErrNotImplemented
 }
 
-//DataDB methods
+// DataDB methods
 func (dbM *DataDBMock) HasDataDrv(*context.Context, string, string, string) (bool, error) {
 	return false, utils.ErrNotImplemented
 }

@@ -31,7 +31,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-//TestDispatcherSCoverage for cover testing
+// TestDispatcherSCoverage for cover testing
 func TestDispatcherSCoverage(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.AttributeSCfg().Enabled = true

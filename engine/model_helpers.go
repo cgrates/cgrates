@@ -91,7 +91,7 @@ func csvLoad(s interface{}, values []string) (interface{}, error) {
 	return elem.Interface(), nil
 }
 
-//CsvDump receive and interface and convert it to a slice of string
+// CsvDump receive and interface and convert it to a slice of string
 func CsvDump(s interface{}) ([]string, error) {
 	fieldIndexMap := make(map[string]int)
 	st := reflect.ValueOf(s)
