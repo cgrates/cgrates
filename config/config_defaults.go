@@ -525,7 +525,8 @@ const CGRATES_CFG_JSON = `
 				
 				// Kafka
 				// "kafkaTopic": "cgrates",						// the topic from where the events are exported
-				// "kafkaSkipTLSVerification": false,			// if set to true it will skip certificate verification
+				// "kafkaCAPath": "",							// path to certificate authority pem file
+				// "kafkaSkipTLSVerify": false,					// if set to true it will skip certificate verification
 				
 				
 				// AMQP

@@ -1194,6 +1194,8 @@ func TestDiffEventExporterOptsJsonCfg(t *testing.T) {
 		SQLDBName:                utils.StringPointer("cgrates"),
 		PgSSLMode:                utils.StringPointer("sslm"),
 		KafkaTopic:               utils.StringPointer("topic1"),
+		KafkaCAPath:              utils.StringPointer("kafkaCAPath"),
+		KafkaSkipTLSVerify:       utils.BoolPointer(false),
 		AMQPRoutingKey:           utils.StringPointer("routing_key"),
 		AMQPQueueID:              utils.StringPointer("queue_id"),
 		AMQPExchange:             utils.StringPointer("amqp_exchange"),
@@ -1242,6 +1244,8 @@ func TestDiffEventExporterOptsJsonCfg(t *testing.T) {
 		SQLDBName:                utils.StringPointer("cgrates"),
 		PgSSLMode:                utils.StringPointer("sslm"),
 		KafkaTopic:               utils.StringPointer("topic1"),
+		KafkaCAPath:              utils.StringPointer("kafkaCAPath"),
+		KafkaSkipTLSVerify:       utils.BoolPointer(false),
 		AMQPRoutingKey:           utils.StringPointer("routing_key"),
 		AMQPQueueID:              utils.StringPointer("queue_id"),
 		AMQPExchange:             utils.StringPointer("amqp_exchange"),
@@ -1297,6 +1301,8 @@ func TestEventExporterOptsClone(t *testing.T) {
 		SQLDBName:                utils.StringPointer("cgrates"),
 		PgSSLMode:                utils.StringPointer("sslm"),
 		KafkaTopic:               utils.StringPointer("topic1"),
+		KafkaCAPath:              utils.StringPointer("kafkaCAPath"),
+		KafkaSkipTLSVerify:       utils.BoolPointer(false),
 		AMQPRoutingKey:           utils.StringPointer("routing_key"),
 		AMQPQueueID:              utils.StringPointer("queue_id"),
 		AMQPExchange:             utils.StringPointer("amqp_exchange"),
@@ -1345,6 +1351,8 @@ func TestEventExporterOptsClone(t *testing.T) {
 		SQLDBName:                utils.StringPointer("cgrates"),
 		PgSSLMode:                utils.StringPointer("sslm"),
 		KafkaTopic:               utils.StringPointer("topic1"),
+		KafkaCAPath:              utils.StringPointer("kafkaCAPath"),
+		KafkaSkipTLSVerify:       utils.BoolPointer(false),
 		AMQPRoutingKey:           utils.StringPointer("routing_key"),
 		AMQPQueueID:              utils.StringPointer("queue_id"),
 		AMQPExchange:             utils.StringPointer("amqp_exchange"),
@@ -1401,6 +1409,8 @@ func TestLoadFromJSONCfg(t *testing.T) {
 		SQLDBName:                utils.StringPointer("cgrates"),
 		PgSSLMode:                utils.StringPointer("sslm"),
 		KafkaTopic:               utils.StringPointer("topic1"),
+		KafkaCAPath:              utils.StringPointer("kafkaCAPath"),
+		KafkaSkipTLSVerify:       utils.BoolPointer(false),
 		AMQPRoutingKey:           utils.StringPointer("routing_key"),
 		AMQPQueueID:              utils.StringPointer("queue_id"),
 		AMQPExchange:             utils.StringPointer("amqp_exchange"),
@@ -1449,6 +1459,8 @@ func TestLoadFromJSONCfg(t *testing.T) {
 		SQLDBName:                utils.StringPointer("cgrates"),
 		PgSSLMode:                utils.StringPointer("sslm"),
 		KafkaTopic:               utils.StringPointer("topic1"),
+		KafkaCAPath:              utils.StringPointer("kafkaCAPath"),
+		KafkaSkipTLSVerify:       utils.BoolPointer(false),
 		AMQPRoutingKey:           utils.StringPointer("routing_key"),
 		AMQPQueueID:              utils.StringPointer("queue_id"),
 		AMQPExchange:             utils.StringPointer("amqp_exchange"),
@@ -1604,6 +1616,8 @@ func TestEEsAsMapInterface(t *testing.T) {
 			SQLDBName:                utils.StringPointer("cgrates"),
 			PgSSLMode:                utils.StringPointer("sslm"),
 			KafkaTopic:               utils.StringPointer("topic1"),
+			KafkaCAPath:              utils.StringPointer("kafkaCAPath"),
+			KafkaSkipTLSVerify:       utils.BoolPointer(false),
 			AMQPRoutingKey:           utils.StringPointer("routing_key"),
 			AMQPQueueID:              utils.StringPointer("queue_id"),
 			AMQPExchange:             utils.StringPointer("amqp_exchange"),
@@ -1659,6 +1673,8 @@ func TestEEsAsMapInterface(t *testing.T) {
 			"elsVersionType":           "version_type",
 			"elsWaitForActiveShards":   "wfas",
 			"kafkaTopic":               "topic1",
+			"kafkaCAPath":              "kafkaCAPath",
+			"kafkaSkipTLSVerify":       false,
 			"keyPath":                  "/path/to/key",
 			"natsCertificateAuthority": "ca",
 			"natsClientCertificate":    "cc",
@@ -1687,6 +1703,6 @@ func TestEEsAsMapInterface(t *testing.T) {
 	rcv := eeCfg.AsMapInterface(",")
 
 	if !reflect.DeepEqual(exp[utils.OptsCfg], rcv[utils.OptsCfg]) {
-		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(rcv))
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp["opts"]), utils.ToJSON(rcv["opts"]))
 	}
 }

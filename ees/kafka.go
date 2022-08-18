@@ -18,7 +18,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package ees
 
 import (
+	"crypto/tls"
+	"crypto/x509"
+	"net"
+	"os"
 	"sync"
+	"time"
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
@@ -38,13 +43,21 @@ func NewKafkaEE(cfg *config.EventExporterCfg, dc *utils.SafeMapStorage) *KafkaEE
 	if cfg.Opts.KafkaTopic != nil {
 		kfkPstr.topic = *cfg.Opts.KafkaTopic
 	}
+	if cfg.Opts.KafkaCAPath != nil {
+		kfkPstr.caPath = *cfg.Opts.KafkaCAPath
+	}
+	if cfg.Opts.KafkaSkipTLSVerify != nil && *cfg.Opts.KafkaSkipTLSVerify {
+		kfkPstr.skipTLSVerify = true
+	}
 	return kfkPstr
 }
 
 // KafkaEE is a kafka poster
 type KafkaEE struct {
-	topic  string // identifier of the CDR queue where we publish
-	writer *kafka.Writer
+	topic         string // identifier of the CDR queue where we publish
+	caPath        string // path to CA pem file
+	skipTLSVerify bool   // if true, it skips certificate validation
+	writer        *kafka.Writer
 
 	cfg          *config.EventExporterCfg
 	dc           *utils.SafeMapStorage
@@ -55,7 +68,7 @@ type KafkaEE struct {
 
 func (pstr *KafkaEE) Cfg() *config.EventExporterCfg { return pstr.cfg }
 
-func (pstr *KafkaEE) Connect() (_ error) {
+func (pstr *KafkaEE) Connect() (err error) {
 	pstr.Lock()
 	if pstr.writer == nil {
 		pstr.writer = &kafka.Writer{
@@ -63,11 +76,32 @@ func (pstr *KafkaEE) Connect() (_ error) {
 			Topic:       pstr.topic,
 			MaxAttempts: pstr.Cfg().Attempts,
 		}
-		// pstr.writer = kafka.NewWriter(kafka.WriterConfig{
-		// Brokers:     []string{pstr.Cfg().ExportPath},
-		// MaxAttempts: pstr.Cfg().Attempts,
-		// Topic:       pstr.topic,
-		// })
+	}
+	var rootCAs *x509.CertPool
+	if rootCAs, err = x509.SystemCertPool(); err != nil {
+		return
+	}
+	if rootCAs == nil {
+		rootCAs = x509.NewCertPool()
+	}
+	if pstr.caPath != "" {
+		var ca []byte
+		if ca, err = os.ReadFile(pstr.caPath); err != nil {
+			return
+		}
+		if !rootCAs.AppendCertsFromPEM(ca) {
+			return
+		}
+	}
+	pstr.writer.Transport = &kafka.Transport{
+		Dial: (&net.Dialer{
+			Timeout:   3 * time.Second,
+			DualStack: true,
+		}).DialContext,
+		TLS: &tls.Config{
+			RootCAs:            rootCAs,
+			InsecureSkipVerify: pstr.skipTLSVerify,
+		},
 	}
 	pstr.Unlock()
 	return
