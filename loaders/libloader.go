@@ -122,7 +122,7 @@ func (ar *record) FieldAsInterface(fldPath []string) (val interface{}, err error
 	return
 }
 
-//SetFields will populate fields of record out of templates
+// SetFields will populate fields of record out of templates
 func (ar *record) SetFields(ctx *context.Context, tmpls []*config.FCTemplate, filterS *engine.FilterS, rndDec int, dftTmz, rsrSep string) (err error) {
 	ar.tmp = &utils.DataNode{Type: utils.NMMapType, Map: make(map[string]*utils.DataNode)}
 	for _, fld := range tmpls {

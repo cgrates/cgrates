@@ -212,7 +212,8 @@ func removeItemFromFilterIndex(ctx *context.Context, dm *DataManager, idxItmType
 // oldFilterIds - the filtersIDs that the old object had; this is optional if the object did not exist
 // newFilterIDs - the filtersIDs for the object that will be set
 // useGrp - in case of subindexes(e.g. Rate from RateProfiles) need to add the grp to the itemID when reverse filter indexes are set
-// 			used when updating the filters
+//
+//	used when updating the filters
 func updatedIndexes(ctx *context.Context, dm *DataManager, idxItmType, tnt, grp, itemID string, oldFilterIds *[]string, newFilterIDs []string, useGrp bool) (err error) {
 	itmGrp := itemID
 	if useGrp {

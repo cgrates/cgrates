@@ -112,7 +112,7 @@ func (admS *AdminSv1) GetResourceProfilesCount(ctx *context.Context, args *utils
 	return
 }
 
-//SetResourceProfile adds a new resource configuration
+// SetResourceProfile adds a new resource configuration
 func (adms *AdminSv1) SetResourceProfile(ctx *context.Context, arg *engine.ResourceProfileWithAPIOpts, reply *string) (err error) {
 	if missing := utils.MissingStructFields(arg.ResourceProfile, []string{utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
@@ -140,7 +140,7 @@ func (adms *AdminSv1) SetResourceProfile(ctx *context.Context, arg *engine.Resou
 	return nil
 }
 
-//RemoveResourceProfile remove a specific resource configuration
+// RemoveResourceProfile remove a specific resource configuration
 func (adms *AdminSv1) RemoveResourceProfile(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *string) error {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)

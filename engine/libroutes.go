@@ -285,7 +285,7 @@ func (lps RouteProfilesWithWeight) Sort() {
 	sort.Slice(lps, func(i, j int) bool { return lps[i].Weight > lps[j].Weight })
 }
 
-//routeLazyPass filters the route based on
+// routeLazyPass filters the route based on
 func routeLazyPass(ctx *context.Context, filters []*FilterRule, ev *utils.CGREvent, data utils.MapStorage,
 	resConns, statConns, acntConns []string) (pass bool, err error) {
 	if len(filters) == 0 {

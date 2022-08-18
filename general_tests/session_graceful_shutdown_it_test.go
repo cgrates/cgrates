@@ -83,7 +83,7 @@ func TestSessionSRplcGracefulShutdown(t *testing.T) {
 	}
 }
 
-//Init Config
+// Init Config
 func testSessionSRplcInitCfg(t *testing.T) {
 	smgRplcCfgPath1 = path.Join(*dataDir, "conf", "samples", "sessions_replication", smgRplcCfgDIR1)
 	if smgRplCfg1, err = config.NewCGRConfigFromPath(context.Background(), smgRplcCfgPath1); err != nil {

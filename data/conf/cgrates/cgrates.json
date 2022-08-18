@@ -50,7 +50,7 @@
 // 	"opts": {
 // 		"kafka_conn": "",                                        // the connection trough kafka
 // 		"kafka_topic": "",                                       // the topic from where the events are exported
-// 		"attempts": 1,                                           // number of attempts of connecting
+// 		"kafka_attempts": 1,                                           // number of attempts of connecting
 // 		"failed_posts_dir": "/var/spool/cgrates/failed_posts"    // path where fail logs are exported
 // 	},
 // },
@@ -492,8 +492,8 @@
 // 				// SQL
 // 				// "sqlMaxIdleConns": 0,						// SQLMaxIdleConns    
 // 				// "sqlMaxOpenConns": 0,						// SQLMaxOpenConns
-// 				// "sqlConnMaxLifetime": "0",						// SQLConnMaxLifetime 
-// 				// "mysqlDSNParams": {},                           // DSN params
+// 				// "sqlConnMaxLifetime": "0",					// SQLConnMaxLifetime 
+// 				// "mysqlDSNParams": {},                        // DSN params
 
 
 // 				// "sqlTableName":"cdrs", 						// the name of the table from where the events are exported
@@ -503,6 +503,8 @@
 				
 // 				// Kafka
 // 				// "kafkaTopic": "cgrates",						// the topic from where the events are exported
+// 				// "kafkaCAPath": "",							// path to certificate authority pem file
+// 				// "kafkaSkipTLSVerify": false,					// if set to true it will skip certificate verification
 				
 				
 // 				// AMQP
@@ -1495,6 +1497,15 @@
 // 	"notexists_indexed_fields": [],			// query indexes based on these fields for faster processing
 // 	"nested_fields": false,					// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
 // 	"attributes_conns": [],					// connections to AttributeS for API authorization, empty to disable auth functionality: <""|*internal|$rpc_conns_id>
+// 	"opts": {								//
+// 		// "*dispatcherS": [						
+// 		// 	{
+// 		// 		"Tenant": "*any",
+// 		// 		"FilterIDs": [],
+// 		// 		"Value": false,
+// 		// 	},
+// 		// ],
+// 	},
 // },
 
 
@@ -1730,7 +1741,7 @@
 // 	"notexists_indexed_fields": [],			// query indexes based on these fields for faster processing
 // 	"nested_fields": false,					// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
 // 	"dynaprepaid_actionprofile": [],		//
-// 	"opts":{								//
+// 	"opts":{	 		
 // 		// "*profileIDs": [				
 // 		// 	{
 // 		// 		"Tenant": "*any",
@@ -1738,11 +1749,18 @@
 // 		// 		"Value": [],
 // 		// 	},
 // 		// ],
-// 		// "*profileIgnoreFilters": [		// ignore the filters for actionProfileIDs
+// 		// "*profileIgnoreFilters": [			// ignore the filters for actionProfileIDs
 // 		// 	{
 // 		// 		"Tenant": "*any",
 // 		// 		"FilterIDs": [],
 // 		// 		"Value": false,
+// 		// 	},
+// 		// ],
+// 		// "*posterAttempts": [				// poster attempts for HTTPPost action type	
+// 		//     {
+// 		// 		"Tenant": "*any",
+// 		// 		"FilterIDs": [],
+// 		// 		"Value": 1,
 // 		// 	},
 // 		// ],									
 // 	},

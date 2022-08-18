@@ -28,7 +28,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-//TestHTTPAgent for cover testing
+// TestHTTPAgent for cover testing
 func TestHTTPAgentCoverage(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	server := cores.NewServer(nil)

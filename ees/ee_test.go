@@ -194,7 +194,7 @@ func TestNewEventExporterDefaultCase(t *testing.T) {
 	}
 }
 
-//Test for Case 7
+// Test for Case 7
 func TestNewEventExporterCase7(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	cgrCfg.EEsCfg().Exporters[0].Type = utils.MetaElastic
@@ -225,7 +225,7 @@ func TestNewEventExporterCase7(t *testing.T) {
 	}
 }
 
-//Test for Case 8
+// Test for Case 8
 func TestNewEventExporterCase8(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	cgrCfg.EEsCfg().Exporters[0].Type = utils.MetaSQL
@@ -238,7 +238,7 @@ func TestNewEventExporterCase8(t *testing.T) {
 	}
 }
 
-//Test for invalid "dc"
+// Test for invalid "dc"
 func TestNewEventExporterDcCase(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	cgrCfg.GeneralCfg().DefaultTimezone = "invalid_timezone"

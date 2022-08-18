@@ -31,7 +31,7 @@ var sTestsDspAccPrf = []func(t *testing.T){
 	testDspAccPrfPing,
 }
 
-//Test start here
+// Test start here
 func TestDspAccountSIT(t *testing.T) {
 	var config1, config2, config3 string
 	switch *dbType {

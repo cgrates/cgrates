@@ -30,7 +30,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-//TestStatSCoverage for cover testing
+// TestStatSCoverage for cover testing
 func TestStatSCoverage(t *testing.T) {
 	// utils.Logger.SetLogLevel(7)
 	cfg := config.NewDefaultCGRConfig()

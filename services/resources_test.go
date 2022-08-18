@@ -30,7 +30,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-//TestResourceSCoverage for cover testing
+// TestResourceSCoverage for cover testing
 func TestResourceSCoverage(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.ThresholdSCfg().Enabled = true

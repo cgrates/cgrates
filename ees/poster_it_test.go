@@ -61,77 +61,77 @@ type TestContent struct {
 }
 
 /*
-func TestHttpJsonPoster(t *testing.T) {
-	SetFailedPostCacheTTL(time.Millisecond)
-	content := &TestContent{Var1: "Val1", Var2: "Val2"}
-	jsn, _ := json.Marshal(content)
-	pstr, err := NewHTTPjsonMapEE(&config.EventExporterCfg{
-		ExportPath:     "http://localhost:8080/invalid",
-		Attempts:       3,
-		FailedPostsDir: "/tmp",
-		Opts:           &config.EventExporterOpts{},
-	}, config.CgrConfig(), nil, nil)
-	if err != nil {
-		t.Error(err)
-	}
-	if err = ExportWithAttempts(context.Background(), pstr, &HTTPPosterRequest{Body: jsn, Header: make(http.Header)}, ""); err == nil {
-		t.Error("Expected error")
-	}
-	AddFailedPost("/tmp", "http://localhost:8080/invalid", utils.MetaHTTPjsonMap, "test1", jsn, &config.EventExporterOpts{})
-	time.Sleep(5 * time.Millisecond)
-	fs, err := filepath.Glob("/tmp/test1*")
-	if err != nil {
-		t.Fatal(err)
-	} else if len(fs) == 0 {
-		t.Fatal("Expected at least one file")
+	func TestHttpJsonPoster(t *testing.T) {
+		SetFailedPostCacheTTL(time.Millisecond)
+		content := &TestContent{Var1: "Val1", Var2: "Val2"}
+		jsn, _ := json.Marshal(content)
+		pstr, err := NewHTTPjsonMapEE(&config.EventExporterCfg{
+			ExportPath:     "http://localhost:8080/invalid",
+			Attempts:       3,
+			FailedPostsDir: "/tmp",
+			Opts:           &config.EventExporterOpts{},
+		}, config.CgrConfig(), nil, nil)
+		if err != nil {
+			t.Error(err)
+		}
+		if err = ExportWithAttempts(context.Background(), pstr, &HTTPPosterRequest{Body: jsn, Header: make(http.Header)}, ""); err == nil {
+			t.Error("Expected error")
+		}
+		AddFailedPost("/tmp", "http://localhost:8080/invalid", utils.MetaHTTPjsonMap, "test1", jsn, &config.EventExporterOpts{})
+		time.Sleep(5 * time.Millisecond)
+		fs, err := filepath.Glob("/tmp/test1*")
+		if err != nil {
+			t.Fatal(err)
+		} else if len(fs) == 0 {
+			t.Fatal("Expected at least one file")
+		}
+
+		ev, err := NewExportEventsFromFile(fs[0])
+		if err != nil {
+			t.Fatal(err)
+		} else if len(ev.Events) == 0 {
+			t.Fatal("Expected at least one event")
+		}
+		if !reflect.DeepEqual(jsn, ev.Events[0]) {
+			t.Errorf("Expecting: %q, received: %q", string(jsn), ev.Events[0])
+		}
 	}
 
-	ev, err := NewExportEventsFromFile(fs[0])
-	if err != nil {
-		t.Fatal(err)
-	} else if len(ev.Events) == 0 {
-		t.Fatal("Expected at least one event")
+	func TestHttpBytesPoster(t *testing.T) {
+		SetFailedPostCacheTTL(time.Millisecond)
+		content := []byte(`Test
+			Test2
+			`)
+		pstr, err := NewHTTPjsonMapEE(&config.EventExporterCfg{
+			ExportPath:     "http://localhost:8080/invalid",
+			Attempts:       3,
+			FailedPostsDir: "/tmp",
+			Opts:           &config.EventExporterOpts{},
+		}, config.CgrConfig(), nil, nil)
+		if err != nil {
+			t.Error(err)
+		}
+		if err = ExportWithAttempts(context.Background(), pstr, &HTTPPosterRequest{Body: content, Header: make(http.Header)}, ""); err == nil {
+			t.Error("Expected error")
+		}
+		AddFailedPost("/tmp", "http://localhost:8080/invalid", utils.ContentJSON, "test2", content, &config.EventExporterOpts{})
+		time.Sleep(5 * time.Millisecond)
+		fs, err := filepath.Glob("/tmp/test2*")
+		if err != nil {
+			t.Fatal(err)
+		} else if len(fs) == 0 {
+			t.Fatal("Expected at least one file")
+		}
+		ev, err := NewExportEventsFromFile(fs[0])
+		if err != nil {
+			t.Fatal(err)
+		} else if len(ev.Events) == 0 {
+			t.Fatal("Expected at least one event")
+		}
+		if !reflect.DeepEqual(content, ev.Events[0]) {
+			t.Errorf("Expecting: %q, received: %q", string(content), ev.Events[0])
+		}
 	}
-	if !reflect.DeepEqual(jsn, ev.Events[0]) {
-		t.Errorf("Expecting: %q, received: %q", string(jsn), ev.Events[0])
-	}
-}
-
-func TestHttpBytesPoster(t *testing.T) {
-	SetFailedPostCacheTTL(time.Millisecond)
-	content := []byte(`Test
-		Test2
-		`)
-	pstr, err := NewHTTPjsonMapEE(&config.EventExporterCfg{
-		ExportPath:     "http://localhost:8080/invalid",
-		Attempts:       3,
-		FailedPostsDir: "/tmp",
-		Opts:           &config.EventExporterOpts{},
-	}, config.CgrConfig(), nil, nil)
-	if err != nil {
-		t.Error(err)
-	}
-	if err = ExportWithAttempts(context.Background(), pstr, &HTTPPosterRequest{Body: content, Header: make(http.Header)}, ""); err == nil {
-		t.Error("Expected error")
-	}
-	AddFailedPost("/tmp", "http://localhost:8080/invalid", utils.ContentJSON, "test2", content, &config.EventExporterOpts{})
-	time.Sleep(5 * time.Millisecond)
-	fs, err := filepath.Glob("/tmp/test2*")
-	if err != nil {
-		t.Fatal(err)
-	} else if len(fs) == 0 {
-		t.Fatal("Expected at least one file")
-	}
-	ev, err := NewExportEventsFromFile(fs[0])
-	if err != nil {
-		t.Fatal(err)
-	} else if len(ev.Events) == 0 {
-		t.Fatal("Expected at least one event")
-	}
-	if !reflect.DeepEqual(content, ev.Events[0]) {
-		t.Errorf("Expecting: %q, received: %q", string(content), ev.Events[0])
-	}
-}
 */
 func TestSQSPoster(t *testing.T) {
 	if !*itTestSQS {

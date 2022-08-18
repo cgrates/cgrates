@@ -199,7 +199,7 @@ func (cfg *CGRConfig) V1SetConfig(ctx *context.Context, args *SetConfigArgs, rep
 	return
 }
 
-//V1GetConfigAsJSON will retrieve from CGRConfig a section as a string
+// V1GetConfigAsJSON will retrieve from CGRConfig a section as a string
 func (cfg *CGRConfig) V1GetConfigAsJSON(ctx *context.Context, args *SectionWithAPIOpts, reply *string) (err error) {
 	var mp map[string]interface{}
 	if err = cfg.V1GetConfig(ctx, args, &mp); err != nil {

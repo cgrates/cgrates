@@ -34,7 +34,7 @@ var sTestsDspRPrf = []func(t *testing.T){
 	testDspRPrfCostForEventWithoutFilters,
 }
 
-//Test start here
+// Test start here
 func TestDspRateSIT(t *testing.T) {
 	var config1, config2, config3 string
 	switch *dbType {

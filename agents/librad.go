@@ -100,7 +100,7 @@ func (pk *radiusDP) FieldAsString(fldPath []string) (data string, err error) {
 	return utils.IfaceAsString(valIface), nil
 }
 
-//radauthReq is used to authorize a request based on flags
+// radauthReq is used to authorize a request based on flags
 func radauthReq(flags utils.FlagsWithParams, req *radigo.Packet, aReq *AgentRequest, rpl *radigo.Packet) (bool, error) {
 	// try to get UserPassword from Vars as slice of NMItems
 	nmItems, has := aReq.Vars.Map[utils.UserPassword]

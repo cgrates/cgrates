@@ -30,7 +30,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-//TestSupplierSCoverage for cover testing
+// TestSupplierSCoverage for cover testing
 func TestSupplierSCoverage(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.StatSCfg().Enabled = true

@@ -27,7 +27,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-//TestDNSAgentCoverage for cover testing
+// TestDNSAgentCoverage for cover testing
 func TestDNSAgentCoverage(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.SessionSCfg().Enabled = true

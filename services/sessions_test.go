@@ -40,7 +40,7 @@ func (sT *testMockClients) Call(ctx *context.Context, method string, arg, rply i
 	return sT.calls(ctx, arg, rply)
 }
 
-//TestSessionSCoverage for cover testing
+// TestSessionSCoverage for cover testing
 func TestSessionSCoverage(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.ChargerSCfg().Enabled = true

@@ -84,7 +84,7 @@ func newRPCClient(cfg *config.ListenCfg) (c *rpc.Client, err error) {
 	}
 }
 
-//Test start here
+// Test start here
 func TestAnalyzerSIT(t *testing.T) {
 	for _, stest := range sTestsAlsPrf {
 		t.Run("TestAnalyzerSIT", stest)

@@ -112,7 +112,7 @@ func (adms *AdminSv1) GetRouteProfilesCount(ctx *context.Context, args *utils.Ar
 	return
 }
 
-//SetRouteProfile add a new Route configuration
+// SetRouteProfile add a new Route configuration
 func (adms *AdminSv1) SetRouteProfile(ctx *context.Context, args *engine.RouteProfileWithAPIOpts, reply *string) error {
 	if missing := utils.MissingStructFields(args.RouteProfile, []string{utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
@@ -139,7 +139,7 @@ func (adms *AdminSv1) SetRouteProfile(ctx *context.Context, args *engine.RoutePr
 	return nil
 }
 
-//RemoveRouteProfile remove a specific Route configuration
+// RemoveRouteProfile remove a specific Route configuration
 func (adms *AdminSv1) RemoveRouteProfile(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *string) error {
 	if missing := utils.MissingStructFields(args, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)

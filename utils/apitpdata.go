@@ -227,7 +227,7 @@ type AttrDisconnectSession struct {
 	Reason     string
 }
 
-//MetricWithFilters is used in TPStatProfile
+// MetricWithFilters is used in TPStatProfile
 type MetricWithFilters struct {
 	FilterIDs []string
 	MetricID  string

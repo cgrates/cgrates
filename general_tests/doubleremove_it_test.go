@@ -62,7 +62,7 @@ var (
 	}
 )
 
-//Test starts here
+// Test starts here
 func TestDoubleRemoveIT(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:

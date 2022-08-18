@@ -189,7 +189,7 @@ func (ar *AgentRequest) FieldAsString(fldPath []string) (val string, err error) 
 	return utils.IfaceAsString(iface), nil
 }
 
-//SetFields will populate fields of AgentRequest out of templates
+// SetFields will populate fields of AgentRequest out of templates
 func (ar *AgentRequest) SetFields(tplFlds []*config.FCTemplate) (err error) {
 	ar.tmp = &utils.DataNode{Type: utils.NMMapType, Map: make(map[string]*utils.DataNode)}
 	for _, tplFld := range tplFlds {

@@ -62,7 +62,8 @@ func (aS *AccountS) Shutdown() {
 
 // matchingAccountsForEvent returns the matched Accounts for the given event
 // if lked option is passed, each Account will be also locked
-//   so it becomes responsibility of upper layers to release the lock
+//
+//	so it becomes responsibility of upper layers to release the lock
 func (aS *AccountS) matchingAccountsForEvent(ctx *context.Context, tnt string, cgrEv *utils.CGREvent,
 	acntIDs []string, ignoreFilters, lked bool) (acnts utils.AccountsWithWeight, err error) {
 	evNm := utils.MapStorage{

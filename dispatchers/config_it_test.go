@@ -33,7 +33,7 @@ var sTestsDspConfig = []func(t *testing.T){
 	testDspConfigSv1GetJSONSection,
 }
 
-//Test start here
+// Test start here
 func TestDspConfigIT(t *testing.T) {
 	var config1, config2, config3 string
 	switch *dbType {

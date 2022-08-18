@@ -1400,7 +1400,7 @@ func testTPeSExportAfterFlush(t *testing.T) {
 	}
 }
 
-//Kill the engine when it is about to be finished
+// Kill the engine when it is about to be finished
 func testTPeSKillEngine(t *testing.T) {
 	if err := engine.KillEngine(100); err != nil {
 		t.Error(err)
