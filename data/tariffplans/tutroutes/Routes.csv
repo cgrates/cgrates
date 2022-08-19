@@ -36,4 +36,10 @@ cgrates.org,ROUTE_LCR,,,,,,route1,*gte:~*stats.STATS_TOP3.*acd:1m;*lte:~*stats.S
 cgrates.org,ROUTE_LCR,,,,,,route2,*eq:~*stats.STATS_TOP3.*asr:100,,RP_STANDARD,,,;15,,
 cgrates.org,ROUTE_LCR,,,,,,route3,*gt:~*stats.STATS_TOP1.*acd:30s,,RP_VENDOR2,,,;10,,
 
+cgrates.org,ROUTE_LCR_ACCOUNTS,*string:~*req.Account:acnt22,,,*lc,,,,,,,,,,
+cgrates.org,ROUTE_LCR_ACCOUNTS,,,,,,route1,*prefix:~*req.Destination:1044,ACCNT_ROUTES1,,,,;20,,
+cgrates.org,ROUTE_LCR_ACCOUNTS,,,,,,route2,*gte:~*accounts.ACCNT_ROUTES1.Balances[Concrete1].Units:130,ACCNT_ROUTES1,,,,;15,,
+cgrates.org,ROUTE_LCR_ACCOUNTS,,,,,,route3,,ACCNT_ROUTES1,,,,;10,,
+cgrates.org,ROUTE_LCR_ACCOUNTS,,,,,,route4,*lt:~*accounts.ACCNT_ROUTES2.Balances[Abstract1].Units:200s,ACCNT_ROUTES2,,,,;55,,
+
 
