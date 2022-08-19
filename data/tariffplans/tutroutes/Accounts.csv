@@ -1,3 +1,5 @@
 #Tenant,ID,FilterIDs,Weights,Blockers,Opts,BalanceID,BalanceFilterIDs,BalanceWeights,BalanceBlockers,BalanceType,BalanceUnits,BalanceUnitFactors,BalanceOpts,BalanceCostIncrements,BalanceAttributeIDs,BalanceRateProfileIDs,ThresholdIDs
 
 cgrates.org,1001,*string:~*req.Account:1001,,,,Concrete1,,;30,,*concrete,15,,,;1s;0;0.01,,,*none
+cgrates.org,ACCNT_ROUTES1,*string:~*req.Account:acnt22,;10,,,Concrete1,,;30,,*concrete,130,,,;1s;0;0.1,,,*none
+cgrates.org,ACCNT_ROUTES2,*string:~*req.Account:acnt22,,,,Abstract1,,;40,,*abstract,70s,,,;1s;0;0.1,,,*none

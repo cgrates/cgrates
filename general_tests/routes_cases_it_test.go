@@ -72,6 +72,7 @@ var (
 		testV1RtsCasesSortRoutesHigherCostAllocateRes,
 		testV1RtsCasesSortRoutesHigherCostV1V3,
 		testV1RtsCasesSortRoutesHigherCostAllRoutes,
+		testV1RtsCasesSortingRoutesLowestCostAccounts,
 
 		testV1RtsCaseStopEngine,
 	}
@@ -1715,6 +1716,70 @@ func testV1RtsCasesSortRoutesHigherCostAllRoutes(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expSrtdRoutes) {
 		t.Errorf("Expecting: %+v \n, received: %+v", utils.ToJSON(expSrtdRoutes), utils.ToJSON(reply))
+	}
+}
+
+func testV1RtsCasesSortingRoutesLowestCostAccounts(t *testing.T) {
+	//gonna match all routes from ROUTE_LCR_ACCOUNTS
+	ev := &utils.CGREvent{
+		ID:     "LC_SORT",
+		Tenant: "cgrates.org",
+		Event: map[string]interface{}{
+			utils.AccountField: "acnt22",
+			utils.Destination:  "104423",
+		},
+		APIOpts: map[string]interface{}{
+			utils.MetaStartTime: "2013-06-01T05:00:00Z",
+			utils.MetaUsage:     "50s",
+		},
+	}
+	expSrtdRoutes := &engine.SortedRoutesList{
+		{
+			ProfileID: "ROUTE_LCR_ACCOUNTS",
+			Sorting:   "*lc",
+			Routes: []*engine.SortedRoute{
+				{
+					RouteID: "route4",
+					SortingData: map[string]interface{}{
+						utils.Cost:       nil,
+						utils.AccountIDs: []interface{}{"ACCNT_ROUTES2"},
+						utils.Weight:     55.,
+					},
+				},
+				{
+					RouteID: "route1",
+					SortingData: map[string]interface{}{
+						utils.Cost:       5.,
+						utils.AccountIDs: []interface{}{"ACCNT_ROUTES1"},
+						utils.Weight:     20.,
+					},
+				},
+				{
+					RouteID: "route2",
+					SortingData: map[string]interface{}{
+						utils.Cost:       5.,
+						utils.AccountIDs: []interface{}{"ACCNT_ROUTES1"},
+						utils.Weight:     15.,
+					},
+				},
+				{
+					RouteID: "route3",
+					SortingData: map[string]interface{}{
+						utils.Cost:       5.,
+						utils.AccountIDs: []interface{}{"ACCNT_ROUTES1"},
+						utils.Weight:     10.,
+					},
+				},
+			},
+		},
+	}
+	var reply *engine.SortedRoutesList
+	//gonna match one route because the totalUsage by ne-allocated resources is 0
+	if err := rtsCaseSv1BiRpc.Call(context.Background(), utils.RouteSv1GetRoutes,
+		ev, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expSrtdRoutes, reply) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expSrtdRoutes), utils.ToJSON(reply))
 	}
 }
 
