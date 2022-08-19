@@ -78,6 +78,96 @@ var (
 	}
 )
 
+// bench for routes with connection trough rates
+// go test -run=BenchmarkV1RtsCasesSortingRoutesLowestCost -tags=integration -bench=. -benchtime=5s -count=4 -v
+
+/*
+func BenchmarkV1RtsCasesSortingRoutesLowestCost(t *testing.B) {
+
+	var err error
+	rtsCaseSv1ConfDIR = "routes_cases_mysql"
+	rtsCaseSv1CfgPath = path.Join(*dataDir, "conf", "samples", rtsCaseSv1ConfDIR)
+	if rtsCaseSv1Cfg, err = config.NewCGRConfigFromPath(context.Background(), rtsCaseSv1CfgPath); err != nil {
+		t.Error(err)
+	}
+
+	rtsCaseSv1BiRpc, err = newBiRPCClient(rtsCaseSv1Cfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
+	if err != nil {
+		t.Fatal("Could not connect to rater: ", err.Error())
+	}
+
+	ev := &utils.CGREvent{
+		ID:     "LC_SORT",
+		Tenant: "cgrates.org",
+		Event: map[string]interface{}{
+			utils.AccountField: "acnt22",
+			utils.Destination:  "104423",
+		},
+		APIOpts: map[string]interface{}{
+			utils.MetaStartTime: "2013-06-01T05:00:00Z",
+			utils.MetaUsage:     "50s",
+		},
+	}
+	expSrtdRoutes := &engine.SortedRoutesList{
+		{
+			ProfileID: "ROUTE_LCR_ACCOUNTS",
+			Sorting:   "*lc",
+			Routes: []*engine.SortedRoute{
+				{
+					RouteID: "route4",
+					SortingData: map[string]interface{}{
+						utils.Cost:       nil,
+						utils.AccountIDs: []interface{}{"ACCNT_ROUTES2"},
+						utils.Weight:     55.,
+					},
+				},
+				{
+					RouteID: "route1",
+					SortingData: map[string]interface{}{
+						utils.Cost:       5.,
+						utils.AccountIDs: []interface{}{"ACCNT_ROUTES1"},
+						utils.Weight:     20.,
+					},
+				},
+				{
+					RouteID: "route2",
+					SortingData: map[string]interface{}{
+						utils.Cost:       5.,
+						utils.AccountIDs: []interface{}{"ACCNT_ROUTES1"},
+						utils.Weight:     15.,
+					},
+				},
+				{
+					RouteID: "route3",
+					SortingData: map[string]interface{}{
+						utils.Cost:       5.,
+						utils.AccountIDs: []interface{}{"ACCNT_ROUTES1"},
+						utils.Weight:     10.,
+					},
+				},
+			},
+		},
+	}
+	//var wg sync.WaitGroup
+	now := time.Now()
+	for i := 0; i < t.N; i++ {
+		//wg.Add(1)
+		//go func() {
+		var reply *engine.SortedRoutesList
+		//gonna match one route because the totalUsage by ne-allocated resources is 0
+		if err := rtsCaseSv1BiRpc.Call(context.Background(), utils.RouteSv1GetRoutes,
+			ev, &reply); err != nil {
+			t.Error(err)
+		} else if !reflect.DeepEqual(expSrtdRoutes, reply) {
+			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expSrtdRoutes), utils.ToJSON(reply))
+		}
+		//wg.Done()
+		//}()
+	}
+	//wg.Wait()
+	fmt.Println(time.Since(now))
+}
+*/
 // Test start here
 func TestRoutesCaseV1IT(t *testing.T) {
 	switch *dbType {
