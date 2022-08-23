@@ -43,6 +43,9 @@ func NewKafkaEE(cfg *config.EventExporterCfg, dc *utils.SafeMapStorage) *KafkaEE
 	if cfg.Opts.KafkaTopic != nil {
 		kfkPstr.topic = *cfg.Opts.KafkaTopic
 	}
+	if cfg.Opts.KafkaTLS != nil && *cfg.Opts.KafkaTLS {
+		kfkPstr.TLS = true
+	}
 	if cfg.Opts.KafkaCAPath != nil {
 		kfkPstr.caPath = *cfg.Opts.KafkaCAPath
 	}
@@ -55,6 +58,7 @@ func NewKafkaEE(cfg *config.EventExporterCfg, dc *utils.SafeMapStorage) *KafkaEE
 // KafkaEE is a kafka poster
 type KafkaEE struct {
 	topic         string // identifier of the CDR queue where we publish
+	TLS           bool   // if true, it will attempt to authenticate the server
 	caPath        string // path to CA pem file
 	skipTLSVerify bool   // if true, it skips certificate validation
 	writer        *kafka.Writer
@@ -77,31 +81,33 @@ func (pstr *KafkaEE) Connect() (err error) {
 			MaxAttempts: pstr.Cfg().Attempts,
 		}
 	}
-	var rootCAs *x509.CertPool
-	if rootCAs, err = x509.SystemCertPool(); err != nil {
-		return
-	}
-	if rootCAs == nil {
-		rootCAs = x509.NewCertPool()
-	}
-	if pstr.caPath != "" {
-		var ca []byte
-		if ca, err = os.ReadFile(pstr.caPath); err != nil {
+	if pstr.TLS {
+		var rootCAs *x509.CertPool
+		if rootCAs, err = x509.SystemCertPool(); err != nil {
 			return
 		}
-		if !rootCAs.AppendCertsFromPEM(ca) {
-			return
+		if rootCAs == nil {
+			rootCAs = x509.NewCertPool()
 		}
-	}
-	pstr.writer.Transport = &kafka.Transport{
-		Dial: (&net.Dialer{
-			Timeout:   3 * time.Second,
-			DualStack: true,
-		}).DialContext,
-		TLS: &tls.Config{
-			RootCAs:            rootCAs,
-			InsecureSkipVerify: pstr.skipTLSVerify,
-		},
+		if pstr.caPath != "" {
+			var ca []byte
+			if ca, err = os.ReadFile(pstr.caPath); err != nil {
+				return
+			}
+			if !rootCAs.AppendCertsFromPEM(ca) {
+				return
+			}
+		}
+		pstr.writer.Transport = &kafka.Transport{
+			Dial: (&net.Dialer{
+				Timeout:   3 * time.Second,
+				DualStack: true,
+			}).DialContext,
+			TLS: &tls.Config{
+				RootCAs:            rootCAs,
+				InsecureSkipVerify: pstr.skipTLSVerify,
+			},
+		}
 	}
 	pstr.Unlock()
 	return
