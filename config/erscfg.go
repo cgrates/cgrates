@@ -149,7 +149,13 @@ type EventReaderOpts struct {
 	KafkaTopic                        *string
 	KafkaGroupID                      *string
 	KafkaMaxWait                      *time.Duration
+	KafkaTLS                          *bool
+	KafkaCAPath                       *string
+	KafkaSkipTLSVerify                *bool
 	KafkaTopicProcessed               *string
+	KafkaTLSProcessed                 *bool
+	KafkaCAPathProcessed              *string
+	KafkaSkipTLSVerifyProcessed       *bool
 	SQLDBName                         *string
 	SQLTableName                      *string
 	PgSSLMode                         *string
@@ -278,8 +284,26 @@ func (erOpts *EventReaderOpts) loadFromJSONCfg(jsnCfg *EventReaderOptsJson) (err
 		}
 		erOpts.KafkaMaxWait = utils.DurationPointer(kafkaMaxWait)
 	}
+	if jsnCfg.KafkaTLS != nil {
+		erOpts.KafkaTLS = jsnCfg.KafkaTLS
+	}
+	if jsnCfg.KafkaCAPath != nil {
+		erOpts.KafkaCAPath = jsnCfg.KafkaCAPath
+	}
+	if jsnCfg.KafkaSkipTLSVerify != nil {
+		erOpts.KafkaSkipTLSVerify = jsnCfg.KafkaSkipTLSVerify
+	}
 	if jsnCfg.KafkaTopicProcessed != nil {
 		erOpts.KafkaTopicProcessed = jsnCfg.KafkaTopicProcessed
+	}
+	if jsnCfg.KafkaTLSProcessed != nil {
+		erOpts.KafkaTLSProcessed = jsnCfg.KafkaTLSProcessed
+	}
+	if jsnCfg.KafkaCAPathProcessed != nil {
+		erOpts.KafkaCAPathProcessed = jsnCfg.KafkaCAPathProcessed
+	}
+	if jsnCfg.KafkaSkipTLSVerifyProcessed != nil {
+		erOpts.KafkaSkipTLSVerifyProcessed = jsnCfg.KafkaSkipTLSVerifyProcessed
 	}
 	if jsnCfg.SQLDBName != nil {
 		erOpts.SQLDBName = jsnCfg.SQLDBName
@@ -542,8 +566,26 @@ func (erOpts *EventReaderOpts) Clone() *EventReaderOpts {
 	if erOpts.KafkaMaxWait != nil {
 		cln.KafkaMaxWait = utils.DurationPointer(*erOpts.KafkaMaxWait)
 	}
+	if erOpts.KafkaTLS != nil {
+		cln.KafkaTLS = utils.BoolPointer(*erOpts.KafkaTLS)
+	}
+	if erOpts.KafkaCAPath != nil {
+		cln.KafkaCAPath = utils.StringPointer(*erOpts.KafkaCAPath)
+	}
+	if erOpts.KafkaSkipTLSVerify != nil {
+		cln.KafkaSkipTLSVerify = utils.BoolPointer(*erOpts.KafkaSkipTLSVerify)
+	}
 	if erOpts.KafkaTopicProcessed != nil {
 		cln.KafkaTopicProcessed = utils.StringPointer(*erOpts.KafkaTopicProcessed)
+	}
+	if erOpts.KafkaTLSProcessed != nil {
+		cln.KafkaTLSProcessed = utils.BoolPointer(*erOpts.KafkaTLSProcessed)
+	}
+	if erOpts.KafkaCAPathProcessed != nil {
+		cln.KafkaCAPathProcessed = utils.StringPointer(*erOpts.KafkaCAPathProcessed)
+	}
+	if erOpts.KafkaSkipTLSVerify != nil {
+		cln.KafkaSkipTLSVerify = utils.BoolPointer(*erOpts.KafkaSkipTLSVerify)
 	}
 	if erOpts.SQLDBName != nil {
 		cln.SQLDBName = utils.StringPointer(*erOpts.SQLDBName)
@@ -764,8 +806,26 @@ func (er *EventReaderCfg) AsMapInterface(separator string) (initialMP map[string
 	if er.Opts.KafkaMaxWait != nil {
 		opts[utils.KafkaMaxWait] = er.Opts.KafkaMaxWait.String()
 	}
+	if er.Opts.KafkaTLS != nil {
+		opts[utils.KafkaTLS] = *er.Opts.KafkaTLS
+	}
+	if er.Opts.KafkaCAPath != nil {
+		opts[utils.KafkaCAPath] = *er.Opts.KafkaCAPath
+	}
+	if er.Opts.KafkaSkipTLSVerify != nil {
+		opts[utils.KafkaSkipTLSVerify] = *er.Opts.KafkaSkipTLSVerify
+	}
 	if er.Opts.KafkaTopicProcessed != nil {
 		opts[utils.KafkaTopicProcessedCfg] = *er.Opts.KafkaTopicProcessed
+	}
+	if er.Opts.KafkaTLSProcessed != nil {
+		opts[utils.KafkaTLSProcessedCfg] = *er.Opts.KafkaTLSProcessed
+	}
+	if er.Opts.KafkaCAPathProcessed != nil {
+		opts[utils.KafkaCAPathProcessedCfg] = *er.Opts.KafkaCAPathProcessed
+	}
+	if er.Opts.KafkaSkipTLSVerifyProcessed != nil {
+		opts[utils.KafkaSkipTLSVerifyProcessedCfg] = *er.Opts.KafkaSkipTLSVerifyProcessed
 	}
 	if er.Opts.SQLDBName != nil {
 		opts[utils.SQLDBNameOpt] = *er.Opts.SQLDBName
@@ -949,7 +1009,13 @@ type EventReaderOptsJson struct {
 	KafkaTopic                        *string `json:"kafkaTopic"`
 	KafkaGroupID                      *string `json:"kafkaGroupID"`
 	KafkaMaxWait                      *string `json:"kafkaMaxWait"`
+	KafkaTLS                          *bool   `json:"kafkaTLS"`
+	KafkaCAPath                       *string `json:"kafkaCAPath"`
+	KafkaSkipTLSVerify                *bool   `json:"kafkaSkipTLSVerify"`
 	KafkaTopicProcessed               *string `json:"kafkaTopicProcessed"`
+	KafkaTLSProcessed                 *bool   `json:"kafkaTLSProcessed"`
+	KafkaCAPathProcessed              *string `json:"kafkaCAPathProcessed"`
+	KafkaSkipTLSVerifyProcessed       *bool   `json:"kafkaSkipTLSVerifyProcessed"`
 	SQLDBName                         *string `json:"sqlDBName"`
 	SQLTableName                      *string `json:"sqlTableName"`
 	PgSSLMode                         *string `json:"pgSSLMode"`
@@ -1179,6 +1245,30 @@ func diffEventReaderOptsJsonCfg(d *EventReaderOptsJson, v1, v2 *EventReaderOpts)
 	} else {
 		d.KafkaMaxWait = nil
 	}
+	if v2.KafkaTLS != nil {
+		if v1.KafkaTLS == nil ||
+			*v1.KafkaTLS != *v2.KafkaTLS {
+			d.KafkaTLS = v2.KafkaTLS
+		}
+	} else {
+		d.KafkaTLS = nil
+	}
+	if v2.KafkaCAPath != nil {
+		if v1.KafkaCAPath == nil ||
+			*v1.KafkaCAPath != *v2.KafkaCAPath {
+			d.KafkaCAPath = v2.KafkaCAPath
+		}
+	} else {
+		d.KafkaCAPath = nil
+	}
+	if v2.KafkaSkipTLSVerify != nil {
+		if v1.KafkaSkipTLSVerify == nil ||
+			*v1.KafkaSkipTLSVerify != *v2.KafkaSkipTLSVerify {
+			d.KafkaSkipTLSVerify = v2.KafkaSkipTLSVerify
+		}
+	} else {
+		d.KafkaSkipTLSVerify = nil
+	}
 	if v2.KafkaTopicProcessed != nil {
 		if v1.KafkaTopicProcessed == nil ||
 			*v1.KafkaTopicProcessed != *v2.KafkaTopicProcessed {
@@ -1186,6 +1276,30 @@ func diffEventReaderOptsJsonCfg(d *EventReaderOptsJson, v1, v2 *EventReaderOpts)
 		}
 	} else {
 		d.KafkaTopicProcessed = nil
+	}
+	if v2.KafkaTLSProcessed != nil {
+		if v1.KafkaTLSProcessed == nil ||
+			*v1.KafkaTLSProcessed != *v2.KafkaTLSProcessed {
+			d.KafkaTLSProcessed = v2.KafkaTLSProcessed
+		}
+	} else {
+		d.KafkaTLSProcessed = nil
+	}
+	if v2.KafkaCAPathProcessed != nil {
+		if v1.KafkaCAPathProcessed == nil ||
+			*v1.KafkaCAPathProcessed != *v2.KafkaCAPathProcessed {
+			d.KafkaCAPathProcessed = v2.KafkaCAPathProcessed
+		}
+	} else {
+		d.KafkaCAPathProcessed = nil
+	}
+	if v2.KafkaSkipTLSVerifyProcessed != nil {
+		if v1.KafkaSkipTLSVerifyProcessed == nil ||
+			*v1.KafkaSkipTLSVerifyProcessed != *v2.KafkaSkipTLSVerifyProcessed {
+			d.KafkaSkipTLSVerifyProcessed = v2.KafkaSkipTLSVerifyProcessed
+		}
+	} else {
+		d.KafkaSkipTLSVerifyProcessed = nil
 	}
 	if v2.SQLDBName != nil {
 		if v1.SQLDBName == nil ||

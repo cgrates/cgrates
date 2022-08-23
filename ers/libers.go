@@ -83,6 +83,24 @@ func getProcessOptions(erOpts *config.EventReaderOpts) (eeOpts *config.EventExpo
 		}
 		eeOpts.KafkaTopic = erOpts.KafkaTopicProcessed
 	}
+	if erOpts.KafkaTLSProcessed != nil {
+		if eeOpts == nil {
+			eeOpts = new(config.EventExporterOpts)
+		}
+		eeOpts.KafkaTLS = erOpts.KafkaTLSProcessed
+	}
+	if erOpts.KafkaCAPathProcessed != nil {
+		if eeOpts == nil {
+			eeOpts = new(config.EventExporterOpts)
+		}
+		eeOpts.KafkaCAPath = erOpts.KafkaCAPathProcessed
+	}
+	if erOpts.KafkaSkipTLSVerifyProcessed != nil {
+		if eeOpts == nil {
+			eeOpts = new(config.EventExporterOpts)
+		}
+		eeOpts.KafkaSkipTLSVerify = erOpts.KafkaSkipTLSVerifyProcessed
+	}
 	if erOpts.NATSCertificateAuthorityProcessed != nil {
 		if eeOpts == nil {
 			eeOpts = new(config.EventExporterOpts)
