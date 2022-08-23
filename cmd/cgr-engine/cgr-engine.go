@@ -67,7 +67,6 @@ func RunCGREngine(fs []string) (err error) {
 	if err = cgr.Init(ctx, cancel, flags, vers); err != nil {
 		return
 	}
-
 	if err = cgr.StartServices(ctx, cancel, *flags.Preload); err != nil {
 		return
 	}
