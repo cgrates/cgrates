@@ -395,8 +395,14 @@ const CGRATES_CFG_JSON = `
 				// "kafkaTopic": "cgrates",						// the topic from were the events are read
 				// "kafkaGroupID": "cgrates",					// the group that reads the events
 				// "kafkaMaxWait": "1ms",						// the maximum amount of time to wait for new data to come
+				// "kafkaTLS": false,							// if set to true it will try to authenticate the server
+				// "kafkaCAPath": "",
+				// "kafkaSkipTLSVerify": false,
 
-				// "kafkaTopicProcessed": "",					 the topic were the events are sent after they are processed
+				// "kafkaTopicProcessed": "",					//the topic were the events are sent after they are processed
+				// "kafkaTLSProcessed": false,					
+				// "kafkaCAPathProcessed": "",
+				// "kafkaSkipTLSVerifyProcessed": false,
 
 				// SQL
 				// "sqlDBName": "cgrates", 						// the name of the database from were the events are read
@@ -525,6 +531,7 @@ const CGRATES_CFG_JSON = `
 				
 				// Kafka
 				// "kafkaTopic": "cgrates",						// the topic from where the events are exported
+				// "kafkaTLS": false,							// if set to true it will try to authenticate the server
 				// "kafkaCAPath": "",							// path to certificate authority pem file
 				// "kafkaSkipTLSVerify": false,					// if set to true it will skip certificate verification
 				

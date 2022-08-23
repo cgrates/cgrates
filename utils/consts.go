@@ -2467,6 +2467,7 @@ const (
 	KafkaDefaultMaxWait = time.Millisecond
 
 	KafkaTopic         = "kafkaTopic"
+	KafkaTLS           = "kafkaTLS"
 	KafkaCAPath        = "kafkaCAPath"
 	KafkaSkipTLSVerify = "kafkaSkipTLSVerify"
 	KafkaGroupID       = "kafkaGroupID"
@@ -2522,7 +2523,10 @@ const (
 	AMQPExchangeTypeProcessedCfg = "amqpExchangeTypeProcessed"
 	AMQPRoutingKeyProcessedCfg   = "amqpRoutingKeyProcessed"
 
-	KafkaTopicProcessedCfg = "kafkaTopicProcessed"
+	KafkaTopicProcessedCfg         = "kafkaTopicProcessed"
+	KafkaTLSProcessedCfg           = "kafkaTLSProcessed"
+	KafkaCAPathProcessedCfg        = "kafkaCAPathProcessed"
+	KafkaSkipTLSVerifyProcessedCfg = "kafkaSkipTLSVerifyProcessed"
 
 	SQLDBNameProcessedCfg    = "sqlDBNameProcessed"
 	SQLTableNameProcessedCfg = "sqlTableNameProcessed"
