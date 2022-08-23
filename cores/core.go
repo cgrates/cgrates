@@ -70,7 +70,10 @@ func (cS *CoreS) ShutdownEngine() {
 // Shutdown is called to shutdown the service
 func (cS *CoreS) Shutdown() {
 	utils.Logger.Info(fmt.Sprintf("<%s> shutdown initialized", utils.CoreS))
-	cS.stopChanMemProf()
+	if cS.stopMemPrf != nil {
+		close(cS.stopMemPrf)
+		cS.stopMemPrf = nil
+	}
 	cS.StopCPUProfiling()
 	utils.Logger.Info(fmt.Sprintf("<%s> shutdown complete", utils.CoreS))
 }
@@ -201,7 +204,7 @@ func (cS *CoreS) StartMemoryProfiling(args *utils.MemoryPrf) (err error) {
 // StopMemoryProfiling is used to stop MemoryProfiling
 func (cS *CoreS) StopMemoryProfiling() (err error) {
 	if cS.stopMemPrf == nil {
-		return errors.New(" Memory Profiling is not started")
+		return errors.New("Memory Profiling is not started")
 	}
 	cS.fileMEM = path.Join(cS.fileMEM, utils.MemProfFileCgr)
 	cS.stopChanMemProf()
