@@ -165,6 +165,7 @@ type EventExporterOpts struct {
 	SQLDBName                *string
 	PgSSLMode                *string
 	KafkaTopic               *string
+	KafkaTLS                 *bool
 	KafkaCAPath              *string
 	KafkaSkipTLSVerify       *bool
 	AMQPRoutingKey           *string
@@ -290,6 +291,9 @@ func (eeOpts *EventExporterOpts) loadFromJSONCfg(jsnCfg *EventExporterOptsJson) 
 	}
 	if jsnCfg.KafkaTopic != nil {
 		eeOpts.KafkaTopic = jsnCfg.KafkaTopic
+	}
+	if jsnCfg.KafkaTLS != nil {
+		eeOpts.KafkaTLS = jsnCfg.KafkaTLS
 	}
 	if jsnCfg.KafkaCAPath != nil {
 		eeOpts.KafkaCAPath = jsnCfg.KafkaCAPath
@@ -556,6 +560,9 @@ func (eeOpts *EventExporterOpts) Clone() *EventExporterOpts {
 	if eeOpts.KafkaTopic != nil {
 		cln.KafkaTopic = utils.StringPointer(*eeOpts.KafkaTopic)
 	}
+	if eeOpts.KafkaTLS != nil {
+		cln.KafkaTLS = utils.BoolPointer(*eeOpts.KafkaTLS)
+	}
 	if eeOpts.KafkaCAPath != nil {
 		cln.KafkaCAPath = utils.StringPointer(*eeOpts.KafkaCAPath)
 	}
@@ -792,6 +799,9 @@ func (optsEes *EventExporterOpts) AsMapInterface() map[string]interface{} {
 	if optsEes.KafkaTopic != nil {
 		opts[utils.KafkaTopic] = *optsEes.KafkaTopic
 	}
+	if optsEes.KafkaTLS != nil {
+		opts[utils.KafkaTLS] = *optsEes.KafkaTLS
+	}
 	if optsEes.KafkaCAPath != nil {
 		opts[utils.KafkaCAPath] = *optsEes.KafkaCAPath
 	}
@@ -908,6 +918,7 @@ type EventExporterOptsJson struct {
 	SQLDBName                *string                `json:"sqlDBName"`
 	PgSSLMode                *string                `json:"pgSSLMode"`
 	KafkaTopic               *string                `json:"kafkaTopic"`
+	KafkaTLS                 *bool                  `json:"kafkaTLS"`
 	KafkaCAPath              *string                `json:"kafkaCAPath"`
 	KafkaSkipTLSVerify       *bool                  `json:"kafkaSkipTLSVerify"`
 	AMQPQueueID              *string                `json:"amqpQueueID"`
@@ -1115,6 +1126,14 @@ func diffEventExporterOptsJsonCfg(d *EventExporterOptsJson, v1, v2 *EventExporte
 		}
 	} else {
 		d.KafkaTopic = nil
+	}
+	if v2.KafkaTLS != nil {
+		if v1.KafkaTLS == nil ||
+			*v1.KafkaTLS != *v2.KafkaTLS {
+			d.KafkaTLS = v2.KafkaTLS
+		}
+	} else {
+		d.KafkaTLS = nil
 	}
 	if v2.KafkaCAPath != nil {
 		if v1.KafkaCAPath == nil ||
