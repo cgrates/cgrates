@@ -40,12 +40,12 @@ func NewServiceManager(shdWg *sync.WaitGroup, connMgr *engine.ConnManager, rldCh
 
 // ServiceManager handles service management ran by the engine
 type ServiceManager struct {
-	sync.RWMutex // lock access to any shared data
-	subsystems   map[string]Service
+	sync.RWMutex                    // lock access to any shared data
+	subsystems   map[string]Service // active subsystems managed by SM
 
-	shdWg   *sync.WaitGroup
+	shdWg   *sync.WaitGroup // list of shutdown items
 	connMgr *engine.ConnManager
-	rldChan <-chan string
+	rldChan <-chan string // reload signals come over this channelc
 }
 
 // StartServices starts all enabled services

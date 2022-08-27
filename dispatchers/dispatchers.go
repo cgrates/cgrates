@@ -156,6 +156,30 @@ func (dS *DispatcherService) Dispatch(ctx *context.Context, ev *utils.CGREvent, 
 	if tnt == utils.EmptyString {
 		tnt = dS.cfg.GeneralCfg().DefaultTenant
 	}
+	var dR *DispatcherRoute
+	var dPrfls engine.DispatcherProfiles
+	routeID := utils.IfaceAsString(ev.APIOpts[utils.OptsRouteID])
+	if routeID != utils.EmptyString { // overwrite routeID with RouteID:Subsystem for subsystem correct routing
+		routeID = utils.ConcatenatedKey(routeID, subsys)
+		// use previously discovered route
+		if x, ok := engine.Cache.Get(utils.CacheDispatcherRoutes,
+			routeID); ok && x != nil {
+			dR = x.(*DispatcherRoute)
+			// query the profile out of cached route
+			var dPrfl *engine.DispatcherProfile
+			if dPrfl, err = dS.dm.GetDispatcherProfile(ctx, dR.Tenant, dR.ProfileID,
+				true, true, utils.NonTransactional); err != nil {
+				if err != utils.ErrNotFound {
+					return
+				}
+				// profile was not found
+				utils.Logger.Warning(fmt.Sprintf("<%s> could not find profile with tenant: <%s> and ID <%s> for routeID: <%s>",
+					utils.DispatcherS, dR.Tenant, dR.ProfileID, routeID))
+			} else {
+				dPrfls = engine.DispatcherProfiles{dPrfl} // will be used as the list of routes
+			}
+		}
+	}
 	evNm := utils.MapStorage{
 		utils.MetaReq:  ev.Event,
 		utils.MetaOpts: ev.APIOpts,
@@ -164,9 +188,13 @@ func (dS *DispatcherService) Dispatch(ctx *context.Context, ev *utils.CGREvent, 
 			utils.MetaMethod: serviceMethod,
 		},
 	}
-	var dPrfls engine.DispatcherProfiles
-	if dPrfls, err = dS.dispatcherProfilesForEvent(ctx, tnt, ev, evNm); err != nil {
-		return utils.NewErrDispatcherS(err)
+	if dPrfls == nil { // did not discover it yet
+		if dPrfls, err = dS.dispatcherProfilesForEvent(ctx, tnt, ev, evNm); err != nil {
+			return utils.NewErrDispatcherS(err)
+		}
+	}
+	if len(dPrfls) == 0 {
+		return utils.NewErrDispatcherS(utils.ErrPrefixNotFound("PROFILE"))
 	}
 	for _, dPrfl := range dPrfls {
 		tntID := dPrfl.TenantID()
@@ -177,13 +205,13 @@ func (dS *DispatcherService) Dispatch(ctx *context.Context, ev *utils.CGREvent, 
 			d = x.(Dispatcher)
 		} else if d, err = newDispatcher(dPrfl); err != nil {
 			return utils.NewErrDispatcherS(err)
-		}
-		if err = engine.Cache.Set(ctx, utils.CacheDispatchers, tntID, d, nil, true, utils.EmptyString); err != nil {
+		} else if err = engine.Cache.Set(ctx, utils.CacheDispatchers, tntID, d, // cache the built Dispatcher
+			nil, true, utils.EmptyString); err != nil {
 			return utils.NewErrDispatcherS(err)
 		}
 		if err = d.Dispatch(dS.dm, dS.fltrS, dS.cfg,
-			ctx, dS.connMgr.GetDispInternalChan(), evNm, tnt, utils.IfaceAsString(ev.APIOpts[utils.OptsRouteID]),
-			subsys, serviceMethod, args, reply); !rpcclient.IsNetworkError(err) {
+			ctx, dS.connMgr.GetDispInternalChan(), evNm, tnt, routeID, dR,
+			serviceMethod, args, reply); !rpcclient.IsNetworkError(err) {
 			return
 		}
 	}

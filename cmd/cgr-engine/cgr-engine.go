@@ -47,7 +47,9 @@ func RunCGREngine(fs []string) (err error) {
 		return
 	}
 	if *flags.PidFile != utils.EmptyString {
-		services.CgrWritePid(*flags.PidFile)
+		if err = services.CgrWritePid(*flags.PidFile); err != nil {
+			return
+		}
 	}
 	if *flags.Singlecpu {
 		runtime.GOMAXPROCS(1) // Having multiple cpus may slow down computing due to CPU management, to be reviewed in future Go releases
