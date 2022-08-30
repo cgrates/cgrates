@@ -1484,3 +1484,90 @@ func TestGetLockFilePath(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestReloadCfgInDb(t *testing.T) {
+	cfg := NewDefaultCGRConfig()
+	db := &CgrJsonCfg{}
+	cfg.db = db
+	cfg.attributeSCfg = &AttributeSCfg{
+		Enabled:                true,
+		ResourceSConns:         []string{"*internal"},
+		StatSConns:             []string{"*internal"},
+		AccountSConns:          []string{"*internal"},
+		IndexedSelects:         false,
+		StringIndexedFields:    &[]string{"field1"},
+		SuffixIndexedFields:    &[]string{"field1"},
+		PrefixIndexedFields:    &[]string{"field1"},
+		ExistsIndexedFields:    &[]string{"field1"},
+		NotExistsIndexedFields: &[]string{"field1"},
+		Opts: &AttributesOpts{
+			ProcessRuns: []*utils.DynamicIntOpt{
+				{
+					FilterIDs: []string{},
+					Value:     2,
+				},
+			},
+		},
+		NestedFields: true,
+	}
+	var reply string
+	cfg.sections = newSections(cfg)
+	cfg.rldCh = make(chan string, 100)
+	cfg.ConfigPath = path.Join("/usr", "share", "cgrates", "conf", "samples", "attributes_internal")
+	jsn := &AttributeSJsonCfg{
+		Enabled:                  utils.BoolPointer(false),
+		Resources_conns:          &[]string{"*localhost"},
+		Stats_conns:              &[]string{"*localhost"},
+		Accounts_conns:           &[]string{"*localhost"},
+		Indexed_selects:          utils.BoolPointer(true),
+		String_indexed_fields:    &[]string{"field2"},
+		Suffix_indexed_fields:    &[]string{"field2"},
+		Prefix_indexed_fields:    &[]string{"field2"},
+		Exists_indexed_fields:    &[]string{"field2"},
+		Notexists_indexed_fields: &[]string{"field2"},
+		Opts: &AttributesOptsJson{
+			ProcessRuns: []*utils.DynamicIntOpt{
+				{
+					Value: 3,
+				},
+			},
+		},
+		Nested_fields: utils.BoolPointer(false),
+	}
+	db.SetSection(context.Background(), AttributeSJSON, jsn)
+	expected := &AttributeSCfg{
+		Enabled:                false,
+		ResourceSConns:         []string{"*localhost"},
+		StatSConns:             []string{"*localhost"},
+		AccountSConns:          []string{"*localhost"},
+		IndexedSelects:         true,
+		StringIndexedFields:    &[]string{"field2"},
+		SuffixIndexedFields:    &[]string{"field2"},
+		PrefixIndexedFields:    &[]string{"field2"},
+		ExistsIndexedFields:    &[]string{"field2"},
+		NotExistsIndexedFields: &[]string{"field2"},
+		Opts: &AttributesOpts{
+			ProcessRuns: []*utils.DynamicIntOpt{
+				{
+					FilterIDs: []string{},
+					Value:     2,
+				},
+				{
+					Value: 3,
+				},
+			},
+		},
+		NestedFields: false,
+	}
+	args2 := &ReloadArgs{
+		Section: AttributeSJSON,
+	}
+	if err := cfg.V1ReloadConfig(context.Background(), args2, &reply); err != nil {
+		t.Error(err)
+	}
+
+	rcv := cfg.AttributeSCfg()
+	if !reflect.DeepEqual(expected, rcv) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+}
