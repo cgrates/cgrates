@@ -141,7 +141,7 @@ func TestStopMemoryProfiling(t *testing.T) {
 		APIOpts: map[string]interface{}{},
 	}
 	var reply string
-	errExp := " Memory Profiling is not started"
+	errExp := "Memory Profiling is not started"
 	if err := cS.StopMemoryProfiling(context.Background(), args, &reply); err.Error() != errExp {
 		t.Errorf("Expected %v\n but received %v", errExp, err)
 	}

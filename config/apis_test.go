@@ -18,7 +18,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
-	"path"
 	"reflect"
 	"testing"
 	"time"
@@ -892,34 +891,6 @@ func TestStoreDiffSectionAccountS(t *testing.T) {
 
 	if err := storeDiffSection(context.Background(), section, new(mockDb), cgrCfgV1, cgrCfgV2); err != utils.ErrNotImplemented || err == nil {
 		t.Error(err)
-	}
-}
-
-func TestV1ReloadConfig(t *testing.T) {
-	cfg := NewDefaultCGRConfig()
-	cfg.db = &CgrJsonCfg{}
-	cfg.ConfigPath = path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo2")
-	args := &ReloadArgs{
-		Section: utils.MetaAll,
-	}
-
-	cfg.rldCh = make(chan string, 100)
-
-	var reply string
-	if err := cfg.V1ReloadConfig(context.Background(), args, &reply); err != nil {
-		t.Error(err)
-	} else if reply != "OK" {
-		t.Errorf("Expected %v \n but received \n %v", "OK", reply)
-	}
-
-	args = &ReloadArgs{
-		Section: ConfigDBJSON,
-	}
-
-	expected := "Invalid section: <config_db> "
-	if err := cfg.V1ReloadConfig(context.Background(), args, &reply); err == nil || err.Error() != expected {
-		t.Errorf("%T and %T", expected, err.Error())
-		t.Errorf("Expected %q \n but received \n %q", expected, err)
 	}
 }
 
