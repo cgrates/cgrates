@@ -165,19 +165,7 @@ func (dS *DispatcherService) Dispatch(ctx *context.Context, ev *utils.CGREvent, 
 		if x, ok := engine.Cache.Get(utils.CacheDispatcherRoutes,
 			routeID); ok && x != nil {
 			dR = x.(*DispatcherRoute)
-			// query the profile out of cached route
-			var dPrfl *engine.DispatcherProfile
-			if dPrfl, err = dS.dm.GetDispatcherProfile(ctx, dR.Tenant, dR.ProfileID,
-				true, true, utils.NonTransactional); err != nil {
-				if err != utils.ErrNotFound {
-					return
-				}
-				// profile was not found
-				utils.Logger.Warning(fmt.Sprintf("<%s> could not find profile with tenant: <%s> and ID <%s> for routeID: <%s>",
-					utils.DispatcherS, dR.Tenant, dR.ProfileID, routeID))
-			} else {
-				dPrfls = engine.DispatcherProfiles{dPrfl} // will be used as the list of routes
-			}
+			dPrfls = engine.DispatcherProfiles{&engine.DispatcherProfile{Tenant: dR.Tenant, ID: dR.ProfileID}} // will be used bellow to retrieve the dispatcher
 		}
 	}
 	evNm := utils.MapStorage{
@@ -196,6 +184,7 @@ func (dS *DispatcherService) Dispatch(ctx *context.Context, ev *utils.CGREvent, 
 	if len(dPrfls) == 0 {
 		return utils.NewErrDispatcherS(utils.ErrPrefixNotFound("PROFILE"))
 	}
+	fmt.Printf("dispatching event: %+v to profiles: %+v\n", ev, dPrfls)
 	for _, dPrfl := range dPrfls {
 		tntID := dPrfl.TenantID()
 		// get or build the Dispatcher for the config
@@ -203,11 +192,34 @@ func (dS *DispatcherService) Dispatch(ctx *context.Context, ev *utils.CGREvent, 
 		if x, ok := engine.Cache.Get(utils.CacheDispatchers,
 			tntID); ok && x != nil {
 			d = x.(Dispatcher)
-		} else if d, err = newDispatcher(dPrfl); err != nil {
-			return utils.NewErrDispatcherS(err)
-		} else if err = engine.Cache.Set(ctx, utils.CacheDispatchers, tntID, d, // cache the built Dispatcher
-			nil, true, utils.EmptyString); err != nil {
-			return utils.NewErrDispatcherS(err)
+		} else { // dispatcher is not cached, build it here
+			if dPrfl.Hosts == nil { // dispatcher profile was not retrieved but built artificially above, try retrieving
+				if dPrfl, err = dS.dm.GetDispatcherProfile(ctx, dPrfl.Tenant, dPrfl.ID,
+					true, true, utils.NonTransactional); err != nil {
+					if err != utils.ErrNotFound {
+						return
+					}
+					// profile was not found
+					utils.Logger.Warning(fmt.Sprintf("<%s> could not find profile with tenant: <%s> and ID <%s> for routeID: <%s>",
+						utils.DispatcherS, dR.Tenant, dR.ProfileID, routeID))
+					if len(dPrfls) == 1 { // the only profile set does not exist anymore
+						return utils.NewErrDispatcherS(utils.ErrPrefixNotFound("PROFILE"))
+					}
+					continue
+				}
+			}
+			if d, err = newDispatcher(dPrfl); err != nil {
+				return utils.NewErrDispatcherS(err)
+			} else if err = engine.Cache.Set(ctx, utils.CacheDispatchers, tntID, d, // cache the built Dispatcher
+				nil, true, utils.EmptyString); err != nil {
+				return utils.NewErrDispatcherS(err)
+			}
+		}
+		if routeID != utils.EmptyString && dR == nil { // first time we cache the route
+			dR = &DispatcherRoute{
+				Tenant:    dPrfl.Tenant,
+				ProfileID: dPrfl.ID,
+			}
 		}
 		if err = d.Dispatch(dS.dm, dS.fltrS, dS.cfg,
 			ctx, dS.connMgr.GetDispInternalChan(), evNm, tnt, routeID, dR,
