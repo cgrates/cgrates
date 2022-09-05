@@ -277,7 +277,7 @@ func TestDispatcherServiceAuthorizeEventError2(t *testing.T) {
 			TLS:       false,
 		},
 	}
-	value := &lazzyDH{dh: dh, cfg: cfg, iPRCCh: nil}
+	value := &lazyDH{dh: dh, cfg: cfg, iPRCCh: nil}
 	engine.Cache.SetWithoutReplicate(utils.CacheRPCConnections, "connID",
 		value, nil, true, utils.NonTransactional)
 
@@ -320,7 +320,7 @@ func TestDispatcherServiceAuthorizeEventError3(t *testing.T) {
 			TLS:       false,
 		},
 	}
-	value := &lazzyDH{dh: dh, cfg: cfg, iPRCCh: chanRPC}
+	value := &lazyDH{dh: dh, cfg: cfg, iPRCCh: chanRPC}
 
 	newCache := engine.NewCacheS(cfg, dm, nil)
 	engine.Cache = newCache
@@ -370,7 +370,7 @@ func TestDispatcherServiceAuthorizeError(t *testing.T) {
 			TLS:       false,
 		},
 	}
-	value := &lazzyDH{dh: dh, cfg: cfg, iPRCCh: chanRPC}
+	value := &lazyDH{dh: dh, cfg: cfg, iPRCCh: chanRPC}
 	newCache := engine.NewCacheS(cfg, dm, nil)
 	engine.Cache = newCache
 	engine.Cache.SetWithoutReplicate(utils.CacheRPCConnections, "testID",
@@ -417,7 +417,7 @@ func TestDispatcherServiceAuthorizeError2(t *testing.T) {
 			TLS:       false,
 		},
 	}
-	value := &lazzyDH{dh: dh, cfg: cfg, iPRCCh: chanRPC}
+	value := &lazyDH{dh: dh, cfg: cfg, iPRCCh: chanRPC}
 
 	newCache := engine.NewCacheS(cfg, dm, nil)
 	engine.Cache = newCache
@@ -467,7 +467,7 @@ func TestDispatcherServiceAuthorizeError3(t *testing.T) {
 			TLS:       false,
 		},
 	}
-	value := &lazzyDH{dh: dh, cfg: cfg, iPRCCh: chanRPC}
+	value := &lazyDH{dh: dh, cfg: cfg, iPRCCh: chanRPC}
 
 	newCache := engine.NewCacheS(cfg, dm, nil)
 	engine.Cache = newCache
