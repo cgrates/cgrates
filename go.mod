@@ -35,7 +35,7 @@ require (
 	github.com/fsnotify/fsnotify v1.4.9
 	github.com/go-sql-driver/mysql v1.5.0
 	github.com/gorhill/cronexpr v0.0.0-20180427100037-88b0669f7d75
-	github.com/mediocregopher/radix/v3 v3.7.0
+	github.com/mediocregopher/radix/v3 v3.8.1
 	github.com/miekg/dns v1.1.44-0.20210927135021-1630ffe2ca11
 	github.com/mitchellh/mapstructure v1.4.0
 	github.com/nats-io/nats.go v1.11.0
