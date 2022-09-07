@@ -186,7 +186,7 @@ func (sd *singleResultDispatcher) Dispatch(dm *engine.DataManager, flts *engine.
 	ctx *context.Context, iPRCCh chan birpc.ClientConnector,
 	ev utils.DataProvider, tnt, routeID string, dR *DispatcherRoute,
 	serviceMethod string, args interface{}, reply interface{}) (err error) {
-	if dR != nil { // route to previously discovered route
+	if routeID != utils.EmptyString && dR.HostID != utils.EmptyString { // route to previously discovered route
 		if err = callDHwithID(ctx, tnt, dR.HostID, routeID, dR, dm,
 			cfg, iPRCCh, serviceMethod, args, reply); err == nil ||
 			(err != utils.ErrNotFound && !rpcclient.IsNetworkError(err)) { // successful dispatch with normal errors
