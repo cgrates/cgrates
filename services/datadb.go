@@ -71,7 +71,6 @@ func (db *DataDBService) Start(*context.Context, context.CancelFunc) (err error)
 	}
 	db.dm = engine.NewDataManager(d, db.cfg.CacheCfg(), db.connMgr)
 	if err = engine.CheckVersions(db.dm.DataDB()); err != nil {
-		fmt.Println(err)
 		return
 	}
 	db.dbchan <- db.dm

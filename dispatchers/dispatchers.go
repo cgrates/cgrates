@@ -25,6 +25,7 @@ import (
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
 )
@@ -156,11 +157,28 @@ func (dS *DispatcherService) Dispatch(ctx *context.Context, ev *utils.CGREvent, 
 	if tnt == utils.EmptyString {
 		tnt = dS.cfg.GeneralCfg().DefaultTenant
 	}
+	if ifAce, has := ev.APIOpts[utils.MetaDispatchers]; has { // special case when dispatching is disabled, directly proxy internally
+		var shouldDispatch bool
+		if shouldDispatch, err = utils.IfaceAsBool(ifAce); err != nil {
+			return utils.NewErrDispatcherS(err)
+		}
+		if !shouldDispatch {
+			return callDH(ctx,
+				newInternalHost(tnt), utils.EmptyString, nil,
+				dS.cfg, dS.connMgr.GetDispInternalChan(),
+				serviceMethod, args, reply)
+		}
+	}
+
 	var dR *DispatcherRoute
 	var dPrfls engine.DispatcherProfiles
 	routeID := utils.IfaceAsString(ev.APIOpts[utils.OptsRouteID])
 	if routeID != utils.EmptyString { // overwrite routeID with RouteID:Subsystem for subsystem correct routing
 		routeID = utils.ConcatenatedKey(routeID, subsys)
+		guardID := utils.ConcatenatedKey(utils.DispatcherSv1, utils.OptsRouteID, routeID)
+		refID := guardian.Guardian.GuardIDs("",
+			dS.cfg.GeneralCfg().LockingTimeout, guardID) // lock the routeID so we can make sure we have time to execute only once before caching
+		defer guardian.Guardian.UnguardIDs(refID)
 		// use previously discovered route
 		if x, ok := engine.Cache.Get(utils.CacheDispatcherRoutes,
 			routeID); ok && x != nil {
@@ -184,7 +202,6 @@ func (dS *DispatcherService) Dispatch(ctx *context.Context, ev *utils.CGREvent, 
 	if len(dPrfls) == 0 {
 		return utils.NewErrDispatcherS(utils.ErrPrefixNotFound("PROFILE"))
 	}
-	fmt.Printf("dispatching event: %+v to profiles: %+v\n", ev, dPrfls)
 	for _, dPrfl := range dPrfls {
 		tntID := dPrfl.TenantID()
 		// get or build the Dispatcher for the config
