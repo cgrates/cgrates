@@ -176,7 +176,7 @@ func newSingleDispatcher(hosts engine.DispatcherHostProfiles, params map[string]
 }
 
 // singleResultDispatcher routes the event to a single host
-// 	implements Dispatcher interface
+// implements Dispatcher interface
 type singleResultDispatcher struct {
 	sorter hostSorter
 	hosts  engine.DispatcherHostProfiles
@@ -202,32 +202,30 @@ func (sd *singleResultDispatcher) Dispatch(dm *engine.DataManager, flts *engine.
 	} else if len(hostIDs) == 0 { // in case we do not match any host
 		return utils.ErrHostNotFound
 	}
-	for _, hostID := range hostIDs {
-		var dRh *DispatcherRoute
-		if routeID != utils.EmptyString {
-			dRh = &DispatcherRoute{
-				Tenant:    dR.Tenant,
-				ProfileID: dR.ProfileID,
-				HostID:    hostID,
-			}
+	hostID := hostIDs[0]
+	var dRh *DispatcherRoute
+	if routeID != utils.EmptyString {
+		dRh = &DispatcherRoute{
+			Tenant:    dR.Tenant,
+			ProfileID: dR.ProfileID,
+			HostID:    hostID,
 		}
-		if err = callDHwithID(ctx, tnt, hostID, routeID, dRh, dm,
-			cfg, iPRCCh, serviceMethod, args, reply); err == nil ||
-			(err != utils.ErrNotFound && !rpcclient.IsNetworkError(err)) { // successful dispatch with normal errors
-			return
-		}
-		if err != nil {
-			// not found or network errors will continue with standard dispatching
-			utils.Logger.Warning(fmt.Sprintf("<%s> error <%s> dispatching to host with identity <%s>",
-				utils.DispatcherS, err.Error(), hostID))
-		}
+	}
+	if err = callDHwithID(ctx, tnt, hostID, routeID, dRh, dm,
+		cfg, iPRCCh, serviceMethod, args, reply); err == nil ||
+		(err != utils.ErrNotFound && !rpcclient.IsNetworkError(err)) { // successful dispatch with normal errors
 		return
+	}
+	if err != nil {
+		// not found or network errors will continue with standard dispatching
+		utils.Logger.Warning(fmt.Sprintf("<%s> error <%s> dispatching to host with identity <%s>",
+			utils.DispatcherS, err.Error(), hostID))
 	}
 	return
 }
 
 // broadcastDispatcher routes the event to multiple hosts in a pool
-// 	implements the Dispatcher interface
+// implements the Dispatcher interface
 type broadcastDispatcher struct {
 	strategy string
 	hosts    engine.DispatcherHostProfiles
@@ -317,29 +315,27 @@ func (ld *loadDispatcher) Dispatch(dm *engine.DataManager, flts *engine.FilterS,
 	} else if len(hostIDs) == 0 { // in case we do not match any host
 		return utils.ErrHostNotFound
 	}
-	for _, hostID := range hostIDs {
-		var dRh *DispatcherRoute
-		if routeID != utils.EmptyString {
-			dRh = &DispatcherRoute{
-				Tenant:    dR.Tenant,
-				ProfileID: dR.ProfileID,
-				HostID:    hostID,
-			}
+	hostID := hostIDs[0]
+	var dRh *DispatcherRoute
+	if routeID != utils.EmptyString {
+		dRh = &DispatcherRoute{
+			Tenant:    dR.Tenant,
+			ProfileID: dR.ProfileID,
+			HostID:    hostID,
 		}
-		lM.incrementLoad(ctx, hostID, ld.tntID)
-		err = callDHwithID(ctx, tnt, hostID, routeID, dRh, dm,
-			cfg, iPRCCh, serviceMethod, args, reply)
-		lM.decrementLoad(ctx, hostID, ld.tntID) // call ended
-		if err == nil ||
-			(err != utils.ErrNotFound && !rpcclient.IsNetworkError(err)) { // successful dispatch with normal errors
-			return
-		}
-		if err != nil {
-			// not found or network errors will continue with standard dispatching
-			utils.Logger.Warning(fmt.Sprintf("<%s> error <%s> dispatching to host with id <%q>",
-				utils.DispatcherS, err.Error(), hostID))
-		}
+	}
+	lM.incrementLoad(ctx, hostID, ld.tntID)
+	err = callDHwithID(ctx, tnt, hostID, routeID, dRh, dm,
+		cfg, iPRCCh, serviceMethod, args, reply)
+	lM.decrementLoad(ctx, hostID, ld.tntID) // call ended
+	if err == nil ||
+		(err != utils.ErrNotFound && !rpcclient.IsNetworkError(err)) { // successful dispatch with normal errors
 		return
+	}
+	if err != nil {
+		// not found or network errors will continue with standard dispatching
+		utils.Logger.Warning(fmt.Sprintf("<%s> error <%s> dispatching to host with id <%q>",
+			utils.DispatcherS, err.Error(), hostID))
 	}
 
 	return
@@ -420,7 +416,7 @@ func (lM *LoadMetrics) decrementLoad(ctx *context.Context, hostID, tntID string)
 }
 
 // callDHwithID is a wrapper on callDH using ID of the host which the other cannot do due to lazyDH
-// 	if routeID provided, will also cache once the call is successful
+// if routeID provided, will also cache once the call is successful
 func callDHwithID(ctx *context.Context, tnt, hostID, routeID string, dR *DispatcherRoute,
 	dm *engine.DataManager, cfg *config.CGRConfig, iPRCCh chan birpc.ClientConnector,
 	serviceMethod string, args, reply interface{}) (err error) {
