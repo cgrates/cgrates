@@ -1,0 +1,27 @@
+{
+
+    "general": {
+        "node_id": "DispatcherOpts_Admin",
+        "log_level": 7,
+    },
+        
+    
+    "listen": {
+        "rpc_json": ":4012",			// RPC JSON listening address
+        "rpc_gob": ":4013",			// RPC GOB listening address
+        "http": ":4080",				// HTTP listening address
+    },
+
+    "data_db": {								// database used to store runtime data (eg: accounts, cdr stats)
+	    "db_type": "redis",						// data_db type: <redis|mongo>
+	    "db_port": 6379, 						// data_db port to reach the database
+	    "db_name": "10", 						// data_db database name to connect to
+    },
+      
+        
+    "admins": {
+        "enabled": true,
+    },
+    
+    
+    }
