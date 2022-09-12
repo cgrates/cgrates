@@ -202,24 +202,25 @@ func (sd *singleResultDispatcher) Dispatch(dm *engine.DataManager, flts *engine.
 	} else if len(hostIDs) == 0 { // in case we do not match any host
 		return utils.ErrHostNotFound
 	}
-	hostID := hostIDs[0]
-	var dRh *DispatcherRoute
-	if routeID != utils.EmptyString {
-		dRh = &DispatcherRoute{
-			Tenant:    dR.Tenant,
-			ProfileID: dR.ProfileID,
-			HostID:    hostID,
+	for _, hostID := range hostIDs {
+		var dRh *DispatcherRoute
+		if routeID != utils.EmptyString {
+			dRh = &DispatcherRoute{
+				Tenant:    dR.Tenant,
+				ProfileID: dR.ProfileID,
+				HostID:    hostID,
+			}
 		}
-	}
-	if err = callDHwithID(ctx, tnt, hostID, routeID, dRh, dm,
-		cfg, iPRCCh, serviceMethod, args, reply); err == nil ||
-		(err != utils.ErrNotFound && !rpcclient.IsNetworkError(err)) { // successful dispatch with normal errors
-		return
-	}
-	if err != nil {
-		// not found or network errors will continue with standard dispatching
-		utils.Logger.Warning(fmt.Sprintf("<%s> error <%s> dispatching to host with identity <%s>",
-			utils.DispatcherS, err.Error(), hostID))
+		if err = callDHwithID(ctx, tnt, hostID, routeID, dRh, dm,
+			cfg, iPRCCh, serviceMethod, args, reply); err == nil ||
+			(err != utils.ErrNotFound && !rpcclient.IsNetworkError(err)) { // successful dispatch with normal errors
+			return
+		}
+		if err != nil {
+			// not found or network errors will continue with standard dispatching
+			utils.Logger.Warning(fmt.Sprintf("<%s> error <%s> dispatching to host with identity <%s>",
+				utils.DispatcherS, err.Error(), hostID))
+		}
 	}
 	return
 }
@@ -315,29 +316,29 @@ func (ld *loadDispatcher) Dispatch(dm *engine.DataManager, flts *engine.FilterS,
 	} else if len(hostIDs) == 0 { // in case we do not match any host
 		return utils.ErrHostNotFound
 	}
-	hostID := hostIDs[0]
-	var dRh *DispatcherRoute
-	if routeID != utils.EmptyString {
-		dRh = &DispatcherRoute{
-			Tenant:    dR.Tenant,
-			ProfileID: dR.ProfileID,
-			HostID:    hostID,
+	for _, hostID := range hostIDs {
+		var dRh *DispatcherRoute
+		if routeID != utils.EmptyString {
+			dRh = &DispatcherRoute{
+				Tenant:    dR.Tenant,
+				ProfileID: dR.ProfileID,
+				HostID:    hostID,
+			}
+		}
+		lM.incrementLoad(ctx, hostID, ld.tntID)
+		err = callDHwithID(ctx, tnt, hostID, routeID, dRh, dm,
+			cfg, iPRCCh, serviceMethod, args, reply)
+		lM.decrementLoad(ctx, hostID, ld.tntID) // call ended
+		if err == nil ||
+			(err != utils.ErrNotFound && !rpcclient.IsNetworkError(err)) { // successful dispatch with normal errors
+			return
+		}
+		if err != nil {
+			// not found or network errors will continue with standard dispatching
+			utils.Logger.Warning(fmt.Sprintf("<%s> error <%s> dispatching to host with id <%q>",
+				utils.DispatcherS, err.Error(), hostID))
 		}
 	}
-	lM.incrementLoad(ctx, hostID, ld.tntID)
-	err = callDHwithID(ctx, tnt, hostID, routeID, dRh, dm,
-		cfg, iPRCCh, serviceMethod, args, reply)
-	lM.decrementLoad(ctx, hostID, ld.tntID) // call ended
-	if err == nil ||
-		(err != utils.ErrNotFound && !rpcclient.IsNetworkError(err)) { // successful dispatch with normal errors
-		return
-	}
-	if err != nil {
-		// not found or network errors will continue with standard dispatching
-		utils.Logger.Warning(fmt.Sprintf("<%s> error <%s> dispatching to host with id <%q>",
-			utils.DispatcherS, err.Error(), hostID))
-	}
-
 	return
 }
 
