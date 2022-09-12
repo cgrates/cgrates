@@ -642,6 +642,7 @@ func TestEEsCfgAsMapInterface(t *testing.T) {
 			utils.MetaFileCSV: map[string]interface{}{
 				utils.LimitCfg:     -2,
 				utils.PrecacheCfg:  false,
+				utils.RemoteCfg:    false,
 				utils.ReplicateCfg: false,
 				utils.TTLCfg:       "1s",
 				utils.StaticTTLCfg: false,
@@ -1103,6 +1104,7 @@ func TestDiffEEsJsonCfg(t *testing.T) {
 				Limit:      utils.IntPointer(1),
 				Ttl:        utils.StringPointer("0s"),
 				Static_ttl: utils.BoolPointer(false),
+				Remote:     utils.BoolPointer(false),
 				Precache:   utils.BoolPointer(false),
 				Replicate:  utils.BoolPointer(false),
 			},
@@ -1128,6 +1130,7 @@ func TestDiffEEsJsonCfg(t *testing.T) {
 				Ttl:        utils.StringPointer("0s"),
 				Static_ttl: utils.BoolPointer(false),
 				Precache:   utils.BoolPointer(false),
+				Remote:     utils.BoolPointer(false),
 				Replicate:  utils.BoolPointer(false),
 			},
 		},

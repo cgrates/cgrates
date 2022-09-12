@@ -33,6 +33,7 @@ type CacheParamCfg struct {
 	TTL       time.Duration
 	StaticTTL bool
 	Precache  bool
+	Remote    bool
 	Replicate bool
 }
 
@@ -49,6 +50,9 @@ func (cParam *CacheParamCfg) loadFromJSONCfg(jsnCfg *CacheParamJsonCfg) (err err
 	if jsnCfg.Precache != nil {
 		cParam.Precache = *jsnCfg.Precache
 	}
+	if jsnCfg.Remote != nil {
+		cParam.Remote = *jsnCfg.Remote
+	}
 	if jsnCfg.Replicate != nil {
 		cParam.Replicate = *jsnCfg.Replicate
 	}
@@ -64,6 +68,7 @@ func (cParam *CacheParamCfg) AsMapInterface() (initialMP map[string]interface{})
 		utils.LimitCfg:     cParam.Limit,
 		utils.StaticTTLCfg: cParam.StaticTTL,
 		utils.PrecacheCfg:  cParam.Precache,
+		utils.RemoteCfg:    cParam.Remote,
 		utils.ReplicateCfg: cParam.Replicate,
 	}
 	if cParam.TTL != 0 {
@@ -79,6 +84,7 @@ func (cParam CacheParamCfg) Clone() (cln *CacheParamCfg) {
 		TTL:       cParam.TTL,
 		StaticTTL: cParam.StaticTTL,
 		Precache:  cParam.Precache,
+		Remote:    cParam.Remote,
 		Replicate: cParam.Replicate,
 	}
 }
@@ -87,6 +93,7 @@ func (cParam CacheParamCfg) Clone() (cln *CacheParamCfg) {
 type CacheCfg struct {
 	Partitions       map[string]*CacheParamCfg
 	ReplicationConns []string
+	RemoteConns      []string
 }
 
 // loadCacheCfg loads the Cache section of the configuration
@@ -118,6 +125,12 @@ func (cCfg *CacheCfg) loadFromJSONCfg(jsnCfg *CacheJsonCfg) (err error) {
 			cCfg.ReplicationConns[idx] = connID
 		}
 	}
+	if jsnCfg.Remote_conns != nil {
+		cCfg.RemoteConns = make([]string, len(*jsnCfg.Remote_conns))
+		for idx, connID := range *jsnCfg.Remote_conns {
+			cCfg.RemoteConns[idx] = connID
+		}
+	}
 	return nil
 }
 
@@ -144,6 +157,9 @@ func (cCfg CacheCfg) AsMapInterface(string) interface{} {
 	if cCfg.ReplicationConns != nil {
 		mp[utils.ReplicationConnsCfg] = cCfg.ReplicationConns
 	}
+	if cCfg.RemoteConns != nil {
+		mp[utils.RemoteConnsCfg] = cCfg.RemoteConns
+	}
 	return mp
 }
 
@@ -161,6 +177,9 @@ func (cCfg CacheCfg) Clone() (cln *CacheCfg) {
 	if cCfg.ReplicationConns != nil {
 		cln.ReplicationConns = utils.CloneStringSlice(cCfg.ReplicationConns)
 	}
+	if cCfg.RemoteConns != nil {
+		cln.RemoteConns = utils.CloneStringSlice(cCfg.RemoteConns)
+	}
 	return
 }
 
@@ -169,6 +188,7 @@ type CacheParamJsonCfg struct {
 	Ttl        *string
 	Static_ttl *bool
 	Precache   *bool
+	Remote     *bool
 	Replicate  *bool
 }
 
@@ -182,6 +202,7 @@ func diffCacheParamsJsonCfg(d map[string]*CacheParamJsonCfg, v2 map[string]*Cach
 			Ttl:        utils.StringPointer(val2.TTL.String()),
 			Static_ttl: utils.BoolPointer(val2.StaticTTL),
 			Precache:   utils.BoolPointer(val2.Precache),
+			Remote:     utils.BoolPointer(val2.Remote),
 			Replicate:  utils.BoolPointer(val2.Replicate),
 		}
 	}
@@ -191,6 +212,7 @@ func diffCacheParamsJsonCfg(d map[string]*CacheParamJsonCfg, v2 map[string]*Cach
 type CacheJsonCfg struct {
 	Partitions        map[string]*CacheParamJsonCfg
 	Replication_conns *[]string
+	Remote_conns      *[]string
 }
 
 func diffCacheJsonCfg(d *CacheJsonCfg, v1, v2 *CacheCfg) *CacheJsonCfg {
@@ -200,6 +222,9 @@ func diffCacheJsonCfg(d *CacheJsonCfg, v1, v2 *CacheCfg) *CacheJsonCfg {
 	d.Partitions = diffCacheParamsJsonCfg(d.Partitions, v2.Partitions)
 	if !utils.SliceStringEqual(v1.ReplicationConns, v2.ReplicationConns) {
 		d.Replication_conns = &v2.ReplicationConns
+	}
+	if !utils.SliceStringEqual(v1.RemoteConns, v2.RemoteConns) {
+		d.Remote_conns = &v2.RemoteConns
 	}
 	return d
 }

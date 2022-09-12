@@ -137,13 +137,13 @@ func TestCachesCfgAsMapInterface1(t *testing.T) {
 	cfgJSONStr := `{
 		"caches":{
 			"partitions": {
-				"*dispatchers": {"limit": -1, "ttl": "", "static_ttl": false, "precache": true, "replicate": true},
+				"*dispatchers": {"limit": -1, "ttl": "", "static_ttl": false, "precache": true, "remote":false, "replicate": true},
 				},
 			},
 		}`
 	eMap := map[string]interface{}{
 		utils.PartitionsCfg: map[string]interface{}{
-			utils.MetaDispatchers: map[string]interface{}{"limit": -1, "static_ttl": false, "precache": true, "replicate": true},
+			utils.MetaDispatchers: map[string]interface{}{"limit": -1, "static_ttl": false, "precache": true, "remote": false, "replicate": true},
 		},
 		utils.ReplicationConnsCfg: []string{},
 	}
@@ -186,6 +186,7 @@ func TestDiffCacheParamsJsonCfg(t *testing.T) {
 			TTL:       5 * time.Minute,
 			StaticTTL: true,
 			Precache:  false,
+			Remote:    true,
 			Replicate: true,
 		},
 	}
@@ -196,6 +197,7 @@ func TestDiffCacheParamsJsonCfg(t *testing.T) {
 			Ttl:        utils.StringPointer("5m0s"),
 			Static_ttl: utils.BoolPointer(true),
 			Precache:   utils.BoolPointer(false),
+			Remote:     utils.BoolPointer(true),
 			Replicate:  utils.BoolPointer(true),
 		},
 	}
@@ -220,6 +222,7 @@ func TestDiffCacheParamsJsonCfg(t *testing.T) {
 			Ttl:        utils.StringPointer("2m0s"),
 			Static_ttl: utils.BoolPointer(false),
 			Precache:   utils.BoolPointer(true),
+			Remote:     utils.BoolPointer(false),
 			Replicate:  utils.BoolPointer(false),
 		},
 	}
@@ -239,6 +242,7 @@ func TestDiffCacheJsonCfg(t *testing.T) {
 				TTL:       2 * time.Minute,
 				StaticTTL: false,
 				Precache:  true,
+				Remote:    false,
 				Replicate: false,
 			},
 		},
@@ -252,6 +256,7 @@ func TestDiffCacheJsonCfg(t *testing.T) {
 				TTL:       5 * time.Minute,
 				StaticTTL: true,
 				Precache:  false,
+				Remote:    true,
 				Replicate: true,
 			},
 		},
@@ -265,6 +270,7 @@ func TestDiffCacheJsonCfg(t *testing.T) {
 				Ttl:        utils.StringPointer("5m0s"),
 				Static_ttl: utils.BoolPointer(true),
 				Precache:   utils.BoolPointer(false),
+				Remote:     utils.BoolPointer(true),
 				Replicate:  utils.BoolPointer(true),
 			},
 		},
@@ -284,6 +290,7 @@ func TestDiffCacheJsonCfg(t *testing.T) {
 				Ttl:        utils.StringPointer("2m0s"),
 				Static_ttl: utils.BoolPointer(false),
 				Precache:   utils.BoolPointer(true),
+				Remote:     utils.BoolPointer(false),
 				Replicate:  utils.BoolPointer(false),
 			},
 		},
