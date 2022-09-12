@@ -225,51 +225,52 @@ const CGRATES_CFG_JSON = `
 
 "caches":{
 	"partitions": {
-		"*resource_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},		// control resource profiles caching
-		"*resources": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},				// control resources caching
-		"*event_resources": {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false},							// matching resources to events
-		"*statqueue_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},	// statqueue profiles
-		"*statqueues": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},			// statqueues with metrics
-		"*threshold_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},	// control threshold profiles caching
-		"*thresholds": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},			// control thresholds caching
-		"*filters": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},				// control filters caching
-		"*route_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},		// control route profile caching
-		"*attribute_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},	// control attribute profile caching
-		"*charger_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},		// control charger profile caching
-		"*dispatcher_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},	// control dispatcher profile caching
-		"*dispatcher_hosts": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},		// control dispatcher hosts caching
-		"*rate_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},			// control rate profile caching
-		"*action_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},		// control action profile caching
-		"*accounts": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},		// control account profile caching
-		"*resource_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 				// control resource filter indexes caching
-		"*stat_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 					// control stat filter indexes caching
-		"*threshold_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 				// control threshold filter indexes caching
-		"*route_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 					// control route filter indexes caching
-		"*attribute_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 				// control attribute filter indexes caching
-		"*charger_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 					// control charger filter indexes caching
-		"*dispatcher_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 				// control dispatcher filter indexes caching
-		"*rate_profile_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 			// control rate profile filter indexes caching
-		"*rate_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 					// control rate filter indexes caching
-		"*action_profile_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 			// control action profile filter indexes caching
-		"*account_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 			// control coount profile filter indexes caching
-		"*reverse_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 					// control reverse filter indexes caching used only for set and remove filters 
-		"*dispatcher_routes": {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 						// control dispatcher routes caching
-		"*dispatcher_loads": {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false},							// control dispatcher load( in case of *ratio ConnParams is present)
-		"*dispatchers": {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 								// control dispatcher interface
-		"*diameter_messages": {"limit": -1, "ttl": "3h", "static_ttl": false, "replicate": false},						// diameter messages caching
-		"*rpc_responses": {"limit": 0, "ttl": "2s", "static_ttl": false, "replicate": false},							// RPC responses caching
-		"*closed_sessions": {"limit": -1, "ttl": "10s", "static_ttl": false, "replicate": false},						// closed sessions cached for CDRs
-		"*event_charges": {"limit": 0, "ttl": "10s", "static_ttl": false, "replicate": false},							// events proccessed by ChargerS
-		"*cdr_ids": {"limit": -1, "ttl": "10m", "static_ttl": false, "replicate": false},								// protects CDRs against double-charging
-		"*load_ids": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},				// control the load_ids for items
-		"*rpc_connections": {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false},							// RPC connections caching
-		"*uch": {"limit": -1, "ttl": "3h", "static_ttl": false, "replicate": false},									// User cache
-		"*stir": {"limit": -1, "ttl": "3h", "static_ttl": false, "replicate": false},									// stirShaken cache keys
-		"*apiban":{"limit": -1, "ttl": "2m", "static_ttl": false, "replicate": false}, 
-		"*caps_events": {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false},								// caps cached samples
-		"*replication_hosts": {"limit": 0, "ttl": "", "static_ttl": false, "replicate": false},							// the replication hosts cache(used when replication_filtered is enbled)
+		"*resource_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},		// control resource profiles caching
+		"*resources": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},				// control resources caching
+		"*event_resources": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false},							// matching resources to events
+		"*statqueue_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},	// statqueue profiles
+		"*statqueues": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},			// statqueues with metrics
+		"*threshold_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},	// control threshold profiles caching
+		"*thresholds": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},			// control thresholds caching
+		"*filters": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},				// control filters caching
+		"*route_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},		// control route profile caching
+		"*attribute_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},	// control attribute profile caching
+		"*charger_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},		// control charger profile caching
+		"*dispatcher_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},	// control dispatcher profile caching
+		"*dispatcher_hosts": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},		// control dispatcher hosts caching
+		"*rate_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},			// control rate profile caching
+		"*action_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},		// control action profile caching
+		"*accounts": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},		// control account profile caching
+		"*resource_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false}, 				// control resource filter indexes caching
+		"*stat_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false}, 					// control stat filter indexes caching
+		"*threshold_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false}, 				// control threshold filter indexes caching
+		"*route_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false}, 					// control route filter indexes caching
+		"*attribute_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false}, 				// control attribute filter indexes caching
+		"*charger_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false}, 					// control charger filter indexes caching
+		"*dispatcher_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false}, 				// control dispatcher filter indexes caching
+		"*rate_profile_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false}, 			// control rate profile filter indexes caching
+		"*rate_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false}, 					// control rate filter indexes caching
+		"*action_profile_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false}, 			// control action profile filter indexes caching
+		"*account_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false}, 			// control coount profile filter indexes caching
+		"*reverse_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false}, 					// control reverse filter indexes caching used only for set and remove filters 
+		"*dispatcher_routes": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false}, 						// control dispatcher routes caching
+		"*dispatcher_loads": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false},							// control dispatcher load( in case of *ratio ConnParams is present)
+		"*dispatchers": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false}, 								// control dispatcher interface
+		"*diameter_messages": {"limit": -1, "ttl": "3h", "static_ttl": false, "remote":false, "replicate": false},						// diameter messages caching
+		"*rpc_responses": {"limit": 0, "ttl": "2s", "static_ttl": false, "remote":false, "replicate": false},							// RPC responses caching
+		"*closed_sessions": {"limit": -1, "ttl": "10s", "static_ttl": false, "remote":false, "replicate": false},						// closed sessions cached for CDRs
+		"*event_charges": {"limit": 0, "ttl": "10s", "static_ttl": false, "remote":false, "replicate": false},							// events proccessed by ChargerS
+		"*cdr_ids": {"limit": -1, "ttl": "10m", "static_ttl": false, "remote":false, "replicate": false},								// protects CDRs against double-charging
+		"*load_ids": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},				// control the load_ids for items
+		"*rpc_connections": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false},							// RPC connections caching
+		"*uch": {"limit": -1, "ttl": "3h", "static_ttl": false, "remote":false, "replicate": false},									// User cache
+		"*stir": {"limit": -1, "ttl": "3h", "static_ttl": false, "remote":false, "replicate": false},									// stirShaken cache keys
+		"*apiban":{"limit": -1, "ttl": "2m", "static_ttl": false, "remote":false, "replicate": false}, 
+		"*caps_events": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false},								// caps cached samples
+		"*replication_hosts": {"limit": 0, "ttl": "", "static_ttl": false, "remote":false, "replicate": false},							// the replication hosts cache(used when replication_filtered is enbled)
 	},
 	"replication_conns": [],
+	"remote_conns": [],						// the conns that are queried when the items are not found in cache
 },
 
 
