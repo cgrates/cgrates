@@ -35,8 +35,11 @@ import (
 
 var (
 	dspOptsCfgPath   string
+	adminsCfgPath    string
 	dspOptsCfg       *config.CGRConfig
+	adminsCfg        *config.CGRConfig
 	dspOptsRPC       *birpc.Client
+	adminsRPC        *birpc.Client
 	dspOptsConfigDIR string
 	dpsOptsTest      = []func(t *testing.T){
 		// Start engine without Dispatcher on engine 4012
@@ -45,49 +48,53 @@ var (
 		testDispatcherOptsAdminStartEngine,
 		testDispatcherOptsAdminRPCConn,
 		testDispatcherOptsAdminSetDispatcherProfile,
-		testDispatcherOptsAdminStopEngine,
 
-		// Start engine without Dispatcher on engine 2012 with profiles in database
+		// Start engine without Dispatcher on engine 2012 with profiles in database (*dispatchers:false)
 		testDispatcherOptsDSPInitCfg,
 		testDispatcherOptsDSPStartEngine,
 		testDispatcherOptsDSPRPCConn,
-		testDispatcherOptsCoreStatus,
+		testDispatcherOptsCoreStatus, // self localhost(:2012) CoresV1Status
+
+		testDispatcherOptsAdminSetDispatcherHost4012,
+		testDispatcherOptsCoreStatusWithAccount,
+
 		testDispatcherOptsDSPStopEngine,
+		testDispatcherOptsAdminStopEngine,
 	}
 )
 
 func TestDispatcherOpts(t *testing.T) {
-	dspOptsConfigDIR = "dispatcher_opts_admin"
 	for _, test := range dpsOptsTest {
 		t.Run(dspOptsConfigDIR, test)
 	}
 }
 
 func testDispatcherOptsAdminInitCfg(t *testing.T) {
+	dspOptsConfigDIR = "dispatcher_opts_admin"
 	var err error
-	dspOptsCfgPath = path.Join(*dataDir, "conf", "samples", dspOptsConfigDIR)
-	dspOptsCfg, err = config.NewCGRConfigFromPath(context.Background(), dspOptsCfgPath)
+	adminsCfgPath = path.Join(*dataDir, "conf", "samples", dspOptsConfigDIR)
+	adminsCfg, err = config.NewCGRConfigFromPath(context.Background(), adminsCfgPath)
 	if err != nil {
 		t.Error(err)
 	}
 }
 
 func testDispatcherOptsAdminInitDataDb(t *testing.T) {
-	if err := engine.InitDataDB(dspOptsCfg); err != nil {
+	if err := engine.InitDataDB(adminsCfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Start CGR Engine woth Dispatcher enabled
 func testDispatcherOptsAdminStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(dspOptsCfgPath, *waitRater); err != nil {
+	if _, err := engine.StartEngine(adminsCfgPath, *waitRater); err != nil {
 		t.Fatal(err)
 	}
 }
 
 func testDispatcherOptsAdminRPCConn(t *testing.T) {
 	var err error
-	dspOptsRPC, err = newRPCClient(dspOptsCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
+	adminsRPC, err = newRPCClient(adminsCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -101,7 +108,8 @@ func testDispatcherOptsAdminSetDispatcherProfile(t *testing.T) {
 			Tenant: "cgrates.org",
 			RemoteHost: &config.RemoteHost{
 				ID:              "SELF_ENGINE",
-				Address:         "*internal",
+				Address:         "*localhost",
+				Transport:       "*json",
 				ConnectAttempts: 1,
 				Reconnects:      3,
 				ConnectTimeout:  time.Minute,
@@ -109,11 +117,12 @@ func testDispatcherOptsAdminSetDispatcherProfile(t *testing.T) {
 			},
 		},
 	}
-	if err := dspOptsRPC.Call(context.Background(), utils.AdminSv1SetDispatcherHost, setDispatcherHost, &replyStr); err != nil {
+	if err := adminsRPC.Call(context.Background(), utils.AdminSv1SetDispatcherHost, setDispatcherHost, &replyStr); err != nil {
 		t.Error("Unexpected error when calling AdminSv1.SetDispatcherHost: ", err)
 	} else if replyStr != utils.OK {
 		t.Error("Unexpected reply returned", replyStr)
 	}
+
 	// Set DispatcherProfile
 	setDispatcherProfile := &engine.DispatcherProfileWithAPIOpts{
 		DispatcherProfile: &engine.DispatcherProfile{
@@ -129,16 +138,10 @@ func testDispatcherOptsAdminSetDispatcherProfile(t *testing.T) {
 			},
 		},
 	}
-	if err := dspOptsRPC.Call(context.Background(), utils.AdminSv1SetDispatcherProfile, setDispatcherProfile, &replyStr); err != nil {
+	if err := adminsRPC.Call(context.Background(), utils.AdminSv1SetDispatcherProfile, setDispatcherProfile, &replyStr); err != nil {
 		t.Error("Unexpected error when calling AdminSv1.SetDispatcherProfile: ", err)
 	} else if replyStr != utils.OK {
 		t.Error("Unexpected reply returned", replyStr)
-	}
-}
-
-func testDispatcherOptsAdminStopEngine(t *testing.T) {
-	if err := engine.KillEngine(*waitRater); err != nil {
-		t.Error(err)
 	}
 }
 
@@ -154,7 +157,7 @@ func testDispatcherOptsDSPInitCfg(t *testing.T) {
 
 // Start CGR Engine woth Dispatcher enabled
 func testDispatcherOptsDSPStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(dspOptsCfgPath, *waitRater); err != nil {
+	if _, err := engine.StartEngine(dspOptsCfgPath, *waitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -171,6 +174,72 @@ func testDispatcherOptsCoreStatus(t *testing.T) {
 	var reply map[string]interface{}
 	ev := utils.TenantWithAPIOpts{
 		Tenant: "cgrates.org",
+		APIOpts: map[string]interface{}{
+			utils.MetaDispatchers: false,
+		},
+	}
+	if err := dspOptsRPC.Call(context.Background(), utils.CoreSv1Status, &ev, &reply); err != nil {
+		t.Error(err)
+	} else {
+		/*
+			t.Errorf("Received: %s", utils.ToJSON(reply))
+		*/
+	}
+}
+
+func testDispatcherOptsAdminSetDispatcherHost4012(t *testing.T) {
+	// Set DispatcherHost on 4012 host
+	var replyStr string
+	setDispatcherHost := &engine.DispatcherHostWithAPIOpts{
+		DispatcherHost: &engine.DispatcherHost{
+			Tenant: "cgrates.org",
+			RemoteHost: &config.RemoteHost{
+				ID:              "HOST4012",
+				Address:         "127.0.0.1:4012",
+				Transport:       "*json",
+				ConnectAttempts: 1,
+				Reconnects:      3,
+				ConnectTimeout:  time.Minute,
+				ReplyTimeout:    2 * time.Minute,
+			},
+		},
+	}
+	if err := adminsRPC.Call(context.Background(), utils.AdminSv1SetDispatcherHost, setDispatcherHost, &replyStr); err != nil {
+		t.Error("Unexpected error when calling AdminSv1.SetDispatcherHost: ", err)
+	} else if replyStr != utils.OK {
+		t.Error("Unexpected reply returned", replyStr)
+	}
+
+	// Set DispatcherProfile
+	setDispatcherProfile := &engine.DispatcherProfileWithAPIOpts{
+		DispatcherProfile: &engine.DispatcherProfile{
+			Tenant:   "cgrates.org",
+			ID:       "DSP1",
+			Strategy: "*weight",
+			Weight:   10,
+			Hosts: engine.DispatcherHostProfiles{
+				{
+					ID:     "HOST4012",
+					Weight: 10,
+				},
+			},
+		},
+	}
+	if err := adminsRPC.Call(context.Background(), utils.AdminSv1SetDispatcherProfile, setDispatcherProfile, &replyStr); err != nil {
+		t.Error("Unexpected error when calling AdminSv1.SetDispatcherProfile: ", err)
+	} else if replyStr != utils.OK {
+		t.Error("Unexpected reply returned", replyStr)
+	}
+}
+
+func testDispatcherOptsCoreStatusWithAccount(t *testing.T) {
+	// status just for HOST4012
+	var reply map[string]interface{}
+	ev := utils.TenantWithAPIOpts{
+		Tenant: "cgrates.org",
+		/* APIOpts: map[string]interface{}{
+			utils.MetaDispatchers: false,
+		}, */
 	}
 	if err := dspOptsRPC.Call(context.Background(), utils.CoreSv1Status, &ev, &reply); err != nil {
 		t.Error(err)
@@ -182,6 +251,12 @@ func testDispatcherOptsCoreStatus(t *testing.T) {
 }
 
 func testDispatcherOptsDSPStopEngine(t *testing.T) {
+	if err := engine.KillEngine(*waitRater); err != nil {
+		t.Error(err)
+	}
+}
+
+func testDispatcherOptsAdminStopEngine(t *testing.T) {
 	if err := engine.KillEngine(*waitRater); err != nil {
 		t.Error(err)
 	}
