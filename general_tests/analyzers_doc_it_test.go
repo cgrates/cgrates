@@ -67,7 +67,7 @@ var (
 		// make queries to the AnalyzerS db using only HeaderFilters
 		testAnzDocQueryWithHeaderFilters,
 		// make queries to the AnalyzerS db using only ContentFilters
-		// testAnzDocQueryWithContentFiltersFilters,
+		testAnzDocQueryWithContentFiltersFilters,
 		// make queries to the AnalyzerS db using a combination of both types of filters
 		testAnzDocQuery,
 		testAnzDocKillEngine,
@@ -133,7 +133,7 @@ func testAnzDocCoreSStatus(t *testing.T) {
 
 func testPopulateTimeVariable(t *testing.T) {
 	time.Sleep(time.Second)
-	timeVar = time.Now().Format("2006-01-02T15:04:05Z07:00")
+	timeVar = time.Now().UTC().Format("2006-01-02T15:04:05Z07:00")
 }
 
 func testAnzDocSetAttributeProfiles(t *testing.T) {
@@ -502,6 +502,16 @@ func testAnzDocQueryWithHeaderFilters(t *testing.T) {
 		t.Errorf("Unexpected result: %s", utils.ToJSON(result))
 	}
 
+	// Query results for all the request methods except CacheSv1.ReloadCache using HeaderFilters
+	if err := anzDocRPC.Call(context.Background(), utils.AnalyzerSv1StringQuery, &analyzers.QueryArgs{
+		HeaderFilters:  `-RequestMethod:"CacheSv1.ReloadCache"`,
+		ContentFilters: []string{},
+	}, &result); err != nil {
+		t.Error(err)
+	} else if len(result) != 11 {
+		t.Errorf("Unexpected result: %s", utils.ToJSON(result))
+	}
+
 	// Query all results for the requests made to the AdminS service using regular expressions
 	if err := anzDocRPC.Call(context.Background(), utils.AnalyzerSv1StringQuery, &analyzers.QueryArgs{
 		HeaderFilters:  `+RequestMethod:"/AdminSv1.*/"`,
@@ -526,12 +536,11 @@ func testAnzDocQueryWithHeaderFilters(t *testing.T) {
 
 	// Query results for API calls with RequestID smaller or equal to 2
 	if err := anzDocRPC.Call(context.Background(), utils.AnalyzerSv1StringQuery, &analyzers.QueryArgs{
-		HeaderFilters:  `+RequestID:<=2`,
+		HeaderFilters:  `+RequestID:<=2 -RequestMethod:"CacheSv1.ReloadCache"`,
 		ContentFilters: []string{},
 	}, &result); err != nil {
 		t.Error(err)
-	} else if len(result) != 7 {
-		fmt.Println(len(result))
+	} else if len(result) != 2 {
 		t.Errorf("Unexpected result: %s", utils.ToJSON(result))
 	}
 }
@@ -624,11 +633,10 @@ func testAnzDocQueryWithContentFiltersFilters(t *testing.T) {
 	// Query results for API calls with with an execution duration longer than 30ms
 	if err := anzDocRPC.Call(context.Background(), utils.AnalyzerSv1StringQuery, &analyzers.QueryArgs{
 		HeaderFilters:  "",
-		ContentFilters: []string{"*gt:~*hdr.RequestDuration:30ms"},
+		ContentFilters: []string{"*gt:~*hdr.RequestDuration:50ms"},
 	}, &result); err != nil {
 		t.Error(err)
-	} else if len(result) != 7 {
-		fmt.Println(len(result))
+	} else if len(result) != 1 {
 		t.Errorf("Unexpected result: %s", utils.ToJSON(result))
 	}
 }
