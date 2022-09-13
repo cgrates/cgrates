@@ -56,7 +56,13 @@ var (
 		testDispatcherOptsCoreStatus, // self localhost(:2012) CoresV1Status
 
 		testDispatcherOptsAdminSetDispatcherHost4012,
-		testDispatcherOptsCoreStatusWithAccount,
+		testDispatcherOptsCoreStatusHost4012,
+
+		testDispatcherOptsAdminSetDispatcherHostWithRouteID,
+		testDispatcherOptsCoreStatusWithRouteID,
+
+		testDispatcherOptsAdminSetDispatcherHostInexistent,
+		testDispatcherOptsCoreStatusWithRouteID2,
 
 		testDispatcherOptsDSPStopEngine,
 		testDispatcherOptsAdminStopEngine,
@@ -232,14 +238,121 @@ func testDispatcherOptsAdminSetDispatcherHost4012(t *testing.T) {
 	}
 }
 
-func testDispatcherOptsCoreStatusWithAccount(t *testing.T) {
+func testDispatcherOptsCoreStatusHost4012(t *testing.T) {
 	// status just for HOST4012
 	var reply map[string]interface{}
 	ev := utils.TenantWithAPIOpts{
 		Tenant: "cgrates.org",
-		/* APIOpts: map[string]interface{}{
-			utils.MetaDispatchers: false,
-		}, */
+	}
+	if err := dspOptsRPC.Call(context.Background(), utils.CoreSv1Status, &ev, &reply); err != nil {
+		t.Error(err)
+	} else {
+		/*
+			t.Errorf("Received: %s", utils.ToJSON(reply))
+		*/
+	}
+}
+
+func testDispatcherOptsAdminSetDispatcherHostWithRouteID(t *testing.T) {
+	var replyStr string
+	// Set DispatcherProfile with both engines
+	setDispatcherProfile := &engine.DispatcherProfileWithAPIOpts{
+		DispatcherProfile: &engine.DispatcherProfile{
+			Tenant:   "cgrates.org",
+			ID:       "DSP1",
+			Strategy: "*weight",
+			Weight:   10,
+			Hosts: engine.DispatcherHostProfiles{
+				{
+					ID:     "SELF_ENGINE",
+					Weight: 5,
+				},
+				{
+					ID:     "HOST4012",
+					Weight: 10,
+				},
+			},
+		},
+	}
+	if err := adminsRPC.Call(context.Background(), utils.AdminSv1SetDispatcherProfile, setDispatcherProfile, &replyStr); err != nil {
+		t.Error("Unexpected error when calling AdminSv1.SetDispatcherProfile: ", err)
+	} else if replyStr != utils.OK {
+		t.Error("Unexpected reply returned", replyStr)
+	}
+}
+
+func testDispatcherOptsCoreStatusWithRouteID(t *testing.T) {
+	// now it will dispatch in both engines
+	var reply map[string]interface{}
+	ev := utils.TenantWithAPIOpts{
+		Tenant: "cgrates.org",
+		APIOpts: map[string]interface{}{
+			utils.OptsRouteID: "account#dan.bogos",
+		},
+	}
+	if err := dspOptsRPC.Call(context.Background(), utils.CoreSv1Status, &ev, &reply); err != nil {
+		t.Error(err)
+	} else {
+		/*
+			t.Errorf("Received: %s", utils.ToJSON(reply))
+		*/
+	}
+}
+
+func testDispatcherOptsAdminSetDispatcherHostInexistent(t *testing.T) {
+	// Set DispatcherHost on 4012 host
+	var replyStr string
+	setDispatcherHost := &engine.DispatcherHostWithAPIOpts{
+		DispatcherHost: &engine.DispatcherHost{
+			Tenant: "cgrates.org",
+			RemoteHost: &config.RemoteHost{
+				ID:              "INEXISTENT",
+				Address:         "127.0.0.1:1223",
+				Transport:       "*json",
+				ConnectAttempts: 1,
+				Reconnects:      3,
+				ConnectTimeout:  time.Minute,
+				ReplyTimeout:    2 * time.Minute,
+			},
+		},
+	}
+	if err := adminsRPC.Call(context.Background(), utils.AdminSv1SetDispatcherHost, setDispatcherHost, &replyStr); err != nil {
+		t.Error("Unexpected error when calling AdminSv1.SetDispatcherHost: ", err)
+	} else if replyStr != utils.OK {
+		t.Error("Unexpected reply returned", replyStr)
+	}
+
+	// Set DispatcherProfile Different with an inexistent engine opened, but with a bigger weight(this should match now)
+	setDispatcherProfile := &engine.DispatcherProfileWithAPIOpts{
+		DispatcherProfile: &engine.DispatcherProfile{
+			Tenant:   "cgrates.org",
+			ID:       "DSP2",
+			Strategy: "*weight",
+			Weight:   20,
+			Hosts: engine.DispatcherHostProfiles{
+				{
+					ID:     "INEXISTENT",
+					Weight: 10,
+				},
+			},
+		},
+	}
+	if err := adminsRPC.Call(context.Background(), utils.AdminSv1SetDispatcherProfile, setDispatcherProfile, &replyStr); err != nil {
+		t.Error("Unexpected error when calling AdminSv1.SetDispatcherProfile: ", err)
+	} else if replyStr != utils.OK {
+		t.Error("Unexpected reply returned", replyStr)
+	}
+}
+
+func testDispatcherOptsCoreStatusWithRouteID2(t *testing.T) {
+	// even if DSP2 must be the dispatcher matching, because we have the routeID it will match DSP1
+	// so again, both engines will match
+	var reply map[string]interface{}
+	ev := utils.TenantWithAPIOpts{
+		Tenant: "cgrates.org",
+		APIOpts: map[string]interface{}{
+			utils.OptsRouteID: "account#dan.bogos",
+		},
 	}
 	if err := dspOptsRPC.Call(context.Background(), utils.CoreSv1Status, &ev, &reply); err != nil {
 		t.Error(err)
