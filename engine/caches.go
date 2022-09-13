@@ -35,6 +35,9 @@ var Cache *CacheS
 
 func init() {
 	Cache = NewCacheS(config.CgrConfig(), nil, nil)
+
+	// Register objects for cache replication/remotes
+	// AttributeS
 	gob.Register(new(AttributeProfile))
 	gob.Register(new(AttributeProfileWithAPIOpts))
 	// Threshold
@@ -69,7 +72,6 @@ func init() {
 	// ActionProfiles
 	gob.Register(new(ActionProfile))
 	gob.Register(new(ActionProfileWithAPIOpts))
-
 	// StatMetrics
 	gob.Register(new(StatASR))
 	gob.Register(new(StatACD))
@@ -81,7 +83,7 @@ func init() {
 	gob.Register(new(StatSum))
 	gob.Register(new(StatAverage))
 	gob.Register(new(StatDistinct))
-
+	// others
 	gob.Register([]interface{}{})
 	gob.Register([]map[string]interface{}{})
 	gob.Register(map[string]interface{}{})
@@ -250,6 +252,17 @@ func (chS *CacheS) V1GetItemIDs(_ *context.Context, args *utils.ArgsGetCacheItem
 func (chS *CacheS) V1HasItem(_ *context.Context, args *utils.ArgsGetCacheItemWithAPIOpts,
 	reply *bool) (err error) {
 	*reply = chS.tCache.HasItem(args.CacheID, args.ItemID)
+	return
+}
+
+// V1GetItem returns a single item from the cache
+func (chS *CacheS) V1GetItem(_ *context.Context, args *utils.ArgsGetCacheItemWithAPIOpts,
+	reply *interface{}) (err error) {
+	itmIface, has := chS.tCache.Get(args.CacheID, args.ItemID)
+	if !has {
+		return utils.ErrNotFound
+	}
+	*reply = itmIface
 	return
 }
 
