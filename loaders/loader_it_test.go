@@ -91,7 +91,7 @@ var (
 	}
 )
 
-//Test start here
+// Test start here
 func TestLoaderIT(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
@@ -159,7 +159,7 @@ func testLoaderRPCConn(t *testing.T) {
 func testLoaderPopulateData(t *testing.T) {
 	fileName := utils.AttributesCsv
 	tmpFilePath := path.Join("/tmp", fileName)
-	if err := os.WriteFile(tmpFilePath, []byte(engine.AttributesCSVContent), 0777); err != nil {
+	if err := os.WriteFile(tmpFilePath, []byte(engine.AttributesCSVContent), os.ModePerm); err != nil {
 		t.Fatal(err.Error())
 	}
 	if err := os.Rename(tmpFilePath, path.Join("/tmp/In", fileName)); err != nil {
@@ -230,7 +230,7 @@ func testLoaderCheckAttributes(t *testing.T) {
 func testLoaderPopulateDataWithoutMoving(t *testing.T) {
 	fileName := utils.AttributesCsv
 	tmpFilePath := path.Join("/tmp/", fileName)
-	if err := os.WriteFile(tmpFilePath, []byte(engine.AttributesCSVContent), 0777); err != nil {
+	if err := os.WriteFile(tmpFilePath, []byte(engine.AttributesCSVContent), os.ModePerm); err != nil {
 		t.Fatal(err.Error())
 	}
 	if err := os.Rename(tmpFilePath, path.Join("/tmp/LoaderIn", fileName)); err != nil {
@@ -259,7 +259,7 @@ func testLoaderVerifyOutDirWithoutMoving(t *testing.T) {
 func testLoaderPopulateDataWithSubpath(t *testing.T) {
 	fileName := utils.AttributesCsv
 	tmpFilePath := path.Join("/tmp/", fileName)
-	if err := os.WriteFile(tmpFilePath, []byte(engine.AttributesCSVContent), 0777); err != nil {
+	if err := os.WriteFile(tmpFilePath, []byte(engine.AttributesCSVContent), os.ModePerm); err != nil {
 		t.Fatal(err.Error())
 	}
 	if err := os.MkdirAll("/tmp/SubpathWithoutMove/folder1", 0755); err != nil {
@@ -291,7 +291,7 @@ func testLoaderVerifyOutDirWithSubpath(t *testing.T) {
 func testLoaderPopulateDataWithSubpathWithMove(t *testing.T) {
 	fileName := utils.AttributesCsv
 	tmpFilePath := path.Join("/tmp/", fileName)
-	if err := os.WriteFile(tmpFilePath, []byte(engine.AttributesCSVContent), 0777); err != nil {
+	if err := os.WriteFile(tmpFilePath, []byte(engine.AttributesCSVContent), os.ModePerm); err != nil {
 		t.Fatal(err.Error())
 	}
 	if err := os.MkdirAll("/tmp/SubpathLoaderWithMove/folder1", 0755); err != nil {
@@ -322,7 +322,7 @@ func testLoaderVerifyOutDirWithSubpathWithMove(t *testing.T) {
 func testLoaderPopulateDataForTemplateLoader(t *testing.T) {
 	fileName := utils.AttributesCsv
 	tmpFilePath := path.Join("/tmp/", fileName)
-	if err := os.WriteFile(tmpFilePath, []byte(engine.AttributesCSVContent), 0777); err != nil {
+	if err := os.WriteFile(tmpFilePath, []byte(engine.AttributesCSVContent), os.ModePerm); err != nil {
 		t.Fatal(err.Error())
 	}
 	if err := os.MkdirAll("/tmp/templateLoaderIn", 0755); err != nil {
@@ -359,7 +359,7 @@ func testLoaderKillEngine(t *testing.T) {
 func testLoaderPopulateDataForCustomSep(t *testing.T) {
 	fileName := utils.Attributes
 	tmpFilePath := path.Join("/tmp/", fileName)
-	if err := os.WriteFile(tmpFilePath, []byte(customAttributes), 0777); err != nil {
+	if err := os.WriteFile(tmpFilePath, []byte(customAttributes), os.ModePerm); err != nil {
 		t.Fatal(err.Error())
 	}
 	if err := os.MkdirAll("/tmp/customSepLoaderIn", 0755); err != nil {
@@ -414,7 +414,7 @@ func testLoaderVerifyOutDirForCustomSep(t *testing.T) {
 
 func testProcessFile(t *testing.T) {
 	flPath := "/tmp/testProcessFile"
-	if err := os.MkdirAll(flPath, 0777); err != nil {
+	if err := os.MkdirAll(flPath, os.ModePerm); err != nil {
 		t.Error(err)
 	}
 	file, err := os.Create(path.Join(flPath, utils.ResourcesCsv))
@@ -521,7 +521,7 @@ cgrates.org,NewRes1
 
 func testProcessFileAllFilesPresent(t *testing.T) {
 	flPath := "/tmp/testProcessFile"
-	if err := os.MkdirAll(flPath, 0777); err != nil {
+	if err := os.MkdirAll(flPath, os.ModePerm); err != nil {
 		t.Error(err)
 	}
 	file, err := os.Create(path.Join(flPath, "inexistent.csv"))
@@ -581,7 +581,7 @@ cgrates.org,NewRes1
 
 func testProcessFileLockFolder(t *testing.T) {
 	flPath := "/tmp/testProcessFileLockFolder"
-	if err := os.MkdirAll(flPath, 0777); err != nil {
+	if err := os.MkdirAll(flPath, os.ModePerm); err != nil {
 		t.Error(err)
 	}
 	_, err := os.Create(path.Join(flPath, utils.ResourcesCsv))
@@ -627,7 +627,7 @@ cgrates.org,NewRes1
 
 func testProcessFileUnableToOpen(t *testing.T) {
 	flPath := "/tmp/testProcessFileUnableToOpen"
-	if err := os.MkdirAll(flPath, 0777); err != nil {
+	if err := os.MkdirAll(flPath, os.ModePerm); err != nil {
 		t.Error(err)
 	}
 
@@ -665,7 +665,7 @@ cgrates.org,NewRes1
 
 func testProcessFileRenameError(t *testing.T) {
 	flPath1 := "/tmp/testProcessFileLockFolder"
-	if err := os.MkdirAll(flPath1, 0777); err != nil {
+	if err := os.MkdirAll(flPath1, os.ModePerm); err != nil {
 		t.Error(err)
 	}
 	data := engine.NewInternalDB(nil, nil, true, loaderCfg.DataDbCfg().Items)
@@ -763,7 +763,7 @@ func testIsFolderLocked(t *testing.T) {
 
 func testNewLockFolder(t *testing.T) {
 	pathL := "/tmp/testNewLockFolder/"
-	if err := os.MkdirAll(pathL, 0777); err != nil {
+	if err := os.MkdirAll(pathL, os.ModePerm); err != nil {
 		t.Error(err)
 	}
 
@@ -806,7 +806,7 @@ func testNewLockFolderNotFound(t *testing.T) {
 
 func testNewIsFolderLock(t *testing.T) {
 	pathL := "/tmp/testNewLockFolder/"
-	if err := os.MkdirAll(pathL, 0777); err != nil {
+	if err := os.MkdirAll(pathL, os.ModePerm); err != nil {
 		t.Error(err)
 	}
 
