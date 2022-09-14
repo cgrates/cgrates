@@ -35,7 +35,7 @@ Add the gpg key:
 
 ::
 
-    sudo wget -O - https://apt.cgrates.org/apt.cgrates.org.gpg.key | sudo apt-key add -
+    sudo wget https://apt.cgrates.org/apt.cgrates.org.gpg.key -O /etc/apt/trusted.gpg.d/apt.cgrates.org.asc
 
 Add the repository in apt sources list:
 
