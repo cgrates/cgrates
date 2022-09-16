@@ -58,11 +58,13 @@ var (
 		testDispatcherOptsAdminSetDispatcherHost4012,
 		testDispatcherOptsCoreStatusHost4012,
 
-		testDispatcherOptsAdminSetDispatcherHostWithRouteID,
+		testDispatcherOptsAdminSetDispatcherProfileDoubleHost,
 		testDispatcherOptsCoreStatusWithRouteID,
 
 		testDispatcherOptsAdminSetDispatcherHostInexistent,
 		testDispatcherOptsCoreStatusWithRouteID2,
+
+		testDispatcherOptsCoreStatusWithoutRouteID,
 
 		testDispatcherOptsDSPStopEngine,
 		testDispatcherOptsAdminStopEngine,
@@ -114,13 +116,16 @@ func testDispatcherOptsAdminSetDispatcherProfile(t *testing.T) {
 			Tenant: "cgrates.org",
 			RemoteHost: &config.RemoteHost{
 				ID:              "SELF_ENGINE",
-				Address:         "*localhost",
+				Address:         "*internal",
 				Transport:       "*json",
 				ConnectAttempts: 1,
 				Reconnects:      3,
 				ConnectTimeout:  time.Minute,
 				ReplyTimeout:    2 * time.Minute,
 			},
+		},
+		APIOpts: map[string]interface{}{
+			utils.MetaDispatchers: false,
 		},
 	}
 	if err := adminsRPC.Call(context.Background(), utils.AdminSv1SetDispatcherHost, setDispatcherHost, &replyStr); err != nil {
@@ -142,6 +147,9 @@ func testDispatcherOptsAdminSetDispatcherProfile(t *testing.T) {
 					Weight: 5,
 				},
 			},
+		},
+		APIOpts: map[string]interface{}{
+			utils.MetaDispatchers: false,
 		},
 	}
 	if err := adminsRPC.Call(context.Background(), utils.AdminSv1SetDispatcherProfile, setDispatcherProfile, &replyStr); err != nil {
@@ -177,6 +185,7 @@ func testDispatcherOptsDSPRPCConn(t *testing.T) {
 }
 
 func testDispatcherOptsCoreStatus(t *testing.T) {
+	//SELF_ENGINE HOST
 	var reply map[string]interface{}
 	ev := utils.TenantWithAPIOpts{
 		Tenant: "cgrates.org",
@@ -209,6 +218,9 @@ func testDispatcherOptsAdminSetDispatcherHost4012(t *testing.T) {
 				ReplyTimeout:    2 * time.Minute,
 			},
 		},
+		APIOpts: map[string]interface{}{
+			utils.MetaDispatchers: false,
+		},
 	}
 	if err := adminsRPC.Call(context.Background(), utils.AdminSv1SetDispatcherHost, setDispatcherHost, &replyStr); err != nil {
 		t.Error("Unexpected error when calling AdminSv1.SetDispatcherHost: ", err)
@@ -229,6 +241,9 @@ func testDispatcherOptsAdminSetDispatcherHost4012(t *testing.T) {
 					Weight: 10,
 				},
 			},
+		},
+		APIOpts: map[string]interface{}{
+			utils.MetaDispatchers: false,
 		},
 	}
 	if err := adminsRPC.Call(context.Background(), utils.AdminSv1SetDispatcherProfile, setDispatcherProfile, &replyStr); err != nil {
@@ -253,8 +268,7 @@ func testDispatcherOptsCoreStatusHost4012(t *testing.T) {
 	}
 }
 
-func testDispatcherOptsAdminSetDispatcherHostWithRouteID(t *testing.T) {
-	var replyStr string
+func testDispatcherOptsAdminSetDispatcherProfileDoubleHost(t *testing.T) {
 	// Set DispatcherProfile with both engines
 	setDispatcherProfile := &engine.DispatcherProfileWithAPIOpts{
 		DispatcherProfile: &engine.DispatcherProfile{
@@ -273,7 +287,11 @@ func testDispatcherOptsAdminSetDispatcherHostWithRouteID(t *testing.T) {
 				},
 			},
 		},
+		APIOpts: map[string]interface{}{
+			utils.MetaDispatchers: false,
+		},
 	}
+	var replyStr string
 	if err := adminsRPC.Call(context.Background(), utils.AdminSv1SetDispatcherProfile, setDispatcherProfile, &replyStr); err != nil {
 		t.Error("Unexpected error when calling AdminSv1.SetDispatcherProfile: ", err)
 	} else if replyStr != utils.OK {
@@ -315,6 +333,9 @@ func testDispatcherOptsAdminSetDispatcherHostInexistent(t *testing.T) {
 				ReplyTimeout:    2 * time.Minute,
 			},
 		},
+		APIOpts: map[string]interface{}{
+			utils.MetaDispatchers: false,
+		},
 	}
 	if err := adminsRPC.Call(context.Background(), utils.AdminSv1SetDispatcherHost, setDispatcherHost, &replyStr); err != nil {
 		t.Error("Unexpected error when calling AdminSv1.SetDispatcherHost: ", err)
@@ -326,7 +347,7 @@ func testDispatcherOptsAdminSetDispatcherHostInexistent(t *testing.T) {
 	setDispatcherProfile := &engine.DispatcherProfileWithAPIOpts{
 		DispatcherProfile: &engine.DispatcherProfile{
 			Tenant:   "cgrates.org",
-			ID:       "DSP2",
+			ID:       "DSP1",
 			Strategy: "*weight",
 			Weight:   20,
 			Hosts: engine.DispatcherHostProfiles{
@@ -335,6 +356,9 @@ func testDispatcherOptsAdminSetDispatcherHostInexistent(t *testing.T) {
 					Weight: 10,
 				},
 			},
+		},
+		APIOpts: map[string]interface{}{
+			utils.MetaDispatchers: false,
 		},
 	}
 	if err := adminsRPC.Call(context.Background(), utils.AdminSv1SetDispatcherProfile, setDispatcherProfile, &replyStr); err != nil {
@@ -345,7 +369,7 @@ func testDispatcherOptsAdminSetDispatcherHostInexistent(t *testing.T) {
 }
 
 func testDispatcherOptsCoreStatusWithRouteID2(t *testing.T) {
-	// even if DSP2 must be the dispatcher matching, because we have the routeID it will match DSP1
+	// because we have the routeID it will match DSP1 and last host matched, host4012
 	// so again, both engines will match
 	var reply map[string]interface{}
 	ev := utils.TenantWithAPIOpts{
@@ -353,6 +377,22 @@ func testDispatcherOptsCoreStatusWithRouteID2(t *testing.T) {
 		APIOpts: map[string]interface{}{
 			utils.OptsRouteID: "account#dan.bogos",
 		},
+	}
+	if err := dspOptsRPC.Call(context.Background(), utils.CoreSv1Status, &ev, &reply); err != nil {
+		t.Error(err)
+	} else {
+		/*
+			t.Errorf("Received: %s", utils.ToJSON(reply))
+		*/
+	}
+}
+
+func testDispatcherOptsCoreStatusWithoutRouteID(t *testing.T) {
+	// because we have the routeID it will match DSP1 and last host matched, host4012
+	// so again, both engines will match
+	var reply map[string]interface{}
+	ev := utils.TenantWithAPIOpts{
+		Tenant: "cgrates.org",
 	}
 	if err := dspOptsRPC.Call(context.Background(), utils.CoreSv1Status, &ev, &reply); err != nil {
 		t.Error(err)
