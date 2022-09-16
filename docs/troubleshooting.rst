@@ -9,7 +9,7 @@ Memory Profiling
 Creating the memory profile files.
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Firstly, go to the main config directory and run manager with the flag named ```-memprof_dir```. For this example, I choosed ```tmp``` directory from my machine.
+Firstly, go to the main config directory and run the engine with the flag named ```-memprof_dir```. For this example, I choosed ```tmp``` directory from my machine.
 Also, there are other flags that we can use:
 
 ```-memprof_interval``` - Time between memory profile saves. By default, the time between writing into files is 5 seconds.
@@ -17,8 +17,7 @@ Also, there are other flags that we can use:
 
 ::
 
-   cd ~/go/src/github.com/ITsysCOM/Rakuten/ricc/cfgs/cgrmanager/dev
-   cgr-manager -config_path=. -logger=*stdout -memprof_dir=/tmp/
+   cgr-engine -config_path=. -logger=*stdout -memprof_dir=/tmp/
 
 In the running process, this will create a file named ```mem1_prof.prof```. Let the engine run for some time, and then you can kill the process. When the process is killed, it will create another file named ```mem_final.prof``` containing the final memory profiling information.
 
