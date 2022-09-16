@@ -24,7 +24,7 @@ import (
 )
 
 const (
-	DispatchersDispatchersDftOpt = false
+	DispatchersDispatchersDftOpt = true
 )
 
 type DispatchersOpts struct {

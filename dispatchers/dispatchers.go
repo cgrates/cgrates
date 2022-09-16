@@ -157,17 +157,16 @@ func (dS *DispatcherService) Dispatch(ctx *context.Context, ev *utils.CGREvent, 
 	if tnt == utils.EmptyString {
 		tnt = dS.cfg.GeneralCfg().DefaultTenant
 	}
-	if ifAce, has := ev.APIOpts[utils.MetaDispatchers]; has { // special case when dispatching is disabled, directly proxy internally
-		var shouldDispatch bool
-		if shouldDispatch, err = utils.IfaceAsBool(ifAce); err != nil {
-			return utils.NewErrDispatcherS(err)
-		}
-		if !shouldDispatch {
-			return callDH(ctx,
-				newInternalHost(tnt), utils.EmptyString, nil,
-				dS.cfg, dS.connMgr.GetDispInternalChan(),
-				serviceMethod, args, reply)
-		}
+	var shouldDispatch bool
+	if shouldDispatch, err = engine.GetBoolOpts(ctx, ev.Tenant, ev, dS.fltrS, dS.cfg.DispatcherSCfg().Opts.Dispatchers,
+		config.DispatchersDispatchersDftOpt, utils.OptsDispatchers); err != nil {
+		return utils.NewErrDispatcherS(err)
+	}
+	if !shouldDispatch {
+		return callDH(ctx,
+			newInternalHost(tnt), utils.EmptyString, nil,
+			dS.cfg, dS.connMgr.GetDispInternalChan(),
+			serviceMethod, args, reply)
 	}
 
 	var dR *DispatcherRoute

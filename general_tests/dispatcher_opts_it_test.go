@@ -181,7 +181,7 @@ func testDispatcherOptsCoreStatus(t *testing.T) {
 	ev := utils.TenantWithAPIOpts{
 		Tenant: "cgrates.org",
 		APIOpts: map[string]interface{}{
-			utils.MetaDispatchers: false,
+			utils.OptsDispatchers: false,
 		},
 	}
 	if err := dspOptsRPC.Call(context.Background(), utils.CoreSv1Status, &ev, &reply); err != nil {
