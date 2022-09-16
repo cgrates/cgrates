@@ -1,7 +1,7 @@
 Troubleshooting
 ===============
 
-In case of **troubleshooting**, CGRateS can monitorize memory profiling and CPU profiling.
+In case of **troubleshooting**, CGRateS can monitor memory profiling and CPU profiling.
 
 Memory Profiling
 ----------------
