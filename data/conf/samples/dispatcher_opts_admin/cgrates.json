@@ -18,10 +18,23 @@
 	    "db_name": "10", 						// data_db database name to connect to
     },
       
-        
+  /*   "dispatchers":{
+        "enabled": true,
+    }, */
+     
     "admins": {
         "enabled": true,
+        "caches_conns":["broadcast_cache"],
     },
     
+    "rpc_conns": {
+        "broadcast_cache": {
+            "strategy": "*broadcast",
+            "conns": [
+                {"address": "127.0.0.1:2012", "transport":"*json"},
+                {"address": "127.0.0.1:4012", "transport":"*json"},
+            ],
+        },
+    }, 
     
     }
