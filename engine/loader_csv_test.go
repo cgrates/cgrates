@@ -458,7 +458,7 @@ func TestLoadDispatcherProfiles(t *testing.T) {
 		Tenant:    "cgrates.org",
 		ID:        "D1",
 		FilterIDs: []string{"*string:~*req.Account:1001"},
-		Strategy:  "*first",
+		Strategy:  utils.MetaFirst,
 		Weight:    20,
 		Hosts: []*utils.TPDispatcherHostProfile{
 			{
