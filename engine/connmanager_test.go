@@ -84,7 +84,7 @@ func TestCMgetConnUnsupportedBiRPC(t *testing.T) {
 	}
 
 	experr := rpcclient.ErrUnsupportedBiRPC
-	exp, err := NewRPCPool(context.Background(), "*first", "", "", "", cfg.GeneralCfg().ConnectAttempts,
+	exp, err := NewRPCPool(context.Background(), utils.MetaFirst, "", "", "", cfg.GeneralCfg().ConnectAttempts,
 		cfg.GeneralCfg().Reconnects, cfg.GeneralCfg().MaxReconnectInterval, cfg.GeneralCfg().ConnectTimeout,
 		cfg.GeneralCfg().ReplyTimeout, nil, cc, true, nil, "", cM.connCache)
 	if err != nil {
@@ -129,7 +129,7 @@ func TestCMgetConnNotInternalRPC(t *testing.T) {
 
 	cM.connCache.Set(connID, nil, nil)
 
-	exp, err := NewRPCPool(context.Background(), "*first", cfg.TLSCfg().ClientKey, cfg.TLSCfg().ClientCerificate,
+	exp, err := NewRPCPool(context.Background(), utils.MetaFirst, cfg.TLSCfg().ClientKey, cfg.TLSCfg().ClientCerificate,
 		cfg.TLSCfg().CaCertificate, cfg.GeneralCfg().ConnectAttempts,
 		cfg.GeneralCfg().Reconnects, cfg.GeneralCfg().MaxReconnectInterval,
 		cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
