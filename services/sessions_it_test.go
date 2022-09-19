@@ -60,7 +60,7 @@ func TestSessionSReload1(t *testing.T) {
 	defer func() {
 		engine.Cache = temporaryCache
 	}()
-	engine.Cache = engine.NewCacheS(cfg, nil, nil)
+	engine.Cache = engine.NewCacheS(cfg, nil, nil, nil)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	server := cores.NewServer(nil)
@@ -146,7 +146,7 @@ func TestSessionSReload2(t *testing.T) {
 	cfg.CdrsCfg().Enabled = true
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
-	chS := engine.NewCacheS(cfg, nil, nil)
+	chS := engine.NewCacheS(cfg, nil, nil, nil)
 	close(chS.GetPrecacheChannel(utils.CacheChargerProfiles))
 	close(chS.GetPrecacheChannel(utils.CacheChargerFilterIndexes))
 
@@ -192,7 +192,7 @@ func TestSessionSReload3(t *testing.T) {
 	cfg.CdrsCfg().Enabled = true
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
-	chS := engine.NewCacheS(cfg, nil, nil)
+	chS := engine.NewCacheS(cfg, nil, nil, nil)
 	close(chS.GetPrecacheChannel(utils.CacheChargerProfiles))
 	close(chS.GetPrecacheChannel(utils.CacheChargerFilterIndexes))
 

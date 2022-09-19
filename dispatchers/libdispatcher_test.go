@@ -472,7 +472,7 @@ func TestLibDispatcherLoadStrategyDispatchCaseCallError(t *testing.T) {
 func TestLibDispatcherLoadStrategyDispatchCaseHostsCastError(t *testing.T) {
 	cacheInit := engine.Cache
 	cfg := config.NewDefaultCGRConfig()
-	newCache := engine.NewCacheS(cfg, nil, nil)
+	newCache := engine.NewCacheS(cfg, nil, nil, nil)
 	engine.Cache = newCache
 	engine.Cache.SetWithoutReplicate(utils.CacheDispatcherLoads, "testID",
 		false, nil, true, utils.NonTransactional)
@@ -528,7 +528,7 @@ func TestLibDispatcherSingleResultDispatcherCastError(t *testing.T) {
 	cacheInit := engine.Cache
 	cfg := config.NewDefaultCGRConfig()
 	dm := engine.NewDataManager(nil, nil, nil)
-	newCache := engine.NewCacheS(cfg, dm, nil)
+	newCache := engine.NewCacheS(cfg, dm, nil, nil)
 	engine.Cache = newCache
 	value := &engine.DispatcherHost{
 		Tenant: "testTenant",
@@ -560,7 +560,7 @@ func TestLibDispatcherBroadcastDispatcherDispatchError1(t *testing.T) {
 	cacheInit := engine.Cache
 	cfg := config.NewDefaultCGRConfig()
 	dm := engine.NewDataManager(nil, nil, nil)
-	newCache := engine.NewCacheS(cfg, dm, nil)
+	newCache := engine.NewCacheS(cfg, dm, nil, nil)
 	engine.Cache = newCache
 	value := &engine.DispatcherHost{
 		Tenant: "testTenant",
@@ -586,7 +586,7 @@ func TestLibDispatcherBroadcastDispatcherDispatchError2(t *testing.T) {
 	cacheInit := engine.Cache
 	cfg := config.NewDefaultCGRConfig()
 	dm := engine.NewDataManager(nil, nil, nil)
-	newCache := engine.NewCacheS(cfg, dm, nil)
+	newCache := engine.NewCacheS(cfg, dm, nil, nil)
 	engine.Cache = newCache
 
 	engine.Cache.SetWithoutReplicate(utils.CacheDispatcherHosts, "testTenant:testID",
@@ -604,7 +604,7 @@ func TestLibDispatcherBroadcastDispatcherDispatchError3(t *testing.T) {
 	cacheInit := engine.Cache
 	cfg := config.NewDefaultCGRConfig()
 	dm := engine.NewDataManager(nil, nil, nil)
-	newCache := engine.NewCacheS(cfg, dm, nil)
+	newCache := engine.NewCacheS(cfg, dm, nil, nil)
 	engine.Cache = newCache
 	value := &engine.DispatcherHost{
 		Tenant: "testTenant",
@@ -646,7 +646,7 @@ func TestLibDispatcherLoadDispatcherCacheError4(t *testing.T) {
 	dataDB := engine.NewInternalDB(nil, nil, nil)
 	dm := engine.NewDataManager(dataDB, nil, connMng)
 
-	newCache := engine.NewCacheS(cfg, dm, nil)
+	newCache := engine.NewCacheS(cfg, dm, connMng, nil)
 	engine.Cache = newCache
 	value := &engine.DispatcherHost{
 		Tenant: "testTenant",
@@ -704,7 +704,7 @@ func TestLibDispatcherLoadDispatcherCacheError5(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 
 	dm := engine.NewDataManager(nil, nil, nil)
-	newCache := engine.NewCacheS(cfg, dm, nil)
+	newCache := engine.NewCacheS(cfg, dm, nil, nil)
 	engine.Cache = newCache
 	value := &engine.DispatcherHost{
 		Tenant: "testTenant",
@@ -745,7 +745,7 @@ func TestLibDispatcherSingleResultDispatcherCase1(t *testing.T) {
 	cacheInit := engine.Cache
 	cfg := config.NewDefaultCGRConfig()
 	dm := engine.NewDataManager(nil, nil, nil)
-	newCache := engine.NewCacheS(cfg, dm, nil)
+	newCache := engine.NewCacheS(cfg, dm, nil, nil)
 	engine.Cache = newCache
 	value := &engine.DispatcherHost{
 		Tenant: "testTenant",
@@ -778,7 +778,7 @@ func TestLibDispatcherSingleResultDispatcherCase2(t *testing.T) {
 	cacheInit := engine.Cache
 	cfg := config.NewDefaultCGRConfig()
 	dm := engine.NewDataManager(nil, nil, nil)
-	newCache := engine.NewCacheS(cfg, dm, nil)
+	newCache := engine.NewCacheS(cfg, dm, nil, nil)
 	engine.Cache = newCache
 	value := &engine.DispatcherHost{
 		Tenant: "testTenant",
@@ -820,7 +820,7 @@ func TestLibDispatcherSingleResultDispatcherCase3(t *testing.T) {
 	}
 	connMng := engine.NewConnManager(cfg)
 	dm := engine.NewDataManager(nil, nil, connMng)
-	newCache := engine.NewCacheS(cfg, dm, nil)
+	newCache := engine.NewCacheS(cfg, dm, connMng, nil)
 	engine.Cache = newCache
 	value := &engine.DispatcherHost{
 		Tenant: "testTenant",

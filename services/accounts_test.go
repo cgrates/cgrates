@@ -42,7 +42,7 @@ func TestAccountSCoverage(t *testing.T) {
 	db := NewDataDBService(cfg, nil, srvDep)
 	actRPC := make(chan birpc.ClientConnector, 1)
 	anz := NewAnalyzerService(cfg, server, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
-	chS := NewCacheService(cfg, db, server, make(chan context.ClientConnector, 1), anz, nil, srvDep)
+	chS := NewCacheService(cfg, db, nil, server, make(chan context.ClientConnector, 1), anz, nil, srvDep)
 	actS := NewAccountService(cfg, db,
 		chS, filterSChan, nil, server, actRPC,
 		anz, srvDep)

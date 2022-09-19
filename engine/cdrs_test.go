@@ -334,7 +334,7 @@ func TestCDRsAttrSProcessEventMock(t *testing.T) {
 	connMng := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	fltrs := NewFilterS(cfg, nil, dm)
-	Cache = NewCacheS(cfg, dm, nil)
+	Cache = NewCacheS(cfg, dm, nil, nil)
 	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
@@ -411,7 +411,7 @@ func TestCDRsAttrSProcessEventMockNotFoundErr(t *testing.T) {
 	connMng := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	fltrs := NewFilterS(cfg, nil, dm)
-	Cache = NewCacheS(cfg, dm, nil)
+	Cache = NewCacheS(cfg, dm, nil, nil)
 	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
@@ -490,7 +490,7 @@ func TestCDRsAttrSProcessEventMockNotEmptyAF(t *testing.T) {
 	connMng := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	fltrs := NewFilterS(cfg, nil, dm)
-	Cache = NewCacheS(cfg, dm, nil)
+	Cache = NewCacheS(cfg, dm, nil, nil)
 	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
@@ -655,7 +655,7 @@ func TestCDRsRateProcessEventMock(t *testing.T) {
 	connMng := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	fltrs := NewFilterS(cfg, nil, dm)
-	Cache = NewCacheS(cfg, dm, nil)
+	Cache = NewCacheS(cfg, dm, nil, nil)
 	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
@@ -731,7 +731,7 @@ func TestCDRsAccountProcessEventMock(t *testing.T) {
 	connMng := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	fltrs := NewFilterS(cfg, nil, dm)
-	Cache = NewCacheS(cfg, dm, nil)
+	Cache = NewCacheS(cfg, dm, nil, nil)
 	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
@@ -809,7 +809,7 @@ func TestCDRsThdSProcessEventMock(t *testing.T) {
 	connMng := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	fltrs := NewFilterS(cfg, nil, dm)
-	Cache = NewCacheS(cfg, dm, nil)
+	Cache = NewCacheS(cfg, dm, nil, nil)
 	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
@@ -879,7 +879,7 @@ func TestCDRsThdSProcessEventMockNotfound(t *testing.T) {
 	connMng := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	fltrs := NewFilterS(cfg, nil, dm)
-	Cache = NewCacheS(cfg, dm, nil)
+	Cache = NewCacheS(cfg, dm, nil, nil)
 	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
@@ -948,7 +948,7 @@ func TestCDRsStatSProcessEventMock(t *testing.T) {
 	connMng := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	fltrs := NewFilterS(cfg, nil, dm)
-	Cache = NewCacheS(cfg, dm, nil)
+	Cache = NewCacheS(cfg, dm, nil, nil)
 	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
@@ -1018,7 +1018,7 @@ func TestCDRsEESProcessEventMock(t *testing.T) {
 	connMng := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	fltrs := NewFilterS(cfg, nil, dm)
-	Cache = NewCacheS(cfg, dm, nil)
+	Cache = NewCacheS(cfg, dm, nil, nil)
 	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
@@ -1092,7 +1092,7 @@ func TestCDRsProcessEventMock(t *testing.T) {
 	connMng := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	fltrs := NewFilterS(cfg, nil, dm)
-	Cache = NewCacheS(cfg, dm, nil)
+	Cache = NewCacheS(cfg, dm, nil, nil)
 	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
@@ -1162,7 +1162,7 @@ func TestCDRsProcessEventMockSkipOpts(t *testing.T) {
 	connMng := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	fltrs := NewFilterS(cfg, nil, dm)
-	Cache = NewCacheS(cfg, dm, nil)
+	Cache = NewCacheS(cfg, dm, nil, nil)
 	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
@@ -1251,7 +1251,7 @@ func TestCDRsProcessEventMockAttrsErr(t *testing.T) {
 	connMng := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	fltrs := NewFilterS(cfg, nil, dm)
-	Cache = NewCacheS(cfg, dm, nil)
+	Cache = NewCacheS(cfg, dm, nil, nil)
 	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
@@ -1312,7 +1312,7 @@ func TestCDRsProcessEventMockAttrsErrBoolOpts(t *testing.T) {
 	connMng := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	fltrs := NewFilterS(cfg, nil, dm)
-	Cache = NewCacheS(cfg, dm, nil)
+	Cache = NewCacheS(cfg, dm, nil, nil)
 	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
@@ -1373,7 +1373,7 @@ func TestCDRsProcessEventMockChrgsErr(t *testing.T) {
 	connMng := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	fltrs := NewFilterS(cfg, nil, dm)
-	Cache = NewCacheS(cfg, dm, nil)
+	Cache = NewCacheS(cfg, dm, nil, nil)
 	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
@@ -1435,7 +1435,7 @@ func TestCDRsProcessEventMockChrgsErrBoolOpts(t *testing.T) {
 	connMng := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	fltrs := NewFilterS(cfg, nil, dm)
-	Cache = NewCacheS(cfg, dm, nil)
+	Cache = NewCacheS(cfg, dm, nil, nil)
 	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
@@ -1497,7 +1497,7 @@ func TestCDRsProcessEventMockRateSErr(t *testing.T) {
 	connMng := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	fltrs := NewFilterS(cfg, nil, dm)
-	Cache = NewCacheS(cfg, dm, nil)
+	Cache = NewCacheS(cfg, dm, nil, nil)
 	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
@@ -1559,7 +1559,7 @@ func TestCDRsProcessEventMockRateSErrBoolOpts(t *testing.T) {
 	connMng := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	fltrs := NewFilterS(cfg, nil, dm)
-	Cache = NewCacheS(cfg, dm, nil)
+	Cache = NewCacheS(cfg, dm, nil, nil)
 	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
@@ -1621,7 +1621,7 @@ func TestCDRsProcessEventMockAcntsErr(t *testing.T) {
 	connMng := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	fltrs := NewFilterS(cfg, nil, dm)
-	Cache = NewCacheS(cfg, dm, nil)
+	Cache = NewCacheS(cfg, dm, nil, nil)
 	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
@@ -1683,7 +1683,7 @@ func TestCDRsProcessEventMockAcntsErrBoolOpts(t *testing.T) {
 	connMng := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	fltrs := NewFilterS(cfg, nil, dm)
-	Cache = NewCacheS(cfg, dm, nil)
+	Cache = NewCacheS(cfg, dm, nil, nil)
 	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
@@ -1746,7 +1746,7 @@ func TestCDRsProcessEventMockExportErr(t *testing.T) {
 	connMng := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	fltrs := NewFilterS(cfg, nil, dm)
-	Cache = NewCacheS(cfg, dm, nil)
+	Cache = NewCacheS(cfg, dm, nil, nil)
 	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
@@ -1808,7 +1808,7 @@ func TestCDRsProcessEventMockExportErrBoolOpts(t *testing.T) {
 	connMng := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	fltrs := NewFilterS(cfg, nil, dm)
-	Cache = NewCacheS(cfg, dm, nil)
+	Cache = NewCacheS(cfg, dm, nil, nil)
 	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
@@ -1870,7 +1870,7 @@ func TestCDRsProcessEventMockThdsErr(t *testing.T) {
 	connMng := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	fltrs := NewFilterS(cfg, nil, dm)
-	Cache = NewCacheS(cfg, dm, nil)
+	Cache = NewCacheS(cfg, dm, nil, nil)
 	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
@@ -1932,7 +1932,7 @@ func TestCDRsProcessEventMockThdsErrBoolOpts(t *testing.T) {
 	connMng := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	fltrs := NewFilterS(cfg, nil, dm)
-	Cache = NewCacheS(cfg, dm, nil)
+	Cache = NewCacheS(cfg, dm, nil, nil)
 	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
@@ -1994,7 +1994,7 @@ func TestCDRsProcessEventMockStatsErr(t *testing.T) {
 	connMng := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	fltrs := NewFilterS(cfg, nil, dm)
-	Cache = NewCacheS(cfg, dm, nil)
+	Cache = NewCacheS(cfg, dm, nil, nil)
 	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
@@ -2056,7 +2056,7 @@ func TestCDRsProcessEventMockStatsErrGetBoolOpts(t *testing.T) {
 	connMng := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	fltrs := NewFilterS(cfg, nil, dm)
-	Cache = NewCacheS(cfg, dm, nil)
+	Cache = NewCacheS(cfg, dm, nil, nil)
 	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
@@ -2113,7 +2113,7 @@ func TestCDRsV1ProcessEventMock(t *testing.T) {
 	connMng := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	fltrs := NewFilterS(cfg, nil, dm)
-	Cache = NewCacheS(cfg, dm, nil)
+	Cache = NewCacheS(cfg, dm, nil, nil)
 	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
@@ -2189,7 +2189,7 @@ func TestCDRsV1ProcessEventMockErr(t *testing.T) {
 	connMng := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	fltrs := NewFilterS(cfg, nil, dm)
-	Cache = NewCacheS(cfg, dm, nil)
+	Cache = NewCacheS(cfg, dm, nil, nil)
 	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
@@ -2268,7 +2268,7 @@ func TestCDRsV1ProcessEventMockCache(t *testing.T) {
 	connMng := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	fltrs := NewFilterS(cfg, nil, dm)
-	Cache = NewCacheS(cfg, dm, nil)
+	Cache = NewCacheS(cfg, dm, nil, nil)
 	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
@@ -2349,7 +2349,7 @@ func TestCDRsV1ProcessEventWithGetMockCache(t *testing.T) {
 	connMng := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	fltrs := NewFilterS(cfg, nil, dm)
-	Cache = NewCacheS(cfg, dm, nil)
+	Cache = NewCacheS(cfg, dm, nil, nil)
 	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
@@ -2429,7 +2429,7 @@ func TestCDRsV1ProcessEventWithGetMockCacheErr(t *testing.T) {
 	connMng := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	fltrs := NewFilterS(cfg, nil, dm)
-	Cache = NewCacheS(cfg, dm, nil)
+	Cache = NewCacheS(cfg, dm, nil, nil)
 	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
@@ -2492,7 +2492,7 @@ func TestCDRsChrgrSProcessEventEmptyChrgrs(t *testing.T) {
 	connMng := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	fltrs := NewFilterS(cfg, nil, dm)
-	Cache = NewCacheS(cfg, dm, nil)
+	Cache = NewCacheS(cfg, dm, nil, nil)
 	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
@@ -2545,7 +2545,7 @@ func TestCDRsV1ProcessEventCacheGet(t *testing.T) {
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	fltrs := NewFilterS(cfg, nil, dm)
-	Cache = NewCacheS(cfg, dm, nil)
+	Cache = NewCacheS(cfg, dm, nil, nil)
 	newCDRSrv := NewCDRServer(cfg, dm, fltrs, nil)
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
@@ -2592,7 +2592,7 @@ func TestCDRsV1ProcessEventWithGetCacheGet(t *testing.T) {
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	fltrs := NewFilterS(cfg, nil, dm)
-	Cache = NewCacheS(cfg, dm, nil)
+	Cache = NewCacheS(cfg, dm, nil, nil)
 	newCDRSrv := NewCDRServer(cfg, dm, fltrs, nil)
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",

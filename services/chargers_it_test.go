@@ -41,7 +41,7 @@ func TestChargerSReload(t *testing.T) {
 
 	cfg.AttributeSCfg().Enabled = true
 	shdWg := new(sync.WaitGroup)
-	chS := engine.NewCacheS(cfg, nil, nil)
+	chS := engine.NewCacheS(cfg, nil, nil, nil)
 	close(chS.GetPrecacheChannel(utils.CacheAttributeProfiles))
 	close(chS.GetPrecacheChannel(utils.CacheAttributeFilterIndexes))
 	close(chS.GetPrecacheChannel(utils.CacheChargerProfiles))

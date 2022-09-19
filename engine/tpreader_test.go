@@ -40,7 +40,7 @@ func TestTPReaderCallCacheNoCaching(t *testing.T) {
 	}()
 
 	defaultCfg := config.NewDefaultCGRConfig()
-	Cache = NewCacheS(defaultCfg, nil, nil)
+	Cache = NewCacheS(defaultCfg, nil, nil, nil)
 	cM := NewConnManager(defaultCfg)
 	args := map[string][]string{
 		utils.CacheFilters:   {"cgrates.org:FLTR_ID1", "cgrates.org:FLTR_ID2"},
@@ -67,7 +67,7 @@ func TestTPReaderCallCacheReloadCacheFirstCallErr(t *testing.T) {
 	}()
 
 	defaultCfg := config.NewDefaultCGRConfig()
-	Cache = NewCacheS(defaultCfg, nil, nil)
+	Cache = NewCacheS(defaultCfg, nil, nil, nil)
 	cacheConns := []string{"cacheConn1"}
 	client := make(chan birpc.ClientConnector, 1)
 	mCC := &ccMock{
@@ -133,7 +133,7 @@ func TestTPReaderCallCacheReloadCacheSecondCallErr(t *testing.T) {
 	}()
 
 	defaultCfg := config.NewDefaultCGRConfig()
-	Cache = NewCacheS(defaultCfg, nil, nil)
+	Cache = NewCacheS(defaultCfg, nil, nil, nil)
 	cacheConns := []string{"cacheConn1"}
 	client := make(chan birpc.ClientConnector, 1)
 	mCC := &ccMock{
@@ -214,7 +214,7 @@ func TestTPReaderCallCacheLoadCache(t *testing.T) {
 	}()
 
 	defaultCfg := config.NewDefaultCGRConfig()
-	Cache = NewCacheS(defaultCfg, nil, nil)
+	Cache = NewCacheS(defaultCfg, nil, nil, nil)
 	cacheConns := []string{"cacheConn1"}
 	client := make(chan birpc.ClientConnector, 1)
 	mCC := &ccMock{
@@ -284,7 +284,7 @@ func TestTPReaderCallCacheRemoveItems(t *testing.T) {
 	}()
 
 	defaultCfg := config.NewDefaultCGRConfig()
-	Cache = NewCacheS(defaultCfg, nil, nil)
+	Cache = NewCacheS(defaultCfg, nil, nil, nil)
 	cacheConns := []string{"cacheConn1"}
 	client := make(chan birpc.ClientConnector, 1)
 	mCC := &ccMock{
@@ -354,7 +354,7 @@ func TestTPReaderCallCacheClear(t *testing.T) {
 	}()
 
 	defaultCfg := config.NewDefaultCGRConfig()
-	Cache = NewCacheS(defaultCfg, nil, nil)
+	Cache = NewCacheS(defaultCfg, nil, nil, nil)
 	cacheConns := []string{"cacheConn1"}
 	client := make(chan birpc.ClientConnector, 1)
 	mCC := &ccMock{

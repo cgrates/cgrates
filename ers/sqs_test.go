@@ -537,10 +537,11 @@ func TestSQSERReadMsgError3(t *testing.T) {
 		queueID:   "cgrates_cdrs",
 		session:   nil,
 		poster: ees.NewSQSee(&config.EventExporterCfg{
-			ExportPath: "url",
-			Attempts:   1,
-			EFsConns:   []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEFs)},
-			Opts:       &config.EventExporterOpts{},
+			ExportPath:     "url",
+			Attempts:       1,
+			FailedPostsDir: utils.MetaNone,
+			EFsConns:       []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEFs)},
+			Opts:           &config.EventExporterOpts{},
 		}, nil),
 	}
 	awsCfg := aws.Config{Endpoint: aws.String(rdr.Config().SourcePath)}

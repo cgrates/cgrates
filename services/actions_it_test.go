@@ -39,7 +39,7 @@ func TestActionSReload(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 
 	shdWg := new(sync.WaitGroup)
-	chS := engine.NewCacheS(cfg, nil, nil)
+	chS := engine.NewCacheS(cfg, nil, nil, nil)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	close(chS.GetPrecacheChannel(utils.CacheActionProfiles))
