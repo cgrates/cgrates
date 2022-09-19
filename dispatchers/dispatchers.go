@@ -157,19 +157,16 @@ func (dS *DispatcherService) Dispatch(ctx *context.Context, ev *utils.CGREvent, 
 	if tnt == utils.EmptyString {
 		tnt = dS.cfg.GeneralCfg().DefaultTenant
 	}
-	if ifAce, has := ev.APIOpts[utils.MetaDispatchers]; has { // special case when dispatching is disabled, directly proxy internally
-		var shouldDispatch bool
-		if shouldDispatch, err = utils.IfaceAsBool(ifAce); err != nil {
-			return utils.NewErrDispatcherS(err)
-		}
-		if !shouldDispatch {
-			return callDH(ctx,
-				newInternalHost(tnt), utils.EmptyString, nil,
-				dS.cfg, dS.connMgr.GetDispInternalChan(),
-				serviceMethod, args, reply)
-		}
+	var shouldDispatch bool
+	if shouldDispatch, err = engine.GetBoolOpts(ctx, tnt, ev, dS.fltrS, dS.cfg.DispatcherSCfg().Opts.Dispatchers,
+		true, utils.OptsDispatchers); err != nil {
+		return utils.NewErrDispatcherS(err)
+	} else if !shouldDispatch {
+		return callDH(ctx,
+			newInternalHost(tnt), utils.EmptyString, nil,
+			dS.cfg, dS.connMgr.GetDispInternalChan(),
+			serviceMethod, args, reply)
 	}
-
 	var dR *DispatcherRoute
 	var dPrfls engine.DispatcherProfiles
 	routeID := utils.IfaceAsString(ev.APIOpts[utils.OptsRouteID])
@@ -180,11 +177,30 @@ func (dS *DispatcherService) Dispatch(ctx *context.Context, ev *utils.CGREvent, 
 			dS.cfg.GeneralCfg().LockingTimeout, guardID) // lock the routeID so we can make sure we have time to execute only once before caching
 		defer guardian.Guardian.UnguardIDs(refID)
 		// use previously discovered route
-		if x, ok := engine.Cache.Get(utils.CacheDispatcherRoutes,
-			routeID); ok && x != nil {
-			dR = x.(*DispatcherRoute)
-			dPrfls = engine.DispatcherProfiles{&engine.DispatcherProfile{Tenant: dR.Tenant, ID: dR.ProfileID}} // will be used bellow to retrieve the dispatcher
+		argsCache := &utils.ArgsGetCacheItemWithAPIOpts{
+			Tenant: ev.Tenant,
+			APIOpts: map[string]interface{}{
+				utils.MetaSubsys: utils.MetaDispatchers,
+				utils.MetaNodeID: dS.cfg.GeneralCfg().NodeID,
+			},
+			ArgsGetCacheItem: utils.ArgsGetCacheItem{
+				CacheID: utils.CacheDispatcherRoutes,
+				ItemID:  routeID,
+			}}
+		// item
+		var itmRemote interface{}
+		if err = dS.connMgr.Call(ctx, dS.cfg.CacheCfg().RemoteConns,
+			utils.CacheSv1GetItem, argsCache, &itmRemote); err != nil &&
+			err.Error() != utils.ErrNotFound.Error() {
+			return utils.NewErrDispatcherS(err)
+		} else if err == nil { // not found
+			dR = itmRemote.(*DispatcherRoute)
+			routeID = utils.EmptyString // cancel cache replication
 		}
+	}
+	if dR != nil {
+		dPrfls = engine.DispatcherProfiles{
+			&engine.DispatcherProfile{Tenant: dR.Tenant, ID: dR.ProfileID}} // will be used bellow to retrieve the dispatcher
 	}
 	evNm := utils.MapStorage{
 		utils.MetaReq:  ev.Event,
@@ -202,6 +218,11 @@ func (dS *DispatcherService) Dispatch(ctx *context.Context, ev *utils.CGREvent, 
 	if len(dPrfls) == 0 {
 		return utils.NewErrDispatcherS(utils.ErrPrefixNotFound("PROFILE"))
 	}
+	if ev.APIOpts == nil {
+		ev.APIOpts = make(map[string]interface{})
+	}
+	ev.APIOpts[utils.MetaSubsys] = utils.MetaDispatchers // inject into args
+	ev.APIOpts[utils.MetaNodeID] = dS.cfg.GeneralCfg().NodeID
 	for _, dPrfl := range dPrfls {
 		tntID := dPrfl.TenantID()
 		// get or build the Dispatcher for the config

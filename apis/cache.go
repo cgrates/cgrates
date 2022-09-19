@@ -49,6 +49,18 @@ func (chSv1 *CacheSv1) HasItem(ctx *context.Context, args *utils.ArgsGetCacheIte
 	return chSv1.cacheS.V1HasItem(ctx, args, reply)
 }
 
+// GetItem returns an Item from the cache
+func (chSv1 *CacheSv1) GetItem(ctx *context.Context, args *utils.ArgsGetCacheItemWithAPIOpts,
+	reply *interface{}) error {
+	return chSv1.cacheS.V1GetItem(ctx, args, reply)
+}
+
+// GetItemWithRemote returns an Item from local or remote cache
+func (chSv1 *CacheSv1) GetItemWithRemote(ctx *context.Context, args *utils.ArgsGetCacheItemWithAPIOpts,
+	reply *interface{}) error {
+	return chSv1.cacheS.V1GetItemWithRemote(ctx, args, reply)
+}
+
 // GetItemExpiryTime returns the expiryTime for an item
 func (chSv1 *CacheSv1) GetItemExpiryTime(ctx *context.Context, args *utils.ArgsGetCacheItemWithAPIOpts, //
 	reply *time.Time) error {

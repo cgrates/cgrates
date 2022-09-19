@@ -139,6 +139,8 @@ github.com/cgrates/radigo v0.0.0-20210902121842-ea2f9a730627 h1:foxHlpQxYj15khhl
 github.com/cgrates/radigo v0.0.0-20210902121842-ea2f9a730627/go.mod h1:PizDxlLTjVQpyPU0ksWYfmM9UbYGu7q6at0nzuiZprI=
 github.com/cgrates/rpcclient v0.0.0-20220527094114-95a7ccc07e77 h1:hZGvmvqP4lHyX7OOvUdBqvWmvjzN4ZOTpVn5yoM9gtg=
 github.com/cgrates/rpcclient v0.0.0-20220527094114-95a7ccc07e77/go.mod h1:kiM7YHZXmhgKZ0q80qRl0yYFDnTxihTdQYtvQPDeGlM=
+github.com/cgrates/rpcclient v0.0.0-20220913172751-83a289e994d7 h1:aTeVpeMMJ/vGK4ErqitwczBlVUv49x8M30X9JNcEz94=
+github.com/cgrates/rpcclient v0.0.0-20220913172751-83a289e994d7/go.mod h1:+Ed0GFdz/rsSY/trWo+k0NFtAi3VP1l3CngZcRSErdw=
 github.com/cgrates/sipingo v1.0.1-0.20200514112313-699ebc1cdb8e h1:izFjZB83/XRXInc+gMIssUxdbleGsGIuGCPj2u7RQo0=
 github.com/cgrates/sipingo v1.0.1-0.20200514112313-699ebc1cdb8e/go.mod h1:0f2+3dq5Iiv3VlcuY83VPJ0QzqRlzDG1Cr8okogQE3g=
 github.com/cgrates/ugocodec v0.0.0-20201023092048-df93d0123f60 h1:TQDg+HGB17LU8FitLiLvYazYSy62GQ1lO3lGKI3xUrU=

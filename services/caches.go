@@ -30,7 +30,7 @@ import (
 )
 
 // NewCacheService .
-func NewCacheService(cfg *config.CGRConfig, dm *DataDBService,
+func NewCacheService(cfg *config.CGRConfig, dm *DataDBService, connMgr *engine.ConnManager,
 	server *cores.Server, internalChan chan birpc.ClientConnector,
 	anz *AnalyzerService, // dspS *DispatcherService,
 	cores *CoreService,
@@ -49,13 +49,14 @@ func NewCacheService(cfg *config.CGRConfig, dm *DataDBService,
 
 // CacheService implements Agent interface
 type CacheService struct {
-	cfg    *config.CGRConfig
-	anz    *AnalyzerService
-	cores  *CoreService
-	server *cores.Server
-	dm     *DataDBService
-	rpc    chan birpc.ClientConnector
-	srvDep map[string]*sync.WaitGroup
+	cfg     *config.CGRConfig
+	anz     *AnalyzerService
+	cores   *CoreService
+	server  *cores.Server
+	dm      *DataDBService
+	connMgr *engine.ConnManager
+	rpc     chan birpc.ClientConnector
+	srvDep  map[string]*sync.WaitGroup
 
 	cacheCh chan *engine.CacheS
 }
@@ -70,7 +71,7 @@ func (cS *CacheService) Start(ctx *context.Context, shtDw context.CancelFunc) (e
 	if cs, err = cS.cores.WaitForCoreS(ctx); err != nil {
 		return
 	}
-	engine.Cache = engine.NewCacheS(cS.cfg, dm, cs.CapsStats)
+	engine.Cache = engine.NewCacheS(cS.cfg, dm, cS.connMgr, cs.CapsStats)
 	go engine.Cache.Precache(ctx, shtDw)
 
 	cS.cacheCh <- engine.Cache

@@ -34,7 +34,7 @@ import (
 var Cache *CacheS
 
 func init() {
-	Cache = NewCacheS(config.CgrConfig(), nil, nil)
+	Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
 
 	// Register objects for cache replication/remotes
 	// AttributeS
@@ -101,7 +101,7 @@ func init() {
 }
 
 // NewCacheS initializes the Cache service and executes the precaching
-func NewCacheS(cfg *config.CGRConfig, dm *DataManager, cpS *CapsStats) (c *CacheS) {
+func NewCacheS(cfg *config.CGRConfig, dm *DataManager, connMgr *ConnManager, cpS *CapsStats) (c *CacheS) {
 	tCache := cfg.CacheCfg().AsTransCacheConfig()
 	if len(cfg.CacheCfg().ReplicationConns) != 0 {
 		var reply string
@@ -128,6 +128,7 @@ func NewCacheS(cfg *config.CGRConfig, dm *DataManager, cpS *CapsStats) (c *Cache
 	c = &CacheS{
 		cfg:     cfg,
 		dm:      dm,
+		connMgr: connMgr,
 		pcItems: make(map[string]chan struct{}),
 		tCache:  ltcache.NewTransCache(tCache),
 	}
@@ -141,6 +142,7 @@ func NewCacheS(cfg *config.CGRConfig, dm *DataManager, cpS *CapsStats) (c *Cache
 type CacheS struct {
 	cfg     *config.CGRConfig
 	dm      *DataManager
+	connMgr *ConnManager
 	pcItems map[string]chan struct{} // signal precaching
 	tCache  *ltcache.TransCache
 }
@@ -153,11 +155,38 @@ func (chS *CacheS) Set(ctx *context.Context, chID, itmID string, value interface
 	return chS.ReplicateSet(ctx, chID, itmID, value)
 }
 
+// ReplicateSet replicate an item to ReplicationConns
+func (chS *CacheS) ReplicateSet(ctx *context.Context, chID, itmID string, value interface{}) (err error) {
+	if len(chS.cfg.CacheCfg().ReplicationConns) == 0 ||
+		!chS.cfg.CacheCfg().Partitions[chID].Replicate {
+		return
+	}
+	var reply string
+	return connMgr.Call(ctx, chS.cfg.CacheCfg().ReplicationConns, utils.CacheSv1ReplicateSet,
+		&utils.ArgCacheReplicateSet{
+			CacheID: chID,
+			ItemID:  itmID,
+			Value:   value,
+		}, &reply)
+}
+
 // SetWithoutReplicate is an exported method from TransCache
 // handled Replicate functionality
 func (chS *CacheS) SetWithoutReplicate(chID, itmID string, value interface{},
 	groupIDs []string, commit bool, transID string) {
 	chS.tCache.Set(chID, itmID, value, groupIDs, commit, transID)
+}
+
+// SetWithReplicate combines local set with replicate, receiving the arguments needed by dispatcher
+func (chS *CacheS) SetWithReplicate(ctx *context.Context, args *utils.ArgCacheReplicateSet) (err error) {
+	chS.tCache.Set(args.CacheID, args.ItemID, args.Value, args.GroupIDs, true, utils.EmptyString)
+	if len(chS.cfg.CacheCfg().ReplicationConns) == 0 ||
+		!chS.cfg.CacheCfg().Partitions[args.CacheID].Replicate {
+		return
+	}
+	var reply string
+	return chS.connMgr.Call(ctx, chS.cfg.CacheCfg().ReplicationConns,
+		utils.CacheSv1ReplicateSet, args, &reply)
 }
 
 // HasItem is an exported method from TransCache
@@ -168,6 +197,25 @@ func (chS *CacheS) HasItem(chID, itmID string) (has bool) {
 // Get is an exported method from TransCache
 func (chS *CacheS) Get(chID, itmID string) (interface{}, bool) {
 	return chS.tCache.Get(chID, itmID)
+}
+
+// GetWithRemote queries locally the cache, followed by remotes
+func (chS *CacheS) GetWithRemote(ctx *context.Context, args *utils.ArgsGetCacheItemWithAPIOpts) (itm interface{}, err error) {
+	var has bool
+	if itm, has = chS.tCache.Get(args.CacheID, args.ItemID); has {
+		return
+	}
+	if len(chS.cfg.CacheCfg().RemoteConns) == 0 ||
+		!chS.cfg.CacheCfg().Partitions[args.CacheID].Remote {
+		return
+	}
+	// item was not found locally, query from remote
+	var itmRemote interface{}
+	if err = chS.connMgr.Call(ctx, chS.cfg.CacheCfg().RemoteConns,
+		utils.CacheSv1GetItem, args, &itmRemote); err != nil && err.Error() == utils.ErrNotFound.Error() {
+		return nil, utils.ErrNotFound // correct the error coming as string type
+	}
+	return
 }
 
 // GetItemIDs is an exported method from TransCache
@@ -261,6 +309,17 @@ func (chS *CacheS) V1GetItem(_ *context.Context, args *utils.ArgsGetCacheItemWit
 	itmIface, has := chS.tCache.Get(args.CacheID, args.ItemID)
 	if !has {
 		return utils.ErrNotFound
+	}
+	*reply = itmIface
+	return
+}
+
+// V1GetItemWithRemote queries the item from remote if not found locally
+func (chS *CacheS) V1GetItemWithRemote(ctx *context.Context, args *utils.ArgsGetCacheItemWithAPIOpts,
+	reply *interface{}) (err error) {
+	var itmIface interface{}
+	if itmIface, err = chS.GetWithRemote(ctx, args); err != nil {
+		return
 	}
 	*reply = itmIface
 	return
@@ -396,22 +455,7 @@ func populateCacheLoadIDs(loadIDs map[string]int64, attrs map[string][]string) (
 	return
 }
 
-// ReplicateSet replicate an item to ReplicationConns
-func (chS *CacheS) ReplicateSet(ctx *context.Context, chID, itmID string, value interface{}) (err error) {
-	if len(chS.cfg.CacheCfg().ReplicationConns) == 0 ||
-		!chS.cfg.CacheCfg().Partitions[chID].Replicate {
-		return
-	}
-	var reply string
-	return connMgr.Call(ctx, chS.cfg.CacheCfg().ReplicationConns, utils.CacheSv1ReplicateSet,
-		&utils.ArgCacheReplicateSet{
-			CacheID: chID,
-			ItemID:  itmID,
-			Value:   value,
-		}, &reply)
-}
-
-// V1ReplicateSet replicate an item
+// V1ReplicateSet receives an item via replication to store in the cache
 func (chS *CacheS) V1ReplicateSet(_ *context.Context, args *utils.ArgCacheReplicateSet, reply *string) (err error) {
 	if cmp, canCast := args.Value.(utils.Compiler); canCast {
 		if err = cmp.Compile(); err != nil {
@@ -430,7 +474,7 @@ func (chS *CacheS) ReplicateRemove(ctx *context.Context, chID, itmID string) (er
 		return
 	}
 	var reply string
-	return connMgr.Call(ctx, chS.cfg.CacheCfg().ReplicationConns, utils.CacheSv1ReplicateRemove,
+	return chS.connMgr.Call(ctx, chS.cfg.CacheCfg().ReplicationConns, utils.CacheSv1ReplicateRemove,
 		&utils.ArgCacheReplicateRemove{
 			CacheID: chID,
 			ItemID:  itmID,

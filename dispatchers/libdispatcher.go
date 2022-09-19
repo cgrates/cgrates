@@ -36,6 +36,8 @@ import (
 
 func init() {
 	gob.Register(new(LoadMetrics))
+	gob.Register(new(DispatcherRoute))
+	//gob.RegisterName("dispatchers.DispatcherRoute", DispatcherRoute{})
 
 }
 
@@ -437,8 +439,17 @@ func callDH(ctx *context.Context,
 	cfg *config.CGRConfig, iPRCCh chan birpc.ClientConnector,
 	method string, args, reply interface{}) (err error) {
 	if routeID != utils.EmptyString { // cache the discovered route before dispatching
-		if err = engine.Cache.Set(ctx, utils.CacheDispatcherRoutes, routeID, dR,
-			nil, true, utils.EmptyString); err != nil {
+		argsCache := &utils.ArgCacheReplicateSet{
+			Tenant: dh.Tenant,
+			APIOpts: map[string]interface{}{
+				utils.MetaSubsys: utils.MetaDispatchers,
+				utils.MetaNodeID: cfg.GeneralCfg().NodeID,
+			},
+			CacheID: utils.CacheDispatcherRoutes,
+			ItemID:  routeID,
+			Value:   dR,
+		}
+		if err = engine.Cache.SetWithReplicate(ctx, argsCache); err != nil {
 			return
 		}
 	}

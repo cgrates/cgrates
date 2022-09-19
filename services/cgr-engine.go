@@ -203,8 +203,8 @@ func (cgr *CGREngine) InitServices(httpPrfPath string, cpuPrfFl io.Closer, memPr
 	cgr.memPrfStop = memPrfStop
 	cgr.cpuPrfF = cpuPrfFl
 
-	cgr.cacheS = NewCacheService(cgr.cfg, cgr.dmS, cgr.server,
-		iCacheSCh, cgr.anzS, cgr.coreS,
+	cgr.cacheS = NewCacheService(cgr.cfg, cgr.dmS, cgr.cM,
+		cgr.server, iCacheSCh, cgr.anzS, cgr.coreS,
 		cgr.srvDep) // init CacheS
 
 	dspS := NewDispatcherService(cgr.cfg, cgr.dmS, cgr.cacheS,

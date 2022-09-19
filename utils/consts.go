@@ -885,6 +885,7 @@ const (
 	MetaEFs                = "*efs"
 	MetaActionProfiles     = "*action_profiles"
 	MetaLoadIDs            = "*load_ids"
+	MetaNodeID             = "*node_id"
 )
 
 // MetaMetrics
@@ -1507,6 +1508,8 @@ const (
 	CacheSv1GetCacheStats     = "CacheSv1.GetCacheStats"
 	CacheSv1GetItemIDs        = "CacheSv1.GetItemIDs"
 	CacheSv1HasItem           = "CacheSv1.HasItem"
+	CacheSv1GetItem           = "CacheSv1.GetItem"
+	CacheSv1GetItemWithRemote = "CacheSv1.GetItemWithRemote"
 	CacheSv1GetItemExpiryTime = "CacheSv1.GetItemExpiryTime"
 	CacheSv1RemoveItem        = "CacheSv1.RemoveItem"
 	CacheSv1RemoveItems       = "CacheSv1.RemoveItems"

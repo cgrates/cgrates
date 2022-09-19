@@ -600,11 +600,12 @@ type DPRArgs struct {
 }
 
 type ArgCacheReplicateSet struct {
-	CacheID string
-	ItemID  string
-	Value   interface{}
-	APIOpts map[string]interface{}
-	Tenant  string
+	Tenant   string
+	APIOpts  map[string]interface{}
+	CacheID  string
+	ItemID   string
+	Value    interface{}
+	GroupIDs []string
 }
 
 // Compiler are objects that need post compiling
