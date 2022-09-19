@@ -22,14 +22,14 @@
     },
         
     
-     "dispatchers":{
+    "dispatchers":{
         "enabled": true,
     }, 
         
         
     "admins": {
         "enabled": true,
-    },
+    }, 
     
     
     }

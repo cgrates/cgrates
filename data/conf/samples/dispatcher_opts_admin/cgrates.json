@@ -18,10 +18,26 @@
 	    "db_name": "10", 						// data_db database name to connect to
     },
       
-  /*   "dispatchers":{
+    /*
+    "dispatchers":{
         "enabled": true,
-    }, */
+        "opts": {								//
+		// "*dispatcherS": [						
+		// 	{
+		// 		"Tenant": "cgrates.org",
+		// 		"FilterIDs": [],
+		// 		"Value": true,
+		// 	},
+		// ],
+	},
+    }, 
+    */
      
+    "caches":{
+        //"remote_conns": ["*internal"],						// the conns that are queried when the items are not found in cache
+    },
+    
+
     "admins": {
         "enabled": true,
         "caches_conns":["broadcast_cache"],
