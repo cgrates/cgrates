@@ -87,23 +87,26 @@ const CGRATES_CFG_JSON = `
 
 
 "rpc_conns": {
-	//"*localhost": {
-		//"conns": [
-			//{
-				//"address": "127.0.0.1:2012", 
-				//"transport":"*json",
-				//"connect_attempts": 5,
-				//"reconnects": -1,
-				//"max_reconnect_interval": ""
-				//"connect_timeout":"1s",
-				//"reply_timeout":"2s",
-				//"tls":false,
-				//"client_key":"",
-				//"client_certificate":"",
-				//"ca_certificate":""
-			//}
-		//],
-	//},
+	// "*localhost": {
+	// 	"strategy": "*first"
+	// 	"poolsize": 0,
+	// 	"reply_timeout": "2s",
+	// 	"conns": [
+	// 		{
+	// 			"address": "127.0.0.1:2012", 
+	// 			"transport":"*json",
+	// 			"connect_attempts": 5,
+	// 			"reconnects": -1,
+	// 			"max_reconnect_interval": ""
+	// 			"connect_timeout":"1s",
+	// 			"reply_timeout":"2s",
+	// 			"tls":false,
+	// 			"client_key":"",
+	// 			"client_certificate":"",
+	// 			"ca_certificate":""
+	// 		}
+	// 	],
+	// },
 },							// rpc connections definitions
 
 

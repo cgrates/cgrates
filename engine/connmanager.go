@@ -124,7 +124,8 @@ func (cM *ConnManager) getConnWithConfig(ctx *context.Context, connID string, co
 			cM.cfg.TLSCfg().ClientCerificate, cM.cfg.TLSCfg().CaCertificate,
 			cM.cfg.GeneralCfg().ConnectAttempts, cM.cfg.GeneralCfg().Reconnects,
 			cM.cfg.GeneralCfg().MaxReconnectInterval, cM.cfg.GeneralCfg().ConnectTimeout,
-			cM.cfg.GeneralCfg().ReplyTimeout, connCfg.Conns, intChan, false, ctx.Client,
+			utils.FirstDurationNonEmpty(connCfg.ReplyTimeout, cM.cfg.GeneralCfg().ReplyTimeout),
+			connCfg.Conns, intChan, false, ctx.Client,
 			connID, cM.connCache); err != nil {
 			return
 		}
@@ -178,8 +179,9 @@ func (cM *ConnManager) CallWithConnIDs(connIDs []string, ctx *context.Context, s
 		// recreate the config with only conns that are needed
 		connCfg := cM.cfg.RPCConns()[connID]
 		newCfg := &config.RPCConn{
-			Strategy: connCfg.Strategy,
-			PoolSize: connCfg.PoolSize,
+			Strategy:     connCfg.Strategy,
+			PoolSize:     connCfg.PoolSize,
+			ReplyTimeout: connCfg.ReplyTimeout,
 			// alloc for all connection in order to not increase the size later
 			Conns: make([]*config.RemoteHost, 0, len(connCfg.Conns)),
 		}
