@@ -55,18 +55,17 @@ var (
 		testDispatcherOptsDSPRPCConn,
 		testDispatcherOptsCoreStatus, // self localhost(:2012) CoresV1Status
 
-		/*
-			testDispatcherOptsAdminSetDispatcherHost4012,
-			testDispatcherOptsCoreStatusHost4012,
+		testDispatcherOptsAdminSetDispatcherHost4012,
+		testDispatcherOptsCoreStatusHost4012,
 
-			testDispatcherOptsAdminSetDispatcherProfileDoubleHost,
-			testDispatcherOptsCoreStatusWithRouteID,
+		testDispatcherOptsAdminSetDispatcherProfileDoubleHost,
+		//testDispatcherOptsCoreStatusWithRouteID,
 
-			testDispatcherOptsAdminSetDispatcherHostInexistent,
-			testDispatcherOptsCoreStatusWithRouteID2,
+		testDispatcherOptsAdminSetDispatcherHostInexistent,
+		//testDispatcherOptsCoreStatusWithRouteID2,
 
-			testDispatcherOptsCoreStatusWithoutRouteID,
-		*/
+		//testDispatcherOptsCoreStatusWithoutRouteID,
+
 		testDispatcherOptsDSPStopEngine,
 		testDispatcherOptsAdminStopEngine,
 	}
@@ -117,7 +116,7 @@ func testDispatcherOptsAdminSetDispatcherProfile(t *testing.T) {
 			Tenant: "cgrates.org",
 			RemoteHost: &config.RemoteHost{
 				ID:              "SELF_ENGINE",
-				Address:         "127.0.0.1:2012",
+				Address:         "127.0.0.1:4012",
 				Transport:       "*json",
 				ConnectAttempts: 1,
 				Reconnects:      3,
@@ -126,7 +125,7 @@ func testDispatcherOptsAdminSetDispatcherProfile(t *testing.T) {
 			},
 		},
 		APIOpts: map[string]interface{}{
-			utils.MetaDispatchers: false,
+			utils.OptsDispatchers: false,
 		},
 	}
 	if err := adminsRPC.Call(context.Background(), utils.AdminSv1SetDispatcherHost, setDispatcherHost, &replyStr); err != nil {
@@ -150,7 +149,7 @@ func testDispatcherOptsAdminSetDispatcherProfile(t *testing.T) {
 			},
 		},
 		APIOpts: map[string]interface{}{
-			utils.MetaDispatchers: false,
+			utils.OptsDispatchers: false,
 		},
 	}
 	if err := adminsRPC.Call(context.Background(), utils.AdminSv1SetDispatcherProfile, setDispatcherProfile, &replyStr); err != nil {
