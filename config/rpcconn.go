@@ -105,12 +105,13 @@ func (rC RPCConns) Clone() (cln RPCConns) {
 
 // RPCConn the connection pool config
 type RPCConn struct {
-	Strategy string
-	PoolSize int
-	Conns    []*RemoteHost
+	Strategy     string
+	PoolSize     int
+	ReplyTimeout time.Duration
+	Conns        []*RemoteHost
 }
 
-func (rC *RPCConn) loadFromJSONCfg(jsnCfg *RPCConnJson) {
+func (rC *RPCConn) loadFromJSONCfg(jsnCfg *RPCConnJson) (err error) {
 	if jsnCfg == nil {
 		return
 	}
@@ -120,6 +121,11 @@ func (rC *RPCConn) loadFromJSONCfg(jsnCfg *RPCConnJson) {
 	if jsnCfg.PoolSize != nil {
 		rC.PoolSize = *jsnCfg.PoolSize
 	}
+	if jsnCfg.Reply_timeout != nil {
+		if rC.ReplyTimeout, err = utils.ParseDurationWithNanosecs(*jsnCfg.Reply_timeout); err != nil {
+			return
+		}
+	}
 	if jsnCfg.Conns != nil {
 		rC.Conns = make([]*RemoteHost, len(*jsnCfg.Conns))
 		for idx, jsnHaCfg := range *jsnCfg.Conns {
@@ -127,20 +133,24 @@ func (rC *RPCConn) loadFromJSONCfg(jsnCfg *RPCConnJson) {
 			rC.Conns[idx].loadFromJSONCfg(jsnHaCfg) //To review if the function signature changes
 		}
 	}
+	return
 }
 
 // AsMapInterface returns the config as a map[string]interface{}
-func (rC *RPCConn) AsMapInterface() (initialMP map[string]interface{}) {
-	initialMP = map[string]interface{}{
+func (rC *RPCConn) AsMapInterface() (mp map[string]interface{}) {
+	mp = map[string]interface{}{
 		utils.StrategyCfg: rC.Strategy,
 		utils.PoolSize:    rC.PoolSize,
+	}
+	if rC.ReplyTimeout != 0 {
+		mp[utils.ReplyTimeoutCfg] = rC.ReplyTimeout
 	}
 	if rC.Conns != nil {
 		conns := make([]map[string]interface{}, len(rC.Conns))
 		for i, item := range rC.Conns {
 			conns[i] = item.AsMapInterface()
 		}
-		initialMP[utils.Conns] = conns
+		mp[utils.Conns] = conns
 	}
 	return
 }
@@ -148,8 +158,9 @@ func (rC *RPCConn) AsMapInterface() (initialMP map[string]interface{}) {
 // Clone returns a deep copy of RPCConn
 func (rC RPCConn) Clone() (cln *RPCConn) {
 	cln = &RPCConn{
-		Strategy: rC.Strategy,
-		PoolSize: rC.PoolSize,
+		Strategy:     rC.Strategy,
+		PoolSize:     rC.PoolSize,
+		ReplyTimeout: rC.ReplyTimeout,
 	}
 	if rC.Conns != nil {
 		cln.Conns = make([]*RemoteHost, len(rC.Conns))
@@ -396,9 +407,10 @@ func diffRemoteHostJson(v1, v2 *RemoteHost) (d *RemoteHostJson) {
 }
 
 type RPCConnJson struct {
-	Strategy *string
-	PoolSize *int
-	Conns    *[]*RemoteHostJson
+	Strategy      *string
+	PoolSize      *int
+	Reply_timeout *string
+	Conns         *[]*RemoteHostJson
 }
 
 func diffRPCConnJson(d *RPCConnJson, v1, v2 *RPCConn) *RPCConnJson {
@@ -410,6 +422,9 @@ func diffRPCConnJson(d *RPCConnJson, v1, v2 *RPCConn) *RPCConnJson {
 	}
 	if v1.PoolSize != v2.PoolSize {
 		d.PoolSize = utils.IntPointer(v2.PoolSize)
+	}
+	if v1.ReplyTimeout != v2.ReplyTimeout {
+		d.Reply_timeout = utils.StringPointer(v2.ReplyTimeout.String())
 	}
 	if v2.Conns != nil {
 		conns := make([]*RemoteHostJson, len(v2.Conns))
@@ -450,6 +465,7 @@ func equalsRPCConn(v1, v2 *RPCConn) bool {
 		(v1 != nil && v2 != nil &&
 			v1.Strategy == v2.Strategy &&
 			v1.PoolSize == v2.PoolSize &&
+			v1.ReplyTimeout == v2.ReplyTimeout &&
 			equalsRemoteHosts(v1.Conns, v2.Conns))
 }
 
