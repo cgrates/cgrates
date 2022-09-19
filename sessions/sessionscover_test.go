@@ -4636,7 +4636,7 @@ func TestSyncSessionsSync(t *testing.T) {
 	sessions := NewSessionS(cfg, dm, nil, connMgr)
 	sessions.aSessions = map[string]*Session{}
 	sessions.cfg.GeneralCfg().ReplyTimeout = 1
-	cacheS := engine.NewCacheS(cfg, nil, nil)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
 	engine.Cache = cacheS
 	engine.SetConnManager(connMgr)
 	sessions.aSessions = map[string]*Session{}

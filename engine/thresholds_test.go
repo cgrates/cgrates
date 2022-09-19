@@ -1501,7 +1501,7 @@ func TestThresholdsProcessEventMaxHitsDMErr(t *testing.T) {
 	dm := NewDataManager(data, cfg.CacheCfg(), connMgr)
 	filterS := NewFilterS(cfg, nil, dm)
 	tS := NewThresholdService(nil, cfg, filterS, connMgr)
-	Cache = NewCacheS(cfg, dm, nil)
+	Cache = NewCacheS(cfg, dm, nil, nil)
 
 	defer func() {
 		connMgr = tmpCMgr
@@ -1627,7 +1627,7 @@ func TestThresholdsV1ProcessEventOK(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
-	Cache = NewCacheS(cfg, dm, nil)
+	Cache = NewCacheS(cfg, dm, nil, nil)
 	filterS := NewFilterS(cfg, nil, dm)
 	tS := NewThresholdService(dm, cfg, filterS, nil)
 
@@ -1699,7 +1699,7 @@ func TestThresholdsV1ProcessEventPartExecErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
-	Cache = NewCacheS(cfg, dm, nil)
+	Cache = NewCacheS(cfg, dm, nil, nil)
 	filterS := NewFilterS(cfg, nil, dm)
 	tS := NewThresholdService(dm, cfg, filterS, nil)
 
@@ -1765,7 +1765,7 @@ func TestThresholdsV1ProcessEventMissingArgs(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
-	Cache = NewCacheS(cfg, dm, nil)
+	Cache = NewCacheS(cfg, dm, nil, nil)
 	filterS := NewFilterS(cfg, nil, dm)
 	tS := NewThresholdService(dm, cfg, filterS, nil)
 
@@ -1849,7 +1849,7 @@ func TestThresholdsV1GetThresholdOK(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
-	Cache = NewCacheS(cfg, dm, nil)
+	Cache = NewCacheS(cfg, dm, nil, nil)
 	filterS := NewFilterS(cfg, nil, dm)
 	tS := NewThresholdService(dm, cfg, filterS, nil)
 
@@ -1902,7 +1902,7 @@ func TestThresholdsV1GetThresholdNotFoundErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
-	Cache = NewCacheS(cfg, dm, nil)
+	Cache = NewCacheS(cfg, dm, nil, nil)
 	filterS := NewFilterS(cfg, nil, dm)
 	tS := NewThresholdService(dm, cfg, filterS, nil)
 
@@ -1937,7 +1937,7 @@ func TestThresholdMatchingThresholdForEventLocks(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	tmp := Cache
 	defer func() { Cache = tmp }()
-	Cache = NewCacheS(cfg, nil, nil)
+	Cache = NewCacheS(cfg, nil, nil, nil)
 	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, config.CgrConfig().CacheCfg(), nil)
 	cfg.ThresholdSCfg().StoreInterval = 1
@@ -1997,7 +1997,7 @@ func TestThresholdMatchingThresholdForEventLocks2(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	tmp := Cache
 	defer func() { Cache = tmp }()
-	Cache = NewCacheS(cfg, nil, nil)
+	Cache = NewCacheS(cfg, nil, nil, nil)
 	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, config.CgrConfig().CacheCfg(), nil)
 	cfg.ThresholdSCfg().StoreInterval = 1
@@ -2069,7 +2069,7 @@ func TestThresholdMatchingThresholdForEventLocksBlocker(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	tmp := Cache
 	defer func() { Cache = tmp }()
-	Cache = NewCacheS(cfg, nil, nil)
+	Cache = NewCacheS(cfg, nil, nil, nil)
 	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, config.CgrConfig().CacheCfg(), nil)
 	cfg.ThresholdSCfg().StoreInterval = 1
@@ -2136,7 +2136,7 @@ func TestThresholdMatchingThresholdForEventLocks3(t *testing.T) {
 	prfs := make([]*ThresholdProfile, 0)
 	tmp := Cache
 	defer func() { Cache = tmp }()
-	Cache = NewCacheS(cfg, nil, nil)
+	Cache = NewCacheS(cfg, nil, nil, nil)
 	db := &DataDBMock{
 		GetThresholdProfileDrvF: func(ctx *context.Context, tnt, id string) (*ThresholdProfile, error) {
 			if id == "TH1" {
@@ -2192,7 +2192,7 @@ func TestThresholdMatchingThresholdForEventLocks4(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	tmp := Cache
 	defer func() { Cache = tmp }()
-	Cache = NewCacheS(cfg, nil, nil)
+	Cache = NewCacheS(cfg, nil, nil, nil)
 	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, config.CgrConfig().CacheCfg(), nil)
 	cfg.ThresholdSCfg().StoreInterval = 1
@@ -2250,7 +2250,7 @@ func TestThresholdMatchingThresholdForEventLocks5(t *testing.T) {
 		Cache = tmp
 		config.SetCgrConfig(tmpC)
 	}()
-	Cache = NewCacheS(cfg, nil, nil)
+	Cache = NewCacheS(cfg, nil, nil, nil)
 	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, config.CgrConfig().CacheCfg(), NewConnManager(cfg))
 	cfg.ThresholdSCfg().StoreInterval = 1
@@ -2430,7 +2430,7 @@ func TestThresholdsV1GetThresholdsForEventOK(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
-	Cache = NewCacheS(cfg, dm, nil)
+	Cache = NewCacheS(cfg, dm, nil, nil)
 	filterS := NewFilterS(cfg, nil, dm)
 	tS := NewThresholdService(dm, cfg, filterS, nil)
 
@@ -2486,7 +2486,7 @@ func TestThresholdsV1GetThresholdsForEventMissingArgs(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
-	Cache = NewCacheS(cfg, dm, nil)
+	Cache = NewCacheS(cfg, dm, nil, nil)
 	filterS := NewFilterS(cfg, nil, dm)
 	tS := NewThresholdService(dm, cfg, filterS, nil)
 
@@ -2552,7 +2552,7 @@ func TestThresholdsV1GetThresholdIDsOK(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
-	Cache = NewCacheS(cfg, dm, nil)
+	Cache = NewCacheS(cfg, dm, nil, nil)
 	filterS := NewFilterS(cfg, nil, dm)
 	tS := NewThresholdService(dm, cfg, filterS, nil)
 
@@ -2612,7 +2612,7 @@ func TestThresholdsV1GetThresholdIDsGetKeysForPrefixErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	data := &DataDBMock{}
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
-	Cache = NewCacheS(cfg, dm, nil)
+	Cache = NewCacheS(cfg, dm, nil, nil)
 	filterS := NewFilterS(cfg, nil, dm)
 	tS := NewThresholdService(dm, cfg, filterS, nil)
 
@@ -2634,7 +2634,7 @@ func TestThresholdsV1ResetThresholdOK(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
-	Cache = NewCacheS(cfg, dm, nil)
+	Cache = NewCacheS(cfg, dm, nil, nil)
 	filterS := NewFilterS(cfg, nil, dm)
 	tS := NewThresholdService(dm, cfg, filterS, nil)
 
@@ -2693,7 +2693,7 @@ func TestThresholdsV1ResetThresholdErrNotFound(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
-	Cache = NewCacheS(cfg, dm, nil)
+	Cache = NewCacheS(cfg, dm, nil, nil)
 	filterS := NewFilterS(cfg, nil, dm)
 	tS := NewThresholdService(dm, cfg, filterS, nil)
 
@@ -2744,7 +2744,7 @@ func TestThresholdsV1ResetThresholdNegativeStoreIntervalOK(t *testing.T) {
 	cfg.ThresholdSCfg().StoreInterval = -1
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
-	Cache = NewCacheS(cfg, dm, nil)
+	Cache = NewCacheS(cfg, dm, nil, nil)
 	filterS := NewFilterS(cfg, nil, dm)
 	tS := NewThresholdService(dm, cfg, filterS, nil)
 
@@ -2799,7 +2799,7 @@ func TestThresholdsV1ResetThresholdNegativeStoreIntervalErr(t *testing.T) {
 	cfg.ThresholdSCfg().StoreInterval = -1
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
-	Cache = NewCacheS(cfg, dm, nil)
+	Cache = NewCacheS(cfg, dm, nil, nil)
 	filterS := NewFilterS(cfg, nil, dm)
 	tS := NewThresholdService(nil, cfg, filterS, nil)
 
@@ -2924,7 +2924,7 @@ func TestThresholdsMatchingThresholdsForEventNotFoundErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
-	Cache = NewCacheS(cfg, dm, nil)
+	Cache = NewCacheS(cfg, dm, nil, nil)
 	filterS := NewFilterS(cfg, nil, dm)
 	tS := NewThresholdService(dm, cfg, filterS, nil)
 
@@ -2980,7 +2980,7 @@ func TestThresholdsStoreThresholdCacheSetErr(t *testing.T) {
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	connMgr = NewConnManager(cfg)
-	Cache = NewCacheS(cfg, dm, nil)
+	Cache = NewCacheS(cfg, dm, nil, nil)
 	filterS := NewFilterS(cfg, nil, dm)
 	tS := NewThresholdService(dm, cfg, filterS, connMgr)
 
@@ -3011,7 +3011,7 @@ func TestThreholdsMatchingThresholdsForEventDoesNotPass(t *testing.T) {
 	config.SetCgrConfig(cfg)
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
-	Cache = NewCacheS(cfg, dm, nil)
+	Cache = NewCacheS(cfg, dm, nil, nil)
 	filterS := NewFilterS(cfg, nil, dm)
 	tS := NewThresholdService(dm, cfg, filterS, nil)
 

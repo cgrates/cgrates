@@ -103,7 +103,7 @@ func testLoaderITInitDataDB(t *testing.T) {
 		}
 	}
 	cacheChan := make(chan birpc.ClientConnector, 1)
-	srv, _ := birpc.NewServiceWithMethodsRename(NewCacheS(lCfg, dataDbCsv, nil), "", false, func(key string) (newKey string) {
+	srv, _ := birpc.NewServiceWithMethodsRename(NewCacheS(lCfg, dataDbCsv, nil, nil), "", false, func(key string) (newKey string) {
 		return strings.TrimPrefix(key, "V1")
 	})
 	cacheChan <- srv

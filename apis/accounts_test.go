@@ -187,7 +187,7 @@ func TestAccountsGetAccountErrorNotFound(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	newCache := engine.NewCacheS(cfg, dm, nil)
+	newCache := engine.NewCacheS(cfg, dm, connMgr, nil)
 	engine.Cache = newCache
 	admS := NewAdminSv1(cfg, dm, connMgr, nil)
 	var getRply utils.Account
@@ -212,7 +212,7 @@ func TestAccountsGetAccountErrorGetAccount(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := &engine.DataDBMock{}
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	newCache := engine.NewCacheS(cfg, dm, nil)
+	newCache := engine.NewCacheS(cfg, dm, connMgr, nil)
 	engine.Cache = newCache
 	admS := NewAdminSv1(cfg, dm, connMgr, nil)
 	var getRply utils.Account
@@ -434,7 +434,7 @@ func TestAccountsSetGetAccountErrorSetLoadIDs(t *testing.T) {
 	}
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
 	admS := NewAdminSv1(cfg, dm, connMgr, nil)
-	newCache := engine.NewCacheS(cfg, dm, nil)
+	newCache := engine.NewCacheS(cfg, dm, connMgr, nil)
 	engine.Cache = newCache
 	args := &utils.AccountWithAPIOpts{
 		Account: &utils.Account{
@@ -502,7 +502,7 @@ func TestAccountsSetGetAccountErrorCallCache(t *testing.T) {
 	}
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
 	admS := NewAdminSv1(cfg, dm, connMgr, nil)
-	newCache := engine.NewCacheS(cfg, dm, nil)
+	newCache := engine.NewCacheS(cfg, dm, connMgr, nil)
 	engine.Cache = newCache
 	args := &utils.AccountWithAPIOpts{
 		Account: &utils.Account{
@@ -940,7 +940,7 @@ func TestAccountsAccountsForEvent(t *testing.T) {
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
 	admS := NewAdminSv1(cfg, dm, connMgr, nil)
-	newCache := engine.NewCacheS(cfg, dm, nil)
+	newCache := engine.NewCacheS(cfg, dm, connMgr, nil)
 	engine.Cache = newCache
 	args := &utils.AccountWithAPIOpts{
 		Account: &utils.Account{
@@ -1087,7 +1087,7 @@ func TestAccountsMaxAbstracts(t *testing.T) {
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
 	admS := NewAdminSv1(cfg, dm, connMgr, nil)
-	newCache := engine.NewCacheS(cfg, dm, nil)
+	newCache := engine.NewCacheS(cfg, dm, connMgr, nil)
 	engine.Cache = newCache
 	args := &utils.AccountWithAPIOpts{
 		Account: &utils.Account{
@@ -1280,7 +1280,7 @@ func TestAccountsDebitAbstracts(t *testing.T) {
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
 	admS := NewAdminSv1(cfg, dm, connMgr, nil)
-	newCache := engine.NewCacheS(cfg, dm, nil)
+	newCache := engine.NewCacheS(cfg, dm, connMgr, nil)
 	engine.Cache = newCache
 	args := &utils.AccountWithAPIOpts{
 		Account: &utils.Account{
@@ -1472,7 +1472,7 @@ func TestAccountsActionSetBalance(t *testing.T) {
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
 	admS := NewAdminSv1(cfg, dm, connMgr, nil)
-	newCache := engine.NewCacheS(cfg, dm, nil)
+	newCache := engine.NewCacheS(cfg, dm, connMgr, nil)
 	engine.Cache = newCache
 	args := &utils.AccountWithAPIOpts{
 		Account: &utils.Account{

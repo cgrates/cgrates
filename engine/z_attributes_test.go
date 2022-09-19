@@ -4074,7 +4074,7 @@ func TestAttributesattributeProfileForEventNoDBConn(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
-	Cache = NewCacheS(cfg, dm, nil)
+	Cache = NewCacheS(cfg, dm, nil, nil)
 	alS := &AttributeS{
 		cfg:   cfg,
 		dm:    dm,
@@ -4155,7 +4155,7 @@ func TestAttributesattributeProfileForEventErrNotFound(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
-	Cache = NewCacheS(cfg, dm, nil)
+	Cache = NewCacheS(cfg, dm, nil, nil)
 	alS := &AttributeS{
 		cfg:   cfg,
 		dm:    dm,
@@ -4193,7 +4193,7 @@ func TestAttributesattributeProfileForEventErrPass(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
-	Cache = NewCacheS(cfg, dm, nil)
+	Cache = NewCacheS(cfg, dm, nil, nil)
 	alS := &AttributeS{
 		cfg:   cfg,
 		dm:    dm,
@@ -4378,7 +4378,7 @@ func TestAttributesV1ProcessEventMultipleRuns1(t *testing.T) {
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	filterS := NewFilterS(cfg, nil, dm)
-	Cache = NewCacheS(cfg, dm, nil)
+	Cache = NewCacheS(cfg, dm, nil, nil)
 	alS := NewAttributeService(dm, filterS, cfg)
 
 	postpaid := config.NewRSRParsersMustCompile(utils.MetaPostpaid, utils.InfieldSep)
@@ -4488,7 +4488,7 @@ func TestAttributesV1ProcessEventMultipleRuns2(t *testing.T) {
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	filterS := NewFilterS(cfg, nil, dm)
-	Cache = NewCacheS(cfg, dm, nil)
+	Cache = NewCacheS(cfg, dm, nil, nil)
 	alS := NewAttributeService(dm, filterS, cfg)
 
 	postpaid := config.NewRSRParsersMustCompile(utils.MetaPostpaid, utils.InfieldSep)
@@ -5269,7 +5269,7 @@ func TestAttributesAttributeServiceV1PrcssEvPrcssRunsGetIntOptsErr(t *testing.T)
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	filterS := NewFilterS(cfg, nil, dm)
-	Cache = NewCacheS(cfg, dm, nil)
+	Cache = NewCacheS(cfg, dm, nil, nil)
 	alS := NewAttributeService(dm, filterS, cfg)
 	pw := config.NewRSRParsersMustCompile("CGRateS.org", utils.InfieldSep)
 
@@ -5321,7 +5321,7 @@ func TestAttributesAttributeServiceV1PrcssEvProfRunsGetIntOptsErr(t *testing.T) 
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	filterS := NewFilterS(cfg, nil, dm)
-	Cache = NewCacheS(cfg, dm, nil)
+	Cache = NewCacheS(cfg, dm, nil, nil)
 	alS := NewAttributeService(dm, filterS, cfg)
 	pw := config.NewRSRParsersMustCompile("CGRateS.org", utils.InfieldSep)
 
@@ -5404,7 +5404,7 @@ func TestAttributesProcessEventPasswordAttribute(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
-	Cache = NewCacheS(cfg, dm, nil)
+	Cache = NewCacheS(cfg, dm, nil, nil)
 	filterS := NewFilterS(cfg, nil, dm)
 	attrS := NewAttributeService(dm, filterS, cfg)
 
@@ -5510,7 +5510,7 @@ func TestAttributesSetAttributeProfilePasswordAttr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
-	Cache = NewCacheS(cfg, dm, nil)
+	Cache = NewCacheS(cfg, dm, nil, nil)
 
 	value := config.NewRSRParsersMustCompile("abcd123", config.CgrConfig().GeneralCfg().RSRSep)
 	attrPrf := &AttributeProfile{

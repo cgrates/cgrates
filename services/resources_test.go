@@ -40,7 +40,7 @@ func TestResourceSCoverage(t *testing.T) {
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	anz := NewAnalyzerService(cfg, server, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
 	db := NewDataDBService(cfg, nil, srvDep)
-	chS := NewCacheService(cfg, db, server, make(chan context.ClientConnector, 1), anz, nil, srvDep)
+	chS := NewCacheService(cfg, db, nil, server, make(chan context.ClientConnector, 1), anz, nil, srvDep)
 	reS := NewResourceService(cfg, db, chS, filterSChan, server, make(chan birpc.ClientConnector, 1), nil, anz, srvDep)
 
 	if reS.IsRunning() {

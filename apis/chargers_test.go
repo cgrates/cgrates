@@ -70,7 +70,7 @@ func TestChargerSDmSetChargerProfileErr(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := &engine.DataDBMock{}
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	newCache := engine.NewCacheS(cfg, dm, nil)
+	newCache := engine.NewCacheS(cfg, dm, connMgr, nil)
 	engine.Cache = newCache
 	admS := NewAdminSv1(cfg, dm, connMgr, nil)
 	var setRply string
@@ -120,7 +120,7 @@ func TestChargerSSetChargerProfileSetLoadIDsErr(t *testing.T) {
 		},
 	}
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	newCache := engine.NewCacheS(cfg, dm, nil)
+	newCache := engine.NewCacheS(cfg, dm, connMgr, nil)
 	engine.Cache = newCache
 	admS := NewAdminSv1(cfg, dm, connMgr, nil)
 	var setRply string
@@ -177,7 +177,7 @@ func TestChargerSSetChargerProfileCallCacheErr(t *testing.T) {
 		},
 	}
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	newCache := engine.NewCacheS(cfg, dm, nil)
+	newCache := engine.NewCacheS(cfg, dm, connMgr, nil)
 	engine.Cache = newCache
 	admS := NewAdminSv1(cfg, dm, connMgr, nil)
 	var setRply string
@@ -299,7 +299,7 @@ func TestChargerSSetGetChargerProfileIDsErr(t *testing.T) {
 	}
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
 	admS := NewAdminSv1(cfg, dm, connMgr, nil)
-	newCache := engine.NewCacheS(cfg, dm, nil)
+	newCache := engine.NewCacheS(cfg, dm, connMgr, nil)
 	engine.Cache = newCache
 	var getRply []string
 	err := admS.GetChargerProfileIDs(context.Background(),
@@ -320,7 +320,7 @@ func TestChargerSSetGetChargerProfileIDsErr2(t *testing.T) {
 	dataDB := &engine.DataDBMock{}
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
 	admS := NewAdminSv1(cfg, dm, connMgr, nil)
-	newCache := engine.NewCacheS(cfg, dm, nil)
+	newCache := engine.NewCacheS(cfg, dm, connMgr, nil)
 	engine.Cache = newCache
 	var getRply []string
 	err := admS.GetChargerProfileIDs(context.Background(),
@@ -538,7 +538,7 @@ func TestChargerSRmvChargerProfileErrRemoveChargerProfile(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := &engine.DataDBMock{}
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	newCache := engine.NewCacheS(cfg, dm, nil)
+	newCache := engine.NewCacheS(cfg, dm, connMgr, nil)
 	engine.Cache = newCache
 	admS := NewAdminSv1(cfg, dm, connMgr, nil)
 	var rmvRply string
@@ -582,7 +582,7 @@ func TestChargerSRmvChargerProfileErrSetLoadIDs(t *testing.T) {
 		},
 	}
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	newCache := engine.NewCacheS(cfg, dm, nil)
+	newCache := engine.NewCacheS(cfg, dm, connMgr, nil)
 	engine.Cache = newCache
 	admS := NewAdminSv1(cfg, dm, connMgr, nil)
 	var rmvRply string
@@ -634,7 +634,7 @@ func TestChargerSRmvChargerProfileErrRemoveCallCache(t *testing.T) {
 		},
 	}
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	newCache := engine.NewCacheS(cfg, dm, nil)
+	newCache := engine.NewCacheS(cfg, dm, connMgr, nil)
 	engine.Cache = newCache
 	admS := NewAdminSv1(cfg, dm, connMgr, nil)
 	var rmvRply string

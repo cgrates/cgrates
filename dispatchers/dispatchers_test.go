@@ -238,10 +238,10 @@ func TestDispatcherServiceAuthorizeEvenError1(t *testing.T) {
 	cacheInit := engine.Cache
 	cfg := config.NewDefaultCGRConfig()
 	dm := engine.NewDataManager(nil, nil, nil)
-	newCache := engine.NewCacheS(cfg, dm, nil)
+	connMgr := engine.NewConnManager(cfg)
+	newCache := engine.NewCacheS(cfg, dm, connMgr, nil)
 	engine.Cache = newCache
 	fltr := &engine.FilterS{}
-	connMgr := &engine.ConnManager{}
 	dsp := NewDispatcherService(dm, cfg, fltr, connMgr)
 	cfg.DispatcherSCfg().AttributeSConns = []string{"connID"}
 	ev := &utils.CGREvent{}
@@ -260,10 +260,10 @@ func TestDispatcherServiceAuthorizeEventError2(t *testing.T) {
 	cacheInit := engine.Cache
 	cfg := config.NewDefaultCGRConfig()
 	dm := engine.NewDataManager(nil, nil, nil)
-	newCache := engine.NewCacheS(cfg, dm, nil)
+	connMgr := engine.NewConnManager(cfg)
+	newCache := engine.NewCacheS(cfg, dm, connMgr, nil)
 	engine.Cache = newCache
 	fltr := &engine.FilterS{}
-	connMgr := &engine.ConnManager{}
 	dsp := NewDispatcherService(dm, cfg, fltr, connMgr)
 	cfg.DispatcherSCfg().AttributeSConns = []string{"connID"}
 	ev := &utils.CGREvent{}
@@ -322,7 +322,7 @@ func TestDispatcherServiceAuthorizeEventError3(t *testing.T) {
 	}
 	value := &lazyDH{dh: dh, cfg: cfg, iPRCCh: chanRPC}
 
-	newCache := engine.NewCacheS(cfg, dm, nil)
+	newCache := engine.NewCacheS(cfg, dm, connMgr, nil)
 	engine.Cache = newCache
 	engine.Cache.SetWithoutReplicate(utils.CacheRPCConnections, "testID",
 		value, nil, true, utils.NonTransactional)
@@ -371,7 +371,7 @@ func TestDispatcherServiceAuthorizeError(t *testing.T) {
 		},
 	}
 	value := &lazyDH{dh: dh, cfg: cfg, iPRCCh: chanRPC}
-	newCache := engine.NewCacheS(cfg, dm, nil)
+	newCache := engine.NewCacheS(cfg, dm, connMgr, nil)
 	engine.Cache = newCache
 	engine.Cache.SetWithoutReplicate(utils.CacheRPCConnections, "testID",
 		value, nil, true, utils.NonTransactional)
@@ -419,7 +419,7 @@ func TestDispatcherServiceAuthorizeError2(t *testing.T) {
 	}
 	value := &lazyDH{dh: dh, cfg: cfg, iPRCCh: chanRPC}
 
-	newCache := engine.NewCacheS(cfg, dm, nil)
+	newCache := engine.NewCacheS(cfg, dm, connMgr, nil)
 	engine.Cache = newCache
 	engine.Cache.SetWithoutReplicate(utils.CacheRPCConnections, "testID",
 		value, nil, true, utils.NonTransactional)
@@ -469,7 +469,7 @@ func TestDispatcherServiceAuthorizeError3(t *testing.T) {
 	}
 	value := &lazyDH{dh: dh, cfg: cfg, iPRCCh: chanRPC}
 
-	newCache := engine.NewCacheS(cfg, dm, nil)
+	newCache := engine.NewCacheS(cfg, dm, connMgr, nil)
 	engine.Cache = newCache
 	engine.Cache.SetWithoutReplicate(utils.CacheRPCConnections, "testID",
 		value, nil, true, utils.NonTransactional)
@@ -966,7 +966,7 @@ func TestDispatcherServiceDispatchDspErrHostNotFound2(t *testing.T) {
 		Weight:         0,
 		Hosts:          nil,
 	}
-	newCache := engine.NewCacheS(cfg, dm, nil)
+	newCache := engine.NewCacheS(cfg, dm, connMng, nil)
 	value, errDsp := newDispatcher(dsp)
 	if errDsp != nil {
 		t.Fatal(errDsp)
@@ -1030,7 +1030,7 @@ func TestDispatcherServiceDispatchDspErrHostNotFound3(t *testing.T) {
 		Weight:         0,
 		Hosts:          nil,
 	}
-	newCache := engine.NewCacheS(cfg, dm, nil)
+	newCache := engine.NewCacheS(cfg, dm, connMgr, nil)
 	engine.Cache = newCache
 
 	err := dm.SetDispatcherProfile(context.TODO(), dsp, false)
@@ -1068,7 +1068,8 @@ func TestDispatchersdispatcherProfileForEventAnySSfalseFirstNotFound(t *testing.
 	cfg := config.NewDefaultCGRConfig()
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, cfg.CacheCfg(), nil)
-	engine.Cache = engine.NewCacheS(cfg, dm, nil)
+	connMgr := engine.NewConnManager(cfg)
+	engine.Cache = engine.NewCacheS(cfg, dm, connMgr, nil)
 
 	dS := &DispatcherService{
 		cfg:   cfg,
@@ -1135,8 +1136,9 @@ func TestDispatchersdispatcherProfileForEventAnySSfalseFound(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	connMgr := engine.NewConnManager(cfg)
 	dm := engine.NewDataManager(dataDB, cfg.CacheCfg(), nil)
-	engine.Cache = engine.NewCacheS(cfg, dm, nil)
+	engine.Cache = engine.NewCacheS(cfg, dm, connMgr, nil)
 
 	dS := &DispatcherService{
 		cfg:   cfg,
@@ -1203,8 +1205,9 @@ func TestDispatchersdispatcherProfileForEventAnySSfalseNotFound(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	connMgr := engine.NewConnManager(cfg)
 	dm := engine.NewDataManager(dataDB, cfg.CacheCfg(), nil)
-	engine.Cache = engine.NewCacheS(cfg, dm, nil)
+	engine.Cache = engine.NewCacheS(cfg, dm, connMgr, nil)
 
 	dS := &DispatcherService{
 		cfg:   cfg,
@@ -1269,8 +1272,9 @@ func TestDispatchersdispatcherProfileForEventAnySStrueNotFound(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	connMgr := engine.NewConnManager(cfg)
 	dm := engine.NewDataManager(dataDB, cfg.CacheCfg(), nil)
-	engine.Cache = engine.NewCacheS(cfg, dm, nil)
+	engine.Cache = engine.NewCacheS(cfg, dm, connMgr, nil)
 
 	dS := &DispatcherService{
 		cfg:   cfg,
@@ -1335,8 +1339,9 @@ func TestDispatchersdispatcherProfileForEventAnySStrueBothFound(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	connMgr := engine.NewConnManager(cfg)
 	dm := engine.NewDataManager(dataDB, cfg.CacheCfg(), nil)
-	engine.Cache = engine.NewCacheS(cfg, dm, nil)
+	engine.Cache = engine.NewCacheS(cfg, dm, connMgr, nil)
 
 	dS := &DispatcherService{
 		cfg:   cfg,

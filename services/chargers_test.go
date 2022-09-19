@@ -40,7 +40,7 @@ func TestChargerSCoverage(t *testing.T) {
 	server := cores.NewServer(nil)
 	db := NewDataDBService(cfg, nil, srvDep)
 	anz := NewAnalyzerService(cfg, server, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
-	chS := NewCacheService(cfg, db, server, make(chan context.ClientConnector, 1), anz, nil, srvDep)
+	chS := NewCacheService(cfg, db, nil, server, make(chan context.ClientConnector, 1), anz, nil, srvDep)
 	chrS1 := NewChargerService(cfg, db, chS,
 		filterSChan, server, make(chan birpc.ClientConnector, 1),
 		nil, anz, srvDep)

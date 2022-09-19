@@ -2066,7 +2066,8 @@ func TestAgReqSetFieldsInCache(t *testing.T) {
 	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	engine.NewCacheS(cfg, dm, nil)
+	connMgr := engine.NewConnManager(cfg)
+	engine.NewCacheS(cfg, dm, connMgr, nil)
 	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil)
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AccountField, PathSlice: []string{utils.AccountField}}, utils.NewLeafNode("1001"))
 
@@ -2107,9 +2108,10 @@ func TestAgReqSetFieldsInCacheWithTimeOut(t *testing.T) {
 	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
+	connMgr := engine.NewConnManager(cfg)
 
 	cfg.CacheCfg().Partitions[utils.CacheUCH].TTL = time.Second
-	engine.Cache = engine.NewCacheS(cfg, dm, nil)
+	engine.Cache = engine.NewCacheS(cfg, dm, connMgr, nil)
 	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil)
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AccountField, PathSlice: []string{utils.AccountField}}, utils.NewLeafNode("1001"))
 
