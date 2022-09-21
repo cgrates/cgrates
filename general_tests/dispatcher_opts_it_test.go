@@ -47,15 +47,15 @@ var (
 		testDispatcherOptsAdminInitDataDb,
 		testDispatcherOptsAdminStartEngine,
 		testDispatcherOptsAdminRPCConn,
-		//testDispatcherOptsAdminSetDispatcherProfile,
+		testDispatcherOptsAdminSetDispatcherProfile,
 
 		// Start engine without Dispatcher on engine 4012 with profiles in database (*dispatchers:false)
 		testDispatcherOptsDSPInitCfg,
 		testDispatcherOptsDSPStartEngine,
 		testDispatcherOptsDSPRPCConn,
-		//testDispatcherOptsCoreStatus, // localhost(:4012) CoresV1Status
+		testDispatcherOptsCoreStatus, // localhost(:4012) CoresV1Status
 
-		//testDispatcherOptsAdminSetDispatcherHost4012,
+		testDispatcherOptsAdminSetDispatcherHost4012,
 		//testDispatcherOptsCoreStatusHost4012,
 
 		testDispatcherOptsAdminSetDispatcherProfileDoubleHost,
@@ -189,9 +189,9 @@ func testDispatcherOptsCoreStatus(t *testing.T) {
 	var reply map[string]interface{}
 	ev := utils.TenantWithAPIOpts{
 		Tenant: "cgrates.org",
-		/* 	APIOpts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsDispatchers: false,
-		}, */
+		},
 	}
 	if err := dspOptsRPC.Call(context.Background(), utils.CoreSv1Status, &ev, &reply); err != nil {
 		t.Error(err)
@@ -269,51 +269,6 @@ func testDispatcherOptsCoreStatusHost4012(t *testing.T) {
 }
 
 func testDispatcherOptsAdminSetDispatcherProfileDoubleHost(t *testing.T) {
-	var replyStr string
-	setDispatcherHost := &engine.DispatcherHostWithAPIOpts{
-		DispatcherHost: &engine.DispatcherHost{
-			Tenant: "cgrates.org",
-			RemoteHost: &config.RemoteHost{
-				ID:              "SELF_ENGINE",
-				Address:         "127.0.0.1:2012",
-				Transport:       "*json",
-				ConnectAttempts: 1,
-				Reconnects:      3,
-				ConnectTimeout:  time.Minute,
-				ReplyTimeout:    2 * time.Minute,
-			},
-		},
-		APIOpts: map[string]interface{}{
-			utils.OptsDispatchers: false,
-		},
-	}
-	if err := adminsRPC.Call(context.Background(), utils.AdminSv1SetDispatcherHost, setDispatcherHost, &replyStr); err != nil {
-		t.Error("Unexpected error when calling AdminSv1.SetDispatcherHost: ", err)
-	} else if replyStr != utils.OK {
-		t.Error("Unexpected reply returned", replyStr)
-	}
-	setDispatcherHost = &engine.DispatcherHostWithAPIOpts{
-		DispatcherHost: &engine.DispatcherHost{
-			Tenant: "cgrates.org",
-			RemoteHost: &config.RemoteHost{
-				ID:              "HOST4012",
-				Address:         "127.0.0.1:4012",
-				Transport:       "*json",
-				ConnectAttempts: 1,
-				Reconnects:      3,
-				ConnectTimeout:  time.Minute,
-				ReplyTimeout:    2 * time.Minute,
-			},
-		},
-		APIOpts: map[string]interface{}{
-			utils.OptsDispatchers: false,
-		},
-	}
-	if err := adminsRPC.Call(context.Background(), utils.AdminSv1SetDispatcherHost, setDispatcherHost, &replyStr); err != nil {
-		t.Error("Unexpected error when calling AdminSv1.SetDispatcherHost: ", err)
-	} else if replyStr != utils.OK {
-		t.Error("Unexpected reply returned", replyStr)
-	}
 	// Set DispatcherProfile with both engines
 	setDispatcherProfile := &engine.DispatcherProfileWithAPIOpts{
 		DispatcherProfile: &engine.DispatcherProfile{
@@ -326,17 +281,17 @@ func testDispatcherOptsAdminSetDispatcherProfileDoubleHost(t *testing.T) {
 					ID:     "SELF_ENGINE",
 					Weight: 5,
 				},
-				/* {
+				{
 					ID:     "HOST4012",
 					Weight: 10,
-				}, */
+				},
 			},
 		},
 		APIOpts: map[string]interface{}{
 			utils.OptsDispatchers: false,
 		},
 	}
-	//var replyStr string
+	var replyStr string
 	if err := adminsRPC.Call(context.Background(), utils.AdminSv1SetDispatcherProfile, setDispatcherProfile, &replyStr); err != nil {
 		t.Error("Unexpected error when calling AdminSv1.SetDispatcherProfile: ", err)
 	} else if replyStr != utils.OK {
