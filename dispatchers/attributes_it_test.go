@@ -266,6 +266,8 @@ func testDspAttrGetAttrFailover(t *testing.T) {
 			APIOpts: map[string]interface{}{
 				utils.OptsAPIKey:  "attr12345",
 				utils.OptsContext: "simpleauth",
+				utils.MetaNodeID:  "DispatcherS1",
+				utils.MetaSubsys:  "*dispatchers",
 			},
 		},
 	}
@@ -467,6 +469,8 @@ func testDspAttrTestAuthKey2(t *testing.T) {
 			APIOpts: map[string]interface{}{
 				utils.OptsAPIKey:  "attr12345",
 				utils.OptsContext: "simpleauth",
+				utils.MetaNodeID:  "DispatcherS1",
+				utils.MetaSubsys:  "*dispatchers",
 			},
 		},
 	}
@@ -557,6 +561,8 @@ func testDspAttrGetAttrRoundRobin(t *testing.T) {
 			APIOpts: map[string]interface{}{
 				utils.OptsAPIKey:  "attr12345",
 				utils.OptsContext: "simpleauth",
+				utils.MetaNodeID:  "DispatcherS1",
+				utils.MetaSubsys:  "*dispatchers",
 			},
 		},
 	}
@@ -632,6 +638,8 @@ func testDspAttrGetAttrInternal(t *testing.T) {
 			APIOpts: map[string]interface{}{
 				utils.OptsAPIKey:  "attr12345",
 				utils.OptsContext: "simpleauth",
+				utils.MetaNodeID:  "DispatcherS1",
+				utils.MetaSubsys:  "*dispatchers",
 			},
 		},
 	}

@@ -20,6 +20,7 @@
 		"*dispatcher_loads": {"limit": -1, "replicate": true}
 	},
 	"replication_conns": ["cacheReplication"],
+	"remote_conns": ["cacheReplication"],	
 },
 
 

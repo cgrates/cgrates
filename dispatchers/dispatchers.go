@@ -104,7 +104,7 @@ func (dS *DispatcherService) dispatcherProfilesForEvent(ctx *context.Context, tn
 	evNm utils.MapStorage) (dPrlfs engine.DispatcherProfiles, err error) {
 	// make sure dispatching is allowed
 	var shouldDispatch bool
-	if shouldDispatch, err = engine.GetBoolOpts(ctx, tnt, ev, dS.fltrS, dS.cfg.DispatcherSCfg().Opts.Dispatchers,
+	if shouldDispatch, err = engine.GetBoolOpts(ctx, tnt, evNm, dS.fltrS, dS.cfg.DispatcherSCfg().Opts.Dispatchers,
 		config.DispatchersDispatchersDftOpt, utils.OptsDispatchers); err != nil {
 		return
 	} else if !shouldDispatch {
@@ -184,7 +184,7 @@ func (dS *DispatcherService) Dispatch(ctx *context.Context, ev *utils.CGREvent, 
 	}
 	// avoid further processing if the request is internal
 	var shouldDispatch bool
-	if shouldDispatch, err = engine.GetBoolOpts(ctx, tnt, ev, dS.fltrS, dS.cfg.DispatcherSCfg().Opts.Dispatchers,
+	if shouldDispatch, err = engine.GetBoolOpts(ctx, tnt, evNm, dS.fltrS, dS.cfg.DispatcherSCfg().Opts.Dispatchers,
 		true, utils.OptsDispatchers); err != nil {
 		return utils.NewErrDispatcherS(err)
 	} else if !shouldDispatch {

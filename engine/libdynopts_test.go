@@ -785,7 +785,7 @@ func TestLibFiltersGetBoolOptsReturnConfigOpt(t *testing.T) {
 	}
 
 	expected := true
-	if rcv, err := GetBoolOpts(context.Background(), "cgrates.org", ev, fS, dynOpts,
+	if rcv, err := GetBoolOpts(context.Background(), "cgrates.org", ev.AsDataProvider(), fS, dynOpts,
 		config.ThresholdsProfileIgnoreFiltersDftOpt, utils.MetaProfileIgnoreFilters); err != nil {
 		t.Error(err)
 	} else if rcv != expected {
@@ -816,7 +816,7 @@ func TestLibFiltersGetBoolOptsFilterCheckErr(t *testing.T) {
 	}
 
 	experr := `inline parse error for string: <*string.invalid:filter>`
-	if _, err := GetBoolOpts(context.Background(), "cgrates.org", ev, fS, dynOpts,
+	if _, err := GetBoolOpts(context.Background(), "cgrates.org", ev.AsDataProvider(), fS, dynOpts,
 		config.ThresholdsProfileIgnoreFiltersDftOpt, utils.MetaProfileIgnoreFilters); err == nil ||
 		err.Error() != experr {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
@@ -845,7 +845,7 @@ func TestLibFiltersGetBoolOptsReturnDefaultOpt(t *testing.T) {
 		},
 	}
 
-	if rcv, err := GetBoolOpts(context.Background(), "cgrates.org", ev, fS, dynOpts,
+	if rcv, err := GetBoolOpts(context.Background(), "cgrates.org", ev.AsDataProvider(), fS, dynOpts,
 		config.ThresholdsProfileIgnoreFiltersDftOpt, utils.MetaProfileIgnoreFilters); err != nil {
 		t.Error(err)
 	} else if rcv != config.ThresholdsProfileIgnoreFiltersDftOpt {
@@ -879,7 +879,7 @@ func TestLibFiltersGetBoolOptsReturnOptFromAPIOpts(t *testing.T) {
 	}
 
 	expected := true
-	if rcv, err := GetBoolOpts(context.Background(), "cgrates.org", ev, fS, dynOpts,
+	if rcv, err := GetBoolOpts(context.Background(), "cgrates.org", ev.AsDataProvider(), fS, dynOpts,
 		config.ThresholdsProfileIgnoreFiltersDftOpt, "nonExistingAPIOpt", utils.MetaProfileIgnoreFilters); err != nil {
 		t.Error(err)
 	} else if rcv != expected {

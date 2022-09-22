@@ -329,7 +329,7 @@ func (rS *RateS) V1CostForEvent(ctx *context.Context, args *utils.CGREvent, rpCo
 		return
 	}
 	var ignFilters bool
-	if ignFilters, err = engine.GetBoolOpts(ctx, args.Tenant, args, rS.fltrS, rS.cfg.RateSCfg().Opts.ProfileIgnoreFilters,
+	if ignFilters, err = engine.GetBoolOpts(ctx, args.Tenant, args.AsDataProvider(), rS.fltrS, rS.cfg.RateSCfg().Opts.ProfileIgnoreFilters,
 		config.RatesProfileIgnoreFiltersDftOpt, utils.MetaProfileIgnoreFilters); err != nil {
 		return
 	}

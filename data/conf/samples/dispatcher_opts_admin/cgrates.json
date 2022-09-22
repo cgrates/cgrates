@@ -18,23 +18,22 @@
 	    "db_name": "10", 						// data_db database name to connect to
     },
       
-    /*
+ 
     "dispatchers":{
         "enabled": true,
-        "opts": {								//
-		// "*dispatcherS": [						
-		// 	{
-		// 		"Tenant": "cgrates.org",
-		// 		"FilterIDs": [],
-		// 		"Value": true,
-		// 	},
-		// ],
-	},
+        "opts": {								
+		 "*dispatcherS": [						
+		 	{
+		 		"Tenant": "cgrates.org",
+		 		"FilterIDs": ["*string:~*opts.*subsys:*dispatchers"],
+		 		"Value": false,
+		 	},
+		 ],
+	   },
     }, 
-    */
      
     "caches":{
-        //"remote_conns": ["*internal"],						// the conns that are queried when the items are not found in cache
+        //"remote_conns": ["gob_cache"],						// the conns that are queried when the items are not found in cache
     },
     
 
@@ -51,6 +50,11 @@
                 {"address": "127.0.0.1:4012", "transport":"*json"},
             ],
         },
+      /*   "gob_cache": {
+            "conns": [
+                {"address": "127.0.0.1:4012", "transport":"*gob"},
+            ],
+        }, */
     }, 
     
     }

@@ -19,9 +19,6 @@
 	"db_port": 6379,
 	"db_name": "11",
 },
-
-
-
 	
 "caches":{
 	"partitions": {

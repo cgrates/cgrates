@@ -162,7 +162,7 @@ func (alS *AttributeS) processEvent(ctx *context.Context, tnt string, args *util
 		return
 	}
 	var ignFilters bool
-	if ignFilters, err = GetBoolOpts(ctx, tnt, args, alS.fltrS, alS.cfg.AttributeSCfg().Opts.ProfileIgnoreFilters,
+	if ignFilters, err = GetBoolOpts(ctx, tnt, evNm, alS.fltrS, alS.cfg.AttributeSCfg().Opts.ProfileIgnoreFilters,
 		config.AttributesProfileIgnoreFiltersDftOpt, utils.MetaProfileIgnoreFilters); err != nil {
 		return
 	}
@@ -256,18 +256,20 @@ func (alS *AttributeS) V1GetAttributeForEvent(ctx *context.Context, args *utils.
 		config.AttributesProfileIDsDftOpt, utils.OptsAttributesProfileIDs); err != nil {
 		return
 	}
-	var ignFilters bool
-	if ignFilters, err = GetBoolOpts(ctx, tnt, args, alS.fltrS, alS.cfg.AttributeSCfg().Opts.ProfileIgnoreFilters,
-		config.AttributesProfileIgnoreFiltersDftOpt, utils.MetaProfileIgnoreFilters); err != nil {
-		return
-	}
-	attrPrf, err := alS.attributeProfileForEvent(ctx, tnt, attrIDs, utils.MapStorage{
+	evNM := utils.MapStorage{
 		utils.MetaReq:  args.Event,
 		utils.MetaOpts: args.APIOpts,
 		utils.MetaVars: utils.MapStorage{
 			utils.OptsAttributesProcessRuns: 0,
 		},
-	}, utils.EmptyString, make(map[string]int), 0, ignFilters)
+	}
+	var ignFilters bool
+	if ignFilters, err = GetBoolOpts(ctx, tnt, evNM, alS.fltrS, alS.cfg.AttributeSCfg().Opts.ProfileIgnoreFilters,
+		config.AttributesProfileIgnoreFiltersDftOpt, utils.MetaProfileIgnoreFilters); err != nil {
+		return
+	}
+	attrPrf, err := alS.attributeProfileForEvent(ctx, tnt, attrIDs, evNM,
+		utils.EmptyString, make(map[string]int), 0, ignFilters)
 	if err != nil {
 		if err != utils.ErrNotFound {
 			err = utils.NewErrServerError(err)
