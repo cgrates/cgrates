@@ -167,6 +167,7 @@ func UUIDSha1Prefix() string {
 // Round return rounded version of x with prec precision.
 //
 // Special cases are:
+//
 //	Round(±0) = ±0
 //	Round(±Inf) = ±Inf
 //	Round(NaN) = NaN
@@ -202,7 +203,7 @@ func Round(x float64, prec int, method string) float64 {
 	return rounder / pow
 }
 
-//RoundStatDuration is used in engine package for stat metrics that has duration (e.g acd metric, tcd metric, etc...)
+// RoundStatDuration is used in engine package for stat metrics that has duration (e.g acd metric, tcd metric, etc...)
 func RoundStatDuration(x time.Duration, prec int) time.Duration {
 	return x.Round(time.Duration(math.Pow10(9 - prec)))
 }
@@ -429,7 +430,7 @@ func InfieldSplit(val string) []string {
 	return strings.Split(val, InfieldSep)
 }
 
-//Splited Unzip in small functions to have better coverage
+// Splited Unzip in small functions to have better coverage
 func Unzip(src, dest string) error {
 	r, err := zip.OpenReader(src)
 	if err != nil {
@@ -577,10 +578,11 @@ func Clone(a, b interface{}) error {
 // Used as generic function logic for various fields
 
 // Attributes
-//  source - the base source
-//  width - the field width
-//  strip - if present it will specify the strip strategy, when missing strip will not be allowed
-//  padding - if present it will specify the padding strategy to use, left, right, zeroleft, zeroright
+//
+//	source - the base source
+//	width - the field width
+//	strip - if present it will specify the strip strategy, when missing strip will not be allowed
+//	padding - if present it will specify the padding strategy to use, left, right, zeroleft, zeroright
 func FmtFieldWidth(fieldID, source string, width int, strip, padding string, mandatory bool) (string, error) {
 	if mandatory && len(source) == 0 {
 		return "", fmt.Errorf("Empty source value for fieldID: <%s>", fieldID)
@@ -1076,19 +1078,19 @@ func VerifyHash(hash string, dataKeys ...string) bool {
 	return err == nil
 }
 
-//newBoolGen initialize an efficient boolean generator
+// newBoolGen initialize an efficient boolean generator
 func newBoolGen() *boolGen {
 	return &boolGen{src: math_rand.NewSource(time.Now().UnixNano())}
 }
 
-//boolGen is an efficient boolean generator
+// boolGen is an efficient boolean generator
 type boolGen struct {
 	src       math_rand.Source
 	cache     int64
 	remaining int
 }
 
-//RandomBool generate a random boolean
+// RandomBool generate a random boolean
 func (b *boolGen) RandomBool() bool {
 	if b.remaining == 0 {
 		b.cache, b.remaining = b.src.Int63(), 63
@@ -1147,4 +1149,10 @@ func SplitPath(rule string, sep byte, n int) (splt []string) {
 	}
 	splt = append(splt, rule[st:])
 	return
+}
+
+type PanicMessageArgs struct {
+	Tenant  string
+	APIOpts map[string]interface{}
+	Message string
 }

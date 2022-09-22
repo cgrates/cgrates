@@ -574,7 +574,7 @@ func (rpS *RouteService) V1GetRoutes(args *utils.CGREvent, reply *SortedRoutesLi
 		if args.APIOpts == nil {
 			args.APIOpts = make(map[string]interface{})
 		}
-		args.APIOpts[utils.Subsys] = utils.MetaRoutes
+		args.APIOpts[utils.MetaSubsys] = utils.MetaRoutes
 		context := utils.GetStringOpts(args, rpS.cgrcfg.RouteSCfg().Opts.Context, utils.OptsContext)
 		args.APIOpts[utils.OptsContext] = utils.FirstNonEmpty(context, utils.MetaRoutes)
 		var rplyEv AttrSProcessEventReply

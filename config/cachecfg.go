@@ -32,6 +32,7 @@ type CacheParamCfg struct {
 	TTL       time.Duration
 	StaticTTL bool
 	Precache  bool
+	Remote    bool
 	Replicate bool
 }
 
@@ -48,6 +49,9 @@ func (cParam *CacheParamCfg) loadFromJSONCfg(jsnCfg *CacheParamJsonCfg) (err err
 	if jsnCfg.Precache != nil {
 		cParam.Precache = *jsnCfg.Precache
 	}
+	if jsnCfg.Remote != nil {
+		cParam.Remote = *jsnCfg.Remote
+	}
 	if jsnCfg.Replicate != nil {
 		cParam.Replicate = *jsnCfg.Replicate
 	}
@@ -63,6 +67,7 @@ func (cParam *CacheParamCfg) AsMapInterface() (initialMP map[string]interface{})
 		utils.LimitCfg:     cParam.Limit,
 		utils.StaticTTLCfg: cParam.StaticTTL,
 		utils.PrecacheCfg:  cParam.Precache,
+		utils.RemoteCfg:    cParam.Remote,
 		utils.ReplicateCfg: cParam.Replicate,
 	}
 	if cParam.TTL != 0 {
@@ -78,6 +83,7 @@ func (cParam CacheParamCfg) Clone() (cln *CacheParamCfg) {
 		TTL:       cParam.TTL,
 		StaticTTL: cParam.StaticTTL,
 		Precache:  cParam.Precache,
+		Remote:    cParam.Remote,
 		Replicate: cParam.Replicate,
 	}
 }
@@ -86,6 +92,7 @@ func (cParam CacheParamCfg) Clone() (cln *CacheParamCfg) {
 type CacheCfg struct {
 	Partitions       map[string]*CacheParamCfg
 	ReplicationConns []string
+	RemoteConns      []string
 }
 
 func (cCfg *CacheCfg) loadFromJSONCfg(jsnCfg *CacheJsonCfg) (err error) {
@@ -108,6 +115,12 @@ func (cCfg *CacheCfg) loadFromJSONCfg(jsnCfg *CacheJsonCfg) (err error) {
 				return fmt.Errorf("replication connection ID needs to be different than *internal")
 			}
 			cCfg.ReplicationConns[idx] = connID
+		}
+	}
+	if jsnCfg.Remote_conns != nil {
+		cCfg.RemoteConns = make([]string, len(*jsnCfg.Remote_conns))
+		for idx, connID := range *jsnCfg.Remote_conns {
+			cCfg.RemoteConns[idx] = connID
 		}
 	}
 	return nil
@@ -135,15 +148,18 @@ func (cCfg *CacheCfg) AddTmpCaches() {
 }
 
 // AsMapInterface returns the config as a map[string]interface{}
-func (cCfg *CacheCfg) AsMapInterface() (initialMP map[string]interface{}) {
-	initialMP = make(map[string]interface{})
+func (cCfg *CacheCfg) AsMapInterface() (mp map[string]interface{}) {
+	mp = make(map[string]interface{})
 	partitions := make(map[string]interface{}, len(cCfg.Partitions))
 	for key, value := range cCfg.Partitions {
 		partitions[key] = value.AsMapInterface()
 	}
-	initialMP[utils.PartitionsCfg] = partitions
+	mp[utils.PartitionsCfg] = partitions
 	if cCfg.ReplicationConns != nil {
-		initialMP[utils.ReplicationConnsCfg] = cCfg.ReplicationConns
+		mp[utils.ReplicationConnsCfg] = cCfg.ReplicationConns
+	}
+	if cCfg.RemoteConns != nil {
+		mp[utils.RemoteConnsCfg] = cCfg.RemoteConns
 	}
 	return
 }
@@ -157,10 +173,10 @@ func (cCfg CacheCfg) Clone() (cln *CacheCfg) {
 		cln.Partitions[key] = par.Clone()
 	}
 	if cCfg.ReplicationConns != nil {
-		cln.ReplicationConns = make([]string, len(cCfg.ReplicationConns))
-		for i, c := range cCfg.ReplicationConns {
-			cln.ReplicationConns[i] = c
-		}
+		cln.ReplicationConns = utils.CloneStringSlice(cCfg.ReplicationConns)
+	}
+	if cCfg.RemoteConns != nil {
+		cln.RemoteConns = utils.CloneStringSlice(cCfg.RemoteConns)
 	}
 	return
 }

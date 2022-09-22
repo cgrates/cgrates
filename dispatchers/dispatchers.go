@@ -26,6 +26,7 @@ import (
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
 )
@@ -81,7 +82,7 @@ func (dS *DispatcherService) authorize(method, tenant string, apiKey string, evT
 		Event: map[string]interface{}{
 			utils.APIKey: apiKey,
 		},
-		APIOpts: map[string]interface{}{utils.Subsys: utils.MetaDispatchers},
+		APIOpts: map[string]interface{}{utils.MetaSubsys: utils.MetaDispatchers},
 	}
 	var rplyEv engine.AttrSProcessEventReply
 	if err = dS.authorizeEvent(ev, &rplyEv); err != nil {
@@ -187,6 +188,49 @@ func (dS *DispatcherService) Dispatch(ev *utils.CGREvent, subsys string,
 	if tnt == utils.EmptyString {
 		tnt = dS.cfg.GeneralCfg().DefaultTenant
 	}
+	var shouldDispatch bool
+	if shouldDispatch, err = utils.GetBoolOpts(ev, true, utils.OptsDispatchers); err != nil {
+		return utils.NewErrDispatcherS(err)
+	} else if !shouldDispatch {
+		return callDH(
+			newInternalHost(tnt), utils.EmptyString, nil,
+			serviceMethod, args, reply)
+	}
+	var dR *DispatcherRoute
+	var dPrfls engine.DispatcherProfiles
+	routeID := utils.IfaceAsString(ev.APIOpts[utils.OptsRouteID])
+	if routeID != utils.EmptyString { // overwrite routeID with RouteID:Subsystem for subsystem correct routing
+		routeID = utils.ConcatenatedKey(routeID, subsys)
+		guardID := utils.ConcatenatedKey(utils.DispatcherSv1, utils.OptsRouteID, routeID)
+		refID := guardian.Guardian.GuardIDs("", dS.cfg.GeneralCfg().LockingTimeout,
+			guardID) // lock the routeID so we can make sure we have time to execute only once before caching
+		defer guardian.Guardian.UnguardIDs(refID)
+		// use previously discovered route
+		argsCache := &utils.ArgsGetCacheItemWithAPIOpts{
+			Tenant: ev.Tenant,
+			APIOpts: map[string]interface{}{
+				utils.MetaSubsys: utils.MetaDispatchers,
+				utils.MetaNodeID: dS.cfg.GeneralCfg().NodeID,
+			},
+			ArgsGetCacheItem: utils.ArgsGetCacheItem{
+				CacheID: utils.CacheDispatcherRoutes,
+				ItemID:  routeID,
+			}}
+		// item
+		var itmRemote interface{}
+		if err = dS.connMgr.Call(dS.cfg.CacheCfg().RemoteConns, nil,
+			utils.CacheSv1GetItem, argsCache, &itmRemote); err != nil &&
+			err.Error() != utils.ErrNotFound.Error() {
+			return utils.NewErrDispatcherS(err)
+		} else if err == nil { // not found
+			dR = itmRemote.(*DispatcherRoute)
+			routeID = utils.EmptyString // cancel cache replication
+		}
+	}
+	if dR != nil {
+		dPrfls = engine.DispatcherProfiles{
+			&engine.DispatcherProfile{Tenant: dR.Tenant, ID: dR.ProfileID}} // will be used bellow to retrieve the dispatcher
+	}
 	evNm := utils.MapStorage{
 		utils.MetaReq:  ev.Event,
 		utils.MetaOpts: ev.APIOpts,
@@ -194,10 +238,19 @@ func (dS *DispatcherService) Dispatch(ev *utils.CGREvent, subsys string,
 			utils.MetaMethod: serviceMethod,
 		},
 	}
-	var dPrfls engine.DispatcherProfiles
-	if dPrfls, err = dS.dispatcherProfilesForEvent(tnt, ev, evNm, subsys); err != nil {
-		return utils.NewErrDispatcherS(err)
+	if dPrfls == nil { // did not discover it yet
+		if dPrfls, err = dS.dispatcherProfilesForEvent(tnt, ev, evNm, subsys); err != nil {
+			return utils.NewErrDispatcherS(err)
+		}
 	}
+	if len(dPrfls) == 0 {
+		return utils.NewErrDispatcherS(utils.ErrPrefixNotFound("PROFILE"))
+	}
+	if ev.APIOpts == nil {
+		ev.APIOpts = make(map[string]interface{})
+	}
+	ev.APIOpts[utils.MetaSubsys] = utils.MetaDispatchers // inject into args
+	ev.APIOpts[utils.MetaNodeID] = dS.cfg.GeneralCfg().NodeID
 	for _, dPrfl := range dPrfls {
 		tntID := dPrfl.TenantID()
 		// get or build the Dispatcher for the config
@@ -205,13 +258,37 @@ func (dS *DispatcherService) Dispatch(ev *utils.CGREvent, subsys string,
 		if x, ok := engine.Cache.Get(utils.CacheDispatchers,
 			tntID); ok && x != nil {
 			d = x.(Dispatcher)
-		} else if d, err = newDispatcher(dPrfl); err != nil {
-			return utils.NewErrDispatcherS(err)
+		} else { // dispatcher is not cached, build it here
+			if dPrfl.Hosts == nil { // dispatcher profile was not retrieved but built artificially above, try retrieving
+				if dPrfl, err = dS.dm.GetDispatcherProfile(dPrfl.Tenant, dPrfl.ID,
+					true, true, utils.NonTransactional); err != nil {
+					if err != utils.ErrNotFound {
+						return
+					}
+					// profile was not found
+					utils.Logger.Warning(fmt.Sprintf("<%s> could not find profile with tenant: <%s> and ID <%s> for routeID: <%s>",
+						utils.DispatcherS, dR.Tenant, dR.ProfileID, routeID))
+					if len(dPrfls) == 1 { // the only profile set does not exist anymore
+						return utils.NewErrDispatcherS(utils.ErrPrefixNotFound("PROFILE"))
+					}
+					continue
+				}
+			}
+			if d, err = newDispatcher(dPrfl); err != nil {
+				return utils.NewErrDispatcherS(err)
+			} else if err = engine.Cache.Set(utils.CacheDispatchers, tntID, d, // cache the built Dispatcher
+				nil, true, utils.EmptyString); err != nil {
+				return utils.NewErrDispatcherS(err)
+			}
 		}
-		if err = engine.Cache.Set(utils.CacheDispatchers, tntID, d, nil, true, utils.EmptyString); err != nil {
-			return utils.NewErrDispatcherS(err)
+		if routeID != utils.EmptyString && dR == nil { // first time we cache the route
+			dR = &DispatcherRoute{
+				Tenant:    dPrfl.Tenant,
+				ProfileID: dPrfl.ID,
+			}
 		}
-		if err = d.Dispatch(dS.dm, dS.fltrS, evNm, tnt, utils.IfaceAsString(ev.APIOpts[utils.OptsRouteID]), subsys, serviceMethod, args, reply); !rpcclient.IsNetworkError(err) {
+		if err = d.Dispatch(dS.dm, dS.fltrS, evNm, tnt, routeID, dR,
+			serviceMethod, args, reply); !rpcclient.IsNetworkError(err) {
 			return
 		}
 	}
@@ -230,7 +307,7 @@ func (dS *DispatcherService) V1GetProfilesForEvent(ev *utils.CGREvent,
 		utils.MetaVars: utils.MapStorage{
 			utils.MetaMethod: ev.APIOpts[utils.MetaMethod],
 		},
-	}, utils.IfaceAsString(ev.APIOpts[utils.Subsys]))
+	}, utils.IfaceAsString(ev.APIOpts[utils.MetaSubsys]))
 	if errDpfl != nil {
 		return utils.NewErrDispatcherS(errDpfl)
 	}

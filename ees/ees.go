@@ -106,7 +106,7 @@ func (eeS *EventExporterS) attrSProcessEvent(cgrEv *utils.CGREvent, attrIDs []st
 	if cgrEv.APIOpts == nil {
 		cgrEv.APIOpts = make(map[string]interface{})
 	}
-	cgrEv.APIOpts[utils.Subsys] = utils.MetaEEs
+	cgrEv.APIOpts[utils.MetaSubsys] = utils.MetaEEs
 	cgrEv.APIOpts[utils.OptsAttributesProfileIDs] = attrIDs
 	cgrEv.APIOpts[utils.OptsContext] = utils.FirstNonEmpty(ctx,
 		utils.IfaceAsString(cgrEv.APIOpts[utils.OptsContext]), utils.MetaEEs)

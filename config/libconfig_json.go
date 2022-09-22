@@ -462,12 +462,14 @@ type CacheParamJsonCfg struct {
 	Ttl        *string
 	Static_ttl *bool
 	Precache   *bool
+	Remote     *bool
 	Replicate  *bool
 }
 
 type CacheJsonCfg struct {
 	Partitions        *map[string]*CacheParamJsonCfg
 	Replication_conns *[]string
+	Remote_conns      *[]string
 }
 
 // SM-Kamailio config section

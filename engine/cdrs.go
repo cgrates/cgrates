@@ -373,7 +373,7 @@ func (cdrS *CDRServer) attrSProcessEvent(cgrEv *utils.CGREvent) (err error) {
 	if cgrEv.APIOpts == nil {
 		cgrEv.APIOpts = make(map[string]interface{})
 	}
-	cgrEv.APIOpts[utils.Subsys] = utils.MetaCDRs
+	cgrEv.APIOpts[utils.MetaSubsys] = utils.MetaCDRs
 	ctx, has := cgrEv.APIOpts[utils.OptsContext]
 	cgrEv.APIOpts[utils.OptsContext] = utils.FirstNonEmpty(
 		utils.IfaceAsString(ctx),

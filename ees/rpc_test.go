@@ -175,7 +175,7 @@ func TestRPCPrepareMap(t *testing.T) {
 			utils.Usage: 21,
 		},
 		APIOpts: map[string]interface{}{
-			utils.Subsys: "*attributes",
+			utils.MetaSubsys: "*attributes",
 		},
 	}
 

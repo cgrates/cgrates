@@ -61,7 +61,7 @@ var sTestsDspSession = []func(t *testing.T){
 	testDspSessionForceDisconect,
 }
 
-//Test start here
+// Test start here
 func TestDspSessionS(t *testing.T) {
 	var config1, config2, config3 string
 	switch *dbType {
@@ -405,7 +405,7 @@ func testDspSessionUpdate(t *testing.T) {
 			APIOpts: map[string]interface{}{
 				utils.OptsAPIKey:  "ses12345",
 				"*attrProfileIDs": nil,
-				utils.Subsys:      utils.MetaSessionS,
+				utils.MetaSubsys:  utils.MetaSessionS,
 			},
 		},
 	}
@@ -480,7 +480,7 @@ func testDspSessionUpdate2(t *testing.T) {
 			APIOpts: map[string]interface{}{
 				utils.OptsAPIKey:  "ses12345",
 				"*attrProfileIDs": nil,
-				utils.Subsys:      utils.MetaSessionS,
+				utils.MetaSubsys:  utils.MetaSessionS,
 			},
 		},
 	}
@@ -637,7 +637,7 @@ func testDspSessionProcessEvent(t *testing.T) {
 				"*attrProfileIDs": nil,
 				"*rsUnits":        1.,
 				"*rsUsageID":      "TestSSv1It2",
-				utils.Subsys:      utils.MetaSessionS,
+				utils.MetaSubsys:  utils.MetaSessionS,
 			},
 		},
 	}
@@ -718,7 +718,7 @@ func testDspSessionProcessEvent2(t *testing.T) {
 				"*attrProfileIDs": nil,
 				"*rsUnits":        1.,
 				"*rsUsageID":      "TestSSv1It2",
-				utils.Subsys:      utils.MetaSessionS,
+				utils.MetaSubsys:  utils.MetaSessionS,
 			},
 		},
 	}

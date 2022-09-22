@@ -36,19 +36,21 @@ var Cache *CacheS
 
 func init() {
 	Cache = NewCacheS(config.CgrConfig(), nil, nil)
+	// Register objects for cache replication/remotes
+	//AttributeS
 	gob.Register(new(AttributeProfile))
 	gob.Register(new(AttributeProfileWithAPIOpts))
-	// Threshold
+	// ThresholdS
 	gob.Register(new(Threshold))
 	gob.Register(new(ThresholdProfile))
 	gob.Register(new(ThresholdProfileWithAPIOpts))
 	gob.Register(new(ThresholdWithAPIOpts))
-	// Resource
+	// ResourceS
 	gob.Register(new(Resource))
 	gob.Register(new(ResourceProfile))
 	gob.Register(new(ResourceProfileWithAPIOpts))
 	gob.Register(new(ResourceWithAPIOpts))
-	// Stats
+	// StatS
 	gob.Register(new(StatQueue))
 	gob.Register(new(StatQueueProfile))
 	gob.Register(new(StatQueueProfileWithAPIOpts))
@@ -57,10 +59,10 @@ func init() {
 	// RouteS
 	gob.Register(new(RouteProfile))
 	gob.Register(new(RouteProfileWithAPIOpts))
-	// Filters
+	// FilterS
 	gob.Register(new(Filter))
 	gob.Register(new(FilterWithAPIOpts))
-	// Dispatcher
+	// DispatcherS
 	gob.Register(new(DispatcherHost))
 	gob.Register(new(DispatcherHostProfile))
 	gob.Register(new(DispatcherHostWithAPIOpts))
@@ -80,6 +82,7 @@ func init() {
 	gob.Register(new(StatAverage))
 	gob.Register(new(StatDistinct))
 
+	// others
 	gob.Register([]interface{}{})
 	gob.Register([]map[string]interface{}{})
 	gob.Register(map[string]interface{}{})
@@ -151,11 +154,38 @@ func (chS *CacheS) Set(chID, itmID string, value interface{},
 	return chS.ReplicateSet(chID, itmID, value)
 }
 
+// ReplicateSet replicates an item to ReplicationConns
+func (chS *CacheS) ReplicateSet(chID, itmID string, value interface{}) (err error) {
+	if len(chS.cfg.CacheCfg().ReplicationConns) == 0 ||
+		!chS.cfg.CacheCfg().Partitions[chID].Replicate {
+		return
+	}
+	var reply string
+	return connMgr.Call(chS.cfg.CacheCfg().ReplicationConns, nil, utils.CacheSv1ReplicateSet,
+		&utils.ArgCacheReplicateSet{
+			CacheID: chID,
+			ItemID:  itmID,
+			Value:   value,
+		}, &reply)
+}
+
 // SetWithoutReplicate is an exported method from TransCache
 // handled Replicate functionality
 func (chS *CacheS) SetWithoutReplicate(chID, itmID string, value interface{},
 	groupIDs []string, commit bool, transID string) {
 	chS.tCache.Set(chID, itmID, value, groupIDs, commit, transID)
+}
+
+// SetWithReplicate combines local set with replicate, receiving the arguments needed by dispatcher
+func (chS *CacheS) SetWithReplicate(args *utils.ArgCacheReplicateSet) (err error) {
+	chS.tCache.Set(args.CacheID, args.ItemID, args.Value, args.GroupIDs, true, utils.EmptyString)
+	if len(chS.cfg.CacheCfg().ReplicationConns) == 0 ||
+		!chS.cfg.CacheCfg().Partitions[args.CacheID].Replicate {
+		return
+	}
+	var reply string
+	return connMgr.Call(chS.cfg.CacheCfg().ReplicationConns, nil,
+		utils.CacheSv1ReplicateSet, args, &reply)
 }
 
 // HasItem is an exported method from TransCache
@@ -166,6 +196,26 @@ func (chS *CacheS) HasItem(chID, itmID string) (has bool) {
 // Get is an exported method from TransCache
 func (chS *CacheS) Get(chID, itmID string) (interface{}, bool) {
 	return chS.tCache.Get(chID, itmID)
+}
+
+// GetWithRemote queries locally the cache, followed by remotes
+func (chS *CacheS) GetWithRemote(args *utils.ArgsGetCacheItemWithAPIOpts) (itm interface{}, err error) {
+	var has bool
+	if itm, has = chS.tCache.Get(args.CacheID, args.ItemID); has {
+		return
+	}
+	if len(chS.cfg.CacheCfg().RemoteConns) == 0 ||
+		!chS.cfg.CacheCfg().Partitions[args.CacheID].Remote {
+		return
+	}
+	// item was not found locally, query from remote
+	var itmRemote interface{}
+	if err = connMgr.Call(chS.cfg.CacheCfg().RemoteConns, nil,
+		utils.CacheSv1GetItem, args, &itmRemote); err != nil &&
+		err.Error() == utils.ErrNotFound.Error() {
+		return nil, utils.ErrNotFound // correct the error coming as string type
+	}
+	return
 }
 
 // GetItemIDs is an exported method from TransCache
@@ -273,6 +323,28 @@ func (chS *CacheS) V1GetItemIDs(args *utils.ArgsGetCacheItemIDsWithAPIOpts,
 func (chS *CacheS) V1HasItem(args *utils.ArgsGetCacheItemWithAPIOpts,
 	reply *bool) (err error) {
 	*reply = chS.tCache.HasItem(args.CacheID, args.ItemID)
+	return
+}
+
+// V1GetItem returns a single item from the cache
+func (chS *CacheS) V1GetItem(args *utils.ArgsGetCacheItemWithAPIOpts,
+	reply *interface{}) (err error) {
+	itmIface, has := chS.tCache.Get(args.CacheID, args.ItemID)
+	if !has {
+		return utils.ErrNotFound
+	}
+	*reply = itmIface
+	return
+}
+
+// V1GetItemWithRemote queries the item from remote if not found locally
+func (chS *CacheS) V1GetItemWithRemote(args *utils.ArgsGetCacheItemWithAPIOpts,
+	reply *interface{}) (err error) {
+	var itmIface interface{}
+	if itmIface, err = chS.GetWithRemote(args); err != nil {
+		return
+	}
+	*reply = itmIface
 	return
 }
 
@@ -394,7 +466,7 @@ func (chS *CacheS) cacheDataFromDB(attrs *utils.AttrReloadCacheWithAPIOpts, repl
 	return
 }
 
-//populateCacheLoadIDs populate cacheLoadIDs based on attrs
+// populateCacheLoadIDs populate cacheLoadIDs based on attrs
 func populateCacheLoadIDs(loadIDs map[string]int64, attrs map[string][]string) (cacheLoadIDs map[string]int64) {
 	cacheLoadIDs = make(map[string]int64)
 	//based on IDs of each type populate cacheLoadIDs and add into cache
@@ -406,22 +478,7 @@ func populateCacheLoadIDs(loadIDs map[string]int64, attrs map[string][]string) (
 	return
 }
 
-// ReplicateSet replicate an item to ReplicationConns
-func (chS *CacheS) ReplicateSet(chID, itmID string, value interface{}) (err error) {
-	if len(chS.cfg.CacheCfg().ReplicationConns) == 0 ||
-		!chS.cfg.CacheCfg().Partitions[chID].Replicate {
-		return
-	}
-	var reply string
-	return connMgr.Call(chS.cfg.CacheCfg().ReplicationConns, nil, utils.CacheSv1ReplicateSet,
-		&utils.ArgCacheReplicateSet{
-			CacheID: chID,
-			ItemID:  itmID,
-			Value:   value,
-		}, &reply)
-}
-
-// V1ReplicateSet replicate an item
+// V1ReplicateSet receives an item via replication to store in the cache
 func (chS *CacheS) V1ReplicateSet(args *utils.ArgCacheReplicateSet, reply *string) (err error) {
 	if cmp, canCast := args.Value.(utils.Compiler); canCast {
 		if err = cmp.Compile(); err != nil {

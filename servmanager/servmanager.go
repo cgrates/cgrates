@@ -47,7 +47,7 @@ func NewServiceManager(cfg *config.CGRConfig, shdChan *utils.SyncedChan, shdWg *
 type ServiceManager struct {
 	sync.RWMutex // lock access to any shared data
 	cfg          *config.CGRConfig
-	subsystems   map[string]Service
+	subsystems   map[string]Service // active subsystems managed by SM
 
 	shdChan *utils.SyncedChan
 	shdWg   *sync.WaitGroup

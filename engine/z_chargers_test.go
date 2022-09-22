@@ -70,7 +70,7 @@ func TestChargersmatchingChargerProfilesForEventErrPass(t *testing.T) {
 			utils.Weight:     "10.0",
 		},
 		APIOpts: map[string]interface{}{
-			utils.Subsys: utils.MetaChargers,
+			utils.MetaSubsys: utils.MetaChargers,
 		},
 		Time: &cgrEvTm,
 	}
@@ -131,7 +131,7 @@ func TestChargersmatchingChargerProfilesForEventNotActive(t *testing.T) {
 			utils.Weight:     "10.0",
 		},
 		APIOpts: map[string]interface{}{
-			utils.Subsys: utils.MetaChargers,
+			utils.MetaSubsys: utils.MetaChargers,
 		},
 		Time: &cgrEvTm,
 	}
@@ -192,7 +192,7 @@ func TestChargersprocessEventNoConnIDs(t *testing.T) {
 			utils.Weight:     "10.0",
 		},
 		APIOpts: map[string]interface{}{
-			utils.Subsys:                    utils.MetaChargers,
+			utils.MetaSubsys:                utils.MetaChargers,
 			utils.OptsAttributesProcessRuns: 2,
 		},
 		Time: &cgrEvTm,
@@ -373,7 +373,7 @@ func TestChargersprocessEventCallErr(t *testing.T) {
 					"RunID":            utils.MetaDefault,
 				},
 				APIOpts: map[string]interface{}{
-					utils.Subsys:                   utils.MetaChargers,
+					utils.MetaSubsys:               utils.MetaChargers,
 					utils.OptsAttributesProfileIDs: []string(nil),
 				},
 			},

@@ -283,7 +283,7 @@ func testSSv1ItAuth(t *testing.T) {
 				utils.Usage:        300000000000.0,
 			},
 			APIOpts: map[string]interface{}{
-				utils.Subsys:                   utils.MetaSessionS,
+				utils.MetaSubsys:               utils.MetaSessionS,
 				utils.OptsAttributesProfileIDs: nil,
 				utils.OptsResourcesUsageID:     "TestSSv1It1",
 				utils.OptsResourcesUnits:       1.,
@@ -400,7 +400,7 @@ func testSSv1ItInitiateSession(t *testing.T) {
 				utils.Usage:        300000000000.0,
 			},
 			APIOpts: map[string]interface{}{
-				utils.Subsys:                   utils.MetaSessionS,
+				utils.MetaSubsys:               utils.MetaSessionS,
 				utils.OptsAttributesProfileIDs: nil,
 				utils.OptsResourcesUnits:       1.,
 				utils.OptsResourcesUsageID:     "TestSSv1It1",
@@ -517,7 +517,7 @@ func testSSv1ItUpdateSession(t *testing.T) {
 				utils.Usage:        300000000000.0,
 			},
 			APIOpts: map[string]interface{}{
-				utils.Subsys:                   utils.MetaSessionS,
+				utils.MetaSubsys:               utils.MetaSessionS,
 				utils.OptsAttributesProfileIDs: nil,
 			},
 		},
@@ -664,7 +664,7 @@ func testSSv1ItProcessEvent(t *testing.T) {
 				utils.Usage:        300000000000.0,
 			},
 			APIOpts: map[string]interface{}{
-				utils.Subsys:                   utils.MetaSessionS,
+				utils.MetaSubsys:               utils.MetaSessionS,
 				utils.OptsAttributesProfileIDs: nil,
 				utils.OptsResourcesUnits:       1.,
 				utils.OptsResourcesUsageID:     "TestSSv1It2",
@@ -848,7 +848,7 @@ func testSSv1ItForceUpdateSession(t *testing.T) {
 				utils.Usage:        300000000000.0,
 			},
 			APIOpts: map[string]interface{}{
-				utils.Subsys:                   utils.MetaSessionS,
+				utils.MetaSubsys:               utils.MetaSessionS,
 				utils.OptsAttributesProfileIDs: nil,
 			},
 		},

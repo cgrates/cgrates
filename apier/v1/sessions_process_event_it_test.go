@@ -33,8 +33,8 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-//Use from sessionsv1_it_test.go
-//functions insted of duplicate them here
+// Use from sessionsv1_it_test.go
+// functions insted of duplicate them here
 // eg: initCfg,ResetDB,StopEngine,etc...
 var sTestSessionSv1ProcessEvent = []func(t *testing.T){
 	testSSv1ItInitCfg,
@@ -247,7 +247,7 @@ func testSSv1ItProcessEventAuth(t *testing.T) {
 				utils.Usage:        300000000000.0,
 			},
 			APIOpts: map[string]interface{}{
-				utils.Subsys:                   utils.MetaSessionS,
+				utils.MetaSubsys:               utils.MetaSessionS,
 				utils.OptsResourcesUnits:       1.,
 				utils.OptsResourcesUsageID:     "testSSv1ItProcessEvent",
 				utils.OptsAttributesProfileIDs: nil,
@@ -326,7 +326,7 @@ func testSSv1ItProcessEventInitiateSession(t *testing.T) {
 				utils.Usage:        300000000000.0,
 			},
 			APIOpts: map[string]interface{}{
-				utils.Subsys:                   utils.MetaSessionS,
+				utils.MetaSubsys:               utils.MetaSessionS,
 				utils.OptsResourcesUnits:       1.,
 				utils.OptsResourcesUsageID:     "testSSv1ItProcessEvent",
 				utils.OptsAttributesProfileIDs: nil,
@@ -394,7 +394,7 @@ func testSSv1ItProcessEventUpdateSession(t *testing.T) {
 				utils.Usage:        300000000000.0,
 			},
 			APIOpts: map[string]interface{}{
-				utils.Subsys:                   utils.MetaSessionS,
+				utils.MetaSubsys:               utils.MetaSessionS,
 				utils.OptsAttributesProfileIDs: nil,
 			},
 		},

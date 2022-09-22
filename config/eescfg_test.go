@@ -639,6 +639,7 @@ func TestEEsCfgAsMapInterface(t *testing.T) {
 				utils.LimitCfg:     -2,
 				utils.PrecacheCfg:  false,
 				utils.ReplicateCfg: false,
+				utils.RemoteCfg:    false,
 				utils.TTLCfg:       "1s",
 				utils.StaticTTLCfg: false,
 			},

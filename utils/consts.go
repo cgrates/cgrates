@@ -943,6 +943,7 @@ const (
 	MetaRoutes              = "*routes"
 	MetaAttributes          = "*attributes"
 	MetaLoadIDs             = "*load_ids"
+	MetaNodeID              = "*node_id"
 )
 
 // MetaMetrics
@@ -1127,7 +1128,7 @@ const (
 	ArgDispatcherField = "ArgDispatcher"
 )
 
-//Filter types
+// Filter types
 const (
 	MetaNot                = "*not"
 	MetaString             = "*string"
@@ -1501,6 +1502,7 @@ const (
 	CoreSv1                     = "CoreSv1"
 	CoreSv1Status               = "CoreSv1.Status"
 	CoreSv1Ping                 = "CoreSv1.Ping"
+	CoreSv1Panic                = "CoreSv1.Panic"
 	CoreSv1Sleep                = "CoreSv1.Sleep"
 	CoreSv1StartCPUProfiling    = "CoreSv1.StartCPUProfiling"
 	CoreSv1StopCPUProfiling     = "CoreSv1.StopCPUProfiling"
@@ -1682,6 +1684,8 @@ const (
 	CacheSv1GetCacheStats     = "CacheSv1.GetCacheStats"
 	CacheSv1GetItemIDs        = "CacheSv1.GetItemIDs"
 	CacheSv1HasItem           = "CacheSv1.HasItem"
+	CacheSv1GetItem           = "CacheSv1.GetItem"
+	CacheSv1GetItemWithRemote = "CacheSv1.GetItemWithRemote"
 	CacheSv1GetItemExpiryTime = "CacheSv1.GetItemExpiryTime"
 	CacheSv1RemoveItem        = "CacheSv1.RemoveItem"
 	CacheSv1RemoveItems       = "CacheSv1.RemoveItems"
@@ -1737,7 +1741,7 @@ const (
 	EeSv1ProcessEvent = "EeSv1.ProcessEvent"
 )
 
-//cgr_ variables
+// cgr_ variables
 const (
 	CGRAccount         = "cgr_account"
 	CGRRoute           = "cgr_route"
@@ -1754,7 +1758,7 @@ const (
 	CGROpts            = "cgr_opts"
 )
 
-//CSV file name
+// CSV file name
 const (
 	TimingsCsv            = "Timings.csv"
 	DestinationsCsv       = "Destinations.csv"
@@ -2476,6 +2480,7 @@ const (
 	OptsAPIKey                   = "*apiKey"
 	OptsRouteID                  = "*routeID"
 	OptsDispatchersProfilesCount = "*dispatchersProfilesCount"
+	OptsDispatchers              = "*dispatcherS"
 	// EEs
 	OptsEEsVerbose = "*eesVerbose"
 	// Resources
@@ -2504,7 +2509,7 @@ const (
 	OptsRefund     = "*refund"
 	// Others
 	OptsContext                        = "*context"
-	Subsys                             = "*subsys"
+	MetaSubsys                         = "*subsys"
 	MetaMethod                         = "*reqMethod"
 	OptsAttributesProfileIDs           = "*attrProfileIDs"
 	OptsAttributesProcessRuns          = "*attrProcessRuns"
@@ -2691,7 +2696,7 @@ const (
 	Opts             = "Opts"
 )
 
-//CMD constants
+// CMD constants
 const (
 	//Common
 	VerboseCgr      = "verbose"

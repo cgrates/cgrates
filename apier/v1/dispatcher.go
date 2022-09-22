@@ -73,7 +73,7 @@ type DispatcherWithAPIOpts struct {
 	APIOpts map[string]interface{}
 }
 
-//SetDispatcherProfile add/update a new Dispatcher Profile
+// SetDispatcherProfile add/update a new Dispatcher Profile
 func (apierSv1 *APIerSv1) SetDispatcherProfile(args *DispatcherWithAPIOpts, reply *string) error {
 	if missing := utils.MissingStructFields(args.DispatcherProfile, []string{utils.ID, utils.Subsystems}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
@@ -97,7 +97,7 @@ func (apierSv1 *APIerSv1) SetDispatcherProfile(args *DispatcherWithAPIOpts, repl
 	return nil
 }
 
-//RemoveDispatcherProfile remove a specific Dispatcher Profile
+// RemoveDispatcherProfile remove a specific Dispatcher Profile
 func (apierSv1 *APIerSv1) RemoveDispatcherProfile(arg *utils.TenantIDWithAPIOpts, reply *string) error {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
@@ -162,7 +162,7 @@ func (apierSv1 *APIerSv1) GetDispatcherHostIDs(tenantArg *utils.PaginatorWithTen
 	return nil
 }
 
-//SetDispatcherHost add/update a new Dispatcher Host
+// SetDispatcherHost add/update a new Dispatcher Host
 func (apierSv1 *APIerSv1) SetDispatcherHost(args *engine.DispatcherHostWithAPIOpts, reply *string) error {
 	if missing := utils.MissingStructFields(args.DispatcherHost, []string{utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
@@ -186,7 +186,7 @@ func (apierSv1 *APIerSv1) SetDispatcherHost(args *engine.DispatcherHostWithAPIOp
 	return nil
 }
 
-//RemoveDispatcherHost remove a specific Dispatcher Host
+// RemoveDispatcherHost remove a specific Dispatcher Host
 func (apierSv1 *APIerSv1) RemoveDispatcherHost(arg *utils.TenantIDWithAPIOpts, reply *string) error {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
@@ -609,6 +609,18 @@ func (dS *DispatcherCacheSv1) HasItem(args *utils.ArgsGetCacheItemWithAPIOpts,
 	return dS.dS.CacheSv1HasItem(args, reply)
 }
 
+// GetItem returns an Item from the cache
+func (dS *DispatcherCacheSv1) GetItem(args *utils.ArgsGetCacheItemWithAPIOpts,
+	reply *interface{}) error {
+	return dS.dS.CacheSv1GetItem(args, reply)
+}
+
+// GetItemWithRemote returns an Item from local or remote cache
+func (dS *DispatcherCacheSv1) GetItemWithRemote(args *utils.ArgsGetCacheItemWithAPIOpts,
+	reply *interface{}) error {
+	return dS.dS.CacheSv1GetItemWithRemote(args, reply)
+}
+
 // GetItemExpiryTime returns the expiryTime for an item
 func (dS *DispatcherCacheSv1) GetItemExpiryTime(args *utils.ArgsGetCacheItemWithAPIOpts,
 	reply *time.Time) error {
@@ -886,6 +898,47 @@ func (dS *DispatcherRALsV1) GetRatingPlansCost(args *utils.RatingPlanCostArg, re
 // Ping used to detreminate if component is active
 func (dS *DispatcherRALsV1) Ping(args *utils.CGREvent, reply *string) error {
 	return dS.dS.RALsV1Ping(args, reply)
+}
+
+// DispatcherCoreSv1 exports RPC from CoreSv1
+type DispatcherCoreSv1 struct {
+	dS *dispatchers.DispatcherService
+}
+
+func NewDispatcherCoreSv1(dps *dispatchers.DispatcherService) *DispatcherCoreSv1 {
+	return &DispatcherCoreSv1{dS: dps}
+}
+
+func (dS *DispatcherCoreSv1) Status(args *utils.TenantWithAPIOpts, reply *map[string]interface{}) error {
+	return dS.dS.CoreSv1Status(args, reply)
+}
+
+func (dS *DispatcherCoreSv1) Ping(args *utils.CGREvent, reply *string) error {
+	return dS.dS.CoreSv1Ping(args, reply)
+}
+
+func (dS *DispatcherCoreSv1) Sleep(args *utils.DurationArgs, reply *string) error {
+	return dS.dS.CoreSv1Sleep(args, reply)
+}
+
+func (dS *DispatcherCoreSv1) StartCPUProfiling(args *utils.DirectoryArgs, reply *string) error {
+	return dS.dS.CoreSv1StartCPUProfiling(args, reply)
+}
+
+func (dS *DispatcherCoreSv1) StopCPUProfiling(args *utils.TenantWithAPIOpts, reply *string) error {
+	return dS.dS.CoreSv1StopCPUProfiling(args, reply)
+}
+
+func (dS *DispatcherCoreSv1) StartMemoryProfiling(args *utils.MemoryPrf, reply *string) error {
+	return dS.dS.CoreSv1StartMemoryProfiling(args, reply)
+}
+
+func (dS *DispatcherCoreSv1) StopMemoryProfiling(args *utils.TenantWithAPIOpts, reply *string) error {
+	return dS.dS.CoreSv1StopMemoryProfiling(args, reply)
+}
+
+func (dS *DispatcherCoreSv1) Panic(args *utils.PanicMessageArgs, reply *string) error {
+	return dS.dS.CoreSv1Panic(args, reply)
 }
 
 type DispatcherReplicatorSv1 struct {

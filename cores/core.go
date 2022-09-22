@@ -202,3 +202,8 @@ func (cS *CoreService) StopMemoryProfiling() (err error) {
 	cS.StopChanMemProf()
 	return
 }
+
+// Panic is used print the Message sent as a panic
+func (cS *CoreService) Panic(args *utils.PanicMessageArgs, _ *string) error {
+	panic(args.Message)
+}
