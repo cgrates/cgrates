@@ -77,6 +77,7 @@ var (
 	ErrMaxIterationsReached          = errors.New("maximum iterations reached")
 	ErrNegative                      = errors.New("NEGATIVE")
 	ErrUnsupportedTPExporterType     = errors.New("UNSUPPORTED_TPEXPORTER_TYPE")
+	ErrCastFailed                    = errors.New("CAST_FAILED")
 
 	ErrMap = map[string]error{
 		ErrNoMoreData.Error():              ErrNoMoreData,

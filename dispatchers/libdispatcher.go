@@ -34,6 +34,10 @@ import (
 	"github.com/cgrates/rpcclient"
 )
 
+var (
+	internalDispatcher = &engine.DispatcherProfile{Tenant: utils.MetaInternal, ID: utils.MetaInternal}
+)
+
 func init() {
 	gob.Register(new(LoadMetrics))
 	gob.Register(new(DispatcherRoute))
@@ -41,9 +45,36 @@ func init() {
 
 }
 
+// isInternalDispatcherProfile compares the profile to the internal one
+func isInternalDispatcherProfile(d *engine.DispatcherProfile) bool {
+	return d.Tenant == internalDispatcher.Tenant && d.ID == internalDispatcher.ID
+}
+
 // DispatcherRoute is bounded to a routeID
 type DispatcherRoute struct {
 	Tenant, ProfileID, HostID string
+}
+
+// getDispatcherWithCache
+func getDispatcherWithCache(ctx *context.Context, dPrfl *engine.DispatcherProfile, dm *engine.DataManager) (d Dispatcher, err error) {
+	tntID := dPrfl.TenantID()
+	if x, ok := engine.Cache.Get(utils.CacheDispatchers,
+		tntID); ok && x != nil {
+		d = x.(Dispatcher)
+		return
+	}
+	if dPrfl.Hosts == nil { // dispatcher profile was not retrieved but built artificially above, try retrieving
+		if dPrfl, err = dm.GetDispatcherProfile(ctx, dPrfl.Tenant, dPrfl.ID,
+			true, true, utils.NonTransactional); err != nil {
+		}
+	}
+	if d, err = newDispatcher(dPrfl); err != nil {
+		return
+	} else if err = engine.Cache.Set(ctx, utils.CacheDispatchers, tntID, d, // cache the built Dispatcher
+		nil, true, utils.EmptyString); err != nil {
+		return
+	}
+	return
 }
 
 // Dispatcher is responsible for routing requests to pool of connections
@@ -188,15 +219,9 @@ func (sd *singleResultDispatcher) Dispatch(dm *engine.DataManager, flts *engine.
 	ctx *context.Context, iPRCCh chan birpc.ClientConnector,
 	ev utils.DataProvider, tnt, routeID string, dR *DispatcherRoute,
 	serviceMethod string, args interface{}, reply interface{}) (err error) {
-	if routeID != utils.EmptyString && dR.HostID != utils.EmptyString { // route to previously discovered route
-		if err = callDHwithID(ctx, tnt, dR.HostID, routeID, dR, dm,
-			cfg, iPRCCh, serviceMethod, args, reply); err == nil ||
-			(err != utils.ErrNotFound && !rpcclient.IsNetworkError(err)) { // successful dispatch with normal errors
-			return
-		}
-		// not found or network errors will continue
-		utils.Logger.Warning(fmt.Sprintf("<%s> error <%s> dispatching to host with idnt <%q>",
-			utils.DispatcherS, err.Error(), dR.HostID))
+	if dR != nil && dR.HostID != utils.EmptyString { // route to previously discovered route
+		return callDHwithID(ctx, tnt, dR.HostID, routeID, dR, dm,
+			cfg, iPRCCh, serviceMethod, args, reply)
 	}
 	var hostIDs []string
 	if hostIDs, err = sd.sorter.Sort(flts, ev, ctx, tnt, sd.hosts); err != nil {
@@ -430,7 +455,6 @@ func callDHwithID(ctx *context.Context, tnt, hostID, routeID string, dR *Dispatc
 	if err = callDH(ctx, dH, routeID, dR, cfg, iPRCCh, serviceMethod, args, reply); err != nil {
 		return
 	}
-
 	return
 }
 
@@ -460,7 +484,6 @@ func callDH(ctx *context.Context,
 	if err = conn.Call(ctx, method, args, reply); err != nil {
 		return
 	}
-
 	return
 }
 

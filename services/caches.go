@@ -42,6 +42,7 @@ func NewCacheService(cfg *config.CGRConfig, dm *DataDBService, connMgr *engine.C
 		cores:   cores,
 		server:  server,
 		dm:      dm,
+		connMgr: connMgr,
 		rpc:     internalChan,
 		cacheCh: make(chan *engine.CacheS, 1),
 	}

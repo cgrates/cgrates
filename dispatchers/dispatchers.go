@@ -102,6 +102,15 @@ func (dS *DispatcherService) authorize(ctx *context.Context, method, tenant stri
 // or utils.ErrNotFound if none present
 func (dS *DispatcherService) dispatcherProfilesForEvent(ctx *context.Context, tnt string, ev *utils.CGREvent,
 	evNm utils.MapStorage) (dPrlfs engine.DispatcherProfiles, err error) {
+	// make sure dispatching is allowed
+	var shouldDispatch bool
+	if shouldDispatch, err = engine.GetBoolOpts(ctx, tnt, ev, dS.fltrS, dS.cfg.DispatcherSCfg().Opts.Dispatchers,
+		config.DispatchersDispatchersDftOpt, utils.OptsDispatchers); err != nil {
+		return
+	} else if !shouldDispatch {
+		return engine.DispatcherProfiles{
+			&engine.DispatcherProfile{Tenant: utils.MetaInternal, ID: utils.MetaInternal}}, nil
+	}
 	// find out the matching profiles
 	var prflIDs utils.StringSet
 	if prflIDs, err = engine.MatchingItemIDsForEvent(ctx, evNm,
@@ -153,10 +162,27 @@ func (dS *DispatcherService) dispatcherProfilesForEvent(ctx *context.Context, tn
 // Dispatch is the method forwarding the request towards the right connection
 func (dS *DispatcherService) Dispatch(ctx *context.Context, ev *utils.CGREvent, subsys string,
 	serviceMethod string, args, reply interface{}) (err error) {
+	// fix missing tenant
 	tnt := ev.Tenant
 	if tnt == utils.EmptyString {
 		tnt = dS.cfg.GeneralCfg().DefaultTenant
 	}
+	if ev.APIOpts == nil {
+		ev.APIOpts = make(map[string]interface{})
+	}
+	evNm := utils.MapStorage{
+		utils.MetaReq:  ev.Event,
+		utils.MetaOpts: ev.APIOpts,
+		utils.MetaVars: utils.MapStorage{
+			utils.MetaSubsys: subsys,
+			utils.MetaMethod: serviceMethod,
+		},
+	}
+	dspLoopAPIOpts := map[string]interface{}{
+		utils.MetaSubsys: utils.MetaDispatchers,
+		utils.MetaNodeID: dS.cfg.GeneralCfg().NodeID,
+	}
+	// avoid further processing if the request is internal
 	var shouldDispatch bool
 	if shouldDispatch, err = engine.GetBoolOpts(ctx, tnt, ev, dS.fltrS, dS.cfg.DispatcherSCfg().Opts.Dispatchers,
 		true, utils.OptsDispatchers); err != nil {
@@ -167,6 +193,8 @@ func (dS *DispatcherService) Dispatch(ctx *context.Context, ev *utils.CGREvent, 
 			dS.cfg, dS.connMgr.GetDispInternalChan(),
 			serviceMethod, args, reply)
 	}
+
+	// in case of routeID, route based on previously discovered profile
 	var dR *DispatcherRoute
 	var dPrfls engine.DispatcherProfiles
 	routeID := utils.IfaceAsString(ev.APIOpts[utils.OptsRouteID])
@@ -178,45 +206,46 @@ func (dS *DispatcherService) Dispatch(ctx *context.Context, ev *utils.CGREvent, 
 		defer guardian.Guardian.UnguardIDs(refID)
 		// use previously discovered route
 		argsCache := &utils.ArgsGetCacheItemWithAPIOpts{
-			Tenant: ev.Tenant,
-			APIOpts: map[string]interface{}{
-				utils.MetaSubsys: utils.MetaDispatchers,
-				utils.MetaNodeID: dS.cfg.GeneralCfg().NodeID,
-			},
+			Tenant:  ev.Tenant,
+			APIOpts: dspLoopAPIOpts,
 			ArgsGetCacheItem: utils.ArgsGetCacheItem{
 				CacheID: utils.CacheDispatcherRoutes,
 				ItemID:  routeID,
 			}}
-		// item
 		var itmRemote interface{}
-		if err = dS.connMgr.Call(ctx, dS.cfg.CacheCfg().RemoteConns,
-			utils.CacheSv1GetItem, argsCache, &itmRemote); err != nil &&
-			err.Error() != utils.ErrNotFound.Error() {
-			return utils.NewErrDispatcherS(err)
-		} else if err == nil { // not found
-			dR = itmRemote.(*DispatcherRoute)
-			routeID = utils.EmptyString // cancel cache replication
+		if itmRemote, err = engine.Cache.GetWithRemote(ctx, argsCache); err == nil && itmRemote != nil {
+			var canCast bool
+			if dR, canCast = itmRemote.(*DispatcherRoute); !canCast {
+				err = utils.ErrCastFailed
+			} else {
+				var d Dispatcher
+				if d, err = getDispatcherWithCache(ctx,
+					&engine.DispatcherProfile{Tenant: dR.Tenant, ID: dR.ProfileID},
+					dS.dm); err == nil {
+					for k, v := range dspLoopAPIOpts {
+						ev.APIOpts[k] = v // dispatcher loop protection opts
+					}
+					if err = d.Dispatch(dS.dm, dS.fltrS, dS.cfg,
+						ctx, dS.connMgr.GetDispInternalChan(), evNm, tnt, utils.EmptyString, dR,
+						serviceMethod, args, reply); !rpcclient.IsNetworkError(err) {
+						return // dispatch success or specific error coming from upstream
+					}
+				}
+			}
+			// did not dispatch properly, fail-back to standard dispatching
+			utils.Logger.Warning(fmt.Sprintf("<%s> error <%s> using cached routing for dR %+v, continuing with normal dispatching",
+				utils.DispatcherS, err.Error(), dR))
 		}
 	}
-	if dR != nil {
-		dPrfls = engine.DispatcherProfiles{
-			&engine.DispatcherProfile{Tenant: dR.Tenant, ID: dR.ProfileID}} // will be used bellow to retrieve the dispatcher
-	}
-	evNm := utils.MapStorage{
-		utils.MetaReq:  ev.Event,
-		utils.MetaOpts: ev.APIOpts,
-		utils.MetaVars: utils.MapStorage{
-			utils.MetaSubsys: subsys,
-			utils.MetaMethod: serviceMethod,
-		},
-	}
-	if dPrfls == nil { // did not discover it yet
-		if dPrfls, err = dS.dispatcherProfilesForEvent(ctx, tnt, ev, evNm); err != nil {
-			return utils.NewErrDispatcherS(err)
-		}
-	}
-	if len(dPrfls) == 0 {
+	if dPrfls, err = dS.dispatcherProfilesForEvent(ctx, tnt, ev, evNm); err != nil {
+		return utils.NewErrDispatcherS(err)
+	} else if len(dPrfls) == 0 { // no profiles matched
 		return utils.NewErrDispatcherS(utils.ErrPrefixNotFound("PROFILE"))
+	} else if isInternalDispatcherProfile(dPrfls[0]) { // dispatcherS was disabled
+		return callDH(ctx,
+			newInternalHost(tnt), utils.EmptyString, nil,
+			dS.cfg, dS.connMgr.GetDispInternalChan(),
+			serviceMethod, args, reply)
 	}
 	if ev.APIOpts == nil {
 		ev.APIOpts = make(map[string]interface{})
@@ -224,46 +253,21 @@ func (dS *DispatcherService) Dispatch(ctx *context.Context, ev *utils.CGREvent, 
 	ev.APIOpts[utils.MetaSubsys] = utils.MetaDispatchers // inject into args
 	ev.APIOpts[utils.MetaNodeID] = dS.cfg.GeneralCfg().NodeID
 	for _, dPrfl := range dPrfls {
-		tntID := dPrfl.TenantID()
 		// get or build the Dispatcher for the config
 		var d Dispatcher
-		if x, ok := engine.Cache.Get(utils.CacheDispatchers,
-			tntID); ok && x != nil {
-			d = x.(Dispatcher)
-		} else { // dispatcher is not cached, build it here
-			if dPrfl.Hosts == nil { // dispatcher profile was not retrieved but built artificially above, try retrieving
-				if dPrfl, err = dS.dm.GetDispatcherProfile(ctx, dPrfl.Tenant, dPrfl.ID,
-					true, true, utils.NonTransactional); err != nil {
-					if err != utils.ErrNotFound {
-						return
-					}
-					// profile was not found
-					utils.Logger.Warning(fmt.Sprintf("<%s> could not find profile with tenant: <%s> and ID <%s> for routeID: <%s>",
-						utils.DispatcherS, dR.Tenant, dR.ProfileID, routeID))
-					if len(dPrfls) == 1 { // the only profile set does not exist anymore
-						return utils.NewErrDispatcherS(utils.ErrPrefixNotFound("PROFILE"))
-					}
-					continue
-				}
-			}
-			if d, err = newDispatcher(dPrfl); err != nil {
-				return utils.NewErrDispatcherS(err)
-			} else if err = engine.Cache.Set(ctx, utils.CacheDispatchers, tntID, d, // cache the built Dispatcher
-				nil, true, utils.EmptyString); err != nil {
-				return utils.NewErrDispatcherS(err)
+		if d, err = getDispatcherWithCache(ctx, dPrfl, dS.dm); err == nil {
+			if err = d.Dispatch(dS.dm, dS.fltrS, dS.cfg,
+				ctx, dS.connMgr.GetDispInternalChan(), evNm, tnt, routeID,
+				&DispatcherRoute{
+					Tenant:    dPrfl.Tenant,
+					ProfileID: dPrfl.ID,
+				},
+				serviceMethod, args, reply); !rpcclient.IsNetworkError(err) {
+				return
 			}
 		}
-		if routeID != utils.EmptyString && dR == nil { // first time we cache the route
-			dR = &DispatcherRoute{
-				Tenant:    dPrfl.Tenant,
-				ProfileID: dPrfl.ID,
-			}
-		}
-		if err = d.Dispatch(dS.dm, dS.fltrS, dS.cfg,
-			ctx, dS.connMgr.GetDispInternalChan(), evNm, tnt, routeID, dR,
-			serviceMethod, args, reply); !rpcclient.IsNetworkError(err) {
-			return
-		}
+		utils.Logger.Warning(fmt.Sprintf("<%s> error <%s> dispatching with the profile: <%+v>",
+			utils.DispatcherS, err.Error(), dPrfl))
 	}
 	return // return the last error
 }
