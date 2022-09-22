@@ -84,6 +84,25 @@ func (dS *DispatcherService) CacheSv1HasItem(args *utils.ArgsGetCacheItemWithAPI
 		utils.MetaCaches, utils.CacheSv1HasItem, args, reply)
 }
 
+func (dS *DispatcherService) CacheSv1GetItem(args *utils.ArgsGetCacheItemWithAPIOpts, reply *interface{}) (err error) {
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args != nil && len(args.Tenant) != 0 {
+		tnt = args.Tenant
+	}
+	ev := make(map[string]interface{})
+	opts := make(map[string]interface{})
+	if args != nil {
+		opts = args.APIOpts
+	}
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
+		if err = dS.authorize(utils.CacheSv1GetItem, tnt,
+			utils.IfaceAsString(opts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			return
+		}
+	}
+	return dS.Dispatch(&utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaCaches, utils.CacheSv1GetItem, args, reply)
+}
+
 // CacheSv1GetItemExpiryTime returns the expiryTime for an item
 func (dS *DispatcherService) CacheSv1GetItemExpiryTime(args *utils.ArgsGetCacheItemWithAPIOpts,
 	reply *time.Time) (err error) {
@@ -196,6 +215,25 @@ func (dS *DispatcherService) CacheSv1PrecacheStatus(args *utils.AttrCacheIDsWith
 		Tenant:  tnt,
 		APIOpts: args.APIOpts,
 	}, utils.MetaCaches, utils.CacheSv1PrecacheStatus, args, reply)
+}
+
+func (dS *DispatcherService) CacheSv1GetItemWithRemote(args *utils.ArgsGetCacheItemWithAPIOpts, reply *interface{}) (err error) {
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args != nil && len(args.Tenant) != 0 {
+		tnt = args.Tenant
+	}
+	ev := make(map[string]interface{})
+	opts := make(map[string]interface{})
+	if args != nil {
+		opts = args.APIOpts
+	}
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
+		if err = dS.authorize(utils.CacheSv1GetItemWithRemote, tnt,
+			utils.IfaceAsString(opts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			return
+		}
+	}
+	return dS.Dispatch(&utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaCaches, utils.CacheSv1GetItemWithRemote, args, reply)
 }
 
 // CacheSv1HasGroup checks existence of a group in cache

@@ -192,7 +192,7 @@ func TestChargerMatchingChargerProfilesForEvent(t *testing.T) {
 				utils.Weight:     "200.0",
 			},
 			APIOpts: map[string]interface{}{
-				utils.Subsys: utils.MetaChargers,
+				utils.MetaSubsys: utils.MetaChargers,
 			},
 		},
 		{
@@ -359,7 +359,7 @@ func TestChargerProcessEvent(t *testing.T) {
 				utils.Weight:     "200.0",
 			},
 			APIOpts: map[string]interface{}{
-				utils.Subsys: utils.MetaChargers,
+				utils.MetaSubsys: utils.MetaChargers,
 			},
 		},
 		{
@@ -521,7 +521,7 @@ func TestChargersmatchingChargerProfilesForEventChargerProfileNotFound(t *testin
 			utils.Weight:     "10.0",
 		},
 		APIOpts: map[string]interface{}{
-			utils.Subsys: utils.MetaChargers,
+			utils.MetaSubsys: utils.MetaChargers,
 		},
 	}
 
@@ -567,7 +567,7 @@ func TestChargersmatchingChargerProfilesForEventDoesNotPass(t *testing.T) {
 			utils.Weight:     "10.0",
 		},
 		APIOpts: map[string]interface{}{
-			utils.Subsys: utils.MetaChargers,
+			utils.MetaSubsys: utils.MetaChargers,
 		},
 	}
 
@@ -617,7 +617,7 @@ func TestChargersmatchingChargerProfilesForEventErrGetChPrf(t *testing.T) {
 			utils.Weight:     "10.0",
 		},
 		APIOpts: map[string]interface{}{
-			utils.Subsys: utils.MetaChargers,
+			utils.MetaSubsys: utils.MetaChargers,
 		},
 	}
 

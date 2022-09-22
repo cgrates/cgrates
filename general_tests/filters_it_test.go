@@ -938,7 +938,7 @@ func testV1FltrChargerSuffix(t *testing.T) {
 					utils.Destination:  "999",
 				},
 				APIOpts: map[string]interface{}{
-					utils.Subsys:                   utils.MetaChargers,
+					utils.MetaSubsys:               utils.MetaChargers,
 					utils.OptsAttributesProfileIDs: []interface{}{"*constant:*req.Subject:intraState"},
 				},
 			},
@@ -976,7 +976,7 @@ func testV1FltrChargerSuffix(t *testing.T) {
 					utils.Destination:  "999",
 				},
 				APIOpts: map[string]interface{}{
-					utils.Subsys:                   utils.MetaChargers,
+					utils.MetaSubsys:               utils.MetaChargers,
 					utils.OptsAttributesProfileIDs: []interface{}{"*constant:*req.Subject:interState"},
 				},
 			},

@@ -160,13 +160,13 @@ func TestCachesCfgAsMapInterface1(t *testing.T) {
 	cfgJSONStr := `{
 		"caches":{
 			"partitions": {
-				"*destinations": {"limit": 10000, "static_ttl": false, "precache": true, "replicate": true},
+				"*destinations": {"limit": 10000, "static_ttl": false, "precache": true, "remote": true, "replicate": true},
 				},
 			},
 		}`
 	eMap := map[string]interface{}{
 		utils.PartitionsCfg: map[string]interface{}{
-			utils.MetaDestinations: map[string]interface{}{"limit": 10000, "static_ttl": false, "precache": true, "replicate": true},
+			utils.MetaDestinations: map[string]interface{}{"limit": 10000, "static_ttl": false, "precache": true, "remote": true, "replicate": true},
 		},
 		utils.ReplicationConnsCfg: []string{},
 	}

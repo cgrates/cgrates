@@ -104,7 +104,7 @@ var (
 	}
 )
 
-//Test start here
+// Test start here
 func TestChargerSIT(t *testing.T) {
 	sTestsChargerCache := sTestsCharger
 	switch *dbType {
@@ -332,7 +332,7 @@ func testChargerSProcessEvent(t *testing.T) {
 				},
 				APIOpts: map[string]interface{}{
 					utils.OptsContext:              "simpleauth",
-					utils.Subsys:                   utils.MetaChargers,
+					utils.MetaSubsys:               utils.MetaChargers,
 					utils.OptsAttributesProfileIDs: []string{"ATTR_1001_SIMPLEAUTH"},
 				},
 			},
@@ -365,7 +365,7 @@ func testChargerSProcessEvent(t *testing.T) {
 				},
 				APIOpts: map[string]interface{}{
 					utils.OptsContext:              "simpleauth",
-					utils.Subsys:                   utils.MetaChargers,
+					utils.MetaSubsys:               utils.MetaChargers,
 					utils.OptsAttributesProfileIDs: []string{"*constant:*req.RequestType:*rated;*constant:*req.Category:call"},
 				},
 			},
@@ -542,7 +542,7 @@ func testChargerSProcessWithNotFoundAttribute(t *testing.T) {
 					"RunID":            "CustomRun",
 				},
 				APIOpts: map[string]interface{}{
-					utils.Subsys:                   utils.MetaChargers,
+					utils.MetaSubsys:               utils.MetaChargers,
 					utils.OptsAttributesProfileIDs: nil,
 				},
 			},
@@ -607,7 +607,7 @@ func testChargerSProccessEventWithProcceSRunS(t *testing.T) {
 					utils.RunID:        "*default",
 				},
 				APIOpts: map[string]interface{}{
-					utils.Subsys:                    utils.MetaChargers,
+					utils.MetaSubsys:                utils.MetaChargers,
 					utils.OptsAttributesProfileIDs:  []string{"*constant:*req.Account:1002", "*constant:*req.Account:1003"},
 					utils.OptsAttributesProcessRuns: 1.,
 				},

@@ -957,7 +957,7 @@ type AttrDisconnectSession struct {
 	Reason     string
 }
 
-//MetricWithFilters is used in TPStatProfile
+// MetricWithFilters is used in TPStatProfile
 type MetricWithFilters struct {
 	FilterIDs []string
 	MetricID  string
@@ -1499,11 +1499,12 @@ type DPRArgs struct {
 }
 
 type ArgCacheReplicateSet struct {
-	CacheID string
-	ItemID  string
-	Value   interface{}
-	APIOpts map[string]interface{}
-	Tenant  string
+	CacheID  string
+	ItemID   string
+	Value    interface{}
+	Tenant   string
+	APIOpts  map[string]interface{}
+	GroupIDs []string
 }
 
 // Compiler are objects that need post compiling

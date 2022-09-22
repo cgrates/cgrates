@@ -185,7 +185,7 @@ func testSes3ItProcessEvent(t *testing.T) {
 				utils.Usage:        300000000000.0,
 			},
 			APIOpts: map[string]interface{}{
-				utils.Subsys:        utils.MetaSessionS,
+				utils.MetaSubsys:    utils.MetaSessionS,
 				utils.OptsAPIKey:    "ses12345",
 				utils.MetaEventType: utils.StatUpdate,
 				"*attrProfileIDs":   nil,

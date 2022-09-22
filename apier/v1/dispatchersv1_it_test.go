@@ -140,7 +140,7 @@ func testDspDspv1GetProfileForEvent(t *testing.T) {
 			utils.EventName: "Event1",
 		},
 		APIOpts: map[string]interface{}{
-			utils.Subsys:                       utils.MetaAny,
+			utils.MetaSubsys:                   utils.MetaAny,
 			utils.OptsDispatchersProfilesCount: 1,
 		},
 	}
@@ -189,7 +189,7 @@ func testDspDspv1GetProfileForEvent(t *testing.T) {
 			utils.EventName: "Event1",
 		},
 		APIOpts: map[string]interface{}{
-			utils.Subsys:                       utils.MetaAny,
+			utils.MetaSubsys:                   utils.MetaAny,
 			utils.OptsDispatchersProfilesCount: 1,
 		},
 	}
@@ -211,7 +211,7 @@ func testDspDspv1GetProfileForEventWithMethod(t *testing.T) {
 		ID:     "testDspv2",
 		Event:  map[string]interface{}{},
 		APIOpts: map[string]interface{}{
-			utils.Subsys:                       utils.MetaAny,
+			utils.MetaSubsys:                   utils.MetaAny,
 			"*method":                          utils.DispatcherSv1GetProfilesForEvent,
 			utils.OptsDispatchersProfilesCount: 1,
 		},

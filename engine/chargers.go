@@ -114,7 +114,7 @@ func (cS *ChargerService) processEvent(tnt string, cgrEv *utils.CGREvent) (rply 
 		clonedEv := cgrEv.Clone()
 		clonedEv.Tenant = tnt
 		clonedEv.Event[utils.RunID] = cP.RunID
-		clonedEv.APIOpts[utils.Subsys] = utils.MetaChargers
+		clonedEv.APIOpts[utils.MetaSubsys] = utils.MetaChargers
 		rply[i] = &ChrgSProcessEventReply{
 			ChargerSProfile: cP.ID,
 			CGREvent:        clonedEv,

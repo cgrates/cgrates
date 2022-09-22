@@ -3886,7 +3886,7 @@ func (sS *SessionS) processAttributes(cgrEv *utils.CGREvent, attrIDs []string,
 	if cgrEv.APIOpts == nil {
 		cgrEv.APIOpts = make(engine.MapEvent)
 	}
-	cgrEv.APIOpts[utils.Subsys] = utils.MetaSessionS
+	cgrEv.APIOpts[utils.MetaSubsys] = utils.MetaSessionS
 	cgrEv.APIOpts[utils.OptsAttributesProfileIDs] = attrIDs
 	ctx, has := cgrEv.APIOpts[utils.OptsContext]
 	cgrEv.APIOpts[utils.OptsContext] = utils.FirstNonEmpty(
