@@ -469,9 +469,10 @@ func callDH(ctx *context.Context,
 				utils.MetaSubsys: utils.MetaDispatchers,
 				utils.MetaNodeID: cfg.GeneralCfg().NodeID,
 			},
-			CacheID: utils.CacheDispatcherRoutes,
-			ItemID:  routeID,
-			Value:   dR,
+			CacheID:  utils.CacheDispatcherRoutes,
+			ItemID:   routeID,
+			Value:    dR,
+			GroupIDs: []string{utils.ConcatenatedKey(utils.CacheDispatcherProfiles, dR.Tenant, dR.ProfileID)},
 		}
 		if err = engine.Cache.SetWithReplicate(ctx, argsCache); err != nil {
 			return
