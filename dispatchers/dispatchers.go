@@ -225,6 +225,7 @@ func (dS *DispatcherService) Dispatch(ctx *context.Context, ev *utils.CGREvent, 
 					for k, v := range dspLoopAPIOpts {
 						ev.APIOpts[k] = v // dispatcher loop protection opts
 					}
+
 					if err = d.Dispatch(dS.dm, dS.fltrS, dS.cfg,
 						ctx, dS.connMgr.GetDispInternalChan(), evNm, tnt, utils.EmptyString, dR,
 						serviceMethod, args, reply); !rpcclient.IsNetworkError(err) {
@@ -232,6 +233,8 @@ func (dS *DispatcherService) Dispatch(ctx *context.Context, ev *utils.CGREvent, 
 					}
 				}
 			}
+		}
+		if err != nil {
 			// did not dispatch properly, fail-back to standard dispatching
 			utils.Logger.Warning(fmt.Sprintf("<%s> error <%s> using cached routing for dR %+v, continuing with normal dispatching",
 				utils.DispatcherS, err.Error(), dR))

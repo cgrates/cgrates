@@ -475,7 +475,12 @@ func callDH(ctx *context.Context,
 			GroupIDs: []string{utils.ConcatenatedKey(utils.CacheDispatcherProfiles, dR.Tenant, dR.ProfileID)},
 		}
 		if err = engine.Cache.SetWithReplicate(ctx, argsCache); err != nil {
-			return
+			if !rpcclient.IsNetworkError(err) {
+				return
+			}
+			// did not dispatch properly, fail-back to standard dispatching
+			utils.Logger.Warning(fmt.Sprintf("<%s> ignoring cache network error <%s> setting route dR %+v",
+				utils.DispatcherS, err.Error(), dR))
 		}
 	}
 	var conn birpc.ClientConnector

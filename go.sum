@@ -141,6 +141,8 @@ github.com/cgrates/rpcclient v0.0.0-20220527094114-95a7ccc07e77 h1:hZGvmvqP4lHyX
 github.com/cgrates/rpcclient v0.0.0-20220527094114-95a7ccc07e77/go.mod h1:kiM7YHZXmhgKZ0q80qRl0yYFDnTxihTdQYtvQPDeGlM=
 github.com/cgrates/rpcclient v0.0.0-20220913172751-83a289e994d7 h1:aTeVpeMMJ/vGK4ErqitwczBlVUv49x8M30X9JNcEz94=
 github.com/cgrates/rpcclient v0.0.0-20220913172751-83a289e994d7/go.mod h1:+Ed0GFdz/rsSY/trWo+k0NFtAi3VP1l3CngZcRSErdw=
+github.com/cgrates/rpcclient v0.0.0-20220922181803-b3ddc74ad65a h1:eZKp/pqv46latOHmyeMOHpAukERoG76qyzx2l74l+1I=
+github.com/cgrates/rpcclient v0.0.0-20220922181803-b3ddc74ad65a/go.mod h1:+Ed0GFdz/rsSY/trWo+k0NFtAi3VP1l3CngZcRSErdw=
 github.com/cgrates/sipingo v1.0.1-0.20200514112313-699ebc1cdb8e h1:izFjZB83/XRXInc+gMIssUxdbleGsGIuGCPj2u7RQo0=
 github.com/cgrates/sipingo v1.0.1-0.20200514112313-699ebc1cdb8e/go.mod h1:0f2+3dq5Iiv3VlcuY83VPJ0QzqRlzDG1Cr8okogQE3g=
 github.com/cgrates/ugocodec v0.0.0-20201023092048-df93d0123f60 h1:TQDg+HGB17LU8FitLiLvYazYSy62GQ1lO3lGKI3xUrU=

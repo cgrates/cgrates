@@ -210,9 +210,9 @@ func (chS *CacheS) GetWithRemote(ctx *context.Context, args *utils.ArgsGetCacheI
 		return
 	}
 	// item was not found locally, query from remote
-	var itmRemote interface{}
 	if err = chS.connMgr.Call(ctx, chS.cfg.CacheCfg().RemoteConns,
-		utils.CacheSv1GetItem, args, &itmRemote); err != nil && err.Error() == utils.ErrNotFound.Error() {
+		utils.CacheSv1GetItem, args, &itm); err != nil &&
+		err.Error() == utils.ErrNotFound.Error() {
 		return nil, utils.ErrNotFound // correct the error coming as string type
 	}
 	return
