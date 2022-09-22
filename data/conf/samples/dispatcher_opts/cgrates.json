@@ -1,7 +1,7 @@
 {
 
     "general": {
-        "node_id": "DispatcherOpts",
+        "node_id": "HOST1",
         "log_level": 7,
     },
         
@@ -36,6 +36,10 @@
     }, 
         
     "caches":{
+        "partitions": {
+            "*dispatcher_routes": {"limit": -1, "ttl": "", "static_ttl": false, "remote":true, "replicate": false}, 						// control dispatcher routes caching
+            "*dispatchers": {"limit": -1, "ttl": "", "static_ttl": false, "remote":true, "replicate": false}, 								// control dispatcher interface
+        },
         "remote_conns": ["gob_cache"],						// the conns that are queried when the items are not found in cache
     },    
 

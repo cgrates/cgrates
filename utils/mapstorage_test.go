@@ -209,6 +209,7 @@ func TestNavMapGetField(t *testing.T) {
 		},
 		"AnotherFirstLevel": "ValAnotherFirstLevel",
 	}
+
 	pth := []string{"FirstLevel", "SecondLevel", "ThirdLevel", "Fld1[0]"}
 	eFld := "Val1"
 	if fld, err := nM.FieldAsInterface(pth); err != nil {

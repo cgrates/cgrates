@@ -173,9 +173,17 @@ func GetIntOpts(ctx *context.Context, tnt string, ev *utils.CGREvent, fS *Filter
 // returns the config option if at least one filter passes or the default value if none of them do
 func GetBoolOpts(ctx *context.Context, tnt string, dP utils.DataProvider, fS *FilterS, dynOpts []*utils.DynamicBoolOpt,
 	dftOpt bool, optNames ...string) (cfgOpt bool, err error) {
-	optsDP := GetAPIOptsFromDataProvider(dP)
+	values, err := dP.FieldAsInterface([]string{utils.MetaOpts})
+	if err != nil {
+		return false, err
+	}
+	var opts map[string]interface{}
+	opts, canCast := values.(map[string]interface{})
+	if !canCast {
+		return false, utils.ErrCastFailed
+	}
 	for _, optName := range optNames {
-		if opt, has := optsDP[optName]; has {
+		if opt, has := opts[optName]; has {
 			return utils.IfaceAsBool(opt)
 		}
 	}
