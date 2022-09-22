@@ -24,12 +24,32 @@
     
     "dispatchers":{
         "enabled": true,
+        "opts": {								
+		 "*dispatcherS": [						
+		 	{
+		 		"Tenant": "cgrates.org",
+		 		"FilterIDs": ["*string:~*opts.*subsys:*dispatchers"],
+		 		"Value": false,
+		 	},
+		 ],
+	   },
     }, 
         
-        
+    "caches":{
+        "remote_conns": ["gob_cache"],						// the conns that are queried when the items are not found in cache
+    },    
+
     "admins": {
         "enabled": true,
     }, 
     
+    "rpc_conns": {
+        "gob_cache": {
+            "strategy": "*first",
+            "conns": [
+                {"address": "127.0.0.1:2013", "transport":"*gob"},
+            ],
+        },
+    }, 
     
     }

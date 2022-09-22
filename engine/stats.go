@@ -330,7 +330,7 @@ func (sS *StatS) processEvent(ctx *context.Context, tnt string, args *utils.CGRE
 		return
 	}
 	var ignFilters bool
-	if ignFilters, err = GetBoolOpts(ctx, tnt, args, sS.fltrS, sS.cfg.StatSCfg().Opts.ProfileIgnoreFilters,
+	if ignFilters, err = GetBoolOpts(ctx, tnt, evNm, sS.fltrS, sS.cfg.StatSCfg().Opts.ProfileIgnoreFilters,
 		config.StatsProfileIgnoreFilters, utils.MetaProfileIgnoreFilters); err != nil {
 		return
 	}
@@ -421,13 +421,14 @@ func (sS *StatS) V1GetStatQueuesForEvent(ctx *context.Context, args *utils.CGREv
 		config.StatsProfileIDsDftOpt, utils.OptsStatsProfileIDs); err != nil {
 		return
 	}
+	evDp := args.AsDataProvider()
 	var ignFilters bool
-	if ignFilters, err = GetBoolOpts(ctx, tnt, args, sS.fltrS, sS.cfg.StatSCfg().Opts.ProfileIgnoreFilters,
+	if ignFilters, err = GetBoolOpts(ctx, tnt, evDp, sS.fltrS, sS.cfg.StatSCfg().Opts.ProfileIgnoreFilters,
 		config.StatsProfileIgnoreFilters, utils.MetaProfileIgnoreFilters); err != nil {
 		return
 	}
 	var sQs StatQueues
-	if sQs, err = sS.matchingStatQueuesForEvent(ctx, tnt, sqIDs, args.AsDataProvider(), ignFilters); err != nil {
+	if sQs, err = sS.matchingStatQueuesForEvent(ctx, tnt, sqIDs, evDp, ignFilters); err != nil {
 		return
 	}
 

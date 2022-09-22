@@ -43,6 +43,7 @@ func (dS *DispatcherService) CacheSv1Clear(ctx *context.Context, args *utils.Att
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaCaches, utils.CacheSv1Clear, args, reply)
 }
+
 func (dS *DispatcherService) CacheSv1GetCacheStats(ctx *context.Context, args *utils.AttrCacheIDsWithAPIOpts, reply *map[string]*ltcache.CacheStats) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args != nil && len(args.Tenant) != 0 {
@@ -60,6 +61,7 @@ func (dS *DispatcherService) CacheSv1GetCacheStats(ctx *context.Context, args *u
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaCaches, utils.CacheSv1GetCacheStats, args, reply)
 }
+
 func (dS *DispatcherService) CacheSv1GetGroupItemIDs(ctx *context.Context, args *utils.ArgsGetGroupWithAPIOpts, reply *[]string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args != nil && len(args.Tenant) != 0 {

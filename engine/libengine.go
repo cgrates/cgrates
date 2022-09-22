@@ -182,6 +182,19 @@ func NewServiceWithName(val interface{}, name string, useName bool) (_ IntServic
 	return s, nil
 }
 
+func GetAPIOptsFromDataProvider(dP utils.DataProvider) map[string]interface{} {
+	switch v := dP.(type) {
+	case utils.MapStorage:
+		if x, has := v[utils.MetaOpts]; has {
+			return x.(map[string]interface{})
+		}
+		return make(map[string]interface{})
+	case MapEvent:
+		return v
+	}
+	return nil
+}
+
 func NewDispatcherService(val interface{}) (_ IntService, err error) {
 	var srv *birpc.Service
 	if srv, err = birpc.NewService(val, utils.EmptyString, false); err != nil {

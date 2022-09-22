@@ -171,19 +171,19 @@ func GetIntOpts(ctx *context.Context, tnt string, ev *utils.CGREvent, fS *Filter
 
 // GetBoolOpts checks the specified option names in order among the keys in APIOpts returning the first value it finds as bool, otherwise it
 // returns the config option if at least one filter passes or the default value if none of them do
-func GetBoolOpts(ctx *context.Context, tnt string, ev *utils.CGREvent, fS *FilterS, dynOpts []*utils.DynamicBoolOpt,
+func GetBoolOpts(ctx *context.Context, tnt string, dP utils.DataProvider, fS *FilterS, dynOpts []*utils.DynamicBoolOpt,
 	dftOpt bool, optNames ...string) (cfgOpt bool, err error) {
+	optsDP := GetAPIOptsFromDataProvider(dP)
 	for _, optName := range optNames {
-		if opt, has := ev.APIOpts[optName]; has {
+		if opt, has := optsDP[optName]; has {
 			return utils.IfaceAsBool(opt)
 		}
 	}
-	evDP := ev.AsDataProvider()
 	for _, opt := range dynOpts { // iterate through the options
 		if !utils.IsSliceMember([]string{utils.EmptyString, utils.MetaAny, tnt}, opt.Tenant) {
 			continue
 		}
-		if pass, err := fS.Pass(ctx, tnt, opt.FilterIDs, evDP); err != nil { // check if the filter is passing for the DataProvider and return the option if it does
+		if pass, err := fS.Pass(ctx, tnt, opt.FilterIDs, dP); err != nil { // check if the filter is passing for the DataProvider and return the option if it does
 			return false, err
 		} else if pass {
 			return opt.Value, nil

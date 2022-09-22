@@ -330,7 +330,7 @@ func (aS *AccountS) V1AccountsForEvent(ctx *context.Context, args *utils.CGREven
 		return
 	}
 	var ignFilters bool
-	if ignFilters, err = engine.GetBoolOpts(ctx, args.Tenant, args, aS.fltrS, aS.cfg.AccountSCfg().Opts.ProfileIgnoreFilters,
+	if ignFilters, err = engine.GetBoolOpts(ctx, args.Tenant, args.AsDataProvider(), aS.fltrS, aS.cfg.AccountSCfg().Opts.ProfileIgnoreFilters,
 		config.AccountsProfileIgnoreFiltersDftOpt, utils.MetaProfileIgnoreFilters); err != nil {
 		return
 	}
@@ -354,7 +354,7 @@ func (aS *AccountS) V1MaxAbstracts(ctx *context.Context, args *utils.CGREvent, e
 		return
 	}
 	var ignFilters bool
-	if ignFilters, err = engine.GetBoolOpts(ctx, args.Tenant, args, aS.fltrS, aS.cfg.AccountSCfg().Opts.ProfileIgnoreFilters,
+	if ignFilters, err = engine.GetBoolOpts(ctx, args.Tenant, args.AsDataProvider(), aS.fltrS, aS.cfg.AccountSCfg().Opts.ProfileIgnoreFilters,
 		config.AccountsProfileIgnoreFiltersDftOpt, utils.MetaProfileIgnoreFilters); err != nil {
 		return
 	}
@@ -384,7 +384,7 @@ func (aS *AccountS) V1DebitAbstracts(ctx *context.Context, args *utils.CGREvent,
 		return
 	}
 	var ignFilters bool
-	if ignFilters, err = engine.GetBoolOpts(ctx, args.Tenant, args, aS.fltrS, aS.cfg.AccountSCfg().Opts.ProfileIgnoreFilters,
+	if ignFilters, err = engine.GetBoolOpts(ctx, args.Tenant, args.AsDataProvider(), aS.fltrS, aS.cfg.AccountSCfg().Opts.ProfileIgnoreFilters,
 		config.AccountsProfileIgnoreFiltersDftOpt, utils.MetaProfileIgnoreFilters); err != nil {
 		return
 	}
@@ -414,7 +414,7 @@ func (aS *AccountS) V1MaxConcretes(ctx *context.Context, args *utils.CGREvent, e
 		return
 	}
 	var ignFilters bool
-	if ignFilters, err = engine.GetBoolOpts(ctx, args.Tenant, args, aS.fltrS, aS.cfg.AccountSCfg().Opts.ProfileIgnoreFilters,
+	if ignFilters, err = engine.GetBoolOpts(ctx, args.Tenant, args.AsDataProvider(), aS.fltrS, aS.cfg.AccountSCfg().Opts.ProfileIgnoreFilters,
 		config.AccountsProfileIgnoreFiltersDftOpt, utils.MetaProfileIgnoreFilters); err != nil {
 		return
 	}
@@ -444,7 +444,7 @@ func (aS *AccountS) V1DebitConcretes(ctx *context.Context, args *utils.CGREvent,
 		return
 	}
 	var ignFilters bool
-	if ignFilters, err = engine.GetBoolOpts(ctx, args.Tenant, args, aS.fltrS, aS.cfg.AccountSCfg().Opts.ProfileIgnoreFilters,
+	if ignFilters, err = engine.GetBoolOpts(ctx, args.Tenant, args.AsDataProvider(), aS.fltrS, aS.cfg.AccountSCfg().Opts.ProfileIgnoreFilters,
 		config.AccountsProfileIgnoreFiltersDftOpt, utils.MetaProfileIgnoreFilters); err != nil {
 		return
 	}

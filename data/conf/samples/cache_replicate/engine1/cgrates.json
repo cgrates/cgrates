@@ -19,12 +19,20 @@
 	"db_type": "*internal",
 },
 
-
+"caches":{
+	"remote_conns": ["gob_cache"],						// the conns that are queried when the items are not found in cache
+},   
 
 "rpc_conns": {
 	"conn1": {
 		"strategy": "*first",
 		"conns": [{"address": "127.0.0.1:6012", "transport":"*json"}],
+	},
+	"gob_cache": {
+		"strategy": "*first",
+		"conns": [
+			{"address": "127.0.0.1:6013", "transport":"*gob"},
+		],
 	},
 },
 

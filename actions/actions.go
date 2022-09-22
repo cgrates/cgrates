@@ -283,7 +283,7 @@ func (aS *ActionS) V1ScheduleActions(ctx *context.Context, args *utils.CGREvent,
 		return
 	}
 	var ignFilters bool
-	if ignFilters, err = engine.GetBoolOpts(ctx, args.Tenant, args, aS.fltrS, aS.cfg.ActionSCfg().Opts.ProfileIgnoreFilters,
+	if ignFilters, err = engine.GetBoolOpts(ctx, args.Tenant, args.AsDataProvider(), aS.fltrS, aS.cfg.ActionSCfg().Opts.ProfileIgnoreFilters,
 		config.ActionsProfileIgnoreFiltersDftOpt, utils.MetaProfileIgnoreFilters); err != nil {
 		return
 	}
@@ -303,7 +303,7 @@ func (aS *ActionS) V1ExecuteActions(ctx *context.Context, args *utils.CGREvent, 
 		return
 	}
 	var ignFilters bool
-	if ignFilters, err = engine.GetBoolOpts(ctx, args.Tenant, args, aS.fltrS, aS.cfg.ActionSCfg().Opts.ProfileIgnoreFilters,
+	if ignFilters, err = engine.GetBoolOpts(ctx, args.Tenant, args.AsDataProvider(), aS.fltrS, aS.cfg.ActionSCfg().Opts.ProfileIgnoreFilters,
 		config.ActionsProfileIgnoreFiltersDftOpt, utils.MetaProfileIgnoreFilters); err != nil {
 		return
 	}
