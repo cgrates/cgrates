@@ -105,7 +105,7 @@ func (dS *DispatcherService) dispatcherProfilesForEvent(ctx *context.Context, tn
 	// make sure dispatching is allowed
 	var shouldDispatch bool
 	if shouldDispatch, err = engine.GetBoolOpts(ctx, tnt, evNm, dS.fltrS, dS.cfg.DispatcherSCfg().Opts.Dispatchers,
-		config.DispatchersDispatchersDftOpt, utils.OptsDispatchers); err != nil {
+		config.DispatchersDispatchersDftOpt, utils.MetaDispatchers); err != nil {
 		return
 	} else if !shouldDispatch {
 		return engine.DispatcherProfiles{
@@ -185,7 +185,7 @@ func (dS *DispatcherService) Dispatch(ctx *context.Context, ev *utils.CGREvent, 
 	// avoid further processing if the request is internal
 	var shouldDispatch bool
 	if shouldDispatch, err = engine.GetBoolOpts(ctx, tnt, evNm, dS.fltrS, dS.cfg.DispatcherSCfg().Opts.Dispatchers,
-		true, utils.OptsDispatchers); err != nil {
+		true, utils.MetaDispatchers); err != nil {
 		return utils.NewErrDispatcherS(err)
 	} else if !shouldDispatch {
 		return callDH(ctx,

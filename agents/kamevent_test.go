@@ -142,7 +142,7 @@ func TestKamEvAsKamAuthReply(t *testing.T) {
 		"cgr_duration": "3", "cgr_pdd": "4",
 		utils.CGRRoute:           "supplier2",
 		utils.CGRDisconnectCause: "200",
-		utils.OptsAccountS:       "true"}
+		utils.MetaAccounts:       "true"}
 	authArgs := &utils.CGREvent{
 		Tenant: utils.FirstNonEmpty(kamEv[utils.Tenant],
 			config.CgrConfig().GeneralCfg().DefaultTenant),

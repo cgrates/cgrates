@@ -274,7 +274,7 @@ func (cdrscfg CdrsCfg) Clone() (cln *CdrsCfg) {
 }
 
 type CdrsOptsJson struct {
-	Accounts   []*utils.DynamicBoolOpt `json:"*accountS"`
+	Accounts   []*utils.DynamicBoolOpt `json:"*accounts"`
 	Attributes []*utils.DynamicBoolOpt `json:"*attributeS"`
 	Chargers   []*utils.DynamicBoolOpt `json:"*chargerS"`
 	Export     []*utils.DynamicBoolOpt `json:"*eeS"`

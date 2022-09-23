@@ -299,7 +299,7 @@ const CGRATES_CFG_JSON = `
 	"rates_conns": [],						// connections to RateS
 	"accounts_conns": [],					// connections to AccountS
 	"opts": {								//
-		// "*accountS": [						
+		// "*accounts": [						
 		// 	{
 		// 		"Tenant": "*any",
 		// 		"FilterIDs": [],
@@ -654,7 +654,7 @@ const CGRATES_CFG_JSON = `
 		// 		"Value": false,
 		// 	},
 		// ],
-		// "*cdrS": [						
+		// "*cdrs": [						
 		// 	{
 		// 		"Tenant": "*any",
 		// 		"FilterIDs": [],
@@ -1531,7 +1531,7 @@ const CGRATES_CFG_JSON = `
 	"nested_fields": false,					// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
 	"attributes_conns": [],					// connections to AttributeS for API authorization, empty to disable auth functionality: <""|*internal|$rpc_conns_id>
 	"opts": {								//
-		// "*dispatcherS": [						
+		// "*dispatchers": [						
 		// 	{
 		// 		"Tenant": "*any",
 		// 		"FilterIDs": [],

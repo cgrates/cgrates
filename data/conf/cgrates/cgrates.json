@@ -277,7 +277,7 @@
 // 	"rates_conns": [],						// connections to RateS
 // 	"accounts_conns": [],					// connections to AccountS
 // 	"opts": {								//
-// 		// "*accountS": [						
+// 		// "*accounts": [						
 // 		// 	{
 // 		// 		"Tenant": "*any",
 // 		// 		"FilterIDs": [],
@@ -632,7 +632,7 @@
 // 		// 		"Value": false,
 // 		// 	},
 // 		// ],
-// 		// "*cdrS": [						
+// 		// "*cdrs": [						
 // 		// 	{
 // 		// 		"Tenant": "*any",
 // 		// 		"FilterIDs": [],
@@ -1509,7 +1509,7 @@
 // 	"nested_fields": false,					// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
 // 	"attributes_conns": [],					// connections to AttributeS for API authorization, empty to disable auth functionality: <""|*internal|$rpc_conns_id>
 // 	"opts": {								//
-// 		// "*dispatcherS": [						
+// 		// "*dispatchers": [						
 // 		// 	{
 // 		// 		"Tenant": "*any",
 // 		// 		"FilterIDs": [],

@@ -199,7 +199,7 @@ func (sma *AsteriskAgent) handleStasisStart(ev *SMAsteriskEvent) {
 			}
 		}
 	}
-	if utils.OptAsBool(authArgs.APIOpts, utils.OptsAccountS) {
+	if utils.OptAsBool(authArgs.APIOpts, utils.MetaAccounts) {
 		if authReply.MaxUsage == nil ||
 			authReply.MaxUsage.Compare(utils.NewDecimal(0, 0)) == 0 {
 			sma.hangupChannel(ev.ChannelID(), "")

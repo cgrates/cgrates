@@ -178,7 +178,7 @@ func (fsa *FSsessions) onChannelPark(fsev FSEvent, connIdx int) {
 			}
 		}
 	}
-	if utils.OptAsBool(authArgs.APIOpts, utils.OptsAccountS) {
+	if utils.OptAsBool(authArgs.APIOpts, utils.MetaAccounts) {
 		if authReply.MaxUsage == nil ||
 			authReply.MaxUsage.Compare(utils.NewDecimal(0, 0)) == 0 {
 			fsa.unparkCall(fsev.GetUUID(), connIdx,

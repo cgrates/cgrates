@@ -79,7 +79,7 @@ func TestRatesCostFiltering(t *testing.T) {
 				},
 				utils.OptsRateS:      true,
 				utils.OptsCDRsExport: true,
-				utils.OptsAccountS:   false,
+				utils.MetaAccounts:   false,
 			},
 		},
 	}

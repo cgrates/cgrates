@@ -247,7 +247,7 @@ func testRPCMethodsAuthorizeSession(t *testing.T) {
 		APIOpts: map[string]interface{}{
 			utils.OptsSesMaxUsage: true,
 			utils.MetaUsage:       authUsage,
-			utils.OptsAccountS:    true,
+			utils.MetaAccounts:    true,
 		},
 	}
 	//authorize the session

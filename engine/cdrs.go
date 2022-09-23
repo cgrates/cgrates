@@ -248,7 +248,7 @@ func (cdrS *CDRServer) processEvent(ctx *context.Context, ev *utils.CGREvent) (e
 	var acntS bool
 	for _, cgrEv := range cgrEvs {
 		if acntS, err = GetBoolOpts(ctx, cgrEv.Tenant, cgrEv.AsDataProvider(), cdrS.fltrS, cdrS.cfg.CdrsCfg().Opts.Accounts,
-			config.CDRsAccountsDftOpt, utils.OptsAccountS); err != nil {
+			config.CDRsAccountsDftOpt, utils.MetaAccounts); err != nil {
 			return
 		}
 		if acntS {

@@ -770,9 +770,9 @@ func diffSTIRJsonCfg(d *STIRJsonCfg, v1, v2 *STIRcfg) *STIRJsonCfg {
 }
 
 type SessionsOptsJson struct {
-	Accounts               []*utils.DynamicBoolOpt   `json:"*accountS"`
+	Accounts               []*utils.DynamicBoolOpt   `json:"*accounts"`
 	Attributes             []*utils.DynamicBoolOpt   `json:"*attributeS"`
-	CDRs                   []*utils.DynamicBoolOpt   `json:"*cdrS"`
+	CDRs                   []*utils.DynamicBoolOpt   `json:"*cdrs"`
 	Chargers               []*utils.DynamicBoolOpt   `json:"*chargerS"`
 	Resources              []*utils.DynamicBoolOpt   `json:"*resourceS"`
 	Routes                 []*utils.DynamicBoolOpt   `json:"*routeS"`

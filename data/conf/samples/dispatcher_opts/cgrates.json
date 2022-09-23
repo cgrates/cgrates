@@ -19,13 +19,12 @@
     
     "attributes": {								
 	    "enabled": true,						
-    },
-        
+    },        
     
     "dispatchers":{
         "enabled": true,
         "opts": {								
-		 "*dispatcherS": [						
+		 "*dispatchers": [						
 		 	{
 		 		"Tenant": "cgrates.org",
 		 		"FilterIDs": ["*string:~*opts.*subsys:*dispatchers"],

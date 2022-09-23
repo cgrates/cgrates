@@ -2492,7 +2492,7 @@ func TestDebitAbstractsMaxDebitAbstractFromConcreteNoConcrBal(t *testing.T) {
 		},
 		APIOpts: map[string]interface{}{
 			utils.MetaUsage:    2 * time.Minute,
-			utils.OptsAccountS: true,
+			utils.MetaAccounts: true,
 		},
 	}
 

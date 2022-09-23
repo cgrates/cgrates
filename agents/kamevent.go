@@ -189,7 +189,7 @@ func (kev KamEvent) AsKamAuthReply(authArgs *utils.CGREvent,
 	if authReply.ResourceAllocation != nil {
 		kar.ResourceAllocation = *authReply.ResourceAllocation
 	}
-	if utils.OptAsBool(authArgs.APIOpts, utils.OptsAccountS) {
+	if utils.OptAsBool(authArgs.APIOpts, utils.MetaAccounts) {
 		if authReply.MaxUsage != nil {
 			maxDur, _ := authReply.MaxUsage.Duration()
 			kar.MaxUsage = maxDur.Seconds()

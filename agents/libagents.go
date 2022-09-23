@@ -67,7 +67,7 @@ func processRequest(ctx *context.Context, reqProcessor *config.RequestProcessor,
 		rply := new(sessions.V1AuthorizeReply)
 		err = connMgr.Call(ctx, sessionsConns, utils.SessionSv1AuthorizeEvent,
 			cgrEv, rply)
-		rply.SetMaxUsageNeeded(utils.OptAsBool(cgrEv.APIOpts, utils.OptsAccountS))
+		rply.SetMaxUsageNeeded(utils.OptAsBool(cgrEv.APIOpts, utils.MetaAccounts))
 		agReq.setCGRReply(rply, err)
 	case utils.MetaInitiate:
 		rply := new(sessions.V1InitSessionReply)
