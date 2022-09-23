@@ -124,7 +124,7 @@ func testDispatcherOptsAdminSetDispatcherProfile(t *testing.T) {
 			},
 		},
 		APIOpts: map[string]interface{}{
-			utils.OptsDispatchers: false,
+			utils.MetaDispatchers: false,
 		},
 	}
 	if err := adminsRPC.Call(context.Background(), utils.AdminSv1SetDispatcherHost, setDispatcherHost, &replyStr); err != nil {
@@ -148,7 +148,7 @@ func testDispatcherOptsAdminSetDispatcherProfile(t *testing.T) {
 			},
 		},
 		APIOpts: map[string]interface{}{
-			utils.OptsDispatchers: false,
+			utils.MetaDispatchers: false,
 		},
 	}
 	if err := adminsRPC.Call(context.Background(), utils.AdminSv1SetDispatcherProfile, setDispatcherProfile, &replyStr); err != nil {
@@ -204,7 +204,7 @@ func testDispatcherGetItemBothEngines1(t *testing.T) {
 	argsCache := &utils.ArgsGetCacheItemWithAPIOpts{
 		Tenant: "cgrates.org",
 		APIOpts: map[string]interface{}{
-			utils.OptsDispatchers: false,
+			utils.MetaDispatchers: false,
 		},
 		ArgsGetCacheItem: utils.ArgsGetCacheItem{
 			CacheID: utils.CacheDispatcherRoutes,
@@ -238,7 +238,7 @@ func testDispatcherAdminCoreStatus(t *testing.T) {
 	ev := utils.TenantWithAPIOpts{
 		Tenant: "cgrates.org",
 		APIOpts: map[string]interface{}{
-			utils.OptsDispatchers: false,
+			utils.MetaDispatchers: false,
 		},
 	}
 	if err := adminsRPC.Call(context.Background(), utils.CoreSv1Status, &ev, &reply); err != nil {
@@ -265,7 +265,7 @@ func testDispatcherOptsAdminSetDispatcherHost4012(t *testing.T) {
 			},
 		},
 		APIOpts: map[string]interface{}{
-			utils.OptsDispatchers: false,
+			utils.MetaDispatchers: false,
 		},
 	}
 	if err := adminsRPC.Call(context.Background(), utils.AdminSv1SetDispatcherHost, setDispatcherHost, &replyStr); err != nil {
@@ -289,7 +289,7 @@ func testDispatcherOptsAdminSetDispatcherHost4012(t *testing.T) {
 			},
 		},
 		APIOpts: map[string]interface{}{
-			utils.OptsDispatchers: false,
+			utils.MetaDispatchers: false,
 		},
 	}
 	if err := adminsRPC.Call(context.Background(), utils.AdminSv1SetDispatcherProfile, setDispatcherProfile, &replyStr); err != nil {
@@ -320,7 +320,7 @@ func testDisaptcherCacheClearBothEngines(t *testing.T) {
 	var reply string
 	if err := dspOptsRPC.Call(context.Background(), utils.CacheSv1Clear, &utils.AttrCacheIDsWithAPIOpts{
 		APIOpts: map[string]interface{}{
-			utils.OptsDispatchers: false,
+			utils.MetaDispatchers: false,
 		},
 	}, &reply); err != nil {
 		t.Fatal(err)
@@ -330,7 +330,7 @@ func testDisaptcherCacheClearBothEngines(t *testing.T) {
 
 	if err := adminsRPC.Call(context.Background(), utils.CacheSv1Clear, &utils.AttrCacheIDsWithAPIOpts{
 		APIOpts: map[string]interface{}{
-			utils.OptsDispatchers: false,
+			utils.MetaDispatchers: false,
 		},
 	}, &reply); err != nil {
 		t.Fatal(err)
@@ -343,7 +343,7 @@ func testDispatcherGetItemBothEngines2(t *testing.T) {
 	argsCache := &utils.ArgsGetCacheItemWithAPIOpts{
 		Tenant: "cgrates.org",
 		APIOpts: map[string]interface{}{
-			utils.OptsDispatchers: false,
+			utils.MetaDispatchers: false,
 		},
 		ArgsGetCacheItem: utils.ArgsGetCacheItem{
 			CacheID: utils.CacheDispatcherRoutes,

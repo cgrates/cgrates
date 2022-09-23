@@ -1611,7 +1611,7 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(ctx *context.Context,
 	}
 	var acntS bool
 	if acntS, err = engine.GetBoolOpts(ctx, args.Tenant, dP, sS.fltrS, sS.cfg.SessionSCfg().Opts.Accounts,
-		config.SessionsAccountsDftOpt, utils.OptsAccountS); err != nil {
+		config.SessionsAccountsDftOpt, utils.MetaAccounts); err != nil {
 		return
 	}
 	if acntS {
@@ -1710,7 +1710,7 @@ func (sS *SessionS) BiRPCv1AuthorizeEventWithDigest(ctx *context.Context,
 	}
 	var acntS bool
 	if acntS, err = engine.GetBoolOpts(ctx, args.Tenant, dP, sS.fltrS, sS.cfg.SessionSCfg().Opts.Accounts,
-		config.SessionsAccountsDftOpt, utils.OptsAccountS); err != nil {
+		config.SessionsAccountsDftOpt, utils.MetaAccounts); err != nil {
 		return
 	}
 	if acntS {

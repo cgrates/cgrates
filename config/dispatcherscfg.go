@@ -176,7 +176,7 @@ func (dps DispatcherSCfg) Clone() (cln *DispatcherSCfg) {
 }
 
 type DispatchersOptsJson struct {
-	Dispatchers []*utils.DynamicBoolOpt `json:"*dispatcherS"`
+	Dispatchers []*utils.DynamicBoolOpt `json:"*dispatchers"`
 }
 
 type DispatcherSJsonCfg struct {

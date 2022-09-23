@@ -1992,9 +1992,9 @@ const (
 	PrecacheCfg   = "precache"
 
 	// CdrsCfg
-	MetaAccountSCfg     = "*accountS"
+	MetaAccountSCfg     = "*accounts"
 	MetaAttributeSCfg   = "*attributeS"
-	MetaCDRsCfg         = "*cdrS"
+	MetaCDRsCfg         = "*cdrs"
 	MetaChargerSCfg     = "*chargerS"
 	MetaResourceSCfg    = "*resourceS"
 	MetaRouteSCfg       = "*routeS"
@@ -2009,7 +2009,7 @@ const (
 	AttributeIDsCfg     = "attribute_ids"
 
 	// DispatcherSCfg
-	MetaDispatcherSCfg = "*dispatcherS"
+	MetaDispatcherSCfg = "*dispatchers"
 
 	//LoaderSCfg
 	DryRunCfg       = "dry_run"
@@ -2244,24 +2244,22 @@ var CGROptionsSet = NewStringSet([]string{OptsRatesProfileIDs, OptsRatesStartTim
 	OptsSesSTIRInitiate, OptsSesThresholdSDerivedReply,
 	OptsSesMaxUsage, OptsSesForceDuration, OptsSesInitiate, OptsSesUpdate, OptsSesTerminate,
 	OptsSesMessage, OptsAttributeS, OptsChargerS, OptsCDRsExport, OptsCDRsRefund,
-	OptsCDRsRerate, OptsStatS, OptsCDRsStore, OptsThresholdS, OptsRateS, OptsAccountS,
+	OptsCDRsRerate, OptsStatS, OptsCDRsStore, OptsThresholdS, OptsRateS, MetaAccounts,
 	OptsAccountsUsage, OptsStatsProfileIDs, OptsActionsProfileIDs, MetaProfileIgnoreFilters,
-	OptsRoundingDecimals, OptsDispatchers})
+	OptsRoundingDecimals, MetaDispatchers})
 
 // Event Opts
 const (
 
-	// CDRs, SessionS and DispatcherS boolean opts
-	OptsAccountS    = "*accountS"
-	OptsCDRs        = "*cdrS"
-	OptsRouteS      = "*routeS"
-	OptsResourceS   = "*resourceS"
-	OptsAttributeS  = "*attributeS"
-	OptsChargerS    = "*chargerS"
-	OptsStatS       = "*statS"
-	OptsThresholdS  = "*thresholdS"
-	OptsRateS       = "*rateS"
-	OptsDispatchers = "*dispatcherS"
+	// Subsystems boolean opts
+	OptsCDRs       = "*cdrs"
+	OptsRouteS     = "*routeS"
+	OptsResourceS  = "*resourceS"
+	OptsAttributeS = "*attributeS"
+	OptsChargerS   = "*chargerS"
+	OptsStatS      = "*statS"
+	OptsThresholdS = "*thresholdS"
+	OptsRateS      = "*rateS"
 
 	// SessionS
 	OptsSesTTL           = "*sesTTL"

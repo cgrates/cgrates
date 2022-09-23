@@ -1649,7 +1649,7 @@ func TestCDRsProcessEventMockAcntsErr(t *testing.T) {
 			utils.Cost:       123.0,
 		},
 		APIOpts: map[string]interface{}{
-			utils.OptsAccountS: true,
+			utils.MetaAccounts: true,
 			"*context":         utils.MetaCDRs,
 		},
 	}
@@ -1711,7 +1711,7 @@ func TestCDRsProcessEventMockAcntsErrBoolOpts(t *testing.T) {
 			utils.Cost:       123.0,
 		},
 		APIOpts: map[string]interface{}{
-			utils.OptsAccountS: time.Second,
+			utils.MetaAccounts: time.Second,
 			"*context":         utils.MetaCDRs,
 		},
 	}

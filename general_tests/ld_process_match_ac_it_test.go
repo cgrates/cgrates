@@ -162,7 +162,7 @@ func testLdPrMatchAcCDRSProcessEvent(t *testing.T) {
 			utils.MetaUsage:      2 * time.Minute,
 			utils.OptsRateS:      false,
 			utils.OptsCDRsExport: true,
-			utils.OptsAccountS:   true,
+			utils.MetaAccounts:   true,
 		},
 	}
 	var rply string
@@ -232,7 +232,7 @@ func testLdPrMatchAcCDRSProcessEvent(t *testing.T) {
 				utils.MetaUsage:      2 * time.Minute,
 				utils.OptsCDRsExport: true,
 				utils.OptsRateS:      false,
-				utils.OptsAccountS:   true,
+				utils.MetaAccounts:   true,
 			},
 		},
 	}

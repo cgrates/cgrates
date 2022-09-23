@@ -60,7 +60,7 @@
                     "Value": true,
                 },
             ],	
-            "*accountS": [
+            "*accounts": [
                 {
                     "Tenant": "*any",
                     "FilterIDs": ["*string:~*req.Account:1001", "*string:~*opts.*runID:suppliers"],
