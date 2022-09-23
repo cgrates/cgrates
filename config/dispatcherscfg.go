@@ -32,6 +32,7 @@ type DispatcherSCfg struct {
 	AttributeSConns     []string
 	NestedFields        bool
 	AnySubsystem        bool
+	PreventLoop         bool
 }
 
 func (dps *DispatcherSCfg) loadFromJSONCfg(jsnCfg *DispatcherSJsonCfg) (err error) {
@@ -81,37 +82,41 @@ func (dps *DispatcherSCfg) loadFromJSONCfg(jsnCfg *DispatcherSJsonCfg) (err erro
 	if jsnCfg.Any_subsystem != nil {
 		dps.AnySubsystem = *jsnCfg.Any_subsystem
 	}
+	if jsnCfg.Prevent_loop != nil {
+		dps.PreventLoop = *jsnCfg.Prevent_loop
+	}
 	return nil
 }
 
 // AsMapInterface returns the config as a map[string]interface{}
-func (dps *DispatcherSCfg) AsMapInterface() (initialMP map[string]interface{}) {
-	initialMP = map[string]interface{}{
+func (dps *DispatcherSCfg) AsMapInterface() (mp map[string]interface{}) {
+	mp = map[string]interface{}{
 		utils.EnabledCfg:        dps.Enabled,
 		utils.IndexedSelectsCfg: dps.IndexedSelects,
 		utils.NestedFieldsCfg:   dps.NestedFields,
 		utils.AnySubsystemCfg:   dps.AnySubsystem,
+		utils.PreventLoopCfg:    dps.PreventLoop,
 	}
 	if dps.StringIndexedFields != nil {
 		stringIndexedFields := make([]string, len(*dps.StringIndexedFields))
 		for i, item := range *dps.StringIndexedFields {
 			stringIndexedFields[i] = item
 		}
-		initialMP[utils.StringIndexedFieldsCfg] = stringIndexedFields
+		mp[utils.StringIndexedFieldsCfg] = stringIndexedFields
 	}
 	if dps.PrefixIndexedFields != nil {
 		prefixIndexedFields := make([]string, len(*dps.PrefixIndexedFields))
 		for i, item := range *dps.PrefixIndexedFields {
 			prefixIndexedFields[i] = item
 		}
-		initialMP[utils.PrefixIndexedFieldsCfg] = prefixIndexedFields
+		mp[utils.PrefixIndexedFieldsCfg] = prefixIndexedFields
 	}
 	if dps.SuffixIndexedFields != nil {
 		suffixIndexedFields := make([]string, len(*dps.SuffixIndexedFields))
 		for i, item := range *dps.SuffixIndexedFields {
 			suffixIndexedFields[i] = item
 		}
-		initialMP[utils.SuffixIndexedFieldsCfg] = suffixIndexedFields
+		mp[utils.SuffixIndexedFieldsCfg] = suffixIndexedFields
 	}
 	if dps.AttributeSConns != nil {
 		attributeSConns := make([]string, len(dps.AttributeSConns))
@@ -121,7 +126,7 @@ func (dps *DispatcherSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 				attributeSConns[i] = utils.MetaInternal
 			}
 		}
-		initialMP[utils.AttributeSConnsCfg] = attributeSConns
+		mp[utils.AttributeSConnsCfg] = attributeSConns
 	}
 	return
 }
@@ -133,6 +138,7 @@ func (dps DispatcherSCfg) Clone() (cln *DispatcherSCfg) {
 		IndexedSelects: dps.IndexedSelects,
 		NestedFields:   dps.NestedFields,
 		AnySubsystem:   dps.AnySubsystem,
+		PreventLoop:    dps.PreventLoop,
 	}
 
 	if dps.AttributeSConns != nil {

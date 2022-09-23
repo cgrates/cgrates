@@ -1,7 +1,7 @@
 {
 
     "general": {
-        "node_id": "DispatcherOpts_APIer",
+        "node_id": "HOST2",
         "log_level": 7
     },
         
@@ -24,20 +24,31 @@
       
     
     "dispatchers":{
-        "enabled": true
+        "enabled": true,
+        "prevent_loop": true
 	},
     
     "caches":{
-        //"remote_conns": ["*internal"],						
+        "partitions": {
+            "*dispatcher_routes": {"limit": -1, "ttl": "", "static_ttl": false, "remote":true, "replicate": false}, 						// control dispatcher routes caching
+            "*dispatchers": {"limit": -1, "ttl": "", "static_ttl": false, "remote":true, "replicate": false}								// control dispatcher interface
+        },
+        "remote_conns": ["gob_cache"]					
     },
     
 
     "apiers": {
-        "enabled": true,
+        "enabled": true
         // "caches_conns":["broadcast_cache"]
     },
     
-    // "rpc_conns": {
+    "rpc_conns": {
+        "gob_cache": {
+            "strategy": "*first",
+            "conns": [
+                {"address": "127.0.0.1:4013", "transport":"*gob"}
+            ]
+        }
     //     "broadcast_cache": {
     //         "strategy": "*broadcast",
     //         "conns": [
@@ -46,6 +57,6 @@
     //             {"address": "127.0.0.1:6012", "transport":"*json"}
     //         ]
     //     }
-    // }
+    }
     
 }

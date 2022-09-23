@@ -739,6 +739,7 @@ type DispatcherSJsonCfg struct {
 	Nested_fields         *bool // applies when indexed fields is not defined
 	Attributes_conns      *[]string
 	Any_subsystem         *bool
+	Prevent_loop          *bool
 }
 
 type RegistrarCJsonCfg struct {
