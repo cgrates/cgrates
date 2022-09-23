@@ -840,7 +840,7 @@ func TestLibDispatcherSingleResultDispatcherCase3(t *testing.T) {
 		Tenant: "testTenant",
 		RemoteHost: &config.RemoteHost{
 			ID:        "testID",
-			Address:   rpcclient.InternalRPC,
+			Address:   "",
 			Transport: utils.MetaInternal,
 			TLS:       false,
 		},
@@ -851,7 +851,7 @@ func TestLibDispatcherSingleResultDispatcherCase3(t *testing.T) {
 		value, nil, true, utils.NonTransactional)
 	wgDsp := &singleResultDispatcher{sorter: new(noSort), hosts: engine.DispatcherHostProfiles{{ID: "testID"}}}
 	err := wgDsp.Dispatch(dm, nil, cfg, context.Background(), chanRPC, nil, "testTenant", "routeID", &DispatcherRoute{}, utils.AttributeSv1Ping, &utils.CGREvent{}, &wgDsp)
-	expected := "DISCONNECTED"
+	expected := "INTERNALLY_DISCONNECTED"
 	if err == nil || err.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
 	}
