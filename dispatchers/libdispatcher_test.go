@@ -456,32 +456,7 @@ func TestLibDispatcherLoadDispatcherDispatchHostsID(t *testing.T) {
 	}
 }
 
-func TestLibDispatcherLoadStrategyDispatchCaseHosts(t *testing.T) {
-	wgDsp := &loadDispatcher{
-		hosts: engine.DispatcherHostProfiles{
-			{
-				ID: "testID",
-				// FilterIDs: []string{"filterID"},
-				Weight: 4,
-				Params: map[string]interface{}{
-					utils.MetaRatio: 1,
-				},
-				Blocker: false,
-			},
-		},
-		defaultRatio: 1,
-		sorter:       new(noSort),
-	}
-	dataDB := engine.NewInternalDB(nil, nil, true, config.CgrConfig().DataDbCfg().Items)
-	dM := engine.NewDataManager(dataDB, config.CgrConfig().CacheCfg(), nil)
-	err := wgDsp.Dispatch(dM, nil, nil, "", "", &DispatcherRoute{}, "", "", "")
-	expected := "HOST_NOT_FOUND"
-	if err == nil || err.Error() != expected {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
-	}
-}
-
-func TestLibDispatcherLoadStrategyDispatchCaseHostsError(t *testing.T) {
+func TestLibDispatcherLoadStrategyDispatchCaseCallError(t *testing.T) {
 	wgDsp := &loadDispatcher{
 		hosts: engine.DispatcherHostProfiles{
 			{
@@ -498,7 +473,7 @@ func TestLibDispatcherLoadStrategyDispatchCaseHostsError(t *testing.T) {
 		sorter:       new(noSort),
 	}
 	err := wgDsp.Dispatch(nil, nil, nil, "", "", &DispatcherRoute{}, "", "", "")
-	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
+	expected := "NO_DATABASE_CONNECTION"
 	if err == nil || err.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
 	}
@@ -578,7 +553,7 @@ func TestLibDispatcherSingleResultDispatcherCastError(t *testing.T) {
 		value, nil, true, utils.NonTransactional)
 	wgDsp := &singleResultDispatcher{sorter: new(noSort), hosts: engine.DispatcherHostProfiles{{ID: "testID"}}}
 	err := wgDsp.Dispatch(nil, nil, nil, "", "testID", &DispatcherRoute{}, "", "", "")
-	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
+	expected := "NO_DATABASE_CONNECTION"
 	if err == nil || err.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
 	}
@@ -589,39 +564,6 @@ type mockTypeCon struct{}
 
 func (*mockTypeCon) Call(serviceMethod string, args, reply interface{}) error {
 	return utils.ErrNotFound
-}
-
-func TestLibDispatcherSingleResultDispatcherCastError2(t *testing.T) {
-	cacheInit := engine.Cache
-	cfg := config.NewDefaultCGRConfig()
-	dm := engine.NewDataManager(nil, nil, nil)
-	newCache := engine.NewCacheS(cfg, dm, nil)
-	engine.Cache = newCache
-	value := &engine.DispatcherHost{
-		Tenant: "testTenant",
-		RemoteHost: &config.RemoteHost{
-			ID:        "testID",
-			Address:   rpcclient.InternalRPC,
-			Transport: utils.MetaInternal,
-			TLS:       false,
-		},
-	}
-
-	tmp := engine.IntRPC
-	engine.IntRPC = map[string]*rpcclient.RPCClient{}
-	chanRPC := make(chan rpcclient.ClientConnector, 1)
-	chanRPC <- new(mockTypeCon)
-	engine.IntRPC.AddInternalRPCClient(utils.AttributeSv1Ping, chanRPC)
-	engine.Cache.SetWithoutReplicate(utils.CacheDispatcherRoutes, "testID:*attributes",
-		value, nil, true, utils.NonTransactional)
-	wgDsp := &singleResultDispatcher{sorter: new(noSort), hosts: engine.DispatcherHostProfiles{{ID: "testID"}}}
-	err := wgDsp.Dispatch(nil, nil, nil, "testTenant", "testID", &DispatcherRoute{}, utils.AttributeSv1Ping, &utils.CGREvent{}, &wgDsp)
-	expected := "UNSUPPORTED_SERVICE_METHOD"
-	if err == nil || err.Error() != expected {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
-	}
-	engine.Cache = cacheInit
-	engine.IntRPC = tmp
 }
 
 func TestLibDispatcherBroadcastDispatcherDispatchError1(t *testing.T) {
@@ -717,95 +659,6 @@ func TestLibDispatcherLoadDispatcherCacheError(t *testing.T) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
 	}
 	engine.Cache = cacheInit
-}
-
-func TestLibDispatcherLoadDispatcherCacheError2(t *testing.T) {
-	cacheInit := engine.Cache
-	cfg := config.NewDefaultCGRConfig()
-	dm := engine.NewDataManager(nil, nil, nil)
-	newCache := engine.NewCacheS(cfg, dm, nil)
-	engine.Cache = newCache
-	value := &engine.DispatcherHost{
-		Tenant: "testTenant",
-		RemoteHost: &config.RemoteHost{
-			ID:        "testID",
-			Address:   rpcclient.InternalRPC,
-			Transport: utils.MetaInternal,
-			TLS:       false,
-		},
-	}
-
-	tmp := engine.IntRPC
-	engine.IntRPC = map[string]*rpcclient.RPCClient{}
-	chanRPC := make(chan rpcclient.ClientConnector, 1)
-	chanRPC <- new(mockTypeCon)
-	engine.IntRPC.AddInternalRPCClient(utils.AttributeSv1Ping, chanRPC)
-	engine.Cache.SetWithoutReplicate(utils.CacheDispatcherRoutes, "testID:*attributes",
-		value, nil, true, utils.NonTransactional)
-	wgDsp := &loadDispatcher{sorter: new(noSort), hosts: engine.DispatcherHostProfiles{{ID: "testID"}}}
-	err := wgDsp.Dispatch(nil, nil, nil, "testTenant", "testID", &DispatcherRoute{}, utils.AttributeSv1Ping, &utils.CGREvent{}, &wgDsp)
-	expected := "UNSUPPORTED_SERVICE_METHOD"
-	if err == nil || err.Error() != expected {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
-	}
-	engine.Cache = cacheInit
-	engine.IntRPC = tmp
-}
-
-func TestLibDispatcherLoadDispatcherCacheError3(t *testing.T) {
-	cacheInit := engine.Cache
-	cfg := config.NewDefaultCGRConfig()
-	dm := engine.NewDataManager(nil, nil, nil)
-	newCache := engine.NewCacheS(cfg, dm, nil)
-	engine.Cache = newCache
-	value := &engine.DispatcherHost{
-		Tenant: "testTenant",
-		RemoteHost: &config.RemoteHost{
-			ID:        "testID",
-			Address:   rpcclient.InternalRPC,
-			Transport: utils.MetaInternal,
-			TLS:       false,
-		},
-	}
-
-	tmp := engine.IntRPC
-	engine.IntRPC = map[string]*rpcclient.RPCClient{}
-	chanRPC := make(chan rpcclient.ClientConnector, 1)
-	chanRPC <- new(mockTypeCon)
-	engine.Cache.SetWithoutReplicate(utils.CacheDispatcherHosts, "testTENANT:testID",
-		value, nil, true, utils.NonTransactional)
-	engine.IntRPC.AddInternalRPCClient(utils.AttributeSv1Ping, chanRPC)
-	wgDsp := &loadDispatcher{
-		tntID: "testTENANT",
-		hosts: engine.DispatcherHostProfiles{
-			{
-				ID: "testID",
-				// FilterIDs: []string{"filterID1", "filterID2"},
-				Weight: 3,
-				Params: map[string]interface{}{
-					utils.MetaRatio: 1,
-				},
-				Blocker: true,
-			},
-			{
-				ID: "testID2",
-				// FilterIDs: []string{"filterID1", "filterID2"},
-				Weight: 3,
-				Params: map[string]interface{}{
-					utils.MetaRatio: 2,
-				},
-				Blocker: true,
-			},
-		},
-		defaultRatio: 0,
-		sorter:       new(noSort),
-	}
-	err := wgDsp.Dispatch(dm, nil, nil, "testTENANT", "testID", &DispatcherRoute{}, utils.AttributeSv1Ping, &utils.CGREvent{}, &wgDsp)
-	if err != nil {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
-	}
-	engine.Cache = cacheInit
-	engine.IntRPC = tmp
 }
 
 func TestLibDispatcherLoadDispatcherCacheError4(t *testing.T) {
@@ -1022,7 +875,7 @@ func TestLibDispatcherSingleResultDispatcherCase3(t *testing.T) {
 		Tenant: "testTenant",
 		RemoteHost: &config.RemoteHost{
 			ID:        "testID",
-			Address:   rpcclient.InternalRPC,
+			Address:   "",
 			Transport: utils.MetaInternal,
 			TLS:       false,
 		},
@@ -1036,7 +889,7 @@ func TestLibDispatcherSingleResultDispatcherCase3(t *testing.T) {
 		value, nil, true, utils.NonTransactional)
 	wgDsp := &singleResultDispatcher{sorter: new(noSort), hosts: engine.DispatcherHostProfiles{{ID: "testID"}}}
 	err := wgDsp.Dispatch(dm, nil, nil, "testTenant", "routeID", &DispatcherRoute{}, utils.AttributeSv1Ping, &utils.CGREvent{}, &wgDsp)
-	expected := "DISCONNECTED"
+	expected := "INTERNALLY_DISCONNECTED"
 	if err == nil || err.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
 	}
@@ -1077,21 +930,6 @@ func TestLibDispatcherDispatchFilterError(t *testing.T) {
 	}
 	if err := dsp.Dispatch(nil, flts, nil, "", "", &DispatcherRoute{}, "", "", ""); err == nil || err.Error() != expErrMsg {
 		t.Errorf("Expected error: %s received: %v", expErrMsg, err)
-	}
-}
-
-func TestLibDispatcherDispatchHostNotFound(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	flts := engine.NewFilterS(cfg, nil, nil)
-	db := engine.NewDataManager(engine.NewInternalDB(nil, nil, true, config.CgrConfig().DataDbCfg().Items), nil, nil)
-	var dsp Dispatcher = &singleResultDispatcher{
-		sorter: new(noSort),
-		hosts: engine.DispatcherHostProfiles{{
-			ID: "testID",
-		}},
-	}
-	if err := dsp.Dispatch(db, flts, nil, "", "", &DispatcherRoute{}, "", "", ""); err != utils.ErrHostNotFound {
-		t.Errorf("Expected error: %s received: %v", utils.ErrHostNotFound, err)
 	}
 }
 

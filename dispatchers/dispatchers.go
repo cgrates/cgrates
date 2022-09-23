@@ -108,7 +108,8 @@ func (dS *DispatcherService) dispatcherProfilesForEvent(tnt string, ev *utils.CG
 		return
 	} else {
 		var subsys string
-		if subsys, err = evNm.FieldAsString([]string{utils.MetaOpts, utils.MetaSubsys}); err != nil {
+		if subsys, err = evNm.FieldAsString([]string{utils.MetaOpts, utils.MetaSubsys}); err != nil &&
+			err != utils.ErrNotFound {
 			return
 		}
 		if !shouldDispatch || (dS.cfg.DispatcherSCfg().PreventLoop &&

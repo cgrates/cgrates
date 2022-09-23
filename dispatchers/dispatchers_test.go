@@ -873,7 +873,7 @@ func TestDispatcherServiceDispatchDspErr(t *testing.T) {
 	}
 	subsys := utils.IfaceAsString(ev.APIOpts[utils.MetaSubsys])
 	err = dss.Dispatch(ev, subsys, "", "", "")
-	expected := "DISPATCHER_ERROR:unsupported dispatch strategy: <>"
+	expected := "unsupported dispatch strategy: <>"
 	if err == nil || err.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
 	}
@@ -1209,7 +1209,7 @@ func TestDispatcherServiceDispatchDspErrHostNotFound3(t *testing.T) {
 	}
 	subsys := utils.IfaceAsString(ev.APIOpts[utils.MetaSubsys])
 	err = dss.Dispatch(ev, subsys, "", "", "")
-	expected := "DISPATCHER_ERROR:NOT_IMPLEMENTED"
+	expected := "NOT_IMPLEMENTED"
 	if err == nil || err.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
 	}
