@@ -629,7 +629,9 @@ func TestLibDispatcherLoadDispatcherCacheError4(t *testing.T) {
 	cacheInit := engine.Cache
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().ReplicationConns = []string{"con"}
+	cfg.CacheCfg().RemoteConns = []string{"con1"}
 	cfg.CacheCfg().Partitions[utils.CacheDispatcherRoutes].Replicate = true
+	cfg.CacheCfg().Partitions[utils.CacheDispatcherRoutes].Remote = true
 	cfg.RPCConns()["con"] = &config.RPCConn{
 		Strategy: "",
 		PoolSize: 0,
@@ -637,6 +639,18 @@ func TestLibDispatcherLoadDispatcherCacheError4(t *testing.T) {
 			{
 				ID:        "testID",
 				Address:   "",
+				Transport: "",
+				TLS:       false,
+			},
+		},
+	}
+	cfg.RPCConns()["con1"] = &config.RPCConn{
+		Strategy: "*first",
+		PoolSize: 0,
+		Conns: []*config.RemoteHost{
+			{
+				ID:        "conn_internal",
+				Address:   "*internal",
 				Transport: "",
 				TLS:       false,
 			},
@@ -686,7 +700,7 @@ func TestLibDispatcherLoadDispatcherCacheError4(t *testing.T) {
 		sorter:       new(noSort),
 	}
 	err := wgDsp.Dispatch(dm, nil, cfg, context.Background(), nil, nil, "testTENANT", "testID", &DispatcherRoute{}, utils.AttributeSv1Ping, &utils.CGREvent{}, &wgDsp)
-	expected := "DISCONNECTED"
+	expected := "INTERNALLY_DISCONNECTED"
 	if err == nil || err.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
 	}

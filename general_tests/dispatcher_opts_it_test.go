@@ -23,6 +23,7 @@ package general_tests
 
 import (
 	"path"
+	"reflect"
 	"testing"
 	"time"
 
@@ -49,22 +50,20 @@ var (
 		testDispatcherOptsAdminRPCConn,
 		testDispatcherOptsAdminSetDispatcherProfile,
 
-		// Start engine without Dispatcher on engine 4012 with profiles in database (*dispatchers:false)
+		// Start engine without Dispatcher on engine 2012 with profiles in database (*dispatchers:false)
 		testDispatcherOptsDSPInitCfg,
 		testDispatcherOptsDSPStartEngine,
 		testDispatcherOptsDSPRPCConn,
-		testDispatcherOptsCoreStatus, // localhost(:4012) CoresV1Status
+		testDispatcherOptsCoreStatus, // localhost(:2012) CoresV1Status
+
+		testDispatcherGetItemBothEngines1,
+		testDispatcherAdminCoreStatus,
 
 		testDispatcherOptsAdminSetDispatcherHost4012,
-		//testDispatcherOptsCoreStatusHost4012,
+		testDisaptcherCacheClearBothEngines,
 
-		testDispatcherOptsAdminSetDispatcherProfileDoubleHost,
-		testDispatcherOptsCoreStatusWithRouteID,
-
-		testDispatcherOptsAdminSetDispatcherHostInexistent,
-		testDispatcherOptsCoreStatusWithRouteID2,
-
-		testDispatcherOptsCoreStatusWithoutRouteID,
+		testDispatcherOptsCoreStatusHost4012,
+		testDispatcherGetItemBothEngines2,
 
 		testDispatcherOptsDSPStopEngine,
 		testDispatcherOptsAdminStopEngine,
@@ -115,7 +114,7 @@ func testDispatcherOptsAdminSetDispatcherProfile(t *testing.T) {
 		DispatcherHost: &engine.DispatcherHost{
 			Tenant: "cgrates.org",
 			RemoteHost: &config.RemoteHost{
-				ID:              "SELF_ENGINE",
+				ID:              "HOST1",
 				Address:         "127.0.0.1:2012",
 				Transport:       "*json",
 				ConnectAttempts: 1,
@@ -143,7 +142,7 @@ func testDispatcherOptsAdminSetDispatcherProfile(t *testing.T) {
 			Weight:   10,
 			Hosts: engine.DispatcherHostProfiles{
 				{
-					ID:     "SELF_ENGINE",
+					ID:     "HOST1",
 					Weight: 5,
 				},
 			},
@@ -185,7 +184,56 @@ func testDispatcherOptsDSPRPCConn(t *testing.T) {
 }
 
 func testDispatcherOptsCoreStatus(t *testing.T) {
-	//SELF_ENGINE HOST
+	// HOST1 host matched
+	var reply map[string]interface{}
+	ev := utils.TenantWithAPIOpts{
+		Tenant: "cgrates.org",
+		APIOpts: map[string]interface{}{
+			"*host":           "HOST2",
+			utils.OptsRouteID: "account#dan.bogos",
+		},
+	}
+	if err := dspOptsRPC.Call(context.Background(), utils.CoreSv1Status, &ev, &reply); err != nil {
+		t.Error(err)
+	} else if reply[utils.NodeID] != "HOST1" {
+		t.Errorf("Expected HOST1, received %v", reply[utils.NodeID])
+	}
+}
+
+func testDispatcherGetItemBothEngines1(t *testing.T) {
+	argsCache := &utils.ArgsGetCacheItemWithAPIOpts{
+		Tenant: "cgrates.org",
+		APIOpts: map[string]interface{}{
+			utils.OptsDispatchers: false,
+		},
+		ArgsGetCacheItem: utils.ArgsGetCacheItem{
+			CacheID: utils.CacheDispatcherRoutes,
+			ItemID:  "account#dan.bogos:*core",
+		},
+	}
+	var reply interface{}
+	if err := dspOptsRPC.Call(context.Background(), utils.CacheSv1GetItemWithRemote, argsCache,
+		&reply); err != nil {
+		t.Error(err)
+	} else {
+		expected := map[string]interface{}{
+			utils.Tenant:    "cgrates.org",
+			utils.ProfileID: "DSP1",
+			"HostID":        "HOST1",
+		}
+		if !reflect.DeepEqual(expected, reply) {
+			t.Errorf("Expected %+v, \n received %+v", utils.ToJSON(expected), utils.ToJSON(reply))
+		}
+	}
+
+	if err := adminsRPC.Call(context.Background(), utils.CacheSv1GetItemWithRemote, argsCache,
+		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+}
+
+func testDispatcherAdminCoreStatus(t *testing.T) {
+	// HOST2 host matched because it was called from engine with port :4012 -> host2
 	var reply map[string]interface{}
 	ev := utils.TenantWithAPIOpts{
 		Tenant: "cgrates.org",
@@ -193,12 +241,10 @@ func testDispatcherOptsCoreStatus(t *testing.T) {
 			utils.OptsDispatchers: false,
 		},
 	}
-	if err := dspOptsRPC.Call(context.Background(), utils.CoreSv1Status, &ev, &reply); err != nil {
+	if err := adminsRPC.Call(context.Background(), utils.CoreSv1Status, &ev, &reply); err != nil {
 		t.Error(err)
-	} else {
-		/*
-			t.Errorf("Received: %s", utils.ToJSON(reply))
-		*/
+	} else if reply[utils.NodeID] != "HOST2" {
+		t.Errorf("Expected HOST2, received %v", reply[utils.NodeID])
 	}
 }
 
@@ -209,7 +255,7 @@ func testDispatcherOptsAdminSetDispatcherHost4012(t *testing.T) {
 		DispatcherHost: &engine.DispatcherHost{
 			Tenant: "cgrates.org",
 			RemoteHost: &config.RemoteHost{
-				ID:              "HOST4012",
+				ID:              "HOST2",
 				Address:         "127.0.0.1:4012",
 				Transport:       "*json",
 				ConnectAttempts: 1,
@@ -237,7 +283,7 @@ func testDispatcherOptsAdminSetDispatcherHost4012(t *testing.T) {
 			Weight:   10,
 			Hosts: engine.DispatcherHostProfiles{
 				{
-					ID:     "HOST4012",
+					ID:     "HOST2",
 					Weight: 10,
 				},
 			},
@@ -258,151 +304,70 @@ func testDispatcherOptsCoreStatusHost4012(t *testing.T) {
 	var reply map[string]interface{}
 	ev := utils.TenantWithAPIOpts{
 		Tenant: "cgrates.org",
-	}
-	if err := dspOptsRPC.Call(context.Background(), utils.CoreSv1Status, &ev, &reply); err != nil {
-		t.Error(err)
-	} else {
-		/*
-			t.Errorf("Received: %s", utils.ToJSON(reply))
-		*/
-	}
-}
-
-func testDispatcherOptsAdminSetDispatcherProfileDoubleHost(t *testing.T) {
-	// Set DispatcherProfile with both engines
-	setDispatcherProfile := &engine.DispatcherProfileWithAPIOpts{
-		DispatcherProfile: &engine.DispatcherProfile{
-			Tenant:   "cgrates.org",
-			ID:       "DSP1",
-			Strategy: "*weight",
-			Weight:   10,
-			Hosts: engine.DispatcherHostProfiles{
-				{
-					ID:     "SELF_ENGINE",
-					Weight: 5,
-				},
-				{
-					ID:     "HOST4012",
-					Weight: 10,
-				},
-			},
-		},
 		APIOpts: map[string]interface{}{
-			utils.OptsDispatchers: false,
-		},
-	}
-	var replyStr string
-	if err := adminsRPC.Call(context.Background(), utils.AdminSv1SetDispatcherProfile, setDispatcherProfile, &replyStr); err != nil {
-		t.Error("Unexpected error when calling AdminSv1.SetDispatcherProfile: ", err)
-	} else if replyStr != utils.OK {
-		t.Error("Unexpected reply returned", replyStr)
-	}
-}
-
-func testDispatcherOptsCoreStatusWithRouteID(t *testing.T) {
-	// now it will dispatch in both engines
-	var reply map[string]interface{}
-	ev := utils.TenantWithAPIOpts{
-		Tenant: "cgrates.org",
-		APIOpts: map[string]interface{}{
+			"*host":           "HOST2",
 			utils.OptsRouteID: "account#dan.bogos",
 		},
 	}
 	if err := dspOptsRPC.Call(context.Background(), utils.CoreSv1Status, &ev, &reply); err != nil {
 		t.Error(err)
-	} else {
-		/*
-			t.Errorf("Received: %s", utils.ToJSON(reply))
-		*/
+	} else if reply[utils.NodeID] != "HOST2" {
+		t.Errorf("Expected HOST1, received %v", reply[utils.NodeID])
 	}
 }
 
-func testDispatcherOptsAdminSetDispatcherHostInexistent(t *testing.T) {
-	// Set DispatcherHost on 4012 host
-	var replyStr string
-	setDispatcherHost := &engine.DispatcherHostWithAPIOpts{
-		DispatcherHost: &engine.DispatcherHost{
-			Tenant: "cgrates.org",
-			RemoteHost: &config.RemoteHost{
-				ID:              "INEXISTENT",
-				Address:         "127.0.0.1:1223",
-				Transport:       "*json",
-				ConnectAttempts: 1,
-				Reconnects:      3,
-				ConnectTimeout:  time.Minute,
-				ReplyTimeout:    2 * time.Minute,
-			},
-		},
+func testDisaptcherCacheClearBothEngines(t *testing.T) {
+	var reply string
+	if err := dspOptsRPC.Call(context.Background(), utils.CacheSv1Clear, &utils.AttrCacheIDsWithAPIOpts{
 		APIOpts: map[string]interface{}{
 			utils.OptsDispatchers: false,
 		},
-	}
-	if err := adminsRPC.Call(context.Background(), utils.AdminSv1SetDispatcherHost, setDispatcherHost, &replyStr); err != nil {
-		t.Error("Unexpected error when calling AdminSv1.SetDispatcherHost: ", err)
-	} else if replyStr != utils.OK {
-		t.Error("Unexpected reply returned", replyStr)
+	}, &reply); err != nil {
+		t.Fatal(err)
+	} else if reply != utils.OK {
+		t.Errorf("Unexpected reply returned")
 	}
 
-	// Set DispatcherProfile Different with an inexistent engine opened, but with a bigger weight(this should match now)
-	setDispatcherProfile := &engine.DispatcherProfileWithAPIOpts{
-		DispatcherProfile: &engine.DispatcherProfile{
-			Tenant:   "cgrates.org",
-			ID:       "DSP1",
-			Strategy: "*weight",
-			Weight:   20,
-			Hosts: engine.DispatcherHostProfiles{
-				{
-					ID:     "INEXISTENT",
-					Weight: 10,
-				},
-			},
-		},
+	if err := adminsRPC.Call(context.Background(), utils.CacheSv1Clear, &utils.AttrCacheIDsWithAPIOpts{
 		APIOpts: map[string]interface{}{
 			utils.OptsDispatchers: false,
 		},
-	}
-	if err := adminsRPC.Call(context.Background(), utils.AdminSv1SetDispatcherProfile, setDispatcherProfile, &replyStr); err != nil {
-		t.Error("Unexpected error when calling AdminSv1.SetDispatcherProfile: ", err)
-	} else if replyStr != utils.OK {
-		t.Error("Unexpected reply returned", replyStr)
-	}
-}
-
-func testDispatcherOptsCoreStatusWithRouteID2(t *testing.T) {
-	// because we have the routeID it will match DSP1 and last host matched, host4012
-	// so again, both engines will match
-	var reply map[string]interface{}
-	ev := utils.TenantWithAPIOpts{
-		Tenant: "cgrates.org",
-		APIOpts: map[string]interface{}{
-			utils.OptsRouteID: "account#dan.bogos",
-		},
-	}
-	if err := dspOptsRPC.Call(context.Background(), utils.CoreSv1Status, &ev, &reply); err != nil {
-		t.Error(err)
-	} else {
-		/*
-			t.Errorf("Received: %s", utils.ToJSON(reply))
-		*/
+	}, &reply); err != nil {
+		t.Fatal(err)
+	} else if reply != utils.OK {
+		t.Errorf("Unexpected reply returned")
 	}
 }
 
-func testDispatcherOptsCoreStatusWithoutRouteID(t *testing.T) {
-	// because we have the routeID it will match DSP1 and last host matched, host4012
-	// so again, both engines will match
-	var reply map[string]interface{}
-	ev := utils.TenantWithAPIOpts{
+func testDispatcherGetItemBothEngines2(t *testing.T) {
+	argsCache := &utils.ArgsGetCacheItemWithAPIOpts{
 		Tenant: "cgrates.org",
 		APIOpts: map[string]interface{}{
-			"ATTEMPTS": 2,
+			utils.OptsDispatchers: false,
+		},
+		ArgsGetCacheItem: utils.ArgsGetCacheItem{
+			CacheID: utils.CacheDispatcherRoutes,
+			ItemID:  "account#dan.bogos:*core",
 		},
 	}
-	if err := dspOptsRPC.Call(context.Background(), utils.CoreSv1Status, &ev, &reply); err != nil {
+	var reply interface{}
+	if err := dspOptsRPC.Call(context.Background(), utils.CacheSv1GetItemWithRemote, argsCache,
+		&reply); err != nil {
 		t.Error(err)
 	} else {
-		/*
-			t.Errorf("Received: %s", utils.ToJSON(reply))
-		*/
+		expected := map[string]interface{}{
+			utils.Tenant:    "cgrates.org",
+			utils.ProfileID: "DSP1",
+			"HostID":        "HOST2",
+		}
+		if !reflect.DeepEqual(expected, reply) {
+			t.Errorf("Expected %+v, \n received %+v", utils.ToJSON(expected), utils.ToJSON(reply))
+		}
+	}
+
+	if err := adminsRPC.Call(context.Background(), utils.CacheSv1GetItemWithRemote, argsCache,
+		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
 	}
 }
 
