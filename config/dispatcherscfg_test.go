@@ -74,6 +74,7 @@ func TestDispatcherSCfgAsMapInterface(t *testing.T) {
 		utils.NestedFieldsCfg:        false,
 		utils.AttributeSConnsCfg:     []string{},
 		utils.AnySubsystemCfg:        true,
+		utils.PreventLoopCfg:         false,
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
@@ -92,6 +93,7 @@ func TestDispatcherSCfgAsMapInterface1(t *testing.T) {
             "suffix_indexed_fields": ["*req.prefix"],
 			"nested_fields": false,
 			"attributes_conns": ["*internal:*attributes", "*conn1"],
+			"prevent_loop": true
 		},
 		
 }`
@@ -104,6 +106,7 @@ func TestDispatcherSCfgAsMapInterface1(t *testing.T) {
 		utils.NestedFieldsCfg:        false,
 		utils.AttributeSConnsCfg:     []string{"*internal", "*conn1"},
 		utils.AnySubsystemCfg:        true,
+		utils.PreventLoopCfg:         true,
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
@@ -124,6 +127,7 @@ func TestDispatcherSCfgAsMapInterface2(t *testing.T) {
 		utils.NestedFieldsCfg:        false,
 		utils.AttributeSConnsCfg:     []string{},
 		utils.AnySubsystemCfg:        true,
+		utils.PreventLoopCfg:         false,
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
