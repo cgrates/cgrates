@@ -159,7 +159,6 @@ func (dH *DispatcherHost) GetConn(ctx *context.Context, cfg *config.CGRConfig, i
 			utils.EmptyString, utils.EmptyString, nil); err != nil {
 			return
 		}
-
 	}
 	return dH.rpcConn, nil
 }
