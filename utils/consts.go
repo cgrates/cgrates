@@ -2276,6 +2276,7 @@ const (
 
 	// DispatcherSCfg
 	AnySubsystemCfg = "any_subsystem"
+	PreventLoopCfg  = "prevent_loop"
 )
 
 // FC Template

@@ -1,7 +1,7 @@
 {
 
     "general": {
-        "node_id": "DispatcherOpts",
+        "node_id": "HOST1",
         "log_level": 7
     },
         
@@ -27,10 +27,15 @@
         
     
     "dispatchers":{
-        "enabled": true
+        "enabled": true,
+        "prevent_loop": true
     }, 
         
     "caches":{
+        "partitions": {
+            "*dispatcher_routes": {"limit": -1, "ttl": "", "static_ttl": false, "remote":true, "replicate": false}, 						// control dispatcher routes caching
+            "*dispatchers": {"limit": -1, "ttl": "", "static_ttl": false, "remote":true, "replicate": false}								// control dispatcher interface
+        },
         "remote_conns": ["gob_cache"]               
     },    
     
