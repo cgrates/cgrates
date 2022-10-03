@@ -156,7 +156,7 @@ func testLdPrMatchRtCDRSProcessEvent(t *testing.T) {
 			utils.Usage:        time.Minute,
 		},
 		APIOpts: map[string]interface{}{
-			utils.OptsRateS:      true,
+			utils.MetaRates:      true,
 			utils.OptsCDRsExport: true,
 			utils.MetaAccounts:   false,
 		},
@@ -220,7 +220,7 @@ func testLdPrMatchRtCDRSProcessEvent(t *testing.T) {
 						},
 					},
 				},
-				utils.OptsRateS:      true,
+				utils.MetaRates:      true,
 				utils.OptsCDRsExport: true,
 				utils.MetaAccounts:   false,
 			},

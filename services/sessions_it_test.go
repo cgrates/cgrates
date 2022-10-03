@@ -125,7 +125,7 @@ func TestSessionSReload1(t *testing.T) {
 		APIOpts: map[string]interface{}{
 			utils.MetaRunID:       utils.MetaDefault,
 			utils.OptsSesInitiate: true,
-			utils.OptsThresholdS:  true,
+			utils.MetaThresholds:  true,
 		},
 	}
 	var rply sessions.V1InitSessionReply

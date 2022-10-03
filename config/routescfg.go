@@ -146,7 +146,7 @@ func (rts *RouteSCfg) loadFromJSONCfg(jsnCfg *RouteSJsonCfg) (err error) {
 		rts.StatSConns = updateInternalConns(*jsnCfg.Stats_conns, utils.MetaStats)
 	}
 	if jsnCfg.Rates_conns != nil {
-		rts.RateSConns = updateInternalConns(*jsnCfg.Rates_conns, utils.MetaRateS)
+		rts.RateSConns = updateInternalConns(*jsnCfg.Rates_conns, utils.MetaRates)
 	}
 	if jsnCfg.Accounts_conns != nil {
 		rts.AccountSConns = updateInternalConns(*jsnCfg.Accounts_conns, utils.MetaAccounts)

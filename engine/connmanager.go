@@ -253,7 +253,7 @@ func (cM *ConnManager) EnableDispatcher(dsp IntService) {
 		case strings.HasPrefix(m, utils.GuardianS):
 			key = utils.MetaGuardian
 		case strings.HasPrefix(m, utils.RateS):
-			key = utils.MetaRateS
+			key = utils.MetaRates
 		case strings.HasPrefix(m, utils.ResourceS):
 			key = utils.MetaResources
 		case strings.HasPrefix(m, utils.RouteS):

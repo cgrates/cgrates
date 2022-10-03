@@ -54,7 +54,7 @@ func TestRouteSCfgloadFromJsonCfg(t *testing.T) {
 		AttributeSConns:        []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), "conn1"},
 		ResourceSConns:         []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources), "conn1"},
 		StatSConns:             []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), "conn1"},
-		RateSConns:             []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRateS), "conn1"},
+		RateSConns:             []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRates), "conn1"},
 		AccountSConns:          []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts), "conn1"},
 		DefaultRatio:           10,
 		NestedFields:           true,

@@ -134,7 +134,7 @@ func (cdrscfg *CdrsCfg) loadFromJSONCfg(jsnCdrsCfg *CdrsJsonCfg) (err error) {
 		cdrscfg.EEsConns = updateInternalConns(*jsnCdrsCfg.Ees_conns, utils.MetaEEs)
 	}
 	if jsnCdrsCfg.Rates_conns != nil {
-		cdrscfg.RateSConns = updateInternalConns(*jsnCdrsCfg.Rates_conns, utils.MetaRateS)
+		cdrscfg.RateSConns = updateInternalConns(*jsnCdrsCfg.Rates_conns, utils.MetaRates)
 	}
 	if jsnCdrsCfg.Accounts_conns != nil {
 		cdrscfg.AccountSConns = updateInternalConns(*jsnCdrsCfg.Accounts_conns, utils.MetaAccounts)
@@ -148,13 +148,13 @@ func (cdrscfg *CdrsCfg) loadFromJSONCfg(jsnCdrsCfg *CdrsJsonCfg) (err error) {
 // AsMapInterface returns the config as a map[string]interface{}
 func (cdrscfg CdrsCfg) AsMapInterface(string) interface{} {
 	opts := map[string]interface{}{
-		utils.MetaAccountSCfg:   cdrscfg.Opts.Accounts,
-		utils.MetaAttributeSCfg: cdrscfg.Opts.Attributes,
-		utils.MetaChargerSCfg:   cdrscfg.Opts.Chargers,
-		utils.MetaEeSCfg:        cdrscfg.Opts.Export,
-		utils.MetaRateSCfg:      cdrscfg.Opts.Rates,
-		utils.MetaStatSCfg:      cdrscfg.Opts.Stats,
-		utils.MetaThresholdSCfg: cdrscfg.Opts.Thresholds,
+		utils.MetaAccounts:   cdrscfg.Opts.Accounts,
+		utils.MetaAttributes: cdrscfg.Opts.Attributes,
+		utils.MetaChargers:   cdrscfg.Opts.Chargers,
+		utils.MetaEEs:        cdrscfg.Opts.Export,
+		utils.MetaRates:      cdrscfg.Opts.Rates,
+		utils.MetaStats:      cdrscfg.Opts.Stats,
+		utils.MetaThresholds: cdrscfg.Opts.Thresholds,
 	}
 	mp := map[string]interface{}{
 		utils.EnabledCfg:          cdrscfg.Enabled,
@@ -275,12 +275,12 @@ func (cdrscfg CdrsCfg) Clone() (cln *CdrsCfg) {
 
 type CdrsOptsJson struct {
 	Accounts   []*utils.DynamicBoolOpt `json:"*accounts"`
-	Attributes []*utils.DynamicBoolOpt `json:"*attributeS"`
-	Chargers   []*utils.DynamicBoolOpt `json:"*chargerS"`
-	Export     []*utils.DynamicBoolOpt `json:"*eeS"`
-	Rates      []*utils.DynamicBoolOpt `json:"*rateS"`
-	Stats      []*utils.DynamicBoolOpt `json:"*statS"`
-	Thresholds []*utils.DynamicBoolOpt `json:"*thresholdS"`
+	Attributes []*utils.DynamicBoolOpt `json:"*attributes"`
+	Chargers   []*utils.DynamicBoolOpt `json:"*chargers"`
+	Export     []*utils.DynamicBoolOpt `json:"*ees"`
+	Rates      []*utils.DynamicBoolOpt `json:"*rates"`
+	Stats      []*utils.DynamicBoolOpt `json:"*stats"`
+	Thresholds []*utils.DynamicBoolOpt `json:"*thresholds"`
 }
 
 // Cdrs config section

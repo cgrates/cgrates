@@ -196,7 +196,7 @@ func (cdrS *CDRServer) processEvent(ctx *context.Context, ev *utils.CGREvent) (e
 	// making the options
 	var attrS bool
 	if attrS, err = GetBoolOpts(ctx, ev.Tenant, ev.AsDataProvider(), cdrS.fltrS, cdrS.cfg.CdrsCfg().Opts.Attributes,
-		config.CDRsAttributesDftOpt, utils.OptsAttributeS); err != nil {
+		config.CDRsAttributesDftOpt, utils.MetaAttributes); err != nil {
 		return
 	}
 	if attrS {
@@ -212,7 +212,7 @@ func (cdrS *CDRServer) processEvent(ctx *context.Context, ev *utils.CGREvent) (e
 	var cgrEvs []*utils.CGREvent
 	var chrgS bool
 	if chrgS, err = GetBoolOpts(ctx, ev.Tenant, ev.AsDataProvider(), cdrS.fltrS, cdrS.cfg.CdrsCfg().Opts.Chargers,
-		config.CDRsChargersDftOpt, utils.OptsChargerS); err != nil {
+		config.CDRsChargersDftOpt, utils.MetaChargers); err != nil {
 		return
 	}
 	if chrgS {
@@ -232,7 +232,7 @@ func (cdrS *CDRServer) processEvent(ctx *context.Context, ev *utils.CGREvent) (e
 	var rateS bool
 	for _, cgrEv := range cgrEvs {
 		if rateS, err = GetBoolOpts(ctx, cgrEv.Tenant, cgrEv.AsDataProvider(), cdrS.fltrS, cdrS.cfg.CdrsCfg().Opts.Rates,
-			config.CDRsRatesDftOpt, utils.OptsRateS); err != nil {
+			config.CDRsRatesDftOpt, utils.MetaRates); err != nil {
 			return
 		}
 		if rateS {
@@ -308,7 +308,7 @@ func (cdrS *CDRServer) processEvent(ctx *context.Context, ev *utils.CGREvent) (e
 	var thdS bool
 	for _, cgrEv := range cgrEvs {
 		if thdS, err = GetBoolOpts(ctx, cgrEv.Tenant, cgrEv.AsDataProvider(), cdrS.fltrS, cdrS.cfg.CdrsCfg().Opts.Thresholds,
-			config.CDRsThresholdsDftOpt, utils.OptsThresholdS); err != nil {
+			config.CDRsThresholdsDftOpt, utils.MetaThresholds); err != nil {
 			return
 		}
 		if thdS {
@@ -324,7 +324,7 @@ func (cdrS *CDRServer) processEvent(ctx *context.Context, ev *utils.CGREvent) (e
 	var stS bool
 	for _, cgrEv := range cgrEvs {
 		if stS, err = GetBoolOpts(ctx, cgrEv.Tenant, cgrEv.AsDataProvider(), cdrS.fltrS, cdrS.cfg.CdrsCfg().Opts.Stats,
-			config.CDRsStatsDftOpt, utils.OptsStatS); err != nil {
+			config.CDRsStatsDftOpt, utils.MetaStats); err != nil {
 			return
 		}
 		if stS {

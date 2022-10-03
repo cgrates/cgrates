@@ -234,7 +234,7 @@ func TestGetTariffPlansKeys(t *testing.T) {
 	if err := dm.SetRateProfile(context.Background(), rt, false, true); err != nil {
 		t.Error(err)
 	}
-	rcv, _ = getTariffPlansKeys(context.Background(), dm, "cgrates.org", utils.MetaRateS)
+	rcv, _ = getTariffPlansKeys(context.Background(), dm, "cgrates.org", utils.MetaRates)
 	exp = []string{"TEST_RATE_TEST"}
 	if !reflect.DeepEqual(rcv, exp) {
 		t.Errorf("Expected %v\n but received %v", exp, rcv)

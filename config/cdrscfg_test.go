@@ -49,7 +49,7 @@ func TestCdrsCfgloadFromJsonCfg(t *testing.T) {
 		OnlineCDRExports: []string{"randomVal"},
 		ActionSConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaActions), "*conn1"},
 		EEsConns:         []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs), "*conn1"},
-		RateSConns:       []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRateS), "*conn1"},
+		RateSConns:       []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRates), "*conn1"},
 		AccountSConns:    []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts), "*conn1"},
 		ExtraFields:      RSRParsers{},
 		Opts: &CdrsOpts{
@@ -201,13 +201,13 @@ func TestCdrsCfgAsMapInterface(t *testing.T) {
 		utils.RateSConnsCfg:       []string{utils.MetaInternal, "*conn1"},
 		utils.AccountSConnsCfg:    []string{utils.MetaInternal, "*conn1"},
 		utils.OptsCfg: map[string]interface{}{
-			utils.MetaAccountSCfg:   []*utils.DynamicBoolOpt{},
-			utils.MetaAttributeSCfg: []*utils.DynamicBoolOpt{},
-			utils.MetaChargerSCfg:   []*utils.DynamicBoolOpt{},
-			utils.MetaEeSCfg:        []*utils.DynamicBoolOpt{},
-			utils.MetaRateSCfg:      []*utils.DynamicBoolOpt{},
-			utils.MetaStatSCfg:      []*utils.DynamicBoolOpt{},
-			utils.MetaThresholdSCfg: []*utils.DynamicBoolOpt{},
+			utils.MetaAccounts:   []*utils.DynamicBoolOpt{},
+			utils.MetaAttributes: []*utils.DynamicBoolOpt{},
+			utils.MetaChargers:   []*utils.DynamicBoolOpt{},
+			utils.MetaEEs:        []*utils.DynamicBoolOpt{},
+			utils.MetaRates:      []*utils.DynamicBoolOpt{},
+			utils.MetaStats:      []*utils.DynamicBoolOpt{},
+			utils.MetaThresholds: []*utils.DynamicBoolOpt{},
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
@@ -240,13 +240,13 @@ func TestCdrsCfgAsMapInterface2(t *testing.T) {
 		utils.RateSConnsCfg:       []string{},
 		utils.AccountSConnsCfg:    []string{},
 		utils.OptsCfg: map[string]interface{}{
-			utils.MetaAccountSCfg:   []*utils.DynamicBoolOpt{},
-			utils.MetaAttributeSCfg: []*utils.DynamicBoolOpt{},
-			utils.MetaChargerSCfg:   []*utils.DynamicBoolOpt{},
-			utils.MetaEeSCfg:        []*utils.DynamicBoolOpt{},
-			utils.MetaRateSCfg:      []*utils.DynamicBoolOpt{},
-			utils.MetaStatSCfg:      []*utils.DynamicBoolOpt{},
-			utils.MetaThresholdSCfg: []*utils.DynamicBoolOpt{},
+			utils.MetaAccounts:   []*utils.DynamicBoolOpt{},
+			utils.MetaAttributes: []*utils.DynamicBoolOpt{},
+			utils.MetaChargers:   []*utils.DynamicBoolOpt{},
+			utils.MetaEEs:        []*utils.DynamicBoolOpt{},
+			utils.MetaRates:      []*utils.DynamicBoolOpt{},
+			utils.MetaStats:      []*utils.DynamicBoolOpt{},
+			utils.MetaThresholds: []*utils.DynamicBoolOpt{},
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {

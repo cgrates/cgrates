@@ -193,7 +193,7 @@ func testSessVolDiscAuthorizeEventSortRoutes1Min30Sec(t *testing.T) {
 		},
 		APIOpts: map[string]interface{}{
 			utils.MetaUsage:                time.Minute + 30*time.Second,
-			utils.OptsRouteS:               true,
+			utils.MetaRoutes:               true,
 			utils.MetaProfileIgnoreFilters: true,
 		},
 	}
@@ -260,7 +260,7 @@ func testSessVolDiscAuthorizeEventSortRoutes11Min10Sec(t *testing.T) {
 		},
 		APIOpts: map[string]interface{}{
 			utils.MetaUsage:                11*time.Minute + 10*time.Second,
-			utils.OptsRouteS:               true,
+			utils.MetaRoutes:               true,
 			utils.MetaProfileIgnoreFilters: true,
 		},
 	}
@@ -327,7 +327,7 @@ func testSessVolDiscAuthorizeEventSortRoutes20Min(t *testing.T) {
 		},
 		APIOpts: map[string]interface{}{
 			utils.MetaUsage:                20 * time.Minute,
-			utils.OptsRouteS:               true,
+			utils.MetaRoutes:               true,
 			utils.MetaProfileIgnoreFilters: true,
 		},
 	}
@@ -522,7 +522,7 @@ func testSessVolDiscAuthorizeEventSortRoutes1Min30SecAfterDebiting(t *testing.T)
 		},
 		APIOpts: map[string]interface{}{
 			utils.MetaUsage:                time.Minute + 30*time.Second,
-			utils.OptsRouteS:               true,
+			utils.MetaRoutes:               true,
 			utils.MetaProfileIgnoreFilters: true,
 		},
 	}

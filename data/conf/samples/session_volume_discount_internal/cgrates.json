@@ -39,14 +39,14 @@
         "rates_conns": ["*localhost"],
         "ees_conns":["*localhost"],
         "opts": {			
-            "*chargerS": [
+            "*chargers": [
                 {
                     "Tenant": "*any",
                     "FilterIDs": ["*notstring:~*req.Account:sipp"],
                     "Value": true,
                 },
             ],
-            "*rateS": [
+            "*rates": [
                 {
                     "Tenant": "*any",
                     "FilterIDs": ["*notstring:~*req.Account:sipp|1001"],
@@ -65,7 +65,7 @@
                     "Value": true,
                 },
             ],			
-            "*eeS": [
+            "*ees": [
                 {
                     "Tenant": "*any",
                     "Value": true,

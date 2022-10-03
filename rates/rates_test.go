@@ -1058,7 +1058,7 @@ func TestCDRProcessRatesCostForEvent(t *testing.T) {
 			"enabled": true,
 			"rates_conns": ["*internal"],
 			"opts": {
-				"*rateS": [
+				"*rates": [
 					{
 						"Tenant": "cgrates.org",
 						"FilterIDs": [],
@@ -1092,7 +1092,7 @@ func TestCDRProcessRatesCostForEvent(t *testing.T) {
 	}
 	ratesConns <- rateSrv
 
-	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRateS), utils.RateSv1, ratesConns)
+	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRates), utils.RateSv1, ratesConns)
 	// set a RateProfile for usage
 	ratePrf := &utils.RateProfile{
 		Tenant:          utils.CGRateSorg,

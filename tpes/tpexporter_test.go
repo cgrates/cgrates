@@ -63,7 +63,7 @@ func TestNewTPExporter(t *testing.T) {
 	}
 
 	//Rates
-	rcv, err = newTPExporter(utils.MetaRateS, nil)
+	rcv, err = newTPExporter(utils.MetaRates, nil)
 	if err != nil {
 		t.Error(err)
 	}

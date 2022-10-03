@@ -49,7 +49,7 @@ func TestAccountSCfgLoadFromJSONCfg(t *testing.T) {
 	expected := &AccountSCfg{
 		Enabled:                true,
 		AttributeSConns:        []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)},
-		RateSConns:             []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRateS)},
+		RateSConns:             []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRates)},
 		ThresholdSConns:        []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)},
 		IndexedSelects:         false,
 		StringIndexedFields:    &[]string{"*req.index1"},

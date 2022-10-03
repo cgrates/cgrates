@@ -188,7 +188,7 @@ var (
 				},
 				{
 					Type:    utils.MetaNotExists,
-					Element: "~*opts.*rateS",
+					Element: "~*opts.*rates",
 				},
 			},
 		},
@@ -359,7 +359,7 @@ func testV1FIdxSetAttributeSProfileWithFltr(t *testing.T) {
 		"*string:*opts.*originID:QWEASDZXC:TEST_ATTRIBUTES_IT_TEST",
 		"*string:*opts.*originID:IOPJKLBNM:TEST_ATTRIBUTES_IT_TEST",
 		"*string:*opts.Subsystems:*attributes:TEST_ATTRIBUTES_IT_TEST",
-		"*notexists:*opts.*rateS:*none:TEST_ATTRIBUTES_IT_TEST"}
+		"*notexists:*opts.*rates:*none:TEST_ATTRIBUTES_IT_TEST"}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
 		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaAttributes},
 		&replyIdx); err != nil {
@@ -872,7 +872,7 @@ func testV1FIdxSetAccountWithFltr(t *testing.T) {
 		"*string:*opts.*originID:QWEASDZXC:ACCOUNT_FILTER_INDEXES",
 		"*string:*opts.*originID:IOPJKLBNM:ACCOUNT_FILTER_INDEXES",
 		"*string:*opts.Subsystems:*attributes:ACCOUNT_FILTER_INDEXES",
-		"*notexists:*opts.*rateS:*none:ACCOUNT_FILTER_INDEXES"}
+		"*notexists:*opts.*rates:*none:ACCOUNT_FILTER_INDEXES"}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
 		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaAccounts},
 		&replyIdx); err != nil {
@@ -1364,7 +1364,7 @@ func testV1FIdxSetActionProfileWithFltr(t *testing.T) {
 		"*string:*opts.*originID:QWEASDZXC:REM_ACC",
 		"*string:*opts.*originID:IOPJKLBNM:REM_ACC",
 		"*string:*opts.Subsystems:*attributes:REM_ACC",
-		"*notexists:*opts.*rateS:*none:REM_ACC"}
+		"*notexists:*opts.*rates:*none:REM_ACC"}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
 		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaActions},
 		&replyIdx); err != nil {
@@ -1845,7 +1845,7 @@ func testV1FIdxSetChargerSProfileWithFltr(t *testing.T) {
 		"*string:*opts.*originID:QWEASDZXC:1001_Charger",
 		"*string:*opts.*originID:IOPJKLBNM:1001_Charger",
 		"*string:*opts.Subsystems:*attributes:1001_Charger",
-		"*notexists:*opts.*rateS:*none:1001_Charger"}
+		"*notexists:*opts.*rates:*none:1001_Charger"}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
 		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaChargers},
 		&replyIdx); err != nil {
@@ -2296,7 +2296,7 @@ func testV1FIdxSetRateSProfileWithFltr(t *testing.T) {
 		"*string:*opts.*originID:QWEASDZXC:RATE_1",
 		"*string:*opts.*originID:IOPJKLBNM:RATE_1",
 		"*string:*opts.Subsystems:*attributes:RATE_1",
-		"*notexists:*opts.*rateS:*none:RATE_1"}
+		"*notexists:*opts.*rates:*none:RATE_1"}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
 		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaRateProfiles},
 		&replyIdx); err != nil {
@@ -2786,7 +2786,7 @@ func testV1FIdxRateSProfileRatesWithFltr(t *testing.T) {
 		"*string:*req.RequestType:*prepaid:RT_ALWAYS",
 		"*string:*req.RequestType:*postpaid:RT_CHRISTMAS",
 		"*string:*opts.Subsystems:*attributes:RT_ALWAYS",
-		"*notexists:*opts.*rateS:*none:RT_ALWAYS"}
+		"*notexists:*opts.*rates:*none:RT_ALWAYS"}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
 		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaRateProfileRates,
 			Context: "RATE_1"}, &replyIdx); err != nil {
@@ -3388,7 +3388,7 @@ func testV1FIdxSetResourceSProfileWithFltr(t *testing.T) {
 		"*string:*opts.*originID:QWEASDZXC:RESOURCE1",
 		"*string:*opts.*originID:IOPJKLBNM:RESOURCE1",
 		"*string:*opts.Subsystems:*attributes:RESOURCE1",
-		"*notexists:*opts.*rateS:*none:RESOURCE1"}
+		"*notexists:*opts.*rates:*none:RESOURCE1"}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
 		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaResources},
 		&replyIdx); err != nil {
@@ -3849,7 +3849,7 @@ func testV1FIdxSetRouteSProfileWithFltr(t *testing.T) {
 		"*string:*opts.*originID:QWEASDZXC:ROUTE_1",
 		"*string:*opts.*originID:IOPJKLBNM:ROUTE_1",
 		"*string:*opts.Subsystems:*attributes:ROUTE_1",
-		"*notexists:*opts.*rateS:*none:ROUTE_1"}
+		"*notexists:*opts.*rates:*none:ROUTE_1"}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
 		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaRoutes},
 		&replyIdx); err != nil {
@@ -4339,7 +4339,7 @@ func testV1FIdxSetStatSProfileWithFltr(t *testing.T) {
 		"*string:*opts.*originID:QWEASDZXC:Stat_1",
 		"*string:*opts.*originID:IOPJKLBNM:Stat_1",
 		"*string:*opts.Subsystems:*attributes:Stat_1",
-		"*notexists:*opts.*rateS:*none:Stat_1"}
+		"*notexists:*opts.*rates:*none:Stat_1"}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
 		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaStats},
 		&replyIdx); err != nil {
@@ -4800,7 +4800,7 @@ func testV1FIdxSetThresholdProfileWithFltr(t *testing.T) {
 		"*string:*opts.*originID:QWEASDZXC:THD_ACNT_1001",
 		"*string:*opts.*originID:IOPJKLBNM:THD_ACNT_1001",
 		"*string:*opts.Subsystems:*attributes:THD_ACNT_1001",
-		"*notexists:*opts.*rateS:*none:THD_ACNT_1001"}
+		"*notexists:*opts.*rates:*none:THD_ACNT_1001"}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
 		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaThresholds},
 		&replyIdx); err != nil {

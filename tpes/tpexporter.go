@@ -30,7 +30,7 @@ var tpExporterTypes = utils.NewStringSet([]string{
 	utils.MetaAttributes,
 	utils.MetaResources,
 	utils.MetaFilters,
-	utils.MetaRateS,
+	utils.MetaRates,
 	utils.MetaChargers,
 	utils.MetaRoutes,
 	utils.MetaAccounts,
@@ -51,7 +51,7 @@ var exportFileName = map[string]string{
 	utils.MetaChargers:        utils.ChargersCsv,
 	utils.MetaDispatchers:     utils.DispatcherProfilesCsv,
 	utils.MetaDispatcherHosts: utils.DispatcherHostsCsv,
-	utils.MetaRateS:           utils.RatesCsv,
+	utils.MetaRates:           utils.RatesCsv,
 	utils.MetaActions:         utils.ActionsCsv,
 	utils.MetaAccounts:        utils.AccountsCsv,
 }
@@ -70,7 +70,7 @@ func newTPExporter(expType string, dm *engine.DataManager) (tpE tpExporter, err 
 		return newTPResources(dm), nil
 	case utils.MetaFilters:
 		return newTPFilters(dm), nil
-	case utils.MetaRateS:
+	case utils.MetaRates:
 		return newTPRates(dm), nil
 	case utils.MetaChargers:
 		return newTPChargers(dm), nil

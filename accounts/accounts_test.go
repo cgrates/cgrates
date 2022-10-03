@@ -1485,11 +1485,11 @@ func TestV1DebitAbstractsEventCharges(t *testing.T) {
 	}) // update the name of the functions
 	rateSConn <- rateSrv
 
-	cfg.AccountSCfg().RateSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRateS)}
+	cfg.AccountSCfg().RateSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRates)}
 
 	connMngr := engine.NewConnManager(cfg)
 	connMngr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), utils.AttributeSv1, attrSConn)
-	connMngr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRateS), utils.RateSv1, rateSConn)
+	connMngr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRates), utils.RateSv1, rateSConn)
 
 	// provision the data
 	atrPrfl := &engine.AttributeProfile{
@@ -2001,11 +2001,11 @@ func TestV1DebitAbstractsEventChargesWithRefundCharges(t *testing.T) {
 	}) // update the name of the functions
 	rateSConn <- rateSrv
 
-	cfg.AccountSCfg().RateSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRateS)}
+	cfg.AccountSCfg().RateSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRates)}
 
 	connMngr := engine.NewConnManager(cfg)
 	connMngr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), utils.AttributeSv1, attrSConn)
-	connMngr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRateS), utils.RateSv1, rateSConn)
+	connMngr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRates), utils.RateSv1, rateSConn)
 
 	// provision the data
 	atrPrfl := &engine.AttributeProfile{
@@ -2523,7 +2523,7 @@ func TestDebitAbstractUsingRatesWithRoundByIncrement(t *testing.T) {
 	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.AccountSCfg().Enabled = true
-	cfg.AccountSCfg().RateSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRateS)}
+	cfg.AccountSCfg().RateSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRates)}
 	//cfg.AccountSCfg().IndexedSelects = false
 	cfg.RateSCfg().Enabled = true
 
@@ -2545,7 +2545,7 @@ func TestDebitAbstractUsingRatesWithRoundByIncrement(t *testing.T) {
 		t.Error(err)
 	}
 	ratesConns <- rateSrv
-	connMngr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRateS), utils.RateSv1, ratesConns)
+	connMngr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRates), utils.RateSv1, ratesConns)
 
 	//create the accounts obj
 	acnts := NewAccountS(cfg, fltrs, connMngr, dm)
