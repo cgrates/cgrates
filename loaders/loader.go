@@ -181,7 +181,7 @@ type loader struct {
 	Locker
 }
 
-func (l *loader) process(ctx *context.Context, obj profile, lType, action, caching string, withIndex, partialRates bool) (err error) {
+func (l *loader) process(ctx *context.Context, obj profile, lType, action string, opts map[string]interface{}, withIndex, partialRates bool) (err error) {
 	switch action {
 	case utils.MetaParse:
 		return
@@ -239,10 +239,12 @@ func (l *loader) process(ctx *context.Context, obj profile, lType, action, cachi
 		cacheIDs = []string{utils.CacheAccounts, utils.CacheAccountsFilterIndexes}
 	}
 
-	return engine.CallCache(l.connMgr, ctx, l.cacheConns, caching, cacheArgs, cacheIDs, nil, false, l.ldrCfg.Tenant)
+	return engine.CallCache(l.connMgr, ctx, l.cacheConns,
+		utils.FirstNonEmpty(utils.IfaceAsString(opts[utils.MetaCache]), l.ldrCfg.Opts.Cache, l.cfg.GeneralCfg().DefaultCaching),
+		cacheArgs, cacheIDs, opts, false, l.ldrCfg.Tenant)
 }
 
-func (l *loader) processData(ctx *context.Context, csv *CSVFile, tmpls []*config.FCTemplate, lType, action, caching string, withIndex, partialRates bool) (err error) {
+func (l *loader) processData(ctx *context.Context, csv *CSVFile, tmpls []*config.FCTemplate, lType, action string, opts map[string]interface{}, withIndex, partialRates bool) (err error) {
 	newPrf := newProfileFunc(lType)
 	obj := newPrf()
 	var prevTntID string
@@ -270,7 +272,7 @@ func (l *loader) processData(ctx *context.Context, csv *CSVFile, tmpls []*config
 
 		if tntID := tmp.TenantID(); prevTntID != tntID {
 			if len(prevTntID) != 0 {
-				if err = l.process(ctx, obj, lType, action, caching, withIndex, partialRates); err != nil {
+				if err = l.process(ctx, obj, lType, action, opts, withIndex, partialRates); err != nil {
 					return
 				}
 			}
@@ -280,18 +282,18 @@ func (l *loader) processData(ctx *context.Context, csv *CSVFile, tmpls []*config
 		obj.Merge(tmp)
 	}
 	if len(prevTntID) != 0 {
-		err = l.process(ctx, obj, lType, action, caching, withIndex, partialRates)
+		err = l.process(ctx, obj, lType, action, opts, withIndex, partialRates)
 	}
 	return
 }
 
-func (l *loader) processFile(ctx *context.Context, cfg *config.LoaderDataType, inPath, outPath, action, caching string, withIndex bool, prv CSVProvider) (err error) {
+func (l *loader) processFile(ctx *context.Context, cfg *config.LoaderDataType, inPath, outPath, action string, opts map[string]interface{}, withIndex bool, prv CSVProvider) (err error) {
 	var csv *CSVFile
 	if csv, err = NewCSVReader(prv, inPath, cfg.Filename, rune(l.ldrCfg.FieldSeparator[0]), 0); err != nil {
 		return
 	}
 	defer csv.Close()
-	if err = l.processData(ctx, csv, cfg.Fields, cfg.Type, action, caching,
+	if err = l.processData(ctx, csv, cfg.Fields, cfg.Type, action, opts,
 		withIndex, cfg.Flags.GetBool(utils.PartialRatesOpt)); err != nil || // encounterd error
 		outPath == utils.EmptyString || // or no moving
 		prv.Type() != utils.MetaFileCSV { // or the type can not be moved(e.g. url)
@@ -322,10 +324,10 @@ func (l *loader) processIFile(_, fileName string) (err error) {
 		return
 	}
 	defer l.Unlock()
-	return l.processFile(context.Background(), cfg, l.ldrCfg.TpInDir, l.ldrCfg.TpOutDir, l.ldrCfg.Action, utils.FirstNonEmpty(l.ldrCfg.Opts.Cache, l.cfg.GeneralCfg().DefaultCaching), l.ldrCfg.Opts.WithIndex, fileProvider{})
+	return l.processFile(context.Background(), cfg, l.ldrCfg.TpInDir, l.ldrCfg.TpOutDir, l.ldrCfg.Action, nil, l.ldrCfg.Opts.WithIndex, fileProvider{})
 }
 
-func (l *loader) processFolder(ctx *context.Context, caching string, withIndex, stopOnError bool) (err error) {
+func (l *loader) processFolder(ctx *context.Context, opts map[string]interface{}, withIndex, stopOnError bool) (err error) {
 	if err = l.Lock(); err != nil {
 		return
 	}
@@ -339,7 +341,7 @@ func (l *loader) processFolder(ctx *context.Context, caching string, withIndex, 
 		csvType = urlProvider{}
 	}
 	for _, cfg := range l.ldrCfg.Data {
-		if err = l.processFile(ctx, cfg, l.ldrCfg.TpInDir, l.ldrCfg.TpOutDir, l.ldrCfg.Action, caching, withIndex, csvType); err != nil {
+		if err = l.processFile(ctx, cfg, l.ldrCfg.TpInDir, l.ldrCfg.TpOutDir, l.ldrCfg.Action, opts, withIndex, csvType); err != nil {
 			if !stopOnError {
 				utils.Logger.Warning(fmt.Sprintf("<%s-%s> loaderType: <%s> cannot open files, err: %s",
 					utils.LoaderS, l.ldrCfg.ID, cfg.Type, err))
@@ -372,7 +374,7 @@ func (l *loader) moveUnprocessedFiles() (err error) {
 
 func (l *loader) handleFolder(stopChan chan struct{}) {
 	for {
-		go l.processFolder(context.Background(), l.ldrCfg.Opts.Cache, l.ldrCfg.Opts.WithIndex, false)
+		go l.processFolder(context.Background(), nil, l.ldrCfg.Opts.WithIndex, false)
 		timer := time.NewTimer(l.ldrCfg.RunDelay)
 		select {
 		case <-stopChan:
@@ -399,14 +401,14 @@ func (l *loader) ListenAndServe(stopChan chan struct{}) (err error) {
 	return
 }
 
-func (l *loader) processZip(ctx *context.Context, caching string, withIndex, stopOnError bool, zipR *zip.Reader) (err error) {
+func (l *loader) processZip(ctx *context.Context, opts map[string]interface{}, withIndex, stopOnError bool, zipR *zip.Reader) (err error) {
 	if err = l.Lock(); err != nil {
 		return
 	}
 	defer l.Unlock()
 	ziP := zipProvider{zipR}
 	for _, cfg := range l.ldrCfg.Data {
-		if err = l.processFile(ctx, cfg, l.ldrCfg.TpInDir, l.ldrCfg.TpOutDir, l.ldrCfg.Action, caching, withIndex, ziP); err != nil {
+		if err = l.processFile(ctx, cfg, l.ldrCfg.TpInDir, l.ldrCfg.TpOutDir, l.ldrCfg.Action, opts, withIndex, ziP); err != nil {
 			if !stopOnError {
 				utils.Logger.Warning(fmt.Sprintf("<%s-%s> loaderType: <%s> cannot open files, err: %s",
 					utils.LoaderS, l.ldrCfg.ID, cfg.Type, err))

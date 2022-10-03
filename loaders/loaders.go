@@ -113,7 +113,7 @@ func (ldrS *LoaderS) V1Run(ctx *context.Context, args *ArgsProcessFolder,
 			return
 		}
 	}
-	if err := ldr.processFolder(context.Background(), utils.FirstNonEmpty(utils.IfaceAsString(args.APIOpts[utils.MetaCache]), ldr.ldrCfg.Opts.Cache, ldrS.cfg.GeneralCfg().DefaultCaching),
+	if err := ldr.processFolder(context.Background(), args.APIOpts,
 		wI, soE); err != nil {
 		return utils.NewErrServerError(err)
 	}
@@ -173,7 +173,7 @@ func (ldrS *LoaderS) V1ImportZip(ctx *context.Context, args *ArgsProcessZip,
 			return
 		}
 	}
-	if err := ldr.processZip(context.Background(), utils.FirstNonEmpty(utils.IfaceAsString(args.APIOpts[utils.MetaCache]), ldr.ldrCfg.Opts.Cache, ldrS.cfg.GeneralCfg().DefaultCaching),
+	if err := ldr.processZip(context.Background(), args.APIOpts,
 		wI, soE, zipR); err != nil {
 		return utils.NewErrServerError(err)
 	}
