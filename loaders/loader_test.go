@@ -153,7 +153,7 @@ func TestDryRun(t *testing.T) {
 		ID:     "ID",
 		Rules:  []*engine.FilterRule{{}},
 	}); err == nil || err.Error() != expErrMsg {
-		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
+		t.Errorf("Expected: %v, received: %v", expErrMsg, err)
 	}
 }
 
@@ -201,7 +201,7 @@ func TestSetToDBWithDBError(t *testing.T) {
 
 	expErrMsg := `empty RSRParser in rule: <>`
 	if err := setToDB(context.Background(), nil, utils.MetaFilters, &engine.Filter{Rules: []*engine.FilterRule{{Type: "*"}}}, true, false); err == nil || err.Error() != expErrMsg {
-		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
+		t.Errorf("Expected: %v, received: %v", expErrMsg, err)
 	}
 }
 
@@ -215,7 +215,7 @@ func TestSetToDB(t *testing.T) {
 	if prf, err := dm.GetAttributeProfile(context.Background(), "cgrates.org", "ID", true, true, utils.NonTransactional); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(v1, prf) {
-		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v1), utils.ToJSON(prf))
+		t.Errorf("Expected: %v, received: %v", utils.ToJSON(v1), utils.ToJSON(prf))
 	}
 
 	v2 := &engine.ResourceProfile{Tenant: "cgrates.org", ID: "ID"}
@@ -225,7 +225,7 @@ func TestSetToDB(t *testing.T) {
 	if prf, err := dm.GetResourceProfile(context.Background(), "cgrates.org", "ID", true, true, utils.NonTransactional); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(v2, prf) {
-		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v2), utils.ToJSON(prf))
+		t.Errorf("Expected: %v, received: %v", utils.ToJSON(v2), utils.ToJSON(prf))
 	}
 
 	v3 := &engine.StatQueueProfile{Tenant: "cgrates.org", ID: "ID"}
@@ -235,7 +235,7 @@ func TestSetToDB(t *testing.T) {
 	if prf, err := dm.GetStatQueueProfile(context.Background(), "cgrates.org", "ID", true, true, utils.NonTransactional); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(v3, prf) {
-		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v3), utils.ToJSON(prf))
+		t.Errorf("Expected: %v, received: %v", utils.ToJSON(v3), utils.ToJSON(prf))
 	}
 
 	v4 := &engine.ThresholdProfile{Tenant: "cgrates.org", ID: "ID"}
@@ -245,7 +245,7 @@ func TestSetToDB(t *testing.T) {
 	if prf, err := dm.GetThresholdProfile(context.Background(), "cgrates.org", "ID", true, true, utils.NonTransactional); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(v4, prf) {
-		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v4), utils.ToJSON(prf))
+		t.Errorf("Expected: %v, received: %v", utils.ToJSON(v4), utils.ToJSON(prf))
 	}
 
 	v5 := &engine.ChargerProfile{Tenant: "cgrates.org", ID: "ID"}
@@ -255,7 +255,7 @@ func TestSetToDB(t *testing.T) {
 	if prf, err := dm.GetChargerProfile(context.Background(), "cgrates.org", "ID", true, true, utils.NonTransactional); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(v5, prf) {
-		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v5), utils.ToJSON(prf))
+		t.Errorf("Expected: %v, received: %v", utils.ToJSON(v5), utils.ToJSON(prf))
 	}
 
 	v6 := &engine.DispatcherProfile{Tenant: "cgrates.org", ID: "ID", StrategyParams: make(map[string]interface{})}
@@ -265,7 +265,7 @@ func TestSetToDB(t *testing.T) {
 	if prf, err := dm.GetDispatcherProfile(context.Background(), "cgrates.org", "ID", true, true, utils.NonTransactional); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(v6, prf) {
-		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v6), utils.ToJSON(prf))
+		t.Errorf("Expected: %v, received: %v", utils.ToJSON(v6), utils.ToJSON(prf))
 	}
 
 	v7 := &engine.ActionProfile{Tenant: "cgrates.org", ID: "ID", Targets: map[string]utils.StringSet{}}
@@ -275,7 +275,7 @@ func TestSetToDB(t *testing.T) {
 	if prf, err := dm.GetActionProfile(context.Background(), "cgrates.org", "ID", true, true, utils.NonTransactional); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(v7, prf) {
-		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v7), utils.ToJSON(prf))
+		t.Errorf("Expected: %v, received: %v", utils.ToJSON(v7), utils.ToJSON(prf))
 	}
 
 	v8 := &engine.Filter{Tenant: "cgrates.org", ID: "ID", Rules: make([]*engine.FilterRule, 0)}
@@ -286,7 +286,7 @@ func TestSetToDB(t *testing.T) {
 	if prf, err := dm.GetFilter(context.Background(), "cgrates.org", "ID", true, true, utils.NonTransactional); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(v8, prf) {
-		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v8), utils.ToJSON(prf))
+		t.Errorf("Expected: %v, received: %v", utils.ToJSON(v8), utils.ToJSON(prf))
 	}
 
 	v9 := &engine.RouteProfile{Tenant: "cgrates.org", ID: "ID"}
@@ -296,7 +296,7 @@ func TestSetToDB(t *testing.T) {
 	if prf, err := dm.GetRouteProfile(context.Background(), "cgrates.org", "ID", true, true, utils.NonTransactional); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(v9, prf) {
-		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v9), utils.ToJSON(prf))
+		t.Errorf("Expected: %v, received: %v", utils.ToJSON(v9), utils.ToJSON(prf))
 	}
 
 	v10 := &engine.DispatcherHost{Tenant: "cgrates.org", RemoteHost: &config.RemoteHost{ID: "ID", Address: "127.0.0.1", Transport: utils.MetaJSON}}
@@ -306,7 +306,7 @@ func TestSetToDB(t *testing.T) {
 	if prf, err := dm.GetDispatcherHost(context.Background(), "cgrates.org", "ID", true, true, utils.NonTransactional); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(v10, prf) {
-		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v10), utils.ToJSON(prf))
+		t.Errorf("Expected: %v, received: %v", utils.ToJSON(v10), utils.ToJSON(prf))
 	}
 
 	v11 := &utils.RateProfile{Tenant: "cgrates.org", ID: "ID", Rates: map[string]*utils.Rate{}, MinCost: utils.NewDecimal(0, 0), MaxCost: utils.NewDecimal(0, 0)}
@@ -316,7 +316,7 @@ func TestSetToDB(t *testing.T) {
 	if prf, err := dm.GetRateProfile(context.Background(), "cgrates.org", "ID", true, true, utils.NonTransactional); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(v11, prf) {
-		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v11), utils.ToJSON(prf))
+		t.Errorf("Expected: %v, received: %v", utils.ToJSON(v11), utils.ToJSON(prf))
 	}
 
 	v12 := &utils.Account{Tenant: "cgrates.org", ID: "ID", Balances: map[string]*utils.Balance{}, Opts: make(map[string]interface{})}
@@ -326,7 +326,7 @@ func TestSetToDB(t *testing.T) {
 	if prf, err := dm.GetAccount(context.Background(), "cgrates.org", "ID"); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(v12, prf) {
-		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v12), utils.ToJSON(prf))
+		t.Errorf("Expected: %v, received: %v", utils.ToJSON(v12), utils.ToJSON(prf))
 	}
 
 	v13 := &utils.RateProfile{Tenant: "cgrates.org", ID: "ID", Rates: map[string]*utils.Rate{}, MinCost: utils.NewDecimal(0, 0), MaxCost: utils.NewDecimal(0, 0)}
@@ -336,7 +336,7 @@ func TestSetToDB(t *testing.T) {
 	if prf, err := dm.GetRateProfile(context.Background(), "cgrates.org", "ID", true, true, utils.NonTransactional); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(v13, prf) {
-		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v13), utils.ToJSON(prf))
+		t.Errorf("Expected: %v, received: %v", utils.ToJSON(v13), utils.ToJSON(prf))
 	}
 }
 
@@ -359,15 +359,17 @@ func TestLoaderProcess(t *testing.T) {
 		dataCache: cache,
 		Locker:    newLocker(cfg.LoaderCfg()[0].GetLockFilePath(), cfg.LoaderCfg()[0].ID),
 	}); !reflect.DeepEqual(expLd, ld) {
-		t.Errorf("Expeceted: %+v, received: %+v", expLd, ld)
+		t.Errorf("Expected: %+v, received: %+v", expLd, ld)
 	}
 
 	expErrMsg := `unsupported loader action: <"notSupported">`
-	if err := ld.process(context.Background(), nil, utils.MetaAttributes, "notSupported", utils.MetaNone, true, false); err == nil || err.Error() != expErrMsg {
-		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
+	if err := ld.process(context.Background(), nil, utils.MetaAttributes, "notSupported",
+		map[string]interface{}{utils.MetaCache: utils.MetaNone}, true, false); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expected: %v, received: %v", expErrMsg, err)
 	}
 
-	if err := ld.process(context.Background(), nil, utils.MetaAttributes, utils.MetaParse, utils.MetaNone, true, false); err != nil {
+	if err := ld.process(context.Background(), nil, utils.MetaAttributes, utils.MetaParse,
+		map[string]interface{}{utils.MetaCache: utils.MetaNone}, true, false); err != nil {
 		t.Error(err)
 	}
 
@@ -378,7 +380,8 @@ func TestLoaderProcess(t *testing.T) {
 	var buf bytes.Buffer
 	utils.Logger = utils.NewStdLoggerWithWriter(&buf, "", 7)
 
-	if err := ld.process(context.Background(), profileTest{utils.Tenant: "cgrates.org", utils.ID: "ID"}, utils.MetaAttributes, utils.MetaDryRun, utils.MetaNone, true, false); err != nil {
+	if err := ld.process(context.Background(), profileTest{utils.Tenant: "cgrates.org", utils.ID: "ID"}, utils.MetaAttributes, utils.MetaDryRun,
+		map[string]interface{}{utils.MetaCache: utils.MetaNone}, true, false); err != nil {
 		t.Error(err)
 	}
 
@@ -388,15 +391,17 @@ func TestLoaderProcess(t *testing.T) {
 	}
 
 	v1 := &engine.AttributeProfile{Tenant: "cgrates.org", ID: "ID"}
-	if err := ld.process(context.Background(), v1, utils.MetaAttributes, utils.MetaStore, utils.MetaNone, true, false); err != nil {
+	if err := ld.process(context.Background(), v1, utils.MetaAttributes, utils.MetaStore,
+		map[string]interface{}{utils.MetaCache: utils.MetaNone}, true, false); err != nil {
 		t.Error(err)
 	}
 	if prf, err := dm.GetAttributeProfile(context.Background(), "cgrates.org", "ID", true, true, utils.NonTransactional); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(v1, prf) {
-		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v1), utils.ToJSON(prf))
+		t.Errorf("Expected: %v, received: %v", utils.ToJSON(v1), utils.ToJSON(prf))
 	}
-	if err := ld.process(context.Background(), v1, utils.MetaAttributes, utils.MetaRemove, utils.MetaNone, true, false); err != nil {
+	if err := ld.process(context.Background(), v1, utils.MetaAttributes, utils.MetaRemove,
+		map[string]interface{}{utils.MetaCache: utils.MetaNone}, true, false); err != nil {
 		t.Error(err)
 	}
 	if _, err := dm.GetAttributeProfile(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != utils.ErrNotFound {
@@ -434,161 +439,242 @@ func TestLoaderProcessCallCahe(t *testing.T) {
 	ld := newLoader(cfg, cfg.LoaderCfg()[0], dm, cache, fS, cM, []string{connID})
 	{
 		v := &engine.AttributeProfile{Tenant: "cgrates.org", ID: "ID"}
-		if err := ld.process(context.Background(), v, utils.MetaAttributes, utils.MetaStore, utils.MetaReload, true, false); err != nil {
+		if err := ld.process(context.Background(), v, utils.MetaAttributes, utils.MetaStore,
+			map[string]interface{}{utils.MetaCache: utils.MetaReload}, true, false); err != nil {
 			t.Error(err)
 		}
 		if prf, err := dm.GetAttributeProfile(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != nil {
 			t.Fatal(err)
 		} else if !reflect.DeepEqual(v, prf) {
-			t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
+			t.Errorf("Expected: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
 		}
-		if exp := (&utils.AttrReloadCacheWithAPIOpts{AttributeProfileIDs: []string{tntID}}); !reflect.DeepEqual(exp, reloadCache) {
-			t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(reloadCache))
+		if exp := (&utils.AttrReloadCacheWithAPIOpts{
+			APIOpts: map[string]interface{}{
+				utils.MetaCache: utils.MetaReload,
+			},
+			AttributeProfileIDs: []string{tntID}}); !reflect.DeepEqual(exp, reloadCache) {
+			t.Errorf("Expected: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(reloadCache))
 		}
-		if exp := (&utils.AttrCacheIDsWithAPIOpts{CacheIDs: []string{utils.CacheAttributeFilterIndexes}}); !reflect.DeepEqual(exp, clearCache) {
-			t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(clearCache))
+		if exp := (&utils.AttrCacheIDsWithAPIOpts{
+			APIOpts: map[string]interface{}{
+				utils.MetaCache: utils.MetaReload,
+			},
+			CacheIDs: []string{utils.CacheAttributeFilterIndexes}}); !reflect.DeepEqual(exp, clearCache) {
+			t.Errorf("Expected: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(clearCache))
 		}
 	}
 	{
 		v := (&engine.ResourceProfile{Tenant: "cgrates.org", ID: "ID"})
-		if err := ld.process(context.Background(), v, utils.MetaResources, utils.MetaStore, utils.MetaReload, true, false); err != nil {
+		if err := ld.process(context.Background(), v, utils.MetaResources, utils.MetaStore,
+			map[string]interface{}{utils.MetaCache: utils.MetaReload}, true, false); err != nil {
 			t.Error(err)
 		}
 		if prf, err := dm.GetResourceProfile(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != nil {
 			t.Fatal(err)
 		} else if !reflect.DeepEqual(v, prf) {
-			t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
+			t.Errorf("Expected: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
 		}
-		if exp := (&utils.AttrReloadCacheWithAPIOpts{ResourceProfileIDs: []string{tntID}, ResourceIDs: []string{tntID}}); !reflect.DeepEqual(exp, reloadCache) {
-			t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(reloadCache))
+		if exp := (&utils.AttrReloadCacheWithAPIOpts{
+			APIOpts: map[string]interface{}{
+				utils.MetaCache: utils.MetaReload,
+			},
+			ResourceProfileIDs: []string{tntID}, ResourceIDs: []string{tntID}}); !reflect.DeepEqual(exp, reloadCache) {
+			t.Errorf("Expected: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(reloadCache))
 		}
-		if exp := (&utils.AttrCacheIDsWithAPIOpts{CacheIDs: []string{utils.CacheResourceFilterIndexes}}); !reflect.DeepEqual(exp, clearCache) {
-			t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(clearCache))
+		if exp := (&utils.AttrCacheIDsWithAPIOpts{
+			APIOpts: map[string]interface{}{
+				utils.MetaCache: utils.MetaReload,
+			},
+			CacheIDs: []string{utils.CacheResourceFilterIndexes}}); !reflect.DeepEqual(exp, clearCache) {
+			t.Errorf("Expected: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(clearCache))
 		}
 	}
 	{
 		v := (&engine.StatQueueProfile{Tenant: "cgrates.org", ID: "ID"})
-		if err := ld.process(context.Background(), v, utils.MetaStats, utils.MetaStore, utils.MetaReload, true, false); err != nil {
+		if err := ld.process(context.Background(), v, utils.MetaStats, utils.MetaStore,
+			map[string]interface{}{utils.MetaCache: utils.MetaReload}, true, false); err != nil {
 			t.Error(err)
 		}
 		if prf, err := dm.GetStatQueueProfile(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != nil {
 			t.Fatal(err)
 		} else if !reflect.DeepEqual(v, prf) {
-			t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
+			t.Errorf("Expected: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
 		}
-		if exp := (&utils.AttrReloadCacheWithAPIOpts{StatsQueueProfileIDs: []string{tntID}, StatsQueueIDs: []string{tntID}}); !reflect.DeepEqual(exp, reloadCache) {
-			t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(reloadCache))
+		if exp := (&utils.AttrReloadCacheWithAPIOpts{
+			APIOpts: map[string]interface{}{
+				utils.MetaCache: utils.MetaReload,
+			},
+			StatsQueueProfileIDs: []string{tntID}, StatsQueueIDs: []string{tntID}}); !reflect.DeepEqual(exp, reloadCache) {
+			t.Errorf("Expected: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(reloadCache))
 		}
-		if exp := (&utils.AttrCacheIDsWithAPIOpts{CacheIDs: []string{utils.CacheStatFilterIndexes}}); !reflect.DeepEqual(exp, clearCache) {
-			t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(clearCache))
+		if exp := (&utils.AttrCacheIDsWithAPIOpts{
+			APIOpts: map[string]interface{}{
+				utils.MetaCache: utils.MetaReload,
+			},
+			CacheIDs: []string{utils.CacheStatFilterIndexes}}); !reflect.DeepEqual(exp, clearCache) {
+			t.Errorf("Expected: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(clearCache))
 		}
 	}
 
 	{
 		v := (&engine.ThresholdProfile{Tenant: "cgrates.org", ID: "ID"})
-		if err := ld.process(context.Background(), v, utils.MetaThresholds, utils.MetaStore, utils.MetaReload, true, false); err != nil {
+		if err := ld.process(context.Background(), v, utils.MetaThresholds, utils.MetaStore,
+			map[string]interface{}{utils.MetaCache: utils.MetaReload}, true, false); err != nil {
 			t.Error(err)
 		}
 		if prf, err := dm.GetThresholdProfile(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != nil {
 			t.Fatal(err)
 		} else if !reflect.DeepEqual(v, prf) {
-			t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
+			t.Errorf("Expected: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
 		}
-		if exp := (&utils.AttrReloadCacheWithAPIOpts{ThresholdProfileIDs: []string{tntID}, ThresholdIDs: []string{tntID}}); !reflect.DeepEqual(exp, reloadCache) {
-			t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(reloadCache))
+		if exp := (&utils.AttrReloadCacheWithAPIOpts{
+			APIOpts: map[string]interface{}{
+				utils.MetaCache: utils.MetaReload,
+			},
+			ThresholdProfileIDs: []string{tntID}, ThresholdIDs: []string{tntID}}); !reflect.DeepEqual(exp, reloadCache) {
+			t.Errorf("Expected: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(reloadCache))
 		}
-		if exp := (&utils.AttrCacheIDsWithAPIOpts{CacheIDs: []string{utils.CacheThresholdFilterIndexes}}); !reflect.DeepEqual(exp, clearCache) {
-			t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(clearCache))
+		if exp := (&utils.AttrCacheIDsWithAPIOpts{
+			APIOpts: map[string]interface{}{
+				utils.MetaCache: utils.MetaReload,
+			},
+			CacheIDs: []string{utils.CacheThresholdFilterIndexes}}); !reflect.DeepEqual(exp, clearCache) {
+			t.Errorf("Expected: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(clearCache))
 		}
 	}
 
 	{
 		v := (&engine.RouteProfile{Tenant: "cgrates.org", ID: "ID"})
-		if err := ld.process(context.Background(), v, utils.MetaRoutes, utils.MetaStore, utils.MetaReload, true, false); err != nil {
+		if err := ld.process(context.Background(), v, utils.MetaRoutes, utils.MetaStore,
+			map[string]interface{}{utils.MetaCache: utils.MetaReload}, true, false); err != nil {
 			t.Error(err)
 		}
 		if prf, err := dm.GetRouteProfile(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != nil {
 			t.Fatal(err)
 		} else if !reflect.DeepEqual(v, prf) {
-			t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
+			t.Errorf("Expected: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
 		}
-		if exp := (&utils.AttrReloadCacheWithAPIOpts{RouteProfileIDs: []string{tntID}}); !reflect.DeepEqual(exp, reloadCache) {
-			t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(reloadCache))
+		if exp := (&utils.AttrReloadCacheWithAPIOpts{
+			APIOpts: map[string]interface{}{
+				utils.MetaCache: utils.MetaReload,
+			},
+			RouteProfileIDs: []string{tntID}}); !reflect.DeepEqual(exp, reloadCache) {
+			t.Errorf("Expected: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(reloadCache))
 		}
-		if exp := (&utils.AttrCacheIDsWithAPIOpts{CacheIDs: []string{utils.CacheRouteFilterIndexes}}); !reflect.DeepEqual(exp, clearCache) {
-			t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(clearCache))
+		if exp := (&utils.AttrCacheIDsWithAPIOpts{
+			APIOpts: map[string]interface{}{
+				utils.MetaCache: utils.MetaReload,
+			},
+			CacheIDs: []string{utils.CacheRouteFilterIndexes}}); !reflect.DeepEqual(exp, clearCache) {
+			t.Errorf("Expected: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(clearCache))
 		}
 	}
 
 	{
 		v := (&engine.ChargerProfile{Tenant: "cgrates.org", ID: "ID"})
-		if err := ld.process(context.Background(), v, utils.MetaChargers, utils.MetaStore, utils.MetaReload, true, false); err != nil {
+		if err := ld.process(context.Background(), v, utils.MetaChargers, utils.MetaStore,
+			map[string]interface{}{utils.MetaCache: utils.MetaReload}, true, false); err != nil {
 			t.Error(err)
 		}
 		if prf, err := dm.GetChargerProfile(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != nil {
 			t.Fatal(err)
 		} else if !reflect.DeepEqual(v, prf) {
-			t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
+			t.Errorf("Expected: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
 		}
-		if exp := (&utils.AttrReloadCacheWithAPIOpts{ChargerProfileIDs: []string{tntID}}); !reflect.DeepEqual(exp, reloadCache) {
-			t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(reloadCache))
+		if exp := (&utils.AttrReloadCacheWithAPIOpts{
+			APIOpts: map[string]interface{}{
+				utils.MetaCache: utils.MetaReload,
+			},
+			ChargerProfileIDs: []string{tntID}}); !reflect.DeepEqual(exp, reloadCache) {
+			t.Errorf("Expected: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(reloadCache))
 		}
-		if exp := (&utils.AttrCacheIDsWithAPIOpts{CacheIDs: []string{utils.CacheChargerFilterIndexes}}); !reflect.DeepEqual(exp, clearCache) {
-			t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(clearCache))
+		if exp := (&utils.AttrCacheIDsWithAPIOpts{
+			APIOpts: map[string]interface{}{
+				utils.MetaCache: utils.MetaReload,
+			},
+			CacheIDs: []string{utils.CacheChargerFilterIndexes}}); !reflect.DeepEqual(exp, clearCache) {
+			t.Errorf("Expected: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(clearCache))
 		}
 	}
 
 	{
 		v := (&engine.DispatcherProfile{Tenant: "cgrates.org", ID: "ID", StrategyParams: make(map[string]interface{})})
-		if err := ld.process(context.Background(), v, utils.MetaDispatchers, utils.MetaStore, utils.MetaReload, true, false); err != nil {
+		if err := ld.process(context.Background(), v, utils.MetaDispatchers, utils.MetaStore,
+			map[string]interface{}{utils.MetaCache: utils.MetaReload}, true, false); err != nil {
 			t.Error(err)
 		}
 		if prf, err := dm.GetDispatcherProfile(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != nil {
 			t.Fatal(err)
 		} else if !reflect.DeepEqual(v, prf) {
-			t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
+			t.Errorf("Expected: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
 		}
-		if exp := (&utils.AttrReloadCacheWithAPIOpts{DispatcherProfileIDs: []string{tntID}}); !reflect.DeepEqual(exp, reloadCache) {
-			t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(reloadCache))
+		if exp := (&utils.AttrReloadCacheWithAPIOpts{
+			APIOpts: map[string]interface{}{
+				utils.MetaCache: utils.MetaReload,
+			},
+			DispatcherProfileIDs: []string{tntID}}); !reflect.DeepEqual(exp, reloadCache) {
+			t.Errorf("Expected: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(reloadCache))
 		}
-		if exp := (&utils.AttrCacheIDsWithAPIOpts{CacheIDs: []string{utils.CacheDispatcherFilterIndexes}}); !reflect.DeepEqual(exp, clearCache) {
-			t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(clearCache))
+		if exp := (&utils.AttrCacheIDsWithAPIOpts{
+			APIOpts: map[string]interface{}{
+				utils.MetaCache: utils.MetaReload,
+			},
+			CacheIDs: []string{utils.CacheDispatcherFilterIndexes}}); !reflect.DeepEqual(exp, clearCache) {
+			t.Errorf("Expected: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(clearCache))
 		}
 	}
 
 	{
 		v := (&utils.RateProfile{Tenant: "cgrates.org", ID: "ID", Rates: map[string]*utils.Rate{}, MinCost: utils.NewDecimal(0, 0), MaxCost: utils.NewDecimal(0, 0)})
-		if err := ld.process(context.Background(), v, utils.MetaRateProfiles, utils.MetaStore, utils.MetaReload, true, false); err != nil {
+		if err := ld.process(context.Background(), v, utils.MetaRateProfiles, utils.MetaStore,
+			map[string]interface{}{utils.MetaCache: utils.MetaReload}, true, false); err != nil {
 			t.Error(err)
 		}
 		if prf, err := dm.GetRateProfile(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != nil {
 			t.Fatal(err)
 		} else if !reflect.DeepEqual(v, prf) {
-			t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
+			t.Errorf("Expected: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
 		}
-		if exp := (&utils.AttrReloadCacheWithAPIOpts{RateProfileIDs: []string{tntID}}); !reflect.DeepEqual(exp, reloadCache) {
-			t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(reloadCache))
+		if exp := (&utils.AttrReloadCacheWithAPIOpts{
+			APIOpts: map[string]interface{}{
+				utils.MetaCache: utils.MetaReload,
+			},
+			RateProfileIDs: []string{tntID}}); !reflect.DeepEqual(exp, reloadCache) {
+			t.Errorf("Expected: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(reloadCache))
 		}
-		if exp := (&utils.AttrCacheIDsWithAPIOpts{CacheIDs: []string{utils.CacheRateProfilesFilterIndexes, utils.CacheRateFilterIndexes}}); !reflect.DeepEqual(exp, clearCache) {
-			t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(clearCache))
+		if exp := (&utils.AttrCacheIDsWithAPIOpts{
+			APIOpts: map[string]interface{}{
+				utils.MetaCache: utils.MetaReload,
+			},
+			CacheIDs: []string{utils.CacheRateProfilesFilterIndexes, utils.CacheRateFilterIndexes}}); !reflect.DeepEqual(exp, clearCache) {
+			t.Errorf("Expected: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(clearCache))
 		}
 	}
 
 	{
 		v := (&engine.ActionProfile{Tenant: "cgrates.org", ID: "ID", Targets: map[string]utils.StringSet{}})
-		if err := ld.process(context.Background(), v, utils.MetaActionProfiles, utils.MetaStore, utils.MetaReload, true, false); err != nil {
+		if err := ld.process(context.Background(), v, utils.MetaActionProfiles, utils.MetaStore,
+			map[string]interface{}{utils.MetaCache: utils.MetaReload}, true, false); err != nil {
 			t.Error(err)
 		}
 		if prf, err := dm.GetActionProfile(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != nil {
 			t.Fatal(err)
 		} else if !reflect.DeepEqual(v, prf) {
-			t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
+			t.Errorf("Expected: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
 		}
-		if exp := (&utils.AttrReloadCacheWithAPIOpts{ActionProfileIDs: []string{tntID}}); !reflect.DeepEqual(exp, reloadCache) {
-			t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(reloadCache))
+		if exp := (&utils.AttrReloadCacheWithAPIOpts{
+			APIOpts: map[string]interface{}{
+				utils.MetaCache: utils.MetaReload,
+			},
+			ActionProfileIDs: []string{tntID}}); !reflect.DeepEqual(exp, reloadCache) {
+			t.Errorf("Expected: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(reloadCache))
 		}
-		if exp := (&utils.AttrCacheIDsWithAPIOpts{CacheIDs: []string{utils.CacheActionProfiles, utils.CacheActionProfilesFilterIndexes}}); !reflect.DeepEqual(exp, clearCache) {
-			t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(clearCache))
+		if exp := (&utils.AttrCacheIDsWithAPIOpts{
+			APIOpts: map[string]interface{}{
+				utils.MetaCache: utils.MetaReload,
+			},
+			CacheIDs: []string{utils.CacheActionProfiles, utils.CacheActionProfilesFilterIndexes}}); !reflect.DeepEqual(exp, clearCache) {
+			t.Errorf("Expected: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(clearCache))
 		}
 	}
 
@@ -596,37 +682,47 @@ func TestLoaderProcessCallCahe(t *testing.T) {
 
 	{
 		v := (&engine.Filter{Tenant: "cgrates.org", ID: "ID", Rules: make([]*engine.FilterRule, 0)})
-		if err := ld.process(context.Background(), v, utils.MetaFilters, utils.MetaStore, utils.MetaReload, true, false); err != nil {
+		if err := ld.process(context.Background(), v, utils.MetaFilters, utils.MetaStore,
+			map[string]interface{}{utils.MetaCache: utils.MetaReload}, true, false); err != nil {
 			t.Error(err)
 		}
 		if prf, err := dm.GetFilter(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != nil {
 			t.Fatal(err)
 		} else if !reflect.DeepEqual(v, prf) {
-			t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
+			t.Errorf("Expected: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
 		}
-		if exp := (&utils.AttrReloadCacheWithAPIOpts{FilterIDs: []string{tntID}}); !reflect.DeepEqual(exp, reloadCache) {
-			t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(reloadCache))
+		if exp := (&utils.AttrReloadCacheWithAPIOpts{
+			APIOpts: map[string]interface{}{
+				utils.MetaCache: utils.MetaReload,
+			},
+			FilterIDs: []string{tntID}}); !reflect.DeepEqual(exp, reloadCache) {
+			t.Errorf("Expected: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(reloadCache))
 		}
 		if !reflect.DeepEqual(nil, clearCache) {
-			t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(nil), utils.ToJSON(clearCache))
+			t.Errorf("Expected: %v, received: %v", utils.ToJSON(nil), utils.ToJSON(clearCache))
 		}
 	}
 
 	{
 		v := (&engine.DispatcherHost{Tenant: "cgrates.org", RemoteHost: &config.RemoteHost{ID: "ID", Address: "127.0.0.1", Transport: utils.MetaJSON}})
-		if err := ld.process(context.Background(), v, utils.MetaDispatcherHosts, utils.MetaStore, utils.MetaReload, true, false); err != nil {
+		if err := ld.process(context.Background(), v, utils.MetaDispatcherHosts, utils.MetaStore,
+			map[string]interface{}{utils.MetaCache: utils.MetaReload}, true, false); err != nil {
 			t.Error(err)
 		}
 		if prf, err := dm.GetDispatcherHost(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != nil {
 			t.Fatal(err)
 		} else if !reflect.DeepEqual(v, prf) {
-			t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
+			t.Errorf("Expected: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
 		}
-		if exp := (&utils.AttrReloadCacheWithAPIOpts{DispatcherHostIDs: []string{tntID}}); !reflect.DeepEqual(exp, reloadCache) {
-			t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(reloadCache))
+		if exp := (&utils.AttrReloadCacheWithAPIOpts{
+			APIOpts: map[string]interface{}{
+				utils.MetaCache: utils.MetaReload,
+			},
+			DispatcherHostIDs: []string{tntID}}); !reflect.DeepEqual(exp, reloadCache) {
+			t.Errorf("Expected: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(reloadCache))
 		}
 		if !reflect.DeepEqual(nil, clearCache) {
-			t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(nil), utils.ToJSON(clearCache))
+			t.Errorf("Expected: %v, received: %v", utils.ToJSON(nil), utils.ToJSON(clearCache))
 		}
 	}
 
@@ -634,19 +730,29 @@ func TestLoaderProcessCallCahe(t *testing.T) {
 
 	{
 		v := (&utils.Account{Tenant: "cgrates.org", ID: "ID", Balances: map[string]*utils.Balance{}, Opts: make(map[string]interface{})})
-		if err := ld.process(context.Background(), v, utils.MetaAccounts, utils.MetaStore, utils.MetaReload, true, false); err != nil {
+		if err := ld.process(context.Background(), v, utils.MetaAccounts, utils.MetaStore,
+			map[string]interface{}{utils.MetaCache: utils.MetaReload}, true, false); err != nil {
 			t.Error(err)
 		}
 		if prf, err := dm.GetAccount(context.Background(), "cgrates.org", "ID"); err != nil {
 			t.Fatal(err)
 		} else if !reflect.DeepEqual(v, prf) {
-			t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
+			t.Errorf("Expected: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
 		}
-		if exp := (&utils.AttrReloadCacheWithAPIOpts{}); !reflect.DeepEqual(exp, reloadCache) {
-			t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(reloadCache))
+		if exp := (&utils.AttrReloadCacheWithAPIOpts{
+			APIOpts: map[string]interface{}{
+				utils.MetaCache: utils.MetaReload,
+			},
+		}); !reflect.DeepEqual(exp, reloadCache) {
+			t.Errorf("Expected: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(reloadCache))
 		}
-		if exp := (&utils.AttrCacheIDsWithAPIOpts{CacheIDs: []string{utils.CacheAccounts, utils.CacheAccountsFilterIndexes}}); !reflect.DeepEqual(exp, clearCache) {
-			t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(clearCache))
+		if exp := (&utils.AttrCacheIDsWithAPIOpts{
+			CacheIDs: []string{utils.CacheAccounts, utils.CacheAccountsFilterIndexes},
+			APIOpts: map[string]interface{}{
+				utils.MetaCache: utils.MetaReload,
+			},
+		}); !reflect.DeepEqual(exp, clearCache) {
+			t.Errorf("Expected: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(clearCache))
 		}
 	}
 }
@@ -670,18 +776,19 @@ func TestLoaderProcessData(t *testing.T) {
 		f.ComputePath()
 	}
 	if err := ld.processData(context.Background(), NewStringCSV(`cgrates.org,ID
-cgrates.org,ID2`, utils.CSVSep, -1), fc, utils.MetaAttributes, utils.MetaStore, utils.MetaNone, true, false); err != nil {
+cgrates.org,ID2`, utils.CSVSep, -1), fc, utils.MetaAttributes, utils.MetaStore,
+		map[string]interface{}{utils.MetaCache: utils.MetaNone}, true, false); err != nil {
 		t.Fatal(err)
 	}
 	if prf, err := dm.GetAttributeProfile(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != nil {
 		t.Fatal(err)
 	} else if v := (&engine.AttributeProfile{Tenant: "cgrates.org", ID: "ID"}); !reflect.DeepEqual(v, prf) {
-		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
+		t.Errorf("Expected: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
 	}
 	if prf, err := dm.GetAttributeProfile(context.Background(), "cgrates.org", "ID2", false, true, utils.NonTransactional); err != nil {
 		t.Fatal(err)
 	} else if v := (&engine.AttributeProfile{Tenant: "cgrates.org", ID: "ID2"}); !reflect.DeepEqual(v, prf) {
-		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
+		t.Errorf("Expected: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
 	}
 }
 
@@ -708,8 +815,9 @@ func TestLoaderProcessDataErrors(t *testing.T) {
 	}
 	expErrMsg := "inline parse error for string: <*string>"
 	if err := ld.processData(context.Background(), NewStringCSV(`cgrates.org,ID
-cgrates.org,ID2`, utils.CSVSep, -1), fc, utils.MetaAttributes, utils.MetaStore, utils.MetaNone, true, false); err == nil || err.Error() != expErrMsg {
-		t.Errorf("Expeceted: %q, received: %v", expErrMsg, err)
+cgrates.org,ID2`, utils.CSVSep, -1), fc, utils.MetaAttributes, utils.MetaStore,
+		map[string]interface{}{utils.MetaCache: utils.MetaNone}, true, false); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expected: %q, received: %v", expErrMsg, err)
 	}
 
 	fc = []*config.FCTemplate{
@@ -721,12 +829,14 @@ cgrates.org,ID2`, utils.CSVSep, -1), fc, utils.MetaAttributes, utils.MetaStore, 
 	}
 	expErrMsg = `unsupported loader action: <"notSupported">`
 	if err := ld.processData(context.Background(), NewStringCSV(`cgrates.org,ID
-cgrates.org,ID2`, utils.CSVSep, -1), fc, utils.MetaAttributes, "notSupported", utils.MetaNone, true, false); err == nil || err.Error() != expErrMsg {
-		t.Errorf("Expeceted: %q, received: %v", expErrMsg, err)
+cgrates.org,ID2`, utils.CSVSep, -1), fc, utils.MetaAttributes, "notSupported",
+		map[string]interface{}{utils.MetaCache: utils.MetaNone}, true, false); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expected: %q, received: %v", expErrMsg, err)
 	}
 
-	if err := ld.processData(context.Background(), &CSVFile{csvRdr: csv.NewReader(mockReader{})}, fc, utils.MetaAttributes, "notSupported", utils.MetaNone, true, false); err != utils.ErrNotFound {
-		t.Errorf("Expeceted: %q, received: %v", utils.ErrNotFound, err)
+	if err := ld.processData(context.Background(), &CSVFile{csvRdr: csv.NewReader(mockReader{})}, fc, utils.MetaAttributes, "notSupported",
+		map[string]interface{}{utils.MetaCache: utils.MetaNone}, true, false); err != utils.ErrNotFound {
+		t.Errorf("Expected: %q, received: %v", utils.ErrNotFound, err)
 	}
 }
 
@@ -759,21 +869,23 @@ func TestLoaderProcessFileURL(t *testing.T) {
 		Type:     utils.MetaAttributes,
 		Filename: utils.AttributesCsv,
 		Fields:   fc,
-	}, s.URL+"/ok", utils.EmptyString, utils.MetaStore, utils.MetaNone, true, urlProvider{}); err != nil {
+	}, s.URL+"/ok", utils.EmptyString, utils.MetaStore,
+		map[string]interface{}{utils.MetaCache: utils.MetaNone}, true, urlProvider{}); err != nil {
 		t.Fatal(err)
 	}
 	if prf, err := dm.GetAttributeProfile(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != nil {
 		t.Fatal(err)
 	} else if v := (&engine.AttributeProfile{Tenant: "cgrates.org", ID: "ID"}); !reflect.DeepEqual(v, prf) {
-		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
+		t.Errorf("Expected: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
 	}
 
 	if err := ld.processFile(context.Background(), &config.LoaderDataType{
 		Type:     utils.MetaAttributes,
 		Filename: utils.AttributesCsv,
 		Fields:   fc,
-	}, s.URL+"/notFound", utils.EmptyString, utils.MetaStore, utils.MetaNone, true, urlProvider{}); err != utils.ErrNotFound {
-		t.Errorf("Expeceted: %v, received: %v", utils.ErrNotFound, err)
+	}, s.URL+"/notFound", utils.EmptyString, utils.MetaStore,
+		map[string]interface{}{utils.MetaCache: utils.MetaNone}, true, urlProvider{}); err != utils.ErrNotFound {
+		t.Errorf("Expected: %v, received: %v", utils.ErrNotFound, err)
 	}
 
 }
@@ -833,7 +945,7 @@ func TestLoaderProcessIFile(t *testing.T) {
 	}, dm, cache, fS, cM, nil)
 	expErrMsg := fmt.Sprintf(`rename %s/Chargers.csv %s/Chargers.csv: no such file or directory`, tmpIn, tmpOut)
 	if err := ld.processIFile(utils.EmptyString, utils.ChargersCsv); err == nil || err.Error() != expErrMsg {
-		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
+		t.Errorf("Expected: %v, received: %v", expErrMsg, err)
 	}
 
 	f, err := os.Create(path.Join(tmpIn, utils.AttributesCsv))
@@ -855,7 +967,7 @@ func TestLoaderProcessIFile(t *testing.T) {
 	if prf, err := dm.GetAttributeProfile(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != nil {
 		t.Fatal(err)
 	} else if v := (&engine.AttributeProfile{Tenant: "cgrates.org", ID: "ID"}); !reflect.DeepEqual(v, prf) {
-		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
+		t.Errorf("Expected: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
 	}
 
 	if _, err := os.Stat(path.Join(tmpIn, utils.AttributesCsv)); err == nil {
@@ -946,14 +1058,15 @@ func TestLoaderProcessFolder(t *testing.T) {
 	if err := f.Close(); err != nil {
 		t.Fatal(err)
 	}
-	if err := ld.processFolder(context.Background(), utils.MetaNone, true, true); err != nil {
+	if err := ld.processFolder(context.Background(),
+		map[string]interface{}{utils.MetaCache: utils.MetaNone}, true, true); err != nil {
 		t.Fatal(err)
 	}
 
 	if prf, err := dm.GetAttributeProfile(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != nil {
 		t.Fatal(err)
 	} else if v := (&engine.AttributeProfile{Tenant: "cgrates.org", ID: "ID"}); !reflect.DeepEqual(v, prf) {
-		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
+		t.Errorf("Expected: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
 	}
 
 	if _, err := os.Stat(path.Join(tmpIn, utils.AttributesCsv)); err == nil {
@@ -975,15 +1088,17 @@ func TestLoaderProcessFolder(t *testing.T) {
 	}
 
 	ld.Locker = mockLock{}
-	if err := ld.processFolder(context.Background(), utils.MetaNone, true, true); err != utils.ErrExists {
+	if err := ld.processFolder(context.Background(),
+		map[string]interface{}{utils.MetaCache: utils.MetaNone}, true, true); err != utils.ErrExists {
 		t.Fatal(err)
 	}
 
 	ld.Locker = nopLock{}
 	ld.ldrCfg.TpInDir = "http://localhost:0"
 	expErrMsg := `path:"http://localhost:0/Attributes.csv" is not reachable`
-	if err := ld.processFolder(context.Background(), utils.MetaNone, true, true); err == nil || err.Error() != expErrMsg {
-		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
+	if err := ld.processFolder(context.Background(),
+		map[string]interface{}{utils.MetaCache: utils.MetaNone}, true, true); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expected: %v, received: %v", expErrMsg, err)
 	}
 }
 
@@ -1047,8 +1162,9 @@ func TestLoaderProcessFolderErrors(t *testing.T) {
 	}
 
 	expErrMsg := "inline parse error for string: <*string>"
-	if err := ld.processFolder(context.Background(), utils.MetaNone, true, true); err == nil || err.Error() != expErrMsg {
-		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
+	if err := ld.processFolder(context.Background(),
+		map[string]interface{}{utils.MetaCache: utils.MetaNone}, true, true); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expected: %v, received: %v", expErrMsg, err)
 	}
 
 	if _, err := dm.GetAttributeProfile(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != utils.ErrNotFound {
@@ -1066,7 +1182,8 @@ func TestLoaderProcessFolderErrors(t *testing.T) {
 	var buf bytes.Buffer
 	utils.Logger = utils.NewStdLoggerWithWriter(&buf, "", 7)
 
-	if err := ld.processFolder(context.Background(), utils.MetaNone, true, false); err != nil {
+	if err := ld.processFolder(context.Background(),
+		map[string]interface{}{utils.MetaCache: utils.MetaNone}, true, false); err != nil {
 		t.Fatal(err)
 	}
 
@@ -1090,7 +1207,7 @@ func TestLoaderMoveUnprocessedFilesErrors(t *testing.T) {
 
 	expErrMsg := "open notAFolder: no such file or directory"
 	if err := ld.moveUnprocessedFiles(); err == nil || err.Error() != expErrMsg {
-		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
+		t.Errorf("Expected: %v, received: %v", expErrMsg, err)
 	}
 	tmpIn, err := os.MkdirTemp(utils.EmptyString, "TestLoaderMoveUnprocessedFilesErrorsIn")
 	if err != nil {
@@ -1109,7 +1226,7 @@ func TestLoaderMoveUnprocessedFilesErrors(t *testing.T) {
 	}
 	expErrMsg = fmt.Sprintf("rename %s/Attributes.csv notAFolder/Attributes.csv: no such file or directory", tmpIn)
 	if err := ld.moveUnprocessedFiles(); err == nil || err.Error() != expErrMsg {
-		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
+		t.Errorf("Expected: %v, received: %v", expErrMsg, err)
 	}
 }
 
@@ -1252,8 +1369,9 @@ func TestLoaderProcessZipErrors(t *testing.T) {
 	}
 
 	expErrMsg := "inline parse error for string: <*string>"
-	if err := ld.processZip(context.Background(), utils.MetaNone, true, true, r); err == nil || err.Error() != expErrMsg {
-		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
+	if err := ld.processZip(context.Background(),
+		map[string]interface{}{utils.MetaCache: utils.MetaNone}, true, true, r); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expected: %v, received: %v", expErrMsg, err)
 	}
 
 	if _, err := dm.GetAttributeProfile(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != utils.ErrNotFound {
@@ -1266,7 +1384,8 @@ func TestLoaderProcessZipErrors(t *testing.T) {
 	}()
 	var buf bytes.Buffer
 	utils.Logger = utils.NewStdLoggerWithWriter(&buf, "", 7)
-	if err := ld.processZip(context.Background(), utils.MetaNone, true, false, r); err != nil {
+	if err := ld.processZip(context.Background(),
+		map[string]interface{}{utils.MetaCache: utils.MetaNone}, true, false, r); err != nil {
 		t.Fatal(err)
 	}
 
@@ -1280,7 +1399,8 @@ func TestLoaderProcessZipErrors(t *testing.T) {
 	}
 
 	ld.Locker = mockLock{}
-	if err := ld.processZip(context.Background(), utils.MetaNone, true, true, r); err != utils.ErrExists {
+	if err := ld.processZip(context.Background(),
+		map[string]interface{}{utils.MetaCache: utils.MetaNone}, true, true, r); err != utils.ErrExists {
 		t.Fatal(err)
 	}
 
