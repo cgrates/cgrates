@@ -418,7 +418,7 @@ func testCsvExportBufferedEvent(t *testing.T) {
 				},
 				Opts: map[string]interface{}{
 					utils.MetaOriginID: utils.Sha1("nlllo", time.Unix(1383813745, 0).UTC().String()),
-					utils.MetaRateS:    true,
+					utils.MetaRates:    true,
 				},
 			},
 			{

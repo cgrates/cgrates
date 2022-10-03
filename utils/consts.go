@@ -361,7 +361,7 @@ const (
 	MetaUCH                  = "*uch"
 	MetaGuardian             = "*guardians"
 	MetaEEs                  = "*ees"
-	MetaRateS                = "*rates"
+	MetaRates                = "*rates"
 	MetaRateSOverwrite       = "*rateSOverwrite"
 	MetaContinue             = "*continue"
 	MetaUp                   = "*up"
@@ -1992,16 +1992,6 @@ const (
 	PrecacheCfg   = "precache"
 
 	// CdrsCfg
-	MetaAccountSCfg     = "*accounts"
-	MetaAttributeSCfg   = "*attributeS"
-	MetaCDRsCfg         = "*cdrs"
-	MetaChargerSCfg     = "*chargerS"
-	MetaResourceSCfg    = "*resourceS"
-	MetaRouteSCfg       = "*routeS"
-	MetaEeSCfg          = "*eeS"
-	MetaRateSCfg        = "*rateS"
-	MetaStatSCfg        = "*statS"
-	MetaThresholdSCfg   = "*thresholdS"
 	ExportPathCfg       = "export_path"
 	SynchronousCfg      = "synchronous"
 	AttemptsCfg         = "attempts"
@@ -2238,28 +2228,19 @@ var CGROptionsSet = NewStringSet([]string{OptsRatesProfileIDs, OptsRatesStartTim
 	OptsAttributesProcessRuns, OptsAttributesProfileRuns, OptsRoutesLimit, OptsRoutesOffset, OptsRoutesMaxItems,
 	OptsSesChargeable, RemoteHostOpt, MetaCache, OptsThresholdsProfileIDs, OptsRoutesProfilesCount,
 	OptsDispatchersProfilesCount, OptsSesAttributeSDerivedReply, OptsSesBlockerError, OptsRoutesUsage,
-	OptsCDRs, OptsSesCDRsDerivedReply, OptsResourceS, OptsSesResourceSAuthorize,
-	OptsSesResourceSAllocate, OptsSesResourceSRelease, OptsSesResourceSDerivedReply, OptsRouteS,
+	MetaCDRs, OptsSesCDRsDerivedReply, MetaResources, OptsSesResourceSAuthorize,
+	OptsSesResourceSAllocate, OptsSesResourceSRelease, OptsSesResourceSDerivedReply, MetaRoutes,
 	OptsSesRouteSDerivedReply, OptsSesStatSDerivedReply, OptsSesSTIRAuthenticate, OptsSesSTIRDerivedReply,
 	OptsSesSTIRInitiate, OptsSesThresholdSDerivedReply,
 	OptsSesMaxUsage, OptsSesForceDuration, OptsSesInitiate, OptsSesUpdate, OptsSesTerminate,
-	OptsSesMessage, OptsAttributeS, OptsChargerS, OptsCDRsExport, OptsCDRsRefund,
-	OptsCDRsRerate, OptsStatS, OptsCDRsStore, OptsThresholdS, OptsRateS, MetaAccounts,
+	OptsSesMessage, MetaAttributes, MetaChargers, OptsCDRsExport, OptsCDRsRefund,
+	OptsCDRsRerate, MetaStats, OptsCDRsStore, MetaThresholds, MetaRates, MetaAccounts,
 	OptsAccountsUsage, OptsStatsProfileIDs, OptsActionsProfileIDs, MetaProfileIgnoreFilters,
 	OptsRoundingDecimals, MetaDispatchers})
 
 // Event Opts
 const (
-
 	// Subsystems boolean opts
-	OptsCDRs       = "*cdrs"
-	OptsRouteS     = "*routeS"
-	OptsResourceS  = "*resourceS"
-	OptsAttributeS = "*attributeS"
-	OptsChargerS   = "*chargerS"
-	OptsStatS      = "*statS"
-	OptsThresholdS = "*thresholdS"
-	OptsRateS      = "*rateS"
 
 	// SessionS
 	OptsSesTTL           = "*sesTTL"

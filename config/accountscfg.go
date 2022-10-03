@@ -100,7 +100,7 @@ func (acS *AccountSCfg) loadFromJSONCfg(jsnCfg *AccountSJsonCfg) (err error) {
 		acS.AttributeSConns = updateInternalConns(*jsnCfg.Attributes_conns, utils.MetaAttributes)
 	}
 	if jsnCfg.Rates_conns != nil {
-		acS.RateSConns = updateInternalConns(*jsnCfg.Rates_conns, utils.MetaRateS)
+		acS.RateSConns = updateInternalConns(*jsnCfg.Rates_conns, utils.MetaRates)
 	}
 	if jsnCfg.Thresholds_conns != nil {
 		acS.ThresholdSConns = updateInternalConns(*jsnCfg.Thresholds_conns, utils.MetaThresholds)

@@ -126,12 +126,14 @@ func TestHttpPostSync(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
+
 	mp := &utils.CGREvent{
 		Event: map[string]interface{}{
 			"Account":     "1001",
 			"Destination": "1002",
 		},
 	}
+
 	vals, err := exp.PrepareMap(mp)
 	if err != nil {
 		t.Fatal(err)

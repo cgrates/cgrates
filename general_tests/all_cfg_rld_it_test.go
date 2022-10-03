@@ -196,7 +196,7 @@ func testConfigSReload(t *testing.T) {
 		t.Errorf("\nExpected %+v ,\n received: %+v", utils.ToIJSON(cfgStr), utils.ToIJSON(rpl8))
 	}
 
-	cfgStr = "{\"cdrs\":{\"accounts_conns\":[],\"actions_conns\":[],\"attributes_conns\":[],\"chargers_conns\":[\"*internal\"],\"ees_conns\":[],\"enabled\":true,\"extra_fields\":[],\"online_cdr_exports\":null,\"opts\":{\"*accountS\":[],\"*attributeS\":[],\"*chargerS\":[],\"*eeS\":[],\"*rateS\":[],\"*statS\":[],\"*thresholdS\":[]},\"rates_conns\":[],\"session_cost_retries\":5,\"stats_conns\":[],\"thresholds_conns\":[]}}"
+	cfgStr = "{\"cdrs\":{\"accounts_conns\":[],\"actions_conns\":[],\"attributes_conns\":[],\"chargers_conns\":[\"*internal\"],\"ees_conns\":[],\"enabled\":true,\"extra_fields\":[],\"online_cdr_exports\":null,\"opts\":{\"*accounts\":[],\"*attributes\":[],\"*chargers\":[],\"*ees\":[],\"*rates\":[],\"*stats\":[],\"*thresholds\":[]},\"rates_conns\":[],\"session_cost_retries\":5,\"stats_conns\":[],\"thresholds_conns\":[]}}"
 	var rpl10 string
 	if err := testRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:   "cgrates.org",
@@ -226,8 +226,8 @@ func testConfigSReload(t *testing.T) {
 	} else if cfgStr != rpl12 {
 		t.Errorf("\nExpected %+v ,\n received: %+v", utils.ToIJSON(cfgStr), utils.ToIJSON(rpl12))
 	}
-	cfgStr = "{\"sessions\":{\"accounts_conns\":[],\"actions_conns\":[],\"alterable_fields\":[],\"attributes_conns\":[\"*internal\"],\"cdrs_conns\":[\"*internal\"],\"channel_sync_interval\":\"0\",\"chargers_conns\":[\"*internal\"],\"client_protocol\":1,\"default_usage\":{\"*any\":\"3h0m0s\",\"*data\":\"1048576\",\"*sms\":\"1\",\"*voice\":\"3h0m0s\"},\"enabled\":true,\"listen_bigob\":\"\",\"listen_bijson\":\"127.0.0.1:2014\",\"min_dur_low_balance\":\"0\",\"opts\":{\"*accountS\":[],\"*attributeS\":[],\"*attributesDerivedReply\":[],\"*blockerError\":[],\"*cdrS\":[],\"*cdrsDerivedReply\":[],\"*chargeable\":[],\"*chargerS\":[],\"*debitInterval\":[],\"*forceDuration\":[],\"*initiate\":[],\"*maxUsage\":[],\"*message\":[],\"*resourceS\":[],\"*resourcesAllocate\":[],\"*resourcesAuthorize\":[],\"*resourcesDerivedReply\":[],\"*resourcesRelease\":[],\"*routeS\":[],\"*routesDerivedReply\":[],\"*statS\":[],\"*statsDerivedReply\":[],\"*terminate\":[],\"*thresholdS\":[],\"*thresholdsDerivedReply\":[],\"*ttl\":[],\"*ttlLastUsage\":[],\"*ttlLastUsed\":[],\"*ttlMaxDelay\":[],\"*ttlUsage\":[],\"*update\":[]},\"rates_conns\":[\"*internal\"],\"replication_conns\":[],\"resources_conns\":[\"*internal\"],\"routes_conns\":[\"*internal\"],\"session_indexes\":[\"OriginID\"],\"stats_conns\":[],\"stir\":{\"allowed_attest\":[\"*any\"],\"default_attest\":\"A\",\"payload_maxduration\":\"-1\",\"privatekey_path\":\"\",\"publickey_path\":\"\"},\"store_session_costs\":false,\"terminate_attempts\":5,\"thresholds_conns\":[]}}"
 
+	cfgStr = "{\"sessions\":{\"accounts_conns\":[],\"actions_conns\":[],\"alterable_fields\":[],\"attributes_conns\":[\"*internal\"],\"cdrs_conns\":[\"*internal\"],\"channel_sync_interval\":\"0\",\"chargers_conns\":[\"*internal\"],\"client_protocol\":1,\"default_usage\":{\"*any\":\"3h0m0s\",\"*data\":\"1048576\",\"*sms\":\"1\",\"*voice\":\"3h0m0s\"},\"enabled\":true,\"listen_bigob\":\"\",\"listen_bijson\":\"127.0.0.1:2014\",\"min_dur_low_balance\":\"0\",\"opts\":{\"*accounts\":[],\"*attributes\":[],\"*attributesDerivedReply\":[],\"*blockerError\":[],\"*cdrs\":[],\"*cdrsDerivedReply\":[],\"*chargeable\":[],\"*chargers\":[],\"*debitInterval\":[],\"*forceDuration\":[],\"*initiate\":[],\"*maxUsage\":[],\"*message\":[],\"*resources\":[],\"*resourcesAllocate\":[],\"*resourcesAuthorize\":[],\"*resourcesDerivedReply\":[],\"*resourcesRelease\":[],\"*routes\":[],\"*routesDerivedReply\":[],\"*stats\":[],\"*statsDerivedReply\":[],\"*terminate\":[],\"*thresholds\":[],\"*thresholdsDerivedReply\":[],\"*ttl\":[],\"*ttlLastUsage\":[],\"*ttlLastUsed\":[],\"*ttlMaxDelay\":[],\"*ttlUsage\":[],\"*update\":[]},\"rates_conns\":[\"*internal\"],\"replication_conns\":[],\"resources_conns\":[\"*internal\"],\"routes_conns\":[\"*internal\"],\"session_indexes\":[\"OriginID\"],\"stats_conns\":[],\"stir\":{\"allowed_attest\":[\"*any\"],\"default_attest\":\"A\",\"payload_maxduration\":\"-1\",\"privatekey_path\":\"\",\"publickey_path\":\"\"},\"store_session_costs\":false,\"terminate_attempts\":5,\"thresholds_conns\":[]}}"
 	var rpl13 string
 	if err := testRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:   "cgrates.org",
@@ -470,7 +470,7 @@ func testConfigSReload(t *testing.T) {
 			t.Errorf("\nExpected %+v ,\n received: %+v", utils.ToIJSON(cfgStr), utils.ToIJSON(rpl30))
 		}
 	}
-	cfgStr = "{\"dispatchers\":{\"attributes_conns\":[],\"enabled\":false,\"exists_indexed_fields\":[],\"indexed_selects\":true,\"nested_fields\":false,\"notexists_indexed_fields\":[],\"opts\":{\"*dispatcherS\":[]},\"prefix_indexed_fields\":[],\"suffix_indexed_fields\":[]}}"
+	cfgStr = "{\"dispatchers\":{\"attributes_conns\":[],\"enabled\":false,\"exists_indexed_fields\":[],\"indexed_selects\":true,\"nested_fields\":false,\"notexists_indexed_fields\":[],\"opts\":{\"*dispatchers\":[]},\"prefix_indexed_fields\":[],\"suffix_indexed_fields\":[]}}"
 	var rpl31 string
 	if err := testRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:   "cgrates.org",

@@ -225,7 +225,7 @@ func (kev KamEvent) AsKamProcessMessageReply(procEvArgs *utils.CGREvent,
 		kar.Error = rplyErr.Error()
 		return
 	}
-	if utils.OptAsBool(procEvArgs.APIOpts, utils.OptsAttributeS) && procEvReply.Attributes != nil {
+	if utils.OptAsBool(procEvArgs.APIOpts, utils.MetaAttributes) && procEvReply.Attributes != nil {
 		kar.Attributes = procEvReply.Attributes.Digest()
 	}
 	if utils.OptAsBool(procEvArgs.APIOpts, utils.OptsSesResourceSAllocate) {
@@ -234,13 +234,13 @@ func (kev KamEvent) AsKamProcessMessageReply(procEvArgs *utils.CGREvent,
 	if utils.OptAsBool(procEvArgs.APIOpts, utils.OptsSesMessage) {
 		kar.MaxUsage = procEvReply.MaxUsage.Seconds()
 	}
-	if utils.OptAsBool(procEvArgs.APIOpts, utils.OptsRouteS) && procEvReply.RouteProfiles != nil {
+	if utils.OptAsBool(procEvArgs.APIOpts, utils.MetaRoutes) && procEvReply.RouteProfiles != nil {
 		kar.Routes = procEvReply.RouteProfiles.Digest()
 	}
-	if utils.OptAsBool(procEvArgs.APIOpts, utils.OptsThresholdS) {
+	if utils.OptAsBool(procEvArgs.APIOpts, utils.MetaThresholds) {
 		kar.Thresholds = strings.Join(*procEvReply.ThresholdIDs, utils.FieldsSep)
 	}
-	if utils.OptAsBool(procEvArgs.APIOpts, utils.OptsStatS) {
+	if utils.OptAsBool(procEvArgs.APIOpts, utils.MetaStats) {
 		kar.StatQueues = strings.Join(*procEvReply.StatQueueIDs, utils.FieldsSep)
 	}
 	return

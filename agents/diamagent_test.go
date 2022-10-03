@@ -182,7 +182,7 @@ func TestProcessRequest(t *testing.T) {
 					"Usage":       "10s",
 				},
 				APIOpts: map[string]interface{}{
-					utils.OptsAttributeS:  "true",
+					utils.MetaAttributes:  "true",
 					utils.OptsSesInitiate: "true",
 				},
 			}
@@ -249,7 +249,7 @@ func TestProcessRequest(t *testing.T) {
 					"Usage":       "10s",
 				},
 				APIOpts: map[string]interface{}{
-					utils.OptsAttributeS: "true",
+					utils.MetaAttributes: "true",
 					utils.OptsSesUpdate:  "true",
 				},
 			}
@@ -389,7 +389,7 @@ func TestProcessRequest(t *testing.T) {
 					"Usage":       "10s",
 				},
 				APIOpts: map[string]interface{}{
-					utils.OptsAttributeS: "true",
+					utils.MetaAttributes: "true",
 					utils.OptsSesMessage: "true",
 				},
 			}
@@ -467,7 +467,7 @@ func TestProcessRequest(t *testing.T) {
 	tmpls := []*config.FCTemplate{
 		{Type: utils.MetaConstant, Path: utils.MetaOpts + utils.NestingSep + utils.OptsSesInitiate,
 			Value: config.NewRSRParsersMustCompile("true", utils.InfieldSep)},
-		{Type: utils.MetaConstant, Path: utils.MetaOpts + utils.NestingSep + utils.OptsAttributeS,
+		{Type: utils.MetaConstant, Path: utils.MetaOpts + utils.NestingSep + utils.MetaAttributes,
 			Value: config.NewRSRParsersMustCompile("true", utils.InfieldSep)},
 	}
 	for _, v := range tmpls {
@@ -496,7 +496,7 @@ func TestProcessRequest(t *testing.T) {
 	tmpls = []*config.FCTemplate{
 		{Type: utils.MetaConstant, Path: utils.MetaOpts + utils.NestingSep + utils.OptsSesUpdate,
 			Value: config.NewRSRParsersMustCompile("true", utils.InfieldSep)},
-		{Type: utils.MetaConstant, Path: utils.MetaOpts + utils.NestingSep + utils.OptsAttributeS,
+		{Type: utils.MetaConstant, Path: utils.MetaOpts + utils.NestingSep + utils.MetaAttributes,
 			Value: config.NewRSRParsersMustCompile("true", utils.InfieldSep)},
 	}
 	for _, v := range tmpls {
@@ -555,7 +555,7 @@ func TestProcessRequest(t *testing.T) {
 	tmpls = []*config.FCTemplate{
 		{Type: utils.MetaConstant, Path: utils.MetaOpts + utils.NestingSep + utils.OptsSesMessage,
 			Value: config.NewRSRParsersMustCompile("true", utils.InfieldSep)},
-		{Type: utils.MetaConstant, Path: utils.MetaOpts + utils.NestingSep + utils.OptsAttributeS,
+		{Type: utils.MetaConstant, Path: utils.MetaOpts + utils.NestingSep + utils.MetaAttributes,
 			Value: config.NewRSRParsersMustCompile("true", utils.InfieldSep)},
 	}
 	for _, v := range tmpls {

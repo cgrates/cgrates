@@ -306,42 +306,42 @@ const CGRATES_CFG_JSON = `
 		// 		"Value": false,
 		// 	},
 		// ],
-		// "*attributeS": [					
+		// "*attributes": [					
 		// 	{
 		// 		"Tenant": "*any",
 		// 		"FilterIDs": [],
 		// 		"Value": false,
 		// 	},
 		// ],
-		// "*chargerS": [						
+		// "*chargers": [						
 		// 	{
 		// 		"Tenant": "*any",
 		// 		"FilterIDs": [],
 		// 		"Value": false,
 		// 	},
 		// ],
-		// "*eeS": [							
+		// "*ees": [							
 		// 	{
 		// 		"Tenant": "*any",
 		// 		"FilterIDs": [],
 		// 		"Value": false,
 		// 	},
 		// ],
-		// "*rateS": [							
+		// "*rates": [							
 		// 	{
 		// 		"Tenant": "*any",
 		// 		"FilterIDs": [],
 		// 		"Value": false,
 		// 	},
 		// ],
-		// "*statS": [							
+		// "*stats": [							
 		// 	{
 		// 		"Tenant": "*any",
 		// 		"FilterIDs": [],
 		// 		"Value": false,
 		// 	},
 		// ],
-		// "*thresholdS": [					
+		// "*thresholds": [					
 		// 	{
 		// 		"Tenant": "*any",
 		// 		"FilterIDs": [],
@@ -647,7 +647,7 @@ const CGRATES_CFG_JSON = `
 		// 		"Value": false,
 		// 	},
 		// ],
-		// "*attributeS": [					
+		// "*attributes": [					
 		// 	{
 		// 		"Tenant": "*any",
 		// 		"FilterIDs": [],
@@ -661,35 +661,35 @@ const CGRATES_CFG_JSON = `
 		// 		"Value": false,
 		// 	},
 		// ],
-		// "*chargerS": [						
+		// "*chargers": [						
 		// 	{
 		// 		"Tenant": "*any",
 		// 		"FilterIDs": [],
 		// 		"Value": false,
 		// 	},
 		// ],
-		// "*resourceS": [						
+		// "*resources": [						
 		// 	{
 		// 		"Tenant": "*any",
 		// 		"FilterIDs": [],
 		// 		"Value": false,
 		// 	},
 		// ],
-		// "*routeS": [						
+		// "*routes": [						
 		// 	{
 		// 		"Tenant": "*any",
 		// 		"FilterIDs": [],
 		// 		"Value": false,
 		// 	},
 		// ],
-		// "*statS": [							
+		// "*stats": [							
 		// 	{
 		// 		"Tenant": "*any",
 		// 		"FilterIDs": [],
 		// 		"Value": false,
 		// 	},
 		// ],
-		// "*thresholdS": [					
+		// "*thresholds": [					
 		// 	{
 		// 		"Tenant": "*any",
 		// 		"FilterIDs": [],

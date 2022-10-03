@@ -1625,7 +1625,7 @@ func testAttributeSetAttributeProfileWithAttrBlockers(t *testing.T) {
 					Value: "*sms",
 				},
 				{
-					Path:  utils.MetaOpts + utils.NestingSep + "*chargerS",
+					Path:  utils.MetaOpts + utils.NestingSep + "*chargers",
 					Value: "true",
 				},
 				{
@@ -1719,7 +1719,7 @@ func testAttributeSetAttributeProfileWithAttrBlockers(t *testing.T) {
 				"Blockers":         "*exists",
 			},
 			APIOpts: map[string]interface{}{
-				utils.MetaRateS: "true",
+				utils.MetaRates: "true",
 			},
 		},
 	}
@@ -1798,7 +1798,7 @@ func testAttributeSetAttributeProfileBlockersBothProfilesProcessRuns(t *testing.
 		AlteredFields: []*engine.FieldsAltered{
 			{
 				MatchedProfileID: "cgrates.org:ATTR_WITH_BLOCKER_TRUE",
-				Fields:           []string{"*opts.*chargerS", "*req.RequestType", "*req.ToR"},
+				Fields:           []string{"*opts.*chargers", "*req.RequestType", "*req.ToR"},
 			},
 			{
 				MatchedProfileID: "cgrates.org:ATTR_WITH_BLOCKER",
@@ -1817,7 +1817,7 @@ func testAttributeSetAttributeProfileBlockersBothProfilesProcessRuns(t *testing.
 			// now *rates was not processde ebcause the blocker amtched the filter of Destination
 			APIOpts: map[string]interface{}{
 				utils.OptsAttributesProcessRuns: 2.,
-				utils.OptsChargerS:              "true",
+				utils.MetaChargers:              "true",
 			},
 		},
 	}
@@ -1881,7 +1881,7 @@ func testAttributeSSetNonIndexedTypeFilter(t *testing.T) {
 				utils.Destination:  "44322",
 			},
 			APIOpts: map[string]interface{}{
-				utils.MetaRateS: "true",
+				utils.MetaRates: "true",
 			},
 		},
 	}

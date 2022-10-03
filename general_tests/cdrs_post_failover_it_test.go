@@ -163,11 +163,11 @@ func testCDRsPostFailoverProcessCDR(t *testing.T) {
 		},
 		APIOpts: map[string]interface{}{
 			utils.OptsCDRsExport: true,
-			utils.OptsAttributeS: false,
-			utils.OptsChargerS:   false,
+			utils.MetaAttributes: false,
+			utils.MetaChargers:   false,
 			utils.OptsCDRsStore:  false,
-			utils.OptsThresholdS: false,
-			utils.OptsStatS:      false,
+			utils.MetaThresholds: false,
+			utils.MetaStats:      false,
 		},
 	}
 

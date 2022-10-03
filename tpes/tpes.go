@@ -77,7 +77,7 @@ func getTariffPlansKeys(ctx *context.Context, dm *engine.DataManager, tnt, expTy
 		prfx = utils.ChargerProfilePrefix + tnt + utils.ConcatenatedKeySep
 	case utils.MetaFilters:
 		prfx = utils.FilterPrefix + tnt + utils.ConcatenatedKeySep
-	case utils.MetaRateS:
+	case utils.MetaRates:
 		prfx = utils.RateProfilePrefix + tnt + utils.ConcatenatedKeySep
 	case utils.MetaResources:
 		prfx = utils.ResourceProfilesPrefix + tnt + utils.ConcatenatedKeySep

@@ -649,7 +649,7 @@ func TestCDRsRateProcessEventMock(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CdrsCfg().RateSConns = []string{utils.ConcatenatedKey(utils.MetaInternal,
-		utils.MetaRateS)}
+		utils.MetaRates)}
 
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	connMng := NewConnManager(cfg)
@@ -668,7 +668,7 @@ func TestCDRsRateProcessEventMock(t *testing.T) {
 	rpcInternal := make(chan birpc.ClientConnector, 1)
 	rpcInternal <- ccM
 	newCDRSrv.connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal,
-		utils.MetaRateS), utils.RateSv1, rpcInternal)
+		utils.MetaRates), utils.RateSv1, rpcInternal)
 
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
@@ -683,7 +683,7 @@ func TestCDRsRateProcessEventMock(t *testing.T) {
 			utils.Cost:       123.0,
 		},
 		APIOpts: map[string]interface{}{
-			utils.MetaSubsys: utils.MetaRateS,
+			utils.MetaSubsys: utils.MetaRates,
 		},
 	}
 	err := newCDRSrv.rateSCostForEvent(context.Background(), cgrEv)
@@ -705,7 +705,7 @@ func TestCDRsRateProcessEventMock(t *testing.T) {
 		},
 		APIOpts: map[string]interface{}{
 			utils.MetaRateSCost: utils.RateProfileCost{},
-			utils.MetaSubsys:    utils.MetaRateS,
+			utils.MetaSubsys:    utils.MetaRates,
 		},
 	}
 	if !reflect.DeepEqual(expected, cgrEv) {
@@ -1279,7 +1279,7 @@ func TestCDRsProcessEventMockAttrsErr(t *testing.T) {
 			utils.Cost:       123.0,
 		},
 		APIOpts: map[string]interface{}{
-			utils.OptsAttributeS: true,
+			utils.MetaAttributes: true,
 			"*context":           utils.MetaCDRs,
 		},
 	}
@@ -1340,7 +1340,7 @@ func TestCDRsProcessEventMockAttrsErrBoolOpts(t *testing.T) {
 			utils.Cost:       123.0,
 		},
 		APIOpts: map[string]interface{}{
-			utils.OptsAttributeS: time.Second,
+			utils.MetaAttributes: time.Second,
 			"*context":           utils.MetaCDRs,
 		},
 	}
@@ -1401,7 +1401,7 @@ func TestCDRsProcessEventMockChrgsErr(t *testing.T) {
 			utils.Cost:       123.0,
 		},
 		APIOpts: map[string]interface{}{
-			utils.OptsChargerS: true,
+			utils.MetaChargers: true,
 			"*context":         utils.MetaCDRs,
 		},
 	}
@@ -1463,7 +1463,7 @@ func TestCDRsProcessEventMockChrgsErrBoolOpts(t *testing.T) {
 			utils.Cost:       123.0,
 		},
 		APIOpts: map[string]interface{}{
-			utils.OptsChargerS: time.Second,
+			utils.MetaChargers: time.Second,
 			"*context":         utils.MetaCDRs,
 		},
 	}
@@ -1525,7 +1525,7 @@ func TestCDRsProcessEventMockRateSErr(t *testing.T) {
 			utils.Cost:       123.0,
 		},
 		APIOpts: map[string]interface{}{
-			utils.OptsRateS: true,
+			utils.MetaRates: true,
 			"*context":      utils.MetaCDRs,
 		},
 	}
@@ -1587,7 +1587,7 @@ func TestCDRsProcessEventMockRateSErrBoolOpts(t *testing.T) {
 			utils.Cost:       123.0,
 		},
 		APIOpts: map[string]interface{}{
-			utils.OptsRateS: time.Second,
+			utils.MetaRates: time.Second,
 			"*context":      utils.MetaCDRs,
 		},
 	}
@@ -1898,7 +1898,7 @@ func TestCDRsProcessEventMockThdsErr(t *testing.T) {
 			utils.Cost:       123.0,
 		},
 		APIOpts: map[string]interface{}{
-			utils.OptsThresholdS: true,
+			utils.MetaThresholds: true,
 			"*context":           utils.MetaCDRs,
 		},
 	}
@@ -1960,7 +1960,7 @@ func TestCDRsProcessEventMockThdsErrBoolOpts(t *testing.T) {
 			utils.Cost:       123.0,
 		},
 		APIOpts: map[string]interface{}{
-			utils.OptsThresholdS: time.Second,
+			utils.MetaThresholds: time.Second,
 			"*context":           utils.MetaCDRs,
 		},
 	}
@@ -2022,7 +2022,7 @@ func TestCDRsProcessEventMockStatsErr(t *testing.T) {
 			utils.Cost:       123.0,
 		},
 		APIOpts: map[string]interface{}{
-			utils.OptsStatS: true,
+			utils.MetaStats: true,
 			"*context":      utils.MetaCDRs,
 		},
 	}
@@ -2084,7 +2084,7 @@ func TestCDRsProcessEventMockStatsErrGetBoolOpts(t *testing.T) {
 			utils.Cost:       123.0,
 		},
 		APIOpts: map[string]interface{}{
-			utils.OptsStatS: time.Second,
+			utils.MetaStats: time.Second,
 			"*context":      utils.MetaCDRs,
 		},
 	}
@@ -2217,7 +2217,7 @@ func TestCDRsV1ProcessEventMockErr(t *testing.T) {
 			utils.Cost:       123.0,
 		},
 		APIOpts: map[string]interface{}{
-			utils.OptsStatS:      true,
+			utils.MetaStats:      true,
 			utils.OptsCDRsExport: true,
 			"*context":           utils.MetaCDRs,
 		},
@@ -2240,7 +2240,7 @@ func TestCDRsV1ProcessEventMockErr(t *testing.T) {
 			utils.Cost:       123.0,
 		},
 		APIOpts: map[string]interface{}{
-			utils.OptsStatS:      true,
+			utils.MetaStats:      true,
 			utils.OptsCDRsExport: true,
 			"*context":           utils.MetaCDRs,
 		},
@@ -2458,7 +2458,7 @@ func TestCDRsV1ProcessEventWithGetMockCacheErr(t *testing.T) {
 		},
 		APIOpts: map[string]interface{}{
 			utils.OptsCDRsExport: true,
-			utils.OptsAttributeS: time.Second,
+			utils.MetaAttributes: time.Second,
 			"*context":           utils.MetaCDRs,
 		},
 	}

@@ -300,7 +300,7 @@ func (scfg *SessionSCfg) loadFromJSONCfg(jsnCfg *SessionSJsonCfg) (err error) {
 		}
 	}
 	if jsnCfg.Rates_conns != nil {
-		scfg.RateSConns = updateInternalConns(*jsnCfg.Rates_conns, utils.MetaRateS)
+		scfg.RateSConns = updateInternalConns(*jsnCfg.Rates_conns, utils.MetaRates)
 	}
 	if jsnCfg.Accounts_conns != nil {
 		scfg.AccountSConns = updateInternalConns(*jsnCfg.Accounts_conns, utils.MetaAccounts)
@@ -368,14 +368,14 @@ func (scfg SessionSCfg) AsMapInterface(string) interface{} {
 		}
 	}
 	opts := map[string]interface{}{
-		utils.MetaAccountSCfg:               scfg.Opts.Accounts,
-		utils.MetaAttributeSCfg:             scfg.Opts.Attributes,
-		utils.MetaCDRsCfg:                   scfg.Opts.CDRs,
-		utils.MetaChargerSCfg:               scfg.Opts.Chargers,
-		utils.MetaResourceSCfg:              scfg.Opts.Resources,
-		utils.MetaRouteSCfg:                 scfg.Opts.Routes,
-		utils.MetaStatSCfg:                  scfg.Opts.Stats,
-		utils.MetaThresholdSCfg:             scfg.Opts.Thresholds,
+		utils.MetaAccounts:                  scfg.Opts.Accounts,
+		utils.MetaAttributes:                scfg.Opts.Attributes,
+		utils.MetaCDRs:                      scfg.Opts.CDRs,
+		utils.MetaChargers:                  scfg.Opts.Chargers,
+		utils.MetaResources:                 scfg.Opts.Resources,
+		utils.MetaRoutes:                    scfg.Opts.Routes,
+		utils.MetaStats:                     scfg.Opts.Stats,
+		utils.MetaThresholds:                scfg.Opts.Thresholds,
 		utils.MetaInitiate:                  scfg.Opts.Initiate,
 		utils.MetaUpdate:                    scfg.Opts.Update,
 		utils.MetaTerminate:                 scfg.Opts.Terminate,
@@ -771,13 +771,13 @@ func diffSTIRJsonCfg(d *STIRJsonCfg, v1, v2 *STIRcfg) *STIRJsonCfg {
 
 type SessionsOptsJson struct {
 	Accounts               []*utils.DynamicBoolOpt   `json:"*accounts"`
-	Attributes             []*utils.DynamicBoolOpt   `json:"*attributeS"`
+	Attributes             []*utils.DynamicBoolOpt   `json:"*attributes"`
 	CDRs                   []*utils.DynamicBoolOpt   `json:"*cdrs"`
-	Chargers               []*utils.DynamicBoolOpt   `json:"*chargerS"`
-	Resources              []*utils.DynamicBoolOpt   `json:"*resourceS"`
-	Routes                 []*utils.DynamicBoolOpt   `json:"*routeS"`
-	Stats                  []*utils.DynamicBoolOpt   `json:"*statS"`
-	Thresholds             []*utils.DynamicBoolOpt   `json:"*thresholdS"`
+	Chargers               []*utils.DynamicBoolOpt   `json:"*chargers"`
+	Resources              []*utils.DynamicBoolOpt   `json:"*resources"`
+	Routes                 []*utils.DynamicBoolOpt   `json:"*routes"`
+	Stats                  []*utils.DynamicBoolOpt   `json:"*stats"`
+	Thresholds             []*utils.DynamicBoolOpt   `json:"*thresholds"`
 	Initiate               []*utils.DynamicBoolOpt   `json:"*initiate"`
 	Update                 []*utils.DynamicBoolOpt   `json:"*update"`
 	Terminate              []*utils.DynamicBoolOpt   `json:"*terminate"`
