@@ -163,7 +163,7 @@ func testCoreItStartEngine(t *testing.T) {
 
 func testCoreItStopMemProfilingBeforeStart(t *testing.T) {
 	var reply string
-	expectedErr := " Memory Profiling is not started"
+	expectedErr := "Memory Profiling is not started"
 	if err := coreSBiRpc.Call(context.Background(), utils.CoreSv1StopMemoryProfiling,
 		new(utils.TenantWithAPIOpts), &reply); err == nil || err.Error() != expectedErr {
 		t.Errorf("Expected %+q, received %+q", expectedErr, err)
