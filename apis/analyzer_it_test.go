@@ -60,6 +60,14 @@ var (
 )
 
 func TestAnalyzerSIT(t *testing.T) {
+	switch *dbType {
+	case utils.MetaInternal, utils.MetaMySQL, utils.MetaPostgres:
+		t.SkipNow()
+	case utils.MetaMongo:
+		anzCfgPath = path.Join(*dataDir, "conf", "samples", "analyzers")
+	default:
+		t.Fatal("Unknown Database type")
+	}
 	for _, stest := range sTestsAnz {
 		t.Run("TestAnalyzerSIT", stest)
 	}
@@ -73,7 +81,7 @@ func testAnalyzerSInitCfg(t *testing.T) {
 	if err = os.MkdirAll("/tmp/analyzers/", 0700); err != nil {
 		t.Fatal(err)
 	}
-	anzCfgPath = path.Join(*dataDir, "conf", "samples", "analyzers")
+
 	anzCfg, err = config.NewCGRConfigFromPath(context.Background(), anzCfgPath)
 	if err != nil {
 		t.Error(err)

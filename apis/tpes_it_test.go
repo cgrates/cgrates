@@ -293,7 +293,7 @@ func testTPeSetFilters(t *testing.T) {
 				},
 				{
 					Type:    utils.MetaNotExists,
-					Element: "~*opts.*rateS",
+					Element: "~*opts.*rates",
 				},
 			},
 		},
@@ -1256,7 +1256,7 @@ func testTPeSExportTariffPlanAllTariffPlan(t *testing.T) {
 			{"cgrates.org", "fltr_for_prf", "*exists", "~*req.NumberOfEvents", ""},
 			{"cgrates.org", "fltr_changed2", "*string", "~*opts.*originID", "QWEASDZXC;IOPJKLBNM"},
 			{"cgrates.org", "fltr_changed2", "*string", "~*opts.Subsystems", "*attributes"},
-			{"cgrates.org", "fltr_changed2", "*notexists", "~*opts.*rateS", ""},
+			{"cgrates.org", "fltr_changed2", "*notexists", "~*opts.*rates", ""},
 		},
 		utils.RatesCsv: {
 			{"#Tenant", "ID", "FilterIDs", "Weights", "MinCost", "MaxCost", "MaxCostStrategy", "RateID", "RateFilterIDs", "RateActivationStart", "RateWeights", "RateBlocker", "RateIntervalStart", "RateFixedFee", "RateRecurrentFee", "RateUnit", "RateIncrement"},
