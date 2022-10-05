@@ -137,6 +137,11 @@ func (admS *AdminSv1) SetDispatcherProfile(ctx *context.Context, args *Dispatche
 		args.TenantID(), &args.FilterIDs, args.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
+	//handle caching for DispatcherProfile
+	if err := admS.CallCache(ctx, utils.IfaceAsString(args.APIOpts[utils.MetaCache]), args.Tenant, utils.CacheDispatcherProfiles,
+		args.TenantID(), &args.FilterIDs, args.APIOpts); err != nil {
+		return utils.APIErrorHandler(err)
+	}
 	*reply = utils.OK
 	return nil
 }

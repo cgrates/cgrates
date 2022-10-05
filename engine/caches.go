@@ -207,7 +207,7 @@ func (chS *CacheS) GetWithRemote(ctx *context.Context, args *utils.ArgsGetCacheI
 	}
 	if len(chS.cfg.CacheCfg().RemoteConns) == 0 ||
 		!chS.cfg.CacheCfg().Partitions[args.CacheID].Remote {
-		return nil, fmt.Errorf("Remote connections are missing from Cache config or Remote field of partition: %s is false", args.CacheID)
+		return nil, utils.ErrNotFound
 	}
 	// item was not found locally, query from remote
 	if err = chS.connMgr.Call(ctx, chS.cfg.CacheCfg().RemoteConns,
