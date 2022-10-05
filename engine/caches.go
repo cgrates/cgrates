@@ -206,7 +206,7 @@ func (chS *CacheS) GetWithRemote(args *utils.ArgsGetCacheItemWithAPIOpts) (itm i
 	}
 	if len(chS.cfg.CacheCfg().RemoteConns) == 0 ||
 		!chS.cfg.CacheCfg().Partitions[args.CacheID].Remote {
-		return
+		return nil, utils.ErrNotFound
 	}
 	// item was not found locally, query from remote
 	if err = connMgr.Call(chS.cfg.CacheCfg().RemoteConns, nil,
