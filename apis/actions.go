@@ -133,7 +133,7 @@ func (admS *AdminSv1) SetActionProfile(ctx *context.Context, ap *engine.ActionPr
 		return utils.APIErrorHandler(err)
 	}
 	if err := admS.CallCache(ctx, utils.IfaceAsString(ap.APIOpts[utils.MetaCache]), ap.Tenant, utils.CacheActionProfiles,
-		ap.TenantID(), &ap.FilterIDs, ap.APIOpts); err != nil {
+		ap.TenantID(), utils.EmptyString, &ap.FilterIDs, ap.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
@@ -158,7 +158,7 @@ func (admS *AdminSv1) RemoveActionProfile(ctx *context.Context, arg *utils.Tenan
 		return utils.APIErrorHandler(err)
 	}
 	if err := admS.CallCache(ctx, utils.IfaceAsString(arg.APIOpts[utils.MetaCache]), tnt, utils.CacheActionProfiles,
-		utils.ConcatenatedKey(tnt, arg.ID), nil, arg.APIOpts); err != nil {
+		utils.ConcatenatedKey(tnt, arg.ID), utils.EmptyString, nil, arg.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK

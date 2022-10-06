@@ -236,7 +236,7 @@ func (admS *AdminSv1) SetRateProfile(ctx *context.Context, args *utils.APIRatePr
 		return utils.APIErrorHandler(err)
 	}
 	if err := admS.CallCache(ctx, utils.IfaceAsString(args.APIOpts[utils.MetaCache]), args.Tenant, utils.CacheRateProfiles,
-		args.TenantID(), &args.FilterIDs, args.APIOpts); err != nil {
+		args.TenantID(), utils.EmptyString, &args.FilterIDs, args.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
@@ -260,7 +260,7 @@ func (admS *AdminSv1) RemoveRateProfileRates(ctx *context.Context, args *utils.R
 		return utils.APIErrorHandler(err)
 	}
 	if err := admS.CallCache(ctx, utils.IfaceAsString(args.APIOpts[utils.MetaCache]), tnt, utils.CacheRateProfiles,
-		utils.ConcatenatedKey(tnt, args.ID), nil, args.APIOpts); err != nil {
+		utils.ConcatenatedKey(tnt, args.ID), utils.EmptyString, nil, args.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
@@ -285,7 +285,7 @@ func (admS *AdminSv1) RemoveRateProfile(ctx *context.Context, arg *utils.TenantI
 		return utils.APIErrorHandler(err)
 	}
 	if err := admS.CallCache(ctx, utils.IfaceAsString(arg.APIOpts[utils.MetaCache]), tnt, utils.CacheRateProfiles,
-		utils.ConcatenatedKey(tnt, arg.ID), nil, arg.APIOpts); err != nil {
+		utils.ConcatenatedKey(tnt, arg.ID), utils.EmptyString, nil, arg.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK

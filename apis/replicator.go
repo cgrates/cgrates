@@ -220,7 +220,7 @@ func (rplSv1 *ReplicatorSv1) SetThresholdProfile(ctx *context.Context, th *engin
 		return
 	}
 	if err = rplSv1.v1.CallCache(ctx, utils.IfaceAsString(th.APIOpts[utils.MetaCache]),
-		th.Tenant, utils.CacheThresholdProfiles, th.TenantID(), &th.FilterIDs, th.APIOpts); err != nil {
+		th.Tenant, utils.CacheThresholdProfiles, th.TenantID(), utils.EmptyString, &th.FilterIDs, th.APIOpts); err != nil {
 		return
 	}
 	*reply = utils.OK
@@ -233,7 +233,7 @@ func (rplSv1 *ReplicatorSv1) SetThreshold(ctx *context.Context, th *engine.Thres
 		return
 	}
 	if err = rplSv1.v1.CallCache(ctx, utils.IfaceAsString(th.APIOpts[utils.MetaCache]),
-		th.Tenant, utils.CacheThresholds, th.TenantID(), nil, th.APIOpts); err != nil {
+		th.Tenant, utils.CacheThresholds, th.TenantID(), utils.EmptyString, nil, th.APIOpts); err != nil {
 		return
 	}
 	*reply = utils.OK
@@ -246,7 +246,7 @@ func (rplSv1 *ReplicatorSv1) SetStatQueueProfile(ctx *context.Context, sq *engin
 		return
 	}
 	if err = rplSv1.v1.CallCache(ctx, utils.IfaceAsString(sq.APIOpts[utils.MetaCache]),
-		sq.Tenant, utils.CacheStatQueueProfiles, sq.TenantID(), &sq.FilterIDs, sq.APIOpts); err != nil {
+		sq.Tenant, utils.CacheStatQueueProfiles, sq.TenantID(), utils.EmptyString, &sq.FilterIDs, sq.APIOpts); err != nil {
 		return
 	}
 	*reply = utils.OK
@@ -259,7 +259,7 @@ func (rplSv1 *ReplicatorSv1) SetStatQueue(ctx *context.Context, sq *engine.StatQ
 		return
 	}
 	if err = rplSv1.v1.CallCache(ctx, utils.IfaceAsString(sq.APIOpts[utils.MetaCache]),
-		sq.StatQueue.Tenant, utils.CacheStatQueues, sq.StatQueue.TenantID(), nil, sq.APIOpts); err != nil {
+		sq.StatQueue.Tenant, utils.CacheStatQueues, sq.StatQueue.TenantID(), utils.EmptyString, nil, sq.APIOpts); err != nil {
 		return
 	}
 	*reply = utils.OK
@@ -272,7 +272,7 @@ func (rplSv1 *ReplicatorSv1) SetFilter(ctx *context.Context, fltr *engine.Filter
 		return
 	}
 	if err = rplSv1.v1.CallCache(ctx, utils.IfaceAsString(fltr.APIOpts[utils.MetaCache]),
-		fltr.Tenant, utils.CacheFilters, fltr.TenantID(), nil, fltr.APIOpts); err != nil {
+		fltr.Tenant, utils.CacheFilters, fltr.TenantID(), utils.EmptyString, nil, fltr.APIOpts); err != nil {
 		return
 	}
 	*reply = utils.OK
@@ -285,7 +285,7 @@ func (rplSv1 *ReplicatorSv1) SetResourceProfile(ctx *context.Context, rs *engine
 		return
 	}
 	if err = rplSv1.v1.CallCache(ctx, utils.IfaceAsString(rs.APIOpts[utils.MetaCache]),
-		rs.Tenant, utils.CacheResourceProfiles, rs.TenantID(), &rs.FilterIDs, rs.APIOpts); err != nil {
+		rs.Tenant, utils.CacheResourceProfiles, rs.TenantID(), utils.EmptyString, &rs.FilterIDs, rs.APIOpts); err != nil {
 		return
 	}
 	*reply = utils.OK
@@ -298,7 +298,7 @@ func (rplSv1 *ReplicatorSv1) SetResource(ctx *context.Context, rs *engine.Resour
 		return
 	}
 	if err = rplSv1.v1.CallCache(ctx, utils.IfaceAsString(rs.APIOpts[utils.MetaCache]),
-		rs.Tenant, utils.CacheResources, rs.TenantID(), nil, rs.APIOpts); err != nil {
+		rs.Tenant, utils.CacheResources, rs.TenantID(), utils.EmptyString, nil, rs.APIOpts); err != nil {
 		return
 	}
 	*reply = utils.OK
@@ -311,7 +311,7 @@ func (rplSv1 *ReplicatorSv1) SetRouteProfile(ctx *context.Context, sp *engine.Ro
 		return
 	}
 	if err = rplSv1.v1.CallCache(ctx, utils.IfaceAsString(sp.APIOpts[utils.MetaCache]),
-		sp.Tenant, utils.CacheRouteProfiles, sp.TenantID(), &sp.FilterIDs, sp.APIOpts); err != nil {
+		sp.Tenant, utils.CacheRouteProfiles, sp.TenantID(), utils.EmptyString, &sp.FilterIDs, sp.APIOpts); err != nil {
 		return
 	}
 	*reply = utils.OK
@@ -324,7 +324,7 @@ func (rplSv1 *ReplicatorSv1) SetAttributeProfile(ctx *context.Context, ap *engin
 		return
 	}
 	if err = rplSv1.v1.CallCache(ctx, utils.IfaceAsString(ap.APIOpts[utils.MetaCache]),
-		ap.Tenant, utils.CacheAttributeProfiles, ap.TenantID(), &ap.FilterIDs, ap.APIOpts); err != nil {
+		ap.Tenant, utils.CacheAttributeProfiles, ap.TenantID(), utils.EmptyString, &ap.FilterIDs, ap.APIOpts); err != nil {
 		return
 	}
 	*reply = utils.OK
@@ -337,7 +337,7 @@ func (rplSv1 *ReplicatorSv1) SetChargerProfile(ctx *context.Context, cp *engine.
 		return
 	}
 	if err = rplSv1.v1.CallCache(ctx, utils.IfaceAsString(cp.APIOpts[utils.MetaCache]),
-		cp.Tenant, utils.CacheChargerProfiles, cp.TenantID(), &cp.FilterIDs, cp.APIOpts); err != nil {
+		cp.Tenant, utils.CacheChargerProfiles, cp.TenantID(), utils.EmptyString, &cp.FilterIDs, cp.APIOpts); err != nil {
 		return
 	}
 	*reply = utils.OK
@@ -350,7 +350,7 @@ func (rplSv1 *ReplicatorSv1) SetDispatcherProfile(ctx *context.Context, dpp *eng
 		return
 	}
 	if err = rplSv1.v1.CallCache(ctx, utils.IfaceAsString(dpp.APIOpts[utils.MetaCache]),
-		dpp.Tenant, utils.CacheDispatcherProfiles, dpp.TenantID(), &dpp.FilterIDs, dpp.APIOpts); err != nil {
+		dpp.Tenant, utils.CacheDispatcherProfiles, dpp.TenantID(), utils.EmptyString, &dpp.FilterIDs, dpp.APIOpts); err != nil {
 		return
 	}
 	*reply = utils.OK
@@ -363,7 +363,7 @@ func (rplSv1 *ReplicatorSv1) SetDispatcherHost(ctx *context.Context, dpp *engine
 		return
 	}
 	if err = rplSv1.v1.CallCache(ctx, utils.IfaceAsString(dpp.APIOpts[utils.MetaCache]),
-		dpp.Tenant, utils.CacheDispatcherHosts, dpp.TenantID(), nil, dpp.APIOpts); err != nil {
+		dpp.Tenant, utils.CacheDispatcherHosts, dpp.TenantID(), utils.EmptyString, nil, dpp.APIOpts); err != nil {
 		return
 	}
 	*reply = utils.OK
@@ -410,7 +410,7 @@ func (rplSv1 *ReplicatorSv1) RemoveThreshold(ctx *context.Context, args *utils.T
 		return
 	}
 	if err = rplSv1.v1.CallCache(ctx, utils.IfaceAsString(args.APIOpts[utils.MetaCache]),
-		args.Tenant, utils.CacheThresholds, args.TenantID.TenantID(), nil, args.APIOpts); err != nil {
+		args.Tenant, utils.CacheThresholds, args.TenantID.TenantID(), utils.EmptyString, nil, args.APIOpts); err != nil {
 		return
 	}
 	*reply = utils.OK
@@ -433,7 +433,7 @@ func (rplSv1 *ReplicatorSv1) RemoveStatQueue(ctx *context.Context, args *utils.T
 		return
 	}
 	if err = rplSv1.v1.CallCache(ctx, utils.IfaceAsString(args.APIOpts[utils.MetaCache]),
-		args.Tenant, utils.CacheStatQueues, args.TenantID.TenantID(), nil, args.APIOpts); err != nil {
+		args.Tenant, utils.CacheStatQueues, args.TenantID.TenantID(), utils.EmptyString, nil, args.APIOpts); err != nil {
 		return
 	}
 	*reply = utils.OK
@@ -446,7 +446,7 @@ func (rplSv1 *ReplicatorSv1) RemoveFilter(ctx *context.Context, args *utils.Tena
 		return
 	}
 	if err = rplSv1.v1.CallCache(ctx, utils.IfaceAsString(args.APIOpts[utils.MetaCache]),
-		args.Tenant, utils.CacheFilters, args.TenantID.TenantID(), nil, args.APIOpts); err != nil {
+		args.Tenant, utils.CacheFilters, args.TenantID.TenantID(), utils.EmptyString, nil, args.APIOpts); err != nil {
 		return
 	}
 	*reply = utils.OK
@@ -459,7 +459,7 @@ func (rplSv1 *ReplicatorSv1) RemoveThresholdProfile(ctx *context.Context, args *
 		return
 	}
 	if err = rplSv1.v1.CallCache(ctx, utils.IfaceAsString(args.APIOpts[utils.MetaCache]),
-		args.Tenant, utils.CacheThresholdProfiles, args.TenantID.TenantID(), nil, args.APIOpts); err != nil {
+		args.Tenant, utils.CacheThresholdProfiles, args.TenantID.TenantID(), utils.EmptyString, nil, args.APIOpts); err != nil {
 		return
 	}
 	*reply = utils.OK
@@ -472,7 +472,7 @@ func (rplSv1 *ReplicatorSv1) RemoveStatQueueProfile(ctx *context.Context, args *
 		return
 	}
 	if err = rplSv1.v1.CallCache(ctx, utils.IfaceAsString(args.APIOpts[utils.MetaCache]),
-		args.Tenant, utils.CacheStatQueueProfiles, args.TenantID.TenantID(), nil, args.APIOpts); err != nil {
+		args.Tenant, utils.CacheStatQueueProfiles, args.TenantID.TenantID(), utils.EmptyString, nil, args.APIOpts); err != nil {
 		return
 	}
 	*reply = utils.OK
@@ -485,7 +485,7 @@ func (rplSv1 *ReplicatorSv1) RemoveResource(ctx *context.Context, args *utils.Te
 		return
 	}
 	if err = rplSv1.v1.CallCache(ctx, utils.IfaceAsString(args.APIOpts[utils.MetaCache]),
-		args.Tenant, utils.CacheResources, args.TenantID.TenantID(), nil, args.APIOpts); err != nil {
+		args.Tenant, utils.CacheResources, args.TenantID.TenantID(), utils.EmptyString, nil, args.APIOpts); err != nil {
 		return
 	}
 	*reply = utils.OK
@@ -498,7 +498,7 @@ func (rplSv1 *ReplicatorSv1) RemoveResourceProfile(ctx *context.Context, args *u
 		return
 	}
 	if err = rplSv1.v1.CallCache(ctx, utils.IfaceAsString(args.APIOpts[utils.MetaCache]),
-		args.Tenant, utils.CacheResourceProfiles, args.TenantID.TenantID(), nil, args.APIOpts); err != nil {
+		args.Tenant, utils.CacheResourceProfiles, args.TenantID.TenantID(), utils.EmptyString, nil, args.APIOpts); err != nil {
 		return
 	}
 	*reply = utils.OK
@@ -511,7 +511,7 @@ func (rplSv1 *ReplicatorSv1) RemoveRouteProfile(ctx *context.Context, args *util
 		return
 	}
 	if err = rplSv1.v1.CallCache(ctx, utils.IfaceAsString(args.APIOpts[utils.MetaCache]),
-		args.Tenant, utils.CacheRouteProfiles, args.TenantID.TenantID(), nil, args.APIOpts); err != nil {
+		args.Tenant, utils.CacheRouteProfiles, args.TenantID.TenantID(), utils.EmptyString, nil, args.APIOpts); err != nil {
 		return
 	}
 	*reply = utils.OK
@@ -524,7 +524,7 @@ func (rplSv1 *ReplicatorSv1) RemoveAttributeProfile(ctx *context.Context, args *
 		return
 	}
 	if err = rplSv1.v1.CallCache(ctx, utils.IfaceAsString(args.APIOpts[utils.MetaCache]),
-		args.Tenant, utils.CacheAttributeProfiles, args.TenantID.TenantID(), nil, args.APIOpts); err != nil {
+		args.Tenant, utils.CacheAttributeProfiles, args.TenantID.TenantID(), utils.EmptyString, nil, args.APIOpts); err != nil {
 		return
 	}
 	*reply = utils.OK
@@ -537,7 +537,7 @@ func (rplSv1 *ReplicatorSv1) RemoveChargerProfile(ctx *context.Context, args *ut
 		return
 	}
 	if err = rplSv1.v1.CallCache(ctx, utils.IfaceAsString(args.APIOpts[utils.MetaCache]),
-		args.Tenant, utils.CacheChargerProfiles, args.TenantID.TenantID(), nil, args.APIOpts); err != nil {
+		args.Tenant, utils.CacheChargerProfiles, args.TenantID.TenantID(), utils.EmptyString, nil, args.APIOpts); err != nil {
 		return
 	}
 	*reply = utils.OK
@@ -550,7 +550,7 @@ func (rplSv1 *ReplicatorSv1) RemoveDispatcherProfile(ctx *context.Context, args 
 		return
 	}
 	if err = rplSv1.v1.CallCache(ctx, utils.IfaceAsString(args.APIOpts[utils.MetaCache]),
-		args.Tenant, utils.CacheDispatcherProfiles, args.TenantID.TenantID(), nil, args.APIOpts); err != nil {
+		args.Tenant, utils.CacheDispatcherProfiles, args.TenantID.TenantID(), utils.EmptyString, nil, args.APIOpts); err != nil {
 		return
 	}
 	*reply = utils.OK
@@ -563,7 +563,7 @@ func (rplSv1 *ReplicatorSv1) RemoveDispatcherHost(ctx *context.Context, args *ut
 		return
 	}
 	if err = rplSv1.v1.CallCache(ctx, utils.IfaceAsString(args.APIOpts[utils.MetaCache]),
-		args.Tenant, utils.CacheDispatcherHosts, args.TenantID.TenantID(), nil, args.APIOpts); err != nil {
+		args.Tenant, utils.CacheDispatcherHosts, args.TenantID.TenantID(), utils.EmptyString, nil, args.APIOpts); err != nil {
 		return
 	}
 	*reply = utils.OK
@@ -576,7 +576,7 @@ func (rplSv1 *ReplicatorSv1) RemoveIndexes(ctx *context.Context, args *utils.Get
 		return
 	}
 	if err = rplSv1.v1.CallCache(ctx, utils.IfaceAsString(args.APIOpts[utils.MetaCache]),
-		args.Tenant, args.IdxItmType, utils.ConcatenatedKey(args.TntCtx, args.IdxKey), nil, args.APIOpts); err != nil {
+		args.Tenant, args.IdxItmType, utils.ConcatenatedKey(args.TntCtx, args.IdxKey), utils.EmptyString, nil, args.APIOpts); err != nil {
 		return
 	}
 	*reply = utils.OK
@@ -615,7 +615,7 @@ func (rplSv1 *ReplicatorSv1) SetRateProfile(ctx *context.Context, sp *utils.Rate
 		return
 	}
 	if err = rplSv1.v1.CallCache(ctx, utils.IfaceAsString(sp.APIOpts[utils.MetaCache]),
-		sp.Tenant, utils.CacheRateProfiles, sp.TenantID(), &sp.FilterIDs, sp.APIOpts); err != nil {
+		sp.Tenant, utils.CacheRateProfiles, sp.TenantID(), utils.EmptyString, &sp.FilterIDs, sp.APIOpts); err != nil {
 		return
 	}
 	*reply = utils.OK
@@ -626,7 +626,7 @@ func (rplSv1 *ReplicatorSv1) SetActionProfile(ctx *context.Context, sp *engine.A
 		return
 	}
 	if err = rplSv1.v1.CallCache(ctx, utils.IfaceAsString(sp.APIOpts[utils.MetaCache]),
-		sp.Tenant, utils.CacheActionProfiles, sp.TenantID(), &sp.FilterIDs, sp.APIOpts); err != nil {
+		sp.Tenant, utils.CacheActionProfiles, sp.TenantID(), utils.EmptyString, &sp.FilterIDs, sp.APIOpts); err != nil {
 		return
 	}
 	*reply = utils.OK
@@ -638,7 +638,7 @@ func (rplSv1 *ReplicatorSv1) RemoveRateProfile(ctx *context.Context, args *utils
 		return
 	}
 	if err = rplSv1.v1.CallCache(ctx, utils.IfaceAsString(args.APIOpts[utils.MetaCache]),
-		args.Tenant, utils.CacheRateProfiles, args.TenantID.TenantID(), nil, args.APIOpts); err != nil {
+		args.Tenant, utils.CacheRateProfiles, args.TenantID.TenantID(), utils.EmptyString, nil, args.APIOpts); err != nil {
 		return
 	}
 	*reply = utils.OK
@@ -650,7 +650,7 @@ func (rplSv1 *ReplicatorSv1) RemoveActionProfile(ctx *context.Context, args *uti
 		return
 	}
 	if err = rplSv1.v1.CallCache(ctx, utils.IfaceAsString(args.APIOpts[utils.MetaCache]),
-		args.Tenant, utils.CacheActionProfiles, args.TenantID.TenantID(), nil, args.APIOpts); err != nil {
+		args.Tenant, utils.CacheActionProfiles, args.TenantID.TenantID(), utils.EmptyString, nil, args.APIOpts); err != nil {
 		return
 	}
 	*reply = utils.OK

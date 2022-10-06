@@ -28,7 +28,7 @@ import (
 
 // CallCache caching the item based on cacheopt
 // visible in APIerSv2
-func (admS *AdminSv1) CallCache(ctx *context.Context, cacheopt string, tnt, cacheID, itemID string,
+func (admS *AdminSv1) CallCache(ctx *context.Context, cacheopt string, tnt, cacheID, itemID, groupID string,
 	filters *[]string, opts map[string]interface{}) (err error) {
 	var reply, method string
 	var args interface{}
@@ -50,6 +50,18 @@ func (admS *AdminSv1) CallCache(ctx *context.Context, cacheopt string, tnt, cach
 		}
 		args = utils.NewAttrReloadCacheWithOptsFromMap(argCache, tnt, opts)
 	case utils.MetaRemove:
+		if groupID != utils.EmptyString {
+			method = utils.CacheSv1RemoveGroup
+			args = &utils.ArgsGetGroupWithAPIOpts{
+				Tenant:  tnt,
+				APIOpts: opts,
+				ArgsGetGroup: utils.ArgsGetGroup{
+					CacheID: cacheID,
+					GroupID: groupID,
+				},
+			}
+			break
+		}
 		method = utils.CacheSv1RemoveItems
 		var argCache map[string][]string
 		if argCache, err = admS.composeArgsReload(ctx, tnt, cacheID, itemID, filters); err != nil {

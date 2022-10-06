@@ -135,7 +135,7 @@ func (admS *AdminSv1) SetAttributeProfile(ctx *context.Context, arg *engine.APIA
 		return utils.APIErrorHandler(err)
 	}
 	if err := admS.CallCache(ctx, utils.IfaceAsString(arg.APIOpts[utils.MetaCache]), alsPrf.Tenant, utils.CacheAttributeProfiles,
-		alsPrf.TenantID(), &alsPrf.FilterIDs, arg.APIOpts); err != nil {
+		alsPrf.TenantID(), utils.EmptyString, &alsPrf.FilterIDs, arg.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
@@ -160,7 +160,7 @@ func (admS *AdminSv1) RemoveAttributeProfile(ctx *context.Context, arg *utils.Te
 		return utils.APIErrorHandler(err)
 	}
 	if err := admS.CallCache(ctx, utils.IfaceAsString(arg.APIOpts[utils.MetaCache]), tnt, utils.CacheAttributeProfiles,
-		utils.ConcatenatedKey(tnt, arg.ID), nil, arg.APIOpts); err != nil {
+		utils.ConcatenatedKey(tnt, arg.ID), utils.EmptyString, nil, arg.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK

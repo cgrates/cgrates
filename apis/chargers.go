@@ -135,7 +135,7 @@ func (adms *AdminSv1) SetChargerProfile(ctx *context.Context, arg *ChargerWithAP
 	}
 	//handle caching for ChargerProfile
 	if err := adms.CallCache(ctx, utils.IfaceAsString(arg.APIOpts[utils.MetaCache]), arg.Tenant, utils.CacheChargerProfiles,
-		arg.TenantID(), &arg.FilterIDs, arg.APIOpts); err != nil {
+		arg.TenantID(), utils.EmptyString, &arg.FilterIDs, arg.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
@@ -161,7 +161,7 @@ func (adms *AdminSv1) RemoveChargerProfile(ctx *context.Context, arg *utils.Tena
 	}
 	//handle caching for ChargerProfile
 	if err := adms.CallCache(ctx, utils.IfaceAsString(arg.APIOpts[utils.MetaCache]), tnt, utils.CacheChargerProfiles,
-		utils.ConcatenatedKey(tnt, arg.ID), nil, arg.APIOpts); err != nil {
+		utils.ConcatenatedKey(tnt, arg.ID), utils.EmptyString, nil, arg.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
