@@ -463,6 +463,7 @@ func NewAttrReloadCacheWithOptsFromMap(arg map[string][]string, tnt string, opts
 		ChargerProfileIDs:            arg[CacheChargerProfiles],
 		DispatcherProfileIDs:         arg[CacheDispatcherProfiles],
 		DispatcherHostIDs:            arg[CacheDispatcherHosts],
+		Dispatchers:                  arg[CacheDispatchers],
 		RateProfileIDs:               arg[CacheRateProfiles],
 		ActionProfileIDs:             arg[CacheActionProfiles],
 		AccountIDs:                   arg[CacheAccounts],
@@ -497,6 +498,7 @@ type AttrReloadCacheWithAPIOpts struct {
 	ChargerProfileIDs    []string `json:",omitempty"`
 	DispatcherProfileIDs []string `json:",omitempty"`
 	DispatcherHostIDs    []string `json:",omitempty"`
+	Dispatchers          []string `json:",omitempty"`
 	RateProfileIDs       []string `json:",omitempty"`
 	ActionProfileIDs     []string `json:",omitempty"`
 	AccountIDs           []string `json:",omitempty"`
@@ -529,6 +531,7 @@ func (a *AttrReloadCacheWithAPIOpts) Map() map[string][]string {
 		CacheChargerProfiles:             a.ChargerProfileIDs,
 		CacheDispatcherProfiles:          a.DispatcherProfileIDs,
 		CacheDispatcherHosts:             a.DispatcherHostIDs,
+		CacheDispatchers:                 a.Dispatchers,
 		CacheRateProfiles:                a.RateProfileIDs,
 		CacheActionProfiles:              a.ActionProfileIDs,
 		CacheAccounts:                    a.AccountIDs,
