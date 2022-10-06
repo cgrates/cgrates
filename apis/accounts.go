@@ -131,7 +131,7 @@ func (admS *AdminSv1) SetAccount(ctx *context.Context, args *utils.AccountWithAP
 		return utils.APIErrorHandler(err)
 	}
 	if err := admS.CallCache(ctx, utils.IfaceAsString(args.APIOpts[utils.MetaCache]), args.Tenant, utils.CacheAccounts,
-		args.TenantID(), &args.FilterIDs, args.APIOpts); err != nil {
+		args.TenantID(), utils.EmptyString, &args.FilterIDs, args.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
@@ -156,7 +156,7 @@ func (admS *AdminSv1) RemoveAccount(ctx *context.Context, arg *utils.TenantIDWit
 		return utils.APIErrorHandler(err)
 	}
 	if err := admS.CallCache(ctx, utils.IfaceAsString(arg.APIOpts[utils.MetaCache]), tnt, utils.CacheAccounts,
-		utils.ConcatenatedKey(tnt, arg.ID), nil, arg.APIOpts); err != nil {
+		utils.ConcatenatedKey(tnt, arg.ID), utils.EmptyString, nil, arg.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK

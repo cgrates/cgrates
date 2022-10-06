@@ -32,7 +32,6 @@ import (
 
 func TestDispatchersGetDispatcherProfilesOK(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
@@ -48,7 +47,9 @@ func TestDispatchersGetDispatcherProfilesOK(t *testing.T) {
 			},
 			Weight: 10,
 		},
-		APIOpts: nil,
+		APIOpts: map[string]interface{}{
+			utils.MetaCache: utils.MetaNone,
+		},
 	}
 
 	var setReply string
@@ -69,7 +70,9 @@ func TestDispatchersGetDispatcherProfilesOK(t *testing.T) {
 			},
 			Weight: 10,
 		},
-		APIOpts: nil,
+		APIOpts: map[string]interface{}{
+			utils.MetaCache: utils.MetaNone,
+		},
 	}
 
 	if err := admS.SetDispatcherProfile(context.Background(), args2, &setReply); err != nil {
@@ -90,7 +93,9 @@ func TestDispatchersGetDispatcherProfilesOK(t *testing.T) {
 			},
 			Weight: 10,
 		},
-		APIOpts: nil,
+		APIOpts: map[string]interface{}{
+			utils.MetaCache: utils.MetaNone,
+		},
 	}
 
 	if err := admS.SetDispatcherProfile(context.Background(), args3, &setReply); err != nil {
@@ -143,7 +148,6 @@ func TestDispatchersGetDispatcherProfilesOK(t *testing.T) {
 func TestDispatchersSetGetRemDispatcherProfile(t *testing.T) {
 	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, cfg.CacheCfg(), nil)
 	adms := &AdminSv1{
@@ -153,6 +157,9 @@ func TestDispatchersSetGetRemDispatcherProfile(t *testing.T) {
 	arg := &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{
 			ID: "dspID",
+		},
+		APIOpts: map[string]interface{}{
+			utils.MetaCache: utils.MetaNone,
 		},
 	}
 	var result engine.DispatcherProfile
@@ -170,7 +177,9 @@ func TestDispatchersSetGetRemDispatcherProfile(t *testing.T) {
 			},
 			Weight: 10,
 		},
-		APIOpts: nil,
+		APIOpts: map[string]interface{}{
+			utils.MetaCache: utils.MetaNone,
+		},
 	}
 
 	if err := adms.SetDispatcherProfile(context.Background(), dspPrf, &reply); err != nil {
@@ -348,6 +357,9 @@ func TestDispatchersRemoveDispatcherProfileCheckErrors(t *testing.T) {
 			},
 			Weight: 10,
 		},
+		APIOpts: map[string]interface{}{
+			utils.MetaCache: utils.MetaNone,
+		},
 	}
 	var reply string
 
@@ -397,6 +409,8 @@ func TestDispatchersRemoveDispatcherProfileCheckErrors(t *testing.T) {
 	if err := adms.RemoveDispatcherProfile(context.Background(), &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{
 			ID: "TestDispatchersRemoveDispatcherProfileCheckErrors",
+		}, APIOpts: map[string]interface{}{
+			utils.MetaCache: utils.MetaNone,
 		}}, &reply); err == nil || err.Error() != experr {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
@@ -437,6 +451,8 @@ func TestDispatchersRemoveDispatcherProfileCheckErrors(t *testing.T) {
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{
 				ID: "TestDispatchersRemoveDispatcherProfileCheckErrors",
+			}, APIOpts: map[string]interface{}{
+				utils.MetaCache: utils.MetaNone,
 			}}, &reply); err == nil || err.Error() != experr {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
@@ -1291,7 +1307,9 @@ func TestDispatchersGetDispatcherProfilesGetIDsErr(t *testing.T) {
 			},
 			Weight: 10,
 		},
-		APIOpts: nil,
+		APIOpts: map[string]interface{}{
+			utils.MetaCache: utils.MetaNone,
+		},
 	}
 
 	var setReply string

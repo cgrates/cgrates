@@ -118,27 +118,27 @@ func TestCallCache(t *testing.T) {
 	errExp := "UNSUPPORTED_SERVICE_METHOD"
 
 	// Reload
-	if err := admS.CallCache(context.Background(), utils.MetaReload, "cgrates.org", "", "", nil, opts); err == nil || err.Error() != errExp {
+	if err := admS.CallCache(context.Background(), utils.MetaReload, "cgrates.org", "", "", utils.EmptyString, nil, opts); err == nil || err.Error() != errExp {
 		t.Errorf("Expected %v\n but received %v", errExp, err)
 	}
 
 	// Load
-	if err := admS.CallCache(context.Background(), utils.MetaLoad, "cgrates.org", "", "", nil, opts); err == nil || err.Error() != errExp {
+	if err := admS.CallCache(context.Background(), utils.MetaLoad, "cgrates.org", "", "", utils.EmptyString, nil, opts); err == nil || err.Error() != errExp {
 		t.Errorf("Expected %v\n but received %v", errExp, err)
 	}
 
 	// Clear - Thresholds
-	if err := admS.CallCache(context.Background(), utils.MetaClear, "cgrates.org", utils.CacheThresholdProfiles, "", nil, opts); err == nil || err.Error() != errExp {
+	if err := admS.CallCache(context.Background(), utils.MetaClear, "cgrates.org", utils.CacheThresholdProfiles, "", utils.EmptyString, nil, opts); err == nil || err.Error() != errExp {
 		t.Errorf("Expected %v\n but received %v", errExp, err)
 	}
 
 	// Clear - Resources
-	if err := admS.CallCache(context.Background(), utils.MetaClear, "cgrates.org", utils.CacheResourceProfiles, "", nil, opts); err == nil || err.Error() != errExp {
+	if err := admS.CallCache(context.Background(), utils.MetaClear, "cgrates.org", utils.CacheResourceProfiles, "", utils.EmptyString, nil, opts); err == nil || err.Error() != errExp {
 		t.Errorf("Expected %v\n but received %v", errExp, err)
 	}
 
 	// Clear - Stats
-	if err := admS.CallCache(context.Background(), utils.MetaClear, "cgrates.org", utils.CacheStatQueueProfiles, "", nil, opts); err == nil || err.Error() != errExp {
+	if err := admS.CallCache(context.Background(), utils.MetaClear, "cgrates.org", utils.CacheStatQueueProfiles, "", utils.EmptyString, nil, opts); err == nil || err.Error() != errExp {
 		t.Errorf("Expected %v\n but received %v", errExp, err)
 	}
 }

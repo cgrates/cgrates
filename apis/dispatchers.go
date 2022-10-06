@@ -134,12 +134,20 @@ func (admS *AdminSv1) SetDispatcherProfile(ctx *context.Context, args *Dispatche
 	}
 	//handle caching for DispatcherProfile
 	if err := admS.CallCache(ctx, utils.IfaceAsString(args.APIOpts[utils.MetaCache]), args.Tenant, utils.CacheDispatcherProfiles,
-		args.TenantID(), &args.FilterIDs, args.APIOpts); err != nil {
+		args.TenantID(), utils.EmptyString, &args.FilterIDs, args.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
-	//handle caching for DispatcherProfile
-	if err := admS.CallCache(ctx, utils.IfaceAsString(args.APIOpts[utils.MetaCache]), args.Tenant, utils.CacheDispatcherProfiles,
-		args.TenantID(), &args.FilterIDs, args.APIOpts); err != nil {
+	//handle caching for Dispatchers Instance
+	cacheAct := utils.MetaRemove
+	if err := admS.CallCache(ctx, utils.FirstNonEmpty(utils.IfaceAsString(args.APIOpts[utils.MetaCache]), cacheAct),
+		args.Tenant, utils.CacheDispatchers, args.TenantID(), utils.EmptyString, &args.FilterIDs, args.APIOpts); err != nil {
+		return utils.APIErrorHandler(err)
+	}
+	//handle caching for Dispatcher Routes
+	if err := admS.CallCache(ctx, utils.FirstNonEmpty(utils.IfaceAsString(args.APIOpts[utils.MetaCache]), cacheAct),
+		args.Tenant, utils.CacheDispatcherRoutes, args.TenantID(),
+		utils.ConcatenatedKey(utils.CacheDispatcherProfiles, args.Tenant, args.ID),
+		&args.FilterIDs, args.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
@@ -165,7 +173,7 @@ func (admS *AdminSv1) RemoveDispatcherProfile(ctx *context.Context, arg *utils.T
 	}
 	//handle caching for DispatcherProfile
 	if err := admS.CallCache(ctx, utils.IfaceAsString(arg.APIOpts[utils.MetaCache]), tnt, utils.CacheDispatcherProfiles,
-		utils.ConcatenatedKey(tnt, arg.ID), nil, arg.APIOpts); err != nil {
+		utils.ConcatenatedKey(tnt, arg.ID), utils.EmptyString, nil, arg.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
@@ -275,7 +283,7 @@ func (admS *AdminSv1) SetDispatcherHost(ctx *context.Context, args *engine.Dispa
 	}
 	//handle caching for DispatcherProfile
 	if err := admS.CallCache(ctx, utils.IfaceAsString(args.APIOpts[utils.MetaCache]), args.Tenant, utils.CacheDispatcherHosts,
-		args.TenantID(), nil, args.APIOpts); err != nil {
+		args.TenantID(), utils.EmptyString, nil, args.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
@@ -300,7 +308,7 @@ func (admS *AdminSv1) RemoveDispatcherHost(ctx *context.Context, arg *utils.Tena
 	}
 	//handle caching for DispatcherProfile
 	if err := admS.CallCache(ctx, utils.IfaceAsString(arg.APIOpts[utils.MetaCache]), tnt, utils.CacheDispatcherHosts,
-		utils.ConcatenatedKey(tnt, arg.ID), nil, arg.APIOpts); err != nil {
+		utils.ConcatenatedKey(tnt, arg.ID), utils.EmptyString, nil, arg.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK

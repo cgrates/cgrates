@@ -131,7 +131,7 @@ func (adms *AdminSv1) SetStatQueueProfile(ctx *context.Context, arg *engine.Stat
 	}
 	//handle caching for StatQueueProfile
 	if err = adms.CallCache(ctx, utils.IfaceAsString(arg.APIOpts[utils.MetaCache]), arg.Tenant, utils.CacheStatQueueProfiles,
-		arg.TenantID(), &arg.FilterIDs, arg.APIOpts); err != nil {
+		arg.TenantID(), utils.EmptyString, &arg.FilterIDs, arg.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
@@ -152,7 +152,7 @@ func (adms *AdminSv1) RemoveStatQueueProfile(ctx *context.Context, args *utils.T
 	}
 	//handle caching for StatQueueProfile
 	if err := adms.CallCache(ctx, utils.IfaceAsString(args.APIOpts[utils.MetaCache]), tnt, utils.CacheStatQueueProfiles,
-		utils.ConcatenatedKey(tnt, args.ID), nil, args.APIOpts); err != nil {
+		utils.ConcatenatedKey(tnt, args.ID), utils.EmptyString, nil, args.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//generate a loadID for CacheStatQueueProfiles and CacheStatQueues and store it in database
