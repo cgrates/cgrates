@@ -427,6 +427,7 @@ func NewAttrReloadCacheWithOpts() *AttrReloadCacheWithAPIOpts {
 		ChargerProfileIDs:    []string{MetaAny},
 		DispatcherProfileIDs: []string{MetaAny},
 		DispatcherHostIDs:    []string{MetaAny},
+		Dispatchers:          []string{MetaAny},
 		RateProfileIDs:       []string{MetaAny},
 		ActionProfileIDs:     []string{MetaAny},
 		AccountIDs:           []string{MetaAny},

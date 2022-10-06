@@ -124,6 +124,7 @@ func TestNewAttrReloadCacheWithOpts(t *testing.T) {
 		ChargerProfileIDs:            []string{MetaAny},
 		DispatcherProfileIDs:         []string{MetaAny},
 		DispatcherHostIDs:            []string{MetaAny},
+		Dispatchers:                  []string{MetaAny},
 		RateProfileIDs:               []string{MetaAny},
 		AttributeFilterIndexIDs:      []string{MetaAny},
 		ResourceFilterIndexIDs:       []string{MetaAny},

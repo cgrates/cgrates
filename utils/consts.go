@@ -79,6 +79,7 @@ var (
 		CacheRateFilterIndexes:    RateFilterIndexPrfx,
 		CacheReverseFilterIndexes: FilterIndexPrfx,
 		MetaAPIBan:                MetaAPIBan, // special case as it is not in a DB
+		CacheDispatchers:          MetaDispatchers,
 	}
 	CachePrefixToInstance map[string]string    // will be built on init
 	CacheIndexesToPrefix  = map[string]string{ // used by match index to get all the ids when index selects is disabled and for compute indexes
