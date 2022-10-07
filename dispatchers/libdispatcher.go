@@ -42,7 +42,6 @@ func init() {
 	gob.Register(new(LoadMetrics))
 	gob.Register(new(DispatcherRoute))
 	//gob.RegisterName("dispatchers.DispatcherRoute", DispatcherRoute{})
-
 }
 
 // isInternalDispatcherProfile compares the profile to the internal one
@@ -66,6 +65,7 @@ func getDispatcherWithCache(ctx *context.Context, dPrfl *engine.DispatcherProfil
 	if dPrfl.Hosts == nil { // dispatcher profile was not retrieved but built artificially above, try retrieving
 		if dPrfl, err = dm.GetDispatcherProfile(ctx, dPrfl.Tenant, dPrfl.ID,
 			true, true, utils.NonTransactional); err != nil {
+			return
 		}
 	}
 	if d, err = newDispatcher(dPrfl); err != nil {

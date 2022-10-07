@@ -5,6 +5,11 @@
       "log_level": 7,
     },
   
+    "data_db": {
+      "db_type": "mongo",
+      "db_name": "10",
+      "db_port": 27017,
+    },
  
     "admins": {
       "enabled": true,
