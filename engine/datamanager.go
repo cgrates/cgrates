@@ -58,7 +58,7 @@ var (
 		utils.ChargerProfilePrefix:          {},
 		utils.DispatcherProfilePrefix:       {},
 		utils.DispatcherHostPrefix:          {},
-		utils.MetaDispatchers:               {},
+		utils.MetaDispatchers:               {}, // not realy a prefix as this is not stored in DB
 		utils.AccountFilterIndexPrfx:        {},
 		utils.AccountPrefix:                 {},
 		utils.RateProfilePrefix:             {},
@@ -119,7 +119,8 @@ func (dm *DataManager) CacheDataFromDB(ctx *context.Context, prfx string, ids []
 	if dm.cacheCfg.Partitions[utils.CachePrefixToInstance[prfx]].Limit == 0 {
 		return
 	}
-	if prfx == utils.MetaAPIBan { // no need for ids in this case
+	// *apiban and *dispatchers are not stored in database
+	if prfx == utils.MetaAPIBan || prfx == utils.MetaDispatchers { // no need for ids in this case
 		ids = []string{utils.EmptyString}
 	} else if len(ids) != 0 && ids[0] == utils.MetaAny {
 		if mustBeCached {

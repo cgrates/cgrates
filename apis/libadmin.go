@@ -26,8 +26,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-// CallCache caching the item based on cacheopt
-// visible in APIerSv2
+// CallCache caching the item based on CacheOpt
 func (admS *AdminSv1) CallCache(ctx *context.Context, cacheopt string, tnt, cacheID, itemID, groupID string,
 	filters *[]string, opts map[string]interface{}) (err error) {
 	var reply, method string

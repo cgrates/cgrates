@@ -165,7 +165,7 @@ func DecimalDecoder(ec bsoncodec.DecodeContext, vw bsonrw.ValueReader, val refle
 func NewMongoStorage(host, port, db, user, pass, mrshlerStr, storageType string,
 	cdrsIndexes []string, ttl time.Duration) (ms *MongoStorage, err error) {
 	url := host
-	if port != "" {
+	if port != "0" {
 		url += ":" + port
 	}
 	if user != "" && pass != "" {

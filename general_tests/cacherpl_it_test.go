@@ -51,7 +51,7 @@ var (
 	sTestsCacheRpl = []func(t *testing.T){
 		testCacheRplInitCfg,
 		testCacheRplInitDataDb,
-		testCacheRplStartEngine,
+		//testCacheRplStartEngine,
 		testCacheRplRpcConn,
 		testCacheRplAddData,
 		testCacheRplPing,
@@ -371,7 +371,6 @@ func testCacheRplCheckReplication(t *testing.T) {
 	var rpl string
 	if err := dspEngine2RPC.Call(context.Background(), utils.AttributeSv1Ping, &utils.CGREvent{
 		Tenant: "cgrates.org",
-
 		APIOpts: map[string]interface{}{
 			utils.OptsRouteID: "testRoute123",
 		},
