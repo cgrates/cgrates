@@ -65,6 +65,7 @@ var (
 		utils.ChargerProfilePrefix:     {},
 		utils.DispatcherProfilePrefix:  {},
 		utils.DispatcherHostPrefix:     {},
+		utils.MetaDispatchers:          {}, // not realy a prefix as this is not stored in DB
 		utils.AttributeFilterIndexes:   {},
 		utils.ResourceFilterIndexes:    {},
 		utils.StatFilterIndexes:        {},
@@ -118,7 +119,7 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 	if dm.cacheCfg.Partitions[utils.CachePrefixToInstance[prfx]].Limit == 0 {
 		return
 	}
-	if prfx == utils.MetaAPIBan { // no need for ids in this case
+	if prfx == utils.MetaAPIBan || prfx == utils.MetaDispatchers { // no need for ids in this case
 		ids = []string{utils.EmptyString}
 	} else if len(ids) != 0 && ids[0] == utils.MetaAny {
 		if mustBeCached {
@@ -1675,7 +1676,7 @@ func (dm *DataManager) RemoveActionTriggers(id, transactionID string) (err error
 	return
 }
 
-//SetActionTriggersArgWithAPIOpts is used to send the key and the ActionTriggers to Replicator
+// SetActionTriggersArgWithAPIOpts is used to send the key and the ActionTriggers to Replicator
 type SetActionTriggersArgWithAPIOpts struct {
 	Key     string
 	Attrs   ActionTriggers
@@ -1852,7 +1853,7 @@ func (dm *DataManager) GetActions(key string, skipCache bool, transactionID stri
 	return
 }
 
-//SetActionsArgsWithOpts is used to send the key and the Actions to replicator
+// SetActionsArgsWithOpts is used to send the key and the Actions to replicator
 type SetActionsArgsWithAPIOpts struct {
 	Key     string
 	Acs     Actions
@@ -2089,7 +2090,7 @@ func (dm *DataManager) GetAccountActionPlans(acntID string, cacheRead, cacheWrit
 	return
 }
 
-//SetAccountActionPlansArgWithAPIOpts is used to send the key and the Actions to replicator
+// SetAccountActionPlansArgWithAPIOpts is used to send the key and the Actions to replicator
 type SetAccountActionPlansArgWithAPIOpts struct {
 	AcntID  string
 	AplIDs  []string

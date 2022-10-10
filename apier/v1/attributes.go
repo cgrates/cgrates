@@ -86,7 +86,7 @@ func (apierSv1 *APIerSv1) GetAttributeProfileCount(args *utils.TenantWithAPIOpts
 	return
 }
 
-//SetAttributeProfile add/update a new Attribute Profile
+// SetAttributeProfile add/update a new Attribute Profile
 func (apierSv1 *APIerSv1) SetAttributeProfile(alsWrp *engine.AttributeProfileWithAPIOpts, reply *string) error {
 	if missing := utils.MissingStructFields(alsWrp.AttributeProfile, []string{utils.ID, utils.Attributes}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
@@ -116,14 +116,14 @@ func (apierSv1 *APIerSv1) SetAttributeProfile(alsWrp *engine.AttributeProfileWit
 	}
 
 	if err := apierSv1.CallCache(utils.IfaceAsString(alsWrp.APIOpts[utils.CacheOpt]), alsWrp.Tenant, utils.CacheAttributeProfiles,
-		alsWrp.TenantID(), &alsWrp.FilterIDs, alsWrp.Contexts, alsWrp.APIOpts); err != nil {
+		alsWrp.TenantID(), utils.EmptyString, &alsWrp.FilterIDs, alsWrp.Contexts, alsWrp.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
 	return nil
 }
 
-//RemoveAttributeProfile remove a specific Attribute Profile
+// RemoveAttributeProfile remove a specific Attribute Profile
 func (apierSv1 *APIerSv1) RemoveAttributeProfile(arg *utils.TenantIDWithAPIOpts, reply *string) error {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
@@ -140,7 +140,7 @@ func (apierSv1 *APIerSv1) RemoveAttributeProfile(arg *utils.TenantIDWithAPIOpts,
 		return utils.APIErrorHandler(err)
 	}
 	if err := apierSv1.CallCache(utils.IfaceAsString(arg.APIOpts[utils.CacheOpt]), tnt, utils.CacheAttributeProfiles,
-		utils.ConcatenatedKey(tnt, arg.ID), nil, nil, arg.APIOpts); err != nil {
+		utils.ConcatenatedKey(tnt, arg.ID), utils.EmptyString, nil, nil, arg.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK

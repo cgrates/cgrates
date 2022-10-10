@@ -504,7 +504,7 @@ func (apierSv1 *APIerSv1) SetRatingProfile(attrs *utils.AttrSetRatingProfile, re
 	if err := apierSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheRatingProfiles: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
-	if err := apierSv1.CallCache(utils.IfaceAsString(attrs.APIOpts[utils.CacheOpt]), attrs.Tenant, utils.CacheRatingProfiles, keyID, nil, nil, attrs.APIOpts); err != nil {
+	if err := apierSv1.CallCache(utils.IfaceAsString(attrs.APIOpts[utils.CacheOpt]), attrs.Tenant, utils.CacheRatingProfiles, keyID, utils.EmptyString, nil, nil, attrs.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
@@ -1263,7 +1263,7 @@ func (apierSv1 *APIerSv1) RemoveRatingProfile(attr *AttrRemoveRatingProfile, rep
 	if err := apierSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheRatingProfiles: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
-	if err := apierSv1.CallCache(utils.IfaceAsString(attr.APIOpts[utils.CacheOpt]), attr.Tenant, utils.CacheRatingProfiles, keyID, nil, nil, attr.APIOpts); err != nil {
+	if err := apierSv1.CallCache(utils.IfaceAsString(attr.APIOpts[utils.CacheOpt]), attr.Tenant, utils.CacheRatingProfiles, keyID, utils.EmptyString, nil, nil, attr.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
@@ -1523,7 +1523,7 @@ func (apierSv1 *APIerSv1) Ping(ign *utils.CGREvent, reply *string) error {
 	return nil
 }
 
-//ExportToFolder export specific items (or all items if items is empty) from DataDB back to CSV
+// ExportToFolder export specific items (or all items if items is empty) from DataDB back to CSV
 func (apierSv1 *APIerSv1) ExportToFolder(arg *utils.ArgExportToFolder, reply *string) error {
 	// if items is empty we need to export all items
 	if len(arg.Items) == 0 {

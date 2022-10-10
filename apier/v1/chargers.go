@@ -69,7 +69,7 @@ type ChargerWithAPIOpts struct {
 	APIOpts map[string]interface{}
 }
 
-//SetChargerProfile add/update a new Charger Profile
+// SetChargerProfile add/update a new Charger Profile
 func (apierSv1 *APIerSv1) SetChargerProfile(arg *ChargerWithAPIOpts, reply *string) error {
 	if missing := utils.MissingStructFields(arg.ChargerProfile, []string{utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
@@ -86,14 +86,14 @@ func (apierSv1 *APIerSv1) SetChargerProfile(arg *ChargerWithAPIOpts, reply *stri
 	}
 	//handle caching for ChargerProfile
 	if err := apierSv1.CallCache(utils.IfaceAsString(arg.APIOpts[utils.CacheOpt]), arg.Tenant, utils.CacheChargerProfiles,
-		arg.TenantID(), &arg.FilterIDs, nil, arg.APIOpts); err != nil {
+		arg.TenantID(), utils.EmptyString, &arg.FilterIDs, nil, arg.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
 	return nil
 }
 
-//RemoveChargerProfile remove a specific Charger Profile
+// RemoveChargerProfile remove a specific Charger Profile
 func (apierSv1 *APIerSv1) RemoveChargerProfile(arg *utils.TenantIDWithAPIOpts, reply *string) error {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
@@ -112,7 +112,7 @@ func (apierSv1 *APIerSv1) RemoveChargerProfile(arg *utils.TenantIDWithAPIOpts, r
 	}
 	//handle caching for ChargerProfile
 	if err := apierSv1.CallCache(utils.IfaceAsString(arg.APIOpts[utils.CacheOpt]), tnt, utils.CacheChargerProfiles,
-		utils.ConcatenatedKey(tnt, arg.ID), nil, nil, arg.APIOpts); err != nil {
+		utils.ConcatenatedKey(tnt, arg.ID), utils.EmptyString, nil, nil, arg.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK

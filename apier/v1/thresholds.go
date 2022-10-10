@@ -142,7 +142,7 @@ func (apierSv1 *APIerSv1) SetThresholdProfile(args *engine.ThresholdProfileWithA
 	}
 	//handle caching for ThresholdProfile and Threshold
 	if err := apierSv1.CallCache(utils.IfaceAsString(args.APIOpts[utils.CacheOpt]), args.Tenant, utils.CacheThresholdProfiles,
-		args.TenantID(), &args.FilterIDs, nil, args.APIOpts); err != nil {
+		args.TenantID(), utils.EmptyString, &args.FilterIDs, nil, args.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
@@ -163,7 +163,7 @@ func (apierSv1 *APIerSv1) RemoveThresholdProfile(args *utils.TenantIDWithAPIOpts
 	}
 	//handle caching for ThresholdProfile
 	if err := apierSv1.CallCache(utils.IfaceAsString(args.APIOpts[utils.CacheOpt]), tnt, utils.CacheThresholdProfiles,
-		utils.ConcatenatedKey(tnt, args.ID), nil, nil, args.APIOpts); err != nil {
+		utils.ConcatenatedKey(tnt, args.ID), utils.EmptyString,nil, nil, args.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//generate a loadID for CacheThresholdProfiles and CacheThresholds and store it in database

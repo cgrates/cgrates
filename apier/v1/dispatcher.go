@@ -90,7 +90,19 @@ func (apierSv1 *APIerSv1) SetDispatcherProfile(args *DispatcherWithAPIOpts, repl
 	}
 	//handle caching for DispatcherProfile
 	if err := apierSv1.CallCache(utils.IfaceAsString(args.APIOpts[utils.CacheOpt]), args.Tenant, utils.CacheDispatcherProfiles,
-		args.TenantID(), &args.FilterIDs, args.Subsystems, args.APIOpts); err != nil {
+		args.TenantID(), utils.EmptyString, &args.FilterIDs, args.Subsystems, args.APIOpts); err != nil {
+		return utils.APIErrorHandler(err)
+	}
+	cacheAct := utils.MetaRemove
+	if err := apierSv1.CallCache(utils.FirstNonEmpty(utils.IfaceAsString(args.APIOpts[utils.CacheOpt]), cacheAct),
+		args.Tenant, utils.CacheDispatchers, args.TenantID(), utils.EmptyString, &args.FilterIDs, args.Subsystems, args.APIOpts); err != nil {
+		return utils.APIErrorHandler(err)
+	}
+	//handle caching for DispatcherRoutes
+	if err := apierSv1.CallCache(utils.FirstNonEmpty(utils.IfaceAsString(args.APIOpts[utils.CacheOpt]), cacheAct),
+		args.Tenant, utils.CacheDispatcherRoutes, args.TenantID(),
+		utils.ConcatenatedKey(utils.CacheDispatcherProfiles, args.Tenant, args.ID),
+		&args.FilterIDs, args.Subsystems, args.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
@@ -116,7 +128,7 @@ func (apierSv1 *APIerSv1) RemoveDispatcherProfile(arg *utils.TenantIDWithAPIOpts
 	}
 	//handle caching for DispatcherProfile
 	if err := apierSv1.CallCache(utils.IfaceAsString(arg.APIOpts[utils.CacheOpt]), tnt, utils.CacheDispatcherProfiles,
-		utils.ConcatenatedKey(tnt, arg.ID), nil, nil, arg.APIOpts); err != nil {
+		utils.ConcatenatedKey(tnt, arg.ID), utils.EmptyString, nil, nil, arg.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
@@ -179,7 +191,7 @@ func (apierSv1 *APIerSv1) SetDispatcherHost(args *engine.DispatcherHostWithAPIOp
 	}
 	//handle caching for DispatcherProfile
 	if err := apierSv1.CallCache(utils.IfaceAsString(args.APIOpts[utils.CacheOpt]), args.Tenant, utils.CacheDispatcherHosts,
-		args.TenantID(), nil, nil, args.APIOpts); err != nil {
+		args.TenantID(), utils.EmptyString, nil, nil, args.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
@@ -205,7 +217,7 @@ func (apierSv1 *APIerSv1) RemoveDispatcherHost(arg *utils.TenantIDWithAPIOpts, r
 	}
 	//handle caching for DispatcherProfile
 	if err := apierSv1.CallCache(utils.IfaceAsString(arg.APIOpts[utils.CacheOpt]), tnt, utils.CacheDispatcherHosts,
-		utils.ConcatenatedKey(tnt, arg.ID), nil, nil, arg.APIOpts); err != nil {
+		utils.ConcatenatedKey(tnt, arg.ID), utils.EmptyString, nil, nil, arg.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK

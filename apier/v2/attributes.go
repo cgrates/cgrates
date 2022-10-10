@@ -30,7 +30,7 @@ type AttributeWithAPIOpts struct {
 	APIOpts map[string]interface{}
 }
 
-//SetAttributeProfile add/update a new Attribute Profile
+// SetAttributeProfile add/update a new Attribute Profile
 func (APIerSv2 *APIerSv2) SetAttributeProfile(arg *AttributeWithAPIOpts, reply *string) error {
 	if missing := utils.MissingStructFields(arg.APIAttributeProfile, []string{utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
@@ -51,7 +51,7 @@ func (APIerSv2 *APIerSv2) SetAttributeProfile(arg *AttributeWithAPIOpts, reply *
 		return utils.APIErrorHandler(err)
 	}
 	if err := APIerSv2.APIerSv1.CallCache(utils.IfaceAsString(arg.APIOpts[utils.CacheOpt]), alsPrf.Tenant, utils.CacheAttributeProfiles,
-		alsPrf.TenantID(), &alsPrf.FilterIDs, alsPrf.Contexts, arg.APIOpts); err != nil {
+		alsPrf.TenantID(), utils.EmptyString, &alsPrf.FilterIDs, alsPrf.Contexts, arg.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK

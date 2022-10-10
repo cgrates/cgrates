@@ -1305,6 +1305,7 @@ func NewAttrReloadCacheWithOpts() *AttrReloadCacheWithAPIOpts {
 		ChargerFilterIndexIDs:    []string{MetaAny},
 		DispatcherFilterIndexIDs: []string{MetaAny},
 		FilterIndexIDs:           []string{MetaAny},
+		Dispatchers:              []string{MetaAny},
 	}
 }
 
@@ -1334,6 +1335,7 @@ func NewAttrReloadCacheWithOptsFromMap(arg map[string][]string, tnt string, opts
 		ChargerProfileIDs:     arg[CacheChargerProfiles],
 		DispatcherProfileIDs:  arg[CacheDispatcherProfiles],
 		DispatcherHostIDs:     arg[CacheDispatcherHosts],
+		Dispatchers:           arg[CacheDispatchers],
 
 		TimingIDs:                arg[CacheTimings],
 		AttributeFilterIndexIDs:  arg[CacheAttributeFilterIndexes],
@@ -1371,6 +1373,7 @@ type AttrReloadCacheWithAPIOpts struct {
 	ChargerProfileIDs        []string               `json:",omitempty"`
 	DispatcherProfileIDs     []string               `json:",omitempty"`
 	DispatcherHostIDs        []string               `json:",omitempty"`
+	Dispatchers              []string               `json:",omitempty"`
 	TimingIDs                []string               `json:",omitempty"`
 	AttributeFilterIndexIDs  []string               `json:",omitempty"`
 	ResourceFilterIndexIDs   []string               `json:",omitempty"`
@@ -1405,6 +1408,7 @@ func (a *AttrReloadCacheWithAPIOpts) Map() map[string][]string {
 		CacheChargerProfiles:     a.ChargerProfileIDs,
 		CacheDispatcherProfiles:  a.DispatcherProfileIDs,
 		CacheDispatcherHosts:     a.DispatcherHostIDs,
+		CacheDispatchers:         a.Dispatchers,
 
 		CacheTimings:                 a.TimingIDs,
 		CacheAttributeFilterIndexes:  a.AttributeFilterIndexIDs,

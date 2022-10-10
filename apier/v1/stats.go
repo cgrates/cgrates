@@ -84,7 +84,7 @@ func (apierSv1 *APIerSv1) SetStatQueueProfile(arg *engine.StatQueueProfileWithAP
 	}
 	//handle caching for StatQueueProfile
 	if err = apierSv1.CallCache(utils.IfaceAsString(arg.APIOpts[utils.CacheOpt]), arg.Tenant, utils.CacheStatQueueProfiles,
-		arg.TenantID(), &arg.FilterIDs, nil, arg.APIOpts); err != nil {
+		arg.TenantID(), utils.EmptyString, &arg.FilterIDs, nil, arg.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
@@ -105,7 +105,7 @@ func (apierSv1 *APIerSv1) RemoveStatQueueProfile(args *utils.TenantIDWithAPIOpts
 	}
 	//handle caching for StatQueueProfile
 	if err := apierSv1.CallCache(utils.IfaceAsString(args.APIOpts[utils.CacheOpt]), tnt, utils.CacheStatQueueProfiles,
-		utils.ConcatenatedKey(tnt, args.ID), nil, nil, args.APIOpts); err != nil {
+		utils.ConcatenatedKey(tnt, args.ID), utils.EmptyString, nil, nil, args.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//generate a loadID for CacheStatQueueProfiles and CacheStatQueues and store it in database
