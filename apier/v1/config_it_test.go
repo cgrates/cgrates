@@ -63,7 +63,7 @@ var (
 	}
 )
 
-//Test start here
+// Test start here
 func TestConfigSIT(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
@@ -390,7 +390,7 @@ func testConfigSSetConfigEEs(t *testing.T) {
 	exp := map[string]interface{}{
 		"enabled":          true,
 		"attributes_conns": []interface{}{},
-		"cache":            map[string]interface{}{"*file_csv": map[string]interface{}{"limit": -1., "precache": false, "replicate": false, "static_ttl": false, "ttl": "5s"}},
+		"cache":            map[string]interface{}{"*file_csv": map[string]interface{}{"limit": -1., "precache": false, "replicate": false, "static_ttl": false, "remote": false, "ttl": "5s"}},
 		"exporters":        []interface{}{eporter},
 	}
 	exp = map[string]interface{}{

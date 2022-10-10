@@ -107,7 +107,7 @@ func (apierSv1 *APIerSv1) GetResourceProfileIDs(args *utils.PaginatorWithTenant,
 	return nil
 }
 
-//SetResourceProfile adds a new resource configuration
+// SetResourceProfile adds a new resource configuration
 func (apierSv1 *APIerSv1) SetResourceProfile(arg *engine.ResourceProfileWithAPIOpts, reply *string) (err error) {
 	if missing := utils.MissingStructFields(arg.ResourceProfile, []string{utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
@@ -128,14 +128,14 @@ func (apierSv1 *APIerSv1) SetResourceProfile(arg *engine.ResourceProfileWithAPIO
 	}
 	//handle caching for ResourceProfile
 	if err = apierSv1.CallCache(utils.IfaceAsString(arg.APIOpts[utils.CacheOpt]), arg.Tenant, utils.CacheResourceProfiles,
-		arg.TenantID(), &arg.FilterIDs, nil, arg.APIOpts); err != nil {
+		arg.TenantID(), utils.EmptyString, &arg.FilterIDs, nil, arg.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
 	return nil
 }
 
-//RemoveResourceProfile remove a specific resource configuration
+// RemoveResourceProfile remove a specific resource configuration
 func (apierSv1 *APIerSv1) RemoveResourceProfile(arg *utils.TenantIDWithAPIOpts, reply *string) error {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
@@ -149,7 +149,7 @@ func (apierSv1 *APIerSv1) RemoveResourceProfile(arg *utils.TenantIDWithAPIOpts, 
 	}
 	//handle caching for ResourceProfile
 	if err := apierSv1.CallCache(utils.IfaceAsString(arg.APIOpts[utils.CacheOpt]), tnt, utils.CacheResourceProfiles,
-		utils.ConcatenatedKey(tnt, arg.ID), nil, nil, arg.APIOpts); err != nil {
+		utils.ConcatenatedKey(tnt, arg.ID), utils.EmptyString, nil, nil, arg.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//generate a loadID for CacheResourceProfiles and CacheResources and store it in database

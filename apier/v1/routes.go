@@ -69,7 +69,7 @@ type RouteWithAPIOpts struct {
 	APIOpts map[string]interface{}
 }
 
-//SetRouteProfile add a new Route configuration
+// SetRouteProfile add a new Route configuration
 func (apierSv1 *APIerSv1) SetRouteProfile(args *RouteWithAPIOpts, reply *string) error {
 	if missing := utils.MissingStructFields(args.RouteProfile, []string{utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
@@ -86,14 +86,14 @@ func (apierSv1 *APIerSv1) SetRouteProfile(args *RouteWithAPIOpts, reply *string)
 	}
 	//handle caching for SupplierProfile
 	if err := apierSv1.CallCache(utils.IfaceAsString(args.APIOpts[utils.CacheOpt]), args.Tenant, utils.CacheRouteProfiles,
-		args.TenantID(), &args.FilterIDs, nil, args.APIOpts); err != nil {
+		args.TenantID(), utils.EmptyString, &args.FilterIDs, nil, args.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
 	return nil
 }
 
-//RemoveRouteProfile remove a specific Route configuration
+// RemoveRouteProfile remove a specific Route configuration
 func (apierSv1 *APIerSv1) RemoveRouteProfile(args *utils.TenantIDWithAPIOpts, reply *string) error {
 	if missing := utils.MissingStructFields(args, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
@@ -111,7 +111,7 @@ func (apierSv1 *APIerSv1) RemoveRouteProfile(args *utils.TenantIDWithAPIOpts, re
 	}
 	//handle caching for SupplierProfile
 	if err := apierSv1.CallCache(utils.IfaceAsString(args.APIOpts[utils.CacheOpt]), tnt, utils.CacheRouteProfiles,
-		utils.ConcatenatedKey(tnt, args.ID), nil, nil, args.APIOpts); err != nil {
+		utils.ConcatenatedKey(tnt, args.ID), utils.EmptyString, nil, nil, args.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK

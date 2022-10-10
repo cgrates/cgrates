@@ -368,7 +368,7 @@ func TestTPAccountActionsKeyId(t *testing.T) {
 
 }
 
-//now working here
+// now working here
 func TestAttrGetCdrsAsCDRsFilter(t *testing.T) {
 	attrGetCdrs := &AttrGetCdrs{
 		TimeStart: "2019-04-04T11:45:26.371Z",
@@ -987,6 +987,7 @@ func TestNewAttrReloadCacheWithOpts(t *testing.T) {
 		ChargerProfileIDs:        []string{MetaAny},
 		DispatcherProfileIDs:     []string{MetaAny},
 		DispatcherHostIDs:        []string{MetaAny},
+		Dispatchers:              []string{MetaAny},
 		TimingIDs:                []string{MetaAny},
 		AttributeFilterIndexIDs:  []string{MetaAny},
 		ResourceFilterIndexIDs:   []string{MetaAny},

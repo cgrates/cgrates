@@ -27,7 +27,7 @@ import (
 
 // CallCache caching the item based on cacheopt
 // visible in APIerSv2
-func (apierSv1 *APIerSv1) CallCache(cacheopt string, tnt, cacheID, itemID string,
+func (apierSv1 *APIerSv1) CallCache(cacheopt string, tnt, cacheID, itemID, groupID string,
 	filters *[]string, contexts []string, opts map[string]interface{}) (err error) {
 	var reply, method string
 	var args interface{}
@@ -49,6 +49,18 @@ func (apierSv1 *APIerSv1) CallCache(cacheopt string, tnt, cacheID, itemID string
 		}
 		args = utils.NewAttrReloadCacheWithOptsFromMap(argCache, tnt, opts)
 	case utils.MetaRemove:
+		if groupID != utils.EmptyString {
+			method = utils.CacheSv1RemoveGroup
+			args = &utils.ArgsGetGroupWithAPIOpts{
+				Tenant:  tnt,
+				APIOpts: opts,
+				ArgsGetGroup: utils.ArgsGetGroup{
+					CacheID: cacheID,
+					GroupID: groupID,
+				},
+			}
+			break
+		}
 		method = utils.CacheSv1RemoveItems
 		var argCache map[string][]string
 		if argCache, err = apierSv1.composeArgsReload(tnt, cacheID, itemID, filters, contexts); err != nil {

@@ -90,6 +90,12 @@ var (
 		testDispatcherAdminCoreStatusWithRouteIDButHost1, // due to clearing cache, HOST1 will be matched
 
 		// verify cache of dispatchers, SetDispatcherProfile API should reload the dispatchers cache (instance, profile and route)
+		testDispatcherAdminCheckCacheAfterRouting,
+		testDispatcherSetterSetDispatcherProfileOverwrite,
+		testDispatcherCheckCacheAfterSetDispatcherDSP1,
+		testDispatcherSetterSetAnotherProifle,          //DSP2
+		testDispatcherCheckCacheAfterSetDispatcherDSP1, //we set DSP2, so for DSP1 nothing changed
+		testDispatcherCheckCacheAfterSetDispatcherDSP2, //NOT_FOUND for every get, cause it was not used that profile before
 
 		testDispatcherOptsDSPStopEngine,
 		testDispatcherOptsAdminStopEngine,
@@ -488,6 +494,287 @@ func testDispatcherAdminCoreStatusWithRouteIDButHost1(t *testing.T) {
 		t.Error(err)
 	} else if reply[utils.NodeID] != "HOST1" {
 		t.Errorf("Expected HOST1, received %v", reply[utils.NodeID])
+	}
+}
+
+func testDispatcherAdminCheckCacheAfterRouting(t *testing.T) {
+	// get for *dispatcher_routes
+	argsCache := &utils.ArgsGetCacheItemWithAPIOpts{
+		Tenant: "cgrates.org",
+		APIOpts: map[string]interface{}{
+			utils.MetaDispatchers: false,
+		},
+		ArgsGetCacheItem: utils.ArgsGetCacheItem{
+			CacheID: utils.CacheDispatcherRoutes,
+			ItemID:  "account#dan.bogos:*core",
+		},
+	}
+	var reply interface{}
+	if err := apierRPC.Call(utils.CacheSv1GetItemWithRemote, argsCache,
+		&reply); err != nil {
+		t.Error(err)
+	} else {
+		expected := map[string]interface{}{
+			utils.Tenant:    "cgrates.org",
+			utils.ProfileID: "DSP1",
+			"HostID":        "HOST1",
+		}
+		if !reflect.DeepEqual(expected, reply) {
+			t.Errorf("Expected %+v, \n received %+v", utils.ToJSON(expected), utils.ToJSON(reply))
+		}
+	}
+
+	// get for *dispatcher_profiles
+	argsCache = &utils.ArgsGetCacheItemWithAPIOpts{
+		Tenant: "cgrates.org",
+		APIOpts: map[string]interface{}{
+			utils.MetaDispatchers: false,
+		},
+		ArgsGetCacheItem: utils.ArgsGetCacheItem{
+			CacheID: utils.CacheDispatcherProfiles,
+			ItemID:  "cgrates.org:DSP1",
+		},
+	}
+	if err := apierRPC.Call(utils.CacheSv1GetItemWithRemote, argsCache,
+		&reply); err != nil {
+		t.Error(err)
+	} else {
+		expected := map[string]interface{}{
+			utils.FilterIDs: nil,
+			"Hosts": []interface{}{
+				map[string]interface{}{
+					utils.Blocker:   false,
+					utils.FilterIDs: nil,
+					utils.ID:        "HOST1",
+					utils.Params:    nil,
+					utils.Weight:    10.,
+				},
+				map[string]interface{}{
+					utils.Blocker:   false,
+					utils.FilterIDs: nil,
+					utils.ID:        "HOST2",
+					utils.Params:    nil,
+					utils.Weight:    5.,
+				},
+			},
+			utils.ID:         "DSP1",
+			utils.Strategy:   "*weight",
+			"StrategyParams": nil,
+			utils.Tenant:     "cgrates.org",
+			utils.Weight:     10.,
+		}
+		if !reflect.DeepEqual(expected, reply) {
+			t.Errorf("Expected %+v, \n received %+v", expected, reply)
+		}
+	}
+
+	// get for *dispatchers
+	argsCache = &utils.ArgsGetCacheItemWithAPIOpts{
+		Tenant: "cgrates.org",
+		APIOpts: map[string]interface{}{
+			utils.MetaDispatchers: false,
+		},
+		ArgsGetCacheItem: utils.ArgsGetCacheItem{
+			CacheID: utils.CacheDispatchers,
+			ItemID:  "cgrates.org:DSP1",
+		},
+	}
+	// reply here is an interface type(singleResultDispatcher), it exists
+	if err := apierRPC.Call(utils.CacheSv1GetItemWithRemote, argsCache,
+		&reply); err != nil {
+		t.Error(err)
+	}
+}
+
+func testDispatcherSetterSetDispatcherProfileOverwrite(t *testing.T) {
+	// as the cache was cleard, now that previously the HOST1 was matched, setting the profile wiht only HOST2 will remove the
+	// DispatcherRoutes, DispatcherProfile and the DispatcherInstance
+	var replyStr string
+	// Set DispatcherProfile
+	setDispatcherProfile := &engine.DispatcherProfileWithAPIOpts{
+		DispatcherProfile: &engine.DispatcherProfile{
+			Tenant:     "cgrates.org",
+			ID:         "DSP1",
+			Strategy:   "*weight",
+			Weight:     10,
+			Subsystems: []string{utils.MetaAny},
+			Hosts: engine.DispatcherHostProfiles{
+				{
+					ID:     "HOST2",
+					Weight: 5,
+				},
+			},
+		},
+		APIOpts: map[string]interface{}{
+			utils.MetaDispatchers: false,
+		},
+	}
+	if err := setterRPC.Call(utils.APIerSv1SetDispatcherProfile, setDispatcherProfile, &replyStr); err != nil {
+		t.Error("Unexpected error when calling APIerSv1.SetDispatcherProfile: ", err)
+	} else if replyStr != utils.OK {
+		t.Error("Unexpected reply returned", replyStr)
+	}
+}
+
+func testDispatcherCheckCacheAfterSetDispatcherDSP1(t *testing.T) {
+	// get for *dispatcher_routes
+	argsCache := &utils.ArgsGetCacheItemWithAPIOpts{
+		Tenant: "cgrates.org",
+		APIOpts: map[string]interface{}{
+			utils.MetaDispatchers: false,
+		},
+		ArgsGetCacheItem: utils.ArgsGetCacheItem{
+			CacheID: utils.CacheDispatcherRoutes,
+			ItemID:  "account#dan.bogos:*core",
+		},
+	}
+	var reply interface{} // Should receive NOT_FOUND, as CallCache that was called in API will remove the DispatcherRoute
+	if err := apierRPC.Call(utils.CacheSv1GetItemWithRemote, argsCache,
+		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("Unexpected error returned: %v", err)
+	}
+
+	// get for *dispatcher_profiles
+	argsCache = &utils.ArgsGetCacheItemWithAPIOpts{
+		Tenant: "cgrates.org",
+		APIOpts: map[string]interface{}{
+			utils.MetaDispatchers: false,
+		},
+		ArgsGetCacheItem: utils.ArgsGetCacheItem{
+			CacheID: utils.CacheDispatcherProfiles,
+			ItemID:  "cgrates.org:DSP1",
+		},
+	}
+	// as the DSP1 profile was overwritten, only HOST2 in profile will be contained
+	if err := apierRPC.Call(utils.CacheSv1GetItemWithRemote, argsCache,
+		&reply); err != nil {
+		t.Error(err)
+	} else {
+		expected := map[string]interface{}{
+			utils.FilterIDs: nil,
+			"Hosts": []interface{}{
+				map[string]interface{}{
+					utils.Blocker:   false,
+					utils.FilterIDs: nil,
+					utils.ID:        "HOST2",
+					utils.Params:    nil,
+					utils.Weight:    5.,
+				},
+			},
+			"ActivationInterval": nil,
+			"Subsystems":         []interface{}{"*any"},
+			utils.ID:             "DSP1",
+			utils.Strategy:       "*weight",
+			"StrategyParams":     nil,
+			utils.Tenant:         "cgrates.org",
+			utils.Weight:         10.,
+		}
+		if !reflect.DeepEqual(expected, reply) {
+			t.Errorf("Expected %+v, \n received %+v", utils.ToJSON(expected), utils.ToJSON(reply))
+		}
+	}
+
+	// get for *dispatchers
+	argsCache = &utils.ArgsGetCacheItemWithAPIOpts{
+		Tenant: "cgrates.org",
+		APIOpts: map[string]interface{}{
+			utils.MetaDispatchers: false,
+		},
+		ArgsGetCacheItem: utils.ArgsGetCacheItem{
+			CacheID: utils.CacheDispatchers,
+			ItemID:  "cgrates.org:DSP1",
+		},
+	}
+	// DispatcherInstance should also be removed, so it will be NOT_FOUND
+	if err := apierRPC.Call(utils.CacheSv1GetItemWithRemote, argsCache,
+		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("Unexpected error returned: %v", err)
+	}
+}
+
+func testDispatcherSetterSetAnotherProifle(t *testing.T) {
+	var replyStr string
+	// Set DispatcherProfile DSP2 with the existing hosts
+	setDispatcherProfile := &engine.DispatcherProfileWithAPIOpts{
+		DispatcherProfile: &engine.DispatcherProfile{
+			Tenant:     "cgrates.org",
+			ID:         "DSP2",
+			Strategy:   "*weight",
+			Weight:     20,
+			Subsystems: []string{utils.MetaAny},
+			Hosts: engine.DispatcherHostProfiles{
+				{
+					ID:     "HOST1",
+					Weight: 50,
+				},
+				{
+					ID:     "HOST2",
+					Weight: 125,
+				},
+			},
+		},
+		APIOpts: map[string]interface{}{
+			utils.MetaDispatchers: false,
+		},
+	}
+	if err := setterRPC.Call(utils.APIerSv1SetDispatcherProfile, setDispatcherProfile, &replyStr); err != nil {
+		t.Error("Unexpected error when calling APIerSv1.SetDispatcherProfile: ", err)
+	} else if replyStr != utils.OK {
+		t.Error("Unexpected reply returned", replyStr)
+	}
+}
+
+func testDispatcherCheckCacheAfterSetDispatcherDSP2(t *testing.T) {
+	// get for *dispatcher_routes
+	argsCache := &utils.ArgsGetCacheItemWithAPIOpts{
+		Tenant: "cgrates.org",
+		APIOpts: map[string]interface{}{
+			utils.MetaDispatchers: false,
+		},
+		ArgsGetCacheItem: utils.ArgsGetCacheItem{
+			CacheID: utils.CacheDispatcherRoutes,
+			ItemID:  "account#dan.bogos:*core",
+		},
+	}
+	var reply interface{}
+	// NOT_FOUND
+	if err := apierRPC.Call(utils.CacheSv1GetItemWithRemote, argsCache,
+		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("Unexpected error returned: %v", err)
+	}
+
+	// get for *dispatcher_profiles
+	argsCache = &utils.ArgsGetCacheItemWithAPIOpts{
+		Tenant: "cgrates.org",
+		APIOpts: map[string]interface{}{
+			utils.MetaDispatchers: false,
+		},
+		ArgsGetCacheItem: utils.ArgsGetCacheItem{
+			CacheID: utils.CacheDispatcherProfiles,
+			ItemID:  "cgrates.org:DSP2",
+		},
+	}
+	// NOT_FOUND
+	if err := apierRPC.Call(utils.CacheSv1GetItemWithRemote, argsCache,
+		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("Unexpected error returned: %v", err)
+	}
+
+	// get for *dispatchers
+	argsCache = &utils.ArgsGetCacheItemWithAPIOpts{
+		Tenant: "cgrates.org",
+		APIOpts: map[string]interface{}{
+			utils.MetaDispatchers: false,
+		},
+		ArgsGetCacheItem: utils.ArgsGetCacheItem{
+			CacheID: utils.CacheDispatchers,
+			ItemID:  "cgrates.org:DSP2",
+		},
+	}
+	// NOT_FOUND
+	if err := apierRPC.Call(utils.CacheSv1GetItemWithRemote, argsCache,
+		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("Unexpected error returned: %v", err)
 	}
 }
 

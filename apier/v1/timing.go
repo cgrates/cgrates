@@ -54,7 +54,7 @@ func (apierSv1 *APIerSv1) SetTiming(args *utils.TPTimingWithAPIOpts, reply *stri
 	}
 	//handle caching for Timings
 	if err := apierSv1.CallCache(utils.IfaceAsString(args.APIOpts[utils.CacheOpt]), args.Tenant, utils.CacheTimings,
-		args.ID, nil, nil, args.APIOpts); err != nil {
+		args.ID, utils.EmptyString, nil, nil, args.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 
@@ -76,7 +76,7 @@ func (apierSv1 *APIerSv1) RemoveTiming(args *utils.TPTimingWithAPIOpts, reply *s
 	}
 	//handle caching for Timings
 	if err := apierSv1.CallCache(utils.IfaceAsString(args.APIOpts[utils.CacheOpt]), tnt, utils.CacheTimings,
-		args.ID, nil, nil, args.APIOpts); err != nil {
+		args.ID, utils.EmptyString, nil, nil, args.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 
