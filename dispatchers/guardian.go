@@ -38,11 +38,6 @@ func (dS *DispatcherService) GuardianSv1Ping(ctx *context.Context, args *utils.C
 	if args != nil {
 		opts = args.APIOpts
 	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.GuardianSv1Ping, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaGuardian, utils.GuardianSv1Ping, args, reply)
 }
 func (dS *DispatcherService) GuardianSv1RemoteLock(ctx *context.Context, args *guardian.AttrRemoteLockWithAPIOpts, reply *string) (err error) {
@@ -55,11 +50,6 @@ func (dS *DispatcherService) GuardianSv1RemoteLock(ctx *context.Context, args *g
 	if args != nil {
 		opts = args.APIOpts
 	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.GuardianSv1RemoteLock, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaGuardian, utils.GuardianSv1RemoteLock, args, reply)
 }
 func (dS *DispatcherService) GuardianSv1RemoteUnlock(ctx *context.Context, args *guardian.AttrRemoteUnlockWithAPIOpts, reply *[]string) (err error) {
@@ -71,11 +61,6 @@ func (dS *DispatcherService) GuardianSv1RemoteUnlock(ctx *context.Context, args 
 	opts := make(map[string]interface{})
 	if args != nil {
 		opts = args.APIOpts
-	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.GuardianSv1RemoteUnlock, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaGuardian, utils.GuardianSv1RemoteUnlock, args, reply)
 }

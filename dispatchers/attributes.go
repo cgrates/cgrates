@@ -38,11 +38,6 @@ func (dS *DispatcherService) AttributeSv1GetAttributeForEvent(ctx *context.Conte
 	if args != nil {
 		opts = args.APIOpts
 	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.AttributeSv1GetAttributeForEvent, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaAttributes, utils.AttributeSv1GetAttributeForEvent, args, reply)
 }
 func (dS *DispatcherService) AttributeSv1Ping(ctx *context.Context, args *utils.CGREvent, reply *string) (err error) {
@@ -58,11 +53,6 @@ func (dS *DispatcherService) AttributeSv1Ping(ctx *context.Context, args *utils.
 	if args != nil {
 		opts = args.APIOpts
 	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.AttributeSv1Ping, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaAttributes, utils.AttributeSv1Ping, args, reply)
 }
 func (dS *DispatcherService) AttributeSv1ProcessEvent(ctx *context.Context, args *utils.CGREvent, reply *engine.AttrSProcessEventReply) (err error) {
@@ -77,11 +67,6 @@ func (dS *DispatcherService) AttributeSv1ProcessEvent(ctx *context.Context, args
 	opts := make(map[string]interface{})
 	if args != nil {
 		opts = args.APIOpts
-	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.AttributeSv1ProcessEvent, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaAttributes, utils.AttributeSv1ProcessEvent, args, reply)
 }

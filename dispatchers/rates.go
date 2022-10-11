@@ -37,11 +37,6 @@ func (dS *DispatcherService) RateSv1CostForEvent(ctx *context.Context, args *uti
 	if args != nil {
 		opts = args.APIOpts
 	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.RateSv1CostForEvent, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.RateS, utils.RateSv1CostForEvent, args, reply)
 }
 func (dS *DispatcherService) RateSv1Ping(ctx *context.Context, args *utils.CGREvent, reply *string) (err error) {
@@ -56,11 +51,6 @@ func (dS *DispatcherService) RateSv1Ping(ctx *context.Context, args *utils.CGREv
 	opts := make(map[string]interface{})
 	if args != nil {
 		opts = args.APIOpts
-	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.RateSv1Ping, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.RateS, utils.RateSv1Ping, args, reply)
 }
@@ -77,11 +67,6 @@ func (dS *DispatcherService) RateSv1RateProfileRatesForEvent(ctx *context.Contex
 	if args != nil && args.CGREvent != nil {
 		opts = args.CGREvent.APIOpts
 	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.RateSv1RateProfileRatesForEvent, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.RateS, utils.RateSv1RateProfileRatesForEvent, args, reply)
 }
 func (dS *DispatcherService) RateSv1RateProfilesForEvent(ctx *context.Context, args *utils.CGREvent, reply *[]string) (err error) {
@@ -96,11 +81,6 @@ func (dS *DispatcherService) RateSv1RateProfilesForEvent(ctx *context.Context, a
 	opts := make(map[string]interface{})
 	if args != nil {
 		opts = args.APIOpts
-	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.RateSv1RateProfilesForEvent, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.RateS, utils.RateSv1RateProfilesForEvent, args, reply)
 }

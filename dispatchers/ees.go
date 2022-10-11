@@ -35,11 +35,6 @@ func (dS *DispatcherService) EeSv1ArchiveEventsInReply(ctx *context.Context, arg
 	if args != nil {
 		opts = args.APIOpts
 	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.EeSv1ArchiveEventsInReply, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaEEs, utils.EeSv1ArchiveEventsInReply, args, reply)
 }
 func (dS *DispatcherService) EeSv1Ping(ctx *context.Context, args *utils.CGREvent, reply *string) (err error) {
@@ -55,11 +50,6 @@ func (dS *DispatcherService) EeSv1Ping(ctx *context.Context, args *utils.CGREven
 	if args != nil {
 		opts = args.APIOpts
 	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.EeSv1Ping, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaEEs, utils.EeSv1Ping, args, reply)
 }
 func (dS *DispatcherService) EeSv1ProcessEvent(ctx *context.Context, args *utils.CGREventWithEeIDs, reply *map[string]map[string]interface{}) (err error) {
@@ -74,11 +64,6 @@ func (dS *DispatcherService) EeSv1ProcessEvent(ctx *context.Context, args *utils
 	opts := make(map[string]interface{})
 	if args != nil && args.CGREvent != nil {
 		opts = args.CGREvent.APIOpts
-	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.EeSv1ProcessEvent, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaEEs, utils.EeSv1ProcessEvent, args, reply)
 }

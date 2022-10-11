@@ -35,11 +35,6 @@ func (dS *DispatcherService) ThresholdSv1GetThreshold(ctx *context.Context, args
 	if args != nil {
 		opts = args.APIOpts
 	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.ThresholdSv1GetThreshold, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaThresholds, utils.ThresholdSv1GetThreshold, args, reply)
 }
 func (dS *DispatcherService) ThresholdSv1GetThresholdIDs(ctx *context.Context, args *utils.TenantWithAPIOpts, reply *[]string) (err error) {
@@ -51,11 +46,6 @@ func (dS *DispatcherService) ThresholdSv1GetThresholdIDs(ctx *context.Context, a
 	opts := make(map[string]interface{})
 	if args != nil {
 		opts = args.APIOpts
-	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.ThresholdSv1GetThresholdIDs, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaThresholds, utils.ThresholdSv1GetThresholdIDs, args, reply)
 }
@@ -72,11 +62,6 @@ func (dS *DispatcherService) ThresholdSv1GetThresholdsForEvent(ctx *context.Cont
 	if args != nil {
 		opts = args.APIOpts
 	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.ThresholdSv1GetThresholdsForEvent, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaThresholds, utils.ThresholdSv1GetThresholdsForEvent, args, reply)
 }
 func (dS *DispatcherService) ThresholdSv1Ping(ctx *context.Context, args *utils.CGREvent, reply *string) (err error) {
@@ -91,11 +76,6 @@ func (dS *DispatcherService) ThresholdSv1Ping(ctx *context.Context, args *utils.
 	opts := make(map[string]interface{})
 	if args != nil {
 		opts = args.APIOpts
-	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.ThresholdSv1Ping, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaThresholds, utils.ThresholdSv1Ping, args, reply)
 }
@@ -112,11 +92,6 @@ func (dS *DispatcherService) ThresholdSv1ProcessEvent(ctx *context.Context, args
 	if args != nil {
 		opts = args.APIOpts
 	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.ThresholdSv1ProcessEvent, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaThresholds, utils.ThresholdSv1ProcessEvent, args, reply)
 }
 func (dS *DispatcherService) ThresholdSv1ResetThreshold(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *string) (err error) {
@@ -128,11 +103,6 @@ func (dS *DispatcherService) ThresholdSv1ResetThreshold(ctx *context.Context, ar
 	opts := make(map[string]interface{})
 	if args != nil {
 		opts = args.APIOpts
-	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.ThresholdSv1ResetThreshold, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaThresholds, utils.ThresholdSv1ResetThreshold, args, reply)
 }

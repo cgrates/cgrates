@@ -32,11 +32,6 @@ func (dS *DispatcherService) LoaderSv1ImportZip(ctx *context.Context, args *load
 	if args != nil {
 		opts = args.APIOpts
 	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.LoaderSv1ImportZip, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaLoaders, utils.LoaderSv1ImportZip, args, reply)
 }
 func (dS *DispatcherService) LoaderSv1Ping(ctx *context.Context, args *utils.CGREvent, reply *string) (err error) {
@@ -52,11 +47,6 @@ func (dS *DispatcherService) LoaderSv1Ping(ctx *context.Context, args *utils.CGR
 	if args != nil {
 		opts = args.APIOpts
 	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.LoaderSv1Ping, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaLoaders, utils.LoaderSv1Ping, args, reply)
 }
 func (dS *DispatcherService) LoaderSv1Run(ctx *context.Context, args *loaders.ArgsProcessFolder, reply *string) (err error) {
@@ -65,11 +55,6 @@ func (dS *DispatcherService) LoaderSv1Run(ctx *context.Context, args *loaders.Ar
 	opts := make(map[string]interface{})
 	if args != nil {
 		opts = args.APIOpts
-	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.LoaderSv1Run, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaLoaders, utils.LoaderSv1Run, args, reply)
 }

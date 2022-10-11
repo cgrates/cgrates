@@ -38,21 +38,11 @@ func (dS *DispatcherService) AnalyzerSv1Ping(ctx *context.Context, args *utils.C
 	if args != nil {
 		opts = args.APIOpts
 	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.AnalyzerSv1Ping, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaAnalyzer, utils.AnalyzerSv1Ping, args, reply)
 }
 func (dS *DispatcherService) AnalyzerSv1StringQuery(ctx *context.Context, args *analyzers.QueryArgs, reply *[]map[string]interface{}) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	ev := make(map[string]interface{})
 	opts := make(map[string]interface{})
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.AnalyzerSv1StringQuery, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaAnalyzer, utils.AnalyzerSv1StringQuery, args, reply)
 }
