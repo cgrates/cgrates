@@ -36,14 +36,8 @@ func (dS *DispatcherService) CacheSv1Clear(ctx *context.Context, args *utils.Att
 	if args != nil {
 		opts = args.APIOpts
 	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.CacheSv1Clear, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaCaches, utils.CacheSv1Clear, args, reply)
 }
-
 func (dS *DispatcherService) CacheSv1GetCacheStats(ctx *context.Context, args *utils.AttrCacheIDsWithAPIOpts, reply *map[string]*ltcache.CacheStats) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args != nil && len(args.Tenant) != 0 {
@@ -54,14 +48,8 @@ func (dS *DispatcherService) CacheSv1GetCacheStats(ctx *context.Context, args *u
 	if args != nil {
 		opts = args.APIOpts
 	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.CacheSv1GetCacheStats, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaCaches, utils.CacheSv1GetCacheStats, args, reply)
 }
-
 func (dS *DispatcherService) CacheSv1GetGroupItemIDs(ctx *context.Context, args *utils.ArgsGetGroupWithAPIOpts, reply *[]string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args != nil && len(args.Tenant) != 0 {
@@ -71,11 +59,6 @@ func (dS *DispatcherService) CacheSv1GetGroupItemIDs(ctx *context.Context, args 
 	opts := make(map[string]interface{})
 	if args != nil {
 		opts = args.APIOpts
-	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.CacheSv1GetGroupItemIDs, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaCaches, utils.CacheSv1GetGroupItemIDs, args, reply)
 }
@@ -89,11 +72,6 @@ func (dS *DispatcherService) CacheSv1GetItem(ctx *context.Context, args *utils.A
 	if args != nil {
 		opts = args.APIOpts
 	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.CacheSv1GetItem, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaCaches, utils.CacheSv1GetItem, args, reply)
 }
 func (dS *DispatcherService) CacheSv1GetItemExpiryTime(ctx *context.Context, args *utils.ArgsGetCacheItemWithAPIOpts, reply *time.Time) (err error) {
@@ -105,11 +83,6 @@ func (dS *DispatcherService) CacheSv1GetItemExpiryTime(ctx *context.Context, arg
 	opts := make(map[string]interface{})
 	if args != nil {
 		opts = args.APIOpts
-	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.CacheSv1GetItemExpiryTime, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaCaches, utils.CacheSv1GetItemExpiryTime, args, reply)
 }
@@ -123,11 +96,6 @@ func (dS *DispatcherService) CacheSv1GetItemIDs(ctx *context.Context, args *util
 	if args != nil {
 		opts = args.APIOpts
 	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.CacheSv1GetItemIDs, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaCaches, utils.CacheSv1GetItemIDs, args, reply)
 }
 func (dS *DispatcherService) CacheSv1GetItemWithRemote(ctx *context.Context, args *utils.ArgsGetCacheItemWithAPIOpts, reply *interface{}) (err error) {
@@ -139,11 +107,6 @@ func (dS *DispatcherService) CacheSv1GetItemWithRemote(ctx *context.Context, arg
 	opts := make(map[string]interface{})
 	if args != nil {
 		opts = args.APIOpts
-	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.CacheSv1GetItemWithRemote, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaCaches, utils.CacheSv1GetItemWithRemote, args, reply)
 }
@@ -157,11 +120,6 @@ func (dS *DispatcherService) CacheSv1HasGroup(ctx *context.Context, args *utils.
 	if args != nil {
 		opts = args.APIOpts
 	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.CacheSv1HasGroup, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaCaches, utils.CacheSv1HasGroup, args, reply)
 }
 func (dS *DispatcherService) CacheSv1HasItem(ctx *context.Context, args *utils.ArgsGetCacheItemWithAPIOpts, reply *bool) (err error) {
@@ -174,11 +132,6 @@ func (dS *DispatcherService) CacheSv1HasItem(ctx *context.Context, args *utils.A
 	if args != nil {
 		opts = args.APIOpts
 	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.CacheSv1HasItem, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaCaches, utils.CacheSv1HasItem, args, reply)
 }
 func (dS *DispatcherService) CacheSv1LoadCache(ctx *context.Context, args *utils.AttrReloadCacheWithAPIOpts, reply *string) (err error) {
@@ -190,11 +143,6 @@ func (dS *DispatcherService) CacheSv1LoadCache(ctx *context.Context, args *utils
 	opts := make(map[string]interface{})
 	if args != nil {
 		opts = args.APIOpts
-	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.CacheSv1LoadCache, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaCaches, utils.CacheSv1LoadCache, args, reply)
 }
@@ -211,11 +159,6 @@ func (dS *DispatcherService) CacheSv1Ping(ctx *context.Context, args *utils.CGRE
 	if args != nil {
 		opts = args.APIOpts
 	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.CacheSv1Ping, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaCaches, utils.CacheSv1Ping, args, reply)
 }
 func (dS *DispatcherService) CacheSv1PrecacheStatus(ctx *context.Context, args *utils.AttrCacheIDsWithAPIOpts, reply *map[string]string) (err error) {
@@ -227,11 +170,6 @@ func (dS *DispatcherService) CacheSv1PrecacheStatus(ctx *context.Context, args *
 	opts := make(map[string]interface{})
 	if args != nil {
 		opts = args.APIOpts
-	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.CacheSv1PrecacheStatus, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaCaches, utils.CacheSv1PrecacheStatus, args, reply)
 }
@@ -245,11 +183,6 @@ func (dS *DispatcherService) CacheSv1ReloadCache(ctx *context.Context, args *uti
 	if args != nil {
 		opts = args.APIOpts
 	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.CacheSv1ReloadCache, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaCaches, utils.CacheSv1ReloadCache, args, reply)
 }
 func (dS *DispatcherService) CacheSv1RemoveGroup(ctx *context.Context, args *utils.ArgsGetGroupWithAPIOpts, reply *string) (err error) {
@@ -261,11 +194,6 @@ func (dS *DispatcherService) CacheSv1RemoveGroup(ctx *context.Context, args *uti
 	opts := make(map[string]interface{})
 	if args != nil {
 		opts = args.APIOpts
-	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.CacheSv1RemoveGroup, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaCaches, utils.CacheSv1RemoveGroup, args, reply)
 }
@@ -279,11 +207,6 @@ func (dS *DispatcherService) CacheSv1RemoveItem(ctx *context.Context, args *util
 	if args != nil {
 		opts = args.APIOpts
 	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.CacheSv1RemoveItem, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaCaches, utils.CacheSv1RemoveItem, args, reply)
 }
 func (dS *DispatcherService) CacheSv1RemoveItems(ctx *context.Context, args *utils.AttrReloadCacheWithAPIOpts, reply *string) (err error) {
@@ -295,11 +218,6 @@ func (dS *DispatcherService) CacheSv1RemoveItems(ctx *context.Context, args *uti
 	opts := make(map[string]interface{})
 	if args != nil {
 		opts = args.APIOpts
-	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.CacheSv1RemoveItems, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaCaches, utils.CacheSv1RemoveItems, args, reply)
 }
@@ -313,11 +231,6 @@ func (dS *DispatcherService) CacheSv1ReplicateRemove(ctx *context.Context, args 
 	if args != nil {
 		opts = args.APIOpts
 	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.CacheSv1ReplicateRemove, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaCaches, utils.CacheSv1ReplicateRemove, args, reply)
 }
 func (dS *DispatcherService) CacheSv1ReplicateSet(ctx *context.Context, args *utils.ArgCacheReplicateSet, reply *string) (err error) {
@@ -329,11 +242,6 @@ func (dS *DispatcherService) CacheSv1ReplicateSet(ctx *context.Context, args *ut
 	opts := make(map[string]interface{})
 	if args != nil {
 		opts = args.APIOpts
-	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.CacheSv1ReplicateSet, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaCaches, utils.CacheSv1ReplicateSet, args, reply)
 }

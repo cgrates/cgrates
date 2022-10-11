@@ -37,11 +37,6 @@ func (dS *DispatcherService) ActionSv1ExecuteActions(ctx *context.Context, args 
 	if args != nil {
 		opts = args.APIOpts
 	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.ActionSv1ExecuteActions, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaActions, utils.ActionSv1ExecuteActions, args, reply)
 }
 func (dS *DispatcherService) ActionSv1Ping(ctx *context.Context, args *utils.CGREvent, reply *string) (err error) {
@@ -57,11 +52,6 @@ func (dS *DispatcherService) ActionSv1Ping(ctx *context.Context, args *utils.CGR
 	if args != nil {
 		opts = args.APIOpts
 	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.ActionSv1Ping, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaActions, utils.ActionSv1Ping, args, reply)
 }
 func (dS *DispatcherService) ActionSv1ScheduleActions(ctx *context.Context, args *utils.CGREvent, reply *string) (err error) {
@@ -76,11 +66,6 @@ func (dS *DispatcherService) ActionSv1ScheduleActions(ctx *context.Context, args
 	opts := make(map[string]interface{})
 	if args != nil {
 		opts = args.APIOpts
-	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.ActionSv1ScheduleActions, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaActions, utils.ActionSv1ScheduleActions, args, reply)
 }

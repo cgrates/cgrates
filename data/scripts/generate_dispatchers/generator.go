@@ -327,55 +327,6 @@ func generateFuncBody(arg reflect.Type, funcName, subsystem string) (p []ast.Stm
 	opts := ast.NewIdent("opts")
 	p = append(p, generateCond(arg, opts, ast.NewIdent("make(map[string]interface{})"), "APIOpts", reflect.Map)...)
 
-	p = append(p, &ast.IfStmt{
-		Cond: &ast.BinaryExpr{
-			X:  ast.NewIdent("len(dS.cfg.DispatcherSCfg().AttributeSConns)"),
-			Op: token.NEQ,
-			Y:  ast.NewIdent("0"),
-		},
-		Body: &ast.BlockStmt{List: []ast.Stmt{
-			&ast.IfStmt{
-				Init: &ast.AssignStmt{
-					Lhs: []ast.Expr{ast.NewIdent("err")},
-					Tok: token.ASSIGN,
-					Rhs: []ast.Expr{&ast.CallExpr{
-						Fun: &ast.SelectorExpr{
-							X:   ast.NewIdent("dS"),
-							Sel: ast.NewIdent("authorize"),
-						},
-						Args: []ast.Expr{
-							ast.NewIdent("ctx"),
-							&ast.SelectorExpr{
-								X:   ast.NewIdent("utils"),
-								Sel: ast.NewIdent(funcName),
-							},
-							tnt,
-							&ast.CallExpr{
-								Fun: &ast.SelectorExpr{
-									X:   ast.NewIdent("utils"),
-									Sel: ast.NewIdent("IfaceAsString"),
-								},
-								Args: []ast.Expr{&ast.IndexExpr{
-									X: opts,
-									Index: &ast.SelectorExpr{
-										X:   ast.NewIdent("utils"),
-										Sel: ast.NewIdent("OptsAPIKey"),
-									},
-								}},
-							},
-						},
-					}},
-				},
-				Cond: &ast.BinaryExpr{
-					X:  ast.NewIdent("err"),
-					Op: token.NEQ,
-					Y:  ast.NewIdent("nil"),
-				},
-				Body: &ast.BlockStmt{List: []ast.Stmt{&ast.ReturnStmt{}}},
-			},
-		},
-		},
-	})
 	p = append(p, &ast.ReturnStmt{Results: []ast.Expr{&ast.CallExpr{
 		Fun: &ast.SelectorExpr{
 			X:   ast.NewIdent("dS"),

@@ -37,11 +37,6 @@ func (dS *DispatcherService) CDRsV1Ping(ctx *context.Context, args *utils.CGREve
 	if args != nil {
 		opts = args.APIOpts
 	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.CDRsV1Ping, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaCDRs, utils.CDRsV1Ping, args, reply)
 }
 func (dS *DispatcherService) CDRsV1ProcessEvent(ctx *context.Context, args *utils.CGREvent, reply *string) (err error) {
@@ -57,11 +52,6 @@ func (dS *DispatcherService) CDRsV1ProcessEvent(ctx *context.Context, args *util
 	if args != nil {
 		opts = args.APIOpts
 	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.CDRsV1ProcessEvent, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaCDRs, utils.CDRsV1ProcessEvent, args, reply)
 }
 func (dS *DispatcherService) CDRsV1ProcessEventWithGet(ctx *context.Context, args *utils.CGREvent, reply *[]*utils.EventsWithOpts) (err error) {
@@ -76,11 +66,6 @@ func (dS *DispatcherService) CDRsV1ProcessEventWithGet(ctx *context.Context, arg
 	opts := make(map[string]interface{})
 	if args != nil {
 		opts = args.APIOpts
-	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.CDRsV1ProcessEventWithGet, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaCDRs, utils.CDRsV1ProcessEventWithGet, args, reply)
 }

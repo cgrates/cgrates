@@ -37,11 +37,6 @@ func (dS *DispatcherService) AccountSv1AccountsForEvent(ctx *context.Context, ar
 	if args != nil {
 		opts = args.APIOpts
 	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.AccountSv1AccountsForEvent, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaAccounts, utils.AccountSv1AccountsForEvent, args, reply)
 }
 func (dS *DispatcherService) AccountSv1ActionRemoveBalance(ctx *context.Context, args *utils.ArgsActRemoveBalances, reply *string) (err error) {
@@ -54,11 +49,6 @@ func (dS *DispatcherService) AccountSv1ActionRemoveBalance(ctx *context.Context,
 	if args != nil {
 		opts = args.APIOpts
 	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.AccountSv1ActionRemoveBalance, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaAccounts, utils.AccountSv1ActionRemoveBalance, args, reply)
 }
 func (dS *DispatcherService) AccountSv1ActionSetBalance(ctx *context.Context, args *utils.ArgsActSetBalance, reply *string) (err error) {
@@ -70,11 +60,6 @@ func (dS *DispatcherService) AccountSv1ActionSetBalance(ctx *context.Context, ar
 	opts := make(map[string]interface{})
 	if args != nil {
 		opts = args.APIOpts
-	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.AccountSv1ActionSetBalance, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaAccounts, utils.AccountSv1ActionSetBalance, args, reply)
 }
@@ -91,11 +76,6 @@ func (dS *DispatcherService) AccountSv1DebitAbstracts(ctx *context.Context, args
 	if args != nil {
 		opts = args.APIOpts
 	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.AccountSv1DebitAbstracts, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaAccounts, utils.AccountSv1DebitAbstracts, args, reply)
 }
 func (dS *DispatcherService) AccountSv1DebitConcretes(ctx *context.Context, args *utils.CGREvent, reply *utils.EventCharges) (err error) {
@@ -111,11 +91,6 @@ func (dS *DispatcherService) AccountSv1DebitConcretes(ctx *context.Context, args
 	if args != nil {
 		opts = args.APIOpts
 	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.AccountSv1DebitConcretes, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaAccounts, utils.AccountSv1DebitConcretes, args, reply)
 }
 func (dS *DispatcherService) AccountSv1GetAccount(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *utils.Account) (err error) {
@@ -127,11 +102,6 @@ func (dS *DispatcherService) AccountSv1GetAccount(ctx *context.Context, args *ut
 	opts := make(map[string]interface{})
 	if args != nil {
 		opts = args.APIOpts
-	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.AccountSv1GetAccount, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaAccounts, utils.AccountSv1GetAccount, args, reply)
 }
@@ -148,11 +118,6 @@ func (dS *DispatcherService) AccountSv1MaxAbstracts(ctx *context.Context, args *
 	if args != nil {
 		opts = args.APIOpts
 	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.AccountSv1MaxAbstracts, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaAccounts, utils.AccountSv1MaxAbstracts, args, reply)
 }
 func (dS *DispatcherService) AccountSv1MaxConcretes(ctx *context.Context, args *utils.CGREvent, reply *utils.EventCharges) (err error) {
@@ -167,11 +132,6 @@ func (dS *DispatcherService) AccountSv1MaxConcretes(ctx *context.Context, args *
 	opts := make(map[string]interface{})
 	if args != nil {
 		opts = args.APIOpts
-	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.AccountSv1MaxConcretes, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaAccounts, utils.AccountSv1MaxConcretes, args, reply)
 }
@@ -188,11 +148,6 @@ func (dS *DispatcherService) AccountSv1Ping(ctx *context.Context, args *utils.CG
 	if args != nil {
 		opts = args.APIOpts
 	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.AccountSv1Ping, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaAccounts, utils.AccountSv1Ping, args, reply)
 }
 func (dS *DispatcherService) AccountSv1RefundCharges(ctx *context.Context, args *utils.APIEventCharges, reply *string) (err error) {
@@ -204,11 +159,6 @@ func (dS *DispatcherService) AccountSv1RefundCharges(ctx *context.Context, args 
 	opts := make(map[string]interface{})
 	if args != nil {
 		opts = args.APIOpts
-	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.AccountSv1RefundCharges, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaAccounts, utils.AccountSv1RefundCharges, args, reply)
 }

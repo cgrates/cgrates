@@ -170,6 +170,11 @@ func (dS *DispatcherService) Dispatch(ctx *context.Context, ev *utils.CGREvent, 
 	if ev.APIOpts == nil {
 		ev.APIOpts = make(map[string]interface{})
 	}
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
+		if err = dS.authorize(ctx, serviceMethod, tnt, utils.IfaceAsString(ev.APIOpts[utils.OptsAPIKey])); err != nil {
+			return
+		}
+	}
 	evNm := utils.MapStorage{
 		utils.MetaReq:  ev.Event,
 		utils.MetaOpts: ev.APIOpts,

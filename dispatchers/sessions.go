@@ -35,11 +35,6 @@ func (dS *DispatcherService) SessionSv1ActivateSessions(ctx *context.Context, ar
 	if args != nil {
 		opts = args.APIOpts
 	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.SessionSv1ActivateSessions, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaSessionS, utils.SessionSv1ActivateSessions, args, reply)
 }
 func (dS *DispatcherService) SessionSv1AuthorizeEvent(ctx *context.Context, args *utils.CGREvent, reply *sessions.V1AuthorizeReply) (err error) {
@@ -54,11 +49,6 @@ func (dS *DispatcherService) SessionSv1AuthorizeEvent(ctx *context.Context, args
 	opts := make(map[string]interface{})
 	if args != nil {
 		opts = args.APIOpts
-	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.SessionSv1AuthorizeEvent, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaSessionS, utils.SessionSv1AuthorizeEvent, args, reply)
 }
@@ -75,11 +65,6 @@ func (dS *DispatcherService) SessionSv1AuthorizeEventWithDigest(ctx *context.Con
 	if args != nil {
 		opts = args.APIOpts
 	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.SessionSv1AuthorizeEventWithDigest, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaSessionS, utils.SessionSv1AuthorizeEventWithDigest, args, reply)
 }
 func (dS *DispatcherService) SessionSv1DeactivateSessions(ctx *context.Context, args *utils.SessionIDsWithAPIOpts, reply *string) (err error) {
@@ -92,22 +77,12 @@ func (dS *DispatcherService) SessionSv1DeactivateSessions(ctx *context.Context, 
 	if args != nil {
 		opts = args.APIOpts
 	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.SessionSv1DeactivateSessions, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaSessionS, utils.SessionSv1DeactivateSessions, args, reply)
 }
 func (dS *DispatcherService) SessionSv1DisconnectPeer(ctx *context.Context, args *utils.DPRArgs, reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	ev := make(map[string]interface{})
 	opts := make(map[string]interface{})
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.SessionSv1DisconnectPeer, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaSessionS, utils.SessionSv1DisconnectPeer, args, reply)
 }
 func (dS *DispatcherService) SessionSv1ForceDisconnect(ctx *context.Context, args *utils.SessionFilter, reply *string) (err error) {
@@ -119,11 +94,6 @@ func (dS *DispatcherService) SessionSv1ForceDisconnect(ctx *context.Context, arg
 	opts := make(map[string]interface{})
 	if args != nil {
 		opts = args.APIOpts
-	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.SessionSv1ForceDisconnect, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaSessionS, utils.SessionSv1ForceDisconnect, args, reply)
 }
@@ -137,11 +107,6 @@ func (dS *DispatcherService) SessionSv1GetActiveSessions(ctx *context.Context, a
 	if args != nil {
 		opts = args.APIOpts
 	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.SessionSv1GetActiveSessions, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaSessionS, utils.SessionSv1GetActiveSessions, args, reply)
 }
 func (dS *DispatcherService) SessionSv1GetActiveSessionsCount(ctx *context.Context, args *utils.SessionFilter, reply *int) (err error) {
@@ -153,11 +118,6 @@ func (dS *DispatcherService) SessionSv1GetActiveSessionsCount(ctx *context.Conte
 	opts := make(map[string]interface{})
 	if args != nil {
 		opts = args.APIOpts
-	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.SessionSv1GetActiveSessionsCount, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaSessionS, utils.SessionSv1GetActiveSessionsCount, args, reply)
 }
@@ -171,11 +131,6 @@ func (dS *DispatcherService) SessionSv1GetPassiveSessions(ctx *context.Context, 
 	if args != nil {
 		opts = args.APIOpts
 	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.SessionSv1GetPassiveSessions, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaSessionS, utils.SessionSv1GetPassiveSessions, args, reply)
 }
 func (dS *DispatcherService) SessionSv1GetPassiveSessionsCount(ctx *context.Context, args *utils.SessionFilter, reply *int) (err error) {
@@ -187,11 +142,6 @@ func (dS *DispatcherService) SessionSv1GetPassiveSessionsCount(ctx *context.Cont
 	opts := make(map[string]interface{})
 	if args != nil {
 		opts = args.APIOpts
-	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.SessionSv1GetPassiveSessionsCount, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaSessionS, utils.SessionSv1GetPassiveSessionsCount, args, reply)
 }
@@ -208,11 +158,6 @@ func (dS *DispatcherService) SessionSv1InitiateSession(ctx *context.Context, arg
 	if args != nil {
 		opts = args.APIOpts
 	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.SessionSv1InitiateSession, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaSessionS, utils.SessionSv1InitiateSession, args, reply)
 }
 func (dS *DispatcherService) SessionSv1InitiateSessionWithDigest(ctx *context.Context, args *utils.CGREvent, reply *sessions.V1InitReplyWithDigest) (err error) {
@@ -227,11 +172,6 @@ func (dS *DispatcherService) SessionSv1InitiateSessionWithDigest(ctx *context.Co
 	opts := make(map[string]interface{})
 	if args != nil {
 		opts = args.APIOpts
-	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.SessionSv1InitiateSessionWithDigest, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaSessionS, utils.SessionSv1InitiateSessionWithDigest, args, reply)
 }
@@ -248,11 +188,6 @@ func (dS *DispatcherService) SessionSv1Ping(ctx *context.Context, args *utils.CG
 	if args != nil {
 		opts = args.APIOpts
 	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.SessionSv1Ping, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaSessionS, utils.SessionSv1Ping, args, reply)
 }
 func (dS *DispatcherService) SessionSv1ProcessCDR(ctx *context.Context, args *utils.CGREvent, reply *string) (err error) {
@@ -267,11 +202,6 @@ func (dS *DispatcherService) SessionSv1ProcessCDR(ctx *context.Context, args *ut
 	opts := make(map[string]interface{})
 	if args != nil {
 		opts = args.APIOpts
-	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.SessionSv1ProcessCDR, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaSessionS, utils.SessionSv1ProcessCDR, args, reply)
 }
@@ -288,11 +218,6 @@ func (dS *DispatcherService) SessionSv1ProcessEvent(ctx *context.Context, args *
 	if args != nil {
 		opts = args.APIOpts
 	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.SessionSv1ProcessEvent, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaSessionS, utils.SessionSv1ProcessEvent, args, reply)
 }
 func (dS *DispatcherService) SessionSv1ProcessMessage(ctx *context.Context, args *utils.CGREvent, reply *sessions.V1ProcessMessageReply) (err error) {
@@ -308,11 +233,6 @@ func (dS *DispatcherService) SessionSv1ProcessMessage(ctx *context.Context, args
 	if args != nil {
 		opts = args.APIOpts
 	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.SessionSv1ProcessMessage, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaSessionS, utils.SessionSv1ProcessMessage, args, reply)
 }
 func (dS *DispatcherService) SessionSv1ReAuthorize(ctx *context.Context, args *utils.SessionFilter, reply *string) (err error) {
@@ -325,22 +245,12 @@ func (dS *DispatcherService) SessionSv1ReAuthorize(ctx *context.Context, args *u
 	if args != nil {
 		opts = args.APIOpts
 	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.SessionSv1ReAuthorize, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaSessionS, utils.SessionSv1ReAuthorize, args, reply)
 }
 func (dS *DispatcherService) SessionSv1RegisterInternalBiJSONConn(ctx *context.Context, args string, reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	ev := make(map[string]interface{})
 	opts := make(map[string]interface{})
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.SessionSv1RegisterInternalBiJSONConn, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaSessionS, utils.SessionSv1RegisterInternalBiJSONConn, args, reply)
 }
 func (dS *DispatcherService) SessionSv1ReplicateSessions(ctx *context.Context, args sessions.ArgsReplicateSessions, reply *string) (err error) {
@@ -350,11 +260,6 @@ func (dS *DispatcherService) SessionSv1ReplicateSessions(ctx *context.Context, a
 	}
 	ev := make(map[string]interface{})
 	opts := args.APIOpts
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.SessionSv1ReplicateSessions, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaSessionS, utils.SessionSv1ReplicateSessions, args, reply)
 }
 func (dS *DispatcherService) SessionSv1STIRAuthenticate(ctx *context.Context, args *sessions.V1STIRAuthenticateArgs, reply *string) (err error) {
@@ -363,11 +268,6 @@ func (dS *DispatcherService) SessionSv1STIRAuthenticate(ctx *context.Context, ar
 	opts := make(map[string]interface{})
 	if args != nil {
 		opts = args.APIOpts
-	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.SessionSv1STIRAuthenticate, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaSessionS, utils.SessionSv1STIRAuthenticate, args, reply)
 }
@@ -378,11 +278,6 @@ func (dS *DispatcherService) SessionSv1STIRIdentity(ctx *context.Context, args *
 	if args != nil {
 		opts = args.APIOpts
 	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.SessionSv1STIRIdentity, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaSessionS, utils.SessionSv1STIRIdentity, args, reply)
 }
 func (dS *DispatcherService) SessionSv1SetPassiveSession(ctx *context.Context, args *sessions.Session, reply *string) (err error) {
@@ -392,11 +287,6 @@ func (dS *DispatcherService) SessionSv1SetPassiveSession(ctx *context.Context, a
 	}
 	ev := make(map[string]interface{})
 	opts := make(map[string]interface{})
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.SessionSv1SetPassiveSession, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaSessionS, utils.SessionSv1SetPassiveSession, args, reply)
 }
 func (dS *DispatcherService) SessionSv1SyncSessions(ctx *context.Context, args *utils.TenantWithAPIOpts, reply *string) (err error) {
@@ -408,11 +298,6 @@ func (dS *DispatcherService) SessionSv1SyncSessions(ctx *context.Context, args *
 	opts := make(map[string]interface{})
 	if args != nil {
 		opts = args.APIOpts
-	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.SessionSv1SyncSessions, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaSessionS, utils.SessionSv1SyncSessions, args, reply)
 }
@@ -429,11 +314,6 @@ func (dS *DispatcherService) SessionSv1TerminateSession(ctx *context.Context, ar
 	if args != nil {
 		opts = args.APIOpts
 	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.SessionSv1TerminateSession, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaSessionS, utils.SessionSv1TerminateSession, args, reply)
 }
 func (dS *DispatcherService) SessionSv1UpdateSession(ctx *context.Context, args *utils.CGREvent, reply *sessions.V1UpdateSessionReply) (err error) {
@@ -448,11 +328,6 @@ func (dS *DispatcherService) SessionSv1UpdateSession(ctx *context.Context, args 
 	opts := make(map[string]interface{})
 	if args != nil {
 		opts = args.APIOpts
-	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.SessionSv1UpdateSession, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaSessionS, utils.SessionSv1UpdateSession, args, reply)
 }

@@ -35,11 +35,6 @@ func (dS *DispatcherService) ReplicatorSv1GetAccount(ctx *context.Context, args 
 	if args != nil {
 		opts = args.APIOpts
 	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.ReplicatorSv1GetAccount, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaReplicator, utils.ReplicatorSv1GetAccount, args, reply)
 }
 func (dS *DispatcherService) ReplicatorSv1GetActionProfile(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *engine.ActionProfile) (err error) {
@@ -51,11 +46,6 @@ func (dS *DispatcherService) ReplicatorSv1GetActionProfile(ctx *context.Context,
 	opts := make(map[string]interface{})
 	if args != nil {
 		opts = args.APIOpts
-	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.ReplicatorSv1GetActionProfile, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaReplicator, utils.ReplicatorSv1GetActionProfile, args, reply)
 }
@@ -69,11 +59,6 @@ func (dS *DispatcherService) ReplicatorSv1GetAttributeProfile(ctx *context.Conte
 	if args != nil {
 		opts = args.APIOpts
 	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.ReplicatorSv1GetAttributeProfile, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaReplicator, utils.ReplicatorSv1GetAttributeProfile, args, reply)
 }
 func (dS *DispatcherService) ReplicatorSv1GetChargerProfile(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *engine.ChargerProfile) (err error) {
@@ -85,11 +70,6 @@ func (dS *DispatcherService) ReplicatorSv1GetChargerProfile(ctx *context.Context
 	opts := make(map[string]interface{})
 	if args != nil {
 		opts = args.APIOpts
-	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.ReplicatorSv1GetChargerProfile, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaReplicator, utils.ReplicatorSv1GetChargerProfile, args, reply)
 }
@@ -103,11 +83,6 @@ func (dS *DispatcherService) ReplicatorSv1GetDispatcherHost(ctx *context.Context
 	if args != nil {
 		opts = args.APIOpts
 	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.ReplicatorSv1GetDispatcherHost, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaReplicator, utils.ReplicatorSv1GetDispatcherHost, args, reply)
 }
 func (dS *DispatcherService) ReplicatorSv1GetDispatcherProfile(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *engine.DispatcherProfile) (err error) {
@@ -119,11 +94,6 @@ func (dS *DispatcherService) ReplicatorSv1GetDispatcherProfile(ctx *context.Cont
 	opts := make(map[string]interface{})
 	if args != nil {
 		opts = args.APIOpts
-	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.ReplicatorSv1GetDispatcherProfile, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaReplicator, utils.ReplicatorSv1GetDispatcherProfile, args, reply)
 }
@@ -137,11 +107,6 @@ func (dS *DispatcherService) ReplicatorSv1GetFilter(ctx *context.Context, args *
 	if args != nil {
 		opts = args.APIOpts
 	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.ReplicatorSv1GetFilter, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaReplicator, utils.ReplicatorSv1GetFilter, args, reply)
 }
 func (dS *DispatcherService) ReplicatorSv1GetIndexes(ctx *context.Context, args *utils.GetIndexesArg, reply *map[string]utils.StringSet) (err error) {
@@ -153,11 +118,6 @@ func (dS *DispatcherService) ReplicatorSv1GetIndexes(ctx *context.Context, args 
 	opts := make(map[string]interface{})
 	if args != nil {
 		opts = args.APIOpts
-	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.ReplicatorSv1GetIndexes, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaReplicator, utils.ReplicatorSv1GetIndexes, args, reply)
 }
@@ -171,11 +131,6 @@ func (dS *DispatcherService) ReplicatorSv1GetItemLoadIDs(ctx *context.Context, a
 	if args != nil {
 		opts = args.APIOpts
 	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.ReplicatorSv1GetItemLoadIDs, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaReplicator, utils.ReplicatorSv1GetItemLoadIDs, args, reply)
 }
 func (dS *DispatcherService) ReplicatorSv1GetRateProfile(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *utils.RateProfile) (err error) {
@@ -187,11 +142,6 @@ func (dS *DispatcherService) ReplicatorSv1GetRateProfile(ctx *context.Context, a
 	opts := make(map[string]interface{})
 	if args != nil {
 		opts = args.APIOpts
-	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.ReplicatorSv1GetRateProfile, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaReplicator, utils.ReplicatorSv1GetRateProfile, args, reply)
 }
@@ -205,11 +155,6 @@ func (dS *DispatcherService) ReplicatorSv1GetResource(ctx *context.Context, args
 	if args != nil {
 		opts = args.APIOpts
 	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.ReplicatorSv1GetResource, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaReplicator, utils.ReplicatorSv1GetResource, args, reply)
 }
 func (dS *DispatcherService) ReplicatorSv1GetResourceProfile(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *engine.ResourceProfile) (err error) {
@@ -221,11 +166,6 @@ func (dS *DispatcherService) ReplicatorSv1GetResourceProfile(ctx *context.Contex
 	opts := make(map[string]interface{})
 	if args != nil {
 		opts = args.APIOpts
-	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.ReplicatorSv1GetResourceProfile, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaReplicator, utils.ReplicatorSv1GetResourceProfile, args, reply)
 }
@@ -239,11 +179,6 @@ func (dS *DispatcherService) ReplicatorSv1GetRouteProfile(ctx *context.Context, 
 	if args != nil {
 		opts = args.APIOpts
 	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.ReplicatorSv1GetRouteProfile, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaReplicator, utils.ReplicatorSv1GetRouteProfile, args, reply)
 }
 func (dS *DispatcherService) ReplicatorSv1GetStatQueue(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *engine.StatQueue) (err error) {
@@ -255,11 +190,6 @@ func (dS *DispatcherService) ReplicatorSv1GetStatQueue(ctx *context.Context, arg
 	opts := make(map[string]interface{})
 	if args != nil {
 		opts = args.APIOpts
-	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.ReplicatorSv1GetStatQueue, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaReplicator, utils.ReplicatorSv1GetStatQueue, args, reply)
 }
@@ -273,11 +203,6 @@ func (dS *DispatcherService) ReplicatorSv1GetStatQueueProfile(ctx *context.Conte
 	if args != nil {
 		opts = args.APIOpts
 	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.ReplicatorSv1GetStatQueueProfile, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaReplicator, utils.ReplicatorSv1GetStatQueueProfile, args, reply)
 }
 func (dS *DispatcherService) ReplicatorSv1GetThreshold(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *engine.Threshold) (err error) {
@@ -290,11 +215,6 @@ func (dS *DispatcherService) ReplicatorSv1GetThreshold(ctx *context.Context, arg
 	if args != nil {
 		opts = args.APIOpts
 	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.ReplicatorSv1GetThreshold, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaReplicator, utils.ReplicatorSv1GetThreshold, args, reply)
 }
 func (dS *DispatcherService) ReplicatorSv1GetThresholdProfile(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *engine.ThresholdProfile) (err error) {
@@ -306,11 +226,6 @@ func (dS *DispatcherService) ReplicatorSv1GetThresholdProfile(ctx *context.Conte
 	opts := make(map[string]interface{})
 	if args != nil {
 		opts = args.APIOpts
-	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.ReplicatorSv1GetThresholdProfile, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaReplicator, utils.ReplicatorSv1GetThresholdProfile, args, reply)
 }
@@ -327,11 +242,6 @@ func (dS *DispatcherService) ReplicatorSv1Ping(ctx *context.Context, args *utils
 	if args != nil {
 		opts = args.APIOpts
 	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.ReplicatorSv1Ping, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaReplicator, utils.ReplicatorSv1Ping, args, reply)
 }
 func (dS *DispatcherService) ReplicatorSv1RemoveAccount(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *string) (err error) {
@@ -343,11 +253,6 @@ func (dS *DispatcherService) ReplicatorSv1RemoveAccount(ctx *context.Context, ar
 	opts := make(map[string]interface{})
 	if args != nil {
 		opts = args.APIOpts
-	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.ReplicatorSv1RemoveAccount, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaReplicator, utils.ReplicatorSv1RemoveAccount, args, reply)
 }
@@ -361,11 +266,6 @@ func (dS *DispatcherService) ReplicatorSv1RemoveActionProfile(ctx *context.Conte
 	if args != nil {
 		opts = args.APIOpts
 	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.ReplicatorSv1RemoveActionProfile, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaReplicator, utils.ReplicatorSv1RemoveActionProfile, args, reply)
 }
 func (dS *DispatcherService) ReplicatorSv1RemoveAttributeProfile(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *string) (err error) {
@@ -377,11 +277,6 @@ func (dS *DispatcherService) ReplicatorSv1RemoveAttributeProfile(ctx *context.Co
 	opts := make(map[string]interface{})
 	if args != nil {
 		opts = args.APIOpts
-	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.ReplicatorSv1RemoveAttributeProfile, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaReplicator, utils.ReplicatorSv1RemoveAttributeProfile, args, reply)
 }
@@ -395,11 +290,6 @@ func (dS *DispatcherService) ReplicatorSv1RemoveChargerProfile(ctx *context.Cont
 	if args != nil {
 		opts = args.APIOpts
 	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.ReplicatorSv1RemoveChargerProfile, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaReplicator, utils.ReplicatorSv1RemoveChargerProfile, args, reply)
 }
 func (dS *DispatcherService) ReplicatorSv1RemoveDispatcherHost(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *string) (err error) {
@@ -411,11 +301,6 @@ func (dS *DispatcherService) ReplicatorSv1RemoveDispatcherHost(ctx *context.Cont
 	opts := make(map[string]interface{})
 	if args != nil {
 		opts = args.APIOpts
-	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.ReplicatorSv1RemoveDispatcherHost, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaReplicator, utils.ReplicatorSv1RemoveDispatcherHost, args, reply)
 }
@@ -429,11 +314,6 @@ func (dS *DispatcherService) ReplicatorSv1RemoveDispatcherProfile(ctx *context.C
 	if args != nil {
 		opts = args.APIOpts
 	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.ReplicatorSv1RemoveDispatcherProfile, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaReplicator, utils.ReplicatorSv1RemoveDispatcherProfile, args, reply)
 }
 func (dS *DispatcherService) ReplicatorSv1RemoveFilter(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *string) (err error) {
@@ -445,11 +325,6 @@ func (dS *DispatcherService) ReplicatorSv1RemoveFilter(ctx *context.Context, arg
 	opts := make(map[string]interface{})
 	if args != nil {
 		opts = args.APIOpts
-	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.ReplicatorSv1RemoveFilter, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaReplicator, utils.ReplicatorSv1RemoveFilter, args, reply)
 }
@@ -463,11 +338,6 @@ func (dS *DispatcherService) ReplicatorSv1RemoveIndexes(ctx *context.Context, ar
 	if args != nil {
 		opts = args.APIOpts
 	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.ReplicatorSv1RemoveIndexes, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaReplicator, utils.ReplicatorSv1RemoveIndexes, args, reply)
 }
 func (dS *DispatcherService) ReplicatorSv1RemoveRateProfile(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *string) (err error) {
@@ -479,11 +349,6 @@ func (dS *DispatcherService) ReplicatorSv1RemoveRateProfile(ctx *context.Context
 	opts := make(map[string]interface{})
 	if args != nil {
 		opts = args.APIOpts
-	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.ReplicatorSv1RemoveRateProfile, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaReplicator, utils.ReplicatorSv1RemoveRateProfile, args, reply)
 }
@@ -497,11 +362,6 @@ func (dS *DispatcherService) ReplicatorSv1RemoveResource(ctx *context.Context, a
 	if args != nil {
 		opts = args.APIOpts
 	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.ReplicatorSv1RemoveResource, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaReplicator, utils.ReplicatorSv1RemoveResource, args, reply)
 }
 func (dS *DispatcherService) ReplicatorSv1RemoveResourceProfile(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *string) (err error) {
@@ -513,11 +373,6 @@ func (dS *DispatcherService) ReplicatorSv1RemoveResourceProfile(ctx *context.Con
 	opts := make(map[string]interface{})
 	if args != nil {
 		opts = args.APIOpts
-	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.ReplicatorSv1RemoveResourceProfile, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaReplicator, utils.ReplicatorSv1RemoveResourceProfile, args, reply)
 }
@@ -531,11 +386,6 @@ func (dS *DispatcherService) ReplicatorSv1RemoveRouteProfile(ctx *context.Contex
 	if args != nil {
 		opts = args.APIOpts
 	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.ReplicatorSv1RemoveRouteProfile, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaReplicator, utils.ReplicatorSv1RemoveRouteProfile, args, reply)
 }
 func (dS *DispatcherService) ReplicatorSv1RemoveStatQueue(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *string) (err error) {
@@ -547,11 +397,6 @@ func (dS *DispatcherService) ReplicatorSv1RemoveStatQueue(ctx *context.Context, 
 	opts := make(map[string]interface{})
 	if args != nil {
 		opts = args.APIOpts
-	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.ReplicatorSv1RemoveStatQueue, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaReplicator, utils.ReplicatorSv1RemoveStatQueue, args, reply)
 }
@@ -565,11 +410,6 @@ func (dS *DispatcherService) ReplicatorSv1RemoveStatQueueProfile(ctx *context.Co
 	if args != nil {
 		opts = args.APIOpts
 	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.ReplicatorSv1RemoveStatQueueProfile, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaReplicator, utils.ReplicatorSv1RemoveStatQueueProfile, args, reply)
 }
 func (dS *DispatcherService) ReplicatorSv1RemoveThreshold(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *string) (err error) {
@@ -581,11 +421,6 @@ func (dS *DispatcherService) ReplicatorSv1RemoveThreshold(ctx *context.Context, 
 	opts := make(map[string]interface{})
 	if args != nil {
 		opts = args.APIOpts
-	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.ReplicatorSv1RemoveThreshold, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaReplicator, utils.ReplicatorSv1RemoveThreshold, args, reply)
 }
@@ -599,11 +434,6 @@ func (dS *DispatcherService) ReplicatorSv1RemoveThresholdProfile(ctx *context.Co
 	if args != nil {
 		opts = args.APIOpts
 	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.ReplicatorSv1RemoveThresholdProfile, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaReplicator, utils.ReplicatorSv1RemoveThresholdProfile, args, reply)
 }
 func (dS *DispatcherService) ReplicatorSv1SetAccount(ctx *context.Context, args *utils.AccountWithAPIOpts, reply *string) (err error) {
@@ -615,11 +445,6 @@ func (dS *DispatcherService) ReplicatorSv1SetAccount(ctx *context.Context, args 
 	opts := make(map[string]interface{})
 	if args != nil {
 		opts = args.APIOpts
-	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.ReplicatorSv1SetAccount, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaReplicator, utils.ReplicatorSv1SetAccount, args, reply)
 }
@@ -633,11 +458,6 @@ func (dS *DispatcherService) ReplicatorSv1SetActionProfile(ctx *context.Context,
 	if args != nil {
 		opts = args.APIOpts
 	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.ReplicatorSv1SetActionProfile, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaReplicator, utils.ReplicatorSv1SetActionProfile, args, reply)
 }
 func (dS *DispatcherService) ReplicatorSv1SetAttributeProfile(ctx *context.Context, args *engine.AttributeProfileWithAPIOpts, reply *string) (err error) {
@@ -649,11 +469,6 @@ func (dS *DispatcherService) ReplicatorSv1SetAttributeProfile(ctx *context.Conte
 	opts := make(map[string]interface{})
 	if args != nil {
 		opts = args.APIOpts
-	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.ReplicatorSv1SetAttributeProfile, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaReplicator, utils.ReplicatorSv1SetAttributeProfile, args, reply)
 }
@@ -667,11 +482,6 @@ func (dS *DispatcherService) ReplicatorSv1SetChargerProfile(ctx *context.Context
 	if args != nil {
 		opts = args.APIOpts
 	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.ReplicatorSv1SetChargerProfile, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaReplicator, utils.ReplicatorSv1SetChargerProfile, args, reply)
 }
 func (dS *DispatcherService) ReplicatorSv1SetDispatcherHost(ctx *context.Context, args *engine.DispatcherHostWithAPIOpts, reply *string) (err error) {
@@ -683,11 +493,6 @@ func (dS *DispatcherService) ReplicatorSv1SetDispatcherHost(ctx *context.Context
 	opts := make(map[string]interface{})
 	if args != nil {
 		opts = args.APIOpts
-	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.ReplicatorSv1SetDispatcherHost, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaReplicator, utils.ReplicatorSv1SetDispatcherHost, args, reply)
 }
@@ -701,11 +506,6 @@ func (dS *DispatcherService) ReplicatorSv1SetDispatcherProfile(ctx *context.Cont
 	if args != nil {
 		opts = args.APIOpts
 	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.ReplicatorSv1SetDispatcherProfile, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaReplicator, utils.ReplicatorSv1SetDispatcherProfile, args, reply)
 }
 func (dS *DispatcherService) ReplicatorSv1SetFilter(ctx *context.Context, args *engine.FilterWithAPIOpts, reply *string) (err error) {
@@ -717,11 +517,6 @@ func (dS *DispatcherService) ReplicatorSv1SetFilter(ctx *context.Context, args *
 	opts := make(map[string]interface{})
 	if args != nil {
 		opts = args.APIOpts
-	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.ReplicatorSv1SetFilter, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaReplicator, utils.ReplicatorSv1SetFilter, args, reply)
 }
@@ -735,11 +530,6 @@ func (dS *DispatcherService) ReplicatorSv1SetIndexes(ctx *context.Context, args 
 	if args != nil {
 		opts = args.APIOpts
 	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.ReplicatorSv1SetIndexes, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaReplicator, utils.ReplicatorSv1SetIndexes, args, reply)
 }
 func (dS *DispatcherService) ReplicatorSv1SetLoadIDs(ctx *context.Context, args *utils.LoadIDsWithAPIOpts, reply *string) (err error) {
@@ -751,11 +541,6 @@ func (dS *DispatcherService) ReplicatorSv1SetLoadIDs(ctx *context.Context, args 
 	opts := make(map[string]interface{})
 	if args != nil {
 		opts = args.APIOpts
-	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.ReplicatorSv1SetLoadIDs, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaReplicator, utils.ReplicatorSv1SetLoadIDs, args, reply)
 }
@@ -769,11 +554,6 @@ func (dS *DispatcherService) ReplicatorSv1SetRateProfile(ctx *context.Context, a
 	if args != nil {
 		opts = args.APIOpts
 	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.ReplicatorSv1SetRateProfile, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaReplicator, utils.ReplicatorSv1SetRateProfile, args, reply)
 }
 func (dS *DispatcherService) ReplicatorSv1SetResource(ctx *context.Context, args *engine.ResourceWithAPIOpts, reply *string) (err error) {
@@ -785,11 +565,6 @@ func (dS *DispatcherService) ReplicatorSv1SetResource(ctx *context.Context, args
 	opts := make(map[string]interface{})
 	if args != nil {
 		opts = args.APIOpts
-	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.ReplicatorSv1SetResource, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaReplicator, utils.ReplicatorSv1SetResource, args, reply)
 }
@@ -803,11 +578,6 @@ func (dS *DispatcherService) ReplicatorSv1SetResourceProfile(ctx *context.Contex
 	if args != nil {
 		opts = args.APIOpts
 	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.ReplicatorSv1SetResourceProfile, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaReplicator, utils.ReplicatorSv1SetResourceProfile, args, reply)
 }
 func (dS *DispatcherService) ReplicatorSv1SetRouteProfile(ctx *context.Context, args *engine.RouteProfileWithAPIOpts, reply *string) (err error) {
@@ -820,11 +590,6 @@ func (dS *DispatcherService) ReplicatorSv1SetRouteProfile(ctx *context.Context, 
 	if args != nil {
 		opts = args.APIOpts
 	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.ReplicatorSv1SetRouteProfile, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaReplicator, utils.ReplicatorSv1SetRouteProfile, args, reply)
 }
 func (dS *DispatcherService) ReplicatorSv1SetStatQueue(ctx *context.Context, args *engine.StatQueueWithAPIOpts, reply *string) (err error) {
@@ -833,11 +598,6 @@ func (dS *DispatcherService) ReplicatorSv1SetStatQueue(ctx *context.Context, arg
 	opts := make(map[string]interface{})
 	if args != nil {
 		opts = args.APIOpts
-	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.ReplicatorSv1SetStatQueue, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaReplicator, utils.ReplicatorSv1SetStatQueue, args, reply)
 }
@@ -851,11 +611,6 @@ func (dS *DispatcherService) ReplicatorSv1SetStatQueueProfile(ctx *context.Conte
 	if args != nil {
 		opts = args.APIOpts
 	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.ReplicatorSv1SetStatQueueProfile, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaReplicator, utils.ReplicatorSv1SetStatQueueProfile, args, reply)
 }
 func (dS *DispatcherService) ReplicatorSv1SetThreshold(ctx *context.Context, args *engine.ThresholdWithAPIOpts, reply *string) (err error) {
@@ -868,11 +623,6 @@ func (dS *DispatcherService) ReplicatorSv1SetThreshold(ctx *context.Context, arg
 	if args != nil {
 		opts = args.APIOpts
 	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.ReplicatorSv1SetThreshold, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaReplicator, utils.ReplicatorSv1SetThreshold, args, reply)
 }
 func (dS *DispatcherService) ReplicatorSv1SetThresholdProfile(ctx *context.Context, args *engine.ThresholdProfileWithAPIOpts, reply *string) (err error) {
@@ -884,11 +634,6 @@ func (dS *DispatcherService) ReplicatorSv1SetThresholdProfile(ctx *context.Conte
 	opts := make(map[string]interface{})
 	if args != nil {
 		opts = args.APIOpts
-	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.ReplicatorSv1SetThresholdProfile, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaReplicator, utils.ReplicatorSv1SetThresholdProfile, args, reply)
 }

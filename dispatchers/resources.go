@@ -38,11 +38,6 @@ func (dS *DispatcherService) ResourceSv1AllocateResources(ctx *context.Context, 
 	if args != nil {
 		opts = args.APIOpts
 	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.ResourceSv1AllocateResources, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaResources, utils.ResourceSv1AllocateResources, args, reply)
 }
 func (dS *DispatcherService) ResourceSv1AuthorizeResources(ctx *context.Context, args *utils.CGREvent, reply *string) (err error) {
@@ -58,11 +53,6 @@ func (dS *DispatcherService) ResourceSv1AuthorizeResources(ctx *context.Context,
 	if args != nil {
 		opts = args.APIOpts
 	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.ResourceSv1AuthorizeResources, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaResources, utils.ResourceSv1AuthorizeResources, args, reply)
 }
 func (dS *DispatcherService) ResourceSv1GetResource(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *engine.Resource) (err error) {
@@ -75,11 +65,6 @@ func (dS *DispatcherService) ResourceSv1GetResource(ctx *context.Context, args *
 	if args != nil {
 		opts = args.APIOpts
 	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.ResourceSv1GetResource, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaResources, utils.ResourceSv1GetResource, args, reply)
 }
 func (dS *DispatcherService) ResourceSv1GetResourceWithConfig(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *engine.ResourceWithConfig) (err error) {
@@ -91,11 +76,6 @@ func (dS *DispatcherService) ResourceSv1GetResourceWithConfig(ctx *context.Conte
 	opts := make(map[string]interface{})
 	if args != nil {
 		opts = args.APIOpts
-	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.ResourceSv1GetResourceWithConfig, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaResources, utils.ResourceSv1GetResourceWithConfig, args, reply)
 }
@@ -112,11 +92,6 @@ func (dS *DispatcherService) ResourceSv1GetResourcesForEvent(ctx *context.Contex
 	if args != nil {
 		opts = args.APIOpts
 	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.ResourceSv1GetResourcesForEvent, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaResources, utils.ResourceSv1GetResourcesForEvent, args, reply)
 }
 func (dS *DispatcherService) ResourceSv1Ping(ctx *context.Context, args *utils.CGREvent, reply *string) (err error) {
@@ -132,11 +107,6 @@ func (dS *DispatcherService) ResourceSv1Ping(ctx *context.Context, args *utils.C
 	if args != nil {
 		opts = args.APIOpts
 	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.ResourceSv1Ping, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaResources, utils.ResourceSv1Ping, args, reply)
 }
 func (dS *DispatcherService) ResourceSv1ReleaseResources(ctx *context.Context, args *utils.CGREvent, reply *string) (err error) {
@@ -151,11 +121,6 @@ func (dS *DispatcherService) ResourceSv1ReleaseResources(ctx *context.Context, a
 	opts := make(map[string]interface{})
 	if args != nil {
 		opts = args.APIOpts
-	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.ResourceSv1ReleaseResources, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaResources, utils.ResourceSv1ReleaseResources, args, reply)
 }
