@@ -162,14 +162,7 @@ func (dS *DispatcherService) dispatcherProfilesForEvent(ctx *context.Context, tn
 // Dispatch is the method forwarding the request towards the right connection
 func (dS *DispatcherService) Dispatch(ctx *context.Context, ev *utils.CGREvent, subsys string,
 	serviceMethod string, args, reply interface{}) (err error) {
-	// fix missing tenant
 	tnt := ev.Tenant
-	if tnt == utils.EmptyString {
-		tnt = dS.cfg.GeneralCfg().DefaultTenant
-	}
-	if ev.APIOpts == nil {
-		ev.APIOpts = make(map[string]interface{})
-	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(ctx, serviceMethod, tnt, utils.IfaceAsString(ev.APIOpts[utils.OptsAPIKey])); err != nil {
 			return
@@ -183,7 +176,6 @@ func (dS *DispatcherService) Dispatch(ctx *context.Context, ev *utils.CGREvent, 
 			utils.MetaMethod: serviceMethod,
 		},
 	}
-
 	dspLoopAPIOpts := map[string]interface{}{
 		utils.MetaSubsys: utils.MetaDispatchers,
 		utils.MetaNodeID: dS.cfg.GeneralCfg().NodeID,
