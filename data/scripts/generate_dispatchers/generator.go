@@ -40,11 +40,13 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/ees"
+	"github.com/cgrates/cgrates/efs"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/loaders"
 	"github.com/cgrates/cgrates/rates"
 	"github.com/cgrates/cgrates/sessions"
+	"github.com/cgrates/cgrates/tpes"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -77,6 +79,8 @@ func main() {
 		{"admins.go", "MetaAdminS", new(apis.AdminSv1), utils.EmptyString},
 		{"cores.go", "MetaCore", new(cores.CoreS), utils.EmptyString},
 		{"guardian.go", "MetaGuardian", guardian.Guardian, utils.GuardianS},
+		{"efs.go", "MetaEFs", new(efs.EfS), utils.EmptyString},
+		{"tpes.go", "MetaTpes", new(tpes.TPeS), utils.EmptyString},
 		// {"servicemanager.go", "MetaServiceManager", new(servmanager.ServiceManager), utils.EmptyString},
 	} {
 		if err := createFile(file.path, file.subsystem, file.customName, file.obj); err != nil {
