@@ -83,7 +83,7 @@ information, please see the [`CONTRIBUTING.md`](CONTRIBUTING.md) file.
 | @nickolasdaniel | Filip Nickolas Daniel |
 | @JeremyC-AU | Jeremy Chequer |
 | @nickvsnetworking | Nick Jones |
-
+| @Eda91 | Edlira Eltari |
 <!-- to sign, include a single line above this comment containing the following text:
 | @username | First Last |
 -->
