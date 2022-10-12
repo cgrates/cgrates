@@ -1276,6 +1276,7 @@ const (
 // EfSv1 APIs
 const (
 	EfSv1             = "EfSv1"
+	EfSv1Ping         = "EfSv1.Ping"
 	EfSv1ProcessEvent = "EfSv1.ProcessEvent"
 	EfSv1ReplayEvents = "EfSv1.ReplayEvents"
 )
