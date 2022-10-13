@@ -1,0 +1,110 @@
+{
+
+    "general": {
+        "log_level": 7
+    },
+    
+    "data_db": {								
+        "db_type": "redis",						
+        "db_port": 6379, 						
+        "db_name": "10" 						
+    },
+  
+    "attributes": {
+      "enabled": true
+    },
+    
+    "loaders": [
+        {
+            "id": "*default",
+            "enabled": true,
+            "tenant": "cgrates.org",
+            "tp_in_dir": "/tmp/TestDataConverter/in",
+            "tp_out_dir": ""
+        },
+        {
+            "id": "remove",
+            "action": "*remove",
+            "enabled": true,
+            "tenant": "cgrates.org",
+            "tp_in_dir": "/tmp/TestDataConverter/in",
+            "tp_out_dir": "",
+            "data":[											
+            {
+                "type": "*attributes",						
+                "file_name": "Attributes.csv",				
+                "fields": [{"tag": "BaseTmpl","type": "*template", "value": "baseTmpl"}]
+            },
+            {
+                "type": "*resources",						
+                "file_name": "Resources.csv",				
+                "fields": [{"tag": "BaseTmpl","type": "*template", "value": "baseTmpl"}]
+            },
+            {
+                "type": "*stats",						
+                "file_name": "Stats.csv",				
+                "fields": [{"tag": "BaseTmpl","type": "*template", "value": "baseTmpl"}]
+            },
+            {
+                "type": "*thresholds",						
+                "file_name": "Thresholds.csv",				
+                "fields": [{"tag": "BaseTmpl","type": "*template", "value": "baseTmpl"}]
+            },
+            {
+                "type": "*routes",						
+                "file_name": "Routes.csv",				
+                "fields": [{"tag": "BaseTmpl","type": "*template", "value": "baseTmpl"}]
+            },
+            {
+                "type": "*chargers",						
+                "file_name": "Chargers.csv",				
+                "fields": [{"tag": "BaseTmpl","type": "*template", "value": "baseTmpl"}]
+            },
+            {
+                "type": "*dispatchers",						
+                "file_name": "DispatcherProfiles.csv",		
+                "fields": [{"tag": "BaseTmpl","type": "*template", "value": "baseTmpl"}]
+            },
+            {
+                "type": "*dispatcher_hosts",						
+                "file_name": "DispatcherHosts.csv",					
+                "fields": [
+                    {"tag": "BaseTmpl","type": "*template", "value": "baseTmpl"}
+                ]
+            },
+            {
+                "type": "*rate_profiles",						
+                "file_name": "Rates.csv",				
+                "fields": [{"tag": "BaseTmpl","type": "*template", "value": "baseTmpl"}]
+            },
+            {
+                "type": "*action_profiles",						
+                "file_name": "Actions.csv",				
+                "fields": [{"tag": "BaseTmpl","type": "*template", "value": "baseTmpl"}]
+            },
+            {
+                "type": "*accounts",						
+                "file_name": "Accounts.csv",				
+                "fields": [{"tag": "BaseTmpl","type": "*template", "value": "baseTmpl"}]
+            },
+            {
+                "type": "*filters",						
+                "file_name": "Filters.csv",				
+                "fields": [{"tag": "BaseTmpl","type": "*template", "value": "baseTmpl"}]
+            }
+          ]
+        }
+    ],
+    
+    "templates": {
+        "baseTmpl": [
+            {"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
+            {"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true} 
+        ]
+    },
+    
+    "admins": {
+        "enabled": true
+    }
+
+}
