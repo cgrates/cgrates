@@ -1,63 +1,51 @@
 {
 
-    "general": {
-        "node_id": "HOST2",
-        "log_level": 7
-    },
-        
-    
-    "listen": {
-        "rpc_json": ":4012",			
-        "rpc_gob": ":4013",			
-        "http": ":4080"			
-    },
+"general": {
+    "node_id": "HOST2",
+    "log_level": 7
+},   
 
-    "data_db": {								
-	    "db_type": "redis",						
-	    "db_port": 6379, 						
-	    "db_name": "10"						
-    },
+"listen": {
+    "rpc_json": ":4012",			
+    "rpc_gob": ":4013",			
+    "http": ":4080"			
+},
 
-    "stor_db": {
-        "db_password": "CGRateS.org"
-    },
-      
-    
-    "dispatchers":{
-        "enabled": true,
-        "prevent_loop": true
-	},
-    
-    "caches":{
-        "partitions": {
-            "*dispatcher_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":true, "replicate": false}, 
-            "*dispatcher_routes": {"limit": -1, "ttl": "", "static_ttl": false, "remote":true, "replicate": false}, 						// control dispatcher routes caching
-            "*dispatchers": {"limit": -1, "ttl": "", "static_ttl": false, "remote":true, "replicate": false}								// control dispatcher interface
-        },
-        "remote_conns": ["gob_cache"]					
-    },
-    
+"data_db": {								
+    "db_type": "redis",						
+    "db_port": 6379, 						
+    "db_name": "10"						
+},
 
-    "apiers": {
-        "enabled": true
-        // "caches_conns":["broadcast_cache"]
-    },
+"stor_db": {
+    "db_password": "CGRateS.org"
+},
     
-    "rpc_conns": {
-        "gob_cache": {
-            "strategy": "*first",
-            "conns": [
-                {"address": "127.0.0.1:4013", "transport":"*gob"}
-            ]
-        }
-    //     "broadcast_cache": {
-    //         "strategy": "*broadcast",
-    //         "conns": [
-    //             {"address": "127.0.0.1:2012", "transport":"*json"},
-    //             {"address": "127.0.0.1:4012", "transport":"*json"},
-    //             {"address": "127.0.0.1:6012", "transport":"*json"}
-    //         ]
-    //     }
+"dispatchers":{
+    "enabled": true,
+    "prevent_loop": true
+},
+
+"caches":{
+    "partitions": {
+        "*dispatcher_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":true, "replicate": false}, 
+        "*dispatcher_routes": {"limit": -1, "ttl": "", "static_ttl": false, "remote":true, "replicate": false}, 						
+        "*dispatchers": {"limit": -1, "ttl": "", "static_ttl": false, "remote":true, "replicate": false}							
+    },
+    "remote_conns": ["gob_cache"]					
+},
+
+"apiers": {
+    "enabled": true
+},
+
+"rpc_conns": {
+    "gob_cache": {
+        "strategy": "*first",
+        "conns": [
+            {"address": "127.0.0.1:4013", "transport":"*gob"}
+        ]
     }
+}
     
 }
