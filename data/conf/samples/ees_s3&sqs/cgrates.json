@@ -1,73 +1,75 @@
 {
-    "general": {
-        "log_level": 7,
-        "poster_attempts": 2,
-        "failed_posts_ttl": "1s"
-    },
-    
-    "data_db": {
-        "db_type": "*internal"
-    },
-    
-    
-    "stor_db": {
-        "db_type": "*internal"
-    },
-    
-    "ees": {
-        "enabled": true,
-        "exporters": [
-            {
-                "id": "sqs_test_file",
-                "type": "*sqs_json_map",
-                "export_path": "https://sqs.eu-central-1.amazonaws.com/?awsRegion=eu-central-1&awsKey=AKIAYPZSIYZCZ5U45KEO&awsSecret=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",
-                "opts": {
-                    "awsRegion": "eu-central-1",
-                    "awsKey": "AKIAYPZSIYZCZ5U45KEO",
-                    "awsSecret": "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",
-                    "sqsQueueID": "testQueue"
-                },
-                "attempts": 1,
-                "failed_posts_dir": "/var/spool/cgrates/failed_posts2",
-                "synchronous": true,
-                "fields":[
-                    {"tag": "RequiredTemplate","type": "*template", "value": "requiredFields"}
-                ]
+
+"general": {
+    "log_level": 7,
+    "poster_attempts": 2,
+    "failed_posts_ttl": "1s"
+},
+
+"data_db": {
+    "db_type": "*internal"
+},
+
+
+"stor_db": {
+    "db_type": "*internal"
+},
+
+"ees": {
+    "enabled": true,
+    "exporters": [
+        {
+            "id": "sqs_test_file",
+            "type": "*sqs_json_map",
+            "export_path": "https://sqs.eu-central-1.amazonaws.com/?awsRegion=eu-central-1&awsKey=AKIAYPZSIYZCZ5U45KEO&awsSecret=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",
+            "opts": {
+                "awsRegion": "eu-central-1",
+                "awsKey": "AKIAYPZSIYZCZ5U45KEO",
+                "awsSecret": "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",
+                "sqsQueueID": "testQueue"
             },
-            {
-                "id": "s3_test_file",
-                "type": "*s3_json_map",
-                "export_path": "https://s3.eu-central-1.amazonaws.com/?awsRegion=eu-central-1&awsKey=AKIAYPZSIYZCZ5U45KEO&awsSecret=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",
-                "opts": {
-                    "awsRegion": "eu-central-1",
-                    "awsKey": "AKIAYPZSIYZCZ5U45KEO",
-                    "awsSecret": "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",
-                    "s3BucketID": "cgrates-cdrs"
-                },
-                "attempts": 1,
-                "failed_posts_dir": "/var/spool/cgrates/failed_posts2",
-                "synchronous": true,
-                "fields":[
-                    {"tag": "RequiredTemplate","type": "*template", "value": "requiredFields"}
-                ]
-            }
-        ]
-    },
+            "attempts": 1,
+            "failed_posts_dir": "/var/spool/cgrates/failed_posts2",
+            "synchronous": true,
+            "fields":[
+                {"tag": "RequiredTemplate","type": "*template", "value": "requiredFields"}
+            ]
+        },
+        {
+            "id": "s3_test_file",
+            "type": "*s3_json_map",
+            "export_path": "https://s3.eu-central-1.amazonaws.com/?awsRegion=eu-central-1&awsKey=AKIAYPZSIYZCZ5U45KEO&awsSecret=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",
+            "opts": {
+                "awsRegion": "eu-central-1",
+                "awsKey": "AKIAYPZSIYZCZ5U45KEO",
+                "awsSecret": "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",
+                "s3BucketID": "cgrates-cdrs"
+            },
+            "attempts": 1,
+            "failed_posts_dir": "/var/spool/cgrates/failed_posts2",
+            "synchronous": true,
+            "fields":[
+                {"tag": "RequiredTemplate","type": "*template", "value": "requiredFields"}
+            ]
+        }
+    ]
+},
+
+
+"templates": {
+    "requiredFields": [
+        {"tag": "CGRID", "path": "*exp.CGRID", "type": "*variable", "value": "~*req.CGRID"},
+        {"tag": "RunID", "path": "*exp.RunID", "type": "*variable", "value": "~*req.RunID"},
+        {"tag": "ToR", "path": "*exp.ToR", "type": "*variable", "value": "~*req.ToR"},
+        {"tag": "OriginID", "path": "*exp.OriginID", "type": "*variable", "value": "~*req.OriginID"},
+        {"tag": "RequestType", "path": "*exp.RequestType", "type": "*variable", "value": "~*req.RequestType"},
+        {"tag": "Tenant", "path": "*exp.Tenant", "type": "*variable", "value": "~*req.Tenant"},
+        {"tag": "Category", "path": "*exp.Category", "type": "*variable", "value": "~*req.Category"},
+        {"tag": "Account", "path": "*exp.Account", "type": "*variable", "value": "~*req.Account"},
+        {"tag": "Subject", "path": "*exp.Subject", "type": "*variable", "value": "~*req.Subject"},
+        {"tag": "Destination", "path": "*exp.Destination", "type": "*variable", "value": "~*req.Destination"},
+        {"tag": "OrderID", "path": "*exp.OrderID", "type": "*variable", "value": "~*req.OrderID","filter":"*string:~*opts.AddOrderID:true"}
+    ]
+} 
     
-    
-    "templates": {
-        "requiredFields": [
-            {"tag": "CGRID", "path": "*exp.CGRID", "type": "*variable", "value": "~*req.CGRID"},
-            {"tag": "RunID", "path": "*exp.RunID", "type": "*variable", "value": "~*req.RunID"},
-            {"tag": "ToR", "path": "*exp.ToR", "type": "*variable", "value": "~*req.ToR"},
-            {"tag": "OriginID", "path": "*exp.OriginID", "type": "*variable", "value": "~*req.OriginID"},
-            {"tag": "RequestType", "path": "*exp.RequestType", "type": "*variable", "value": "~*req.RequestType"},
-            {"tag": "Tenant", "path": "*exp.Tenant", "type": "*variable", "value": "~*req.Tenant"},
-            {"tag": "Category", "path": "*exp.Category", "type": "*variable", "value": "~*req.Category"},
-            {"tag": "Account", "path": "*exp.Account", "type": "*variable", "value": "~*req.Account"},
-            {"tag": "Subject", "path": "*exp.Subject", "type": "*variable", "value": "~*req.Subject"},
-            {"tag": "Destination", "path": "*exp.Destination", "type": "*variable", "value": "~*req.Destination"},
-            {"tag": "OrderID", "path": "*exp.OrderID", "type": "*variable", "value": "~*req.OrderID","filter":"*string:~*opts.AddOrderID:true"}
-        ]
-    }  
 }

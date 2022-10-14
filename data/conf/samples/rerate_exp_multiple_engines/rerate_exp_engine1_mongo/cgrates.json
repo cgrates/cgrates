@@ -1,82 +1,81 @@
 {
-    "general": {
-        "log_level": 7,
-        "reply_timeout": "50s"
-    },
     
-    
-    "listen": {
-        "rpc_json": ":2012",
-        "rpc_gob": ":2013",
-        "http": ":2080"
-    },
-    
-    "data_db": {
-        "db_type": "mongo",
-        "db_name": "10",
-        "db_port": 27017
-    },
-    
-    
-    "stor_db": {
-        "db_type": "mongo",
-        "db_name": "cgrates",
-        "db_port": 27017
-    },
-    
-    "ees": {
-        "enabled": true,
-        "exporters": [
-            {
-                "id": "toNg2",
-                "type": "*rpc",
-                "opts": {
-                    "rpcCodec": "*json", 
-                    "connIDs": ["rplConn"],
-                    "serviceMethod": "CDRsV1.ProcessEvent", 
-                    "keyPath": "" ,
-                    "certPath": "", 
-                    "caPath": "",  
-                    "tls": false, 
-                    "rpcConnTimeout" : "1s", 
-                    "rpcReplyTimeout":"5s",
-                    "rpcAPIOpts": {
-                        "*ralS": false
-                    }
+"general": {
+    "log_level": 7,
+    "reply_timeout": "50s"
+},
+
+"listen": {
+    "rpc_json": ":2012",
+    "rpc_gob": ":2013",
+    "http": ":2080"
+},
+
+"data_db": {
+    "db_type": "mongo",
+    "db_name": "10",
+    "db_port": 27017
+},
+
+"stor_db": {
+    "db_type": "mongo",
+    "db_name": "cgrates",
+    "db_port": 27017
+},
+
+"ees": {
+    "enabled": true,
+    "exporters": [
+        {
+            "id": "toNg2",
+            "type": "*rpc",
+            "opts": {
+                "rpcCodec": "*json", 
+                "connIDs": ["rplConn"],
+                "serviceMethod": "CDRsV1.ProcessEvent", 
+                "keyPath": "" ,
+                "certPath": "", 
+                "caPath": "",  
+                "tls": false, 
+                "rpcConnTimeout" : "1s", 
+                "rpcReplyTimeout":"5s",
+                "rpcAPIOpts": {
+                    "*ralS": false
                 }
             }
-        ]
-    },
-    
-
-    "rpc_conns": {
-        "rplConn": {
-            "strategy": "*broadcast_sync",
-            "conns": [{"address": "127.0.0.1:22012", "transport": "*json"}]
         }
-    },
+    ]
+},
 
-    "rals": {
-        "enabled": true,
-        "max_increments":3000000
-    },
-    
-    "cdrs": {
-        "enabled": true,
-        "rals_conns": ["*localhost"],
-        "store_cdrs": false,
-        "online_cdr_exports": ["toNg2"],
-        "ees_conns": ["*localhost"]
-    },
-
-    "sessions": {
-        "enabled": true,
-        "rals_conns": ["*localhost"],
-        "cdrs_conns": ["*localhost"],
-        "replication_conns": ["rplConn"]
-    },
-    
-    "apiers": {
-        "enabled": true
+"rpc_conns": {
+    "rplConn": {
+        "strategy": "*broadcast_sync",
+        "conns": [{"address": "127.0.0.1:22012", "transport": "*json"}]
     }
+},
+
+"rals": {
+    "enabled": true,
+    "max_increments":3000000
+},
+
+"cdrs": {
+    "enabled": true,
+    "rals_conns": ["*localhost"],
+    "store_cdrs": false,
+    "online_cdr_exports": ["toNg2"],
+    "ees_conns": ["*localhost"]
+},
+
+"sessions": {
+    "enabled": true,
+    "rals_conns": ["*localhost"],
+    "cdrs_conns": ["*localhost"],
+    "replication_conns": ["rplConn"]
+},
+
+"apiers": {
+    "enabled": true
+}
+
 }
