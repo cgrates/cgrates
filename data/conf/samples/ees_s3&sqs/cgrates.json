@@ -21,11 +21,11 @@
         {
             "id": "sqs_test_file",
             "type": "*sqs_json_map",
-            "export_path": "https://sqs.eu-central-1.amazonaws.com/?awsRegion=eu-central-1&awsKey=AKIAYPZSIYZCZ5U45KEO&awsSecret=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",
+            "export_path": "https://sqs.eu-central-1.amazonaws.com/",
             "opts": {
                 "awsRegion": "eu-central-1",
-                "awsKey": "AKIAYPZSIYZCZ5U45KEO",
-                "awsSecret": "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",
+                "awsKey": "set-using-flags",
+                "awsSecret": "set-using-flags",
                 "sqsQueueID": "testQueue"
             },
             "attempts": 1,
@@ -38,11 +38,11 @@
         {
             "id": "s3_test_file",
             "type": "*s3_json_map",
-            "export_path": "https://s3.eu-central-1.amazonaws.com/?awsRegion=eu-central-1&awsKey=AKIAYPZSIYZCZ5U45KEO&awsSecret=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",
+            "export_path": "https://s3.eu-central-1.amazonaws.com/",
             "opts": {
                 "awsRegion": "eu-central-1",
-                "awsKey": "AKIAYPZSIYZCZ5U45KEO",
-                "awsSecret": "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",
+                "awsKey": "set-using-flags",
+                "awsSecret": "set-using-flags",
                 "s3BucketID": "cgrates-cdrs"
             },
             "attempts": 1,
