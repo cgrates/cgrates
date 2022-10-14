@@ -953,6 +953,23 @@ func (dS *DispatcherCoreSv1) Panic(args *utils.PanicMessageArgs, reply *string) 
 	return dS.dS.CoreSv1Panic(args, reply)
 }
 
+// DispatcherCoreSv1 exports RPC from CoreSv1
+type DispatcherEeSv1 struct {
+	dS *dispatchers.DispatcherService
+}
+
+func NewDispatcherEeSv1(dps *dispatchers.DispatcherService) *DispatcherEeSv1 {
+	return &DispatcherEeSv1{dS: dps}
+}
+
+func (dS *DispatcherEeSv1) Ping(args *utils.CGREvent, reply *string) error {
+	return dS.dS.EeSv1Ping(args, reply)
+}
+
+func (dS *DispatcherEeSv1) ProcessEvent(args *engine.CGREventWithEeIDs, reply *map[string]map[string]interface{}) error {
+	return dS.dS.EeSv1ProcessEvent(args, reply)
+}
+
 type DispatcherReplicatorSv1 struct {
 	dS *dispatchers.DispatcherService
 }
