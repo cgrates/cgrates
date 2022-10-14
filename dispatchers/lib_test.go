@@ -64,7 +64,7 @@ type testDispatcher struct {
 	cmd     *exec.Cmd
 }
 
-func newTestEngine(t *testing.T, cfgPath string, initDataDB, intitStoreDB bool) (d *testDispatcher) {
+func newTestEngine(t *testing.T, cfgPath string, initDataDB, initStoreDB bool) (d *testDispatcher) {
 	d = new(testDispatcher)
 	d.CfgPath = cfgPath
 	var err error
@@ -78,7 +78,7 @@ func newTestEngine(t *testing.T, cfgPath string, initDataDB, intitStoreDB bool) 
 		d.initDataDb(t)
 	}
 
-	if intitStoreDB {
+	if initStoreDB {
 		d.resetStorDb(t)
 	}
 	d.startEngine(t)
