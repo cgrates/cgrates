@@ -22,6 +22,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package ees
 
 import (
+	"flag"
+	"fmt"
 	"net/rpc"
 	"path"
 	"testing"
@@ -38,6 +40,8 @@ import (
 )
 
 var (
+	awsKey     = flag.String("awsKey", utils.EmptyString, "Access key ID for IAM user")
+	awsSecret  = flag.String("awsSecret", utils.EmptyString, "Secret access key")
 	sqsConfDir string
 	sqsCfgPath string
 	sqsCfg     *config.CGRConfig
@@ -56,6 +60,10 @@ var (
 )
 
 func TestSQSExport(t *testing.T) {
+	if awsKey == nil || *awsKey == utils.EmptyString ||
+		awsSecret == nil || *awsSecret == utils.EmptyString {
+		t.SkipNow()
+	}
 	sqsConfDir = "ees_s3&sqs"
 	for _, stest := range sTestsSQS {
 		t.Run(sqsConfDir, stest)
@@ -67,6 +75,13 @@ func testSQSLoadConfig(t *testing.T) {
 	sqsCfgPath = path.Join(*dataDir, "conf", "samples", sqsConfDir)
 	if sqsCfg, err = config.NewCGRConfigFromPath(sqsCfgPath); err != nil {
 		t.Error(err)
+	}
+	for _, value := range sqsCfg.EEsCfg().Exporters {
+		if value.ID == "sqs_test_file" {
+			value.ExportPath = fmt.Sprintf("https://sqs.eu-central-1.amazonaws.com/?awsRegion=eu-central-1&awsKey=%s&awsSecret=%s", *awsKey, *awsSecret)
+			value.Opts.AWSKey = awsKey
+			value.Opts.AWSSecret = awsSecret
+		}
 	}
 }
 
@@ -132,17 +147,15 @@ func testSQSExportEvent(t *testing.T) {
 }
 
 func testSQSVerifyExport(t *testing.T) {
-	endpoint := "https://sqs.eu-central-1.amazonaws.com/?awsRegion=eu-central-1&awsKey=AKIAYPZSIYZCZ5U45KEO&awsSecret=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"
+	endpoint := fmt.Sprintf("https://sqs.eu-central-1.amazonaws.com/?awsRegion=eu-central-1&awsKey=%s&awsSecret=%s", *awsKey, *awsSecret)
 	region := "eu-central-1"
-	awsKey := "AKIAYPZSIYZCZ5U45KEO"
-	awsSecret := "RIUlDyxh7qpoxSBomGOjymIZqSs/pgdXkW16HlKxt"
 	qname := "testQueue"
 
 	var sess *session.Session
 	cfg := aws.Config{Endpoint: aws.String(endpoint)}
 	cfg.Region = aws.String(region)
 	var err error
-	cfg.Credentials = credentials.NewStaticCredentials(awsKey, awsSecret, "")
+	cfg.Credentials = credentials.NewStaticCredentials(*awsKey, *awsSecret, "")
 	sess, err = session.NewSessionWithOptions(
 		session.Options{
 			Config: cfg,

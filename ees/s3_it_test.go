@@ -22,6 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package ees
 
 import (
+	"fmt"
 	"net/rpc"
 	"path"
 	"testing"
@@ -56,6 +57,10 @@ var (
 )
 
 func TestS3Export(t *testing.T) {
+	if awsKey == nil || *awsKey == utils.EmptyString ||
+		awsSecret == nil || *awsSecret == utils.EmptyString {
+		t.SkipNow()
+	}
 	s3ConfDir = "ees_s3&sqs"
 	for _, stest := range sTestsS3 {
 		t.Run(s3ConfDir, stest)
@@ -67,6 +72,13 @@ func testS3LoadConfig(t *testing.T) {
 	s3CfgPath = path.Join(*dataDir, "conf", "samples", s3ConfDir)
 	if s3Cfg, err = config.NewCGRConfigFromPath(s3CfgPath); err != nil {
 		t.Error(err)
+	}
+	for _, value := range s3Cfg.EEsCfg().Exporters {
+		if value.ID == "sqs_test_file" {
+			value.ExportPath = fmt.Sprintf("https://s3.eu-central-1.amazonaws.com/?awsRegion=eu-central-1&awsKey=%s&awsSecret=%s", *awsKey, *awsSecret)
+			value.Opts.AWSKey = awsKey
+			value.Opts.AWSSecret = awsSecret
+		}
 	}
 }
 
@@ -131,10 +143,8 @@ func testS3ExportEvent(t *testing.T) {
 }
 
 func testS3VerifyExport(t *testing.T) {
-	endpoint := "https://s3.eu-central-1.amazonaws.com/?awsRegion=eu-central-1&awsKey=AKIAYPZSIYZCZ5U45KEO&awsSecret=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"
+	endpoint := fmt.Sprintf("https://s3.eu-central-1.amazonaws.com/?awsRegion=eu-central-1&awsKey=%s&awsSecret=%s", *awsKey, *awsSecret)
 	region := "eu-central-1"
-	awsKey := "AKIAYPZSIYZCZ5U45KEO"
-	awsSecret := "RIUlDyxh7qpoxSBomGOjymIZqSs/pgdXkW16HlKxt"
 	qname := "cgrates-cdrs"
 
 	key := "key"
@@ -143,7 +153,7 @@ func testS3VerifyExport(t *testing.T) {
 	cfg := aws.Config{Endpoint: aws.String(endpoint)}
 	cfg.Region = aws.String(region)
 
-	cfg.Credentials = credentials.NewStaticCredentials(awsKey, awsSecret, "")
+	cfg.Credentials = credentials.NewStaticCredentials(*awsKey, *awsSecret, "")
 	var err error
 	sess, err = session.NewSessionWithOptions(
 		session.Options{
