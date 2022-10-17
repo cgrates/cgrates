@@ -627,3 +627,35 @@ func TestNMAsCGREvent(t *testing.T) {
 		t.Errorf("expecting: %+v, \nreceived: %+v", ToJSON(eEv), ToJSON(cgrEv.Event))
 	}
 }
+
+func TestCGREventRPCClone(t *testing.T) {
+	att := &CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "234",
+		clnb:   false,
+		Time:   TimePointer(time.Date(2013, 12, 30, 15, 0, 1, 0, time.UTC)),
+		Event: map[string]interface{}{
+			"key": "value",
+		},
+		APIOpts: map[string]interface{}{
+			"rand": "we",
+		},
+	}
+
+	if rec, _ := att.RPCClone(); !reflect.DeepEqual(rec, att) {
+		t.Errorf("expected %v and received %v ", ToJSON(att), ToJSON(rec))
+
+	}
+
+	att.SetCloneable(true)
+	if att.clnb != true {
+		t.Error("expected true")
+	}
+	rec, _ := att.RPCClone()
+	att.SetCloneable(false)
+	if !reflect.DeepEqual(rec, att) {
+		t.Errorf("expected %v and received %v ", att, rec)
+
+	}
+
+}

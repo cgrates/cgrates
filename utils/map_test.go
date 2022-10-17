@@ -424,3 +424,133 @@ func TestFlagsWithParamsClone(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", ToJSON(fWp), ToJSON(cln))
 	}
 }
+
+// my test
+func TestStringMapFieldAsInterfaceNotNil(t *testing.T) {
+	sm := StringMap{}
+	fldPath := []string{"first", "second"}
+	if val, _ := sm.FieldAsInterface(fldPath); val != nil {
+		t.Error("expected nil")
+	}
+	sm["first"] = true
+	fldPath = []string{"second"}
+	if val, _ := sm.FieldAsInterface(fldPath); val != nil {
+		t.Error("Should be nil")
+	}
+	fldPath[0] = "first"
+	if _, val := sm.FieldAsInterface(fldPath); val != nil {
+		t.Error("Should not be nil")
+	}
+
+}
+
+func TestStringMapFieldAsString(t *testing.T) {
+	sm := StringMap{}
+	fldPath := []string{"Hello"}
+	if _, val := sm.FieldAsString(fldPath); val == nil {
+		t.Error("Should not  be nil")
+	}
+	sm["first"] = true
+	fldPath[0] = "first"
+	if _, val := sm.FieldAsString(fldPath); val != nil {
+		t.Error("Should  be nil")
+	}
+
+}
+
+func TestStringMapHasKey(t *testing.T) {
+
+	sm := StringMap{"first": true}
+	key := "first"
+	exp := true
+	if v := sm.HasKey(key); v != exp {
+		t.Error("Expected true")
+	}
+	exp = false
+	if v := sm.HasKey(key); v == exp {
+		t.Error("Expected false")
+	}
+
+}
+
+func TestStringMapStringToInt64(t *testing.T) {
+	mymap := map[string]string{
+		"first":  "1",
+		"second": "two",
+	}
+	exp := map[string]int64{
+		"first":  1,
+		"second": 2,
+	}
+
+	if val, _ := MapStringToInt64(mymap); reflect.DeepEqual(val, exp) == true {
+		t.Errorf("expected %v got %v", ToJSON(exp), ToJSON(val))
+
+	}
+	mymap["second"] = "2"
+	if val, _ := MapStringToInt64(mymap); reflect.DeepEqual(val, exp) == false {
+		t.Errorf("expected %v got %v", ToJSON(exp), ToJSON(val))
+
+	}
+
+}
+
+func TestStringMapIsEmpty(t *testing.T) {
+	sm := StringMap{"foo": true}
+	exp := false
+
+	if val := sm.IsEmpty(); val != exp {
+		t.Error("Should be false")
+	}
+}
+
+func TestStringMapFromSlice(t *testing.T) {
+
+	s := []string{"foo", "", "!baz", "bar"}
+	exp := map[string]bool{
+		"foo": true,
+		"baz": false,
+		"bar": true,
+	}
+
+	if val := StringMapFromSlice(s); reflect.DeepEqual(val, exp) {
+
+		t.Errorf("expected %v got %v", ToJSON(exp), ToJSON(val))
+	}
+
+}
+
+func TestStringMapNewStringMap(t *testing.T) {
+	s := []string{"foo", "", "!baz", "bar"}
+	exp := map[string]bool{
+		"foo": true,
+		"baz": false,
+		"bar": true,
+	}
+
+	if val := NewStringMap(s...); reflect.DeepEqual(val, exp) {
+
+		t.Errorf("expected %v got %v", ToJSON(exp), ToJSON(val))
+	}
+}
+
+func TestStringMapMapParse(t *testing.T) {
+	s := MetaZero
+
+	exp := make(StringMap)
+
+	if val := ParseStringMap(s); !reflect.DeepEqual(exp, val) {
+		t.Errorf("expected %v go t %v", ToJSON(exp), ToJSON(val))
+	}
+	s = "foo;!bar;baz"
+
+	exp = StringMap{
+		"foo": true,
+		"bar": false,
+		"baz": true,
+	}
+	if val := ParseStringMap(s); !reflect.DeepEqual(exp, val) {
+		t.Errorf("expected %v got %v", ToJSON(exp), ToJSON(val))
+	}
+
+}
