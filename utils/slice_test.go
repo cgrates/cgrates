@@ -74,3 +74,30 @@ func TestSliceStringToIface(t *testing.T) {
 		t.Errorf("Expected: %s ,received: %s", ToJSON(exp), ToJSON(rply))
 	}
 }
+
+func TestSliceStringEqualDiffLength(t *testing.T) {
+	v1 := []string{"foo", "bar"}
+	v2 := []string{"baz"}
+	if rcv := SliceStringEqual(v1, v2); rcv != false {
+		t.Errorf("expected false ,received : %v", rcv)
+	}
+
+}
+func TestSliceStringEqualElementEqualFalse(t *testing.T) {
+
+	v1 := []string{"foo", "bar"}
+	v2 := []string{"foo", "baz"}
+	if rcv := SliceStringEqual(v1, v2); rcv != false {
+		t.Errorf("expected false ,received : %v", rcv)
+	}
+
+}
+func TestSliceStringEqualTrue(t *testing.T) {
+
+	v1 := []string{"foo", "bar"}
+	v2 := []string{"foo", "bar"}
+	if rcv := SliceStringEqual(v1, v2); rcv != true {
+		t.Errorf("expected false ,received : %v", rcv)
+	}
+
+}
