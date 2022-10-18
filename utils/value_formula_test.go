@@ -289,3 +289,45 @@ func TestValueFormulaCover(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, received)
 	}
 }
+
+func TestValueFieldAsInterface(t *testing.T) {
+	vf := &ValueFormula{}
+	fldPath := make([]string, 0)
+	if val, _ := vf.FieldAsInterface(fldPath); val != nil {
+		t.Errorf("expected error")
+	}
+	fldPath = []string{"test1"}
+	vf = &ValueFormula{
+		Method: "Method",
+		Params: map[string]interface{}{},
+		Static: 22,
+	}
+	if val, _ := vf.FieldAsInterface(fldPath); val != nil {
+		t.Error("expected error")
+	}
+	fldPath = []string{"Method"}
+	if _, err := vf.FieldAsInterface(fldPath); err != nil {
+		t.Errorf("expected %v ", vf.Method)
+	}
+	fldPath = []string{"Method", "second"}
+	if val, _ := vf.FieldAsInterface(fldPath); val != nil {
+		t.Error("expected error")
+	}
+	fldPath = []string{"Static"}
+	if _, err := vf.FieldAsInterface(fldPath); err != nil {
+		t.Errorf("expected %v", vf.Static)
+	}
+	fldPath = []string{"Static", "second"}
+	if val, _ := vf.FieldAsInterface(fldPath); val != nil {
+		t.Error("expected error")
+	}
+	fldPath = []string{"Params"}
+	if _, err := vf.FieldAsInterface(fldPath); err != nil {
+		t.Errorf("expected %v", vf.Params)
+	}
+	fldPath = []string{"Params", "second"}
+	if val, _ := vf.FieldAsInterface(fldPath); val != nil {
+		t.Error("expected error")
+	}
+
+}
