@@ -926,7 +926,7 @@ func TestDispatcherServiceDispatchDspErrHostNotFound(t *testing.T) {
 	}
 	subsys := utils.IfaceAsString(ev.APIOpts[utils.MetaSubsys])
 	err = dss.Dispatch(ev, subsys, "", "", "")
-	expected := "HOST_NOT_FOUND"
+	expected := "DSP_HOST_NOT_FOUND"
 	if err == nil || err.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
 	}
@@ -1146,7 +1146,7 @@ func TestDispatcherServiceDispatchDspErrHostNotFound2(t *testing.T) {
 	}
 	subsys := utils.IfaceAsString(ev.APIOpts[utils.MetaSubsys])
 	err = dss.Dispatch(ev, subsys, "", "", "")
-	expected := "HOST_NOT_FOUND"
+	expected := "DSP_HOST_NOT_FOUND"
 	if err == nil || err.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
 	}

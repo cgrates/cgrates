@@ -2681,7 +2681,7 @@ cgrates.org,REM_DISPATCHERS_1
 	}
 
 	//nothing to remvoe from database
-	if err := ldr.removeContent(utils.MetaDispatchers, utils.EmptyString); err != utils.ErrNotFound {
+	if err := ldr.removeContent(utils.MetaDispatchers, utils.EmptyString); err != utils.ErrDSPProfileNotFound {
 		t.Error(err)
 	}
 
@@ -2772,7 +2772,7 @@ cgrates.org,REM_DISPATCHERH_1
 	}
 
 	//nothing to remove from database
-	if err := ldr.removeContent(utils.MetaDispatcherHosts, utils.EmptyString); err != utils.ErrNotFound {
+	if err := ldr.removeContent(utils.MetaDispatcherHosts, utils.EmptyString); err != utils.ErrDSPHostNotFound {
 		t.Error(err)
 	}
 

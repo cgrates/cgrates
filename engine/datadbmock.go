@@ -40,7 +40,7 @@ type DataDBMock struct {
 	RemStatQueueProfileDrvF   func(tenant, id string) (err error)
 }
 
-//Storage methods
+// Storage methods
 func (dbM *DataDBMock) Close() {}
 
 func (dbM *DataDBMock) Flush(string) error {
@@ -78,7 +78,7 @@ func (dbM *DataDBMock) IsDBEmpty() (resp bool, err error) {
 	return false, utils.ErrNotImplemented
 }
 
-//DataDB methods
+// DataDB methods
 func (dbM *DataDBMock) HasDataDrv(string, string, string) (bool, error) {
 	return false, utils.ErrNotImplemented
 }

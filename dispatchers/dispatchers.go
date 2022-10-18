@@ -160,7 +160,7 @@ func (dS *DispatcherService) dispatcherProfilesForEvent(tnt string, ev *utils.CG
 	for prflID := range prflIDs {
 		prfl, err := dS.dm.GetDispatcherProfile(tnt, prflID, true, true, utils.NonTransactional)
 		if err != nil {
-			if err != utils.ErrNotFound {
+			if err != utils.ErrDSPProfileNotFound {
 				return nil, err
 			}
 			continue

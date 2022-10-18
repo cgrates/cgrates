@@ -492,12 +492,12 @@ func testInternalReplicateITDispatcherProfile(t *testing.T) {
 	var reply string
 	if err := engineOneRPC.Call(utils.APIerSv1GetDispatcherProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "Dsp1"},
-		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		&reply); err == nil || err.Error() != utils.ErrDSPProfileNotFound.Error() {
 		t.Error(err)
 	}
 	if err := engineTwoRPC.Call(utils.APIerSv1GetDispatcherProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "Dsp1"},
-		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		&reply); err == nil || err.Error() != utils.ErrDSPProfileNotFound.Error() {
 		t.Error(err)
 	}
 	// set
@@ -543,16 +543,16 @@ func testInternalReplicateITDispatcherProfile(t *testing.T) {
 	}
 	// remove again
 	if err := internalRPC.Call(utils.APIerSv1RemoveDispatcherProfile,
-		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "Dsp1"}}, &result); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "Dsp1"}}, &result); err == nil || err.Error() != utils.ErrDSPProfileNotFound.Error() {
 		t.Error(err)
 	}
 	// check again
 	if err := engineOneRPC.Call(utils.APIerSv1GetDispatcherProfile,
-		&utils.TenantID{Tenant: "cgrates.org", ID: "Dsp1"}, &dsp); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		&utils.TenantID{Tenant: "cgrates.org", ID: "Dsp1"}, &dsp); err == nil || err.Error() != utils.ErrDSPProfileNotFound.Error() {
 		t.Error(err)
 	}
 	if err := engineTwoRPC.Call(utils.APIerSv1GetDispatcherProfile,
-		&utils.TenantID{Tenant: "cgrates.org", ID: "Dsp1"}, &dsp); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		&utils.TenantID{Tenant: "cgrates.org", ID: "Dsp1"}, &dsp); err == nil || err.Error() != utils.ErrDSPProfileNotFound.Error() {
 		t.Error(err)
 	}
 }
@@ -627,12 +627,12 @@ func testInternalReplicateITDispatcherHost(t *testing.T) {
 	var reply string
 	if err := engineOneRPC.Call(utils.APIerSv1GetDispatcherHost,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "Dsp1"},
-		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		&reply); err == nil || err.Error() != utils.ErrDSPHostNotFound.Error() {
 		t.Error(err)
 	}
 	if err := engineTwoRPC.Call(utils.APIerSv1GetDispatcherHost,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "Dsp1"},
-		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		&reply); err == nil || err.Error() != utils.ErrDSPHostNotFound.Error() {
 		t.Error(err)
 	}
 	dispatcherHost = &engine.DispatcherHostWithAPIOpts{
@@ -679,12 +679,12 @@ func testInternalReplicateITDispatcherHost(t *testing.T) {
 	//check
 	if err := engineOneRPC.Call(utils.APIerSv1GetDispatcherHost,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "DspHst1"},
-		&dsp); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		&dsp); err == nil || err.Error() != utils.ErrDSPHostNotFound.Error() {
 		t.Error(err)
 	}
 	if err := engineTwoRPC.Call(utils.APIerSv1GetDispatcherHost,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "DspHst1"},
-		&dsp); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		&dsp); err == nil || err.Error() != utils.ErrDSPHostNotFound.Error() {
 		t.Error(err)
 	}
 }

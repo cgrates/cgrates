@@ -35,6 +35,10 @@
     "remote_conns": ["gob_cache"]					
 },
 
+"attributes": {
+    "enabled": true,
+},
+
 "apiers": {
     "enabled": true
 },
