@@ -425,7 +425,6 @@ func TestFlagsWithParamsClone(t *testing.T) {
 	}
 }
 
-// my test
 func TestStringMapFieldAsInterfaceNotNil(t *testing.T) {
 	sm := StringMap{}
 	fldPath := []string{"first", "second"}

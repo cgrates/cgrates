@@ -1889,3 +1889,106 @@ func TestIfaceAsTFloat64(t *testing.T) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 }
+
+func TestIfaceAsTInt(t *testing.T) {
+	eInt := 3
+
+	val := interface{}(3)
+
+	if intConvert, err := IfaceAsTInt(val); err != nil {
+
+		t.Error(err)
+	} else if intConvert != eInt {
+		t.Errorf("received %+v", intConvert)
+	}
+	val = interface{}(time.Duration(3))
+
+	if intConvert, err := IfaceAsTInt(val); err != nil {
+
+		t.Error(err)
+	} else if intConvert != eInt {
+		t.Errorf("received %+v ", intConvert)
+	}
+	val = interface{}(int32(3))
+	if intConvert, err := IfaceAsTInt(val); err != nil {
+
+		t.Error(err)
+	} else if intConvert != eInt {
+		t.Errorf("received %+v ", intConvert)
+	}
+	val = interface{}(int64(3))
+
+	if intConvert, err := IfaceAsTInt(val); err != nil {
+		t.Error(err)
+	} else if intConvert != eInt {
+		t.Errorf("received %+v", intConvert)
+	}
+
+	val = interface{}(3.122)
+	if intConvert, err := IfaceAsTInt(val); err != nil {
+		t.Error(err)
+	} else if intConvert != eInt {
+		t.Errorf("received %+v", intConvert)
+	}
+	val = interface{}(float32(3.11))
+	if intConvert, err := IfaceAsTInt(val); err != nil {
+		t.Error(err)
+	} else if intConvert != eInt {
+		t.Errorf("received %+v", intConvert)
+	}
+	val = interface{}("3")
+	if intConvert, err := IfaceAsTInt(val); err != nil {
+
+		t.Error(err)
+	} else if intConvert != eInt {
+		t.Errorf("received %+v", intConvert)
+	}
+	val = interface{}(nil)
+	if _, err := IfaceAsTInt(val); err == nil {
+
+		t.Error("expecting error")
+	}
+}
+
+func TestIfaceStringInterface(t *testing.T) {
+
+	s := ""
+
+	if strItem := StringToInterface(s); strItem != s {
+		t.Error("Return empty")
+	}
+	s = "3"
+
+	if _, ok := StringToInterface(s).(int64); !ok {
+
+		t.Errorf("received type %T", s)
+	}
+	s = "false"
+
+	if _, ok := StringToInterface(s).(bool); !ok {
+
+		t.Errorf("received type  %T ", s)
+	}
+	s = "4.566"
+
+	if _, ok := StringToInterface(s).(float64); !ok {
+
+		t.Errorf("received type %T", s)
+	}
+	s = "*daily"
+
+	if _, ok := StringToInterface(s).(time.Time); !ok {
+		t.Errorf("received %T", s)
+	}
+	s = "3s"
+	if _, ok := StringToInterface(s).(time.Duration); !ok {
+		t.Errorf("received type %T", s)
+	}
+	s = "A string"
+
+	if _, ok := StringToInterface(s).(string); !ok {
+		t.Error("Should return string")
+
+	}
+
+}

@@ -265,3 +265,36 @@ func TestStringSetJoin(t *testing.T) {
 		t.Errorf("Expected %+v, received %+v", ToJSON(expected), ToJSON(rcv))
 	}
 }
+
+func TestStringFieldAsInterface(t *testing.T) {
+	var s StringSet
+	fldPath := []string{"test1", "test2", "test3"}
+	if val, _ := s.FieldAsInterface(fldPath); val != nil {
+		t.Error("expected error")
+	}
+
+	fldPath = []string{"test1"}
+	s = StringSet{
+		"test2": struct{}{},
+	}
+	if val, _ := s.FieldAsInterface(fldPath); val != nil {
+		t.Errorf("expected error")
+	}
+	fldPath = []string{"test2"}
+	if val, err := s.FieldAsInterface(fldPath); err != nil {
+		t.Errorf("expected %v", val)
+	}
+}
+
+func TestStringFieldAsString(t *testing.T) {
+	s := StringSet{}
+	fldPath := []string{"test1"}
+	if _, err := s.FieldAsString(fldPath); err == nil {
+		t.Error("expected error")
+	}
+	exp := "{}"
+	s["test1"] = struct{}{}
+	if _, err := s.FieldAsString(fldPath); err != nil {
+		t.Errorf("expected %v got error", exp)
+	}
+}
