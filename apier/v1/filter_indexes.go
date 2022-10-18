@@ -361,7 +361,7 @@ func (apierSv1 *APIerSv1) ComputeFilterIndexes(args *utils.ArgsComputeFilterInde
 					fltrIDs[i] = fltrID
 				}
 				return &fltrIDs, nil
-			}, nil); err != nil && err != utils.ErrNotFound {
+			}, nil); err != nil && err != utils.ErrDSPProfileNotFound {
 			return utils.APIErrorHandler(err)
 		}
 		args.DispatcherS = indexes.Size() != 0
@@ -570,7 +570,7 @@ func (apierSv1 *APIerSv1) ComputeFilterIndexIDs(args *utils.ArgsComputeFilterInd
 				fltrIDs[i] = fltrID
 			}
 			return &fltrIDs, nil
-		}, nil); err != nil && err != utils.ErrNotFound {
+		}, nil); err != nil && err != utils.ErrDSPProfileNotFound {
 		return utils.APIErrorHandler(err)
 	}
 	if indexes.Size() != 0 {

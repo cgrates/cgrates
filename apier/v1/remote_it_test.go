@@ -603,7 +603,7 @@ func testInternalRemoteITGetDispatcherProfile(t *testing.T) {
 	var reply string
 	if err := internalRPC.Call(utils.APIerSv1GetDispatcherProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "Dsp1"},
-		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		&reply); err == nil || err.Error() != utils.ErrDSPProfileNotFound.Error() {
 		t.Error(err)
 	}
 
@@ -640,7 +640,7 @@ func testInternalRemoteITGetDispatcherHost(t *testing.T) {
 	var reply string
 	if err := internalRPC.Call(utils.APIerSv1GetDispatcherHost,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "Dsp1"},
-		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		&reply); err == nil || err.Error() != utils.ErrDSPHostNotFound.Error() {
 		t.Error(err)
 	}
 

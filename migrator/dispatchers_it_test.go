@@ -212,7 +212,7 @@ func testDspITMigrateAndMove(t *testing.T) {
 
 	_, err = dspMigrator.dmOut.DataManager().GetDispatcherProfile("cgrates.org",
 		"Dsp1", false, false, utils.NonTransactional)
-	if err != utils.ErrNotFound {
+	if err != utils.ErrDSPProfileNotFound {
 		t.Error(err)
 	}
 
@@ -244,7 +244,7 @@ func testDspITMigrateAndMove(t *testing.T) {
 	}
 	resultHost, err = dspMigrator.dmIN.DataManager().GetDispatcherHost("cgrates.org",
 		"ALL", false, false, utils.NonTransactional)
-	if err != utils.ErrNotFound {
+	if err != utils.ErrDSPHostNotFound {
 		t.Error(err)
 	} else if dspMigrator.stats[utils.Dispatchers] != 1 {
 		t.Errorf("Expected 1, received: %v", dspMigrator.stats[utils.Dispatchers])

@@ -28,7 +28,8 @@ var (
 	ErrNoMoreData                    = errors.New("NO_MORE_DATA")
 	ErrNotImplemented                = errors.New("NOT_IMPLEMENTED")
 	ErrNotFound                      = errors.New("NOT_FOUND")
-	ErrHostNotFound                  = errors.New("HOST_NOT_FOUND")
+	ErrDSPHostNotFound               = errors.New("DSP_HOST_NOT_FOUND")
+	ErrDSPProfileNotFound            = errors.New("DSP_PROFILE_NOT_FOUND")
 	ErrTimedOut                      = errors.New("TIMED_OUT")
 	ErrServerError                   = errors.New("SERVER_ERROR")
 	ErrMaxRecursionDepth             = errors.New("MAX_RECURSION_DEPTH")
@@ -81,6 +82,8 @@ var (
 	ErrMap = map[string]error{
 		ErrNoMoreData.Error():              ErrNoMoreData,
 		ErrNotImplemented.Error():          ErrNotImplemented,
+		ErrDSPProfileNotFound.Error():      ErrDSPProfileNotFound,
+		ErrDSPHostNotFound.Error():         ErrDSPHostNotFound,
 		ErrNotFound.Error():                ErrNotFound,
 		ErrTimedOut.Error():                ErrTimedOut,
 		ErrServerError.Error():             ErrServerError,
@@ -115,7 +118,7 @@ var (
 		ErrMaxIncrementsExceeded.Error():   ErrMaxIncrementsExceeded,
 		ErrIndexOutOfBounds.Error():        ErrIndexOutOfBounds,
 		ErrWrongPath.Error():               ErrWrongPath,
-		ErrHostNotFound.Error():            ErrHostNotFound,
+		ErrDSPHostNotFound.Error():         ErrDSPHostNotFound,
 	}
 )
 
@@ -216,7 +219,7 @@ func APIErrorHandler(errIn error) (err error) {
 	cgrErr, ok := errIn.(*CGRError)
 	if !ok {
 		err = errIn
-		if err != ErrNotFound {
+		if err != ErrNotFound && err != ErrDSPProfileNotFound && err != ErrDSPHostNotFound {
 			err = NewErrServerError(err)
 		}
 		return
