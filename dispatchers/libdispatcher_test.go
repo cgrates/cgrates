@@ -456,7 +456,7 @@ func TestLibDispatcherLoadDispatcherDispatchHostsID(t *testing.T) {
 	}
 }
 
-func TestLibDispatcherLoadStrategyDispatchCaseCallError(t *testing.T) {
+func TestLibDispatcherLoadStrategyDispatchCaseCallError2(t *testing.T) {
 	wgDsp := &loadDispatcher{
 		hosts: engine.DispatcherHostProfiles{
 			{
@@ -661,7 +661,7 @@ func TestLibDispatcherLoadDispatcherCacheError(t *testing.T) {
 	engine.Cache = cacheInit
 }
 
-func TestLibDispatcherLoadDispatcherCacheError4(t *testing.T) {
+func TestLibDispatcherLoadDispatcherCacheError7(t *testing.T) {
 	cacheInit := engine.Cache
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().ReplicationConns = []string{"con"}
@@ -911,42 +911,6 @@ func TestLibDispatcherSingleResultDispatcherCase3(t *testing.T) {
 	engine.IntRPC = tmp
 }
 
-func TestLibDispatcherDispatchFilterError(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	flts := engine.NewFilterS(cfg, nil, nil)
-	var dsp Dispatcher = &singleResultDispatcher{
-		sorter: new(noSort),
-		hosts: engine.DispatcherHostProfiles{{
-			ID:        "testID",
-			FilterIDs: []string{"*wrongType"},
-		}},
-	}
-	expErrMsg := "inline parse error for string: <*wrongType>"
-	if err := dsp.Dispatch(nil, flts, nil, "", "", &DispatcherRoute{}, "", "", ""); err == nil || err.Error() != expErrMsg {
-		t.Errorf("Expected error: %s received: %v", expErrMsg, err)
-	}
-	dsp = &loadDispatcher{
-		sorter: new(noSort),
-		hosts: engine.DispatcherHostProfiles{{
-			ID:        "testID2",
-			FilterIDs: []string{"*wrongType"},
-		}},
-		defaultRatio: 1,
-	}
-	if err := dsp.Dispatch(nil, flts, nil, "", "", &DispatcherRoute{}, "", "", ""); err == nil || err.Error() != expErrMsg {
-		t.Errorf("Expected error: %s received: %v", expErrMsg, err)
-	}
-	dsp = &broadcastDispatcher{
-		hosts: engine.DispatcherHostProfiles{{
-			ID:        "testID",
-			FilterIDs: []string{"*wrongType"},
-		}},
-	}
-	if err := dsp.Dispatch(nil, flts, nil, "", "", &DispatcherRoute{}, "", "", ""); err == nil || err.Error() != expErrMsg {
-		t.Errorf("Expected error: %s received: %v", expErrMsg, err)
-	}
-}
-
 func TestLibDispatcherRandomSort(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	flts := engine.NewFilterS(cfg, nil, nil)
@@ -986,5 +950,60 @@ func TestLibDispatcherRoundRobinSort(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expHostIDs2, hostIDs) {
 		t.Errorf("Expected: %q, received: %q", expHostIDs2, hostIDs)
+	}
+}
+
+func TestLibDispatcherLoadStrategyDispatchCaseCallError(t *testing.T) {
+	wgDsp := &loadDispatcher{
+		hosts: engine.DispatcherHostProfiles{
+			{
+				ID: "hostID",
+			},
+		},
+		defaultRatio: 1,
+		sorter:       new(noSort),
+	}
+	err := wgDsp.Dispatch(nil, nil, nil, "cgrates.org", "", &DispatcherRoute{}, utils.AttributeSv1Ping, &utils.CGREvent{}, &wgDsp)
+	expected := "NO_DATABASE_CONNECTION"
+	if err == nil || err.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
+	}
+}
+
+func TestLibDispatcherDispatchFilterError(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	flts := engine.NewFilterS(cfg, nil, nil)
+	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	var dsp Dispatcher = &singleResultDispatcher{
+		sorter: new(noSort),
+		hosts: engine.DispatcherHostProfiles{{
+			ID:        "testID",
+			FilterIDs: []string{"*wrongType"},
+		}},
+	}
+	expErrMsg := "inline parse error for string: <*wrongType>"
+	if err := dsp.Dispatch(dm, flts, nil, "cgrates.org", "", &DispatcherRoute{}, "", "", ""); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expected error: %s received: %v", expErrMsg, err)
+	}
+	dsp = &loadDispatcher{
+		sorter: new(noSort),
+		hosts: engine.DispatcherHostProfiles{{
+			ID:        "testID2",
+			FilterIDs: []string{"*wrongType"},
+		}},
+		defaultRatio: 1,
+	}
+	if err := dsp.Dispatch(dm, flts, nil, "cgrates.org", "", &DispatcherRoute{}, "", "", ""); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expected error: %s received: %v", expErrMsg, err)
+	}
+	dsp = &broadcastDispatcher{
+		hosts: engine.DispatcherHostProfiles{{
+			ID:        "testID",
+			FilterIDs: []string{"*wrongType"},
+		}},
+	}
+	if err := dsp.Dispatch(dm, flts, nil, "cgrates.org", "", &DispatcherRoute{}, "", "", ""); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expected error: %s received: %v", expErrMsg, err)
 	}
 }

@@ -229,8 +229,8 @@ func (sd *singleResultDispatcher) Dispatch(dm *engine.DataManager, flts *engine.
 		}
 		if err = callDHwithID(tnt, hostID, routeID, dRh, dm,
 			serviceMethod, args, reply); err == nil ||
-			err != utils.ErrDSPHostNotFound ||
-			!rpcclient.IsNetworkError(err) { // successful dispatch with normal errors
+			(err != utils.ErrDSPHostNotFound &&
+				!rpcclient.IsNetworkError(err)) { // successful dispatch with normal errors
 			return
 		}
 		if err != nil {
@@ -315,7 +315,8 @@ func (ld *loadDispatcher) Dispatch(dm *engine.DataManager, flts *engine.FilterS,
 			serviceMethod, args, reply)
 		lM.decrementLoad(dR.HostID, ld.tntID) // call ended
 		if err == nil ||
-			(err != utils.ErrNotFound && !rpcclient.IsNetworkError(err)) { // successful dispatch with normal errors
+			(err != utils.ErrDSPHostNotFound &&
+				!rpcclient.IsNetworkError(err)) { // successful dispatch with normal errors
 			return
 		}
 		// not found or network errors will continue with standard dispatching
@@ -342,7 +343,8 @@ func (ld *loadDispatcher) Dispatch(dm *engine.DataManager, flts *engine.FilterS,
 			serviceMethod, args, reply)
 		lM.decrementLoad(hostID, ld.tntID) // call ended
 		if err == nil ||
-			(err != utils.ErrNotFound && !rpcclient.IsNetworkError(err)) { // successful dispatch with normal errors
+			(err != utils.ErrDSPHostNotFound &&
+				!rpcclient.IsNetworkError(err)) { // successful dispatch with normal errors
 			return
 		}
 		if err != nil {
