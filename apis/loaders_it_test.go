@@ -1462,8 +1462,8 @@ func testLoadersGetDispatcherProfileAfterRemove(t *testing.T) {
 		utils.TenantID{
 			Tenant: "cgrates.org",
 			ID:     "DSP1",
-		}, &rplyDspPrf); err == nil || err.Error() != utils.ErrNotFound.Error() {
-		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
+		}, &rplyDspPrf); err == nil || err.Error() != utils.ErrDSPProfileNotFound.Error() {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrDSPProfileNotFound, err)
 	}
 }
 
@@ -1481,8 +1481,8 @@ func testLoadersGetDispatcherHostAfterRemove(t *testing.T) {
 		utils.TenantID{
 			Tenant: "cgrates.org",
 			ID:     "DSPHOST1",
-		}, &rplyDspHost); err == nil || err.Error() != utils.ErrNotFound.Error() {
-		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
+		}, &rplyDspHost); err == nil || err.Error() != utils.ErrDSPHostNotFound.Error() {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrDSPHostNotFound, err)
 	}
 }
 

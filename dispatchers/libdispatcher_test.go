@@ -390,7 +390,7 @@ func TestLibDispatcherSingleResultDispatcherDispatch(t *testing.T) {
 	wgDsp := &singleResultDispatcher{sorter: new(noSort)}
 	dM := engine.NewDataManager(engine.NewInternalDB(nil, nil, config.CgrConfig().DataDbCfg().Items), config.CgrConfig().CacheCfg(), nil)
 	err := wgDsp.Dispatch(dM, nil, config.CgrConfig(), context.Background(), nil, nil, "", "", &DispatcherRoute{}, "", "", "")
-	expected := "HOST_NOT_FOUND"
+	expected := "DSP_HOST_NOT_FOUND"
 	if err == nil || err.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
 	}
@@ -400,7 +400,7 @@ func TestLibDispatcherSingleResultDispatcherDispatchRouteID(t *testing.T) {
 	wgDsp := &singleResultDispatcher{sorter: new(roundRobinSort)}
 	dM := engine.NewDataManager(engine.NewInternalDB(nil, nil, config.CgrConfig().DataDbCfg().Items), config.CgrConfig().CacheCfg(), nil)
 	err := wgDsp.Dispatch(dM, nil, config.CgrConfig(), context.Background(), nil, nil, "", "routeID", &DispatcherRoute{}, "", "", "")
-	expected := "HOST_NOT_FOUND"
+	expected := "DSP_HOST_NOT_FOUND"
 	if err == nil || err.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
 	}
@@ -410,7 +410,7 @@ func TestLibDispatcherBroadcastDispatcherDispatch(t *testing.T) {
 	wgDsp := &broadcastDispatcher{hosts: engine.DispatcherHostProfiles{{ID: "testID"}}}
 	dM := engine.NewDataManager(engine.NewInternalDB(nil, nil, config.CgrConfig().DataDbCfg().Items), config.CgrConfig().CacheCfg(), nil)
 	err := wgDsp.Dispatch(dM, nil, config.CgrConfig(), context.Background(), nil, nil, "", "", &DispatcherRoute{}, "", "", "")
-	expected := "HOST_NOT_FOUND"
+	expected := "DSP_HOST_NOT_FOUND"
 	if err == nil || err.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
 	}
@@ -420,7 +420,7 @@ func TestLibDispatcherBroadcastDispatcherDispatchRouteID(t *testing.T) {
 	wgDsp := &broadcastDispatcher{hosts: engine.DispatcherHostProfiles{{ID: "testID"}}}
 	dM := engine.NewDataManager(engine.NewInternalDB(nil, nil, config.CgrConfig().DataDbCfg().Items), config.CgrConfig().CacheCfg(), nil)
 	err := wgDsp.Dispatch(dM, nil, config.CgrConfig(), context.Background(), nil, nil, "", "routeID", &DispatcherRoute{}, "", "", "")
-	expected := "HOST_NOT_FOUND"
+	expected := "DSP_HOST_NOT_FOUND"
 	if err == nil || err.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
 	}
@@ -430,7 +430,7 @@ func TestLibDispatcherLoadDispatcherDispatch(t *testing.T) {
 	wgDsp := &loadDispatcher{sorter: new(randomSort)}
 	dM := engine.NewDataManager(engine.NewInternalDB(nil, nil, config.CgrConfig().DataDbCfg().Items), config.CgrConfig().CacheCfg(), nil)
 	err := wgDsp.Dispatch(dM, nil, config.CgrConfig(), context.Background(), nil, nil, "", "", &DispatcherRoute{}, "", "", "")
-	expected := "HOST_NOT_FOUND"
+	expected := "DSP_HOST_NOT_FOUND"
 	if err == nil || err.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
 	}
@@ -446,7 +446,7 @@ func TestLibDispatcherLoadDispatcherDispatchHostsID(t *testing.T) {
 	}
 	dM := engine.NewDataManager(engine.NewInternalDB(nil, nil, config.CgrConfig().DataDbCfg().Items), config.CgrConfig().CacheCfg(), nil)
 	err := wgDsp.Dispatch(dM, nil, config.CgrConfig(), context.Background(), nil, nil, "", "routeID", &DispatcherRoute{}, "", "", "")
-	expected := "HOST_NOT_FOUND"
+	expected := "DSP_HOST_NOT_FOUND"
 	if err == nil || err.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
 	}
@@ -593,7 +593,7 @@ func TestLibDispatcherBroadcastDispatcherDispatchError2(t *testing.T) {
 		nil, nil, true, utils.NonTransactional)
 	wgDsp := &broadcastDispatcher{hosts: engine.DispatcherHostProfiles{{ID: "testID"}}}
 	err := wgDsp.Dispatch(nil, nil, cfg, context.Background(), nil, nil, "testTenant", "testID", &DispatcherRoute{}, "", "", "")
-	expected := "HOST_NOT_FOUND"
+	expected := "DSP_HOST_NOT_FOUND"
 	if err == nil || err.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
 	}
@@ -861,6 +861,8 @@ func TestLibDispatcherSingleResultDispatcherCase3(t *testing.T) {
 func TestLibDispatcherDispatchFilterError(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	flts := engine.NewFilterS(cfg, nil, nil)
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
 	var dsp Dispatcher = &singleResultDispatcher{
 		sorter: new(noSort),
 		hosts: engine.DispatcherHostProfiles{{
@@ -869,7 +871,7 @@ func TestLibDispatcherDispatchFilterError(t *testing.T) {
 		}},
 	}
 	expErrMsg := "inline parse error for string: <*wrongType>"
-	if err := dsp.Dispatch(nil, flts, cfg, context.Background(), nil, nil, "", "", &DispatcherRoute{}, "", "", ""); err == nil || err.Error() != expErrMsg {
+	if err := dsp.Dispatch(dm, flts, cfg, context.Background(), nil, nil, "", "", &DispatcherRoute{}, "", "", ""); err == nil || err.Error() != expErrMsg {
 		t.Errorf("Expected error: %s received: %v", expErrMsg, err)
 	}
 	dsp = &loadDispatcher{
@@ -880,7 +882,7 @@ func TestLibDispatcherDispatchFilterError(t *testing.T) {
 		}},
 		defaultRatio: 1,
 	}
-	if err := dsp.Dispatch(nil, flts, cfg, context.Background(), nil, nil, "", "", &DispatcherRoute{}, "", "", ""); err == nil || err.Error() != expErrMsg {
+	if err := dsp.Dispatch(dm, flts, cfg, context.Background(), nil, nil, "", "", &DispatcherRoute{}, "", "", ""); err == nil || err.Error() != expErrMsg {
 		t.Errorf("Expected error: %s received: %v", expErrMsg, err)
 	}
 	dsp = &broadcastDispatcher{
@@ -889,7 +891,7 @@ func TestLibDispatcherDispatchFilterError(t *testing.T) {
 			FilterIDs: []string{"*wrongType"},
 		}},
 	}
-	if err := dsp.Dispatch(nil, flts, cfg, context.Background(), nil, nil, "", "", &DispatcherRoute{}, "", "", ""); err == nil || err.Error() != expErrMsg {
+	if err := dsp.Dispatch(dm, flts, cfg, context.Background(), nil, nil, "", "", &DispatcherRoute{}, "", "", ""); err == nil || err.Error() != expErrMsg {
 		t.Errorf("Expected error: %s received: %v", expErrMsg, err)
 	}
 }

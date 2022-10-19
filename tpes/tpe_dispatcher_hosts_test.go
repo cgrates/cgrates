@@ -130,7 +130,7 @@ func TestTPEExportItemsDispatchersIDNotFoundHost(t *testing.T) {
 	}
 	tpDsph.dm.SetDispatcherHost(context.Background(), dsph)
 	err := tpDsph.exportItems(context.Background(), wrtr, "cgrates.org", []string{"DSH2"})
-	errExpect := "<NOT_FOUND> cannot find DispatcherHost with id: <DSH2>"
+	errExpect := "<DSP_HOST_NOT_FOUND> cannot find DispatcherHost with id: <DSH2>"
 	if err.Error() != errExpect {
 		t.Errorf("Expected %v\n but received %v", errExpect, err)
 	}

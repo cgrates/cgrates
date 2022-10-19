@@ -513,7 +513,7 @@ func testdoubleRemoveDispatcherProfile(t *testing.T) {
 	var reply *engine.DispatcherProfile
 	if err := doubleRemoveRPC.Call(context.Background(), utils.AdminSv1GetDispatcherProfile,
 		&utils.TenantID{Tenant: doubleRemoveTenant, ID: "DSP_PRF"}, &reply); err == nil ||
-		err.Error() != utils.ErrNotFound.Error() {
+		err.Error() != utils.ErrDSPProfileNotFound.Error() {
 		t.Error(err)
 	}
 	// set
@@ -547,18 +547,18 @@ func testdoubleRemoveDispatcherProfile(t *testing.T) {
 	}
 	if err := doubleRemoveRPC.Call(context.Background(), utils.AdminSv1RemoveDispatcherProfile,
 		&utils.TenantID{Tenant: doubleRemoveTenant, ID: "DSP_PRF"}, &result); err == nil ||
-		err.Error() != utils.ErrNotFound.Error() {
+		err.Error() != utils.ErrDSPProfileNotFound.Error() {
 		t.Error(err)
 	}
 	if err := doubleRemoveRPC.Call(context.Background(), utils.AdminSv1RemoveDispatcherProfile,
 		&utils.TenantID{Tenant: doubleRemoveTenant, ID: "DSP_PRF"}, &result); err == nil ||
-		err.Error() != utils.ErrNotFound.Error() {
+		err.Error() != utils.ErrDSPProfileNotFound.Error() {
 		t.Error(err)
 	}
 	// check
 	if err := doubleRemoveRPC.Call(context.Background(), utils.AdminSv1GetDispatcherProfile,
 		&utils.TenantID{Tenant: doubleRemoveTenant, ID: "DSP_PRF"}, &reply); err == nil ||
-		err.Error() != utils.ErrNotFound.Error() {
+		err.Error() != utils.ErrDSPProfileNotFound.Error() {
 		t.Error(err)
 	}
 }
@@ -568,7 +568,7 @@ func testdoubleRemoveDispatcherHost(t *testing.T) {
 	var reply *engine.DispatcherHost
 	if err := doubleRemoveRPC.Call(context.Background(), utils.AdminSv1GetDispatcherHost,
 		&utils.TenantID{Tenant: doubleRemoveTenant, ID: "DSP_HOST"}, &reply); err == nil ||
-		err.Error() != utils.ErrNotFound.Error() {
+		err.Error() != utils.ErrDSPHostNotFound.Error() {
 		t.Error(err)
 	}
 	// set
@@ -614,7 +614,7 @@ func testdoubleRemoveDispatcherHost(t *testing.T) {
 	// check
 	if err := doubleRemoveRPC.Call(context.Background(), utils.AdminSv1GetDispatcherHost,
 		&utils.TenantID{Tenant: doubleRemoveTenant, ID: "DSP_HOST"}, &reply); err == nil ||
-		err.Error() != utils.ErrNotFound.Error() {
+		err.Error() != utils.ErrDSPHostNotFound.Error() {
 		t.Error(err)
 	}
 }

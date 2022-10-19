@@ -220,7 +220,7 @@ func TestDispatchersSetGetRemDispatcherProfile(t *testing.T) {
 
 	engine.Cache.Clear(nil)
 	if err := adms.GetDispatcherProfile(context.Background(), arg, &result); err == nil ||
-		err != utils.ErrNotFound {
+		err != utils.ErrDSPProfileNotFound {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	}
 
@@ -391,8 +391,8 @@ func TestDispatchersRemoveDispatcherProfileCheckErrors(t *testing.T) {
 		},
 	}
 
-	if err := adms.GetDispatcherProfile(context.Background(), arg, &rcv); err == nil || err != utils.ErrNotFound {
-		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
+	if err := adms.GetDispatcherProfile(context.Background(), arg, &rcv); err == nil || err != utils.ErrDSPProfileNotFound {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", utils.ErrDSPProfileNotFound, err)
 	}
 
 	experr = "MANDATORY_IE_MISSING: [ID]"
@@ -840,8 +840,8 @@ func TestDispatchersSetGetRemDispatcherHost(t *testing.T) {
 
 	engine.Cache.Clear(nil)
 	if err := adms.GetDispatcherHost(context.Background(), arg, &result); err == nil ||
-		err != utils.ErrNotFound {
-		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
+		err != utils.ErrDSPHostNotFound {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", utils.ErrDSPHostNotFound, err)
 	}
 
 	dm.DataDB().Flush(utils.EmptyString)
@@ -999,8 +999,8 @@ func TestDispatchersRemoveDispatcherHostCheckErrors(t *testing.T) {
 		},
 	}
 
-	if err := adms.GetDispatcherHost(context.Background(), arg, &rcv); err == nil || err != utils.ErrNotFound {
-		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
+	if err := adms.GetDispatcherHost(context.Background(), arg, &rcv); err == nil || err != utils.ErrDSPHostNotFound {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", utils.ErrDSPHostNotFound, err)
 	}
 
 	experr = "MANDATORY_IE_MISSING: [ID]"

@@ -395,7 +395,7 @@ func (adms *AdminSv1) ComputeFilterIndexes(ctx *context.Context, args *utils.Arg
 					return nil, e
 				}
 				return utils.SliceStringPointer(utils.CloneStringSlice(dsp.FilterIDs)), nil
-			}, nil); err != nil && err != utils.ErrNotFound {
+			}, nil); err != nil && err != utils.ErrDSPProfileNotFound {
 			return utils.APIErrorHandler(err)
 		}
 		args.DispatcherS = indexes.Size() != 0
@@ -648,7 +648,7 @@ func (adms *AdminSv1) ComputeFilterIndexIDs(ctx *context.Context, args *utils.Ar
 				return nil, e
 			}
 			return utils.SliceStringPointer(utils.CloneStringSlice(dsp.FilterIDs)), nil
-		}, nil); err != nil && err != utils.ErrNotFound {
+		}, nil); err != nil && err != utils.ErrDSPProfileNotFound {
 		return utils.APIErrorHandler(err)
 	}
 	if indexes.Size() != 0 {

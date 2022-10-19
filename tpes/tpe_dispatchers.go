@@ -52,7 +52,7 @@ func (tpDsp TPDispatchers) exportItems(ctx *context.Context, wrtr io.Writer, tnt
 		var dspPrf *engine.DispatcherProfile
 		dspPrf, err = tpDsp.dm.GetDispatcherProfile(ctx, tnt, dspID, true, true, utils.NonTransactional)
 		if err != nil {
-			if err.Error() == utils.ErrNotFound.Error() {
+			if err.Error() == utils.ErrDSPProfileNotFound.Error() {
 				return fmt.Errorf("<%s> cannot find DispatcherProfile with id: <%v>", err, dspID)
 			}
 			return err

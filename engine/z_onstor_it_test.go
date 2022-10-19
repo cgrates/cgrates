@@ -971,7 +971,7 @@ func testOnStorITDispatcherProfile(t *testing.T) {
 		Weight: 20,
 	}
 	if _, rcvErr := onStor.GetDispatcherProfile(context.TODO(), "cgrates.org", "Dsp1",
-		true, false, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
+		true, false, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrDSPProfileNotFound {
 		t.Error(rcvErr)
 	}
 	if err := onStor.SetDispatcherProfile(context.TODO(), dpp, false); err != nil {
@@ -1009,7 +1009,7 @@ func testOnStorITDispatcherProfile(t *testing.T) {
 	}
 	//check database if removed
 	if _, rcvErr := onStor.GetDispatcherProfile(context.TODO(), "cgrates.org", "Dsp1",
-		false, false, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
+		false, false, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrDSPProfileNotFound {
 		t.Error(rcvErr)
 	}
 }

@@ -144,7 +144,7 @@ func getIHObjFromCache(ctx *context.Context, dm *DataManager, objCache *ltcache.
 		return objVal.([]string), nil
 	}
 	if filtIDs, err = getFilters(ctx, dm, indxType, tnt, id); err != nil {
-		if err == utils.ErrNotFound {
+		if err == utils.ErrNotFound || err == utils.ErrDSPProfileNotFound || err == utils.ErrDSPHostNotFound {
 			objCache.Set(cacheKey, nil, nil)
 		}
 		return
@@ -330,7 +330,7 @@ func GetFltrIdxHealth(ctx *context.Context, dm *DataManager, fltrCache, fltrIdxC
 		for itmID := range idx {
 			var filterIDs []string
 			if filterIDs, err = getIHObjFromCache(ctx, dm, objCache, indxType, tnt, itmID); err != nil {
-				if err != utils.ErrNotFound {
+				if err != utils.ErrNotFound && err != utils.ErrDSPHostNotFound && err != utils.ErrDSPProfileNotFound {
 					return
 				}
 				missingObj.Add(utils.ConcatenatedKey(tnt, itmID))

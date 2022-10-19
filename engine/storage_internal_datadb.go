@@ -399,7 +399,7 @@ func (iDB *InternalDB) RemoveChargerProfileDrv(_ *context.Context, tenant, id st
 func (iDB *InternalDB) GetDispatcherProfileDrv(_ *context.Context, tenant, id string) (dpp *DispatcherProfile, err error) {
 	x, ok := iDB.db.Get(utils.CacheDispatcherProfiles, utils.ConcatenatedKey(tenant, id))
 	if !ok || x == nil {
-		return nil, utils.ErrNotFound
+		return nil, utils.ErrDSPProfileNotFound
 	}
 	return x.(*DispatcherProfile), nil
 }
@@ -437,7 +437,7 @@ func (iDB *InternalDB) SetLoadIDsDrv(_ *context.Context, loadIDs map[string]int6
 func (iDB *InternalDB) GetDispatcherHostDrv(_ *context.Context, tenant, id string) (dpp *DispatcherHost, err error) {
 	x, ok := iDB.db.Get(utils.CacheDispatcherHosts, utils.ConcatenatedKey(tenant, id))
 	if !ok || x == nil {
-		return nil, utils.ErrNotFound
+		return nil, utils.ErrDSPHostNotFound
 	}
 	return x.(*DispatcherHost), nil
 }

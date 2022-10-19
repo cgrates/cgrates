@@ -927,8 +927,8 @@ func TestReplicatorGetDispatcherProfileError(t *testing.T) {
 		TenantID: utils.NewTenantID("cgrates.org:Dsp1"),
 	}
 
-	if err := rp.GetDispatcherProfile(context.Background(), tntID, &reply); err == nil || err != utils.ErrNotFound {
-		t.Errorf("Expected %v\n but received %v", utils.ErrNotFound, err)
+	if err := rp.GetDispatcherProfile(context.Background(), tntID, &reply); err == nil || err != utils.ErrDSPProfileNotFound {
+		t.Errorf("Expected %v\n but received %v", utils.ErrDSPProfileNotFound, err)
 	}
 }
 
@@ -998,8 +998,8 @@ func TestReplicatorGetDispatcherHostError(t *testing.T) {
 		TenantID: utils.NewTenantID("cgrates.org:DSH1"),
 	}
 
-	if err := rp.GetDispatcherHost(context.Background(), tntID, &reply); err == nil || err != utils.ErrNotFound {
-		t.Errorf("Expected %v\n but received %v", utils.ErrNotFound, err)
+	if err := rp.GetDispatcherHost(context.Background(), tntID, &reply); err == nil || err != utils.ErrDSPHostNotFound {
+		t.Errorf("Expected %v\n but received %v", utils.ErrDSPHostNotFound, err)
 	}
 }
 

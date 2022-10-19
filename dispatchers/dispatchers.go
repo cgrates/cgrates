@@ -128,7 +128,7 @@ func (dS *DispatcherService) dispatcherProfilesForEvent(ctx *context.Context, tn
 	for prflID := range prflIDs {
 		prfl, err := dS.dm.GetDispatcherProfile(ctx, tnt, prflID, true, true, utils.NonTransactional)
 		if err != nil {
-			if err != utils.ErrNotFound {
+			if err != utils.ErrDSPProfileNotFound {
 				return nil, err
 			}
 			continue
@@ -143,7 +143,7 @@ func (dS *DispatcherService) dispatcherProfilesForEvent(ctx *context.Context, tn
 		dPrlfs = append(dPrlfs, prfl)
 	}
 	if len(dPrlfs) == 0 {
-		err = utils.ErrNotFound
+		err = utils.ErrDSPProfileNotFound
 		return
 	}
 	prfCount := len(dPrlfs) // if the option is not present return for all profiles
@@ -223,7 +223,6 @@ func (dS *DispatcherService) Dispatch(ctx *context.Context, ev *utils.CGREvent, 
 					for k, v := range dspLoopAPIOpts {
 						ev.APIOpts[k] = v // dispatcher loop protection opts
 					}
-
 					if err = d.Dispatch(dS.dm, dS.fltrS, dS.cfg,
 						ctx, dS.connMgr.GetDispInternalChan(), evNm, tnt, utils.EmptyString, dR,
 						serviceMethod, args, reply); !rpcclient.IsNetworkError(err) {
@@ -241,7 +240,7 @@ func (dS *DispatcherService) Dispatch(ctx *context.Context, ev *utils.CGREvent, 
 	if dPrfls, err = dS.dispatcherProfilesForEvent(ctx, tnt, ev, evNm); err != nil {
 		return utils.NewErrDispatcherS(err)
 	} else if len(dPrfls) == 0 { // no profiles matched
-		return utils.NewErrDispatcherS(utils.ErrPrefixNotFound("PROFILE"))
+		return utils.ErrDSPProfileNotFound
 	} else if isInternalDispatcherProfile(dPrfls[0]) { // dispatcherS was disabled
 		return callDH(ctx,
 			newInternalHost(tnt), utils.EmptyString, nil,
