@@ -50,7 +50,7 @@ func TestRouteSReload(t *testing.T) {
 	chSCh <- chS
 	css := &CacheService{cacheCh: chSCh}
 	server := cores.NewServer(nil)
-	srvMngr := servmanager.NewServiceManager(shdWg, nil, cfg.GetReloadChan())
+	srvMngr := servmanager.NewServiceManager(shdWg, nil, cfg)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	anz := NewAnalyzerService(cfg, server, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
 	db := NewDataDBService(cfg, nil, srvDep)

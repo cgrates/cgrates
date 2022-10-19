@@ -50,7 +50,7 @@ func TestDataDBReload(t *testing.T) {
 	css := &CacheService{cacheCh: chSCh}
 	server := cores.NewServer(nil)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	srvMngr := servmanager.NewServiceManager(shdWg, nil, cfg.GetReloadChan())
+	srvMngr := servmanager.NewServiceManager(shdWg, nil, cfg)
 	cM := engine.NewConnManager(cfg)
 	db := NewDataDBService(cfg, cM, srvDep)
 	anz := NewAnalyzerService(cfg, server, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
