@@ -25,6 +25,7 @@ import (
 )
 
 func TestAttributeSCfgloadFromJsonCfg(t *testing.T) {
+
 	jsonCfg := &AttributeSJsonCfg{
 		Enabled:               utils.BoolPointer(true),
 		Indexed_selects:       utils.BoolPointer(false),
