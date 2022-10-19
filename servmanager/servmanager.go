@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package servmanager
 
 import (
-	"errors"
 	"fmt"
 	"sync"
 
@@ -300,7 +299,7 @@ func toggleService(serviceID string, status bool, srvMngr *ServiceManager) (err 
 		srvMngr.cfg.SIPAgentCfg().Enabled = status
 		srvMngr.cfg.GetReloadChan() <- serviceID
 	default:
-		err = errors.New(utils.UnsupportedServiceIDCaps)
+		err = utils.ErrUnsupportedServiceID
 	}
 	return
 }
