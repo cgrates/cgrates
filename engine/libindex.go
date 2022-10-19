@@ -755,7 +755,7 @@ func UpdateFilterIndex(ctx *context.Context, dm *DataManager, oldFlt, newFlt *Fi
 					fltrIDs := make([]string, len(dp.FilterIDs))
 					copy(fltrIDs, dp.FilterIDs)
 					return &fltrIDs, nil
-				}, newFlt); err != nil && err != utils.ErrNotFound {
+				}, newFlt); err != nil && err != utils.ErrDSPProfileNotFound {
 				return utils.APIErrorHandler(err)
 			}
 		}

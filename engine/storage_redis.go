@@ -673,7 +673,7 @@ func (rs *RedisStorage) GetDispatcherProfileDrv(ctx *context.Context, tenant, id
 	if err = rs.Cmd(&values, redisGET, utils.DispatcherProfilePrefix+utils.ConcatenatedKey(tenant, id)); err != nil {
 		return
 	} else if len(values) == 0 {
-		err = utils.ErrNotFound
+		err = utils.ErrDSPProfileNotFound
 		return
 	}
 	err = rs.ms.Unmarshal(values, &r)
@@ -697,7 +697,7 @@ func (rs *RedisStorage) GetDispatcherHostDrv(ctx *context.Context, tenant, id st
 	if err = rs.Cmd(&values, redisGET, utils.DispatcherHostPrefix+utils.ConcatenatedKey(tenant, id)); err != nil {
 		return
 	} else if len(values) == 0 {
-		err = utils.ErrNotFound
+		err = utils.ErrDSPHostNotFound
 		return
 	}
 	err = rs.ms.Unmarshal(values, &r)

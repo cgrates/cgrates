@@ -344,7 +344,7 @@ func testDspRplDispatcherProfile(t *testing.T) {
 
 	// Get DispatcherProfile
 	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetDispatcherProfile, argsDispatcherProfile, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
-		t.Errorf("Expecting: %+v, received: %+v, ", utils.ErrNotFound, err)
+		t.Errorf("Expecting: %+v, received: %+v, ", utils.ErrDSPProfileNotFound, err)
 	}
 
 	// Start engine 1
@@ -359,7 +359,7 @@ func testDspRplDispatcherProfile(t *testing.T) {
 
 	// Get DispatcherProfile
 	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetDispatcherProfile, argsDispatcherProfile, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
-		t.Errorf("Expecting: %+v, received: %+v, ", utils.ErrNotFound, err)
+		t.Errorf("Expecting: %+v, received: %+v, ", utils.ErrDSPProfileNotFound, err)
 	}
 }
 
@@ -405,7 +405,7 @@ func testDspRplDispatcherHost(t *testing.T) {
 
 	// Get DispatcherHost
 	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetDispatcherHost, argsDispatcherHost, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
-		t.Errorf("Expecting: %+v, received: %+v, ", utils.ErrNotFound, err)
+		t.Errorf("Expecting: %+v, received: %+v, ", utils.ErrDSPHostNotFound, err)
 	}
 
 	// Start engine 1
@@ -420,7 +420,7 @@ func testDspRplDispatcherHost(t *testing.T) {
 
 	// Get DispatcherHost
 	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetDispatcherHost, argsDispatcherHost, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
-		t.Errorf("Expecting: %+v, received: %+v, ", utils.ErrNotFound, err)
+		t.Errorf("Expecting: %+v, received: %+v, ", utils.ErrDSPHostNotFound, err)
 	}
 }
 

@@ -618,8 +618,8 @@ func TestDispatcherServiceDispatcherProfileForEventErrNotFound(t *testing.T) {
 			utils.MetaSubsys: subsys,
 		},
 	})
-	if err == nil || err != utils.ErrNotFound {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ErrNotFound, err)
+	if err == nil || err != utils.ErrDSPProfileNotFound {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ErrDSPProfileNotFound, err)
 	}
 }
 
@@ -664,8 +664,8 @@ func TestDispatcherServiceDispatcherProfileForEventErrNotFound2(t *testing.T) {
 			utils.MetaSubsys: subsys,
 		},
 	})
-	if err == nil || err != utils.ErrNotFound {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ErrNotFound, err)
+	if err == nil || err != utils.ErrDSPProfileNotFound {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ErrDSPProfileNotFound, err)
 	}
 }
 
@@ -801,7 +801,7 @@ func TestDispatcherServiceDispatchDspErrHostNotFound(t *testing.T) {
 	}
 	subsys := utils.IfaceAsString(ev.APIOpts[utils.MetaSubsys])
 	err = dss.Dispatch(context.TODO(), ev, subsys, "", "", "")
-	expected := "HOST_NOT_FOUND"
+	expected := "DSP_HOST_NOT_FOUND"
 	if err == nil || err.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
 	}
@@ -850,8 +850,8 @@ func TestDispatcherServiceDispatcherProfileForEventFoundFilter(t *testing.T) {
 			utils.MetaSubsys: subsys,
 		},
 	})
-	if err == nil || err.Error() != "NOT_FOUND" {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "NOT_FOUND:filter", err)
+	if err == nil || err.Error() != "DSP_PROFILE_NOT_FOUND" {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "DSP_PROFILE_NOT_FOUND:filter", err)
 	}
 }
 
@@ -945,8 +945,8 @@ func TestDispatcherServiceDispatcherProfileForEventGetDispatcherError(t *testing
 			utils.MetaSubsys: subsys,
 		},
 	})
-	if err == nil || err.Error() != "NOT_FOUND" {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "NOT_FOUND:filter", err)
+	if err == nil || err.Error() != "DSP_PROFILE_NOT_FOUND" {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "DSP_PROFILE_NOT_FOUND:filter", err)
 	}
 }
 
@@ -994,7 +994,7 @@ func TestDispatcherServiceDispatchDspErrHostNotFound2(t *testing.T) {
 	}
 	subsys := utils.IfaceAsString(ev.APIOpts[utils.MetaSubsys])
 	err = dss.Dispatch(context.TODO(), ev, subsys, "", "", "")
-	expected := "HOST_NOT_FOUND"
+	expected := "DSP_HOST_NOT_FOUND"
 	if err == nil || err.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
 	}
@@ -1257,8 +1257,8 @@ func TestDispatchersdispatcherProfileForEventAnySSfalseNotFound(t *testing.T) {
 		utils.MetaVars: utils.MapStorage{
 			utils.MetaSubsys: subsys,
 		},
-	}); err == nil || err != utils.ErrNotFound {
-		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
+	}); err == nil || err != utils.ErrDSPProfileNotFound {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", utils.ErrDSPProfileNotFound, err)
 	} else if rcv != nil {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, rcv)
 	}
@@ -1324,8 +1324,8 @@ func TestDispatchersdispatcherProfileForEventAnySStrueNotFound(t *testing.T) {
 		utils.MetaVars: utils.MapStorage{
 			utils.MetaSubsys: subsys,
 		},
-	}); err == nil || err != utils.ErrNotFound {
-		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
+	}); err == nil || err != utils.ErrDSPProfileNotFound {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", utils.ErrDSPProfileNotFound, err)
 	} else if rcv != nil {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, rcv)
 	}

@@ -161,7 +161,7 @@ func TestTPEExportItemsDispatchersIDNotFound(t *testing.T) {
 	}
 	tpDsp.dm.SetDispatcherProfile(context.Background(), dsp, false)
 	err := tpDsp.exportItems(context.Background(), wrtr, "cgrates.org", []string{"Dsp2"})
-	errExpect := "<NOT_FOUND> cannot find DispatcherProfile with id: <Dsp2>"
+	errExpect := "<DSP_PROFILE_NOT_FOUND> cannot find DispatcherProfile with id: <Dsp2>"
 	if err.Error() != errExpect {
 		t.Errorf("Expected %v\n but received %v", errExpect, err)
 	}

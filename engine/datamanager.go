@@ -281,7 +281,9 @@ func (dm *DataManager) CacheDataFromDB(ctx *context.Context, prfx string, ids []
 			_, err = GetAPIBan(ctx, utils.EmptyString, config.CgrConfig().APIBanCfg().Keys, false, false, true)
 		}
 		if err != nil {
-			if err != utils.ErrNotFound {
+			if err != utils.ErrNotFound &&
+				err != utils.ErrDSPProfileNotFound &&
+				err != utils.ErrDSPHostNotFound {
 				return utils.NewCGRError(utils.DataManager,
 					utils.ServerErrorCaps,
 					err.Error(),
@@ -1602,7 +1604,7 @@ func (dm *DataManager) GetDispatcherProfile(ctx *context.Context, tenant, id str
 	if cacheRead {
 		if x, ok := Cache.Get(utils.CacheDispatcherProfiles, tntID); ok {
 			if x == nil {
-				return nil, utils.ErrNotFound
+				return nil, utils.ErrDSPProfileNotFound
 			}
 			return x.(*DispatcherProfile), nil
 		}
@@ -1613,7 +1615,7 @@ func (dm *DataManager) GetDispatcherProfile(ctx *context.Context, tenant, id str
 	}
 	dpp, err = dm.dataDB.GetDispatcherProfileDrv(ctx, tenant, id)
 	if err != nil {
-		if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaDispatcherProfiles]; err == utils.ErrNotFound && itm.Remote {
+		if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaDispatcherProfiles]; err == utils.ErrDSPProfileNotFound && itm.Remote {
 			if err = dm.connMgr.Call(ctx, config.CgrConfig().DataDbCfg().RmtConns,
 				utils.ReplicatorSv1GetDispatcherProfile,
 				&utils.TenantIDWithAPIOpts{
@@ -1627,7 +1629,7 @@ func (dm *DataManager) GetDispatcherProfile(ctx *context.Context, tenant, id str
 		}
 		if err != nil {
 			err = utils.CastRPCErr(err)
-			if err == utils.ErrNotFound && cacheWrite {
+			if err == utils.ErrDSPProfileNotFound && cacheWrite {
 				if errCh := Cache.Set(ctx, utils.CacheDispatcherProfiles, tntID, nil, nil,
 					cacheCommit(transactionID), transactionID); errCh != nil {
 					return nil, errCh
@@ -1658,7 +1660,7 @@ func (dm *DataManager) SetDispatcherProfile(ctx *context.Context, dpp *Dispatche
 		}
 	}
 	oldDpp, err := dm.GetDispatcherProfile(ctx, dpp.Tenant, dpp.ID, true, false, utils.NonTransactional)
-	if err != nil && err != utils.ErrNotFound {
+	if err != nil && err != utils.ErrDSPProfileNotFound {
 		return err
 	}
 	if err = dm.DataDB().SetDispatcherProfileDrv(ctx, dpp); err != nil {
@@ -1699,7 +1701,7 @@ func (dm *DataManager) RemoveDispatcherProfile(ctx *context.Context, tenant, id 
 		return
 	}
 	if oldDpp == nil {
-		return utils.ErrNotFound
+		return utils.ErrDSPProfileNotFound
 	}
 	if withIndex {
 		if err = removeIndexFiltersItem(ctx, dm, utils.CacheDispatcherFilterIndexes, tenant, id, oldDpp.FilterIDs); err != nil {
@@ -1729,7 +1731,7 @@ func (dm *DataManager) GetDispatcherHost(ctx *context.Context, tenant, id string
 	if cacheRead {
 		if x, ok := Cache.Get(utils.CacheDispatcherHosts, tntID); ok {
 			if x == nil {
-				return nil, utils.ErrNotFound
+				return nil, utils.ErrDSPHostNotFound
 			}
 			return x.(*DispatcherHost), nil
 		}
@@ -1740,7 +1742,7 @@ func (dm *DataManager) GetDispatcherHost(ctx *context.Context, tenant, id string
 	}
 	dH, err = dm.dataDB.GetDispatcherHostDrv(ctx, tenant, id)
 	if err != nil {
-		if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaDispatcherHosts]; err == utils.ErrNotFound && itm.Remote {
+		if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaDispatcherHosts]; err == utils.ErrDSPHostNotFound && itm.Remote {
 			if err = dm.connMgr.Call(ctx, config.CgrConfig().DataDbCfg().RmtConns,
 				utils.ReplicatorSv1GetDispatcherHost,
 				&utils.TenantIDWithAPIOpts{
@@ -1754,7 +1756,7 @@ func (dm *DataManager) GetDispatcherHost(ctx *context.Context, tenant, id string
 		}
 		if err != nil {
 			err = utils.CastRPCErr(err)
-			if err == utils.ErrNotFound && cacheWrite {
+			if err == utils.ErrDSPHostNotFound && cacheWrite {
 				if errCh := Cache.Set(ctx, utils.CacheDispatcherHosts, tntID, nil, nil,
 					cacheCommit(transactionID), transactionID); errCh != nil {
 					return nil, errCh
@@ -1798,7 +1800,7 @@ func (dm *DataManager) RemoveDispatcherHost(ctx *context.Context, tenant, id str
 		return utils.ErrNoDatabaseConn
 	}
 	oldDpp, err := dm.GetDispatcherHost(ctx, tenant, id, true, false, utils.NonTransactional)
-	if err != nil && err != utils.ErrNotFound {
+	if err != nil && err != utils.ErrDSPHostNotFound {
 		return err
 	}
 	if err = dm.DataDB().RemoveDispatcherHostDrv(ctx, tenant, id); err != nil {

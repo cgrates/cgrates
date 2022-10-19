@@ -1080,7 +1080,7 @@ func (ms *MongoStorage) GetDispatcherProfileDrv(ctx *context.Context, tenant, id
 		if err := cur.Decode(r); err != nil {
 			r = nil
 			if err == mongo.ErrNoDocuments {
-				return utils.ErrNotFound
+				return utils.ErrDSPProfileNotFound
 			}
 			return err
 		}
@@ -1116,7 +1116,7 @@ func (ms *MongoStorage) GetDispatcherHostDrv(ctx *context.Context, tenant, id st
 		if err := cur.Decode(r); err != nil {
 			r = nil
 			if err == mongo.ErrNoDocuments {
-				return utils.ErrNotFound
+				return utils.ErrDSPHostNotFound
 			}
 			return err
 		}

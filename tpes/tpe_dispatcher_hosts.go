@@ -52,7 +52,7 @@ func (tpDspHst TPDispatcherHosts) exportItems(ctx *context.Context, wrtr io.Writ
 		var dspHostPrf *engine.DispatcherHost
 		dspHostPrf, err = tpDspHst.dm.GetDispatcherHost(ctx, tnt, dspHostID, true, true, utils.NonTransactional)
 		if err != nil {
-			if err.Error() == utils.ErrNotFound.Error() {
+			if err.Error() == utils.ErrDSPHostNotFound.Error() {
 				return fmt.Errorf("<%s> cannot find DispatcherHost with id: <%v>", err, dspHostID)
 			}
 			return err

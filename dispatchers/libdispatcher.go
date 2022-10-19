@@ -227,7 +227,7 @@ func (sd *singleResultDispatcher) Dispatch(dm *engine.DataManager, flts *engine.
 	if hostIDs, err = sd.sorter.Sort(flts, ev, ctx, tnt, sd.hosts); err != nil {
 		return
 	} else if len(hostIDs) == 0 { // in case we do not match any host
-		return utils.ErrHostNotFound
+		return utils.ErrDSPHostNotFound
 	}
 	for _, hostID := range hostIDs {
 		var dRh *DispatcherRoute
@@ -240,7 +240,8 @@ func (sd *singleResultDispatcher) Dispatch(dm *engine.DataManager, flts *engine.
 		}
 		if err = callDHwithID(ctx, tnt, hostID, routeID, dRh, dm,
 			cfg, iPRCCh, serviceMethod, args, reply); err == nil ||
-			(err != utils.ErrNotFound && !rpcclient.IsNetworkError(err)) { // successful dispatch with normal errors
+			(err != utils.ErrDSPHostNotFound &&
+				!rpcclient.IsNetworkError(err)) { // successful dispatch with normal errors
 			return
 		}
 		if err != nil {
@@ -272,7 +273,7 @@ func (b *broadcastDispatcher) Dispatch(dm *engine.DataManager, flts *engine.Filt
 	for _, hostID := range hostIDs {
 		var dH *engine.DispatcherHost
 		if dH, err = dm.GetDispatcherHost(ctx, tnt, hostID, true, true, utils.NonTransactional); err != nil {
-			if err == utils.ErrNotFound {
+			if err == utils.ErrDSPHostNotFound {
 				utils.Logger.Warning(fmt.Sprintf("<%s> could not find host with ID %q",
 					utils.DispatcherS, hostID))
 				err = nil
@@ -298,7 +299,7 @@ func (b *broadcastDispatcher) Dispatch(dm *engine.DataManager, flts *engine.Filt
 		})
 	}
 	if !hasHosts { // in case we do not match any host
-		return utils.ErrHostNotFound
+		return utils.ErrDSPHostNotFound
 	}
 	return pool.Call(ctx, serviceMethod, args, reply)
 }
@@ -330,7 +331,8 @@ func (ld *loadDispatcher) Dispatch(dm *engine.DataManager, flts *engine.FilterS,
 			cfg, iPRCCh, serviceMethod, args, reply)
 		lM.decrementLoad(ctx, dR.HostID, ld.tntID) // call ended
 		if err == nil ||
-			(err != utils.ErrNotFound && !rpcclient.IsNetworkError(err)) { // successful dispatch with normal errors
+			(err != utils.ErrDSPHostNotFound &&
+				!rpcclient.IsNetworkError(err)) { // successful dispatch with normal errors
 			return
 		}
 		// not found or network errors will continue with standard dispatching
@@ -341,7 +343,7 @@ func (ld *loadDispatcher) Dispatch(dm *engine.DataManager, flts *engine.FilterS,
 	if hostIDs, err = ld.sorter.Sort(flts, ev, ctx, tnt, lM.getHosts(ld.hosts)); err != nil {
 		return
 	} else if len(hostIDs) == 0 { // in case we do not match any host
-		return utils.ErrHostNotFound
+		return utils.ErrDSPHostNotFound
 	}
 	for _, hostID := range hostIDs {
 		var dRh *DispatcherRoute
@@ -357,7 +359,8 @@ func (ld *loadDispatcher) Dispatch(dm *engine.DataManager, flts *engine.FilterS,
 			cfg, iPRCCh, serviceMethod, args, reply)
 		lM.decrementLoad(ctx, hostID, ld.tntID) // call ended
 		if err == nil ||
-			(err != utils.ErrNotFound && !rpcclient.IsNetworkError(err)) { // successful dispatch with normal errors
+			(err != utils.ErrDSPHostNotFound &&
+				!rpcclient.IsNetworkError(err)) { // successful dispatch with normal errors
 			return
 		}
 		if err != nil {

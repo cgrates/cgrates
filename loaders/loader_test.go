@@ -48,7 +48,8 @@ func TestRemoveFromDB(t *testing.T) {
 	for _, lType := range []string{utils.MetaAttributes, utils.MetaResources, utils.MetaFilters, utils.MetaStats,
 		utils.MetaThresholds, utils.MetaRoutes, utils.MetaChargers, utils.MetaDispatchers, utils.MetaDispatcherHosts,
 		utils.MetaRateProfiles, utils.MetaActionProfiles, utils.MetaAccounts} {
-		if err := removeFromDB(context.Background(), dm, lType, true, false, profileTest{utils.Tenant: "cgrates.org", utils.ID: "ID"}); err != utils.ErrNotFound {
+		if err := removeFromDB(context.Background(), dm, lType, true, false, profileTest{utils.Tenant: "cgrates.org", utils.ID: "ID"}); err != utils.ErrNotFound &&
+			err != utils.ErrDSPProfileNotFound && err != utils.ErrDSPHostNotFound {
 			t.Error(err)
 		}
 	}
