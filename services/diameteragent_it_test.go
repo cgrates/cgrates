@@ -44,7 +44,7 @@ func TestDiameterAgentReload1(t *testing.T) {
 	shdWg := new(sync.WaitGroup)
 	server := cores.NewServer(nil)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	srvMngr := servmanager.NewServiceManager(shdWg, nil, cfg.GetReloadChan())
+	srvMngr := servmanager.NewServiceManager(shdWg, nil, cfg)
 	db := NewDataDBService(cfg, nil, srvDep)
 	anz := NewAnalyzerService(cfg, server, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
 	sS := NewSessionService(cfg, db, filterSChan, server, make(chan birpc.ClientConnector, 1),

@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package servmanager
 
 import (
+	"errors"
 	"fmt"
 	"sync"
 
@@ -29,18 +30,20 @@ import (
 )
 
 // NewServiceManager returns a service manager
-func NewServiceManager(shdWg *sync.WaitGroup, connMgr *engine.ConnManager, rldChan <-chan string) *ServiceManager {
+func NewServiceManager(shdWg *sync.WaitGroup, connMgr *engine.ConnManager, cfg *config.CGRConfig) *ServiceManager {
 	return &ServiceManager{
+		cfg:        cfg,
 		subsystems: make(map[string]Service),
 		shdWg:      shdWg,
 		connMgr:    connMgr,
-		rldChan:    rldChan,
+		rldChan:    cfg.GetReloadChan(),
 	}
 }
 
 // ServiceManager handles service management ran by the engine
 type ServiceManager struct {
-	sync.RWMutex                    // lock access to any shared data
+	sync.RWMutex // lock access to any shared data
+	cfg          *config.CGRConfig
 	subsystems   map[string]Service // active subsystems managed by SM
 
 	shdWg   *sync.WaitGroup // list of shutdown items
@@ -160,4 +163,144 @@ type Service interface {
 	ShouldRun() bool
 	// ServiceName returns the service name
 	ServiceName() string
+}
+
+// ArgsServiceID are passed to Start/Stop/Status RPC methods
+type ArgsServiceID struct {
+	ServiceID string
+	APIOpts   map[string]interface{}
+}
+
+// V1StartService starts a service with ID
+func (srvMngr *ServiceManager) V1StartService(ctx *context.Context, args *ArgsServiceID, reply *string) (err error) {
+	err = toggleService(args.ServiceID, true, srvMngr)
+	if err != nil {
+		return
+	}
+	*reply = utils.OK
+	return
+}
+
+// V1StopService shuts-down a service with ID
+func (srvMngr *ServiceManager) V1StopService(ctx *context.Context, args *ArgsServiceID, reply *string) (err error) {
+	err = toggleService(args.ServiceID, false, srvMngr)
+	if err != nil {
+		return
+	}
+	*reply = utils.OK
+	return
+}
+
+// V1ServiceStatus  returns the service status
+func (srvMngr *ServiceManager) V1ServiceStatus(ctx *context.Context, args *ArgsServiceID, reply *string) error {
+	srvMngr.RLock()
+	defer srvMngr.RUnlock()
+
+	srv := srvMngr.GetService(args.ServiceID)
+	if srv == nil {
+		return utils.ErrUnsupportedServiceID
+	}
+	running := srv.IsRunning()
+
+	if running {
+		*reply = utils.RunningCaps
+	} else {
+		*reply = utils.StoppedCaps
+	}
+	return nil
+}
+
+// GetConfig returns the Configuration
+func (srvMngr *ServiceManager) GetConfig() *config.CGRConfig {
+	srvMngr.RLock()
+	defer srvMngr.RUnlock()
+	return srvMngr.cfg
+}
+
+func toggleService(serviceID string, status bool, srvMngr *ServiceManager) (err error) {
+	srvMngr.Lock()
+	defer srvMngr.Unlock()
+	switch serviceID {
+	case utils.AccountS:
+		srvMngr.cfg.AccountSCfg().Enabled = status
+		srvMngr.cfg.GetReloadChan() <- serviceID
+	case utils.ActionS:
+		srvMngr.cfg.ActionSCfg().Enabled = status
+		srvMngr.cfg.GetReloadChan() <- serviceID
+	case utils.AdminS:
+		srvMngr.cfg.AdminSCfg().Enabled = status
+		srvMngr.cfg.GetReloadChan() <- serviceID
+	case utils.AnalyzerS:
+		srvMngr.cfg.AnalyzerSCfg().Enabled = status
+		srvMngr.cfg.GetReloadChan() <- serviceID
+	case utils.AttributeS:
+		srvMngr.cfg.AttributeSCfg().Enabled = status
+		srvMngr.cfg.GetReloadChan() <- serviceID
+	case utils.CDRServer:
+		srvMngr.cfg.CdrsCfg().Enabled = status
+		srvMngr.cfg.GetReloadChan() <- serviceID
+	case utils.ChargerS:
+		srvMngr.cfg.ChargerSCfg().Enabled = status
+		srvMngr.cfg.GetReloadChan() <- serviceID
+	case utils.DispatcherS:
+		srvMngr.cfg.DispatcherSCfg().Enabled = status
+		srvMngr.cfg.GetReloadChan() <- serviceID
+	case utils.EEs:
+		srvMngr.cfg.EEsCfg().Enabled = status
+		srvMngr.cfg.GetReloadChan() <- serviceID
+	case utils.EFs:
+		srvMngr.cfg.EFsCfg().Enabled = status
+		srvMngr.cfg.GetReloadChan() <- serviceID
+	case utils.ERs:
+		srvMngr.cfg.ERsCfg().Enabled = status
+		srvMngr.cfg.GetReloadChan() <- serviceID
+		// case utils.LoaderS:
+		// 	srvMngr.cfg.LoaderCfg()[0].Enabled = status
+		// 	srvMngr.cfg.GetReloadChan() <- serviceID
+	case utils.RateS:
+		srvMngr.cfg.RateSCfg().Enabled = status
+		srvMngr.cfg.GetReloadChan() <- serviceID
+	case utils.ResourceS:
+		srvMngr.cfg.ResourceSCfg().Enabled = status
+		srvMngr.cfg.GetReloadChan() <- serviceID
+	case utils.RouteS:
+		srvMngr.cfg.RouteSCfg().Enabled = status
+		srvMngr.cfg.GetReloadChan() <- serviceID
+	case utils.SessionS:
+		srvMngr.cfg.SessionSCfg().Enabled = status
+		srvMngr.cfg.GetReloadChan() <- serviceID
+	case utils.StatS:
+		srvMngr.cfg.StatSCfg().Enabled = status
+		srvMngr.cfg.GetReloadChan() <- serviceID
+	case utils.ThresholdS:
+		srvMngr.cfg.ThresholdSCfg().Enabled = status
+		srvMngr.cfg.GetReloadChan() <- serviceID
+	case utils.TPeS:
+		srvMngr.cfg.TpeSCfg().Enabled = status
+		srvMngr.cfg.GetReloadChan() <- serviceID
+	case utils.AsteriskAgent:
+		srvMngr.cfg.AsteriskAgentCfg().Enabled = status
+		srvMngr.cfg.GetReloadChan() <- serviceID
+	case utils.DiameterAgent:
+		srvMngr.cfg.DiameterAgentCfg().Enabled = status
+		srvMngr.cfg.GetReloadChan() <- serviceID
+	case utils.DNSAgent:
+		srvMngr.cfg.DNSAgentCfg().Enabled = status
+		srvMngr.cfg.GetReloadChan() <- serviceID
+	case utils.FreeSWITCHAgent:
+		srvMngr.cfg.FsAgentCfg().Enabled = status
+		srvMngr.cfg.GetReloadChan() <- serviceID
+	case utils.KamailioAgent:
+		srvMngr.cfg.KamAgentCfg().Enabled = status
+		srvMngr.cfg.GetReloadChan() <- serviceID
+	case utils.RadiusAgent:
+		srvMngr.cfg.RadiusAgentCfg().Enabled = status
+		srvMngr.cfg.GetReloadChan() <- serviceID
+	case utils.SIPAgent:
+		srvMngr.cfg.SIPAgentCfg().Enabled = status
+		srvMngr.cfg.GetReloadChan() <- serviceID
+	default:
+		err = errors.New(utils.UnsupportedServiceIDCaps)
+	}
+	return
 }

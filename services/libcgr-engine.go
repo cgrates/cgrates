@@ -31,6 +31,7 @@ import (
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/apis"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
@@ -195,11 +196,9 @@ func cgrInitGuardianSv1(iGuardianSCh chan birpc.ClientConnector, cfg *config.CGR
 func cgrInitServiceManagerV1(iServMngrCh chan birpc.ClientConnector,
 	srvMngr *servmanager.ServiceManager, cfg *config.CGRConfig,
 	server *cores.Server, anz *AnalyzerService) {
-	srv, _ := engine.NewServiceWithName(srvMngr, utils.ServiceManager, true)
+	srv, _ := birpc.NewService(apis.NewServiceManagerV1(srvMngr), utils.EmptyString, false)
 	if !cfg.DispatcherSCfg().Enabled {
-		for _, s := range srv {
-			server.RpcRegister(s)
-		}
+		server.RpcRegister(srv)
 	}
 	iServMngrCh <- anz.GetInternalCodec(srv, utils.ServiceManager)
 }

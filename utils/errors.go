@@ -79,6 +79,7 @@ var (
 	ErrNegative                      = errors.New("NEGATIVE")
 	ErrUnsupportedTPExporterType     = errors.New("UNSUPPORTED_TPEXPORTER_TYPE")
 	ErrCastFailed                    = errors.New("CAST_FAILED")
+	ErrUnsupportedServiceID          = errors.New(UnsupportedServiceIDCaps)
 
 	ErrMap = map[string]error{
 		ErrNoMoreData.Error():              ErrNoMoreData,

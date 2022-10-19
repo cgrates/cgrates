@@ -51,7 +51,7 @@ func TestCdrsReload(t *testing.T) {
 
 	cfg.ChargerSCfg().Enabled = true
 	server := cores.NewServer(nil)
-	srvMngr := servmanager.NewServiceManager(shdWg, nil, cfg.GetReloadChan())
+	srvMngr := servmanager.NewServiceManager(shdWg, nil, cfg)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	db := NewDataDBService(cfg, nil, srvDep)
 	anz := NewAnalyzerService(cfg, server, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
