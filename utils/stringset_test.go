@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 import (
+	"encoding/json"
 	"reflect"
 	"sort"
 	"testing"
@@ -297,4 +298,24 @@ func TestStringFieldAsString(t *testing.T) {
 	if _, err := s.FieldAsString(fldPath); err != nil {
 		t.Errorf("expected %v got error", exp)
 	}
+}
+
+func TestStringString(t *testing.T) {
+	s := StringSet{
+		"key1": struct{}{},
+		"key2": struct{}{},
+		"key3": struct{}{},
+	}
+	exp := `["key1","key2","key3"]`
+
+	rcv := s.String()
+	rcvAsMap := []string{}
+	if err := json.Unmarshal([]byte(rcv), &rcvAsMap); err != nil {
+		t.Error(err)
+	}
+	rcv = ToJSON(rcvAsMap)
+	if rcv != exp {
+		t.Errorf("expected %v received %v", exp, rcv)
+	}
+
 }

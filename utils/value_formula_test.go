@@ -299,7 +299,9 @@ func TestValueFieldAsInterface(t *testing.T) {
 	fldPath = []string{"test1"}
 	vf = &ValueFormula{
 		Method: "Method",
-		Params: map[string]interface{}{},
+		Params: map[string]interface{}{
+			"key": "val",
+		},
 		Static: 22,
 	}
 	if val, _ := vf.FieldAsInterface(fldPath); val != nil {
@@ -328,6 +330,34 @@ func TestValueFieldAsInterface(t *testing.T) {
 	fldPath = []string{"Params", "second"}
 	if val, _ := vf.FieldAsInterface(fldPath); val != nil {
 		t.Error("expected error")
+	}
+
+	fldPath = []string{"Params[key]"}
+	if _, err := vf.FieldAsInterface(fldPath); err != nil {
+
+		t.Errorf("expected error nil but received %v", err)
+	}
+
+}
+
+func TestValueFieldAsString(t *testing.T) {
+	vf := &ValueFormula{}
+	fldPath := []string{}
+
+	if _, err := vf.FieldAsString(fldPath); err == nil {
+		t.Error("expected error")
+	}
+
+	vf = &ValueFormula{
+		Method: "Method",
+		Params: map[string]interface{}{
+			"Params": "index",
+		},
+		Static: 22,
+	}
+	fldPath = []string{"Params"}
+	if val, err := vf.FieldAsString(fldPath); err != nil {
+		t.Errorf("expected %v", val)
 	}
 
 }
