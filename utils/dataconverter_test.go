@@ -1132,6 +1132,9 @@ func TestLenTimeConverter3(t *testing.T) {
 	} else if !reflect.DeepEqual(expected, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, rcv)
 	}
+	if rcv, err := cnv.Convert(nil); err != nil {
+		t.Errorf("Expecting: %+v, received: %+v", expected, rcv)
+	}
 }
 
 func TestFloat64Converter(t *testing.T) {
@@ -1180,6 +1183,10 @@ func TestSliceConverter(t *testing.T) {
 	} else if !reflect.DeepEqual(expected2, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, rcv)
 	}
+
+	if _, err := cnv.Convert(`test`); err != nil {
+		t.Error(err)
+	}
 }
 
 func TestE164FromNAPTRConverter(t *testing.T) {
@@ -1190,6 +1197,9 @@ func TestE164FromNAPTRConverter(t *testing.T) {
 	}
 	if !reflect.DeepEqual(exp, cnv) {
 		t.Errorf("Expecting: %+v, received: %+v", exp, cnv)
+	}
+	if _, err := cnv.Convert("8.7.6.5.4.3.2.1"); err == nil {
+		t.Error("Error")
 	}
 	if e164, err := cnv.Convert("8.7.6.5.4.3.2.1.0.1.6.e164.arpa."); err != nil {
 		t.Error(err)
@@ -1207,6 +1217,7 @@ func TestDomainNameFromNAPTRConverter(t *testing.T) {
 	if !reflect.DeepEqual(exp, cnv) {
 		t.Errorf("Expecting: %+v, received: %+v", exp, cnv)
 	}
+
 	if dName, err := cnv.Convert("8.7.6.5.4.3.2.1.0.1.6.e164.arpa."); err != nil {
 		t.Fatal(err)
 	} else if dName != "e164.arpa" {
