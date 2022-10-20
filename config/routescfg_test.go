@@ -37,6 +37,12 @@ func TestRouteSCfgloadFromJsonCfg(t *testing.T) {
 		Rals_conns:            &[]string{utils.MetaInternal, "conn1"},
 		Default_ratio:         utils.IntPointer(10),
 		Nested_fields:         utils.BoolPointer(true),
+		Opts: &RoutesOptsJson{
+			MaxCost:      utils.IntPointer(3),
+			Limit:        utils.IntPointer(3),
+			Offset:       utils.IntPointer(3),
+			ProfileCount: utils.IntPointer(3),
+		},
 	}
 	expected := &RouteSCfg{
 		Enabled:             true,
@@ -53,7 +59,11 @@ func TestRouteSCfgloadFromJsonCfg(t *testing.T) {
 		Opts: &RoutesOpts{
 			Context:      utils.MetaRoutes,
 			IgnoreErrors: false,
-			MaxCost:      utils.EmptyString,
+
+			MaxCost:      utils.IntPointer(3),
+			Limit:        utils.IntPointer(3),
+			Offset:       utils.IntPointer(3),
+			ProfileCount: utils.IntPointer(3),
 		},
 	}
 	jsonCfg := NewDefaultCGRConfig()

@@ -203,3 +203,76 @@ func TestHTTPCfgClone(t *testing.T) {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
 }
+
+func TestHTTPNewDialer(t *testing.T) {
+	dialer := &net.Dialer{
+		DualStack: true,
+	}
+	var jsnCfg *HTTPClientOptsJson
+	if err := newDialer(dialer, jsnCfg); err != nil {
+		t.Error(err)
+	}
+	jsnCfg = &HTTPClientOptsJson{
+		DialTimeout:       utils.StringPointer("test"),
+		DialFallbackDelay: utils.StringPointer("test2"),
+	}
+	if err := newDialer(dialer, jsnCfg); err == nil {
+		t.Error(err)
+	}
+	jsnCfg = &HTTPClientOptsJson{
+		DialFallbackDelay: utils.StringPointer("test2"),
+	}
+	if err := newDialer(dialer, jsnCfg); err == nil {
+		t.Error(err)
+	}
+	jsnCfg = &HTTPClientOptsJson{
+		DialKeepAlive: utils.StringPointer("test3"),
+	}
+	if err := newDialer(dialer, jsnCfg); err == nil {
+		t.Error(err)
+	}
+}
+
+func TestHTTPLoadTransportFromJSONCfg(t *testing.T) {
+
+	var jsnCfg *HTTPClientOptsJson
+	httpOpts := &http.Transport{}
+	httpDialer := &net.Dialer{}
+	if err := loadTransportFromJSONCfg(httpOpts, httpDialer, jsnCfg); err != nil {
+		t.Error(err)
+	}
+	jsnCfg = &HTTPClientOptsJson{
+		TLSHandshakeTimeout: utils.StringPointer("test"),
+	}
+	if err := loadTransportFromJSONCfg(httpOpts, httpDialer, jsnCfg); err == nil {
+		t.Error(err)
+	}
+	jsnCfg = &HTTPClientOptsJson{
+		IdleConnTimeout: utils.StringPointer("test2"),
+	}
+	if err := loadTransportFromJSONCfg(httpOpts, httpDialer, jsnCfg); err == nil {
+		t.Error(err)
+	}
+	jsnCfg = &HTTPClientOptsJson{
+		ResponseHeaderTimeout: utils.StringPointer("test3"),
+	}
+	if err := loadTransportFromJSONCfg(httpOpts, httpDialer, jsnCfg); err == nil {
+		t.Error(err)
+	}
+	jsnCfg = &HTTPClientOptsJson{
+		ExpectContinueTimeout: utils.StringPointer("test4"),
+	}
+	if err := loadTransportFromJSONCfg(httpOpts, httpDialer, jsnCfg); err == nil {
+		t.Error(err)
+	}
+
+}
+
+func TestHTTPLoadFromJSONCfg(t *testing.T) {
+	var jsnHTTPCfg *HTTPJsonCfg
+	httpcfg := &HTTPCfg{}
+	if err := httpcfg.loadFromJSONCfg(jsnHTTPCfg); err != nil {
+		t.Error(err)
+	}
+
+}

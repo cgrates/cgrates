@@ -94,6 +94,58 @@ func TestDataDbCfgloadFromJsonCfg(t *testing.T) {
 			t.Errorf("Expected %+v \n, received %+v", expected.RplConns, jsnCfg.dataDbCfg.RplConns)
 		}
 	}
+	jsonCfg = &DbJsonCfg{
+		Opts: &DBOptsJson{
+			RedisClusterSync: utils.StringPointer("test"),
+		},
+	}
+
+	if err := jsnCfg.dataDbCfg.loadFromJSONCfg(jsonCfg); err == nil {
+		t.Error(err)
+	}
+	jsonCfg = &DbJsonCfg{
+		Opts: &DBOptsJson{
+			RedisClusterOndownDelay: utils.StringPointer("test2"),
+		},
+	}
+
+	if err := jsnCfg.dataDbCfg.loadFromJSONCfg(jsonCfg); err == nil {
+		t.Error(err)
+	}
+	jsonCfg = &DbJsonCfg{
+		Opts: &DBOptsJson{
+			RedisConnectTimeout: utils.StringPointer("test3"),
+		},
+	}
+
+	if err := jsnCfg.dataDbCfg.loadFromJSONCfg(jsonCfg); err == nil {
+		t.Error(err)
+	}
+	jsonCfg = &DbJsonCfg{
+		Opts: &DBOptsJson{
+			RedisReadTimeout: utils.StringPointer("test4"),
+		},
+	}
+	if err := jsnCfg.dataDbCfg.loadFromJSONCfg(jsonCfg); err == nil {
+		t.Error(err)
+	}
+	jsonCfg = &DbJsonCfg{
+		Opts: &DBOptsJson{
+			RedisWriteTimeout: utils.StringPointer("test4"),
+		},
+	}
+	if err := jsnCfg.dataDbCfg.loadFromJSONCfg(jsonCfg); err == nil {
+		t.Error(err)
+	}
+	jsonCfg = &DbJsonCfg{
+		Opts: &DBOptsJson{
+			MongoQueryTimeout: utils.StringPointer("test4"),
+		},
+	}
+	if err := jsnCfg.dataDbCfg.loadFromJSONCfg(jsonCfg); err == nil {
+		t.Error(err)
+	}
+
 }
 
 func TestConnsloadFromJsonCfg(t *testing.T) {
