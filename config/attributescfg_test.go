@@ -39,6 +39,7 @@ func TestAttributeSCfgloadFromJsonCfg(t *testing.T) {
 		Any_context:           utils.BoolPointer(true),
 		Opts: &AttributesOptsJson{
 			ProcessRuns: utils.IntPointer(1),
+			Context:     utils.StringPointer("context"),
 		},
 	}
 	expected := &AttributeSCfg{
@@ -55,6 +56,7 @@ func TestAttributeSCfgloadFromJsonCfg(t *testing.T) {
 		Opts: &AttributesOpts{
 			ProcessRuns: 1,
 			ProfileIDs:  []string{},
+			Context:     utils.StringPointer("context"),
 		},
 	}
 	jsnCfg := NewDefaultCGRConfig()
@@ -62,6 +64,12 @@ func TestAttributeSCfgloadFromJsonCfg(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, jsnCfg.attributeSCfg) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expected), utils.ToJSON(jsnCfg.attributeSCfg))
+	}
+
+	jsnCfg.attributeSCfg.Opts.loadFromJSONCfg(nil)
+
+	if reflect.DeepEqual(jsnCfg.attributeSCfg.Opts, nil) {
+		t.Error("expected nil")
 	}
 }
 
@@ -76,6 +84,7 @@ func TestAttributeSCfgAsMapInterface(t *testing.T) {
     "string_indexed_fields": ["*req.index1"],
 	"opts": {
 		"*processRuns": 3,
+		"*context":"Context"
 	},
 },		
 }`
@@ -95,6 +104,7 @@ func TestAttributeSCfgAsMapInterface(t *testing.T) {
 			utils.MetaProfileRuns:             0,
 			utils.MetaProfileIDs:              []string{},
 			utils.MetaProfileIgnoreFiltersCfg: false,
+			utils.OptsContext:                 "Context",
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
@@ -184,6 +194,7 @@ func TestAttributeSCfgClone(t *testing.T) {
 		Opts: &AttributesOpts{
 			ProcessRuns: 1,
 			ProfileIDs:  []string{},
+			Context:     utils.StringPointer("Context"),
 		},
 	}
 	rcv := ban.Clone()

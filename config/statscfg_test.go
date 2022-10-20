@@ -56,6 +56,11 @@ func TestStatSCfgloadFromJsonCfgCase1(t *testing.T) {
 	} else if !reflect.DeepEqual(expected, jsonCfg.statsCfg) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsonCfg.statsCfg))
 	}
+	jsonCfg.statsCfg.Opts.loadFromJSONCfg(nil)
+	if reflect.DeepEqual(nil, jsonCfg.statsCfg.Opts) {
+
+		t.Error("expected nil")
+	}
 }
 
 func TestStatSCfgloadFromJsonCfgCase2(t *testing.T) {

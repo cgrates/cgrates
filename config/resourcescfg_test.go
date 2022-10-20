@@ -55,6 +55,23 @@ func TestResourceSConfigloadFromJsonCfgCase1(t *testing.T) {
 	} else if !reflect.DeepEqual(expected, cfg.resourceSCfg) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(cfg.resourceSCfg))
 	}
+	cfg.resourceSCfg.Opts.loadFromJSONCfg(nil)
+	if reflect.DeepEqual(nil, cfg.resourceSCfg.Opts) {
+		t.Error("expected nil")
+	}
+	cfgJson := &ResourcesOptsJson{
+		UsageTTL: utils.StringPointer("1000"),
+	}
+	if err := cfg.resourceSCfg.Opts.loadFromJSONCfg(cfgJson); err != nil {
+		t.Error(err)
+	}
+	cfgJsonFail := &ResourcesOptsJson{
+		UsageTTL: utils.StringPointer("test"),
+	}
+	if err := cfg.resourceSCfg.Opts.loadFromJSONCfg(cfgJsonFail); err == nil {
+		t.Error(err)
+	}
+
 }
 
 func TestResourceSConfigloadFromJsonCfgCase2(t *testing.T) {
@@ -102,7 +119,11 @@ func TestResourceSConfigAsMapInterface1(t *testing.T) {
             "string_indexed_fields": ["*req.index1"],
 			"prefix_indexed_fields": ["*req.prefix_indexed_fields1","*req.prefix_indexed_fields2"],
             "suffix_indexed_fields": ["*req.prefix_indexed_fields1"],
-			"nested_fields": true,					
+			"nested_fields": true,	
+			"opts":{
+				"*usageTTL":"1"
+
+			}		
 		},	
 	}`
 	eMap := map[string]interface{}{
@@ -115,8 +136,9 @@ func TestResourceSConfigAsMapInterface1(t *testing.T) {
 		utils.SuffixIndexedFieldsCfg: []string{"*req.prefix_indexed_fields1"},
 		utils.NestedFieldsCfg:        true,
 		utils.OptsCfg: map[string]interface{}{
-			utils.MetaUnitsCfg:   1.,
-			utils.MetaUsageIDCfg: "",
+			utils.MetaUnitsCfg:    1.,
+			utils.MetaUsageIDCfg:  "",
+			utils.MetaUsageTTLCfg: 1 * time.Nanosecond,
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
@@ -136,7 +158,9 @@ func TestResourceSConfigClone(t *testing.T) {
 		PrefixIndexedFields: &[]string{"*req.index1"},
 		SuffixIndexedFields: &[]string{"*req.index1"},
 		NestedFields:        true,
-		Opts:                &ResourcesOpts{},
+		Opts: &ResourcesOpts{
+			UsageTTL: utils.DurationPointer(1 * time.Second),
+		},
 	}
 	rcv := ban.Clone()
 	if !reflect.DeepEqual(ban, rcv) {

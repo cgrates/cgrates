@@ -99,6 +99,27 @@ func TestStoreDbCfgloadFromJsonCfgCase1(t *testing.T) {
 	} else if !reflect.DeepEqual(expected.RmtConns, jsonCfg.storDbCfg.RmtConns) {
 		t.Errorf("Expected %+v \n, recevied %+v", utils.ToJSON(expected.RmtConns), utils.ToJSON(jsonCfg.storDbCfg.RmtConns))
 	}
+
+	var dbOpts *StorDBOpts
+	var jsonDbOpts *DBOptsJson
+	dbOpts.loadFromJSONCfg(jsonDbOpts)
+	if reflect.DeepEqual(nil, dbOpts) {
+		t.Error("expected nil")
+	}
+	jsonDOpts := &DBOptsJson{
+
+		SQLConnMaxLifetime: utils.StringPointer("test"),
+	}
+	if err := jsonCfg.storDbCfg.Opts.loadFromJSONCfg(jsonDOpts); err == nil {
+		t.Error(err)
+	}
+	jjsonDOpts := &DBOptsJson{
+
+		MongoQueryTimeout: utils.StringPointer("test"),
+	}
+	if err := jsonCfg.storDbCfg.Opts.loadFromJSONCfg(jjsonDOpts); err == nil {
+		t.Error(err)
+	}
 }
 
 func TestStoreDbCfgloadFromJsonCfgCase2(t *testing.T) {

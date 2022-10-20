@@ -75,6 +75,7 @@ func TestHTTPCfgloadFromJsonCfg(t *testing.T) {
 	} else if !reflect.DeepEqual(expected.AsMapInterface(), cfgJsn.httpCfg.AsMapInterface()) {
 		t.Errorf("Expected %+v \n, received %+v", expected.AsMapInterface(), cfgJsn.httpCfg.AsMapInterface())
 	}
+
 }
 
 func TestHTTPCfgAsMapInterface(t *testing.T) {

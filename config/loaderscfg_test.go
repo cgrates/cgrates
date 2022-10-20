@@ -512,3 +512,16 @@ func TestLockFolderIsDir(t *testing.T) {
 		t.Errorf("Expected %v \n but received \n %v", expPath, ldr.LockFilePath)
 	}
 }
+
+func TestLockGetLockFilePath(t *testing.T) {
+
+	l := LoaderSCfg{
+		LockFilePath: "folder",
+		TpInDir:      "/dir",
+		ID:           "4"}
+	expected := "/dir/folder"
+	if val := l.GetLockFilePath(); val != expected {
+		t.Error(val)
+	}
+
+}
