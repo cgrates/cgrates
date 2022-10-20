@@ -661,21 +661,28 @@ func TestFsConnCfgloadFromJsonCfg(t *testing.T) {
 		t.Errorf("Expected: %+v ,received: %+v", expected, fscocfg)
 	}
 	json := &FsConnJsonCfg{
-		Address:    utils.StringPointer("127.0.0.1:8448"),
-		Password:   utils.StringPointer("pass123"),
-		Reconnects: utils.IntPointer(5),
-		Alias:      utils.StringPointer("127.0.0.1:8448"),
+		Address:                utils.StringPointer("127.0.0.1:8448"),
+		Password:               utils.StringPointer("pass123"),
+		Reconnects:             utils.IntPointer(5),
+		Alias:                  utils.StringPointer("127.0.0.1:8448"),
+		Max_reconnect_interval: utils.StringPointer("1"),
 	}
 	expected = FsConnCfg{
-		Address:    "127.0.0.1:8448",
-		Password:   "pass123",
-		Reconnects: 5,
-		Alias:      "127.0.0.1:8448",
+		Address:              "127.0.0.1:8448",
+		Password:             "pass123",
+		Reconnects:           5,
+		Alias:                "127.0.0.1:8448",
+		MaxReconnectInterval: 1 * time.Nanosecond,
 	}
 	if err = fscocfg.loadFromJSONCfg(json); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, fscocfg) {
 		t.Errorf("Expected: %+v , received: %+v", utils.ToJSON(expected), utils.ToJSON(fscocfg))
+	}
+	json.Max_reconnect_interval = utils.StringPointer("test")
+
+	if err := fscocfg.loadFromJSONCfg(json); err == nil {
+		t.Error(err)
 	}
 }
 
@@ -799,23 +806,29 @@ func TestAsteriskConnCfgloadFromJsonCfg(t *testing.T) {
 		t.Errorf("Expected: %+v ,received: %+v", expected, asconcfg)
 	}
 	json := &AstConnJsonCfg{
-		Address:          utils.StringPointer("127.0.0.1:8088"),
-		User:             utils.StringPointer("cgrates"),
-		Password:         utils.StringPointer("CGRateS.org"),
-		Connect_attempts: utils.IntPointer(3),
-		Reconnects:       utils.IntPointer(5),
+		Address:                utils.StringPointer("127.0.0.1:8088"),
+		User:                   utils.StringPointer("cgrates"),
+		Password:               utils.StringPointer("CGRateS.org"),
+		Connect_attempts:       utils.IntPointer(3),
+		Reconnects:             utils.IntPointer(5),
+		Max_reconnect_interval: utils.StringPointer("1"),
 	}
 	expected = AsteriskConnCfg{
-		Address:         "127.0.0.1:8088",
-		User:            "cgrates",
-		Password:        "CGRateS.org",
-		ConnectAttempts: 3,
-		Reconnects:      5,
+		Address:              "127.0.0.1:8088",
+		User:                 "cgrates",
+		Password:             "CGRateS.org",
+		ConnectAttempts:      3,
+		Reconnects:           5,
+		MaxReconnectInterval: 1 * time.Nanosecond,
 	}
 	if err = asconcfg.loadFromJSONCfg(json); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, asconcfg) {
 		t.Errorf("Expected: %+v , received: %+v", utils.ToJSON(expected), utils.ToJSON(asconcfg))
+	}
+	json.Max_reconnect_interval = utils.StringPointer("test")
+	if err = asconcfg.loadFromJSONCfg(json); err == nil {
+		t.Error(err)
 	}
 }
 

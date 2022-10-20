@@ -94,6 +94,11 @@ func TestDataDbCfgloadFromJsonCfg(t *testing.T) {
 			t.Errorf("Expected %+v \n, received %+v", expected.RplConns, jsnCfg.dataDbCfg.RplConns)
 		}
 	}
+
+	if err := jsnCfg.dataDbCfg.Opts.loadFromJSONCfg(nil); err != nil {
+		t.Error(err)
+	}
+
 	jsonCfg = &DbJsonCfg{
 		Opts: &DBOptsJson{
 			RedisClusterSync: utils.StringPointer("test"),
@@ -537,8 +542,8 @@ func TestDataDbCfgAsMapInterface(t *testing.T) {
 		"remote_conns":[],
 		"replication_conns":[],
 		"items":{
-			"*accounts":{"remote":true, "replicate":false, "api_key": "randomVal", "route_id": "randomVal"}, 					
-			"*reverse_destinations": {"remote":false, "replicate":false, "api_key": "randomVal", "route_id": "randomVal"},
+			"*accounts":{"remote":true, "replicate":false, "api_key": "randomVal", "route_id": "randomVal","ttl":"1"}, 					
+			"*reverse_destinations": {"remote":false, "replicate":false, "api_key": "randomVal", "route_id": "randomVal","ttl":"1"},
 		},
 	},		
 }`
@@ -556,8 +561,8 @@ func TestDataDbCfgAsMapInterface(t *testing.T) {
 		utils.RemoteConnsCfg:      []string{},
 		utils.ReplicationConnsCfg: []string{},
 		utils.ItemsCfg: map[string]interface{}{
-			utils.MetaAccounts:            map[string]interface{}{utils.RemoteCfg: true, utils.ReplicateCfg: false, utils.APIKeyCfg: "randomVal", utils.RouteIDCfg: "randomVal", utils.LimitCfg: -1, utils.StaticTTLCfg: false},
-			utils.MetaReverseDestinations: map[string]interface{}{utils.RemoteCfg: false, utils.ReplicateCfg: false, utils.APIKeyCfg: "randomVal", utils.RouteIDCfg: "randomVal", utils.LimitCfg: -1, utils.StaticTTLCfg: false},
+			utils.MetaAccounts:            map[string]interface{}{utils.RemoteCfg: true, utils.ReplicateCfg: false, utils.APIKeyCfg: "randomVal", utils.RouteIDCfg: "randomVal", utils.LimitCfg: -1, utils.StaticTTLCfg: false, utils.TTLCfg: "1ns"},
+			utils.MetaReverseDestinations: map[string]interface{}{utils.RemoteCfg: false, utils.ReplicateCfg: false, utils.APIKeyCfg: "randomVal", utils.RouteIDCfg: "randomVal", utils.LimitCfg: -1, utils.StaticTTLCfg: false, utils.TTLCfg: "1ns"},
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {

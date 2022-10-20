@@ -57,6 +57,12 @@ func TestThresholdSCfgloadFromJsonCfgCase1(t *testing.T) {
 	} else if !reflect.DeepEqual(expected, jsonCfg.thresholdSCfg) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsonCfg.thresholdSCfg))
 	}
+	var optsCfg *ThresholdsOpts
+	var jsonOpt *ThresholdsOptsJson
+	optsCfg.loadFromJSONCfg(jsonOpt)
+	if reflect.DeepEqual(nil, optsCfg) {
+		t.Error("expected nil")
+	}
 }
 
 func TestThresholdSCfgloadFromJsonCfgCase2(t *testing.T) {

@@ -76,6 +76,12 @@ func TestGeneralCfgloadFromJsonCfg(t *testing.T) {
 	} else if !reflect.DeepEqual(expected, jsnCfg.generalCfg) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsnCfg.generalCfg))
 	}
+
+	cfgJSON.Max_reconnect_interval = utils.StringPointer("test1")
+
+	if err := jsnCfg.generalCfg.loadFromJSONCfg(cfgJSON); err == nil {
+		t.Error(err)
+	}
 }
 
 func TestGeneralParseDurationCfgloadFromJsonCfg(t *testing.T) {
@@ -139,9 +145,11 @@ func TestGeneralCfgAsMapInterface(t *testing.T) {
 			"digest_separator": ",",								
 			"digest_equal": ":",									
 			"rsr_separator": ";",									
-			"max_parallel_conns": 100,								
+			"max_parallel_conns": 100,
+			"max_reconnect_interval":"1s"
 		},
 	}`
+
 	eMap := map[string]interface{}{
 		utils.NodeIDCfg:               "cgrates",
 		utils.LoggerCfg:               "*syslog",
@@ -159,7 +167,7 @@ func TestGeneralCfgAsMapInterface(t *testing.T) {
 		utils.DefaultCachingCfg:       "*reload",
 		utils.ConnectAttemptsCfg:      5,
 		utils.ReconnectsCfg:           -1,
-		utils.MaxReconnectIntervalCfg: "0",
+		utils.MaxReconnectIntervalCfg: "1s",
 		utils.ConnectTimeoutCfg:       "1s",
 		utils.ReplyTimeoutCfg:         "2s",
 		utils.LockingTimeoutCfg:       "1s",

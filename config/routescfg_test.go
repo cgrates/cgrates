@@ -72,11 +72,20 @@ func TestRouteSCfgloadFromJsonCfg(t *testing.T) {
 	} else if !reflect.DeepEqual(expected, jsonCfg.routeSCfg) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsonCfg.routeSCfg))
 	}
+	jsonCfg.routeSCfg.Opts.loadFromJSONCfg(nil)
+	if reflect.DeepEqual(nil, jsonCfg.routeSCfg.Opts) {
+		t.Error(err)
+	}
 }
 
 func TestRouteSCfgAsMapInterface(t *testing.T) {
 	cfgJSONStr := `{
-	"routes": {},
+	"routes": {
+		
+		"opts":{
+		
+		 },
+	},
 }`
 	eMap := map[string]interface{}{
 		utils.EnabledCfg:             false,
@@ -156,7 +165,11 @@ func TestRouteSCfgClone(t *testing.T) {
 		RALsConns:           []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResponder), "conn1"},
 		DefaultRatio:        10,
 		NestedFields:        true,
-		Opts:                &RoutesOpts{},
+		Opts: &RoutesOpts{
+			ProfileCount: utils.IntPointer(0),
+			Limit:        utils.IntPointer(0),
+			Offset:       utils.IntPointer(0),
+		},
 	}
 	rcv := ban.Clone()
 	if !reflect.DeepEqual(ban, rcv) {
