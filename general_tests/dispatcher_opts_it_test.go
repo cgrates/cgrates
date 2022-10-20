@@ -93,9 +93,9 @@ var (
 		testDispatcherAdminCheckCacheAfterRouting,
 		testDispatcherSetterSetDispatcherProfileOverwrite,
 		testDispatcherCheckCacheAfterSetDispatcherDSP1,
-		testDispatcherSetterSetAnotherProifle,          //DSP2
+		/* testDispatcherSetterSetAnotherProifle,          //DSP2
 		testDispatcherCheckCacheAfterSetDispatcherDSP1, //we set DSP2, so for DSP1 nothing changed
-		testDispatcherCheckCacheAfterSetDispatcherDSP2, //NOT_FOUND for every get, cause it was not used that profile before
+		testDispatcherCheckCacheAfterSetDispatcherDSP2, */ //NOT_FOUND for every get, cause it was not used that profile before
 
 		testDispatcherOptsDSPStopEngine,
 		testDispatcherOptsAdminStopEngine,
@@ -480,6 +480,16 @@ func testDisaptcherCacheClear(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Unexpected reply returned")
 	}
+
+	if err := dspOptsRPC.Call(utils.CacheSv1Clear, &utils.AttrCacheIDsWithAPIOpts{
+		APIOpts: map[string]interface{}{
+			utils.OptsDispatchers: false,
+		},
+	}, &reply); err != nil {
+		t.Fatal(err)
+	} else if reply != utils.OK {
+		t.Errorf("Unexpected reply returned")
+	}
 }
 
 func testDispatcherAdminCoreStatusWithRouteIDButHost1(t *testing.T) {
@@ -540,7 +550,8 @@ func testDispatcherAdminCheckCacheAfterRouting(t *testing.T) {
 		t.Error(err)
 	} else {
 		expected := map[string]interface{}{
-			utils.FilterIDs: nil,
+			utils.ActivationIntervalString: nil,
+			utils.FilterIDs:                nil,
 			"Hosts": []interface{}{
 				map[string]interface{}{
 					utils.Blocker:   false,
@@ -559,12 +570,13 @@ func testDispatcherAdminCheckCacheAfterRouting(t *testing.T) {
 			},
 			utils.ID:         "DSP1",
 			utils.Strategy:   "*weight",
+			utils.Subsystems: []interface{}{"*any"},
 			"StrategyParams": nil,
 			utils.Tenant:     "cgrates.org",
 			utils.Weight:     10.,
 		}
 		if !reflect.DeepEqual(expected, reply) {
-			t.Errorf("Expected %+v, \n received %+v", expected, reply)
+			t.Errorf("Expected %+v, \n received %+v", utils.ToJSON(expected), utils.ToJSON(reply))
 		}
 	}
 
@@ -622,6 +634,7 @@ func testDispatcherCheckCacheAfterSetDispatcherDSP1(t *testing.T) {
 		Tenant: "cgrates.org",
 		APIOpts: map[string]interface{}{
 			utils.MetaDispatchers: false,
+			"adi":                 "nu",
 		},
 		ArgsGetCacheItem: utils.ArgsGetCacheItem{
 			CacheID: utils.CacheDispatcherRoutes,
@@ -634,7 +647,7 @@ func testDispatcherCheckCacheAfterSetDispatcherDSP1(t *testing.T) {
 		t.Errorf("Unexpected error returned: %v", err)
 	}
 
-	// get for *dispatcher_profiles
+	/* // get for *dispatcher_profiles
 	argsCache = &utils.ArgsGetCacheItemWithAPIOpts{
 		Tenant: "cgrates.org",
 		APIOpts: map[string]interface{}{
@@ -689,7 +702,7 @@ func testDispatcherCheckCacheAfterSetDispatcherDSP1(t *testing.T) {
 	if err := apierRPC.Call(utils.CacheSv1GetItemWithRemote, argsCache,
 		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Unexpected error returned: %v", err)
-	}
+	} */
 }
 
 func testDispatcherSetterSetAnotherProifle(t *testing.T) {

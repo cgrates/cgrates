@@ -36,6 +36,7 @@
         "*dispatcher_routes": {"limit": -1, "ttl": "", "static_ttl": false, "remote":true, "replicate": false}, 						
         "*dispatchers": {"limit": -1, "ttl": "", "static_ttl": false, "remote":true, "replicate": false}								
     },
+    "replication_conns": ["gob_cache"] ,
     "remote_conns": ["gob_cache"]               
 },    
 
