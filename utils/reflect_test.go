@@ -622,6 +622,11 @@ func TestDifference(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", time.Date(2009, 11, 10, 22, 59, 40, 0, time.UTC), diff)
 	}
 
+	if _, err := Difference("time.Second", time.Date(2009, 11, 10, 22, 59, 40, 0, time.UTC), "20000000"); err != nil {
+
+		t.Errorf("%v", err)
+	}
+
 }
 
 func TestMultiply(t *testing.T) {
