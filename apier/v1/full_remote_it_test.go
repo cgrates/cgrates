@@ -539,7 +539,7 @@ func testFullRemoteITDispatcher(t *testing.T) {
 	var reply *engine.DispatcherProfile
 	if err := fullRemInternalRPC.Call(utils.APIerSv1GetDispatcherProfile,
 		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "Dsp1"}},
-		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		&reply); err == nil || err.Error() != utils.ErrDSPProfileNotFound.Error() {
 		t.Fatal(err)
 	}
 
