@@ -104,7 +104,7 @@ func (dS *DispatcherService) dispatcherProfilesForEvent(tnt string, ev *utils.CG
 	evNm utils.MapStorage, subsys string) (dPrlfs engine.DispatcherProfiles, err error) {
 	// make sure dispatching is allowed
 	var shouldDispatch bool
-	if shouldDispatch, err = utils.GetBoolOpts(ev, true, utils.OptsDispatchers); err != nil {
+	if shouldDispatch, err = utils.GetBoolOpts(ev, true, utils.MetaDispatchers); err != nil {
 		return
 	} else {
 		var subsys string
@@ -200,7 +200,6 @@ func (dS *DispatcherService) dispatcherProfilesForEvent(tnt string, ev *utils.CG
 // Dispatch is the method forwarding the request towards the right connection
 func (dS *DispatcherService) Dispatch(ev *utils.CGREvent, subsys string,
 	serviceMethod string, args interface{}, reply interface{}) (err error) {
-	// fix missing tenant
 	tnt := ev.Tenant
 	if tnt == utils.EmptyString {
 		tnt = dS.cfg.GeneralCfg().DefaultTenant
@@ -222,7 +221,7 @@ func (dS *DispatcherService) Dispatch(ev *utils.CGREvent, subsys string,
 	}
 	// avoid further processing if the request is internal
 	var shouldDispatch bool
-	if shouldDispatch, err = utils.GetBoolOpts(ev, true, utils.OptsDispatchers); err != nil {
+	if shouldDispatch, err = utils.GetBoolOpts(ev, true, utils.MetaDispatchers); err != nil {
 		return utils.NewErrDispatcherS(err)
 	} else {
 		var subsys string
