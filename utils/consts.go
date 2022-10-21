@@ -2482,7 +2482,6 @@ const (
 	OptsAPIKey                   = "*apiKey"
 	OptsRouteID                  = "*routeID"
 	OptsDispatchersProfilesCount = "*dispatchersProfilesCount"
-	OptsDispatchers              = "*dispatcherS"
 	// EEs
 	OptsEEsVerbose = "*eesVerbose"
 	// Resources

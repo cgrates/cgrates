@@ -2798,7 +2798,6 @@ func (dm *DataManager) GetDispatcherProfile(tenant, id string, cacheRead, cacheW
 					cacheCommit(transactionID), transactionID); errCh != nil {
 					return nil, errCh
 				}
-
 			}
 			return nil, err
 		}

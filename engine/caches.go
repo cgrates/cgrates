@@ -178,7 +178,12 @@ func (chS *CacheS) SetWithoutReplicate(chID, itmID string, value interface{},
 
 // SetWithReplicate combines local set with replicate, receiving the arguments needed by dispatcher
 func (chS *CacheS) SetWithReplicate(args *utils.ArgCacheReplicateSet) (err error) {
+	// normal cache set
 	chS.tCache.Set(args.CacheID, args.ItemID, args.Value, args.GroupIDs, true, utils.EmptyString)
+	if len(chS.cfg.CacheCfg().ReplicationConns) == 0 ||
+		!chS.cfg.CacheCfg().Partitions[args.CacheID].Replicate {
+		return
+	}
 	var reply string
 	return connMgr.Call(chS.cfg.CacheCfg().ReplicationConns, nil,
 		utils.CacheSv1ReplicateSet, args, &reply)

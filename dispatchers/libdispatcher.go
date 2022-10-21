@@ -455,16 +455,13 @@ func callDH(dh *engine.DispatcherHost, routeID string, dR *DispatcherRoute,
 			Value:    dR,
 			GroupIDs: []string{utils.ConcatenatedKey(utils.CacheDispatcherProfiles, dR.Tenant, dR.ProfileID)},
 		}
-		if len(config.CgrConfig().CacheCfg().ReplicationConns) != 0 &&
-			config.CgrConfig().CacheCfg().Partitions[utils.CacheDispatcherRoutes].Replicate {
-			if err = engine.Cache.SetWithReplicate(argsCache); err != nil {
-				if !rpcclient.IsNetworkError(err) {
-					return
-				}
-				// did not dispatch properly, fail-back to standard dispatching
-				utils.Logger.Warning(fmt.Sprintf("<%s> ignoring cache network error <%s> setting route dR %+v",
-					utils.DispatcherS, err.Error(), dR))
+		if err = engine.Cache.SetWithReplicate(argsCache); err != nil {
+			if !rpcclient.IsNetworkError(err) {
+				return
 			}
+			// did not dispatch properly, fail-back to standard dispatching
+			utils.Logger.Warning(fmt.Sprintf("<%s> ignoring cache network error <%s> setting route dR %+v",
+				utils.DispatcherS, err.Error(), dR))
 		}
 	}
 	if err = dh.Call(method, args, reply); err != nil {
