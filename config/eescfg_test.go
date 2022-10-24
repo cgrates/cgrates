@@ -171,6 +171,7 @@ func TestEESClone(t *testing.T) {
 					},
 				},
 				Opts: &EventExporterOpts{
+
 					CSVFieldSeparator: utils.StringPointer(utils.InfieldSep),
 					MYSQLDSNParams: map[string]string{
 						"allowOldPasswords":    "true",
@@ -249,6 +250,80 @@ func TestEventExporterloadFromJsonCfg(t *testing.T) {
 	if err := eventExporter.loadFromJSONCfg(nil, jsonCfg.templates, jsonCfg.generalCfg.RSRSep); err != nil {
 		t.Error(err)
 	}
+}
+
+func TestEventExporterOptsloadFromJsonCfg(t *testing.T) {
+
+	eventExporterOptsJSON := &EventExporterOptsJson{
+
+		ElsIndex:                 utils.StringPointer("test"),
+		ElsIfPrimaryTerm:         utils.IntPointer(0),
+		ElsIfSeqNo:               utils.IntPointer(0),
+		ElsOpType:                utils.StringPointer("test2"),
+		ElsPipeline:              utils.StringPointer("test3"),
+		ElsRouting:               utils.StringPointer("test4"),
+		ElsTimeout:               utils.StringPointer("1m"),
+		ElsVersion:               utils.IntPointer(2),
+		ElsVersionType:           utils.StringPointer("test5"),
+		ElsWaitForActiveShards:   utils.StringPointer("test6"),
+		SQLMaxIdleConns:          utils.IntPointer(4),
+		SQLMaxOpenConns:          utils.IntPointer(6),
+		SQLConnMaxLifetime:       utils.StringPointer("1m"),
+		SQLTableName:             utils.StringPointer("table"),
+		SQLDBName:                utils.StringPointer("db"),
+		PgSSLMode:                utils.StringPointer("pg"),
+		AWSToken:                 utils.StringPointer("token"),
+		S3FolderPath:             utils.StringPointer("s3"),
+		NATSJetStream:            utils.BoolPointer(true),
+		NATSSubject:              utils.StringPointer("nat"),
+		NATSJWTFile:              utils.StringPointer("jwt"),
+		NATSSeedFile:             utils.StringPointer("seed"),
+		NATSCertificateAuthority: utils.StringPointer("NATS"),
+		NATSClientCertificate:    utils.StringPointer("NATSClient"),
+		NATSClientKey:            utils.StringPointer("key"),
+		NATSJetStreamMaxWait:     utils.StringPointer("1m"),
+	}
+
+	expected := &EventExporterOpts{
+
+		ElsIndex:                 utils.StringPointer("test2"),
+		ElsIfPrimaryTerm:         utils.IntPointer(0),
+		ElsIfSeqNo:               utils.IntPointer(0),
+		ElsOpType:                utils.StringPointer("test2"),
+		ElsPipeline:              utils.StringPointer("test3"),
+		ElsRouting:               utils.StringPointer("test4"),
+		ElsTimeout:               utils.DurationPointer(1 * time.Minute),
+		ElsVersion:               utils.IntPointer(2),
+		ElsVersionType:           utils.StringPointer("test5"),
+		ElsWaitForActiveShards:   utils.StringPointer("test6"),
+		SQLMaxIdleConns:          utils.IntPointer(4),
+		SQLMaxOpenConns:          utils.IntPointer(6),
+		SQLConnMaxLifetime:       utils.DurationPointer(1 * time.Minute),
+		SQLTableName:             utils.StringPointer("table"),
+		SQLDBName:                utils.StringPointer("db"),
+		PgSSLMode:                utils.StringPointer("pg"),
+		AWSToken:                 utils.StringPointer("token"),
+		S3FolderPath:             utils.StringPointer("s3"),
+		NATSJetStream:            utils.BoolPointer(true),
+		NATSSubject:              utils.StringPointer("nat"),
+		NATSJWTFile:              utils.StringPointer("jwt"),
+		NATSSeedFile:             utils.StringPointer("seed"),
+		NATSCertificateAuthority: utils.StringPointer("NATS"),
+		NATSClientCertificate:    utils.StringPointer("NATSClient"),
+		NATSClientKey:            utils.StringPointer("key"),
+		NATSJetStreamMaxWait:     utils.DurationPointer(1 * time.Minute),
+	}
+	eventExporter := &EventExporterCfg{
+
+		Opts: &EventExporterOpts{},
+	}
+	if err := eventExporter.Opts.loadFromJSONCfg(eventExporterOptsJSON); err != nil {
+		t.Error(expected)
+
+	} else if reflect.DeepEqual(expected, eventExporter.Opts) {
+		t.Errorf("expected %v  received %v", expected, eventExporter.Opts)
+	}
+
 }
 
 func TestEESCacheloadFromJsonCfg(t *testing.T) {

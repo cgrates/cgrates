@@ -1183,3 +1183,145 @@ func TestGetDefaultExporter(t *testing.T) {
 		t.Fatalf("Unexpected default cfg returned: %s", utils.ToJSON(dft))
 	}
 }
+
+func TestEventReaderOptsCfg(t *testing.T) {
+
+	erCfg := new(EventReaderCfg)
+
+	if err := erCfg.Opts.loadFromJSONCfg(nil); err != nil {
+
+		t.Error(err)
+	}
+
+	eventReaderOptsJson := &EventReaderOptsJson{
+		PartialPath:               utils.StringPointer("path"),
+		PartialCSVFieldSeparator:  utils.StringPointer("/"),
+		CSVLazyQuotes:             utils.BoolPointer(false),
+		AMQPQueueID:               utils.StringPointer("id"),
+		AMQPQueueIDProcessed:      utils.StringPointer("id"),
+		AMQPConsumerTag:           utils.StringPointer("tag"),
+		AMQPExchange:              utils.StringPointer("exchange"),
+		AMQPExchangeType:          utils.StringPointer("type"),
+		AMQPRoutingKey:            utils.StringPointer("key1"),
+		AMQPExchangeProcessed:     utils.StringPointer("amq"),
+		AMQPExchangeTypeProcessed: utils.StringPointer("amqtype"),
+		AMQPRoutingKeyProcessed:   utils.StringPointer("key"),
+		KafkaTopic:                utils.StringPointer("kafka"),
+		KafkaMaxWait:              utils.StringPointer("1m"),
+		KafkaTopicProcessed:       utils.StringPointer("kafkaproc"),
+		SQLDBName:                 utils.StringPointer("dbname"),
+		SQLTableName:              utils.StringPointer("tablename"),
+		PgSSLMode:                 utils.StringPointer("sslmode"),
+		SQLDBNameProcessed:        utils.StringPointer("dbnameproc"),
+		SQLTableNameProcessed:     utils.StringPointer("tablenameproc"),
+		PgSSLModeProcessed:        utils.StringPointer("sslproc"),
+		AWSRegion:                 utils.StringPointer("eu"),
+		AWSKey:                    utils.StringPointer("key"),
+		AWSSecret:                 utils.StringPointer("secret"),
+		AWSToken:                  utils.StringPointer("token"),
+
+		AWSKeyProcessed:                   utils.StringPointer("secret"),
+		AWSSecretProcessed:                utils.StringPointer("secret"),
+		AWSTokenProcessed:                 utils.StringPointer("token"),
+		SQSQueueID:                        utils.StringPointer("SQSQueue"),
+		SQSQueueIDProcessed:               utils.StringPointer("SQSQueueId"),
+		S3BucketID:                        utils.StringPointer("S3BucketID"),
+		S3FolderPathProcessed:             utils.StringPointer("S3Path"),
+		S3BucketIDProcessed:               utils.StringPointer("S3BucketProc"),
+		NATSJetStream:                     utils.BoolPointer(false),
+		NATSConsumerName:                  utils.StringPointer("user"),
+		NATSQueueID:                       utils.StringPointer("id"),
+		NATSJWTFile:                       utils.StringPointer("jwt"),
+		NATSSeedFile:                      utils.StringPointer("seed"),
+		NATSCertificateAuthority:          utils.StringPointer("authority"),
+		NATSClientCertificate:             utils.StringPointer("certificate"),
+		NATSClientKey:                     utils.StringPointer("key5"),
+		NATSJetStreamMaxWait:              utils.StringPointer("1m"),
+		NATSJetStreamProcessed:            utils.BoolPointer(true),
+		NATSJWTFileProcessed:              utils.StringPointer("file"),
+		NATSSeedFileProcessed:             utils.StringPointer("natseed"),
+		NATSCertificateAuthorityProcessed: utils.StringPointer("natsauth"),
+		NATSClientCertificateProcessed:    utils.StringPointer("natcertificate"),
+		NATSClientKeyProcessed:            utils.StringPointer("natsprocess"),
+		NATSJetStreamMaxWaitProcessed:     utils.StringPointer("1m"),
+	}
+
+	eventReader := &EventReaderCfg{
+		Opts: &EventReaderOpts{},
+	}
+	if err := eventReader.Opts.loadFromJSONCfg(eventReaderOptsJson); err != nil {
+		t.Error(err)
+	}
+
+}
+
+func TestEventReaderCfgClone(t *testing.T) {
+	ban := &EventReaderCfg{
+		ID:             "2",
+		Type:           "type",
+		RunDelay:       1 * time.Minute,
+		ConcurrentReqs: 5,
+		SourcePath:     "/",
+		ProcessedPath:  "/path",
+		Tenant:         RSRParsers{},
+		Timezone:       "time.Utc",
+		Flags:          utils.FlagsWithParams{},
+		Opts: &EventReaderOpts{
+			PartialPath:               utils.StringPointer("path"),
+			PartialCSVFieldSeparator:  utils.StringPointer("/"),
+			CSVLazyQuotes:             utils.BoolPointer(false),
+			AMQPQueueID:               utils.StringPointer("id"),
+			AMQPQueueIDProcessed:      utils.StringPointer("id"),
+			AMQPConsumerTag:           utils.StringPointer("tag"),
+			AMQPExchange:              utils.StringPointer("exchange"),
+			AMQPExchangeType:          utils.StringPointer("type"),
+			AMQPRoutingKey:            utils.StringPointer("key1"),
+			AMQPExchangeProcessed:     utils.StringPointer("amq"),
+			AMQPExchangeTypeProcessed: utils.StringPointer("amqtype"),
+			AMQPRoutingKeyProcessed:   utils.StringPointer("key"),
+			KafkaTopic:                utils.StringPointer("kafka"),
+			KafkaMaxWait:              utils.DurationPointer(1 * time.Minute),
+			KafkaTopicProcessed:       utils.StringPointer("kafkaproc"),
+			SQLDBName:                 utils.StringPointer("dbname"),
+			SQLTableName:              utils.StringPointer("tablename"),
+			PgSSLMode:                 utils.StringPointer("sslmode"),
+			SQLDBNameProcessed:        utils.StringPointer("dbnameproc"),
+			SQLTableNameProcessed:     utils.StringPointer("tablenameproc"),
+			PgSSLModeProcessed:        utils.StringPointer("sslproc"),
+			AWSRegion:                 utils.StringPointer("eu"),
+			AWSKey:                    utils.StringPointer("key"),
+			AWSSecret:                 utils.StringPointer("secret"),
+			AWSToken:                  utils.StringPointer("token"),
+
+			AWSKeyProcessed:                   utils.StringPointer("secret"),
+			AWSSecretProcessed:                utils.StringPointer("secret"),
+			AWSTokenProcessed:                 utils.StringPointer("token"),
+			SQSQueueID:                        utils.StringPointer("SQSQueue"),
+			SQSQueueIDProcessed:               utils.StringPointer("SQSQueueId"),
+			S3BucketID:                        utils.StringPointer("S3BucketID"),
+			S3FolderPathProcessed:             utils.StringPointer("S3Path"),
+			S3BucketIDProcessed:               utils.StringPointer("S3BucketProc"),
+			NATSJetStream:                     utils.BoolPointer(false),
+			NATSConsumerName:                  utils.StringPointer("user"),
+			NATSQueueID:                       utils.StringPointer("id"),
+			NATSJWTFile:                       utils.StringPointer("jwt"),
+			NATSSeedFile:                      utils.StringPointer("seed"),
+			NATSCertificateAuthority:          utils.StringPointer("authority"),
+			NATSClientCertificate:             utils.StringPointer("certificate"),
+			NATSClientKey:                     utils.StringPointer("key5"),
+			NATSJetStreamMaxWait:              utils.DurationPointer(1 * time.Minute),
+			NATSJetStreamProcessed:            utils.BoolPointer(true),
+			NATSJWTFileProcessed:              utils.StringPointer("file"),
+			NATSSeedFileProcessed:             utils.StringPointer("natseed"),
+			NATSCertificateAuthorityProcessed: utils.StringPointer("natsauth"),
+			NATSClientCertificateProcessed:    utils.StringPointer("natcertificate"),
+			NATSClientKeyProcessed:            utils.StringPointer("natsprocess"),
+			NATSJetStreamMaxWaitProcessed:     utils.DurationPointer(1 * time.Minute),
+		},
+	}
+	rcv := ban.Clone()
+	if !reflect.DeepEqual(rcv, ban) {
+		t.Errorf("expected %v received %v", utils.ToJSON(ban), utils.ToJSON(rcv))
+	}
+
+}

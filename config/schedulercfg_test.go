@@ -98,11 +98,12 @@ func TestSchedulerCfgAsMapInterface1(t *testing.T) {
 
 func TestSchedulerCfgClone(t *testing.T) {
 	ban := &SchedulerCfg{
-		Enabled:      true,
-		CDRsConns:    []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs), "*conn1"},
-		ThreshSConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), "*conn1"},
-		StatSConns:   []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), "*conn1"},
-		Filters:      []string{"randomFilter"},
+		Enabled:                true,
+		CDRsConns:              []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs), "*conn1"},
+		ThreshSConns:           []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), "*conn1"},
+		StatSConns:             []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), "*conn1"},
+		Filters:                []string{"randomFilter"},
+		DynaprepaidActionPlans: []string{"plan"},
 	}
 	rcv := ban.Clone()
 	if !reflect.DeepEqual(ban, rcv) {
@@ -118,6 +119,10 @@ func TestSchedulerCfgClone(t *testing.T) {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
 	if rcv.Filters[0] = ""; ban.Filters[0] != "randomFilter" {
+		t.Errorf("Expected clone to not modify the cloned")
+	}
+
+	if rcv.DynaprepaidActionPlans[0] = ""; ban.DynaprepaidActionPlans[0] != "plan" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
 }

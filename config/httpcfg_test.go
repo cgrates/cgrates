@@ -270,10 +270,21 @@ func TestHTTPLoadTransportFromJSONCfg(t *testing.T) {
 }
 
 func TestHTTPLoadFromJSONCfg(t *testing.T) {
-	var jsnHTTPCfg *HTTPJsonCfg
+	var jsonHTTPCfg *HTTPJsonCfg
 	httpcfg := &HTTPCfg{}
-	if err := httpcfg.loadFromJSONCfg(jsnHTTPCfg); err != nil {
+	if err := httpcfg.loadFromJSONCfg(jsonHTTPCfg); err != nil {
 		t.Error(err)
 	}
 
+	jsnHTTPCfg := &HTTPJsonCfg{
+		Client_opts: &HTTPClientOptsJson{
+			DialTimeout: utils.StringPointer("test")},
+	}
+	httpcg := &HTTPCfg{
+		dialer:     &net.Dialer{},
+		ClientOpts: &http.Transport{},
+	}
+	if err := httpcg.loadFromJSONCfg(jsnHTTPCfg); err == nil {
+		t.Error(err)
+	}
 }
