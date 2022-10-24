@@ -52,6 +52,19 @@ func TestKamAgentCfgloadFromJsonCfg(t *testing.T) {
 	} else if !reflect.DeepEqual(expected, jsnCfg.kamAgentCfg) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsnCfg.kamAgentCfg))
 	}
+	cfgJson := &KamAgentJsonCfg{
+
+		Evapi_conns: &[]*KamConnJsonCfg{
+			{
+				Max_reconnect_interval: utils.StringPointer("test"),
+			},
+		}}
+
+	if err := jsnCfg.kamAgentCfg.loadFromJSONCfg(cfgJson); err != nil {
+
+		t.Error(err)
+	}
+
 }
 
 func TestKamConnCfgloadFromJsonCfg(t *testing.T) {

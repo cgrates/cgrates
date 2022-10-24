@@ -87,6 +87,11 @@ func TestRouteSCfgAsMapInterface(t *testing.T) {
 		 },
 	},
 }`
+
+	/*	"*limit":3,
+		"*offset":3,
+		"*profileCount":3,*/
+
 	eMap := map[string]interface{}{
 		utils.EnabledCfg:             false,
 		utils.IndexedSelectsCfg:      true,
@@ -102,6 +107,9 @@ func TestRouteSCfgAsMapInterface(t *testing.T) {
 			utils.OptsContext:         utils.MetaRoutes,
 			utils.MetaIgnoreErrorsCfg: false,
 			utils.MetaMaxCostCfg:      utils.EmptyString,
+			/*	utils.MetaLimitCfg:        utils.IntPointer(3),
+				utils.MetaOffsetCfg:       utils.IntPointer(3),
+				utils.MetaProfileCountCfg: utils.IntPointer(3),*/
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
