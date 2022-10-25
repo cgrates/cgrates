@@ -44,7 +44,15 @@ func TestEESClone(t *testing.T) {
 				"mysqlDSNParams": {
 					"allowOldPasswords": "true",
 					"allowNativePasswords": "true",
+					
 				},
+			
+				"elsIndex":"test2",
+				
+				
+
+
+					
 			},											
 			"timezone": "local",										
 			"filters": ["randomFiletrs"],										
@@ -64,6 +72,36 @@ func TestEESClone(t *testing.T) {
 	],
 },
 }`
+
+	/*                   "kafkaTopic",
+	"amqpQueueID",
+	"amqpRoutingKey",
+	"amqpExchangeType",
+	"awsRegion",
+	"awsKey",
+	"awsSecret"
+	"awsToken",
+	"sqsQueueID",
+	"s3BucketID",
+	"s3FolderPath",
+	"natsJetStream",
+	"natsSubject",
+	"natsJWTFile",
+	"natsSeedFile",
+	"natsCertificateAuthority",
+	"natsClientCertificate",
+	"natsClientKey",
+	"natsJetStreamMaxWait",
+	"rpcCodec",
+	"serviceMethod",
+	"keyPath",
+	"certPath",
+	"caPath",
+	"tls",
+	"connIDs",
+	"rpcConnTimeout",
+	"rpcReplyTimeout",
+	"rpcAPIOpts"*/
 	expected := &EEsCfg{
 		Enabled:         true,
 		AttributeSConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), "*conn1"},
@@ -177,6 +215,7 @@ func TestEESClone(t *testing.T) {
 						"allowOldPasswords":    "true",
 						"allowNativePasswords": "true",
 					},
+					ElsIndex: utils.StringPointer("test"),
 				},
 			},
 		},
