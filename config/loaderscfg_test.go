@@ -199,6 +199,10 @@ func TestLoaderSCfgloadFromJsonCfgCase5(t *testing.T) {
 	} else if !reflect.DeepEqual(jsonCfg.loaderCfg[0].Data[0].Fields[0], expectedFields[0].Data[0].Fields[0]) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expectedFields[0].Data[0].Fields[0]), utils.ToJSON(jsonCfg.loaderCfg[0].Data[0].Fields[0]))
 	}
+
+	if err := jsonCfg.loaderCfg[0].loadFromJSONCfg(nil, msgTemplates, jsonCfg.generalCfg.RSRSep); err != nil {
+		t.Error(err)
+	}
 }
 
 func TestLoaderSCfgloadFromJsonCfgCase6(t *testing.T) {

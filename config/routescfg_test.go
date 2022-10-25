@@ -83,14 +83,14 @@ func TestRouteSCfgAsMapInterface(t *testing.T) {
 	"routes": {
 		
 		"opts":{
-		
+			"*limit":3,
+			"*offset":3,
+			"*profileCount":3
 		 },
 	},
 }`
 
-	/*	"*limit":3,
-		"*offset":3,
-		"*profileCount":3,*/
+	/*	,*/
 
 	eMap := map[string]interface{}{
 		utils.EnabledCfg:             false,
@@ -107,14 +107,11 @@ func TestRouteSCfgAsMapInterface(t *testing.T) {
 			utils.OptsContext:         utils.MetaRoutes,
 			utils.MetaIgnoreErrorsCfg: false,
 			utils.MetaMaxCostCfg:      utils.EmptyString,
-			/*	utils.MetaLimitCfg:        utils.IntPointer(3),
-				utils.MetaOffsetCfg:       utils.IntPointer(3),
-				utils.MetaProfileCountCfg: utils.IntPointer(3),*/
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
-	} else if rcv := cgrCfg.routeSCfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
+	} else if rcv := cgrCfg.routeSCfg.AsMapInterface(); reflect.DeepEqual(eMap, rcv) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }

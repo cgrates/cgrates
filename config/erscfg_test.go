@@ -185,6 +185,14 @@ func TestEventReaderloadFromJsonCase1(t *testing.T) {
 	if err = jsoncfg.ersCfg.loadFromJSONCfg(cfgJSON, jsoncfg.templates, jsoncfg.generalCfg.RSRSep, jsoncfg.dfltEvRdr, jsoncfg.generalCfg.RSRSep); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
+	cfgJson := &ERsJsonCfg{
+
+		Partial_cache_ttl: utils.StringPointer("test"),
+	}
+
+	if err := jsoncfg.ersCfg.loadFromJSONCfg(cfgJson, jsoncfg.templates, jsoncfg.generalCfg.RSRSep, jsoncfg.dfltEvRdr, jsoncfg.generalCfg.RSRSep); err == nil {
+		t.Error(err)
+	}
 }
 
 func TestEventReaderloadFromJsonCase3(t *testing.T) {
@@ -947,6 +955,16 @@ func TestERSCfgAsMapInterfaceCase2(t *testing.T) {
 				],
 				"opts":{
 					"kafkaGroupID": "test",
+					"csvLazyQuotes": false,
+					"amqpQueueID": "id",
+					"amqpQueueIDProcessed":"queue",
+					"amqpConsumerTag": "tag",
+					"amqpExchange":"exchange",
+					"amqpExchangeType":"type",
+					"amqpRoutingKey":"key",
+					"amqpExchangeProcessed":"amqprocess",
+					"amqpExchangeTypeProcessed":"amqtype",
+					"amqpRoutingKeyProcessed":"routekey",
 				},
 			},
 		],
@@ -1021,14 +1039,24 @@ func TestERSCfgAsMapInterfaceCase2(t *testing.T) {
 				utils.TenantCfg:        "~*req.Destination1",
 				utils.TimezoneCfg:      "",
 				utils.OptsCfg: map[string]interface{}{
-					utils.KafkaGroupID:    "test",
-					"csvFieldSeparator":   ",",
-					"csvHeaderDefineChar": ":",
-					"csvRowLength":        0,
-					"xmlRootPath":         "",
-					"partialOrderField":   "~*req.AnswerTime",
-					"partialCacheAction":  utils.MetaNone,
-					"natsSubject":         "cgrates_cdrs",
+					utils.CSVLazyQuotes:                false,
+					utils.KafkaGroupID:                 "test",
+					utils.CSVFieldSepOpt:               ",",
+					utils.XMLRootPathOpt:               "",
+					"csvHeaderDefineChar":              ":",
+					"csvRowLength":                     0,
+					"partialOrderField":                "~*req.AnswerTime",
+					"partialCacheAction":               utils.MetaNone,
+					"natsSubject":                      "cgrates_cdrs",
+					utils.AMQPQueueID:                  "id",
+					utils.AMQPQueueIDProcessedCfg:      "queue",
+					utils.AMQPConsumerTag:              "tag",
+					utils.AMQPExchange:                 "exchange",
+					utils.AMQPExchangeType:             "type",
+					utils.AMQPRoutingKey:               "key",
+					utils.AMQPExchangeProcessedCfg:     "amqprocess",
+					utils.AMQPExchangeTypeProcessedCfg: "amqtype",
+					utils.AMQPRoutingKeyProcessedCfg:   "routekey",
 				},
 			},
 		},
@@ -1172,7 +1200,6 @@ func TestERsloadFromJsonCfg(t *testing.T) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expectedERsCfg), utils.ToJSON(cgrCfg.ersCfg))
 	}
 }
-
 func TestGetDefaultExporter(t *testing.T) {
 	ees := new(EEsCfg)
 	if dft := ees.GetDefaultExporter(); dft != nil {
@@ -1183,43 +1210,37 @@ func TestGetDefaultExporter(t *testing.T) {
 		t.Fatalf("Unexpected default cfg returned: %s", utils.ToJSON(dft))
 	}
 }
-
 func TestEventReaderOptsCfg(t *testing.T) {
-
 	erCfg := new(EventReaderCfg)
-
 	if err := erCfg.Opts.loadFromJSONCfg(nil); err != nil {
-
 		t.Error(err)
 	}
-
 	eventReaderOptsJson := &EventReaderOptsJson{
-		PartialPath:               utils.StringPointer("path"),
-		PartialCSVFieldSeparator:  utils.StringPointer("/"),
-		CSVLazyQuotes:             utils.BoolPointer(false),
-		AMQPQueueID:               utils.StringPointer("id"),
-		AMQPQueueIDProcessed:      utils.StringPointer("id"),
-		AMQPConsumerTag:           utils.StringPointer("tag"),
-		AMQPExchange:              utils.StringPointer("exchange"),
-		AMQPExchangeType:          utils.StringPointer("type"),
-		AMQPRoutingKey:            utils.StringPointer("key1"),
-		AMQPExchangeProcessed:     utils.StringPointer("amq"),
-		AMQPExchangeTypeProcessed: utils.StringPointer("amqtype"),
-		AMQPRoutingKeyProcessed:   utils.StringPointer("key"),
-		KafkaTopic:                utils.StringPointer("kafka"),
-		KafkaMaxWait:              utils.StringPointer("1m"),
-		KafkaTopicProcessed:       utils.StringPointer("kafkaproc"),
-		SQLDBName:                 utils.StringPointer("dbname"),
-		SQLTableName:              utils.StringPointer("tablename"),
-		PgSSLMode:                 utils.StringPointer("sslmode"),
-		SQLDBNameProcessed:        utils.StringPointer("dbnameproc"),
-		SQLTableNameProcessed:     utils.StringPointer("tablenameproc"),
-		PgSSLModeProcessed:        utils.StringPointer("sslproc"),
-		AWSRegion:                 utils.StringPointer("eu"),
-		AWSKey:                    utils.StringPointer("key"),
-		AWSSecret:                 utils.StringPointer("secret"),
-		AWSToken:                  utils.StringPointer("token"),
-
+		PartialPath:                       utils.StringPointer("path"),
+		PartialCSVFieldSeparator:          utils.StringPointer("/"),
+		CSVLazyQuotes:                     utils.BoolPointer(false),
+		AMQPQueueID:                       utils.StringPointer("id"),
+		AMQPQueueIDProcessed:              utils.StringPointer("id"),
+		AMQPConsumerTag:                   utils.StringPointer("tag"),
+		AMQPExchange:                      utils.StringPointer("exchange"),
+		AMQPExchangeType:                  utils.StringPointer("type"),
+		AMQPRoutingKey:                    utils.StringPointer("key1"),
+		AMQPExchangeProcessed:             utils.StringPointer("amq"),
+		AMQPExchangeTypeProcessed:         utils.StringPointer("amqtype"),
+		AMQPRoutingKeyProcessed:           utils.StringPointer("key"),
+		KafkaTopic:                        utils.StringPointer("kafka"),
+		KafkaMaxWait:                      utils.StringPointer("1m"),
+		KafkaTopicProcessed:               utils.StringPointer("kafkaproc"),
+		SQLDBName:                         utils.StringPointer("dbname"),
+		SQLTableName:                      utils.StringPointer("tablename"),
+		PgSSLMode:                         utils.StringPointer("sslmode"),
+		SQLDBNameProcessed:                utils.StringPointer("dbnameproc"),
+		SQLTableNameProcessed:             utils.StringPointer("tablenameproc"),
+		PgSSLModeProcessed:                utils.StringPointer("sslproc"),
+		AWSRegion:                         utils.StringPointer("eu"),
+		AWSKey:                            utils.StringPointer("key"),
+		AWSSecret:                         utils.StringPointer("secret"),
+		AWSToken:                          utils.StringPointer("token"),
 		AWSKeyProcessed:                   utils.StringPointer("secret"),
 		AWSSecretProcessed:                utils.StringPointer("secret"),
 		AWSTokenProcessed:                 utils.StringPointer("token"),
@@ -1244,12 +1265,27 @@ func TestEventReaderOptsCfg(t *testing.T) {
 		NATSClientCertificateProcessed:    utils.StringPointer("natcertificate"),
 		NATSClientKeyProcessed:            utils.StringPointer("natsprocess"),
 		NATSJetStreamMaxWaitProcessed:     utils.StringPointer("1m"),
+		AWSRegionProcessed:                utils.StringPointer("eu"),
+		NATSSubjectProcessed:              utils.StringPointer("process"),
+		KafkaGroupID:                      utils.StringPointer("groupId"),
 	}
-
 	eventReader := &EventReaderCfg{
 		Opts: &EventReaderOpts{},
 	}
 	if err := eventReader.Opts.loadFromJSONCfg(eventReaderOptsJson); err != nil {
+		t.Error(err)
+	}
+	if err := eventReader.Opts.loadFromJSONCfg(&EventReaderOptsJson{
+		KafkaMaxWait: utils.StringPointer("test"),
+	}); err == nil {
+		t.Error(err)
+	} else if err := eventReader.Opts.loadFromJSONCfg(&EventReaderOptsJson{
+		NATSJetStreamMaxWait: utils.StringPointer("nil"),
+	}); err == nil {
+		t.Error(err)
+	} else if err := eventReader.Opts.loadFromJSONCfg(&EventReaderOptsJson{
+		NATSJetStreamMaxWaitProcessed: utils.StringPointer("nil"),
+	}); err == nil {
 		t.Error(err)
 	}
 
@@ -1261,38 +1297,47 @@ func TestEventReaderCfgClone(t *testing.T) {
 		Type:           "type",
 		RunDelay:       1 * time.Minute,
 		ConcurrentReqs: 5,
-		SourcePath:     "/",
-		ProcessedPath:  "/path",
-		Tenant:         RSRParsers{},
-		Timezone:       "time.Utc",
-		Flags:          utils.FlagsWithParams{},
+		PartialCommitFields: []*FCTemplate{
+			{
+				Tag:  "tag1",
+				Type: "type1",
+			},
+			{
+				Tag:  "tag2",
+				Type: "type2",
+			},
+		},
+		SourcePath:    "/",
+		ProcessedPath: "/path",
+		Tenant:        RSRParsers{},
+		Timezone:      "time.Utc",
+		Flags:         utils.FlagsWithParams{},
 		Opts: &EventReaderOpts{
-			PartialPath:               utils.StringPointer("path"),
-			PartialCSVFieldSeparator:  utils.StringPointer("/"),
-			CSVLazyQuotes:             utils.BoolPointer(false),
-			AMQPQueueID:               utils.StringPointer("id"),
-			AMQPQueueIDProcessed:      utils.StringPointer("id"),
-			AMQPConsumerTag:           utils.StringPointer("tag"),
-			AMQPExchange:              utils.StringPointer("exchange"),
-			AMQPExchangeType:          utils.StringPointer("type"),
-			AMQPRoutingKey:            utils.StringPointer("key1"),
-			AMQPExchangeProcessed:     utils.StringPointer("amq"),
-			AMQPExchangeTypeProcessed: utils.StringPointer("amqtype"),
-			AMQPRoutingKeyProcessed:   utils.StringPointer("key"),
-			KafkaTopic:                utils.StringPointer("kafka"),
-			KafkaMaxWait:              utils.DurationPointer(1 * time.Minute),
-			KafkaTopicProcessed:       utils.StringPointer("kafkaproc"),
-			SQLDBName:                 utils.StringPointer("dbname"),
-			SQLTableName:              utils.StringPointer("tablename"),
-			PgSSLMode:                 utils.StringPointer("sslmode"),
-			SQLDBNameProcessed:        utils.StringPointer("dbnameproc"),
-			SQLTableNameProcessed:     utils.StringPointer("tablenameproc"),
-			PgSSLModeProcessed:        utils.StringPointer("sslproc"),
-			AWSRegion:                 utils.StringPointer("eu"),
-			AWSKey:                    utils.StringPointer("key"),
-			AWSSecret:                 utils.StringPointer("secret"),
-			AWSToken:                  utils.StringPointer("token"),
-
+			PartialPath:                       utils.StringPointer("path"),
+			PartialCSVFieldSeparator:          utils.StringPointer("/"),
+			CSVLazyQuotes:                     utils.BoolPointer(false),
+			AMQPQueueID:                       utils.StringPointer("id"),
+			AMQPQueueIDProcessed:              utils.StringPointer("id"),
+			AMQPConsumerTag:                   utils.StringPointer("tag"),
+			AMQPExchange:                      utils.StringPointer("exchange"),
+			AMQPExchangeType:                  utils.StringPointer("type"),
+			AMQPRoutingKey:                    utils.StringPointer("key1"),
+			AMQPExchangeProcessed:             utils.StringPointer("amq"),
+			AMQPExchangeTypeProcessed:         utils.StringPointer("amqtype"),
+			AMQPRoutingKeyProcessed:           utils.StringPointer("key"),
+			KafkaTopic:                        utils.StringPointer("kafka"),
+			KafkaMaxWait:                      utils.DurationPointer(1 * time.Minute),
+			KafkaTopicProcessed:               utils.StringPointer("kafkaproc"),
+			SQLDBName:                         utils.StringPointer("dbname"),
+			SQLTableName:                      utils.StringPointer("tablename"),
+			PgSSLMode:                         utils.StringPointer("sslmode"),
+			SQLDBNameProcessed:                utils.StringPointer("dbnameproc"),
+			SQLTableNameProcessed:             utils.StringPointer("tablenameproc"),
+			PgSSLModeProcessed:                utils.StringPointer("sslproc"),
+			AWSRegion:                         utils.StringPointer("eu"),
+			AWSKey:                            utils.StringPointer("key"),
+			AWSSecret:                         utils.StringPointer("secret"),
+			AWSToken:                          utils.StringPointer("token"),
 			AWSKeyProcessed:                   utils.StringPointer("secret"),
 			AWSSecretProcessed:                utils.StringPointer("secret"),
 			AWSTokenProcessed:                 utils.StringPointer("token"),
@@ -1317,6 +1362,9 @@ func TestEventReaderCfgClone(t *testing.T) {
 			NATSClientCertificateProcessed:    utils.StringPointer("natcertificate"),
 			NATSClientKeyProcessed:            utils.StringPointer("natsprocess"),
 			NATSJetStreamMaxWaitProcessed:     utils.DurationPointer(1 * time.Minute),
+			AWSRegionProcessed:                utils.StringPointer("eu"),
+			NATSSubjectProcessed:              utils.StringPointer("process"),
+			KafkaGroupID:                      utils.StringPointer("groupId"),
 		},
 	}
 	rcv := ban.Clone()
