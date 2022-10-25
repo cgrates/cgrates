@@ -273,7 +273,7 @@ func TestRpcConnAsMapInterface1(t *testing.T) {
      "rpc_conns": {
 	     "*localhost": {
 		     "conns": [
-                  {"address": "127.0.0.1:2018", "tls": true, "synchronous": true, "transport": "*json"},
+                  {"address": "127.0.0.1:2018", "tls": true, "synchronous": true, "transport": "*json",},
              ],
              "poolSize": 2,
 	      },
