@@ -678,6 +678,9 @@ func Difference(tm string, items ...interface{}) (diff interface{}, err error) {
 				}
 				items[i] = diff
 				return Difference(tm, items[i:]...)
+			} else {
+
+				fmt.Println(err)
 			}
 
 			if itmVal, err := IfaceAsDuration(item); err != nil {

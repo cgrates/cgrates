@@ -53,9 +53,7 @@ func TestRPCConnsloadFromJsonCfgCase1(t *testing.T) {
 			PoolSize: 0,
 			Conns: []*RemoteHost{{
 				Address:   "127.0.0.1:2014",
-				Transport: rpcclient.BiRPCJSON,
-			},
-			},
+				Transport: rpcclient.BiRPCJSON}},
 		},
 		utils.MetaInternal: {
 			Strategy: utils.MetaFirst,
@@ -105,8 +103,7 @@ func TestRPCConnsloadFromJsonCfgCase1(t *testing.T) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsonCfg.rpcConns))
 	}
 	cfgJson := &RemoteHostJson{
-		Connect_timeout: utils.StringPointer("test"),
-	}
+		Connect_timeout: utils.StringPointer("test")}
 	if err := jsonCfg.rpcConns[utils.MetaLocalHost].Conns[0].loadFromJSONCfg(cfgJson); err == nil {
 		t.Error(err)
 	}
@@ -132,8 +129,7 @@ func TestRPCConnsloadFromJsonCfgCase2(t *testing.T) {
 			Conns: []*RemoteHost{{
 				Address:   "127.0.0.1:2014",
 				Transport: rpcclient.BiRPCJSON,
-			},
-			},
+			}},
 		},
 		utils.MetaInternal: {
 			Strategy: utils.MetaFirst,
@@ -273,7 +269,7 @@ func TestRpcConnAsMapInterface1(t *testing.T) {
      "rpc_conns": {
 	     "*localhost": {
 		     "conns": [
-                  {"address": "127.0.0.1:2018", "tls": true, "synchronous": true, "transport": "*json",},
+                  {"address": "127.0.0.1:2018", "tls": true, "synchronous": true, "transport": "*json"},
              ],
              "poolSize": 2,
 	      },
