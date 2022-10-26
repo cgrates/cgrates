@@ -798,3 +798,112 @@ func TestUnitsCounterresetCounters(t *testing.T) {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", utils.ToJSON(exp), utils.ToJSON(ucs["kind"]))
 	}
 }
+
+func TestUnitCounterFieldAsInterface1(t *testing.T) {
+	uc := &UnitCounter{}
+	fldPath := make([]string, 0)
+	if _, err := uc.FieldAsInterface(fldPath); err == nil {
+		t.Error(err)
+	}
+	uc = &UnitCounter{
+		Counters: CounterFilters{
+			{
+				Value:  3,
+				Filter: &BalanceFilter{},
+			}}}
+	fldPath = []string{utils.Counters}
+	if _, err := uc.FieldAsInterface(fldPath); err != nil {
+		t.Error(err)
+	} else if _, err := uc.FieldAsInterface(append(fldPath, "second")); err == nil {
+		t.Error(err)
+	} else if _, err := uc.FieldAsInterface(append(fldPath, "1", "2")); err == nil {
+		t.Error(err)
+	}
+	uc.Counters = append(uc.Counters, &CounterFilter{
+		Value:  4,
+		Filter: &BalanceFilter{}},
+	)
+	if val, err := uc.FieldAsInterface(append(fldPath, "1")); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(val, uc.Counters[1]) {
+		t.Errorf("expected %v but got %v", utils.ToJSON(val), utils.ToJSON(uc.Counters[1]))
+	} else if _, err := uc.FieldAsInterface(append(fldPath, "1", "2")); err == nil {
+		t.Error(err)
+	}
+}
+func TestUnitCounterFieldAsInterface2(t *testing.T) {
+	uc := &UnitCounter{
+		CounterType: "balance",
+		Counters: CounterFilters{
+			&CounterFilter{
+				Value: 20.68,
+				Filter: &BalanceFilter{
+					Uuid: utils.StringPointer("uuid"),
+					ID:   utils.StringPointer("id"),
+					Type: utils.StringPointer("type"),
+					Value: &utils.ValueFormula{
+						Method: "method",
+						Static: 25.0,
+					}}}},
+	}
+	fldPath := []string{utils.CounterType}
+	if val, err := uc.FieldAsInterface(fldPath); err != nil {
+		t.Error(err)
+	} else if val != uc.CounterType {
+		t.Errorf("expected %v , received %v ", val, uc.CounterType)
+	} else if _, err = uc.FieldAsInterface(append(fldPath, "2")); err == nil {
+		t.Error(err)
+	}
+}
+
+func TestUnitCounterFieldAsInterface3(t *testing.T) {
+
+	fldPath := []string{"test"}
+
+	uc := &UnitCounter{
+		CounterType: "balance",
+		Counters: CounterFilters{
+			&CounterFilter{
+				Value: 20.68,
+				Filter: &BalanceFilter{
+					Uuid: utils.StringPointer("uuid"),
+					ID:   utils.StringPointer("id"),
+					Type: utils.StringPointer("type"),
+					Value: &utils.ValueFormula{
+						Method: "method",
+						Static: 25.0,
+					}}}},
+	}
+	if _, err := uc.FieldAsInterface(fldPath); err == nil {
+		t.Error(err)
+	} else if _, err = uc.FieldAsInterface([]string{"Counters[3]"}); err == nil {
+		t.Error(err)
+	} else if val, err := uc.FieldAsInterface([]string{"Counters[0]"}); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(val, uc.Counters[0]) {
+		t.Errorf("expected %v  ,received  %v", utils.ToJSON(val), utils.ToJSON(uc.Counters[0]))
+	} else if _, err = uc.FieldAsInterface([]string{"Counters[0]", utils.CounterType}); err == nil {
+		t.Error(err)
+	}
+
+}
+
+func TestUnitCounterFieldAsString(t *testing.T) {
+	fldPath := []string{}
+	uc := &UnitCounter{
+		CounterType: "event",
+		Counters: CounterFilters{
+			&CounterFilter{
+				Value: 20,
+				Filter: &BalanceFilter{
+					ID:     utils.StringPointer("testID2"),
+					Type:   utils.StringPointer("kind"),
+					Weight: utils.Float64Pointer(15),
+				}}},
+	}
+	if _, err := uc.FieldAsString(fldPath); err == nil {
+		t.Error(err)
+	} else if _, err := uc.FieldAsString([]string{utils.Counters}); err != nil {
+		t.Error(err)
+	}
+}

@@ -97,57 +97,46 @@ func TestDataDbCfgloadFromJsonCfg(t *testing.T) {
 
 	if err := jsnCfg.dataDbCfg.Opts.loadFromJSONCfg(nil); err != nil {
 		t.Error(err)
-	}
-
-	jsonCfg = &DbJsonCfg{
+	} else if err := jsnCfg.dataDbCfg.loadFromJSONCfg(&DbJsonCfg{
 		Opts: &DBOptsJson{
 			RedisClusterSync: utils.StringPointer("test"),
-		},
-	}
-
-	if err := jsnCfg.dataDbCfg.loadFromJSONCfg(jsonCfg); err == nil {
+		}}); err == nil {
 		t.Error(err)
-	}
-	jsonCfg = &DbJsonCfg{
+	} else if err := jsnCfg.dataDbCfg.loadFromJSONCfg(&DbJsonCfg{
 		Opts: &DBOptsJson{
 			RedisClusterOndownDelay: utils.StringPointer("test2"),
 		},
-	}
-
-	if err := jsnCfg.dataDbCfg.loadFromJSONCfg(jsonCfg); err == nil {
+	}); err == nil {
 		t.Error(err)
-	}
-	jsonCfg = &DbJsonCfg{
+	} else if err := jsnCfg.dataDbCfg.loadFromJSONCfg(&DbJsonCfg{
 		Opts: &DBOptsJson{
 			RedisConnectTimeout: utils.StringPointer("test3"),
 		},
-	}
-
-	if err := jsnCfg.dataDbCfg.loadFromJSONCfg(jsonCfg); err == nil {
+	}); err == nil {
 		t.Error(err)
-	}
-	jsonCfg = &DbJsonCfg{
+	} else if err := jsnCfg.dataDbCfg.loadFromJSONCfg(&DbJsonCfg{
 		Opts: &DBOptsJson{
 			RedisReadTimeout: utils.StringPointer("test4"),
 		},
-	}
-	if err := jsnCfg.dataDbCfg.loadFromJSONCfg(jsonCfg); err == nil {
+	}); err == nil {
 		t.Error(err)
-	}
-	jsonCfg = &DbJsonCfg{
+	} else if err := jsnCfg.dataDbCfg.loadFromJSONCfg(&DbJsonCfg{
 		Opts: &DBOptsJson{
-			RedisWriteTimeout: utils.StringPointer("test4"),
+			RedisWriteTimeout: utils.StringPointer("test5"),
 		},
-	}
-	if err := jsnCfg.dataDbCfg.loadFromJSONCfg(jsonCfg); err == nil {
+	}); err == nil {
 		t.Error(err)
-	}
-	jsonCfg = &DbJsonCfg{
+	} else if err := jsnCfg.dataDbCfg.loadFromJSONCfg(&DbJsonCfg{
 		Opts: &DBOptsJson{
 			MongoQueryTimeout: utils.StringPointer("test4"),
 		},
-	}
-	if err := jsnCfg.dataDbCfg.loadFromJSONCfg(jsonCfg); err == nil {
+	}); err == nil {
+		t.Error(err)
+	} else if err := jsnCfg.dataDbCfg.loadFromJSONCfg(&DbJsonCfg{
+		Items: &map[string]*ItemOptJson{
+			utils.MetaAccounts: {
+				Ttl: utils.StringPointer("test5"),
+			}}}); err == nil {
 		t.Error(err)
 	}
 

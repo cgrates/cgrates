@@ -313,6 +313,10 @@ func TestStringString(t *testing.T) {
 	if err := json.Unmarshal([]byte(rcv), &rcvAsMap); err != nil {
 		t.Error(err)
 	}
+	sort.Slice(rcvAsMap, func(i, j int) bool {
+		return rcvAsMap[i] < rcvAsMap[j]
+	})
+
 	rcv = ToJSON(rcvAsMap)
 	if rcv != exp {
 		t.Errorf("expected %v received %v", exp, rcv)

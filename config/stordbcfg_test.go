@@ -100,25 +100,23 @@ func TestStoreDbCfgloadFromJsonCfgCase1(t *testing.T) {
 		t.Errorf("Expected %+v \n, recevied %+v", utils.ToJSON(expected.RmtConns), utils.ToJSON(jsonCfg.storDbCfg.RmtConns))
 	}
 
-	var dbOpts *StorDBOpts
-	var jsonDbOpts *DBOptsJson
-	dbOpts.loadFromJSONCfg(jsonDbOpts)
-	if reflect.DeepEqual(nil, dbOpts) {
-		t.Error("expected nil")
-	}
-	jsonDOpts := &DBOptsJson{
-
-		SQLConnMaxLifetime: utils.StringPointer("test"),
-	}
-	if err := jsonCfg.storDbCfg.Opts.loadFromJSONCfg(jsonDOpts); err == nil {
+	if err := jsonCfg.storDbCfg.Opts.loadFromJSONCfg(nil); err != nil {
 		t.Error(err)
-	}
-	jjsonDOpts := &DBOptsJson{
-
-		MongoQueryTimeout: utils.StringPointer("test"),
-	}
-	if err := jsonCfg.storDbCfg.Opts.loadFromJSONCfg(jjsonDOpts); err == nil {
+	} else if err := jsonCfg.storDbCfg.Opts.loadFromJSONCfg(&DBOptsJson{
+		SQLConnMaxLifetime: utils.StringPointer("test1"),
+	}); err == nil {
 		t.Error(err)
+	} else if err := jsonCfg.storDbCfg.Opts.loadFromJSONCfg(&DBOptsJson{
+		MongoQueryTimeout: utils.StringPointer("test2"),
+	}); err == nil {
+		t.Error(err)
+	} else if err := jsonCfg.storDbCfg.loadFromJSONCfg(&DbJsonCfg{
+		Items: &map[string]*ItemOptJson{
+			utils.MetaSessionsCosts: {
+				Ttl: utils.StringPointer("test3"),
+			},
+		}}); err == nil {
+
 	}
 }
 

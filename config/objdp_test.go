@@ -53,11 +53,17 @@ func TestFieldAsInterfaceObjDPSliceOfInt(t *testing.T) {
 		obj:   []int{12, 13},
 		cache: make(map[string]interface{}),
 	}
+	objDp2 := &ObjectDP{
+		obj:   []interface{}{},
+		cache: make(map[string]interface{}),
+	}
 	expected := 13
 	if received, err := objDp.FieldAsInterface(object); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(received, expected) {
 		t.Errorf("Expected %+v, received %+v", expected, received)
+	} else if _, err = objDp2.FieldAsInterface([]string{"test"}); err != utils.ErrNotFound {
+		t.Error(err)
 	}
 }
 
