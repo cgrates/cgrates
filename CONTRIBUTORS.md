@@ -85,6 +85,7 @@ information, please see the [`CONTRIBUTING.md`](CONTRIBUTING.md) file.
 | @nickvsnetworking | Nick Jones |
 | @Eda91 | Edlira Eltari |
 | @gezimbll | Gezim Blliku|
+| @ruhnet | Ruel Tmeizeh |
 <!-- to sign, include a single line above this comment containing the following text:
 | @username | First Last |
 -->
