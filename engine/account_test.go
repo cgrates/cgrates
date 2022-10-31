@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"encoding/json"
 	"reflect"
 	"testing"
 	"time"
@@ -2417,5 +2418,197 @@ func BenchmarkGetSecondsForPrefix(b *testing.B) {
 	}
 	for i := 0; i < b.N; i++ {
 		ub1.getCreditForPrefix(cd)
+	}
+}
+
+func TestAccountSummaryFieldAsInterface(t *testing.T) {
+	as := AccountSummary{
+		BalanceSummaries: BalanceSummaries{
+			&BalanceSummary{
+				UUID:    "uId",
+				ID:      "id",
+				Type:    "*data",
+				Initial: 20.54,
+				Value:   1,
+			}},
+		Tenant: "tenant",
+		ID:     "accID",
+	}
+
+	if _, err := as.FieldAsInterface(nil); err == nil {
+		t.Error(err)
+	} else if _, err := as.FieldAsInterface([]string{"test"}); err == nil {
+		t.Error(err)
+	}
+	if val, err := as.FieldAsInterface([]string{"BalanceSummaries[0]"}); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(val, as.BalanceSummaries[0]) {
+		t.Errorf("expected %v ,received %v", utils.ToJSON(val), utils.ToJSON(as.BalanceSummaries[0]))
+	} else if _, err = as.FieldAsInterface([]string{"Tenant"}); err != nil {
+		t.Error(err)
+	} else if _, err = as.FieldAsInterface([]string{"Tenant", "Value"}); err == nil {
+		t.Error(err)
+	} else if _, err = as.FieldAsInterface([]string{"ID"}); err != nil {
+		t.Error(err)
+	} else if _, err = as.FieldAsInterface([]string{"ID", "test"}); err == nil {
+		t.Error(err)
+	}
+	if val, err := as.FieldAsInterface([]string{"BalanceSummaries"}); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(val, as.BalanceSummaries) {
+		t.Errorf("expected %v ,received %v ", utils.ToJSON(val), utils.ToJSON(as.BalanceSummaries))
+	}
+	as.BalanceSummaries = BalanceSummaries{
+		&BalanceSummary{
+
+			UUID:    "uId",
+			ID:      "id",
+			Type:    "*data",
+			Initial: 20.54,
+			Value:   1,
+		},
+		&BalanceSummary{
+			UUID:    "uId2",
+			ID:      "id2",
+			Type:    "*data",
+			Initial: 20.54,
+			Value:   1,
+		}}
+	if _, err := as.FieldAsInterface([]string{"BalanceSummaries", "id3"}); err == nil {
+		t.Error(err)
+
+	} else if val, err := as.FieldAsInterface([]string{"BalanceSummaries", "id2"}); err != nil {
+		t.Error(err)
+
+	} else if !reflect.DeepEqual(val, as.BalanceSummaries[1]) {
+		t.Errorf("expected %v ,received %v", utils.ToJSON(val), utils.ToJSON(as.BalanceSummaries[1]))
+	}
+	if _, err = as.FieldAsInterface([]string{"AllowNegative"}); err != nil {
+		t.Error(err)
+	} else if _, err = as.FieldAsInterface([]string{"AllowNegative", "test"}); err == nil {
+		t.Error(err)
+	} else if _, err = as.FieldAsInterface([]string{"Disabled"}); err != nil {
+		t.Error(err)
+	} else if _, err = as.FieldAsInterface([]string{"Disabled", "test"}); err == nil {
+		t.Error(err)
+	}
+
+}
+
+func TestAccountSummaryFieldAsString(t *testing.T) {
+	as := AccountSummary{
+		BalanceSummaries: BalanceSummaries{
+			&BalanceSummary{
+				UUID:    "uId",
+				ID:      "id",
+				Type:    "*data",
+				Initial: 20.54,
+				Value:   1,
+			}},
+	}
+	rec := &BalanceSummary{}
+	if _, err := as.FieldAsString([]string{}); err == nil {
+		t.Error(err)
+	}
+	if val, err := as.FieldAsString([]string{"BalanceSummaries[0]"}); err != nil {
+		t.Error(err)
+	} else if err := json.Unmarshal([]byte(val), rec); err != nil {
+		t.Error("Error converting value")
+	} else if !reflect.DeepEqual(rec, as.BalanceSummaries[0]) {
+		t.Errorf("expected %v ,received %v", utils.ToJSON(as.BalanceSummaries[0]), utils.ToJSON(rec))
+	}
+
+}
+func TestAccountFieldAsInterface(t *testing.T) {
+	var acc *Account
+	if _, err := acc.FieldAsInterface([]string{}); err != nil {
+		t.Error(err)
+	} else if _, err := acc.FieldAsInterface([]string{"test"}); err == nil {
+		t.Error(err)
+	}
+	acc = &Account{
+		ID: "id",
+		BalanceMap: map[string]Balances{
+			"first": {
+				&Balance{
+					Uuid:  "uuid1",
+					ID:    "id",
+					Value: 20.44,
+				},
+				&Balance{
+					Uuid:  "uuid2",
+					ID:    "id2",
+					Value: 12.2,
+				},
+			}},
+		UnitCounters: UnitCounters{
+			"first": []*UnitCounter{
+				{
+					CounterType: "balance",
+					Counters: CounterFilters{
+						{
+							Value: 20.44,
+							Filter: &BalanceFilter{
+								Uuid: utils.StringPointer("filterUuid"),
+								ID:   utils.StringPointer("filterId"),
+								Type: utils.StringPointer("type"),
+							},
+						},
+					},
+				}}},
+		ActionTriggers: ActionTriggers{
+			{
+				UniqueID:       "uniId",
+				ID:             "id",
+				ThresholdType:  "*min_event_counter",
+				ThresholdValue: 20.55,
+			},
+			{
+				UniqueID:       "uniId2",
+				ID:             "id2",
+				ThresholdType:  "*max_event_counter",
+				ThresholdValue: 19.22,
+				Recurrent:      true,
+			},
+		},
+	}
+	if _, err := acc.FieldAsInterface([]string{"Balance"}); err == nil {
+		t.Error(err)
+	} else if _, err = acc.FieldAsInterface([]string{"BalanceMap[second]"}); err == nil {
+		t.Error(err)
+	} else if val, err := acc.FieldAsInterface([]string{"BalanceMap[first]"}); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(acc.BalanceMap["first"], val) {
+		t.Errorf("expected %v ,received %v", utils.ToJSON(val), utils.ToJSON(acc.BalanceMap["first"]))
+	} else if _, err := acc.FieldAsInterface([]string{"BalanceMap[first]", "UnitCounters[test]"}); err == nil {
+		t.Error(err)
+	} else if _, err := acc.FieldAsInterface([]string{"UnitCounters[test]"}); err == nil {
+		t.Error(err)
+	} else if val, err := acc.FieldAsInterface([]string{"UnitCounters[first]"}); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(val, acc.UnitCounters["first"]) {
+		t.Errorf("expected %v ,received %v", val, acc.UnitCounters["first"])
+	}
+	if _, err := acc.FieldAsInterface([]string{"ActionTriggers[3]"}); err == nil {
+		t.Error(err)
+	} else if _, err := acc.FieldAsInterface([]string{"ActionTriggers[three]"}); err == nil {
+		t.Error(err)
+	} else if val, err := acc.FieldAsInterface([]string{"ActionTriggers[0]"}); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(val, acc.ActionTriggers[0]) {
+		t.Errorf("expected %v ,received %v", utils.ToJSON(acc.ActionTriggers[0]), utils.ToJSON(val))
+	} else if _, err = acc.FieldAsInterface([]string{"ActionTriggers[0]", "test"}); err == nil {
+		t.Error(err)
+	}
+
+	if _, err := acc.FieldAsInterface([]string{"ID"}); err != nil {
+		t.Error(err)
+	} else if _, err = acc.FieldAsInterface([]string{"ID", "test"}); err == nil {
+		t.Error(err)
+	}
+	if _, err := acc.FieldAsInterface([]string{"BalanceMap"}); err != nil {
+		t.Error(err)
+	} else if _, err = acc.FieldAsInterface([]string{"BalanceMap", "first[0]"}); err != nil {
+		t.Error(err)
 	}
 }

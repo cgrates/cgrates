@@ -1006,7 +1006,7 @@ func TestERSCfgAsMapInterfaceCase2(t *testing.T) {
 					"natsClientCertificateProcessed":"ClientCertificate",
 					"natsClientKeyProcessed":"ClientKey",
 					"natsJetStreamMaxWaitProcessed":"1m",
-				
+					
 				},
 			},
 		],

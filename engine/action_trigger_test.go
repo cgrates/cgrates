@@ -116,3 +116,100 @@ func TestActionTriggersClone(t *testing.T) {
 	}
 
 }
+
+func TestActionTriggerFieldAsInterface(t *testing.T) {
+	at := &ActionTrigger{}
+	if _, err := at.FieldAsInterface([]string{}); err == nil {
+		t.Error(err)
+	} else if _, err = at.FieldAsInterface([]string{"test"}); err == nil {
+		t.Error(err)
+	}
+	at = &ActionTrigger{
+		ID:                "id",
+		UniqueID:          "unId",
+		ThresholdType:     "*max_balance_counter",
+		ThresholdValue:    16.1,
+		Recurrent:         true,
+		MinSleep:          1 * time.Second,
+		ExpirationDate:    time.Date(2023, 02, 22, 1, 0, 0, 0, time.UTC),
+		ActivationDate:    time.Date(2022, 02, 22, 1, 0, 0, 0, time.UTC),
+		Balance:           &BalanceFilter{},
+		Weight:            1.02,
+		ActionsID:         "acID",
+		MinQueuedItems:    5,
+		Executed:          true,
+		LastExecutionTime: time.Date(2022, 2, 22, 1, 0, 0, 0, time.UTC),
+	}
+	if _, err := at.FieldAsInterface([]string{"ID"}); err != nil {
+		t.Error(err)
+	} else if _, err = at.FieldAsInterface([]string{"ID", "test"}); err == nil {
+		t.Error(err)
+	} else if _, err = at.FieldAsInterface([]string{"UniqueID"}); err != nil {
+		t.Error(err)
+	} else if _, err = at.FieldAsInterface([]string{"UniqueID", "test"}); err == nil {
+		t.Error(err)
+	} else if _, err = at.FieldAsInterface([]string{"ThresholdType"}); err != nil {
+		t.Error(err)
+	} else if _, err = at.FieldAsInterface([]string{"ThresholdType", "test"}); err == nil {
+		t.Error(err)
+	} else if _, err = at.FieldAsInterface([]string{"ThresholdValue"}); err != nil {
+		t.Error(err)
+	} else if _, err = at.FieldAsInterface([]string{"ThresholdValue", "test"}); err == nil {
+		t.Error(err)
+	} else if _, err = at.FieldAsInterface([]string{"Recurrent"}); err != nil {
+		t.Error(err)
+	} else if _, err = at.FieldAsInterface([]string{"Recurrent", "test"}); err == nil {
+		t.Error(err)
+	} else if _, err = at.FieldAsInterface([]string{"MinSleep"}); err != nil {
+		t.Error(err)
+	} else if _, err = at.FieldAsInterface([]string{"MinSleep", "test"}); err == nil {
+		t.Error(err)
+	} else if _, err = at.FieldAsInterface([]string{"ExpirationDate"}); err != nil {
+		t.Error(err)
+	} else if _, err = at.FieldAsInterface([]string{"ExpirationDate", "test"}); err == nil {
+		t.Error(err)
+	} else if _, err = at.FieldAsInterface([]string{"ActivationDate"}); err != nil {
+		t.Error(err)
+	} else if _, err = at.FieldAsInterface([]string{"ActivationDate", "test"}); err == nil {
+		t.Error(err)
+	} else if _, err = at.FieldAsInterface([]string{"Balance"}); err != nil {
+		t.Error(err)
+	} else if _, err = at.FieldAsInterface([]string{"Balance", "test"}); err == nil {
+		t.Error(err)
+	} else if _, err = at.FieldAsInterface([]string{"Weight"}); err != nil {
+		t.Error(err)
+	} else if _, err = at.FieldAsInterface([]string{"Weight", "test"}); err == nil {
+		t.Error(err)
+	} else if _, err = at.FieldAsInterface([]string{"ActionsID"}); err != nil {
+		t.Error(err)
+	} else if _, err = at.FieldAsInterface([]string{"ActionsID", "test"}); err == nil {
+		t.Error(err)
+	} else if _, err = at.FieldAsInterface([]string{"MinQueuedItems"}); err != nil {
+		t.Error(err)
+	} else if _, err = at.FieldAsInterface([]string{"MinQueuedItems", "test"}); err == nil {
+		t.Error(err)
+	} else if _, err = at.FieldAsInterface([]string{"Executed"}); err != nil {
+		t.Error(err)
+	} else if _, err = at.FieldAsInterface([]string{"Executed", "test"}); err == nil {
+		t.Error(err)
+	} else if _, err = at.FieldAsInterface([]string{"LastExecutionTime"}); err != nil {
+		t.Error(err)
+	} else if _, err = at.FieldAsInterface([]string{"LastExecutionTime", "test"}); err == nil {
+		t.Error(err)
+	}
+
+}
+
+func TestActionTriggerFieldAsString(t *testing.T) {
+	at := &ActionTrigger{
+		ThresholdValue: 2.6,
+	}
+	if _, err := at.FieldAsString([]string{}); err == nil {
+		t.Error(err)
+	} else if val, err := at.FieldAsString([]string{"ThresholdValue"}); err != nil {
+		t.Error(err)
+	} else if val != "2.6" {
+		t.Errorf("received %v", val)
+	}
+
+}

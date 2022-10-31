@@ -1868,6 +1868,9 @@ func TestCallDescriptorUpdateFromCGREvent(t *testing.T) {
 		TimeStart:    time.Date(2015, 3, 23, 6, 0, 0, 0, time.UTC),
 		TimeEnd:      time.Date(2015, 3, 23, 6, 30, 0, 0, time.UTC),
 		MaxCostSoFar: 0,
+		ExtraFields: map[string]string{
+			"Extra": "Value",
+		},
 	}
 	cdExpected := &CallDescriptor{
 		Category:     "call",
@@ -1878,8 +1881,11 @@ func TestCallDescriptorUpdateFromCGREvent(t *testing.T) {
 		TimeStart:    time.Date(2015, 3, 23, 6, 0, 0, 0, time.UTC),
 		TimeEnd:      time.Date(2015, 3, 23, 6, 30, 0, 0, time.UTC),
 		MaxCostSoFar: 0,
+		ExtraFields: map[string]string{
+			"Extra": "Value",
+		},
 	}
-	if err := cd.UpdateFromCGREvent(cgrEv, []string{utils.AccountField, utils.Subject}); err != nil {
+	if err := cd.UpdateFromCGREvent(cgrEv, []string{utils.Usage, utils.AnswerTime, utils.Destination, utils.Category, utils.ToR, utils.Tenant, utils.AccountField, utils.Subject}); err != nil {
 		t.Error(err)
 	} else {
 		if !reflect.DeepEqual(cd, cdExpected) {
@@ -1906,6 +1912,24 @@ func TestCallDescriptorUpdateFromCGREvent(t *testing.T) {
 		if !reflect.DeepEqual(cd, cdExpected) {
 			t.Errorf("Expecting: %+v, received: %+v", cdExpected, cd)
 		}
+	}
+	cgrEv = &utils.CGREvent{}
+	if err = cd.UpdateFromCGREvent(cgrEv, []string{utils.Usage}); err == nil {
+		t.Error(err)
+	} else if err = cd.UpdateFromCGREvent(cgrEv, []string{utils.AnswerTime}); err == nil {
+		t.Error(err)
+	} else if err = cd.UpdateFromCGREvent(cgrEv, []string{utils.Destination}); err == nil {
+		t.Error(err)
+	} else if err = cd.UpdateFromCGREvent(cgrEv, []string{utils.Category}); err == nil {
+		t.Error(err)
+	} else if err = cd.UpdateFromCGREvent(cgrEv, []string{utils.ToR}); err == nil {
+		t.Error(err)
+	} else if err = cd.UpdateFromCGREvent(cgrEv, []string{utils.Tenant}); err == nil {
+		t.Error(err)
+	} else if err = cd.UpdateFromCGREvent(cgrEv, []string{utils.AccountField}); err == nil {
+		t.Error(err)
+	} else if err = cd.UpdateFromCGREvent(cgrEv, []string{utils.Subject}); err == nil {
+		t.Error(err)
 	}
 
 }
@@ -2477,4 +2501,25 @@ func TestCDRefundIncrementspanic(t *testing.T) {
 		len(ub.BalanceMap[utils.MetaMonetary]) != 1 {
 		t.Error("Error refunding money: ", utils.ToIJSON(ub.BalanceMap))
 	}
+}
+func TestValidateCallData(t *testing.T) {
+
+	cd := &CallDescriptor{
+
+		TimeStart: time.Date(2022, 07, 02, 20, 0, 0, 0, time.UTC),
+		TimeEnd:   time.Date(2022, 07, 02, 20, 0, 0, 0, time.UTC),
+	}
+	if err := cd.ValidateCallData(); err == nil {
+		t.Error(err)
+	}
+	cd.TimeEnd = time.Date(2022, 07, 02, 21, 0, 0, 0, time.UTC)
+	cd.DurationIndex = 62 * time.Minute
+	if err := cd.ValidateCallData(); err == nil {
+		t.Error(err)
+	}
+	cd.DurationIndex = 60 * time.Minute
+	if err = cd.ValidateCallData(); err != nil {
+		t.Error(err)
+	}
+
 }

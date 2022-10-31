@@ -814,3 +814,11 @@ func TestRGRateCloneNil(t *testing.T) {
 		t.Errorf("\nExpecting: <nil>,\n Received: <%+v>", result)
 	}
 }
+
+func RITimingAsFieldInterface(t *testing.T) {
+	ri := &RateInterval{}
+	if _, err := ri.Timing.FieldAsInterface([]string{}); err == nil {
+		t.Error(err)
+	}
+
+}
