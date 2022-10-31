@@ -901,9 +901,51 @@ func TestUnitCounterFieldAsString(t *testing.T) {
 					Weight: utils.Float64Pointer(15),
 				}}},
 	}
-	if _, err := uc.FieldAsString(fldPath); err == nil {
+	if _, err := uc.FieldAsString(fldPath); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
 	} else if _, err := uc.FieldAsString([]string{utils.Counters}); err != nil {
 		t.Error(err)
 	}
+}
+
+func TestUnitCounterFilterFieldAsInterFace(t *testing.T) {
+	cfs := &CounterFilter{
+		Value: 2.3,
+		Filter: &BalanceFilter{
+			ID:     utils.StringPointer("testID2"),
+			Type:   utils.StringPointer("kind"),
+			Weight: utils.Float64Pointer(15),
+		}}
+	if _, err := cfs.FieldAsInterface([]string{}); err == nil {
+		t.Error(err)
+	} else if _, err = cfs.FieldAsInterface([]string{"test"}); err == nil {
+		t.Error(err)
+	} else if _, err = cfs.FieldAsInterface([]string{utils.Value}); err != nil {
+		t.Error(err)
+	} else if _, err = cfs.FieldAsInterface([]string{utils.Value, "test"}); err == nil {
+		t.Error(err)
+	} else if val, err := cfs.FieldAsInterface([]string{utils.Filter}); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(val, cfs.Filter) {
+		t.Errorf("expected %v ,received %v", utils.ToJSON(cfs.Filter), utils.ToJSON(val))
+	} else if _, err = cfs.FieldAsInterface([]string{utils.Filter, "test"}); err == nil {
+		t.Error(err)
+	}
+}
+
+func TestUnitCounterFilterFieldAsString(t *testing.T) {
+	cfs := &CounterFilter{
+		Value: 2.3,
+		Filter: &BalanceFilter{
+			ID:     utils.StringPointer("testID2"),
+			Type:   utils.StringPointer("kind"),
+			Weight: utils.Float64Pointer(15),
+		},
+	}
+	if _, err := cfs.FieldAsString([]string{}); err == nil {
+		t.Error(err)
+	} else if _, err = cfs.FieldAsString([]string{utils.Value}); err != nil {
+		t.Error(err)
+	}
+
 }
