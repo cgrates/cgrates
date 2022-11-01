@@ -749,7 +749,10 @@ func TestCDRNewCDRFromSQL(t *testing.T) {
 	} else if !reflect.DeepEqual(cdr, eCDR) {
 		t.Errorf("Expecting: %+v, received: %+v", cdr, eCDR)
 	}
-
+	cdrSQL.ExtraFields = "extrafield"
+	if _, err := NewCDRFromSQL(cdrSQL); err == nil {
+		t.Error(err)
+	}
 }
 
 func TestCDRAsCGREvent(t *testing.T) {
