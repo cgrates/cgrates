@@ -20,6 +20,7 @@ package engine
 import (
 	"encoding/json"
 	"reflect"
+	"sort"
 	"testing"
 	"time"
 
@@ -2600,7 +2601,6 @@ func TestAccountFieldAsInterface(t *testing.T) {
 	} else if _, err = acc.FieldAsInterface([]string{"ActionTriggers[0]", "test"}); err == nil {
 		t.Error(err)
 	}
-
 	if _, err := acc.FieldAsInterface([]string{"ID"}); err != nil {
 		t.Error(err)
 	} else if _, err = acc.FieldAsInterface([]string{"ID", "test"}); err == nil {
@@ -2610,5 +2610,123 @@ func TestAccountFieldAsInterface(t *testing.T) {
 		t.Error(err)
 	} else if _, err = acc.FieldAsInterface([]string{"BalanceMap", "first[0]"}); err != nil {
 		t.Error(err)
+	} else if _, err = acc.FieldAsInterface([]string{"BalanceMap", "first[3]"}); err == nil {
+		t.Error(err)
+	} else if _, err = acc.FieldAsInterface([]string{"BalanceMap", "first[first]"}); err == nil {
+		t.Error(err)
+	} else if _, err = acc.FieldAsInterface([]string{utils.UnitCounters}); err != nil {
+		t.Error(err)
+	} else if _, err = acc.FieldAsInterface([]string{utils.UnitCounters, "first"}); err != nil {
+		t.Error(err)
+	} else if _, err = acc.FieldAsInterface([]string{utils.UnitCounters, "first", "sec"}); err == nil {
+		t.Error(err)
+	} else if _, err = acc.FieldAsInterface([]string{utils.UnitCounters, "first", "2"}); err == nil {
+		t.Error(err)
+	} else if _, err := acc.FieldAsInterface([]string{utils.UnitCounters, "first", "0"}); err == nil {
+		t.Error(err)
+	} else if _, err = acc.FieldAsInterface([]string{utils.UnitCounters, "sec"}); err == nil {
+		t.Error(err)
+	} else if _, err = acc.FieldAsInterface([]string{utils.ActionTriggers}); err != nil {
+		t.Error(err)
+	} else if _, err = acc.FieldAsInterface([]string{utils.ActionTriggers, "val"}); err == nil {
+		t.Error(err)
+	} else if val, err := acc.FieldAsInterface([]string{utils.ActionTriggers, "id"}); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(val, acc.ActionTriggers[0]) {
+		t.Errorf("expected %v ,received %v", utils.ToJSON(val), utils.ToJSON(acc.ActionTriggers[0]))
+	} else if _, err = acc.FieldAsInterface([]string{utils.AllowNegative}); err != nil {
+		t.Error(err)
+	} else if _, err = acc.FieldAsInterface([]string{utils.AllowNegative, "test"}); err == nil {
+		t.Error(err)
+	} else if _, err = acc.FieldAsInterface([]string{utils.Disabled}); err != nil {
+		t.Error(err)
+	} else if _, err = acc.FieldAsInterface([]string{utils.Disabled, "test"}); err == nil {
+		t.Error(err)
+	} else if _, err = acc.FieldAsInterface([]string{utils.UpdateTime}); err != nil {
+		t.Error(err)
+	} else if _, err = acc.FieldAsInterface([]string{utils.UpdateTime, "test"}); err == nil {
+		t.Error(err)
+	}
+}
+
+func TestAccountFieldAsString(t *testing.T) {
+	acc := &Account{
+		ID: "id",
+		BalanceMap: map[string]Balances{
+			"first": {
+				&Balance{
+					Uuid:  "uuid1",
+					ID:    "id",
+					Value: 20.44,
+				},
+				&Balance{
+					Uuid:  "uuid2",
+					ID:    "id2",
+					Value: 12.2,
+				},
+			}},
+		UnitCounters: UnitCounters{
+			"first": []*UnitCounter{
+				{
+					CounterType: "balance",
+					Counters: CounterFilters{
+						{
+							Value: 20.44,
+							Filter: &BalanceFilter{
+								Uuid: utils.StringPointer("filterUuid"),
+								ID:   utils.StringPointer("filterId"),
+								Type: utils.StringPointer("type"),
+							},
+						},
+					},
+				}}},
+		ActionTriggers: ActionTriggers{
+			{
+				UniqueID:       "uniId",
+				ID:             "id",
+				ThresholdType:  "*min_event_counter",
+				ThresholdValue: 20.55,
+			},
+			{
+				UniqueID:       "uniId2",
+				ID:             "id2",
+				ThresholdType:  "*max_event_counter",
+				ThresholdValue: 19.22,
+				Recurrent:      true,
+			},
+		},
+	}
+	if _, err := acc.FieldAsString([]string{"val"}); err == nil {
+		t.Error(err)
+	} else if _, err := acc.FieldAsString([]string{"ID"}); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestGetSharedGroups(t *testing.T) {
+	acc := &Account{
+		BalanceMap: map[string]Balances{
+			"first": {
+				{SharedGroups: utils.StringMap{
+					"firstval":  true,
+					"firstval2": true,
+				}}},
+			"second": {
+				{
+					SharedGroups: utils.StringMap{
+						"secondval":  true,
+						"secondval2": false,
+					}}},
+		},
+	}
+	exp := []string{"firstval", "firstval2", "secondval", "secondval2"}
+
+	val := acc.GetSharedGroups()
+
+	sort.Slice(val, func(i, j int) bool {
+		return val[i] < val[j]
+	})
+	if !reflect.DeepEqual(val, exp) {
+		t.Errorf("expected %v ,received %v", utils.ToJSON(val), utils.ToJSON(exp))
 	}
 }
