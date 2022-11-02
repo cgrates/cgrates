@@ -114,7 +114,12 @@ func TestActionPlanClone(t *testing.T) {
 }
 
 func TestActionTimingClone(t *testing.T) {
-	at := &ActionTiming{
+	var at *ActionTiming
+	val := at.Clone()
+	if val != nil {
+		t.Errorf("expected nil ,received %v", val)
+	}
+	at = &ActionTiming{
 		Uuid:      "Uuid_test",
 		ActionsID: "ActionsID_test",
 		Weight:    0.7,

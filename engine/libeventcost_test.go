@@ -26,7 +26,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-//Start tests for ChargingInterval
+// Start tests for ChargingInterval
 func TestChargingIntervalPartiallyEquals(t *testing.T) {
 	ci1 := &ChargingInterval{
 		RatingID: "Rating1",
@@ -341,7 +341,7 @@ func TestChargingIntervalClone(t *testing.T) {
 
 }
 
-//Start tests for ChargingIncrement
+// Start tests for ChargingIncrement
 func TestChargingIncrementEquals(t *testing.T) {
 	ch1 := &ChargingIncrement{
 		AccountingID:   "Acc1",
@@ -414,7 +414,7 @@ func TestChargingIncrementTotalCost(t *testing.T) {
 	}
 }
 
-//Start tests for BalanceCharge
+// Start tests for BalanceCharge
 func TestBalanceChargeEquals(t *testing.T) {
 	bc1 := &BalanceCharge{
 		AccountID:     "1001",
@@ -463,7 +463,7 @@ func TestBalanceChargeClone(t *testing.T) {
 	}
 }
 
-//Start tests for RatingMatchedFilters
+// Start tests for RatingMatchedFilters
 func TestRatingMatchedFiltersEquals(t *testing.T) {
 	rmf1 := RatingMatchedFilters{
 		"AccountID":     "1001",
@@ -504,7 +504,7 @@ func TestRatingMatchedFiltersClone(t *testing.T) {
 	}
 }
 
-//Start tests for ChargedTiming
+// Start tests for ChargedTiming
 func TestChargedTimingEquals(t *testing.T) {
 	ct1 := &ChargedTiming{
 		Years:     utils.Years{1, 2},
@@ -553,7 +553,7 @@ func TestChargedTimingClone(t *testing.T) {
 	}
 }
 
-//Start tests for RatingUnit
+// Start tests for RatingUnit
 func TestRatingUnitEquals(t *testing.T) {
 	ru1 := &RatingUnit{
 		ConnectFee:       1.23,
@@ -614,7 +614,7 @@ func TestRatingUnitClone(t *testing.T) {
 	}
 }
 
-//Start tests for RatingFilters
+// Start tests for RatingFilters
 func TestRatingFiltersGetIDWithSet(t *testing.T) {
 	rf1 := RatingFilters{
 		"Key1": RatingMatchedFilters{
@@ -673,7 +673,7 @@ func TestRatingFiltersClone(t *testing.T) {
 	}
 }
 
-//Start tests for Rating
+// Start tests for Rating
 func TestRatingGetIDWithSet(t *testing.T) {
 	r1 := Rating{
 		"Key1": &RatingUnit{
@@ -762,7 +762,7 @@ func TestRatingClone(t *testing.T) {
 	}
 }
 
-//Start tests for ChargedRates
+// Start tests for ChargedRates
 func TestChargedRatesGetIDWithSet(t *testing.T) {
 	cr1 := ChargedRates{
 		"Key1": RateGroups{
@@ -875,7 +875,7 @@ func TestChargedRatesClone(t *testing.T) {
 	}
 }
 
-//Start tests for ChargedTimings
+// Start tests for ChargedTimings
 func TestChargedTimingsGetIDWithSet(t *testing.T) {
 	ct1 := ChargedTimings{
 		"Key1": &ChargedTiming{
@@ -946,7 +946,7 @@ func TestChargedTimingsClone(t *testing.T) {
 	}
 }
 
-//Start tests for Accounting
+// Start tests for Accounting
 func TestAccountingGetIDWithSet(t *testing.T) {
 	a1 := Accounting{
 		"Key1": &BalanceCharge{

@@ -90,6 +90,9 @@ func TestEESClone(t *testing.T) {
 			"connIDs":["id1","id2"],
 			"rpcConnTimeout":"1m",
 			"rpcReplyTimeout":"1m",
+			"rpcAPIOpts":{
+				"key":"val",
+			}
 			},											
 			"timezone": "local",										
 			"filters": ["randomFiletrs"],										
@@ -268,6 +271,9 @@ func TestEESClone(t *testing.T) {
 					ConnIDs:                  utils.SliceStringPointer([]string{"id1", "id2"}),
 					RPCConnTimeout:           utils.DurationPointer(1 * time.Minute),
 					RPCReplyTimeout:          utils.DurationPointer(1 * time.Minute),
+					RPCAPIOpts: map[string]interface{}{
+						"key": "val",
+					},
 				},
 			},
 		},
@@ -851,7 +857,10 @@ func TestEEsCfgAsMapInterface(t *testing.T) {
 					"csvFieldSeparator":",",
 					"mysqlDSNParams":{
 						"key":"param",
-					},					
+					},	
+					"rpcAPIOpts":{
+						"key":"val",
+					}				
 				  },											
 			      "timezone": "UTC",										
 			      "filters": [],										
@@ -934,6 +943,9 @@ func TestEEsCfgAsMapInterface(t *testing.T) {
 					utils.CSVFieldSepOpt:           ",",
 					utils.MYSQLDSNParams: map[string]string{
 						"key": "param",
+					},
+					utils.RPCAPIOpts: map[string]interface{}{
+						"key": "val",
 					},
 				},
 				utils.TimezoneCfg:           "UTC",

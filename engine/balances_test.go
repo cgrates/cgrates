@@ -116,6 +116,12 @@ func TestBalanceMatchFilter(t *testing.T) {
 	if !mb1.MatchFilter(mb2, false, false) {
 		t.Errorf("Match filter failure: %+v == %+v", mb1, mb2)
 	}
+
+	mb1.Uuid, mb2.Uuid = "id", utils.StringPointer("id")
+	if !mb1.MatchFilter(mb2, false, false) {
+		t.Errorf("Match filter failure: %+v == %+v", mb1, mb2)
+	}
+
 }
 
 func TestBalanceMatchFilterEmpty(t *testing.T) {
@@ -143,7 +149,12 @@ func TestBalanceMatchFilterDiffId(t *testing.T) {
 }
 
 func TestBalanceClone(t *testing.T) {
-	mb1 := &Balance{Value: 1, Weight: 2, RatingSubject: "test", DestinationIDs: utils.NewStringMap("5")}
+	var mb1 *Balance
+	if mb2 := mb1.Clone(); mb2 != nil {
+		t.Errorf("Balance should be %v", mb2)
+	}
+
+	mb1 = &Balance{Value: 1, Weight: 2, RatingSubject: "test", DestinationIDs: utils.NewStringMap("5")}
 	mb2 := mb1.Clone()
 	if mb1 == mb2 || !mb1.Equal(mb2) {
 		t.Errorf("Cloning failure: \n%+v\n%+v", mb1, mb2)

@@ -359,7 +359,7 @@ func TestLibRoutesSortHighestCost(t *testing.T) {
 	}
 }
 
-//sort based on *acd and *tcd
+// sort based on *acd and *tcd
 func TestLibRoutesSortQOS(t *testing.T) {
 	sSpls := &SortedRoutes{
 		Routes: []*SortedRoute{
@@ -428,7 +428,7 @@ func TestLibRoutesSortQOS(t *testing.T) {
 	}
 }
 
-//sort based on *acd and *tcd
+// sort based on *acd and *tcd
 func TestLibRoutesSortQOS2(t *testing.T) {
 	sSpls := &SortedRoutes{
 		Routes: []*SortedRoute{
@@ -492,7 +492,7 @@ func TestLibRoutesSortQOS2(t *testing.T) {
 	}
 }
 
-//sort based on *pdd
+// sort based on *pdd
 func TestLibRoutesSortQOS3(t *testing.T) {
 	sSpls := &SortedRoutes{
 		Routes: []*SortedRoute{
@@ -1399,4 +1399,77 @@ func TestSortedRoutesAsNavigableMap(t *testing.T) {
 	if rcv := sSpls.AsNavigableMap(); !reflect.DeepEqual(rcv, expNavMap) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expNavMap), utils.ToJSON(rcv))
 	}
+}
+
+func TestSortedRoutesListRouteIDs(t *testing.T) {
+	sr := SortedRoutesList{
+		{
+			Routes: []*SortedRoute{
+				{
+					RouteID: "sr1id1",
+				},
+				{
+					RouteID: "sr1id2",
+				},
+			},
+		},
+		{
+			Routes: []*SortedRoute{
+				{
+					RouteID: "sr2id1",
+				},
+				{
+					RouteID: "sr2id2",
+				},
+			},
+		},
+	}
+
+	val := sr.RouteIDs()
+	sort.Slice(val, func(i, j int) bool {
+		return val[i] < val[j]
+	})
+	exp := []string{"sr1id1", "sr1id2", "sr2id1", "sr2id2"}
+	if !reflect.DeepEqual(val, exp) {
+		t.Errorf("expected %v ,received %v", exp, val)
+	}
+}
+
+func TestSortedRoutesListRoutesWithParams(t *testing.T) {
+	sRs := SortedRoutesList{
+		{
+			Routes: []*SortedRoute{
+				{
+					RouteID:         "route1",
+					RouteParameters: "params1",
+				},
+				{
+					RouteID:         "route2",
+					RouteParameters: "params2",
+				},
+			},
+		},
+		{
+			Routes: []*SortedRoute{
+				{
+					RouteID:         "route3",
+					RouteParameters: "params3",
+				},
+				{
+					RouteID:         "route4",
+					RouteParameters: "params4",
+				},
+			},
+		},
+	}
+	val := sRs.RoutesWithParams()
+	sort.Slice(val, func(i, j int) bool {
+		return val[i] < val[j]
+	})
+	exp := []string{"route1:params1", "route2:params2", "route3:params3", "route4:params4"}
+
+	if !reflect.DeepEqual(val, exp) {
+		t.Errorf("expected %v ,received %v", val, exp)
+	}
+
 }

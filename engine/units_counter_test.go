@@ -916,13 +916,13 @@ func TestUnitCounterFilterFieldAsInterFace(t *testing.T) {
 			Type:   utils.StringPointer("kind"),
 			Weight: utils.Float64Pointer(15),
 		}}
-	if _, err := cfs.FieldAsInterface([]string{}); err == nil {
+	if _, err := cfs.FieldAsInterface([]string{}); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
 	} else if _, err = cfs.FieldAsInterface([]string{"test"}); err == nil {
 		t.Error(err)
 	} else if _, err = cfs.FieldAsInterface([]string{utils.Value}); err != nil {
 		t.Error(err)
-	} else if _, err = cfs.FieldAsInterface([]string{utils.Value, "test"}); err == nil {
+	} else if _, err = cfs.FieldAsInterface([]string{utils.Value, "test"}); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
 	} else if val, err := cfs.FieldAsInterface([]string{utils.Filter}); err != nil {
 		t.Error(err)

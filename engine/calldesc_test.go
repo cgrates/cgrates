@@ -1857,6 +1857,7 @@ func TestCallDescriptorUpdateFromCGREvent(t *testing.T) {
 			"Tenant":      "cgrates.org",
 			"ToR":         "",
 			"Usage":       30 * time.Minute,
+			"Extra":       "Value",
 		},
 	}
 	cd := &CallDescriptor{
@@ -2227,6 +2228,7 @@ func TestCalldescNewCallDescriptorFromCGREvent(t *testing.T) {
 	if !reflect.DeepEqual(rcv, exp) {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", exp, rcv)
 	}
+
 }
 
 func TestCalldescAsCGREvent(t *testing.T) {
