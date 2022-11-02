@@ -119,7 +119,7 @@ func TestActionTriggersClone(t *testing.T) {
 
 func TestActionTriggerFieldAsInterface(t *testing.T) {
 	at := &ActionTrigger{}
-	if _, err := at.FieldAsInterface([]string{}); err == nil {
+	if _, err := at.FieldAsInterface([]string{}); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
 	} else if _, err = at.FieldAsInterface([]string{"test"}); err == nil {
 		t.Error(err)
@@ -142,35 +142,35 @@ func TestActionTriggerFieldAsInterface(t *testing.T) {
 	}
 	if _, err := at.FieldAsInterface([]string{"ID"}); err != nil {
 		t.Error(err)
-	} else if _, err = at.FieldAsInterface([]string{"ID", "test"}); err == nil {
+	} else if _, err = at.FieldAsInterface([]string{"ID", "test"}); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
 	} else if _, err = at.FieldAsInterface([]string{"UniqueID"}); err != nil {
 		t.Error(err)
-	} else if _, err = at.FieldAsInterface([]string{"UniqueID", "test"}); err == nil {
+	} else if _, err = at.FieldAsInterface([]string{"UniqueID", "test"}); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
 	} else if _, err = at.FieldAsInterface([]string{"ThresholdType"}); err != nil {
 		t.Error(err)
-	} else if _, err = at.FieldAsInterface([]string{"ThresholdType", "test"}); err == nil {
+	} else if _, err = at.FieldAsInterface([]string{"ThresholdType", "test"}); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
 	} else if _, err = at.FieldAsInterface([]string{"ThresholdValue"}); err != nil {
 		t.Error(err)
-	} else if _, err = at.FieldAsInterface([]string{"ThresholdValue", "test"}); err == nil {
+	} else if _, err = at.FieldAsInterface([]string{"ThresholdValue", "test"}); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
 	} else if _, err = at.FieldAsInterface([]string{"Recurrent"}); err != nil {
 		t.Error(err)
-	} else if _, err = at.FieldAsInterface([]string{"Recurrent", "test"}); err == nil {
+	} else if _, err = at.FieldAsInterface([]string{"Recurrent", "test"}); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
 	} else if _, err = at.FieldAsInterface([]string{"MinSleep"}); err != nil {
 		t.Error(err)
-	} else if _, err = at.FieldAsInterface([]string{"MinSleep", "test"}); err == nil {
+	} else if _, err = at.FieldAsInterface([]string{"MinSleep", "test"}); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
 	} else if _, err = at.FieldAsInterface([]string{"ExpirationDate"}); err != nil {
 		t.Error(err)
-	} else if _, err = at.FieldAsInterface([]string{"ExpirationDate", "test"}); err == nil {
+	} else if _, err = at.FieldAsInterface([]string{"ExpirationDate", "test"}); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
 	} else if _, err = at.FieldAsInterface([]string{"ActivationDate"}); err != nil {
 		t.Error(err)
-	} else if _, err = at.FieldAsInterface([]string{"ActivationDate", "test"}); err == nil {
+	} else if _, err = at.FieldAsInterface([]string{"ActivationDate", "test"}); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
 	} else if _, err = at.FieldAsInterface([]string{"Balance"}); err != nil {
 		t.Error(err)
@@ -178,23 +178,23 @@ func TestActionTriggerFieldAsInterface(t *testing.T) {
 		t.Error(err)
 	} else if _, err = at.FieldAsInterface([]string{"Weight"}); err != nil {
 		t.Error(err)
-	} else if _, err = at.FieldAsInterface([]string{"Weight", "test"}); err == nil {
+	} else if _, err = at.FieldAsInterface([]string{"Weight", "test"}); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
 	} else if _, err = at.FieldAsInterface([]string{"ActionsID"}); err != nil {
 		t.Error(err)
-	} else if _, err = at.FieldAsInterface([]string{"ActionsID", "test"}); err == nil {
+	} else if _, err = at.FieldAsInterface([]string{"ActionsID", "test"}); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
 	} else if _, err = at.FieldAsInterface([]string{"MinQueuedItems"}); err != nil {
 		t.Error(err)
-	} else if _, err = at.FieldAsInterface([]string{"MinQueuedItems", "test"}); err == nil {
+	} else if _, err = at.FieldAsInterface([]string{"MinQueuedItems", "test"}); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
 	} else if _, err = at.FieldAsInterface([]string{"Executed"}); err != nil {
 		t.Error(err)
-	} else if _, err = at.FieldAsInterface([]string{"Executed", "test"}); err == nil {
+	} else if _, err = at.FieldAsInterface([]string{"Executed", "test"}); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
 	} else if _, err = at.FieldAsInterface([]string{"LastExecutionTime"}); err != nil {
 		t.Error(err)
-	} else if _, err = at.FieldAsInterface([]string{"LastExecutionTime", "test"}); err == nil {
+	} else if _, err = at.FieldAsInterface([]string{"LastExecutionTime", "test"}); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
 	}
 

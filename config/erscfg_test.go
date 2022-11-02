@@ -169,7 +169,6 @@ func TestEventReaderloadFromJsonCfg(t *testing.T) {
 	if err = eventReader.loadFromJSONCfg(nil, jsonCfg.templates, jsonCfg.generalCfg.RSRSep); err != nil {
 		t.Error(err)
 	}
-
 }
 
 func TestEventReaderloadFromJsonCase1(t *testing.T) {

@@ -1333,3 +1333,17 @@ func TestStatQueueLockUnlockStatQueues(t *testing.T) {
 		t.Fatal("expected struct field \"lkID\" to be empty")
 	}
 }
+
+func TestStatQueueUnmarshalJSON(t *testing.T) {
+	sq := &StatQueue{}
+	if err := sq.UnmarshalJSON(nil); err == nil {
+		t.Error(err)
+	}
+	ssq := &StatQueueWithAPIOpts{}
+	if err := ssq.UnmarshalJSON(nil); err == nil {
+		t.Error(err)
+	} else if err := ssq.UnmarshalJSON([]byte("value:key")); err == nil {
+		t.Error(err)
+	}
+
+}

@@ -815,10 +815,100 @@ func TestRGRateCloneNil(t *testing.T) {
 	}
 }
 
-func RITimingAsFieldInterface(t *testing.T) {
-	ri := &RateInterval{}
-	if _, err := ri.Timing.FieldAsInterface([]string{}); err == nil {
+func TestRGRateAsFieldInterface(t *testing.T) {
+	ri := &RITiming{
+		Years:     utils.Years{2, 3},
+		Months:    utils.Months{1, 2, 3, 5},
+		MonthDays: utils.MonthDays{21, 12, 14},
+		WeekDays:  utils.WeekDays{0, 2, 3},
+		ID:        "id",
+		StartTime: "20:00:00",
+		EndTime:   "20:30:00",
+	}
+	if _, err := ri.FieldAsInterface([]string{}); err == nil || err != utils.ErrNotFound {
+		t.Error(err)
+	} else if _, err = ri.FieldAsInterface([]string{"Years[3]"}); err == nil || err != utils.ErrNotFound {
+		t.Error(err)
+	} else if _, err = ri.FieldAsInterface([]string{"Months[5]"}); err == nil || err != utils.ErrNotFound {
+		t.Error(err)
+	} else if _, err = ri.FieldAsInterface([]string{"MonthDays[4]"}); err == nil || err != utils.ErrNotFound {
+		t.Error(err)
+	} else if _, err = ri.FieldAsInterface([]string{"WeekDays[4]"}); err == nil || err != utils.ErrNotFound {
+		t.Error(err)
+	} else if _, err = ri.FieldAsInterface([]string{"Values"}); err == nil {
+		t.Error(err)
+	} else if _, err = ri.FieldAsInterface([]string{"Years[0]"}); err != nil {
+		t.Error(err)
+	} else if _, err = ri.FieldAsInterface([]string{"Months[1]"}); err != nil {
+		t.Error(err)
+	} else if _, err = ri.FieldAsInterface([]string{"MonthDays[1]"}); err != nil {
+		t.Error(err)
+	} else if _, err = ri.FieldAsInterface([]string{"WeekDays[1]"}); err != nil {
+		t.Error(err)
+	} else if _, err = ri.FieldAsInterface([]string{"ID"}); err != nil {
+		t.Error(err)
+	} else if _, err = ri.FieldAsInterface([]string{"ID", "test"}); err == nil || err != utils.ErrNotFound {
+		t.Error(err)
+	} else if _, err = ri.FieldAsInterface([]string{"StartTime"}); err != nil {
+		t.Error(err)
+	} else if _, err = ri.FieldAsInterface([]string{"StartTime", "test"}); err == nil || err != utils.ErrNotFound {
+		t.Error(err)
+	} else if _, err = ri.FieldAsInterface([]string{"StartTime"}); err != nil {
+		t.Error(err)
+	} else if _, err = ri.FieldAsInterface([]string{"StartTime", "test"}); err == nil || err != utils.ErrNotFound {
+		t.Error(err)
+	} else if _, err = ri.FieldAsInterface([]string{"Years"}); err != nil {
+		t.Error(err)
+	} else if _, err = ri.FieldAsInterface([]string{"Years", "0"}); err != nil {
+		t.Error(err)
+	} else if _, err = ri.FieldAsInterface([]string{"Years", "5"}); err == nil || err != utils.ErrNotFound {
+		t.Error(err)
+	} else if _, err = ri.FieldAsInterface([]string{"Years", "zero"}); err == nil {
+		t.Error(err)
+	} else if _, err = ri.FieldAsInterface([]string{"Years", "0", "2"}); err == nil || err != utils.ErrNotFound {
+		t.Error(err)
+	} else if _, err = ri.FieldAsInterface([]string{"EndTime"}); err != nil {
+		t.Error(err)
+	} else if _, err = ri.FieldAsInterface([]string{"EndTime", "test"}); err == nil || err != utils.ErrNotFound {
+		t.Error(err)
+	} else if _, err = ri.FieldAsInterface([]string{"Months"}); err != nil {
+		t.Error(err)
+	} else if _, err = ri.FieldAsInterface([]string{"Months", "0"}); err != nil {
+		t.Error(err)
+	} else if _, err = ri.FieldAsInterface([]string{"Months", "5"}); err == nil || err != utils.ErrNotFound {
+		t.Error(err)
+	} else if _, err = ri.FieldAsInterface([]string{"Months", "zero"}); err == nil {
+		t.Error(err)
+	} else if _, err = ri.FieldAsInterface([]string{"Months", "0", "2"}); err == nil || err != utils.ErrNotFound {
+		t.Error(err)
+	} else if _, err = ri.FieldAsInterface([]string{"MonthDays"}); err != nil {
+		t.Error(err)
+	} else if _, err = ri.FieldAsInterface([]string{"MonthDays", "0"}); err != nil {
+		t.Error(err)
+	} else if _, err = ri.FieldAsInterface([]string{"MonthDays", "5"}); err == nil || err != utils.ErrNotFound {
+		t.Error(err)
+	} else if _, err = ri.FieldAsInterface([]string{"MonthDays", "zero"}); err == nil {
+		t.Error(err)
+	} else if _, err = ri.FieldAsInterface([]string{"MonthDays", "0", "2"}); err == nil || err != utils.ErrNotFound {
+		t.Error(err)
+	} else if _, err = ri.FieldAsInterface([]string{"WeekDays"}); err != nil {
+		t.Error(err)
+	} else if _, err = ri.FieldAsInterface([]string{"WeekDays", "0"}); err != nil {
+		t.Error(err)
+	} else if _, err = ri.FieldAsInterface([]string{"WeekDays", "5"}); err == nil || err != utils.ErrNotFound {
+		t.Error(err)
+	} else if _, err = ri.FieldAsInterface([]string{"WeekDays", "zero"}); err == nil {
+		t.Error(err)
+	} else if _, err = ri.FieldAsInterface([]string{"WeekDays", "0", "2"}); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
 	}
+}
 
+func TestRGRateFieldAsString(t *testing.T) {
+	rit := &RITiming{}
+	if _, err := rit.FieldAsString([]string{"ID"}); err != nil {
+		t.Error(err)
+	} else if _, err = rit.FieldAsString([]string{"val"}); err == nil {
+		t.Error(err)
+	}
 }

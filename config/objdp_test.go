@@ -133,6 +133,8 @@ func TestFieldAsInterfaceObjDPValid1(t *testing.T) {
 		t.Error(err)
 	} else if rcv != 1 {
 		t.Errorf("Expected %+v, received %+v", 1, rcv)
+	} else if _, err = objDp.FieldAsInterface([]string{"val"}); err == nil && err != utils.ErrNotFound {
+		t.Error(err)
 	}
 }
 

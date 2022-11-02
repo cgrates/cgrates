@@ -2436,7 +2436,7 @@ func TestAccountSummaryFieldAsInterface(t *testing.T) {
 		ID:     "accID",
 	}
 
-	if _, err := as.FieldAsInterface(nil); err == nil {
+	if _, err := as.FieldAsInterface(nil); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
 	} else if _, err := as.FieldAsInterface([]string{"test"}); err == nil {
 		t.Error(err)
@@ -2447,11 +2447,11 @@ func TestAccountSummaryFieldAsInterface(t *testing.T) {
 		t.Errorf("expected %v ,received %v", utils.ToJSON(val), utils.ToJSON(as.BalanceSummaries[0]))
 	} else if _, err = as.FieldAsInterface([]string{"Tenant"}); err != nil {
 		t.Error(err)
-	} else if _, err = as.FieldAsInterface([]string{"Tenant", "Value"}); err == nil {
+	} else if _, err = as.FieldAsInterface([]string{"Tenant", "Value"}); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
 	} else if _, err = as.FieldAsInterface([]string{"ID"}); err != nil {
 		t.Error(err)
-	} else if _, err = as.FieldAsInterface([]string{"ID", "test"}); err == nil {
+	} else if _, err = as.FieldAsInterface([]string{"ID", "test"}); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
 	}
 	if val, err := as.FieldAsInterface([]string{"BalanceSummaries"}); err != nil {
@@ -2475,7 +2475,7 @@ func TestAccountSummaryFieldAsInterface(t *testing.T) {
 			Initial: 20.54,
 			Value:   1,
 		}}
-	if _, err := as.FieldAsInterface([]string{"BalanceSummaries", "id3"}); err == nil {
+	if _, err := as.FieldAsInterface([]string{"BalanceSummaries", "id3"}); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
 
 	} else if val, err := as.FieldAsInterface([]string{"BalanceSummaries", "id2"}); err != nil {
@@ -2486,11 +2486,11 @@ func TestAccountSummaryFieldAsInterface(t *testing.T) {
 	}
 	if _, err = as.FieldAsInterface([]string{"AllowNegative"}); err != nil {
 		t.Error(err)
-	} else if _, err = as.FieldAsInterface([]string{"AllowNegative", "test"}); err == nil {
+	} else if _, err = as.FieldAsInterface([]string{"AllowNegative", "test"}); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
 	} else if _, err = as.FieldAsInterface([]string{"Disabled"}); err != nil {
 		t.Error(err)
-	} else if _, err = as.FieldAsInterface([]string{"Disabled", "test"}); err == nil {
+	} else if _, err = as.FieldAsInterface([]string{"Disabled", "test"}); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
 	}
 
@@ -2523,8 +2523,6 @@ func TestAccountSummaryFieldAsString(t *testing.T) {
 func TestAccountFieldAsInterface(t *testing.T) {
 	var acc *Account
 	if _, err := acc.FieldAsInterface([]string{}); err != nil {
-		t.Error(err)
-	} else if _, err := acc.FieldAsInterface([]string{"test"}); err == nil {
 		t.Error(err)
 	}
 	acc = &Account{
@@ -2575,7 +2573,7 @@ func TestAccountFieldAsInterface(t *testing.T) {
 	}
 	if _, err := acc.FieldAsInterface([]string{"Balance"}); err == nil {
 		t.Error(err)
-	} else if _, err = acc.FieldAsInterface([]string{"BalanceMap[second]"}); err == nil {
+	} else if _, err = acc.FieldAsInterface([]string{"BalanceMap[second]"}); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
 	} else if val, err := acc.FieldAsInterface([]string{"BalanceMap[first]"}); err != nil {
 		t.Error(err)
@@ -2583,14 +2581,14 @@ func TestAccountFieldAsInterface(t *testing.T) {
 		t.Errorf("expected %v ,received %v", utils.ToJSON(val), utils.ToJSON(acc.BalanceMap["first"]))
 	} else if _, err := acc.FieldAsInterface([]string{"BalanceMap[first]", "UnitCounters[test]"}); err == nil {
 		t.Error(err)
-	} else if _, err := acc.FieldAsInterface([]string{"UnitCounters[test]"}); err == nil {
+	} else if _, err := acc.FieldAsInterface([]string{"UnitCounters[test]"}); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
 	} else if val, err := acc.FieldAsInterface([]string{"UnitCounters[first]"}); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(val, acc.UnitCounters["first"]) {
 		t.Errorf("expected %v ,received %v", val, acc.UnitCounters["first"])
 	}
-	if _, err := acc.FieldAsInterface([]string{"ActionTriggers[3]"}); err == nil {
+	if _, err := acc.FieldAsInterface([]string{"ActionTriggers[3]"}); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
 	} else if _, err := acc.FieldAsInterface([]string{"ActionTriggers[three]"}); err == nil {
 		t.Error(err)
@@ -2603,16 +2601,16 @@ func TestAccountFieldAsInterface(t *testing.T) {
 	}
 	if _, err := acc.FieldAsInterface([]string{"ID"}); err != nil {
 		t.Error(err)
-	} else if _, err = acc.FieldAsInterface([]string{"ID", "test"}); err == nil {
+	} else if _, err = acc.FieldAsInterface([]string{"ID", "test"}); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
 	}
 	if _, err := acc.FieldAsInterface([]string{"BalanceMap"}); err != nil {
 		t.Error(err)
 	} else if _, err = acc.FieldAsInterface([]string{"BalanceMap", "first[0]"}); err != nil {
 		t.Error(err)
-	} else if _, err = acc.FieldAsInterface([]string{"BalanceMap", "first[3]"}); err == nil {
+	} else if _, err = acc.FieldAsInterface([]string{"BalanceMap", "first[3]"}); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
-	} else if _, err = acc.FieldAsInterface([]string{"BalanceMap", "first[first]"}); err == nil {
+	} else if _, err = acc.FieldAsInterface([]string{"BalanceMap", "first[first]"}); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
 	} else if _, err = acc.FieldAsInterface([]string{utils.UnitCounters}); err != nil {
 		t.Error(err)
@@ -2620,15 +2618,15 @@ func TestAccountFieldAsInterface(t *testing.T) {
 		t.Error(err)
 	} else if _, err = acc.FieldAsInterface([]string{utils.UnitCounters, "first", "sec"}); err == nil {
 		t.Error(err)
-	} else if _, err = acc.FieldAsInterface([]string{utils.UnitCounters, "first", "2"}); err == nil {
+	} else if _, err = acc.FieldAsInterface([]string{utils.UnitCounters, "first", "2"}); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
-	} else if _, err := acc.FieldAsInterface([]string{utils.UnitCounters, "first", "0"}); err == nil {
+	} else if _, err := acc.FieldAsInterface([]string{utils.UnitCounters, "first", "0"}); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
-	} else if _, err = acc.FieldAsInterface([]string{utils.UnitCounters, "sec"}); err == nil {
+	} else if _, err = acc.FieldAsInterface([]string{utils.UnitCounters, "sec"}); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
 	} else if _, err = acc.FieldAsInterface([]string{utils.ActionTriggers}); err != nil {
 		t.Error(err)
-	} else if _, err = acc.FieldAsInterface([]string{utils.ActionTriggers, "val"}); err == nil {
+	} else if _, err = acc.FieldAsInterface([]string{utils.ActionTriggers, "val"}); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
 	} else if val, err := acc.FieldAsInterface([]string{utils.ActionTriggers, "id"}); err != nil {
 		t.Error(err)
@@ -2636,15 +2634,15 @@ func TestAccountFieldAsInterface(t *testing.T) {
 		t.Errorf("expected %v ,received %v", utils.ToJSON(val), utils.ToJSON(acc.ActionTriggers[0]))
 	} else if _, err = acc.FieldAsInterface([]string{utils.AllowNegative}); err != nil {
 		t.Error(err)
-	} else if _, err = acc.FieldAsInterface([]string{utils.AllowNegative, "test"}); err == nil {
+	} else if _, err = acc.FieldAsInterface([]string{utils.AllowNegative, "test"}); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
 	} else if _, err = acc.FieldAsInterface([]string{utils.Disabled}); err != nil {
 		t.Error(err)
-	} else if _, err = acc.FieldAsInterface([]string{utils.Disabled, "test"}); err == nil {
+	} else if _, err = acc.FieldAsInterface([]string{utils.Disabled, "test"}); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
 	} else if _, err = acc.FieldAsInterface([]string{utils.UpdateTime}); err != nil {
 		t.Error(err)
-	} else if _, err = acc.FieldAsInterface([]string{utils.UpdateTime, "test"}); err == nil {
+	} else if _, err = acc.FieldAsInterface([]string{utils.UpdateTime, "test"}); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
 	}
 }
