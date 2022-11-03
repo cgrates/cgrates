@@ -85,10 +85,15 @@ func TestNewBalanceFilter(t *testing.T) {
 	if _, err := NewBalanceFilter(attrs, ""); err == nil {
 		t.Error("Expecxted error received nil")
 	}
+	attrs[utils.ExpiryTime] = "NotTime"
+	if _, err := NewBalanceFilter(attrs, ""); err == nil {
+		t.Error("Expecxted error received nil")
+	}
 	attrs[utils.Value] = "NotFloat"
 	if _, err := NewBalanceFilter(attrs, ""); err == nil {
 		t.Error("Expecxted error received nil")
 	}
+
 }
 
 func TestBalanceFilterClone(t *testing.T) {
@@ -476,4 +481,58 @@ func TestBalanceFilterFieldAsString(t *testing.T) {
 	} else if _, err = bp.FieldAsString([]string{"Uuid"}); err != nil {
 		t.Error(err)
 	}
+}
+
+func TestBalanceFilterModifyBalance(t *testing.T) {
+
+	bf := &BalanceFilter{
+		ID: utils.StringPointer("id"),
+
+		ExpirationDate: utils.TimePointer(time.Date(2022, 12, 24, 10, 0, 0, 0, time.UTC)),
+		RatingSubject:  utils.StringPointer("rating"),
+		Categories: &utils.StringMap{
+			"exp": true,
+		},
+		SharedGroups: &utils.StringMap{
+			"shared": false,
+		},
+		TimingIDs: &utils.StringMap{
+			"one": true,
+		},
+		Blocker: utils.BoolPointer(true),
+		Timings: []*RITiming{
+			{
+				ID:    "tId",
+				Years: utils.Years{2, 1},
+			},
+		},
+		Disabled: utils.BoolPointer(true),
+	}
+	b := &Balance{}
+
+	exp := &Balance{
+		ID:             "id",
+		ExpirationDate: time.Date(2022, 12, 24, 10, 0, 0, 0, time.UTC),
+		Weight:         0,
+		RatingSubject:  "rating",
+		Categories:     utils.StringMap{"exp": true},
+		SharedGroups: utils.StringMap{
+			"shared": false},
+		Timings: []*RITiming{
+			{
+				ID:    "tId",
+				Years: utils.Years{2, 1},
+			},
+		},
+		TimingIDs: utils.StringMap{
+			"one": true},
+		Disabled: true,
+
+		Blocker: true}
+
+	bf.ModifyBalance(b)
+	if reflect.DeepEqual(b, exp) {
+		t.Errorf("expected %v ,received %v", utils.ToJSON(exp), utils.ToJSON(b))
+	}
+
 }

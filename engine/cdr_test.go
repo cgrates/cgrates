@@ -470,6 +470,11 @@ func TestCDRAsExternalCDR(t *testing.T) {
 	if cdrOut := storCdr.AsExternalCDR(); !reflect.DeepEqual(expectOutCdr, cdrOut) {
 		t.Errorf("Expected: %+v, received: %+v", expectOutCdr, cdrOut)
 	}
+	expectOutCdr.ToR, storCdr.ToR, expectOutCdr.Usage = "other", "other", "10000000000"
+	if cdrOut := storCdr.AsExternalCDR(); !reflect.DeepEqual(expectOutCdr, cdrOut) {
+		t.Errorf("Expected: %+v, received: %+v", expectOutCdr, cdrOut)
+	}
+
 }
 
 func TestUsageReqAsCD(t *testing.T) {
@@ -491,10 +496,39 @@ func TestUsageReqAsCD(t *testing.T) {
 	} else if !reflect.DeepEqual(eCD, cd) {
 		t.Errorf("Expected: %+v, received: %+v", eCD, cd)
 	}
+
+}
+func TestUsageReqAsCDNil(t *testing.T) {
+	req := &UsageRecord{
+		ToR: utils.MetaVoice, RequestType: utils.MetaRated,
+		Tenant: "cgrates.org", Category: "call",
+		Account: "1001", Subject: "1001", Destination: "1002",
+		Usage:     "test",
+		SetupTime: "2013-11-07T08:42:26Z",
+		ExtraFields: map[string]string{
+			"ExtraField1": "extraVal",
+		},
+	}
+
+	if _, err := req.AsCallDescriptor("/time.zone", true); err == nil {
+		t.Error(err)
+	} else if _, err = req.AsCallDescriptor("", true); err == nil {
+		t.Error(err)
+	}
+	req.Usage = "10"
+	if _, err := req.AsCallDescriptor("", true); err != nil {
+		t.Error(err)
+	}
+
 }
 
 func TestCdrClone(t *testing.T) {
-	cdr := &CDR{}
+
+	var cdr *CDR
+	if val := cdr.Clone(); val != nil {
+		t.Errorf("expected nil , received %v ", val)
+	}
+	cdr = &CDR{}
 	eOut := &CDR{}
 	if rcv := cdr.Clone(); !reflect.DeepEqual(rcv, eOut) {
 		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
@@ -749,8 +783,12 @@ func TestCDRNewCDRFromSQL(t *testing.T) {
 	} else if !reflect.DeepEqual(cdr, eCDR) {
 		t.Errorf("Expecting: %+v, received: %+v", cdr, eCDR)
 	}
-	cdrSQL.ExtraFields = "extrafield"
-	if _, err := NewCDRFromSQL(cdrSQL); err == nil {
+	cdrSQL.CostDetails = "val"
+	if _, err = NewCDRFromSQL(cdrSQL); err == nil {
+		t.Error(err)
+	}
+	cdrSQL.ExtraFields = "test"
+	if _, err = NewCDRFromSQL(cdrSQL); err == nil {
 		t.Error(err)
 	}
 }

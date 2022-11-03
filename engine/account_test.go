@@ -2728,3 +2728,20 @@ func TestGetSharedGroups(t *testing.T) {
 		t.Errorf("expected %v ,received %v", utils.ToJSON(val), utils.ToJSON(exp))
 	}
 }
+
+func TestAccountAsOldStructure(t *testing.T) {
+
+	acc := &Account{}
+	expAcc := &Account{
+		ID:             "*out:",
+		BalanceMap:     map[string]Balances{},
+		UnitCounters:   UnitCounters{},
+		ActionTriggers: ActionTriggers{},
+		AllowNegative:  false,
+		Disabled:       false,
+	}
+
+	if val := acc.AsOldStructure(); reflect.DeepEqual(val, expAcc) {
+		t.Errorf("expected %v ,received %v ", utils.ToJSON(expAcc), utils.ToJSON(val))
+	}
+}
