@@ -1003,8 +1003,15 @@ func TestAttributesParseAttributeSIPCID(t *testing.T) {
 		InfieldSep), 0, utils.EmptyString, utils.EmptyString, utils.InfieldSep); err != utils.ErrNotFound {
 		t.Errorf("Expected <%+v>, received <%+v>", utils.ErrNotFound, err)
 	}
-}
 
+	if _, err := ParseAttribute(dp, utils.MetaNone, utils.EmptyString, config.NewRSRParsersMustCompile("~*req.cid;~*req.extra;~*req.to;~*req.from", utils.
+		InfieldSep), 0, utils.EmptyString, utils.EmptyString, utils.InfieldSep); err != nil {
+		t.Errorf("received <%+v>", err)
+	} else if _, err = ParseAttribute(dp, utils.MetaUsageDifference, utils.EmptyString, config.NewRSRParsersMustCompile("~*req.cid;~*req.extra;~*req.to;~*req.from", utils.
+		InfieldSep), 0, utils.EmptyString, utils.EmptyString, utils.InfieldSep); err == nil {
+		t.Errorf("received <%+v>", err)
+	}
+}
 func TestAttributesParseAttributeSIPCIDWrongPathErr(t *testing.T) {
 	dp := utils.MapStorage{
 		utils.MetaReq: utils.MapStorage{

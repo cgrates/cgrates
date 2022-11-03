@@ -192,12 +192,11 @@ func TestRPCConnsAsMapInterface(t *testing.T) {
 						"key_path": "path_to_key",
 						"cert_path": "path_to_cert",
 						"ca_path":	"path_to_ca",
-						"connect_attempts": 5,
 						"reconnects": 3,
 						"connect_timeout": "1m",
 						"reply_timeout": "1m",
 						"max_reconnect_interval":"1m",
-					
+						
 
 					}
 				],

@@ -32,7 +32,6 @@ func TestDispatcherHCfgloadFromJsonCfg(t *testing.T) {
 			Hosts: []*RemoteHostJsonWithTenant{
 				{
 
-					Tenant: utils.StringPointer(utils.MetaDefault),
 					RemoteHostJson: &RemoteHostJson{
 						Id:        utils.StringPointer("Host1"),
 						Transport: utils.StringPointer(utils.MetaJSON),
@@ -168,6 +167,7 @@ func TestDispatcherHCfgloadFromJsonCfg(t *testing.T) {
 	} else if !reflect.DeepEqual(expected, jsnCfg.registrarCCfg) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsnCfg.registrarCCfg))
 	}
+
 }
 
 func TestDispatcherHCfgAsMapInterface(t *testing.T) {
