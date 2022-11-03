@@ -2521,7 +2521,12 @@ func TestValueFormulaDebit(t *testing.T) {
 }
 
 func TestClonedAction(t *testing.T) {
-	a := &Action{
+
+	var a *Action
+	if clone := a.Clone(); clone != nil {
+		t.Errorf("Expected nil but got %v", clone)
+	}
+	a = &Action{
 		Id:         "test1",
 		ActionType: utils.MetaTopUp,
 		Balance: &BalanceFilter{

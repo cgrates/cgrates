@@ -225,6 +225,7 @@ func TestBalanceMatchActionTriggerWeight(t *testing.T) {
 }
 
 func TestBalanceMatchActionTriggerRatingSubject(t *testing.T) {
+
 	at := &ActionTrigger{Balance: &BalanceFilter{RatingSubject: utils.StringPointer("test")}}
 	b := &Balance{RatingSubject: "test"}
 	if !b.MatchActionTrigger(at) {
@@ -299,6 +300,81 @@ func TestBalanceIsExpiredAt(t *testing.T) {
 	var date3 time.Time
 	if rcv := balance.IsExpiredAt(date3); rcv {
 		t.Errorf("Expecting: false , received: %+v", rcv)
+	}
+
+}
+
+func TestBalanceAsInterface(t *testing.T) {
+
+	b := &Balance{
+		Uuid:           "uuid",
+		ID:             "id",
+		Value:          2.21,
+		ExpirationDate: time.Date(2022, 11, 22, 9, 0, 0, 0, time.UTC),
+		Weight:         2.88,
+		DestinationIDs: utils.StringMap{
+			"destId1": true,
+			"destId2": true,
+		},
+		RatingSubject: "rating",
+		Categories: utils.StringMap{
+			"ctg1": true,
+			"ctg2": false,
+		},
+		SharedGroups: utils.StringMap{
+			"shgp1": false,
+			"shgp2": true,
+		},
+		Timings: []*RITiming{
+			{
+				ID:    "id",
+				Years: utils.Years{2, 3},
+			},
+		},
+		TimingIDs: utils.StringMap{
+			"timingid1": true,
+			"timingid2": false,
+		},
+		Factor: ValueFactor{
+			"factor1": 2.21,
+			"factor2": 1.34,
+		},
+	}
+
+	if _, err := b.FieldAsInterface([]string{}); err == nil || err != utils.ErrNotFound {
+		t.Error(err)
+	} else if _, err = b.FieldAsInterface([]string{"value"}); err == nil {
+		t.Error(err)
+	} else if _, err = b.FieldAsInterface([]string{"DestinationIDs[destId1]", "secondVal"}); err == nil || err != utils.ErrNotFound {
+		t.Error(err)
+	} else if _, err = b.FieldAsInterface([]string{"Categories[ctg1]", "secondVal"}); err == nil || err != utils.ErrNotFound {
+		t.Error(err)
+	} else if _, err = b.FieldAsInterface([]string{"SharedGroups[shgp1]", "secondVal"}); err == nil || err != utils.ErrNotFound {
+		t.Error(err)
+	} else if _, err = b.FieldAsInterface([]string{"TimingIDs[timingid1]", "secondVal"}); err == nil || err != utils.ErrNotFound {
+		t.Error(err)
+	} else if _, err = b.FieldAsInterface([]string{"Timings[zero]"}); err == nil {
+		t.Error(err)
+	} else if _, err = b.FieldAsInterface([]string{"Timings[2]"}); err == nil || err != utils.ErrNotFound {
+		t.Error(err)
+	} else if _, err = b.FieldAsInterface([]string{"Timings[2]", "val"}); err == nil {
+		t.Error(err)
+	} else if _, err = b.FieldAsInterface([]string{"Factor[factor1]", "secondVal"}); err == nil || err != utils.ErrNotFound {
+		t.Error(err)
+	}
+
+	if _, err = b.FieldAsInterface([]string{"DestinationIDs[destId1]"}); err != nil {
+		t.Error(err)
+	} else if _, err = b.FieldAsInterface([]string{"Categories[ctg1]"}); err != nil {
+		t.Error(err)
+	} else if _, err = b.FieldAsInterface([]string{"SharedGroups[shgp1]"}); err != nil {
+		t.Error(err)
+	} else if _, err = b.FieldAsInterface([]string{"TimingIDs[timingid1]"}); err != nil {
+		t.Error(err)
+	} else if _, err = b.FieldAsInterface([]string{"Timings[0]"}); err != nil {
+		t.Error(err)
+	} else if _, err = b.FieldAsInterface([]string{"Factor[factor1]"}); err != nil {
+		t.Error(err)
 	}
 
 }
