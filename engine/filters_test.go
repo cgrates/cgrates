@@ -840,6 +840,13 @@ func TestFilterNewRequestFilter(t *testing.T) {
 	if !reflect.DeepEqual(erf, rf) {
 		t.Errorf("Expecting: %+v, received: %+v", erf, rf)
 	}
+	if _, err = NewFilterRule("", "~MetaRegex", []string{"Regex"}); err == nil {
+		t.Error(err)
+	} else if _, err = NewFilterRule(utils.MetaRegex, "", []string{"Regex"}); err == nil {
+		t.Error(err)
+	} else if _, err = NewFilterRule(utils.MetaRegex, "~MetaRegex", []string{}); err == nil {
+		t.Error(err)
+	}
 }
 
 func TestInlineFilterPassFiltersForEvent(t *testing.T) {

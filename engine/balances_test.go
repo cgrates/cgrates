@@ -378,3 +378,63 @@ func TestBalanceAsInterface(t *testing.T) {
 	}
 
 }
+
+func TestValueFactorFieldAsInterface(t *testing.T) {
+	v := &ValueFactor{
+		"FACT_VAL": 20.22,
+	}
+	if _, err := v.FieldAsInterface([]string{}); err == nil || err != utils.ErrNotFound {
+		t.Error(err)
+	} else if _, err = v.FieldAsInterface([]string{"TEST"}); err == nil || err != utils.ErrNotFound {
+		t.Error(err)
+	} else if _, err = v.FieldAsInterface([]string{"FACT_VAL"}); err != nil {
+		t.Error(err)
+	}
+}
+func TestValueFactorFieldAsString(t *testing.T) {
+	v := &ValueFactor{
+		"FACT_VAL": 20.22,
+	}
+	if _, err = v.FieldAsString([]string{"TEST"}); err == nil {
+		t.Error(err)
+	} else if _, err = v.FieldAsString([]string{"FACT_VAL"}); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestBalancesHasBalance(t *testing.T) {
+	bc := Balances{
+		{
+			Uuid:           "uuid",
+			ID:             "id",
+			Value:          12.22,
+			ExpirationDate: time.Date(2022, 11, 1, 20, 0, 0, 0, time.UTC),
+			Blocker:        true,
+			Disabled:       true,
+			precision:      2,
+		},
+		{
+			Uuid:           "uuid2",
+			ID:             "id2",
+			Value:          133.22,
+			ExpirationDate: time.Date(2023, 3, 21, 5, 0, 0, 0, time.UTC),
+			Blocker:        true,
+			Disabled:       true,
+			precision:      2,
+		},
+	}
+	balance := &Balance{
+		Uuid:           "uuid",
+		ID:             "id",
+		Value:          12.22,
+		ExpirationDate: time.Date(2022, 11, 1, 20, 0, 0, 0, time.UTC),
+		Blocker:        true,
+		Disabled:       true,
+		precision:      2,
+	}
+
+	if !bc.HasBalance(balance) {
+		t.Error("should be true")
+	}
+
+}
