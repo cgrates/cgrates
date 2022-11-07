@@ -1010,6 +1010,75 @@ func TestAttributesParseAttributeSIPCID(t *testing.T) {
 	} else if _, err = ParseAttribute(dp, utils.MetaUsageDifference, utils.EmptyString, config.NewRSRParsersMustCompile("~*req.cid;~*req.extra;~*req.to;~*req.from", utils.
 		InfieldSep), 0, utils.EmptyString, utils.EmptyString, utils.InfieldSep); err == nil {
 		t.Errorf("received <%+v>", err)
+	} else if _, err = ParseAttribute(utils.MapStorage{}, utils.MetaSum, utils.EmptyString, config.NewRSRParsersMustCompile("~*req.cid;~*req.extra;~*req.to;~*req.from", utils.
+		InfieldSep), 0, utils.EmptyString, utils.EmptyString, utils.InfieldSep); err == nil {
+		t.Errorf("received <%+v>", err)
+	} else if _, err = ParseAttribute(utils.MapStorage{}, utils.MetaDifference, utils.EmptyString, config.NewRSRParsersMustCompile("~*req.cid;~*req.extra;~*req.to;~*req.from", utils.
+		InfieldSep), 0, utils.EmptyString, utils.EmptyString, utils.InfieldSep); err == nil {
+		t.Errorf("received <%+v>", err)
+	} else if _, err = ParseAttribute(utils.MapStorage{}, utils.MetaMultiply, utils.EmptyString, config.NewRSRParsersMustCompile("~*req.cid;~*req.extra;~*req.to;~*req.from", utils.
+		InfieldSep), 0, utils.EmptyString, utils.EmptyString, utils.InfieldSep); err == nil {
+		t.Errorf("received <%+v>", err)
+	} else if _, err = ParseAttribute(utils.MapStorage{}, utils.MetaDivide, utils.EmptyString, config.NewRSRParsersMustCompile("~*req.cid;~*req.extra;~*req.to;~*req.from", utils.
+		InfieldSep), 0, utils.EmptyString, utils.EmptyString, utils.InfieldSep); err == nil {
+		t.Errorf("received <%+v>", err)
+	} else if _, err = ParseAttribute(utils.MapStorage{}, utils.MetaUnixTimestamp, utils.EmptyString, config.NewRSRParsersMustCompile("~*req.cid;~*req.extra;~*req.to;~*req.from", utils.
+		InfieldSep), 0, utils.EmptyString, utils.EmptyString, utils.InfieldSep); err == nil {
+		t.Errorf("received <%+v>", err)
+	} else if _, err = ParseAttribute(utils.MapStorage{}, utils.MetaDateTime, utils.EmptyString, config.NewRSRParsersMustCompile("~*req.cid;~*req.extra;~*req.to;~*req.from", utils.
+		InfieldSep), 0, utils.EmptyString, utils.EmptyString, utils.InfieldSep); err == nil {
+		t.Errorf("received <%+v>", err)
+	} else if _, err = ParseAttribute(utils.MapStorage{}, utils.MetaPrefix, "`val", config.NewRSRParsersMustCompile("~*req.cid;~*req.extra;~*req.to;~*req.from", utils.
+		InfieldSep), 0, utils.EmptyString, utils.EmptyString, utils.InfieldSep); err == nil {
+		t.Errorf("received <%+v>", err)
+	} else if _, err = ParseAttribute(utils.MapStorage{}, utils.MetaSuffix, "`val", config.NewRSRParsersMustCompile("~*req.cid;~*req.extra;~*req.to;~*req.from", utils.
+		InfieldSep), 0, utils.EmptyString, utils.EmptyString, utils.InfieldSep); err == nil {
+		t.Errorf("received <%+v>", err)
+	} else if _, err = ParseAttribute(utils.MapStorage{}, utils.MetaCCUsage, "`val", config.NewRSRParsersMustCompile("~*req.cid;~*req.extra;~*req.to;~*req.from", utils.
+		InfieldSep), 0, utils.EmptyString, utils.EmptyString, utils.InfieldSep); err == nil {
+		t.Errorf("received <%+v>", err)
+	} else if _, err = ParseAttribute(utils.MapStorage{}, "default", utils.EmptyString, config.NewRSRParsersMustCompile("~*req.cid;~*req.extra;~*req.to;~*req.from", utils.
+		InfieldSep), 0, utils.EmptyString, utils.EmptyString, utils.InfieldSep); err == nil {
+		t.Errorf("received <%+v>", err)
+	} else if _, err = ParseAttribute(utils.MapStorage{}, "default", utils.EmptyString, config.NewRSRParsersMustCompile("~*req.cid;~*req.extra", utils.
+		InfieldSep), 0, utils.EmptyString, utils.EmptyString, utils.InfieldSep); err == nil {
+		t.Errorf("received <%+v>", err)
+	} else if _, err = ParseAttribute(utils.MapStorage{utils.MetaReq: utils.MapStorage{"cid": "12345"}}, utils.MetaUsageDifference, utils.EmptyString, config.NewRSRParsersMustCompile("~*req.cid;~*req.extra", utils.InfieldSep), 0, utils.EmptyString, utils.EmptyString, utils.InfieldSep); err == nil {
+		t.Errorf("received <%+v>", err)
+	} else if _, err = ParseAttribute(utils.MapStorage{utils.MetaReq: utils.MapStorage{"cid": "12345", "extra": "1003"}}, utils.MetaUsageDifference, utils.EmptyString, config.NewRSRParsersMustCompile("~*req.cid;~*req.extra", utils.
+		InfieldSep), 0, utils.EmptyString, utils.EmptyString, utils.InfieldSep); err == nil {
+		t.Errorf("received <%+v>", err)
+	} else if _, err = ParseAttribute(utils.MapStorage{utils.MetaReq: utils.MapStorage{"cid": "0", "extra": "1003"}}, utils.MetaUsageDifference, utils.EmptyString, config.NewRSRParsersMustCompile("~*req.cid;~*req.extra", utils.
+		InfieldSep), 0, utils.EmptyString, utils.EmptyString, utils.InfieldSep); err == nil {
+		t.Errorf("received <%+v>", err)
+	} else if _, err = ParseAttribute(utils.MapStorage{utils.MetaReq: utils.MapStorage{}}, utils.MetaUsageDifference, utils.EmptyString, config.NewRSRParsersMustCompile("~*req.cid;~*req.extra", utils.
+		InfieldSep), 0, utils.EmptyString, utils.EmptyString, utils.InfieldSep); err == nil {
+		t.Errorf("received <%+v>", err)
+	} else if _, err = ParseAttribute(utils.MapStorage{utils.MetaReq: utils.MapStorage{"extra": "1003", "to": "1001"}}, utils.MetaCCUsage, utils.EmptyString, config.NewRSRParsersMustCompile("~*req.cid;~*req.extra;~*req.to", utils.
+		InfieldSep), 0, utils.EmptyString, utils.EmptyString, utils.InfieldSep); err == nil {
+		t.Errorf("received <%+v>", err)
+	} else if _, err = ParseAttribute(utils.MapStorage{utils.MetaReq: utils.MapStorage{"cid": "val", "extra": "1003", "to": "1001"}}, utils.MetaCCUsage, utils.EmptyString, config.NewRSRParsersMustCompile("~*req.cid;~*req.extra;~*req.to", utils.
+		InfieldSep), 0, utils.EmptyString, utils.EmptyString, utils.InfieldSep); err == nil {
+		t.Errorf("received <%+v>", err)
+	} else if _, err = ParseAttribute(utils.MapStorage{utils.MetaReq: utils.MapStorage{"cid": "12233", "to": "1001"}}, utils.MetaCCUsage, utils.EmptyString, config.NewRSRParsersMustCompile("~*req.cid;~*req.extra;~*req.to", utils.
+		InfieldSep), 0, utils.EmptyString, utils.EmptyString, utils.InfieldSep); err == nil {
+		t.Errorf("received <%+v>", err)
+	} else if _, err = ParseAttribute(utils.MapStorage{utils.MetaReq: utils.MapStorage{"cid": "12232", "extra": "val", "to": "1001"}}, utils.MetaCCUsage, utils.EmptyString, config.NewRSRParsersMustCompile("~*req.cid;~*req.extra;~*req.to", utils.
+		InfieldSep), 0, utils.EmptyString, utils.EmptyString, utils.InfieldSep); err == nil {
+		t.Errorf("received <%+v>", err)
+	} else if _, err = ParseAttribute(utils.MapStorage{utils.MetaReq: utils.MapStorage{"cid": "12233", "extra": "1001"}}, utils.MetaCCUsage, utils.EmptyString, config.NewRSRParsersMustCompile("~*req.cid;~*req.extra;~*req.to", utils.
+		InfieldSep), 0, utils.EmptyString, utils.EmptyString, utils.InfieldSep); err == nil {
+		t.Errorf("received <%+v>", err)
+	} else if _, err = ParseAttribute(utils.MapStorage{utils.MetaReq: utils.MapStorage{"cid": "12232", "extra": "1001", "to": "val"}}, utils.MetaCCUsage, utils.EmptyString, config.NewRSRParsersMustCompile("~*req.cid;~*req.extra;~*req.to", utils.
+		InfieldSep), 0, utils.EmptyString, utils.EmptyString, utils.InfieldSep); err == nil {
+		t.Errorf("received <%+v>", err)
+	}
+	expDur := 100000 * time.Nanosecond
+	if val, err := ParseAttribute(utils.MapStorage{utils.MetaReq: utils.MapStorage{"cid": "1000", "extra": "100", "to": "100"}}, utils.MetaCCUsage, utils.EmptyString, config.NewRSRParsersMustCompile("~*req.cid;~*req.extra;~*req.to", utils.
+		InfieldSep), 0, utils.EmptyString, utils.EmptyString, utils.InfieldSep); err != nil {
+		t.Errorf("received <%+v>", err)
+	} else if val != expDur {
+		t.Errorf("expected %v,received %v", expDur, val)
 	}
 }
 func TestAttributesParseAttributeSIPCIDWrongPathErr(t *testing.T) {
@@ -1147,6 +1216,10 @@ func TestAttributesV1ProcessEventMultipleRuns1(t *testing.T) {
 		if !reflect.DeepEqual(reply, exp) {
 			t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ToJSON(exp), utils.ToJSON(reply))
 		}
+	}
+
+	if err := alS.V1ProcessEvent(nil, reply); err == nil {
+		t.Error("expected error")
 	}
 }
 

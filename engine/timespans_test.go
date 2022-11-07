@@ -1969,6 +1969,14 @@ func TestMerge(t *testing.T) {
 	} else if !tss1.Equal(eMergedTSS) {
 		t.Errorf("Expecting: %+v, received: %+v", eMergedTSS, tss1)
 	}
+	tss1.TimeEnd = time.Date(2015, 1, 9, 16, 20, 0, 0, time.UTC)
+	if merged := tss1.Merge(tss2); merged {
+		t.Error("expected false")
+	}
+	tss1.MatchedSubject = "match_subj1"
+	if merged := tss1.Merge(tss2); merged {
+		t.Error("expected false")
+	}
 }
 
 func TestIncrementClone(t *testing.T) {
@@ -1991,5 +1999,165 @@ func TestIncrementClone(t *testing.T) {
 	}
 	if clone := incr.Clone(); !reflect.DeepEqual(eOut, clone) {
 		t.Errorf("Expecting %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(clone))
+	}
+}
+
+func TestTimeSpansMerge(t *testing.T) {
+
+	tss := &TimeSpans{
+		{
+			CompressFactor: 4,
+			DurationIndex:  1 * time.Hour,
+			Cost:           12,
+			TimeStart:      time.Date(2022, 12, 1, 18, 0, 0, 0, time.UTC),
+			TimeEnd:        time.Date(2022, 12, 1, 19, 0, 0, 0, time.UTC),
+			Increments: Increments{
+				&Increment{
+					Duration: 2 * time.Minute,
+					Cost:     23.22,
+				},
+				{
+					Duration: 5 * time.Minute,
+					Cost:     12.32,
+				},
+			},
+			RateInterval: &RateInterval{
+				Timing: &RITiming{
+					ID:    "id",
+					Years: utils.Years{2, 1, 3},
+				},
+				Rating: &RIRate{
+					ConnectFee:       12.11,
+					RoundingMethod:   "method",
+					RoundingDecimals: 13,
+					MaxCost:          494,
+				},
+				Weight: 2.3,
+			},
+			MatchedSubject: "subject",
+			MatchedPrefix:  "match_prefix",
+			MatchedDestId:  "dest_id",
+			RatingPlanId:   "rate_id",
+		},
+		{
+			CompressFactor: 4,
+			DurationIndex:  1 * time.Hour,
+			Cost:           12,
+			TimeStart:      time.Date(2022, 12, 1, 19, 0, 0, 0, time.UTC),
+			TimeEnd:        time.Date(2022, 12, 1, 20, 0, 0, 0, time.UTC),
+			Increments: Increments{
+				&Increment{
+					Duration: 2 * time.Minute,
+					Cost:     23.22,
+				},
+				{
+					Duration: 5 * time.Minute,
+					Cost:     12.32,
+				},
+			},
+			RateInterval: &RateInterval{
+				Timing: &RITiming{
+					ID:    "id",
+					Years: utils.Years{2, 1, 3},
+				},
+				Rating: &RIRate{
+					ConnectFee:       12.11,
+					RoundingMethod:   "method",
+					RoundingDecimals: 13,
+					MaxCost:          494,
+				},
+				Weight: 2.3,
+			},
+			MatchedSubject: "subject",
+			MatchedPrefix:  "match_prefix",
+			MatchedDestId:  "dest_id",
+			RatingPlanId:   "rate_id",
+		}, {
+			Cost:           11,
+			DurationIndex:  1 * time.Hour,
+			CompressFactor: 4,
+			TimeStart:      time.Date(2022, 12, 1, 20, 0, 0, 0, time.UTC),
+			TimeEnd:        time.Date(2022, 12, 1, 21, 0, 0, 0, time.UTC),
+			Increments: Increments{
+				&Increment{
+					Duration: 2 * time.Minute,
+					Cost:     23.22,
+				},
+				{
+					Duration: 5 * time.Minute,
+					Cost:     12.32,
+				},
+			},
+			RateInterval: &RateInterval{
+				Timing: &RITiming{
+					ID:    "id",
+					Years: utils.Years{2, 1, 3},
+				},
+				Rating: &RIRate{
+					ConnectFee:       12.11,
+					RoundingMethod:   "method",
+					RoundingDecimals: 13,
+					MaxCost:          494,
+				},
+				Weight: 2.3,
+			},
+			MatchedSubject: "subject",
+			MatchedPrefix:  "match_prefix",
+			MatchedDestId:  "dest_id",
+			RatingPlanId:   "rate_id",
+		},
+	}
+	expMerge := &TimeSpans{{
+		CompressFactor: 4,
+		DurationIndex:  1 * time.Hour,
+		Cost:           35,
+		TimeStart:      time.Date(2022, 12, 1, 18, 0, 0, 0, time.UTC),
+		TimeEnd:        time.Date(2022, 12, 1, 21, 0, 0, 0, time.UTC),
+		Increments: Increments{
+			{
+				Duration: 2 * time.Minute,
+				Cost:     23.22,
+			},
+			{
+				Duration: 5 * time.Minute,
+				Cost:     12.32,
+			},
+			{
+				Duration: 2 * time.Minute,
+				Cost:     23.22,
+			},
+			{
+				Duration: 5 * time.Minute,
+				Cost:     12.32,
+			},
+			{
+				Duration: 2 * time.Minute,
+				Cost:     23.22,
+			},
+			{
+				Duration: 5 * time.Minute,
+				Cost:     12.32,
+			},
+		},
+		RateInterval: &RateInterval{
+			Timing: &RITiming{
+				ID:    "id",
+				Years: utils.Years{2, 1, 3},
+			},
+			Rating: &RIRate{
+				ConnectFee:       12.11,
+				RoundingMethod:   "method",
+				RoundingDecimals: 13,
+				MaxCost:          494,
+			},
+			Weight: 2.3,
+		},
+		MatchedSubject: "subject",
+		MatchedPrefix:  "match_prefix",
+		MatchedDestId:  "dest_id",
+		RatingPlanId:   "rate_id",
+	}}
+	if tss.Merge(); !reflect.DeepEqual(tss, expMerge) {
+		t.Errorf("expected %v ,recived %v", utils.ToJSON(expMerge), utils.ToJSON(tss))
 	}
 }
