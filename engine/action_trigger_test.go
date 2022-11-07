@@ -213,3 +213,44 @@ func TestActionTriggerFieldAsString(t *testing.T) {
 	}
 
 }
+
+func TestActionTriggerCreateBalance(t *testing.T) {
+	at := &ActionTrigger{
+		UniqueID: "u_id",
+		Balance: &BalanceFilter{
+			Uuid: utils.StringPointer("uuid"),
+			ID:   utils.StringPointer("bal_id"),
+			Type: utils.StringPointer("type"),
+			Categories: &utils.StringMap{
+				"category": true,
+			},
+			Value: &utils.ValueFormula{
+				Static: 22.21,
+				Method: "",
+			},
+			ExpirationDate: utils.TimePointer(time.Date(2022, 12, 1, 15, 0, 0, 0, time.UTC)),
+			DestinationIDs: &utils.StringMap{
+				"dest_id": true,
+			},
+			RatingSubject: utils.StringPointer("rating*"),
+		},
+	}
+	expBal := &Balance{
+		Uuid:           "uuid",
+		ID:             "u_id",
+		ExpirationDate: time.Date(2022, 12, 1, 15, 0, 0, 0, time.UTC),
+		RatingSubject:  "rating*",
+		DestinationIDs: utils.StringMap{
+			"dest_id": true,
+		},
+		Value: 22.21,
+		Categories: utils.StringMap{
+			"category": true,
+		},
+	}
+
+	if val := at.CreateBalance(); reflect.DeepEqual(val, expBal) {
+		t.Errorf("expected %v,received %v", utils.ToJSON(expBal), utils.ToJSON(val))
+	}
+
+}
