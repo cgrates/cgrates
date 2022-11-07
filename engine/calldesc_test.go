@@ -1931,8 +1931,29 @@ func TestCallDescriptorUpdateFromCGREvent(t *testing.T) {
 		t.Error(err)
 	} else if err = cd.UpdateFromCGREvent(cgrEv, []string{utils.Subject}); err == nil {
 		t.Error(err)
+	} else if err = cd.UpdateFromCGREvent(cgrEv, []string{"Extra"}); err == nil {
+		t.Error(err)
 	}
-
+	cgrEv = &utils.CGREvent{
+		Event: map[string]interface{}{
+			"Extra": "Value",
+		},
+	}
+	cd = &CallDescriptor{
+		ExtraFields: map[string]string{
+			"Extra": "Value",
+		},
+	}
+	cdExpected = &CallDescriptor{
+		ExtraFields: map[string]string{
+			"Extra": "Value",
+		},
+	}
+	if err = cd.UpdateFromCGREvent(cgrEv, []string{"Extra"}); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(cd, cdExpected) {
+		t.Errorf("expected %v ,received %v", utils.ToJSON(cd), utils.ToJSON(cdExpected))
+	}
 }
 
 func TestCallDescriptorAsCGREvent(t *testing.T) {
@@ -2523,5 +2544,4 @@ func TestValidateCallData(t *testing.T) {
 	if err = cd.ValidateCallData(); err != nil {
 		t.Error(err)
 	}
-
 }

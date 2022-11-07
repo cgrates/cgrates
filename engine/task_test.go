@@ -124,4 +124,17 @@ func TestTaskFieldAsString(t *testing.T) {
 	if !reflect.DeepEqual(eOut, rcv) {
 		t.Errorf("Expecting: %q, received: %q", eOut, rcv)
 	}
+	if _, err = task.FieldAsString([]string{"default"}); err == nil {
+		t.Error(err)
+	}
+}
+
+func TestTaskExecute(t *testing.T) {
+
+	task := &Task{
+		AccountID: "accID",
+	}
+	if err := task.Execute(&FilterS{}); err == nil {
+		t.Error(err)
+	}
 }
