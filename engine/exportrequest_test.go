@@ -283,6 +283,10 @@ func TestExportReqFieldAsINterfaceOnePath(t *testing.T) {
 	} else if !reflect.DeepEqual(val, mS[utils.MetaReq]) {
 		t.Errorf("Expected %+v \n, received %+v", val, mS[utils.MetaReq])
 	}
+	fldPath = []string{"default"}
+	if _, err = eventReq.FieldAsInterface(fldPath); err == nil {
+		t.Error("expected error")
+	}
 
 	fldPath = []string{utils.MetaOpts}
 	if val, err := eventReq.FieldAsInterface(fldPath); err != nil {
@@ -296,6 +300,10 @@ func TestExportReqFieldAsINterfaceOnePath(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(val, mS[utils.MetaVars]) {
 		t.Errorf("Expected %+v \n, received %+v", val, mS[utils.MetaVars])
+	}
+	fldPath = []string{utils.MetaUCH}
+	if _, err = eventReq.FieldAsInterface(fldPath); err == nil || err != utils.ErrNotFound {
+		t.Error(err)
 	}
 }
 func TestEventReqFieldAsInterface(t *testing.T) {
@@ -352,4 +360,172 @@ func TestEventReqNewEventExporter(t *testing.T) {
 	if !reflect.DeepEqual(expected, eventReq) {
 		t.Errorf("Expected %v \n but received \n %v", expected, eventReq)
 	}
+}
+
+func TestExportRequestSetAsSlice(t *testing.T) {
+	onm := utils.NewOrderedNavigableMap()
+	fullpath := &utils.FullPath{
+		PathSlice: []string{utils.MetaReq, utils.MetaTenant},
+		Path:      utils.MetaTenant,
+	}
+	value := &utils.DataLeaf{
+		Data: "value1",
+	}
+	onm.Append(fullpath, value)
+	expData := map[string]*utils.OrderedNavigableMap{
+		"default": onm,
+	}
+
+	eeR := &ExportRequest{
+		inData: map[string]utils.DataStorage{
+			utils.MetaReq: utils.MapStorage{
+				"Account": "1001",
+				"Usage":   "10m",
+			},
+			utils.MetaOpts: utils.MapStorage{},
+		},
+		tnt:     "cgrates.org",
+		ExpData: expData,
+	}
+
+	fullPath := &utils.FullPath{
+		PathSlice: []string{utils.MetaUCH, utils.MetaReq, utils.MetaTenant},
+		Path:      utils.MetaTenant,
+	}
+	val := &utils.DataLeaf{
+		Data: "value1",
+	}
+
+	if err := eeR.SetAsSlice(fullPath, val); err != nil {
+		t.Error(err)
+	}
+	fullPath.PathSlice[0] = utils.MetaOpts
+	if err = eeR.SetAsSlice(fullPath, val); err != nil {
+		t.Error(err)
+	}
+	fullPath.PathSlice[0] = "default"
+	if err = eeR.SetAsSlice(fullPath, val); err != nil {
+		t.Error(err)
+	} else if err = eeR.SetAsSlice(&utils.FullPath{PathSlice: []string{"Val"}}, val); err == nil {
+		t.Error(err)
+	}
+}
+
+func TestExportRequestParseField(t *testing.T) {
+	fctTemp := &config.FCTemplate{
+		Type:       utils.MetaMaskedDestination,
+		Value:      config.NewRSRParsersMustCompile("*month_endTest", utils.InfieldSep),
+		Layout:     "“Mon Jan _2 15:04:05 2006”",
+		Timezone:   "Local",
+		MaskLen:    3,
+		MaskDestID: "dest",
+	}
+	mS := map[string]utils.DataStorage{
+		utils.MetaReq: utils.MapStorage{
+			utils.AccountField: "1004",
+			utils.Usage:        "20m",
+			utils.Destination:  "dest",
+		},
+		utils.MetaOpts: utils.MapStorage{
+			utils.APIKey: "attr12345",
+		},
+		utils.MetaVars: utils.MapStorage{
+			utils.RequestType: utils.MetaRated,
+			utils.Subsystems:  utils.MetaChargers,
+		},
+	}
+	eventReq := NewExportRequest(mS, "", nil, nil)
+
+	if _, err := eventReq.ParseField(fctTemp); err != nil {
+		t.Error(err)
+	}
+
+}
+
+func TestExportRequestAppend(t *testing.T) {
+	onm := utils.NewOrderedNavigableMap()
+	fullpath := &utils.FullPath{
+		PathSlice: []string{utils.MetaReq, utils.MetaTenant},
+		Path:      utils.MetaTenant,
+	}
+	value := &utils.DataLeaf{
+		Data: "value1",
+	}
+	onm.Append(fullpath, value)
+	expData := map[string]*utils.OrderedNavigableMap{
+		"default": onm,
+	}
+
+	eeR := &ExportRequest{
+		inData: map[string]utils.DataStorage{
+			utils.MetaReq: utils.MapStorage{
+				"Account": "1001",
+				"Usage":   "10m",
+			},
+			utils.MetaOpts: utils.MapStorage{},
+		},
+		tnt:     "cgrates.org",
+		ExpData: expData,
+	}
+
+	fullPath := &utils.FullPath{
+		PathSlice: []string{utils.MetaUCH, utils.MetaReq, utils.MetaTenant},
+		Path:      utils.MetaTenant,
+	}
+	val := &utils.DataLeaf{
+		Data: "value1",
+	}
+
+	if err := eeR.Append(fullPath, val); err != nil {
+		t.Error(err)
+	}
+	fullPath.PathSlice[0] = utils.MetaOpts
+	if err = eeR.Append(fullPath, val); err != nil {
+		t.Error(err)
+	}
+	fullPath.PathSlice[0] = "default"
+	if err = eeR.Append(fullPath, val); err != nil {
+		t.Error(err)
+	} else if err = eeR.Append(&utils.FullPath{PathSlice: []string{"Val"}}, val); err == nil {
+		t.Error(err)
+	}
+
+}
+
+func TestExportRequestCompose(t *testing.T) {
+	onm := utils.NewOrderedNavigableMap()
+	fullPath := &utils.FullPath{
+		PathSlice: []string{utils.MetaReq, utils.MetaTenant},
+		Path:      utils.MetaTenant,
+	}
+	val := &utils.DataLeaf{
+		Data: "value1",
+	}
+	onm.Append(fullPath, val)
+
+	eeR := &ExportRequest{
+		inData: map[string]utils.DataStorage{
+			utils.MetaReq: utils.MapStorage{
+				"Account": "1001",
+				"Usage":   "10m",
+			},
+		},
+		filterS: nil,
+		tnt:     "cgrates.org",
+		ExpData: map[string]*utils.OrderedNavigableMap{
+			utils.MetaReq: onm,
+		},
+	}
+	if err := eeR.Compose(&utils.FullPath{
+		PathSlice: []string{utils.MetaReq},
+		Path:      "path"}, &utils.DataLeaf{
+		Data: "Value"}); err == nil {
+		t.Error(err)
+	} else if err = eeR.Compose(&utils.FullPath{
+		PathSlice: []string{"default"},
+		Path:      "path"}, &utils.DataLeaf{
+		Data: "Value"}); err == nil {
+		t.Error(err)
+	}
+
 }
