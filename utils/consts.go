@@ -18,6 +18,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package utils
 
+import "time"
+
 var (
 	CDRExportFormats = NewStringSet([]string{DRYRUN, MetaFileCSV, MetaFileFWV, MetaHTTPjsonCDR, MetaHTTPjsonMap,
 		MetaHTTPjson, MetaHTTPPost, MetaAMQPjsonCDR, MetaAMQPjsonMap, MetaAMQPV1jsonMap, MetaSQSjsonMap,
@@ -866,7 +868,7 @@ const (
 	ArgDispatcherField = "ArgDispatcher"
 )
 
-//Filter types
+// Filter types
 const (
 	MetaNot            = "*not"
 	MetaString         = "*string"
@@ -1414,7 +1416,7 @@ const (
 	SchedulerSv1Reload = "SchedulerSv1.Reload"
 )
 
-//cgr_ variables
+// cgr_ variables
 const (
 	CGR_ACCOUNT          = "cgr_account"
 	CGR_SUPPLIER         = "cgr_supplier"
@@ -1430,7 +1432,7 @@ const (
 	CGRFlags             = "cgr_flags"
 )
 
-//CSV file name
+// CSV file name
 const (
 	TimingsCsv            = "Timings.csv"
 	DestinationsCsv       = "Destinations.csv"
@@ -1981,6 +1983,15 @@ const (
 	Apier            = "apiers"           // from JSON
 	ErsCfg           = "ers"              // from JSON
 
+)
+
+// Go type limits
+const (
+	AbsoluteMaxUint     = ^uint(0)
+	AbsoluteMinUint     = 0
+	AbsoluteMaxInt      = int(AbsoluteMaxUint >> 1)
+	AbsoluteMinInt      = -AbsoluteMaxInt - 1
+	AbsoluteMaxDuration = time.Duration(AbsoluteMaxInt)
 )
 
 // Strip/Padding strategy

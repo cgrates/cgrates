@@ -76,7 +76,8 @@ func (self *KamailioAgent) Connect() (err error) {
 	errChan := make(chan error)
 	for connIdx, connCfg := range self.cfg.EvapiConns {
 		logger := log.New(utils.Logger, "kamevapi:", 2)
-		if self.conns[connIdx], err = kamevapi.NewKamEvapi(connCfg.Address, connIdx, connCfg.Reconnects, eventHandlers, logger); err != nil {
+		if self.conns[connIdx], err = kamevapi.NewKamEvapi(connCfg.Address, connIdx, connCfg.Reconnects, 0, utils.FibDuration,
+			eventHandlers, logger); err != nil {
 			return
 		}
 		go func(conn *kamevapi.KamEvapi) { // Start reading in own goroutine, return on error

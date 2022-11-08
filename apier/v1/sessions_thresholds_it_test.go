@@ -407,8 +407,8 @@ func testSessionSv1ItAuthNotFoundThreshold(t *testing.T) {
 		args, &rply); err != nil {
 		t.Error(err)
 	}
-	if rply.ThresholdIDs != nil {
-		t.Errorf("Expecting: nil, received: %s",
+	if len(*rply.ThresholdIDs) != 0 {
+		t.Errorf("Expecting: empty slice, received: %s",
 			rply.ThresholdIDs)
 	}
 	if rply.StatQueueIDs != nil && len(*rply.StatQueueIDs) != 1 && (*rply.StatQueueIDs)[0] != "Stat_2" {
@@ -451,8 +451,8 @@ func testSessionSv1ItInitNotFoundThreshold(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v",
 			time.Duration(1024), rply.MaxUsage)
 	}
-	if rply.ThresholdIDs != nil {
-		t.Errorf("Expecting: nil, received: %s",
+	if len(*rply.ThresholdIDs) != 0 {
+		t.Errorf("Expecting: empty slice, received: %s",
 			rply.ThresholdIDs)
 	}
 	if rply.StatQueueIDs != nil && len(*rply.StatQueueIDs) != 1 && (*rply.StatQueueIDs)[0] != "Stat_2" {
@@ -539,12 +539,12 @@ func testSessionSv1ItAuthNotFoundThresholdAndStats(t *testing.T) {
 		args, &rply); err != nil {
 		t.Error(err)
 	}
-	if rply.ThresholdIDs != nil {
-		t.Errorf("Expecting: nil, received: %s",
+	if len(*rply.ThresholdIDs) != 0 {
+		t.Errorf("Expecting: empty slice, received: %s",
 			rply.ThresholdIDs)
 	}
-	if rply.StatQueueIDs != nil {
-		t.Errorf("Expecting: nil, received: %s",
+	if len(*rply.StatQueueIDs) != 0 {
+		t.Errorf("Expecting: empty slice, received: %s",
 			rply.StatQueueIDs)
 	}
 }
@@ -584,12 +584,12 @@ func testSessionSv1ItInitNotFoundThresholdAndStats(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v",
 			time.Duration(1024), rply.MaxUsage)
 	}
-	if rply.ThresholdIDs != nil {
-		t.Errorf("Expecting: nil, received: %s",
+	if len(*rply.ThresholdIDs) != 0 {
+		t.Errorf("Expecting: empty slice, received: %s",
 			rply.ThresholdIDs)
 	}
-	if rply.StatQueueIDs != nil {
-		t.Errorf("Expecting: nil, received: %s",
+	if len(*rply.StatQueueIDs) != 0 {
+		t.Errorf("Expecting: empty slice, received: %s",
 			rply.StatQueueIDs)
 	}
 

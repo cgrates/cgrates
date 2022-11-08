@@ -141,6 +141,7 @@ func UUIDSha1Prefix() string {
 // Round return rounded version of x with prec precision.
 //
 // Special cases are:
+//
 //	Round(±0) = ±0
 //	Round(±Inf) = ±Inf
 //	Round(NaN) = NaN
@@ -410,12 +411,32 @@ func Unzip(src, dest string) error {
 	return nil
 }
 
-// successive Fibonacci numbers.
+// Fib returns successive Fibonacci numbers.
 func Fib() func() int {
 	a, b := 0, 1
 	return func() int {
-		a, b = b, a+b
+		if b > 0 { // only increment Fibonacci numbers while b doesn't overflow
+			a, b = b, a+b
+		}
 		return a
+	}
+}
+
+// FibDuration returns successive Fibonacci numbers as time.Duration with the
+// unit specified by durationUnit or maxDuration if it is exceeded
+func FibDuration(durationUnit, maxDuration time.Duration) func() time.Duration {
+	fib := Fib()
+	return func() time.Duration {
+		fibNrAsDuration := time.Duration(fib())
+		if fibNrAsDuration > (AbsoluteMaxDuration / durationUnit) { // check if the current fibonacci nr. in the sequence would exceed the absolute maximum duration if multiplied by the duration unit value
+			fibNrAsDuration = AbsoluteMaxDuration
+		} else {
+			fibNrAsDuration *= durationUnit
+		}
+		if maxDuration > 0 && maxDuration < fibNrAsDuration {
+			return maxDuration
+		}
+		return fibNrAsDuration
 	}
 }
 
@@ -491,10 +512,11 @@ func Clone(a, b interface{}) error {
 // Used as generic function logic for various fields
 
 // Attributes
-//  source - the base source
-//  width - the field width
-//  strip - if present it will specify the strip strategy, when missing strip will not be allowed
-//  padding - if present it will specify the padding strategy to use, left, right, zeroleft, zeroright
+//
+//	source - the base source
+//	width - the field width
+//	strip - if present it will specify the strip strategy, when missing strip will not be allowed
+//	padding - if present it will specify the padding strategy to use, left, right, zeroleft, zeroright
 func FmtFieldWidth(fieldID, source string, width int, strip, padding string, mandatory bool) (string, error) {
 	if mandatory && len(source) == 0 {
 		return "", fmt.Errorf("Empty source value for fieldID: <%s>", fieldID)
