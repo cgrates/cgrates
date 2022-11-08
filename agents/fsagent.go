@@ -286,13 +286,13 @@ func (sm *FSsessions) Connect() error {
 	eventFilters := map[string][]string{"Call-Direction": {"inbound"}}
 	errChan := make(chan error)
 	for connIdx, connCfg := range sm.cfg.EventSocketConns {
-		fSock, err := fsock.NewFSock(connCfg.Address, connCfg.Password, connCfg.Reconnects,
-			sm.createHandlers(), eventFilters, utils.Logger.GetSyslog(), connIdx)
+		fSock, err := fsock.NewFSock(connCfg.Address, connCfg.Password, connCfg.Reconnects, 0, utils.FibDuration,
+			sm.createHandlers(), eventFilters, utils.Logger, connIdx, true)
 		if err != nil {
 			return err
 		}
 		if !fSock.Connected() {
-			return errors.New("Could not connect to FreeSWITCH")
+			return errors.New("could not connect to FreeSWITCH")
 		}
 		sm.conns[connIdx] = fSock
 		utils.Logger.Info(fmt.Sprintf("<%s> successfully connected to FreeSWITCH at: <%s>", utils.FreeSWITCHAgent, connCfg.Address))
@@ -301,13 +301,10 @@ func (sm *FSsessions) Connect() error {
 				errChan <- err
 			}
 		}(fSock)
-		fsSenderPool, err := fsock.NewFSockPool(5, connCfg.Address, connCfg.Password, 1, sm.cfg.MaxWaitConnection,
-			make(map[string][]func(string, int)), make(map[string][]string), utils.Logger.GetSyslog(), connIdx)
-		if err != nil {
-			return fmt.Errorf("Cannot connect FreeSWITCH senders pool, error: %s", err.Error())
-		}
+		fsSenderPool := fsock.NewFSockPool(5, connCfg.Address, connCfg.Password, 1, sm.cfg.MaxWaitConnection, 0, utils.FibDuration,
+			make(map[string][]func(string, int)), make(map[string][]string), utils.Logger.GetSyslog(), connIdx, true)
 		if fsSenderPool == nil {
-			return errors.New("Cannot connect FreeSWITCH senders pool.")
+			return errors.New("cannot connect FreeSWITCH senders pool")
 		}
 		sm.senderPools[connIdx] = fsSenderPool
 	}
