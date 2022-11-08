@@ -376,6 +376,55 @@ func TestBalanceAsInterface(t *testing.T) {
 	} else if _, err = b.FieldAsInterface([]string{"Factor[factor1]"}); err != nil {
 		t.Error(err)
 	}
+	if _, err = b.FieldAsInterface([]string{utils.Uuid}); err != nil {
+		t.Error(err)
+	} else if _, err = b.FieldAsInterface([]string{utils.ExpirationDate}); err != nil {
+		t.Error(err)
+	} else if _, err = b.FieldAsInterface([]string{utils.Weight}); err != nil {
+		t.Error(err)
+	} else if _, err = b.FieldAsInterface([]string{utils.DestinationIDs}); err != nil {
+		t.Error(err)
+	} else if _, err = b.FieldAsInterface([]string{utils.DestinationIDs}); err != nil {
+		t.Error(err)
+	} else if _, err = b.FieldAsInterface([]string{utils.RatingSubject}); err != nil {
+		t.Error(err)
+	} else if _, err = b.FieldAsInterface([]string{utils.Categories}); err != nil {
+		t.Error(err)
+	} else if _, err = b.FieldAsInterface([]string{utils.SharedGroups}); err != nil {
+		t.Error(err)
+	} else if _, err = b.FieldAsInterface([]string{utils.Timings}); err != nil {
+		t.Error(err)
+	} else if _, err = b.FieldAsInterface([]string{utils.Disabled}); err != nil {
+		t.Error(err)
+	} else if _, err = b.FieldAsInterface([]string{utils.Factor}); err != nil {
+		t.Error(err)
+	} else if _, err = b.FieldAsInterface([]string{utils.Blocker}); err != nil {
+		t.Error(err)
+	} else if _, err = b.FieldAsInterface([]string{utils.TimingIDs}); err != nil {
+		t.Error(err)
+	}
+
+	if _, err = b.FieldAsInterface([]string{utils.TimingIDs, "val"}); err == nil || err != utils.ErrNotFound {
+		t.Error(err)
+	} else if _, err = b.FieldAsInterface([]string{utils.Uuid, "val"}); err == nil || err != utils.ErrNotFound {
+		t.Error(err)
+	} else if _, err = b.FieldAsInterface([]string{utils.ID, "val"}); err == nil || err != utils.ErrNotFound {
+		t.Error(err)
+	} else if _, err = b.FieldAsInterface([]string{utils.Value, "val"}); err == nil || err != utils.ErrNotFound {
+		t.Error(err)
+	} else if _, err = b.FieldAsInterface([]string{utils.ExpirationDate, "val"}); err == nil || err != utils.ErrNotFound {
+		t.Error(err)
+	} else if _, err = b.FieldAsInterface([]string{utils.Weight, "val"}); err == nil || err != utils.ErrNotFound {
+		t.Error(err)
+	} else if _, err = b.FieldAsInterface([]string{utils.DestinationIDs, "val"}); err == nil || err != utils.ErrNotFound {
+		t.Error(err)
+	} else if _, err = b.FieldAsInterface([]string{utils.RatingSubject, "val"}); err == nil || err != utils.ErrNotFound {
+		t.Error(err)
+	} else if _, err = b.FieldAsInterface([]string{utils.Categories, "val"}); err == nil || err != utils.ErrNotFound {
+		t.Error(err)
+	} else if _, err = b.FieldAsInterface([]string{utils.SharedGroups, "val"}); err == nil || err != utils.ErrNotFound {
+		t.Error(err)
+	}
 
 }
 

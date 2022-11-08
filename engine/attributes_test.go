@@ -1330,3 +1330,63 @@ func TestAttributesV1ProcessEventMultipleRuns2(t *testing.T) {
 		}
 	}
 }
+
+func TestArgeesUnmarshalJSON(t *testing.T) {
+	cgr := &CGREventWithEeIDs{
+		EeIDs: []string{"eeID1", "eeID2", "eeID3", "eeID$"},
+		clnb:  true,
+		CGREvent: &utils.CGREvent{
+			Event: map[string]interface{}{
+				utils.CostDetails: "22",
+			},
+		},
+	}
+	if err := cgr.UnmarshalJSON([]byte("val")); err == nil {
+		t.Error(err)
+	} else if err = cgr.UnmarshalJSON([]byte(`{
+		"EeIDs":["eeid1","eeid2"],
+		"CGREvent":{
+			"Event":{
+				"CostDetails":"22"
+		}
+	}}`)); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestArgeesRPCClone(t *testing.T) {
+
+	attr := &CGREventWithEeIDs{
+		EeIDs: []string{"eeid1", "eeid2"},
+		CGREvent: &utils.CGREvent{
+			Tenant:  "cgrates.org",
+			ID:      "id",
+			Time:    &time.Time{},
+			Event:   map[string]interface{}{},
+			APIOpts: map[string]interface{}{},
+		},
+		clnb: false,
+	}
+	if val, err := attr.RPCClone(); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(val, attr) {
+		t.Errorf("expected %v,received %v", utils.ToJSON(attr), utils.ToJSON(val))
+	}
+	attr.clnb = true
+	exp := &CGREventWithEeIDs{
+		EeIDs: []string{"eeid1", "eeid2"},
+		CGREvent: &utils.CGREvent{
+			Tenant:  "cgrates.org",
+			ID:      "id",
+			Time:    &time.Time{},
+			Event:   map[string]interface{}{},
+			APIOpts: map[string]interface{}{},
+		},
+	}
+
+	if val, err := attr.RPCClone(); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(val, exp) {
+		t.Errorf("expected %v,received %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+}

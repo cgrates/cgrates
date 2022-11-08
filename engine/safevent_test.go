@@ -798,3 +798,20 @@ func TestSafEventGetDurationOrDefault(t *testing.T) {
 	}
 
 }
+
+func TestSafEventAsCGREvent(t *testing.T) {
+	se := SafEvent{Me: MapEvent{
+		"ExtraField1": 5,
+		"Source":      1001,
+		"CostSource":  "1002",
+		"ExtraField2": "extra",
+		"SetupTime":   "2009-11-10T23:00:00Z",
+		"Usage":       "42s",
+		"PreRated":    "True",
+		"Cost":        "42.3",
+	}}
+
+	if cgrEv := se.AsCGREvent("cgrates.org"); reflect.DeepEqual(se.Me, cgrEv.Event) {
+		t.Errorf("expected %v,received %v", utils.ToJSON(se.Me), utils.ToJSON(cgrEv.Event))
+	}
+}

@@ -2816,3 +2816,17 @@ func BenchmarkUUID(b *testing.B) {
 		b.StartTimer()
 	}
 }
+
+func TestResetAccountCDR(t *testing.T) {
+	var ub *Account
+	action := &Action{}
+	fltrS := &FilterS{}
+	acts := Actions{}
+	if err := resetAccountCDR(ub, action, acts, fltrS, nil); err == nil {
+		t.Error(err)
+	}
+	ub = &Account{}
+	if err := resetAccountCDR(ub, action, acts, fltrS, nil); err == nil {
+		t.Error(err)
+	}
+}
