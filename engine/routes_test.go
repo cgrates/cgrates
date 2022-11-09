@@ -1011,4 +1011,8 @@ func TestRouteServiceV1GetRoutes(t *testing.T) {
 		t.Error(err)
 	}
 
+	if err := rpS.V1GetRoutesList(args, &[]string{}); err == nil {
+		t.Error(err)
+	}
+
 }
