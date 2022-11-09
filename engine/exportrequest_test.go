@@ -439,7 +439,14 @@ func TestExportRequestParseField(t *testing.T) {
 	if _, err := eventReq.ParseField(fctTemp); err != nil {
 		t.Error(err)
 	}
-
+	fctTemp.Type = utils.MetaFiller
+	if _, err = eventReq.ParseField(fctTemp); err != nil {
+		t.Error(err)
+	}
+	fctTemp.Type = utils.MetaGroup
+	if _, err = eventReq.ParseField(fctTemp); err != nil {
+		t.Error(err)
+	}
 }
 
 func TestExportRequestAppend(t *testing.T) {
@@ -509,6 +516,9 @@ func TestExportRequestCompose(t *testing.T) {
 				"Account": "1001",
 				"Usage":   "10m",
 			},
+			utils.MetaOpts: utils.MapStorage{
+				"*opts": "val",
+			},
 		},
 		filterS: nil,
 		tnt:     "cgrates.org",
@@ -526,6 +536,94 @@ func TestExportRequestCompose(t *testing.T) {
 		Path:      "path"}, &utils.DataLeaf{
 		Data: "Value"}); err == nil {
 		t.Error(err)
+	} else if err = eeR.Compose(&utils.FullPath{
+		PathSlice: []string{utils.MetaUCH},
+		Path:      "pathvalue"}, &utils.DataLeaf{
+		Data: "Value"}); err != nil {
+		t.Error(err)
+	} else if err = eeR.Compose(&utils.FullPath{
+		PathSlice: []string{utils.MetaOpts, "*opts"},
+		Path:      "pathvalue"}, &utils.DataLeaf{
+		Data: "Value"}); err != nil {
+		t.Error(err)
 	}
 
+}
+
+func TestExportRequestSetFields(t *testing.T) {
+	onm := utils.NewOrderedNavigableMap()
+	fullPath := &utils.FullPath{
+		PathSlice: []string{utils.MetaReq, utils.MetaTenant},
+		Path:      utils.MetaTenant,
+	}
+	val := &utils.DataLeaf{
+		Data: "value1",
+	}
+	onm.Append(fullPath, val)
+	cfg := config.NewDefaultCGRConfig()
+	idb := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dmSPP := NewDataManager(idb, config.CgrConfig().CacheCfg(), nil)
+	eeR := &ExportRequest{
+		inData: map[string]utils.DataStorage{
+			utils.MetaReq: utils.MapStorage{
+				"Account": "1001",
+				"Usage":   "10m",
+			},
+			utils.MetaOpts: utils.MapStorage{
+				"*opts": "val",
+			},
+		},
+		filterS: NewFilterS(cfg, nil, dmSPP),
+		tnt:     "cgrates.org",
+		ExpData: map[string]*utils.OrderedNavigableMap{
+			utils.MetaReq: onm,
+		},
+	}
+	fctTemp := []*config.FCTemplate{
+		{
+			Type:       utils.MetaMaskedDestination,
+			Value:      config.NewRSRParsersMustCompile("*month_endTest", utils.InfieldSep),
+			Layout:     "“Mon Jan _2 15:04:05 2006”",
+			Timezone:   "Local",
+			MaskLen:    3,
+			MaskDestID: "dest1"},
+		{
+			Type:       utils.MetaMaskedDestination,
+			Value:      config.NewRSRParsersMustCompile("*month_endTest", utils.InfieldSep),
+			Layout:     "“Mon Jan _2 15:04:05 2006”",
+			Timezone:   "Local",
+			MaskLen:    3,
+			MaskDestID: "dest1"},
+		{
+			Type:       utils.MetaMaskedDestination,
+			Value:      config.NewRSRParsersMustCompile("*month_endTest", utils.InfieldSep),
+			Layout:     "“Mon Jan _2 15:04:05 2006”",
+			Timezone:   "Local",
+			MaskLen:    3,
+			MaskDestID: "dest3"},
+	}
+	if err = eeR.SetFields(fctTemp); err == nil {
+		t.Error(err)
+	}
+}
+
+func TestExportRequestFieldAsString(t *testing.T) {
+	inData := map[string]utils.DataStorage{
+		utils.MetaReq: utils.MapStorage{
+			"Account": "1001",
+			"Usage":   "10m",
+		},
+	}
+	eventReq := NewExportRequest(inData, "cgrates.org", nil, nil)
+	fldPath := []string{utils.MetaReq, "Usage"}
+	expVal := "10m"
+	if rcv, err := eventReq.FieldAsString(fldPath); err != nil {
+		t.Error(err)
+	} else if rcv != expVal {
+		t.Errorf("expected %v,received %v", expVal, rcv)
+	}
+	fldPath[0] = utils.MetaUCH
+	if _, err = eventReq.FieldAsString(fldPath); err == nil || err != utils.ErrNotFound {
+		t.Error(err)
+	}
 }
