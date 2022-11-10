@@ -59,7 +59,7 @@ var sTestsTPChrgs = []func(t *testing.T){
 	testTPChrgsKillEngine,
 }
 
-//Test start here
+// Test start here
 func TestTPChrgsIT(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:

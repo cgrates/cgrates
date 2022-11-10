@@ -29,7 +29,7 @@ import (
 	"github.com/cgrates/rpcclient"
 )
 
-//TestCoreSCoverage for cover testing
+// TestCoreSCoverage for cover testing
 func TestCoreSCoverage(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	caps := engine.NewCaps(1, "test_caps")

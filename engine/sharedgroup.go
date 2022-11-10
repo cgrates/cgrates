@@ -76,7 +76,7 @@ func (sg *SharedGroup) Clone() (sharedGroup *SharedGroup) {
 	return
 }
 
-//Clone clones *SharingParameters
+// Clone clones *SharingParameters
 func (sp *SharingParameters) Clone() *SharingParameters {
 	if sp == nil {
 		return nil

@@ -180,7 +180,7 @@ func testV1FIdxRpcConn(t *testing.T) {
 	}
 }
 
-//ThresholdProfile
+// ThresholdProfile
 func testV1FIdxSetThresholdProfile(t *testing.T) {
 	var reply *engine.ThresholdProfile
 	filter = &engine.FilterWithAPIOpts{
@@ -492,7 +492,7 @@ func testV1FIdxRemoveThresholdProfile(t *testing.T) {
 	}
 }
 
-//StatQueueProfile
+// StatQueueProfile
 func testV1FIdxSetStatQueueProfileIndexes(t *testing.T) {
 	var reply *engine.StatQueueProfile
 	filter = &engine.FilterWithAPIOpts{
@@ -783,7 +783,7 @@ func testV1FIdxRemoveStatQueueProfile(t *testing.T) {
 	}
 }
 
-//ResourceProfile
+// ResourceProfile
 func testV1FIdxSetResourceProfileIndexes(t *testing.T) {
 	var reply *engine.ResourceProfile
 	filter = &engine.FilterWithAPIOpts{
@@ -1035,7 +1035,7 @@ func testV1FIdxRemoveResourceProfile(t *testing.T) {
 	}
 }
 
-//RouteProfile
+// RouteProfile
 func testV1FIdxSetRouteProfileIndexes(t *testing.T) {
 	var reply *engine.RouteProfile
 	filter = &engine.FilterWithAPIOpts{
@@ -1325,7 +1325,7 @@ func testV1FIdxRemoveRouteProfile(t *testing.T) {
 	}
 }
 
-//AttributeProfile Indexes
+// AttributeProfile Indexes
 func testV1FIdxSetAttributeProfileIndexes(t *testing.T) {
 	var reply *engine.AttributeProfile
 	filter = &engine.FilterWithAPIOpts{

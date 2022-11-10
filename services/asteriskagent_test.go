@@ -29,7 +29,7 @@ import (
 	"github.com/cgrates/rpcclient"
 )
 
-//TestAsteriskAgentCoverage for cover testing
+// TestAsteriskAgentCoverage for cover testing
 func TestAsteriskAgentCoverage(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.SessionSCfg().Enabled = true

@@ -32,7 +32,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-//Test start here
+// Test start here
 func TestGuardianSIT(t *testing.T) {
 	var err error
 	var guardianConfigDIR string

@@ -52,7 +52,7 @@ var (
 	}
 )
 
-//Test start here
+// Test start here
 func TestCGRLoader(t *testing.T) {
 	if !*loaderGoogleSheet {
 		t.SkipNow()

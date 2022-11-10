@@ -29,7 +29,7 @@ import (
 	"github.com/cgrates/rpcclient"
 )
 
-//TestSIPAgentCoverage for cover testing
+// TestSIPAgentCoverage for cover testing
 func TestSIPAgentCoverage(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.SessionSCfg().Enabled = true

@@ -58,7 +58,7 @@ var sTestsTPResources = []func(t *testing.T){
 	testTPResKillEngine,
 }
 
-//Test start here
+// Test start here
 func TestTPResIT(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:

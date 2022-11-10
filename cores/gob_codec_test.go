@@ -43,7 +43,7 @@ func (mk *mockRWC) Close() error {
 	return nil
 }
 
-//Mocking For getting a nil error when the interface argument is nil in encoding
+// Mocking For getting a nil error when the interface argument is nil in encoding
 type mockReadWriteCloserErrorNilInterface struct {
 	mockRWC
 }

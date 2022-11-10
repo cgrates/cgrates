@@ -29,7 +29,7 @@ import (
 	"github.com/cgrates/rpcclient"
 )
 
-//TestResourceSCoverage for cover testing
+// TestResourceSCoverage for cover testing
 func TestResourceSCoverage(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.ThresholdSCfg().Enabled = true

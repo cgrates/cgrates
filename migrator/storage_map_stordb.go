@@ -41,24 +41,24 @@ func (iDBMig *internalStorDBMigrator) StorDB() engine.StorDB {
 	return *iDBMig.storDB
 }
 
-//CDR methods
-//get
+// CDR methods
+// get
 func (iDBMig *internalStorDBMigrator) getV1CDR() (v1Cdr *v1Cdrs, err error) {
 	return nil, utils.ErrNotImplemented
 }
 
-//set
+// set
 func (iDBMig *internalStorDBMigrator) setV1CDR(v1Cdr *v1Cdrs) (err error) {
 	return utils.ErrNotImplemented
 }
 
-//rem
+// rem
 func (iDBMig *internalStorDBMigrator) remV1CDRs(v1Cdr *v1Cdrs) (err error) {
 	return utils.ErrNotImplemented
 }
 
-//SMCost methods
-//rename
+// SMCost methods
+// rename
 func (iDBMig *internalStorDBMigrator) renameV1SMCosts() (err error) {
 	return utils.ErrNotImplemented
 }
@@ -67,17 +67,17 @@ func (iDBMig *internalStorDBMigrator) createV1SMCosts() (err error) {
 	return utils.ErrNotImplemented
 }
 
-//get
+// get
 func (iDBMig *internalStorDBMigrator) getV2SMCost() (v2Cost *v2SessionsCost, err error) {
 	return nil, utils.ErrNotImplemented
 }
 
-//set
+// set
 func (iDBMig *internalStorDBMigrator) setV2SMCost(v2Cost *v2SessionsCost) (err error) {
 	return utils.ErrNotImplemented
 }
 
-//remove
+// remove
 func (iDBMig *internalStorDBMigrator) remV2SMCost(v2Cost *v2SessionsCost) (err error) {
 	return utils.ErrNotImplemented
 }

@@ -50,7 +50,7 @@ var (
 	}
 )
 
-//Test start here
+// Test start here
 func TestCostIT(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:

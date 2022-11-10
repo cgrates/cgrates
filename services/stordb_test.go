@@ -27,7 +27,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-//TestStorDBServiceCoverage for cover testing
+// TestStorDBServiceCoverage for cover testing
 func TestStorDBServiceCoverage(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}

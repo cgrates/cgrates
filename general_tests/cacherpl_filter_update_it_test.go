@@ -100,7 +100,7 @@ func TestFilterUpdateIT(t *testing.T) {
 	}
 }
 
-//Init Config
+// Init Config
 func testFilterUpdateInitCfg(t *testing.T) {
 	fltrUpdateCfgPath1 = path.Join(*dataDir, "conf", "samples", "cache_replicate", fltrUpdateCfgDIR1)
 	if fltrUpdateCfg1, err = config.NewCGRConfigFromPath(fltrUpdateCfgPath1); err != nil {

@@ -50,7 +50,7 @@ var (
 	}
 )
 
-//Test start here
+// Test start here
 func TestRsV1IT(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:

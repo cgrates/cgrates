@@ -53,7 +53,7 @@ var (
 	}
 )
 
-//Tests start here
+// Tests start here
 func TestTimingIT(t *testing.T) {
 	timingTests := sTestsTiming
 	switch *dbType {

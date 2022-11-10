@@ -1810,7 +1810,7 @@ func (ms *MongoStorage) GetDispatcherHostDrv(tenant, id string) (r *DispatcherHo
 		if err := cur.Decode(r); err != nil {
 			r = nil
 			if err == mongo.ErrNoDocuments {
-				return utils.ErrDSPHostNotFound 
+				return utils.ErrDSPHostNotFound
 			}
 			return err
 		}

@@ -60,7 +60,7 @@ var sTestsTPAlsPrf = []func(t *testing.T){
 	testTPAlsPrfKillEngine,
 }
 
-//Test start here
+// Test start here
 func TestTPAlsPrfIT(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:

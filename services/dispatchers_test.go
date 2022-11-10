@@ -30,7 +30,7 @@ import (
 	"github.com/cgrates/rpcclient"
 )
 
-//TestDispatcherSCoverage for cover testing
+// TestDispatcherSCoverage for cover testing
 func TestDispatcherSCoverage(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.AttributeSCfg().Enabled = true

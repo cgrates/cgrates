@@ -29,7 +29,7 @@ import (
 	"github.com/cgrates/rpcclient"
 )
 
-//TestFreeSwitchAgentCoverage for cover testing
+// TestFreeSwitchAgentCoverage for cover testing
 func TestFreeSwitchAgentCoverage(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.SessionSCfg().Enabled = true

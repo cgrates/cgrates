@@ -51,9 +51,9 @@ func (v1rs *redisMigrator) DataManager() *engine.DataManager {
 	return v1rs.dm
 }
 
-//Account methods
-//V1
-//get
+// Account methods
+// V1
+// get
 func (v1rs *redisMigrator) getv1Account() (v1Acnt *v1Account, err error) {
 	if v1rs.qryIdx == nil {
 		v1rs.dataKeys, err = v1rs.rds.GetKeysForPrefix(v1AccountDBPrefix)
@@ -81,7 +81,7 @@ func (v1rs *redisMigrator) getv1Account() (v1Acnt *v1Account, err error) {
 	return v1Acnt, nil
 }
 
-//set
+// set
 func (v1rs *redisMigrator) setV1Account(x *v1Account) (err error) {
 	key := v1AccountDBPrefix + x.Id
 	bit, err := v1rs.rds.Marshaler().Marshal(x)
@@ -94,14 +94,14 @@ func (v1rs *redisMigrator) setV1Account(x *v1Account) (err error) {
 	return
 }
 
-//rem
+// rem
 func (v1rs *redisMigrator) remV1Account(id string) (err error) {
 	key := v1AccountDBPrefix + id
 	return v1rs.rds.Cmd(nil, "DEL", key)
 }
 
-//V2
-//get
+// V2
+// get
 func (v1rs *redisMigrator) getv2Account() (v2Acnt *v2Account, err error) {
 	if v1rs.qryIdx == nil {
 		v1rs.dataKeys, err = v1rs.rds.GetKeysForPrefix(utils.AccountPrefix)
@@ -129,7 +129,7 @@ func (v1rs *redisMigrator) getv2Account() (v2Acnt *v2Account, err error) {
 	return v2Acnt, nil
 }
 
-//set
+// set
 func (v1rs *redisMigrator) setV2Account(x *v2Account) (err error) {
 	key := utils.AccountPrefix + x.ID
 	bit, err := v1rs.rds.Marshaler().Marshal(x)
@@ -142,14 +142,14 @@ func (v1rs *redisMigrator) setV2Account(x *v2Account) (err error) {
 	return
 }
 
-//rem
+// rem
 func (v1rs *redisMigrator) remV2Account(id string) (err error) {
 	key := utils.AccountPrefix + id
 	return v1rs.rds.Cmd(nil, "DEL", key)
 }
 
-//ActionPlans methods
-//get
+// ActionPlans methods
+// get
 func (v1rs *redisMigrator) getV1ActionPlans() (v1aps *v1ActionPlans, err error) {
 	if v1rs.qryIdx == nil {
 		v1rs.dataKeys, err = v1rs.rds.GetKeysForPrefix(utils.ActionPlanPrefix)
@@ -176,7 +176,7 @@ func (v1rs *redisMigrator) getV1ActionPlans() (v1aps *v1ActionPlans, err error) 
 	return v1aps, nil
 }
 
-//set
+// set
 func (v1rs *redisMigrator) setV1ActionPlans(x *v1ActionPlans) (err error) {
 	key := utils.ActionPlanPrefix + (*x)[0].Id
 	bit, err := v1rs.rds.Marshaler().Marshal(x)
@@ -189,14 +189,14 @@ func (v1rs *redisMigrator) setV1ActionPlans(x *v1ActionPlans) (err error) {
 	return
 }
 
-//rem
+// rem
 func (v1rs *redisMigrator) remV1ActionPlans(x *v1ActionPlans) (err error) {
 	key := utils.ActionPlanPrefix + (*x)[0].Id
 	return v1rs.rds.Cmd(nil, "DEL", key)
 }
 
-//Actions methods
-//get
+// Actions methods
+// get
 func (v1rs *redisMigrator) getV1Actions() (v1acs *v1Actions, err error) {
 	if v1rs.qryIdx == nil {
 		v1rs.dataKeys, err = v1rs.rds.GetKeysForPrefix(utils.ActionPrefix)
@@ -223,7 +223,7 @@ func (v1rs *redisMigrator) getV1Actions() (v1acs *v1Actions, err error) {
 	return v1acs, nil
 }
 
-//set
+// set
 func (v1rs *redisMigrator) setV1Actions(x *v1Actions) (err error) {
 	key := utils.ActionPrefix + (*x)[0].Id
 	bit, err := v1rs.rds.Marshaler().Marshal(x)
@@ -236,15 +236,15 @@ func (v1rs *redisMigrator) setV1Actions(x *v1Actions) (err error) {
 	return
 }
 
-//rem
+// rem
 func (v1rs *redisMigrator) remV1Actions(x v1Actions) (err error) {
 	key := utils.ActionPrefix + x[0].Id
 	return v1rs.rds.Cmd(nil, "DEL", key)
 
 }
 
-//ActionTriggers methods
-//get
+// ActionTriggers methods
+// get
 func (v1rs *redisMigrator) getV1ActionTriggers() (v1acts *v1ActionTriggers, err error) {
 	if v1rs.qryIdx == nil {
 		v1rs.dataKeys, err = v1rs.rds.GetKeysForPrefix(utils.ActionTriggerPrefix)
@@ -271,7 +271,7 @@ func (v1rs *redisMigrator) getV1ActionTriggers() (v1acts *v1ActionTriggers, err 
 	return v1acts, nil
 }
 
-//set
+// set
 func (v1rs *redisMigrator) setV1ActionTriggers(x *v1ActionTriggers) (err error) {
 	key := utils.ActionTriggerPrefix + (*x)[0].Id
 	bit, err := v1rs.rds.Marshaler().Marshal(x)
@@ -284,14 +284,14 @@ func (v1rs *redisMigrator) setV1ActionTriggers(x *v1ActionTriggers) (err error) 
 	return
 }
 
-//rem
+// rem
 func (v1rs *redisMigrator) remV1ActionTriggers(x *v1ActionTriggers) (err error) {
 	key := utils.ActionTriggerPrefix + (*x)[0].Id
 	return v1rs.rds.Cmd(nil, "DEL", key)
 }
 
-//SharedGroup methods
-//get
+// SharedGroup methods
+// get
 func (v1rs *redisMigrator) getV1SharedGroup() (v1sg *v1SharedGroup, err error) {
 	if v1rs.qryIdx == nil {
 		v1rs.dataKeys, err = v1rs.rds.GetKeysForPrefix(utils.SharedGroupPrefix)
@@ -318,7 +318,7 @@ func (v1rs *redisMigrator) getV1SharedGroup() (v1sg *v1SharedGroup, err error) {
 	return v1sg, nil
 }
 
-//set
+// set
 func (v1rs *redisMigrator) setV1SharedGroup(x *v1SharedGroup) (err error) {
 	key := utils.SharedGroupPrefix + x.Id
 	bit, err := v1rs.rds.Marshaler().Marshal(x)
@@ -331,8 +331,8 @@ func (v1rs *redisMigrator) setV1SharedGroup(x *v1SharedGroup) (err error) {
 	return
 }
 
-//Stats methods
-//get
+// Stats methods
+// get
 func (v1rs *redisMigrator) getV1Stats() (v1st *v1Stat, err error) {
 	if v1rs.qryIdx == nil {
 		v1rs.dataKeys, err = v1rs.rds.GetKeysForPrefix(utils.CDRsStatsPrefix)
@@ -385,7 +385,7 @@ func (v1rs *redisMigrator) getV3Stats() (v1st *engine.StatQueueProfile, err erro
 	return v1st, nil
 }
 
-//set
+// set
 func (v1rs *redisMigrator) setV1Stats(x *v1Stat) (err error) {
 	key := utils.CDRsStatsPrefix + x.Id
 	bit, err := v1rs.rds.Marshaler().Marshal(x)
@@ -398,7 +398,7 @@ func (v1rs *redisMigrator) setV1Stats(x *v1Stat) (err error) {
 	return
 }
 
-//get
+// get
 func (v1rs *redisMigrator) getV2Stats() (v2 *engine.StatQueue, err error) {
 	if v1rs.qryIdx == nil {
 		v1rs.dataKeys, err = v1rs.rds.GetKeysForPrefix(utils.StatQueuePrefix)
@@ -425,7 +425,7 @@ func (v1rs *redisMigrator) getV2Stats() (v2 *engine.StatQueue, err error) {
 	return v2, nil
 }
 
-//set
+// set
 func (v1rs *redisMigrator) setV2Stats(v2 *engine.StatQueue) (err error) {
 	key := utils.StatQueuePrefix + v2.ID
 	bit, err := v1rs.rds.Marshaler().Marshal(v2)
@@ -438,8 +438,8 @@ func (v1rs *redisMigrator) setV2Stats(v2 *engine.StatQueue) (err error) {
 	return
 }
 
-//Action  methods
-//get
+// Action  methods
+// get
 func (v1rs *redisMigrator) getV2ActionTrigger() (v2at *v2ActionTrigger, err error) {
 	if v1rs.qryIdx == nil {
 		v1rs.dataKeys, err = v1rs.rds.GetKeysForPrefix(utils.ActionTriggerPrefix)
@@ -466,7 +466,7 @@ func (v1rs *redisMigrator) getV2ActionTrigger() (v2at *v2ActionTrigger, err erro
 	return v2at, nil
 }
 
-//set
+// set
 func (v1rs *redisMigrator) setV2ActionTrigger(x *v2ActionTrigger) (err error) {
 	key := utils.ActionTriggerPrefix + x.ID
 	bit, err := v1rs.rds.Marshaler().Marshal(x)
@@ -479,8 +479,8 @@ func (v1rs *redisMigrator) setV2ActionTrigger(x *v2ActionTrigger) (err error) {
 	return
 }
 
-//AttributeProfile methods
-//get
+// AttributeProfile methods
+// get
 func (v1rs *redisMigrator) getV1AttributeProfile() (v1attrPrf *v1AttributeProfile, err error) {
 	var v1attr *v1AttributeProfile
 	if v1rs.qryIdx == nil {
@@ -508,7 +508,7 @@ func (v1rs *redisMigrator) getV1AttributeProfile() (v1attrPrf *v1AttributeProfil
 	return v1attr, nil
 }
 
-//set
+// set
 func (v1rs *redisMigrator) setV1AttributeProfile(x *v1AttributeProfile) (err error) {
 	key := utils.AttributeProfilePrefix + utils.ConcatenatedKey(x.Tenant, x.ID)
 	bit, err := v1rs.rds.Marshaler().Marshal(x)
@@ -521,8 +521,8 @@ func (v1rs *redisMigrator) setV1AttributeProfile(x *v1AttributeProfile) (err err
 	return
 }
 
-//ThresholdProfile methods
-//get
+// ThresholdProfile methods
+// get
 func (v1rs *redisMigrator) getV2ThresholdProfile() (v2T *v2Threshold, err error) {
 	var v2Th *v2Threshold
 	if v1rs.qryIdx == nil {
@@ -576,7 +576,7 @@ func (v1rs *redisMigrator) getV3ThresholdProfile() (v2T *engine.ThresholdProfile
 	return v2T, nil
 }
 
-//set
+// set
 func (v1rs *redisMigrator) setV2ThresholdProfile(x *v2Threshold) (err error) {
 	key := utils.ThresholdProfilePrefix + utils.ConcatenatedKey(x.Tenant, x.ID)
 	bit, err := v1rs.rds.Marshaler().Marshal(x)
@@ -589,14 +589,14 @@ func (v1rs *redisMigrator) setV2ThresholdProfile(x *v2Threshold) (err error) {
 	return
 }
 
-//rem
+// rem
 func (v1rs *redisMigrator) remV2ThresholdProfile(tenant, id string) (err error) {
 	key := utils.ThresholdProfilePrefix + utils.ConcatenatedKey(tenant, id)
 	return v1rs.rds.Cmd(nil, "DEL", key)
 }
 
-//ThresholdProfile methods
-//get
+// ThresholdProfile methods
+// get
 func (v1rs *redisMigrator) getV1Alias() (v1a *v1Alias, err error) {
 	v1a = &v1Alias{Values: make(v1AliasValues, 0)}
 	if v1rs.qryIdx == nil {
@@ -626,7 +626,7 @@ func (v1rs *redisMigrator) getV1Alias() (v1a *v1Alias, err error) {
 	return v1a, nil
 }
 
-//set
+// set
 func (v1rs *redisMigrator) setV1Alias(al *v1Alias) (err error) {
 	var result []byte
 	result, err = v1rs.rds.Marshaler().Marshal(al.Values)
@@ -640,7 +640,7 @@ func (v1rs *redisMigrator) setV1Alias(al *v1Alias) (err error) {
 	return
 }
 
-//rem
+// rem
 func (v1rs *redisMigrator) remV1Alias(key string) (err error) {
 
 	// get alias for values list
@@ -681,7 +681,7 @@ func (v1rs *redisMigrator) remV1Alias(key string) (err error) {
 }
 
 // User methods
-//get
+// get
 func (v1rs *redisMigrator) getV1User() (v1u *v1UserProfile, err error) {
 	if v1rs.qryIdx == nil {
 		v1rs.dataKeys, err = v1rs.rds.GetKeysForPrefix(utils.UsersPrefix)
@@ -708,7 +708,7 @@ func (v1rs *redisMigrator) getV1User() (v1u *v1UserProfile, err error) {
 	return nil, utils.ErrNoMoreData
 }
 
-//set
+// set
 func (v1rs *redisMigrator) setV1User(us *v1UserProfile) (err error) {
 	bit, err := v1rs.rds.Marshaler().Marshal(us)
 	if err != nil {
@@ -717,13 +717,13 @@ func (v1rs *redisMigrator) setV1User(us *v1UserProfile) (err error) {
 	return v1rs.rds.Cmd(nil, "SET", utils.UsersPrefix+us.GetId(), string(bit))
 }
 
-//rem
+// rem
 func (v1rs *redisMigrator) remV1User(key string) (err error) {
 	return v1rs.rds.Cmd(nil, "DEL", utils.UsersPrefix+key)
 }
 
 // DerivedChargers methods
-//get
+// get
 func (v1rs *redisMigrator) getV1DerivedChargers() (v1d *v1DerivedChargersWithKey, err error) {
 	if v1rs.qryIdx == nil {
 		v1rs.dataKeys, err = v1rs.rds.GetKeysForPrefix(utils.DerivedChargersPrefix)
@@ -752,7 +752,7 @@ func (v1rs *redisMigrator) getV1DerivedChargers() (v1d *v1DerivedChargersWithKey
 	return nil, utils.ErrNoMoreData
 }
 
-//set
+// set
 func (v1rs *redisMigrator) setV1DerivedChargers(dc *v1DerivedChargersWithKey) (err error) {
 	if dc == nil || len(dc.Value.Chargers) == 0 {
 		return v1rs.remV1DerivedChargers(dc.Key)
@@ -764,13 +764,13 @@ func (v1rs *redisMigrator) setV1DerivedChargers(dc *v1DerivedChargersWithKey) (e
 	return v1rs.rds.Cmd(nil, "SET", utils.DerivedChargersPrefix+dc.Key, string(bit))
 }
 
-//rem
+// rem
 func (v1rs *redisMigrator) remV1DerivedChargers(key string) (err error) {
 	return v1rs.rds.Cmd(nil, "DEL", utils.DerivedChargersPrefix+key)
 }
 
-//AttributeProfile methods
-//get
+// AttributeProfile methods
+// get
 func (v1rs *redisMigrator) getV2AttributeProfile() (v2attrPrf *v2AttributeProfile, err error) {
 	var v2attr *v2AttributeProfile
 	if v1rs.qryIdx == nil {
@@ -798,7 +798,7 @@ func (v1rs *redisMigrator) getV2AttributeProfile() (v2attrPrf *v2AttributeProfil
 	return v2attr, nil
 }
 
-//set
+// set
 func (v1rs *redisMigrator) setV2AttributeProfile(x *v2AttributeProfile) (err error) {
 	key := utils.AttributeProfilePrefix + utils.ConcatenatedKey(x.Tenant, x.ID)
 	bit, err := v1rs.rds.Marshaler().Marshal(x)
@@ -811,14 +811,14 @@ func (v1rs *redisMigrator) setV2AttributeProfile(x *v2AttributeProfile) (err err
 	return
 }
 
-//rem
+// rem
 func (v1rs *redisMigrator) remV2AttributeProfile(tenant, id string) (err error) {
 	key := utils.AttributeProfilePrefix + utils.ConcatenatedKey(tenant, id)
 	return v1rs.rds.Cmd(nil, "DEL", key)
 }
 
-//AttributeProfile methods
-//get
+// AttributeProfile methods
+// get
 func (v1rs *redisMigrator) getV3AttributeProfile() (v3attrPrf *v3AttributeProfile, err error) {
 	var v3attr *v3AttributeProfile
 	if v1rs.qryIdx == nil {
@@ -846,7 +846,7 @@ func (v1rs *redisMigrator) getV3AttributeProfile() (v3attrPrf *v3AttributeProfil
 	return v3attr, nil
 }
 
-//set
+// set
 func (v1rs *redisMigrator) setV3AttributeProfile(x *v3AttributeProfile) (err error) {
 	key := utils.AttributeProfilePrefix + utils.ConcatenatedKey(x.Tenant, x.ID)
 	bit, err := v1rs.rds.Marshaler().Marshal(x)
@@ -859,14 +859,14 @@ func (v1rs *redisMigrator) setV3AttributeProfile(x *v3AttributeProfile) (err err
 	return
 }
 
-//rem
+// rem
 func (v1rs *redisMigrator) remV3AttributeProfile(tenant, id string) (err error) {
 	key := utils.AttributeProfilePrefix + utils.ConcatenatedKey(tenant, id)
 	return v1rs.rds.Cmd(nil, "DEL", key)
 }
 
-//AttributeProfile methods
-//get
+// AttributeProfile methods
+// get
 func (v1rs *redisMigrator) getV4AttributeProfile() (v3attrPrf *v4AttributeProfile, err error) {
 	var v4attr *v4AttributeProfile
 	if v1rs.qryIdx == nil {
@@ -920,7 +920,7 @@ func (v1rs *redisMigrator) getV5AttributeProfile() (v5attr *engine.AttributeProf
 	return
 }
 
-//set
+// set
 func (v1rs *redisMigrator) setV4AttributeProfile(x *v4AttributeProfile) (err error) {
 	key := utils.AttributeProfilePrefix + utils.ConcatenatedKey(x.Tenant, x.ID)
 	bit, err := v1rs.rds.Marshaler().Marshal(x)
@@ -933,14 +933,14 @@ func (v1rs *redisMigrator) setV4AttributeProfile(x *v4AttributeProfile) (err err
 	return
 }
 
-//rem
+// rem
 func (v1rs *redisMigrator) remV4AttributeProfile(tenant, id string) (err error) {
 	key := utils.AttributeProfilePrefix + utils.ConcatenatedKey(tenant, id)
 	return v1rs.rds.Cmd(nil, "DEL", key)
 }
 
 // Filter Methods
-//get
+// get
 func (v1rs *redisMigrator) getV1Filter() (v1Fltr *v1Filter, err error) {
 	if v1rs.qryIdx == nil {
 		v1rs.dataKeys, err = v1rs.rds.GetKeysForPrefix(utils.FilterPrefix)
@@ -993,7 +993,7 @@ func (v1rs *redisMigrator) getV4Filter() (v4Fltr *engine.Filter, err error) {
 	return
 }
 
-//set
+// set
 func (v1rs *redisMigrator) setV1Filter(x *v1Filter) (err error) {
 	key := utils.FilterPrefix + utils.ConcatenatedKey(x.Tenant, x.ID)
 	bit, err := v1rs.rds.Marshaler().Marshal(x)
@@ -1003,7 +1003,7 @@ func (v1rs *redisMigrator) setV1Filter(x *v1Filter) (err error) {
 	return v1rs.rds.Cmd(nil, "SET", key, string(bit))
 }
 
-//rem
+// rem
 func (v1rs *redisMigrator) remV1Filter(tenant, id string) (err error) {
 	key := utils.FilterPrefix + utils.ConcatenatedKey(tenant, id)
 	return v1rs.rds.Cmd(nil, "DEL", key)
@@ -1036,7 +1036,7 @@ func (v1rs *redisMigrator) getSupplier() (spl *SupplierProfile, err error) {
 	return
 }
 
-//set
+// set
 func (v1rs *redisMigrator) setSupplier(spl *SupplierProfile) (err error) {
 	key := SupplierProfilePrefix + utils.ConcatenatedKey(spl.Tenant, spl.ID)
 	bit, err := v1rs.rds.Marshaler().Marshal(spl)
@@ -1049,7 +1049,7 @@ func (v1rs *redisMigrator) setSupplier(spl *SupplierProfile) (err error) {
 	return
 }
 
-//rem
+// rem
 func (v1rs *redisMigrator) remSupplier(tenant, id string) (err error) {
 	key := SupplierProfilePrefix + utils.ConcatenatedKey(tenant, id)
 	return v1rs.rds.Cmd(nil, "DEL", key)

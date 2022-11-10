@@ -142,7 +142,7 @@ func testV1FIdxCaFromFolder(t *testing.T) {
 	time.Sleep(100 * time.Millisecond)
 }
 
-//ThresholdProfile
+// ThresholdProfile
 func testV1FIdxCaProcessEventWithNotFound(t *testing.T) {
 	tEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
@@ -510,7 +510,7 @@ func testV1FIdxCaRemoveThresholdProfile(t *testing.T) {
 	}
 }
 
-//StatQueue
+// StatQueue
 func testV1FIdxCaGetStatQueuesWithNotFound(t *testing.T) {
 	var reply *[]string
 	tEv := &utils.CGREvent{
@@ -910,7 +910,7 @@ func testV1FIdxCaRemoveStatQueueProfile(t *testing.T) {
 	}
 }
 
-//AttributeProfile
+// AttributeProfile
 func testV1FIdxCaProcessAttributeProfileEventWithNotFound(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",

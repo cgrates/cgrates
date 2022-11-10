@@ -450,7 +450,7 @@ func TestDebitSession(t *testing.T) {
 	}
 }
 
-//mocking for
+// mocking for
 type testMockClients struct {
 	calls map[string]func(args interface{}, reply interface{}) error
 }

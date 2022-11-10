@@ -29,7 +29,7 @@ import (
 	"github.com/cgrates/rpcclient"
 )
 
-//TestHTTPAgent for cover testing
+// TestHTTPAgent for cover testing
 func TestHTTPAgentCoverage(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	server := cores.NewServer(nil)

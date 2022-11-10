@@ -25,7 +25,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-//SetFilter add a new Filter
+// SetFilter add a new Filter
 func (apierSv1 *APIerSv1) SetFilter(arg *engine.FilterWithAPIOpts, reply *string) (err error) {
 	if missing := utils.MissingStructFields(arg.Filter, []string{utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
@@ -64,7 +64,7 @@ func (apierSv1 *APIerSv1) SetFilter(arg *engine.FilterWithAPIOpts, reply *string
 	return nil
 }
 
-//GetFilter returns a Filter
+// GetFilter returns a Filter
 func (apierSv1 *APIerSv1) GetFilter(arg *utils.TenantID, reply *engine.Filter) error {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
@@ -103,7 +103,7 @@ func (apierSv1 *APIerSv1) GetFilterIDs(args *utils.PaginatorWithTenant, fltrIDs 
 	return nil
 }
 
-//RemoveFilter  remove a specific filter
+// RemoveFilter  remove a specific filter
 func (apierSv1 *APIerSv1) RemoveFilter(arg *utils.TenantIDWithAPIOpts, reply *string) error {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)

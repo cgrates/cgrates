@@ -29,7 +29,7 @@ import (
 	"github.com/cgrates/rpcclient"
 )
 
-//TestResponderCoverage for cover testing
+// TestResponderCoverage for cover testing
 func TestResponderCoverage(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	server := cores.NewServer(nil)

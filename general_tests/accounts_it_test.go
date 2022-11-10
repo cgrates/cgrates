@@ -235,7 +235,7 @@ func testV1AccMonthly(t *testing.T) {
 
 }
 
-//Add test to check if AccountS send event to ThresholdS
+// Add test to check if AccountS send event to ThresholdS
 func testV1AccSendToThreshold(t *testing.T) {
 	var reply string
 

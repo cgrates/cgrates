@@ -30,7 +30,7 @@ import (
 	"github.com/cgrates/rpcclient"
 )
 
-//TestEventExporterSCoverage for cover testing
+// TestEventExporterSCoverage for cover testing
 func TestEventExporterSCoverage(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()

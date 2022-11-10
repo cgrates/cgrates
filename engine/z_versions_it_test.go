@@ -257,8 +257,8 @@ func testVersionsWithEngine(t *testing.T) {
 	}
 }
 
-//Tests for DataDB
-//We do a test for each version field in order to test them as a unit and not at as a whole.
+// Tests for DataDB
+// We do a test for each version field in order to test them as a unit and not at as a whole.
 func testUpdateVersionsAccounts(t *testing.T) {
 	newVersions := CurrentDataDBVersions()
 	newVersions[utils.Accounts] = 2
@@ -658,7 +658,7 @@ func testUpdateVersionsTiming(t *testing.T) {
 	}
 }
 
-//Tests for StorDB
+// Tests for StorDB
 func testUpdateVersionsCostDetails(t *testing.T) {
 	newVersions := CurrentStorDBVersions()
 	newVersions[utils.CostDetails] = 1

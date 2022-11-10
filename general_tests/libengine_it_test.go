@@ -92,7 +92,6 @@ func testLibengITStartEngine(t *testing.T) {
 	}
 }
 
-//
 func testLibengITRPCConnection(t *testing.T) {
 	cgrCfg := &config.RemoteHost{
 		ID:              "a4f3f",
