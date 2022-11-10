@@ -1,0 +1,29 @@
+{
+
+"general": {
+    "log_level": 7
+},
+
+"data_db": {
+    "db_type": "*internal"
+},
+
+"loaders": [
+    {
+        "id": "*default",
+        "enabled": true,
+        "tenant": "cgrates.org",
+        "tp_in_dir": "/tmp/TestFltrSepIT/in",
+        "tp_out_dir": ""
+    }
+],
+
+"attributes": {
+    "enabled": true
+},
+
+"admins": {
+    "enabled": true
+}
+
+}
