@@ -2730,18 +2730,167 @@ func TestGetSharedGroups(t *testing.T) {
 }
 
 func TestAccountAsOldStructure(t *testing.T) {
+	acc := &Account{
+		ID: "TEST_ID",
+		BalanceMap: map[string]Balances{
+			utils.MetaMonetary: {
+				&Balance{
+					Value: 100}},
+			utils.MetaVoice: {
+				&Balance{
+					Value:          10 * float64(time.Second),
+					Weight:         20,
+					DestinationIDs: utils.StringMap{"NAT": true}},
+				&Balance{
+					Weight:         10,
+					DestinationIDs: utils.StringMap{"RET": true}}}},
+		UnitCounters: UnitCounters{
+			utils.MetaMonetary: []*UnitCounter{
+				{Counters: CounterFilters{
+					&CounterFilter{Filter: &BalanceFilter{
+						Type: utils.StringPointer(utils.MetaMonetary)},
+						Value: 1.0}}}}},
+		ActionTriggers: ActionTriggers{
+			&ActionTrigger{
+				Balance: &BalanceFilter{
+					Type: utils.StringPointer(utils.MetaMonetary)},
+				ThresholdValue: 100,
+				ThresholdType:  utils.TriggerMinEventCounter,
+				ActionsID:      "TEST_ACTIONS"}},
 
-	acc := &Account{}
+		AllowNegative: true,
+		Disabled:      true,
+	}
 	expAcc := &Account{
-		ID:             "*out:",
-		BalanceMap:     map[string]Balances{},
-		UnitCounters:   UnitCounters{},
-		ActionTriggers: ActionTriggers{},
-		AllowNegative:  false,
-		Disabled:       false,
+		ID: "*out:TEST_ID",
+		BalanceMap: map[string]Balances{
+			"*monetary*out": {
+				&Balance{
+					Value: 100}},
+			"*voice*out": {
+				&Balance{
+					Value:          10 * float64(time.Second),
+					Weight:         20,
+					DestinationIDs: utils.StringMap{"NAT": true}},
+				&Balance{
+					Weight:         10,
+					DestinationIDs: utils.StringMap{"RET": true}}}},
+		UnitCounters: UnitCounters{
+			"*monetary": []*UnitCounter{
+				{Counters: CounterFilters{
+					&CounterFilter{Filter: &BalanceFilter{
+						Type: utils.StringPointer(utils.MetaMonetary)},
+						Value: 1.0}}}}},
+		ActionTriggers: ActionTriggers{
+			&ActionTrigger{
+				Balance: &BalanceFilter{
+					Type: utils.StringPointer(utils.MetaMonetary)},
+				ThresholdValue: 100,
+				ThresholdType:  utils.TriggerMinEventCounter,
+				ActionsID:      "TEST_ACTIONS"}},
+
+		AllowNegative: true,
+		Disabled:      true,
 	}
 
 	if val := acc.AsOldStructure(); reflect.DeepEqual(val, expAcc) {
-		t.Errorf("expected %v ,received %v ", utils.ToJSON(expAcc), utils.ToJSON(val))
+		t.Errorf("expected %+v ,received %+v ", utils.ToJSON(expAcc), utils.ToJSON(val))
+	}
+}
+
+func TestAccountSummary(t *testing.T) {
+
+	as := &AccountSummary{
+		Tenant: "cgrates.org",
+		ID:     "CGRATES_1",
+		BalanceSummaries: BalanceSummaries{
+			&BalanceSummary{
+				ID:       "summary_1",
+				UUID:     "summary_uuid",
+				Type:     "*voice",
+				Initial:  2.0,
+				Value:    12.2,
+				Disabled: true,
+			},
+			&BalanceSummary{
+				ID:       "summary_2",
+				UUID:     "summary_uuid2",
+				Type:     "*voice",
+				Initial:  4.0,
+				Value:    20.2,
+				Disabled: false,
+			},
+		},
+		AllowNegative: false,
+		Disabled:      false,
+	}
+
+	asOld := &AccountSummary{
+		Tenant: "cgrates.org",
+		ID:     "CGRATES_1",
+		BalanceSummaries: BalanceSummaries{
+			&BalanceSummary{
+				ID:       "oldsummary_1",
+				UUID:     "oldsummary_uuid",
+				Type:     "*voice",
+				Initial:  2.0,
+				Value:    12.2,
+				Disabled: true,
+			},
+			&BalanceSummary{
+				ID:       "old_summary_2",
+				UUID:     "old_summary_uuid2",
+				Type:     "*data",
+				Initial:  4.0,
+				Value:    20.2,
+				Disabled: false,
+			},
+		},
+		AllowNegative: false,
+		Disabled:      false,
+	}
+	expAs := &AccountSummary{
+		Tenant: "cgrates.org",
+		ID:     "CGRATES_1",
+		BalanceSummaries: BalanceSummaries{
+			&BalanceSummary{
+				ID:       "summary_1",
+				UUID:     "summary_uuid",
+				Type:     "*voice",
+				Initial:  2.0,
+				Value:    12.2,
+				Disabled: true,
+			},
+			&BalanceSummary{
+				ID:       "summary_2",
+				UUID:     "summary_uuid2",
+				Type:     "*voice",
+				Initial:  4.0,
+				Value:    20.2,
+				Disabled: false,
+			},
+			&BalanceSummary{
+				ID:       "oldsummary_1",
+				UUID:     "oldsummary_uuid",
+				Type:     "*voice",
+				Initial:  0,
+				Value:    0,
+				Disabled: true,
+			},
+			&BalanceSummary{
+				ID:       "old_summary_2",
+				UUID:     "old_summary_uuid2",
+				Type:     "*data",
+				Initial:  0,
+				Value:    0,
+				Disabled: false,
+			},
+		},
+		AllowNegative: false,
+		Disabled:      false,
+	}
+	as.SetInitialValue(asOld)
+	if !reflect.DeepEqual(as, expAs) {
+		t.Errorf("expected %+v ,received %+v", utils.ToJSON(expAs), utils.ToJSON(as))
 	}
 }

@@ -2312,3 +2312,41 @@ func TestFilterGreaterThanOnObjectDP(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestWeightFromDynamics(t *testing.T) {
+	dWs := []*utils.DynamicWeight{
+		{
+			FilterIDs: []string{"field1", "field2", "field2"},
+			Weight:    22.1,
+		},
+		{
+			FilterIDs: []string{"field1", "ffield2", "field2"},
+			Weight:    12.1,
+		},
+		{
+			FilterIDs: []string{"field1", "field2", "field2"},
+			Weight:    19.1,
+		},
+		{
+			FilterIDs: []string{"field1", "field2", "field2"},
+			Weight:    10.2,
+		},
+	}
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dmSPP := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	cfg.RouteSCfg().StringIndexedFields = nil
+	cfg.RouteSCfg().PrefixIndexedFields = nil
+
+	fltrS := &FilterS{
+		cfg:     cfg,
+		dm:      dmSPP,
+		connMgr: nil,
+	}
+	ev := &ExportRequest{}
+
+	if _, err := WeightFromDynamics(dWs, fltrS, "cgrates.org", ev); err == nil {
+		t.Error(err)
+	}
+
+}

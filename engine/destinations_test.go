@@ -157,3 +157,15 @@ func BenchmarkDestinationStorageStoreRestore(b *testing.B) {
 		dm.GetDestination(nationale.Id, false, true, utils.NonTransactional)
 	}
 }
+
+func TestDynamicDPFieldAsInterface(t *testing.T) {
+
+	dDP := newDynamicDP(nil, nil, nil, "cgrates.org", &Account{})
+
+	if _, err := dDP.fieldAsInterface([]string{"field"}); err == nil {
+		t.Error(err)
+	}
+	if _, err := dDP.fieldAsInterface([]string{utils.MetaAccounts, "field1", "field2"}); err == nil {
+		t.Error(err)
+	}
+}
