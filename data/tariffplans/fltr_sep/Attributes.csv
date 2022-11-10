@@ -1,0 +1,2 @@
+#Tenant,ID,Contexts,FilterIDs,ActivationInterval,AttributeFilterIDs,Path,Type,Value,Blocker,Weight
+cgrates.org,ATTR_FLTR_TEST,*any,*string:~*req.Account:1001|1002|1003|1101;*prefix:~*req.Account:10,,,*req.TestField,*constant,testValue,false,20
