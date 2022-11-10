@@ -1016,3 +1016,648 @@ func TestRouteServiceV1GetRoutes(t *testing.T) {
 	}
 
 }
+
+func TestRouteServiceResourceUsage(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dmSPP := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	cfg.RouteSCfg().StringIndexedFields = nil
+	cfg.RouteSCfg().PrefixIndexedFields = nil
+	rpS := NewRouteService(dmSPP, &FilterS{dm: dmSPP, cfg: cfg, connMgr: nil}, cfg, nil)
+	if _, err := rpS.resourceUsage([]string{"res1", "res2", "res3"}, "cgrates.org"); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestRouteServiceStatMetricsForLoadDistribution(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dmSPP := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	cfg.RouteSCfg().StringIndexedFields = nil
+	cfg.RouteSCfg().PrefixIndexedFields = nil
+	rpS := NewRouteService(dmSPP, &FilterS{dm: dmSPP, cfg: cfg, connMgr: nil}, cfg, nil)
+	if _, err := rpS.statMetricsForLoadDistribution([]string{"res1", "res2", "res3"}, "cgrates.org"); err != nil {
+		t.Error(err)
+	}
+
+}
+
+func TestRouteServiceSortRoutes(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dmSPP := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	cfg.RouteSCfg().StringIndexedFields = nil
+	cfg.RouteSCfg().PrefixIndexedFields = nil
+	rpS := NewRouteService(dmSPP, &FilterS{dm: dmSPP, cfg: cfg, connMgr: nil}, cfg, nil)
+	lcs := &LeastCostSorter{
+		sorting: "sort",
+		rS:      rpS,
+	}
+	prflID := "CGREvent1"
+	routes := map[string]*Route{
+		"route1": {
+			ID:              "id",
+			FilterIDs:       []string{"filterid1", "filterid2", "filterid3"},
+			AccountIDs:      []string{"acc_id1", "acc_id2", "acc_id3"},
+			RatingPlanIDs:   []string{"rate1", "rate2", "rate3", "rate4"},
+			ResourceIDs:     []string{"rsc1", "rsc2", "rsc3"},
+			StatIDs:         []string{"stat1", "stat2", "stat3"},
+			Weight:          2.3,
+			Blocker:         true,
+			RouteParameters: "route",
+			cacheRoute: map[string]interface{}{
+				"*ratio": "ratio",
+			},
+			lazyCheckRules: []*FilterRule{
+				{
+					Type:    "*string",
+					Element: "elem",
+					Values:  []string{"val1", "val2", "val3"},
+					rsrValues: config.RSRParsers{
+						&config.RSRParser{Rules: "public"},
+						{Rules: "private"},
+					}},
+				{
+					Type:    "*string",
+					Element: "elem",
+					Values:  []string{"val1", "val2", "val3"},
+					rsrValues: config.RSRParsers{
+						&config.RSRParser{Rules: "public"},
+						{Rules: "private"},
+					},
+				},
+			},
+		},
+		"route2": {
+			ID:              "id",
+			FilterIDs:       []string{"filterid1", "filterid2", "filterid3"},
+			AccountIDs:      []string{"acc_id1", "acc_id2", "acc_id3"},
+			RatingPlanIDs:   []string{"rate1", "rate2", "rate3", "rate4"},
+			ResourceIDs:     []string{"rsc1", "rsc2", "rsc3"},
+			StatIDs:         []string{"stat1", "stat2", "stat3"},
+			Weight:          2.3,
+			Blocker:         true,
+			RouteParameters: "route",
+			cacheRoute: map[string]interface{}{
+				"*ratio": "ratio",
+			},
+			lazyCheckRules: []*FilterRule{
+				{
+					Type:    "*string",
+					Element: "elem",
+					Values:  []string{"val1", "val2", "val3"},
+					rsrValues: config.RSRParsers{
+						&config.RSRParser{Rules: "public"},
+						{Rules: "private"},
+					}},
+				{
+					Type:    "*string",
+					Element: "elem",
+					Values:  []string{"val1", "val2", "val3"},
+					rsrValues: config.RSRParsers{
+						&config.RSRParser{Rules: "public"},
+						{Rules: "private"},
+					},
+				},
+			},
+		},
+	}
+	ev := &utils.CGREvent{ //matching RouteProfile1
+		Tenant: "cgrates.org",
+		ID:     "utils.CGREvent1",
+		Event: map[string]interface{}{
+			"Route":          "RouteProfile1",
+			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
+			"UsageInterval":  "1s",
+			"PddInterval":    "1s",
+			utils.Weight:     "20.0",
+		},
+		APIOpts: map[string]interface{}{},
+	}
+	extraOpts := &optsGetRoutes{
+		ignoreErrors: true,
+		maxCost:      12.1,
+		paginator: &utils.Paginator{
+			Limit:  utils.IntPointer(4),
+			Offset: utils.IntPointer(2),
+		},
+		sortingParameters: []string{"param1", "param2"},
+	}
+	expSr := &SortedRoutes{
+		ProfileID: "CGREvent1",
+		Sorting:   "sort",
+		Routes:    []*SortedRoute{},
+	}
+	if val, err := lcs.SortRoutes(prflID, routes, ev, extraOpts); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(val, expSr) {
+		t.Errorf("recived %+v", utils.ToJSON(val))
+	}
+
+}
+
+func TestRDSRSortRoutes(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dmSPP := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	cfg.RouteSCfg().StringIndexedFields = nil
+	cfg.RouteSCfg().PrefixIndexedFields = nil
+	rpS := NewRouteService(dmSPP, &FilterS{dm: dmSPP, cfg: cfg, connMgr: nil}, cfg, nil)
+	rds := &ResourceDescendentSorter{
+		sorting: "desc",
+		rS:      rpS,
+	}
+	prflID := "CGREvent1"
+	routes := map[string]*Route{
+		"sorted_route1": {
+			ID:              "id",
+			FilterIDs:       []string{"filterid1", "filterid2", "filterid3"},
+			AccountIDs:      []string{"acc_id1", "acc_id2", "acc_id3"},
+			RatingPlanIDs:   []string{"rate1", "rate2", "rate3", "rate4"},
+			ResourceIDs:     []string{"rsc1", "rsc2", "rsc3"},
+			StatIDs:         []string{"stat1", "stat2", "stat3"},
+			Weight:          2.3,
+			Blocker:         true,
+			RouteParameters: "route",
+			cacheRoute: map[string]interface{}{
+				"*ratio": "ratio",
+			},
+			lazyCheckRules: []*FilterRule{
+				{
+					Type:    "*string",
+					Element: "elem",
+					Values:  []string{"val1", "val2", "val3"},
+					rsrValues: config.RSRParsers{
+						&config.RSRParser{Rules: "public"},
+						{Rules: "private"},
+					}},
+				{
+					Type:    "*string",
+					Element: "elem",
+					Values:  []string{"val1", "val2", "val3"},
+					rsrValues: config.RSRParsers{
+						&config.RSRParser{Rules: "public"},
+						{Rules: "private"},
+					},
+				},
+			},
+		},
+		"sorted_route2": {
+			ID:              "id",
+			FilterIDs:       []string{"filterid1", "filterid2", "filterid3"},
+			AccountIDs:      []string{"acc_id1", "acc_id2", "acc_id3"},
+			RatingPlanIDs:   []string{"rate1", "rate2", "rate3", "rate4"},
+			ResourceIDs:     []string{"rsc1", "rsc2", "rsc3"},
+			StatIDs:         []string{"stat1", "stat2", "stat3"},
+			Weight:          2.3,
+			Blocker:         true,
+			RouteParameters: "route",
+			cacheRoute: map[string]interface{}{
+				"*ratio": "ratio",
+			},
+			lazyCheckRules: []*FilterRule{
+				{
+					Type:    "*string",
+					Element: "elem",
+					Values:  []string{"val1", "val2", "val3"},
+					rsrValues: config.RSRParsers{
+						&config.RSRParser{Rules: "public"},
+						{Rules: "private"},
+					}},
+				{
+					Type:    "*string",
+					Element: "elem",
+					Values:  []string{"val1", "val2", "val3"},
+					rsrValues: config.RSRParsers{
+						&config.RSRParser{Rules: "public"},
+						{Rules: "private"},
+					},
+				},
+			},
+		},
+	}
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "utils.CGREvent1",
+		Event:  map[string]interface{}{},
+		APIOpts: map[string]interface{}{
+			utils.OptsRoutesProfileCount: 3,
+		},
+	}
+	extraOpts := &optsGetRoutes{
+		ignoreErrors: true,
+		maxCost:      12.1,
+		paginator: &utils.Paginator{
+			Limit:  utils.IntPointer(4),
+			Offset: utils.IntPointer(2),
+		},
+		sortingParameters: []string{"param1", "param2"},
+	}
+	if _, err := rds.SortRoutes(prflID, routes, ev, extraOpts); err != nil {
+		t.Error(err)
+	}
+}
+func TestQosRSortRoutes(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dmSPP := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	cfg.RouteSCfg().StringIndexedFields = nil
+	cfg.RouteSCfg().PrefixIndexedFields = nil
+	rpS := NewRouteService(dmSPP, &FilterS{dm: dmSPP, cfg: cfg, connMgr: nil}, cfg, nil)
+	qos := &QOSRouteSorter{
+		sorting: "desc",
+		rS:      rpS,
+	}
+	prflID := "CGREvent1"
+	routes := map[string]*Route{
+		"sorted_route1": {
+			ID:              "id",
+			FilterIDs:       []string{"filterid1", "filterid2", "filterid3"},
+			AccountIDs:      []string{"acc_id1", "acc_id2", "acc_id3"},
+			RatingPlanIDs:   []string{"rate1", "rate2", "rate3", "rate4"},
+			ResourceIDs:     []string{"rsc1", "rsc2", "rsc3"},
+			StatIDs:         []string{"stat1", "stat2", "stat3"},
+			Weight:          2.3,
+			Blocker:         true,
+			RouteParameters: "route",
+			cacheRoute: map[string]interface{}{
+				"*ratio": "ratio",
+			},
+			lazyCheckRules: []*FilterRule{
+				{
+					Type:    "*string",
+					Element: "elem",
+					Values:  []string{"val1", "val2", "val3"},
+					rsrValues: config.RSRParsers{
+						&config.RSRParser{Rules: "public"},
+						{Rules: "private"},
+					}},
+				{
+					Type:    "*string",
+					Element: "elem",
+					Values:  []string{"val1", "val2", "val3"},
+					rsrValues: config.RSRParsers{
+						&config.RSRParser{Rules: "public"},
+						{Rules: "private"},
+					},
+				},
+			},
+		},
+		"sorted_route2": {
+			ID:              "id",
+			FilterIDs:       []string{"filterid1", "filterid2", "filterid3"},
+			AccountIDs:      []string{"acc_id1", "acc_id2", "acc_id3"},
+			RatingPlanIDs:   []string{"rate1", "rate2", "rate3", "rate4"},
+			ResourceIDs:     []string{"rsc1", "rsc2", "rsc3"},
+			StatIDs:         []string{"stat1", "stat2", "stat3"},
+			Weight:          2.3,
+			Blocker:         true,
+			RouteParameters: "route",
+			cacheRoute: map[string]interface{}{
+				"*ratio": "ratio",
+			},
+			lazyCheckRules: []*FilterRule{
+				{
+					Type:    "*string",
+					Element: "elem",
+					Values:  []string{"val1", "val2", "val3"},
+					rsrValues: config.RSRParsers{
+						&config.RSRParser{Rules: "public"},
+						{Rules: "private"},
+					}},
+				{
+					Type:    "*string",
+					Element: "elem",
+					Values:  []string{"val1", "val2", "val3"},
+					rsrValues: config.RSRParsers{
+						&config.RSRParser{Rules: "public"},
+						{Rules: "private"},
+					},
+				},
+			},
+		},
+	}
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "utils.CGREvent1",
+		Event:  map[string]interface{}{},
+		APIOpts: map[string]interface{}{
+			utils.OptsRoutesProfileCount: 3,
+		},
+	}
+	extraOpts := &optsGetRoutes{
+		ignoreErrors: true,
+		maxCost:      12.1,
+		paginator: &utils.Paginator{
+			Limit:  utils.IntPointer(4),
+			Offset: utils.IntPointer(2),
+		},
+		sortingParameters: []string{"param1", "param2"},
+	}
+	if _, err := qos.SortRoutes(prflID, routes, ev, extraOpts); err != nil {
+		t.Error(err)
+	}
+}
+func TestReaSortRoutes(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dmSPP := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	cfg.RouteSCfg().StringIndexedFields = nil
+	cfg.RouteSCfg().PrefixIndexedFields = nil
+	rpS := NewRouteService(dmSPP, &FilterS{dm: dmSPP, cfg: cfg, connMgr: nil}, cfg, nil)
+	rea := &ResourceAscendentSorter{
+		sorting: "desc",
+		rS:      rpS,
+	}
+	prflID := "CGREvent1"
+	routes := map[string]*Route{
+		"sorted_route1": {
+			ID:              "id",
+			FilterIDs:       []string{"filterid1", "filterid2", "filterid3"},
+			AccountIDs:      []string{"acc_id1", "acc_id2", "acc_id3"},
+			RatingPlanIDs:   []string{"rate1", "rate2", "rate3", "rate4"},
+			ResourceIDs:     []string{"rsc1", "rsc2", "rsc3"},
+			StatIDs:         []string{"stat1", "stat2", "stat3"},
+			Weight:          2.3,
+			Blocker:         true,
+			RouteParameters: "route",
+			cacheRoute: map[string]interface{}{
+				"*ratio": "ratio",
+			},
+			lazyCheckRules: []*FilterRule{
+				{
+					Type:    "*string",
+					Element: "elem",
+					Values:  []string{"val1", "val2", "val3"},
+					rsrValues: config.RSRParsers{
+						&config.RSRParser{Rules: "public"},
+						{Rules: "private"},
+					}},
+				{
+					Type:    "*string",
+					Element: "elem",
+					Values:  []string{"val1", "val2", "val3"},
+					rsrValues: config.RSRParsers{
+						&config.RSRParser{Rules: "public"},
+						{Rules: "private"},
+					},
+				},
+			},
+		},
+		"sorted_route2": {
+			ID:              "id",
+			FilterIDs:       []string{"filterid1", "filterid2", "filterid3"},
+			AccountIDs:      []string{"acc_id1", "acc_id2", "acc_id3"},
+			RatingPlanIDs:   []string{"rate1", "rate2", "rate3", "rate4"},
+			ResourceIDs:     []string{"rsc1", "rsc2", "rsc3"},
+			StatIDs:         []string{"stat1", "stat2", "stat3"},
+			Weight:          2.3,
+			Blocker:         true,
+			RouteParameters: "route",
+			cacheRoute: map[string]interface{}{
+				"*ratio": "ratio",
+			},
+			lazyCheckRules: []*FilterRule{
+				{
+					Type:    "*string",
+					Element: "elem",
+					Values:  []string{"val1", "val2", "val3"},
+					rsrValues: config.RSRParsers{
+						&config.RSRParser{Rules: "public"},
+						{Rules: "private"},
+					}},
+				{
+					Type:    "*string",
+					Element: "elem",
+					Values:  []string{"val1", "val2", "val3"},
+					rsrValues: config.RSRParsers{
+						&config.RSRParser{Rules: "public"},
+						{Rules: "private"},
+					},
+				},
+			},
+		},
+	}
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "utils.CGREvent1",
+		Event:  map[string]interface{}{},
+		APIOpts: map[string]interface{}{
+			utils.OptsRoutesProfileCount: 3,
+		},
+	}
+	extraOpts := &optsGetRoutes{
+		ignoreErrors: true,
+		maxCost:      12.1,
+		paginator: &utils.Paginator{
+			Limit:  utils.IntPointer(4),
+			Offset: utils.IntPointer(2),
+		},
+		sortingParameters: []string{"param1", "param2"},
+	}
+	if _, err := rea.SortRoutes(prflID, routes, ev, extraOpts); err != nil {
+		t.Error(err)
+	}
+}
+func TestHCRSortRoutes(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dmSPP := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	cfg.RouteSCfg().StringIndexedFields = nil
+	cfg.RouteSCfg().PrefixIndexedFields = nil
+	rpS := NewRouteService(dmSPP, &FilterS{dm: dmSPP, cfg: cfg, connMgr: nil}, cfg, nil)
+	hcr := &HightCostSorter{
+		sorting: "desc",
+		rS:      rpS,
+	}
+	prflID := "CGREvent1"
+	routes := map[string]*Route{
+		"sorted_route1": {
+			ID:              "id",
+			FilterIDs:       []string{"filterid1", "filterid2", "filterid3"},
+			AccountIDs:      []string{"acc_id1", "acc_id2", "acc_id3"},
+			RatingPlanIDs:   []string{"rate1", "rate2", "rate3", "rate4"},
+			ResourceIDs:     []string{"rsc1", "rsc2", "rsc3"},
+			StatIDs:         []string{"stat1", "stat2", "stat3"},
+			Weight:          2.3,
+			Blocker:         true,
+			RouteParameters: "route",
+			cacheRoute: map[string]interface{}{
+				"*ratio": "ratio",
+			},
+			lazyCheckRules: []*FilterRule{
+				{
+					Type:    "*string",
+					Element: "elem",
+					Values:  []string{"val1", "val2", "val3"},
+					rsrValues: config.RSRParsers{
+						&config.RSRParser{Rules: "public"},
+						{Rules: "private"},
+					}},
+				{
+					Type:    "*string",
+					Element: "elem",
+					Values:  []string{"val1", "val2", "val3"},
+					rsrValues: config.RSRParsers{
+						&config.RSRParser{Rules: "public"},
+						{Rules: "private"},
+					},
+				},
+			},
+		},
+		"sorted_route2": {
+			ID:              "id",
+			FilterIDs:       []string{"filterid1", "filterid2", "filterid3"},
+			AccountIDs:      []string{"acc_id1", "acc_id2", "acc_id3"},
+			RatingPlanIDs:   []string{"rate1", "rate2", "rate3", "rate4"},
+			ResourceIDs:     []string{"rsc1", "rsc2", "rsc3"},
+			StatIDs:         []string{"stat1", "stat2", "stat3"},
+			Weight:          2.3,
+			Blocker:         true,
+			RouteParameters: "route",
+			cacheRoute: map[string]interface{}{
+				"*ratio": "ratio",
+			},
+			lazyCheckRules: []*FilterRule{
+				{
+					Type:    "*string",
+					Element: "elem",
+					Values:  []string{"val1", "val2", "val3"},
+					rsrValues: config.RSRParsers{
+						&config.RSRParser{Rules: "public"},
+						{Rules: "private"},
+					}},
+				{
+					Type:    "*string",
+					Element: "elem",
+					Values:  []string{"val1", "val2", "val3"},
+					rsrValues: config.RSRParsers{
+						&config.RSRParser{Rules: "public"},
+						{Rules: "private"},
+					},
+				},
+			},
+		},
+	}
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "utils.CGREvent1",
+		Event:  map[string]interface{}{},
+		APIOpts: map[string]interface{}{
+			utils.OptsRoutesProfileCount: 3,
+		},
+	}
+	extraOpts := &optsGetRoutes{
+		ignoreErrors: true,
+		maxCost:      12.1,
+		paginator: &utils.Paginator{
+			Limit:  utils.IntPointer(4),
+			Offset: utils.IntPointer(2),
+		},
+		sortingParameters: []string{"param1", "param2"},
+	}
+	if _, err := hcr.SortRoutes(prflID, routes, ev, extraOpts); err != nil {
+		t.Error(err)
+	}
+}
+func TestLoadDistributionSorterSortRoutes(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dmSPP := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	cfg.RouteSCfg().StringIndexedFields = nil
+	cfg.RouteSCfg().PrefixIndexedFields = nil
+	rpS := NewRouteService(dmSPP, &FilterS{dm: dmSPP, cfg: cfg, connMgr: nil}, cfg, nil)
+	lds := &LoadDistributionSorter{
+		sorting: "desc",
+		rS:      rpS,
+	}
+	prflID := "CGREvent1"
+	routes := map[string]*Route{
+		"sorted_route1": {
+			ID:              "id",
+			FilterIDs:       []string{"filterid1", "filterid2", "filterid3"},
+			AccountIDs:      []string{"acc_id1", "acc_id2", "acc_id3"},
+			RatingPlanIDs:   []string{"rate1", "rate2", "rate3", "rate4"},
+			ResourceIDs:     []string{"rsc1", "rsc2", "rsc3"},
+			StatIDs:         []string{"stat1", "stat2", "stat3"},
+			Weight:          2.3,
+			Blocker:         true,
+			RouteParameters: "route",
+			cacheRoute: map[string]interface{}{
+				"*ratio": "ratio",
+			},
+			lazyCheckRules: []*FilterRule{
+				{
+					Type:    "*string",
+					Element: "elem",
+					Values:  []string{"val1", "val2", "val3"},
+					rsrValues: config.RSRParsers{
+						&config.RSRParser{Rules: "public"},
+						{Rules: "private"},
+					}},
+				{
+					Type:    "*string",
+					Element: "elem",
+					Values:  []string{"val1", "val2", "val3"},
+					rsrValues: config.RSRParsers{
+						&config.RSRParser{Rules: "public"},
+						{Rules: "private"},
+					},
+				},
+			},
+		},
+		"sorted_route2": {
+			ID:              "id",
+			FilterIDs:       []string{"filterid1", "filterid2", "filterid3"},
+			AccountIDs:      []string{"acc_id1", "acc_id2", "acc_id3"},
+			RatingPlanIDs:   []string{"rate1", "rate2", "rate3", "rate4"},
+			ResourceIDs:     []string{"rsc1", "rsc2", "rsc3"},
+			StatIDs:         []string{"stat1", "stat2", "stat3"},
+			Weight:          2.3,
+			Blocker:         true,
+			RouteParameters: "route",
+			cacheRoute: map[string]interface{}{
+				"*ratio": "ratio",
+			},
+			lazyCheckRules: []*FilterRule{
+				{
+					Type:    "*string",
+					Element: "elem",
+					Values:  []string{"val1", "val2", "val3"},
+					rsrValues: config.RSRParsers{
+						&config.RSRParser{Rules: "public"},
+						{Rules: "private"},
+					}},
+				{
+					Type:    "*string",
+					Element: "elem",
+					Values:  []string{"val1", "val2", "val3"},
+					rsrValues: config.RSRParsers{
+						&config.RSRParser{Rules: "public"},
+						{Rules: "private"},
+					},
+				},
+			},
+		},
+	}
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "utils.CGREvent1",
+		Event:  map[string]interface{}{},
+		APIOpts: map[string]interface{}{
+			utils.OptsRoutesProfileCount: 3,
+		},
+	}
+	extraOpts := &optsGetRoutes{
+		ignoreErrors: true,
+		maxCost:      12.1,
+		paginator: &utils.Paginator{
+			Limit:  utils.IntPointer(4),
+			Offset: utils.IntPointer(2),
+		},
+		sortingParameters: []string{"param1", "param2"},
+	}
+	if _, err := lds.SortRoutes(prflID, routes, ev, extraOpts); err != nil {
+		t.Error(err)
+	}
+}

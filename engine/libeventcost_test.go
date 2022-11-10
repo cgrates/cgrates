@@ -1016,3 +1016,51 @@ func TestAccountingClone(t *testing.T) {
 		t.Errorf("Expecting 1001 , received: %+v", a2)
 	}
 }
+
+func TestChargingIncrementFieldAsInterface(t *testing.T) {
+	cIt := &ChargingIncrement{
+		Usage:          1 * time.Minute,
+		Cost:           19,
+		AccountingID:   "account_id",
+		CompressFactor: 1,
+	}
+	if _, err := cIt.FieldAsInterface([]string{utils.Usage, utils.Cost}); err == nil || err != utils.ErrNotFound {
+		t.Error(err)
+	} else if _, err = cIt.FieldAsInterface([]string{"default"}); err == nil {
+		t.Error(err)
+	} else if val, err := cIt.FieldAsInterface([]string{utils.Usage}); err != nil && val != cIt.Usage {
+		t.Error(err)
+	} else if val, err := cIt.FieldAsInterface([]string{utils.Cost}); err != nil && val != cIt.Cost {
+		t.Error(err)
+	} else if val, err := cIt.FieldAsInterface([]string{utils.AccountingID}); err != nil && val != cIt.AccountingID {
+		t.Error(err)
+	} else if val, err := cIt.FieldAsInterface([]string{utils.CompressFactor}); err != nil && val != cIt.CompressFactor {
+		t.Error(err)
+	}
+}
+
+func TestBalanceChargeFieldAsInterface(t *testing.T) {
+	bc := &BalanceCharge{
+		AccountID:     "ACC_ID",
+		BalanceUUID:   "BAL_UUID",
+		RatingID:      "Rating_ID",
+		Units:         10.0,
+		ExtraChargeID: "extra",
+	}
+	if _, err = bc.FieldAsInterface([]string{utils.AccountID, utils.BalanceUUID}); err == nil || err != utils.ErrNotFound {
+		t.Error(err)
+	} else if _, err = bc.FieldAsInterface([]string{"default"}); err == nil {
+		t.Error(err)
+	} else if val, err := bc.FieldAsInterface([]string{utils.AccountID}); err != nil && val != bc.AccountID {
+		t.Error(err)
+	} else if val, err := bc.FieldAsInterface([]string{utils.BalanceUUID}); err != nil && val != bc.BalanceUUID {
+		t.Error(err)
+	} else if val, err := bc.FieldAsInterface([]string{utils.RatingID}); err != nil && val != bc.RatingID {
+		t.Error(err)
+	} else if val, err := bc.FieldAsInterface([]string{utils.Units}); err != nil && val != bc.Units {
+		t.Error(err)
+	} else if val, err := bc.FieldAsInterface([]string{utils.ExtraChargeID}); err != nil && val != bc.Units {
+		t.Error(err)
+	}
+
+}

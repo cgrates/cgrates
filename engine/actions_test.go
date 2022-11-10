@@ -2818,15 +2818,48 @@ func BenchmarkUUID(b *testing.B) {
 }
 
 func TestResetAccountCDR(t *testing.T) {
-	var ub *Account
-	action := &Action{}
-	fltrS := &FilterS{}
-	acts := Actions{}
-	if err := resetAccountCDR(ub, action, acts, fltrS, nil); err == nil {
-		t.Error(err)
+	var extraData interface{}
+	acc := &Account{
+		ID: "cgrates.org:1001",
+		BalanceMap: map[string]Balances{
+			utils.MetaMonetary: {
+				&Balance{Value: 20},
+			},
+		},
+		UnitCounters: UnitCounters{
+			utils.MetaMonetary: []*UnitCounter{
+				{
+					Counters: CounterFilters{
+						&CounterFilter{Value: 1},
+					},
+				},
+			},
+		},
 	}
-	ub = &Account{}
-	if err := resetAccountCDR(ub, action, acts, fltrS, nil); err == nil {
+	a := &Action{
+		Id:              "CDRLog1",
+		ActionType:      utils.CDRLog,
+		ExtraParameters: "{\"BalanceID\":\"~*acnt.BalanceID\",\"ActionID\":\"~*act.ActionID\",\"BalanceValue\":\"~*acnt.BalanceValue\"}",
+		Weight:          50,
+	}
+	acs := Actions{
+		a,
+		&Action{
+			Id:         "CdrDebit",
+			ActionType: "*debit",
+			Balance: &BalanceFilter{
+				ID:     utils.StringPointer(utils.MetaDefault),
+				Value:  &utils.ValueFormula{Static: 9.95},
+				Type:   utils.StringPointer(utils.MetaMonetary),
+				Weight: utils.Float64Pointer(0),
+			},
+			Weight:       float64(90),
+			balanceValue: 10,
+		},
+	}
+	if err := resetAccountCDR(nil, a, acs, nil, extraData); err == nil {
+		t.Error(err)
+	} else if err = resetAccountCDR(acc, a, acs, nil, extraData); err == nil {
 		t.Error(err)
 	}
 }
