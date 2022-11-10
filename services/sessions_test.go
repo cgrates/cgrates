@@ -31,7 +31,7 @@ import (
 	"github.com/cgrates/rpcclient"
 )
 
-//TestSessionSCoverage for cover testing
+// TestSessionSCoverage for cover testing
 func TestSessionSCoverage(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.ChargerSCfg().Enabled = true

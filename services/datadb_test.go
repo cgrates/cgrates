@@ -28,7 +28,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-//TestDataDBCoverage for cover testing
+// TestDataDBCoverage for cover testing
 func TestDataDBCoverage(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	//chS := engine.NewCacheS(cfg, nil, nil)

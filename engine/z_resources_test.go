@@ -1335,7 +1335,7 @@ func TestResourceMatchingResourcesForEvent(t *testing.T) {
 	}
 }
 
-//UsageTTL 0 in ResourceProfile and give 10s duration
+// UsageTTL 0 in ResourceProfile and give 10s duration
 func TestResourceUsageTTLCase1(t *testing.T) {
 	resprf := &ResourceProfile{
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
@@ -1435,7 +1435,7 @@ func TestResourceUsageTTLCase1(t *testing.T) {
 	}
 }
 
-//UsageTTL 5s in ResourceProfile and give nil duration
+// UsageTTL 5s in ResourceProfile and give nil duration
 func TestResourceUsageTTLCase2(t *testing.T) {
 	resprf := []*ResourceProfile{
 		{
@@ -1641,7 +1641,7 @@ func TestResourceUsageTTLCase2(t *testing.T) {
 	}
 }
 
-//UsageTTL 5s in ResourceProfile and give 0 duration
+// UsageTTL 5s in ResourceProfile and give 0 duration
 func TestResourceUsageTTLCase3(t *testing.T) {
 	resprf := &ResourceProfile{
 		Tenant:            config.CgrConfig().GeneralCfg().DefaultTenant,
@@ -1734,7 +1734,7 @@ func TestResourceUsageTTLCase3(t *testing.T) {
 	}
 }
 
-//UsageTTL 5s in ResourceProfile and give 10s duration
+// UsageTTL 5s in ResourceProfile and give 10s duration
 func TestResourceUsageTTLCase4(t *testing.T) {
 	resprf := &ResourceProfile{
 		Tenant:            config.CgrConfig().GeneralCfg().DefaultTenant,

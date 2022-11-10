@@ -28,7 +28,7 @@ import (
 	"github.com/cgrates/rpcclient"
 )
 
-//TestCdrsCoverage for cover testing
+// TestCdrsCoverage for cover testing
 func TestCdrsCoverage(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	chS := engine.NewCacheS(cfg, nil, nil)

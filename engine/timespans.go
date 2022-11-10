@@ -417,7 +417,7 @@ func (ts *TimeSpan) GetDuration() time.Duration {
 	return ts.TimeEnd.Sub(ts.TimeStart)
 }
 
-//Returns the duration of a unitary timespan in a compressed set
+// Returns the duration of a unitary timespan in a compressed set
 func (ts *TimeSpan) GetUnitDuration() time.Duration {
 	return time.Duration(int(ts.TimeEnd.Sub(ts.TimeStart)) / ts.GetCompressFactor())
 }

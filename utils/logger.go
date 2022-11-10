@@ -97,7 +97,7 @@ func (sl *StdLogger) Write(p []byte) (n int, err error) {
 	return 1, nil
 }
 
-//SetSyslog sets the logger for the server
+// SetSyslog sets the logger for the server
 func (sl *StdLogger) SetSyslog(l *syslog.Writer) {
 	sl.syslog = l
 }

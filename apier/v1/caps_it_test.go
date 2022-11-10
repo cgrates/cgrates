@@ -65,7 +65,7 @@ var (
 	capsLastCfgDir string
 )
 
-//Test start here
+// Test start here
 func TestCapsBusyJSON(t *testing.T) {
 	capsConfigDIR = "caps_busy"
 	for _, stest := range sTestsCaps {

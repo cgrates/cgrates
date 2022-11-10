@@ -60,7 +60,7 @@ var sTestsTPRoute = []func(t *testing.T){
 	testTPRouteKillEngine,
 }
 
-//Test start here
+// Test start here
 func TestTPRouteIT(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:

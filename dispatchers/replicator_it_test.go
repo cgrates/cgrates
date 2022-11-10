@@ -56,7 +56,7 @@ var sTestsDspRpl = []func(t *testing.T){
 	testDspRplDestination,
 }
 
-//Test start here
+// Test start here
 func TestDspReplicator(t *testing.T) {
 	var config1, config2, config3 string
 	switch *dbType {
@@ -1365,7 +1365,7 @@ func testDspRplRatingProfile(t *testing.T) {
 	}
 }
 
-//Destination
+// Destination
 func testDspRplDestination(t *testing.T) {
 	// Set Destination
 	var replyStr string

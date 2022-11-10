@@ -54,7 +54,7 @@ var sTestsSchedFiltered = []func(t *testing.T){
 	testSchedStopEngine,
 }
 
-//TestSchedWithoutFilters will execute action for all accounts
+// TestSchedWithoutFilters will execute action for all accounts
 func TestSchedWithoutFilters(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
@@ -74,7 +74,7 @@ func TestSchedWithoutFilters(t *testing.T) {
 	}
 }
 
-//TestSchedWithFiltersSingleAccount will execute actions only for account 1001
+// TestSchedWithFiltersSingleAccount will execute actions only for account 1001
 func TestSchedWithFiltersSingleAccount(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
@@ -93,7 +93,7 @@ func TestSchedWithFiltersSingleAccount(t *testing.T) {
 	}
 }
 
-//TestSchedWithFilters2 will execute actions for accounts 1002 and 1003 ( 1001 will be skiped )
+// TestSchedWithFilters2 will execute actions for accounts 1002 and 1003 ( 1001 will be skiped )
 func TestSchedWithFilters2(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:

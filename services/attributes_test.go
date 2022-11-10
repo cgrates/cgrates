@@ -29,7 +29,7 @@ import (
 	"github.com/cgrates/rpcclient"
 )
 
-//TestAttributeSCoverage for cover testing
+// TestAttributeSCoverage for cover testing
 func TestAttributeSCoverage(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	shdChan := utils.NewSyncedChan()

@@ -59,7 +59,7 @@ var sTestsTPThreshold = []func(t *testing.T){
 	testTPThreholdKillEngine,
 }
 
-//Test start here
+// Test start here
 func TestTPThresholdIT(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:

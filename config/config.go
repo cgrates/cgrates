@@ -1756,7 +1756,7 @@ func (cfg *CGRConfig) V1SetConfig(args *SetConfigArgs, reply *string) (err error
 	return
 }
 
-//V1GetConfigAsJSON will retrieve from CGRConfig a section as a string
+// V1GetConfigAsJSON will retrieve from CGRConfig a section as a string
 func (cfg *CGRConfig) V1GetConfigAsJSON(args *SectionWithAPIOpts, reply *string) (err error) {
 	args.Section = utils.FirstNonEmpty(args.Section, utils.MetaAll)
 	cfg.cacheDPMux.RLock()

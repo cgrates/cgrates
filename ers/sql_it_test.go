@@ -698,16 +698,16 @@ func TestErsSqlPostCDRS(t *testing.T) {
 	logger.Default = tmp
 }
 
-// type mockDialector interface {
-// 	Name() string
-// 	Initialize(*gorm.DB) error
-// 	Migrator(db *gorm.DB) gorm.Migrator
-// 	DataTypeOf(*schema.Field) string
-// 	DefaultValueOf(*schema.Field) clause.Expression
-// 	BindVarTo(writer clause.Writer, stmt *Statement, v interface{})
-// 	QuoteTo(clause.Writer, string)
-// 	Explain(sql string, vars ...interface{}) string
-// }
+//	type mockDialector interface {
+//		Name() string
+//		Initialize(*gorm.DB) error
+//		Migrator(db *gorm.DB) gorm.Migrator
+//		DataTypeOf(*schema.Field) string
+//		DefaultValueOf(*schema.Field) clause.Expression
+//		BindVarTo(writer clause.Writer, stmt *Statement, v interface{})
+//		QuoteTo(clause.Writer, string)
+//		Explain(sql string, vars ...interface{}) string
+//	}
 type mockDialect struct{}
 
 func (mockDialect) Name() string                                                        { return "" }

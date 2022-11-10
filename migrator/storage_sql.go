@@ -79,7 +79,7 @@ func (mgSQL *migratorSQL) setV1CDR(v1Cdr *v1Cdrs) (err error) {
 	return nil
 }
 
-//rem
+// rem
 func (mgSQL *migratorSQL) remV1CDRs(v1Cdr *v1Cdrs) (err error) {
 	tx := mgSQL.sqlStorage.ExportGormDB().Begin()
 	var rmParam *v1Cdrs

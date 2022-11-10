@@ -84,7 +84,7 @@ var sTestsCalls = []func(t *testing.T){
 	testCallStopFS,
 }
 
-//Test start here
+// Test start here
 func TestFreeswitchCalls(t *testing.T) {
 	optConf = utils.Freeswitch
 	for _, stest := range sTestsCalls {

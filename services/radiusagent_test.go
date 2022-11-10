@@ -29,7 +29,7 @@ import (
 	"github.com/cgrates/rpcclient"
 )
 
-//TestLoaderSCoverage for cover testing
+// TestLoaderSCoverage for cover testing
 func TestRadiusAgentCoverage(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.SessionSCfg().Enabled = true

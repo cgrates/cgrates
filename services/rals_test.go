@@ -30,7 +30,7 @@ import (
 	"github.com/cgrates/rpcclient"
 )
 
-//TestRalsCoverage for cover testing
+// TestRalsCoverage for cover testing
 func TestRalsCoverage(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	filterSChan := make(chan *engine.FilterS, 1)

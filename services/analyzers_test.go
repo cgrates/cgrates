@@ -31,7 +31,7 @@ import (
 	"github.com/cgrates/rpcclient"
 )
 
-//TestAnalyzerCoverage for cover testing
+// TestAnalyzerCoverage for cover testing
 func TestAnalyzerCoverage(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	shdChan := utils.NewSyncedChan()

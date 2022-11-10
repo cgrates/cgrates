@@ -58,7 +58,7 @@ var sTestsTPDispatchers = []func(t *testing.T){
 	testTPDispatcherKillEngine,
 }
 
-//Test start here
+// Test start here
 func TestTPDispatcherIT(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:

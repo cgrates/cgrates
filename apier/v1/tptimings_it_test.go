@@ -58,7 +58,7 @@ var sTestsTPTiming = []func(t *testing.T){
 	testTPTimingsKillEngine,
 }
 
-//Test start here
+// Test start here
 func TestTPTimingIT(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:

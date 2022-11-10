@@ -573,11 +573,12 @@ func BenchmarkGetPathIndexSlice(b *testing.B) {
 }
 
 /*
-func BenchmarkGetPathIndexSliceSplit(b *testing.B) {
-	for i := 0; i < b.N; i++ {
-		GetPathIndexSlice(benchPath)
+	func BenchmarkGetPathIndexSliceSplit(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			GetPathIndexSlice(benchPath)
+		}
 	}
-}*/
+*/
 func BenchmarkGetPathIndexSliceStringsIndex(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		GetPathIndexSliceStringsIndex(benchPath)

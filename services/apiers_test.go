@@ -33,7 +33,7 @@ import (
 	"github.com/cgrates/rpcclient"
 )
 
-//TestApiersCoverage for cover testing
+// TestApiersCoverage for cover testing
 func TestApiersCoverage(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	filterSChan := make(chan *engine.FilterS, 1)

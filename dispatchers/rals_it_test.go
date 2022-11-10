@@ -33,7 +33,7 @@ var sTestsDspRALs = []func(t *testing.T){
 	testDspRALsGetRatingPlanCost,
 }
 
-//Test start here
+// Test start here
 func TestDspRALsIT(t *testing.T) {
 	var config1, config2, config3 string
 	switch *dbType {

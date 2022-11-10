@@ -29,7 +29,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-//TestEventReaderSCoverage for cover testing
+// TestEventReaderSCoverage for cover testing
 func TestEventReaderSCoverage(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.SessionSCfg().Enabled = true
