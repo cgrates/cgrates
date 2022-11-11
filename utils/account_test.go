@@ -957,6 +957,7 @@ func TestAccountSet(t *testing.T) {
 		ID:           "ID",
 		FilterIDs:    []string{"fltr1", "*string:~*req.Account:1001"},
 		Weights:      DynamicWeights{{}},
+		Blockers:     DynamicBlockers{{}},
 		ThresholdIDs: []string{"TH1"},
 		Opts: map[string]interface{}{
 			"bal":  "val",
@@ -979,6 +980,7 @@ func TestAccountSet(t *testing.T) {
 				AttributeIDs:   []string{"Attr1", "Attr2"},
 				RateProfileIDs: []string{"Attr1", "Attr2"},
 				Weights:        DynamicWeights{{Weight: 10}},
+				Blockers:       DynamicBlockers{{Blocker: false}},
 				UnitFactors: []*UnitFactor{
 					{FilterIDs: []string{"fltr1"}, Factor: NewDecimal(10, 0)},
 					{FilterIDs: []string{"fltr1"}, Factor: NewDecimal(101, 0)},
@@ -1031,6 +1033,9 @@ func TestAccountSet(t *testing.T) {
 	if err := acc.Set([]string{Weights}, ";0", false, EmptyString); err != nil {
 		t.Error(err)
 	}
+	if err := acc.Set([]string{Blockers}, ";0", false, EmptyString); err != nil {
+		t.Error(err)
+	}
 	if err := acc.Set([]string{Balances + "[bal1]", ID}, "bal1", false, EmptyString); err != nil {
 		t.Error(err)
 	}
@@ -1068,6 +1073,9 @@ func TestAccountSet(t *testing.T) {
 		t.Error(err)
 	}
 	if err := acc.Set([]string{Balances, "bal1", Weights}, ";10", false, EmptyString); err != nil {
+		t.Error(err)
+	}
+	if err := acc.Set([]string{Balances, "bal1", Blockers}, ";false", false, EmptyString); err != nil {
 		t.Error(err)
 	}
 
@@ -1141,6 +1149,7 @@ func TestAccountFieldAsInterface(t *testing.T) {
 		ID:           "ID",
 		FilterIDs:    []string{"fltr1", "*string:~*req.Account:1001"},
 		Weights:      DynamicWeights{{}},
+		Blockers:     DynamicBlockers{{}},
 		ThresholdIDs: []string{"TH1"},
 		Opts: map[string]interface{}{
 			"bal":  "val",
@@ -1163,6 +1172,7 @@ func TestAccountFieldAsInterface(t *testing.T) {
 				AttributeIDs:   []string{"Attr1", "Attr2"},
 				RateProfileIDs: []string{"Attr1", "Attr2"},
 				Weights:        DynamicWeights{{Weight: 10}},
+				Blockers:       DynamicBlockers{{Blocker: false}},
 				UnitFactors: []*UnitFactor{
 					{FilterIDs: []string{"fltr1"}, Factor: NewDecimal(10, 0)},
 					{FilterIDs: []string{"fltr1"}, Factor: NewDecimal(101, 0)},
@@ -1204,6 +1214,13 @@ func TestAccountFieldAsInterface(t *testing.T) {
 	} else if exp := ";0"; exp != val {
 		t.Errorf("Expected %v \n but received \n %v", ToJSON(exp), ToJSON(val))
 	}
+
+	if val, err := acc.FieldAsInterface([]string{Blockers}); err != nil {
+		t.Fatal(err)
+	} else if exp := ";false"; exp != val {
+		t.Errorf("Expected %v \n but received \n %v", ToJSON(exp), ToJSON(val))
+	}
+
 	if val, err := acc.FieldAsInterface([]string{Opts}); err != nil {
 		t.Fatal(err)
 	} else if exp := acc.Opts; !reflect.DeepEqual(exp, val) {
@@ -1282,6 +1299,13 @@ func TestAccountFieldAsInterface(t *testing.T) {
 	} else if exp := ";10"; exp != val {
 		t.Errorf("Expected %v \n but received \n %v", ToJSON(exp), ToJSON(val))
 	}
+
+	if val, err := acc.FieldAsInterface([]string{Balances + "[bal1]", Blockers}); err != nil {
+		t.Fatal(err)
+	} else if exp := ";false"; exp != val {
+		t.Errorf("Expected %v \n but received \n %v", ToJSON(exp), ToJSON(val))
+	}
+
 	if val, err := acc.FieldAsInterface([]string{Balances + "[bal1]", FilterIDs}); err != nil {
 		t.Fatal(err)
 	} else if exp := acc.Balances["bal1"].FilterIDs; !reflect.DeepEqual(exp, val) {
@@ -1560,4 +1584,23 @@ func TestAccountUnitFactorClone(t *testing.T) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
 			ToJSON(uF), ToJSON(rcv))
 	}
+}
+
+func TestAccountObjectID(t *testing.T) {
+	apWws := &AccountsWithWeight{
+		{
+			Account: &Account{
+				ID: "ID",
+			},
+		},
+	}
+
+	exp := &Account{
+		ID: "ID",
+	}
+
+	if val := apWws.Account("ID"); !reflect.DeepEqual(val, exp) {
+		t.Errorf("expected %v ,received %v", exp, val)
+	}
+
 }
