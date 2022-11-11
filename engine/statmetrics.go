@@ -28,7 +28,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-//to be moved in utils
+// to be moved in utils
 const STATS_NA = -1.0
 
 // ACDHelper structure

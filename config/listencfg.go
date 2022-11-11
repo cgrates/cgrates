@@ -30,7 +30,7 @@ type ListenCfg struct {
 	HTTPTLSListen    string // HTTP TLS listening address
 }
 
-//loadFromJsonCfg loads Database config from JsonCfg
+// loadFromJsonCfg loads Database config from JsonCfg
 func (lstcfg *ListenCfg) loadFromJsonCfg(jsnListenCfg *ListenJsonCfg) (err error) {
 	if jsnListenCfg == nil {
 		return nil

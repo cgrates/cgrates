@@ -68,7 +68,7 @@ func TestGOCSIT(t *testing.T) {
 	}
 }
 
-//Init Config
+// Init Config
 func testGOCSInitCfg(t *testing.T) {
 	auCfgPath = path.Join(*dataDir, "conf", "samples", "gocs", "au_site")
 	if auCfg, err = config.NewCGRConfigFromPath(auCfgPath); err != nil {

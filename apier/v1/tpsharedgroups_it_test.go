@@ -59,7 +59,7 @@ var sTestsTPSharedGroups = []func(t *testing.T){
 	testTPSharedGroupsKillEngine,
 }
 
-//Test start here
+// Test start here
 func TestTPSharedGroupsIT(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:

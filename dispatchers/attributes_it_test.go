@@ -49,7 +49,7 @@ var sTestsDspAttr = []func(t *testing.T){
 	testDspAttrGetAttrInternal,
 }
 
-//Test start here
+// Test start here
 func TestDspAttributeS(t *testing.T) {
 	var config1, config2, config3 string
 	switch *dbType {

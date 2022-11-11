@@ -68,7 +68,7 @@ type AttributeWithCache struct {
 	*utils.ArgDispatcher
 }
 
-//SetAttributeProfile add/update a new Attribute Profile
+// SetAttributeProfile add/update a new Attribute Profile
 func (APIerSv1 *APIerSv1) SetAttributeProfile(alsWrp *AttributeWithCache, reply *string) error {
 	if missing := utils.MissingStructFields(alsWrp.AttributeProfile, []string{"Tenant", "ID", "Attributes"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
@@ -103,7 +103,7 @@ func (APIerSv1 *APIerSv1) SetAttributeProfile(alsWrp *AttributeWithCache, reply 
 	return nil
 }
 
-//RemoveAttributeProfile remove a specific Attribute Profile
+// RemoveAttributeProfile remove a specific Attribute Profile
 func (APIerSv1 *APIerSv1) RemoveAttributeProfile(arg *utils.TenantIDWithCache, reply *string) error {
 	if missing := utils.MissingStructFields(arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)

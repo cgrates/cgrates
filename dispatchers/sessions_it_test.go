@@ -58,7 +58,7 @@ var sTestsDspSession = []func(t *testing.T){
 	testDspSessionForceDisconect,
 }
 
-//Test start here
+// Test start here
 func TestDspSessionS(t *testing.T) {
 	var config1, config2, config3 string
 	switch *dbType {

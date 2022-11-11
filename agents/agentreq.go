@@ -160,7 +160,7 @@ func (ar *AgentRequest) FieldAsString(fldPath []string) (val string, err error) 
 	return utils.IfaceAsString(iface), nil
 }
 
-//SetFields will populate fields of AgentRequest out of templates
+// SetFields will populate fields of AgentRequest out of templates
 func (ar *AgentRequest) SetFields(tplFlds []*config.FCTemplate) (err error) {
 	for _, tplFld := range tplFlds {
 		if pass, err := ar.filterS.Pass(ar.Tenant,

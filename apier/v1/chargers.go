@@ -64,7 +64,7 @@ type ChargerWithCache struct {
 	Cache *string
 }
 
-//SetChargerProfile add/update a new Charger Profile
+// SetChargerProfile add/update a new Charger Profile
 func (APIerSv1 *APIerSv1) SetChargerProfile(arg *ChargerWithCache, reply *string) error {
 	if missing := utils.MissingStructFields(arg.ChargerProfile, []string{"Tenant", "ID"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
@@ -88,7 +88,7 @@ func (APIerSv1 *APIerSv1) SetChargerProfile(arg *ChargerWithCache, reply *string
 	return nil
 }
 
-//RemoveChargerProfile remove a specific Charger Profile
+// RemoveChargerProfile remove a specific Charger Profile
 func (APIerSv1 *APIerSv1) RemoveChargerProfile(arg *utils.TenantIDWithCache, reply *string) error {
 	if missing := utils.MissingStructFields(arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)

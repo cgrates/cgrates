@@ -1315,7 +1315,7 @@ func TestIndexHealthMultipleProfiles(t *testing.T) {
 		MissingIndexes: map[string][]string{
 			"cgrates.org:*string:~*asm.ID:1002":                          {"Raw"},
 			"cgrates.org:*string:~*opts.*eventType:ChargerAccountUpdate": {"Default", "Raw"},
-			"cgrates.org:*string:~*req.Account:1234":                     {"Call_Attr1", "Default","Raw"},
+			"cgrates.org:*string:~*req.Account:1234":                     {"Call_Attr1", "Default", "Raw"},
 			"cgrates.org:*prefix:~*req.Destination:+2234":                {"Default"},
 			"cgrates.org:*prefix:~*req.Destination:~*req.CGRID":          {"Default"},
 			"cgrates.org:*prefix:~*req.Usage:10":                         {"Default"},
@@ -1335,9 +1335,15 @@ func TestIndexHealthMultipleProfiles(t *testing.T) {
 		utils.CacheChargerFilterIndexes); err != nil {
 		t.Error(err)
 	} else {
-		for _, slice := range rply.MissingIndexes{sort.Strings(slice)}
-		for _, slice := range rply.MissingFilters{sort.Strings(slice)}
-		for _, slice := range rply.BrokenIndexes{sort.Strings(slice)}
+		for _, slice := range rply.MissingIndexes {
+			sort.Strings(slice)
+		}
+		for _, slice := range rply.MissingFilters {
+			sort.Strings(slice)
+		}
+		for _, slice := range rply.BrokenIndexes {
+			sort.Strings(slice)
+		}
 		if !reflect.DeepEqual(exp, rply) {
 			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(exp), utils.ToJSON(rply))
 		}

@@ -38,7 +38,7 @@ var sTestsDspRsp = []func(t *testing.T){
 	testDspResponderPingEmptyCGREventWIthArgDispatcher,
 }
 
-//Test start here
+// Test start here
 func TestDspResponder(t *testing.T) {
 	var config1, config2, config3 string
 	switch *dbType {

@@ -1005,8 +1005,8 @@ func (rs *RedisStorage) RemoveTimingDrv(id string) (err error) {
 	return
 }
 
-//GetFilterIndexesDrv retrieves Indexes from dataDB
-//filterType is used togheter with fieldName:Val
+// GetFilterIndexesDrv retrieves Indexes from dataDB
+// filterType is used togheter with fieldName:Val
 func (rs *RedisStorage) GetFilterIndexesDrv(cacheID, itemIDPrefix, filterType string,
 	fldNameVal map[string]string) (indexes map[string]utils.StringMap, err error) {
 	mp := make(map[string]string)
@@ -1042,7 +1042,7 @@ func (rs *RedisStorage) GetFilterIndexesDrv(cacheID, itemIDPrefix, filterType st
 	return
 }
 
-//SetFilterIndexesDrv stores Indexes into DataDB
+// SetFilterIndexesDrv stores Indexes into DataDB
 func (rs *RedisStorage) SetFilterIndexesDrv(cacheID, itemIDPrefix string,
 	indexes map[string]utils.StringMap, commit bool, transactionID string) (err error) {
 	originKey := utils.CacheInstanceToPrefix[cacheID] + itemIDPrefix

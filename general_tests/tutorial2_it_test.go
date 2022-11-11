@@ -53,7 +53,7 @@ var sTutTests = []func(t *testing.T){
 	testTutStopEngine,
 }
 
-//Test start here
+// Test start here
 func TestTutorial2(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:

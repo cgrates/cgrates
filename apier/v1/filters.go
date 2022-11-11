@@ -30,7 +30,7 @@ type FilterWithCache struct {
 	Cache *string
 }
 
-//SetFilter add a new Filter
+// SetFilter add a new Filter
 func (APIerSv1 *APIerSv1) SetFilter(arg *FilterWithCache, reply *string) error {
 	if missing := utils.MissingStructFields(arg.Filter, []string{"Tenant", "ID"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
@@ -54,7 +54,7 @@ func (APIerSv1 *APIerSv1) SetFilter(arg *FilterWithCache, reply *string) error {
 	return nil
 }
 
-//GetFilter returns a Filter
+// GetFilter returns a Filter
 func (APIerSv1 *APIerSv1) GetFilter(arg utils.TenantID, reply *engine.Filter) error {
 	if missing := utils.MissingStructFields(&arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
@@ -88,7 +88,7 @@ func (APIerSv1 *APIerSv1) GetFilterIDs(args utils.TenantArgWithPaginator, fltrID
 	return nil
 }
 
-//RemoveFilter  remove a specific filter
+// RemoveFilter  remove a specific filter
 func (APIerSv1 *APIerSv1) RemoveFilter(arg utils.TenantIDWithCache, reply *string) error {
 	if missing := utils.MissingStructFields(&arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)

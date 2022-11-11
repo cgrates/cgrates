@@ -32,7 +32,7 @@ var sTestsDspSched = []func(t *testing.T){
 	testDspSchedPingEmptyCGREventWIthArgDispatcher,
 }
 
-//Test start here
+// Test start here
 func TestDspSchedulerS(t *testing.T) {
 	var config1, config2, config3 string
 	switch *dbType {

@@ -27,7 +27,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-//implement LoadReader interface
+// implement LoadReader interface
 func (iDB *InternalDB) GetTpIds(colName string) (ids []string, err error) {
 	return nil, utils.ErrNotImplemented
 }
@@ -551,7 +551,7 @@ func (iDB *InternalDB) GetTPDispatcherHosts(tpid, tenant, id string) (dpps []*ut
 	return
 }
 
-//implement LoadWriter interface
+// implement LoadWriter interface
 func (iDB *InternalDB) RemTpData(table, tpid string, args map[string]string) (err error) {
 	if table == utils.EmptyString {
 		return iDB.Flush(utils.EmptyString)
@@ -790,7 +790,7 @@ func (iDB *InternalDB) SetTPDispatcherHosts(dpps []*utils.TPDispatcherHost) (err
 	return
 }
 
-//implement CdrStorage interface
+// implement CdrStorage interface
 func (iDB *InternalDB) SetCDR(cdr *CDR, allowUpdate bool) (err error) {
 	if cdr.OrderID == 0 {
 		cdr.OrderID = iDB.cnter.Next()

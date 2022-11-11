@@ -142,7 +142,7 @@ func testV1FIdxCaFromFolder(t *testing.T) {
 	time.Sleep(500 * time.Millisecond)
 }
 
-//ThresholdProfile
+// ThresholdProfile
 func testV1FIdxCaProcessEventWithNotFound(t *testing.T) {
 	tEv := &engine.ArgsProcessEvent{
 		CGREvent: &utils.CGREvent{
@@ -474,7 +474,7 @@ func testV1FIdxCaRemoveThresholdProfile(t *testing.T) {
 	}
 }
 
-//StatQueue
+// StatQueue
 func testV1FIdxCaGetStatQueuesWithNotFound(t *testing.T) {
 	var reply *[]string
 	tEv := &engine.StatsArgsProcessEvent{
@@ -862,7 +862,7 @@ func testV1FIdxCaRemoveStatQueueProfile(t *testing.T) {
 	}
 }
 
-//AttributeProfile
+// AttributeProfile
 func testV1FIdxCaProcessAttributeProfileEventWithNotFound(t *testing.T) {
 	ev := &engine.AttrArgsProcessEvent{
 		Context: utils.StringPointer(utils.MetaSessionS),

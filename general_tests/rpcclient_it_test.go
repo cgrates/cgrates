@@ -54,7 +54,7 @@ var ( // configuration opts
 	RemoteRALsAddr2 = "192.168.244.138:2012"
 )
 
-//subtests to be executed
+// subtests to be executed
 var sTestRPCITLcl = []func(t *testing.T){
 	testRPCITLclInitCfg,
 	testRPCITLclStartSecondEngine,

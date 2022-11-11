@@ -57,7 +57,7 @@ func isWhiteSpace(c byte) bool {
 	return c == ' ' || c == '\t' || isNewLine(c) || c == 0
 }
 
-//ReadEnv reads the enviorment variable
+// ReadEnv reads the enviorment variable
 func ReadEnv(key string) (string, error) { //it shod print a warning not a error
 	if env := os.Getenv(key); env != "" {
 		return env, nil
@@ -165,7 +165,7 @@ func (rjr *rjReader) consumeComent(pkbit byte) (bool, error) {
 	return false, nil
 }
 
-//readFirstNonWhiteSpace reads first non white space byte
+// readFirstNonWhiteSpace reads first non white space byte
 func (rjr *rjReader) readFirstNonWhiteSpace() (bit byte, err error) {
 	for !rjr.isEndOfFile() {
 		bit = rjr.buf[rjr.indx]
@@ -232,13 +232,13 @@ func (rjr *rjReader) PeekByteWC() (bit byte, err error) {
 	return 0, io.EOF
 }
 
-//checkMeta check if char mach with next char from MetaEnv if not reset the counting
+// checkMeta check if char mach with next char from MetaEnv if not reset the counting
 func (rjr *rjReader) checkMeta() bool {
 	return rjr.indx-1+len(utils.MetaEnv) < len(rjr.buf) &&
 		utils.MetaEnv == string(rjr.buf[rjr.indx-1:rjr.indx-1+len(utils.MetaEnv)])
 }
 
-//readEnvName reads the enviorment key
+// readEnvName reads the enviorment key
 func (rjr *rjReader) readEnvName(indx int) (name []byte, endindx int, err error) { //0 if not set
 	for indx < len(rjr.buf) { //read byte by byte
 		bit := rjr.buf[indx]
@@ -251,7 +251,7 @@ func (rjr *rjReader) readEnvName(indx int) (name []byte, endindx int, err error)
 	return name, indx, io.EOF
 }
 
-//replaceEnv replaces the EnvMeta and enviorment key with  enviorment variable value in specific buffer
+// replaceEnv replaces the EnvMeta and enviorment key with  enviorment variable value in specific buffer
 func (rjr *rjReader) replaceEnv(startEnv int) error {
 	midEnv := len(utils.MetaEnv)
 	key, endEnv, err := rjr.readEnvName(startEnv + midEnv)

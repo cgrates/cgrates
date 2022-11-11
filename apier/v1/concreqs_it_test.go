@@ -61,7 +61,7 @@ var (
 	}
 )
 
-//Test start here
+// Test start here
 func TestConcReqsBusyJSON(t *testing.T) {
 	concReqsConfigDIR = "conc_reqs_busy"
 	for _, stest := range sTestsConcReqs {

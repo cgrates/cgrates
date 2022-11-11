@@ -436,7 +436,7 @@ func TestAttrExpFileCdrsAsCDRsFilter(t *testing.T) {
 	}
 }
 
-//now working here
+// now working here
 func TestAttrGetCdrsAsCDRsFilter(t *testing.T) {
 	attrGetCdrs := &AttrGetCdrs{
 		TimeStart: "2019-04-04T11:45:26.371Z",

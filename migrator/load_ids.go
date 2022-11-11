@@ -25,7 +25,6 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-//
 func (m *Migrator) migrateLoadIDs() (err error) {
 	var vrs engine.Versions
 	if vrs, err = m.dmIN.DataManager().DataDB().GetVersions(""); err != nil {

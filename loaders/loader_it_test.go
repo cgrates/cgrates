@@ -56,7 +56,7 @@ var (
 	}
 )
 
-//Test start here
+// Test start here
 func TestLoaderIT(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:

@@ -538,7 +538,7 @@ func TestResourceMatchingResourcesForEvent(t *testing.T) {
 	}
 }
 
-//UsageTTL 0 in ResourceProfile and give 10s duration
+// UsageTTL 0 in ResourceProfile and give 10s duration
 func TestResourceUsageTTLCase1(t *testing.T) {
 	Cache.Clear(nil)
 	resprf[0].UsageTTL = time.Duration(0)
@@ -567,7 +567,7 @@ func TestResourceUsageTTLCase1(t *testing.T) {
 	}
 }
 
-//UsageTTL 5s in ResourceProfile and give nil duration
+// UsageTTL 5s in ResourceProfile and give nil duration
 func TestResourceUsageTTLCase2(t *testing.T) {
 	Cache.Clear(nil)
 	resprf[0].UsageTTL = time.Duration(0)
@@ -596,7 +596,7 @@ func TestResourceUsageTTLCase2(t *testing.T) {
 	}
 }
 
-//UsageTTL 5s in ResourceProfile and give 0 duration
+// UsageTTL 5s in ResourceProfile and give 0 duration
 func TestResourceUsageTTLCase3(t *testing.T) {
 	Cache.Clear(nil)
 	resprf[0].UsageTTL = time.Duration(0)
@@ -625,7 +625,7 @@ func TestResourceUsageTTLCase3(t *testing.T) {
 	}
 }
 
-//UsageTTL 5s in ResourceProfile and give 10s duration
+// UsageTTL 5s in ResourceProfile and give 10s duration
 func TestResourceUsageTTLCase4(t *testing.T) {
 	Cache.Clear(nil)
 	resprf[0].UsageTTL = time.Duration(5)

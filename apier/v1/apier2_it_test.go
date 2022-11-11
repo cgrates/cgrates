@@ -70,7 +70,7 @@ var (
 	}
 )
 
-//Test start here
+// Test start here
 func TestApierIT2(t *testing.T) {
 	// no need for a new config with *gob transport in this case
 	switch *dbType {

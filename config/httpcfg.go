@@ -30,7 +30,7 @@ type HTTPCfg struct {
 	HTTPAuthUsers         map[string]string // Basic auth user:password map (base64 passwords)
 }
 
-//loadFromJsonCfg loads Database config from JsonCfg
+// loadFromJsonCfg loads Database config from JsonCfg
 func (httpcfg *HTTPCfg) loadFromJsonCfg(jsnHttpCfg *HTTPJsonCfg) (err error) {
 	if jsnHttpCfg == nil {
 		return nil

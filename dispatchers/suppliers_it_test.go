@@ -43,7 +43,7 @@ var sTestsDspSup = []func(t *testing.T){
 	testDspSupGetSupplierForEvent,
 }
 
-//Test start here
+// Test start here
 func TestDspSupplierS(t *testing.T) {
 	var config1, config2, config3 string
 	switch *dbType {

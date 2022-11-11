@@ -61,7 +61,7 @@ var sTestsTPFilters = []func(t *testing.T){
 	testTPFilterKillEngine,
 }
 
-//Test start here
+// Test start here
 func TestTPFilterITMySql(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:

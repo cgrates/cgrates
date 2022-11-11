@@ -39,7 +39,7 @@ var sTestsDspRes = []func(t *testing.T){
 	testDspResTestAuthKey3,
 }
 
-//Test start here
+// Test start here
 func TestDspResourceSIT(t *testing.T) {
 	var config1, config2, config3 string
 	switch *dbType {

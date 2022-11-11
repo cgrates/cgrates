@@ -59,7 +59,7 @@ var sTestsTPDestinations = []func(t *testing.T){
 	testTPDestinationsKillEngine,
 }
 
-//Test start here
+// Test start here
 func TestTPDestinationsIT(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:

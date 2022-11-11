@@ -28,7 +28,7 @@ type MailerCfg struct {
 	MailerFromAddr string // From address used when sending emails out
 }
 
-//loadFromJsonCfg loads Database config from JsonCfg
+// loadFromJsonCfg loads Database config from JsonCfg
 func (mailcfg *MailerCfg) loadFromJsonCfg(jsnMailerCfg *MailerJsonCfg) (err error) {
 	if jsnMailerCfg == nil {
 		return nil

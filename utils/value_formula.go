@@ -26,7 +26,7 @@ import (
 	"time"
 )
 
-//for computing a dynamic value for Value field
+// for computing a dynamic value for Value field
 type ValueFormula struct {
 	Method string
 	Params map[string]interface{}

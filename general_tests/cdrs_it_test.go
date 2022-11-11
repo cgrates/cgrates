@@ -228,7 +228,7 @@ func testV2CDRsGetCdrs(t *testing.T) {
 	}
 }
 
-//Disable Attributes process
+// Disable Attributes process
 func testV2CDRsProcessCDR2(t *testing.T) {
 	args := &engine.ArgV1ProcessEvent{
 		Flags: []string{"*attributes:false", utils.MetaRALs},
@@ -301,7 +301,7 @@ func testV2CDRsGetCdrs2(t *testing.T) {
 	}
 }
 
-//Disable Attributes and Charger process
+// Disable Attributes and Charger process
 func testV2CDRsProcessCDR3(t *testing.T) {
 	args := &engine.ArgV1ProcessEvent{
 		Flags: []string{"*attributes:false", "*chargers:false"},

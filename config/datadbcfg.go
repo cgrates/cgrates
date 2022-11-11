@@ -43,7 +43,7 @@ type DataDbCfg struct {
 	Items              map[string]*ItemOpt
 }
 
-//loadFromJsonCfg loads Database config from JsonCfg
+// loadFromJsonCfg loads Database config from JsonCfg
 func (dbcfg *DataDbCfg) loadFromJsonCfg(jsnDbCfg *DbJsonCfg) (err error) {
 	if jsnDbCfg == nil {
 		return nil
