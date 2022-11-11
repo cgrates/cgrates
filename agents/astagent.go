@@ -89,6 +89,7 @@ func (sma *AsteriskAgent) connectAsterisk() (err error) {
 	if err != nil {
 		return err
 	}
+	utils.Logger.Info(fmt.Sprintf("<%s> successfully connected to Asterisk at: <%s>", utils.AsteriskAgent, connCfg.Address))
 	return nil
 }
 

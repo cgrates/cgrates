@@ -1020,7 +1020,7 @@ type StringWithArgDispatcher struct {
 	Section string
 }
 
-//V1GetConfigSection will retrieve from CGRConfig a section
+// V1GetConfigSection will retrieve from CGRConfig a section
 func (cfg *CGRConfig) V1GetConfigSection(args *StringWithArgDispatcher, reply *map[string]interface{}) (err error) {
 	var jsonString string
 	switch args.Section {
