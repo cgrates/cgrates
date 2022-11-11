@@ -985,7 +985,7 @@ func (ms *MongoStorage) cleanEmptyFilters(filters bson.M) {
 	}
 }
 
-//  _, err := col(ColCDRs).UpdateAll(bson.M{CGRIDLow: bson.M{"$in": cgrIds}}, bson.M{"$set": bson.M{"deleted_at": time.Now()}})
+// _, err := col(ColCDRs).UpdateAll(bson.M{CGRIDLow: bson.M{"$in": cgrIds}}, bson.M{"$set": bson.M{"deleted_at": time.Now()}})
 func (ms *MongoStorage) GetCDRs(qryFltr *utils.CDRsFilter, remove bool) ([]*CDR, int64, error) {
 	var minUsage, maxUsage *time.Duration
 	if len(qryFltr.MinUsage) != 0 {

@@ -37,7 +37,7 @@ type RalsCfg struct {
 	MaxIncrements           int
 }
 
-//loadFromJsonCfg loads Rals config from JsonCfg
+// loadFromJsonCfg loads Rals config from JsonCfg
 func (ralsCfg *RalsCfg) loadFromJsonCfg(jsnRALsCfg *RalsJsonCfg) (err error) {
 	if jsnRALsCfg == nil {
 		return nil

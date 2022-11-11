@@ -64,7 +64,7 @@ type SupplierWithCache struct {
 	Cache *string
 }
 
-//SetSupplierProfile add a new Supplier configuration
+// SetSupplierProfile add a new Supplier configuration
 func (APIerSv1 *APIerSv1) SetSupplierProfile(args *SupplierWithCache, reply *string) error {
 	if missing := utils.MissingStructFields(args.SupplierProfile, []string{"Tenant", "ID"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
@@ -88,7 +88,7 @@ func (APIerSv1 *APIerSv1) SetSupplierProfile(args *SupplierWithCache, reply *str
 	return nil
 }
 
-//RemoveSupplierProfile remove a specific Supplier configuration
+// RemoveSupplierProfile remove a specific Supplier configuration
 func (APIerSv1 *APIerSv1) RemoveSupplierProfile(args *utils.TenantIDWithCache, reply *string) error {
 	if missing := utils.MissingStructFields(args, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)

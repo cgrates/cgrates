@@ -196,7 +196,7 @@ func (atpl ActionTriggers) Swap(i, j int) {
 	atpl[i], atpl[j] = atpl[j], atpl[i]
 }
 
-//we need higher weights earlyer in the list
+// we need higher weights earlyer in the list
 func (atpl ActionTriggers) Less(j, i int) bool {
 	return atpl[i].Weight < atpl[j].Weight
 }

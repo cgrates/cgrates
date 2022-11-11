@@ -55,7 +55,7 @@ var (
 	}
 )
 
-//Test start here
+// Test start here
 func TestCDRExport(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:

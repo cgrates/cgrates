@@ -55,7 +55,7 @@ type GeneralCfg struct {
 	ConcurrentStrategy string
 }
 
-//loadFromJsonCfg loads General config from JsonCfg
+// loadFromJsonCfg loads General config from JsonCfg
 func (gencfg *GeneralCfg) loadFromJsonCfg(jsnGeneralCfg *GeneralJsonCfg) (err error) {
 	if jsnGeneralCfg == nil {
 		return nil

@@ -33,8 +33,8 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-//Use from sessionsv1_it_test.go
-//functions insted of duplicate them here
+// Use from sessionsv1_it_test.go
+// functions insted of duplicate them here
 // eg: initCfg,ResetDB,StopEngine,etc...
 var sTestSessionSv1ProcessEvent = []func(t *testing.T){
 	testSSv1ItInitCfg,

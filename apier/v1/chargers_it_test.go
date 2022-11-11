@@ -81,7 +81,7 @@ var (
 	}
 )
 
-//Test start here
+// Test start here
 func TestChargerSIT(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:

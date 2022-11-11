@@ -37,7 +37,7 @@ type CdrsCfg struct {
 	OnlineCDRExports []string // list of CDRE templates to use for real-time CDR exports
 }
 
-//loadFromJsonCfg loads Cdrs config from JsonCfg
+// loadFromJsonCfg loads Cdrs config from JsonCfg
 func (cdrscfg *CdrsCfg) loadFromJsonCfg(jsnCdrsCfg *CdrsJsonCfg) (err error) {
 	if jsnCdrsCfg == nil {
 		return nil

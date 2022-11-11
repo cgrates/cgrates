@@ -69,7 +69,7 @@ type DispatcherWithCache struct {
 	Cache *string
 }
 
-//SetDispatcherProfile add/update a new Dispatcher Profile
+// SetDispatcherProfile add/update a new Dispatcher Profile
 func (APIerSv1 *APIerSv1) SetDispatcherProfile(args *DispatcherWithCache, reply *string) error {
 	if missing := utils.MissingStructFields(args.DispatcherProfile, []string{"Tenant", "ID"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
@@ -93,7 +93,7 @@ func (APIerSv1 *APIerSv1) SetDispatcherProfile(args *DispatcherWithCache, reply 
 	return nil
 }
 
-//RemoveDispatcherProfile remove a specific Dispatcher Profile
+// RemoveDispatcherProfile remove a specific Dispatcher Profile
 func (APIerSv1 *APIerSv1) RemoveDispatcherProfile(arg *utils.TenantIDWithCache, reply *string) error {
 	if missing := utils.MissingStructFields(arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
@@ -158,7 +158,7 @@ type DispatcherHostWithCache struct {
 	Cache *string
 }
 
-//SetDispatcherHost add/update a new Dispatcher Host
+// SetDispatcherHost add/update a new Dispatcher Host
 func (APIerSv1 *APIerSv1) SetDispatcherHost(args *DispatcherHostWithCache, reply *string) error {
 	if missing := utils.MissingStructFields(args.DispatcherHost, []string{"Tenant", "ID"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
@@ -182,7 +182,7 @@ func (APIerSv1 *APIerSv1) SetDispatcherHost(args *DispatcherHostWithCache, reply
 	return nil
 }
 
-//RemoveDispatcherHost remove a specific Dispatcher Host
+// RemoveDispatcherHost remove a specific Dispatcher Host
 func (APIerSv1 *APIerSv1) RemoveDispatcherHost(arg *utils.TenantIDWithCache, reply *string) error {
 	if missing := utils.MissingStructFields(arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)

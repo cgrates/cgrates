@@ -65,7 +65,7 @@ var (
 	}
 )
 
-//Test start here
+// Test start here
 func TestDispatcherSIT(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:

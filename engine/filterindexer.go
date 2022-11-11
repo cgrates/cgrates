@@ -127,7 +127,7 @@ func (rfi *FilterIndexer) StoreIndexes(commit bool, transactionID string) (err e
 	return
 }
 
-//Populate FilterIndexer.indexes with specific fieldName:fieldValue , item
+// Populate FilterIndexer.indexes with specific fieldName:fieldValue , item
 func (rfi *FilterIndexer) loadFldNameFldValIndex(filterType, fldName, fldVal string) error {
 	rcvIdx, err := rfi.dm.GetFilterIndexes(
 		utils.PrefixToIndexCache[rfi.itemType], rfi.dbKeySuffix, filterType,
@@ -144,7 +144,7 @@ func (rfi *FilterIndexer) loadFldNameFldValIndex(filterType, fldName, fldVal str
 	return nil
 }
 
-//RemoveItemFromIndex remove Indexes for a specific itemID
+// RemoveItemFromIndex remove Indexes for a specific itemID
 func (rfi *FilterIndexer) RemoveItemFromIndex(tenant, itemID string, oldFilters []string) (err error) {
 	var filterIDs []string
 	switch rfi.itemType {
@@ -280,7 +280,7 @@ func (rfi *FilterIndexer) RemoveItemFromIndex(tenant, itemID string, oldFilters 
 	return rfi.StoreIndexes(false, utils.NonTransactional)
 }
 
-//createAndIndex create indexes for an item
+// createAndIndex create indexes for an item
 func createAndIndex(itemPrefix, tenant, context, itemID string, filterIDs []string, dm *DataManager) (err error) {
 	indexerKey := tenant
 	if context != "" {

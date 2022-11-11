@@ -44,7 +44,7 @@ func SliceWithoutMember(ss []string, s string) []string {
 	return ss
 }
 
-//Iterates over slice members and returns true if one starts with prefix
+// Iterates over slice members and returns true if one starts with prefix
 func SliceMemberHasPrefix(ss []string, prfx string) bool {
 	for _, mbr := range ss {
 		if strings.HasPrefix(mbr, prfx) {

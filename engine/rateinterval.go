@@ -141,7 +141,7 @@ func (rit *RITiming) getRightMargin(t time.Time) (rigthtTime time.Time) {
 	return time.Date(year, month, day, hour, min, sec, nsec, loc).Add(time.Second)
 }
 
-//Returns a time object that represents the start of the interval realtive to the received time
+// Returns a time object that represents the start of the interval realtive to the received time
 func (rit *RITiming) getLeftMargin(t time.Time) (rigthtTime time.Time) {
 	year, month, day := t.Year(), t.Month(), t.Day()
 	hour, min, sec, nsec := 0, 0, 0, 0

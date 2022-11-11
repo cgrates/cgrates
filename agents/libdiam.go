@@ -210,7 +210,8 @@ func updateAVPLenght(avps []*diam.AVP) (l int) {
 }
 
 // messageAddAVPsWithPath will dynamically add AVPs into the message
-// 	append:	append to the message, on false overwrite if AVP is single or add to group if AVP is Grouped
+//
+//	append:	append to the message, on false overwrite if AVP is single or add to group if AVP is Grouped
 func messageSetAVPsWithPath(m *diam.Message, pathStr []string,
 	avpValStr string, newBranch bool, tmz string) (err error) {
 	if len(pathStr) == 0 {

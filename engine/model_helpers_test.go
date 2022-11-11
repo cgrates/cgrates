@@ -1371,7 +1371,7 @@ func TestAPItoChargerProfile(t *testing.T) {
 	}
 }
 
-//Number of FilterIDs and AttributeIDs are equal
+// Number of FilterIDs and AttributeIDs are equal
 func TestAPItoModelTPCharger(t *testing.T) {
 	tpCharger := &utils.TPChargerProfile{
 		TPid:      "TP1",
@@ -1412,7 +1412,7 @@ func TestAPItoModelTPCharger(t *testing.T) {
 	}
 }
 
-//Number of FilterIDs is smaller than AttributeIDs
+// Number of FilterIDs is smaller than AttributeIDs
 func TestAPItoModelTPCharger2(t *testing.T) {
 	tpCharger := &utils.TPChargerProfile{
 		TPid:      "TP1",
@@ -1452,7 +1452,7 @@ func TestAPItoModelTPCharger2(t *testing.T) {
 	}
 }
 
-//Number of FilterIDs is greater than AttributeIDs
+// Number of FilterIDs is greater than AttributeIDs
 func TestAPItoModelTPCharger3(t *testing.T) {
 	tpCharger := &utils.TPChargerProfile{
 		TPid:      "TP1",
@@ -1491,7 +1491,7 @@ func TestAPItoModelTPCharger3(t *testing.T) {
 	}
 }
 
-//len(AttributeIDs) is 0
+// len(AttributeIDs) is 0
 func TestAPItoModelTPCharger4(t *testing.T) {
 	tpCharger := &utils.TPChargerProfile{
 		TPid:      "TP1",
@@ -1522,7 +1522,7 @@ func TestAPItoModelTPCharger4(t *testing.T) {
 	}
 }
 
-//len(FilterIDs) is 0
+// len(FilterIDs) is 0
 func TestAPItoModelTPCharger5(t *testing.T) {
 	tpCharger := &utils.TPChargerProfile{
 		TPid:   "TP1",
@@ -1553,7 +1553,7 @@ func TestAPItoModelTPCharger5(t *testing.T) {
 	}
 }
 
-//both len(AttributeIDs) and len(FilterIDs) are 0
+// both len(AttributeIDs) and len(FilterIDs) are 0
 func TestAPItoModelTPCharger6(t *testing.T) {
 	tpCharger := &utils.TPChargerProfile{
 		TPid:   "TP1",

@@ -76,7 +76,7 @@ func TestSessionSRpl(t *testing.T) {
 	}
 }
 
-//topup
+// topup
 func testSessionSRplAddVoiceBalance(t *testing.T) {
 	attrSetBalance := utils.AttrSetBalance{
 		Tenant:      "cgrates.org",
@@ -108,7 +108,7 @@ func testSessionSRplAddVoiceBalance(t *testing.T) {
 	}
 }
 
-//Init Config
+// Init Config
 func testSessionSRplInitCfg(t *testing.T) {
 	smgRplcMasterCfgPath = path.Join(*dataDir, "conf", "samples", "sessions_replication", smgRplcMasterCfgDIR)
 	if smgRplcMasterCfg, err = config.NewCGRConfigFromPath(smgRplcMasterCfgPath); err != nil {

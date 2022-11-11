@@ -151,7 +151,7 @@ func TestSessionClone(t *testing.T) {
 
 //Test1 ExtraDuration 0 and LastUsage < initial
 
-//Test1 ExtraDuration 0 and LastUsage < initial
+// Test1 ExtraDuration 0 and LastUsage < initial
 func TestSRunDebitReserve(t *testing.T) {
 	lastUsage := time.Duration(1*time.Minute + 30*time.Second)
 	duration := time.Duration(2 * time.Minute)
@@ -175,7 +175,7 @@ func TestSRunDebitReserve(t *testing.T) {
 	}
 }
 
-//Test2 ExtraDuration 0 and LastUsage > initial
+// Test2 ExtraDuration 0 and LastUsage > initial
 func TestSRunDebitReserve2(t *testing.T) {
 	lastUsage := time.Duration(2*time.Minute + 30*time.Second)
 	duration := time.Duration(2 * time.Minute)
@@ -198,7 +198,7 @@ func TestSRunDebitReserve2(t *testing.T) {
 	}
 }
 
-//Test3 ExtraDuration ( 1m < duration) and LastUsage < initial
+// Test3 ExtraDuration ( 1m < duration) and LastUsage < initial
 func TestSRunDebitReserve3(t *testing.T) {
 	lastUsage := time.Duration(1*time.Minute + 30*time.Second)
 	duration := time.Duration(2 * time.Minute)
@@ -221,7 +221,7 @@ func TestSRunDebitReserve3(t *testing.T) {
 	}
 }
 
-//Test4 ExtraDuration 1m and LastUsage > initial
+// Test4 ExtraDuration 1m and LastUsage > initial
 func TestSRunDebitReserve4(t *testing.T) {
 	lastUsage := time.Duration(2*time.Minute + 30*time.Second)
 	duration := time.Duration(2 * time.Minute)
@@ -245,7 +245,7 @@ func TestSRunDebitReserve4(t *testing.T) {
 	}
 }
 
-//Test5 ExtraDuration 3m ( > initialDuration) and LastUsage < initial
+// Test5 ExtraDuration 3m ( > initialDuration) and LastUsage < initial
 func TestSRunDebitReserve5(t *testing.T) {
 	lastUsage := time.Duration(1*time.Minute + 30*time.Second)
 	duration := time.Duration(2 * time.Minute)
@@ -271,7 +271,7 @@ func TestSRunDebitReserve5(t *testing.T) {
 	}
 }
 
-//Test6 ExtraDuration 3m ( > initialDuration) and LastUsage > initial
+// Test6 ExtraDuration 3m ( > initialDuration) and LastUsage > initial
 func TestSRunDebitReserve6(t *testing.T) {
 	lastUsage := time.Duration(2*time.Minute + 30*time.Second)
 	duration := time.Duration(2 * time.Minute)

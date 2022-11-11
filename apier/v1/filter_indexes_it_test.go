@@ -153,7 +153,7 @@ func testV1FIdxRpcConn(t *testing.T) {
 	}
 }
 
-//ThresholdProfile
+// ThresholdProfile
 func testV1FIdxSetThresholdProfile(t *testing.T) {
 	var reply *engine.ThresholdProfile
 	filter = &FilterWithCache{
@@ -412,7 +412,7 @@ func testV1FIdxRemoveThresholdProfile(t *testing.T) {
 	}
 }
 
-//StatQueueProfile
+// StatQueueProfile
 func testV1FIdxSetStatQueueProfileIndexes(t *testing.T) {
 	var reply *engine.StatQueueProfile
 	filter = &FilterWithCache{
@@ -661,7 +661,7 @@ func testV1FIdxRemoveStatQueueProfile(t *testing.T) {
 	}
 }
 
-//ResourceProfile
+// ResourceProfile
 func testV1FIdxSetResourceProfileIndexes(t *testing.T) {
 	var reply *engine.ResourceProfile
 	filter = &FilterWithCache{
@@ -889,7 +889,7 @@ func testV1FIdxRemoveResourceProfile(t *testing.T) {
 	}
 }
 
-//SupplierProfile
+// SupplierProfile
 func testV1FIdxSetSupplierProfileIndexes(t *testing.T) {
 	var reply *engine.SupplierProfile
 	filter = &FilterWithCache{
@@ -1132,7 +1132,7 @@ func testV1FIdxRemoveSupplierProfile(t *testing.T) {
 	}
 }
 
-//AttributeProfile
+// AttributeProfile
 func testV1FIdxSetAttributeProfileIndexes(t *testing.T) {
 	var reply *engine.AttributeProfile
 	filter = &FilterWithCache{

@@ -103,7 +103,7 @@ type ResourceWithCache struct {
 	Cache *string
 }
 
-//SetResourceProfile adds a new resource configuration
+// SetResourceProfile adds a new resource configuration
 func (APIerSv1 *APIerSv1) SetResourceProfile(arg *ResourceWithCache, reply *string) error {
 	if missing := utils.MissingStructFields(arg.ResourceProfile, []string{"Tenant", "ID"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
@@ -151,7 +151,7 @@ func (APIerSv1 *APIerSv1) SetResourceProfile(arg *ResourceWithCache, reply *stri
 	return nil
 }
 
-//RemoveResourceProfile remove a specific resource configuration
+// RemoveResourceProfile remove a specific resource configuration
 func (APIerSv1 *APIerSv1) RemoveResourceProfile(arg utils.TenantIDWithCache, reply *string) error {
 	if missing := utils.MissingStructFields(&arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)

@@ -210,7 +210,7 @@ func (er *EventReaderCfg) loadFromJsonCfg(jsnCfg *EventReaderJsonCfg, sep string
 	return
 }
 
-//Clone itself into a new EventReaderCfg
+// Clone itself into a new EventReaderCfg
 func (er *EventReaderCfg) Clone() (cln *EventReaderCfg) {
 	cln = new(EventReaderCfg)
 	cln.ID = er.ID

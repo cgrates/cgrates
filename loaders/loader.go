@@ -193,7 +193,7 @@ func (ldr *Loader) processFiles(loaderType, caching, loadOption string) (err err
 	return
 }
 
-//processContent will process the contect and will store it into database
+// processContent will process the contect and will store it into database
 func (ldr *Loader) processContent(loaderType, caching string) (err error) {
 	// start processing lines
 	keepLooping := true // controls looping
@@ -586,7 +586,7 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 	return
 }
 
-//removeContent will process the contect and will remove it from database
+// removeContent will process the contect and will remove it from database
 func (ldr *Loader) removeContent(loaderType, caching string) (err error) {
 	// start processing lines
 	keepLooping := true // controls looping
@@ -651,8 +651,8 @@ func (ldr *Loader) removeContent(loaderType, caching string) (err error) {
 	return
 }
 
-//removeLoadedData will remove the data from database
-//since we remove we don't need to compose the struct we only need the Tenant and the ID of the profile
+// removeLoadedData will remove the data from database
+// since we remove we don't need to compose the struct we only need the Tenant and the ID of the profile
 func (ldr *Loader) removeLoadedData(loaderType, tntID, caching string) (err error) {
 	var ids []string
 	cacheArgs := utils.InitAttrReloadCache()

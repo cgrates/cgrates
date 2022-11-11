@@ -34,7 +34,7 @@ func (smgv1 *SMGenericV1) Handlers() map[string]interface{} {
 	}
 }
 
-/// Returns MaxUsage (for calls in seconds), -1 for no limit
+// / Returns MaxUsage (for calls in seconds), -1 for no limit
 func (smgv1 *SMGenericV1) BiRPCV1GetMaxUsage(clnt *rpc2.Client,
 	ev map[string]interface{}, maxUsage *float64) (err error) {
 	if err = utils.ConReqs.Allocate(); err != nil {

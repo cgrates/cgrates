@@ -60,7 +60,7 @@ var sTestsTPActionTriggers = []func(t *testing.T){
 	testTPActionTriggersKillEngine,
 }
 
-//Test start here
+// Test start here
 func TestTPActionTriggersIT(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:

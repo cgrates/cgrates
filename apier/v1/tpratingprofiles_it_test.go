@@ -63,7 +63,7 @@ var sTestsTPRatingProfiles = []func(t *testing.T){
 	testTPRatingProfilesKillEngine,
 }
 
-//Test start here
+// Test start here
 func TestTPRatingProfilesIT(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:

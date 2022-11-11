@@ -47,8 +47,8 @@ func (mgoMig *mongoStorDBMigrator) StorDB() engine.StorDB {
 	return *mgoMig.storDB
 }
 
-//CDR methods
-//get
+// CDR methods
+// get
 func (v1ms *mongoStorDBMigrator) getV1CDR() (v1Cdr *v1Cdrs, err error) {
 	if v1ms.cursor == nil {
 		v1ms.cursor, err = v1ms.mgoDB.DB().Collection(engine.ColCDRs).Find(v1ms.mgoDB.GetContext(), bson.D{})
@@ -68,14 +68,14 @@ func (v1ms *mongoStorDBMigrator) getV1CDR() (v1Cdr *v1Cdrs, err error) {
 	return v1Cdr, nil
 }
 
-//set
+// set
 func (v1ms *mongoStorDBMigrator) setV1CDR(v1Cdr *v1Cdrs) (err error) {
 	_, err = v1ms.mgoDB.DB().Collection(engine.ColCDRs).InsertOne(v1ms.mgoDB.GetContext(), v1Cdr)
 	return
 }
 
-//SMCost methods
-//rename
+// SMCost methods
+// rename
 func (v1ms *mongoStorDBMigrator) renameV1SMCosts() (err error) {
 	if err = v1ms.mgoDB.DB().Collection(utils.OldSMCosts).Drop(v1ms.mgoDB.GetContext()); err != nil {
 		return err
@@ -91,7 +91,7 @@ func (v1ms *mongoStorDBMigrator) createV1SMCosts() (err error) {
 		bson.D{{"create", utils.OldSMCosts}, {"size", 1024}, {"capped", true}}).Err()
 }
 
-//get
+// get
 func (v1ms *mongoStorDBMigrator) getV2SMCost() (v2Cost *v2SessionsCost, err error) {
 	if v1ms.cursor == nil {
 		v1ms.cursor, err = v1ms.mgoDB.DB().Collection(utils.SessionCostsTBL).Find(v1ms.mgoDB.GetContext(), bson.D{})
@@ -111,13 +111,13 @@ func (v1ms *mongoStorDBMigrator) getV2SMCost() (v2Cost *v2SessionsCost, err erro
 	return v2Cost, nil
 }
 
-//set
+// set
 func (v1ms *mongoStorDBMigrator) setV2SMCost(v2Cost *v2SessionsCost) (err error) {
 	_, err = v1ms.mgoDB.DB().Collection(utils.SessionCostsTBL).InsertOne(v1ms.mgoDB.GetContext(), v2Cost)
 	return
 }
 
-//remove
+// remove
 func (v1ms *mongoStorDBMigrator) remV2SMCost(v2Cost *v2SessionsCost) (err error) {
 	_, err = v1ms.mgoDB.DB().Collection(utils.SessionCostsTBL).DeleteMany(v1ms.mgoDB.GetContext(), bson.D{})
 	return

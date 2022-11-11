@@ -279,7 +279,7 @@ func TestLibSuppliersSortHighestCost(t *testing.T) {
 	}
 }
 
-//sort based on *acd and *tcd
+// sort based on *acd and *tcd
 func TestLibSuppliersSortQOS(t *testing.T) {
 	sSpls := &SortedSuppliers{
 		SortedSuppliers: []*SortedSupplier{
@@ -330,7 +330,7 @@ func TestLibSuppliersSortQOS(t *testing.T) {
 	}
 }
 
-//sort based on *acd and *tcd
+// sort based on *acd and *tcd
 func TestLibSuppliersSortQOS2(t *testing.T) {
 	sSpls := &SortedSuppliers{
 		SortedSuppliers: []*SortedSupplier{
@@ -379,7 +379,7 @@ func TestLibSuppliersSortQOS2(t *testing.T) {
 	}
 }
 
-//sort based on *pdd
+// sort based on *pdd
 func TestLibSuppliersSortQOS3(t *testing.T) {
 	sSpls := &SortedSuppliers{
 		SortedSuppliers: []*SortedSupplier{

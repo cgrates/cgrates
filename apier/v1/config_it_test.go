@@ -49,7 +49,7 @@ var (
 	}
 )
 
-//Test start here
+// Test start here
 func TestConfigSIT(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
