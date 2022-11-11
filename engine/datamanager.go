@@ -2005,6 +2005,9 @@ func (dm *DataManager) SetAttributeProfile(ap *AttributeProfile, withIndex bool)
 	if err != nil && err != utils.ErrNotFound {
 		return err
 	}
+	if len(ap.Contexts) == 0 {
+		ap.Contexts = append(ap.Contexts, utils.META_ANY)
+	}
 	if err = dm.DataDB().SetAttributeProfileDrv(ap); err != nil {
 		return err
 	}
@@ -2224,6 +2227,9 @@ func (dm *DataManager) SetDispatcherProfile(dpp *DispatcherProfile, withIndex bo
 	oldDpp, err := dm.GetDispatcherProfile(dpp.Tenant, dpp.ID, true, false, utils.NonTransactional)
 	if err != nil && err != utils.ErrNotFound {
 		return err
+	}
+	if len(dpp.Subsystems) == 0 {
+		dpp.Subsystems = append(dpp.Subsystems, utils.META_ANY)
 	}
 	if err = dm.DataDB().SetDispatcherProfileDrv(dpp); err != nil {
 		return err
