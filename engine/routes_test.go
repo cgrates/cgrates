@@ -23,6 +23,7 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/rpcclient"
 
 	"github.com/cgrates/cgrates/utils"
 )
@@ -829,40 +830,83 @@ func TestRouteProfileCompileCacheParameters(t *testing.T) {
 }
 
 func TestRouteServiceCostForEvent(t *testing.T) {
+	ccMock := &ccMock{
+		calls: map[string]func(args, reply interface{}) error{
+			utils.ResponderGetMaxSessionTimeOnAccounts: func(args, reply interface{}) error {
+				rpl := map[string]interface{}{
+					utils.CapMaxUsage: 10 * time.Minute,
+				}
+				*reply.(*map[string]interface{}) = rpl
+				return nil
+			},
+			utils.ResponderGetMaxSessionTime: func(args, reply interface{}) error {
+				rpl := map[string]interface{}{
+					utils.CapMaxUsage: 20 * time.Minute,
+				}
+				*reply.(*map[string]interface{}) = rpl
+				return nil
+			},
+		},
+	}
 	cfg := config.NewDefaultCGRConfig()
 
 	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dmSPP := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	cfg.RouteSCfg().StringIndexedFields = nil
 	cfg.RouteSCfg().PrefixIndexedFields = nil
-	cfg.RouteSCfg().RALsConns = nil
+	cfg.RouteSCfg().RALsConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}
+	clientconn := make(chan rpcclient.ClientConnector, 1)
+	clientconn <- ccMock
+	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes): clientconn})
 	routeService := NewRouteService(dmSPP, &FilterS{
-		dm: dmSPP, cfg: cfg}, cfg, nil)
+		dm: dmSPP, cfg: cfg, connMgr: nil}, cfg, connMgr)
 	ev := &utils.CGREvent{
 		Tenant: "tnt",
 		ID:     "id",
-		Time:   utils.TimePointer(time.Date(2022, 12, 1, 20, 0, 0, 0, time.UTC)),
+
+		Time: utils.TimePointer(time.Date(2022, 12, 1, 20, 0, 0, 0, time.UTC)),
 		Event: map[string]interface{}{
 			utils.AccountField: "acc_event",
 			utils.Destination:  "desc_event",
 			utils.SetupTime:    time.Now(),
+			utils.Usage:        20 * time.Minute,
 		},
 	}
 	if _, err := routeService.costForEvent(ev, []string{}, []string{}); err == nil {
 		t.Error(err)
-	} else if _, err := routeService.costForEvent(ev, []string{"acc1", "acc2", "acc3"}, []string{}); err == nil {
+	} else if _, err := routeService.costForEvent(ev, []string{"acc1", "acc2", "acc3"}, []string{"rpid"}); err == nil {
 		t.Error(err)
 	}
 
 }
 
 func TestRouteServiceStatMetrics(t *testing.T) {
+
+	testMock := &ccMock{
+
+		calls: map[string]func(args, reply interface{}) error{
+			utils.StatSv1GetQueueFloatMetrics: func(args, reply interface{}) error {
+				rpl := map[string]float64{
+					"metric1": 21.11,
+				}
+				*reply.(*map[string]float64) = rpl
+				return nil
+			},
+		},
+	}
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dmSPP := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	cfg.RouteSCfg().StringIndexedFields = nil
 	cfg.RouteSCfg().PrefixIndexedFields = nil
-	rpS := NewRouteService(dmSPP, &FilterS{dm: dmSPP, cfg: cfg, connMgr: nil}, cfg, nil)
+	cfg.RouteSCfg().StatSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}
+	clientconn := make(chan rpcclient.ClientConnector, 1)
+	clientconn <- testMock
+	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats): clientconn,
+	})
+	rpS := NewRouteService(dmSPP, &FilterS{dm: dmSPP, cfg: cfg, connMgr: nil}, cfg, connMgr)
 	if _, err := rpS.statMetrics([]string{"stat1", "stat2"}, "cgrates.org"); err != nil {
 		t.Error(err)
 	}
@@ -955,20 +999,40 @@ func TestRouteServiceV1GetRouteProfilesForEvent(t *testing.T) {
 }
 
 func TestRouteServiceV1GetRoutes(t *testing.T) {
+	ccMock := &ccMock{
+		calls: map[string]func(args interface{}, reply interface{}) error{
+			utils.AttributeSv1ProcessEvent: func(args, reply interface{}) error {
+				rpl := &AttrSProcessEventReply{
+					AlteredFields: []string{"testcase"},
+					CGREvent: &utils.CGREvent{
+						Event: map[string]interface{}{
+							"testcase": 1,
+						},
+					},
+				}
+				*reply.(*AttrSProcessEventReply) = *rpl
+				return nil
+			},
+		},
+	}
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dmSPP := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	cfg.RouteSCfg().StringIndexedFields = nil
 	cfg.RouteSCfg().PrefixIndexedFields = nil
-	rpS := NewRouteService(dmSPP, &FilterS{dm: dmSPP, cfg: cfg, connMgr: nil}, cfg, nil)
+	cfg.RouteSCfg().AttributeSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}
+	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn <- ccMock
+	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes): clientConn,
+	})
+	rpS := NewRouteService(dmSPP, &FilterS{dm: dmSPP, cfg: cfg, connMgr: nil}, cfg, connMgr)
 	args := &utils.CGREvent{
 		ID:     "CGREvent1",
 		Tenant: "cgrates.orgs",
 		Time:   utils.TimePointer(time.Date(2022, 12, 1, 20, 0, 0, 0, time.UTC)),
 		Event: map[string]interface{}{
-			utils.AccountField: "acc_event",
-			utils.Destination:  "desc_event",
-			utils.SetupTime:    time.Now(),
+			"testcase": 1,
 		},
 	}
 	reply := &SortedRoutesList{
@@ -1018,24 +1082,64 @@ func TestRouteServiceV1GetRoutes(t *testing.T) {
 }
 
 func TestRouteServiceResourceUsage(t *testing.T) {
+	ccMock := &ccMock{
+		calls: map[string]func(args, reply interface{}) error{
+			utils.ResourceSv1GetResource: func(args, reply interface{}) error {
+				rpl := &Resource{
+					Usages: map[string]*ResourceUsage{
+						"test_usage1": {
+							Units: 29.2,
+						},
+						"test_usage2": {
+							Units: 19,
+						},
+					},
+				}
+				*reply.(*Resource) = *rpl
+				return nil
+			},
+		},
+	}
 	cfg := config.NewDefaultCGRConfig()
+	clientconn := make(chan rpcclient.ClientConnector, 1)
+	clientconn <- ccMock
+	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.ResourceSConnsCfg): clientconn,
+	})
 	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dmSPP := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	cfg.RouteSCfg().StringIndexedFields = nil
 	cfg.RouteSCfg().PrefixIndexedFields = nil
-	rpS := NewRouteService(dmSPP, &FilterS{dm: dmSPP, cfg: cfg, connMgr: nil}, cfg, nil)
+	cfg.RouteSCfg().ResourceSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ResourceSConnsCfg)}
+	rpS := NewRouteService(dmSPP, &FilterS{dm: dmSPP, cfg: cfg, connMgr: nil}, cfg, connMgr)
 	if _, err := rpS.resourceUsage([]string{"res1", "res2", "res3"}, "cgrates.org"); err != nil {
 		t.Error(err)
 	}
 }
 
 func TestRouteServiceStatMetricsForLoadDistribution(t *testing.T) {
+	ccMock := &ccMock{
+		calls: map[string]func(args interface{}, reply interface{}) error{
+			utils.StatSv1GetQueueFloatMetrics: func(args, reply interface{}) error {
+				rpl := map[string]float64{
+					"stat": 2.1,
+				}
+				*reply.(*map[string]float64) = rpl
+				return nil
+			},
+		},
+	}
+	clientconn := make(chan rpcclient.ClientConnector, 1)
+	clientconn <- ccMock
 	cfg := config.NewDefaultCGRConfig()
+	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.StatSConnsCfg): clientconn})
 	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dmSPP := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	cfg.RouteSCfg().StringIndexedFields = nil
 	cfg.RouteSCfg().PrefixIndexedFields = nil
-	rpS := NewRouteService(dmSPP, &FilterS{dm: dmSPP, cfg: cfg, connMgr: nil}, cfg, nil)
+	cfg.RouteSCfg().StatSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.StatSConnsCfg)}
+	rpS := NewRouteService(dmSPP, &FilterS{dm: dmSPP, cfg: cfg, connMgr: nil}, cfg, connMgr)
 	if _, err := rpS.statMetricsForLoadDistribution([]string{"res1", "res2", "res3"}, "cgrates.org"); err != nil {
 		t.Error(err)
 	}

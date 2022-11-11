@@ -3855,7 +3855,6 @@ func TestTPDispatcherHostsAsTPDispatcherHosts(t *testing.T) {
 			ID:                "ID1",
 			Tenant:            "Tenant1",
 			Address:           "localhost:6012",
-			Transport:         "*json",
 			ConnectAttempts:   2,
 			Reconnects:        5,
 			ConnectTimeout:    "2m",
@@ -3962,6 +3961,44 @@ func TestTPDispatcherHostsAsTPDispatcherHosts(t *testing.T) {
 	if !reflect.DeepEqual(rcv, eOut) {
 		t.Errorf("Expecting: %+v,\nReceived: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
 	}
+	tps = &DispatcherHostMdls{
+		&DispatcherHostMdl{
+			Address:              "Address4",
+			ID:                   "ID4",
+			Tenant:               "Tenant4",
+			Transport:            "*gob",
+			MaxReconnectInterval: "val",
+		},
+	}
+	if _, err = tps.AsTPDispatcherHosts(); err == nil {
+		t.Error("expected <error>")
+	}
+	tps = &DispatcherHostMdls{
+		&DispatcherHostMdl{
+			Address:   "Address4",
+			ID:        "ID4",
+			Tenant:    "Tenant4",
+			Transport: "*gob",
+
+			ConnectTimeout: "timeout",
+		},
+	}
+	if _, err = tps.AsTPDispatcherHosts(); err == nil {
+		t.Error("expected <error>")
+	}
+	tps = &DispatcherHostMdls{
+		&DispatcherHostMdl{
+			Address:      "Address4",
+			ID:           "ID4",
+			Tenant:       "Tenant4",
+			Transport:    "*gob",
+			ReplyTimeout: "reply",
+		},
+	}
+	if _, err = tps.AsTPDispatcherHosts(); err == nil {
+		t.Error("expected <error>")
+	}
+
 }
 
 func TestAPItoModelTPDispatcherHost(t *testing.T) {
