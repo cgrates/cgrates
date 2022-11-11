@@ -2894,3 +2894,41 @@ func TestAccountSummary(t *testing.T) {
 		t.Errorf("expected %+v ,received %+v", utils.ToJSON(expAs), utils.ToJSON(as))
 	}
 }
+
+func TestAccountGetCreditForPrefix(t *testing.T) {
+	acc := &Account{
+		ID:            "cgrates.org:account1",
+		AllowNegative: true,
+		BalanceMap: map[string]Balances{
+			utils.MetaSMS: {&Balance{ID: "sms1", Value: 14,
+				SharedGroups: utils.StringMap{
+					"group": true,
+				}}},
+			utils.MetaMMS: {&Balance{ID: "mms1", Value: 140, SharedGroups: utils.StringMap{
+				"group": true,
+			}}},
+			utils.MetaData: {&Balance{ID: "data1", Value: 1204, SharedGroups: utils.StringMap{
+				"group": true,
+			}}},
+			utils.MetaVoice: {
+				&Balance{ID: "voice1", Weight: 20, DestinationIDs: utils.StringMap{"NAT": true}, Value: 3600},
+				&Balance{ID: "voice2", Weight: 10, DestinationIDs: utils.StringMap{"RET": true}, Value: 1200},
+			},
+		},
+	}
+	cd := &CallDescriptor{
+		Category:      "0",
+		Tenant:        "vdf",
+		TimeStart:     time.Date(2013, 10, 4, 15, 46, 0, 0, time.UTC),
+		TimeEnd:       time.Date(2013, 10, 4, 15, 46, 10, 0, time.UTC),
+		LoopIndex:     0,
+		DurationIndex: 10 * time.Second,
+		Destination:   "0723",
+		ToR:           utils.MetaVoice,
+	}
+
+	if _, _, balances := acc.getCreditForPrefix(cd); len(balances) == 0 {
+
+		t.Errorf("received %+v", utils.ToJSON(balances))
+	}
+}

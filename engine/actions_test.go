@@ -2863,3 +2863,28 @@ func TestResetAccountCDR(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestSetRecurrentAction(t *testing.T) {
+
+	ub := &Account{
+		ID: "ACCID",
+		ActionTriggers: ActionTriggers{
+			&ActionTrigger{
+				ID:        "acTrigger",
+				UniqueID:  "uuid_acc",
+				Recurrent: false,
+			},
+			&ActionTrigger{
+				ID:        "acTrigger1",
+				UniqueID:  "uuid_acc1",
+				Recurrent: false,
+			},
+		},
+	}
+	ac := &Action{
+		Id: "acTrigger",
+	}
+	if err = setRecurrentAction(ub, ac, nil, nil, nil); err != nil {
+		t.Error(err)
+	}
+}
