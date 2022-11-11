@@ -83,7 +83,7 @@ var sTestsCalls = []func(t *testing.T){
 	testCallStopFS,
 }
 
-//Test start here
+// Test start here
 func TestFreeswitchCalls(t *testing.T) {
 	optConf = utils.Freeswitch
 	for _, stest := range sTestsCalls {
@@ -203,7 +203,7 @@ func testCallStartEngine(t *testing.T) {
 			t.Fatal(err)
 		}
 	case utils.Asterisk:
-		if err := engine.CallScript(path.Join(*ariConf, "cgrates", "etc", "init.d", "cgrates"), "start", 100); err != nil {
+		if err := engine.CallScript(path.Join(*ariConf, "cgrates", "etc", "init.d", "cgrates"), "start", 5000); err != nil {
 			t.Fatal(err)
 		}
 	default:
@@ -754,8 +754,10 @@ func testCallSyncSessions(t *testing.T) {
 
 	// activeSessions shouldn't be active
 	if err := tutorialCallsRpc.Call(utils.SessionSv1GetActiveSessions,
-		nil, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
-		t.Errorf("Got error on SessionSv1.GetActiveSessions: %v and reply: %s", err, utils.ToJSON(reply))
+		nil, &reply); err == nil {
+		t.Error("SessionSv1.GetActiveSessions should not be nil")
+	} else if err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("Expected: %s, received %s", utils.ErrNotFound.Error(), err)
 	}
 
 	var sourceForCDR string

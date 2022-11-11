@@ -31,7 +31,7 @@ type AttributeWithCache struct {
 	Cache *string
 }
 
-//SetAttributeProfile add/update a new Attribute Profile
+// SetAttributeProfile add/update a new Attribute Profile
 func (APIerSv2 *APIerSv2) SetAttributeProfile(arg *AttributeWithCache, reply *string) error {
 	if missing := utils.MissingStructFields(arg.ExternalAttributeProfile, []string{utils.Tenant, utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)

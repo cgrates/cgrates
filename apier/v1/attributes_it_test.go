@@ -87,7 +87,7 @@ var (
 	}
 )
 
-//Test start here
+// Test start here
 func TestAttributeSIT(t *testing.T) {
 	attrsTests := sTestsAlsPrf
 	switch *dbType {
@@ -1204,7 +1204,7 @@ func testAttributeSKillEngine(t *testing.T) {
 	}
 }
 
-//Start tests for caching
+// Start tests for caching
 func testAttributeSCachingMetaNone(t *testing.T) {
 	//*none option should not add attribute in cache only in Datamanager
 	attrPrf1 := &AttributeWithCache{

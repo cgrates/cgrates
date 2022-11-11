@@ -165,7 +165,7 @@ func (dm *DataManager) LoadDataDBCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs,
 	return
 }
 
-//Used for InternalDB
+// Used for InternalDB
 func (dm *DataManager) PreloadCacheForPrefix(prefix string) error {
 	transID := Cache.BeginTransaction()
 	Cache.Clear([]string{utils.CachePrefixToInstance[prefix]})
@@ -1216,7 +1216,7 @@ func (dm *DataManager) RemoveActionTriggers(id, transactionID string) (err error
 	return
 }
 
-//SetActionTriggersArg is used to send the key and the ActionTriggers to Replicator
+// SetActionTriggersArg is used to send the key and the ActionTriggers to Replicator
 type SetActionTriggersArg struct {
 	Key   string
 	Attrs ActionTriggers
@@ -1346,7 +1346,7 @@ func (dm *DataManager) GetActions(key string, skipCache bool, transactionID stri
 	return
 }
 
-//SetActionsArgs is used to send the key and the Actions to replicator
+// SetActionsArgs is used to send the key and the Actions to replicator
 type SetActionsArgs struct {
 	Key string
 	Acs Actions

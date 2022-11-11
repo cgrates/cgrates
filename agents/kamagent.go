@@ -80,6 +80,7 @@ func (self *KamailioAgent) Connect() (err error) {
 			eventHandlers, logger); err != nil {
 			return
 		}
+		utils.Logger.Info(fmt.Sprintf("<%s> successfully connected to Kamailio at: <%s>", utils.KamailioAgent, connCfg.Address))
 		go func(conn *kamevapi.KamEvapi) { // Start reading in own goroutine, return on error
 			if err := conn.ReadEvents(); err != nil {
 				errChan <- err

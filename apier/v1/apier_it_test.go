@@ -49,15 +49,15 @@ import (
 /*
 README:
 
- Enable local tests by passing '-local' to the go test command
- It is expected that the data folder of CGRateS exists at path /usr/share/cgrates/data or passed via command arguments.
- Prior running the tests, create database and users by running:
-  mysql -pyourrootpwd < /usr/share/cgrates/data/storage/mysql/create_db_with_users.sql
- What these tests do:
-  * Flush tables in storDb to start clean.
-  * Start engine with default configuration and give it some time to listen (here caching can slow down, hence the command argument parameter).
-  * Connect rpc client depending on encoding defined in configuration.
-  * Execute remote Apis and test their replies(follow testtp scenario so we can test load in dataDb also).
+	Enable local tests by passing '-local' to the go test command
+	It is expected that the data folder of CGRateS exists at path /usr/share/cgrates/data or passed via command arguments.
+	Prior running the tests, create database and users by running:
+	 mysql -pyourrootpwd < /usr/share/cgrates/data/storage/mysql/create_db_with_users.sql
+	What these tests do:
+	 * Flush tables in storDb to start clean.
+	 * Start engine with default configuration and give it some time to listen (here caching can slow down, hence the command argument parameter).
+	 * Connect rpc client depending on encoding defined in configuration.
+	 * Execute remote Apis and test their replies(follow testtp scenario so we can test load in dataDb also).
 */
 var (
 	cfgPath           string
@@ -973,10 +973,11 @@ func testAPIerSv1GetRatingProfile(t *testing.T) {
 
 	expectedIds := []string{"call:dan", "call:*any"}
 	var result []string
-	if err := rater.Call(utils.APIerSv1GetRatingProfileIDs, utils.TenantArgWithPaginator{TenantArg: utils.TenantArg{Tenant: "cgrates.org"}}, &result); err != nil {
+	if err := rater.Call(utils.APIerSv1GetRatingProfileIDs, utils.TenantArgWithPaginator{
+		TenantArg: utils.TenantArg{Tenant: "cgrates.org"}}, &result); err != nil {
 		t.Error(err)
 	} else if len(expectedIds) != len(result) {
-		t.Errorf("Expecting : %+v, received: %+v", expected, result)
+		t.Errorf("Expecting : %+v, received: %+v", expectedIds, result)
 	}
 }
 
@@ -2115,7 +2116,7 @@ func TestAttrRemoveRatingProfileGetID(t *testing.T) {
 	}
 }
 
-//Start tests for caching
+// Start tests for caching
 func testRatingProfileCachingMetaNone(t *testing.T) {
 	//*none option should not add profile in cache only in Datamanager
 	rpf := &utils.AttrSetRatingProfile{
