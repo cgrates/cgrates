@@ -394,3 +394,18 @@ func TestCGREventRPCClone(t *testing.T) {
 		t.Errorf("Expected %v \n but received \n %v", exp, rcv.(*CGREvent))
 	}
 }
+
+func TestHasField(t *testing.T) {
+	ev := &CGREvent{
+		Event: map[string]interface{}{
+			"supplierprofile1": "Supplier",
+		},
+	}
+
+	exp := true
+
+	if rcv := ev.HasField("supplierprofile1"); !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("Expected %v \n received %v", exp, rcv)
+
+	}
+}

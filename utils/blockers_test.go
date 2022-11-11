@@ -47,6 +47,17 @@ func TestNewBlockersFromString(t *testing.T) {
 	} else if !reflect.DeepEqual(rcv, blkrs) {
 		t.Errorf("Expected %v \n received %v", ToJSON(blkrs), ToJSON(rcv))
 	}
+	blkrs = DynamicBlockers{
+		{
+			FilterIDs: nil,
+			Blocker:   false,
+		},
+	}
+	if received, err := NewDynamicBlockersFromString("", InfieldSep, ANDSep); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(received, blkrs) {
+		t.Errorf("Expected %v \n received %v", ToJSON(blkrs), ToJSON(received))
+	}
 
 }
 
@@ -79,5 +90,26 @@ func TestNewBlockersFromStringFormatBool(t *testing.T) {
 	exp := "cannot convert bool with value: <tttrrruuue> into Blocker"
 	if _, err := NewDynamicBlockersFromString(blkrsStr, InfieldSep, ANDSep); err.Error() != exp {
 		t.Errorf("Expected %s \n received %s", exp, err.Error())
+	}
+}
+
+func TestBlockersClone(t *testing.T) {
+
+	blckrs := DynamicBlockers{
+		{
+			FilterIDs: []string{"*string:~*opts.*cost:0"},
+			Blocker:   false,
+		},
+	}
+
+	exp := DynamicBlockers{
+		{
+			FilterIDs: []string{"*string:~*opts.*cost:0"},
+			Blocker:   false,
+		},
+	}
+	if rcv := blckrs.Clone(); !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("Expected %v \n received %v", ToJSON(exp), ToJSON(rcv))
+
 	}
 }
