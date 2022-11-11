@@ -1064,5 +1064,3 @@ func TestBalanceChargeFieldAsInterface(t *testing.T) {
 	}
 
 }
-
-func TestNewFreeEventCost(t *testing.T) {}
