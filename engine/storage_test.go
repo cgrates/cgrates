@@ -71,7 +71,6 @@ func TestMsgpackTime(t *testing.T) {
 		t.Errorf("error unmarshalling structure: %#v %#v %v", t1, t2, err)
 	}
 }
-
 func TestStorageDestinationContainsPrefixShort(t *testing.T) {
 	dest, err := dm.GetDestination("NAT", false, true, utils.NonTransactional)
 	precision := dest.containsPrefix("0723")

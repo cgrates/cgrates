@@ -169,3 +169,12 @@ func TestDynamicDPFieldAsInterface(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestDPNewLibNumber(t *testing.T) {
+	if _, err := newLibPhoneNumberDP("+3554735474"); err != nil {
+		t.Errorf("received <%v>", err)
+	} else if _, err = newLibPhoneNumberDP("some"); err == nil {
+		t.Error("expected error")
+	}
+
+}

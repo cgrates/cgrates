@@ -24,6 +24,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -1193,6 +1194,10 @@ func TestMaxDebitWithAccountShared(t *testing.T) {
 	other, err := dm.GetAccount("vdf:empty10")
 	if err != nil || other.BalanceMap[utils.MetaMonetary][0].GetValue() != 7.5 {
 		t.Errorf("Error debiting shared balance: %+v", other.BalanceMap[utils.MetaMonetary][0])
+	}
+	cd.account.Disabled = true
+	if _, err := cd.getAccount(); err == nil {
+		t.Error("expected nil")
 	}
 }
 
@@ -2542,6 +2547,24 @@ func TestValidateCallData(t *testing.T) {
 	}
 	cd.DurationIndex = 60 * time.Minute
 	if err = cd.ValidateCallData(); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestCDRefundRounding(t *testing.T) {
+	cd := &CallDescriptor{
+		Category:    "call",
+		Tenant:      "cgrates.org",
+		Subject:     "1001",
+		Account:     "1001",
+		Destination: "1002",
+	}
+	cfg := config.NewDefaultCGRConfig()
+	dataDB := NewInternalDB(nil, nil, true, nil)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	fltrs := NewFilterS(cfg, nil, dm)
+
+	if _, err := cd.RefundRounding(fltrs); err != nil {
 		t.Error(err)
 	}
 }
