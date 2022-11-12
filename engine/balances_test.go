@@ -21,6 +21,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -486,4 +487,120 @@ func TestBalancesHasBalance(t *testing.T) {
 		t.Error("should be true")
 	}
 
+}
+
+func TestBalanceDebitUnits(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true, nil)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	cd := &CallDescriptor{
+		Category:      "postpaid",
+		ToR:           utils.MetaVoice,
+		Tenant:        "foehn",
+		Subject:       "foehn",
+		Account:       "foehn",
+		Destination:   "0034678096720",
+		TimeStart:     time.Date(2015, 4, 24, 7, 59, 4, 0, time.UTC),
+		TimeEnd:       time.Date(2015, 4, 24, 8, 2, 0, 0, time.UTC),
+		LoopIndex:     0,
+		DurationIndex: 176 * time.Second,
+
+		FallbackSubject: "",
+		RatingInfos: RatingInfos{
+			&RatingInfo{
+				MatchedSubject: "*out:foehn:postpaid:foehn",
+				MatchedPrefix:  "0034678",
+				MatchedDestId:  "SPN_MOB",
+				ActivationTime: time.Date(2015, 4, 23, 0, 0, 0, 0, time.UTC),
+				RateIntervals: []*RateInterval{
+					{
+						Timing: &RITiming{
+							WeekDays:  []time.Weekday{time.Monday, time.Tuesday, time.Wednesday, time.Thursday, time.Friday},
+							StartTime: "08:00:00",
+						},
+						Rating: &RIRate{
+							ConnectFee:       0,
+							RoundingMethod:   "*up",
+							RoundingDecimals: 6,
+							Rates: RateGroups{
+								&RGRate{Value: 1, RateIncrement: time.Second, RateUnit: time.Second},
+							},
+						},
+					},
+					{
+						Timing: &RITiming{
+							WeekDays:  []time.Weekday{time.Monday, time.Tuesday, time.Wednesday, time.Thursday, time.Friday},
+							StartTime: "00:00:00",
+						},
+						Rating: &RIRate{
+							ConnectFee:       0,
+							RoundingMethod:   "*up",
+							RoundingDecimals: 6,
+							Rates: RateGroups{
+								&RGRate{Value: 1, RateIncrement: time.Second, RateUnit: time.Second},
+							},
+						},
+					},
+					{
+						Timing: &RITiming{
+							WeekDays:  []time.Weekday{time.Saturday, time.Sunday},
+							StartTime: "00:00:00",
+						},
+						Rating: &RIRate{
+							ConnectFee:       0,
+							RoundingMethod:   "*up",
+							RoundingDecimals: 6,
+							Rates: RateGroups{
+								&RGRate{Value: 1, RateIncrement: time.Second, RateUnit: time.Second},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+	ub := &Account{
+		ID: "vdf:broker",
+		BalanceMap: map[string]Balances{
+			utils.MetaVoice: {
+				&Balance{Value: 20 * float64(time.Second),
+					DestinationIDs: utils.NewStringMap("NAT"),
+					Weight:         10, RatingSubject: "rif"},
+				&Balance{Value: 100 * float64(time.Second),
+					DestinationIDs: utils.NewStringMap("RET"), Weight: 20},
+			}},
+	}
+
+	moneyBalances := Balances{{
+		Uuid:           "uuid",
+		ID:             "id",
+		Value:          12.22,
+		ExpirationDate: time.Date(2022, 11, 1, 20, 0, 0, 0, time.UTC),
+		Blocker:        true,
+		Disabled:       true,
+		precision:      2,
+	},
+		{
+			Uuid:           "uuid2",
+			ID:             "id2",
+			Value:          133.22,
+			ExpirationDate: time.Date(2023, 3, 21, 5, 0, 0, 0, time.UTC),
+			Blocker:        true,
+			Disabled:       true,
+			precision:      2,
+		}}
+	b := &Balance{
+		Uuid:           "uuid",
+		ID:             "id",
+		Value:          12.22,
+		ExpirationDate: time.Date(2022, 11, 1, 20, 0, 0, 0, time.UTC),
+		Blocker:        true,
+		Disabled:       true,
+		precision:      2,
+	}
+	fltrs := FilterS{cfg, dm, nil}
+
+	if _, err := b.debitUnits(cd, ub, moneyBalances, true, false, true, &fltrs); err != nil {
+		t.Error(err)
+	}
 }

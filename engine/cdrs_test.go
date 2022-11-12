@@ -20,6 +20,7 @@ package engine
 
 import (
 	"fmt"
+	"reflect"
 	"testing"
 	"time"
 
@@ -214,4 +215,28 @@ func TestCDRSV1V1ProcessExternalCDRNoTenant(t *testing.T) {
 	if err := cdrs.V1ProcessExternalCDR(args, &reply); err != nil {
 		t.Error(err)
 	}
+}
+
+func TestArgV1ProcessClone(t *testing.T) {
+	attr := &ArgV1ProcessEvent{
+		Flags: []string{"flg,flg2,flg3"},
+		CGREvent: utils.CGREvent{
+			ID:   "TestBiRPCv1AuthorizeEventNoTenant",
+			Time: utils.TimePointer(time.Date(2016, time.January, 5, 18, 30, 49, 0, time.UTC)),
+			Event: map[string]interface{}{
+				"Account":     "1002",
+				"Category":    "call",
+				"Destination": "1003",
+				"OriginHost":  "local",
+				"OriginID":    "123456",
+				"ToR":         "*voice",
+				"Usage":       "10s",
+			},
+		},
+		clnb: true,
+	}
+	if val := attr.Clone(); reflect.DeepEqual(attr, val) {
+		t.Errorf("expected %v,received %v", utils.ToJSON(val), utils.ToJSON(attr))
+	}
+
 }
