@@ -113,3 +113,24 @@ func TestBlockersClone(t *testing.T) {
 
 	}
 }
+
+func TestBlockersString(t *testing.T) {
+	blkrs := DynamicBlockers{}
+
+	exp := ""
+
+	if rcv := blkrs.String("", ""); !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("Expected %v \n received %v, length of blksr is %v", ToJSON(exp), ToJSON(rcv), len(blkrs))
+
+	}
+	blkrsTrue := DynamicBlocker{
+
+		Blocker: true,
+	}
+	expTrue := "true"
+	if rcvTrue := blkrsTrue.String("", ""); !reflect.DeepEqual(rcvTrue, expTrue) {
+		t.Errorf("Expected %v \n received %v", ToJSON(expTrue), ToJSON(rcvTrue))
+
+	}
+
+}

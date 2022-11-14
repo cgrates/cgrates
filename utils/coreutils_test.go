@@ -542,6 +542,11 @@ func TestParseTimeDetectLayout(t *testing.T) {
 	if err != nil || !date.UTC().Equal(expected.UTC()) {
 		t.Errorf("Expecting: %v, received: %v", expected.UTC(), date.UTC())
 	}
+	if date, err := ParseTimeDetectLayout("2014-11-25T00:00:00+01:00", "65"); err == nil {
+		t.Error("Expecting error 'timezone: invalid timezone', received: nil")
+	} else if date != nilTime {
+		t.Errorf("Expecting nilTime, received: %+v", date)
+	}
 
 }
 
@@ -1475,6 +1480,9 @@ func TestFibDuration(t *testing.T) {
 	if tmp := FibDuration(2*time.Second, 0); tmp() != 2*time.Second {
 		t.Error("Expecting: 2, received ", tmp())
 	}
+	if tmp := FibDuration(2*time.Second, 4); tmp() != 4*time.Nanosecond {
+		t.Error("Expecting: 4, received ", tmp())
+	}
 }
 
 func TestCoreUtilsPaginate(t *testing.T) {
@@ -1684,5 +1692,48 @@ func TestCoreUtilsFibDurationSeqNrOverflow(t *testing.T) {
 		if rcv := fib(); rcv != AbsoluteMaxDuration {
 			t.Errorf("expected: <%+v>, \nreceived: <%+v>", AbsoluteMaxDuration, rcv)
 		}
+	}
+}
+
+func TestUnzip(t *testing.T) {
+
+	if rcv := Unzip("Test error for unzip", "Test dest"); rcv == nil {
+		t.Error(rcv)
+	}
+
+}
+
+func TestToUnescapedJSON(t *testing.T) {
+	type testStruc struct {
+		testInt int
+	}
+
+	a := func(a int, b int) int {
+		return a + b
+	}
+
+	r := testStruc{testInt: 999}
+
+	if rcv, err := ToUnescapedJSON(a); err == nil {
+		t.Error(err)
+		t.Errorf("Expected nil, received %v", rcv)
+	}
+	exp := []byte{123, 125, 10}
+	if rcv, err := ToUnescapedJSON(r); err != nil {
+		t.Error(err)
+		t.Errorf("Expected %v, received %v", ToJSON(exp), ToJSON(rcv))
+	}
+}
+
+func TestCloneOfObject(t *testing.T) {
+
+	pgnt := Paginator{
+		MaxItems: IntPointer(7),
+	}
+	exp := Paginator{
+		MaxItems: IntPointer(7),
+	}
+	if rcv := pgnt.Clone(); !reflect.DeepEqual(exp, rcv) {
+		t.Errorf("Expected %v, received %v", ToJSON(exp), ToJSON(rcv))
 	}
 }

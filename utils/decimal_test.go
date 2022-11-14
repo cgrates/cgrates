@@ -444,3 +444,27 @@ func TestMarshalUnmarshalNA(t *testing.T) {
 		t.Errorf("%v and %v are different", dec2, DecimalNaN)
 	}
 }
+
+func TestNewRoundingMode(t *testing.T) {
+	var tests = []struct {
+		rnd string
+		exp decimal.RoundingMode
+	}{
+		{"*toNearestEven", 0},
+		{"*toNearestAway", 1},
+		{"*toZero", 2},
+		{"*awayFromZero", 3},
+		{"*toNegativeInf", 4},
+		{"*toPositiveInf", 5},
+		{"*toNearestTowardZero", 6},
+	}
+
+	for _, e := range tests {
+		if rcv, err := NewRoundingMode(e.rnd); err != nil {
+			t.Error(err)
+		} else if !reflect.DeepEqual(rcv, e.exp) {
+			t.Errorf("expected: <%v>, received: <%v>", e.exp, rcv)
+		}
+
+	}
+}
