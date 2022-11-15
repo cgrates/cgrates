@@ -1659,3 +1659,16 @@ func TestECEventChargesClone(t *testing.T) {
 			ToJSON(ec), ToJSON(rcv))
 	}
 }
+
+func TestEqualsAccountCharges(t *testing.T) {
+	ac := &AccountCharge{}
+	nAc := &AccountCharge{}
+	if rcv := ac.equals(nAc); rcv != true {
+		t.Errorf("Expected <true>, Recevied <%v>", rcv)
+	}
+	ac = nil
+	nAc = nil
+	if rcv := ac.equals(nAc); rcv != true {
+		t.Errorf("Expected <true>, Recevied <%v>", rcv)
+	}
+}
