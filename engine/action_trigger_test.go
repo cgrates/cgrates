@@ -23,6 +23,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -253,4 +254,32 @@ func TestActionTriggerCreateBalance(t *testing.T) {
 		t.Errorf("expected %v,received %v", utils.ToJSON(expBal), utils.ToJSON(val))
 	}
 
+}
+
+func TestATExecute(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	at := &ActionTrigger{
+		ID:                "id",
+		UniqueID:          "uid",
+		ThresholdType:     "*min_event_counter",
+		Recurrent:         true,
+		MinSleep:          10 * time.Minute,
+		LastExecutionTime: time.Date(0, 0, 0, 0, 0, 0, 0, time.Now().UTC().Location()),
+	}
+
+	ub := &Account{
+		ID:             "acc_id",
+		BalanceMap:     map[string]Balances{},
+		UnitCounters:   UnitCounters{},
+		ActionTriggers: ActionTriggers{},
+		AllowNegative:  false,
+		UpdateTime:     time.Date(2019, 3, 1, 12, 0, 0, 0, time.UTC),
+	}
+	fltrs := NewFilterS(cfg, nil, dm)
+
+	if err := at.Execute(ub, fltrs); err == nil {
+		t.Error(err)
+	}
 }

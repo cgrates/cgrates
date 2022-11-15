@@ -240,3 +240,239 @@ func TestArgV1ProcessClone(t *testing.T) {
 	}
 
 }
+
+func TestCDRV1GetCDRs(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultTimezone = "UTC"
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	cdrS := &CDRServer{
+		cgrCfg:  cfg,
+		connMgr: nil,
+		cdrDb:   NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items),
+		dm:      dm,
+	}
+	args := &utils.RPCCDRsFilterWithAPIOpts{
+
+		RPCCDRsFilter: &utils.RPCCDRsFilter{},
+		Tenant:        "cgrates.org",
+		APIOpts:       map[string]interface{}{},
+	}
+	cdrs := &[]*CDR{
+		{
+			CGRID: "cgrid"},
+		{
+			CGRID: "cgr1d",
+		},
+	}
+	if err := cdrS.V1GetCDRs(*args, cdrs); err == nil {
+		t.Error(err)
+	}
+
+}
+
+func TestCDRV1CountCDRs(t *testing.T) {
+
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultTimezone = "UTC"
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	cdrS := &CDRServer{
+		cgrCfg:  cfg,
+		connMgr: nil,
+		cdrDb:   NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items),
+		dm:      dm,
+	}
+	args := &utils.RPCCDRsFilterWithAPIOpts{
+
+		RPCCDRsFilter: &utils.RPCCDRsFilter{},
+		Tenant:        "cgrates.org",
+		APIOpts:       map[string]interface{}{},
+	}
+
+	i := int64(3)
+	if err := cdrS.V1CountCDRs(args, &i); err != nil {
+		t.Error(err)
+	}
+
+}
+func TestV1RateCDRs(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultTimezone = "UTC"
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	cdrS := &CDRServer{
+		cgrCfg:  cfg,
+		connMgr: nil,
+		cdrDb:   NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items),
+		dm:      dm,
+	}
+	arg := &ArgRateCDRs{
+		Flags:         []string{"flag1", "flag2", "flag3"},
+		Tenant:        "cgrates",
+		RPCCDRsFilter: utils.RPCCDRsFilter{},
+		APIOpts:       map[string]interface{}{},
+	}
+
+	reply := "reply"
+	if err := cdrS.V1RateCDRs(arg, &reply); err == nil {
+		t.Error(err)
+	}
+
+}
+
+func TestCDRServerThdsProcessEvent(t *testing.T) {
+	clMock := &ccMock{
+		calls: map[string]func(args interface{}, reply interface{}) error{
+			utils.ThresholdSv1ProcessEvent: func(args, reply interface{}) error {
+
+				rpl := &[]string{"event"}
+
+				*reply.(*[]string) = *rpl
+				return nil
+			},
+		},
+	}
+	clientconn := make(chan rpcclient.ClientConnector, 1)
+	clientconn <- clMock
+	cfg := config.NewDefaultCGRConfig()
+	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.ThresholdSConnsCfg): clientconn,
+	})
+	cfg.CdrsCfg().ThresholdSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ThreshSConnsCfg)}
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	cdrS := &CDRServer{
+		cgrCfg:  cfg,
+		connMgr: connMgr,
+		cdrDb:   db,
+		dm:      dm,
+	}
+	crgEv := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "id",
+		Time:   utils.TimePointer(time.Date(2019, 12, 1, 15, 0, 0, 0, time.UTC)),
+	}
+
+	if err := cdrS.thdSProcessEvent(crgEv); err != nil {
+		t.Error(err)
+	}
+
+}
+func TestCDRServerStatSProcessEvent(t *testing.T) {
+	ccMock := &ccMock{
+		calls: map[string]func(args interface{}, reply interface{}) error{
+			utils.StatSv1ProcessEvent: func(args, reply interface{}) error {
+
+				rpl := &[]string{"status"}
+
+				*reply.(*[]string) = *rpl
+				return nil
+			},
+		},
+	}
+	clientconn := make(chan rpcclient.ClientConnector, 1)
+	clientconn <- ccMock
+	cfg := config.NewDefaultCGRConfig()
+	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.StatSConnsCfg): clientconn,
+	})
+	cfg.CdrsCfg().StatSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.StatSConnsCfg)}
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	fltrs := NewFilterS(cfg, connMgr, dm)
+	cdrS := &CDRServer{
+		cgrCfg:  cfg,
+		dm:      dm,
+		filterS: fltrs,
+		cdrDb:   db,
+		connMgr: connMgr,
+	}
+	crgEv := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "id",
+		Time:   utils.TimePointer(time.Date(2019, 12, 1, 15, 0, 0, 0, time.UTC)),
+	}
+
+	if err := cdrS.statSProcessEvent(crgEv); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestCDRServerEesProcessEvent(t *testing.T) {
+	ccMock := &ccMock{
+		calls: map[string]func(args interface{}, reply interface{}) error{
+			utils.EeSv1ProcessEvent: func(args, reply interface{}) error {
+				rpls := &map[string]map[string]interface{}{
+					"eeS": {
+						"process": "event",
+					},
+				}
+				*reply.(*map[string]map[string]interface{}) = *rpls
+
+				return nil
+			},
+		},
+	}
+	clientconn := make(chan rpcclient.ClientConnector, 1)
+	clientconn <- ccMock
+
+	cfg := config.NewDefaultCGRConfig()
+	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.EEsConnsCfg): clientconn,
+	})
+	cfg.CdrsCfg().EEsConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.EEsConnsCfg)}
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
+	cdrS := &CDRServer{
+		cgrCfg:  cfg,
+		cdrDb:   db,
+		dm:      dm,
+		connMgr: connMgr,
+	}
+
+	cgrEv := &CGREventWithEeIDs{
+		EeIDs: []string{"ees"},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "id",
+			Time:   utils.TimePointer(time.Date(2019, 12, 1, 15, 0, 0, 0, time.UTC)),
+		},
+	}
+	if err := cdrS.eeSProcessEvent(cgrEv); err != nil {
+		t.Error(err)
+	}
+
+}
+
+func TestCDRefundEventCost(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	ccMock := &ccMock{
+		calls: map[string]func(args interface{}, reply interface{}) error{
+			utils.ResponderRefundIncrements: func(args, reply interface{}) error {
+				return nil
+			},
+		},
+	}
+	ec := &EventCost{
+		CGRID: "event",
+		RunID: "runid",
+	}
+	clientconn := make(chan rpcclient.ClientConnector, 1)
+	clientconn <- ccMock
+	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.ResponderRefundIncrements): clientconn,
+	})
+	cfg.CdrsCfg().RaterConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ResponderRefundIncrements)}
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	cdrS := &CDRServer{
+		cgrCfg:  cfg,
+		cdrDb:   db,
+		dm:      dm,
+		connMgr: connMgr,
+	}
+	if _, err := cdrS.refundEventCost(ec, "*postpaid", "tor"); err != nil {
+		t.Error(err)
+	}
+}

@@ -1345,15 +1345,14 @@ func TestArgeesUnmarshalJSON(t *testing.T) {
 		t.Error(err)
 	} else if err = cgr.UnmarshalJSON([]byte(`{
 		"EeIDs":["eeid1","eeid2"],
-		"CGREvent":{
-			"Event":{
-				"CostDetails":"22"
-		}
-	}}`)); err != nil {
+		"Event":{
+				"CostDetails":{
+				 "CGRID":"id1"	}
+			 }
+	  }`)); err != nil {
 		t.Error(err)
 	}
 }
-
 func TestArgeesRPCClone(t *testing.T) {
 
 	attr := &CGREventWithEeIDs{
