@@ -543,9 +543,9 @@ func TestParseTimeDetectLayout(t *testing.T) {
 		t.Errorf("Expecting: %v, received: %v", expected.UTC(), date.UTC())
 	}
 	if date, err := ParseTimeDetectLayout("2014-11-25T00:00:00+01:00", "65"); err == nil {
-		t.Error("Expecting error 'timezone: invalid timezone', received: nil")
+		t.Errorf("Expecting error 'timezone: invalid timezone', received: %v", err)
 	} else if date != nilTime {
-		t.Errorf("Expecting nilTime, received: %+v", date)
+		t.Errorf("Expecting %+v, received: %+v", nilTime, date)
 	}
 
 }
@@ -1713,10 +1713,9 @@ func TestToUnescapedJSON(t *testing.T) {
 	}
 
 	r := testStruc{testInt: 999}
-
-	if rcv, err := ToUnescapedJSON(a); err == nil {
-		t.Error(err)
-		t.Errorf("Expected nil, received %v", rcv)
+	expErr := "json: unsupported type: func(int, int) int"
+	if _, err := ToUnescapedJSON(a); err == nil || err.Error() != expErr {
+		t.Errorf("Expected: <%+v>, received: <%+v>", expErr, err)
 	}
 	exp := []byte{123, 125, 10}
 	if rcv, err := ToUnescapedJSON(r); err != nil {

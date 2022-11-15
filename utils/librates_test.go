@@ -2248,3 +2248,20 @@ func TestLibratesRateSIncrementClone(t *testing.T) {
 			ToJSON(ri), ToJSON(rcv))
 	}
 }
+
+// unfinished
+// func TestAsRateAPIConvert(t *testing.T) {
+// 	ext := APIRate{
+
+// 		Weights: "notEmpty",
+// 	}
+// 	expErr := "invalid DynamicWeight format for string <notEmpty>"
+// 	exp := APIRate{}
+
+// 	if rcv, err := ext.AsRate(); err == nil || err.Error() != expErr {
+// 		t.Errorf("%+v", err)
+// 	} else if !reflect.DeepEqual(exp, rcv) {
+// 		t.Errorf("Expected <%+v>, Recevied <%+v>", ToJSON(exp), ToJSON(rcv))
+// 	}
+
+// }

@@ -429,6 +429,12 @@ func TestDecimalDuration(t *testing.T) {
 	} else if rcv != time.Nanosecond*3 {
 		t.Errorf("Expected 3ns")
 	}
+
+	d = NewDecimal(999999999999999999, 5555555555555555555)
+	rcv, ok = d.Duration()
+	if ok {
+		t.Errorf("Cannot convert %v", rcv)
+	}
 }
 
 func TestMarshalUnmarshalNA(t *testing.T) {
@@ -459,6 +465,8 @@ func TestNewRoundingMode(t *testing.T) {
 		{"*toNearestTowardZero", 6},
 	}
 
+	unsupp := "unsupported"
+
 	for _, e := range tests {
 		if rcv, err := NewRoundingMode(e.rnd); err != nil {
 			t.Error(err)
@@ -466,5 +474,48 @@ func TestNewRoundingMode(t *testing.T) {
 			t.Errorf("expected: <%v>, received: <%v>", e.exp, rcv)
 		}
 
+	}
+	expErr := "usupoorted rounding: <\"unsupported\">"
+	if _, err := NewRoundingMode(unsupp); err == nil || err.Error() != expErr {
+		t.Errorf("expected: <%+v>, received: <%+v>", expErr, err)
+	}
+
+}
+
+func TestNewRoundingModeToString(t *testing.T) {
+	var tests = []struct {
+		rnd decimal.RoundingMode
+		exp string
+	}{
+		{0, "*toNearestEven"},
+		{1, "*toNearestAway"},
+		{2, "*toZero"},
+		{3, "*awayFromZero"},
+		{4, "*toNegativeInf"},
+		{5, "*toPositiveInf"},
+		{6, "*toNearestTowardZero"},
+		{7, ""},
+	}
+
+	for _, e := range tests {
+		if rcv := RoundingModeToString(e.rnd); !reflect.DeepEqual(rcv, e.exp) {
+			t.Errorf("expected: <%v>, received: <%v>", e.exp, rcv)
+		}
+	}
+
+}
+
+func TestDivideDecimal(t *testing.T) {
+	var x *Decimal = NewDecimal(12, 0)
+	var y *Decimal = NewDecimal(2, 0)
+	exp := NewDecimal(6, 0)
+	if rcv := DivideDecimal(x, y); !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("expected: <%+v>, received: <%+v>", exp, rcv)
+	}
+}
+
+func TestNewDecimalFromStringIgnoreError(t *testing.T) {
+	if rcv := NewDecimalFromStringIgnoreError("teststring"); rcv != nil {
+		t.Errorf("Expected <nil>, received <%+v>", rcv)
 	}
 }

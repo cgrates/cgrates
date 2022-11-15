@@ -104,12 +104,14 @@ func TestNewDynamicWeightsFromString(t *testing.T) {
 			Weight:    5,
 		},
 	}
+
+	expErr := "invalid DynamicWeight format for string <;5;>"
 	if rcv, err := NewDynamicWeightsFromString(";5", ";", "&"); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(exps, rcv) {
 		t.Errorf("expecting: %+v, received: %+v", ToJSON(exps), ToJSON(rcv))
-	} else if _, err := NewDynamicWeightsFromString(";5;", ";", "&"); err == nil {
-		t.Error(err)
+	} else if _, err := NewDynamicWeightsFromString(";5;", ";", "&"); err == nil || err.Error() != expErr {
+		t.Errorf("Expected <%+v> Received <%+v>", expErr, err)
 	}
 }
 
