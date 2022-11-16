@@ -200,7 +200,7 @@ func (d *Decimal) MarshalBinary() ([]byte, error) {
 // UnmarshalJSON implements the method for jsonUnmarshal for JSON encoding
 func (d *Decimal) UnmarshalJSON(data []byte) (err error) {
 	if d == nil {
-		*d = Decimal{decimal.WithContext(DecimalContext)}
+		d = &Decimal{decimal.WithContext(DecimalContext)}
 	}
 	if d.Big == nil {
 		d.Big = decimal.WithContext(DecimalContext)

@@ -21,6 +21,7 @@ package utils
 import (
 	"bytes"
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"reflect"
@@ -228,3 +229,166 @@ func TestLoggerStdLoggerDebug(t *testing.T) {
 		t.Errorf("expected: <%s>, \nreceived: <%s>", expMsg, buf.String())
 	}
 }
+
+func TestCloseSysLogger(t *testing.T) {
+	sl, _ := NewSysLogger("test", 2)
+
+	if err := sl.Close(); err != nil {
+		t.Errorf("Expected <nil>, received %v", err)
+	}
+
+}
+func TestWriteSysLogger(t *testing.T) {
+	sl, _ := NewSysLogger("test", 2)
+	exp := 6
+	testbyte := []byte{97, 98, 99, 100, 101, 102}
+	if rcv, err := sl.Write(testbyte); err != nil {
+		t.Errorf("Expected <nil>, received %v", err)
+	} else if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("expected: <%v>, received: <%v>", exp, rcv)
+	}
+
+}
+
+func TestAlertSysLogger(t *testing.T) {
+	sl, _ := NewSysLogger("test", 0)
+
+	if err := sl.Alert("Alert Message"); err != nil {
+		t.Errorf("Expected <nil>, received %v", err)
+	}
+	sl, _ = NewSysLogger("test2", 2)
+	if err := sl.Alert("Alert Message 2"); err != nil {
+		t.Errorf("Expected <nil>, received %v", err)
+	}
+}
+func TestCritSysLogger(t *testing.T) {
+	sl, _ := NewSysLogger("test", 1)
+
+	if err := sl.Crit("Critical Message"); err != nil {
+		t.Errorf("Expected <nil>, received %v", err)
+	}
+	sl, _ = NewSysLogger("test2", 4)
+	if err := sl.Crit("Critical Message 2"); err != nil {
+		t.Errorf("Expected <nil>, received %v", err)
+	}
+}
+
+func TestDebugSysLogger(t *testing.T) {
+	sl, _ := NewSysLogger("test", 6)
+
+	if err := sl.Debug("Debug Message"); err != nil {
+		t.Errorf("Expected <nil>, received %v", err)
+	}
+	sl, _ = NewSysLogger("test2", 8)
+	if err := sl.Debug("Debug Message 2"); err != nil {
+		t.Errorf("Expected <nil>, received %v", err)
+	}
+}
+
+func TestEmergSysLogger(t *testing.T) {
+	sl, _ := NewSysLogger("test", -1)
+
+	if err := sl.Emerg("Emergency Message"); err != nil {
+		t.Errorf("Expected <nil>, received %v", err)
+	}
+	// always prints to stderr
+	// sl, _ = NewSysLogger("test2", 1)
+	// if err := sl.Emerg("Emergency Message 2"); err != nil {
+	// 	t.Errorf("Expected <nil>, received %v", err)
+	// }
+}
+
+func TestErrSysLogger(t *testing.T) {
+	sl, _ := NewSysLogger("test", 2)
+
+	if err := sl.Err("Error Message"); err != nil {
+		t.Errorf("Expected <nil>, received %v", err)
+	}
+	sl, _ = NewSysLogger("test2", 4)
+	if err := sl.Err("Error Message 2"); err != nil {
+		t.Errorf("Expected <nil>, received %v", err)
+	}
+}
+func TestInfoSysLogger(t *testing.T) {
+	sl, _ := NewSysLogger("test", 5)
+
+	if err := sl.Info("Info Message"); err != nil {
+		t.Errorf("Expected <nil>, received %v", err)
+	}
+	sl, _ = NewSysLogger("test2", 7)
+	if err := sl.Info("Info Message 2"); err != nil {
+		t.Errorf("Expected <nil>, received %v", err)
+	}
+}
+func TestNoticeSysLogger(t *testing.T) {
+	sl, _ := NewSysLogger("test", 4)
+
+	if err := sl.Notice("Notice Message"); err != nil {
+		t.Errorf("Expected <nil>, received %v", err)
+	}
+	sl, _ = NewSysLogger("test2", 6)
+	if err := sl.Notice("Notice Message 2"); err != nil {
+		t.Errorf("Expected <nil>, received %v", err)
+	}
+}
+func TestWarningSysLogger(t *testing.T) {
+	sl, _ := NewSysLogger("test", 3)
+
+	if err := sl.Warning("Warning Message"); err != nil {
+		t.Errorf("Expected <nil>, received %v", err)
+	}
+	sl, _ = NewSysLogger("test2", 5)
+	if err := sl.Warning("Warning Message 2"); err != nil {
+		t.Errorf("Expected <nil>, received %v", err)
+	}
+}
+
+func TestCloseNopCloser(t *testing.T) {
+	var nC NopCloser
+
+	if err := nC.Close(); err != nil {
+		t.Errorf("Expected <nil>, received %v", err)
+	}
+
+}
+
+func TestWriteLogWriter(t *testing.T) {
+	l := &logWriter{
+		log.New(io.Discard, EmptyString, log.LstdFlags),
+	}
+	exp := 1
+	if rcv, err := l.Write([]byte{51}); err != nil {
+		t.Error(err)
+	} else if rcv != exp {
+		t.Errorf("Expected <%+v> <%T>, received <%+v> <%T>", exp, exp, rcv, rcv)
+	}
+}
+
+func TestCloseLogWriter(t *testing.T) {
+	var lW logWriter
+	if err := lW.Close(); err != nil {
+		t.Errorf("Expected <nil>, received %v", err)
+	}
+
+}
+
+func TestGetSyslogStdLogger(t *testing.T) {
+	sl := &StdLogger{}
+	if rcv := sl.GetSyslog(); rcv != nil {
+		t.Errorf("Expected <nil>, received %v", rcv)
+	}
+}
+func TestCloseStdLogger(t *testing.T) {
+	sl := &StdLogger{w: Logger}
+	if rcv := sl.Close(); rcv != nil {
+		t.Errorf("Expected <nil>, received %v", rcv)
+	}
+}
+
+//  unfinished
+// func TestWriteStdLogger(t *testing.T) {
+// sl := &StdLogger{w: Logger}
+// if rcv, err := sl.Write([]byte{}); err != nil {
+// t.Errorf("Expected <nil>, received %v %v", err, rcv)
+// }
+// }

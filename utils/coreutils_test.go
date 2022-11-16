@@ -542,8 +542,9 @@ func TestParseTimeDetectLayout(t *testing.T) {
 	if err != nil || !date.UTC().Equal(expected.UTC()) {
 		t.Errorf("Expecting: %v, received: %v", expected.UTC(), date.UTC())
 	}
-	if date, err := ParseTimeDetectLayout("2014-11-25T00:00:00+01:00", "65"); err == nil {
-		t.Errorf("Expecting error 'timezone: invalid timezone', received: %v", err)
+	expErr := "unknown time zone 65"
+	if date, err := ParseTimeDetectLayout("2014-11-25T00:00:00+01:00", "65"); err == nil || err.Error() != expErr {
+		t.Errorf("Expecting error %v, received: %v", expErr, err)
 	} else if date != nilTime {
 		t.Errorf("Expecting %+v, received: %+v", nilTime, date)
 	}

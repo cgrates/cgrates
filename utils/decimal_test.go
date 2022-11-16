@@ -264,6 +264,11 @@ func TestUnmarshalJSON(t *testing.T) {
 	if err := dec2.UnmarshalJSON([]byte(`0`)); err != nil {
 		t.Error(err)
 	}
+
+	var decnil *Decimal
+	if err := decnil.UnmarshalJSON([]byte(`0`)); err != nil {
+		t.Error(err)
+	}
 }
 
 func TestDecimalCalculus(t *testing.T) {
