@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"reflect"
 	"testing"
 	"time"
 
@@ -595,12 +596,46 @@ func TestBalanceDebitUnits(t *testing.T) {
 		Value:          12.22,
 		ExpirationDate: time.Date(2022, 11, 1, 20, 0, 0, 0, time.UTC),
 		Blocker:        true,
-		Disabled:       true,
+		Disabled:       false,
 		precision:      2,
+		RatingSubject:  "*zero34",
 	}
 	fltrs := FilterS{cfg, dm, nil}
+	config.SetCgrConfig(cfg)
+	exp := &CallCost{Category: "postpaid",
+		Tenant:  "foehn",
+		Subject: "foehn", Account: "foehn",
+		Destination: "0034678096720", ToR: "*voice",
+		Cost: 0,
+		Timespans: TimeSpans{
+			{TimeStart: time.Date(2015, 4, 24, 7, 59, 4, 0, time.UTC),
+				TimeEnd: time.Date(2015, 4, 24, 8, 2, 0, 0, time.UTC),
+				Cost:    0,
+				RateInterval: &RateInterval{
+					Rating: &RIRate{
+						ConnectFee:       0,
+						RoundingDecimals: 0,
+						MaxCost:          0,
+						Rates: RateGroups{
+							{
+								GroupIntervalStart: 0,
+								Value:              0,
+								RateIncrement:      34,
+								RateUnit:           34},
+						}},
+					Weight: 0},
+				DurationIndex:  26,
+				MatchedSubject: "uuid",
+				MatchedPrefix:  "0034678096720",
+				MatchedDestId:  "*any",
+				RatingPlanId:   "*none",
+				CompressFactor: 0}},
+		RatedUsage: 0,
+	}
 
-	if _, err := b.debitUnits(cd, ub, moneyBalances, true, false, true, &fltrs); err != nil {
-		t.Error(err)
+	if val, err := b.debitUnits(cd, ub, moneyBalances, true, false, true, &fltrs); err != nil {
+		t.Errorf("received %v", err)
+	} else if reflect.DeepEqual(val, exp) {
+		t.Errorf("expected %+v ,received  %+v", utils.ToJSON(exp), utils.ToJSON(val))
 	}
 }

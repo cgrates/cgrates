@@ -19,6 +19,7 @@ package engine
 
 import (
 	"encoding/json"
+	"reflect"
 	"testing"
 
 	"github.com/cgrates/cgrates/utils"
@@ -171,10 +172,13 @@ func TestDynamicDPFieldAsInterface(t *testing.T) {
 }
 
 func TestDPNewLibNumber(t *testing.T) {
-	if _, err := newLibPhoneNumberDP("+3554735474"); err != nil {
+	exp := &libphonenumberDP{}
+	if val, err := newLibPhoneNumberDP("+3554735474"); err != nil {
 		t.Errorf("received <%v>", err)
+	} else if reflect.DeepEqual(val, exp) {
+		t.Errorf("expected %v,received %v", utils.ToJSON(exp), utils.ToJSON(val))
 	} else if _, err = newLibPhoneNumberDP("some"); err == nil {
-		t.Error("expected error")
+		t.Error("expected error ,received nil")
 	}
 
 }

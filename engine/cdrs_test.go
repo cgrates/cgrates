@@ -476,3 +476,40 @@ func TestCDRefundEventCost(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+/*
+func TestV2ProcessEvent(t *testing.T) {
+
+	cfg := config.NewDefaultCGRConfig()
+	ccMock := &ccMock{
+		calls: map[string]func(args interface{}, reply interface{}) error{
+			utils.ResponderRefundIncrements: func(args, reply interface{}) error {
+				return nil
+			},
+		},
+	}
+
+	clientconn := make(chan rpcclient.ClientConnector, 1)
+	clientconn <- ccMock
+	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.ResponderRefundIncrements): clientconn,
+	})
+	cfg.CdrsCfg().RaterConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ResponderRefundIncrements)}
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	cdrS := &CDRServer{
+		cgrCfg:  cfg,
+		cdrDb:   db,
+		dm:      dm,
+		connMgr: connMgr,
+	}
+	arg:=&ArgV1ProcessEvent{
+		Flags: []string{},
+
+	}
+	evs:=&[]*utils.EventWithFlags{
+
+	}
+	if err:=cdrS.V2ProcessEvent()
+}
+*/

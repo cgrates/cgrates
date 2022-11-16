@@ -2818,6 +2818,11 @@ func BenchmarkUUID(b *testing.B) {
 }
 
 func TestResetAccountCDR(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	idb := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(idb, cfg.CacheCfg(), nil)
+	fltrs := NewFilterS(cfg, nil, dm)
+	SetCdrStorage(idb)
 	var extraData interface{}
 	acc := &Account{
 		ID: "cgrates.org:1001",
@@ -2857,9 +2862,9 @@ func TestResetAccountCDR(t *testing.T) {
 			balanceValue: 10,
 		},
 	}
-	if err := resetAccountCDR(nil, a, acs, nil, extraData); err == nil {
-		t.Error(err)
-	} else if err = resetAccountCDR(acc, a, acs, nil, extraData); err == nil {
+	if err := resetAccountCDR(nil, a, acs, fltrs, extraData); err == nil || err.Error() != "nil account" {
+		t.Errorf("expected <nil account> ,received <%+v>", err)
+	} else if err = resetAccountCDR(acc, a, acs, fltrs, extraData); err == nil {
 		t.Error(err)
 	}
 }
@@ -2890,6 +2895,42 @@ func TestSetRecurrentAction(t *testing.T) {
 }
 
 func TestActionSetDDestinations(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.RalsCfg().StatSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.StatSConnsCfg)}
+	cfg.GeneralCfg().DefaultTenant = "cgrates.org"
+	ccMock := &ccMock{
+		calls: map[string]func(args interface{}, reply interface{}) error{
+			utils.StatSv1GetStatQueue: func(args, reply interface{}) error {
+				rpl := &StatQueue{
+					Tenant: "cgrates",
+					ID:     "id",
+					SQMetrics: map[string]StatMetric{
+						utils.MetaDDC: &StatDDC{
+							FilterIDs: []string{"filters"},
+							Count:     7,
+						},
+					},
+					SQItems: []SQItem{
+						{
+							EventID: "event1",
+						}, {
+							EventID: "event2",
+						},
+					},
+				}
+				*reply.(*StatQueue) = *rpl
+				return nil
+			},
+		},
+	}
+	clientconn := make(chan rpcclient.ClientConnector, 1)
+	clientconn <- ccMock
+
+	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.StatSConnsCfg): clientconn,
+	})
+	SetConnManager(connMgr)
+	config.SetCgrConfig(cfg)
 	ub := &Account{
 		ID: "ACCID",
 		ActionTriggers: ActionTriggers{
@@ -2911,7 +2952,7 @@ func TestActionSetDDestinations(t *testing.T) {
 					DestinationIDs: utils.StringMap{
 
 						"*ddc_dest": true,
-						"*dest":     false,
+						"*ddcdest":  false,
 					}},
 			},
 			utils.MetaVoice: {
@@ -2932,7 +2973,7 @@ func TestActionSetDDestinations(t *testing.T) {
 	a := &Action{
 		Id:              "CDRLog1",
 		ActionType:      utils.CDRLog,
-		ExtraParameters: "{\"BalanceID\":\"~*acnt.BalanceID\",\"ActionID\":\"~*act.ActionID\",\"BalanceValue\":\"~*acnt.BalanceValue\"}",
+		ExtraParameters: "{\"BalanceID\";\"~*acnt.BalanceID\";\"ActionID\";\"~*act.ActionID\";\"BalanceValue\";\"~*acnt.BalanceValue\"}",
 		Weight:          50,
 	}
 	acs := Actions{
@@ -3019,12 +3060,31 @@ func TestActionPublishAccount(t *testing.T) {
 		},
 	}
 	if err := publishAccount(ub, a, acs, nil, nil); err != nil {
-		t.Error(err)
+		t.Errorf("received %v", err)
 	}
 }
 
 func TestExportAction(t *testing.T) {
 
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ApierCfg().EEsConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.EEsConnsCfg)}
+	config.SetCgrConfig(cfg)
+	ccMock := &ccMock{
+		calls: map[string]func(args, reply interface{}) error{
+			utils.EeSv1ProcessEvent: func(args, reply interface{}) error {
+				rpl := &map[string]map[string]interface{}{}
+				*reply.(*map[string]map[string]interface{}) = *rpl
+
+				return nil
+			},
+		},
+	}
+	clientconn := make(chan rpcclient.ClientConnector, 1)
+	clientconn <- ccMock
+	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.EEsConnsCfg): clientconn,
+	})
+	SetConnManager(connMgr)
 	ub := &Account{
 		ID: "ACCID",
 		ActionTriggers: ActionTriggers{
@@ -3085,7 +3145,67 @@ func TestExportAction(t *testing.T) {
 			balanceValue: 10,
 		},
 	}
-	if err := export(ub, a, acs, nil, utils.CGREvent{Tenant: "cgrates.org", ID: "id"}); err == nil {
-		t.Error(err)
+	if err := export(ub, a, acs, nil, utils.CGREvent{Tenant: "cgrates.org", ID: "id"}); err != nil {
+		t.Errorf("received %v", err)
 	}
+}
+func TestResetStatQueue(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.SchedulerCfg().StatSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.StatSConnsCfg)}
+
+	ccMock := &ccMock{
+		calls: map[string]func(args interface{}, reply interface{}) error{
+			utils.StatSv1ResetStatQueue: func(args, reply interface{}) error {
+				rpl := "reset"
+				*reply.(*string) = rpl
+				return nil
+			},
+		},
+	}
+	clientconn := make(chan rpcclient.ClientConnector, 1)
+	clientconn <- ccMock
+	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.StatSConnsCfg): clientconn,
+	})
+	SetConnManager(connMgr)
+	config.SetCgrConfig(cfg)
+	ub := &Account{}
+	a := &Action{
+		ExtraParameters: "cgrates.org:id",
+	}
+	acs := Actions{}
+	if err := resetStatQueue(ub, a, acs, nil, nil); err == nil {
+		t.Errorf("received <%+v>", err)
+	}
+
+}
+
+func TestResetTreshold(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.SchedulerCfg().ThreshSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ThreshSConnsCfg)}
+	ccMock := &ccMock{
+		calls: map[string]func(args interface{}, reply interface{}) error{
+			utils.ThresholdSv1ResetThreshold: func(args, reply interface{}) error {
+				rpl := "threshold_reset"
+				*reply.(*string) = rpl
+				return nil
+			},
+		},
+	}
+	clientconn := make(chan rpcclient.ClientConnector, 1)
+	clientconn <- ccMock
+	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.ThreshSConnsCfg): clientconn,
+	})
+	SetConnManager(connMgr)
+	config.SetCgrConfig(cfg)
+	ub := &Account{}
+	a := &Action{
+		ExtraParameters: "cgrates.org:id",
+	}
+	acs := Actions{}
+	if err := resetThreshold(ub, a, acs, nil, nil); err != nil {
+		t.Errorf("received <%+v>", err)
+	}
+
 }

@@ -1196,8 +1196,8 @@ func TestMaxDebitWithAccountShared(t *testing.T) {
 		t.Errorf("Error debiting shared balance: %+v", other.BalanceMap[utils.MetaMonetary][0])
 	}
 	cd.account.Disabled = true
-	if _, err := cd.getAccount(); err == nil {
-		t.Error("expected nil")
+	if _, err := cd.getAccount(); err == nil || err != utils.ErrAccountDisabled {
+		t.Errorf("expected %v,received %v", utils.ErrAccountDisabled, err)
 	}
 }
 
@@ -2552,19 +2552,42 @@ func TestValidateCallData(t *testing.T) {
 }
 
 func TestCDRefundRounding(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().LockingTimeout = 4 * time.Second
+	config.SetCgrConfig(cfg)
 	cd := &CallDescriptor{
 		Category:    "call",
 		Tenant:      "cgrates.org",
 		Subject:     "1001",
 		Account:     "1001",
 		Destination: "1002",
+		Increments: Increments{
+			&Increment{
+				BalanceInfo: &DebitInfo{
+					AccountID: "acc_id",
+					Unit:      &UnitInfo{},
+				},
+				Duration: 1 * time.Minute,
+				Cost:     21,
+			},
+			&Increment{
+				BalanceInfo: &DebitInfo{
+					AccountID: "acc_id2",
+					Unit:      &UnitInfo{},
+				},
+				Duration: 1 * time.Minute,
+				Cost:     21,
+			},
+		},
 	}
-	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, true, nil)
+
+	dataDB := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
 	fltrs := NewFilterS(cfg, nil, dm)
 
-	if _, err := cd.RefundRounding(fltrs); err != nil {
-		t.Error(err)
+	if val, err := cd.RefundRounding(fltrs); err != nil {
+		t.Errorf("received <%v>", err)
+	} else if reflect.DeepEqual(val, nil) {
+		t.Errorf("received %v", val)
 	}
 }
