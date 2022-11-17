@@ -2161,3 +2161,23 @@ func TestTimeSpansMerge(t *testing.T) {
 		t.Errorf("expected %v ,recived %v", utils.ToJSON(expMerge), utils.ToJSON(tss))
 	}
 }
+
+func TestMIUIEqualFalse(t *testing.T) {
+	mi := &MonetaryInfo{
+		UUID:  "uuid",
+		ID:    "id",
+		Value: 23.1,
+	}
+	ui := &UnitInfo{
+		UUID:          "uuid",
+		ID:            "id",
+		Value:         12.2,
+		DestinationID: "destId",
+	}
+	if val := mi.Equal(nil); val {
+		t.Errorf("expected false ,received %+v", val)
+	} else if val = ui.Equal(nil); val {
+		t.Errorf("expected false,received %+v", val)
+	}
+
+}

@@ -1030,3 +1030,27 @@ func TestTPReaderReloadCache(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestTPReaderLoadDestinationsFiltered(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	tpr, err := NewTpReader(nil, db, "id", "local", nil, nil, false)
+	if err != nil {
+		t.Error(err)
+	}
+	if b, err := tpr.LoadDestinationsFiltered("tag"); (err == nil || err != utils.ErrNotFound) || b {
+		t.Errorf("expected %+v ,received %v", utils.ErrNotFound, err)
+	}
+}
+
+func TestTPReaderLoadAll(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	tpr, err := NewTpReader(nil, db, "", "local", nil, nil, false)
+	if err != nil {
+		t.Error(err)
+	}
+	if err = tpr.LoadAll(); err != nil {
+		t.Error(err)
+	}
+}
