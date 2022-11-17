@@ -385,10 +385,25 @@ func TestCloseStdLogger(t *testing.T) {
 	}
 }
 
-//  unfinished
-// func TestWriteStdLogger(t *testing.T) {
-// sl := &StdLogger{w: Logger}
-// if rcv, err := sl.Write([]byte{}); err != nil {
-// t.Errorf("Expected <nil>, received %v %v", err, rcv)
-// }
-// }
+func TestWriteStdLogger(t *testing.T) {
+	sl := &StdLogger{
+		w: &logWriter{
+			log.New(io.Discard, EmptyString, log.LstdFlags),
+		},
+	}
+	exp := 1
+	if rcv, err := sl.Write([]byte{222}); err != nil {
+		t.Error(err)
+	} else if rcv != exp {
+		t.Errorf("Expected <%v>, received <%v>", exp, rcv)
+	}
+}
+
+func TestGetLogLevelStdLogger(t *testing.T) {
+	sl := &StdLogger{}
+	exp := 0
+	if rcv := sl.GetLogLevel(); rcv != exp {
+		t.Errorf("Expected <%v>, received %v %T", exp, rcv, rcv)
+	}
+
+}

@@ -2255,11 +2255,8 @@ func TestAsRateAPIConvert(t *testing.T) {
 		Weights: "notEmpty",
 	}
 	expErr := "invalid DynamicWeight format for string <notEmpty>"
-	var exp *Rate
 
-	if rcv, err := ext.AsRate(); err == nil || err.Error() != expErr {
+	if _, err := ext.AsRate(); err == nil || err.Error() != expErr {
 		t.Errorf("%+v", err)
-	} else if !reflect.DeepEqual(exp, rcv) {
-		t.Errorf("Expected <%+v %T>, Recevied <%+v %T>", ToJSON(exp), exp, ToJSON(rcv), rcv)
 	}
 }

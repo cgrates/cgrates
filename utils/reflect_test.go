@@ -1755,3 +1755,28 @@ func TestStringAsBig(t *testing.T) {
 		t.Errorf("Expected %v \n but received \n %v", exp, v)
 	}
 }
+
+func TestIfaceAsTInt(t *testing.T) {
+
+	var testInt32 int32 = 132
+	var testInt64 int64 = 164
+	var testFloat32 float32 = 15.32
+	var expInt32 int32 = 132
+	var expInt64 int64 = 164
+	var expFloat32 float32 = 15.32
+	if rcv, err := IfaceAsInt(testInt32); err != nil {
+		t.Error(err)
+	} else if rcv != int(expInt32) {
+		t.Errorf("Expected <%+v>, received <%+v>", expInt32, rcv)
+	}
+	if rcv, err := IfaceAsInt(testInt64); err != nil {
+		t.Error(err)
+	} else if rcv != int(expInt64) {
+		t.Errorf("Expected <%+v>, received <%+v>", expInt32, rcv)
+	}
+	if rcv, err := IfaceAsInt(testFloat32); err != nil {
+		t.Error(err)
+	} else if rcv != int(expFloat32) {
+		t.Errorf("Expected <%+v>, received <%+v>", expInt32, rcv)
+	}
+}
