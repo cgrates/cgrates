@@ -3209,3 +3209,38 @@ func TestResetTreshold(t *testing.T) {
 	}
 
 }
+
+func TestEnableDisableAccountAction(t *testing.T) {
+
+	var acc *Account
+	expErr := "nil account"
+	if err := enableAccountAction(acc, nil, nil, nil, nil); err == nil || err.Error() != expErr {
+		t.Errorf("expected %+v ,received %v", expErr, err)
+	} else if err = disableAccountAction(acc, nil, nil, nil, nil); err == nil || err.Error() != expErr {
+		t.Errorf("expected %+v ,received %v", expErr, err)
+	} else if err = genericDebit(acc, nil, true, nil); err == nil || err.Error() != expErr {
+		t.Errorf("expected %+v ,received %v", expErr, err)
+	} else if err = resetCountersAction(acc, nil, nil, nil, nil); err == nil || err.Error() != expErr {
+		t.Errorf("expected %+v ,received %v", expErr, err)
+	} else if err = debitAction(acc, nil, nil, nil, nil); err == nil || err.Error() != expErr {
+		t.Errorf("expected %+v ,received %v", expErr, err)
+	} else if err = debitResetAction(acc, nil, nil, nil, nil); err == nil || err.Error() != expErr {
+		t.Errorf("expected %+v ,received %v", expErr, err)
+	} else if err = topupAction(acc, nil, nil, nil, nil); err == nil || err.Error() != expErr {
+		t.Errorf("expected %+v ,received %v", expErr, err)
+	} else if err = topupResetAction(acc, nil, nil, nil, nil); err == nil || err.Error() != expErr {
+		t.Errorf("expected %+v ,received %v", expErr, err)
+	} else if err = resetAccountAction(acc, nil, nil, nil, nil); err == nil || err.Error() != expErr {
+		t.Errorf("expected %+v ,received %v", expErr, err)
+	} else if err = denyNegativeAction(acc, nil, nil, nil, nil); err == nil || err.Error() != expErr {
+		t.Errorf("expected %+v ,received %v", expErr, err)
+	} else if err = allowNegativeAction(acc, nil, nil, nil, nil); err == nil || err.Error() != expErr {
+		t.Errorf("expected %+v ,received %v", expErr, err)
+	} else if err = unsetRecurrentAction(acc, nil, nil, nil, nil); err == nil || err.Error() != expErr {
+		t.Errorf("expected %+v ,received %v", expErr, err)
+	} else if err = setRecurrentAction(acc, nil, nil, nil, nil); err == nil || err.Error() != expErr {
+		t.Errorf("expected %+v ,received %v", expErr, err)
+	} else if err = resetTriggersAction(acc, nil, nil, nil, nil); err == nil || err.Error() != expErr {
+		t.Errorf("expected %+v ,received %v", expErr, err)
+	}
+}

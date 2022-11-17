@@ -639,3 +639,17 @@ func TestBalanceDebitUnits(t *testing.T) {
 		t.Errorf("expected %+v ,received  %+v", utils.ToJSON(exp), utils.ToJSON(val))
 	}
 }
+func TestBalanceDebitMoney(t *testing.T) {
+	cd := &CallDescriptor{}
+	ub := &Account{}
+	moneyBalances := Balances{}
+
+	b := &Balance{
+		Value:   220,
+		Timings: []*RITiming{},
+	}
+	if val, err := b.debitMoney(cd, ub, moneyBalances, true, true, true, nil); err != nil {
+		t.Errorf("expected nil,received %+v", val)
+	}
+
+}

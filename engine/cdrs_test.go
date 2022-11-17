@@ -477,39 +477,102 @@ func TestCDRefundEventCost(t *testing.T) {
 	}
 }
 
-/*
-func TestV2ProcessEvent(t *testing.T) {
-
+func TestGetCostFromRater(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	cfg.CdrsCfg().RaterConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.RateSConnsCfg)}
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+
 	ccMock := &ccMock{
 		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ResponderRefundIncrements: func(args, reply interface{}) error {
+
+			utils.ResponderDebit: func(args, reply interface{}) error {
+				rpl := &CallCost{
+					Category: "category",
+					Tenant:   "cgrates",
+				}
+				*reply.(*CallCost) = *rpl
 				return nil
 			},
 		},
 	}
-
 	clientconn := make(chan rpcclient.ClientConnector, 1)
 	clientconn <- ccMock
 	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
-		utils.ConcatenatedKey(utils.MetaInternal, utils.ResponderRefundIncrements): clientconn,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.RateSConnsCfg): clientconn,
 	})
-	cfg.CdrsCfg().RaterConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ResponderRefundIncrements)}
+	cdrS := &CDRServer{
+		cgrCfg:  cfg,
+		connMgr: connMgr,
+		cdrDb:   db,
+		dm:      dm,
+	}
+	cd := &CDR{
+		Category:    "category",
+		Tenant:      "cgrates.org",
+		RequestType: utils.PseudoPrepaid,
+	}
+	cdr := &CDRWithAPIOpts{
+		CDR:     cd,
+		APIOpts: map[string]interface{}{},
+	}
+	exp := &CallCost{
+		Category: "category",
+		Tenant:   "cgrates",
+	}
+	if val, err := cdrS.getCostFromRater(cdr); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(exp, val) {
+		t.Errorf("expected %+v ,received %+v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+}
+
+func TestRefundEventCost(t *testing.T) {
+
+	cfg := config.NewDefaultCGRConfig()
+	cfg.CdrsCfg().RaterConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.RateSConnsCfg)}
+	ccMock := &ccMock{
+		calls: map[string]func(args interface{}, reply interface{}) error{
+			utils.ResponderRefundIncrements: func(args, reply interface{}) error {
+				rpl := &Account{}
+				*reply.(*Account) = *rpl
+				return nil
+			},
+		},
+	}
+	clientconn := make(chan rpcclient.ClientConnector, 1)
+	clientconn <- ccMock
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.RateSConnsCfg): clientconn,
+	})
 	cdrS := &CDRServer{
 		cgrCfg:  cfg,
 		cdrDb:   db,
 		dm:      dm,
 		connMgr: connMgr,
 	}
-	arg:=&ArgV1ProcessEvent{
-		Flags: []string{},
-
+	ec := &EventCost{
+		CGRID:     "cgrid",
+		RunID:     "rnID",
+		StartTime: time.Date(2022, 12, 1, 11, 0, 0, 0, time.UTC),
+		Charges: []*ChargingInterval{
+			{
+				CompressFactor: 2,
+				Increments: []*ChargingIncrement{
+					{
+						Usage: 10 * time.Minute,
+						Cost:  20,
+					}, {
+						Usage: 5 * time.Minute,
+						Cost:  15,
+					},
+				},
+			}, {},
+		},
 	}
-	evs:=&[]*utils.EventWithFlags{
-
+	if _, err := cdrS.refundEventCost(ec, utils.MetaPrepaid, "tor"); err == nil {
+		t.Error(err)
 	}
-	if err:=cdrS.V2ProcessEvent()
 }
-*/

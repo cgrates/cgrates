@@ -23,6 +23,7 @@ import (
 	"testing"
 
 	"github.com/cgrates/cgrates/utils"
+	"github.com/nyaruka/phonenumbers"
 )
 
 func TestDestinationStoreRestore(t *testing.T) {
@@ -172,13 +173,22 @@ func TestDynamicDPFieldAsInterface(t *testing.T) {
 }
 
 func TestDPNewLibNumber(t *testing.T) {
-	exp := &libphonenumberDP{}
+	num, err := phonenumbers.ParseAndKeepRawInput("+3554735474", utils.EmptyString)
+	if err != nil {
+		t.Error(err)
+	}
+	exp := &libphonenumberDP{
+		pNumber: num,
+		cache:   utils.MapStorage{},
+	}
 	if val, err := newLibPhoneNumberDP("+3554735474"); err != nil {
 		t.Errorf("received <%v>", err)
-	} else if reflect.DeepEqual(val, exp) {
-		t.Errorf("expected %v,received %v", utils.ToJSON(exp), utils.ToJSON(val))
-	} else if _, err = newLibPhoneNumberDP("some"); err == nil {
-		t.Error("expected error ,received nil")
+	} else if !reflect.DeepEqual(val, exp) {
+		t.Errorf("expected %v,received %v", exp, val)
+	}
+	expErr := "the phone number supplied is not a number"
+	if _, err := newLibPhoneNumberDP("some"); err == nil || err.Error() != expErr {
+		t.Errorf("expected %v ,received %v", expErr, err)
 	}
 
 }
