@@ -576,3 +576,57 @@ func TestRefundEventCost(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestCDRSV2ProcessEventNoTenant(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.CdrsCfg().ChargerSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)}
+	clMock := clMock(func(_ string, args interface{}, reply interface{}) error {
+		rply, cancast := reply.(*[]*ChrgSProcessEventReply)
+		if !cancast {
+			return fmt.Errorf("can't cast")
+		}
+		newArgs, cancast := args.(*utils.CGREvent)
+		if !cancast {
+			return fmt.Errorf("can't cast")
+		}
+		if newArgs.Tenant == utils.EmptyString {
+			return fmt.Errorf("Tenant is missing")
+		}
+		*rply = []*ChrgSProcessEventReply{}
+		return nil
+	})
+	chanClnt := make(chan rpcclient.ClientConnector, 1)
+	chanClnt <- clMock
+	connMngr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers): chanClnt,
+	})
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), connMngr)
+	cdrs := &CDRServer{
+		cgrCfg:  cfg,
+		connMgr: connMngr,
+		cdrDb:   NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items),
+		dm:      dm,
+	}
+	args := &ArgV1ProcessEvent{
+		Flags: []string{utils.MetaChargers},
+		CGREvent: utils.CGREvent{
+			ID: "TestV1ProcessEventNoTenant",
+			Event: map[string]interface{}{
+				utils.CGRID:        "test1",
+				utils.RunID:        utils.MetaDefault,
+				utils.OriginID:     "testV1CDRsRefundOutOfSessionCost",
+				utils.RequestType:  utils.MetaPrepaid,
+				utils.AccountField: "testV1CDRsRefundOutOfSessionCost",
+				utils.Destination:  "+4986517174963",
+				utils.AnswerTime:   time.Date(2019, 11, 27, 12, 21, 26, 0, time.UTC),
+				utils.Usage:        123 * time.Minute,
+			},
+		},
+	}
+	evs := &[]*utils.EventWithFlags{}
+
+	if err := cdrs.V2ProcessEvent(args, evs); err == nil {
+		t.Error(err)
+	}
+}
