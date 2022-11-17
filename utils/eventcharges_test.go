@@ -809,6 +809,18 @@ func TestEventChargerMerge(t *testing.T) {
 				CompressFactor: 2,
 			},
 		},
+		Rates: map[string]*IntervalRate{
+			"RATE_3": {
+				IntervalStart: NewDecimal(0, 0),
+				FixedFee:      NewDecimal(4, 1),
+				RecurrentFee:  NewDecimal(24, 1),
+			},
+			"RATE_4": {
+				IntervalStart: NewDecimal(12, 1),
+				FixedFee:      NewDecimal(1, 0),
+				RecurrentFee:  NewDecimal(5, 2),
+			},
+		},
 		Accounts: map[string]*Account{
 			"ACC3": {
 				Tenant: CGRateSorg,
@@ -933,6 +945,17 @@ func TestEventChargerMerge(t *testing.T) {
 				RecurrentFee:  NewDecimal(24, 1),
 			},
 			"RATE_2": {
+				IntervalStart: NewDecimal(12, 1),
+				FixedFee:      NewDecimal(1, 0),
+				RecurrentFee:  NewDecimal(5, 2),
+			},
+
+			"RATE_3": {
+				IntervalStart: NewDecimal(0, 0),
+				FixedFee:      NewDecimal(4, 1),
+				RecurrentFee:  NewDecimal(24, 1),
+			},
+			"RATE_4": {
 				IntervalStart: NewDecimal(12, 1),
 				FixedFee:      NewDecimal(1, 0),
 				RecurrentFee:  NewDecimal(5, 2),
@@ -1665,5 +1688,149 @@ func TestEqualsAccountCharges(t *testing.T) {
 	var nAc *AccountCharge
 	if rcv := ac.equals(nAc); rcv != true {
 		t.Errorf("Expected <true>, Recevied <%v>", rcv)
+	}
+
+	ac = &AccountCharge{
+		AttributeIDs: []string{"test", "range"},
+	}
+	nAc = &AccountCharge{
+		AttributeIDs: []string{"test2", "range"},
+	}
+
+	if rcv := ac.equals(nAc); rcv != false {
+		t.Error(rcv)
+	}
+}
+
+func TestSyncIDsEventCharges(t *testing.T) {
+	eEvChgs := &EventCharges{
+		Charges: []*ChargeEntry{
+			{
+				ChargingID: "GENUUID3",
+			},
+		},
+		Accounting: map[string]*AccountCharge{
+			"THIS_GENUUID1": {
+				AccountID: "TestEventChargesEquals",
+			},
+			"GENUUID3": {
+				AccountID:       "TestEventChargesMerge",
+				BalanceID:       "CONCRETE1",
+				Units:           NewDecimal(8, 1),
+				BalanceLimit:    NewDecimal(200, 0),
+				UnitFactorID:    "GENUUID_FACTOR3",
+				RatingID:        "GENUUID_RATING1",
+				JoinedChargeIDs: []string{"THIS_GENUUID1"},
+			},
+		},
+		UnitFactors: map[string]*UnitFactor{
+			"GENUUID_FACTOR3": {
+				Factor:    NewDecimal(100, 0),
+				FilterIDs: []string{"*string:~*req.Account:1003"},
+			},
+		},
+		Rating: map[string]*RateSInterval{
+			"GENUUID_RATING1": {
+				Increments: []*RateSIncrement{
+					{
+						Usage:          NewDecimal(int64(time.Minute), 0),
+						CompressFactor: 1,
+					},
+				},
+				IntervalStart:  NewDecimal(int64(time.Second), 0),
+				CompressFactor: 1,
+			},
+		},
+	}
+
+	newEc := &EventCharges{
+		Charges: []*ChargeEntry{
+			{
+				ChargingID:     "GENUUID2",
+				CompressFactor: 1,
+			},
+		},
+		Accounting: map[string]*AccountCharge{
+			"THIS_GENUUID2": {
+				AccountID:    "TestEventChargesEquals",
+				BalanceID:    "CONCRETE1",
+				Units:        NewDecimal(8, 1),
+				BalanceLimit: NewDecimal(200, 0),
+				UnitFactorID: "GENUUID_FACTOR1",
+			},
+			"GENUUID2": {
+				AccountID:       "TestEventChargesMerge",
+				BalanceID:       "CONCRETE1",
+				Units:           NewDecimal(8, 1),
+				BalanceLimit:    NewDecimal(200, 0),
+				UnitFactorID:    "GENUUID_FACTOR2",
+				RatingID:        "GENUUID_RATING2",
+				JoinedChargeIDs: []string{"THIS_GENUUID2"},
+			},
+		},
+		UnitFactors: map[string]*UnitFactor{
+			"GENUUID_FACTOR2": {
+				Factor:    NewDecimal(100, 0),
+				FilterIDs: []string{"*string:~*req.Account:1003"},
+			},
+		},
+		Rating: map[string]*RateSInterval{
+			"GENUUID_RATING2": {
+				Increments: []*RateSIncrement{
+					{
+						Usage:             NewDecimal(int64(time.Minute), 0),
+						RateIntervalIndex: 0,
+						RateID:            "RATE_2",
+						CompressFactor:    1,
+					},
+				},
+				IntervalStart:  NewDecimal(int64(time.Second), 0),
+				CompressFactor: 1,
+			},
+		},
+	}
+
+	expEc := &EventCharges{
+		Charges: []*ChargeEntry{
+			{
+				ChargingID: "GENUUID3",
+			},
+		},
+		Accounting: map[string]*AccountCharge{
+			"THIS_GENUUID1": {
+				AccountID: "TestEventChargesEquals",
+			},
+			"GENUUID3": {
+				AccountID:       "TestEventChargesMerge",
+				BalanceID:       "CONCRETE1",
+				Units:           NewDecimal(8, 1),
+				BalanceLimit:    NewDecimal(200, 0),
+				UnitFactorID:    "GENUUID_FACTOR3",
+				RatingID:        "GENUUID_RATING1",
+				JoinedChargeIDs: []string{"THIS_GENUUID1"},
+			},
+		},
+		UnitFactors: map[string]*UnitFactor{
+			"GENUUID_FACTOR3": {
+				Factor:    NewDecimal(100, 0),
+				FilterIDs: []string{"*string:~*req.Account:1003"},
+			},
+		},
+		Rating: map[string]*RateSInterval{
+			"GENUUID_RATING1": {
+				Increments: []*RateSIncrement{
+					{
+						Usage:          NewDecimal(int64(time.Minute), 0),
+						CompressFactor: 1,
+					},
+				},
+				IntervalStart:  NewDecimal(int64(time.Second), 0),
+				CompressFactor: 1,
+			},
+		},
+	}
+	eEvChgs.SyncIDs(newEc)
+	if !reflect.DeepEqual(expEc, eEvChgs) {
+		t.Errorf("Expected %v \n but received \n %v", ToJSON(expEc), ToJSON(eEvChgs))
 	}
 }

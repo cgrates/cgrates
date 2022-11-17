@@ -23,6 +23,7 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/cgrates/ugocodec/codec"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
@@ -72,22 +73,22 @@ type dummyStruct struct {
 	Field string
 }
 
-// func TestJSONUnmarshaler(t *testing.T) {
-// 	data := []byte(`{"Field": "some_string"}`)
-// 	jsnM := &JSONMarshaler{}
-// 	dS := dummyStruct{
-// 		Field: "some_string",
-// 	}
+func TestJSONUnmarshaler(t *testing.T) {
+	data := []byte(`{"Field": "some_string"}`)
+	jsnM := &JSONMarshaler{}
+	dS := dummyStruct{
+		Field: "some_string",
+	}
 
-// 	var ndS dummyStruct
-// 	err := jsnM.Unmarshal(data, &ndS)
-// 	if err != nil {
-// 		t.Error(err)
-// 	}
-// 	if reflect.DeepEqual(dS, ndS) {
-// 		t.Errorf("Expected: %s , received: %s", ToJSON(dS), ToJSON(ndS))
-// 	}
-// }
+	var ndS dummyStruct
+	err := jsnM.Unmarshal(data, &ndS)
+	if err != nil {
+		t.Error(err)
+	}
+	if !reflect.DeepEqual(dS, ndS) {
+		t.Errorf("Expected: %s , received: %s", ToJSON(dS), ToJSON(ndS))
+	}
+}
 
 func TestBSONMarshaler(t *testing.T) {
 	v := bson.M{"ts": "test"}
@@ -141,5 +142,27 @@ func TestJSONBufUnmarshaler(t *testing.T) {
 	}
 	if !reflect.DeepEqual(rcv, s) {
 		t.Errorf("Expected %v\n but received %v", s, rcv)
+	}
+}
+func TestBsonUnmarshal(t *testing.T) {
+	v := bson.M{"ts": "test"}
+	bsnM := &BSONMarshaler{}
+	rcvM, _ := bsnM.Marshal(v)
+	dS := dummyStruct{}
+
+	var ndS dummyStruct
+	err := bsnM.Unmarshal(rcvM, &ndS)
+	if err != nil {
+		t.Error(err)
+	}
+	if !reflect.DeepEqual(dS, ndS) {
+		t.Errorf("Expected: %s , received: %s", ToJSON(dS), ToJSON(ndS))
+	}
+}
+
+func TestNewBincMarshler(t *testing.T) {
+	exp := &BincMarshaler{new(codec.BincHandle)}
+	if rcv := NewBincMarshaler(); !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("Expected <%+v>, Received <%+v>", ToJSON(exp), ToJSON(rcv))
 	}
 }
