@@ -665,7 +665,7 @@ const (
 	MetaDiamreq                 = "*diamreq"
 	MetaGroup                   = "*group"
 	InternalRPCSet              = "InternalRPCSet"
-	FileName                    = "FileName"
+	MetaFileName                = "*fileName"
 	MetaBusy                    = "*busy"
 	MetaQueue                   = "*queue"
 	MetaRounding                = "*rounding"
