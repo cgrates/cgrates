@@ -783,7 +783,7 @@ const (
 	MetaCost                = "*cost"
 	MetaGroup               = "*group"
 	InternalRPCSet          = "InternalRPCSet"
-	FileName                = "FileName"
+	MetaFileName            = "*fileName"
 	MetaRadauth             = "*radauth"
 	UserPassword            = "UserPassword"
 	RadauthFailed           = "RADAUTH_FAILED"
