@@ -1834,3 +1834,198 @@ func TestSyncIDsEventCharges(t *testing.T) {
 		t.Errorf("Expected %v \n but received \n %v", ToJSON(expEc), ToJSON(eEvChgs))
 	}
 }
+
+func TestEqualsAccounting(t *testing.T) {
+
+	acc1 := &AccountCharge{
+		AccountID:       "AccountID1",
+		BalanceID:       "BalanceID1",
+		Units:           NewDecimal(20, 0),
+		BalanceLimit:    NewDecimal(40, 0),
+		UnitFactorID:    "UF1",
+		AttributeIDs:    []string{"ID1", "ID2"},
+		RatingID:        "RatingID1",
+		JoinedChargeIDs: []string{"chID1", "chID3"},
+	}
+	acc2 := &AccountCharge{
+		AccountID:       "AccountID2",
+		BalanceID:       "BalanceID2",
+		Units:           NewDecimal(20, 0),
+		BalanceLimit:    NewDecimal(40, 0),
+		UnitFactorID:    "UF2",
+		AttributeIDs:    []string{"ID3", "ID4"},
+		RatingID:        "RatingID2",
+		JoinedChargeIDs: []string{"chID2"},
+	}
+
+	accM1 := map[string]*AccountCharge{
+		"chID1": {
+			AccountID:    "AccountID2",
+			BalanceID:    "BalanceID2",
+			Units:        NewDecimal(20, 0),
+			BalanceLimit: NewDecimal(40, 0),
+			UnitFactorID: "UF2",
+			AttributeIDs: []string{"ID3", "ID4"},
+			RatingID:     "RatingID2",
+		},
+		"chID3": {
+			AccountID:    "AccountID3",
+			BalanceID:    "BalanceID3",
+			Units:        NewDecimal(20, 0),
+			BalanceLimit: NewDecimal(40, 0),
+			UnitFactorID: "UF2",
+			AttributeIDs: []string{"ID3", "ID4"},
+			RatingID:     "RatingID3",
+		},
+		"GENUUID1": {
+			AccountID:       "AccountID1",
+			BalanceID:       "BalanceID1",
+			Units:           NewDecimal(20, 0),
+			BalanceLimit:    NewDecimal(40, 0),
+			UnitFactorID:    "UF1",
+			AttributeIDs:    []string{"ID1", "ID2"},
+			RatingID:        "RatingID1",
+			JoinedChargeIDs: []string{"chID1", "chID3"},
+		},
+	}
+	accM2 := map[string]*AccountCharge{
+		"chID2": {
+			AccountID:    "AccountID2",
+			BalanceID:    "BalanceID2",
+			Units:        NewDecimal(20, 0),
+			BalanceLimit: NewDecimal(40, 0),
+			UnitFactorID: "UF2",
+			AttributeIDs: []string{"ID1", "ID2"},
+			RatingID:     "RatingID2",
+		},
+		"GENUUID2": {
+			AccountID:       "AccountID2",
+			BalanceID:       "BalanceID2",
+			Units:           NewDecimal(20, 0),
+			BalanceLimit:    NewDecimal(40, 0),
+			UnitFactorID:    "UF2",
+			AttributeIDs:    []string{"ID3", "ID4"},
+			RatingID:        "RatingID2",
+			JoinedChargeIDs: []string{"chID2"},
+		}}
+
+	uf1 := map[string]*UnitFactor{
+		"UF2": {
+			Factor: NewDecimal(200, 0),
+		},
+	}
+	uf2 := map[string]*UnitFactor{
+		"UF2": {
+			Factor: NewDecimal(200, 0),
+		},
+	}
+	rat1 := map[string]*RateSInterval{
+		"RatingID1": {
+			Increments: []*RateSIncrement{
+				{
+					Usage:          NewDecimal(int64(time.Minute), 0),
+					CompressFactor: 1,
+					RateID:         "IvalRate1",
+				},
+			},
+			IntervalStart:  NewDecimal(int64(time.Second), 0),
+			CompressFactor: 1,
+		}}
+	rat2 := map[string]*RateSInterval{
+		"RatingID1": {
+			Increments: []*RateSIncrement{
+				{
+					Usage:          NewDecimal(int64(time.Minute), 0),
+					CompressFactor: 1,
+					RateID:         "IvalRate1",
+				},
+			},
+			IntervalStart:  NewDecimal(int64(time.Second), 0),
+			CompressFactor: 1,
+		}}
+	rts1 := map[string]*IntervalRate{"IvalRate1": {
+		IntervalStart: NewDecimalFromFloat64(1.2),
+		FixedFee:      NewDecimalFromFloat64(1.234),
+		RecurrentFee:  NewDecimalFromFloat64(0.5),
+		Unit:          NewDecimalFromFloat64(7.1),
+		Increment:     NewDecimalFromFloat64(-321),
+	}}
+	rts2 := map[string]*IntervalRate{"IvalRate1": {
+		IntervalStart: NewDecimalFromFloat64(1.2),
+		FixedFee:      NewDecimalFromFloat64(1.234),
+		RecurrentFee:  NewDecimalFromFloat64(0.5),
+		Unit:          NewDecimalFromFloat64(7.1),
+		Increment:     NewDecimalFromFloat64(-321),
+	}}
+	//////////////////////////
+	acc10 := &AccountCharge{
+		AccountID:       "AccountID2",
+		BalanceID:       "BalanceID2",
+		Units:           NewDecimal(20, 0),
+		BalanceLimit:    NewDecimal(40, 0),
+		UnitFactorID:    "UF2",
+		AttributeIDs:    []string{"ID3", "ID4"},
+		RatingID:        "RatingID2",
+		JoinedChargeIDs: []string{"chID2"},
+	}
+
+	acc20 := &AccountCharge{
+		AccountID:       "AccountID2",
+		BalanceID:       "BalanceID2",
+		Units:           NewDecimal(20, 0),
+		BalanceLimit:    NewDecimal(40, 0),
+		UnitFactorID:    "UF2",
+		AttributeIDs:    []string{"ID3", "ID4"},
+		RatingID:        "RatingID2",
+		JoinedChargeIDs: []string{"chID3"},
+	}
+
+	accM10 := map[string]*AccountCharge{
+
+		"chID2": {
+			AccountID:    "AccountID2",
+			BalanceID:    "BalanceID2",
+			Units:        NewDecimal(20, 0),
+			BalanceLimit: NewDecimal(40, 0),
+			UnitFactorID: "UF2",
+			AttributeIDs: []string{"ID3", "ID4"},
+			RatingID:     "RatingID2",
+		},
+		"GENUUID1": {
+			AccountID:       "AccountID1",
+			BalanceID:       "BalanceID1",
+			Units:           NewDecimal(20, 0),
+			BalanceLimit:    NewDecimal(40, 0),
+			UnitFactorID:    "UF1",
+			AttributeIDs:    []string{"ID1", "ID2"},
+			RatingID:        "RatingID1",
+			JoinedChargeIDs: []string{"chID2"},
+		},
+	}
+
+	accM20 := map[string]*AccountCharge{
+		"chID3": {
+			AccountID:    "AccountID2",
+			BalanceID:    "BalanceID5",
+			Units:        NewDecimal(20, 0),
+			BalanceLimit: NewDecimal(40, 0),
+			UnitFactorID: "UF2",
+			AttributeIDs: []string{"ID3", "ID4"},
+			RatingID:     "RatingID2",
+		},
+
+		"GENUUID1": {
+			AccountID:       "AccountID1",
+			BalanceID:       "BalanceID1",
+			Units:           NewDecimal(20, 0),
+			BalanceLimit:    NewDecimal(40, 0),
+			UnitFactorID:    "UF1",
+			AttributeIDs:    []string{"ID1", "ID2"},
+			RatingID:        "RatingID1",
+			JoinedChargeIDs: []string{"chID3"},
+		},
+	}
+
+	equalsAccounting(acc1, acc2, accM1, accM2, uf1, uf2, rat1, rat2, rts1, rts2)
+	equalsAccounting(acc10, acc20, accM10, accM20, uf1, uf2, rat1, rat2, rts1, rts2)
+}
