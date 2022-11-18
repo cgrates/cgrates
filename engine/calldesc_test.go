@@ -2587,7 +2587,7 @@ func TestCDRefundRounding(t *testing.T) {
 
 	if val, err := cd.RefundRounding(fltrs); err != nil {
 		t.Errorf("received <%v>", err)
-	} else if reflect.DeepEqual(val, nil) {
+	} else if val != nil {
 		t.Errorf("received %v", val)
 	}
 }
