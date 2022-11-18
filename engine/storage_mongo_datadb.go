@@ -267,9 +267,9 @@ func (ms *MongoStorage) enusureIndex(colName string, uniq bool, keys ...string) 
 	return ms.query(context.TODO(), func(sctx mongo.SessionContext) error {
 		col := ms.getCol(colName)
 		io := options.Index().SetUnique(uniq)
-		doc := make(bson.M)
+		doc := make(bson.D, 0)
 		for _, k := range keys {
-			doc[k] = 1
+			doc = append(doc, bson.E{Key: k, Value: 1})
 		}
 		_, err := col.Indexes().CreateOne(sctx, mongo.IndexModel{
 			Keys:    doc,
