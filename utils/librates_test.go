@@ -2406,8 +2406,19 @@ func TestMergeRate(t *testing.T) {
 
 }
 
-// unfinished
+type MockMarshaler struct{}
+
+func (MockMarshaler) Marshal(interface{}) ([]byte, error) {
+	return nil, ErrNotImplemented
+}
+
+func (MockMarshaler) Unmarshal([]byte, interface{}) error {
+	return ErrNotImplemented
+}
+
 func TestAsDataDBMap(t *testing.T) {
+
+	ms := MockMarshaler{}
 	rp := &RateProfile{
 		FilterIDs: []string{"fltr1", "fltr2"},
 		Weights: DynamicWeights{{
@@ -2418,27 +2429,66 @@ func TestAsDataDBMap(t *testing.T) {
 		MaxCost:         NewDecimal(10, 0),
 		MaxCostStrategy: "strategy",
 		Rates: map[string]*Rate{
-			"rat1": {
-				ID:              "rat1",
-				FilterIDs:       []string{"fltr1"},
-				ActivationTimes: "* * * * *",
-				Weights:         DynamicWeights{{}},
-				Blocker:         true,
-				IntervalRates:   []*IntervalRate{{}},
-			},
-			"rat2": {
-				ID: "rat2",
-			},
-			"rat3": {},
+			"rat1": {ID: "rat1"}, "rat2": {ID: "rat2"},
 		},
 	}
 
-	// exp := map[FilterIDs:fltr1;fltr2 MaxCost:10 MaxCostStrategy:strategy MinCost:10 Rates:rat1:{"ID":"rat1","FilterIDs":["fltr1"],"ActivationTimes":"* * * * *","Weights":[{"FilterIDs":null,"Weight":0}],"Blocker":true,"IntervalRates":[{"IntervalStart":null,"FixedFee":null,"RecurrentFee":null,"Unit":null,"Increment":null}]} Rates:rat2:{"ID":"rat2","FilterIDs":null,"ActivationTimes":"","Weights":null,"Blocker":false,"IntervalRates":null} Rates:rat3:{"ID":"","FilterIDs":null,"ActivationTimes":"","Weights":null,"Blocker":false,"IntervalRates":null} Weights:;10]
-	if _, err := rp.AsDataDBMap(JSONMarshaler{}); err != nil {
+	exp := "{\"FilterIDs\":\"fltr1;fltr2\",\"MaxCost\":\"10\",\"MaxCostStrategy\":\"strategy\",\"MinCost\":\"10\",\"Rates:rat1\":\"{\\\"ID\\\":\\\"rat1\\\",\\\"FilterIDs\\\":null,\\\"ActivationTimes\\\":\\\"\\\",\\\"Weights\\\":null,\\\"Blocker\\\":false,\\\"IntervalRates\\\":null}\",\"Rates:rat2\":\"{\\\"ID\\\":\\\"rat2\\\",\\\"FilterIDs\\\":null,\\\"ActivationTimes\\\":\\\"\\\",\\\"Weights\\\":null,\\\"Blocker\\\":false,\\\"IntervalRates\\\":null}\",\"Weights\":\";10\"}"
+
+	if rcv, err := rp.AsDataDBMap(JSONMarshaler{}); err != nil {
 		t.Error(err)
 
+	} else if !reflect.DeepEqual(exp, ToJSON(rcv)) {
+		t.Errorf("Expected <%v %T>, \nReceived <%v %T>", exp, exp, ToJSON(rcv), ToJSON(rcv))
 	}
-	// else if !reflect.DeepEqual(ToJSON(rp), ToJSON(rcv)) {
-	// 	t.Error(ToJSON(rcv))
-	// }
+
+	if _, err := rp.AsDataDBMap(ms); err == nil || err != ErrNotImplemented {
+		t.Errorf("Expected <%v>, Received <%v>", ErrNotImplemented, err)
+	}
+}
+
+func TestNewRateProfileFromMapDataDBMap(t *testing.T) {
+	mapRP := map[string]interface{}{
+		"FilterIDs":  "fltrID1",
+		"Weights":    "fltrID1;20",
+		"MinCost":    "2",
+		"MaxCost":    "10",
+		"Rates:rat1": "{\"ID\":\"rat1\",\"FilterIDs\":null,\"ActivationTimes\":\"\",\"Weights\":null,\"Blocker\":false,\"IntervalRates\":null}",
+	}
+	if rcv, err := NewRateProfileFromMapDataDBMap("cgrates.org", "ExID", mapRP, JSONMarshaler{}); err != nil {
+		t.Error(rcv, err)
+	}
+
+	mapRP = map[string]interface{}{
+		"FilterIDs": "fltrID1",
+		"Weights":   "wrong",
+	}
+	expErr := "invalid DynamicWeight format for string <wrong>"
+	if _, err := NewRateProfileFromMapDataDBMap("cgrates.org", "ExID", mapRP, JSONMarshaler{}); err == nil || err.Error() != expErr {
+		t.Errorf("Expected error <%v>, received <%v>", expErr, err)
+	}
+	mapRP = map[string]interface{}{
+		"FilterIDs": "fltrID1",
+		"MinCost":   "wrong",
+	}
+	expErr = "can't convert <wrong> to decimal"
+	if _, err := NewRateProfileFromMapDataDBMap("cgrates.org", "ExID", mapRP, JSONMarshaler{}); err == nil || err.Error() != expErr {
+		t.Errorf("Expected error <%v>, received <%v>", expErr, err)
+	}
+	mapRP = map[string]interface{}{
+		"FilterIDs": "fltrID1",
+		"MaxCost":   "wrong",
+	}
+	expErr = "can't convert <wrong> to decimal"
+	if _, err := NewRateProfileFromMapDataDBMap("cgrates.org", "ExID", mapRP, JSONMarshaler{}); err == nil || err.Error() != expErr {
+		t.Errorf("Expected error <%v>, received <%v>", expErr, err)
+	}
+	mapRP = map[string]interface{}{
+		"FilterIDs":  "fltrID1",
+		"Rates:rat1": "{\"ID\":\"rat1\",\"FilterIDs\":null,\"ActivationTimes\":\"\",\"Weights\":null,\"Blocker\":false,\"IntervalRates\":null}\",\"Rates:rat2\":\"{\"ID\":\"rat2\",\"FilterIDs\":null,\"ActivationTimes\":\"\",\"Weights\":null,\"Blocker\":false,\"IntervalRates\":null}\",\"Weights\":\";10\"}",
+	}
+	expErr = "invalid character '\"' after top-level value"
+	if _, err := NewRateProfileFromMapDataDBMap("cgrates.org", "ExID", mapRP, JSONMarshaler{}); err == nil || err.Error() != expErr {
+		t.Errorf("Expected error <%v>, received <%v>", expErr, err)
+	}
 }
