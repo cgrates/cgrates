@@ -2260,3 +2260,185 @@ func TestAsRateAPIConvert(t *testing.T) {
 		t.Errorf("%+v", err)
 	}
 }
+
+func TestCloneRate(t *testing.T) {
+	rt := &Rate{
+		FilterIDs: []string{"id1", "id2"},
+		Weights: DynamicWeights{
+			{
+				Weight: 0,
+			},
+		},
+		IntervalRates: []*IntervalRate{
+			{
+				IntervalStart: NewDecimal(0, 0),
+				RecurrentFee:  NewDecimal(12, 2),
+			},
+		},
+	}
+
+	exp := &Rate{
+		FilterIDs: []string{"id1", "id2"},
+		Weights: DynamicWeights{
+			{
+				Weight: 0,
+			},
+		},
+		IntervalRates: []*IntervalRate{
+			{
+				IntervalStart: NewDecimal(0, 0),
+				RecurrentFee:  NewDecimal(12, 2),
+			},
+		},
+	}
+	if rcv := rt.Clone(); !reflect.DeepEqual(exp, rcv) {
+
+		t.Errorf("Expected <%v>, Received <%v>", exp, rcv)
+	}
+
+}
+
+func TestEqualsNRpCt(t *testing.T) {
+	rtPrfCost := &RateProfileCost{
+		ID:              "RATE_1",
+		Cost:            NewDecimal(2, 1),
+		MinCost:         NewDecimal(1, 2),
+		MaxCost:         NewDecimal(15, 0),
+		MaxCostStrategy: "*round",
+		CostIntervals: []*RateSIntervalCost{
+			{
+				Increments: []*RateSIncrementCost{
+					{
+						RateIntervalIndex: 0,
+						RateID:            "RATE1",
+						CompressFactor:    1,
+						Usage:             NewDecimal(int64(time.Minute), 0),
+					},
+				},
+				CompressFactor: 1,
+			},
+		},
+		Rates: map[string]*IntervalRate{
+			"RATE1": {
+				IntervalStart: NewDecimal(0, 0),
+				RecurrentFee:  NewDecimal(2, 1),
+				Unit:          NewDecimal(int64(time.Second), 1),
+				Increment:     NewDecimal(int64(time.Second), 1),
+			},
+		},
+		Altered: []string{MetaRoundingDown},
+	}
+	expectedRT := &RateProfileCost{
+		ID:              "RATE_1",
+		Cost:            NewDecimal(2, 1),
+		MinCost:         NewDecimal(1, 2),
+		MaxCost:         NewDecimal(15, 0),
+		MaxCostStrategy: "*round",
+		CostIntervals: []*RateSIntervalCost{
+			{
+				Increments: []*RateSIncrementCost{
+					{
+						RateIntervalIndex: 0,
+						RateID:            "RATE1",
+						CompressFactor:    1,
+						Usage:             NewDecimal(int64(time.Minute), 0),
+					},
+				},
+				CompressFactor: 1,
+			},
+		},
+		Rates: map[string]*IntervalRate{
+			"RATE1": {
+				IntervalStart: NewDecimal(0, 0),
+				RecurrentFee:  NewDecimal(2, 1),
+				Unit:          NewDecimal(int64(time.Second), 1),
+				Increment:     NewDecimal(int64(time.Second), 1),
+			},
+		},
+		Altered: []string{MetaRoundingUp},
+	}
+	if rtPrfCost.Equals(expectedRT) {
+		t.Errorf("%v and \n%v are equals", ToJSON(rtPrfCost), ToJSON(expectedRT))
+	}
+}
+
+func TestMergeRate(t *testing.T) {
+	rt := &Rate{ID: "rate_id1",
+		FilterIDs:       []string{"fltr1"},
+		ActivationTimes: "1 1 3",
+		Weights: DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
+		Blocker: false,
+		IntervalRates: []*IntervalRate{
+			{
+				IntervalStart: NewDecimal(int64(1), 0),
+				FixedFee:      NewDecimal(int64(10), 0),
+				RecurrentFee:  NewDecimal(int64(2), 0),
+				Unit:          NewDecimal(int64(2), 0),
+				Increment:     NewDecimal(int64(3), 0),
+			},
+		}}
+	vi := &Rate{
+		ID:              "rate_id1",
+		FilterIDs:       []string{"fltr1"},
+		ActivationTimes: "1 1 3",
+		Weights: DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
+		Blocker: false,
+		IntervalRates: []*IntervalRate{
+			{
+				IntervalStart: NewDecimal(int64(1), 0),
+				FixedFee:      NewDecimal(int64(10), 0),
+				RecurrentFee:  NewDecimal(int64(2), 0),
+				Unit:          NewDecimal(int64(2), 0),
+				Increment:     NewDecimal(int64(3), 0),
+			},
+		},
+	}
+
+	rt.Merge(vi)
+
+}
+
+// unfinished
+func TestAsDataDBMap(t *testing.T) {
+	rp := &RateProfile{
+		FilterIDs: []string{"fltr1", "fltr2"},
+		Weights: DynamicWeights{{
+
+			Weight: 10,
+		}},
+		MinCost:         NewDecimal(10, 0),
+		MaxCost:         NewDecimal(10, 0),
+		MaxCostStrategy: "strategy",
+		Rates: map[string]*Rate{
+			"rat1": {
+				ID:              "rat1",
+				FilterIDs:       []string{"fltr1"},
+				ActivationTimes: "* * * * *",
+				Weights:         DynamicWeights{{}},
+				Blocker:         true,
+				IntervalRates:   []*IntervalRate{{}},
+			},
+			"rat2": {
+				ID: "rat2",
+			},
+			"rat3": {},
+		},
+	}
+
+	// exp := map[FilterIDs:fltr1;fltr2 MaxCost:10 MaxCostStrategy:strategy MinCost:10 Rates:rat1:{"ID":"rat1","FilterIDs":["fltr1"],"ActivationTimes":"* * * * *","Weights":[{"FilterIDs":null,"Weight":0}],"Blocker":true,"IntervalRates":[{"IntervalStart":null,"FixedFee":null,"RecurrentFee":null,"Unit":null,"Increment":null}]} Rates:rat2:{"ID":"rat2","FilterIDs":null,"ActivationTimes":"","Weights":null,"Blocker":false,"IntervalRates":null} Rates:rat3:{"ID":"","FilterIDs":null,"ActivationTimes":"","Weights":null,"Blocker":false,"IntervalRates":null} Weights:;10]
+	if _, err := rp.AsDataDBMap(JSONMarshaler{}); err != nil {
+		t.Error(err)
+
+	}
+	// else if !reflect.DeepEqual(ToJSON(rp), ToJSON(rcv)) {
+	// 	t.Error(ToJSON(rcv))
+	// }
+}

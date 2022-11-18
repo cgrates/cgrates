@@ -291,11 +291,12 @@ func TestEmergSysLogger(t *testing.T) {
 	if err := sl.Emerg("Emergency Message"); err != nil {
 		t.Errorf("Expected <nil>, received %v", err)
 	}
-	// always prints to stderr
+	// always broadcasts message from journal
 	// sl, _ = NewSysLogger("test2", 1)
 	// if err := sl.Emerg("Emergency Message 2"); err != nil {
 	// 	t.Errorf("Expected <nil>, received %v", err)
 	// }
+
 }
 
 func TestErrSysLogger(t *testing.T) {
