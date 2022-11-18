@@ -950,7 +950,6 @@ func TestV1ProcessCDRSet(t *testing.T) {
 
 }
 
-/*
 func TestV1StoreSessionCost(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
@@ -959,25 +958,32 @@ func TestV1StoreSessionCost(t *testing.T) {
 		return nil
 	})
 	clientconn := make(chan rpcclient.ClientConnector, 1)
-	config.CgrConfig().GeneralCfg().LockingTimeout = 1 * time.Minute
+
 	clientconn <- clMock
 	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{})
 	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 1
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+
+	config.SetCgrConfig(cfg)
+	Cache = NewCacheS(cfg, dm, nil)
+	attr := &AttrCDRSStoreSMCost{
+		Cost: &SMCost{
+			CGRID:    "cgrid1",
+			RunID:    "run1",
+			OriginID: "originid",
+			CostDetails: &EventCost{
+				Usage: utils.DurationPointer(1 * time.Minute),
+				Cost:  utils.Float64Pointer(32.3),
+			},
+		},
+		CheckDuplicate: false,
+	}
 	cdrS := &CDRServer{
 		cgrCfg:  cfg,
 		cdrDb:   db,
 		dm:      dm,
 		connMgr: connMgr,
-	}
-	config.SetCgrConfig(cfg)
-	Cache = NewCacheS(cfg, dm, nil)
-	attr := &AttrCDRSStoreSMCost{
-		Cost: &SMCost{
-			CGRID: "cgrid1",
-			RunID: "run1",
-		},
 	}
 	reply := utils.StringPointer("reply")
 
@@ -996,4 +1002,60 @@ func TestV1StoreSessionCost(t *testing.T) {
 		t.Errorf("expected %v,received %v", utils.ToJSON(exp), utils.ToJSON(rcv))
 	}
 }
-*/
+
+func TestV1StoreSessionCostSet(t *testing.T) {
+	Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	clMock := clMock(func(_ string, _, _ interface{}) error {
+
+		return nil
+	})
+	clientconn := make(chan rpcclient.ClientConnector, 1)
+
+	clientconn <- clMock
+	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{})
+	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 1
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+
+	config.SetCgrConfig(cfg)
+	Cache = NewCacheS(cfg, dm, nil)
+
+	attr := &AttrCDRSStoreSMCost{
+		Cost: &SMCost{
+			CGRID:    "cgrid1",
+			RunID:    "run1",
+			OriginID: "originid",
+			CostDetails: &EventCost{
+				Usage: utils.DurationPointer(1 * time.Minute),
+				Cost:  utils.Float64Pointer(32.3),
+			},
+		},
+		CheckDuplicate: false,
+	}
+	cdrS := &CDRServer{
+		cgrCfg:  cfg,
+		cdrDb:   db,
+		dm:      dm,
+		connMgr: connMgr,
+	}
+	reply := utils.StringPointer("reply")
+	Cache.Set(utils.CacheRPCResponses, utils.ConcatenatedKey(utils.CDRsV1StoreSessionCost, attr.Cost.CGRID, attr.Cost.RunID),
+		&utils.CachedRPCResponse{Result: reply, Error: nil},
+		nil, true, utils.NonTransactional)
+
+	if err = cdrS.V1StoreSessionCost(attr, reply); err != nil {
+		t.Error(err)
+	}
+	exp := &utils.CachedRPCResponse{
+		Result: reply,
+		Error:  nil,
+	}
+	rcv, has := Cache.Get(utils.CacheRPCResponses, utils.ConcatenatedKey(utils.CDRsV1StoreSessionCost, attr.Cost.CGRID, attr.Cost.RunID))
+
+	if !has {
+		t.Errorf("has no value")
+	} else if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("expected %v,received %v", utils.ToJSON(exp), utils.ToJSON(rcv))
+	}
+}
