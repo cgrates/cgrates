@@ -166,3 +166,66 @@ func TestNewBincMarshler(t *testing.T) {
 		t.Errorf("Expected <%+v>, Received <%+v>", ToJSON(exp), ToJSON(rcv))
 	}
 }
+
+func TestCodecMsgpackMarshalerMarshal(t *testing.T) {
+	cmm := &CodecMsgpackMarshaler{&codec.MsgpackHandle{}}
+	v := "texted"
+	exp := []byte{166, 116, 101, 120, 116, 101, 100}
+	if rcv, err := cmm.Marshal(v); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(exp, rcv) {
+		t.Errorf("Expected <%v>, Received <%v>", exp, rcv)
+	}
+
+}
+
+func TestCodecMsgpackMarshalerUnmarshal(t *testing.T) {
+	cmm := &CodecMsgpackMarshaler{&codec.MsgpackHandle{}}
+	data := []byte{116, 101, 100}
+	v := "testv"
+	expErr := "[pos 1]: invalid container type: expecting bin|str|array"
+	if err := cmm.Unmarshal(data, v); err == nil || err.Error() != expErr {
+		t.Errorf("Expected error <%v>, Received <%v>", expErr, err)
+	}
+}
+
+func TestBincMarshalerMarshal(t *testing.T) {
+	bm := &BincMarshaler{&codec.BincHandle{}}
+	v := "testinterface"
+	exp := []byte{64, 13, 116, 101, 115, 116, 105, 110, 116, 101, 114, 102, 97, 99, 101}
+	if rcv, err := bm.Marshal(v); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(exp, rcv) {
+		t.Errorf("Expected <%v>, Received <%v>", exp, rcv)
+	}
+}
+func TestBincMarshalerUnmarshal(t *testing.T) {
+	bm := &BincMarshaler{&codec.BincHandle{}}
+	v := "testinterce"
+	data := []byte{64, 13, 11, 115, 116, 105, 110, 116, 101, 114, 102, 97, 99, 101}
+	expErr := "unexpected EOF"
+	if err := bm.Unmarshal(data, v); err == nil || err.Error() != expErr {
+		t.Errorf("Expected error <%v>, Received <%v>", expErr, err)
+	}
+}
+
+func TestGOBMarshalerMarshal(t *testing.T) {
+	v := "test"
+	gobm := GOBMarshaler{}
+	exp := []byte{7, 12, 0, 4, 116, 101, 115, 116}
+	if rcv, err := gobm.Marshal(v); err != nil {
+		t.Error(rcv, err)
+	} else if !reflect.DeepEqual(exp, rcv) {
+		t.Errorf("Expected <%v>, Received <%v>", exp, rcv)
+	}
+}
+
+func TestGOBMarshalerUnmarshal(t *testing.T) {
+	gobm := GOBMarshaler{}
+	v := "testinterce"
+	data := []byte{64, 13, 11, 115, 116, 105, 110, 116, 101, 114, 102, 97, 99, 101}
+	expErr := "gob: attempt to decode into a non-pointer"
+	if err := gobm.Unmarshal(data, v); err == nil || err.Error() != expErr {
+		t.Errorf("Expected error <%v>, Received <%v>", expErr, err)
+	}
+}
