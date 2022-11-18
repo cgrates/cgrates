@@ -150,7 +150,7 @@ func (rdr *CSVFileER) processFile(fPath, fName string) (err error) {
 	rowNr := 0 // This counts the rows in the file, not really number of CDRs
 	evsPosted := 0
 	timeStart := time.Now()
-	reqVars := &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{utils.FileName: utils.NewLeafNode(fName)}}
+	reqVars := &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{utils.MetaFileName: utils.NewLeafNode(fName)}}
 	var hdrDefChar string
 	if rdr.cgrCfg.ERsCfg().Readers[rdr.cfgIdx].Opts.CSVHeaderDefineChar != nil {
 		hdrDefChar = *rdr.cgrCfg.ERsCfg().Readers[rdr.cfgIdx].Opts.CSVHeaderDefineChar
