@@ -334,6 +334,32 @@ func TestStoreDiffSectionGeneral(t *testing.T) {
 	}
 }
 
+func TestStoreDiffSectionLogger(t *testing.T) {
+	section := LoggerJSON
+
+	cgrCfgV1 := NewDefaultCGRConfig()
+	cgrCfgV1.loggerCfg = &LoggerCfg{}
+
+	cgrCfgV2 := NewDefaultCGRConfig()
+	cgrCfgV2.loggerCfg = &LoggerCfg{}
+
+	if err := storeDiffSection(context.Background(), section, &mockDb{}, cgrCfgV1, cgrCfgV2); err != utils.ErrNotImplemented || err == nil {
+		t.Errorf("Expected error <%v>, Received error <%v>", utils.ErrNotImplemented, err)
+	}
+}
+func TestStoreDiffSectionEFs(t *testing.T) {
+	section := EFsJSON
+
+	cgrCfgV1 := NewDefaultCGRConfig()
+	cgrCfgV1.efsCfg = &EFsCfg{}
+
+	cgrCfgV2 := NewDefaultCGRConfig()
+	cgrCfgV2.efsCfg = &EFsCfg{}
+
+	if err := storeDiffSection(context.Background(), section, &mockDb{}, cgrCfgV1, cgrCfgV2); err != utils.ErrNotImplemented || err == nil {
+		t.Errorf("Expected error <%v>, Received error <%v>", utils.ErrNotImplemented, err)
+	}
+}
 func TestStoreDiffSectionRPCConns(t *testing.T) {
 	section := RPCConnsJSON
 
@@ -991,7 +1017,7 @@ func TestLoadCfgFromDBErr(t *testing.T) {
 func TestLoadCfgFromDBErr2(t *testing.T) {
 	cfg := NewDefaultCGRConfig()
 	sections := []string{"test"}
-	expected := "Invalid section: <test> "
+	expected := "Invalid section: <test>"
 	if err := cfg.loadCfgFromDB(context.Background(), new(mockDb), sections, false); err == nil || err.Error() != expected {
 		t.Errorf("Expected %v \n but received \n %v", new(mockDb), err)
 	}
@@ -1061,5 +1087,35 @@ func TestApisLoadFromPathErr(t *testing.T) {
 	errExpect := `path:"/tmp/test.json" is not reachable`
 	if err := cfg.LoadFromPath(context.Background(), path); err == nil || err.Error() != errExpect {
 		t.Errorf("Expected %v \n but received \n %v", errExpect, err.Error())
+	}
+}
+
+func TestLoadCfgFromDBErr3(t *testing.T) {
+
+	cfg := NewDefaultCGRConfig()
+	sections := []string{"config_db", "test"}
+	expected := "Invalid section: <test>"
+
+	if err := cfg.loadCfgFromDB(context.Background(), new(mockDb), sections, true); err == nil || err.Error() != expected {
+		t.Errorf("Expected %v \n but received \n %v", expected, err)
+	}
+
+}
+
+func TestLoadCfgFromDBErr4(t *testing.T) {
+	cfg := NewDefaultCGRConfig()
+	sections := []string{"config_db"}
+	expected := "Invalid section: <config_db>"
+	if err := cfg.loadCfgFromDB(context.Background(), new(mockDb), sections, false); err == nil || err.Error() != expected {
+		t.Errorf("Expected <%v> \n but received \n <%v><%T>", expected, err, err)
+	}
+}
+
+func TestLoadCfgFromDBErr5(t *testing.T) {
+	cfg := NewDefaultCGRConfig()
+	sections := []string{"config_db"}
+
+	if err := cfg.loadCfgFromDB(context.Background(), new(mockDb), sections, true); err != nil {
+		t.Errorf("Expected <nil> \n but received \n <%v>", err)
 	}
 }

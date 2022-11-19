@@ -49,7 +49,7 @@ func TestV1ReloadConfig(t *testing.T) {
 		Section: ConfigDBJSON,
 	}
 
-	expected := "Invalid section: <config_db> "
+	expected := "Invalid section: <config_db>"
 	if err := cfg.V1ReloadConfig(context.Background(), args, &reply); err == nil || err.Error() != expected {
 		t.Errorf("%T and %T", expected, err.Error())
 		t.Errorf("Expected %q \n but received \n %q", expected, err)

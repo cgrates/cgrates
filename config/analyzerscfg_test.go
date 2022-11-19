@@ -205,20 +205,23 @@ func TestAnalyzerSCloneSection(t *testing.T) {
 	}
 }
 
-// //unfinished
-// func TestToLoadFromJSONCfg(t *testing.T) {
-// 	anzOpts := &AnalyzerSOpts{
-// 		ExporterIDs: []*utils.DynamicStringSliceOpt{
-// 			{
-// 				FilterIDs: []string{"filtr1"},
-// 			},
-// 		},
-// 	}
-// 	var jsonAnzOpts *AnalyzerSOptsJson
+func TestToLoadFromJSONCfg(t *testing.T) {
+	anzOpts := &AnalyzerSOpts{
+		ExporterIDs: []*utils.DynamicStringSliceOpt{
+			{
+				FilterIDs: []string{"filtr1"},
+			},
+		},
+	}
+	var jsonAnzOpts *AnalyzerSOptsJson
 
-// 	anzOpts.loadFromJSONCfg(jsonAnzOpts)
+	temp := *anzOpts
 
-// }
+	anzOpts.loadFromJSONCfg(jsonAnzOpts)
+	if !reflect.DeepEqual(temp, *anzOpts) {
+		t.Errorf("Expected anzOpts to not change, was<%v>, now is <%v>", temp, *anzOpts)
+	}
+}
 
 func TestDiffAnalyzerSOptsJsonCfg(t *testing.T) {
 	d := &AnalyzerSOptsJson{}

@@ -334,3 +334,44 @@ func TestCacheCloneSection(t *testing.T) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(cacheCfg))
 	}
 }
+
+func TestCacheCfgloadFromJSONCfg(t *testing.T) {
+
+	cCfg := &CacheCfg{}
+
+	jsnCfg := &CacheJsonCfg{
+		Remote_conns: &[]string{"remote", "test"},
+	}
+
+	exp := &CacheCfg{
+		RemoteConns: []string{"remote", "test"},
+	}
+
+	if err := cCfg.loadFromJSONCfg(jsnCfg); err != nil {
+		t.Error(err)
+	}
+	if !reflect.DeepEqual(utils.ToJSON(cCfg), utils.ToJSON(exp)) {
+		t.Errorf("Expected <%v>, Received <%v>", utils.ToJSON(exp), utils.ToJSON(cCfg))
+
+	}
+}
+func TestDiffCacheJsonCfgRemoteConn(t *testing.T) {
+	var d *CacheJsonCfg
+
+	v1 := &CacheCfg{}
+
+	v2 := &CacheCfg{
+
+		RemoteConns: []string{"test"},
+	}
+
+	expected := &CacheJsonCfg{
+		Partitions:   make(map[string]*CacheParamJsonCfg),
+		Remote_conns: &[]string{"test"},
+	}
+
+	if rcv := diffCacheJsonCfg(d, v1, v2); !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+
+}
