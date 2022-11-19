@@ -204,3 +204,41 @@ func TestAnalyzerSCloneSection(t *testing.T) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(anlCfg))
 	}
 }
+
+// //unfinished
+// func TestToLoadFromJSONCfg(t *testing.T) {
+// 	anzOpts := &AnalyzerSOpts{
+// 		ExporterIDs: []*utils.DynamicStringSliceOpt{
+// 			{
+// 				FilterIDs: []string{"filtr1"},
+// 			},
+// 		},
+// 	}
+// 	var jsonAnzOpts *AnalyzerSOptsJson
+
+// 	anzOpts.loadFromJSONCfg(jsonAnzOpts)
+
+// }
+
+func TestDiffAnalyzerSOptsJsonCfg(t *testing.T) {
+	d := &AnalyzerSOptsJson{}
+	v1 := &AnalyzerSOpts{
+		ExporterIDs: []*utils.DynamicStringSliceOpt{},
+	}
+	v2 := &AnalyzerSOpts{
+		ExporterIDs: []*utils.DynamicStringSliceOpt{{
+			FilterIDs: []string{"test"},
+		},
+		},
+	}
+	exp := &AnalyzerSOptsJson{
+
+		ExporterIDs: []*utils.DynamicStringSliceOpt{{
+			FilterIDs: []string{"test"},
+		},
+		},
+	}
+	if rcv := diffAnalyzerSOptsJsonCfg(d, v1, v2); utils.ToJSON(rcv) != utils.ToJSON(exp) {
+		t.Errorf("Expected <%v> \n Received \n <%v>", exp, rcv)
+	}
+}

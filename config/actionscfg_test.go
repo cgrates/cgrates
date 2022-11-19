@@ -371,3 +371,26 @@ func TestActionSCloneSection(t *testing.T) {
 		t.Errorf("Expected %v \n but received \n %v", exp, actCfg)
 	}
 }
+func TestDiffActionsOptsJsonCfg(t *testing.T) {
+	d := &ActionsOptsJson{}
+	v1 := &ActionsOpts{
+		PosterAttempts: []*utils.DynamicIntOpt{},
+	}
+	v2 := &ActionsOpts{
+		PosterAttempts: []*utils.DynamicIntOpt{{
+			FilterIDs: []string{"fltr1"},
+		},
+		},
+	}
+	exp := &ActionsOptsJson{
+
+		PosterAttempts: []*utils.DynamicIntOpt{{
+			FilterIDs: []string{"fltr1"},
+		},
+		},
+	}
+	if rcv := diffActionsOptsJsonCfg(d, v1, v2); utils.ToJSON(rcv) != utils.ToJSON(exp) {
+		t.Errorf("Expected <%v> \n Received \n <%v>", exp, rcv)
+	}
+
+}
