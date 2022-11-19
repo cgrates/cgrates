@@ -21,6 +21,7 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -463,4 +464,15 @@ func TestAttributeSCloneSection(t *testing.T) {
 	if !reflect.DeepEqual(attrCfg, exp) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(attrCfg))
 	}
+}
+
+func TestLoadAttributeSCfg(t *testing.T) {
+	alS := &AttributeSCfg{}
+	ctx := &context.Context{}
+	jsnCfg := new(mockDb)
+	cgrcfg := &CGRConfig{}
+	if err := alS.Load(ctx, jsnCfg, cgrcfg); err == nil || err != utils.ErrNotImplemented {
+		t.Errorf("Expected error <%v>, Received error <%v>", utils.ErrNotImplemented, err)
+	}
+
 }

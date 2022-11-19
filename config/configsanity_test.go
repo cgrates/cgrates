@@ -1818,3 +1818,30 @@ func TestConfigSanityErs(t *testing.T) {
 		t.Errorf("expected: <%v>,\n received: <%v>", expected, err)
 	}
 }
+
+func TestCGRConfigcheckConfigSanity(t *testing.T) {
+	cfg := &CGRConfig{
+		cdrsCfg: &CdrsCfg{
+			Enabled: false,
+		},
+
+		sessionSCfg: &SessionSCfg{
+			Enabled:           true,
+			TerminateAttempts: 1,
+			AlterableFields:   utils.NewStringSet([]string{"OriginHost"}),
+		},
+		cacheCfg: &CacheCfg{
+
+			Partitions: map[string]*CacheParamCfg{
+				utils.CacheClosedSessions: {
+					Limit: 1,
+				},
+			},
+		},
+	}
+	expErr := "<SessionS> the following protected field can't be altered by session: <OriginHost>"
+	if err := cfg.checkConfigSanity(); err.Error() != expErr {
+		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err)
+	}
+
+}
