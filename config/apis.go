@@ -298,11 +298,11 @@ func (cfg *CGRConfig) loadCfgFromDB(ctx *context.Context, db ConfigDB, sections 
 			if ignoreConfigDB {
 				continue
 			}
-			return fmt.Errorf("Invalid section: <%s> ", section)
+			return fmt.Errorf("Invalid section: <%s>", section)
 		}
 		sec, has := cfg.sections.Get(section)
 		if !has {
-			return fmt.Errorf("Invalid section: <%s> ", section)
+			return fmt.Errorf("Invalid section: <%s>", section)
 		}
 		cfg.lks[section].Lock()
 		err = sec.Load(ctx, db, cfg)
