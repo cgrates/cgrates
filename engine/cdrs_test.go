@@ -1059,3 +1059,179 @@ func TestV1StoreSessionCostSet(t *testing.T) {
 		t.Errorf("expected %v,received %v", utils.ToJSON(exp), utils.ToJSON(rcv))
 	}
 }
+
+func TestV2StoreSessionCost(t *testing.T) {
+	Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	ccMock := &ccMock{
+		calls: map[string]func(args interface{}, reply interface{}) error{
+			utils.ResponderRefundRounding: func(args, reply interface{}) error {
+				rpl := &Account{}
+				*reply.(*Account) = *rpl
+				return nil
+			},
+		},
+	}
+	clientconn := make(chan rpcclient.ClientConnector, 1)
+	clientconn <- ccMock
+	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.RateSConnsCfg): clientconn,
+	})
+	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 1
+	cfg.CdrsCfg().RaterConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.RateSConnsCfg)}
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	config.SetCgrConfig(cfg)
+	Cache = NewCacheS(cfg, dm, nil)
+	args := &ArgsV2CDRSStoreSMCost{
+		CheckDuplicate: false,
+		Cost: &V2SMCost{
+			CGRID:      "cgrid",
+			RunID:      "runid",
+			OriginHost: "host",
+			OriginID:   "originid",
+			CostSource: "cgrates",
+			CostDetails: &EventCost{
+				CGRID:          "evcgrid",
+				RunID:          "evrunid",
+				StartTime:      time.Date(2021, 11, 1, 2, 0, 0, 0, time.UTC),
+				Usage:          utils.DurationPointer(122),
+				Cost:           utils.Float64Pointer(134),
+				Charges:        []*ChargingInterval{},
+				AccountSummary: &AccountSummary{},
+				Rating:         Rating{},
+				Accounting:     Accounting{},
+				RatingFilters:  RatingFilters{},
+				Rates:          ChargedRates{},
+				Timings:        ChargedTimings{},
+			},
+		},
+	}
+	cdrS := &CDRServer{
+		cgrCfg:  cfg,
+		cdrDb:   db,
+		dm:      dm,
+		connMgr: connMgr,
+	}
+	reply := utils.StringPointer("reply")
+
+	if err := cdrS.V2StoreSessionCost(args, reply); err != nil {
+		t.Error(err)
+	}
+	exp := &utils.CachedRPCResponse{Result: utils.StringPointer("OK"), Error: nil}
+	rcv, has := Cache.Get(utils.CacheRPCResponses, utils.ConcatenatedKey(utils.CDRsV1StoreSessionCost, args.Cost.CGRID, args.Cost.RunID))
+
+	if !has {
+		t.Error("has no value")
+	}
+
+	if !reflect.DeepEqual(exp, rcv) {
+		t.Errorf("expected %+v,received %+v", utils.ToJSON(exp), utils.ToJSON(rcv))
+	}
+}
+
+func TestV2StoreSessionCostSet(t *testing.T) {
+	Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	ccMock := &ccMock{
+		calls: map[string]func(args interface{}, reply interface{}) error{
+			utils.ResponderRefundRounding: func(args, reply interface{}) error {
+				rpl := &Account{}
+				*reply.(*Account) = *rpl
+				return nil
+			},
+		},
+	}
+	clientconn := make(chan rpcclient.ClientConnector, 1)
+	clientconn <- ccMock
+	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.RateSConnsCfg): clientconn,
+	})
+	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 1
+	cfg.CdrsCfg().RaterConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.RateSConnsCfg)}
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	config.SetCgrConfig(cfg)
+	Cache = NewCacheS(cfg, dm, nil)
+	args := &ArgsV2CDRSStoreSMCost{
+		CheckDuplicate: false,
+		Cost: &V2SMCost{
+			CGRID:      "cgrid",
+			RunID:      "runid",
+			OriginHost: "host",
+			OriginID:   "originid",
+			CostSource: "cgrates",
+			CostDetails: &EventCost{
+				CGRID:          "evcgrid",
+				RunID:          "evrunid",
+				StartTime:      time.Date(2021, 11, 1, 2, 0, 0, 0, time.UTC),
+				Usage:          utils.DurationPointer(122),
+				Cost:           utils.Float64Pointer(134),
+				Charges:        []*ChargingInterval{},
+				AccountSummary: &AccountSummary{},
+				Rating:         Rating{},
+				Accounting:     Accounting{},
+				RatingFilters:  RatingFilters{},
+				Rates:          ChargedRates{},
+				Timings:        ChargedTimings{},
+			},
+		},
+	}
+	cdrS := &CDRServer{
+		cgrCfg:  cfg,
+		cdrDb:   db,
+		dm:      dm,
+		connMgr: connMgr,
+	}
+	reply := utils.StringPointer("reply")
+	Cache.Set(utils.CacheRPCResponses, utils.ConcatenatedKey(utils.CDRsV1StoreSessionCost, args.Cost.CGRID, args.Cost.RunID),
+		&utils.CachedRPCResponse{Result: reply, Error: nil},
+		nil, true, utils.NonTransactional)
+
+	if err := cdrS.V2StoreSessionCost(args, reply); err != nil {
+		t.Error(err)
+	}
+	exp := &utils.CachedRPCResponse{Result: reply, Error: nil}
+	rcv, has := Cache.Get(utils.CacheRPCResponses, utils.ConcatenatedKey(utils.CDRsV1StoreSessionCost, args.Cost.CGRID, args.Cost.RunID))
+
+	if !has {
+		t.Error("has no value")
+	}
+
+	if !reflect.DeepEqual(exp, rcv) {
+		t.Errorf("expected %+v,received %+v", utils.ToJSON(exp), utils.ToJSON(rcv))
+	}
+}
+
+func TestV1RateCDRS(t *testing.T) {
+	Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	cfg.CdrsCfg().ChargerSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ChargerSConnsCfg)}
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	cdrS := &CDRServer{
+		cgrCfg:  cfg,
+		cdrDb:   db,
+		dm:      dm,
+		connMgr: connMgr,
+	}
+	arg := &ArgRateCDRs{
+		Flags: []string{utils.MetaStore, utils.MetaExport, utils.MetaThresholds, utils.MetaStats, utils.MetaChargers, utils.MetaAttributes},
+		RPCCDRsFilter: utils.RPCCDRsFilter{
+			CGRIDs:          []string{"id", "cgr"},
+			NotRequestTypes: []string{"noreq"},
+			NotCGRIDs:       []string{"cgrid"},
+			RunIDs:          []string{"runid"},
+			OriginIDs:       []string{"o_id"},
+			NotOriginIDs:    []string{"noid"},
+		},
+		Tenant:  "cgrates.org",
+		APIOpts: map[string]interface{}{},
+	}
+	reply := utils.StringPointer("reply")
+
+	if err := cdrS.V1RateCDRs(arg, reply); err == nil || err != utils.ErrNotFound {
+		t.Error(err)
+	}
+
+}
