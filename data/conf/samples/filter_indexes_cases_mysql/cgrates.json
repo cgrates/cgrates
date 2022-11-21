@@ -1,0 +1,34 @@
+{
+    // CGRateS Configuration file
+    // for general_tests/filter_indexes_cases_it_test.go
+    
+    
+    "general": {
+        "node_id": "FIdxCasesMysql",
+        "log_level": 7,
+        "reply_timeout": "50s",
+    },
+    
+    
+    "data_db": {								// database used to store runtime data (eg: accounts, cdr stats)
+	    "db_type": "redis",						// data_db type: <redis|mongo>
+	    "db_port": 6379, 						// data_db port to reach the database
+	    "db_name": "10", 						// data_db database name to connect to
+    },
+
+    "stor_db": {
+	    "db_password": "CGRateS.org",
+    },
+    
+    
+    "attributes": {
+        "enabled": true,
+    }, 
+    
+    "apiers": {
+        "enabled": true,
+    },
+    
+    
+    }
+    

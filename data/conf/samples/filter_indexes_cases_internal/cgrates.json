@@ -1,0 +1,33 @@
+{
+    // CGRateS Configuration file
+    // for general_tests/filter_indexes_cases_it_test.go
+    
+    
+    "general": {
+        "node_id": "FIdxCasesInternal",
+        "log_level": 7,
+        "reply_timeout": "50s",
+    },
+    
+    
+    "data_db": {
+        "db_type": "*internal",	
+    },
+    
+    
+    "stor_db": {
+        "db_type": "*internal",	
+    },
+    
+    
+    "attributes": {
+        "enabled": true,
+    }, 
+    
+    "apiers": {
+        "enabled": true,
+    },
+    
+    
+    }
+    
