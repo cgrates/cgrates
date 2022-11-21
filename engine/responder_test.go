@@ -468,3 +468,165 @@ func TestResponderGetMaxSessionTimeMaxUsageVOICE(t *testing.T) {
 		t.Errorf("Expected %+v, received : %+v", utils.ErrMaxUsageExceeded, err)
 	}
 }
+
+func TestResponderGetCost(t *testing.T) {
+	Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 1
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	Cache = NewCacheS(cfg, dm, nil)
+	config.SetCgrConfig(cfg)
+	rs := &Responder{
+		Timezone: "UTC",
+		FilterS: &FilterS{
+			cfg:     cfg,
+			dm:      dm,
+			connMgr: nil,
+		},
+	}
+	arg := &CallDescriptorWithAPIOpts{
+
+		CallDescriptor: &CallDescriptor{
+			CgrID:       "cgrid",
+			Category:    "category",
+			Tenant:      "tenant",
+			Subject:     "subject",
+			Account:     "acount",
+			Destination: "uk",
+		},
+		APIOpts: map[string]interface{}{},
+	}
+	reply := &CallCost{
+
+		Category:    "category",
+		Tenant:      "tenant",
+		Subject:     "subject",
+		Account:     "acount",
+		Destination: "uk",
+	}
+
+	if err = rs.GetCost(arg, reply); err != nil {
+		t.Error(err)
+	}
+	exp := &utils.CachedRPCResponse{
+		Result: reply,
+		Error:  nil,
+	}
+	rcv, has := Cache.Get(utils.CacheRPCResponses, utils.ConcatenatedKey(utils.ResponderGetCost, arg.CgrID))
+
+	if !has {
+		t.Error("has no value")
+	}
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("expected %+v,received %+v", utils.ToJSON(rcv), utils.ToJSON(exp))
+	}
+
+}
+
+func TestResponderGetCostSet(t *testing.T) {
+	Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 1
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	Cache = NewCacheS(cfg, dm, nil)
+	config.SetCgrConfig(cfg)
+	rs := &Responder{
+		Timezone: "UTC",
+		FilterS: &FilterS{
+			cfg:     cfg,
+			dm:      dm,
+			connMgr: nil,
+		},
+	}
+	arg := &CallDescriptorWithAPIOpts{
+
+		CallDescriptor: &CallDescriptor{
+			CgrID:       "cgrid",
+			Category:    "category",
+			Tenant:      "tenant",
+			Subject:     "subject",
+			Account:     "acount",
+			Destination: "uk",
+		},
+		APIOpts: map[string]interface{}{},
+	}
+	reply := &CallCost{
+
+		Category:    "category",
+		Tenant:      "tenant",
+		Subject:     "subject",
+		Account:     "acount",
+		Destination: "uk",
+	}
+	Cache.Set(utils.CacheRPCResponses, utils.ConcatenatedKey(utils.ResponderGetCost, arg.CgrID),
+		&utils.CachedRPCResponse{Result: reply, Error: nil},
+		nil, true, utils.NonTransactional)
+
+	if err = rs.GetCost(arg, reply); err != nil {
+		t.Error(err)
+	}
+	exp := &utils.CachedRPCResponse{
+		Result: reply,
+		Error:  nil,
+	}
+	rcv, has := Cache.Get(utils.CacheRPCResponses, utils.ConcatenatedKey(utils.ResponderGetCost, arg.CgrID))
+
+	if !has {
+		t.Error("has no value")
+	}
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("expected %+v,received %+v", utils.ToJSON(rcv), utils.ToJSON(exp))
+	}
+
+}
+
+func TestResponderDebit(t *testing.T) {
+	Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 1
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	Cache = NewCacheS(cfg, dm, nil)
+	config.SetCgrConfig(cfg)
+	rs := &Responder{
+		Timezone: "UTC",
+		FilterS: &FilterS{
+			cfg:     cfg,
+			dm:      dm,
+			connMgr: nil,
+		},
+		MaxComputedUsage: map[string]time.Duration{},
+	}
+	arg := &CallDescriptorWithAPIOpts{
+
+		CallDescriptor: &CallDescriptor{
+			CgrID:       "cgrid",
+			Category:    "category",
+			Tenant:      "tenant",
+			Subject:     "subject",
+			Account:     "acount",
+			Destination: "uk",
+			ToR:         "tor",
+			TimeStart:   time.Date(2022, 12, 1, 12, 0, 0, 0, time.UTC),
+			TimeEnd:     time.Date(2022, 12, 1, 12, 0, 0, 0, time.UTC),
+		},
+		APIOpts: map[string]interface{}{
+			"tor": 30 * time.Minute,
+		},
+	}
+	reply := &CallCost{
+
+		Category:    "category",
+		Tenant:      "tenant",
+		Subject:     "subject",
+		Account:     "acount",
+		Destination: "uk",
+	}
+	if err := rs.Debit(arg, reply); err == nil {
+		t.Error(err)
+	}
+}
