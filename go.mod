@@ -13,7 +13,7 @@ require (
 	github.com/cgrates/fsock v0.0.0-20221024103442-1e3fb3cc7c8e
 	github.com/cgrates/kamevapi v0.0.0-20220525160402-5b8036487a6c
 	github.com/cgrates/ltcache v0.0.0-20210405185848-da943e80c1ab
-	github.com/cgrates/radigo v0.0.0-20200306160903-17b28bb0e1bb
+	github.com/cgrates/radigo v0.0.0-20210902121842-ea2f9a730627
 	github.com/cgrates/rpcclient v0.0.0-20210218104959-97dcf0d39a2c
 	github.com/creack/pty v1.1.18
 	github.com/fiorix/go-diameter v3.0.3-0.20190716165154-f4823472d0e0+incompatible
@@ -31,7 +31,7 @@ require (
 	github.com/streadway/amqp v1.0.1-0.20200716223359-e6b33f460591
 	github.com/ugorji/go/codec v1.2.7
 	go.mongodb.org/mongo-driver v1.11.0
-	golang.org/x/net v0.1.0
+	golang.org/x/net v0.2.0
 	golang.org/x/oauth2 v0.1.0
 	google.golang.org/api v0.102.0
 	pack.ag/amqp v0.12.5
@@ -69,10 +69,10 @@ require (
 	github.com/xdg-go/stringprep v1.0.3 // indirect
 	github.com/youmark/pkcs8 v0.0.0-20181117223130-1be2e3e5546d // indirect
 	go.opencensus.io v0.24.0 // indirect
-	golang.org/x/crypto v0.1.0 // indirect
+	golang.org/x/crypto v0.3.0 // indirect
 	golang.org/x/mod v0.6.0 // indirect
 	golang.org/x/sync v0.1.0 // indirect
-	golang.org/x/sys v0.1.0 // indirect
+	golang.org/x/sys v0.2.0 // indirect
 	golang.org/x/text v0.4.0 // indirect
 	golang.org/x/tools v0.2.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect

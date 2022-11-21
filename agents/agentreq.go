@@ -245,7 +245,6 @@ func (ar *AgentRequest) Set(fullPath *utils.FullPath, nm utils.NMInterface) (add
 			Path:      fullPath.Path[9:],
 		}, nm)
 	}
-	return false, err
 }
 
 // RemoveAll deletes all fields at given prefix
