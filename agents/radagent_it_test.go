@@ -270,7 +270,7 @@ func testRAitAcctStart(t *testing.T) {
 	if err := req.AddAVPWithName("Ascend-User-Acct-Time", "1497106115", ""); err != nil {
 		t.Error(err)
 	}
-	if err := req.AddAVPWithName("NAS-Port-Id", "5060", ""); err != nil {
+	if err := req.AddAVPWithName("NAS-Port", "5060", ""); err != nil {
 		t.Error(err)
 	}
 	if err := req.AddAVPWithName("Acct-Delay-Time", "0", ""); err != nil {
@@ -346,7 +346,7 @@ func testRAitAcctStop(t *testing.T) {
 	if err := req.AddAVPWithName("Ascend-User-Acct-Time", "1497106115", ""); err != nil {
 		t.Error(err)
 	}
-	if err := req.AddAVPWithName("NAS-Port-Id", "5060", ""); err != nil {
+	if err := req.AddAVPWithName("NAS-Port", "5060", ""); err != nil {
 		t.Error(err)
 	}
 	if err := req.AddAVPWithName("Acct-Delay-Time", "0", ""); err != nil {
@@ -365,7 +365,7 @@ func testRAitAcctStop(t *testing.T) {
 	if len(reply.AVPs) != 0 { // we don't expect AVPs to be populated
 		t.Errorf("Received AVPs: %+v", reply.AVPs)
 	}
-	// Make sure the sessin was disconnected from SMG
+	// Make sure the session was disconnected from SMG
 	var aSessions []*sessions.ExternalSession
 	if err := raRPC.Call(utils.SessionSv1GetActiveSessions,
 		utils.SessionFilter{

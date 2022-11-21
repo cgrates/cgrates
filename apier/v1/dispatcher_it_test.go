@@ -134,11 +134,12 @@ func testDispatcherSSetDispatcherProfile(t *testing.T) {
 
 	dispatcherProfile = &DispatcherWithCache{
 		DispatcherProfile: &engine.DispatcherProfile{
-			Tenant:    "cgrates.org",
-			ID:        "Dsp1",
-			FilterIDs: []string{"*string:~*req.Account:1001"},
-			Strategy:  utils.MetaFirst,
-			Weight:    20,
+			Tenant:     "cgrates.org",
+			ID:         "Dsp1",
+			Subsystems: []string{utils.META_ANY},
+			FilterIDs:  []string{"*string:~*req.Account:1001"},
+			Strategy:   utils.MetaFirst,
+			Weight:     20,
 		},
 	}
 

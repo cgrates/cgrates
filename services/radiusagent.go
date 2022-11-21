@@ -45,6 +45,7 @@ type RadiusAgent struct {
 	sync.RWMutex
 	cfg         *config.CGRConfig
 	filterSChan chan *engine.FilterS
+	stopChan    chan struct{}
 	exitChan    chan bool
 
 	rad     *agents.RadiusAgent
@@ -67,9 +68,9 @@ func (rad *RadiusAgent) Start() (err error) {
 		utils.Logger.Err(fmt.Sprintf("<%s> error: <%s>", utils.RadiusAgent, err.Error()))
 		return
 	}
-
+	rad.stopChan = make(chan struct{})
 	go func() {
-		if err = rad.rad.ListenAndServe(); err != nil {
+		if err = rad.rad.ListenAndServe(rad.stopChan); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<%s> error: <%s>", utils.RadiusAgent, err.Error()))
 		}
 		rad.exitChan <- true
@@ -84,7 +85,11 @@ func (rad *RadiusAgent) Reload() (err error) {
 
 // Shutdown stops the service
 func (rad *RadiusAgent) Shutdown() (err error) {
-	return // no shutdown for the momment
+	rad.Lock()
+	close(rad.stopChan)
+	rad.rad = nil
+	rad.Unlock()
+	return
 }
 
 // IsRunning returns if the service is running
