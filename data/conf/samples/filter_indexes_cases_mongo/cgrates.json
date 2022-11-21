@@ -1,0 +1,37 @@
+{
+    // CGRateS Configuration file
+    // for general_tests/filter_indexes_cases_it_test.go
+    
+    
+    "general": {
+        "node_id": "FIdxCasesMongo",
+        "log_level": 7,
+        "reply_timeout": "50s",
+    },
+    
+    
+    "data_db": {
+        "db_type": "mongo",
+        "db_name": "10",
+        "db_port": 27017,
+    },
+    
+    
+    "stor_db": {
+        "db_type": "mongo",
+        "db_name": "cgrates",
+        "db_port": 27017,
+    },
+    
+    
+    "attributes": {
+        "enabled": true,
+    }, 
+    
+    "apiers": {
+        "enabled": true,
+    },
+    
+    
+    }
+    
