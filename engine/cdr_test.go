@@ -244,13 +244,13 @@ func TestFieldAsStringForCostDetails(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "AccountFromAccountSummary",
 			BalanceSummaries: []*BalanceSummary{
-				&BalanceSummary{
+				{
 					UUID:  "f9be602747f4",
 					ID:    "monetary",
 					Type:  utils.MONETARY,
 					Value: 0.5,
 				},
-				&BalanceSummary{
+				{
 					UUID:  "2e02510ab90a",
 					ID:    "voice",
 					Type:  utils.VOICE,
@@ -860,11 +860,11 @@ func TestCDRAsExportMap(t *testing.T) {
 		"FieldExtra1":     "val_extr1",
 	}
 	expFlds := []*config.FCTemplate{
-		&config.FCTemplate{Path: utils.MetaExp + utils.NestingSep + utils.CGRID, Type: utils.META_COMPOSED,
+		{Path: utils.MetaExp + utils.NestingSep + utils.CGRID, Type: utils.META_COMPOSED,
 			Value: config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.MetaReq+utils.NestingSep+utils.CGRID, true, utils.INFIELD_SEP)},
-		&config.FCTemplate{Path: utils.MetaExp + utils.NestingSep + utils.Destination, Type: utils.META_COMPOSED,
+		{Path: utils.MetaExp + utils.NestingSep + utils.Destination, Type: utils.META_COMPOSED,
 			Value: config.NewRSRParsersMustCompile("~*req.Destination:s/^\\+(\\d+)$/00${1}/", true, utils.INFIELD_SEP)},
-		&config.FCTemplate{Path: utils.MetaExp + utils.NestingSep + "FieldExtra1", Type: utils.META_COMPOSED,
+		{Path: utils.MetaExp + utils.NestingSep + "FieldExtra1", Type: utils.META_COMPOSED,
 			Value: config.NewRSRParsersMustCompile("~*req.field_extr1", true, utils.INFIELD_SEP)},
 	}
 	if cdrMp, err := cdr.AsExportMap(expFlds, false, nil, nil); err != nil {
@@ -1201,7 +1201,7 @@ func TestCDRcombimedCdrFieldVal(t *testing.T) {
 	}
 	groupCDRs := []*CDR{
 		cdr,
-		&CDR{
+		{
 			CGRID:       utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()),
 			OrderID:     124,
 			ToR:         utils.VOICE,
@@ -1220,7 +1220,7 @@ func TestCDRcombimedCdrFieldVal(t *testing.T) {
 			Usage:       time.Duration(10) * time.Second,
 			Cost:        1.22,
 		},
-		&CDR{
+		{
 			CGRID:       utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()),
 			OrderID:     125,
 			ToR:         utils.VOICE,

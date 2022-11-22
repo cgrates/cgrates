@@ -1099,7 +1099,7 @@ func (sum *StatSum) GetFilterIDs() []string {
 // Compress is part of StatMetric interface
 func (sum *StatSum) Compress(queueLen int64, defaultID string) (eventIDs []string) {
 	if sum.Count < queueLen {
-		for id, _ := range sum.Events {
+		for id := range sum.Events {
 			eventIDs = append(eventIDs, id)
 		}
 		return
@@ -1237,7 +1237,7 @@ func (avg *StatAverage) GetFilterIDs() []string {
 // Compress is part of StatMetric interface
 func (avg *StatAverage) Compress(queueLen int64, defaultID string) (eventIDs []string) {
 	if avg.Count < queueLen {
-		for id, _ := range avg.Events {
+		for id := range avg.Events {
 			eventIDs = append(eventIDs, id)
 		}
 		return
@@ -1345,7 +1345,7 @@ func (dst *StatDistinct) RemEvent(evID string) (err error) {
 
 	// decrement events
 	var fieldValue string
-	for k, _ := range fieldValues {
+	for k := range fieldValues {
 		fieldValue = k
 		break
 	}
@@ -1381,7 +1381,7 @@ func (dst *StatDistinct) GetFilterIDs() []string {
 }
 
 func (dst *StatDistinct) Compress(queueLen int64, defaultID string) (eventIDs []string) {
-	for id, _ := range dst.Events {
+	for id := range dst.Events {
 		eventIDs = append(eventIDs, id)
 	}
 	return

@@ -131,7 +131,7 @@ func testTPFilterSetTPFilter(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "Filter",
 		Filters: []*utils.TPFilter{
-			&utils.TPFilter{
+			{
 				Type:    utils.MetaString,
 				Element: "Account",
 				Values:  []string{"1001", "1002"},
@@ -177,12 +177,12 @@ func testTPFilterGetFilterIds(t *testing.T) {
 
 func testTPFilterUpdateTPFilter(t *testing.T) {
 	tpFilter.Filters = []*utils.TPFilter{
-		&utils.TPFilter{
+		{
 			Type:    utils.MetaString,
 			Element: "Account",
 			Values:  []string{"1001", "1002"},
 		},
-		&utils.TPFilter{
+		{
 			Type:    utils.MetaPrefix,
 			Element: "Destination",
 			Values:  []string{"10", "20"},

@@ -445,16 +445,16 @@ func testV1CDRsRefundCDR(t *testing.T) {
 					Usage:     utils.DurationPointer(time.Duration(3 * time.Minute)),
 					Cost:      utils.Float64Pointer(2.3),
 					Charges: []*engine.ChargingInterval{
-						&engine.ChargingInterval{
+						{
 							RatingID: "c1a5ab9",
 							Increments: []*engine.ChargingIncrement{
-								&engine.ChargingIncrement{
+								{
 									Usage:          time.Duration(2 * time.Minute),
 									Cost:           2.0,
 									AccountingID:   "a012888",
 									CompressFactor: 1,
 								},
-								&engine.ChargingIncrement{
+								{
 									Usage:          time.Duration(1 * time.Second),
 									Cost:           0.005,
 									AccountingID:   "44d6c02",
@@ -468,7 +468,7 @@ func testV1CDRsRefundCDR(t *testing.T) {
 						Tenant: "cgrates.org",
 						ID:     "testV1CDRsRefundCDR",
 						BalanceSummaries: []*engine.BalanceSummary{
-							&engine.BalanceSummary{
+							{
 								UUID:  balanceUuid,
 								Type:  utils.MONETARY,
 								Value: 50,

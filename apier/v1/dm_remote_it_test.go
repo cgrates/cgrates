@@ -354,10 +354,10 @@ func testInternalRemoteITGetStatQueueProfile(t *testing.T) {
 		TTL:         -1,
 		MinItems:    0,
 		Metrics: []*engine.MetricWithFilters{
-			&engine.MetricWithFilters{
+			{
 				MetricID: utils.MetaTCC,
 			},
-			&engine.MetricWithFilters{
+			{
 				MetricID: utils.MetaTCD,
 			},
 		},
@@ -378,10 +378,10 @@ func testInternalRemoteITGetStatQueueProfile(t *testing.T) {
 		TTL:         -1,
 		MinItems:    0,
 		Metrics: []*engine.MetricWithFilters{
-			&engine.MetricWithFilters{
+			{
 				MetricID: utils.MetaTCD,
 			},
-			&engine.MetricWithFilters{
+			{
 				MetricID: utils.MetaTCC,
 			},
 		},
@@ -942,10 +942,10 @@ func testInternalReplicateStats(t *testing.T) {
 			QueueLength: 10,
 			TTL:         time.Duration(10) * time.Second,
 			Metrics: []*engine.MetricWithFilters{
-				&engine.MetricWithFilters{
+				{
 					MetricID: utils.MetaACD,
 				},
-				&engine.MetricWithFilters{
+				{
 					MetricID: utils.MetaTCD,
 				},
 			},

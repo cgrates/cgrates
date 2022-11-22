@@ -106,9 +106,9 @@ func testDMitCRUDStatQueue(t *testing.T) {
 				Answered: 2,
 				Count:    3,
 				Events: map[string]*StatWithCompress{
-					"cgrates.org:ev1": &StatWithCompress{Stat: 1},
-					"cgrates.org:ev2": &StatWithCompress{Stat: 1},
-					"cgrates.org:ev3": &StatWithCompress{Stat: 0},
+					"cgrates.org:ev1": {Stat: 1},
+					"cgrates.org:ev2": {Stat: 1},
+					"cgrates.org:ev3": {Stat: 0},
 				},
 			},
 		},

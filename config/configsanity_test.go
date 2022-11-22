@@ -108,7 +108,7 @@ func TestConfigSanityCDRServer(t *testing.T) {
 	cfg.cdrsCfg.StatSConns = []string{}
 
 	cfg.cdrsCfg.OnlineCDRExports = []string{"stringy"}
-	cfg.CdreProfiles = map[string]*CdreCfg{"stringx": &CdreCfg{}}
+	cfg.CdreProfiles = map[string]*CdreCfg{"stringx": {}}
 	expected = "<CDRs> cannot find CDR export template with ID: <stringy>"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
@@ -134,7 +134,7 @@ func TestConfigSanityLoaders(t *testing.T) {
 			Enabled: true,
 			TpInDir: "/not/exist",
 			Data: []*LoaderDataType{
-				&LoaderDataType{
+				{
 					Type: "strsdfing",
 				},
 			},
@@ -151,7 +151,7 @@ func TestConfigSanityLoaders(t *testing.T) {
 			TpInDir:  "/",
 			TpOutDir: "/",
 			Data: []*LoaderDataType{
-				&LoaderDataType{
+				{
 					Type: "wrongtype",
 				},
 			},
@@ -168,10 +168,10 @@ func TestConfigSanityLoaders(t *testing.T) {
 			TpInDir:  "/",
 			TpOutDir: "/",
 			Data: []*LoaderDataType{
-				&LoaderDataType{
+				{
 					Type: utils.MetaStats,
 					Fields: []*FCTemplate{
-						&FCTemplate{
+						{
 							Type: utils.MetaStats,
 							Tag:  "test1",
 						},
@@ -639,7 +639,7 @@ func TestConfigSanityEventReader(t *testing.T) {
 	}
 	cfg.sessionSCfg.Enabled = true
 	cfg.ersCfg.Readers = []*EventReaderCfg{
-		&EventReaderCfg{
+		{
 			ID:   "test",
 			Type: "wrongtype",
 		},
@@ -650,7 +650,7 @@ func TestConfigSanityEventReader(t *testing.T) {
 	}
 
 	cfg.ersCfg.Readers = []*EventReaderCfg{
-		&EventReaderCfg{
+		{
 			ID:            "test2",
 			Type:          utils.MetaFileCSV,
 			ProcessedPath: "not/a/path",
@@ -662,7 +662,7 @@ func TestConfigSanityEventReader(t *testing.T) {
 	}
 
 	cfg.ersCfg.Readers = []*EventReaderCfg{
-		&EventReaderCfg{
+		{
 			ID:            "test3",
 			Type:          utils.MetaFileCSV,
 			ProcessedPath: "/",
@@ -768,7 +768,7 @@ func TestConfigSanityDataDB(t *testing.T) {
 	cfg.thresholdSCfg.Enabled = false
 
 	cfg.dataDbCfg.Items = map[string]*ItemOpt{
-		"test1": &ItemOpt{
+		"test1": {
 			Remote: true,
 		},
 	}
@@ -778,7 +778,7 @@ func TestConfigSanityDataDB(t *testing.T) {
 	}
 
 	cfg.dataDbCfg.Items = map[string]*ItemOpt{
-		"test2": &ItemOpt{
+		"test2": {
 			Remote:    false,
 			Replicate: true,
 		},
@@ -835,12 +835,12 @@ func TestConfigSanityDispatcher(t *testing.T) {
 func TestConfigSanityCacheS(t *testing.T) {
 	cfg, _ = NewDefaultCGRConfig()
 
-	cfg.cacheCfg = map[string]*CacheParamCfg{"wrong_partition_name": &CacheParamCfg{Limit: 10}}
+	cfg.cacheCfg = map[string]*CacheParamCfg{"wrong_partition_name": {Limit: 10}}
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != "<CacheS> partition <wrong_partition_name> not defined" {
 		t.Error(err)
 	}
 
-	cfg.cacheCfg = map[string]*CacheParamCfg{utils.CacheLoadIDs: &CacheParamCfg{Limit: 9}}
+	cfg.cacheCfg = map[string]*CacheParamCfg{utils.CacheLoadIDs: {Limit: 9}}
 	if err := cfg.checkConfigSanity(); err != nil {
 		t.Error(err)
 	}

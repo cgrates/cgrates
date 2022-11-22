@@ -38,10 +38,10 @@ func TestUnitCounterClone(t *testing.T) {
 	uc = &UnitCounter{
 		CounterType: "testCounterType",
 		Counters: []*CounterFilter{
-			&CounterFilter{
+			{
 				Value: 0.7,
 			},
-			&CounterFilter{
+			{
 				Value: 0.8,
 			},
 		},
@@ -49,10 +49,10 @@ func TestUnitCounterClone(t *testing.T) {
 	eOut = &UnitCounter{
 		CounterType: "testCounterType",
 		Counters: []*CounterFilter{
-			&CounterFilter{
+			{
 				Value: 0.7,
 			},
-			&CounterFilter{
+			{
 				Value: 0.8,
 			},
 		},
@@ -102,36 +102,36 @@ func TestUnitCountersClone(t *testing.T) {
 	}
 	ucs = UnitCounters{
 		"string1": []*UnitCounter{
-			&UnitCounter{
+			{
 				CounterType: "testCounterType1.1",
 			},
-			&UnitCounter{
+			{
 				CounterType: "testCounterType1.2",
 			},
 		},
 		"string2": []*UnitCounter{
-			&UnitCounter{
+			{
 				CounterType: "testCounterType2.1",
 			},
-			&UnitCounter{
+			{
 				CounterType: "testCounterType2.2",
 			},
 		},
 	}
 	eOut = UnitCounters{
 		"string1": []*UnitCounter{
-			&UnitCounter{
+			{
 				CounterType: "testCounterType1.1",
 			},
-			&UnitCounter{
+			{
 				CounterType: "testCounterType1.2",
 			},
 		},
 		"string2": []*UnitCounter{
-			&UnitCounter{
+			{
 				CounterType: "testCounterType2.1",
 			},
-			&UnitCounter{
+			{
 				CounterType: "testCounterType2.2",
 			},
 		},

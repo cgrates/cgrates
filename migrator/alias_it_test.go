@@ -122,10 +122,10 @@ func testAlsITMigrateAndMove(t *testing.T) {
 			&v1AliasValue{
 				DestinationId: "DST_1003",
 				Pairs: map[string]map[string]string{
-					"Account": map[string]string{
+					"Account": {
 						"1001": "1002",
 					},
-					"Category": map[string]string{
+					"Category": {
 						"call_1001": "call_1002",
 					},
 				},
@@ -208,10 +208,10 @@ func testAlsITMigrateAndMove(t *testing.T) {
 	}
 
 	expAlsIdx := map[string]utils.StringMap{
-		"*string:~*req.Account:1001": utils.StringMap{
+		"*string:~*req.Account:1001": {
 			"*out:*any:*any:1001:call_1001:*rated": true,
 		},
-		"*string:~*req.Subject:call_1001": utils.StringMap{
+		"*string:~*req.Subject:call_1001": {
 			"*out:*any:*any:1001:call_1001:*rated": true,
 		},
 	}

@@ -345,7 +345,7 @@ func testV1CDRsProcessEventSts(t *testing.T) {
 	}
 	var cdrs []*engine.CDR
 	eOut := []*engine.CDR{
-		&engine.CDR{
+		{
 			CGRID:       "c87609aa1cb6e9529ab1836cfeeebaab7aa7ebaf",
 			RunID:       "testv1",
 			OrderID:     0,
@@ -438,9 +438,9 @@ func testV1CDRsProcessEventThreshold(t *testing.T) {
 	if err := pecdrsRpc.Call(utils.APIerSv2SetActions, &utils.AttrSetActions{
 		ActionsId: "ACT_LOG",
 		Actions: []*utils.TPAction{
-			&utils.TPAction{
+			{
 				Identifier: utils.LOG},
-			&utils.TPAction{
+			{
 				Identifier: utils.TOPUP_RESET, BalanceType: utils.VOICE,
 				Units: "10", ExpiryTime: "*unlimited",
 				DestinationIds: "*any", BalanceWeight: "10", Weight: 10},

@@ -49,7 +49,7 @@ type ActionTiming struct {
 func (at *ActionTiming) Tasks() (tsks []*Task) {
 	if len(at.accountIDs) == 0 {
 		return []*Task{
-			&Task{
+			{
 				Uuid:      at.Uuid,
 				ActionsID: at.ActionsID,
 			}}

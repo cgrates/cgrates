@@ -400,7 +400,7 @@ func testAPIerSv2itSetActionPlanWithWrongTiming(t *testing.T) {
 	tNow := time.Now().Add(time.Duration(time.Minute)).String()
 	argAP1 := &v1.AttrSetActionPlan{Id: "TestAPIerSv2itSetAccountWithAPWithWrongTiming",
 		ActionPlan: []*v1.AttrActionPlan{
-			&v1.AttrActionPlan{
+			{
 				ActionsId: "TestAPIerSv2itSetAccountWithAP_ACT_1",
 				Time:      tNow,
 				Weight:    20.0,
@@ -418,7 +418,7 @@ func testAPIerSv2itSetActionPlanWithWrongTiming2(t *testing.T) {
 	var reply string
 	argAP1 := &v1.AttrSetActionPlan{Id: "TestAPIerSv2itSetAccountWithAPWithWrongTiming",
 		ActionPlan: []*v1.AttrActionPlan{
-			&v1.AttrActionPlan{
+			{
 				ActionsId: "TestAPIerSv2itSetAccountWithAP_ACT_1",
 				Time:      "aa:bb:cc",
 				Weight:    20.0,

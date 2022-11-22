@@ -115,7 +115,7 @@ func testDCITMigrateAndMove(t *testing.T) {
 	dcGetMapKeys = func(m utils.StringMap) (keys []string) { //make sure destination are in order
 		keys = make([]string, len(m))
 		i := 0
-		for k, _ := range m {
+		for k := range m {
 			keys[i] = k
 			i += 1
 		}
@@ -127,7 +127,7 @@ func testDCITMigrateAndMove(t *testing.T) {
 		Value: &v1DerivedChargers{
 			DestinationIDs: utils.StringMap{"1001": true, "1002": true, "1003": true},
 			Chargers: []*v1DerivedCharger{
-				&v1DerivedCharger{
+				{
 					RunID:      "RunID",
 					RunFilters: "~filterhdr1:s/(.+)/special_run3/",
 
@@ -229,7 +229,7 @@ func testDCITMigrateAndMove(t *testing.T) {
 		t.Error("Error should be not found : ", err)
 	}
 	expDcIdx := map[string]utils.StringMap{
-		"*string:~*req.Account:1003": utils.StringMap{
+		"*string:~*req.Account:1003": {
 			"*out:cgrates.org:*any:1003:*any_0": true,
 		},
 	}
@@ -240,7 +240,7 @@ func testDCITMigrateAndMove(t *testing.T) {
 		t.Errorf("Expected %v, recived: %v", utils.ToJSON(expDcIdx), utils.ToJSON(dcidx))
 	}
 	expDcIdx = map[string]utils.StringMap{
-		"*string:~*req.Account:1003": utils.StringMap{
+		"*string:~*req.Account:1003": {
 			"*out:cgrates.org:*any:1003:*any_0": true,
 		},
 	}

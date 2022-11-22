@@ -31,7 +31,7 @@ func TestV1AccountAsAccount(t *testing.T) {
 		Weight:         10,
 		DestinationIds: "NAT",
 		Timings: []*engine.RITiming{
-			&engine.RITiming{
+			{
 				StartTime: "00:00:00",
 			},
 		},
@@ -41,7 +41,7 @@ func TestV1AccountAsAccount(t *testing.T) {
 		Weight:         10,
 		DestinationIds: "NAT",
 		Timings: []*engine.RITiming{
-			&engine.RITiming{
+			{
 				StartTime: "00:00:00",
 			},
 		},
@@ -49,12 +49,12 @@ func TestV1AccountAsAccount(t *testing.T) {
 	v1Acc := &v1Account{
 		Id: "*OUT:CUSTOMER_1:rif",
 		BalanceMap: map[string]v1BalanceChain{
-			utils.DATA:  v1BalanceChain{d1b},
-			utils.VOICE: v1BalanceChain{v1b},
-			utils.MONETARY: v1BalanceChain{&v1Balance{
+			utils.DATA:  {d1b},
+			utils.VOICE: {v1b},
+			utils.MONETARY: {&v1Balance{
 				Value: 21,
 				Timings: []*engine.RITiming{
-					&engine.RITiming{
+					{
 						StartTime: "00:00:00",
 					},
 				},
@@ -70,7 +70,7 @@ func TestV1AccountAsAccount(t *testing.T) {
 		RatingSubject:  "",
 		Categories:     utils.NewStringMap(""),
 		SharedGroups:   utils.NewStringMap(""),
-		Timings:        []*engine.RITiming{&engine.RITiming{StartTime: "00:00:00"}},
+		Timings:        []*engine.RITiming{{StartTime: "00:00:00"}},
 		TimingIDs:      utils.NewStringMap(""),
 		Factor:         engine.ValueFactor{},
 	}
@@ -83,7 +83,7 @@ func TestV1AccountAsAccount(t *testing.T) {
 		RatingSubject:  "",
 		Categories:     utils.NewStringMap(""),
 		SharedGroups:   utils.NewStringMap(""),
-		Timings:        []*engine.RITiming{&engine.RITiming{StartTime: "00:00:00"}},
+		Timings:        []*engine.RITiming{{StartTime: "00:00:00"}},
 		TimingIDs:      utils.NewStringMap(""),
 		Factor:         engine.ValueFactor{},
 	}
@@ -95,16 +95,16 @@ func TestV1AccountAsAccount(t *testing.T) {
 		RatingSubject:  "",
 		Categories:     utils.NewStringMap(""),
 		SharedGroups:   utils.NewStringMap(""),
-		Timings:        []*engine.RITiming{&engine.RITiming{StartTime: "00:00:00"}},
+		Timings:        []*engine.RITiming{{StartTime: "00:00:00"}},
 		TimingIDs:      utils.NewStringMap(""),
 		Factor:         engine.ValueFactor{},
 	}
 	testAccount := &engine.Account{
 		ID: "CUSTOMER_1:rif",
 		BalanceMap: map[string]engine.Balances{
-			utils.DATA:     engine.Balances{d2},
-			utils.VOICE:    engine.Balances{v2},
-			utils.MONETARY: engine.Balances{m2},
+			utils.DATA:     {d2},
+			utils.VOICE:    {v2},
+			utils.MONETARY: {m2},
 		},
 		UnitCounters:   engine.UnitCounters{},
 		ActionTriggers: engine.ActionTriggers{},

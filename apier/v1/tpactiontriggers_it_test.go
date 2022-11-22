@@ -132,7 +132,7 @@ func testTPActionTriggersSetTPActionTriggers(t *testing.T) {
 		TPid: "TPAct",
 		ID:   "ID",
 		ActionTriggers: []*utils.TPActionTrigger{
-			&utils.TPActionTrigger{
+			{
 				Id:                    "STANDARD_TRIGGERS",
 				UniqueID:              "",
 				ThresholdType:         "*min_balance",
@@ -155,7 +155,7 @@ func testTPActionTriggersSetTPActionTriggers(t *testing.T) {
 				ActionsId:             "LOG_WARNING",
 				Weight:                10,
 			},
-			&utils.TPActionTrigger{
+			{
 				Id:                    "STANDARD_TRIGGERS",
 				UniqueID:              "",
 				ThresholdType:         "*max_event_counter",
@@ -215,7 +215,7 @@ func testTPActionTriggersGetTPActionTriggersIds(t *testing.T) {
 
 func testTPActionTriggersUpdateTPActionTriggers(t *testing.T) {
 	tpActionTriggers.ActionTriggers = []*utils.TPActionTrigger{
-		&utils.TPActionTrigger{
+		{
 			Id:                    "STANDARD_TRIGGERS",
 			UniqueID:              "",
 			ThresholdType:         "*min_balance",
@@ -238,7 +238,7 @@ func testTPActionTriggersUpdateTPActionTriggers(t *testing.T) {
 			ActionsId:             "LOG_WARNING",
 			Weight:                10,
 		},
-		&utils.TPActionTrigger{
+		{
 			Id:                    "STANDARD_TRIGGERS",
 			UniqueID:              "",
 			ThresholdType:         "*max_event_counter",
@@ -261,7 +261,7 @@ func testTPActionTriggersUpdateTPActionTriggers(t *testing.T) {
 			ActionsId:             "LOG_WARNING",
 			Weight:                10,
 		},
-		&utils.TPActionTrigger{
+		{
 			Id:                    "CDRST1_WARN",
 			UniqueID:              "",
 			ThresholdType:         "*min_asr",

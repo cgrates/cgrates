@@ -81,16 +81,16 @@ func TestNMAsXMLElements(t *testing.T) {
 		t.Error(err)
 	}
 	eXMLElmnts := []*XMLElement{
-		&XMLElement{
+		{
 			XMLName: xml.Name{Local: order[0][0].String()},
 			Elements: []*XMLElement{
-				&XMLElement{
+				{
 					XMLName: xml.Name{Local: order[0][1].String()},
 					Elements: []*XMLElement{
-						&XMLElement{
+						{
 							XMLName: xml.Name{Local: order[0][2].String()},
 							Attributes: []*xml.Attr{
-								&xml.Attr{
+								{
 									Name:  xml.Name{Local: "attribute1"},
 									Value: "attrVal1",
 								},
@@ -99,14 +99,14 @@ func TestNMAsXMLElements(t *testing.T) {
 						},
 					},
 				},
-				&XMLElement{
+				{
 					XMLName: xml.Name{Local: "Field3"},
 					Value:   "Value3",
 				},
-				&XMLElement{
+				{
 					XMLName: xml.Name{Local: order[3][1].String()},
 					Attributes: []*xml.Attr{
-						&xml.Attr{
+						{
 							Name:  xml.Name{Local: "attribute5"},
 							Value: "attrVal5",
 						},
@@ -115,16 +115,16 @@ func TestNMAsXMLElements(t *testing.T) {
 				},
 			},
 		},
-		&XMLElement{
+		{
 			XMLName: xml.Name{Local: order[1][0].String()},
 			Elements: []*XMLElement{
-				&XMLElement{
+				{
 					XMLName: xml.Name{Local: order[1][1].String()},
 					Elements: []*XMLElement{
-						&XMLElement{
+						{
 							XMLName: xml.Name{Local: order[1][2].String()},
 							Elements: []*XMLElement{
-								&XMLElement{
+								{
 									XMLName: xml.Name{Local: "Fld1"},
 									Value:   "Val1",
 								},
@@ -134,23 +134,23 @@ func TestNMAsXMLElements(t *testing.T) {
 				},
 			},
 		},
-		&XMLElement{
+		{
 			XMLName: xml.Name{Local: order[4][0].String()},
 			Attributes: []*xml.Attr{
-				&xml.Attr{
+				{
 					Name:  xml.Name{Local: "attribute2"},
 					Value: "attrVal2",
 				},
 			},
 			Value: "Val4",
 		},
-		&XMLElement{
+		{
 			XMLName: xml.Name{Local: order[5][0].String()},
 			Elements: []*XMLElement{
-				&XMLElement{
+				{
 					XMLName: xml.Name{Local: order[5][1].String()},
 					Attributes: []*xml.Attr{
-						&xml.Attr{
+						{
 							Name:  xml.Name{Local: "attribute6"},
 							Value: "attrVal6",
 						},

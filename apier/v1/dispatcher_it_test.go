@@ -254,10 +254,10 @@ func testDispatcherSSetDispatcherHost(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "DspHst1",
 			Conns: []*config.RemoteHost{
-				&config.RemoteHost{
+				{
 					Address: "*internal",
 				},
-				&config.RemoteHost{
+				{
 					Address:   ":2012",
 					Transport: utils.MetaJSON,
 					TLS:       true,

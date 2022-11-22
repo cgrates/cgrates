@@ -131,12 +131,12 @@ func testTPRatingPlansSetTPRatingPlan(t *testing.T) {
 		TPid: "TPRP1",
 		ID:   "Plan1",
 		RatingPlanBindings: []*utils.TPRatingPlanBinding{
-			&utils.TPRatingPlanBinding{
+			{
 				DestinationRatesId: "RateId",
 				TimingId:           "TimingID",
 				Weight:             12,
 			},
-			&utils.TPRatingPlanBinding{
+			{
 				DestinationRatesId: "DR_FREESWITCH_USERS",
 				TimingId:           "ALWAYS",
 				Weight:             10,
@@ -178,17 +178,17 @@ func testTPRatingPlansGetTPRatingPlanIds(t *testing.T) {
 
 func testTPRatingPlansUpdateTPRatingPlan(t *testing.T) {
 	tpRatingPlan.RatingPlanBindings = []*utils.TPRatingPlanBinding{
-		&utils.TPRatingPlanBinding{
+		{
 			DestinationRatesId: "RateId",
 			TimingId:           "TimingID",
 			Weight:             12,
 		},
-		&utils.TPRatingPlanBinding{
+		{
 			DestinationRatesId: "DR_FREESWITCH_USERS",
 			TimingId:           "ALWAYS",
 			Weight:             10,
 		},
-		&utils.TPRatingPlanBinding{
+		{
 			DestinationRatesId: "RateID2",
 			TimingId:           "ALWAYS",
 			Weight:             11,

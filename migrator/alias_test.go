@@ -52,7 +52,7 @@ func TestAlias2AtttributeProfile(t *testing.T) {
 				&v1AliasValue{
 					DestinationId: utils.META_ANY,
 					Pairs: map[string]map[string]string{
-						"Account": map[string]string{
+						"Account": {
 							"1001": "1002",
 						},
 					},
@@ -71,7 +71,7 @@ func TestAlias2AtttributeProfile(t *testing.T) {
 				&v1AliasValue{
 					DestinationId: utils.META_ANY,
 					Pairs: map[string]map[string]string{
-						"Account": map[string]string{
+						"Account": {
 							"1001": "1002",
 							"1003": "1004",
 						},
@@ -91,7 +91,7 @@ func TestAlias2AtttributeProfile(t *testing.T) {
 				&v1AliasValue{
 					DestinationId: utils.META_ANY,
 					Pairs: map[string]map[string]string{
-						"Account": map[string]string{
+						"Account": {
 							"1001": "1002",
 							"1003": "1004",
 						},
@@ -111,10 +111,10 @@ func TestAlias2AtttributeProfile(t *testing.T) {
 				&v1AliasValue{
 					DestinationId: "DST_1003",
 					Pairs: map[string]map[string]string{
-						"Account": map[string]string{
+						"Account": {
 							"": "1002",
 						},
-						"Subject": map[string]string{
+						"Subject": {
 							"": "call_1001",
 						},
 					},
@@ -133,10 +133,10 @@ func TestAlias2AtttributeProfile(t *testing.T) {
 				&v1AliasValue{
 					DestinationId: "DST_1003",
 					Pairs: map[string]map[string]string{
-						"Account": map[string]string{
+						"Account": {
 							"1001": "1002",
 						},
-						"Category": map[string]string{
+						"Category": {
 							"call_1001": "call_1002",
 						},
 					},
@@ -153,7 +153,7 @@ func TestAlias2AtttributeProfile(t *testing.T) {
 			Values: v1AliasValues{
 				&v1AliasValue{
 					Pairs: map[string]map[string]string{
-						utils.Category: map[string]string{
+						utils.Category: {
 							"somecateg_5141": "somecateg_roam_fromz4",
 						},
 					},

@@ -182,7 +182,7 @@ func testSupITMigrateAndMove(t *testing.T) {
 		Sorting:           utils.MetaQOS,
 		SortingParameters: []string{},
 		Suppliers: []*engine.Supplier{
-			&engine.Supplier{
+			{
 				ID:            "Sup",
 				FilterIDs:     []string{},
 				AccountIDs:    []string{"1001"},
