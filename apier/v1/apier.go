@@ -1085,8 +1085,8 @@ func (arrp *AttrRemoveRatingProfile) GetId() (result string) {
 }
 
 func (apiv1 *APIerSv1) RemoveRatingProfile(attr AttrRemoveRatingProfile, reply *string) error {
-	if (attr.Subject != utils.EmptyString && utils.IsSliceMember([]string{attr.Tenant, attr.Category}, "")) ||
-		(attr.Category != utils.EmptyString && attr.Tenant == utils.EmptyString) {
+	if attr.Subject != utils.EmptyString && utils.IsSliceMember([]string{attr.Tenant, attr.Category}, "") ||
+		attr.Category != utils.EmptyString && attr.Tenant == utils.EmptyString {
 		return utils.ErrMandatoryIeMissing
 	}
 	keyID := attr.GetId()

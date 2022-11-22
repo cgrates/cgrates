@@ -1475,7 +1475,7 @@ func (dm *DataManager) SetActionPlan(key string, ats *ActionPlan,
 
 func (dm *DataManager) GetAllActionPlans() (ats map[string]*ActionPlan, err error) {
 	ats, err = dm.dataDB.GetAllActionPlansDrv()
-	if ((err == nil && len(ats) == 0) || err == utils.ErrNotFound) &&
+	if (err == nil && len(ats) == 0 || err == utils.ErrNotFound) &&
 		config.CgrConfig().DataDbCfg().Items[utils.MetaActionPlans].Remote {
 		err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RmtConns, nil,
 			utils.ReplicatorSv1GetAllActionPlans,
@@ -1511,7 +1511,7 @@ func (dm *DataManager) GetAccountActionPlans(acntID string, cacheRead, cacheWrit
 		}
 	}
 	apIDs, err = dm.dataDB.GetAccountActionPlansDrv(acntID)
-	if ((err == nil && len(apIDs) == 0) || err == utils.ErrNotFound) &&
+	if (err == nil && len(apIDs) == 0 || err == utils.ErrNotFound) &&
 		config.CgrConfig().DataDbCfg().Items[utils.MetaAccountActionPlans].Remote {
 		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RmtConns, nil,
 			utils.ReplicatorSv1GetAccountActionPlans, acntID, &apIDs); err == nil {

@@ -26,7 +26,7 @@ import (
 )
 
 func (dS *DispatcherService) ThresholdSv1Ping(args *utils.CGREventWithArgDispatcher, reply *string) (err error) {
-	if args == nil || (args.CGREvent == nil && args.ArgDispatcher == nil) {
+	if args == nil || args.CGREvent == nil && args.ArgDispatcher == nil {
 		args = utils.NewCGREventWithArgDispatcher()
 	} else if args.CGREvent == nil {
 		args.CGREvent = new(utils.CGREvent)

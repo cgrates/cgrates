@@ -600,7 +600,7 @@ func TestACDGetValue(t *testing.T) {
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			"Usage":      time.Duration(10 * time.Second)}}
 	acd.AddEvent(ev)
-	if v := acd.GetValue(); v != time.Duration((-1)*time.Nanosecond) {
+	if v := acd.GetValue(); v != time.Duration(-1*time.Nanosecond) {
 		t.Errorf("wrong acd value: %+v", v)
 	}
 	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2",
@@ -614,11 +614,11 @@ func TestACDGetValue(t *testing.T) {
 		t.Errorf("wrong acd value: %+v", v)
 	}
 	acd.RemEvent(ev.ID)
-	if v := acd.GetValue(); v != time.Duration((-1)*time.Nanosecond) {
+	if v := acd.GetValue(); v != time.Duration(-1*time.Nanosecond) {
 		t.Errorf("wrong acd value: %+v", v)
 	}
 	acd.RemEvent(ev2.ID)
-	if v := acd.GetValue(); v != time.Duration((-1)*time.Nanosecond) {
+	if v := acd.GetValue(); v != time.Duration(-1*time.Nanosecond) {
 		t.Errorf("wrong acd value: %+v", v)
 	}
 	ev4 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_4",
@@ -640,11 +640,11 @@ func TestACDGetValue(t *testing.T) {
 	}
 	acd.RemEvent(ev5.ID)
 	acd.RemEvent(ev4.ID)
-	if v := acd.GetValue(); v != time.Duration((-1)*time.Nanosecond) {
+	if v := acd.GetValue(); v != time.Duration(-1*time.Nanosecond) {
 		t.Errorf("wrong acd value: %+v", v)
 	}
 	acd.RemEvent(ev3.ID)
-	if v := acd.GetValue(); v != time.Duration((-1)*time.Nanosecond) {
+	if v := acd.GetValue(); v != time.Duration(-1*time.Nanosecond) {
 		t.Errorf("wrong acd value: %+v", v)
 	}
 }
@@ -839,7 +839,7 @@ func TestTCDGetValue(t *testing.T) {
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			"Usage":      time.Duration(10 * time.Second)}}
 	tcd.AddEvent(ev)
-	if v := tcd.GetValue(); v != time.Duration((-1)*time.Nanosecond) {
+	if v := tcd.GetValue(); v != time.Duration(-1*time.Nanosecond) {
 		t.Errorf("wrong tcd value: %+v", v)
 	}
 	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2",
@@ -853,11 +853,11 @@ func TestTCDGetValue(t *testing.T) {
 		t.Errorf("wrong tcd value: %+v", v)
 	}
 	tcd.RemEvent(ev.ID)
-	if v := tcd.GetValue(); v != time.Duration((-1)*time.Nanosecond) {
+	if v := tcd.GetValue(); v != time.Duration(-1*time.Nanosecond) {
 		t.Errorf("wrong tcd value: %+v", v)
 	}
 	tcd.RemEvent(ev2.ID)
-	if v := tcd.GetValue(); v != time.Duration((-1)*time.Nanosecond) {
+	if v := tcd.GetValue(); v != time.Duration(-1*time.Nanosecond) {
 		t.Errorf("wrong tcd value: %+v", v)
 	}
 	ev4 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_4",
@@ -879,11 +879,11 @@ func TestTCDGetValue(t *testing.T) {
 	}
 	tcd.RemEvent(ev5.ID)
 	tcd.RemEvent(ev4.ID)
-	if v := tcd.GetValue(); v != time.Duration((-1)*time.Nanosecond) {
+	if v := tcd.GetValue(); v != time.Duration(-1*time.Nanosecond) {
 		t.Errorf("wrong tcd value: %+v", v)
 	}
 	tcd.RemEvent(ev3.ID)
-	if v := tcd.GetValue(); v != time.Duration((-1)*time.Nanosecond) {
+	if v := tcd.GetValue(); v != time.Duration(-1*time.Nanosecond) {
 		t.Errorf("wrong tcd value: %+v", v)
 	}
 }
@@ -1711,7 +1711,7 @@ func TestPDDGetValue(t *testing.T) {
 			"Usage":      time.Duration(10 * time.Second),
 			utils.PDD:    time.Duration(9 * time.Second)}}
 	pdd.AddEvent(ev)
-	if v := pdd.GetValue(); v != time.Duration((-1)*time.Nanosecond) {
+	if v := pdd.GetValue(); v != time.Duration(-1*time.Nanosecond) {
 		t.Errorf("wrong pdd value: %+v", v)
 	}
 	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2",
@@ -1732,13 +1732,13 @@ func TestPDDGetValue(t *testing.T) {
 	if err := pdd.RemEvent(ev.ID); err != nil {
 		t.Error(err)
 	}
-	if v := pdd.GetValue(); v != time.Duration((-1)*time.Nanosecond) {
+	if v := pdd.GetValue(); v != time.Duration(-1*time.Nanosecond) {
 		t.Errorf("wrong pdd value: %+v", v)
 	}
 	if err := pdd.RemEvent(ev2.ID); err != nil {
 		t.Error(err)
 	}
-	if v := pdd.GetValue(); v != time.Duration((-1)*time.Nanosecond) {
+	if v := pdd.GetValue(); v != time.Duration(-1*time.Nanosecond) {
 		t.Errorf("wrong pdd value: %+v", v)
 	}
 	ev4 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_4",
@@ -1760,7 +1760,7 @@ func TestPDDGetValue(t *testing.T) {
 	if err := pdd.AddEvent(ev5); err == nil || err.Error() != "NOT_FOUND:PDD" {
 		t.Error(err)
 	}
-	if v := pdd.GetValue(); v != time.Duration((-1)*time.Nanosecond) {
+	if v := pdd.GetValue(); v != time.Duration(-1*time.Nanosecond) {
 		t.Errorf("wrong pdd value: %+v", v)
 	}
 	if err := pdd.RemEvent(ev5.ID); err == nil || err.Error() != "NOT_FOUND" {
@@ -1769,7 +1769,7 @@ func TestPDDGetValue(t *testing.T) {
 	if err := pdd.RemEvent(ev4.ID); err != nil {
 		t.Error(err)
 	}
-	if v := pdd.GetValue(); v != time.Duration((-1)*time.Nanosecond) {
+	if v := pdd.GetValue(); v != time.Duration(-1*time.Nanosecond) {
 		t.Errorf("wrong pdd value: %+v", v)
 	}
 }

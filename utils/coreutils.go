@@ -126,8 +126,8 @@ func GenUUID() string {
 	if err != nil {
 		log.Fatal(err)
 	}
-	b[6] = (b[6] & 0x0F) | 0x40
-	b[8] = (b[8] &^ 0x40) | 0x80
+	b[6] = b[6]&0x0F | 0x40
+	b[8] = b[8]&^0x40 | 0x80
 	return fmt.Sprintf("%x-%x-%x-%x-%x", b[:4], b[4:6], b[6:8], b[8:10],
 		b[10:])
 }
@@ -286,7 +286,7 @@ func RoundDuration(whole, amount time.Duration) time.Duration {
 	if math.Mod(a, w) == 0 {
 		return amount
 	}
-	return time.Duration((w - math.Mod(a, w)) + a)
+	return time.Duration(w - math.Mod(a, w) + a)
 }
 
 func SplitPrefix(prefix string, minLength int) []string {
@@ -428,7 +428,7 @@ func FibDuration(durationUnit, maxDuration time.Duration) func() time.Duration {
 	fib := Fib()
 	return func() time.Duration {
 		fibNrAsDuration := time.Duration(fib())
-		if fibNrAsDuration > (AbsoluteMaxDuration / durationUnit) { // check if the current fibonacci nr. in the sequence would exceed the absolute maximum duration if multiplied by the duration unit value
+		if fibNrAsDuration > AbsoluteMaxDuration/durationUnit { // check if the current fibonacci nr. in the sequence would exceed the absolute maximum duration if multiplied by the duration unit value
 			fibNrAsDuration = AbsoluteMaxDuration
 		} else {
 			fibNrAsDuration *= durationUnit

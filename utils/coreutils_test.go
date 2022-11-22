@@ -770,7 +770,7 @@ func TestCastIfToString(t *testing.T) {
 	} else if sOut != "1" {
 		t.Errorf("Received: %+v", sOut)
 	}
-	v = interface{}((int64)(1))
+	v = interface{}(int64(1))
 	if sOut, casts := CastIfToString(v); !casts {
 		t.Error("Does not cast")
 	} else if sOut != "1" {
