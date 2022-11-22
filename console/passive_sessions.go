@@ -68,9 +68,9 @@ func (self *CmdPassiveSessions) RpcResult() interface{} {
 
 func (self *CmdPassiveSessions) GetFormatedResult(result interface{}) string {
 	return GetFormatedSliceResult(result, map[string]struct{}{
-		"Usage":         struct{}{},
-		"DurationIndex": struct{}{},
-		"MaxRateUnit":   struct{}{},
-		"DebitInterval": struct{}{},
+		"Usage":         {},
+		"DurationIndex": {},
+		"MaxRateUnit":   {},
+		"DebitInterval": {},
 	})
 }

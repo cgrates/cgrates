@@ -132,7 +132,7 @@ func testTPActionsSetTPAction(t *testing.T) {
 		TPid: "TPAcc",
 		ID:   "ID",
 		Actions: []*utils.TPAction{
-			&utils.TPAction{
+			{
 				Identifier:      "*topup_reset",
 				BalanceId:       "BalID",
 				BalanceUuid:     "BalUuid",
@@ -151,7 +151,7 @@ func testTPActionsSetTPAction(t *testing.T) {
 				BalanceDisabled: "false",
 				Weight:          10,
 			},
-			&utils.TPAction{
+			{
 				Identifier:      "*log",
 				BalanceId:       "BalID",
 				BalanceUuid:     "BalUuid",
@@ -207,7 +207,7 @@ func testTPActionsGetTPActionIds(t *testing.T) {
 
 func testTPActionsUpdateTPAction(t *testing.T) {
 	tpActions.Actions = []*utils.TPAction{
-		&utils.TPAction{
+		{
 			Identifier:      "*topup_reset",
 			BalanceId:       "BalID",
 			BalanceUuid:     "BalUuid",
@@ -226,7 +226,7 @@ func testTPActionsUpdateTPAction(t *testing.T) {
 			BalanceDisabled: "false",
 			Weight:          10,
 		},
-		&utils.TPAction{
+		{
 			Identifier:      "*log",
 			BalanceId:       "BalID",
 			BalanceUuid:     "BalUuid",
@@ -245,7 +245,7 @@ func testTPActionsUpdateTPAction(t *testing.T) {
 			BalanceDisabled: "false",
 			Weight:          11,
 		},
-		&utils.TPAction{
+		{
 			Identifier:      "*topup",
 			BalanceId:       "BalID",
 			BalanceUuid:     "BalUuid",

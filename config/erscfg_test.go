@@ -104,7 +104,7 @@ func TestEventReaderLoadFromJSON(t *testing.T) {
 		Enabled:       true,
 		SessionSConns: []string{"conn1", "conn3"},
 		Readers: []*EventReaderCfg{
-			&EventReaderCfg{
+			{
 				ID:             utils.MetaDefault,
 				Type:           utils.META_NONE,
 				FieldSep:       ",",
@@ -143,7 +143,7 @@ func TestEventReaderLoadFromJSON(t *testing.T) {
 				},
 				CacheDumpFields: make([]*FCTemplate, 0),
 			},
-			&EventReaderCfg{
+			{
 				ID:             "file_reader1",
 				Type:           utils.MetaFileCSV,
 				FieldSep:       ",",

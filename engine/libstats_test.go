@@ -53,8 +53,8 @@ func TestStatRemEventWithID(t *testing.T) {
 				Answered: 1,
 				Count:    2,
 				Events: map[string]*StatWithCompress{
-					"cgrates.org:TestRemEventWithID_1": &StatWithCompress{Stat: 1, CompressFactor: 1},
-					"cgrates.org:TestRemEventWithID_2": &StatWithCompress{Stat: 0, CompressFactor: 1},
+					"cgrates.org:TestRemEventWithID_1": {Stat: 1, CompressFactor: 1},
+					"cgrates.org:TestRemEventWithID_2": {Stat: 0, CompressFactor: 1},
 				},
 			},
 		},
@@ -96,8 +96,8 @@ func TestStatRemEventWithID2(t *testing.T) {
 				Answered: 2,
 				Count:    4,
 				Events: map[string]*StatWithCompress{
-					"cgrates.org:TestRemEventWithID_1": &StatWithCompress{Stat: 1, CompressFactor: 2},
-					"cgrates.org:TestRemEventWithID_2": &StatWithCompress{Stat: 0, CompressFactor: 2},
+					"cgrates.org:TestRemEventWithID_1": {Stat: 1, CompressFactor: 2},
+					"cgrates.org:TestRemEventWithID_2": {Stat: 0, CompressFactor: 2},
 				},
 			},
 		},
@@ -141,16 +141,16 @@ func TestStatRemExpired(t *testing.T) {
 				Answered: 2,
 				Count:    3,
 				Events: map[string]*StatWithCompress{
-					"cgrates.org:TestStatRemExpired_1": &StatWithCompress{Stat: 1, CompressFactor: 1},
-					"cgrates.org:TestStatRemExpired_2": &StatWithCompress{Stat: 0, CompressFactor: 1},
-					"cgrates.org:TestStatRemExpired_3": &StatWithCompress{Stat: 1, CompressFactor: 1},
+					"cgrates.org:TestStatRemExpired_1": {Stat: 1, CompressFactor: 1},
+					"cgrates.org:TestStatRemExpired_2": {Stat: 0, CompressFactor: 1},
+					"cgrates.org:TestStatRemExpired_3": {Stat: 1, CompressFactor: 1},
 				},
 			},
 		},
 		SQItems: []SQItem{
-			SQItem{"cgrates.org:TestStatRemExpired_1", utils.TimePointer(time.Now())},
-			SQItem{"cgrates.org:TestStatRemExpired_2", utils.TimePointer(time.Now())},
-			SQItem{"cgrates.org:TestStatRemExpired_3", utils.TimePointer(time.Now().Add(time.Duration(time.Minute)))},
+			{"cgrates.org:TestStatRemExpired_1", utils.TimePointer(time.Now())},
+			{"cgrates.org:TestStatRemExpired_2", utils.TimePointer(time.Now())},
+			{"cgrates.org:TestStatRemExpired_3", utils.TimePointer(time.Now().Add(time.Duration(time.Minute)))},
 		},
 	}
 	asrMetric := sq.SQMetrics[utils.MetaASR].(*StatASR)
@@ -210,7 +210,7 @@ func TestStatAddStatEvent(t *testing.T) {
 				Answered: 1,
 				Count:    1,
 				Events: map[string]*StatWithCompress{
-					"cgrates.org:TestStatRemExpired_1": &StatWithCompress{Stat: 1, CompressFactor: 1},
+					"cgrates.org:TestStatRemExpired_1": {Stat: 1, CompressFactor: 1},
 				},
 			},
 		},
@@ -250,13 +250,13 @@ func TestStatRemOnQueueLength2(t *testing.T) {
 			utils.MetaTCD: &StatTCD{
 				FilterIDs: []string{"*string:~*req.Account:1002"},
 				Events: map[string]*DurationWithCompress{
-					"cgrates.org:TestStatRemExpired_2": &DurationWithCompress{Duration: 1 * time.Minute, CompressFactor: 1},
+					"cgrates.org:TestStatRemExpired_2": {Duration: 1 * time.Minute, CompressFactor: 1},
 				},
 			},
 			utils.MetaASR: &StatASR{
 				FilterIDs: []string{"*string:~*req.Account:1001"},
 				Events: map[string]*StatWithCompress{
-					"cgrates.org:TestStatRemExpired_1": &StatWithCompress{Stat: 1, CompressFactor: 1},
+					"cgrates.org:TestStatRemExpired_1": {Stat: 1, CompressFactor: 1},
 				},
 			},
 		},
@@ -272,17 +272,17 @@ func TestStatCompress(t *testing.T) {
 		Answered: 2,
 		Count:    4,
 		Events: map[string]*StatWithCompress{
-			"cgrates.org:TestStatRemExpired_1": &StatWithCompress{Stat: 1, CompressFactor: 1},
-			"cgrates.org:TestStatRemExpired_2": &StatWithCompress{Stat: 0, CompressFactor: 1},
-			"cgrates.org:TestStatRemExpired_3": &StatWithCompress{Stat: 1, CompressFactor: 1},
-			"cgrates.org:TestStatRemExpired_4": &StatWithCompress{Stat: 0, CompressFactor: 1},
+			"cgrates.org:TestStatRemExpired_1": {Stat: 1, CompressFactor: 1},
+			"cgrates.org:TestStatRemExpired_2": {Stat: 0, CompressFactor: 1},
+			"cgrates.org:TestStatRemExpired_3": {Stat: 1, CompressFactor: 1},
+			"cgrates.org:TestStatRemExpired_4": {Stat: 0, CompressFactor: 1},
 		},
 	}
 	expectedASR := &StatASR{
 		Answered: 2,
 		Count:    4,
 		Events: map[string]*StatWithCompress{
-			"cgrates.org:TestStatRemExpired_4": &StatWithCompress{Stat: 0.5, CompressFactor: 4},
+			"cgrates.org:TestStatRemExpired_4": {Stat: 0.5, CompressFactor: 4},
 		},
 	}
 	sqItems := []SQItem{
@@ -319,32 +319,32 @@ func TestStatCompress2(t *testing.T) {
 		Answered: 2,
 		Count:    4,
 		Events: map[string]*StatWithCompress{
-			"cgrates.org:TestStatRemExpired_1": &StatWithCompress{Stat: 1, CompressFactor: 1},
-			"cgrates.org:TestStatRemExpired_2": &StatWithCompress{Stat: 0, CompressFactor: 1},
-			"cgrates.org:TestStatRemExpired_3": &StatWithCompress{Stat: 1, CompressFactor: 1},
-			"cgrates.org:TestStatRemExpired_4": &StatWithCompress{Stat: 0, CompressFactor: 1},
+			"cgrates.org:TestStatRemExpired_1": {Stat: 1, CompressFactor: 1},
+			"cgrates.org:TestStatRemExpired_2": {Stat: 0, CompressFactor: 1},
+			"cgrates.org:TestStatRemExpired_3": {Stat: 1, CompressFactor: 1},
+			"cgrates.org:TestStatRemExpired_4": {Stat: 0, CompressFactor: 1},
 		},
 	}
 	expectedASR := &StatASR{
 		Answered: 2,
 		Count:    4,
 		Events: map[string]*StatWithCompress{
-			"cgrates.org:TestStatRemExpired_4": &StatWithCompress{Stat: 0.5, CompressFactor: 4},
+			"cgrates.org:TestStatRemExpired_4": {Stat: 0.5, CompressFactor: 4},
 		},
 	}
 	tcd := &StatTCD{
 		Sum:   3 * time.Minute,
 		Count: 2,
 		Events: map[string]*DurationWithCompress{
-			"cgrates.org:TestStatRemExpired_2": &DurationWithCompress{Duration: 1 * time.Minute, CompressFactor: 1},
-			"cgrates.org:TestStatRemExpired_3": &DurationWithCompress{Duration: 2 * time.Minute, CompressFactor: 1},
+			"cgrates.org:TestStatRemExpired_2": {Duration: 1 * time.Minute, CompressFactor: 1},
+			"cgrates.org:TestStatRemExpired_3": {Duration: 2 * time.Minute, CompressFactor: 1},
 		},
 	}
 	expectedTCD := &StatTCD{
 		Sum:   3 * time.Minute,
 		Count: 2,
 		Events: map[string]*DurationWithCompress{
-			"cgrates.org:TestStatRemExpired_4": &DurationWithCompress{Duration: 1*time.Minute + 30*time.Second, CompressFactor: 2},
+			"cgrates.org:TestStatRemExpired_4": {Duration: 1*time.Minute + 30*time.Second, CompressFactor: 2},
 		},
 	}
 	sqItems := []SQItem{
@@ -387,33 +387,33 @@ func TestStatCompress3(t *testing.T) {
 		Answered: 2,
 		Count:    4,
 		Events: map[string]*StatWithCompress{
-			"cgrates.org:TestStatRemExpired_1": &StatWithCompress{Stat: 1, CompressFactor: 1},
-			"cgrates.org:TestStatRemExpired_2": &StatWithCompress{Stat: 0, CompressFactor: 1},
-			"cgrates.org:TestStatRemExpired_3": &StatWithCompress{Stat: 1, CompressFactor: 1},
-			"cgrates.org:TestStatRemExpired_4": &StatWithCompress{Stat: 0, CompressFactor: 1},
+			"cgrates.org:TestStatRemExpired_1": {Stat: 1, CompressFactor: 1},
+			"cgrates.org:TestStatRemExpired_2": {Stat: 0, CompressFactor: 1},
+			"cgrates.org:TestStatRemExpired_3": {Stat: 1, CompressFactor: 1},
+			"cgrates.org:TestStatRemExpired_4": {Stat: 0, CompressFactor: 1},
 		},
 	}
 	expectedASR := &StatASR{
 		Answered: 2,
 		Count:    4,
 		Events: map[string]*StatWithCompress{
-			"cgrates.org:TestStatRemExpired_4": &StatWithCompress{Stat: 0.5, CompressFactor: 4},
+			"cgrates.org:TestStatRemExpired_4": {Stat: 0.5, CompressFactor: 4},
 		},
 	}
 	tcd := &StatTCD{
 		Sum:   3 * time.Minute,
 		Count: 2,
 		Events: map[string]*DurationWithCompress{
-			"cgrates.org:TestStatRemExpired_2": &DurationWithCompress{Duration: 1 * time.Minute, CompressFactor: 1},
-			"cgrates.org:TestStatRemExpired_3": &DurationWithCompress{Duration: 2 * time.Minute, CompressFactor: 1},
+			"cgrates.org:TestStatRemExpired_2": {Duration: 1 * time.Minute, CompressFactor: 1},
+			"cgrates.org:TestStatRemExpired_3": {Duration: 2 * time.Minute, CompressFactor: 1},
 		},
 	}
 	expectedTCD := &StatTCD{
 		Sum:   3 * time.Minute,
 		Count: 2,
 		Events: map[string]*DurationWithCompress{
-			"cgrates.org:TestStatRemExpired_2": &DurationWithCompress{Duration: 1 * time.Minute, CompressFactor: 1},
-			"cgrates.org:TestStatRemExpired_3": &DurationWithCompress{Duration: 2 * time.Minute, CompressFactor: 1},
+			"cgrates.org:TestStatRemExpired_2": {Duration: 1 * time.Minute, CompressFactor: 1},
+			"cgrates.org:TestStatRemExpired_3": {Duration: 2 * time.Minute, CompressFactor: 1},
 		},
 	}
 	sqItems := []SQItem{
@@ -457,14 +457,14 @@ func TestStatExpand(t *testing.T) {
 		Answered: 2,
 		Count:    4,
 		Events: map[string]*StatWithCompress{
-			"cgrates.org:TestStatRemExpired_4": &StatWithCompress{Stat: 0.5, CompressFactor: 4},
+			"cgrates.org:TestStatRemExpired_4": {Stat: 0.5, CompressFactor: 4},
 		},
 	}
 	asr := &StatASR{
 		Answered: 2,
 		Count:    4,
 		Events: map[string]*StatWithCompress{
-			"cgrates.org:TestStatRemExpired_4": &StatWithCompress{Stat: 0.5, CompressFactor: 4},
+			"cgrates.org:TestStatRemExpired_4": {Stat: 0.5, CompressFactor: 4},
 		},
 	}
 	expectedSqItems := []SQItem{
@@ -497,28 +497,28 @@ func TestStatExpand2(t *testing.T) {
 		Answered: 2,
 		Count:    4,
 		Events: map[string]*StatWithCompress{
-			"cgrates.org:TestStatRemExpired_4": &StatWithCompress{Stat: 0.5, CompressFactor: 4},
+			"cgrates.org:TestStatRemExpired_4": {Stat: 0.5, CompressFactor: 4},
 		},
 	}
 	asr := &StatASR{
 		Answered: 2,
 		Count:    4,
 		Events: map[string]*StatWithCompress{
-			"cgrates.org:TestStatRemExpired_4": &StatWithCompress{Stat: 0.5, CompressFactor: 4},
+			"cgrates.org:TestStatRemExpired_4": {Stat: 0.5, CompressFactor: 4},
 		},
 	}
 	expectedTCD := &StatTCD{
 		Sum:   3 * time.Minute,
 		Count: 2,
 		Events: map[string]*DurationWithCompress{
-			"cgrates.org:TestStatRemExpired_4": &DurationWithCompress{Duration: 1*time.Minute + 30*time.Second, CompressFactor: 2},
+			"cgrates.org:TestStatRemExpired_4": {Duration: 1*time.Minute + 30*time.Second, CompressFactor: 2},
 		},
 	}
 	tcd := &StatTCD{
 		Sum:   3 * time.Minute,
 		Count: 2,
 		Events: map[string]*DurationWithCompress{
-			"cgrates.org:TestStatRemExpired_4": &DurationWithCompress{Duration: 1*time.Minute + 30*time.Second, CompressFactor: 2},
+			"cgrates.org:TestStatRemExpired_4": {Duration: 1*time.Minute + 30*time.Second, CompressFactor: 2},
 		},
 	}
 	expectedSqItems := []SQItem{
@@ -556,30 +556,30 @@ func TestStatExpand3(t *testing.T) {
 		Answered: 2,
 		Count:    4,
 		Events: map[string]*StatWithCompress{
-			"cgrates.org:TestStatRemExpired_3": &StatWithCompress{Stat: 0.5, CompressFactor: 4},
+			"cgrates.org:TestStatRemExpired_3": {Stat: 0.5, CompressFactor: 4},
 		},
 	}
 	asr := &StatASR{
 		Answered: 2,
 		Count:    4,
 		Events: map[string]*StatWithCompress{
-			"cgrates.org:TestStatRemExpired_3": &StatWithCompress{Stat: 0.5, CompressFactor: 4},
+			"cgrates.org:TestStatRemExpired_3": {Stat: 0.5, CompressFactor: 4},
 		},
 	}
 	expectedTCD := &StatTCD{
 		Sum:   3 * time.Minute,
 		Count: 2,
 		Events: map[string]*DurationWithCompress{
-			"cgrates.org:TestStatRemExpired_2": &DurationWithCompress{Duration: 1 * time.Minute, CompressFactor: 1},
-			"cgrates.org:TestStatRemExpired_4": &DurationWithCompress{Duration: 2 * time.Minute, CompressFactor: 1},
+			"cgrates.org:TestStatRemExpired_2": {Duration: 1 * time.Minute, CompressFactor: 1},
+			"cgrates.org:TestStatRemExpired_4": {Duration: 2 * time.Minute, CompressFactor: 1},
 		},
 	}
 	tcd := &StatTCD{
 		Sum:   3 * time.Minute,
 		Count: 2,
 		Events: map[string]*DurationWithCompress{
-			"cgrates.org:TestStatRemExpired_2": &DurationWithCompress{Duration: 1 * time.Minute, CompressFactor: 1},
-			"cgrates.org:TestStatRemExpired_4": &DurationWithCompress{Duration: 2 * time.Minute, CompressFactor: 1},
+			"cgrates.org:TestStatRemExpired_2": {Duration: 1 * time.Minute, CompressFactor: 1},
+			"cgrates.org:TestStatRemExpired_4": {Duration: 2 * time.Minute, CompressFactor: 1},
 		},
 	}
 	expectedSqItems := []SQItem{
@@ -623,7 +623,7 @@ func TestStatRemoveExpiredTTL(t *testing.T) {
 				Answered: 1,
 				Count:    1,
 				Events: map[string]*StatWithCompress{
-					"cgrates.org:TestStatRemExpired_1": &StatWithCompress{Stat: 1, CompressFactor: 1},
+					"cgrates.org:TestStatRemExpired_1": {Stat: 1, CompressFactor: 1},
 				},
 			},
 		},
@@ -657,7 +657,7 @@ func TestStatRemoveExpiredQueue(t *testing.T) {
 				Answered: 1,
 				Count:    1,
 				Events: map[string]*StatWithCompress{
-					"cgrates.org:TestStatRemExpired_1": &StatWithCompress{Stat: 1, CompressFactor: 1},
+					"cgrates.org:TestStatRemExpired_1": {Stat: 1, CompressFactor: 1},
 				},
 			},
 		},

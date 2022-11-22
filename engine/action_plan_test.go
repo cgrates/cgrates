@@ -28,7 +28,7 @@ import (
 func TestActionTimingTasks(t *testing.T) {
 	//empty check
 	actionTiming := new(ActionTiming)
-	eOut := []*Task{&Task{Uuid: "", ActionsID: ""}}
+	eOut := []*Task{{Uuid: "", ActionsID: ""}}
 	rcv := actionTiming.Tasks()
 	if !reflect.DeepEqual(eOut, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
@@ -38,9 +38,9 @@ func TestActionTimingTasks(t *testing.T) {
 	actionTiming.Uuid = "test"
 	actionTiming.accountIDs = utils.StringMap{"1001": true, "1002": true, "1003": true}
 	eOut = []*Task{
-		&Task{Uuid: "test", AccountID: "1001", ActionsID: "test"},
-		&Task{Uuid: "test", AccountID: "1002", ActionsID: "test"},
-		&Task{Uuid: "test", AccountID: "1003", ActionsID: "test"},
+		{Uuid: "test", AccountID: "1001", ActionsID: "test"},
+		{Uuid: "test", AccountID: "1002", ActionsID: "test"},
+		{Uuid: "test", AccountID: "1003", ActionsID: "test"},
 	}
 	rcv = actionTiming.Tasks()
 	sort.Slice(rcv, func(i, j int) bool { return rcv[i].AccountID < rcv[j].AccountID })
@@ -92,7 +92,7 @@ func TestActionPlanClone(t *testing.T) {
 		Id:         "test",
 		AccountIDs: utils.StringMap{"one": true, "two": true, "three": true},
 		ActionTimings: []*ActionTiming{
-			&ActionTiming{
+			{
 				Uuid:      "Uuid_test1",
 				ActionsID: "ActionsID_test1",
 				Weight:    0.8,

@@ -1097,7 +1097,7 @@ func testStorDBitCRUDTpStats(t *testing.T) {
 			QueueLength: 100,
 			TTL:         "1s",
 			Metrics: []*utils.MetricWithFilters{
-				&utils.MetricWithFilters{
+				{
 					MetricID: "*asr",
 				},
 			},
@@ -1120,10 +1120,10 @@ func testStorDBitCRUDTpStats(t *testing.T) {
 
 	// UPDATE
 	eTPs[0].Metrics = []*utils.MetricWithFilters{
-		&utils.MetricWithFilters{
+		{
 			MetricID: "*asr",
 		},
-		&utils.MetricWithFilters{
+		{
 			MetricID: utils.MetaACD,
 		},
 	}
@@ -1142,10 +1142,10 @@ func testStorDBitCRUDTpStats(t *testing.T) {
 			QueueLength: 100,
 			TTL:         "1s",
 			Metrics: []*utils.MetricWithFilters{
-				&utils.MetricWithFilters{
+				{
 					MetricID: utils.MetaACD,
 				},
-				&utils.MetricWithFilters{
+				{
 					MetricID: "*asr",
 				},
 			},

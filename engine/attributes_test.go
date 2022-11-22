@@ -1839,7 +1839,7 @@ func TestGetAttributeProfileFromInline(t *testing.T) {
 		Tenant:   config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:       attrID,
 		Contexts: []string{utils.META_ANY},
-		Attributes: []*Attribute{&Attribute{
+		Attributes: []*Attribute{{
 			Path:  utils.MetaReq + utils.NestingSep + "Field2",
 			Type:  utils.MetaSum,
 			Value: config.NewRSRParsersMustCompile("10;~*req.NumField;20", true, utils.INFIELD_SEP),

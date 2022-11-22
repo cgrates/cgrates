@@ -68,6 +68,6 @@ func (self *CmdGetTriggers) RpcResult() interface{} {
 
 func (self *CmdGetTriggers) GetFormatedResult(result interface{}) string {
 	return GetFormatedSliceResult(result, map[string]struct{}{
-		"MinSleep": struct{}{},
+		"MinSleep": {},
 	})
 }

@@ -92,8 +92,8 @@ func TestAccountStorageStoreRestore(t *testing.T) {
 	b2 := &Balance{Value: 100, Weight: 20,
 		DestinationIDs: utils.StringMap{"RET": true}}
 	rifsBalance := &Account{ID: "other",
-		BalanceMap: map[string]Balances{utils.VOICE: Balances{b1, b2},
-			utils.MONETARY: Balances{&Balance{Value: 21}}}}
+		BalanceMap: map[string]Balances{utils.VOICE: {b1, b2},
+			utils.MONETARY: {&Balance{Value: 21}}}}
 	dm.SetAccount(rifsBalance)
 	ub1, err := dm.GetAccount("other")
 	if err != nil ||
@@ -139,8 +139,8 @@ func TestGetSpecialPricedSeconds(t *testing.T) {
 	ub1 := &Account{
 		ID: "OUT:CUSTOMER_1:rif",
 		BalanceMap: map[string]Balances{
-			utils.VOICE:    Balances{b1, b2},
-			utils.MONETARY: Balances{&Balance{Value: 21}},
+			utils.VOICE:    {b1, b2},
+			utils.MONETARY: {&Balance{Value: 21}},
 		},
 	}
 	cd := &CallDescriptor{
@@ -169,8 +169,8 @@ func TestAccountStorageStore(t *testing.T) {
 	b2 := &Balance{Value: 100, Weight: 20, DestinationIDs: utils.StringMap{"RET": true}}
 	rifsBalance := &Account{ID: "other",
 		BalanceMap: map[string]Balances{
-			utils.VOICE:    Balances{b1, b2},
-			utils.MONETARY: Balances{&Balance{Value: 21}}}}
+			utils.VOICE:    {b1, b2},
+			utils.MONETARY: {&Balance{Value: 21}}}}
 	dm.SetAccount(rifsBalance)
 	result, err := dm.GetAccount(rifsBalance.ID)
 	if err != nil || rifsBalance.ID != result.ID ||
@@ -191,7 +191,7 @@ func TestDebitCreditZeroSecond(t *testing.T) {
 	cc := &CallCost{
 		Destination: "0723045326",
 		Timespans: []*TimeSpan{
-			&TimeSpan{
+			{
 				TimeStart:     time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
 				TimeEnd:       time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
 				DurationIndex: 0,
@@ -213,8 +213,8 @@ func TestDebitCreditZeroSecond(t *testing.T) {
 	}
 	rifsBalance := &Account{ID: "other",
 		BalanceMap: map[string]Balances{
-			utils.VOICE: Balances{b1},
-			utils.MONETARY: Balances{&Balance{
+			utils.VOICE: {b1},
+			utils.MONETARY: {&Balance{
 				Categories: utils.NewStringMap("0"), Value: 21}}}}
 	var err error
 	cc, err = rifsBalance.debitCreditBalance(cd, false, false, true)
@@ -239,7 +239,7 @@ func TestDebitCreditBlocker(t *testing.T) {
 	cc := &CallCost{
 		Destination: "0723045326",
 		Timespans: []*TimeSpan{
-			&TimeSpan{
+			{
 				TimeStart:     time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
 				TimeEnd:       time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
 				DurationIndex: 0,
@@ -262,7 +262,7 @@ func TestDebitCreditBlocker(t *testing.T) {
 		testCallcost: cc,
 	}
 	rifsBalance := &Account{ID: "other",
-		BalanceMap: map[string]Balances{utils.MONETARY: Balances{b1, b2}}}
+		BalanceMap: map[string]Balances{utils.MONETARY: {b1, b2}}}
 	var err error
 	cc, err = rifsBalance.debitCreditBalance(cd, false, true, true)
 	if err != nil {
@@ -282,7 +282,7 @@ func TestDebitFreeEmpty(t *testing.T) {
 	cc := &CallCost{
 		Destination: "112",
 		Timespans: []*TimeSpan{
-			&TimeSpan{
+			{
 				TimeStart:     time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
 				TimeEnd:       time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
 				DurationIndex: 0,
@@ -308,7 +308,7 @@ func TestDebitFreeEmpty(t *testing.T) {
 	}
 	// empty account
 	rifsBalance := &Account{ID: "other",
-		BalanceMap: map[string]Balances{utils.MONETARY: Balances{}}}
+		BalanceMap: map[string]Balances{utils.MONETARY: {}}}
 	var err error
 	cc, err = rifsBalance.debitCreditBalance(cd, false, true, true)
 	if err != nil {
@@ -330,7 +330,7 @@ func TestDebitCreditZeroMinute(t *testing.T) {
 	cc := &CallCost{
 		Destination: "0723045326",
 		Timespans: []*TimeSpan{
-			&TimeSpan{
+			{
 				TimeStart:     time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
 				TimeEnd:       time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
 				DurationIndex: 0,
@@ -354,8 +354,8 @@ func TestDebitCreditZeroMinute(t *testing.T) {
 	rifsBalance := &Account{
 		ID: "other",
 		BalanceMap: map[string]Balances{
-			utils.VOICE:    Balances{b1},
-			utils.MONETARY: Balances{&Balance{Value: 21}},
+			utils.VOICE:    {b1},
+			utils.MONETARY: {&Balance{Value: 21}},
 		}}
 	var err error
 	cc, err = rifsBalance.debitCreditBalance(cd, false, false, true)
@@ -385,7 +385,7 @@ func TestDebitCreditZeroMixedMinute(t *testing.T) {
 	cc := &CallCost{
 		Destination: "0723045326",
 		Timespans: []*TimeSpan{
-			&TimeSpan{
+			{
 				TimeStart:     time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
 				TimeEnd:       time.Date(2013, 9, 24, 10, 48, 20, 0, time.UTC),
 				ratingInfo:    &RatingInfo{},
@@ -409,8 +409,8 @@ func TestDebitCreditZeroMixedMinute(t *testing.T) {
 	}
 	rifsBalance := &Account{ID: "other",
 		BalanceMap: map[string]Balances{
-			utils.VOICE:    Balances{b1, b2},
-			utils.MONETARY: Balances{&Balance{Value: 21}},
+			utils.VOICE:    {b1, b2},
+			utils.MONETARY: {&Balance{Value: 21}},
 		}}
 	var err error
 	cc, err = rifsBalance.debitCreditBalance(cd, false, false, true)
@@ -437,7 +437,7 @@ func TestDebitCreditNoCredit(t *testing.T) {
 	cc := &CallCost{
 		Destination: "0723045326",
 		Timespans: []*TimeSpan{
-			&TimeSpan{
+			{
 				TimeStart:     time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
 				TimeEnd:       time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
 				DurationIndex: 0,
@@ -448,7 +448,7 @@ func TestDebitCreditNoCredit(t *testing.T) {
 								RateIncrement: 10 * time.Second,
 								RateUnit:      time.Second}}}},
 			},
-			&TimeSpan{
+			{
 				TimeStart:     time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
 				TimeEnd:       time.Date(2013, 9, 24, 10, 49, 20, 0, time.UTC),
 				DurationIndex: 10 * time.Second,
@@ -472,7 +472,7 @@ func TestDebitCreditNoCredit(t *testing.T) {
 	}
 	rifsBalance := &Account{ID: "other",
 		BalanceMap: map[string]Balances{
-			utils.VOICE: Balances{b1},
+			utils.VOICE: {b1},
 		}}
 	var err error
 	cc, err = rifsBalance.debitCreditBalance(cd, false, false, true)
@@ -501,7 +501,7 @@ func TestDebitCreditHasCredit(t *testing.T) {
 	cc := &CallCost{
 		Destination: "0723045326",
 		Timespans: []*TimeSpan{
-			&TimeSpan{
+			{
 				TimeStart:     time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
 				TimeEnd:       time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
 				DurationIndex: 0,
@@ -511,7 +511,7 @@ func TestDebitCreditHasCredit(t *testing.T) {
 							RateIncrement: 10 * time.Second,
 							RateUnit:      time.Second}}}},
 			},
-			&TimeSpan{
+			{
 				TimeStart:     time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
 				TimeEnd:       time.Date(2013, 9, 24, 10, 49, 20, 0, time.UTC),
 				DurationIndex: 10 * time.Second,
@@ -534,8 +534,8 @@ func TestDebitCreditHasCredit(t *testing.T) {
 		testCallcost:  cc,
 	}
 	rifsBalance := &Account{ID: "other", BalanceMap: map[string]Balances{
-		utils.VOICE:    Balances{b1},
-		utils.MONETARY: Balances{&Balance{Uuid: "moneya", Value: 110}},
+		utils.VOICE:    {b1},
+		utils.MONETARY: {&Balance{Uuid: "moneya", Value: 110}},
 	}}
 	var err error
 	cc, err = rifsBalance.debitCreditBalance(cd, false, false, true)
@@ -565,7 +565,7 @@ func TestDebitCreditSplitMinutesMoney(t *testing.T) {
 	cc := &CallCost{
 		Destination: "0723045326",
 		Timespans: []*TimeSpan{
-			&TimeSpan{
+			{
 				TimeStart:     time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
 				TimeEnd:       time.Date(2013, 9, 24, 10, 48, 20, 0, time.UTC),
 				DurationIndex: 0,
@@ -590,8 +590,8 @@ func TestDebitCreditSplitMinutesMoney(t *testing.T) {
 	}
 	rifsBalance := &Account{ID: "other",
 		BalanceMap: map[string]Balances{
-			utils.VOICE:    Balances{b1},
-			utils.MONETARY: Balances{&Balance{Uuid: "moneya", Value: 50}},
+			utils.VOICE:    {b1},
+			utils.MONETARY: {&Balance{Uuid: "moneya", Value: 50}},
 		}}
 	var err error
 	cc, err = rifsBalance.debitCreditBalance(cd, false, false, true)
@@ -625,7 +625,7 @@ func TestDebitCreditMoreTimespans(t *testing.T) {
 	cc := &CallCost{
 		Destination: "0723045326",
 		Timespans: []*TimeSpan{
-			&TimeSpan{
+			{
 				TimeStart:     time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
 				TimeEnd:       time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
 				DurationIndex: 0,
@@ -636,7 +636,7 @@ func TestDebitCreditMoreTimespans(t *testing.T) {
 								RateIncrement: 10 * time.Second,
 								RateUnit:      time.Second}}}},
 			},
-			&TimeSpan{
+			{
 				TimeStart:     time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
 				TimeEnd:       time.Date(2013, 9, 24, 10, 49, 20, 0, time.UTC),
 				DurationIndex: 10 * time.Second,
@@ -659,7 +659,7 @@ func TestDebitCreditMoreTimespans(t *testing.T) {
 	}
 	rifsBalance := &Account{ID: "other",
 		BalanceMap: map[string]Balances{
-			utils.VOICE: Balances{b1},
+			utils.VOICE: {b1},
 		}}
 	var err error
 	cc, err = rifsBalance.debitCreditBalance(cd, false, false, true)
@@ -687,7 +687,7 @@ func TestDebitCreditMoreTimespansMixed(t *testing.T) {
 	cc := &CallCost{
 		Destination: "0723045326",
 		Timespans: []*TimeSpan{
-			&TimeSpan{
+			{
 				TimeStart:     time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
 				TimeEnd:       time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
 				DurationIndex: 0,
@@ -699,7 +699,7 @@ func TestDebitCreditMoreTimespansMixed(t *testing.T) {
 								RateIncrement: 10 * time.Second,
 								RateUnit:      time.Second}}}},
 			},
-			&TimeSpan{
+			{
 				TimeStart:     time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
 				TimeEnd:       time.Date(2013, 9, 24, 10, 49, 20, 0, time.UTC),
 				DurationIndex: 10 * time.Second,
@@ -724,7 +724,7 @@ func TestDebitCreditMoreTimespansMixed(t *testing.T) {
 	rifsBalance := &Account{
 		ID: "other",
 		BalanceMap: map[string]Balances{
-			utils.VOICE: Balances{b1, b2},
+			utils.VOICE: {b1, b2},
 		}}
 	var err error
 	cc, err = rifsBalance.debitCreditBalance(cd, false, false, true)
@@ -750,7 +750,7 @@ func TestDebitCreditNoConectFeeCredit(t *testing.T) {
 	cc := &CallCost{
 		Destination: "0723045326",
 		Timespans: []*TimeSpan{
-			&TimeSpan{
+			{
 				TimeStart:     time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
 				TimeEnd:       time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
 				DurationIndex: 0,
@@ -762,7 +762,7 @@ func TestDebitCreditNoConectFeeCredit(t *testing.T) {
 								RateIncrement: 10 * time.Second,
 								RateUnit:      time.Second}}}},
 			},
-			&TimeSpan{
+			{
 				TimeStart:     time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
 				TimeEnd:       time.Date(2013, 9, 24, 10, 49, 20, 0, time.UTC),
 				DurationIndex: 10 * time.Second,
@@ -788,7 +788,7 @@ func TestDebitCreditNoConectFeeCredit(t *testing.T) {
 	}
 	rifsBalance := &Account{ID: "other",
 		BalanceMap: map[string]Balances{
-			utils.VOICE: Balances{b1},
+			utils.VOICE: {b1},
 		}}
 	var err error
 	cc, err = rifsBalance.debitCreditBalance(cd, false, false, true)
@@ -806,7 +806,7 @@ func TestDebitCreditMoneyOnly(t *testing.T) {
 	cc := &CallCost{
 		Destination: "0723045326",
 		Timespans: []*TimeSpan{
-			&TimeSpan{
+			{
 				TimeStart:     time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
 				TimeEnd:       time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
 				DurationIndex: 0,
@@ -818,7 +818,7 @@ func TestDebitCreditMoneyOnly(t *testing.T) {
 								RateIncrement: 10 * time.Second,
 								RateUnit:      time.Second}}}},
 			},
-			&TimeSpan{
+			{
 				TimeStart:     time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
 				TimeEnd:       time.Date(2013, 9, 24, 10, 49, 20, 0, time.UTC),
 				DurationIndex: 10 * time.Second,
@@ -844,7 +844,7 @@ func TestDebitCreditMoneyOnly(t *testing.T) {
 	}
 	rifsBalance := &Account{ID: "other",
 		BalanceMap: map[string]Balances{
-			utils.MONETARY: Balances{&Balance{Uuid: "money", Value: 50}},
+			utils.MONETARY: {&Balance{Uuid: "money", Value: 50}},
 		}}
 	var err error
 	cc, err = rifsBalance.debitCreditBalance(cd, false, false, true)
@@ -880,7 +880,7 @@ func TestDebitCreditSubjectMinutes(t *testing.T) {
 		Category:    "0",
 		Destination: "0723045326",
 		Timespans: []*TimeSpan{
-			&TimeSpan{
+			{
 				TimeStart:     time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
 				TimeEnd:       time.Date(2013, 9, 24, 10, 49, 10, 0, time.UTC),
 				DurationIndex: 0,
@@ -907,8 +907,8 @@ func TestDebitCreditSubjectMinutes(t *testing.T) {
 	}
 	rifsBalance := &Account{ID: "other",
 		BalanceMap: map[string]Balances{
-			utils.VOICE:    Balances{b1},
-			utils.MONETARY: Balances{&Balance{Uuid: "moneya", Value: 350}},
+			utils.VOICE:    {b1},
+			utils.MONETARY: {&Balance{Uuid: "moneya", Value: 350}},
 		}}
 	var err error
 	cc, err = rifsBalance.debitCreditBalance(cd, false, false, true)
@@ -942,7 +942,7 @@ func TestDebitCreditSubjectMoney(t *testing.T) {
 		Category:    "0",
 		Destination: "0723045326",
 		Timespans: []*TimeSpan{
-			&TimeSpan{
+			{
 				TimeStart:     time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
 				TimeEnd:       time.Date(2013, 9, 24, 10, 49, 10, 0, time.UTC),
 				DurationIndex: 0,
@@ -970,7 +970,7 @@ func TestDebitCreditSubjectMoney(t *testing.T) {
 	}
 	rifsBalance := &Account{ID: "other",
 		BalanceMap: map[string]Balances{
-			utils.MONETARY: Balances{
+			utils.MONETARY: {
 				&Balance{Uuid: "moneya", Value: 75,
 					DestinationIDs: utils.StringMap{"NAT": true},
 					RatingSubject:  "minu"}},
@@ -1000,9 +1000,9 @@ func TestAccountdebitBalance(t *testing.T) {
 		ID:            "rif",
 		AllowNegative: true,
 		BalanceMap: map[string]Balances{
-			utils.SMS:  Balances{&Balance{Value: 14}},
-			utils.DATA: Balances{&Balance{Value: 1204}},
-			utils.VOICE: Balances{
+			utils.SMS:  {&Balance{Value: 14}},
+			utils.DATA: {&Balance{Value: 1204}},
+			utils.VOICE: {
 				&Balance{Weight: 20,
 					DestinationIDs: utils.StringMap{"NAT": true}},
 				&Balance{Weight: 10,
@@ -1027,9 +1027,9 @@ func TestAccountdebitBalanceExists(t *testing.T) {
 		ID:            "rif",
 		AllowNegative: true,
 		BalanceMap: map[string]Balances{
-			utils.SMS:  Balances{&Balance{Value: 14}},
-			utils.DATA: Balances{&Balance{Value: 1024}},
-			utils.VOICE: Balances{
+			utils.SMS:  {&Balance{Value: 14}},
+			utils.DATA: {&Balance{Value: 1024}},
+			utils.VOICE: {
 				&Balance{
 					Value: 15, Weight: 20,
 					DestinationIDs: utils.StringMap{"NAT": true}},
@@ -1055,9 +1055,9 @@ func TestAccountAddMinuteNil(t *testing.T) {
 		ID:            "rif",
 		AllowNegative: true,
 		BalanceMap: map[string]Balances{
-			utils.SMS:  Balances{&Balance{Value: 14}},
-			utils.DATA: Balances{&Balance{Value: 1024}},
-			utils.VOICE: Balances{
+			utils.SMS:  {&Balance{Value: 14}},
+			utils.DATA: {&Balance{Value: 1024}},
+			utils.VOICE: {
 				&Balance{Weight: 20, DestinationIDs: utils.StringMap{"NAT": true}},
 				&Balance{Weight: 10, DestinationIDs: utils.StringMap{"RET": true}}}},
 	}
@@ -1105,9 +1105,9 @@ func TestAccountExecuteTriggeredActions(t *testing.T) {
 	ub := &Account{
 		ID: "TEST_UB",
 		BalanceMap: map[string]Balances{
-			utils.MONETARY: Balances{
+			utils.MONETARY: {
 				&Balance{Value: 100}},
-			utils.VOICE: Balances{
+			utils.VOICE: {
 				&Balance{Value: 10 * float64(time.Second),
 					Weight:         20,
 					DestinationIDs: utils.StringMap{"NAT": true}},
@@ -1115,7 +1115,7 @@ func TestAccountExecuteTriggeredActions(t *testing.T) {
 					DestinationIDs: utils.StringMap{"RET": true}}}},
 		UnitCounters: UnitCounters{
 			utils.MONETARY: []*UnitCounter{
-				&UnitCounter{Counters: CounterFilters{
+				{Counters: CounterFilters{
 					&CounterFilter{Value: 1,
 						Filter: &BalanceFilter{
 							Type: utils.StringPointer(utils.MONETARY)}}}}}},
@@ -1155,10 +1155,10 @@ func TestAccountExecuteTriggeredActionsBalance(t *testing.T) {
 	ub := &Account{
 		ID: "TEST_UB",
 		BalanceMap: map[string]Balances{
-			utils.MONETARY: Balances{
+			utils.MONETARY: {
 				&Balance{
 					Value: 100}},
-			utils.VOICE: Balances{
+			utils.VOICE: {
 				&Balance{
 					Value:          10 * float64(time.Second),
 					Weight:         20,
@@ -1168,7 +1168,7 @@ func TestAccountExecuteTriggeredActionsBalance(t *testing.T) {
 					DestinationIDs: utils.StringMap{"RET": true}}}},
 		UnitCounters: UnitCounters{
 			utils.MONETARY: []*UnitCounter{
-				&UnitCounter{Counters: CounterFilters{
+				{Counters: CounterFilters{
 					&CounterFilter{Filter: &BalanceFilter{
 						Type: utils.StringPointer(utils.MONETARY)},
 						Value: 1.0}}}}},
@@ -1194,11 +1194,11 @@ func TestAccountExecuteTriggeredActionsOrder(t *testing.T) {
 	ub := &Account{
 		ID: "TEST_UB_OREDER",
 		BalanceMap: map[string]Balances{
-			utils.MONETARY: Balances{
+			utils.MONETARY: {
 				&Balance{Value: 100}}},
 		UnitCounters: UnitCounters{
 			utils.MONETARY: []*UnitCounter{
-				&UnitCounter{Counters: CounterFilters{
+				{Counters: CounterFilters{
 					&CounterFilter{Value: 1,
 						Filter: &BalanceFilter{
 							Type: utils.StringPointer(utils.MONETARY)}}}}}},
@@ -1223,9 +1223,9 @@ func TestAccountExecuteTriggeredDayWeek(t *testing.T) {
 	ub := &Account{
 		ID: "TEST_UB",
 		BalanceMap: map[string]Balances{
-			utils.MONETARY: Balances{
+			utils.MONETARY: {
 				&Balance{Value: 100}},
-			utils.VOICE: Balances{
+			utils.VOICE: {
 				&Balance{Value: 10, Weight: 20, DestinationIDs: utils.StringMap{"NAT": true}},
 				&Balance{Weight: 10, DestinationIDs: utils.StringMap{"RET": true}}}},
 		ActionTriggers: ActionTriggers{
@@ -1268,10 +1268,10 @@ func TestAccountExpActionTrigger(t *testing.T) {
 	ub := &Account{
 		ID: "TEST_UB",
 		BalanceMap: map[string]Balances{
-			utils.MONETARY: Balances{
+			utils.MONETARY: {
 				&Balance{Value: 100,
 					ExpirationDate: time.Date(2015, time.November, 9, 9, 48, 0, 0, time.UTC)}},
-			utils.VOICE: Balances{
+			utils.VOICE: {
 				&Balance{Value: 10 * float64(time.Second), Weight: 20,
 					DestinationIDs: utils.StringMap{"NAT": true}},
 				&Balance{Weight: 10 * float64(time.Second),
@@ -1300,8 +1300,8 @@ func TestAccountExpActionTriggerNotActivated(t *testing.T) {
 	ub := &Account{
 		ID: "TEST_UB",
 		BalanceMap: map[string]Balances{
-			utils.MONETARY: Balances{&Balance{Value: 100}},
-			utils.VOICE: Balances{
+			utils.MONETARY: {&Balance{Value: 100}},
+			utils.VOICE: {
 				&Balance{Value: 10, Weight: 20,
 					DestinationIDs: utils.StringMap{"NAT": true}},
 				&Balance{Weight: 10,
@@ -1328,8 +1328,8 @@ func TestAccountExpActionTriggerExpired(t *testing.T) {
 	ub := &Account{
 		ID: "TEST_UB",
 		BalanceMap: map[string]Balances{
-			utils.MONETARY: Balances{&Balance{Value: 100}},
-			utils.VOICE: Balances{&Balance{Value: 10, Weight: 20,
+			utils.MONETARY: {&Balance{Value: 100}},
+			utils.VOICE: {&Balance{Value: 10, Weight: 20,
 				DestinationIDs: utils.StringMap{"NAT": true}},
 				&Balance{Weight: 10, DestinationIDs: utils.StringMap{"RET": true}}}},
 		ActionTriggers: ActionTriggers{
@@ -1356,10 +1356,10 @@ func TestAccountExpActionTriggerExpired(t *testing.T) {
 func TestCleanExpired(t *testing.T) {
 	ub := &Account{
 		ID: "TEST_UB_OREDER",
-		BalanceMap: map[string]Balances{utils.MONETARY: Balances{
+		BalanceMap: map[string]Balances{utils.MONETARY: {
 			&Balance{ExpirationDate: time.Now().Add(10 * time.Second)},
 			&Balance{ExpirationDate: time.Date(2013, 7, 18, 14, 33, 0, 0, time.UTC)},
-			&Balance{ExpirationDate: time.Now().Add(10 * time.Second)}}, utils.VOICE: Balances{
+			&Balance{ExpirationDate: time.Now().Add(10 * time.Second)}}, utils.VOICE: {
 			&Balance{ExpirationDate: time.Date(2013, 7, 18, 14, 33, 0, 0, time.UTC)},
 			&Balance{ExpirationDate: time.Now().Add(10 * time.Second)},
 		}},
@@ -1386,7 +1386,7 @@ func TestCleanExpired(t *testing.T) {
 
 func TestAccountUnitCounting(t *testing.T) {
 	ub := &Account{UnitCounters: UnitCounters{
-		utils.MONETARY: []*UnitCounter{&UnitCounter{
+		utils.MONETARY: []*UnitCounter{{
 			Counters: CounterFilters{&CounterFilter{Value: 0}}}}}}
 	ub.countUnits(10, utils.MONETARY, &CallCost{}, nil)
 	if len(ub.UnitCounters[utils.MONETARY]) != 1 ||
@@ -1402,7 +1402,7 @@ func TestAccountUnitCounting(t *testing.T) {
 
 func TestAccountUnitCountingOutbound(t *testing.T) {
 	ub := &Account{UnitCounters: UnitCounters{utils.MONETARY: []*UnitCounter{
-		&UnitCounter{Counters: CounterFilters{&CounterFilter{Value: 0}}}}}}
+		{Counters: CounterFilters{&CounterFilter{Value: 0}}}}}}
 	ub.countUnits(10, utils.MONETARY, new(CallCost), nil)
 	if len(ub.UnitCounters[utils.MONETARY]) != 1 ||
 		ub.UnitCounters[utils.MONETARY][0].Counters[0].Value != 10 {
@@ -1423,7 +1423,7 @@ func TestAccountUnitCountingOutbound(t *testing.T) {
 func TestAccountUnitCountingOutboundInbound(t *testing.T) {
 	ub := &Account{UnitCounters: UnitCounters{
 		utils.MONETARY: []*UnitCounter{
-			&UnitCounter{Counters: CounterFilters{&CounterFilter{Value: 0}}}}}}
+			{Counters: CounterFilters{&CounterFilter{Value: 0}}}}}}
 	ub.countUnits(10, utils.MONETARY, new(CallCost), nil)
 	if len(ub.UnitCounters[utils.MONETARY]) != 1 ||
 		ub.UnitCounters[utils.MONETARY][0].Counters[0].Value != 10 {
@@ -1443,7 +1443,7 @@ func TestDebitShared(t *testing.T) {
 		Category:    "0",
 		Destination: "0723045326",
 		Timespans: []*TimeSpan{
-			&TimeSpan{
+			{
 				TimeStart:     time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
 				TimeEnd:       time.Date(2013, 9, 24, 10, 49, 0, 0, time.UTC),
 				DurationIndex: 55 * time.Second,
@@ -1467,13 +1467,13 @@ func TestDebitShared(t *testing.T) {
 		testCallcost:  cc,
 	}
 	rif := &Account{ID: "rif", BalanceMap: map[string]Balances{
-		utils.MONETARY: Balances{&Balance{Uuid: "moneya", Value: 0, SharedGroups: utils.NewStringMap("SG_TEST")}},
+		utils.MONETARY: {&Balance{Uuid: "moneya", Value: 0, SharedGroups: utils.NewStringMap("SG_TEST")}},
 	}}
 	groupie := &Account{ID: "groupie", BalanceMap: map[string]Balances{
-		utils.MONETARY: Balances{&Balance{Uuid: "moneyc", Value: 130, SharedGroups: utils.NewStringMap("SG_TEST")}},
+		utils.MONETARY: {&Balance{Uuid: "moneyc", Value: 130, SharedGroups: utils.NewStringMap("SG_TEST")}},
 	}}
 
-	sg := &SharedGroup{Id: "SG_TEST", MemberIds: utils.NewStringMap(rif.ID, groupie.ID), AccountParameters: map[string]*SharingParameters{"*any": &SharingParameters{Strategy: STRATEGY_MINE_RANDOM}}}
+	sg := &SharedGroup{Id: "SG_TEST", MemberIds: utils.NewStringMap(rif.ID, groupie.ID), AccountParameters: map[string]*SharingParameters{"*any": {Strategy: STRATEGY_MINE_RANDOM}}}
 
 	dm.SetAccount(groupie)
 	dm.SetSharedGroup(sg, utils.NonTransactional)
@@ -1514,7 +1514,7 @@ func TestMaxDurationShared(t *testing.T) {
 		Category:    "0",
 		Destination: "0723045326",
 		Timespans: []*TimeSpan{
-			&TimeSpan{
+			{
 				TimeStart:     time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
 				TimeEnd:       time.Date(2013, 9, 24, 10, 49, 0, 0, time.UTC),
 				DurationIndex: 55 * time.Second,
@@ -1538,13 +1538,13 @@ func TestMaxDurationShared(t *testing.T) {
 		testCallcost:  cc,
 	}
 	rif := &Account{ID: "rif", BalanceMap: map[string]Balances{
-		utils.MONETARY: Balances{&Balance{Uuid: "moneya", Value: 0, SharedGroups: utils.NewStringMap("SG_TEST")}},
+		utils.MONETARY: {&Balance{Uuid: "moneya", Value: 0, SharedGroups: utils.NewStringMap("SG_TEST")}},
 	}}
 	groupie := &Account{ID: "groupie", BalanceMap: map[string]Balances{
-		utils.MONETARY: Balances{&Balance{Uuid: "moneyc", Value: 130, SharedGroups: utils.NewStringMap("SG_TEST")}},
+		utils.MONETARY: {&Balance{Uuid: "moneyc", Value: 130, SharedGroups: utils.NewStringMap("SG_TEST")}},
 	}}
 
-	sg := &SharedGroup{Id: "SG_TEST", MemberIds: utils.NewStringMap(rif.ID, groupie.ID), AccountParameters: map[string]*SharingParameters{"*any": &SharingParameters{Strategy: STRATEGY_MINE_RANDOM}}}
+	sg := &SharedGroup{Id: "SG_TEST", MemberIds: utils.NewStringMap(rif.ID, groupie.ID), AccountParameters: map[string]*SharingParameters{"*any": {Strategy: STRATEGY_MINE_RANDOM}}}
 
 	dm.SetAccount(groupie)
 	dm.SetSharedGroup(sg, utils.NonTransactional)
@@ -1571,7 +1571,7 @@ func TestMaxDurationConnectFeeOnly(t *testing.T) {
 		DurationIndex: 600,
 	}
 	rif := &Account{ID: "rif", BalanceMap: map[string]Balances{
-		utils.MONETARY: Balances{&Balance{Uuid: "moneya", Value: 0.2}},
+		utils.MONETARY: {&Balance{Uuid: "moneya", Value: 0.2}},
 	}}
 
 	duration, err := cd.getMaxSessionDuration(rif)
@@ -1588,7 +1588,7 @@ func TestDebitSMS(t *testing.T) {
 	cc := &CallCost{
 		Destination: "0723045326",
 		Timespans: []*TimeSpan{
-			&TimeSpan{
+			{
 				TimeStart:     time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
 				TimeEnd:       time.Date(2013, 9, 24, 10, 48, 0, 1, time.UTC),
 				ratingInfo:    &RatingInfo{},
@@ -1614,11 +1614,11 @@ func TestDebitSMS(t *testing.T) {
 	}
 	rifsBalance := &Account{ID: "other",
 		BalanceMap: map[string]Balances{
-			utils.SMS: Balances{
+			utils.SMS: {
 				&Balance{Uuid: "testm",
 					Value: 100, Weight: 5,
 					DestinationIDs: utils.StringMap{"NAT": true}}},
-			utils.MONETARY: Balances{
+			utils.MONETARY: {
 				&Balance{Value: 21}},
 		}}
 	var err error
@@ -1642,7 +1642,7 @@ func TestDebitGeneric(t *testing.T) {
 	cc := &CallCost{
 		Destination: "0723045326",
 		Timespans: []*TimeSpan{
-			&TimeSpan{
+			{
 				TimeStart:     time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
 				TimeEnd:       time.Date(2013, 9, 24, 10, 48, 0, 1, time.UTC),
 				ratingInfo:    &RatingInfo{},
@@ -1673,10 +1673,10 @@ func TestDebitGeneric(t *testing.T) {
 	}
 	rifsBalance := &Account{ID: "other",
 		BalanceMap: map[string]Balances{
-			utils.GENERIC: Balances{
+			utils.GENERIC: {
 				&Balance{Uuid: "testm", Value: 100, Weight: 5,
 					DestinationIDs: utils.StringMap{"NAT": true}}},
-			utils.MONETARY: Balances{&Balance{Value: 21}},
+			utils.MONETARY: {&Balance{Value: 21}},
 		}}
 	var err error
 	cc, err = rifsBalance.debitCreditBalance(cd, false, false, true)
@@ -1700,7 +1700,7 @@ func TestDebitGenericBalance(t *testing.T) {
 	cc := &CallCost{
 		Destination: "0723045326",
 		Timespans: []*TimeSpan{
-			&TimeSpan{
+			{
 				TimeStart:     time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
 				TimeEnd:       time.Date(2013, 9, 24, 10, 48, 30, 0, time.UTC),
 				ratingInfo:    &RatingInfo{},
@@ -1726,11 +1726,11 @@ func TestDebitGenericBalance(t *testing.T) {
 	}
 	rifsBalance := &Account{
 		ID: "other", BalanceMap: map[string]Balances{
-			utils.GENERIC: Balances{
+			utils.GENERIC: {
 				&Balance{Uuid: "testm", Value: 100, Weight: 5,
 					DestinationIDs: utils.StringMap{"NAT": true},
 					Factor:         ValueFactor{utils.VOICE: 60 * float64(time.Second)}}},
-			utils.MONETARY: Balances{&Balance{Value: 21}},
+			utils.MONETARY: {&Balance{Value: 21}},
 		}}
 	var err error
 	cc, err = rifsBalance.debitCreditBalance(cd, false, false, true)
@@ -1753,7 +1753,7 @@ func TestDebitGenericBalanceWithRatingSubject(t *testing.T) {
 	cc := &CallCost{
 		Destination: "0723045326",
 		Timespans: []*TimeSpan{
-			&TimeSpan{
+			{
 				TimeStart:     time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
 				TimeEnd:       time.Date(2013, 9, 24, 10, 48, 30, 0, time.UTC),
 				ratingInfo:    &RatingInfo{},
@@ -1778,12 +1778,12 @@ func TestDebitGenericBalanceWithRatingSubject(t *testing.T) {
 	}
 	rifsBalance := &Account{ID: "other",
 		BalanceMap: map[string]Balances{
-			utils.GENERIC: Balances{
+			utils.GENERIC: {
 				&Balance{Uuid: "testm", Value: 100,
 					Weight: 5, DestinationIDs: utils.StringMap{"NAT": true},
 					Factor:        ValueFactor{utils.VOICE: 60 * float64(time.Second)},
 					RatingSubject: "free"}},
-			utils.MONETARY: Balances{&Balance{Value: 21}},
+			utils.MONETARY: {&Balance{Value: 21}},
 		}}
 	var err error
 	cc, err = rifsBalance.debitCreditBalance(cd, false, false, true)
@@ -1806,7 +1806,7 @@ func TestDebitDataUnits(t *testing.T) {
 	cc := &CallCost{
 		Destination: "0723045326",
 		Timespans: []*TimeSpan{
-			&TimeSpan{
+			{
 				TimeStart:     time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
 				TimeEnd:       time.Date(2013, 9, 24, 10, 48, 0, 80, time.UTC),
 				ratingInfo:    &RatingInfo{},
@@ -1838,11 +1838,11 @@ func TestDebitDataUnits(t *testing.T) {
 	}
 	rifsBalance := &Account{ID: "other",
 		BalanceMap: map[string]Balances{
-			utils.DATA: Balances{
+			utils.DATA: {
 				&Balance{Uuid: "testm", Value: 100,
 					Weight:         5,
 					DestinationIDs: utils.StringMap{"NAT": true}}},
-			utils.MONETARY: Balances{&Balance{Value: 21}},
+			utils.MONETARY: {&Balance{Value: 21}},
 		}}
 	var err error
 	cc, err = rifsBalance.debitCreditBalance(cd, false, false, true)
@@ -1871,7 +1871,7 @@ func TestDebitDataMoney(t *testing.T) {
 	cc := &CallCost{
 		Destination: "0723045326",
 		Timespans: []*TimeSpan{
-			&TimeSpan{
+			{
 				TimeStart:     time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
 				TimeEnd:       time.Date(2013, 9, 24, 10, 49, 20, 0, time.UTC),
 				ratingInfo:    &RatingInfo{},
@@ -1896,8 +1896,8 @@ func TestDebitDataMoney(t *testing.T) {
 		testCallcost:  cc,
 	}
 	rifsBalance := &Account{ID: "other", BalanceMap: map[string]Balances{
-		utils.DATA:     Balances{&Balance{Uuid: "testm", Value: 0, Weight: 5, DestinationIDs: utils.StringMap{"NAT": true}}},
-		utils.MONETARY: Balances{&Balance{Value: 160}},
+		utils.DATA:     {&Balance{Uuid: "testm", Value: 0, Weight: 5, DestinationIDs: utils.StringMap{"NAT": true}}},
+		utils.MONETARY: {&Balance{Value: 160}},
 	}}
 	var err error
 	cc, err = rifsBalance.debitCreditBalance(cd, false, false, true)
@@ -2077,7 +2077,7 @@ func TestAccountDoubleInitCounters(t *testing.T) {
 func TestAccountGetBalancesForPrefixMixed(t *testing.T) {
 	acc := &Account{
 		BalanceMap: map[string]Balances{
-			utils.MONETARY: Balances{
+			utils.MONETARY: {
 				&Balance{
 					Value:          10,
 					DestinationIDs: utils.StringMap{"NAT": true, "RET": false},
@@ -2094,7 +2094,7 @@ func TestAccountGetBalancesForPrefixMixed(t *testing.T) {
 func TestAccountGetBalancesForPrefixAllExcl(t *testing.T) {
 	acc := &Account{
 		BalanceMap: map[string]Balances{
-			utils.MONETARY: Balances{
+			utils.MONETARY: {
 				&Balance{
 					Value:          10,
 					DestinationIDs: utils.StringMap{"NAT": false, "RET": false},
@@ -2111,7 +2111,7 @@ func TestAccountGetBalancesForPrefixAllExcl(t *testing.T) {
 func TestAccountGetBalancesForPrefixMixedGood(t *testing.T) {
 	acc := &Account{
 		BalanceMap: map[string]Balances{
-			utils.MONETARY: Balances{
+			utils.MONETARY: {
 				&Balance{
 					Value:          10,
 					DestinationIDs: utils.StringMap{"NAT": true, "RET": false, "EXOTIC": true},
@@ -2129,7 +2129,7 @@ func TestAccountGetBalancesForPrefixMixedGood(t *testing.T) {
 func TestAccountGetBalancesForPrefixMixedBad(t *testing.T) {
 	acc := &Account{
 		BalanceMap: map[string]Balances{
-			utils.MONETARY: Balances{
+			utils.MONETARY: {
 				&Balance{
 					Value:          10,
 					DestinationIDs: utils.StringMap{"NAT": true, "RET": false, "EXOTIC": false},
@@ -2156,10 +2156,10 @@ func TestAccountAsAccountDigest(t *testing.T) {
 		ID:            "cgrates.org:account1",
 		AllowNegative: true,
 		BalanceMap: map[string]Balances{
-			utils.SMS:  Balances{&Balance{ID: "sms1", Value: 14}},
-			utils.MMS:  Balances{&Balance{ID: "mms1", Value: 140}},
-			utils.DATA: Balances{&Balance{ID: "data1", Value: 1204}},
-			utils.VOICE: Balances{
+			utils.SMS:  {&Balance{ID: "sms1", Value: 14}},
+			utils.MMS:  {&Balance{ID: "mms1", Value: 140}},
+			utils.DATA: {&Balance{ID: "data1", Value: 1204}},
+			utils.VOICE: {
 				&Balance{ID: "voice1", Weight: 20, DestinationIDs: utils.StringMap{"NAT": true}, Value: 3600},
 				&Balance{ID: "voice2", Weight: 10, DestinationIDs: utils.StringMap{"RET": true}, Value: 1200},
 			},
@@ -2169,11 +2169,11 @@ func TestAccountAsAccountDigest(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "account1",
 		BalanceSummaries: []*BalanceSummary{
-			&BalanceSummary{ID: "data1", Type: utils.DATA, Value: 1204, Disabled: false},
-			&BalanceSummary{ID: "sms1", Type: utils.SMS, Value: 14, Disabled: false},
-			&BalanceSummary{ID: "mms1", Type: utils.MMS, Value: 140, Disabled: false},
-			&BalanceSummary{ID: "voice1", Type: utils.VOICE, Value: 3600, Disabled: false},
-			&BalanceSummary{ID: "voice2", Type: utils.VOICE, Value: 1200, Disabled: false},
+			{ID: "data1", Type: utils.DATA, Value: 1204, Disabled: false},
+			{ID: "sms1", Type: utils.SMS, Value: 14, Disabled: false},
+			{ID: "mms1", Type: utils.MMS, Value: 140, Disabled: false},
+			{ID: "voice1", Type: utils.VOICE, Value: 3600, Disabled: false},
+			{ID: "voice2", Type: utils.VOICE, Value: 1200, Disabled: false},
 		},
 		AllowNegative: true,
 		Disabled:      false,
@@ -2188,7 +2188,7 @@ func TestAccountAsAccountDigest(t *testing.T) {
 func TestAccountGetBalancesGetBalanceWithSameWeight(t *testing.T) {
 	acc := &Account{
 		BalanceMap: map[string]Balances{
-			utils.MONETARY: Balances{
+			utils.MONETARY: {
 				&Balance{
 					ID:     "SpecialBalance1",
 					Value:  10,
@@ -2211,7 +2211,7 @@ func TestAccountGetBalancesGetBalanceWithSameWeight(t *testing.T) {
 func TestAccountGetBalancesForPrefix2(t *testing.T) {
 	acc := &Account{
 		BalanceMap: map[string]Balances{
-			utils.MONETARY: Balances{
+			utils.MONETARY: {
 				&Balance{
 					ID:     "SpecialBalance1",
 					Value:  10,
@@ -2234,7 +2234,7 @@ func TestAccountGetBalancesForPrefix2(t *testing.T) {
 func TestAccountGetMultipleBalancesForPrefixWithSameWeight(t *testing.T) {
 	acc := &Account{
 		BalanceMap: map[string]Balances{
-			utils.MONETARY: Balances{
+			utils.MONETARY: {
 				&Balance{
 					ID:     "SpecialBalance1",
 					Value:  10,
@@ -2283,10 +2283,10 @@ func TestAccountClone(t *testing.T) {
 		BalanceMap: map[string]Balances{
 			utils.MONETARY: {&Balance{Value: 10, Weight: 10}}},
 		ActionTriggers: []*ActionTrigger{
-			&ActionTrigger{
+			{
 				ID: "ActionTriggerID1",
 			},
-			&ActionTrigger{
+			{
 				ID: "ActionTriggerID2",
 			},
 		},
@@ -2298,10 +2298,10 @@ func TestAccountClone(t *testing.T) {
 		BalanceMap: map[string]Balances{
 			utils.MONETARY: {&Balance{Value: 10, Weight: 10}}},
 		ActionTriggers: []*ActionTrigger{
-			&ActionTrigger{
+			{
 				ID: "ActionTriggerID1",
 			},
-			&ActionTrigger{
+			{
 				ID: "ActionTriggerID2",
 			},
 		},
@@ -2318,8 +2318,8 @@ func TestAccountClone(t *testing.T) {
 func TestAccountGetBalanceWithID(t *testing.T) {
 	account := &Account{
 		BalanceMap: map[string]Balances{
-			"type1": Balances{&Balance{ID: "test1", Value: 0.7}},
-			"type2": Balances{&Balance{ID: "test2", Value: 0.8}},
+			"type1": {&Balance{ID: "test1", Value: 0.7}},
+			"type2": {&Balance{ID: "test2", Value: 0.8}},
 		},
 	}
 	if rcv := account.GetBalanceWithID("type1", "test1"); rcv.Value != 0.7 {
@@ -2340,7 +2340,7 @@ func BenchmarkGetSecondForPrefix(b *testing.B) {
 	b1 := &Balance{Value: 10, Weight: 10, DestinationIDs: utils.StringMap{"NAT": true}}
 	b2 := &Balance{Value: 100, Weight: 20, DestinationIDs: utils.StringMap{"RET": true}}
 
-	ub1 := &Account{ID: "other", BalanceMap: map[string]Balances{utils.VOICE: Balances{b1, b2}, utils.MONETARY: Balances{&Balance{Value: 21}}}}
+	ub1 := &Account{ID: "other", BalanceMap: map[string]Balances{utils.VOICE: {b1, b2}, utils.MONETARY: {&Balance{Value: 21}}}}
 	cd := &CallDescriptor{
 		Destination: "0723",
 	}
@@ -2353,7 +2353,7 @@ func BenchmarkGetSecondForPrefix(b *testing.B) {
 func BenchmarkAccountStorageStoreRestore(b *testing.B) {
 	b1 := &Balance{Value: 10, Weight: 10, DestinationIDs: utils.StringMap{"NAT": true}}
 	b2 := &Balance{Value: 100, Weight: 20, DestinationIDs: utils.StringMap{"RET": true}}
-	rifsBalance := &Account{ID: "other", BalanceMap: map[string]Balances{utils.VOICE: Balances{b1, b2}, utils.MONETARY: Balances{&Balance{Value: 21}}}}
+	rifsBalance := &Account{ID: "other", BalanceMap: map[string]Balances{utils.VOICE: {b1, b2}, utils.MONETARY: {&Balance{Value: 21}}}}
 	for i := 0; i < b.N; i++ {
 		dm.SetAccount(rifsBalance)
 		dm.GetAccount(rifsBalance.ID)
@@ -2363,7 +2363,7 @@ func BenchmarkAccountStorageStoreRestore(b *testing.B) {
 func BenchmarkGetSecondsForPrefix(b *testing.B) {
 	b1 := &Balance{Value: 10, Weight: 10, DestinationIDs: utils.StringMap{"NAT": true}}
 	b2 := &Balance{Value: 100, Weight: 20, DestinationIDs: utils.StringMap{"RET": true}}
-	ub1 := &Account{ID: "OUT:CUSTOMER_1:rif", BalanceMap: map[string]Balances{utils.VOICE: Balances{b1, b2}, utils.MONETARY: Balances{&Balance{Value: 21}}}}
+	ub1 := &Account{ID: "OUT:CUSTOMER_1:rif", BalanceMap: map[string]Balances{utils.VOICE: {b1, b2}, utils.MONETARY: {&Balance{Value: 21}}}}
 	cd := &CallDescriptor{
 		Destination: "0723",
 	}

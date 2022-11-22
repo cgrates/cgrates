@@ -29,14 +29,14 @@ func TestV1SharedGroupAsSharedGroup(t *testing.T) {
 	v1sg := &v1SharedGroup{
 		Id: "Test",
 		AccountParameters: map[string]*engine.SharingParameters{
-			"test": &engine.SharingParameters{Strategy: "*highest"},
+			"test": {Strategy: "*highest"},
 		},
 		MemberIds: []string{"1", "2", "3"},
 	}
 	sg := &engine.SharedGroup{
 		Id: "Test",
 		AccountParameters: map[string]*engine.SharingParameters{
-			"test": &engine.SharingParameters{Strategy: "*highest"},
+			"test": {Strategy: "*highest"},
 		},
 		MemberIds: utils.NewStringMap("1", "2", "3"),
 	}

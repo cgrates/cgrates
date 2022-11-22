@@ -135,7 +135,7 @@ func testTPAlsPrfSetTPAlsPrf(t *testing.T) {
 		},
 		Contexts: []string{"con1"},
 		Attributes: []*utils.TPAttribute{
-			&utils.TPAttribute{
+			{
 				Path:      utils.MetaReq + utils.NestingSep + "FL1",
 				Value:     "Al1",
 				FilterIDs: []string{},
@@ -177,12 +177,12 @@ func testTPAlsPrfGetTPAlsPrfIDs(t *testing.T) {
 
 func testTPAlsPrfUpdateTPAlsPrf(t *testing.T) {
 	tpAlsPrf.Attributes = []*utils.TPAttribute{
-		&utils.TPAttribute{
+		{
 			Path:      utils.MetaReq + utils.NestingSep + "FL1",
 			Value:     "Al1",
 			FilterIDs: []string{},
 		},
-		&utils.TPAttribute{
+		{
 			Path:      utils.MetaReq + utils.NestingSep + "FL2",
 			Value:     "Al2",
 			FilterIDs: []string{},
@@ -209,12 +209,12 @@ func testTPAlsPrfGetTPAlsPrfAfterUpdate(t *testing.T) {
 		},
 		Contexts: []string{"con1"},
 		Attributes: []*utils.TPAttribute{
-			&utils.TPAttribute{
+			{
 				Path:      utils.MetaReq + utils.NestingSep + "FL2",
 				Value:     "Al2",
 				FilterIDs: []string{},
 			},
-			&utils.TPAttribute{
+			{
 				Path:      utils.MetaReq + utils.NestingSep + "FL1",
 				Value:     "Al1",
 				FilterIDs: []string{},

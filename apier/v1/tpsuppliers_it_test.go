@@ -138,7 +138,7 @@ func testTPSplPrfSetTPSplPrf(t *testing.T) {
 		Sorting:           "*lowest_cost",
 		SortingParameters: []string{},
 		Suppliers: []*utils.TPSupplier{
-			&utils.TPSupplier{
+			{
 				ID:                 "supplier1",
 				FilterIDs:          []string{"FLTR_1"},
 				AccountIDs:         []string{"Acc1", "Acc2"},
@@ -188,7 +188,7 @@ func testTPSplPrfGetTPSplPrfIDs(t *testing.T) {
 
 func testTPSplPrfUpdateTPSplPrf(t *testing.T) {
 	tpSplPr.Suppliers = []*utils.TPSupplier{
-		&utils.TPSupplier{
+		{
 			ID:                 "supplier1",
 			FilterIDs:          []string{"FLTR_1"},
 			AccountIDs:         []string{"Acc1", "Acc2"},
@@ -199,7 +199,7 @@ func testTPSplPrfUpdateTPSplPrf(t *testing.T) {
 			Blocker:            true,
 			SupplierParameters: "SortingParam1",
 		},
-		&utils.TPSupplier{
+		{
 			ID:                 "supplier2",
 			FilterIDs:          []string{"FLTR_1"},
 			AccountIDs:         []string{"Acc3"},

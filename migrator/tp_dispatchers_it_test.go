@@ -110,7 +110,7 @@ func testTpDispITFlush(t *testing.T) {
 
 func testTpDispITPopulate(t *testing.T) {
 	tpDisps = []*utils.TPDispatcherProfile{
-		&utils.TPDispatcherProfile{
+		{
 			TPid:      "TP1",
 			Tenant:    "cgrates.org",
 			ID:        "Dsp1",

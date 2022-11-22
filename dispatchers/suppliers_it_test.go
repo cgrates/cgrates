@@ -385,7 +385,7 @@ func testDspSupGetSupplierForEvent(t *testing.T) {
 		Sorting:           utils.MetaLC,
 		SortingParameters: []string{},
 		Suppliers: []*engine.Supplier{
-			&engine.Supplier{
+			{
 				ID:                 "supplier1",
 				FilterIDs:          nil,
 				AccountIDs:         nil,
@@ -396,7 +396,7 @@ func testDspSupGetSupplierForEvent(t *testing.T) {
 				Blocker:            false,
 				SupplierParameters: "",
 			},
-			&engine.Supplier{
+			{
 				ID:                 "supplier2",
 				FilterIDs:          nil,
 				AccountIDs:         nil,

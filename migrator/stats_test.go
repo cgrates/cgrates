@@ -92,13 +92,13 @@ func TestV1StatsAsStats(t *testing.T) {
 		QueueLength: 10,
 		TTL:         time.Duration(0) * time.Second,
 		Metrics: []*engine.MetricWithFilters{
-			&engine.MetricWithFilters{
+			{
 				MetricID: "*asr",
 			},
-			&engine.MetricWithFilters{
+			{
 				MetricID: utils.MetaACD,
 			},
-			&engine.MetricWithFilters{
+			{
 				MetricID: "*acc",
 			},
 		},

@@ -75,6 +75,6 @@ func (self *CmdChargersProcessEvent) RpcResult() interface{} {
 
 func (self *CmdChargersProcessEvent) GetFormatedResult(result interface{}) string {
 	return GetFormatedResult(result, map[string]struct{}{
-		"Usage": struct{}{},
+		"Usage": {},
 	})
 }

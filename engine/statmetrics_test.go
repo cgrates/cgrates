@@ -112,8 +112,8 @@ func TestASRGetStringValue3(t *testing.T) {
 		MinItems: 2, FilterIDs: []string{}}
 	expected := &StatASR{
 		Events: map[string]*StatWithCompress{
-			"EVENT_1": &StatWithCompress{Stat: 1, CompressFactor: 1},
-			"EVENT_2": &StatWithCompress{Stat: 0, CompressFactor: 1},
+			"EVENT_1": {Stat: 1, CompressFactor: 1},
+			"EVENT_2": {Stat: 0, CompressFactor: 1},
 		},
 		MinItems:  2,
 		FilterIDs: []string{},
@@ -221,8 +221,8 @@ func TestASRCompress(t *testing.T) {
 		MinItems: 2, FilterIDs: []string{}}
 	expected := &StatASR{
 		Events: map[string]*StatWithCompress{
-			"EVENT_1": &StatWithCompress{Stat: 1, CompressFactor: 1},
-			"EVENT_2": &StatWithCompress{Stat: 0, CompressFactor: 1},
+			"EVENT_1": {Stat: 1, CompressFactor: 1},
+			"EVENT_2": {Stat: 0, CompressFactor: 1},
 		},
 		MinItems:  2,
 		FilterIDs: []string{},
@@ -251,7 +251,7 @@ func TestASRCompress(t *testing.T) {
 	}
 	expected = &StatASR{
 		Events: map[string]*StatWithCompress{
-			"EVENT_3": &StatWithCompress{Stat: 0.5, CompressFactor: 2},
+			"EVENT_3": {Stat: 0.5, CompressFactor: 2},
 		},
 		MinItems:  2,
 		FilterIDs: []string{},
@@ -413,8 +413,8 @@ func TestACDGetStringValue3(t *testing.T) {
 	acd := &StatACD{Events: make(map[string]*DurationWithCompress), MinItems: 2, FilterIDs: []string{}}
 	expected := &StatACD{
 		Events: map[string]*DurationWithCompress{
-			"EVENT_1": &DurationWithCompress{Duration: 2*time.Minute + 30*time.Second, CompressFactor: 2},
-			"EVENT_3": &DurationWithCompress{Duration: time.Minute, CompressFactor: 1},
+			"EVENT_1": {Duration: 2*time.Minute + 30*time.Second, CompressFactor: 2},
+			"EVENT_3": {Duration: time.Minute, CompressFactor: 1},
 		},
 		MinItems:  2,
 		FilterIDs: []string{},
@@ -458,8 +458,8 @@ func TestACDCompress(t *testing.T) {
 	acd := &StatACD{Events: make(map[string]*DurationWithCompress), MinItems: 2, FilterIDs: []string{}}
 	expected := &StatACD{
 		Events: map[string]*DurationWithCompress{
-			"EVENT_1": &DurationWithCompress{Duration: 2*time.Minute + 30*time.Second, CompressFactor: 2},
-			"EVENT_3": &DurationWithCompress{Duration: time.Minute, CompressFactor: 1},
+			"EVENT_1": {Duration: 2*time.Minute + 30*time.Second, CompressFactor: 2},
+			"EVENT_3": {Duration: time.Minute, CompressFactor: 1},
 		},
 		MinItems:  2,
 		FilterIDs: []string{},
@@ -488,7 +488,7 @@ func TestACDCompress(t *testing.T) {
 	}
 	expected = &StatACD{
 		Events: map[string]*DurationWithCompress{
-			"EVENT_3": &DurationWithCompress{Duration: 2 * time.Minute, CompressFactor: 3},
+			"EVENT_3": {Duration: 2 * time.Minute, CompressFactor: 3},
 		},
 		MinItems:  2,
 		FilterIDs: []string{},
@@ -738,8 +738,8 @@ func TestTCDGetStringValue3(t *testing.T) {
 	tcd := &StatTCD{Events: make(map[string]*DurationWithCompress), MinItems: 2, FilterIDs: []string{}}
 	expected := &StatTCD{
 		Events: map[string]*DurationWithCompress{
-			"EVENT_1": &DurationWithCompress{Duration: 2*time.Minute + 30*time.Second, CompressFactor: 2},
-			"EVENT_3": &DurationWithCompress{Duration: time.Minute, CompressFactor: 1},
+			"EVENT_1": {Duration: 2*time.Minute + 30*time.Second, CompressFactor: 2},
+			"EVENT_3": {Duration: time.Minute, CompressFactor: 1},
 		},
 		MinItems:  2,
 		FilterIDs: []string{},
@@ -892,8 +892,8 @@ func TestTCDCompress(t *testing.T) {
 	tcd := &StatTCD{Events: make(map[string]*DurationWithCompress), MinItems: 2, FilterIDs: []string{}}
 	expected := &StatTCD{
 		Events: map[string]*DurationWithCompress{
-			"EVENT_1": &DurationWithCompress{Duration: 2*time.Minute + 30*time.Second, CompressFactor: 2},
-			"EVENT_3": &DurationWithCompress{Duration: time.Minute, CompressFactor: 1},
+			"EVENT_1": {Duration: 2*time.Minute + 30*time.Second, CompressFactor: 2},
+			"EVENT_3": {Duration: time.Minute, CompressFactor: 1},
 		},
 		MinItems:  2,
 		FilterIDs: []string{},
@@ -922,7 +922,7 @@ func TestTCDCompress(t *testing.T) {
 	}
 	expected = &StatTCD{
 		Events: map[string]*DurationWithCompress{
-			"EVENT_3": &DurationWithCompress{Duration: 2 * time.Minute, CompressFactor: 3},
+			"EVENT_3": {Duration: 2 * time.Minute, CompressFactor: 3},
 		},
 		MinItems:  2,
 		FilterIDs: []string{},
@@ -1054,8 +1054,8 @@ func TestACCGetStringValue3(t *testing.T) {
 	acc := &StatACC{Events: make(map[string]*StatWithCompress), MinItems: 2, FilterIDs: []string{}}
 	expected := &StatACC{
 		Events: map[string]*StatWithCompress{
-			"EVENT_1": &StatWithCompress{Stat: 12.2, CompressFactor: 2},
-			"EVENT_3": &StatWithCompress{Stat: 18.3, CompressFactor: 1},
+			"EVENT_1": {Stat: 12.2, CompressFactor: 2},
+			"EVENT_3": {Stat: 18.3, CompressFactor: 1},
 		},
 		MinItems:  2,
 		FilterIDs: []string{},
@@ -1149,8 +1149,8 @@ func TestACCCompress(t *testing.T) {
 		MinItems: 2, FilterIDs: []string{}}
 	expected := &StatACC{
 		Events: map[string]*StatWithCompress{
-			"EVENT_1": &StatWithCompress{Stat: 18.2, CompressFactor: 1},
-			"EVENT_2": &StatWithCompress{Stat: 6.2, CompressFactor: 1},
+			"EVENT_1": {Stat: 18.2, CompressFactor: 1},
+			"EVENT_2": {Stat: 6.2, CompressFactor: 1},
 		},
 		MinItems:  2,
 		FilterIDs: []string{},
@@ -1178,7 +1178,7 @@ func TestACCCompress(t *testing.T) {
 	}
 	expected = &StatACC{
 		Events: map[string]*StatWithCompress{
-			"EVENT_3": &StatWithCompress{Stat: 12.2, CompressFactor: 2},
+			"EVENT_3": {Stat: 12.2, CompressFactor: 2},
 		},
 		MinItems:  2,
 		FilterIDs: []string{},
@@ -1324,8 +1324,8 @@ func TestTCCGetStringValue3(t *testing.T) {
 	tcc := &StatTCC{Events: make(map[string]*StatWithCompress), MinItems: 2, FilterIDs: []string{}}
 	expected := &StatTCC{
 		Events: map[string]*StatWithCompress{
-			"EVENT_1": &StatWithCompress{Stat: 12.2, CompressFactor: 2},
-			"EVENT_3": &StatWithCompress{Stat: 18.3, CompressFactor: 1},
+			"EVENT_1": {Stat: 12.2, CompressFactor: 2},
+			"EVENT_3": {Stat: 18.3, CompressFactor: 1},
 		},
 		MinItems:  2,
 		FilterIDs: []string{},
@@ -1422,8 +1422,8 @@ func TestTCCCompress(t *testing.T) {
 		MinItems: 2, FilterIDs: []string{}}
 	expected := &StatTCC{
 		Events: map[string]*StatWithCompress{
-			"EVENT_1": &StatWithCompress{Stat: 18.2, CompressFactor: 1},
-			"EVENT_2": &StatWithCompress{Stat: 6.2, CompressFactor: 1},
+			"EVENT_1": {Stat: 18.2, CompressFactor: 1},
+			"EVENT_2": {Stat: 6.2, CompressFactor: 1},
 		},
 		MinItems:  2,
 		FilterIDs: []string{},
@@ -1451,7 +1451,7 @@ func TestTCCCompress(t *testing.T) {
 	}
 	expected = &StatTCC{
 		Events: map[string]*StatWithCompress{
-			"EVENT_3": &StatWithCompress{Stat: 12.2, CompressFactor: 2},
+			"EVENT_3": {Stat: 12.2, CompressFactor: 2},
 		},
 		MinItems:  2,
 		FilterIDs: []string{},
@@ -1607,8 +1607,8 @@ func TestPDDGetStringValue3(t *testing.T) {
 	pdd := &StatPDD{Events: make(map[string]*DurationWithCompress), MinItems: 2, FilterIDs: []string{}}
 	expected := &StatPDD{
 		Events: map[string]*DurationWithCompress{
-			"EVENT_1": &DurationWithCompress{Duration: 2*time.Minute + 30*time.Second, CompressFactor: 2},
-			"EVENT_3": &DurationWithCompress{Duration: time.Minute, CompressFactor: 1},
+			"EVENT_1": {Duration: 2*time.Minute + 30*time.Second, CompressFactor: 2},
+			"EVENT_3": {Duration: time.Minute, CompressFactor: 1},
 		},
 		MinItems:  2,
 		FilterIDs: []string{},
@@ -1778,8 +1778,8 @@ func TestPDDCompress(t *testing.T) {
 	pdd := &StatPDD{Events: make(map[string]*DurationWithCompress), MinItems: 2, FilterIDs: []string{}}
 	expected := &StatPDD{
 		Events: map[string]*DurationWithCompress{
-			"EVENT_1": &DurationWithCompress{Duration: 2*time.Minute + 30*time.Second, CompressFactor: 2},
-			"EVENT_3": &DurationWithCompress{Duration: time.Minute, CompressFactor: 1},
+			"EVENT_1": {Duration: 2*time.Minute + 30*time.Second, CompressFactor: 2},
+			"EVENT_3": {Duration: time.Minute, CompressFactor: 1},
 		},
 		MinItems:  2,
 		FilterIDs: []string{},
@@ -1808,7 +1808,7 @@ func TestPDDCompress(t *testing.T) {
 	}
 	expected = &StatPDD{
 		Events: map[string]*DurationWithCompress{
-			"EVENT_3": &DurationWithCompress{Duration: 2 * time.Minute, CompressFactor: 3},
+			"EVENT_3": {Duration: 2 * time.Minute, CompressFactor: 3},
 		},
 		MinItems:  2,
 		FilterIDs: []string{},
@@ -1993,19 +1993,19 @@ func TestDDCCompress(t *testing.T) {
 	}
 	expected := &StatDDC{
 		Events: map[string]map[string]int64{
-			"EVENT_1": map[string]int64{
+			"EVENT_1": {
 				"1001": 2,
 			},
-			"EVENT_3": map[string]int64{
+			"EVENT_3": {
 				"1002": 1,
 			},
 		},
 		FieldValues: map[string]map[string]struct{}{
-			"1001": map[string]struct{}{
-				"EVENT_1": struct{}{},
+			"1001": {
+				"EVENT_1": {},
 			},
-			"1002": map[string]struct{}{
-				"EVENT_3": struct{}{},
+			"1002": {
+				"EVENT_3": {},
 			},
 		},
 		MinItems:  2,
@@ -2212,8 +2212,8 @@ func TestStatSumGetStringValue3(t *testing.T) {
 	statSum := &StatSum{Events: make(map[string]*StatWithCompress), MinItems: 2, FilterIDs: []string{}, FieldName: "~*req.Cost"}
 	expected := &StatSum{
 		Events: map[string]*StatWithCompress{
-			"EVENT_1": &StatWithCompress{Stat: 12.2, CompressFactor: 2},
-			"EVENT_3": &StatWithCompress{Stat: 18.3, CompressFactor: 1},
+			"EVENT_1": {Stat: 12.2, CompressFactor: 2},
+			"EVENT_3": {Stat: 18.3, CompressFactor: 1},
 		},
 		MinItems:  2,
 		FilterIDs: []string{},
@@ -2259,8 +2259,8 @@ func TestStatSumCompress(t *testing.T) {
 		MinItems: 2, FilterIDs: []string{}}
 	expected := &StatSum{
 		Events: map[string]*StatWithCompress{
-			"EVENT_1": &StatWithCompress{Stat: 18.2, CompressFactor: 1},
-			"EVENT_2": &StatWithCompress{Stat: 6.2, CompressFactor: 1},
+			"EVENT_1": {Stat: 18.2, CompressFactor: 1},
+			"EVENT_2": {Stat: 6.2, CompressFactor: 1},
 		},
 		MinItems:  2,
 		FilterIDs: []string{},
@@ -2289,7 +2289,7 @@ func TestStatSumCompress(t *testing.T) {
 	}
 	expected = &StatSum{
 		Events: map[string]*StatWithCompress{
-			"EVENT_3": &StatWithCompress{Stat: 12.2, CompressFactor: 2},
+			"EVENT_3": {Stat: 12.2, CompressFactor: 2},
 		},
 		MinItems:  2,
 		FilterIDs: []string{},
@@ -2491,8 +2491,8 @@ func TestStatAverageGetStringValue3(t *testing.T) {
 		MinItems: 2, FilterIDs: []string{}, FieldName: "~*req.Cost"}
 	expected := &StatAverage{
 		Events: map[string]*StatWithCompress{
-			"EVENT_1": &StatWithCompress{Stat: 12.2, CompressFactor: 2},
-			"EVENT_3": &StatWithCompress{Stat: 18.3, CompressFactor: 1},
+			"EVENT_1": {Stat: 12.2, CompressFactor: 2},
+			"EVENT_3": {Stat: 18.3, CompressFactor: 1},
 		},
 		MinItems:  2,
 		FilterIDs: []string{},
@@ -2538,8 +2538,8 @@ func TestStatAverageCompress(t *testing.T) {
 		MinItems: 2, FilterIDs: []string{}}
 	expected := &StatAverage{
 		Events: map[string]*StatWithCompress{
-			"EVENT_1": &StatWithCompress{Stat: 18.2, CompressFactor: 1},
-			"EVENT_2": &StatWithCompress{Stat: 6.2, CompressFactor: 1},
+			"EVENT_1": {Stat: 18.2, CompressFactor: 1},
+			"EVENT_2": {Stat: 6.2, CompressFactor: 1},
 		},
 		MinItems:  2,
 		FilterIDs: []string{},
@@ -2568,7 +2568,7 @@ func TestStatAverageCompress(t *testing.T) {
 	}
 	expected = &StatAverage{
 		Events: map[string]*StatWithCompress{
-			"EVENT_3": &StatWithCompress{Stat: 12.2, CompressFactor: 2},
+			"EVENT_3": {Stat: 12.2, CompressFactor: 2},
 		},
 		MinItems:  2,
 		FilterIDs: []string{},
@@ -2755,19 +2755,19 @@ func TestStatDistinctCompress(t *testing.T) {
 	}
 	expected := &StatDistinct{
 		Events: map[string]map[string]int64{
-			"EVENT_1": map[string]int64{
+			"EVENT_1": {
 				"1001": 2,
 			},
-			"EVENT_3": map[string]int64{
+			"EVENT_3": {
 				"1002": 1,
 			},
 		},
 		FieldValues: map[string]map[string]struct{}{
-			"1001": map[string]struct{}{
-				"EVENT_1": struct{}{},
+			"1001": {
+				"EVENT_1": {},
 			},
-			"1002": map[string]struct{}{
-				"EVENT_3": struct{}{},
+			"1002": {
+				"EVENT_3": {},
 			},
 		},
 		MinItems:  2,

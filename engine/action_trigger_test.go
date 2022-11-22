@@ -96,18 +96,18 @@ func TestActionTriggersClone(t *testing.T) {
 
 	}
 	atpl = []*ActionTrigger{
-		&ActionTrigger{
+		{
 			ID: "test1",
 		},
-		&ActionTrigger{
+		{
 			ID: "test2",
 		},
 	}
 	eOut = []*ActionTrigger{
-		&ActionTrigger{
+		{
 			ID: "test1",
 		},
-		&ActionTrigger{
+		{
 			ID: "test2",
 		},
 	}

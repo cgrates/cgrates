@@ -355,7 +355,7 @@ func (cfg *CGRConfig) loadRPCConns(jsnCfg *CgrJsonCfg) (err error) {
 		Strategy: rpcclient.PoolFirst,
 		PoolSize: 0,
 		Conns: []*RemoteHost{
-			&RemoteHost{
+			{
 				Address: utils.MetaInternal,
 			},
 		},

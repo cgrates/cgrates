@@ -128,7 +128,7 @@ func testTPDstRateSetTPDstRate(t *testing.T) {
 		TPid: "TP1",
 		ID:   "DR_FREESWITCH_USERS",
 		DestinationRates: []*utils.DestinationRate{
-			&utils.DestinationRate{
+			{
 				DestinationId:    "FS_USERS",
 				RateId:           "RT_FS_USERS",
 				RoundingMethod:   "*up",

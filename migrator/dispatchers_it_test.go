@@ -190,7 +190,7 @@ func testDspITMigrateAndMove(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "ALL",
 		Conns: []*config.RemoteHost{
-			&config.RemoteHost{
+			{
 				Address:   "127.0.0.1",
 				Transport: utils.MetaJSON,
 			},

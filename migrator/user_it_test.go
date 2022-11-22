@@ -195,7 +195,7 @@ func testUsrITMigrateAndMove(t *testing.T) {
 	}
 
 	expUsrIdx := map[string]utils.StringMap{
-		"*string:~Account:1002": utils.StringMap{
+		"*string:~Account:1002": {
 			"1001": true,
 		},
 	}

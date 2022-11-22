@@ -33,28 +33,28 @@ var testEC = &EventCost{
 	RunID:     utils.MetaDefault,
 	StartTime: time.Date(2017, 1, 9, 16, 18, 21, 0, time.UTC),
 	Charges: []*ChargingInterval{
-		&ChargingInterval{
+		{
 			RatingID: "c1a5ab9",
 			Increments: []*ChargingIncrement{
-				&ChargingIncrement{
+				{
 					Usage:          time.Duration(0),
 					Cost:           0.1,
 					AccountingID:   "9bdad10",
 					CompressFactor: 1,
 				},
-				&ChargingIncrement{
+				{
 					Usage:          time.Duration(1 * time.Second),
 					Cost:           0,
 					AccountingID:   "3455b83",
 					CompressFactor: 10,
 				},
-				&ChargingIncrement{
+				{
 					Usage:          time.Duration(10 * time.Second),
 					Cost:           0.01,
 					AccountingID:   "a012888",
 					CompressFactor: 2,
 				},
-				&ChargingIncrement{
+				{
 					Usage:          time.Duration(1 * time.Second),
 					Cost:           0.005,
 					AccountingID:   "44d6c02",
@@ -63,10 +63,10 @@ var testEC = &EventCost{
 			},
 			CompressFactor: 1,
 		},
-		&ChargingInterval{
+		{
 			RatingID: "c1a5ab9",
 			Increments: []*ChargingIncrement{
-				&ChargingIncrement{
+				{
 					Usage:          time.Duration(1 * time.Second),
 					Cost:           0.01,
 					AccountingID:   "a012888",
@@ -75,22 +75,22 @@ var testEC = &EventCost{
 			},
 			CompressFactor: 4,
 		},
-		&ChargingInterval{
+		{
 			RatingID: "c1a5ab9",
 			Increments: []*ChargingIncrement{
-				&ChargingIncrement{
+				{
 					Usage:          time.Duration(1 * time.Second),
 					Cost:           0,
 					AccountingID:   "3455b83",
 					CompressFactor: 10,
 				},
-				&ChargingIncrement{
+				{
 					Usage:          time.Duration(10 * time.Second),
 					Cost:           0.01,
 					AccountingID:   "a012888",
 					CompressFactor: 2,
 				},
-				&ChargingIncrement{
+				{
 					Usage:          time.Duration(1 * time.Second),
 					Cost:           0.005,
 					AccountingID:   "44d6c02",
@@ -104,17 +104,17 @@ var testEC = &EventCost{
 		Tenant: "cgrates.org",
 		ID:     "dan",
 		BalanceSummaries: []*BalanceSummary{
-			&BalanceSummary{
+			{
 				UUID:  "8c54a9e9-d610-4c82-bcb5-a315b9a65010",
 				Type:  utils.MONETARY,
 				Value: 50,
 			},
-			&BalanceSummary{
+			{
 				UUID:  "7a54a9e9-d610-4c82-bcb5-a315b9a65010",
 				Type:  utils.MONETARY,
 				Value: 25,
 			},
-			&BalanceSummary{
+			{
 				UUID:  "4b8b53d7-c1a1-4159-b845-4623a00a0165",
 				Type:  utils.VOICE,
 				Value: 200,
@@ -297,16 +297,16 @@ func TestNewEventCostFromCallCost(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "dan",
 		BalanceSummaries: []*BalanceSummary{
-			&BalanceSummary{
+			{
 				Type:     "*monetary",
 				Value:    50,
 				Disabled: false},
-			&BalanceSummary{
+			{
 				ID:       "4b8b53d7-c1a1-4159-b845-4623a00a0165",
 				Type:     "*monetary",
 				Value:    25,
 				Disabled: false},
-			&BalanceSummary{
+			{
 				Type:     "*voice",
 				Value:    200,
 				Disabled: false,
@@ -488,22 +488,22 @@ func TestNewEventCostFromCallCost(t *testing.T) {
 		Cost:      utils.Float64Pointer(0.85),
 		Usage:     utils.DurationPointer(time.Duration(2 * time.Minute)),
 		Charges: []*ChargingInterval{
-			&ChargingInterval{
+			{
 				RatingID: "f2518464-68b8-42f4-acec-aef23d714314",
 				Increments: []*ChargingIncrement{
-					&ChargingIncrement{
+					{
 						Usage:          time.Duration(0),
 						Cost:           0.1,
 						AccountingID:   "44e97dec-8a7e-43d0-8b0a-736d46b5613e",
 						CompressFactor: 1,
 					},
-					&ChargingIncrement{
+					{
 						Usage:          time.Duration(1 * time.Second),
 						Cost:           0,
 						AccountingID:   "a555cde8-4bd0-408a-afbc-c3ba64888927",
 						CompressFactor: 30,
 					},
-					&ChargingIncrement{
+					{
 						Usage:          time.Duration(1 * time.Second),
 						Cost:           0.005,
 						AccountingID:   "906bfd0f-035c-40a3-93a8-46f71627983e",
@@ -520,10 +520,10 @@ func TestNewEventCostFromCallCost(t *testing.T) {
 				cost:           utils.Float64Pointer(0.15),
 				ecUsageIdx:     utils.DurationPointer(time.Duration(0)),
 			},
-			&ChargingInterval{
+			{
 				RatingID: "f2518464-68b8-42f4-acec-aef23d714314",
 				Increments: []*ChargingIncrement{
-					&ChargingIncrement{
+					{
 						Usage:          time.Duration(1 * time.Second),
 						Cost:           0.01,
 						AccountingID:   "c890a899-df43-497a-9979-38492713f57b",
@@ -967,16 +967,16 @@ func TestECAsCallCost(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "dan",
 		BalanceSummaries: []*BalanceSummary{
-			&BalanceSummary{
+			{
 				Type:     "*monetary",
 				Value:    50,
 				Disabled: false},
-			&BalanceSummary{
+			{
 				ID:       "4b8b53d7-c1a1-4159-b845-4623a00a0165",
 				Type:     "*monetary",
 				Value:    25,
 				Disabled: false},
-			&BalanceSummary{
+			{
 				Type:     "*voice",
 				Value:    200,
 				Disabled: false,
@@ -992,22 +992,22 @@ func TestECAsCallCost(t *testing.T) {
 		Cost:      utils.Float64Pointer(0.85),
 		Usage:     utils.DurationPointer(time.Duration(2 * time.Minute)),
 		Charges: []*ChargingInterval{
-			&ChargingInterval{
+			{
 				RatingID: "f2518464-68b8-42f4-acec-aef23d714314",
 				Increments: []*ChargingIncrement{
-					&ChargingIncrement{
+					{
 						Usage:          time.Duration(0),
 						Cost:           0.1,
 						AccountingID:   "44e97dec-8a7e-43d0-8b0a-736d46b5613e",
 						CompressFactor: 1,
 					},
-					&ChargingIncrement{
+					{
 						Usage:          time.Duration(1 * time.Second),
 						Cost:           0,
 						AccountingID:   "a555cde8-4bd0-408a-afbc-c3ba64888927",
 						CompressFactor: 30,
 					},
-					&ChargingIncrement{
+					{
 						Usage:          time.Duration(1 * time.Second),
 						Cost:           0.005,
 						AccountingID:   "906bfd0f-035c-40a3-93a8-46f71627983e",
@@ -1016,10 +1016,10 @@ func TestECAsCallCost(t *testing.T) {
 				},
 				CompressFactor: 1,
 			},
-			&ChargingInterval{
+			{
 				RatingID: "f2518464-68b8-42f4-acec-aef23d714314",
 				Increments: []*ChargingIncrement{
-					&ChargingIncrement{
+					{
 						Usage:          time.Duration(1 * time.Second),
 						Cost:           0.01,
 						AccountingID:   "c890a899-df43-497a-9979-38492713f57b",
@@ -1343,28 +1343,28 @@ func TestECTrimMiddle1(t *testing.T) {
 	ec := testEC.Clone()
 	eEC := testEC.Clone()
 	eEC.Charges = []*ChargingInterval{
-		&ChargingInterval{
+		{
 			RatingID: "c1a5ab9",
 			Increments: []*ChargingIncrement{
-				&ChargingIncrement{
+				{
 					Usage:          time.Duration(0),
 					Cost:           0.1,
 					AccountingID:   "9bdad10",
 					CompressFactor: 1,
 				},
-				&ChargingIncrement{
+				{
 					Usage:          time.Duration(1 * time.Second),
 					Cost:           0,
 					AccountingID:   "3455b83",
 					CompressFactor: 10,
 				},
-				&ChargingIncrement{
+				{
 					Usage:          time.Duration(10 * time.Second),
 					Cost:           0.01,
 					AccountingID:   "a012888",
 					CompressFactor: 2,
 				},
-				&ChargingIncrement{
+				{
 					Usage:          time.Duration(1 * time.Second),
 					Cost:           0.005,
 					AccountingID:   "44d6c02",
@@ -1373,10 +1373,10 @@ func TestECTrimMiddle1(t *testing.T) {
 			},
 			CompressFactor: 1,
 		},
-		&ChargingInterval{
+		{
 			RatingID: "c1a5ab9",
 			Increments: []*ChargingIncrement{
-				&ChargingIncrement{
+				{
 					Usage:          time.Duration(1 * time.Second),
 					Cost:           0.01,
 					AccountingID:   "a012888",
@@ -1385,10 +1385,10 @@ func TestECTrimMiddle1(t *testing.T) {
 			},
 			CompressFactor: 2,
 		},
-		&ChargingInterval{
+		{
 			RatingID: "c1a5ab9",
 			Increments: []*ChargingIncrement{
-				&ChargingIncrement{
+				{
 					Usage:          time.Duration(1 * time.Second),
 					Cost:           0.01,
 					AccountingID:   "a012888",
@@ -1401,10 +1401,10 @@ func TestECTrimMiddle1(t *testing.T) {
 	eSrplsEC := testEC.Clone()
 	eSrplsEC.StartTime = time.Date(2017, 1, 9, 16, 21, 31, 0, time.UTC)
 	eSrplsEC.Charges = []*ChargingInterval{
-		&ChargingInterval{
+		{
 			RatingID: "c1a5ab9",
 			Increments: []*ChargingIncrement{
-				&ChargingIncrement{
+				{
 					Usage:          time.Duration(1 * time.Second),
 					Cost:           0.01,
 					AccountingID:   "a012888",
@@ -1413,10 +1413,10 @@ func TestECTrimMiddle1(t *testing.T) {
 			},
 			CompressFactor: 1,
 		},
-		&ChargingInterval{
+		{
 			RatingID: "c1a5ab9",
 			Increments: []*ChargingIncrement{
-				&ChargingIncrement{
+				{
 					Usage:          time.Duration(1 * time.Second),
 					Cost:           0.01,
 					AccountingID:   "a012888",
@@ -1425,22 +1425,22 @@ func TestECTrimMiddle1(t *testing.T) {
 			},
 			CompressFactor: 1,
 		},
-		&ChargingInterval{
+		{
 			RatingID: "c1a5ab9",
 			Increments: []*ChargingIncrement{
-				&ChargingIncrement{
+				{
 					Usage:          time.Duration(1 * time.Second),
 					Cost:           0,
 					AccountingID:   "3455b83",
 					CompressFactor: 10,
 				},
-				&ChargingIncrement{
+				{
 					Usage:          time.Duration(10 * time.Second),
 					Cost:           0.01,
 					AccountingID:   "a012888",
 					CompressFactor: 2,
 				},
-				&ChargingIncrement{
+				{
 					Usage:          time.Duration(1 * time.Second),
 					Cost:           0.005,
 					AccountingID:   "44d6c02",
@@ -1569,10 +1569,10 @@ func TestECMergeGT(t *testing.T) {
 		RunID:     utils.MetaDefault,
 		StartTime: time.Date(2018, 7, 27, 0, 59, 21, 0, time.UTC),
 		Charges: []*ChargingInterval{
-			&ChargingInterval{
+			{
 				RatingID: "cc68da4",
 				Increments: []*ChargingIncrement{
-					&ChargingIncrement{
+					{
 						Usage:          time.Duration(102400),
 						AccountingID:   "0d87a64",
 						CompressFactor: 103,
@@ -1585,7 +1585,7 @@ func TestECMergeGT(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "dan",
 			BalanceSummaries: []*BalanceSummary{
-				&BalanceSummary{
+				{
 					UUID:  "9a767726-fe69-4940-b7bd-f43de9f0f8a5",
 					ID:    "addon_data",
 					Type:  utils.DATA,
@@ -1627,10 +1627,10 @@ func TestECMergeGT(t *testing.T) {
 		RunID:     utils.MetaDefault,
 		StartTime: time.Date(2018, 7, 27, 0, 59, 38, 0105472, time.UTC),
 		Charges: []*ChargingInterval{
-			&ChargingInterval{
+			{
 				RatingID: "6a83227",
 				Increments: []*ChargingIncrement{
-					&ChargingIncrement{
+					{
 						Usage:          time.Duration(102400),
 						AccountingID:   "9288f93",
 						CompressFactor: 84,
@@ -1643,7 +1643,7 @@ func TestECMergeGT(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "dan",
 			BalanceSummaries: []*BalanceSummary{
-				&BalanceSummary{
+				{
 					UUID:  "9a767726-fe69-4940-b7bd-f43de9f0f8a5",
 					ID:    "addon_data",
 					Type:  utils.DATA,
@@ -1686,10 +1686,10 @@ func TestECMergeGT(t *testing.T) {
 		RunID:     utils.MetaDefault,
 		StartTime: time.Date(2018, 7, 27, 0, 59, 21, 0, time.UTC),
 		Charges: []*ChargingInterval{
-			&ChargingInterval{
+			{
 				RatingID: "cc68da4",
 				Increments: []*ChargingIncrement{
-					&ChargingIncrement{
+					{
 						Usage:          time.Duration(102400),
 						AccountingID:   "0d87a64",
 						CompressFactor: 187,
@@ -1702,7 +1702,7 @@ func TestECMergeGT(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "dan",
 			BalanceSummaries: []*BalanceSummary{
-				&BalanceSummary{
+				{
 					UUID:  "9a767726-fe69-4940-b7bd-f43de9f0f8a5",
 					ID:    "addon_data",
 					Type:  utils.DATA,
@@ -1752,10 +1752,10 @@ func TestECAppendCIlFromEC(t *testing.T) {
 	// Standard compressing 1-1
 	ec := &EventCost{
 		Charges: []*ChargingInterval{
-			&ChargingInterval{
+			{
 				RatingID: "cc68da4",
 				Increments: []*ChargingIncrement{
-					&ChargingIncrement{
+					{
 						Usage:          time.Duration(102400),
 						AccountingID:   "0d87a64",
 						CompressFactor: 103,
@@ -1796,10 +1796,10 @@ func TestECAppendCIlFromEC(t *testing.T) {
 	}
 	oEC := &EventCost{
 		Charges: []*ChargingInterval{
-			&ChargingInterval{
+			{
 				RatingID: "6a83227",
 				Increments: []*ChargingIncrement{
-					&ChargingIncrement{
+					{
 						Usage:          time.Duration(102400),
 						AccountingID:   "9288f93",
 						CompressFactor: 84,
@@ -1841,10 +1841,10 @@ func TestECAppendCIlFromEC(t *testing.T) {
 	ec.appendCIlFromEC(oEC, 0)
 	eEC := &EventCost{
 		Charges: []*ChargingInterval{
-			&ChargingInterval{
+			{
 				RatingID: "cc68da4",
 				Increments: []*ChargingIncrement{
-					&ChargingIncrement{
+					{
 						Usage:          time.Duration(102400),
 						AccountingID:   "0d87a64",
 						CompressFactor: 187,
@@ -1890,10 +1890,10 @@ func TestECAppendCIlFromEC(t *testing.T) {
 	// Second case, do not compress if first interval's compress factor is different than 1
 	ec = &EventCost{
 		Charges: []*ChargingInterval{
-			&ChargingInterval{
+			{
 				RatingID: "cc68da4",
 				Increments: []*ChargingIncrement{
-					&ChargingIncrement{
+					{
 						Usage:          time.Duration(102400),
 						AccountingID:   "0d87a64",
 						CompressFactor: 103,
@@ -1934,10 +1934,10 @@ func TestECAppendCIlFromEC(t *testing.T) {
 	}
 	oEC = &EventCost{
 		Charges: []*ChargingInterval{
-			&ChargingInterval{
+			{
 				RatingID: "6a83227",
 				Increments: []*ChargingIncrement{
-					&ChargingIncrement{
+					{
 						Usage:          time.Duration(102400),
 						AccountingID:   "9288f93",
 						CompressFactor: 84,
@@ -1979,10 +1979,10 @@ func TestECAppendCIlFromEC(t *testing.T) {
 	ec.appendCIlFromEC(oEC, 0)
 	eEC = &EventCost{
 		Charges: []*ChargingInterval{
-			&ChargingInterval{
+			{
 				RatingID: "cc68da4",
 				Increments: []*ChargingIncrement{
-					&ChargingIncrement{
+					{
 						Usage:          time.Duration(102400),
 						AccountingID:   "0d87a64",
 						CompressFactor: 103,
@@ -1990,10 +1990,10 @@ func TestECAppendCIlFromEC(t *testing.T) {
 				},
 				CompressFactor: 2,
 			},
-			&ChargingInterval{
+			{
 				RatingID: "cc68da4",
 				Increments: []*ChargingIncrement{
-					&ChargingIncrement{
+					{
 						Usage:          time.Duration(102400),
 						AccountingID:   "0d87a64",
 						CompressFactor: 84,
@@ -2039,10 +2039,10 @@ func TestECAppendCIlFromEC(t *testing.T) {
 	// Third case, split oEC
 	ec = &EventCost{
 		Charges: []*ChargingInterval{
-			&ChargingInterval{
+			{
 				RatingID: "cc68da4",
 				Increments: []*ChargingIncrement{
-					&ChargingIncrement{
+					{
 						Usage:          time.Duration(100),
 						AccountingID:   "0d87a64",
 						CompressFactor: 1,
@@ -2050,10 +2050,10 @@ func TestECAppendCIlFromEC(t *testing.T) {
 				},
 				CompressFactor: 1,
 			},
-			&ChargingInterval{
+			{
 				RatingID: "cc68da4",
 				Increments: []*ChargingIncrement{
-					&ChargingIncrement{
+					{
 						Usage:          time.Duration(102400),
 						AccountingID:   "0d87a64",
 						CompressFactor: 103,
@@ -2094,15 +2094,15 @@ func TestECAppendCIlFromEC(t *testing.T) {
 	}
 	oEC = &EventCost{
 		Charges: []*ChargingInterval{
-			&ChargingInterval{
+			{
 				RatingID: "6a83227",
 				Increments: []*ChargingIncrement{
-					&ChargingIncrement{
+					{
 						Usage:          time.Duration(102400),
 						AccountingID:   "9288f93",
 						CompressFactor: 42,
 					},
-					&ChargingIncrement{
+					{
 						Usage:          time.Duration(10240),
 						AccountingID:   "9288f93",
 						CompressFactor: 20,
@@ -2144,10 +2144,10 @@ func TestECAppendCIlFromEC(t *testing.T) {
 	ec.appendCIlFromEC(oEC, 0)
 	eEC = &EventCost{
 		Charges: []*ChargingInterval{
-			&ChargingInterval{
+			{
 				RatingID: "cc68da4",
 				Increments: []*ChargingIncrement{
-					&ChargingIncrement{
+					{
 						Usage:          time.Duration(100),
 						AccountingID:   "0d87a64",
 						CompressFactor: 1,
@@ -2155,10 +2155,10 @@ func TestECAppendCIlFromEC(t *testing.T) {
 				},
 				CompressFactor: 1,
 			},
-			&ChargingInterval{
+			{
 				RatingID: "cc68da4",
 				Increments: []*ChargingIncrement{
-					&ChargingIncrement{
+					{
 						Usage:          time.Duration(102400),
 						AccountingID:   "0d87a64",
 						CompressFactor: 145,
@@ -2166,10 +2166,10 @@ func TestECAppendCIlFromEC(t *testing.T) {
 				},
 				CompressFactor: 1,
 			},
-			&ChargingInterval{
+			{
 				RatingID: "cc68da4",
 				Increments: []*ChargingIncrement{
-					&ChargingIncrement{
+					{
 						Usage:          time.Duration(10240),
 						AccountingID:   "0d87a64",
 						CompressFactor: 20,
@@ -2177,15 +2177,15 @@ func TestECAppendCIlFromEC(t *testing.T) {
 				},
 				CompressFactor: 1,
 			},
-			&ChargingInterval{
+			{
 				RatingID: "cc68da4",
 				Increments: []*ChargingIncrement{
-					&ChargingIncrement{
+					{
 						Usage:          time.Duration(102400),
 						AccountingID:   "0d87a64",
 						CompressFactor: 42,
 					},
-					&ChargingIncrement{
+					{
 						Usage:          time.Duration(10240),
 						AccountingID:   "0d87a64",
 						CompressFactor: 20,
@@ -2231,10 +2231,10 @@ func TestECAppendCIlFromEC(t *testing.T) {
 	// Fourth case, increase ChargingInterval.CompressFactor
 	ec = &EventCost{
 		Charges: []*ChargingInterval{
-			&ChargingInterval{
+			{
 				RatingID: "cc68da4",
 				Increments: []*ChargingIncrement{
-					&ChargingIncrement{
+					{
 						Usage:          time.Duration(102400),
 						AccountingID:   "0d87a64",
 						CompressFactor: 103,
@@ -2275,10 +2275,10 @@ func TestECAppendCIlFromEC(t *testing.T) {
 	}
 	oEC = &EventCost{
 		Charges: []*ChargingInterval{
-			&ChargingInterval{
+			{
 				RatingID: "6a83227",
 				Increments: []*ChargingIncrement{
-					&ChargingIncrement{
+					{
 						Usage:          time.Duration(102400),
 						AccountingID:   "9288f93",
 						CompressFactor: 103,
@@ -2320,10 +2320,10 @@ func TestECAppendCIlFromEC(t *testing.T) {
 	ec.appendCIlFromEC(oEC, 0)
 	eEC = &EventCost{
 		Charges: []*ChargingInterval{
-			&ChargingInterval{
+			{
 				RatingID: "cc68da4",
 				Increments: []*ChargingIncrement{
-					&ChargingIncrement{
+					{
 						Usage:          time.Duration(102400),
 						AccountingID:   "0d87a64",
 						CompressFactor: 103,
@@ -2431,28 +2431,28 @@ func TestECSyncKeys(t *testing.T) {
 		RunID:     utils.MetaDefault,
 		StartTime: time.Date(2017, 1, 9, 16, 18, 21, 0, time.UTC),
 		Charges: []*ChargingInterval{
-			&ChargingInterval{
+			{
 				RatingID: "21a5ab9",
 				Increments: []*ChargingIncrement{
-					&ChargingIncrement{
+					{
 						Usage:          time.Duration(0),
 						Cost:           0.1,
 						AccountingID:   "9bdad10",
 						CompressFactor: 1,
 					},
-					&ChargingIncrement{
+					{
 						Usage:          time.Duration(1 * time.Second),
 						Cost:           0,
 						AccountingID:   "3455b83",
 						CompressFactor: 10,
 					},
-					&ChargingIncrement{
+					{
 						Usage:          time.Duration(10 * time.Second),
 						Cost:           0.01,
 						AccountingID:   "2012888",
 						CompressFactor: 2,
 					},
-					&ChargingIncrement{
+					{
 						Usage:          time.Duration(1 * time.Second),
 						Cost:           0.005,
 						AccountingID:   "44d6c02",
@@ -2461,10 +2461,10 @@ func TestECSyncKeys(t *testing.T) {
 				},
 				CompressFactor: 1,
 			},
-			&ChargingInterval{
+			{
 				RatingID: "21a5ab9",
 				Increments: []*ChargingIncrement{
-					&ChargingIncrement{
+					{
 						Usage:          time.Duration(1 * time.Second),
 						Cost:           0.01,
 						AccountingID:   "2012888",
@@ -2473,22 +2473,22 @@ func TestECSyncKeys(t *testing.T) {
 				},
 				CompressFactor: 4,
 			},
-			&ChargingInterval{
+			{
 				RatingID: "21a5ab9",
 				Increments: []*ChargingIncrement{
-					&ChargingIncrement{
+					{
 						Usage:          time.Duration(1 * time.Second),
 						Cost:           0,
 						AccountingID:   "3455b83",
 						CompressFactor: 10,
 					},
-					&ChargingIncrement{
+					{
 						Usage:          time.Duration(10 * time.Second),
 						Cost:           0.01,
 						AccountingID:   "2012888",
 						CompressFactor: 2,
 					},
-					&ChargingIncrement{
+					{
 						Usage:          time.Duration(1 * time.Second),
 						Cost:           0.005,
 						AccountingID:   "44d6c02",
@@ -2502,17 +2502,17 @@ func TestECSyncKeys(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "dan",
 			BalanceSummaries: []*BalanceSummary{
-				&BalanceSummary{
+				{
 					UUID:     "8c54a9e9-d610-4c82-bcb5-a315b9a65010",
 					Type:     utils.MONETARY,
 					Value:    50,
 					Disabled: false},
-				&BalanceSummary{
+				{
 					UUID:     "7a54a9e9-d610-4c82-bcb5-a315b9a65010",
 					Type:     utils.MONETARY,
 					Value:    25,
 					Disabled: false},
-				&BalanceSummary{
+				{
 					UUID:     "4b8b53d7-c1a1-4159-b845-4623a00a0165",
 					Type:     "*voice",
 					Value:    200,

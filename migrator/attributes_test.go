@@ -59,7 +59,7 @@ func TestV1AttributeProfileAsAttributeProfile(t *testing.T) {
 			ExpiryTime:     cloneExpTime,
 		},
 		Attributes: []*engine.Attribute{
-			&engine.Attribute{
+			{
 				FilterIDs: []string{"*string:FL1:In1"},
 				Path:      utils.MetaReq + utils.NestingSep + "FL1",
 				Type:      utils.MetaVariable,
@@ -87,7 +87,7 @@ func TestV2AttributeProfileAsAttributeProfile(t *testing.T) {
 			ExpiryTime:     cloneExpTime,
 		},
 		Attributes: []*v2Attribute{
-			&v2Attribute{
+			{
 				FieldName:  "FL1",
 				Initial:    "In1",
 				Substitute: config.NewRSRParsersMustCompile("Al1", true, utils.INFIELD_SEP),
@@ -106,7 +106,7 @@ func TestV2AttributeProfileAsAttributeProfile(t *testing.T) {
 			ExpiryTime:     cloneExpTime,
 		},
 		Attributes: []*engine.Attribute{
-			&engine.Attribute{
+			{
 				FilterIDs: []string{"*string:FL1:In1"},
 				Path:      utils.MetaReq + utils.NestingSep + "FL1",
 				Type:      utils.MetaVariable,
@@ -134,7 +134,7 @@ func TestV2AttributeProfileAsAttributeProfile2(t *testing.T) {
 			ExpiryTime:     cloneExpTime,
 		},
 		Attributes: []*v2Attribute{
-			&v2Attribute{
+			{
 				FieldName:  "FL1",
 				Initial:    nil,
 				Substitute: config.NewRSRParsersMustCompile("Al1", true, utils.INFIELD_SEP),
@@ -153,7 +153,7 @@ func TestV2AttributeProfileAsAttributeProfile2(t *testing.T) {
 			ExpiryTime:     cloneExpTime,
 		},
 		Attributes: []*engine.Attribute{
-			&engine.Attribute{
+			{
 				FilterIDs: []string{},
 				Path:      utils.MetaReq + utils.NestingSep + "FL1",
 				Type:      utils.MetaVariable,
@@ -181,7 +181,7 @@ func TestV3AttributeProfileAsAttributeProfile(t *testing.T) {
 			ExpiryTime:     cloneExpTime,
 		},
 		Attributes: []*v3Attribute{
-			&v3Attribute{
+			{
 				FilterIDs:  []string{"*string:FL1:In1"},
 				FieldName:  "FL1",
 				Substitute: config.NewRSRParsersMustCompile("Al1", true, utils.INFIELD_SEP),
@@ -199,7 +199,7 @@ func TestV3AttributeProfileAsAttributeProfile(t *testing.T) {
 			ExpiryTime:     cloneExpTime,
 		},
 		Attributes: []*engine.Attribute{
-			&engine.Attribute{
+			{
 				FilterIDs: []string{"*string:FL1:In1"},
 				Path:      utils.MetaReq + utils.NestingSep + "FL1",
 				Type:      utils.MetaVariable,
@@ -227,7 +227,7 @@ func TestV4AttributeProfileAsAttributeProfile(t *testing.T) {
 			ExpiryTime:     cloneExpTime,
 		},
 		Attributes: []*v4Attribute{
-			&v4Attribute{
+			{
 				FieldName: "FL1",
 				Type:      utils.MetaVariable,
 				Value:     config.NewRSRParsersMustCompile("~Category:s/(.*)/${1}_UK_Mobile_Vodafone_GBRVF/", true, utils.INFIELD_SEP),
@@ -245,7 +245,7 @@ func TestV4AttributeProfileAsAttributeProfile(t *testing.T) {
 			ExpiryTime:     cloneExpTime,
 		},
 		Attributes: []*engine.Attribute{
-			&engine.Attribute{
+			{
 				Path:  utils.MetaReq + utils.NestingSep + "FL1",
 				Type:  utils.MetaVariable,
 				Value: config.NewRSRParsersMustCompile("~*req.Category:s/(.*)/${1}_UK_Mobile_Vodafone_GBRVF/", true, utils.INFIELD_SEP),

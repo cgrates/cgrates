@@ -30,7 +30,7 @@ import (
 var dcGetMapKeys = func(m utils.StringMap) (keys []string) {
 	keys = make([]string, len(m))
 	i := 0
-	for k, _ := range m {
+	for k := range m {
 		keys[i] = k
 		i += 1
 	}

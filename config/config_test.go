@@ -1679,7 +1679,7 @@ func TestCgrCdfEventReader(t *testing.T) {
 		Enabled:       false,
 		SessionSConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)},
 		Readers: []*EventReaderCfg{
-			&EventReaderCfg{
+			{
 				ID:             utils.MetaDefault,
 				Type:           utils.META_NONE,
 				FieldSep:       ",",
@@ -1786,7 +1786,7 @@ func TestRpcConnsDefaults(t *testing.T) {
 		Strategy: rpcclient.PoolFirst,
 		PoolSize: 0,
 		Conns: []*RemoteHost{
-			&RemoteHost{
+			{
 				Address: utils.MetaInternal,
 			},
 		},
@@ -1795,7 +1795,7 @@ func TestRpcConnsDefaults(t *testing.T) {
 		Strategy: rpcclient.PoolFirst,
 		PoolSize: 0,
 		Conns: []*RemoteHost{
-			&RemoteHost{
+			{
 				Address:   "127.0.0.1:2012",
 				Transport: utils.MetaJSON,
 			},
@@ -1861,7 +1861,7 @@ func TestCheckConfigSanity(t *testing.T) {
 	}
 	cfg.statsCfg.Enabled = true
 	cfg.cdrsCfg.OnlineCDRExports = []string{"stringy"}
-	cfg.CdreProfiles = map[string]*CdreCfg{"stringx": &CdreCfg{}}
+	cfg.CdreProfiles = map[string]*CdreCfg{"stringx": {}}
 	expected = "<CDRs> cannot find CDR export template with ID: <stringy>"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)

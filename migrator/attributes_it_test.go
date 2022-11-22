@@ -434,7 +434,7 @@ func testAttrITMigrateV2(t *testing.T) {
 			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 		Attributes: []*v2Attribute{
-			&v2Attribute{
+			{
 				FieldName:  "FL1",
 				Initial:    "In1",
 				Substitute: config.NewRSRParsersMustCompile("Al1", true, utils.INFIELD_SEP),
@@ -517,7 +517,7 @@ func testAttrITMigrateV3(t *testing.T) {
 			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 		Attributes: []*v3Attribute{
-			&v3Attribute{
+			{
 				FilterIDs:  []string{"*string:FL1:In1"},
 				FieldName:  "FL1",
 				Substitute: config.NewRSRParsersMustCompile("Al1", true, utils.INFIELD_SEP),
@@ -599,7 +599,7 @@ func testAttrITMigrateV4(t *testing.T) {
 			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 		Attributes: []*v4Attribute{
-			&v4Attribute{
+			{
 				FilterIDs: []string{"*string:~*req.FL1:In1"},
 				FieldName: "FL1",
 				Value:     config.NewRSRParsersMustCompile("~Category:s/(.*)/${1}_UK_Mobile_Vodafone_GBRVF/", true, utils.INFIELD_SEP),

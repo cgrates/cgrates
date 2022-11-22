@@ -130,12 +130,12 @@ func testTPSharedGroupsSetSharedGroups(t *testing.T) {
 		TPid: "TPS1",
 		ID:   "Group1",
 		SharedGroups: []*utils.TPSharedGroup{
-			&utils.TPSharedGroup{
+			{
 				Account:       "AccOne",
 				Strategy:      "StrategyOne",
 				RatingSubject: "SubOne",
 			},
-			&utils.TPSharedGroup{
+			{
 				Account:       "AccTow",
 				Strategy:      "StrategyTwo",
 				RatingSubject: "SubTwo",
@@ -177,17 +177,17 @@ func testTPSharedGroupsGetTPSharedGroupIds(t *testing.T) {
 func testTPSharedGroupsUpdateTPShareGroups(t *testing.T) {
 	var result string
 	tpSharedGroups.SharedGroups = []*utils.TPSharedGroup{
-		&utils.TPSharedGroup{
+		{
 			Account:       "AccOne",
 			Strategy:      "StrategyOne",
 			RatingSubject: "SubOne",
 		},
-		&utils.TPSharedGroup{
+		{
 			Account:       "AccTow",
 			Strategy:      "StrategyTwo",
 			RatingSubject: "SubTwo",
 		},
-		&utils.TPSharedGroup{
+		{
 			Account:       "AccPlus",
 			Strategy:      "StrategyPlus",
 			RatingSubject: "SubPlus",
