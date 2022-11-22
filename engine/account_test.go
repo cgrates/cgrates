@@ -176,8 +176,8 @@ func TestAccountStorageStore(t *testing.T) {
 	if err != nil || rifsBalance.ID != result.ID ||
 		len(rifsBalance.BalanceMap[utils.VOICE]) < 2 ||
 		len(result.BalanceMap[utils.VOICE]) < 2 ||
-		!(rifsBalance.BalanceMap[utils.VOICE][0].Equal(result.BalanceMap[utils.VOICE][0])) ||
-		!(rifsBalance.BalanceMap[utils.VOICE][1].Equal(result.BalanceMap[utils.VOICE][1])) ||
+		!rifsBalance.BalanceMap[utils.VOICE][0].Equal(result.BalanceMap[utils.VOICE][0]) ||
+		!rifsBalance.BalanceMap[utils.VOICE][1].Equal(result.BalanceMap[utils.VOICE][1]) ||
 		!rifsBalance.BalanceMap[utils.MONETARY].Equal(result.BalanceMap[utils.MONETARY]) {
 		t.Errorf("Expected %s was %s", utils.ToIJSON(rifsBalance), utils.ToIJSON(result))
 	}

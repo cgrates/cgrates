@@ -207,7 +207,7 @@ func TestSRunDebitReserve3(t *testing.T) {
 		LastUsage:     duration,
 		TotalUsage:    duration,
 	}
-	if rDur := sr.debitReserve(duration, &lastUsage); rDur != (duration - lastUsage) {
+	if rDur := sr.debitReserve(duration, &lastUsage); rDur != duration-lastUsage {
 		t.Errorf("Expecting: %+v, received: %+v", lastUsage, rDur)
 	}
 	if sr.ExtraDuration != time.Duration(0) {

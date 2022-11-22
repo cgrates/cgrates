@@ -198,7 +198,7 @@ func testFlatstoreITHandleCdr1File(t *testing.T) {
 	ePartContent := "INVITE|2daec40c|548625ac|dd0c4c617a9919d29a6175cdff223a9p@0:0:0:0:0:0:0:0|200|OK|1436454408|*prepaid|1001|1002||3401:2069362475\n"
 	if partContent, err := os.ReadFile(path.Join("/tmp/flatstoreErs/out", "acc_3.log.tmp")); err != nil {
 		t.Error(err)
-	} else if (ePartContent) != (string(partContent)) {
+	} else if ePartContent != string(partContent) {
 		t.Errorf("Expecting:\n%s\nReceived:\n%s", ePartContent, string(partContent))
 	}
 }

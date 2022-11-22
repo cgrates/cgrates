@@ -1168,46 +1168,46 @@ func (iDB *InternalDB) GetCDRs(filter *utils.CDRsFilter, remove bool) (cdrs []*C
 		cdr := x.(*CDR)
 
 		// default indexed filters
-		if (len(filter.CGRIDs) > 0 && !utils.SliceHasMember(filter.CGRIDs, cdr.CGRID)) ||
-			(len(filter.RunIDs) > 0 && !utils.SliceHasMember(filter.RunIDs, cdr.RunID)) ||
-			(len(filter.OriginIDs) > 0 && !utils.SliceHasMember(filter.OriginIDs, cdr.OriginID)) ||
-			(len(filter.OriginHosts) > 0 && !utils.SliceHasMember(filter.OriginHosts, cdr.OriginHost)) ||
-			(len(filter.Sources) > 0 && !utils.SliceHasMember(filter.Sources, cdr.Source)) ||
-			(len(filter.ToRs) > 0 && !utils.SliceHasMember(filter.ToRs, cdr.ToR)) ||
-			(len(filter.RequestTypes) > 0 && !utils.SliceHasMember(filter.RequestTypes, cdr.RequestType)) ||
-			(len(filter.Tenants) > 0 && !utils.SliceHasMember(filter.Tenants, cdr.Tenant)) ||
-			(len(filter.Categories) > 0 && !utils.SliceHasMember(filter.Categories, cdr.Category)) ||
-			(len(filter.Accounts) > 0 && !utils.SliceHasMember(filter.Accounts, cdr.Account)) ||
-			(len(filter.Subjects) > 0 && !utils.SliceHasMember(filter.Subjects, cdr.Subject)) ||
+		if len(filter.CGRIDs) > 0 && !utils.SliceHasMember(filter.CGRIDs, cdr.CGRID) ||
+			len(filter.RunIDs) > 0 && !utils.SliceHasMember(filter.RunIDs, cdr.RunID) ||
+			len(filter.OriginIDs) > 0 && !utils.SliceHasMember(filter.OriginIDs, cdr.OriginID) ||
+			len(filter.OriginHosts) > 0 && !utils.SliceHasMember(filter.OriginHosts, cdr.OriginHost) ||
+			len(filter.Sources) > 0 && !utils.SliceHasMember(filter.Sources, cdr.Source) ||
+			len(filter.ToRs) > 0 && !utils.SliceHasMember(filter.ToRs, cdr.ToR) ||
+			len(filter.RequestTypes) > 0 && !utils.SliceHasMember(filter.RequestTypes, cdr.RequestType) ||
+			len(filter.Tenants) > 0 && !utils.SliceHasMember(filter.Tenants, cdr.Tenant) ||
+			len(filter.Categories) > 0 && !utils.SliceHasMember(filter.Categories, cdr.Category) ||
+			len(filter.Accounts) > 0 && !utils.SliceHasMember(filter.Accounts, cdr.Account) ||
+			len(filter.Subjects) > 0 && !utils.SliceHasMember(filter.Subjects, cdr.Subject) ||
 
-			(len(filter.NotCGRIDs) > 0 && utils.SliceHasMember(filter.NotCGRIDs, cdr.CGRID)) ||
-			(len(filter.NotRunIDs) > 0 && utils.SliceHasMember(filter.NotRunIDs, cdr.RunID)) ||
-			(len(filter.NotOriginIDs) > 0 && utils.SliceHasMember(filter.NotOriginIDs, cdr.OriginID)) ||
-			(len(filter.NotOriginHosts) > 0 && utils.SliceHasMember(filter.NotOriginHosts, cdr.OriginHost)) ||
-			(len(filter.NotSources) > 0 && utils.SliceHasMember(filter.NotSources, cdr.Source)) ||
-			(len(filter.NotToRs) > 0 && utils.SliceHasMember(filter.NotToRs, cdr.ToR)) ||
-			(len(filter.NotRequestTypes) > 0 && utils.SliceHasMember(filter.NotRequestTypes, cdr.RequestType)) ||
-			(len(filter.NotTenants) > 0 && utils.SliceHasMember(filter.NotTenants, cdr.Tenant)) ||
-			(len(filter.NotCategories) > 0 && utils.SliceHasMember(filter.NotCategories, cdr.Category)) ||
-			(len(filter.NotAccounts) > 0 && utils.SliceHasMember(filter.NotAccounts, cdr.Account)) ||
-			(len(filter.NotSubjects) > 0 && utils.SliceHasMember(filter.NotSubjects, cdr.Subject)) ||
+			len(filter.NotCGRIDs) > 0 && utils.SliceHasMember(filter.NotCGRIDs, cdr.CGRID) ||
+			len(filter.NotRunIDs) > 0 && utils.SliceHasMember(filter.NotRunIDs, cdr.RunID) ||
+			len(filter.NotOriginIDs) > 0 && utils.SliceHasMember(filter.NotOriginIDs, cdr.OriginID) ||
+			len(filter.NotOriginHosts) > 0 && utils.SliceHasMember(filter.NotOriginHosts, cdr.OriginHost) ||
+			len(filter.NotSources) > 0 && utils.SliceHasMember(filter.NotSources, cdr.Source) ||
+			len(filter.NotToRs) > 0 && utils.SliceHasMember(filter.NotToRs, cdr.ToR) ||
+			len(filter.NotRequestTypes) > 0 && utils.SliceHasMember(filter.NotRequestTypes, cdr.RequestType) ||
+			len(filter.NotTenants) > 0 && utils.SliceHasMember(filter.NotTenants, cdr.Tenant) ||
+			len(filter.NotCategories) > 0 && utils.SliceHasMember(filter.NotCategories, cdr.Category) ||
+			len(filter.NotAccounts) > 0 && utils.SliceHasMember(filter.NotAccounts, cdr.Account) ||
+			len(filter.NotSubjects) > 0 && utils.SliceHasMember(filter.NotSubjects, cdr.Subject) ||
 
-			(len(filter.Costs) > 0 && !utils.Float64SliceHasMember(filter.Costs, cdr.Cost)) ||
-			(len(filter.NotCosts) > 0 && utils.Float64SliceHasMember(filter.NotCosts, cdr.Cost)) ||
+			len(filter.Costs) > 0 && !utils.Float64SliceHasMember(filter.Costs, cdr.Cost) ||
+			len(filter.NotCosts) > 0 && utils.Float64SliceHasMember(filter.NotCosts, cdr.Cost) ||
 
-			(len(filter.DestinationPrefixes) > 0 && !utils.HasPrefixSlice(filter.DestinationPrefixes, cdr.Destination)) ||
-			(len(filter.NotDestinationPrefixes) > 0 && utils.HasPrefixSlice(filter.NotDestinationPrefixes, cdr.Destination)) ||
+			len(filter.DestinationPrefixes) > 0 && !utils.HasPrefixSlice(filter.DestinationPrefixes, cdr.Destination) ||
+			len(filter.NotDestinationPrefixes) > 0 && utils.HasPrefixSlice(filter.NotDestinationPrefixes, cdr.Destination) ||
 
-			(filter.OrderIDStart != nil && cdr.OrderID < *filter.OrderIDStart) ||
-			(filter.OrderIDEnd != nil && cdr.OrderID >= *filter.OrderIDEnd) ||
+			filter.OrderIDStart != nil && cdr.OrderID < *filter.OrderIDStart ||
+			filter.OrderIDEnd != nil && cdr.OrderID >= *filter.OrderIDEnd ||
 
-			(filter.AnswerTimeStart != nil && !filter.AnswerTimeStart.IsZero() && cdr.AnswerTime.Before(*filter.AnswerTimeStart)) ||
-			(filter.AnswerTimeEnd != nil && !filter.AnswerTimeEnd.IsZero() && cdr.AnswerTime.After(*filter.AnswerTimeEnd)) ||
-			(filter.SetupTimeStart != nil && !filter.SetupTimeStart.IsZero() && cdr.SetupTime.Before(*filter.SetupTimeStart)) ||
-			(filter.SetupTimeEnd != nil && !filter.SetupTimeEnd.IsZero() && cdr.SetupTime.Before(*filter.SetupTimeEnd)) ||
+			filter.AnswerTimeStart != nil && !filter.AnswerTimeStart.IsZero() && cdr.AnswerTime.Before(*filter.AnswerTimeStart) ||
+			filter.AnswerTimeEnd != nil && !filter.AnswerTimeEnd.IsZero() && cdr.AnswerTime.After(*filter.AnswerTimeEnd) ||
+			filter.SetupTimeStart != nil && !filter.SetupTimeStart.IsZero() && cdr.SetupTime.Before(*filter.SetupTimeStart) ||
+			filter.SetupTimeEnd != nil && !filter.SetupTimeEnd.IsZero() && cdr.SetupTime.Before(*filter.SetupTimeEnd) ||
 
-			(len(filter.MinUsage) != 0 && cdr.Usage < minUsage) ||
-			(len(filter.MaxUsage) != 0 && cdr.Usage > maxUsage) {
+			len(filter.MinUsage) != 0 && cdr.Usage < minUsage ||
+			len(filter.MaxUsage) != 0 && cdr.Usage > maxUsage {
 			continue
 		}
 

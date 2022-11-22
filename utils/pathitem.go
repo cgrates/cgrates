@@ -28,7 +28,7 @@ func stripIdxFromLastPathElm(path string) string {
 	lastDotIdx := strings.LastIndexByte(path, '.')
 	lastIdxStart := strings.LastIndexByte(path, '[')
 	if lastIdxStart == -1 ||
-		(lastDotIdx != -1 && lastDotIdx > lastIdxStart) {
+		lastDotIdx != -1 && lastDotIdx > lastIdxStart {
 		return path
 	}
 	return path[:lastIdxStart]
