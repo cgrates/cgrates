@@ -2015,7 +2015,7 @@ func (dm *DataManager) SetAttributeProfile(ap *AttributeProfile, withIndex bool)
 		if oldAP != nil {
 			for _, ctx := range oldAP.Contexts {
 				var needsRemove bool
-				if !utils.IsSliceMember(ap.Contexts, ctx) {
+				if !utils.IsSliceMember(ap.Contexts, ctx) || (ctx == utils.META_ANY && len(ap.FilterIDs) != 0) {
 					needsRemove = true
 				} else {
 					for _, fltrID := range oldAP.FilterIDs {

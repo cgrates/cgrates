@@ -45,23 +45,23 @@ var (
 			ID:     "FLTR_TEST1",
 			Rules: []*engine.FilterRule{
 				{
-					Element: utils.MetaString,
-					Type:    "~Account",
+					Type:    utils.MetaString,
+					Element: "~*req.Account",
 					Values:  []string{"1001", "1002"},
 				},
 				{
-					Element: utils.MetaExists,
-					Type:    "~Destiantion",
+					Type:    utils.MetaExists,
+					Element: "~*req.Destiantion",
 					Values:  []string{},
 				},
 				{
-					Element: utils.MetaLessThan,
-					Type:    "~ProcessedField",
+					Type:    utils.MetaLessThan,
+					Element: "~*req.ProcessedField",
 					Values:  []string{"5"},
 				},
 				{
-					Element: utils.MetaSuffix,
-					Type:    "~Contancts",
+					Type:    utils.MetaSuffix,
+					Element: "~*req.Contacts",
 					Values:  []string{"455643", "99984", "123"},
 				},
 			},
@@ -73,13 +73,13 @@ var (
 			ID:     "FLTR_TEST2",
 			Rules: []*engine.FilterRule{
 				{
-					Element: utils.MetaEmpty,
-					Type:    "~Subject",
+					Type:    utils.MetaEmpty,
+					Element: "~*req.Subject",
 					Values:  []string{},
 				},
 				{
-					Element: utils.MetaPrefix,
-					Type:    "~Missed",
+					Type:    utils.MetaPrefix,
+					Element: "~*req.Missed",
 					Values:  []string{"1"},
 				},
 			},
@@ -95,7 +95,13 @@ var (
 
 		testFilterIndexesCasesSetFilters,
 		testFilterIndexesCasesSetAttributesWithFilters,
-		testFilterIndexesCasesGetIndexes,
+		testFilterIndexesCasesGetIndexesAnyContext,
+		testFilterIndexesCasesGetIndexesSessionsContext,
+
+		testFilterIndexesCasesSetDifferentFilters,
+		testFilterIndexesCasesOverwriteAttributes,
+		testFilterIndexesCasesGetIndexesAnyContextChanged,
+		testFilterIndexesCasesGetIndexesSessionsContextChanged,
 
 		testFilterIndexesCasesStopEngine,
 	}
@@ -175,7 +181,7 @@ func testFilterIndexesCasesSetAttributesWithFilters(t *testing.T) {
 			Tenant:    "cgrates.org",
 			ID:        "ATTR_NO_FLTR",
 			FilterIDs: []string{},
-			Contexts:  []string{utils.MetaSessionS},
+			Contexts:  []string{utils.MetaSessionS, utils.META_ANY},
 			Attributes: []*engine.Attribute{
 				{
 					Path:  utils.MetaReq + utils.NestingSep + utils.CGRID,
@@ -210,7 +216,9 @@ func testFilterIndexesCasesSetAttributesWithFilters(t *testing.T) {
 			ID:     "ATTR_NO_FLTR2",
 			FilterIDs: []string{
 				"FLTR_TEST2",
-				"*string:~*req.Category:call"},
+				"*lt:~*req.Usage:10s",
+				"*string:~*req.Category:call",
+			},
 			Contexts: []string{utils.META_ANY},
 			Attributes: []*engine.Attribute{
 				{
@@ -240,39 +248,181 @@ func testFilterIndexesCasesSetAttributesWithFilters(t *testing.T) {
 	}
 }
 
-func testFilterIndexesCasesGetIndexes(t *testing.T) {
+func testFilterIndexesCasesGetIndexesAnyContext(t *testing.T) {
 	arg := &v1.AttrGetFilterIndexes{
 		Tenant:   "cgrates.org",
 		ItemType: utils.MetaAttributes,
 		Context:  utils.META_ANY,
 	}
 	expectedIndexes := []string{
-		"*string:~*req.Account:3001:ResProfile3",
-		"*string:~*req.Destination:1001:ResProfile1",
-		"*string:~*req.Destination:1001:ResProfile2",
-		"*string:~*req.Destination:1001:ResProfile3",
-		"*string:~*req.Account:1002:ResProfile1",
-		"*string:~*req.Account:1002:ResProfile2",
-		"*string:~*req.Account:1002:ResProfile3",
-		"*string:~*req.Account:1003:ResProfile3",
-		"*prefix:~*req.Destination:20:ResProfile1",
-		"*prefix:~*req.Destination:20:ResProfile2",
-		"*string:~*req.Account:1001:ResProfile1",
-		"*string:~*req.Account:1001:ResProfile2",
-		"*string:~*req.Account:2002:ResProfile2",
-		"*prefix:~*req.Destination:1001:ResProfile3",
-		"*prefix:~*req.Destination:200:ResProfile3",
-		"*string:~*req.Destination:2001:ResProfile1",
-		"*string:~*req.Destination:2001:ResProfile2",
-		"*string:~*req.Destination:2001:ResProfile3",
-		"*prefix:~*req.Account:10:ResProfile1",
-		"*prefix:~*req.Account:10:ResProfile2",
-		"*prefix:~*req.Account:10:ResProfile3"}
+		"*none:*any:*any:ATTR_NO_FLTR",
+		"*prefix:~*req.Missed:1:ATTR_NO_FLTR2",
+		"*string:~*req.Account:1001:ATTR_NO_FLTR1",
+		"*string:~*req.Account:1002:ATTR_NO_FLTR1",
+		"*string:~*req.Category:call:ATTR_NO_FLTR2"}
 	sort.Strings(expectedIndexes)
 	var reply []string
 	if err := fIdxCasesRPC.Call(utils.APIerSv1GetFilterIndexes, arg, &reply); err != nil {
 		t.Error(err)
 	} else if sort.Strings(reply); !reflect.DeepEqual(expectedIndexes, reply) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expectedIndexes), utils.ToJSON(reply))
+	}
+}
+
+func testFilterIndexesCasesGetIndexesSessionsContext(t *testing.T) {
+	arg := &v1.AttrGetFilterIndexes{
+		Tenant:   "cgrates.org",
+		ItemType: utils.MetaAttributes,
+		Context:  utils.MetaSessionS,
+	}
+	expectedIndexes := []string{
+		"*none:*any:*any:ATTR_NO_FLTR"}
+	var reply []string
+	if err := fIdxCasesRPC.Call(utils.APIerSv1GetFilterIndexes, arg, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expectedIndexes, reply) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expectedIndexes), utils.ToJSON(reply))
+	}
+}
+
+func testFilterIndexesCasesSetDifferentFilters(t *testing.T) {
+	filter1 = &v1.FilterWithCache{
+		Filter: &engine.Filter{
+			Tenant: "cgrates.org",
+			ID:     "FLTR_TEST1",
+			Rules: []*engine.FilterRule{
+				{
+					Type:    utils.MetaPrefix,
+					Element: "~*req.Cost",
+					Values:  []string{"10", "15", "210"},
+				},
+				{
+					Type:    utils.MetaExists,
+					Element: "~*req.Usage",
+					Values:  []string{},
+				},
+				{
+					Type:    utils.MetaSuffix,
+					Element: "~*req.AnswerTime",
+					Values:  []string{"202"},
+				},
+			},
+		},
+	}
+	var result string
+	if err := fIdxCasesRPC.Call(utils.APIerSv1SetFilter, filter1, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+}
+
+func testFilterIndexesCasesOverwriteAttributes(t *testing.T) {
+	eAttrPrf1 := &v1.AttributeWithCache{
+		AttributeProfile: &engine.AttributeProfile{
+			Tenant: "cgrates.org",
+			ID:     "ATTR_NO_FLTR",
+			FilterIDs: []string{
+				"FLTR_TEST1",
+				"*destinations:~*req.Destination:+443",
+			},
+			Contexts: []string{},
+			Attributes: []*engine.Attribute{
+				{
+					Path:  utils.MetaReq + utils.NestingSep + utils.Destination,
+					Value: config.NewRSRParsersMustCompile("test_generated_id", true, utils.INFIELD_SEP),
+				},
+			},
+			Weight: 20.0,
+		},
+	}
+	eAttrPrf1.Compile()
+	eAttrPrf2 := &v1.AttributeWithCache{
+		AttributeProfile: &engine.AttributeProfile{
+			Tenant: "cgrates.org",
+			ID:     "ATTR_NO_FLTR1",
+			FilterIDs: []string{
+				"*none"},
+			Contexts: []string{utils.MetaSessionS, utils.META_ANY},
+			Attributes: []*engine.Attribute{
+				{
+					Path:  utils.MetaReq + utils.NestingSep + utils.Account,
+					Value: config.NewRSRParsersMustCompile("SuccesfullID", true, utils.INFIELD_SEP),
+				},
+			},
+			Weight: 30.0,
+		},
+	}
+	eAttrPrf2.Compile()
+	eAttrPrf3 := &v1.AttributeWithCache{
+		AttributeProfile: &engine.AttributeProfile{
+			Tenant: "cgrates.org",
+			ID:     "ATTR_NO_FLTR2",
+			FilterIDs: []string{
+				"*rsr::~*req.Tenant(~^cgr.*\\.org$)",
+			},
+			Contexts: []string{utils.META_ANY},
+			Attributes: []*engine.Attribute{
+				{
+					Path:  utils.MetaReq + utils.NestingSep + utils.Account,
+					Value: config.NewRSRParsersMustCompile("ChangedFIlter", true, utils.INFIELD_SEP),
+				},
+			},
+			Weight: 5.0,
+		},
+	}
+	eAttrPrf3.Compile()
+	var result string
+	if err := fIdxCasesRPC.Call(utils.APIerSv1SetAttributeProfile, eAttrPrf1, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+	if err := fIdxCasesRPC.Call(utils.APIerSv1SetAttributeProfile, eAttrPrf2, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+	if err := fIdxCasesRPC.Call(utils.APIerSv1SetAttributeProfile, eAttrPrf3, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+}
+
+func testFilterIndexesCasesGetIndexesAnyContextChanged(t *testing.T) {
+	arg := &v1.AttrGetFilterIndexes{
+		Tenant:   "cgrates.org",
+		ItemType: utils.MetaAttributes,
+		Context:  utils.META_ANY,
+	}
+	expectedIndexes := []string{
+		"*prefix:~*req.Cost:10:ATTR_NO_FLTR",
+		"*prefix:~*req.Cost:15:ATTR_NO_FLTR",
+		"*prefix:~*req.Cost:210:ATTR_NO_FLTR",
+		"*none:*any:*any:ATTR_NO_FLTR1",
+	}
+	sort.Strings(expectedIndexes)
+	var reply []string
+	if err := fIdxCasesRPC.Call(utils.APIerSv1GetFilterIndexes, arg, &reply); err != nil {
+		t.Error(err)
+	} else if sort.Strings(reply); !reflect.DeepEqual(expectedIndexes, reply) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expectedIndexes), utils.ToJSON(reply))
+	}
+}
+
+func testFilterIndexesCasesGetIndexesSessionsContextChanged(t *testing.T) {
+	arg := &v1.AttrGetFilterIndexes{
+		Tenant:   "cgrates.org",
+		ItemType: utils.MetaAttributes,
+		Context:  utils.MetaSessionS,
+	}
+	expectedIndexes := []string{
+		"*none:*any:*any:ATTR_NO_FLTR1"}
+	var reply []string
+	if err := fIdxCasesRPC.Call(utils.APIerSv1GetFilterIndexes, arg, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expectedIndexes, reply) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expectedIndexes), utils.ToJSON(reply))
 	}
 }
