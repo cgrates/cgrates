@@ -20,7 +20,7 @@ package loaders
 
 import (
 	"encoding/csv"
-	"io/ioutil"
+	"io"
 	"reflect"
 	"sort"
 	"strings"
@@ -90,7 +90,7 @@ func TestLoaderProcessContentSingleFile(t *testing.T) {
 				Value: config.NewRSRParsersMustCompile("~10", true, utils.INFIELD_SEP)},
 		},
 	}
-	rdr := ioutil.NopCloser(strings.NewReader(engine.AttributesCSVContent))
+	rdr := io.NopCloser(strings.NewReader(engine.AttributesCSVContent))
 	csvRdr := csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -176,10 +176,10 @@ func TestLoaderProcessContentMultiFiles(t *testing.T) {
 				Value: config.NewRSRParsersMustCompile("10", true, utils.INFIELD_SEP)},
 		},
 	}
-	rdr1 := ioutil.NopCloser(strings.NewReader(file1CSV))
+	rdr1 := io.NopCloser(strings.NewReader(file1CSV))
 	csvRdr1 := csv.NewReader(rdr1)
 	csvRdr1.Comment = '#'
-	rdr2 := ioutil.NopCloser(strings.NewReader(file2CSV))
+	rdr2 := io.NopCloser(strings.NewReader(file2CSV))
 	csvRdr2 := csv.NewReader(rdr2)
 	csvRdr2.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -274,7 +274,7 @@ func TestLoaderProcessResource(t *testing.T) {
 				Value: config.NewRSRParsersMustCompile("~10", true, utils.INFIELD_SEP)},
 		},
 	}
-	rdr := ioutil.NopCloser(strings.NewReader(engine.ResourcesCSVContent))
+	rdr := io.NopCloser(strings.NewReader(engine.ResourcesCSVContent))
 	csvRdr := csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -372,7 +372,7 @@ func TestLoaderProcessFilters(t *testing.T) {
 				Value: config.NewRSRParsersMustCompile("~5", true, utils.INFIELD_SEP)},
 		},
 	}
-	rdr := ioutil.NopCloser(strings.NewReader(engine.FiltersCSVContent))
+	rdr := io.NopCloser(strings.NewReader(engine.FiltersCSVContent))
 	csvRdr := csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -503,7 +503,7 @@ func TestLoaderProcessThresholds(t *testing.T) {
 				Value: config.NewRSRParsersMustCompile("~10", true, utils.INFIELD_SEP)},
 		},
 	}
-	rdr := ioutil.NopCloser(strings.NewReader(engine.ThresholdsCSVContent))
+	rdr := io.NopCloser(strings.NewReader(engine.ThresholdsCSVContent))
 	csvRdr := csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -610,7 +610,7 @@ func TestLoaderProcessStats(t *testing.T) {
 				Value: config.NewRSRParsersMustCompile("~12", true, utils.INFIELD_SEP)},
 		},
 	}
-	rdr := ioutil.NopCloser(strings.NewReader(engine.StatsCSVContent))
+	rdr := io.NopCloser(strings.NewReader(engine.StatsCSVContent))
 	csvRdr := csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -743,7 +743,7 @@ func TestLoaderProcessSuppliers(t *testing.T) {
 				Value: config.NewRSRParsersMustCompile("~15", true, utils.INFIELD_SEP)},
 		},
 	}
-	rdr := ioutil.NopCloser(strings.NewReader(engine.SuppliersCSVContent))
+	rdr := io.NopCloser(strings.NewReader(engine.SuppliersCSVContent))
 	csvRdr := csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -865,7 +865,7 @@ func TestLoaderProcessChargers(t *testing.T) {
 				Value: config.NewRSRParsersMustCompile("~6", true, utils.INFIELD_SEP)},
 		},
 	}
-	rdr := ioutil.NopCloser(strings.NewReader(engine.ChargersCSVContent))
+	rdr := io.NopCloser(strings.NewReader(engine.ChargersCSVContent))
 	csvRdr := csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -993,7 +993,7 @@ func TestLoaderProcessDispatches(t *testing.T) {
 			},
 		},
 	}
-	rdr := ioutil.NopCloser(strings.NewReader(engine.DispatcherCSVContent))
+	rdr := io.NopCloser(strings.NewReader(engine.DispatcherCSVContent))
 	csvRdr := csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -1097,7 +1097,7 @@ func TestLoaderProcessDispatcheHosts(t *testing.T) {
 			},
 		},
 	}
-	rdr := ioutil.NopCloser(strings.NewReader(engine.DispatcherHostCSVContent))
+	rdr := io.NopCloser(strings.NewReader(engine.DispatcherHostCSVContent))
 	csvRdr := csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -1163,7 +1163,7 @@ func TestLoaderRemoveContentSingleFile(t *testing.T) {
 				Mandatory: true},
 		},
 	}
-	rdr := ioutil.NopCloser(strings.NewReader(engine.AttributesCSVContent))
+	rdr := io.NopCloser(strings.NewReader(engine.AttributesCSVContent))
 	csvRdr := csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{

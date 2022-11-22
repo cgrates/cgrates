@@ -21,7 +21,6 @@ package v1
 import (
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path"
 	"strconv"
@@ -1219,7 +1218,7 @@ func (apiv1 *APIerSv1) ReplayFailedPosts(args ArgsReplyFailedPosts, reply *strin
 	if args.FailedRequestsOutDir != nil && *args.FailedRequestsOutDir != "" {
 		failedReqsOutDir = *args.FailedRequestsOutDir
 	}
-	filesInDir, _ := ioutil.ReadDir(failedReqsInDir)
+	filesInDir, _ := os.ReadDir(failedReqsInDir)
 	if len(filesInDir) == 0 {
 		return utils.ErrNotFound
 	}

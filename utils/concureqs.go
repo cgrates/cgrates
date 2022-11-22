@@ -65,5 +65,4 @@ func (cR *ConcReqs) Deallocate() {
 		return
 	}
 	cR.aReqs <- struct{}{}
-	return
 }

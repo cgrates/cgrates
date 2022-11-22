@@ -126,9 +126,7 @@ func (sm StringMap) Slice() []string {
 }
 
 func (sm StringMap) IsEmpty() bool {
-	return sm == nil ||
-		len(sm) == 0 ||
-		sm[ANY] == true
+	return len(sm) == 0 || sm[ANY]
 }
 
 func StringMapFromSlice(s []string) StringMap {
@@ -289,7 +287,7 @@ func (fWp FlagsWithParams) GetBool(key string) (b bool) {
 	if v, b = fWp[key]; !b {
 		return // not present means false
 	}
-	if v == nil || len(v) == 0 {
+	if len(v) == 0 {
 		return true // empty slice
 	}
 	return v[0] == "true" // check only the first element

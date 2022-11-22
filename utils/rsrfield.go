@@ -71,10 +71,8 @@ func NewRSRField(fldStr string) (fld *RSRField, err error) {
 	if strings.HasPrefix(fldStr, STATIC_VALUE_PREFIX) { // Special case when RSR is defined as static header/value
 		var staticHdr, staticVal string
 		if splt := strings.Split(fldStr, STATIC_HDRVAL_SEP); len(splt) == 2 { // Using / as separator since ':' is often use in date/time fields
-			staticHdr, staticVal = splt[0][1:], splt[1] // Strip the / suffix
-			if strings.HasSuffix(staticVal, "/") {      // If value ends with /, strip it since it is a part of the definition syntax
-				staticVal = staticVal[:len(staticVal)-1]
-			}
+			staticHdr, staticVal = splt[0][1:], splt[1]    // Strip the / suffix
+			staticVal = strings.TrimSuffix(staticVal, "/") // If value ends with /, strip it since it is a part of the definition syntax
 		} else if len(splt) > 2 {
 			return nil, fmt.Errorf("Invalid RSRField string: %s", fldStr)
 		} else {
@@ -299,7 +297,7 @@ func (rsrFltr *RSRFilter) Pass(val string) bool {
 		}
 		return gt != rsrFltr.negative
 	}
-	return (strings.Index(val, rsrFltr.filterRule) != -1) != rsrFltr.negative // default is string index
+	return strings.Contains(val, rsrFltr.filterRule) != rsrFltr.negative // default is string index
 }
 
 func ParseRSRFilters(fldsStr, sep string) (RSRFilters, error) {

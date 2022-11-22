@@ -22,8 +22,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
-	"io/ioutil"
 	"net/rpc"
+	"os"
 	"path"
 	"reflect"
 	"testing"
@@ -340,7 +340,7 @@ Cdr2,*default,test2,OriginCDR2,cgrates.org,ATTR_CATEGORY,1001,ATTR_SUBJECT,+4986
 	fileContent2 := `Cdr2,*default,test2,OriginCDR2,cgrates.org,ATTR_CATEGORY,1001,ATTR_SUBJECT,+4986517174963,5s,-1.0000
 Cdr3,*default,test2,OriginCDR3,cgrates.org,ATTR_CATEGORY,1001,ATTR_SUBJECT,+4986517174963,30s,-1.0000
 `
-	if outContent1, err := ioutil.ReadFile(rply.ExportedPath); err != nil {
+	if outContent1, err := os.ReadFile(rply.ExportedPath); err != nil {
 		t.Error(err)
 	} else if fileContent1 != string(outContent1) && fileContent2 != string(outContent1) {
 		t.Errorf("Expecting: \n<%q>, \nreceived: \n<%q>", fileContent1, string(outContent1))

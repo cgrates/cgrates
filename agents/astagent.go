@@ -147,7 +147,6 @@ func (sma *AsteriskAgent) hangupChannel(channelID, warnMsg string) {
 			fmt.Sprintf("<%s> failed disconnecting channel <%s>, err: %s",
 				utils.AsteriskAgent, channelID, err.Error()))
 	}
-	return
 }
 
 func (sma *AsteriskAgent) handleStasisStart(ev *SMAsteriskEvent) {

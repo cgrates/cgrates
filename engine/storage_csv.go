@@ -23,7 +23,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -665,7 +664,7 @@ func saveToken(path string, token *oauth2.Token) {
 }
 
 func newSheet(configPath string) (sht *sheets.Service, err error) { //*google_api
-	b, err := ioutil.ReadFile(path.Join(configPath, utils.GoogleConfigDirName, utils.GoogleCredentialsFileName))
+	b, err := os.ReadFile(path.Join(configPath, utils.GoogleConfigDirName, utils.GoogleCredentialsFileName))
 	if err != nil {
 		err = fmt.Errorf("Unable to read client secret file: %v", err)
 		return

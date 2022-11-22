@@ -283,7 +283,7 @@ func (lc *PhoneNumberConverter) Convert(in interface{}) (out interface{}, err er
 // HexConvertor will round floats
 type IP2HexConverter struct{}
 
-func (_ *IP2HexConverter) Convert(in interface{}) (out interface{}, err error) {
+func (*IP2HexConverter) Convert(in interface{}) (out interface{}, err error) {
 	var ip net.IP
 	switch val := in.(type) {
 	case string:

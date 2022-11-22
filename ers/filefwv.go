@@ -22,7 +22,6 @@ import (
 	"bufio"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"path"
 	"strings"
@@ -101,7 +100,7 @@ func (rdr *FWVFileER) Serve() (err error) {
 					return
 				default:
 				}
-				filesInDir, _ := ioutil.ReadDir(rdr.rdrDir)
+				filesInDir, _ := os.ReadDir(rdr.rdrDir)
 				for _, file := range filesInDir {
 					if !strings.HasSuffix(file.Name(), utils.FWVSuffix) { // hardcoded file extension for xml event reader
 						continue // used in order to filter the files from directory

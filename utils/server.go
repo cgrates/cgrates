@@ -25,13 +25,13 @@ import (
 	"encoding/gob"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"net"
 	"net/http"
 	"net/http/pprof"
 	"net/rpc"
 	"net/url"
+	"os"
 	"reflect"
 	"strings"
 	"sync"
@@ -298,7 +298,7 @@ func (s *Server) ServeHTTP(addr string, jsonRPCURL string, wsRPCURL string,
 	}
 	Logger.Info(fmt.Sprintf("<HTTP> start listening at <%s>", addr))
 	if err := http.ListenAndServe(addr, s.httpMux); err != nil {
-		log.Println(fmt.Sprintf("<HTTP>Error: %s when listening ", err))
+		log.Printf("<HTTP>Error: %s when listening ", err)
 	}
 	exitChan <- true
 }
@@ -397,7 +397,7 @@ func loadTLSConfig(serverCrt, serverKey, caCert string, serverPolicy int,
 	}
 
 	if caCert != "" {
-		ca, err := ioutil.ReadFile(caCert)
+		ca, err := os.ReadFile(caCert)
 		if err != nil {
 			log.Fatalf("Error: %s when read CA", err)
 			return config, err
@@ -434,7 +434,7 @@ func (s *Server) ServeGOBTLS(addr, serverCrt, serverKey, caCert string,
 	}
 	listener, err := tls.Listen(TCP, addr, &config)
 	if err != nil {
-		log.Println(fmt.Sprintf("Error: %s when listening", err))
+		log.Printf("Error: %s when listening", err)
 		exitChan <- true
 		return
 	}
@@ -477,7 +477,7 @@ func (s *Server) ServeJSONTLS(addr, serverCrt, serverKey, caCert string,
 	}
 	listener, err := tls.Listen(TCP, addr, &config)
 	if err != nil {
-		log.Println(fmt.Sprintf("Error: %s when listening", err))
+		log.Printf("Error: %s when listening", err)
 		exitChan <- true
 		return
 	}
@@ -566,8 +566,7 @@ func (s *Server) ServeHTTPTLS(addr, serverCrt, serverKey, caCert string, serverP
 	}
 	Logger.Info(fmt.Sprintf("<HTTPS> start listening at <%s>", addr))
 	if err := httpSrv.ListenAndServeTLS(serverCrt, serverKey); err != nil {
-		log.Println(fmt.Sprintf("<HTTPS>Error: %s when listening ", err))
+		log.Printf("<HTTPS>Error: %s when listening ", err)
 	}
 	exitChan <- true
-	return
 }

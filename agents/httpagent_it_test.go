@@ -26,9 +26,10 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/rpc"
+	"os"
 	"path"
 	"reflect"
 	"testing"
@@ -132,7 +133,7 @@ func testHAitHttp(t *testing.T) {
 			t.Error(err)
 		}
 		// Load CA cert
-		caCert, err := ioutil.ReadFile(haCfg.TlsCfg().CaCertificate)
+		caCert, err := os.ReadFile(haCfg.TlsCfg().CaCertificate)
 		if err != nil {
 			t.Error(err)
 		}
@@ -209,7 +210,7 @@ func testHAitAuthDryRun(t *testing.T) {
   <Concatenated>234/Val1</Concatenated>
   <MaxDuration>1200</MaxDuration>
 </response>`)
-	if body, err := ioutil.ReadAll(rply.Body); err != nil {
+	if body, err := io.ReadAll(rply.Body); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eXml, body) {
 		t.Errorf("expecting: <%s>, received: <%s>", string(eXml), string(body))
@@ -258,7 +259,7 @@ func testHAitAuth1001(t *testing.T) {
   <Allow>1</Allow>
   <MaxDuration>%v</MaxDuration>
 </response>`, maxDuration))
-	if body, err := ioutil.ReadAll(rply.Body); err != nil {
+	if body, err := io.ReadAll(rply.Body); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eXml, body) {
 		t.Errorf("expecting: %s, received: %s", string(eXml), string(body))
@@ -285,7 +286,7 @@ func testHAitCDRmtcall(t *testing.T) {
   <CDR_ID>123456</CDR_ID>
   <CDR_STATUS>1</CDR_STATUS>
 </CDR_RESPONSE>`)
-	if body, err := ioutil.ReadAll(rply.Body); err != nil {
+	if body, err := io.ReadAll(rply.Body); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eXml, body) {
 		t.Errorf("expecting: <%s>, received: <%s>", string(eXml), string(body))
@@ -365,7 +366,7 @@ ComposedVar=TestComposed
 Item1.1=Val2
 Item1.1=Val1
 `)
-	if body, err := ioutil.ReadAll(rply.Body); err != nil {
+	if body, err := io.ReadAll(rply.Body); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(len(response), len(body)) {
 		t.Errorf("expecting: \n<%s>\n, received: \n<%s>\n", string(response), string(body))

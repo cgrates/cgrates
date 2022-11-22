@@ -21,7 +21,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package loaders
 
 import (
-	"io/ioutil"
 	"net/rpc"
 	"os"
 	"path"
@@ -128,7 +127,7 @@ func testLoaderRPCConn(t *testing.T) {
 func testLoaderPopulateData(t *testing.T) {
 	fileName := utils.AttributesCsv
 	tmpFilePath := path.Join("/tmp", fileName)
-	if err := ioutil.WriteFile(tmpFilePath, []byte(engine.AttributesCSVContent), 0777); err != nil {
+	if err := os.WriteFile(tmpFilePath, []byte(engine.AttributesCSVContent), 0777); err != nil {
 		t.Fatal(err.Error())
 	}
 	if err := os.Rename(tmpFilePath, path.Join(loaderPathIn, fileName)); err != nil {
@@ -146,7 +145,7 @@ func testLoaderLoadAttributes(t *testing.T) {
 
 func testLoaderVerifyOutDir(t *testing.T) {
 	time.Sleep(100 * time.Millisecond)
-	if outContent1, err := ioutil.ReadFile(path.Join(loaderPathOut, utils.AttributesCsv)); err != nil {
+	if outContent1, err := os.ReadFile(path.Join(loaderPathOut, utils.AttributesCsv)); err != nil {
 		t.Error(err)
 	} else if engine.AttributesCSVContent != string(outContent1) {
 		t.Errorf("Expecting: %q, received: %q", engine.AttributesCSVContent, string(outContent1))
