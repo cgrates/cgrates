@@ -131,7 +131,7 @@ func (nms NMSlice) Type() NMType {
 
 // Empty returns true if the NM is empty(no data)
 func (nms NMSlice) Empty() bool {
-	return nms == nil || len(nms) == 0
+	return len(nms) == 0
 }
 
 // Len returns the lenght of the slice

@@ -23,7 +23,7 @@ import (
 	"compress/zlib"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"strconv"
 	"sync"
 	"time"
@@ -354,7 +354,7 @@ func (rs *RedisStorage) GetRatingPlanDrv(key string) (rp *RatingPlan, err error)
 	if err != nil {
 		return nil, err
 	}
-	out, err := ioutil.ReadAll(r)
+	out, err := io.ReadAll(r)
 	if err != nil {
 		return nil, err
 	}
@@ -454,7 +454,7 @@ func (rs *RedisStorage) GetDestinationDrv(key string, skipCache bool,
 	if err != nil {
 		return nil, err
 	}
-	out, err := ioutil.ReadAll(r)
+	out, err := io.ReadAll(r)
 	if err != nil {
 		return nil, err
 	}
@@ -820,7 +820,7 @@ func (rs *RedisStorage) GetActionPlanDrv(key string) (ats *ActionPlan, err error
 	if err != nil {
 		return nil, err
 	}
-	out, err := ioutil.ReadAll(r)
+	out, err := io.ReadAll(r)
 	if err != nil {
 		return nil, err
 	}

@@ -20,7 +20,7 @@ package engine
 
 import (
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"reflect"
 	"strings"
@@ -55,7 +55,7 @@ func cgrCdrHandler(w http.ResponseWriter, r *http.Request) {
 
 // fsCdrHandler will handle CDRs received from FreeSWITCH over HTTP-JSON
 func fsCdrHandler(w http.ResponseWriter, r *http.Request) {
-	body, _ := ioutil.ReadAll(r.Body)
+	body, _ := io.ReadAll(r.Body)
 	fsCdr, err := NewFSCdr(body, cdrServer.cgrCfg)
 	if err != nil {
 		utils.Logger.Err(fmt.Sprintf("<CDRS> Could not create CDR entry: %s", err.Error()))

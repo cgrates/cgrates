@@ -22,7 +22,7 @@ import (
 	"bytes"
 	"crypto/tls"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/url"
 	"time"
@@ -45,7 +45,7 @@ func HttpJsonPost(url string, skipTLSVerify bool, content []byte) (respBody []by
 	if resp, err = client.Post(url, "application/json", bytes.NewBuffer(content)); err != nil {
 		return
 	}
-	respBody, err = ioutil.ReadAll(resp.Body)
+	respBody, err = io.ReadAll(resp.Body)
 	resp.Body.Close()
 	if err != nil {
 		return
@@ -118,7 +118,7 @@ func (pstr *HTTPPoster) GetResponse(content interface{}) (respBody []byte, err e
 			}
 			continue
 		}
-		respBody, err = ioutil.ReadAll(resp.Body)
+		respBody, err = io.ReadAll(resp.Body)
 		resp.Body.Close()
 		if err != nil {
 			utils.Logger.Warning(fmt.Sprintf("<HTTPPoster> Posting to : <%s>, error: <%s>", pstr.addr, err.Error()))

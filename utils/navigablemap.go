@@ -164,7 +164,7 @@ func (nm NavigableMap2) Type() NMType {
 
 // Empty returns true if the NM is empty(no data)
 func (nm NavigableMap2) Empty() bool {
-	return nm == nil || len(nm) == 0
+	return len(nm) == 0
 }
 
 // Len returns the lenght of the map

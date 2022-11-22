@@ -564,21 +564,21 @@ func FmtFieldWidth(fieldID, source string, width int, strip, padding string, man
 
 // Returns the string representation of iface or error if not convertible
 func CastIfToString(iface interface{}) (strVal string, casts bool) {
-	switch iface.(type) {
+	switch rawVal := iface.(type) {
 	case string:
-		strVal = iface.(string)
+		strVal = rawVal
 		casts = true
 	case int:
-		strVal = strconv.Itoa(iface.(int))
+		strVal = strconv.Itoa(rawVal)
 		casts = true
 	case int64:
-		strVal = strconv.FormatInt(iface.(int64), 10)
+		strVal = strconv.FormatInt(rawVal, 10)
 		casts = true
 	case float64:
-		strVal = strconv.FormatFloat(iface.(float64), 'f', -1, 64)
+		strVal = strconv.FormatFloat(rawVal, 'f', -1, 64)
 		casts = true
 	case bool:
-		strVal = strconv.FormatBool(iface.(bool))
+		strVal = strconv.FormatBool(rawVal)
 		casts = true
 	case []uint8:
 		var byteVal []byte
@@ -734,7 +734,7 @@ func GetCGRVersion() (vers string, err error) {
 }
 
 func NewTenantID(tntID string) *TenantID {
-	if strings.Index(tntID, CONCATENATED_KEY_SEP) == -1 { // no :, ID without Tenant
+	if !strings.Contains(tntID, CONCATENATED_KEY_SEP) { // no :, ID without Tenant
 		return &TenantID{ID: tntID}
 	}
 	tIDSplt := strings.Split(tntID, CONCATENATED_KEY_SEP)

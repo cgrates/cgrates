@@ -198,7 +198,6 @@ func SetMapExtraFields(in interface{}, values map[string]string, extraFields str
 			}
 		}
 	}
-	return
 }
 
 func FromMapStringString(m map[string]string, in interface{}) {
@@ -216,7 +215,6 @@ func FromMapStringString(m map[string]string, in interface{}) {
 			}
 		}
 	}
-	return
 }
 
 func FromMapStringInterface(m map[string]interface{}, in interface{}) error {

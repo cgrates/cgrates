@@ -25,7 +25,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/url"
 	"os"
 	"os/exec"
@@ -230,7 +229,7 @@ func testCDRsOnExpDisableOnlineExport(t *testing.T) {
 		t.Error("Unexpected reply received: ", reply)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
-	filesInDir, _ := ioutil.ReadDir(cdrsMasterCfg.GeneralCfg().FailedPostsDir)
+	filesInDir, _ := os.ReadDir(cdrsMasterCfg.GeneralCfg().FailedPostsDir)
 	if len(filesInDir) != 0 {
 		t.Fatalf("Should be no files in directory: %s", cdrsMasterCfg.GeneralCfg().FailedPostsDir)
 	}
@@ -485,7 +484,7 @@ func testCDRsOnExpFileFailover(t *testing.T) {
 	v1.Set("OriginID", "httpjsonrpc1")
 	v2.Set("OriginID", "amqpreconnect")
 	httpContent := []interface{}{v1, v2}
-	filesInDir, _ := ioutil.ReadDir(cdrsMasterCfg.GeneralCfg().FailedPostsDir)
+	filesInDir, _ := os.ReadDir(cdrsMasterCfg.GeneralCfg().FailedPostsDir)
 	if len(filesInDir) == 0 {
 		t.Fatalf("No files in directory: %s", cdrsMasterCfg.GeneralCfg().FailedPostsDir)
 	}

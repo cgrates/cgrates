@@ -196,7 +196,7 @@ func (asr *StatASR) GetFilterIDs() []string {
 // Compress is part of StatMetric interface
 func (asr *StatASR) Compress(queueLen int64, defaultID string) (eventIDs []string) {
 	if asr.Count < queueLen {
-		for id, _ := range asr.Events {
+		for id := range asr.Events {
 			eventIDs = append(eventIDs, id)
 		}
 		return
@@ -324,7 +324,7 @@ func (acd *StatACD) GetFilterIDs() []string {
 // Compress is part of StatMetric interface
 func (acd *StatACD) Compress(queueLen int64, defaultID string) (eventIDs []string) {
 	if acd.Count < queueLen {
-		for id, _ := range acd.Events {
+		for id := range acd.Events {
 			eventIDs = append(eventIDs, id)
 		}
 		return
@@ -452,7 +452,7 @@ func (tcd *StatTCD) GetFilterIDs() []string {
 // Compress is part of StatMetric interface
 func (tcd *StatTCD) Compress(queueLen int64, defaultID string) (eventIDs []string) {
 	if tcd.Count < queueLen {
-		for id, _ := range tcd.Events {
+		for id := range tcd.Events {
 			eventIDs = append(eventIDs, id)
 		}
 		return
@@ -575,7 +575,7 @@ func (acc *StatACC) GetFilterIDs() []string {
 // Compress is part of StatMetric interface
 func (acc *StatACC) Compress(queueLen int64, defaultID string) (eventIDs []string) {
 	if acc.Count < queueLen {
-		for id, _ := range acc.Events {
+		for id := range acc.Events {
 			eventIDs = append(eventIDs, id)
 		}
 		return
@@ -701,7 +701,7 @@ func (tcc *StatTCC) GetFilterIDs() []string {
 // Compress is part of StatMetric interface
 func (tcc *StatTCC) Compress(queueLen int64, defaultID string) (eventIDs []string) {
 	if tcc.Count < queueLen {
-		for id, _ := range tcc.Events {
+		for id := range tcc.Events {
 			eventIDs = append(eventIDs, id)
 		}
 		return
@@ -829,7 +829,7 @@ func (pdd *StatPDD) GetFilterIDs() []string {
 // Compress is part of StatMetric interface
 func (pdd *StatPDD) Compress(queueLen int64, defaultID string) (eventIDs []string) {
 	if pdd.Count < queueLen {
-		for id, _ := range pdd.Events {
+		for id := range pdd.Events {
 			eventIDs = append(eventIDs, id)
 		}
 		return
@@ -930,7 +930,7 @@ func (ddc *StatDDC) RemEvent(evID string) (err error) {
 
 	// decrement events
 	var fieldValue string
-	for k, _ := range fieldValues {
+	for k := range fieldValues {
 		fieldValue = k
 		break
 	}
@@ -966,7 +966,7 @@ func (ddc *StatDDC) GetFilterIDs() []string {
 }
 
 func (ddc *StatDDC) Compress(queueLen int64, defaultID string) (eventIDs []string) {
-	for id, _ := range ddc.Events {
+	for id := range ddc.Events {
 		eventIDs = append(eventIDs, id)
 	}
 	return

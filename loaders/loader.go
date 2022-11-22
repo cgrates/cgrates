@@ -22,7 +22,6 @@ import (
 	"encoding/csv"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"path"
 	"strings"
@@ -151,7 +150,7 @@ func (ldr *Loader) unreferenceFile(loaderType, fileName string) (err error) {
 }
 
 func (ldr *Loader) moveFiles() (err error) {
-	filesInDir, _ := ioutil.ReadDir(ldr.tpInDir)
+	filesInDir, _ := os.ReadDir(ldr.tpInDir)
 	for _, file := range filesInDir {
 		fName := file.Name()
 		if fName == ldr.lockFilename {

@@ -24,7 +24,7 @@ package v1
 import (
 	"bytes"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/rpc"
 	"path"
@@ -196,7 +196,7 @@ func testConcReqsOnHTTPBusy(t *testing.T) {
 				t.Error(err)
 				return
 			}
-			contents, err := ioutil.ReadAll(resp.Body)
+			contents, err := io.ReadAll(resp.Body)
 			if err != nil {
 				wg.Done()
 				t.Error(err)
