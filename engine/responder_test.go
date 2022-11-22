@@ -630,3 +630,519 @@ func TestResponderDebit(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestGetCostOnRatingPlans(t *testing.T) {
+	Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	arg := &utils.GetCostOnRatingPlansArgs{
+		Account:       "account",
+		Subject:       "subj",
+		Destination:   "destination",
+		Tenant:        "cgrates.org",
+		SetupTime:     time.Date(2021, 12, 24, 8, 0, 0, 0, time.UTC),
+		Usage:         10 * time.Minute,
+		RatingPlanIDs: []string{"rplan1", "rplan2", "rplan3"},
+		APIOpts: map[string]interface{}{
+			"apiopts": "opt",
+		},
+	}
+	reply := &map[string]interface{}{}
+	rs := &Responder{
+		FilterS: &FilterS{
+			cfg: cfg,
+			dm:  dm,
+		},
+	}
+	if err := rs.GetCostOnRatingPlans(arg, reply); err == nil {
+		t.Error(err)
+	}
+}
+
+func TestSetMaxComputedUsage(t *testing.T) {
+
+	rs := &Responder{
+		Timeout:  10 * time.Minute,
+		Timezone: "UTC",
+	}
+
+	mx := map[string]time.Duration{
+		"usage1": 2 * time.Minute,
+		"usage2": 4 * time.Minute,
+	}
+	rs.SetMaxComputedUsage(mx)
+	if !reflect.DeepEqual(rs.MaxComputedUsage, mx) {
+		t.Errorf("expected %v,received %v", mx, rs.MaxComputedUsage)
+	}
+}
+
+func TestResponderDebitSet(t *testing.T) {
+	Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 1
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	Cache = NewCacheS(cfg, dm, nil)
+	config.SetCgrConfig(cfg)
+	rs := &Responder{
+		Timezone: "UTC",
+		FilterS: &FilterS{
+			cfg:     cfg,
+			dm:      dm,
+			connMgr: nil,
+		},
+		MaxComputedUsage: map[string]time.Duration{},
+	}
+	arg := &CallDescriptorWithAPIOpts{
+
+		CallDescriptor: &CallDescriptor{
+			CgrID:       "cgrid",
+			Category:    "category",
+			Tenant:      "tenant",
+			Subject:     "subject",
+			Account:     "acount",
+			Destination: "uk",
+			ToR:         "tor",
+			TimeStart:   time.Date(2022, 12, 1, 12, 0, 0, 0, time.UTC),
+			TimeEnd:     time.Date(2022, 12, 1, 12, 0, 0, 0, time.UTC),
+		},
+		APIOpts: map[string]interface{}{
+			"tor": 30 * time.Minute,
+		},
+	}
+	reply := &CallCost{
+
+		Category:    "category",
+		Tenant:      "tenant",
+		Subject:     "subject",
+		Account:     "acount",
+		Destination: "uk",
+	}
+	key := utils.ConcatenatedKey(utils.ResponderDebit, arg.CgrID)
+	Cache.Set(utils.CacheRPCResponses, key,
+		&utils.CachedRPCResponse{Result: reply, Error: nil},
+		nil, true, utils.NonTransactional)
+
+	if err := rs.Debit(arg, reply); err != nil {
+		t.Error(err)
+	}
+	exp := &utils.CachedRPCResponse{Result: reply, Error: nil}
+	rcv, has := Cache.Get(utils.CacheRPCResponses, key)
+
+	if !has {
+		t.Error("has no values")
+	}
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("expected %+v,received %+v", exp, rcv)
+	}
+}
+
+func TestResponderMaxDebit(t *testing.T) {
+	Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 1
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	Cache = NewCacheS(cfg, dm, nil)
+	config.SetCgrConfig(cfg)
+	rs := &Responder{
+		Timezone: "UTC",
+		FilterS: &FilterS{
+			cfg:     cfg,
+			dm:      dm,
+			connMgr: nil,
+		},
+		MaxComputedUsage: map[string]time.Duration{},
+	}
+	arg := &CallDescriptorWithAPIOpts{
+
+		CallDescriptor: &CallDescriptor{
+			CgrID:       "cgrid",
+			Category:    "category",
+			Tenant:      "tenant",
+			Subject:     "subject",
+			Account:     "acount",
+			Destination: "uk",
+			ToR:         "tor",
+			TimeStart:   time.Date(2022, 12, 1, 12, 0, 0, 0, time.UTC),
+			TimeEnd:     time.Date(2022, 12, 1, 12, 0, 0, 0, time.UTC),
+		},
+		APIOpts: map[string]interface{}{
+			"tor": 30 * time.Minute,
+		},
+	}
+	reply := &CallCost{
+
+		Category:    "category",
+		Tenant:      "tenant",
+		Subject:     "subject",
+		Account:     "acount",
+		Destination: "uk",
+	}
+	if err := rs.MaxDebit(arg, reply); err == nil {
+		t.Error(err)
+	}
+	exp := &utils.CachedRPCResponse{
+		Result: reply,
+		Error:  nil,
+	}
+	rcv, has := Cache.Get(utils.CacheRPCResponses, utils.ConcatenatedKey(utils.ResponderMaxDebit, arg.CgrID))
+
+	if !has {
+		t.Error("has no value")
+	}
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("expected %v,received %v", utils.ToJSON(exp), utils.ToJSON(rcv))
+	}
+}
+
+func TestResponderMaxDebitSet(t *testing.T) {
+	Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 1
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	Cache = NewCacheS(cfg, dm, nil)
+	config.SetCgrConfig(cfg)
+	rs := &Responder{
+		Timezone: "UTC",
+		FilterS: &FilterS{
+			cfg:     cfg,
+			dm:      dm,
+			connMgr: nil,
+		},
+		MaxComputedUsage: map[string]time.Duration{},
+	}
+	arg := &CallDescriptorWithAPIOpts{
+
+		CallDescriptor: &CallDescriptor{
+			CgrID:       "cgrid",
+			Category:    "category",
+			Tenant:      "tenant",
+			Subject:     "subject",
+			Account:     "acount",
+			Destination: "uk",
+			ToR:         "tor",
+			TimeStart:   time.Date(2022, 12, 1, 12, 0, 0, 0, time.UTC),
+			TimeEnd:     time.Date(2022, 12, 1, 12, 0, 0, 0, time.UTC),
+		},
+		APIOpts: map[string]interface{}{
+			"tor": 30 * time.Minute,
+		},
+	}
+	reply := &CallCost{
+
+		Category:    "category",
+		Tenant:      "tenant",
+		Subject:     "subject",
+		Account:     "acount",
+		Destination: "uk",
+	}
+	Cache.Set(utils.CacheRPCResponses, utils.ConcatenatedKey(utils.ResponderMaxDebit, arg.CgrID),
+		&utils.CachedRPCResponse{Result: reply, Error: nil},
+		nil, true, utils.NonTransactional)
+	if err := rs.MaxDebit(arg, reply); err != nil {
+		t.Error(err)
+	}
+	exp := &utils.CachedRPCResponse{
+		Result: reply,
+		Error:  nil,
+	}
+	rcv, has := Cache.Get(utils.CacheRPCResponses, utils.ConcatenatedKey(utils.ResponderMaxDebit, arg.CgrID))
+
+	if !has {
+		t.Error("has no value")
+	}
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("expected %v,received %v", utils.ToJSON(exp), utils.ToJSON(rcv))
+	}
+}
+
+func TestResponderRefundIncrements(t *testing.T) {
+	Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 1
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	Cache = NewCacheS(cfg, dm, nil)
+	config.SetCgrConfig(cfg)
+	rs := &Responder{
+		Timezone: "UTC",
+		FilterS: &FilterS{
+			cfg:     cfg,
+			dm:      dm,
+			connMgr: nil,
+		},
+		MaxComputedUsage: map[string]time.Duration{},
+	}
+	arg := &CallDescriptorWithAPIOpts{
+
+		CallDescriptor: &CallDescriptor{
+			CgrID:       "cgrid",
+			Category:    "category",
+			Tenant:      "tenant",
+			Subject:     "subject",
+			Account:     "acount",
+			Destination: "uk",
+			ToR:         "tor",
+			TimeStart:   time.Date(2022, 12, 1, 12, 0, 0, 0, time.UTC),
+			TimeEnd:     time.Date(2022, 12, 1, 12, 0, 0, 0, time.UTC),
+		},
+		APIOpts: map[string]interface{}{
+			"tor": 30 * time.Minute,
+		},
+	}
+	reply := &Account{
+		ID:                "acc_id",
+		BalanceMap:        map[string]Balances{},
+		UnitCounters:      UnitCounters{},
+		ActionTriggers:    ActionTriggers{},
+		AllowNegative:     false,
+		Disabled:          false,
+		UpdateTime:        time.Date(2021, 12, 1, 12, 0, 0, 0, time.UTC),
+		executingTriggers: false,
+	}
+	if err := rs.RefundIncrements(arg, reply); err != nil {
+		t.Error(err)
+	}
+	exp := &utils.CachedRPCResponse{
+		Result: reply,
+		Error:  nil,
+	}
+	rcv, has := Cache.Get(utils.CacheRPCResponses, utils.ConcatenatedKey(utils.ResponderRefundIncrements, arg.CgrID))
+
+	if !has {
+		t.Error("has no value")
+	}
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("expected %v,received %v", utils.ToJSON(exp), utils.ToJSON(rcv))
+	}
+
+}
+func TestResponderRefundIncrementsSet(t *testing.T) {
+	Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 1
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	Cache = NewCacheS(cfg, dm, nil)
+	config.SetCgrConfig(cfg)
+	rs := &Responder{
+		Timezone: "UTC",
+		FilterS: &FilterS{
+			cfg:     cfg,
+			dm:      dm,
+			connMgr: nil,
+		},
+		MaxComputedUsage: map[string]time.Duration{},
+	}
+	arg := &CallDescriptorWithAPIOpts{
+
+		CallDescriptor: &CallDescriptor{
+			CgrID:       "cgrid",
+			Category:    "category",
+			Tenant:      "tenant",
+			Subject:     "subject",
+			Account:     "acount",
+			Destination: "uk",
+			ToR:         "tor",
+			TimeStart:   time.Date(2022, 12, 1, 12, 0, 0, 0, time.UTC),
+			TimeEnd:     time.Date(2022, 12, 1, 12, 0, 0, 0, time.UTC),
+		},
+		APIOpts: map[string]interface{}{
+			"tor": 30 * time.Minute,
+		},
+	}
+	reply := &Account{
+		ID:                "acc_id",
+		BalanceMap:        map[string]Balances{},
+		UnitCounters:      UnitCounters{},
+		ActionTriggers:    ActionTriggers{},
+		AllowNegative:     false,
+		Disabled:          false,
+		UpdateTime:        time.Date(2021, 12, 1, 12, 0, 0, 0, time.UTC),
+		executingTriggers: false,
+	}
+
+	Cache.Set(utils.CacheRPCResponses, utils.ConcatenatedKey(utils.ResponderRefundIncrements, arg.CgrID), &utils.CachedRPCResponse{
+		Result: reply,
+		Error:  nil,
+	}, nil, true, utils.NonTransactional)
+	if err := rs.RefundIncrements(arg, reply); err != nil {
+		t.Error(err)
+	}
+	exp := &utils.CachedRPCResponse{
+		Result: reply,
+		Error:  nil,
+	}
+	rcv, has := Cache.Get(utils.CacheRPCResponses, utils.ConcatenatedKey(utils.ResponderRefundIncrements, arg.CgrID))
+
+	if !has {
+		t.Error("has no value")
+	}
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("expected %v,received %v", utils.ToJSON(exp), utils.ToJSON(rcv))
+	}
+
+}
+
+func TestResponderRefundRounding(t *testing.T) {
+	Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 1
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	Cache = NewCacheS(cfg, dm, nil)
+	config.SetCgrConfig(cfg)
+	rs := &Responder{
+		Timezone: "UTC",
+		FilterS: &FilterS{
+			cfg:     cfg,
+			dm:      dm,
+			connMgr: nil,
+		},
+		MaxComputedUsage: map[string]time.Duration{},
+	}
+	arg := &CallDescriptorWithAPIOpts{
+
+		CallDescriptor: &CallDescriptor{
+			CgrID:       "cgrid",
+			Category:    "category",
+			Tenant:      "tenant",
+			Subject:     "subject",
+			Account:     "acount",
+			Destination: "uk",
+			ToR:         "tor",
+			TimeStart:   time.Date(2022, 12, 1, 12, 0, 0, 0, time.UTC),
+			TimeEnd:     time.Date(2022, 12, 1, 12, 0, 0, 0, time.UTC),
+		},
+		APIOpts: map[string]interface{}{
+			"tor": 30 * time.Minute,
+		},
+	}
+	reply := &Account{
+		ID:                "acc_id",
+		BalanceMap:        map[string]Balances{},
+		UnitCounters:      UnitCounters{},
+		ActionTriggers:    ActionTriggers{},
+		AllowNegative:     false,
+		Disabled:          false,
+		UpdateTime:        time.Date(2021, 12, 1, 12, 0, 0, 0, time.UTC),
+		executingTriggers: false,
+	}
+	if err := rs.RefundRounding(arg, reply); err != nil {
+		t.Error(err)
+	}
+	exp := &utils.CachedRPCResponse{
+		Result: reply,
+		Error:  nil,
+	}
+	rcv, has := Cache.Get(utils.CacheRPCResponses, utils.ConcatenatedKey(utils.ResponderRefundRounding, arg.CgrID))
+
+	if !has {
+		t.Error("has no value")
+	}
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("expected %v,received %v", utils.ToJSON(exp), utils.ToJSON(rcv))
+	}
+
+}
+func TestResponderRefundRoundingSet(t *testing.T) {
+	Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 1
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	Cache = NewCacheS(cfg, dm, nil)
+	config.SetCgrConfig(cfg)
+	rs := &Responder{
+		Timezone: "UTC",
+		FilterS: &FilterS{
+			cfg:     cfg,
+			dm:      dm,
+			connMgr: nil,
+		},
+		MaxComputedUsage: map[string]time.Duration{},
+	}
+	arg := &CallDescriptorWithAPIOpts{
+
+		CallDescriptor: &CallDescriptor{
+			CgrID:       "cgrid",
+			Category:    "category",
+			Tenant:      "tenant",
+			Subject:     "subject",
+			Account:     "acount",
+			Destination: "uk",
+			ToR:         "tor",
+			TimeStart:   time.Date(2022, 12, 1, 12, 0, 0, 0, time.UTC),
+			TimeEnd:     time.Date(2022, 12, 1, 12, 0, 0, 0, time.UTC),
+		},
+		APIOpts: map[string]interface{}{
+			"tor": 30 * time.Minute,
+		},
+	}
+	reply := &Account{
+		ID:                "acc_id",
+		BalanceMap:        map[string]Balances{},
+		UnitCounters:      UnitCounters{},
+		ActionTriggers:    ActionTriggers{},
+		AllowNegative:     false,
+		Disabled:          false,
+		UpdateTime:        time.Date(2021, 12, 1, 12, 0, 0, 0, time.UTC),
+		executingTriggers: false,
+	}
+	Cache.Set(utils.CacheRPCResponses, utils.ConcatenatedKey(utils.ResponderRefundRounding, arg.CgrID),
+		&utils.CachedRPCResponse{Result: reply, Error: err},
+		nil, true, utils.NonTransactional)
+
+	if err := rs.RefundRounding(arg, reply); err != nil {
+		t.Error(err)
+	}
+	exp := &utils.CachedRPCResponse{
+		Result: reply,
+		Error:  nil,
+	}
+	rcv, has := Cache.Get(utils.CacheRPCResponses, utils.ConcatenatedKey(utils.ResponderRefundRounding, arg.CgrID))
+
+	if !has {
+		t.Error("has no value")
+	}
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("expected %v,received %v", utils.ToJSON(exp), utils.ToJSON(rcv))
+	}
+
+}
+
+func TestGetMaxSessionTimeOnAccounts(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	arg := &utils.GetMaxSessionTimeOnAccountsArgs{
+		Subject:     "subject",
+		Tenant:      "",
+		Destination: "destination",
+		AccountIDs:  []string{"acc_id1", "acc_id2"},
+		Usage:       10 * time.Minute,
+		SetupTime:   time.Date(2022, 12, 1, 1, 0, 0, 0, time.UTC),
+		APIOpts:     map[string]interface{}{},
+	}
+
+	reply := &map[string]interface{}{}
+	rs := &Responder{
+		FilterS: &FilterS{
+			cfg:     cfg,
+			dm:      dm,
+			connMgr: nil,
+		},
+	}
+	if err := rs.GetMaxSessionTimeOnAccounts(arg, reply); err == nil || err != utils.ErrAccountNotFound {
+		t.Error(err)
+	}
+
+}
