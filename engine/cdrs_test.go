@@ -1162,18 +1162,70 @@ func TestV2StoreSessionCostSet(t *testing.T) {
 			OriginID:   "originid",
 			CostSource: "cgrates",
 			CostDetails: &EventCost{
-				CGRID:          "evcgrid",
-				RunID:          "evrunid",
-				StartTime:      time.Date(2021, 11, 1, 2, 0, 0, 0, time.UTC),
-				Usage:          utils.DurationPointer(122),
-				Cost:           utils.Float64Pointer(134),
-				Charges:        []*ChargingInterval{},
-				AccountSummary: &AccountSummary{},
-				Rating:         Rating{},
-				Accounting:     Accounting{},
-				RatingFilters:  RatingFilters{},
-				Rates:          ChargedRates{},
-				Timings:        ChargedTimings{},
+				CGRID:     "evcgrid",
+				RunID:     "evrunid",
+				StartTime: time.Date(2021, 11, 1, 2, 0, 0, 0, time.UTC),
+				Usage:     utils.DurationPointer(122),
+				Cost:      utils.Float64Pointer(134),
+				Charges: []*ChargingInterval{
+					{
+						RatingID: "rating1",
+						Increments: []*ChargingIncrement{
+							{
+								Usage:          5 * time.Minute,
+								Cost:           23,
+								AccountingID:   "acc_id",
+								CompressFactor: 5,
+							},
+							{
+								Usage:          5 * time.Minute,
+								Cost:           23,
+								AccountingID:   "acc_id",
+								CompressFactor: 5,
+							},
+						},
+						CompressFactor: 3,
+						usage:          utils.DurationPointer(10 * time.Minute),
+						ecUsageIdx:     utils.DurationPointer(4 * time.Minute),
+						cost:           utils.Float64Pointer(38),
+					},
+					{
+						RatingID: "rating2",
+						Increments: []*ChargingIncrement{
+							{
+								Usage:          5 * time.Minute,
+								Cost:           23,
+								AccountingID:   "acc_id",
+								CompressFactor: 5,
+							},
+							{
+								Usage:          5 * time.Minute,
+								Cost:           23,
+								AccountingID:   "acc_id",
+								CompressFactor: 5,
+							},
+						},
+						CompressFactor: 3,
+						usage:          utils.DurationPointer(10 * time.Minute),
+						ecUsageIdx:     utils.DurationPointer(4 * time.Minute),
+						cost:           utils.Float64Pointer(38),
+					},
+				},
+				AccountSummary: &AccountSummary{
+					Tenant:           "Tenant",
+					ID:               "acc_id",
+					BalanceSummaries: BalanceSummaries{},
+					AllowNegative:    false,
+					Disabled:         true,
+				},
+				Rating: Rating{
+					"rating1": &RatingUnit{},
+					"rating2": &RatingUnit{},
+				},
+				Accounting:    Accounting{},
+				RatingFilters: RatingFilters{},
+				Rates:         ChargedRates{},
+				Timings:       ChargedTimings{},
 			},
 		},
 	}
@@ -1217,14 +1269,7 @@ func TestV1RateCDRS(t *testing.T) {
 	}
 	arg := &ArgRateCDRs{
 		Flags: []string{utils.MetaStore, utils.MetaExport, utils.MetaThresholds, utils.MetaStats, utils.MetaChargers, utils.MetaAttributes},
-		RPCCDRsFilter: utils.RPCCDRsFilter{
-			CGRIDs:          []string{"id", "cgr"},
-			NotRequestTypes: []string{"noreq"},
-			NotCGRIDs:       []string{"cgrid"},
-			RunIDs:          []string{"runid"},
-			OriginIDs:       []string{"o_id"},
-			NotOriginIDs:    []string{"noid"},
-		},
+
 		Tenant:  "cgrates.org",
 		APIOpts: map[string]interface{}{},
 	}
@@ -1234,4 +1279,98 @@ func TestV1RateCDRS(t *testing.T) {
 		t.Error(err)
 	}
 
+}
+func TestGetCostFromRater2(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.CdrsCfg().RaterConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.RateSConnsCfg)}
+	cfg.CdrsCfg().SchedulerConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.SchedulerConnsCfg)}
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	ccMock := &ccMock{
+		calls: map[string]func(args interface{}, reply interface{}) error{
+			utils.ResponderDebit: func(args, reply interface{}) error {
+
+				return utils.ErrAccountNotFound
+			},
+			utils.SchedulerSv1ExecuteActionPlans: func(args, reply interface{}) error {
+				rpl := "reply"
+				*reply.(*string) = rpl
+				return nil
+			},
+		},
+	}
+	clientconn := make(chan rpcclient.ClientConnector, 1)
+	clientconn <- ccMock
+	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.RateSConnsCfg):     clientconn,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.SchedulerConnsCfg): clientconn,
+	})
+	cdrS := &CDRServer{
+		cgrCfg:  cfg,
+		cdrDb:   db,
+		dm:      dm,
+		connMgr: connMgr,
+	}
+	cdr := &CDRWithAPIOpts{
+
+		CDR: &CDR{
+			ToR:         "tor",
+			Tenant:      "tenant",
+			Category:    "cdr",
+			Subject:     "cdrsubj",
+			Account:     "acc_cdr",
+			Destination: "acc_dest",
+			RequestType: utils.MetaDynaprepaid,
+			Usage:       1 * time.Minute,
+		},
+		APIOpts: map[string]interface{}{},
+	}
+
+	if _, err := cdrS.getCostFromRater(cdr); err == nil {
+		t.Error(err)
+	}
+}
+
+func TestGetCostFromRater3(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.CdrsCfg().RaterConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.RateSConnsCfg)}
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	ccMock := &ccMock{
+		calls: map[string]func(args interface{}, reply interface{}) error{
+			utils.ResponderGetCost: func(args, reply interface{}) error {
+
+				return nil
+			},
+		},
+	}
+	clientconn := make(chan rpcclient.ClientConnector, 1)
+	clientconn <- ccMock
+	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.RateSConnsCfg): clientconn,
+	})
+	cdrS := &CDRServer{
+		cgrCfg:  cfg,
+		cdrDb:   db,
+		dm:      dm,
+		connMgr: connMgr,
+	}
+	cdr := &CDRWithAPIOpts{
+
+		CDR: &CDR{
+			ToR:         "tor",
+			Tenant:      "tenant",
+			Category:    "cdr",
+			Subject:     "cdrsubj",
+			Account:     "acc_cdr",
+			Destination: "acc_dest",
+			RequestType: "default",
+			Usage:       1 * time.Minute,
+		},
+		APIOpts: map[string]interface{}{},
+	}
+
+	if _, err := cdrS.getCostFromRater(cdr); err == nil {
+		t.Error(err)
+	}
 }
