@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"reflect"
 	"testing"
 
 	"github.com/cgrates/cgrates/utils"
@@ -1844,4 +1845,186 @@ func TestCGRConfigcheckConfigSanity(t *testing.T) {
 		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err)
 	}
 
+	cfg = NewDefaultCGRConfig()
+	cfg.cacheCfg.Partitions = map[string]*CacheParamCfg{
+		utils.CacheClosedSessions: {
+			Limit: 1,
+		},
+	}
+	cfg.eesCfg = &EEsCfg{
+		Enabled: true,
+		Exporters: []*EventExporterCfg{
+			{
+				Type:       utils.MetaFileCSV,
+				ExportPath: utils.MetaBuffer,
+				Opts: &EventExporterOpts{
+					CSVFieldSeparator: nil,
+				},
+			},
+		},
+	}
+	cfg.admS = &AdminSCfg{
+		AttributeSConns: []string{"test"},
+	}
+	cfg.ersCfg = &ERsCfg{
+		Enabled: true,
+		Readers: []*EventReaderCfg{
+			{
+				Type:          utils.MetaFileCSV,
+				ProcessedPath: "",
+				SourcePath:    "/",
+
+				Opts: &EventReaderOpts{
+					PartialCacheAction: utils.StringPointer(utils.MetaNone),
+				},
+			},
+		},
+	}
+	CfgCopy := cfg
+	expErr = "<AdminS> connection with id: <test> not defined"
+	if err := cfg.checkConfigSanity(); err.Error() != expErr {
+		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err)
+	}
+	if !reflect.DeepEqual(CfgCopy, cfg) {
+		t.Errorf("Expected cfg not to change, was <%+v> \nnow is <%+v>", CfgCopy, cfg)
+	}
+
+	cfg = NewDefaultCGRConfig()
+	cfg.cacheCfg.Partitions = map[string]*CacheParamCfg{
+		utils.CacheClosedSessions: {
+			Limit: 1,
+		},
+	}
+	cfg.eesCfg = &EEsCfg{
+		Enabled: true,
+		Exporters: []*EventExporterCfg{
+			{
+				Type:       utils.MetaFileFWV,
+				ExportPath: utils.MetaBuffer,
+				Opts: &EventExporterOpts{
+					CSVFieldSeparator: nil,
+				},
+			},
+		},
+	}
+	cfg.admS = &AdminSCfg{
+		AttributeSConns: []string{"test"},
+	}
+	cfg.ersCfg = &ERsCfg{
+		Enabled: true,
+		Readers: []*EventReaderCfg{
+			{
+				Type:          utils.MetaFileCSV,
+				ProcessedPath: "",
+				SourcePath:    "/",
+
+				Opts: &EventReaderOpts{
+					PartialCacheAction: utils.StringPointer(utils.MetaNone),
+				},
+			},
+		},
+	}
+
+	CfgCopy = cfg
+	expErr = "<AdminS> connection with id: <test> not defined"
+	if err := cfg.checkConfigSanity(); err.Error() != expErr {
+		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err)
+	}
+	if !reflect.DeepEqual(CfgCopy, cfg) {
+		t.Errorf("Expected cfg not to change, was <%+v> \nnow is <%+v>", CfgCopy, cfg)
+	}
+
+	cfg = NewDefaultCGRConfig()
+	cfg.cacheCfg.Partitions = map[string]*CacheParamCfg{
+
+		utils.CacheResourceProfiles: {
+			Limit: 1,
+		},
+	}
+	cfg.dataDbCfg = &DataDbCfg{
+		Type: utils.Internal,
+	}
+
+	expErr = "<CacheS> *resource_profiles needs to be 0 when DataBD is *internal, received : 1"
+	if err := cfg.checkConfigSanity(); err.Error() != expErr {
+		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err.Error())
+	}
+
+	cfg = NewDefaultCGRConfig()
+	cfg.cacheCfg.RemoteConns = []string{"remote conn"}
+	cfg.attributeSCfg = &AttributeSCfg{
+		Enabled: true,
+		Opts: &AttributesOpts{
+			ProcessRuns: []*utils.DynamicIntOpt{
+				{
+					Value: 2,
+				},
+			},
+		},
+	}
+	cfg.admS.AttributeSConns = []string{utils.MetaInternal}
+	expErr = "<CacheS> connection with id: <remote conn> not defined"
+	if err := cfg.checkConfigSanity(); err.Error() != expErr {
+		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err.Error())
+	}
+
+	cfg = NewDefaultCGRConfig()
+	cfg.cacheCfg.RemoteConns = []string{"con1"}
+	cfg.admS.ActionSConns = []string{utils.MetaInternal}
+	cfg.actionSCfg = &ActionSCfg{Enabled: true}
+	cfg.rpcConns = map[string]*RPCConn{
+		"con1": {
+			Conns: []*RemoteHost{
+				{
+					Transport: utils.MetaNone,
+				},
+			},
+		},
+	}
+
+	expErr = "<CacheS> unsupported transport <*none> for connection with ID: <con1>"
+	if err := cfg.checkConfigSanity(); err.Error() != expErr {
+		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err.Error())
+	}
+
+	cfg = NewDefaultCGRConfig()
+	cfg.cacheCfg = &CacheCfg{
+		Partitions: map[string]*CacheParamCfg{
+			utils.CacheRPCConnections: {
+				Replicate: true,
+			},
+		},
+	}
+
+	expErr = "<CacheS> partition <*rpc_connections> does not support replication"
+	if err := cfg.checkConfigSanity(); err.Error() != expErr {
+		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err.Error())
+	}
+
+	cfg = NewDefaultCGRConfig()
+	cfg.eesCfg = &EEsCfg{Enabled: false}
+	cfg.analyzerSCfg = &AnalyzerSCfg{
+		Enabled:         true,
+		IndexType:       utils.MetaInternal,
+		TTL:             1,
+		CleanupInterval: 1,
+		EEsConns:        []string{utils.MetaInternal},
+	}
+
+	expErr = "<EEs> not enabled but requested by <AnalyzerS> component"
+	if err := cfg.checkConfigSanity(); err.Error() != expErr {
+		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err.Error())
+	}
+	cfg.eesCfg = &EEsCfg{Enabled: true}
+	cfg.analyzerSCfg = &AnalyzerSCfg{
+		Enabled:   true,
+		IndexType: utils.MetaInternal,
+		TTL:       1,
+		EEsConns:  []string{"test"},
+	}
+
+	expErr = "<AnalyzerS> connection with id: <test> not defined"
+	if err := cfg.checkConfigSanity(); err.Error() != expErr {
+		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err.Error())
+	}
 }
