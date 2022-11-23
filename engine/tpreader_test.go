@@ -1054,3 +1054,72 @@ func TestTPReaderLoadAll(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestTpReaderReloadScheduler(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	ccMocK := &ccMock{
+		calls: map[string]func(args interface{}, reply interface{}) error{
+			utils.SchedulerSv1Reload: func(args, reply interface{}) error {
+				rpl := "reply"
+
+				*reply.(*string) = rpl
+				return nil
+			},
+		},
+	}
+	clientconn := make(chan rpcclient.ClientConnector, 1)
+	clientconn <- ccMocK
+
+	tmp := connMgr
+	defer func() { connMgr = tmp }()
+	connMgr = NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.SchedulerConnsCfg): clientconn,
+	})
+
+	tpr := &TpReader{
+		actions: map[string][]*Action{
+			"ActionsID": {},
+		},
+		actionPlans: map[string]*ActionPlan{
+			"ActionPlansID":  {},
+			"ActionPlansID2": {},
+		},
+
+		resProfiles: map[utils.TenantID]*utils.TPResourceProfile{
+			{Tenant: "cgrates.org", ID: "resourceProfilesID"}: {},
+		},
+		sqProfiles: map[utils.TenantID]*utils.TPStatProfile{
+			{Tenant: "cgrates.org", ID: "statProfilesID"}: {},
+		},
+		thProfiles: map[utils.TenantID]*utils.TPThresholdProfile{
+			{Tenant: "cgrates.org", ID: "thresholdProfilesID"}: {},
+		},
+		filters: map[utils.TenantID]*utils.TPFilterProfile{
+			{Tenant: "cgrates.org", ID: "filtersID"}: {},
+		},
+		routeProfiles: map[utils.TenantID]*utils.TPRouteProfile{
+			{Tenant: "cgrates.org", ID: "routeProfilesID"}: {},
+		},
+		attributeProfiles: map[utils.TenantID]*utils.TPAttributeProfile{
+			{Tenant: "cgrates.org", ID: "attributeProfilesID"}: {},
+		},
+		chargerProfiles: map[utils.TenantID]*utils.TPChargerProfile{
+			{Tenant: "cgrates.org", ID: "chargerProfilesID"}: {},
+		},
+		dispatcherProfiles: map[utils.TenantID]*utils.TPDispatcherProfile{
+			{Tenant: "cgrates.org", ID: "dispatcherProfilesID"}: {},
+		},
+		dispatcherHosts: map[utils.TenantID]*utils.TPDispatcherHost{
+			{Tenant: "cgrates.org", ID: "dispatcherHostsID"}: {},
+		},
+
+		dm: NewDataManager(NewInternalDB(nil, nil, false, cfg.DataDbCfg().Items), config.CgrConfig().CacheCfg(), connMgr),
+	}
+	tpr.dm.SetLoadIDs(make(map[string]int64))
+	tpr.schedulerConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.SchedulerConnsCfg)}
+
+	if err := tpr.ReloadScheduler(false); err != nil {
+		t.Error(err)
+	}
+
+}

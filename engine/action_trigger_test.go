@@ -257,10 +257,12 @@ func TestActionTriggerCreateBalance(t *testing.T) {
 }
 
 func TestATExecute(t *testing.T) {
+	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 	at := &ActionTrigger{
+		ActionsID:         "id",
 		ID:                "id",
 		UniqueID:          "uid",
 		ThresholdType:     "*min_event_counter",
@@ -277,9 +279,10 @@ func TestATExecute(t *testing.T) {
 		AllowNegative:  false,
 		UpdateTime:     time.Date(2019, 3, 1, 12, 0, 0, 0, time.UTC),
 	}
+
 	fltrs := NewFilterS(cfg, nil, dm)
 
-	if err := at.Execute(ub, fltrs); err == nil {
-		t.Error(err)
+	if err := at.Execute(ub, fltrs); err == nil || err != utils.ErrNotFound {
+		t.Errorf("expected <%+v>,received <%+v>", utils.ErrNotFound, err)
 	}
 }
