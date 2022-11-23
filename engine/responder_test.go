@@ -626,8 +626,8 @@ func TestResponderDebit(t *testing.T) {
 		Account:     "acount",
 		Destination: "uk",
 	}
-	if err := rs.Debit(arg, reply); err == nil {
-		t.Error(err)
+	if err := rs.Debit(arg, reply); err == nil || err != utils.ErrAccountNotFound {
+		t.Errorf("expected %+v ,received %+v", utils.ErrAccountNotFound, err)
 	}
 }
 
@@ -655,8 +655,8 @@ func TestGetCostOnRatingPlans(t *testing.T) {
 			dm:  dm,
 		},
 	}
-	if err := rs.GetCostOnRatingPlans(arg, reply); err == nil {
-		t.Error(err)
+	if err := rs.GetCostOnRatingPlans(arg, reply); err == nil || err != utils.ErrUnauthorizedDestination {
+		t.Errorf("expected %+v ,received %+v", utils.ErrUnauthorizedDestination, err)
 	}
 }
 
@@ -781,8 +781,8 @@ func TestResponderMaxDebit(t *testing.T) {
 		Account:     "acount",
 		Destination: "uk",
 	}
-	if err := rs.MaxDebit(arg, reply); err == nil {
-		t.Error(err)
+	if err := rs.MaxDebit(arg, reply); err == nil || err != utils.ErrAccountNotFound {
+		t.Errorf("expected %+v ,received %+v", utils.ErrAccountNotFound, err)
 	}
 	exp := &utils.CachedRPCResponse{
 		Result: reply,

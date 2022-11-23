@@ -1326,7 +1326,7 @@ func TestGetCostFromRater2(t *testing.T) {
 		APIOpts: map[string]interface{}{},
 	}
 
-	if _, err := cdrS.getCostFromRater(cdr); err == nil {
+	if _, err := cdrS.getCostFromRater(cdr); err == nil || err != utils.ErrAccountNotFound {
 		t.Error(err)
 	}
 }
@@ -1370,7 +1370,163 @@ func TestGetCostFromRater3(t *testing.T) {
 		APIOpts: map[string]interface{}{},
 	}
 
-	if _, err := cdrS.getCostFromRater(cdr); err == nil {
+	if _, err := cdrS.getCostFromRater(cdr); err == nil || err != rpcclient.ErrUnsupporteServiceMethod {
+		t.Errorf("expected %+v,received %v", rpcclient.ErrUnsupporteServiceMethod, err)
+	}
+}
+
+func TestV2StoreSessionCost2(t *testing.T) {
+	Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 0
+	cfg.CdrsCfg().RaterConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.RateSConnsCfg)}
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+
+	ccMOck := &ccMock{
+
+		calls: map[string]func(args interface{}, reply interface{}) error{
+			utils.ResponderRefundRounding: func(args, reply interface{}) error {
+				rpl := &Account{}
+				*reply.(*Account) = *rpl
+				return nil
+			},
+		},
+	}
+	clientconn := make(chan rpcclient.ClientConnector, 1)
+	clientconn <- ccMOck
+	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.RateSConnsCfg): clientconn,
+	})
+	cdrS := &CDRServer{
+		cgrCfg:  cfg,
+		cdrDb:   db,
+		dm:      dm,
+		connMgr: connMgr,
+	}
+
+	args := &ArgsV2CDRSStoreSMCost{
+
+		CheckDuplicate: false,
+		Cost: &V2SMCost{
+			CGRID:      "cgrid",
+			RunID:      "runid",
+			OriginHost: "host",
+			OriginID:   "originid",
+			CostSource: "cgrates",
+			CostDetails: &EventCost{
+				CGRID:     "evcgrid",
+				RunID:     "evrunid",
+				StartTime: time.Date(2021, 11, 1, 2, 0, 0, 0, time.UTC),
+				Usage:     utils.DurationPointer(122),
+				Cost:      utils.Float64Pointer(134),
+				Charges: []*ChargingInterval{
+					{
+
+						RatingID: "acc_id",
+						Increments: []*ChargingIncrement{
+							{
+
+								Usage:          5 * time.Minute,
+								Cost:           23,
+								AccountingID:   "acc_id",
+								CompressFactor: 5,
+							},
+							{
+								Usage:          5 * time.Minute,
+								Cost:           23,
+								AccountingID:   "acc_id2",
+								CompressFactor: 5,
+							},
+						},
+						CompressFactor: 3,
+						usage:          utils.DurationPointer(10 * time.Minute),
+						ecUsageIdx:     utils.DurationPointer(4 * time.Minute),
+						cost:           utils.Float64Pointer(38),
+					},
+					{
+						RatingID: "acc_id2",
+
+						Increments: []*ChargingIncrement{
+							{
+								Usage:          5 * time.Minute,
+								Cost:           23,
+								AccountingID:   "acc_id",
+								CompressFactor: 5,
+							},
+							{
+								Usage:          5 * time.Minute,
+								Cost:           23,
+								AccountingID:   "acc_id2",
+								CompressFactor: 5,
+							},
+						},
+						CompressFactor: 3,
+						usage:          utils.DurationPointer(10 * time.Minute),
+						ecUsageIdx:     utils.DurationPointer(4 * time.Minute),
+						cost:           utils.Float64Pointer(38),
+					},
+				},
+				AccountSummary: &AccountSummary{
+					Tenant:           "Tenant",
+					ID:               "acc_id",
+					BalanceSummaries: BalanceSummaries{},
+					AllowNegative:    false,
+					Disabled:         true,
+				},
+
+				Accounting: Accounting{
+					"acc_id": &BalanceCharge{
+						RatingID: "acc_id",
+					},
+					"acc_id2": &BalanceCharge{
+						RatingID: "acc_id2",
+					},
+				},
+				RatingFilters: RatingFilters{
+					"filtersid": RatingMatchedFilters{
+						utils.Subject:               "string",
+						utils.DestinationPrefixName: "string",
+						utils.DestinationID:         "dest",
+						utils.RatingPlanID:          "rating",
+					},
+					"ratefilter": RatingMatchedFilters{
+						utils.Subject:               "string",
+						utils.DestinationPrefixName: "string",
+						utils.DestinationID:         "dest",
+						utils.RatingPlanID:          "rating",
+					},
+				},
+				Rates:   ChargedRates{},
+				Timings: ChargedTimings{},
+				Rating: Rating{
+					"acc_id": &RatingUnit{
+						ConnectFee:       21,
+						RoundingMethod:   "method",
+						RoundingDecimals: 3,
+						MaxCost:          22,
+						MaxCostStrategy:  "sr",
+						RatesID:          "rates",
+						RatingFiltersID:  "filtersid",
+					},
+
+					"acc_id2": &RatingUnit{
+						ConnectFee:       21,
+						RoundingMethod:   "method",
+						RoundingDecimals: 3,
+						MaxCost:          22,
+						MaxCostStrategy:  "sr",
+						RatesID:          "rates",
+						RatingFiltersID:  "ratefilter",
+					},
+				},
+			},
+		},
+		Tenant:  "cgrates.org",
+		APIOpts: map[string]interface{}{},
+	}
+	if err := cdrS.V2StoreSessionCost(args, utils.StringPointer("reply")); err != nil {
 		t.Error(err)
 	}
+
 }
