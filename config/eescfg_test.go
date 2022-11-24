@@ -749,6 +749,8 @@ func TestDiffEventExporterJsonCfg(t *testing.T) {
 				Type: "*string",
 			},
 		},
+		Blocker:  true,
+		EFsConns: []string{"v1 efs test"},
 	}
 
 	v2 := &EventExporterCfg{
@@ -792,6 +794,8 @@ func TestDiffEventExporterJsonCfg(t *testing.T) {
 				Type: "*prefix",
 			},
 		},
+		Blocker:  false,
+		EFsConns: []string{"efs test"},
 	}
 
 	expected := &EventExporterJsonCfg{
@@ -816,6 +820,8 @@ func TestDiffEventExporterJsonCfg(t *testing.T) {
 				Layout: utils.StringPointer(""),
 			},
 		},
+		Blocker:   utils.BoolPointer(false),
+		Efs_conns: utils.SliceStringPointer([]string{"efs test"}),
 	}
 
 	rcv := diffEventExporterJsonCfg(d, v1, v2, ";")
@@ -1176,7 +1182,9 @@ func TestEeSCloneSection(t *testing.T) {
 func TestDiffEventExporterOptsJsonCfg(t *testing.T) {
 	var d *EventExporterOptsJson
 
-	v1 := &EventExporterOpts{}
+	v1 := &EventExporterOpts{
+		ConnIDs: utils.SliceStringPointer([]string{"V1test"}),
+	}
 
 	v2 := &EventExporterOpts{
 		CSVFieldSeparator:        utils.StringPointer(","),
@@ -1226,6 +1234,9 @@ func TestDiffEventExporterOptsJsonCfg(t *testing.T) {
 		TLS:                      utils.BoolPointer(false),
 		RPCConnTimeout:           utils.DurationPointer(2 * time.Second),
 		RPCReplyTimeout:          utils.DurationPointer(2 * time.Second),
+		MYSQLDSNParams:           map[string]string{},
+		KafkaTLS:                 utils.BoolPointer(true),
+		ConnIDs:                  utils.SliceStringPointer([]string{"test"}),
 	}
 
 	exp := &EventExporterOptsJson{
@@ -1276,7 +1287,29 @@ func TestDiffEventExporterOptsJsonCfg(t *testing.T) {
 		TLS:                      utils.BoolPointer(false),
 		RPCConnTimeout:           utils.StringPointer("2s"),
 		RPCReplyTimeout:          utils.StringPointer("2s"),
+		MYSQLDSNParams:           map[string]string{},
+		KafkaTLS:                 utils.BoolPointer(true),
+		ConnIDs:                  utils.SliceStringPointer([]string{"test"}),
 	}
+
+	rcv := diffEventExporterOptsJsonCfg(d, v1, v2)
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(rcv))
+	}
+}
+
+func TestDiffEventExporterOptsJsonCfgConnIDsAreEqual(t *testing.T) {
+	var d *EventExporterOptsJson
+
+	v1 := &EventExporterOpts{
+		ConnIDs: utils.SliceStringPointer([]string{"test"}),
+	}
+
+	v2 := &EventExporterOpts{
+		ConnIDs: utils.SliceStringPointer([]string{"test"}),
+	}
+
+	exp := &EventExporterOptsJson{}
 
 	rcv := diffEventExporterOptsJsonCfg(d, v1, v2)
 	if !reflect.DeepEqual(rcv, exp) {
@@ -1333,6 +1366,10 @@ func TestEventExporterOptsClone(t *testing.T) {
 		TLS:                      utils.BoolPointer(false),
 		RPCConnTimeout:           utils.DurationPointer(2 * time.Second),
 		RPCReplyTimeout:          utils.DurationPointer(2 * time.Second),
+		MYSQLDSNParams:           make(map[string]string),
+		KafkaTLS:                 utils.BoolPointer(false),
+		ConnIDs:                  utils.SliceStringPointer([]string{"testID"}),
+		RPCAPIOpts:               make(map[string]interface{}),
 	}
 
 	exp := &EventExporterOpts{
@@ -1383,6 +1420,10 @@ func TestEventExporterOptsClone(t *testing.T) {
 		TLS:                      utils.BoolPointer(false),
 		RPCConnTimeout:           utils.DurationPointer(2 * time.Second),
 		RPCReplyTimeout:          utils.DurationPointer(2 * time.Second),
+		MYSQLDSNParams:           make(map[string]string),
+		KafkaTLS:                 utils.BoolPointer(false),
+		ConnIDs:                  utils.SliceStringPointer([]string{"testID"}),
+		RPCAPIOpts:               make(map[string]interface{}),
 	}
 
 	if rcv := eeOpts.Clone(); !reflect.DeepEqual(exp, rcv) {
@@ -1441,6 +1482,9 @@ func TestLoadFromJSONCfg(t *testing.T) {
 		TLS:                      utils.BoolPointer(false),
 		RPCConnTimeout:           utils.StringPointer("2s"),
 		RPCReplyTimeout:          utils.StringPointer("2s"),
+		KafkaTLS:                 utils.BoolPointer(false),
+		ConnIDs:                  utils.SliceStringPointer([]string{"testID"}),
+		RPCAPIOpts:               make(map[string]interface{}),
 	}
 
 	exp := &EventExporterOpts{
@@ -1491,6 +1535,9 @@ func TestLoadFromJSONCfg(t *testing.T) {
 		TLS:                      utils.BoolPointer(false),
 		RPCConnTimeout:           utils.DurationPointer(2 * time.Second),
 		RPCReplyTimeout:          utils.DurationPointer(2 * time.Second),
+		KafkaTLS:                 utils.BoolPointer(false),
+		ConnIDs:                  utils.SliceStringPointer([]string{"testID"}),
+		RPCAPIOpts:               make(map[string]interface{}),
 	}
 
 	if err := eeOpts.loadFromJSONCfg(eeSJson); err != nil {
@@ -1648,6 +1695,9 @@ func TestEEsAsMapInterface(t *testing.T) {
 			TLS:                      utils.BoolPointer(false),
 			RPCConnTimeout:           utils.DurationPointer(2 * time.Second),
 			RPCReplyTimeout:          utils.DurationPointer(2 * time.Second),
+			KafkaTLS:                 utils.BoolPointer(false),
+			ConnIDs:                  utils.SliceStringPointer([]string{"testID"}),
+			RPCAPIOpts:               make(map[string]interface{}),
 		},
 	}
 
@@ -1700,6 +1750,9 @@ func TestEEsAsMapInterface(t *testing.T) {
 			"sqlTableName":             "cdrs",
 			"sqsQueueID":               "sqs_queue_id",
 			"pgSSLMode":                "sslm",
+			"kafkaTLS":                 false,
+			"connIDs":                  []string{"testID"},
+			"rpcAPIOpts":               make(map[string]interface{}),
 		},
 	}
 

@@ -1797,6 +1797,12 @@ func TestERsLoadFromJSONCfg(t *testing.T) {
 		NATSClientCertificateProcessed:    utils.StringPointer("cc_processed"),
 		NATSClientKeyProcessed:            utils.StringPointer("ck_processed"),
 		NATSJetStreamMaxWaitProcessed:     utils.StringPointer("2s"),
+		KafkaTLS:                          utils.BoolPointer(true),
+		KafkaCAPath:                       utils.StringPointer("/tmp/path"),
+		KafkaSkipTLSVerify:                utils.BoolPointer(true),
+		KafkaTLSProcessed:                 utils.BoolPointer(true),
+		KafkaCAPathProcessed:              utils.StringPointer("/tmp/path"),
+		KafkaSkipTLSVerifyProcessed:       utils.BoolPointer(true),
 	}
 
 	exp := &EventReaderOpts{
@@ -1859,6 +1865,12 @@ func TestERsLoadFromJSONCfg(t *testing.T) {
 		NATSClientCertificateProcessed:    utils.StringPointer("cc_processed"),
 		NATSClientKeyProcessed:            utils.StringPointer("ck_processed"),
 		NATSJetStreamMaxWaitProcessed:     utils.DurationPointer(2 * time.Second),
+		KafkaTLS:                          utils.BoolPointer(true),
+		KafkaCAPath:                       utils.StringPointer("/tmp/path"),
+		KafkaSkipTLSVerify:                utils.BoolPointer(true),
+		KafkaTLSProcessed:                 utils.BoolPointer(true),
+		KafkaCAPathProcessed:              utils.StringPointer("/tmp/path"),
+		KafkaSkipTLSVerifyProcessed:       utils.BoolPointer(true),
 	}
 
 	if err := erOpts.loadFromJSONCfg(erJson); err != nil {
@@ -2026,6 +2038,12 @@ func TestERsClone(t *testing.T) {
 		NATSClientCertificateProcessed:    utils.StringPointer("cc_processed"),
 		NATSClientKeyProcessed:            utils.StringPointer("ck_processed"),
 		NATSJetStreamMaxWaitProcessed:     utils.DurationPointer(2 * time.Second),
+		KafkaTLS:                          utils.BoolPointer(false),
+		KafkaCAPath:                       utils.StringPointer("/tmp/path"),
+		KafkaSkipTLSVerify:                utils.BoolPointer(false),
+		KafkaTLSProcessed:                 utils.BoolPointer(false),
+		KafkaCAPathProcessed:              utils.StringPointer("/tmp/path"),
+		KafkaSkipTLSVerifyProcessed:       utils.BoolPointer(false),
 	}
 
 	exp := &EventReaderOpts{
@@ -2088,6 +2106,12 @@ func TestERsClone(t *testing.T) {
 		NATSClientCertificateProcessed:    utils.StringPointer("cc_processed"),
 		NATSClientKeyProcessed:            utils.StringPointer("ck_processed"),
 		NATSJetStreamMaxWaitProcessed:     utils.DurationPointer(2 * time.Second),
+		KafkaTLS:                          utils.BoolPointer(false),
+		KafkaCAPath:                       utils.StringPointer("/tmp/path"),
+		KafkaSkipTLSVerify:                utils.BoolPointer(false),
+		KafkaTLSProcessed:                 utils.BoolPointer(false),
+		KafkaCAPathProcessed:              utils.StringPointer("/tmp/path"),
+		KafkaSkipTLSVerifyProcessed:       utils.BoolPointer(false),
 	}
 
 	rcv := erOpts.Clone()
@@ -2158,6 +2182,12 @@ func TestERsAsMapInterface(t *testing.T) {
 			NATSClientCertificateProcessed:    utils.StringPointer("cc_processed"),
 			NATSClientKeyProcessed:            utils.StringPointer("ck_processed"),
 			NATSJetStreamMaxWaitProcessed:     utils.DurationPointer(2 * time.Second),
+			KafkaTLS:                          utils.BoolPointer(false),
+			KafkaCAPath:                       utils.StringPointer("/tmp/path"),
+			KafkaSkipTLSVerify:                utils.BoolPointer(false),
+			KafkaTLSProcessed:                 utils.BoolPointer(false),
+			KafkaCAPathProcessed:              utils.StringPointer("/tmp/path"),
+			KafkaSkipTLSVerifyProcessed:       utils.BoolPointer(false),
 		},
 	}
 
@@ -2222,6 +2252,12 @@ func TestERsAsMapInterface(t *testing.T) {
 			"pgSSLMode":                         "ssl_mode",
 			"pgSSLModeProcessed":                "ssl_mode_processed",
 			"xmlRootPath":                       "xml_root_path",
+			"kafkaTLS":                          false,
+			"kafkaCAPath":                       "/tmp/path",
+			"kafkaSkipTLSVerify":                false,
+			"kafkaTLSProcessed":                 false,
+			"kafkaCAPathProcessed":              "/tmp/path",
+			"kafkaSkipTLSVerifyProcessed":       false,
 		},
 	}
 

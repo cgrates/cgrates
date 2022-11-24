@@ -269,3 +269,60 @@ func TestDispatcherSCfgCloneTest(t *testing.T) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(rcv))
 	}
 }
+
+func TestDispatchersOptsLoadFromJSONCfgNil(t *testing.T) {
+	var jsnCfg *DispatchersOptsJson
+	dspOpts := &DispatchersOpts{
+		Dispatchers: []*utils.DynamicBoolOpt{
+			{
+				Tenant: "Filler val",
+			},
+		},
+	}
+	dspOptsClone := dspOpts.Clone()
+	dspOpts.loadFromJSONCfg(jsnCfg)
+	if !reflect.DeepEqual(dspOptsClone, dspOpts) {
+		t.Errorf("Expected DispatcherSCfg to not change. Was <%+v>\n,now is <%+v>", dspOptsClone, dspOpts)
+	}
+}
+
+func TestDiffDispatchersOptsJsonCfg(t *testing.T) {
+	var d *DispatchersOptsJson
+
+	v1 := &DispatchersOpts{
+		Dispatchers: []*utils.DynamicBoolOpt{
+			{
+				Tenant: "1",
+			},
+		},
+	}
+
+	v2 := &DispatchersOpts{
+		Dispatchers: []*utils.DynamicBoolOpt{
+			{
+				Tenant: "2",
+			},
+		},
+	}
+
+	expected := &DispatchersOptsJson{
+		Dispatchers: []*utils.DynamicBoolOpt{
+			{
+				Tenant: "2",
+			},
+		},
+	}
+
+	rcv := diffDispatchersOptsJsonCfg(d, v1, v2)
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+
+	v2_2 := v1
+	expected2 := &DispatchersOptsJson{}
+
+	rcv = diffDispatchersOptsJsonCfg(d, v1, v2_2)
+	if !reflect.DeepEqual(rcv, expected2) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected2), utils.ToJSON(rcv))
+	}
+}
