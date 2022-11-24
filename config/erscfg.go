@@ -584,8 +584,8 @@ func (erOpts *EventReaderOpts) Clone() *EventReaderOpts {
 	if erOpts.KafkaCAPathProcessed != nil {
 		cln.KafkaCAPathProcessed = utils.StringPointer(*erOpts.KafkaCAPathProcessed)
 	}
-	if erOpts.KafkaSkipTLSVerify != nil {
-		cln.KafkaSkipTLSVerify = utils.BoolPointer(*erOpts.KafkaSkipTLSVerify)
+	if erOpts.KafkaSkipTLSVerifyProcessed != nil {
+		cln.KafkaSkipTLSVerifyProcessed = utils.BoolPointer(*erOpts.KafkaSkipTLSVerifyProcessed)
 	}
 	if erOpts.SQLDBName != nil {
 		cln.SQLDBName = utils.StringPointer(*erOpts.SQLDBName)
