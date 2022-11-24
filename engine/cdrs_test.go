@@ -1525,8 +1525,11 @@ func TestV2StoreSessionCost2(t *testing.T) {
 		Tenant:  "cgrates.org",
 		APIOpts: map[string]interface{}{},
 	}
-	if err := cdrS.V2StoreSessionCost(args, utils.StringPointer("reply")); err != nil {
+	reply := utils.StringPointer("reply")
+	if err := cdrS.V2StoreSessionCost(args, reply); err != nil {
 		t.Error(err)
+	} else if *reply != utils.OK {
+		t.Errorf("expected %+v,received %+v", utils.OK, *reply)
 	}
 
 }
