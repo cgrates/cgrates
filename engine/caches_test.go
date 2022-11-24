@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"fmt"
 	"reflect"
 	"testing"
 	"time"
@@ -440,7 +441,7 @@ func TestCacheSV1Clear(t *testing.T) {
 
 			},
 		},
-		"cacheID#": {
+		"cacheID3": {
 			MaxItems:  3,
 			TTL:       time.Minute * 30,
 			StaticTTL: false,
@@ -459,4 +460,107 @@ func TestCacheSV1Clear(t *testing.T) {
 	if err := chS.V1Clear(args, &reply); err != nil {
 		t.Error(err)
 	}
+}
+
+func TestCacheSV1ReplicateSet(t *testing.T) {
+	fltr := &Filter{
+		Tenant: "cgrates",
+		ID:     "filterID",
+	}
+	args := &utils.ArgCacheReplicateSet{
+		CacheID: "cacheID",
+		ItemID:  "itemID",
+		Value:   fltr,
+	}
+	cfg := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	tscache := ltcache.NewTransCache(
+		map[string]*ltcache.CacheConfig{
+			"cacheID": {
+				MaxItems:  3,
+				TTL:       time.Minute * 30,
+				StaticTTL: false,
+				OnEvicted: func(itmID string, value interface{}) {
+				},
+			}},
+	)
+	chS := &CacheS{
+		cfg:    cfg,
+		dm:     dm,
+		tCache: tscache,
+	}
+	reply := "reply"
+	if err := chS.V1ReplicateSet(args, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("expected %+v,received %+v", utils.OK, reply)
+	}
+	val, has := chS.tCache.Get(args.CacheID, args.ItemID)
+
+	if !has {
+		t.Error("has no value")
+	}
+
+	if !reflect.DeepEqual(val, fltr) {
+		t.Errorf("expected %+v,received %+v", "", utils.ToJSON(val))
+	}
+}
+
+func TestCacheSV1GetCacheStats(t *testing.T) {
+	args := &utils.AttrCacheIDsWithAPIOpts{
+		APIOpts:  map[string]interface{}{},
+		Tenant:   "cgrates.org",
+		CacheIDs: []string{"cacheID", "cacheID2", "cacheID3"},
+	}
+	reply := map[string]*ltcache.CacheStats{}
+	cfg := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	tscache := ltcache.NewTransCache(
+		map[string]*ltcache.CacheConfig{
+			"cacheID": {
+				MaxItems:  3,
+				TTL:       time.Minute * 30,
+				StaticTTL: false,
+				OnEvicted: func(itmID string, value interface{}) {
+				},
+			},
+			"cacheID2": {
+				MaxItems:  3,
+				TTL:       time.Minute * 30,
+				StaticTTL: false,
+				OnEvicted: func(itmID string, value interface{}) {
+				},
+			},
+			"cacheID3": {
+				MaxItems:  3,
+				TTL:       time.Minute * 30,
+				StaticTTL: false,
+				OnEvicted: func(itmID string, value interface{}) {
+				},
+			},
+		},
+	)
+
+	for i, id := range args.CacheIDs {
+
+		tscache.Set(id, fmt.Sprintf("%s%d", "item", i), "value", []string{}, true, "tId")
+	}
+	chS := &CacheS{
+		cfg:    cfg,
+		dm:     dm,
+		tCache: tscache,
+	}
+	exp := map[string]*ltcache.CacheStats{
+		"cacheID":  {Items: 1, Groups: 0},
+		"cacheID2": {Items: 1, Groups: 0},
+		"cacheID3": {Items: 1, Groups: 0},
+	}
+	if err := chS.V1GetCacheStats(args, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(reply, exp) {
+		t.Errorf("expected %v,received %v", utils.ToJSON(reply), utils.ToJSON(exp))
+	}
+
 }
