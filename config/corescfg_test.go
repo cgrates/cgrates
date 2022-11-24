@@ -184,3 +184,24 @@ func TestCoreSCloneSection(t *testing.T) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(rcv))
 	}
 }
+
+func TestDiffCoreSJsonCfgEEsConnsNotEqual(t *testing.T) {
+	var d *CoreSJsonCfg
+
+	v1 := &CoreSCfg{
+		EEsConns: []string{"sltest1", "sltest2"},
+	}
+
+	v2 := &CoreSCfg{
+		EEsConns: []string{"sltest3", "sltest4"},
+	}
+
+	expected := &CoreSJsonCfg{
+		Ees_conns: utils.SliceStringPointer([]string{"sltest3", "sltest4"}),
+	}
+
+	rcv := diffCoreSJsonCfg(d, v1, v2)
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+}

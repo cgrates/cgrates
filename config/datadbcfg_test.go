@@ -84,6 +84,25 @@ func TestDataDbCfgloadFromJsonCfg(t *testing.T) {
 	}
 }
 
+func TestDataDbCfgloadFromJsonCfgItemsErr(t *testing.T) {
+	jsonCfg := &DbJsonCfg{
+		Items: map[string]*ItemOptsJson{
+
+			"Bad Item": {
+				Ttl: utils.StringPointer("bad input"),
+			},
+		},
+	}
+	expErr := `time: invalid duration "bad input"`
+	jsnCfg := NewDefaultCGRConfig()
+	jsnCfg.dataDbCfg.Items = map[string]*ItemOpts{
+		"Bad Item": {},
+	}
+	if err = jsnCfg.dataDbCfg.loadFromJSONCfg(jsonCfg); err.Error() != expErr {
+		t.Errorf("Expected Error <%v>, ]\n Received error <%v>", expErr, err.Error())
+	}
+}
+
 func TestDataDbLoadFromJsonCfgOpt(t *testing.T) {
 	dbOpts := &DataDBOpts{}
 	if err := dbOpts.loadFromJSONCfg(nil); err != nil {
@@ -115,6 +134,37 @@ func TestDataDbLoadFromJsonCfgOpt(t *testing.T) {
 
 }
 
+func TestDataDbLoadFromJsonCfgRedisConnTimeOut(t *testing.T) {
+	dbOpts := &DataDBOpts{}
+	jsnCfg := &DBOptsJson{
+		RedisConnectTimeout: utils.StringPointer("2c"),
+	}
+	errExpect := `time: unknown unit "c" in duration "2c"`
+	if err := dbOpts.loadFromJSONCfg(jsnCfg); err == nil || err.Error() != errExpect {
+		t.Errorf("Expecting %v \n but received \n %v", errExpect, err.Error())
+	}
+}
+func TestDataDbLoadFromJsonCfgRedisReadTimeOut(t *testing.T) {
+	dbOpts := &DataDBOpts{}
+	jsnCfg := &DBOptsJson{
+		RedisReadTimeout: utils.StringPointer("2c"),
+	}
+	errExpect := `time: unknown unit "c" in duration "2c"`
+	if err := dbOpts.loadFromJSONCfg(jsnCfg); err == nil || err.Error() != errExpect {
+		t.Errorf("Expecting %v \n but received \n %v", errExpect, err.Error())
+	}
+}
+
+func TestDataDbLoadFromJsonCfgRedisWriteTimeout(t *testing.T) {
+	dbOpts := &DataDBOpts{}
+	jsnCfg := &DBOptsJson{
+		RedisWriteTimeout: utils.StringPointer("2c"),
+	}
+	errExpect := `time: unknown unit "c" in duration "2c"`
+	if err := dbOpts.loadFromJSONCfg(jsnCfg); err == nil || err.Error() != errExpect {
+		t.Errorf("Expecting %v \n but received \n %v", errExpect, err.Error())
+	}
+}
 func TestConnsloadFromJsonCfg(t *testing.T) {
 	jsonCfg := &DbJsonCfg{
 		Remote_conns: &[]string{"*internal"},
@@ -594,6 +644,9 @@ func TestDiffItemOptJson(t *testing.T) {
 		Replicate: false,
 		RouteID:   "RouteID",
 		APIKey:    "APIKey",
+		Limit:     1,
+		StaticTTL: true,
+		TTL:       2,
 	}
 
 	v2 := &ItemOpts{
@@ -601,13 +654,19 @@ func TestDiffItemOptJson(t *testing.T) {
 		Replicate: true,
 		RouteID:   "RouteID2",
 		APIKey:    "APIKey2",
+		Limit:     2,
+		StaticTTL: false,
+		TTL:       3,
 	}
 
 	expected := &ItemOptsJson{
-		Remote:    utils.BoolPointer(false),
-		Replicate: utils.BoolPointer(true),
-		Route_id:  utils.StringPointer("RouteID2"),
-		Api_key:   utils.StringPointer("APIKey2"),
+		Remote:     utils.BoolPointer(false),
+		Replicate:  utils.BoolPointer(true),
+		Route_id:   utils.StringPointer("RouteID2"),
+		Api_key:    utils.StringPointer("APIKey2"),
+		Limit:      utils.IntPointer(2),
+		Ttl:        utils.StringPointer("3ns"),
+		Static_ttl: utils.BoolPointer(false),
 	}
 
 	rcv := diffItemOptJson(d, v1, v2)
@@ -766,6 +825,11 @@ func TestDataDbDiffOptsJson(t *testing.T) {
 		RedisClientCertificate:  "",
 		RedisClientKey:          "",
 		RedisCACertificate:      "",
+		RedisMaxConns:           2,
+		RedisConnectAttempts:    3,
+		RedisConnectTimeout:     3,
+		RedisReadTimeout:        2,
+		RedisWriteTimeout:       2,
 	}
 
 	v2 := &DataDBOpts{
@@ -778,6 +842,11 @@ func TestDataDbDiffOptsJson(t *testing.T) {
 		RedisClientCertificate:  "1",
 		RedisClientKey:          "1",
 		RedisCACertificate:      "1",
+		RedisMaxConns:           3,
+		RedisConnectAttempts:    4,
+		RedisConnectTimeout:     4,
+		RedisReadTimeout:        3,
+		RedisWriteTimeout:       3,
 	}
 
 	exp := &DBOptsJson{
@@ -790,6 +859,11 @@ func TestDataDbDiffOptsJson(t *testing.T) {
 		RedisClientCertificate:  utils.StringPointer("1"),
 		RedisClientKey:          utils.StringPointer("1"),
 		RedisCACertificate:      utils.StringPointer("1"),
+		RedisWriteTimeout:       utils.StringPointer("3ns"),
+		RedisReadTimeout:        utils.StringPointer("3ns"),
+		RedisConnectTimeout:     utils.StringPointer("4ns"),
+		RedisConnectAttempts:    utils.IntPointer(4),
+		RedisMaxConns:           utils.IntPointer(3),
 	}
 
 	rcv := diffDataDBOptsJsonCfg(d, v1, v2)
@@ -803,7 +877,12 @@ func TestDataDbDefaultDBPort(t *testing.T) {
 		t.Errorf("Expected %v \n but received \n %v", "5432", port)
 	}
 }
-
+func TestDataDbDefaultDBPortMySQL(t *testing.T) {
+	port := defaultDBPort(utils.MySQL, utils.MetaDynamic)
+	if port != "3306" {
+		t.Errorf("Expected %v \n but received \n %v", "3306", port)
+	}
+}
 func TestDataDbDiff(t *testing.T) {
 	dataDbCfg := &DataDbCfg{
 		Type:        "mysql",
@@ -845,4 +924,23 @@ func TestDataDbDiff(t *testing.T) {
 	if !reflect.DeepEqual(rcv, exp) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(rcv))
 	}
+}
+
+func TestItemOptsAsMapInterface(t *testing.T) {
+	itm := &ItemOpts{
+		TTL: 1,
+	}
+
+	exp := map[string]interface{}{
+		"limit":      0,
+		"remote":     false,
+		"replicate":  false,
+		"static_ttl": false,
+		"ttl":        "1ns",
+	}
+
+	if rcv := itm.AsMapInterface(); !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("Expected <%+v>, \nReceived <%+v>", utils.ToJSON(exp), utils.ToJSON(rcv))
+	}
+
 }

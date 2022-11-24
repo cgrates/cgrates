@@ -21,7 +21,7 @@ import (
 	"testing"
 )
 
-func TestConfigDBWhatever(t *testing.T) {
+func TestConfigDBOptsInvalid(t *testing.T) {
 	cfgJSONStr := `{
 	"config_db": {                               
         "opts":{
