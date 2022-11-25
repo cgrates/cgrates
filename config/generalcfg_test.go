@@ -23,6 +23,7 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
+	"github.com/ericlagergren/decimal"
 )
 
 func TestGeneralCfgloadFromJsonCfg(t *testing.T) {
@@ -274,6 +275,11 @@ func TestDiffGeneralJsonCfg(t *testing.T) {
 				},
 			},
 		},
+		MaxReconnectInterval: time.Duration(5),
+		DecimalMaxScale:      5,
+		DecimalMinScale:      5,
+		DecimalPrecision:     5,
+		DecimalRoundingMode:  decimal.ToNearestAway,
 	}
 
 	v2 := &GeneralCfg{
@@ -302,6 +308,11 @@ func TestDiffGeneralJsonCfg(t *testing.T) {
 				},
 			},
 		},
+		MaxReconnectInterval: time.Duration(2),
+		DecimalMaxScale:      2,
+		DecimalMinScale:      2,
+		DecimalPrecision:     2,
+		DecimalRoundingMode:  decimal.ToNearestEven,
 	}
 
 	expected := &GeneralJsonCfg{
@@ -330,6 +341,11 @@ func TestDiffGeneralJsonCfg(t *testing.T) {
 				},
 			},
 		},
+		Max_reconnect_interval: utils.StringPointer("2ns"),
+		Decimal_max_scale:      utils.IntPointer(2),
+		Decimal_min_scale:      utils.IntPointer(2),
+		Decimal_precision:      utils.IntPointer(2),
+		Decimal_rounding_mode:  utils.StringPointer("ToNearestEven"),
 	}
 
 	rcv := diffGeneralJsonCfg(d, v1, v2)
@@ -396,5 +412,35 @@ func TestGeneralCfgCloneSection(t *testing.T) {
 	rcv := gnrCfg.CloneSection()
 	if !reflect.DeepEqual(rcv, exp) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(rcv))
+	}
+}
+
+func TestGeneralOptsLoadFromJSONCfgNilJson(t *testing.T) {
+	generalOpts := &GeneralOpts{}
+	var jsnCfg *GeneralOptsJson
+	generalOptsClone := &GeneralOpts{}
+	generalOpts.loadFromJSONCfg(jsnCfg)
+	if !reflect.DeepEqual(generalOptsClone, generalOpts) {
+		t.Errorf("Expected GeneralOpts to not change, Was <%+v>,\nNow is <%+v>",
+			generalOptsClone, generalOpts)
+	}
+}
+func TestGeneralCfgloadFromJsonCfgMaxReconnInterval(t *testing.T) {
+	cfgJSON := &GeneralJsonCfg{Max_reconnect_interval: utils.StringPointer("invalid time")}
+
+	expected := `time: invalid duration "invalid time"`
+	jsnCfg := NewDefaultCGRConfig()
+	if err = jsnCfg.generalCfg.loadFromJSONCfg(cfgJSON); err.Error() != expected {
+		t.Errorf("Expected error <%v>, Received error <%v>", expected, err.Error())
+	}
+}
+
+func TestGeneralOptsCloneNil(t *testing.T) {
+
+	var generalOpts *GeneralOpts
+	generalOptsClone := generalOpts.Clone()
+	if !reflect.DeepEqual(generalOptsClone, generalOpts) {
+		t.Errorf("Expected GeneralOpts to not change, Was <%+v>,\nNow is <%+v>",
+			generalOptsClone, generalOpts)
 	}
 }

@@ -20,6 +20,7 @@ package config
 import (
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
@@ -164,21 +165,24 @@ func TestKamAgentCfgClone(t *testing.T) {
 
 func TestDiffKamConnJsonCfg(t *testing.T) {
 	v1 := &KamConnCfg{
-		Alias:      "KAM",
-		Address:    "localhost:8080",
-		Reconnects: 2,
+		Alias:                "KAM",
+		Address:              "localhost:8080",
+		Reconnects:           2,
+		MaxReconnectInterval: time.Duration(2),
 	}
 
 	v2 := &KamConnCfg{
-		Alias:      "KAM_2",
-		Address:    "localhost:8037",
-		Reconnects: 5,
+		Alias:                "KAM_2",
+		Address:              "localhost:8037",
+		Reconnects:           5,
+		MaxReconnectInterval: time.Duration(3),
 	}
 
 	expected := &KamConnJsonCfg{
-		Alias:      utils.StringPointer("KAM_2"),
-		Address:    utils.StringPointer("localhost:8037"),
-		Reconnects: utils.IntPointer(5),
+		Alias:                  utils.StringPointer("KAM_2"),
+		Address:                utils.StringPointer("localhost:8037"),
+		Reconnects:             utils.IntPointer(5),
+		Max_reconnect_interval: utils.StringPointer("3ns"),
 	}
 
 	rcv := diffKamConnJsonCfg(v1, v2)
@@ -325,5 +329,16 @@ func TestKamAgentCloneSection(t *testing.T) {
 	rcv := kamCfg.CloneSection()
 	if !reflect.DeepEqual(rcv, exp) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(rcv))
+	}
+}
+func TestKamConnCfgloadFromJsonCfgMaxReconnErr(t *testing.T) {
+	var kamcocfg KamConnCfg
+
+	json := &KamConnJsonCfg{
+		Max_reconnect_interval: utils.StringPointer("invalid duration"),
+	}
+	expErr := `time: invalid duration "invalid duration"`
+	if err = kamcocfg.loadFromJSONCfg(json); err.Error() != expErr {
+		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err.Error())
 	}
 }

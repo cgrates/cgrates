@@ -329,9 +329,9 @@ func TestCacheCloneSection(t *testing.T) {
 		},
 		ReplicationConns: []string{},
 	}
-	cacheCfg.CloneSection()
-	if !reflect.DeepEqual(cacheCfg, exp) {
-		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(cacheCfg))
+	rcv := cacheCfg.CloneSection()
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(rcv))
 	}
 }
 

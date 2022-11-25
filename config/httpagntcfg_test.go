@@ -760,30 +760,30 @@ func TestDiffHttpAgentsJsonCfg(t *testing.T) {
 	}
 }
 
-// func TestHttpAgentCloneSection(t *testing.T) {
-// 	httpCfg := HTTPAgentCfgs{
-// 		{
-// 			ID:             "http_agent",
-// 			URL:            "http_url",
-// 			SessionSConns:  []string{"*localhost"},
-// 			RequestPayload: "request_payload",
-// 			ReplyPayload:   "reply_payload",
-// 		},
-// 	}
+func TestHttpAgentCloneSection(t *testing.T) {
+	httpCfg := HTTPAgentCfgs{
+		{
+			ID:             "http_agent",
+			URL:            "http_url",
+			SessionSConns:  []string{"*localhost"},
+			RequestPayload: "request_payload",
+			ReplyPayload:   "reply_payload",
+		},
+	}
 
-// 	exp := HTTPAgentCfgs{
-// 		{
-// 			ID:             "http_agent",
-// 			URL:            "http_url",
-// 			SessionSConns:  []string{"*localhost"},
-// 			RequestPayload: "request_payload",
-// 			ReplyPayload:   "reply_payload",
-// 		},
-// 	}
+	exp := &HTTPAgentCfgs{
+		{
+			ID:                "http_agent",
+			URL:               "http_url",
+			SessionSConns:     []string{"*localhost"},
+			RequestPayload:    "request_payload",
+			ReplyPayload:      "reply_payload",
+			RequestProcessors: []*RequestProcessor{},
+		},
+	}
 
-// 	rcv := httpCfg.CloneSection()
-// 	rcv.(*HTTPAgentCfgs)[0].RequestProcessors = nil
-// 	if !reflect.DeepEqual(rcv, exp) {
-// 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(rcv))
-// 	}
-// }
+	rcv := httpCfg.CloneSection()
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(rcv))
+	}
+}

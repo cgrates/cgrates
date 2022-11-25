@@ -135,8 +135,8 @@ func TestAPIBanCloneSection(t *testing.T) {
 		Enabled: false,
 		Keys:    []string{"key1", "key2"},
 	}
-	apbCfg.CloneSection()
-	if !reflect.DeepEqual(exp, apbCfg) {
-		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(apbCfg))
+	rcv := apbCfg.CloneSection()
+	if !reflect.DeepEqual(exp, rcv) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(rcv))
 	}
 }

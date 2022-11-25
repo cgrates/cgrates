@@ -2330,6 +2330,12 @@ func TestDiffEventReaderOptsJsonCfg(t *testing.T) {
 		NATSClientCertificateProcessed:    utils.StringPointer("cc_processed_diff"),
 		NATSClientKeyProcessed:            utils.StringPointer("ck_processed_diff"),
 		NATSJetStreamMaxWaitProcessed:     utils.DurationPointer(6 * time.Second),
+		KafkaTLS:                          utils.BoolPointer(true),
+		KafkaCAPath:                       utils.StringPointer("/tmp/path/diff"),
+		KafkaSkipTLSVerify:                utils.BoolPointer(true),
+		KafkaTLSProcessed:                 utils.BoolPointer(true),
+		KafkaCAPathProcessed:              utils.StringPointer("/tmp/path/diff"),
+		KafkaSkipTLSVerifyProcessed:       utils.BoolPointer(true),
 	}
 
 	v2 := &EventReaderOpts{
@@ -2392,6 +2398,12 @@ func TestDiffEventReaderOptsJsonCfg(t *testing.T) {
 		NATSClientCertificateProcessed:    utils.StringPointer("cc_processed"),
 		NATSClientKeyProcessed:            utils.StringPointer("ck_processed"),
 		NATSJetStreamMaxWaitProcessed:     utils.DurationPointer(2 * time.Second),
+		KafkaTLS:                          utils.BoolPointer(false),
+		KafkaCAPath:                       utils.StringPointer("/tmp/path"),
+		KafkaSkipTLSVerify:                utils.BoolPointer(false),
+		KafkaTLSProcessed:                 utils.BoolPointer(false),
+		KafkaCAPathProcessed:              utils.StringPointer("/tmp/path"),
+		KafkaSkipTLSVerifyProcessed:       utils.BoolPointer(false),
 	}
 
 	exp := &EventReaderOptsJson{
@@ -2454,6 +2466,12 @@ func TestDiffEventReaderOptsJsonCfg(t *testing.T) {
 		NATSClientCertificateProcessed:    utils.StringPointer("cc_processed"),
 		NATSClientKeyProcessed:            utils.StringPointer("ck_processed"),
 		NATSJetStreamMaxWaitProcessed:     utils.StringPointer("2s"),
+		KafkaTLS:                          utils.BoolPointer(false),
+		KafkaCAPath:                       utils.StringPointer("/tmp/path"),
+		KafkaSkipTLSVerify:                utils.BoolPointer(false),
+		KafkaTLSProcessed:                 utils.BoolPointer(false),
+		KafkaCAPathProcessed:              utils.StringPointer("/tmp/path"),
+		KafkaSkipTLSVerifyProcessed:       utils.BoolPointer(false),
 	}
 
 	if rcv := diffEventReaderOptsJsonCfg(d, v1, v2); !reflect.DeepEqual(rcv, exp) {
