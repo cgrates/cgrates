@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"fmt"
 	"reflect"
 	"sort"
 	"strconv"
@@ -1669,5 +1670,13 @@ func TestSortedRoutesListDigest(t *testing.T) {
 
 	if val := sRs.Digest(); val != exp {
 		t.Errorf("received %v", val)
+	}
+}
+
+func TestRouteSortDispatcher(t *testing.T) {
+	ssd := RouteSortDispatcher{}
+	strategy := "strategy"
+	if _, err := ssd.SortRoutes("prfID", strategy, map[string]*Route{}, &utils.CGREvent{}, &optsGetRoutes{}); err == nil || err.Error() != fmt.Sprintf("unsupported sorting strategy: %s", strategy) {
+		t.Error(err)
 	}
 }

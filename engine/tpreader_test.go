@@ -30,6 +30,7 @@ import (
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/ltcache"
 	"github.com/cgrates/rpcclient"
 )
 
@@ -1034,17 +1035,34 @@ func TestTPReaderReloadCache(t *testing.T) {
 func TestTPReaderLoadDestinationsFiltered(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	tpr, err := NewTpReader(nil, db, "id", "local", nil, nil, false)
+	tscache := ltcache.NewTransCache(
+		map[string]*ltcache.CacheConfig{
+			utils.CacheTBLTPDestinations: {
+				MaxItems:  3,
+				TTL:       time.Minute * 30,
+				StaticTTL: false,
+				OnEvicted: func(itmID string, value interface{}) {
+				},
+			}},
+	)
+	tscache.Set(utils.CacheTBLTPDestinations, "itemId", &utils.TPDestination{
+		TPid: "tpID",
+		ID:   "prefixes",
+	}, []string{"groupId"}, true, "tId")
+	db.db = tscache
+	tpr, err := NewTpReader(db, db, "itemId", "local", nil, nil, true)
 	if err != nil {
 		t.Error(err)
 	}
-	if b, err := tpr.LoadDestinationsFiltered("tag"); (err == nil || err != utils.ErrNotFound) || b {
-		t.Errorf("expected %+v ,received %v", utils.ErrNotFound, err)
+	if b, err := tpr.LoadDestinationsFiltered(""); (err != nil) || !b {
+		t.Errorf("expected nil ,received %v", err)
 	}
+
 }
 
 func TestTPReaderLoadAll(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	tpr, err := NewTpReader(nil, db, "", "local", nil, nil, false)
 	if err != nil {
