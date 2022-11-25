@@ -20,6 +20,7 @@
   shell: "sudo firewall-cmd --reload"
 
 - name: Restart the nginx so the change take effects
+  become: true
   systemd:
     state: restarted
     name: nginx
