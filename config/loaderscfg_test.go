@@ -2677,3 +2677,43 @@ func TestLoaderSCloneSection(t *testing.T) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp[0]), utils.ToJSON((*rcv.(*LoaderSCfgs))[0]))
 	}
 }
+func TestLoaderDataTypeLoadFromJSONId(t *testing.T) {
+	lData := &LoaderDataType{}
+	jsnCfg := &LoaderJsonDataType{
+		Id: utils.StringPointer("IdTest"),
+	}
+
+	if err := lData.loadFromJSONCfg(jsnCfg, nil, ""); err != nil {
+		t.Errorf("Expected error <%v>, Received error <%v>", nil, err)
+	}
+}
+
+func TestLoaderSCfgloadFromJSONCfgDataId(t *testing.T) {
+	l := &LoaderSCfg{}
+	jsnCfg := &LoaderJsonCfg{
+		Data: &[]*LoaderJsonDataType{
+			{
+				Id: utils.StringPointer(""),
+			},
+		},
+	}
+	if err := l.loadFromJSONCfg(jsnCfg, nil, ""); err != nil {
+
+		t.Errorf("Expected error <%v>, Received error <%v>", nil, err)
+	}
+}
+func TestLoaderSCfgloadFromJSONCacheErr(t *testing.T) {
+	l := &LoaderSCfg{}
+	jsnCfg := &LoaderJsonCfg{
+		Cache: map[string]*CacheParamJsonCfg{
+			"": {
+				Ttl: utils.StringPointer("invalid"),
+			},
+		},
+	}
+
+	expErr := `time: invalid duration "invalid"`
+	if err := l.loadFromJSONCfg(jsnCfg, nil, ""); err.Error() != expErr {
+		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err.Error())
+	}
+}

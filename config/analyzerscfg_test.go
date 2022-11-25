@@ -199,9 +199,9 @@ func TestAnalyzerSCloneSection(t *testing.T) {
 		TTL:             3 * time.Minute,
 		CleanupInterval: 30 * time.Minute,
 	}
-	anlCfg.CloneSection()
-	if !reflect.DeepEqual(anlCfg, exp) {
-		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(anlCfg))
+	rcv := anlCfg.CloneSection()
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(rcv))
 	}
 }
 

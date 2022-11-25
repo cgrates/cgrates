@@ -187,8 +187,8 @@ func TestAdminSCloneSection(t *testing.T) {
 		EEsConns:        []string{"*localhost"},
 	}
 
-	admCfg.CloneSection()
-	if !reflect.DeepEqual(admCfg, exp) {
-		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(admCfg))
+	rcv := admCfg.CloneSection()
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(rcv))
 	}
 }

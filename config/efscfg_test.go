@@ -25,26 +25,8 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-type mockConfDb struct {
-	GetSectionF func(*context.Context, string, interface{}) error
-	SetSectionF func(*context.Context, string, interface{}) error
-}
-
-func (m *mockConfDb) GetSection(ctx *context.Context, sec string, val interface{}) error {
-	if m.GetSectionF != nil {
-		return m.GetSectionF(ctx, sec, val)
-	}
-	return utils.ErrNotImplemented
-}
-
-func (m *mockConfDb) SetSection(ctx *context.Context, sec string, val interface{}) error {
-	if m.SetSectionF != nil {
-		return m.SetSectionF(ctx, sec, val)
-	}
-	return utils.ErrNotImplemented
-}
 func TestEFsCfgLoad(t *testing.T) {
-	m := &mockConfDb{}
+	m := &mockDb{}
 	efsCfg := &EFsCfg{}
 	if err := efsCfg.Load(context.Background(), m, cfg); err != utils.ErrNotImplemented {
 		t.Errorf("Expected error <%v>, Received errpr <%v>", utils.ErrNotImplemented, err)

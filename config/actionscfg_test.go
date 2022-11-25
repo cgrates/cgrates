@@ -344,7 +344,7 @@ func TestActionSCloneSection(t *testing.T) {
 			},
 		},
 	}
-	exp := ActionSCfg{
+	exp := &ActionSCfg{
 		Enabled:                  true,
 		CDRsConns:                []string{"*localhost"},
 		EEsConns:                 []string{"*localhost"},
@@ -366,9 +366,9 @@ func TestActionSCloneSection(t *testing.T) {
 			},
 		},
 	}
-	actCfg.CloneSection()
-	if !reflect.DeepEqual(exp, actCfg) {
-		t.Errorf("Expected %v \n but received \n %v", exp, actCfg)
+	rcv := actCfg.CloneSection()
+	if !reflect.DeepEqual(exp, rcv) {
+		t.Errorf("Expected %v \n but received \n %v", exp, rcv)
 	}
 }
 func TestDiffActionsOptsJsonCfg(t *testing.T) {

@@ -230,8 +230,9 @@ func TestDiffHTTPJsonCfg(t *testing.T) {
 		AuthUsers: map[string]string{
 			"User1": "passUser1",
 		},
-		ClientOpts: &http.Transport{},
-		dialer:     &net.Dialer{},
+		ClientOpts:    &http.Transport{},
+		dialer:        &net.Dialer{},
+		PrometheusURL: "PrometheusURL",
 	}
 
 	v2 := &HTTPCfg{
@@ -247,7 +248,8 @@ func TestDiffHTTPJsonCfg(t *testing.T) {
 		ClientOpts: &http.Transport{
 			MaxIdleConns: 100,
 		},
-		dialer: &net.Dialer{},
+		dialer:        &net.Dialer{},
+		PrometheusURL: "PrometheusURL2",
 	}
 
 	expected := &HTTPJsonCfg{
@@ -263,6 +265,7 @@ func TestDiffHTTPJsonCfg(t *testing.T) {
 		Client_opts: &HTTPClientOptsJson{
 			MaxIdleConns: utils.IntPointer(100),
 		},
+		Prometheus_url: utils.StringPointer("PrometheusURL2"),
 	}
 
 	rcv := diffHTTPJsonCfg(d, v1, v2)
@@ -316,5 +319,273 @@ func TestHttpCfgCloneSection(t *testing.T) {
 		t.Errorf("Expected %v \n but received \n %v",
 			utils.ToJSON(exp.AsMapInterface(utils.InfieldSep)),
 			utils.ToJSON(rcv.AsMapInterface(utils.InfieldSep)))
+	}
+}
+
+func TestNewDialerJsonCfgNil(t *testing.T) {
+	var jsnCfg *HTTPClientOptsJson
+
+	nDialer := NewDefaultCGRConfig().httpCfg.dialer
+	nDialer.DualStack = false
+	if err := newDialer(nDialer, jsnCfg); err != nil {
+		t.Errorf("Expected error <nil> \n but received error <%v>", err)
+	} else if nDialer.DualStack {
+		t.Errorf("Dialer DualStack shouldnt have changed, was <false>, now is <%v>",
+			nDialer.DualStack)
+	}
+
+}
+func TestNewDialerJsonCfgDialTimeout(t *testing.T) {
+	jsnCfg := &HTTPClientOptsJson{
+		DialTimeout: utils.StringPointer("invalid time"),
+	}
+
+	nDialer := NewDefaultCGRConfig().httpCfg.dialer
+	expErr := `time: invalid duration "invalid time"`
+	if err := newDialer(nDialer, jsnCfg); err.Error() != expErr {
+		t.Errorf("Expected error <%v> \n but received error <%v>", expErr, err)
+	}
+
+}
+func TestNewDialerJsonCfgDialFallbackDelay(t *testing.T) {
+	jsnCfg := &HTTPClientOptsJson{
+		DialFallbackDelay: utils.StringPointer("invalid time"),
+	}
+
+	nDialer := NewDefaultCGRConfig().httpCfg.dialer
+	expErr := `time: invalid duration "invalid time"`
+	if err := newDialer(nDialer, jsnCfg); err.Error() != expErr {
+		t.Errorf("Expected error <%v> \n but received error <%v>", expErr, err)
+	}
+
+}
+func TestNewDialerJsonCfgDialKeepAlive(t *testing.T) {
+	jsnCfg := &HTTPClientOptsJson{
+		DialKeepAlive: utils.StringPointer("invalid time"),
+	}
+
+	nDialer := NewDefaultCGRConfig().httpCfg.dialer
+	expErr := `time: invalid duration "invalid time"`
+	if err := newDialer(nDialer, jsnCfg); err.Error() != expErr {
+		t.Errorf("Expected error <%v> \n but received error <%v>", expErr, err)
+	}
+
+}
+
+func TestLoadTransportFromJSONCfgNilJson(t *testing.T) {
+
+	EqualHttpOpts := func(httpOpts1, httpOpts2 *http.Transport) bool {
+		if httpOpts1.TLSHandshakeTimeout != httpOpts2.TLSHandshakeTimeout {
+			return false
+		}
+		if httpOpts1.DisableKeepAlives != httpOpts2.DisableKeepAlives {
+			return false
+		}
+		if httpOpts1.DisableCompression != httpOpts2.DisableCompression {
+			return false
+		}
+		if httpOpts1.MaxIdleConns != httpOpts2.MaxIdleConns {
+			return false
+		}
+		if httpOpts1.MaxIdleConnsPerHost != httpOpts2.MaxIdleConnsPerHost {
+			return false
+		}
+		if httpOpts1.IdleConnTimeout != httpOpts2.IdleConnTimeout {
+			return false
+		}
+		if httpOpts1.MaxConnsPerHost != httpOpts2.MaxConnsPerHost {
+			return false
+		}
+		return true
+	}
+
+	httpOpts := &http.Transport{
+		TLSHandshakeTimeout: time.Duration(2),
+		DisableKeepAlives:   false,
+		DisableCompression:  false,
+		MaxIdleConns:        2,
+		MaxIdleConnsPerHost: 2,
+		MaxConnsPerHost:     2,
+		IdleConnTimeout:     time.Duration(2),
+	}
+
+	httpOptsCopy := httpOpts
+
+	var jsnCfg *HTTPClientOptsJson
+
+	if err := loadTransportFromJSONCfg(httpOpts,
+		NewDefaultCGRConfig().httpCfg.dialer,
+		jsnCfg); err != nil {
+		t.Errorf("Expected error <nil> \n but received error <%v>", err)
+	} else if !EqualHttpOpts(httpOpts, httpOptsCopy) {
+		t.Errorf("Expected HttpOpts not to change, was <%+v>,\n Now is <%+v>",
+			httpOpts, httpOptsCopy)
+	}
+
+}
+
+func TestLoadTransportFromJSONCfgTLSHandshakeTimeout(t *testing.T) {
+	httpOpts := NewDefaultCGRConfig().httpCfg.ClientOpts
+
+	jsnCfg := &HTTPClientOptsJson{
+		TLSHandshakeTimeout: utils.StringPointer("invalid time"),
+	}
+	expErr := `time: invalid duration "invalid time"`
+	if err := loadTransportFromJSONCfg(httpOpts,
+		NewDefaultCGRConfig().httpCfg.dialer,
+		jsnCfg); err.Error() != expErr {
+		t.Errorf("Expected error <%v> \n but received error <%v>", expErr, err.Error())
+	}
+
+}
+func TestLoadTransportFromJSONCfgIdleConnTimeout(t *testing.T) {
+	httpOpts := NewDefaultCGRConfig().httpCfg.ClientOpts
+
+	jsnCfg := &HTTPClientOptsJson{
+		IdleConnTimeout: utils.StringPointer("invalid time"),
+	}
+	expErr := `time: invalid duration "invalid time"`
+	if err := loadTransportFromJSONCfg(httpOpts,
+		NewDefaultCGRConfig().httpCfg.dialer,
+		jsnCfg); err.Error() != expErr {
+		t.Errorf("Expected error <%v> \n but received error <%v>", expErr, err.Error())
+	}
+
+}
+func TestLoadTransportFromJSONCfgResponseHeaderTimeout(t *testing.T) {
+	httpOpts := NewDefaultCGRConfig().httpCfg.ClientOpts
+
+	jsnCfg := &HTTPClientOptsJson{
+		ResponseHeaderTimeout: utils.StringPointer("invalid time"),
+	}
+	expErr := `time: invalid duration "invalid time"`
+	if err := loadTransportFromJSONCfg(httpOpts,
+		NewDefaultCGRConfig().httpCfg.dialer,
+		jsnCfg); err.Error() != expErr {
+		t.Errorf("Expected error <%v> \n but received error <%v>", expErr, err.Error())
+	}
+}
+func TestLoadTransportFromJSONCfgExpectContinueTimeout(t *testing.T) {
+	httpOpts := NewDefaultCGRConfig().httpCfg.ClientOpts
+
+	jsnCfg := &HTTPClientOptsJson{
+		ExpectContinueTimeout: utils.StringPointer("invalid time"),
+	}
+	expErr := `time: invalid duration "invalid time"`
+	if err := loadTransportFromJSONCfg(httpOpts,
+		NewDefaultCGRConfig().httpCfg.dialer,
+		jsnCfg); err.Error() != expErr {
+		t.Errorf("Expected error <%v> \n but received error <%v>", expErr, err.Error())
+	}
+}
+
+func TestHTTPCfgloadFromJsonCfgClientOptsErr(t *testing.T) {
+	cfgJSONStr := &HTTPJsonCfg{
+		Client_opts: &HTTPClientOptsJson{
+			DialTimeout: utils.StringPointer("invalid value"),
+		},
+	}
+	expErr := `time: invalid duration "invalid value"`
+	cfgJsn := NewDefaultCGRConfig()
+	if err = cfgJsn.httpCfg.loadFromJSONCfg(cfgJSONStr); err.Error() != expErr {
+		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err.Error())
+	}
+}
+
+func TestDiffHTTPClientOptsJsonCfgDialer(t *testing.T) {
+	var d *HTTPClientOptsJson
+
+	v1 := &net.Dialer{
+		Timeout:       time.Duration(2),
+		FallbackDelay: time.Duration(2),
+		KeepAlive:     time.Duration(2),
+	}
+
+	v2 := &net.Dialer{
+		Timeout:       time.Duration(3),
+		FallbackDelay: time.Duration(3),
+		KeepAlive:     time.Duration(3),
+	}
+
+	expected := &HTTPClientOptsJson{
+		DialTimeout:       utils.StringPointer("3ns"),
+		DialFallbackDelay: utils.StringPointer("3ns"),
+		DialKeepAlive:     utils.StringPointer("3ns"),
+	}
+
+	rcv := diffHTTPClientOptsJsonCfgDialer(d, v1, v2)
+	if !reflect.DeepEqual(expected, rcv) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+
+	v2_2 := v1
+	expected2 := &HTTPClientOptsJson{}
+
+	rcv = diffHTTPClientOptsJsonCfgDialer(d, v1, v2_2)
+	if !reflect.DeepEqual(expected2, rcv) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected2), utils.ToJSON(rcv))
+	}
+}
+
+func TestDiffHTTPClientOptsJsonCfg(t *testing.T) {
+	var d *HTTPClientOptsJson
+
+	v1 := &http.Transport{
+		TLSClientConfig: &tls.Config{
+			InsecureSkipVerify: false,
+		},
+		TLSHandshakeTimeout:   time.Duration(2),
+		DisableKeepAlives:     false,
+		DisableCompression:    false,
+		MaxIdleConns:          2,
+		MaxIdleConnsPerHost:   2,
+		MaxConnsPerHost:       2,
+		IdleConnTimeout:       time.Duration(2),
+		ResponseHeaderTimeout: time.Duration(2),
+		ExpectContinueTimeout: time.Duration(2),
+		ForceAttemptHTTP2:     false,
+	}
+
+	v2 := &http.Transport{
+		TLSClientConfig: &tls.Config{
+			InsecureSkipVerify: true,
+		},
+		TLSHandshakeTimeout:   time.Duration(3),
+		DisableKeepAlives:     true,
+		DisableCompression:    true,
+		MaxIdleConns:          3,
+		MaxIdleConnsPerHost:   3,
+		MaxConnsPerHost:       3,
+		IdleConnTimeout:       time.Duration(3),
+		ResponseHeaderTimeout: time.Duration(3),
+		ExpectContinueTimeout: time.Duration(3),
+		ForceAttemptHTTP2:     true,
+	}
+
+	expected := &HTTPClientOptsJson{
+		SkipTLSVerification:   utils.BoolPointer(true),
+		TLSHandshakeTimeout:   utils.StringPointer("3ns"),
+		DisableKeepAlives:     utils.BoolPointer(true),
+		DisableCompression:    utils.BoolPointer(true),
+		MaxIdleConns:          utils.IntPointer(3),
+		MaxIdleConnsPerHost:   utils.IntPointer(3),
+		MaxConnsPerHost:       utils.IntPointer(3),
+		IdleConnTimeout:       utils.StringPointer("3ns"),
+		ResponseHeaderTimeout: utils.StringPointer("3ns"),
+		ExpectContinueTimeout: utils.StringPointer("3ns"),
+		ForceAttemptHTTP2:     utils.BoolPointer(true),
+	}
+
+	rcv := diffHTTPClientOptsJsonCfg(d, v1, v2)
+	if !reflect.DeepEqual(expected, rcv) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+
+	v2_2 := v1
+	expected2 := &HTTPClientOptsJson{}
+
+	rcv = diffHTTPClientOptsJsonCfg(d, v1, v2_2)
+	if !reflect.DeepEqual(expected2, rcv) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected2), utils.ToJSON(rcv))
 	}
 }

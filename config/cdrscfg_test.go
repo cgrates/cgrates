@@ -542,8 +542,8 @@ func TestCdrsCfgCloneSection(t *testing.T) {
 		Opts:             &CdrsOpts{},
 	}
 
-	cdrsCfg.CloneSection()
-	if !reflect.DeepEqual(exp, cdrsCfg) {
-		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(cdrsCfg))
+	rcv := cdrsCfg.CloneSection()
+	if !reflect.DeepEqual(exp, rcv) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(rcv))
 	}
 }
