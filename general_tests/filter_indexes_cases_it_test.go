@@ -100,8 +100,14 @@ var (
 
 		testFilterIndexesCasesSetDifferentFilters,
 		testFilterIndexesCasesOverwriteAttributes,
-		testFilterIndexesCasesGetIndexesAnyContextChanged,
+		//testFilterIndexesCasesGetIndexesAnyContextChanged,
 		testFilterIndexesCasesGetIndexesSessionsContextChanged,
+
+		testFilterIndexesCasesSetIndexedFilter,
+		testFilterIndexesCasesSetChargerWithFltr,
+		testFilterIndexesCasesGetChargerIndexes,
+		testFilterIndexesCasesOverwriteFilterForCharger,
+		testFilterIndexesCasesGetChargerIndexesChanged,
 
 		testFilterIndexesCasesStopEngine,
 	}
@@ -423,6 +429,119 @@ func testFilterIndexesCasesGetIndexesSessionsContextChanged(t *testing.T) {
 	if err := fIdxCasesRPC.Call(utils.APIerSv1GetFilterIndexes, arg, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedIndexes, reply) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expectedIndexes), utils.ToJSON(reply))
+	}
+}
+
+func testFilterIndexesCasesSetIndexedFilter(t *testing.T) {
+	filter1 = &v1.FilterWithCache{
+		Filter: &engine.Filter{
+			Tenant: "cgrates.org",
+			ID:     "FLTR_Charger",
+			Rules: []*engine.FilterRule{
+				{
+					Type:    utils.MetaString,
+					Element: "~*req.CGRID",
+					Values:  []string{"tester_id"},
+				},
+				{
+					Type:    utils.MetaPrefix,
+					Element: "~*req.AnswerTime",
+					Values:  []string{"2022"},
+				},
+				{
+					Type:    utils.MetaSuffix,
+					Element: "~*req.AnswerTime",
+					Values:  []string{"202"},
+				},
+			},
+		},
+	}
+	var result string
+	if err := fIdxCasesRPC.Call(utils.APIerSv1SetFilter, filter1, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+}
+
+func testFilterIndexesCasesSetChargerWithFltr(t *testing.T) {
+	chargerProfile := &v1.ChargerWithCache{
+		ChargerProfile: &engine.ChargerProfile{
+			Tenant:       "cgrates.org",
+			ID:           "ChrgerIndexable",
+			FilterIDs:    []string{"FLTR_Charger"},
+			RunID:        utils.MetaRaw,
+			AttributeIDs: []string{"ATTR_FLTR1"},
+			Weight:       20,
+		},
+	}
+	var result string
+	if err := fIdxCasesRPC.Call(utils.APIerSv1SetChargerProfile, chargerProfile, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+}
+
+func testFilterIndexesCasesGetChargerIndexes(t *testing.T) {
+	arg := &v1.AttrGetFilterIndexes{
+		Tenant:   "cgrates.org",
+		ItemType: utils.MetaChargers,
+	}
+	expectedIndexes := []string{
+		"*string:~*req.CGRID:tester_id:ChrgerIndexable",
+		"*prefix:~*req.AnswerTime:2022:ChrgerIndexable",
+	}
+	sort.Strings(expectedIndexes)
+	var reply []string
+	if err := fIdxCasesRPC.Call(utils.APIerSv1GetFilterIndexes, arg, &reply); err != nil {
+		t.Error(err)
+	} else if sort.Strings(reply); !reflect.DeepEqual(expectedIndexes, reply) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expectedIndexes), utils.ToJSON(reply))
+	}
+}
+
+func testFilterIndexesCasesOverwriteFilterForCharger(t *testing.T) {
+	filter1 = &v1.FilterWithCache{
+		Filter: &engine.Filter{
+			Tenant: "cgrates.org",
+			ID:     "FLTR_Charger",
+			Rules: []*engine.FilterRule{
+				{
+					Type:    utils.MetaString,
+					Element: "~*req.Account",
+					Values:  []string{"12345"},
+				},
+				{
+					Type:    utils.MetaLessOrEqual,
+					Element: "~*req.ProcessRuns",
+					Values:  []string{"1"},
+				},
+			},
+		},
+	}
+	var result string
+	if err := fIdxCasesRPC.Call(utils.APIerSv1SetFilter, filter1, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+}
+
+func testFilterIndexesCasesGetChargerIndexesChanged(t *testing.T) {
+	arg := &v1.AttrGetFilterIndexes{
+		Tenant:   "cgrates.org",
+		ItemType: utils.MetaChargers,
+	}
+	expectedIndexes := []string{
+		"*string:~*req.Account:12345:ChrgerIndexable",
+	}
+	sort.Strings(expectedIndexes)
+	var reply []string
+	if err := fIdxCasesRPC.Call(utils.APIerSv1GetFilterIndexes, arg, &reply); err != nil {
+		t.Error(err)
+	} else if sort.Strings(reply); !reflect.DeepEqual(expectedIndexes, reply) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expectedIndexes), utils.ToJSON(reply))
 	}
 }
