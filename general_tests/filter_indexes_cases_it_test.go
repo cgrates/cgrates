@@ -100,6 +100,7 @@ var (
 
 		testFilterIndexesCasesSetDifferentFilters,
 		testFilterIndexesCasesOverwriteAttributes,
+		testFilterIndexesCasesComputeAttributesIndexes,
 		testFilterIndexesCasesGetIndexesAnyContextChanged,
 		testFilterIndexesCasesGetIndexesSessionsContextChanged,
 
@@ -266,7 +267,8 @@ func testFilterIndexesCasesGetIndexesAnyContext(t *testing.T) {
 		"*prefix:~*req.Missed:1:ATTR_NO_FLTR2",
 		"*string:~*req.Account:1001:ATTR_NO_FLTR1",
 		"*string:~*req.Account:1002:ATTR_NO_FLTR1",
-		"*string:~*req.Category:call:ATTR_NO_FLTR2"}
+		"*string:~*req.Category:call:ATTR_NO_FLTR2",
+	}
 	sort.Strings(expectedIndexes)
 	var reply []string
 	if err := fIdxCasesRPC.Call(utils.APIerSv1GetFilterIndexes, arg, &reply); err != nil {

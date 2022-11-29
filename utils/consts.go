@@ -69,7 +69,7 @@ var (
 		CacheSupplierProfiles, CacheAttributeProfiles, CacheChargerProfiles,
 		CacheDispatcherProfiles, CacheDispatcherHosts, CacheResourceFilterIndexes,
 		CacheStatFilterIndexes, CacheThresholdFilterIndexes, CacheSupplierFilterIndexes,
-		CacheAttributeFilterIndexes, CacheChargerFilterIndexes, CacheDispatcherFilterIndexes,
+		CacheAttributeFilterIndexes, CacheChargerFilterIndexes, CacheDispatcherFilterIndexes, CacheReverseFilterIndexes,
 		CacheDispatcherRoutes, CacheDiameterMessages, CacheRPCResponses, CacheClosedSessions,
 		CacheCDRIDs, CacheLoadIDs, CacheRPCConnections, CacheRatingProfilesTmp})
 	CacheInstanceToPrefix = map[string]string{
@@ -102,6 +102,7 @@ var (
 		CacheAttributeFilterIndexes:  AttributeFilterIndexes,
 		CacheChargerFilterIndexes:    ChargerFilterIndexes,
 		CacheDispatcherFilterIndexes: DispatcherFilterIndexes,
+		CacheReverseFilterIndexes:    ReverseFilterIndexes,
 		CacheLoadIDs:                 LoadIDPrefix,
 		CacheAccounts:                ACCOUNT_PREFIX,
 	}
@@ -114,6 +115,7 @@ var (
 		AttributeProfilePrefix:  CacheAttributeFilterIndexes,
 		ChargerProfilePrefix:    CacheChargerFilterIndexes,
 		DispatcherProfilePrefix: CacheDispatcherFilterIndexes,
+		ReverseFilterIndexes:    CacheReverseFilterIndexes,
 	}
 	CacheIndexesToPrefix map[string]string // will be built on init
 
@@ -129,7 +131,7 @@ var (
 		CacheTimings, CacheStatQueueProfiles, CacheStatQueues, CacheThresholdProfiles, CacheThresholds,
 		CacheFilters, CacheSupplierProfiles, CacheAttributeProfiles, CacheChargerProfiles,
 		CacheDispatcherProfiles, CacheDispatcherHosts, CacheResourceFilterIndexes, CacheStatFilterIndexes,
-		CacheThresholdFilterIndexes, CacheSupplierFilterIndexes, CacheAttributeFilterIndexes,
+		CacheThresholdFilterIndexes, CacheSupplierFilterIndexes, CacheAttributeFilterIndexes, CacheReverseFilterIndexes,
 		CacheChargerFilterIndexes, CacheDispatcherFilterIndexes, CacheLoadIDs, CacheAccounts})
 
 	// ProtectedSFlds are the fields that sessions should not alter
@@ -1518,6 +1520,7 @@ const (
 	CacheAttributeFilterIndexes  = "*attribute_filter_indexes"
 	CacheChargerFilterIndexes    = "*charger_filter_indexes"
 	CacheDispatcherFilterIndexes = "*dispatcher_filter_indexes"
+	CacheReverseFilterIndexes    = "*reverse_filter_indexes"
 	CacheDiameterMessages        = "*diameter_messages"
 	CacheRPCResponses            = "*rpc_responses"
 	CacheClosedSessions          = "*closed_sessions"
@@ -1541,6 +1544,7 @@ const (
 	ChargerFilterIndexes    = "cfi_"
 	DispatcherFilterIndexes = "dfi_"
 	ActionPlanIndexes       = "api_"
+	ReverseFilterIndexes    = "fii_"
 )
 
 // Agents

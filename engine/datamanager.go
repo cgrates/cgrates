@@ -627,8 +627,19 @@ func GetFilter(dm *DataManager, tenant, id string, cacheRead, cacheWrite bool,
 }
 
 func (dm *DataManager) SetFilter(fltr *Filter) (err error) {
+	var oldFltr *Filter
+	oldFltr, err = GetFilter(dm, fltr.Tenant, fltr.ID, true, false, utils.NonTransactional)
+	if err != nil && err != utils.ErrNotFound {
+		return err
+	}
 	if err = dm.DataDB().SetFilterDrv(fltr); err != nil {
 		return
+	}
+	if oldFltr != nil {
+		/* if err = UpdateFilterIndexes(dm, oldFltr, fltr); err != nil {
+			return
+		} */
+
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaFilters]; itm.Replicate {
 		err = replicate(dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
