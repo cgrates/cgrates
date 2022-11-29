@@ -819,3 +819,56 @@ func TestNewCacheS(t *testing.T) {
 	}
 
 }
+
+func TestCacheRemoveWithoutReplicate(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	tscache := ltcache.NewTransCache(
+		map[string]*ltcache.CacheConfig{
+			"cacheId": {
+				MaxItems:  3,
+				TTL:       time.Minute * 30,
+				StaticTTL: false,
+				OnEvicted: func(itmID string, value interface{}) {
+				},
+			}},
+	)
+	tscache.Set("cacheID", "itemId", "value", []string{"groupId"}, true, "tId")
+	chS := &CacheS{
+		cfg:    cfg,
+		dm:     dm,
+		tCache: tscache,
+	}
+	chS.RemoveWithoutReplicate("cacheID", "itemId", true, "tId")
+
+	if _, has := tscache.Get("cacheID", "itemId"); has {
+		t.Error("shouldn't exist")
+	}
+}
+func TestCacheRemoveGroup(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	tscache := ltcache.NewTransCache(
+		map[string]*ltcache.CacheConfig{
+			"cacheId": {
+				MaxItems:  3,
+				TTL:       time.Minute * 30,
+				StaticTTL: false,
+				OnEvicted: func(itmID string, value interface{}) {
+				},
+			}},
+	)
+	tscache.Set("cacheID", "itemId", "value", []string{"groupId"}, true, "tId")
+	chS := &CacheS{
+		cfg:    cfg,
+		dm:     dm,
+		tCache: tscache,
+	}
+	chS.RemoveGroup("cacheID", "groupId")
+	if _, has := tscache.Get("cacheID", "itemId"); has {
+		t.Error("shouldn't exist")
+	}
+
+}

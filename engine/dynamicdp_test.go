@@ -47,5 +47,12 @@ func TestDynamicDpFieldAsInterface(t *testing.T) {
 	SetConnManager(connMgr)
 	if _, err := dDp.fieldAsInterface([]string{utils.MetaStats, "val", "val3"}); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
+	} else if _, err := dDp.fieldAsInterface([]string{utils.MetaLibPhoneNumber, "+402552663", "val3"}); err != nil {
+		t.Error(err)
+	} else if _, err := dDp.fieldAsInterface([]string{utils.MetaLibPhoneNumber, "+402552663", "val3"}); err != nil {
+		t.Error(err)
+	} else if _, err := dDp.fieldAsInterface([]string{utils.MetaAsm, "+402552663", "val3"}); err == nil || err != utils.ErrNotFound {
+		t.Error(err)
 	}
+
 }
