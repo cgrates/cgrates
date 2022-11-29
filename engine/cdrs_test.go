@@ -1273,9 +1273,9 @@ func TestV1RateCDRS(t *testing.T) {
 		Tenant:  "cgrates.org",
 		APIOpts: map[string]interface{}{},
 	}
-	reply := utils.StringPointer("reply")
+	var reply string
 
-	if err := cdrS.V1RateCDRs(arg, reply); err == nil || err != utils.ErrNotFound {
+	if err := cdrS.V1RateCDRs(arg, &reply); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
 	}
 
@@ -1532,4 +1532,145 @@ func TestV2StoreSessionCost2(t *testing.T) {
 		t.Errorf("expected %+v,received %+v", utils.OK, *reply)
 	}
 
+}
+func TestV1RateCDRSSuccesful(t *testing.T) {
+	Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	cfg.CdrsCfg().ChargerSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ChargerSConnsCfg)}
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	cdrS := &CDRServer{
+		cgrCfg:  cfg,
+		cdrDb:   db,
+		dm:      dm,
+		connMgr: connMgr,
+	}
+	cdr := &CDR{
+		CGRID:       "Cdr1",
+		OrderID:     123,
+		ToR:         utils.MetaVoice,
+		OriginID:    "OriginCDR1",
+		OriginHost:  "192.168.1.1",
+		Source:      "test",
+		RequestType: utils.MetaRated,
+		Category:    "call",
+		Account:     "1001",
+		Subject:     "1001",
+		Destination: "+4986517174963",
+		RunID:       utils.MetaDefault,
+		Usage:       time.Duration(0),
+		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
+		Cost:        1.01,
+	}
+	if err := cdrS.cdrDb.SetCDR(cdr, true); err != nil {
+		t.Error(err)
+	}
+	arg := &ArgRateCDRs{
+		Flags: []string{utils.MetaStore, utils.MetaExport, utils.MetaThresholds, utils.MetaStats, utils.MetaChargers, utils.MetaAttributes},
+		RPCCDRsFilter: utils.RPCCDRsFilter{
+			CGRIDs: []string{"Cdr1"},
+		},
+		Tenant:  "cgrates.org",
+		APIOpts: map[string]interface{}{},
+	}
+	var reply *string
+
+	if err := cdrS.V1RateCDRs(arg, reply); err == nil {
+		t.Error(err)
+	}
+}
+
+func TestCdrServerStoreSMCost(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.CdrsCfg().ChargerSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ChargerSConnsCfg)}
+	db := NewInternalDB(nil, nil, true, map[string]*config.ItemOpt{
+		utils.CacheSessionCostsTBL: {
+			Limit:     2,
+			TTL:       2 * time.Minute,
+			StaticTTL: true,
+			Remote:    false,
+			Replicate: true,
+		},
+	})
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	cdrS := &CDRServer{
+		cgrCfg:  cfg,
+		cdrDb:   db,
+		dm:      dm,
+		connMgr: connMgr,
+	}
+	smCost := &SMCost{
+		CGRID:      "cgrid",
+		RunID:      "runid",
+		OriginHost: "originhost",
+		OriginID:   "origin",
+		CostSource: "cost",
+		Usage:      1 * time.Minute,
+		CostDetails: &EventCost{
+			CGRID:          "ecId",
+			RunID:          "ecRunId",
+			StartTime:      time.Date(2022, 12, 1, 12, 0, 0, 0, time.UTC),
+			Usage:          utils.DurationPointer(1 * time.Hour),
+			Cost:           utils.Float64Pointer(12.1),
+			Charges:        []*ChargingInterval{},
+			AccountSummary: &AccountSummary{},
+			Accounting:     Accounting{},
+			RatingFilters:  RatingFilters{},
+			Rates:          ChargedRates{},
+		},
+	}
+	if err := cdrS.cdrDb.SetSMCost(smCost); err != nil {
+		t.Error(err)
+	}
+
+}
+
+func TestCdrSRateCDR(t *testing.T) {
+
+	cfg := config.NewDefaultCGRConfig()
+	cfg.CdrsCfg().ChargerSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ChargerSConnsCfg)}
+	db := NewInternalDB(nil, nil, true, map[string]*config.ItemOpt{
+		utils.CacheSessionCostsTBL: {
+			Limit:     2,
+			TTL:       2 * time.Minute,
+			StaticTTL: true,
+			Remote:    false,
+			Replicate: true,
+		},
+	})
+
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	cdrS := &CDRServer{
+		cgrCfg:  cfg,
+		cdrDb:   db,
+		dm:      dm,
+		connMgr: connMgr,
+	}
+	smc := &SMCost{
+		CGRID:       "cgrid",
+		RunID:       "runid",
+		OriginHost:  "originHost",
+		OriginID:    "originID",
+		CostSource:  "cost_source",
+		Usage:       2 * time.Minute,
+		CostDetails: &EventCost{},
+	}
+	cdrS.cdrDb.SetSMCost(smc)
+
+	cdrOpts := &CDRWithAPIOpts{
+		CDR: &CDR{
+			CGRID:       "cgrId",
+			RunID:       "runId",
+			OrderID:     222,
+			Usage:       4 * time.Second,
+			RequestType: utils.Prepaid,
+			ExtraFields: map[string]string{
+				utils.LastUsed:       "extra",
+				utils.OriginIDPrefix: "prefix2",
+			},
+		},
+	}
+	if _, err := cdrS.rateCDR(cdrOpts); err == nil {
+		t.Error(err)
+	}
 }

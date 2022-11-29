@@ -3244,3 +3244,142 @@ func TestEnableDisableAccountAction(t *testing.T) {
 		t.Errorf("expected %+v ,received %v", expErr, err)
 	}
 }
+
+func TestResetAccountCDRSuccesful(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	idb := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(idb, cfg.CacheCfg(), nil)
+	fltrs := NewFilterS(cfg, nil, dm)
+	cdr := &CDR{
+		CGRID:       "Cdr1",
+		OrderID:     123,
+		ToR:         utils.MetaVoice,
+		OriginID:    "OriginCDR1",
+		OriginHost:  "192.168.1.1",
+		Source:      "test",
+		RequestType: utils.MetaRated,
+		Category:    "call",
+		Account:     "1001",
+		Subject:     "1001",
+		Destination: "+4986517174963",
+		RunID:       utils.MetaDefault,
+		Usage:       time.Duration(0),
+		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
+		Cost:        1.01,
+		CostDetails: &EventCost{
+			CGRID:     "ecId",
+			RunID:     "ecRunId",
+			StartTime: time.Date(2022, 12, 1, 12, 0, 0, 0, time.UTC),
+			Usage:     utils.DurationPointer(1 * time.Hour),
+			Cost:      utils.Float64Pointer(12.1),
+			Charges:   []*ChargingInterval{},
+			AccountSummary: &AccountSummary{
+				Tenant: "cgrates.org",
+				ID:     "acc_Id",
+				BalanceSummaries: BalanceSummaries{
+					{
+						UUID:     "uuid",
+						ID:       "summary_id",
+						Type:     "type",
+						Initial:  1,
+						Value:    12,
+						Disabled: true,
+					}, {},
+				},
+				AllowNegative: true,
+				Disabled:      false,
+			},
+			Accounting:    Accounting{},
+			RatingFilters: RatingFilters{},
+			Rates:         ChargedRates{},
+		},
+	}
+	if err := idb.SetCDR(cdr, true); err != nil {
+		t.Error(err)
+	}
+
+	SetCdrStorage(idb)
+	var extraData interface{}
+	acc := &Account{
+		ID: "cgrates.org:1001",
+		BalanceMap: map[string]Balances{
+			utils.MetaMonetary: {
+				&Balance{Value: 20},
+			},
+		},
+		UnitCounters: UnitCounters{
+			utils.MetaMonetary: []*UnitCounter{
+				{
+					Counters: CounterFilters{
+						&CounterFilter{Value: 1},
+					},
+				},
+			},
+		},
+	}
+	a := &Action{
+		Id:              "CDRLog1",
+		ActionType:      utils.CDRLog,
+		ExtraParameters: "{\"BalanceID\":\"~*acnt.BalanceID\",\"ActionID\":\"~*act.ActionID\",\"BalanceValue\":\"~*acnt.BalanceValue\"}",
+		Weight:          50,
+	}
+	acs := Actions{
+		a,
+		&Action{
+			Id:         "CdrDebit",
+			ActionType: "*debit",
+			Balance: &BalanceFilter{
+				ID:     utils.StringPointer(utils.MetaDefault),
+				Value:  &utils.ValueFormula{Static: 9.95},
+				Type:   utils.StringPointer(utils.MetaMonetary),
+				Weight: utils.Float64Pointer(0),
+			},
+			Weight:       float64(90),
+			balanceValue: 10,
+		},
+	}
+	if err = resetAccountCDR(acc, a, acs, fltrs, extraData); err != nil {
+		t.Error(err)
+	}
+
+}
+
+/*
+func TestRemoveSessionCost(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	fl := &Filter{
+		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+		ID:     "BalanceID;",
+		Rules: []*FilterRule{
+			{
+				Type:       "*string",
+				Element:    "rules",
+				Values:     []string{},
+				rsrValues:  config.RSRParsers{},
+				rsrElement: &config.RSRParser{},
+				rsrFilters: utils.RSRFilters{},
+				negative:   utils.BoolPointer(false),
+			}, {
+
+				Type:       "*string",
+				Element:    "rules",
+				Values:     []string{},
+				rsrValues:  config.RSRParsers{},
+				rsrElement: &config.RSRParser{},
+				rsrFilters: utils.RSRFilters{},
+				negative:   utils.BoolPointer(false),
+			},
+		},
+	}
+	dm.SetFilter(fl, true)
+	SetDataStorage(dm)
+	action := &Action{
+		ExtraParameters: "{BalanceID;~*acnt.BalanceID;ActionID;~*act.ActionID;BalanceValue;~*acnt.BalanceValue}",
+	}
+	if err := removeSessionCosts(nil, action, nil, nil, nil); err != nil {
+		t.Error(err)
+	}
+}
+*/
