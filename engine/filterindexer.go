@@ -28,7 +28,10 @@ import (
 
 // NewFilterIndexer creates the FilterIndexes without any indexes in it
 func NewFilterIndexer(dm *DataManager, itemType, dbKeySuffix string) *FilterIndexer {
-	return &FilterIndexer{dm: dm, itemType: itemType, dbKeySuffix: dbKeySuffix,
+	return &FilterIndexer{
+		dm:            dm,
+		itemType:      itemType,
+		dbKeySuffix:   dbKeySuffix,
 		indexes:       make(map[string]utils.StringMap),
 		chngdIndxKeys: make(utils.StringMap)}
 }
@@ -109,6 +112,9 @@ func (rfi *FilterIndexer) cacheRemItemType() { // ToDo: tune here by removing pe
 
 	case utils.DispatcherProfilePrefix:
 		Cache.Clear([]string{utils.CacheDispatcherFilterIndexes})
+
+	case utils.ReverseFilterIndexes:
+		Cache.Clear([]string{utils.CacheReverseFilterIndexes})
 	}
 }
 
@@ -279,6 +285,7 @@ func (rfi *FilterIndexer) RemoveItemFromIndex(tenant, itemID string, oldFilters 
 			}
 		}
 	}
+
 	return rfi.StoreIndexes(false, utils.NonTransactional)
 }
 
