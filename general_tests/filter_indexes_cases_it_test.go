@@ -100,13 +100,14 @@ var (
 
 		testFilterIndexesCasesSetDifferentFilters,
 		testFilterIndexesCasesOverwriteAttributes,
-		//testFilterIndexesCasesGetIndexesAnyContextChanged,
+		testFilterIndexesCasesGetIndexesAnyContextChanged,
 		testFilterIndexesCasesGetIndexesSessionsContextChanged,
 
 		testFilterIndexesCasesSetIndexedFilter,
 		testFilterIndexesCasesSetChargerWithFltr,
 		testFilterIndexesCasesGetChargerIndexes,
 		testFilterIndexesCasesOverwriteFilterForCharger,
+		testFilterIndexesCasesComputeChargersIndexes,
 		testFilterIndexesCasesGetChargerIndexesChanged,
 
 		testFilterIndexesCasesStopEngine,
@@ -323,6 +324,20 @@ func testFilterIndexesCasesSetDifferentFilters(t *testing.T) {
 	}
 }
 
+func testFilterIndexesCasesComputeAttributesIndexes(t *testing.T) {
+	var result string
+	if err := fIdxCasesRPC.Call(utils.APIerSv1ComputeFilterIndexes,
+		utils.ArgsComputeFilterIndexes{
+			Tenant:     "cgrates.org",
+			Context:    utils.META_ANY,
+			AttributeS: true,
+		}, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Errorf("Error: %+v", result)
+	}
+}
+
 func testFilterIndexesCasesOverwriteAttributes(t *testing.T) {
 	eAttrPrf1 := &v1.AttributeWithCache{
 		AttributeProfile: &engine.AttributeProfile{
@@ -526,6 +541,19 @@ func testFilterIndexesCasesOverwriteFilterForCharger(t *testing.T) {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
+	}
+}
+
+func testFilterIndexesCasesComputeChargersIndexes(t *testing.T) {
+	var result string
+	if err := fIdxCasesRPC.Call(utils.APIerSv1ComputeFilterIndexes,
+		utils.ArgsComputeFilterIndexes{
+			Tenant:   "cgrates.org",
+			ChargerS: true,
+		}, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Errorf("Error: %+v", result)
 	}
 }
 
