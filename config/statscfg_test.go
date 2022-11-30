@@ -241,6 +241,18 @@ func TestDiffStatServJsonCfg(t *testing.T) {
 					Value:  false,
 				},
 			},
+			RoundingDecimals: []*utils.DynamicIntOpt{
+				{
+					Tenant: "cgrates.org",
+					Value:  1,
+				},
+			},
+			PrometheusStatIDs: []*utils.DynamicStringSliceOpt{
+				{
+					Tenant: "cgrates.org",
+					Value:  []string{"statsid1"},
+				},
+			},
 		},
 	}
 
@@ -267,6 +279,18 @@ func TestDiffStatServJsonCfg(t *testing.T) {
 					Value:  true,
 				},
 			},
+			RoundingDecimals: []*utils.DynamicIntOpt{
+				{
+					Tenant: "cgrates.net",
+					Value:  2,
+				},
+			},
+			PrometheusStatIDs: []*utils.DynamicStringSliceOpt{
+				{
+					Tenant: "cgrates.net",
+					Value:  []string{"statsid2"},
+				},
+			},
 		},
 	}
 
@@ -291,6 +315,18 @@ func TestDiffStatServJsonCfg(t *testing.T) {
 				{
 					Tenant: "cgrates.net",
 					Value:  true,
+				},
+			},
+			RoundingDecimals: []*utils.DynamicIntOpt{
+				{
+					Tenant: "cgrates.net",
+					Value:  2,
+				},
+			},
+			PrometheusStatIDs: []*utils.DynamicStringSliceOpt{
+				{
+					Tenant: "cgrates.net",
+					Value:  []string{"statsid2"},
 				},
 			},
 		},

@@ -281,6 +281,13 @@ func TestDiffRouteSJsonCfg(t *testing.T) {
 					Value:  decimal.WithContext(utils.DecimalContext).SetUint64(3),
 				},
 			},
+			MaxItems: []*utils.DynamicIntPointerOpt{
+				{
+					FilterIDs: []string{"id1"},
+					Tenant:    "cgrates.net",
+					Value:     utils.IntPointer(1),
+				},
+			},
 		},
 	}
 
@@ -334,6 +341,13 @@ func TestDiffRouteSJsonCfg(t *testing.T) {
 					Value:  decimal.WithContext(utils.DecimalContext).SetUint64(2),
 				},
 			},
+			MaxItems: []*utils.DynamicIntPointerOpt{
+				{
+					FilterIDs: []string{"id2"},
+					Tenant:    "cgrates.org",
+					Value:     utils.IntPointer(2),
+				},
+			},
 		},
 	}
 
@@ -385,6 +399,13 @@ func TestDiffRouteSJsonCfg(t *testing.T) {
 				{
 					Tenant: "cgrates.org",
 					Value:  "2",
+				},
+			},
+			MaxItems: []*utils.DynamicIntOpt{
+				{
+					FilterIDs: []string{"id2"},
+					Tenant:    "cgrates.org",
+					Value:     2,
 				},
 			},
 		},

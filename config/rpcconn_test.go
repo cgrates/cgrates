@@ -183,35 +183,46 @@ func TestRemoteHostLoadFromJSONCfg(t *testing.T) {
 	if err := rh.loadFromJSONCfg(jsnCfg); err == nil || err.Error() != errExpect {
 		t.Errorf("Expected %v \n but received \n %v", errExpect, err.Error())
 	}
+
+	jsnCfg = &RemoteHostJson{
+		Connect_timeout:        utils.StringPointer("2s"),
+		Reply_timeout:          utils.StringPointer("2s"),
+		Max_reconnect_interval: utils.StringPointer("2c"),
+	}
+	if err := rh.loadFromJSONCfg(jsnCfg); err == nil || err.Error() != errExpect {
+		t.Errorf("Expected %v \n but received \n %v", errExpect, err.Error())
+	}
 }
 
 func TestRemoteHostAsMapInterface(t *testing.T) {
 	rh := &RemoteHost{
-		ID:                "rh_id1",
-		Address:           "localhost",
-		Transport:         "*json",
-		ConnectAttempts:   2,
-		Reconnects:        2,
-		ConnectTimeout:    3 * time.Nanosecond,
-		ReplyTimeout:      2 * time.Nanosecond,
-		TLS:               true,
-		ClientKey:         "ck",
-		ClientCertificate: "cc",
-		CaCertificate:     "ca",
+		ID:                   "rh_id1",
+		Address:              "localhost",
+		Transport:            "*json",
+		ConnectAttempts:      2,
+		Reconnects:           2,
+		ConnectTimeout:       3 * time.Nanosecond,
+		ReplyTimeout:         2 * time.Nanosecond,
+		TLS:                  true,
+		ClientKey:            "ck",
+		ClientCertificate:    "cc",
+		CaCertificate:        "ca",
+		MaxReconnectInterval: 2 * time.Nanosecond,
 	}
 
 	eMap := map[string]interface{}{
-		utils.IDCfg:              "rh_id1",
-		utils.AddressCfg:         "localhost",
-		utils.TransportCfg:       "*json",
-		utils.ConnectAttemptsCfg: 2,
-		utils.ReconnectsCfg:      2,
-		utils.ConnectTimeoutCfg:  3 * time.Nanosecond,
-		utils.ReplyTimeoutCfg:    2 * time.Nanosecond,
-		utils.TLSNoCaps:          true,
-		utils.KeyPathCgr:         "ck",
-		utils.CertPathCgr:        "cc",
-		utils.CAPathCgr:          "ca",
+		utils.IDCfg:                   "rh_id1",
+		utils.AddressCfg:              "localhost",
+		utils.TransportCfg:            "*json",
+		utils.ConnectAttemptsCfg:      2,
+		utils.ReconnectsCfg:           2,
+		utils.ConnectTimeoutCfg:       3 * time.Nanosecond,
+		utils.ReplyTimeoutCfg:         2 * time.Nanosecond,
+		utils.TLSNoCaps:               true,
+		utils.KeyPathCgr:              "ck",
+		utils.CertPathCgr:             "cc",
+		utils.CAPathCgr:               "ca",
+		utils.MaxReconnectIntervalCfg: (2 * time.Nanosecond).String(),
 	}
 
 	rcv := rh.AsMapInterface()
@@ -534,19 +545,21 @@ func TestDiffRPCConnJson(t *testing.T) {
 		PoolSize: 2,
 		Conns: []*RemoteHost{
 			{
-				ID:                "host1_ID",
-				Address:           "127.0.0.1:8080",
-				Transport:         "tcp",
-				ConnectAttempts:   2,
-				Reconnects:        5,
-				ConnectTimeout:    1 * time.Minute,
-				ReplyTimeout:      1 * time.Minute,
-				TLS:               false,
-				ClientKey:         "key1",
-				ClientCertificate: "path1",
-				CaCertificate:     "ca_path1",
+				ID:                   "host1_ID",
+				Address:              "127.0.0.1:8080",
+				Transport:            "tcp",
+				ConnectAttempts:      2,
+				Reconnects:           5,
+				ConnectTimeout:       1 * time.Minute,
+				ReplyTimeout:         1 * time.Minute,
+				TLS:                  false,
+				ClientKey:            "key1",
+				ClientCertificate:    "path1",
+				CaCertificate:        "ca_path1",
+				MaxReconnectInterval: 1 * time.Minute,
 			},
 		},
+		ReplyTimeout: 1 * time.Minute,
 	}
 
 	v2 := &RPCConn{
@@ -554,19 +567,21 @@ func TestDiffRPCConnJson(t *testing.T) {
 		PoolSize: 3,
 		Conns: []*RemoteHost{
 			{
-				ID:                "host2_ID",
-				Address:           "0.0.0.0:8080",
-				Transport:         "udp",
-				ConnectAttempts:   3,
-				Reconnects:        4,
-				ConnectTimeout:    2 * time.Minute,
-				ReplyTimeout:      2 * time.Minute,
-				TLS:               true,
-				ClientKey:         "key2",
-				ClientCertificate: "path2",
-				CaCertificate:     "ca_path2",
+				ID:                   "host2_ID",
+				Address:              "0.0.0.0:8080",
+				Transport:            "udp",
+				ConnectAttempts:      3,
+				Reconnects:           4,
+				ConnectTimeout:       2 * time.Minute,
+				ReplyTimeout:         2 * time.Minute,
+				TLS:                  true,
+				ClientKey:            "key2",
+				ClientCertificate:    "path2",
+				CaCertificate:        "ca_path2",
+				MaxReconnectInterval: 2 * time.Minute,
 			},
 		},
+		ReplyTimeout: 2 * time.Minute,
 	}
 
 	expected := &RPCConnJson{
@@ -574,19 +589,21 @@ func TestDiffRPCConnJson(t *testing.T) {
 		PoolSize: utils.IntPointer(3),
 		Conns: &[]*RemoteHostJson{
 			{
-				Id:                 utils.StringPointer("host2_ID"),
-				Address:            utils.StringPointer("0.0.0.0:8080"),
-				Transport:          utils.StringPointer("udp"),
-				Tls:                utils.BoolPointer(true),
-				Client_key:         utils.StringPointer("key2"),
-				Client_certificate: utils.StringPointer("path2"),
-				Ca_certificate:     utils.StringPointer("ca_path2"),
-				Connect_attempts:   utils.IntPointer(3),
-				Reconnects:         utils.IntPointer(4),
-				Connect_timeout:    utils.StringPointer("2m0s"),
-				Reply_timeout:      utils.StringPointer("2m0s"),
+				Id:                     utils.StringPointer("host2_ID"),
+				Address:                utils.StringPointer("0.0.0.0:8080"),
+				Transport:              utils.StringPointer("udp"),
+				Tls:                    utils.BoolPointer(true),
+				Client_key:             utils.StringPointer("key2"),
+				Client_certificate:     utils.StringPointer("path2"),
+				Ca_certificate:         utils.StringPointer("ca_path2"),
+				Connect_attempts:       utils.IntPointer(3),
+				Reconnects:             utils.IntPointer(4),
+				Connect_timeout:        utils.StringPointer("2m0s"),
+				Reply_timeout:          utils.StringPointer("2m0s"),
+				Max_reconnect_interval: utils.StringPointer("2m0s"),
 			},
 		},
+		Reply_timeout: utils.StringPointer("2m0s"),
 	}
 
 	rcv := diffRPCConnJson(d, v1, v2)
@@ -598,17 +615,18 @@ func TestDiffRPCConnJson(t *testing.T) {
 	expected = &RPCConnJson{
 		Conns: &[]*RemoteHostJson{
 			{
-				Id:                 utils.StringPointer("host2_ID"),
-				Address:            utils.StringPointer("0.0.0.0:8080"),
-				Transport:          utils.StringPointer("udp"),
-				Tls:                utils.BoolPointer(true),
-				Client_key:         utils.StringPointer("key2"),
-				Client_certificate: utils.StringPointer("path2"),
-				Ca_certificate:     utils.StringPointer("ca_path2"),
-				Connect_attempts:   utils.IntPointer(3),
-				Reconnects:         utils.IntPointer(4),
-				Connect_timeout:    utils.StringPointer("2m0s"),
-				Reply_timeout:      utils.StringPointer("2m0s"),
+				Id:                     utils.StringPointer("host2_ID"),
+				Address:                utils.StringPointer("0.0.0.0:8080"),
+				Transport:              utils.StringPointer("udp"),
+				Tls:                    utils.BoolPointer(true),
+				Client_key:             utils.StringPointer("key2"),
+				Client_certificate:     utils.StringPointer("path2"),
+				Ca_certificate:         utils.StringPointer("ca_path2"),
+				Connect_attempts:       utils.IntPointer(3),
+				Reconnects:             utils.IntPointer(4),
+				Connect_timeout:        utils.StringPointer("2m0s"),
+				Reply_timeout:          utils.StringPointer("2m0s"),
+				Max_reconnect_interval: utils.StringPointer("2m0s"),
 			},
 		},
 	}
@@ -852,5 +870,51 @@ func TestRPCConnCloneSection(t *testing.T) {
 	rcv := rpcCfg.CloneSection()
 	if !reflect.DeepEqual(rcv, exp) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(rcv))
+	}
+}
+func TestRPCConnsloadFromJsonCfgReplyTimeoutErr(t *testing.T) {
+	cfgJSON := &RPCConnJson{
+		Strategy: utils.StringPointer(utils.MetaFirst),
+		PoolSize: utils.IntPointer(1),
+		Conns: &[]*RemoteHostJson{
+			{
+				Address:            utils.StringPointer("127.0.0.1:2012"),
+				Transport:          utils.StringPointer("*json"),
+				Tls:                utils.BoolPointer(false),
+				Client_key:         utils.StringPointer("key_path"),
+				Client_certificate: utils.StringPointer("cert_path"),
+				Ca_certificate:     utils.StringPointer("ca_path"),
+				Connect_attempts:   utils.IntPointer(5),
+				Reconnects:         utils.IntPointer(2),
+				Connect_timeout:    utils.StringPointer("1m"),
+				Reply_timeout:      utils.StringPointer("1m"),
+			},
+		},
+		Reply_timeout: utils.StringPointer("invalid"),
+	}
+	expErr := `time: invalid duration "invalid"`
+	jsonCfg := NewDefaultCGRConfig()
+
+	if err := jsonCfg.rpcConns[utils.MetaLocalHost].loadFromJSONCfg(cfgJSON); err.Error() != expErr {
+		t.Errorf("Expected <%+v> \n, received <%+v>", expErr, err.Error())
+
+	}
+
+}
+
+func TestRPCConnAsMapInterface(t *testing.T) {
+
+	rC := &RPCConn{
+		ReplyTimeout: time.Duration(2),
+	}
+
+	exp := map[string]interface{}{
+		"poolSize":      0,
+		"reply_timeout": time.Duration(2),
+		"strategy":      "",
+	}
+	if rcv := rC.AsMapInterface(); !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("Expected <%+v> \n, received <%+v>", utils.ToJSON(exp), utils.ToJSON(rcv))
+
 	}
 }

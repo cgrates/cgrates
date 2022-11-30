@@ -1119,3 +1119,30 @@ func TestLoadCfgFromDBErr5(t *testing.T) {
 		t.Errorf("Expected <nil> \n but received \n <%v>", err)
 	}
 }
+
+func TestCGRConfigTpeSCfg(t *testing.T) {
+	cfg := NewDefaultCGRConfig()
+	rcv := cfg.TpeSCfg()
+	if rcv != cfg.tpeSCfg {
+		t.Errorf("Expected <%v>, Received <%v>", cfg.tpeSCfg, rcv)
+	}
+}
+
+// unfinished
+// func TestCGRConfigV1StoreCfgInDB(t *testing.T) {
+
+// 	cfg := NewDefaultCGRConfig()
+// 	cfg.rldCh = make(chan string, 100)
+// 	db := make(CgrJsonCfg)
+// 	cfg.db = db
+
+// 	args := &SectionWithAPIOpts{
+// 		Sections: []string{utils.MetaAll},
+// 	}
+
+// 	var reply string
+
+// 	if err := cfg.V1StoreCfgInDB(context.Background(), args, &reply); err == nil || err != nil {
+// 		t.Errorf("Expected %v \n but received \n %v", nil, err)
+// 	}
+// }
