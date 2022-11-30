@@ -3346,9 +3346,11 @@ func TestResetAccountCDRSuccesful(t *testing.T) {
 
 /*
 func TestRemoveSessionCost(t *testing.T) {
+	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+
 	fl := &Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "BalanceID;",
@@ -3374,9 +3376,11 @@ func TestRemoveSessionCost(t *testing.T) {
 		},
 	}
 	dm.SetFilter(fl, true)
+	Cache = NewCacheS(cfg, dm, nil)
+
 	SetDataStorage(dm)
 	action := &Action{
-		ExtraParameters: "{BalanceID;~*acnt.BalanceID;ActionID;~*act.ActionID;BalanceValue;~*acnt.BalanceValue}",
+		ExtraParameters: "BalanceID;~*acnt.BalanceID;ActionID;~*act.ActionID;BalanceValue;~*acnt.BalanceValue",
 	}
 	if err := removeSessionCosts(nil, action, nil, nil, nil); err != nil {
 		t.Error(err)

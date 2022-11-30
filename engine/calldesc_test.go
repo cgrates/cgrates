@@ -2591,3 +2591,24 @@ func TestCDRefundRounding(t *testing.T) {
 		t.Errorf("received %v", val)
 	}
 }
+
+func TestCdAddRatingInfos(t *testing.T) {
+
+	cd := &CallDescriptor{
+		TimeStart: time.Date(2022, 12, 5, 0, 0, 0, 0, time.UTC),
+		RatingInfos: RatingInfos{
+			&RatingInfo{
+				ActivationTime: time.Date(2022, 12, 4, 0, 0, 0, 0, time.UTC),
+			},
+		},
+	}
+	riS := RatingInfos{
+		{
+			ActivationTime: time.Date(2022, 12, 4, 0, 0, 0, 0, time.UTC),
+		},
+	}
+	if has := cd.addRatingInfos(riS); !has {
+		t.Error("expected true,received false")
+	}
+
+}

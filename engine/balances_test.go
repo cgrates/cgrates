@@ -640,7 +640,64 @@ func TestBalanceDebitUnits(t *testing.T) {
 	}
 }
 func TestBalanceDebitMoney(t *testing.T) {
-	cd := &CallDescriptor{}
+	cd := &CallDescriptor{
+		testCallcost: &CallCost{Category: "postpaid",
+			Tenant:  "foehn",
+			Subject: "foehn", Account: "foehn",
+			Destination: "0034678096720", ToR: "*voice",
+			Cost: 0,
+			Timespans: TimeSpans{
+				{TimeStart: time.Date(2015, 4, 24, 7, 59, 4, 0, time.UTC),
+					TimeEnd: time.Date(2015, 4, 24, 8, 2, 0, 0, time.UTC),
+					Cost:    0,
+					RateInterval: &RateInterval{
+						Rating: &RIRate{
+							ConnectFee:       5,
+							RoundingDecimals: 3,
+							MaxCost:          0,
+							Rates: RateGroups{
+								{
+									GroupIntervalStart: 0,
+									Value:              0,
+									RateIncrement:      34,
+									RateUnit:           34},
+							}},
+						Weight: 0},
+					DurationIndex:  26,
+					MatchedSubject: "uuid3",
+					MatchedPrefix:  "00346786720",
+					MatchedDestId:  "*any",
+					RatingPlanId:   "*none",
+					CompressFactor: 0},
+
+				{TimeStart: time.Date(2015, 4, 24, 7, 59, 4, 0, time.UTC),
+					TimeEnd: time.Date(2015, 4, 24, 8, 2, 0, 0, time.UTC),
+					Cost:    0,
+					RateInterval: &RateInterval{
+						Rating: &RIRate{
+							ConnectFee:       0,
+							RoundingDecimals: 0,
+							MaxCost:          0,
+							Rates: RateGroups{
+								{
+									GroupIntervalStart: 0,
+									Value:              0,
+									RateIncrement:      34,
+									RateUnit:           34},
+							}},
+						Weight: 0},
+					DurationIndex:  26,
+					MatchedSubject: "uuid",
+					MatchedPrefix:  "0034678096720",
+					MatchedDestId:  "*any",
+					RatingPlanId:   "*none",
+					CompressFactor: 5},
+			},
+			RatedUsage:       0,
+			deductConnectFee: true,
+		},
+	}
+
 	ub := &Account{}
 	moneyBalances := Balances{}
 
@@ -649,7 +706,7 @@ func TestBalanceDebitMoney(t *testing.T) {
 		Timings: []*RITiming{},
 	}
 	if val, err := b.debitMoney(cd, ub, moneyBalances, true, true, true, nil); err != nil {
-		t.Errorf("expected nil,received %+v", val)
+		t.Errorf("expected nil,received %+v", utils.ToJSON(val))
 	}
 
 }

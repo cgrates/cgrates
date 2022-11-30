@@ -25,6 +25,7 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
 )
@@ -1593,12 +1594,7 @@ func TestCdrServerStoreSMCost(t *testing.T) {
 		},
 	})
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
-	cdrS := &CDRServer{
-		cgrCfg:  cfg,
-		cdrDb:   db,
-		dm:      dm,
-		connMgr: connMgr,
-	}
+
 	smCost := &SMCost{
 		CGRID:      "cgrid",
 		RunID:      "runid",
@@ -1618,6 +1614,14 @@ func TestCdrServerStoreSMCost(t *testing.T) {
 			RatingFilters:  RatingFilters{},
 			Rates:          ChargedRates{},
 		},
+	}
+	guardian := guardian.GuardianLocker{}
+	cdrS := &CDRServer{
+		cgrCfg:  cfg,
+		cdrDb:   db,
+		dm:      dm,
+		connMgr: connMgr,
+		guard:   &guardian,
 	}
 	if err := cdrS.cdrDb.SetSMCost(smCost); err != nil {
 		t.Error(err)

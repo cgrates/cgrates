@@ -192,3 +192,54 @@ func TestDPNewLibNumber(t *testing.T) {
 	}
 
 }
+
+/*
+func TestDMSetDestination(t *testing.T) {
+	Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	cfg.DataDbCfg().Items = map[string]*config.ItemOpt{
+		utils.MetaDestinations: &config.ItemOpt{
+			Replicate: true,
+		},
+	}
+	cfg.DataDbCfg().RplConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicationConnsCfg)}
+	cfg.DataDbCfg().RplFiltered = true
+	cfg.DataDbCfg().RplCache = "cache"
+
+	db := NewInternalDB(nil, nil, true, map[string]*config.ItemOpt{
+		utils.CacheDestinations: {
+			Limit:     2,
+			TTL:       2 * time.Minute,
+			StaticTTL: true,
+			Remote:    true,
+			Replicate: true,
+			RouteID:   "route",
+			APIKey:    "api",
+		},
+	})
+	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn <- &ccMock{
+		calls: map[string]func(args interface{}, reply interface{}) error{
+			utils.ReplicatorSv1SetDestination: func(args, reply interface{}) error {
+				*reply.(*string) = "reply"
+				return nil
+			},
+		},
+	}
+	connMngr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicationConnsCfg): clientConn,
+	})
+
+	dest := &Destination{
+		Id:       "dest21",
+		Prefixes: []string{},
+	}
+	dm := NewDataManager(db, cfg.CacheCfg(), connMngr)
+	config.SetCgrConfig(cfg)
+	Cache = NewCacheS(cfg, dm, nil)
+	if err := dm.SetDestination(dest, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+
+}
+*/
