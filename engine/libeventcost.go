@@ -681,6 +681,6 @@ func NewFreeEventCost(cgrID, runID, account string, tStart time.Time, usage time
 				StartTime: "00:00:00",
 			},
 		},
-		cache: utils.MapStorage{},
+		cache: utils.NewSecureMapStorage(),
 	}
 }

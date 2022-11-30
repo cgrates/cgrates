@@ -24,6 +24,7 @@ import (
 	"reflect"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -323,6 +324,77 @@ func (ms MapStorage) Clone() (msClone MapStorage) {
 	for k, v := range ms {
 		msClone[k] = v
 	}
+	return
+}
+
+// NewSecureMapStorage constructs a new SecureMapStorage
+func NewSecureMapStorage() *SecureMapStorage {
+	return &SecureMapStorage{
+		ms: make(MapStorage),
+	}
+}
+
+// SecureMapStorage is a MapStorage with secure read/writes
+// useful for example as cache for various parts
+type SecureMapStorage struct {
+	sync.RWMutex
+	ms MapStorage
+}
+
+// String returns the JNSON representation of MapStorage
+func (sm *SecureMapStorage) String() (s string) {
+	sm.RLock()
+	s = sm.ms.String()
+	sm.RUnlock()
+	return
+}
+
+// FieldAsInterface returns the value at the path specified
+func (sm *SecureMapStorage) FieldAsInterface(fldPath []string) (val interface{}, err error) {
+	sm.RLock()
+	val, err = sm.ms.FieldAsInterface(fldPath)
+	sm.RUnlock()
+	return
+}
+
+// FieldAsString returns the value at the path specified casted as string
+func (sm *SecureMapStorage) FieldAsString(fldPath []string) (s string, err error) {
+	sm.RLock()
+	s, err = sm.ms.FieldAsString(fldPath)
+	sm.RUnlock()
+	return
+}
+
+// Set will set the value at path
+func (sm *SecureMapStorage) Set(fldPath []string, val interface{}) (err error) {
+	sm.Lock()
+	err = sm.ms.Set(fldPath, val)
+	sm.Unlock()
+	return
+}
+
+// GetKeys returns a list of keys for the prefix
+func (sm *SecureMapStorage) GetKeys(nested bool, nestedLimit int, prefix string) (keys []string) {
+	sm.RLock()
+	keys = sm.ms.GetKeys(nested, nestedLimit, prefix)
+	sm.RUnlock()
+	return
+}
+
+// Remove will remove based on field path
+func (sm *SecureMapStorage) Remove(fldPath []string) (err error) {
+	sm.Lock()
+	err = sm.ms.Remove(fldPath)
+	sm.Unlock()
+	return
+}
+
+// Clone returns a clone of sm
+func (sm *SecureMapStorage) Clone() (smClone *SecureMapStorage) {
+	sm.RLock()
+	smClone = new(SecureMapStorage)
+	smClone.ms = smClone.ms.Clone()
+	sm.RUnlock()
 	return
 }
 
