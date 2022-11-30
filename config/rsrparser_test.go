@@ -894,3 +894,89 @@ func TestRSRParsersClone(t *testing.T) {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
 }
+
+func TestRSRParsersParseDataProviderWithInterfaces2(t *testing.T) {
+	ruleStr := "~;*accounts.;~*req.Account"
+	if prsrs, err := NewRSRParsers(ruleStr, utils.InfieldSep); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if rcv, err := prsrs.ParseDataProviderWithInterfaces2(utils.MapStorage{
+		utils.MetaReq: utils.MapStorage{utils.AccountField: "1001"},
+	}); err != nil {
+		t.Errorf("Expected error <nil>, Received error <%v>", err)
+
+	} else if expected := "~*accounts.1001"; rcv != expected {
+		t.Errorf("Expected %q ,received %q", expected, rcv)
+	}
+	ruleStr = "constant;`>;q=0.7;expires=3600`;~*req.Account"
+	if prsrs, err := NewRSRParsers(ruleStr, utils.InfieldSep); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if _, err := prsrs.ParseDataProviderWithInterfaces2(utils.MapStorage{}); err != utils.ErrNotFound {
+		t.Errorf("Expected error <%v>, Received error <%v>", utils.ErrNotFound, err)
+	}
+
+}
+
+func TestRSRParserParseValueInterface(t *testing.T) {
+
+	prsr := &RSRParser{
+		rsrRules: []*utils.ReSearchReplace{
+			{
+				SearchRegexp:    regexp.MustCompile(`a`),
+				ReplaceTemplate: "${1}b",
+			},
+		},
+	}
+
+	if rcv, err := prsr.parseValueInterface(""); err != nil {
+		t.Errorf("Expected error <nil>, Received error <%v>", err)
+
+	} else if expected := ""; rcv != expected {
+		t.Errorf("Expected %q ,received %q", expected, rcv)
+	}
+}
+
+func TestRSRParserParseDataProviderWithInterfaces2(t *testing.T) {
+	prsr := &RSRParser{
+		dynRules: NewRSRParsersMustCompile("~*opts.*originID;~*req.RunID;-Cost", ";"),
+	}
+
+	if _, err := prsr.ParseDataProviderWithInterfaces2(utils.MapStorage{
+		utils.MetaReq: utils.MapStorage{utils.AccountField: "1001"},
+	}); err != utils.ErrNotFound {
+		t.Errorf("Expected error <%v>, Received error <%v>", utils.ErrNotFound, err)
+
+	}
+
+	rsrParser, _ := NewRSRParsers("~*opts.*originI;;;D;~*req.RunID;-Cost", "")
+	prsr = &RSRParser{
+		Rules:    "~*opts.<~*opts.*originID;~*req.RunID;-Cost{*}>",
+		dynRules: rsrParser,
+	}
+	expErr := "invalid converter value in string: <*>, err: unsupported converter definition: <*>"
+	if _, err := prsr.ParseDataProviderWithInterfaces2(utils.MapStorage{
+		utils.MetaReq: utils.MapStorage{utils.AccountField: "1001"},
+	}); err.Error() != expErr {
+		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err.Error())
+
+	}
+
+	prsr = &RSRParser{
+		dynRules: NewRSRParsersMustCompile("~*opts.*originID;~*req.RunID;-Cost", ";"),
+	}
+	dP := utils.MapStorage{
+		utils.MetaReq: utils.MapStorage{
+
+			utils.RunID: utils.MetaDefault,
+		},
+		utils.MetaOpts: utils.MapStorage{
+			utils.MetaOriginID:  "Uniq",
+			"Uniq*default-Cost": 10,
+		},
+	}
+	exp := "Uniq*default-Cost"
+	if rcv, err := prsr.ParseDataProviderWithInterfaces2(dP); err != nil {
+		t.Error(err)
+	} else if rcv != exp {
+		t.Errorf("Expected <%v>, \nReceived <%v>", exp, rcv)
+	}
+}

@@ -5845,6 +5845,7 @@ func TestCGRConfigClone(t *testing.T) {
 	if !reflect.DeepEqual(cfg.coreSCfg, rcv.coreSCfg) {
 		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(cfg.coreSCfg), utils.ToJSON(rcv.coreSCfg))
 	}
+
 }
 
 func TestActionSConfig(t *testing.T) {
@@ -6291,5 +6292,14 @@ func TestFreewitchLoadFromJsonNil(t *testing.T) {
 	fsAgCfg := FsAgentCfg{}
 	if err := fsAgCfg.loadFromJSONCfg(nil); err != nil {
 		t.Error(err)
+	}
+}
+
+func TestCGRConfigLoadConfigDBCfgError(t *testing.T) {
+	cfg := &CGRConfig{}
+	ctx := &context.Context{}
+	jsnCfg := new(mockDb)
+	if err := cfg.loadConfigDBCfg(ctx, jsnCfg); err != utils.ErrNotImplemented {
+		t.Errorf("Expected error <%v>, Received error <%v>", utils.ErrNotImplemented, err)
 	}
 }

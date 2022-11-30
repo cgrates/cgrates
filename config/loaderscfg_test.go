@@ -2717,3 +2717,39 @@ func TestLoaderSCfgloadFromJSONCacheErr(t *testing.T) {
 		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err.Error())
 	}
 }
+
+func TestDiffLoaderJsonOptsCfg(t *testing.T) {
+
+	v1 := &LoaderSOptsCfg{
+		Cache:       "cacheFiller",
+		WithIndex:   true,
+		ForceLock:   true,
+		StopOnError: true,
+	}
+
+	v2 := &LoaderSOptsCfg{
+		Cache:       "cacheFillerV2",
+		WithIndex:   false,
+		ForceLock:   false,
+		StopOnError: false,
+	}
+
+	expected := &LoaderJsonOptsCfg{
+		Cache:       utils.StringPointer("cacheFillerV2"),
+		WithIndex:   utils.BoolPointer(false),
+		ForceLock:   utils.BoolPointer(false),
+		StopOnError: utils.BoolPointer(false),
+	}
+
+	rcv := diffLoaderJsonOptsCfg(v1, v2)
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+
+	v1 = v2
+	expected = &LoaderJsonOptsCfg{}
+	rcv = diffLoaderJsonOptsCfg(v1, v2)
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+}
