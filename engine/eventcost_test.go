@@ -204,7 +204,7 @@ var testEC = &EventCost{
 			StartTime: "00:00:00",
 		},
 	},
-	cache: utils.MapStorage{},
+	cache: utils.NewSecureMapStorage(),
 }
 
 func TestECClone(t *testing.T) {
@@ -2609,7 +2609,7 @@ func TestECSyncKeys(t *testing.T) {
 				StartTime: "00:00:00",
 			},
 		},
-		cache: utils.MapStorage{},
+		cache: utils.NewSecureMapStorage(),
 	}
 
 	ec.SyncKeys(refEC)
@@ -2646,7 +2646,7 @@ func TestECAsDataProvider(t *testing.T) {
 func TestInitCache(t *testing.T) {
 	eventCost := &EventCost{}
 	eventCost.initCache()
-	eOut := utils.MapStorage{}
+	eOut := utils.NewSecureMapStorage()
 	if !reflect.DeepEqual(eOut, eventCost.cache) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(eventCost.cache))
 	}
@@ -2656,14 +2656,15 @@ func TestEventCostFieldAsInterface(t *testing.T) {
 	eventCost := &EventCost{}
 	eventCost.initCache()
 	// item found in cache
-	eventCost.cache = utils.MapStorage{"test": nil}
+	eventCost.cache = utils.NewSecureMapStorage()
+	eventCost.cache.Set([]string{"test"}, nil)
 	if rcv, err := eventCost.FieldAsInterface([]string{"test"}); err == nil || err != utils.ErrNotFound {
 		t.Errorf("Expecting: nil, received: %+v", err)
 	} else if rcv != nil {
 		t.Errorf("Expecting: nil, received: %+v", rcv)
 	}
 	// data found in cache
-	eventCost.cache = utils.MapStorage{"test": "test"}
+	eventCost.cache.Set([]string{"test"}, "test")
 	if rcv, err := eventCost.FieldAsInterface([]string{"test"}); err != nil {
 		t.Errorf("Expecting: nil, received: %+v", err)
 	} else if rcv != "test" {
@@ -3722,7 +3723,7 @@ func TestECAsCallCost3(t *testing.T) {
 				StartTime: "00:00:00",
 			},
 		},
-		cache: utils.MapStorage{},
+		cache: utils.NewSecureMapStorage(),
 	}
 	ec := NewEventCostFromCallCost(eCC, "cgrID", utils.MetaDefault)
 	eEC.SyncKeys(ec)
