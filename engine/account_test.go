@@ -24,6 +24,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -2930,5 +2931,38 @@ func TestAccountGetCreditForPrefix(t *testing.T) {
 	if _, _, balances := acc.getCreditForPrefix(cd); len(balances) == 0 {
 
 		t.Errorf("received %+v", utils.ToJSON(balances))
+	}
+}
+
+func TestAcountSetBalanceAction(t *testing.T) {
+
+	cfg := config.NewDefaultCGRConfig()
+	acc := &Account{
+		ID:            "rif",
+		AllowNegative: true,
+		BalanceMap: map[string]Balances{
+			utils.MetaSMS:  {&Balance{Value: 14}},
+			utils.MetaData: {&Balance{Value: 1204}},
+			utils.MetaVoice: {
+				&Balance{Weight: 20,
+					DestinationIDs: utils.StringMap{"NAT": true}},
+				&Balance{Weight: 10,
+					DestinationIDs: utils.StringMap{"RET": true}}}},
+	}
+	fltrs := NewFilterS(cfg, nil, nil)
+
+	a := &Action{
+		Balance: &BalanceFilter{
+			Uuid: utils.StringPointer(utils.EmptyString),
+			ID:   utils.StringPointer(utils.MetaDefault),
+			Type: utils.StringPointer("b_type"),
+			Value: &utils.ValueFormula{
+
+				Method: "value_method",
+			},
+		},
+	}
+	if err := acc.setBalanceAction(a, fltrs); err != nil {
+		t.Error(err)
 	}
 }

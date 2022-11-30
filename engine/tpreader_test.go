@@ -1141,3 +1141,16 @@ func TestTpReaderReloadScheduler(t *testing.T) {
 	}
 
 }
+
+func TestTpReaderIsValid(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	tpr, err := NewTpReader(nil, db, "", "local", nil, nil, false)
+	if err != nil {
+		t.Error(err)
+	}
+	if valid := tpr.IsValid(); !valid {
+		t.Error("expected true,received false")
+	}
+
+}
