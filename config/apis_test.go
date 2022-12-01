@@ -1128,21 +1128,22 @@ func TestCGRConfigTpeSCfg(t *testing.T) {
 	}
 }
 
-// unfinished
-// func TestCGRConfigV1StoreCfgInDB(t *testing.T) {
+func TestCGRConfigV1StoreCfgInDB(t *testing.T) {
 
-// 	cfg := NewDefaultCGRConfig()
-// 	cfg.rldCh = make(chan string, 100)
-// 	db := make(CgrJsonCfg)
-// 	cfg.db = db
+	cfg := NewDefaultCGRConfig()
+	cfg.rldCh = make(chan string, 100)
+	cfg.db = &mockDb{
+		GetSectionF: func(ctx *context.Context, s string, i interface{}) error { return nil },
+		SetSectionF: func(ctx *context.Context, s string, i interface{}) error { return utils.ErrNotImplemented },
+	}
 
-// 	args := &SectionWithAPIOpts{
-// 		Sections: []string{utils.MetaAll},
-// 	}
+	args := &SectionWithAPIOpts{
+		Sections: []string{GeneralJSON},
+	}
 
-// 	var reply string
+	var reply string
 
-// 	if err := cfg.V1StoreCfgInDB(context.Background(), args, &reply); err == nil || err != nil {
-// 		t.Errorf("Expected %v \n but received \n %v", nil, err)
-// 	}
-// }
+	if err := cfg.V1StoreCfgInDB(context.Background(), args, &reply); err == nil || err != utils.ErrNotImplemented {
+		t.Errorf("Expected %v \n but received \n %v", utils.ErrNotImplemented, err)
+	}
+}
