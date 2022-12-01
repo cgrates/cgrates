@@ -393,7 +393,7 @@ func (sm *SecureMapStorage) Remove(fldPath []string) (err error) {
 func (sm *SecureMapStorage) Clone() (smClone *SecureMapStorage) {
 	sm.RLock()
 	smClone = new(SecureMapStorage)
-	smClone.ms = smClone.ms.Clone()
+	smClone.ms = sm.ms.Clone()
 	sm.RUnlock()
 	return
 }

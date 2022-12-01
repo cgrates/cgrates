@@ -1023,7 +1023,7 @@ func TestRouteServiceV1GetRoutes(t *testing.T) {
 		t.Error(err)
 	}
 
-	if err := rpS.V1GetRoutesList(args, &[]string{}); err == nil {
+	if err := rpS.V1GetRoutesList(args, &[]string{}); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
 	}
 
@@ -1733,7 +1733,8 @@ func TestRouteServicePopulateSortingData(t *testing.T) {
 	}
 
 	extraOpts := &optsGetRoutes{
-		sortingStrategy: utils.MetaLoad,
+		sortingStrategy:   utils.MetaLoad,
+		sortingParameters: []string{"sort1"},
 	}
 	exp := &SortedRoute{
 		RouteID:         "id",
@@ -1758,5 +1759,11 @@ func TestRouteServicePopulateSortingData(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(exp.SortingData, sroutes.SortingData) {
 		t.Errorf("expected %+v,received %+v", utils.ToJSON(exp), utils.ToJSON(sroutes))
+	}
+
+	extraOpts.sortingStrategy = "other"
+
+	if _, pass, err := routeService.populateSortingData(ev, route, extraOpts); err != nil || !pass {
+		t.Error(err)
 	}
 }
