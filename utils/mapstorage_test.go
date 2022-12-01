@@ -916,3 +916,112 @@ func TestMSgetPathFromValue(t *testing.T) {
 		)
 	}
 }
+
+func TestSecureMapStorageString(t *testing.T) {
+	sm := &SecureMapStorage{ms: MapStorage{
+		"field1": 23,
+		"field2": []string{"ms1", "ms2"},
+	}}
+	exp := "{\"field1\":23,\"field2\":[\"ms1\",\"ms2\"]}"
+	if val := sm.String(); val != exp {
+		t.Errorf("expected %+s,received %+s", exp, val)
+	}
+}
+
+func TestSecureMapStorageFieldAsInterface(t *testing.T) {
+	sm := &SecureMapStorage{ms: MapStorage{
+		"field1": []string{"val1", "val2"},
+	}}
+	if val, err := sm.FieldAsInterface([]string{"field1[0]"}); err != nil {
+
+		t.Error(err)
+	} else if val.(string) != sm.ms["field1"].([]string)[0] {
+		t.Errorf("expected %s,received %v", val, sm.ms["field1"].([]string)[0])
+	}
+}
+
+func TestSecureMapStorageFieldAsString(t *testing.T) {
+	sm := &SecureMapStorage{ms: MapStorage{
+		"field1": []string{"val1", "val2"},
+	}}
+	if val, err := sm.FieldAsString([]string{"field1[0]"}); err != nil {
+		t.Error(err)
+	} else if val != sm.ms["field1"].([]string)[0] {
+		t.Errorf("expected %s,received %v", val, sm.ms["field1"].([]string)[0])
+	}
+
+}
+func TestSecureMapStorageSet(t *testing.T) {
+	sm := &SecureMapStorage{ms: MapStorage{
+		"field": map[string]interface{}{},
+	}}
+	exp := MapStorage{
+		"test": "val",
+	}
+	if err := sm.Set([]string{"field2"}, MapStorage{"test": "val"}); err != nil {
+		t.Error(err)
+	}
+	if v, has := sm.ms["field2"]; !has {
+		t.Error("expected")
+	} else if !reflect.DeepEqual(v, exp) {
+		t.Errorf("expected %v,reeived %v", ToJSON(exp), ToJSON(v))
+	}
+
+}
+
+func TestSecureMapStorageGetKeys(t *testing.T) {
+	sm := &SecureMapStorage{
+		ms: MapStorage{
+			"field1": map[string]interface{}{
+				"subfield1": []string{"subkey"},
+			},
+			"field2": MapStorage{
+				"mapfield": map[string]interface{}{
+					"submapfield2": []string{"subkey"},
+				},
+			},
+		},
+	}
+	exp := []string{"*pre.field1.subfield1[0]", "*pre.field2.mapfield.submapfield2[0]"}
+	val := sm.GetKeys(true, 3, "*pre")
+	sort.Slice(val, func(i, j int) bool {
+		return val[i] < val[j]
+	})
+	if !reflect.DeepEqual(val, exp) {
+		t.Errorf("expected %+v,received %+v", ToJSON(exp), ToJSON(val))
+	}
+}
+
+func TestSecureMapStorageRemove(t *testing.T) {
+	sm := &SecureMapStorage{
+		ms: MapStorage{
+			"field": map[string]interface{}{
+				"subfield": uint16(3),
+			},
+		},
+	}
+	if err := sm.Remove([]string{"field", "subfield"}); err != nil {
+		t.Error(err)
+	}
+	if _, has := sm.ms["field"].(map[string]interface{})["subfield"]; has {
+		t.Error("should been removed")
+	}
+}
+
+func TestSecureMapStorageClone(t *testing.T) {
+	sm := &SecureMapStorage{
+		ms: MapStorage{
+			"field1": []string{"val1", "val2"},
+			"field2": "val",
+		},
+	}
+	if val := sm.Clone(); !reflect.DeepEqual(val, sm) {
+		t.Errorf("expected %+v,received %+v", ToJSON(sm.ms), ToJSON(val.ms))
+	}
+}
+
+func TestNewSecureMapStorage(t *testing.T) {
+	if sm := NewSecureMapStorage(); reflect.DeepEqual(sm, nil) {
+		t.Error("should receive new secure map")
+	}
+}

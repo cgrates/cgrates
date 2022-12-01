@@ -21,6 +21,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -359,5 +360,44 @@ func BenchmarkMarshallerBincStoreRestore(b *testing.B) {
 		ms.Unmarshal(result, ap1)
 		result, _ = ms.Marshal(ub)
 		ms.Unmarshal(result, ub1)
+	}
+}
+
+func TestIDBRemoveIndexesDrv(t *testing.T) {
+	idb := NewInternalDB(nil, nil, true, map[string]*config.ItemOpt{
+		"chID": {
+			Limit:     3,
+			TTL:       4 * time.Minute,
+			StaticTTL: false,
+			Remote:    true,
+			Replicate: true,
+
+			RouteID: "route",
+			APIKey:  "api",
+		},
+		"chID2": {
+
+			Limit:     3,
+			TTL:       4 * time.Minute,
+			StaticTTL: false,
+			Remote:    true,
+			Replicate: true,
+
+			RouteID: "route",
+			APIKey:  "api",
+		},
+	},
+	)
+	idb.db.Set("chID", "itmID", true, []string{utils.EmptyString}, true, "trID")
+	idb.db.Set("chID2", "itmIDv", true, []string{"grpID"}, true, "trID")
+
+	if err := idb.RemoveIndexesDrv("chID", utils.EmptyString, utils.EmptyString); err != nil {
+		t.Error(err)
+	}
+	if err := idb.RemoveIndexesDrv("chID2", "itmID", "v"); err != nil {
+		t.Error(err)
+	}
+	if has := idb.db.HasGroup("chID", utils.EmptyString); has {
+		t.Error("group should be removed")
 	}
 }

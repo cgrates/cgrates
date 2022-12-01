@@ -1154,3 +1154,42 @@ func TestTpReaderIsValid(t *testing.T) {
 	}
 
 }
+
+func TestTpReaderLoadAccountActions(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	tscache := ltcache.NewTransCache(
+		map[string]*ltcache.CacheConfig{
+			utils.CacheTBLTPAccountActions: {
+				MaxItems:  3,
+				TTL:       time.Minute * 30,
+				StaticTTL: false,
+				OnEvicted: func(itmID string, value interface{}) {
+				},
+			}},
+	)
+	tscache.Set(utils.CacheTBLTPAccountActions, "*prfitemId", &utils.TPAccountActions{
+		TPid:    "tp_acc1",
+		Account: "acc1",
+		Tenant:  "tn1",
+	}, []string{"groupId"}, true, "tId")
+	tscache.Set(utils.CacheTBLTPAccountActions, "*prfitemId2", &utils.TPAccountActions{
+		TPid:         "tp_acc2",
+		Account:      "acc2",
+		Tenant:       "tn2",
+		ActionPlanId: "actionplans",
+	}, []string{"groupId"}, true, "tId")
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	db.db = tscache
+	tpr, err := NewTpReader(db, db, "*prf", "local", nil, nil, true)
+	if err != nil {
+		t.Error(err)
+	}
+	if err := tpr.LoadAccountActions(); err == nil || err.Error() != fmt.Sprintf("could not get action plan for tag %q", "actionplans") {
+
+		t.Error(err)
+	}
+	tpr.dm = nil
+	if err := tpr.LoadAccountActions(); err == nil {
+		t.Error(err)
+	}
+}
