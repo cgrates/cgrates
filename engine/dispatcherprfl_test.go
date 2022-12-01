@@ -826,3 +826,30 @@ func TestDispatcherHostGetConnErr(t *testing.T) {
 	}
 
 }
+func TestDispatcherHostProfileMerge(t *testing.T) {
+
+	dspHost := &DispatcherHostProfile{
+		Params: map[string]interface{}{
+			"opt1": "val1",
+		},
+	}
+
+	dspHostV2 := &DispatcherHostProfile{
+		ID: "DispatcherId",
+		Params: map[string]interface{}{
+
+			"opt1": "val1",
+			"opt2": "val1",
+			"opt3": "val1",
+		},
+		Weight:    10,
+		Blocker:   true,
+		FilterIDs: []string{"FltrId"},
+	}
+	exp := dspHostV2
+
+	dspHost.Merge(dspHostV2)
+	if !reflect.DeepEqual(dspHost, exp) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(dspHost))
+	}
+}
