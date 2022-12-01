@@ -174,6 +174,11 @@ func TestActionProfileSet(t *testing.T) {
 				Weight: 10,
 			},
 		},
+		Blockers: utils.DynamicBlockers{
+			{
+				Blocker: true,
+			},
+		},
 		Targets: map[string]utils.StringSet{
 			utils.MetaAccounts:   utils.NewStringSet([]string{"1001", "1002"}),
 			utils.MetaThresholds: utils.NewStringSet([]string{"TH1", "TH2"}),
@@ -273,7 +278,9 @@ func TestActionProfileSet(t *testing.T) {
 	if err := ap.Actions[0].Set(nil, "", false); err != utils.ErrWrongPath {
 		t.Error(err)
 	}
-
+	if err := ap.Set([]string{utils.Blockers}, ";true", false, utils.EmptyString); err != nil {
+		t.Error(err)
+	}
 	if !reflect.DeepEqual(exp, ap) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(ap))
 	}
@@ -288,6 +295,11 @@ func TestActionProfileFieldAsInterface(t *testing.T) {
 		Weights: utils.DynamicWeights{
 			{
 				Weight: 10,
+			},
+		},
+		Blockers: utils.DynamicBlockers{
+			{
+				Blocker: true,
 			},
 		},
 		Targets: map[string]utils.StringSet{
@@ -343,6 +355,11 @@ func TestActionProfileFieldAsInterface(t *testing.T) {
 	if val, err := ap.FieldAsInterface([]string{utils.Weights}); err != nil {
 		t.Fatal(err)
 	} else if exp := ap.Weights; !reflect.DeepEqual(exp, val) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := ap.FieldAsInterface([]string{utils.Blockers}); err != nil {
+		t.Fatal(err)
+	} else if exp := ap.Blockers; !reflect.DeepEqual(exp, val) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
 	}
 	if val, err := ap.FieldAsInterface([]string{utils.Actions}); err != nil {

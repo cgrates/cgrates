@@ -403,3 +403,14 @@ func TestParseAtributeCCUsageNoErr(t *testing.T) {
 		t.Errorf("Expected %v\n but received %v", exp, out)
 	}
 }
+
+//
+// unfinished
+//
+func TestUniqueAlteredFields(t *testing.T) {
+	flds := &AttrSProcessEventReply{}
+
+	if rcv := flds.UniqueAlteredFields(); rcv != nil {
+		t.Errorf("Expected <%+v>, Received <%+v>", flds, rcv)
+	}
+}

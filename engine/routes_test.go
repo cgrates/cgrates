@@ -1181,3 +1181,26 @@ func TestRouteProfileMerge(t *testing.T) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(dp))
 	}
 }
+
+func TestRouteMerge(t *testing.T) {
+
+	route := &Route{}
+
+	routeV2 := &Route{
+		ID:              "RouteId",
+		RouteParameters: "RouteParam",
+		Weights:         utils.DynamicWeights{{Weight: 10}},
+		Blockers:        utils.DynamicBlockers{{Blocker: false}},
+		FilterIDs:       []string{"FltrId"},
+		AccountIDs:      []string{"AccId"},
+		RateProfileIDs:  []string{"RateProfileId"},
+		ResourceIDs:     []string{"ResourceId"},
+		StatIDs:         []string{"StatId"},
+	}
+	exp := routeV2
+
+	route.Merge(routeV2)
+	if !reflect.DeepEqual(route, exp) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(route))
+	}
+}
