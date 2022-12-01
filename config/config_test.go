@@ -6303,3 +6303,17 @@ func TestCGRConfigLoadConfigDBCfgError(t *testing.T) {
 		t.Errorf("Expected error <%v>, Received error <%v>", utils.ErrNotImplemented, err)
 	}
 }
+
+// unfinished
+// func TestLoadConfigFromHTTPErrorNewReqCtx(t *testing.T) {
+// 	cfgCgr := NewDefaultCGRConfig()
+
+// 	ctx := context.Background()
+
+// 	url := "https://raw.githubusercontent.com/cgrates/cgrates/master/data/conf/samples/multifiles/a.json"
+// 	expected := "parse \"inexistentURL\": invalid URI for request"
+// 	if err := loadConfigFromHTTP(ctx, url, cfgCgr.sections, nil); err == nil || err.Error() != expected {
+// 		t.Errorf("Expected %+v, received %+v", expected, err)
+// 	}
+
+// }
