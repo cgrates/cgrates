@@ -989,7 +989,7 @@ func testV1SplSGetSupplierForEvent(t *testing.T) {
 		Sorting:           utils.MetaLC,
 		SortingParameters: []string{},
 		Suppliers: []*engine.Supplier{
-			{
+			&engine.Supplier{
 				ID:                 "supplier_1",
 				FilterIDs:          nil,
 				AccountIDs:         nil,
@@ -1000,7 +1000,7 @@ func testV1SplSGetSupplierForEvent(t *testing.T) {
 				Blocker:            false,
 				SupplierParameters: "",
 			},
-			{
+			&engine.Supplier{
 				ID:                 "supplier_2",
 				FilterIDs:          nil,
 				AccountIDs:         nil,

@@ -108,7 +108,7 @@ func (cIl *ChargingInterval) Cost() float64 {
 
 // TotalCost returns the cost of charges
 func (cIl *ChargingInterval) TotalCost() float64 {
-	return utils.Round(cIl.Cost()*float64(cIl.CompressFactor),
+	return utils.Round((cIl.Cost() * float64(cIl.CompressFactor)),
 		globalRoundingDecimals, utils.ROUNDING_MIDDLE)
 }
 

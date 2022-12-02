@@ -316,7 +316,7 @@ func (ec *EventCost) AsRefundIncrements(tor string) (cd *CallDescriptor) {
 	}
 	var nrIcrms int
 	for _, cIl := range ec.Charges {
-		nrIcrms += cIl.CompressFactor * len(cIl.Increments)
+		nrIcrms += (cIl.CompressFactor * len(cIl.Increments))
 	}
 	cd.Increments = make(Increments, nrIcrms)
 	var iIdx int
@@ -808,7 +808,7 @@ func (ec *EventCost) Trim(atUsage time.Duration) (srplusEC *EventCost, err error
 		}
 	}
 	if atUsage != ec.GetUsage() { // lastInterval covering more than needed, need split
-		atUsage -= ec.GetUsage() - *lastActiveCIl.Usage() // remaining duration to cover in increments of the last charging interval
+		atUsage -= (ec.GetUsage() - *lastActiveCIl.Usage()) // remaining duration to cover in increments of the last charging interval
 		// find out last increment covering duration
 		var lastActiveCItIdx *int
 		var incrementsUsage time.Duration

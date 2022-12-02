@@ -134,7 +134,7 @@ func (rp *RatingPlan) getFirstUnsaneRating() string {
 	for _, rating := range rp.Ratings {
 		rating.Rates.Sort()
 		for i, rate := range rating.Rates {
-			if i < len(rating.Rates)-1 {
+			if i < (len(rating.Rates) - 1) {
 				nextRate := rating.Rates[i+1]
 				if nextRate.GroupIntervalStart <= rate.GroupIntervalStart {
 					return rating.tag

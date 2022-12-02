@@ -97,7 +97,7 @@ func (pstr *SQSPoster) getQueueURL() (err error) {
 		QueueName: aws.String(pstr.queueID),
 	}); err == nil {
 		pstr.queueURL = new(string)
-		*pstr.queueURL = *result.QueueUrl
+		*(pstr.queueURL) = *result.QueueUrl
 		return
 	}
 	if aerr, ok := err.(awserr.Error); ok && aerr.Code() == sqs.ErrCodeQueueDoesNotExist {
@@ -107,7 +107,7 @@ func (pstr *SQSPoster) getQueueURL() (err error) {
 			QueueName: aws.String(pstr.queueID),
 		}); err == nil {
 			pstr.queueURL = new(string)
-			*pstr.queueURL = *createResult.QueueUrl
+			*(pstr.queueURL) = *createResult.QueueUrl
 			return
 		}
 	}

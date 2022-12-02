@@ -570,8 +570,8 @@ func (sS *SessionS) refundSession(s *Session, sRunIdx int, rUsage time.Duration)
 	for _, tmspn := range sCC.Timespans {
 		for _, incr := range tmspn.Increments {
 			if incr.BalanceInfo == nil ||
-				incr.BalanceInfo.Unit == nil &&
-					incr.BalanceInfo.Monetary == nil {
+				(incr.BalanceInfo.Unit == nil &&
+					incr.BalanceInfo.Monetary == nil) {
 				continue // not enough information for refunds, most probably free units uncounted
 			}
 			for i := 0; i < tmspn.CompressFactor; i++ {
