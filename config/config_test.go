@@ -6305,15 +6305,27 @@ func TestCGRConfigLoadConfigDBCfgError(t *testing.T) {
 }
 
 // unfinished
+// Cant get err of http.NewRequestWithContext
 // func TestLoadConfigFromHTTPErrorNewReqCtx(t *testing.T) {
 // 	cfgCgr := NewDefaultCGRConfig()
 
-// 	ctx := context.Background()
-
-// 	url := "https://raw.githubusercontent.com/cgrates/cgrates/master/data/conf/samples/multifiles/a.json"
+// 	// ctx, cancel := context.WithTimeout(context.Background(), 10*time.Nanosecond)
+// 	// cancel()
+// 	url := "https://raw.githubusercontent.com/cgrates/cgrates/master/data/conf/samples/tutmongo/cgrates.json"
 // 	expected := "parse \"inexistentURL\": invalid URI for request"
-// 	if err := loadConfigFromHTTP(ctx, url, cfgCgr.sections, nil); err == nil || err.Error() != expected {
-// 		t.Errorf("Expected %+v, received %+v", expected, err)
+// 	if err := loadConfigFromHTTP(nil, url, cfgCgr.sections, nil); err == nil || err.Error() != expected {
+// 		t.Errorf("Expected %+v, \nreceived %+v", expected, err)
 // 	}
 
 // }
+
+func TestGetDftRemoteHostCfg(t *testing.T) {
+	cgrCfg := NewDefaultCGRConfig()
+
+	exp := cgrCfg.rpcConns[utils.MetaLocalHost].Conns[0]
+
+	if rcv := getDftRemHstCfg(); !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("Expected <%+v>,\nReceived <%+v>", exp, rcv)
+	}
+
+}
