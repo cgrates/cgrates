@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"reflect"
 	"testing"
 	"time"
 
@@ -404,13 +405,17 @@ func TestParseAtributeCCUsageNoErr(t *testing.T) {
 	}
 }
 
-//
-// unfinished
-//
 func TestUniqueAlteredFields(t *testing.T) {
-	flds := &AttrSProcessEventReply{}
-
-	if rcv := flds.UniqueAlteredFields(); rcv != nil {
-		t.Errorf("Expected <%+v>, Received <%+v>", flds, rcv)
+	flds := &AttrSProcessEventReply{
+		AlteredFields: []*FieldsAltered{
+			{Fields: []string{"field1"}},
+		},
+	}
+	exp := make(utils.StringSet)
+	for _, altered := range flds.AlteredFields {
+		exp.AddSlice(altered.Fields)
+	}
+	if rcv := flds.UniqueAlteredFields(); !reflect.DeepEqual(exp, rcv) {
+		t.Errorf("Expected <%+v>, Received <%+v>", exp, rcv)
 	}
 }
