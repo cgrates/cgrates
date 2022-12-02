@@ -703,3 +703,23 @@ func TestTPReaderReloadCache(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestTpReaderLoadAll(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	storeCSV := &CSVStorage{}
+	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	tpr, err := NewTpReader(db, storeCSV, "", "", nil, nil, true)
+	if err != nil {
+		t.Error(err)
+	}
+	tprCopy, err := NewTpReader(db, storeCSV, "", "", nil, nil, true)
+	if err != nil {
+		t.Error(err)
+	}
+	if err = tpr.LoadAll(); err != nil {
+		t.Error(err)
+	}
+	if !reflect.DeepEqual(tpr, tprCopy) {
+		t.Errorf("Expected <%+v> , \nReceived <%+v>", tprCopy, tpr)
+	}
+}

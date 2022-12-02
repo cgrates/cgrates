@@ -1721,3 +1721,70 @@ func TestStatQueueProfile_Set(t *testing.T) {
 		})
 	}
 }
+
+func TestStatQueueGobEncode(t *testing.T) {
+	exp := []byte{68, 255, 129, 3, 1, 1, 8, 115, 113, 69, 110, 99, 111, 100, 101, 1, 255, 130, 0, 1, 4, 1, 6, 84, 101, 110, 97, 110, 116, 1, 12, 0, 1, 2, 73, 68, 1, 12, 0, 1, 7, 83, 81, 73, 116, 101, 109, 115, 1, 255, 136, 0, 1, 9, 83, 81, 77, 101, 116, 114, 105, 99, 115, 1, 255, 138, 0, 0, 0, 30, 255, 135, 2, 1, 1, 15, 91, 93, 101, 110, 103, 105, 110, 101, 46, 83, 81, 73, 116, 101, 109, 1, 255, 136, 0, 1, 255, 132, 0, 0, 48, 255, 131, 3, 1, 1, 6, 83, 81, 73, 116, 101, 109, 1, 255, 132, 0, 1, 2, 1, 7, 69, 118, 101, 110, 116, 73, 68, 1, 12, 0, 1, 10, 69, 120, 112, 105, 114, 121, 84, 105, 109, 101, 1, 255, 134, 0, 0, 0, 10, 255, 133, 5, 1, 2, 255, 140, 0, 0, 0, 44, 255, 137, 4, 1, 1, 28, 109, 97, 112, 91, 115, 116, 114, 105, 110, 103, 93, 101, 110, 103, 105, 110, 101, 46, 83, 116, 97, 116, 77, 101, 116, 114, 105, 99, 1, 255, 138, 0, 1, 12, 1, 16, 0, 0, 3, 255, 130, 0}
+	sq := &StatQueue{}
+	if rcv, err := sq.GobEncode(); err != nil {
+		t.Error(err)
+	} else if string(rcv) != string(exp) {
+		t.Errorf("Expected <%v>, \nReceived <%v>", exp, rcv)
+	}
+}
+func TestStatQueueGobDecode(t *testing.T) {
+	rply := []byte{77, 1}
+	expErr := "unexpected EOF"
+	sq := &StatQueue{}
+	if err := sq.GobDecode(rply); err == nil || err.Error() != expErr {
+		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err.Error())
+	}
+}
+
+func TestStatQueueClone(t *testing.T) {
+	exTime := time.Date(2021, 1, 1, 23, 59, 59, 0, time.UTC)
+	sq := &StatQueue{
+		Tenant: "testTnt",
+		ID:     "testId",
+		SQItems: []SQItem{
+			{
+				EventID:    "testEventId",
+				ExpiryTime: &exTime,
+			},
+		},
+		SQMetrics: map[string]StatMetric{
+			"key": statMetricMock("remExpired error"),
+		},
+		lkID:   "testLkId",
+		dirty:  utils.BoolPointer(false),
+		ttl:    utils.DurationPointer(time.Duration(3)),
+		weight: 2,
+	}
+	exp := &StatQueue{
+		Tenant: "testTnt",
+		ID:     "testId",
+		SQItems: []SQItem{
+			{
+				EventID:    "testEventId",
+				ExpiryTime: &exTime,
+			},
+		},
+		SQMetrics: map[string]StatMetric{
+			"key": statMetricMock("remExpired error"),
+		},
+		lkID:   "testLkId",
+		dirty:  utils.BoolPointer(false),
+		ttl:    utils.DurationPointer(time.Duration(3)),
+		weight: 2,
+	}
+	if rcv := sq.Clone(); !reflect.DeepEqual(utils.ToJSON(rcv), utils.ToJSON(exp)) {
+		t.Errorf("Expected <%v>, \nReceived <%v>", utils.ToJSON(exp), utils.ToJSON(rcv))
+	}
+}
+
+func TestStatQueueWithAPIOptsMarshalJSONNil(t *testing.T) {
+	var ssq *StatQueueWithAPIOpts
+	if _, err := ssq.MarshalJSON(); err != nil {
+		t.Errorf("Expected error <nil>, Received error <%v>", err)
+	}
+
+}

@@ -19,25 +19,110 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"reflect"
 	"testing"
+	"time"
 
+	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
-// unfinished
 func TestUpdateReplicationFilters(t *testing.T) {
-	UpdateReplicationFilters("objType", "objId", utils.EmptyString)
-	UpdateReplicationFilters("objType", "objId", "connID")
+	tmp := Cache
+	cfgTmp := config.CgrConfig()
+
+	Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	cfg.CacheCfg().Partitions[utils.CacheReplicationHosts] = &config.CacheParamCfg{
+		Limit: 1,
+	}
+	config.SetCgrConfig(cfg)
+	Cache = NewCacheS(cfg, nil, nil, nil)
+
+	args := &utils.ArgsGetGroupWithAPIOpts{
+		Tenant: "cgrates.org",
+		ArgsGetGroup: utils.ArgsGetGroup{
+			CacheID: utils.CacheReplicationHosts,
+			GroupID: utils.AccountPrefix + "cgrates.org:acc1",
+		},
+	}
+	var reply []string
+
+	UpdateReplicationFilters(utils.AccountPrefix, "cgrates.org:acc1", utils.EmptyString)
+	if err := Cache.V1GetGroupItemIDs(context.Background(), args,
+		&reply); err == nil || err != utils.ErrNotFound {
+		t.Errorf("Expected %v, received %v", utils.ErrNotFound, err)
+	}
+
+	UpdateReplicationFilters(utils.AccountPrefix, "cgrates.org:acc1", utils.MetaLocalHost)
+	expected := []string{utils.AccountPrefix + "cgrates.org:acc1:" + utils.MetaLocalHost}
+	if err := Cache.V1GetGroupItemIDs(context.Background(), args, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(reply, expected) {
+		t.Errorf("Expected %v, received %v", expected, reply)
+	}
+
+	Cache = tmp
+	config.SetCgrConfig(cfgTmp)
 }
 
-// unfinished
-// cover never stops
-// func TestReplicateMultipleIDs(t *testing.T) {
-// 	connMgr := NewConnManager(config.NewDefaultCGRConfig())
-// 	ctx := context.Background()
-// 	connId := []string{"connID"}
-// 	objIds := []string{"ObjIds"}
-// 	err := replicateMultipleIDs(ctx, connMgr, connId, false, "objType", objIds, "method", "args")
-// 	t.Error(err)
+func TestReplicateNnReplicatorSv1(t *testing.T) {
+	tmp := Cache
+	cfgTmp := config.CgrConfig()
+	Cache.Clear(nil)
 
-// }
+	cfg := config.NewDefaultCGRConfig()
+	connMgr := NewConnManager(cfg)
+	cfg.CacheCfg().Partitions[utils.CacheReplicationHosts] = &config.CacheParamCfg{
+		Limit: 1,
+	}
+	config.SetCgrConfig(cfg)
+	Cache = NewCacheS(cfg, nil, nil, nil)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(10))
+	connId := []string{}
+	objIds := "cgrates.org:acc1"
+	objType := utils.AccountPrefix
+	expErr := "MANDATORY_IE_MISSING: [connIDs]"
+
+	Cache.Set(ctx, utils.CacheReplicationHosts, objType+"cgrates.org:acc1"+utils.ConcatenatedKeySep+utils.MetaLocalHost, utils.MetaLocalHost, []string{objType + "cgrates.org:acc1"}, true, utils.NonTransactional)
+	if err := replicate(ctx, connMgr, connId, true, utils.AccountPrefix, objIds, "GET", "args"); err == nil || err.Error() != expErr {
+		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err)
+	}
+	cancel()
+
+	Cache = tmp
+	config.SetCgrConfig(cfgTmp)
+}
+
+func TestReplicateMultipleIDs(t *testing.T) {
+	tmp := Cache
+	cfgTmp := config.CgrConfig()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	connMgr := NewConnManager(cfg)
+	cfg.CacheCfg().Partitions[utils.CacheReplicationHosts] = &config.CacheParamCfg{
+		Limit: 1,
+	}
+	config.SetCgrConfig(cfg)
+	Cache = NewCacheS(cfg, nil, nil, nil)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(10))
+	connId := []string{}
+	objIds := []string{"cgrates.org:acc1"}
+	objType := utils.AccountPrefix
+	expErr := "MANDATORY_IE_MISSING: [connIDs]"
+	if err := replicateMultipleIDs(ctx, connMgr, connId, false, utils.AccountPrefix, objIds, "GET", "args"); err == nil || err.Error() != expErr {
+		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err)
+	}
+	cancel()
+
+	Cache.Set(ctx, utils.CacheReplicationHosts, objType+"cgrates.org:acc1"+utils.ConcatenatedKeySep+utils.MetaLocalHost, utils.MetaLocalHost, []string{objType + "cgrates.org:acc1"}, true, utils.NonTransactional)
+	if err := replicateMultipleIDs(ctx, connMgr, connId, true, utils.AccountPrefix, objIds, "GET", "args"); err == nil || err.Error() != expErr {
+		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err)
+	}
+	cancel()
+
+	Cache = tmp
+	config.SetCgrConfig(cfgTmp)
+}
