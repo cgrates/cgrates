@@ -2652,7 +2652,9 @@ func TestCdrLogAction(t *testing.T) {
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs): internalChan,
 	})
 
-	var extraData interface{}
+	extraData := map[string]interface{}{
+		"test": "val",
+	}
 	acc := &Account{
 		ID: "cgrates.org:1001",
 		BalanceMap: map[string]Balances{
@@ -2725,6 +2727,7 @@ func TestCdrLogAction(t *testing.T) {
 			"Tenant":       "cgrates.org",
 			"ToR":          "*monetary",
 			"Usage":        mock.args.CGREvent.Event["Usage"],
+			"test":         "val",
 		},
 		APIOpts: map[string]interface{}{},
 	}
@@ -3145,7 +3148,16 @@ func TestExportAction(t *testing.T) {
 			balanceValue: 10,
 		},
 	}
-	if err := export(ub, a, acs, nil, utils.CGREvent{Tenant: "cgrates.org", ID: "id"}); err != nil {
+	extraData := &utils.CGREvent{
+		Tenant:  "tenant",
+		ID:      "id1",
+		Time:    utils.TimePointer(time.Date(2022, 12, 1, 1, 0, 0, 0, time.UTC)),
+		Event:   map[string]interface{}{},
+		APIOpts: map[string]interface{}{},
+	}
+	if err := export(ub, a, acs, nil, nil); err != nil {
+		t.Errorf("received %v", err)
+	} else if err = export(nil, a, acs, nil, extraData); err != nil {
 		t.Errorf("received %v", err)
 	}
 }
@@ -3383,4 +3395,187 @@ func TestRemoveSessionCost(t *testing.T) {
 	if err := removeSessionCosts(nil, action, nil, nil, nil); err != nil {
 		t.Error(err)
 	}
+}
+
+func TestLogAction(t *testing.T) {
+	acc := &Account{
+		ID: "cgrates.org:1001",
+		BalanceMap: map[string]Balances{
+			utils.MetaMonetary: {
+				&Balance{Value: 20},
+			},
+		},
+		UnitCounters: UnitCounters{
+			utils.MetaMonetary: []*UnitCounter{
+				{
+					Counters: CounterFilters{
+						&CounterFilter{Value: 1},
+					},
+				},
+			},
+		},
+	}
+	extraData := map[string]interface{}{
+		"field1": "value",
+		"field2": "second",
+	}
+	if err := logAction(acc, nil, nil, nil, nil); err != nil {
+		t.Error(err)
+	} else if err = logAction(nil, nil, nil, nil, extraData); err != nil {
+		t.Error(err)
+	}
+
+}
+
+func TestCdrLogProviderFieldAsInterface(t *testing.T) {
+	acc := &Account{
+		ID: "ACCID",
+		ActionTriggers: ActionTriggers{
+			&ActionTrigger{
+				ID:        "acTrigger",
+				UniqueID:  "uuid_acc",
+				Recurrent: false,
+			},
+			&ActionTrigger{
+				ID:        "acTrigger1",
+				UniqueID:  "uuid_acc1",
+				Recurrent: false,
+			},
+		},
+		BalanceMap: map[string]Balances{
+			utils.MetaMonetary: {
+
+				&Balance{Value: 10,
+					DestinationIDs: utils.StringMap{
+
+						"*ddc_dest": true,
+						"*dest":     false,
+					}},
+			},
+			utils.MetaVoice: {
+				&Balance{Value: 10, Weight: 20, DestinationIDs: utils.NewStringMap("NAT")},
+				&Balance{Weight: 10, DestinationIDs: utils.NewStringMap("RET")},
+			},
+		},
+		UnitCounters: UnitCounters{
+			utils.MetaMonetary: []*UnitCounter{
+				{
+					Counters: CounterFilters{
+						&CounterFilter{Value: 1},
+					},
+				},
+			},
+		},
+	}
+	a := &Action{
+
+		Id:              "CDRLog1",
+		ActionType:      utils.CDRLog,
+		ExtraParameters: "{\"BalanceID\":\"~*acnt.BalanceID\",\"ActionID\":\"~*act.ActionID\",\"BalanceValue\":\"~*acnt.BalanceValue\"}",
+		Weight:          50,
+		Balance: &BalanceFilter{
+			Uuid:          utils.StringPointer("uuid113"),
+			ID:            utils.StringPointer("b_id_22"),
+			Type:          utils.StringPointer("*prepaid"),
+			RatingSubject: utils.StringPointer("rate"),
+			DestinationIDs: &utils.StringMap{
+				"dest1": true,
+			},
+			Value: &utils.ValueFormula{
+				Static: 3.0,
+			},
+			Categories: &utils.StringMap{
+				"category": true,
+			},
+			SharedGroups: &utils.StringMap{
+				"group1": true,
+			},
+			ExpirationDate: utils.TimePointer(time.Date(2022, 1, 1, 2, 0, 0, 0, time.UTC)),
+			Weight:         utils.Float64Pointer(323.0),
+		},
+	}
+	cd := &cdrLogProvider{action: a,
+		acnt: acc,
+		cache: utils.MapStorage{
+			"field": "val",
+		}}
+	if val, err := cd.FieldAsInterface([]string{utils.MetaAcnt, utils.AccountID}); err != nil {
+		t.Error(err)
+	} else if val != acc.ID {
+		t.Errorf("expected %v,received %v", acc.ID, val)
+	}
+	if _, has := cd.cache[utils.MetaAcnt]; !has {
+		t.Error("field does not exist")
+	}
+	if val, err := cd.FieldAsInterface([]string{utils.MetaAcnt, utils.BalanceUUID}); err != nil {
+		t.Error(err)
+	} else if val != *a.Balance.Uuid {
+		t.Errorf("expected %v,received %v", *a.Balance.Uuid, val)
+	}
+	if _, has := cd.cache[utils.MetaAcnt]; !has {
+		t.Error("field does not exist")
+	}
+
+	if val, err := cd.FieldAsInterface([]string{utils.MetaAcnt, utils.DestinationIDs}); err != nil {
+		t.Error(err)
+	} else if val != a.Balance.DestinationIDs.String() {
+		t.Errorf("expected %v,received %v", *a.Balance.Uuid, val)
+	}
+	if _, has := cd.cache[utils.MetaAcnt]; !has {
+		t.Error("field does not exist")
+	}
+
+	if val, err := cd.FieldAsInterface([]string{utils.MetaAcnt, utils.ExtraParameters}); err != nil {
+		t.Error()
+	} else if val != a.ExtraParameters {
+		t.Errorf("expected %v,received %v", *a.Balance.Uuid, val)
+	}
+	if _, has := cd.cache[utils.MetaAcnt]; !has {
+		t.Error("field does not exist")
+	}
+
+	if val, err := cd.FieldAsInterface([]string{utils.MetaAcnt, utils.RatingSubject}); err != nil {
+		t.Error()
+	} else if val != *a.Balance.RatingSubject {
+		t.Errorf("expected %v,received %v", *a.Balance.Uuid, val)
+	}
+	if _, has := cd.cache[utils.MetaAcnt]; !has {
+		t.Error("field does not exist")
+	}
+
+	if val, err := cd.FieldAsInterface([]string{utils.MetaAcnt, utils.Category}); err != nil {
+		t.Error()
+	} else if val != a.Balance.Categories.String() {
+		t.Errorf("expected %v,received %v", *a.Balance.Uuid, val)
+	}
+	if _, has := cd.cache[utils.MetaAcnt]; !has {
+		t.Error("field does not exist")
+	}
+
+	if val, err := cd.FieldAsInterface([]string{utils.MetaAcnt, utils.SharedGroups}); err != nil {
+		t.Error()
+	} else if val != a.Balance.SharedGroups.String() {
+		t.Errorf("expected %v,received %v", *a.Balance.Uuid, val)
+	}
+	if _, has := cd.cache[utils.MetaAcnt]; !has {
+		t.Error("field does not exist")
+	}
+
+	if val, err := cd.FieldAsInterface([]string{utils.MetaAct, utils.ActionType}); err != nil {
+		t.Error()
+	} else if val != a.ActionType {
+		t.Errorf("expected %v,received %v", *a.Balance.Uuid, val)
+	}
+	if _, has := cd.cache[utils.MetaAct]; !has {
+		t.Error("field does not exist")
+	}
+	if val, err := cd.FieldAsInterface([]string{"val"}); err != nil {
+		t.Error()
+	} else if val != "val" {
+		t.Errorf("expected %v,received %v", *a.Balance.Uuid, val)
+	}
+	if _, has := cd.cache["val"]; !has {
+		t.Error("field does not exist")
+	}
+
 }

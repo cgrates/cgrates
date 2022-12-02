@@ -1193,3 +1193,90 @@ func TestTpReaderLoadAccountActions(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestTPCSVImporterChargerProfiles(t *testing.T) {
+	db := NewInternalDB(nil, nil, true, map[string]*config.ItemOpt{
+		utils.CacheTBLTPChargers: {
+			Limit: 2,
+		},
+	})
+	tpCharger := &utils.TPChargerProfile{
+		TPid:   "chargetp",
+		Tenant: "cgrates",
+		ID:     "id",
+	}
+	db.db.Set(utils.CacheTBLTPChargers, "tpid:itm1", tpCharger, []string{"grp"}, true, utils.NonTransactional)
+	tpImp := &TPCSVImporter{
+		TPid:    "tpid",
+		Verbose: false,
+		csvr:    db,
+		StorDb:  db,
+	}
+	if err := tpImp.importChargerProfiles("fn"); err != nil {
+		t.Error(err)
+	}
+	if val, has := db.db.Get(utils.CacheTBLTPChargers, utils.ConcatenatedKey(tpCharger.TPid, tpCharger.Tenant, tpCharger.ID)); !has {
+		t.Error("has no value")
+	} else if !reflect.DeepEqual(val, tpCharger) {
+		t.Errorf("expected %+v,received %+v", utils.ToJSON(tpCharger), utils.ToJSON(val))
+	}
+}
+
+func TestTPCSVImporterDispatcherProfiles(t *testing.T) {
+
+	db := NewInternalDB(nil, nil, true, map[string]*config.ItemOpt{
+		utils.CacheTBLTPDispatchers: {
+			Limit: 3,
+		},
+	})
+	dsP := &utils.TPDispatcherProfile{
+		TPid:   "disTP",
+		Tenant: "tnt",
+		ID:     "id",
+	}
+	db.db.Set(utils.CacheTBLTPDispatchers, "tpid:dsp1", dsP, []string{"grp"}, true, utils.NonTransactional)
+	tpImp := &TPCSVImporter{
+		TPid:    "tpid",
+		Verbose: false,
+		csvr:    db,
+		StorDb:  db,
+	}
+	if err := tpImp.importDispatcherProfiles("fn"); err != nil {
+		t.Error(err)
+	}
+	if val, has := db.db.Get(utils.CacheTBLTPDispatchers, utils.ConcatenatedKey(dsP.TPid, dsP.Tenant, dsP.ID)); !has {
+		t.Error("has no value")
+	} else if !reflect.DeepEqual(val, dsP) {
+		t.Errorf("expected %+v,received %+v", utils.ToJSON(dsP), utils.ToJSON(val))
+	}
+
+}
+
+func TestTPCSVImporterDispatcherHosts(t *testing.T) {
+	db := NewInternalDB(nil, nil, true, map[string]*config.ItemOpt{
+		utils.CacheTBLTPDispatcherHosts: {
+			Limit: 3,
+		},
+	})
+	dsH := &utils.TPDispatcherHost{
+		TPid:   "dshTp",
+		Tenant: "host",
+		ID:     "host_id",
+	}
+	db.db.Set(utils.CacheTBLTPDispatcherHosts, "tpid:dsp1", dsH, []string{"grp"}, true, utils.NonTransactional)
+	tpImp := &TPCSVImporter{
+		TPid:    "tpid",
+		Verbose: false,
+		csvr:    db,
+		StorDb:  db,
+	}
+	if err := tpImp.importDispatcherHosts("fn"); err != nil {
+		t.Error(err)
+	}
+	if val, has := db.db.Get(utils.CacheTBLTPDispatcherHosts, utils.ConcatenatedKey(dsH.TPid, dsH.Tenant, dsH.ID)); !has {
+		t.Error("has no value")
+	} else if !reflect.DeepEqual(val, dsH) {
+		t.Errorf("expected %+v,received %+v", utils.ToJSON(dsH), utils.ToJSON(val))
+	}
+
+}

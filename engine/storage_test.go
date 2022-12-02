@@ -18,6 +18,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"reflect"
+	"strings"
 	"testing"
 	"time"
 
@@ -399,5 +401,74 @@ func TestIDBRemoveIndexesDrv(t *testing.T) {
 	}
 	if has := idb.db.HasGroup("chID", utils.EmptyString); has {
 		t.Error("group should be removed")
+	}
+}
+
+func TestIDBGetDispatcherHostDrv(t *testing.T) {
+	idb := NewInternalDB(nil, nil, true, map[string]*config.ItemOpt{
+		utils.CacheDispatcherHosts: {
+			Limit:  2,
+			Remote: true,
+		},
+	})
+	dsp := &DispatcherHost{
+		Tenant: "cgrates.org",
+	}
+	tenant, acc := "cgrates", "acc1"
+	idb.db.Set(utils.CacheDispatcherHosts, utils.ConcatenatedKey(tenant, acc), dsp, []string{"id", "id3"}, true, utils.NonTransactional)
+
+	if val, err := idb.GetDispatcherHostDrv(tenant, acc); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(dsp, val) {
+		t.Errorf("expected %+v,received %+v", utils.ToJSON(dsp), utils.ToJSON(val))
+	}
+}
+
+func TestIDBRemoveDispatcherHostDrv(t *testing.T) {
+	idb := NewInternalDB(nil, nil, true, map[string]*config.ItemOpt{
+		utils.CacheDispatcherHosts: {
+			Limit:  2,
+			Remote: true,
+		},
+	})
+	dsp := &DispatcherHost{
+		Tenant: "cgrates.org",
+	}
+	tenant, acc := "cgrates", "acc1"
+	idb.db.Set(utils.CacheDispatcherHosts, utils.ConcatenatedKey(tenant, acc), dsp, []string{"id", "id3"}, true, utils.NonTransactional)
+
+	if err := idb.RemoveDispatcherHostDrv(tenant, acc); err != nil {
+		t.Error(err)
+	}
+	if _, has := idb.db.Get(utils.CacheDispatcherHosts, utils.ConcatenatedKey(tenant, acc)); has {
+		t.Error("should been removed")
+	}
+}
+
+func TestIDBSetStatQueueDrvNil(t *testing.T) {
+	idb := NewInternalDB(nil, nil, true, map[string]*config.ItemOpt{
+		utils.CacheStatQueues: {
+			Limit:     4,
+			StaticTTL: true,
+		},
+	})
+	ssq := &StoredStatQueue{
+		Tenant: "cgrates",
+		ID:     "id",
+		SQItems: []SQItem{
+			{
+				EventID: "event1",
+			},
+			{
+				EventID: "event2",
+			},
+		},
+		Compressed: false,
+		SQMetrics: map[string][]byte{
+			strings.Join([]string{utils.MetaASR, "test"}, "#"): []byte("val"),
+		},
+	}
+	if err := idb.SetStatQueueDrv(ssq, nil); err == nil {
+		t.Error(err)
 	}
 }

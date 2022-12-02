@@ -21,7 +21,6 @@ import (
 	"encoding/json"
 	"reflect"
 	"testing"
-	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
@@ -196,8 +195,8 @@ func TestDPNewLibNumber(t *testing.T) {
 
 }
 
-func TestDMSetDestination(t *testing.T) {
-
+func TestDMSetDestinationSucces(t *testing.T) {
+	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.DataDbCfg().Items = map[string]*config.ItemOpt{
 		utils.MetaDestinations: {
@@ -208,17 +207,7 @@ func TestDMSetDestination(t *testing.T) {
 	cfg.DataDbCfg().RplFiltered = true
 	cfg.DataDbCfg().RplCache = "cache"
 
-	db := NewInternalDB(nil, nil, true, map[string]*config.ItemOpt{
-		utils.CacheDestinations: {
-			Limit:     2,
-			TTL:       2 * time.Minute,
-			StaticTTL: true,
-			Remote:    true,
-			Replicate: true,
-			RouteID:   "route",
-			APIKey:    "api",
-		},
-	})
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	clientConn := make(chan rpcclient.ClientConnector, 1)
 	clientConn <- &ccMock{
 		calls: map[string]func(args interface{}, reply interface{}) error{
@@ -237,24 +226,24 @@ func TestDMSetDestination(t *testing.T) {
 		Prefixes: []string{},
 	}
 	dm := NewDataManager(db, cfg.CacheCfg(), connMngr)
+	config.SetCgrConfig(cfg)
 
-	Cache = NewCacheS(cfg, dm, nil)
 	if err := dm.SetDestination(dest, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
 
 }
 
-func TestDMSetAccount(t *testing.T) {
+func TestDMSetAccountSucces(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	cfg.DataDbCfg().RplConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicationConnsCfg)}
+	/*cfg.DataDbCfg().RplConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicationConnsCfg)}
 	cfg.DataDbCfg().RplFiltered = false
 	cfg.DataDbCfg().Items = map[string]*config.ItemOpt{
 		utils.MetaAccounts: {
 			Replicate: true,
 		},
-	}
+	}*/
 	clientConn := make(chan rpcclient.ClientConnector, 1)
 	clientConn <- &ccMock{
 		calls: map[string]func(args interface{}, reply interface{}) error{
@@ -267,16 +256,8 @@ func TestDMSetAccount(t *testing.T) {
 	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicationConnsCfg): clientConn,
 	})
-	db := NewInternalDB(nil, nil, true, map[string]*config.ItemOpt{
-		utils.CacheAccounts: {
-			Limit:     3,
-			TTL:       2 * time.Minute,
-			StaticTTL: true,
-			Remote:    true,
-			Replicate: true,
-		},
-	})
-	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+
 	acc := &Account{
 		ID: "id",
 		BalanceMap: map[string]Balances{
@@ -293,10 +274,37 @@ func TestDMSetAccount(t *testing.T) {
 		AllowNegative:  true,
 		Disabled:       false,
 	}
-
-	Cache = NewCacheS(cfg, dm, nil)
+	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
+	config.SetCgrConfig(cfg)
 
 	if err := dm.SetAccount(acc); err != nil {
+		t.Error(err)
+	}
+
+}
+
+func TestDMSetReverseDestination(t *testing.T) {
+	Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn <- &ccMock{
+		calls: map[string]func(args interface{}, reply interface{}) error{
+			utils.ReplicatorSv1SetReverseDestination: func(args, reply interface{}) error {
+				*reply.(*string) = "reply"
+				return nil
+			},
+		},
+	}
+	connMngr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicationConnsCfg): clientConn,
+	})
+
+	dm := NewDataManager(db, cfg.CacheCfg(), connMngr)
+	config.SetCgrConfig(cfg)
+
+	if err := dm.SetReverseDestination("val", []string{"prf"}, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
 
