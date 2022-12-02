@@ -121,6 +121,7 @@ type FieldsAltered struct {
 
 // UniqueAlteredFields will return all altered fields without duplicates
 func (flds *AttrSProcessEventReply) UniqueAlteredFields() (unFlds utils.StringSet) {
+	unFlds = make(utils.StringSet)
 	for _, altered := range flds.AlteredFields {
 		unFlds.AddSlice(altered.Fields)
 	}
