@@ -25,6 +25,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"net/url"
 	"os"
 	"path"
@@ -52,7 +53,7 @@ func (api *APIerSv1) ExportCdrsToZipString(attr utils.AttrExpFileCdrs, reply *st
 	// Create a new zip archive.
 	w := zip.NewWriter(buf)
 	// read generated file
-	content, err := os.ReadFile(efc.ExportedFilePath)
+	content, err := ioutil.ReadFile(efc.ExportedFilePath)
 	if err != nil {
 		return err
 	}
@@ -68,7 +69,7 @@ func (api *APIerSv1) ExportCdrsToZipString(attr utils.AttrExpFileCdrs, reply *st
 	// Write metadata into a separate file with extension .cgr
 	medaData, err := json.MarshalIndent(efc, "", "  ")
 	if err != nil {
-		return errors.New("failed creating metadata content")
+		return errors.New("Failed creating metadata content")
 	}
 	medatadaFileName := exportFileName[:len(path.Ext(exportFileName))] + ".cgr"
 	mf, err := w.Create(medatadaFileName)
@@ -84,7 +85,7 @@ func (api *APIerSv1) ExportCdrsToZipString(attr utils.AttrExpFileCdrs, reply *st
 		return err
 	}
 	if err := os.Remove(efc.ExportedFilePath); err != nil {
-		return fmt.Errorf("failed removing exported file at path: %s", efc.ExportedFilePath)
+		return fmt.Errorf("Failed removing exported file at path: %s", efc.ExportedFilePath)
 	}
 	*reply = base64.StdEncoding.EncodeToString(buf.Bytes())
 	return nil

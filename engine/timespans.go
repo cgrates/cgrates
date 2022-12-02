@@ -295,7 +295,7 @@ func (incr *Increment) Clone() *Increment {
 func (incr *Increment) Equal(other *Increment) bool {
 	return incr.Duration == other.Duration &&
 		incr.Cost == other.Cost &&
-		(incr.BalanceInfo == nil && other.BalanceInfo == nil || incr.BalanceInfo.Equal(other.BalanceInfo))
+		((incr.BalanceInfo == nil && other.BalanceInfo == nil) || incr.BalanceInfo.Equal(other.BalanceInfo))
 }
 
 func (incr *Increment) GetCompressFactor() int {
@@ -365,10 +365,10 @@ func (incs *Increments) Decompress() { // must be pointer receiver
 			// set right Values
 			if incr.BalanceInfo != nil {
 				if incr.BalanceInfo.Monetary != nil {
-					incr.BalanceInfo.Monetary.Value += float64(cf-(i+1)) * incr.Cost
+					incr.BalanceInfo.Monetary.Value += (float64(cf-(i+1)) * incr.Cost)
 				}
 				if incr.BalanceInfo.Unit != nil {
-					incr.BalanceInfo.Unit.Value += float64(cf-(i+1)) * incr.BalanceInfo.Unit.Consumed
+					incr.BalanceInfo.Unit.Value += (float64(cf-(i+1)) * incr.BalanceInfo.Unit.Consumed)
 				}
 			}
 			cIncrs = append(cIncrs, incr)

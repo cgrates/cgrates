@@ -230,7 +230,7 @@ func (fltr *FilterRule) Pass(fieldNameDP utils.DataProvider,
 	if err != nil {
 		return false, err
 	}
-	return result != *fltr.negative, nil
+	return result != *(fltr.negative), nil
 }
 
 func (fltr *FilterRule) passString(fielNameDP utils.DataProvider, fieldValuesDP []utils.DataProvider) (bool, error) {

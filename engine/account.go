@@ -204,7 +204,7 @@ func (acc *Account) debitBalanceAction(a *Action, reset, resetIfNegative bool) e
 		}
 		b.account = acc
 		if b.MatchFilter(a.Balance, false, false) {
-			if reset || resetIfNegative && b.Value < 0 {
+			if reset || (resetIfNegative && b.Value < 0) {
 				b.SetValue(0)
 			}
 			b.SubstractValue(bClone.GetValue())
@@ -287,7 +287,7 @@ func (acc *Account) getBalancesForPrefix(prefix, category, tor,
 		if b.Disabled {
 			continue
 		}
-		if b.IsExpiredAt(aTime) || len(b.SharedGroups) == 0 && b.GetValue() <= 0 && !b.Blocker {
+		if b.IsExpiredAt(aTime) || (len(b.SharedGroups) == 0 && b.GetValue() <= 0 && !b.Blocker) {
 			continue
 		}
 		if sharedGroup != "" && b.SharedGroups[sharedGroup] == false {

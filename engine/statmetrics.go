@@ -103,10 +103,10 @@ type StatASR struct {
 // getValue returns asr.val
 func (asr *StatASR) getValue() float64 {
 	if asr.val == nil {
-		if asr.MinItems > 0 && asr.Count < int64(asr.MinItems) || asr.Count == 0 {
+		if (asr.MinItems > 0 && asr.Count < int64(asr.MinItems)) || (asr.Count == 0) {
 			asr.val = utils.Float64Pointer(STATS_NA)
 		} else {
-			asr.val = utils.Float64Pointer(utils.Round(asr.Answered/float64(asr.Count)*100.0,
+			asr.val = utils.Float64Pointer(utils.Round((asr.Answered / float64(asr.Count) * 100.0),
 				config.CgrConfig().GeneralCfg().RoundingDecimals, utils.ROUNDING_MIDDLE))
 		}
 	}
@@ -171,7 +171,7 @@ func (asr *StatASR) RemEvent(evID string) (err error) {
 	if val.CompressFactor <= 1 {
 		delete(asr.Events, evID)
 	} else {
-		val.Stat = (val.Stat*float64(val.CompressFactor) - float64(ans)) / float64(val.CompressFactor-1)
+		val.Stat = (val.Stat*float64(val.CompressFactor) - float64(ans)) / (float64(val.CompressFactor - 1))
 		val.CompressFactor = val.CompressFactor - 1
 	}
 	asr.val = nil
@@ -240,7 +240,7 @@ type StatACD struct {
 // getValue returns acr.val
 func (acd *StatACD) getValue() time.Duration {
 	if acd.val == nil {
-		if acd.MinItems > 0 && acd.Count < int64(acd.MinItems) || acd.Count == 0 {
+		if (acd.MinItems > 0 && acd.Count < int64(acd.MinItems)) || (acd.Count == 0) {
 			acd.val = utils.DurationPointer(time.Duration(-1 * time.Nanosecond))
 		} else {
 			acd.val = utils.DurationPointer(time.Duration(acd.Sum.Nanoseconds() / acd.Count))
@@ -367,7 +367,7 @@ type StatTCD struct {
 // getValue returns tcd.val
 func (tcd *StatTCD) getValue() time.Duration {
 	if tcd.val == nil {
-		if tcd.MinItems > 0 && tcd.Count < int64(tcd.MinItems) || tcd.Count == 0 {
+		if (tcd.MinItems > 0 && tcd.Count < int64(tcd.MinItems)) || (tcd.Count == 0) {
 			tcd.val = utils.DurationPointer(time.Duration(-1 * time.Nanosecond))
 		} else {
 			tcd.val = utils.DurationPointer(time.Duration(tcd.Sum.Nanoseconds()))
@@ -495,10 +495,10 @@ type StatACC struct {
 // getValue returns tcd.val
 func (acc *StatACC) getValue() float64 {
 	if acc.val == nil {
-		if acc.MinItems > 0 && acc.Count < int64(acc.MinItems) || acc.Count == 0 {
+		if (acc.MinItems > 0 && acc.Count < int64(acc.MinItems)) || (acc.Count == 0) {
 			acc.val = utils.Float64Pointer(STATS_NA)
 		} else {
-			acc.val = utils.Float64Pointer(utils.Round(acc.Sum/float64(acc.Count),
+			acc.val = utils.Float64Pointer(utils.Round((acc.Sum / float64(acc.Count)),
 				config.CgrConfig().GeneralCfg().RoundingDecimals, utils.ROUNDING_MIDDLE))
 		}
 	}
@@ -581,7 +581,7 @@ func (acc *StatACC) Compress(queueLen int64, defaultID string) (eventIDs []strin
 		return
 	}
 	stat := &StatWithCompress{
-		Stat: utils.Round(acc.Sum/float64(acc.Count),
+		Stat: utils.Round((acc.Sum / float64(acc.Count)),
 			config.CgrConfig().GeneralCfg().RoundingDecimals, utils.ROUNDING_MIDDLE),
 		CompressFactor: int(acc.Count),
 	}
@@ -619,7 +619,7 @@ type StatTCC struct {
 // getValue returns tcd.val
 func (tcc *StatTCC) getValue() float64 {
 	if tcc.val == nil {
-		if tcc.MinItems > 0 && tcc.Count < int64(tcc.MinItems) || tcc.Count == 0 {
+		if (tcc.MinItems > 0 && tcc.Count < int64(tcc.MinItems)) || (tcc.Count == 0) {
 			tcc.val = utils.Float64Pointer(STATS_NA)
 		} else {
 			tcc.val = utils.Float64Pointer(utils.Round(tcc.Sum,
@@ -707,7 +707,7 @@ func (tcc *StatTCC) Compress(queueLen int64, defaultID string) (eventIDs []strin
 		return
 	}
 	stat := &StatWithCompress{
-		Stat: utils.Round(tcc.Sum/float64(tcc.Count),
+		Stat: utils.Round((tcc.Sum / float64(tcc.Count)),
 			config.CgrConfig().GeneralCfg().RoundingDecimals, utils.ROUNDING_MIDDLE),
 		CompressFactor: int(tcc.Count),
 	}
@@ -745,7 +745,7 @@ type StatPDD struct {
 // getValue returns pdd.val
 func (pdd *StatPDD) getValue() time.Duration {
 	if pdd.val == nil {
-		if pdd.MinItems > 0 && pdd.Count < int64(pdd.MinItems) || pdd.Count == 0 {
+		if (pdd.MinItems > 0 && pdd.Count < int64(pdd.MinItems)) || (pdd.Count == 0) {
 			pdd.val = utils.DurationPointer(time.Duration(-1 * time.Nanosecond))
 		} else {
 			pdd.val = utils.DurationPointer(time.Duration(pdd.Sum.Nanoseconds() / pdd.Count))
@@ -1105,7 +1105,7 @@ func (sum *StatSum) Compress(queueLen int64, defaultID string) (eventIDs []strin
 		return
 	}
 	stat := &StatWithCompress{
-		Stat: utils.Round(sum.Sum/float64(sum.Count),
+		Stat: utils.Round((sum.Sum / float64(sum.Count)),
 			config.CgrConfig().GeneralCfg().RoundingDecimals, utils.ROUNDING_MIDDLE),
 		CompressFactor: int(sum.Count),
 	}
@@ -1145,10 +1145,10 @@ type StatAverage struct {
 // getValue returns tcd.val
 func (avg *StatAverage) getValue() float64 {
 	if avg.val == nil {
-		if avg.MinItems > 0 && avg.Count < int64(avg.MinItems) || avg.Count == 0 {
+		if (avg.MinItems > 0 && avg.Count < int64(avg.MinItems)) || (avg.Count == 0) {
 			avg.val = utils.Float64Pointer(STATS_NA)
 		} else {
-			avg.val = utils.Float64Pointer(utils.Round(avg.Sum/float64(avg.Count),
+			avg.val = utils.Float64Pointer(utils.Round((avg.Sum / float64(avg.Count)),
 				config.CgrConfig().GeneralCfg().RoundingDecimals, utils.ROUNDING_MIDDLE))
 		}
 	}
@@ -1243,7 +1243,7 @@ func (avg *StatAverage) Compress(queueLen int64, defaultID string) (eventIDs []s
 		return
 	}
 	stat := &StatWithCompress{
-		Stat: utils.Round(avg.Sum/float64(avg.Count),
+		Stat: utils.Round((avg.Sum / float64(avg.Count)),
 			config.CgrConfig().GeneralCfg().RoundingDecimals, utils.ROUNDING_MIDDLE),
 		CompressFactor: int(avg.Count),
 	}

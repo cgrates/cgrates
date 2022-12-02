@@ -433,7 +433,7 @@ func PjsuaCallUri(acnt *PjsuaAccount, dstUri, outboundUri string, callDur time.D
 	buf := new(bytes.Buffer)
 	io.Copy(os.Stdout, buf)
 	go func() {
-		time.Sleep(callDur + time.Duration(2)*time.Second)
+		time.Sleep(callDur + (time.Duration(2) * time.Second))
 		fPty.Write([]byte("q\n")) // Destroy the listener
 	}()
 	return nil

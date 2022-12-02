@@ -24,7 +24,7 @@ import (
 )
 
 func (dS *DispatcherService) ResourceSv1Ping(args *utils.CGREventWithArgDispatcher, rpl *string) (err error) {
-	if args == nil || args.CGREvent == nil && args.ArgDispatcher == nil {
+	if args == nil || (args.CGREvent == nil && args.ArgDispatcher == nil) {
 		args = utils.NewCGREventWithArgDispatcher()
 	} else if args.CGREvent == nil {
 		args.CGREvent = new(utils.CGREvent)
