@@ -69,8 +69,10 @@ func addReverseFilterIndexForFilter(dm *DataManager, idxItmType, ctx, tnt, itemI
 		}
 		fltrIndexer := NewFilterIndexer(dm, utils.ReverseFilterIndexes, indexerKey)
 		if err = fltrIndexer.StoreIndexes(true, utils.NonTransactional); err != nil {
+			guardian.Guardian.UnguardIDs(refID)
 			return
 		}
+		guardian.Guardian.UnguardIDs(refID)
 	}
 	return
 }
