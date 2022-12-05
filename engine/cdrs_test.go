@@ -1002,6 +1002,10 @@ func TestV1StoreSessionCost(t *testing.T) {
 	} else if !reflect.DeepEqual(rcv, exp) {
 		t.Errorf("expected %v,received %v", utils.ToJSON(exp), utils.ToJSON(rcv))
 	}
+	attr.Cost.CGRID = utils.EmptyString
+	if err := cdrS.V1StoreSessionCost(attr, reply); err == nil || err.Error() != fmt.Sprintf("%s: CGRID", utils.MandatoryInfoMissing) {
+		t.Error(err)
+	}
 }
 
 func TestV1StoreSessionCostSet(t *testing.T) {
@@ -1035,6 +1039,7 @@ func TestV1StoreSessionCostSet(t *testing.T) {
 		CheckDuplicate: false,
 	}
 	cdrS := &CDRServer{
+
 		cgrCfg:  cfg,
 		cdrDb:   db,
 		dm:      dm,
@@ -1059,6 +1064,13 @@ func TestV1StoreSessionCostSet(t *testing.T) {
 	} else if !reflect.DeepEqual(rcv, exp) {
 		t.Errorf("expected %v,received %v", utils.ToJSON(exp), utils.ToJSON(rcv))
 	}
+	cdrS.guard = guardian.Guardian
+	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 0
+	attr.CheckDuplicate = true
+	if err = cdrS.V1StoreSessionCost(attr, reply); err != nil {
+		t.Error(err)
+	}
+
 }
 
 func TestV2StoreSessionCost(t *testing.T) {
@@ -1630,8 +1642,8 @@ func TestCdrServerStoreSMCost(t *testing.T) {
 }
 
 func TestCdrSRateCDR(t *testing.T) {
-
 	cfg := config.NewDefaultCGRConfig()
+	cfg.CdrsCfg().SMCostRetries = 1
 	cfg.CdrsCfg().ChargerSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ChargerSConnsCfg)}
 	db := NewInternalDB(nil, nil, true, map[string]*config.ItemOpt{
 		utils.CacheSessionCostsTBL: {
@@ -1659,7 +1671,9 @@ func TestCdrSRateCDR(t *testing.T) {
 		Usage:       2 * time.Minute,
 		CostDetails: &EventCost{},
 	}
-	cdrS.cdrDb.SetSMCost(smc)
+	if err := cdrS.cdrDb.SetSMCost(smc); err != nil {
+		t.Error(err)
+	}
 
 	cdrOpts := &CDRWithAPIOpts{
 		CDR: &CDR{
