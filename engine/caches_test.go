@@ -872,3 +872,61 @@ func TestCacheRemoveGroup(t *testing.T) {
 	}
 
 }
+
+func TestUpdateReplicationFilters(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	tmp := *Cache
+	defer func() {
+		*Cache = tmp
+	}()
+	Cache.Clear(nil)
+	Cache = NewCacheS(cfg, nil, nil)
+	Cache.tCache = ltcache.NewTransCache(map[string]*ltcache.CacheConfig{
+		utils.CacheReplicationHosts: {
+			MaxItems: 3,
+		},
+	})
+	objType, objID, connID := "obj", "id", "conn"
+	UpdateReplicationFilters("obj", "id", "conn")
+	if val, has := Cache.Get(utils.CacheReplicationHosts, objType+objID+utils.ConcatenatedKeySep+connID); !has {
+		t.Error("has no value")
+	} else if val.(string) != connID {
+		t.Errorf("expected %v,received %v", connID, val)
+	}
+}
+
+/*
+func TestReplicateMultipleIDs(t *testing.T) {
+
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ChargerSCfg().AttributeSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}
+	cfg.AttributeSCfg().Enabled = true
+
+	connClient := make(chan rpcclient.ClientConnector, 1)
+	connClient <- &ccMock{
+		calls: map[string]func(args interface{}, reply interface{}) error{
+			utils.AttributeSv1ProcessEvent: func(args, reply interface{}) error {
+				*reply.(*string) = "reply"
+				return nil
+			},
+		},
+	}
+
+	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes): connClient,
+	})
+
+	filtered := false
+	objType := "obj"
+	objIds := []string{"objID2", "objID3"}
+	method := utils.AttributeSv1ProcessEvent
+	args := &utils.CGREvent{
+		Tenant: "Cgrates",
+		ID:     "id",
+	}
+
+	if err := replicateMultipleIDs(connMgr, cfg.ChargerSCfg().AttributeSConns, filtered, objType, objIds, method, args); err != nil {
+		t.Error(err)
+	}
+}
+*/

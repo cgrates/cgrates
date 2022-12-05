@@ -1050,6 +1050,7 @@ func TestTPReaderLoadDestinationsFiltered(t *testing.T) {
 		ID:   "prefixes",
 	}, []string{"groupId"}, true, "tId")
 	db.db = tscache
+
 	tpr, err := NewTpReader(db, db, "itemId", "local", nil, nil, true)
 	if err != nil {
 		t.Error(err)
@@ -1057,7 +1058,16 @@ func TestTPReaderLoadDestinationsFiltered(t *testing.T) {
 	if b, err := tpr.LoadDestinationsFiltered(""); (err != nil) || !b {
 		t.Errorf("expected nil ,received %v", err)
 	}
+	tscache.Remove(utils.CacheTBLTPDestinations, "itemId", true, utils.NonTransactional)
 
+	if b, err := tpr.LoadDestinationsFiltered(""); err == nil || err != utils.ErrNotFound || b {
+		t.Errorf("expected nil ,received %v", err)
+	}
+	tpr.dm = nil
+	tscache.Set(utils.CacheTBLTPDestinations, "itemId", &utils.TPDestination{}, []string{"groupId"}, true, "tId")
+	if b, err := tpr.LoadDestinationsFiltered(""); err != nil || !b {
+		t.Errorf("expected nil ,received %v", err)
+	}
 }
 
 func TestTPReaderLoadAll(t *testing.T) {
@@ -1148,6 +1158,19 @@ func TestTpReaderIsValid(t *testing.T) {
 	tpr, err := NewTpReader(nil, db, "", "local", nil, nil, false)
 	if err != nil {
 		t.Error(err)
+	}
+	tpr.ratingPlans = map[string]*RatingPlan{
+		"rate": {
+			Timings: map[string]*RITiming{
+				"timing": {
+					StartTime: "00:00:00",
+					Years:     utils.Years{},
+					Months:    utils.Months{},
+					MonthDays: utils.MonthDays{},
+					WeekDays:  utils.WeekDays{},
+				},
+			},
+		},
 	}
 	if valid := tpr.IsValid(); !valid {
 		t.Error("expected true,received false")
@@ -1279,4 +1302,267 @@ func TestTPCSVImporterDispatcherHosts(t *testing.T) {
 		t.Errorf("expected %+v,received %+v", utils.ToJSON(dsH), utils.ToJSON(val))
 	}
 
+}
+
+func TestTPCSVImporterErrs(t *testing.T) {
+	db := NewInternalDB(nil, nil, true, map[string]*config.ItemOpt{
+		utils.CacheTBLTPDispatcherHosts: {
+			Limit: 3,
+		},
+	})
+	tpImp := &TPCSVImporter{
+		TPid:    "tpid",
+		Verbose: false,
+		csvr:    db,
+		StorDb:  db,
+	}
+	fn := "test"
+	if err := tpImp.importTimings(fn); err == nil || err != utils.ErrNotFound {
+		t.Error(err)
+	}
+	if err := tpImp.importDestinations(fn); err == nil || err != utils.ErrNotFound {
+		t.Error(err)
+	}
+	if err := tpImp.importRates(fn); err == nil || err != utils.ErrNotFound {
+		t.Error(err)
+	}
+	if err := tpImp.importDestinationRates(fn); err == nil || err != utils.ErrNotFound {
+		t.Error(err)
+	}
+	if err := tpImp.importRatingPlans(fn); err == nil || err != utils.ErrNotFound {
+		t.Error(err)
+	}
+	if err := tpImp.importRatingProfiles(fn); err == nil || err != utils.ErrNotFound {
+		t.Error(err)
+	}
+	if err := tpImp.importSharedGroups(fn); err == nil || err != utils.ErrNotFound {
+		t.Error(err)
+	}
+	if err := tpImp.importActions(fn); err == nil || err != utils.ErrNotFound {
+		t.Error(err)
+	}
+	if err := tpImp.importActionTimings(fn); err == nil || err != utils.ErrNotFound {
+		t.Error(err)
+	}
+	if err := tpImp.importActionTriggers(fn); err == nil || err != utils.ErrNotFound {
+		t.Error(err)
+	}
+	if err := tpImp.importAccountActions(fn); err == nil || err != utils.ErrNotFound {
+		t.Error(err)
+	}
+	if err := tpImp.importResources(fn); err == nil || err != utils.ErrNotFound {
+		t.Error(err)
+	}
+	if err := tpImp.importStats(fn); err == nil || err != utils.ErrNotFound {
+		t.Error(err)
+	}
+	if err := tpImp.importThresholds(fn); err == nil || err != utils.ErrNotFound {
+		t.Error(err)
+	}
+	if err := tpImp.importFilters(fn); err == nil || err != utils.ErrNotFound {
+		t.Error(err)
+	}
+	if err := tpImp.importRoutes(fn); err == nil || err != utils.ErrNotFound {
+		t.Error(err)
+	}
+	if err := tpImp.importAttributeProfiles(fn); err == nil || err != utils.ErrNotFound {
+		t.Error(err)
+	}
+	if err := tpImp.importChargerProfiles(fn); err == nil || err != utils.ErrNotFound {
+		t.Error(err)
+	}
+	if err := tpImp.importDispatcherProfiles(fn); err == nil || err != utils.ErrNotFound {
+		t.Error(err)
+	}
+	if err := tpImp.importDispatcherHosts(fn); err == nil || err != utils.ErrNotFound {
+		t.Error(err)
+	}
+}
+
+func TestTpReaderLoadTimingsErr(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	tscache := ltcache.NewTransCache(
+		map[string]*ltcache.CacheConfig{
+			utils.CacheTBLTPAccountActions: {
+				MaxItems:  3,
+				TTL:       time.Minute * 30,
+				StaticTTL: false,
+				OnEvicted: func(itmID string, value interface{}) {
+				},
+			}},
+	)
+	duplicateId := "id"
+	tscache.Set(utils.CacheTBLTPTimings, "*prfitemId", &utils.ApierTPTiming{
+		TPid: "tpId2",
+		ID:   duplicateId,
+	}, []string{"groupId"}, true, "tId")
+	tscache.Set(utils.CacheTBLTPTimings, "*prfitemId2", &utils.ApierTPTiming{
+		TPid: "TpId3",
+		ID:   duplicateId,
+	}, []string{"groupId"}, true, "tId")
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	db.db = tscache
+	tpr, err := NewTpReader(db, db, "*prf", "local", nil, nil, true)
+	if err != nil {
+		t.Error(err)
+	}
+	if err := tpr.LoadTimings(); err == nil || err.Error() != fmt.Sprintf("duplicate timing tag: %s", duplicateId) {
+		t.Error(err)
+	}
+}
+
+func TestLoadDestinationRatesErr(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	tscache := ltcache.NewTransCache(
+		map[string]*ltcache.CacheConfig{
+			utils.CacheTBLTPDestinationRates: {
+				MaxItems:  3,
+				TTL:       time.Minute * 30,
+				StaticTTL: false,
+				OnEvicted: func(itmID string, value interface{}) {
+				},
+			},
+		},
+	)
+	duplicateId := "id"
+	tscache.Set(utils.CacheTBLTPDestinationRates, "*prfdest_rate1", &utils.TPDestinationRate{
+		TPid: "tpId2",
+		ID:   duplicateId,
+	}, []string{"groupId"}, true, "tId")
+	tscache.Set(utils.CacheTBLTPDestinationRates, "*prfdest_rate2", &utils.TPDestinationRate{
+		TPid: "TpId3",
+		ID:   duplicateId,
+	}, []string{"groupId"}, true, "tId")
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	db.db = tscache
+	tpr, err := NewTpReader(db, db, "*prf", "local", nil, nil, true)
+	if err != nil {
+		t.Error(err)
+	}
+	if err := tpr.LoadDestinationRates(); err == nil || err.Error() != fmt.Sprintf("Non unique ID %+s", duplicateId) {
+		t.Error(err)
+	}
+	tpr.rates = map[string]*utils.TPRateRALs{
+		"rate002": {},
+	}
+	tscache.Remove(utils.CacheTBLTPDestinationRates, "*prfdest_rate2", true, utils.NonTransactional)
+	tpDestRate := &utils.TPDestinationRate{
+		TPid: "tpId3",
+		ID:   "tp_rate001",
+		DestinationRates: []*utils.DestinationRate{
+			{
+				RateId:        "rate001",
+				DestinationId: "val",
+			},
+		},
+	}
+	tscache.Set(utils.CacheTBLTPDestinationRates, "*prfdest_rate3", tpDestRate, []string{"grpId"}, true, utils.NonTransactional)
+	if err := tpr.LoadDestinationRates(); err == nil || err.Error() != fmt.Sprintf("could not find rate for tag %q", tpDestRate.DestinationRates[0].RateId) {
+		t.Error(err)
+	}
+	tpr.rates["rate001"] = &utils.TPRateRALs{
+		TPid:      "tariff",
+		ID:        "rals_id",
+		RateSlots: []*utils.RateSlot{},
+	}
+	tpr.dm.dataDB = db
+	if err := tpr.LoadDestinationRates(); err == nil || err.Error() != fmt.Sprintf("could not get destination for tag %q", tpDestRate.DestinationRates[0].DestinationId) {
+		t.Error(err)
+	}
+}
+
+func TestTpReaderLoadRatingPlansFilteredErr(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	tscache := ltcache.NewTransCache(
+		map[string]*ltcache.CacheConfig{
+			utils.CacheTBLTPRatingPlans: {
+				MaxItems:  3,
+				TTL:       time.Minute * 30,
+				StaticTTL: false,
+				OnEvicted: func(itmID string, value interface{}) {
+				},
+			},
+			utils.CacheTBLTPTimings: {
+				MaxItems:  3,
+				TTL:       time.Minute * 30,
+				StaticTTL: false,
+			},
+		},
+	)
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	db.db = tscache
+	tpr, err := NewTpReader(db, db, "*prf", "local", nil, nil, true)
+	if err != nil {
+		t.Error(err)
+	}
+	if b, err := tpr.LoadRatingPlansFiltered("tag"); err == nil || b {
+		t.Error(err)
+	}
+	tpr.timings = map[string]*utils.TPTiming{
+		"timingtpr": {},
+	}
+	tscache.Set(utils.CacheTBLTPRatingPlans, "*prf:tag:ratingID2", &utils.TPRatingPlan{
+		ID: "rate2",
+		RatingPlanBindings: []*utils.TPRatingPlanBinding{
+			{
+				TimingId: "timing2",
+			},
+		},
+	}, []string{"grpID"}, true, utils.NonTransactional)
+
+	if b, err := tpr.LoadRatingPlansFiltered("tag"); err == nil || err.Error() != fmt.Sprintf("no timing with id %q: %v", "timing2", utils.ErrNotFound) || b {
+		t.Error(err)
+	}
+	tscache.Set(utils.CacheTBLTPTimings, "*prf:timing2item2", &utils.ApierTPTiming{
+		TPid: "tpid2",
+		ID:   "id2",
+	}, []string{"grpId"}, false, utils.NonTransactional)
+}
+
+func TestLoadRatingProfilesFiltered(t *testing.T) {
+	qriedRpf := &utils.TPRatingProfile{
+		TPid:   "rate",
+		Tenant: "cgr",
+	}
+	cfg := config.NewDefaultCGRConfig()
+	tscache := ltcache.NewTransCache(
+		map[string]*ltcache.CacheConfig{
+			utils.CacheTBLTPRatingProfiles: {
+				MaxItems:  3,
+				TTL:       time.Minute * 30,
+				StaticTTL: false,
+				OnEvicted: func(itmID string, value interface{}) {
+				},
+			},
+		},
+	)
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	db.db = tscache
+	tpr, err := NewTpReader(db, db, "*prf", "local", nil, nil, true)
+	if err != nil {
+		t.Error(err)
+	}
+	if err := tpr.LoadRatingProfilesFiltered(qriedRpf); err == nil || err.Error() != fmt.Sprintf("no RatingProfile for filter %v, error: %v", qriedRpf, utils.ErrNotFound) {
+		t.Error(err)
+	}
+	val := []*utils.TPRatingProfile{
+		{
+			LoadId:   "load",
+			Tenant:   "cgrates",
+			Category: "cat",
+			Subject:  " subj",
+			TPid:     "rating1",
+		}, {
+			LoadId:   "load",
+			Tenant:   "cgrates",
+			Category: "cat",
+			Subject:  " subj",
+			TPid:     "rating1",
+		},
+	}
+	tscache.Set(utils.CacheTBLTPRatingProfiles, "rate:cgritm", val[0], []string{"grpId"}, true, utils.NonTransactional)
+	tscache.Set(utils.CacheTBLTPRatingProfiles, "rate:cgritm2", val[1], []string{"grpId"}, true, utils.NonTransactional)
+	if err := tpr.LoadRatingProfilesFiltered(qriedRpf); err == nil || err.Error() != fmt.Sprintf("Non unique id %+v", val[1].GetId()) {
+		t.Error(err)
+	}
 }
