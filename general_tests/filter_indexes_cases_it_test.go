@@ -480,6 +480,65 @@ func testFilterIndexesCasesSetIndexedFilter(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
+
+	/*
+		 	filter1 = &v1.FilterWithCache{
+				Filter: &engine.Filter{
+					Tenant: "cgrates.org",
+					ID:     "FLTR_Charger12312",
+					Rules: []*engine.FilterRule{
+						{
+							Type:    utils.MetaString,
+							Element: "~*req.CGRID",
+							Values:  []string{"tester_id"},
+						},
+						{
+							Type:    utils.MetaPrefix,
+							Element: "~*req.AnswerTime",
+							Values:  []string{"2022"},
+						},
+						{
+							Type:    utils.MetaSuffix,
+							Element: "~*req.AnswerTime",
+							Values:  []string{"202"},
+						},
+					},
+				},
+			}
+			filter2 := &v1.FilterWithCache{
+				Filter: &engine.Filter{
+					Tenant: "cgrates.org",
+					ID:     "FLTR_Charger4564",
+					Rules: []*engine.FilterRule{
+						{
+							Type:    utils.MetaString,
+							Element: "~*req.CGRID",
+							Values:  []string{"tester_id"},
+						},
+						{
+							Type:    utils.MetaPrefix,
+							Element: "~*req.AnswerTime",
+							Values:  []string{"2022"},
+						},
+						{
+							Type:    utils.MetaSuffix,
+							Element: "~*req.AnswerTime",
+							Values:  []string{"202"},
+						},
+					},
+				},
+			}
+			if err := fIdxCasesRPC.Call(utils.APIerSv1SetFilter, filter1, &result); err != nil {
+				t.Error(err)
+			} else if result != utils.OK {
+				t.Error("Unexpected reply returned", result)
+			}
+			if err := fIdxCasesRPC.Call(utils.APIerSv1SetFilter, filter2, &result); err != nil {
+				t.Error(err)
+			} else if result != utils.OK {
+				t.Error("Unexpected reply returned", result)
+			}
+	*/
 }
 
 func testFilterIndexesCasesSetChargerWithFltr(t *testing.T) {
@@ -487,7 +546,7 @@ func testFilterIndexesCasesSetChargerWithFltr(t *testing.T) {
 		ChargerProfile: &engine.ChargerProfile{
 			Tenant:       "cgrates.org",
 			ID:           "ChrgerIndexable",
-			FilterIDs:    []string{"FLTR_Charger"},
+			FilterIDs:    []string{"FLTR_Charger" /*"FLTR_Charger12312", "FLTR_Charger4564"*/},
 			RunID:        utils.MetaRaw,
 			AttributeIDs: []string{"ATTR_FLTR1"},
 			Weight:       20,
@@ -499,6 +558,22 @@ func testFilterIndexesCasesSetChargerWithFltr(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
+	/* chargerProfile =
+		&v1.ChargerWithCache{
+			ChargerProfile: &engine.ChargerProfile{
+				Tenant:       "cgrates.org",
+				ID:           "ChrgerIndexable222",
+				FilterIDs:    []string{"FLTR_Charger", "FLTR_Charger4564"},
+				RunID:        utils.MetaRaw,
+				AttributeIDs: []string{"ATTR_FLTR1"},
+				Weight:       20,
+			},
+		}
+	if err := fIdxCasesRPC.Call(utils.APIerSv1SetChargerProfile, chargerProfile, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	} */
 }
 
 func testFilterIndexesCasesGetChargerIndexes(t *testing.T) {

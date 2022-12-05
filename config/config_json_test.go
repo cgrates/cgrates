@@ -74,6 +74,8 @@ func TestDfGeneralJsonCfg(t *testing.T) {
 
 func TestCacheJsonCfg(t *testing.T) {
 	eCfg := &CacheJsonCfg{
+		utils.CacheReverseFilterIndexes: &CacheParamJsonCfg{Limit: utils.IntPointer(-1),
+			Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false)},
 		utils.CacheDestinations: &CacheParamJsonCfg{Limit: utils.IntPointer(-1),
 			Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
 			Precache: utils.BoolPointer(false)},

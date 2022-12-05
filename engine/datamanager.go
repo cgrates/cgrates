@@ -2152,10 +2152,18 @@ func (dm *DataManager) SetChargerProfile(cpp *ChargerProfile, withIndex bool) (e
 					cpp.Tenant).RemoveItemFromIndex(cpp.Tenant, cpp.ID, oldCpp.FilterIDs); err != nil {
 					return
 				}
+				if err = removeReverseFilterIndexForFilter(dm, utils.CacheChargerFilterIndexes, utils.EmptyString,
+					cpp.Tenant, cpp.ID, cpp.FilterIDs); err != nil {
+					return
+				}
 			}
 		}
 		if err = createAndIndex(utils.ChargerProfilePrefix, cpp.Tenant,
 			utils.EmptyString, cpp.ID, cpp.FilterIDs, dm); err != nil {
+			return
+		}
+		if err = addReverseFilterIndexForFilter(dm, utils.CacheChargerFilterIndexes, utils.EmptyString,
+			cpp.Tenant, cpp.ID, cpp.FilterIDs); err != nil {
 			return
 		}
 	}
