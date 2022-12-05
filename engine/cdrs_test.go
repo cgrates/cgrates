@@ -2622,3 +2622,216 @@ func TestCDRsV1ProcessEventWithGetCacheGet(t *testing.T) {
 		t.Errorf("\nExpected <%+v> \n,received <%+v>", expected, cgrEv)
 	}
 }
+
+func TestCDRServerAccountSRefundCharges(t *testing.T) {
+	testCache := Cache
+	tmpC := config.CgrConfig()
+	tmpCM := connMgr
+	defer func() {
+		Cache = testCache
+		config.SetCgrConfig(tmpC)
+		connMgr = tmpCM
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	cfg.CdrsCfg().AccountSConns = []string{utils.ConcatenatedKey(utils.MetaInternal,
+		utils.AccountSConnsCfg)}
+
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	connMng := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	fltrs := NewFilterS(cfg, nil, dm)
+	Cache = NewCacheS(cfg, dm, nil, nil)
+	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng)
+	ccM := &ccMock{
+		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+			utils.AccountSv1RefundCharges: func(ctx *context.Context, args, reply interface{}) error {
+				*reply.(*string) = ""
+				return nil
+			},
+		},
+	}
+	rpcInternal := make(chan birpc.ClientConnector, 1)
+	rpcInternal <- ccM
+	newCDRSrv.connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal,
+		utils.AccountSConnsCfg), utils.AccountSv1, rpcInternal)
+
+	apiOpts := map[string]interface{}{
+		utils.MetaAccountSCost: &utils.EventCharges{},
+		utils.MetaSubsys:       utils.AccountSConnsCfg,
+	}
+	eChrgs := &utils.EventCharges{
+		Abstracts: utils.NewDecimal(500, 0),
+		Concretes: utils.NewDecimal(400, 0),
+		Charges: []*utils.ChargeEntry{
+			{
+				ChargingID:     "GENUUID", //will be changed
+				CompressFactor: 1,
+			},
+			{
+				ChargingID:     "GENUUID2", //will be changed
+				CompressFactor: 1,
+			},
+		},
+		Accounting: map[string]*utils.AccountCharge{
+			"GENUUID2": {
+				BalanceID:    "CB2",
+				Units:        utils.NewDecimal(2, 0),
+				BalanceLimit: utils.NewDecimal(-1, 0),
+			},
+			"GENUUID": {
+				BalanceID:    "CB1",
+				Units:        utils.NewDecimal(7, 0),
+				BalanceLimit: utils.NewDecimal(-200, 0),
+				UnitFactorID: "GENNUUID_FACTOR",
+			},
+		},
+		UnitFactors: map[string]*utils.UnitFactor{
+			"GENNUUID_FACTOR": {
+				Factor: utils.NewDecimal(100, 0),
+			},
+		},
+		Rating:   make(map[string]*utils.RateSInterval),
+		Rates:    make(map[string]*utils.IntervalRate),
+		Accounts: make(map[string]*utils.Account),
+	}
+	err := newCDRSrv.accountSRefundCharges(context.Background(), "cgrates.org", eChrgs, apiOpts)
+	if err != nil {
+		t.Errorf("\nExpected <%+v> \n, received <%+v>", nil, err)
+	}
+
+	expected := &utils.EventCharges{
+		Abstracts: utils.NewDecimal(500, 0),
+		Concretes: utils.NewDecimal(400, 0),
+		Charges: []*utils.ChargeEntry{
+			{
+				ChargingID:     "GENUUID", //will be changed
+				CompressFactor: 1,
+			},
+			{
+				ChargingID:     "GENUUID2", //will be changed
+				CompressFactor: 1,
+			},
+		},
+		Accounting: map[string]*utils.AccountCharge{
+			"GENUUID2": {
+				BalanceID:    "CB2",
+				Units:        utils.NewDecimal(2, 0),
+				BalanceLimit: utils.NewDecimal(-1, 0),
+			},
+			"GENUUID": {
+				BalanceID:    "CB1",
+				Units:        utils.NewDecimal(7, 0),
+				BalanceLimit: utils.NewDecimal(-200, 0),
+				UnitFactorID: "GENNUUID_FACTOR",
+			},
+		},
+		UnitFactors: map[string]*utils.UnitFactor{
+			"GENNUUID_FACTOR": {
+				Factor: utils.NewDecimal(100, 0),
+			},
+		},
+		Rating:   make(map[string]*utils.RateSInterval),
+		Rates:    make(map[string]*utils.IntervalRate),
+		Accounts: make(map[string]*utils.Account),
+	}
+	if !reflect.DeepEqual(expected, eChrgs) {
+		t.Errorf("\nExpected <%+v> \n,received <%+v>", expected, eChrgs)
+	}
+}
+func TestCDRServerAccountSRefundChargesErr(t *testing.T) {
+	testCache := Cache
+	tmpC := config.CgrConfig()
+	tmpCM := connMgr
+	defer func() {
+		Cache = testCache
+		config.SetCgrConfig(tmpC)
+		connMgr = tmpCM
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	cfg.CdrsCfg().AccountSConns = []string{utils.ConcatenatedKey(utils.MetaInternal,
+		utils.AccountSConnsCfg)}
+
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	connMng := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	fltrs := NewFilterS(cfg, nil, dm)
+	Cache = NewCacheS(cfg, dm, nil, nil)
+	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng)
+	ccM := &ccMock{
+		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+			utils.ChargerSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
+				*reply.(*string) = ""
+				return nil
+			},
+		},
+	}
+	rpcInternal := make(chan birpc.ClientConnector, 1)
+	rpcInternal <- ccM
+	newCDRSrv.connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal,
+		utils.AccountSConnsCfg), utils.AccountSv1, rpcInternal)
+
+	apiOpts := map[string]interface{}{
+		utils.MetaAccountSCost: &utils.EventCharges{},
+		utils.MetaSubsys:       utils.AccountSConnsCfg,
+	}
+	eChrgs := &utils.EventCharges{
+		Abstracts: utils.NewDecimal(500, 0),
+		Concretes: utils.NewDecimal(400, 0),
+	}
+	expErr := "UNSUPPORTED_SERVICE_METHOD"
+	err := newCDRSrv.accountSRefundCharges(context.Background(), "cgrates.org", eChrgs, apiOpts)
+	if err == nil || err.Error() != expErr {
+		t.Errorf("\nExpected error <%v> \n, received error <%v>", expErr, err)
+	}
+
+}
+
+func TestPopulateCost(t *testing.T) {
+
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		Event: map[string]interface{}{
+			utils.Usage: "10s",
+		},
+		APIOpts: map[string]interface{}{
+			utils.MetaAccountSCost: &utils.EventCharges{
+				Concretes: utils.NewDecimal(400, 0),
+			},
+		},
+	}
+	exp := utils.NewDecimal(400, 0)
+	if rcv := populateCost(ev.APIOpts); !reflect.DeepEqual(exp, rcv) {
+		t.Errorf("Expected <%+v>, Received <%+v>", exp, rcv)
+	}
+	ev = &utils.CGREvent{
+		Tenant: "cgrates.org",
+		Event: map[string]interface{}{
+			utils.Usage: "10s",
+		},
+		APIOpts: map[string]interface{}{
+
+			utils.MetaRateSCost: utils.RateProfileCost{
+
+				Cost: utils.NewDecimal(400, 0),
+			},
+		},
+	}
+	if rcv := populateCost(ev.APIOpts); !reflect.DeepEqual(exp, rcv) {
+		t.Errorf("Expected <%+v>, Received <%+v>", exp, rcv)
+	}
+	ev = &utils.CGREvent{
+		Tenant: "cgrates.org",
+		Event: map[string]interface{}{
+			utils.Usage: "10s",
+		},
+		APIOpts: map[string]interface{}{
+
+			utils.MetaCost: 102.1,
+		},
+	}
+	if rcv := populateCost(ev.APIOpts); rcv != nil {
+		t.Errorf("Expected <%+v>, Received <%+v>", nil, rcv)
+	}
+}
