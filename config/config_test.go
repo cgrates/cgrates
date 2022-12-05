@@ -624,6 +624,8 @@ func TestCgrCfgJSONDefaultsSMGenericCfg(t *testing.T) {
 
 func TestCgrCfgJSONDefaultsCacheCFG(t *testing.T) {
 	eCacheCfg := CacheCfg{
+		utils.CacheReverseFilterIndexes: &CacheParamCfg{Limit: -1,
+			TTL: time.Duration(0), StaticTTL: false, Precache: false},
 		utils.CacheDestinations: &CacheParamCfg{Limit: -1,
 			TTL: time.Duration(0), StaticTTL: false, Precache: false},
 		utils.CacheReverseDestinations: &CacheParamCfg{Limit: -1,
