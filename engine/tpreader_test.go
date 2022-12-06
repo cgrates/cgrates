@@ -1545,6 +1545,7 @@ func TestLoadRatingProfilesFiltered(t *testing.T) {
 	if err := tpr.LoadRatingProfilesFiltered(qriedRpf); err == nil || err.Error() != fmt.Sprintf("no RatingProfile for filter %v, error: %v", qriedRpf, utils.ErrNotFound) {
 		t.Error(err)
 	}
+
 	val := []*utils.TPRatingProfile{
 		{
 			LoadId:   "load",
@@ -1558,11 +1559,133 @@ func TestLoadRatingProfilesFiltered(t *testing.T) {
 			Category: "cat",
 			Subject:  " subj",
 			TPid:     "rating1",
+			RatingPlanActivations: []*utils.TPRatingActivation{
+				{
+					RatingPlanId:   "RP_1001",
+					ActivationTime: "test",
+				},
+			},
 		},
 	}
 	tscache.Set(utils.CacheTBLTPRatingProfiles, "rate:cgritm", val[0], []string{"grpId"}, true, utils.NonTransactional)
 	tscache.Set(utils.CacheTBLTPRatingProfiles, "rate:cgritm2", val[1], []string{"grpId"}, true, utils.NonTransactional)
 	if err := tpr.LoadRatingProfilesFiltered(qriedRpf); err == nil || err.Error() != fmt.Sprintf("Non unique id %+v", val[1].GetId()) {
 		t.Error(err)
+	}
+	val[1].TPid, val[1].LoadId, val[1].Category = "rating2", "load2", "category2"
+	if err := tpr.LoadRatingProfilesFiltered(qriedRpf); err == nil || err.Error() != fmt.Sprintf("cannot parse activation time from %v", val[1].RatingPlanActivations[0].ActivationTime) {
+		t.Error(err)
+	}
+	tpr.timezone, val[1].RatingPlanActivations[0].ActivationTime = "UTC", "*monthly_estimated"
+
+	if err := tpr.LoadRatingProfilesFiltered(qriedRpf); err == nil || err.Error() != fmt.Sprintf("could not load rating plans for tag: %q", val[1].RatingPlanActivations[0].RatingPlanId) {
+		t.Error(err)
+	}
+}
+
+func TestTpReaderLoadActionTriggers(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	tscache := ltcache.NewTransCache(
+		map[string]*ltcache.CacheConfig{
+			utils.CacheTBLTPActionTriggers: {
+				MaxItems:  3,
+				TTL:       time.Minute * 30,
+				StaticTTL: false,
+			},
+		},
+	)
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	db.db = tscache
+	tpr, err := NewTpReader(db, db, "*prf", "UTC", nil, nil, true)
+	if err != nil {
+		t.Error(err)
+	}
+	trVals := []*utils.TPActionTriggers{
+		{
+			TPid: "TPAct",
+			ID:   "ID2",
+			ActionTriggers: []*utils.TPActionTrigger{
+				{
+					BalanceId:             "id",
+					Id:                    "STANDARD_TRIGGERS",
+					ThresholdType:         "*min_balance",
+					ThresholdValue:        2,
+					Recurrent:             false,
+					MinSleep:              "0",
+					ExpirationDate:        "date",
+					BalanceType:           "*monetary",
+					BalanceDestinationIds: "FS_USERS",
+					ActionsId:             "LOG_WARNING",
+					Weight:                10,
+				},
+				{
+					BalanceId:             "id",
+					Id:                    "STANDARD_TRIGGERS",
+					ThresholdType:         "*max_event_counter",
+					ThresholdValue:        5,
+					Recurrent:             false,
+					MinSleep:              "0",
+					BalanceType:           "*monetary",
+					BalanceDestinationIds: "FS_USERS",
+					ActionsId:             "LOG_WARNING",
+					Weight:                10,
+				},
+			},
+		},
+	}
+	tscache.Set(utils.CacheTBLTPActionTriggers, "*prfitem1", trVals[0], []string{"*prfitem1", "*prfitem2"}, true, utils.NonTransactional)
+
+	if err := tpr.LoadActionTriggers(); err == nil || err.Error() != "Unsupported time format" {
+		t.Error(err)
+	}
+	trVals[0].ActionTriggers[0].ExpirationDate = "*monthly"
+	trVals[0].ActionTriggers[0].ActivationDate = "value"
+	if err := tpr.LoadActionTriggers(); err == nil || err.Error() != "Unsupported time format" {
+		t.Error(err)
+	}
+
+	trVals[0].ActionTriggers[0].ActivationDate = "*monthly"
+	trVals[0].ActionTriggers[0].MinSleep = "two"
+	if err := tpr.LoadActionTriggers(); err == nil || err.Error() != fmt.Sprintf("time: invalid duration %q", trVals[0].ActionTriggers[0].MinSleep) {
+		t.Error(err)
+	}
+	trVals[0].ActionTriggers[0].MinSleep = "5000"
+	if err := tpr.LoadActionTriggers(); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestTpReaderSetDestination(t *testing.T) {
+	dest := &Destination{
+		Id:       "1001_ID",
+		Prefixes: []string{"39", "75"},
+	}
+	cfg := config.NewDefaultCGRConfig()
+	tscache := ltcache.NewTransCache(
+		map[string]*ltcache.CacheConfig{
+			utils.CacheDestinations: {
+				MaxItems:  3,
+				TTL:       time.Minute * 30,
+				StaticTTL: false,
+			},
+		},
+	)
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	db.db = tscache
+	tpr, err := NewTpReader(db, db, "*prf", "UTC", nil, nil, true)
+	if err != nil {
+		t.Error(err)
+	}
+	if err := tpr.setDestination(dest, true, ""); err != nil {
+		t.Error(err)
+	}
+	if val, has := tscache.Get(utils.CacheDestinations, dest.Id); !has {
+		t.Error("has no value")
+	} else {
+		if rcv, cancast := val.(*Destination); !cancast {
+			t.Error("it's not type *Destination")
+		} else if !reflect.DeepEqual(rcv, dest) {
+			t.Errorf("exepcted %v,received %v", utils.ToJSON(dest), utils.ToJSON(rcv))
+		}
 	}
 }

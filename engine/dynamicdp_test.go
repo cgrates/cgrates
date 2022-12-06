@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/cgrates/cgrates/config"
@@ -59,38 +60,20 @@ func TestDynamicDpFieldAsInterface(t *testing.T) {
 }
 
 func TestDpLibPhoneNumber(t *testing.T) {
-
-	libphonenumber := &libphonenumberDP{
-		pNumber: &phonenumbers.PhoneNumber{
-			CountryCode: func(i int32) *int32 {
-
-				return &i
-			}(33),
-			NationalNumber: func(i uint64) *uint64 {
-
-				return &i
-			}(121411111),
-		},
-		cache: utils.MapStorage{},
-	}
-	if val, err := libphonenumber.fieldAsInterface([]string{"CountryCode"}); err != nil {
-		t.Error(err)
-	} else if val != *libphonenumber.pNumber.CountryCode {
-		t.Errorf("expected %v,received %v", libphonenumber.pNumber.CountryCode, val)
-	}
-
-	if val, err := libphonenumber.fieldAsInterface([]string{"NationalNumber"}); err != nil {
-		t.Error(err)
-	} else if val != *libphonenumber.pNumber.NationalNumber {
-		t.Errorf("expected %v,received %v", libphonenumber.pNumber.CountryCode, val)
-	}
-
-	if val, err := libphonenumber.fieldAsInterface([]string{"Region"}); err != nil {
-		t.Error(err)
-	} else if val != "FR" {
-		t.Errorf("expected %v,received %v", "FR", val)
-	}
-	if _, err := libphonenumber.fieldAsInterface([]string{"NumberType"}); err != nil {
+	num, err := phonenumbers.ParseAndKeepRawInput("+3554735474", utils.EmptyString)
+	if err != nil {
 		t.Error(err)
 	}
+	dDP := &libphonenumberDP{
+		pNumber: num,
+		cache:   utils.MapStorage{},
+	}
+	dDP.setDefaultFields()
+	if _, err := dDP.fieldAsInterface([]string{}); err == nil || err.Error() != fmt.Sprintf("invalid field path <%+v> for libphonenumberDP", []string{}) {
+		t.Error(err)
+	}
+	if _, err := dDP.fieldAsInterface([]string{"CountryCode"}); err != nil {
+		t.Error(err)
+	}
+
 }

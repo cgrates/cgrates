@@ -1692,3 +1692,82 @@ func TestCdrSRateCDR(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestChrgrSProcessEvent(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.CdrsCfg().ChargerSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)}
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	clienConn := make(chan rpcclient.ClientConnector, 1)
+	clienConn <- &ccMock{
+		calls: map[string]func(args interface{}, reply interface{}) error{
+			utils.ChargerSv1ProcessEvent: func(args, reply interface{}) error {
+				*reply.(*[]*ChrgSProcessEventReply) = []*ChrgSProcessEventReply{
+					{
+						ChargerSProfile:    "Charger1",
+						AttributeSProfiles: []string{"cgrates.org:ATTR_1001_SIMPLEAUTH"},
+						AlteredFields:      []string{utils.MetaReqRunID, "*req.Password"},
+						CGREvent: &utils.CGREvent{ // matching Charger1
+							Tenant: "cgrates.org",
+							ID:     "event1",
+							Event: map[string]interface{}{
+								utils.AccountField: "1001",
+								"Password":         "CGRateS.org",
+								"RunID":            utils.MetaDefault,
+							},
+							APIOpts: map[string]interface{}{
+								utils.OptsContext:              "simpleauth",
+								utils.MetaSubsys:               utils.MetaChargers,
+								utils.OptsAttributesProfileIDs: []string{"ATTR_1001_SIMPLEAUTH"},
+							},
+						},
+					},
+				}
+				return nil
+			},
+		},
+	}
+	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers): clienConn,
+	})
+	cdrS := &CDRServer{
+		cgrCfg:  cfg,
+		cdrDb:   db,
+		dm:      dm,
+		connMgr: connMgr,
+	}
+	cgrEv := utils.CGREvent{
+		ID: "TestV1ProcessEventNoTenant",
+		Event: map[string]interface{}{
+			utils.CGRID:        "test1",
+			utils.RunID:        utils.MetaDefault,
+			utils.OriginID:     "testV1CDRsRefundOutOfSessionCost",
+			utils.RequestType:  utils.MetaPrepaid,
+			utils.AccountField: "testV1CDRsRefundOutOfSessionCost",
+			utils.Destination:  "+4986517174963",
+			utils.AnswerTime:   time.Date(2019, 11, 27, 12, 21, 26, 0, time.UTC),
+			utils.Usage:        123 * time.Minute,
+		},
+	}
+	expcgrEv := []*utils.CGREvent{
+		{
+			Tenant: "cgrates.org",
+			ID:     "event1",
+			Event: map[string]interface{}{
+				utils.AccountField: "1001",
+				"Password":         "CGRateS.org",
+				"RunID":            utils.MetaDefault,
+			},
+			APIOpts: map[string]interface{}{
+				utils.OptsContext:              "simpleauth",
+				utils.MetaSubsys:               utils.MetaChargers,
+				utils.OptsAttributesProfileIDs: []string{"ATTR_1001_SIMPLEAUTH"},
+			},
+		},
+	}
+	if val, err := cdrS.chrgrSProcessEvent(&cgrEv); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(val, expcgrEv) {
+		t.Errorf("expected %v,received %v", utils.ToJSON(expcgrEv), utils.ToJSON(val))
+	}
+}
