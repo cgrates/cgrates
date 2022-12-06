@@ -33,7 +33,7 @@ func TestCachesReplicateRemove(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().ReplicationConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicationConnsCfg)}
 	cfg.CacheCfg().Partitions = map[string]*config.CacheParamCfg{
-		"id": {
+		utils.ReplicatorSv1GetDispatcherHost: {
 			Replicate: true,
 		},
 	}
@@ -43,7 +43,7 @@ func TestCachesReplicateRemove(t *testing.T) {
 	clientconn <- &ccMock{
 		calls: map[string]func(args interface{}, reply interface{}) error{
 			utils.CacheSv1ReplicateRemove: func(args, reply interface{}) error {
-				*reply.(*string) = "reply"
+				*reply.(*string) = utils.OK
 				return nil
 			},
 		},
@@ -56,17 +56,15 @@ func TestCachesReplicateRemove(t *testing.T) {
 		dm:  dm,
 	}
 	SetConnManager(connMgr)
-	if err := chS.ReplicateRemove("id", "itm_id"); err != nil {
-
+	if err := chS.ReplicateRemove(utils.ReplicatorSv1GetDispatcherHost, "itm_id"); err != nil {
 		t.Error(err)
-
 	}
 }
 
 func TestCacheSSetWithReplicate(t *testing.T) {
 	Cache.Clear(nil)
 	args := &utils.ArgCacheReplicateSet{
-		CacheID:  "chID",
+		CacheID:  utils.ReplicatorSv1GetActions,
 		ItemID:   "itemID",
 		Value:    &utils.CachedRPCResponse{Result: "reply", Error: nil},
 		GroupIDs: []string{"groupId", "groupId"},
@@ -78,13 +76,13 @@ func TestCacheSSetWithReplicate(t *testing.T) {
 			Replicate: true,
 		},
 	}
-
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 	clientconn := make(chan rpcclient.ClientConnector, 1)
 	clientconn <- &ccMock{
 		calls: map[string]func(args interface{}, reply interface{}) error{
 			utils.CacheSv1ReplicateSet: func(args, reply interface{}) error {
+
 				*reply.(*string) = "reply"
 				return nil
 			},
@@ -93,28 +91,21 @@ func TestCacheSSetWithReplicate(t *testing.T) {
 	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicationConnsCfg): clientconn,
 	})
-	tscache := ltcache.NewTransCache(
-		map[string]*ltcache.CacheConfig{
-			ltcache.DefaultCacheInstance: {
-				MaxItems:  3,
-				TTL:       time.Second * 1,
-				StaticTTL: true,
-				OnEvicted: func(itmID string, value interface{}) {
-
-				},
-			},
+	ltcache := ltcache.NewTransCache(map[string]*ltcache.CacheConfig{
+		args.CacheID: {
+			MaxItems: 2,
 		},
-	)
-	casheS := &CacheS{
-		cfg:    cfg,
+	})
+	cacheS := &CacheS{
 		dm:     dm,
-		tCache: tscache,
+		cfg:    cfg,
+		tCache: ltcache,
 	}
 	SetConnManager(connMgr)
-
-	if err := casheS.SetWithReplicate(args); err != nil {
+	if err := cacheS.SetWithReplicate(args); err != nil {
 		t.Error(err)
 	}
+
 }
 
 func TestCacheSV1GetItemIDs(t *testing.T) {
@@ -895,38 +886,107 @@ func TestUpdateReplicationFilters(t *testing.T) {
 	}
 }
 
-/*
 func TestReplicateMultipleIDs(t *testing.T) {
-
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	cfg.ChargerSCfg().AttributeSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}
+	cfg.ApierCfg().CachesConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}
 	cfg.AttributeSCfg().Enabled = true
+	cfg.CacheCfg().Partitions = map[string]*config.CacheParamCfg{
+		utils.CacheReplicationHosts: {
+			Limit: 3,
+		},
+	}
 
+	Cache = NewCacheS(cfg, nil, nil)
 	connClient := make(chan rpcclient.ClientConnector, 1)
 	connClient <- &ccMock{
 		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.AttributeSv1ProcessEvent: func(args, reply interface{}) error {
+			utils.CacheSv1ReloadCache: func(args, reply interface{}) error {
 				*reply.(*string) = "reply"
 				return nil
 			},
 		},
 	}
-
 	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes): connClient,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches): connClient,
 	})
-
-	filtered := false
 	objType := "obj"
-	objIds := []string{"objID2", "objID3"}
-	method := utils.AttributeSv1ProcessEvent
-	args := &utils.CGREvent{
-		Tenant: "Cgrates",
-		ID:     "id",
+	objIds := []string{"rpl1", "rpl2"}
+	method := utils.CacheSv1ReloadCache
+	args := &utils.AttrReloadCacheWithAPIOpts{
+		AccountActionPlanIDs: []string{"accID"},
 	}
-
-	if err := replicateMultipleIDs(connMgr, cfg.ChargerSCfg().AttributeSConns, filtered, objType, objIds, method, args); err != nil {
+	if err := replicateMultipleIDs(connMgr, cfg.ApierCfg().CachesConns, false, objType, objIds, method, args); err != nil {
+		t.Error(err)
+	}
+	if err := replicateMultipleIDs(connMgr, cfg.ApierCfg().CachesConns, true, objType, objIds, method, args); err != nil {
 		t.Error(err)
 	}
 }
-*/
+func TestCachesGetWithRemote(t *testing.T) {
+	Cache.Clear(nil)
+	args := &utils.ArgsGetCacheItemWithAPIOpts{
+		ArgsGetCacheItem: utils.ArgsGetCacheItem{
+			CacheID: utils.CacheTBLTPActionPlans,
+			ItemID:  "cacheItem",
+		},
+	}
+	cfg := config.NewDefaultCGRConfig()
+	cfg.DataDbCfg().Items = map[string]*config.ItemOpt{
+		utils.CacheTBLTPActionPlans: {
+			Limit:  3,
+			Remote: false,
+		},
+	}
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	chS := NewCacheS(cfg, dm, nil)
+	clientconn := make(chan rpcclient.ClientConnector, 1)
+	clientconn <- &ccMock{
+		calls: map[string]func(args interface{}, reply interface{}) error{
+			utils.CacheSv1GetItem: func(args, reply interface{}) error {
+				*reply.(*string) = utils.OK
+				return utils.ErrNotFound
+			},
+		},
+	}
+
+	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.RemoteConnsCfg): clientconn,
+	})
+	SetConnManager(connMgr)
+	tpAc := &utils.TPActionTrigger{
+		BalanceId:             "id",
+		Id:                    "STANDARD_TRIGGERS",
+		ThresholdType:         "*min_balance",
+		ThresholdValue:        2,
+		Recurrent:             false,
+		MinSleep:              "0",
+		ExpirationDate:        "date",
+		BalanceType:           "*monetary",
+		BalanceDestinationIds: "FS_USERS",
+		ActionsId:             "LOG_WARNING",
+		Weight:                10,
+	}
+	chS.tCache.Set(args.CacheID, "cacheItem", tpAc, []string{"cacheItem"}, true, utils.NonTransactional)
+	if val, err := chS.GetWithRemote(args); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(val, tpAc) {
+		t.Errorf("expected %v,received %v", utils.ToJSON(tpAc), utils.ToJSON(val))
+	}
+	chS.tCache.Remove(utils.CacheTBLTPActionPlans, "cacheItem", true, utils.NonTransactional)
+	if _, err := chS.GetWithRemote(args); err == nil || err != utils.ErrNotFound {
+		t.Errorf("expected %v,received %v", utils.ErrNotFound, err)
+	}
+	cfg.DataDbCfg().Items[utils.CacheTBLTPActionPlans].Remote = true
+	cfg.CacheCfg().RemoteConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.RemoteConnsCfg)}
+	/*
+		if _, err = chS.GetWithRemote(args); err == nil || err != utils.ErrNotFound {
+			t.Errorf("expected %v,received %v", utils.ErrNotFound, err)
+		}
+	*/
+}

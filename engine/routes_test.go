@@ -1767,3 +1767,31 @@ func TestRouteServicePopulateSortingData(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestNewOptsGetRoutes(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	ev := &utils.CGREvent{
+
+		APIOpts: map[string]interface{}{
+			utils.OptsRoutesMaxCost: utils.MetaEventCost,
+		},
+		Event: map[string]interface{}{
+			utils.AccountField: "",
+			utils.Destination:  "",
+			utils.SetupTime:    "",
+			utils.Usage:        "",
+		},
+	}
+	fltr := &FilterS{cfg, dm, nil}
+	cfgOpt := &config.RoutesOpts{
+		Limit:        utils.IntPointer(12),
+		IgnoreErrors: true,
+		Offset:       utils.IntPointer(21),
+	}
+
+	if _, err := newOptsGetRoutes(ev, fltr, cfgOpt); err != nil {
+		t.Error(err)
+	}
+}
