@@ -1031,7 +1031,7 @@ func TestCDRsEESProcessEventMock(t *testing.T) {
 	rpcInternal := make(chan birpc.ClientConnector, 1)
 	rpcInternal <- ccM
 	newCDRSrv.connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal,
-		utils.MetaEEs), utils.ThresholdSv1, rpcInternal)
+		utils.MetaEEs), utils.EeSv1, rpcInternal)
 
 	cgrEv := &utils.CGREventWithEeIDs{
 		CGREvent: &utils.CGREvent{
@@ -2646,7 +2646,7 @@ func TestCDRServerAccountSRefundCharges(t *testing.T) {
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
 			utils.AccountSv1RefundCharges: func(ctx *context.Context, args, reply interface{}) error {
-				*reply.(*string) = ""
+				*reply.(*string) = utils.OK
 				return nil
 			},
 		},
@@ -2699,45 +2699,6 @@ func TestCDRServerAccountSRefundCharges(t *testing.T) {
 	if err != nil {
 		t.Errorf("\nExpected <%+v> \n, received <%+v>", nil, err)
 	}
-
-	expected := &utils.EventCharges{
-		Abstracts: utils.NewDecimal(500, 0),
-		Concretes: utils.NewDecimal(400, 0),
-		Charges: []*utils.ChargeEntry{
-			{
-				ChargingID:     "GENUUID", //will be changed
-				CompressFactor: 1,
-			},
-			{
-				ChargingID:     "GENUUID2", //will be changed
-				CompressFactor: 1,
-			},
-		},
-		Accounting: map[string]*utils.AccountCharge{
-			"GENUUID2": {
-				BalanceID:    "CB2",
-				Units:        utils.NewDecimal(2, 0),
-				BalanceLimit: utils.NewDecimal(-1, 0),
-			},
-			"GENUUID": {
-				BalanceID:    "CB1",
-				Units:        utils.NewDecimal(7, 0),
-				BalanceLimit: utils.NewDecimal(-200, 0),
-				UnitFactorID: "GENNUUID_FACTOR",
-			},
-		},
-		UnitFactors: map[string]*utils.UnitFactor{
-			"GENNUUID_FACTOR": {
-				Factor: utils.NewDecimal(100, 0),
-			},
-		},
-		Rating:   make(map[string]*utils.RateSInterval),
-		Rates:    make(map[string]*utils.IntervalRate),
-		Accounts: make(map[string]*utils.Account),
-	}
-	if !reflect.DeepEqual(expected, eChrgs) {
-		t.Errorf("\nExpected <%+v> \n,received <%+v>", expected, eChrgs)
-	}
 }
 func TestCDRServerAccountSRefundChargesErr(t *testing.T) {
 	testCache := Cache
@@ -2762,7 +2723,7 @@ func TestCDRServerAccountSRefundChargesErr(t *testing.T) {
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
 			utils.ChargerSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
-				*reply.(*string) = ""
+				*reply.(*string) = utils.OK
 				return nil
 			},
 		},
@@ -2835,3 +2796,204 @@ func TestPopulateCost(t *testing.T) {
 		t.Errorf("Expected <%+v>, Received <%+v>", nil, rcv)
 	}
 }
+func TestCDRsProcessEventMockThdsEcCostIface(t *testing.T) {
+	testCache := Cache
+	tmpC := config.CgrConfig()
+	tmpCM := connMgr
+	defer func() {
+		Cache = testCache
+		config.SetCgrConfig(tmpC)
+		connMgr = tmpCM
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	cfg.CdrsCfg().AccountSConns = []string{utils.ConcatenatedKey(utils.MetaInternal,
+		utils.MetaAccounts)}
+	cfg.CdrsCfg().Opts.Attributes = []*utils.DynamicBoolOpt{
+		{
+			Value: false,
+		},
+	}
+
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	connMng := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	fltrs := NewFilterS(cfg, nil, dm)
+	Cache = NewCacheS(cfg, dm, nil, nil)
+	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng)
+	ccM := &ccMock{
+		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+
+			utils.AccountSv1DebitAbstracts: func(ctx *context.Context, args, reply interface{}) error {
+				*reply.(*utils.EventCharges) = utils.EventCharges{
+					Concretes: utils.NewDecimal(400, 0),
+				}
+				return nil
+			},
+		},
+	}
+	rpcInternal := make(chan birpc.ClientConnector, 1)
+	rpcInternal <- ccM
+	newCDRSrv.connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal,
+		utils.MetaAccounts), utils.AccountSv1, rpcInternal)
+
+	cgrEv := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "testID",
+		Event: map[string]interface{}{
+			"Resources":      "ResourceProfile1",
+			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
+			"UsageInterval":  "1s",
+			"PddInterval":    "1s",
+			utils.Weight:     "20.0",
+			utils.Usage:      135 * time.Second,
+			utils.Cost:       123.0,
+		},
+		APIOpts: map[string]interface{}{
+			utils.MetaAccounts: true,
+			"*context":         utils.MetaCDRs,
+			utils.MetaAccountSCost: map[string]interface{}{
+				"Concretes": utils.NewDecimal(400, 0),
+			},
+		},
+	}
+	_, err := newCDRSrv.processEvent(context.Background(), cgrEv)
+	if err == nil || err.Error() != "PARTIALLY_EXECUTED" {
+		t.Errorf("\nExpected <%+v> \n, received <%+v>", "PARTIALLY_EXECUTED", err)
+	}
+}
+
+func TestCDRsProcessEventMockThdsEcCostIfaceMarshalErr(t *testing.T) {
+	testCache := Cache
+	tmpC := config.CgrConfig()
+	tmpCM := connMgr
+	defer func() {
+		Cache = testCache
+		config.SetCgrConfig(tmpC)
+		connMgr = tmpCM
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	connMng := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	fltrs := NewFilterS(cfg, nil, dm)
+	Cache = NewCacheS(cfg, dm, nil, nil)
+	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng)
+
+	rpcInternal := make(chan birpc.ClientConnector, 1)
+
+	newCDRSrv.connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal,
+		utils.MetaAccounts), utils.AccountSv1, rpcInternal)
+
+	cgrEv := &utils.CGREvent{
+		APIOpts: map[string]interface{}{
+			utils.MetaAccounts: true,
+			"*context":         utils.MetaCDRs,
+			utils.MetaAccountSCost: map[string]interface{}{
+				"Concretes": make(chan string),
+			},
+		},
+	}
+	_, err := newCDRSrv.processEvent(context.Background(), cgrEv)
+	if err == nil || err.Error() != "json: unsupported type: chan string" {
+		t.Errorf("\nExpected <%+v> \n, received <%+v>", "json: unsupported type: chan string", err)
+	}
+}
+
+func TestCDRsProcessEventMockThdsEcCostIfaceUnmarshalErr(t *testing.T) {
+	testCache := Cache
+	tmpC := config.CgrConfig()
+	tmpCM := connMgr
+	defer func() {
+		Cache = testCache
+		config.SetCgrConfig(tmpC)
+		connMgr = tmpCM
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	connMng := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	fltrs := NewFilterS(cfg, nil, dm)
+	Cache = NewCacheS(cfg, dm, nil, nil)
+	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng)
+
+	rpcInternal := make(chan birpc.ClientConnector, 1)
+
+	newCDRSrv.connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal,
+		utils.MetaAccounts), utils.AccountSv1, rpcInternal)
+
+	cgrEv := &utils.CGREvent{
+		APIOpts: map[string]interface{}{
+			utils.MetaAccounts: true,
+			"*context":         utils.MetaCDRs,
+			utils.MetaAccountSCost: map[string]interface{}{
+				"Charges": "not unmarshable",
+			},
+		},
+	}
+	expErr := "json: cannot unmarshal string into Go struct field EventCharges.Charges of type []*utils.ChargeEntry"
+	_, err := newCDRSrv.processEvent(context.Background(), cgrEv)
+	if err == nil || err.Error() != expErr {
+		t.Errorf("\nExpected <%+v> \n, received <%+v>", expErr, err)
+	}
+}
+
+//unfinished (solo cover it)
+// func TestCDRsV1ProcessEventWithGetMockCacheErrResp(t *testing.T) {
+// 	testCache := Cache
+// 	tmpC := config.CgrConfig()
+// 	tmpCM := connMgr
+// 	defer func() {
+// 		Cache = testCache
+// 		config.SetCgrConfig(tmpC)
+// 		connMgr = tmpCM
+// 	}()
+
+// 	cfg := config.NewDefaultCGRConfig()
+// 	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 1
+
+// 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+// 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+// 	fltrs := NewFilterS(cfg, nil, dm)
+// 	Cache = NewCacheS(cfg, dm, nil, nil)
+// 	newCDRSrv := NewCDRServer(cfg, dm, fltrs, nil)
+// 	cgrEv := &utils.CGREvent{
+// 		Tenant: "cgrates.org",
+// 		ID:     "testID",
+// 		Event: map[string]interface{}{
+// 			utils.Cost: 123,
+// 		},
+// 	}
+
+// 	var evs []*utils.EventsWithOpts
+// 	Cache.Set(context.Background(), utils.CacheRPCResponses, "CDRsV1.ProcessEventWithGet:testID",
+// 		&utils.CachedRPCResponse{Result: &evs, Error: nil},
+// 		nil, true, utils.NonTransactional)
+
+// 	err := newCDRSrv.V1ProcessEventWithGet(context.Background(), cgrEv, &evs)
+// 	if err != nil {
+// 		t.Errorf("\nExpected <%+v> \n, received <%+v>", nil, err)
+// 	}
+
+// 	expectedVal := &utils.EventsWithOpts{}
+// 	if val, ok := Cache.Get(utils.CacheRPCResponses, "CDRsV1.ProcessEventWithGet:testID"); !ok {
+// 		t.Error("Expected value", val)
+// 	} else {
+// 		valConverted, canCast := val.(*utils.CachedRPCResponse)
+// 		if !canCast {
+// 			t.Error("Should cast")
+// 		}
+// 		if valConverted.Error != nil {
+// 			t.Errorf("Expected error <%v>, Received error <%v>", expectedVal, valConverted.Error)
+// 		} else if valConverted.Error == nil {
+// 			evs = *valConverted.Result.(*[]*utils.EventsWithOpts)
+// 		}
+// 		if !reflect.DeepEqual(expectedVal, valConverted.Result) {
+// 			t.Errorf("Expected %v, received %v", utils.ToJSON(expectedVal), utils.ToJSON(valConverted))
+// 		}
+// 	}
+// }
