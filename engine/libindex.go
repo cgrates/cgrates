@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/cgrates/cgrates/config"
@@ -47,7 +48,7 @@ func addReverseFilterIndexForFilter(dm *DataManager, idxItmType, ctx, tnt,
 		var indexes map[string]utils.StringMap
 		if indexes, err = dm.GetFilterIndexes(utils.PrefixToIndexCache[utils.ReverseFilterIndexes], tntFltrID,
 			utils.EmptyString, nil); err != nil {
-
+			utils.Logger.Crit(fmt.Sprintf("err: %v", err))
 			if err != utils.ErrNotFound {
 				guardian.Guardian.UnguardIDs(refID)
 				return
@@ -57,22 +58,16 @@ func addReverseFilterIndexForFilter(dm *DataManager, idxItmType, ctx, tnt,
 				idxItmType: make(map[string]bool), // not found in database any reverse, we declare them to add in the next steps
 			}
 		}
-		indexes[idxItmType] = map[string]bool{
+		indexes[idxItmType].Copy(map[string]bool{
 			itemID: true,
-		}
-		// it is removed in StoreIndexes
-		/* // remove the old reference from cache in case
-		for idxKeyItmType := range indexes {
-			Cache.Remove(utils.CacheReverseFilterIndexes, utils.ConcatenatedKey(tntCtx, idxKeyItmType),
-				true, utils.NonTransactional)
-		} */
+		})
 		indexerKey := utils.ConcatenatedKey(tnt, fltrID)
 		if ctx != utils.EmptyString {
 			indexerKey = utils.ConcatenatedKey(tnt, ctx)
 		}
 		fltrIndexer := NewFilterIndexer(dm, utils.ReverseFilterIndexes, indexerKey)
 		fltrIndexer.indexes = indexes
-		if err = fltrIndexer.StoreIndexes(true, utils.NonTransactional); err != nil {
+		if err = fltrIndexer.StoreIndexes(true, utils.NonTransactional); err != nil { // it will remove from cache the old ones
 			guardian.Guardian.UnguardIDs(refID)
 			return
 		}

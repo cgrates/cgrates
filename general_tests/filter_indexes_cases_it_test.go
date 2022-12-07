@@ -93,7 +93,7 @@ var (
 		testFilterIndexesCasesStartEngine,
 		testFilterIndexesCasesRpcConn,
 
-		testFilterIndexesCasesSetFilters,
+		/* 	testFilterIndexesCasesSetFilters,
 		testFilterIndexesCasesSetAttributesWithFilters,
 		testFilterIndexesCasesGetIndexesAnyContext,
 		testFilterIndexesCasesGetIndexesSessionsContext,
@@ -102,7 +102,7 @@ var (
 		testFilterIndexesCasesOverwriteAttributes,
 		testFilterIndexesCasesComputeAttributesIndexes,
 		testFilterIndexesCasesGetIndexesAnyContextChanged,
-		testFilterIndexesCasesGetIndexesSessionsContextChanged,
+		testFilterIndexesCasesGetIndexesSessionsContextChanged, */
 
 		testFilterIndexesCasesSetIndexedFilter,
 		testFilterIndexesCasesSetChargerWithFltr,
@@ -110,6 +110,8 @@ var (
 		testFilterIndexesCasesOverwriteFilterForCharger,
 		testFilterIndexesCasesComputeChargersIndexes,
 		testFilterIndexesCasesGetChargerIndexesChanged,
+
+		testFilterIndexesCasesGetReverseFilterIndexes,
 
 		testFilterIndexesCasesStopEngine,
 	}
@@ -468,8 +470,8 @@ func testFilterIndexesCasesSetIndexedFilter(t *testing.T) {
 				},
 				{
 					Type:    utils.MetaSuffix,
-					Element: "~*req.AnswerTime",
-					Values:  []string{"202"},
+					Element: "~*req.Account",
+					Values:  []string{"02"},
 				},
 			},
 		},
@@ -481,64 +483,57 @@ func testFilterIndexesCasesSetIndexedFilter(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 
-	/*
-		 	filter1 = &v1.FilterWithCache{
-				Filter: &engine.Filter{
-					Tenant: "cgrates.org",
-					ID:     "FLTR_Charger12312",
-					Rules: []*engine.FilterRule{
-						{
-							Type:    utils.MetaString,
-							Element: "~*req.CGRID",
-							Values:  []string{"tester_id"},
-						},
-						{
-							Type:    utils.MetaPrefix,
-							Element: "~*req.AnswerTime",
-							Values:  []string{"2022"},
-						},
-						{
-							Type:    utils.MetaSuffix,
-							Element: "~*req.AnswerTime",
-							Values:  []string{"202"},
-						},
-					},
+	filter1 = &v1.FilterWithCache{
+		Filter: &engine.Filter{
+			Tenant: "cgrates.org",
+			ID:     "FLTR_Charger12312",
+			Rules: []*engine.FilterRule{
+				{
+					Type:    utils.MetaString,
+					Element: "~*req.Destination",
+					Values:  []string{"1443"},
 				},
-			}
-			filter2 := &v1.FilterWithCache{
-				Filter: &engine.Filter{
-					Tenant: "cgrates.org",
-					ID:     "FLTR_Charger4564",
-					Rules: []*engine.FilterRule{
-						{
-							Type:    utils.MetaString,
-							Element: "~*req.CGRID",
-							Values:  []string{"tester_id"},
-						},
-						{
-							Type:    utils.MetaPrefix,
-							Element: "~*req.AnswerTime",
-							Values:  []string{"2022"},
-						},
-						{
-							Type:    utils.MetaSuffix,
-							Element: "~*req.AnswerTime",
-							Values:  []string{"202"},
-						},
-					},
+				{
+					Type:    utils.MetaPrefix,
+					Element: "~*req.SetupTime",
+					Values:  []string{"2022"},
 				},
-			}
-			if err := fIdxCasesRPC.Call(utils.APIerSv1SetFilter, filter1, &result); err != nil {
-				t.Error(err)
-			} else if result != utils.OK {
-				t.Error("Unexpected reply returned", result)
-			}
-			if err := fIdxCasesRPC.Call(utils.APIerSv1SetFilter, filter2, &result); err != nil {
-				t.Error(err)
-			} else if result != utils.OK {
-				t.Error("Unexpected reply returned", result)
-			}
-	*/
+				{
+					Type:    utils.MetaSuffix,
+					Element: "~*req.AnswerTime",
+					Values:  []string{"202"},
+				},
+			},
+		},
+	}
+	filter2 := &v1.FilterWithCache{
+		Filter: &engine.Filter{
+			Tenant: "cgrates.org",
+			ID:     "FLTR_Charger4564",
+			Rules: []*engine.FilterRule{
+				{
+					Type:    utils.MetaString,
+					Element: "~*req.RequestType",
+					Values:  []string{"*none"},
+				},
+				{
+					Type:    utils.MetaSuffix,
+					Element: "~*req.AnswerTime",
+					Values:  []string{"212"},
+				},
+			},
+		},
+	}
+	if err := fIdxCasesRPC.Call(utils.APIerSv1SetFilter, filter1, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+	if err := fIdxCasesRPC.Call(utils.APIerSv1SetFilter, filter2, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
 }
 
 func testFilterIndexesCasesSetChargerWithFltr(t *testing.T) {
@@ -546,7 +541,7 @@ func testFilterIndexesCasesSetChargerWithFltr(t *testing.T) {
 		ChargerProfile: &engine.ChargerProfile{
 			Tenant:       "cgrates.org",
 			ID:           "ChrgerIndexable",
-			FilterIDs:    []string{"FLTR_Charger" /*"FLTR_Charger12312", "FLTR_Charger4564"*/},
+			FilterIDs:    []string{"FLTR_Charger", "FLTR_Charger12312", "FLTR_Charger4564"},
 			RunID:        utils.MetaRaw,
 			AttributeIDs: []string{"ATTR_FLTR1"},
 			Weight:       20,
@@ -558,7 +553,7 @@ func testFilterIndexesCasesSetChargerWithFltr(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	/* chargerProfile =
+	chargerProfile =
 		&v1.ChargerWithCache{
 			ChargerProfile: &engine.ChargerProfile{
 				Tenant:       "cgrates.org",
@@ -573,7 +568,7 @@ func testFilterIndexesCasesSetChargerWithFltr(t *testing.T) {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
-	} */
+	}
 }
 
 func testFilterIndexesCasesGetChargerIndexes(t *testing.T) {
@@ -582,8 +577,14 @@ func testFilterIndexesCasesGetChargerIndexes(t *testing.T) {
 		ItemType: utils.MetaChargers,
 	}
 	expectedIndexes := []string{
-		"*string:~*req.CGRID:tester_id:ChrgerIndexable",
 		"*prefix:~*req.AnswerTime:2022:ChrgerIndexable",
+		"*prefix:~*req.AnswerTime:2022:ChrgerIndexable222",
+		"*prefix:~*req.SetupTime:2022:ChrgerIndexable",
+		"*string:~*req.CGRID:tester_id:ChrgerIndexable",
+		"*string:~*req.CGRID:tester_id:ChrgerIndexable222",
+		"*string:~*req.Destination:1443:ChrgerIndexable",
+		"*string:~*req.RequestType:*none:ChrgerIndexable",
+		"*string:~*req.RequestType:*none:ChrgerIndexable222",
 	}
 	sort.Strings(expectedIndexes)
 	var reply []string
@@ -641,6 +642,33 @@ func testFilterIndexesCasesGetChargerIndexesChanged(t *testing.T) {
 	}
 	expectedIndexes := []string{
 		"*string:~*req.Account:12345:ChrgerIndexable",
+		"*string:~*req.Account:12345:ChrgerIndexable222",
+		"*prefix:~*req.SetupTime:2022:ChrgerIndexable",
+		"*string:~*req.Destination:1443:ChrgerIndexable",
+		"*string:~*req.RequestType:*none:ChrgerIndexable",
+		"*string:~*req.RequestType:*none:ChrgerIndexable222",
+	}
+	sort.Strings(expectedIndexes)
+	var reply []string
+	if err := fIdxCasesRPC.Call(utils.APIerSv1GetFilterIndexes, arg, &reply); err != nil {
+		t.Error(err)
+	} else if sort.Strings(reply); !reflect.DeepEqual(expectedIndexes, reply) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expectedIndexes), utils.ToJSON(reply))
+	}
+}
+
+func testFilterIndexesCasesGetReverseFilterIndexes(t *testing.T) {
+	arg := &v1.AttrGetFilterIndexes{
+		Tenant:   "cgrates.org",
+		ItemType: utils.CacheReverseFilterIndexes,
+	}
+	expectedIndexes := []string{
+		/* "*string:~*req.Account:12345:ChrgerIndexable",
+		"*string:~*req.Account:12345:ChrgerIndexable222",
+		"*prefix:~*req.SetupTime:2022:ChrgerIndexable",
+		"*string:~*req.Destination:1443:ChrgerIndexable",
+		"*string:~*req.RequestType:*none:ChrgerIndexable",
+		"*string:~*req.RequestType:*none:ChrgerIndexable222", */
 	}
 	sort.Strings(expectedIndexes)
 	var reply []string
