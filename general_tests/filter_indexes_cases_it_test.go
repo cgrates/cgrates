@@ -111,7 +111,10 @@ var (
 		testFilterIndexesCasesComputeChargersIndexes,
 		testFilterIndexesCasesGetChargerIndexesChanged,
 
-		testFilterIndexesCasesGetReverseFilterIndexes,
+		testFilterIndexesCasesGetReverseFilterIndexes, // for chargers
+		testFilterIndexesCasesRemoveChargerProfile,
+		testFilterIndexesCasesGetIndexesAfterRemove,
+		testFilterIndexesCasesGetReverseIndexesAfterRemove,
 
 		testFilterIndexesCasesStopEngine,
 	}
@@ -659,19 +662,119 @@ func testFilterIndexesCasesGetChargerIndexesChanged(t *testing.T) {
 
 func testFilterIndexesCasesGetReverseFilterIndexes(t *testing.T) {
 	arg := &v1.AttrGetFilterIndexes{
-		Tenant:   "cgrates.org",
+		Tenant:   "cgrates.org:FLTR_Charger",
 		ItemType: utils.CacheReverseFilterIndexes,
 	}
 	expectedIndexes := []string{
-		/* "*string:~*req.Account:12345:ChrgerIndexable",
-		"*string:~*req.Account:12345:ChrgerIndexable222",
-		"*prefix:~*req.SetupTime:2022:ChrgerIndexable",
-		"*string:~*req.Destination:1443:ChrgerIndexable",
-		"*string:~*req.RequestType:*none:ChrgerIndexable",
-		"*string:~*req.RequestType:*none:ChrgerIndexable222", */
+		"*charger_filter_indexes:ChrgerIndexable",
+		"*charger_filter_indexes:ChrgerIndexable222",
 	}
 	sort.Strings(expectedIndexes)
 	var reply []string
+	if err := fIdxCasesRPC.Call(utils.APIerSv1GetFilterIndexes, arg, &reply); err != nil {
+		t.Error(err)
+	} else if sort.Strings(reply); !reflect.DeepEqual(expectedIndexes, reply) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expectedIndexes), utils.ToJSON(reply))
+	}
+
+	arg = &v1.AttrGetFilterIndexes{
+		Tenant:   "cgrates.org:FLTR_Charger4564",
+		ItemType: utils.CacheReverseFilterIndexes,
+	}
+	expectedIndexes = []string{
+		"*charger_filter_indexes:ChrgerIndexable",
+		"*charger_filter_indexes:ChrgerIndexable222",
+	}
+	sort.Strings(expectedIndexes)
+	if err := fIdxCasesRPC.Call(utils.APIerSv1GetFilterIndexes, arg, &reply); err != nil {
+		t.Error(err)
+	} else if sort.Strings(reply); !reflect.DeepEqual(expectedIndexes, reply) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expectedIndexes), utils.ToJSON(reply))
+	}
+
+	arg = &v1.AttrGetFilterIndexes{
+		Tenant:   "cgrates.org:FLTR_Charger12312",
+		ItemType: utils.CacheReverseFilterIndexes,
+	}
+	expectedIndexes = []string{
+		"*charger_filter_indexes:ChrgerIndexable",
+	}
+	sort.Strings(expectedIndexes)
+	if err := fIdxCasesRPC.Call(utils.APIerSv1GetFilterIndexes, arg, &reply); err != nil {
+		t.Error(err)
+	} else if sort.Strings(reply); !reflect.DeepEqual(expectedIndexes, reply) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expectedIndexes), utils.ToJSON(reply))
+	}
+}
+
+func testFilterIndexesCasesRemoveChargerProfile(t *testing.T) {
+	var resp string
+	if err := fIdxCasesRPC.Call(utils.APIerSv1RemoveChargerProfile,
+		&utils.TenantID{Tenant: "cgrates.org", ID: "ChrgerIndexable222"}, &resp); err != nil {
+		t.Error(err)
+	} else if resp != utils.OK {
+		t.Error("Unexpected reply returned", resp)
+	}
+}
+
+func testFilterIndexesCasesGetIndexesAfterRemove(t *testing.T) {
+	arg := &v1.AttrGetFilterIndexes{
+		Tenant:   "cgrates.org",
+		ItemType: utils.MetaChargers,
+	}
+	expectedIndexes := []string{
+		"*string:~*req.Account:12345:ChrgerIndexable",
+		"*prefix:~*req.SetupTime:2022:ChrgerIndexable",
+		"*string:~*req.Destination:1443:ChrgerIndexable",
+		"*string:~*req.RequestType:*none:ChrgerIndexable",
+	}
+	sort.Strings(expectedIndexes)
+	var reply []string
+	if err := fIdxCasesRPC.Call(utils.APIerSv1GetFilterIndexes, arg, &reply); err != nil {
+		t.Error(err)
+	} else if sort.Strings(reply); !reflect.DeepEqual(expectedIndexes, reply) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expectedIndexes), utils.ToJSON(reply))
+	}
+}
+
+func testFilterIndexesCasesGetReverseIndexesAfterRemove(t *testing.T) {
+	arg := &v1.AttrGetFilterIndexes{
+		Tenant:   "cgrates.org:FLTR_Charger",
+		ItemType: utils.CacheReverseFilterIndexes,
+	}
+	expectedIndexes := []string{
+		"*charger_filter_indexes:ChrgerIndexable",
+	}
+	sort.Strings(expectedIndexes)
+	var reply []string
+	if err := fIdxCasesRPC.Call(utils.APIerSv1GetFilterIndexes, arg, &reply); err != nil {
+		t.Error(err)
+	} else if sort.Strings(reply); !reflect.DeepEqual(expectedIndexes, reply) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expectedIndexes), utils.ToJSON(reply))
+	}
+
+	arg = &v1.AttrGetFilterIndexes{
+		Tenant:   "cgrates.org:FLTR_Charger4564",
+		ItemType: utils.CacheReverseFilterIndexes,
+	}
+	expectedIndexes = []string{
+		"*charger_filter_indexes:ChrgerIndexable",
+	}
+	sort.Strings(expectedIndexes)
+	if err := fIdxCasesRPC.Call(utils.APIerSv1GetFilterIndexes, arg, &reply); err != nil {
+		t.Error(err)
+	} else if sort.Strings(reply); !reflect.DeepEqual(expectedIndexes, reply) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expectedIndexes), utils.ToJSON(reply))
+	}
+
+	arg = &v1.AttrGetFilterIndexes{
+		Tenant:   "cgrates.org:FLTR_Charger12312",
+		ItemType: utils.CacheReverseFilterIndexes,
+	}
+	expectedIndexes = []string{
+		"*charger_filter_indexes:ChrgerIndexable",
+	}
+	sort.Strings(expectedIndexes)
 	if err := fIdxCasesRPC.Call(utils.APIerSv1GetFilterIndexes, arg, &reply); err != nil {
 		t.Error(err)
 	} else if sort.Strings(reply); !reflect.DeepEqual(expectedIndexes, reply) {

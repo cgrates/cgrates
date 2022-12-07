@@ -110,6 +110,8 @@ func (api *APIerSv1) GetFilterIndexes(arg AttrGetFilterIndexes, reply *[]string)
 		}
 		arg.ItemType = utils.AttributeProfilePrefix
 		key = utils.ConcatenatedKey(arg.Tenant, arg.Context)
+	case utils.CacheReverseFilterIndexes:
+		arg.ItemType = utils.ReverseFilterIndexes
 	}
 	if indexes, err = api.DataManager.GetFilterIndexes(
 		utils.PrefixToIndexCache[arg.ItemType], key, "", nil); err != nil {
