@@ -589,3 +589,31 @@ func TestCMDeadLock(t *testing.T) {
 	}
 }
 */
+
+func TestCMEnableDispatcher(t *testing.T) {
+	Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	cM := NewConnManager(cfg)
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	fltrs := NewFilterS(cfg, nil, dm)
+	Cache = NewCacheS(cfg, dm, nil, nil)
+	newCDRSrv := NewCDRServer(cfg, dm, fltrs, nil)
+
+	srvcNames := []string{utils.AccountS, utils.ActionS, utils.AttributeS,
+		utils.CacheS, utils.ChargerS, utils.ConfigS, utils.DispatcherS,
+		utils.GuardianS, utils.RateS, utils.ResourceS, utils.RouteS,
+		utils.SessionS, utils.StatS, utils.ThresholdS, utils.CDRs,
+		utils.ReplicatorS, utils.EeS, utils.CoreS, utils.AnalyzerS,
+		utils.AdminS, utils.LoaderS, utils.ServiceManager}
+
+	for _, name := range srvcNames {
+
+		newSrvcWName, err := NewServiceWithName(newCDRSrv, name, true)
+		if err != nil {
+			t.Error(err)
+		}
+		cM.EnableDispatcher(newSrvcWName)
+
+	}
+}

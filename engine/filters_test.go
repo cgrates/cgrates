@@ -2069,3 +2069,56 @@ func TestFiltersFilterRuleIsValid(t *testing.T) {
 		t.Error("filter should be valid")
 	}
 }
+
+func TestPassPartialErr(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dmFilterPass := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	filterS := FilterS{
+		cfg: cfg,
+		dm:  dmFilterPass,
+	}
+	passEvent := map[string]interface{}{
+		"Account": "1007",
+	}
+	fEv := utils.MapStorage{}
+	fEv.Set([]string{utils.MetaReq}, passEvent)
+	prefixes := []string{utils.DynamicDataPrefix + utils.MetaReq}
+	expErr := "NOT_FOUND:bad fltr"
+	if _, _, err := filterS.LazyPass(context.Background(), "cgrates.org",
+		[]string{"bad fltr"}, fEv, prefixes); err == nil || err.Error() != expErr {
+		t.Errorf("Expected error <%v>, Received error <%v> ", expErr, err.Error())
+	}
+
+}
+
+func TestNewFilterRuleErrSupportedFltrType(t *testing.T) {
+	expErr := "Unsupported filter Type: unsupported"
+	if _, err := NewFilterRule("unsupported", "", []string{}); err == nil || err.Error() != expErr {
+		t.Errorf("Expected error <%v>, Received error <%v> ", expErr, err.Error())
+
+	}
+}
+
+func TestNewFilterRuleErrNoFldName(t *testing.T) {
+	expErr := "Element is mandatory for Type: *cronexp"
+	if _, err := NewFilterRule(utils.MetaCronExp, "", []string{}); err == nil || err.Error() != expErr {
+		t.Errorf("Expected error <%v>, Received error <%v> ", expErr, err.Error())
+
+	}
+}
+func TestNewFilterRuleErrNoVals(t *testing.T) {
+	expErr := "Values is mandatory for Type: *cronexp"
+	if _, err := NewFilterRule(utils.MetaCronExp, "~*req.AnswerTime", []string{}); err == nil || err.Error() != expErr {
+		t.Errorf("Expected error <%v>, Received error <%v> ", expErr, err.Error())
+
+	}
+}
+
+func TestPassNever(t *testing.T) {
+	fltr := &FilterRule{}
+	dDP := utils.MapStorage{}
+	if ok, err := fltr.passNever(dDP); ok != false && err != nil {
+		t.Errorf("Expected filter to never pass, unexpected error <%v>", err)
+	}
+}
