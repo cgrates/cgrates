@@ -1634,7 +1634,6 @@ func TestTpReaderLoadActionTriggers(t *testing.T) {
 		},
 	}
 	tscache.Set(utils.CacheTBLTPActionTriggers, "*prfitem1", trVals[0], []string{"*prfitem1", "*prfitem2"}, true, utils.NonTransactional)
-
 	if err := tpr.LoadActionTriggers(); err == nil || err.Error() != "Unsupported time format" {
 		t.Error(err)
 	}
@@ -1688,4 +1687,79 @@ func TestTpReaderSetDestination(t *testing.T) {
 			t.Errorf("exepcted %v,received %v", utils.ToJSON(dest), utils.ToJSON(rcv))
 		}
 	}
+}
+
+func TestTpReaderLoadActionPlansErrs(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.DataDbCfg().Items = map[string]*config.ItemOpt{
+		utils.CacheTBLTPActionPlans: {
+			Limit:  3,
+			TTL:    3,
+			Remote: true,
+		},
+		utils.CacheActions: {
+			TTL:    3,
+			Remote: true,
+		},
+	}
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	tpr, err := NewTpReader(db, db, "*prf", "UTC", nil, nil, true)
+	if err != nil {
+		t.Error(err)
+	}
+	tpAP := &utils.TPActionPlan{
+		TPid: "TEST_TPID",
+		ID:   "PACKAGE_10",
+		ActionPlan: []*utils.TPActionTiming{
+			{
+				ActionsId: "TOPUP_RST_10",
+				TimingId:  "ASAP",
+				Weight:    10.0},
+			{
+				ActionsId: "TOPUP_RST_5",
+				TimingId:  "ASAP",
+				Weight:    20.0},
+		},
+	}
+	db.db.Set(utils.CacheTBLTPActionPlans, "*prfitem1", tpAP, []string{"grpId"}, true, utils.NonTransactional)
+	if err := tpr.LoadActionPlans(); err == nil || err.Error() != fmt.Sprintf("[ActionPlans] Could not load the action for tag: %q", tpAP.ActionPlan[0].ActionsId) {
+		t.Error(err)
+	}
+
+}
+
+func TestLoadSharedGroupsFiltered(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.DataDbCfg().Items = map[string]*config.ItemOpt{
+		utils.CacheTBLTPSharedGroups: {
+			Limit:  3,
+			TTL:    3,
+			Remote: true,
+		},
+	}
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	tpr, err := NewTpReader(db, db, "*prf", "UTC", nil, nil, true)
+	if err != nil {
+		t.Error(err)
+	}
+	sgs := &utils.TPSharedGroups{
+
+		TPid: "TEST_TPID",
+		ID:   "SHARED_GROUP_TEST",
+		SharedGroups: []*utils.TPSharedGroup{
+			{
+				Account:       "*any",
+				Strategy:      "*highest",
+				RatingSubject: "special1"},
+			{
+				Account:       "*second",
+				Strategy:      "*highest",
+				RatingSubject: "special2"},
+		},
+	}
+	db.db.Set(utils.CacheTBLTPSharedGroups, "*prfitem1", sgs, []string{"grp"}, true, utils.NonTransactional)
+	if err = tpr.LoadSharedGroupsFiltered("SHARED_GROUP_TEST", true); err != nil {
+		t.Error(err)
+	}
+
 }

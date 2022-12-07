@@ -1674,17 +1674,26 @@ func TestCdrSRateCDR(t *testing.T) {
 	if err := cdrS.cdrDb.SetSMCost(smc); err != nil {
 		t.Error(err)
 	}
-
+	db.db.Set(utils.CacheSessionCostsTBL, "cgrates:item1", &SMCost{
+		CGRID:      "CGRID",
+		RunID:      utils.MetaDefault,
+		OriginHost: utils.FreeSWITCHAgent,
+		OriginID:   "Origin1",
+		Usage:      time.Second,
+		CostSource: utils.MetaSessionS,
+	}, []string{utils.ConcatenatedKey(utils.CGRID, "CGRID_22"),
+		utils.ConcatenatedKey(utils.RunID, "RUN_ID1"),
+		utils.ConcatenatedKey(utils.OriginHost, "ORG_Host1")}, true, utils.NonTransactional)
 	cdrOpts := &CDRWithAPIOpts{
 		CDR: &CDR{
-			CGRID:       "cgrId",
-			RunID:       "runId",
+			CGRID:       "CGRID_22",
+			RunID:       "RUN_ID1",
+			OriginHost:  "ORG_Host1",
 			OrderID:     222,
 			Usage:       4 * time.Second,
 			RequestType: utils.Prepaid,
 			ExtraFields: map[string]string{
-				utils.LastUsed:       "extra",
-				utils.OriginIDPrefix: "prefix2",
+				utils.LastUsed: "extra",
 			},
 		},
 	}

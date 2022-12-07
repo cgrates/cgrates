@@ -2940,14 +2940,6 @@ func TestAcountSetBalanceAction(t *testing.T) {
 	acc := &Account{
 		ID:            "rif",
 		AllowNegative: true,
-		BalanceMap: map[string]Balances{
-			utils.MetaSMS:  {&Balance{Value: 14}},
-			utils.MetaData: {&Balance{Value: 1204}},
-			utils.MetaVoice: {
-				&Balance{Weight: 20,
-					DestinationIDs: utils.StringMap{"NAT": true}},
-				&Balance{Weight: 10,
-					DestinationIDs: utils.StringMap{"RET": true}}}},
 	}
 	fltrs := NewFilterS(cfg, nil, nil)
 
@@ -2963,6 +2955,9 @@ func TestAcountSetBalanceAction(t *testing.T) {
 		},
 	}
 	if err := acc.setBalanceAction(a, fltrs); err != nil {
+		t.Error(err)
+	}
+	if err := acc.setBalanceAction(nil, fltrs); err == nil || err.Error() != "nil action" {
 		t.Error(err)
 	}
 }

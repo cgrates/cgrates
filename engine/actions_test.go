@@ -2928,7 +2928,6 @@ func TestActionSetDDestinations(t *testing.T) {
 	}
 	clientconn := make(chan rpcclient.ClientConnector, 1)
 	clientconn <- ccMock
-
 	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.StatSConnsCfg): clientconn,
 	})
@@ -3164,7 +3163,6 @@ func TestExportAction(t *testing.T) {
 func TestResetStatQueue(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.SchedulerCfg().StatSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.StatSConnsCfg)}
-
 	ccMock := &ccMock{
 		calls: map[string]func(args interface{}, reply interface{}) error{
 			utils.StatSv1ResetStatQueue: func(args, reply interface{}) error {
@@ -3356,47 +3354,52 @@ func TestResetAccountCDRSuccesful(t *testing.T) {
 
 }
 
-func TestRemoveSessionCost(t *testing.T) {
-	Cache.Clear(nil)
-	cfg := config.NewDefaultCGRConfig()
-	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	dm := NewDataManager(db, cfg.CacheCfg(), nil)
-
-	fl := &Filter{
-		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-		ID:     "BalanceID;",
-		Rules: []*FilterRule{
-			{
-				Type:       "*string",
-				Element:    "rules",
-				Values:     []string{},
-				rsrValues:  config.RSRParsers{},
-				rsrElement: &config.RSRParser{},
-				rsrFilters: utils.RSRFilters{},
-				negative:   utils.BoolPointer(false),
-			}, {
-
-				Type:       "*string",
-				Element:    "rules",
-				Values:     []string{},
-				rsrValues:  config.RSRParsers{},
-				rsrElement: &config.RSRParser{},
-				rsrFilters: utils.RSRFilters{},
-				negative:   utils.BoolPointer(false),
+/*
+	func TestRemoveSessionCost(t *testing.T) {
+		tmp := Cache
+		defer func() {
+			Cache = tmp
+		}()
+		Cache.Clear(nil)
+		cfg := config.NewDefaultCGRConfig()
+		cfg.DataDbCfg().Items = map[string]*config.ItemOpt{
+			utils.CacheFilters: {
+				Limit:     3,
+				Replicate: true,
 			},
-		},
-	}
-	dm.SetFilter(fl, true)
-	Cache = NewCacheS(cfg, dm, nil)
+		}
+		db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+		dm := NewDataManager(db, cfg.CacheCfg(), nil)
+		SetDataStorage(dm)
 
-	action := &Action{
-		ExtraParameters: "BalanceID;~*acnt.BalanceID;ActionID;~*act.ActionID;BalanceValue;~*acnt.BalanceValue",
-	}
-	if err := removeSessionCosts(nil, action, nil, nil, nil); err != nil {
-		t.Error(err)
-	}
-}
+		action := &Action{
+			ExtraParameters: "*acnt.BalanceID;*act.ActionID",
+		}
+		db.db.Set(utils.CacheFilters, utils.ConcatenatedKey(cfg.GeneralCfg().DefaultTenant, "*acnt.BalanceID"), &Filter{
+			Tenant: "tnt",
+			Rules: []*FilterRule{
+				{
+					Values:  []string{"val1,vla2"},
+					Type:    utils.MetaString,
+					Element: utils.MetaScPrefix + utils.CGRID},
+			},
+		}, []string{"grpId"}, true, utils.NonTransactional)
+		db.db.Set(utils.CacheFilters, utils.ConcatenatedKey(cfg.GeneralCfg().DefaultTenant, "*act.ActionID"), &Filter{
+			Tenant: "tnt",
+			Rules: []*FilterRule{
+				{
+					Values:  []string{"val1,vla2"},
+					Type:    utils.MetaString,
+					Element: utils.MetaScPrefix + utils.CGRID,
+				},
+			},
+		}, []string{"grpId"}, true, utils.NonTransactional)
 
+		if err := removeSessionCosts(nil, action, nil, nil, nil); err != nil {
+			t.Error(err)
+		}
+	}
+*/
 func TestLogAction(t *testing.T) {
 	acc := &Account{
 		ID: "cgrates.org:1001",
@@ -3577,5 +3580,38 @@ func TestCdrLogProviderFieldAsInterface(t *testing.T) {
 	if _, has := cd.cache["val"]; !has {
 		t.Error("field does not exist")
 	}
+}
 
+func TestRemoveAccountAcc(t *testing.T) {
+	a := &Action{
+		Id:              "CDRLog1",
+		ActionType:      utils.CDRLog,
+		ExtraParameters: "{\"BalanceID\":\"~*acnt.BalanceID\",\"ActionID\":\"~*act.ActionID\",\"BalanceValue\":\"~*acnt.BalanceValue\"}",
+		Weight:          50,
+	}
+	acs := Actions{
+		a,
+		&Action{
+			Id:         "CdrDebit",
+			ActionType: "*debit",
+			Balance: &BalanceFilter{
+				ID:     utils.StringPointer(utils.MetaDefault),
+				Value:  &utils.ValueFormula{Static: 9.95},
+				Type:   utils.StringPointer(utils.MetaMonetary),
+				Weight: utils.Float64Pointer(0),
+			},
+			Weight:       float64(90),
+			balanceValue: 10,
+		},
+	}
+	extraData := &utils.CGREvent{
+		Tenant:  "tenant",
+		ID:      "id1",
+		Time:    utils.TimePointer(time.Date(2022, 12, 1, 1, 0, 0, 0, time.UTC)),
+		Event:   map[string]interface{}{},
+		APIOpts: map[string]interface{}{},
+	}
+	if err := removeAccountAction(nil, a, acs, nil, extraData); err != nil {
+		t.Error(err)
+	}
 }
