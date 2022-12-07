@@ -551,6 +551,7 @@ func TestExportRequestCompose(t *testing.T) {
 }
 
 func TestExportRequestSetFields(t *testing.T) {
+	Cache.Clear(nil)
 	onm := utils.NewOrderedNavigableMap()
 	fullPath := &utils.FullPath{
 		PathSlice: []string{utils.MetaReq, utils.MetaTenant},
@@ -561,8 +562,24 @@ func TestExportRequestSetFields(t *testing.T) {
 	}
 	onm.Append(fullPath, val)
 	cfg := config.NewDefaultCGRConfig()
-	idb := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	dmSPP := NewDataManager(idb, config.CgrConfig().CacheCfg(), nil)
+	cfg.DataDbCfg().Items = map[string]*config.ItemOpt{
+		utils.CacheFilters: {
+			Limit:     4,
+			TTL:       5,
+			StaticTTL: true,
+		},
+		utils.CacheUCH: {
+			Limit:     4,
+			TTL:       5,
+			StaticTTL: true,
+		},
+	}
+	cfg.FilterSCfg().ResourceSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ResourceSConnsCfg)}
+	cfg.FilterSCfg().StatSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.StatSConnsCfg)}
+	cfg.FilterSCfg().ApierSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ApierSConnsCfg)}
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+
+	dm := NewDataManager(db, config.CgrConfig().CacheCfg(), nil)
 	eeR := &ExportRequest{
 		inData: map[string]utils.DataStorage{
 			utils.MetaReq: utils.MapStorage{
@@ -573,7 +590,7 @@ func TestExportRequestSetFields(t *testing.T) {
 				"*opts": "val",
 			},
 		},
-		filterS: NewFilterS(cfg, nil, dmSPP),
+		filterS: NewFilterS(cfg, nil, dm),
 		tnt:     "cgrates.org",
 		ExpData: map[string]*utils.OrderedNavigableMap{
 			utils.MetaReq: onm,
@@ -581,27 +598,27 @@ func TestExportRequestSetFields(t *testing.T) {
 	}
 	fctTemp := []*config.FCTemplate{
 		{
-			Type:       utils.MetaMaskedDestination,
+			Type:       utils.MetaFiller,
 			Value:      config.NewRSRParsersMustCompile("*month_endTest", utils.InfieldSep),
 			Layout:     "“Mon Jan _2 15:04:05 2006”",
 			Timezone:   "Local",
 			MaskLen:    3,
-			MaskDestID: "dest1"},
-		{
-			Type:       utils.MetaMaskedDestination,
-			Value:      config.NewRSRParsersMustCompile("*month_endTest", utils.InfieldSep),
-			Layout:     "“Mon Jan _2 15:04:05 2006”",
-			Timezone:   "Local",
-			MaskLen:    3,
-			MaskDestID: "dest1"},
-		{
-			Type:       utils.MetaMaskedDestination,
-			Value:      config.NewRSRParsersMustCompile("*month_endTest", utils.InfieldSep),
-			Layout:     "“Mon Jan _2 15:04:05 2006”",
-			Timezone:   "Local",
-			MaskLen:    3,
-			MaskDestID: "dest3"},
+			MaskDestID: "dest1",
+			Filters:    []string{"filter1"},
+			Path:       "<*uch;*opts>",
+		},
 	}
+
+	Cache.Set(utils.CacheFilters, utils.ConcatenatedKey(eeR.tnt, fctTemp[0].Filters[0]), &Filter{
+		Tenant: "cgrates.org",
+		ID:     "FLTR_2",
+		Rules:  []*FilterRule{
+			// {
+			// 	Type:    utils.MetaPrefix,
+			// 	Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.AccountField,
+			// 	Values:  []string{"1001"},
+			// },
+		}}, []string{}, true, utils.NonTransactional)
 	if err = eeR.SetFields(fctTemp); err == nil {
 		t.Error(err)
 	}

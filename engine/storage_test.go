@@ -19,6 +19,7 @@ package engine
 
 import (
 	"reflect"
+	"sort"
 	"strings"
 	"testing"
 	"time"
@@ -470,5 +471,35 @@ func TestIDBSetStatQueueDrvNil(t *testing.T) {
 	}
 	if err := idb.SetStatQueueDrv(ssq, nil); err == nil {
 		t.Error(err)
+	}
+}
+
+func TestGetTpTableIds(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.DataDbCfg().Items = map[string]*config.ItemOpt{
+		utils.CacheTBLTPRates: {
+			Limit:     3,
+			StaticTTL: true,
+		},
+	}
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	tpid := "*prf"
+	paginator := &utils.PaginatorWithSearch{
+		Paginator: &utils.Paginator{},
+		Search:    "",
+	}
+	expIds := []string{"Item1", "Item2"}
+	filters := map[string]string{}
+	db.db.Set(utils.CacheTBLTPRates, "*prf:Item1", "val", []string{"grpId"}, true, utils.NonTransactional)
+	db.db.Set(utils.CacheTBLTPRates, "*prf:Item2", "val", []string{"grpId"}, true, utils.NonTransactional)
+	if val, err := db.GetTpTableIds(tpid, utils.TBLTPRates, []string{}, filters, paginator); err != nil {
+		t.Error(err)
+	} else {
+		sort.Slice(val, func(i, j int) bool {
+			return val[i] < val[j]
+		})
+		if !reflect.DeepEqual(val, expIds) {
+			t.Errorf("expected %v,received %v", utils.ToJSON(val), utils.ToJSON(expIds))
+		}
 	}
 }
