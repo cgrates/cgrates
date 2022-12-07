@@ -2942,58 +2942,62 @@ func TestCDRsProcessEventMockThdsEcCostIfaceUnmarshalErr(t *testing.T) {
 	}
 }
 
-//unfinished (solo cover it)
-// func TestCDRsV1ProcessEventWithGetMockCacheErrResp(t *testing.T) {
-// 	testCache := Cache
-// 	tmpC := config.CgrConfig()
-// 	tmpCM := connMgr
-// 	defer func() {
-// 		Cache = testCache
-// 		config.SetCgrConfig(tmpC)
-// 		connMgr = tmpCM
-// 	}()
+func TestCDRsV1ProcessEventWithGetMockCacheErrResp(t *testing.T) {
 
-// 	cfg := config.NewDefaultCGRConfig()
-// 	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 1
+	testCache := Cache
+	tmpC := config.CgrConfig()
+	tmpCM := connMgr
+	defer func() {
+		Cache = testCache
+		config.SetCgrConfig(tmpC)
+		connMgr = tmpCM
+	}()
+	Cache.Clear(nil)
 
-// 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-// 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
-// 	fltrs := NewFilterS(cfg, nil, dm)
-// 	Cache = NewCacheS(cfg, dm, nil, nil)
-// 	newCDRSrv := NewCDRServer(cfg, dm, fltrs, nil)
-// 	cgrEv := &utils.CGREvent{
-// 		Tenant: "cgrates.org",
-// 		ID:     "testID",
-// 		Event: map[string]interface{}{
-// 			utils.Cost: 123,
-// 		},
-// 	}
+	cfg := config.NewDefaultCGRConfig()
+	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 1
+	config.SetCgrConfig(cfg)
 
-// 	var evs []*utils.EventsWithOpts
-// 	Cache.Set(context.Background(), utils.CacheRPCResponses, "CDRsV1.ProcessEventWithGet:testID",
-// 		&utils.CachedRPCResponse{Result: &evs, Error: nil},
-// 		nil, true, utils.NonTransactional)
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	fltrs := NewFilterS(cfg, nil, dm)
+	Cache = NewCacheS(cfg, dm, nil, nil)
+	newCDRSrv := NewCDRServer(cfg, dm, fltrs, nil)
 
-// 	err := newCDRSrv.V1ProcessEventWithGet(context.Background(), cgrEv, &evs)
-// 	if err != nil {
-// 		t.Errorf("\nExpected <%+v> \n, received <%+v>", nil, err)
-// 	}
+	cgrEv := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "testID",
+		Event: map[string]interface{}{
+			utils.Cost: 123,
+		},
+		APIOpts: map[string]interface{}{},
+	}
 
-// 	expectedVal := &utils.EventsWithOpts{}
-// 	if val, ok := Cache.Get(utils.CacheRPCResponses, "CDRsV1.ProcessEventWithGet:testID"); !ok {
-// 		t.Error("Expected value", val)
-// 	} else {
-// 		valConverted, canCast := val.(*utils.CachedRPCResponse)
-// 		if !canCast {
-// 			t.Error("Should cast")
-// 		}
-// 		if valConverted.Error != nil {
-// 			t.Errorf("Expected error <%v>, Received error <%v>", expectedVal, valConverted.Error)
-// 		} else if valConverted.Error == nil {
-// 			evs = *valConverted.Result.(*[]*utils.EventsWithOpts)
-// 		}
-// 		if !reflect.DeepEqual(expectedVal, valConverted.Result) {
-// 			t.Errorf("Expected %v, received %v", utils.ToJSON(expectedVal), utils.ToJSON(valConverted))
-// 		}
-// 	}
-// }
+	evs := []*utils.EventsWithOpts{
+		{
+			Event: map[string]interface{}{
+				utils.Cost: 666,
+			},
+		},
+	}
+	Cache.Set(context.Background(), utils.CacheRPCResponses, "CDRsV1.ProcessEventWithGet:testID",
+		&utils.CachedRPCResponse{Result: &evs, Error: nil},
+		nil, true, utils.NonTransactional)
+	var reply []*utils.EventsWithOpts
+	err := newCDRSrv.V1ProcessEventWithGet(context.Background(), cgrEv, &reply)
+	if err != nil {
+		t.Errorf("\nExpected <%+v> \n, received <%+v>", nil, err)
+	}
+
+	expectedVal := []*utils.EventsWithOpts{
+		{
+			Event: map[string]interface{}{
+				utils.Cost: 666,
+			},
+		},
+	}
+	if !reflect.DeepEqual(expectedVal, reply) {
+		t.Errorf("Expected %v, received %v", utils.ToJSON(expectedVal), utils.ToJSON(reply))
+	}
+
+}

@@ -22,6 +22,7 @@ import (
 	"errors"
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
@@ -66,9 +67,9 @@ func TestCacheSSetWithReplicateTrue(t *testing.T) {
 	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicationConnsCfg), utils.CacheSv1, clientconn)
 
 	stopchan := make(chan struct{}, 1)
-	caps := NewCaps(1, utils.MetaBusy)
-	sts := NewCapsStats(cfg.CoreSCfg().CapsStatsInterval, caps, stopchan)
-	cacheS := NewCacheS(cfg, dm, connMgr, sts)
+	close(stopchan)
+
+	cacheS := NewCacheS(cfg, dm, connMgr, nil)
 
 	if err := cacheS.SetWithReplicate(context.Background(), args); err != nil {
 		t.Error(err)
@@ -116,9 +117,9 @@ func TestCacheSSetWithReplicateFalse(t *testing.T) {
 	connMgr := NewConnManager(cfg)
 
 	stopchan := make(chan struct{}, 1)
-	caps := NewCaps(1, utils.MetaBusy)
-	sts := NewCapsStats(cfg.CoreSCfg().CapsStatsInterval, caps, stopchan)
-	cacheS := NewCacheS(cfg, dm, connMgr, sts)
+	close(stopchan)
+
+	cacheS := NewCacheS(cfg, dm, connMgr, nil)
 
 	if err := cacheS.SetWithReplicate(context.Background(), args); err != nil {
 		t.Error(err)
@@ -156,9 +157,9 @@ func TestCacheSGetWithRemote(t *testing.T) {
 	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.RemoteConnsCfg), utils.CacheSv1GetItem, clientconn)
 
 	stopchan := make(chan struct{}, 1)
-	caps := NewCaps(1, utils.MetaBusy)
-	sts := NewCapsStats(cfg.CoreSCfg().CapsStatsInterval, caps, stopchan)
-	cacheS := NewCacheS(cfg, dm, connMgr, sts)
+	close(stopchan)
+
+	cacheS := NewCacheS(cfg, dm, connMgr, nil)
 
 	// first we have to set the value in order to get it from our mock
 	cacheS.Set(context.Background(), utils.CacheAccounts, "itemId", "test_value_was_set", []string{}, true, utils.NonTransactional)
@@ -182,7 +183,7 @@ func TestCacheSGetWithRemoteFalse(t *testing.T) {
 	args := &utils.ArgsGetCacheItemWithAPIOpts{
 
 		ArgsGetCacheItem: utils.ArgsGetCacheItem{
-			CacheID: "cacheID",
+			CacheID: utils.CacheAccounts,
 			ItemID:  "itemId",
 		},
 	}
@@ -199,12 +200,96 @@ func TestCacheSGetWithRemoteFalse(t *testing.T) {
 	connMgr := NewConnManager(cfg)
 
 	stopchan := make(chan struct{}, 1)
-	caps := NewCaps(1, utils.MetaBusy)
-	sts := NewCapsStats(cfg.CoreSCfg().CapsStatsInterval, caps, stopchan)
-	cacheS := NewCacheS(cfg, dm, connMgr, sts)
+	close(stopchan)
+
+	cacheS := NewCacheS(cfg, dm, connMgr, nil)
 
 	var reply interface{} = utils.OK
 	if err := cacheS.V1GetItemWithRemote(context.Background(), args, &reply); err == nil || err != utils.ErrNotFound {
 		t.Errorf("Expected error <%v>, received error <%v>", utils.ErrNotFound, err)
 	}
+}
+func TestRemoveWithoutReplicate(t *testing.T) {
+	Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	connMgr := NewConnManager(cfg)
+	chS := NewCacheS(cfg, dm, connMgr, nil)
+
+	chS.tCache.Set(utils.CacheAccounts, "itemId", "value", nil, true, utils.NonTransactional)
+
+	chS.RemoveWithoutReplicate(utils.CacheAccounts, "itemId", true, utils.NonTransactional)
+	if _, has := chS.tCache.Get(utils.CacheAccounts, "itemId"); has {
+		t.Error("This itemId shouldn't exist")
+	}
+
+}
+
+func TestV1GetItemExpiryTimeFromCacheErr(t *testing.T) {
+	Cache.Clear(nil)
+	args := &utils.ArgsGetCacheItemWithAPIOpts{
+		ArgsGetCacheItem: utils.ArgsGetCacheItem{
+			CacheID: utils.CacheAccounts,
+			ItemID:  "itemId",
+		},
+	}
+	cfg := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	cfg.CacheCfg().RemoteConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.RemoteConnsCfg)}
+	cfg.CacheCfg().Partitions = map[string]*config.CacheParamCfg{}
+
+	cacheS := NewCacheS(cfg, dm, connMgr, nil)
+
+	var reply time.Time
+	if err := cacheS.V1GetItemExpiryTime(context.Background(), args, &reply); err == nil || err != utils.ErrNotFound {
+		t.Errorf("Expected error <%v>, Received error <%v>", utils.ErrNotFound, err)
+	}
+
+}
+
+func TestV1GetItemErr(t *testing.T) {
+	Cache.Clear(nil)
+	args := &utils.ArgsGetCacheItemWithAPIOpts{
+		ArgsGetCacheItem: utils.ArgsGetCacheItem{
+			CacheID: utils.CacheAccounts,
+			ItemID:  "itemId",
+		},
+	}
+	cfg := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	cfg.CacheCfg().RemoteConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.RemoteConnsCfg)}
+	cfg.CacheCfg().Partitions = map[string]*config.CacheParamCfg{}
+
+	cacheS := NewCacheS(cfg, dm, connMgr, nil)
+
+	var reply interface{}
+	if err := cacheS.V1GetItem(context.Background(), args, &reply); err == nil || err != utils.ErrNotFound {
+		t.Errorf("Expected error <%v>, Received error <%v>", utils.ErrNotFound, err)
+	}
+
+}
+func TestV1GetItemIDsErr(t *testing.T) {
+	Cache.Clear(nil)
+	args := &utils.ArgsGetCacheItemIDsWithAPIOpts{
+		ArgsGetCacheItemIDs: utils.ArgsGetCacheItemIDs{
+			CacheID:      utils.CacheAccounts,
+			ItemIDPrefix: "itemId",
+		},
+	}
+	cfg := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	cfg.CacheCfg().RemoteConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.RemoteConnsCfg)}
+	cfg.CacheCfg().Partitions = map[string]*config.CacheParamCfg{}
+
+	cacheS := NewCacheS(cfg, dm, connMgr, nil)
+
+	var reply []string
+	if err := cacheS.V1GetItemIDs(context.Background(), args, &reply); err == nil || err != utils.ErrNotFound {
+		t.Errorf("Expected error <%v>, Received error <%v>", utils.ErrNotFound, err)
+	}
+
 }
