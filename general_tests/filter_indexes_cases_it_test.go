@@ -93,7 +93,7 @@ var (
 		testFilterIndexesCasesStartEngine,
 		testFilterIndexesCasesRpcConn,
 
-		/* 	testFilterIndexesCasesSetFilters,
+		testFilterIndexesCasesSetFilters,
 		testFilterIndexesCasesSetAttributesWithFilters,
 		testFilterIndexesCasesGetIndexesAnyContext,
 		testFilterIndexesCasesGetIndexesSessionsContext,
@@ -102,7 +102,7 @@ var (
 		testFilterIndexesCasesOverwriteAttributes,
 		testFilterIndexesCasesComputeAttributesIndexes,
 		testFilterIndexesCasesGetIndexesAnyContextChanged,
-		testFilterIndexesCasesGetIndexesSessionsContextChanged, */
+		testFilterIndexesCasesGetIndexesSessionsContextChanged,
 
 		testFilterIndexesCasesSetIndexedFilter,
 		testFilterIndexesCasesSetChargerWithFltr,
