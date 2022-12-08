@@ -893,7 +893,7 @@ func testApierSetRatingProfile(t *testing.T) {
 	if err := rater.Call(utils.CacheSv1GetCacheStats, new(utils.AttrCacheIDsWithArgDispatcher), &rcvStats); err != nil {
 		t.Error("Got error on CacheSv1.GetCacheStats: ", err.Error())
 	} else if !reflect.DeepEqual(expectedStats, rcvStats) {
-		t.Errorf("Calling CacheSv1.GetCacheStats expected: %+v, received: %+v", expectedStats, rcvStats)
+		t.Errorf("Calling CacheSv1.GetCacheStats expected: %+v, received: %+v", utils.ToJSON(expectedStats), utils.ToJSON(rcvStats))
 	}
 	// Calling the second time should not raise EXISTS
 	if err := rater.Call(utils.APIerSv1SetRatingProfile, rpf, &reply); err != nil {
@@ -1914,7 +1914,7 @@ func testApierGetCacheStats2(t *testing.T) {
 	if err != nil {
 		t.Error("Got error on CacheSv1.GetCacheStats: ", err.Error())
 	} else if !reflect.DeepEqual(expectedStats, rcvStats) {
-		t.Errorf("Calling CacheSv1.GetCacheStats expected: %v, received: %v", expectedStats, rcvStats)
+		t.Errorf("Calling CacheSv1.GetCacheStats expected: %v, received: %v", utils.ToJSON(expectedStats), utils.ToJSON(rcvStats))
 	}
 }
 

@@ -636,10 +636,11 @@ func (dm *DataManager) SetFilter(fltr *Filter) (err error) {
 		return
 	}
 	if oldFltr != nil {
-		/* if err = UpdateFilterIndexes(dm, oldFltr, fltr); err != nil {
-			return
-		} */
-
+		/*
+			if err = UpdateFilterIndexes(dm, fltr.Tenant, oldFltr, fltr); err != nil {
+				return
+			}
+		*/
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaFilters]; itm.Replicate {
 		err = replicate(dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
