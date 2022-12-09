@@ -5670,16 +5670,6 @@ func TestCgrCfgJSONDefaultsConfigS(t *testing.T) {
 	}
 }
 
-func TestLoadConfigFromHTTP(t *testing.T) {
-	cfgCgr := NewDefaultCGRConfig()
-
-	url := "inexistentURL"
-	expected := "parse \"inexistentURL\": invalid URI for request"
-	if err := loadConfigFromHTTP(context.Background(), url, cfgCgr.sections, nil); err == nil || err.Error() != expected {
-		t.Errorf("Expected %+v, received %+v", expected, err)
-	}
-}
-
 func TestLoadConfigFromReaderError(t *testing.T) {
 	expectedErrFile := "open randomfile.go: no such file or directory"
 	file, err := os.Open("randomfile.go")
@@ -6304,20 +6294,18 @@ func TestCGRConfigLoadConfigDBCfgError(t *testing.T) {
 	}
 }
 
-// unfinished
-// Cant get err of http.NewRequestWithContext
-// func TestLoadConfigFromHTTPErrorNewReqCtx(t *testing.T) {
-// 	cfgCgr := NewDefaultCGRConfig()
+func TestLoadConfigFromHTTPErrorNewReqCtx(t *testing.T) {
+	cfgCgr := NewDefaultCGRConfig()
 
-// 	// ctx, cancel := context.WithTimeout(context.Background(), 10*time.Nanosecond)
-// 	// cancel()
-// 	url := "https://raw.githubusercontent.com/cgrates/cgrates/master/data/conf/samples/tutmongo/cgrates.json"
-// 	expected := "parse \"inexistentURL\": invalid URI for request"
-// 	if err := loadConfigFromHTTP(nil, url, cfgCgr.sections, nil); err == nil || err.Error() != expected {
-// 		t.Errorf("Expected %+v, \nreceived %+v", expected, err)
-// 	}
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Nanosecond)
+	cancel()
+	url := "inexistentURL"
+	expected := `path:"inexistentURL" is not reachable`
+	if err := loadConfigFromHTTP(ctx, url, cfgCgr.sections, nil); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, \nreceived %+v", expected, err)
+	}
 
-// }
+}
 
 func TestGetDftRemoteHostCfg(t *testing.T) {
 	cgrCfg := NewDefaultCGRConfig()

@@ -23,7 +23,6 @@ import (
 	"io"
 	"net"
 	"net/http"
-	"net/url"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -946,14 +945,12 @@ func loadConfigFromFile(ctx *context.Context, jsonFilePath string, loadFuncs Sec
 
 func loadConfigFromHTTP(ctx *context.Context, urlPaths string, loadFuncs Sections, cfg *CGRConfig) (err error) {
 	for _, urlPath := range strings.Split(urlPaths, utils.InfieldSep) {
-		if _, err = url.ParseRequestURI(urlPath); err != nil {
-			return
-		}
+
 		var myClient = &http.Client{
 			Timeout: CgrConfig().GeneralCfg().ReplyTimeout,
 		}
 		var req *http.Request
-		if req, err = http.NewRequestWithContext(ctx, "GET", urlPath, nil); err != nil {
+		if req, err = http.NewRequestWithContext(ctx, utils.EmptyString, urlPath, nil); err != nil {
 			return
 		}
 		var cfgReq *http.Response
