@@ -425,3 +425,28 @@ func TestMapEventData(t *testing.T) {
 		t.Errorf("Expected: %+v, received: %+v", expStruct, result)
 	}
 }
+
+func TestMapEventGetBoolOrDefault(t *testing.T) {
+
+	me := MapEvent{}
+	fldName := "fldTest"
+	dflt := true
+
+	if out := me.GetBoolOrDefault(fldName, dflt); out != true {
+		t.Errorf("Map doesn't have that field name. Expected bool to be default <true>, Received <%v>", out)
+	}
+
+	me = MapEvent{
+		fldName: "Fldname",
+	}
+	if out := me.GetBoolOrDefault(fldName, dflt); out != true {
+		t.Errorf("Expected bool to be default <true>, Received <%v>", out)
+	}
+
+	me = MapEvent{
+		fldName: interface{}("false"),
+	}
+	if out := me.GetBoolOrDefault(fldName, dflt); out != false {
+		t.Errorf("Expected bool to same output as fldName <false>, Received <%v>", out)
+	}
+}

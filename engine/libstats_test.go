@@ -1480,6 +1480,9 @@ func TestStatQueueProfileAsInterface(t *testing.T) {
 		}, {
 			MetricID:  utils.MetaACD,
 			FilterIDs: []string{"fltr1"},
+		}, {
+
+			Blockers: utils.DynamicBlockers{{Blocker: true}},
 		}},
 	}
 	if _, err := sqp.FieldAsInterface(nil); err != utils.ErrNotFound {
@@ -1616,6 +1619,12 @@ func TestStatQueueProfileAsInterface(t *testing.T) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
 	}
 	if val, exp := sqp.Metrics[0].String(), utils.ToJSON(sqp.Metrics[0]); exp != val {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+
+	if val, err := sqp.Metrics[2].FieldAsInterface([]string{utils.Blockers}); err != nil {
+		t.Fatal(err)
+	} else if exp := sqp.Metrics[2].Blockers; !reflect.DeepEqual(exp, val) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
 	}
 }
@@ -1785,6 +1794,24 @@ func TestStatQueueWithAPIOptsMarshalJSONNil(t *testing.T) {
 	var ssq *StatQueueWithAPIOpts
 	if _, err := ssq.MarshalJSON(); err != nil {
 		t.Errorf("Expected error <nil>, Received error <%v>", err)
+	}
+
+}
+
+func TestStatQueueUnmarshalJSONErrUnmarsheling(t *testing.T) {
+	sq := &StatQueue{}
+	expErr := "invalid character 'Ô' looking for beginning of value"
+	if err := sq.UnmarshalJSON([]byte{212}); err == nil || err.Error() != expErr {
+		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err)
+	}
+
+}
+
+func TestStatQueueWithAPIOptsUnmarshalJSONErrWithSSQ(t *testing.T) {
+	ssq := &StatQueueWithAPIOpts{}
+	expErr := "invalid character 'Ô' looking for beginning of value"
+	if err := ssq.UnmarshalJSON([]byte{212}); err == nil || err.Error() != expErr {
+		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err)
 	}
 
 }

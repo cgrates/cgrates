@@ -2119,6 +2119,26 @@ func TestPassNever(t *testing.T) {
 	fltr := &FilterRule{}
 	dDP := utils.MapStorage{}
 	if ok, err := fltr.passNever(dDP); ok != false && err != nil {
-		t.Errorf("Expected filter to never pass, unexpected error <%v>", err)
+		t.Errorf("Expected filter to pass never, unexpected error <%v>", err)
+	}
+}
+
+func TestFilterRulePassRegexParseErrNotFound(t *testing.T) {
+
+	rsrBadParse := config.NewRSRParserMustCompile("~*opts.<~*opts.*originID;~*req.RunID;-Cost>")
+
+	fltr := &FilterRule{
+
+		rsrElement: rsrBadParse,
+	}
+
+	dDP := utils.MapStorage{
+		utils.MetaReq: utils.MapStorage{},
+		utils.MetaOpts: utils.MapStorage{
+			utils.MetaOriginID: "originIDUniq",
+		},
+	}
+	if ok, err := fltr.passRegex(dDP); ok != false && err != utils.ErrNotFound {
+		t.Errorf("Expected error <%v>, Received error <%v>", utils.ErrNotFound, err)
 	}
 }

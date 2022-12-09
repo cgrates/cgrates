@@ -23,6 +23,7 @@ import (
 	"strconv"
 	"testing"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -1434,4 +1435,157 @@ func TestSortedRoutesAsNavigableMap(t *testing.T) {
 	if rcv := sSpls.AsNavigableMap(); !reflect.DeepEqual(rcv, expNavMap) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expNavMap), utils.ToJSON(rcv))
 	}
+}
+
+func TestSortedRoutesListRouteIDs(t *testing.T) {
+	sr := SortedRoutesList{
+		{
+			Routes: []*SortedRoute{
+				{
+					RouteID: "sr1id1",
+				},
+				{
+					RouteID: "sr1id2",
+				},
+			},
+		},
+		{
+			Routes: []*SortedRoute{
+				{
+					RouteID: "sr2id1",
+				},
+				{
+					RouteID: "sr2id2",
+				},
+			},
+		},
+	}
+
+	val := sr.RouteIDs()
+	sort.Slice(val, func(i, j int) bool {
+		return val[i] < val[j]
+	})
+	exp := []string{"sr1id1", "sr1id2", "sr2id1", "sr2id2"}
+	if !reflect.DeepEqual(val, exp) {
+		t.Errorf("expected %v ,received %v", exp, val)
+	}
+}
+
+func TestSortedRoutesListRoutesWithParams(t *testing.T) {
+	sRs := SortedRoutesList{
+		{
+			Routes: []*SortedRoute{
+				{
+					RouteID:         "route1",
+					RouteParameters: "params1",
+				},
+				{
+					RouteID:         "route2",
+					RouteParameters: "params2",
+				},
+			},
+		},
+		{
+			Routes: []*SortedRoute{
+				{
+					RouteID:         "route3",
+					RouteParameters: "params3",
+				},
+				{
+					RouteID:         "route4",
+					RouteParameters: "params4",
+				},
+			},
+		},
+	}
+	val := sRs.RoutesWithParams()
+	sort.Slice(val, func(i, j int) bool {
+		return val[i] < val[j]
+	})
+	exp := []string{"route1:params1", "route2:params2", "route3:params3", "route4:params4"}
+
+	if !reflect.DeepEqual(val, exp) {
+		t.Errorf("expected %v ,received %v", val, exp)
+	}
+
+}
+
+func TestRouteSortDispatcherSortRoutes(t *testing.T) {
+	ssd := RouteSortDispatcher{}
+	suppls := map[string]*RouteWithWeight{}
+	suplEv := new(utils.CGREvent)
+	extraOpts := new(optsGetRoutes)
+	expErr := "unsupported sorting strategy: "
+	if _, err := ssd.SortRoutes(context.Background(), "", "", suppls, suplEv, extraOpts); err.Error() != expErr {
+		t.Errorf("Expected error <%v>, Received <%v>", expErr, err)
+	}
+}
+
+func TestSortedRoutesListAsNavigableMap(t *testing.T) {
+
+	sRs := SortedRoutesList{
+
+		{
+			Routes: []*SortedRoute{
+				{
+					RouteID:         "route1",
+					RouteParameters: "params1",
+				},
+				{
+					RouteID:         "route2",
+					RouteParameters: "params2",
+				},
+			},
+		},
+		{
+			Routes: []*SortedRoute{
+				{
+					RouteID:         "route3",
+					RouteParameters: "params3",
+				},
+				{
+					RouteID:         "route4",
+					RouteParameters: "params4",
+				},
+			},
+		},
+	}
+	exp := &utils.DataNode{Type: utils.NMSliceType, Slice: make([]*utils.DataNode, len(sRs))}
+	for i, ss := range sRs {
+		exp.Slice[i] = ss.AsNavigableMap()
+	}
+	if rcv := sRs.AsNavigableMap(); !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("Expected <%v>, \n Received \n<%v>", utils.ToJSON(exp), utils.ToJSON(rcv))
+
+	}
+
+}
+
+func TestRouteLazyPass(t *testing.T) {
+
+	filters := []*FilterRule{
+		{
+			Type:    "nr1",
+			Element: "nr1",
+			Values:  []string{"nr1"},
+		},
+		{
+			Type:    "nr2",
+			Element: "nr2",
+			Values:  []string{"nr2"},
+		},
+	}
+
+	ev := new(utils.CGREvent)
+	data := utils.MapStorage{
+		"FirstLevel":        map[string]interface{}{},
+		"AnotherFirstLevel": "ValAnotherFirstLevel",
+	}
+
+	expErr := "NOT_IMPLEMENTED:nr1"
+	if _, err := routeLazyPass(context.Background(), filters, ev,
+		data, []string{""}, []string{""}, []string{""}); err == nil || err.Error() != expErr {
+		t.Errorf("Expected error <%v>, received <%v>", expErr, err)
+	}
+
 }
