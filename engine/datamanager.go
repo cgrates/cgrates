@@ -788,11 +788,19 @@ func (dm *DataManager) SetThresholdProfile(th *ThresholdProfile, withIndex bool)
 					th.Tenant).RemoveItemFromIndex(th.Tenant, th.ID, oldTh.FilterIDs); err != nil {
 					return
 				}
+				if err = removeReverseFilterIndexForFilter(dm, utils.CacheThresholdFilterIndexes, utils.EmptyString,
+					th.Tenant, th.ID, th.FilterIDs); err != nil {
+					return
+				}
 			}
 		}
 		if err := createAndIndex(utils.ThresholdProfilePrefix, th.Tenant,
 			utils.EmptyString, th.ID, th.FilterIDs, dm); err != nil {
 			return err
+		}
+		if err = addReverseFilterIndexForFilter(dm, utils.CacheThresholdFilterIndexes, utils.EmptyString,
+			th.Tenant, th.ID, th.FilterIDs); err != nil {
+			return
 		}
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaThresholdProfiles]; itm.Replicate {
@@ -822,6 +830,10 @@ func (dm *DataManager) RemoveThresholdProfile(tenant, id,
 	if withIndex {
 		if err = NewFilterIndexer(dm, utils.ThresholdProfilePrefix,
 			tenant).RemoveItemFromIndex(tenant, id, oldTh.FilterIDs); err != nil {
+			return
+		}
+		if err = removeReverseFilterIndexForFilter(dm, utils.CacheThresholdFilterIndexes, utils.EmptyString,
+			oldTh.Tenant, oldTh.ID, oldTh.FilterIDs); err != nil {
 			return
 		}
 	}

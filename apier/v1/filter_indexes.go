@@ -209,7 +209,7 @@ func (api *APIerSv1) ComputeFilterIndexes(args utils.ArgsComputeFilterIndexes, r
 	//ThresholdProfile Indexes
 	var thdsIndexers *engine.FilterIndexer
 	if args.ThresholdS {
-		thdsIndexers, err = api.computeThresholdIndexes(args.Tenant, nil, transactionID)
+		thdsIndexers, err = engine.ComputeThresholdIndexes(api.DataManager, args.Tenant, nil, transactionID)
 		if err != nil && err != utils.ErrNotFound {
 			return utils.APIErrorHandler(err)
 		}
@@ -314,7 +314,7 @@ func (api *APIerSv1) ComputeFilterIndexes(args utils.ArgsComputeFilterIndexes, r
 func (api *APIerSv1) ComputeFilterIndexIDs(args utils.ArgsComputeFilterIndexIDs, reply *string) (err error) {
 	transactionID := utils.GenUUID()
 	//ThresholdProfile Indexes
-	thdsIndexers, err := api.computeThresholdIndexes(args.Tenant, &args.ThresholdIDs, transactionID)
+	thdsIndexers, err := engine.ComputeThresholdIndexes(api.DataManager, args.Tenant, &args.ThresholdIDs, transactionID)
 	if err != nil && err != utils.ErrNotFound {
 		return utils.APIErrorHandler(err)
 	}
@@ -458,83 +458,6 @@ func (api *APIerSv1) ComputeFilterIndexIDs(args utils.ArgsComputeFilterIndexIDs,
 	}
 	*reply = utils.OK
 	return nil
-}
-
-func (api *APIerSv1) computeThresholdIndexes(tenant string, thIDs *[]string,
-	transactionID string) (filterIndexer *engine.FilterIndexer, err error) {
-	var thresholdIDs []string
-	var thdsIndexers *engine.FilterIndexer
-	if thIDs == nil {
-		ids, err := api.DataManager.DataDB().GetKeysForPrefix(utils.ThresholdProfilePrefix)
-		if err != nil {
-			return nil, err
-		}
-		for _, id := range ids {
-			thresholdIDs = append(thresholdIDs, strings.Split(id, utils.CONCATENATED_KEY_SEP)[1])
-		}
-		// this will be on ComputeIndexes that contains empty indexes
-		thdsIndexers = engine.NewFilterIndexer(api.DataManager, utils.ThresholdProfilePrefix, tenant)
-	} else {
-		// this will be on ComputeIndexesIDs that contains the old indexes from the next getter
-		var oldIDx map[string]utils.StringMap
-		if oldIDx, err = api.DataManager.GetFilterIndexes(utils.PrefixToIndexCache[utils.ThresholdProfilePrefix],
-			tenant, utils.EmptyString, nil); err != nil || oldIDx == nil {
-			thdsIndexers = engine.NewFilterIndexer(api.DataManager, utils.ThresholdProfilePrefix, tenant)
-		} else {
-			thdsIndexers = engine.NewFilterIndexerWithIndexes(api.DataManager, utils.ThresholdProfilePrefix, tenant, oldIDx)
-		}
-		thresholdIDs = *thIDs
-		transactionID = utils.NonTransactional
-	}
-	for _, id := range thresholdIDs {
-		th, err := api.DataManager.GetThresholdProfile(tenant, id, true, false, utils.NonTransactional)
-		if err != nil {
-			return nil, err
-		}
-		fltrIDs := make([]string, len(th.FilterIDs))
-		for i, fltrID := range th.FilterIDs {
-			fltrIDs[i] = fltrID
-		}
-		if len(fltrIDs) == 0 {
-			fltrIDs = []string{utils.META_NONE}
-		}
-		for _, fltrID := range fltrIDs {
-			var fltr *engine.Filter
-			if fltrID == utils.META_NONE {
-				fltr = &engine.Filter{
-					Tenant: th.Tenant,
-					ID:     th.ID,
-					Rules: []*engine.FilterRule{
-						{
-							Type:    utils.META_NONE,
-							Element: utils.META_ANY,
-							Values:  []string{utils.META_ANY},
-						},
-					},
-				}
-			} else if fltr, err = engine.GetFilter(api.DataManager, th.Tenant, fltrID,
-				true, false, utils.NonTransactional); err != nil {
-				if err == utils.ErrNotFound {
-					err = fmt.Errorf("broken reference to filter: %+v for threshold: %+v",
-						fltrID, th)
-				}
-				return nil, err
-			}
-			thdsIndexers.IndexTPFilter(engine.FilterToTPFilter(fltr), th.ID)
-		}
-	}
-
-	if transactionID == utils.NonTransactional {
-		if err := thdsIndexers.StoreIndexes(true, transactionID); err != nil {
-			return nil, err
-		}
-		return nil, nil
-	} else {
-		if err := thdsIndexers.StoreIndexes(false, transactionID); err != nil {
-			return nil, err
-		}
-	}
-	return thdsIndexers, nil
 }
 
 func (api *APIerSv1) computeAttributeIndexes(tenant, context string, attrIDs *[]string,
