@@ -208,6 +208,12 @@ func (TestRPCDspMock) SessionSv1Do(*context.Context, interface{}, *string) error
 func (TestRPCDspMock) StatSv1Do(*context.Context, interface{}, *string) error       { return nil }
 func (TestRPCDspMock) ThresholdSv1Do(*context.Context, interface{}, *string) error  { return nil }
 func (TestRPCDspMock) CDRsv1Do(*context.Context, interface{}, *string) error        { return nil }
+func (TestRPCDspMock) EeSv1Do(*context.Context, interface{}, *string) error         { return nil }
+func (TestRPCDspMock) CoreSv1Do(*context.Context, interface{}, *string) error       { return nil }
+func (TestRPCDspMock) AnalyzerSv1Do(*context.Context, interface{}, *string) error   { return nil }
+func (TestRPCDspMock) AdminSv1Do(*context.Context, interface{}, *string) error      { return nil }
+func (TestRPCDspMock) LoaderSv1Do(*context.Context, interface{}, *string) error     { return nil }
+
 func TestIntServiceNewDispatcherService(t *testing.T) {
 	expErrMsg := `rpc.Register: no service name for type struct {}`
 	if _, err := NewDispatcherService(struct{}{}); err == nil || err.Error() != expErrMsg {
@@ -234,11 +240,17 @@ func TestIntServiceNewDispatcherService(t *testing.T) {
 		"RouteSv1":       {"Do", "Ping"},
 		"SessionSv1":     {"Do", "Ping"},
 		"StatSv1":        {"Do", "Ping"},
-		"TestRPCDspMock": {"AccountSv1Do", "ActionSv1Do", "AttributeSv1Do", "CDRsv1Do", "CacheSv1Do", "ChargerSv1Do", "ConfigSv1Do", "DispatcherSv1Do", "GuardianSv1Do", "Ping", "RateSv1Do", "ReplicatorSv1Do", "ResourceSv1Do", "RouteSv1Do", "SessionSv1Do", "StatSv1Do", "ThresholdSv1Do"},
+		"TestRPCDspMock": {"AccountSv1Do", "ActionSv1Do", "AdminSv1Do", "AnalyzerSv1Do", "AttributeSv1Do", "CDRsv1Do", "CacheSv1Do", "ChargerSv1Do", "ConfigSv1Do", "CoreSv1Do", "DispatcherSv1Do", "EeSv1Do", "GuardianSv1Do", "LoaderSv1Do", "Ping", "RateSv1Do", "ReplicatorSv1Do", "ResourceSv1Do", "RouteSv1Do", "SessionSv1Do", "StatSv1Do", "ThresholdSv1Do"},
 		"ThresholdSv1":   {"Do", "Ping"},
 		"ReplicatorSv1":  {"Do", "Ping"},
+
+		"EeSv1":       {"Do", "Ping"},
+		"CoreSv1":     {"Do", "Ping"},
+		"AnalyzerSv1": {"Do", "Ping"},
+		"AdminSv1":    {"Do", "Ping"},
+		"LoaderSv1":   {"Do", "Ping"},
 	}
 	if !reflect.DeepEqual(exp, methods) {
-		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(methods))
+		t.Errorf("Expeceted: %v, \nreceived: \n%v", utils.ToJSON(exp), utils.ToJSON(methods))
 	}
 }
