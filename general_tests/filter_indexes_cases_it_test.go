@@ -108,7 +108,6 @@ var (
 		testFilterIndexesCasesSetChargerWithFltr,
 		testFilterIndexesCasesGetChargerIndexes,
 		testFilterIndexesCasesOverwriteFilterForCharger,
-		testFilterIndexesCasesComputeChargersIndexes,
 		testFilterIndexesCasesGetChargerIndexesChanged,
 
 		testFilterIndexesCasesGetReverseFilterIndexes, // for chargers
@@ -622,19 +621,6 @@ func testFilterIndexesCasesOverwriteFilterForCharger(t *testing.T) {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
-	}
-}
-
-func testFilterIndexesCasesComputeChargersIndexes(t *testing.T) {
-	var result string
-	if err := fIdxCasesRPC.Call(utils.APIerSv1ComputeFilterIndexes,
-		utils.ArgsComputeFilterIndexes{
-			Tenant:   "cgrates.org",
-			ChargerS: true,
-		}, &result); err != nil {
-		t.Error(err)
-	} else if result != utils.OK {
-		t.Errorf("Error: %+v", result)
 	}
 }
 

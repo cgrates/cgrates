@@ -121,7 +121,7 @@ func (rfi *FilterIndexer) cacheRemItemType() { // ToDo: tune here by removing pe
 // StoreIndexes handles storing the indexes to dataDB
 func (rfi *FilterIndexer) StoreIndexes(commit bool, transactionID string) (err error) {
 	lockID := utils.CacheInstanceToPrefix[utils.PrefixToIndexCache[rfi.itemType]] + rfi.dbKeySuffix
-	refID := guardian.Guardian.GuardIDs("",
+	refID := guardian.Guardian.GuardIDs(utils.EmptyString,
 		config.CgrConfig().GeneralCfg().LockingTimeout, lockID)
 	defer guardian.Guardian.UnguardIDs(refID)
 	if err = rfi.dm.SetFilterIndexes(
