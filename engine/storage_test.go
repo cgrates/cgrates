@@ -503,3 +503,26 @@ func TestGetTpTableIds(t *testing.T) {
 		}
 	}
 }
+func TestIDBGetTpIds(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.DataDbCfg().Items = map[string]*config.ItemOpt{
+		utils.CacheTBLTPRates: {
+			Limit:     3,
+			StaticTTL: true,
+		},
+	}
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	db.db.Set(utils.CacheTBLTPRates, "item_ID1", "value", []string{"grpID"}, true, utils.NonTransactional)
+	db.db.Set(utils.CacheTBLTPRates, "item_ID2", "value", []string{"grpID"}, true, utils.NonTransactional)
+	exp := []string{"item_ID1", "item_ID2"}
+	val, err := db.GetTpIds(utils.TBLTPRates)
+	if err != nil {
+		t.Error(err)
+	}
+	sort.Slice(val, func(i, j int) bool {
+		return val[i] < val[j]
+	})
+	if !reflect.DeepEqual(val, exp) {
+		t.Errorf("expected %v,received %v", utils.ToJSON(val), utils.ToJSON(exp))
+	}
+}

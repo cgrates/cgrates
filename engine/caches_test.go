@@ -270,6 +270,7 @@ func TestCacheSV1GetItem(t *testing.T) {
 }
 
 func TestCacheSV1GetItemExpiryTime(t *testing.T) {
+	Cache.Clear(nil)
 	args := &utils.ArgsGetCacheItemWithAPIOpts{
 		ArgsGetCacheItem: utils.ArgsGetCacheItem{
 			CacheID: "cacheID",

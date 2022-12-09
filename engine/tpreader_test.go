@@ -1743,7 +1743,6 @@ func TestLoadSharedGroupsFiltered(t *testing.T) {
 		t.Error(err)
 	}
 	sgs := &utils.TPSharedGroups{
-
 		TPid: "TEST_TPID",
 		ID:   "SHARED_GROUP_TEST",
 		SharedGroups: []*utils.TPSharedGroup{
@@ -1761,5 +1760,53 @@ func TestLoadSharedGroupsFiltered(t *testing.T) {
 	if err = tpr.LoadSharedGroupsFiltered("SHARED_GROUP_TEST", true); err != nil {
 		t.Error(err)
 	}
+}
 
+func TestTPReaderLoadAccountActionsFilteredErr(t *testing.T) {
+	qried := &utils.TPAccountActions{
+		TPid:          "tp_Id",
+		AllowNegative: false,
+		Disabled:      true,
+	}
+	cfg := config.NewDefaultCGRConfig()
+	cfg.DataDbCfg().Items = map[string]*config.ItemOpt{
+		utils.CacheTBLTPAccountActions: {
+			Limit:  3,
+			TTL:    3,
+			Remote: true,
+		},
+	}
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	tpr, err := NewTpReader(db, db, "*prf", "UTC", nil, nil, true)
+	if err != nil {
+		t.Error(err)
+	}
+	if err := tpr.LoadAccountActionsFiltered(qried); err == nil || err.Error() != fmt.Sprintf("%v: %+v", utils.ErrNotFound.Error(), qried) {
+		t.Error(err)
+	}
+	db.db.Set(utils.CacheTBLTPAccountActions, "tp_Id:item", &utils.TPAccountActions{TPid: utils.TestSQL, LoadId: utils.TestSQL, Tenant: "cgrates.org",
+		Account: "1001", ActionPlanId: "PREPAID_10", ActionTriggersId: "STANDARD_TRIGGERS"}, []string{"grpId"}, true, utils.NonTransactional)
+	db.db.Set(utils.CacheTBLTPAccountActions, "tp_Id:item2", &utils.TPAccountActions{TPid: utils.TestSQL, LoadId: utils.TestSQL, Tenant: "cgrates.org",
+		Account: "1001", ActionPlanId: "PREPAID_10", ActionTriggersId: "STANDARD_TRIGGERS"}, []string{"grpId"}, true, utils.NonTransactional)
+	if err := tpr.LoadAccountActionsFiltered(qried); err == nil || err.Error() != fmt.Sprintf("Non unique ID %+v", utils.ConcatenatedKey("cgrates.org", "1001")) {
+		t.Error(err)
+	}
+	db.db.Remove(utils.CacheTBLTPAccountActions, "tp_Id:item2", true, utils.NonTransactional)
+	if err := tpr.LoadAccountActionsFiltered(qried); err == nil || err.Error() != fmt.Sprint(utils.ErrNotFound.Error()+" (ActionPlan): "+"PREPAID_10") {
+		t.Error(err)
+	}
+	db.db.Set(utils.CacheTBLTPActionPlans, "*prf:PREPAID_10", &utils.TPActionPlan{
+		TPid: "TEST_TPID",
+		ID:   "PACKAGE_10",
+		ActionPlan: []*utils.TPActionTiming{
+			{
+				ActionsId: "TOPUP_RST_10",
+				TimingId:  "ASAP",
+				Weight:    10.0},
+			{
+				ActionsId: "TOPUP_RST_5",
+				TimingId:  "ASAP",
+				Weight:    20.0},
+		},
+	}, []string{"grpID"}, true, utils.NonTransactional)
 }

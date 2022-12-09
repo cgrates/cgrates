@@ -262,15 +262,13 @@ func TestATExecute(t *testing.T) {
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 	at := &ActionTrigger{
-		ActionsID:         "id",
-		ID:                "id",
-		UniqueID:          "uid",
-		ThresholdType:     "*min_event_counter",
-		Recurrent:         true,
-		MinSleep:          10 * time.Minute,
-		LastExecutionTime: time.Date(0, 0, 0, 0, 0, 0, 0, time.Now().UTC().Location()),
+		ActionsID:     "id",
+		ID:            "id",
+		UniqueID:      "uid",
+		ThresholdType: "*min_event_counter",
+		Recurrent:     true,
+		MinSleep:      10 * time.Minute,
 	}
-
 	ub := &Account{
 		ID:             "acc_id",
 		BalanceMap:     map[string]Balances{},
