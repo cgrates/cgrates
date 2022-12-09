@@ -116,6 +116,7 @@ func UpdateFilterIndexes(dm *DataManager, tnt string, oldFltr *Filter, newFltr *
 		err = nil // if the error is NOT_FOUND, it means that no indexes were found for this filter, so no need to update
 		return
 	}
+
 	removeIndexKeys := removeRules.Slice()
 
 	for idxItmType, index := range rcvIndexes {
@@ -129,6 +130,18 @@ func UpdateFilterIndexes(dm *DataManager, tnt string, oldFltr *Filter, newFltr *
 			// we removed the old reverse indexes, now we have to compute the new ones
 			chargerIDs := index.Slice()
 			if _, err = ComputeChargerIndexes(dm, newFltr.Tenant, &chargerIDs,
+				utils.NonTransactional); err != nil {
+				return err
+			}
+		case utils.CacheThresholdFilterIndexes:
+			// remove the indexes from this filter for this partition
+			if err = removeFilterIndexesForFilter(dm, idxItmType, utils.CacheThresholdProfiles,
+				tnt, removeIndexKeys, index); err != nil {
+				return
+			}
+			// we removed the old reverse indexes, now we have to compute the new ones
+			thresholdIDs := index.Slice()
+			if _, err = ComputeThresholdIndexes(dm, newFltr.Tenant, &thresholdIDs,
 				utils.NonTransactional); err != nil {
 				return err
 			}
@@ -189,6 +202,9 @@ func addReverseFilterIndexForFilter(dm *DataManager, idxItmType, ctx, tnt,
 			indexes = map[string]utils.StringMap{
 				idxItmType: make(map[string]bool), // not found in database any reverse, we declare them to add in the next steps
 			}
+		}
+		if indexes[idxItmType] == nil {
+			indexes[idxItmType] = make(utils.StringMap)
 		}
 		indexes[idxItmType].Copy(map[string]bool{
 			itemID: true,
