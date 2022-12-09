@@ -122,8 +122,8 @@ func UpdateFilterIndexes(dm *DataManager, tnt string, oldFltr *Filter, newFltr *
 		switch idxItmType {
 		case utils.CacheChargerFilterIndexes:
 			// remove the indexes from this filter for this partition
-			if err = removeFilterIndexesForFilter(dm, idxItmType, tnt,
-				removeIndexKeys, index); err != nil {
+			if err = removeFilterIndexesForFilter(dm, idxItmType, utils.CacheChargerProfiles,
+				tnt, removeIndexKeys, index); err != nil {
 				return
 			}
 			// we removed the old reverse indexes, now we have to compute the new ones
@@ -139,14 +139,13 @@ func UpdateFilterIndexes(dm *DataManager, tnt string, oldFltr *Filter, newFltr *
 
 // removeFilterIndexesForFilter removes the itemID for the index keys
 // used to remove the old indexes when a filter is updated
-func removeFilterIndexesForFilter(dm *DataManager, idxItmType, tnt string,
+func removeFilterIndexesForFilter(dm *DataManager, idxItmType, cacheItmType, tnt string,
 	removeIndexKeys []string, itemIDs utils.StringMap) (err error) {
 	refID := guardian.Guardian.GuardIDs(utils.EmptyString,
 		config.CgrConfig().GeneralCfg().LockingTimeout, idxItmType+tnt)
 	defer guardian.Guardian.UnguardIDs(refID)
 	for _, idxKey := range removeIndexKeys { // delete old filters indexes for this item
 		var remIndx map[string]utils.StringMap
-
 		if remIndx, err = dm.GetFilterIndexes(idxItmType, tnt,
 			utils.EmptyString, nil); err != nil {
 			if err != utils.ErrNotFound {
@@ -155,12 +154,11 @@ func removeFilterIndexesForFilter(dm *DataManager, idxItmType, tnt string,
 			err = nil
 			continue
 		}
-
 		for idx := range itemIDs {
 			delete(remIndx[idxKey], idx)
-			//remIndx[idxKey].Remove(idx)
 		}
-		fltrIndexer := NewFilterIndexer(dm, utils.CacheInstanceToPrefix[idxItmType], tnt)
+
+		fltrIndexer := NewFilterIndexer(dm, utils.CacheInstanceToPrefix[cacheItmType], tnt)
 		fltrIndexer.indexes = remIndx
 		if err = fltrIndexer.StoreIndexes(true, utils.NonTransactional); err != nil {
 			return
