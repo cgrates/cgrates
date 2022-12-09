@@ -2935,29 +2935,71 @@ func TestAccountGetCreditForPrefix(t *testing.T) {
 }
 
 func TestAcountSetBalanceAction(t *testing.T) {
-
 	cfg := config.NewDefaultCGRConfig()
-	acc := &Account{
-		ID:            "rif",
-		AllowNegative: true,
-	}
-	fltrs := NewFilterS(cfg, nil, nil)
-
-	a := &Action{
-		Balance: &BalanceFilter{
-			Uuid: utils.StringPointer(utils.EmptyString),
-			ID:   utils.StringPointer(utils.MetaDefault),
-			Type: utils.StringPointer("b_type"),
-			Value: &utils.ValueFormula{
-
-				Method: "value_method",
-			},
+	tmpDm := dm
+	defer func() {
+		dm = tmpDm
+	}()
+	cfg.DataDbCfg().Items = map[string]*config.ItemOpt{
+		utils.CacheSharedGroups: {
+			Limit:     3,
+			StaticTTL: true,
 		},
 	}
-	if err := acc.setBalanceAction(a, fltrs); err != nil {
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	SetDataStorage(dm)
+	acc := &Account{
+		ID: "vdf:minu",
+		BalanceMap: map[string]Balances{
+			utils.MetaVoice: {
+				&Balance{
+					Uuid:           "uuid2",
+					ExpirationDate: time.Date(2022, 12, 2, 2, 0, 0, 0, time.UTC),
+					Value:          200 * float64(time.Second),
+					DestinationIDs: utils.NewStringMap("NAT"), Weight: 10,
+					SharedGroups: utils.StringMap{
+						"SharedGroups_true":  true,
+						"SharedGroups_false": false,
+					},
+				},
+				&Balance{
+					Uuid:           "uuid1",
+					ExpirationDate: time.Date(2021, 12, 2, 2, 0, 0, 0, time.UTC),
+					Value:          100 * float64(time.Second),
+					DestinationIDs: utils.NewStringMap("RET"), Weight: 20},
+			}},
+	}
+	fltrs := NewFilterS(cfg, nil, nil)
+	a := &Action{
+		Balance: &BalanceFilter{
+
+			ID:   utils.StringPointer("id"),
+			Type: utils.StringPointer("b_type"),
+			Value: &utils.ValueFormula{
+				Method: "value_method",
+			},
+			SharedGroups: utils.StringMapPointer(utils.NewStringMap("shrdGroup")),
+		},
+	}
+	if err := dm.dataDB.SetSharedGroupDrv(&SharedGroup{
+		Id:        "shrdGroup",
+		MemberIds: utils.StringMap{}}); err != nil {
 		t.Error(err)
 	}
-	if err := acc.setBalanceAction(nil, fltrs); err == nil || err.Error() != "nil action" {
+	if err = acc.setBalanceAction(a, fltrs); err != nil {
+		t.Error(err)
+	}
+	exp := utils.StringMap{
+		"vdf:minu": true,
+	}
+	if val, err := dm.dataDB.GetSharedGroupDrv("shrdGroup"); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(val.MemberIds, exp) {
+		t.Errorf("expected %v,received %v", utils.ToJSON(exp), utils.ToJSON(val.MemberIds))
+	}
+
+	if err = acc.setBalanceAction(nil, fltrs); err == nil || err.Error() != "nil action" {
 		t.Error(err)
 	}
 }

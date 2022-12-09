@@ -2898,9 +2898,23 @@ func TestSetRecurrentAction(t *testing.T) {
 }
 
 func TestActionSetDDestinations(t *testing.T) {
+	tmpDm := dm
+	defer func() {
+		dm = tmpDm
+	}()
 	cfg := config.NewDefaultCGRConfig()
 	cfg.RalsCfg().StatSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.StatSConnsCfg)}
 	cfg.GeneralCfg().DefaultTenant = "cgrates.org"
+	cfg.DataDbCfg().Items = map[string]*config.ItemOpt{
+		utils.CacheDestinations: {
+			Limit:     3,
+			StaticTTL: true,
+		},
+		utils.MetaReverseDestinations: {
+			Limit:     3,
+			Replicate: false,
+		},
+	}
 	ccMock := &ccMock{
 		calls: map[string]func(args interface{}, reply interface{}) error{
 			utils.StatSv1GetStatQueue: func(args, reply interface{}) error {
@@ -2953,8 +2967,8 @@ func TestActionSetDDestinations(t *testing.T) {
 				&Balance{Value: 10,
 					DestinationIDs: utils.StringMap{
 
-						"*ddc_dest": true,
-						"*ddcdest":  false,
+						"*ddc:fr":  true,
+						"*ddc:ger": false,
 					}},
 			},
 			utils.MetaVoice: {
@@ -2993,14 +3007,53 @@ func TestActionSetDDestinations(t *testing.T) {
 			balanceValue: 10,
 		},
 	}
+	if err := dm.dataDB.SetDestinationDrv(&Destination{
+		Id: "*ddc:fr",
+	}, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+	if err := dm.dataDB.SetDestinationDrv(&Destination{
+		Id: "*ddc:ger",
+	}, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+	SetDataStorage(dm)
 
-	if err := setddestinations(ub, a, acs, nil, nil); err == nil {
+	if err := setddestinations(ub, a, acs, nil, nil); err != nil {
 		t.Error(err)
 	}
 
 }
 
 func TestActionPublishAccount(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	tmpCfg := cfg
+	defer func() {
+		config.SetCgrConfig(tmpCfg)
+		SetConnManager(nil)
+	}()
+	cfg.RalsCfg().ThresholdSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ThreshSConnsCfg)}
+	cfg.RalsCfg().StatSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.StatSConnsCfg)}
+	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn <- &ccMock{
+		calls: map[string]func(args interface{}, reply interface{}) error{
+			utils.ThresholdSv1ProcessEvent: func(args, reply interface{}) error {
+				*reply.(*[]string) = []string{"*thr"}
+				return nil
+			},
+			utils.StatSv1ProcessEvent: func(args, reply interface{}) error {
+				*reply.(*[]string) = []string{"*stat"}
+				return nil
+			},
+		},
+	}
+	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.ThreshSConnsCfg): clientConn,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.StatSConnsCfg):   clientConn,
+	})
+
+	SetConnManager(connMgr)
+	config.SetCgrConfig(cfg)
 	ub := &Account{
 		ID: "ACCID",
 		ActionTriggers: ActionTriggers{
@@ -3192,6 +3245,7 @@ func TestResetStatQueue(t *testing.T) {
 
 func TestResetTreshold(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+
 	cfg.SchedulerCfg().ThreshSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ThreshSConnsCfg)}
 	ccMock := &ccMock{
 		calls: map[string]func(args interface{}, reply interface{}) error{
@@ -3214,7 +3268,7 @@ func TestResetTreshold(t *testing.T) {
 		ExtraParameters: "cgrates.org:id",
 	}
 	acs := Actions{}
-	if err := resetThreshold(ub, a, acs, nil, nil); err != nil {
+	if err := resetThreshold(ub, a, acs, nil, nil); err == nil {
 		t.Errorf("received <%+v>", err)
 	}
 
@@ -3354,52 +3408,57 @@ func TestResetAccountCDRSuccesful(t *testing.T) {
 
 }
 
-/*
-	func TestRemoveSessionCost(t *testing.T) {
-		tmp := Cache
-		defer func() {
-			Cache = tmp
-		}()
-		Cache.Clear(nil)
-		cfg := config.NewDefaultCGRConfig()
-		cfg.DataDbCfg().Items = map[string]*config.ItemOpt{
-			utils.CacheFilters: {
-				Limit:     3,
-				Replicate: true,
-			},
-		}
-		db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-		dm := NewDataManager(db, cfg.CacheCfg(), nil)
-		SetDataStorage(dm)
-
-		action := &Action{
-			ExtraParameters: "*acnt.BalanceID;*act.ActionID",
-		}
-		db.db.Set(utils.CacheFilters, utils.ConcatenatedKey(cfg.GeneralCfg().DefaultTenant, "*acnt.BalanceID"), &Filter{
-			Tenant: "tnt",
-			Rules: []*FilterRule{
-				{
-					Values:  []string{"val1,vla2"},
-					Type:    utils.MetaString,
-					Element: utils.MetaScPrefix + utils.CGRID},
-			},
-		}, []string{"grpId"}, true, utils.NonTransactional)
-		db.db.Set(utils.CacheFilters, utils.ConcatenatedKey(cfg.GeneralCfg().DefaultTenant, "*act.ActionID"), &Filter{
-			Tenant: "tnt",
-			Rules: []*FilterRule{
-				{
-					Values:  []string{"val1,vla2"},
-					Type:    utils.MetaString,
-					Element: utils.MetaScPrefix + utils.CGRID,
-				},
-			},
-		}, []string{"grpId"}, true, utils.NonTransactional)
-
-		if err := removeSessionCosts(nil, action, nil, nil, nil); err != nil {
-			t.Error(err)
-		}
+func TestRemoveSessionCost(t *testing.T) {
+	tmp := Cache
+	tmpCdr := cdrStorage
+	tmpDm := dm
+	defer func() {
+		Cache = tmp
+		cdrStorage = tmpCdr
+		dm = tmpDm
+	}()
+	Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	cfg.DataDbCfg().Items = map[string]*config.ItemOpt{
+		utils.CacheFilters: {
+			Limit:     3,
+			Replicate: true,
+		},
+		utils.CacheSessionCostsTBL: {
+			Limit: 2,
+		},
 	}
-*/
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	SetDataStorage(dm)
+	action := &Action{
+		ExtraParameters: "*acnt.BalanceID;*act.ActionID",
+	}
+	db.db.Set(utils.CacheFilters, utils.ConcatenatedKey(cfg.GeneralCfg().DefaultTenant, "*acnt.BalanceID"), &Filter{
+		Tenant: "tnt",
+		Rules: []*FilterRule{
+			{
+				Values:  []string{"val1,val2"},
+				Type:    utils.MetaString,
+				Element: utils.MetaScPrefix + utils.CGRID},
+		},
+	}, []string{"grpId"}, true, utils.NonTransactional)
+	db.db.Set(utils.CacheFilters, utils.ConcatenatedKey(cfg.GeneralCfg().DefaultTenant, "*act.ActionID"), &Filter{
+		Tenant: "tnt",
+		Rules: []*FilterRule{
+			{
+				Values:  []string{"val1,vla2"},
+				Type:    utils.MetaString,
+				Element: utils.MetaScPrefix + utils.CGRID,
+			},
+		},
+	}, []string{"grpId"}, true, utils.NonTransactional)
+	SetCdrStorage(db)
+	if err := removeSessionCosts(nil, action, nil, nil, nil); err == nil || err != utils.ErrNotFound {
+		t.Error(err)
+	}
+}
+
 func TestLogAction(t *testing.T) {
 	acc := &Account{
 		ID: "cgrates.org:1001",
@@ -3612,6 +3671,65 @@ func TestRemoveAccountAcc(t *testing.T) {
 		APIOpts: map[string]interface{}{},
 	}
 	if err := removeAccountAction(nil, a, acs, nil, extraData); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestRemoveExpiredErrs(t *testing.T) {
+	var acc *Account
+	action := &Action{
+		Id:               "MINI",
+		ActionType:       utils.MetaTopUpReset,
+		ExpirationString: utils.MetaUnlimited,
+		ExtraParameters:  "",
+		Weight:           10,
+		Balance: &BalanceFilter{
+			Type:           utils.StringPointer(utils.MetaMonetary),
+			Uuid:           utils.StringPointer("uuid"),
+			Value:          &utils.ValueFormula{Static: 10},
+			Weight:         utils.Float64Pointer(10),
+			DestinationIDs: nil,
+			TimingIDs:      nil,
+			SharedGroups:   nil,
+			Categories:     nil,
+			Disabled:       utils.BoolPointer(false),
+			Blocker:        utils.BoolPointer(false),
+		},
+	}
+	if err := removeExpired(acc, action, nil, nil, nil); err == nil || err.Error() != fmt.Sprintf("nil account for %s action", utils.ToJSON(action)) {
+		t.Error(err)
+	}
+	acc = &Account{
+		ID:         "cgrates.org:rembal2",
+		BalanceMap: map[string]Balances{},
+		Disabled:   true,
+	}
+	if err = removeExpired(acc, action, nil, nil, nil); err == nil || err != utils.ErrNotFound {
+		t.Error(err)
+	}
+	acc.BalanceMap = map[string]Balances{
+		utils.MetaMonetary: {
+			&Balance{
+				Value: 10,
+			},
+			&Balance{
+				Value:          10,
+				DestinationIDs: utils.NewStringMap("NAT", "RET"),
+				ExpirationDate: time.Date(2023, time.November, 11, 22, 39, 0, 0, time.UTC),
+			},
+			&Balance{
+				Value:          10,
+				DestinationIDs: utils.NewStringMap("NAT", "RET"),
+				ExpirationDate: time.Date(2023, time.November, 15, 22, 39, 0, 0, time.UTC),
+			},
+			&Balance{
+				Value:          10,
+				DestinationIDs: utils.NewStringMap("NAT", "RET"),
+				ExpirationDate: time.Date(2024, time.November, 11, 22, 39, 0, 0, time.UTC),
+			},
+		},
+	}
+	if err := removeExpired(acc, action, nil, nil, nil); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
 	}
 }

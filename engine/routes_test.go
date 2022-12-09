@@ -1347,104 +1347,95 @@ func TestQosRSortRoutes(t *testing.T) {
 }
 func TestReaSortRoutes(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	dmSPP := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
-	cfg.RouteSCfg().StringIndexedFields = nil
-	cfg.RouteSCfg().PrefixIndexedFields = nil
-	rpS := NewRouteService(dmSPP, &FilterS{dm: dmSPP, cfg: cfg, connMgr: nil}, cfg, nil)
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, config.CgrConfig().CacheCfg(), nil)
+	cfg.RouteSCfg().RALsConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs)}
+	cfg.RouteSCfg().StatSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}
+	cfg.GeneralCfg().DefaultTimezone = "UTC"
+	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn <- &ccMock{
+		calls: map[string]func(args interface{}, reply interface{}) error{
+			utils.ResponderGetMaxSessionTimeOnAccounts: func(args, reply interface{}) error {
+				rpl := map[string]interface{}{
+					utils.CapMaxUsage: 3 * time.Minute,
+				}
+				*reply.(*map[string]interface{}) = rpl
+				return nil
+			},
+			utils.StatSv1GetQueueFloatMetrics: func(args, reply interface{}) error {
+				rpl := map[string]float64{
+					"metric":  22.0,
+					"metric3": 32.2,
+				}
+				*reply.(*map[string]float64) = rpl
+				return nil
+			},
+		},
+	}
+	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs):  clientConn,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats): clientConn,
+	})
+	rpS := NewRouteService(dm, nil, cfg, connMgr)
 	rea := &ResourceAscendentSorter{
-		sorting: "desc",
+		sorting: "asc",
 		rS:      rpS,
 	}
 	prflID := "CGREvent1"
 	routes := map[string]*Route{
 		"sorted_route1": {
 			ID:              "id",
-			FilterIDs:       []string{"filterid1", "filterid2", "filterid3"},
-			AccountIDs:      []string{"acc_id1", "acc_id2", "acc_id3"},
-			RatingPlanIDs:   []string{"rate1", "rate2", "rate3", "rate4"},
-			ResourceIDs:     []string{"rsc1", "rsc2", "rsc3"},
-			StatIDs:         []string{"stat1", "stat2", "stat3"},
+			FilterIDs:       []string{"filterid1"},
+			AccountIDs:      []string{"acc_id1"},
+			RatingPlanIDs:   []string{"rate1"},
+			ResourceIDs:     []string{"resource1"},
+			StatIDs:         []string{"statId"},
 			Weight:          2.3,
 			Blocker:         true,
 			RouteParameters: "route",
 			cacheRoute: map[string]interface{}{
 				"*ratio": "ratio",
-			},
-			lazyCheckRules: []*FilterRule{
-				{
-					Type:    "*string",
-					Element: "elem",
-					Values:  []string{"val1", "val2", "val3"},
-					rsrValues: config.RSRParsers{
-						&config.RSRParser{Rules: "public"},
-						{Rules: "private"},
-					}},
-				{
-					Type:    "*string",
-					Element: "elem",
-					Values:  []string{"val1", "val2", "val3"},
-					rsrValues: config.RSRParsers{
-						&config.RSRParser{Rules: "public"},
-						{Rules: "private"},
-					},
-				},
 			},
 		},
 		"sorted_route2": {
 			ID:              "id",
-			FilterIDs:       []string{"filterid1", "filterid2", "filterid3"},
-			AccountIDs:      []string{"acc_id1", "acc_id2", "acc_id3"},
-			RatingPlanIDs:   []string{"rate1", "rate2", "rate3", "rate4"},
-			ResourceIDs:     []string{"rsc1", "rsc2", "rsc3"},
-			StatIDs:         []string{"stat1", "stat2", "stat3"},
+			FilterIDs:       []string{"filterid1"},
+			AccountIDs:      []string{"acc_id1"},
+			RatingPlanIDs:   []string{"rate1"},
+			ResourceIDs:     []string{"rsc"},
+			StatIDs:         []string{"statID"},
 			Weight:          2.3,
 			Blocker:         true,
 			RouteParameters: "route",
 			cacheRoute: map[string]interface{}{
 				"*ratio": "ratio",
-			},
-			lazyCheckRules: []*FilterRule{
-				{
-					Type:    "*string",
-					Element: "elem",
-					Values:  []string{"val1", "val2", "val3"},
-					rsrValues: config.RSRParsers{
-						&config.RSRParser{Rules: "public"},
-						{Rules: "private"},
-					}},
-				{
-					Type:    "*string",
-					Element: "elem",
-					Values:  []string{"val1", "val2", "val3"},
-					rsrValues: config.RSRParsers{
-						&config.RSRParser{Rules: "public"},
-						{Rules: "private"},
-					},
-				},
 			},
 		},
 	}
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "utils.CGREvent1",
-		Event:  map[string]interface{}{},
+		Event: map[string]interface{}{
+			utils.AccountField: "account",
+			utils.Destination:  "destination",
+			utils.SetupTime:    "*monthly",
+			utils.Usage:        2 * time.Minute,
+		},
 		APIOpts: map[string]interface{}{
 			utils.OptsRoutesProfileCount: 3,
 		},
 	}
 	extraOpts := &optsGetRoutes{
-		ignoreErrors: true,
-		maxCost:      12.1,
-		paginator: &utils.Paginator{
-			Limit:  utils.IntPointer(4),
-			Offset: utils.IntPointer(2),
-		},
-		sortingParameters: []string{"param1", "param2"},
+		sortingStrategy: utils.MetaLoad,
 	}
 	if _, err := rea.SortRoutes(prflID, routes, ev, extraOpts); err != nil {
 		t.Error(err)
 	}
+	// routes["sorted_route2"].ResourceIDs = []string{}
+	// if _, err = rea.SortRoutes(prflID, routes, ev, extraOpts); err == nil {
+	// 	t.Error(err)
+	// }
+
 }
 func TestHCRSortRoutes(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
@@ -1454,7 +1445,7 @@ func TestHCRSortRoutes(t *testing.T) {
 	cfg.RouteSCfg().PrefixIndexedFields = nil
 	rpS := NewRouteService(dmSPP, &FilterS{dm: dmSPP, cfg: cfg, connMgr: nil}, cfg, nil)
 	hcr := &HightCostSorter{
-		sorting: "desc",
+		sorting: utils.MetaHC,
 		rS:      rpS,
 	}
 	prflID := "CGREvent1"
@@ -1565,11 +1556,11 @@ func TestLoadDistributionSorterSortRoutes(t *testing.T) {
 				return nil
 			},
 			utils.StatSv1GetQueueFloatMetrics: func(args, reply interface{}) error {
-				rpl := map[string]interface{}{
+				rpl := map[string]float64{
 					"metric":  22.0,
 					"metric3": 32.2,
 				}
-				*reply.(*map[string]interface{}) = rpl
+				*reply.(*map[string]float64) = rpl
 				return nil
 			},
 		},
