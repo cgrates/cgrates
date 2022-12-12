@@ -1470,53 +1470,32 @@ func TestLoadDestinationRatesErr(t *testing.T) {
 		t.Error(err)
 	}
 }
-
 func TestTpReaderLoadRatingPlansFilteredErr(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	tscache := ltcache.NewTransCache(
-		map[string]*ltcache.CacheConfig{
-			utils.CacheTBLTPRatingPlans: {
-				MaxItems:  3,
-				TTL:       time.Minute * 30,
-				StaticTTL: false,
-				OnEvicted: func(itmID string, value interface{}) {
-				},
-			},
-			utils.CacheTBLTPTimings: {
-				MaxItems:  3,
-				TTL:       time.Minute * 30,
-				StaticTTL: false,
-			},
+	cfg.DataDbCfg().Items = map[string]*config.ItemOpt{
+		utils.CacheTBLTPRatingPlans: {
+			TTL:       time.Minute * 30,
+			StaticTTL: false,
 		},
-	)
+		utils.CacheTBLTPTimings: {
+			TTL:       time.Minute * 30,
+			StaticTTL: false,
+		},
+	}
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	db.db = tscache
+
 	tpr, err := NewTpReader(db, db, "*prf", "local", nil, nil, true)
 	if err != nil {
 		t.Error(err)
 	}
-	if b, err := tpr.LoadRatingPlansFiltered("tag"); err == nil || b {
+	if b, err := tpr.LoadRatingPlansFiltered("tag"); err == nil || b || err != utils.ErrNotFound {
 		t.Error(err)
 	}
-	tpr.timings = map[string]*utils.TPTiming{
-		"timingtpr": {},
-	}
-	tscache.Set(utils.CacheTBLTPRatingPlans, "*prf:tag:ratingID2", &utils.TPRatingPlan{
-		ID: "rate2",
-		RatingPlanBindings: []*utils.TPRatingPlanBinding{
-			{
-				TimingId: "timing2",
-			},
-		},
-	}, []string{"grpID"}, true, utils.NonTransactional)
-
-	if b, err := tpr.LoadRatingPlansFiltered("tag"); err == nil || err.Error() != fmt.Sprintf("no timing with id %q: %v", "timing2", utils.ErrNotFound) || b {
-		t.Error(err)
-	}
-	tscache.Set(utils.CacheTBLTPTimings, "*prf:timing2item2", &utils.ApierTPTiming{
-		TPid: "tpid2",
-		ID:   "id2",
-	}, []string{"grpId"}, false, utils.NonTransactional)
 }
 
 func TestLoadRatingProfilesFiltered(t *testing.T) {
@@ -1545,7 +1524,6 @@ func TestLoadRatingProfilesFiltered(t *testing.T) {
 	if err := tpr.LoadRatingProfilesFiltered(qriedRpf); err == nil || err.Error() != fmt.Sprintf("no RatingProfile for filter %v, error: %v", qriedRpf, utils.ErrNotFound) {
 		t.Error(err)
 	}
-
 	val := []*utils.TPRatingProfile{
 		{
 			LoadId:   "load",
@@ -1577,13 +1555,13 @@ func TestLoadRatingProfilesFiltered(t *testing.T) {
 		t.Error(err)
 	}
 	tpr.timezone, val[1].RatingPlanActivations[0].ActivationTime = "UTC", "*monthly_estimated"
-
 	if err := tpr.LoadRatingProfilesFiltered(qriedRpf); err == nil || err.Error() != fmt.Sprintf("could not load rating plans for tag: %q", val[1].RatingPlanActivations[0].RatingPlanId) {
 		t.Error(err)
 	}
 }
 
 func TestTpReaderLoadActionTriggers(t *testing.T) {
+	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	tscache := ltcache.NewTransCache(
 		map[string]*ltcache.CacheConfig{
@@ -1612,11 +1590,14 @@ func TestTpReaderLoadActionTriggers(t *testing.T) {
 					ThresholdValue:        2,
 					Recurrent:             false,
 					MinSleep:              "0",
-					ExpirationDate:        "date",
+					BalanceRatingSubject:  "rate",
 					BalanceType:           "*monetary",
 					BalanceDestinationIds: "FS_USERS",
 					ActionsId:             "LOG_WARNING",
 					Weight:                10,
+					BalanceWeight:         "20.12",
+					BalanceExpirationDate: "*monthly",
+					BalanceCategories:     "monthly",
 				},
 				{
 					BalanceId:             "id",
@@ -1629,6 +1610,13 @@ func TestTpReaderLoadActionTriggers(t *testing.T) {
 					BalanceDestinationIds: "FS_USERS",
 					ActionsId:             "LOG_WARNING",
 					Weight:                10,
+					BalanceWeight:         "20.1",
+					BalanceExpirationDate: "*yearly",
+					ExpirationDate:        "date",
+					BalanceSharedGroups:   "group1",
+					BalanceTimingTags:     "timing",
+					BalanceBlocker:        "true",
+					BalanceDisabled:       "false",
 				},
 			},
 		},
@@ -1642,13 +1630,13 @@ func TestTpReaderLoadActionTriggers(t *testing.T) {
 	if err := tpr.LoadActionTriggers(); err == nil || err.Error() != "Unsupported time format" {
 		t.Error(err)
 	}
-
 	trVals[0].ActionTriggers[0].ActivationDate = "*monthly"
 	trVals[0].ActionTriggers[0].MinSleep = "two"
 	if err := tpr.LoadActionTriggers(); err == nil || err.Error() != fmt.Sprintf("time: invalid duration %q", trVals[0].ActionTriggers[0].MinSleep) {
 		t.Error(err)
 	}
-	trVals[0].ActionTriggers[0].MinSleep = "5000"
+	trVals[0].ActionTriggers[0].MinSleep = "5000ns"
+	trVals[0].ActionTriggers[1].ExpirationDate = "*montly"
 	if err := tpr.LoadActionTriggers(); err != nil {
 		t.Error(err)
 	}
@@ -1689,80 +1677,8 @@ func TestTpReaderSetDestination(t *testing.T) {
 	}
 }
 
-func TestTpReaderLoadActionPlansErrs(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	cfg.DataDbCfg().Items = map[string]*config.ItemOpt{
-		utils.CacheTBLTPActionPlans: {
-			Limit:  3,
-			TTL:    3,
-			Remote: true,
-		},
-		utils.CacheActions: {
-			TTL:    3,
-			Remote: true,
-		},
-	}
-	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	tpr, err := NewTpReader(db, db, "*prf", "UTC", nil, nil, true)
-	if err != nil {
-		t.Error(err)
-	}
-	tpAP := &utils.TPActionPlan{
-		TPid: "TEST_TPID",
-		ID:   "PACKAGE_10",
-		ActionPlan: []*utils.TPActionTiming{
-			{
-				ActionsId: "TOPUP_RST_10",
-				TimingId:  "ASAP",
-				Weight:    10.0},
-			{
-				ActionsId: "TOPUP_RST_5",
-				TimingId:  "ASAP",
-				Weight:    20.0},
-		},
-	}
-	db.db.Set(utils.CacheTBLTPActionPlans, "*prfitem1", tpAP, []string{"grpId"}, true, utils.NonTransactional)
-	if err := tpr.LoadActionPlans(); err == nil || err.Error() != fmt.Sprintf("[ActionPlans] Could not load the action for tag: %q", tpAP.ActionPlan[0].ActionsId) {
-		t.Error(err)
-	}
-
-}
-
-func TestLoadSharedGroupsFiltered(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	cfg.DataDbCfg().Items = map[string]*config.ItemOpt{
-		utils.CacheTBLTPSharedGroups: {
-			Limit:  3,
-			TTL:    3,
-			Remote: true,
-		},
-	}
-	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	tpr, err := NewTpReader(db, db, "*prf", "UTC", nil, nil, true)
-	if err != nil {
-		t.Error(err)
-	}
-	sgs := &utils.TPSharedGroups{
-		TPid: "TEST_TPID",
-		ID:   "SHARED_GROUP_TEST",
-		SharedGroups: []*utils.TPSharedGroup{
-			{
-				Account:       "*any",
-				Strategy:      "*highest",
-				RatingSubject: "special1"},
-			{
-				Account:       "*second",
-				Strategy:      "*highest",
-				RatingSubject: "special2"},
-		},
-	}
-	db.db.Set(utils.CacheTBLTPSharedGroups, "*prfitem1", sgs, []string{"grp"}, true, utils.NonTransactional)
-	if err = tpr.LoadSharedGroupsFiltered("SHARED_GROUP_TEST", true); err != nil {
-		t.Error(err)
-	}
-}
-
 func TestTPReaderLoadAccountActionsFilteredErr(t *testing.T) {
+	Cache.Clear(nil)
 	qried := &utils.TPAccountActions{
 		TPid:          "tp_Id",
 		AllowNegative: false,
@@ -1809,4 +1725,33 @@ func TestTPReaderLoadAccountActionsFilteredErr(t *testing.T) {
 				Weight:    20.0},
 		},
 	}, []string{"grpID"}, true, utils.NonTransactional)
+}
+
+func TestTprRemoveFromDatabase(t *testing.T) {
+	Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	cfg.DataDbCfg().Items = map[string]*config.ItemOpt{
+		utils.CacheSharedGroups: {
+			Limit: 3,
+		},
+	}
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	tpr, err := NewTpReader(db, db, "*prf", "UTC", nil, nil, true)
+	if err != nil {
+		t.Error(err)
+	}
+	db.db.Set(utils.CacheSharedGroups, "itmID", &SharedGroup{
+		Id: "SG_TEST",
+	}, []string{}, true, utils.NonTransactional)
+	tpr.sharedGroups = map[string]*SharedGroup{
+		"itmID": {
+			Id: "SG_TEST",
+		},
+	}
+	if err := tpr.RemoveFromDatabase(false, true); err != nil {
+		t.Error(err)
+	}
+	if _, has := db.db.Get(utils.CacheSharedGroups, "itmID"); has {
+		t.Error("should been removed from the cache")
+	}
 }
