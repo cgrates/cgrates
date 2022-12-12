@@ -23,6 +23,7 @@ import (
 	"testing"
 
 	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -44,4 +45,30 @@ func TestFilterHelpersWeightFromDynamics(t *testing.T) {
 	if !reflect.DeepEqual(result, expected) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
+}
+
+func TestFilterHelpersWeightFromDynamicsErr(t *testing.T) {
+
+	ctx := context.Background()
+	dWs := []*utils.DynamicWeight{
+		{
+			FilterIDs: []string{"*stirng:~*req.Account:1001:4fields"},
+			Weight:    64,
+		},
+	}
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+
+	cM := NewConnManager(cfg)
+	fltrs := NewFilterS(cfg, cM, dm)
+	tnt := utils.CGRateSorg
+	ev := utils.MapStorage{}
+
+	expErr := "NOT_IMPLEMENTED:*stirng"
+	_, err := WeightFromDynamics(ctx, dWs, fltrs, tnt, ev)
+	if err.Error() != expErr {
+		t.Errorf("Expected error <%v>, received error <%V>", expErr, err)
+	}
+
 }

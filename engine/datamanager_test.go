@@ -546,3 +546,123 @@ func TestDatamanagerCacheDataFromDBNotCachedActionProfilePrefix(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestDataManagerDataDB(t *testing.T) {
+	var dm *DataManager
+	rcv := dm.DataDB()
+	if rcv != nil {
+		t.Errorf("Expected DataDB to be nil, Received <%+v>", rcv)
+	}
+}
+
+func TestDataManagerSetFilterDMNil(t *testing.T) {
+	expErr := utils.ErrNoDatabaseConn
+	var dm *DataManager
+	err := dm.SetFilter(context.Background(), nil, true)
+	if err != expErr {
+		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err)
+	}
+}
+
+func TestDataManagerSetFilterErrConnID(t *testing.T) {
+	tmp := Cache
+	cfgtmp := config.CgrConfig()
+	defer func() {
+		Cache = tmp
+		config.SetCgrConfig(cfgtmp)
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	cfg.DataDbCfg().Items[utils.MetaFilters].Remote = true
+	config.SetCgrConfig(cfg)
+
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	fltr := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "fltr1",
+		Rules: []*FilterRule{{
+			Type:    utils.MetaString,
+			Element: "~*req.Account",
+			Values:  []string{"1001", "1002"},
+		}},
+	}
+
+	expErr := "MANDATORY_IE_MISSING: [connIDs]"
+	err := dm.SetFilter(context.Background(), fltr, true)
+	if err.Error() != expErr {
+		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err)
+	}
+}
+
+func TestDataManagerSetFilterErrSetFilterDrv(t *testing.T) {
+	tmp := Cache
+	cfgtmp := config.CgrConfig()
+	defer func() {
+		Cache = tmp
+		config.SetCgrConfig(cfgtmp)
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	dm.dataDB = &DataDBMock{
+		GetFilterDrvF: func(ctx *context.Context, str1 string, str2 string) (*Filter, error) {
+			return nil, utils.ErrNotFound
+		},
+	}
+	fltr := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "fltr1",
+		Rules: []*FilterRule{{
+			Type:    utils.MetaString,
+			Element: "~*req.Account",
+			Values:  []string{"1001", "1002"},
+		}},
+	}
+
+	err := dm.SetFilter(context.Background(), fltr, true)
+	if err != utils.ErrNotImplemented {
+		t.Errorf("Expected error <%v>, Received error <%v>", utils.ErrNotImplemented, err)
+	}
+}
+
+// unfinished
+// func TestDataManagerSetFilterErrUpdateFilterIndex(t *testing.T) {
+// 	tmp := Cache
+// 	cfgtmp := config.CgrConfig()
+// 	defer func() {
+// 		Cache = tmp
+// 		config.SetCgrConfig(cfgtmp)
+// 	}()
+// 	Cache.Clear(nil)
+
+// 	cfg := config.NewDefaultCGRConfig()
+
+// 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+// 	cM := NewConnManager(cfg)
+// 	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+// 	dm.dataDB = &DataDBMock{
+// 		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
+// 			return nil, utils.ErrNotImplemented
+// 		},
+// 	}
+// 	fltr := &Filter{
+// 		Tenant: "cgrates.org",
+// 		ID:     "*stirng:~*req.Account:1001",
+// 		Rules: []*FilterRule{{
+// 			Type:    utils.MetaString,
+// 			Element: "~*req.Account",
+// 			Values:  []string{"1001", "1002"},
+// 		}},
+// 	}
+
+// 	err := dm.SetFilter(context.Background(), fltr, true)
+// 	if err != nil {
+// 		t.Errorf("Expected error <%v>, Received error <%v>", utils.ErrNotImplemented, err)
+// 	}
+// }
