@@ -5551,16 +5551,6 @@ func TestCgrCfgJSONDefaultsConfigS(t *testing.T) {
 	}
 }
 
-func TestLoadConfigFromHTTP(t *testing.T) {
-	cfgCgr := NewDefaultCGRConfig()
-
-	url := "inexistentURL"
-	expected := "parse \"inexistentURL\": invalid URI for request"
-	if err := cfgCgr.loadConfigFromHTTP(url, nil); err == nil || err.Error() != expected {
-		t.Errorf("Expected %+v, received %+v", expected, err)
-	}
-}
-
 func TestReloadSections(t *testing.T) {
 	subsystemsThatNeedDataDB := utils.NewStringSet([]string{SCHEDULER_JSN,
 		RALS_JSN, CDRS_JSN, SessionSJson, ATTRIBUTE_JSN,
