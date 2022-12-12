@@ -528,34 +528,6 @@ func TestBalanceDebitUnits(t *testing.T) {
 							},
 						},
 					},
-					{
-						Timing: &RITiming{
-							WeekDays:  []time.Weekday{time.Monday, time.Tuesday, time.Wednesday, time.Thursday, time.Friday},
-							StartTime: "00:00:00",
-						},
-						Rating: &RIRate{
-							ConnectFee:       0,
-							RoundingMethod:   "*up",
-							RoundingDecimals: 6,
-							Rates: RateGroups{
-								&RGRate{Value: 1, RateIncrement: time.Second, RateUnit: time.Second},
-							},
-						},
-					},
-					{
-						Timing: &RITiming{
-							WeekDays:  []time.Weekday{time.Saturday, time.Sunday},
-							StartTime: "00:00:00",
-						},
-						Rating: &RIRate{
-							ConnectFee:       0,
-							RoundingMethod:   "*up",
-							RoundingDecimals: 6,
-							Rates: RateGroups{
-								&RGRate{Value: 1, RateIncrement: time.Second, RateUnit: time.Second},
-							},
-						},
-					},
 				},
 			},
 		},
@@ -580,16 +552,7 @@ func TestBalanceDebitUnits(t *testing.T) {
 		Blocker:        true,
 		Disabled:       true,
 		precision:      2,
-	},
-		{
-			Uuid:           "uuid2",
-			ID:             "id2",
-			Value:          133.22,
-			ExpirationDate: time.Date(2023, 3, 21, 5, 0, 0, 0, time.UTC),
-			Blocker:        true,
-			Disabled:       true,
-			precision:      2,
-		}}
+	}}
 	b := &Balance{
 		Uuid:           "uuid",
 		ID:             "id",
@@ -640,73 +603,153 @@ func TestBalanceDebitUnits(t *testing.T) {
 	}
 }
 func TestBalanceDebitMoney(t *testing.T) {
+
 	cd := &CallDescriptor{
-		testCallcost: &CallCost{Category: "postpaid",
-			Tenant:  "foehn",
-			Subject: "foehn", Account: "foehn",
-			Destination: "0034678096720", ToR: "*voice",
-			Cost: 0,
-			Timespans: TimeSpans{
-				{TimeStart: time.Date(2015, 4, 24, 7, 59, 4, 0, time.UTC),
-					TimeEnd: time.Date(2015, 4, 24, 8, 2, 0, 0, time.UTC),
-					Cost:    0,
-					RateInterval: &RateInterval{
-						Rating: &RIRate{
-							ConnectFee:       5,
-							RoundingDecimals: 3,
-							MaxCost:          0,
-							Rates: RateGroups{
-								{
-									GroupIntervalStart: 0,
-									Value:              0,
-									RateIncrement:      34,
-									RateUnit:           34},
-							}},
-						Weight: 0},
-					DurationIndex:  26,
-					MatchedSubject: "uuid3",
-					MatchedPrefix:  "00346786720",
-					MatchedDestId:  "*any",
-					RatingPlanId:   "*none",
-					CompressFactor: 0},
+		Category:  "postpaid",
+		ToR:       utils.MetaVoice,
+		Tenant:    "foehn",
+		TimeStart: time.Date(2015, 4, 24, 7, 59, 4, 0, time.UTC),
+		TimeEnd:   time.Date(2015, 4, 24, 8, 2, 0, 0, time.UTC),
 
-				{TimeStart: time.Date(2015, 4, 24, 7, 59, 4, 0, time.UTC),
-					TimeEnd: time.Date(2015, 4, 24, 8, 2, 0, 0, time.UTC),
-					Cost:    0,
-					RateInterval: &RateInterval{
-						Rating: &RIRate{
-							ConnectFee:       0,
-							RoundingDecimals: 0,
-							MaxCost:          0,
-							Rates: RateGroups{
-								{
-									GroupIntervalStart: 0,
-									Value:              0,
-									RateIncrement:      34,
-									RateUnit:           34},
-							}},
-						Weight: 0},
-					DurationIndex:  26,
-					MatchedSubject: "uuid",
-					MatchedPrefix:  "0034678096720",
-					MatchedDestId:  "*any",
-					RatingPlanId:   "*none",
-					CompressFactor: 5},
-			},
-			RatedUsage:       0,
+		testCallcost: &CallCost{
+			Category:         "generic",
+			Tenant:           "cgrates.org",
+			Subject:          "1001",
+			Account:          "1001",
+			Destination:      "data",
+			ToR:              "*data",
+			Cost:             0,
 			deductConnectFee: true,
+			Timespans: TimeSpans{
+				{
+					TimeStart:     time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
+					TimeEnd:       time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
+					DurationIndex: 0,
+					Increments: Increments{
+						{Cost: 2, BalanceInfo: &DebitInfo{
+							Monetary: &MonetaryInfo{UUID: "moneya"}},
+						}},
+					RateInterval: &RateInterval{
+						Rating: &RIRate{
+							ConnectFee: 0.15,
+							MaxCost:    23.2,
+							Rates: RateGroups{&RGRate{GroupIntervalStart: 0,
+								Value: 0.1, RateIncrement: time.Second,
+								RateUnit: time.Second}}}},
+				},
+			},
 		},
+		FallbackSubject: "",
 	}
-
-	ub := &Account{}
+	ub := &Account{
+		ID: "vdf:broker",
+		BalanceMap: map[string]Balances{
+			utils.MetaVoice: {
+				&Balance{Value: 20 * float64(time.Second),
+					DestinationIDs: utils.NewStringMap("NAT"),
+					Weight:         10, RatingSubject: "rif"},
+				&Balance{Value: 100 * float64(time.Second),
+					DestinationIDs: utils.NewStringMap("RET"), Weight: 20},
+			}},
+	}
 	moneyBalances := Balances{}
-
 	b := &Balance{
-		Value:   220,
-		Timings: []*RITiming{},
+		Uuid:           "uuid",
+		ID:             "id",
+		Value:          12.22,
+		ExpirationDate: time.Date(2022, 11, 1, 20, 0, 0, 0, time.UTC),
+		Blocker:        true,
+		Disabled:       false,
+		precision:      2,
+		RatingSubject:  "*val34",
+		Factor: ValueFactor{
+			"FACT_VAL": 20.22,
+		},
 	}
 	if val, err := b.debitMoney(cd, ub, moneyBalances, true, true, true, nil); err != nil {
 		t.Errorf("expected nil,received %+v", utils.ToJSON(val))
 	}
+}
 
+func TestBalanceDebitUnits2(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true, nil)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	cd := &CallDescriptor{
+		Category:  "postpaid",
+		ToR:       utils.MetaVoice,
+		Tenant:    "foehn",
+		TimeStart: time.Date(2015, 4, 24, 7, 59, 4, 0, time.UTC),
+		TimeEnd:   time.Date(2015, 4, 24, 8, 2, 0, 0, time.UTC),
+
+		testCallcost: &CallCost{
+			Category:         "generic",
+			Tenant:           "cgrates.org",
+			Subject:          "1001",
+			Account:          "1001",
+			Destination:      "data",
+			ToR:              "*data",
+			Cost:             0,
+			deductConnectFee: true,
+			Timespans: TimeSpans{
+				{
+					TimeStart:     time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
+					TimeEnd:       time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
+					DurationIndex: 0,
+					Increments: Increments{
+						{Cost: 2, BalanceInfo: &DebitInfo{
+							Monetary: &MonetaryInfo{UUID: "moneya"}},
+						}},
+					RateInterval: &RateInterval{
+						Rating: &RIRate{
+							ConnectFee: 0.15,
+							MaxCost:    23.2,
+							Rates: RateGroups{&RGRate{GroupIntervalStart: 0,
+								Value: 0.1, RateIncrement: time.Second,
+								RateUnit: time.Second}}}},
+				},
+			},
+		},
+		FallbackSubject: "",
+	}
+	ub := &Account{
+		ID: "vdf:broker",
+		BalanceMap: map[string]Balances{
+			utils.MetaVoice: {
+				&Balance{Value: 20 * float64(time.Second),
+					DestinationIDs: utils.NewStringMap("NAT"),
+					Weight:         10, RatingSubject: "rif"},
+				&Balance{Value: 100 * float64(time.Second),
+					DestinationIDs: utils.NewStringMap("RET"), Weight: 20},
+			}},
+	}
+
+	moneyBalances := Balances{{
+		Uuid:           "uuid",
+		ID:             "id",
+		Value:          12.22,
+		ExpirationDate: time.Date(2022, 11, 1, 20, 0, 0, 0, time.UTC),
+		Blocker:        true,
+		Disabled:       true,
+		precision:      2,
+	}}
+	b := &Balance{
+		Uuid:           "uuid",
+		ID:             "id",
+		Value:          12.22,
+		ExpirationDate: time.Date(2022, 11, 1, 20, 0, 0, 0, time.UTC),
+		Blocker:        true,
+		Disabled:       false,
+		precision:      2,
+		RatingSubject:  "*val34",
+		Factor: ValueFactor{
+			"FACT_VAL": 20.22,
+		},
+	}
+	fltrs := FilterS{cfg, dm, nil}
+	config.SetCgrConfig(cfg)
+
+	if _, err := b.debitUnits(cd, ub, moneyBalances, true, false, true, &fltrs); err != nil {
+		t.Errorf("received %v", err)
+	}
 }

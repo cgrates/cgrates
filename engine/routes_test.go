@@ -1431,11 +1431,6 @@ func TestReaSortRoutes(t *testing.T) {
 	if _, err := rea.SortRoutes(prflID, routes, ev, extraOpts); err != nil {
 		t.Error(err)
 	}
-	// routes["sorted_route2"].ResourceIDs = []string{}
-	// if _, err = rea.SortRoutes(prflID, routes, ev, extraOpts); err == nil {
-	// 	t.Error(err)
-	// }
-
 }
 func TestHCRSortRoutes(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()

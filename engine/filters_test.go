@@ -2335,8 +2335,6 @@ func TestWeightFromDynamics(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dmSPP := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
-	cfg.RouteSCfg().StringIndexedFields = nil
-	cfg.RouteSCfg().PrefixIndexedFields = nil
 
 	fltrS := &FilterS{
 		cfg:     cfg,
