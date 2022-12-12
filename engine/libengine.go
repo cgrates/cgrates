@@ -255,9 +255,9 @@ func NewDispatcherService(val interface{}) (_ IntService, err error) {
 		case strings.HasPrefix(m, utils.LoaderS):
 			m = strings.TrimPrefix(m, utils.LoaderS)
 			key = utils.LoaderS
-		case strings.HasPrefix(m, utils.ServiceManager):
-			m = strings.TrimPrefix(m, utils.ServiceManager)
-			key = utils.ServiceManager
+		case strings.HasPrefix(m, utils.ServiceManagerS):
+			m = strings.TrimPrefix(m, utils.ServiceManagerS)
+			key = utils.ServiceManagerS
 		}
 		if len(m) < 2 || unicode.ToLower(rune(m[0])) != 'v' {
 			continue
