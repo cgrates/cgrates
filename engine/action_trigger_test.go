@@ -257,17 +257,30 @@ func TestActionTriggerCreateBalance(t *testing.T) {
 }
 
 func TestATExecute(t *testing.T) {
-	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
+	tmp := Cache
+	tmpDm := dm
+	defer func() {
+		Cache = tmp
+		SetDataStorage(tmpDm)
+		config.SetCgrConfig(config.NewDefaultCGRConfig())
+	}()
+	Cache.Clear(nil)
+	cfg.DataDbCfg().Items = map[string]*config.ItemOpt{
+		utils.CacheActions: {
+			Limit: 2,
+		},
+	}
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 	at := &ActionTrigger{
-		ActionsID:     "id",
-		ID:            "id",
-		UniqueID:      "uid",
-		ThresholdType: "*min_event_counter",
-		Recurrent:     true,
-		MinSleep:      10 * time.Minute,
+		ID:             "STANDARD_TRIGGER",
+		ActionsID:      "actID",
+		UniqueID:       "st0",
+		ThresholdType:  utils.TriggerMinEventCounter,
+		ThresholdValue: 10,
+		Recurrent:      true,
+		MinSleep:       10 * time.Minute,
 	}
 	ub := &Account{
 		ID:             "acc_id",
@@ -277,10 +290,27 @@ func TestATExecute(t *testing.T) {
 		AllowNegative:  false,
 		UpdateTime:     time.Date(2019, 3, 1, 12, 0, 0, 0, time.UTC),
 	}
-
-	fltrs := NewFilterS(cfg, nil, dm)
-
-	if err := at.Execute(ub, fltrs); err == nil || err != utils.ErrNotFound {
-		t.Errorf("expected <%+v>,received <%+v>", utils.ErrNotFound, err)
+	fltrStr := `*lt:~*req.BalanceMap.*monetary.GetTotalValue:3`
+	db.db.Set(utils.CacheActions, "actID", Actions{
+		{
+			Id:         "cgrates.org:id1",
+			ActionType: "VALID_FUNCTION_TYPE",
+			Balance: &BalanceFilter{
+				Type:  utils.StringPointer("test"),
+				Value: &utils.ValueFormula{Static: 1.1},
+			},
+			Filters: []string{fltrStr},
+		},
+	}, []string{}, true, utils.NonTransactional)
+	SetDataStorage(dm)
+	fltr := NewFilterS(cfg, nil, dm)
+	db.db.Set(utils.CacheFilters, utils.ConcatenatedKey("cgrates.org", fltrStr), &Filter{
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2022, 1, 12, 1, 0, 0, 0, time.UTC),
+			ExpiryTime:     time.Date(2024, 1, 12, 1, 0, 0, 0, time.UTC),
+		},
+	}, []string{}, true, utils.NonTransactional)
+	if err := at.Execute(ub, fltr); err != nil {
+		t.Error(err)
 	}
 }

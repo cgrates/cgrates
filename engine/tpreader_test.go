@@ -1734,6 +1734,9 @@ func TestTprRemoveFromDatabase(t *testing.T) {
 		utils.CacheSharedGroups: {
 			Limit: 3,
 		},
+		utils.CacheChargerProfiles: {
+			Limit: 2,
+		},
 	}
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	tpr, err := NewTpReader(db, db, "*prf", "UTC", nil, nil, true)
@@ -1743,9 +1746,28 @@ func TestTprRemoveFromDatabase(t *testing.T) {
 	db.db.Set(utils.CacheSharedGroups, "itmID", &SharedGroup{
 		Id: "SG_TEST",
 	}, []string{}, true, utils.NonTransactional)
+	db.db.Set(utils.CacheChargerProfiles, "cgrates.org:DEFAULT", &ChargerProfile{
+		Tenant:       "cgrates.org",
+		ID:           "DEFAULT",
+		FilterIDs:    []string{},
+		RunID:        utils.MetaDefault,
+		AttributeIDs: []string{"*none"},
+		Weight:       0,
+	}, []string{}, true, utils.NonTransactional)
+
 	tpr.sharedGroups = map[string]*SharedGroup{
 		"itmID": {
 			Id: "SG_TEST",
+		},
+	}
+	tpr.chargerProfiles = map[utils.TenantID]*utils.TPChargerProfile{
+		{Tenant: "cgrates", ID: "item2"}: {
+			Tenant:       "cgrates.org",
+			ID:           "DEFAULT",
+			FilterIDs:    []string{},
+			RunID:        utils.MetaDefault,
+			AttributeIDs: []string{"*none"},
+			Weight:       0,
 		},
 	}
 	if err := tpr.RemoveFromDatabase(false, true); err != nil {
@@ -1753,5 +1775,51 @@ func TestTprRemoveFromDatabase(t *testing.T) {
 	}
 	if _, has := db.db.Get(utils.CacheSharedGroups, "itmID"); has {
 		t.Error("should been removed from the cache")
+	} else if _, has := db.db.Get(utils.CacheSharedGroups, "cgrates.org:DEFAULT"); has {
+		t.Error("should been removed from the cache")
+	}
+}
+
+func TestLoadActionPlansErrs(t *testing.T) {
+	tmp := Cache
+	cfg := config.NewDefaultCGRConfig()
+	cfg.DataDbCfg().Items = map[string]*config.ItemOpt{
+		utils.CacheTBLTPActionPlans: {
+			StaticTTL: true,
+			Limit:     4,
+		},
+		utils.CacheActions: {
+			Limit: 2,
+		},
+	}
+	defer func() {
+		Cache = tmp
+		config.SetCgrConfig(config.NewDefaultCGRConfig())
+	}()
+	Cache.Clear(nil)
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	tpr, err := NewTpReader(db, db, "tpr", "UTC", nil, nil, true)
+	if err != nil {
+		t.Error(err)
+	}
+	db.db.Set(utils.CacheTBLTPActionPlans, "tpr:item1", &utils.TPActionPlan{
+		TPid: "TEST_TPID",
+		ID:   "PACKAGE_10",
+		ActionPlan: []*utils.TPActionTiming{
+			{
+				ActionsId: "TOPUP_RST_10",
+				TimingId:  "ASAP",
+				Weight:    10.0},
+		},
+	}, []string{}, true, utils.NonTransactional)
+	tpr.actions = map[string][]*Action{
+		"TOPUP_RST_*": {},
+	}
+	if err := tpr.LoadActionPlans(); err == nil || err.Error() != fmt.Sprintf("[ActionPlans] Could not load the action for tag: %q", "TOPUP_RST_10") {
+		t.Error(err)
+	}
+	db.db.Set(utils.CacheActions, "TOPUP_RST_10", nil, []string{}, true, utils.NonTransactional)
+	if err := tpr.LoadActionPlans(); err == nil || err.Error() != fmt.Sprintf("[ActionPlans] Could not load the timing for tag: %q", "ASAP") {
+		t.Error(err)
 	}
 }

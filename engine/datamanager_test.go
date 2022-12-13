@@ -372,3 +372,338 @@ func TestDMGetStatQueue(t *testing.T) {
 		t.Errorf("expected %+v,received %+v", utils.ToJSON(exp), utils.ToJSON(val))
 	}
 }
+
+func TestRebuildReverseForPrefix(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	tmpDm := dm
+	tmp := Cache
+	defer func() {
+		config.SetCgrConfig(config.NewDefaultCGRConfig())
+		Cache = tmp
+		SetDataStorage(tmpDm)
+	}()
+	Cache.Clear(nil)
+	cfg.DataDbCfg().Items = map[string]*config.ItemOpt{
+		utils.CacheReverseDestinations: {
+			Limit:  3,
+			Remote: true,
+		},
+	}
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	dm.dataDB = &DataDBMock{}
+	db.db.Set(utils.CacheReverseDestinations, utils.ConcatenatedKey(utils.ReverseDestinationPrefix, "item1"), &Destination{}, []string{}, true, utils.NonTransactional)
+	if err := dm.RebuildReverseForPrefix(utils.ReverseDestinationPrefix); err == nil || err != utils.ErrNotImplemented {
+		t.Error(err)
+	}
+	dm.dataDB = db
+	if err := dm.RebuildReverseForPrefix(utils.ReverseDestinationPrefix); err != nil {
+		t.Error(err)
+	}
+
+}
+
+func TestDMSetAccount(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	tmpDm := dm
+	tmp := Cache
+	defer func() {
+		config.SetCgrConfig(config.NewDefaultCGRConfig())
+		Cache = tmp
+		SetDataStorage(tmpDm)
+	}()
+	Cache.Clear(nil)
+	cfg.DataDbCfg().RplConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1)}
+	cfg.DataDbCfg().RplFiltered = true
+	cfg.DataDbCfg().Items = map[string]*config.ItemOpt{
+		utils.CacheAccounts: {
+			Limit:     3,
+			Replicate: true,
+			APIKey:    "key",
+			RouteID:   "route",
+		},
+	}
+	acc := &Account{
+		ID: "vdf:broker",
+		BalanceMap: map[string]Balances{
+			utils.MetaVoice: {
+				&Balance{Value: 20 * float64(time.Second),
+					DestinationIDs: utils.NewStringMap("NAT"),
+					Weight:         10, RatingSubject: "rif"},
+				&Balance{Value: 100 * float64(time.Second),
+					DestinationIDs: utils.NewStringMap("RET"), Weight: 20},
+			}},
+	}
+	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn <- &ccMock{
+		calls: map[string]func(args interface{}, reply interface{}) error{
+			utils.ReplicatorSv1SetAccount: func(args, reply interface{}) error {
+				accApiOpts, cancast := args.(AccountWithAPIOpts)
+				if !cancast {
+					return utils.ErrNotConvertible
+				}
+				dm.dataDB.SetAccountDrv(accApiOpts.Account)
+
+				return nil
+			},
+		},
+	}
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
+	})
+	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
+	dm.ms = &JSONMarshaler{}
+	config.SetCgrConfig(cfg)
+	SetDataStorage(dm)
+	if err := dm.SetAccount(acc); err != nil {
+		t.Error(err)
+	}
+	var dmnil *DataManager
+	if err = dmnil.SetAccount(acc); err == nil || err != utils.ErrNoDatabaseConn {
+		t.Error(err)
+	}
+	dm.dataDB = &DataDBMock{}
+	if err = dm.SetAccount(acc); err == nil || err != utils.ErrNotImplemented {
+		t.Error(err)
+	}
+}
+
+func TestDMRemoveAccount(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	tmpDm := dm
+	tmp := Cache
+	defer func() {
+		config.SetCgrConfig(config.NewDefaultCGRConfig())
+		Cache = tmp
+		SetDataStorage(tmpDm)
+	}()
+	Cache.Clear(nil)
+	cfg.DataDbCfg().RplConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1)}
+	cfg.DataDbCfg().RplFiltered = true
+	cfg.DataDbCfg().Items = map[string]*config.ItemOpt{
+		utils.CacheAccounts: {
+			Limit:     3,
+			Replicate: true,
+			APIKey:    "key",
+			RouteID:   "route",
+		},
+	}
+	acc := &Account{
+		ID: "vdf:broker",
+		BalanceMap: map[string]Balances{
+			utils.MetaVoice: {
+				&Balance{Value: 20 * float64(time.Second),
+					DestinationIDs: utils.NewStringMap("NAT"),
+					Weight:         10, RatingSubject: "rif"},
+				&Balance{Value: 100 * float64(time.Second),
+					DestinationIDs: utils.NewStringMap("RET"), Weight: 20},
+			}},
+	}
+	if err = dm.dataDB.SetAccountDrv(acc); err != nil {
+		t.Error(err)
+	}
+
+	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn <- &ccMock{
+		calls: map[string]func(args interface{}, reply interface{}) error{
+			utils.ReplicatorSv1RemoveAccount: func(args, reply interface{}) error {
+				strApiOpts, cancast := args.(utils.StringWithAPIOpts)
+				if !cancast {
+					return utils.ErrNotConvertible
+				}
+				dm.dataDB.RemoveAccountDrv(strApiOpts.Arg)
+				return nil
+			},
+		},
+	}
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
+	})
+	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
+	config.SetCgrConfig(cfg)
+	SetDataStorage(dm)
+	if err = dm.RemoveAccount(acc.ID); err != nil {
+		t.Error(err)
+	}
+	var dmnil *DataManager
+	if err = dmnil.RemoveAccount(acc.ID); err == nil || err != utils.ErrNoDatabaseConn {
+		t.Error(err)
+	}
+	dm.dataDB = &DataDBMock{}
+	if err = dm.RemoveAccount(acc.ID); err == nil || err != utils.ErrNotImplemented {
+		t.Error(err)
+	}
+}
+
+func TestDmSetFilter(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	tmpDm := dm
+	tmp := Cache
+	defer func() {
+		config.SetCgrConfig(config.NewDefaultCGRConfig())
+		Cache = tmp
+		SetDataStorage(tmpDm)
+	}()
+	Cache.Clear(nil)
+	cfg.DataDbCfg().RplConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1)}
+	cfg.DataDbCfg().RplFiltered = true
+	cfg.DataDbCfg().Items = map[string]*config.ItemOpt{
+		utils.CacheFilters: {
+			Limit:     3,
+			Replicate: true,
+			APIKey:    "key",
+			RouteID:   "route",
+		},
+	}
+	filter := &Filter{
+		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+		ID:     "FLTR_CP_1",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaString,
+				Element: "~*req.Charger",
+				Values:  []string{"ChargerProfile1"},
+			},
+		},
+	}
+	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn <- &ccMock{
+		calls: map[string]func(args interface{}, reply interface{}) error{
+			utils.ReplicatorSv1SetFilter: func(args, reply interface{}) error {
+				fltr, cancast := args.(FilterWithAPIOpts)
+				if !cancast {
+					return utils.ErrNotConvertible
+				}
+				dm.dataDB.SetFilterDrv(fltr.Filter)
+				return nil
+			},
+		},
+	}
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
+	})
+	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
+	config.SetCgrConfig(cfg)
+	SetDataStorage(dm)
+	if err := dm.SetFilter(filter, false); err != nil {
+		t.Error(err)
+	}
+	var dmnil *DataManager
+	if err = dmnil.SetFilter(filter, false); err == nil || err != utils.ErrNoDatabaseConn {
+		t.Error(err)
+	}
+}
+
+func TestDMSetThreshold(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	tmpDm := dm
+	tmp := Cache
+	defer func() {
+		config.SetCgrConfig(config.NewDefaultCGRConfig())
+		Cache = tmp
+		SetDataStorage(tmpDm)
+	}()
+	Cache.Clear(nil)
+	Cache.Clear(nil)
+	cfg.DataDbCfg().RplConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1)}
+	cfg.DataDbCfg().RplFiltered = true
+	cfg.DataDbCfg().Items = map[string]*config.ItemOpt{
+		utils.CacheThresholds: {
+			Limit:     3,
+			Replicate: true,
+			APIKey:    "key",
+			RouteID:   "route",
+		},
+	}
+	thS := &Threshold{
+		Tenant: "cgrates.org",
+		ID:     "THD_ACNT_1001",
+		Hits:   0,
+	}
+	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn <- &ccMock{
+		calls: map[string]func(args interface{}, reply interface{}) error{
+			utils.ReplicatorSv1SetThreshold: func(args, reply interface{}) error {
+				thS, cancast := args.(ThresholdWithAPIOpts)
+				if !cancast {
+					return utils.ErrNotConvertible
+				}
+				dm.dataDB.SetThresholdDrv(thS.Threshold)
+				return nil
+			},
+		},
+	}
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
+	})
+	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
+	config.SetCgrConfig(cfg)
+	SetDataStorage(dm)
+
+	if err = dm.SetThreshold(thS); err != nil {
+		t.Error(err)
+	}
+	dm.dataDB = &DataDBMock{}
+	if err = dm.SetThreshold(thS); err == nil || err != utils.ErrNotImplemented {
+		t.Error(err)
+	}
+}
+
+func TestDmRemoveThreshold(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	tmpDm := dm
+	tmp := Cache
+	defer func() {
+		config.SetCgrConfig(config.NewDefaultCGRConfig())
+		Cache = tmp
+		SetDataStorage(tmpDm)
+	}()
+	Cache.Clear(nil)
+	Cache.Clear(nil)
+	cfg.DataDbCfg().RplConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1)}
+	cfg.DataDbCfg().RplFiltered = true
+	cfg.DataDbCfg().Items = map[string]*config.ItemOpt{
+		utils.CacheThresholds: {
+			Limit:     3,
+			Replicate: true,
+			APIKey:    "key",
+			RouteID:   "route",
+		},
+	}
+	thS := &Threshold{
+		Tenant: "cgrates.org",
+		ID:     "THD_ACNT_1001",
+		Hits:   0,
+	}
+	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn <- &ccMock{
+		calls: map[string]func(args interface{}, reply interface{}) error{
+			utils.ReplicatorSv1RemoveThreshold: func(args, reply interface{}) error {
+				tntApiOpts, cancast := args.(utils.TenantIDWithAPIOpts)
+				if !cancast {
+					return utils.ErrNotConvertible
+				}
+				dm.dataDB.RemoveThresholdDrv(tntApiOpts.TenantID.Tenant, tntApiOpts.TenantID.ID)
+				return nil
+			},
+		},
+	}
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
+	})
+	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
+	config.SetCgrConfig(cfg)
+	SetDataStorage(dm)
+	if err := dm.RemoveThreshold(thS.Tenant, thS.ID); err != nil {
+		t.Error(err)
+	}
+	dm.dataDB = &DataDBMock{}
+	if err = dm.RemoveThreshold(thS.Tenant, thS.ID); err == nil || err != utils.ErrNotImplemented {
+		t.Error(err)
+	}
+}
