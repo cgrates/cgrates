@@ -1433,6 +1433,7 @@ func TestReaSortRoutes(t *testing.T) {
 	}
 }
 func TestHCRSortRoutes(t *testing.T) {
+	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dmSPP := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
@@ -1534,7 +1535,14 @@ func TestHCRSortRoutes(t *testing.T) {
 	}
 }
 func TestLoadDistributionSorterSortRoutes(t *testing.T) {
+
 	cfg := config.NewDefaultCGRConfig()
+	tmpDm := dm
+	defer func() {
+		config.SetCgrConfig(config.NewDefaultCGRConfig())
+		SetDataStorage(tmpDm)
+	}()
+
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, config.CgrConfig().CacheCfg(), nil)
 	cfg.RouteSCfg().RALsConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs)}
@@ -1585,20 +1593,6 @@ func TestLoadDistributionSorterSortRoutes(t *testing.T) {
 				"*ratio": "ratio",
 			},
 		},
-		"sorted_route2": {
-			ID:              "id",
-			FilterIDs:       []string{"filterid1"},
-			AccountIDs:      []string{"acc_id1"},
-			RatingPlanIDs:   []string{"rate1"},
-			ResourceIDs:     []string{},
-			StatIDs:         []string{"statID"},
-			Weight:          2.3,
-			Blocker:         true,
-			RouteParameters: "route",
-			cacheRoute: map[string]interface{}{
-				"*ratio": "ratio",
-			},
-		},
 	}
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
@@ -1635,32 +1629,24 @@ func TestLoadDistributionSorterSortRoutes(t *testing.T) {
 					"Ratio":    0.0,
 					"Weight":   2.3,
 				},
-			}, {
-				RouteID:         "id",
-				RouteParameters: "route",
-				SortingData: map[string]interface{}{
-					"Load":     21.11,
-					"MaxUsage": 180000000000,
-					"Ratio":    0,
-					"Weight":   2.3,
-				},
-				sortingDataF64: map[string]float64{
-					"Load":     21.11,
-					"MaxUsage": 180000000000.0,
-					"Ratio":    0.0,
-					"Weight":   2.3,
-				},
 			},
 		}}
 
 	if val, err := lds.SortRoutes(prflID, routes, ev, extraOpts); err != nil {
 		t.Error(err)
-	} else if reflect.DeepEqual(val, expSr) {
+	} else if reflect.DeepEqual(val.Routes[0].SortingData, expSr.Routes[0].SortingData) {
 		t.Errorf("expected %v,received %v", utils.ToJSON(expSr), utils.ToJSON(val))
 	}
+	// routes["sorted_id2"] = &Route{
+	// 	StatIDs: []string{},
+	// }
+	// if _, err = lds.SortRoutes(prflID, routes, ev, extraOpts); err == nil {
+	// 	t.Error(err)
+	// }
 }
 
 func TestRouteServicePopulateSortingData(t *testing.T) {
+	Cache.Clear(nil)
 
 	ccMock := &ccMock{
 		calls: map[string]func(args, reply interface{}) error{
