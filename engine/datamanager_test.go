@@ -631,38 +631,482 @@ func TestDataManagerSetFilterErrSetFilterDrv(t *testing.T) {
 	}
 }
 
-// unfinished
-// func TestDataManagerSetFilterErrUpdateFilterIndex(t *testing.T) {
-// 	tmp := Cache
-// 	cfgtmp := config.CgrConfig()
-// 	defer func() {
-// 		Cache = tmp
-// 		config.SetCgrConfig(cfgtmp)
-// 	}()
-// 	Cache.Clear(nil)
+func TestDataManagerSetFilterErrUpdateFilterIndex(t *testing.T) {
+	tmp := Cache
+	cfgtmp := config.CgrConfig()
+	defer func() {
+		Cache = tmp
+		config.SetCgrConfig(cfgtmp)
+	}()
+	Cache.Clear(nil)
 
-// 	cfg := config.NewDefaultCGRConfig()
+	cfg := config.NewDefaultCGRConfig()
 
-// 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-// 	cM := NewConnManager(cfg)
-// 	dm := NewDataManager(data, cfg.CacheCfg(), cM)
-// 	dm.dataDB = &DataDBMock{
-// 		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
-// 			return nil, utils.ErrNotImplemented
-// 		},
-// 	}
-// 	fltr := &Filter{
-// 		Tenant: "cgrates.org",
-// 		ID:     "*stirng:~*req.Account:1001",
-// 		Rules: []*FilterRule{{
-// 			Type:    utils.MetaString,
-// 			Element: "~*req.Account",
-// 			Values:  []string{"1001", "1002"},
-// 		}},
-// 	}
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+	dm.dataDB = &DataDBMock{
+		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
+			return nil, utils.ErrNotImplemented
+		},
+		SetFilterDrvF: func(ctx *context.Context, fltr *Filter) error { return nil },
+	}
+	fltr := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "*stirng:~*req.Account:1001",
+		Rules: []*FilterRule{{
+			Type:    utils.MetaString,
+			Element: "~*req.Account",
+			Values:  []string{"1001", "1002"},
+		}},
+	}
 
-// 	err := dm.SetFilter(context.Background(), fltr, true)
-// 	if err != nil {
-// 		t.Errorf("Expected error <%v>, Received error <%v>", utils.ErrNotImplemented, err)
-// 	}
-// }
+	err := dm.SetFilter(context.Background(), fltr, true)
+	if err != utils.ErrNotImplemented {
+		t.Errorf("Expected error <%v>, Received error <%v>", utils.ErrNotImplemented, err)
+	}
+}
+
+func TestDataManagerSetFilterErrItemReplicate(t *testing.T) {
+	tmp := Cache
+	cfgtmp := config.CgrConfig()
+	defer func() {
+		Cache = tmp
+		config.SetCgrConfig(cfgtmp)
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	cfg.DataDbCfg().Items[utils.MetaFilters].Replicate = true
+	config.SetCgrConfig(cfg)
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+	dm.dataDB = &DataDBMock{
+		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
+			return nil, nil
+		},
+		SetFilterDrvF: func(ctx *context.Context, fltr *Filter) error { return nil },
+	}
+	fltr := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "*stirng:~*req.Account:1001",
+		Rules: []*FilterRule{{
+			Type:    utils.MetaString,
+			Element: "~*req.Account",
+			Values:  []string{"1001", "1002"},
+		}},
+	}
+
+	expErr := "MANDATORY_IE_MISSING: [connIDs]"
+	err := dm.SetFilter(context.Background(), fltr, true)
+	if err.Error() != expErr {
+		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err)
+	}
+}
+
+func TestDataManagerRemoveFilterNildm(t *testing.T) {
+
+	var dm *DataManager
+
+	expErr := utils.ErrNoDatabaseConn
+	err := dm.RemoveFilter(context.Background(), utils.CGRateSorg, "fltr1", true)
+	if err != expErr {
+		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err)
+	}
+
+}
+
+func TestDataManagerRemoveFilterErrGetFilter(t *testing.T) {
+
+	tmp := Cache
+	cfgtmp := config.CgrConfig()
+	defer func() {
+		Cache = tmp
+		config.SetCgrConfig(cfgtmp)
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+	dm.dataDB = &DataDBMock{
+		GetFilterDrvF: func(ctx *context.Context, str1, str2 string) (*Filter, error) {
+			return nil, utils.ErrNotImplemented
+		},
+	}
+
+	expErr := utils.ErrNotImplemented
+	err := dm.RemoveFilter(context.Background(), utils.CGRateSorg, "fltr1", true)
+	if err != expErr {
+		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err)
+	}
+
+}
+
+func TestDataManagerRemoveFilterErrGetIndexes(t *testing.T) {
+
+	tmp := Cache
+	cfgtmp := config.CgrConfig()
+	defer func() {
+		Cache = tmp
+		config.SetCgrConfig(cfgtmp)
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+	dm.dataDB = &DataDBMock{
+		GetFilterDrvF: func(ctx *context.Context, str1, str2 string) (*Filter, error) {
+			return nil, utils.ErrNotFound
+		},
+	}
+
+	expErr := utils.ErrNotImplemented
+	err := dm.RemoveFilter(context.Background(), utils.CGRateSorg, "fltr1", true)
+	if err != expErr {
+		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err)
+	}
+
+}
+
+func TestDataManagerRemoveFilterErrGetIndexesBrokenReference(t *testing.T) {
+
+	tmp := Cache
+	cfgtmp := config.CgrConfig()
+	defer func() {
+		Cache = tmp
+		config.SetCgrConfig(cfgtmp)
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+	dm.dataDB = &DataDBMock{
+		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
+			return nil, nil
+		},
+	}
+
+	fltrId := "*stirng:~*req.Account:1001:4fields"
+	expErr := "cannot remove filter <cgrates.org:*stirng:~*req.Account:1001:4fields> because will broken the reference to following items: null"
+	err := dm.RemoveFilter(context.Background(), utils.CGRateSorg, fltrId, true)
+	if err.Error() != expErr {
+		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err)
+	}
+
+}
+
+func TestDataManagerRemoveFilterErrRemoveFilterDrv(t *testing.T) {
+
+	tmp := Cache
+	cfgtmp := config.CgrConfig()
+	defer func() {
+		Cache = tmp
+		config.SetCgrConfig(cfgtmp)
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+	dm.dataDB = &DataDBMock{
+		GetFilterDrvF: func(ctx *context.Context, str1 string, str2 string) (*Filter, error) {
+			return &Filter{}, nil
+		},
+		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
+			return map[string]utils.StringSet{}, utils.ErrNotFound
+		},
+		RemoveFilterDrvF: func(ctx *context.Context, str1 string, str2 string) error {
+			return utils.ErrNotImplemented
+		},
+	}
+
+	fltrId := "fltr1"
+	expErr := utils.ErrNotImplemented
+	err := dm.RemoveFilter(context.Background(), utils.CGRateSorg, fltrId, true)
+	if err != expErr {
+		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err)
+	}
+
+}
+
+func TestDataManagerRemoveFilterErrNilOldFltr(t *testing.T) {
+
+	tmp := Cache
+	cfgtmp := config.CgrConfig()
+	defer func() {
+		Cache = tmp
+		config.SetCgrConfig(cfgtmp)
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	var fltrId string
+	var tnt string
+	expErr := utils.ErrNotFound
+	err := dm.RemoveFilter(context.Background(), tnt, fltrId, false)
+	if err != expErr {
+		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err)
+	}
+
+}
+
+func TestDataManagerRemoveFilterReplicateTrue(t *testing.T) {
+
+	tmp := Cache
+	cfgtmp := config.CgrConfig()
+	defer func() {
+		Cache = tmp
+		config.SetCgrConfig(cfgtmp)
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	cfg.DataDbCfg().Items[utils.MetaFilters].Replicate = true
+	cfg.DataDbCfg().RplConns = []string{}
+	config.SetCgrConfig(cfg)
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+	dm.dataDB = &DataDBMock{
+		GetFilterDrvF: func(ctx *context.Context, str1 string, str2 string) (*Filter, error) {
+			return &Filter{}, nil
+		},
+
+		RemoveFilterDrvF: func(ctx *context.Context, str1 string, str2 string) error {
+			return nil
+		},
+	}
+
+	tnt := utils.CGRateSorg
+	fltrId := "*stirng:~*req.Account:1001"
+
+	// tested replicate
+	dm.RemoveFilter(context.Background(), tnt, fltrId, false)
+
+}
+
+func TestDataManagerRemoveAccountNilDM(t *testing.T) {
+
+	var dm *DataManager
+
+	expErr := utils.ErrNoDatabaseConn
+	err := dm.RemoveAccount(context.Background(), utils.CGRateSorg, "acc1", false)
+	if err != expErr {
+		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err)
+	}
+
+}
+
+func TestDataManagerRemoveAccountErrGetAccount(t *testing.T) {
+
+	tmp := Cache
+	cfgtmp := config.CgrConfig()
+	defer func() {
+		Cache = tmp
+		config.SetCgrConfig(cfgtmp)
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+	dm.dataDB = &DataDBMock{
+		GetAccountDrvF: func(ctx *context.Context, str1, str2 string) (*utils.Account, error) {
+			return nil, utils.ErrNotImplemented
+		},
+	}
+
+	expErr := utils.ErrNotImplemented
+	err := dm.RemoveAccount(context.Background(), utils.CGRateSorg, "fltr1", false)
+	if err != expErr {
+		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err)
+	}
+
+}
+
+func TestDataManagerRemoveAccountErrRemoveAccountDrv(t *testing.T) {
+
+	tmp := Cache
+	cfgtmp := config.CgrConfig()
+	defer func() {
+		Cache = tmp
+		config.SetCgrConfig(cfgtmp)
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+	dm.dataDB = &DataDBMock{
+		GetAccountDrvF: func(ctx *context.Context, str1, str2 string) (*utils.Account, error) {
+			return &utils.Account{}, nil
+		},
+		RemoveAccountDrvF: func(ctx *context.Context, str1, str2 string) error {
+			return utils.ErrNotImplemented
+		},
+	}
+
+	expErr := utils.ErrNotImplemented
+	err := dm.RemoveAccount(context.Background(), utils.CGRateSorg, "fltr1", false)
+	if err != expErr {
+		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err)
+	}
+
+}
+
+func TestDataManagerRemoveAccountErrNiloldRpp(t *testing.T) {
+
+	tmp := Cache
+	cfgtmp := config.CgrConfig()
+	defer func() {
+		Cache = tmp
+		config.SetCgrConfig(cfgtmp)
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	var fltrId string
+	var tnt string
+	expErr := utils.ErrNotFound
+	err := dm.RemoveAccount(context.Background(), tnt, fltrId, false)
+	if err != expErr {
+		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err)
+	}
+
+}
+
+func TestDataManagerRemoveAccountErrRemoveItemFromFilterIndex(t *testing.T) {
+
+	tmp := Cache
+	cfgtmp := config.CgrConfig()
+	defer func() {
+		Cache = tmp
+		config.SetCgrConfig(cfgtmp)
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+	dm.dataDB = &DataDBMock{
+		GetAccountDrvF: func(ctx *context.Context, str1, str2 string) (*utils.Account, error) {
+			return &utils.Account{}, nil
+		},
+		RemoveAccountDrvF: func(ctx *context.Context, str1, str2 string) error {
+			return nil
+		},
+		SetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
+			return utils.ErrNotImplemented
+		},
+	}
+
+	tnt := utils.CGRateSorg
+	fltrId := "*stirng:~*req.Account:1001"
+	expErr := utils.ErrNotImplemented
+	err := dm.RemoveAccount(context.Background(), tnt, fltrId, true)
+	if err != expErr {
+		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err)
+	}
+
+}
+
+func TestDataManagerRemoveAccountErrRemoveIndexFiltersItem(t *testing.T) {
+
+	tmp := Cache
+	cfgtmp := config.CgrConfig()
+	defer func() {
+		Cache = tmp
+		config.SetCgrConfig(cfgtmp)
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+	dm.dataDB = &DataDBMock{
+		GetAccountDrvF: func(ctx *context.Context, str1, str2 string) (*utils.Account, error) {
+			return &utils.Account{
+				FilterIDs: []string{"fltr1"},
+			}, nil
+		},
+		RemoveAccountDrvF: func(ctx *context.Context, str1, str2 string) error {
+			return nil
+		},
+		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
+			return nil, utils.ErrNotImplemented
+		},
+	}
+
+	tnt := utils.CGRateSorg
+	fltrId := "*stirng:~*req.Account:1001"
+	expErr := utils.ErrNotImplemented
+	err := dm.RemoveAccount(context.Background(), tnt, fltrId, true)
+	if err != expErr {
+		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err)
+	}
+
+}
+
+func TestDataManagerRemoveAccountReplicateTrue(t *testing.T) {
+
+	tmp := Cache
+	cfgtmp := config.CgrConfig()
+	defer func() {
+		Cache = tmp
+		config.SetCgrConfig(cfgtmp)
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	cfg.DataDbCfg().Items[utils.MetaFilters].Replicate = true
+	cfg.DataDbCfg().RplConns = []string{}
+	config.SetCgrConfig(cfg)
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+	dm.dataDB = &DataDBMock{
+		GetAccountDrvF: func(ctx *context.Context, str1, str2 string) (*utils.Account, error) {
+			return &utils.Account{}, nil
+		},
+		RemoveAccountDrvF: func(ctx *context.Context, str1, str2 string) error {
+			return nil
+		},
+	}
+
+	tnt := utils.CGRateSorg
+	fltrId := "*stirng:~*req.Account:1001"
+
+	// tested replicate
+	dm.RemoveAccount(context.Background(), tnt, fltrId, false)
+
+}

@@ -2142,3 +2142,28 @@ func TestFilterRulePassRegexParseErrNotFound(t *testing.T) {
 		t.Errorf("Expected error <%v>, Received error <%v>", utils.ErrNotFound, err)
 	}
 }
+
+// unfinished
+// func TestFilterRulePassRegexParseErr2(t *testing.T) {
+
+// 	rsrBadParse, _ := config.NewRSRParser("~*opts.*originID<~*opts.Converter>")
+
+// 	fltr := &FilterRule{
+// 		Type:       utils.EmptyString,
+// 		Element:    "~*req.Element",
+// 		Values:     []string{"value1", "value2"},
+// 		rsrElement: rsrBadParse,
+// 	}
+// 	fmt.Println(utils.ToJSON(fltr.rsrElement))
+
+// 	dDP := utils.MapStorage{
+// 		utils.MetaReq: utils.MapStorage{},
+// 		utils.MetaOpts: utils.MapStorage{
+// 			"Converter":        "{*",
+// 			utils.MetaOriginID: "originIDUniq",
+// 		},
+// 	}
+// 	if ok, err := fltr.passRegex(dDP); ok != false && err != utils.ErrNotFound {
+// 		t.Errorf("Expected error <%v>, Received error <%v>", utils.ErrNotFound, err)
+// 	}
+// }
