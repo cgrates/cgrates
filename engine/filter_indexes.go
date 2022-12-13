@@ -177,3 +177,79 @@ func ComputeChargerIndexes(dm *DataManager, tenant string, cppIDs *[]string,
 	}
 	return cppIndexes, nil
 }
+
+func ComputeResourceIndexes(dm *DataManager, tenant string, rsIDs *[]string,
+	transactionID string) (filterIndexer *FilterIndexer, err error) {
+	var resourceIDs []string
+	var rpIndexers *FilterIndexer
+	if rsIDs == nil {
+		ids, err := dm.DataDB().GetKeysForPrefix(utils.ResourceProfilesPrefix)
+		if err != nil {
+			return nil, err
+		}
+		for _, id := range ids {
+			resourceIDs = append(resourceIDs, strings.Split(id, utils.CONCATENATED_KEY_SEP)[1])
+		}
+		// this will be on ComputeIndexes that contains empty indexes
+		rpIndexers = NewFilterIndexer(dm, utils.ResourceProfilesPrefix, tenant)
+	} else {
+		// this will be on ComputeIndexesIDs that contains the old indexes from the next getter
+		var oldIDx map[string]utils.StringMap
+		if oldIDx, err = dm.GetFilterIndexes(utils.PrefixToIndexCache[utils.ResourceFilterIndexes],
+			tenant, utils.EmptyString, nil); err != nil || oldIDx == nil {
+			rpIndexers = NewFilterIndexer(dm, utils.ResourceProfilesPrefix, tenant)
+		} else {
+			rpIndexers = NewFilterIndexerWithIndexes(dm, utils.ResourceProfilesPrefix, tenant, oldIDx)
+		}
+		resourceIDs = *rsIDs
+		transactionID = utils.NonTransactional
+	}
+	for _, id := range resourceIDs {
+		rp, err := dm.GetResourceProfile(tenant, id, true, false, utils.NonTransactional)
+		if err != nil {
+			return nil, err
+		}
+		fltrIDs := make([]string, len(rp.FilterIDs))
+		for i, fltrID := range rp.FilterIDs {
+			fltrIDs[i] = fltrID
+		}
+		if len(fltrIDs) == 0 {
+			fltrIDs = []string{utils.META_NONE}
+		}
+		for _, fltrID := range fltrIDs {
+			var fltr *Filter
+			if fltrID == utils.META_NONE {
+				fltr = &Filter{
+					Tenant: rp.Tenant,
+					ID:     rp.ID,
+					Rules: []*FilterRule{
+						{
+							Type:    utils.META_NONE,
+							Element: utils.META_ANY,
+							Values:  []string{utils.META_ANY},
+						},
+					},
+				}
+			} else if fltr, err = GetFilter(dm, rp.Tenant, fltrID,
+				true, false, utils.NonTransactional); err != nil {
+				if err == utils.ErrNotFound {
+					err = fmt.Errorf("broken reference to filter: %+v for resource: %+v",
+						fltrID, rp)
+				}
+				return nil, err
+			}
+			rpIndexers.IndexTPFilter(FilterToTPFilter(fltr), rp.ID)
+		}
+	}
+	if transactionID == utils.NonTransactional {
+		if err := rpIndexers.StoreIndexes(true, transactionID); err != nil {
+			return nil, err
+		}
+		return nil, nil
+	} else {
+		if err := rpIndexers.StoreIndexes(false, transactionID); err != nil {
+			return nil, err
+		}
+	}
+	return rpIndexers, nil
+}

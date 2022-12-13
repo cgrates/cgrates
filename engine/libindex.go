@@ -145,6 +145,18 @@ func UpdateFilterIndexes(dm *DataManager, tnt string, oldFltr *Filter, newFltr *
 				utils.NonTransactional); err != nil {
 				return err
 			}
+		case utils.CacheResourceFilterIndexes:
+			// remove the indexes from this filter for this partition
+			if err = removeFilterIndexesForFilter(dm, idxItmType, utils.CacheResourceProfiles,
+				tnt, removeIndexKeys, index); err != nil {
+				return
+			}
+			// we removed the old reverse indexes, now we have to compute the new ones
+			resourceIDs := index.Slice()
+			if _, err = ComputeResourceIndexes(dm, newFltr.Tenant, &resourceIDs,
+				utils.NonTransactional); err != nil {
+				return err
+			}
 		}
 	}
 	return nil

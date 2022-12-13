@@ -225,7 +225,7 @@ func (api *APIerSv1) ComputeFilterIndexes(args utils.ArgsComputeFilterIndexes, r
 	//ResourceProfile Indexes
 	var rsIndexes *engine.FilterIndexer
 	if args.ResourceS {
-		rsIndexes, err = api.computeResourceIndexes(args.Tenant, nil, transactionID)
+		rsIndexes, err = engine.ComputeResourceIndexes(api.DataManager, args.Tenant, nil, transactionID)
 		if err != nil && err != utils.ErrNotFound {
 			return utils.APIErrorHandler(err)
 		}
@@ -325,7 +325,7 @@ func (api *APIerSv1) ComputeFilterIndexIDs(args utils.ArgsComputeFilterIndexIDs,
 		return utils.APIErrorHandler(err)
 	}
 	//ResourceProfile Indexes
-	rsIndexes, err := api.computeResourceIndexes(args.Tenant, &args.ResourceIDs, transactionID)
+	rsIndexes, err := engine.ComputeResourceIndexes(api.DataManager, args.Tenant, &args.ResourceIDs, transactionID)
 	if err != nil && err != utils.ErrNotFound {
 		return utils.APIErrorHandler(err)
 	}
@@ -538,82 +538,6 @@ func (api *APIerSv1) computeAttributeIndexes(tenant, context string, attrIDs *[]
 		}
 	}
 	return attrIndexers, nil
-}
-
-func (api *APIerSv1) computeResourceIndexes(tenant string, rsIDs *[]string,
-	transactionID string) (filterIndexer *engine.FilterIndexer, err error) {
-	var resourceIDs []string
-	var rpIndexers *engine.FilterIndexer
-	if rsIDs == nil {
-		ids, err := api.DataManager.DataDB().GetKeysForPrefix(utils.ResourceProfilesPrefix)
-		if err != nil {
-			return nil, err
-		}
-		for _, id := range ids {
-			resourceIDs = append(resourceIDs, strings.Split(id, utils.CONCATENATED_KEY_SEP)[1])
-		}
-		// this will be on ComputeIndexes that contains empty indexes
-		rpIndexers = engine.NewFilterIndexer(api.DataManager, utils.ResourceProfilesPrefix, tenant)
-	} else {
-		// this will be on ComputeIndexesIDs that contains the old indexes from the next getter
-		var oldIDx map[string]utils.StringMap
-		if oldIDx, err = api.DataManager.GetFilterIndexes(utils.PrefixToIndexCache[utils.ResourceFilterIndexes],
-			tenant, utils.EmptyString, nil); err != nil || oldIDx == nil {
-			rpIndexers = engine.NewFilterIndexer(api.DataManager, utils.ResourceProfilesPrefix, tenant)
-		} else {
-			rpIndexers = engine.NewFilterIndexerWithIndexes(api.DataManager, utils.ResourceProfilesPrefix, tenant, oldIDx)
-		}
-		resourceIDs = *rsIDs
-		transactionID = utils.NonTransactional
-	}
-	for _, id := range resourceIDs {
-		rp, err := api.DataManager.GetResourceProfile(tenant, id, true, false, utils.NonTransactional)
-		if err != nil {
-			return nil, err
-		}
-		fltrIDs := make([]string, len(rp.FilterIDs))
-		for i, fltrID := range rp.FilterIDs {
-			fltrIDs[i] = fltrID
-		}
-		if len(fltrIDs) == 0 {
-			fltrIDs = []string{utils.META_NONE}
-		}
-		for _, fltrID := range fltrIDs {
-			var fltr *engine.Filter
-			if fltrID == utils.META_NONE {
-				fltr = &engine.Filter{
-					Tenant: rp.Tenant,
-					ID:     rp.ID,
-					Rules: []*engine.FilterRule{
-						{
-							Type:    utils.META_NONE,
-							Element: utils.META_ANY,
-							Values:  []string{utils.META_ANY},
-						},
-					},
-				}
-			} else if fltr, err = engine.GetFilter(api.DataManager, rp.Tenant, fltrID,
-				true, false, utils.NonTransactional); err != nil {
-				if err == utils.ErrNotFound {
-					err = fmt.Errorf("broken reference to filter: %+v for resource: %+v",
-						fltrID, rp)
-				}
-				return nil, err
-			}
-			rpIndexers.IndexTPFilter(engine.FilterToTPFilter(fltr), rp.ID)
-		}
-	}
-	if transactionID == utils.NonTransactional {
-		if err := rpIndexers.StoreIndexes(true, transactionID); err != nil {
-			return nil, err
-		}
-		return nil, nil
-	} else {
-		if err := rpIndexers.StoreIndexes(false, transactionID); err != nil {
-			return nil, err
-		}
-	}
-	return rpIndexers, nil
 }
 
 func (api *APIerSv1) computeStatIndexes(tenant string, stIDs *[]string,
