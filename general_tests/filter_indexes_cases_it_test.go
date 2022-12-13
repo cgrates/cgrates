@@ -128,6 +128,17 @@ var (
 		testFilterIndexesCasesGetIndexesAfterRemove2,
 		testFilterIndexesCasesGetReverseIndexesAfterRemove2,
 
+		// RESOURCES
+		testFilterIndexesCasesSetResourceWithFltr,
+		testFilterIndexesCasesGetResourcesIndexes,
+		/* testFilterIndexesCasesOverwriteFilterForResources,
+		testFilterIndexesCasesGetResourcesIndexesChanged,
+
+		testFilterIndexesCasesGetReverseFilterIndexes3,
+		testFilterIndexesCasesRemoveResourcesProfile,
+		testFilterIndexesCasesGetIndexesAfterRemove3,
+		testFilterIndexesCasesGetReverseIndexesAfterRemove3, */
+
 		testFilterIndexesCasesStopEngine,
 	}
 )
@@ -1119,6 +1130,168 @@ func testFilterIndexesCasesGetReverseIndexesAfterRemove2(t *testing.T) {
 	} else if sort.Strings(reply); !reflect.DeepEqual(expectedIndexes, reply) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expectedIndexes), utils.ToJSON(reply))
 	}
+}
+
+func testFilterIndexesCasesSetResourceWithFltr(t *testing.T) {
+	rsPrf1 := &v1.ResourceWithCache{
+		ResourceProfile: &engine.ResourceProfile{
+			Tenant: "cgrates.org",
+			ID:     "RESOURCE_FLTR1",
+			FilterIDs: []string{
+				"FLTR_Charger",
+			},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+				ExpiryTime:     time.Date(2015, 7, 14, 14, 25, 0, 0, time.UTC),
+			},
+			UsageTTL:          time.Duration(1) * time.Nanosecond,
+			Limit:             10,
+			AllocationMessage: "MessageAllocation",
+			Blocker:           true,
+			Stored:            true,
+			Weight:            20,
+		},
+	}
+	rsPrf2 := &v1.ResourceWithCache{
+		ResourceProfile: &engine.ResourceProfile{
+			Tenant: "cgrates.org",
+			ID:     "RESOURCE_FLTR2",
+			FilterIDs: []string{
+				"FLTR_Charger4564",
+				"FLTR_Charger",
+				"FLTR_Charger12312"},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+				ExpiryTime:     time.Date(2015, 7, 14, 14, 25, 0, 0, time.UTC),
+			},
+			UsageTTL:          time.Duration(10) * time.Nanosecond,
+			Limit:             10,
+			AllocationMessage: "MessageAllocation",
+			Blocker:           true,
+			Stored:            true,
+			Weight:            50,
+		},
+	}
+	rsPrf3 := &v1.ResourceWithCache{
+		ResourceProfile: &engine.ResourceProfile{
+			Tenant: "cgrates.org",
+			ID:     "RESOURCE_FLTR3",
+			FilterIDs: []string{
+				"FLTR_Charger12312",
+				"*prefix:~*req.Usage:15s",
+				"FLTR_Charger",
+			},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+				ExpiryTime:     time.Date(2015, 7, 14, 14, 25, 0, 0, time.UTC),
+			},
+			UsageTTL:          time.Duration(5) * time.Nanosecond,
+			Limit:             10,
+			AllocationMessage: "MessageAllocation",
+			Blocker:           true,
+			Stored:            true,
+			Weight:            10,
+		},
+	}
+	rsPrf4 := &v1.ResourceWithCache{
+		ResourceProfile: &engine.ResourceProfile{
+			Tenant:    "cgrates.org",
+			ID:        "RESOURCE_FLTR4",
+			FilterIDs: []string{},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+				ExpiryTime:     time.Date(2015, 7, 14, 14, 25, 0, 0, time.UTC),
+			},
+			UsageTTL:          time.Duration(1) * time.Nanosecond,
+			Limit:             10,
+			AllocationMessage: "MessageAllocation",
+			Blocker:           true,
+			Stored:            true,
+			Weight:            26,
+		},
+	}
+
+	var result string
+	if err := fIdxCasesRPC.Call(utils.APIerSv1SetResourceProfile, rsPrf1, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+	if err := fIdxCasesRPC.Call(utils.APIerSv1SetResourceProfile, rsPrf2, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+	if err := fIdxCasesRPC.Call(utils.APIerSv1SetResourceProfile, rsPrf3, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+	if err := fIdxCasesRPC.Call(utils.APIerSv1SetResourceProfile, rsPrf4, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+}
+
+func testFilterIndexesCasesGetResourcesIndexes(t *testing.T) {
+	arg := &v1.AttrGetFilterIndexes{
+		Tenant:   "cgrates.org",
+		ItemType: utils.MetaResources,
+	}
+	expectedIndexes := []string{
+		// RESOURCE_FLTR1
+		"*prefix:~*req.CostRefunded:12345:RESOURCE_FLTR1",
+		"*string:~*req.ToR:*voice:RESOURCE_FLTR1",
+
+		// RESOURCE_FLTR2
+		"*prefix:~*req.CostRefunded:12345:RESOURCE_FLTR2",
+		"*string:~*req.ToR:*voice:RESOURCE_FLTR2",
+		"*string:~*req.Increment:1s:RESOURCE_FLTR2",
+		"*string:~*req.Destination:1443:RESOURCE_FLTR2",
+		"*prefix:~*req.SetupTime:2022:RESOURCE_FLTR2",
+
+		// RESOURCE_FLTR3
+		"*prefix:~*req.CostRefunded:12345:RESOURCE_FLTR3",
+		"*string:~*req.ToR:*voice:RESOURCE_FLTR3",
+		"*string:~*req.Destination:1443:RESOURCE_FLTR3",
+		"*prefix:~*req.SetupTime:2022:RESOURCE_FLTR3",
+		"*prefix:~*req.Usage:15s:RESOURCE_FLTR3",
+
+		// RESOURCE_FLTR4
+		"*none:*any:*any:RESOURCE_FLTR4",
+	}
+	sort.Strings(expectedIndexes)
+	var reply []string
+	if err := fIdxCasesRPC.Call(utils.APIerSv1GetFilterIndexes, arg, &reply); err != nil {
+		t.Error(err)
+	} else if sort.Strings(reply); !reflect.DeepEqual(expectedIndexes, reply) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expectedIndexes), utils.ToJSON(reply))
+	}
+}
+
+func testFilterIndexesCasesOverwriteFilterForResources(t *testing.T) {
+
+}
+
+func testFilterIndexesCasesGetResourcesIndexesChanged(t *testing.T) {
+
+}
+
+func testFilterIndexesCasesGetReverseFilterIndexes3(t *testing.T) {
+
+}
+
+func testFilterIndexesCasesRemoveResourcesProfile(t *testing.T) {
+
+}
+
+func testFilterIndexesCasesGetIndexesAfterRemove3(t *testing.T) {
+
+}
+
+func testFilterIndexesCasesGetReverseIndexesAfterRemove3(t *testing.T) {
+
 }
 
 func testFilterIndexesCasesStopEngine(t *testing.T) {
