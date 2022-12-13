@@ -1143,9 +1143,17 @@ func (dm *DataManager) SetResourceProfile(rp *ResourceProfile, withIndex bool) (
 					rp.Tenant).RemoveItemFromIndex(rp.Tenant, rp.ID, oldRes.FilterIDs); err != nil {
 					return
 				}
+				if err = removeReverseFilterIndexForFilter(dm, utils.CacheResourceFilterIndexes, utils.EmptyString,
+					rp.Tenant, rp.ID, rp.FilterIDs); err != nil {
+					return
+				}
 			}
 		}
 		if err = createAndIndex(utils.ResourceProfilesPrefix, rp.Tenant, utils.EmptyString, rp.ID, rp.FilterIDs, dm); err != nil {
+			return
+		}
+		if err = addReverseFilterIndexForFilter(dm, utils.CacheResourceFilterIndexes, utils.EmptyString,
+			rp.Tenant, rp.ID, rp.FilterIDs); err != nil {
 			return
 		}
 		Cache.Clear([]string{utils.CacheEventResources})
@@ -1176,6 +1184,10 @@ func (dm *DataManager) RemoveResourceProfile(tenant, id, transactionID string, w
 	if withIndex {
 		if err = NewFilterIndexer(dm, utils.ResourceProfilesPrefix,
 			tenant).RemoveItemFromIndex(tenant, id, oldRes.FilterIDs); err != nil {
+			return
+		}
+		if err = removeReverseFilterIndexForFilter(dm, utils.CacheResourceFilterIndexes, utils.EmptyString,
+			oldRes.Tenant, oldRes.ID, oldRes.FilterIDs); err != nil {
 			return
 		}
 	}
