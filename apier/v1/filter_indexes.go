@@ -217,7 +217,7 @@ func (api *APIerSv1) ComputeFilterIndexes(args utils.ArgsComputeFilterIndexes, r
 	//StatQueueProfile Indexes
 	var sqpIndexers *engine.FilterIndexer
 	if args.StatS {
-		sqpIndexers, err = api.computeStatIndexes(args.Tenant, nil, transactionID)
+		sqpIndexers, err = engine.ComputeStatIndexes(api.DataManager, args.Tenant, nil, transactionID)
 		if err != nil && err != utils.ErrNotFound {
 			return utils.APIErrorHandler(err)
 		}
@@ -320,7 +320,7 @@ func (api *APIerSv1) ComputeFilterIndexIDs(args utils.ArgsComputeFilterIndexIDs,
 	}
 
 	//StatQueueProfile Indexes
-	sqpIndexers, err := api.computeStatIndexes(args.Tenant, &args.StatIDs, transactionID)
+	sqpIndexers, err := engine.ComputeStatIndexes(api.DataManager, args.Tenant, &args.StatIDs, transactionID)
 	if err != nil && err != utils.ErrNotFound {
 		return utils.APIErrorHandler(err)
 	}
@@ -538,82 +538,6 @@ func (api *APIerSv1) computeAttributeIndexes(tenant, context string, attrIDs *[]
 		}
 	}
 	return attrIndexers, nil
-}
-
-func (api *APIerSv1) computeStatIndexes(tenant string, stIDs *[]string,
-	transactionID string) (filterIndexer *engine.FilterIndexer, err error) {
-	var statIDs []string
-	var sqpIndexers *engine.FilterIndexer
-	if stIDs == nil {
-		ids, err := api.DataManager.DataDB().GetKeysForPrefix(utils.StatQueueProfilePrefix)
-		if err != nil {
-			return nil, err
-		}
-		for _, id := range ids {
-			statIDs = append(statIDs, strings.Split(id, utils.CONCATENATED_KEY_SEP)[1])
-		}
-		// this will be on ComputeIndexes that contains empty indexes
-		sqpIndexers = engine.NewFilterIndexer(api.DataManager, utils.StatQueueProfilePrefix, tenant)
-	} else {
-		// this will be on ComputeIndexesIDs that contains the old indexes from the next getter
-		var oldIDx map[string]utils.StringMap
-		if oldIDx, err = api.DataManager.GetFilterIndexes(utils.PrefixToIndexCache[utils.StatQueueProfilePrefix],
-			tenant, utils.EmptyString, nil); err != nil || oldIDx == nil {
-			sqpIndexers = engine.NewFilterIndexer(api.DataManager, utils.StatQueueProfilePrefix, tenant)
-		} else {
-			sqpIndexers = engine.NewFilterIndexerWithIndexes(api.DataManager, utils.StatQueueProfilePrefix, tenant, oldIDx)
-		}
-		statIDs = *stIDs
-		transactionID = utils.NonTransactional
-	}
-	for _, id := range statIDs {
-		sqp, err := api.DataManager.GetStatQueueProfile(tenant, id, true, false, utils.NonTransactional)
-		if err != nil {
-			return nil, err
-		}
-		fltrIDs := make([]string, len(sqp.FilterIDs))
-		for i, fltrID := range sqp.FilterIDs {
-			fltrIDs[i] = fltrID
-		}
-		if len(fltrIDs) == 0 {
-			fltrIDs = []string{utils.META_NONE}
-		}
-		for _, fltrID := range fltrIDs {
-			var fltr *engine.Filter
-			if fltrID == utils.META_NONE {
-				fltr = &engine.Filter{
-					Tenant: sqp.Tenant,
-					ID:     sqp.ID,
-					Rules: []*engine.FilterRule{
-						{
-							Type:    utils.META_NONE,
-							Element: utils.META_ANY,
-							Values:  []string{utils.META_ANY},
-						},
-					},
-				}
-			} else if fltr, err = engine.GetFilter(api.DataManager, sqp.Tenant, fltrID,
-				true, false, utils.NonTransactional); err != nil {
-				if err == utils.ErrNotFound {
-					err = fmt.Errorf("broken reference to filter: %+v for statqueue: %+v",
-						fltrID, sqp)
-				}
-				return nil, err
-			}
-			sqpIndexers.IndexTPFilter(engine.FilterToTPFilter(fltr), sqp.ID)
-		}
-	}
-	if transactionID == utils.NonTransactional {
-		if err := sqpIndexers.StoreIndexes(true, transactionID); err != nil {
-			return nil, err
-		}
-		return nil, nil
-	} else {
-		if err := sqpIndexers.StoreIndexes(false, transactionID); err != nil {
-			return nil, err
-		}
-	}
-	return sqpIndexers, nil
 }
 
 func (api *APIerSv1) computeDispatcherIndexes(tenant, context string, dspIDs *[]string,
