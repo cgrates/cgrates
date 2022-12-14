@@ -181,6 +181,27 @@ func UpdateFilterIndexes(dm *DataManager, tnt string, oldFltr *Filter, newFltr *
 				utils.NonTransactional); err != nil {
 				return err
 			}
+		case utils.CacheAttributeFilterIndexes:
+			attributeIDs := index.Slice()
+			for _, attrID := range attributeIDs {
+				var ap *AttributeProfile
+				if ap, err = dm.GetAttributeProfile(newFltr.Tenant, attrID,
+					true, false, utils.NonTransactional); err != nil {
+					return
+				}
+				for _, ctx := range ap.Contexts {
+					tntCtx := utils.ConcatenatedKey(newFltr.Tenant, ctx)
+					if err = removeFilterIndexesForFilter(dm, idxItmType, utils.CacheAttributeProfiles,
+						tntCtx, // remove the indexes for the filter
+						removeIndexKeys, index); err != nil {
+						return
+					}
+					if _, err = ComputeAttributeIndexes(dm, newFltr.Tenant, ctx, &attributeIDs,
+						utils.NonTransactional); err != nil {
+						return err
+					}
+				}
+			}
 		}
 	}
 	return nil
@@ -217,7 +238,7 @@ func removeFilterIndexesForFilter(dm *DataManager, idxItmType, cacheItmType, tnt
 }
 
 // addReverseFilterIndexForFilter will add a reference for the filter in reverse filter indexes
-func addReverseFilterIndexForFilter(dm *DataManager, idxItmType, ctx, tnt,
+func addReverseFilterIndexForFilter(dm *DataManager, idxItmType, tnt,
 	itemID string, filterIDs []string) (err error) {
 	for _, fltrID := range filterIDs {
 		if strings.HasPrefix(fltrID, utils.Meta) { // we do not reverse for inline filters
@@ -246,9 +267,6 @@ func addReverseFilterIndexForFilter(dm *DataManager, idxItmType, ctx, tnt,
 			itemID: true,
 		})
 		indexerKey := utils.ConcatenatedKey(tnt, fltrID)
-		if ctx != utils.EmptyString {
-			indexerKey = utils.ConcatenatedKey(tnt, ctx)
-		}
 		fltrIndexer := NewFilterIndexer(dm, utils.ReverseFilterIndexes, indexerKey)
 		fltrIndexer.indexes = indexes
 		if err = fltrIndexer.StoreIndexes(true, utils.NonTransactional); err != nil { // it will remove from cache the old ones
@@ -261,7 +279,7 @@ func addReverseFilterIndexForFilter(dm *DataManager, idxItmType, ctx, tnt,
 }
 
 // removeReverseFilterIndexForFilter will remove a reference for the filter in reverse filter indexes
-func removeReverseFilterIndexForFilter(dm *DataManager, idxItmType, ctx, tnt, itemID string, filterIDs []string) (err error) {
+func removeReverseFilterIndexForFilter(dm *DataManager, idxItmType, tnt, itemID string, filterIDs []string) (err error) {
 	for _, fltrID := range filterIDs {
 		if strings.HasPrefix(fltrID, utils.Meta) { // we do not reverse for inline filters
 			continue
@@ -282,9 +300,6 @@ func removeReverseFilterIndexForFilter(dm *DataManager, idxItmType, ctx, tnt, it
 		delete(indexes[idxItmType], itemID) // delete index from map
 
 		indexerKey := utils.ConcatenatedKey(tnt, fltrID)
-		if ctx != utils.EmptyString {
-			indexerKey = utils.ConcatenatedKey(tnt, ctx)
-		}
 		fltrIndexer := NewFilterIndexer(dm, utils.ReverseFilterIndexes, indexerKey)
 		fltrIndexer.indexes = indexes
 		if err = fltrIndexer.StoreIndexes(true, utils.NonTransactional); err != nil {
