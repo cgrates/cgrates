@@ -158,6 +158,8 @@ func TestCDRSV1ProcessEventNoTenant(t *testing.T) {
 
 	if err := cdrs.V1ProcessEvent(args, &reply); err != nil {
 		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("expected %v,received %v", utils.OK, reply)
 	}
 }
 
@@ -802,14 +804,18 @@ func TestV1ProcessEvent(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CdrsCfg().AttributeSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.AttributeSConnsCfg)}
+	cfg.CdrsCfg().ChargerSConns = []string{utils.ConcatenatedKey(utils.MetaInternal)}
 	cfg.CdrsCfg().StoreCdrs = true
-
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
-	ccMock := &ccMock{
+	clientconn := make(chan rpcclient.ClientConnector, 1)
+	clientconn <- &ccMock{
 		calls: map[string]func(args interface{}, reply interface{}) error{
 			utils.AttributeSv1ProcessEvent: func(args, reply interface{}) error {
-				rpl := &AttrSProcessEventReply{}
+				rpl := &AttrSProcessEventReply{
+					AlteredFields: []string{"*req.OfficeGroup"},
+					CGREvent:      &utils.CGREvent{},
+				}
 				*reply.(*AttrSProcessEventReply) = *rpl
 
 				return nil
@@ -819,9 +825,12 @@ func TestV1ProcessEvent(t *testing.T) {
 					{
 						ChargerSProfile:    "chrgs1",
 						AttributeSProfiles: []string{"attr1", "attr2"},
+						CGREvent:           &utils.CGREvent{},
 					}, {
-						ChargerSProfile:    "chrgs1",
+						ChargerSProfile: "chrgs1",
+
 						AttributeSProfiles: []string{"attr1", "attr2"},
+						CGREvent:           &utils.CGREvent{},
 					},
 				}
 				*reply.(*[]*ChrgSProcessEventReply) = rpl
@@ -829,9 +838,6 @@ func TestV1ProcessEvent(t *testing.T) {
 			},
 		},
 	}
-
-	clientconn := make(chan rpcclient.ClientConnector, 1)
-	clientconn <- ccMock
 	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.AttributeSConnsCfg): clientconn,
 	})
@@ -843,7 +849,7 @@ func TestV1ProcessEvent(t *testing.T) {
 		connMgr: connMgr,
 	}
 	arg := &ArgV1ProcessEvent{
-		Flags: []string{utils.MetaAttributes, utils.MetaExport, utils.MetaStore, utils.OptsThresholdS, utils.MetaThresholds, utils.MetaStats, utils.OptsChargerS, utils.MetaChargers, utils.OptsRALs, utils.MetaRALs, utils.OptsRerate, utils.MetaRerate, utils.OptsRefund, utils.MetaRefund},
+		Flags: []string{utils.MetaAttributes, utils.MetaStats, utils.MetaExport, utils.MetaStore, utils.OptsThresholdS, utils.MetaThresholds, utils.MetaStats, utils.OptsChargerS, utils.MetaChargers, utils.OptsRALs, utils.MetaRALs, utils.OptsRerate, utils.MetaRerate, utils.OptsRefund, utils.MetaRefund},
 		CGREvent: utils.CGREvent{
 			ID: "TestV1ProcessEventNoTenant",
 			Event: map[string]interface{}{
@@ -858,7 +864,8 @@ func TestV1ProcessEvent(t *testing.T) {
 			},
 		},
 	}
-	if err := cdrS.V1ProcessEvent(arg, utils.StringPointer("val")); err == nil || err != utils.ErrPartiallyExecuted {
+	var reply string
+	if err := cdrS.V1ProcessEvent(arg, &reply); err == nil || err != utils.ErrPartiallyExecuted {
 		t.Error(err)
 	}
 }
@@ -1643,8 +1650,15 @@ func TestCdrServerStoreSMCost(t *testing.T) {
 
 func TestCdrSRateCDR(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	tmp := Cache
+	defer func() {
+		config.SetCgrConfig(config.NewDefaultCGRConfig())
+		Cache = tmp
+	}()
+	Cache.Clear(nil)
 	cfg.CdrsCfg().SMCostRetries = 1
 	cfg.CdrsCfg().ChargerSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ChargerSConnsCfg)}
+	cfg.CdrsCfg().RaterConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs)}
 	db := NewInternalDB(nil, nil, true, map[string]*config.ItemOpt{
 		utils.CacheSessionCostsTBL: {
 			Limit:     2,
@@ -1654,7 +1668,27 @@ func TestCdrSRateCDR(t *testing.T) {
 			Replicate: true,
 		},
 	})
-
+	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn <- &ccMock{
+		calls: map[string]func(args interface{}, reply interface{}) error{
+			utils.ResponderDebit: func(args, reply interface{}) error {
+				cc := &CallCost{
+					Category:    "generic",
+					Tenant:      "cgrates.org",
+					Subject:     "1001",
+					Account:     "1001",
+					Destination: "data",
+					ToR:         "*data",
+					Cost:        0,
+				}
+				*reply.(*CallCost) = *cc
+				return nil
+			},
+		},
+	}
+	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs): clientConn,
+	})
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 	cdrS := &CDRServer{
 		cgrCfg:  cfg,
@@ -1697,7 +1731,48 @@ func TestCdrSRateCDR(t *testing.T) {
 			},
 		},
 	}
-	if _, err := cdrS.rateCDR(cdrOpts); err == nil {
+
+	if _, err := cdrS.rateCDR(cdrOpts); err != nil {
+		t.Error(err)
+	}
+
+	cdrOpts.ExtraFields = map[string]string{}
+	cdrOpts.Usage = 0
+	if _, err := cdrS.rateCDR(cdrOpts); err != nil {
+		t.Error(err)
+	}
+
+	cdrOpts.CostDetails = &EventCost{
+		CGRID:     "7636f3f1a06dffa038ba7900fb57f52d28830a24",
+		RunID:     utils.MetaDefault,
+		StartTime: time.Date(2018, 7, 27, 0, 59, 21, 0, time.UTC),
+		Usage:     utils.DurationPointer(2 * time.Second),
+		Charges: []*ChargingInterval{
+			{
+				RatingID: "cc68da4",
+				Increments: []*ChargingIncrement{
+					{
+						Usage:          102400,
+						AccountingID:   "0d87a64",
+						CompressFactor: 103,
+					},
+				},
+				CompressFactor: 1,
+			},
+		},
+		AccountSummary: &AccountSummary{
+			Tenant: "cgrates.org",
+			ID:     "dan",
+			BalanceSummaries: []*BalanceSummary{
+				{
+					UUID:  "9a767726-fe69-4940-b7bd-f43de9f0f8a5",
+					ID:    "addon_data",
+					Type:  utils.MetaData,
+					Value: 10726871040},
+			},
+		},
+	}
+	if _, err := cdrS.rateCDR(cdrOpts); err != nil {
 		t.Error(err)
 	}
 }

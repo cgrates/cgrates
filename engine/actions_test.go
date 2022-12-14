@@ -2500,6 +2500,24 @@ func TestCgrRpcAction(t *testing.T) {
 	if trpcp.status != utils.OK {
 		t.Error("RPC not called!")
 	}
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().ReplyTimeout = 1000 * time.Millisecond
+	cfg.GeneralCfg().ConnectTimeout = 1000 * time.Millisecond
+	config.SetCgrConfig(cfg)
+	defer func() {
+		config.SetCgrConfig(config.NewDefaultCGRConfig())
+	}()
+	a = &Action{
+		ExtraParameters: `{"Address": "*json*localhost",
+	"Transport": "*gob",
+	"Method": "TestRPCParameters.Hopa",
+	"Attempts":1,
+	"Async" :false,
+	"Params": {"Name":"n", "Surname":"s", "Age":10.2}}`,
+	}
+	if err := cgrRPCAction(nil, a, nil, nil, nil); err == nil {
+		t.Error("error executing cgr action: ", err)
+	}
 }
 
 func TestValueFormulaDebit(t *testing.T) {
@@ -2822,6 +2840,10 @@ func BenchmarkUUID(b *testing.B) {
 
 func TestResetAccountCDR(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	defer func() {
+		config.SetCgrConfig(config.NewDefaultCGRConfig())
+		SetCdrStorage(cdrStorage)
+	}()
 	idb := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := NewDataManager(idb, cfg.CacheCfg(), nil)
 	fltrs := NewFilterS(cfg, nil, dm)
@@ -2867,9 +2889,14 @@ func TestResetAccountCDR(t *testing.T) {
 	}
 	if err := resetAccountCDR(nil, a, acs, fltrs, extraData); err == nil || err.Error() != "nil account" {
 		t.Errorf("expected <nil account> ,received <%+v>", err)
-	} else if err = resetAccountCDR(acc, a, acs, fltrs, extraData); err == nil {
+	} else if err = resetAccountCDR(acc, a, acs, fltrs, extraData); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
 	}
+	SetCdrStorage(nil)
+	if err := resetAccountCDR(acc, a, acs, fltrs, extraData); err == nil || err.Error() != fmt.Sprintf("nil cdrStorage for %s action", utils.ToJSON(a)) {
+		t.Error(err)
+	}
+
 }
 
 func TestSetRecurrentAction(t *testing.T) {
@@ -3211,6 +3238,10 @@ func TestExportAction(t *testing.T) {
 		t.Errorf("received %v", err)
 	} else if err = export(nil, a, acs, nil, extraData); err != nil {
 		t.Errorf("received %v", err)
+	} else if err = export(nil, a, acs, nil, "test"); err != nil {
+		t.Error(err)
+	} else if err = export(nil, a, acs, nil, nil); err != nil {
+		t.Error(err)
 	}
 }
 func TestResetStatQueue(t *testing.T) {

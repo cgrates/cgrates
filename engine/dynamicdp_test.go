@@ -72,8 +72,18 @@ func TestDpLibPhoneNumber(t *testing.T) {
 	if _, err := dDP.fieldAsInterface([]string{}); err == nil || err.Error() != fmt.Sprintf("invalid field path <%+v> for libphonenumberDP", []string{}) {
 		t.Error(err)
 	}
-	if _, err := dDP.fieldAsInterface([]string{"CountryCode"}); err != nil {
+	val, err := dDP.fieldAsInterface([]string{"CountryCode"})
+	if err != nil {
 		t.Error(err)
+	}
+	if err != nil {
+		t.Error(err)
+	}
+	exp := int32(355)
+	if nationalNumber, cancast := val.(int32); !cancast {
+		t.Error("can't convert")
+	} else if nationalNumber != exp {
+		t.Errorf("expected %v,received %v", exp, nationalNumber)
 	}
 
 }
