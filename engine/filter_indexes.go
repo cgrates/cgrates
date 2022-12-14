@@ -405,3 +405,83 @@ func ComputeStatIndexes(dm *DataManager, tenant string, stIDs *[]string,
 	}
 	return sqpIndexers, nil
 }
+
+func ComputeAttributeIndexes(dm *DataManager, tenant, context string, attrIDs *[]string,
+	transactionID string) (filterIndexer *FilterIndexer, err error) {
+	var attributeIDs []string
+	var attrIndexers *FilterIndexer
+	if attrIDs == nil {
+		ids, err := dm.DataDB().GetKeysForPrefix(utils.AttributeProfilePrefix)
+		if err != nil {
+			return nil, err
+		}
+		for _, id := range ids {
+			attributeIDs = append(attributeIDs, strings.Split(id, utils.CONCATENATED_KEY_SEP)[1])
+		}
+		// this will be on ComputeIndexes that contains empty indexes
+		attrIndexers = NewFilterIndexer(dm, utils.AttributeProfilePrefix,
+			utils.ConcatenatedKey(tenant, context))
+	} else {
+		// this will be on ComputeIndexesIDs that contains the old indexes from the next getter
+		var oldIDx map[string]utils.StringMap
+		if oldIDx, err = dm.GetFilterIndexes(utils.PrefixToIndexCache[utils.AttributeProfilePrefix],
+			tenant, utils.EmptyString, nil); err != nil || oldIDx == nil {
+			attrIndexers = NewFilterIndexer(dm, utils.AttributeProfilePrefix, utils.ConcatenatedKey(tenant, context))
+		} else {
+			attrIndexers = NewFilterIndexerWithIndexes(dm, utils.AttributeProfilePrefix, utils.ConcatenatedKey(tenant, context), oldIDx)
+		}
+		attributeIDs = *attrIDs
+		transactionID = utils.NonTransactional
+	}
+	for _, id := range attributeIDs {
+		ap, err := dm.GetAttributeProfile(tenant, id, true, false, utils.NonTransactional)
+		if err != nil {
+			return nil, err
+		}
+		if !utils.IsSliceMember(ap.Contexts, context) && context != utils.META_ANY {
+			continue
+		}
+		fltrIDs := make([]string, len(ap.FilterIDs))
+		for i, fltrID := range ap.FilterIDs {
+			fltrIDs[i] = fltrID
+		}
+		if len(fltrIDs) == 0 {
+			fltrIDs = []string{utils.META_NONE}
+		}
+		for _, fltrID := range fltrIDs {
+			var fltr *Filter
+			if fltrID == utils.META_NONE {
+				fltr = &Filter{
+					Tenant: ap.Tenant,
+					ID:     ap.ID,
+					Rules: []*FilterRule{
+						{
+							Type:    utils.META_NONE,
+							Element: utils.META_ANY,
+							Values:  []string{utils.META_ANY},
+						},
+					},
+				}
+			} else if fltr, err = GetFilter(dm, ap.Tenant, fltrID,
+				true, false, utils.NonTransactional); err != nil {
+				if err == utils.ErrNotFound {
+					err = fmt.Errorf("broken reference to filter: %+v for attribute: %+v",
+						fltrID, ap)
+				}
+				return nil, err
+			}
+			attrIndexers.IndexTPFilter(FilterToTPFilter(fltr), ap.ID)
+		}
+	}
+	if transactionID == utils.NonTransactional {
+		if err := attrIndexers.StoreIndexes(true, transactionID); err != nil {
+			return nil, err
+		}
+		return nil, nil
+	} else {
+		if err := attrIndexers.StoreIndexes(false, transactionID); err != nil {
+			return nil, err
+		}
+	}
+	return attrIndexers, nil
+}

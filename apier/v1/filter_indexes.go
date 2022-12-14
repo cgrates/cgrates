@@ -241,7 +241,7 @@ func (api *APIerSv1) ComputeFilterIndexes(args utils.ArgsComputeFilterIndexes, r
 	//AttributeProfile Indexes
 	var attrIndexes *engine.FilterIndexer
 	if args.AttributeS {
-		attrIndexes, err = api.computeAttributeIndexes(args.Tenant, args.Context, nil, transactionID)
+		attrIndexes, err = engine.ComputeAttributeIndexes(api.DataManager, args.Tenant, args.Context, nil, transactionID)
 		if err != nil && err != utils.ErrNotFound {
 			return utils.APIErrorHandler(err)
 		}
@@ -335,7 +335,7 @@ func (api *APIerSv1) ComputeFilterIndexIDs(args utils.ArgsComputeFilterIndexIDs,
 		return utils.APIErrorHandler(err)
 	}
 	//AttributeProfile Indexes
-	attrIndexes, err := api.computeAttributeIndexes(args.Tenant, args.Context, &args.AttributeIDs, transactionID)
+	attrIndexes, err := engine.ComputeAttributeIndexes(api.DataManager, args.Tenant, args.Context, &args.AttributeIDs, transactionID)
 	if err != nil && err != utils.ErrNotFound {
 		return utils.APIErrorHandler(err)
 	}
@@ -458,86 +458,6 @@ func (api *APIerSv1) ComputeFilterIndexIDs(args utils.ArgsComputeFilterIndexIDs,
 	}
 	*reply = utils.OK
 	return nil
-}
-
-func (api *APIerSv1) computeAttributeIndexes(tenant, context string, attrIDs *[]string,
-	transactionID string) (filterIndexer *engine.FilterIndexer, err error) {
-	var attributeIDs []string
-	var attrIndexers *engine.FilterIndexer
-	if attrIDs == nil {
-		ids, err := api.DataManager.DataDB().GetKeysForPrefix(utils.AttributeProfilePrefix)
-		if err != nil {
-			return nil, err
-		}
-		for _, id := range ids {
-			attributeIDs = append(attributeIDs, strings.Split(id, utils.CONCATENATED_KEY_SEP)[1])
-		}
-		// this will be on ComputeIndexes that contains empty indexes
-		attrIndexers = engine.NewFilterIndexer(api.DataManager, utils.AttributeProfilePrefix,
-			utils.ConcatenatedKey(tenant, context))
-	} else {
-		// this will be on ComputeIndexesIDs that contains the old indexes from the next getter
-		var oldIDx map[string]utils.StringMap
-		if oldIDx, err = api.DataManager.GetFilterIndexes(utils.PrefixToIndexCache[utils.AttributeProfilePrefix],
-			tenant, utils.EmptyString, nil); err != nil || oldIDx == nil {
-			attrIndexers = engine.NewFilterIndexer(api.DataManager, utils.AttributeProfilePrefix, utils.ConcatenatedKey(tenant, context))
-		} else {
-			attrIndexers = engine.NewFilterIndexerWithIndexes(api.DataManager, utils.AttributeProfilePrefix, utils.ConcatenatedKey(tenant, context), oldIDx)
-		}
-		attributeIDs = *attrIDs
-		transactionID = utils.NonTransactional
-	}
-	for _, id := range attributeIDs {
-		ap, err := api.DataManager.GetAttributeProfile(tenant, id, true, false, utils.NonTransactional)
-		if err != nil {
-			return nil, err
-		}
-		if !utils.IsSliceMember(ap.Contexts, context) && context != utils.META_ANY {
-			continue
-		}
-		fltrIDs := make([]string, len(ap.FilterIDs))
-		for i, fltrID := range ap.FilterIDs {
-			fltrIDs[i] = fltrID
-		}
-		if len(fltrIDs) == 0 {
-			fltrIDs = []string{utils.META_NONE}
-		}
-		for _, fltrID := range fltrIDs {
-			var fltr *engine.Filter
-			if fltrID == utils.META_NONE {
-				fltr = &engine.Filter{
-					Tenant: ap.Tenant,
-					ID:     ap.ID,
-					Rules: []*engine.FilterRule{
-						{
-							Type:    utils.META_NONE,
-							Element: utils.META_ANY,
-							Values:  []string{utils.META_ANY},
-						},
-					},
-				}
-			} else if fltr, err = engine.GetFilter(api.DataManager, ap.Tenant, fltrID,
-				true, false, utils.NonTransactional); err != nil {
-				if err == utils.ErrNotFound {
-					err = fmt.Errorf("broken reference to filter: %+v for attribute: %+v",
-						fltrID, ap)
-				}
-				return nil, err
-			}
-			attrIndexers.IndexTPFilter(engine.FilterToTPFilter(fltr), ap.ID)
-		}
-	}
-	if transactionID == utils.NonTransactional {
-		if err := attrIndexers.StoreIndexes(true, transactionID); err != nil {
-			return nil, err
-		}
-		return nil, nil
-	} else {
-		if err := attrIndexers.StoreIndexes(false, transactionID); err != nil {
-			return nil, err
-		}
-	}
-	return attrIndexers, nil
 }
 
 func (api *APIerSv1) computeDispatcherIndexes(tenant, context string, dspIDs *[]string,

@@ -788,7 +788,7 @@ func (dm *DataManager) SetThresholdProfile(th *ThresholdProfile, withIndex bool)
 					th.Tenant).RemoveItemFromIndex(th.Tenant, th.ID, oldTh.FilterIDs); err != nil {
 					return
 				}
-				if err = removeReverseFilterIndexForFilter(dm, utils.CacheThresholdFilterIndexes, utils.EmptyString,
+				if err = removeReverseFilterIndexForFilter(dm, utils.CacheThresholdFilterIndexes,
 					th.Tenant, th.ID, th.FilterIDs); err != nil {
 					return
 				}
@@ -798,7 +798,7 @@ func (dm *DataManager) SetThresholdProfile(th *ThresholdProfile, withIndex bool)
 			utils.EmptyString, th.ID, th.FilterIDs, dm); err != nil {
 			return err
 		}
-		if err = addReverseFilterIndexForFilter(dm, utils.CacheThresholdFilterIndexes, utils.EmptyString,
+		if err = addReverseFilterIndexForFilter(dm, utils.CacheThresholdFilterIndexes,
 			th.Tenant, th.ID, th.FilterIDs); err != nil {
 			return
 		}
@@ -832,7 +832,7 @@ func (dm *DataManager) RemoveThresholdProfile(tenant, id,
 			tenant).RemoveItemFromIndex(tenant, id, oldTh.FilterIDs); err != nil {
 			return
 		}
-		if err = removeReverseFilterIndexForFilter(dm, utils.CacheThresholdFilterIndexes, utils.EmptyString,
+		if err = removeReverseFilterIndexForFilter(dm, utils.CacheThresholdFilterIndexes,
 			oldTh.Tenant, oldTh.ID, oldTh.FilterIDs); err != nil {
 			return
 		}
@@ -906,7 +906,7 @@ func (dm *DataManager) SetStatQueueProfile(sqp *StatQueueProfile, withIndex bool
 					sqp.Tenant).RemoveItemFromIndex(sqp.Tenant, sqp.ID, oldSts.FilterIDs); err != nil {
 					return
 				}
-				if err = removeReverseFilterIndexForFilter(dm, utils.CacheStatFilterIndexes, utils.EmptyString,
+				if err = removeReverseFilterIndexForFilter(dm, utils.CacheStatFilterIndexes,
 					sqp.Tenant, sqp.ID, sqp.FilterIDs); err != nil {
 					return
 				}
@@ -916,7 +916,7 @@ func (dm *DataManager) SetStatQueueProfile(sqp *StatQueueProfile, withIndex bool
 			utils.EmptyString, sqp.ID, sqp.FilterIDs, dm); err != nil {
 			return
 		}
-		if err = addReverseFilterIndexForFilter(dm, utils.CacheStatFilterIndexes, utils.EmptyString,
+		if err = addReverseFilterIndexForFilter(dm, utils.CacheStatFilterIndexes,
 			sqp.Tenant, sqp.ID, sqp.FilterIDs); err != nil {
 			return
 		}
@@ -950,7 +950,7 @@ func (dm *DataManager) RemoveStatQueueProfile(tenant, id,
 			tenant).RemoveItemFromIndex(tenant, id, oldSts.FilterIDs); err != nil {
 			return
 		}
-		if err = removeReverseFilterIndexForFilter(dm, utils.CacheStatFilterIndexes, utils.EmptyString,
+		if err = removeReverseFilterIndexForFilter(dm, utils.CacheStatFilterIndexes,
 			oldSts.Tenant, oldSts.ID, oldSts.FilterIDs); err != nil {
 			return
 		}
@@ -1155,7 +1155,7 @@ func (dm *DataManager) SetResourceProfile(rp *ResourceProfile, withIndex bool) (
 					rp.Tenant).RemoveItemFromIndex(rp.Tenant, rp.ID, oldRes.FilterIDs); err != nil {
 					return
 				}
-				if err = removeReverseFilterIndexForFilter(dm, utils.CacheResourceFilterIndexes, utils.EmptyString,
+				if err = removeReverseFilterIndexForFilter(dm, utils.CacheResourceFilterIndexes,
 					rp.Tenant, rp.ID, rp.FilterIDs); err != nil {
 					return
 				}
@@ -1164,7 +1164,7 @@ func (dm *DataManager) SetResourceProfile(rp *ResourceProfile, withIndex bool) (
 		if err = createAndIndex(utils.ResourceProfilesPrefix, rp.Tenant, utils.EmptyString, rp.ID, rp.FilterIDs, dm); err != nil {
 			return
 		}
-		if err = addReverseFilterIndexForFilter(dm, utils.CacheResourceFilterIndexes, utils.EmptyString,
+		if err = addReverseFilterIndexForFilter(dm, utils.CacheResourceFilterIndexes,
 			rp.Tenant, rp.ID, rp.FilterIDs); err != nil {
 			return
 		}
@@ -1198,7 +1198,7 @@ func (dm *DataManager) RemoveResourceProfile(tenant, id, transactionID string, w
 			tenant).RemoveItemFromIndex(tenant, id, oldRes.FilterIDs); err != nil {
 			return
 		}
-		if err = removeReverseFilterIndexForFilter(dm, utils.CacheResourceFilterIndexes, utils.EmptyString,
+		if err = removeReverseFilterIndexForFilter(dm, utils.CacheResourceFilterIndexes,
 			oldRes.Tenant, oldRes.ID, oldRes.FilterIDs); err != nil {
 			return
 		}
@@ -1945,7 +1945,7 @@ func (dm *DataManager) SetSupplierProfile(supp *SupplierProfile, withIndex bool)
 					supp.Tenant).RemoveItemFromIndex(supp.Tenant, supp.ID, oldSup.FilterIDs); err != nil {
 					return
 				}
-				if err = removeReverseFilterIndexForFilter(dm, utils.CacheSupplierFilterIndexes, utils.EmptyString,
+				if err = removeReverseFilterIndexForFilter(dm, utils.CacheSupplierFilterIndexes,
 					supp.Tenant, supp.ID, supp.FilterIDs); err != nil {
 					return
 				}
@@ -1955,7 +1955,7 @@ func (dm *DataManager) SetSupplierProfile(supp *SupplierProfile, withIndex bool)
 			utils.EmptyString, supp.ID, supp.FilterIDs, dm); err != nil {
 			return
 		}
-		if err = addReverseFilterIndexForFilter(dm, utils.CacheSupplierFilterIndexes, utils.EmptyString,
+		if err = addReverseFilterIndexForFilter(dm, utils.CacheSupplierFilterIndexes,
 			supp.Tenant, supp.ID, supp.FilterIDs); err != nil {
 			return
 		}
@@ -1987,7 +1987,7 @@ func (dm *DataManager) RemoveSupplierProfile(tenant, id, transactionID string, w
 			tenant).RemoveItemFromIndex(tenant, id, oldSupp.FilterIDs); err != nil {
 			return
 		}
-		if err = removeReverseFilterIndexForFilter(dm, utils.CacheSupplierFilterIndexes, utils.EmptyString,
+		if err = removeReverseFilterIndexForFilter(dm, utils.CacheSupplierFilterIndexes,
 			oldSupp.Tenant, oldSupp.ID, oldSupp.FilterIDs); err != nil {
 			return
 		}
@@ -2089,12 +2089,20 @@ func (dm *DataManager) SetAttributeProfile(ap *AttributeProfile, withIndex bool)
 					}
 				}
 			}
+			if err = removeReverseFilterIndexForFilter(dm, utils.CacheAttributeFilterIndexes,
+				ap.Tenant, ap.ID, ap.FilterIDs); err != nil {
+				return
+			}
 		}
 		for _, ctx := range ap.Contexts {
 			if err = createAndIndex(utils.AttributeProfilePrefix,
 				ap.Tenant, ctx, ap.ID, ap.FilterIDs, dm); err != nil {
 				return
 			}
+		}
+		if err = addReverseFilterIndexForFilter(dm, utils.CacheAttributeFilterIndexes,
+			ap.Tenant, ap.ID, ap.FilterIDs); err != nil {
+			return
 		}
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaAttributeProfiles]; itm.Replicate {
@@ -2124,6 +2132,10 @@ func (dm *DataManager) RemoveAttributeProfile(tenant, id string, transactionID s
 				utils.ConcatenatedKey(tenant, context)).RemoveItemFromIndex(tenant, id, oldAttr.FilterIDs); err != nil {
 				return
 			}
+		}
+		if err = removeReverseFilterIndexForFilter(dm, utils.CacheAttributeFilterIndexes,
+			oldAttr.Tenant, oldAttr.ID, oldAttr.FilterIDs); err != nil {
+			return
 		}
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaAttributeProfiles]; itm.Replicate {
@@ -2199,7 +2211,7 @@ func (dm *DataManager) SetChargerProfile(cpp *ChargerProfile, withIndex bool) (e
 					cpp.Tenant).RemoveItemFromIndex(cpp.Tenant, cpp.ID, oldCpp.FilterIDs); err != nil {
 					return
 				}
-				if err = removeReverseFilterIndexForFilter(dm, utils.CacheChargerFilterIndexes, utils.EmptyString,
+				if err = removeReverseFilterIndexForFilter(dm, utils.CacheChargerFilterIndexes,
 					cpp.Tenant, cpp.ID, cpp.FilterIDs); err != nil {
 					return
 				}
@@ -2209,7 +2221,7 @@ func (dm *DataManager) SetChargerProfile(cpp *ChargerProfile, withIndex bool) (e
 			utils.EmptyString, cpp.ID, cpp.FilterIDs, dm); err != nil {
 			return
 		}
-		if err = addReverseFilterIndexForFilter(dm, utils.CacheChargerFilterIndexes, utils.EmptyString,
+		if err = addReverseFilterIndexForFilter(dm, utils.CacheChargerFilterIndexes,
 			cpp.Tenant, cpp.ID, cpp.FilterIDs); err != nil {
 			return
 		}
@@ -2242,7 +2254,7 @@ func (dm *DataManager) RemoveChargerProfile(tenant, id string,
 			tenant).RemoveItemFromIndex(tenant, id, oldCpp.FilterIDs); err != nil {
 			return
 		}
-		if err = removeReverseFilterIndexForFilter(dm, utils.CacheChargerFilterIndexes, utils.EmptyString,
+		if err = removeReverseFilterIndexForFilter(dm, utils.CacheChargerFilterIndexes,
 			oldCpp.Tenant, oldCpp.ID, oldCpp.FilterIDs); err != nil {
 			return
 		}
