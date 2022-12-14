@@ -906,10 +906,18 @@ func (dm *DataManager) SetStatQueueProfile(sqp *StatQueueProfile, withIndex bool
 					sqp.Tenant).RemoveItemFromIndex(sqp.Tenant, sqp.ID, oldSts.FilterIDs); err != nil {
 					return
 				}
+				if err = removeReverseFilterIndexForFilter(dm, utils.CacheStatFilterIndexes, utils.EmptyString,
+					sqp.Tenant, sqp.ID, sqp.FilterIDs); err != nil {
+					return
+				}
 			}
 		}
 		if err = createAndIndex(utils.StatQueueProfilePrefix, sqp.Tenant,
 			utils.EmptyString, sqp.ID, sqp.FilterIDs, dm); err != nil {
+			return
+		}
+		if err = addReverseFilterIndexForFilter(dm, utils.CacheStatFilterIndexes, utils.EmptyString,
+			sqp.Tenant, sqp.ID, sqp.FilterIDs); err != nil {
 			return
 		}
 	}
@@ -940,6 +948,10 @@ func (dm *DataManager) RemoveStatQueueProfile(tenant, id,
 	if withIndex {
 		if err = NewFilterIndexer(dm, utils.StatQueueProfilePrefix,
 			tenant).RemoveItemFromIndex(tenant, id, oldSts.FilterIDs); err != nil {
+			return
+		}
+		if err = removeReverseFilterIndexForFilter(dm, utils.CacheStatFilterIndexes, utils.EmptyString,
+			oldSts.Tenant, oldSts.ID, oldSts.FilterIDs); err != nil {
 			return
 		}
 	}

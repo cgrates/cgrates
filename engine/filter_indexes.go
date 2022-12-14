@@ -329,3 +329,79 @@ func ComputeSupplierIndexes(dm *DataManager, tenant string, sppIDs *[]string,
 	}
 	return sppIndexers, nil
 }
+
+func ComputeStatIndexes(dm *DataManager, tenant string, stIDs *[]string,
+	transactionID string) (filterIndexer *FilterIndexer, err error) {
+	var statIDs []string
+	var sqpIndexers *FilterIndexer
+	if stIDs == nil {
+		ids, err := dm.DataDB().GetKeysForPrefix(utils.StatQueueProfilePrefix)
+		if err != nil {
+			return nil, err
+		}
+		for _, id := range ids {
+			statIDs = append(statIDs, strings.Split(id, utils.CONCATENATED_KEY_SEP)[1])
+		}
+		// this will be on ComputeIndexes that contains empty indexes
+		sqpIndexers = NewFilterIndexer(dm, utils.StatQueueProfilePrefix, tenant)
+	} else {
+		// this will be on ComputeIndexesIDs that contains the old indexes from the next getter
+		var oldIDx map[string]utils.StringMap
+		if oldIDx, err = dm.GetFilterIndexes(utils.PrefixToIndexCache[utils.StatQueueProfilePrefix],
+			tenant, utils.EmptyString, nil); err != nil || oldIDx == nil {
+			sqpIndexers = NewFilterIndexer(dm, utils.StatQueueProfilePrefix, tenant)
+		} else {
+			sqpIndexers = NewFilterIndexerWithIndexes(dm, utils.StatQueueProfilePrefix, tenant, oldIDx)
+		}
+		statIDs = *stIDs
+		transactionID = utils.NonTransactional
+	}
+	for _, id := range statIDs {
+		sqp, err := dm.GetStatQueueProfile(tenant, id, true, false, utils.NonTransactional)
+		if err != nil {
+			return nil, err
+		}
+		fltrIDs := make([]string, len(sqp.FilterIDs))
+		for i, fltrID := range sqp.FilterIDs {
+			fltrIDs[i] = fltrID
+		}
+		if len(fltrIDs) == 0 {
+			fltrIDs = []string{utils.META_NONE}
+		}
+		for _, fltrID := range fltrIDs {
+			var fltr *Filter
+			if fltrID == utils.META_NONE {
+				fltr = &Filter{
+					Tenant: sqp.Tenant,
+					ID:     sqp.ID,
+					Rules: []*FilterRule{
+						{
+							Type:    utils.META_NONE,
+							Element: utils.META_ANY,
+							Values:  []string{utils.META_ANY},
+						},
+					},
+				}
+			} else if fltr, err = GetFilter(dm, sqp.Tenant, fltrID,
+				true, false, utils.NonTransactional); err != nil {
+				if err == utils.ErrNotFound {
+					err = fmt.Errorf("broken reference to filter: %+v for statqueue: %+v",
+						fltrID, sqp)
+				}
+				return nil, err
+			}
+			sqpIndexers.IndexTPFilter(FilterToTPFilter(fltr), sqp.ID)
+		}
+	}
+	if transactionID == utils.NonTransactional {
+		if err := sqpIndexers.StoreIndexes(true, transactionID); err != nil {
+			return nil, err
+		}
+		return nil, nil
+	} else {
+		if err := sqpIndexers.StoreIndexes(false, transactionID); err != nil {
+			return nil, err
+		}
+	}
+	return sqpIndexers, nil
+}
