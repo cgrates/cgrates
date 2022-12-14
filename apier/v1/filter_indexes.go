@@ -233,7 +233,7 @@ func (api *APIerSv1) ComputeFilterIndexes(args utils.ArgsComputeFilterIndexes, r
 	//SupplierProfile Indexes
 	var sppIndexes *engine.FilterIndexer
 	if args.SupplierS {
-		sppIndexes, err = api.computeSupplierIndexes(args.Tenant, nil, transactionID)
+		sppIndexes, err = engine.ComputeSupplierIndexes(api.DataManager, args.Tenant, nil, transactionID)
 		if err != nil && err != utils.ErrNotFound {
 			return utils.APIErrorHandler(err)
 		}
@@ -330,7 +330,7 @@ func (api *APIerSv1) ComputeFilterIndexIDs(args utils.ArgsComputeFilterIndexIDs,
 		return utils.APIErrorHandler(err)
 	}
 	//SupplierProfile Indexes
-	sppIndexes, err := api.computeSupplierIndexes(args.Tenant, &args.SupplierIDs, transactionID)
+	sppIndexes, err := engine.ComputeSupplierIndexes(api.DataManager, args.Tenant, &args.SupplierIDs, transactionID)
 	if err != nil && err != utils.ErrNotFound {
 		return utils.APIErrorHandler(err)
 	}
@@ -614,82 +614,6 @@ func (api *APIerSv1) computeStatIndexes(tenant string, stIDs *[]string,
 		}
 	}
 	return sqpIndexers, nil
-}
-
-func (api *APIerSv1) computeSupplierIndexes(tenant string, sppIDs *[]string,
-	transactionID string) (filterIndexer *engine.FilterIndexer, err error) {
-	var supplierIDs []string
-	var sppIndexers *engine.FilterIndexer
-	if sppIDs == nil {
-		ids, err := api.DataManager.DataDB().GetKeysForPrefix(utils.SupplierProfilePrefix)
-		if err != nil {
-			return nil, err
-		}
-		for _, id := range ids {
-			supplierIDs = append(supplierIDs, strings.Split(id, utils.CONCATENATED_KEY_SEP)[1])
-		}
-		// this will be on ComputeIndexes that contains empty indexes
-		sppIndexers = engine.NewFilterIndexer(api.DataManager, utils.SupplierProfilePrefix, tenant)
-	} else {
-		// this will be on ComputeIndexesIDs that contains the old indexes from the next getter
-		var oldIDx map[string]utils.StringMap
-		if oldIDx, err = api.DataManager.GetFilterIndexes(utils.PrefixToIndexCache[utils.SupplierProfilePrefix],
-			tenant, utils.EmptyString, nil); err != nil || oldIDx == nil {
-			sppIndexers = engine.NewFilterIndexer(api.DataManager, utils.SupplierProfilePrefix, tenant)
-		} else {
-			sppIndexers = engine.NewFilterIndexerWithIndexes(api.DataManager, utils.SupplierProfilePrefix, tenant, oldIDx)
-		}
-		supplierIDs = *sppIDs
-		transactionID = utils.NonTransactional
-	}
-	for _, id := range supplierIDs {
-		spp, err := api.DataManager.GetSupplierProfile(tenant, id, true, false, utils.NonTransactional)
-		if err != nil {
-			return nil, err
-		}
-		fltrIDs := make([]string, len(spp.FilterIDs))
-		for i, fltrID := range spp.FilterIDs {
-			fltrIDs[i] = fltrID
-		}
-		if len(fltrIDs) == 0 {
-			fltrIDs = []string{utils.META_NONE}
-		}
-		for _, fltrID := range fltrIDs {
-			var fltr *engine.Filter
-			if fltrID == utils.META_NONE {
-				fltr = &engine.Filter{
-					Tenant: spp.Tenant,
-					ID:     spp.ID,
-					Rules: []*engine.FilterRule{
-						{
-							Type:    utils.META_NONE,
-							Element: utils.META_ANY,
-							Values:  []string{utils.META_ANY},
-						},
-					},
-				}
-			} else if fltr, err = engine.GetFilter(api.DataManager, spp.Tenant, fltrID,
-				true, false, utils.NonTransactional); err != nil {
-				if err == utils.ErrNotFound {
-					err = fmt.Errorf("broken reference to filter: %+v for suppliers: %+v",
-						fltrID, spp)
-				}
-				return nil, err
-			}
-			sppIndexers.IndexTPFilter(engine.FilterToTPFilter(fltr), spp.ID)
-		}
-	}
-	if transactionID == utils.NonTransactional {
-		if err := sppIndexers.StoreIndexes(true, transactionID); err != nil {
-			return nil, err
-		}
-		return nil, nil
-	} else {
-		if err := sppIndexers.StoreIndexes(false, transactionID); err != nil {
-			return nil, err
-		}
-	}
-	return sppIndexers, nil
 }
 
 func (api *APIerSv1) computeDispatcherIndexes(tenant, context string, dspIDs *[]string,

@@ -253,3 +253,79 @@ func ComputeResourceIndexes(dm *DataManager, tenant string, rsIDs *[]string,
 	}
 	return rpIndexers, nil
 }
+
+func ComputeSupplierIndexes(dm *DataManager, tenant string, sppIDs *[]string,
+	transactionID string) (filterIndexer *FilterIndexer, err error) {
+	var supplierIDs []string
+	var sppIndexers *FilterIndexer
+	if sppIDs == nil {
+		ids, err := dm.DataDB().GetKeysForPrefix(utils.SupplierProfilePrefix)
+		if err != nil {
+			return nil, err
+		}
+		for _, id := range ids {
+			supplierIDs = append(supplierIDs, strings.Split(id, utils.CONCATENATED_KEY_SEP)[1])
+		}
+		// this will be on ComputeIndexes that contains empty indexes
+		sppIndexers = NewFilterIndexer(dm, utils.SupplierProfilePrefix, tenant)
+	} else {
+		// this will be on ComputeIndexesIDs that contains the old indexes from the next getter
+		var oldIDx map[string]utils.StringMap
+		if oldIDx, err = dm.GetFilterIndexes(utils.PrefixToIndexCache[utils.SupplierProfilePrefix],
+			tenant, utils.EmptyString, nil); err != nil || oldIDx == nil {
+			sppIndexers = NewFilterIndexer(dm, utils.SupplierProfilePrefix, tenant)
+		} else {
+			sppIndexers = NewFilterIndexerWithIndexes(dm, utils.SupplierProfilePrefix, tenant, oldIDx)
+		}
+		supplierIDs = *sppIDs
+		transactionID = utils.NonTransactional
+	}
+	for _, id := range supplierIDs {
+		spp, err := dm.GetSupplierProfile(tenant, id, true, false, utils.NonTransactional)
+		if err != nil {
+			return nil, err
+		}
+		fltrIDs := make([]string, len(spp.FilterIDs))
+		for i, fltrID := range spp.FilterIDs {
+			fltrIDs[i] = fltrID
+		}
+		if len(fltrIDs) == 0 {
+			fltrIDs = []string{utils.META_NONE}
+		}
+		for _, fltrID := range fltrIDs {
+			var fltr *Filter
+			if fltrID == utils.META_NONE {
+				fltr = &Filter{
+					Tenant: spp.Tenant,
+					ID:     spp.ID,
+					Rules: []*FilterRule{
+						{
+							Type:    utils.META_NONE,
+							Element: utils.META_ANY,
+							Values:  []string{utils.META_ANY},
+						},
+					},
+				}
+			} else if fltr, err = GetFilter(dm, spp.Tenant, fltrID,
+				true, false, utils.NonTransactional); err != nil {
+				if err == utils.ErrNotFound {
+					err = fmt.Errorf("broken reference to filter: %+v for suppliers: %+v",
+						fltrID, spp)
+				}
+				return nil, err
+			}
+			sppIndexers.IndexTPFilter(FilterToTPFilter(fltr), spp.ID)
+		}
+	}
+	if transactionID == utils.NonTransactional {
+		if err := sppIndexers.StoreIndexes(true, transactionID); err != nil {
+			return nil, err
+		}
+		return nil, nil
+	} else {
+		if err := sppIndexers.StoreIndexes(false, transactionID); err != nil {
+			return nil, err
+		}
+	}
+	return sppIndexers, nil
+}

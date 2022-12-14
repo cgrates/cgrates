@@ -131,13 +131,19 @@ var (
 		// RESOURCES
 		testFilterIndexesCasesSetResourceWithFltr,
 		testFilterIndexesCasesGetResourcesIndexes,
-		/* testFilterIndexesCasesOverwriteFilterForResources,
-		testFilterIndexesCasesGetResourcesIndexesChanged,
+		/*
+			testFilterIndexesCasesOverwriteFilterForResources,
+			testFilterIndexesCasesGetResourcesIndexesChanged,
 
-		testFilterIndexesCasesGetReverseFilterIndexes3,
-		testFilterIndexesCasesRemoveResourcesProfile,
-		testFilterIndexesCasesGetIndexesAfterRemove3,
-		testFilterIndexesCasesGetReverseIndexesAfterRemove3, */
+
+			testFilterIndexesCasesGetReverseFilterIndexes3,
+			testFilterIndexesCasesRemoveResourcesProfile,
+			testFilterIndexesCasesGetIndexesAfterRemove3,
+			testFilterIndexesCasesGetReverseIndexesAfterRemove3, */
+
+		// SUPPLIER
+
+		// DISPATCHER
 
 		testFilterIndexesCasesStopEngine,
 	}
