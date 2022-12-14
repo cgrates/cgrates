@@ -2138,32 +2138,68 @@ func TestFilterRulePassRegexParseErrNotFound(t *testing.T) {
 			utils.MetaOriginID: "originIDUniq",
 		},
 	}
-	if ok, err := fltr.passRegex(dDP); ok != false && err != utils.ErrNotFound {
-		t.Errorf("Expected error <%v>, Received error <%v>", utils.ErrNotFound, err)
+	if ok, err := fltr.passRegex(dDP); ok != false && err != nil {
+		t.Errorf("Expected error <%v>, Received error <%v>. Ok <%v>", nil, err, ok)
 	}
 }
 
-// unfinished
-// func TestFilterRulePassRegexParseErr2(t *testing.T) {
+func TestFilterRulePassRegexParseErr(t *testing.T) {
 
-// 	rsrBadParse, _ := config.NewRSRParser("~*opts.*originID<~*opts.Converter>")
+	rsrBadParse, _ := config.NewRSRParser("~*opts.*originID<~*opts.Converter>")
 
-// 	fltr := &FilterRule{
-// 		Type:       utils.EmptyString,
-// 		Element:    "~*req.Element",
-// 		Values:     []string{"value1", "value2"},
-// 		rsrElement: rsrBadParse,
-// 	}
-// 	fmt.Println(utils.ToJSON(fltr.rsrElement))
+	fltr := &FilterRule{
+		Type:       utils.EmptyString,
+		Element:    "~*req.Element",
+		Values:     []string{"value1", "value2"},
+		rsrElement: rsrBadParse,
+	}
 
-// 	dDP := utils.MapStorage{
-// 		utils.MetaReq: utils.MapStorage{},
-// 		utils.MetaOpts: utils.MapStorage{
-// 			"Converter":        "{*",
-// 			utils.MetaOriginID: "originIDUniq",
-// 		},
-// 	}
-// 	if ok, err := fltr.passRegex(dDP); ok != false && err != utils.ErrNotFound {
-// 		t.Errorf("Expected error <%v>, Received error <%v>", utils.ErrNotFound, err)
-// 	}
-// }
+	dDP := utils.MapStorage{
+		utils.MetaReq: utils.MapStorage{},
+		utils.MetaOpts: utils.MapStorage{
+			"Converter":        "{*",
+			utils.MetaOriginID: "originIDUniq",
+		},
+	}
+	expErr := `invalid converter terminator in rule: <~*opts.*originID{*>`
+	if ok, err := fltr.passRegex(dDP); ok != false || err.Error() != expErr {
+		t.Errorf("Expected error <%v>, Received error <%v>. Ok <%v>", expErr, err, ok)
+	}
+}
+func TestCheckFilterErrValFuncElement(t *testing.T) {
+
+	fltr := &Filter{
+		Tenant: utils.CGRateSorg,
+		ID:     "FLTR_CP_1",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaString,
+				Element: "~missing path",
+				Values:  []string{"ChargerProfile1"},
+			},
+		},
+	}
+	expErr := `Path is missing  for filter <{"Tenant":"cgrates.org","ID":"FLTR_CP_1","Rules":[{"Type":"*string","Element":"~missing path","Values":["ChargerProfile1"]}]}>`
+	if err := CheckFilter(fltr); err.Error() != expErr {
+		t.Error(err)
+	}
+}
+
+func TestCheckFilterErrValFuncValues(t *testing.T) {
+
+	fltr := &Filter{
+		Tenant: utils.CGRateSorg,
+		ID:     "FLTR_CP_1",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaString,
+				Element: "~*req.Charger",
+				Values:  []string{"~missing path"},
+			},
+		},
+	}
+	expErr := `Path is missing  for filter <{"Tenant":"cgrates.org","ID":"FLTR_CP_1","Rules":[{"Type":"*string","Element":"~*req.Charger","Values":["~missing path"]}]}>`
+	if err := CheckFilter(fltr); err.Error() != expErr {
+		t.Error(err)
+	}
+}
