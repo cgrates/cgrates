@@ -1933,10 +1933,18 @@ func (dm *DataManager) SetSupplierProfile(supp *SupplierProfile, withIndex bool)
 					supp.Tenant).RemoveItemFromIndex(supp.Tenant, supp.ID, oldSup.FilterIDs); err != nil {
 					return
 				}
+				if err = removeReverseFilterIndexForFilter(dm, utils.CacheSupplierFilterIndexes, utils.EmptyString,
+					supp.Tenant, supp.ID, supp.FilterIDs); err != nil {
+					return
+				}
 			}
 		}
 		if err = createAndIndex(utils.SupplierProfilePrefix, supp.Tenant,
 			utils.EmptyString, supp.ID, supp.FilterIDs, dm); err != nil {
+			return
+		}
+		if err = addReverseFilterIndexForFilter(dm, utils.CacheSupplierFilterIndexes, utils.EmptyString,
+			supp.Tenant, supp.ID, supp.FilterIDs); err != nil {
 			return
 		}
 	}
@@ -1965,6 +1973,10 @@ func (dm *DataManager) RemoveSupplierProfile(tenant, id, transactionID string, w
 	if withIndex {
 		if err = NewFilterIndexer(dm, utils.SupplierProfilePrefix,
 			tenant).RemoveItemFromIndex(tenant, id, oldSupp.FilterIDs); err != nil {
+			return
+		}
+		if err = removeReverseFilterIndexForFilter(dm, utils.CacheSupplierFilterIndexes, utils.EmptyString,
+			oldSupp.Tenant, oldSupp.ID, oldSupp.FilterIDs); err != nil {
 			return
 		}
 	}

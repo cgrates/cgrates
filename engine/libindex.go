@@ -157,6 +157,18 @@ func UpdateFilterIndexes(dm *DataManager, tnt string, oldFltr *Filter, newFltr *
 				utils.NonTransactional); err != nil {
 				return err
 			}
+		case utils.CacheSupplierFilterIndexes:
+			// remove the indexes from this filter for this partition
+			if err = removeFilterIndexesForFilter(dm, idxItmType, utils.CacheSupplierProfiles,
+				tnt, removeIndexKeys, index); err != nil {
+				return
+			}
+			// we removed the old reverse indexes, now we have to compute the new ones
+			supplierIDs := index.Slice()
+			if _, err = ComputeSupplierIndexes(dm, newFltr.Tenant, &supplierIDs,
+				utils.NonTransactional); err != nil {
+				return err
+			}
 		}
 	}
 	return nil
