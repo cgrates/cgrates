@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/cgrates/cgrates/engine"
@@ -257,7 +256,7 @@ func (api *APIerSv1) ComputeFilterIndexes(args utils.ArgsComputeFilterIndexes, r
 	//DispatcherProfile Indexes
 	var dspIndexes *engine.FilterIndexer
 	if args.DispatcherS {
-		dspIndexes, err = api.computeDispatcherIndexes(args.Tenant, args.Context, nil, transactionID)
+		dspIndexes, err = engine.ComputeDispatcherIndexes(api.DataManager, args.Tenant, args.Context, nil, transactionID)
 		if err != nil && err != utils.ErrNotFound {
 			return utils.APIErrorHandler(err)
 		}
@@ -345,7 +344,7 @@ func (api *APIerSv1) ComputeFilterIndexIDs(args utils.ArgsComputeFilterIndexIDs,
 		return utils.APIErrorHandler(err)
 	}
 	//DispatcherProfile Indexes
-	dspIndexes, err := api.computeDispatcherIndexes(args.Tenant, args.Context, &args.DispatcherIDs, transactionID)
+	dspIndexes, err := engine.ComputeDispatcherIndexes(api.DataManager, args.Tenant, args.Context, &args.DispatcherIDs, transactionID)
 	if err != nil && err != utils.ErrNotFound {
 		return utils.APIErrorHandler(err)
 	}
@@ -458,88 +457,6 @@ func (api *APIerSv1) ComputeFilterIndexIDs(args utils.ArgsComputeFilterIndexIDs,
 	}
 	*reply = utils.OK
 	return nil
-}
-
-func (api *APIerSv1) computeDispatcherIndexes(tenant, context string, dspIDs *[]string,
-	transactionID string) (filterIndexer *engine.FilterIndexer, err error) {
-	var dispatcherIDs []string
-	var dspIndexes *engine.FilterIndexer
-	if dspIDs == nil {
-		ids, err := api.DataManager.DataDB().GetKeysForPrefix(utils.DispatcherProfilePrefix)
-		if err != nil {
-			return nil, err
-		}
-		for _, id := range ids {
-			dispatcherIDs = append(dispatcherIDs, strings.Split(id, utils.CONCATENATED_KEY_SEP)[1])
-		}
-		// this will be on ComputeIndexes that contains empty indexes
-		dspIndexes = engine.NewFilterIndexer(api.DataManager, utils.DispatcherProfilePrefix,
-			utils.ConcatenatedKey(tenant, context))
-	} else {
-		// this will be on ComputeIndexesIDs that contains the old indexes from the next getter
-		var oldIDx map[string]utils.StringMap
-		if oldIDx, err = api.DataManager.GetFilterIndexes(utils.PrefixToIndexCache[utils.DispatcherProfilePrefix],
-			tenant, utils.EmptyString, nil); err != nil || oldIDx == nil {
-			dspIndexes = engine.NewFilterIndexer(api.DataManager, utils.DispatcherProfilePrefix,
-				utils.ConcatenatedKey(tenant, context))
-		} else {
-			dspIndexes = engine.NewFilterIndexerWithIndexes(api.DataManager, utils.DispatcherProfilePrefix,
-				utils.ConcatenatedKey(tenant, context), oldIDx)
-		}
-		dispatcherIDs = *dspIDs
-		transactionID = utils.NonTransactional
-	}
-	for _, id := range dispatcherIDs {
-		dsp, err := api.DataManager.GetDispatcherProfile(tenant, id, true, false, utils.NonTransactional)
-		if err != nil {
-			return nil, err
-		}
-		if !utils.IsSliceMember(dsp.Subsystems, context) && context != utils.META_ANY {
-			continue
-		}
-		fltrIDs := make([]string, len(dsp.FilterIDs))
-		for i, fltrID := range dsp.FilterIDs {
-			fltrIDs[i] = fltrID
-		}
-		if len(fltrIDs) == 0 {
-			fltrIDs = []string{utils.META_NONE}
-		}
-		for _, fltrID := range fltrIDs {
-			var fltr *engine.Filter
-			if fltrID == utils.META_NONE {
-				fltr = &engine.Filter{
-					Tenant: dsp.Tenant,
-					ID:     dsp.ID,
-					Rules: []*engine.FilterRule{
-						{
-							Type:    utils.META_NONE,
-							Element: utils.META_ANY,
-							Values:  []string{utils.META_ANY},
-						},
-					},
-				}
-			} else if fltr, err = engine.GetFilter(api.DataManager, dsp.Tenant, fltrID,
-				true, false, utils.NonTransactional); err != nil {
-				if err == utils.ErrNotFound {
-					err = fmt.Errorf("broken reference to filter: %+v for dispatcher: %+v",
-						fltrID, dsp)
-				}
-				return nil, err
-			}
-			dspIndexes.IndexTPFilter(engine.FilterToTPFilter(fltr), dsp.ID)
-		}
-	}
-	if transactionID == utils.NonTransactional {
-		if err := dspIndexes.StoreIndexes(true, transactionID); err != nil {
-			return nil, err
-		}
-		return nil, nil
-	} else {
-		if err := dspIndexes.StoreIndexes(false, transactionID); err != nil {
-			return nil, err
-		}
-	}
-	return dspIndexes, nil
 }
 
 func (apierSv1 *APIerSv1) GetAccountActionPlansIndexHealth(args *engine.IndexHealthArgsWith2Ch, reply *engine.AccountActionPlanIHReply) error {

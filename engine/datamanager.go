@@ -2336,11 +2336,19 @@ func (dm *DataManager) SetDispatcherProfile(dpp *DispatcherProfile, withIndex bo
 					}
 				}
 			}
+			if err = removeReverseFilterIndexForFilter(dm, utils.CacheDispatcherFilterIndexes,
+				dpp.Tenant, dpp.ID, dpp.FilterIDs); err != nil {
+				return
+			}
 		}
 		for _, ctx := range dpp.Subsystems {
 			if err = createAndIndex(utils.DispatcherProfilePrefix, dpp.Tenant, ctx, dpp.ID, dpp.FilterIDs, dm); err != nil {
 				return
 			}
+		}
+		if err = addReverseFilterIndexForFilter(dm, utils.CacheDispatcherFilterIndexes,
+			dpp.Tenant, dpp.ID, dpp.FilterIDs); err != nil {
+			return
 		}
 	}
 	if config.CgrConfig().DataDbCfg().Items[utils.MetaDispatcherProfiles].Replicate {
@@ -2372,6 +2380,10 @@ func (dm *DataManager) RemoveDispatcherProfile(tenant, id string,
 				utils.ConcatenatedKey(tenant, ctx)).RemoveItemFromIndex(tenant, id, oldDpp.FilterIDs); err != nil {
 				return
 			}
+		}
+		if err = removeReverseFilterIndexForFilter(dm, utils.CacheDispatcherFilterIndexes,
+			oldDpp.Tenant, oldDpp.ID, oldDpp.FilterIDs); err != nil {
+			return
 		}
 	}
 	if config.CgrConfig().DataDbCfg().Items[utils.MetaDispatcherProfiles].Replicate {
