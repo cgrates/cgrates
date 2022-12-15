@@ -311,13 +311,13 @@ func TestV1RateCDRs(t *testing.T) {
 		dm:      dm,
 	}
 	arg := &ArgRateCDRs{
-		Flags:         []string{"flag1", "flag2", "flag3"},
-		Tenant:        "cgrates",
+		Flags:         []string{utils.MetaAttributes, utils.MetaStats, utils.MetaExport, utils.MetaStore, utils.OptsThresholdS, utils.MetaThresholds, utils.MetaStats, utils.OptsChargerS, utils.MetaChargers, utils.OptsRALs, utils.MetaRALs, utils.OptsRerate, utils.MetaRerate, utils.OptsRefund, utils.MetaRefund},
+		Tenant:        "cgrates.rg",
 		RPCCDRsFilter: utils.RPCCDRsFilter{},
 		APIOpts:       map[string]interface{}{},
 	}
 
-	reply := "reply"
+	var reply string
 	if err := cdrS.V1RateCDRs(arg, &reply); err == nil {
 		t.Error(err)
 	}
@@ -804,7 +804,11 @@ func TestV1ProcessEvent(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CdrsCfg().AttributeSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.AttributeSConnsCfg)}
-	cfg.CdrsCfg().ChargerSConns = []string{utils.ConcatenatedKey(utils.MetaInternal)}
+	cfg.CdrsCfg().ChargerSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)}
+	cfg.CdrsCfg().RaterConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResponder)}
+	cfg.CdrsCfg().EEsConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.EEsConnsCfg)}
+	cfg.CdrsCfg().ThresholdSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)}
+	cfg.CdrsCfg().StatSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}
 	cfg.CdrsCfg().StoreCdrs = true
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
@@ -814,7 +818,11 @@ func TestV1ProcessEvent(t *testing.T) {
 			utils.AttributeSv1ProcessEvent: func(args, reply interface{}) error {
 				rpl := &AttrSProcessEventReply{
 					AlteredFields: []string{"*req.OfficeGroup"},
-					CGREvent:      &utils.CGREvent{},
+					CGREvent: &utils.CGREvent{
+						Event: map[string]interface{}{
+							utils.CGRID: "cgrid",
+						},
+					},
 				}
 				*reply.(*AttrSProcessEventReply) = *rpl
 
@@ -825,21 +833,60 @@ func TestV1ProcessEvent(t *testing.T) {
 					{
 						ChargerSProfile:    "chrgs1",
 						AttributeSProfiles: []string{"attr1", "attr2"},
-						CGREvent:           &utils.CGREvent{},
-					}, {
-						ChargerSProfile: "chrgs1",
-
-						AttributeSProfiles: []string{"attr1", "attr2"},
-						CGREvent:           &utils.CGREvent{},
+						CGREvent: &utils.CGREvent{
+							Event: map[string]interface{}{
+								utils.CGRID: "cgrid2",
+							},
+						},
 					},
 				}
 				*reply.(*[]*ChrgSProcessEventReply) = rpl
+				return nil
+			},
+			utils.ResponderRefundIncrements: func(args, reply interface{}) error {
+				rpl := &Account{
+					ID: "cgrates.org:1001",
+					BalanceMap: map[string]Balances{
+						utils.MetaMonetary: {
+							&Balance{Value: 20},
+						}}}
+				*reply.(*Account) = *rpl
+				return nil
+			},
+			utils.ResponderDebit: func(args, reply interface{}) error {
+				rpl := &CallCost{}
+				*reply.(*CallCost) = *rpl
+				return nil
+			},
+			utils.ResponderGetCost: func(args, reply interface{}) error {
+				rpl := &CallCost{}
+				*reply.(*CallCost) = *rpl
+				return nil
+			},
+			utils.EeSv1ProcessEvent: func(args, reply interface{}) error {
+				rpl := &map[string]map[string]interface{}{}
+				*reply.(*map[string]map[string]interface{}) = *rpl
+				return nil
+			},
+			utils.ThresholdSv1ProcessEvent: func(args, reply interface{}) error {
+				rpl := &[]string{}
+				*reply.(*[]string) = *rpl
+				return nil
+			},
+			utils.StatSv1ProcessEvent: func(args, reply interface{}) error {
+				rpl := &[]string{}
+				*reply.(*[]string) = *rpl
 				return nil
 			},
 		},
 	}
 	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.AttributeSConnsCfg): clientconn,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers):       clientconn,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResponder):      clientconn,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.EEsConnsCfg):        clientconn,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds):     clientconn,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats):          clientconn,
 	})
 
 	cdrS := &CDRServer{
@@ -865,8 +912,10 @@ func TestV1ProcessEvent(t *testing.T) {
 		},
 	}
 	var reply string
-	if err := cdrS.V1ProcessEvent(arg, &reply); err == nil || err != utils.ErrPartiallyExecuted {
+	if err := cdrS.V1ProcessEvent(arg, &reply); err != nil {
 		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("expected %v,received %v", utils.OK, reply)
 	}
 }
 
@@ -1133,9 +1182,9 @@ func TestV2StoreSessionCost(t *testing.T) {
 		dm:      dm,
 		connMgr: connMgr,
 	}
-	reply := utils.StringPointer("reply")
+	var reply string
 
-	if err := cdrS.V2StoreSessionCost(args, reply); err != nil {
+	if err := cdrS.V2StoreSessionCost(args, &reply); err != nil {
 		t.Error(err)
 	}
 	exp := &utils.CachedRPCResponse{Result: utils.StringPointer("OK"), Error: nil}
@@ -1545,11 +1594,11 @@ func TestV2StoreSessionCost2(t *testing.T) {
 		Tenant:  "cgrates.org",
 		APIOpts: map[string]interface{}{},
 	}
-	reply := utils.StringPointer("reply")
-	if err := cdrS.V2StoreSessionCost(args, reply); err != nil {
+	var reply string
+	if err := cdrS.V2StoreSessionCost(args, &reply); err != nil {
 		t.Error(err)
-	} else if *reply != utils.OK {
-		t.Errorf("expected %+v,received %+v", utils.OK, *reply)
+	} else if reply != utils.OK {
+		t.Errorf("expected %+v,received %+v", utils.OK, reply)
 	}
 
 }

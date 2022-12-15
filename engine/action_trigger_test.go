@@ -293,8 +293,9 @@ func TestATExecute(t *testing.T) {
 	fltrStr := `*lt:~*req.BalanceMap.*monetary.GetTotalValue:3`
 	db.db.Set(utils.CacheActions, "actID", Actions{
 		{
-			Id:         "cgrates.org:id1",
-			ActionType: "VALID_FUNCTION_TYPE",
+			Id:               "cgrates.org:id1",
+			ActionType:       "VALID_FUNCTION_TYPE",
+			ExpirationString: "*yearly",
 			Balance: &BalanceFilter{
 				Type:  utils.StringPointer("test"),
 				Value: &utils.ValueFormula{Static: 1.1},

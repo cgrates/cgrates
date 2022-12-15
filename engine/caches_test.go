@@ -270,6 +270,12 @@ func TestCacheSV1GetItem(t *testing.T) {
 }
 
 func TestCacheSV1GetItemExpiryTime(t *testing.T) {
+	tmp := Cache
+
+	defer func() {
+		Cache = tmp
+		config.SetCgrConfig(config.NewDefaultCGRConfig())
+	}()
 	Cache.Clear(nil)
 	args := &utils.ArgsGetCacheItemWithAPIOpts{
 		ArgsGetCacheItem: utils.ArgsGetCacheItem{
