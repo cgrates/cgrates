@@ -90,9 +90,9 @@ func (dDP *dynamicDP) fieldAsInterface(fldPath []string) (val interface{}, err e
 	}
 	switch fldPath[0] {
 	case utils.MetaAccounts:
-		// sample of fieldName : ~*accounts.1001.BalanceMap.*monetary[0].Value
+		// sample of fieldName : ~*accounts.1001.Balances[Concrete1].Units
 		// split the field name in 3 parts
-		// fieldNameType (~*accounts), accountID(1001) and queried part (BalanceMap.*monetary[0].Value)
+		// fieldNameType (~*accounts), accountID(1001) and queried part (Balances.Balances[Concrete1].Units)
 
 		var account utils.Account
 		if err = connMgr.Call(dDP.ctx, dDP.actsConns, utils.AccountSv1GetAccount,

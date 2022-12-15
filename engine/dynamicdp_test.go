@@ -18,11 +18,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"bytes"
 	"reflect"
+	"strings"
 	"testing"
 
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/ericlagergren/decimal"
 	"github.com/nyaruka/phonenumbers"
 )
 
@@ -263,8 +268,14 @@ func TestFieldAsInterfacelibphonenumberDP(t *testing.T) {
 	}
 }
 
-// unfinished do with buffer
 func TestLibphonenumberDPfieldAsInterfaceGeoLocationErr(t *testing.T) {
+	tmp := utils.Logger
+	defer func() {
+		utils.Logger = tmp
+	}()
+
+	buf := new(bytes.Buffer)
+	utils.Logger = utils.NewStdLoggerWithWriter(buf, "", 7)
 
 	dDP := &libphonenumberDP{
 		pNumber: &phonenumbers.PhoneNumber{},
@@ -276,48 +287,37 @@ func TestLibphonenumberDPfieldAsInterfaceGeoLocationErr(t *testing.T) {
 	if rcv, err := dDP.fieldAsInterface([]string{"GeoLocation"}); err != nil {
 		t.Error(rcv, err)
 	}
-}
+	expErr := "Received error: <language: tag is not well-formed> when getting GeoLocation for number"
 
-// unfinished do with buffer
-func TestLibphonenumberDPfieldAsInterfaceCarrierErr(t *testing.T) {
-	var pInt int32 = 49444444
-	var nNum uint64 = 49233333333333
-	dDP := &libphonenumberDP{
-		pNumber: &phonenumbers.PhoneNumber{
-			CountryCode:    &pInt,
-			NationalNumber: &nNum,
-		},
-		cache: utils.MapStorage{
-			"testField": "testValue",
-		},
+	if rcvTxt := buf.String(); !strings.Contains(rcvTxt, expErr) {
+		t.Errorf("Expected <%v>, Received <%v>", expErr, rcvTxt)
 	}
 
-	if rcv, err := dDP.fieldAsInterface([]string{"Carrier"}); err != nil {
-		t.Error(rcv, err)
-	}
+	buf.Reset()
 }
 
 func TestLibphonenumberDPfieldAsInterface(t *testing.T) {
 
 	var pInt int32 = 49
-	var nNum uint64 = 49
-	var leadingZeros int32 = 0
+	var nNum uint64 = 17222020
+	var leadingZeros int32 = 1
 
+	lDP, err := newLibPhoneNumberDP("+49 17222020")
+	if err != nil {
+		t.Error(err)
+	}
+	libphone, canCast := lDP.(*libphonenumberDP)
+	if !canCast {
+		t.Errorf("cant cast <%v> to a libphonenumberDP", lDP)
+	}
 	dDP := &libphonenumberDP{
-		pNumber: &phonenumbers.PhoneNumber{
-			CountryCode:                  &pInt,
-			NationalNumber:               &nNum,
-			Extension:                    utils.StringPointer("+"),
-			RawInput:                     utils.StringPointer("+4917642092123"),
-			ItalianLeadingZero:           utils.BoolPointer(true),
-			NumberOfLeadingZeros:         &leadingZeros,
-			CountryCodeSource:            phonenumbers.PhoneNumber_FROM_DEFAULT_COUNTRY.Enum(),
-			PreferredDomesticCarrierCode: utils.StringPointer("262 02"),
-		},
+		pNumber: libphone.pNumber,
 		cache: utils.MapStorage{
 			"testField": "testValue",
 		},
 	}
+	dDP.pNumber.Extension = utils.StringPointer("+")
+	dDP.pNumber.PreferredDomesticCarrierCode = utils.StringPointer("49 172")
 
 	exp := interface{}(pInt)
 	if rcv, err := dDP.fieldAsInterface([]string{"CountryCode"}); err != nil {
@@ -352,19 +352,19 @@ func TestLibphonenumberDPfieldAsInterface(t *testing.T) {
 	} else if rcv != exp {
 		t.Errorf("Expected <%+v>, Received <%v>", exp, rcv)
 	}
-	// exp = interface{}(nNum)
-	// if rcv, err := dDP.fieldAsInterface([]string{"Carrier"}); err != nil {
-	// 	t.Error(err)
-	// } else if rcv != exp {
-	// 	t.Errorf("Expected <%+v>, Received <%v>", exp, rcv)
-	// }
+	exp = interface{}("Vodafone")
+	if rcv, err := dDP.fieldAsInterface([]string{"Carrier"}); err != nil {
+		t.Error(err)
+	} else if rcv != exp {
+		t.Errorf("Expected <%+v>, Received <%v><%T>", exp, rcv, rcv)
+	}
 	exp = interface{}(0)
 	if rcv, err := dDP.fieldAsInterface([]string{"LengthOfNationalDestinationCode"}); err != nil {
 		t.Error(err)
 	} else if rcv != exp {
 		t.Errorf("Expected <%+v>, Received <%v>", exp, rcv)
 	}
-	exp = interface{}("+4917642092123")
+	exp = interface{}("+49 17222020")
 	if rcv, err := dDP.fieldAsInterface([]string{"RawInput"}); err != nil {
 		t.Error(err)
 	} else if rcv != exp {
@@ -382,19 +382,19 @@ func TestLibphonenumberDPfieldAsInterface(t *testing.T) {
 	} else if rcv != exp {
 		t.Errorf("Expected <%+v>, Received <%v>", exp, rcv)
 	}
-	exp = interface{}(true)
+	exp = interface{}(false)
 	if rcv, err := dDP.fieldAsInterface([]string{"ItalianLeadingZero"}); err != nil {
 		t.Error(err)
 	} else if rcv != exp {
 		t.Errorf("Expected <%+v>, Received <%v>", exp, rcv)
 	}
-	exp = interface{}("262 02")
+	exp = interface{}("49 172")
 	if rcv, err := dDP.fieldAsInterface([]string{"PreferredDomesticCarrierCode"}); err != nil {
 		t.Error(err)
 	} else if rcv != exp {
 		t.Errorf("Expected <%+v>, Received <%v>", exp, rcv)
 	}
-	exp = interface{}(phonenumbers.PhoneNumber_FROM_DEFAULT_COUNTRY)
+	exp = interface{}(phonenumbers.PhoneNumber_FROM_NUMBER_WITH_PLUS_SIGN)
 	if rcv, err := dDP.fieldAsInterface([]string{"CountryCodeSource"}); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcv, exp) {
@@ -410,17 +410,21 @@ func TestDynamicDPfieldAsInterfaceMetaLibPhoneNumber(t *testing.T) {
 		stsConns:  []string{"conn2"},
 		actsConns: []string{"conn3"},
 		tenant:    "cgrates.org",
-		initialDP: utils.StringSet{
-			"test": struct{}{},
-		},
+
 		cache: utils.MapStorage{
 			"testField": "testValue",
 		},
 		ctx: context.Background(),
 	}
 
-	dp, _ := newLibPhoneNumberDP("+4917642092123")
-	expAsField, _ := dp.FieldAsInterface([]string{})
+	dp, err := newLibPhoneNumberDP("+4917642092123")
+	if err != nil {
+		t.Error(err)
+	}
+	expAsField, err := dp.FieldAsInterface([]string{})
+	if err != nil {
+		t.Error(err)
+	}
 	exp := interface{}(expAsField)
 	if rcv, err := dDP.fieldAsInterface([]string{utils.MetaLibPhoneNumber, "+4917642092123"}); err != nil {
 		t.Error(err)
@@ -429,36 +433,313 @@ func TestDynamicDPfieldAsInterfaceMetaLibPhoneNumber(t *testing.T) {
 	}
 }
 
-func TestDynamicDPfieldAsInterfaceMetaLibPhoneNumberErr(t *testing.T) {
+func TestDynamicDPfieldAsInterfaceErrMetaLibPhoneNumber(t *testing.T) {
 
 	dDP := &dynamicDP{
 		resConns:  []string{"conn1"},
 		stsConns:  []string{"conn2"},
 		actsConns: []string{"conn3"},
 		tenant:    "cgrates.org",
-		initialDP: utils.StringSet{
-			"test": struct{}{},
-		},
+
 		cache: utils.MapStorage{
 			"testField": "testValue",
 		},
 		ctx: context.Background(),
 	}
 
-	if _, err := dDP.fieldAsInterface([]string{utils.MetaLibPhoneNumber, "inexistentNum"}); err != phonenumbers.ErrNotANumber {
+	if _, err := dDP.fieldAsInterface([]string{utils.MetaLibPhoneNumber, "inexistentNum"}); err == nil || err != phonenumbers.ErrNotANumber {
 		t.Error(err)
 	}
 }
 
-// func TestDynamicDPfieldAsInterfaceNotFound(t *testing.T) {
-// 	Cache.Clear(nil)
+func TestDynamicDPfieldAsInterfaceNotFound(t *testing.T) {
+	Cache.Clear(nil)
 
-// 	ms := utils.MapStorage{}
-// 	dDp := newDynamicDP(context.Background(), []string{}, []string{utils.ConcatenatedKey(utils.MetaInternal, utils.StatSConnsCfg)}, []string{}, "cgrates.org", ms)
-// 	exp := ""
-// 	if rcv, err := dDp.fieldAsInterface([]string{utils.MetaStats, "val", "val3"}); err == nil || err != utils.ErrNotFound {
-// 		t.Error(err)
-// 	} else if !reflect.DeepEqual(rcv, exp) {
-// 		t.Errorf("Expected \n<%v>, Received \n<%v>", exp, rcv)
-// 	}
-// }
+	ms := utils.MapStorage{}
+	dDp := newDynamicDP(context.Background(), []string{}, []string{}, []string{}, "cgrates.org", ms)
+
+	if _, err := dDp.fieldAsInterface([]string{"inexistentfld1", "inexistentfld2"}); err == nil || err != utils.ErrNotFound {
+		t.Error(err)
+	}
+}
+
+func TestDynamicDPfieldAsInterfaceErrMetaStats(t *testing.T) {
+
+	dDP := &dynamicDP{
+
+		stsConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)},
+
+		tenant: "cgrates.org",
+
+		cache: utils.MapStorage{
+			"testField": "testValue",
+		},
+		ctx: context.Background(),
+	}
+	cfg := config.NewDefaultCGRConfig()
+
+	cc := &ccMock{
+		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+			utils.StatSv1GetQueueDecimalMetrics: func(ctx *context.Context, args, reply interface{}) error {
+				return utils.ErrNotImplemented
+			},
+		},
+	}
+	rpcInternal := make(chan birpc.ClientConnector, 1)
+	rpcInternal <- cc
+	cM := NewConnManager(cfg)
+	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), utils.StatSv1, rpcInternal)
+
+	if _, err := dDP.fieldAsInterface([]string{utils.MetaStats, "fld1"}); err == nil || err != utils.ErrNotImplemented {
+		t.Error(err)
+	}
+}
+
+func TestDynamicDPfieldAsInterfaceErrMetaResources(t *testing.T) {
+
+	dDP := &dynamicDP{
+		resConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)},
+
+		tenant: "cgrates.org",
+
+		cache: utils.MapStorage{
+			"testField": "testValue",
+		},
+		ctx: context.Background(),
+	}
+	cfg := config.NewDefaultCGRConfig()
+
+	cc := &ccMock{
+		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+			utils.ResourceSv1GetResourceWithConfig: func(ctx *context.Context, args, reply interface{}) error {
+				return utils.ErrNotImplemented
+			},
+		},
+	}
+	rpcInternal := make(chan birpc.ClientConnector, 1)
+	rpcInternal <- cc
+	cM := NewConnManager(cfg)
+	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources), utils.ResourceSv1, rpcInternal)
+
+	if _, err := dDP.fieldAsInterface([]string{utils.MetaResources, "fld1"}); err == nil || err != utils.ErrNotImplemented {
+		t.Error(err)
+	}
+}
+
+func TestDynamicDPfieldAsInterfaceErrMetaAccounts(t *testing.T) {
+
+	dDP := &dynamicDP{
+
+		actsConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts)},
+		tenant:    "cgrates.org",
+
+		cache: utils.MapStorage{
+			"testField": "testValue",
+		},
+		ctx: context.Background(),
+	}
+	cfg := config.NewDefaultCGRConfig()
+
+	cc := &ccMock{
+		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+			utils.AccountSv1GetAccount: func(ctx *context.Context, args, reply interface{}) error {
+				return utils.ErrNotImplemented
+			},
+		},
+	}
+	rpcInternal := make(chan birpc.ClientConnector, 1)
+	rpcInternal <- cc
+	cM := NewConnManager(cfg)
+	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts), utils.AccountSv1, rpcInternal)
+
+	if _, err := dDP.fieldAsInterface([]string{utils.MetaAccounts, "fld1"}); err == nil || err != utils.ErrNotImplemented {
+		t.Error(err)
+	}
+}
+
+func TestDynamicDPfieldAsInterfaceMetaAccounts(t *testing.T) {
+	Cache.Clear(nil)
+
+	dDP := &dynamicDP{
+
+		actsConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts)},
+		tenant:    "cgrates.org",
+
+		cache: utils.MapStorage{
+			"testField": "testValue",
+		},
+		ctx: context.Background(),
+	}
+	cfg := config.NewDefaultCGRConfig()
+
+	customRply := &utils.Account{
+		Tenant:    "cgrates.org",
+		ID:        "1004",
+		FilterIDs: []string{"*string:~*req.Account:1004"},
+		Balances: map[string]*utils.Balance{
+			"ConcreteBalance1": {
+				ID: "ConcreteBalance1",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 20,
+					},
+				},
+				Type:  utils.MetaConcrete,
+				Units: &utils.Decimal{Big: decimal.New(1000, 0)},
+				CostIncrements: []*utils.CostIncrement{
+					{
+						FilterIDs:    []string{"*string:~*req.ToR:*data"},
+						Increment:    &utils.Decimal{Big: decimal.New(1, 0)},
+						FixedFee:     &utils.Decimal{Big: decimal.New(0, 0)},
+						RecurrentFee: &utils.Decimal{Big: decimal.New(1, 0)},
+					},
+				},
+			},
+		},
+	}
+
+	cc := &ccMock{
+		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+			utils.AccountSv1GetAccount: func(ctx *context.Context, args, reply interface{}) error {
+				rplCast, canCast := reply.(*utils.Account)
+				if !canCast {
+					t.Errorf("Wrong argument type : %T", reply)
+					return nil
+				}
+				*rplCast = *customRply
+				return nil
+			},
+		},
+	}
+	rpcInternal := make(chan birpc.ClientConnector, 1)
+	rpcInternal <- cc
+	cM := NewConnManager(cfg)
+	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts), utils.AccountSv1, rpcInternal)
+
+	exp := &utils.Decimal{Big: decimal.New(1000, 0)}
+
+	if rcv, err := dDP.fieldAsInterface([]string{utils.MetaAccounts, "1001", "Balances", "ConcreteBalance1", "Units"}); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("expected: <%+v>,\nreceived: \n<%+v>", utils.ToJSON(exp), utils.ToJSON(rcv))
+	}
+}
+
+func TestDynamicDPfieldAsInterfaceMetaResources(t *testing.T) {
+	Cache.Clear(nil)
+
+	dDP := &dynamicDP{
+
+		resConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)},
+		tenant:   "cgrates.org",
+
+		cache: utils.MapStorage{
+			"testField": "testValue",
+		},
+		ctx: context.Background(),
+	}
+	cfg := config.NewDefaultCGRConfig()
+
+	customRply := &ResourceWithConfig{
+		Resource: &Resource{
+			Tenant: "cgrates.org",
+			ID:     "ResGroup2",
+			Usages: map[string]*ResourceUsage{
+				"RU1": {
+					Tenant: "cgrates.org",
+					ID:     "RU1",
+					Units:  9,
+				},
+			},
+			tUsage: utils.Float64Pointer(9),
+		},
+		Config: &ResourceProfile{
+			Tenant:            "cgrates.org",
+			ID:                "ResGroup2",
+			FilterIDs:         []string{"*string:~*req.Account:1001"},
+			Limit:             10,
+			AllocationMessage: "Approved",
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				}},
+			ThresholdIDs: []string{utils.MetaNone},
+		},
+	}
+
+	cc := &ccMock{
+		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+			utils.ResourceSv1GetResourceWithConfig: func(ctx *context.Context, args, reply interface{}) error {
+				rplCast, canCast := reply.(*ResourceWithConfig)
+				if !canCast {
+					t.Errorf("Wrong argument type : %T", reply)
+					return nil
+				}
+				*rplCast = *customRply
+				return nil
+			},
+		},
+	}
+	rpcInternal := make(chan birpc.ClientConnector, 1)
+	rpcInternal <- cc
+	cM := NewConnManager(cfg)
+	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources), utils.ResourceSv1, rpcInternal)
+
+	var exp float64 = 9
+
+	if rcv, err := dDP.fieldAsInterface([]string{utils.MetaResources, "ResGroup2", "TotalUsage"}); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("expected: <%+v>,\nreceived: \n<%+v>", utils.ToJSON(exp), utils.ToJSON(rcv))
+	}
+}
+
+func TestDynamicDPfieldAsInterfaceMetaStats(t *testing.T) {
+	Cache.Clear(nil)
+
+	dDP := &dynamicDP{
+
+		stsConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)},
+		tenant:   "cgrates.org",
+
+		cache: utils.MapStorage{
+			"testField": "testValue",
+		},
+		ctx: context.Background(),
+	}
+	cfg := config.NewDefaultCGRConfig()
+
+	customRply := &map[string]*utils.Decimal{
+		"Stat1": {Big: decimal.New(1, 0)},
+		"Stat2": {Big: decimal.New(1, 0)},
+	}
+
+	cc := &ccMock{
+		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+			utils.StatSv1GetQueueDecimalMetrics: func(ctx *context.Context, args, reply interface{}) error {
+				rplCast, canCast := reply.(*map[string]*utils.Decimal)
+				if !canCast {
+					t.Errorf("Wrong argument type : %T", reply)
+					return nil
+				}
+				*rplCast = *customRply
+				return nil
+			},
+		},
+	}
+	rpcInternal := make(chan birpc.ClientConnector, 1)
+	rpcInternal <- cc
+	cM := NewConnManager(cfg)
+	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), utils.StatSv1, rpcInternal)
+
+	exp := utils.MapStorage{
+		"Stat1": 1,
+		"Stat2": 1,
+	}
+
+	if rcv, err := dDP.fieldAsInterface([]string{utils.MetaStats, "Stat2"}); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(utils.ToJSON(exp), utils.ToJSON(rcv)) {
+		t.Errorf("expected: <%+v><%T>,\nreceived: \n<%+v><%T>", utils.ToJSON(exp), exp, utils.ToJSON(rcv), rcv)
+	}
+}

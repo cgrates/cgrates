@@ -293,3 +293,44 @@ func TestV1GetItemIDsErr(t *testing.T) {
 	}
 
 }
+
+// unfinished
+// func TestNewCacheS(t *testing.T) {
+// 	Cache.Clear(nil)
+// 	args := &utils.ArgCacheReplicateSet{
+// 		CacheID:  utils.CacheAccounts,
+// 		ItemID:   "itemID",
+// 		Value:    &utils.CachedRPCResponse{Result: "reply", Error: nil},
+// 		GroupIDs: []string{"groupId", "groupId"},
+// 	}
+// 	cfg := config.NewDefaultCGRConfig()
+// 	cfg.CacheCfg().ReplicationConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicationConnsCfg)}
+// 	cfg.CacheCfg().Partitions = map[string]*config.CacheParamCfg{
+// 		args.CacheID: {
+// 			Replicate: false,
+// 		},
+// 	}
+// 	ltcache := ltcache.NewTransCache(map[string]*ltcache.CacheConfig{
+// 		args.CacheID: {
+// 			OnEvicted: func(itmID string, value interface{}) {
+// 				return
+// 			},
+// 		},
+// 	})
+
+// 	fmt.Printf("%+v", cfg)
+
+// 	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+// 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+
+// 	connMgr := NewConnManager(cfg)
+
+// 	stopchan := make(chan struct{}, 1)
+// 	close(stopchan)
+
+// 	cacheS := NewCacheS(cfg, dm, connMgr, nil)
+
+// 	if err := cacheS.SetWithReplicate(context.Background(), args); err != nil {
+// 		t.Error(err)
+// 	}
+// }
