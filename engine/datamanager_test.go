@@ -977,3 +977,172 @@ func TestDMSetActionTriggers(t *testing.T) {
 		t.Error("should been removed")
 	}
 }
+
+func TestDMResourceProfileRemote(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	tmpDm := dm
+	tmp := Cache
+	defer func() {
+		config.SetCgrConfig(config.NewDefaultCGRConfig())
+		Cache = tmp
+		SetDataStorage(tmpDm)
+	}()
+	Cache.Clear(nil)
+	cfg.DataDbCfg().RplConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1)}
+	cfg.DataDbCfg().RplFiltered = true
+	cfg.DataDbCfg().Items = map[string]*config.ItemOpt{
+		utils.CacheResourceProfiles: {
+			Limit:     3,
+			Replicate: true,
+			APIKey:    "key",
+			RouteID:   "route",
+		},
+		utils.CacheResources: {
+			Limit:     3,
+			Replicate: true,
+			APIKey:    "key",
+			RouteID:   "route",
+		},
+	}
+	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn <- &ccMock{
+		calls: map[string]func(args interface{}, reply interface{}) error{
+			utils.ReplicatorSv1SetResourceProfile: func(args, reply interface{}) error {
+				rscPrflApiOpts, cancast := args.(ResourceProfileWithAPIOpts)
+				if !cancast {
+					return utils.ErrNotConvertible
+				}
+				dm.DataDB().SetResourceProfileDrv(rscPrflApiOpts.ResourceProfile)
+				return nil
+			},
+			utils.ReplicatorSv1SetResource: func(args, reply interface{}) error {
+				rscApiOpts, cancast := args.(ResourceWithAPIOpts)
+				if !cancast {
+					return utils.ErrNotConvertible
+				}
+				dm.DataDB().SetResourceDrv(rscApiOpts.Resource)
+				return nil
+			},
+			utils.ReplicatorSv1RemoveResourceProfile: func(args, reply interface{}) error {
+				tntApiOpts, cancast := args.(utils.TenantIDWithAPIOpts)
+				if !cancast {
+					return utils.ErrNotConvertible
+				}
+				dm.DataDB().RemoveResourceProfileDrv(tntApiOpts.Tenant, tntApiOpts.ID)
+				return nil
+			},
+		},
+	}
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
+	})
+	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
+	config.SetCgrConfig(cfg)
+	SetDataStorage(dm)
+	rp := &ResourceProfile{
+		Tenant:    "cgrates.org",
+		ID:        "RES_ULTIMITED",
+		FilterIDs: []string{"*string:~*req.CustomField:UnlimitedEvent"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+		},
+	}
+	if err := dm.SetResourceProfile(rp, false); err != nil {
+		t.Error(err)
+	}
+	if val, err := dm.GetResourceProfile(rp.Tenant, rp.ID, true, false, utils.NonTransactional); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rp, val) {
+		t.Errorf("expected %v,received %v", utils.ToJSON(rp), utils.ToJSON(val))
+	}
+	expRes := &Resource{
+		Tenant: rp.Tenant,
+		ID:     rp.ID,
+		Usages: map[string]*ResourceUsage{},
+	}
+	if val, err := dm.GetResource(rp.Tenant, rp.ID, true, false, utils.NonTransactional); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expRes, val) {
+		t.Errorf("expected %v,received %v", utils.ToJSON(rp), utils.ToJSON(val))
+	}
+	if err := dm.RemoveResourceProfile(rp.Tenant, rp.ID, false); err != nil {
+		t.Error(err)
+	}
+	if _, has := db.db.Get(utils.CacheResourceProfiles, utils.ConcatenatedKey(rp.Tenant, rp.ID)); has {
+		t.Error("should been removed")
+	}
+}
+
+func TestDmSharedGroup(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	tmpDm := dm
+	tmp := Cache
+	defer func() {
+		config.SetCgrConfig(config.NewDefaultCGRConfig())
+		Cache = tmp
+		SetDataStorage(tmpDm)
+	}()
+	Cache.Clear(nil)
+	cfg.DataDbCfg().RplConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1)}
+	cfg.DataDbCfg().RplFiltered = true
+	cfg.DataDbCfg().Items = map[string]*config.ItemOpt{
+		utils.CacheSharedGroups: {
+			Limit:     3,
+			Replicate: true,
+			APIKey:    "key",
+			RouteID:   "route",
+		},
+	}
+	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn <- &ccMock{
+		calls: map[string]func(args interface{}, reply interface{}) error{
+			utils.ReplicatorSv1SetSharedGroup: func(args, reply interface{}) error {
+				shGrpApiOpts, cancast := args.(SharedGroupWithAPIOpts)
+				if !cancast {
+					return utils.ErrNotConvertible
+				}
+				dm.dataDB.SetSharedGroupDrv(shGrpApiOpts.SharedGroup)
+				return nil
+			},
+			utils.ReplicatorSv1RemoveSharedGroup: func(args, reply interface{}) error {
+				strApiOpts, cancast := args.(utils.StringWithAPIOpts)
+				if !cancast {
+					return utils.ErrNotConvertible
+				}
+				dm.DataDB().RemoveSharedGroupDrv(strApiOpts.Arg)
+				return nil
+			},
+		},
+	}
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
+	})
+	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
+	config.SetCgrConfig(cfg)
+	SetDataStorage(dm)
+	sg := &SharedGroup{
+		Id: "SG2",
+		AccountParameters: map[string]*SharingParameters{
+			"*any": {
+				Strategy:      "*lowest",
+				RatingSubject: "one",
+			},
+		},
+	}
+	if err := dm.SetSharedGroup(sg); err != nil {
+		t.Error(err)
+	}
+	if val, err := dm.GetSharedGroup(sg.Id, false, utils.NonTransactional); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(val, sg) {
+		t.Errorf("expected %+v,received %+v", utils.ToJSON(sg), utils.ToJSON(val))
+	}
+	if err := dm.RemoveSharedGroup(sg.Id, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+	if _, has := db.db.Get(utils.CacheSharedGroups, sg.Id); has {
+		t.Error("should been removed")
+	}
+}

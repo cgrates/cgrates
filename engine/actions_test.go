@@ -18,10 +18,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"bytes"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"reflect"
 	"strings"
 	"testing"
@@ -3706,6 +3709,69 @@ func TestRemoveAccountAcc(t *testing.T) {
 	}
 }
 
+func TestRemoveAccountActionErr(t *testing.T) {
+	tmp := Cache
+	tmpDm := dm
+	utils.Logger.SetLogLevel(4)
+	utils.Logger.SetSyslog(nil)
+	var buf bytes.Buffer
+	log.SetOutput(&buf)
+	defer func() {
+		Cache = tmp
+		SetDataStorage(tmpDm)
+		log.SetOutput(os.Stderr)
+	}()
+	a := &Action{
+		Id:              "CDRLog1",
+		ActionType:      utils.CDRLog,
+		ExtraParameters: "{\"BalanceID\":\"~*acnt.BalanceID\",\"ActionID\":\"~*act.ActionID\",\"BalanceValue\":\"~*acnt.BalanceValue\"}",
+		Weight:          50,
+	}
+	acs := Actions{
+		a,
+		&Action{
+			Id:         "CdrDebit",
+			ActionType: "*debit",
+			Balance: &BalanceFilter{
+				ID:     utils.StringPointer(utils.MetaDefault),
+				Value:  &utils.ValueFormula{Static: 9.95},
+				Type:   utils.StringPointer(utils.MetaMonetary),
+				Weight: utils.Float64Pointer(0),
+			},
+			Weight:       float64(90),
+			balanceValue: 10,
+		},
+	}
+	extraData := &utils.CGREvent{
+		Tenant:  "tenant",
+		ID:      "id1",
+		Time:    utils.TimePointer(time.Date(2022, 12, 1, 1, 0, 0, 0, time.UTC)),
+		Event:   map[string]interface{}{},
+		APIOpts: map[string]interface{}{},
+	}
+	ub := &Account{
+
+		BalanceMap: map[string]Balances{
+			utils.MetaMonetary: {&Balance{
+				Value: 10,
+			}},
+		},
+	}
+	SetDataStorage(nil)
+	if err := removeAccountAction(ub, a, acs, nil, extraData); err == nil || err != utils.ErrInvalidKey {
+		t.Error(err)
+	}
+	ub.ID = "cgrates.org:exp"
+	expLog := `[ERROR] Could not remove account Id: cgrates.org:exp: NO_DATABASE_CONNECTION`
+	if err := removeAccountAction(ub, a, acs, nil, extraData); err == nil {
+		t.Error(err)
+	} else if rcvLog := buf.String(); !strings.Contains(rcvLog, expLog) {
+		t.Errorf("expected log <%+v> to be included in: <%+v>",
+			expLog, rcvLog)
+	}
+	utils.Logger.SetLogLevel(0)
+}
+
 func TestRemoveExpiredErrs(t *testing.T) {
 	var acc *Account
 	action := &Action{
@@ -3763,4 +3829,41 @@ func TestRemoveExpiredErrs(t *testing.T) {
 	if err := removeExpired(acc, action, nil, nil, nil); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
 	}
+}
+
+func TestTransferMonetaryDefaultAction(t *testing.T) {
+	utils.Logger.SetLogLevel(3)
+	utils.Logger.SetSyslog(nil)
+	buf := new(bytes.Buffer)
+	log.SetOutput(buf)
+	defer func() {
+		utils.Logger.SetLogLevel(0)
+		log.SetOutput(os.Stderr)
+	}()
+	a := &Action{
+		Id:              "CDRLog1",
+		ActionType:      utils.CDRLog,
+		ExtraParameters: "{\"BalanceID\":\"~*acnt.BalanceID\",\"ActionID\":\"~*act.ActionID\",\"BalanceValue\":\"~*acnt.BalanceValue\"}",
+		Weight:          50,
+	}
+	acs := Actions{
+		&Action{
+			Id:           "CdrDebit",
+			ActionType:   "*debit",
+			Weight:       float64(90),
+			balanceValue: 10,
+		},
+	}
+	expLog := `*transfer_monetary_default called without account`
+	if err := transferMonetaryDefaultAction(nil, a, acs, nil, "data"); err == nil || err != utils.ErrAccountNotFound {
+		t.Errorf("expected <%v>,received <%v>", utils.ErrAccountNotFound, err)
+	} else if rcvLog := buf.String(); !strings.Contains(rcvLog, expLog) {
+		t.Errorf("expected log <%+v> to be included in: <%+v>",
+			expLog, rcvLog)
+	}
+	ub := &Account{}
+	if err := transferMonetaryDefaultAction(ub, a, acs, nil, "data"); err == nil || err != utils.ErrNotFound {
+		t.Errorf("expected <%v>,received <%v>", utils.ErrNotFound, err)
+	}
+
 }

@@ -18,7 +18,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"bytes"
+	"fmt"
+	"log"
+	"os"
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 
@@ -1535,14 +1540,22 @@ func TestHCRSortRoutes(t *testing.T) {
 	}
 }
 func TestLoadDistributionSorterSortRoutes(t *testing.T) {
-
 	cfg := config.NewDefaultCGRConfig()
 	tmpDm := dm
+	tmp := Cache
+
+	utils.Logger.SetLogLevel(4)
+	utils.Logger.SetSyslog(nil)
+	buf := new(bytes.Buffer)
+	log.SetOutput(buf)
 	defer func() {
 		config.SetCgrConfig(config.NewDefaultCGRConfig())
 		SetDataStorage(tmpDm)
-	}()
+		Cache = tmp
+		log.SetOutput(os.Stderr)
 
+	}()
+	Cache.Clear(nil)
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, config.CgrConfig().CacheCfg(), nil)
 	cfg.RouteSCfg().RALsConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs)}
@@ -1631,18 +1644,23 @@ func TestLoadDistributionSorterSortRoutes(t *testing.T) {
 				},
 			},
 		}}
-
+	expLog := `cannot convert ratio`
 	if val, err := lds.SortRoutes(prflID, routes, ev, extraOpts); err != nil {
 		t.Error(err)
 	} else if reflect.DeepEqual(val.Routes[0].SortingData, expSr.Routes[0].SortingData) {
 		t.Errorf("expected %v,received %v", utils.ToJSON(expSr), utils.ToJSON(val))
+	} else if rcvLog := buf.String(); !strings.Contains(rcvLog, expLog) {
+		t.Errorf("expected log <%+v> to be included in: <%+v>",
+			expLog, rcvLog)
 	}
-	// routes["sorted_id2"] = &Route{
-	// 	StatIDs: []string{},
-	// }
-	// if _, err = lds.SortRoutes(prflID, routes, ev, extraOpts); err == nil {
-	// 	t.Error(err)
-	// }
+	routes["sorted_id2"] = &Route{
+		StatIDs: []string{},
+	}
+
+	if _, err = lds.SortRoutes(prflID, routes, ev, extraOpts); err == nil || err.Error() != fmt.Sprintf("MANDATORY_IE_MISSING: [%v]", "StatIDs") {
+		t.Errorf("expected %v,received %v", err.Error(), fmt.Sprintf("MANDATORY_IE_MISSING: %v", "StatIDs"))
+	}
+	utils.Logger.SetLogLevel(0)
 }
 
 func TestRouteServicePopulateSortingData(t *testing.T) {

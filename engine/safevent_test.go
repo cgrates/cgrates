@@ -625,9 +625,6 @@ func TestSafEventAsCDR(t *testing.T) {
 		t.Errorf("Expecting %+v, received: %+v", expected, rply)
 	}
 	cfg := config.NewDefaultCGRConfig()
-	if err != nil {
-		t.Errorf("Error: %+v", err)
-	}
 	expected = &CDR{
 		CGRID:       "da39a3ee5e6b4b0d3255bfef95601890afd80709",
 		Cost:        -1.0,
