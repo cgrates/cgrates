@@ -485,3 +485,85 @@ func ComputeAttributeIndexes(dm *DataManager, tenant, context string, attrIDs *[
 	}
 	return attrIndexers, nil
 }
+
+func ComputeDispatcherIndexes(dm *DataManager, tenant, context string, dspIDs *[]string,
+	transactionID string) (filterIndexer *FilterIndexer, err error) {
+	var dispatcherIDs []string
+	var dspIndexes *FilterIndexer
+	if dspIDs == nil {
+		ids, err := dm.DataDB().GetKeysForPrefix(utils.DispatcherProfilePrefix)
+		if err != nil {
+			return nil, err
+		}
+		for _, id := range ids {
+			dispatcherIDs = append(dispatcherIDs, strings.Split(id, utils.CONCATENATED_KEY_SEP)[1])
+		}
+		// this will be on ComputeIndexes that contains empty indexes
+		dspIndexes = NewFilterIndexer(dm, utils.DispatcherProfilePrefix,
+			utils.ConcatenatedKey(tenant, context))
+	} else {
+		// this will be on ComputeIndexesIDs that contains the old indexes from the next getter
+		var oldIDx map[string]utils.StringMap
+		if oldIDx, err = dm.GetFilterIndexes(utils.PrefixToIndexCache[utils.DispatcherProfilePrefix],
+			tenant, utils.EmptyString, nil); err != nil || oldIDx == nil {
+			dspIndexes = NewFilterIndexer(dm, utils.DispatcherProfilePrefix,
+				utils.ConcatenatedKey(tenant, context))
+		} else {
+			dspIndexes = NewFilterIndexerWithIndexes(dm, utils.DispatcherProfilePrefix,
+				utils.ConcatenatedKey(tenant, context), oldIDx)
+		}
+		dispatcherIDs = *dspIDs
+		transactionID = utils.NonTransactional
+	}
+	for _, id := range dispatcherIDs {
+		dsp, err := dm.GetDispatcherProfile(tenant, id, true, false, utils.NonTransactional)
+		if err != nil {
+			return nil, err
+		}
+		if !utils.IsSliceMember(dsp.Subsystems, context) && context != utils.META_ANY {
+			continue
+		}
+		fltrIDs := make([]string, len(dsp.FilterIDs))
+		for i, fltrID := range dsp.FilterIDs {
+			fltrIDs[i] = fltrID
+		}
+		if len(fltrIDs) == 0 {
+			fltrIDs = []string{utils.META_NONE}
+		}
+		for _, fltrID := range fltrIDs {
+			var fltr *Filter
+			if fltrID == utils.META_NONE {
+				fltr = &Filter{
+					Tenant: dsp.Tenant,
+					ID:     dsp.ID,
+					Rules: []*FilterRule{
+						{
+							Type:    utils.META_NONE,
+							Element: utils.META_ANY,
+							Values:  []string{utils.META_ANY},
+						},
+					},
+				}
+			} else if fltr, err = GetFilter(dm, dsp.Tenant, fltrID,
+				true, false, utils.NonTransactional); err != nil {
+				if err == utils.ErrNotFound {
+					err = fmt.Errorf("broken reference to filter: %+v for dispatcher: %+v",
+						fltrID, dsp)
+				}
+				return nil, err
+			}
+			dspIndexes.IndexTPFilter(FilterToTPFilter(fltr), dsp.ID)
+		}
+	}
+	if transactionID == utils.NonTransactional {
+		if err := dspIndexes.StoreIndexes(true, transactionID); err != nil {
+			return nil, err
+		}
+		return nil, nil
+	} else {
+		if err := dspIndexes.StoreIndexes(false, transactionID); err != nil {
+			return nil, err
+		}
+	}
+	return dspIndexes, nil
+}

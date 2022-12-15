@@ -29,7 +29,8 @@ import (
 var (
 	filterIndexType = utils.StringMap{
 		utils.MetaString: true,
-		utils.MetaPrefix: true}
+		utils.MetaPrefix: true,
+	}
 )
 
 // UpdateFilterIndexes will update the indexes for every reference of a filter that exists in a profile.
@@ -197,6 +198,27 @@ func UpdateFilterIndexes(dm *DataManager, tnt string, oldFltr *Filter, newFltr *
 						return
 					}
 					if _, err = ComputeAttributeIndexes(dm, newFltr.Tenant, ctx, &attributeIDs,
+						utils.NonTransactional); err != nil {
+						return err
+					}
+				}
+			}
+		case utils.CacheDispatcherFilterIndexes:
+			dispatcherIDs := index.Slice()
+			for _, dspID := range dispatcherIDs {
+				var dpp *DispatcherProfile
+				if dpp, err = dm.GetDispatcherProfile(newFltr.Tenant, dspID,
+					true, false, utils.NonTransactional); err != nil {
+					return
+				}
+				for _, subsys := range dpp.Subsystems {
+					tntSubsys := utils.ConcatenatedKey(newFltr.Tenant, subsys)
+					if err = removeFilterIndexesForFilter(dm, idxItmType, utils.CacheDispatcherProfiles,
+						tntSubsys, // remove the indexes for the filter
+						removeIndexKeys, index); err != nil {
+						return
+					}
+					if _, err = ComputeDispatcherIndexes(dm, newFltr.Tenant, subsys, &dispatcherIDs,
 						utils.NonTransactional); err != nil {
 						return err
 					}
