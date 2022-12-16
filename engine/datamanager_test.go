@@ -1110,3 +1110,202 @@ func TestDataManagerRemoveAccountReplicateTrue(t *testing.T) {
 	dm.RemoveAccount(context.Background(), tnt, fltrId, false)
 
 }
+
+func TestDataManagerRemoveDispatcherHostErrNilDM(t *testing.T) {
+
+	var dm *DataManager
+	if err := dm.RemoveDispatcherHost(context.Background(), utils.CGRateSorg, "*stirng:~*req.Account:1001"); err == nil || err != utils.ErrNoDatabaseConn {
+		t.Error(err)
+	}
+
+}
+
+func TestDataManagerRemoveDispatcherHostErroldDppNil(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	if err := dm.RemoveDispatcherHost(context.Background(), utils.CGRateSorg, "*stirng:~*req.Account:1001"); err == nil || err != utils.ErrNotFound {
+		t.Error(err)
+	}
+
+}
+
+func TestDataManagerRemoveDispatcherHostErrGetDisp(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	dm.dataDB = &DataDBMock{
+		GetDispatcherHostDrvF: func(ctx *context.Context, s1, s2 string) (*DispatcherHost, error) {
+			return nil, utils.ErrNotImplemented
+		},
+	}
+
+	if err := dm.RemoveDispatcherHost(context.Background(), utils.CGRateSorg, "*stirng:~*req.Account:1001"); err == nil || err != utils.ErrNotImplemented {
+		t.Error(err)
+	}
+
+}
+
+func TestDataManagerRemoveDispatcherHostErrRemoveDisp(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+
+	Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	dm.dataDB = &DataDBMock{
+		GetDispatcherHostDrvF: func(ctx *context.Context, s1, s2 string) (*DispatcherHost, error) {
+			return &DispatcherHost{}, nil
+		},
+		RemoveDispatcherHostDrvF: func(ctx *context.Context, s1, s2 string) error {
+			return utils.ErrNotImplemented
+		},
+	}
+
+	if err := dm.RemoveDispatcherHost(context.Background(), utils.CGRateSorg, "*stirng:~*req.Account:1001"); err == nil || err != utils.ErrNotImplemented {
+		t.Error(err)
+	}
+
+}
+
+func TestDataManagerRemoveDispatcherHostReplicateTrue(t *testing.T) {
+	tmp := Cache
+	cfgtmp := config.CgrConfig()
+	defer func() {
+		Cache = tmp
+		config.SetCgrConfig(cfgtmp)
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	cfg.DataDbCfg().Items[utils.MetaDispatcherHosts].Replicate = true
+	cfg.DataDbCfg().RplConns = []string{}
+	config.SetCgrConfig(cfg)
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	dm.dataDB = &DataDBMock{
+		GetDispatcherHostDrvF: func(ctx *context.Context, s1, s2 string) (*DispatcherHost, error) {
+			return &DispatcherHost{}, nil
+		},
+		RemoveDispatcherHostDrvF: func(ctx *context.Context, s1, s2 string) error {
+			return nil
+		},
+	}
+
+	// tested replicate
+	dm.RemoveDispatcherHost(context.Background(), utils.CGRateSorg, "*stirng:~*req.Account:1001")
+
+}
+
+func TestDataManagerSetDispatcherHostErrNilDM(t *testing.T) {
+
+	var dm *DataManager
+	if err := dm.SetDispatcherHost(context.Background(), nil); err == nil || err != utils.ErrNoDatabaseConn {
+		t.Error(err)
+	}
+
+}
+
+func TestDataManagerSetDispatcherHostErrDataDB(t *testing.T) {
+
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+	dm.dataDB = &DataDBMock{
+		SetDispatcherHostDrvF: func(ctx *context.Context, dh *DispatcherHost) error {
+			return utils.ErrNotImplemented
+		},
+	}
+
+	if err := dm.SetDispatcherHost(context.Background(), nil); err == nil || err != utils.ErrNotImplemented {
+		t.Error(err)
+	}
+
+}
+
+// unfinished get not implemented and conn error with no mock
+// func TestDataManagerSetDispatcherHostReplicateTrue(t *testing.T) {
+
+// 	tmp := Cache
+// 	cfgtmp := config.CgrConfig()
+// 	defer func() {
+// 		Cache = tmp
+// 		config.SetCgrConfig(cfgtmp)
+// 	}()
+// 	Cache.Clear(nil)
+
+// 	// cfg := config.NewDefaultCGRConfig()
+// 	// cfg.DataDbCfg().Items[utils.MetaDispatcherHosts].Replicate = true
+// 	// cfg.DataDbCfg().RplConns = []string{}
+// 	// config.SetCgrConfig(cfg)
+// 	// data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+// 	// cM := NewConnManager(cfg)
+// 	// dm := NewDataManager(data, cfg.CacheCfg(), cM)
+// 	cfg := config.NewDefaultCGRConfig()
+// 	connMng := NewConnManager(cfg)
+// 	dataDB, err := NewDataDBConn(cfg.DataDbCfg().Type,
+// 		cfg.DataDbCfg().Host, cfg.DataDbCfg().Port,
+// 		cfg.DataDbCfg().Name, cfg.DataDbCfg().User,
+// 		cfg.DataDbCfg().Password, cfg.GeneralCfg().DBDataEncoding,
+// 		cfg.DataDbCfg().Opts, cfg.DataDbCfg().Items)
+// 	if err != nil {
+// 		t.Error(err)
+// 	}
+// 	defer dataDB.Close()
+// 	dm := NewDataManager(dataDB, config.CgrConfig().CacheCfg(), connMng)
+// 	dm.dataDB = &DataDBMock{
+// 		SetDispatcherHostDrvF: func(ctx *context.Context, dh *DispatcherHost) error {
+// 			return nil
+// 		},
+// 	}
+
+// 	dpp := &DispatcherHost{
+// 		Tenant: utils.CGRateSorg,
+// 		RemoteHost: &config.RemoteHost{
+// 			ID:                   "ID",
+// 			Address:              "127.0.0.1",
+// 			Transport:            utils.MetaJSON,
+// 			ConnectAttempts:      1,
+// 			Reconnects:           1,
+// 			MaxReconnectInterval: time.Minute,
+// 			ConnectTimeout:       time.Nanosecond,
+// 			ReplyTimeout:         time.Nanosecond,
+// 			TLS:                  true,
+// 			ClientKey:            "key",
+// 			ClientCertificate:    "ce",
+// 			CaCertificate:        "ca",
+// 		},
+// 	}
+// 	// tested replicate
+// 	err = dm.SetDispatcherHost(context.Background(), dpp)
+// 	if err != nil {
+// 		t.Error(err)
+// 	}
+// }
