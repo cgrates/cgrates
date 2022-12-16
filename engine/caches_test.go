@@ -294,7 +294,7 @@ func TestV1GetItemIDsErr(t *testing.T) {
 
 }
 
-// unfinished
+// unfinished OnEvicted
 // func TestNewCacheS(t *testing.T) {
 // 	Cache.Clear(nil)
 // 	args := &utils.ArgCacheReplicateSet{
@@ -307,18 +307,9 @@ func TestV1GetItemIDsErr(t *testing.T) {
 // 	cfg.CacheCfg().ReplicationConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicationConnsCfg)}
 // 	cfg.CacheCfg().Partitions = map[string]*config.CacheParamCfg{
 // 		args.CacheID: {
-// 			Replicate: false,
+// 			Replicate: true,
 // 		},
 // 	}
-// 	ltcache := ltcache.NewTransCache(map[string]*ltcache.CacheConfig{
-// 		args.CacheID: {
-// 			OnEvicted: func(itmID string, value interface{}) {
-// 				return
-// 			},
-// 		},
-// 	})
-
-// 	fmt.Printf("%+v", cfg)
 
 // 	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 // 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
@@ -327,10 +318,163 @@ func TestV1GetItemIDsErr(t *testing.T) {
 
 // 	stopchan := make(chan struct{}, 1)
 // 	close(stopchan)
+// 	caps := NewCaps(1, utils.MetaBusy)
 
-// 	cacheS := NewCacheS(cfg, dm, connMgr, nil)
-
-// 	if err := cacheS.SetWithReplicate(context.Background(), args); err != nil {
-// 		t.Error(err)
-// 	}
+// 	sts := NewCapsStats(cfg.CoreSCfg().CapsStatsInterval, caps, stopchan)
+// 	cacheS := NewCacheS(cfg, dm, connMgr, sts)
+// 	t.Error(cacheS)
 // }
+
+func TestCacheSGetWithRemoteQueryErr(t *testing.T) {
+	Cache.Clear(nil)
+	args := &utils.ArgsGetCacheItemWithAPIOpts{
+		ArgsGetCacheItem: utils.ArgsGetCacheItem{
+			CacheID: utils.CacheAccounts,
+			ItemID:  "itemId",
+		},
+	}
+	cfg := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	cfg.CacheCfg().RemoteConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.RemoteConnsCfg)}
+	cfg.CacheCfg().Partitions = map[string]*config.CacheParamCfg{
+		args.CacheID: {
+
+			Remote: true,
+		},
+	}
+	clientconn := make(chan birpc.ClientConnector, 1)
+	clientconn <- &ccMock{
+		calls: map[string]func(_ *context.Context, args interface{}, reply interface{}) error{
+			utils.CacheSv1GetItem: func(_ *context.Context, args, reply interface{}) error {
+				return utils.ErrNotFound
+			},
+		},
+	}
+	connMgr := NewConnManager(cfg)
+	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.RemoteConnsCfg), utils.CacheSv1GetItem, clientconn)
+
+	cacheS := NewCacheS(cfg, dm, connMgr, nil)
+
+	expErr := utils.ErrNotFound
+	if _, err := cacheS.GetWithRemote(context.Background(), args); err == nil || err != expErr {
+		t.Error(err)
+	}
+}
+
+func TestCacheSGetWithRemoteTCacheGet(t *testing.T) {
+	Cache.Clear(nil)
+	args := &utils.ArgsGetCacheItemWithAPIOpts{
+		ArgsGetCacheItem: utils.ArgsGetCacheItem{
+			CacheID: utils.Accounts,
+			ItemID:  "itemId",
+		},
+	}
+	cfg := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	cfg.CacheCfg().RemoteConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.RemoteConnsCfg)}
+
+	var customRply interface{} = utils.ArgsGetCacheItem{
+		CacheID: utils.Accounts,
+		ItemID:  "itemId",
+	}
+	clientconn := make(chan birpc.ClientConnector, 1)
+	clientconn <- &ccMock{
+		calls: map[string]func(_ *context.Context, args interface{}, reply interface{}) error{
+			utils.CacheSv1GetItem: func(_ *context.Context, args, reply interface{}) error {
+				*reply.(*interface{}) = customRply
+				return nil
+			},
+		},
+	}
+	connMgr := NewConnManager(cfg)
+	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.RemoteConnsCfg), utils.CacheSv1GetItem, clientconn)
+
+	cacheS := NewCacheS(cfg, dm, connMgr, nil)
+
+	exp := "expected value"
+	cacheS.tCache.Set(utils.Accounts, "itemId", exp, []string{}, true, utils.EmptyString)
+
+	if rcv, err := cacheS.GetWithRemote(context.Background(), args); err != nil {
+		t.Error(err)
+	} else if rcv != exp {
+		t.Errorf("Expected <%v>, received <%v>", exp, rcv)
+	}
+}
+
+func TestCacheSV1ReplicateRemove(t *testing.T) {
+	Cache.Clear(nil)
+	args := &utils.ArgCacheReplicateRemove{
+
+		CacheID: utils.CacheAccounts,
+		ItemID:  "itemId",
+		Tenant:  utils.CGRateSorg,
+	}
+	cfg := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	cfg.CacheCfg().ReplicationConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicationConnsCfg)}
+	clientconn := make(chan birpc.ClientConnector, 1)
+	clientconn <- &ccMock{
+		calls: map[string]func(_ *context.Context, args interface{}, reply interface{}) error{
+			utils.CacheSv1ReplicateRemove: func(_ *context.Context, args, reply interface{}) error {
+				var valBack string = utils.OK
+				*reply.(*interface{}) = valBack
+				return nil
+			},
+		},
+	}
+	connMgr := NewConnManager(cfg)
+	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicationConnsCfg), utils.CacheSv1, clientconn)
+
+	cacheS := NewCacheS(cfg, dm, connMgr, nil)
+
+	var reply string
+	if err := cacheS.V1ReplicateRemove(context.Background(), args, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Expected reply <%v>, Received <%v>", utils.OK, reply)
+	}
+}
+
+func TestCacheSReplicateRemove(t *testing.T) {
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	cfg.CacheCfg().ReplicationConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicationConnsCfg)}
+	cfg.CacheCfg().Partitions = map[string]*config.CacheParamCfg{
+		utils.CacheAccounts: {
+			Replicate: true,
+		},
+	}
+	clientconn := make(chan birpc.ClientConnector, 1)
+	clientconn <- &ccMock{
+		calls: map[string]func(_ *context.Context, args interface{}, reply interface{}) error{
+			utils.CacheSv1ReplicateRemove: func(_ *context.Context, args, reply interface{}) error {
+				if err := Cache.Remove(context.Background(), utils.CacheAccounts, "itemId", true, utils.NonTransactional); err != nil {
+					t.Error(err)
+				}
+				return nil
+			},
+		},
+	}
+	connMgr := NewConnManager(cfg)
+	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicationConnsCfg), utils.CacheSv1, clientconn)
+
+	cacheS := NewCacheS(cfg, dm, connMgr, nil)
+
+	if err := Cache.Set(context.Background(), utils.CacheAccounts, "itemId", "val", nil, true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+
+	if err := cacheS.ReplicateRemove(context.Background(), utils.CacheAccounts, "itemId"); err != nil {
+		t.Error(err)
+	}
+
+	if rcv, ok := Cache.Get(utils.CacheAccounts, "itemId"); ok != false || rcv != nil {
+		t.Errorf("Expected rcv <nil>, Received <%v>, OK <%v>", rcv, ok)
+	}
+}

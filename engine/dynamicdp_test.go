@@ -710,8 +710,8 @@ func TestDynamicDPfieldAsInterfaceMetaStats(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 
 	customRply := &map[string]*utils.Decimal{
-		"Stat1": {Big: decimal.New(1, 0)},
-		"Stat2": {Big: decimal.New(1, 0)},
+		utils.MetaACD: utils.NewDecimal(1, 0),
+		utils.MetaTCC: utils.NewDecimal(2, 0),
 	}
 
 	cc := &ccMock{
@@ -732,12 +732,9 @@ func TestDynamicDPfieldAsInterfaceMetaStats(t *testing.T) {
 	cM := NewConnManager(cfg)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), utils.StatSv1, rpcInternal)
 
-	exp := utils.MapStorage{
-		"Stat1": 1,
-		"Stat2": 1,
-	}
+	exp := utils.NewDecimal(1, 0)
 
-	if rcv, err := dDP.fieldAsInterface([]string{utils.MetaStats, "Stat2"}); err != nil {
+	if rcv, err := dDP.fieldAsInterface([]string{utils.MetaStats, "Stats2", utils.MetaACD}); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(utils.ToJSON(exp), utils.ToJSON(rcv)) {
 		t.Errorf("expected: <%+v><%T>,\nreceived: \n<%+v><%T>", utils.ToJSON(exp), exp, utils.ToJSON(rcv), rcv)
