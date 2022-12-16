@@ -1146,3 +1146,166 @@ func TestDmSharedGroup(t *testing.T) {
 		t.Error("should been removed")
 	}
 }
+
+func TestDMThresholdProfile(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	tmpDm := dm
+	tmp := Cache
+	defer func() {
+		config.SetCgrConfig(config.NewDefaultCGRConfig())
+		Cache = tmp
+		SetDataStorage(tmpDm)
+	}()
+	Cache.Clear(nil)
+	cfg.DataDbCfg().RplConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1)}
+	cfg.DataDbCfg().RplFiltered = true
+	cfg.DataDbCfg().Items = map[string]*config.ItemOpt{
+		utils.CacheThresholdProfiles: {
+			Limit:     3,
+			Replicate: true,
+			APIKey:    "key",
+			RouteID:   "route",
+		},
+		utils.CacheThresholds: {
+			Limit:     3,
+			Replicate: true,
+			APIKey:    "key",
+			RouteID:   "route",
+		},
+	}
+	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn <- &ccMock{
+		calls: map[string]func(args interface{}, reply interface{}) error{
+			utils.ReplicatorSv1SetThresholdProfile: func(args, reply interface{}) error {
+				thPApiOpts, cancast := args.(ThresholdProfileWithAPIOpts)
+				if !cancast {
+					return utils.ErrNotConvertible
+				}
+				dm.DataDB().SetThresholdProfileDrv(thPApiOpts.ThresholdProfile)
+				return nil
+			},
+			utils.ReplicatorSv1SetThreshold: func(args, reply interface{}) error {
+				thApiOpts, cancast := args.(ThresholdWithAPIOpts)
+				if !cancast {
+					return utils.ErrNotConvertible
+				}
+				dm.DataDB().SetThresholdDrv(thApiOpts.Threshold)
+				return nil
+			},
+			utils.ReplicatorSv1RemoveThresholdProfile: func(args, reply interface{}) error {
+				tntApiOpts, cancast := args.(utils.TenantIDWithAPIOpts)
+				if !cancast {
+					return utils.ErrNotConvertible
+				}
+				dm.DataDB().RemThresholdProfileDrv(tntApiOpts.Tenant, tntApiOpts.ID)
+				return nil
+			},
+		},
+	}
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
+	})
+	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
+	config.SetCgrConfig(cfg)
+	SetDataStorage(dm)
+	th := &ThresholdProfile{
+		Tenant:    "cgrates.org",
+		ID:        "THD_Test",
+		FilterIDs: []string{"*string:Account:test"},
+		MaxHits:   -1,
+		MinSleep:  time.Second,
+		Blocker:   false,
+		Weight:    20.0,
+		ActionIDs: []string{"ACT_LOG"},
+		Async:     false,
+	}
+	if err := dm.SetThresholdProfile(th, false); err != nil {
+		t.Error(err)
+	}
+	if val, err := dm.GetThresholdProfile(th.Tenant, th.ID, true, false, utils.NonTransactional); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(th, val) {
+		t.Errorf("expected %v,received %v", utils.ToJSON(th), utils.ToJSON(val))
+	}
+	if err := dm.RemoveThresholdProfile(th.Tenant, th.ID, false); err != nil {
+		t.Error(err)
+	}
+	if _, has := db.db.Get(utils.CacheThresholdProfiles, utils.ConcatenatedKey(th.Tenant, th.ID)); has {
+		t.Error("should receive error")
+	}
+}
+
+func TestDmDispatcherHost(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	tmpDm := dm
+	tmp := Cache
+	defer func() {
+		config.SetCgrConfig(config.NewDefaultCGRConfig())
+		Cache = tmp
+		SetDataStorage(tmpDm)
+	}()
+	Cache.Clear(nil)
+	cfg.DataDbCfg().RplConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1)}
+	cfg.DataDbCfg().RplFiltered = true
+	cfg.DataDbCfg().Items = map[string]*config.ItemOpt{
+		utils.CacheDispatcherHosts: {
+			Limit:     3,
+			Replicate: true,
+			APIKey:    "key",
+			RouteID:   "route",
+		},
+	}
+	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn <- &ccMock{
+		calls: map[string]func(args interface{}, reply interface{}) error{
+			utils.ReplicatorSv1SetDispatcherHost: func(args, reply interface{}) error {
+				dspApiOpts, cancast := args.(DispatcherHostWithAPIOpts)
+				if !cancast {
+					return utils.ErrNotConvertible
+				}
+				dm.DataDB().SetDispatcherHostDrv(dspApiOpts.DispatcherHost)
+				return nil
+			},
+			utils.ReplicatorSv1RemoveDispatcherHost: func(args, reply interface{}) error {
+				tntApiOpts, cancast := args.(utils.TenantIDWithAPIOpts)
+				if !cancast {
+					return utils.ErrNotConvertible
+				}
+				dm.DataDB().RemoveDispatcherHostDrv(tntApiOpts.Tenant, tntApiOpts.ID)
+				return nil
+			},
+		},
+	}
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
+	})
+	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
+	config.SetCgrConfig(cfg)
+	SetDataStorage(dm)
+
+	dH := &DispatcherHost{
+		Tenant: "testTenant",
+		RemoteHost: &config.RemoteHost{
+			ID:        "testID",
+			Address:   rpcclient.InternalRPC,
+			Transport: utils.MetaInternal,
+			TLS:       false,
+		},
+	}
+	if err := dm.SetDispatcherHost(dH); err != nil {
+		t.Error(err)
+	}
+	if val, err := dm.GetDispatcherHost(dH.Tenant, dH.ID, true, false, utils.NonTransactional); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(dH, val) {
+		t.Errorf("expected %v,received %v", utils.ToJSON(dH), utils.ToJSON(val))
+	}
+	if err = dm.RemoveDispatcherHost(dH.Tenant, dH.ID); err != nil {
+		t.Error(err)
+	}
+	if _, has := db.db.Get(utils.CacheDispatcherHosts, utils.ConcatenatedKey(dH.Tenant, dH.ID)); has {
+		t.Error("has not been removed from the cache")
+	}
+}

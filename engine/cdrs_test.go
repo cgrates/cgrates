@@ -19,8 +19,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"bytes"
 	"fmt"
+	"log"
+	"os"
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 
@@ -245,8 +249,11 @@ func TestArgV1ProcessClone(t *testing.T) {
 }
 
 func TestCDRV1GetCDRs(t *testing.T) {
+
 	cfg := config.NewDefaultCGRConfig()
-	cfg.GeneralCfg().DefaultTimezone = "UTC"
+	defer func() {
+		config.SetCgrConfig(config.NewDefaultCGRConfig())
+	}()
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 	cdrS := &CDRServer{
@@ -255,11 +262,21 @@ func TestCDRV1GetCDRs(t *testing.T) {
 		cdrDb:   NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items),
 		dm:      dm,
 	}
-	args := &utils.RPCCDRsFilterWithAPIOpts{
+	args := utils.RPCCDRsFilterWithAPIOpts{
 
-		RPCCDRsFilter: &utils.RPCCDRsFilter{},
-		Tenant:        "cgrates.org",
-		APIOpts:       map[string]interface{}{},
+		RPCCDRsFilter: &utils.RPCCDRsFilter{
+			CGRIDs:         []string{"CGRIDs"},
+			NotCGRIDs:      []string{"NotCGRIDs"},
+			RunIDs:         []string{"RunIDs"},
+			NotRunIDs:      []string{"NotRunIDs"},
+			OriginIDs:      []string{"OriginIDs"},
+			NotOriginIDs:   []string{"NotOriginIDs"},
+			OriginHosts:    []string{"OriginHosts"},
+			SetupTimeStart: "2020-04-18T11:46:26.371Z",
+			SetupTimeEnd:   "2020-04-18T11:46:26.371Z",
+		},
+		Tenant:  "cgrates.org",
+		APIOpts: map[string]interface{}{},
 	}
 	cdrs := &[]*CDR{
 		{
@@ -268,8 +285,8 @@ func TestCDRV1GetCDRs(t *testing.T) {
 			CGRID: "cgr1d",
 		},
 	}
-	if err := cdrS.V1GetCDRs(*args, cdrs); err == nil {
-		t.Error(err)
+	if err := cdrS.V1GetCDRs(args, cdrs); err == nil || err.Error() != fmt.Sprintf("SERVER_ERROR: %s", utils.ErrNotFound) {
+		t.Error(utils.NewErrServerError(utils.ErrNotFound))
 	}
 
 }
@@ -803,6 +820,9 @@ func TestCDRSV1ProcessEventCacheSet(t *testing.T) {
 func TestV1ProcessEvent(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
+	defer func() {
+		config.SetCgrConfig(cfg)
+	}()
 	cfg.CdrsCfg().AttributeSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.AttributeSConnsCfg)}
 	cfg.CdrsCfg().ChargerSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)}
 	cfg.CdrsCfg().RaterConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResponder)}
@@ -916,6 +936,149 @@ func TestV1ProcessEvent(t *testing.T) {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("expected %v,received %v", utils.OK, reply)
+	}
+}
+func TestCdrprocessEventsErrLog(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	buf := new(bytes.Buffer)
+	setlog := func(b *bytes.Buffer) {
+		utils.Logger.SetLogLevel(4)
+		utils.Logger.SetSyslog(nil)
+		log.SetOutput(b)
+	}
+	setlog(buf)
+	removelog := func() {
+		utils.Logger.SetLogLevel(0)
+		log.SetOutput(os.Stderr)
+	}
+	tmp := Cache
+	defer func() {
+		removelog()
+		Cache = tmp
+	}()
+	cfg.DataDbCfg().Items = map[string]*config.ItemOpt{
+		utils.CacheCDRsTBL: {
+			Limit:     3,
+			StaticTTL: true,
+		},
+	}
+	Cache.Clear(nil)
+	cfg.CdrsCfg().EEsConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs)}
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn <- &ccMock{
+		calls: map[string]func(args interface{}, reply interface{}) error{
+			utils.EeSv1ProcessEvent: func(args, reply interface{}) error {
+
+				return utils.ErrPartiallyExecuted
+			},
+		},
+	}
+	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs): clientConn,
+	})
+	cdrs := &CDRServer{
+		cgrCfg:  cfg,
+		cdrDb:   db,
+		dm:      dm,
+		connMgr: connMgr,
+	}
+
+	evs := []*utils.CGREvent{
+		{ID: "TestV1ProcessEventNoTenant",
+			Event: map[string]interface{}{
+				utils.CGRID:        "test1",
+				utils.RunID:        utils.MetaDefault,
+				utils.OriginID:     "testV1CDRsRefundOutOfSessionCost",
+				utils.RequestType:  utils.MetaPrepaid,
+				utils.AccountField: "testV1CDRsRefundOutOfSessionCost",
+				utils.Destination:  "+4986517174963",
+				utils.AnswerTime:   time.Date(2019, 11, 27, 12, 21, 26, 0, time.UTC),
+				utils.Usage:        123 * time.Minute},
+		}}
+	expLog := `with AttributeS`
+	if _, err := cdrs.processEvents(evs, true, true, true, true, true, true, true, true, true); err == nil || err != utils.ErrPartiallyExecuted {
+		t.Error(err)
+	} else if rcvLog := buf.String(); !strings.Contains(rcvLog, expLog) {
+		t.Errorf("expected %v,received %v", expLog, rcvLog)
+	}
+	removelog()
+	buf2 := new(bytes.Buffer)
+	setlog(buf2)
+	expLog = `with ChargerS`
+	if _, err := cdrs.processEvents(evs, true, false, true, true, true, true, true, true, true); err == nil || err != utils.ErrPartiallyExecuted {
+		t.Error(err)
+	} else if rcvLog := buf2.String(); !strings.Contains(rcvLog, expLog) {
+		t.Errorf("expected %v,received %v", expLog, rcvLog)
+	}
+	removelog()
+	buf3 := new(bytes.Buffer)
+	setlog(buf3)
+	Cache.Set(utils.CacheCDRIDs, utils.ConcatenatedKey("test1", utils.MetaDefault), "val", []string{}, true, utils.NonTransactional)
+	expLog = `with CacheS`
+	if _, err = cdrs.processEvents(evs, false, false, false, true, true, false, true, true, true); err == nil || err != utils.ErrExists {
+		t.Error(err)
+	} else if rcvLog := buf3.String(); !strings.Contains(rcvLog, expLog) {
+		t.Errorf("expected %v,received %v", expLog, rcvLog)
+	}
+	buf4 := new(bytes.Buffer)
+	removelog()
+	setlog(buf4)
+	evs[0].Event[utils.AnswerTime] = "time"
+	expLog = `converting event`
+	if _, err = cdrs.processEvents(evs, false, false, true, true, true, false, true, true, true); err == nil || err != utils.ErrPartiallyExecuted {
+		t.Error(err)
+	} else if rcvLog := buf4.String(); !strings.Contains(rcvLog, expLog) {
+		t.Errorf("expected %v,received %v", expLog, rcvLog)
+	}
+	buf5 := new(bytes.Buffer)
+	removelog()
+	setlog(buf5)
+	evs[0].Event[utils.AnswerTime] = time.Date(2019, 11, 27, 12, 21, 26, 0, time.UTC)
+	expLog = `refunding CDR`
+	if _, err = cdrs.processEvents(evs, false, false, true, false, false, false, false, false, false); err != nil {
+		t.Error(err)
+	} else if rcvLog := buf5.String(); !strings.Contains(rcvLog, expLog) {
+		t.Errorf("expected %v,received %v", expLog, rcvLog)
+	}
+	db.db.Set(utils.CacheCDRsTBL, utils.ConcatenatedKey("test1", utils.MetaDefault, "testV1CDRsRefundOutOfSessionCost"), "val", []string{}, true, utils.NonTransactional)
+
+	buf6 := new(bytes.Buffer)
+	removelog()
+	setlog(buf6)
+	expLog = `refunding CDR`
+	if _, err = cdrs.processEvents(evs, false, false, true, false, true, false, false, false, false); err == nil || err != utils.ErrExists {
+		t.Error(err)
+	} else if rcvLog := buf6.String(); !strings.Contains(rcvLog, expLog) {
+		t.Errorf("expected %v,received %v", expLog, rcvLog)
+	}
+	buf7 := new(bytes.Buffer)
+	removelog()
+	setlog(buf7)
+	expLog = `exporting cdr`
+	if _, err = cdrs.processEvents(evs, false, false, true, false, false, true, true, false, false); err == nil || err != utils.ErrPartiallyExecuted {
+		t.Error(err)
+	} else if rcvLog := buf7.String(); !strings.Contains(rcvLog, expLog) {
+		t.Errorf("expected %v,received %v", expLog, rcvLog)
+	}
+	buf8 := new(bytes.Buffer)
+	removelog()
+	setlog(buf8)
+	expLog = `processing event`
+	if _, err = cdrs.processEvents(evs, false, false, true, false, false, true, false, true, false); err == nil || err != utils.ErrPartiallyExecuted {
+		t.Error(err)
+	} else if rcvLog := buf8.String(); !strings.Contains(rcvLog, expLog) {
+		t.Errorf("expected %v,received %v", expLog, rcvLog)
+	}
+	buf9 := new(bytes.Buffer)
+	removelog()
+	setlog(buf9)
+	expLog = `processing event`
+	if _, err = cdrs.processEvents(evs, false, false, true, false, false, true, false, false, true); err == nil || err != utils.ErrPartiallyExecuted {
+		t.Error(err)
+	} else if rcvLog := buf9.String(); !strings.Contains(rcvLog, expLog) {
+		t.Errorf("expected %v,received %v", expLog, rcvLog)
 	}
 }
 
