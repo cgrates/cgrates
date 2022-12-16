@@ -3446,7 +3446,13 @@ func TestRemoveSessionCost(t *testing.T) {
 	tmp := Cache
 	tmpCdr := cdrStorage
 	tmpDm := dm
+	utils.Logger.SetLogLevel(4)
+	utils.Logger.SetSyslog(nil)
+	buf := new(bytes.Buffer)
+	log.SetOutput(buf)
 	defer func() {
+		utils.Logger.SetLogLevel(0)
+		log.SetOutput(os.Stderr)
 		Cache = tmp
 		cdrStorage = tmpCdr
 		dm = tmpDm
@@ -3488,9 +3494,13 @@ func TestRemoveSessionCost(t *testing.T) {
 		},
 	}, []string{"grpId"}, true, utils.NonTransactional)
 	SetCdrStorage(db)
+	expLog := `for filter`
 	if err := removeSessionCosts(nil, action, nil, nil, nil); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
+	} else if rcvLog := buf.String(); !strings.Contains(rcvLog, expLog) {
+		t.Errorf("expected %v,received %v", expLog, rcvLog)
 	}
+
 }
 
 func TestLogAction(t *testing.T) {

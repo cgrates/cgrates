@@ -18,7 +18,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/cgrates/cgrates/config"
@@ -59,31 +58,88 @@ func TestDynamicDpFieldAsInterface(t *testing.T) {
 
 }
 
-func TestDpLibPhoneNumber(t *testing.T) {
-	num, err := phonenumbers.ParseAndKeepRawInput("+3554735474", utils.EmptyString)
+func TestDDPFieldAsInterface(t *testing.T) {
+	libDP, err := newLibPhoneNumberDP("+447975777666")
 	if err != nil {
 		t.Error(err)
+	}
+	phoneNm, canCast := libDP.(*libphonenumberDP)
+	if !canCast {
+		t.Error("can't convert interface")
 	}
 	dDP := &libphonenumberDP{
-		pNumber: num,
-		cache:   utils.MapStorage{},
+		pNumber: phoneNm.pNumber,
+		cache: utils.MapStorage{
+			"field": "val",
+		},
 	}
-	dDP.setDefaultFields()
-	if _, err := dDP.fieldAsInterface([]string{}); err == nil || err.Error() != fmt.Sprintf("invalid field path <%+v> for libphonenumberDP", []string{}) {
+	dDP.pNumber.Extension = utils.StringPointer("+")
+	dDP.pNumber.PreferredDomesticCarrierCode = utils.StringPointer("49 172")
+
+	if val, err := dDP.fieldAsInterface([]string{"CountryCode"}); err != nil {
 		t.Error(err)
+	} else if val.(int32) != int32(44) {
+		t.Errorf("expected %v,reveived %v", 44, val.(int32))
 	}
-	val, err := dDP.fieldAsInterface([]string{"CountryCode"})
-	if err != nil {
+	if val, err := dDP.fieldAsInterface([]string{"NationalNumber"}); err != nil {
 		t.Error(err)
+	} else if val.(uint64) != uint64(7975777666) {
+		t.Errorf("expected %v,reveived %v", 7975777666, val)
 	}
-	if err != nil {
+	if val, err := dDP.fieldAsInterface([]string{"Region"}); err != nil {
 		t.Error(err)
+	} else if val.(string) != "GB" {
+		t.Errorf("expected %v,reveived %v", "GB", val)
 	}
-	exp := int32(355)
-	if nationalNumber, cancast := val.(int32); !cancast {
-		t.Error("can't convert")
-	} else if nationalNumber != exp {
-		t.Errorf("expected %v,received %v", exp, nationalNumber)
+	if val, err := dDP.fieldAsInterface([]string{"NumberType"}); err != nil {
+		t.Error(err)
+	} else if val.(phonenumbers.PhoneNumberType) != 1 {
+		t.Errorf("expected %v,reveived %v", 1, val)
+	}
+	if val, err := dDP.fieldAsInterface([]string{"GeoLocation"}); err != nil {
+		t.Error(err)
+	} else if val.(string) != "United Kingdom" {
+		t.Errorf("expected %v,reveived %v", "United Kingdom", val)
+	}
+	if val, err := dDP.fieldAsInterface([]string{"Carrier"}); err != nil {
+		t.Error(err)
+	} else if val.(string) != "Orange" {
+		t.Errorf("expected %v,reveived %v", "Orange", val)
+	}
+	if val, err := dDP.fieldAsInterface([]string{"LengthOfNationalDestinationCode"}); err != nil {
+		t.Error(err)
+	} else if val.(int) != 0 {
+		t.Errorf("expected %v,reveived %v", 0, val)
+	}
+	if val, err := dDP.fieldAsInterface([]string{"RawInput"}); err != nil {
+		t.Error(err)
+	} else if val.(string) != "+447975777666" {
+		t.Errorf("expected %v,reveived %v", "+447975777666", val)
+	}
+	if val, err := dDP.fieldAsInterface([]string{"Extension"}); err != nil {
+		t.Error(err)
+	} else if val.(string) != "+" {
+		t.Errorf("expected %v,reveived %v", "+", val)
+	}
+	if val, err := dDP.fieldAsInterface([]string{"NumberOfLeadingZeros"}); err != nil {
+		t.Error(err)
+	} else if val.(int32) != int32(1) {
+		t.Errorf("expected %v,reveived %v", int32(1), val)
+	}
+	if val, err := dDP.fieldAsInterface([]string{"ItalianLeadingZero"}); err != nil {
+		t.Error(err)
+	} else if val.(bool) != false {
+		t.Errorf("expected %v,reveived %v", false, val)
+	}
+	if val, err := dDP.fieldAsInterface([]string{"PreferredDomesticCarrierCode"}); err != nil {
+		t.Error(err)
+	} else if val.(string) != "49 172" {
+		t.Errorf("expected %v,reveived %v", "49 172", val)
+	}
+	if val, err := dDP.fieldAsInterface([]string{"CountryCodeSource"}); err != nil {
+		t.Error(err)
+	} else if val.(phonenumbers.PhoneNumber_CountryCodeSource) != phonenumbers.PhoneNumber_CountryCodeSource(1) {
+		t.Errorf("expected %v,reveived %v", 1, val)
 	}
 
 }
