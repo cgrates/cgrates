@@ -425,7 +425,7 @@ func ComputeAttributeIndexes(dm *DataManager, tenant, context string, attrIDs *[
 		// this will be on ComputeIndexesIDs that contains the old indexes from the next getter
 		var oldIDx map[string]utils.StringMap
 		if oldIDx, err = dm.GetFilterIndexes(utils.PrefixToIndexCache[utils.AttributeProfilePrefix],
-			tenant, utils.EmptyString, nil); err != nil || oldIDx == nil {
+			utils.ConcatenatedKey(tenant, context), utils.EmptyString, nil); err != nil || oldIDx == nil {
 			attrIndexers = NewFilterIndexer(dm, utils.AttributeProfilePrefix, utils.ConcatenatedKey(tenant, context))
 		} else {
 			attrIndexers = NewFilterIndexerWithIndexes(dm, utils.AttributeProfilePrefix, utils.ConcatenatedKey(tenant, context), oldIDx)
@@ -505,7 +505,7 @@ func ComputeDispatcherIndexes(dm *DataManager, tenant, context string, dspIDs *[
 		// this will be on ComputeIndexesIDs that contains the old indexes from the next getter
 		var oldIDx map[string]utils.StringMap
 		if oldIDx, err = dm.GetFilterIndexes(utils.PrefixToIndexCache[utils.DispatcherProfilePrefix],
-			tenant, utils.EmptyString, nil); err != nil || oldIDx == nil {
+			utils.ConcatenatedKey(tenant, context), utils.EmptyString, nil); err != nil || oldIDx == nil {
 			dspIndexes = NewFilterIndexer(dm, utils.DispatcherProfilePrefix,
 				utils.ConcatenatedKey(tenant, context))
 		} else {

@@ -197,7 +197,7 @@ func UpdateFilterIndexes(dm *DataManager, tnt string, oldFltr *Filter, newFltr *
 						removeIndexKeys, index); err != nil {
 						return
 					}
-					if _, err = ComputeAttributeIndexes(dm, newFltr.Tenant, ctx, &attributeIDs,
+					if _, err = ComputeAttributeIndexes(dm, newFltr.Tenant, ctx, &[]string{attrID},
 						utils.NonTransactional); err != nil {
 						return err
 					}
@@ -218,7 +218,7 @@ func UpdateFilterIndexes(dm *DataManager, tnt string, oldFltr *Filter, newFltr *
 						removeIndexKeys, index); err != nil {
 						return
 					}
-					if _, err = ComputeDispatcherIndexes(dm, newFltr.Tenant, subsys, &dispatcherIDs,
+					if _, err = ComputeDispatcherIndexes(dm, newFltr.Tenant, subsys, &[]string{dspID},
 						utils.NonTransactional); err != nil {
 						return err
 					}

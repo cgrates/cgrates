@@ -652,6 +652,20 @@ func (dm *DataManager) SetFilter(fltr *Filter) (err error) {
 }
 
 func (dm *DataManager) RemoveFilter(tenant, id, transactionID string) (err error) {
+	// frsit, check if we have indexes based on this filter in order to remove the filter
+	// we cannot remove a filter if it is referenced to a profile
+	tntFltrID := utils.ConcatenatedKey(tenant, id)
+	var rcvIdx map[string]utils.StringMap
+	if rcvIdx, err = dm.GetFilterIndexes(utils.PrefixToIndexCache[utils.ReverseFilterIndexes], tntFltrID,
+		utils.EmptyString, nil); err != nil {
+		if err != utils.ErrNotFound {
+			return
+		}
+		err = nil // no index for this filter so  no remove needed from index side
+	} else {
+		return fmt.Errorf("cannot remove filter <%s> because will broken the reference to following items: %s",
+			tntFltrID, utils.ToJSON(rcvIdx))
+	}
 	if err = dm.DataDB().RemoveFilterDrv(tenant, id); err != nil {
 		return
 	}
