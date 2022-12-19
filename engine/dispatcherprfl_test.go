@@ -21,6 +21,7 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -319,5 +320,21 @@ func TestDispatcherHostProfileCloneWithParams(t *testing.T) {
 
 	if !reflect.DeepEqual(rcv, exp) {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v", exp, rcv)
+	}
+}
+
+func TestDispatcherHostCallErr(t *testing.T) {
+	dH := &DispatcherHost{
+		Tenant: "testTenant",
+		RemoteHost: &config.RemoteHost{
+			ID:        "testID",
+			Address:   "",
+			Transport: "",
+			TLS:       false,
+		},
+	}
+	var reply string
+	if err := dH.Call(utils.AttributeSv1Ping, &utils.CGREvent{}, &reply); err == nil || err.Error() != "dial tcp: missing address" {
+		t.Error(err)
 	}
 }
