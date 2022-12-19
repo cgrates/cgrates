@@ -2145,8 +2145,10 @@ func TestFilterRulePassRegexParseErrNotFound(t *testing.T) {
 
 func TestFilterRulePassRegexParseErr(t *testing.T) {
 
-	rsrBadParse, _ := config.NewRSRParser("~*opts.*originID<~*opts.Converter>")
-
+	rsrBadParse, err := config.NewRSRParser("~*opts.*originID<~*opts.Converter>")
+	if err != nil {
+		t.Fatal(err)
+	}
 	fltr := &FilterRule{
 		Type:       utils.EmptyString,
 		Element:    "~*req.Element",

@@ -19,6 +19,7 @@ package engine
 
 import (
 	"testing"
+	"time"
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
@@ -1243,7 +1244,7 @@ func TestDataManagerSetDispatcherHostErrDataDB(t *testing.T) {
 			return utils.ErrNotImplemented
 		},
 	}
-
+	defer data.Close()
 	if err := dm.SetDispatcherHost(context.Background(), nil); err == nil || err != utils.ErrNotImplemented {
 		t.Error(err)
 	}
@@ -1251,61 +1252,42 @@ func TestDataManagerSetDispatcherHostErrDataDB(t *testing.T) {
 }
 
 // unfinished get not implemented and conn error with no mock
-// func TestDataManagerSetDispatcherHostReplicateTrue(t *testing.T) {
+func TestDataManagerSetDispatcherHostReplicateTrue(t *testing.T) {
 
-// 	tmp := Cache
-// 	cfgtmp := config.CgrConfig()
-// 	defer func() {
-// 		Cache = tmp
-// 		config.SetCgrConfig(cfgtmp)
-// 	}()
-// 	Cache.Clear(nil)
+	tmp := Cache
+	cfgtmp := config.CgrConfig()
+	defer func() {
+		Cache = tmp
+		config.SetCgrConfig(cfgtmp)
+	}()
+	Cache.Clear(nil)
 
-// 	// cfg := config.NewDefaultCGRConfig()
-// 	// cfg.DataDbCfg().Items[utils.MetaDispatcherHosts].Replicate = true
-// 	// cfg.DataDbCfg().RplConns = []string{}
-// 	// config.SetCgrConfig(cfg)
-// 	// data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-// 	// cM := NewConnManager(cfg)
-// 	// dm := NewDataManager(data, cfg.CacheCfg(), cM)
-// 	cfg := config.NewDefaultCGRConfig()
-// 	connMng := NewConnManager(cfg)
-// 	dataDB, err := NewDataDBConn(cfg.DataDbCfg().Type,
-// 		cfg.DataDbCfg().Host, cfg.DataDbCfg().Port,
-// 		cfg.DataDbCfg().Name, cfg.DataDbCfg().User,
-// 		cfg.DataDbCfg().Password, cfg.GeneralCfg().DBDataEncoding,
-// 		cfg.DataDbCfg().Opts, cfg.DataDbCfg().Items)
-// 	if err != nil {
-// 		t.Error(err)
-// 	}
-// 	defer dataDB.Close()
-// 	dm := NewDataManager(dataDB, config.CgrConfig().CacheCfg(), connMng)
-// 	dm.dataDB = &DataDBMock{
-// 		SetDispatcherHostDrvF: func(ctx *context.Context, dh *DispatcherHost) error {
-// 			return nil
-// 		},
-// 	}
+	cfg := config.NewDefaultCGRConfig()
+	cfg.DataDbCfg().Items[utils.MetaDispatcherHosts].Replicate = true
 
-// 	dpp := &DispatcherHost{
-// 		Tenant: utils.CGRateSorg,
-// 		RemoteHost: &config.RemoteHost{
-// 			ID:                   "ID",
-// 			Address:              "127.0.0.1",
-// 			Transport:            utils.MetaJSON,
-// 			ConnectAttempts:      1,
-// 			Reconnects:           1,
-// 			MaxReconnectInterval: time.Minute,
-// 			ConnectTimeout:       time.Nanosecond,
-// 			ReplyTimeout:         time.Nanosecond,
-// 			TLS:                  true,
-// 			ClientKey:            "key",
-// 			ClientCertificate:    "ce",
-// 			CaCertificate:        "ca",
-// 		},
-// 	}
-// 	// tested replicate
-// 	err = dm.SetDispatcherHost(context.Background(), dpp)
-// 	if err != nil {
-// 		t.Error(err)
-// 	}
-// }
+	config.SetCgrConfig(cfg)
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+
+	dpp := &DispatcherHost{
+		Tenant: utils.CGRateSorg,
+		RemoteHost: &config.RemoteHost{
+			ID:                   "ID",
+			Address:              "127.0.0.1",
+			Transport:            utils.MetaJSON,
+			ConnectAttempts:      1,
+			Reconnects:           1,
+			MaxReconnectInterval: time.Minute,
+			ConnectTimeout:       time.Nanosecond,
+			ReplyTimeout:         time.Nanosecond,
+			TLS:                  true,
+			ClientKey:            "key",
+			ClientCertificate:    "ce",
+			CaCertificate:        "ca",
+		},
+	}
+	// tested replicate
+	dm.SetDispatcherHost(context.Background(), dpp)
+
+}
