@@ -28,9 +28,14 @@ import (
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/ltcache"
 )
 
 func TestCacheSSetWithReplicateTrue(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
 	Cache.Clear(nil)
 	args := &utils.ArgCacheReplicateSet{
 		CacheID: utils.CacheAccounts,
@@ -96,6 +101,10 @@ func TestCacheSSetWithReplicateTrue(t *testing.T) {
 }
 
 func TestCacheSSetWithReplicateFalse(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
 	Cache.Clear(nil)
 	args := &utils.ArgCacheReplicateSet{
 		CacheID:  utils.CacheAccounts,
@@ -127,6 +136,10 @@ func TestCacheSSetWithReplicateFalse(t *testing.T) {
 }
 
 func TestCacheSGetWithRemote(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
 	Cache.Clear(nil)
 	args := &utils.ArgsGetCacheItemWithAPIOpts{
 		ArgsGetCacheItem: utils.ArgsGetCacheItem{
@@ -179,6 +192,10 @@ func TestCacheSGetWithRemote(t *testing.T) {
 }
 
 func TestCacheSGetWithRemoteFalse(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
 	Cache.Clear(nil)
 	args := &utils.ArgsGetCacheItemWithAPIOpts{
 
@@ -210,6 +227,10 @@ func TestCacheSGetWithRemoteFalse(t *testing.T) {
 	}
 }
 func TestRemoveWithoutReplicate(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
@@ -227,6 +248,10 @@ func TestRemoveWithoutReplicate(t *testing.T) {
 }
 
 func TestV1GetItemExpiryTimeFromCacheErr(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
 	Cache.Clear(nil)
 	args := &utils.ArgsGetCacheItemWithAPIOpts{
 		ArgsGetCacheItem: utils.ArgsGetCacheItem{
@@ -250,6 +275,10 @@ func TestV1GetItemExpiryTimeFromCacheErr(t *testing.T) {
 }
 
 func TestV1GetItemErr(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
 	Cache.Clear(nil)
 	args := &utils.ArgsGetCacheItemWithAPIOpts{
 		ArgsGetCacheItem: utils.ArgsGetCacheItem{
@@ -272,6 +301,10 @@ func TestV1GetItemErr(t *testing.T) {
 
 }
 func TestV1GetItemIDsErr(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
 	Cache.Clear(nil)
 	args := &utils.ArgsGetCacheItemIDsWithAPIOpts{
 		ArgsGetCacheItemIDs: utils.ArgsGetCacheItemIDs{
@@ -326,6 +359,10 @@ func TestV1GetItemIDsErr(t *testing.T) {
 // }
 
 func TestCacheSGetWithRemoteQueryErr(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
 	Cache.Clear(nil)
 	args := &utils.ArgsGetCacheItemWithAPIOpts{
 		ArgsGetCacheItem: utils.ArgsGetCacheItem{
@@ -363,6 +400,10 @@ func TestCacheSGetWithRemoteQueryErr(t *testing.T) {
 }
 
 func TestCacheSGetWithRemoteTCacheGet(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
 	Cache.Clear(nil)
 	args := &utils.ArgsGetCacheItemWithAPIOpts{
 		ArgsGetCacheItem: utils.ArgsGetCacheItem{
@@ -404,6 +445,10 @@ func TestCacheSGetWithRemoteTCacheGet(t *testing.T) {
 }
 
 func TestCacheSV1ReplicateRemove(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
 	Cache.Clear(nil)
 	args := &utils.ArgCacheReplicateRemove{
 
@@ -439,6 +484,10 @@ func TestCacheSV1ReplicateRemove(t *testing.T) {
 }
 
 func TestCacheSReplicateRemove(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
 	Cache.Clear(nil)
 
 	cfg := config.NewDefaultCGRConfig()
@@ -477,4 +526,383 @@ func TestCacheSReplicateRemove(t *testing.T) {
 	if rcv, ok := Cache.Get(utils.CacheAccounts, "itemId"); ok != false || rcv != nil {
 		t.Errorf("Expected rcv <nil>, Received <%v>, OK <%v>", rcv, ok)
 	}
+}
+
+func TestCacheSV1ReplicateSet(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	cacheS := NewCacheS(cfg, dm, connMgr, nil)
+
+	args := &utils.ArgCacheReplicateSet{
+		Tenant: utils.CGRateSorg,
+
+		CacheID:  utils.CacheAccounts,
+		ItemID:   "itemId",
+		Value:    "valinterface",
+		GroupIDs: []string{},
+	}
+
+	if err := Cache.Set(context.Background(), utils.CacheAccounts, "itemId", "valinterface", []string{}, true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+
+	exp := utils.OK
+	var reply string
+	if err := cacheS.V1ReplicateSet(context.Background(), args, &reply); err != nil {
+		t.Error(err)
+	} else if exp != reply {
+		t.Errorf("Expected rcv <%v>, Received <%v>", exp, reply)
+	}
+
+	getExp := "valinterface"
+	if rcv, ok := Cache.Get(utils.CacheAccounts, "itemId"); !ok {
+		t.Errorf("Cache.Get did not receive ok, received <%v>", rcv)
+	} else if rcv != getExp {
+		t.Errorf("Expected rcv <%v>, Received <%v>", getExp, rcv)
+	}
+
+}
+
+func TestCacheSV1ReplicateSetErr(t *testing.T) {
+
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	cacheS := NewCacheS(cfg, dm, connMgr, nil)
+	fltr := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "fltr1",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaRegex,
+				Element: "~*req.Account",
+				Values:  []string{"^(?!On.*On\\s.+?wrote:)(On\\s(.+?)wrote:)$"},
+			},
+		},
+	}
+	args := &utils.ArgCacheReplicateSet{
+		Tenant: utils.CGRateSorg,
+
+		CacheID:  utils.CacheAccounts,
+		ItemID:   "itemId",
+		Value:    fltr,
+		GroupIDs: []string{},
+	}
+
+	expErr := "error parsing regexp: invalid or unsupported Perl syntax: `(?!`"
+	var reply string
+	if err := cacheS.V1ReplicateSet(context.Background(), args, &reply); err == nil || err.Error() != expErr {
+		t.Errorf("Expected error <%v>, received error <%v>", expErr, err)
+	}
+
+}
+
+func TestCacheSCacheDataFromDB(t *testing.T) {
+
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	cacheS := NewCacheS(cfg, dm, connMgr, nil)
+
+	attrs := &utils.AttrReloadCacheWithAPIOpts{
+		Tenant:              utils.CGRateSorg,
+		AttributeProfileIDs: []string{"cgrates.org:TEST_ATTRIBUTES_TEST"},
+	}
+	atrPrfl := &AttributeProfile{
+		Tenant: utils.CGRateSorg,
+		ID:     "TEST_ATTRIBUTES_TEST",
+		Attributes: []*Attribute{
+			{
+				Path:  "*opts.RateSProfile",
+				Type:  utils.MetaConstant,
+				Value: config.NewRSRParsersMustCompile("RP_2", utils.InfieldSep),
+			},
+		},
+		Blockers: utils.DynamicBlockers{
+			{
+				Blocker: false,
+			},
+		},
+	}
+	if err := dm.SetAttributeProfile(context.Background(), atrPrfl, true); err != nil {
+		t.Error(err)
+	}
+	if _, err := dm.GetAttributeProfile(context.Background(), utils.CGRateSorg, "TEST_ATTRIBUTES_TEST", true, true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+
+	exp := utils.OK
+	var reply string
+	if err := cacheS.cacheDataFromDB(context.Background(), attrs, &reply, false); err != nil {
+		t.Error(err)
+	} else if exp != reply {
+		t.Errorf("Expected rcv <%v>, Received <%v>", exp, reply)
+	}
+
+	if rcv, ok := Cache.Get(utils.CacheAttributeProfiles, "cgrates.org:TEST_ATTRIBUTES_TEST"); !ok {
+		t.Errorf("Cache.Get did not receive ok, received <%v>", rcv)
+	} else if !reflect.DeepEqual(rcv, atrPrfl) {
+		t.Errorf("Expected rcv <%v>, Received <%v>", atrPrfl, rcv)
+	}
+}
+
+func TestCacheScacheDataFromDBErrCacheDataFromDB(t *testing.T) {
+
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	cacheS := NewCacheS(cfg, nil, connMgr, nil)
+
+	attrs := &utils.AttrReloadCacheWithAPIOpts{
+		Tenant:              utils.CGRateSorg,
+		AttributeProfileIDs: []string{"cgrates.org:TEST_ATTRIBUTES_TEST"},
+	}
+
+	expErr := utils.ErrNoDatabaseConn
+	var reply string
+
+	if err := cacheS.cacheDataFromDB(context.Background(), attrs, &reply, true); err == nil || err != expErr {
+		t.Errorf("Expected error <%v>, received error <%v>", expErr, err)
+	}
+
+}
+
+func TestCacheScacheDataFromDBErrGetItemLoadIDs(t *testing.T) {
+
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	cacheS := NewCacheS(cfg, dm, connMgr, nil)
+
+	attrs := &utils.AttrReloadCacheWithAPIOpts{
+		Tenant:              utils.CGRateSorg,
+		AttributeProfileIDs: []string{"cgrates.org:TEST_ATTRIBUTES_TEST"},
+	}
+
+	dm.dataDB = &DataDBMock{
+		GetItemLoadIDsDrvF: func(ctx *context.Context, itemIDPrefix string) (loadIDs map[string]int64, err error) {
+			return nil, utils.ErrNotImplemented
+		},
+	}
+
+	expErr := utils.ErrNotImplemented
+	var reply string
+
+	if err := cacheS.cacheDataFromDB(context.Background(), attrs, &reply, true); err == nil || err != expErr {
+		t.Errorf("Expected error <%v>, received error <%v>", expErr, err)
+	}
+
+}
+
+func TestCacheSV1LoadCache(t *testing.T) {
+
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	cacheS := NewCacheS(cfg, dm, connMgr, nil)
+
+	attrs := &utils.AttrReloadCacheWithAPIOpts{
+		Tenant:              utils.CGRateSorg,
+		AttributeProfileIDs: []string{"cgrates.org:TEST_ATTRIBUTES_TEST"},
+	}
+	atrPrfl := &AttributeProfile{
+		Tenant: utils.CGRateSorg,
+		ID:     "TEST_ATTRIBUTES_TEST",
+		Attributes: []*Attribute{
+			{
+				Path:  "*opts.RateSProfile",
+				Type:  utils.MetaConstant,
+				Value: config.NewRSRParsersMustCompile("RP_2", utils.InfieldSep),
+			},
+		},
+		Blockers: utils.DynamicBlockers{
+			{
+				Blocker: false,
+			},
+		},
+	}
+	if err := dm.SetAttributeProfile(context.Background(), atrPrfl, true); err != nil {
+		t.Error(err)
+	}
+
+	exp := utils.OK
+	var reply string
+	if err := cacheS.V1LoadCache(context.Background(), attrs, &reply); err != nil {
+		t.Error(err)
+	} else if exp != reply {
+		t.Errorf("Expected rcv <%v>, Received <%v>", exp, reply)
+	}
+
+	if rcv, ok := Cache.Get(utils.CacheAttributeProfiles, "cgrates.org:TEST_ATTRIBUTES_TEST"); !ok {
+		t.Errorf("Cache.Get did not receive ok, received <%v>", rcv)
+	} else if !reflect.DeepEqual(rcv, atrPrfl) {
+		t.Errorf("Expected rcv <%v>, Received <%v>", atrPrfl, rcv)
+	}
+}
+
+func TestCacheSV1ReloadCache(t *testing.T) {
+
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	cacheS := NewCacheS(cfg, dm, connMgr, nil)
+
+	attrs := &utils.AttrReloadCacheWithAPIOpts{
+		Tenant:              utils.CGRateSorg,
+		AttributeProfileIDs: []string{"cgrates.org:TEST_ATTRIBUTES_TEST"},
+	}
+
+	atrPrfl := &AttributeProfile{
+		Tenant: utils.CGRateSorg,
+		ID:     "TEST_ATTRIBUTES_TEST",
+		Attributes: []*Attribute{
+			{
+				Path:  "*opts.RateSProfile",
+				Type:  utils.MetaConstant,
+				Value: config.NewRSRParsersMustCompile("RP_2", utils.InfieldSep),
+			},
+		},
+		Blockers: utils.DynamicBlockers{
+			{
+				Blocker: false,
+			},
+		},
+	}
+	if err := dm.SetAttributeProfile(context.Background(), atrPrfl, true); err != nil {
+		t.Error(err)
+	}
+	if _, err := dm.GetAttributeProfile(context.Background(), utils.CGRateSorg, "TEST_ATTRIBUTES_TEST", true, true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+
+	exp := utils.OK
+	var reply string
+	if err := cacheS.V1ReloadCache(context.Background(), attrs, &reply); err != nil {
+		t.Error(err)
+	} else if exp != reply {
+		t.Errorf("Expected rcv <%v>, Received <%v>", exp, reply)
+	}
+
+	if rcv, ok := Cache.Get(utils.CacheAttributeProfiles, "cgrates.org:TEST_ATTRIBUTES_TEST"); !ok {
+		t.Errorf("Cache.Get did not receive ok, received <%v>", rcv)
+	} else if !reflect.DeepEqual(rcv, atrPrfl) {
+		t.Errorf("Expected rcv <%v>, Received <%v>", atrPrfl, rcv)
+	}
+}
+
+func TestCacheSV1RemoveGroup(t *testing.T) {
+
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	cacheS := NewCacheS(cfg, dm, connMgr, nil)
+
+	args := &utils.ArgsGetGroupWithAPIOpts{
+		Tenant:  "cgrates.org",
+		APIOpts: map[string]interface{}{},
+		ArgsGetGroup: utils.ArgsGetGroup{
+			CacheID: utils.CacheAccounts,
+			GroupID: "Group",
+		},
+	}
+
+	if err := cacheS.Set(context.Background(), utils.CacheAccounts, "itemId", "valinterface", []string{"Group", "group2"}, true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+	exp := utils.OK
+	var reply string
+	if err := cacheS.V1RemoveGroup(context.Background(), args, &reply); err != nil {
+		t.Error(err)
+	} else if exp != reply {
+		t.Errorf("Expected rcv <%v>, Received <%v>", exp, reply)
+	}
+
+	var hasRply bool
+	if err := cacheS.V1HasGroup(context.Background(), args, &hasRply); err != nil {
+		t.Error(err)
+	} else if hasRply {
+		t.Error("There are groups in cacheS")
+	}
+
+}
+
+func TestV1GetCacheStats(t *testing.T) {
+
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	cacheS := NewCacheS(cfg, dm, connMgr, nil)
+
+	args := &utils.AttrCacheIDsWithAPIOpts{
+		APIOpts: map[string]interface{}{
+			utils.MetaSubsys: utils.MetaChargers,
+		},
+		CacheIDs: []string{"cacheId1"},
+		Tenant:   "cgrates.org",
+	}
+
+	if err := cacheS.Set(context.Background(), "cacheId1", "itemId", "valinterface", []string{"GroupId"}, true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+
+	exp := cacheS.tCache.GetCacheStats(args.CacheIDs)
+	var reply map[string]*ltcache.CacheStats
+	if err := cacheS.V1GetCacheStats(context.Background(), args, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(reply, exp) {
+		t.Errorf("Expected rcv <%v>, Received <%v>", exp, reply)
+	}
+
 }
