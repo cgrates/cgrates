@@ -803,7 +803,7 @@ func (dm *DataManager) SetThresholdProfile(th *ThresholdProfile, withIndex bool)
 					return
 				}
 				if err = removeReverseFilterIndexForFilter(dm, utils.CacheThresholdFilterIndexes,
-					th.Tenant, th.ID, th.FilterIDs); err != nil {
+					th.Tenant, th.ID, oldTh.FilterIDs); err != nil {
 					return
 				}
 			}
@@ -921,7 +921,7 @@ func (dm *DataManager) SetStatQueueProfile(sqp *StatQueueProfile, withIndex bool
 					return
 				}
 				if err = removeReverseFilterIndexForFilter(dm, utils.CacheStatFilterIndexes,
-					sqp.Tenant, sqp.ID, sqp.FilterIDs); err != nil {
+					sqp.Tenant, sqp.ID, oldSts.FilterIDs); err != nil {
 					return
 				}
 			}
@@ -1170,12 +1170,13 @@ func (dm *DataManager) SetResourceProfile(rp *ResourceProfile, withIndex bool) (
 					return
 				}
 				if err = removeReverseFilterIndexForFilter(dm, utils.CacheResourceFilterIndexes,
-					rp.Tenant, rp.ID, rp.FilterIDs); err != nil {
+					rp.Tenant, rp.ID, oldRes.FilterIDs); err != nil {
 					return
 				}
 			}
 		}
-		if err = createAndIndex(utils.ResourceProfilesPrefix, rp.Tenant, utils.EmptyString, rp.ID, rp.FilterIDs, dm); err != nil {
+		if err = createAndIndex(utils.ResourceProfilesPrefix, rp.Tenant,
+			utils.EmptyString, rp.ID, rp.FilterIDs, dm); err != nil {
 			return
 		}
 		if err = addReverseFilterIndexForFilter(dm, utils.CacheResourceFilterIndexes,
@@ -1960,7 +1961,7 @@ func (dm *DataManager) SetSupplierProfile(supp *SupplierProfile, withIndex bool)
 					return
 				}
 				if err = removeReverseFilterIndexForFilter(dm, utils.CacheSupplierFilterIndexes,
-					supp.Tenant, supp.ID, supp.FilterIDs); err != nil {
+					supp.Tenant, supp.ID, oldSup.FilterIDs); err != nil {
 					return
 				}
 			}
@@ -2104,7 +2105,7 @@ func (dm *DataManager) SetAttributeProfile(ap *AttributeProfile, withIndex bool)
 				}
 			}
 			if err = removeReverseFilterIndexForFilter(dm, utils.CacheAttributeFilterIndexes,
-				ap.Tenant, ap.ID, ap.FilterIDs); err != nil {
+				ap.Tenant, ap.ID, oldAP.FilterIDs); err != nil {
 				return
 			}
 		}
@@ -2226,7 +2227,7 @@ func (dm *DataManager) SetChargerProfile(cpp *ChargerProfile, withIndex bool) (e
 					return
 				}
 				if err = removeReverseFilterIndexForFilter(dm, utils.CacheChargerFilterIndexes,
-					cpp.Tenant, cpp.ID, cpp.FilterIDs); err != nil {
+					cpp.Tenant, cpp.ID, oldCpp.FilterIDs); err != nil {
 					return
 				}
 			}
@@ -2351,7 +2352,7 @@ func (dm *DataManager) SetDispatcherProfile(dpp *DispatcherProfile, withIndex bo
 				}
 			}
 			if err = removeReverseFilterIndexForFilter(dm, utils.CacheDispatcherFilterIndexes,
-				dpp.Tenant, dpp.ID, dpp.FilterIDs); err != nil {
+				dpp.Tenant, dpp.ID, oldDpp.FilterIDs); err != nil {
 				return
 			}
 		}
