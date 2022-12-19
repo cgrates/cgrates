@@ -139,12 +139,16 @@ var (
 
 		testFilterIndexesCasesGetReverseFilterIndexes6,
 		testFilterIndexesCasesRemoveDispatchersProfile,
-		testFilterIndexesCasesGetIndexesAfterRemove6,
+		testFilterIndexesCasesGetIndexesAfterRemoveAnyContext,
+		testFilterIndexesCasesGetIndexesAfterRemoveDifferentContext,
 		testFilterIndexesCasesGetReverseIndexesAfterRemove6,
+		testFilterIndexesCasesOverwriteDispatchersProfile,
+		testFilterIndexesCasesOverwriteDispatchersGetIndexesEveryContext,
+		testFilterIndexesCasesOverwriteDispatchersGetReverseIndexes,
 
 		// RESOURCES
-		testFilterIndexesCasesSetResourceWithFltr,
-		testFilterIndexesCasesGetResourcesIndexes,
+		//testFilterIndexesCasesSetResourceWithFltr,
+		//testFilterIndexesCasesGetResourcesIndexes,
 		/*
 			testFilterIndexesCasesOverwriteFilterForResources,
 			testFilterIndexesCasesGetResourcesIndexesChanged,
@@ -1708,15 +1712,314 @@ func testFilterIndexesCasesGetReverseFilterIndexes6(t *testing.T) {
 }
 
 func testFilterIndexesCasesRemoveDispatchersProfile(t *testing.T) {
-
+	var result string
+	if err := fIdxCasesRPC.Call(utils.APIerSv1RemoveDispatcherProfile,
+		&utils.TenantIDWithCache{Tenant: "cgrates.org", ID: "Dsp1"},
+		&result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Errorf("Expecting : %+v, received: %+v", utils.OK, result)
+	}
+	if err := fIdxCasesRPC.Call(utils.APIerSv1RemoveDispatcherProfile,
+		&utils.TenantIDWithCache{Tenant: "cgrates.org", ID: "Dsp3"},
+		&result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Errorf("Expecting : %+v, received: %+v", utils.OK, result)
+	}
 }
 
-func testFilterIndexesCasesGetIndexesAfterRemove6(t *testing.T) {
+func testFilterIndexesCasesGetIndexesAfterRemoveAnyContext(t *testing.T) {
+	arg := &v1.AttrGetFilterIndexes{
+		Tenant:   "cgrates.org",
+		ItemType: utils.MetaDispatchers,
+		Context:  utils.META_ANY,
+	}
+	// *any context just for Dsp2
+	expectedIndexes := []string{
+		// Dsp2
+		"*prefix:~*req.AnswerTime:2022:Dsp2",
+		"*prefix:~*req.AnswerTime:2021:Dsp2",
+		"*string:~*req.Dynamically:true:Dsp2",
+		"*prefix:~*req.CostUsage:10:Dsp2",
+		"*prefix:~*req.CostUsage:20:Dsp2",
+		"*prefix:~*req.CostUsage:30:Dsp2",
+	}
+	sort.Strings(expectedIndexes)
+	var reply []string
+	if err := fIdxCasesRPC.Call(utils.APIerSv1GetFilterIndexes, arg, &reply); err != nil {
+		t.Error(err)
+	} else if sort.Strings(reply); !reflect.DeepEqual(expectedIndexes, reply) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expectedIndexes), utils.ToJSON(reply))
+	}
+}
 
+func testFilterIndexesCasesGetIndexesAfterRemoveDifferentContext(t *testing.T) {
+	arg := &v1.AttrGetFilterIndexes{
+		Tenant:   "cgrates.org",
+		ItemType: utils.MetaDispatchers,
+		Context:  utils.MetaSessionS,
+	}
+	// *sessions context just for Dsp2 and Dsp4
+	expectedIndexes := []string{
+		// Dsp2
+		"*prefix:~*req.AnswerTime:2022:Dsp2",
+		"*prefix:~*req.AnswerTime:2021:Dsp2",
+		"*string:~*req.Dynamically:true:Dsp2",
+		"*prefix:~*req.CostUsage:10:Dsp2",
+		"*prefix:~*req.CostUsage:20:Dsp2",
+		"*prefix:~*req.CostUsage:30:Dsp2",
+
+		// Dsp4
+		"*string:~*req.Account:1001:Dsp4",
+		"*string:~*req.Dynamically:true:Dsp4",
+		"*prefix:~*req.CostUsage:10:Dsp4",
+		"*prefix:~*req.CostUsage:20:Dsp4",
+		"*prefix:~*req.CostUsage:30:Dsp4",
+		"*string:~*req.Dimension:20:Dsp4",
+		"*string:~*req.Dimension:25:Dsp4",
+		"*prefix:~*req.DebitVal:166:Dsp4",
+	}
+	sort.Strings(expectedIndexes)
+	var reply []string
+	if err := fIdxCasesRPC.Call(utils.APIerSv1GetFilterIndexes, arg, &reply); err != nil {
+		t.Error(err)
+	} else if sort.Strings(reply); !reflect.DeepEqual(expectedIndexes, reply) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expectedIndexes), utils.ToJSON(reply))
+	}
+
+	arg = &v1.AttrGetFilterIndexes{
+		Tenant:   "cgrates.org",
+		ItemType: utils.MetaDispatchers,
+		Context:  utils.MetaChargers,
+	}
+	// *sessions context just for Dsp2
+	expectedIndexes = []string{
+		// Dsp2
+		"*prefix:~*req.AnswerTime:2022:Dsp2",
+		"*prefix:~*req.AnswerTime:2021:Dsp2",
+		"*string:~*req.Dynamically:true:Dsp2",
+		"*prefix:~*req.CostUsage:10:Dsp2",
+		"*prefix:~*req.CostUsage:20:Dsp2",
+		"*prefix:~*req.CostUsage:30:Dsp2",
+	}
+	sort.Strings(expectedIndexes)
+	if err := fIdxCasesRPC.Call(utils.APIerSv1GetFilterIndexes, arg, &reply); err != nil {
+		t.Error(err)
+	} else if sort.Strings(reply); !reflect.DeepEqual(expectedIndexes, reply) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expectedIndexes), utils.ToJSON(reply))
+	}
 }
 
 func testFilterIndexesCasesGetReverseIndexesAfterRemove6(t *testing.T) {
+	arg := &v1.AttrGetFilterIndexes{
+		Tenant:   "cgrates.org:FLTR_Charger",
+		ItemType: utils.CacheReverseFilterIndexes,
+	}
+	expectedIndexes := []string{
+		"*charger_filter_indexes:ChrgerIndexable",
+		"*threshold_filter_indexes:TEST_PROFILE2",
+	}
+	sort.Strings(expectedIndexes)
+	var reply []string
+	if err := fIdxCasesRPC.Call(utils.APIerSv1GetFilterIndexes, arg, &reply); err != nil {
+		t.Error(err)
+	} else if sort.Strings(reply); !reflect.DeepEqual(expectedIndexes, reply) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expectedIndexes), utils.ToJSON(reply))
+	}
 
+	arg = &v1.AttrGetFilterIndexes{
+		Tenant:   "cgrates.org:FLTR_Charger4564",
+		ItemType: utils.CacheReverseFilterIndexes,
+	}
+	expectedIndexes = []string{
+		"*charger_filter_indexes:ChrgerIndexable",
+		"*dispatcher_filter_indexes:Dsp4",
+		"*threshold_filter_indexes:TEST_PROFILE2",
+	}
+	sort.Strings(expectedIndexes)
+	if err := fIdxCasesRPC.Call(utils.APIerSv1GetFilterIndexes, arg, &reply); err != nil {
+		t.Error(err)
+	} else if sort.Strings(reply); !reflect.DeepEqual(expectedIndexes, reply) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expectedIndexes), utils.ToJSON(reply))
+	}
+
+	arg = &v1.AttrGetFilterIndexes{
+		Tenant:   "cgrates.org:FLTR_Charger12312",
+		ItemType: utils.CacheReverseFilterIndexes,
+	}
+	expectedIndexes = []string{
+		"*charger_filter_indexes:ChrgerIndexable",
+		"*dispatcher_filter_indexes:Dsp2",
+		"*dispatcher_filter_indexes:Dsp4",
+		"*threshold_filter_indexes:TEST_PROFILE2",
+	}
+	sort.Strings(expectedIndexes)
+	if err := fIdxCasesRPC.Call(utils.APIerSv1GetFilterIndexes, arg, &reply); err != nil {
+		t.Error(err)
+	} else if sort.Strings(reply); !reflect.DeepEqual(expectedIndexes, reply) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expectedIndexes), utils.ToJSON(reply))
+	}
+}
+
+func testFilterIndexesCasesOverwriteDispatchersProfile(t *testing.T) {
+	dispatcherProfile1 := &v1.DispatcherWithCache{
+		DispatcherProfile: &engine.DispatcherProfile{
+			Tenant:     "cgrates.org",
+			ID:         "Dsp2",
+			Subsystems: []string{utils.MetaSessionS, utils.MetaAttributes},
+			FilterIDs: []string{
+				"*string:~*req.AccountToMatch:1005",
+				"FLTR_Charger",
+				"*prefix:~*req.Destination:990",
+			},
+			Strategy: utils.MetaFirst,
+			Weight:   20,
+		},
+	}
+	dispatcherProfile4 := &v1.DispatcherWithCache{
+		DispatcherProfile: &engine.DispatcherProfile{
+			Tenant:     "cgrates.org",
+			ID:         "Dsp4",
+			Subsystems: []string{utils.MetaChargers, utils.MetaSessionS},
+			FilterIDs: []string{
+				"FLTR_Charger",
+				"*gt:~*req.ProcessRuns:2",
+			},
+			Strategy: utils.MetaFirst,
+			Weight:   20,
+		},
+	}
+	var reply string
+	if err := fIdxCasesRPC.Call(utils.APIerSv1SetDispatcherProfile,
+		dispatcherProfile1,
+		&reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Expecting : %+v, received: %+v", utils.OK, reply)
+	}
+	if err := fIdxCasesRPC.Call(utils.APIerSv1SetDispatcherProfile,
+		dispatcherProfile4,
+		&reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Expecting : %+v, received: %+v", utils.OK, reply)
+	}
+}
+
+func testFilterIndexesCasesOverwriteDispatchersGetIndexesEveryContext(t *testing.T) {
+	arg := &v1.AttrGetFilterIndexes{
+		Tenant:   "cgrates.org",
+		ItemType: utils.MetaDispatchers,
+		Context:  utils.MetaSessionS,
+	}
+	// *sessions context just for Dsp2 and Dsp4
+	expectedIndexes := []string{
+		// Dsp2
+		"*prefix:~*req.Destination:990:Dsp2",
+		"*string:~*req.AccountToMatch:1005:Dsp2",
+		"*prefix:~*req.CostRefunded:12345:Dsp2",
+		"*string:~*req.ToR:*voice:Dsp2",
+
+		// Dsp4
+		"*prefix:~*req.CostRefunded:12345:Dsp4",
+		"*string:~*req.ToR:*voice:Dsp4",
+	}
+	sort.Strings(expectedIndexes)
+	var reply []string
+	if err := fIdxCasesRPC.Call(utils.APIerSv1GetFilterIndexes, arg, &reply); err != nil {
+		t.Error(err)
+	} else if sort.Strings(reply); !reflect.DeepEqual(expectedIndexes, reply) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expectedIndexes), utils.ToJSON(reply))
+	}
+
+	arg = &v1.AttrGetFilterIndexes{
+		Tenant:   "cgrates.org",
+		ItemType: utils.MetaDispatchers,
+		Context:  utils.MetaAttributes,
+	}
+	// *sessions context just for Dsp2
+	expectedIndexes = []string{
+		// Dsp2
+		"*prefix:~*req.Destination:990:Dsp2",
+		"*string:~*req.AccountToMatch:1005:Dsp2",
+		"*prefix:~*req.CostRefunded:12345:Dsp2",
+		"*string:~*req.ToR:*voice:Dsp2",
+	}
+	sort.Strings(expectedIndexes)
+	if err := fIdxCasesRPC.Call(utils.APIerSv1GetFilterIndexes, arg, &reply); err != nil {
+		t.Error(err)
+	} else if sort.Strings(reply); !reflect.DeepEqual(expectedIndexes, reply) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expectedIndexes), utils.ToJSON(reply))
+	}
+
+	arg = &v1.AttrGetFilterIndexes{
+		Tenant:   "cgrates.org",
+		ItemType: utils.MetaDispatchers,
+		Context:  utils.MetaChargers,
+	}
+	// *sessions context just for Dsp4
+	expectedIndexes = []string{
+		// Dsp4
+		"*prefix:~*req.CostRefunded:12345:Dsp4",
+		"*string:~*req.ToR:*voice:Dsp4",
+	}
+	sort.Strings(expectedIndexes)
+	if err := fIdxCasesRPC.Call(utils.APIerSv1GetFilterIndexes, arg, &reply); err != nil {
+		t.Error(err)
+	} else if sort.Strings(reply); !reflect.DeepEqual(expectedIndexes, reply) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expectedIndexes), utils.ToJSON(reply))
+	}
+}
+
+func testFilterIndexesCasesOverwriteDispatchersGetReverseIndexes(t *testing.T) {
+	arg := &v1.AttrGetFilterIndexes{
+		Tenant:   "cgrates.org:FLTR_Charger",
+		ItemType: utils.CacheReverseFilterIndexes,
+	}
+	expectedIndexes := []string{
+		"*charger_filter_indexes:ChrgerIndexable",
+		"*dispatcher_filter_indexes:Dsp2",
+		"*dispatcher_filter_indexes:Dsp4",
+		"*threshold_filter_indexes:TEST_PROFILE2",
+	}
+	sort.Strings(expectedIndexes)
+	var reply []string
+	if err := fIdxCasesRPC.Call(utils.APIerSv1GetFilterIndexes, arg, &reply); err != nil {
+		t.Error(err)
+	} else if sort.Strings(reply); !reflect.DeepEqual(expectedIndexes, reply) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expectedIndexes), utils.ToJSON(reply))
+	}
+
+	arg = &v1.AttrGetFilterIndexes{
+		Tenant:   "cgrates.org:FLTR_Charger4564",
+		ItemType: utils.CacheReverseFilterIndexes,
+	}
+	expectedIndexes = []string{
+		"*charger_filter_indexes:ChrgerIndexable",
+		"*threshold_filter_indexes:TEST_PROFILE2",
+	}
+	sort.Strings(expectedIndexes)
+	if err := fIdxCasesRPC.Call(utils.APIerSv1GetFilterIndexes, arg, &reply); err != nil {
+		t.Error(err)
+	} else if sort.Strings(reply); !reflect.DeepEqual(expectedIndexes, reply) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expectedIndexes), utils.ToJSON(reply))
+	}
+
+	arg = &v1.AttrGetFilterIndexes{
+		Tenant:   "cgrates.org:FLTR_Charger12312",
+		ItemType: utils.CacheReverseFilterIndexes,
+	}
+	expectedIndexes = []string{
+		"*charger_filter_indexes:ChrgerIndexable",
+		"*threshold_filter_indexes:TEST_PROFILE2",
+	}
+	sort.Strings(expectedIndexes)
+	if err := fIdxCasesRPC.Call(utils.APIerSv1GetFilterIndexes, arg, &reply); err != nil {
+		t.Error(err)
+	} else if sort.Strings(reply); !reflect.DeepEqual(expectedIndexes, reply) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expectedIndexes), utils.ToJSON(reply))
+	}
 }
 
 func testFilterIndexesCasesStopEngine(t *testing.T) {
