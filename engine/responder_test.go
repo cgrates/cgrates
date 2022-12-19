@@ -20,7 +20,10 @@ package engine
 import (
 	"bytes"
 	"encoding/gob"
+	"log"
+	"os"
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 
@@ -631,7 +634,7 @@ func TestResponderDebit(t *testing.T) {
 	}
 }
 
-func TestGetCostOnRatingPlans(t *testing.T) {
+func TestGetCostOnRatingPlansErr(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
@@ -1119,10 +1122,18 @@ func TestResponderRefundRoundingSet(t *testing.T) {
 
 }
 
-func TestGetMaxSessionTimeOnAccounts(t *testing.T) {
+func TestGetMaxSessionTimeOnAccountsErr(t *testing.T) {
+	utils.Logger.SetLogLevel(4)
+	utils.Logger.SetSyslog(nil)
+	buf := new(bytes.Buffer)
+	log.SetOutput(buf)
 	cfg := config.NewDefaultCGRConfig()
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	defer func() {
+		utils.Logger.SetLogLevel(0)
+		log.SetOutput(os.Stderr)
+	}()
 	arg := &utils.GetMaxSessionTimeOnAccountsArgs{
 		Subject:     "subject",
 		Tenant:      "",
@@ -1141,8 +1152,12 @@ func TestGetMaxSessionTimeOnAccounts(t *testing.T) {
 			connMgr: nil,
 		},
 	}
+	expLog := ` ignoring cost for account: `
 	if err := rs.GetMaxSessionTimeOnAccounts(arg, reply); err == nil || err != utils.ErrAccountNotFound {
 		t.Error(err)
+	}
+	if rcvLog := buf.String(); !strings.Contains(rcvLog, expLog) {
+		t.Errorf("logger %v doesn't contain %v", utils.ToJSON(rcvLog), utils.ToJSON(expLog))
 	}
 
 }

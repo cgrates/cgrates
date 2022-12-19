@@ -248,51 +248,7 @@ func TestArgV1ProcessClone(t *testing.T) {
 
 }
 
-func TestCDRV1GetCDRs(t *testing.T) {
-
-	cfg := config.NewDefaultCGRConfig()
-	defer func() {
-		config.SetCgrConfig(config.NewDefaultCGRConfig())
-	}()
-	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	dm := NewDataManager(db, cfg.CacheCfg(), nil)
-	cdrS := &CDRServer{
-		cgrCfg:  cfg,
-		connMgr: nil,
-		cdrDb:   NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items),
-		dm:      dm,
-	}
-	args := utils.RPCCDRsFilterWithAPIOpts{
-
-		RPCCDRsFilter: &utils.RPCCDRsFilter{
-			CGRIDs:         []string{"CGRIDs"},
-			NotCGRIDs:      []string{"NotCGRIDs"},
-			RunIDs:         []string{"RunIDs"},
-			NotRunIDs:      []string{"NotRunIDs"},
-			OriginIDs:      []string{"OriginIDs"},
-			NotOriginIDs:   []string{"NotOriginIDs"},
-			OriginHosts:    []string{"OriginHosts"},
-			SetupTimeStart: "2020-04-18T11:46:26.371Z",
-			SetupTimeEnd:   "2020-04-18T11:46:26.371Z",
-		},
-		Tenant:  "cgrates.org",
-		APIOpts: map[string]interface{}{},
-	}
-	cdrs := &[]*CDR{
-		{
-			CGRID: "cgrid"},
-		{
-			CGRID: "cgr1d",
-		},
-	}
-	if err := cdrS.V1GetCDRs(args, cdrs); err == nil || err.Error() != fmt.Sprintf("SERVER_ERROR: %s", utils.ErrNotFound) {
-		t.Error(utils.NewErrServerError(utils.ErrNotFound))
-	}
-
-}
-
 func TestCDRV1CountCDRs(t *testing.T) {
-
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultTimezone = "UTC"
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
@@ -314,7 +270,33 @@ func TestCDRV1CountCDRs(t *testing.T) {
 	if err := cdrS.V1CountCDRs(args, &i); err != nil {
 		t.Error(err)
 	}
-
+}
+func TestV1CountCDRsErr(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultTimezone = "UTC"
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	cdrS := &CDRServer{
+		cgrCfg:  cfg,
+		connMgr: nil,
+		cdrDb:   NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items),
+		dm:      dm,
+	}
+	args := &utils.RPCCDRsFilterWithAPIOpts{
+		RPCCDRsFilter: &utils.RPCCDRsFilter{
+			Accounts:       []string{"1001"},
+			RunIDs:         []string{utils.MetaDefault},
+			SetupTimeStart: "fdd",
+		},
+		Tenant: "cgrates.org",
+		APIOpts: map[string]interface{}{
+			utils.OptsAPIKey: "cdrs12345",
+		},
+	}
+	i := utils.Int64Pointer(23)
+	if err := cdrS.V1CountCDRs(args, i); err == nil {
+		t.Error(err)
+	}
 }
 func TestV1RateCDRs(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
@@ -1356,9 +1338,14 @@ func TestV2StoreSessionCost(t *testing.T) {
 	if !has {
 		t.Error("has no value")
 	}
-
 	if !reflect.DeepEqual(exp, rcv) {
 		t.Errorf("expected %+v,received %+v", utils.ToJSON(exp), utils.ToJSON(rcv))
+	}
+	args = &ArgsV2CDRSStoreSMCost{
+		Cost: &V2SMCost{},
+	}
+	if err = cdrS.V2StoreSessionCost(args, &reply); err == nil {
+		t.Error(err)
 	}
 }
 
@@ -1510,7 +1497,41 @@ func TestV1RateCDRS(t *testing.T) {
 	if err := cdrS.V1RateCDRs(arg, &reply); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
 	}
+}
 
+func TestV1GetCDRsErr(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	defer func() {
+		config.SetCgrConfig(config.NewDefaultCGRConfig())
+	}()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	cdrS := &CDRServer{
+		cgrCfg:  cfg,
+		connMgr: nil,
+		cdrDb:   NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items),
+		dm:      dm,
+	}
+	args := utils.RPCCDRsFilterWithAPIOpts{
+
+		RPCCDRsFilter: &utils.RPCCDRsFilter{
+			CGRIDs:         []string{"CGRIDs"},
+			NotCGRIDs:      []string{"NotCGRIDs"},
+			OriginHosts:    []string{"OriginHosts"},
+			SetupTimeStart: "time",
+			SetupTimeEnd:   "2020-04-18T11:46:26.371Z",
+		},
+		Tenant:  "cgrates.org",
+		APIOpts: map[string]interface{}{},
+	}
+	var cdrs *[]*CDR
+	if err := cdrS.V1GetCDRs(args, cdrs); err == nil {
+		t.Error(utils.NewErrServerError(utils.ErrNotFound))
+	}
+	args.RPCCDRsFilter.SetupTimeStart = ""
+	if err := cdrS.V1GetCDRs(args, cdrs); err == nil || err.Error() != fmt.Sprintf("SERVER_ERROR: %s", utils.ErrNotFound) {
+		t.Error(utils.NewErrServerError(utils.ErrNotFound))
+	}
 }
 func TestGetCostFromRater2(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()

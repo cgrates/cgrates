@@ -19,7 +19,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"bytes"
+	"log"
+	"os"
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 
@@ -256,11 +260,17 @@ func TestActionTriggerCreateBalance(t *testing.T) {
 
 }
 
-func TestATExecute(t *testing.T) {
+func TestATExecute22(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	tmp := Cache
 	tmpDm := dm
+	utils.Logger.SetLogLevel(4)
+	utils.Logger.SetSyslog(nil)
+	buf := new(bytes.Buffer)
+	log.SetOutput(buf)
 	defer func() {
+		utils.Logger.SetLogLevel(0)
+		log.SetOutput(os.Stderr)
 		Cache = tmp
 		SetDataStorage(tmpDm)
 		config.SetCgrConfig(config.NewDefaultCGRConfig())
@@ -290,7 +300,6 @@ func TestATExecute(t *testing.T) {
 		AllowNegative:  false,
 		UpdateTime:     time.Date(2019, 3, 1, 12, 0, 0, 0, time.UTC),
 	}
-	fltrStr := `*lt:~*req.BalanceMap.*monetary.GetTotalValue:3`
 	db.db.Set(utils.CacheActions, "actID", Actions{
 		{
 			Id:               "cgrates.org:id1",
@@ -300,18 +309,31 @@ func TestATExecute(t *testing.T) {
 				Type:  utils.StringPointer("test"),
 				Value: &utils.ValueFormula{Static: 1.1},
 			},
-			Filters: []string{fltrStr},
+			Filters: []string{
+				"fltr",
+			},
 		},
 	}, []string{}, true, utils.NonTransactional)
+	fltrNew := &Filter{
+		ID:     "fltr",
+		Tenant: "cgrates.org",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaString,
+				Element: "~*req.ID",
+				Values:  []string{"acc_id", "acc1", "acc2"},
+			},
+		},
+	}
 	SetDataStorage(dm)
 	fltr := NewFilterS(cfg, nil, dm)
-	db.db.Set(utils.CacheFilters, utils.ConcatenatedKey("cgrates.org", fltrStr), &Filter{
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2022, 1, 12, 1, 0, 0, 0, time.UTC),
-			ExpiryTime:     time.Date(2024, 1, 12, 1, 0, 0, 0, time.UTC),
-		},
-	}, []string{}, true, utils.NonTransactional)
+	db.db.Set(utils.CacheFilters, utils.ConcatenatedKey("cgrates.org", "fltr"),
+		fltrNew, []string{}, true, utils.NonTransactional)
 	if err := at.Execute(ub, fltr); err != nil {
 		t.Error(err)
+	}
+	expLog := ` not available, aborting execution!`
+	if rcvLog := buf.String(); !strings.Contains(rcvLog, expLog) {
+		t.Errorf("expected %v,received%v", expLog, rcvLog)
 	}
 }

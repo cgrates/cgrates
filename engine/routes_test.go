@@ -1038,9 +1038,15 @@ func TestRouteServiceSortRoutes(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dmSPP := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
-	cfg.RouteSCfg().StringIndexedFields = nil
-	cfg.RouteSCfg().PrefixIndexedFields = nil
 	rpS := NewRouteService(dmSPP, &FilterS{dm: dmSPP, cfg: cfg, connMgr: nil}, cfg, nil)
+	utils.Logger.SetLogLevel(4)
+	utils.Logger.SetSyslog(nil)
+	buf := new(bytes.Buffer)
+	log.SetOutput(buf)
+	defer func() {
+		utils.Logger.SetLogLevel(0)
+		log.SetOutput(os.Stderr)
+	}()
 	lcs := &LeastCostSorter{
 		sorting: "sort",
 		rS:      rpS,
@@ -1049,72 +1055,22 @@ func TestRouteServiceSortRoutes(t *testing.T) {
 	routes := map[string]*Route{
 		"route1": {
 			ID:              "id",
-			FilterIDs:       []string{"filterid1", "filterid2", "filterid3"},
-			AccountIDs:      []string{"acc_id1", "acc_id2", "acc_id3"},
-			RatingPlanIDs:   []string{"rate1", "rate2", "rate3", "rate4"},
-			ResourceIDs:     []string{"rsc1", "rsc2", "rsc3"},
-			StatIDs:         []string{"stat1", "stat2", "stat3"},
+			FilterIDs:       []string{"filterid1"},
+			AccountIDs:      []string{"acc_id1"},
+			RatingPlanIDs:   []string{"rate1"},
+			ResourceIDs:     []string{"rsc1"},
+			StatIDs:         []string{"stat1"},
 			Weight:          2.3,
 			Blocker:         true,
 			RouteParameters: "route",
 			cacheRoute: map[string]interface{}{
 				"*ratio": "ratio",
 			},
-			lazyCheckRules: []*FilterRule{
-				{
-					Type:    "*string",
-					Element: "elem",
-					Values:  []string{"val1", "val2", "val3"},
-					rsrValues: config.RSRParsers{
-						&config.RSRParser{Rules: "public"},
-						{Rules: "private"},
-					}},
-				{
-					Type:    "*string",
-					Element: "elem",
-					Values:  []string{"val1", "val2", "val3"},
-					rsrValues: config.RSRParsers{
-						&config.RSRParser{Rules: "public"},
-						{Rules: "private"},
-					},
-				},
-			},
-		},
-		"route2": {
-			ID:              "id",
-			FilterIDs:       []string{"filterid1", "filterid2", "filterid3"},
-			AccountIDs:      []string{"acc_id1", "acc_id2", "acc_id3"},
-			RatingPlanIDs:   []string{"rate1", "rate2", "rate3", "rate4"},
-			ResourceIDs:     []string{"rsc1", "rsc2", "rsc3"},
-			StatIDs:         []string{"stat1", "stat2", "stat3"},
-			Weight:          2.3,
-			Blocker:         true,
-			RouteParameters: "route",
-			cacheRoute: map[string]interface{}{
-				"*ratio": "ratio",
-			},
-			lazyCheckRules: []*FilterRule{
-				{
-					Type:    "*string",
-					Element: "elem",
-					Values:  []string{"val1", "val2", "val3"},
-					rsrValues: config.RSRParsers{
-						&config.RSRParser{Rules: "public"},
-						{Rules: "private"},
-					}},
-				{
-					Type:    "*string",
-					Element: "elem",
-					Values:  []string{"val1", "val2", "val3"},
-					rsrValues: config.RSRParsers{
-						&config.RSRParser{Rules: "public"},
-						{Rules: "private"},
-					},
-				},
-			},
+			lazyCheckRules: []*FilterRule{},
 		},
 	}
-	ev := &utils.CGREvent{ //matching RouteProfile1
+
+	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "utils.CGREvent1",
 		Event: map[string]interface{}{
@@ -1145,10 +1101,26 @@ func TestRouteServiceSortRoutes(t *testing.T) {
 	} else if !reflect.DeepEqual(val, expSr) {
 		t.Errorf("recived %+v", utils.ToJSON(val))
 	}
+	routes["route1"].RatingPlanIDs = []string{}
+	routes["route1"].AccountIDs = []string{}
+	expLog := `empty RatingPlanIDs or AccountIDs`
+	if _, err = lcs.SortRoutes(prflID, routes, ev, extraOpts); err == nil {
+		t.Error(err)
+	} else if rcvLog := buf.String(); !strings.Contains(rcvLog, expLog) {
+		t.Errorf("Logger %v doesn't contain %v", utils.ToJSON(rcvLog), utils.ToJSON(expLog))
+	}
 
 }
 
 func TestRDSRSortRoutes(t *testing.T) {
+	utils.Logger.SetLogLevel(4)
+	utils.Logger.SetSyslog(nil)
+	buf := new(bytes.Buffer)
+	log.SetOutput(buf)
+	defer func() {
+		utils.Logger.SetLogLevel(0)
+		log.SetOutput(os.Stderr)
+	}()
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dmSPP := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
@@ -1163,11 +1135,11 @@ func TestRDSRSortRoutes(t *testing.T) {
 	routes := map[string]*Route{
 		"sorted_route1": {
 			ID:              "id",
-			FilterIDs:       []string{"filterid1", "filterid2", "filterid3"},
-			AccountIDs:      []string{"acc_id1", "acc_id2", "acc_id3"},
-			RatingPlanIDs:   []string{"rate1", "rate2", "rate3", "rate4"},
-			ResourceIDs:     []string{"rsc1", "rsc2", "rsc3"},
-			StatIDs:         []string{"stat1", "stat2", "stat3"},
+			FilterIDs:       []string{"filterid1"},
+			AccountIDs:      []string{"acc_id1"},
+			RatingPlanIDs:   []string{"rate1"},
+			ResourceIDs:     []string{"rsc1"},
+			StatIDs:         []string{"stat1"},
 			Weight:          2.3,
 			Blocker:         true,
 			RouteParameters: "route",
@@ -1179,51 +1151,11 @@ func TestRDSRSortRoutes(t *testing.T) {
 					Type:    "*string",
 					Element: "elem",
 					Values:  []string{"val1", "val2", "val3"},
-					rsrValues: config.RSRParsers{
-						&config.RSRParser{Rules: "public"},
-						{Rules: "private"},
-					}},
-				{
-					Type:    "*string",
-					Element: "elem",
-					Values:  []string{"val1", "val2", "val3"},
-					rsrValues: config.RSRParsers{
-						&config.RSRParser{Rules: "public"},
-						{Rules: "private"},
-					},
 				},
-			},
-		},
-		"sorted_route2": {
-			ID:              "id",
-			FilterIDs:       []string{"filterid1", "filterid2", "filterid3"},
-			AccountIDs:      []string{"acc_id1", "acc_id2", "acc_id3"},
-			RatingPlanIDs:   []string{"rate1", "rate2", "rate3", "rate4"},
-			ResourceIDs:     []string{"rsc1", "rsc2", "rsc3"},
-			StatIDs:         []string{"stat1", "stat2", "stat3"},
-			Weight:          2.3,
-			Blocker:         true,
-			RouteParameters: "route",
-			cacheRoute: map[string]interface{}{
-				"*ratio": "ratio",
-			},
-			lazyCheckRules: []*FilterRule{
 				{
 					Type:    "*string",
 					Element: "elem",
 					Values:  []string{"val1", "val2", "val3"},
-					rsrValues: config.RSRParsers{
-						&config.RSRParser{Rules: "public"},
-						{Rules: "private"},
-					}},
-				{
-					Type:    "*string",
-					Element: "elem",
-					Values:  []string{"val1", "val2", "val3"},
-					rsrValues: config.RSRParsers{
-						&config.RSRParser{Rules: "public"},
-						{Rules: "private"},
-					},
 				},
 			},
 		},
@@ -1248,6 +1180,14 @@ func TestRDSRSortRoutes(t *testing.T) {
 	if _, err := rds.SortRoutes(prflID, routes, ev, extraOpts); err != nil {
 		t.Error(err)
 	}
+	routes["sorted_route1"].ResourceIDs = []string{}
+	expLog := `empty ResourceIDs`
+	if _, err = rds.SortRoutes(prflID, routes, ev, extraOpts); err == nil {
+		t.Error(err)
+	} else if rcvLog := buf.String(); !strings.Contains(rcvLog, expLog) {
+		t.Errorf("Logger %v doesn't contain %v", utils.ToJSON(rcvLog), utils.ToJSON(expLog))
+	}
+
 }
 func TestQosRSortRoutes(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
@@ -1356,7 +1296,14 @@ func TestReaSortRoutes(t *testing.T) {
 	dm := NewDataManager(db, config.CgrConfig().CacheCfg(), nil)
 	cfg.RouteSCfg().RALsConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs)}
 	cfg.RouteSCfg().StatSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}
-	cfg.GeneralCfg().DefaultTimezone = "UTC"
+	utils.Logger.SetLogLevel(4)
+	utils.Logger.SetSyslog(nil)
+	buf := new(bytes.Buffer)
+	log.SetOutput(buf)
+	defer func() {
+		utils.Logger.SetLogLevel(0)
+		log.SetOutput(os.Stderr)
+	}()
 	clientConn := make(chan rpcclient.ClientConnector, 1)
 	clientConn <- &ccMock{
 		calls: map[string]func(args interface{}, reply interface{}) error{
@@ -1402,20 +1349,6 @@ func TestReaSortRoutes(t *testing.T) {
 				"*ratio": "ratio",
 			},
 		},
-		"sorted_route2": {
-			ID:              "id",
-			FilterIDs:       []string{"filterid1"},
-			AccountIDs:      []string{"acc_id1"},
-			RatingPlanIDs:   []string{"rate1"},
-			ResourceIDs:     []string{"rsc"},
-			StatIDs:         []string{"statID"},
-			Weight:          2.3,
-			Blocker:         true,
-			RouteParameters: "route",
-			cacheRoute: map[string]interface{}{
-				"*ratio": "ratio",
-			},
-		},
 	}
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
@@ -1436,85 +1369,47 @@ func TestReaSortRoutes(t *testing.T) {
 	if _, err := rea.SortRoutes(prflID, routes, ev, extraOpts); err != nil {
 		t.Error(err)
 	}
+	routes["sorted_route1"].ResourceIDs = []string{}
+	expLog := `empty ResourceIDs`
+	if _, err = rea.SortRoutes(prflID, routes, ev, extraOpts); err == nil {
+		t.Error(err)
+	} else if rcvLog := buf.String(); !strings.Contains(rcvLog, expLog) {
+		t.Errorf("Logger %v  doesn't contain %v", utils.ToJSON(rcvLog), utils.ToJSON(expLog))
+	}
+
 }
 func TestHCRSortRoutes(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dmSPP := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
-	cfg.RouteSCfg().StringIndexedFields = nil
-	cfg.RouteSCfg().PrefixIndexedFields = nil
 	rpS := NewRouteService(dmSPP, &FilterS{dm: dmSPP, cfg: cfg, connMgr: nil}, cfg, nil)
 	hcr := &HightCostSorter{
 		sorting: utils.MetaHC,
 		rS:      rpS,
 	}
+	utils.Logger.SetLogLevel(4)
+	utils.Logger.SetSyslog(nil)
+	buf := new(bytes.Buffer)
+	log.SetOutput(buf)
+	defer func() {
+		utils.Logger.SetLogLevel(0)
+		log.SetOutput(os.Stderr)
+	}()
 	prflID := "CGREvent1"
 	routes := map[string]*Route{
 		"sorted_route1": {
 			ID:              "id",
-			FilterIDs:       []string{"filterid1", "filterid2", "filterid3"},
-			AccountIDs:      []string{"acc_id1", "acc_id2", "acc_id3"},
-			RatingPlanIDs:   []string{"rate1", "rate2", "rate3", "rate4"},
-			ResourceIDs:     []string{"rsc1", "rsc2", "rsc3"},
-			StatIDs:         []string{"stat1", "stat2", "stat3"},
+			FilterIDs:       []string{"filterid1"},
+			AccountIDs:      []string{"acc_id1"},
+			RatingPlanIDs:   []string{"rate1"},
+			ResourceIDs:     []string{"rsc1"},
+			StatIDs:         []string{"stat1"},
 			Weight:          2.3,
 			Blocker:         true,
 			RouteParameters: "route",
 			cacheRoute: map[string]interface{}{
 				"*ratio": "ratio",
-			},
-			lazyCheckRules: []*FilterRule{
-				{
-					Type:    "*string",
-					Element: "elem",
-					Values:  []string{"val1", "val2", "val3"},
-					rsrValues: config.RSRParsers{
-						&config.RSRParser{Rules: "public"},
-						{Rules: "private"},
-					}},
-				{
-					Type:    "*string",
-					Element: "elem",
-					Values:  []string{"val1", "val2", "val3"},
-					rsrValues: config.RSRParsers{
-						&config.RSRParser{Rules: "public"},
-						{Rules: "private"},
-					},
-				},
-			},
-		},
-		"sorted_route2": {
-			ID:              "id",
-			FilterIDs:       []string{"filterid1", "filterid2", "filterid3"},
-			AccountIDs:      []string{"acc_id1", "acc_id2", "acc_id3"},
-			RatingPlanIDs:   []string{"rate1", "rate2", "rate3", "rate4"},
-			ResourceIDs:     []string{"rsc1", "rsc2", "rsc3"},
-			StatIDs:         []string{"stat1", "stat2", "stat3"},
-			Weight:          2.3,
-			Blocker:         true,
-			RouteParameters: "route",
-			cacheRoute: map[string]interface{}{
-				"*ratio": "ratio",
-			},
-			lazyCheckRules: []*FilterRule{
-				{
-					Type:    "*string",
-					Element: "elem",
-					Values:  []string{"val1", "val2", "val3"},
-					rsrValues: config.RSRParsers{
-						&config.RSRParser{Rules: "public"},
-						{Rules: "private"},
-					}},
-				{
-					Type:    "*string",
-					Element: "elem",
-					Values:  []string{"val1", "val2", "val3"},
-					rsrValues: config.RSRParsers{
-						&config.RSRParser{Rules: "public"},
-						{Rules: "private"},
-					},
-				},
 			},
 		},
 	}
@@ -1538,6 +1433,15 @@ func TestHCRSortRoutes(t *testing.T) {
 	if _, err := hcr.SortRoutes(prflID, routes, ev, extraOpts); err != nil {
 		t.Error(err)
 	}
+	routes["sorted_route1"].RatingPlanIDs = []string{}
+	routes["sorted_route1"].AccountIDs = []string{}
+	expLog := `empty RatingPlanIDs or AccountIDs`
+	if _, err := hcr.SortRoutes(prflID, routes, ev, extraOpts); err == nil {
+		t.Error(err)
+	} else if rcvLog := buf.String(); !strings.Contains(rcvLog, expLog) {
+		t.Errorf("Logger %v doesn't contains %v", rcvLog, expLog)
+	}
+
 }
 func TestLoadDistributionSorterSortRoutes(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()

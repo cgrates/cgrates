@@ -18,7 +18,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"bytes"
+	"log"
+	"os"
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 
@@ -751,5 +755,40 @@ func TestBalanceDebitUnits2(t *testing.T) {
 
 	if _, err := b.debitUnits(cd, ub, moneyBalances, true, false, true, &fltrs); err != nil {
 		t.Errorf("received %v", err)
+	}
+}
+
+func TestGetMinutesForCredi(t *testing.T) {
+	utils.Logger.SetLogLevel(4)
+	utils.Logger.SetSyslog(nil)
+	buf := new(bytes.Buffer)
+	log.SetOutput(buf)
+	defer func() {
+		utils.Logger.SetLogLevel(0)
+		log.SetOutput(os.Stderr)
+	}()
+	b := &Balance{
+		Value:          20 * float64(time.Second),
+		DestinationIDs: utils.NewStringMap("NAT"),
+		Weight:         10, RatingSubject: "rif",
+	}
+	cd := &CallDescriptor{
+		Category:      "postpaid",
+		ToR:           utils.MetaVoice,
+		Tenant:        "foehn",
+		Subject:       "foehn",
+		Account:       "foehn",
+		Destination:   "0034678096720",
+		TimeStart:     time.Date(2015, 4, 24, 7, 59, 4, 0, time.UTC),
+		TimeEnd:       time.Date(2015, 4, 24, 8, 2, 0, 0, time.UTC),
+		LoopIndex:     0,
+		DurationIndex: 176 * time.Second,
+	}
+	if dur, _ := b.GetMinutesForCredit(cd, 12); dur != 0 {
+		t.Error(err)
+	}
+	expLog := `Error getting new cost for balance subject:`
+	if rcvLog := buf.String(); !strings.Contains(rcvLog, expLog) {
+		t.Errorf("expected %v,received %v", utils.ToJSON(expLog), utils.ToJSON(rcvLog))
 	}
 }
