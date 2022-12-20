@@ -195,7 +195,7 @@ func ComputeResourceIndexes(dm *DataManager, tenant string, rsIDs *[]string,
 	} else {
 		// this will be on ComputeIndexesIDs that contains the old indexes from the next getter
 		var oldIDx map[string]utils.StringMap
-		if oldIDx, err = dm.GetFilterIndexes(utils.PrefixToIndexCache[utils.ResourceFilterIndexes],
+		if oldIDx, err = dm.GetFilterIndexes(utils.PrefixToIndexCache[utils.ResourceProfilesPrefix],
 			tenant, utils.EmptyString, nil); err != nil || oldIDx == nil {
 			rpIndexers = NewFilterIndexer(dm, utils.ResourceProfilesPrefix, tenant)
 		} else {
