@@ -19,6 +19,7 @@ package engine
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -3722,15 +3723,59 @@ func TestRemoveAccountAcc(t *testing.T) {
 func TestRemoveAccountActionErr(t *testing.T) {
 	tmp := Cache
 	tmpDm := dm
-	utils.Logger.SetLogLevel(4)
-	utils.Logger.SetSyslog(nil)
-	var buf bytes.Buffer
-	log.SetOutput(&buf)
+
+	setLogger := func(buf *bytes.Buffer) {
+		utils.Logger.SetLogLevel(4)
+		utils.Logger.SetSyslog(nil)
+		log.SetOutput(buf)
+	}
+	removeLogger := func() {
+		utils.Logger.SetLogLevel(0)
+		log.SetOutput(os.Stderr)
+	}
+	buf := new(bytes.Buffer)
+	setLogger(buf)
+	cfg := config.NewDefaultCGRConfig()
 	defer func() {
+		removeLogger()
 		Cache = tmp
 		SetDataStorage(tmpDm)
-		log.SetOutput(os.Stderr)
+
+		config.SetCgrConfig(config.NewDefaultCGRConfig())
 	}()
+	cfg.DataDbCfg().Items = map[string]*config.ItemOpt{
+		utils.CacheAccounts: {
+			Limit:  3,
+			TTL:    2 * time.Minute,
+			Remote: true,
+		},
+		utils.CacheAccountActionPlans: {
+			Limit:     3,
+			StaticTTL: true,
+			Remote:    true,
+		},
+		utils.CacheActionPlans: {
+			Remote:    true,
+			Limit:     3,
+			StaticTTL: true,
+		},
+	}
+	cfg.DataDbCfg().RmtConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
+	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn <- &ccMock{
+		calls: map[string]func(args interface{}, reply interface{}) error{
+			utils.ReplicatorSv1GetAccountActionPlans: func(args, reply interface{}) error {
+
+				return errors.New("ActionPlans not found")
+			},
+			utils.ReplicatorSv1GetActionPlan: func(args, reply interface{}) error {
+				return errors.New("ActionPlan not found")
+			},
+		},
+	}
+	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator): clientConn,
+	})
 	a := &Action{
 		Id:              "CDRLog1",
 		ActionType:      utils.CDRLog,
@@ -3760,13 +3805,14 @@ func TestRemoveAccountActionErr(t *testing.T) {
 		APIOpts: map[string]interface{}{},
 	}
 	ub := &Account{
-
 		BalanceMap: map[string]Balances{
 			utils.MetaMonetary: {&Balance{
 				Value: 10,
 			}},
 		},
 	}
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
 	SetDataStorage(nil)
 	if err := removeAccountAction(ub, a, acs, nil, extraData); err == nil || err != utils.ErrInvalidKey {
 		t.Error(err)
@@ -3779,7 +3825,39 @@ func TestRemoveAccountActionErr(t *testing.T) {
 		t.Errorf("expected log <%+v> to be included in: <%+v>",
 			expLog, rcvLog)
 	}
-	utils.Logger.SetLogLevel(0)
+	SetDataStorage(dm)
+	config.SetCgrConfig(cfg)
+	ub.ID = "acc_id"
+	if err := dm.SetAccount(ub); err != nil {
+		t.Error(err)
+	}
+	removeLogger()
+	buf2 := new(bytes.Buffer)
+	setLogger(buf2)
+	expLog = `Could not get action plans`
+	if err := removeAccountAction(ub, a, acs, nil, extraData); err == nil {
+		t.Error(err)
+	} else if rcvLog := buf2.String(); !strings.Contains(rcvLog, expLog) {
+		t.Errorf("Logger %v doesn't contain %v", rcvLog, expLog)
+	}
+	removeLogger()
+	buf3 := new(bytes.Buffer)
+	setLogger(buf3)
+	expLog = `Could not retrieve action plan:`
+	dm.SetAccountActionPlans(ub.ID, []string{"acc1"}, true)
+	if err := removeAccountAction(ub, a, acs, nil, extraData); err == nil {
+		t.Error(err)
+	} else if rcvLog := buf3.String(); !strings.Contains(rcvLog, expLog) {
+		t.Errorf("Logger %v doesn't contain %v", rcvLog, expLog)
+	}
+	// if err := dm.SetActionPlan("acc1", &ActionPlan{
+	// 	ActionTimings: []*ActionTiming{
+	// 		{ActionsID: "ENABLE_ACNT"},
+	// 	},
+	// }, true, utils.NonTransactional); err != nil {
+	// 	t.Error(err)
+	// }
+
 }
 
 func TestRemoveExpiredErrs(t *testing.T) {
