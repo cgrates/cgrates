@@ -1251,7 +1251,6 @@ func TestDataManagerSetDispatcherHostErrDataDB(t *testing.T) {
 
 }
 
-// unfinished get not implemented and conn error with no mock
 func TestDataManagerSetDispatcherHostReplicateTrue(t *testing.T) {
 
 	tmp := Cache

@@ -852,7 +852,7 @@ func TestCacheSV1RemoveGroup(t *testing.T) {
 		},
 	}
 
-	if err := cacheS.Set(context.Background(), utils.CacheAccounts, "itemId", "valinterface", []string{"Group", "group2"}, true, utils.NonTransactional); err != nil {
+	if err := Cache.Set(context.Background(), utils.CacheAccounts, "itemId", "valinterface", []string{"Group", "group2"}, true, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
 	exp := utils.OK
@@ -893,7 +893,7 @@ func TestV1GetCacheStats(t *testing.T) {
 		Tenant:   "cgrates.org",
 	}
 
-	if err := cacheS.Set(context.Background(), "cacheId1", "itemId", "valinterface", []string{"GroupId"}, true, utils.NonTransactional); err != nil {
+	if err := Cache.Set(context.Background(), "cacheId1", "itemId", "valinterface", []string{"GroupId"}, true, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
 
@@ -903,6 +903,341 @@ func TestV1GetCacheStats(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, exp) {
 		t.Errorf("Expected rcv <%v>, Received <%v>", exp, reply)
+	}
+
+}
+
+func TestCacheSV1Clear(t *testing.T) {
+
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	cacheS := NewCacheS(cfg, dm, connMgr, nil)
+
+	args := &utils.AttrCacheIDsWithAPIOpts{
+		APIOpts: map[string]interface{}{
+			utils.MetaSubsys: utils.MetaChargers,
+		},
+		CacheIDs: []string{"cacheId1", "cacheId2", "cacheId3", "cacheId4"},
+		Tenant:   "cgrates.org",
+	}
+
+	if err := Cache.Set(context.Background(), "cacheId1", "itemId", "valinterface", []string{"GroupId"}, true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+
+	var reply string
+	if err := cacheS.V1Clear(context.Background(), args, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Expected <%v>, Received <%v>", utils.OK, reply)
+	}
+
+	if rcv, ok := Cache.Get(utils.CacheAccounts, "cacheId1"); ok {
+		t.Errorf("Cache.Get ok shouldnt be true, received <%v>", rcv)
+	} else if rcv != nil {
+		t.Errorf("Expected <%v>, Received <%v>", nil, rcv)
+	}
+
+}
+
+func TestCacheSV1RemoveItems(t *testing.T) {
+
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	cacheS := NewCacheS(cfg, dm, connMgr, nil)
+
+	args := &utils.AttrReloadCacheWithAPIOpts{
+		Tenant:              utils.CGRateSorg,
+		AttributeProfileIDs: []string{"cgrates.org:TEST_ATTRIBUTES_TEST"},
+	}
+
+	if err := cacheS.Set(context.Background(), utils.CacheAttributeProfiles, "cgrates.org:TEST_ATTRIBUTES_TEST", "valinterface", []string{}, true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+
+	expNotRemovedGet := "valinterface"
+	if rcv, ok := cacheS.Get(utils.CacheAttributeProfiles, "cgrates.org:TEST_ATTRIBUTES_TEST"); !ok {
+		t.Errorf("Cache.Get did not receive ok, received <%v>", rcv)
+	} else if rcv != expNotRemovedGet {
+		t.Errorf("Expected <%v>, Received <%v>", expNotRemovedGet, rcv)
+	}
+	var reply string
+	if err := cacheS.V1RemoveItems(context.Background(), args, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Expected <%v>, Received <%v>", utils.OK, reply)
+	}
+
+	if rcv, ok := cacheS.Get(utils.CacheAttributeProfiles, "cgrates.org:TEST_ATTRIBUTES_TEST"); ok {
+		t.Errorf("Cache.Get shouldnt receive ok, received <%v>", rcv)
+	} else if rcv != nil {
+		t.Errorf("Expected <%v>, Received <%v>", nil, rcv)
+	}
+
+}
+
+func TestCacheSV1RemoveSingular(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	cacheS := NewCacheS(cfg, dm, connMgr, nil)
+	args := &utils.ArgsGetCacheItemWithAPIOpts{
+		ArgsGetCacheItem: utils.ArgsGetCacheItem{
+			CacheID: utils.CacheAccounts,
+			ItemID:  "itemId",
+		},
+	}
+
+	if err := cacheS.Set(context.Background(), utils.CacheAccounts, "itemId", "valinterface", []string{}, true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+
+	expNotRemovedGet := "valinterface"
+	if rcv, ok := cacheS.Get(utils.CacheAccounts, "itemId"); !ok {
+		t.Errorf("Cache.Get did not receive ok, received <%v>", rcv)
+	} else if rcv != expNotRemovedGet {
+		t.Errorf("Expected <%v>, Received <%v>", expNotRemovedGet, rcv)
+	}
+	var reply string
+	if err := cacheS.V1RemoveItem(context.Background(), args, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Expected <%v>, Received <%v>", utils.OK, reply)
+	}
+
+	if rcv, ok := cacheS.Get(utils.CacheAccounts, "itemId"); ok {
+		t.Errorf("Cache.Get shouldnt receive ok, received <%v>", rcv)
+	} else if rcv != nil {
+		t.Errorf("Expected <%v>, Received <%v>", nil, rcv)
+	}
+
+}
+
+func TestCacheSV1GetItemExpiryTime(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+	Cache.Clear(nil)
+
+	args := &utils.ArgsGetCacheItemWithAPIOpts{
+		ArgsGetCacheItem: utils.ArgsGetCacheItem{
+			CacheID: utils.CacheAccounts,
+			ItemID:  "itemId",
+		},
+	}
+	cfg := config.NewDefaultCGRConfig()
+	cfg.CacheCfg().Partitions = map[string]*config.CacheParamCfg{
+		args.CacheID: {
+			Limit: 1,
+			TTL:   5 * time.Second,
+		},
+	}
+	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+
+	cacheS := NewCacheS(cfg, dm, connMgr, nil)
+
+	if err := cacheS.Set(context.Background(), utils.CacheAccounts, "itemId", "valinterface", []string{}, true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+
+	exp := time.Now().Year()
+	var reply time.Time
+	if err := cacheS.V1GetItemExpiryTime(context.Background(), args, &reply); err != nil {
+		t.Error(err)
+	} else if reply.Year() != exp {
+		t.Errorf("Expected <%v>, Received <%v>", exp, reply)
+	}
+
+}
+
+func TestV1GetItemSingular(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+	Cache.Clear(nil)
+
+	args := &utils.ArgsGetCacheItemWithAPIOpts{
+		ArgsGetCacheItem: utils.ArgsGetCacheItem{
+			CacheID: utils.CacheAccounts,
+			ItemID:  "itemId",
+		},
+	}
+	cfg := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+
+	cacheS := NewCacheS(cfg, dm, connMgr, nil)
+
+	if err := cacheS.Set(context.Background(), utils.CacheAccounts, "itemId", "valinterface", []string{}, true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+
+	exp := interface{}("valinterface")
+	var reply interface{}
+	if err := cacheS.V1GetItem(context.Background(), args, &reply); err != nil {
+		t.Error(err)
+	} else if reply != exp {
+		t.Errorf("Expected <%v>, Received <%v>", exp, reply)
+	}
+
+}
+
+func TestCacheSV1HasItem(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+	Cache.Clear(nil)
+
+	args := &utils.ArgsGetCacheItemWithAPIOpts{
+		ArgsGetCacheItem: utils.ArgsGetCacheItem{
+			CacheID: utils.CacheAccounts,
+			ItemID:  "itemId",
+		},
+	}
+	cfg := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+
+	cacheS := NewCacheS(cfg, dm, connMgr, nil)
+
+	if err := cacheS.Set(context.Background(), utils.CacheAccounts, "itemId", "valinterface", []string{}, true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+
+	exp := true
+	var reply bool
+	if err := cacheS.V1HasItem(context.Background(), args, &reply); err != nil {
+		t.Error(err)
+	} else if reply != exp {
+		t.Errorf("Expected <%v>, Received <%v>", exp, reply)
+	}
+
+}
+
+func TestCacheSV1GetItemIDs(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+	Cache.Clear(nil)
+
+	args := &utils.ArgsGetCacheItemIDsWithAPIOpts{
+		ArgsGetCacheItemIDs: utils.ArgsGetCacheItemIDs{
+			CacheID:      utils.CacheAccounts,
+			ItemIDPrefix: "itemId",
+		},
+	}
+	cfg := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+
+	cacheS := NewCacheS(cfg, dm, connMgr, nil)
+
+	if err := cacheS.Set(context.Background(), utils.CacheAccounts, "itemId", "valinterface", []string{}, true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+
+	exp := []string{"itemId"}
+	var reply []string
+	if err := cacheS.V1GetItemIDs(context.Background(), args, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(exp, reply) {
+		t.Errorf("Expected <%v>, Received <%v>", exp, reply)
+	}
+
+}
+
+type ccCloner struct {
+	mckField string
+}
+
+func (cc *ccCloner) Clone() (interface{}, error) {
+	cc.mckField = "value"
+	return cc, nil
+}
+
+func TestCacheSGetCloned(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+
+	cacheS := NewCacheS(cfg, dm, connMgr, nil)
+
+	intfCloneVal := new(ccCloner)
+
+	if err := cacheS.Set(context.Background(), utils.MetaAccounts, "itemId", intfCloneVal, nil, true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+
+	expVal := intfCloneVal
+	expGetVal, ok := cacheS.Get(utils.MetaAccounts, "itemId")
+	if !ok {
+		t.Errorf("Cache.Get should receive ok, received <%v>", expGetVal)
+	} else if expGetVal != expVal {
+		t.Errorf("Expected <%v>, Received <%v>", expVal, expGetVal)
+	}
+
+	if rcv, err := cacheS.GetCloned(utils.MetaAccounts, "itemId"); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expGetVal, rcv) {
+		t.Errorf("Expected <%v>, Received <%v>", expGetVal, rcv)
+	}
+
+}
+
+func TestCacheSGetPrecacheChannel(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+
+	cacheS := NewCacheS(cfg, dm, connMgr, nil)
+
+	if err := cacheS.Set(context.Background(), utils.MetaAccounts, "itemId", "valinterface", nil, true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+
+	exp := cacheS.pcItems[utils.MetaAccounts]
+
+	if rcv := cacheS.GetPrecacheChannel(utils.MetaAccounts); err != nil {
+		t.Error(err)
+	} else if exp != rcv {
+		t.Errorf("Expected <%v>, Received <%v>", exp, rcv)
 	}
 
 }
