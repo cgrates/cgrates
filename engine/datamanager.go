@@ -797,7 +797,7 @@ func (dm *DataManager) SetThresholdProfile(th *ThresholdProfile, withIndex bool)
 					needsRemove = true
 				}
 			}
-			if needsRemove {
+			if needsRemove || len(oldTh.FilterIDs) == 0 {
 				if err = NewFilterIndexer(dm, utils.ThresholdProfilePrefix,
 					th.Tenant).RemoveItemFromIndex(th.Tenant, th.ID, oldTh.FilterIDs); err != nil {
 					return
@@ -915,7 +915,7 @@ func (dm *DataManager) SetStatQueueProfile(sqp *StatQueueProfile, withIndex bool
 					needsRemove = true
 				}
 			}
-			if needsRemove {
+			if needsRemove || len(oldSts.FilterIDs) == 0 {
 				if err = NewFilterIndexer(dm, utils.StatQueueProfilePrefix,
 					sqp.Tenant).RemoveItemFromIndex(sqp.Tenant, sqp.ID, oldSts.FilterIDs); err != nil {
 					return
@@ -1164,7 +1164,7 @@ func (dm *DataManager) SetResourceProfile(rp *ResourceProfile, withIndex bool) (
 					needsRemove = true
 				}
 			}
-			if needsRemove {
+			if needsRemove || len(oldRes.FilterIDs) == 0 {
 				if err = NewFilterIndexer(dm, utils.ResourceProfilesPrefix,
 					rp.Tenant).RemoveItemFromIndex(rp.Tenant, rp.ID, oldRes.FilterIDs); err != nil {
 					return
@@ -1950,12 +1950,13 @@ func (dm *DataManager) SetSupplierProfile(supp *SupplierProfile, withIndex bool)
 	if withIndex {
 		if oldSup != nil {
 			var needsRemove bool
+			utils.Logger.Crit(fmt.Sprintf("verifica needsRemove pt supp.ID: %v si oldSup.FilterIDs: %v", oldSup.ID, oldSup.FilterIDs))
 			for _, fltrID := range oldSup.FilterIDs {
 				if !utils.IsSliceMember(supp.FilterIDs, fltrID) {
 					needsRemove = true
 				}
 			}
-			if needsRemove {
+			if needsRemove || len(oldSup.FilterIDs) == 0 {
 				if err = NewFilterIndexer(dm, utils.SupplierProfilePrefix,
 					supp.Tenant).RemoveItemFromIndex(supp.Tenant, supp.ID, oldSup.FilterIDs); err != nil {
 					return
@@ -2221,7 +2222,7 @@ func (dm *DataManager) SetChargerProfile(cpp *ChargerProfile, withIndex bool) (e
 					needsRemove = true
 				}
 			}
-			if needsRemove {
+			if needsRemove || len(oldCpp.FilterIDs) == 0 {
 				if err = NewFilterIndexer(dm, utils.ChargerProfilePrefix,
 					cpp.Tenant).RemoveItemFromIndex(cpp.Tenant, cpp.ID, oldCpp.FilterIDs); err != nil {
 					return
@@ -2335,7 +2336,7 @@ func (dm *DataManager) SetDispatcherProfile(dpp *DispatcherProfile, withIndex bo
 		if oldDpp != nil {
 			for _, ctx := range oldDpp.Subsystems {
 				var needsRemove bool
-				if !utils.IsSliceMember(dpp.Subsystems, ctx) {
+				if !utils.IsSliceMember(dpp.Subsystems, ctx) || (ctx == utils.META_ANY && len(dpp.FilterIDs) != 0) {
 					needsRemove = true
 				} else {
 					for _, fltrID := range oldDpp.FilterIDs {

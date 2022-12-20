@@ -239,7 +239,9 @@ func (rfi *FilterIndexer) RemoveItemFromIndex(tenant, itemID string, oldFilters 
 	if len(oldFilters) == 0 && len(filterIDs) != 0 {
 		oldFilters = append(oldFilters, utils.META_NONE)
 	}
+
 	filterIDs = append(filterIDs, oldFilters...)
+
 	for _, fltrID := range filterIDs {
 		var fltr *Filter
 		if fltrID == utils.META_NONE {
