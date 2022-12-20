@@ -18,6 +18,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"bytes"
+	"log"
+	"os"
+	"strings"
 	"testing"
 
 	"github.com/cgrates/cgrates/config"
@@ -59,6 +63,15 @@ func TestDynamicDpFieldAsInterface(t *testing.T) {
 }
 
 func TestDDPFieldAsInterface(t *testing.T) {
+	utils.Logger.SetLogLevel(4)
+	utils.Logger.SetSyslog(nil)
+	buf := new(bytes.Buffer)
+	log.SetOutput(buf)
+	defer func() {
+		utils.Logger.SetLogLevel(0)
+		log.SetOutput(os.Stderr)
+	}()
+
 	libDP, err := newLibPhoneNumberDP("+447975777666")
 	if err != nil {
 		t.Error(err)
@@ -142,4 +155,29 @@ func TestDDPFieldAsInterface(t *testing.T) {
 		t.Errorf("expected %v,reveived %v", 1, val)
 	}
 
+	dDP = &libphonenumberDP{
+		cache:   utils.MapStorage{},
+		pNumber: &phonenumbers.PhoneNumber{},
+	}
+	expLog := `when getting GeoLocation for number`
+	if _, err := dDP.fieldAsInterface([]string{"GeoLocation"}); err != nil {
+		t.Error(err)
+	} else if rcvLog := buf.String(); !strings.Contains(rcvLog, expLog) {
+		t.Errorf("Logger %v doesn't contain %v", rcvLog, expLog)
+	}
+	dDP = &libphonenumberDP{
+		cache:   utils.MapStorage{},
+		pNumber: &phonenumbers.PhoneNumber{},
+	}
+	dDP.setDefaultFields()
+	utils.Logger.SetLogLevel(0)
+	log.SetOutput(os.Stderr)
+	utils.Logger.SetLogLevel(4)
+	utils.Logger.SetSyslog(nil)
+	buf2 := new(bytes.Buffer)
+	log.SetOutput(buf2)
+	expLog = ` when getting GeoLocation for number`
+	if rcvLog := buf2.String(); strings.Contains(rcvLog, expLog) {
+		t.Errorf("Logger %v doesn't contain %v", rcvLog, expLog)
+	}
 }
