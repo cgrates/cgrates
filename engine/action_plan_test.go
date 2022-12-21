@@ -23,6 +23,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -420,5 +421,63 @@ func TestActionTimingGetNextStartTime(t *testing.T) {
 	exp = time.Date(2021, 1, 31, 14, 25, 0, 0, time.UTC)
 	if st := at.GetNextStartTime(t1); !st.Equal(exp) {
 		t.Errorf("Expecting: %+v, received: %+v", exp, st)
+	}
+}
+
+func TestActionTimingExErr(t *testing.T) {
+	tmpDm := dm
+	tmp := Cache
+	cfg := config.NewDefaultCGRConfig()
+	defer func() {
+		dm = tmpDm
+		Cache = tmp
+		config.SetCgrConfig(config.NewDefaultCGRConfig())
+	}()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	at := &ActionTiming{
+		Timing: &RateInterval{},
+		actions: []*Action{
+			{
+				Filters:          []string{},
+				ExpirationString: "*yearly",
+				ActionType:       "test",
+				Id:               "ZeroMonetary",
+				Balance: &BalanceFilter{
+					Type: utils.StringPointer(utils.MetaMonetary),
+
+					Value:  &utils.ValueFormula{Static: 11},
+					Weight: utils.Float64Pointer(30),
+				},
+			},
+		},
+	}
+	fltrs := NewFilterS(cfg, nil, dm)
+	if err := at.Execute(nil); err == nil || err != utils.ErrPartiallyExecuted {
+		t.Error(err)
+	}
+	at.actions[0].ActionType = utils.MetaDebitReset
+	if err := at.Execute(nil); err == nil || err != utils.ErrPartiallyExecuted {
+		t.Error(err)
+	}
+	at.accountIDs = utils.StringMap{"cgrates.org:zeroNegative": true}
+	at.actions[0].ActionType = utils.MetaResetStatQueue
+	if err := at.Execute(nil); err == nil || err != utils.ErrPartiallyExecuted {
+		t.Error(err)
+	}
+	Cache.Set(utils.CacheFilters, "cgrates.org:*string:~*req.BalanceMap.*monetary[0].ID:*default", nil, []string{}, true, utils.NonTransactional)
+	at.actions[0].Filters = []string{"*string:~*req.BalanceMap.*monetary[0].ID:*default"}
+	if err := at.Execute(fltrs); err != nil {
+		t.Error(err)
+	}
+	SetDataStorage(nil)
+	if err := at.Execute(nil); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestGetDayOrEndOfMonth(t *testing.T) {
+	if val := getDayOrEndOfMonth(31, time.Date(2022, 12, 22, 12, 0, 0, 0, time.UTC)); val != 31 {
+		t.Errorf("Should Receive Last Day %v", val)
 	}
 }

@@ -1629,7 +1629,7 @@ func (dm *DataManager) GetActionTriggers(id string, skipCache bool,
 					APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID, utils.EmptyString,
 						utils.FirstNonEmpty(config.CgrConfig().DataDbCfg().RmtConnID,
 							config.CgrConfig().GeneralCfg().NodeID)),
-				}, attrs); err == nil {
+				}, &attrs); err == nil {
 				err = dm.dataDB.SetActionTriggersDrv(id, attrs)
 			}
 		}
