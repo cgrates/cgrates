@@ -176,7 +176,7 @@ func TestDDPFieldAsInterface(t *testing.T) {
 	utils.Logger.SetSyslog(nil)
 	buf2 := new(bytes.Buffer)
 	log.SetOutput(buf2)
-	expLog = ` when getting GeoLocation for number`
+	expLog = `when getting GeoLocation for number`
 	if rcvLog := buf2.String(); strings.Contains(rcvLog, expLog) {
 		t.Errorf("Logger %v doesn't contain %v", rcvLog, expLog)
 	}

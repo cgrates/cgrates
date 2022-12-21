@@ -145,6 +145,10 @@ func TestCacheSV1GetItemIDs(t *testing.T) {
 	} else if !reflect.DeepEqual(reply, exp) {
 		t.Errorf("expected %+v,received %+v", utils.ToJSON(exp), utils.ToJSON(reply))
 	}
+	tscache.Remove("cacheID", "itemID", true, utils.NonTransactional)
+	if err := chS.V1GetItemIDs(args, reply); err == nil || err != utils.ErrNotFound {
+		t.Error(err)
+	}
 }
 
 func TestCacheSV1HasItem(t *testing.T) {
@@ -262,11 +266,18 @@ func TestCacheSV1GetItem(t *testing.T) {
 		dm:     dm,
 		tCache: tscache,
 	}
-	var reply interface{} = ""
+	var reply interface{}
 	if err := chS.V1GetItem(args, &reply); err != nil {
 		t.Error(err)
+	} else if val, cancast := reply.(string); cancast {
+		if val != "value" {
+			t.Errorf("expected value,received %v", val)
+		}
 	}
-
+	tscache.Remove("cacheID", "itemID", true, utils.NonTransactional)
+	if err := chS.V1GetItem(args, &reply); err == nil || err != utils.ErrNotFound {
+		t.Error(err)
+	}
 }
 
 func TestCacheSV1GetItemExpiryTime(t *testing.T) {
@@ -589,25 +600,15 @@ func TestCachesPrecache(t *testing.T) {
 }
 
 func TestV1PrecacheStatus(t *testing.T) {
-
 	args := &utils.AttrCacheIDsWithAPIOpts{
 		APIOpts:  map[string]interface{}{},
 		Tenant:   "cgrates.org",
-		CacheIDs: []string{"cache1", "cache2", "cache3"},
+		CacheIDs: []string{utils.CacheFilters},
 	}
 	cfg := config.NewDefaultCGRConfig()
-	cfg.CacheCfg().Partitions = map[string]*config.CacheParamCfg{
-		utils.CacheDestinations: {
-			Limit:    1,
-			Precache: true,
-			TTL:      time.Minute * 2,
-			Remote:   true,
-		},
-	}
+
 	pcI := map[string]chan struct{}{
-		"cache1": make(chan struct{}),
-		"cache2": make(chan struct{}),
-		"cache3": make(chan struct{}),
+		utils.CacheFilters: make(chan struct{}),
 	}
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
@@ -619,14 +620,16 @@ func TestV1PrecacheStatus(t *testing.T) {
 
 	reply := map[string]string{}
 	exp := map[string]string{
-		"cache1": utils.MetaPrecaching,
-		"cache2": utils.MetaPrecaching,
-		"cache3": utils.MetaPrecaching,
+		utils.CacheFilters: utils.MetaPrecaching,
 	}
 	if err := chS.V1PrecacheStatus(args, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(exp, reply) {
 		t.Errorf("expected %+v,received %+v", exp, reply)
+	}
+	args.CacheIDs = []string{}
+	if err := chS.V1PrecacheStatus(args, &reply); err == nil {
+		t.Error(err)
 	}
 }
 
@@ -996,4 +999,25 @@ func TestCachesGetWithRemote(t *testing.T) {
 			t.Errorf("expected %v,received %v", utils.ErrNotFound, err)
 		}
 	*/
+}
+
+func TestV1LoadCache(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	tmpDm := dm
+	defer func() {
+		dm = tmpDm
+	}()
+	attr := &utils.AttrReloadCacheWithAPIOpts{
+		Tenant:                  "cgrates.org",
+		FilterIDs:               []string{"cgrates.org:FLTR_ID"},
+		AttributeFilterIndexIDs: []string{"cgrates.org:*any:*string:*req.Account:1001", "cgrates.org:*any:*string:*req.Account:1002"},
+	}
+	chS := NewCacheS(cfg, dm, nil)
+	var reply string
+	if err := chS.V1LoadCache(attr, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("reply should  be %v", utils.OK)
+	}
+
 }

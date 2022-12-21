@@ -20,6 +20,7 @@ package engine
 
 import (
 	"bytes"
+	"fmt"
 	"log"
 	"os"
 	"reflect"
@@ -264,13 +265,19 @@ func TestATExecute22(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	tmp := Cache
 	tmpDm := dm
-	utils.Logger.SetLogLevel(4)
-	utils.Logger.SetSyslog(nil)
-	buf := new(bytes.Buffer)
-	log.SetOutput(buf)
-	defer func() {
+	setLogger := func(buf *bytes.Buffer) {
+		utils.Logger.SetLogLevel(4)
+		utils.Logger.SetSyslog(nil)
+		log.SetOutput(buf)
+	}
+	removeLogger := func() {
 		utils.Logger.SetLogLevel(0)
 		log.SetOutput(os.Stderr)
+	}
+	buf := new(bytes.Buffer)
+	setLogger(buf)
+	defer func() {
+		removeLogger()
 		Cache = tmp
 		SetDataStorage(tmpDm)
 		config.SetCgrConfig(config.NewDefaultCGRConfig())
@@ -290,7 +297,6 @@ func TestATExecute22(t *testing.T) {
 		ThresholdType:  utils.TriggerMinEventCounter,
 		ThresholdValue: 10,
 		Recurrent:      true,
-		MinSleep:       10 * time.Minute,
 	}
 	ub := &Account{
 		ID:             "acc_id",
@@ -314,6 +320,21 @@ func TestATExecute22(t *testing.T) {
 			},
 		},
 	}, []string{}, true, utils.NonTransactional)
+	db.db.Set(utils.CacheActions, "actID2", Actions{
+		{
+			Id:               "cgrates.org:id1",
+			ActionType:       utils.MetaResetStatQueue,
+			ExpirationString: "*yearly",
+			Balance: &BalanceFilter{
+				Type:  utils.StringPointer("test"),
+				Value: &utils.ValueFormula{Static: 1.1},
+			},
+			Filters: []string{
+				"fltr",
+			},
+		},
+	}, []string{}, true, utils.NonTransactional)
+
 	fltrNew := &Filter{
 		ID:     "fltr",
 		Tenant: "cgrates.org",
@@ -335,5 +356,26 @@ func TestATExecute22(t *testing.T) {
 	expLog := ` not available, aborting execution!`
 	if rcvLog := buf.String(); !strings.Contains(rcvLog, expLog) {
 		t.Errorf("expected %v,received%v", expLog, rcvLog)
+	}
+	removeLogger()
+	buf2 := new(bytes.Buffer)
+	setLogger(buf2)
+	at.ActionsID = "actID2"
+	expLog = `Error executing action`
+	if err := at.Execute(ub, fltr); err != nil {
+		t.Error(err)
+	} else if rcvLog := buf2.String(); !strings.Contains(rcvLog, expLog) {
+		t.Errorf("Logger %v doesn't contain %v", rcvLog, expLog)
+	}
+
+	ub.Disabled = true
+	if err := at.Execute(ub, fltr); err == nil || err.Error() != fmt.Sprintf("User %s is disabled and there are triggers in action!", ub.ID) {
+		t.Error(err)
+	}
+	ub.Disabled = false
+	at.MinSleep = 10 * time.Minute
+	at.LastExecutionTime = time.Now().Add(-5 * time.Minute)
+	if err := at.Execute(ub, fltr); err != nil {
+		t.Error(err)
 	}
 }
