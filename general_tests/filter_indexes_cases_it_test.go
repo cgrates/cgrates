@@ -173,7 +173,20 @@ var (
 		testFilterIndexesCasesOverwriteSupplierProfiles,
 		testFilterIndexesCasesSuppliersGetIndexesAfterOverwrite,
 		testFilterIndexesCasesSuppliersGetReverseIndexesAfterOverwrite,
+
 		// STATS
+		testFilterIndexesCasesSetStatQueueWithFltr,
+		testFilterIndexesCasesGetStatQueuesIndexes,
+		testFilterIndexesCasesOverwriteFilterForStatQueues,
+		testFilterIndexesCasesGetStatQueuesIndexesChanged,
+
+		testFilterIndexesCasesGetReverseFilterIndexes5,
+		testFilterIndexesCasesRemoveStatQueuesProfile,
+		testFilterIndexesCasesGetIndexesAfterRemove5,
+		testFilterIndexesCasesGetReverseIndexesAfterRemove5,
+		testFilterIndexesCasesOverwriteStatQueueProfiles,
+		testFilterIndexesCasesStatQueuesGetIndexesAfterOverwrite,
+		testFilterIndexesCasesStatQueuesGetReverseIndexesAfterOverwrite,
 
 		testFilterIndexesCasesStopEngine,
 	}
@@ -2924,6 +2937,573 @@ func testFilterIndexesCasesSuppliersGetReverseIndexesAfterOverwrite(t *testing.T
 		"*charger_filter_indexes:ChrgerIndexable",
 		"*resource_filter_indexes:RESOURCE_FLTR1",
 		"*resource_filter_indexes:RESOURCE_FLTR3",
+		"*threshold_filter_indexes:TEST_PROFILE2",
+	}
+	sort.Strings(expectedIndexes)
+	if err := fIdxCasesRPC.Call(utils.APIerSv1GetFilterIndexes, arg, &reply); err != nil {
+		t.Error(err)
+	} else if sort.Strings(reply); !reflect.DeepEqual(expectedIndexes, reply) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expectedIndexes), utils.ToJSON(reply))
+	}
+
+	arg = &v1.AttrGetFilterIndexes{
+		Tenant:   "cgrates.org:FLTR_Charger12312",
+		ItemType: utils.CacheReverseFilterIndexes,
+	}
+	expectedIndexes = []string{
+		"*charger_filter_indexes:ChrgerIndexable",
+		"*resource_filter_indexes:RESOURCE_FLTR1",
+		"*supplier_filter_indexes:Supplier2",
+		"*supplier_filter_indexes:Supplier4",
+		"*threshold_filter_indexes:TEST_PROFILE2",
+	}
+	sort.Strings(expectedIndexes)
+	if err := fIdxCasesRPC.Call(utils.APIerSv1GetFilterIndexes, arg, &reply); err != nil {
+		t.Error(err)
+	} else if sort.Strings(reply); !reflect.DeepEqual(expectedIndexes, reply) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expectedIndexes), utils.ToJSON(reply))
+	}
+}
+
+func testFilterIndexesCasesSetStatQueueWithFltr(t *testing.T) {
+	stat1 := &engine.StatQueueWithCache{
+		StatQueueProfile: &engine.StatQueueProfile{
+			Tenant: "cgrates.org",
+			ID:     "Stats1",
+			FilterIDs: []string{
+				"FLTR_Charger",
+			},
+			QueueLength: 10,
+			TTL:         time.Duration(10) * time.Second,
+			Metrics: []*engine.MetricWithFilters{
+				{
+					MetricID: utils.MetaACD,
+				},
+				{
+					MetricID: utils.MetaTCD,
+				},
+			},
+			ThresholdIDs: []string{"*none"},
+			Weight:       20,
+			MinItems:     1,
+		},
+	}
+	stat2 := &engine.StatQueueWithCache{
+		StatQueueProfile: &engine.StatQueueProfile{
+			Tenant: "cgrates.org",
+			ID:     "Stats2",
+			FilterIDs: []string{
+				"FLTR_Charger4564",
+				"FLTR_Charger",
+				"FLTR_Charger12312",
+			},
+			QueueLength: 10,
+			TTL:         time.Duration(10) * time.Second,
+			Metrics: []*engine.MetricWithFilters{
+				{
+					MetricID: utils.MetaACD,
+				},
+				{
+					MetricID: utils.MetaTCD,
+				},
+			},
+			ThresholdIDs: []string{"*none"},
+			Weight:       20,
+			MinItems:     1,
+		},
+	}
+	stat3 := &engine.StatQueueWithCache{
+		StatQueueProfile: &engine.StatQueueProfile{
+			Tenant: "cgrates.org",
+			ID:     "Stats3",
+			FilterIDs: []string{
+				"FLTR_Charger12312",
+				"*prefix:~*req.Cost:4",
+				"FLTR_Charger",
+			},
+			QueueLength: 10,
+			TTL:         time.Duration(10) * time.Second,
+			Metrics: []*engine.MetricWithFilters{
+				{
+					MetricID: utils.MetaACD,
+				},
+				{
+					MetricID: utils.MetaTCD,
+				},
+			},
+			ThresholdIDs: []string{"*none"},
+			Weight:       20,
+			MinItems:     1,
+		},
+	}
+	stat4 := &engine.StatQueueWithCache{
+		StatQueueProfile: &engine.StatQueueProfile{
+			Tenant:      "cgrates.org",
+			ID:          "Stats4",
+			FilterIDs:   []string{},
+			QueueLength: 10,
+			TTL:         time.Duration(10) * time.Second,
+			Metrics: []*engine.MetricWithFilters{
+				{
+					MetricID: utils.MetaACD,
+				},
+				{
+					MetricID: utils.MetaTCD,
+				},
+			},
+			ThresholdIDs: []string{"*none"},
+			Weight:       20,
+			MinItems:     1,
+		},
+	}
+	var reply string
+	if err := fIdxCasesRPC.Call(utils.APIerSv1SetStatQueueProfile, stat1, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned", reply)
+	}
+	if err := fIdxCasesRPC.Call(utils.APIerSv1SetStatQueueProfile, stat2, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned", reply)
+	}
+	if err := fIdxCasesRPC.Call(utils.APIerSv1SetStatQueueProfile, stat3, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned", reply)
+	}
+	if err := fIdxCasesRPC.Call(utils.APIerSv1SetStatQueueProfile, stat4, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned", reply)
+	}
+}
+
+func testFilterIndexesCasesGetStatQueuesIndexes(t *testing.T) {
+	arg := &v1.AttrGetFilterIndexes{
+		Tenant:   "cgrates.org",
+		ItemType: utils.MetaStats,
+	}
+	expectedIndexes := []string{
+		// Stats1
+		"*string:~*req.Bank:BoA:Stats1",
+		"*string:~*req.Bank:CEC:Stats1",
+		"*prefix:~*req.Customer:11:Stats1",
+		"*prefix:~*req.Customer:22:Stats1",
+
+		// Stats2
+		"*string:~*req.Bank:BoA:Stats2",
+		"*string:~*req.Bank:CEC:Stats2",
+		"*prefix:~*req.Customer:11:Stats2",
+		"*prefix:~*req.Customer:22:Stats2",
+		"*prefix:~*req.AnswerTime:2010:Stats2",
+		"*prefix:~*req.AnswerTime:2011:Stats2",
+		"*string:~*req.Caching:true:Stats2",
+		"*prefix:~*req.NoCall:+4332225465:Stats2",
+
+		// Stats3
+		"*prefix:~*req.AnswerTime:2010:Stats3",
+		"*prefix:~*req.AnswerTime:2011:Stats3",
+		"*string:~*req.Bank:BoA:Stats3",
+		"*string:~*req.Bank:CEC:Stats3",
+		"*prefix:~*req.Customer:11:Stats3",
+		"*prefix:~*req.Customer:22:Stats3",
+		"*prefix:~*req.Cost:4:Stats3",
+
+		// Stats4
+		"*none:*any:*any:Stats4",
+	}
+	sort.Strings(expectedIndexes)
+	var reply []string
+	if err := fIdxCasesRPC.Call(utils.APIerSv1GetFilterIndexes, arg, &reply); err != nil {
+		t.Error(err)
+	} else if sort.Strings(reply); !reflect.DeepEqual(expectedIndexes, reply) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expectedIndexes), utils.ToJSON(reply))
+	}
+}
+
+func testFilterIndexesCasesOverwriteFilterForStatQueues(t *testing.T) {
+	// FLTR_Charger, FLTR_Charger12312 and FLTR_Charger4564 will be changed
+	filter1 = &v1.FilterWithCache{
+		Filter: &engine.Filter{
+			Tenant: "cgrates.org",
+			ID:     "FLTR_Charger",
+			Rules: []*engine.FilterRule{
+				{
+					Type:    utils.MetaString,
+					Element: "~*req.RatingPlan",
+					Values:  []string{"RP1"},
+				},
+				{
+					Type:    utils.MetaPrefix,
+					Element: "~*req.Subject",
+					Values:  []string{"1001", "1002"},
+				},
+			},
+		},
+	}
+	filter2 = &v1.FilterWithCache{
+		Filter: &engine.Filter{
+			Tenant: "cgrates.org",
+			ID:     "FLTR_Charger12312",
+			Rules: []*engine.FilterRule{
+				{
+					Type:    utils.MetaString,
+					Element: "~*req.Category",
+					Values:  []string{"call"},
+				},
+				{
+					Type:    utils.MetaGreaterThan,
+					Element: "~*req.ProcessRuns",
+					Values:  []string{"2"},
+				},
+			},
+		},
+	}
+	filter3 := &v1.FilterWithCache{
+		Filter: &engine.Filter{
+			Tenant: "cgrates.org",
+			ID:     "FLTR_Charger4564",
+			Rules: []*engine.FilterRule{
+				{
+					Type:    utils.MetaNotEmpty,
+					Element: "~*req.Destintion",
+					Values:  []string{},
+				},
+			},
+		},
+	}
+	var result string
+	if err := fIdxCasesRPC.Call(utils.APIerSv1SetFilter, filter1, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+	if err := fIdxCasesRPC.Call(utils.APIerSv1SetFilter, filter2, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+	if err := fIdxCasesRPC.Call(utils.APIerSv1SetFilter, filter3, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+}
+
+func testFilterIndexesCasesGetStatQueuesIndexesChanged(t *testing.T) {
+	arg := &v1.AttrGetFilterIndexes{
+		Tenant:   "cgrates.org",
+		ItemType: utils.MetaStats,
+	}
+	expectedIndexes := []string{
+		// Stats1
+		"*string:~*req.RatingPlan:RP1:Stats1",
+		"*prefix:~*req.Subject:1001:Stats1",
+		"*prefix:~*req.Subject:1002:Stats1",
+
+		// Stats2
+		"*string:~*req.RatingPlan:RP1:Stats2",
+		"*prefix:~*req.Subject:1001:Stats2",
+		"*prefix:~*req.Subject:1002:Stats2",
+		"*string:~*req.Category:call:Stats2",
+
+		// Stats3
+		"*string:~*req.Category:call:Stats3",
+		"*prefix:~*req.Cost:4:Stats3",
+		"*string:~*req.RatingPlan:RP1:Stats3",
+		"*prefix:~*req.Subject:1001:Stats3",
+		"*prefix:~*req.Subject:1002:Stats3",
+
+		// Stats4
+		"*none:*any:*any:Stats4",
+	}
+	sort.Strings(expectedIndexes)
+	var reply []string
+	if err := fIdxCasesRPC.Call(utils.APIerSv1GetFilterIndexes, arg, &reply); err != nil {
+		t.Error(err)
+	} else if sort.Strings(reply); !reflect.DeepEqual(expectedIndexes, reply) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expectedIndexes), utils.ToJSON(reply))
+	}
+}
+
+func testFilterIndexesCasesGetReverseFilterIndexes5(t *testing.T) {
+	arg := &v1.AttrGetFilterIndexes{
+		Tenant:   "cgrates.org:FLTR_Charger",
+		ItemType: utils.CacheReverseFilterIndexes,
+	}
+	expectedIndexes := []string{
+		"*charger_filter_indexes:ChrgerIndexable",
+		"*dispatcher_filter_indexes:Dsp2",
+		"*dispatcher_filter_indexes:Dsp4",
+		"*supplier_filter_indexes:Supplier4",
+		"*stat_filter_indexes:Stats1",
+		"*stat_filter_indexes:Stats2",
+		"*stat_filter_indexes:Stats3",
+		"*threshold_filter_indexes:TEST_PROFILE2",
+	}
+	sort.Strings(expectedIndexes)
+	var reply []string
+	if err := fIdxCasesRPC.Call(utils.APIerSv1GetFilterIndexes, arg, &reply); err != nil {
+		t.Error(err)
+	} else if sort.Strings(reply); !reflect.DeepEqual(expectedIndexes, reply) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expectedIndexes), utils.ToJSON(reply))
+	}
+
+	arg = &v1.AttrGetFilterIndexes{
+		Tenant:   "cgrates.org:FLTR_Charger4564",
+		ItemType: utils.CacheReverseFilterIndexes,
+	}
+	expectedIndexes = []string{
+		"*charger_filter_indexes:ChrgerIndexable",
+		"*resource_filter_indexes:RESOURCE_FLTR1",
+		"*resource_filter_indexes:RESOURCE_FLTR3",
+		"*stat_filter_indexes:Stats2",
+		"*threshold_filter_indexes:TEST_PROFILE2",
+	}
+	sort.Strings(expectedIndexes)
+	if err := fIdxCasesRPC.Call(utils.APIerSv1GetFilterIndexes, arg, &reply); err != nil {
+		t.Error(err)
+	} else if sort.Strings(reply); !reflect.DeepEqual(expectedIndexes, reply) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expectedIndexes), utils.ToJSON(reply))
+	}
+
+	arg = &v1.AttrGetFilterIndexes{
+		Tenant:   "cgrates.org:FLTR_Charger12312",
+		ItemType: utils.CacheReverseFilterIndexes,
+	}
+	expectedIndexes = []string{
+		"*charger_filter_indexes:ChrgerIndexable",
+		"*resource_filter_indexes:RESOURCE_FLTR1",
+		"*supplier_filter_indexes:Supplier2",
+		"*supplier_filter_indexes:Supplier4",
+		"*stat_filter_indexes:Stats2",
+		"*stat_filter_indexes:Stats3",
+		"*threshold_filter_indexes:TEST_PROFILE2",
+	}
+	sort.Strings(expectedIndexes)
+	if err := fIdxCasesRPC.Call(utils.APIerSv1GetFilterIndexes, arg, &reply); err != nil {
+		t.Error(err)
+	} else if sort.Strings(reply); !reflect.DeepEqual(expectedIndexes, reply) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expectedIndexes), utils.ToJSON(reply))
+	}
+}
+
+func testFilterIndexesCasesRemoveStatQueuesProfile(t *testing.T) {
+	var rply string
+	if err := fIdxCasesRPC.Call(utils.APIerSv1RemoveStatQueueProfile,
+		&utils.TenantIDWithCache{
+			Tenant: "cgrates.org",
+			ID:     "Stats1",
+		}, &rply); err != nil {
+		t.Error(err)
+	} else if rply != utils.OK {
+		t.Errorf("UNexpected reply returned")
+	}
+	if err := fIdxCasesRPC.Call(utils.APIerSv1RemoveStatQueueProfile,
+		&utils.TenantIDWithCache{
+			Tenant: "cgrates.org",
+			ID:     "Stats3",
+		}, &rply); err != nil {
+		t.Error(err)
+	} else if rply != utils.OK {
+		t.Errorf("UNexpected reply returned")
+	}
+}
+
+func testFilterIndexesCasesGetIndexesAfterRemove5(t *testing.T) {
+	arg := &v1.AttrGetFilterIndexes{
+		Tenant:   "cgrates.org",
+		ItemType: utils.MetaStats,
+	}
+	expectedIndexes := []string{
+		// Stats2
+		"*string:~*req.RatingPlan:RP1:Stats2",
+		"*prefix:~*req.Subject:1001:Stats2",
+		"*prefix:~*req.Subject:1002:Stats2",
+		"*string:~*req.Category:call:Stats2",
+
+		// Stats4
+		"*none:*any:*any:Stats4",
+	}
+	sort.Strings(expectedIndexes)
+	var reply []string
+	if err := fIdxCasesRPC.Call(utils.APIerSv1GetFilterIndexes, arg, &reply); err != nil {
+		t.Error(err)
+	} else if sort.Strings(reply); !reflect.DeepEqual(expectedIndexes, reply) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expectedIndexes), utils.ToJSON(reply))
+	}
+}
+
+func testFilterIndexesCasesGetReverseIndexesAfterRemove5(t *testing.T) {
+	arg := &v1.AttrGetFilterIndexes{
+		Tenant:   "cgrates.org:FLTR_Charger",
+		ItemType: utils.CacheReverseFilterIndexes,
+	}
+	expectedIndexes := []string{
+		"*charger_filter_indexes:ChrgerIndexable",
+		"*dispatcher_filter_indexes:Dsp2",
+		"*dispatcher_filter_indexes:Dsp4",
+		"*supplier_filter_indexes:Supplier4",
+		"*stat_filter_indexes:Stats2",
+		"*threshold_filter_indexes:TEST_PROFILE2",
+	}
+	sort.Strings(expectedIndexes)
+	var reply []string
+	if err := fIdxCasesRPC.Call(utils.APIerSv1GetFilterIndexes, arg, &reply); err != nil {
+		t.Error(err)
+	} else if sort.Strings(reply); !reflect.DeepEqual(expectedIndexes, reply) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expectedIndexes), utils.ToJSON(reply))
+	}
+
+	arg = &v1.AttrGetFilterIndexes{
+		Tenant:   "cgrates.org:FLTR_Charger4564",
+		ItemType: utils.CacheReverseFilterIndexes,
+	}
+	expectedIndexes = []string{
+		"*charger_filter_indexes:ChrgerIndexable",
+		"*resource_filter_indexes:RESOURCE_FLTR1",
+		"*resource_filter_indexes:RESOURCE_FLTR3",
+		"*stat_filter_indexes:Stats2",
+		"*threshold_filter_indexes:TEST_PROFILE2",
+	}
+	sort.Strings(expectedIndexes)
+	if err := fIdxCasesRPC.Call(utils.APIerSv1GetFilterIndexes, arg, &reply); err != nil {
+		t.Error(err)
+	} else if sort.Strings(reply); !reflect.DeepEqual(expectedIndexes, reply) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expectedIndexes), utils.ToJSON(reply))
+	}
+
+	arg = &v1.AttrGetFilterIndexes{
+		Tenant:   "cgrates.org:FLTR_Charger12312",
+		ItemType: utils.CacheReverseFilterIndexes,
+	}
+	expectedIndexes = []string{
+		"*charger_filter_indexes:ChrgerIndexable",
+		"*resource_filter_indexes:RESOURCE_FLTR1",
+		"*supplier_filter_indexes:Supplier2",
+		"*supplier_filter_indexes:Supplier4",
+		"*stat_filter_indexes:Stats2",
+		"*threshold_filter_indexes:TEST_PROFILE2",
+	}
+	sort.Strings(expectedIndexes)
+	if err := fIdxCasesRPC.Call(utils.APIerSv1GetFilterIndexes, arg, &reply); err != nil {
+		t.Error(err)
+	} else if sort.Strings(reply); !reflect.DeepEqual(expectedIndexes, reply) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expectedIndexes), utils.ToJSON(reply))
+	}
+}
+
+func testFilterIndexesCasesOverwriteStatQueueProfiles(t *testing.T) {
+	stat2 := &engine.StatQueueWithCache{
+		StatQueueProfile: &engine.StatQueueProfile{
+			Tenant: "cgrates.org",
+			ID:     "Stats2",
+			FilterIDs: []string{
+				"FLTR_Charger",
+			},
+			QueueLength: 10,
+			TTL:         time.Duration(10) * time.Second,
+			Metrics: []*engine.MetricWithFilters{
+				{
+					MetricID: utils.MetaACD,
+				},
+				{
+					MetricID: utils.MetaTCD,
+				},
+			},
+			ThresholdIDs: []string{"*none"},
+			Weight:       20,
+			MinItems:     1,
+		},
+	}
+	stat4 := &engine.StatQueueWithCache{
+		StatQueueProfile: &engine.StatQueueProfile{
+			Tenant: "cgrates.org",
+			ID:     "Stats4",
+			FilterIDs: []string{
+				"FLTR_Charger4564",
+			},
+			QueueLength: 10,
+			TTL:         time.Duration(10) * time.Second,
+			Metrics: []*engine.MetricWithFilters{
+				{
+					MetricID: utils.MetaACD,
+				},
+				{
+					MetricID: utils.MetaTCD,
+				},
+			},
+			ThresholdIDs: []string{"*none"},
+			Weight:       20,
+			MinItems:     1,
+		},
+	}
+	var reply string
+	if err := fIdxCasesRPC.Call(utils.APIerSv1SetStatQueueProfile, stat2, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned", reply)
+	}
+	if err := fIdxCasesRPC.Call(utils.APIerSv1SetStatQueueProfile, stat4, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned", reply)
+	}
+}
+
+func testFilterIndexesCasesStatQueuesGetIndexesAfterOverwrite(t *testing.T) {
+	arg := &v1.AttrGetFilterIndexes{
+		Tenant:   "cgrates.org",
+		ItemType: utils.MetaStats,
+	}
+	expectedIndexes := []string{
+		// Stats2
+		"*string:~*req.RatingPlan:RP1:Stats2",
+		"*prefix:~*req.Subject:1001:Stats2",
+		"*prefix:~*req.Subject:1002:Stats2",
+
+		// Stats4 nothing
+	}
+	sort.Strings(expectedIndexes)
+	var reply []string
+	if err := fIdxCasesRPC.Call(utils.APIerSv1GetFilterIndexes, arg, &reply); err != nil {
+		t.Error(err)
+	} else if sort.Strings(reply); !reflect.DeepEqual(expectedIndexes, reply) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expectedIndexes), utils.ToJSON(reply))
+	}
+}
+
+func testFilterIndexesCasesStatQueuesGetReverseIndexesAfterOverwrite(t *testing.T) {
+	arg := &v1.AttrGetFilterIndexes{
+		Tenant:   "cgrates.org:FLTR_Charger",
+		ItemType: utils.CacheReverseFilterIndexes,
+	}
+	expectedIndexes := []string{
+		"*charger_filter_indexes:ChrgerIndexable",
+		"*dispatcher_filter_indexes:Dsp2",
+		"*dispatcher_filter_indexes:Dsp4",
+		"*supplier_filter_indexes:Supplier4",
+		"*stat_filter_indexes:Stats2",
+		"*threshold_filter_indexes:TEST_PROFILE2",
+	}
+	sort.Strings(expectedIndexes)
+	var reply []string
+	if err := fIdxCasesRPC.Call(utils.APIerSv1GetFilterIndexes, arg, &reply); err != nil {
+		t.Error(err)
+	} else if sort.Strings(reply); !reflect.DeepEqual(expectedIndexes, reply) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expectedIndexes), utils.ToJSON(reply))
+	}
+
+	arg = &v1.AttrGetFilterIndexes{
+		Tenant:   "cgrates.org:FLTR_Charger4564",
+		ItemType: utils.CacheReverseFilterIndexes,
+	}
+	expectedIndexes = []string{
+		"*charger_filter_indexes:ChrgerIndexable",
+		"*resource_filter_indexes:RESOURCE_FLTR1",
+		"*resource_filter_indexes:RESOURCE_FLTR3",
+		"*stat_filter_indexes:Stats4",
 		"*threshold_filter_indexes:TEST_PROFILE2",
 	}
 	sort.Strings(expectedIndexes)
