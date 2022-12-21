@@ -1950,7 +1950,6 @@ func (dm *DataManager) SetSupplierProfile(supp *SupplierProfile, withIndex bool)
 	if withIndex {
 		if oldSup != nil {
 			var needsRemove bool
-			utils.Logger.Crit(fmt.Sprintf("verifica needsRemove pt supp.ID: %v si oldSup.FilterIDs: %v", oldSup.ID, oldSup.FilterIDs))
 			for _, fltrID := range oldSup.FilterIDs {
 				if !utils.IsSliceMember(supp.FilterIDs, fltrID) {
 					needsRemove = true
