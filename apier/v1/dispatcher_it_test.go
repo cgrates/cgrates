@@ -25,6 +25,7 @@ import (
 	"net/rpc"
 	"path"
 	"reflect"
+	"sort"
 	"testing"
 	"time"
 
@@ -200,8 +201,12 @@ func testDispatcherSUpdateDispatcherProfile(t *testing.T) {
 		&utils.TenantID{Tenant: "cgrates.org", ID: "Dsp1"},
 		&dsp); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(dispatcherProfile.DispatcherProfile, dsp) {
-		t.Errorf("Expecting : %+v, received: %+v", dispatcherProfile.DispatcherProfile, dsp)
+	} else {
+		sort.Strings(dispatcherProfile.DispatcherProfile.Subsystems)
+		sort.Strings(dsp.Subsystems)
+		if !reflect.DeepEqual(dispatcherProfile.DispatcherProfile, dsp) {
+			t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(dispatcherProfile.DispatcherProfile), utils.ToJSON(dsp))
+		}
 	}
 }
 

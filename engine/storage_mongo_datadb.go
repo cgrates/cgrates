@@ -1626,6 +1626,12 @@ func (ms *MongoStorage) GetFilterIndexesDrv(cacheID, itemIDPrefix, filterType st
 			continue
 		}
 		keys := strings.Split(res.Key, ":")
+		isReverse := strings.HasPrefix(keys[0], utils.ReverseFilterIndexes)
+		if isReverse {
+			indexKey := utils.ConcatenatedKey(keys[1], keys[2])
+			indexes[indexKey] = utils.StringMapFromSlice(res.Value)
+			continue
+		}
 		indexKey := utils.ConcatenatedKey(keys[1], keys[2], keys[3])
 		//check here if itemIDPrefix has context
 		if len(strings.Split(itemIDPrefix, ":")) == 2 {
