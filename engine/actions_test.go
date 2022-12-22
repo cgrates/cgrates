@@ -3057,9 +3057,15 @@ func TestActionSetDDestinations(t *testing.T) {
 }
 
 func TestActionPublishAccount(t *testing.T) {
+	utils.Logger.SetLogLevel(4)
+	utils.Logger.SetSyslog(nil)
+	buf := new(bytes.Buffer)
+	log.SetOutput(buf)
 	cfg := config.NewDefaultCGRConfig()
 	tmpCfg := cfg
 	defer func() {
+		utils.Logger.SetLogLevel(0)
+		log.SetOutput(os.Stderr)
 		config.SetCgrConfig(tmpCfg)
 		SetConnManager(nil)
 	}()
@@ -3070,11 +3076,11 @@ func TestActionPublishAccount(t *testing.T) {
 		calls: map[string]func(args interface{}, reply interface{}) error{
 			utils.ThresholdSv1ProcessEvent: func(args, reply interface{}) error {
 				*reply.(*[]string) = []string{"*thr"}
-				return nil
+				return errors.New("Can't publish!")
 			},
 			utils.StatSv1ProcessEvent: func(args, reply interface{}) error {
 				*reply.(*[]string) = []string{"*stat"}
-				return nil
+				return errors.New("Can't publish!")
 			},
 		},
 	}
@@ -3101,7 +3107,6 @@ func TestActionPublishAccount(t *testing.T) {
 		},
 		BalanceMap: map[string]Balances{
 			utils.MetaMonetary: {
-
 				&Balance{Value: 10,
 					DestinationIDs: utils.StringMap{
 
@@ -3145,8 +3150,14 @@ func TestActionPublishAccount(t *testing.T) {
 			balanceValue: 10,
 		},
 	}
+	expLog := ` with ThresholdS`
+	expLog2 := `with StatS.`
 	if err := publishAccount(ub, a, acs, nil, nil); err != nil {
 		t.Errorf("received %v", err)
+	} else if rcvLog := buf.String(); !strings.Contains(rcvLog, expLog) {
+		t.Errorf("Logger %v doesn't contain %v", rcvLog, expLog)
+	} else if rcvLog := buf.String(); !strings.Contains(rcvLog, expLog2) {
+		t.Errorf("Logger %v doesn't contain %v", rcvLog, expLog2)
 	}
 }
 
@@ -3446,7 +3457,7 @@ func TestResetAccountCDRSuccesful(t *testing.T) {
 func TestRemoveSessionCost(t *testing.T) {
 	tmp := Cache
 	tmpCdr := cdrStorage
-	tmpDm := dm
+
 	utils.Logger.SetLogLevel(4)
 	utils.Logger.SetSyslog(nil)
 	buf := new(bytes.Buffer)
@@ -3456,26 +3467,15 @@ func TestRemoveSessionCost(t *testing.T) {
 		log.SetOutput(os.Stderr)
 		Cache = tmp
 		cdrStorage = tmpCdr
-		dm = tmpDm
+
 	}()
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	cfg.DataDbCfg().Items = map[string]*config.ItemOpt{
-		utils.CacheFilters: {
-			Limit:     3,
-			Replicate: true,
-		},
-		utils.CacheSessionCostsTBL: {
-			Limit: 2,
-		},
-	}
-	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	dm := NewDataManager(db, cfg.CacheCfg(), nil)
-	SetDataStorage(dm)
+
 	action := &Action{
 		ExtraParameters: "*acnt.BalanceID;*act.ActionID",
 	}
-	db.db.Set(utils.CacheFilters, utils.ConcatenatedKey(cfg.GeneralCfg().DefaultTenant, "*acnt.BalanceID"), &Filter{
+	Cache.Set(utils.CacheFilters, utils.ConcatenatedKey(cfg.GeneralCfg().DefaultTenant, "*acnt.BalanceID"), &Filter{
 		Tenant: "tnt",
 		Rules: []*FilterRule{
 			{
@@ -3484,17 +3484,7 @@ func TestRemoveSessionCost(t *testing.T) {
 				Element: utils.MetaScPrefix + utils.CGRID},
 		},
 	}, []string{"grpId"}, true, utils.NonTransactional)
-	db.db.Set(utils.CacheFilters, utils.ConcatenatedKey(cfg.GeneralCfg().DefaultTenant, "*act.ActionID"), &Filter{
-		Tenant: "tnt",
-		Rules: []*FilterRule{
-			{
-				Values:  []string{"val1,vla2"},
-				Type:    utils.MetaString,
-				Element: utils.MetaScPrefix + utils.CGRID,
-			},
-		},
-	}, []string{"grpId"}, true, utils.NonTransactional)
-	SetCdrStorage(db)
+
 	expLog := `for filter`
 	if err := removeSessionCosts(nil, action, nil, nil, nil); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
@@ -3952,6 +3942,39 @@ func TestTransferMonetaryDefaultAction(t *testing.T) {
 	ub := &Account{}
 	if err := transferMonetaryDefaultAction(ub, a, acs, nil, "data"); err == nil || err != utils.ErrNotFound {
 		t.Errorf("expected <%v>,received <%v>", utils.ErrNotFound, err)
+	}
+}
+
+func TestRemoveBalanceActionErr(t *testing.T) {
+	acc := &Account{
+		ID: "vdf:minu",
+		BalanceMap: map[string]Balances{
+			utils.MetaMonetary: {&Balance{Value: 50}},
+			utils.MetaVoice: {
+				&Balance{Value: 200 * float64(time.Second),
+					ExpirationDate: time.Date(2022, 11, 22, 2, 0, 0, 0, time.UTC),
+					DestinationIDs: utils.NewStringMap("NAT"), Weight: 10},
+				&Balance{Value: 100 * float64(time.Second),
+					DestinationIDs: utils.NewStringMap("RET"), Weight: 20},
+			},
+		},
+	}
+	acs := &Action{
+		Balance: &BalanceFilter{},
+	}
+	if err := removeBalanceAction(nil, acs, nil, nil, nil); err == nil {
+		t.Error(err)
+	}
+	if err := removeBalanceAction(acc, acs, nil, nil, nil); err == nil {
+		t.Error(err)
+	}
+	acs.Balance = &BalanceFilter{
+		ExpirationDate: utils.TimePointer(time.Date(2022, 11, 12, 2, 0, 0, 0, time.UTC)),
+		Type:           utils.StringPointer(utils.MetaMonetary),
+		Value:          &utils.ValueFormula{Static: 10},
+	}
+	if err := removeBalanceAction(acc, acs, nil, nil, nil); err == nil || err != utils.ErrNotFound {
+		t.Error(err)
 	}
 
 }

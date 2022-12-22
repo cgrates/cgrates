@@ -1676,7 +1676,7 @@ func TestV2StoreSessionCost2(t *testing.T) {
 				Charges: []*ChargingInterval{
 					{
 
-						RatingID: "acc_id",
+						RatingID: utils.MetaRounding,
 						Increments: []*ChargingIncrement{
 							{
 
@@ -1698,7 +1698,7 @@ func TestV2StoreSessionCost2(t *testing.T) {
 						cost:           utils.Float64Pointer(38),
 					},
 					{
-						RatingID: "acc_id2",
+						RatingID: utils.MetaRounding,
 
 						Increments: []*ChargingIncrement{
 							{
@@ -1730,10 +1730,10 @@ func TestV2StoreSessionCost2(t *testing.T) {
 
 				Accounting: Accounting{
 					"acc_id": &BalanceCharge{
-						RatingID: "acc_id",
+						RatingID: utils.MetaRounding,
 					},
 					"acc_id2": &BalanceCharge{
-						RatingID: "acc_id2",
+						RatingID: utils.MetaRounding,
 					},
 				},
 				RatingFilters: RatingFilters{
@@ -1753,7 +1753,7 @@ func TestV2StoreSessionCost2(t *testing.T) {
 				Rates:   ChargedRates{},
 				Timings: ChargedTimings{},
 				Rating: Rating{
-					"acc_id": &RatingUnit{
+					utils.MetaRounding: &RatingUnit{
 						ConnectFee:       21,
 						RoundingMethod:   "method",
 						RoundingDecimals: 3,
@@ -1761,16 +1761,6 @@ func TestV2StoreSessionCost2(t *testing.T) {
 						MaxCostStrategy:  "sr",
 						RatesID:          "rates",
 						RatingFiltersID:  "filtersid",
-					},
-
-					"acc_id2": &RatingUnit{
-						ConnectFee:       21,
-						RoundingMethod:   "method",
-						RoundingDecimals: 3,
-						MaxCost:          22,
-						MaxCostStrategy:  "sr",
-						RatesID:          "rates",
-						RatingFiltersID:  "ratefilter",
 					},
 				},
 			},
