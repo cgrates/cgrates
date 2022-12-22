@@ -19,8 +19,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"bytes"
 	"errors"
 	"reflect"
+	"regexp"
+	"strings"
 	"testing"
 	"time"
 
@@ -1239,5 +1242,317 @@ func TestCacheSGetPrecacheChannel(t *testing.T) {
 	} else if exp != rcv {
 		t.Errorf("Expected <%v>, Received <%v>", exp, rcv)
 	}
+
+}
+
+func TestCacheSV1PrecacheStatusDefault(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+
+	args := &utils.AttrCacheIDsWithAPIOpts{
+		APIOpts: map[string]interface{}{
+			utils.MetaSubsys: utils.MetaChargers,
+		},
+		CacheIDs: []string{},
+		Tenant:   "cgrates.org",
+	}
+
+	cacheS := NewCacheS(cfg, dm, connMgr, nil)
+
+	expArgs := &utils.AttrCacheIDsWithAPIOpts{
+		APIOpts: map[string]interface{}{
+			utils.MetaSubsys: utils.MetaChargers,
+		},
+		CacheIDs: []string{},
+		Tenant:   "cgrates.org",
+	}
+	expArgs.CacheIDs = utils.CachePartitions.AsSlice()
+	pCacheStatus := make(map[string]string)
+	for _, cacheID := range expArgs.CacheIDs {
+		pCacheStatus[cacheID] = utils.MetaPrecaching
+	}
+
+	exp := pCacheStatus
+
+	var reply map[string]string
+	if err := cacheS.V1PrecacheStatus(context.Background(), args, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(reply, exp) {
+		t.Errorf("Expected \n<%v>,\nReceived \n<%v>", exp, reply)
+	}
+
+}
+
+func TestCacheSV1PrecacheStatusErrUnknownCacheID(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+
+	args := &utils.AttrCacheIDsWithAPIOpts{
+		APIOpts: map[string]interface{}{
+			utils.MetaSubsys: utils.MetaChargers,
+		},
+		CacheIDs: []string{"Inproper ID"},
+		Tenant:   "cgrates.org",
+	}
+
+	cacheS := NewCacheS(cfg, dm, connMgr, nil)
+
+	expErr := "unknown cacheID: Inproper ID"
+	var reply map[string]string
+	if err := cacheS.V1PrecacheStatus(context.Background(), args, &reply); err == nil || err.Error() != expErr {
+		t.Errorf("Expected error <%v>, error received <%v>", expErr, err)
+	}
+
+}
+
+func TestCacheSV1PrecacheStatusMetaReady(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+
+	args := &utils.AttrCacheIDsWithAPIOpts{
+		APIOpts: map[string]interface{}{
+			utils.MetaSubsys: utils.MetaChargers,
+		},
+		CacheIDs: []string{utils.MetaAccounts},
+		Tenant:   "cgrates.org",
+	}
+
+	cacheS := NewCacheS(cfg, dm, connMgr, nil)
+
+	if err := Cache.Set(context.Background(), utils.MetaAccounts, "itemId", "valinterface", nil, true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+
+	go func() {
+		cacheS.GetPrecacheChannel(utils.MetaAccounts) <- struct{}{}
+	}()
+	time.Sleep(10 * time.Millisecond)
+
+	pCacheStatus := make(map[string]string)
+	pCacheStatus[utils.MetaAccounts] = utils.MetaReady
+
+	exp := pCacheStatus
+	var reply map[string]string
+	if err := cacheS.V1PrecacheStatus(context.Background(), args, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(reply, exp) {
+		t.Errorf("Expected \n<%v>,\nReceived \n<%v>", exp, reply)
+	}
+
+}
+
+func TestCacheSPrecachePartitions(t *testing.T) {
+
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	cfg.CacheCfg().Partitions = map[string]*config.CacheParamCfg{
+		utils.CacheAccounts: {
+			Precache: false,
+		},
+		utils.MetaAttributeProfiles: {
+			Precache: true,
+		},
+	}
+	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+
+	cacheS := NewCacheS(cfg, dm, connMgr, nil)
+
+	atrPrfl := &AttributeProfile{
+		Tenant: utils.CGRateSorg,
+		ID:     "TEST_ATTRIBUTES_TEST",
+		Attributes: []*Attribute{
+			{
+				Path:  "*opts.RateSProfile",
+				Type:  utils.MetaConstant,
+				Value: config.NewRSRParsersMustCompile("RP_2", utils.InfieldSep),
+			},
+		},
+		Blockers: utils.DynamicBlockers{
+			{
+				Blocker: false,
+			},
+		},
+	}
+	if err := dm.SetAttributeProfile(context.Background(), atrPrfl, true); err != nil {
+		t.Error(err)
+	}
+	if _, err := dm.GetAttributeProfile(context.Background(), utils.CGRateSorg, "TEST_ATTRIBUTES_TEST", true, true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+	cacheS.Precache(context.Background(), func() {})
+	time.Sleep(10 * time.Millisecond)
+
+	if rcv, ok := Cache.Get(utils.CacheAttributeProfiles, "cgrates.org:TEST_ATTRIBUTES_TEST"); !ok {
+		t.Errorf("Cache.Get did not receive ok, received <%v>", rcv)
+	} else if !reflect.DeepEqual(rcv, atrPrfl) {
+		t.Errorf("Expected rcv <%v>, Received <%v>", atrPrfl, rcv)
+	}
+
+}
+
+func TestCacheSPrecacheErr(t *testing.T) {
+
+	tmp := Cache
+	tmpLog := utils.Logger
+	defer func() {
+		Cache = tmp
+		utils.Logger = tmpLog
+	}()
+
+	Cache.Clear(nil)
+
+	buf := new(bytes.Buffer)
+	utils.Logger = utils.NewStdLoggerWithWriter(buf, "", 7)
+
+	args := &utils.ArgCacheReplicateSet{
+		CacheID: utils.CacheAccounts,
+		ItemID:  "itemID",
+		Value: &utils.CachedRPCResponse{
+			Result: "reply",
+			Error:  nil},
+	}
+	cfg := config.NewDefaultCGRConfig()
+	cfg.CacheCfg().Partitions = map[string]*config.CacheParamCfg{
+		args.CacheID: {
+			Precache: true,
+		},
+	}
+
+	cacheS := NewCacheS(cfg, nil, connMgr, nil)
+
+	cacheS.Precache(context.Background(), func() {})
+	time.Sleep(10 * time.Millisecond)
+	expErr := "<CacheS> precaching cacheID <*accounts>, got error: NO_DATABASE_CONNECTION"
+
+	if rcvTxt := buf.String(); !strings.Contains(rcvTxt, expErr) {
+		t.Errorf("Expected <%v>, Received <%v>", expErr, rcvTxt)
+	}
+
+	buf.Reset()
+
+}
+
+func TestCacheSBeginTransaction(t *testing.T) {
+
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+
+	cacheS := NewCacheS(cfg, dm, connMgr, nil)
+
+	expFormat := `........-....-....-....-............`
+	rcv := cacheS.BeginTransaction()
+	if matched, err := regexp.Match(expFormat, []byte(rcv)); err != nil {
+		t.Error(err)
+	} else if !matched {
+		t.Errorf("Unexpected transaction format, Received <%v>", rcv)
+	}
+
+}
+
+func TestCacheSRollbackTransaction(t *testing.T) {
+
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+
+	cacheS := NewCacheS(cfg, dm, connMgr, nil)
+
+	expFormat := `........-....-....-....-............`
+	tranId := cacheS.BeginTransaction()
+	if matched, err := regexp.Match(expFormat, []byte(tranId)); err != nil {
+		t.Error(err)
+	} else if !matched {
+		t.Errorf("Unexpected transaction format, Received <%v>", tranId)
+	}
+
+	if err := cacheS.Set(context.Background(), utils.CacheAccounts, "itemId", "valinterface", []string{}, true, tranId); err != nil {
+		t.Error(err)
+	}
+
+	if rcv, ok := cacheS.Get(utils.CacheAccounts, "itemId"); !ok {
+		t.Errorf("Cache.Get should receive ok, received <%v>", rcv)
+	} else if rcv != "valinterface" {
+		t.Errorf("Expected <%v>, Received <%v>", "valinterface", rcv)
+	}
+
+	// destroys a transaction from transactions buffer
+	cacheS.RollbackTransaction(tranId)
+
+}
+
+func TestCacheSCommitTransaction(t *testing.T) {
+
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+
+	cacheS := NewCacheS(cfg, dm, connMgr, nil)
+
+	expFormat := `........-....-....-....-............`
+	tranId := cacheS.BeginTransaction()
+	if matched, err := regexp.Match(expFormat, []byte(tranId)); err != nil {
+		t.Error(err)
+	} else if !matched {
+		t.Errorf("Unexpected transaction format, Received <%v>", tranId)
+	}
+
+	if err := cacheS.Set(context.Background(), utils.CacheAccounts, "itemId", "valinterface", []string{}, true, tranId); err != nil {
+		t.Error(err)
+	}
+
+	if rcv, ok := cacheS.Get(utils.CacheAccounts, "itemId"); !ok {
+		t.Errorf("Cache.Get should receive ok, received <%v>", rcv)
+	} else if rcv != "valinterface" {
+		t.Errorf("Expected <%v>, Received <%v>", "valinterface", rcv)
+	}
+
+	// executes the actions in a transaction buffer
+	cacheS.CommitTransaction(tranId)
 
 }
