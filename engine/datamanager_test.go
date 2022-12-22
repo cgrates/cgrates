@@ -1290,3 +1290,359 @@ func TestDataManagerSetDispatcherHostReplicateTrue(t *testing.T) {
 	dm.SetDispatcherHost(context.Background(), dpp)
 
 }
+
+func TestDMRemoveAccountReplicate(t *testing.T) {
+
+	tmp := Cache
+	cfgtmp := config.CgrConfig()
+	defer func() {
+		Cache = tmp
+		config.SetCgrConfig(cfgtmp)
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	cfg.DataDbCfg().Items[utils.MetaAccounts].Replicate = true
+	config.SetCgrConfig(cfg)
+
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+	dm.dataDB = &DataDBMock{
+		GetAccountDrvF: func(ctx *context.Context, str1, str2 string) (*utils.Account, error) {
+			return &utils.Account{}, nil
+		},
+		RemoveAccountDrvF: func(ctx *context.Context, str1, str2 string) error {
+			return nil
+		},
+	}
+
+	// tested replicate
+	if err := dm.RemoveAccount(context.Background(), utils.CGRateSorg, "accId", false); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestDMSetAccountNilDM(t *testing.T) {
+
+	var dm *DataManager
+	ap := &utils.Account{}
+
+	expErr := utils.ErrNoDatabaseConn
+	if err := dm.SetAccount(context.Background(), ap, false); err == nil || err != utils.ErrNoDatabaseConn {
+		t.Errorf("Expected error <%v>, Received <%v>", expErr, err)
+	}
+}
+
+func TestDMSetAccountcheckFiltersErr(t *testing.T) {
+
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	ap := &utils.Account{
+		Tenant: "cgrates.org",
+		ID:     "accId",
+		Weights: []*utils.DynamicWeight{
+			{
+				Weight: 0,
+			},
+		},
+		FilterIDs: []string{":::"},
+		Balances: map[string]*utils.Balance{
+			"AbstractBalance1": {
+				ID: "AbstractBalance1",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 25,
+					},
+				},
+				Type:  utils.MetaAbstract,
+				Units: utils.NewDecimal(int64(40*time.Second), 0),
+				CostIncrements: []*utils.CostIncrement{
+					{
+						Increment:    utils.NewDecimal(int64(time.Second), 0),
+						FixedFee:     utils.NewDecimal(0, 0),
+						RecurrentFee: utils.NewDecimal(0, 0),
+					},
+				},
+			},
+		},
+		Blockers: utils.DynamicBlockers{
+			{
+				FilterIDs: []string{"fltrID"},
+				Blocker:   true,
+			},
+		},
+		Opts:         make(map[string]interface{}),
+		ThresholdIDs: []string{utils.MetaNone},
+	}
+
+	expErr := "broken reference to filter: <:::> for item with ID: cgrates.org:accId"
+	if err := dm.SetAccount(context.Background(), ap, true); err == nil || err.Error() != expErr {
+		t.Errorf("Expected error <%v>, Received <%v>", expErr, err)
+	}
+}
+
+func TestDMSetAccountGetAccountErr(t *testing.T) {
+
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+	dm.dataDB = &DataDBMock{
+		GetAccountDrvF: func(ctx *context.Context, str1, str2 string) (*utils.Account, error) {
+			return nil, utils.ErrNotImplemented
+		},
+	}
+
+	ap := &utils.Account{
+		Tenant: "cgrates.org",
+		ID:     "accId",
+		Weights: []*utils.DynamicWeight{
+			{
+				Weight: 0,
+			},
+		},
+		FilterIDs: []string{"*stirng:~*req.Account:1001"},
+		Balances: map[string]*utils.Balance{
+			"AbstractBalance1": {
+				ID: "AbstractBalance1",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 25,
+					},
+				},
+				Type:  utils.MetaAbstract,
+				Units: utils.NewDecimal(int64(40*time.Second), 0),
+				CostIncrements: []*utils.CostIncrement{
+					{
+						Increment:    utils.NewDecimal(int64(time.Second), 0),
+						FixedFee:     utils.NewDecimal(0, 0),
+						RecurrentFee: utils.NewDecimal(0, 0),
+					},
+				},
+			},
+		},
+		Blockers: utils.DynamicBlockers{
+			{
+				FilterIDs: []string{"fltrID"},
+				Blocker:   true,
+			},
+		},
+		Opts:         make(map[string]interface{}),
+		ThresholdIDs: []string{utils.MetaNone},
+	}
+
+	expErr := utils.ErrNotImplemented
+	if err := dm.SetAccount(context.Background(), ap, true); err == nil || err != expErr {
+		t.Errorf("Expected error <%v>, Received <%v>", expErr, err)
+	}
+}
+
+func TestDMSetAccountSetAccountDrvErr(t *testing.T) {
+
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+	dm.dataDB = &DataDBMock{
+		GetAccountDrvF: func(ctx *context.Context, str1, str2 string) (*utils.Account, error) {
+			return &utils.Account{
+				Tenant: "cgrates.org",
+			}, nil
+		},
+		SetAccountDrvF: func(ctx *context.Context, profile *utils.Account) error {
+			return utils.ErrNotImplemented
+		},
+	}
+
+	ap := &utils.Account{
+		Tenant: "cgrates.org",
+		ID:     "accId",
+		Weights: []*utils.DynamicWeight{
+			{
+				Weight: 0,
+			},
+		},
+		FilterIDs: []string{"*stirng:~*req.Account:1001"},
+		Balances: map[string]*utils.Balance{
+			"AbstractBalance1": {
+				ID: "AbstractBalance1",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 25,
+					},
+				},
+				Type:  utils.MetaAbstract,
+				Units: utils.NewDecimal(int64(40*time.Second), 0),
+				CostIncrements: []*utils.CostIncrement{
+					{
+						Increment:    utils.NewDecimal(int64(time.Second), 0),
+						FixedFee:     utils.NewDecimal(0, 0),
+						RecurrentFee: utils.NewDecimal(0, 0),
+					},
+				},
+			},
+		},
+		Blockers: utils.DynamicBlockers{
+			{
+				FilterIDs: []string{"fltrID"},
+				Blocker:   true,
+			},
+		},
+		Opts:         make(map[string]interface{}),
+		ThresholdIDs: []string{utils.MetaNone},
+	}
+
+	expErr := utils.ErrNotImplemented
+	if err := dm.SetAccount(context.Background(), ap, true); err == nil || err != expErr {
+		t.Errorf("Expected error <%v>, Received <%v>", expErr, err)
+	}
+}
+
+func TestDMSetAccountupdatedIndexesErr(t *testing.T) {
+
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+	dm.dataDB = &DataDBMock{
+		GetAccountDrvF: func(ctx *context.Context, str1, str2 string) (*utils.Account, error) {
+			return &utils.Account{
+				Tenant: "cgrates.org",
+			}, nil
+		},
+		SetAccountDrvF: func(ctx *context.Context, profile *utils.Account) error {
+			return nil
+		},
+	}
+
+	ap := &utils.Account{
+		Tenant: "cgrates.org",
+		ID:     "accId",
+		Weights: []*utils.DynamicWeight{
+			{
+				Weight: 0,
+			},
+		},
+		FilterIDs: []string{"*stirng:~*req.Account:1001"},
+		Balances: map[string]*utils.Balance{
+			"AbstractBalance1": {
+				ID: "AbstractBalance1",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 25,
+					},
+				},
+				Type:  utils.MetaAbstract,
+				Units: utils.NewDecimal(int64(40*time.Second), 0),
+				CostIncrements: []*utils.CostIncrement{
+					{
+						Increment:    utils.NewDecimal(int64(time.Second), 0),
+						FixedFee:     utils.NewDecimal(0, 0),
+						RecurrentFee: utils.NewDecimal(0, 0),
+					},
+				},
+			},
+		},
+		Blockers: utils.DynamicBlockers{
+			{
+				FilterIDs: []string{"fltrID"},
+				Blocker:   true,
+			},
+		},
+		Opts:         make(map[string]interface{}),
+		ThresholdIDs: []string{utils.MetaNone},
+	}
+
+	expErr := utils.ErrNotImplemented
+	if err := dm.SetAccount(context.Background(), ap, true); err == nil || err != expErr {
+		t.Errorf("Expected error <%v>, Received <%v>", expErr, err)
+	}
+}
+
+func TestDMSetAccountReplicateTrue(t *testing.T) {
+
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	cfg.DataDbCfg().Items[utils.MetaAccounts].Replicate = true
+	config.SetCgrConfig(cfg)
+
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+	dm.dataDB = &DataDBMock{
+		GetAccountDrvF: func(ctx *context.Context, str1, str2 string) (*utils.Account, error) {
+			return &utils.Account{}, nil
+		},
+		SetAccountDrvF: func(ctx *context.Context, profile *utils.Account) error {
+			return nil
+		},
+	}
+
+	ap := &utils.Account{
+		Tenant: "cgrates.org",
+		ID:     "accId",
+		Weights: []*utils.DynamicWeight{
+			{
+				Weight: 0,
+			},
+		},
+		FilterIDs: []string{"*stirng:~*req.Account:1001"},
+		Balances: map[string]*utils.Balance{
+			"AbstractBalance1": {
+				ID: "AbstractBalance1",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 25,
+					},
+				},
+				Type:  utils.MetaAbstract,
+				Units: utils.NewDecimal(int64(40*time.Second), 0),
+				CostIncrements: []*utils.CostIncrement{
+					{
+						Increment:    utils.NewDecimal(int64(time.Second), 0),
+						FixedFee:     utils.NewDecimal(0, 0),
+						RecurrentFee: utils.NewDecimal(0, 0),
+					},
+				},
+			},
+		},
+		Blockers: utils.DynamicBlockers{
+			{
+				FilterIDs: []string{"fltrID"},
+				Blocker:   true,
+			},
+		},
+		Opts:         make(map[string]interface{}),
+		ThresholdIDs: []string{utils.MetaNone},
+	}
+	// tests replicete
+	dm.SetAccount(context.Background(), ap, false)
+}

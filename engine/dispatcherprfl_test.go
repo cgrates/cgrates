@@ -853,3 +853,48 @@ func TestDispatcherHostProfileMerge(t *testing.T) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(dspHost))
 	}
 }
+
+type cMock struct {
+	rcvM string
+}
+
+func (*cMock) Call(ctx *context.Context, serviceMethod string, args, reply interface{}) error {
+	return nil
+}
+func TestDispatcherHostGetConnExistingConn(t *testing.T) {
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	chanRPC := make(chan birpc.ClientConnector, 1)
+	chanRPC <- &cMock{
+		rcvM: "testM",
+	}
+	connMgr := NewConnManager(cfg)
+	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), utils.AttributeSv1, chanRPC)
+	dH := &DispatcherHost{
+		Tenant: "cgrates.org",
+		RemoteHost: &config.RemoteHost{
+			ID:                "ID",
+			Address:           "127.0.0.1",
+			Transport:         utils.MetaJSON,
+			ConnectAttempts:   1,
+			Reconnects:        1,
+			ConnectTimeout:    time.Nanosecond,
+			ReplyTimeout:      time.Nanosecond,
+			TLS:               true,
+			ClientKey:         "key",
+			ClientCertificate: "ce",
+			CaCertificate:     "ca",
+		},
+		rpcConn: <-chanRPC,
+	}
+
+	exp := &cMock{rcvM: "testM"}
+
+	if rcv, err := dH.GetConn(context.Background(), cfg, make(chan birpc.ClientConnector, 1)); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(exp, rcv) {
+		t.Errorf("Expected %+v %T \n but received \n %+v %T", rcv, rcv, exp, exp)
+	}
+
+}

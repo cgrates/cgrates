@@ -425,3 +425,127 @@ func TestLibIndexModifyAttrPrfFilter(t *testing.T) {
 			utils.ToJSON(expIndexes), utils.ToJSON(rcvIndexes))
 	}
 }
+
+// unfinished
+// func TestUpdateFilterIndexssss(t *testing.T) {
+// 	tmp := Cache
+// 	defer func() {
+// 		Cache = tmp
+// 	}()
+// 	Cache.Clear(nil)
+
+// 	cfg := config.NewDefaultCGRConfig()
+// 	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+// 	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+// 	// to give error on dm.GetIndexes
+// 	// dm.dataDB = &DataDBMock{
+// 	// 	GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
+// 	// 		return nil, utils.ErrNotImplemented
+// 	// 	},
+// 	// }
+
+// 	dm.dataDB = &DataDBMock{
+// 		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
+// 			return map[string]utils.StringSet{
+// 				utils.CacheThresholdFilterIndexes: {
+// 					"ATTR_TEST": {},
+// 				},
+// 			}, nil
+// 		},
+// 	}
+
+// 	Cache.Set(context.Background(), utils.CacheReverseFilterIndexes, utils.ConcatenatedKey("cgrates.org:fltr_test", utils.EmptyString), "someval", []string{"grId1"}, true, utils.NonTransactional)
+
+// 	oldFlt := &Filter{
+// 		Tenant: "cgrates.org",
+// 		ID:     "fltr_test",
+// 		Rules: []*FilterRule{
+// 			{
+// 				Type:    utils.MetaExists,
+// 				Element: "~*req.Cost",
+// 				Values:  []string{},
+// 			},
+// 			{
+// 				Type:    utils.MetaNotExists,
+// 				Element: "~*req.Cost",
+// 				Values:  []string{},
+// 			},
+// 			{
+// 				Type:    utils.MetaExists,
+// 				Element: "~*req.Cost",
+// 				Values: []string{utils.DynamicDataPrefix + utils.MetaAccounts,
+// 					utils.DynamicDataPrefix + utils.MetaStats,
+// 					utils.DynamicDataPrefix + utils.MetaResources,
+// 					utils.DynamicDataPrefix + utils.MetaLibPhoneNumber},
+// 			},
+// 			{
+// 				Type:    utils.MetaExists,
+// 				Element: "~*req.Cost",
+// 				Values:  []string{utils.DynamicDataPrefix},
+// 			},
+// 			{
+// 				Type:    utils.MetaExists,
+// 				Element: "~*req.Cost",
+// 				Values:  []string{"unRegVal"},
+// 			},
+// 			{
+// 				Type:    utils.MetaExists,
+// 				Element: "*req.Cost",
+// 				Values:  []string{utils.DynamicDataPrefix},
+// 			},
+// 			{
+// 				Type:    utils.MetaExists,
+// 				Element: "*req.Cost",
+// 				Values:  []string{"unRegVal"},
+// 			},
+// 		},
+// 	}
+// 	newFlt := &Filter{
+// 		Tenant: "cgrates.org",
+// 		ID:     "fltr_test",
+// 		Rules: []*FilterRule{
+// 			// {
+// 			// 	Type:    utils.MetaExists,
+// 			// 	Element: "~*req.Cost",
+// 			// 	Values:  []string{},
+// 			// },
+// 			{
+// 				Type:    utils.MetaNotExists,
+// 				Element: "~*req.Cost",
+// 				Values:  []string{},
+// 			},
+// 			{
+// 				Type:    utils.MetaExists,
+// 				Element: "~*req.Cost",
+// 				Values: []string{utils.DynamicDataPrefix + utils.MetaAccounts,
+// 					utils.DynamicDataPrefix + utils.MetaStats,
+// 					utils.DynamicDataPrefix + utils.MetaResources,
+// 					utils.DynamicDataPrefix + utils.MetaLibPhoneNumber},
+// 			},
+// 			{
+// 				Type:    utils.MetaExists,
+// 				Element: "~*req.Cost",
+// 				Values:  []string{utils.DynamicDataPrefix},
+// 			},
+// 			{
+// 				Type:    utils.MetaExists,
+// 				Element: "~*req.Cost",
+// 				Values:  []string{"unRegVal"},
+// 			},
+// 			{
+// 				Type:    utils.MetaExists,
+// 				Element: "*req.Cost",
+// 				Values:  []string{utils.DynamicDataPrefix},
+// 			},
+// 			{
+// 				Type:    utils.MetaExists,
+// 				Element: "*req.Cost",
+// 				Values:  []string{"unRegVal"},
+// 			},
+// 		},
+// 	}
+// 	if err := UpdateFilterIndex(context.Background(), dm, oldFlt, newFlt); err != nil {
+// 		t.Error(err)
+// 	}
+
+// }
