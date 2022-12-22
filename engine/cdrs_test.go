@@ -3001,3 +3001,23 @@ func TestCDRsV1ProcessEventWithGetMockCacheErrResp(t *testing.T) {
 	}
 
 }
+
+func TestCDRServerListenAndServe(t *testing.T) {
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	connMng := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	fltrs := NewFilterS(cfg, connMng, dm)
+	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng)
+
+	stopChan := make(chan struct{}, 1)
+
+	go func() {
+		time.Sleep(10 * time.Millisecond)
+		stopChan <- struct{}{}
+	}()
+
+	newCDRSrv.ListenAndServe(stopChan)
+
+}
