@@ -18,14 +18,20 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"bytes"
 	"encoding/json"
+	"errors"
+	"log"
+	"os"
 	"reflect"
 	"sort"
+	"strings"
 	"testing"
 	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
 )
 
 var (
@@ -2897,26 +2903,32 @@ func TestAccountSummary(t *testing.T) {
 }
 
 func TestAccountGetCreditForPrefix(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+	Cache.Clear(nil)
 	acc := &Account{
 		ID:            "cgrates.org:account1",
 		AllowNegative: true,
 		BalanceMap: map[string]Balances{
-			utils.MetaSMS: {&Balance{ID: "sms1", Value: 14,
-				SharedGroups: utils.StringMap{
-					"group": true,
-				}}},
-			utils.MetaMMS: {&Balance{ID: "mms1", Value: 140, SharedGroups: utils.StringMap{
-				"group": true,
-			}}},
-			utils.MetaData: {&Balance{ID: "data1", Value: 1204, SharedGroups: utils.StringMap{
-				"group": true,
-			}}},
-			utils.MetaVoice: {
-				&Balance{ID: "voice1", Weight: 20, DestinationIDs: utils.StringMap{"NAT": true}, Value: 3600},
-				&Balance{ID: "voice2", Weight: 10, DestinationIDs: utils.StringMap{"RET": true}, Value: 1200},
+			utils.MetaMonetary: {
+				&Balance{
+					ID:             "voice1",
+					Weight:         20,
+					DestinationIDs: utils.StringMap{utils.MetaAny: false},
+					precision:      0,
+					SharedGroups:   utils.NewStringMap("SG_TEST"),
+					Value:          3600},
 			},
 		},
 	}
+	Cache.Set(utils.CacheSharedGroups, "SG_TEST", &SharedGroup{
+		Id: "SG_TEST", MemberIds: utils.NewStringMap("cgrates.org:account1"),
+		AccountParameters: map[string]*SharingParameters{
+			"*any": {Strategy: STRATEGY_MINE_RANDOM},
+		},
+	}, []string{}, true, utils.NonTransactional)
 	cd := &CallDescriptor{
 		Category:      "0",
 		Tenant:        "vdf",
@@ -2925,11 +2937,9 @@ func TestAccountGetCreditForPrefix(t *testing.T) {
 		LoopIndex:     0,
 		DurationIndex: 10 * time.Second,
 		Destination:   "0723",
-		ToR:           utils.MetaVoice,
+		ToR:           utils.MetaMonetary,
 	}
-
 	if _, _, balances := acc.getCreditForPrefix(cd); len(balances) == 0 {
-
 		t.Errorf("received %+v", utils.ToJSON(balances))
 	}
 }
@@ -2998,8 +3008,151 @@ func TestAcountSetBalanceAction(t *testing.T) {
 	} else if !reflect.DeepEqual(val.MemberIds, exp) {
 		t.Errorf("expected %v,received %v", utils.ToJSON(exp), utils.ToJSON(val.MemberIds))
 	}
-
 	if err = acc.setBalanceAction(nil, fltrs); err == nil || err.Error() != "nil action" {
 		t.Error(err)
 	}
+}
+
+func TestDebitCreditBalance(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	fltrs := NewFilterS(cfg, nil, dm)
+	tmpConn := connMgr
+	utils.Logger.SetLogLevel(4)
+	utils.Logger.SetSyslog(nil)
+	buf := new(bytes.Buffer)
+	log.SetOutput(buf)
+	defer func() {
+		utils.Logger.SetLogLevel(0)
+		log.SetOutput(os.Stderr)
+		connMgr = tmpConn
+		config.SetCgrConfig(config.NewDefaultCGRConfig())
+	}()
+	cfg.RalsCfg().ThresholdSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)}
+	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn <- &ccMock{
+		calls: map[string]func(args interface{}, reply interface{}) error{
+			utils.ThresholdSv1ProcessEvent: func(args, reply interface{}) error {
+				rpl := &[]string{"id"}
+				*reply.(*[]string) = *rpl
+				return errors.New("Can't process Event")
+			},
+		},
+	}
+	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds): clientConn,
+	})
+	cd := &CallDescriptor{
+		Tenant:        "cgrates.org",
+		Category:      "call",
+		TimeStart:     time.Date(2015, 9, 24, 10, 48, 0, 0, time.UTC),
+		TimeEnd:       time.Date(2015, 9, 24, 10, 58, 1, 0, time.UTC),
+		Destination:   "4444",
+		Subject:       "dy",
+		Account:       "dy",
+		ToR:           utils.MetaVoice,
+		DurationIndex: 600,
+	}
+	acc := &Account{
+		ID: "vdf:broker",
+		BalanceMap: map[string]Balances{
+			utils.MetaVoice: {
+				&Balance{Value: 20 * float64(time.Second),
+					DestinationIDs: utils.NewStringMap("NAT"),
+					Weight:         10, RatingSubject: "rif"},
+				&Balance{Value: 100 * float64(time.Second),
+					DestinationIDs: utils.NewStringMap("RET"), Weight: 20},
+			}},
+	}
+	config.SetCgrConfig(cfg)
+	SetConnManager(connMgr)
+	expLog := `processing balance event`
+	if _, err := acc.debitCreditBalance(cd, true, true, true, fltrs); err != nil {
+		t.Error(err)
+	} else if rcvLog := buf.String(); !strings.Contains(rcvLog, expLog) {
+		t.Errorf("Logger %v,doesn't contain %v", utils.ToJSON(rcvLog), utils.ToJSON(expLog))
+	}
+}
+
+func TestAccGetAllBalancesForPrefixLogg(t *testing.T) {
+	tmp := Cache
+	utils.Logger.SetLogLevel(4)
+	utils.Logger.SetSyslog(nil)
+	buf := new(bytes.Buffer)
+	log.SetOutput(buf)
+	defer func() {
+		utils.Logger.SetLogLevel(0)
+		log.SetOutput(os.Stderr)
+		Cache = tmp
+	}()
+	Cache.Clear(nil)
+	acc := &Account{
+		ID:            "cgrates.org:account1",
+		AllowNegative: true,
+		BalanceMap: map[string]Balances{
+			utils.MetaMonetary: {
+				&Balance{
+					ID:             "voice1",
+					Weight:         20,
+					DestinationIDs: utils.StringMap{utils.MetaAny: false},
+					precision:      0,
+					SharedGroups:   utils.NewStringMap("SG_TEST"),
+					Value:          3600},
+			},
+		},
+	}
+	Cache.Set(utils.CacheSharedGroups, "SG_TEST", nil, []string{}, true, utils.NonTransactional)
+	acc.getAlldBalancesForPrefix("0723", "0", utils.MetaMonetary, time.Date(2013, 10, 4, 15, 46, 0, 0, time.UTC))
+	expLog := "Could not get shared group:"
+	if rcvLog := buf.String(); !strings.Contains(rcvLog, expLog) {
+		t.Errorf("Logger %v doesn't containe %v ", rcvLog, expLog)
+	}
+}
+
+func TestGetUniqueSharedGroupMemebersErr(t *testing.T) {
+	utils.Logger.SetLogLevel(4)
+	utils.Logger.SetSyslog(nil)
+	buf := new(bytes.Buffer)
+	log.SetOutput(buf)
+	tmp := Cache
+	defer func() {
+		utils.Logger.SetLogLevel(0)
+		log.SetOutput(os.Stderr)
+		Cache = tmp
+	}()
+	Cache.Clear(nil)
+	acc := &Account{
+		ID:            "cgrates.org:account1",
+		AllowNegative: true,
+		BalanceMap: map[string]Balances{
+			utils.MetaMonetary: {
+				&Balance{
+					ID:             "voice1",
+					Weight:         20,
+					DestinationIDs: utils.StringMap{utils.MetaAny: false},
+					precision:      0,
+					SharedGroups:   utils.NewStringMap("SG_TEST"),
+					Value:          3600},
+			},
+		},
+	}
+	Cache.Set(utils.CacheSharedGroups, "SG_TEST", nil, []string{}, true, utils.NonTransactional)
+	cd := &CallDescriptor{
+		Category:      "0",
+		Tenant:        "vdf",
+		TimeStart:     time.Date(2013, 10, 4, 15, 46, 0, 0, time.UTC),
+		TimeEnd:       time.Date(2013, 10, 4, 15, 46, 10, 0, time.UTC),
+		LoopIndex:     0,
+		DurationIndex: 10 * time.Second,
+		Destination:   "0723",
+		ToR:           utils.MetaMonetary,
+	}
+	expLog := `Could not get shared group: `
+	if _, err := acc.GetUniqueSharedGroupMembers(cd); err == nil || err != utils.ErrNotFound {
+		t.Error(err)
+	} else if rcvLog := buf.String(); !strings.Contains(rcvLog, expLog) {
+		t.Errorf("Logger %v doesn't contain %v", rcvLog, expLog)
+	}
+
 }

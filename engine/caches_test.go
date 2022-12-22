@@ -20,6 +20,7 @@ package engine
 import (
 	"fmt"
 	"reflect"
+	"regexp"
 	"testing"
 	"time"
 
@@ -1018,6 +1019,29 @@ func TestV1LoadCache(t *testing.T) {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("reply should  be %v", utils.OK)
+	}
+
+}
+
+func TestCacheSBeginTransaction(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, false, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+
+	cacheS := NewCacheS(cfg, dm, nil)
+
+	expFormat := `........-....-....-....-............`
+	rcv := cacheS.BeginTransaction()
+	if matched, err := regexp.Match(expFormat, []byte(rcv)); err != nil {
+		t.Error(err)
+	} else if !matched {
+		t.Errorf("Unexpected transaction format, Received <%v>", rcv)
 	}
 
 }
