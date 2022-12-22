@@ -46,27 +46,26 @@ var (
 		testAPIerInitCfg,
 		testAPIerInitDataDb,
 		testAPIerResetStorDb,
-		testAPIerStartEngine,
+		//testAPIerStartEngine,
 		testAPIerRPCConn,
-		testAPIerLoadFromFolder,
-		testAPIerVerifyAttributesAfterLoad,
-		testAPIerRemoveTPFromFolder,
-		testAPIerAfterDelete,
-		testAPIerVerifyAttributesAfterDelete,
 		testAPIerLoadFromFolder,
 		testAPIerGetRatingPlanCost,
 		testAPIerGetRatingPlanCost2,
 		testAPIerGetRatingPlanCost3,
 		testAPIerGetActionPlanIDs,
 		testAPIerGetRatingPlanIDs,
-		testAPIerKillEngine,
+		testAPIerVerifyAttributesAfterLoad,
+		testAPIerRemoveTPFromFolder,
+		testAPIerAfterDelete,
+		testAPIerVerifyAttributesAfterDelete,
+		//testAPIerKillEngine,
 
-		testAPIerInitDataDb,
+		/* testAPIerInitDataDb,
 		testAPIerResetStorDb,
 		testAPIerStartEngineSleep,
 		testAPIerRPCConn,
 		testApierSetAndRemoveRatingProfileAnySubject,
-		testAPIerKillEngine,
+		testAPIerKillEngine, */
 	}
 )
 
@@ -145,7 +144,7 @@ func testAPIerLoadFromFolder(t *testing.T) {
 	if err := apierRPC.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(500 * time.Millisecond)
+	time.Sleep(1000 * time.Millisecond)
 }
 
 func testAPIerVerifyAttributesAfterLoad(t *testing.T) {

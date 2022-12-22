@@ -49,14 +49,14 @@ var (
 		testV1CDRsRefundCDR,
 		testV1CDRsKillEngine,
 
-		testV1CDRsInitConfig,
+		/* 	testV1CDRsInitConfig,
 		testV1CDRsInitDataDb,
 		testV1CDRsInitCdrDb,
 		testV1CDRsStartEngine,
 		testV1CDRsRpcConn,
 		testV1CDRsLoadTariffPlanFromFolderSMS,
 		testV1CDRsAddBalanceForSMS,
-		testV1CDRsKillEngine,
+		testV1CDRsKillEngine, */
 	}
 )
 
@@ -204,9 +204,11 @@ func testV1CDRsProcessEventWithRefund(t *testing.T) {
 	} else if blc2 := acnt.GetBalanceWithID(utils.VOICE, "BALANCE2"); blc2.Value != 120000000000 {
 		t.Errorf("Balance2 is: %s", utils.ToIJSON(blc2))
 	}
+
 	// without re-rate we should be denied
-	if err := cdrsRpc.Call(utils.CDRsV1ProcessEvent, argsEv, &reply); err == nil {
-		t.Error("should receive error here")
+	if err := cdrsRpc.Call(utils.CDRsV1ProcessEvent, argsEv, &reply); err == nil &&
+		err.Error() != utils.ErrExists.Error() {
+		t.Errorf("should receive error here: %v", err)
 	}
 	if err := cdrsRpc.Call(utils.APIerSv2GetAccount, acntAttrs, &acnt); err != nil {
 		t.Error(err)
@@ -215,6 +217,7 @@ func testV1CDRsProcessEventWithRefund(t *testing.T) {
 	} else if blc2 := acnt.GetBalanceWithID(utils.VOICE, "BALANCE2"); blc2.Value != 120000000000 {
 		t.Errorf("Balance2 is: %s", utils.ToIJSON(blc2))
 	}
+
 	argsEv = &engine.ArgV1ProcessEvent{
 		Flags: []string{utils.MetaRALs, utils.MetaRerate},
 		CGREvent: utils.CGREvent{
@@ -230,6 +233,7 @@ func testV1CDRsProcessEventWithRefund(t *testing.T) {
 			},
 		},
 	}
+
 	if err := cdrsRpc.Call(utils.CDRsV1ProcessEvent, argsEv, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -242,7 +246,6 @@ func testV1CDRsProcessEventWithRefund(t *testing.T) {
 	} else if blc2 := acnt.GetBalanceWithID(utils.VOICE, "BALANCE2"); blc2.Value != 120000000000 {
 		t.Errorf("Balance2 is: %s", utils.ToIJSON(blc2))
 	}
-	return
 }
 
 func testV1CDRsRefundOutOfSessionCost(t *testing.T) {
