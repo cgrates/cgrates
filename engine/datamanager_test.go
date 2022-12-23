@@ -1586,8 +1586,10 @@ func TestDMSetAccountupdatedIndexesErr(t *testing.T) {
 func TestDMSetAccountReplicateTrue(t *testing.T) {
 
 	tmp := Cache
+	cfgtmp := config.CgrConfig()
 	defer func() {
 		Cache = tmp
+		config.SetCgrConfig(cfgtmp)
 	}()
 
 	cfg := config.NewDefaultCGRConfig()

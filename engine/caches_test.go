@@ -330,37 +330,6 @@ func TestV1GetItemIDsErr(t *testing.T) {
 
 }
 
-// unfinished OnEvicted
-// func TestNewCacheS(t *testing.T) {
-// 	Cache.Clear(nil)
-// 	args := &utils.ArgCacheReplicateSet{
-// 		CacheID:  utils.CacheAccounts,
-// 		ItemID:   "itemID",
-// 		Value:    &utils.CachedRPCResponse{Result: "reply", Error: nil},
-// 		GroupIDs: []string{"groupId", "groupId"},
-// 	}
-// 	cfg := config.NewDefaultCGRConfig()
-// 	cfg.CacheCfg().ReplicationConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicationConnsCfg)}
-// 	cfg.CacheCfg().Partitions = map[string]*config.CacheParamCfg{
-// 		args.CacheID: {
-// 			Replicate: true,
-// 		},
-// 	}
-
-// 	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-// 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
-
-// 	connMgr := NewConnManager(cfg)
-
-// 	stopchan := make(chan struct{}, 1)
-// 	close(stopchan)
-// 	caps := NewCaps(1, utils.MetaBusy)
-
-// 	sts := NewCapsStats(cfg.CoreSCfg().CapsStatsInterval, caps, stopchan)
-// 	cacheS := NewCacheS(cfg, dm, connMgr, sts)
-// 	t.Error(cacheS)
-// }
-
 func TestCacheSGetWithRemoteQueryErr(t *testing.T) {
 	tmp := Cache
 	defer func() {
