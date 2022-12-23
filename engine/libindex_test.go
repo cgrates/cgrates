@@ -21,10 +21,12 @@ package engine
 import (
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/ericlagergren/decimal"
 )
 
 func TestSplitFilterIndexes(t *testing.T) {
@@ -426,126 +428,1483 @@ func TestLibIndexModifyAttrPrfFilter(t *testing.T) {
 	}
 }
 
-// unfinished
-// func TestUpdateFilterIndexssss(t *testing.T) {
-// 	tmp := Cache
-// 	defer func() {
-// 		Cache = tmp
-// 	}()
-// 	Cache.Clear(nil)
+func TestUpdateFilterIndexThreshold(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+	Cache.Clear(nil)
 
-// 	cfg := config.NewDefaultCGRConfig()
-// 	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-// 	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
-// 	// to give error on dm.GetIndexes
-// 	// dm.dataDB = &DataDBMock{
-// 	// 	GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
-// 	// 		return nil, utils.ErrNotImplemented
-// 	// 	},
-// 	// }
+	cfg := config.NewDefaultCGRConfig()
+	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
 
-// 	dm.dataDB = &DataDBMock{
-// 		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
-// 			return map[string]utils.StringSet{
-// 				utils.CacheThresholdFilterIndexes: {
-// 					"ATTR_TEST": {},
-// 				},
-// 			}, nil
-// 		},
-// 	}
+	oldFlt := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "fltr_test",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaExists,
+				Element: "~*req.Cost",
+				Values:  []string{},
+			},
+			{
+				Type:    utils.MetaNotExists,
+				Element: "~*req.Cost",
+				Values:  []string{},
+			},
+			{
+				Type:    utils.MetaExists,
+				Element: "~*req.Cost",
+				Values: []string{utils.DynamicDataPrefix + utils.MetaAccounts,
+					utils.DynamicDataPrefix + utils.MetaStats,
+					utils.DynamicDataPrefix + utils.MetaResources,
+					utils.DynamicDataPrefix + utils.MetaLibPhoneNumber},
+			},
+			{
+				Type:    utils.MetaExists,
+				Element: "~*req.Cost",
+				Values:  []string{utils.DynamicDataPrefix},
+			},
+			{
+				Type:    utils.MetaExists,
+				Element: "~*req.Cost",
+				Values:  []string{"unRegVal"},
+			},
+			{
+				Type:    utils.MetaExists,
+				Element: "*req.Cost",
+				Values:  []string{utils.DynamicDataPrefix},
+			},
+			{
+				Type:    utils.MetaString,
+				Element: "*req.Account",
+				Values:  []string{"1001"},
+			},
+		},
+	}
 
-// 	Cache.Set(context.Background(), utils.CacheReverseFilterIndexes, utils.ConcatenatedKey("cgrates.org:fltr_test", utils.EmptyString), "someval", []string{"grId1"}, true, utils.NonTransactional)
+	if err := oldFlt.Compile(); err != nil {
+		t.Error(err)
+	}
 
-// 	oldFlt := &Filter{
-// 		Tenant: "cgrates.org",
-// 		ID:     "fltr_test",
-// 		Rules: []*FilterRule{
-// 			{
-// 				Type:    utils.MetaExists,
-// 				Element: "~*req.Cost",
-// 				Values:  []string{},
-// 			},
-// 			{
-// 				Type:    utils.MetaNotExists,
-// 				Element: "~*req.Cost",
-// 				Values:  []string{},
-// 			},
-// 			{
-// 				Type:    utils.MetaExists,
-// 				Element: "~*req.Cost",
-// 				Values: []string{utils.DynamicDataPrefix + utils.MetaAccounts,
-// 					utils.DynamicDataPrefix + utils.MetaStats,
-// 					utils.DynamicDataPrefix + utils.MetaResources,
-// 					utils.DynamicDataPrefix + utils.MetaLibPhoneNumber},
-// 			},
-// 			{
-// 				Type:    utils.MetaExists,
-// 				Element: "~*req.Cost",
-// 				Values:  []string{utils.DynamicDataPrefix},
-// 			},
-// 			{
-// 				Type:    utils.MetaExists,
-// 				Element: "~*req.Cost",
-// 				Values:  []string{"unRegVal"},
-// 			},
-// 			{
-// 				Type:    utils.MetaExists,
-// 				Element: "*req.Cost",
-// 				Values:  []string{utils.DynamicDataPrefix},
-// 			},
-// 			{
-// 				Type:    utils.MetaExists,
-// 				Element: "*req.Cost",
-// 				Values:  []string{"unRegVal"},
-// 			},
-// 		},
-// 	}
-// 	newFlt := &Filter{
-// 		Tenant: "cgrates.org",
-// 		ID:     "fltr_test",
-// 		Rules: []*FilterRule{
-// 			// {
-// 			// 	Type:    utils.MetaExists,
-// 			// 	Element: "~*req.Cost",
-// 			// 	Values:  []string{},
-// 			// },
-// 			{
-// 				Type:    utils.MetaNotExists,
-// 				Element: "~*req.Cost",
-// 				Values:  []string{},
-// 			},
-// 			{
-// 				Type:    utils.MetaExists,
-// 				Element: "~*req.Cost",
-// 				Values: []string{utils.DynamicDataPrefix + utils.MetaAccounts,
-// 					utils.DynamicDataPrefix + utils.MetaStats,
-// 					utils.DynamicDataPrefix + utils.MetaResources,
-// 					utils.DynamicDataPrefix + utils.MetaLibPhoneNumber},
-// 			},
-// 			{
-// 				Type:    utils.MetaExists,
-// 				Element: "~*req.Cost",
-// 				Values:  []string{utils.DynamicDataPrefix},
-// 			},
-// 			{
-// 				Type:    utils.MetaExists,
-// 				Element: "~*req.Cost",
-// 				Values:  []string{"unRegVal"},
-// 			},
-// 			{
-// 				Type:    utils.MetaExists,
-// 				Element: "*req.Cost",
-// 				Values:  []string{utils.DynamicDataPrefix},
-// 			},
-// 			{
-// 				Type:    utils.MetaExists,
-// 				Element: "*req.Cost",
-// 				Values:  []string{"unRegVal"},
-// 			},
-// 		},
-// 	}
-// 	if err := UpdateFilterIndex(context.Background(), dm, oldFlt, newFlt); err != nil {
-// 		t.Error(err)
-// 	}
+	if err := dm.SetFilter(context.Background(), oldFlt, true); err != nil {
+		t.Error(err)
+	}
 
-// }
+	thP := &ThresholdProfile{
+		Tenant:           "cgrates.org",
+		ID:               "ThP1",
+		FilterIDs:        []string{"fltr_test"},
+		ActionProfileIDs: []string{"actPrfID"},
+		MaxHits:          7,
+		MinHits:          0,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
+		Async: true,
+	}
+
+	if err := dm.SetThresholdProfile(context.Background(), thP, true); err != nil {
+		t.Error(err)
+	}
+
+	expindx := map[string]utils.StringSet{
+		"*exists:*req.Cost:*any":     {"ThP1": {}},
+		"*exists:*req.Cost:unRegVal": {"ThP1": {}},
+		"*exists::*req.Cost":         {"ThP1": {}},
+		"*notexists:*req.Cost:*none": {"ThP1": {}},
+	}
+
+	getindx, err := dm.GetIndexes(context.Background(), utils.CacheThresholdFilterIndexes, utils.CGRateSorg, utils.EmptyString, utils.EmptyString, true, true)
+	if err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expindx, getindx) {
+		t.Errorf("Expected \n<%v>, \nReceived \n<%v>", utils.ToJSON(expindx), utils.ToJSON(getindx))
+	}
+
+	newFlt := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "fltr_test",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaNotExists,
+				Element: "~*req.Cost",
+				Values:  []string{},
+			},
+			{
+				Type:    utils.MetaExists,
+				Element: "~*req.Cost",
+				Values: []string{utils.DynamicDataPrefix + utils.MetaAccounts,
+					utils.DynamicDataPrefix + utils.MetaStats,
+					utils.DynamicDataPrefix + utils.MetaResources,
+					utils.DynamicDataPrefix + utils.MetaLibPhoneNumber},
+			},
+			{
+				Type:    utils.MetaExists,
+				Element: "~*req.Cost",
+				Values:  []string{utils.DynamicDataPrefix},
+			},
+			{
+				Type:    utils.MetaExists,
+				Element: "~*req.Cost",
+				Values:  []string{"unRegVal"},
+			},
+			{
+				Type:    utils.MetaExists,
+				Element: "*req.Cost",
+				Values:  []string{utils.DynamicDataPrefix},
+			},
+			{
+				Type:    utils.MetaExists,
+				Element: "*req.Cost",
+				Values:  []string{"unRegVal"},
+			},
+			{
+				Type:    utils.MetaPrefix,
+				Element: "*req.Usage",
+				Values:  []string{"10s"},
+			},
+		},
+	}
+	if err := newFlt.Compile(); err != nil {
+		t.Error(err)
+	}
+	if err := dm.SetFilter(context.Background(), newFlt, false); err != nil {
+		t.Error(err)
+	}
+
+	if err := UpdateFilterIndex(context.Background(), dm, oldFlt, newFlt); err != nil {
+		t.Error(err)
+	}
+
+	expindxNew := map[string]utils.StringSet{
+		"*exists:*req.Cost:unRegVal": {"ThP1": {}},
+		"*exists::*req.Cost":         {"ThP1": {}},
+		"*notexists:*req.Cost:*none": {"ThP1": {}},
+	}
+	getindxNew, err := dm.GetIndexes(context.Background(), utils.CacheThresholdFilterIndexes, utils.CGRateSorg, utils.EmptyString, utils.EmptyString, true, true)
+	if err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expindxNew, getindxNew) {
+		t.Errorf("Expected \n<%v>, \nReceived \n<%v>", utils.ToJSON(expindxNew), utils.ToJSON(getindxNew))
+	}
+
+}
+
+func TestUpdateFilterIndexGetIndexErr(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+
+	dm.dataDB = &DataDBMock{
+		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
+			return map[string]utils.StringSet{}, utils.ErrNotImplemented
+		},
+	}
+
+	oldFlt := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "fltr_test",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaExists,
+				Element: "~*req.Cost",
+				Values:  []string{},
+			},
+			{
+				Type:    utils.MetaNotExists,
+				Element: "~*req.Cost",
+				Values:  []string{},
+			},
+			{
+				Type:    utils.MetaExists,
+				Element: "~*req.Cost",
+				Values: []string{utils.DynamicDataPrefix + utils.MetaAccounts,
+					utils.DynamicDataPrefix + utils.MetaStats,
+					utils.DynamicDataPrefix + utils.MetaResources,
+					utils.DynamicDataPrefix + utils.MetaLibPhoneNumber},
+			},
+			{
+				Type:    utils.MetaExists,
+				Element: "~*req.Cost",
+				Values:  []string{utils.DynamicDataPrefix},
+			},
+			{
+				Type:    utils.MetaExists,
+				Element: "~*req.Cost",
+				Values:  []string{"unRegVal"},
+			},
+			{
+				Type:    utils.MetaExists,
+				Element: "*req.Cost",
+				Values:  []string{utils.DynamicDataPrefix},
+			},
+			{
+				Type:    utils.MetaExists,
+				Element: "*req.Cost",
+				Values:  []string{"unRegVal"},
+			},
+		},
+	}
+	newFlt := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "fltr_test",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaExists,
+				Element: "~*req.Cost",
+				Values:  []string{},
+			},
+		},
+	}
+
+	if err := UpdateFilterIndex(context.Background(), dm, oldFlt, newFlt); err == nil || err != utils.ErrNotImplemented {
+		t.Errorf("Expected error <%v>, Received error <%v>", utils.ErrNotImplemented, err)
+	}
+
+}
+
+func TestUpdateFilterIndexGetIndexErr2(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+
+	dm.dataDB = &DataDBMock{
+		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
+			return map[string]utils.StringSet{}, utils.ErrNotFound
+		},
+	}
+
+	oldFlt := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "fltr_test",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaExists,
+				Element: "~*req.Cost",
+				Values:  []string{},
+			},
+			{
+				Type:    utils.MetaNotExists,
+				Element: "~*req.Cost",
+				Values:  []string{},
+			},
+			{
+				Type:    utils.MetaExists,
+				Element: "~*req.Cost",
+				Values: []string{utils.DynamicDataPrefix + utils.MetaAccounts,
+					utils.DynamicDataPrefix + utils.MetaStats,
+					utils.DynamicDataPrefix + utils.MetaResources,
+					utils.DynamicDataPrefix + utils.MetaLibPhoneNumber},
+			},
+			{
+				Type:    utils.MetaExists,
+				Element: "~*req.Cost",
+				Values:  []string{utils.DynamicDataPrefix},
+			},
+			{
+				Type:    utils.MetaExists,
+				Element: "~*req.Cost",
+				Values:  []string{"unRegVal"},
+			},
+			{
+				Type:    utils.MetaExists,
+				Element: "*req.Cost",
+				Values:  []string{utils.DynamicDataPrefix},
+			},
+			{
+				Type:    utils.MetaExists,
+				Element: "*req.Cost",
+				Values:  []string{"unRegVal"},
+			},
+		},
+	}
+	newFlt := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "fltr_test",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaExists,
+				Element: "~*req.Cost",
+				Values:  []string{},
+			},
+		},
+	}
+
+	// no index for this filter so  no update needed
+	if err := UpdateFilterIndex(context.Background(), dm, oldFlt, newFlt); err != nil {
+		t.Errorf("Expected error <%v>, Received error <%v>", nil, err)
+	}
+
+}
+
+func TestUpdateFilterIndexRemoveIndexesFromThresholdErr1(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+
+	dm.dataDB = &DataDBMock{
+		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
+			return map[string]utils.StringSet{
+				utils.CacheThresholdFilterIndexes: {
+					"ATTR_TEST": {},
+				},
+			}, nil
+		},
+		SetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
+			return utils.ErrNotImplemented
+		},
+	}
+
+	oldFlt := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "fltr_test",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaExists,
+				Element: "~*req.Cost",
+				Values:  []string{"val"},
+			},
+		},
+	}
+	newFlt := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "fltr_test",
+		Rules: []*FilterRule{
+
+			{
+				Type:    utils.MetaExists,
+				Element: "~*req.Cost",
+				Values: []string{utils.DynamicDataPrefix + utils.MetaAccounts,
+					utils.DynamicDataPrefix + utils.MetaStats,
+					utils.DynamicDataPrefix + utils.MetaResources,
+					utils.DynamicDataPrefix + utils.MetaLibPhoneNumber},
+			},
+		},
+	}
+
+	expErr := utils.ErrNotImplemented
+	if err := UpdateFilterIndex(context.Background(), dm, oldFlt, newFlt); err != expErr {
+		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err)
+	}
+
+}
+
+func TestUpdateFilterIndexRemoveIndexesFromThresholdErr2(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+
+	dm.dataDB = &DataDBMock{
+		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
+			return map[string]utils.StringSet{
+				utils.CacheThresholdFilterIndexes: {
+					"ATTR_TEST": {},
+				},
+			}, nil
+		},
+		SetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
+			return nil
+		},
+	}
+
+	oldFlt := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "fltr_test",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaExists,
+				Element: "~*req.Cost",
+				Values:  []string{"val"},
+			},
+		},
+	}
+	newFlt := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "fltr_test",
+		Rules: []*FilterRule{
+
+			{
+				Type:    utils.MetaExists,
+				Element: "~*req.Cost",
+				Values: []string{utils.DynamicDataPrefix + utils.MetaAccounts,
+					utils.DynamicDataPrefix + utils.MetaStats,
+					utils.DynamicDataPrefix + utils.MetaResources,
+					utils.DynamicDataPrefix + utils.MetaLibPhoneNumber},
+			},
+		},
+	}
+
+	expErr := "SERVER_ERROR: NOT_IMPLEMENTED"
+	if err := UpdateFilterIndex(context.Background(), dm, oldFlt, newFlt); err.Error() != expErr {
+		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err)
+	}
+
+}
+
+func TestUpdateFilterIndexStatIndex(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+
+	oldFlt := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "fltr_test",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaString,
+				Element: "~*req.Cost",
+				Values:  []string{"unRegVal2"},
+			},
+		},
+	}
+
+	if err := oldFlt.Compile(); err != nil {
+		t.Error(err)
+	}
+
+	if err := dm.SetFilter(context.Background(), oldFlt, true); err != nil {
+		t.Error(err)
+	}
+	statQProfl := &StatQueueProfile{
+		Tenant:      "cgrates.org",
+		ID:          "StatQueueProfile3",
+		FilterIDs:   []string{"fltr_test"},
+		QueueLength: 10,
+		TTL:         10 * time.Second,
+		Metrics: []*MetricWithFilters{
+			{
+				MetricID: "*sum#~*req.Usage",
+			},
+		},
+		ThresholdIDs: []string{},
+		Stored:       true,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
+		MinItems: 1,
+	}
+
+	if err := dm.SetStatQueueProfile(context.Background(), statQProfl, true); err != nil {
+		t.Error(err)
+	}
+
+	expindx := map[string]utils.StringSet{
+		"*string:*req.Cost:unRegVal2": {
+			"StatQueueProfile3": {},
+		},
+	}
+
+	getindx, err := dm.GetIndexes(context.Background(), utils.CacheStatFilterIndexes, utils.CGRateSorg, utils.EmptyString, utils.EmptyString, true, true)
+	if err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expindx, getindx) {
+		t.Errorf("Expected \n<%v>, \nReceived \n<%v>", utils.ToJSON(expindx), utils.ToJSON(getindx))
+	}
+
+	newFlt := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "fltr_test",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaPrefix,
+				Element: "~*req.Usage",
+				Values:  []string{"10s"},
+			},
+		},
+	}
+	if err := newFlt.Compile(); err != nil {
+		t.Error(err)
+	}
+	if err := dm.SetFilter(context.Background(), newFlt, false); err != nil {
+		t.Error(err)
+	}
+
+	if err := UpdateFilterIndex(context.Background(), dm, oldFlt, newFlt); err != nil {
+		t.Error(err)
+	}
+
+	expindxNew := map[string]utils.StringSet{
+		"*prefix:*req.Usage:10s": {
+			"StatQueueProfile3": {},
+		},
+	}
+	getindxNew, err := dm.GetIndexes(context.Background(), utils.CacheStatFilterIndexes, utils.CGRateSorg, utils.EmptyString, utils.EmptyString, true, true)
+	if err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expindxNew, getindxNew) {
+		t.Errorf("Expected \n<%v>, \nReceived \n<%v>", utils.ToJSON(expindxNew), utils.ToJSON(getindxNew))
+	}
+
+}
+
+func TestUpdateFilterIndexStatErr1(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+
+	dm.dataDB = &DataDBMock{
+		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
+			return map[string]utils.StringSet{
+				utils.CacheStatFilterIndexes: {
+					"ATTR_TEST": {},
+				},
+			}, nil
+		},
+		SetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
+			return utils.ErrNotImplemented
+		},
+	}
+
+	oldFlt := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "fltr_test",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaString,
+				Element: "~*req.Cost",
+				Values:  []string{"unRegVal2"},
+			},
+		},
+	}
+	newFlt := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "fltr_test",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaPrefix,
+				Element: "~*req.Usage",
+				Values:  []string{"10s"},
+			},
+		},
+	}
+
+	expErr := utils.ErrNotImplemented
+	if err := UpdateFilterIndex(context.Background(), dm, oldFlt, newFlt); err != expErr {
+		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err)
+	}
+
+}
+
+func TestUpdateFilterIndexStatErr2(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+
+	dm.dataDB = &DataDBMock{
+		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
+			return map[string]utils.StringSet{
+				utils.CacheStatFilterIndexes: {
+					"ATTR_TEST": {},
+				},
+			}, nil
+		},
+		SetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
+			return nil
+		},
+	}
+
+	oldFlt := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "fltr_test",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaString,
+				Element: "~*req.Cost",
+				Values:  []string{"unRegVal2"},
+			},
+		},
+	}
+	newFlt := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "fltr_test",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaPrefix,
+				Element: "~*req.Usage",
+				Values:  []string{"10s"},
+			},
+		},
+	}
+
+	expErr := "SERVER_ERROR: NOT_IMPLEMENTED"
+	if err := UpdateFilterIndex(context.Background(), dm, oldFlt, newFlt); err.Error() != expErr {
+		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err)
+	}
+
+}
+
+func TestUpdateFilterIndexResourceIndex(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+
+	oldFlt := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "fltr_test",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaString,
+				Element: "~*req.Cost",
+				Values:  []string{"unRegVal2"},
+			},
+		},
+	}
+
+	if err := oldFlt.Compile(); err != nil {
+		t.Error(err)
+	}
+
+	if err := dm.SetFilter(context.Background(), oldFlt, true); err != nil {
+		t.Error(err)
+	}
+	resProf := &ResourceProfile{
+		Tenant:    "cgrates.org",
+		ID:        "RL1",
+		FilterIDs: []string{"fltr_test"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 100,
+			}},
+		Limit:        2,
+		ThresholdIDs: []string{"TEST_ACTIONS"},
+
+		UsageTTL:          time.Millisecond,
+		AllocationMessage: "ALLOC",
+	}
+
+	if err := dm.SetResourceProfile(context.Background(), resProf, true); err != nil {
+		t.Error(err)
+	}
+
+	expindx := map[string]utils.StringSet{
+		"*string:*req.Cost:unRegVal2": {"RL1": {}},
+	}
+
+	getindx, err := dm.GetIndexes(context.Background(), utils.CacheResourceFilterIndexes, utils.CGRateSorg, utils.EmptyString, utils.EmptyString, true, true)
+	if err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expindx, getindx) {
+		t.Errorf("Expected \n<%v>, \nReceived \n<%v>", utils.ToJSON(expindx), utils.ToJSON(getindx))
+	}
+
+	newFlt := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "fltr_test",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaPrefix,
+				Element: "~*req.Usage",
+				Values:  []string{"10s"},
+			},
+		},
+	}
+	if err := newFlt.Compile(); err != nil {
+		t.Error(err)
+	}
+	if err := dm.SetFilter(context.Background(), newFlt, false); err != nil {
+		t.Error(err)
+	}
+
+	if err := UpdateFilterIndex(context.Background(), dm, oldFlt, newFlt); err != nil {
+		t.Error(err)
+	}
+
+	expindxNew := map[string]utils.StringSet{
+		"*prefix:*req.Usage:10s": {"RL1": {}},
+	}
+	getindxNew, err := dm.GetIndexes(context.Background(), utils.CacheResourceFilterIndexes, utils.CGRateSorg, utils.EmptyString, utils.EmptyString, true, true)
+	if err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expindxNew, getindxNew) {
+		t.Errorf("Expected \n<%v>, \nReceived \n<%v>", utils.ToJSON(expindxNew), utils.ToJSON(getindxNew))
+	}
+
+}
+
+func TestUpdateFilterIndexResourcetErr1(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+
+	dm.dataDB = &DataDBMock{
+		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
+			return map[string]utils.StringSet{
+				utils.CacheResourceFilterIndexes: {
+					"ATTR_TEST": {},
+				},
+			}, nil
+		},
+		SetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
+			return utils.ErrNotImplemented
+		},
+	}
+
+	oldFlt := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "fltr_test",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaString,
+				Element: "~*req.Cost",
+				Values:  []string{"unRegVal2"},
+			},
+		},
+	}
+	newFlt := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "fltr_test",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaPrefix,
+				Element: "~*req.Usage",
+				Values:  []string{"10s"},
+			},
+		},
+	}
+
+	expErr := utils.ErrNotImplemented
+	if err := UpdateFilterIndex(context.Background(), dm, oldFlt, newFlt); err != expErr {
+		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err)
+	}
+
+}
+
+func TestUpdateFilterIndexResourceErr2(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+
+	dm.dataDB = &DataDBMock{
+		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
+			return map[string]utils.StringSet{
+				utils.CacheResourceFilterIndexes: {
+					"ATTR_TEST": {},
+				},
+			}, nil
+		},
+		SetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
+			return nil
+		},
+	}
+
+	oldFlt := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "fltr_test",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaString,
+				Element: "~*req.Cost",
+				Values:  []string{"unRegVal2"},
+			},
+		},
+	}
+	newFlt := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "fltr_test",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaPrefix,
+				Element: "~*req.Usage",
+				Values:  []string{"10s"},
+			},
+		},
+	}
+
+	expErr := "SERVER_ERROR: NOT_IMPLEMENTED"
+	if err := UpdateFilterIndex(context.Background(), dm, oldFlt, newFlt); err.Error() != expErr {
+		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err)
+	}
+
+}
+
+func TestUpdateFilterIndexRouteIndex(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+
+	oldFlt := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "fltr_test",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaString,
+				Element: "~*req.Cost",
+				Values:  []string{"unRegVal2"},
+			},
+		},
+	}
+
+	if err := oldFlt.Compile(); err != nil {
+		t.Error(err)
+	}
+
+	if err := dm.SetFilter(context.Background(), oldFlt, true); err != nil {
+		t.Error(err)
+	}
+	routeProf := &RouteProfile{
+		Tenant:            "cgrates.org",
+		ID:                "ID",
+		FilterIDs:         []string{"fltr_test"},
+		Weights:           utils.DynamicWeights{{}},
+		Sorting:           utils.MetaQOS,
+		SortingParameters: []string{"param"},
+		Routes: []*Route{{
+			ID:             "RT1",
+			FilterIDs:      []string{"fltr1"},
+			AccountIDs:     []string{"acc1"},
+			RateProfileIDs: []string{"rp1"},
+			ResourceIDs:    []string{"res1"},
+			StatIDs:        []string{"stat1"},
+			Weights:        utils.DynamicWeights{{}},
+			Blockers: utils.DynamicBlockers{
+				{
+					Blocker: true,
+				},
+			},
+			RouteParameters: "params",
+		}},
+	}
+
+	if err := dm.SetRouteProfile(context.Background(), routeProf, true); err != nil {
+		t.Error(err)
+	}
+
+	expindx := map[string]utils.StringSet{
+		"*string:*req.Cost:unRegVal2": {"ID": {}},
+	}
+
+	getindx, err := dm.GetIndexes(context.Background(), utils.CacheRouteFilterIndexes, utils.CGRateSorg, utils.EmptyString, utils.EmptyString, true, true)
+	if err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expindx, getindx) {
+		t.Errorf("Expected \n<%v>, \nReceived \n<%v>", utils.ToJSON(expindx), utils.ToJSON(getindx))
+	}
+
+	newFlt := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "fltr_test",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaPrefix,
+				Element: "~*req.Usage",
+				Values:  []string{"10s"},
+			},
+		},
+	}
+	if err := newFlt.Compile(); err != nil {
+		t.Error(err)
+	}
+	if err := dm.SetFilter(context.Background(), newFlt, false); err != nil {
+		t.Error(err)
+	}
+
+	if err := UpdateFilterIndex(context.Background(), dm, oldFlt, newFlt); err != nil {
+		t.Error(err)
+	}
+
+	expindxNew := map[string]utils.StringSet{
+		"*prefix:*req.Usage:10s": {"ID": {}},
+	}
+	getindxNew, err := dm.GetIndexes(context.Background(), utils.CacheRouteFilterIndexes, utils.CGRateSorg, utils.EmptyString, utils.EmptyString, true, true)
+	if err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expindxNew, getindxNew) {
+		t.Errorf("Expected \n<%v>, \nReceived \n<%v>", utils.ToJSON(expindxNew), utils.ToJSON(getindxNew))
+	}
+
+}
+
+func TestUpdateFilterIndexRouteErr1(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+
+	dm.dataDB = &DataDBMock{
+		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
+			return map[string]utils.StringSet{
+				utils.CacheRouteFilterIndexes: {
+					"ATTR_TEST": {},
+				},
+			}, nil
+		},
+		SetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
+			return utils.ErrNotImplemented
+		},
+	}
+
+	oldFlt := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "fltr_test",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaString,
+				Element: "~*req.Cost",
+				Values:  []string{"unRegVal2"},
+			},
+		},
+	}
+	newFlt := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "fltr_test",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaPrefix,
+				Element: "~*req.Usage",
+				Values:  []string{"10s"},
+			},
+		},
+	}
+
+	expErr := utils.ErrNotImplemented
+	if err := UpdateFilterIndex(context.Background(), dm, oldFlt, newFlt); err != expErr {
+		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err)
+	}
+
+}
+
+func TestUpdateFilterIndexRouteErr2(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+
+	dm.dataDB = &DataDBMock{
+		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
+			return map[string]utils.StringSet{
+				utils.CacheRouteFilterIndexes: {
+					"ATTR_TEST": {},
+				},
+			}, nil
+		},
+		SetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
+			return nil
+		},
+	}
+
+	oldFlt := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "fltr_test",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaString,
+				Element: "~*req.Cost",
+				Values:  []string{"unRegVal2"},
+			},
+		},
+	}
+	newFlt := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "fltr_test",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaPrefix,
+				Element: "~*req.Usage",
+				Values:  []string{"10s"},
+			},
+		},
+	}
+
+	expErr := "SERVER_ERROR: NOT_IMPLEMENTED"
+	if err := UpdateFilterIndex(context.Background(), dm, oldFlt, newFlt); err.Error() != expErr {
+		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err)
+	}
+
+}
+
+func TestUpdateFilterIndexChargerIndex(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+
+	oldFlt := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "fltr_test",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaString,
+				Element: "~*req.Cost",
+				Values:  []string{"unRegVal2"},
+			},
+		},
+	}
+
+	if err := oldFlt.Compile(); err != nil {
+		t.Error(err)
+	}
+
+	if err := dm.SetFilter(context.Background(), oldFlt, true); err != nil {
+		t.Error(err)
+	}
+	ChProf := &ChargerProfile{
+
+		Tenant:       "cgrates.org",
+		ID:           "CPP_3",
+		FilterIDs:    []string{"fltr_test"},
+		RunID:        "*rated",
+		AttributeIDs: []string{"ATTR_1"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
+		weight: 20,
+	}
+
+	if err := dm.SetChargerProfile(context.Background(), ChProf, true); err != nil {
+		t.Error(err)
+	}
+
+	expindx := map[string]utils.StringSet{
+		"*string:*req.Cost:unRegVal2": {"CPP_3": {}},
+	}
+
+	getindx, err := dm.GetIndexes(context.Background(), utils.CacheChargerFilterIndexes, utils.CGRateSorg, utils.EmptyString, utils.EmptyString, true, true)
+	if err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expindx, getindx) {
+		t.Errorf("Expected \n<%v>, \nReceived \n<%v>", utils.ToJSON(expindx), utils.ToJSON(getindx))
+	}
+
+	newFlt := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "fltr_test",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaPrefix,
+				Element: "~*req.Usage",
+				Values:  []string{"10s"},
+			},
+		},
+	}
+	if err := newFlt.Compile(); err != nil {
+		t.Error(err)
+	}
+	if err := dm.SetFilter(context.Background(), newFlt, false); err != nil {
+		t.Error(err)
+	}
+
+	if err := UpdateFilterIndex(context.Background(), dm, oldFlt, newFlt); err != nil {
+		t.Error(err)
+	}
+
+	expindxNew := map[string]utils.StringSet{
+		"*prefix:*req.Usage:10s": {"CPP_3": {}},
+	}
+	getindxNew, err := dm.GetIndexes(context.Background(), utils.CacheChargerFilterIndexes, utils.CGRateSorg, utils.EmptyString, utils.EmptyString, true, true)
+	if err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expindxNew, getindxNew) {
+		t.Errorf("Expected \n<%v>, \nReceived \n<%v>", utils.ToJSON(expindxNew), utils.ToJSON(getindxNew))
+	}
+
+}
+
+func TestUpdateFilterIndexChargerErr1(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+
+	dm.dataDB = &DataDBMock{
+		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
+			return map[string]utils.StringSet{
+				utils.CacheChargerFilterIndexes: {
+					"ATTR_TEST": {},
+				},
+			}, nil
+		},
+		SetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
+			return utils.ErrNotImplemented
+		},
+	}
+
+	oldFlt := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "fltr_test",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaString,
+				Element: "~*req.Cost",
+				Values:  []string{"unRegVal2"},
+			},
+		},
+	}
+	newFlt := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "fltr_test",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaPrefix,
+				Element: "~*req.Usage",
+				Values:  []string{"10s"},
+			},
+		},
+	}
+
+	expErr := utils.ErrNotImplemented
+	if err := UpdateFilterIndex(context.Background(), dm, oldFlt, newFlt); err != expErr {
+		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err)
+	}
+
+}
+
+func TestUpdateFilterIndexChargerErr2(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+
+	dm.dataDB = &DataDBMock{
+		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
+			return map[string]utils.StringSet{
+				utils.CacheChargerFilterIndexes: {
+					"ATTR_TEST": {},
+				},
+			}, nil
+		},
+		SetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
+			return nil
+		},
+	}
+
+	oldFlt := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "fltr_test",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaString,
+				Element: "~*req.Cost",
+				Values:  []string{"unRegVal2"},
+			},
+		},
+	}
+	newFlt := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "fltr_test",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaPrefix,
+				Element: "~*req.Usage",
+				Values:  []string{"10s"},
+			},
+		},
+	}
+
+	expErr := "SERVER_ERROR: NOT_IMPLEMENTED"
+	if err := UpdateFilterIndex(context.Background(), dm, oldFlt, newFlt); err.Error() != expErr {
+		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err)
+	}
+
+}
+
+func TestUpdateFilterIndexAccountsIndex(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+
+	oldFlt := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "fltr_test",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaString,
+				Element: "~*req.Cost",
+				Values:  []string{"unRegVal2"},
+			},
+		},
+	}
+
+	if err := oldFlt.Compile(); err != nil {
+		t.Error(err)
+	}
+
+	if err := dm.SetFilter(context.Background(), oldFlt, true); err != nil {
+		t.Error(err)
+	}
+	accPrf := &utils.Account{
+		Tenant:    "cgrates.org",
+		ID:        "1004",
+		FilterIDs: []string{"fltr_test"},
+		Balances: map[string]*utils.Balance{
+			"ConcreteBalance1": {
+				ID: "ConcreteBalance1",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 20,
+					},
+				},
+				Type:  utils.MetaConcrete,
+				Units: &utils.Decimal{Big: decimal.New(0, 0)},
+				CostIncrements: []*utils.CostIncrement{
+					{
+						FilterIDs:    []string{"*string:~*req.ToR:*data"},
+						Increment:    &utils.Decimal{Big: decimal.New(1, 0)},
+						FixedFee:     &utils.Decimal{Big: decimal.New(0, 0)},
+						RecurrentFee: &utils.Decimal{Big: decimal.New(1, 0)},
+					},
+				},
+			},
+		},
+	}
+
+	if err := dm.SetAccount(context.Background(), accPrf, true); err != nil {
+		t.Error(err)
+	}
+
+	expindx := map[string]utils.StringSet{
+		"*string:*req.Cost:unRegVal2": {"1004": {}},
+	}
+
+	getindx, err := dm.GetIndexes(context.Background(), utils.CacheAccountsFilterIndexes, utils.CGRateSorg, utils.EmptyString, utils.EmptyString, true, true)
+	if err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expindx, getindx) {
+		t.Errorf("Expected \n<%v>, \nReceived \n<%v>", utils.ToJSON(expindx), utils.ToJSON(getindx))
+	}
+
+	newFlt := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "fltr_test",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaPrefix,
+				Element: "~*req.Usage",
+				Values:  []string{"10s"},
+			},
+		},
+	}
+	if err := newFlt.Compile(); err != nil {
+		t.Error(err)
+	}
+	if err := dm.SetFilter(context.Background(), newFlt, false); err != nil {
+		t.Error(err)
+	}
+
+	if err := UpdateFilterIndex(context.Background(), dm, oldFlt, newFlt); err != nil {
+		t.Error(err)
+	}
+
+	expindxNew := map[string]utils.StringSet{
+		"*prefix:*req.Usage:10s": {"1004": {}},
+	}
+	getindxNew, err := dm.GetIndexes(context.Background(), utils.CacheAccountsFilterIndexes, utils.CGRateSorg, utils.EmptyString, utils.EmptyString, true, true)
+	if err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expindxNew, getindxNew) {
+		t.Errorf("Expected \n<%v>, \nReceived \n<%v>", utils.ToJSON(expindxNew), utils.ToJSON(getindxNew))
+	}
+
+}
+
+func TestUpdateFilterIndexAccountsErr1(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+
+	dm.dataDB = &DataDBMock{
+		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
+			return map[string]utils.StringSet{
+				utils.CacheAccountsFilterIndexes: {
+					"ATTR_TEST": {},
+				},
+			}, nil
+		},
+		SetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
+			return utils.ErrNotImplemented
+		},
+	}
+
+	oldFlt := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "fltr_test",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaString,
+				Element: "~*req.Cost",
+				Values:  []string{"unRegVal2"},
+			},
+		},
+	}
+	newFlt := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "fltr_test",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaPrefix,
+				Element: "~*req.Usage",
+				Values:  []string{"10s"},
+			},
+		},
+	}
+
+	expErr := utils.ErrNotImplemented
+	if err := UpdateFilterIndex(context.Background(), dm, oldFlt, newFlt); err != expErr {
+		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err)
+	}
+
+}
+
+func TestUpdateFilterIndexAccountsErr2(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+
+	dm.dataDB = &DataDBMock{
+		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
+			return map[string]utils.StringSet{
+				utils.CacheAccountsFilterIndexes: {
+					"ATTR_TEST": {},
+				},
+			}, nil
+		},
+		SetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
+			return nil
+		},
+	}
+
+	oldFlt := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "fltr_test",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaString,
+				Element: "~*req.Cost",
+				Values:  []string{"unRegVal2"},
+			},
+		},
+	}
+	newFlt := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "fltr_test",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaPrefix,
+				Element: "~*req.Usage",
+				Values:  []string{"10s"},
+			},
+		},
+	}
+
+	expErr := "SERVER_ERROR: NOT_IMPLEMENTED"
+	if err := UpdateFilterIndex(context.Background(), dm, oldFlt, newFlt); err.Error() != expErr {
+		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err)
+	}
+
+}
