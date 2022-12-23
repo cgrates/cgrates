@@ -3457,7 +3457,6 @@ func TestResetAccountCDRSuccesful(t *testing.T) {
 func TestRemoveSessionCost(t *testing.T) {
 	tmp := Cache
 	tmpCdr := cdrStorage
-
 	utils.Logger.SetLogLevel(4)
 	utils.Logger.SetSyslog(nil)
 	buf := new(bytes.Buffer)
@@ -3467,11 +3466,9 @@ func TestRemoveSessionCost(t *testing.T) {
 		log.SetOutput(os.Stderr)
 		Cache = tmp
 		cdrStorage = tmpCdr
-
 	}()
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-
 	action := &Action{
 		ExtraParameters: "*acnt.BalanceID;*act.ActionID",
 	}
@@ -3482,13 +3479,20 @@ func TestRemoveSessionCost(t *testing.T) {
 				Values:  []string{"val1,val2"},
 				Type:    utils.MetaString,
 				Element: utils.MetaScPrefix + utils.CGRID},
+			{
+				Values:  []string{"val1,val2"},
+				Type:    utils.MetaString,
+				Element: "test"},
 		},
 	}, []string{"grpId"}, true, utils.NonTransactional)
 
 	expLog := `for filter`
+	expLog2 := `in action:`
 	if err := removeSessionCosts(nil, action, nil, nil, nil); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
 	} else if rcvLog := buf.String(); !strings.Contains(rcvLog, expLog) {
+		t.Errorf("expected %v,received %v", expLog, rcvLog)
+	} else if rcvLog := buf.String(); !strings.Contains(rcvLog, expLog2) {
 		t.Errorf("expected %v,received %v", expLog, rcvLog)
 	}
 
@@ -3976,5 +3980,37 @@ func TestRemoveBalanceActionErr(t *testing.T) {
 	if err := removeBalanceAction(acc, acs, nil, nil, nil); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
 	}
+}
 
+func TestDebitResetAction(t *testing.T) {
+
+	ub := &Account{
+		ID: "OUT:CUSTOMER_1:rif",
+		BalanceMap: map[string]Balances{
+			utils.MetaVoice:    {&Balance{Value: 21}},
+			utils.MetaMonetary: {&Balance{Value: 21}},
+		},
+	}
+	a := &Action{
+		Id:               "MINI",
+		ActionType:       utils.MetaTopUpReset,
+		ExpirationString: utils.MetaUnlimited,
+		ExtraParameters:  "",
+		Weight:           10,
+		Balance: &BalanceFilter{
+			Type:           utils.StringPointer(utils.MetaMonetary),
+			Uuid:           utils.StringPointer("uuid"),
+			Value:          &utils.ValueFormula{Static: 10},
+			Weight:         utils.Float64Pointer(10),
+			DestinationIDs: nil,
+			TimingIDs:      nil,
+			SharedGroups:   nil,
+			Categories:     nil,
+			Disabled:       utils.BoolPointer(false),
+			Blocker:        utils.BoolPointer(false),
+		},
+	}
+	if err := debitResetAction(ub, a, nil, nil, nil); err != nil {
+		t.Error(err)
+	}
 }

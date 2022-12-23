@@ -508,7 +508,7 @@ func TestBalanceDebitUnits(t *testing.T) {
 		TimeStart:     time.Date(2015, 4, 24, 7, 59, 4, 0, time.UTC),
 		TimeEnd:       time.Date(2015, 4, 24, 8, 2, 0, 0, time.UTC),
 		LoopIndex:     0,
-		DurationIndex: 176 * time.Second,
+		DurationIndex: 17 * time.Second,
 
 		FallbackSubject: "",
 		RatingInfos: RatingInfos{
@@ -606,15 +606,22 @@ func TestBalanceDebitUnits(t *testing.T) {
 		t.Errorf("expected %+v ,received  %+v", utils.ToJSON(exp), utils.ToJSON(val))
 	}
 }
-func TestBalanceDebitMoney(t *testing.T) {
-
+func TestBalanceDebitMoneyMaxCostFree(t *testing.T) {
+	utils.Logger.SetLogLevel(3)
+	utils.Logger.SetSyslog(nil)
+	buf := new(bytes.Buffer)
+	log.SetOutput(buf)
+	defer func() {
+		utils.Logger.SetLogLevel(0)
+		log.SetOutput(os.Stderr)
+	}()
 	cd := &CallDescriptor{
-		Category:  "postpaid",
-		ToR:       utils.MetaVoice,
-		Tenant:    "foehn",
-		TimeStart: time.Date(2015, 4, 24, 7, 59, 4, 0, time.UTC),
-		TimeEnd:   time.Date(2015, 4, 24, 8, 2, 0, 0, time.UTC),
-
+		Category:     "postpaid",
+		ToR:          utils.MetaVoice,
+		Tenant:       "foehn",
+		TimeStart:    time.Date(2015, 4, 24, 7, 59, 4, 0, time.UTC),
+		TimeEnd:      time.Date(2015, 4, 24, 8, 2, 0, 0, time.UTC),
+		MaxCostSoFar: 33,
 		testCallcost: &CallCost{
 			Category:         "generic",
 			Tenant:           "cgrates.org",
@@ -635,8 +642,9 @@ func TestBalanceDebitMoney(t *testing.T) {
 						}},
 					RateInterval: &RateInterval{
 						Rating: &RIRate{
-							ConnectFee: 0.15,
-							MaxCost:    23.2,
+							ConnectFee:      0.15,
+							MaxCost:         23.2,
+							MaxCostStrategy: utils.MetaMaxCostFree,
 							Rates: RateGroups{&RGRate{GroupIntervalStart: 0,
 								Value: 0.1, RateIncrement: time.Second,
 								RateUnit: time.Second}}}},
@@ -670,22 +678,109 @@ func TestBalanceDebitMoney(t *testing.T) {
 			"FACT_VAL": 20.22,
 		},
 	}
-	if val, err := b.debitMoney(cd, ub, moneyBalances, true, true, true, nil); err != nil {
-		t.Errorf("expected nil,received %+v", utils.ToJSON(val))
+
+	if _, err := b.debitMoney(cd, ub, moneyBalances, true, true, true, nil); err != nil {
+		t.Error(err)
 	}
 }
-
-func TestBalanceDebitUnits2(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	db := NewInternalDB(nil, nil, true, nil)
-	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+func TestBalanceDebitMoneyMaxCostDisconnect(t *testing.T) {
+	utils.Logger.SetLogLevel(3)
+	utils.Logger.SetSyslog(nil)
+	buf := new(bytes.Buffer)
+	log.SetOutput(buf)
+	defer func() {
+		utils.Logger.SetLogLevel(0)
+		log.SetOutput(os.Stderr)
+	}()
 	cd := &CallDescriptor{
-		Category:  "postpaid",
-		ToR:       utils.MetaVoice,
-		Tenant:    "foehn",
-		TimeStart: time.Date(2015, 4, 24, 7, 59, 4, 0, time.UTC),
-		TimeEnd:   time.Date(2015, 4, 24, 8, 2, 0, 0, time.UTC),
-
+		Category:     "postpaid",
+		ToR:          utils.MetaVoice,
+		Tenant:       "foehn",
+		TimeStart:    time.Date(2015, 4, 24, 7, 59, 4, 0, time.UTC),
+		TimeEnd:      time.Date(2015, 4, 24, 8, 2, 0, 0, time.UTC),
+		MaxCostSoFar: 33,
+		testCallcost: &CallCost{
+			Category:         "generic",
+			Tenant:           "cgrates.org",
+			Subject:          "1001",
+			Account:          "1001",
+			Destination:      "data",
+			ToR:              "*data",
+			Cost:             0,
+			deductConnectFee: true,
+			Timespans: TimeSpans{
+				{
+					TimeStart:     time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
+					TimeEnd:       time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
+					DurationIndex: 0,
+					Increments: Increments{
+						{Cost: 2, BalanceInfo: &DebitInfo{
+							Monetary: &MonetaryInfo{UUID: "moneya"}},
+						}},
+				},
+			},
+		},
+		FallbackSubject: "",
+	}
+	ub := &Account{
+		ID: "vdf:broker",
+		BalanceMap: map[string]Balances{
+			utils.MetaVoice: {
+				&Balance{Value: 20 * float64(time.Second),
+					DestinationIDs: utils.NewStringMap("NAT"),
+					Weight:         10, RatingSubject: "rif"},
+				&Balance{Value: 100 * float64(time.Second),
+					DestinationIDs: utils.NewStringMap("RET"), Weight: 20},
+			}},
+	}
+	moneyBalances := Balances{}
+	b := &Balance{
+		Uuid:           "uuid",
+		ID:             "id",
+		Value:          12.22,
+		ExpirationDate: time.Date(2022, 11, 1, 20, 0, 0, 0, time.UTC),
+		Blocker:        true,
+		Disabled:       false,
+		precision:      2,
+		RatingSubject:  "*val34",
+		Factor: ValueFactor{
+			"FACT_VAL": 20.22,
+		},
+	}
+	expLog := `Nil RateInterval ERROR on TS:`
+	if _, err := b.debitMoney(cd, ub, moneyBalances, true, true, true, nil); err == nil {
+		t.Error(err)
+	} else if rcvLog := buf.String(); !strings.Contains(rcvLog, expLog) {
+		t.Errorf("Logger %v,doesn't contain %v", rcvLog, expLog)
+	}
+	cd.testCallcost.Timespans[0].RateInterval = &RateInterval{
+		Rating: &RIRate{
+			ConnectFee:      0.15,
+			MaxCost:         23.2,
+			MaxCostStrategy: utils.MetaMaxCostDisconnect,
+			Rates: RateGroups{&RGRate{GroupIntervalStart: 0,
+				Value: 0.1, RateIncrement: time.Second,
+				RateUnit: time.Second}}}}
+	if _, err := b.debitMoney(cd, ub, moneyBalances, true, true, true, nil); err != nil {
+		t.Error(err)
+	}
+}
+func TestBalanceDebitMoney(t *testing.T) {
+	utils.Logger.SetLogLevel(3)
+	utils.Logger.SetSyslog(nil)
+	buf := new(bytes.Buffer)
+	log.SetOutput(buf)
+	defer func() {
+		utils.Logger.SetLogLevel(0)
+		log.SetOutput(os.Stderr)
+	}()
+	cd := &CallDescriptor{
+		Category:     "postpaid",
+		ToR:          utils.MetaVoice,
+		Tenant:       "foehn",
+		TimeStart:    time.Date(2015, 4, 24, 7, 59, 4, 0, time.UTC),
+		TimeEnd:      time.Date(2015, 4, 24, 8, 2, 0, 0, time.UTC),
+		MaxCostSoFar: 33,
 		testCallcost: &CallCost{
 			Category:         "generic",
 			Tenant:           "cgrates.org",
@@ -708,6 +803,76 @@ func TestBalanceDebitUnits2(t *testing.T) {
 						Rating: &RIRate{
 							ConnectFee: 0.15,
 							MaxCost:    23.2,
+
+							Rates: RateGroups{&RGRate{GroupIntervalStart: 0,
+								Value: 0.1, RateIncrement: time.Second,
+								RateUnit: time.Second}}}},
+				},
+			},
+		},
+		FallbackSubject: "",
+	}
+	ub := &Account{
+		ID: "vdf:broker",
+		BalanceMap: map[string]Balances{
+			utils.MetaVoice: {
+				&Balance{Value: 20 * float64(time.Second),
+					DestinationIDs: utils.NewStringMap("NAT"),
+					Weight:         10, RatingSubject: "rif"},
+				&Balance{Value: 100 * float64(time.Second),
+					DestinationIDs: utils.NewStringMap("RET"), Weight: 20},
+			}},
+	}
+	moneyBalances := Balances{}
+	b := &Balance{
+		ID:             "id",
+		Value:          12.22,
+		ExpirationDate: time.Date(2022, 11, 1, 20, 0, 0, 0, time.UTC),
+		precision:      2,
+		RatingSubject:  "*val34",
+		Factor: ValueFactor{
+			"FACT_VAL": 20.22,
+		},
+	}
+	if _, err := b.debitMoney(cd, ub, moneyBalances, true, true, true, nil); err != nil {
+		t.Error(err)
+	}
+}
+func TestBalanceDebitUnits2(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true, nil)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	cd := &CallDescriptor{
+		Category:     "postpaid",
+		ToR:          utils.MetaVoice,
+		Tenant:       "foehn",
+		TimeStart:    time.Date(2015, 4, 24, 7, 59, 4, 0, time.UTC),
+		TimeEnd:      time.Date(2015, 4, 24, 8, 2, 0, 0, time.UTC),
+		MaxCostSoFar: 23.8,
+		testCallcost: &CallCost{
+			Category: "generic",
+			Tenant:   "cgrates.org",
+			Subject:  "1001",
+			Account:  "1001",
+
+			Destination:      "data",
+			ToR:              "*data",
+			Cost:             0,
+			deductConnectFee: true,
+			Timespans: TimeSpans{
+				{
+					TimeStart:     time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
+					TimeEnd:       time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
+					DurationIndex: 0,
+					Increments: Increments{
+						{Cost: 2, BalanceInfo: &DebitInfo{
+							Monetary: &MonetaryInfo{UUID: "moneya"}},
+						}},
+					RateInterval: &RateInterval{
+						Rating: &RIRate{
+							ConnectFee:      0.15,
+							MaxCost:         23.2,
+							MaxCostStrategy: utils.MetaMaxCostDisconnect,
 							Rates: RateGroups{&RGRate{GroupIntervalStart: 0,
 								Value: 0.1, RateIncrement: time.Second,
 								RateUnit: time.Second}}}},
@@ -753,7 +918,7 @@ func TestBalanceDebitUnits2(t *testing.T) {
 	fltrs := FilterS{cfg, dm, nil}
 	config.SetCgrConfig(cfg)
 
-	if _, err := b.debitUnits(cd, ub, moneyBalances, true, false, true, &fltrs); err != nil {
+	if _, err := b.debitUnits(cd, ub, moneyBalances, true, true, true, &fltrs); err != nil {
 		t.Errorf("received %v", err)
 	}
 }
