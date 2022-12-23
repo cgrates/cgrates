@@ -1774,6 +1774,22 @@ func TestV2StoreSessionCost2(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("expected %+v,received %+v", utils.OK, reply)
 	}
+	clientconn2 := make(chan rpcclient.ClientConnector, 1)
+	clientconn2 <- &ccMock{
+
+		calls: map[string]func(args interface{}, reply interface{}) error{
+			utils.ResponderRefundRounding: func(args, reply interface{}) error {
+				rpl := &Account{}
+				*reply.(*Account) = *rpl
+				return utils.ErrNotFound
+			},
+		},
+	}
+	cdrS.connMgr.rpcInternal[utils.ConcatenatedKey(utils.MetaInternal, utils.RateSConnsCfg)] = clientconn2
+
+	if err := cdrS.V2StoreSessionCost(args, &reply); err != nil {
+		t.Error(err)
+	}
 
 }
 func TestV1RateCDRSSuccesful(t *testing.T) {
@@ -2076,5 +2092,44 @@ func TestChrgrSProcessEvent(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(val, expcgrEv) {
 		t.Errorf("expected %v,received %v", utils.ToJSON(expcgrEv), utils.ToJSON(val))
+	}
+}
+
+func TestCdrSCall123(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+
+	tmpConnMgr := connMgr
+	defer func() {
+		connMgr = tmpConnMgr
+		config.SetCgrConfig(config.NewDefaultCGRConfig())
+	}()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	cdrS := &CDRServer{
+		cgrCfg:  cfg,
+		connMgr: connMgr,
+		dm:      dm,
+		cdrDb:   db,
+	}
+	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn <- cdrS
+	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{})
+	config.SetCgrConfig(cfg)
+	SetConnManager(connMgr)
+	var reply string
+	attr := &AttrCDRSStoreSMCost{
+		Cost: &SMCost{
+			CGRID:    "cgrid1",
+			RunID:    "run1",
+			OriginID: "originid",
+			CostDetails: &EventCost{
+				Usage: utils.DurationPointer(1 * time.Minute),
+				Cost:  utils.Float64Pointer(32.3),
+			},
+		},
+		CheckDuplicate: false,
+	}
+	if err := cdrS.Call(utils.CDRsV1StoreSessionCost, attr, &reply); err != nil {
+		t.Error(err)
 	}
 }
