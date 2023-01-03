@@ -119,8 +119,10 @@ func UpdateFilterIndexes(dm *DataManager, tnt string, oldFltr *Filter, newFltr *
 	}
 
 	removeIndexKeys := removeRules.Slice()
-
 	for idxItmType, index := range rcvIndexes {
+		if !strings.HasPrefix(idxItmType, utils.Meta) {
+			idxItmType = strings.Split(idxItmType, utils.CONCATENATED_KEY_SEP)[0]
+		}
 		switch idxItmType {
 		case utils.CacheChargerFilterIndexes:
 			// remove the indexes from this filter for this partition
@@ -171,6 +173,7 @@ func UpdateFilterIndexes(dm *DataManager, tnt string, oldFltr *Filter, newFltr *
 				return err
 			}
 		case utils.CacheStatFilterIndexes:
+
 			// remove the indexes from this filter for this partition
 			if err = removeFilterIndexesForFilter(dm, idxItmType, utils.CacheStatQueueProfiles,
 				tnt, removeIndexKeys, index); err != nil {
@@ -252,6 +255,7 @@ func removeFilterIndexesForFilter(dm *DataManager, idxItmType, cacheItmType, tnt
 
 		fltrIndexer := NewFilterIndexer(dm, utils.CacheInstanceToPrefix[cacheItmType], tnt)
 		fltrIndexer.indexes = remIndx
+
 		if err = fltrIndexer.StoreIndexes(true, utils.NonTransactional); err != nil {
 			return
 		}
@@ -271,6 +275,7 @@ func addReverseFilterIndexForFilter(dm *DataManager, idxItmType, tnt,
 		refID := guardian.Guardian.GuardIDs(utils.EmptyString,
 			config.CgrConfig().GeneralCfg().LockingTimeout, utils.CacheReverseFilterIndexes+tntFltrID)
 		var indexes map[string]utils.StringMap
+
 		if indexes, err = dm.GetFilterIndexes(utils.PrefixToIndexCache[utils.ReverseFilterIndexes], tntFltrID,
 			utils.EmptyString, nil); err != nil {
 			if err != utils.ErrNotFound {

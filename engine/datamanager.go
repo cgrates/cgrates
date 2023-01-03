@@ -369,6 +369,7 @@ func (dm *DataManager) RebuildReverseForPrefix(prefix string) (err error) {
 	}
 	return
 }
+
 func (dm *DataManager) GetDestination(key string, skipCache bool, transactionID string) (dest *Destination, err error) {
 	dest, err = dm.dataDB.GetDestinationDrv(key, skipCache, transactionID)
 	if err != nil {
