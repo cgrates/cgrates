@@ -1572,10 +1572,32 @@ func (ms *MongoStorage) GetFilterIndexesDrv(cacheID, itemIDPrefix, filterType st
 	}
 	var results []result
 	dbKey := utils.CacheInstanceToPrefix[cacheID] + itemIDPrefix
-	if len(fldNameVal) != 0 {
+	if strings.HasPrefix(dbKey, utils.ReverseFilterIndexes) { // case for reverse filter indexes, key is different
+		if err = ms.query(func(sctx mongo.SessionContext) (err error) {
+			cur, err := ms.getCol(ColRFI).Find(sctx,
+				bson.M{"key": utils.ConcatenatedKey(dbKey)})
+			if err != nil {
+				return err
+			}
+			for cur.Next(sctx) {
+				var elem result
+				if err := cur.Decode(&elem); err != nil {
+					return err
+				}
+				results = append(results, elem)
+			}
+			return cur.Close(sctx)
+		}); err != nil {
+			return nil, err
+		}
+		if len(results) == 0 {
+			return nil, utils.ErrNotFound
+		}
+	} else if len(fldNameVal) != 0 {
 		for fldName, fldValue := range fldNameVal {
 			if err = ms.query(func(sctx mongo.SessionContext) (err error) {
-				cur, err := ms.getCol(ColRFI).Find(sctx, bson.M{"key": utils.ConcatenatedKey(dbKey, filterType, fldName, fldValue)})
+				cur, err := ms.getCol(ColRFI).Find(sctx,
+					bson.M{"key": utils.ConcatenatedKey(dbKey, filterType, fldName, fldValue)})
 				if err != nil {
 					return err
 				}
@@ -1620,16 +1642,27 @@ func (ms *MongoStorage) GetFilterIndexesDrv(cacheID, itemIDPrefix, filterType st
 		}
 	}
 	indexes = make(map[string]utils.StringMap)
-
 	for _, res := range results {
 		if len(res.Value) == 0 {
 			continue
 		}
 		keys := strings.Split(res.Key, ":")
 		isReverse := strings.HasPrefix(keys[0], utils.ReverseFilterIndexes)
+
 		if isReverse {
-			indexKey := utils.ConcatenatedKey(keys[1], keys[2])
-			indexes[indexKey] = utils.StringMapFromSlice(res.Value)
+			for _, val := range res.Value {
+				// val should look someting like "*stat_filter_indexes:Stats1"
+				// idxTypeItmID[0] = *stat_filter_indexes
+				// idxTypeItmID[1] = Stats1
+				idxTypeItmID := strings.Split(val, utils.CONCATENATED_KEY_SEP)
+				if _, has := indexes[idxTypeItmID[0]]; !has {
+					indexes[idxTypeItmID[0]] = make(utils.StringMap)
+				}
+				indexes[idxTypeItmID[0]].Copy(map[string]bool{
+					idxTypeItmID[1]: true,
+				})
+
+			}
 			continue
 		}
 		indexKey := utils.ConcatenatedKey(keys[1], keys[2], keys[3])
@@ -1693,7 +1726,20 @@ func (ms *MongoStorage) SetFilterIndexesDrv(cacheID, itemIDPrefix string,
 		var lastErr error
 		for key, itmMp := range indexes {
 			if err = ms.query(func(sctx mongo.SessionContext) (err error) {
-				idxDbkey := utils.ConcatenatedKey(dbKey, key)
+				var idxDbkey string
+				// reverse filter indexes case
+				if strings.HasPrefix(dbKey, utils.ReverseFilterIndexes) {
+					idxDbkey = dbKey
+					replaceItmMP := make(utils.StringMap)
+					for itemID := range itmMp {
+						replaceItmMP.Copy(utils.StringMap{
+							utils.ConcatenatedKey(key, itemID): true,
+						})
+					}
+					itmMp = replaceItmMP
+				} else { // normal filter indexes case
+					idxDbkey = utils.ConcatenatedKey(dbKey, key)
+				}
 				if len(itmMp) == 0 { // remove from DB if we set it with empty indexes
 					_, err = ms.getCol(ColRFI).DeleteOne(sctx,
 						bson.M{"key": idxDbkey})

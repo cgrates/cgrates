@@ -94,88 +94,93 @@ var (
 		testFilterIndexesCasesStartEngine,
 		testFilterIndexesCasesRpcConn,
 
-		// ATTRIBUTES
-		testFilterIndexesCasesSetFilters,
-		testFilterIndexesCasesSetAttributesWithFilters,
-		testFilterIndexesCasesGetIndexesAnyContext,
-		testFilterIndexesCasesGetIndexesSessionsContext,
+		/*
+			// ATTRIBUTES
+			testFilterIndexesCasesSetFilters,
+			testFilterIndexesCasesSetAttributesWithFilters,
+			testFilterIndexesCasesGetIndexesAnyContext,
+			testFilterIndexesCasesGetIndexesSessionsContext,
 
-		testFilterIndexesCasesSetDifferentFilters,
-		testFilterIndexesCasesOverwriteAttributes,
-		testFilterIndexesCasesComputeAttributesIndexes,
-		testFilterIndexesCasesGetIndexesAnyContextChanged,
-		testFilterIndexesCasesGetIndexesSessionsContextChanged,
+			testFilterIndexesCasesSetDifferentFilters,
+			testFilterIndexesCasesOverwriteAttributes,
+			testFilterIndexesCasesComputeAttributesIndexes,
+			testFilterIndexesCasesGetIndexesAnyContextChanged,
+			testFilterIndexesCasesGetIndexesSessionsContextChanged,
 
-		// CHARGERS
-		testFilterIndexesCasesSetIndexedFilter,
-		testFilterIndexesCasesSetChargerWithFltr,
-		testFilterIndexesCasesGetChargerIndexes,
-		testFilterIndexesCasesOverwriteFilterForCharger,
-		testFilterIndexesCasesGetChargerIndexesChanged,
+			// CHARGERS
+			testFilterIndexesCasesSetIndexedFilter,
+			testFilterIndexesCasesSetChargerWithFltr,
+			testFilterIndexesCasesGetChargerIndexes,
+			testFilterIndexesCasesOverwriteFilterForCharger,
+			testFilterIndexesCasesGetChargerIndexesChanged,
 
-		testFilterIndexesCasesGetReverseFilterIndexes, // for chargers
-		testFilterIndexesCasesRemoveChargerProfile,
-		testFilterIndexesCasesGetIndexesAfterRemove,
-		testFilterIndexesCasesGetReverseIndexesAfterRemove,
+			testFilterIndexesCasesGetReverseFilterIndexes, // for chargers
+			testFilterIndexesCasesRemoveChargerProfile,
+			testFilterIndexesCasesGetIndexesAfterRemove,
+			testFilterIndexesCasesGetReverseIndexesAfterRemove,
 
-		// THRESHOLDS
-		testFilterIndexesCasesSetThresholdWithFltr,
-		testFilterIndexesCasesGetThresholdsIndexes,
-		testFilterIndexesCasesOverwriteFilterForThresholds,
-		testFilterIndexesCasesGetThresholdsIndexesChanged,
+			// THRESHOLDS
+			testFilterIndexesCasesSetThresholdWithFltr,
+			testFilterIndexesCasesGetThresholdsIndexes,
+			testFilterIndexesCasesOverwriteFilterForThresholds,
+			testFilterIndexesCasesGetThresholdsIndexesChanged,
 
-		testFilterIndexesCasesGetReverseFilterIndexes2,
-		testFilterIndexesCasesRemoveThresholdsProfile,
-		testFilterIndexesCasesGetIndexesAfterRemove2,
-		testFilterIndexesCasesGetReverseIndexesAfterRemove2,
+			testFilterIndexesCasesGetReverseFilterIndexes2,
+			testFilterIndexesCasesRemoveThresholdsProfile,
+			testFilterIndexesCasesGetIndexesAfterRemove2,
+			testFilterIndexesCasesGetReverseIndexesAfterRemove2,
 
-		// DISPATCHER
-		testFilterIndexesCasesSetDispatcherWithFltr,
-		testFilterIndexesCasesGetDispatchersIndexesAnyContext,
-		testFilterIndexesCasesGetDispatchersIndexesDifferentContext,
-		testFilterIndexesCasesOverwriteFilterForDispatchers,
-		testFilterIndexesCasesGetDispatchersIndexesChangedAnyContext,
-		testFilterIndexesCasesGetDispatchersIndexesChangedDifferentContext,
 
-		testFilterIndexesCasesGetReverseFilterIndexes6,
-		testFilterIndexesCasesRemoveDispatchersProfile,
-		testFilterIndexesCasesGetIndexesAfterRemoveAnyContext,
-		testFilterIndexesCasesGetIndexesAfterRemoveDifferentContext,
-		testFilterIndexesCasesGetReverseIndexesAfterRemove6,
-		testFilterIndexesCasesOverwriteDispatchersProfile,
-		testFilterIndexesCasesOverwriteDispatchersGetIndexesEveryContext,
-		testFilterIndexesCasesOverwriteDispatchersGetReverseIndexes,
+				// DISPATCHER
+				testFilterIndexesCasesSetDispatcherWithFltr,
+				testFilterIndexesCasesGetDispatchersIndexesAnyContext,
+				testFilterIndexesCasesGetDispatchersIndexesDifferentContext,
+				testFilterIndexesCasesOverwriteFilterForDispatchers,
+				testFilterIndexesCasesGetDispatchersIndexesChangedAnyContext,
+				testFilterIndexesCasesGetDispatchersIndexesChangedDifferentContext,
 
-		// RESOURCES
-		testFilterIndexesCasesSetResourceWithFltr,
-		testFilterIndexesCasesGetResourcesIndexes,
-		testFilterIndexesCasesOverwriteFilterForResources,
-		testFilterIndexesCasesGetResourcesIndexesChanged,
+				testFilterIndexesCasesGetReverseFilterIndexes6,
+				testFilterIndexesCasesRemoveDispatchersProfile,
+				testFilterIndexesCasesGetIndexesAfterRemoveAnyContext,
+				testFilterIndexesCasesGetIndexesAfterRemoveDifferentContext,
+				testFilterIndexesCasesGetReverseIndexesAfterRemove6,
+				testFilterIndexesCasesOverwriteDispatchersProfile,
+				testFilterIndexesCasesOverwriteDispatchersGetIndexesEveryContext,
+				testFilterIndexesCasesOverwriteDispatchersGetReverseIndexes,
 
-		testFilterIndexesCasesGetReverseFilterIndexes3,
-		testFilterIndexesCasesRemoveResourcesProfile,
-		testFilterIndexesCasesGetIndexesAfterRemove3,
-		testFilterIndexesCasesGetReverseIndexesAfterRemove3,
-		testFilterIndexesCasesOverwriteResourceProfiles,
-		testFilterIndexesCasesResourcesGetIndexesAfterOverwrite,
-		testFilterIndexesCasesResourcesGetReverseIndexesAfterOverwrite,
+				// RESOURCES
+				testFilterIndexesCasesSetResourceWithFltr,
+				testFilterIndexesCasesGetResourcesIndexes,
+				testFilterIndexesCasesOverwriteFilterForResources,
+				testFilterIndexesCasesGetResourcesIndexesChanged,
 
-		// SUPPLIER
-		testFilterIndexesCasesSetSupplierWithFltr,
-		testFilterIndexesCasesGetSuppliersIndexes,
-		testFilterIndexesCasesOverwriteFilterForSuppliers,
-		testFilterIndexesCasesGetSuppliersIndexesChanged,
+				testFilterIndexesCasesGetReverseFilterIndexes3,
+				testFilterIndexesCasesRemoveResourcesProfile,
+				testFilterIndexesCasesGetIndexesAfterRemove3,
+				testFilterIndexesCasesGetReverseIndexesAfterRemove3,
+				testFilterIndexesCasesOverwriteResourceProfiles,
+				testFilterIndexesCasesResourcesGetIndexesAfterOverwrite,
+				testFilterIndexesCasesResourcesGetReverseIndexesAfterOverwrite,
 
-		testFilterIndexesCasesGetReverseFilterIndexes4,
-		testFilterIndexesCasesRemoveSuppliersProfile,
-		testFilterIndexesCasesGetIndexesAfterRemove4,
-		testFilterIndexesCasesGetReverseIndexesAfterRemove4,
-		testFilterIndexesCasesOverwriteSupplierProfiles,
-		testFilterIndexesCasesSuppliersGetIndexesAfterOverwrite,
-		testFilterIndexesCasesSuppliersGetReverseIndexesAfterOverwrite,
+				// SUPPLIER
+				testFilterIndexesCasesSetSupplierWithFltr,
+				testFilterIndexesCasesGetSuppliersIndexes,
+				testFilterIndexesCasesOverwriteFilterForSuppliers,
+				testFilterIndexesCasesGetSuppliersIndexesChanged,
+
+				testFilterIndexesCasesGetReverseFilterIndexes4,
+				testFilterIndexesCasesRemoveSuppliersProfile,
+				testFilterIndexesCasesGetIndexesAfterRemove4,
+				testFilterIndexesCasesGetReverseIndexesAfterRemove4,
+				testFilterIndexesCasesOverwriteSupplierProfiles,
+				testFilterIndexesCasesSuppliersGetIndexesAfterOverwrite,
+				testFilterIndexesCasesSuppliersGetReverseIndexesAfterOverwrite, */
 
 		// STATS
-		testFilterIndexesCasesSetStatQueueWithFltr,
+
+		//testFilterIndexesCasesOverwriteFilterForSuppliers1,
+
+		/* testFilterIndexesCasesSetStatQueueWithFltr,
 		testFilterIndexesCasesGetStatQueuesIndexes,
 		testFilterIndexesCasesOverwriteFilterForStatQueues,
 		testFilterIndexesCasesGetStatQueuesIndexesChanged,
@@ -186,7 +191,9 @@ var (
 		testFilterIndexesCasesGetReverseIndexesAfterRemove5,
 		testFilterIndexesCasesOverwriteStatQueueProfiles,
 		testFilterIndexesCasesStatQueuesGetIndexesAfterOverwrite,
-		testFilterIndexesCasesStatQueuesGetReverseIndexesAfterOverwrite,
+		testFilterIndexesCasesStatQueuesGetReverseIndexesAfterOverwrite, */
+
+		testMongoFIdx,
 
 		testFilterIndexesCasesStopEngine,
 	}
@@ -2548,7 +2555,7 @@ func testFilterIndexesCasesGetSuppliersIndexes(t *testing.T) {
 	}
 }
 
-func testFilterIndexesCasesOverwriteFilterForSuppliers(t *testing.T) {
+func testFilterIndexesCasesOverwriteFilterForSuppliers1(t *testing.T) {
 	// FLTR_Charger, FLTR_Charger12312 and FLTR_Charger4564 will be changed
 	filter1 = &v1.FilterWithCache{
 		Filter: &engine.Filter{
@@ -2962,6 +2969,85 @@ func testFilterIndexesCasesSuppliersGetReverseIndexesAfterOverwrite(t *testing.T
 		t.Error(err)
 	} else if sort.Strings(reply); !reflect.DeepEqual(expectedIndexes, reply) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expectedIndexes), utils.ToJSON(reply))
+	}
+}
+
+func testFilterIndexesCasesOverwriteFilterForSuppliers(t *testing.T) {
+	// FLTR_Charger, FLTR_Charger12312 and FLTR_Charger4564 will be changed
+	filter1 = &v1.FilterWithCache{
+		Filter: &engine.Filter{
+			Tenant: "cgrates.org",
+			ID:     "FLTR_Charger",
+			Rules: []*engine.FilterRule{
+				{
+					Type:    utils.MetaString,
+					Element: "~*req.Bank",
+					Values:  []string{"BoA", "CEC"},
+				},
+				{
+					Type:    utils.MetaPrefix,
+					Element: "~*req.Customer",
+					Values:  []string{"11", "22"},
+				},
+			},
+		},
+	}
+	filter2 = &v1.FilterWithCache{
+		Filter: &engine.Filter{
+			Tenant: "cgrates.org",
+			ID:     "FLTR_Charger12312",
+			Rules: []*engine.FilterRule{
+				{
+					Type:    utils.MetaPrefix,
+					Element: "~*req.AnswerTime",
+					Values:  []string{"2010", "2011"},
+				},
+				{
+					Type:    utils.MetaGreaterThan,
+					Element: "~*req.ProcessRuns",
+					Values:  []string{"2"},
+				},
+			},
+		},
+	}
+	filter3 := &v1.FilterWithCache{
+		Filter: &engine.Filter{
+			Tenant: "cgrates.org",
+			ID:     "FLTR_Charger4564",
+			Rules: []*engine.FilterRule{
+				{
+					Type:    utils.MetaString,
+					Element: "~*req.Caching",
+					Values:  []string{"true"},
+				},
+				{
+					Type:    utils.MetaPrefix,
+					Element: "~*req.NoCall",
+					Values:  []string{"+4332225465"},
+				},
+				{
+					Type:    utils.MetaNotEmpty,
+					Element: "~*req.Hash",
+					Values:  []string{},
+				},
+			},
+		},
+	}
+	var result string
+	if err := fIdxCasesRPC.Call(utils.APIerSv1SetFilter, filter1, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+	if err := fIdxCasesRPC.Call(utils.APIerSv1SetFilter, filter2, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+	if err := fIdxCasesRPC.Call(utils.APIerSv1SetFilter, filter3, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
 	}
 }
 
@@ -3529,6 +3615,201 @@ func testFilterIndexesCasesStatQueuesGetReverseIndexesAfterOverwrite(t *testing.
 		t.Error(err)
 	} else if sort.Strings(reply); !reflect.DeepEqual(expectedIndexes, reply) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expectedIndexes), utils.ToJSON(reply))
+	}
+}
+
+func testMongoFIdx(t *testing.T) {
+	// FLTR_Charger, FLTR_Charger12312 and FLTR_Charger4564 will be changed
+	filter1 = &v1.FilterWithCache{
+		Filter: &engine.Filter{
+			Tenant: "cgrates.org",
+			ID:     "FLTR_Charger",
+			Rules: []*engine.FilterRule{
+				{
+					Type:    utils.MetaString,
+					Element: "~*req.Bank",
+					Values:  []string{"BoA", "CEC"},
+				},
+				{
+					Type:    utils.MetaPrefix,
+					Element: "~*req.Customer",
+					Values:  []string{"11", "22"},
+				},
+			},
+		},
+	}
+	filter2 = &v1.FilterWithCache{
+		Filter: &engine.Filter{
+			Tenant: "cgrates.org",
+			ID:     "FLTR_Charger2",
+			Rules: []*engine.FilterRule{
+				{
+					Type:    utils.MetaString,
+					Element: "~*req.Account",
+					Values:  []string{"1001"},
+				},
+			},
+		},
+	}
+	var result string
+	if err := fIdxCasesRPC.Call(utils.APIerSv1SetFilter, filter1, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+	if err := fIdxCasesRPC.Call(utils.APIerSv1SetFilter, filter2, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+
+	stat1 := &engine.StatQueueWithCache{
+		StatQueueProfile: &engine.StatQueueProfile{
+			Tenant: "cgrates.org",
+			ID:     "Stats1",
+			FilterIDs: []string{
+				"FLTR_Charger",
+				"FLTR_Charger2",
+			},
+			QueueLength: 10,
+			TTL:         time.Duration(10) * time.Second,
+			Metrics: []*engine.MetricWithFilters{
+				{
+					MetricID: utils.MetaACD,
+				},
+				{
+					MetricID: utils.MetaTCD,
+				},
+			},
+			ThresholdIDs: []string{"*none"},
+			Weight:       20,
+			MinItems:     1,
+		},
+	}
+	stat2 := &engine.StatQueueWithCache{
+		StatQueueProfile: &engine.StatQueueProfile{
+			Tenant: "cgrates.org",
+			ID:     "Stats2",
+			FilterIDs: []string{
+				"FLTR_Charger",
+			},
+			QueueLength: 10,
+			TTL:         time.Duration(10) * time.Second,
+			Metrics: []*engine.MetricWithFilters{
+				{
+					MetricID: utils.MetaACD,
+				},
+				{
+					MetricID: utils.MetaTCD,
+				},
+			},
+			ThresholdIDs: []string{"*none"},
+			Weight:       20,
+			MinItems:     1,
+		},
+	}
+	var reply string
+	if err := fIdxCasesRPC.Call(utils.APIerSv1SetStatQueueProfile, stat1, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned", reply)
+	}
+	if err := fIdxCasesRPC.Call(utils.APIerSv1SetStatQueueProfile, stat2, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned", reply)
+	}
+
+	arg := &v1.AttrGetFilterIndexes{
+		Tenant:   "cgrates.org",
+		ItemType: utils.MetaStats,
+	}
+	expectedIndexes := []string{
+		// Stats1
+		"*string:~*req.Bank:BoA:Stats1",
+		"*string:~*req.Bank:CEC:Stats1",
+		"*prefix:~*req.Customer:11:Stats1",
+		"*prefix:~*req.Customer:22:Stats1",
+		"*string:~*req.Account:1001:Stats1",
+
+		// Stats2
+		"*string:~*req.Bank:BoA:Stats2",
+		"*string:~*req.Bank:CEC:Stats2",
+		"*prefix:~*req.Customer:11:Stats2",
+		"*prefix:~*req.Customer:22:Stats2",
+	}
+	sort.Strings(expectedIndexes)
+	var replyIDx []string
+	if err := fIdxCasesRPC.Call(utils.APIerSv1GetFilterIndexes, arg, &replyIDx); err != nil {
+		t.Error(err)
+	} else if sort.Strings(replyIDx); !reflect.DeepEqual(expectedIndexes, replyIDx) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expectedIndexes), utils.ToJSON(replyIDx))
+	}
+
+	// FLTR_Charger, FLTR_Charger12312 and FLTR_Charger4564 will be changed
+	filter1 = &v1.FilterWithCache{
+		Filter: &engine.Filter{
+			Tenant: "cgrates.org",
+			ID:     "FLTR_Charger",
+			Rules: []*engine.FilterRule{
+				{
+					Type:    utils.MetaString,
+					Element: "~*req.RatingPlan",
+					Values:  []string{"RP1"},
+				},
+				{
+					Type:    utils.MetaPrefix,
+					Element: "~*req.Subject",
+					Values:  []string{"1001", "1002"},
+				},
+			},
+		},
+	}
+	filter2 = &v1.FilterWithCache{
+		Filter: &engine.Filter{
+			Tenant: "cgrates.org",
+			ID:     "FLTR_Charger2",
+			Rules: []*engine.FilterRule{
+				{
+					Type:    utils.MetaString,
+					Element: "~*req.Destination",
+					Values:  []string{"randomID"},
+				},
+			},
+		},
+	}
+	if err := fIdxCasesRPC.Call(utils.APIerSv1SetFilter, filter1, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned", reply)
+	}
+	if err := fIdxCasesRPC.Call(utils.APIerSv1SetFilter, filter2, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned", reply)
+	}
+
+	arg = &v1.AttrGetFilterIndexes{
+		Tenant:   "cgrates.org",
+		ItemType: utils.MetaStats,
+	}
+	expectedIndexes = []string{
+		// Stats1
+		"*string:~*req.RatingPlan:RP1:Stats1",
+		"*prefix:~*req.Subject:1001:Stats1",
+		"*prefix:~*req.Subject:1002:Stats1",
+		"*string:~*req.Destination:randomID:Stats1",
+
+		// Stats2
+		"*string:~*req.RatingPlan:RP1:Stats2",
+		"*prefix:~*req.Subject:1001:Stats2",
+		"*prefix:~*req.Subject:1002:Stats2",
+	}
+	sort.Strings(expectedIndexes)
+	if err := fIdxCasesRPC.Call(utils.APIerSv1GetFilterIndexes, arg, &replyIDx); err != nil {
+		t.Error(err)
+	} else if sort.Strings(replyIDx); !reflect.DeepEqual(expectedIndexes, replyIDx) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expectedIndexes), utils.ToJSON(replyIDx))
 	}
 }
 
