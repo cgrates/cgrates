@@ -1648,3 +1648,203 @@ func TestDMSetAccountReplicateTrue(t *testing.T) {
 	// tests replicete
 	dm.SetAccount(context.Background(), ap, false)
 }
+
+func TestDMRemoveThresholdProfileNilDM(t *testing.T) {
+
+	var dm *DataManager
+
+	expErr := utils.ErrNoDatabaseConn
+	if err := dm.RemoveThresholdProfile(context.Background(), utils.CGRateSorg, "ThrPrf1", false); err == nil || err != utils.ErrNoDatabaseConn {
+		t.Errorf("Expected error <%v>, Received <%v>", expErr, err)
+	}
+}
+
+func TestDMRemoveThresholdProfileGetErr(t *testing.T) {
+
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+	dm.dataDB = &DataDBMock{
+		GetThresholdProfileDrvF: func(ctx *context.Context, tenant, id string) (tp *ThresholdProfile, err error) {
+			return nil, utils.ErrNotImplemented
+		},
+	}
+
+	expErr := utils.ErrNotImplemented
+	if err := dm.RemoveThresholdProfile(context.Background(), utils.CGRateSorg, "ThrPrf1", false); err == nil || err != expErr {
+		t.Errorf("Expected error <%v>, Received <%v>", expErr, err)
+	}
+}
+
+func TestDMRemoveThresholdProfileRmvErr(t *testing.T) {
+
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+	dm.dataDB = &DataDBMock{
+		GetThresholdProfileDrvF: func(ctx *context.Context, tenant, id string) (tp *ThresholdProfile, err error) {
+			return nil, nil
+		},
+		RemThresholdProfileDrvF: func(ctx *context.Context, tenant, id string) (err error) { return utils.ErrNotImplemented },
+	}
+
+	expErr := utils.ErrNotImplemented
+	if err := dm.RemoveThresholdProfile(context.Background(), utils.CGRateSorg, "ThrPrf1", false); err == nil || err != expErr {
+		t.Errorf("Expected error <%v>, Received <%v>", expErr, err)
+	}
+}
+
+func TestDMRemoveThresholdProfileOldThrNil(t *testing.T) {
+
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+	dm.dataDB = &DataDBMock{
+		GetThresholdProfileDrvF: func(ctx *context.Context, tenant, id string) (tp *ThresholdProfile, err error) {
+			return nil, nil
+		},
+		RemThresholdProfileDrvF: func(ctx *context.Context, tenant, id string) (err error) { return nil },
+	}
+
+	expErr := utils.ErrNotFound
+	if err := dm.RemoveThresholdProfile(context.Background(), utils.CGRateSorg, "ThrPrf1", false); err == nil || err != expErr {
+		t.Errorf("Expected error <%v>, Received <%v>", expErr, err)
+	}
+}
+
+func TestDMRemoveThresholdProfileIndxTrueErr1(t *testing.T) {
+
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+	dm.dataDB = &DataDBMock{
+		GetThresholdProfileDrvF: func(ctx *context.Context, tenant, id string) (tp *ThresholdProfile, err error) {
+			return &ThresholdProfile{
+				Tenant:           "cgrates.org",
+				ID:               "THD_2",
+				FilterIDs:        []string{"*string:~*req.Account:1001"},
+				ActionProfileIDs: []string{"actPrfID"},
+				MaxHits:          7,
+				MinHits:          0,
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 20,
+					},
+				},
+				Async: true,
+			}, nil
+		},
+		RemThresholdProfileDrvF: func(ctx *context.Context, tenant, id string) (err error) { return nil },
+	}
+
+	expErr := utils.ErrNotImplemented
+	if err := dm.RemoveThresholdProfile(context.Background(), utils.CGRateSorg, "THD_2", true); err == nil || err != expErr {
+		t.Errorf("Expected error <%v>, Received <%v>", expErr, err)
+	}
+}
+
+func TestDMRemoveThresholdProfileIndxTrueErr2(t *testing.T) {
+
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+	dm.dataDB = &DataDBMock{
+		GetThresholdProfileDrvF: func(ctx *context.Context, tenant, id string) (tp *ThresholdProfile, err error) {
+			return &ThresholdProfile{
+				Tenant:           "cgrates.org",
+				ID:               "THD_2",
+				FilterIDs:        []string{"*string:~*req.Account:1001", "noPrefix"},
+				ActionProfileIDs: []string{"actPrfID"},
+				MaxHits:          7,
+				MinHits:          0,
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 20,
+					},
+				},
+				Async: true,
+			}, nil
+		},
+		RemThresholdProfileDrvF: func(ctx *context.Context, tenant, id string) (err error) { return nil },
+		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
+			return nil, utils.ErrNotImplemented
+		},
+	}
+
+	expErr := utils.ErrNotImplemented
+	if err := dm.RemoveThresholdProfile(context.Background(), utils.CGRateSorg, "THD_2", true); err == nil || err != expErr {
+		t.Errorf("Expected error <%v>, Received <%v>", expErr, err)
+	}
+}
+
+func TestDMRemoveThresholdProfileReplicateTrue(t *testing.T) {
+
+	tmp := Cache
+	cfgtmp := config.CgrConfig()
+	defer func() {
+		Cache = tmp
+		config.SetCgrConfig(cfgtmp)
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	cfg.DataDbCfg().Items[utils.MetaThresholdProfiles].Replicate = true
+	config.SetCgrConfig(cfg)
+
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+	dm.dataDB = &DataDBMock{
+		GetThresholdProfileDrvF: func(ctx *context.Context, tenant, id string) (tp *ThresholdProfile, err error) {
+			return &ThresholdProfile{
+				Tenant:           "cgrates.org",
+				ID:               "THD_2",
+				FilterIDs:        []string{"*string:~*req.Account:1001"},
+				ActionProfileIDs: []string{"actPrfID"},
+				MaxHits:          7,
+				MinHits:          0,
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 20,
+					},
+				},
+				Async: true,
+			}, nil
+		},
+		RemThresholdProfileDrvF: func(ctx *context.Context, tenant, id string) (err error) { return nil },
+	}
+
+	expErr := utils.ErrNotImplemented
+	if err := dm.RemoveThresholdProfile(context.Background(), utils.CGRateSorg, "THD_2", false); err == nil || err != expErr {
+		t.Errorf("Expected error <%v>, Received <%v>", expErr, err)
+	}
+}

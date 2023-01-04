@@ -24,6 +24,7 @@ import (
 	"testing"
 
 	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -1561,7 +1562,7 @@ func TestSortedRoutesListAsNavigableMap(t *testing.T) {
 
 }
 
-func TestRouteLazyPass(t *testing.T) {
+func TestRouteLazyPassErr(t *testing.T) {
 
 	filters := []*FilterRule{
 		{
@@ -1586,6 +1587,65 @@ func TestRouteLazyPass(t *testing.T) {
 	if _, err := routeLazyPass(context.Background(), filters, ev,
 		data, []string{""}, []string{""}, []string{""}); err == nil || err.Error() != expErr {
 		t.Errorf("Expected error <%v>, received <%v>", expErr, err)
+	}
+
+}
+
+func TestRouteLazyPassTrue(t *testing.T) {
+
+	rsrParse := &config.RSRParser{
+		Rules: "~*opts.<~*opts.*originID;~*req.RunID;-Cost>",
+	}
+	if err := rsrParse.Compile(); err != nil {
+		t.Error(err)
+	}
+	valParse := config.RSRParsers{
+		&config.RSRParser{
+			Rules: "~*opts.<~*opts.*originID;~*req.RunID;-Cost>",
+		},
+	}
+	if err := valParse.Compile(); err != nil {
+		t.Error(err)
+	}
+
+	filters := []*FilterRule{
+		{
+			Type:       utils.MetaString,
+			Element:    "~*req.Charger",
+			Values:     []string{"ChargerProfile1"},
+			rsrElement: rsrParse,
+			rsrValues:  valParse,
+		},
+	}
+
+	ev := &utils.CGREvent{
+		ID:     "cgrId",
+		Tenant: "cgrates.org",
+		Event: utils.MapStorage{
+
+			utils.RunID: utils.MetaDefault,
+		},
+		APIOpts: utils.MapStorage{
+			utils.MetaOriginID:  "Uniq",
+			"Uniq*default-Cost": 10,
+		},
+	}
+	data := utils.MapStorage{
+		utils.MetaReq: utils.MapStorage{
+
+			utils.RunID: utils.MetaDefault,
+		},
+		utils.MetaOpts: utils.MapStorage{
+			utils.MetaOriginID:  "Uniq",
+			"Uniq*default-Cost": 10,
+		},
+	}
+
+	if ok, err := routeLazyPass(context.Background(), filters, ev,
+		data, []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}, []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}, []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts)}); err != nil {
+		t.Error(err)
+	} else if !ok {
+		t.Error("Returned false, expecting true")
 	}
 
 }

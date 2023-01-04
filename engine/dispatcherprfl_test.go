@@ -374,17 +374,18 @@ func TestDispatcherHostSet(t *testing.T) {
 	exp := DispatcherHost{
 		Tenant: "cgrates.org",
 		RemoteHost: &config.RemoteHost{
-			ID:                "ID",
-			Address:           "127.0.0.1",
-			Transport:         utils.MetaJSON,
-			ConnectAttempts:   1,
-			Reconnects:        1,
-			ConnectTimeout:    time.Nanosecond,
-			ReplyTimeout:      time.Nanosecond,
-			TLS:               true,
-			ClientKey:         "key",
-			ClientCertificate: "ce",
-			CaCertificate:     "ca",
+			ID:                   "ID",
+			Address:              "127.0.0.1",
+			Transport:            utils.MetaJSON,
+			ConnectAttempts:      1,
+			Reconnects:           1,
+			MaxReconnectInterval: 1,
+			ConnectTimeout:       time.Nanosecond,
+			ReplyTimeout:         time.Nanosecond,
+			TLS:                  true,
+			ClientKey:            "key",
+			ClientCertificate:    "ce",
+			CaCertificate:        "ca",
 		},
 	}
 	if err := dp.Set([]string{}, "", false, utils.EmptyString); err != utils.ErrWrongPath {
@@ -413,6 +414,9 @@ func TestDispatcherHostSet(t *testing.T) {
 		t.Error(err)
 	}
 	if err := dp.Set([]string{utils.Reconnects}, 1, false, utils.EmptyString); err != nil {
+		t.Error(err)
+	}
+	if err := dp.Set([]string{utils.MaxReconnectInterval}, 1, false, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
 	if err := dp.Set([]string{utils.ConnectTimeout}, 1, false, utils.EmptyString); err != nil {
@@ -675,21 +679,128 @@ func TestDispatcherProfileMerge(t *testing.T) {
 	}
 }
 
+func TestDispatcherProfileMergeEmptyHostId(t *testing.T) {
+	dp := &DispatcherProfile{
+		StrategyParams: make(map[string]interface{}),
+		Hosts: DispatcherHostProfiles{
+			{
+				ID: utils.EmptyString,
+			},
+		},
+	}
+	exp := &DispatcherProfile{
+		Tenant:         "cgrates.org",
+		ID:             "ID",
+		FilterIDs:      []string{"fltr1"},
+		Weight:         65,
+		Strategy:       utils.MetaLoad,
+		StrategyParams: map[string]interface{}{"k": "v"},
+		Hosts: DispatcherHostProfiles{
+			{
+				ID:        "C3",
+				FilterIDs: []string{"fltr2"},
+				Weight:    20,
+				Params: map[string]interface{}{
+					"param4": "value4",
+				},
+				Blocker: false,
+			},
+		},
+	}
+	if dp.Merge(&DispatcherProfile{
+		Tenant:         "cgrates.org",
+		ID:             "ID",
+		FilterIDs:      []string{"fltr1"},
+		Weight:         65,
+		Strategy:       utils.MetaLoad,
+		StrategyParams: map[string]interface{}{"k": "v"},
+		Hosts: DispatcherHostProfiles{
+			{
+				ID:        "C3",
+				FilterIDs: []string{"fltr2"},
+				Weight:    20,
+				Params: map[string]interface{}{
+					"param4": "value4",
+				},
+				Blocker: false,
+			},
+		},
+	}); !reflect.DeepEqual(exp, dp) {
+		t.Errorf("Expected %+v \n but received \n %+v", utils.ToJSON(exp), utils.ToJSON(dp))
+	}
+}
+func TestDispatcherProfileMergeEqualHosts(t *testing.T) {
+	dp := &DispatcherProfile{
+		StrategyParams: make(map[string]interface{}),
+		Hosts: DispatcherHostProfiles{
+			{
+				ID:        "C3",
+				FilterIDs: []string{"dpFltr1"},
+				Weight:    20,
+				Params: map[string]interface{}{
+					"param4": "value4",
+				},
+				Blocker: false,
+			},
+		},
+	}
+	exp := &DispatcherProfile{
+		Tenant:         "cgrates.org",
+		ID:             "ID",
+		FilterIDs:      []string{"fltr1"},
+		Weight:         65,
+		Strategy:       utils.MetaLoad,
+		StrategyParams: map[string]interface{}{"k": "v"},
+		Hosts: DispatcherHostProfiles{
+			{
+				ID:        "C3",
+				FilterIDs: []string{"dpFltr1", "newFltr2"},
+				Weight:    20,
+				Params: map[string]interface{}{
+					"param4": "value4",
+				},
+				Blocker: false,
+			},
+		},
+	}
+	if dp.Merge(&DispatcherProfile{
+		Tenant:         "cgrates.org",
+		ID:             "ID",
+		FilterIDs:      []string{"fltr1"},
+		Weight:         65,
+		Strategy:       utils.MetaLoad,
+		StrategyParams: map[string]interface{}{"k": "v"},
+		Hosts: DispatcherHostProfiles{
+			{
+				ID:        "C3",
+				FilterIDs: []string{"newFltr2"},
+				Weight:    20,
+				Params: map[string]interface{}{
+					"param4": "value4",
+				},
+				Blocker: false,
+			},
+		},
+	}); !reflect.DeepEqual(exp, dp) {
+		t.Errorf("Expected %+v \n but received \n %+v", utils.ToJSON(exp), utils.ToJSON(dp))
+	}
+}
 func TestDispatcherHostAsInterface(t *testing.T) {
 	dh := DispatcherHost{
 		Tenant: "cgrates.org",
 		RemoteHost: &config.RemoteHost{
-			ID:                "ID",
-			Address:           "127.0.0.1",
-			Transport:         utils.MetaJSON,
-			ConnectAttempts:   1,
-			Reconnects:        1,
-			ConnectTimeout:    time.Nanosecond,
-			ReplyTimeout:      time.Nanosecond,
-			TLS:               true,
-			ClientKey:         "key",
-			ClientCertificate: "ce",
-			CaCertificate:     "ca",
+			ID:                   "ID",
+			Address:              "127.0.0.1",
+			Transport:            utils.MetaJSON,
+			ConnectAttempts:      1,
+			Reconnects:           1,
+			MaxReconnectInterval: 1,
+			ConnectTimeout:       time.Nanosecond,
+			ReplyTimeout:         time.Nanosecond,
+			TLS:                  true,
+			ClientKey:            "key",
+			ClientCertificate:    "ce",
+			CaCertificate:        "ca",
 		},
 	}
 	if _, err := dh.FieldAsInterface(nil); err != utils.ErrNotFound {
@@ -731,6 +842,11 @@ func TestDispatcherHostAsInterface(t *testing.T) {
 		t.Fatal(err)
 	} else if exp := dh.Reconnects; exp != val {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := dh.FieldAsInterface([]string{utils.MaxReconnectInterval}); err != nil {
+		t.Fatal(err)
+	} else if exp := dh.MaxReconnectInterval; exp != val {
+		t.Errorf("Expected %+v \n but received \n %+v", utils.ToJSON(exp), utils.ToJSON(val))
 	}
 	if val, err := dh.FieldAsInterface([]string{utils.ConnectTimeout}); err != nil {
 		t.Fatal(err)
@@ -782,33 +898,35 @@ func TestDispatcherHostMerge(t *testing.T) {
 	exp := &DispatcherHost{
 		Tenant: "cgrates.org",
 		RemoteHost: &config.RemoteHost{
-			ID:                "ID",
-			Address:           "127.0.0.1",
-			Transport:         utils.MetaJSON,
-			ConnectAttempts:   1,
-			Reconnects:        1,
-			ConnectTimeout:    time.Nanosecond,
-			ReplyTimeout:      time.Nanosecond,
-			TLS:               true,
-			ClientKey:         "key",
-			ClientCertificate: "ce",
-			CaCertificate:     "ca",
+			ID:                   "ID",
+			Address:              "127.0.0.1",
+			Transport:            utils.MetaJSON,
+			ConnectAttempts:      1,
+			Reconnects:           1,
+			MaxReconnectInterval: 1,
+			ConnectTimeout:       time.Nanosecond,
+			ReplyTimeout:         time.Nanosecond,
+			TLS:                  true,
+			ClientKey:            "key",
+			ClientCertificate:    "ce",
+			CaCertificate:        "ca",
 		},
 	}
 	if dp.Merge(&DispatcherHost{
 		Tenant: "cgrates.org",
 		RemoteHost: &config.RemoteHost{
-			ID:                "ID",
-			Address:           "127.0.0.1",
-			Transport:         utils.MetaJSON,
-			ConnectAttempts:   1,
-			Reconnects:        1,
-			ConnectTimeout:    time.Nanosecond,
-			ReplyTimeout:      time.Nanosecond,
-			TLS:               true,
-			ClientKey:         "key",
-			ClientCertificate: "ce",
-			CaCertificate:     "ca",
+			ID:                   "ID",
+			Address:              "127.0.0.1",
+			Transport:            utils.MetaJSON,
+			ConnectAttempts:      1,
+			Reconnects:           1,
+			MaxReconnectInterval: 1,
+			ConnectTimeout:       time.Nanosecond,
+			ReplyTimeout:         time.Nanosecond,
+			TLS:                  true,
+			ClientKey:            "key",
+			ClientCertificate:    "ce",
+			CaCertificate:        "ca",
 		},
 	}); !reflect.DeepEqual(exp, dp) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(dp))
