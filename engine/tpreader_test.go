@@ -1474,6 +1474,7 @@ func TestTpReaderLoadRatingPlansFilteredErr(t *testing.T) {
 	tmp := Cache
 	defer func() {
 		Cache = tmp
+		config.SetCgrConfig(config.NewDefaultCGRConfig())
 	}()
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()

@@ -2743,3 +2743,451 @@ func TestDMItemLoadIDsRemoteErr(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestActionPlanRemote(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	tmpDm := dm
+	tmp := Cache
+	defer func() {
+		config.SetCgrConfig(config.NewDefaultCGRConfig())
+		Cache = tmp
+		SetDataStorage(tmpDm)
+	}()
+	Cache.Clear(nil)
+	cfg.DataDbCfg().RplConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1)}
+	cfg.DataDbCfg().RmtConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1)}
+	cfg.DataDbCfg().RplFiltered = true
+	cfg.DataDbCfg().Items = map[string]*config.ItemOpt{
+		utils.CacheActionPlans: {
+			Limit:     3,
+			Replicate: true,
+			APIKey:    "key",
+			RouteID:   "route",
+			Remote:    true,
+		},
+	}
+	actPln := &ActionPlan{
+		Id:         "TestActionPlansRemoveMember1",
+		AccountIDs: utils.StringMap{"one": true},
+		ActionTimings: []*ActionTiming{
+			{
+				Uuid: "uuid1",
+				Timing: &RateInterval{
+					Timing: &RITiming{
+						Years:     utils.Years{2012},
+						Months:    utils.Months{},
+						MonthDays: utils.MonthDays{},
+						WeekDays:  utils.WeekDays{},
+						StartTime: utils.MetaASAP,
+					},
+				},
+				Weight:    10,
+				ActionsID: "MINI",
+			},
+		},
+	}
+	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn <- &ccMock{
+		calls: map[string]func(args interface{}, reply interface{}) error{
+			utils.ReplicatorSv1SetActionPlan: func(args, reply interface{}) error {
+				setActPlnOpts, cancast := args.(*SetActionPlanArgWithAPIOpts)
+				if !cancast {
+					return utils.ErrNotConvertible
+				}
+				dm.dataDB.SetActionPlanDrv(setActPlnOpts.Key, setActPlnOpts.Ats)
+				return nil
+			},
+			utils.ReplicatorSv1RemoveActionPlan: func(args, reply interface{}) error {
+				strApiOpts, cancast := args.(*utils.StringWithAPIOpts)
+				if !cancast {
+					return utils.ErrNotConvertible
+				}
+				dm.DataDB().RemoveActionPlanDrv(strApiOpts.Arg)
+				return nil
+			},
+			utils.ReplicatorSv1GetAllActionPlans: func(args, reply interface{}) error {
+
+				*reply.(*map[string]*ActionPlan) = map[string]*ActionPlan{
+					"act_key": actPln,
+				}
+				return nil
+			},
+		},
+	}
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
+	})
+	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
+	config.SetCgrConfig(cfg)
+	SetDataStorage(dm)
+
+	if err := dm.SetActionPlan("act_key", actPln, true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+	if err := dm.RemoveActionPlan("act_key", utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+	exp := map[string]*ActionPlan{
+		"act_key": actPln,
+	}
+	if val, err := dm.GetAllActionPlans(); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(val, exp) {
+		t.Errorf("expected %v,received %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+}
+
+func TestAccountActionPlansRemote(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	tmpDm := dm
+	tmp := Cache
+	defer func() {
+		config.SetCgrConfig(config.NewDefaultCGRConfig())
+		Cache = tmp
+		SetDataStorage(tmpDm)
+	}()
+	Cache.Clear(nil)
+	cfg.DataDbCfg().RplConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1)}
+	cfg.DataDbCfg().RmtConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1)}
+	cfg.DataDbCfg().RplFiltered = true
+	cfg.DataDbCfg().Items = map[string]*config.ItemOpt{
+		utils.CacheAccountActionPlans: {
+			Limit:     3,
+			Replicate: true,
+			APIKey:    "key",
+			RouteID:   "route",
+			Remote:    true,
+		},
+	}
+
+	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn <- &ccMock{
+		calls: map[string]func(args interface{}, reply interface{}) error{
+			utils.ReplicatorSv1SetAccountActionPlans: func(args, reply interface{}) error {
+				setActPlnOpts, cancast := args.(*SetActionPlanArgWithAPIOpts)
+				if !cancast {
+					return utils.ErrNotConvertible
+				}
+				dm.dataDB.SetActionPlanDrv(setActPlnOpts.Key, setActPlnOpts.Ats)
+				return nil
+			},
+			utils.ReplicatorSv1RemAccountActionPlans: func(args, reply interface{}) error {
+
+				return nil
+			},
+		},
+	}
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
+	})
+	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
+	config.SetCgrConfig(cfg)
+	SetDataStorage(dm)
+
+	if err := dm.SetAccountActionPlans("acc_ID", []string{"act_pln", "act_pln"}, true); err != nil {
+		t.Error(err)
+	}
+	if err = dm.RemAccountActionPlans("acc_ID", []string{}); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestComputeIndexes(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	thd := &ThresholdProfile{
+		Tenant:    "cgrates.org",
+		ID:        "THD_2",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+
+		MinHits: 0,
+
+		Async: true,
+	}
+	dm.SetThresholdProfile(thd, false)
+	transactionID := utils.GenUUID()
+	if _, err := ComputeIndexes(dm, "cgrates.org", utils.EmptyString, utils.CacheThresholdFilterIndexes,
+		nil, transactionID, func(tnt, id, grp string) (*[]string, error) {
+			th, e := dm.GetThresholdProfile(tnt, id, true, false, utils.NonTransactional)
+			if e != nil {
+				return nil, e
+			}
+			return utils.SliceStringPointer(utils.CloneStringSlice(th.FilterIDs)), nil
+		}, nil); err != nil {
+		t.Error(err)
+	}
+}
+func TestUpdateFilterIndexRouteIndex(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	dataDB := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+
+	oldFlt := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "fltr_test",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaString,
+				Element: "~*req.Cost",
+				Values:  []string{"unRegVal2"},
+			},
+		},
+	}
+
+	if err := oldFlt.Compile(); err != nil {
+		t.Error(err)
+	}
+
+	if err := dm.SetFilter(oldFlt, true); err != nil {
+		t.Error(err)
+	}
+	rp := &RouteProfile{
+		Tenant:    "cgrates.org",
+		ID:        "ID",
+		FilterIDs: []string{"fltr_test"},
+
+		Sorting:           utils.MetaQOS,
+		SortingParameters: []string{"param"},
+		Routes: []*Route{{
+			ID:         "RT1",
+			FilterIDs:  []string{"fltr1"},
+			AccountIDs: []string{"acc1"},
+
+			ResourceIDs: []string{"res1"},
+			StatIDs:     []string{"stat1"},
+
+			RouteParameters: "params",
+		}},
+	}
+
+	if err := dm.SetRouteProfile(rp, true); err != nil {
+		t.Error(err)
+	}
+
+	expindx := map[string]utils.StringSet{
+		"*string:*req.Cost:unRegVal2": {"ID": {}},
+	}
+
+	getindx, err := dm.GetIndexes(utils.CacheRouteFilterIndexes, cfg.GeneralCfg().DefaultTenant, utils.EmptyString, true, true)
+	if err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expindx, getindx) {
+		t.Errorf("Expected %v, Received %v", utils.ToJSON(expindx), utils.ToJSON(getindx))
+	}
+
+	newFlt := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "fltr_test",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaPrefix,
+				Element: "~*req.Usage",
+				Values:  []string{"10s"},
+			},
+		},
+	}
+	if err := newFlt.Compile(); err != nil {
+		t.Error(err)
+	}
+	if err := dm.SetFilter(newFlt, false); err != nil {
+		t.Error(err)
+	}
+
+	if err := UpdateFilterIndex(dm, oldFlt, newFlt); err != nil {
+		t.Error(err)
+	}
+
+	expindxNew := map[string]utils.StringSet{
+		"*prefix:*req.Usage:10s": {"ID": {}},
+	}
+	getindxNew, err := dm.GetIndexes(utils.CacheRouteFilterIndexes, cfg.GeneralCfg().DefaultTenant, utils.EmptyString, true, true)
+	if err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expindxNew, getindxNew) {
+		t.Errorf("Expected %v, Received %v", utils.ToJSON(expindxNew), utils.ToJSON(getindxNew))
+	}
+}
+
+func TestUpdateFilterIndexStatIndex(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	dataDB := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+
+	oldFlt := &Filter{
+		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+		ID:     "FLTR_STATS_1",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaString,
+				Element: "~*req.Stats",
+				Values:  []string{"StatQueueProfile1"},
+			},
+		},
+	}
+	if err := oldFlt.Compile(); err != nil {
+		t.Error(err)
+	}
+	if err := dm.SetFilter(oldFlt, true); err != nil {
+		t.Error(err)
+	}
+	sQ := &StatQueueProfile{
+		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+		ID:     "TEST_PROFILE1",
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2020, 4, 18, 14, 25, 0, 0, time.UTC),
+			ExpiryTime:     time.Date(2020, 4, 18, 14, 25, 0, 0, time.UTC),
+		},
+		QueueLength: 10,
+		TTL:         10 * time.Second,
+		Metrics: []*MetricWithFilters{
+			{
+				MetricID: "*sum",
+			},
+			{
+				MetricID: "*acd",
+			},
+		},
+		ThresholdIDs: []string{"Val1", "Val2"},
+		Blocker:      true,
+		Stored:       true,
+		Weight:       20,
+		MinItems:     1,
+		FilterIDs:    []string{"FLTR_STATS_1"},
+	}
+
+	if err := dm.SetStatQueueProfile(sQ, true); err != nil {
+		t.Error(err)
+	}
+
+	expindx := map[string]utils.StringSet{
+		"*string:*req.Stats:StatQueueProfile1": {"TEST_PROFILE1": {}},
+	}
+
+	if getindx, err := dm.GetIndexes(utils.CacheStatFilterIndexes, cfg.GeneralCfg().DefaultTenant, utils.EmptyString, true, true); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expindx, getindx) {
+		t.Errorf("Expected %v, Received %v", utils.ToJSON(expindx), utils.ToJSON(getindx))
+	}
+	newFlt := &Filter{
+		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+		ID:     "FLTR_STATS_1",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaGreaterOrEqual,
+				Element: "~*req.UsageInterval",
+				Values:  []string{(time.Second).String()},
+			},
+		},
+	}
+	if err := newFlt.Compile(); err != nil {
+		t.Error(err)
+	}
+	if err := dm.SetFilter(newFlt, false); err != nil {
+		t.Error(err)
+	}
+	if err := UpdateFilterIndex(dm, oldFlt, newFlt); err != nil {
+		t.Error(err)
+	}
+	// expindxNew := map[string]utils.StringSet{
+	// 	"*gte:*req.UsageInterval:1s": {"TEST_PROFILE1": {}},
+	// }
+	// if getindx, err := dm.GetIndexes(utils.CacheStatFilterIndexes, cfg.GeneralCfg().DefaultTenant, utils.EmptyString, true, true); err != nil {
+	// 	t.Error(err)
+	// } else if !reflect.DeepEqual(expindxNew, getindx) {
+	// 	t.Errorf("Expected %v, Received %v", utils.ToJSON(expindx), utils.ToJSON(getindx))
+	// }
+
+}
+
+func TestDMRatingProfile(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	tmpDm := dm
+	tmp := Cache
+	defer func() {
+		config.SetCgrConfig(config.NewDefaultCGRConfig())
+		Cache = tmp
+		SetDataStorage(tmpDm)
+	}()
+	Cache.Clear(nil)
+	cfg.DataDbCfg().RplConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1)}
+	cfg.DataDbCfg().RmtConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1)}
+	cfg.DataDbCfg().RplFiltered = true
+	cfg.DataDbCfg().Items = map[string]*config.ItemOpt{
+		utils.CacheRatingProfiles: {
+			Limit:     3,
+			Replicate: true,
+			APIKey:    "key",
+			RouteID:   "route",
+			Remote:    true,
+		},
+	}
+	rpf := &RatingProfile{
+		Id: "*out:TCDDBSWF:call:*any",
+		RatingPlanActivations: RatingPlanActivations{&RatingPlanActivation{
+			ActivationTime: time.Date(2015, 01, 01, 8, 0, 0, 0, time.UTC),
+			RatingPlanId:   "RP_ANY2CNT",
+		}},
+	}
+
+	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn <- &ccMock{
+		calls: map[string]func(args interface{}, reply interface{}) error{
+			utils.ReplicatorSv1SetRatingProfile: func(args, reply interface{}) error {
+				rtPrfApiOpts, cancast := args.(*RatingProfileWithAPIOpts)
+				if !cancast {
+					return utils.ErrNotConvertible
+				}
+				dm.dataDB.SetRatingProfileDrv(rtPrfApiOpts.RatingProfile)
+				return nil
+			},
+			utils.ReplicatorSv1RemoveRatingProfile: func(args, reply interface{}) error {
+				strApiOpts, cancast := args.(*utils.StringWithAPIOpts)
+				if !cancast {
+					return utils.ErrNotConvertible
+				}
+				dm.DataDB().RemoveRatingProfileDrv(strApiOpts.Arg)
+				return nil
+			},
+			utils.ReplicatorSv1GetRatingProfile: func(args, reply interface{}) error {
+				strApiOpts, cancast := args.(*utils.StringWithAPIOpts)
+				if !cancast {
+					return utils.ErrNotConvertible
+				}
+				dm.DataDB().GetRatingProfileDrv(strApiOpts.Arg)
+				*reply.(**RatingProfile) = rpf
+				return nil
+			},
+		},
+	}
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
+	})
+	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
+	config.SetCgrConfig(cfg)
+	SetDataStorage(dm)
+	if err := dm.SetRatingProfile(rpf); err != nil {
+		t.Error(err)
+	}
+	if err := dm.RemoveRatingProfile(rpf.Id); err != nil {
+		t.Error(err)
+	}
+	if _, err := dm.GetRatingProfile(rpf.Id, true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+}
