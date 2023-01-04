@@ -3156,3 +3156,39 @@ func TestGetUniqueSharedGroupMemebersErr(t *testing.T) {
 	}
 
 }
+
+func TestAccSetBalanceAction(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+	a := &Action{
+		ActionType: "*topup",
+		Balance: &BalanceFilter{
+			ID:    utils.StringPointer(utils.MetaDefault),
+			Type:  utils.StringPointer(utils.MetaMonetary),
+			Value: &utils.ValueFormula{Static: 10},
+			SharedGroups: &utils.StringMap{
+				"string1": true,
+			}},
+	}
+	acc := &Account{
+		ID:            "cgrates.org:account1",
+		AllowNegative: true,
+		BalanceMap: map[string]Balances{
+			utils.MetaMonetary: {
+				&Balance{
+					ID:             "voice1",
+					Weight:         20,
+					DestinationIDs: utils.StringMap{utils.MetaAny: false},
+					precision:      0,
+					SharedGroups:   utils.NewStringMap("SG_TEST"),
+					Value:          3600},
+			},
+		},
+	}
+	Cache.Set(utils.CacheSharedGroups, "string1", nil, []string{}, false, utils.NonTransactional)
+	if err := acc.setBalanceAction(a, nil); err != nil {
+		t.Error(err)
+	}
+}

@@ -1474,7 +1474,7 @@ func TestV2StoreSessionCostSet(t *testing.T) {
 	}
 }
 
-func TestV1RateCDRS(t *testing.T) {
+func TestV1RateCDRSErr(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CdrsCfg().ChargerSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ChargerSConnsCfg)}
