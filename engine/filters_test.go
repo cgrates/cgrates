@@ -2316,34 +2316,77 @@ func TestFilterGreaterThanOnObjectDP(t *testing.T) {
 func TestWeightFromDynamics(t *testing.T) {
 	dWs := []*utils.DynamicWeight{
 		{
-			FilterIDs: []string{"field1", "field2", "field2"},
-			Weight:    22.1,
-		},
-		{
-			FilterIDs: []string{"field1", "ffield2", "field2"},
-			Weight:    12.1,
-		},
-		{
-			FilterIDs: []string{"field1", "field2", "field2"},
-			Weight:    19.1,
-		},
-		{
-			FilterIDs: []string{"field1", "field2", "field2"},
+			FilterIDs: []string{"*destinations:~*req.Destination:EU"},
 			Weight:    10.2,
 		},
 	}
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dmSPP := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	passEvent := map[string]interface{}{
+		utils.Destination: "+4986517174963",
+	}
 
+	pEv := utils.MapStorage{utils.MetaReq: passEvent}
 	fltrS := &FilterS{
 		cfg:     cfg,
 		dm:      dmSPP,
 		connMgr: nil,
 	}
-	ev := &ExportRequest{}
 
-	if _, err := WeightFromDynamics(dWs, fltrS, "cgrates.org", ev); err == nil {
+	if _, err := WeightFromDynamics(dWs, fltrS, "cgrates.org", pEv); err != nil {
+		t.Error(err)
+	}
+
+}
+
+func TestCheckFilterErr(t *testing.T) {
+	fltr := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "FLTR_CP_2",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaString,
+				Element: "~*reqCharger",
+				Values:  []string{"ChargerProfile2"},
+			},
+		},
+	}
+	if err := CheckFilter(fltr); err == nil {
+		t.Error(err)
+	}
+	fltr = &Filter{
+		Tenant: "cgrates.org",
+		ID:     "TestFilter",
+		Rules: []*FilterRule{{
+			Element: "~*req.Account",
+			Type:    utils.MetaString,
+			Values:  []string{"~1001"},
+		},
+		},
+	}
+	if err := CheckFilter(fltr); err == nil {
+		t.Error(err)
+	}
+}
+
+func TestFilterPassRegexErr(t *testing.T) {
+	cd := &CallDescriptor{
+		Category:      "callx",
+		Tenant:        "cgrates.org",
+		Subject:       "dan",
+		Destination:   "+4986517174963",
+		TimeStart:     time.Date(2013, time.October, 7, 14, 50, 0, 0, time.UTC),
+		TimeEnd:       time.Date(2013, time.October, 7, 14, 52, 12, 0, time.UTC),
+		DurationIndex: 132 * time.Second,
+		ExtraFields:   map[string]string{"navigation": "off"},
+	}
+	rf := &FilterRule{Type: utils.MetaRegex,
+		Element: "~ategory", Values: []string{"^call"}}
+	if err := rf.CompileValues(); err != nil {
+		t.Fatal(err)
+	}
+	if pass, err := rf.passRegex(cd); err != nil || pass {
 		t.Error(err)
 	}
 

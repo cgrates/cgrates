@@ -20,6 +20,7 @@ package engine
 import (
 	"errors"
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 
@@ -3088,9 +3089,9 @@ func TestUpdateFilterIndexStatIndex(t *testing.T) {
 		ID:     "FLTR_STATS_1",
 		Rules: []*FilterRule{
 			{
-				Type:    utils.MetaGreaterOrEqual,
-				Element: "~*req.UsageInterval",
-				Values:  []string{(time.Second).String()},
+				Type:    utils.MetaPrefix,
+				Element: "~*req.Usage",
+				Values:  []string{"10s"},
 			},
 		},
 	}
@@ -3103,14 +3104,14 @@ func TestUpdateFilterIndexStatIndex(t *testing.T) {
 	if err := UpdateFilterIndex(dm, oldFlt, newFlt); err != nil {
 		t.Error(err)
 	}
-	// expindxNew := map[string]utils.StringSet{
-	// 	"*gte:*req.UsageInterval:1s": {"TEST_PROFILE1": {}},
-	// }
-	// if getindx, err := dm.GetIndexes(utils.CacheStatFilterIndexes, cfg.GeneralCfg().DefaultTenant, utils.EmptyString, true, true); err != nil {
-	// 	t.Error(err)
-	// } else if !reflect.DeepEqual(expindxNew, getindx) {
-	// 	t.Errorf("Expected %v, Received %v", utils.ToJSON(expindx), utils.ToJSON(getindx))
-	// }
+	expindxNew := map[string]utils.StringSet{
+		"*prefix:*req.Usage:10s": {"TEST_PROFILE1": {}},
+	}
+	if getindx, err := dm.GetIndexes(utils.CacheStatFilterIndexes, cfg.GeneralCfg().DefaultTenant, utils.EmptyString, true, true); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expindxNew, getindx) {
+		t.Errorf("Expected %v, Received %v", utils.ToJSON(expindx), utils.ToJSON(getindx))
+	}
 
 }
 
@@ -3188,6 +3189,277 @@ func TestDMRatingProfile(t *testing.T) {
 		t.Error(err)
 	}
 	if _, err := dm.GetRatingProfile(rpf.Id, true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+}
+
+// func TestUpdateFilterDispatcherIndex(t *testing.T) {
+// 	tmp := Cache
+// 	tmpDm := dm
+// 	defer func() {
+// 		Cache = tmp
+// 		dm = tmpDm
+// 		config.SetCgrConfig(config.NewDefaultCGRConfig())
+// 	}()
+// 	Cache.Clear(nil)
+// cfg := config.NewDefaultCGRConfig()
+// 		dataDB := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+// 	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+
+// 	oldFlt := &Filter{
+// 		Tenant: cfg.GeneralCfg().DefaultTenant,
+// 		ID:     "DISPATCHER_FLTR1",
+// 		Rules:  []*FilterRule{{Type: utils.MetaString, Element: "~*req.Destination", Values: []string{"ACC1", "ACC2", "~*req.Account"}}},
+// 	}
+// 	if err := oldFlt.Compile(); err != nil {
+// 		t.Error(err)
+// 	}
+// 	if err := dm.SetFilter(oldFlt, true); err != nil {
+// 		t.Error(err)
+// 	}
+// 	disp := &DispatcherProfile{
+// 		Tenant:     cfg.GeneralCfg().DefaultTenant,
+// 		ID:         "Dsp",
+// 		Subsystems: []string{"*any"},
+// 		FilterIDs:  []string{"DISPATCHER_FLTR1"},
+// 		Strategy:   utils.MetaFirst,
+// 		ActivationInterval: &utils.ActivationInterval{
+// 			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+// 		},
+// 		StrategyParams: map[string]interface{}{},
+// 		Weight:         20,
+// 		Hosts: DispatcherHostProfiles{
+// 			&DispatcherHostProfile{
+// 				ID:        "C1",
+// 				FilterIDs: []string{},
+// 				Weight:    10,
+// 				Params:    map[string]interface{}{"0": "192.168.54.203", utils.MetaRatio: "2"},
+// 				Blocker:   false,
+// 			},
+// 		},
+// 	}
+// 	if err := dm.SetDispatcherProfile(disp, true); err != nil {
+// 		t.Error(err)
+// 	}
+
+// 	expindx := map[string]utils.StringSet{
+// 		"*string:*req.Destination": {"Dsp": {}},
+// 	}
+
+// 	if getindx, err := dm.GetIndexes(utils.CacheDispatcherFilterIndexes, cfg.GeneralCfg().DefaultTenant, utils.EmptyString, true, true); err != nil {
+// 		t.Error(err)
+// 	} else if !reflect.DeepEqual(expindx, getindx) {
+// 		t.Errorf("Expected %v, Received %v", utils.ToJSON(expindx), utils.ToJSON(getindx))
+// 	}
+
+// }
+
+func TestDMGetRatingPlan(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	tmpDm := dm
+	tmp := Cache
+	tmpConn := connMgr
+	defer func() {
+		config.SetCgrConfig(config.NewDefaultCGRConfig())
+		Cache = tmp
+		SetConnManager(tmpConn)
+		SetDataStorage(tmpDm)
+	}()
+	Cache.Clear(nil)
+	cfg.CacheCfg().Partitions[utils.CacheLoadIDs].Replicate = true
+	cfg.CacheCfg().ReplicationConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}
+	cfg.CacheCfg().Partitions[utils.CacheRatingPlans].Remote = true
+	cfg.DataDbCfg().RmtConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1)}
+	cfg.DataDbCfg().Items = map[string]*config.ItemOpt{
+		utils.CacheRatingPlans: {
+			Limit:     3,
+			Remote:    true,
+			APIKey:    "key",
+			RouteID:   "route",
+			Replicate: true,
+		},
+	}
+	rpL := &RatingPlan{
+		Id: "id",
+		DestinationRates: map[string]RPRateList{
+			"DestinationRates": {&RPRate{Rating: "Rating"}}},
+		Ratings: map[string]*RIRate{"Ratings": {ConnectFee: 0.7}},
+		Timings: map[string]*RITiming{"Timings": {Months: utils.Months{4}}},
+	}
+	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn <- &ccMock{
+		calls: map[string]func(args interface{}, reply interface{}) error{
+			utils.ReplicatorSv1GetRatingPlan: func(args, reply interface{}) error {
+				*reply.(**RatingPlan) = rpL
+				return nil
+			},
+			utils.CacheSv1ReplicateSet: func(args, reply interface{}) error {
+
+				return errors.New("Can't replicate ")
+			},
+		},
+	}
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches):    clientConn,
+	})
+	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
+	config.SetCgrConfig(cfg)
+	SetDataStorage(dm)
+	if _, err := dm.GetRatingPlan("id", true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+
+}
+
+func TestDMChargerProfile(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	tmpDm := dm
+	tmp := Cache
+	tmpConn := connMgr
+	defer func() {
+		config.SetCgrConfig(config.NewDefaultCGRConfig())
+		Cache = tmp
+		SetConnManager(tmpConn)
+		SetDataStorage(tmpDm)
+	}()
+	Cache.Clear(nil)
+	cfg.CacheCfg().Partitions[utils.CacheLoadIDs].Replicate = true
+	cfg.CacheCfg().ReplicationConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}
+	cfg.CacheCfg().Partitions[utils.CacheRatingPlans].Remote = true
+	cfg.DataDbCfg().RmtConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1)}
+	cfg.DataDbCfg().Items = map[string]*config.ItemOpt{
+		utils.CacheChargerProfiles: {
+			Limit:     3,
+			Remote:    true,
+			APIKey:    "key",
+			RouteID:   "route",
+			Replicate: true,
+		},
+	}
+	chP := &ChargerProfile{
+		Tenant:    "cgrates.org",
+		ID:        "CPP_3",
+		FilterIDs: []string{"FLTR_CP_3"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+		},
+		RunID:        "*rated",
+		AttributeIDs: []string{"ATTR_1"},
+		Weight:       20,
+	}
+	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn <- &ccMock{
+		calls: map[string]func(args interface{}, reply interface{}) error{
+			utils.ReplicatorSv1GetChargerProfile: func(args, reply interface{}) error {
+				*reply.(**ChargerProfile) = chP
+				return nil
+			},
+			utils.CacheSv1ReplicateSet: func(args, reply interface{}) error {
+
+				return errors.New("Can't replicate ")
+			},
+		},
+	}
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches):    clientConn,
+	})
+	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
+	config.SetCgrConfig(cfg)
+	SetDataStorage(dm)
+	if _, err := dm.GetChargerProfile(chP.Tenant, chP.ID, false, true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestDMDispatcherProfile(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	tmpDm := dm
+	tmp := Cache
+	tmpConn := connMgr
+	defer func() {
+		config.SetCgrConfig(config.NewDefaultCGRConfig())
+		Cache = tmp
+		SetConnManager(tmpConn)
+		SetDataStorage(tmpDm)
+	}()
+	Cache.Clear(nil)
+	cfg.CacheCfg().Partitions[utils.CacheLoadIDs].Replicate = true
+	cfg.CacheCfg().ReplicationConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}
+	cfg.CacheCfg().Partitions[utils.CacheRatingPlans].Remote = true
+	cfg.DataDbCfg().RmtConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1)}
+	cfg.DataDbCfg().Items = map[string]*config.ItemOpt{
+		utils.CacheDispatcherProfiles: {
+			Limit:     3,
+			Remote:    true,
+			APIKey:    "key",
+			RouteID:   "route",
+			Replicate: true,
+		},
+	}
+	dPP := &DispatcherProfile{
+		Tenant:     cfg.GeneralCfg().DefaultTenant,
+		ID:         "Dsp",
+		Subsystems: []string{"*any"},
+		FilterIDs:  []string{"DISPATCHER_FLTR1"},
+		Strategy:   utils.MetaFirst,
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+		},
+		StrategyParams: map[string]interface{}{},
+		Weight:         20,
+		Hosts: DispatcherHostProfiles{
+			&DispatcherHostProfile{
+				ID:        "C1",
+				FilterIDs: []string{},
+				Weight:    10,
+				Params:    map[string]interface{}{"0": "192.168.54.203", utils.MetaRatio: "2"},
+				Blocker:   false,
+			},
+		},
+	}
+	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn <- &ccMock{
+		calls: map[string]func(args interface{}, reply interface{}) error{
+			utils.ReplicatorSv1GetDispatcherProfile: func(args, reply interface{}) error {
+				*reply.(**DispatcherProfile) = dPP
+				return nil
+			},
+			utils.CacheSv1ReplicateSet: func(args, reply interface{}) error {
+
+				return errors.New("Can't replicate ")
+			},
+		},
+	}
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches):    clientConn,
+	})
+	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
+	config.SetCgrConfig(cfg)
+	SetDataStorage(dm)
+	if _, err := dm.GetDispatcherProfile(dPP.Tenant, dPP.ID, false, true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+
+}
+
+func TestCacheDataFromDB(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	tmpDm := dm
+	tmp := Cache
+	defer func() {
+		config.SetCgrConfig(config.NewDefaultCGRConfig())
+		Cache = tmp
+		SetDataStorage(tmpDm)
+	}()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	if err := dm.CacheDataFromDB("*test_", []string{}, true); err == nil || !strings.Contains(err.Error(), "unsupported cache prefix") {
 		t.Error(err)
 	}
 }
