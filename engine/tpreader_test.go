@@ -25,6 +25,7 @@ import (
 	"os"
 	"reflect"
 	"sort"
+	"strings"
 	"testing"
 	"time"
 
@@ -1823,4 +1824,172 @@ func TestLoadActionPlansErrs(t *testing.T) {
 	if err := tpr.LoadActionPlans(); err == nil || err.Error() != fmt.Sprintf("[ActionPlans] Could not load the timing for tag: %q", "ASAP") {
 		t.Error(err)
 	}
+}
+
+func TestLoadRatingPlansFiltered(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+	Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	cfg.DataDbCfg().Items = map[string]*config.ItemOpt{
+		utils.CacheSharedGroups: {
+			Limit: 3,
+		},
+		utils.CacheTBLTPTimings: {
+			Limit: 2,
+		},
+		utils.CacheTBLTPDestinationRates: {
+			Limit: 3,
+		},
+		utils.CacheTBLTPRates: {
+			Limit: 2,
+		},
+	}
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	tpr, err := NewTpReader(db, db, "*prf", "UTC", nil, nil, true)
+	if err != nil {
+		t.Error(err)
+	}
+	db.db.Set(utils.CacheTBLTPRatingPlans, "*prf:def:itmID", &utils.TPRatingPlan{
+		ID:   "ID",
+		TPid: "TPid",
+		RatingPlanBindings: []*utils.TPRatingPlanBinding{
+			{
+				DestinationRatesId: "DestinationRatesId",
+				TimingId:           "TimingId",
+				Weight:             0.7,
+			},
+		},
+	}, []string{}, true, utils.NonTransactional)
+	if _, err := tpr.LoadRatingPlansFiltered("def"); err == nil || !strings.Contains(err.Error(), "no timing with id ") {
+		t.Error(err)
+	}
+	db.db.Set(utils.CacheTBLTPTimings, "*prf:TimingId", &utils.ApierTPTiming{
+
+		TPid:      "testTPid",
+		ID:        "TimingId",
+		Years:     "*any",
+		Months:    "*any",
+		MonthDays: "*any",
+		WeekDays:  "1;2;3;4;5",
+		Time:      "01:00:00",
+	}, []string{}, true, utils.NonTransactional)
+	db.db.Set(utils.CacheTBLTPTimings, "*prf:TimingId2", &utils.ApierTPTiming{
+
+		TPid:      "testTPid",
+		ID:        "TimingId",
+		Years:     "*any",
+		Months:    "*any",
+		MonthDays: "*any",
+		WeekDays:  "1;2;3;4;5",
+		Time:      "01:00:00",
+	}, []string{}, true, utils.NonTransactional)
+	if _, err := tpr.LoadRatingPlansFiltered("def"); err == nil {
+		t.Error(err)
+	}
+	db.db.Remove(utils.CacheTBLTPTimings, "*prf:TimingId2", true, utils.NonTransactional)
+	if _, err := tpr.LoadRatingPlansFiltered("def"); err == nil || !strings.Contains(err.Error(), "no DestinationRates profile with id") {
+		t.Error(err)
+	}
+	db.db.Set(utils.CacheTBLTPDestinationRates, "*prf:DestinationRatesId1", &utils.TPDestinationRate{
+		TPid: "TEST_TPID",
+		ID:   "DestinationRatesId",
+		DestinationRates: []*utils.DestinationRate{
+			{
+				DestinationId:  "TEST_DEST1",
+				RateId:         "TEST_RATE1",
+				RoundingMethod: "*up",
+				Rate: &utils.TPRateRALs{
+					TPid: "TPidTpRate",
+					ID:   "RT_FS_USERS",
+					RateSlots: []*utils.RateSlot{
+						{
+							ConnectFee:         12,
+							Rate:               3,
+							RateUnit:           "6s",
+							RateIncrement:      "6s",
+							GroupIntervalStart: "0s",
+						},
+						{
+							ConnectFee:         12,
+							Rate:               3,
+							RateUnit:           "4s",
+							RateIncrement:      "6s",
+							GroupIntervalStart: "1s",
+						},
+					},
+				},
+				RoundingDecimals: 4},
+			{
+				DestinationId:    "TEST_DEST2",
+				RateId:           "TEST_RATE2",
+				RoundingMethod:   "*up",
+				RoundingDecimals: 4},
+		},
+	}, []string{}, true, utils.NonTransactional)
+	db.db.Set(utils.CacheTBLTPDestinationRates, "*prf:DestinationRatesId2", &utils.TPDestinationRate{
+		TPid: "TEST_TPID",
+		ID:   "DestinationRatesId",
+		DestinationRates: []*utils.DestinationRate{
+			{
+				DestinationId:    "TEST_DEST1",
+				RateId:           "TEST_RATE1",
+				RoundingMethod:   "*up",
+				RoundingDecimals: 4},
+		},
+	}, []string{}, true, utils.NonTransactional)
+	if _, err := tpr.LoadRatingPlansFiltered("def"); err == nil {
+		t.Error(err)
+	}
+	db.db.Remove(utils.CacheTBLTPDestinationRates, "*prf:DestinationRatesId2", true, utils.NonTransactional)
+	if _, err := tpr.LoadRatingPlansFiltered("def"); err == nil || !strings.Contains(err.Error(), "no Rates profile with id ") {
+		t.Error(err)
+	}
+	db.db.Set(utils.CacheTBLTPRates, "*prf:TEST_RATE1", &utils.TPRateRALs{
+		TPid: "TPidTpRate",
+		ID:   "RT_FS_USERS",
+		RateSlots: []*utils.RateSlot{
+			{
+				ConnectFee:         12,
+				Rate:               3,
+				RateUnit:           "6s",
+				RateIncrement:      "6s",
+				GroupIntervalStart: "0s",
+			},
+			{
+				ConnectFee:         12,
+				Rate:               3,
+				RateUnit:           "4s",
+				RateIncrement:      "6s",
+				GroupIntervalStart: "1s",
+			},
+		},
+	}, []string{}, true, utils.NonTransactional)
+	db.db.Set(utils.CacheTBLTPRates, "*prf:TEST_RATE12", &utils.TPRateRALs{
+		TPid: "TPidTpRate",
+		ID:   "RT_FS_USERS",
+		RateSlots: []*utils.RateSlot{
+			{
+				ConnectFee:         12,
+				Rate:               3,
+				RateUnit:           "6s",
+				RateIncrement:      "6s",
+				GroupIntervalStart: "0s",
+			},
+			{
+				ConnectFee:         12,
+				Rate:               3,
+				RateUnit:           "4s",
+				RateIncrement:      "6s",
+				GroupIntervalStart: "1s",
+			},
+		},
+	}, []string{}, true, utils.NonTransactional)
+	if _, err := tpr.LoadRatingPlansFiltered("def"); err == nil {
+		t.Error(err)
+	}
+	db.db.Remove(utils.CacheTBLTPRates, "*prf:TEST_RATE12", true, utils.NonTransactional)
+
 }

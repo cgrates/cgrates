@@ -1635,9 +1635,7 @@ func TestV2StoreSessionCost2(t *testing.T) {
 	cfg.CdrsCfg().RaterConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.RateSConnsCfg)}
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
-
 	ccMOck := &ccMock{
-
 		calls: map[string]func(args interface{}, reply interface{}) error{
 			utils.ResponderRefundRounding: func(args, reply interface{}) error {
 				rpl := &Account{}
