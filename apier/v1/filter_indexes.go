@@ -113,7 +113,7 @@ func (api *APIerSv1) GetFilterIndexes(arg AttrGetFilterIndexes, reply *[]string)
 		arg.ItemType = utils.ReverseFilterIndexes
 	}
 	if indexes, err = api.DataManager.GetFilterIndexes(
-		utils.PrefixToIndexCache[arg.ItemType], key, "", nil); err != nil {
+		utils.PrefixToIndexCache[arg.ItemType], key, utils.EmptyString, nil); err != nil {
 		return err
 	}
 	if arg.FilterType != "" {

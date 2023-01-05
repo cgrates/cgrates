@@ -197,8 +197,7 @@ func testITGetFilterIndexes(t *testing.T) {
 	} else if !reflect.DeepEqual(eIdxes, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", eIdxes, rcv)
 	}
-	if _, err := dataManager.GetFilterIndexes("unknown_key", "unkonwn_tenant",
-		utils.EmptyString, nil); err == nil || err != utils.ErrNotFound {
+	if _, err := dataManager.GetFilterIndexes("unknown_key", "unkonwn_tenant", utils.EmptyString, nil); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
 	}
 }
@@ -283,8 +282,7 @@ func testITTestThresholdFilterIndexes(t *testing.T) {
 	}
 	rfi := NewFilterIndexer(onStor, utils.ThresholdProfilePrefix, th.Tenant)
 	if rcvIdx, err := dataManager.GetFilterIndexes(
-		utils.PrefixToIndexCache[rfi.itemType], rfi.dbKeySuffix,
-		utils.EmptyString, nil); err != nil {
+		utils.PrefixToIndexCache[rfi.itemType], rfi.dbKeySuffix, utils.EmptyString, nil); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eIdxes, rcvIdx) {
 		t.Errorf("Expecting %+v, received: %+v", eIdxes, rcvIdx)

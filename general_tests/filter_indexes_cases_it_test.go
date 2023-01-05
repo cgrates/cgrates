@@ -94,93 +94,91 @@ var (
 		testFilterIndexesCasesStartEngine,
 		testFilterIndexesCasesRpcConn,
 
-		/*
-			// ATTRIBUTES
-			testFilterIndexesCasesSetFilters,
-			testFilterIndexesCasesSetAttributesWithFilters,
-			testFilterIndexesCasesGetIndexesAnyContext,
-			testFilterIndexesCasesGetIndexesSessionsContext,
+		// ATTRIBUTES
+		testFilterIndexesCasesSetFilters,
+		testFilterIndexesCasesSetAttributesWithFilters,
+		testFilterIndexesCasesGetIndexesAnyContext,
+		testFilterIndexesCasesGetIndexesSessionsContext,
 
-			testFilterIndexesCasesSetDifferentFilters,
-			testFilterIndexesCasesOverwriteAttributes,
-			testFilterIndexesCasesComputeAttributesIndexes,
-			testFilterIndexesCasesGetIndexesAnyContextChanged,
-			testFilterIndexesCasesGetIndexesSessionsContextChanged,
+		testFilterIndexesCasesSetDifferentFilters,
+		testFilterIndexesCasesOverwriteAttributes,
+		testFilterIndexesCasesComputeAttributesIndexes,
+		testFilterIndexesCasesGetIndexesAnyContextChanged,
+		testFilterIndexesCasesGetIndexesSessionsContextChanged,
 
-			// CHARGERS
-			testFilterIndexesCasesSetIndexedFilter,
-			testFilterIndexesCasesSetChargerWithFltr,
-			testFilterIndexesCasesGetChargerIndexes,
-			testFilterIndexesCasesOverwriteFilterForCharger,
-			testFilterIndexesCasesGetChargerIndexesChanged,
+		// CHARGERS
+		testFilterIndexesCasesSetIndexedFilter,
+		testFilterIndexesCasesSetChargerWithFltr,
+		testFilterIndexesCasesGetChargerIndexes,
+		testFilterIndexesCasesOverwriteFilterForCharger,
+		testFilterIndexesCasesGetChargerIndexesChanged,
 
-			testFilterIndexesCasesGetReverseFilterIndexes, // for chargers
-			testFilterIndexesCasesRemoveChargerProfile,
-			testFilterIndexesCasesGetIndexesAfterRemove,
-			testFilterIndexesCasesGetReverseIndexesAfterRemove,
+		testFilterIndexesCasesGetReverseFilterIndexes, // for chargers
+		testFilterIndexesCasesRemoveChargerProfile,
+		testFilterIndexesCasesGetIndexesAfterRemove,
+		testFilterIndexesCasesGetReverseIndexesAfterRemove,
 
-			// THRESHOLDS
-			testFilterIndexesCasesSetThresholdWithFltr,
-			testFilterIndexesCasesGetThresholdsIndexes,
-			testFilterIndexesCasesOverwriteFilterForThresholds,
-			testFilterIndexesCasesGetThresholdsIndexesChanged,
+		// THRESHOLDS
+		testFilterIndexesCasesSetThresholdWithFltr,
+		testFilterIndexesCasesGetThresholdsIndexes,
+		testFilterIndexesCasesOverwriteFilterForThresholds,
+		testFilterIndexesCasesGetThresholdsIndexesChanged,
 
-			testFilterIndexesCasesGetReverseFilterIndexes2,
-			testFilterIndexesCasesRemoveThresholdsProfile,
-			testFilterIndexesCasesGetIndexesAfterRemove2,
-			testFilterIndexesCasesGetReverseIndexesAfterRemove2,
+		testFilterIndexesCasesGetReverseFilterIndexes2,
+		testFilterIndexesCasesRemoveThresholdsProfile,
+		testFilterIndexesCasesGetIndexesAfterRemove2,
+		testFilterIndexesCasesGetReverseIndexesAfterRemove2,
 
+		// DISPATCHER
+		testFilterIndexesCasesSetDispatcherWithFltr,
+		testFilterIndexesCasesGetDispatchersIndexesAnyContext,
+		testFilterIndexesCasesGetDispatchersIndexesDifferentContext,
+		testFilterIndexesCasesOverwriteFilterForDispatchers,
+		testFilterIndexesCasesGetDispatchersIndexesChangedAnyContext,
+		testFilterIndexesCasesGetDispatchersIndexesChangedDifferentContext,
 
-				// DISPATCHER
-				testFilterIndexesCasesSetDispatcherWithFltr,
-				testFilterIndexesCasesGetDispatchersIndexesAnyContext,
-				testFilterIndexesCasesGetDispatchersIndexesDifferentContext,
-				testFilterIndexesCasesOverwriteFilterForDispatchers,
-				testFilterIndexesCasesGetDispatchersIndexesChangedAnyContext,
-				testFilterIndexesCasesGetDispatchersIndexesChangedDifferentContext,
+		testFilterIndexesCasesGetReverseFilterIndexes6,
+		testFilterIndexesCasesRemoveDispatchersProfile,
+		testFilterIndexesCasesGetIndexesAfterRemoveAnyContext,
+		testFilterIndexesCasesGetIndexesAfterRemoveDifferentContext,
+		testFilterIndexesCasesGetReverseIndexesAfterRemove6,
+		testFilterIndexesCasesOverwriteDispatchersProfile,
+		testFilterIndexesCasesOverwriteDispatchersGetIndexesEveryContext,
+		testFilterIndexesCasesOverwriteDispatchersGetReverseIndexes,
 
-				testFilterIndexesCasesGetReverseFilterIndexes6,
-				testFilterIndexesCasesRemoveDispatchersProfile,
-				testFilterIndexesCasesGetIndexesAfterRemoveAnyContext,
-				testFilterIndexesCasesGetIndexesAfterRemoveDifferentContext,
-				testFilterIndexesCasesGetReverseIndexesAfterRemove6,
-				testFilterIndexesCasesOverwriteDispatchersProfile,
-				testFilterIndexesCasesOverwriteDispatchersGetIndexesEveryContext,
-				testFilterIndexesCasesOverwriteDispatchersGetReverseIndexes,
+		// RESOURCES
+		testFilterIndexesCasesSetResourceWithFltr,
+		testFilterIndexesCasesGetResourcesIndexes,
+		testFilterIndexesCasesOverwriteFilterForResources,
+		testFilterIndexesCasesGetResourcesIndexesChanged,
 
-				// RESOURCES
-				testFilterIndexesCasesSetResourceWithFltr,
-				testFilterIndexesCasesGetResourcesIndexes,
-				testFilterIndexesCasesOverwriteFilterForResources,
-				testFilterIndexesCasesGetResourcesIndexesChanged,
+		testFilterIndexesCasesGetReverseFilterIndexes3,
+		testFilterIndexesCasesRemoveResourcesProfile,
+		testFilterIndexesCasesGetIndexesAfterRemove3,
+		testFilterIndexesCasesGetReverseIndexesAfterRemove3,
+		testFilterIndexesCasesOverwriteResourceProfiles,
+		testFilterIndexesCasesResourcesGetIndexesAfterOverwrite,
+		testFilterIndexesCasesResourcesGetReverseIndexesAfterOverwrite,
 
-				testFilterIndexesCasesGetReverseFilterIndexes3,
-				testFilterIndexesCasesRemoveResourcesProfile,
-				testFilterIndexesCasesGetIndexesAfterRemove3,
-				testFilterIndexesCasesGetReverseIndexesAfterRemove3,
-				testFilterIndexesCasesOverwriteResourceProfiles,
-				testFilterIndexesCasesResourcesGetIndexesAfterOverwrite,
-				testFilterIndexesCasesResourcesGetReverseIndexesAfterOverwrite,
+		// SUPPLIER
+		testFilterIndexesCasesSetSupplierWithFltr,
+		testFilterIndexesCasesGetSuppliersIndexes,
+		testFilterIndexesCasesOverwriteFilterForSuppliers,
+		testFilterIndexesCasesGetSuppliersIndexesChanged,
 
-				// SUPPLIER
-				testFilterIndexesCasesSetSupplierWithFltr,
-				testFilterIndexesCasesGetSuppliersIndexes,
-				testFilterIndexesCasesOverwriteFilterForSuppliers,
-				testFilterIndexesCasesGetSuppliersIndexesChanged,
-
-				testFilterIndexesCasesGetReverseFilterIndexes4,
-				testFilterIndexesCasesRemoveSuppliersProfile,
-				testFilterIndexesCasesGetIndexesAfterRemove4,
-				testFilterIndexesCasesGetReverseIndexesAfterRemove4,
-				testFilterIndexesCasesOverwriteSupplierProfiles,
-				testFilterIndexesCasesSuppliersGetIndexesAfterOverwrite,
-				testFilterIndexesCasesSuppliersGetReverseIndexesAfterOverwrite, */
+		testFilterIndexesCasesGetReverseFilterIndexes4,
+		testFilterIndexesCasesRemoveSuppliersProfile,
+		testFilterIndexesCasesGetIndexesAfterRemove4,
+		testFilterIndexesCasesGetReverseIndexesAfterRemove4,
+		testFilterIndexesCasesOverwriteSupplierProfiles,
+		testFilterIndexesCasesSuppliersGetIndexesAfterOverwrite,
+		testFilterIndexesCasesSuppliersGetReverseIndexesAfterOverwrite,
 
 		// STATS
 
 		//testFilterIndexesCasesOverwriteFilterForSuppliers1,
 
-		/* testFilterIndexesCasesSetStatQueueWithFltr,
+		testFilterIndexesCasesSetStatQueueWithFltr,
 		testFilterIndexesCasesGetStatQueuesIndexes,
 		testFilterIndexesCasesOverwriteFilterForStatQueues,
 		testFilterIndexesCasesGetStatQueuesIndexesChanged,
@@ -191,9 +189,9 @@ var (
 		testFilterIndexesCasesGetReverseIndexesAfterRemove5,
 		testFilterIndexesCasesOverwriteStatQueueProfiles,
 		testFilterIndexesCasesStatQueuesGetIndexesAfterOverwrite,
-		testFilterIndexesCasesStatQueuesGetReverseIndexesAfterOverwrite, */
+		testFilterIndexesCasesStatQueuesGetReverseIndexesAfterOverwrite,
 
-		testMongoFIdx,
+		//testMongoFIdx,
 
 		testFilterIndexesCasesStopEngine,
 	}
@@ -3715,6 +3713,24 @@ func testMongoFIdx(t *testing.T) {
 		t.Error("Unexpected reply returned", reply)
 	}
 	if err := fIdxCasesRPC.Call(utils.APIerSv1SetStatQueueProfile, stat2, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned", reply)
+	}
+
+	tPrfl1 := &engine.ThresholdWithCache{
+		ThresholdProfile: &engine.ThresholdProfile{
+			Tenant:    "cgrates.org",
+			ID:        "TEST_PROFILE1",
+			FilterIDs: []string{"FLTR_Charger"},
+			MaxHits:   1,
+			MinSleep:  time.Duration(5 * time.Minute),
+			Blocker:   false,
+			Weight:    10.0,
+			Async:     true,
+		},
+	}
+	if err := fIdxCasesRPC.Call(utils.APIerSv1SetThresholdProfile, tPrfl1, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply returned", reply)
