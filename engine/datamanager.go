@@ -657,8 +657,8 @@ func (dm *DataManager) RemoveFilter(tenant, id, transactionID string) (err error
 	// we cannot remove a filter if it is referenced to a profile
 	tntFltrID := utils.ConcatenatedKey(tenant, id)
 	var rcvIdx map[string]utils.StringMap
-	if rcvIdx, err = dm.GetFilterIndexes(utils.PrefixToIndexCache[utils.ReverseFilterIndexes], tntFltrID,
-		utils.EmptyString, nil); err != nil {
+	if rcvIdx, err = dm.GetFilterIndexes(utils.PrefixToIndexCache[utils.ReverseFilterIndexes],
+		tntFltrID, utils.EmptyString, nil); err != nil {
 		if err != utils.ErrNotFound {
 			return
 		}

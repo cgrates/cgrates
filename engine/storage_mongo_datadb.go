@@ -1572,7 +1572,8 @@ func (ms *MongoStorage) GetFilterIndexesDrv(cacheID, itemIDPrefix, filterType st
 	}
 	var results []result
 	dbKey := utils.CacheInstanceToPrefix[cacheID] + itemIDPrefix
-	if strings.HasPrefix(dbKey, utils.ReverseFilterIndexes) { // case for reverse filter indexes, key is different
+	// case for reverse filter indexes, key is different, must not use regex finding for key
+	if strings.HasPrefix(dbKey, utils.ReverseFilterIndexes) {
 		if err = ms.query(func(sctx mongo.SessionContext) (err error) {
 			cur, err := ms.getCol(ColRFI).Find(sctx,
 				bson.M{"key": utils.ConcatenatedKey(dbKey)})
@@ -1593,7 +1594,7 @@ func (ms *MongoStorage) GetFilterIndexesDrv(cacheID, itemIDPrefix, filterType st
 		if len(results) == 0 {
 			return nil, utils.ErrNotFound
 		}
-	} else if len(fldNameVal) != 0 {
+	} else if len(fldNameVal) != 0 { // case for searching of a field:value
 		for fldName, fldValue := range fldNameVal {
 			if err = ms.query(func(sctx mongo.SessionContext) (err error) {
 				cur, err := ms.getCol(ColRFI).Find(sctx,
@@ -1642,6 +1643,7 @@ func (ms *MongoStorage) GetFilterIndexesDrv(cacheID, itemIDPrefix, filterType st
 		}
 	}
 	indexes = make(map[string]utils.StringMap)
+
 	for _, res := range results {
 		if len(res.Value) == 0 {
 			continue
@@ -1661,7 +1663,6 @@ func (ms *MongoStorage) GetFilterIndexesDrv(cacheID, itemIDPrefix, filterType st
 				indexes[idxTypeItmID[0]].Copy(map[string]bool{
 					idxTypeItmID[1]: true,
 				})
-
 			}
 			continue
 		}
@@ -1672,6 +1673,7 @@ func (ms *MongoStorage) GetFilterIndexesDrv(cacheID, itemIDPrefix, filterType st
 		}
 		indexes[indexKey] = utils.StringMapFromSlice(res.Value)
 	}
+
 	if len(indexes) == 0 {
 		return nil, utils.ErrNotFound
 	}
@@ -1724,34 +1726,49 @@ func (ms *MongoStorage) SetFilterIndexesDrv(cacheID, itemIDPrefix string,
 		})
 	} else {
 		var lastErr error
-		for key, itmMp := range indexes {
+		// forming reverse filter indexes (the format of those is different from normal indexes)
+		if strings.HasPrefix(dbKey, utils.ReverseFilterIndexes) {
+			replaceItmMP := make(utils.StringMap)
 			if err = ms.query(func(sctx mongo.SessionContext) (err error) {
-				var idxDbkey string
-				// reverse filter indexes case
-				if strings.HasPrefix(dbKey, utils.ReverseFilterIndexes) {
-					idxDbkey = dbKey
-					replaceItmMP := make(utils.StringMap)
+				for key, itmMp := range indexes {
 					for itemID := range itmMp {
 						replaceItmMP.Copy(utils.StringMap{
 							utils.ConcatenatedKey(key, itemID): true,
 						})
 					}
-					itmMp = replaceItmMP
-				} else { // normal filter indexes case
-					idxDbkey = utils.ConcatenatedKey(dbKey, key)
 				}
-				if len(itmMp) == 0 { // remove from DB if we set it with empty indexes
+				if len(replaceItmMP) == 0 { // remove from DB if we set it with empty indexes
 					_, err = ms.getCol(ColRFI).DeleteOne(sctx,
-						bson.M{"key": idxDbkey})
+						bson.M{"key": dbKey})
 				} else {
-					_, err = ms.getCol(ColRFI).UpdateOne(sctx, bson.M{"key": idxDbkey},
-						bson.M{"$set": bson.M{"key": idxDbkey, "value": itmMp.Slice()}},
+					_, err = ms.getCol(ColRFI).UpdateOne(sctx, bson.M{"key": dbKey},
+						bson.M{"$set": bson.M{"key": dbKey, "value": replaceItmMP.Slice()}},
 						options.Update().SetUpsert(true),
 					)
 				}
 				return err
 			}); err != nil {
-				lastErr = err
+				return err
+			}
+		} else {
+			// forming normal indexes
+			for key, itmMp := range indexes {
+				if err = ms.query(func(sctx mongo.SessionContext) (err error) {
+					var idxDbkey string
+					idxDbkey = utils.ConcatenatedKey(dbKey, key)
+					if len(itmMp) == 0 { // remove from DB if we set it with empty indexes
+						_, err = ms.getCol(ColRFI).DeleteOne(sctx,
+							bson.M{"key": idxDbkey})
+					} else {
+						_, err = ms.getCol(ColRFI).UpdateOne(sctx, bson.M{"key": idxDbkey},
+							bson.M{"$set": bson.M{"key": idxDbkey, "value": itmMp.Slice()}},
+							options.Update().SetUpsert(true),
+						)
+					}
+					return err
+				}); err != nil {
+					lastErr = err
+				}
 			}
 		}
 		return lastErr
