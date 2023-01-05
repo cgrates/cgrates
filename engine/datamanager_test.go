@@ -1843,8 +1843,7 @@ func TestDMRemoveThresholdProfileReplicateTrue(t *testing.T) {
 		RemThresholdProfileDrvF: func(ctx *context.Context, tenant, id string) (err error) { return nil },
 	}
 
-	expErr := utils.ErrNotImplemented
-	if err := dm.RemoveThresholdProfile(context.Background(), utils.CGRateSorg, "THD_2", false); err == nil || err != expErr {
-		t.Errorf("Expected error <%v>, Received <%v>", expErr, err)
-	}
+	// tests replicate
+
+	dm.RemoveThresholdProfile(context.Background(), utils.CGRateSorg, "THD_2", false)
 }

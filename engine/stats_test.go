@@ -3252,3 +3252,462 @@ func TestStatQueueV1GetStatQueuesForEventProfileIgnoreFilters(t *testing.T) {
 		}
 	}
 }
+
+func TestStatSV1GetQueueDecimalMetricsOK(t *testing.T) {
+	tmp := Cache
+	tmpC := config.CgrConfig()
+	defer func() {
+		Cache = tmp
+		config.SetCgrConfig(tmpC)
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	cfg.StatSCfg().StoreInterval = 1
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	Cache = NewCacheS(cfg, dm, nil, nil)
+	filterS := NewFilterS(cfg, nil, dm)
+	sS := NewStatService(dm, cfg, filterS, nil)
+
+	sqPrf := &StatQueueProfile{
+		Tenant:    "cgrates.org",
+		ID:        "SQ1",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
+		Blockers:     utils.DynamicBlockers{{Blocker: true}},
+		QueueLength:  10,
+		ThresholdIDs: []string{"*none"},
+		MinItems:     5,
+		Metrics: []*MetricWithFilters{
+			{
+				MetricID: utils.MetaTCD,
+			},
+		},
+	}
+	sq := &StatQueue{
+		sqPrfl: sqPrf,
+		dirty:  utils.BoolPointer(false),
+		Tenant: "cgrates.org",
+		ID:     "SQ1",
+		SQItems: []SQItem{
+			{
+				EventID: "SqProcessEvent",
+			},
+		},
+		SQMetrics: map[string]StatMetric{
+			utils.MetaTCD: &StatTCD{
+				Metric: &Metric{
+					Value: utils.NewDecimal(int64(time.Hour), 0),
+					Count: 1,
+					Events: map[string]*DecimalWithCompress{
+						"SqProcessEvent": {},
+					},
+				},
+			},
+		},
+	}
+
+	if err := dm.SetStatQueue(context.Background(), sq); err != nil {
+		t.Error(err)
+	}
+
+	expected := map[string]float64{
+		utils.MetaTCD: 3600000000000,
+	}
+	var reply map[string]*utils.Decimal
+	if err := sS.V1GetQueueDecimalMetrics(context.Background(), &utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{ID: "SQ1"}}, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(utils.ToJSON(expected), utils.ToJSON(reply)) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ToJSON(expected), utils.ToJSON(reply))
+	}
+}
+
+func TestStatSV1GetQueueDecimalMetricsErrNotFound(t *testing.T) {
+	tmp := Cache
+	tmpC := config.CgrConfig()
+	defer func() {
+		Cache = tmp
+		config.SetCgrConfig(tmpC)
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	cfg.StatSCfg().StoreInterval = 1
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	Cache = NewCacheS(cfg, dm, nil, nil)
+	filterS := NewFilterS(cfg, nil, dm)
+	sS := NewStatService(dm, cfg, filterS, nil)
+
+	sqPrf := &StatQueueProfile{
+		Tenant:    "cgrates.org",
+		ID:        "SQ1",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
+		Blockers:     utils.DynamicBlockers{{Blocker: true}},
+		QueueLength:  10,
+		ThresholdIDs: []string{"*none"},
+		MinItems:     5,
+		Metrics: []*MetricWithFilters{
+			{
+				MetricID: utils.MetaTCD,
+			},
+		},
+	}
+	sq := &StatQueue{
+		sqPrfl: sqPrf,
+		dirty:  utils.BoolPointer(false),
+		Tenant: "cgrates.org",
+		ID:     "SQ1",
+		SQItems: []SQItem{
+			{
+				EventID: "SqProcessEvent",
+			},
+		},
+		SQMetrics: map[string]StatMetric{
+			utils.MetaTCD: &StatTCD{
+				Metric: &Metric{
+					Value: utils.NewDecimal(int64(time.Hour), 0),
+					Count: 1,
+					Events: map[string]*DecimalWithCompress{
+						"SqProcessEvent": {},
+					},
+				},
+			},
+		},
+	}
+
+	if err := dm.SetStatQueue(context.Background(), sq); err != nil {
+		t.Error(err)
+	}
+
+	var reply map[string]*utils.Decimal
+	if err := sS.V1GetQueueDecimalMetrics(context.Background(), &utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{ID: "SQ2"}}, &reply); err == nil || err != utils.ErrNotFound {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
+	}
+}
+
+func TestStatV1GetQueueDecimalMetricsMissingArgs(t *testing.T) {
+	tmp := Cache
+	tmpC := config.CgrConfig()
+	defer func() {
+		Cache = tmp
+		config.SetCgrConfig(tmpC)
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	cfg.StatSCfg().StoreInterval = 1
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	Cache = NewCacheS(cfg, dm, nil, nil)
+	filterS := NewFilterS(cfg, nil, dm)
+	sS := NewStatService(dm, cfg, filterS, nil)
+
+	sqPrf := &StatQueueProfile{
+		Tenant:    "cgrates.org",
+		ID:        "SQ1",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
+		Blockers:     utils.DynamicBlockers{{Blocker: true}},
+		QueueLength:  10,
+		ThresholdIDs: []string{"*none"},
+		MinItems:     5,
+		Metrics: []*MetricWithFilters{
+			{
+				MetricID: utils.MetaTCD,
+			},
+		},
+	}
+	sq := &StatQueue{
+		sqPrfl: sqPrf,
+		dirty:  utils.BoolPointer(false),
+		Tenant: "cgrates.org",
+		ID:     "SQ1",
+		SQItems: []SQItem{
+			{
+				EventID: "SqProcessEvent",
+			},
+		},
+		SQMetrics: map[string]StatMetric{
+			utils.MetaTCD: &StatTCD{
+				Metric: &Metric{
+					Value:  utils.NewDecimal(int64(time.Hour), 0),
+					Count:  1,
+					Events: make(map[string]*DecimalWithCompress),
+				},
+			},
+		},
+	}
+
+	if err := dm.SetStatQueue(context.Background(), sq); err != nil {
+		t.Error(err)
+	}
+
+	experr := `MANDATORY_IE_MISSING: [ID]`
+	var reply map[string]*utils.Decimal
+	if err := sS.V1GetQueueDecimalMetrics(context.Background(), &utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{}}, &reply); err == nil ||
+		err.Error() != experr {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+}
+
+func TestStatV1GetQueueDecimalMetricsErrGetStats(t *testing.T) {
+	tmp := Cache
+	tmpC := config.CgrConfig()
+	defer func() {
+		Cache = tmp
+		config.SetCgrConfig(tmpC)
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	cfg.StatSCfg().StoreInterval = 1
+	Cache = NewCacheS(cfg, nil, nil, nil)
+	filterS := NewFilterS(cfg, nil, nil)
+	sS := NewStatService(nil, cfg, filterS, nil)
+
+	experr := `SERVER_ERROR: NO_DATABASE_CONNECTION`
+	var reply map[string]*utils.Decimal
+	if err := sS.V1GetQueueDecimalMetrics(context.Background(), &utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{ID: "SQ1"}}, &reply); err == nil || err.Error() != experr {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+}
+
+func TestStatSV1GetQueueStringMetricsIntOptsErr(t *testing.T) {
+	Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dmSTS := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+
+	cfg.StatSCfg().StoreInterval = 1
+	cfg.StatSCfg().StringIndexedFields = nil
+	cfg.StatSCfg().PrefixIndexedFields = nil
+	cfg.StatSCfg().Opts.RoundingDecimals = []*utils.DynamicIntOpt{
+		// function will return error after trying to parse the filter
+		{
+			FilterIDs: []string{"*string.invalid:filter"},
+			Tenant:    "cgrates.org",
+			Value:     4,
+		},
+	}
+	statService := NewStatService(dmSTS, cfg,
+		&FilterS{dm: dmSTS, cfg: cfg}, nil)
+
+	prepareStatsData(t, dmSTS)
+
+	stq := map[string]string{}
+
+	experr := `inline parse error for string: <*string.invalid:filter>`
+
+	err = statService.V1GetQueueStringMetrics(context.TODO(), &utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: testStatsQ[0].Tenant, ID: testStatsQ[0].ID}}, &stq)
+	if err.Error() != experr {
+		t.Errorf("Expected error <%v>, Received <%v>", experr, err)
+	}
+
+}
+
+func TestStatSV1GetStatQueuesForEventsqIDsErr(t *testing.T) {
+	tmp := Cache
+	tmpC := config.CgrConfig()
+	defer func() {
+		Cache = tmp
+		config.SetCgrConfig(tmpC)
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	cfg.StatSCfg().Opts.ProfileIDs = []*utils.DynamicStringSliceOpt{
+		// function will return error after trying to parse the filter
+		{
+			FilterIDs: []string{"*string.invalid:filter"},
+			Tenant:    "cgrates.org",
+			Value:     []string{"value2"},
+		},
+	}
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	Cache = NewCacheS(cfg, dm, nil, nil)
+	filterS := NewFilterS(cfg, nil, dm)
+	sS := NewStatService(dm, cfg, filterS, nil)
+
+	sqPrf1 := &StatQueueProfile{
+		Tenant:    "cgrates.org",
+		ID:        "SQ1",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
+		Blockers:     utils.DynamicBlockers{{Blocker: true}},
+		QueueLength:  10,
+		ThresholdIDs: []string{"*none"},
+		MinItems:     5,
+		Metrics: []*MetricWithFilters{
+			{
+				MetricID: utils.MetaTCD,
+			},
+		},
+	}
+
+	if err := dm.SetStatQueueProfile(context.Background(), sqPrf1, true); err != nil {
+		t.Error(err)
+	}
+
+	sqPrf2 := &StatQueueProfile{
+		Tenant: "cgrates.org",
+		ID:     "SQ2",
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
+		Blockers:     utils.DynamicBlockers{{Blocker: false}},
+		QueueLength:  10,
+		ThresholdIDs: []string{"*none"},
+		MinItems:     5,
+		Metrics: []*MetricWithFilters{
+			{
+				MetricID: utils.MetaACD,
+			},
+		},
+	}
+
+	if err := dm.SetStatQueueProfile(context.Background(), sqPrf2, true); err != nil {
+		t.Error(err)
+	}
+
+	args := &utils.CGREvent{
+		ID: "TestGetStatQueuesForEvent",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+		},
+	}
+
+	experr := `inline parse error for string: <*string.invalid:filter>`
+	var reply []string
+	if err := sS.V1GetStatQueuesForEvent(context.Background(), args, &reply); err.Error() != experr {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+}
+
+func TestStatSV1GetStatQueuesForEventignFiltersErr(t *testing.T) {
+	tmp := Cache
+	tmpC := config.CgrConfig()
+	defer func() {
+		Cache = tmp
+		config.SetCgrConfig(tmpC)
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	cfg.StatSCfg().Opts.ProfileIgnoreFilters = []*utils.DynamicBoolOpt{
+		// function will return error after trying to parse the filter
+		{
+			FilterIDs: []string{"*string.invalid:filter"},
+			Tenant:    "cgrates.org",
+			Value:     false,
+		},
+	}
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	Cache = NewCacheS(cfg, dm, nil, nil)
+	filterS := NewFilterS(cfg, nil, dm)
+	sS := NewStatService(dm, cfg, filterS, nil)
+
+	sqPrf1 := &StatQueueProfile{
+		Tenant:    "cgrates.org",
+		ID:        "SQ1",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
+		Blockers:     utils.DynamicBlockers{{Blocker: true}},
+		QueueLength:  10,
+		ThresholdIDs: []string{"*none"},
+		MinItems:     5,
+		Metrics: []*MetricWithFilters{
+			{
+				MetricID: utils.MetaTCD,
+			},
+		},
+	}
+
+	if err := dm.SetStatQueueProfile(context.Background(), sqPrf1, true); err != nil {
+		t.Error(err)
+	}
+
+	sqPrf2 := &StatQueueProfile{
+		Tenant: "cgrates.org",
+		ID:     "SQ2",
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
+		Blockers:     utils.DynamicBlockers{{Blocker: false}},
+		QueueLength:  10,
+		ThresholdIDs: []string{"*none"},
+		MinItems:     5,
+		Metrics: []*MetricWithFilters{
+			{
+				MetricID: utils.MetaACD,
+			},
+		},
+	}
+
+	if err := dm.SetStatQueueProfile(context.Background(), sqPrf2, true); err != nil {
+		t.Error(err)
+	}
+
+	args := &utils.CGREvent{
+		ID: "TestGetStatQueuesForEvent",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+		},
+	}
+
+	experr := `inline parse error for string: <*string.invalid:filter>`
+	var reply []string
+	if err := sS.V1GetStatQueuesForEvent(context.Background(), args, &reply); err.Error() != experr {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+}
+
+func TestStatQueuesProcessEventidsErr(t *testing.T) {
+	Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dmSTS := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+
+	cfg.StatSCfg().StoreInterval = 1
+	cfg.StatSCfg().StringIndexedFields = nil
+	cfg.StatSCfg().PrefixIndexedFields = nil
+	statService := NewStatService(dmSTS, cfg,
+		&FilterS{dm: dmSTS, cfg: cfg}, nil)
+
+	prepareStatsData(t, dmSTS)
+	args := &utils.CGREvent{
+		Tenant: utils.EmptyString,
+		ID:     "SqProcessEvent",
+		Event: map[string]interface{}{
+			utils.AccountField: "1002",
+		},
+	}
+
+	reply := []string{}
+	err := statService.V1ProcessEvent(context.TODO(), args, &reply)
+	if err != utils.ErrNotFound {
+		t.Errorf("Expecting error: %+v, received error: %+v", utils.ErrNotFound, err)
+	}
+}
