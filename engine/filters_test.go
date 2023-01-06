@@ -2389,5 +2389,31 @@ func TestFilterPassRegexErr(t *testing.T) {
 	if pass, err := rf.passRegex(cd); err != nil || pass {
 		t.Error(err)
 	}
-
+}
+func TestFilterLazyPassErr(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+	Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, config.CgrConfig().CacheCfg(), nil)
+	filterS := FilterS{
+		cfg: cfg,
+		dm:  dm,
+	}
+	fltrID := "*string:~*req.Account:1007"
+	passEvent := map[string]interface{}{
+		"Account": "1007",
+	}
+	dm.dataDB = &DataDBMock{}
+	fEv := utils.MapStorage{}
+	fEv.Set([]string{utils.MetaReq}, passEvent)
+	prefixes := []string{utils.DynamicDataPrefix + utils.MetaReq}
+	Cache.Set(utils.CacheFilters, utils.ConcatenatedKey("cgrates.org", fltrID), nil, []string{}, true, utils.NonTransactional)
+	if _, _, err := filterS.LazyPass("cgrates.org",
+		[]string{fltrID}, fEv, prefixes); err == nil || err.Error() != utils.ErrPrefixNotFound(fltrID).Error() {
+		t.Errorf(err.Error())
+	}
 }
