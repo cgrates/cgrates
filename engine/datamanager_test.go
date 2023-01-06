@@ -3202,10 +3202,9 @@ func TestDMRatingProfile(t *testing.T) {
 // 		config.SetCgrConfig(config.NewDefaultCGRConfig())
 // 	}()
 // 	Cache.Clear(nil)
-// cfg := config.NewDefaultCGRConfig()
-// 		dataDB := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+// 	cfg := config.NewDefaultCGRConfig()
+// 	dataDB := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 // 	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
-
 // 	oldFlt := &Filter{
 // 		Tenant: cfg.GeneralCfg().DefaultTenant,
 // 		ID:     "DISPATCHER_FLTR1",
@@ -3217,6 +3216,7 @@ func TestDMRatingProfile(t *testing.T) {
 // 	if err := dm.SetFilter(oldFlt, true); err != nil {
 // 		t.Error(err)
 // 	}
+
 // 	disp := &DispatcherProfile{
 // 		Tenant:     cfg.GeneralCfg().DefaultTenant,
 // 		ID:         "Dsp",
@@ -3245,11 +3245,10 @@ func TestDMRatingProfile(t *testing.T) {
 // 	expindx := map[string]utils.StringSet{
 // 		"*string:*req.Destination": {"Dsp": {}},
 // 	}
-
-// 	if getindx, err := dm.GetIndexes(utils.CacheDispatcherFilterIndexes, cfg.GeneralCfg().DefaultTenant, utils.EmptyString, true, true); err != nil {
+// 	if getidx, err := dm.GetIndexes(utils.CacheDispatcherFilterIndexes, cfg.GeneralCfg().DefaultTenant, utils.EmptyString, true, true); err != nil {
 // 		t.Error(err)
-// 	} else if !reflect.DeepEqual(expindx, getindx) {
-// 		t.Errorf("Expected %v, Received %v", utils.ToJSON(expindx), utils.ToJSON(getindx))
+// 	} else if !reflect.DeepEqual(expindx, getidx) {
+// 		t.Errorf("Expected %v, Received %v", utils.ToJSON(expindx), utils.ToJSON(getidx))
 // 	}
 
 // }
@@ -3461,5 +3460,157 @@ func TestCacheDataFromDB(t *testing.T) {
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 	if err := dm.CacheDataFromDB("*test_", []string{}, true); err == nil || !strings.Contains(err.Error(), "unsupported cache prefix") {
 		t.Error(err)
+	}
+}
+
+func TestDMGetRouteProfile(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	tmpDm := dm
+	tmp := Cache
+	defer func() {
+		config.SetCgrConfig(config.NewDefaultCGRConfig())
+		Cache = tmp
+		SetDataStorage(tmpDm)
+	}()
+	Cache.Clear(nil)
+	cfg.DataDbCfg().RmtConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1)}
+	cfg.DataDbCfg().Items = map[string]*config.ItemOpt{
+		utils.CacheRouteProfiles: {
+			Limit:     3,
+			Remote:    true,
+			APIKey:    "key",
+			RouteID:   "route",
+			Replicate: true,
+		},
+	}
+	rpL := &RouteProfile{Tenant: "cgrates.org",
+		ID:        "ROUTE_ACNT_1002",
+		FilterIDs: []string{"FLTR_ACNT_1002"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2017, 11, 27, 00, 00, 00, 00, time.UTC),
+		},
+		Sorting: utils.MetaLC,
+		Routes: []*Route{
+			{
+				ID:            "route1",
+				RatingPlanIDs: []string{"RP_1002_LOW"},
+				Weight:        10,
+				Blocker:       false,
+			},
+		},
+		Weight: 10,
+	}
+	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn <- &ccMock{
+		calls: map[string]func(args interface{}, reply interface{}) error{
+			utils.ReplicatorSv1GetRouteProfile: func(args, reply interface{}) error {
+				*reply.(**RouteProfile) = rpL
+				return nil
+			},
+		},
+	}
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
+	})
+	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
+	config.SetCgrConfig(cfg)
+	SetDataStorage(dm)
+	if val, err := dm.GetRouteProfile(rpL.Tenant, rpL.ID, false, true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(val, rpL) {
+		t.Errorf("expected %v,received %v", utils.ToJSON(rpL), utils.ToJSON(val))
+	}
+}
+
+func TestUpdateFilterIndexStatErr1(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+	Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	dataDB := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	dm.dataDB = &DataDBMock{
+		GetIndexesDrvF: func(idxItmType, tntCtx, idxKey string) (indexes map[string]utils.StringSet, err error) {
+			return map[string]utils.StringSet{
+				utils.CacheStatFilterIndexes: {
+					"ATTR_TEST": {},
+				},
+			}, nil
+		},
+	}
+
+	oldFlt := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "fltr_test",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaString,
+				Element: "~*req.Cost",
+				Values:  []string{"unRegVal2"},
+			},
+		},
+	}
+	newFlt := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "fltr_test",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaPrefix,
+				Element: "~*req.Usage",
+				Values:  []string{"10s"},
+			},
+		},
+	}
+	if err := UpdateFilterIndex(dm, oldFlt, newFlt); err != utils.ErrNotImplemented {
+		t.Errorf("Expected error <%v>, Received error <%v>", utils.ErrNotImplemented, err)
+	}
+}
+
+func TestUpdateFilterIndexRemoveThresholdErr1(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+	Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	dataDB := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	dm.dataDB = &DataDBMock{
+		GetIndexesDrvF: func(idxItmType, tntCtx, idxKey string) (indexes map[string]utils.StringSet, err error) {
+			return map[string]utils.StringSet{
+				utils.CacheThresholdFilterIndexes: {
+					"ATTR_TEST": {},
+				},
+			}, nil
+		},
+	}
+
+	oldFlt := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "fltr_test",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaString,
+				Element: "~*req.Cost",
+				Values:  []string{"unRegVal2"},
+			},
+		},
+	}
+	newFlt := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "fltr_test",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaPrefix,
+				Element: "~*req.Usage",
+				Values:  []string{"10s"},
+			},
+		},
+	}
+	if err := UpdateFilterIndex(dm, oldFlt, newFlt); err != utils.ErrNotImplemented {
+		t.Errorf("Expected error <%v>, Received error <%v>", utils.ErrNotImplemented, err)
 	}
 }

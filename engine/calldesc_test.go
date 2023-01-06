@@ -18,8 +18,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"bytes"
 	"log"
+	"os"
 	"reflect"
+	"strings"
 	"sync"
 	"testing"
 	"time"
@@ -2609,6 +2612,30 @@ func TestCdAddRatingInfos(t *testing.T) {
 	}
 	if has := cd.addRatingInfos(riS); !has {
 		t.Error("expected true,received false")
+	}
+
+}
+
+func TestCDRefundIncrementWarning(t *testing.T) {
+	utils.Logger.SetLogLevel(4)
+	utils.Logger.SetSyslog(nil)
+	buf := new(bytes.Buffer)
+	log.SetOutput(buf)
+	defer func() {
+		utils.Logger.SetLogLevel(0)
+		log.SetOutput(os.Stderr)
+
+	}()
+	increments := Increments{
+		&Increment{Cost: 2, BalanceInfo: &DebitInfo{
+			Monetary: &MonetaryInfo{UUID: "moneya2"}, AccountID: "acc"}},
+	}
+	cd := &CallDescriptor{ToR: utils.MetaVoice, Increments: increments}
+	expLog := `Could not get the account to be refunded`
+	if _, err := cd.refundIncrements(nil); err != nil {
+		t.Error(err)
+	} else if rcvLog := buf.String(); !strings.Contains(rcvLog, expLog) {
+		t.Errorf("Logger %v doesn't contain %v", rcvLog, expLog)
 	}
 
 }

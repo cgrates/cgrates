@@ -29,6 +29,7 @@ import (
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
 )
 
 var rsponder = &Responder{MaxComputedUsage: config.CgrConfig().RalsCfg().MaxComputedUsage}
@@ -1160,4 +1161,48 @@ func TestGetMaxSessionTimeOnAccountsErr(t *testing.T) {
 		t.Errorf("logger %v doesn't contain %v", utils.ToJSON(rcvLog), utils.ToJSON(expLog))
 	}
 
+}
+
+func TestResponderCall(t *testing.T) {
+	tmpConn := connMgr
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+		connMgr = tmpConn
+	}()
+	Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 1
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	Cache = NewCacheS(cfg, dm, nil)
+	config.SetCgrConfig(cfg)
+	rs := &Responder{
+		Timezone: "UTC",
+		FilterS: &FilterS{
+			cfg: cfg,
+			dm:  dm,
+		},
+		MaxComputedUsage: map[string]time.Duration{},
+	}
+	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn <- rs
+	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{})
+	config.SetCgrConfig(cfg)
+	SetConnManager(connMgr)
+	var reply CallCost
+	attr := &CallDescriptorWithAPIOpts{
+		CallDescriptor: &CallDescriptor{
+			Category:      "call",
+			Tenant:        "cgrates.org",
+			Subject:       "dan",
+			ToR:           utils.MetaAny,
+			Account:       "dan",
+			Destination:   "+4917621621391",
+			DurationIndex: 9,
+		},
+	}
+	if err := rs.Call(utils.ResponderGetCost, attr, &reply); err != nil {
+		t.Error(err)
+	}
 }

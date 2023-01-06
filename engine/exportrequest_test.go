@@ -617,3 +617,20 @@ func TestExportRequestFieldAsString(t *testing.T) {
 		t.Error(err)
 	}
 }
+func TestExportRequestParseFieldErr(t *testing.T) {
+	mp := utils.NewSecureMapStorage()
+	inData := map[string]utils.DataStorage{
+		utils.MetaReq: mp,
+	}
+	EventReq := NewExportRequest(inData, "", nil, nil)
+	fctTemp := &config.FCTemplate{
+		Type:     utils.MetaMaskedDestination,
+		Value:    config.NewRSRParsersMustCompile("*daily", utils.InfieldSep),
+		Layout:   "“Mon Jan _2 15:04:05 2006”",
+		Timezone: "Local",
+	}
+	if _, err := EventReq.ParseField(fctTemp); err == nil {
+		t.Error(err)
+	}
+
+}

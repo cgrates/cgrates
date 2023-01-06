@@ -19,6 +19,7 @@ package engine
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -551,6 +552,10 @@ func TestRoutesSortedForEventWithLimitAndOffset(t *testing.T) {
 }
 
 func TestRoutesAsOptsGetRoutesMaxCost(t *testing.T) {
+	defer func() {
+		config.SetCgrConfig(config.NewDefaultCGRConfig())
+
+	}()
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dmSPP := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
@@ -596,6 +601,10 @@ func TestRoutesMatchWithIndexFalse(t *testing.T) {
 	routeService := NewRouteService(dmSPP, &FilterS{
 		dm: dmSPP, cfg: cfg}, cfg, nil)
 	prepareRoutesData(t, dmSPP)
+	defer func() {
+		config.SetCgrConfig(config.NewDefaultCGRConfig())
+
+	}()
 
 	routeService.cgrcfg.RouteSCfg().IndexedSelects = false
 	sprf, err := routeService.matchingRouteProfilesForEvent("cgrates.org", testRoutesArgs[0])
@@ -624,6 +633,10 @@ func TestRoutesMatchWithIndexFalse(t *testing.T) {
 }
 
 func TestRoutesSortedForEventWithLimitAndOffset2(t *testing.T) {
+	defer func() {
+		config.SetCgrConfig(config.NewDefaultCGRConfig())
+
+	}()
 	Cache.Clear(nil)
 	testRoutesPrfs := RouteProfiles{
 		&RouteProfile{
@@ -763,6 +776,10 @@ func TestRoutesSortedForEventWithLimitAndOffset2(t *testing.T) {
 	}
 }
 func TestRouteProfileCompileCacheParameters(t *testing.T) {
+	defer func() {
+		config.SetCgrConfig(config.NewDefaultCGRConfig())
+
+	}()
 	rp := &RouteProfile{
 		Tenant:    "tnt",
 		ID:        "id2",
@@ -836,8 +853,11 @@ func TestRouteProfileCompileCacheParameters(t *testing.T) {
 
 func TestRouteServiceStatMetrics(t *testing.T) {
 
-	testMock := &ccMock{
+	defer func() {
+		config.SetCgrConfig(config.NewDefaultCGRConfig())
 
+	}()
+	testMock := &ccMock{
 		calls: map[string]func(args, reply interface{}) error{
 			utils.StatSv1GetQueueFloatMetrics: func(args, reply interface{}) error {
 				rpl := map[string]float64{
@@ -860,13 +880,55 @@ func TestRouteServiceStatMetrics(t *testing.T) {
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats): clientconn,
 	})
 	rpS := NewRouteService(dmSPP, &FilterS{dm: dmSPP, cfg: cfg, connMgr: nil}, cfg, connMgr)
-	if _, err := rpS.statMetrics([]string{"stat1", "stat2"}, "cgrates.org"); err != nil {
+	exp := map[string]float64{
+		"metric1": 21.11,
+	}
+
+	if val, err := rpS.statMetrics([]string{"stat1", "stat2"}, "cgrates.org"); err != nil {
 		t.Error(err)
+	} else if !reflect.DeepEqual(val, exp) {
+		t.Errorf("Expected %v,Received %v", utils.ToJSON(exp), utils.ToJSON(val))
 	}
 }
-
+func TestRouteServiceStatMetricsLog(t *testing.T) {
+	utils.Logger.SetLogLevel(4)
+	utils.Logger.SetSyslog(nil)
+	buf := new(bytes.Buffer)
+	log.SetOutput(buf)
+	defer func() {
+		utils.Logger.SetLogLevel(0)
+		log.SetOutput(os.Stderr)
+	}()
+	testMock := &ccMock{
+		calls: map[string]func(args, reply interface{}) error{
+			utils.StatSv1GetQueueFloatMetrics: func(args, reply interface{}) error {
+				return errors.New("Error")
+			},
+		},
+	}
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dmSPP := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	cfg.RouteSCfg().StatSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}
+	clientconn := make(chan rpcclient.ClientConnector, 1)
+	clientconn <- testMock
+	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats): clientconn,
+	})
+	rpS := NewRouteService(dmSPP, &FilterS{dm: dmSPP, cfg: cfg, connMgr: nil}, cfg, connMgr)
+	expLog := `getting statMetrics for stat`
+	if _, err := rpS.statMetrics([]string{"stat1", "stat2"}, "cgrates.org"); err != nil {
+		t.Error(err)
+	} else if rcvLog := buf.String(); strings.Contains(rcvLog, expLog) {
+		t.Errorf("Logger %v doesn't contain  %v", rcvLog, expLog)
+	}
+}
 func TestRouteServiceV1GetRouteProfilesForEvent(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	defer func() {
+		config.SetCgrConfig(config.NewDefaultCGRConfig())
+
+	}()
 	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dmSPP := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	cfg.RouteSCfg().StringIndexedFields = nil
@@ -952,6 +1014,10 @@ func TestRouteServiceV1GetRouteProfilesForEvent(t *testing.T) {
 }
 
 func TestRouteServiceV1GetRoutes(t *testing.T) {
+	defer func() {
+		config.SetCgrConfig(config.NewDefaultCGRConfig())
+
+	}()
 	ccMock := &ccMock{
 		calls: map[string]func(args interface{}, reply interface{}) error{
 			utils.AttributeSv1ProcessEvent: func(args, reply interface{}) error {
@@ -1035,6 +1101,10 @@ func TestRouteServiceV1GetRoutes(t *testing.T) {
 }
 
 func TestRouteServiceSortRoutes(t *testing.T) {
+	defer func() {
+		config.SetCgrConfig(config.NewDefaultCGRConfig())
+
+	}()
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dmSPP := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
@@ -1120,6 +1190,8 @@ func TestRDSRSortRoutes(t *testing.T) {
 	defer func() {
 		utils.Logger.SetLogLevel(0)
 		log.SetOutput(os.Stderr)
+		config.SetCgrConfig(config.NewDefaultCGRConfig())
+
 	}()
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
@@ -1190,6 +1262,10 @@ func TestRDSRSortRoutes(t *testing.T) {
 
 }
 func TestQosRSortRoutes(t *testing.T) {
+	defer func() {
+		config.SetCgrConfig(config.NewDefaultCGRConfig())
+
+	}()
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dmSPP := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
@@ -1291,6 +1367,10 @@ func TestQosRSortRoutes(t *testing.T) {
 	}
 }
 func TestReaSortRoutes(t *testing.T) {
+	defer func() {
+		config.SetCgrConfig(config.NewDefaultCGRConfig())
+
+	}()
 	cfg := config.NewDefaultCGRConfig()
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, config.CgrConfig().CacheCfg(), nil)
@@ -1379,6 +1459,10 @@ func TestReaSortRoutes(t *testing.T) {
 
 }
 func TestHCRSortRoutes(t *testing.T) {
+	defer func() {
+		config.SetCgrConfig(config.NewDefaultCGRConfig())
+
+	}()
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
@@ -1568,6 +1652,10 @@ func TestLoadDistributionSorterSortRoutes(t *testing.T) {
 }
 
 func TestRouteServicePopulateSortingData(t *testing.T) {
+	defer func() {
+		config.SetCgrConfig(config.NewDefaultCGRConfig())
+
+	}()
 	Cache.Clear(nil)
 
 	ccMock := &ccMock{
@@ -1688,6 +1776,10 @@ func TestRouteServicePopulateSortingData(t *testing.T) {
 }
 
 func TestNewOptsGetRoutes(t *testing.T) {
+	defer func() {
+		config.SetCgrConfig(config.NewDefaultCGRConfig())
+
+	}()
 	cfg := config.NewDefaultCGRConfig()
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
