@@ -52,7 +52,7 @@ func TestFilterHelpersWeightFromDynamicsErr(t *testing.T) {
 	ctx := context.Background()
 	dWs := []*utils.DynamicWeight{
 		{
-			FilterIDs: []string{"*stirng:~*req.Account:1001:4fields"},
+			FilterIDs: []string{"*stirng:~*req.Account:1001"},
 			Weight:    64,
 		},
 	}
@@ -78,7 +78,7 @@ func TestBlockerFromDynamicsErr(t *testing.T) {
 	ctx := context.Background()
 	dBs := []*utils.DynamicBlocker{
 		{
-			FilterIDs: []string{"*stirng:~*req.Account:1001:4fields"},
+			FilterIDs: []string{"*stirng:~*req.Account:1001"},
 			Blocker:   true,
 		},
 	}
