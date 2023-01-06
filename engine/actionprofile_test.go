@@ -858,3 +858,54 @@ func TestFilterHelpersGetWeightFromDynamics(t *testing.T) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, ap.weight)
 	}
 }
+
+func TestActionProfileGetWeightFromDynamicsErr(t *testing.T) {
+
+	ap := &ActionProfile{
+		Tenant:    "cgrates.org",
+		ID:        "TEST_ID1",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		Weights: utils.DynamicWeights{
+			{
+				FilterIDs: []string{"*stirng"},
+				Weight:    20,
+			},
+		},
+		Schedule: utils.MetaASAP,
+		Targets: map[string]utils.StringSet{
+			utils.MetaAccounts: utils.NewStringSet([]string{"acc1", "acc2", "acc3"}),
+		},
+		Actions: []*APAction{
+			{
+				ID:        "TOPUP",
+				FilterIDs: []string{},
+				Type:      "*topup",
+				Diktats: []*APDiktat{{
+					Path: "~*balance.TestBalance.Value",
+				}},
+			},
+			{
+				ID:        "TOPUP_TEST_VOICE",
+				FilterIDs: []string{},
+				Type:      "*topup",
+				Diktats: []*APDiktat{{
+					Path: "~*balance.TestVoiceBalance.Value",
+				}},
+			},
+		},
+	}
+	ctx := context.Background()
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+
+	cM := NewConnManager(cfg)
+	fltrs := NewFilterS(cfg, cM, dm)
+	tnt := utils.CGRateSorg
+	ev := utils.MapStorage{}
+	expErr := "inline parse error for string: <*stirng>"
+	err := ap.GetWeightFromDynamics(ctx, fltrs, tnt, ev)
+	if err == nil || err.Error() != expErr {
+		t.Errorf("Expected error <%v> , Received <%v>", expErr, err)
+	}
+}

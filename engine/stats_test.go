@@ -3711,3 +3711,347 @@ func TestStatQueuesProcessEventidsErr(t *testing.T) {
 		t.Errorf("Expecting error: %+v, received error: %+v", utils.ErrNotFound, err)
 	}
 }
+
+func TestStatSMatchingStatQueuesForEventNoSqs(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dmSTS := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+
+	cfg.StatSCfg().StoreInterval = 1
+	cfg.StatSCfg().StringIndexedFields = nil
+	cfg.StatSCfg().PrefixIndexedFields = nil
+
+	statService := NewStatService(dmSTS, cfg,
+		&FilterS{dm: dmSTS, cfg: cfg}, nil)
+	prepareStatsData(t, dmSTS)
+	_, err := statService.matchingStatQueuesForEvent(context.TODO(), testStatsArgs[0].Tenant, []string{"statsIds"},
+		testStatsArgs[0].AsDataProvider(), false)
+	if err == nil || err != utils.ErrNotFound {
+		t.Errorf("Expected error <%v>, Received error <%v>", utils.ErrNotFound, err)
+	}
+}
+
+func TestStatQueuesMatchingStatQueuesForEventWeightErr(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dmSTS := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+
+	cfg.StatSCfg().StoreInterval = 1
+	cfg.StatSCfg().StringIndexedFields = nil
+	cfg.StatSCfg().PrefixIndexedFields = nil
+	statService := NewStatService(dmSTS, cfg,
+		&FilterS{dm: dmSTS, cfg: cfg}, nil)
+	prepareStatsData(t, dmSTS)
+
+	sqp := &StatQueueProfile{
+		Tenant:      "cgrates.org",
+		ID:          "StatQueueProfile1",
+		FilterIDs:   []string{"FLTR_STATS_1"},
+		QueueLength: 10,
+		TTL:         10 * time.Second,
+		Metrics: []*MetricWithFilters{
+			{
+				MetricID: "*sum#~*req.Usage",
+			},
+		},
+		ThresholdIDs: []string{},
+		Stored:       true,
+		Weights: utils.DynamicWeights{
+			{
+				FilterIDs: []string{"*stirng:~*req.Account:1001"},
+				Weight:    64,
+			},
+		},
+		MinItems: 1,
+	}
+
+	if err := statService.dm.SetStatQueueProfile(context.Background(), sqp, true); err != nil {
+		t.Error(err)
+	}
+
+	expErr := "NOT_IMPLEMENTED:*stirng"
+	_, err := statService.matchingStatQueuesForEvent(context.TODO(), testStatsArgs[0].Tenant, nil,
+		testStatsArgs[0].AsDataProvider(), false)
+
+	if err == nil || err.Error() != expErr {
+		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err)
+	}
+}
+
+func TestStatQueueProcessEventProfileIDsErr(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	filterS := NewFilterS(cfg, nil, dm)
+	sS := NewStatService(dm, cfg, filterS, nil)
+
+	args := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "SqProcessEvent",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+		},
+		APIOpts: map[string]interface{}{},
+	}
+	sS.cfg.StatSCfg().Opts.ProfileIDs = []*utils.DynamicStringSliceOpt{
+
+		{
+			FilterIDs: []string{"*string.invalid:filter"},
+			Tenant:    "cgrates.org",
+			Value:     []string{"value2"},
+		},
+	}
+
+	experr := `inline parse error for string: <*string.invalid:filter>`
+	if _, err := sS.processEvent(context.Background(), args.Tenant, args); err == nil ||
+		err.Error() != experr {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+
+}
+
+// unfinished should be unlocked from the main func
+func TestStatQueueProcessEventPrometheusStatIDsErr(t *testing.T) {
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	filterS := NewFilterS(cfg, nil, dm)
+	sS := NewStatService(dm, cfg, filterS, nil)
+
+	sqPrf := &StatQueueProfile{
+		Tenant:    "cgrates.org",
+		ID:        "SQ2",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
+		Blockers:     utils.DynamicBlockers{{Blocker: true}},
+		QueueLength:  10,
+		ThresholdIDs: []string{"*none"},
+		MinItems:     5,
+		Metrics: []*MetricWithFilters{
+			{
+				MetricID: utils.MetaTCD,
+			},
+		},
+	}
+	stat, err := NewStatMetric("*tcd", uint64(sqPrf.MinItems), []string{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	stq := &StatQueue{
+		sqPrfl: sqPrf,
+		Tenant: "cgrates.org",
+		ID:     "SQ2",
+		SQItems: []SQItem{
+			{
+				EventID: "SqProcessEvent",
+			},
+		},
+		SQMetrics: map[string]StatMetric{
+			utils.MetaTCD: stat,
+		},
+	}
+
+	if err := dm.SetStatQueueProfile(context.Background(), sqPrf, true); err != nil {
+		t.Error(err)
+	}
+	if err := dm.SetStatQueue(context.Background(), stq); err != nil {
+		t.Error(err)
+	}
+
+	args := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "SqProcessEvent",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+		},
+		APIOpts: map[string]interface{}{
+			utils.MetaUsage:           "10s",
+			utils.OptsStatsProfileIDs: []string{"SQ2"},
+		},
+	}
+
+	sS.cfg.StatSCfg().Opts.PrometheusStatIDs = []*utils.DynamicStringSliceOpt{
+
+		{
+			FilterIDs: []string{"*string.invalid:filter"},
+			Tenant:    "cgrates.org",
+			Value:     []string{"value2"},
+		},
+	}
+
+	experr := `inline parse error for string: <*string.invalid:filter>`
+	if _, err := sS.processEvent(context.Background(), args.Tenant, args); err == nil ||
+		err.Error() != experr {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
+
+	}
+
+}
+
+// unfinished should be unlocked from the main func
+func TestStatQueueProcessEventExpiredErr(t *testing.T) {
+
+	tmp := utils.Logger
+	defer func() {
+		utils.Logger = tmp
+	}()
+
+	buf := new(bytes.Buffer)
+	utils.Logger = utils.NewStdLoggerWithWriter(buf, "", 7)
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	filterS := NewFilterS(cfg, nil, dm)
+	sS := NewStatService(dm, cfg, filterS, nil)
+
+	sqPrf := &StatQueueProfile{
+		Tenant:    "cgrates.org",
+		ID:        "SQ1",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
+		Blockers:     utils.DynamicBlockers{{Blocker: true}},
+		QueueLength:  -1,
+		ThresholdIDs: []string{"*none"},
+		MinItems:     5,
+		Metrics: []*MetricWithFilters{
+			{
+				MetricID: utils.MetaTCD,
+			},
+		},
+	}
+	expiry := time.Date(2021, 1, 1, 23, 59, 59, 10, time.UTC)
+
+	stq := &StatQueue{
+		sqPrfl: sqPrf,
+		Tenant: "cgrates.org",
+		ID:     "SQ1",
+		SQItems: []SQItem{
+			{
+				EventID:    "SqProcessEvent",
+				ExpiryTime: &expiry,
+			},
+		},
+		SQMetrics: map[string]StatMetric{
+			"key": statMetricMock("remExpired error"),
+		},
+	}
+
+	if err := dm.SetStatQueueProfile(context.Background(), sqPrf, true); err != nil {
+		t.Error(err)
+	}
+	if err := dm.SetStatQueue(context.Background(), stq); err != nil {
+		t.Error(err)
+	}
+
+	args := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "SqProcessEvent",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+		},
+		APIOpts: map[string]interface{}{
+			utils.MetaUsage:           "10s",
+			utils.OptsStatsProfileIDs: []string{"SQ1"},
+		},
+	}
+
+	if rcv, err := sS.processEvent(context.Background(), args.Tenant, args); err != nil {
+		t.Error(err)
+	} else if rcv != nil {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", nil, rcv)
+
+	}
+	expErr := "cgrates.org:SQ1, ignoring event: cgrates.org:SqProcessEvent, error: remExpired mock error"
+	if rcvTxt := buf.String(); !strings.Contains(rcvTxt, expErr) {
+		t.Errorf("Expected <%v>, Received <%v>", expErr, rcvTxt)
+	}
+
+	buf.Reset()
+
+}
+
+// unfinished should be unlocked from the main func
+func TestStatQueueProcessEventBlockerErr(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	filterS := NewFilterS(cfg, nil, dm)
+	sS := NewStatService(dm, cfg, filterS, nil)
+
+	sqPrf := &StatQueueProfile{
+		Tenant:    "cgrates.org",
+		ID:        "SQ3",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
+		Blockers: []*utils.DynamicBlocker{
+			{
+				FilterIDs: []string{"*stirng:~*req.Account:1001"},
+				Blocker:   true,
+			},
+		},
+		QueueLength:  10,
+		ThresholdIDs: []string{"*none"},
+		MinItems:     5,
+		Metrics: []*MetricWithFilters{
+			{
+				MetricID: utils.MetaTCD,
+			},
+		},
+	}
+	stat, err := NewStatMetric("*tcd", uint64(sqPrf.MinItems), []string{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	stq := &StatQueue{
+		sqPrfl: sqPrf,
+		Tenant: "cgrates.org",
+		ID:     "SQ3",
+		SQItems: []SQItem{
+			{
+				EventID: "SqProcessEvent",
+			},
+		},
+		SQMetrics: map[string]StatMetric{
+			utils.MetaTCD: stat,
+		},
+	}
+
+	if err := dm.SetStatQueueProfile(context.Background(), sqPrf, true); err != nil {
+		t.Error(err)
+	}
+	if err := dm.SetStatQueue(context.Background(), stq); err != nil {
+		t.Error(err)
+	}
+
+	args := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "SqProcessEvent",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+		},
+		APIOpts: map[string]interface{}{
+			utils.MetaUsage:           "10s",
+			utils.OptsStatsProfileIDs: []string{"SQ3"},
+		},
+	}
+
+	expErr := "NOT_IMPLEMENTED:*stirng"
+	if _, err := sS.processEvent(context.Background(), args.Tenant, args); err == nil || err.Error() != expErr {
+		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err)
+	}
+
+}
