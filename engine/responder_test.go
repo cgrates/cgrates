@@ -1206,3 +1206,89 @@ func TestResponderCall(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestGetMaxSessionTime(t *testing.T) {
+	tmpdm := dm
+	cfg := config.NewDefaultCGRConfig()
+	defer func() {
+		dm = tmpdm
+		config.SetCgrConfig(config.NewDefaultCGRConfig())
+	}()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	acc := &Account{
+		ID:            "cgrates.org:acc_id",
+		AllowNegative: true,
+		BalanceMap: map[string]Balances{
+			utils.MetaSMS:  {&Balance{Value: 14}},
+			utils.MetaData: {&Balance{Value: 1024}},
+			utils.MetaVoice: {
+				&Balance{
+					Value: 15, Weight: 20,
+					DestinationIDs: utils.StringMap{"NAT": true}},
+				&Balance{Weight: 10,
+					DestinationIDs: utils.StringMap{"RET": true}}}},
+	}
+	if err := dm.SetAccount(acc); err != nil {
+		t.Error(err)
+	}
+	rsponder.MaxComputedUsage = map[string]time.Duration{
+		utils.MetaAny:   10 * time.Second,
+		utils.MetaVoice: 800 * time.Second,
+	}
+	tStart, _ := utils.ParseTimeDetectLayout("2013-08-07T17:30:00Z", "")
+	tEnd, _ := utils.ParseTimeDetectLayout("2013-08-07T17:31:21Z", "")
+	cd := &CallDescriptorWithAPIOpts{
+		CallDescriptor: &CallDescriptor{
+			Category:      "call",
+			ToR:           utils.MetaVoice,
+			Account:       "acc_id",
+			Destination:   "+4917621621391",
+			DurationIndex: 9,
+			TimeStart:     tStart,
+			TimeEnd:       tEnd,
+		},
+	}
+	var reply time.Duration
+	if err := rsponder.GetMaxSessionTime(cd, &reply); err == nil || err != utils.ErrAccountNotFound {
+		t.Errorf("Expected %+v, received :", err)
+	}
+}
+
+func TestResponderShutDown(t *testing.T) {
+	tempDm := dm
+	defer func() {
+		SetCdrStorage(cdrStorage)
+		dm = tempDm
+	}()
+	Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 1
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	Cache = NewCacheS(cfg, dm, nil)
+	config.SetCgrConfig(cfg)
+	SetCdrStorage(db)
+	rs := &Responder{
+		Timezone: "UTC",
+		FilterS: &FilterS{
+			cfg:     cfg,
+			dm:      dm,
+			connMgr: nil,
+		},
+		MaxComputedUsage: map[string]time.Duration{},
+	}
+	rs.ShdChan = utils.NewSyncedChan()
+	arg := &utils.TenantWithAPIOpts{
+		Tenant: "cgrates.org",
+		APIOpts: map[string]interface{}{
+			utils.OptsAPIKey: "thr12345",
+		},
+	}
+	var reply string
+	if err := rs.Shutdown(arg, &reply); err != nil {
+		t.Error(err)
+	} else if reply != "Done!" {
+		t.Errorf("Expected Done!,Received %v", reply)
+	}
+}

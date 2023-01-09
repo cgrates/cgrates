@@ -2095,7 +2095,6 @@ func TestChrgrSProcessEvent(t *testing.T) {
 
 func TestCdrSCall123(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-
 	tmpConnMgr := connMgr
 	defer func() {
 		connMgr = tmpConnMgr
@@ -2130,4 +2129,55 @@ func TestCdrSCall123(t *testing.T) {
 	if err := cdrS.Call(utils.CDRsV1StoreSessionCost, attr, &reply); err != nil {
 		t.Error(err)
 	}
+}
+
+func TestCDRServerListenAndServe(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	tmpConnMgr := connMgr
+	defer func() {
+		connMgr = tmpConnMgr
+		config.SetCgrConfig(config.NewDefaultCGRConfig())
+	}()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	cdrS := &CDRServer{
+		cgrCfg:  cfg,
+		connMgr: connMgr,
+		dm:      dm,
+		cdrDb:   db,
+	}
+	stopChan := make(chan struct{}, 1)
+	go func() {
+		time.Sleep(10 * time.Millisecond)
+		stopChan <- struct{}{}
+	}()
+	cdrS.ListenAndServe(stopChan)
+}
+
+func TestCDRServerListenAndServe2(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	tmpConnMgr := connMgr
+	defer func() {
+		connMgr = tmpConnMgr
+		config.SetCgrConfig(config.NewDefaultCGRConfig())
+	}()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	cdrS := &CDRServer{
+		cgrCfg:  cfg,
+		connMgr: connMgr,
+		dm:      dm,
+		cdrDb:   db,
+	}
+	stopChan := make(chan struct{}, 1)
+	go func() {
+		time.Sleep(20 * time.Millisecond)
+		stopChan <- struct{}{}
+	}()
+
+	go func() {
+		time.Sleep(10 * time.Millisecond)
+		cdrS.storDBChan <- db
+	}()
+	cdrS.ListenAndServe(stopChan)
 }
