@@ -71,6 +71,8 @@ type DataDBMock struct {
 	SetDispatcherHostDrvF       func(*context.Context, *DispatcherHost) error
 	RemoveDispatcherHostDrvF    func(*context.Context, string, string) error
 	GetItemLoadIDsDrvF          func(ctx *context.Context, itemIDPrefix string) (loadIDs map[string]int64, err error)
+	SetThresholdDrvF            func(*context.Context, *Threshold) error
+	SetStatQueueDrvF            func(*context.Context, *StoredStatQueue, *StatQueue) error
 }
 
 // Storage methods
