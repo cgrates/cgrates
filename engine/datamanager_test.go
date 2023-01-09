@@ -1847,3 +1847,340 @@ func TestDMRemoveThresholdProfileReplicateTrue(t *testing.T) {
 
 	dm.RemoveThresholdProfile(context.Background(), utils.CGRateSorg, "THD_2", false)
 }
+
+func TestDMSetThresholdErr(t *testing.T) {
+
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+	dm.dataDB = &DataDBMock{
+		SetThresholdDrvF: func(ctx *context.Context, t *Threshold) error { return utils.ErrNotImplemented },
+	}
+
+	th := &Threshold{
+		Tenant: "cgrates.org",
+		ID:     "TH_1",
+		Hits:   0,
+	}
+	expErr := utils.ErrNotImplemented
+	if err := dm.SetThreshold(context.Background(), th); err == nil || err != expErr {
+		t.Errorf("Expected error <%v>, Received <%v>", expErr, err)
+	}
+}
+
+func TestDMSetThresholdReplicateTrue(t *testing.T) {
+
+	tmp := Cache
+	cfgtmp := config.CgrConfig()
+	defer func() {
+		Cache = tmp
+		config.SetCgrConfig(cfgtmp)
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	cfg.DataDbCfg().Items[utils.MetaThresholds].Replicate = true
+	config.SetCgrConfig(cfg)
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	th := &Threshold{
+		Tenant: "cgrates.org",
+		ID:     "TH_1",
+		Hits:   0,
+	}
+
+	// tests replicate
+
+	dm.SetThreshold(context.Background(), th)
+}
+
+func TestDMRemoveThresholdReplicateTrue(t *testing.T) {
+
+	tmp := Cache
+	cfgtmp := config.CgrConfig()
+	defer func() {
+		Cache = tmp
+		config.SetCgrConfig(cfgtmp)
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	cfg.DataDbCfg().Items[utils.MetaThresholds].Replicate = true
+	config.SetCgrConfig(cfg)
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	th := &Threshold{
+		Tenant: "cgrates.org",
+		ID:     "TH_1",
+		Hits:   0,
+	}
+
+	if err := dm.DataDB().SetThresholdDrv(context.Background(), th); err != nil {
+		t.Error(err)
+	}
+
+	rcv, err := dm.GetThreshold(context.Background(), utils.CGRateSorg, "TH_1", true, false, utils.NonTransactional)
+	if err != nil {
+		t.Error(err)
+	} else if th != rcv {
+		t.Errorf("Expected <%+v> , Received <%+v>", th, rcv)
+	}
+
+	// tests replicate
+
+	if err := dm.RemoveThreshold(context.Background(), "cgrates.org", "TH_1"); err != nil {
+		t.Error(err)
+	}
+	if getRcv, err := dm.GetThreshold(context.Background(), utils.CGRateSorg, "TH_1", true, false, utils.NonTransactional); err == nil || err != utils.ErrNotFound {
+		t.Error(err)
+	} else if getRcv != nil {
+		t.Errorf("Expected <%+v>, \nReceived <%+v>\n", nil, getRcv)
+	}
+}
+
+func TestDMGetThresholdCacheGetErr(t *testing.T) {
+
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	if err := Cache.Set(context.Background(), utils.CacheThresholds, utils.ConcatenatedKey(utils.CGRateSorg, "TH_1"), nil, []string{}, true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+
+	_, err := dm.GetThreshold(context.Background(), utils.CGRateSorg, "TH_1", true, false, utils.NonTransactional)
+	if err == nil || err != utils.ErrNotFound {
+		t.Error(err)
+	}
+}
+
+// unfinished, getting **Threshold GetThresholdDrv outputing *, we need plain
+// func TestDMGetThresholdSetThErr(t *testing.T) {
+// 	tmp := Cache
+// 	cfgtmp := config.CgrConfig()
+// 	tmpCM := connMgr
+// 	defer func() {
+// 		Cache = tmp
+// 		config.SetCgrConfig(cfgtmp)
+// 		connMgr = tmpCM
+// 	}()
+// 	Cache.Clear(nil)
+
+// 	cfg := config.NewDefaultCGRConfig()
+// 	cfg.DataDbCfg().Items[utils.MetaThresholds].Remote = true
+// 	cfg.DataDbCfg().RmtConns = []string{utils.ConcatenatedKey(utils.MetaInternal,
+// 		utils.MetaThresholds)}
+// 	config.SetCgrConfig(cfg)
+// 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+
+// 	th := &Threshold{
+// 		Tenant: "cgrates.org",
+// 		ID:     "TH_1",
+// 		Hits:   0,
+// 	}
+
+// 	cc := &ccMock{
+// 		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+// 			utils.ReplicatorSv1GetThreshold: func(ctx *context.Context, args, reply interface{}) error {
+// 				rplCast, canCast := reply.(*Threshold)
+// 				if !canCast {
+// 					t.Errorf("Wrong argument type : %T", reply)
+// 					return nil
+// 				}
+// 				*rplCast = *th
+// 				return nil
+// 			},
+// 		},
+// 	}
+
+// 	rpcInternal := make(chan birpc.ClientConnector, 1)
+// 	rpcInternal <- cc
+// 	cM := NewConnManager(cfg)
+// 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), utils.ReplicatorSv1, rpcInternal)
+// 	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+// 	_, err := dm.GetThreshold(context.Background(), utils.CGRateSorg, "TH_1", false, false, utils.NonTransactional)
+// 	if err == nil || err != utils.ErrNotFound {
+// 		t.Error(err)
+// 	}
+// }
+
+// unfinished
+// func TestDMGetThresholdSetThErr(t *testing.T) {
+// 	tmp := Cache
+// 	cfgtmp := config.CgrConfig()
+// 	tmpCM := connMgr
+// 	defer func() {
+// 		Cache = tmp
+// 		config.SetCgrConfig(cfgtmp)
+// 		connMgr = tmpCM
+// 	}()
+// 	Cache.Clear(nil)
+
+// 	cfg := config.NewDefaultCGRConfig()
+// 	cfg.CacheCfg().ReplicationConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
+// 	config.SetCgrConfig(cfg)
+// 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+
+// 	// th := &Threshold{
+// 	// 	Tenant: "cgrates.org",
+// 	// 	ID:     "TH_1",
+// 	// 	Hits:   0,
+// 	// }
+// 	cc := make(chan birpc.ClientConnector, 1)
+// 	cc <- &ccMock{
+
+// 		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+
+// 			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply interface{}) error {
+// 				// argCache, canCast := args.(*utils.ArgCacheReplicateSet)
+// 				// if !canCast {
+// 				// 	return errors.New("cannot cast")
+// 				// }
+// 				fmt.Println(" 2 inside call")
+// 				// Cache.Set(nil, argCache.CacheID, argCache.ItemID, argCache.Value, nil, true, utils.EmptyString)
+// 				// *reply.(*string) = utils.OK
+// 				return utils.ErrNotImplemented
+// 			},
+// 		},
+// 	}
+
+// 	cM := NewConnManager(cfg)
+// 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.CacheSv1, cc)
+// 	SetConnManager(cM)
+// 	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+// 	_, err := dm.GetThreshold(context.Background(), utils.CGRateSorg, "TH_1", false, true, utils.NonTransactional)
+// 	if err != nil {
+// 		t.Error(err)
+// 	}
+// }
+
+func TestDMSetStatQueueNewErr(t *testing.T) {
+
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+	experr := "marshal mock error"
+	dm.ms = mockMarshal(experr)
+
+	sq := &StatQueue{
+		SQMetrics: map[string]StatMetric{
+			"key": statMetricMock(""),
+		},
+	}
+
+	if err := dm.SetStatQueue(context.Background(), sq); err == nil || err.Error() != experr {
+		t.Errorf("Expected error <%v>, Received <%v>", experr, err)
+	}
+}
+
+func TestDMSetStatQueueSetDrvErr(t *testing.T) {
+
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+	dm.dataDB = &DataDBMock{
+		SetStatQueueDrvF: func(ctx *context.Context, ssq *StoredStatQueue, sq *StatQueue) error { return utils.ErrNotImplemented },
+	}
+
+	sq := &StatQueue{
+
+		SQMetrics: map[string]StatMetric{
+			utils.MetaASR: &StatASR{
+				Metric: &Metric{
+					Value: utils.NewDecimal(1, 0),
+					Count: 1,
+					Events: map[string]*DecimalWithCompress{
+						"cgrates.org:TestStatRemExpired_1": {Stat: utils.NewDecimalFromFloat64(1), CompressFactor: 1},
+					},
+				},
+			},
+		},
+		sqPrfl: &StatQueueProfile{
+			Metrics: []*MetricWithFilters{
+				{
+					MetricID: utils.MetaASR,
+				},
+			},
+		},
+	}
+
+	expErr := utils.ErrNotImplemented
+	if err := dm.SetStatQueue(context.Background(), sq); err != expErr {
+		t.Errorf("Expected error <%v>, Received <%v>", expErr, err)
+	}
+}
+
+func TestDMSetStatQueueReplicateTrue(t *testing.T) {
+
+	tmp := Cache
+	cfgtmp := config.CgrConfig()
+	defer func() {
+		Cache = tmp
+		config.SetCgrConfig(cfgtmp)
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	cfg.DataDbCfg().Items[utils.MetaStatQueues].Replicate = true
+	config.SetCgrConfig(cfg)
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	sq := &StatQueue{
+
+		SQMetrics: map[string]StatMetric{
+			utils.MetaASR: &StatASR{
+				Metric: &Metric{
+					Value: utils.NewDecimal(1, 0),
+					Count: 1,
+					Events: map[string]*DecimalWithCompress{
+						"cgrates.org:TestStatRemExpired_1": {Stat: utils.NewDecimalFromFloat64(1), CompressFactor: 1},
+					},
+				},
+			},
+		},
+		sqPrfl: &StatQueueProfile{
+			Metrics: []*MetricWithFilters{
+				{
+					MetricID: utils.MetaASR,
+				},
+			},
+		},
+	}
+
+	// tests replicate
+	dm.SetStatQueue(context.Background(), sq)
+}
