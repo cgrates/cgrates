@@ -142,6 +142,10 @@ var (
 		testV1FIdxThresholdSRemoveThresholdsProfileNoINdexes,
 		testV1IndexClearCache,
 
+		testV1FIdxdxInitDataDb,
+		testV1FidxSetProfilesWithFltrsAndOverwriteThemFIdx,
+		testV1FidxSetAndChangeFiltersOnProfiles,
+
 		testV1FIdxStopEngine,
 	}
 	fltr = &engine.FilterWithAPIOpts{
@@ -5163,6 +5167,353 @@ func testV1FIdxThresholdSRemoveThresholdsProfileNoINdexes(t *testing.T) {
 		t.Error(err)
 	}
 
+}
+
+func testV1FidxSetProfilesWithFltrsAndOverwriteThemFIdx(t *testing.T) {
+	// FLTR_Charger, FLTR_Charger2  will be changed
+	filter1 := &engine.FilterWithAPIOpts{
+		Filter: &engine.Filter{
+			Tenant: "cgrates.org",
+			ID:     "FLTR_Charger",
+			Rules: []*engine.FilterRule{
+				{
+					Type:    utils.MetaString,
+					Element: "~*req.Bank",
+					Values:  []string{"BoA", "CEC"},
+				},
+				{
+					Type:    utils.MetaPrefix,
+					Element: "~*req.Customer",
+					Values:  []string{"11", "22"},
+				},
+			},
+		},
+	}
+	filter2 := &engine.FilterWithAPIOpts{
+		Filter: &engine.Filter{
+			Tenant: "cgrates.org",
+			ID:     "FLTR_Charger2",
+			Rules: []*engine.FilterRule{
+				{
+					Type:    utils.MetaString,
+					Element: "~*req.Account",
+					Values:  []string{"1001"},
+				},
+			},
+		},
+	}
+	var result string
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1SetFilter, filter1, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1SetFilter, filter2, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+
+	stat1 := &engine.StatQueueProfileWithAPIOpts{
+		StatQueueProfile: &engine.StatQueueProfile{
+			Tenant: "cgrates.org",
+			ID:     "Stats1",
+			FilterIDs: []string{
+				"FLTR_Charger",
+				"FLTR_Charger2",
+			},
+			QueueLength: 10,
+			TTL:         time.Duration(10) * time.Second,
+			Metrics: []*engine.MetricWithFilters{
+				{
+					MetricID: utils.MetaACD,
+				},
+				{
+					MetricID: utils.MetaTCD,
+				},
+			},
+			ThresholdIDs: []string{"*none"},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
+			MinItems: 1,
+		},
+	}
+	stat2 := &engine.StatQueueProfileWithAPIOpts{
+		StatQueueProfile: &engine.StatQueueProfile{
+			Tenant: "cgrates.org",
+			ID:     "Stats2",
+			FilterIDs: []string{
+				"FLTR_Charger",
+			},
+			QueueLength: 10,
+			TTL:         time.Duration(10) * time.Second,
+			Metrics: []*engine.MetricWithFilters{
+				{
+					MetricID: utils.MetaACD,
+				},
+				{
+					MetricID: utils.MetaTCD,
+				},
+			},
+			ThresholdIDs: []string{"*none"},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
+			MinItems: 1,
+		},
+	}
+	var reply string
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1SetStatQueueProfile, stat1, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned", reply)
+	}
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1SetStatQueueProfile, stat2, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned", reply)
+	}
+
+	tPrfl1 := &engine.ThresholdProfileWithAPIOpts{
+		ThresholdProfile: &engine.ThresholdProfile{
+			Tenant:    "cgrates.org",
+			ID:        "TEST_PROFILE1",
+			FilterIDs: []string{"FLTR_Charger"},
+			MaxHits:   1,
+			MinSleep:  time.Duration(5 * time.Minute),
+			Blocker:   false,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				},
+			},
+			Async: true,
+		},
+	}
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1SetThresholdProfile, tPrfl1, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned", reply)
+	}
+
+	arg := &AttrGetFilterIndexes{
+		Tenant:   "cgrates.org",
+		ItemType: utils.MetaStats,
+	}
+	expectedIndexes := []string{
+		// Stats1
+		"*string:*req.Bank:BoA:Stats1",
+		"*string:*req.Bank:CEC:Stats1",
+		"*prefix:*req.Customer:11:Stats1",
+		"*prefix:*req.Customer:22:Stats1",
+		"*string:*req.Account:1001:Stats1",
+
+		// Stats2
+		"*string:*req.Bank:BoA:Stats2",
+		"*string:*req.Bank:CEC:Stats2",
+		"*prefix:*req.Customer:11:Stats2",
+		"*prefix:*req.Customer:22:Stats2",
+	}
+	sort.Strings(expectedIndexes)
+	var replyIDx []string
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes, arg, &replyIDx); err != nil {
+		t.Error(err)
+	} else if sort.Strings(replyIDx); !reflect.DeepEqual(expectedIndexes, replyIDx) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expectedIndexes), utils.ToJSON(replyIDx))
+	}
+
+	// FLTR_Charger, FLTR_Charger12312 and FLTR_Charger4564 will be changed
+	filter1 = &engine.FilterWithAPIOpts{
+		Filter: &engine.Filter{
+			Tenant: "cgrates.org",
+			ID:     "FLTR_Charger",
+			Rules: []*engine.FilterRule{
+				{
+					Type:    utils.MetaString,
+					Element: "~*req.RatingPlan",
+					Values:  []string{"RP1"},
+				},
+				{
+					Type:    utils.MetaPrefix,
+					Element: "~*req.Subject",
+					Values:  []string{"1001", "1002"},
+				},
+			},
+		},
+	}
+	filter2 = &engine.FilterWithAPIOpts{
+		Filter: &engine.Filter{
+			Tenant: "cgrates.org",
+			ID:     "FLTR_Charger2",
+			Rules: []*engine.FilterRule{
+				{
+					Type:    utils.MetaString,
+					Element: "~*req.Destination",
+					Values:  []string{"randomID"},
+				},
+			},
+		},
+	}
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1SetFilter, filter1, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned", reply)
+	}
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1SetFilter, filter2, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned", reply)
+	}
+
+	arg = &AttrGetFilterIndexes{
+		Tenant:   "cgrates.org",
+		ItemType: utils.MetaStats,
+	}
+	expectedIndexes = []string{
+		// Stats1
+		"*string:*req.RatingPlan:RP1:Stats1",
+		"*prefix:*req.Subject:1001:Stats1",
+		"*prefix:*req.Subject:1002:Stats1",
+		"*string:*req.Destination:randomID:Stats1",
+
+		// Stats2
+		"*string:*req.RatingPlan:RP1:Stats2",
+		"*prefix:*req.Subject:1001:Stats2",
+		"*prefix:*req.Subject:1002:Stats2",
+	}
+	sort.Strings(expectedIndexes)
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes, arg, &replyIDx); err != nil {
+		t.Error(err)
+	} else if sort.Strings(replyIDx); !reflect.DeepEqual(expectedIndexes, replyIDx) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expectedIndexes), utils.ToJSON(replyIDx))
+	}
+}
+
+func testV1FidxSetAndChangeFiltersOnProfiles(t *testing.T) {
+	stat1 := &engine.StatQueueProfileWithAPIOpts{
+		StatQueueProfile: &engine.StatQueueProfile{
+			Tenant:      "cgrates.org",
+			ID:          "Stats1",
+			FilterIDs:   []string{},
+			QueueLength: 10,
+			TTL:         time.Duration(10) * time.Second,
+			Metrics: []*engine.MetricWithFilters{
+				{
+					MetricID: utils.MetaACD,
+				},
+				{
+					MetricID: utils.MetaTCD,
+				},
+			},
+			ThresholdIDs: []string{"*none"},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
+			MinItems: 1,
+		},
+	}
+
+	stat2 := &engine.StatQueueProfileWithAPIOpts{
+		StatQueueProfile: &engine.StatQueueProfile{
+			Tenant: "cgrates.org",
+			ID:     "Stats2",
+			FilterIDs: []string{
+				"FLTR_Charger2",
+			},
+			QueueLength: 10,
+			TTL:         time.Duration(10) * time.Second,
+			Metrics: []*engine.MetricWithFilters{
+				{
+					MetricID: utils.MetaACD,
+				},
+				{
+					MetricID: utils.MetaTCD,
+				},
+			},
+			ThresholdIDs: []string{"*none"},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
+			MinItems: 1,
+		},
+	}
+	var reply string
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1SetStatQueueProfile, stat1, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned", reply)
+	}
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1SetStatQueueProfile, stat2, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned", reply)
+	}
+
+	tPrfl1 := &engine.ThresholdProfileWithAPIOpts{
+		ThresholdProfile: &engine.ThresholdProfile{
+			Tenant: "cgrates.org",
+			ID:     "TEST_PROFILE1",
+			FilterIDs: []string{"FLTR_Charger",
+				"FLTR_Charger2"},
+			MaxHits:  1,
+			MinSleep: time.Duration(5 * time.Minute),
+			Blocker:  false,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
+			Async: true,
+		},
+	}
+
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1SetThresholdProfile, tPrfl1, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned", reply)
+	}
+
+	arg := &AttrGetFilterIndexes{
+		Tenant:   "cgrates.org",
+		ItemType: utils.MetaStats,
+	}
+	expectedIndexes := []string{
+		"*none:*any:*any:Stats1",
+		"*string:*req.Destination:randomID:Stats2",
+	}
+	sort.Strings(expectedIndexes)
+	var replyIDx []string
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes, arg, &replyIDx); err != nil {
+		t.Error(err)
+	} else if sort.Strings(replyIDx); !reflect.DeepEqual(expectedIndexes, replyIDx) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expectedIndexes), utils.ToJSON(replyIDx))
+	}
+
+	arg = &AttrGetFilterIndexes{
+		Tenant:   "cgrates.org",
+		ItemType: utils.MetaThresholds,
+	}
+	expectedIndexes = []string{
+		"*string:*req.Destination:randomID:TEST_PROFILE1",
+		"*string:*req.RatingPlan:RP1:TEST_PROFILE1",
+		"*prefix:*req.Subject:1001:TEST_PROFILE1",
+		"*prefix:*req.Subject:1002:TEST_PROFILE1",
+	}
+	sort.Strings(expectedIndexes)
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes, arg, &replyIDx); err != nil {
+		t.Error(err)
+	} else if sort.Strings(replyIDx); !reflect.DeepEqual(expectedIndexes, replyIDx) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expectedIndexes), utils.ToJSON(replyIDx))
+	}
 }
 
 func testV1FIdxStopEngine(t *testing.T) {
