@@ -46,7 +46,7 @@ var (
 		testAPIerInitCfg,
 		testAPIerInitDataDb,
 		testAPIerResetStorDb,
-		//testAPIerStartEngine,
+		testAPIerStartEngine,
 		testAPIerRPCConn,
 		testAPIerLoadFromFolder,
 		testAPIerGetRatingPlanCost,
@@ -58,14 +58,14 @@ var (
 		testAPIerRemoveTPFromFolder,
 		testAPIerAfterDelete,
 		testAPIerVerifyAttributesAfterDelete,
-		//testAPIerKillEngine,
+		testAPIerKillEngine,
 
-		/* testAPIerInitDataDb,
+		testAPIerInitDataDb,
 		testAPIerResetStorDb,
 		testAPIerStartEngineSleep,
 		testAPIerRPCConn,
 		testApierSetAndRemoveRatingProfileAnySubject,
-		testAPIerKillEngine, */
+		testAPIerKillEngine,
 	}
 )
 
