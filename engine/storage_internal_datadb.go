@@ -840,10 +840,6 @@ func (iDB *InternalDB) SetIndexesDrv(idxItmType, tntCtx string,
 				true, utils.NonTransactional)
 			continue
 		}
-		//to be the same as HMSET
-		// if x, ok := iDB.db.Get(idxItmType, dbKey); ok && x != nil {
-		// indx = utils.JoinStringSet(indx, x.(utils.StringSet))
-		// }
 		iDB.db.Set(idxItmType, dbKey, indx, []string{tntCtx},
 			true, utils.NonTransactional)
 	}

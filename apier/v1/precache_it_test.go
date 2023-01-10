@@ -153,7 +153,7 @@ func testPrecacheRestartEngine(t *testing.T) {
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
-	time.Sleep(2 * time.Second) // let the *apiban cache to be populated
+	time.Sleep(3*time.Second + 800*time.Millisecond) // let the *apiban cache to be populated
 }
 
 func testPrecacheGetCacheStatsAfterRestart(t *testing.T) {

@@ -49,8 +49,9 @@ var (
 
 		testSetProfilesWithFltrsAndOverwriteThemFIdx,
 		testSetAndChangeFiltersOnProfiles,
+		testV1FIdxdxInitDataDb,
 
-		/* testV1FIdxSetThresholdProfile,
+		testV1FIdxSetThresholdProfile,
 		testV1FIdxComputeThresholdsIndexes,
 		testV1FIdxSetSecondThresholdProfile,
 		testV1FIdxSecondComputeThresholdsIndexes,
@@ -108,7 +109,7 @@ var (
 		testV1FIdxResetStorDb,
 		testV1FIdxClearCache,
 		//testV1FIdxSetDispatcherComputeIDs,
-		testV1FIdxSetResourceComputeIDs, */
+		testV1FIdxSetResourceComputeIDs,
 
 		testV1FIdxStopEngine,
 	}
