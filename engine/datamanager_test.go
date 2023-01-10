@@ -21,6 +21,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
@@ -2023,56 +2024,43 @@ func TestDMGetThresholdCacheGetErr(t *testing.T) {
 // 	}
 // }
 
-// unfinished
-// func TestDMGetThresholdSetThErr(t *testing.T) {
-// 	tmp := Cache
-// 	cfgtmp := config.CgrConfig()
-// 	tmpCM := connMgr
-// 	defer func() {
-// 		Cache = tmp
-// 		config.SetCgrConfig(cfgtmp)
-// 		connMgr = tmpCM
-// 	}()
-// 	Cache.Clear(nil)
+func TestDMGetThresholdSetThErr(t *testing.T) {
+	tmp := Cache
+	cfgtmp := config.CgrConfig()
+	defer func() {
+		Cache = tmp
+		config.SetCgrConfig(cfgtmp)
+	}()
+	Cache.Clear(nil)
 
-// 	cfg := config.NewDefaultCGRConfig()
-// 	cfg.CacheCfg().ReplicationConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
-// 	config.SetCgrConfig(cfg)
-// 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cfg := config.NewDefaultCGRConfig()
+	cfg.CacheCfg().ReplicationConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
+	cfg.CacheCfg().Partitions[utils.MetaThresholds].Replicate = true
+	config.SetCgrConfig(cfg)
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 
-// 	// th := &Threshold{
-// 	// 	Tenant: "cgrates.org",
-// 	// 	ID:     "TH_1",
-// 	// 	Hits:   0,
-// 	// }
-// 	cc := make(chan birpc.ClientConnector, 1)
-// 	cc <- &ccMock{
+	cc := make(chan birpc.ClientConnector, 1)
+	cc <- &ccMock{
 
-// 		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply interface{}) error {
 
-// 			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply interface{}) error {
-// 				// argCache, canCast := args.(*utils.ArgCacheReplicateSet)
-// 				// if !canCast {
-// 				// 	return errors.New("cannot cast")
-// 				// }
-// 				fmt.Println(" 2 inside call")
-// 				// Cache.Set(nil, argCache.CacheID, argCache.ItemID, argCache.Value, nil, true, utils.EmptyString)
-// 				// *reply.(*string) = utils.OK
-// 				return utils.ErrNotImplemented
-// 			},
-// 		},
-// 	}
+				return utils.ErrNotImplemented
+			},
+		},
+	}
 
-// 	cM := NewConnManager(cfg)
-// 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.CacheSv1, cc)
-// 	SetConnManager(cM)
-// 	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+	cM := NewConnManager(cfg)
+	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.CacheSv1, cc)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+	Cache = NewCacheS(cfg, dm, connMgr, nil)
 
-// 	_, err := dm.GetThreshold(context.Background(), utils.CGRateSorg, "TH_1", false, true, utils.NonTransactional)
-// 	if err != nil {
-// 		t.Error(err)
-// 	}
-// }
+	expErr := utils.ErrNotImplemented
+	_, err := dm.GetThreshold(context.Background(), utils.CGRateSorg, "TH_1", false, true, utils.NonTransactional)
+	if err == nil || err != expErr {
+		t.Errorf("Expected <%v> , Received <%v>", expErr, err)
+	}
+}
 
 func TestDMSetStatQueueNewErr(t *testing.T) {
 
@@ -2183,4 +2171,262 @@ func TestDMSetStatQueueReplicateTrue(t *testing.T) {
 
 	// tests replicate
 	dm.SetStatQueue(context.Background(), sq)
+}
+
+func TestDMGetThresholdProfileSetThErr2(t *testing.T) {
+	tmp := Cache
+	cfgtmp := config.CgrConfig()
+	defer func() {
+		Cache = tmp
+		config.SetCgrConfig(cfgtmp)
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	cfg.CacheCfg().ReplicationConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
+	cfg.CacheCfg().Partitions[utils.MetaThresholds].Replicate = true
+
+	config.SetCgrConfig(cfg)
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+
+	cc := make(chan birpc.ClientConnector, 1)
+	cc <- &ccMock{
+
+		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply interface{}) error {
+
+				return utils.ErrNotImplemented
+			},
+		},
+	}
+
+	cM := NewConnManager(cfg)
+	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.CacheSv1, cc)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+	dm.dataDB = &DataDBMock{
+		GetThresholdDrvF: func(ctx *context.Context, tenant, id string) (*Threshold, error) {
+			return &Threshold{}, nil
+		},
+	}
+
+	Cache = NewCacheS(cfg, dm, connMgr, nil)
+
+	expErr := utils.ErrNotImplemented
+	_, err := dm.GetThreshold(context.Background(), utils.CGRateSorg, "TH_1", false, true, utils.NonTransactional)
+	if err == nil || err != expErr {
+		t.Errorf("Expected <%v> , Received <%v>", expErr, err)
+	}
+}
+
+func TestDMGetThresholdGetThProflErr(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	if err := Cache.Set(context.Background(), utils.CacheThresholdProfiles, utils.ConcatenatedKey(utils.CGRateSorg, "TH_1"), nil, []string{}, true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+
+	expErr := utils.ErrNotFound
+	_, err := dm.GetThresholdProfile(context.Background(), utils.CGRateSorg, "TH_1", true, true, utils.NonTransactional)
+	if err == nil || err != expErr {
+		t.Errorf("Expected <%v> , Received <%v>", expErr, err)
+	}
+}
+
+func TestDMGetThresholdProfileDMErr(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+	Cache.Clear(nil)
+
+	var dm *DataManager
+
+	expErr := utils.ErrNoDatabaseConn
+	_, err := dm.GetThresholdProfile(context.Background(), utils.CGRateSorg, "TH_1", true, true, utils.NonTransactional)
+	if err == nil || err != expErr {
+		t.Errorf("Expected <%v> , Received <%v>", expErr, err)
+	}
+}
+
+// unfinished, open issue
+// func TestGetThresholdProfileSetThErr(t *testing.T) {
+// 	tmp := Cache
+// 	cfgtmp := config.CgrConfig()
+// 	tmpCM := connMgr
+// 	defer func() {
+// 		Cache = tmp
+// 		config.SetCgrConfig(cfgtmp)
+// 		connMgr = tmpCM
+// 	}()
+// 	Cache.Clear(nil)
+
+// 	cfg := config.NewDefaultCGRConfig()
+// 	cfg.DataDbCfg().Items[utils.MetaThresholdProfiles].Remote = true
+// 	cfg.DataDbCfg().RmtConns = []string{utils.ConcatenatedKey(utils.MetaInternal,
+// 		utils.MetaThresholds)}
+// 	config.SetCgrConfig(cfg)
+// 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+
+// 	th := &Threshold{
+// 		Tenant: "cgrates.org",
+// 		ID:     "TH_1",
+// 		Hits:   0,
+// 	}
+
+// 	cc := &ccMock{
+// 		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+// 			utils.ReplicatorSv1GetThresholdProfile: func(ctx *context.Context, args, reply interface{}) error {
+// 				rplCast, canCast := reply.(*Threshold)
+// 				if !canCast {
+// 					t.Errorf("Wrong argument type : %T", reply)
+// 					return nil
+// 				}
+// 				*rplCast = *th
+// 				return nil
+// 			},
+// 		},
+// 	}
+
+// 	rpcInternal := make(chan birpc.ClientConnector, 1)
+// 	rpcInternal <- cc
+// 	cM := NewConnManager(cfg)
+// 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), utils.ReplicatorSv1, rpcInternal)
+// 	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+// 	_, err := dm.GetThresholdProfile(context.Background(), utils.CGRateSorg, "TH_1", false, false, utils.NonTransactional)
+// 	if err == nil || err != utils.ErrNotFound {
+// 		t.Error(err)
+// 	}
+// }
+
+func TestDMGetThresholdProfileSetThPrfErr(t *testing.T) {
+	tmp := Cache
+	cfgtmp := config.CgrConfig()
+	defer func() {
+		Cache = tmp
+		config.SetCgrConfig(cfgtmp)
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	cfg.CacheCfg().ReplicationConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
+	cfg.CacheCfg().Partitions[utils.MetaThresholdProfiles].Replicate = true
+	config.SetCgrConfig(cfg)
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+
+	cc := make(chan birpc.ClientConnector, 1)
+	cc <- &ccMock{
+
+		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply interface{}) error {
+
+				return utils.ErrNotImplemented
+			},
+		},
+	}
+
+	cM := NewConnManager(cfg)
+	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.CacheSv1, cc)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+	Cache = NewCacheS(cfg, dm, connMgr, nil)
+
+	expErr := utils.ErrNotImplemented
+	_, err := dm.GetThresholdProfile(context.Background(), utils.CGRateSorg, "TH_1", false, true, utils.NonTransactional)
+	if err == nil || err != expErr {
+		t.Errorf("Expected <%v> , Received <%v>", expErr, err)
+	}
+}
+
+func TestDMGetThresholdProfileSetThPrfErr2(t *testing.T) {
+	tmp := Cache
+	cfgtmp := config.CgrConfig()
+	defer func() {
+		Cache = tmp
+		config.SetCgrConfig(cfgtmp)
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	cfg.CacheCfg().ReplicationConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
+	cfg.CacheCfg().Partitions[utils.MetaThresholdProfiles].Replicate = true
+	config.SetCgrConfig(cfg)
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+
+	cc := make(chan birpc.ClientConnector, 1)
+	cc <- &ccMock{
+
+		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply interface{}) error {
+
+				return utils.ErrNotImplemented
+			},
+		},
+	}
+
+	cM := NewConnManager(cfg)
+	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.CacheSv1, cc)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+	dm.dataDB = &DataDBMock{
+		GetThresholdProfileDrvF: func(ctx *context.Context, tenant, id string) (tp *ThresholdProfile, err error) {
+			return &ThresholdProfile{}, nil
+		},
+	}
+	Cache = NewCacheS(cfg, dm, connMgr, nil)
+
+	expErr := utils.ErrNotImplemented
+	_, err := dm.GetThresholdProfile(context.Background(), utils.CGRateSorg, "TH_1", false, true, utils.NonTransactional)
+	if err == nil || err != expErr {
+		t.Errorf("Expected <%v> , Received <%v>", expErr, err)
+	}
+}
+
+// unfinished set without using cache.set and then go cache.get
+func TestDMCacheDataFromDBResourceProfilesPrefix(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	if err := Cache.Set(context.Background(), utils.CachePrefixToInstance[utils.ResourceProfilesPrefix], "cgrates.org:RL2", &ResourceProfile{}, []string{}, true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+
+	rp := &ResourceProfile{
+		Tenant:    "cgrates.org",
+		ID:        "RL2",
+		FilterIDs: []string{"fltr_test"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 100,
+			}},
+		Limit:             2,
+		ThresholdIDs:      []string{"TEST_ACTIONS"},
+		Blocker:           false,
+		UsageTTL:          time.Millisecond,
+		AllocationMessage: "ALLOC",
+	}
+
+	if err := dm.SetResourceProfile(context.Background(), rp, false); err != nil {
+		t.Error(err)
+	}
+
+	if err := dm.CacheDataFromDB(context.Background(), utils.ResourceProfilesPrefix, []string{utils.MetaAny}, true); err != nil {
+		t.Error(err)
+	}
+
 }
