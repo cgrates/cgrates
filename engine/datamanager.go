@@ -2270,6 +2270,7 @@ func (dm *DataManager) RemoveChargerProfile(tenant, id string,
 			tenant).RemoveItemFromIndex(tenant, id, oldCpp.FilterIDs); err != nil {
 			return
 		}
+
 		if err = removeReverseFilterIndexForFilter(dm, utils.CacheChargerFilterIndexes,
 			oldCpp.Tenant, oldCpp.ID, oldCpp.FilterIDs); err != nil {
 			return

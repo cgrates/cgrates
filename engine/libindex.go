@@ -324,6 +324,7 @@ func removeReverseFilterIndexForFilter(dm *DataManager, idxItmType, tnt, itemID 
 			err = nil
 			continue // already removed
 		}
+
 		delete(indexes[idxItmType], itemID) // delete index from map
 
 		indexerKey := utils.ConcatenatedKey(tnt, fltrID)

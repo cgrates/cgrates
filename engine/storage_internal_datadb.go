@@ -985,12 +985,6 @@ func (iDB *InternalDB) SetFilterIndexesDrv(cacheID, tntCtx string,
 				true, utils.NonTransactional)
 			continue
 		}
-		//to be the same as HMSET
-		if x, ok := iDB.db.Get(cacheID, dbKey); ok && x != nil {
-			for key := range x.(utils.StringMap) {
-				indx[key] = true
-			}
-		}
 		iDB.db.Set(cacheID, dbKey, indx, []string{tntCtx},
 			true, utils.NonTransactional)
 	}
