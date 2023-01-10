@@ -1023,11 +1023,7 @@ func TestRouteServiceV1GetRoutes(t *testing.T) {
 			utils.AttributeSv1ProcessEvent: func(args, reply interface{}) error {
 				rpl := &AttrSProcessEventReply{
 					AlteredFields: []string{"testcase"},
-					CGREvent: &utils.CGREvent{
-						Event: map[string]interface{}{
-							"testcase": 1,
-						},
-					},
+					CGREvent:      testRoutesArgs[1],
 				}
 				*reply.(*AttrSProcessEventReply) = *rpl
 				return nil
@@ -1048,54 +1044,32 @@ func TestRouteServiceV1GetRoutes(t *testing.T) {
 	rpS := NewRouteService(dmSPP, &FilterS{dm: dmSPP, cfg: cfg, connMgr: nil}, cfg, connMgr)
 	args := &utils.CGREvent{
 		ID:     "CGREvent1",
-		Tenant: "cgrates.orgs",
+		Tenant: "cgrates.org",
 		Time:   utils.TimePointer(time.Date(2022, 12, 1, 20, 0, 0, 0, time.UTC)),
 		Event: map[string]interface{}{
 			"testcase": 1,
 		},
 	}
-	reply := &SortedRoutesList{
-		{
-			ProfileID: "RouteProfile1",
-			Sorting:   utils.MetaWeight,
+	expErr := fmt.Sprintf("MANDATORY_IE_MISSING: [%v]", utils.CGREventString)
+	var reply SortedRoutesList
+	if err := rpS.V1GetRoutes(nil, &reply); err == nil || err.Error() != expErr {
+		t.Errorf("Expected <%v>,Received <%v>", expErr, err.Error())
+	}
+	expS := SortedRoutesList{
+		{ProfileID: "RouteProfile1",
+			Sorting: "*weight",
 			Routes: []*SortedRoute{
 				{
-					RouteID: "route1",
-					sortingDataF64: map[string]float64{
-						utils.Weight: 10.0,
-					},
-					SortingData: map[string]interface{}{
-						utils.Weight: 10.0,
-					},
+					RouteID:         "route2",
 					RouteParameters: "param1",
+					SortingData:     map[string]interface{}{"Weight": 10},
 				},
 			},
-		},
-		{
-			ProfileID: "RouteProfile2",
-			Sorting:   utils.MetaWeight,
-			Routes: []*SortedRoute{
-				{
-					RouteID: "route1",
-					sortingDataF64: map[string]float64{
-						utils.Weight: 10.0,
-					},
-					SortingData: map[string]interface{}{
-						utils.Weight: 10.0,
-					},
-					RouteParameters: "param1",
-				},
-			},
-		},
-	}
-	if err := rpS.V1GetRoutes(nil, reply); err == nil {
+		}}
+	if err = rpS.V1GetRoutes(args, &reply); err != nil {
 		t.Error(err)
-	} else if err = rpS.V1GetRoutes(args, reply); err == nil {
-		t.Error(err)
-	}
-
-	if err := rpS.V1GetRoutesList(args, &[]string{}); err == nil || err != utils.ErrNotFound {
-		t.Error(err)
+	} else if !reflect.DeepEqual(reply[0].ProfileID, expS[0].ProfileID) {
+		t.Errorf("Expected %v,Received %v", utils.ToJSON(expS), utils.ToJSON(reply))
 	}
 
 }
@@ -1803,6 +1777,214 @@ func TestNewOptsGetRoutes(t *testing.T) {
 	}
 
 	if _, err := newOptsGetRoutes(ev, fltr, cfgOpt); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestRSStatMetricsLogg(t *testing.T) {
+	utils.Logger.SetLogLevel(4)
+	utils.Logger.SetSyslog(nil)
+	cfg := config.NewDefaultCGRConfig()
+	buf := new(bytes.Buffer)
+	log.SetOutput(buf)
+	defer func() {
+		utils.Logger.SetLogLevel(0)
+		log.SetOutput(os.Stderr)
+		config.SetCgrConfig(config.NewDefaultCGRConfig())
+	}()
+	cfg.RouteSCfg().StatSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn <- &ccMock{
+		calls: map[string]func(args interface{}, reply interface{}) error{
+			utils.StatSv1GetQueueFloatMetrics: func(args, reply interface{}) error {
+				return errors.New("Can't get StatMetrics")
+			},
+		},
+	}
+	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats): clientConn,
+	})
+	statIds := []string{"STATS_VENDOR_1:*sum#1"}
+	rps := NewRouteService(dm, nil, cfg, connMgr)
+	expLog := ` getting statMetrics for stat : `
+	if _, err := rps.statMetrics(statIds, "cgrates.org"); err == nil || err.Error() != "Can't get StatMetrics" {
+		t.Error(err)
+	} else if rcvLog := buf.String(); !strings.Contains(rcvLog, expLog) {
+		t.Errorf("Logger %v doesn't contain %v", rcvLog, expLog)
+	}
+}
+
+func TestRSStatMetricsForLoadDistributionLogg(t *testing.T) {
+	utils.Logger.SetLogLevel(4)
+	utils.Logger.SetSyslog(nil)
+	cfg := config.NewDefaultCGRConfig()
+	buf := new(bytes.Buffer)
+	log.SetOutput(buf)
+	defer func() {
+		utils.Logger.SetLogLevel(0)
+		log.SetOutput(os.Stderr)
+		config.SetCgrConfig(config.NewDefaultCGRConfig())
+	}()
+	cfg.RouteSCfg().StatSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn <- &ccMock{
+		calls: map[string]func(args interface{}, reply interface{}) error{
+			utils.StatSv1GetQueueFloatMetrics: func(args, reply interface{}) error {
+				return errors.New("Can't get StatMetrics")
+			},
+		},
+	}
+	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats): clientConn,
+	})
+	statIds := []string{"STATS_VENDOR_1:*sum#1"}
+	rps := NewRouteService(dm, nil, cfg, connMgr)
+	expLog := `getting statMetrics for stat : `
+	if _, err := rps.statMetricsForLoadDistribution(statIds, "cgrates.org"); err == nil || !strings.Contains(err.Error(), utils.ErrNotFound.Error()) {
+		t.Error(err)
+	} else if rcvLog := buf.String(); !strings.Contains(rcvLog, expLog) {
+		t.Errorf("Logger %v doesn't contain %v", rcvLog, expLog)
+	}
+}
+
+func TestResourceUsage(t *testing.T) {
+	utils.Logger.SetLogLevel(4)
+	utils.Logger.SetSyslog(nil)
+	cfg := config.NewDefaultCGRConfig()
+	buf := new(bytes.Buffer)
+	log.SetOutput(buf)
+	defer func() {
+		utils.Logger.SetLogLevel(0)
+		log.SetOutput(os.Stderr)
+		config.SetCgrConfig(config.NewDefaultCGRConfig())
+	}()
+	cfg.RouteSCfg().ResourceSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}
+	resIds := []string{"RL1"}
+	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn <- &ccMock{
+		calls: map[string]func(args interface{}, reply interface{}) error{
+			utils.ResourceSv1GetResource: func(args, reply interface{}) error {
+				return errors.New("Can't get Resources")
+			},
+		},
+	}
+	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources): clientConn,
+	})
+	rps := NewRouteService(dm, nil, cfg, connMgr)
+	expLog := `getting resource for ID :`
+	if _, err := rps.resourceUsage(resIds, "cgrates.org"); err == nil || err.Error() != "Can't get Resources" {
+		t.Error(err)
+	} else if rcvLog := buf.String(); !strings.Contains(rcvLog, expLog) {
+		t.Errorf("Logger %v doesn't contain %v", rcvLog, expLog)
+	}
+}
+
+func TestRSLazyCheckRule(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	defer func() {
+		config.SetCgrConfig(config.NewDefaultCGRConfig())
+	}()
+	rps := NewRouteService(dm, nil, cfg, nil)
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "SqProcessEvent",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsStatsProfileIDs: []string{"SQ1"},
+		},
+	}
+	extraOpts := &optsGetRoutes{
+		ignoreErrors: true,
+		maxCost:      12.1,
+		paginator: &utils.Paginator{
+			Limit:  utils.IntPointer(4),
+			Offset: utils.IntPointer(2),
+		},
+	}
+	route := &Route{
+		ID:        "route1",
+		FilterIDs: []string{"FLTR_ACNT"},
+
+		Weight:          10,
+		Blocker:         true,
+		RouteParameters: "param1",
+		lazyCheckRules: []*FilterRule{
+			{
+				Element:    "~*req.Account",
+				Type:       utils.MetaString,
+				Values:     []string{"1001", "1002"},
+				rsrElement: config.NewRSRParserMustCompile(utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.ToR),
+			},
+		},
+	}
+	if _, _, err := rps.populateSortingData(ev, route, extraOpts); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestRSPopulateSortingDataResourceErr(t *testing.T) {
+	utils.Logger.SetLogLevel(4)
+	utils.Logger.SetSyslog(nil)
+	cfg := config.NewDefaultCGRConfig()
+	buf := new(bytes.Buffer)
+	log.SetOutput(buf)
+	defer func() {
+		utils.Logger.SetLogLevel(0)
+		log.SetOutput(os.Stderr)
+		config.SetCgrConfig(config.NewDefaultCGRConfig())
+	}()
+	cfg.RouteSCfg().ResourceSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}
+	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn <- &ccMock{
+		calls: map[string]func(args interface{}, reply interface{}) error{
+			utils.ResourceSv1GetResource: func(args, reply interface{}) error {
+				return errors.New("No Resources")
+			},
+		},
+	}
+	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources): clientConn,
+	})
+	rps := NewRouteService(dm, nil, cfg, connMgr)
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "SqProcessEvent",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsStatsProfileIDs: []string{"SQ1"},
+		},
+	}
+	extraOpts := &optsGetRoutes{
+		ignoreErrors: true,
+		maxCost:      12.1,
+		paginator: &utils.Paginator{
+			Limit:  utils.IntPointer(4),
+			Offset: utils.IntPointer(2),
+		},
+	}
+	route := &Route{
+		ID:          "route1",
+		ResourceIDs: []string{"ResourceSupplier1", "Resource2Supplier1"},
+		Weight:      20,
+		Blocker:     false,
+	}
+	expLog := ` ignoring route with ID:`
+	if _, _, err := rps.populateSortingData(ev, route, extraOpts); err != nil {
+		t.Error(err)
+	} else if rcvLog := buf.String(); !strings.Contains(rcvLog, expLog) {
+		t.Errorf("Logger %v doesn't contain %v", rcvLog, expLog)
+	}
+	extraOpts.ignoreErrors = false
+	if _, _, err := rps.populateSortingData(ev, route, extraOpts); err == nil {
 		t.Error(err)
 	}
 }
