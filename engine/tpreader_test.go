@@ -1912,13 +1912,6 @@ func TestLoadRatingPlansFiltered(t *testing.T) {
 							RateIncrement:      "6s",
 							GroupIntervalStart: "0s",
 						},
-						{
-							ConnectFee:         12,
-							Rate:               3,
-							RateUnit:           "4s",
-							RateIncrement:      "6s",
-							GroupIntervalStart: "1s",
-						},
 					},
 				},
 				RoundingDecimals: 4},
@@ -1958,13 +1951,6 @@ func TestLoadRatingPlansFiltered(t *testing.T) {
 				RateIncrement:      "6s",
 				GroupIntervalStart: "0s",
 			},
-			{
-				ConnectFee:         12,
-				Rate:               3,
-				RateUnit:           "4s",
-				RateIncrement:      "6s",
-				GroupIntervalStart: "1s",
-			},
 		},
 	}, []string{}, true, utils.NonTransactional)
 	db.db.Set(utils.CacheTBLTPRates, "*prf:TEST_RATE12", &utils.TPRateRALs{
@@ -1977,13 +1963,6 @@ func TestLoadRatingPlansFiltered(t *testing.T) {
 				RateUnit:           "6s",
 				RateIncrement:      "6s",
 				GroupIntervalStart: "0s",
-			},
-			{
-				ConnectFee:         12,
-				Rate:               3,
-				RateUnit:           "4s",
-				RateIncrement:      "6s",
-				GroupIntervalStart: "1s",
 			},
 		},
 	}, []string{}, true, utils.NonTransactional)

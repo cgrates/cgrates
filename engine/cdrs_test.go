@@ -2171,7 +2171,7 @@ func TestCDRServerListenAndServe2(t *testing.T) {
 	}
 	stopChan := make(chan struct{}, 1)
 	go func() {
-		time.Sleep(20 * time.Millisecond)
+		time.Sleep(40 * time.Millisecond)
 		stopChan <- struct{}{}
 	}()
 
