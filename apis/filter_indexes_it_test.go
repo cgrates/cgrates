@@ -57,6 +57,7 @@ var (
 		testV1FIdxAttributeComputeIndexes,
 		testV1FIdxAttributeMoreProfilesForFilters,
 		testV1FIdxAttributeSRemoveComputedIndexesIDs,
+		testV1IndexClearCache,
 
 		testV1FIdxAttributeRemoveIndexesComputeIndexesAllProfiles,
 		testV1FIdxAttributesRemoveProfilesNoIndexes,
