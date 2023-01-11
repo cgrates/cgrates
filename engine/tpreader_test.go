@@ -1969,6 +1969,21 @@ func TestLoadRatingPlansFiltered(t *testing.T) {
 	if _, err := tpr.LoadRatingPlansFiltered("def"); err == nil {
 		t.Error(err)
 	}
-	db.db.Remove(utils.CacheTBLTPRates, "*prf:TEST_RATE12", true, utils.NonTransactional)
-
 }
+
+// func TestLoadRatingProfilesErr(t *testing.T) {
+// 	cfg := config.NewDefaultCGRConfig()
+// 	defer func() {
+// 		config.SetCgrConfig(config.NewDefaultCGRConfig())
+// 	}()
+// 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+// 	_ = NewDataManager(db, cfg.CacheCfg(), nil)
+
+// 	tpr, err := NewTpReader(db, db, utils.EmptyString, cfg.GeneralCfg().DefaultTimezone, nil, nil, true)
+// 	if err != nil {
+// 		t.Error(err)
+// 	}
+// 	if err := tpr.LoadRatingProfiles(); err != nil {
+// 		t.Error(err)
+// 	}
+// }

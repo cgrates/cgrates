@@ -21,6 +21,7 @@ import (
 	"bytes"
 	"log"
 	"os"
+	"reflect"
 	"strings"
 	"testing"
 
@@ -179,5 +180,93 @@ func TestDDPFieldAsInterface(t *testing.T) {
 	expLog = `when getting GeoLocation for number`
 	if rcvLog := buf2.String(); strings.Contains(rcvLog, expLog) {
 		t.Errorf("Logger %v doesn't contain %v", rcvLog, expLog)
+	}
+}
+func TestLibphonenumberDPString(t *testing.T) {
+	pInt := int32(2)
+	LDP := &libphonenumberDP{
+		pNumber: &phonenumbers.PhoneNumber{
+			CountryCode: &pInt,
+		},
+	}
+	exp2 := "country_code:2 "
+	rcv2 := LDP.String()
+	if !reflect.DeepEqual(rcv2, exp2) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
+			utils.ToJSON(exp2), utils.ToJSON(rcv2))
+	}
+}
+
+func TestLibphonenumberDPFieldAsString(t *testing.T) {
+	pInt := int32(2)
+	LDP := &libphonenumberDP{
+		pNumber: &phonenumbers.PhoneNumber{
+			CountryCode: &pInt,
+		},
+		cache: utils.MapStorage{
+			"testField": "testValue",
+		},
+	}
+	exp2 := "testValue"
+	rcv2, err := LDP.FieldAsString([]string{"testField"})
+	if err != nil {
+		t.Error(err)
+	}
+	if !reflect.DeepEqual(rcv2, exp2) {
+		t.Errorf("expected: <%+v>, received: <%+v>",
+			utils.ToJSON(exp2), utils.ToJSON(rcv2))
+	}
+}
+
+func TestLibphonenumberDPFieldAsStringError(t *testing.T) {
+	var pInt int32 = 2
+	LDP := &libphonenumberDP{
+		pNumber: &phonenumbers.PhoneNumber{
+			CountryCode: &pInt,
+		},
+		cache: utils.MapStorage{
+			"testField": "testValue",
+		},
+	}
+	_, err := LDP.FieldAsString([]string{"testField", "testField2"})
+	if err == nil || err.Error() != "WRONG_PATH" {
+		t.Errorf("expected: <%v>, received: <%v>",
+			"WRONG_PATH", err)
+	}
+}
+
+func TestLibphonenumberDPFieldAsInterfaceLen0(t *testing.T) {
+	pInt := int32(2)
+	LDP := &libphonenumberDP{
+		pNumber: &phonenumbers.PhoneNumber{
+			CountryCode: &pInt,
+		},
+		cache: utils.MapStorage{
+			"testField": "testValue",
+		},
+	}
+	exp2 := &libphonenumberDP{
+		pNumber: &phonenumbers.PhoneNumber{
+			CountryCode: &pInt,
+		},
+		cache: utils.MapStorage{
+			"testField": "testValue",
+		}}
+	exp2.setDefaultFields()
+
+	rcv2, err := LDP.FieldAsInterface([]string{})
+	if err != nil {
+		t.Error(err)
+	}
+	if !reflect.DeepEqual(rcv2, exp2.cache) {
+		t.Errorf("expected: %+v, received: %+v",
+			exp2.cache, rcv2)
+	}
+}
+
+func TestNewLibPhoneNumberDPErr(t *testing.T) {
+	num := "errNum"
+	if _, err := newLibPhoneNumberDP(num); err != phonenumbers.ErrNotANumber {
+		t.Error(err)
 	}
 }

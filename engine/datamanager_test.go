@@ -3397,65 +3397,77 @@ func TestDMRatingProfile(t *testing.T) {
 	}
 }
 
-// func TestUpdateFilterDispatcherIndex(t *testing.T) {
-// 	tmp := Cache
-// 	tmpDm := dm
-// 	defer func() {
-// 		Cache = tmp
-// 		dm = tmpDm
-// 		config.SetCgrConfig(config.NewDefaultCGRConfig())
-// 	}()
-// 	Cache.Clear(nil)
-// 	cfg := config.NewDefaultCGRConfig()
-// 	dataDB := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-// 	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
-// 	oldFlt := &Filter{
-// 		Tenant: "cgrates.org",
-// 		ID:     "DISPATCHER_FLTR1",
-// 		Rules:  []*FilterRule{{Type: utils.MetaString, Element: "~*req.Destination", Values: []string{"ACC1", "ACC2", "~*req.Account"}}},
-// 	}
-// 	if err := oldFlt.Compile(); err != nil {
-// 		t.Error(err)
-// 	}
-// 	if err := dm.SetFilter(oldFlt, true); err != nil {
-// 		t.Error(err)
-// 	}
+func TestUpdateFilterDispatcherIndex(t *testing.T) {
+	tmp := Cache
+	tmpDm := dm
+	defer func() {
+		Cache = tmp
+		dm = tmpDm
+		config.SetCgrConfig(config.NewDefaultCGRConfig())
+	}()
+	Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	dataDB := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	oldFlt := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "DISPATCHER_FLTR1",
+		Rules:  []*FilterRule{{Type: utils.MetaString, Element: "~*req.Destination", Values: []string{"ACC1", "ACC2", "~*req.Account"}}},
+	}
+	if err := oldFlt.Compile(); err != nil {
+		t.Error(err)
+	}
+	if err := dm.SetFilter(oldFlt, true); err != nil {
+		t.Error(err)
+	}
+	disp := &DispatcherProfile{
+		Tenant:     "cgrates.org",
+		ID:         "Dsp",
+		Subsystems: []string{"*any"},
+		FilterIDs:  []string{"DISPATCHER_FLTR1"},
+		Strategy:   utils.MetaFirst,
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+		},
+		StrategyParams: map[string]interface{}{},
+		Weight:         20,
+	}
+	if err := dm.SetDispatcherProfile(disp, true); err != nil {
+		t.Error(err)
+	}
 
-// 	disp := &DispatcherProfile{
-// 		Tenant:     "cgrates.org",
-// 		ID:         "Dsp",
-// 		Subsystems: []string{"*any"},
-// 		FilterIDs:  []string{"DISPATCHER_FLTR1"},
-// 		Strategy:   utils.MetaFirst,
-// 		ActivationInterval: &utils.ActivationInterval{
-// 			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
-// 		},
-// 		StrategyParams: map[string]interface{}{},
-// 		Weight:         20,
-// 		Hosts: DispatcherHostProfiles{
-// 			&DispatcherHostProfile{
-// 				ID:        "C1",
-// 				FilterIDs: []string{},
-// 				Weight:    10,
-// 				Params:    map[string]interface{}{"0": "192.168.54.203", utils.MetaRatio: "2"},
-// 				Blocker:   false,
-// 			},
-// 		},
-// 	}
-// 	if err := dm.SetDispatcherProfile(disp, true); err != nil {
-// 		t.Error(err)
-// 	}
-
-// 	expindx := map[string]utils.StringSet{
-// 		"*string:*req.Destination": {"Dsp": {}},
-// 	}
-// 	if getidx, err := dm.GetIndexes(utils.CacheDispatcherFilterIndexes, "cgrates.org", utils.EmptyString, true, true); err != nil {
-// 		t.Error(err)
-// 	} else if !reflect.DeepEqual(expindx, getidx) {
-// 		t.Errorf("Expected %v, Received %v", utils.ToJSON(expindx), utils.ToJSON(getidx))
-// 	}
-
-// }
+	exp := map[string]utils.StringSet{
+		"*string:*req.Destination:ACC1": {"Dsp": {}},
+		"*string:*req.Destination:ACC2": {"Dsp": {}},
+	}
+	if indx, err := dm.GetIndexes(utils.CacheDispatcherFilterIndexes, "cgrates.org:*any", utils.EmptyString, true, true); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(exp, indx) {
+		t.Errorf("Expected %v, Received %v", utils.ToJSON(exp), utils.ToJSON(indx))
+	}
+	newFlt := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "DISPATCHER_FLTR1",
+		Rules: []*FilterRule{{
+			Type:    utils.MetaString,
+			Element: "~*req.Charger",
+			Values:  []string{"ChargerProfile2"}}},
+	}
+	if err := newFlt.Compile(); err != nil {
+		t.Error(err)
+	}
+	if err := dm.SetFilter(newFlt, true); err != nil {
+		t.Error(err)
+	}
+	exp = map[string]utils.StringSet{
+		"*string:*req.Charger:ChargerProfile2": {"Dsp": {}},
+	}
+	if indx, err := dm.GetIndexes(utils.CacheDispatcherFilterIndexes, "cgrates.org:*any", utils.EmptyString, true, true); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(exp, indx) {
+		t.Errorf("Expected %v, Received %v", utils.ToJSON(exp), utils.ToJSON(indx))
+	}
+}
 
 func TestDMGetRatingPlan(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
@@ -3678,6 +3690,8 @@ func TestDMGetRouteProfile(t *testing.T) {
 	}()
 	Cache.Clear(nil)
 	cfg.DataDbCfg().RmtConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1)}
+	cfg.CacheCfg().Partitions[utils.CacheRouteProfiles].Replicate = true
+	cfg.CacheCfg().ReplicationConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}
 	cfg.DataDbCfg().Items = map[string]*config.ItemOpt{
 		utils.CacheRouteProfiles: {
 			Limit:     3,
@@ -3711,11 +3725,15 @@ func TestDMGetRouteProfile(t *testing.T) {
 				*reply.(**RouteProfile) = rpL
 				return nil
 			},
+			utils.CacheSv1ReplicateSet: func(args, reply interface{}) error {
+				return errors.New("Can't Replicate")
+			},
 		},
 	}
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches):    clientConn,
 	})
 	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
 	config.SetCgrConfig(cfg)
@@ -3725,8 +3743,68 @@ func TestDMGetRouteProfile(t *testing.T) {
 	} else if !reflect.DeepEqual(val, rpL) {
 		t.Errorf("expected %v,received %v", utils.ToJSON(rpL), utils.ToJSON(val))
 	}
+	Cache = NewCacheS(cfg, dm, nil)
+	SetConnManager(connMgr)
+	if _, err := dm.GetRouteProfile(rpL.Tenant, rpL.ID, false, true, utils.NonTransactional); err == nil {
+		t.Error(err)
+	}
 }
+func TestDMGetRouteProfileErr(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	tmpDm := dm
+	tmp := Cache
+	defer func() {
+		config.SetCgrConfig(config.NewDefaultCGRConfig())
+		Cache = tmp
+		SetDataStorage(tmpDm)
+	}()
+	Cache.Clear(nil)
+	cfg.DataDbCfg().RmtConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1)}
+	cfg.CacheCfg().Partitions[utils.CacheRouteProfiles].Replicate = true
+	cfg.CacheCfg().ReplicationConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}
+	cfg.DataDbCfg().Items = map[string]*config.ItemOpt{
+		utils.CacheRouteProfiles: {
+			Limit:     3,
+			Remote:    true,
+			APIKey:    "key",
+			RouteID:   "route",
+			Replicate: true,
+		},
+	}
+	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn <- &ccMock{
+		calls: map[string]func(args interface{}, reply interface{}) error{
+			utils.ReplicatorSv1GetRouteProfile: func(args, reply interface{}) error {
+				return utils.ErrNotFound
+			},
+			utils.CacheSv1ReplicateSet: func(args, reply interface{}) error {
+				return errors.New("Can't Replicate")
+			},
+		},
+	}
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches):    clientConn,
+	})
+	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
+	config.SetCgrConfig(cfg)
+	SetDataStorage(dm)
+	Cache = NewCacheS(cfg, dm, nil)
+	SetConnManager(connMgr)
+	if _, err := dm.GetRouteProfile("cgrates.org", "id", false, true, utils.NonTransactional); err == nil || err.Error() != "Can't Replicate" {
+		t.Error(err)
+	}
+	Cache.Set(utils.CacheRouteProfiles, "cgrates.org:id", nil, []string{}, false, utils.NonTransactional)
+	if _, err := dm.GetRouteProfile("cgrates.org", "id", true, true, utils.NonTransactional); err == nil || err != utils.ErrNotFound {
+		t.Error(err)
+	}
+	var dm2 *DataManager
+	if _, err := dm2.GetRouteProfile("cgrates.org", "id", false, true, utils.NonTransactional); err == nil || err != utils.ErrNoDatabaseConn {
+		t.Error(err)
+	}
 
+}
 func TestUpdateFilterIndexStatErr1(t *testing.T) {
 	tmp := Cache
 	defer func() {
@@ -4021,5 +4099,65 @@ func TestUpdateFilterChargersIndexErr(t *testing.T) {
 		}}
 	if err := UpdateFilterIndex(dm, oldFlt, newFlt); err != utils.ErrNotImplemented {
 		t.Errorf("Expected error <%v>, Received error <%v>", utils.ErrNotImplemented, err)
+	}
+}
+
+func TestDmIndexes(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	defer func() {
+		config.SetCgrConfig(config.NewDefaultCGRConfig())
+	}()
+	cfg.DataDbCfg().Items = map[string]*config.ItemOpt{
+		utils.CacheResourceFilterIndexes: {
+			Replicate: true,
+		},
+	}
+	cfg.DataDbCfg().RplConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
+	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn <- &ccMock{
+		calls: map[string]func(args interface{}, reply interface{}) error{
+			utils.ReplicatorSv1SetIndexes: func(args, reply interface{}) error {
+				setcastIndxArg, cancast := args.(*utils.SetIndexesArg)
+				if !cancast {
+					return utils.ErrNotConvertible
+				}
+				dm.DataDB().SetIndexesDrv(setcastIndxArg.IdxItmType, setcastIndxArg.TntCtx, setcastIndxArg.Indexes, true, utils.NonTransactional)
+				return nil
+			},
+			utils.ReplicatorSv1RemoveIndexes: func(args, reply interface{}) error {
+				gIdxArg, cancast := args.(*utils.GetIndexesArg)
+				if !cancast {
+					return utils.ErrNotConvertible
+				}
+				dm.DataDB().RemoveIndexesDrv(gIdxArg.IdxItmType, gIdxArg.Tenant, utils.EmptyString)
+				return nil
+			},
+		},
+	}
+	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator): clientConn,
+	})
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
+	idxes := map[string]utils.StringSet{
+		"*string:Account:1001": {
+			"RL1": struct{}{},
+		},
+		"*string:Account:1002": {
+			"RL1": struct{}{},
+			"RL2": struct{}{},
+		},
+		utils.ConcatenatedKey(utils.MetaNone, utils.MetaAny, utils.MetaAny): {
+			"RL4": struct{}{},
+			"RL5": struct{}{},
+		},
+	}
+	config.SetCgrConfig(cfg)
+	if err := dm.SetIndexes(utils.CacheResourceFilterIndexes,
+		"cgrates.org", idxes, false, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+	if err := dm.RemoveIndexes(utils.CacheResourceFilterIndexes, "cgrates.org", utils.EmptyString); err != nil {
+		t.Error(err)
 	}
 }
