@@ -1,0 +1,83 @@
+{
+
+"general": {
+    "log_level": 7,
+    "node_id": "CGR_FRAUD"
+},
+
+
+"listen": {
+    "rpc_json": ":2012",
+    "rpc_gob": ":2013",
+    "http": ":2080"
+},
+
+"data_db": {								
+    "db_type": "redis",						
+    "db_port": 6379, 						
+    "db_name": "10"					
+},
+
+"stor_db": {
+    "db_password": "CGRateS.org"
+},
+
+"rals": {
+    "enabled": true
+},
+
+"schedulers": {
+    "enabled": true				
+},
+
+"filters": {								
+    "stats_conns": ["*internal"],
+    "apiers_conns": ["*internal"]
+},
+
+"stats": {
+    "enabled": true,
+    "indexed_selects":false,
+    "thresholds_conns": ["*internal"],						
+    "store_interval": "1s"
+},
+
+"thresholds": {
+    "enabled": true,
+    "indexed_selects":false,					
+    "store_interval": "1s"
+},
+
+"apiers": {
+    "enabled": true,
+    "caches_conns":["*internal"],
+    "scheduler_conns": ["*internal"]
+},
+
+"sessions": {
+	"enabled": true,						
+	"listen_bijson": "127.0.0.1:2014",	
+	"cdrs_conns": ["*internal"],						
+	"stats_conns": ["*internal"],
+    "chargers_conns": ["*internal"],
+    "rals_conns": ["*internal"]					
+},
+
+"chargers": {
+    "enabled": true,
+    "attributes_conns": ["*internal"]
+},
+
+"attributes": {
+    "enabled": true
+},
+
+"cdrs": {									
+	"enabled": true,						
+	"rals_conns": ["*internal"],						
+	"stats_conns": ["*internal"],
+    "attributes_conns": ["*internal"]						
+}
+
+}
+    
