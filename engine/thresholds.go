@@ -157,6 +157,9 @@ func (t *Threshold) ProcessEvent(args *utils.CGREvent, dm *DataManager, fltrS *F
 	} else {
 		acnt, _ = args.FieldAsString(utils.AccountField)
 	}
+	if _, has := args.APIOpts[utils.MetaAccount]; has {
+		acnt, _ = args.OptAsString(utils.MetaAccount)
+	}
 	if acnt != utils.EmptyString {
 		tntAcnt = utils.ConcatenatedKey(args.Tenant, acnt)
 	}
