@@ -3362,3 +3362,158 @@ func TestThresholdProfileMerge(t *testing.T) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(dp))
 	}
 }
+
+func TestThresholdSmatchingThresholdsForEventGetOptsErr(t *testing.T) {
+
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ThresholdSCfg().Opts.ProfileIDs = []*utils.DynamicStringSliceOpt{
+		{
+			FilterIDs: []string{"*string"},
+			Tenant:    "cgrates.org",
+			Value:     []string{"ProfIdVal"},
+		},
+	}
+
+	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), cM)
+	filterS := NewFilterS(cfg, cM, dm)
+	tS := &ThresholdS{
+		dm: dm,
+		storedTdIDs: utils.StringSet{
+			"Th1": struct{}{},
+		},
+		cfg:         cfg,
+		fltrS:       filterS,
+		loopStopped: make(chan struct{}, 1),
+		stopBackup:  make(chan struct{}),
+	}
+
+	args := &utils.CGREvent{
+		ID:     "TestV1DebitID",
+		Tenant: "cgrates.org",
+		Event: map[string]interface{}{
+			utils.AccountField: "1004",
+		},
+		APIOpts: map[string]interface{}{
+			utils.MetaUsage: "3m",
+		},
+	}
+
+	expErr := "inline parse error for string: <*string>"
+	if _, err := tS.matchingThresholdsForEvent(context.Background(), args.Tenant, args); err.Error() != expErr || err == nil {
+		t.Errorf("Expected error <%v>, Received <%v>", expErr, err)
+	}
+
+}
+
+func TestThresholdSmatchingThresholdsForEventWeightErr(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ThresholdSCfg().Opts.ProfileIDs = []*utils.DynamicStringSliceOpt{
+		{
+			Tenant: "cgrates.org",
+			Value:  []string{"ACC1"},
+		},
+	}
+	cfg.ThresholdSCfg().Opts.ProfileIgnoreFilters = []*utils.DynamicBoolOpt{
+		{
+			Tenant: "cgrates.org",
+			Value:  true,
+		},
+	}
+	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), cM)
+	dm.dataDB = &DataDBMock{
+		GetThresholdProfileDrvF: func(ctx *context.Context, tenant, id string) (tp *ThresholdProfile, err error) {
+			return &ThresholdProfile{
+				Tenant:           "cgrates.org",
+				ID:               "THD_2",
+				FilterIDs:        []string{"*string:~*req.Account:1001"},
+				ActionProfileIDs: []string{"actPrfID"},
+				MaxHits:          7,
+				MinHits:          0,
+				Weights: []*utils.DynamicWeight{
+					{
+						FilterIDs: []string{"*stirng:~*req.Account:1001"},
+						Weight:    64,
+					},
+				},
+				Async: true,
+			}, nil
+		},
+		GetThresholdDrvF: func(ctx *context.Context, tenant, id string) (*Threshold, error) { return &Threshold{}, nil },
+	}
+	filterS := NewFilterS(cfg, cM, dm)
+	tS := &ThresholdS{
+		dm: dm,
+		storedTdIDs: utils.StringSet{
+			"Th1": struct{}{},
+		},
+		cfg:         cfg,
+		fltrS:       filterS,
+		loopStopped: make(chan struct{}, 1),
+		stopBackup:  make(chan struct{}),
+	}
+
+	args := &utils.CGREvent{
+		ID:     "EvID",
+		Tenant: "cgrates.org",
+		Event: map[string]interface{}{
+			utils.AccountField: "1004",
+		},
+		APIOpts: map[string]interface{}{
+			utils.MetaUsage: "3m",
+		},
+	}
+
+	expErr := "NOT_IMPLEMENTED:*stirng"
+	if _, err := tS.matchingThresholdsForEvent(context.Background(), args.Tenant, args); err.Error() != expErr || err == nil {
+		t.Errorf("Expected error <%v>, Received <%v>", expErr, err)
+	}
+}
+
+func TestThresholdsV1ResetThresholdStoreErr(t *testing.T) {
+
+	tmp := Cache
+	tmpC := config.CgrConfig()
+	tmpCM := connMgr
+	defer func() {
+		Cache = tmp
+		config.SetCgrConfig(tmpC)
+		connMgr = tmpCM
+
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ThresholdSCfg().StoreInterval = -1
+	cfg.CacheCfg().ReplicationConns = []string{"test"}
+	cfg.CacheCfg().Partitions[utils.CacheThresholds].Replicate = true
+	cfg.RPCConns()["test"] = &config.RPCConn{Conns: []*config.RemoteHost{{}}}
+	config.SetCgrConfig(cfg)
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	connMgr = NewConnManager(cfg)
+	Cache = NewCacheS(cfg, dm, nil, nil)
+	filterS := NewFilterS(cfg, nil, dm)
+	tS := NewThresholdService(dm, cfg, filterS, connMgr)
+	th := &Threshold{
+		Hits:   2,
+		Tenant: "cgrates.org",
+		ID:     "TH1",
+		dirty:  utils.BoolPointer(true),
+	}
+	if err := dm.SetThreshold(context.Background(), th); err != nil {
+		t.Error(err)
+	}
+	Cache.SetWithoutReplicate(utils.CacheThresholds, th.TenantID(), th, nil, true, utils.NonTransactional)
+
+	var reply string
+	if err := tS.V1ResetThreshold(context.Background(), &utils.TenantIDWithAPIOpts{
+		TenantID: &utils.TenantID{
+			ID: "TH1",
+		},
+	}, &reply); err == nil || err.Error() != utils.ErrDisconnected.Error() {
+		t.Errorf("Expected error <%+v>, Received error <%+v>", utils.ErrDisconnected, err)
+	}
+}
