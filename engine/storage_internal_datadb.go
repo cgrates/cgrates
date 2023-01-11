@@ -599,6 +599,12 @@ func (iDB *InternalDB) SetIndexesDrv(_ *context.Context, idxItmType, tntCtx stri
 				true, utils.NonTransactional)
 			continue
 		}
+		//to be the same as HMSET
+		if transactionID != utils.EmptyString {
+			if x, ok := iDB.db.Get(idxItmType, dbKey); ok && x != nil {
+				indx = utils.JoinStringSet(indx, x.(utils.StringSet))
+			}
+		}
 		iDB.db.Set(idxItmType, dbKey, indx, []string{tntCtx},
 			true, utils.NonTransactional)
 	}
