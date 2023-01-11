@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"reflect"
 	"testing"
 	"time"
 
@@ -2389,7 +2390,6 @@ func TestDMGetThresholdProfileSetThPrfErr2(t *testing.T) {
 	}
 }
 
-// unfinished set without using cache.set and then go cache.get
 func TestDMCacheDataFromDBResourceProfilesPrefix(t *testing.T) {
 	tmp := Cache
 	defer func() {
@@ -2401,10 +2401,6 @@ func TestDMCacheDataFromDBResourceProfilesPrefix(t *testing.T) {
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	cM := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg.CacheCfg(), cM)
-
-	if err := Cache.Set(context.Background(), utils.CachePrefixToInstance[utils.ResourceProfilesPrefix], "cgrates.org:RL2", &ResourceProfile{}, []string{}, true, utils.NonTransactional); err != nil {
-		t.Error(err)
-	}
 
 	rp := &ResourceProfile{
 		Tenant:    "cgrates.org",
@@ -2425,8 +2421,345 @@ func TestDMCacheDataFromDBResourceProfilesPrefix(t *testing.T) {
 		t.Error(err)
 	}
 
-	if err := dm.CacheDataFromDB(context.Background(), utils.ResourceProfilesPrefix, []string{utils.MetaAny}, true); err != nil {
+	if _, ok := Cache.Get(utils.CacheResourceProfiles, "cgrates.org:RL2"); ok {
+		t.Error("expected ok to be false")
+	}
+
+	if err := dm.CacheDataFromDB(context.Background(), utils.ResourceProfilesPrefix, []string{utils.MetaAny}, false); err != nil {
 		t.Error(err)
+	}
+
+	if rcv, ok := Cache.Get(utils.CacheResourceProfiles, "cgrates.org:RL2"); !ok {
+		t.Error("expected ok to be true")
+	} else if !reflect.DeepEqual(rcv, rp) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", rp, rcv)
+	}
+
+}
+
+func TestDMCacheDataFromDBResourcesPrefix(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	rs := &Resource{
+		Tenant: "cgrates.org",
+		ID:     "ResGroup2",
+		Usages: map[string]*ResourceUsage{
+			"RU1": {
+				Tenant: "cgrates.org",
+				ID:     "RU1",
+				Units:  9,
+			},
+		},
+		tUsage: utils.Float64Pointer(9),
+	}
+
+	if err := dm.SetResource(context.Background(), rs); err != nil {
+		t.Error(err)
+	}
+
+	if _, ok := Cache.Get(utils.CacheResources, "cgrates.org:ResGroup2"); ok {
+		t.Error("expected ok to be false")
+	}
+
+	if err := dm.CacheDataFromDB(context.Background(), utils.ResourcesPrefix, []string{utils.MetaAny}, false); err != nil {
+		t.Error(err)
+	}
+
+	if rcv, ok := Cache.Get(utils.CacheResources, "cgrates.org:ResGroup2"); !ok {
+		t.Error("expected ok to be true")
+	} else if !reflect.DeepEqual(rcv, rs) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", rs, rcv)
+	}
+
+}
+
+func TestDMCacheDataFromDBStatQueueProfilePrefix(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	sQP := &StatQueueProfile{
+		Tenant:      "cgrates.org",
+		ID:          "StatQueueProfile3",
+		FilterIDs:   []string{"fltr_test"},
+		QueueLength: 10,
+		TTL:         10 * time.Second,
+		Metrics: []*MetricWithFilters{
+			{
+				MetricID: "*sum#~*req.Usage",
+			},
+		},
+		ThresholdIDs: []string{},
+		Stored:       true,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
+		MinItems: 1,
+	}
+
+	if err := dm.SetStatQueueProfile(context.Background(), sQP, false); err != nil {
+		t.Error(err)
+	}
+
+	if _, ok := Cache.Get(utils.CacheStatQueueProfiles, "cgrates.org:StatQueueProfile3"); ok {
+		t.Error("expected ok to be false")
+	}
+
+	if err := dm.CacheDataFromDB(context.Background(), utils.StatQueueProfilePrefix, []string{utils.MetaAny}, false); err != nil {
+		t.Error(err)
+	}
+
+	if rcv, ok := Cache.Get(utils.CacheStatQueueProfiles, "cgrates.org:StatQueueProfile3"); !ok {
+		t.Error("expected ok to be true")
+	} else if !reflect.DeepEqual(rcv, sQP) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", sQP, rcv)
+	}
+
+}
+
+func TestDMCacheDataFromDBStatQueuePrefix(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	sq := &StatQueue{
+		Tenant: "cgrates.org",
+		ID:     "SQ1",
+		SQItems: []SQItem{
+			{
+				EventID: "SqProcessEvent",
+			},
+		},
+		SQMetrics: make(map[string]StatMetric),
+	}
+
+	if err := dm.SetStatQueue(context.Background(), sq); err != nil {
+		t.Error(err)
+	}
+
+	if _, ok := Cache.Get(utils.CacheStatQueues, "cgrates.org:SQ1"); ok {
+		t.Error("expected ok to be false")
+	}
+
+	if err := dm.CacheDataFromDB(context.Background(), utils.StatQueuePrefix, []string{utils.MetaAny}, false); err != nil {
+		t.Error(err)
+	}
+
+	if rcv, ok := Cache.Get(utils.CacheStatQueues, "cgrates.org:SQ1"); !ok {
+		t.Error("expected ok to be true")
+	} else if !reflect.DeepEqual(rcv, sq) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", sq, rcv)
+	}
+
+}
+
+func TestDMCacheDataFromDBThresholdProfilePrefix(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	thP := &ThresholdProfile{
+		Tenant:           "cgrates.org",
+		ID:               "THD_2",
+		FilterIDs:        []string{"*string:~*req.Account:1001"},
+		ActionProfileIDs: []string{"actPrfID"},
+		MaxHits:          7,
+		MinHits:          0,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
+		Async: true,
+	}
+
+	if err := dm.SetThresholdProfile(context.Background(), thP, false); err != nil {
+		t.Error(err)
+	}
+
+	if _, ok := Cache.Get(utils.CacheThresholdProfiles, "cgrates.org:THD_2"); ok {
+		t.Error("expected ok to be false")
+	}
+
+	if err := dm.CacheDataFromDB(context.Background(), utils.ThresholdProfilePrefix, []string{utils.MetaAny}, false); err != nil {
+		t.Error(err)
+	}
+
+	if rcv, ok := Cache.Get(utils.CacheThresholdProfiles, "cgrates.org:THD_2"); !ok {
+		t.Error("expected ok to be true")
+	} else if !reflect.DeepEqual(rcv, thP) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", thP, rcv)
+	}
+
+}
+
+func TestDMCacheDataFromDBThresholdPrefix(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	th := &Threshold{
+		Tenant: "cgrates.org",
+		ID:     "TH_3",
+		Hits:   0,
+	}
+
+	if err := dm.SetThreshold(context.Background(), th); err != nil {
+		t.Error(err)
+	}
+
+	if _, ok := Cache.Get(utils.CacheThresholds, "cgrates.org:TH_3"); ok {
+		t.Error("expected ok to be false")
+	}
+
+	if err := dm.CacheDataFromDB(context.Background(), utils.ThresholdPrefix, []string{utils.MetaAny}, false); err != nil {
+		t.Error(err)
+	}
+
+	if rcv, ok := Cache.Get(utils.CacheThresholds, "cgrates.org:TH_3"); !ok {
+		t.Error("expected ok to be true")
+	} else if !reflect.DeepEqual(rcv, th) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", th, rcv)
+	}
+
+}
+
+func TestDMCacheDataFromDBFilterPrefix(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	fltr := &Filter{
+		Tenant: cfg.GeneralCfg().DefaultTenant,
+		ID:     "FLTR_CP_2",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaString,
+				Element: "~*req.Charger",
+				Values:  []string{"ChargerProfile2"},
+			},
+		},
+	}
+
+	if err := dm.SetFilter(context.Background(), fltr, false); err != nil {
+		t.Error(err)
+	}
+
+	if _, ok := Cache.Get(utils.CacheFilters, "cgrates.org:FLTR_CP_2"); ok {
+		t.Error("expected ok to be false")
+	}
+
+	if err := dm.CacheDataFromDB(context.Background(), utils.FilterPrefix, []string{utils.MetaAny}, false); err != nil {
+		t.Error(err)
+	}
+
+	if rcv, ok := Cache.Get(utils.CacheFilters, "cgrates.org:FLTR_CP_2"); !ok {
+		t.Error("expected ok to be true")
+	} else if !reflect.DeepEqual(rcv, fltr) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", fltr, rcv)
+	}
+
+}
+
+func TestDMCacheDataFromDBRouteProfilePrefix(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	routeProf := &RouteProfile{
+
+		Tenant:            "cgrates.org",
+		ID:                "RP_1",
+		FilterIDs:         []string{"fltr_test"},
+		Weights:           utils.DynamicWeights{{}},
+		Sorting:           utils.MetaQOS,
+		SortingParameters: []string{"param"},
+		Routes: []*Route{{
+			ID:             "RT1",
+			FilterIDs:      []string{"fltr1"},
+			AccountIDs:     []string{"acc1"},
+			RateProfileIDs: []string{"rp1"},
+			ResourceIDs:    []string{"res1"},
+			StatIDs:        []string{"stat1"},
+			Weights:        utils.DynamicWeights{{}},
+			Blockers: utils.DynamicBlockers{
+				{
+					Blocker: true,
+				},
+			},
+			RouteParameters: "params",
+		}},
+	}
+
+	if err := dm.SetRouteProfile(context.Background(), routeProf, false); err != nil {
+		t.Error(err)
+	}
+
+	if _, ok := Cache.Get(utils.CacheRouteProfiles, "cgrates.org:RP_1"); ok {
+		t.Error("expected ok to be false")
+	}
+
+	if err := dm.CacheDataFromDB(context.Background(), utils.RouteProfilePrefix, []string{utils.MetaAny}, false); err != nil {
+		t.Error(err)
+	}
+
+	if rcv, ok := Cache.Get(utils.CacheRouteProfiles, "cgrates.org:RP_1"); !ok {
+		t.Error("expected ok to be true")
+	} else if !reflect.DeepEqual(rcv, routeProf) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", routeProf, rcv)
 	}
 
 }
