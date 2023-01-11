@@ -1,0 +1,80 @@
+{
+
+"general": {
+    "log_level": 7,
+    "node_id": "CGR_FRAUD"
+},
+
+"listen": {
+    "rpc_json": ":2012",
+    "rpc_gob": ":2013",
+    "http": ":2080"
+},
+
+"data_db": {
+	"db_type": "*internal"
+},
+
+"stor_db": {
+	"db_type": "*internal"	
+},
+
+"rals": {
+    "enabled": true
+},
+
+"schedulers": {
+    "enabled": true				
+},
+
+"filters": {								
+    "stats_conns": ["*internal"],
+    "apiers_conns": ["*internal"]
+},
+
+"stats": {
+    "enabled": true,
+    "indexed_selects":false,
+    "thresholds_conns": ["*internal"],						
+    "store_interval": "-1"
+},
+
+"thresholds": {
+    "enabled": true,
+    "indexed_selects":false,					
+    "store_interval": "-1"
+},
+
+"apiers": {
+    "enabled": true,
+    "caches_conns":["*internal"],
+    "scheduler_conns": ["*internal"]
+},
+
+"sessions": {
+    "enabled": true,						
+    "listen_bijson": "127.0.0.1:2014",	
+    "cdrs_conns": ["*internal"],						
+    "stats_conns": ["*internal"],
+    "chargers_conns": ["*internal"],
+    "rals_conns": ["*internal"]					
+},
+
+"chargers": {
+    "enabled": true,
+    "attributes_conns": ["*internal"]
+},
+
+"attributes": {
+    "enabled": true
+},
+
+"cdrs": {									
+    "enabled": true,						
+    "rals_conns": ["*internal"],						
+    "stats_conns": ["*internal"],
+    "attributes_conns": ["*internal"]						
+}
+
+}
+    
