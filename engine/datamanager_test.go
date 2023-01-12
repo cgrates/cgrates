@@ -2763,3 +2763,297 @@ func TestDMCacheDataFromDBRouteProfilePrefix(t *testing.T) {
 	}
 
 }
+
+func TestDMCacheDataFromDBChargerProfilePrefix(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	cpp := &ChargerProfile{
+		Tenant:       "cgrates.org",
+		ID:           "CPP_1",
+		FilterIDs:    []string{"FLTR_CP_1"},
+		RunID:        "TestRunID",
+		AttributeIDs: []string{"*none"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
+	}
+
+	if err := dm.SetChargerProfile(context.Background(), cpp, false); err != nil {
+		t.Error(err)
+	}
+
+	if _, ok := Cache.Get(utils.CacheChargerProfiles, "cgrates.org:CPP_1"); ok {
+		t.Error("expected ok to be false")
+	}
+
+	if err := dm.CacheDataFromDB(context.Background(), utils.ChargerProfilePrefix, []string{utils.MetaAny}, false); err != nil {
+		t.Error(err)
+	}
+
+	if rcv, ok := Cache.Get(utils.CacheChargerProfiles, "cgrates.org:CPP_1"); !ok {
+		t.Error("expected ok to be true")
+	} else if !reflect.DeepEqual(rcv, cpp) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", cpp, rcv)
+	}
+
+}
+
+func TestDMCacheDataFromDBDispatcherProfilePrefix(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	dpp := &DispatcherProfile{
+
+		Tenant:         "cgrates.org",
+		ID:             "ID",
+		FilterIDs:      []string{"fltr1"},
+		Weight:         65,
+		Strategy:       utils.MetaLoad,
+		StrategyParams: map[string]interface{}{"k": "v"},
+		Hosts: DispatcherHostProfiles{
+			{
+				ID:        "C3",
+				FilterIDs: []string{"fltr2"},
+				Weight:    20,
+				Params:    map[string]interface{}{},
+				Blocker:   true,
+			},
+		},
+	}
+
+	if err := dm.SetDispatcherProfile(context.Background(), dpp, false); err != nil {
+		t.Error(err)
+	}
+
+	if _, ok := Cache.Get(utils.CacheDispatcherProfiles, "cgrates.org:ID"); ok {
+		t.Error("expected ok to be false")
+	}
+
+	if err := dm.CacheDataFromDB(context.Background(), utils.DispatcherProfilePrefix, []string{utils.MetaAny}, false); err != nil {
+		t.Error(err)
+	}
+
+	if rcv, ok := Cache.Get(utils.CacheDispatcherProfiles, "cgrates.org:ID"); !ok {
+		t.Error("expected ok to be true")
+	} else if !reflect.DeepEqual(rcv, dpp) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", dpp, rcv)
+	}
+
+}
+
+func TestDMCacheDataFromDBDispatcherHostPrefix(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	dph := &DispatcherHost{
+		Tenant: "cgrates.org",
+		RemoteHost: &config.RemoteHost{
+			ID:                   "ID",
+			Address:              "127.0.0.1",
+			Transport:            utils.MetaJSON,
+			ConnectAttempts:      1,
+			Reconnects:           1,
+			MaxReconnectInterval: 1,
+			ConnectTimeout:       time.Nanosecond,
+			ReplyTimeout:         time.Nanosecond,
+			TLS:                  true,
+			ClientKey:            "key",
+			ClientCertificate:    "ce",
+			CaCertificate:        "ca",
+		},
+	}
+
+	if err := dm.SetDispatcherHost(context.Background(), dph); err != nil {
+		t.Error(err)
+	}
+
+	if _, ok := Cache.Get(utils.CacheDispatcherHosts, "cgrates.org:ID"); ok {
+		t.Error("expected ok to be false")
+	}
+
+	if err := dm.CacheDataFromDB(context.Background(), utils.DispatcherHostPrefix, []string{utils.MetaAny}, false); err != nil {
+		t.Error(err)
+	}
+
+	if rcv, ok := Cache.Get(utils.CacheDispatcherHosts, "cgrates.org:ID"); !ok {
+		t.Error("expected ok to be true")
+	} else if !reflect.DeepEqual(rcv, dph) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", dph, rcv)
+	}
+
+}
+
+func TestDMCacheDataFromDBRateProfilePrefix(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	rpp := &utils.RateProfile{
+		ID:        "RP1",
+		Tenant:    "cgrates.org",
+		FilterIDs: []string{"*string:~*req.Destination:1234"},
+		Rates: map[string]*utils.Rate{
+			"RT1": {
+				ID: "RT1",
+				IntervalRates: []*utils.IntervalRate{
+					{
+						IntervalStart: utils.NewDecimal(0, 0),
+						RecurrentFee:  utils.NewDecimal(1, 2),
+						Unit:          utils.NewDecimal(int64(time.Second), 0),
+						Increment:     utils.NewDecimal(int64(time.Second), 0),
+					},
+				},
+			},
+		},
+	}
+
+	if err := dm.SetRateProfile(context.Background(), rpp, false, false); err != nil {
+		t.Error(err)
+	}
+
+	if _, ok := Cache.Get(utils.CacheRateProfiles, "cgrates.org:RP1"); ok {
+		t.Error("expected ok to be false")
+	}
+
+	if err := dm.CacheDataFromDB(context.Background(), utils.RateProfilePrefix, []string{utils.MetaAny}, false); err != nil {
+		t.Error(err)
+	}
+
+	if rcv, ok := Cache.Get(utils.CacheRateProfiles, "cgrates.org:RP1"); !ok {
+		t.Error("expected ok to be true")
+	} else if !reflect.DeepEqual(rcv, rpp) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", rpp, rcv)
+	}
+
+}
+
+func TestDMCacheDataFromDBActionProfilePrefix(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	ap := &ActionProfile{
+
+		Tenant:    "cgrates.org",
+		ID:        "ID",
+		FilterIDs: []string{"fltr1"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 65,
+			},
+		},
+		Schedule: "* * * * *",
+		Targets:  map[string]utils.StringSet{utils.MetaAccounts: {"1001": {}}},
+		Actions:  []*APAction{{}},
+	}
+
+	if err := dm.SetActionProfile(context.Background(), ap, false); err != nil {
+		t.Error(err)
+	}
+
+	if _, ok := Cache.Get(utils.CacheActionProfiles, "cgrates.org:ID"); ok {
+		t.Error("expected ok to be false")
+	}
+
+	if err := dm.CacheDataFromDB(context.Background(), utils.ActionProfilePrefix, []string{utils.MetaAny}, false); err != nil {
+		t.Error(err)
+	}
+
+	if rcv, ok := Cache.Get(utils.CacheActionProfiles, "cgrates.org:ID"); !ok {
+		t.Error("expected ok to be true")
+	} else if !reflect.DeepEqual(rcv, ap) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", ap, rcv)
+	}
+
+}
+
+// unfinished
+// func TestDMCacheDataFromDBAttributeFilterIndexes(t *testing.T) {
+// 	tmp := Cache
+// 	defer func() {
+// 		Cache = tmp
+// 	}()
+// 	Cache.Clear(nil)
+
+// 	cfg := config.NewDefaultCGRConfig()
+// 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+// 	cM := NewConnManager(cfg)
+// 	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+// 	ap := &ActionProfile{
+
+// 		Tenant:    "cgrates.org",
+// 		ID:        "ID",
+// 		FilterIDs: []string{"fltr1"},
+// 		Weights: utils.DynamicWeights{
+// 			{
+// 				Weight: 65,
+// 			},
+// 		},
+// 		Schedule: "* * * * *",
+// 		Targets:  map[string]utils.StringSet{utils.MetaAccounts: {"1001": {}}},
+// 		Actions:  []*APAction{{}},
+// 	}
+
+// 	indexes := map[string]utils.StringSet{"*string:*req.Account:1002": {"ATTR1": {}, "ATTR2": {}}}
+
+// 	if err := dm.SetIndexes(context.Background(), utils.CacheAttributeFilterIndexes, "cgrates.org", indexes, true, utils.NonTransactional); err != nil {
+// 		t.Error(err)
+// 	}
+
+// 	if _, ok := Cache.Get(utils.CacheAttributeFilterIndexes, utils.ConcatenatedKey("cgrates.org", "ATTR1")); ok {
+// 		t.Error("expected ok to be false")
+// 	}
+
+// 	if err := dm.CacheDataFromDB(context.Background(), utils.AttributeFilterIndexes, []string{utils.MetaAny}, false); err != nil {
+// 		t.Error(err)
+// 	}
+
+// 	if rcv, ok := Cache.Get(utils.CacheAttributeFilterIndexes, utils.ConcatenatedKey("cgrates.org", "ATTR1")); !ok {
+// 		t.Error("expected ok to be true")
+// 	} else if !reflect.DeepEqual(rcv, ap) {
+// 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", ap, rcv)
+// 	}
+
+// }
