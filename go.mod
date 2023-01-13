@@ -41,8 +41,8 @@ require (
 	github.com/nats-io/nats.go v1.11.0
 	github.com/nyaruka/phonenumbers v1.0.75
 	github.com/peterh/liner v1.2.1
+	github.com/rabbitmq/amqp091-go v1.5.0
 	github.com/segmentio/kafka-go v0.4.8
-	github.com/streadway/amqp v1.0.0
 	go.mongodb.org/mongo-driver v1.11.0
 	golang.org/x/crypto v0.0.0-20220622213112-05595931fe9d
 	golang.org/x/net v0.0.0-20220524220425-1d687d428aca

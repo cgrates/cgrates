@@ -39,8 +39,8 @@ import (
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
+	amqp "github.com/rabbitmq/amqp091-go"
 	kafka "github.com/segmentio/kafka-go"
-	"github.com/streadway/amqp"
 )
 
 var (
