@@ -87,6 +87,8 @@ github.com/cgrates/baningo v0.0.0-20210413080722-004ffd5e429f h1:dCp5BflGB8I8wlh
 github.com/cgrates/baningo v0.0.0-20210413080722-004ffd5e429f/go.mod h1:3SwVROaS1Iml5lqEhj0gRhDRtmbBgypZpKcEkVTSleU=
 github.com/cgrates/fsock v0.0.0-20221024103442-1e3fb3cc7c8e h1:59lQFuWtorH0wo2JwReUeFVYBEpxUZ7qAfAzdD1XnhU=
 github.com/cgrates/fsock v0.0.0-20221024103442-1e3fb3cc7c8e/go.mod h1:5A9wag324AzIlaDd7tpPDAg26ouUO1orarAq7Vxr4As=
+github.com/cgrates/fsock v0.0.0-20230113150315-a92e3078a316 h1:xYmQoS9ziOEcl89PG1anMXpM7ktRM1j5UftXcmztqwU=
+github.com/cgrates/fsock v0.0.0-20230113150315-a92e3078a316/go.mod h1:5A9wag324AzIlaDd7tpPDAg26ouUO1orarAq7Vxr4As=
 github.com/cgrates/kamevapi v0.0.0-20220525160402-5b8036487a6c h1:ILTMiCcBw80hSe1L0LE3u2U7sFQB/vcFc2JZpvTD4/E=
 github.com/cgrates/kamevapi v0.0.0-20220525160402-5b8036487a6c/go.mod h1:R1iZadqJTrjkwWxhK8gVPcYhcWoE4d0A6HZ+y6ZHzys=
 github.com/cgrates/ltcache v0.0.0-20210405185848-da943e80c1ab h1:dKdAUwrij6vYwewe1WV1+pDSagqGI5JLqjTZZyN2ANo=
