@@ -42,7 +42,7 @@ import (
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/ltcache"
-	"github.com/streadway/amqp"
+	amqp "github.com/rabbitmq/amqp091-go"
 )
 
 // ToDo: Replace rpc.Client with internal rpc server and Apier using internal map as both data and stor so we can run the tests non-local
