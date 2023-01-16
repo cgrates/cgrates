@@ -72,7 +72,7 @@ type FWVFileER struct {
 	offset        int64         // Index of the next byte to process
 	headerOffset  int64
 	trailerOffset int64 // Index where trailer starts, to be used as boundary when reading cdrs
-	trailerLenght int64
+	trailerLength int64
 	headerDP      utils.DataProvider
 	trailerDP     utils.DataProvider
 }
@@ -186,7 +186,7 @@ func (rdr *FWVFileER) processFile(fPath, fName string) (err error) {
 				break
 			}
 			return err
-		} else if nRead != len(buf) && int64(nRead) != rdr.trailerLenght {
+		} else if nRead != len(buf) && int64(nRead) != rdr.trailerLength {
 			utils.Logger.Err(fmt.Sprintf("<%s> Could not read complete line, have instead: %s", utils.ERs, string(buf)))
 			rdr.offset += rdr.lineLen // increase the offset when exit
 			continue
@@ -228,6 +228,12 @@ func (rdr *FWVFileER) processFile(fPath, fName string) (err error) {
 		}
 	}
 	rdr.offset = 0
+	rdr.headerOffset = 0
+	rdr.trailerOffset = 0
+	rdr.trailerLength = 0
+	rdr.lineLen = 0
+	rdr.trailerDP = nil
+	rdr.headerDP = nil
 	utils.Logger.Info(
 		fmt.Sprintf("%s finished processing file <%s>. Total records processed: %d, events posted: %d, run duration: %s",
 			utils.ERs, absPath, rowNr, evsPosted, time.Now().Sub(timeStart)))
@@ -263,7 +269,7 @@ func (rdr *FWVFileER) setLineLen(file *os.File, hasHeader, hasTrailer bool) erro
 			return err
 		} else {
 			rdr.trailerOffset = fi.Size() - int64(lastLineSize)
-			rdr.trailerLenght = int64(lastLineSize)
+			rdr.trailerLength = int64(lastLineSize)
 		}
 	}
 
@@ -274,7 +280,7 @@ func (rdr *FWVFileER) setLineLen(file *os.File, hasHeader, hasTrailer bool) erro
 }
 
 func (rdr *FWVFileER) processTrailer(file *os.File, rowNr, evsPosted int, absPath string, trailerFields []*config.FCTemplate) (err error) {
-	buf := make([]byte, rdr.trailerLenght)
+	buf := make([]byte, rdr.trailerLength)
 	if nRead, err := file.ReadAt(buf, rdr.trailerOffset); err != nil && err != io.EOF {
 		return err
 	} else if nRead != len(buf) {
