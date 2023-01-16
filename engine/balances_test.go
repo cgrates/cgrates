@@ -957,3 +957,55 @@ func TestGetMinutesForCredi(t *testing.T) {
 		t.Errorf("expected %v,received %v", utils.ToJSON(expLog), utils.ToJSON(rcvLog))
 	}
 }
+
+func TestBalanceDebitUnits3(t *testing.T) {
+	cc := &CallCost{
+		Destination: "0723045326",
+		Timespans: []*TimeSpan{
+			{
+				TimeStart:     time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
+				TimeEnd:       time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
+				DurationIndex: 0,
+				RateInterval: &RateInterval{
+					Rating: &RIRate{Rates: RateGroups{
+						&RGRate{GroupIntervalStart: 0, Value: 1,
+							RateIncrement: 10 * time.Second,
+							RateUnit:      time.Second}}}},
+			},
+			{
+				TimeStart:     time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
+				TimeEnd:       time.Date(2013, 9, 24, 10, 49, 20, 0, time.UTC),
+				DurationIndex: 10 * time.Second,
+				RateInterval: &RateInterval{
+					Rating: &RIRate{Rates: RateGroups{
+						&RGRate{GroupIntervalStart: 0,
+							Value:         1,
+							RateIncrement: 10 * time.Second,
+							RateUnit:      time.Second}}}},
+			},
+		},
+		ToR: utils.MetaVoice,
+	}
+	b1 := &Balance{
+		Uuid: "testb", Value: 10 * float64(time.Second), Weight: 10,
+		DestinationIDs: utils.StringMap{"NAT": true},
+		RatingSubject:  "*zero1s"}
+	cd := &CallDescriptor{
+		TimeStart:     cc.Timespans[0].TimeStart,
+		TimeEnd:       cc.Timespans[1].TimeEnd,
+		Destination:   cc.Destination,
+		ToR:           cc.ToR,
+		DurationIndex: cc.GetDuration(),
+		testCallcost:  cc,
+	}
+	rifsBalance := &Account{ID: "other", BalanceMap: map[string]Balances{
+		utils.MetaVoice:    {b1},
+		utils.MetaMonetary: {{Uuid: "moneya", Value: 110}},
+	}}
+	moneyBalances := Balances{
+		{Uuid: "moneyc", Value: 130, SharedGroups: utils.NewStringMap("SG_TEST")},
+	}
+	if _, err := b1.debitUnits(cd, rifsBalance, moneyBalances, true, true, true, nil); err != nil {
+		t.Error(err)
+	}
+}

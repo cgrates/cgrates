@@ -1436,6 +1436,66 @@ func TestDmDispatcherHost(t *testing.T) {
 	}
 }
 
+func TestGetDispatcherHostErr(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	tmpDm := dm
+	tmp := Cache
+	defer func() {
+		config.SetCgrConfig(config.NewDefaultCGRConfig())
+		Cache = tmp
+		SetDataStorage(tmpDm)
+	}()
+	Cache.Clear(nil)
+	cfg.DataDbCfg().RplConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1)}
+	cfg.CacheCfg().ReplicationConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}
+	cfg.CacheCfg().Partitions[utils.CacheDispatcherHosts].Replicate = true
+	cfg.DataDbCfg().RplFiltered = true
+	cfg.DataDbCfg().Items = map[string]*config.ItemOpt{
+		utils.CacheDispatcherHosts: {
+			Limit:     3,
+			Replicate: true,
+		},
+	}
+	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn <- &ccMock{
+		calls: map[string]func(args interface{}, reply interface{}) error{
+			utils.ReplicatorSv1GetDispatcherHost: func(args, reply interface{}) error {
+				return utils.ErrDSPHostNotFound
+			},
+			utils.CacheSv1ReplicateSet: func(args, reply interface{}) error {
+				return errors.New("Can't Replicate")
+			},
+		},
+	}
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches):    clientConn,
+	})
+	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
+	config.SetCgrConfig(cfg)
+	SetDataStorage(dm)
+	dH := &DispatcherHost{
+		Tenant: "testTenant",
+		RemoteHost: &config.RemoteHost{
+			ID:        "testID",
+			Address:   rpcclient.InternalRPC,
+			Transport: utils.MetaInternal,
+			TLS:       false,
+		},
+	}
+
+	if _, err := dm.GetDispatcherHost(dH.Tenant, dH.ID, true, true, utils.NonTransactional); err == nil || err != utils.ErrDSPHostNotFound {
+		t.Error(err)
+	}
+	SetConnManager(connMgr)
+	Cache = NewCacheS(cfg, dm, nil)
+
+	if _, err := dm.GetDispatcherHost(dH.Tenant, dH.ID, true, true, utils.NonTransactional); err == nil {
+		t.Error(err)
+	}
+}
+
 func TestChargerProfileRemote(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	tmpDm := dm
