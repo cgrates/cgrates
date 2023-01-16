@@ -3008,52 +3008,38 @@ func TestDMCacheDataFromDBActionProfilePrefix(t *testing.T) {
 
 }
 
-// unfinished
-// func TestDMCacheDataFromDBAttributeFilterIndexes(t *testing.T) {
-// 	tmp := Cache
-// 	defer func() {
-// 		Cache = tmp
-// 	}()
-// 	Cache.Clear(nil)
+func TestDMCacheDataFromDBAttributeFilterIndexes(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+	Cache.Clear(nil)
 
-// 	cfg := config.NewDefaultCGRConfig()
-// 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-// 	cM := NewConnManager(cfg)
-// 	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
 
-// 	ap := &ActionProfile{
+	indexes := map[string]utils.StringSet{"*string:*req.Account:1002": {"ATTR1": {}, "ATTR2": {}}}
 
-// 		Tenant:    "cgrates.org",
-// 		ID:        "ID",
-// 		FilterIDs: []string{"fltr1"},
-// 		Weights: utils.DynamicWeights{
-// 			{
-// 				Weight: 65,
-// 			},
-// 		},
-// 		Schedule: "* * * * *",
-// 		Targets:  map[string]utils.StringSet{utils.MetaAccounts: {"1001": {}}},
-// 		Actions:  []*APAction{{}},
-// 	}
+	if err := dm.SetIndexes(context.Background(), utils.CacheAttributeFilterIndexes, "cgrates.org", indexes, true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
 
-// 	indexes := map[string]utils.StringSet{"*string:*req.Account:1002": {"ATTR1": {}, "ATTR2": {}}}
+	if _, ok := Cache.Get(utils.CacheAttributeFilterIndexes, utils.ConcatenatedKey("cgrates.org", "*string:*req.Account:1002")); ok {
+		t.Error("expected ok to be false")
+	}
 
-// 	if err := dm.SetIndexes(context.Background(), utils.CacheAttributeFilterIndexes, "cgrates.org", indexes, true, utils.NonTransactional); err != nil {
-// 		t.Error(err)
-// 	}
+	if err := dm.CacheDataFromDB(context.Background(), utils.AttributeFilterIndexes, []string{utils.MetaAny}, false); err != nil {
+		t.Error(err)
+	}
 
-// 	if _, ok := Cache.Get(utils.CacheAttributeFilterIndexes, utils.ConcatenatedKey("cgrates.org", "ATTR1")); ok {
-// 		t.Error("expected ok to be false")
-// 	}
+	exp := utils.StringSet{"ATTR1": {}, "ATTR2": {}}
 
-// 	if err := dm.CacheDataFromDB(context.Background(), utils.AttributeFilterIndexes, []string{utils.MetaAny}, false); err != nil {
-// 		t.Error(err)
-// 	}
+	if rcv, ok := Cache.Get(utils.CacheAttributeFilterIndexes, utils.ConcatenatedKey("cgrates.org", "*string:*req.Account:1002")); !ok {
+		t.Error("expected ok to be true")
+	} else if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", exp, rcv)
+	}
 
-// 	if rcv, ok := Cache.Get(utils.CacheAttributeFilterIndexes, utils.ConcatenatedKey("cgrates.org", "ATTR1")); !ok {
-// 		t.Error("expected ok to be true")
-// 	} else if !reflect.DeepEqual(rcv, ap) {
-// 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", ap, rcv)
-// 	}
-
-// }
+}
