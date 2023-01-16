@@ -176,6 +176,9 @@ func (rdr *FWVFileER) processFile(fPath, fName string) (err error) {
 				continue
 			}
 		}
+		if rdr.offset >= rdr.trailerOffset {
+			break
+		}
 
 		buf := make([]byte, rdr.lineLen)
 		if nRead, err := file.Read(buf); err != nil {
@@ -224,7 +227,7 @@ func (rdr *FWVFileER) processFile(fPath, fName string) (err error) {
 			return
 		}
 	}
-
+	rdr.offset = 0
 	utils.Logger.Info(
 		fmt.Sprintf("%s finished processing file <%s>. Total records processed: %d, events posted: %d, run duration: %s",
 			utils.ERs, absPath, rowNr, evsPosted, time.Now().Sub(timeStart)))
