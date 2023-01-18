@@ -33,11 +33,20 @@ ifneq ($(GIT_TAG_LOG),)
 	DEBIAN_PKG_VERSION=$(DEBIAN_VERSION)
 endif
 
+MAINTAINER_EMAIL=$(dpkg-parsechangelog -S Maintainer | awk -F'<' '{print $$2}')
+KEY_COUNT=$(shell gpg --list-secret-keys "$(MAINTAINER_EMAIL)" 2> /dev/null | grep -c "^sec")
+ifeq ($(KEY_COUNT), 0)
+	NO_SIGN="--no-sign"
+else
+	NO_SIGN=""
+endif
+
+
 deb:
 	cd ..;\
 	ln -sf packages/debian debian ;\
 	dch -v "$(DEBIAN_PKG_VERSION)" -m "Package build for git commit $(GIT_COMMIT) ($(GIT_DATE))." -D "$(DISTRIBUTION)" --force-distribution ;\
-	dpkg-buildpackage -rfakeroot -tc; \
+	dpkg-buildpackage -rfakeroot -tc $(NO_SIGN); \
 	rm debian
 	git checkout debian/changelog
 
