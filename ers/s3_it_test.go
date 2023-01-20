@@ -39,7 +39,7 @@ import (
 )
 
 var (
-	itTestS3 = flag.Bool("s3", false, "Run the test for S3Reader")
+	itTestS3 = flag.Bool("s3_ers", false, "Run the test for S3Reader")
 )
 
 func TestS3ER(t *testing.T) {
