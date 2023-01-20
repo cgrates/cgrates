@@ -1988,3 +1988,71 @@ func TestRSPopulateSortingDataResourceErr(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestPopulateSortingDataStatsErr(t *testing.T) {
+	utils.Logger.SetLogLevel(4)
+	utils.Logger.SetSyslog(nil)
+	cfg := config.NewDefaultCGRConfig()
+	buf := new(bytes.Buffer)
+	log.SetOutput(buf)
+	defer func() {
+		utils.Logger.SetLogLevel(0)
+		log.SetOutput(os.Stderr)
+		config.SetCgrConfig(config.NewDefaultCGRConfig())
+	}()
+	cfg.RouteSCfg().StatSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}
+	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn <- &ccMock{
+		calls: map[string]func(args interface{}, reply interface{}) error{
+			utils.StatSv1GetQueueFloatMetrics: func(args, reply interface{}) error {
+				return errors.New("No Stats")
+			},
+		},
+	}
+	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats): clientConn,
+	})
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "voiceEvent",
+		Time:   utils.TimePointer(time.Now()),
+		Event:  map[string]interface{}{},
+		APIOpts: map[string]interface{}{
+			utils.OptsEEsVerbose: struct{}{},
+		},
+	}
+	route := &Route{
+		ID:      "vendor1",
+		StatIDs: []string{"STATS_VENDOR_1"},
+		Weight:  0,
+	}
+	extraOpts := &optsGetRoutes{
+		sortingStrategy: utils.MetaLoad,
+		ignoreErrors:    true,
+	}
+	expLog := `ignoring route with ID:`
+	rpS := NewRouteService(dm, nil, cfg, connMgr)
+	if _, pass, err := rpS.populateSortingData(ev, route, extraOpts); err != nil || pass == true {
+		t.Error(err)
+	} else if rcvLog := buf.String(); !strings.Contains(rcvLog, expLog) {
+		t.Errorf("Logger %v doesn't containe %v", rcvLog, expLog)
+	}
+	extraOpts.sortingStrategy = utils.MetaReds
+	if _, pass, err := rpS.populateSortingData(ev, route, extraOpts); err != nil || pass == true {
+		t.Error(err)
+	}
+}
+func TestV1GetRoutesList(t *testing.T) {
+	defer func() {
+		config.SetCgrConfig(config.NewDefaultCGRConfig())
+	}()
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dmSPP := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	rpS := NewRouteService(dmSPP, &FilterS{dm: dmSPP, cfg: cfg, connMgr: nil}, cfg, connMgr)
+	var reply []string
+	if err := rpS.V1GetRoutesList(testRoutesArgs[0], &reply); err == nil || err != utils.ErrNotFound {
+		t.Error(err)
+	}
+
+}
