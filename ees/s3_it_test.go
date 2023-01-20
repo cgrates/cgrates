@@ -22,6 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package ees
 
 import (
+	"flag"
 	"fmt"
 	"net/rpc"
 	"path"
@@ -39,6 +40,8 @@ import (
 )
 
 var (
+	runS3Test = flag.Bool("s3_ees", false, "Run the integration test for the S3 exporter")
+	cgrID     string // needed to compute the key when verifying export
 	s3ConfDir string
 	s3CfgPath string
 	s3Cfg     *config.CGRConfig
@@ -50,15 +53,14 @@ var (
 		testS3ResetStorDb,
 		testS3StartEngine,
 		testS3RPCConn,
-		// testS3ExportEvent,
-		// testS3VerifyExport,
+		testS3ExportEvent,
+		testS3VerifyExport,
 		testStopCgrEngine,
 	}
 )
 
 func TestS3Export(t *testing.T) {
-	if awsKey == nil || *awsKey == utils.EmptyString ||
-		awsSecret == nil || *awsSecret == utils.EmptyString {
+	if !*runS3Test {
 		t.SkipNow()
 	}
 	s3ConfDir = "ees_s3&sqs"
@@ -75,9 +77,8 @@ func testS3LoadConfig(t *testing.T) {
 	}
 	for _, value := range s3Cfg.EEsCfg().Exporters {
 		if value.ID == "sqs_test_file" {
-			value.ExportPath = fmt.Sprintf("https://s3.eu-central-1.amazonaws.com/?awsRegion=eu-central-1&awsKey=%s&awsSecret=%s", *awsKey, *awsSecret)
-			value.Opts.AWSKey = awsKey
-			value.Opts.AWSSecret = awsSecret
+			awsKey = *value.Opts.AWSKey
+			awsSecret = *value.Opts.AWSSecret
 		}
 	}
 }
@@ -109,6 +110,7 @@ func testS3RPCConn(t *testing.T) {
 }
 
 func testS3ExportEvent(t *testing.T) {
+	cgrID = utils.Sha1("abcdef", time.Unix(1383813745, 0).UTC().String())
 	ev := &engine.CGREventWithEeIDs{
 		EeIDs: []string{"s3_test_file"},
 		CGREvent: &utils.CGREvent{
@@ -116,7 +118,7 @@ func testS3ExportEvent(t *testing.T) {
 			ID:     "dataEvent",
 			Time:   utils.TimePointer(time.Now()),
 			Event: map[string]interface{}{
-				utils.CGRID:        utils.Sha1("abcdef", time.Unix(1383813745, 0).UTC().String()),
+				utils.CGRID:        cgrID,
 				utils.ToR:          utils.MetaData,
 				utils.OriginID:     "abcdef",
 				utils.OriginHost:   "192.168.1.1",
@@ -139,21 +141,21 @@ func testS3ExportEvent(t *testing.T) {
 	if err := s3RPC.Call(utils.EeSv1ProcessEvent, ev, &reply); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(time.Second)
+	time.Sleep(2 * time.Second)
 }
 
 func testS3VerifyExport(t *testing.T) {
-	endpoint := fmt.Sprintf("https://s3.eu-central-1.amazonaws.com/?awsRegion=eu-central-1&awsKey=%s&awsSecret=%s", *awsKey, *awsSecret)
+	endpoint := "s3.eu-central-1.amazonaws.com"
 	region := "eu-central-1"
 	qname := "cgrates-cdrs"
 
-	key := "key"
-	key += ".json"
+	key := fmt.Sprintf("%s/%s:%s.json", "", cgrID, utils.MetaDefault)
+
 	var sess *session.Session
 	cfg := aws.Config{Endpoint: aws.String(endpoint)}
 	cfg.Region = aws.String(region)
 
-	cfg.Credentials = credentials.NewStaticCredentials(*awsKey, *awsSecret, "")
+	cfg.Credentials = credentials.NewStaticCredentials(awsKey, awsSecret, "")
 	var err error
 	sess, err = session.NewSessionWithOptions(
 		session.Options{
@@ -176,7 +178,7 @@ func testS3VerifyExport(t *testing.T) {
 		t.Fatalf("Unable to download item %v", err)
 	}
 
-	expected := `{"Account":"1001","CGRID":"dbafe9c8614c785a65aabd116dd3959c3c56f7f6","Category":"call","Destination":"1002","OriginID":"dsafdsaf","RequestType":"*rated","RunID":"*default","Subject":"1001","Tenant":"cgrates.org","ToR":"*voice"}`
+	expected := `{"Account":"1001","CGRID":"ea1f1968cc207859672c332364fc7614c86b04c5","Category":"call","Destination":"1002","OriginID":"abcdef","RequestType":"*rated","RunID":"*default","Subject":"1001","Tenant":"AnotherTenant","ToR":"*data"}`
 	if rply := string(file.Bytes()); rply != expected {
 		t.Errorf("Expected: %q, received: %q", expected, rply)
 	}

@@ -38,7 +38,7 @@ import (
 )
 
 var (
-	itTestSQS = flag.Bool("sqs", false, "Run the test for SQSReader")
+	itTestSQS = flag.Bool("sqs_ers", false, "Run the test for SQSReader")
 )
 
 func TestSQSER(t *testing.T) {

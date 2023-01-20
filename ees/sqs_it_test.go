@@ -23,7 +23,6 @@ package ees
 
 import (
 	"flag"
-	"fmt"
 	"net/rpc"
 	"path"
 	"testing"
@@ -40,8 +39,9 @@ import (
 )
 
 var (
-	awsKey     = flag.String("awsKey", utils.EmptyString, "Access key ID for IAM user")
-	awsSecret  = flag.String("awsSecret", utils.EmptyString, "Secret access key")
+	runSQSTest = flag.Bool("sqs_ees", false, "Run the integration test for the SQS exporter")
+	awsKey     string
+	awsSecret  string
 	sqsConfDir string
 	sqsCfgPath string
 	sqsCfg     *config.CGRConfig
@@ -54,14 +54,13 @@ var (
 		testSQSStartEngine,
 		testSQSRPCConn,
 		testSQSExportEvent,
-		// testSQSVerifyExport,
+		testSQSVerifyExport,
 		testStopCgrEngine,
 	}
 )
 
 func TestSQSExport(t *testing.T) {
-	if awsKey == nil || *awsKey == utils.EmptyString ||
-		awsSecret == nil || *awsSecret == utils.EmptyString {
+	if !*runSQSTest {
 		t.SkipNow()
 	}
 	sqsConfDir = "ees_s3&sqs"
@@ -78,9 +77,8 @@ func testSQSLoadConfig(t *testing.T) {
 	}
 	for _, value := range sqsCfg.EEsCfg().Exporters {
 		if value.ID == "sqs_test_file" {
-			value.ExportPath = fmt.Sprintf("https://sqs.eu-central-1.amazonaws.com/?awsRegion=eu-central-1&awsKey=%s&awsSecret=%s", *awsKey, *awsSecret)
-			value.Opts.AWSKey = awsKey
-			value.Opts.AWSSecret = awsSecret
+			awsKey = *value.Opts.AWSKey
+			awsSecret = *value.Opts.AWSSecret
 		}
 	}
 }
@@ -143,11 +141,11 @@ func testSQSExportEvent(t *testing.T) {
 		t.Error(err)
 	}
 
-	time.Sleep(time.Second)
+	time.Sleep(2 * time.Second)
 }
 
 func testSQSVerifyExport(t *testing.T) {
-	endpoint := fmt.Sprintf("https://sqs.eu-central-1.amazonaws.com/?awsRegion=eu-central-1&awsKey=%s&awsSecret=%s", *awsKey, *awsSecret)
+	endpoint := "sqs.eu-central-1.amazonaws.com"
 	region := "eu-central-1"
 	qname := "testQueue"
 
@@ -155,7 +153,7 @@ func testSQSVerifyExport(t *testing.T) {
 	cfg := aws.Config{Endpoint: aws.String(endpoint)}
 	cfg.Region = aws.String(region)
 	var err error
-	cfg.Credentials = credentials.NewStaticCredentials(*awsKey, *awsSecret, "")
+	cfg.Credentials = credentials.NewStaticCredentials(awsKey, awsSecret, "")
 	sess, err = session.NewSessionWithOptions(
 		session.Options{
 			Config: cfg,
