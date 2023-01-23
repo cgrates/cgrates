@@ -1970,20 +1970,3 @@ func TestLoadRatingPlansFiltered(t *testing.T) {
 		t.Error(err)
 	}
 }
-
-// func TestLoadRatingProfilesErr(t *testing.T) {
-// 	cfg := config.NewDefaultCGRConfig()
-// 	defer func() {
-// 		config.SetCgrConfig(config.NewDefaultCGRConfig())
-// 	}()
-// 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-// 	_ = NewDataManager(db, cfg.CacheCfg(), nil)
-
-// 	tpr, err := NewTpReader(db, db, utils.EmptyString, cfg.GeneralCfg().DefaultTimezone, nil, nil, true)
-// 	if err != nil {
-// 		t.Error(err)
-// 	}
-// 	if err := tpr.LoadRatingProfiles(); err != nil {
-// 		t.Error(err)
-// 	}
-// }

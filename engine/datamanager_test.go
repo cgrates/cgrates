@@ -20,7 +20,6 @@ package engine
 import (
 	"errors"
 	"reflect"
-	"strings"
 	"testing"
 	"time"
 
@@ -1792,21 +1791,23 @@ func TestGetResourceRemote(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	tmpDm := dm
 	tmp := Cache
+	tmpConn := connMgr
 	defer func() {
 		config.SetCgrConfig(config.NewDefaultCGRConfig())
 		Cache = tmp
 		SetDataStorage(tmpDm)
+		SetConnManager(tmpConn)
 	}()
 	Cache.Clear(nil)
+	cfg.CacheCfg().Partitions[utils.CacheResources].Replicate = true
 	cfg.DataDbCfg().RmtConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
-	cfg.DataDbCfg().RplFiltered = true
+	cfg.CacheCfg().ReplicationConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}
 	cfg.DataDbCfg().Items = map[string]*config.ItemOpt{
 		utils.CacheResources: {
 			Limit:     3,
 			Replicate: true,
-			APIKey:    "key",
-			RouteID:   "route",
-			Remote:    true,
+
+			Remote: true,
 		},
 	}
 
@@ -1833,11 +1834,15 @@ func TestGetResourceRemote(t *testing.T) {
 				*reply.(**Resource) = rS
 				return nil
 			},
+			utils.CacheSv1ReplicateSet: func(args, reply interface{}) error {
+				return errors.New("Can't Replicate")
+			},
 		},
 	}
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator): clientConn,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches):     clientConn,
 	})
 	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
 	config.SetCgrConfig(cfg)
@@ -1847,6 +1852,11 @@ func TestGetResourceRemote(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rS, val) {
 		t.Errorf("expected %v,received %v", utils.ToJSON(rS), utils.ToJSON(val))
+	}
+	Cache = NewCacheS(cfg, dm, nil)
+	SetConnManager(connMgr)
+	if _, err := dm.GetResource(rS.Tenant, rS.ID, false, true, utils.NonTransactional); err == nil || err.Error() != "Can't Replicate" {
+		t.Error(err)
 	}
 }
 
@@ -3732,9 +3742,64 @@ func TestCacheDataFromDB(t *testing.T) {
 		Cache = tmp
 		SetDataStorage(tmpDm)
 	}()
+	Cache.Clear(nil)
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
-	if err := dm.CacheDataFromDB("*test_", []string{}, true); err == nil || !strings.Contains(err.Error(), "unsupported cache prefix") {
+
+	if err := dm.CacheDataFromDB("INVALID", nil, false); err == nil || err.Error() != utils.UnsupportedCachePrefix {
+		t.Error(err)
+	}
+	rp := &RatingPlan{
+		Id: "id",
+		DestinationRates: map[string]RPRateList{
+			"DestinationRates": {&RPRate{Rating: "Rating"}}},
+		Ratings: map[string]*RIRate{"Ratings": {ConnectFee: 0.7}},
+		Timings: map[string]*RITiming{"Timings": {Months: utils.Months{4}}},
+	}
+	if err := dm.SetRatingPlan(rp); err != nil {
+		t.Error(err)
+	}
+	if _, hasIt := Cache.Get(utils.CacheRatingPlans, rp.Id); hasIt {
+		t.Error("Already in cache")
+	}
+	if err := dm.CacheDataFromDB(utils.RatingPlanPrefix, []string{rp.Id}, false); err != nil {
+		t.Error(err)
+	}
+	rP := &RatingProfile{
+		Id: "*out:TCDDBSWF:call:*any",
+		RatingPlanActivations: RatingPlanActivations{&RatingPlanActivation{
+			ActivationTime: time.Date(2015, 01, 01, 8, 0, 0, 0, time.UTC),
+			RatingPlanId:   rp.Id,
+		}},
+	}
+	if err := dm.SetRatingProfile(rP); err != nil {
+		t.Error(err)
+	}
+	if _, hasIt := Cache.Get(utils.CacheRatingProfiles, rP.Id); hasIt {
+		t.Error("Already in cache")
+	}
+	if err := dm.CacheDataFromDB(utils.RatingProfilePrefix, []string{rP.Id}, false); err != nil {
+		t.Error(err)
+	}
+	as := Actions{
+		&Action{
+			ActionType: utils.MetaSetBalance,
+			Filters:    []string{"*string:~*req.BalanceMap.*monetary[0].ID:*default", "*lt:~*req.BalanceMap.*monetary[0].Value:0"},
+			Balance: &BalanceFilter{
+				Type:     utils.StringPointer("*sms"),
+				ID:       utils.StringPointer("for_v3hsillmilld500m_sms_ill"),
+				Disabled: utils.BoolPointer(true),
+			},
+			Weight: 9,
+		},
+	}
+	if err := dm.SetActions("test", as); err != nil {
+		t.Error(err)
+	}
+	if _, hasIt := Cache.Get(utils.CacheActions, "test"); hasIt {
+		t.Error("Already in cache")
+	}
+	if err := dm.CacheDataFromDB(utils.ActionPrefix, []string{"test"}, false); err != nil {
 		t.Error(err)
 	}
 }
