@@ -2042,6 +2042,131 @@ func TestPopulateSortingDataStatsErr(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestPopulateSortingDataAccsErr(t *testing.T) {
+	utils.Logger.SetLogLevel(4)
+	utils.Logger.SetSyslog(nil)
+	cfg := config.NewDefaultCGRConfig()
+	buf := new(bytes.Buffer)
+	log.SetOutput(buf)
+	defer func() {
+		utils.Logger.SetLogLevel(0)
+		log.SetOutput(os.Stderr)
+		config.SetCgrConfig(config.NewDefaultCGRConfig())
+	}()
+	cfg.RouteSCfg().RALsConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs)}
+	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn <- &ccMock{
+		calls: map[string]func(args interface{}, reply interface{}) error{
+			utils.ResponderGetMaxSessionTimeOnAccounts: func(args, reply interface{}) error {
+				rpl := map[string]interface{}{
+					utils.CapMaxUsage: 50 * time.Second,
+					utils.Cost:        12.12,
+				}
+				*reply.(*map[string]interface{}) = rpl
+				return nil
+			},
+		},
+	}
+	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs): clientConn,
+	})
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "voiceEvent",
+		Time:   utils.TimePointer(time.Now()),
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+			utils.Destination:  "1002",
+			utils.SetupTime:    "2023-03-03 11:39:32 +0100 CET",
+			utils.Usage:        5 * time.Second,
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsEEsVerbose: struct{}{},
+		},
+	}
+	route := &Route{
+		ID:            "ROUTE1",
+		AccountIDs:    []string{"Acc"},
+		RatingPlanIDs: []string{"RP_1002_LOW"},
+		Weight:        10,
+		Blocker:       false,
+	}
+	extraOpts := &optsGetRoutes{
+		sortingStrategy: utils.MetaLoad,
+		ignoreErrors:    true,
+		maxCost:         11.11,
+	}
+	rpS := NewRouteService(dm, nil, cfg, connMgr)
+	expLog := `ignoring route with ID:`
+	if _, pass, err := rpS.populateSortingData(ev, route, extraOpts); err != nil || pass {
+		t.Error(err)
+	} else if rcvLog := buf.String(); !strings.Contains(rcvLog, expLog) {
+		t.Errorf("Logger %v doesn't contain %v", rcvLog, expLog)
+	}
+}
+func TestPopulateSortingDataAccs2(t *testing.T) {
+	utils.Logger.SetLogLevel(4)
+	utils.Logger.SetSyslog(nil)
+	cfg := config.NewDefaultCGRConfig()
+	buf := new(bytes.Buffer)
+	log.SetOutput(buf)
+	defer func() {
+		utils.Logger.SetLogLevel(0)
+		log.SetOutput(os.Stderr)
+		config.SetCgrConfig(config.NewDefaultCGRConfig())
+	}()
+	cfg.RouteSCfg().RALsConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs)}
+	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn <- &ccMock{
+		calls: map[string]func(args interface{}, reply interface{}) error{
+			utils.ResponderGetMaxSessionTimeOnAccounts: func(args, reply interface{}) error {
+				rpl := map[string]interface{}{}
+				*reply.(*map[string]interface{}) = rpl
+				return nil
+			},
+			utils.ResponderGetCostOnRatingPlans: func(args, reply interface{}) error {
+				return nil
+			},
+		},
+	}
+	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs): clientConn,
+	})
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "voiceEvent",
+		Time:   utils.TimePointer(time.Now()),
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+			utils.Destination:  "1002",
+			utils.SetupTime:    "2023-03-03 11:39:32 +0100 CET",
+			utils.Usage:        5 * time.Second,
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsEEsVerbose: struct{}{},
+		},
+	}
+	route := &Route{
+		ID:            "ROUTE1",
+		AccountIDs:    []string{"Acc"},
+		RatingPlanIDs: []string{"RP_1002_LOW"},
+		Weight:        10,
+		Blocker:       false,
+	}
+	extraOpts := &optsGetRoutes{
+		sortingStrategy: utils.MetaLoad,
+		ignoreErrors:    true,
+		maxCost:         11.11,
+	}
+	rpS := NewRouteService(dm, nil, cfg, connMgr)
+	expLog := `ignoring route with ID:`
+	if _, pass, err := rpS.populateSortingData(ev, route, extraOpts); err != nil || pass {
+		t.Error(err)
+	} else if rcvLog := buf.String(); !strings.Contains(rcvLog, expLog) {
+		t.Errorf("Logger %v doesn't contain %v", rcvLog, expLog)
+	}
+}
 func TestV1GetRoutesList(t *testing.T) {
 	defer func() {
 		config.SetCgrConfig(config.NewDefaultCGRConfig())
