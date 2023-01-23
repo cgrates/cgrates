@@ -129,8 +129,8 @@ github.com/cgrates/birpc v1.3.1-0.20211117095917-5b0ff29f3084 h1:YIEepjEOjeHaFre
 github.com/cgrates/birpc v1.3.1-0.20211117095917-5b0ff29f3084/go.mod h1:z/PmNnDPqSQALedKJv5T8+eXIq6XHa9J0St1YsvAVns=
 github.com/cgrates/cron v0.0.0-20201022095836-3522d5b72c70 h1:/O+Dr12jcizDiCoIG2oK6wyE1pNRVQc62Wz+TfPWDhU=
 github.com/cgrates/cron v0.0.0-20201022095836-3522d5b72c70/go.mod h1:I9cUDn/uzkakr0hmYTjXkQqf6wagg44L2p01gSYRRz0=
-github.com/cgrates/fsock v0.0.0-20221024103442-1e3fb3cc7c8e h1:59lQFuWtorH0wo2JwReUeFVYBEpxUZ7qAfAzdD1XnhU=
-github.com/cgrates/fsock v0.0.0-20221024103442-1e3fb3cc7c8e/go.mod h1:5A9wag324AzIlaDd7tpPDAg26ouUO1orarAq7Vxr4As=
+github.com/cgrates/fsock v0.0.0-20230123160954-12cae14030cc h1:qKfOK61ZLktbywOLTMNWwobJsxkxszlMbuduwNgAO/c=
+github.com/cgrates/fsock v0.0.0-20230123160954-12cae14030cc/go.mod h1:5A9wag324AzIlaDd7tpPDAg26ouUO1orarAq7Vxr4As=
 github.com/cgrates/kamevapi v0.0.0-20220525160402-5b8036487a6c h1:ILTMiCcBw80hSe1L0LE3u2U7sFQB/vcFc2JZpvTD4/E=
 github.com/cgrates/kamevapi v0.0.0-20220525160402-5b8036487a6c/go.mod h1:R1iZadqJTrjkwWxhK8gVPcYhcWoE4d0A6HZ+y6ZHzys=
 github.com/cgrates/ltcache v0.0.0-20210405185848-da943e80c1ab h1:dKdAUwrij6vYwewe1WV1+pDSagqGI5JLqjTZZyN2ANo=
