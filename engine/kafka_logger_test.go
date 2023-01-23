@@ -18,31 +18,33 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package engine
 
-/*
+import (
+	"reflect"
+	"testing"
+
+	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/utils"
+	"github.com/segmentio/kafka-go"
+)
+
 func TestLoggerNewLoggerExport(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	exp := &ExportLogger{
-		logLevel: 6,
-		nodeID:   "123",
-		tenant:   "cgrates.org",
-		loggOpts: cfg.LoggerCfg().Opts,
-		writer: &kafka.Writer{
-			Addr:        kafka.TCP(cfg.LoggerCfg().Opts.KafkaConn),
-			Topic:       cfg.LoggerCfg().Opts.KafkaTopic,
-			MaxAttempts: cfg.LoggerCfg().Opts.Attempts,
-		},
-	}
-	if rcv, err := NewLogger(utils.MetaKafka, "cgrates.org", "123", cfg.LoggerCfg()); err != nil {
+	cM := NewConnManager(cfg)
+
+	exp := NewExportLogger(context.Background(), "123", "cgrates.org", 6, cM, cfg)
+	if rcv, err := NewLogger(context.Background(), utils.MetaKafkaLog, "cgrates.org", "123", cM, cfg); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(rcv.(*ExportLogger), exp) {
+	} else if !reflect.DeepEqual(rcv, exp) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", exp, rcv)
 	}
 }
 
 func TestLoggerNewLoggerDefault(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	cM := NewConnManager(cfg)
 	experr := `unsupported logger: <invalid>`
-	if _, err := NewLogger("invalid", "cgrates.org", "123", cfg.LoggerCfg()); err == nil ||
+	if _, err := NewLogger(context.Background(), "invalid", "cgrates.org", "123", cM, cfg); err == nil ||
 		err.Error() != experr {
 		t.Errorf("expected: <%s>, \nreceived: <%s>", experr, err)
 	}
@@ -50,69 +52,62 @@ func TestLoggerNewLoggerDefault(t *testing.T) {
 
 func TestLoggerNewExportLogger(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	cM := NewConnManager(cfg)
 	exp := &ExportLogger{
-		logLevel: 7,
-		nodeID:   "123",
-		tenant:   "cgrates.org",
-		loggOpts: cfg.LoggerCfg().Opts,
-		writer: &kafka.Writer{
+		ctx:        context.Background(),
+		cfg:        cfg,
+		connMgr:    cM,
+		FldPostDir: "/var/spool/cgrates/failed_posts",
+		LogLevel:   7,
+		NodeID:     "123",
+		Tenant:     "cgrates.org",
+		Writer: &kafka.Writer{
 			Addr:        kafka.TCP(cfg.LoggerCfg().Opts.KafkaConn),
 			Topic:       cfg.LoggerCfg().Opts.KafkaTopic,
-			MaxAttempts: cfg.LoggerCfg().Opts.Attempts,
+			MaxAttempts: cfg.LoggerCfg().Opts.KafkaAttempts,
 		},
 	}
-	if rcv := NewExportLogger("123", "cgrates.org", 7, cfg.LoggerCfg().Opts); !reflect.DeepEqual(rcv, exp) {
+	if rcv := NewExportLogger(context.Background(), "123", "cgrates.org", 7, cM, cfg); !reflect.DeepEqual(rcv, exp) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", exp, rcv)
 	}
 }
 
-func TestLoggerExportEmerg(t *testing.T) {
+func TestLoggerExportEmergNil(t *testing.T) {
 	tmp := Cache
 	defer func() {
 		Cache = tmp
 	}()
-	eesConn := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs)
+
+	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	cfg.CoreSCfg().EEsConns = []string{eesConn}
-	Cache = NewCacheS(cfg, nil, nil)
 	cM := NewConnManager(cfg)
-	ccM := &ccMock{
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
-				delete(args.(*utils.CGREventWithEeIDs).Event, "Timestamp")
-				exp := &utils.CGREventWithEeIDs{
-					CGREvent: &utils.CGREvent{
-						Tenant: "cgrates.org",
-						Event: map[string]interface{}{
-							utils.NodeID: "123",
-							"Message":    "Emergency message",
-							"Severity":   utils.LOGLEVEL_EMERGENCY,
-						},
-					},
-				}
-				if !reflect.DeepEqual(exp, args) {
-					return fmt.Errorf("\nexpected: <%+v>, \nreceived: <%+v>",
-						utils.ToJSON(exp), utils.ToJSON(args))
-				}
-				return nil
-			},
-		},
-	}
-	rpcInternal := make(chan birpc.ClientConnector, 1)
-	rpcInternal <- ccM
-	cM.AddInternalConn(eesConn, utils.EeSv1, rpcInternal)
 
-	el := NewExportLogger("123", "cgrates.org", -1, cfg.LoggerCfg().Opts)
+	el := NewExportLogger(context.Background(), "123", "cgrates.org", -1, cM, cfg)
 
 	if err := el.Emerg("Emergency message"); err != nil {
 		t.Error(err)
 	}
-	el.SetLogLevel(0)
-	if err := el.Emerg("Emergency message"); err != nil {
-		t.Error(err)
-	}
+
 }
 
+// func TestLoggerExportEmergOk(t *testing.T) {
+// 	tmp := Cache
+// 	defer func() {
+// 		Cache = tmp
+// 	}()
+
+// 	Cache.Clear(nil)
+// 	cfg := config.NewDefaultCGRConfig()
+// 	cM := NewConnManager(cfg)
+
+// 	el := NewExportLogger(context.Background(), "123", "cgrates.org", 0, cM, cfg)
+
+// 	if err := el.Emerg("Emergency message"); err != nil {
+// 		t.Error(err)
+// 	}
+// }
+
+/*
 func TestLoggerExportAlert(t *testing.T) {
 	tmp := Cache
 	defer func() {
@@ -504,4 +499,4 @@ func TestLoggerExportWrite(t *testing.T) {
 		t.Error(err)
 	}
 	el.Close()
-} */
+}*/

@@ -3043,3 +3043,345 @@ func TestDMCacheDataFromDBAttributeFilterIndexes(t *testing.T) {
 	}
 
 }
+
+func TestDMCacheDataFromDBResourceFilterIndexes(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	indexes := map[string]utils.StringSet{"*string:*req.Account:1002": {"ATTR1": {}, "ATTR2": {}}}
+
+	if err := dm.SetIndexes(context.Background(), utils.CacheResourceFilterIndexes, "cgrates.org", indexes, true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+
+	if _, ok := Cache.Get(utils.CacheResourceFilterIndexes, utils.ConcatenatedKey("cgrates.org", "*string:*req.Account:1002")); ok {
+		t.Error("expected ok to be false")
+	}
+
+	if err := dm.CacheDataFromDB(context.Background(), utils.ResourceFilterIndexes, []string{utils.MetaAny}, false); err != nil {
+		t.Error(err)
+	}
+
+	exp := utils.StringSet{"ATTR1": {}, "ATTR2": {}}
+
+	if rcv, ok := Cache.Get(utils.CacheResourceFilterIndexes, utils.ConcatenatedKey("cgrates.org", "*string:*req.Account:1002")); !ok {
+		t.Error("expected ok to be true")
+	} else if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", exp, rcv)
+	}
+
+}
+
+func TestDMCacheDataFromDBStatFilterIndexes(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	indexes := map[string]utils.StringSet{"*string:*req.Account:1002": {"ATTR1": {}, "ATTR2": {}}}
+
+	if err := dm.SetIndexes(context.Background(), utils.CacheStatFilterIndexes, "cgrates.org", indexes, true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+
+	if _, ok := Cache.Get(utils.CacheStatFilterIndexes, utils.ConcatenatedKey("cgrates.org", "*string:*req.Account:1002")); ok {
+		t.Error("expected ok to be false")
+	}
+
+	if err := dm.CacheDataFromDB(context.Background(), utils.StatFilterIndexes, []string{utils.MetaAny}, false); err != nil {
+		t.Error(err)
+	}
+
+	exp := utils.StringSet{"ATTR1": {}, "ATTR2": {}}
+
+	if rcv, ok := Cache.Get(utils.CacheStatFilterIndexes, utils.ConcatenatedKey("cgrates.org", "*string:*req.Account:1002")); !ok {
+		t.Error("expected ok to be true")
+	} else if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", exp, rcv)
+	}
+
+}
+
+func TestDMCacheDataFromDBThresholdFilterIndexes(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	indexes := map[string]utils.StringSet{"*string:*req.Account:1002": {"ATTR1": {}, "ATTR2": {}}}
+
+	if err := dm.SetIndexes(context.Background(), utils.CacheThresholdFilterIndexes, "cgrates.org", indexes, true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+
+	if _, ok := Cache.Get(utils.CacheThresholdFilterIndexes, utils.ConcatenatedKey("cgrates.org", "*string:*req.Account:1002")); ok {
+		t.Error("expected ok to be false")
+	}
+
+	if err := dm.CacheDataFromDB(context.Background(), utils.ThresholdFilterIndexes, []string{utils.MetaAny}, false); err != nil {
+		t.Error(err)
+	}
+
+	exp := utils.StringSet{"ATTR1": {}, "ATTR2": {}}
+
+	if rcv, ok := Cache.Get(utils.CacheThresholdFilterIndexes, utils.ConcatenatedKey("cgrates.org", "*string:*req.Account:1002")); !ok {
+		t.Error("expected ok to be true")
+	} else if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", exp, rcv)
+	}
+
+}
+
+func TestDMCacheDataFromDBRouteFilterIndexes(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	indexes := map[string]utils.StringSet{"*string:*req.Account:1002": {"ATTR1": {}, "ATTR2": {}}}
+
+	if err := dm.SetIndexes(context.Background(), utils.CacheRouteFilterIndexes, "cgrates.org", indexes, true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+
+	if _, ok := Cache.Get(utils.CacheRouteFilterIndexes, utils.ConcatenatedKey("cgrates.org", "*string:*req.Account:1002")); ok {
+		t.Error("expected ok to be false")
+	}
+
+	if err := dm.CacheDataFromDB(context.Background(), utils.RouteFilterIndexes, []string{utils.MetaAny}, false); err != nil {
+		t.Error(err)
+	}
+
+	exp := utils.StringSet{"ATTR1": {}, "ATTR2": {}}
+
+	if rcv, ok := Cache.Get(utils.CacheRouteFilterIndexes, utils.ConcatenatedKey("cgrates.org", "*string:*req.Account:1002")); !ok {
+		t.Error("expected ok to be true")
+	} else if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", exp, rcv)
+	}
+
+}
+
+func TestDMCacheDataFromDBChargerFilterIndexes(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	indexes := map[string]utils.StringSet{"*string:*req.Account:1002": {"ATTR1": {}, "ATTR2": {}}}
+
+	if err := dm.SetIndexes(context.Background(), utils.CacheChargerFilterIndexes, "cgrates.org", indexes, true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+
+	if _, ok := Cache.Get(utils.CacheChargerFilterIndexes, utils.ConcatenatedKey("cgrates.org", "*string:*req.Account:1002")); ok {
+		t.Error("expected ok to be false")
+	}
+
+	if err := dm.CacheDataFromDB(context.Background(), utils.ChargerFilterIndexes, []string{utils.MetaAny}, false); err != nil {
+		t.Error(err)
+	}
+
+	exp := utils.StringSet{"ATTR1": {}, "ATTR2": {}}
+
+	if rcv, ok := Cache.Get(utils.CacheChargerFilterIndexes, utils.ConcatenatedKey("cgrates.org", "*string:*req.Account:1002")); !ok {
+		t.Error("expected ok to be true")
+	} else if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", exp, rcv)
+	}
+
+}
+
+func TestDMCacheDataFromDBDispatcherFilterIndexes(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	indexes := map[string]utils.StringSet{"*string:*req.Account:1002": {"ATTR1": {}, "ATTR2": {}}}
+
+	if err := dm.SetIndexes(context.Background(), utils.CacheDispatcherFilterIndexes, "cgrates.org", indexes, true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+
+	if _, ok := Cache.Get(utils.CacheDispatcherFilterIndexes, utils.ConcatenatedKey("cgrates.org", "*string:*req.Account:1002")); ok {
+		t.Error("expected ok to be false")
+	}
+
+	if err := dm.CacheDataFromDB(context.Background(), utils.DispatcherFilterIndexes, []string{utils.MetaAny}, false); err != nil {
+		t.Error(err)
+	}
+
+	exp := utils.StringSet{"ATTR1": {}, "ATTR2": {}}
+
+	if rcv, ok := Cache.Get(utils.CacheDispatcherFilterIndexes, utils.ConcatenatedKey("cgrates.org", "*string:*req.Account:1002")); !ok {
+		t.Error("expected ok to be true")
+	} else if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", exp, rcv)
+	}
+
+}
+
+func TestDMCacheDataFromDBRateProfilesFilterIndexPrfx(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	indexes := map[string]utils.StringSet{"*string:*req.Account:1002": {"ATTR1": {}, "ATTR2": {}}}
+
+	if err := dm.SetIndexes(context.Background(), utils.CacheRateProfilesFilterIndexes, "cgrates.org", indexes, true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+
+	if _, ok := Cache.Get(utils.CacheRateProfilesFilterIndexes, utils.ConcatenatedKey("cgrates.org", "*string:*req.Account:1002")); ok {
+		t.Error("expected ok to be false")
+	}
+
+	if err := dm.CacheDataFromDB(context.Background(), utils.RateProfilesFilterIndexPrfx, []string{utils.MetaAny}, false); err != nil {
+		t.Error(err)
+	}
+
+	exp := utils.StringSet{"ATTR1": {}, "ATTR2": {}}
+
+	if rcv, ok := Cache.Get(utils.CacheRateProfilesFilterIndexes, utils.ConcatenatedKey("cgrates.org", "*string:*req.Account:1002")); !ok {
+		t.Error("expected ok to be true")
+	} else if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", exp, rcv)
+	}
+
+}
+
+func TestDMCacheDataFromDBRateFilterIndexPrfx(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	indexes := map[string]utils.StringSet{"*string:*req.Account:1002": {"ATTR1": {}, "ATTR2": {}}}
+
+	if err := dm.SetIndexes(context.Background(), utils.CacheRateFilterIndexes, "cgrates.org", indexes, true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+
+	if _, ok := Cache.Get(utils.CacheRateFilterIndexes, utils.ConcatenatedKey("cgrates.org", "*string:*req.Account:1002")); ok {
+		t.Error("expected ok to be false")
+	}
+
+	if err := dm.CacheDataFromDB(context.Background(), utils.RateFilterIndexPrfx, []string{utils.MetaAny}, false); err != nil {
+		t.Error(err)
+	}
+
+	exp := utils.StringSet{"ATTR1": {}, "ATTR2": {}}
+
+	if rcv, ok := Cache.Get(utils.CacheRateFilterIndexes, utils.ConcatenatedKey("cgrates.org", "*string:*req.Account:1002")); !ok {
+		t.Error("expected ok to be true")
+	} else if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", exp, rcv)
+	}
+
+}
+
+func TestDMCacheDataFromDBActionProfilesFilterIndexPrfx(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	indexes := map[string]utils.StringSet{"*string:*req.Account:1002": {"ATTR1": {}, "ATTR2": {}}}
+
+	if err := dm.SetIndexes(context.Background(), utils.CacheActionProfilesFilterIndexes, "cgrates.org", indexes, true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+
+	if _, ok := Cache.Get(utils.CacheActionProfilesFilterIndexes, utils.ConcatenatedKey("cgrates.org", "*string:*req.Account:1002")); ok {
+		t.Error("expected ok to be false")
+	}
+
+	if err := dm.CacheDataFromDB(context.Background(), utils.ActionProfilesFilterIndexPrfx, []string{utils.MetaAny}, false); err != nil {
+		t.Error(err)
+	}
+
+	exp := utils.StringSet{"ATTR1": {}, "ATTR2": {}}
+
+	if rcv, ok := Cache.Get(utils.CacheActionProfilesFilterIndexes, utils.ConcatenatedKey("cgrates.org", "*string:*req.Account:1002")); !ok {
+		t.Error("expected ok to be true")
+	} else if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", exp, rcv)
+	}
+
+}
+
+func TestDMCacheDataFromDBActionProfilesFilterIndexPrfxErr(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	errExp := "WRONG_IDX_KEY_FORMAT<tntCtx:*prefix:~*accounts>"
+	if err := dm.CacheDataFromDB(context.Background(), utils.AttributeFilterIndexes, []string{"tntCtx:*prefix:~*accounts"}, false); errExp != err.Error() {
+		t.Errorf("Expected %v\n but received %v", errExp, err)
+	}
+}
