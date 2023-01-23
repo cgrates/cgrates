@@ -16,7 +16,7 @@ require (
 	github.com/cgrates/baningo v0.0.0-20210413080722-004ffd5e429f
 	github.com/cgrates/birpc v1.3.1-0.20211117095917-5b0ff29f3084
 	github.com/cgrates/cron v0.0.0-20201022095836-3522d5b72c70
-	github.com/cgrates/fsock v0.0.0-20221024103442-1e3fb3cc7c8e
+	github.com/cgrates/fsock v0.0.0-20230123160954-12cae14030cc
 	github.com/cgrates/kamevapi v0.0.0-20220525160402-5b8036487a6c
 	github.com/cgrates/ltcache v0.0.0-20210405185848-da943e80c1ab
 	github.com/cgrates/radigo v0.0.0-20210902121842-ea2f9a730627
