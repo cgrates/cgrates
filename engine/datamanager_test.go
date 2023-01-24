@@ -3802,6 +3802,246 @@ func TestCacheDataFromDB(t *testing.T) {
 	if err := dm.CacheDataFromDB(utils.ActionPrefix, []string{"test"}, false); err != nil {
 		t.Error(err)
 	}
+	rsPrf := &ResourceProfile{
+		Tenant: "tenant.custom",
+		ID:     "RES_GRP1",
+		FilterIDs: []string{
+			"*string:~*req.RequestType:*rated",
+		},
+		UsageTTL:          10 * time.Microsecond,
+		Limit:             10,
+		AllocationMessage: "MessageAllocation",
+		Blocker:           true,
+		Stored:            true,
+		Weight:            20,
+	}
+	if err := dm.SetResourceProfile(rsPrf, false); err != nil {
+		t.Error(err)
+	}
+	if _, hasIt := Cache.Get(utils.CacheResourceProfiles, "test"); hasIt {
+		t.Error("Already in cache")
+	}
+	if err := dm.CacheDataFromDB(utils.ResourceProfilesPrefix, []string{utils.ConcatenatedKey(rsPrf.Tenant, rsPrf.ID)}, false); err != nil {
+		t.Error(err)
+	}
+	ru1 := &ResourceUsage{
+		Tenant:     "cgrates.org",
+		ID:         "RU1",
+		ExpiryTime: time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC),
+		Units:      1,
+	}
+	rs := &Resource{
+		Tenant: "cgrates.org",
+		ID:     "RES_GRP1",
+		rPrf:   rsPrf,
+		TTLIdx: []string{ru1.ID},
+		tUsage: utils.Float64Pointer(2),
+	}
+	if err = dm.SetResource(rs); err != nil {
+		t.Error(err)
+	}
+	if _, hasIt := Cache.Get(utils.CacheResources, utils.ConcatenatedKey(rs.Tenant, rs.ID)); hasIt {
+		t.Error("Already in cache")
+	}
+	if err := dm.CacheDataFromDB(utils.ResourcesPrefix, []string{utils.ConcatenatedKey(rs.Tenant, rs.ID)}, false); err != nil {
+		t.Error(err)
+	}
+	if err := dm.CacheDataFromDB(utils.ResourceFilterIndexes, []string{"*resources:*string:~*req.RequestType:*rated"}, false); err != nil {
+		t.Error(err)
+	}
+	sqPrf := &StatQueueProfile{
+		Tenant:    "cgrates.org",
+		ID:        "SQ1",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		Weight:    50,
+	}
+	if err = dm.SetStatQueueProfile(sqPrf, false); err != nil {
+		t.Error(err)
+	}
+	if _, hasIt := Cache.Get(utils.CacheStatQueueProfiles, utils.ConcatenatedKey(sqPrf.Tenant, sqPrf.ID)); hasIt {
+		t.Error("Already in cache")
+	}
+	if err := dm.CacheDataFromDB(utils.StatQueueProfilePrefix, []string{utils.ConcatenatedKey(sqPrf.Tenant, sqPrf.ID)}, false); err != nil {
+		t.Error(err)
+	}
+	if err := dm.CacheDataFromDB(utils.StatFilterIndexes, []string{"*statqueue_profiles:*string:~*req.Account:1001"}, false); err != nil {
+		t.Error(err)
+	}
+	sq := &StatQueue{
+		sqPrfl: sqPrf,
+		Tenant: "cgrates.org",
+		ID:     "SQ1",
+		SQItems: []SQItem{
+			{
+				EventID: "SqProcessEvent",
+			},
+		},
+		SQMetrics: map[string]StatMetric{
+			utils.MetaTCD: &StatTCD{},
+		},
+	}
+	if err = dm.SetStatQueue(sq); err != nil {
+		t.Error(err)
+	}
+	if _, hasIt := Cache.Get(utils.CacheStatQueues, utils.ConcatenatedKey(sq.Tenant, sq.ID)); hasIt {
+		t.Error("Already in cache")
+	}
+	if err := dm.CacheDataFromDB(utils.StatQueuePrefix, []string{utils.ConcatenatedKey(sq.Tenant, sq.ID)}, false); err != nil {
+		t.Error(err)
+	}
+	thdPrf := &ThresholdProfile{
+		Tenant:    "cgrates.org",
+		ID:        "TH1",
+		FilterIDs: []string{"*string:~*req.Account:1001", "*notstring:~*req.Destination:+49123"},
+	}
+	if err = dm.SetThresholdProfile(thdPrf, false); err != nil {
+		t.Error(err)
+	}
+	if _, hasIt := Cache.Get(utils.CacheThresholdProfiles, utils.ConcatenatedKey(thdPrf.Tenant, thdPrf.ID)); hasIt {
+		t.Error("Already in cache")
+	}
+	if err := dm.CacheDataFromDB(utils.ThresholdProfilePrefix, []string{utils.ConcatenatedKey(thdPrf.Tenant, thdPrf.ID)}, false); err != nil {
+		t.Error(err)
+	}
+	if err := dm.CacheDataFromDB(utils.ThresholdFilterIndexes, []string{"*threshold_profiles:*string:~*req.Account:1001"}, false); err != nil {
+		t.Error(err)
+	}
+	thd := &Threshold{
+		Tenant: "cgrates.org",
+		ID:     "TH1",
+		tPrfl:  thdPrf,
+	}
+	if err = dm.SetThreshold(thd); err != nil {
+		t.Error(err)
+	}
+	if _, hasIt := Cache.Get(utils.CacheThresholds, utils.ConcatenatedKey(thd.Tenant, thd.ID)); hasIt {
+		t.Error("Already in cache")
+	}
+	if err := dm.CacheDataFromDB(utils.ThresholdPrefix, []string{utils.ConcatenatedKey(thd.Tenant, thd.ID)}, false); err != nil {
+		t.Error(err)
+	}
+	rPrf := &RouteProfile{
+		Tenant:            "cgrates.org",
+		ID:                "SUP1",
+		FilterIDs:         []string{"*string:~*opts.Account:1001"},
+		Weight:            10,
+		Sorting:           utils.MetaQOS,
+		SortingParameters: []string{},
+		Routes: []*Route{{
+			ID:            "Sup",
+			FilterIDs:     []string{},
+			AccountIDs:    []string{"1001"},
+			RatingPlanIDs: []string{"RT_PLAN1"},
+			ResourceIDs:   []string{"RES1"},
+			Weight:        10,
+		}},
+	}
+	if err = dm.SetRouteProfile(rPrf, false); err != nil {
+		t.Error(err)
+	}
+	if _, hasIt := Cache.Get(utils.CacheRouteProfiles, rPrf.TenantID()); hasIt {
+		t.Error("Already in cache")
+	}
+	if err := dm.CacheDataFromDB(utils.RouteProfilePrefix, []string{rPrf.TenantID()}, false); err != nil {
+		t.Error(err)
+	}
+	if err := dm.CacheDataFromDB(utils.RouteFilterIndexes, []string{"*route_profiles:*string:~*opts.Account:1001"}, false); err != nil {
+		t.Error(err)
+	}
+	attrPrf := &AttributeProfile{
+		Tenant:             "cgrates.org",
+		ID:                 "1001",
+		Contexts:           []string{utils.MetaAny},
+		FilterIDs:          []string{"*string:~*req.Account:1002"},
+		ActivationInterval: nil,
+		Attributes: []*Attribute{
+			{
+				Path:  utils.MetaReq + utils.NestingSep + "Subject",
+				Type:  utils.MetaVariable,
+				Value: config.NewRSRParsersMustCompile("call_1001", utils.InfieldSep),
+			},
+		},
+		Blocker: false,
+		Weight:  10,
+	}
+	if err = dm.SetAttributeProfile(attrPrf, false); err != nil {
+		t.Error(err)
+	}
+	if _, hasIt := Cache.Get(utils.CacheAttributeProfiles, attrPrf.TenantID()); hasIt {
+		t.Error("Already in cache")
+	}
+	if err := dm.CacheDataFromDB(utils.AttributeProfilePrefix, []string{attrPrf.TenantID()}, false); err != nil {
+		t.Error(err)
+	}
+	if err := dm.CacheDataFromDB(utils.AttributeFilterIndexes, []string{"*attribute_profiles:*string:~*req.Account:1002"}, false); err != nil {
+		t.Error(err)
+	}
+	chPrf := &ChargerProfile{
+		Tenant:    "cgrates.com",
+		ID:        "CHRG_1",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+		},
+		AttributeIDs: []string{"ATTR_1"},
+		Weight:       20,
+	}
+	if err = dm.SetChargerProfile(chPrf, false); err != nil {
+		t.Error(err)
+	}
+	if _, hasIt := Cache.Get(utils.CacheChargerProfiles, chPrf.TenantID()); hasIt {
+		t.Error("Already in cache")
+	}
+	if err := dm.CacheDataFromDB(utils.ChargerProfilePrefix, []string{chPrf.TenantID()}, false); err != nil {
+		t.Error(err)
+	}
+	if err := dm.CacheDataFromDB(utils.ChargerFilterIndexes, []string{"*charger_profiles:*string:~*req.Account:1001"}, false); err != nil {
+		t.Error(err)
+	}
+	dsPrf := &DispatcherProfile{
+		Tenant:    "cgrates.org",
+		ID:        "Dsp1",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+		},
+		Strategy: utils.MetaRandom,
+		Weight:   20,
+	}
+	if err = dm.SetDispatcherProfile(dsPrf, false); err != nil {
+		t.Error(err)
+	}
+	if _, hasIt := Cache.Get(utils.CacheDispatcherProfiles, dsPrf.TenantID()); hasIt {
+		t.Error("Already in cache")
+	}
+	if err := dm.CacheDataFromDB(utils.DispatcherProfilePrefix, []string{dsPrf.TenantID()}, false); err != nil {
+		t.Error(err)
+	}
+	if err := dm.CacheDataFromDB(utils.DispatcherFilterIndexes, []string{"*dispatcher_profiles:*string:~*req.Account:1001"}, false); err != nil {
+		t.Error(err)
+	}
+	dH := &DispatcherHost{
+		Tenant: "cgrates.org",
+		RemoteHost: &config.RemoteHost{
+			ID:        "Host1",
+			Address:   "127.0.0.1:2012",
+			Transport: utils.MetaJSON,
+		},
+	}
+	if err = dm.SetDispatcherHost(dH); err != nil {
+		t.Error(err)
+	}
+	if _, hasIt := Cache.Get(utils.CacheDispatcherHosts, dH.TenantID()); hasIt {
+		t.Error("Already in cache")
+	}
+	if err := dm.CacheDataFromDB(utils.DispatcherHostPrefix, []string{dH.TenantID()}, false); err != nil {
+		t.Error(err)
+	}
+	if err := dm.CacheDataFromDB(utils.FilterIndexPrfx, []string{"*string:~*req.Account:1001:Dsp1"}, false); err != nil {
+		t.Error(err)
+	}
 }
 
 func TestDMGetRouteProfile(t *testing.T) {

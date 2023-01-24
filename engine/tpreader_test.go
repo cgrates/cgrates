@@ -1970,3 +1970,94 @@ func TestLoadRatingPlansFiltered(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestTPRLoadRatingProfiles(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	defer func() {
+		config.SetCgrConfig(config.NewDefaultCGRConfig())
+	}()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	tpr, err := NewTpReader(db, db, "RP1", "", nil, nil, false)
+
+	if err != nil {
+		t.Error(err)
+	}
+	rpS := []*utils.TPRatingProfile{
+		{
+			TPid: "RP1",
+			RatingPlanActivations: []*utils.TPRatingActivation{
+				{
+					ActivationTime:   "2014-07-29T15:00:00Z",
+					RatingPlanId:     "PlanOne",
+					FallbackSubjects: "FallBack",
+				},
+			},
+		},
+	}
+	if err := db.SetTPRatingProfiles(rpS); err != nil {
+		t.Error(err)
+	}
+	if err = tpr.LoadRatingProfiles(); err == nil || err.Error() != fmt.Sprintf("could not load rating plans for tag: %q", rpS[0].RatingPlanActivations[0].RatingPlanId) {
+		t.Error(err)
+	}
+	rpS2 := []*utils.TPRatingProfile{
+		{
+			TPid: "RP2",
+			RatingPlanActivations: []*utils.TPRatingActivation{
+				{
+					ActivationTime:   "2014-07-29T15:00:00Z",
+					RatingPlanId:     "PlanOne",
+					FallbackSubjects: "FallBack",
+				},
+			},
+		},
+		{
+			TPid: "RP2",
+			RatingPlanActivations: []*utils.TPRatingActivation{
+				{
+					ActivationTime:   "2012-01-01T00:00:00Z",
+					RatingPlanId:     "RPl_SAMPLE_RATING_PLAN",
+					FallbackSubjects: utils.EmptyString,
+				},
+				{
+					ActivationTime:   "test",
+					RatingPlanId:     "RPl_SAMPLE_RATING_PLAN2",
+					FallbackSubjects: utils.EmptyString,
+				},
+			},
+		}}
+	if err := db.SetTPRatingProfiles(rpS2); err != nil {
+		t.Error(err)
+	}
+	if err = tpr.LoadRatingProfiles(); err == nil {
+		t.Error(err)
+	}
+}
+
+func TestTPRLoadAccountActions(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	defer func() {
+		config.SetCgrConfig(config.NewDefaultCGRConfig())
+	}()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	tpr, err := NewTpReader(db, db, "", "", nil, nil, false)
+
+	if err != nil {
+		t.Error(err)
+	}
+	accAcs := []*utils.TPAccountActions{
+		{
+			TPid:             "testTPid",
+			ActionPlanId:     "PACKAGE_10_SHARED_A_5",
+			ActionTriggersId: "STANDARD_TRIGGERS",
+			AllowNegative:    true,
+			Disabled:         true,
+		},
+	}
+	if err := db.SetTPAccountActions(accAcs); err != nil {
+		t.Error(err)
+	}
+	if err = tpr.LoadAccountActions(); err == nil || err.Error() != fmt.Sprintf("could not get action triggers for tag %q", accAcs[0].ActionTriggersId) {
+		t.Error(err)
+	}
+}
