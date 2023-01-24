@@ -1204,3 +1204,155 @@ func TestRouteMerge(t *testing.T) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(route))
 	}
 }
+
+func TestRouteProfileCompileCacheParametersErrParse(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+
+	Cache.Clear(nil)
+
+	rp := &RouteProfile{
+		Tenant:            "cgrates.org",
+		ID:                "ID",
+		FilterIDs:         []string{"fltr1", "*string:~*req.Account:1001"},
+		Weights:           utils.DynamicWeights{{}},
+		Sorting:           utils.MetaLoad,
+		SortingParameters: []string{"sort:param"},
+		Routes: []*Route{{
+			ID:             "RT1",
+			FilterIDs:      []string{"fltr1"},
+			AccountIDs:     []string{"acc1"},
+			RateProfileIDs: []string{"rp1"},
+			ResourceIDs:    []string{"res1"},
+			StatIDs:        []string{"stat1"},
+			Weights:        utils.DynamicWeights{{}},
+			Blockers: utils.DynamicBlockers{
+				{
+					Blocker: true,
+				},
+			},
+			RouteParameters: "params",
+		}},
+	}
+
+	expErr := `strconv.Atoi: parsing "param": invalid syntax`
+	if err := rp.compileCacheParameters(); err.Error() != expErr || err == nil {
+		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err)
+	}
+}
+
+func TestRouteProfileCompileCacheParametersConfigRatio(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+
+	Cache.Clear(nil)
+
+	rp := &RouteProfile{
+		Tenant:            "cgrates.org",
+		ID:                "ID",
+		FilterIDs:         []string{"fltr1", "*string:~*req.Account:1001"},
+		Weights:           utils.DynamicWeights{{}},
+		Sorting:           utils.MetaLoad,
+		SortingParameters: []string{"param:1"},
+		Routes: []*Route{{
+			ID:             "RT1",
+			FilterIDs:      []string{"fltr1"},
+			AccountIDs:     []string{"acc1"},
+			RateProfileIDs: []string{"rp1"},
+			ResourceIDs:    []string{"res1"},
+			StatIDs:        []string{"stat1"},
+			Weights:        utils.DynamicWeights{{}},
+			Blockers: utils.DynamicBlockers{
+				{
+					Blocker: true,
+				},
+			},
+			RouteParameters: "params",
+		}},
+	}
+
+	expErr := `strconv.Atoi: parsing "param": invalid syntax`
+	if err := rp.compileCacheParameters(); err != nil {
+		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err)
+	}
+}
+
+func TestRouteProfileCompileCacheParametersDefaultRatio(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+
+	Cache.Clear(nil)
+
+	rp := &RouteProfile{
+		Tenant:            "cgrates.org",
+		ID:                "ID",
+		FilterIDs:         []string{"fltr1", "*string:~*req.Account:1001"},
+		Weights:           utils.DynamicWeights{{}},
+		Sorting:           utils.MetaLoad,
+		SortingParameters: []string{"*default:1"},
+		Routes: []*Route{{
+			ID:             "RT1",
+			FilterIDs:      []string{"fltr1"},
+			AccountIDs:     []string{"acc1"},
+			RateProfileIDs: []string{"rp1"},
+			ResourceIDs:    []string{"res1"},
+			StatIDs:        []string{"stat1"},
+			Weights:        utils.DynamicWeights{{}},
+			Blockers: utils.DynamicBlockers{
+				{
+					Blocker: true,
+				},
+			},
+			RouteParameters: "params",
+		}},
+	}
+
+	expErr := `strconv.Atoi: parsing "param": invalid syntax`
+	if err := rp.compileCacheParameters(); err != nil {
+		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err)
+	}
+}
+
+func TestRouteProfileCompileCacheParametersRouteRatio(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+
+	Cache.Clear(nil)
+
+	rp := &RouteProfile{
+		Tenant:            "cgrates.org",
+		ID:                "ID",
+		FilterIDs:         []string{"fltr1", "*string:~*req.Account:1001"},
+		Weights:           utils.DynamicWeights{{}},
+		Sorting:           utils.MetaLoad,
+		SortingParameters: []string{"RT1:1"},
+		Routes: []*Route{{
+			ID:             "RT1",
+			FilterIDs:      []string{"fltr1"},
+			AccountIDs:     []string{"acc1"},
+			RateProfileIDs: []string{"rp1"},
+			ResourceIDs:    []string{"res1"},
+			StatIDs:        []string{"stat1"},
+			Weights:        utils.DynamicWeights{{}},
+			Blockers: utils.DynamicBlockers{
+				{
+					Blocker: true,
+				},
+			},
+			RouteParameters: "params",
+		}},
+	}
+
+	expErr := `strconv.Atoi: parsing "param": invalid syntax`
+	if err := rp.compileCacheParameters(); err != nil {
+		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err)
+	}
+}
