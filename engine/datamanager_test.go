@@ -19,6 +19,7 @@ package engine
 
 import (
 	"errors"
+	"fmt"
 	"reflect"
 	"testing"
 	"time"
@@ -1362,6 +1363,62 @@ func TestDMThresholdProfile(t *testing.T) {
 	}
 }
 
+func TestDMRemoveThresholdProfileErr(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	tmpDm := dm
+	tmp := Cache
+	defer func() {
+		config.SetCgrConfig(config.NewDefaultCGRConfig())
+		Cache = tmp
+		SetDataStorage(tmpDm)
+	}()
+	Cache.Clear(nil)
+	cfg.DataDbCfg().Items = map[string]*config.ItemOpt{
+		utils.MetaThresholdProfiles: {
+			Remote: true,
+		},
+	}
+	cfg.DataDbCfg().RmtConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn <- &ccMock{
+		calls: map[string]func(args interface{}, reply interface{}) error{
+			utils.ReplicatorSv1GetThresholdProfile: func(args, reply interface{}) error {
+				return fmt.Errorf("Can't Replicate")
+			},
+		},
+	}
+	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator): clientConn,
+	})
+	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
+	Cache.Set(utils.MetaThresholdProfiles, "cgrates.org:TEST_PROFILE1", nil, []string{}, true, utils.NonTransactional)
+	if err := dm.RemoveThresholdProfile("cgrates.org", "TEST_PROFILE1", true); err == nil || err != utils.ErrNotFound {
+		t.Error(err)
+	}
+	Cache.Remove(utils.MetaThresholdProfiles, "cgrates.org:TEST_PROFILE1", true, utils.NonTransactional)
+	var dm2 *DataManager
+	if err = dm2.RemoveThresholdProfile("cgrates.org", "TEST_PROFILE1", true); err == nil || err != utils.ErrNoDatabaseConn {
+		t.Error(err)
+	}
+	dm2 = NewDataManager(db, cfg.CacheCfg(), nil)
+	dm2.dataDB = &DataDBMock{
+		GetThresholdProfileDrvF: func(tenant, id string) (tp *ThresholdProfile, err error) {
+			return
+		},
+		RemThresholdProfileDrvF: func(tenant, id string) (err error) {
+			return utils.ErrNotImplemented
+		},
+	}
+	if err = dm2.RemoveThresholdProfile("cgrates.org", "TEST_PROFILE1", true); err == nil || err != utils.ErrNotImplemented {
+		t.Error(err)
+	}
+	config.SetCgrConfig(cfg)
+	if err = dm.RemoveThresholdProfile("cgrates.org", "TEST_PROFILE1", true); err == nil || err.Error() != "Can't Replicate" {
+		t.Error(err)
+	}
+
+}
 func TestDmDispatcherHost(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	tmpDm := dm
@@ -4043,6 +4100,55 @@ func TestCacheDataFromDB(t *testing.T) {
 		t.Error(err)
 	}
 }
+func TestCacheDataFromDBErr(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	tmpDm := dm
+	tmp := Cache
+	tmpConn := connMgr
+	defer func() {
+		config.SetCgrConfig(config.NewDefaultCGRConfig())
+		Cache = tmp
+		SetDataStorage(tmpDm)
+		SetConnManager(tmpConn)
+	}()
+	Cache.Clear(nil)
+	cfg.DataDbCfg().Items = map[string]*config.ItemOpt{
+		utils.MetaThresholdProfiles: {
+			Remote: true,
+		},
+	}
+	cfg.DataDbCfg().RmtConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
+	cfg.CacheCfg().Partitions[utils.CacheThresholdProfiles].Replicate = true
+	cfg.CacheCfg().ReplicationConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn <- &ccMock{
+		calls: map[string]func(args interface{}, reply interface{}) error{
+			utils.ReplicatorSv1GetThresholdProfile: func(args, reply interface{}) error {
+				return errors.New("Another Error")
+			},
+			utils.CacheSv1ReplicateSet: func(args, reply interface{}) error {
+				return fmt.Errorf("New Error")
+			},
+		},
+	}
+	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator): clientConn,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches):     clientConn,
+	})
+	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
+	Cache = NewCacheS(cfg, dm, nil)
+	SetConnManager(connMgr)
+	thdPrf := &ThresholdProfile{
+		Tenant:    "cgrates.org",
+		ID:        "TH1",
+		FilterIDs: []string{"*string:~*req.Account:1001", "*notstring:~*req.Destination:+49123"},
+	}
+
+	if err := dm.CacheDataFromDB(utils.ThresholdProfilePrefix, []string{utils.ConcatenatedKey(thdPrf.Tenant, thdPrf.ID)}, false); err == nil {
+		t.Error(err)
+	}
+}
 
 func TestDMGetRouteProfile(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
@@ -4523,6 +4629,99 @@ func TestDmIndexes(t *testing.T) {
 		t.Error(err)
 	}
 	if err := dm.RemoveIndexes(utils.CacheResourceFilterIndexes, "cgrates.org", utils.EmptyString); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestDmCheckFilters(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	defer func() {
+		config.SetCgrConfig(config.NewDefaultCGRConfig())
+	}()
+	cfg.DataDbCfg().Items = map[string]*config.ItemOpt{
+		utils.MetaFilters: {
+			Remote: true,
+		},
+	}
+	cfg.DataDbCfg().RmtConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
+	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn <- &ccMock{
+		calls: map[string]func(args interface{}, reply interface{}) error{
+			utils.ReplicatorSv1GetFilter: func(args, reply interface{}) error {
+				fltr := &Filter{
+					ID:     "FLTR_1",
+					Tenant: "cgrates.org",
+					Rules: []*FilterRule{
+						{
+							Type:    utils.MetaString,
+							Element: "~*req.Account",
+							Values:  []string{"1001", "1002"},
+						},
+					},
+				}
+				*reply.(*Filter) = *fltr
+				return nil
+			},
+		},
+	}
+	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator): clientConn,
+	})
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
+	config.SetCgrConfig(cfg)
+	if err := dm.checkFilters("cgrates.org", []string{"FLTR_1"}); err == nil || err.Error() != "broken reference to filter: <FLTR_1>" {
+		t.Error(err)
+	}
+}
+
+func TestRemoveFilterIndexes(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	defer func() {
+		config.SetCgrConfig(config.NewDefaultCGRConfig())
+	}()
+	cfg.DataDbCfg().Items = map[string]*config.ItemOpt{
+		utils.CacheThresholdFilterIndexes: {
+			Remote: true,
+		},
+	}
+	cfg.DataDbCfg().RmtConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
+	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn <- &ccMock{
+		calls: map[string]func(args interface{}, reply interface{}) error{
+			utils.ReplicatorSv1GetIndexes: func(args, reply interface{}) error {
+				return utils.ErrNotImplemented
+			},
+		},
+	}
+	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator): clientConn,
+	})
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
+	fp3 := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "Filter3",
+		Rules: []*FilterRule{
+			{
+				Element: "~*req.Destination",
+				Type:    utils.MetaString,
+				Values:  []string{"30", "50"},
+			},
+		}}
+	if err := dm.SetFilter(fp3, true); err != nil {
+		t.Error(err)
+	}
+
+	if err := removeFilterIndexesForFilter(dm, utils.CacheThresholdFilterIndexes, "cgrates.org", []string{"Filter3"}, utils.StringSet{
+		"Filter3:THD1": {},
+	}); err != nil {
+		t.Error(err)
+	}
+	config.SetCgrConfig(cfg)
+	if err := removeFilterIndexesForFilter(dm, utils.CacheThresholdFilterIndexes, "cgrates.org", []string{"Filter3"}, utils.StringSet{
+		"Filter3:THD1": {},
+	}); err == nil || err != utils.ErrUnsupporteServiceMethod {
 		t.Error(err)
 	}
 }
