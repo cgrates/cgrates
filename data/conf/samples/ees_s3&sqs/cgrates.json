@@ -24,8 +24,8 @@
             "export_path": "sqs.eu-central-1.amazonaws.com",
             "opts": {
                 "awsRegion": "eu-central-1",
-                "awsKey": "AKIAYPZSIYZCW22KRSVY",
-                "awsSecret": "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",
+                "awsKey": "access key ID",
+                "awsSecret": "secret access key",
                 "sqsQueueID": "testQueue"
             },
             "attempts": 1,
@@ -41,8 +41,8 @@
             "export_path": "s3.eu-central-1.amazonaws.com",
             "opts": {
                 "awsRegion": "eu-central-1",
-                "awsKey": "AKIAYPZSIYZCW22KRSVY",
-                "awsSecret": "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",
+                "awsKey": "access key ID",
+                "awsSecret": "secret access key",
                 "s3BucketID": "cgrates-cdrs"
             },
             "attempts": 1,
