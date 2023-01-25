@@ -22,6 +22,7 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
@@ -115,50 +116,49 @@ func TestCloseExportLogger(t *testing.T) {
 
 }
 
-// unfinished panic when covering
-// func TestExportLoggerCall(t *testing.T) {
-// 	tmp := Cache
-// 	defer func() {
-// 		Cache = tmp
-// 	}()
+func TestExportLoggerCallErrWriter(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
 
-// 	Cache.Clear(nil)
+	Cache.Clear(nil)
 
-// 	connID := "connID"
-// 	cfg := config.NewDefaultCGRConfig()
-// 	cfg.RPCConns()[connID] = config.NewDfltRPCConn()
-// 	cfg.RPCConns()[connID].Conns = []*config.RemoteHost{
-// 		{
-// 			ID:      connID,
-// 			Address: utils.MetaInternal,
-// 		},
-// 	}
-// 	eesConn := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs)
+	connID := "connID"
+	cfg := config.NewDefaultCGRConfig()
+	cfg.RPCConns()[connID] = config.NewDfltRPCConn()
+	cfg.RPCConns()[connID].Conns = []*config.RemoteHost{
+		{
+			ID:      connID,
+			Address: utils.MetaInternal,
+		},
+	}
+	efsConn := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEFs)
 
-// 	cfg.CoreSCfg().EEsConns = []string{eesConn}
+	cfg.LoggerCfg().EFsConns = []string{efsConn}
 
-// 	rpcInternal := make(chan birpc.ClientConnector, 1)
-// 	rpcInternal <- &ccMock{
-// 		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-// 			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
-// 				return nil
-// 			},
-// 		},
-// 	}
-// 	cM := NewConnManager(cfg)
-// 	cM.connCache.Set(connID, nil, nil)
-// 	cM.AddInternalConn(eesConn, utils.EeSv1, rpcInternal)
-// 	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-// 	dm := NewDataManager(db, cfg.CacheCfg(), cM)
-// 	Cache = NewCacheS(cfg, dm, cM, nil)
+	rpcInternal := make(chan birpc.ClientConnector, 1)
+	rpcInternal <- &ccMock{
+		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+			utils.EfSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
+				return nil
+			},
+		},
+	}
+	cM := NewConnManager(cfg)
+	cM.connCache.Set(connID, nil, nil)
+	cM.AddInternalConn(efsConn, utils.EfSv1, rpcInternal)
+	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), cM)
+	Cache = NewCacheS(cfg, dm, cM, nil)
 
-// 	el := NewExportLogger(context.Background(), "123", "cgrates.org", 7, cM, cfg)
+	el := NewExportLogger(context.Background(), "123", "cgrates.org", 7, cM, cfg)
 
-// 	if err := el.call("test msg", 7); err != utils.ErrLoggerChanged || err == nil {
-// 		t.Error(err)
-// 	}
+	if err := el.call("test msg", 7); err != utils.ErrLoggerChanged || err == nil {
+		t.Error(err)
+	}
 
-// }
+}
 
 func TestLoggerExportEmergNil(t *testing.T) {
 	tmp := Cache
@@ -178,163 +178,205 @@ func TestLoggerExportEmergNil(t *testing.T) {
 
 }
 
+// func TestLoggerExportDebugOk(t *testing.T) {
+// 	tmpC := Cache
+// 	tmpLog := utils.Logger
+// 	defer func() {
+// 		Cache = tmpC
+// 		utils.Logger = tmpLog
+// 	}()
+// 	Cache.Clear(nil)
+
+// 	connID := "connID"
+// 	cfg := config.NewDefaultCGRConfig()
+// 	cfg.RPCConns()[connID] = config.NewDfltRPCConn()
+// 	cfg.RPCConns()[connID].Conns = []*config.RemoteHost{
+// 		{
+// 			ID:      connID,
+// 			Address: utils.MetaInternal,
+// 		},
+// 	}
+// 	efsConn := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEFs)
+
+// 	cfg.LoggerCfg().EFsConns = []string{efsConn}
+
+// 	rpcInternal := make(chan birpc.ClientConnector, 1)
+// 	rpcInternal <- &ccMock{
+// 		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+// 			utils.EfSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
+// 				return nil
+// 			},
+// 		},
+// 	}
+// 	cM := NewConnManager(cfg)
+// 	cM.connCache.Set(connID, nil, nil)
+// 	cM.AddInternalConn(efsConn, utils.EfSv1, rpcInternal)
+// 	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+// 	dm := NewDataManager(db, cfg.CacheCfg(), cM)
+// 	Cache = NewCacheS(cfg, dm, cM, nil)
+
+// 	el := NewExportLogger(context.Background(), "123", "cgrates.org", 7, cM, cfg)
+
+// 	logMsg := "log message"
+// 	var buf bytes.Buffer
+// 	fmt.Printf("\n %+v ", utils.NewStdLoggerWithWriter(&buf, el.NodeID, el.LogLevel))
+// 	// sl := utils.NewStdLoggerWithWriter(&buf, "123", -1)
+// 	if err := el.Debug(logMsg); err != nil {
+// 		t.Error(err)
+// 	} else if buf.String() != "" {
+// 		t.Error("did not expect the message to be logged")
+// 	}
+
+// 	el.SetLogLevel(utils.LOGLEVEL_DEBUG)
+// 	expMsg := fmt.Sprintf("CGRateS <%s> [DEBUG] %s\n", el.NodeID, logMsg)
+// 	if err := el.Debug(logMsg); err != nil {
+// 		t.Error(err)
+// 	} else if buf.String() != expMsg {
+// 		t.Errorf("expected: <%s>, \nreceived: <%s>", expMsg, buf.String())
+// 	}
+
+// }
+
 /*
-func TestLoggerExportEmergOk(t *testing.T) {
-	tmp := Cache
-	defer func() {
-		Cache = tmp
-	}()
+	func TestLoggerExportAlert(t *testing.T) {
+		testCache := Cache
+		tmpC := config.CgrConfig()
+		tmpCM := connMgr
+		defer func() {
+			Cache = testCache
+			config.SetCgrConfig(tmpC)
+			connMgr = tmpCM
+		}()
 
-	Cache.Clear(nil)
-	cfg := config.NewDefaultCGRConfig()
-	cM := NewConnManager(cfg)
+		cfg := config.NewDefaultCGRConfig()
+		cfg.CdrsCfg().EEsConns = []string{utils.ConcatenatedKey(utils.MetaInternal,
+			utils.MetaEEs)}
 
-	el := NewExportLogger(context.Background(), "123", "cgrates.org", 0, cM, cfg)
-
-	if err := el.Emerg("Emergency message"); err != nil {
-		t.Error(err)
-	}
-}
-
-func TestLoggerExportAlert(t *testing.T) {
-	testCache := Cache
-	tmpC := config.CgrConfig()
-	tmpCM := connMgr
-	defer func() {
-		Cache = testCache
-		config.SetCgrConfig(tmpC)
-		connMgr = tmpCM
-	}()
-
-	cfg := config.NewDefaultCGRConfig()
-	cfg.CdrsCfg().EEsConns = []string{utils.ConcatenatedKey(utils.MetaInternal,
-		utils.MetaEEs)}
-
-	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	cM := NewConnManager(cfg)
-	dm := NewDataManager(data, cfg.CacheCfg(), nil)
-	fltrs := NewFilterS(cfg, nil, dm)
-	Cache = NewCacheS(cfg, dm, nil, nil)
-	newCDRSrv := NewCDRServer(cfg, dm, fltrs, cM)
-	ccM := &ccMock{
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
-				*reply.(*map[string]map[string]interface{}) = map[string]map[string]interface{}{}
-				return utils.ErrNotFound
+		data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+		cM := NewConnManager(cfg)
+		dm := NewDataManager(data, cfg.CacheCfg(), nil)
+		fltrs := NewFilterS(cfg, nil, dm)
+		Cache = NewCacheS(cfg, dm, nil, nil)
+		newCDRSrv := NewCDRServer(cfg, dm, fltrs, cM)
+		ccM := &ccMock{
+			calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+				utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
+					*reply.(*map[string]map[string]interface{}) = map[string]map[string]interface{}{}
+					return utils.ErrNotFound
+				},
 			},
-		},
+		}
+		rpcInternal := make(chan birpc.ClientConnector, 1)
+		rpcInternal <- ccM
+		newCDRSrv.connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal,
+			utils.MetaEEs), utils.EeSv1, rpcInternal)
+
+		el := NewExportLogger(context.Background(), "123", "cgrates.org", 0, cM, cfg)
+
+		if err := el.Alert("Alert message"); err != nil {
+			t.Error(err)
+		}
+		el.SetLogLevel(1)
+		if err := el.Alert("Alert message"); err != nil {
+			t.Error(err)
+		}
 	}
-	rpcInternal := make(chan birpc.ClientConnector, 1)
-	rpcInternal <- ccM
-	newCDRSrv.connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal,
-		utils.MetaEEs), utils.EeSv1, rpcInternal)
 
-	el := NewExportLogger(context.Background(), "123", "cgrates.org", 0, cM, cfg)
-
-	if err := el.Alert("Alert message"); err != nil {
-		t.Error(err)
-	}
-	el.SetLogLevel(1)
-	if err := el.Alert("Alert message"); err != nil {
-		t.Error(err)
-	}
-}
-
-
-func TestLoggerExportCrit(t *testing.T) {
-	tmp := Cache
-	defer func() {
-		Cache = tmp
-	}()
-	eesConn := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs)
-	cfg := config.NewDefaultCGRConfig()
-	cfg.CoreSCfg().EEsConns = []string{eesConn}
-	Cache = NewCacheS(cfg, nil, nil)
-	cM := NewConnManager(cfg)
-	ccM := &ccMock{
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
-				delete(args.(*utils.CGREventWithEeIDs).Event, "Timestamp")
-				exp := &utils.CGREventWithEeIDs{
-					CGREvent: &utils.CGREvent{
-						Tenant: "cgrates.org",
-						Event: map[string]interface{}{
-							utils.NodeID: "123",
-							"Message":    "Critical message",
-							"Severity":   utils.LOGLEVEL_CRITICAL,
+	func TestLoggerExportCrit(t *testing.T) {
+		tmp := Cache
+		defer func() {
+			Cache = tmp
+		}()
+		eesConn := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs)
+		cfg := config.NewDefaultCGRConfig()
+		cfg.CoreSCfg().EEsConns = []string{eesConn}
+		Cache = NewCacheS(cfg, nil, nil)
+		cM := NewConnManager(cfg)
+		ccM := &ccMock{
+			calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+				utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
+					delete(args.(*utils.CGREventWithEeIDs).Event, "Timestamp")
+					exp := &utils.CGREventWithEeIDs{
+						CGREvent: &utils.CGREvent{
+							Tenant: "cgrates.org",
+							Event: map[string]interface{}{
+								utils.NodeID: "123",
+								"Message":    "Critical message",
+								"Severity":   utils.LOGLEVEL_CRITICAL,
+							},
 						},
-					},
-				}
-				if !reflect.DeepEqual(exp, args) {
-					return fmt.Errorf("\nexpected: <%+v>, \nreceived: <%+v>",
-						utils.ToJSON(exp), utils.ToJSON(args))
-				}
-				return nil
+					}
+					if !reflect.DeepEqual(exp, args) {
+						return fmt.Errorf("\nexpected: <%+v>, \nreceived: <%+v>",
+							utils.ToJSON(exp), utils.ToJSON(args))
+					}
+					return nil
+				},
 			},
-		},
-	}
-	rpcInternal := make(chan birpc.ClientConnector, 1)
-	rpcInternal <- ccM
-	cM.AddInternalConn(eesConn, utils.EeSv1, rpcInternal)
+		}
+		rpcInternal := make(chan birpc.ClientConnector, 1)
+		rpcInternal <- ccM
+		cM.AddInternalConn(eesConn, utils.EeSv1, rpcInternal)
 
-	el := NewExportLogger("123", "cgrates.org", 1, cfg.LoggerCfg().Opts)
+		el := NewExportLogger("123", "cgrates.org", 1, cfg.LoggerCfg().Opts)
 
-	if err := el.Crit("Critical message"); err != nil {
-		t.Error(err)
+		if err := el.Crit("Critical message"); err != nil {
+			t.Error(err)
+		}
+		el.SetLogLevel(2)
+		if err := el.Crit("Critical message"); err != nil {
+			t.Error(err)
+		}
 	}
-	el.SetLogLevel(2)
-	if err := el.Crit("Critical message"); err != nil {
-		t.Error(err)
-	}
-}
+*/
+// func TestLoggerExportErr(t *testing.T) {
+// 	tmp := Cache
+// 	defer func() {
+// 		Cache = tmp
+// 	}()
+// 	efsConn := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEFs)
+// 	cfg := config.NewDefaultCGRConfig()
+// 	cfg.LoggerCfg().EFsConns = []string{efsConn}
+// 	Cache = NewCacheS(cfg, nil, nil, nil)
+// 	cM := NewConnManager(cfg)
+// 	ccM := &ccMock{
+// 		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+// 			utils.EfSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
+// 				delete(args.(*utils.CGREventWithEeIDs).Event, "Timestamp")
+// 				exp := &utils.CGREventWithEeIDs{
+// 					CGREvent: &utils.CGREvent{
+// 						Tenant: "cgrates.org",
+// 						Event: map[string]interface{}{
+// 							utils.NodeID: "123",
+// 							"Message":    "Error message",
+// 							"Severity":   utils.LOGLEVEL_ERROR,
+// 						},
+// 					},
+// 				}
+// 				if !reflect.DeepEqual(exp, args) {
+// 					return fmt.Errorf("\nexpected: <%+v>, \nreceived: <%+v>",
+// 						utils.ToJSON(exp), utils.ToJSON(args))
+// 				}
+// 				return nil
+// 			},
+// 		},
+// 	}
+// 	rpcInternal := make(chan birpc.ClientConnector, 1)
+// 	rpcInternal <- ccM
+// 	cM.AddInternalConn(efsConn, utils.EfSv1, rpcInternal)
 
-func TestLoggerExportErr(t *testing.T) {
-	tmp := Cache
-	defer func() {
-		Cache = tmp
-	}()
-	eesConn := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs)
-	cfg := config.NewDefaultCGRConfig()
-	cfg.CoreSCfg().EEsConns = []string{eesConn}
-	Cache = NewCacheS(cfg, nil, nil)
-	cM := NewConnManager(cfg)
-	ccM := &ccMock{
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
-				delete(args.(*utils.CGREventWithEeIDs).Event, "Timestamp")
-				exp := &utils.CGREventWithEeIDs{
-					CGREvent: &utils.CGREvent{
-						Tenant: "cgrates.org",
-						Event: map[string]interface{}{
-							utils.NodeID: "123",
-							"Message":    "Error message",
-							"Severity":   utils.LOGLEVEL_ERROR,
-						},
-					},
-				}
-				if !reflect.DeepEqual(exp, args) {
-					return fmt.Errorf("\nexpected: <%+v>, \nreceived: <%+v>",
-						utils.ToJSON(exp), utils.ToJSON(args))
-				}
-				return nil
-			},
-		},
-	}
-	rpcInternal := make(chan birpc.ClientConnector, 1)
-	rpcInternal <- ccM
-	cM.AddInternalConn(eesConn, utils.EeSv1, rpcInternal)
+// 	el := NewExportLogger(context.Background(), "123", "cgrates.org", 2, cM, cfg)
 
-	el := NewExportLogger("123", "cgrates.org", 2, cfg.LoggerCfg().Opts)
+// 	if err := el.Err("Error message"); err != nil {
+// 		t.Error(err)
+// 	}
+// 	el.SetLogLevel(3)
+// 	if err := el.Err("Error message"); err != nil {
+// 		t.Error(err)
+// 	}
+// }
 
-	if err := el.Err("Error message"); err != nil {
-		t.Error(err)
-	}
-	el.SetLogLevel(3)
-	if err := el.Err("Error message"); err != nil {
-		t.Error(err)
-	}
-}
-
+/*
 func TestLoggerExportWarning(t *testing.T) {
 	tmp := Cache
 	defer func() {

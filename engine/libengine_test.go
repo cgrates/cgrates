@@ -291,3 +291,102 @@ func TestNewRPCPoolUnsupportedTransport(t *testing.T) {
 	}
 
 }
+
+// unfinished return shouldnt give error
+// func TestRPCClientSetCallOK(t *testing.T) {
+// 	tmp := Cache
+// 	defer func() {
+// 		Cache = tmp
+// 	}()
+// 	Cache.Clear(nil)
+
+// 	// s, err := NewService(new(TestRPCSrvMockS))
+// 	// if err != nil {
+// 	// 	t.Fatal(err)
+// 	// }
+
+// 	cfg := config.NewDefaultCGRConfig()
+// 	cM := NewConnManager(cfg)
+// 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+// 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+// 	fltrs := NewFilterS(cfg, nil, dm)
+// 	newCDRSrv := NewCDRServer(cfg, dm, fltrs, nil)
+// 	newSrvcWName, err := NewServiceWithName(newCDRSrv, utils.CoreSv1Ping, false)
+// 	if err != nil {
+// 		t.Error(err)
+// 	}
+// 	cM.EnableDispatcher(newSrvcWName)
+
+// 	// s := &RPCClientSet{
+// 	// 	utils.CoreSv1: make(chan context.ClientConnector, 1),
+// 	// }
+
+// 	rpc.Register("CDRServer.CDRServerV1")
+
+// 	var rply string
+// 	fmt.Printf("\n%+v\n", cM.dispIntCh)
+// 	if err := cM.dispIntCh.Call(context.Background(), "CDRServer.CDRServerV1", new(utils.CGREvent), &rply); err != nil {
+// 		t.Error(err)
+// 	}
+
+// }
+
+func TestRPCClientSetCallErrCtxTimeOut(t *testing.T) {
+	tmp := Cache
+	cfgtmp := config.CgrConfig()
+
+	defer func() {
+		Cache = tmp
+		config.SetCgrConfig(cfgtmp)
+
+	}()
+	Cache.Clear(nil)
+
+	connChan := make(chan birpc.ClientConnector, 1)
+	s := &RPCClientSet{
+		"test": connChan,
+	}
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().ConnectTimeout = 1 * time.Millisecond
+	config.SetCgrConfig(cfg)
+
+	var args interface{}
+	var reply interface{}
+	expErr := "context deadline exceeded"
+	if err := s.Call(context.Background(), "test.bad", args, reply); err == nil || expErr != err.Error() {
+		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err)
+	}
+
+}
+
+func TestRPCClientSetCallErrBadMethod(t *testing.T) {
+
+	connChan := make(chan birpc.ClientConnector, 1)
+	s := &RPCClientSet{
+		"test": connChan,
+	}
+
+	var args interface{}
+	var reply interface{}
+	expErr := rpcclient.ErrUnsupporteServiceMethod
+	if err := s.Call(context.Background(), "bad method", args, reply); err == nil || expErr != err {
+		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err)
+	}
+
+}
+
+func TestRPCClientSetCallErr2BadMethod(t *testing.T) {
+
+	connChan := make(chan birpc.ClientConnector, 1)
+	s := &RPCClientSet{
+		"test": connChan,
+	}
+
+	var args interface{}
+	var reply interface{}
+	expErr := rpcclient.ErrUnsupporteServiceMethod
+	if err := s.Call(context.Background(), "bad.method", args, reply); err == nil || expErr != err {
+		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err)
+	}
+
+}
