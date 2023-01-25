@@ -2061,3 +2061,142 @@ func TestTPRLoadAccountActions(t *testing.T) {
 		t.Error(err)
 	}
 }
+func TestTpReaderRemoveFromDatabase(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	defer func() {
+		config.SetCgrConfig(config.NewDefaultCGRConfig())
+	}()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	tpr, err := NewTpReader(db, db, "", "", nil, nil, false)
+	if err != nil {
+		t.Error(err)
+	}
+	dest := &Destination{
+		Id:       "DST2",
+		Prefixes: []string{"1001"},
+	}
+	tpr.destinations = map[string]*Destination{
+		"GERMANY": dest,
+	}
+	if tpr.dm.SetDestination(dest, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+	acc := &Account{
+		ID: "cgrates.org:1001",
+	}
+	ap1 := &ActionPlan{
+		Id:         "TestActionPlansRemoveMember1",
+		AccountIDs: utils.StringMap{"one": true},
+		ActionTimings: []*ActionTiming{
+			{
+				Uuid: "uuid1",
+				Timing: &RateInterval{
+					Timing: &RITiming{
+						Years:     utils.Years{2012},
+						Months:    utils.Months{},
+						MonthDays: utils.MonthDays{},
+						WeekDays:  utils.WeekDays{},
+						StartTime: utils.MetaASAP,
+					},
+				},
+				Weight:    10,
+				ActionsID: "MINI",
+			},
+		},
+	}
+	if err := tpr.dm.SetAccount(acc); err != nil {
+		t.Error(err)
+	}
+	if err := tpr.dm.SetActionPlan(ap1.Id, ap1, true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+	if err = tpr.dm.SetAccountActionPlans(acc.ID, []string{ap1.Id}, false); err != nil {
+		t.Error(err)
+	}
+	tpr.acntActionPlans = map[string][]string{
+		acc.ID: {ap1.Id},
+	}
+	if err := tpr.RemoveFromDatabase(false, false); err != nil {
+		t.Error(err)
+	}
+	if err := tpr.RemoveFromDatabase(false, true); err == nil || err != utils.ErrNotFound {
+		t.Error(err)
+	}
+}
+
+func TestTpReaderRemoveFromDatabaseDspPrf(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	defer func() {
+		config.SetCgrConfig(config.NewDefaultCGRConfig())
+	}()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	tpr, err := NewTpReader(db, db, "", "", nil, nil, false)
+	if err != nil {
+		t.Error(err)
+	}
+	dspPrf := &DispatcherProfile{
+		Tenant:    "cgrates.org",
+		ID:        "Dsp1",
+		FilterIDs: []string{"*string:~*req.Accont:1001"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+		},
+		Strategy: utils.MetaRandom,
+		Weight:   20,
+	}
+	if err := tpr.dm.SetDispatcherProfile(dspPrf, true); err != nil {
+		t.Error(err)
+	}
+	tpr.dispatcherProfiles = map[utils.TenantID]*utils.TPDispatcherProfile{
+		{
+			Tenant: "cgrates.org",
+			ID:     "Dsp1",
+		}: {
+			Tenant: "cgrates.org",
+			ID:     "Dsp1",
+		},
+	}
+	if err = tpr.RemoveFromDatabase(false, true); err != nil {
+		t.Error(err)
+	}
+	if err = tpr.RemoveFromDatabase(false, true); err == nil || err != utils.ErrDSPProfileNotFound {
+		t.Error(err)
+	}
+}
+
+func TestTpReaderRemoveFromDatabaseDspHst(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	defer func() {
+		config.SetCgrConfig(config.NewDefaultCGRConfig())
+	}()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	tpr, err := NewTpReader(db, db, "", "", nil, nil, false)
+	if err != nil {
+		t.Error(err)
+	}
+	dspHst := &DispatcherHost{
+		Tenant: "cgrates.org",
+		RemoteHost: &config.RemoteHost{
+			ID:        "Host2",
+			Address:   "127.0.0.1:2013",
+			TLS:       false,
+			Transport: utils.MetaGOB,
+		},
+	}
+	if err = tpr.dm.SetDispatcherHost(dspHst); err != nil {
+		t.Error(err)
+	}
+	tpr.dispatcherHosts = map[utils.TenantID]*utils.TPDispatcherHost{
+		{}: {
+			ID:     "Host2",
+			Tenant: "cgrates.org",
+		},
+	}
+	if err = tpr.RemoveFromDatabase(false, true); err != nil {
+		t.Error(err)
+	}
+	if err = tpr.RemoveFromDatabase(false, true); err == nil || err != utils.ErrDSPHostNotFound {
+		t.Error(err)
+	}
+}
