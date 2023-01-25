@@ -3368,7 +3368,7 @@ func TestDMCacheDataFromDBActionProfilesFilterIndexPrfx(t *testing.T) {
 
 }
 
-func TestDMCacheDataFromDBActionProfilesFilterIndexPrfxErr(t *testing.T) {
+func TestDMCacheDataFromDBAttributeFilterIndexErr(t *testing.T) {
 	tmp := Cache
 	defer func() {
 		Cache = tmp
@@ -3382,6 +3382,168 @@ func TestDMCacheDataFromDBActionProfilesFilterIndexPrfxErr(t *testing.T) {
 
 	errExp := "WRONG_IDX_KEY_FORMAT<tntCtx:*prefix:~*accounts>"
 	if err := dm.CacheDataFromDB(context.Background(), utils.AttributeFilterIndexes, []string{"tntCtx:*prefix:~*accounts"}, false); errExp != err.Error() {
+		t.Errorf("Expected %v\n but received %v", errExp, err)
+	}
+}
+
+func TestDMCacheDataFromDBResourceFilterIndexErr(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	errExp := "WRONG_IDX_KEY_FORMAT<tntCtx:*prefix:~*accounts>"
+	if err := dm.CacheDataFromDB(context.Background(), utils.ResourceFilterIndexes, []string{"tntCtx:*prefix:~*accounts"}, false); errExp != err.Error() {
+		t.Errorf("Expected %v\n but received %v", errExp, err)
+	}
+}
+
+func TestDMCacheDataFromDBStatFilterIndexErr(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	errExp := "WRONG_IDX_KEY_FORMAT<tntCtx:*prefix:~*accounts>"
+	if err := dm.CacheDataFromDB(context.Background(), utils.StatFilterIndexes, []string{"tntCtx:*prefix:~*accounts"}, false); errExp != err.Error() {
+		t.Errorf("Expected %v\n but received %v", errExp, err)
+	}
+}
+
+func TestDMCacheDataFromDBThresholdFilterIndexesErr(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	errExp := "WRONG_IDX_KEY_FORMAT<tntCtx:*prefix:~*accounts>"
+	if err := dm.CacheDataFromDB(context.Background(), utils.ThresholdFilterIndexes, []string{"tntCtx:*prefix:~*accounts"}, false); errExp != err.Error() {
+		t.Errorf("Expected %v\n but received %v", errExp, err)
+	}
+}
+
+func TestDMCacheDataFromDBRouteFilterIndexesErr(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	errExp := "WRONG_IDX_KEY_FORMAT<tntCtx:*prefix:~*accounts>"
+	if err := dm.CacheDataFromDB(context.Background(), utils.RouteFilterIndexes, []string{"tntCtx:*prefix:~*accounts"}, false); errExp != err.Error() {
+		t.Errorf("Expected %v\n but received %v", errExp, err)
+	}
+}
+
+func TestDMCacheDataFromDBChargerFilterIndexesErr(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	errExp := "WRONG_IDX_KEY_FORMAT<tntCtx:*prefix:~*accounts>"
+	if err := dm.CacheDataFromDB(context.Background(), utils.ChargerFilterIndexes, []string{"tntCtx:*prefix:~*accounts"}, false); errExp != err.Error() {
+		t.Errorf("Expected %v\n but received %v", errExp, err)
+	}
+}
+
+func TestDMCacheDataFromDBDispatcherFilterIndexesErr(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	errExp := "WRONG_IDX_KEY_FORMAT<tntCtx:*prefix:~*accounts>"
+	if err := dm.CacheDataFromDB(context.Background(), utils.DispatcherFilterIndexes, []string{"tntCtx:*prefix:~*accounts"}, false); errExp != err.Error() {
+		t.Errorf("Expected %v\n but received %v", errExp, err)
+	}
+}
+
+func TestDMCacheDataFromDBRateProfilesFilterIndexPrfxErr(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	errExp := "WRONG_IDX_KEY_FORMAT<tntCtx:*prefix:~*accounts>"
+	if err := dm.CacheDataFromDB(context.Background(), utils.RateProfilesFilterIndexPrfx, []string{"tntCtx:*prefix:~*accounts"}, false); errExp != err.Error() {
+		t.Errorf("Expected %v\n but received %v", errExp, err)
+	}
+}
+
+func TestDMCacheDataFromDBRateFilterIndexPrfxErr(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	errExp := "WRONG_IDX_KEY_FORMAT<tntCtx:*prefix:~*accounts>"
+	if err := dm.CacheDataFromDB(context.Background(), utils.RateFilterIndexPrfx, []string{"tntCtx:*prefix:~*accounts"}, false); errExp != err.Error() {
+		t.Errorf("Expected %v\n but received %v", errExp, err)
+	}
+}
+
+func TestDMCacheDataFromDBActionProfilesFilterIndexPrfxErr(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	errExp := "WRONG_IDX_KEY_FORMAT<tntCtx:*prefix:~*accounts>"
+	if err := dm.CacheDataFromDB(context.Background(), utils.ActionProfilesFilterIndexPrfx, []string{"tntCtx:*prefix:~*accounts"}, false); errExp != err.Error() {
 		t.Errorf("Expected %v\n but received %v", errExp, err)
 	}
 }
