@@ -18,14 +18,17 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"fmt"
 	"reflect"
 	"sort"
+	"strings"
 	"testing"
 	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/ericlagergren/decimal"
+	"github.com/prometheus/client_golang/prometheus"
 )
 
 func TestASRGetStringValue(t *testing.T) {
@@ -3656,4 +3659,54 @@ func TestStatMetricsStatASRAddEventErr3(t *testing.T) {
 	if err == nil || err.Error() != utils.ErrAccountNotFound.Error() {
 		t.Errorf("Expecting <%+v>,\n Recevied <%+v>", utils.ErrAccountNotFound, err)
 	}
+}
+
+func TestExportToPrometheusOK(t *testing.T) {
+
+	matchSQs := StatQueues{
+		&StatQueue{
+			Tenant: "cgrates.org",
+			ID:     "1",
+			weight: 30.0,
+			sqPrfl: &StatQueueProfile{ID: "FIRST"},
+			SQMetrics: map[string]StatMetric{
+				utils.MetaACD: NewACD(0, "", nil),
+				utils.MetaTCD: NewTCD(0, "", nil),
+			},
+		},
+		&StatQueue{ID: "2", weight: 40.0, sqPrfl: &StatQueueProfile{ID: "SECOND"}},
+	}
+
+	promIDs := utils.StringSet{
+		"1": {},
+	}
+
+	expTxt := utils.MetaACD
+	if rcv, err := prometheus.DefaultGatherer.Gather(); err != nil {
+		t.Error(err)
+	} else if rcvTxt := fmt.Sprint(rcv); strings.Contains(rcvTxt, expTxt) {
+		t.Errorf("Should'nt contain yet since its not registered, \nReceived: %+v\n", rcv)
+	}
+	gaugeVal := prometheus.NewGaugeVec(prometheus.GaugeOpts{
+		Subsystem: "stats",
+		Name:      getStatTenantID(matchSQs[0].TenantID()),
+		Help:      "Metrics exported as gauge, depending on metricID's ID.",
+	}, []string{"metricID"})
+
+	if err = prometheus.Register(gaugeVal); err != nil {
+		if _, ok := err.(prometheus.AlreadyRegisteredError); ok {
+			t.Error("GaugeValue was already registered")
+		}
+	}
+
+	if err := exportToPrometheus(matchSQs, promIDs); err != nil {
+		t.Error(err)
+	}
+
+	if rcv, err := prometheus.DefaultGatherer.Gather(); err != nil {
+		t.Error(err)
+	} else if rcvTxt := fmt.Sprint(rcv); !strings.Contains(rcvTxt, expTxt) {
+		t.Errorf("Expected to contain new SQMetric, Received <%+v>", rcv)
+	}
+
 }
