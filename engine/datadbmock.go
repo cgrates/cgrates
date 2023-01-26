@@ -38,6 +38,9 @@ type DataDBMock struct {
 	GetStatQueueProfileDrvF   func(tenant, id string) (sq *StatQueueProfile, err error)
 	SetStatQueueProfileDrvF   func(sq *StatQueueProfile) (err error)
 	RemStatQueueProfileDrvF   func(tenant, id string) (err error)
+	GetActionPlanDrvF         func(key string) (ap *ActionPlan, err error)
+	SetActionPlanDrvF         func(key string, ap *ActionPlan) (err error)
+	RemoveActionPlanDrvF      func(key string) (err error)
 }
 
 // Storage methods
@@ -163,15 +166,24 @@ func (dbM *DataDBMock) RemoveActionTriggersDrv(string) error {
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) GetActionPlanDrv(string) (*ActionPlan, error) {
+func (dbM *DataDBMock) GetActionPlanDrv(key string) (*ActionPlan, error) {
+	if dbM.GetActionPlanDrvF != nil {
+		return dbM.GetActionPlanDrvF(key)
+	}
 	return nil, utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) SetActionPlanDrv(string, *ActionPlan) error {
+func (dbM *DataDBMock) SetActionPlanDrv(key string, ap *ActionPlan) error {
+	if dbM.GetActionPlanDrvF != nil {
+		return dbM.SetActionPlanDrvF(key, ap)
+	}
 	return utils.ErrNotImplemented
 }
 
 func (dbM *DataDBMock) RemoveActionPlanDrv(key string) error {
+	if dbM.RemoveActionPlanDrvF != nil {
+		return dbM.RemoveActionPlanDrv(key)
+	}
 	return utils.ErrNotImplemented
 }
 
