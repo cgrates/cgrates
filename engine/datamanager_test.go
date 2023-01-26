@@ -3368,6 +3368,42 @@ func TestDMCacheDataFromDBActionProfilesFilterIndexPrfx(t *testing.T) {
 
 }
 
+func TestDMCacheDataFromDBFilterIndexPrfx(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	indexes := map[string]utils.StringSet{"*string:*req.Account:1002": {"ATTR1": {}, "ATTR2": {}}}
+
+	if err := dm.SetIndexes(context.Background(), utils.CacheReverseFilterIndexes, "cgrates.org", indexes, true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+
+	if _, ok := Cache.Get(utils.CacheReverseFilterIndexes, utils.ConcatenatedKey("cgrates.org", "*string:*req.Account:1002")); ok {
+		t.Error("expected ok to be false")
+	}
+
+	if err := dm.CacheDataFromDB(context.Background(), utils.FilterIndexPrfx, []string{utils.MetaAny}, false); err != nil {
+		t.Error(err)
+	}
+
+	exp := utils.StringSet{"ATTR1": {}, "ATTR2": {}}
+
+	if rcv, ok := Cache.Get(utils.CacheReverseFilterIndexes, utils.ConcatenatedKey("cgrates.org", "*string:*req.Account:1002")); !ok {
+		t.Error("expected ok to be true")
+	} else if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", exp, rcv)
+	}
+
+}
+
 func TestDMCacheDataFromDBAttributeFilterIndexErr(t *testing.T) {
 	tmp := Cache
 	defer func() {
@@ -3546,4 +3582,234 @@ func TestDMCacheDataFromDBActionProfilesFilterIndexPrfxErr(t *testing.T) {
 	if err := dm.CacheDataFromDB(context.Background(), utils.ActionProfilesFilterIndexPrfx, []string{"tntCtx:*prefix:~*accounts"}, false); errExp != err.Error() {
 		t.Errorf("Expected %v\n but received %v", errExp, err)
 	}
+}
+
+func TestDMGetAccountNil(t *testing.T) {
+
+	var dm *DataManager
+
+	expErr := utils.ErrNoDatabaseConn
+	if _, err := dm.GetAccount(context.Background(), utils.CGRateSorg, "1002"); err != expErr || err == nil {
+		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err)
+	}
+}
+
+func TestDMGetAccountReplicate(t *testing.T) {
+	tmp := Cache
+	cfgtmp := config.CgrConfig()
+	defer func() {
+		Cache = tmp
+		config.SetCgrConfig(cfgtmp)
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	cfg.DataDbCfg().Items[utils.MetaAccounts].Remote = true
+	cfg.DataDbCfg().RmtConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts)}
+	config.SetCgrConfig(cfg)
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+
+	cc := &ccMock{
+		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+			utils.ReplicatorSv1GetAccount: func(ctx *context.Context, args, reply interface{}) error {
+				return nil
+			},
+		},
+	}
+	rpcInternal := make(chan birpc.ClientConnector, 1)
+	rpcInternal <- cc
+
+	cM := NewConnManager(cfg)
+	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts), utils.ReplicatorSv1, rpcInternal)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	ap := &utils.Account{
+		Tenant: "cgrates.org",
+		ID:     "1002",
+		Weights: []*utils.DynamicWeight{
+			{
+				Weight: 0,
+			},
+		},
+		FilterIDs: []string{"*stirng:~*req.Account:1001"},
+		Balances: map[string]*utils.Balance{
+			"AbstractBalance1": {
+				ID: "AbstractBalance1",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 25,
+					},
+				},
+				Type:  utils.MetaAbstract,
+				Units: utils.NewDecimal(int64(40*time.Second), 0),
+				CostIncrements: []*utils.CostIncrement{
+					{
+						Increment:    utils.NewDecimal(int64(time.Second), 0),
+						FixedFee:     utils.NewDecimal(0, 0),
+						RecurrentFee: utils.NewDecimal(0, 0),
+					},
+				},
+			},
+		},
+		Blockers: utils.DynamicBlockers{
+			{
+				FilterIDs: []string{"fltrID"},
+				Blocker:   true,
+			},
+		},
+		Opts:         make(map[string]interface{}),
+		ThresholdIDs: []string{utils.MetaNone},
+	}
+
+	dm.dataDB = &DataDBMock{
+		GetAccountDrvF: func(ctx *context.Context, str1, str2 string) (*utils.Account, error) {
+			return ap, utils.ErrNotFound
+		},
+		SetAccountDrvF: func(ctx *context.Context, profile *utils.Account) error {
+			return nil
+		},
+	}
+
+	// tests replicate
+	if rcv, err := dm.GetAccount(context.Background(), utils.CGRateSorg, "1002"); err != nil {
+		t.Error(err, rcv)
+	} else if rcv != ap {
+		t.Errorf("Expected <%v>, received <%v>", ap, rcv)
+	}
+}
+
+func TestDMGetRateProfileRatesNil(t *testing.T) {
+
+	var dm *DataManager
+
+	expErr := utils.ErrNoDatabaseConn
+	if _, _, err := dm.GetRateProfileRates(context.Background(), &utils.ArgsSubItemIDs{}, false); err != expErr || err == nil {
+		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err)
+	}
+}
+
+func TestDMGetRateProfileRatesOK(t *testing.T) {
+
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	rps := &utils.RateProfile{
+		ID:        "test_ID1",
+		Tenant:    "cgrates.org",
+		FilterIDs: []string{"*string:~*req.Destination:1234"},
+		Rates: map[string]*utils.Rate{
+			"RT1": {
+				ID: "RT1",
+				IntervalRates: []*utils.IntervalRate{
+					{
+						IntervalStart: utils.NewDecimal(0, 0),
+						RecurrentFee:  utils.NewDecimal(1, 2),
+						Unit:          utils.NewDecimal(int64(time.Second), 0),
+						Increment:     utils.NewDecimal(int64(time.Second), 0),
+					},
+				},
+			},
+		},
+	}
+
+	dm.DataDB().SetRateProfileDrv(context.Background(), rps, true)
+
+	args := &utils.ArgsSubItemIDs{
+		Tenant:      "cgrates.org",
+		ProfileID:   "test_ID1",
+		ItemsPrefix: "RT1",
+	}
+
+	exp := []*utils.Rate{
+		{
+			ID: "RT1",
+			IntervalRates: []*utils.IntervalRate{
+				{
+					IntervalStart: utils.NewDecimal(0, 0),
+					RecurrentFee:  utils.NewDecimal(1, 2),
+					Unit:          utils.NewDecimal(int64(time.Second), 0),
+					Increment:     utils.NewDecimal(int64(time.Second), 0),
+				},
+			},
+		},
+	}
+
+	if _, rcv, err := dm.GetRateProfileRates(context.Background(), args, false); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(utils.ToJSON(exp), utils.ToJSON(rcv)) {
+		t.Errorf("Expected \n<%+v>,\nreceived \n<%+v>", exp, rcv)
+	}
+}
+
+func TestDMSetLoadIDsNil(t *testing.T) {
+
+	var dm *DataManager
+
+	expErr := utils.ErrNoDatabaseConn
+	if err := dm.SetLoadIDs(context.Background(), map[string]int64{}); err != expErr || err == nil {
+		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err)
+	}
+
+}
+
+func TestDMSetLoadIDsDrvErr(t *testing.T) {
+
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	dm.dataDB = &DataDBMock{
+		SetLoadIDsDrvF: func(ctx *context.Context, loadIDs map[string]int64) error { return utils.ErrNotImplemented },
+	}
+
+	itmLIDs := map[string]int64{
+		"ID_1": 21,
+	}
+
+	expErr := utils.ErrNotImplemented
+	if err := dm.SetLoadIDs(context.Background(), itmLIDs); err == nil || err != expErr {
+		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err)
+	}
+
+}
+
+func TestDMSetLoadIDsReplicate(t *testing.T) {
+
+	tmp := Cache
+	cfgtmp := config.CgrConfig()
+	defer func() {
+		Cache = tmp
+		config.SetCgrConfig(cfgtmp)
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	cfg.DataDbCfg().Items[utils.MetaLoadIDs].Replicate = true
+	config.SetCgrConfig(cfg)
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	itmLIDs := map[string]int64{
+		"ID_1": 21,
+	}
+
+	// tests Replicate
+	dm.SetLoadIDs(context.Background(), itmLIDs)
+
 }
