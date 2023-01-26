@@ -4014,3 +4014,212 @@ func TestDebitResetAction(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestSetDestinationsErr(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	tempConn := connMgr
+	tmpDm := dm
+	defer func() {
+		config.SetCgrConfig(config.NewDefaultCGRConfig())
+		SetConnManager(tempConn)
+		dm = tmpDm
+	}()
+	cfg.RalsCfg().StatSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}
+	cfg.DataDbCfg().RplConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
+	cfg.DataDbCfg().Items = map[string]*config.ItemOpt{
+		utils.MetaReverseDestinations: {
+			Replicate: true,
+		},
+		utils.MetaDestinations: {
+			Replicate: false,
+		},
+	}
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn <- &ccMock{
+		calls: map[string]func(args interface{}, reply interface{}) error{
+			utils.StatSv1GetStatQueue: func(args, reply interface{}) error {
+				rpl := StatQueue{
+					Tenant: "cgrates.org",
+					ID:     "StatsID",
+					SQItems: []SQItem{{
+						EventID: "ev1",
+					}},
+					SQMetrics: map[string]StatMetric{
+						utils.MetaDDC: &StatDDC{
+							FilterIDs: []string{"Test_Filter_ID"},
+							FieldValues: map[string]utils.StringSet{
+								"1001": {
+									"EVENT_1": {},
+								},
+								"1002": {
+									"EVENT_3": {},
+								},
+							},
+							Events: map[string]map[string]int64{
+								"Event1": {
+									"FieldValue1": 1,
+								},
+								"Event2": {},
+							},
+							MinItems: 3,
+							Count:    3,
+						},
+					},
+				}
+				*reply.(*StatQueue) = rpl
+				return nil
+			},
+			utils.ReplicatorSv1SetReverseDestination: func(args, reply interface{}) error {
+				return utils.ErrNotImplemented
+			},
+		},
+	}
+	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats):      clientConn,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator): clientConn,
+	})
+	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
+	ub := &Account{
+		ID: "cgrates.org:1001",
+		BalanceMap: map[string]Balances{
+			utils.MetaVoice: {
+				{
+					ID:    "1001",
+					Value: 0,
+					DestinationIDs: utils.StringMap{
+						utils.MetaDDC + "TEST": true,
+					},
+				},
+			},
+			utils.MetaMonetary: {
+				{
+					ID:    utils.MetaDefault,
+					Value: -1.8,
+				},
+			},
+		},
+	}
+	a := &Action{
+		Id:               "TOPUP_RST_GNR_1000",
+		ActionType:       utils.MetaTopUpReset,
+		ExtraParameters:  `{"*voice": 60.0,"*data":1024.0,"*sms":1.0}`,
+		Weight:           10,
+		ExpirationString: utils.MetaUnlimited,
+	}
+	acs := Actions{
+		a,
+	}
+	dest := &Destination{Id: utils.MetaDDC + "TEST", Prefixes: []string{"+491", "+492", "+493"}}
+	if err := dm.SetDestination(dest, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+	config.SetCgrConfig(cfg)
+	SetConnManager(connMgr)
+	SetDataStorage(dm)
+	if err := setddestinations(ub, a, acs, nil, nil); err == nil || err != utils.ErrNotFound {
+		t.Error(err)
+	}
+	ub = &Account{
+		ID: "cgrates.org:1001",
+		BalanceMap: map[string]Balances{
+			utils.MetaMonetary: {
+				&Balance{Value: 20},
+			},
+		},
+	}
+	if err := setddestinations(ub, a, acs, nil, nil); err == nil || err != utils.ErrNotFound {
+		t.Error(err)
+	}
+}
+
+func TestRemoveAccountActionLogg(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	tempConn := connMgr
+	tmpDm := dm
+	tmpCache := Cache
+	defer func() {
+		config.SetCgrConfig(config.NewDefaultCGRConfig())
+		SetConnManager(tempConn)
+		dm = tmpDm
+		Cache = tmpCache
+	}()
+	Cache.Clear(nil)
+	cfg.DataDbCfg().Items = map[string]*config.ItemOpt{
+		utils.CacheAccountActionPlans: {
+			Remote: true,
+		},
+		utils.MetaAccounts: {
+			Replicate: false,
+		},
+		utils.MetaActionPlans: {
+			Remote:    true,
+			Replicate: true,
+		},
+	}
+	cfg.DataDbCfg().RmtConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
+	cfg.DataDbCfg().RplConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn <- &ccMock{
+		calls: map[string]func(args interface{}, reply interface{}) error{
+			utils.ReplicatorSv1GetAccountActionPlans: func(args, reply interface{}) error {
+				rpl := []string{"PACKAGE_10_SHARED_A_5"}
+				*reply.(*[]string) = rpl
+				return nil
+			},
+			utils.ReplicatorSv1GetActionPlan: func(args, reply interface{}) error {
+				rpl := ActionPlan{
+					Id: "PACKAGE_10_SHARED_A_5",
+					AccountIDs: utils.StringMap{
+						"cgrates.org:1001": true,
+					},
+				}
+				*reply.(**ActionPlan) = &rpl
+				return nil
+			},
+			utils.ReplicatorSv1SetActionPlan: func(args, reply interface{}) error {
+				return utils.ErrNotFound
+			},
+		}}
+	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator): clientConn,
+	})
+	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
+	ub := &Account{
+		ID: "cgrates.org:1001",
+		BalanceMap: map[string]Balances{
+			utils.MetaVoice: {
+				{
+					ID:    "1001",
+					Value: 0,
+					DestinationIDs: utils.StringMap{
+						utils.MetaDDC + "TEST": true,
+					},
+				},
+			},
+			utils.MetaMonetary: {
+				{
+					ID:    utils.MetaDefault,
+					Value: -1.8,
+				},
+			},
+		},
+	}
+	a := &Action{
+		Id:               "TOPUP_RST_GNR_1000",
+		ActionType:       utils.MetaTopUpReset,
+		ExtraParameters:  `{"*voice": 60.0,"*data":1024.0,"*sms":1.0}`,
+		Weight:           10,
+		ExpirationString: utils.MetaUnlimited,
+	}
+	acs := Actions{
+		a,
+	}
+	SetDataStorage(dm)
+	config.SetCgrConfig(cfg)
+	if err := removeAccountAction(ub, a, acs, nil, nil); err != nil {
+		t.Error(err)
+	}
+
+}

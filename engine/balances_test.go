@@ -1009,3 +1009,81 @@ func TestBalanceDebitUnits3(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestBalanceDebitUnits5(t *testing.T) {
+	utils.Logger.SetLogLevel(3)
+	utils.Logger.SetSyslog(nil)
+	buf := new(bytes.Buffer)
+	log.SetOutput(buf)
+	defer func() {
+		utils.Logger.SetLogLevel(0)
+		log.SetOutput(os.Stderr)
+	}()
+	cd := &CallDescriptor{
+		Category:     "postpaid",
+		ToR:          utils.MetaVoice,
+		Tenant:       "foehn",
+		TimeStart:    time.Date(2015, 4, 24, 7, 59, 4, 0, time.UTC),
+		TimeEnd:      time.Date(2015, 4, 24, 8, 2, 0, 0, time.UTC),
+		MaxCostSoFar: 23.8,
+		testCallcost: &CallCost{
+			Category:         "generic",
+			Tenant:           "cgrates.org",
+			Subject:          "1001",
+			Account:          "1001",
+			Destination:      "data",
+			ToR:              "*data",
+			Cost:             0,
+			deductConnectFee: true,
+			Timespans: TimeSpans{
+				{
+					TimeStart:     time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
+					TimeEnd:       time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
+					DurationIndex: 0,
+					Increments: Increments{
+						{Cost: 2, BalanceInfo: &DebitInfo{
+							Monetary: &MonetaryInfo{UUID: "moneya"}},
+						}},
+				},
+			},
+		},
+		FallbackSubject: "",
+	}
+	ub := &Account{
+		ID: "vdf:broker",
+		BalanceMap: map[string]Balances{
+			utils.MetaVoice: {
+				&Balance{Value: 20 * float64(time.Second),
+					DestinationIDs: utils.NewStringMap("NAT"),
+					Weight:         10, RatingSubject: "rif"},
+				&Balance{Value: 100 * float64(time.Second),
+					DestinationIDs: utils.NewStringMap("RET"), Weight: 20},
+			}},
+	}
+	moneyBalances := Balances{{
+		Uuid:           "uuid",
+		ID:             "id",
+		Value:          12.22,
+		ExpirationDate: time.Date(2022, 11, 1, 20, 0, 0, 0, time.UTC),
+		Blocker:        true,
+		Disabled:       true,
+		precision:      2,
+	}}
+	b := &Balance{
+		Value:          12.22,
+		ExpirationDate: time.Date(2022, 11, 1, 20, 0, 0, 0, time.UTC),
+		Blocker:        true,
+		Disabled:       false,
+		precision:      2,
+		RatingSubject:  "*val34",
+		Factor: ValueFactor{
+			"FACT_VAL": 20.22,
+		},
+	}
+	expLog := `Nil RateInterval ERROR on TS`
+	if _, err := b.debitUnits(cd, ub, moneyBalances, true, true, true, nil); err == nil || err.Error() != "timespan with no rate interval assigned" {
+		t.Error(err)
+	} else if rcvLog := buf.String(); !strings.Contains(rcvLog, expLog) {
+		t.Errorf("Logger %v doesn't contain %v", rcvLog, expLog)
+	}
+}

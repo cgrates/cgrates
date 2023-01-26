@@ -4725,3 +4725,53 @@ func TestRemoveFilterIndexes(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestGetDispatcherProfileErr(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	tmpCache := Cache
+	defer func() {
+		config.SetCgrConfig(config.NewDefaultCGRConfig())
+		Cache = tmpCache
+	}()
+	Cache.Clear(nil)
+	cfg.DataDbCfg().Items = map[string]*config.ItemOpt{
+		utils.MetaDispatcherProfiles: {
+			Remote: true,
+		},
+	}
+	cfg.DataDbCfg().RmtConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn <- &ccMock{
+		calls: map[string]func(args interface{}, reply interface{}) error{
+			utils.ReplicatorSv1GetDispatcherProfile: func(args, reply interface{}) error {
+				return utils.ErrDSPProfileNotFound
+			},
+		},
+	}
+	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator): clientConn,
+	})
+	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
+	// dp := &DispatcherProfile{
+	// 	Tenant:     "cgrates.org",
+	// 	ID:         "DSP_1",
+	// 	Subsystems: []string{"*any"},
+	// 	FilterIDs:  []string{"*string:~*req.Account:1001"},
+	// 	ActivationInterval: &utils.ActivationInterval{
+	// 		ActivationTime: time.Date(2014, 7, 29, 15, 00, 0, 0, time.UTC),
+	// 	},
+	// }
+	Cache.Set(utils.MetaDispatcherProfiles, "cgrates:Dsp1", nil, []string{}, true, utils.NonTransactional)
+	if _, err := dm.GetDispatcherProfile("cgrates.org", "Dsp1", true, false, utils.NonTransactional); err == nil || err != utils.ErrDSPProfileNotFound {
+		t.Error(err)
+	}
+	var dm2 *DataManager
+	if _, err := dm2.GetDispatcherProfile("cgrates.org", "Dsp1", false, true, utils.NonTransactional); err == nil || err != utils.ErrNoDatabaseConn {
+		t.Error(err)
+	}
+	config.SetCgrConfig(cfg)
+	if _, err := dm.GetDispatcherProfile("cgrates.org", "Dsp1", false, true, utils.NonTransactional); err == nil || err != utils.ErrDSPProfileNotFound {
+		t.Error(err)
+	}
+}
