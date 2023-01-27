@@ -1239,3 +1239,148 @@ func TestEventCostFilter(t *testing.T) {
 		t.Errorf("Expecting: true , received: %+v", pass)
 	}
 }
+
+func TestComputeThresholdIndexes(t *testing.T) {
+	cfg, err := config.NewDefaultCGRConfig()
+	if err != nil {
+		t.Error(err)
+	}
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	fltr := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "FLTR_2",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaPrefix,
+				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Account,
+				Values:  []string{"1001"},
+			},
+		},
+	}
+	if err := dm.SetFilter(fltr); err != nil {
+		t.Error(err)
+	}
+	thd1 := &ThresholdProfile{
+		Tenant:    "cgrates.org",
+		ID:        "TH_1",
+		FilterIDs: []string{"FLTR_2"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+			ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+		},
+	}
+	if err := dm.SetThresholdProfile(thd1, true); err != nil {
+		t.Error(err)
+	}
+	thd2 := &ThresholdProfile{
+		Tenant:    "cgrates.org",
+		ID:        "TH_2",
+		FilterIDs: []string{"FLTR_2", utils.META_NONE},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+		},
+	}
+	if err := dm.SetThresholdProfile(thd2, true); err != nil {
+		t.Error(err)
+	}
+	thIDs := []string{"TH_1", "TH_2"}
+	if _, err := ComputeThresholdIndexes(dm, "cgrates.org", &thIDs, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+	if _, err := ComputeThresholdIndexes(dm, "cgrates.org", nil, "ID"); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestComputeChargerIndexes(t *testing.T) {
+	cfg, err := config.NewDefaultCGRConfig()
+	if err != nil {
+		t.Error(err)
+	}
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	fltr := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "Filter3",
+		Rules: []*FilterRule{
+			{
+				Element: "Destination",
+				Type:    utils.MetaString,
+				Values:  []string{"10", "20"},
+			},
+		},
+	}
+	if err := dm.SetFilter(fltr); err != nil {
+		t.Error(err)
+	}
+	chP := &ChargerProfile{
+		Tenant:    "cgrates.org",
+		ID:        "CHRG_1",
+		FilterIDs: []string{"Filter3", "*string:~*req.Account:1001", utils.META_NONE},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+		},
+		AttributeIDs: []string{"ATTR_1"},
+		Weight:       20,
+	}
+
+	if err := dm.SetChargerProfile(chP, true); err != nil {
+		t.Error(err)
+	}
+	chIDs := []string{"CHRG_1"}
+	if _, err := ComputeChargerIndexes(dm, "cgrates.org", &chIDs, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+	if _, err := ComputeChargerIndexes(dm, "cgrates.org", nil, "ID"); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestComputeResourceIndexes(t *testing.T) {
+	cfg, err := config.NewDefaultCGRConfig()
+	if err != nil {
+		t.Error(err)
+	}
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	fltr := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "FLTR_TH_Resource",
+		Rules: []*FilterRule{
+			{
+				Type:    "*lt",
+				Element: "~*resources.ResTest.TotalUsage",
+				Values:  []string{"2.0"},
+			},
+		},
+	}
+	if err := dm.SetFilter(fltr); err != nil {
+		t.Error(err)
+	}
+	rs := &ResourceProfile{
+		Tenant:    "cgrates.org",
+		ID:        "RES_GR_TEST",
+		FilterIDs: []string{"FLTR_TH_Resource", utils.META_NONE},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+		},
+		UsageTTL:          time.Duration(-1),
+		Limit:             2,
+		AllocationMessage: "Account1Channels",
+		Weight:            20,
+		ThresholdIDs:      []string{utils.META_NONE},
+	}
+	if err := dm.SetResourceProfile(rs, true); err != nil {
+		t.Error(err)
+	}
+	chIDs := []string{"RES_GR_TEST"}
+	if _, err := ComputeResourceIndexes(dm, "cgrates.org", &chIDs, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+	if _, err := ComputeResourceIndexes(dm, "cgrates.org", nil, "ID"); err != nil {
+		t.Error(err)
+	}
+}
