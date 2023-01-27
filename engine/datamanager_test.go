@@ -4775,3 +4775,107 @@ func TestGetDispatcherProfileErr(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestRemoveIndexFiltersItem(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	tmpCache := Cache
+	defer func() {
+		config.SetCgrConfig(config.NewDefaultCGRConfig())
+		Cache = tmpCache
+	}()
+	Cache.Clear(nil)
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	fltr := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "FLTR_ACCOUNT_1001",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaString,
+				Element: "~*req.Account",
+				Values:  []string{"1001"},
+			},
+		},
+	}
+	if err := dm.SetFilter(fltr, false); err != nil {
+		t.Error(err)
+	}
+	thd := &ThresholdProfile{
+		Tenant:    "cgrates.org",
+		ID:        "THD_ACNT_1001",
+		FilterIDs: []string{"FLTR_ACCOUNT_1001"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 29, 15, 0, 0, 0, time.UTC),
+		},
+		MaxHits:   -1,
+		MinHits:   0,
+		MinSleep:  0,
+		Blocker:   false,
+		Weight:    10.0,
+		ActionIDs: []string{"TOPUP_MONETARY_10"},
+		Async:     false,
+	}
+	if err := dm.SetThresholdProfile(thd, false); err != nil {
+		t.Error(err)
+	}
+	indexes := map[string]utils.StringSet{
+		"*string:*req.Account:1001": {
+			"THD_ACNT_1001": struct{}{},
+		},
+	}
+
+	if err := dm.SetIndexes(utils.CacheReverseFilterIndexes, "cgrates.org:FLTR_ACCOUNT_1001:*threshold_filter_indexes",
+		indexes, true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+
+	if err := removeIndexFiltersItem(dm, utils.CacheThresholdFilterIndexes, "cgrates", "THD_ACNT_1001", []string{"FLTR_ACCOUNT_1001"}); err != nil {
+		t.Error(err)
+	}
+
+}
+
+func TestDmRemoveRouteProfileErr(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	defer func() {
+		config.SetCgrConfig(config.NewDefaultCGRConfig())
+	}()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	oldRp := &RouteProfile{
+		Tenant:  "cgrates.org",
+		ID:      "RouteProfilePrefix4",
+		Sorting: utils.MetaWeight,
+		Routes: []*Route{
+			{
+				ID:              "route1",
+				Weight:          10.0,
+				RouteParameters: "param1",
+			},
+		},
+		Weight: 0,
+	}
+	dm.dataDB = &DataDBMock{
+		GetRouteProfileDrvF: func(tenant, id string) (rp *RouteProfile, err error) {
+			return oldRp, nil
+		},
+		RemoveRouteProfileDrvF: func(tenant, id string) error {
+			return nil
+		},
+	}
+	if err := dm.RemoveRouteProfile("cgrates.org", "RP1", true); err == nil || err != utils.ErrNotImplemented {
+		t.Error(err)
+	}
+	dm.dataDB = &DataDBMock{
+		GetRouteProfileDrvF: func(tenant, id string) (rp *RouteProfile, err error) {
+			return oldRp, nil
+		},
+	}
+	if err := dm.RemoveRouteProfile("cgrates.org", "RP1", true); err == nil || err != utils.ErrNotImplemented {
+		t.Error(err)
+	}
+	dm.dataDB = &DataDBMock{}
+	if err := dm.RemoveRouteProfile("cgrates.org", "RP1", true); err == nil || err != utils.ErrNotImplemented {
+		t.Error(err)
+	}
+}
