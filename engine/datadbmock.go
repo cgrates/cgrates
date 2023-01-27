@@ -41,6 +41,8 @@ type DataDBMock struct {
 	GetActionPlanDrvF         func(key string) (ap *ActionPlan, err error)
 	SetActionPlanDrvF         func(key string, ap *ActionPlan) (err error)
 	RemoveActionPlanDrvF      func(key string) (err error)
+	GetRouteProfileDrvF       func(tenant, id string) (rp *RouteProfile, err error)
+	RemoveRouteProfileDrvF    func(tenant, id string) error
 }
 
 // Storage methods
@@ -379,7 +381,10 @@ func (dbM *DataDBMock) RemoveFilterDrv(string, string) error {
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) GetRouteProfileDrv(string, string) (*RouteProfile, error) {
+func (dbM *DataDBMock) GetRouteProfileDrv(tenant, id string) (*RouteProfile, error) {
+	if dbM.GetRouteProfileDrvF != nil {
+		return dbM.GetRouteProfileDrvF(tenant, id)
+	}
 	return nil, utils.ErrNotImplemented
 }
 
@@ -387,7 +392,11 @@ func (dbM *DataDBMock) SetRouteProfileDrv(*RouteProfile) error {
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) RemoveRouteProfileDrv(string, string) error {
+func (dbM *DataDBMock) RemoveRouteProfileDrv(tenant, id string) error {
+
+	if dbM.RemoveRouteProfileDrvF != nil {
+		return dbM.RemoveRouteProfileDrvF(tenant, id)
+	}
 	return utils.ErrNotImplemented
 }
 

@@ -2181,3 +2181,110 @@ func TestCDRServerListenAndServe2(t *testing.T) {
 	}()
 	cdrS.ListenAndServe(stopChan)
 }
+
+func TestStoreSMCostErr(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	tmpConnMgr := connMgr
+	tmpCache := Cache
+	defer func() {
+		connMgr = tmpConnMgr
+		config.SetCgrConfig(config.NewDefaultCGRConfig())
+		Cache = tmpCache
+	}()
+	Cache.Clear(nil)
+	cfg.DataDbCfg().Items = map[string]*config.ItemOpt{
+		utils.CacheSessionCostsTBL: {
+			Replicate: true,
+		},
+	}
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	db.db.Set(utils.CacheSessionCostsTBL, "CGRID:CGRID", nil, []string{"GRP_1"}, true, utils.NonTransactional)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	cdrS := &CDRServer{
+		cgrCfg:  cfg,
+		connMgr: connMgr,
+		dm:      dm,
+		cdrDb:   db,
+		guard:   guardian.Guardian,
+	}
+	smCost := &SMCost{
+		CGRID:      "CGRID",
+		RunID:      utils.MetaDefault,
+		OriginHost: utils.FreeSWITCHAgent,
+		OriginID:   "Origin1",
+		Usage:      time.Second,
+		CostSource: utils.MetaSessionS,
+		CostDetails: &EventCost{
+			CGRID:     "164b0422fdc6a5117031b427439482c6a4f90e41",
+			RunID:     utils.MetaDefault,
+			StartTime: time.Date(2017, 1, 9, 16, 18, 21, 0, time.UTC),
+			Charges: []*ChargingInterval{
+				{
+					RatingID: "c1a5ab9",
+					Increments: []*ChargingIncrement{
+						{
+							Usage:          0,
+							Cost:           0.1,
+							AccountingID:   "9bdad10",
+							CompressFactor: 1,
+						},
+					},
+					CompressFactor: 1,
+				},
+			},
+			AccountSummary: &AccountSummary{
+				Tenant: "cgrates.org",
+				ID:     "dan",
+				BalanceSummaries: []*BalanceSummary{
+					{
+						UUID:  "8c54a9e9-d610-4c82-bcb5-a315b9a65010",
+						Type:  utils.MetaMonetary,
+						Value: 50,
+					},
+				},
+				AllowNegative: false,
+				Disabled:      false,
+			},
+			Rating: Rating{
+				"3cd6425": &RatingUnit{
+					RoundingMethod:   "*up",
+					RoundingDecimals: 5,
+					TimingID:         "7f324ab",
+					RatesID:          "4910ecf",
+					RatingFiltersID:  "43e77dc",
+				},
+			},
+			Accounting: Accounting{
+				"a012888": &BalanceCharge{
+					AccountID:   "cgrates.org:dan",
+					BalanceUUID: "8c54a9e9-d610-4c82-bcb5-a315b9a65010",
+					Units:       0.01,
+				},
+			},
+			RatingFilters: RatingFilters{
+				"43e77dc": RatingMatchedFilters{
+					"DestinationID":     "GERMANY",
+					"DestinationPrefix": "+49",
+					"RatingPlanID":      "RPL_RETAIL1",
+					"Subject":           "*out:cgrates.org:call:*any",
+				},
+			},
+			Rates: ChargedRates{
+				"ec1a177": RateGroups{
+					&RGRate{
+						GroupIntervalStart: 0,
+						Value:              0.01,
+						RateIncrement:      time.Minute,
+						RateUnit:           time.Second},
+				},
+			},
+			Timings: ChargedTimings{
+				"7f324ab": &ChargedTiming{
+					StartTime: "00:00:00",
+				}}}}
+
+	if err := cdrS.storeSMCost(smCost, true); err != nil {
+		t.Error(err)
+	}
+
+}
