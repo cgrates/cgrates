@@ -292,7 +292,6 @@ func TestNewRPCPoolUnsupportedTransport(t *testing.T) {
 
 }
 
-// unfinished return shouldnt give error
 // func TestRPCClientSetCallOK(t *testing.T) {
 // 	tmp := Cache
 // 	defer func() {
@@ -300,32 +299,50 @@ func TestNewRPCPoolUnsupportedTransport(t *testing.T) {
 // 	}()
 // 	Cache.Clear(nil)
 
-// 	// s, err := NewService(new(TestRPCSrvMockS))
-// 	// if err != nil {
-// 	// 	t.Fatal(err)
-// 	// }
-
+// 	connID := "connID"
 // 	cfg := config.NewDefaultCGRConfig()
-// 	cM := NewConnManager(cfg)
-// 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-// 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
-// 	fltrs := NewFilterS(cfg, nil, dm)
-// 	newCDRSrv := NewCDRServer(cfg, dm, fltrs, nil)
-// 	newSrvcWName, err := NewServiceWithName(newCDRSrv, utils.CoreSv1Ping, false)
+// 	cfg.RPCConns()[connID] = config.NewDfltRPCConn()
+// 	cfg.RPCConns()[connID].Strategy = rpcclient.PoolParallel
+// 	cfg.RPCConns()[connID].Conns = []*config.RemoteHost{
+// 		{
+// 			Address:   rpcclient.InternalRPC, //might need integration
+// 			Transport: rpcclient.GOBrpc,
+// 		},
+// 	}
+
+// 	cc := make(chan birpc.ClientConnector, 1)
+
+// 	cM := &ConnManager{
+// 		cfg: cfg,
+// 		rpcInternal: map[string]chan birpc.ClientConnector{
+// 			connID: cc,
+// 		},
+// 		connCache: ltcache.NewCache(-1, 0, true, nil),
+// 	}
+
+// 	cM.connCache.Set(connID, nil, nil)
+
+// 	rpcConnCfg := cfg.RPCConns()[connID].Conns[0]
+// 	codec := rpcclient.GOBrpc
+
+// 	conn, err := rpcclient.NewRPCParallelClientPool(context.Background(), utils.TCP, rpcConnCfg.Address, rpcConnCfg.TLS,
+// 		utils.FirstNonEmpty(rpcConnCfg.ClientKey, cM.cfg.TLSCfg().ClientKey), utils.FirstNonEmpty(rpcConnCfg.ClientCertificate, cM.cfg.TLSCfg().ClientCerificate),
+// 		utils.FirstNonEmpty(rpcConnCfg.CaCertificate, cM.cfg.TLSCfg().CaCertificate), utils.FirstIntNonEmpty(rpcConnCfg.ConnectAttempts, cM.cfg.GeneralCfg().ConnectAttempts),
+// 		utils.FirstIntNonEmpty(rpcConnCfg.Reconnects, cM.cfg.GeneralCfg().Reconnects), utils.FirstDurationNonEmpty(rpcConnCfg.MaxReconnectInterval, cM.cfg.GeneralCfg().MaxReconnectInterval),
+// 		utils.FibDuration, utils.FirstDurationNonEmpty(rpcConnCfg.ConnectTimeout, cM.cfg.GeneralCfg().ConnectTimeout), utils.FirstDurationNonEmpty(rpcConnCfg.ReplyTimeout, cM.cfg.GeneralCfg().ReplyTimeout),
+// 		codec, nil, int64(cM.cfg.GeneralCfg().MaxParallelConns), false, context.Background().Client)
 // 	if err != nil {
 // 		t.Error(err)
 // 	}
-// 	cM.EnableDispatcher(newSrvcWName)
 
-// 	// s := &RPCClientSet{
-// 	// 	utils.CoreSv1: make(chan context.ClientConnector, 1),
-// 	// }
-
-// 	rpc.Register("CDRServer.CDRServerV1")
+// 	connChan := make(chan birpc.ClientConnector, 1)
+// 	connChan <- conn
+// 	s := &RPCClientSet{
+// 		utils.SessionSv1: connChan,
+// 	}
 
 // 	var rply string
-// 	fmt.Printf("\n%+v\n", cM.dispIntCh)
-// 	if err := cM.dispIntCh.Call(context.Background(), "CDRServer.CDRServerV1", new(utils.CGREvent), &rply); err != nil {
+// 	if err := s.Call(context.Background(), utils.SessionSv1RegisterInternalBiJSONConn, connID, &rply); err != nil {
 // 		t.Error(err)
 // 	}
 
