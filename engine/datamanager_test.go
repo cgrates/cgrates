@@ -4142,3 +4142,48 @@ func TestDMSetLoadIDsReplicate(t *testing.T) {
 	dm.SetLoadIDs(context.Background(), itmLIDs)
 
 }
+
+func TestDMCheckFiltersErrBadReference(t *testing.T) {
+
+	var dm *DataManager
+
+	expErr := "broken reference to filter: <*string:~*req.Account>"
+	if err := dm.checkFilters(context.Background(), utils.CGRateSorg, []string{"*string:~*req.Account"}); expErr != err.Error() {
+		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err)
+	}
+
+}
+
+func TestDMCheckFiltersErrBadPath(t *testing.T) {
+
+	var dm *DataManager
+
+	expErr := `Path is missing  for filter <{"Tenant":"cgrates.org","ID":"*string:~missing path:chp1","Rules":[{"Type":"*string","Element":"~missing path","Values":["chp1"]}]}>`
+	if err := dm.checkFilters(context.Background(), utils.CGRateSorg, []string{"*string:~missing path:chp1"}); expErr != err.Error() {
+		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err)
+	}
+
+}
+
+// might need to add nil checker for dm on main
+// func TestDMCheckFiltersErrBrokenReferenceCache(t *testing.T) {
+
+// 	tmp := Cache
+// 	defer func() {
+// 		Cache = tmp
+// 	}()
+// 	Cache.Clear(nil)
+
+// 	var dm *DataManager
+// 	// var val interface{}
+
+// 	if err := Cache.Set(context.Background(), utils.CacheFilters, "cgrates.org:*string:~*req.Account:1001", "", []string{}, true, utils.NonTransactional); err != nil {
+// 		t.Error(err)
+// 	}
+
+// 	expErr := ``
+// 	if err := dm.checkFilters(context.Background(), utils.CGRateSorg, []string{"*string:~*req.Account:1001"}); expErr != err.Error() {
+// 		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err)
+// 	}
+
+// }
