@@ -179,11 +179,11 @@ func TestLoggerExportEmergNil(t *testing.T) {
 }
 
 // func TestLoggerExportDebugOk(t *testing.T) {
+
 // 	tmpC := Cache
-// 	tmpLog := utils.Logger
 // 	defer func() {
 // 		Cache = tmpC
-// 		utils.Logger = tmpLog
+
 // 	}()
 // 	Cache.Clear(nil)
 
@@ -218,22 +218,12 @@ func TestLoggerExportEmergNil(t *testing.T) {
 // 	el := NewExportLogger(context.Background(), "123", "cgrates.org", 7, cM, cfg)
 
 // 	logMsg := "log message"
-// 	var buf bytes.Buffer
-// 	fmt.Printf("\n %+v ", utils.NewStdLoggerWithWriter(&buf, el.NodeID, el.LogLevel))
-// 	// sl := utils.NewStdLoggerWithWriter(&buf, "123", -1)
+
 // 	if err := el.Debug(logMsg); err != nil {
 // 		t.Error(err)
-// 	} else if buf.String() != "" {
-// 		t.Error("did not expect the message to be logged")
 // 	}
 
 // 	el.SetLogLevel(utils.LOGLEVEL_DEBUG)
-// 	expMsg := fmt.Sprintf("CGRateS <%s> [DEBUG] %s\n", el.NodeID, logMsg)
-// 	if err := el.Debug(logMsg); err != nil {
-// 		t.Error(err)
-// 	} else if buf.String() != expMsg {
-// 		t.Errorf("expected: <%s>, \nreceived: <%s>", expMsg, buf.String())
-// 	}
 
 // }
 
