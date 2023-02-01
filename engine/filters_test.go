@@ -1384,3 +1384,98 @@ func TestComputeResourceIndexes(t *testing.T) {
 		t.Error(err)
 	}
 }
+func TestComputeSupplierIndexes(t *testing.T) {
+	cfg, err := config.NewDefaultCGRConfig()
+	if err != nil {
+		t.Error(err)
+	}
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	fltr := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "FLTR_SUPP_1",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaString,
+				Element: "~*req.Supplier",
+				Values:  []string{"SupplierProfile1"},
+			},
+		},
+	}
+	if err := dm.SetFilter(fltr); err != nil {
+		t.Error(err)
+	}
+	spp := &SupplierProfile{
+		Tenant:    "cgrates.org",
+		ID:        "SPL_2",
+		Sorting:   utils.MetaLC,
+		FilterIDs: []string{"FLTR_SUPP_1"},
+		Suppliers: []*Supplier{
+			{
+				ID:         "SPL1",
+				FilterIDs:  []string{"FLTR_1"},
+				AccountIDs: []string{"accc"},
+				Weight:     20,
+				Blocker:    false,
+			},
+		},
+		Weight: 10,
+	}
+	if err := dm.SetSupplierProfile(spp, true); err != nil {
+		t.Error(err)
+	}
+	chIDs := []string{"SPL_2"}
+	if _, err := ComputeSupplierIndexes(dm, "cgrates.org", &chIDs, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+	if _, err := ComputeSupplierIndexes(dm, "cgrates.org", nil, "ID"); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestRemoveItemFromIndexRP(t *testing.T) {
+	cfg, err := config.NewDefaultCGRConfig()
+	if err != nil {
+		t.Error(err)
+	}
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	fltr := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "FLTR_1",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaString,
+				Element: "~*req.Account",
+				Values:  []string{"1001"},
+			},
+		},
+	}
+	if err := dm.SetFilter(fltr); err != nil {
+		t.Error(err)
+	}
+	fltr.Compile()
+	rs := &ResourceProfile{
+		Tenant:    "cgrates.org",
+		ID:        "RES_GR_TEST",
+		FilterIDs: []string{"FLTR_1"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+		},
+		UsageTTL:          time.Duration(-1),
+		Limit:             2,
+		AllocationMessage: "Account1Channels",
+		Weight:            20,
+		ThresholdIDs:      []string{utils.META_NONE},
+	}
+	if err := dm.SetResourceProfile(rs, true); err != nil {
+		t.Error(err)
+	}
+	fltInd := NewFilterIndexer(dm, utils.ResourceProfilesPrefix, rs.Tenant)
+
+	if err := fltInd.RemoveItemFromIndex("cgrates.org", rs.ID, []string{}); err != nil {
+		t.Error(err)
+	}
+
+}
