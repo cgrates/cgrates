@@ -24,6 +24,7 @@ import (
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
 )
 
 var (
@@ -649,5 +650,128 @@ func TestSuppliersMatchWithIndexFalse(t *testing.T) {
 	}
 	if !reflect.DeepEqual(sppTest[2], sprf[0]) {
 		t.Errorf("Expecting: %+v, received: %+v", sppTest[2], sprf[0])
+	}
+}
+
+type ccMock struct {
+	calls map[string]func(args interface{}, reply interface{}) error
+}
+
+func (ccM *ccMock) Call(serviceMethod string, args interface{}, reply interface{}) (err error) {
+	if call, has := ccM.calls[serviceMethod]; !has {
+		return rpcclient.ErrUnsupporteServiceMethod
+	} else {
+		return call(args, reply)
+	}
+}
+func TestSuppliersV1GetSuppliers(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	defer func() {
+		cfg2, _ := config.NewDefaultCGRConfig()
+		config.SetCgrConfig(cfg2)
+	}()
+	cfg.SupplierSCfg().IndexedSelects = false
+	cfg.SupplierSCfg().RALsConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs)}
+	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn <- &ccMock{
+		calls: map[string]func(args interface{}, reply interface{}) error{
+			utils.ResponderGetMaxSessionTimeOnAccounts: func(args, reply interface{}) error {
+				rpl := map[string]interface{}{
+					"Cost": 10,
+				}
+				*reply.(*map[string]interface{}) = rpl
+				return nil
+			},
+			utils.ResponderGetCostOnRatingPlans: func(args, reply interface{}) error {
+				rpl := map[string]interface{}{
+					utils.CapMaxUsage: 1000000000,
+				}
+				*reply.(*map[string]interface{}) = rpl
+				return nil
+
+			},
+		},
+	}
+	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs): clientConn,
+	})
+	splService, err := NewSupplierService(dm, &FilterS{
+		dm: dm, cfg: cfg}, cfg, connMgr)
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	arg := &ArgsGetSuppliers{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     utils.UUIDSha1Prefix(),
+			Event: map[string]interface{}{
+				utils.EVENT_NAME:  "Event1",
+				utils.Account:     "1001",
+				utils.Subject:     "1001",
+				utils.Destination: "1002",
+				utils.SetupTime:   time.Date(2017, 12, 1, 14, 25, 0, 0, time.UTC),
+				utils.Usage:       "1m20s",
+			},
+		},
+		ArgDispatcher: &utils.ArgDispatcher{
+			APIKey: utils.StringPointer("sup12345"),
+		},
+	}
+	fltr := &Filter{
+		ID:     "FLTR_1",
+		Tenant: "cgrates.org",
+		Rules: []*FilterRule{
+			{Type: utils.MetaString,
+				Element: "~*req.Account",
+				Values:  []string{"1001"},
+			},
+		},
+	}
+	if err := dm.SetFilter(fltr); err != nil {
+		t.Error(err)
+	}
+	supplier := &SupplierProfile{
+		Tenant:            "cgrates.org",
+		ID:                "SUP1",
+		FilterIDs:         []string{"FLTR_1"},
+		Weight:            10,
+		Sorting:           utils.MetaQOS,
+		SortingParameters: []string{},
+		Suppliers: []*Supplier{
+			{
+				ID:            "Sup",
+				FilterIDs:     []string{},
+				AccountIDs:    []string{"1001"},
+				RatingPlanIDs: []string{"RT_PLAN1"},
+				ResourceIDs:   []string{"RES1"},
+				Weight:        10,
+			},
+		},
+	}
+	if err := dm.SetSupplierProfile(supplier, true); err != nil {
+		t.Error(err)
+	}
+	exp := &SortedSuppliers{
+		ProfileID: "SUP1",
+		Sorting:   utils.MetaQOS,
+		Count:     1,
+		SortedSuppliers: []*SortedSupplier{
+			{
+				SupplierID: "Sup",
+				SortingData: map[string]interface{}{
+					"MaxUsage":      1 * time.Second,
+					"ResourceUsage": 0,
+					"Weight":        10,
+				},
+			},
+		},
+	}
+	var reply SortedSuppliers
+	if err := splService.V1GetSuppliers(arg, &reply); err != nil {
+		t.Error(err)
+	} else if reflect.DeepEqual(exp, reply) {
+		t.Errorf("expected %+v,received %+v", utils.ToJSON(exp), utils.ToJSON(reply))
 	}
 }
