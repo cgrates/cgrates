@@ -73,6 +73,7 @@ type DataDBMock struct {
 	GetItemLoadIDsDrvF          func(ctx *context.Context, itemIDPrefix string) (loadIDs map[string]int64, err error)
 	SetThresholdDrvF            func(*context.Context, *Threshold) error
 	SetStatQueueDrvF            func(*context.Context, *StoredStatQueue, *StatQueue) error
+	HasDataDrvF                 func(ctx *context.Context, category, subject, tenant string) (bool, error)
 }
 
 // Storage methods
@@ -110,7 +111,10 @@ func (dbM *DataDBMock) IsDBEmpty() (resp bool, err error) {
 }
 
 // DataDB methods
-func (dbM *DataDBMock) HasDataDrv(*context.Context, string, string, string) (bool, error) {
+func (dbM *DataDBMock) HasDataDrv(ctx *context.Context, category, subject, tenant string) (bool, error) {
+	if dbM.HasDataDrvF != nil {
+		return dbM.HasDataDrvF(ctx, category, subject, tenant)
+	}
 	return false, utils.ErrNotImplemented
 }
 

@@ -18,10 +18,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"net/http"
+	"net/http/httptest"
 	"reflect"
 	"testing"
 	"time"
 
+	"github.com/cgrates/baningo"
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
@@ -1117,7 +1120,7 @@ func TestDataManagerRemoveAccountReplicateTrue(t *testing.T) {
 func TestDataManagerRemoveDispatcherHostErrNilDM(t *testing.T) {
 
 	var dm *DataManager
-	if err := dm.RemoveDispatcherHost(context.Background(), utils.CGRateSorg, "*stirng:~*req.Account:1001"); err == nil || err != utils.ErrNoDatabaseConn {
+	if err := dm.RemoveDispatcherHost(context.Background(), utils.CGRateSorg, "*stirng:~*req.Account:1001"); err != utils.ErrNoDatabaseConn {
 		t.Error(err)
 	}
 
@@ -1134,7 +1137,7 @@ func TestDataManagerRemoveDispatcherHostErroldDppNil(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg.CacheCfg(), cM)
 
-	if err := dm.RemoveDispatcherHost(context.Background(), utils.CGRateSorg, "*stirng:~*req.Account:1001"); err == nil || err != utils.ErrNotFound {
+	if err := dm.RemoveDispatcherHost(context.Background(), utils.CGRateSorg, "*stirng:~*req.Account:1001"); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 
@@ -1157,7 +1160,7 @@ func TestDataManagerRemoveDispatcherHostErrGetDisp(t *testing.T) {
 		},
 	}
 
-	if err := dm.RemoveDispatcherHost(context.Background(), utils.CGRateSorg, "*stirng:~*req.Account:1001"); err == nil || err != utils.ErrNotImplemented {
+	if err := dm.RemoveDispatcherHost(context.Background(), utils.CGRateSorg, "*stirng:~*req.Account:1001"); err != utils.ErrNotImplemented {
 		t.Error(err)
 	}
 
@@ -1184,7 +1187,7 @@ func TestDataManagerRemoveDispatcherHostErrRemoveDisp(t *testing.T) {
 		},
 	}
 
-	if err := dm.RemoveDispatcherHost(context.Background(), utils.CGRateSorg, "*stirng:~*req.Account:1001"); err == nil || err != utils.ErrNotImplemented {
+	if err := dm.RemoveDispatcherHost(context.Background(), utils.CGRateSorg, "*stirng:~*req.Account:1001"); err != utils.ErrNotImplemented {
 		t.Error(err)
 	}
 
@@ -1224,7 +1227,7 @@ func TestDataManagerRemoveDispatcherHostReplicateTrue(t *testing.T) {
 func TestDataManagerSetDispatcherHostErrNilDM(t *testing.T) {
 
 	var dm *DataManager
-	if err := dm.SetDispatcherHost(context.Background(), nil); err == nil || err != utils.ErrNoDatabaseConn {
+	if err := dm.SetDispatcherHost(context.Background(), nil); err != utils.ErrNoDatabaseConn {
 		t.Error(err)
 	}
 
@@ -1247,7 +1250,7 @@ func TestDataManagerSetDispatcherHostErrDataDB(t *testing.T) {
 		},
 	}
 	defer data.Close()
-	if err := dm.SetDispatcherHost(context.Background(), nil); err == nil || err != utils.ErrNotImplemented {
+	if err := dm.SetDispatcherHost(context.Background(), nil); err != utils.ErrNotImplemented {
 		t.Error(err)
 	}
 
@@ -1331,7 +1334,7 @@ func TestDMSetAccountNilDM(t *testing.T) {
 	ap := &utils.Account{}
 
 	expErr := utils.ErrNoDatabaseConn
-	if err := dm.SetAccount(context.Background(), ap, false); err == nil || err != utils.ErrNoDatabaseConn {
+	if err := dm.SetAccount(context.Background(), ap, false); err != utils.ErrNoDatabaseConn {
 		t.Errorf("Expected error <%v>, Received <%v>", expErr, err)
 	}
 }
@@ -1448,7 +1451,7 @@ func TestDMSetAccountGetAccountErr(t *testing.T) {
 	}
 
 	expErr := utils.ErrNotImplemented
-	if err := dm.SetAccount(context.Background(), ap, true); err == nil || err != expErr {
+	if err := dm.SetAccount(context.Background(), ap, true); err != expErr {
 		t.Errorf("Expected error <%v>, Received <%v>", expErr, err)
 	}
 }
@@ -1514,7 +1517,7 @@ func TestDMSetAccountSetAccountDrvErr(t *testing.T) {
 	}
 
 	expErr := utils.ErrNotImplemented
-	if err := dm.SetAccount(context.Background(), ap, true); err == nil || err != expErr {
+	if err := dm.SetAccount(context.Background(), ap, true); err != expErr {
 		t.Errorf("Expected error <%v>, Received <%v>", expErr, err)
 	}
 }
@@ -1580,7 +1583,7 @@ func TestDMSetAccountupdatedIndexesErr(t *testing.T) {
 	}
 
 	expErr := utils.ErrNotImplemented
-	if err := dm.SetAccount(context.Background(), ap, true); err == nil || err != expErr {
+	if err := dm.SetAccount(context.Background(), ap, true); err != expErr {
 		t.Errorf("Expected error <%v>, Received <%v>", expErr, err)
 	}
 }
@@ -1656,7 +1659,7 @@ func TestDMRemoveThresholdProfileNilDM(t *testing.T) {
 	var dm *DataManager
 
 	expErr := utils.ErrNoDatabaseConn
-	if err := dm.RemoveThresholdProfile(context.Background(), utils.CGRateSorg, "ThrPrf1", false); err == nil || err != utils.ErrNoDatabaseConn {
+	if err := dm.RemoveThresholdProfile(context.Background(), utils.CGRateSorg, "ThrPrf1", false); err != utils.ErrNoDatabaseConn {
 		t.Errorf("Expected error <%v>, Received <%v>", expErr, err)
 	}
 }
@@ -1679,7 +1682,7 @@ func TestDMRemoveThresholdProfileGetErr(t *testing.T) {
 	}
 
 	expErr := utils.ErrNotImplemented
-	if err := dm.RemoveThresholdProfile(context.Background(), utils.CGRateSorg, "ThrPrf1", false); err == nil || err != expErr {
+	if err := dm.RemoveThresholdProfile(context.Background(), utils.CGRateSorg, "ThrPrf1", false); err != expErr {
 		t.Errorf("Expected error <%v>, Received <%v>", expErr, err)
 	}
 }
@@ -1703,7 +1706,7 @@ func TestDMRemoveThresholdProfileRmvErr(t *testing.T) {
 	}
 
 	expErr := utils.ErrNotImplemented
-	if err := dm.RemoveThresholdProfile(context.Background(), utils.CGRateSorg, "ThrPrf1", false); err == nil || err != expErr {
+	if err := dm.RemoveThresholdProfile(context.Background(), utils.CGRateSorg, "ThrPrf1", false); err != expErr {
 		t.Errorf("Expected error <%v>, Received <%v>", expErr, err)
 	}
 }
@@ -1727,7 +1730,7 @@ func TestDMRemoveThresholdProfileOldThrNil(t *testing.T) {
 	}
 
 	expErr := utils.ErrNotFound
-	if err := dm.RemoveThresholdProfile(context.Background(), utils.CGRateSorg, "ThrPrf1", false); err == nil || err != expErr {
+	if err := dm.RemoveThresholdProfile(context.Background(), utils.CGRateSorg, "ThrPrf1", false); err != expErr {
 		t.Errorf("Expected error <%v>, Received <%v>", expErr, err)
 	}
 }
@@ -1764,7 +1767,7 @@ func TestDMRemoveThresholdProfileIndxTrueErr1(t *testing.T) {
 	}
 
 	expErr := utils.ErrNotImplemented
-	if err := dm.RemoveThresholdProfile(context.Background(), utils.CGRateSorg, "THD_2", true); err == nil || err != expErr {
+	if err := dm.RemoveThresholdProfile(context.Background(), utils.CGRateSorg, "THD_2", true); err != expErr {
 		t.Errorf("Expected error <%v>, Received <%v>", expErr, err)
 	}
 }
@@ -1804,7 +1807,7 @@ func TestDMRemoveThresholdProfileIndxTrueErr2(t *testing.T) {
 	}
 
 	expErr := utils.ErrNotImplemented
-	if err := dm.RemoveThresholdProfile(context.Background(), utils.CGRateSorg, "THD_2", true); err == nil || err != expErr {
+	if err := dm.RemoveThresholdProfile(context.Background(), utils.CGRateSorg, "THD_2", true); err != expErr {
 		t.Errorf("Expected error <%v>, Received <%v>", expErr, err)
 	}
 }
@@ -1872,7 +1875,7 @@ func TestDMSetThresholdErr(t *testing.T) {
 		Hits:   0,
 	}
 	expErr := utils.ErrNotImplemented
-	if err := dm.SetThreshold(context.Background(), th); err == nil || err != expErr {
+	if err := dm.SetThreshold(context.Background(), th); err != expErr {
 		t.Errorf("Expected error <%v>, Received <%v>", expErr, err)
 	}
 }
@@ -1944,7 +1947,7 @@ func TestDMRemoveThresholdReplicateTrue(t *testing.T) {
 	if err := dm.RemoveThreshold(context.Background(), "cgrates.org", "TH_1"); err != nil {
 		t.Error(err)
 	}
-	if getRcv, err := dm.GetThreshold(context.Background(), utils.CGRateSorg, "TH_1", true, false, utils.NonTransactional); err == nil || err != utils.ErrNotFound {
+	if getRcv, err := dm.GetThreshold(context.Background(), utils.CGRateSorg, "TH_1", true, false, utils.NonTransactional); err != utils.ErrNotFound {
 		t.Error(err)
 	} else if getRcv != nil {
 		t.Errorf("Expected <%+v>, \nReceived <%+v>\n", nil, getRcv)
@@ -1969,7 +1972,7 @@ func TestDMGetThresholdCacheGetErr(t *testing.T) {
 	}
 
 	_, err := dm.GetThreshold(context.Background(), utils.CGRateSorg, "TH_1", true, false, utils.NonTransactional)
-	if err == nil || err != utils.ErrNotFound {
+	if err != utils.ErrNotFound {
 		t.Error(err)
 	}
 }
@@ -2020,7 +2023,7 @@ func TestDMGetThresholdCacheGetErr(t *testing.T) {
 // 	dm := NewDataManager(data, cfg.CacheCfg(), cM)
 
 // 	_, err := dm.GetThreshold(context.Background(), utils.CGRateSorg, "TH_1", false, false, utils.NonTransactional)
-// 	if err == nil || err != utils.ErrNotFound {
+// 	if  err != utils.ErrNotFound {
 // 		t.Error(err)
 // 	}
 // }
@@ -2058,7 +2061,7 @@ func TestDMGetThresholdSetThErr(t *testing.T) {
 
 	expErr := utils.ErrNotImplemented
 	_, err := dm.GetThreshold(context.Background(), utils.CGRateSorg, "TH_1", false, true, utils.NonTransactional)
-	if err == nil || err != expErr {
+	if err != expErr {
 		t.Errorf("Expected <%v> , Received <%v>", expErr, err)
 	}
 }
@@ -2177,7 +2180,7 @@ func TestDMSetStatQueueReplicateTrue(t *testing.T) {
 func TestDMRemoveStatQueueNildb(t *testing.T) {
 	var dm *DataManager
 
-	if err := dm.RemoveStatQueue(context.Background(), utils.CGRateSorg, "SQ99"); err != utils.ErrNoDatabaseConn || err == nil {
+	if err := dm.RemoveStatQueue(context.Background(), utils.CGRateSorg, "SQ99"); err != utils.ErrNoDatabaseConn {
 		t.Error(err)
 	}
 
@@ -2199,7 +2202,7 @@ func TestDMRemoveStatQueueErrDrv(t *testing.T) {
 		RemStatQueueDrvF: func(ctx *context.Context, tenant, id string) (err error) { return utils.ErrNotImplemented },
 	}
 
-	if err := dm.RemoveStatQueue(context.Background(), utils.CGRateSorg, "SQ99"); err != utils.ErrNotImplemented || err == nil {
+	if err := dm.RemoveStatQueue(context.Background(), utils.CGRateSorg, "SQ99"); err != utils.ErrNotImplemented {
 		t.Error(err)
 	}
 
@@ -2274,7 +2277,7 @@ func TestDMRemoveStatQueueReplicate(t *testing.T) {
 		t.Error(err)
 	}
 
-	if _, err := dm.GetStatQueue(context.Background(), utils.CGRateSorg, "sqid99", true, false, utils.NonTransactional); err == nil || err != utils.ErrNotFound {
+	if _, err := dm.GetStatQueue(context.Background(), utils.CGRateSorg, "sqid99", true, false, utils.NonTransactional); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 
@@ -2282,7 +2285,7 @@ func TestDMRemoveStatQueueReplicate(t *testing.T) {
 
 func TestDMGetStatQueueProfileErrNildm(t *testing.T) {
 	var dm *DataManager
-	if _, err := dm.GetStatQueueProfile(context.Background(), utils.CGRateSorg, "sqp99", false, false, utils.NonTransactional); err == nil || err != utils.ErrNoDatabaseConn {
+	if _, err := dm.GetStatQueueProfile(context.Background(), utils.CGRateSorg, "sqp99", false, false, utils.NonTransactional); err != utils.ErrNoDatabaseConn {
 		t.Error(err)
 	}
 }
@@ -2306,7 +2309,7 @@ func TestDMGetStatQueueProfileErrNilCacheRead(t *testing.T) {
 		t.Error(err)
 	}
 
-	if _, err := dm.GetStatQueueProfile(context.Background(), utils.CGRateSorg, "sqp99", true, false, utils.NonTransactional); err == nil || err != utils.ErrNotFound {
+	if _, err := dm.GetStatQueueProfile(context.Background(), utils.CGRateSorg, "sqp99", true, false, utils.NonTransactional); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 }
@@ -2372,7 +2375,7 @@ func TestDMGetStatQueueProfileErrRemote(t *testing.T) {
 		SetStatQueueProfileDrvF: func(ctx *context.Context, sq *StatQueueProfile) (err error) { return utils.ErrNotImplemented },
 	}
 
-	if _, err := dm.GetStatQueueProfile(context.Background(), utils.CGRateSorg, "sqp99", false, false, utils.NonTransactional); err == nil || err != utils.ErrNotImplemented {
+	if _, err := dm.GetStatQueueProfile(context.Background(), utils.CGRateSorg, "sqp99", false, false, utils.NonTransactional); err != utils.ErrNotImplemented {
 		t.Error(err)
 	}
 }
@@ -2435,7 +2438,7 @@ func TestDMGetStatQueueProfileErrCacheWrite(t *testing.T) {
 
 	Cache = NewCacheS(cfg, dm, cM, nil)
 
-	if _, err := dm.GetStatQueueProfile(context.Background(), utils.CGRateSorg, "sqp99", false, true, utils.NonTransactional); err == nil || err != utils.ErrNotImplemented {
+	if _, err := dm.GetStatQueueProfile(context.Background(), utils.CGRateSorg, "sqp99", false, true, utils.NonTransactional); err != utils.ErrNotImplemented {
 		t.Error(err)
 	}
 
@@ -2497,7 +2500,7 @@ func TestDMGetStatQueueProfileErr2CacheWrite(t *testing.T) {
 
 	Cache = NewCacheS(cfg, dm, cM, nil)
 
-	if _, err := dm.GetStatQueueProfile(context.Background(), utils.CGRateSorg, "sqp99", false, true, utils.NonTransactional); err == nil || err != utils.ErrNotImplemented {
+	if _, err := dm.GetStatQueueProfile(context.Background(), utils.CGRateSorg, "sqp99", false, true, utils.NonTransactional); err != utils.ErrNotImplemented {
 		t.Error(err)
 	}
 
@@ -2543,7 +2546,7 @@ func TestDMGetThresholdProfileSetThErr2(t *testing.T) {
 
 	expErr := utils.ErrNotImplemented
 	_, err := dm.GetThreshold(context.Background(), utils.CGRateSorg, "TH_1", false, true, utils.NonTransactional)
-	if err == nil || err != expErr {
+	if err != expErr {
 		t.Errorf("Expected <%v> , Received <%v>", expErr, err)
 	}
 }
@@ -2566,7 +2569,7 @@ func TestDMGetThresholdGetThProflErr(t *testing.T) {
 
 	expErr := utils.ErrNotFound
 	_, err := dm.GetThresholdProfile(context.Background(), utils.CGRateSorg, "TH_1", true, true, utils.NonTransactional)
-	if err == nil || err != expErr {
+	if err != expErr {
 		t.Errorf("Expected <%v> , Received <%v>", expErr, err)
 	}
 }
@@ -2582,7 +2585,7 @@ func TestDMGetThresholdProfileDMErr(t *testing.T) {
 
 	expErr := utils.ErrNoDatabaseConn
 	_, err := dm.GetThresholdProfile(context.Background(), utils.CGRateSorg, "TH_1", true, true, utils.NonTransactional)
-	if err == nil || err != expErr {
+	if err != expErr {
 		t.Errorf("Expected <%v> , Received <%v>", expErr, err)
 	}
 }
@@ -2633,7 +2636,7 @@ func TestDMGetThresholdProfileDMErr(t *testing.T) {
 // 	dm := NewDataManager(data, cfg.CacheCfg(), cM)
 
 // 	_, err := dm.GetThresholdProfile(context.Background(), utils.CGRateSorg, "TH_1", false, false, utils.NonTransactional)
-// 	if err == nil || err != utils.ErrNotFound {
+// 	if  err != utils.ErrNotFound {
 // 		t.Error(err)
 // 	}
 // }
@@ -2671,7 +2674,7 @@ func TestDMGetThresholdProfileSetThPrfErr(t *testing.T) {
 
 	expErr := utils.ErrNotImplemented
 	_, err := dm.GetThresholdProfile(context.Background(), utils.CGRateSorg, "TH_1", false, true, utils.NonTransactional)
-	if err == nil || err != expErr {
+	if err != expErr {
 		t.Errorf("Expected <%v> , Received <%v>", expErr, err)
 	}
 }
@@ -2714,7 +2717,7 @@ func TestDMGetThresholdProfileSetThPrfErr2(t *testing.T) {
 
 	expErr := utils.ErrNotImplemented
 	_, err := dm.GetThresholdProfile(context.Background(), utils.CGRateSorg, "TH_1", false, true, utils.NonTransactional)
-	if err == nil || err != expErr {
+	if err != expErr {
 		t.Errorf("Expected <%v> , Received <%v>", expErr, err)
 	}
 }
@@ -3918,7 +3921,7 @@ func TestDMGetAccountNil(t *testing.T) {
 	var dm *DataManager
 
 	expErr := utils.ErrNoDatabaseConn
-	if _, err := dm.GetAccount(context.Background(), utils.CGRateSorg, "1002"); err != expErr || err == nil {
+	if _, err := dm.GetAccount(context.Background(), utils.CGRateSorg, "1002"); err != expErr {
 		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err)
 	}
 }
@@ -4012,7 +4015,7 @@ func TestDMGetRateProfileRatesNil(t *testing.T) {
 	var dm *DataManager
 
 	expErr := utils.ErrNoDatabaseConn
-	if _, _, err := dm.GetRateProfileRates(context.Background(), &utils.ArgsSubItemIDs{}, false); err != expErr || err == nil {
+	if _, _, err := dm.GetRateProfileRates(context.Background(), &utils.ArgsSubItemIDs{}, false); err != expErr {
 		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err)
 	}
 }
@@ -4083,7 +4086,7 @@ func TestDMSetLoadIDsNil(t *testing.T) {
 	var dm *DataManager
 
 	expErr := utils.ErrNoDatabaseConn
-	if err := dm.SetLoadIDs(context.Background(), map[string]int64{}); err != expErr || err == nil {
+	if err := dm.SetLoadIDs(context.Background(), map[string]int64{}); err != expErr {
 		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err)
 	}
 
@@ -4111,7 +4114,7 @@ func TestDMSetLoadIDsDrvErr(t *testing.T) {
 	}
 
 	expErr := utils.ErrNotImplemented
-	if err := dm.SetLoadIDs(context.Background(), itmLIDs); err == nil || err != expErr {
+	if err := dm.SetLoadIDs(context.Background(), itmLIDs); err != expErr {
 		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err)
 	}
 
@@ -4165,25 +4168,278 @@ func TestDMCheckFiltersErrBadPath(t *testing.T) {
 
 }
 
-// might need to add nil checker for dm on main
-// func TestDMCheckFiltersErrBrokenReferenceCache(t *testing.T) {
+func TestDMCheckFiltersErrBrokenReferenceCache(t *testing.T) {
 
-// 	tmp := Cache
-// 	defer func() {
-// 		Cache = tmp
-// 	}()
-// 	Cache.Clear(nil)
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+	Cache.Clear(nil)
 
-// 	var dm *DataManager
-// 	// var val interface{}
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
 
-// 	if err := Cache.Set(context.Background(), utils.CacheFilters, "cgrates.org:*string:~*req.Account:1001", "", []string{}, true, utils.NonTransactional); err != nil {
-// 		t.Error(err)
-// 	}
+	var val interface{}
+	if err := Cache.Set(context.Background(), utils.CacheFilters, utils.ConcatenatedKey(utils.CGRateSorg, "fltr1"), val, []string{}, true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
 
-// 	expErr := ``
-// 	if err := dm.checkFilters(context.Background(), utils.CGRateSorg, []string{"*string:~*req.Account:1001"}); expErr != err.Error() {
-// 		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err)
-// 	}
+	expErr := `broken reference to filter: <fltr1>`
+	if err := dm.checkFilters(context.Background(), utils.CGRateSorg, []string{"fltr1"}); expErr != err.Error() {
+		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err)
+	}
 
-// }
+}
+
+func TestDMCheckFiltersErrCall(t *testing.T) {
+
+	tmp := Cache
+	cfgtmp := config.CgrConfig()
+	defer func() {
+		Cache = tmp
+		config.SetCgrConfig(cfgtmp)
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	cfg.DataDbCfg().Items[utils.MetaFilters].Remote = true
+	config.SetCgrConfig(cfg)
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	dm.dataDB = &DataDBMock{
+		HasDataDrvF: func(ctx *context.Context, category, subject, tenant string) (bool, error) {
+			return false, utils.ErrNotFound
+		},
+	}
+
+	expErr := `broken reference to filter: <fltr1>`
+	if err := dm.checkFilters(context.Background(), utils.CGRateSorg, []string{"fltr1"}); expErr != err.Error() {
+		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err)
+	}
+
+}
+
+func TestGetAPIBanErrSingleCacheWrite(t *testing.T) {
+	tmp := Cache
+	cfgtmp := config.CgrConfig()
+	defer func() {
+		Cache = tmp
+		config.SetCgrConfig(cfgtmp)
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	cfg.APIBanCfg().Keys = []string{"testKey"}
+	cfg.CacheCfg().Partitions[utils.MetaAPIBan].Replicate = true
+	cfg.CacheCfg().ReplicationConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
+	config.SetCgrConfig(cfg)
+
+	var counter int
+	testServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != "GET" {
+			w.WriteHeader(http.StatusMethodNotAllowed)
+			return
+		}
+		responses := map[string]struct {
+			code int
+			body []byte
+		}{
+			"/testKey/check/1.2.3.251": {code: http.StatusOK, body: []byte(`{"ipaddress":["1.2.3.251"], "ID":"987654321"}`)},
+		}
+		if val, has := responses[r.URL.EscapedPath()]; has {
+			w.WriteHeader(val.code)
+			if val.body != nil {
+				w.Write(val.body)
+			}
+			return
+		}
+		counter++
+		w.WriteHeader(http.StatusOK)
+		if counter < 2 {
+			_, _ = w.Write([]byte(`{"ipaddress": ["1.2.3.251", "ID": "100"}`))
+		} else {
+			_, _ = w.Write([]byte(`{"ID": "none"}`))
+			counter = 0
+		}
+	}))
+	defer testServer.Close()
+	baningo.RootURL = testServer.URL + "/"
+
+	config.SetCgrConfig(cfg)
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+
+	cc := make(chan birpc.ClientConnector, 1)
+	cc <- &ccMock{
+
+		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply interface{}) error {
+
+				return utils.ErrNotImplemented
+			},
+		},
+	}
+
+	cM := NewConnManager(cfg)
+	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.CacheSv1, cc)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+	Cache = NewCacheS(cfg, dm, connMgr, nil)
+
+	if _, err := GetAPIBan(context.Background(), "1.2.3.251", []string{"testKey"}, true, false, true); err != utils.ErrNotImplemented {
+		t.Errorf("Expected error <%v>, Received error <%v>", utils.ErrNotImplemented, err)
+	}
+}
+
+func TestGetAPIBanErrMultipleCacheWrite(t *testing.T) {
+	tmp := Cache
+	cfgtmp := config.CgrConfig()
+	defer func() {
+		Cache = tmp
+		config.SetCgrConfig(cfgtmp)
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	cfg.APIBanCfg().Keys = []string{"testKey"}
+	cfg.CacheCfg().Partitions[utils.MetaAPIBan].Replicate = true
+	cfg.CacheCfg().ReplicationConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
+	config.SetCgrConfig(cfg)
+
+	var counter int
+	testServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != "GET" {
+			w.WriteHeader(http.StatusMethodNotAllowed)
+			return
+		}
+		responses := map[string]struct {
+			code int
+			body []byte
+		}{
+			"/testKey/check/1.2.3.251": {code: http.StatusOK, body: []byte(`{"ipaddress":["1.2.3.251"], "ID":"987654321"}`)},
+		}
+		if val, has := responses[r.URL.EscapedPath()]; has {
+			w.WriteHeader(val.code)
+			if val.body != nil {
+				w.Write(val.body)
+			}
+			return
+		}
+		counter++
+		w.WriteHeader(http.StatusOK)
+		if counter < 2 {
+			_, _ = w.Write([]byte(`{"ipaddress": ["1.2.3.251", "1.2.3.252"], "ID": "100"}`))
+		} else {
+			_, _ = w.Write([]byte(`{"ID": "none"}`))
+			counter = 0
+		}
+	}))
+	defer testServer.Close()
+	baningo.RootURL = testServer.URL + "/"
+
+	config.SetCgrConfig(cfg)
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+
+	cc := make(chan birpc.ClientConnector, 1)
+	cc <- &ccMock{
+
+		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply interface{}) error {
+
+				return utils.ErrNotImplemented
+			},
+		},
+	}
+
+	cM := NewConnManager(cfg)
+	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.CacheSv1, cc)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+	Cache = NewCacheS(cfg, dm, connMgr, nil)
+
+	if _, err := GetAPIBan(context.Background(), "1.2.3.251", []string{"testKey"}, false, false, true); err != utils.ErrNotImplemented {
+		t.Errorf("Expected error <%v>, Received error <%v>", utils.ErrNotImplemented, err)
+	}
+}
+
+func TestGetAPIBanErrNoBanCacheSet(t *testing.T) {
+	tmp := Cache
+	cfgtmp := config.CgrConfig()
+	defer func() {
+		Cache = tmp
+		config.SetCgrConfig(cfgtmp)
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	cfg.APIBanCfg().Keys = []string{"testKey"}
+	cfg.CacheCfg().Partitions[utils.MetaAPIBan].Replicate = true
+	cfg.CacheCfg().ReplicationConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
+	config.SetCgrConfig(cfg)
+
+	var counter int
+	testServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != "GET" {
+			w.WriteHeader(http.StatusMethodNotAllowed)
+			return
+		}
+		responses := map[string]struct {
+			code int
+			body []byte
+		}{
+			"/testKey/check/1.2.3.251": {code: http.StatusOK, body: []byte(`{"ipaddress":["1.2.3.251"], "ID":"987654321"}`)},
+			"/testKey/check/1.2.3.254": {code: http.StatusBadRequest, body: []byte(`{"ipaddress":["not blocked"], "ID":"none"}`)},
+		}
+		if val, has := responses[r.URL.EscapedPath()]; has {
+			w.WriteHeader(val.code)
+			if val.body != nil {
+				w.Write(val.body)
+			}
+			return
+		}
+		counter++
+		w.WriteHeader(http.StatusOK)
+		if counter < 2 {
+			_, _ = w.Write([]byte(`{"ipaddress": ["1.2.3.251", "1.2.3.252"], "ID": "100"}`))
+		} else {
+			_, _ = w.Write([]byte(`{"ID": "none"}`))
+			counter = 0
+		}
+	}))
+	defer testServer.Close()
+	baningo.RootURL = testServer.URL + "/"
+
+	config.SetCgrConfig(cfg)
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+
+	cc := make(chan birpc.ClientConnector, 1)
+	cc <- &ccMock{
+
+		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply interface{}) error {
+
+				return utils.ErrNotImplemented
+			},
+		},
+	}
+
+	cM := NewConnManager(cfg)
+	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.CacheSv1, cc)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+	Cache = NewCacheS(cfg, dm, connMgr, nil)
+
+	if _, err := GetAPIBan(context.Background(), "1.2.3.254", []string{}, false, false, true); err != utils.ErrNotImplemented {
+		t.Errorf("Expected error <%v>, Received error <%v>", utils.ErrNotImplemented, err)
+	}
+}
+
+func TestDMRemoveIndexesErrNilDm(t *testing.T) {
+
+	var dm *DataManager
+
+	if err := dm.RemoveIndexes(context.Background(), "indxItmtype", "cgrates.org", "indxkey"); err != utils.ErrNoDatabaseConn {
+		t.Errorf("Expected error <%v>, received error <%v>", utils.ErrNoDatabaseConn, err)
+	}
+
+}
