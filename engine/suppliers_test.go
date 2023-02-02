@@ -750,7 +750,28 @@ func TestSuppliersV1GetSuppliers(t *testing.T) {
 			},
 		},
 	}
+	supplier2 := &SupplierProfile{
+		Tenant:            "cgrates.org",
+		ID:                "SUP2",
+		FilterIDs:         []string{"FLTR_1"},
+		Weight:            10,
+		Sorting:           utils.MetaHC,
+		SortingParameters: []string{},
+		Suppliers: []*Supplier{
+			{
+				ID:            "Sup",
+				FilterIDs:     []string{},
+				AccountIDs:    []string{"1001"},
+				RatingPlanIDs: []string{"RT_PLAN1"},
+				ResourceIDs:   []string{"RES1"},
+				Weight:        10,
+			},
+		},
+	}
 	if err := dm.SetSupplierProfile(supplier, true); err != nil {
+		t.Error(err)
+	}
+	if err := dm.SetSupplierProfile(supplier2, true); err != nil {
 		t.Error(err)
 	}
 	exp := &SortedSuppliers{
@@ -773,5 +794,74 @@ func TestSuppliersV1GetSuppliers(t *testing.T) {
 		t.Error(err)
 	} else if reflect.DeepEqual(exp, reply) {
 		t.Errorf("expected %+v,received %+v", utils.ToJSON(exp), utils.ToJSON(reply))
+	}
+}
+func TestSupplierServiceGetSPForEvent(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	defer func() {
+		cfg2, _ := config.NewDefaultCGRConfig()
+		config.SetCgrConfig(cfg2)
+	}()
+	cfg.SupplierSCfg().IndexedSelects = false
+	splService, err := NewSupplierService(dm, &FilterS{
+		dm: dm, cfg: cfg}, cfg, nil)
+	if err != nil {
+		t.Error(err)
+	}
+	arg := &utils.CGREventWithArgDispatcher{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testV1SplSGetHighestCostSuppliers",
+			Event: map[string]interface{}{
+				utils.Account:     "1001",
+				utils.Subject:     "1001",
+				utils.Destination: "1002",
+				utils.SetupTime:   time.Date(2017, 12, 1, 14, 25, 0, 0, time.UTC),
+				utils.Usage:       "1m20s",
+			},
+		},
+		ArgDispatcher: &utils.ArgDispatcher{
+			APIKey: utils.StringPointer("sup12345"),
+		},
+	}
+	fltr := &Filter{
+		ID:     "FLTR_1",
+		Tenant: "cgrates.org",
+		Rules: []*FilterRule{
+			{Type: utils.MetaString,
+				Element: "~*req.Account",
+				Values:  []string{"1001"},
+			},
+		},
+	}
+	if err := dm.SetFilter(fltr); err != nil {
+		t.Error(err)
+	}
+	supplier := &SupplierProfile{
+		Tenant:            "cgrates.org",
+		ID:                "SUP1",
+		FilterIDs:         []string{"FLTR_1"},
+		Weight:            10,
+		Sorting:           utils.MetaQOS,
+		SortingParameters: []string{},
+		Suppliers: []*Supplier{
+			{
+				ID:            "Sup",
+				FilterIDs:     []string{},
+				AccountIDs:    []string{"1001"},
+				RatingPlanIDs: []string{"RT_PLAN1"},
+				ResourceIDs:   []string{"RES1"},
+				Weight:        10,
+			},
+		},
+	}
+	if err := dm.SetSupplierProfile(supplier, true); err != nil {
+		t.Error(err)
+	}
+	var reply []*SupplierProfile
+	if err := splService.V1GetSupplierProfilesForEvent(arg, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(reply, []*SupplierProfile{supplier}) {
+		t.Errorf("expected %v,received %v", utils.ToJSON([]*SupplierProfile{supplier}), utils.ToJSON(reply))
 	}
 }

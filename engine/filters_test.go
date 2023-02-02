@@ -19,6 +19,7 @@ package engine
 
 import (
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 
@@ -1477,5 +1478,53 @@ func TestRemoveItemFromIndexRP(t *testing.T) {
 	if err := fltInd.RemoveItemFromIndex("cgrates.org", rs.ID, []string{}); err != nil {
 		t.Error(err)
 	}
+}
 
+func TestRemoveItemFromIndexCHP(t *testing.T) {
+	cfg, err := config.NewDefaultCGRConfig()
+	if err != nil {
+		t.Error(err)
+	}
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	fltr := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "FLTR_CP_2",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaString,
+				Element: "~*req.Charger",
+				Values:  []string{"ChargerProfile2"},
+			},
+		}}
+	if err := fltr.Compile(); err != nil {
+		t.Error(err)
+	}
+	if err := dm.SetFilter(fltr); err != nil {
+		t.Error(err)
+	}
+	chp := &ChargerProfile{
+		Tenant:       "cgrates.org",
+		ID:           "Raw",
+		FilterIDs:    []string{"FLTR_CP_2"},
+		RunID:        utils.MetaRaw,
+		AttributeIDs: []string{"*constant:*req.RequestType:*none"},
+		Weight:       0,
+	}
+	if err := dm.SetChargerProfile(chp, false); err != nil {
+		t.Error(err)
+	}
+	fltInd := NewFilterIndexer(dm, utils.ChargerProfilePrefix, chp.Tenant)
+	if err := fltInd.RemoveItemFromIndex("cgrates.org", chp.ID, []string{}); err != nil {
+		t.Error(err)
+	}
+	if err := dm.RemoveFilter("cgrates.org", fltr.ID, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+	if err := fltInd.RemoveItemFromIndex("cgrates.org", chp.ID, []string{}); err == nil {
+		t.Error(err)
+	}
+	if err := dm.SetChargerProfile(chp, true); err == nil || !strings.HasPrefix(err.Error(), "broken reference to filter:") {
+		t.Error(err)
+	}
 }
