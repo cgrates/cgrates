@@ -74,6 +74,7 @@ type DataDBMock struct {
 	SetThresholdDrvF            func(*context.Context, *Threshold) error
 	SetStatQueueDrvF            func(*context.Context, *StoredStatQueue, *StatQueue) error
 	HasDataDrvF                 func(ctx *context.Context, category, subject, tenant string) (bool, error)
+	RemoveIndexesDrvF           func(ctx *context.Context, idxItmType, tntCtx, idxKey string) error
 }
 
 // Storage methods
