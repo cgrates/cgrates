@@ -21,7 +21,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
 )
 
 func TestBalanceSortPrecision(t *testing.T) {
@@ -289,5 +291,80 @@ func TestBalanceIsExpiredAt(t *testing.T) {
 	if rcv := balance.IsExpiredAt(date3); rcv {
 		t.Errorf("Expecting: false , received: %+v", rcv)
 	}
+}
 
+func TestBalancesSaveDirtyBalances(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	tmpDm := dm
+	tmpConn := connMgr
+	defer func() {
+		cfg2, _ := config.NewDefaultCGRConfig()
+		config.SetCgrConfig(cfg2)
+		dm = tmpDm
+		connMgr = tmpConn
+	}()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+
+	cfg.RalsCfg().ThresholdSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)}
+	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn <- &ccMock{
+		calls: map[string]func(args interface{}, reply interface{}) error{
+			utils.ThresholdSv1ProcessEvent: func(args, reply interface{}) error {
+				return nil
+			},
+		},
+	}
+	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds): clientConn,
+	})
+	acc := &Account{
+		ID: "cgrates.org:cond",
+		BalanceMap: map[string]Balances{
+			utils.MONETARY: {
+				&Balance{
+					Uuid:   utils.GenUUID(),
+					Value:  1,
+					Weight: 10,
+				},
+				&Balance{
+					Uuid:   utils.GenUUID(),
+					Value:  6,
+					Weight: 20,
+				},
+			},
+			utils.VOICE: {
+				&Balance{
+					Uuid:   utils.GenUUID(),
+					Value:  10,
+					Weight: 10,
+				},
+				&Balance{
+					Uuid:   utils.GenUUID(),
+					Value:  100,
+					Weight: 20,
+				},
+			},
+		}}
+	bAcc := &Account{
+		ID: "cgrates.org:max",
+		BalanceMap: map[string]Balances{
+			utils.MONETARY: {
+				&Balance{Value: 11, Weight: 20},
+			}},
+	}
+	bc := Balances{
+		&Balance{Value: 200 * float64(time.Second),
+			DestinationIDs: utils.NewStringMap("NAT"), Weight: 10,
+			dirty:   true,
+			account: bAcc,
+		},
+	}
+	config.SetCgrConfig(cfg)
+	SetDataStorage(dm)
+	SetConnManager(connMgr)
+	bc.SaveDirtyBalances(acc)
+	if _, err := dm.GetAccount("cgrates.org:max"); err != nil {
+		t.Error(err)
+	}
 }

@@ -21,6 +21,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -359,5 +360,48 @@ func BenchmarkMarshallerBincStoreRestore(b *testing.B) {
 		ms.Unmarshal(result, ap1)
 		result, _ = ms.Marshal(ub)
 		ms.Unmarshal(result, ub1)
+	}
+}
+
+func TestIDBGetTpSuppliers(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	defer func() {
+		cfg2, _ := config.NewDefaultCGRConfig()
+		config.SetCgrConfig(cfg2)
+	}()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	suppliers := []*utils.TPSupplierProfile{
+		{
+			TPid:      "TP1",
+			Tenant:    "cgrates.org",
+			ID:        "SUPL_1",
+			FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
+			ActivationInterval: &utils.TPActivationInterval{
+				ActivationTime: "2014-07-29T15:00:00Z",
+				ExpiryTime:     "",
+			},
+			Sorting:           "*lowest_cost",
+			SortingParameters: []string{},
+			Suppliers: []*utils.TPSupplier{
+				{
+					ID:                 "supplier1",
+					FilterIDs:          []string{"FLTR_1"},
+					AccountIDs:         []string{"Acc1", "Acc2"},
+					RatingPlanIDs:      []string{"RPL_1"},
+					ResourceIDs:        []string{"ResGroup1"},
+					StatIDs:            []string{"Stat1"},
+					Weight:             10,
+					Blocker:            false,
+					SupplierParameters: "SortingParam1",
+				},
+			},
+			Weight: 20,
+		},
+	}
+	if err := db.SetTPSuppliers(suppliers); err != nil {
+		t.Error(err)
+	}
+	if _, err := db.GetTPSuppliers("TP1", "cgrates.org", "SUPL_1"); err != nil {
+		t.Error(err)
 	}
 }
