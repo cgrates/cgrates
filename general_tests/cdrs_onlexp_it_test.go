@@ -40,7 +40,7 @@ package general_tests
 // 	"github.com/cgrates/cgrates/utils"
 // 	"github.com/cgrates/rpcclient"
 // 	kafka "github.com/segmentio/kafka-go"
-// 	"github.com/streadway/amqp"
+// 	amqp "github.com/rabbitmq/amqp091-go"
 // )
 
 // var (
