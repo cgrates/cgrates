@@ -59,7 +59,6 @@ func Newlogger(loggertype, id string) (lgr LoggerInterface, err error) {
 	default:
 		return nil, fmt.Errorf("unsupported logger: <%s>", loggertype)
 	}
-	// }
 }
 
 type LoggerInterface interface {
