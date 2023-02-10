@@ -261,6 +261,9 @@ func TestDebugLogger(t *testing.T) {
 }
 
 func TestWriteLogger(t *testing.T) {
+	if noSysLog {
+		t.SkipNow()
+	}
 	log.SetOutput(os.Stderr)
 
 	loggertype := MetaSysLog
@@ -286,6 +289,9 @@ func TestWriteLogger(t *testing.T) {
 }
 
 func TestCloseLogger(t *testing.T) {
+	if noSysLog {
+		t.SkipNow()
+	}
 	log.SetOutput(io.Discard)
 
 	loggertype := MetaStdLog

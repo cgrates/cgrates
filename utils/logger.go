@@ -27,11 +27,18 @@ import (
 )
 
 var Logger LoggerInterface
+var noSysLog bool
 
 func init() {
 	if Logger == nil || reflect.ValueOf(Logger).IsNil() {
+
+		var err error
 		//used for testing only, so we will ignore the error for now
-		Logger, _ = Newlogger(MetaSysLog, EmptyString)
+		if Logger, err = Newlogger(MetaSysLog, EmptyString); err != nil {
+			noSysLog = true
+			Logger, _ = Newlogger(MetaStdLog, EmptyString)
+		}
+
 	}
 }
 
@@ -42,6 +49,9 @@ func Newlogger(loggertype, id string) (lgr LoggerInterface, err error) {
 	case MetaStdLog:
 		return
 	case MetaSysLog:
+		if noSysLog {
+			return
+		}
 		var l *syslog.Writer
 		l, err = syslog.New(syslog.LOG_INFO|syslog.LOG_DAEMON, fmt.Sprintf("CGRateS <%s> ", id))
 		lgr.SetSyslog(l) // if we received an error, l is nil
@@ -49,6 +59,7 @@ func Newlogger(loggertype, id string) (lgr LoggerInterface, err error) {
 	default:
 		return nil, fmt.Errorf("unsupported logger: <%s>", loggertype)
 	}
+	// }
 }
 
 type LoggerInterface interface {
