@@ -288,16 +288,25 @@ func TestWriteLogger(t *testing.T) {
 	log.SetOutput(os.Stderr)
 }
 
-func TestCloseLogger(t *testing.T) {
-	if noSysLog {
-		t.SkipNow()
-	}
+func TestCloseLoggerStdLog(t *testing.T) {
 	log.SetOutput(io.Discard)
 
 	loggertype := MetaStdLog
 	if _, err := Newlogger(loggertype, EmptyString); err != nil {
 		t.Error(err)
 	}
+
+	newLogger := &StdLogger{nodeID: EmptyString}
+	if err := newLogger.Close(); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestCloseLoggerSysLog(t *testing.T) {
+	if noSysLog {
+		t.SkipNow()
+	}
+	log.SetOutput(io.Discard)
 
 	newLogger := &StdLogger{nodeID: EmptyString}
 	if err := newLogger.Close(); err != nil {
