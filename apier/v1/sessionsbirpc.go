@@ -61,7 +61,8 @@ func (ssv1 *SessionSv1) Handlers() map[string]interface{} {
 		utils.SessionSv1STIRAuthenticate: ssv1.BiRPCV1STIRAuthenticate,
 		utils.SessionSv1STIRIdentity:     ssv1.BiRPCV1STIRIdentity,
 
-		utils.SessionSv1Sleep: ssv1.BiRPCV1Sleep, // Sleep method is used to test the concurrent requests mechanism
+		utils.SessionSv1Sleep:     ssv1.BiRPCV1Sleep, // Sleep method is used to test the concurrent requests mechanism
+		utils.SessionSv1CapsError: ssv1.BiRPCV1CapsError,
 	}
 }
 
@@ -199,9 +200,14 @@ func (ssv1 *SessionSv1) BiRPCV1STIRIdentity(clnt *rpc2.Client,
 	return ssv1.sS.BiRPCv1STIRIdentity(nil, args, reply)
 }
 
-func (ssv1 *SessionSv1) BiRPCV1Sleep(clnt *rpc2.Client, arg *utils.DurationArgs,
+func (ssv1 *SessionSv1) BiRPCV1Sleep(clnt *rpc2.Client, args *utils.DurationArgs,
 	reply *string) (err error) {
-	time.Sleep(arg.Duration)
+	time.Sleep(args.Duration)
 	*reply = utils.OK
 	return nil
+}
+
+func (ssv1 *SessionSv1) BiRPCV1CapsError(clnt *rpc2.Client, args interface{},
+	reply *string) (err error) {
+	return ssv1.sS.BiRPCv1CapsError(clnt, args, reply)
 }

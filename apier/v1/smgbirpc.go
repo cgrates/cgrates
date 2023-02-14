@@ -20,6 +20,7 @@ package v1
 
 import (
 	"github.com/cenkalti/rpc2"
+	"github.com/cgrates/cgrates/utils"
 )
 
 // Publishes methods exported by SMGenericV1 as SMGenericV1 (so we can handle standard RPC methods via birpc socket)
@@ -30,6 +31,7 @@ func (smgv1 *SMGenericV1) Handlers() map[string]interface{} {
 		"SMGenericV1.UpdateSession":    smgv1.BiRPCV1UpdateSession,
 		"SMGenericV1.TerminateSession": smgv1.BiRPCV1TerminateSession,
 		"SMGenericV1.ProcessCDR":       smgv1.BiRPCV1ProcessCDR,
+		"SMGenericV1.Sleep":            smgv1.BiRPCV1CapsError,
 	}
 }
 
@@ -61,4 +63,10 @@ func (smgv1 *SMGenericV1) BiRPCV1TerminateSession(clnt *rpc2.Client,
 func (smgv1 *SMGenericV1) BiRPCV1ProcessCDR(clnt *rpc2.Client,
 	ev map[string]interface{}, reply *string) (err error) {
 	return smgv1.Ss.BiRPCV1ProcessCDR(clnt, ev, reply)
+}
+
+// BiRPCv1CapsError is used to return error when the caps limit is hit
+func (smgv1 *SMGenericV1) BiRPCV1CapsError(clnt *rpc2.Client,
+	args interface{}, reply *string) (err error) {
+	return utils.ErrMaxConcurentRPCExceeded
 }

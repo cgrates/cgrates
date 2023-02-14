@@ -164,14 +164,18 @@ type capsBiRPCCodec struct {
 // ReadHeader must read a message and populate either the request
 // or the response by inspecting the incoming message.
 func (c *capsBiRPCCodec) ReadHeader(req *rpc2.Request, resp *rpc2.Response) (err error) {
-	return c.sc.ReadHeader(req, resp)
+	if err = c.sc.ReadHeader(req, resp); err != nil || req.Method == utils.EmptyString {
+		return
+	}
+	if err = c.caps.Allocate(); err != nil {
+		req.Method = utils.SessionSv1CapsError
+		err = nil
+	}
+	return
 }
 
 // ReadRequestBody into args argument of handler function.
 func (c *capsBiRPCCodec) ReadRequestBody(x interface{}) (err error) {
-	if err = c.caps.Allocate(); err != nil {
-		return
-	}
 	return c.sc.ReadRequestBody(x)
 }
 
