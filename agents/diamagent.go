@@ -602,6 +602,11 @@ func (da *DiameterAgent) BiRPCv1WarnDisconnect(clnt rpcclient.ClientConnector, a
 	return da.V1WarnDisconnect(args, reply)
 }
 
+// BiRPCv1CapsError is used to return error when the caps limit is hit
+func (da *DiameterAgent) BiRPCv1CapsError(clnt rpcclient.ClientConnector, args interface{}, reply *string) (err error) {
+	return utils.ErrMaxConcurentRPCExceeded
+}
+
 // Handlers is used to implement the rpcclient.BiRPCConector interface
 func (da *DiameterAgent) Handlers() map[string]interface{} {
 	return map[string]interface{}{
@@ -619,6 +624,9 @@ func (da *DiameterAgent) Handlers() map[string]interface{} {
 		},
 		utils.SessionSv1WarnDisconnect: func(clnt *rpc2.Client, args map[string]interface{}, rply *string) (err error) {
 			return da.BiRPCv1WarnDisconnect(clnt, args, rply)
+		},
+		utils.SessionSv1CapsError: func(clnt *rpc2.Client, args interface{}, rply *string) (err error) {
+			return da.BiRPCv1CapsError(clnt, args, rply)
 		},
 	}
 }

@@ -4133,6 +4133,12 @@ func (sS *SessionS) BiRPCv1STIRIdentity(clnt rpcclient.ClientConnector,
 	return
 }
 
+// BiRPCv1STIRIdentity the API for STIR header creation
+func (sS *SessionS) BiRPCv1CapsError(clnt rpcclient.ClientConnector,
+	args interface{}, identity *string) (err error) {
+	return utils.ErrMaxConcurentRPCExceeded
+}
+
 // Handlers bidirectional methods following
 func (sS *SessionS) Handlers() map[string]interface{} {
 	return map[string]interface{}{
@@ -4210,6 +4216,9 @@ func (sS *SessionS) Handlers() map[string]interface{} {
 		},
 		utils.SessionSv1STIRIdentity: func(clnt *rpc2.Client, args *V1STIRIdentityArgs, rply *string) (err error) {
 			return sS.BiRPCv1STIRIdentity(clnt, args, rply)
+		},
+		utils.SessionSv1CapsError: func(clnt *rpc2.Client, args interface{}, rply *string) (err error) {
+			return sS.BiRPCv1CapsError(clnt, args, rply)
 		},
 	}
 }
