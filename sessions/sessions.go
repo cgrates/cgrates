@@ -4136,7 +4136,7 @@ func (sS *SessionS) BiRPCv1STIRIdentity(clnt rpcclient.ClientConnector,
 // BiRPCv1STIRIdentity the API for STIR header creation
 func (sS *SessionS) BiRPCv1CapsError(clnt rpcclient.ClientConnector,
 	args interface{}, identity *string) (err error) {
-	return utils.ErrMaxConcurentRPCExceeded
+	return utils.ErrMaxConcurrentRPCExceeded
 }
 
 // Handlers bidirectional methods following

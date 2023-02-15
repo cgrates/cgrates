@@ -47,8 +47,8 @@ func TestNewCaps(t *testing.T) {
 	if al := cs.Allocated(); al != 0 {
 		t.Errorf("Expected: %v ,received: %v", 0, al)
 	}
-	if err := cs.Allocate(); err != utils.ErrMaxConcurentRPCExceededNoCaps {
-		t.Errorf("Expected: %v ,received: %v", utils.ErrMaxConcurentRPCExceededNoCaps, err)
+	if err := cs.Allocate(); err != utils.ErrMaxConcurrentRPCExceededNoCaps {
+		t.Errorf("Expected: %v ,received: %v", utils.ErrMaxConcurrentRPCExceededNoCaps, err)
 	}
 	cs = NewCaps(1, utils.MetaBusy)
 	if err := cs.Allocate(); err != nil {

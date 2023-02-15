@@ -411,7 +411,7 @@ func (sma *AsteriskAgent) BiRPCv1WarnDisconnect(clnt rpcclient.ClientConnector, 
 
 // BiRPCv1CapsError is used to return error when the caps limit is hit
 func (sma *AsteriskAgent) BiRPCv1CapsError(clnt rpcclient.ClientConnector, args interface{}, reply *string) (err error) {
-	return utils.ErrMaxConcurentRPCExceeded
+	return utils.ErrMaxConcurrentRPCExceeded
 }
 
 // Handlers is used to implement the rpcclient.BiRPCConector interface

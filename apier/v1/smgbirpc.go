@@ -68,5 +68,5 @@ func (smgv1 *SMGenericV1) BiRPCV1ProcessCDR(clnt *rpc2.Client,
 // BiRPCv1CapsError is used to return error when the caps limit is hit
 func (smgv1 *SMGenericV1) BiRPCV1CapsError(clnt *rpc2.Client,
 	args interface{}, reply *string) (err error) {
-	return utils.ErrMaxConcurentRPCExceeded
+	return utils.ErrMaxConcurrentRPCExceeded
 }

@@ -101,8 +101,8 @@ func (c *capsServerCodec) ReadRequestBody(x interface{}) error {
 	return c.sc.ReadRequestBody(x)
 }
 func (c *capsServerCodec) WriteResponse(r *rpc.Response, x interface{}) error {
-	if r.Error == utils.ErrMaxConcurentRPCExceededNoCaps.Error() {
-		r.Error = utils.ErrMaxConcurentRPCExceeded.Error()
+	if r.Error == utils.ErrMaxConcurrentRPCExceededNoCaps.Error() {
+		r.Error = utils.ErrMaxConcurrentRPCExceeded.Error()
 	} else {
 		defer c.caps.Deallocate()
 	}
@@ -164,7 +164,8 @@ type capsBiRPCCodec struct {
 // ReadHeader must read a message and populate either the request
 // or the response by inspecting the incoming message.
 func (c *capsBiRPCCodec) ReadHeader(req *rpc2.Request, resp *rpc2.Response) (err error) {
-	if err = c.sc.ReadHeader(req, resp); err != nil || req.Method == utils.EmptyString {
+	if err = c.sc.ReadHeader(req, resp); err != nil ||
+		req.Method == utils.EmptyString { // caps will not process replies
 		return
 	}
 	if err = c.caps.Allocate(); err != nil {
@@ -191,8 +192,8 @@ func (c *capsBiRPCCodec) WriteRequest(req *rpc2.Request, x interface{}) error {
 
 // WriteResponse must be safe for concurrent use by multiple goroutines.
 func (c *capsBiRPCCodec) WriteResponse(r *rpc2.Response, x interface{}) error {
-	if r.Error == utils.ErrMaxConcurentRPCExceededNoCaps.Error() {
-		r.Error = utils.ErrMaxConcurentRPCExceeded.Error()
+	if r.Error == utils.ErrMaxConcurrentRPCExceededNoCaps.Error() {
+		r.Error = utils.ErrMaxConcurrentRPCExceeded.Error()
 	} else {
 		defer c.caps.Deallocate()
 	}

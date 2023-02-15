@@ -55,7 +55,7 @@ func (cR *Caps) Allocate() (err error) {
 	switch cR.strategy {
 	case utils.MetaBusy:
 		if len(cR.aReqs) == cap(cR.aReqs) {
-			return utils.ErrMaxConcurentRPCExceededNoCaps
+			return utils.ErrMaxConcurrentRPCExceededNoCaps
 		}
 		fallthrough
 	case utils.MetaQueue:
