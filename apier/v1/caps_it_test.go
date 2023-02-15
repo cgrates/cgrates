@@ -119,6 +119,7 @@ func testCapsBusyAPIs(t *testing.T) {
 	for i := 0; i < 5; i++ {
 		wg.Add(1)
 		go func() {
+			defer wg.Done()
 			var resp string
 			if err := capsRPC.Call(utils.CoreSv1Sleep,
 				&utils.DurationArgs{Duration: 10 * time.Millisecond},
@@ -126,10 +127,8 @@ func testCapsBusyAPIs(t *testing.T) {
 				lock.Lock()
 				failedAPIs++
 				lock.Unlock()
-				wg.Done()
 				return
 			}
-			wg.Done()
 		}()
 	}
 	wg.Wait()
@@ -146,15 +145,14 @@ func testCapsQueueAPIs(t *testing.T) {
 	for i := 0; i < 5; i++ {
 		wg.Add(1)
 		go func() {
+			defer wg.Done()
 			var resp string
 			if err := capsRPC.Call(utils.CoreSv1Sleep,
 				&utils.DurationArgs{Duration: 10 * time.Millisecond},
 				&resp); err != nil {
-				wg.Done()
 				t.Error(err)
 				return
 			}
-			wg.Done()
 		}()
 	}
 	wg.Wait()
@@ -170,15 +168,14 @@ func testCapsOnHTTPBusy(t *testing.T) {
 	for i := 0; i < 5; i++ {
 		wg.Add(1)
 		go func(index int) {
+			defer wg.Done()
 			resp, err := http.Post("http://localhost:2080/jsonrpc", "application/json", bytes.NewBuffer([]byte(fmt.Sprintf(`{"method": "CoreSv1.Sleep", "params": [{"Duration":10000000}], "id":%d}`, index))))
 			if err != nil {
-				wg.Done()
 				t.Error(err)
 				return
 			}
 			contents, err := io.ReadAll(resp.Body)
 			if err != nil {
-				wg.Done()
 				t.Error(err)
 				return
 			}
@@ -188,8 +185,6 @@ func testCapsOnHTTPBusy(t *testing.T) {
 				fldAPIs++
 				lock.Unlock()
 			}
-			wg.Done()
-			return
 		}(i)
 	}
 	wg.Wait()
@@ -206,14 +201,12 @@ func testCapsOnHTTPQueue(t *testing.T) {
 	for i := 0; i < 5; i++ {
 		wg.Add(1)
 		go func(index int) {
+			defer wg.Done()
 			_, err := http.Post("http://localhost:2080/jsonrpc", "application/json", bytes.NewBuffer([]byte(fmt.Sprintf(`{"method": "CoreSv1.Sleep", "params": [{"Duration":10000000}], "id":%d}`, index))))
 			if err != nil {
-				wg.Done()
 				t.Error(err)
 				return
 			}
-			wg.Done()
-			return
 		}(i)
 	}
 	wg.Wait()
@@ -224,27 +217,44 @@ func testCapsOnBiJSONBusy(t *testing.T) {
 		t.SkipNow()
 	}
 	var failedAPIs int
-	wg := new(sync.WaitGroup)
 	lock := new(sync.Mutex)
-	for i := 0; i < 5; i++ {
-		wg.Add(1)
-		go func() {
-			var resp string
-			if err := capsBiRPC.Call(utils.SessionSv1Sleep,
-				&utils.DurationArgs{Duration: 10 * time.Millisecond},
-				&resp); err != nil {
-				lock.Lock()
-				failedAPIs++
-				lock.Unlock()
-				wg.Done()
-				return
+	errChan := make(chan error)   // to retrieve and verify api errors
+	waitCh := make(chan struct{}) // helper channel to break the for-select loop
+	go func() {
+		wg := new(sync.WaitGroup)
+		for i := 0; i < 5; i++ {
+			wg.Add(1)
+			go func() {
+				defer wg.Done()
+				var resp string
+				if err := capsBiRPC.Call(utils.SessionSv1Sleep, &utils.DurationArgs{
+					Duration: 10 * time.Millisecond}, &resp); err != nil {
+					errChan <- err
+					lock.Lock()
+					failedAPIs++
+					lock.Unlock()
+					return
+				}
+			}()
+		}
+		wg.Wait()
+		close(waitCh)
+	}()
+	waiting := true
+	for waiting {
+		select {
+		case err := <-errChan:
+			if err.Error() != utils.ErrMaxConcurentRPCExceeded.Error() {
+				t.Errorf("expected: <%+v>, \nreceived: <%+v>",
+					utils.ErrMaxConcurentRPCExceeded, err)
 			}
-			wg.Done()
-		}()
+		case <-waitCh:
+			waiting = false
+		}
+
 	}
-	wg.Wait()
 	if failedAPIs < 2 {
-		t.Errorf("Expected at leat 2 APIs to wait")
+		t.Errorf("Expected at least 2 APIs to wait")
 	}
 }
 
@@ -256,15 +266,14 @@ func testCapsOnBiJSONQueue(t *testing.T) {
 	for i := 0; i < 5; i++ {
 		wg.Add(1)
 		go func() {
+			defer wg.Done()
 			var resp string
 			if err := capsBiRPC.Call(utils.SessionSv1Sleep,
 				&utils.DurationArgs{Duration: 10 * time.Millisecond},
 				&resp); err != nil {
-				wg.Done()
 				t.Error(err)
 				return
 			}
-			wg.Done()
 		}()
 	}
 	wg.Wait()
