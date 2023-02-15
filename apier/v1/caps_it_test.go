@@ -180,7 +180,7 @@ func testCapsOnHTTPBusy(t *testing.T) {
 				return
 			}
 			resp.Body.Close()
-			if strings.Contains(string(contents), utils.ErrMaxConcurentRPCExceeded.Error()) {
+			if strings.Contains(string(contents), utils.ErrMaxConcurrentRPCExceeded.Error()) {
 				lock.Lock()
 				fldAPIs++
 				lock.Unlock()
@@ -244,9 +244,9 @@ func testCapsOnBiJSONBusy(t *testing.T) {
 	for waiting {
 		select {
 		case err := <-errChan:
-			if err.Error() != utils.ErrMaxConcurentRPCExceeded.Error() {
+			if err.Error() != utils.ErrMaxConcurrentRPCExceeded.Error() {
 				t.Errorf("expected: <%+v>, \nreceived: <%+v>",
-					utils.ErrMaxConcurentRPCExceeded, err)
+					utils.ErrMaxConcurrentRPCExceeded, err)
 			}
 		case <-waitCh:
 			waiting = false

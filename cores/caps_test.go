@@ -80,8 +80,8 @@ func TestNewCapsServerCodec(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if err = codec.ReadRequestBody("args"); err != utils.ErrMaxConcurentRPCExceededNoCaps {
-		t.Errorf("Expected error: %v ,received: %v ", utils.ErrMaxConcurentRPCExceededNoCaps, err)
+	if err = codec.ReadRequestBody("args"); err != utils.ErrMaxConcurrentRPCExceededNoCaps {
+		t.Errorf("Expected error: %v ,received: %v ", utils.ErrMaxConcurrentRPCExceededNoCaps, err)
 	}
 
 	if err = codec.WriteResponse(&rpc.Response{
@@ -93,7 +93,7 @@ func TestNewCapsServerCodec(t *testing.T) {
 	}
 
 	if err = codec.WriteResponse(&rpc.Response{
-		Error:         utils.ErrMaxConcurentRPCExceededNoCaps.Error(),
+		Error:         utils.ErrMaxConcurrentRPCExceededNoCaps.Error(),
 		Seq:           0,
 		ServiceMethod: utils.CoreSv1Ping,
 	}, "reply"); err != nil {
@@ -184,8 +184,8 @@ func TestNewCapsBiRPCCodec(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if err = codec.ReadRequestBody("args"); err != utils.ErrMaxConcurentRPCExceededNoCaps {
-		t.Errorf("Expected error: %v ,received: %v ", utils.ErrMaxConcurentRPCExceededNoCaps, err)
+	if err = codec.ReadRequestBody("args"); err != utils.ErrMaxConcurrentRPCExceededNoCaps {
+		t.Errorf("Expected error: %v ,received: %v ", utils.ErrMaxConcurrentRPCExceededNoCaps, err)
 	}
 
 	if err = codec.WriteResponse(&rpc2.Response{
@@ -207,7 +207,7 @@ func TestNewCapsBiRPCCodec(t *testing.T) {
 	}
 
 	if err = codec.WriteResponse(&rpc2.Response{
-		Error: utils.ErrMaxConcurentRPCExceededNoCaps.Error(),
+		Error: utils.ErrMaxConcurrentRPCExceededNoCaps.Error(),
 		Seq:   0,
 	}, "reply"); err != nil {
 		t.Fatal(err)
