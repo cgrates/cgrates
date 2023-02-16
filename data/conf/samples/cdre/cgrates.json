@@ -1,0 +1,152 @@
+{
+
+"general": {
+    "log_level": 7,
+    "connect_timeout": "1h",								
+	"reply_timeout": "1h"
+},
+
+"listen": {
+    "rpc_json": ":2012",
+    "rpc_gob": ":2013",
+    "http": ":2080"
+},
+
+"data_db": {								
+    "db_type": "redis",						
+    "db_port": 6379, 						
+    "db_name": "10"					
+    
+},
+
+"stor_db": {
+    "db_password": "CGRateS.org"
+},
+
+"schedulers": {
+    "enabled": true
+},
+
+"cdrs": {
+    "enabled": true
+},
+
+"cdre": {
+    "amqp_exporter_map": {
+        "export_format": "*amqp_json_map",
+        "export_path": "amqp://guest:guest@localhost:5672/?queue_id=cgrates_cdrs&routing_key=cgrates_cdrs",
+        "filters" :["*string:~*req.Source:test2"],
+        "synchronous": true,
+        "fields": [
+            {"path": "*exp.CGRID", "type": "*composed", "value": "~*req.CGRID"},
+            {"path": "*exp.RunID", "type": "*composed", "value": "~*req.RunID"},
+            {"path": "*exp.Source", "type": "*composed", "value": "~*req.Source"},
+            {"path": "*exp.OriginID", "type": "*composed", "value": "~*req.OriginID"},
+            {"path": "*exp.Tenant", "type": "*composed", "value": "~*req.Tenant"},
+            {"path": "*exp.Category", "type": "*composed", "value": "~*req.Category"},
+            {"path": "*exp.Account", "type": "*composed", "value": "~*req.Account"},
+            {"path": "*exp.Destination", "type": "*composed", "value": "~*req.Destination"},
+            {"path": "*exp.Usage", "type": "*composed", "value": "~*req.Usage"},
+            {"path": "*exp.Cost", "type": "*composed", "value": "~*req.Cost", "rounding_decimals": 4}
+        ]
+    },
+    "amqp_exporter_cdr": {
+        "export_format": "*amqp_json_cdr",
+        "export_path": "amqp://guest:guest@localhost:5672/?queue_id=cgrates_cdrs&routing_key=cgrates_cdrs",
+        "filters" :["*string:~*req.Source:test1"],
+        "synchronous": true,
+        "fields": [
+            {"path": "*exp.CGRID", "type": "*composed", "value": "~*req.CGRID"},
+            {"path": "*exp.RunID", "type": "*composed", "value": "~*req.RunID"},
+            {"path": "*exp.Source", "type": "*composed", "value": "~*req.Source"},
+            {"path": "*exp.OriginID", "type": "*composed", "value": "~*req.OriginID"},
+            {"path": "*exp.Tenant", "type": "*composed", "value": "~*req.Tenant"},
+            {"path": "*exp.Category", "type": "*composed", "value": "~*req.Category"},
+            {"path": "*exp.Account", "type": "*composed", "value": "~*req.Account"},
+            {"path": "*exp.Destination", "type": "*composed", "value": "~*req.Destination"},
+            {"path": "*exp.Usage", "type": "*composed", "value": "~*req.Usage"},
+            {"path": "*exp.Cost", "type": "*composed", "value": "~*req.Cost", "rounding_decimals": 4}
+        ]
+    },
+    "amqpv1_exporter_map": {
+        "export_format": "*amqpv1_json_map",
+        "export_path": "amqp://guest:guest@localhost:5672/?queue_id=cgrates_cdrs&routing_key=cgrates_cdrs",
+        "filters" :["*string:~*req.Source:test2"],
+        "synchronous": true,
+        "fields": [
+            {"path": "*exp.CGRID", "type": "*composed", "value": "~*req.CGRID"},
+            {"path": "*exp.RunID", "type": "*composed", "value": "~*req.RunID"},
+            {"path": "*exp.Source", "type": "*composed", "value": "~*req.Source"},
+            {"path": "*exp.OriginID", "type": "*composed", "value": "~*req.OriginID"},
+            {"path": "*exp.Tenant", "type": "*composed", "value": "~*req.Tenant"},
+            {"path": "*exp.Category", "type": "*composed", "value": "~*req.Category"},
+            {"path": "*exp.Account", "type": "*composed", "value": "~*req.Account"},
+            {"path": "*exp.Destination", "type": "*composed", "value": "~*req.Destination"},
+            {"path": "*exp.Usage", "type": "*composed", "value": "~*req.Usage"},
+            {"path": "*exp.Cost", "type": "*composed", "value": "~*req.Cost", "rounding_decimals": 4}
+        ]
+    },
+    "sqs_exporter": {
+        "export_format": "*sqs_json_map",
+        "export_path": "http://sqs.eu-central-1.amazonaws.com/?aws_region=eu-central-1&aws_key=testKey&aws_secret=testSecret&queue_id=cgrates-cdrs",
+        "filters" :["*string:~*req.Source:test2"],
+        "synchronous": true,
+        "fields": [
+            {"path": "*exp.CGRID", "type": "*composed", "value": "~*req.CGRID"},
+            {"path": "*exp.RunID", "type": "*composed", "value": "~*req.RunID"},
+            {"path": "*exp.Source", "type": "*composed", "value": "~*req.Source"},
+            {"path": "*exp.OriginID", "type": "*composed", "value": "~*req.OriginID"},
+            {"path": "*exp.Tenant", "type": "*composed", "value": "~*req.Tenant"},
+            {"path": "*exp.Category", "type": "*composed", "value": "~*req.Category"},
+            {"path": "*exp.Account", "type": "*composed", "value": "~*req.Account"},
+            {"path": "*exp.Destination", "type": "*composed", "value": "~*req.Destination"},
+            {"path": "*exp.Usage", "type": "*composed", "value": "~*req.Usage"},
+            {"path": "*exp.Cost", "type": "*composed", "value": "~*req.Cost", "rounding_decimals": 4}
+        ]
+    },
+    "s3_exporter": {
+        "export_format": "*s3_json_map",
+        "export_path": "http://s3.eu-central-1.amazonaws.com/?aws_region=eu-central-1&aws_key=testKey&aws_secret=testSecret&queue_id=cgrates-cdrs",
+        "filters" :["*string:~*req.Source:test2"],
+        "synchronous": true,
+        "fields": [
+            {"path": "*exp.CGRID", "type": "*composed", "value": "~*req.CGRID"},
+            {"path": "*exp.RunID", "type": "*composed", "value": "~*req.RunID"},
+            {"path": "*exp.Source", "type": "*composed", "value": "~*req.Source"},
+            {"path": "*exp.OriginID", "type": "*composed", "value": "~*req.OriginID"},
+            {"path": "*exp.Tenant", "type": "*composed", "value": "~*req.Tenant"},
+            {"path": "*exp.Category", "type": "*composed", "value": "~*req.Category"},
+            {"path": "*exp.Account", "type": "*composed", "value": "~*req.Account"},
+            {"path": "*exp.Destination", "type": "*composed", "value": "~*req.Destination"},
+            {"path": "*exp.Usage", "type": "*composed", "value": "~*req.Usage"},
+            {"path": "*exp.Cost", "type": "*composed", "value": "~*req.Cost", "rounding_decimals": 4}
+        ]
+    },
+    "kafka_exporter": {
+        "export_format": "*kafka_json_map",
+        "export_path": "",
+        "filters" :["*string:~*req.Source:test2"],
+        "synchronous": true,
+        "fields": [
+            {"path": "*exp.CGRID", "type": "*composed", "value": "~*req.CGRID"},
+            {"path": "*exp.RunID", "type": "*composed", "value": "~*req.RunID"},
+            {"path": "*exp.Source", "type": "*composed", "value": "~*req.Source"},
+            {"path": "*exp.OriginID", "type": "*composed", "value": "~*req.OriginID"},
+            {"path": "*exp.Tenant", "type": "*composed", "value": "~*req.Tenant"},
+            {"path": "*exp.Category", "type": "*composed", "value": "~*req.Category"},
+            {"path": "*exp.Account", "type": "*composed", "value": "~*req.Account"},
+            {"path": "*exp.Destination", "type": "*composed", "value": "~*req.Destination"},
+            {"path": "*exp.Usage", "type": "*composed", "value": "~*req.Usage"},
+            {"path": "*exp.Cost", "type": "*composed", "value": "~*req.Cost", "rounding_decimals": 4}
+        ]
+    }
+},
+
+"apiers": {
+    "enabled": true,
+    "scheduler_conns": ["*internal"]
+}
+
+
+}
+    

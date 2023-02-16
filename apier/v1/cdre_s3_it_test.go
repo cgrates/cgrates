@@ -1,5 +1,5 @@
-//go:build integration
-// +build integration
+//go:build aws
+// +build aws
 
 /*
 Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
@@ -25,80 +25,83 @@ import (
 	"net/rpc"
 	"path"
 	"reflect"
-	"sort"
 	"testing"
 	"time"
 
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/credentials"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	amqp "github.com/rabbitmq/amqp091-go"
 )
 
 var (
-	amqpCfgPath   string
-	amqpCfg       *config.CGRConfig
-	amqpRPC       *rpc.Client
-	amqpConfigDIR string
+	s3CfgPath   string
+	s3Cfg       *config.CGRConfig
+	s3RPC       *rpc.Client
+	s3ConfigDIR string
 
-	sTestsCDReAMQP = []func(t *testing.T){
-		testAMQPInitCfg,
-		testAMQPInitDataDb,
-		testAMQPResetStorDb,
-		testAMQPStartEngine,
-		testAMQPRPCConn,
-		testAMQPAddCDRs,
-		testAMQPExportCDRs,
-		testAMQPVerifyExport,
-		testAMQPKillEngine,
+	sTestsCDReS3 = []func(t *testing.T){
+		testS3InitCfg,
+		testS3InitDataDb,
+		testS3ResetStorDb,
+		testS3StartEngine,
+		testS3RPCConn,
+		testS3AddCDRs,
+		testS3ExportCDRs,
+		testS3VerifyExport,
+		testS3KillEngine,
 	}
 )
 
-func TestAMQPExport(t *testing.T) {
-	amqpConfigDIR = "cdre"
-	for _, stest := range sTestsCDReAMQP {
-		t.Run(amqpConfigDIR, stest)
+func TestS3Export(t *testing.T) {
+	s3ConfigDIR = "cdre"
+	for _, stest := range sTestsCDReS3 {
+		t.Run(s3ConfigDIR, stest)
 	}
 }
 
-func testAMQPInitCfg(t *testing.T) {
+func testS3InitCfg(t *testing.T) {
 	var err error
-	amqpCfgPath = path.Join("/usr/share/cgrates", "conf", "samples", amqpConfigDIR)
-	amqpCfg, err = config.NewCGRConfigFromPath(amqpCfgPath)
+	s3CfgPath = path.Join("/usr/share/cgrates", "conf", "samples", s3ConfigDIR)
+	s3Cfg, err = config.NewCGRConfigFromPath(s3CfgPath)
 	if err != nil {
 		t.Fatal(err)
 	}
-	amqpCfg.DataFolderPath = "/usr/share/cgrates" // Share DataFolderPath through config towards StoreDb for Flush()
-	config.SetCgrConfig(amqpCfg)
+	s3Cfg.DataFolderPath = "/usr/share/cgrates" // Share DataFolderPath through config towards StoreDb for Flush()
+	config.SetCgrConfig(s3Cfg)
 }
 
-func testAMQPInitDataDb(t *testing.T) {
-	if err := engine.InitDataDb(amqpCfg); err != nil {
+func testS3InitDataDb(t *testing.T) {
+	if err := engine.InitDataDb(s3Cfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
-func testAMQPResetStorDb(t *testing.T) {
-	if err := engine.InitStorDb(amqpCfg); err != nil {
+func testS3ResetStorDb(t *testing.T) {
+	if err := engine.InitStorDb(s3Cfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
-func testAMQPStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(amqpCfgPath, *waitRater); err != nil {
+func testS3StartEngine(t *testing.T) {
+	if _, err := engine.StopStartEngine(s3CfgPath, *waitRater); err != nil {
 		t.Fatal(err)
 	}
 }
 
-func testAMQPRPCConn(t *testing.T) {
+func testS3RPCConn(t *testing.T) {
 	var err error
-	amqpRPC, err = newRPCClient(amqpCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
+	s3RPC, err = newRPCClient(s3Cfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}
 }
 
-func testAMQPAddCDRs(t *testing.T) {
+func testS3AddCDRs(t *testing.T) {
 	storedCdrs := []*engine.CDR{
 		{
 			CGRID:       "Cdr1",
@@ -182,7 +185,7 @@ func testAMQPAddCDRs(t *testing.T) {
 	}
 	for _, cdr := range storedCdrs {
 		var reply string
-		if err := amqpRPC.Call(utils.CDRsV1ProcessCDR, &engine.CDRWithArgDispatcher{CDR: cdr}, &reply); err != nil {
+		if err := s3RPC.Call(utils.CDRsV1ProcessCDR, &engine.CDRWithArgDispatcher{CDR: cdr}, &reply); err != nil {
 			t.Error("Unexpected error: ", err.Error())
 		} else if reply != utils.OK {
 			t.Error("Unexpected reply received: ", reply)
@@ -191,61 +194,69 @@ func testAMQPAddCDRs(t *testing.T) {
 	time.Sleep(100 * time.Millisecond)
 }
 
-func testAMQPExportCDRs(t *testing.T) {
+func testS3ExportCDRs(t *testing.T) {
 	attr := ArgExportCDRs{
 		ExportArgs: map[string]interface{}{
-			utils.ExportTemplate: "amqp_exporter_map",
+			utils.ExportTemplate: "s3_exporter",
 		},
 		Verbose: true,
 	}
 	var rply RplExportedCDRs
-	if err := amqpRPC.Call(utils.APIerSv1ExportCDRs, attr, &rply); err != nil {
+	if err := s3RPC.Call(utils.APIerSv1ExportCDRs, attr, &rply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(rply.ExportedCGRIDs) != 2 {
 		t.Errorf("Unexpected number of CDR exported: %s ", utils.ToJSON(rply))
 	}
 }
 
-func testAMQPVerifyExport(t *testing.T) {
-	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
+func testS3VerifyExport(t *testing.T) {
+	endpoint := "s3.eu-central-1.amazonaws.com"
+	region := "eu-central-1"
+	qname := "cgrates-cdrs"
+
+	keys := []string{"Cdr2:*default.json", "Cdr3:*default.json"}
+
+	var sess *session.Session
+	cfg := aws.Config{Endpoint: aws.String(endpoint)}
+	cfg.Region = aws.String(region)
+
+	cfg.Credentials = credentials.NewStaticCredentials("testKey", "testSecret", "")
+	var err error
+	sess, err = session.NewSessionWithOptions(
+		session.Options{
+			Config: cfg,
+		},
+	)
 	if err != nil {
-		t.Fatal(err)
+		t.Error(err)
 	}
-	defer conn.Close()
-	ch, err := conn.Channel()
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer ch.Close()
-	q, err := ch.QueueDeclare("cgrates_cdrs", true, false, false, false, nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-	msgs, err := ch.Consume(q.Name, utils.EmptyString, true, false, false, false, nil)
-	if err != nil {
-		t.Fatal(err)
-	}
+	s3Clnt := s3.New(sess)
+	s3Clnt.DeleteObject(&s3.DeleteObjectInput{})
+	file := aws.NewWriteAtBuffer([]byte{})
+	svc := s3manager.NewDownloader(sess)
+
 	expCDRs := []string{
 		`{"Account":"1001","CGRID":"Cdr2","Category":"call","Cost":"-1.0000","Destination":"+4986517174963","OriginID":"OriginCDR2","RunID":"*default","Source":"test2","Tenant":"cgrates.org","Usage":"5s"}`,
 		`{"Account":"1001","CGRID":"Cdr3","Category":"call","Cost":"-1.0000","Destination":"+4986517174963","OriginID":"OriginCDR3","RunID":"*default","Source":"test2","Tenant":"cgrates.org","Usage":"30s"}`,
 	}
-	rcvCDRs := make([]string, 0)
-	waiting := true
-	for waiting {
-		select {
-		case d := <-msgs:
-			rcvCDRs = append(rcvCDRs, string(d.Body))
-		case <-time.After(100 * time.Millisecond):
-			waiting = false
+	rplyCDRs := make([]string, 0)
+	for _, key := range keys {
+		if _, err = svc.Download(file,
+			&s3.GetObjectInput{
+				Bucket: aws.String(qname),
+				Key:    aws.String(key),
+			}); err != nil {
+			t.Fatalf("Unable to download item %v", err)
 		}
+		rplyCDRs = append(rplyCDRs, string(file.Bytes()))
 	}
-	sort.Strings(rcvCDRs)
-	if !reflect.DeepEqual(rcvCDRs, expCDRs) {
-		t.Errorf("expected: <%+v>, \nreceived: <%+v>", expCDRs, rcvCDRs)
+
+	if !reflect.DeepEqual(rplyCDRs, expCDRs) {
+		t.Errorf("expected: %s,\nreceived: %s", expCDRs, rplyCDRs)
 	}
 }
 
-func testAMQPKillEngine(t *testing.T) {
+func testS3KillEngine(t *testing.T) {
 	if err := engine.KillEngine(100); err != nil {
 		t.Error(err)
 	}
