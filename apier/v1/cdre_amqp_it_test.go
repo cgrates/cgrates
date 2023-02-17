@@ -42,14 +42,22 @@ var (
 	amqpConfigDIR string
 
 	sTestsCDReAMQP = []func(t *testing.T){
+
 		testAMQPInitCfg,
 		testAMQPInitDataDb,
 		testAMQPResetStorDb,
 		testAMQPStartEngine,
 		testAMQPRPCConn,
-		testAMQPAddCDRs,
-		testAMQPExportCDRs,
-		testAMQPVerifyExport,
+		testAMQPMapAddCDRs,
+
+		// tests for "*amqp_json_map" exporter
+		testAMQPMapExportCDRs,
+		testAMQPMapVerifyExport,
+
+		// tests for "*amqp_json_cdr" exporter
+		testAMQPCDRExportCDRs,
+		testAMQPCDRVerifyExport,
+
 		testAMQPKillEngine,
 	}
 )
@@ -98,7 +106,7 @@ func testAMQPRPCConn(t *testing.T) {
 	}
 }
 
-func testAMQPAddCDRs(t *testing.T) {
+func testAMQPMapAddCDRs(t *testing.T) {
 	storedCdrs := []*engine.CDR{
 		{
 			CGRID:       "Cdr1",
@@ -173,10 +181,8 @@ func testAMQPAddCDRs(t *testing.T) {
 			Account:     "1001",
 			Subject:     "1001",
 			Destination: "+4986517174963",
-			SetupTime:   time.Now(),
-			AnswerTime:  time.Time{},
 			RunID:       utils.MetaDefault,
-			Usage:       time.Duration(0) * time.Second,
+			Usage:       time.Second,
 			ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01,
 		},
 	}
@@ -191,7 +197,7 @@ func testAMQPAddCDRs(t *testing.T) {
 	time.Sleep(100 * time.Millisecond)
 }
 
-func testAMQPExportCDRs(t *testing.T) {
+func testAMQPMapExportCDRs(t *testing.T) {
 	attr := ArgExportCDRs{
 		ExportArgs: map[string]interface{}{
 			utils.ExportTemplate: "amqp_exporter_map",
@@ -206,7 +212,7 @@ func testAMQPExportCDRs(t *testing.T) {
 	}
 }
 
-func testAMQPVerifyExport(t *testing.T) {
+func testAMQPMapVerifyExport(t *testing.T) {
 	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
 	if err != nil {
 		t.Fatal(err)
@@ -248,5 +254,52 @@ func testAMQPVerifyExport(t *testing.T) {
 func testAMQPKillEngine(t *testing.T) {
 	if err := engine.KillEngine(100); err != nil {
 		t.Error(err)
+	}
+}
+
+func testAMQPCDRExportCDRs(t *testing.T) {
+	attr := ArgExportCDRs{
+		ExportArgs: map[string]interface{}{
+			utils.ExportTemplate: "amqp_exporter_cdr",
+		},
+		Verbose: true,
+	}
+	var rply RplExportedCDRs
+	if err := amqpRPC.Call(utils.APIerSv1ExportCDRs, attr, &rply); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if len(rply.ExportedCGRIDs) != 1 {
+		t.Errorf("Unexpected number of CDR exported: %s ", utils.ToJSON(rply))
+	}
+}
+
+func testAMQPCDRVerifyExport(t *testing.T) {
+	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer conn.Close()
+	ch, err := conn.Channel()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer ch.Close()
+	q, err := ch.QueueDeclare("cgrates_cdrs", true, false, false, false, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	msgs, err := ch.Consume(q.Name, utils.EmptyString, true, false, false, false, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	expCDR := `{"CGRID":"Cdr4","RunID":"*default","OrderID":4,"OriginHost":"192.168.1.1","Source":"test3","OriginID":"OriginCDR4","ToR":"*voice","RequestType":"*rated","Tenant":"cgrates.org","Category":"call","Account":"1001","Subject":"1001","Destination":"+4986517174963","SetupTime":"0001-01-01T00:00:00Z","AnswerTime":"0001-01-01T00:00:00Z","Usage":1000000000,"ExtraFields":{"field_extr1":"val_extr1","fieldextr2":"valextr2"},"ExtraInfo":"NOT_CONNECTED: RALs","Partial":false,"PreRated":false,"CostSource":"","Cost":-1,"CostDetails":null}`
+	var rcvCDR string
+	select {
+	case d := <-msgs:
+		rcvCDR = string(d.Body)
+	case <-time.After(100 * time.Millisecond):
+		t.Error("No message received from RabbitMQ")
+	}
+	if rcvCDR != expCDR {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", expCDR, rcvCDR)
 	}
 }
