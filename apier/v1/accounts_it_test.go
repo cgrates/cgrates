@@ -53,6 +53,7 @@ var (
 		testAccITAddBalance,
 		testAccITAddBalanceWithValue0,
 		testAccITAddBalanceWithValueInMap,
+		testAccITsetBalanceWithUUid,
 		testAccITSetBalance,
 		testAccITSetBalanceWithVaslue0,
 		testAccITSetBalanceWithVaslueInMap,
@@ -314,6 +315,72 @@ func testAccITAddBalance(t *testing.T) {
 	}
 }
 
+func testAccITsetBalanceWithUUid(t *testing.T) {
+	var reply string
+	acnt := utils.AttrSetAccount{Tenant: "cgrates.org", Account: "test", ExtraOptions: map[string]bool{utils.Disabled: true}}
+
+	if err := accRPC.Call(utils.APIerSv1SetAccount, acnt, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Calling APIerSv1.SetAccount received: %s", reply)
+	}
+
+	attrs := &utils.AttrSetBalance{
+		Tenant:      "cgrates.org",
+		Account:     "test",
+		BalanceType: "*sms",
+		Value:       1,
+		Balance:     map[string]interface{}{"UUID": "37b54e1a-e1e6-4df6-a9a5-d97b4552f2f6"},
+	}
+	if err := accRPC.Call(utils.APIerSv1SetBalance, attrs, &reply); err == nil || err.Error() != "PARTIALLY_EXECUTED" {
+		t.Error("Got error on APIerSv1.SetBalance: ", err.Error())
+	}
+
+	attrs = &utils.AttrSetBalance{
+		Tenant:      "cgrates.org",
+		Account:     "test",
+		BalanceType: "*sms",
+		Value:       1,
+		Balance: map[string]interface{}{
+			utils.Weight: 20,
+			utils.ID:     "balance1",
+		},
+	}
+	if err := accRPC.Call(utils.APIerSv1SetBalance, attrs, &reply); err != nil {
+		t.Error("Got error on APIerSv1.SetBalance: ", err.Error())
+	} else if reply != utils.OK {
+		t.Errorf("Calling APIerSv1.SetBalance received: %s", reply)
+	}
+	var account engine.Account
+	attrAcc := &utils.AttrGetAccount{
+		Tenant:  "cgrates.org",
+		Account: "test",
+	}
+
+	if err := accRPC.Call(utils.APIerSv2GetAccount, attrAcc, &account); err != nil {
+		t.Error(err)
+	} else if account.BalanceMap["*sms"][0].Weight != 20 {
+		t.Error("Balance is not set in account")
+	}
+	balUuid := account.BalanceMap["*sms"][0].Uuid
+	attrs2 := &utils.AttrSetBalance{
+		Tenant:      "cgrates.org",
+		Account:     "test",
+		BalanceType: "*sms",
+		Value:       4,
+		Balance: map[string]interface{}{
+			utils.UUID: balUuid,
+		},
+	}
+	if err := accRPC.Call(utils.APIerSv1SetBalance, attrs2, &reply); err != nil {
+		t.Error("Got error on APIerSv1.SetBalance: ", err.Error())
+	} else if err := accRPC.Call(utils.APIerSv2GetAccount, attrAcc, &account); err != nil {
+		t.Error(err)
+	} else if account.BalanceMap["*sms"][0].Value != 4 || len(account.BalanceMap["*sms"]) != 1 {
+		t.Error("Balance is not set in account")
+	}
+}
+
 func testAccITSetBalance(t *testing.T) {
 	var reply string
 	attrs := &utils.AttrSetBalance{
@@ -505,7 +572,7 @@ func testAccITGetDisabledAccounts(t *testing.T) {
 	if err := accRPC.Call(utils.APIerSv2GetAccounts, utils.AttrGetAccounts{Tenant: "cgrates.org", Filter: map[string]bool{utils.Disabled: true}},
 		&acnts); err != nil {
 		t.Error(err)
-	} else if len(acnts) != 3 {
+	} else if len(acnts) != 4 {
 		t.Errorf("Accounts received: %+v", acnts)
 	}
 }
@@ -516,8 +583,8 @@ func testAccITCountAccounts(t *testing.T) {
 	}
 	if err := accRPC.Call(utils.APIerSv1GetAccountsCount, args, &reply); err != nil {
 		t.Error(err)
-	} else if reply != 10 {
-		t.Errorf("Expecting: %v, received: %v", 10, reply)
+	} else if reply != 11 {
+		t.Errorf("Expecting: %v, received: %v", 11, reply)
 	}
 }
 
