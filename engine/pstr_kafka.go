@@ -88,19 +88,19 @@ func (pstr *KafkaPoster) Close() {
 	pstr.Lock()
 	if pstr.writer != nil {
 		pstr.writer.Close()
+		pstr.writer = nil
 	}
-	pstr.writer = nil
 	pstr.Unlock()
 }
 
 func (pstr *KafkaPoster) newPostWriter() {
 	pstr.Lock()
 	if pstr.writer == nil {
-		pstr.writer = kafka.NewWriter(kafka.WriterConfig{
-			Brokers:     []string{pstr.dialURL},
-			MaxAttempts: pstr.attempts,
+		pstr.writer = &kafka.Writer{
+			Addr:        kafka.TCP(pstr.dialURL),
 			Topic:       pstr.topic,
-		})
+			MaxAttempts: pstr.attempts,
+		}
 	}
 	pstr.Unlock()
 }
