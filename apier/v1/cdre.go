@@ -273,7 +273,7 @@ func (api *APIerSv1) ExportCDRs(arg ArgExportCDRs, reply *RplExportedCDRs) (err 
 		filePath = path.Join(eDir, fileName)
 	case utils.DRYRUN:
 		filePath = utils.DRYRUN
-	case utils.MetaAMQPjsonMap, utils.MetaAMQPjsonCDR,
+	case utils.MetaAMQPjsonMap, utils.MetaAMQPjsonCDR, utils.MetaKafkajsonMap,
 		utils.MetaSQSjsonMap, utils.MetaS3jsonMap:
 		filePath = eDir
 	default:
