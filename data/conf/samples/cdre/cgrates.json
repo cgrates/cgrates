@@ -68,9 +68,9 @@
             {"path": "*exp.Cost", "type": "*composed", "value": "~*req.Cost", "rounding_decimals": 4}
         ]
     },
-    "amqpv1_exporter_map": {
+    "amqpv1_exporter": {
         "export_format": "*amqpv1_json_map",
-        "export_path": "amqp://guest:guest@localhost:5672/?queue_id=cgrates_cdrs&routing_key=cgrates_cdrs",
+        "export_path": "amqps://RootManageSharedAccessKey:Je8l%2Bt9tyOgZbdA%2B5SmGIJEsEzhZ9VdIO7yRke5EYtM%3D@test0123456y.servicebus.windows.net",
         "filters" :["*string:~*req.Source:test2"],
         "synchronous": true,
         "fields": [
@@ -124,7 +124,7 @@
     },
     "kafka_exporter": {
         "export_format": "*kafka_json_map",
-        "export_path": "",
+        "export_path": "localhost:9092?topic=cgrates_cdrs",
         "filters" :["*string:~*req.Source:test2"],
         "synchronous": true,
         "fields": [
