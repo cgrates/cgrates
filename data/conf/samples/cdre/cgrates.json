@@ -53,7 +53,7 @@
     "amqp_exporter_cdr": {
         "export_format": "*amqp_json_cdr",
         "export_path": "amqp://guest:guest@localhost:5672/?queue_id=cgrates_cdrs&routing_key=cgrates_cdrs",
-        "filters" :["*string:~*req.Source:test1"],
+        "filters" :["*string:~*req.Source:test3"],
         "synchronous": true,
         "fields": [
             {"path": "*exp.CGRID", "type": "*composed", "value": "~*req.CGRID"},
