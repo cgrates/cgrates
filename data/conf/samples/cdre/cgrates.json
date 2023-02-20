@@ -70,7 +70,10 @@
     },
     "amqpv1_exporter": {
         "export_format": "*amqpv1_json_map",
-        "export_path": "amqps://RootManageSharedAccessKey:Je8l%2Bt9tyOgZbdA%2B5SmGIJEsEzhZ9VdIO7yRke5EYtM%3D@test0123456y.servicebus.windows.net",
+        // connection string from Azure Portal can be found here: Home > [Service Bus namespace] > 
+        // > Shared access policies > RootManageSharedAccessKey > Primary Connection String where
+        // access-key-name is RootManageSharedAccessKey and access-key is the primary connection string
+        "export_path": "amqps://access-key-name:access-key@name-space.servicebus.windows.net",
         "filters" :["*string:~*req.Source:test2"],
         "synchronous": true,
         "fields": [
