@@ -13,7 +13,7 @@ go 1.18
 // replace github.com/cgrates/aringo => ../aringo
 
 require (
-	github.com/Azure/go-amqp v0.15.0
+	github.com/Azure/go-amqp v0.17.5
 	github.com/antchfx/xmlquery v1.3.3
 	github.com/aws/aws-sdk-go v1.36.24
 	github.com/blevesearch/bleve v1.0.14
