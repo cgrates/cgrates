@@ -516,21 +516,19 @@
 			"id": "KafkaExporter",								
 			"type": "*kafkaJSONMap",									
 			"export_path": "localhost:9092",			
-			"concurrent_requests": 0,							
 			"opts": {
 				"kafkaTopic": "cgrates",
 				// "kafkaCAPath": "/home/kafka/kafka/ssl/ca-cert.pem"
-			},												
-			"timezone": "",										
-			"filters": [],										
-			"flags": [],										
-			"attribute_ids": [],								
-			"attribute_context": "",							
-			"synchronous": false,								
-			"blocker": false,									
-			"attempts": 1,										
-			"fields":[],										
-			"failed_posts_dir": "/var/spool/cgrates/failed_posts"
+			}											
+		},
+		{
+			"id": "AMQPExporter",								
+			"type": "*amqpJSONMap",									
+			"export_path": "amqp://guest:guest@localhost:5672",			
+			"opts": {
+				"amqpQueueID": "cgrates_cdrs",
+				"amqpRoutingKey": "cgrates_cdrs"
+			}											
 		}
 	]
 },
