@@ -440,6 +440,22 @@
 			"opts": {
 				"natsSubject": "processed_cdrs",
 			}
+		},
+		{
+			"id": "AMQPExporter",
+			"type": "*amqp_json_map",
+			"export_path": "amqp://guest:guest@localhost:5672/",
+			"opts": {
+				"amqpQueueID": "cgrates_cdrs",
+				"amqpExchange": "exchangename",
+				"amqpExchangeType": "fanout",
+				"amqpRoutingKey": "cgr_cdrs"
+			},
+			"failed_posts_dir": "/var/spool/cgrates/failed_posts2",
+			"synchronous": true,
+			"fields":[
+				{"tag": "RequiredTemplate","type": "*template", "value": "requiredFields"}
+			]
 		}
 	]
 },

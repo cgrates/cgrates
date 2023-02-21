@@ -34,25 +34,30 @@ import (
 )
 
 var (
-	amqpConfDir string
-	amqpCfgPath string
-	amqpCfg     *config.CGRConfig
-	amqpRPC     *rpc.Client
+	amqpConfDir    string
+	amqpCfgPath    string
+	amqpCfg        *config.CGRConfig
+	amqpRPC        *rpc.Client
+	amqpExportPath string
 
 	sTestsAMQP = []func(t *testing.T){
+		testCreateDirectory,
 		testAMQPLoadConfig,
 		testAMQPResetDataDB,
 		testAMQPResetStorDb,
 		testAMQPStartEngine,
 		testAMQPRPCConn,
+
 		testAMQPExportEvent,
 		testAMQPVerifyExport,
+
 		testStopCgrEngine,
+		testCleanDirectory,
 	}
 )
 
 func TestAMQPExport(t *testing.T) {
-	amqpConfDir = "ees_amqp"
+	amqpConfDir = "ees"
 	for _, stest := range sTestsAMQP {
 		t.Run(amqpConfDir, stest)
 	}
@@ -63,6 +68,11 @@ func testAMQPLoadConfig(t *testing.T) {
 	amqpCfgPath = path.Join(*dataDir, "conf", "samples", amqpConfDir)
 	if amqpCfg, err = config.NewCGRConfigFromPath(amqpCfgPath); err != nil {
 		t.Error(err)
+	}
+	for _, value := range amqpCfg.EEsCfg().Exporters {
+		if value.ID == "AMQPExporter" {
+			amqpExportPath = value.ExportPath
+		}
 	}
 }
 
@@ -94,7 +104,7 @@ func testAMQPRPCConn(t *testing.T) {
 
 func testAMQPExportEvent(t *testing.T) {
 	ev := &engine.CGREventWithEeIDs{
-		EeIDs: []string{"amqp_test_file"},
+		EeIDs: []string{"AMQPExporter"},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "voiceEvent",
@@ -124,11 +134,11 @@ func testAMQPExportEvent(t *testing.T) {
 		t.Error(err)
 	}
 
-	time.Sleep(2 * time.Second)
+	time.Sleep(1 * time.Second)
 }
 
 func testAMQPVerifyExport(t *testing.T) {
-	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
+	conn, err := amqp.Dial(amqpExportPath)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -146,14 +156,20 @@ func testAMQPVerifyExport(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	expCDR := `{"Account":"1001","CGRID":"dbafe9c8614c785a65aabd116dd3959c3c56f7f6","Category":"call","Destination":"1002","OriginID":"dsafdsaf","RequestType":"*rated","RunID":"*default","Subject":"1001","Tenant":"cgrates.org","ToR":"*voice"}`
+	expCDR := `{"Account":"1001","AnswerTime":"2013-11-07T08:42:26Z","CGRID":"dbafe9c8614c785a65aabd116dd3959c3c56f7f6","Category":"call","Cost":"1.01","Destination":"1002","OriginID":"dsafdsaf","RequestType":"*rated","RunID":"*default","SetupTime":"2013-11-07T08:42:25Z","Subject":"1001","Tenant":"cgrates.org","ToR":"*voice","Usage":"10000000000"}`
 	select {
 	case d := <-msgs:
 		rcvCDR := string(d.Body)
 		if rcvCDR != expCDR {
-			t.Errorf("unexpected CDR received: <%s>", rcvCDR)
+			t.Errorf("expected: <%+v>, \nreceived: <%+v>", expCDR, rcvCDR)
 		}
 	case <-time.After(100 * time.Millisecond):
 		t.Error("No message received from RabbitMQ")
+	}
+
+	// Delete the queue after verifying if the export was successful
+	_, err = ch.QueueDelete("cgrates_cdrs", false, false, true)
+	if err != nil {
+		t.Error(err)
 	}
 }
