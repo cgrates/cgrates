@@ -33,21 +33,16 @@ require (
 	golang.org/x/net v0.2.0
 	golang.org/x/oauth2 v0.2.0
 	google.golang.org/api v0.103.0
-	pack.ag/amqp v0.12.5
 )
+
+require github.com/Azure/go-amqp v0.17.5
 
 require (
 	cloud.google.com/go/compute v1.12.1 // indirect
 	cloud.google.com/go/compute/metadata v0.2.1 // indirect
-	github.com/Azure/azure-sdk-for-go v33.2.0+incompatible // indirect
-	github.com/Azure/go-autorest/autorest v0.9.1 // indirect
-	github.com/Azure/go-autorest/autorest/adal v0.6.0 // indirect
-	github.com/Azure/go-autorest/autorest/to v0.3.0 // indirect
-	github.com/Azure/go-autorest/autorest/validation v0.2.0 // indirect
 	github.com/antchfx/xpath v1.2.1 // indirect
 	github.com/cenk/hub v1.0.1 // indirect
 	github.com/cenkalti/hub v1.0.1 // indirect
-	github.com/fortytw2/leaktest v1.3.0 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/golang/snappy v0.0.4 // indirect

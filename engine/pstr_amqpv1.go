@@ -25,8 +25,8 @@ import (
 	"sync"
 	"time"
 
+	amqpv1 "github.com/Azure/go-amqp"
 	"github.com/cgrates/cgrates/utils"
-	amqpv1 "pack.ag/amqp"
 )
 
 // NewAMQPv1Poster creates a poster for amqpv1
