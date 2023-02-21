@@ -442,6 +442,15 @@
 			}
 		},
 		{
+			"id": "KafkaExporter",								
+			"type": "*kafka_json_map",									
+			"export_path": "localhost:9092",			
+			"opts": {
+				"kafkaTopic": "cgrates",
+				// "kafkaCAPath": "/home/kafka/kafka/ssl/ca-cert.pem"
+			}											
+		},
+		{
 			"id": "AMQPExporter",
 			"type": "*amqp_json_map",
 			"export_path": "amqp://guest:guest@localhost:5672/",
