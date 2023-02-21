@@ -352,7 +352,7 @@ func TestAMQPv1Poster(t *testing.T) {
 	}
 
 	// Accept message
-	msg.Accept(ctx)
+	receiver.AcceptMessage(ctx, msg)
 	if rply := string(msg.GetData()); rply != body {
 		t.Errorf("Expected: %q, received: %q", body, rply)
 	}
