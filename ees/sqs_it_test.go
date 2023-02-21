@@ -60,7 +60,7 @@ func TestSQSExport(t *testing.T) {
 	if !*runSQSTest {
 		t.SkipNow()
 	}
-	sqsConfDir = "ees_s3&sqs"
+	sqsConfDir = "ees_cloud"
 	for _, stest := range sTestsSQS {
 		t.Run(sqsConfDir, stest)
 	}

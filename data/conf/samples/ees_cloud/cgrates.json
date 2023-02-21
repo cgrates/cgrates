@@ -51,6 +51,23 @@
             "fields":[
                 {"tag": "RequiredTemplate","type": "*template", "value": "requiredFields"}
             ]
+        },
+        {
+            "id": "amqpv1_test_file",
+            "type": "*amqpv1JSONMap",
+            // connection string from Azure Portal can be found here: Home > [Service Bus namespace] > 
+            // > Shared access policies > RootManageSharedAccessKey > Primary Connection String where
+            // access-key-name is RootManageSharedAccessKey and access-key is the primary connection string
+            "export_path": "amqps://access-key-name:access-key@name-space.servicebus.windows.net",
+            "opts": {
+				"amqpQueueID": "cgrates_cdrs"
+			},
+            "attempts": 1,
+            "failed_posts_dir": "/var/spool/cgrates/failed_posts2",
+            "synchronous": true,
+            "fields":[
+                {"tag": "RequiredTemplate","type": "*template", "value": "requiredFields"}
+            ]
         }
     ]
 },
