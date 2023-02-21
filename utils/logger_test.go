@@ -44,6 +44,9 @@ func TestLoggerNewLoggerStdoutOK(t *testing.T) {
 }
 
 func TestLoggerNewLoggerSyslogOK(t *testing.T) {
+	if noSysLog {
+		t.SkipNow()
+	}
 	exp := &SysLogger{
 		logLevel: 7,
 	}
@@ -65,6 +68,9 @@ func TestLoggerNewLoggerUnsupported(t *testing.T) {
 }
 
 func TestLoggerSysloggerSetGetLogLevel(t *testing.T) {
+	if noSysLog {
+		t.SkipNow()
+	}
 	sl, err := NewSysLogger("1234", 4)
 	if err != nil {
 		t.Error(err)
@@ -231,6 +237,9 @@ func TestLoggerStdLoggerDebug(t *testing.T) {
 }
 
 func TestCloseSysLogger(t *testing.T) {
+	if noSysLog {
+		t.SkipNow()
+	}
 	sl, _ := NewSysLogger("test", 2)
 
 	if err := sl.Close(); err != nil {
@@ -239,6 +248,9 @@ func TestCloseSysLogger(t *testing.T) {
 
 }
 func TestWriteSysLogger(t *testing.T) {
+	if noSysLog {
+		t.SkipNow()
+	}
 	sl, _ := NewSysLogger("test", 2)
 	exp := 6
 	testbyte := []byte{97, 98, 99, 100, 101, 102}
@@ -251,6 +263,9 @@ func TestWriteSysLogger(t *testing.T) {
 }
 
 func TestAlertSysLogger(t *testing.T) {
+	if noSysLog {
+		t.SkipNow()
+	}
 	sl, _ := NewSysLogger("test", 0)
 
 	if err := sl.Alert("Alert Message"); err != nil {
@@ -262,6 +277,9 @@ func TestAlertSysLogger(t *testing.T) {
 	}
 }
 func TestCritSysLogger(t *testing.T) {
+	if noSysLog {
+		t.SkipNow()
+	}
 	sl, _ := NewSysLogger("test", 1)
 
 	if err := sl.Crit("Critical Message"); err != nil {
@@ -274,6 +292,9 @@ func TestCritSysLogger(t *testing.T) {
 }
 
 func TestDebugSysLogger(t *testing.T) {
+	if noSysLog {
+		t.SkipNow()
+	}
 	sl, _ := NewSysLogger("test", 6)
 
 	if err := sl.Debug("Debug Message"); err != nil {
@@ -286,6 +307,9 @@ func TestDebugSysLogger(t *testing.T) {
 }
 
 func TestEmergSysLogger(t *testing.T) {
+	if noSysLog {
+		t.SkipNow()
+	}
 	sl, _ := NewSysLogger("test", -1)
 
 	if err := sl.Emerg("Emergency Message"); err != nil {
@@ -300,6 +324,9 @@ func TestEmergSysLogger(t *testing.T) {
 }
 
 func TestErrSysLogger(t *testing.T) {
+	if noSysLog {
+		t.SkipNow()
+	}
 	sl, _ := NewSysLogger("test", 2)
 
 	if err := sl.Err("Error Message"); err != nil {
@@ -311,6 +338,9 @@ func TestErrSysLogger(t *testing.T) {
 	}
 }
 func TestInfoSysLogger(t *testing.T) {
+	if noSysLog {
+		t.SkipNow()
+	}
 	sl, _ := NewSysLogger("test", 5)
 
 	if err := sl.Info("Info Message"); err != nil {
@@ -322,6 +352,9 @@ func TestInfoSysLogger(t *testing.T) {
 	}
 }
 func TestNoticeSysLogger(t *testing.T) {
+	if noSysLog {
+		t.SkipNow()
+	}
 	sl, _ := NewSysLogger("test", 4)
 
 	if err := sl.Notice("Notice Message"); err != nil {
@@ -333,6 +366,9 @@ func TestNoticeSysLogger(t *testing.T) {
 	}
 }
 func TestWarningSysLogger(t *testing.T) {
+	if noSysLog {
+		t.SkipNow()
+	}
 	sl, _ := NewSysLogger("test", 3)
 
 	if err := sl.Warning("Warning Message"); err != nil {

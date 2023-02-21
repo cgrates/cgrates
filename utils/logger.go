@@ -27,9 +27,14 @@ import (
 )
 
 var Logger LoggerInterface
+var noSysLog bool
 
 func init() {
-	Logger, _ = NewLogger(MetaStdLog, EmptyString, 0)
+	var err error
+	if Logger, err = NewLogger(MetaSysLog, EmptyString, 0); err != nil {
+		noSysLog = true
+		Logger, _ = NewLogger(MetaStdLog, EmptyString, 0)
+	}
 }
 
 // log severities following rfc3164
@@ -65,6 +70,9 @@ func NewLogger(loggerType, nodeID string, logLvl int) (LoggerInterface, error) {
 	case MetaStdLog:
 		return NewStdLogger(nodeID, logLvl), nil
 	case MetaSysLog:
+		if noSysLog {
+			return NewStdLogger(nodeID, logLvl), nil
+		}
 		return NewSysLogger(nodeID, logLvl)
 	default:
 		return nil, fmt.Errorf("unsupported logger: <%+s>", loggerType)

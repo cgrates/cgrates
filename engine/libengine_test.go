@@ -30,6 +30,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/ltcache"
 	"github.com/cgrates/rpcclient"
+	"golang.org/x/exp/slices"
 )
 
 // For the purpose of this test, we don't need our client to establish a connection
@@ -51,26 +52,16 @@ func TestLibengineNewRPCConnection(t *testing.T) {
 		TLS:             true,
 		ClientKey:       "key1",
 	}
-	expectedErr := "dial tcp [::1]:6012: connect: connection refused"
+	expErr := []string{"dial tcp [::1]:6012: connect: connection refused", "dial tcp 127.0.0.1:6012: connect: connection refused"}
 	cM := NewConnManager(config.NewDefaultCGRConfig())
 	ctx := context.Background()
-	exp, err := rpcclient.NewRPCClient(ctx, utils.TCP, cfg.Address, cfg.TLS, cfg.ClientKey,
-		cM.cfg.TLSCfg().ClientCerificate, cM.cfg.TLSCfg().CaCertificate, cfg.ConnectAttempts, cfg.Reconnects,
-		cfg.MaxReconnectInterval, utils.FibDuration, cfg.ConnectTimeout, cfg.ReplyTimeout, cfg.Transport, nil, false, nil)
 
-	if err.Error() != expectedErr {
-		t.Errorf("Expected %v \n but received \n %v", expectedErr, err)
-	}
-
-	conn, err := NewRPCConnection(ctx, cfg, cM.cfg.TLSCfg().ClientKey, cM.cfg.TLSCfg().ClientCerificate,
+	_, err := NewRPCConnection(ctx, cfg, cM.cfg.TLSCfg().ClientKey, cM.cfg.TLSCfg().ClientCerificate,
 		cM.cfg.TLSCfg().CaCertificate, cM.cfg.GeneralCfg().ConnectAttempts, cM.cfg.GeneralCfg().Reconnects,
 		cM.cfg.GeneralCfg().MaxReconnectInterval, cM.cfg.GeneralCfg().ConnectTimeout, cM.cfg.GeneralCfg().ReplyTimeout,
 		nil, false, nil, "*localhost", "a4f3f", new(ltcache.Cache))
-	if err.Error() != expectedErr {
-		t.Errorf("Expected %v \n but received \n %v", expectedErr, err)
-	}
-	if !reflect.DeepEqual(exp, conn) {
-		//t.Errorf("Expected %v \n but received \n %v", exp, conn)
+	if !slices.Contains(expErr, err.Error()) {
+		t.Errorf("Unexpected error <%v>", err)
 	}
 }
 
