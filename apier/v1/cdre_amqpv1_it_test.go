@@ -31,10 +31,10 @@ import (
 	"testing"
 	"time"
 
+	"github.com/Azure/go-amqp"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"pack.ag/amqp"
 )
 
 var (
@@ -43,7 +43,7 @@ var (
 	amqpv1Cfg       *config.CGRConfig
 	amqpv1RPC       *rpc.Client
 	amqpv1ConfigDIR string
-	amqpv1DialUrl   string
+	amqpv1DialURL   string
 
 	sTestsCDReAMQPv1 = []func(t *testing.T){
 		testAMQPv1InitCfg,
@@ -75,7 +75,7 @@ func testAMQPv1InitCfg(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	amqpv1DialUrl = amqpv1Cfg.CdreProfiles["amqpv1_exporter"].ExportPath
+	amqpv1DialURL = amqpv1Cfg.CdreProfiles["amqpv1_exporter"].ExportPath
 	amqpv1Cfg.DataFolderPath = "/usr/share/cgrates" // Share DataFolderPath through config towards StoreDb for Flush()
 	config.SetCgrConfig(amqpv1Cfg)
 }
@@ -216,10 +216,10 @@ func testAMQPv1ExportCDRs(t *testing.T) {
 
 func testAMQPv1VerifyExport(t *testing.T) {
 	// Create client
-	client, err := amqp.Dial(amqpv1DialUrl)
+	client, err := amqp.Dial(amqpv1DialURL)
 	/* an alternative way to create the client
-	client, err := amqp.Dial("amqps://cgratescdrs.servicebus.windows.net",
-		amqp.ConnSASLPlain("RootManageSharedAccessKey", "hGnhxlEP6UxQsc6M80tGDTTFPDpKUDMik+ASbC0q7kk="),
+	client, err := amqp.Dial("amqps://name-space.servicebus.windows.net",
+		amqp.ConnSASLPlain("access-key-name", "access-key"),
 	)
 	*/
 	if err != nil {
@@ -264,7 +264,7 @@ func testAMQPv1VerifyExport(t *testing.T) {
 		}
 
 		// Accept message
-		msg.Accept()
+		receiver.AcceptMessage(ctx, msg)
 
 		rplyCDRs = append(rplyCDRs, string(msg.GetData()))
 		i++
