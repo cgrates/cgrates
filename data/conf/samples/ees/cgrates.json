@@ -515,11 +515,11 @@
 		{
 			"id": "KafkaExporter",								
 			"type": "*kafkaJSONMap",									
-			"export_path": "localhost:9093",			
+			"export_path": "localhost:9092",			
 			"concurrent_requests": 0,							
 			"opts": {
 				"kafkaTopic": "cgrates",
-				"kafkaCAPath": "/home/kafka/kafka/ssl/ca-cert.pem"
+				// "kafkaCAPath": "/home/kafka/kafka/ssl/ca-cert.pem"
 			},												
 			"timezone": "",										
 			"filters": [],										

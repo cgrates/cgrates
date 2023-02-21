@@ -48,14 +48,14 @@ var (
 		testKafkaLoadConfig,
 		testKafkaResetDataDB,
 
-		// testKafkaStartEngine,
+		testKafkaStartEngine,
 		testKafkaRPCConn,
-		// testKafkaCreateTopic,
+		testKafkaCreateTopic,
 		testKafkaExportEvent,
 		testKafkaVerifyExport,
-		// testKafkaDeleteTopic,
-		// testStopCgrEngine,
-		// testCleanDirectory,
+		testKafkaDeleteTopic,
+		testStopCgrEngine,
+		testCleanDirectory,
 	}
 )
 
@@ -168,15 +168,12 @@ func testKafkaVerifyExport(t *testing.T) {
 	})
 
 	ctx, cancel := context.WithCancel(context.Background())
-	var rcv string
-	for {
-		m, err := r.ReadMessage(ctx)
-		if err != nil {
-			break
-		}
-		rcv = string(m.Value)
-		cancel()
+	m, err := r.ReadMessage(ctx)
+	if err != nil {
+		t.Error(err)
 	}
+	rcv := string(m.Value)
+	cancel()
 
 	exp := `{"Account":"1001","AnswerTime":"2013-11-07T08:42:28Z","Category":"call","Cost":1.01,"Destination":"1002","OriginHost":"192.168.1.1","OriginID":"abcdef","RequestType":"*rated","RunID":"*default","SetupTime":"2013-11-07T08:42:25Z","Subject":"1001","Tenant":"cgrates.org","ToR":"*voice","Usage":10000000000}`
 
