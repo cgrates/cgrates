@@ -1481,6 +1481,8 @@ func TestRemoveItemFromIndexRP(t *testing.T) {
 }
 
 func TestRemoveItemFromIndexCHP(t *testing.T) {
+	Cache.Clear(nil)
+
 	cfg, err := config.NewDefaultCGRConfig()
 	if err != nil {
 		t.Error(err)
