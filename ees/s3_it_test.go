@@ -63,7 +63,7 @@ func TestS3Export(t *testing.T) {
 	if !*runS3Test {
 		t.SkipNow()
 	}
-	s3ConfDir = "ees_s3&sqs"
+	s3ConfDir = "ees_cloud"
 	for _, stest := range sTestsS3 {
 		t.Run(s3ConfDir, stest)
 	}
