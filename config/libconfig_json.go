@@ -217,6 +217,10 @@ type EventReaderOptsJson struct {
 	XMLRootPath                       *string `json:"xmlRootPath"`
 	AMQPQueueID                       *string `json:"amqpQueueID"`
 	AMQPQueueIDProcessed              *string `json:"amqpQueueIDProcessed"`
+	AMQPUsername                      *string `json:"amqpUsername"`
+	AMQPPassword                      *string `json:"amqpPassword"`
+	AMQPUsernameProcessed             *string `json:"amqpUsernameProcessed"`
+	AMQPPasswordProcessed             *string `json:"amqpPasswordProcessed"`
 	AMQPConsumerTag                   *string `json:"amqpConsumerTag"`
 	AMQPExchange                      *string `json:"amqpExchange"`
 	AMQPExchangeType                  *string `json:"amqpExchangeType"`
@@ -317,6 +321,8 @@ type EventExporterOptsJson struct {
 	AMQPRoutingKey           *string                `json:"amqpRoutingKey"`
 	AMQPExchange             *string                `json:"amqpExchange"`
 	AMQPExchangeType         *string                `json:"amqpExchangeType"`
+	AMQPUsername             *string                `json:"amqpUsername"`
+	AMQPPassword             *string                `json:"amqpPassword"`
 	AWSRegion                *string                `json:"awsRegion"`
 	AWSKey                   *string                `json:"awsKey"`
 	AWSSecret                *string                `json:"awsSecret"`

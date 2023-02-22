@@ -33,12 +33,13 @@ import (
 )
 
 var (
-	runAMQPv1Test = flag.Bool("amqpv1_ees", false, "Run the integration test for the AMQPv1 exporter")
-	amqpv1ConfDir string
-	amqpv1CfgPath string
-	amqpv1Cfg     *config.CGRConfig
-	amqpv1RPC     *rpc.Client
-	amqpv1DialURL string
+	runAMQPv1Test  = flag.Bool("amqpv1_ees", false, "Run the integration test for the AMQPv1 exporter")
+	amqpv1ConfDir  string
+	amqpv1CfgPath  string
+	amqpv1Cfg      *config.CGRConfig
+	amqpv1RPC      *rpc.Client
+	amqpv1DialURL  string
+	amqpv1ConnOpts *amqpv1.ConnOptions
 
 	sTestsAMQPv1 = []func(t *testing.T){
 		testAMQPv1LoadConfig,
@@ -73,6 +74,11 @@ func testAMQPv1LoadConfig(t *testing.T) {
 	for _, value := range amqpv1Cfg.EEsCfg().Exporters {
 		if value.ID == "amqpv1_test_file" {
 			amqpv1DialURL = value.ExportPath
+			if value.Opts.AMQPUsername != nil && value.Opts.AMQPPassword != nil {
+				amqpv1ConnOpts = &amqpv1.ConnOptions{
+					SASLType: amqpv1.SASLTypePlain(*value.Opts.AMQPUsername, *value.Opts.AMQPPassword),
+				}
+			}
 		}
 	}
 }
@@ -137,12 +143,7 @@ func testAMQPv1ExportEvent(t *testing.T) {
 
 func testAMQPv1VerifyExport(t *testing.T) {
 	// Create client
-	client, err := amqpv1.Dial(amqpv1DialURL, nil)
-	/* an alternative way to create the client
-	client, err := amqpv1.Dial("amqps://cgratescdrs.servicebus.windows.net",
-		amqpv1.ConnSASLPlain("access-key-name", "access-key"),
-	)
-	*/
+	client, err := amqpv1.Dial(amqpv1DialURL, amqpv1ConnOpts)
 	if err != nil {
 		t.Fatal("Dialing AMQP server:", err)
 	}

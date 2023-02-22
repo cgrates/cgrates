@@ -389,11 +389,16 @@ const CGRATES_CFG_JSON = `
 				// "amqpQueueID": "cgrates_cdrs",				// the queue id for AMQP and AMQPv1 readers from were the events are read
 				// "amqpQueueIDProcessed": "", 					// the queue id for AMQP and AMQPv1 readers were the events are sent after they are processed
 
-				// AMQP
-				// "amqpConsumerTag": "cgrates",				// the ID of the consumer
-				// "amqpExchange": "",									
-				// "amqpExchangeType": "",
-				// "amqpRoutingKey": "",
+				// "amqpUsername": "",							// amqp 1.0 exclusive, used for SASL PLAIN auth, usually represents the policy name
+				// "amqpPassword": "",							// amqp 1.0 exclusive, used for SASL PLAIN auth, populated with one of its policy's keys
+
+				// "amqpUsernameProcessed": "",					
+				// "amqpPasswordProcessed": "",	
+
+				// "amqpConsumerTag": "cgrates",				// the ID of the consumer, amqp 0.9.1 exclusive
+				// "amqpExchange": "",							// amqp 0.9.1 exclusive			
+				// "amqpExchangeType": "",						// amqp 0.9.1 exclusive		
+				// "amqpRoutingKey": "",						// amqp 0.9.1 exclusive	
 
 				// "amqpExchangeProcessed": "",									
 				// "amqpExchangeTypeProcessed": "",
@@ -532,9 +537,11 @@ const CGRATES_CFG_JSON = `
 				
 				// AMQP
 				// "amqpQueueID": "cgrates_cdrs",				// the queue id for AMQP exporters from were the events are exported
-				// "amqpRoutingKey": "",						// RoutingKey
-				// "amqpExchange": "",							// Exchange
-				// "amqpExchangeType": "",						// ExchangeType
+				// "amqpRoutingKey": "",						// RoutingKey, amqp 0.9.1 exclusive
+				// "amqpExchange": "",							// Exchange, amqp 0.9.1 exclusive
+				// "amqpExchangeType": "",						// ExchangeType, amqp 0.9.1 exclusive
+				// "amqpUsername": "",							// amqp 1.0 exclusive, used for SASL PLAIN auth, usually represents the policy name
+				// "amqpPassword": "",							// amqp 1.0 exclusive, used for SASL PLAIN auth, populated with one of its policy's keys
 				
 
 				// SQS and S3

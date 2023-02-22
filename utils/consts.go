@@ -2596,6 +2596,8 @@ const (
 	AMQPExchange     = "amqpExchange"
 	AMQPExchangeType = "amqpExchangeType"
 	AMQPRoutingKey   = "amqpRoutingKey"
+	AMQPUsername     = "amqpUsername"
+	AMQPPassword     = "amqpPassword"
 
 	// kafka
 	KafkaDefaultTopic   = "cgrates"
@@ -2652,6 +2654,8 @@ const (
 
 	// processed opts
 	AMQPQueueIDProcessedCfg      = "amqpQueueIDProcessed"
+	AMQPUsernameProcessedCfg     = "amqpUsernameProcessed"
+	AMQPPasswordProcessedCfg     = "amqpPasswordProcessed"
 	AMQPExchangeProcessedCfg     = "amqpExchangeProcessed"
 	AMQPExchangeTypeProcessedCfg = "amqpExchangeTypeProcessed"
 	AMQPRoutingKeyProcessedCfg   = "amqpRoutingKeyProcessed"

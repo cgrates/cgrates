@@ -54,6 +54,11 @@ func NewAMQPv1ER(cfg *config.CGRConfig, cfgIdx int,
 	if rdr.Config().Opts.AMQPQueueID != nil {
 		rdr.queueID = "/" + *rdr.Config().Opts.AMQPQueueID
 	}
+	if rdr.Config().Opts.AMQPUsername != nil && rdr.Config().Opts.AMQPPassword != nil {
+		rdr.connOpts = &amqpv1.ConnOptions{
+			SASLType: amqpv1.SASLTypePlain(*rdr.Config().Opts.AMQPUsername, *rdr.Config().Opts.AMQPPassword),
+		}
+	}
 	rdr.createPoster()
 	return rdr, nil
 }
@@ -73,8 +78,9 @@ type AMQPv1ER struct {
 	rdrErr        chan error
 	cap           chan struct{}
 
-	conn *amqpv1.Conn
-	ses  *amqpv1.Session
+	conn     *amqpv1.Conn
+	connOpts *amqpv1.ConnOptions
+	ses      *amqpv1.Session
 
 	poster *ees.AMQPv1EE
 }
@@ -86,7 +92,7 @@ func (rdr *AMQPv1ER) Config() *config.EventReaderCfg {
 
 // Serve will start the gorutines needed to watch the amqpv1 topic
 func (rdr *AMQPv1ER) Serve() (err error) {
-	if rdr.conn, err = amqpv1.Dial(rdr.Config().SourcePath, nil); err != nil {
+	if rdr.conn, err = amqpv1.Dial(rdr.Config().SourcePath, rdr.connOpts); err != nil {
 		return
 	}
 	if rdr.ses, err = rdr.conn.NewSession(context.TODO(), nil); err != nil {
