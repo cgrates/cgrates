@@ -177,6 +177,8 @@ type EventExporterOpts struct {
 	AMQPQueueID              *string
 	AMQPExchange             *string
 	AMQPExchangeType         *string
+	AMQPUsername             *string
+	AMQPPassword             *string
 	AWSRegion                *string
 	AWSKey                   *string
 	AWSSecret                *string
@@ -306,6 +308,12 @@ func (eeOpts *EventExporterOpts) loadFromJSONCfg(jsnCfg *EventExporterOptsJson) 
 	}
 	if jsnCfg.AMQPExchangeType != nil {
 		eeOpts.AMQPExchangeType = jsnCfg.AMQPExchangeType
+	}
+	if jsnCfg.AMQPUsername != nil {
+		eeOpts.AMQPUsername = jsnCfg.AMQPUsername
+	}
+	if jsnCfg.AMQPPassword != nil {
+		eeOpts.AMQPPassword = jsnCfg.AMQPPassword
 	}
 	if jsnCfg.AWSRegion != nil {
 		eeOpts.AWSRegion = jsnCfg.AWSRegion
@@ -567,6 +575,12 @@ func (eeOpts *EventExporterOpts) Clone() *EventExporterOpts {
 	if eeOpts.AMQPExchangeType != nil {
 		cln.AMQPExchangeType = utils.StringPointer(*eeOpts.AMQPExchangeType)
 	}
+	if eeOpts.AMQPUsername != nil {
+		cln.AMQPUsername = utils.StringPointer(*eeOpts.AMQPUsername)
+	}
+	if eeOpts.AMQPPassword != nil {
+		cln.AMQPPassword = utils.StringPointer(*eeOpts.AMQPPassword)
+	}
 	if eeOpts.AWSRegion != nil {
 		cln.AWSRegion = utils.StringPointer(*eeOpts.AWSRegion)
 	}
@@ -765,6 +779,12 @@ func (eeC *EventExporterCfg) AsMapInterface(separator string) (initialMP map[str
 	}
 	if eeC.Opts.AMQPExchangeType != nil {
 		opts[utils.AMQPExchangeType] = *eeC.Opts.AMQPExchangeType
+	}
+	if eeC.Opts.AMQPUsername != nil {
+		opts[utils.AMQPUsername] = *eeC.Opts.AMQPUsername
+	}
+	if eeC.Opts.AMQPPassword != nil {
+		opts[utils.AMQPPassword] = *eeC.Opts.AMQPPassword
 	}
 	if eeC.Opts.AWSRegion != nil {
 		opts[utils.AWSRegion] = *eeC.Opts.AWSRegion

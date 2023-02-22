@@ -147,6 +147,10 @@ type EventReaderOpts struct {
 	XMLRootPath                       *string
 	AMQPQueueID                       *string
 	AMQPQueueIDProcessed              *string
+	AMQPUsername                      *string
+	AMQPPassword                      *string
+	AMQPUsernameProcessed             *string
+	AMQPPasswordProcessed             *string
 	AMQPConsumerTag                   *string
 	AMQPExchange                      *string
 	AMQPExchangeType                  *string
@@ -251,6 +255,18 @@ func (erOpts *EventReaderOpts) loadFromJSONCfg(jsnCfg *EventReaderOptsJson) (err
 	}
 	if jsnCfg.AMQPQueueIDProcessed != nil {
 		erOpts.AMQPQueueIDProcessed = jsnCfg.AMQPQueueIDProcessed
+	}
+	if jsnCfg.AMQPUsername != nil {
+		erOpts.AMQPUsername = jsnCfg.AMQPUsername
+	}
+	if jsnCfg.AMQPPassword != nil {
+		erOpts.AMQPPassword = jsnCfg.AMQPPassword
+	}
+	if jsnCfg.AMQPUsernameProcessed != nil {
+		erOpts.AMQPUsernameProcessed = jsnCfg.AMQPUsernameProcessed
+	}
+	if jsnCfg.AMQPPasswordProcessed != nil {
+		erOpts.AMQPPasswordProcessed = jsnCfg.AMQPPasswordProcessed
 	}
 	if jsnCfg.AMQPConsumerTag != nil {
 		erOpts.AMQPConsumerTag = jsnCfg.AMQPConsumerTag
@@ -523,6 +539,18 @@ func (erOpts *EventReaderOpts) Clone() *EventReaderOpts {
 	if erOpts.AMQPQueueIDProcessed != nil {
 		cln.AMQPQueueIDProcessed = utils.StringPointer(*erOpts.AMQPQueueIDProcessed)
 	}
+	if erOpts.AMQPUsername != nil {
+		cln.AMQPUsername = utils.StringPointer(*erOpts.AMQPUsername)
+	}
+	if erOpts.AMQPPassword != nil {
+		cln.AMQPPassword = utils.StringPointer(*erOpts.AMQPPassword)
+	}
+	if erOpts.AMQPUsernameProcessed != nil {
+		cln.AMQPUsernameProcessed = utils.StringPointer(*erOpts.AMQPUsernameProcessed)
+	}
+	if erOpts.AMQPPasswordProcessed != nil {
+		cln.AMQPPasswordProcessed = utils.StringPointer(*erOpts.AMQPPasswordProcessed)
+	}
 	if erOpts.AMQPConsumerTag != nil {
 		cln.AMQPConsumerTag = utils.StringPointer(*erOpts.AMQPConsumerTag)
 	}
@@ -747,6 +775,18 @@ func (er *EventReaderCfg) AsMapInterface(separator string) (initialMP map[string
 	}
 	if er.Opts.AMQPQueueIDProcessed != nil {
 		opts[utils.AMQPQueueIDProcessedCfg] = *er.Opts.AMQPQueueIDProcessed
+	}
+	if er.Opts.AMQPUsername != nil {
+		opts[utils.AMQPUsername] = *er.Opts.AMQPUsername
+	}
+	if er.Opts.AMQPPassword != nil {
+		opts[utils.AMQPPassword] = *er.Opts.AMQPPassword
+	}
+	if er.Opts.AMQPUsernameProcessed != nil {
+		opts[utils.AMQPUsernameProcessedCfg] = *er.Opts.AMQPUsernameProcessed
+	}
+	if er.Opts.AMQPPasswordProcessed != nil {
+		opts[utils.AMQPPasswordProcessedCfg] = *er.Opts.AMQPPasswordProcessed
 	}
 	if er.Opts.AMQPConsumerTag != nil {
 		opts[utils.AMQPConsumerTag] = *er.Opts.AMQPConsumerTag
