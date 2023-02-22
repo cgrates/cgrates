@@ -7,7 +7,7 @@ go 1.18
 // replace github.com/cgrates/rpcclient => ../rpcclient
 
 require (
-	github.com/Azure/go-amqp v0.17.5
+	github.com/Azure/go-amqp v0.18.1
 	github.com/antchfx/xmlquery v1.3.11
 	github.com/aws/aws-sdk-go v1.44.43
 	github.com/blevesearch/bleve v1.0.14

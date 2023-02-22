@@ -44,7 +44,7 @@ func NewAMQPv1EE(cfg *config.EventExporterCfg, dc *utils.SafeMapStorage) *AMQPv1
 // AMQPv1EE a poster for amqpv1
 type AMQPv1EE struct {
 	queueID string // identifier of the CDR queue where we publish
-	client  *amqpv1.Client
+	conn    *amqpv1.Conn
 	session *amqpv1.Session
 
 	cfg          *config.EventExporterCfg
@@ -59,19 +59,19 @@ func (pstr *AMQPv1EE) Cfg() *config.EventExporterCfg { return pstr.cfg }
 func (pstr *AMQPv1EE) Connect() (err error) {
 	pstr.Lock()
 	defer pstr.Unlock()
-	if pstr.client == nil {
-		if pstr.client, err = amqpv1.Dial(pstr.Cfg().ExportPath); err != nil {
+	if pstr.conn == nil {
+		if pstr.conn, err = amqpv1.Dial(pstr.Cfg().ExportPath, nil); err != nil {
 			return
 		}
 	}
 	if pstr.session == nil {
-		pstr.session, err = pstr.client.NewSession()
+		pstr.session, err = pstr.conn.NewSession(context.TODO(), nil)
 		if err != nil {
 			// reset client and try again
 			// used in case of closed connection because of idle time
-			if pstr.client != nil {
-				pstr.client.Close() // Make shure the connection is closed before reseting it
-				pstr.client = nil
+			if pstr.conn != nil {
+				pstr.conn.Close() // Make shure the connection is closed before reseting it
+				pstr.conn = nil
 			}
 		}
 	}
@@ -88,9 +88,7 @@ func (pstr *AMQPv1EE) ExportEvent(ctx *context.Context, content, _ interface{}) 
 	if pstr.session == nil {
 		return utils.ErrDisconnected
 	}
-	sender, err := pstr.session.NewSender(
-		amqpv1.LinkTargetAddress(pstr.queueID),
-	)
+	sender, err := pstr.session.NewSender(ctx, pstr.queueID, nil)
 	if err != nil {
 		return
 	}
@@ -106,9 +104,9 @@ func (pstr *AMQPv1EE) Close() (err error) {
 		pstr.session.Close(context.Background())
 		pstr.session = nil
 	}
-	if pstr.client != nil {
-		err = pstr.client.Close()
-		pstr.client = nil
+	if pstr.conn != nil {
+		err = pstr.conn.Close()
+		pstr.conn = nil
 	}
 	pstr.Unlock()
 	return
