@@ -1,6 +1,6 @@
 module github.com/cgrates/cgrates
 
-go 1.18
+go 1.20
 
 // replace github.com/cgrates/radigo => ../radigo
 
