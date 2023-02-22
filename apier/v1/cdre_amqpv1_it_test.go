@@ -216,7 +216,7 @@ func testAMQPv1ExportCDRs(t *testing.T) {
 
 func testAMQPv1VerifyExport(t *testing.T) {
 	// Create client
-	client, err := amqp.Dial(amqpv1DialURL)
+	client, err := amqp.Dial(amqpv1DialURL, nil)
 	/* an alternative way to create the client
 	client, err := amqp.Dial("amqps://name-space.servicebus.windows.net",
 		amqp.ConnSASLPlain("access-key-name", "access-key"),
@@ -227,13 +227,13 @@ func testAMQPv1VerifyExport(t *testing.T) {
 	}
 	defer client.Close()
 
+	ctx := context.Background()
+
 	// Open a session
-	session, err := client.NewSession()
+	session, err := client.NewSession(ctx, nil)
 	if err != nil {
 		t.Fatal("Creating AMQP session:", err)
 	}
-
-	ctx := context.Background()
 
 	expCDRs := []string{
 		`{"Account":"1001","CGRID":"Cdr2","Category":"call","Cost":"-1.0000","Destination":"+4986517174963","OriginID":"OriginCDR2","RunID":"*default","Source":"test2","Tenant":"cgrates.org","Usage":"5s"}`,
@@ -242,10 +242,7 @@ func testAMQPv1VerifyExport(t *testing.T) {
 	rplyCDRs := make([]string, 0)
 
 	// Create a receiver
-	receiver, err := session.NewReceiver(
-		amqp.LinkSourceAddress("/cgrates_cdrs"),
-		amqp.LinkCredit(10),
-	)
+	receiver, err := session.NewReceiver(ctx, "/cgrates_cdrs", nil)
 	if err != nil {
 		t.Fatal("Creating receiver link:", err)
 	}
