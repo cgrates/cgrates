@@ -317,14 +317,14 @@ func TestAMQPv1Poster(t *testing.T) {
 		t.Fatal(err)
 	}
 	// Create client
-	client, err := amqpv1.Dial(endpoint)
+	client, err := amqpv1.Dial(endpoint, nil)
 	if err != nil {
 		t.Fatal("Dialing AMQP server:", err)
 	}
 	defer client.Close()
 
 	// Open a session
-	session, err := client.NewSession()
+	session, err := client.NewSession(context.Background(), nil)
 	if err != nil {
 		t.Fatal("Creating AMQP session:", err)
 	}
@@ -332,9 +332,7 @@ func TestAMQPv1Poster(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 
 	// Create a receiver
-	receiver, err := session.NewReceiver(
-		amqpv1.LinkSourceAddress("/" + qname),
-	)
+	receiver, err := session.NewReceiver(ctx, "/"+qname, nil)
 	if err != nil {
 		t.Fatal("Creating receiver link:", err)
 	}

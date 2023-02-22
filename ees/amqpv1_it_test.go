@@ -137,7 +137,7 @@ func testAMQPv1ExportEvent(t *testing.T) {
 
 func testAMQPv1VerifyExport(t *testing.T) {
 	// Create client
-	client, err := amqpv1.Dial(amqpv1DialURL)
+	client, err := amqpv1.Dial(amqpv1DialURL, nil)
 	/* an alternative way to create the client
 	client, err := amqpv1.Dial("amqps://cgratescdrs.servicebus.windows.net",
 		amqpv1.ConnSASLPlain("access-key-name", "access-key"),
@@ -148,19 +148,16 @@ func testAMQPv1VerifyExport(t *testing.T) {
 	}
 	defer client.Close()
 
+	ctx := context.Background()
+
 	// Open a session
-	session, err := client.NewSession()
+	session, err := client.NewSession(ctx, nil)
 	if err != nil {
 		t.Fatal("Creating AMQP session:", err)
 	}
 
-	ctx := context.Background()
-
 	// Create a receiver
-	receiver, err := session.NewReceiver(
-		amqpv1.LinkSourceAddress("/cgrates_cdrs"),
-		amqpv1.LinkCredit(10),
-	)
+	receiver, err := session.NewReceiver(ctx, "/cgrates_cdrs", nil)
 	if err != nil {
 		t.Fatal("Creating receiver link:", err)
 	}
