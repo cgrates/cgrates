@@ -84,20 +84,20 @@ func TestAMQPERv1(t *testing.T) {
 		t.Fatal(err)
 	}
 	amqpv1Rdr := rdr.(*AMQPv1ER)
-	connection, err := amqpv1.Dial("amqps://RootManageSharedAccessKey:Je8l%2Bt9tyOgZbdA%2B5SmGIJEsEzhZ9VdIO7yRke5EYtM%3D@test0123456y.servicebus.windows.net")
+	connection, err := amqpv1.Dial("amqps://RootManageSharedAccessKey:Je8l%2Bt9tyOgZbdA%2B5SmGIJEsEzhZ9VdIO7yRke5EYtM%3D@test0123456y.servicebus.windows.net", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer connection.Close()
 
-	channel, err := connection.NewSession()
+	channel, err := connection.NewSession(context.Background(), nil)
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer channel.Close(context.Background())
 
 	randomOriginID := utils.UUIDSha1Prefix()
-	sndr, err := channel.NewSender(amqpv1.LinkTargetAddress(amqpv1Rdr.queueID))
+	sndr, err := channel.NewSender(context.Background(), amqpv1Rdr.queueID, nil)
 	if err != nil {
 		t.Fatal(err)
 	}

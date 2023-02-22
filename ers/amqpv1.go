@@ -75,7 +75,7 @@ type AMQPv1ER struct {
 	rdrErr        chan error
 	cap           chan struct{}
 
-	conn *amqpv1.Client
+	conn *amqpv1.Conn
 	ses  *amqpv1.Session
 
 	poster *ees.AMQPv1EE
@@ -88,10 +88,10 @@ func (rdr *AMQPv1ER) Config() *config.EventReaderCfg {
 
 // Serve will start the gorutines needed to watch the amqpv1 topic
 func (rdr *AMQPv1ER) Serve() (err error) {
-	if rdr.conn, err = amqpv1.Dial(rdr.Config().SourcePath); err != nil {
+	if rdr.conn, err = amqpv1.Dial(rdr.Config().SourcePath, nil); err != nil {
 		return
 	}
-	if rdr.ses, err = rdr.conn.NewSession(); err != nil {
+	if rdr.ses, err = rdr.conn.NewSession(context.TODO(), nil); err != nil {
 		rdr.close()
 		return
 	}
@@ -100,9 +100,8 @@ func (rdr *AMQPv1ER) Serve() (err error) {
 	}
 
 	var receiver *amqpv1.Receiver
-	if receiver, err = rdr.ses.NewReceiver(
-		amqpv1.LinkSourceAddress(rdr.queueID),
-	); err != nil {
+	if receiver, err = rdr.ses.NewReceiver(context.TODO(), rdr.queueID,
+		nil); err != nil {
 		return
 	}
 	go func() {
@@ -125,7 +124,7 @@ func (rdr *AMQPv1ER) readLoop(recv *amqpv1.Receiver) (err error) {
 		ctx := context.Background()
 		var msg *amqpv1.Message
 		if msg, err = recv.Receive(ctx); err != nil {
-			if err == amqpv1.ErrLinkClosed {
+			if err.Error() == "amqp: link closed" {
 				err = nil
 				return
 			}
