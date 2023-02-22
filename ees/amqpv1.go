@@ -38,14 +38,20 @@ func NewAMQPv1EE(cfg *config.EventExporterCfg, dc *utils.SafeMapStorage) *AMQPv1
 	if cfg.Opts.AMQPQueueID != nil {
 		pstr.queueID = "/" + *cfg.Opts.AMQPQueueID
 	}
+	if cfg.Opts.AMQPUsername != nil && cfg.Opts.AMQPPassword != nil {
+		pstr.connOpts = &amqpv1.ConnOptions{
+			SASLType: amqpv1.SASLTypePlain(*cfg.Opts.AMQPUsername, *cfg.Opts.AMQPPassword),
+		}
+	}
 	return pstr
 }
 
 // AMQPv1EE a poster for amqpv1
 type AMQPv1EE struct {
-	queueID string // identifier of the CDR queue where we publish
-	conn    *amqpv1.Conn
-	session *amqpv1.Session
+	queueID  string // identifier of the CDR queue where we publish
+	conn     *amqpv1.Conn
+	connOpts *amqpv1.ConnOptions
+	session  *amqpv1.Session
 
 	cfg          *config.EventExporterCfg
 	dc           *utils.SafeMapStorage
@@ -60,7 +66,7 @@ func (pstr *AMQPv1EE) Connect() (err error) {
 	pstr.Lock()
 	defer pstr.Unlock()
 	if pstr.conn == nil {
-		if pstr.conn, err = amqpv1.Dial(pstr.Cfg().ExportPath, nil); err != nil {
+		if pstr.conn, err = amqpv1.Dial(pstr.Cfg().ExportPath, pstr.connOpts); err != nil {
 			return
 		}
 	}

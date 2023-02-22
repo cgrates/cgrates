@@ -53,6 +53,18 @@ func getProcessOptions(erOpts *config.EventReaderOpts) (eeOpts *config.EventExpo
 		}
 		eeOpts.AMQPRoutingKey = erOpts.AMQPRoutingKeyProcessed
 	}
+	if erOpts.AMQPUsernameProcessed != nil {
+		if eeOpts == nil {
+			eeOpts = new(config.EventExporterOpts)
+		}
+		eeOpts.AMQPUsername = erOpts.AMQPUsernameProcessed
+	}
+	if erOpts.AMQPPasswordProcessed != nil {
+		if eeOpts == nil {
+			eeOpts = new(config.EventExporterOpts)
+		}
+		eeOpts.AMQPPassword = erOpts.AMQPPasswordProcessed
+	}
 	if erOpts.AWSKeyProcessed != nil {
 		if eeOpts == nil {
 			eeOpts = new(config.EventExporterOpts)
