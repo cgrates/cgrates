@@ -180,12 +180,16 @@ func TestNewCapsBiRPCCodec(t *testing.T) {
 		t.Errorf("Expected: %v ,received:%v", expR, r)
 	}
 
-	if err = codec.ReadRequestBody("args"); err == nil || err != utils.ErrNotImplemented {
+	expR.Method = utils.SessionSv1CapsError
+
+	if err = codec.ReadHeader(r, nil); err != nil {
 		t.Fatal(err)
+	} else if !reflect.DeepEqual(r, expR) {
+		t.Errorf("Expected: %v ,received:%v", expR, r)
 	}
 
-	if err = codec.ReadRequestBody("args"); err != utils.ErrMaxConcurrentRPCExceededNoCaps {
-		t.Errorf("Expected error: %v ,received: %v ", utils.ErrMaxConcurrentRPCExceededNoCaps, err)
+	if err = codec.ReadRequestBody("args"); err == nil || err != utils.ErrNotImplemented {
+		t.Fatal(err)
 	}
 
 	if err = codec.WriteResponse(&rpc2.Response{
