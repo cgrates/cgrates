@@ -21,7 +21,6 @@ package engine
 import (
 	"context"
 	"fmt"
-	"net"
 	"sync"
 	"time"
 
@@ -48,16 +47,16 @@ type AMQPv1Poster struct {
 	dialURL  string
 	queueID  string // identifier of the CDR queue where we publish
 	attempts int
-	client   *amqpv1.Client
+	conn     *amqpv1.Conn
 }
 
 // Close closes the connections
 func (pstr *AMQPv1Poster) Close() {
 	pstr.Lock()
-	if pstr.client != nil {
-		pstr.client.Close()
+	if pstr.conn != nil {
+		pstr.conn.Close()
 	}
-	pstr.client = nil
+	pstr.conn = nil
 	pstr.Unlock()
 }
 
@@ -72,10 +71,10 @@ func (pstr *AMQPv1Poster) Post(content []byte, _ string) (err error) {
 		}
 		// reset client and try again
 		// used in case of closed connection because of idle time
-		if pstr.client != nil {
-			pstr.client.Close() // Make shure the connection is closed before reseting it
+		if pstr.conn != nil {
+			pstr.conn.Close() // Make shure the connection is closed before reseting it
 		}
-		pstr.client = nil
+		pstr.conn = nil
 		if i+1 < pstr.attempts {
 			time.Sleep(time.Duration(fib()) * time.Second)
 		}
@@ -87,22 +86,11 @@ func (pstr *AMQPv1Poster) Post(content []byte, _ string) (err error) {
 
 	ctx := context.Background()
 	for i := 0; i < pstr.attempts; i++ {
-		sender, err := s.NewSender(
-			amqpv1.LinkTargetAddress(pstr.queueID),
-		)
+		sender, err := s.NewSender(ctx, pstr.queueID, nil)
 		if err != nil {
 			if i+1 < pstr.attempts {
 				time.Sleep(time.Duration(fib()) * time.Second)
 			}
-			// if pstr.isRecoverableError(err) {
-			// 	s.Close(ctx)
-			// 	pstr.client.Close()
-			// 	pstr.client = nil
-			// 	stmp, err := pstr.newPosterSession()
-			// 	if err == nil {
-			// 		s = stmp
-			// 	}
-			// }
 			continue
 		}
 		// Send message
@@ -114,15 +102,6 @@ func (pstr *AMQPv1Poster) Post(content []byte, _ string) (err error) {
 		if i+1 < pstr.attempts {
 			time.Sleep(time.Duration(fib()) * time.Second)
 		}
-		// if pstr.isRecoverableError(err) {
-		// 	s.Close(ctx)
-		// 	pstr.client.Close()
-		// 	pstr.client = nil
-		// 	stmp, err := pstr.newPosterSession()
-		// 	if err == nil {
-		// 		s = stmp
-		// 	}
-		// }
 	}
 	if err != nil {
 		return
@@ -136,35 +115,13 @@ func (pstr *AMQPv1Poster) Post(content []byte, _ string) (err error) {
 func (pstr *AMQPv1Poster) newPosterSession() (s *amqpv1.Session, err error) {
 	pstr.Lock()
 	defer pstr.Unlock()
-	if pstr.client == nil {
-		var client *amqpv1.Client
-		client, err = amqpv1.Dial(pstr.dialURL)
+	if pstr.conn == nil {
+		var client *amqpv1.Conn
+		client, err = amqpv1.Dial(pstr.dialURL, nil)
 		if err != nil {
 			return nil, err
 		}
-		pstr.client = client
+		pstr.conn = client
 	}
-	return pstr.client.NewSession()
-}
-
-func isRecoverableCloseError(err error) bool {
-	return err == amqpv1.ErrConnClosed ||
-		err == amqpv1.ErrLinkClosed ||
-		err == amqpv1.ErrSessionClosed
-}
-
-func (pstr *AMQPv1Poster) isRecoverableError(err error) bool {
-	switch err.(type) {
-	case *amqpv1.Error, *amqpv1.DetachError, net.Error:
-		if netErr, ok := err.(net.Error); ok {
-			if !netErr.Temporary() {
-				return false
-			}
-		}
-	default:
-		if !isRecoverableCloseError(err) {
-			return false
-		}
-	}
-	return true
+	return pstr.conn.NewSession(context.TODO(), nil)
 }
