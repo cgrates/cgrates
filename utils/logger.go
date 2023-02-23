@@ -34,7 +34,8 @@ func init() {
 
 		var err error
 		//used for testing only, so we will ignore the error for now
-		if Logger, err = Newlogger(MetaSysLog, EmptyString); err != nil {
+		Logger, err = Newlogger(MetaSysLog, EmptyString)
+		if err != nil {
 			noSysLog = true
 			Logger, _ = Newlogger(MetaStdLog, EmptyString)
 		}
