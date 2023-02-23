@@ -124,6 +124,12 @@ func testEmergencyLogger(t *testing.T) {
 	if err := newLogger.Emerg("emergency_panic"); err != nil {
 		t.Error(err)
 	}
+
+	newLogger.SetLogLevel(-1)
+
+	if err := newLogger.Emerg("emergency_panic2"); err != nil {
+		t.Error(err)
+	}
 	if err := writer.Close(); err != nil {
 		t.Error(err)
 	}
@@ -133,8 +139,11 @@ func testEmergencyLogger(t *testing.T) {
 		t.Error(err)
 	}
 	expected := "emergency_panic"
+	expected2 := "emergency_panic2"
 	if rcv := l.String(); !strings.Contains(rcv, expected) {
 		t.Errorf("Expected %q, received %q", expected, rcv)
+	} else if strings.Contains(rcv, expected2) {
+		t.Errorf("Expected %q to not exist, received %q", expected, rcv)
 	}
 }
 
@@ -160,6 +169,12 @@ func testAlertLogger(t *testing.T) {
 	if err := newLogger.Alert("emergency_alert"); err != nil {
 		t.Error(err)
 	}
+
+	newLogger.SetLogLevel(0)
+
+	if err := newLogger.Alert("emergency_alert2"); err != nil {
+		t.Error(err)
+	}
 	if err := writer.Close(); err != nil {
 		t.Error(err)
 	}
@@ -169,8 +184,11 @@ func testAlertLogger(t *testing.T) {
 		t.Error(err)
 	}
 	expected := "emergency_alert"
+	expected2 := "emergency_alert2"
 	if rcv := l.String(); !strings.Contains(rcv, expected) {
 		t.Errorf("Expected %q, received %q", expected, rcv)
+	} else if strings.Contains(rcv, expected2) {
+		t.Errorf("Expected %q to not exist, received %q", expected, rcv)
 	}
 }
 
@@ -195,6 +213,13 @@ func testCriticalLogger(t *testing.T) {
 	if err := newLogger.Crit("critical_panic"); err != nil {
 		t.Error(err)
 	}
+
+	newLogger.SetLogLevel(1)
+
+	if err := newLogger.Crit("critical_panic2"); err != nil {
+		t.Error(err)
+	}
+
 	if err := writer.Close(); err != nil {
 		t.Error(err)
 	}
@@ -204,8 +229,11 @@ func testCriticalLogger(t *testing.T) {
 		t.Error(err)
 	}
 	expected := "critical_panic"
+	expected2 := "critical_panic2"
 	if rcv := l.String(); !strings.Contains(rcv, expected) {
 		t.Errorf("Expected %q, received %q", expected, rcv)
+	} else if strings.Contains(rcv, expected2) {
+		t.Errorf("Expected %q to not exist, received %q", expected, rcv)
 	}
 }
 
@@ -301,6 +329,12 @@ func testNoticeLogger(t *testing.T) {
 		t.Error(err)
 	}
 
+	newLogger.SetLogLevel(4)
+
+	if err := newLogger.Notice("notice_panic2"); err != nil {
+		t.Error(err)
+	}
+
 	if err := writer.Close(); err != nil {
 		t.Error(err)
 	}
@@ -310,8 +344,11 @@ func testNoticeLogger(t *testing.T) {
 		t.Error(err)
 	}
 	expected := "notice_panic"
+	expected2 := "notice_panic2"
 	if rcv := l.String(); !strings.Contains(rcv, expected) {
 		t.Errorf("Expected %q, received %q", expected, rcv)
+	} else if strings.Contains(rcv, expected2) {
+		t.Errorf("Expected %q to not exist, received %q", expected, rcv)
 	}
 }
 
@@ -371,6 +408,12 @@ func testDebugLogger(t *testing.T) {
 	if err := newLogger.Debug("debug_panic"); err != nil {
 		t.Error(err)
 	}
+
+	newLogger.SetLogLevel(6)
+
+	if err := newLogger.Debug("debug_panic2"); err != nil {
+		t.Error(err)
+	}
 	if err := writer.Close(); err != nil {
 		t.Error(err)
 	}
@@ -380,7 +423,10 @@ func testDebugLogger(t *testing.T) {
 		t.Error(err)
 	}
 	expected := "debug_panic"
+	expected2 := "debug_panic2"
 	if rcv := l.String(); !strings.Contains(rcv, expected) {
 		t.Errorf("Expected %q, received %q", expected, rcv)
+	} else if strings.Contains(rcv, expected2) {
+		t.Errorf("Expected %q to not exist, received %q", expected, rcv)
 	}
 }
