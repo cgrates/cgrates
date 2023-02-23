@@ -41,6 +41,7 @@ var (
 		testNoticeLogger,
 		testInfoLogger,
 		testDebugLogger,
+		TestCloseLoggerSysLog,
 	}
 )
 
@@ -374,5 +375,19 @@ func testDebugLogger(t *testing.T) {
 	expected := "debug_panic"
 	if rcv := l.String(); !strings.Contains(rcv, expected) {
 		t.Errorf("Expected %q, received %q", expected, rcv)
+	}
+}
+
+func TestCloseLoggerSysLog(t *testing.T) {
+	newLogger := &StdLogger{nodeID: EmptyString}
+	newWriter, err := syslog.New(0, "CGRates")
+	if err != nil {
+		t.Error(err)
+	}
+	x := newWriter
+
+	newLogger.SetSyslog(x)
+	if err := newLogger.Close(); err != nil {
+		t.Error(err)
 	}
 }

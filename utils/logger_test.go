@@ -22,7 +22,6 @@ import (
 	"bytes"
 	"io"
 	"log"
-	syslog "log/syslog"
 	"os"
 	"strings"
 	"testing"
@@ -31,11 +30,7 @@ import (
 func TestEmergLogger(t *testing.T) {
 	output := new(bytes.Buffer)
 	log.SetOutput(output)
-	loggertype := MetaSysLog
 	id := "id_emerg"
-	if _, err := Newlogger(loggertype, id); err != nil {
-		t.Error(err)
-	}
 
 	newLogger := &StdLogger{nodeID: id}
 
@@ -59,11 +54,7 @@ func TestEmergLogger(t *testing.T) {
 func TestAlertLogger(t *testing.T) {
 	output := new(bytes.Buffer)
 	log.SetOutput(output)
-	loggertype := MetaSysLog
 	id := "id_alert"
-	if _, err := Newlogger(loggertype, id); err != nil {
-		t.Error(err)
-	}
 
 	newLogger := &StdLogger{nodeID: id}
 
@@ -88,11 +79,7 @@ func TestCritLogger(t *testing.T) {
 	output := new(bytes.Buffer)
 	log.SetOutput(output)
 
-	loggertype := MetaSysLog
 	id := "id_crit"
-	if _, err := Newlogger(loggertype, id); err != nil {
-		t.Error(err)
-	}
 
 	newLogger := &StdLogger{nodeID: id}
 
@@ -117,11 +104,7 @@ func TestErrorLogger(t *testing.T) {
 	output := new(bytes.Buffer)
 	log.SetOutput(output)
 
-	loggertype := MetaSysLog
 	id := "id_error"
-	if _, err := Newlogger(loggertype, id); err != nil {
-		t.Error(err)
-	}
 
 	newLogger := &StdLogger{nodeID: id}
 
@@ -146,11 +129,7 @@ func TestWarningLogger(t *testing.T) {
 	output := new(bytes.Buffer)
 	log.SetOutput(output)
 
-	loggertype := MetaSysLog
 	id := "id_error"
-	if _, err := Newlogger(loggertype, id); err != nil {
-		t.Error(err)
-	}
 
 	newLogger := &StdLogger{nodeID: id}
 
@@ -175,11 +154,7 @@ func TestNoticeLogger(t *testing.T) {
 	output := new(bytes.Buffer)
 	log.SetOutput(output)
 
-	loggertype := MetaSysLog
 	id := "id_notice"
-	if _, err := Newlogger(loggertype, id); err != nil {
-		t.Error(err)
-	}
 
 	newLogger := &StdLogger{nodeID: id}
 
@@ -204,11 +179,7 @@ func TestInfoLogger(t *testing.T) {
 	output := new(bytes.Buffer)
 	log.SetOutput(output)
 
-	loggertype := MetaSysLog
 	id := "id_info"
-	if _, err := Newlogger(loggertype, id); err != nil {
-		t.Error(err)
-	}
 
 	newLogger := &StdLogger{nodeID: id}
 
@@ -233,11 +204,7 @@ func TestDebugLogger(t *testing.T) {
 	output := new(bytes.Buffer)
 	log.SetOutput(output)
 
-	loggertype := MetaSysLog
 	id := "id_debug"
-	if _, err := Newlogger(loggertype, id); err != nil {
-		t.Error(err)
-	}
 
 	newLogger, err := Newlogger(MetaStdLog, id)
 	if err != nil {
@@ -261,23 +228,11 @@ func TestDebugLogger(t *testing.T) {
 }
 
 func TestWriteLogger(t *testing.T) {
-	if noSysLog {
-		t.SkipNow()
-	}
 	log.SetOutput(os.Stderr)
 
-	loggertype := MetaSysLog
 	id := "id_write"
-	if _, err := Newlogger(loggertype, id); err != nil {
-		t.Error(err)
-	}
 
-	newWriter, err := syslog.New(syslog.LOG_INFO|syslog.LOG_DAEMON, "CGRates id_write")
-	if err != nil {
-		t.Error(err)
-	}
 	newLogger := &StdLogger{nodeID: id}
-	newLogger.SetSyslog(newWriter)
 
 	if n, err := newLogger.Write([]byte(EmptyString)); err != nil {
 		t.Error(err)
@@ -297,28 +252,6 @@ func TestCloseLoggerStdLog(t *testing.T) {
 	}
 
 	newLogger := &StdLogger{nodeID: EmptyString}
-	if err := newLogger.Close(); err != nil {
-		t.Error(err)
-	}
-}
-
-func TestCloseLoggerSysLog(t *testing.T) {
-	if noSysLog {
-		t.SkipNow()
-	}
-	log.SetOutput(io.Discard)
-
-	newLogger := &StdLogger{nodeID: EmptyString}
-	if err := newLogger.Close(); err != nil {
-		t.Error(err)
-	}
-	newWriter, err := syslog.New(0, "CGRates")
-	if err != nil {
-		t.Error(err)
-	}
-	x := newWriter
-
-	newLogger.SetSyslog(x)
 	if err := newLogger.Close(); err != nil {
 		t.Error(err)
 	}
