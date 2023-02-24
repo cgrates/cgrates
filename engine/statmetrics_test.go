@@ -3693,7 +3693,7 @@ func TestExportToPrometheusOK(t *testing.T) {
 		Help:      "Metrics exported as gauge, depending on metricID's ID.",
 	}, []string{"metricID"})
 
-	if err = prometheus.Register(gaugeVal); err != nil {
+	if err := prometheus.Register(gaugeVal); err != nil {
 		if _, ok := err.(prometheus.AlreadyRegisteredError); ok {
 			t.Error("GaugeValue was already registered")
 		}

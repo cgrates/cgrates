@@ -6126,14 +6126,14 @@ func TestResourceMatchingResourcesForEventLocks2(t *testing.T) {
 			}},
 		ThresholdIDs: []string{utils.MetaNone},
 	}
-	err = db.SetResourceProfileDrv(context.Background(), rPrf)
+	err := db.SetResourceProfileDrv(context.Background(), rPrf)
 	if err != nil {
 		t.Fatal(err)
 	}
 	prfs = append(prfs, rPrf)
 	ids.Add(rPrf.ID)
 	Cache.Set(context.Background(), utils.CacheEventResources, "TestResourceMatchingResourcesForEventLocks2", ids, nil, true, utils.NonTransactional)
-	_, err := rS.matchingResourcesForEvent(context.Background(), "cgrates.org", new(utils.CGREvent),
+	_, err = rS.matchingResourcesForEvent(context.Background(), "cgrates.org", new(utils.CGREvent),
 		"TestResourceMatchingResourcesForEventLocks2", utils.DurationPointer(10*time.Second))
 	expErr := utils.ErrPrefixNotFound(rPrf.FilterIDs[0])
 	if err == nil || err.Error() != expErr.Error() {

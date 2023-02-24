@@ -30,8 +30,6 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-var err error
-
 func TestChargerSetChargerProfiles(t *testing.T) {
 	var dmCharger *DataManager
 	cPPs := ChargerProfiles{
@@ -136,7 +134,7 @@ func TestChargerSetChargerProfiles(t *testing.T) {
 	}
 	dmCharger.SetFilter(context.Background(), fltrCP4, true)
 	for _, cp := range cPPs {
-		if err = dmCharger.SetChargerProfile(context.Background(), cp, true); err != nil {
+		if err := dmCharger.SetChargerProfile(context.Background(), cp, true); err != nil {
 			t.Errorf("Error: %+v", err)
 		}
 	}
@@ -288,7 +286,7 @@ func TestChargerMatchingChargerProfilesForEvent(t *testing.T) {
 	dmCharger.SetFilter(context.Background(), fltrCP4, true)
 
 	for _, cp := range cPPs {
-		if err = dmCharger.SetChargerProfile(context.Background(), cp, true); err != nil {
+		if err := dmCharger.SetChargerProfile(context.Background(), cp, true); err != nil {
 			t.Errorf("Error: %+v", err)
 		}
 	}
@@ -302,7 +300,7 @@ func TestChargerMatchingChargerProfilesForEvent(t *testing.T) {
 		}
 	}
 
-	if _, err = chargerSrv.matchingChargerProfilesForEvent(context.Background(), chargerEvents[2].Tenant, chargerEvents[2]); err == nil ||
+	if _, err := chargerSrv.matchingChargerProfilesForEvent(context.Background(), chargerEvents[2].Tenant, chargerEvents[2]); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Error: %+v", err)
 	}
@@ -461,7 +459,7 @@ func TestChargerProcessEvent(t *testing.T) {
 	dmCharger.SetFilter(context.Background(), fltrCP4, true)
 
 	for _, cp := range cPPs {
-		if err = dmCharger.SetChargerProfile(context.Background(), cp, true); err != nil {
+		if err := dmCharger.SetChargerProfile(context.Background(), cp, true); err != nil {
 			t.Errorf("Error: %+v", err)
 		}
 	}
@@ -475,7 +473,7 @@ func TestChargerProcessEvent(t *testing.T) {
 		}
 	}
 
-	if _, err = chargerSrv.matchingChargerProfilesForEvent(context.Background(), chargerEvents[2].Tenant, chargerEvents[2]); err == nil ||
+	if _, err := chargerSrv.matchingChargerProfilesForEvent(context.Background(), chargerEvents[2].Tenant, chargerEvents[2]); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Error: %+v", err)
 	}

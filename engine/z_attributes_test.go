@@ -197,7 +197,7 @@ func TestAttributesV1GetAttributeForEventProfileIgnoreOpts(t *testing.T) {
 		Attributes: []*ExternalAttribute{},
 	}
 
-	err = aA.V1GetAttributeForEvent(context.Background(), ev, rply)
+	err := aA.V1GetAttributeForEvent(context.Background(), ev, rply)
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
@@ -396,7 +396,7 @@ func TestAttributeAddFilters(t *testing.T) {
 
 func TestAttributeCache(t *testing.T) {
 	for _, atr := range atrPs {
-		if err = dmAtr.SetAttributeProfile(context.TODO(), atr, true); err != nil {
+		if err := dmAtr.SetAttributeProfile(context.TODO(), atr, true); err != nil {
 			t.Errorf("Error: %+v", err)
 		}
 	}
@@ -764,10 +764,10 @@ func TestAttributeProcessWithMultipleRuns1(t *testing.T) {
 	if err := dmAtr.SetAttributeProfile(context.TODO(), attrPrf1, true); err != nil {
 		t.Error(err)
 	}
-	if err = dmAtr.SetAttributeProfile(context.TODO(), attrPrf2, true); err != nil {
+	if err := dmAtr.SetAttributeProfile(context.TODO(), attrPrf2, true); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-	if err = dmAtr.SetAttributeProfile(context.TODO(), attrPrf3, true); err != nil {
+	if err := dmAtr.SetAttributeProfile(context.TODO(), attrPrf3, true); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	ev := &utils.CGREvent{
@@ -888,10 +888,10 @@ func TestAttributeProcessWithMultipleRuns2(t *testing.T) {
 	if err := dmAtr.SetAttributeProfile(context.TODO(), attrPrf1, true); err != nil {
 		t.Error(err)
 	}
-	if err = dmAtr.SetAttributeProfile(context.TODO(), attrPrf2, true); err != nil {
+	if err := dmAtr.SetAttributeProfile(context.TODO(), attrPrf2, true); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-	if err = dmAtr.SetAttributeProfile(context.TODO(), attrPrf3, true); err != nil {
+	if err := dmAtr.SetAttributeProfile(context.TODO(), attrPrf3, true); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	ev := &utils.CGREvent{
@@ -1009,10 +1009,10 @@ func TestAttributeProcessWithMultipleRuns3(t *testing.T) {
 	if err := dmAtr.SetAttributeProfile(context.TODO(), attrPrf1, true); err != nil {
 		t.Error(err)
 	}
-	if err = dmAtr.SetAttributeProfile(context.TODO(), attrPrf2, true); err != nil {
+	if err := dmAtr.SetAttributeProfile(context.TODO(), attrPrf2, true); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-	if err = dmAtr.SetAttributeProfile(context.TODO(), attrPrf3, true); err != nil {
+	if err := dmAtr.SetAttributeProfile(context.TODO(), attrPrf3, true); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	ev := &utils.CGREvent{
@@ -1108,7 +1108,7 @@ func TestAttributeProcessWithMultipleRuns4(t *testing.T) {
 	if err := dmAtr.SetAttributeProfile(context.TODO(), attrPrf1, true); err != nil {
 		t.Error(err)
 	}
-	if err = dmAtr.SetAttributeProfile(context.TODO(), attrPrf2, true); err != nil {
+	if err := dmAtr.SetAttributeProfile(context.TODO(), attrPrf2, true); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	ev := &utils.CGREvent{
@@ -1232,10 +1232,10 @@ func TestAttributeMultipleProcessWithBlocker(t *testing.T) {
 	if err := dmAtr.SetAttributeProfile(context.TODO(), attrPrf1, true); err != nil {
 		t.Error(err)
 	}
-	if err = dmAtr.SetAttributeProfile(context.TODO(), attrPrf2, true); err != nil {
+	if err := dmAtr.SetAttributeProfile(context.TODO(), attrPrf2, true); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-	if err = dmAtr.SetAttributeProfile(context.TODO(), attrPrf3, true); err != nil {
+	if err := dmAtr.SetAttributeProfile(context.TODO(), attrPrf3, true); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	ev := &utils.CGREvent{
@@ -1350,10 +1350,10 @@ func TestAttributeMultipleProcessWithBlocker2(t *testing.T) {
 	if err := dmAtr.SetAttributeProfile(context.TODO(), attrPrf1, true); err != nil {
 		t.Error(err)
 	}
-	if err = dmAtr.SetAttributeProfile(context.TODO(), attrPrf2, true); err != nil {
+	if err := dmAtr.SetAttributeProfile(context.TODO(), attrPrf2, true); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-	if err = dmAtr.SetAttributeProfile(context.TODO(), attrPrf3, true); err != nil {
+	if err := dmAtr.SetAttributeProfile(context.TODO(), attrPrf3, true); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	ev := &utils.CGREvent{
@@ -3175,7 +3175,7 @@ func TestAttributeMultipleProcessWithFiltersExists(t *testing.T) {
 	if err := dmAtr.SetAttributeProfile(context.TODO(), attrPrf1Exists, true); err != nil {
 		t.Error(err)
 	}
-	if err = dmAtr.SetAttributeProfile(context.TODO(), attrPrf2Exists, true); err != nil {
+	if err := dmAtr.SetAttributeProfile(context.TODO(), attrPrf2Exists, true); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	// Add attribute in DM
@@ -3280,7 +3280,7 @@ func TestAttributeMultipleProcessWithFiltersNotEmpty(t *testing.T) {
 	if err := dmAtr.SetAttributeProfile(context.TODO(), attrPrf1NotEmpty, true); err != nil {
 		t.Error(err)
 	}
-	if err = dmAtr.SetAttributeProfile(context.TODO(), attrPrf2NotEmpty, true); err != nil {
+	if err := dmAtr.SetAttributeProfile(context.TODO(), attrPrf2NotEmpty, true); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	// Add attribute in DM
@@ -3550,7 +3550,7 @@ func TestAttributeMultipleProfileRunns(t *testing.T) {
 	if err := dm.SetAttributeProfile(context.TODO(), attrPrf1Exists, true); err != nil {
 		t.Error(err)
 	}
-	if err = dm.SetAttributeProfile(context.TODO(), attrPrf2Exists, true); err != nil {
+	if err := dm.SetAttributeProfile(context.TODO(), attrPrf2Exists, true); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	// Add attribute in DM
@@ -4163,7 +4163,7 @@ func TestAttributesattributeProfileForEventErrNotFound(t *testing.T) {
 	}
 
 	apNil := &AttributeProfile{}
-	err = alS.dm.SetAttributeProfile(context.Background(), apNil, true)
+	err := alS.dm.SetAttributeProfile(context.Background(), apNil, true)
 	if err != nil {
 		t.Error(err)
 	}
@@ -4401,7 +4401,7 @@ func TestAttributesV1ProcessEventMultipleRuns1(t *testing.T) {
 			},
 		},
 	}
-	err = alS.dm.SetAttributeProfile(context.Background(), ap1, true)
+	err := alS.dm.SetAttributeProfile(context.Background(), ap1, true)
 	if err != nil {
 		t.Error(err)
 	}
@@ -4511,7 +4511,7 @@ func TestAttributesV1ProcessEventMultipleRuns2(t *testing.T) {
 			},
 		},
 	}
-	err = alS.dm.SetAttributeProfile(context.Background(), ap1, true)
+	err := alS.dm.SetAttributeProfile(context.Background(), ap1, true)
 	if err != nil {
 		t.Error(err)
 	}
@@ -5289,7 +5289,7 @@ func TestAttributesAttributeServiceV1PrcssEvPrcssRunsGetIntOptsErr(t *testing.T)
 			},
 		},
 	}
-	err = alS.dm.SetAttributeProfile(context.Background(), ap1, true)
+	err := alS.dm.SetAttributeProfile(context.Background(), ap1, true)
 	if err != nil {
 		t.Error(err)
 	}
@@ -5341,7 +5341,7 @@ func TestAttributesAttributeServiceV1PrcssEvProfRunsGetIntOptsErr(t *testing.T) 
 			},
 		},
 	}
-	err = alS.dm.SetAttributeProfile(context.Background(), ap1, true)
+	err := alS.dm.SetAttributeProfile(context.Background(), ap1, true)
 	if err != nil {
 		t.Error(err)
 	}

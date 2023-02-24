@@ -75,6 +75,7 @@ func TestLoaderIT(t *testing.T) {
 
 func testLoaderITInitConfig(t *testing.T) {
 	loaderCfgPath = path.Join(*dataDir, "conf", "samples", loaderConfigDIR)
+	var err error
 	lCfg, err = config.NewCGRConfigFromPath(context.Background(), loaderCfgPath)
 	if err != nil {
 		t.Error(err)

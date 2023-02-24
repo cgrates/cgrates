@@ -513,7 +513,7 @@ func TestStatQueuesUpdateStatQueue(t *testing.T) {
 		Metrics:     []*MetricWithFilters{{MetricID: utils.MetaTCC}},
 	}
 	sqm := NewTCC(0, utils.EmptyString, nil)
-	if err = sqm.AddEvent("ev1", utils.MapStorage{utils.MetaOpts: utils.MapStorage{utils.MetaCost: 10}}); err != nil {
+	if err := sqm.AddEvent("ev1", utils.MapStorage{utils.MetaOpts: utils.MapStorage{utils.MetaCost: 10}}); err != nil {
 		t.Fatal(err)
 	}
 	sq := &StatQueue{
@@ -523,9 +523,7 @@ func TestStatQueuesUpdateStatQueue(t *testing.T) {
 		SQMetrics: map[string]StatMetric{utils.MetaTCC: sqm, utils.MetaTCD: sqm},
 	}
 	sqm2 := NewTCC(0, utils.EmptyString, nil)
-	if err != nil {
-		t.Fatal(err)
-	}
+
 	expTh := &StatQueue{
 		Tenant:    sqp.Tenant,
 		ID:        sqp.ID,
@@ -571,9 +569,7 @@ func TestStatQueuesUpdateStatQueue(t *testing.T) {
 	}
 
 	sqm3 := NewTCC(0, utils.EmptyString, []string{"*string:~*req.Account:1001"})
-	if err != nil {
-		t.Fatal(err)
-	}
+
 	expTh = &StatQueue{
 		Tenant:    sqp.Tenant,
 		ID:        sqp.ID,
@@ -591,9 +587,7 @@ func TestStatQueuesUpdateStatQueue(t *testing.T) {
 	}
 
 	sqm2 = NewTCC(5, utils.EmptyString, nil)
-	if err != nil {
-		t.Fatal(err)
-	}
+
 	expTh = &StatQueue{
 		Tenant:    sqp.Tenant,
 		ID:        sqp.ID,
@@ -800,13 +794,13 @@ func TestStatQueueMatchingStatQueuesForEventLocks2(t *testing.T) {
 		},
 		ThresholdIDs: []string{utils.MetaNone},
 	}
-	err = db.SetStatQueueProfileDrv(context.Background(), rPrf)
+	err := db.SetStatQueueProfileDrv(context.Background(), rPrf)
 	if err != nil {
 		t.Fatal(err)
 	}
 	prfs = append(prfs, rPrf)
 	ids.Add(rPrf.ID)
-	_, err := rS.matchingStatQueuesForEvent(context.Background(), "cgrates.org", ids.AsSlice(), utils.MapStorage{}, false)
+	_, err = rS.matchingStatQueuesForEvent(context.Background(), "cgrates.org", ids.AsSlice(), utils.MapStorage{}, false)
 	expErr := utils.ErrPrefixNotFound(rPrf.FilterIDs[0])
 	if err == nil || err.Error() != expErr.Error() {
 		t.Errorf("Expected error: %s ,received: %+v", expErr, err)
@@ -3509,7 +3503,7 @@ func TestStatSV1GetQueueStringMetricsIntOptsErr(t *testing.T) {
 
 	experr := `inline parse error for string: <*string.invalid:filter>`
 
-	err = statService.V1GetQueueStringMetrics(context.TODO(), &utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: testStatsQ[0].Tenant, ID: testStatsQ[0].ID}}, &stq)
+	err := statService.V1GetQueueStringMetrics(context.TODO(), &utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: testStatsQ[0].Tenant, ID: testStatsQ[0].ID}}, &stq)
 	if err.Error() != experr {
 		t.Errorf("Expected error <%v>, Received <%v>", experr, err)
 	}

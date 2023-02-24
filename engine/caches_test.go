@@ -1206,9 +1206,7 @@ func TestCacheSGetPrecacheChannel(t *testing.T) {
 
 	exp := cacheS.pcItems[utils.MetaAccounts]
 
-	if rcv := cacheS.GetPrecacheChannel(utils.MetaAccounts); err != nil {
-		t.Error(err)
-	} else if exp != rcv {
+	if rcv := cacheS.GetPrecacheChannel(utils.MetaAccounts); exp != rcv {
 		t.Errorf("Expected <%v>, Received <%v>", exp, rcv)
 	}
 

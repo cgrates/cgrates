@@ -170,7 +170,7 @@ func TestThresholdsCache(t *testing.T) {
 	}
 	dmTH.SetFilter(context.Background(), fltrTh3, true)
 	for _, th := range tPrfls {
-		if err = dmTH.SetThresholdProfile(context.TODO(), th, true); err != nil {
+		if err := dmTH.SetThresholdProfile(context.TODO(), th, true); err != nil {
 			t.Errorf("Error: %+v", err)
 		}
 	}
@@ -184,7 +184,7 @@ func TestThresholdsCache(t *testing.T) {
 		}
 	}
 	for _, th := range ths {
-		if err = dmTH.SetThreshold(context.TODO(), th); err != nil {
+		if err := dmTH.SetThreshold(context.TODO(), th); err != nil {
 			t.Errorf("Error: %+v", err)
 		}
 	}
@@ -299,9 +299,7 @@ func TestThresholdsmatchingThresholdsForEvent(t *testing.T) {
 	cfg.ThresholdSCfg().StringIndexedFields = nil
 	cfg.ThresholdSCfg().PrefixIndexedFields = nil
 	thServ = NewThresholdService(dmTH, cfg, &FilterS{dm: dmTH, cfg: cfg}, nil)
-	if err != nil {
-		t.Errorf("Error: %+v", err)
-	}
+
 	fltrTh1 := &Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_TH_1",
@@ -349,7 +347,7 @@ func TestThresholdsmatchingThresholdsForEvent(t *testing.T) {
 	dmTH.SetFilter(context.TODO(), fltrTh2, true)
 	dmTH.SetFilter(context.TODO(), fltrTh3, true)
 	for _, th := range tPrfls {
-		if err = dmTH.SetThresholdProfile(context.TODO(), th, true); err != nil {
+		if err := dmTH.SetThresholdProfile(context.TODO(), th, true); err != nil {
 			t.Errorf("Error: %+v", err)
 		}
 	}
@@ -363,7 +361,7 @@ func TestThresholdsmatchingThresholdsForEvent(t *testing.T) {
 		}
 	}
 	for _, th := range ths {
-		if err = dmTH.SetThreshold(context.TODO(), th); err != nil {
+		if err := dmTH.SetThreshold(context.TODO(), th); err != nil {
 			t.Errorf("Error: %+v", err)
 		}
 	}
@@ -2034,7 +2032,7 @@ func TestThresholdMatchingThresholdForEventLocks2(t *testing.T) {
 		},
 		MaxHits: 5,
 	}
-	err = db.SetThresholdProfileDrv(context.Background(), rPrf)
+	err := db.SetThresholdProfileDrv(context.Background(), rPrf)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -2045,7 +2043,7 @@ func TestThresholdMatchingThresholdForEventLocks2(t *testing.T) {
 			utils.OptsThresholdsProfileIDs: ids.AsSlice(),
 		},
 	}
-	_, err := rS.matchingThresholdsForEvent(context.Background(), "cgrates.org", ev)
+	_, err = rS.matchingThresholdsForEvent(context.Background(), "cgrates.org", ev)
 	expErr := utils.ErrPrefixNotFound(rPrf.FilterIDs[0])
 	if err == nil || err.Error() != expErr.Error() {
 		t.Errorf("Expected error: %s ,received: %+v", expErr, err)

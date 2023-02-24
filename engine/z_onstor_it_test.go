@@ -76,6 +76,7 @@ func TestOnStorIT(t *testing.T) {
 			config.CgrConfig().CacheCfg(), nil)
 	case utils.MetaMySQL:
 		cfg := config.NewDefaultCGRConfig()
+		var err error
 		rdsITdb, err = NewRedisStorage(
 			fmt.Sprintf("%s:%s", cfg.DataDbCfg().Host, cfg.DataDbCfg().Port),
 			4, cfg.DataDbCfg().User, cfg.DataDbCfg().Password, cfg.GeneralCfg().DBDataEncoding,
@@ -291,7 +292,7 @@ func testOnStorITCRUDStructVersion(t *testing.T) {
 	} else if !reflect.DeepEqual(vrs, rcv) {
 		t.Errorf("Expecting: %v, received: %v", vrs, rcv)
 	}
-	if err = onStor.DataDB().RemoveVersions(eAcnts); err != nil { // remove one element
+	if err := onStor.DataDB().RemoveVersions(eAcnts); err != nil { // remove one element
 		t.Error(err)
 	}
 	delete(vrs, utils.Accounts)
@@ -300,7 +301,7 @@ func testOnStorITCRUDStructVersion(t *testing.T) {
 	} else if !reflect.DeepEqual(vrs, rcv) {
 		t.Errorf("Expecting: %v, received: %v", vrs, rcv)
 	}
-	if err = onStor.DataDB().RemoveVersions(nil); err != nil { // remove one element
+	if err := onStor.DataDB().RemoveVersions(nil); err != nil { // remove one element
 		t.Error(err)
 	}
 	if _, err := onStor.DataDB().GetVersions(""); err != utils.ErrNotFound { //query non-existent
@@ -1055,7 +1056,7 @@ func testOnStorITRateProfile(t *testing.T) {
 	if err := onStor.SetRateProfile(context.TODO(), rPrf, false, false); err != nil {
 		t.Error(err)
 	}
-	if err = rPrf.Compile(); err != nil {
+	if err := rPrf.Compile(); err != nil {
 		t.Fatal(err)
 	}
 	//get from database

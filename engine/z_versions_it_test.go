@@ -66,6 +66,7 @@ func TestVersionsIT(t *testing.T) {
 }
 
 func testInitConfig(t *testing.T) {
+	var err error
 	if vrsCfg, err = config.NewCGRConfigFromPath(context.Background(), path.Join(*dataDir, "conf", "samples", versionsConfigDIR)); err != nil {
 		t.Fatal(err)
 	}
@@ -133,7 +134,7 @@ func testVersion(t *testing.T) {
 	} else if len(currentVersion) != len(rcv) {
 		t.Errorf("Expecting: %v, received: %v", currentVersion, rcv)
 	}
-	if err = dm3.DataDB().RemoveVersions(currentVersion); err != nil {
+	if err := dm3.DataDB().RemoveVersions(currentVersion); err != nil {
 		t.Error(err)
 	}
 	if _, rcvErr := dm3.DataDB().GetVersions(""); rcvErr != utils.ErrNotFound {
@@ -145,7 +146,7 @@ func testVersion(t *testing.T) {
 	if err := CheckVersions(dm3.DataDB()); err.Error() != test {
 		t.Error(err)
 	}
-	if err = dm3.DataDB().RemoveVersions(testVersion); err != nil {
+	if err := dm3.DataDB().RemoveVersions(testVersion); err != nil {
 		t.Error(err)
 	}
 	switch storType {

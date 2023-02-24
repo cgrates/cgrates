@@ -197,7 +197,7 @@ func prepareRoutesData(t *testing.T, dm *DataManager) {
 		t.Fatal(err)
 	}
 	for _, spp := range testRoutesPrfs {
-		if err = dm.SetRouteProfile(context.Background(), spp, true); err != nil {
+		if err := dm.SetRouteProfile(context.Background(), spp, true); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -638,7 +638,7 @@ func TestRoutesSortedForEventWithLimitAndOffset2(t *testing.T) {
 		dm: dmSPP, cfg: cfg}, cfg, nil)
 
 	for _, spp := range sppTest {
-		if err = dmSPP.SetRouteProfile(context.Background(), spp, true); err != nil {
+		if err := dmSPP.SetRouteProfile(context.Background(), spp, true); err != nil {
 			t.Errorf("Error: %+v", err)
 		}
 		if tempSpp, err := dmSPP.GetRouteProfile(context.Background(), spp.Tenant,
@@ -1355,4 +1355,22 @@ func TestRouteProfileCompileCacheParametersRouteRatio(t *testing.T) {
 	if err := rp.compileCacheParameters(); err != nil {
 		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err)
 	}
+}
+
+func TestRouteSV1GetRoutesListErr(t *testing.T) {
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	connMng := NewConnManager(cfg)
+	dmSPP := NewDataManager(data, config.CgrConfig().CacheCfg(), connMng)
+	fltr := &FilterS{dm: dmSPP, cfg: cfg}
+
+	var reply *[]string
+	rpS := NewRouteService(dmSPP, fltr, cfg, connMng)
+
+	if err := rpS.V1GetRoutesList(context.Background(), testRoutesArgs[3], reply); err != utils.ErrNotFound {
+		t.Errorf("Expected error <%v>, Received error <%v>", utils.ErrNotFound, err)
+	}
+
 }
