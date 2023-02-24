@@ -540,7 +540,7 @@ func testITTestAttributeProfileFilterIndexes(t *testing.T) {
 	}
 	//check if old contexts was delete
 	for _, ctx := range []string{"con1", "con2"} {
-		if _, err = dataManager.GetIndexes(context.Background(),
+		if _, err := dataManager.GetIndexes(context.Background(),
 			utils.CacheAttributeFilterIndexes,
 			utils.ConcatenatedKey(attrProfile.Tenant, ctx), utils.EmptyString,
 			utils.NonTransactional, false, false); err == nil ||
@@ -680,7 +680,7 @@ func testITTestAttributeProfileFilterIndexes2(t *testing.T) {
 	}
 	//check if old contexts was delete
 	for _, ctx := range []string{"con1", "con2"} {
-		if _, err = dataManager.GetIndexes(context.Background(),
+		if _, err := dataManager.GetIndexes(context.Background(),
 			utils.CacheAttributeFilterIndexes,
 			utils.ConcatenatedKey(attrProfile.Tenant, ctx), utils.EmptyString,
 			utils.NonTransactional, false, false); err == nil ||

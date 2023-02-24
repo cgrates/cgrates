@@ -109,8 +109,13 @@ func TestAPItoResource(t *testing.T) {
 		AllocationMessage: tpRL.AllocationMessage,
 		Limit:             2,
 	}
+
 	if tpRL.Weights != utils.EmptyString {
+		var err error
 		eRL.Weights, err = utils.NewDynamicWeightsFromString(utils.IfaceAsString(tpRL.Weights), utils.InfieldSep, utils.ANDSep)
+		if err != nil {
+			t.Error(err)
+		}
 	}
 	if rl, err := APItoResource(tpRL, "UTC"); err != nil {
 		t.Error(err)
@@ -284,6 +289,7 @@ func TestAPItoTPStats(t *testing.T) {
 		},
 		MinItems: tps.MinItems,
 	}
+	var err error
 	if eTPs.TTL, err = utils.ParseDurationWithNanosecs(tps.TTL); err != nil {
 		t.Errorf("Got error: %+v", err)
 	}
@@ -662,6 +668,7 @@ func TestAPItoTPThreshold(t *testing.T) {
 		FilterIDs:        tps.FilterIDs,
 		ActionProfileIDs: []string{"WARN3"},
 	}
+	var err error
 	eTPs.Weights, err = utils.NewDynamicWeightsFromString(utils.IfaceAsString(tps.Weights), utils.InfieldSep, utils.ANDSep)
 	if err != nil {
 		t.Errorf("Got error: %+v", err)
@@ -1392,9 +1399,7 @@ func TestChargerProfileToAPI(t *testing.T) {
 			},
 		},
 	}
-	if rcv := ChargerProfileToAPI(chargerPrf); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(exp, rcv) {
+	if rcv := ChargerProfileToAPI(chargerPrf); !reflect.DeepEqual(exp, rcv) {
 		t.Errorf("Expecting : %+v, \n received: %+v", utils.ToJSON(exp), utils.ToJSON(rcv))
 	}
 }
@@ -1792,9 +1797,7 @@ func TestDispatcherProfileToAPI(t *testing.T) {
 			},
 		},
 	}
-	if rcv := DispatcherProfileToAPI(dspPrf); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(exp, rcv) && !reflect.DeepEqual(exp2, rcv) {
+	if rcv := DispatcherProfileToAPI(dspPrf); !reflect.DeepEqual(exp, rcv) && !reflect.DeepEqual(exp2, rcv) {
 		t.Errorf("Expecting : \n %+v \n  or \n %+v \n ,\n received: %+v", utils.ToJSON(exp), utils.ToJSON(exp2), utils.ToJSON(rcv))
 	}
 }

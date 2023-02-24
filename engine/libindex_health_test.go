@@ -27,6 +27,7 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/ltcache"
+	"github.com/ericlagergren/decimal"
 )
 
 func TestGetFltrIdxHealthForRateRates(t *testing.T) {
@@ -68,4 +69,167 @@ func TestGetFltrIdxHealthForRateRates(t *testing.T) {
 	if !reflect.DeepEqual(rply, exp) {
 		t.Errorf("Expected %v\n but received %v", exp, rply)
 	}
+}
+
+func TestGetFiltersRateProfilesErr(t *testing.T) {
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	if _, err := getFilters(context.Background(), dm, utils.CacheRateProfilesFilterIndexes, utils.CGRateSorg, "fltrID"); err != utils.ErrNotFound {
+		t.Errorf("Expected error <%v>, Received error <%v>", utils.ErrNotFound, err)
+	}
+
+}
+
+func TestGetFiltersActionProfilesOK(t *testing.T) {
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	ap := &ActionProfile{
+		Tenant:    "cgrates.org",
+		ID:        "fltrID",
+		FilterIDs: []string{"fltr_test"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 65,
+			},
+		},
+		Schedule: "* * * * *",
+		Targets:  map[string]utils.StringSet{utils.MetaAccounts: {"1001": {}}},
+		Actions:  []*APAction{{}},
+	}
+	newFlt := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "fltr_test",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaPrefix,
+				Element: "~*req.Usage",
+				Values:  []string{"10s"},
+			},
+		},
+	}
+	if err := newFlt.Compile(); err != nil {
+		t.Error(err)
+	}
+	if err := dm.SetFilter(context.Background(), newFlt, false); err != nil {
+		t.Error(err)
+	}
+
+	if err := dm.SetActionProfile(context.Background(), ap, true); err != nil {
+		t.Error(err)
+	}
+
+	if rcv, err := getFilters(context.Background(), dm, utils.CacheActionProfilesFilterIndexes, utils.CGRateSorg, "fltrID"); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcv, ap.FilterIDs) {
+		t.Errorf("Expected %v\n but received %v", ap.FilterIDs, rcv)
+	}
+}
+
+func TestGetFiltersActionProfilesErr(t *testing.T) {
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	if _, err := getFilters(context.Background(), dm, utils.CacheActionProfilesFilterIndexes, utils.CGRateSorg, "fltrID"); err != utils.ErrNotFound {
+		t.Errorf("Expected error <%v>, Received error <%v>", utils.ErrNotFound, err)
+	}
+
+}
+
+func TestGetFiltersAccountsOK(t *testing.T) {
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	ap := &utils.Account{
+		Tenant:    "cgrates.org",
+		ID:        "fltrID",
+		FilterIDs: []string{"fltr_test"},
+		Balances: map[string]*utils.Balance{
+			"ConcreteBalance1": {
+				ID: "ConcreteBalance1",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 20,
+					},
+				},
+				Type:  utils.MetaConcrete,
+				Units: &utils.Decimal{Big: decimal.New(0, 0)},
+				CostIncrements: []*utils.CostIncrement{
+					{
+						FilterIDs:    []string{"*string:~*req.ToR:*data"},
+						Increment:    &utils.Decimal{Big: decimal.New(1, 0)},
+						FixedFee:     &utils.Decimal{Big: decimal.New(0, 0)},
+						RecurrentFee: &utils.Decimal{Big: decimal.New(1, 0)},
+					},
+				},
+			},
+		},
+	}
+	newFlt := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "fltr_test",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaPrefix,
+				Element: "~*req.Usage",
+				Values:  []string{"10s"},
+			},
+		},
+	}
+	if err := newFlt.Compile(); err != nil {
+		t.Error(err)
+	}
+	if err := dm.SetFilter(context.Background(), newFlt, false); err != nil {
+		t.Error(err)
+	}
+
+	if err := dm.SetAccount(context.Background(), ap, true); err != nil {
+		t.Error(err)
+	}
+
+	if rcv, err := getFilters(context.Background(), dm, utils.CacheAccountsFilterIndexes, utils.CGRateSorg, "fltrID"); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcv, ap.FilterIDs) {
+		t.Errorf("Expected %v\n but received %v", ap.FilterIDs, rcv)
+	}
+}
+
+func TestGetFiltersAccountsErr(t *testing.T) {
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	if _, err := getFilters(context.Background(), dm, utils.CacheAccountsFilterIndexes, utils.CGRateSorg, "fltrID"); err != utils.ErrNotFound {
+		t.Errorf("Expected error <%v>, Received error <%v>", utils.ErrNotFound, err)
+	}
+
+}
+
+func TestGetFiltersDefault(t *testing.T) {
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	expErr := `unsupported index type:<"inexistent">`
+	if _, err := getFilters(context.Background(), dm, "inexistent", utils.CGRateSorg, "fltrID"); err == nil || err.Error() != expErr {
+		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err)
+	}
+
 }
