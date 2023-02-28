@@ -1,0 +1,16 @@
+{{ ansible_managed | comment }}
+[Unit]
+Description=Copr Custom Webhook Server 
+ConditionPathExists={{ copr_hooks_dir }}
+After=network.target
+[Service]
+Environment="V10={{ v10 }}" "MASTER={{ nightly }}"
+ExecStart=/usr/local/bin/copr-hooks-server
+Restart=on-failure
+RestartSec=10
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier={{ service_name }}
+[Install]
+WantedBy=multi-user.target
+
