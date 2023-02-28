@@ -1,0 +1,9 @@
+function releaseTag {
+rpmTag=$(git log -1 --format=%ci | date +%Y%m%d%H%M%S)+$(git rev-parse --short HEAD)
+echo $rpmTag
+}
+
+function git_commit {
+gitLastCommit=$(git rev-parse HEAD)
+echo  $gitLastCommit
+}
