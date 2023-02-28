@@ -1021,7 +1021,7 @@ func (dm *DataManager) GetStatQueue(tenant, id string,
 							config.CgrConfig().GeneralCfg().NodeID)),
 				}, &sq); err == nil {
 				var ssq *StoredStatQueue
-				if dm.dataDB.GetStorageType() != utils.MetaInternal {
+				if dm.dataDB.GetStorageType() != utils.Internal {
 					// in case of internal we don't marshal
 					if ssq, err = NewStoredStatQueue(sq, dm.ms); err != nil {
 						return nil, err
@@ -1056,7 +1056,7 @@ func (dm *DataManager) SetStatQueue(sq *StatQueue) (err error) {
 		return utils.ErrNoDatabaseConn
 	}
 	var ssq *StoredStatQueue
-	if dm.dataDB.GetStorageType() != utils.MetaInternal {
+	if dm.dataDB.GetStorageType() != utils.Internal {
 		// in case of internal we don't marshal
 		if ssq, err = NewStoredStatQueue(sq, dm.ms); err != nil {
 			return
