@@ -75,6 +75,7 @@ type DataDBMock struct {
 	SetStatQueueDrvF            func(*context.Context, *StoredStatQueue, *StatQueue) error
 	HasDataDrvF                 func(ctx *context.Context, category, subject, tenant string) (bool, error)
 	RemoveIndexesDrvF           func(ctx *context.Context, idxItmType, tntCtx, idxKey string) error
+	GetStatQueueDrvF            func(ctx *context.Context, tenant, id string) (sq *StatQueue, err error)
 }
 
 // Storage methods
@@ -207,6 +208,9 @@ func (dbM *DataDBMock) RemStatQueueProfileDrv(ctx *context.Context, tenant, id s
 }
 
 func (dbM *DataDBMock) GetStatQueueDrv(ctx *context.Context, tenant, id string) (sq *StatQueue, err error) {
+	if dbM.GetStatQueueDrvF != nil {
+		return dbM.GetStatQueueDrvF(ctx, tenant, id)
+	}
 	return nil, utils.ErrNotImplemented
 }
 
