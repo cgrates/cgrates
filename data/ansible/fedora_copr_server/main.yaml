@@ -1,0 +1,112 @@
+
+- hosts: pkg
+  vars:
+   # Go language SDK version number
+    golang_version: '1.19.2'
+    go_version_target: "go version go{{ golang_version }} linux/amd64"
+    # Mirror to download the Go language SDK redistributable package from
+    golang_mirror: 'https://storage.googleapis.com/golang'
+    # Base installation directory the Go language SDK distribution
+    golang_install_dir: '/usr/local/go'
+    # Directory to store files downloaded for Go language SDK installation
+    golang_download_dir: "{{ x_ansible_download_dir | default(ansible_env.HOME + '/.ansible/tmp/downloads') }}"
+    # Location for GOPATH environment variable
+    golang_gopath: "/home/{{ user }}/go"
+    # Filename of Go language SDK redistributable package
+    golang_redis_filename: 'go{{ golang_version }}.linux-amd64.tar.gz'
+
+    copr_hooks_dir: "/home/{{ user }}/go/src/github.com/copr-hooks"
+    copr_hook_bin: "{{ golang_gopath }}/bin/copr-hooks-server"
+    service_name: coprhooks
+
+  tasks:
+  
+    - name: Install dependencies
+      become: yes
+      apt:
+        name:
+          - git
+          - tar
+        state: present
+    - name:  Install golang
+      include: go.yaml
+
+    - name: Create copr-hooks directory
+      become: yes
+      file:
+        state: directory
+        mode: 'u=rwx,go=rx'
+        owner: "{{ user }}"
+        group: "{{ user }}"
+        dest: '{{ copr_hooks_dir }}'
+      become_user: "{{ user }}"
+
+    - name: Clone Copr-Webhooks from github repository
+      git:
+        repo: https://github.com/gezimbll/Copr-WebHook.git
+        dest: '{{ copr_hooks_dir }}'
+        update: yes
+        force: yes
+      become: yes
+
+
+    - name:  Install copr-hooks
+      shell: "go install copr-hooks-server.go"
+      environment:
+        PATH: "{{ lookup('env','PATH') }}:{{ golang_gopath }}/bin:/usr/local/go/bin:{{ ansible_env.PATH }}"
+      args:
+        chdir: '{{ copr_hooks_dir }}'
+
+    
+    - name: Copy copr-hooks to system executable
+      become: yes
+      copy:
+        src: "{{ copr_hook_bin }}"
+        remote_src: true
+        dest: "/usr/local/bin"
+        unsafe_writes: yes
+
+    - name: Changing the permissions	
+      become: yes
+      file:
+        path: /usr/local/bin/copr-hooks-server
+        owner: root
+        mode: 0755
+
+    - name: Create the service file
+      become: yes
+      template:
+        src: copr-hooks.service.j2
+        dest: /etc/systemd/system/copr-hooks.service
+
+    - name: Reload daemon and start the service
+      become: yes
+      ansible.builtin.systemd:
+          state: started
+          daemon_reload: true
+          name: copr-hooks.service
+          enabled: true
+     
+    - name: Create directory for reading logs 
+      become: yes
+      file:
+        path: /var/log/{{ service_name }}
+        state: directory
+
+    - name: Change log file permissions
+      become: yes
+      file:
+         path: /var/log/{{ service_name }}
+         owner: '{{ user }}'
+         group: '{{ user }}'
+         state: directory
+
+    - name: Create the log file
+      become: yes
+      template:
+        src: coprhooks.conf.j2
+        dest: /etc/rsyslog.d/coprhooks.conf
+
+    - name: Restart rsyslog
+      become: yes
+      shell: "systemctl restart rsyslog.service"
