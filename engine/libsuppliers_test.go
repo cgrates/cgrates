@@ -20,8 +20,11 @@ package engine
 import (
 	"reflect"
 	"testing"
+	"time"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
 )
 
 func TestLibSuppliersSortCost(t *testing.T) {
@@ -670,4 +673,111 @@ func TestLibSuppliersSortLoadDistribution(t *testing.T) {
 		t.Errorf("Expecting: %+v, \n received: %+v",
 			eIds, rcv)
 	}
+}
+
+func TestSortSuppliersSortResourceAscendent(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	cfg.SupplierSCfg().ResourceSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}
+	cfg.SupplierSCfg().RALsConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs)}
+	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn <- &ccMock{
+		calls: map[string]func(args interface{}, reply interface{}) error{
+			utils.ResourceSv1GetResource: func(args, reply interface{}) error {
+				res := Resource{
+					ID:     "ResourceSupplier2",
+					Tenant: "cgrates.org",
+					tUsage: utils.Float64Pointer(46.2),
+				}
+				*reply.(*Resource) = res
+				return nil
+			},
+			utils.ResponderGetCostOnRatingPlans: func(args, reply interface{}) error {
+				rpl := map[string]interface{}{
+					utils.Cost: 23.1,
+				}
+				*reply.(*map[string]interface{}) = rpl
+				return nil
+			},
+		},
+	}
+	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources): clientConn,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs):      clientConn,
+	})
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	spS, err := NewSupplierService(dm, nil, cfg, connMgr)
+	if err != nil {
+		t.Error(err)
+	}
+	rscAscSort := NewResourceAscendetSorter(spS)
+	rscDscSort := NewResourceDescendentSorter(spS)
+	qosSuppSort := NewQOSSupplierSorter(spS)
+	lDistSort := NewLoadDistributionSorter(spS)
+	lCostSort := NewLeastCostSorter(spS)
+	hCostSort := NewHighestCostSorter(spS)
+	suppls := []*Supplier{
+		{
+			ID:            "supplier2",
+			ResourceIDs:   []string{"ResourceSupplier2"},
+			StatIDs:       []string{"Stat1"},
+			RatingPlanIDs: []string{"RPL_1"},
+			Weight:        20,
+			Blocker:       false,
+			cacheSupplier: map[string]interface{}{
+				utils.MetaRatio: 3.3,
+			},
+		},
+		{
+			ID:            "supplier3",
+			ResourceIDs:   []string{"ResourceSupplier3"},
+			StatIDs:       []string{"Stat2"},
+			RatingPlanIDs: []string{"RPL_2"},
+			Weight:        35,
+			Blocker:       false,
+			cacheSupplier: map[string]interface{}{
+				utils.MetaRatio: 2.4,
+			},
+		},
+	}
+	suplEv := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "utils.CGREvent1",
+		Event: map[string]interface{}{
+			"Account":        "1001",
+			"Destination":    "1002",
+			"Supplier":       "SupplierProfile2",
+			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
+			"UsageInterval":  "1s",
+			"PddInterval":    "1s",
+			utils.SetupTime:  time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+			"Weight":         "20.0",
+		},
+	}
+	spl := &optsGetSuppliers{
+		maxCost: 25.0,
+		sortingParameters: []string{
+			"ResourceUsage",
+		},
+		sortingStragety: utils.MetaLoad,
+	}
+	if _, err := rscAscSort.SortSuppliers("ASC_SUPP", suppls, suplEv, spl, nil); err != nil {
+		t.Error(err)
+	}
+	if _, err := rscDscSort.SortSuppliers("DSC_SUPP", suppls, suplEv, spl, nil); err != nil {
+		t.Error(err)
+	}
+	if _, err := qosSuppSort.SortSuppliers("QOS_SUPP", suppls, suplEv, spl, nil); err != nil {
+		t.Error(err)
+	}
+	if _, err := lDistSort.SortSuppliers("LDS_SUPP", suppls, suplEv, spl, nil); err != nil {
+		t.Error(err)
+	}
+	if _, err := lCostSort.SortSuppliers("LST_SUPP", suppls, suplEv, spl, nil); err != nil {
+		t.Error(err)
+	}
+	if _, err := hCostSort.SortSuppliers("HCS_SUPP", suppls, suplEv, spl, nil); err != nil {
+		t.Error(err)
+	}
+
 }

@@ -1277,7 +1277,7 @@ func TestComputeThresholdIndexes(t *testing.T) {
 	thd2 := &ThresholdProfile{
 		Tenant:    "cgrates.org",
 		ID:        "TH_2",
-		FilterIDs: []string{"FLTR_2", utils.META_NONE},
+		FilterIDs: []string{utils.META_NONE},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
 		},
@@ -1289,8 +1289,15 @@ func TestComputeThresholdIndexes(t *testing.T) {
 	if _, err := ComputeThresholdIndexes(dm, "cgrates.org", &thIDs, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
-	if _, err := ComputeThresholdIndexes(dm, "cgrates.org", nil, "ID"); err != nil {
+	expIndexes := map[string]utils.StringMap{
+		"*prefix:~*req.Account:1001": {"TH_1": true},
+		"*none:*any:*any":            {"TH_2": true},
+	}
+
+	if fltrIndexer, err := ComputeThresholdIndexes(dm, "cgrates.org", nil, "ID"); err != nil {
 		t.Error(err)
+	} else if !reflect.DeepEqual(fltrIndexer.indexes, expIndexes) {
+		t.Errorf("Expected %v,Received %v", utils.ToJSON(expIndexes), utils.ToJSON(fltrIndexer.indexes))
 	}
 }
 
@@ -1306,7 +1313,7 @@ func TestComputeChargerIndexes(t *testing.T) {
 		ID:     "Filter3",
 		Rules: []*FilterRule{
 			{
-				Element: "Destination",
+				Element: "~*req.Destination",
 				Type:    utils.MetaString,
 				Values:  []string{"10", "20"},
 			},
@@ -1334,8 +1341,16 @@ func TestComputeChargerIndexes(t *testing.T) {
 	if _, err := ComputeChargerIndexes(dm, "cgrates.org", &chIDs, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
-	if _, err := ComputeChargerIndexes(dm, "cgrates.org", nil, "ID"); err != nil {
+	expIndexes := map[string]utils.StringMap{
+		"*string:~*req.Account:1001":   {"CHRG_1": true},
+		"*string:~*req.Destination:10": {"CHRG_1": true},
+		"*string:~*req.Destination:20": {"CHRG_1": true},
+		"*none:*any:*any":              {"CHRG_1": true},
+	}
+	if fltrIndexer, err := ComputeChargerIndexes(dm, "cgrates.org", nil, "ID"); err != nil {
 		t.Error(err)
+	} else if !reflect.DeepEqual(fltrIndexer.indexes, expIndexes) {
+		t.Errorf("Expected %v,Received %v", utils.ToJSON(expIndexes), utils.ToJSON(fltrIndexer.indexes))
 	}
 }
 
@@ -1348,12 +1363,12 @@ func TestComputeResourceIndexes(t *testing.T) {
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 	fltr := &Filter{
 		Tenant: "cgrates.org",
-		ID:     "FLTR_TH_Resource",
+		ID:     "FLTR_RES_1",
 		Rules: []*FilterRule{
 			{
-				Type:    "*lt",
-				Element: "~*resources.ResTest.TotalUsage",
-				Values:  []string{"2.0"},
+				Type:    utils.MetaString,
+				Element: "~*req.Resources",
+				Values:  []string{"ResourceProfile2"},
 			},
 		},
 	}
@@ -1363,7 +1378,7 @@ func TestComputeResourceIndexes(t *testing.T) {
 	rs := &ResourceProfile{
 		Tenant:    "cgrates.org",
 		ID:        "RES_GR_TEST",
-		FilterIDs: []string{"FLTR_TH_Resource", utils.META_NONE},
+		FilterIDs: []string{"FLTR_RES_1", utils.META_NONE},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
@@ -1381,8 +1396,14 @@ func TestComputeResourceIndexes(t *testing.T) {
 	if _, err := ComputeResourceIndexes(dm, "cgrates.org", &chIDs, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
-	if _, err := ComputeResourceIndexes(dm, "cgrates.org", nil, "ID"); err != nil {
+	expIndexes := map[string]utils.StringMap{
+		"*none:*any:*any":                          {"RES_GR_TEST": true},
+		"*string:~*req.Resources:ResourceProfile2": {"RES_GR_TEST": true},
+	}
+	if fltrIndexer, err := ComputeResourceIndexes(dm, "cgrates.org", nil, "ID"); err != nil {
 		t.Error(err)
+	} else if !reflect.DeepEqual(fltrIndexer.indexes, expIndexes) {
+		t.Errorf("Expected %v,Received %v", utils.ToJSON(fltrIndexer.indexes), utils.ToJSON(expIndexes))
 	}
 }
 func TestComputeSupplierIndexes(t *testing.T) {
@@ -1429,8 +1450,13 @@ func TestComputeSupplierIndexes(t *testing.T) {
 	if _, err := ComputeSupplierIndexes(dm, "cgrates.org", &chIDs, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
-	if _, err := ComputeSupplierIndexes(dm, "cgrates.org", nil, "ID"); err != nil {
+	expIndexes := map[string]utils.StringMap{
+		"*string:~*req.Supplier:SupplierProfile1": {"SPL_2": true},
+	}
+	if fltrIndexes, err := ComputeSupplierIndexes(dm, "cgrates.org", nil, "ID"); err != nil {
 		t.Error(err)
+	} else if !reflect.DeepEqual(expIndexes, fltrIndexes.indexes) {
+		t.Errorf("Expected %v,Received %v", utils.ToJSON(expIndexes), utils.ToJSON(fltrIndexes.indexes))
 	}
 }
 
@@ -1528,5 +1554,72 @@ func TestRemoveItemFromIndexCHP(t *testing.T) {
 	}
 	if err := dm.SetChargerProfile(chp, true); err == nil || !strings.HasPrefix(err.Error(), "broken reference to filter:") {
 		t.Error(err)
+	}
+}
+
+func TestComputeStatIndexes(t *testing.T) {
+	cfg, err := config.NewDefaultCGRConfig()
+	if err != nil {
+		t.Error(err)
+	}
+	Cache.Clear(nil)
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	fltr := &Filter{
+		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+		ID:     "FLTR_STATS_1",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaString,
+				Element: "~*req.Stats",
+				Values:  []string{"StatQueueProfile1"},
+			},
+		},
+	}
+	if err := fltr.Compile(); err != nil {
+		t.Error(err)
+	}
+	if err := dm.SetFilter(fltr); err != nil {
+		t.Error(err)
+	}
+	sq := &StatQueueProfile{
+		Tenant:    "cgrates.org",
+		ID:        "TEST_PROFILE2",
+		FilterIDs: []string{"FLTR_STATS_1"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+		},
+		QueueLength: 10,
+		TTL:         time.Duration(10) * time.Second,
+		Metrics: []*MetricWithFilters{
+			{
+				MetricID: "*sum",
+			},
+			{
+				MetricID: utils.MetaACD,
+			},
+		},
+		ThresholdIDs: []string{"Val1", "Val2"},
+		Blocker:      true,
+		Stored:       true,
+		Weight:       20,
+		MinItems:     1,
+	}
+
+	if err := dm.SetStatQueueProfile(sq, true); err != nil {
+		t.Error(err)
+	}
+	stIDs := []string{"TEST_PROFILE2"}
+	if _, err := ComputeStatIndexes(dm, "cgrates.org", &stIDs, ""); err != nil {
+		t.Error(err)
+	}
+	expIndexes := map[string]utils.StringMap{
+		"*string:~*req.Stats:StatQueueProfile1": {"TEST_PROFILE2": true},
+	}
+	if fltrIndexer, err := ComputeStatIndexes(dm, "cgrates.org", nil, "ID"); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expIndexes, fltrIndexer.indexes) {
+		t.Errorf("Expected %v,Received %v", utils.ToJSON(expIndexes), utils.ToJSON(fltrIndexer))
 	}
 }
