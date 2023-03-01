@@ -1623,3 +1623,131 @@ func TestComputeStatIndexes(t *testing.T) {
 		t.Errorf("Expected %v,Received %v", utils.ToJSON(expIndexes), utils.ToJSON(fltrIndexer))
 	}
 }
+
+func TestComputeAttributeIndexes(t *testing.T) {
+	cfg, err := config.NewDefaultCGRConfig()
+	if err != nil {
+		t.Error(err)
+	}
+	Cache.Clear(nil)
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	fltrAttr1 := &Filter{
+		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+		ID:     "FLTR_ATTR_1",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaString,
+				Element: "~*req.Attribute",
+				Values:  []string{"AttributeProfile1"},
+			},
+			{
+				Type:    utils.MetaGreaterOrEqual,
+				Element: "~*req.UsageInterval",
+				Values:  []string{(1 * time.Second).String()},
+			},
+			{
+				Type:    utils.MetaGreaterOrEqual,
+				Element: "~*req." + utils.Weight,
+				Values:  []string{"9.0"},
+			},
+			{
+				Type:    utils.MetaPrefix,
+				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Account,
+				Values:  []string{"1001"},
+			},
+		},
+	}
+	if err := fltrAttr1.Compile(); err != nil {
+		t.Error(err)
+	}
+	if err := dm.SetFilter(fltrAttr1); err != nil {
+		t.Error(err)
+	}
+	ap := &AttributeProfile{
+		Tenant:    "cgrates.org",
+		ID:        "AttrPrf1",
+		FilterIDs: []string{"FLTR_ATTR_1"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+		},
+		Contexts: []string{"con1"},
+		Attributes: []*Attribute{
+			{
+				Path:  utils.MetaReq + utils.NestingSep + "FN1",
+				Value: config.NewRSRParsersMustCompile("Val1", true, utils.INFIELD_SEP),
+			},
+		},
+		Weight: 20,
+	}
+	if err := dm.SetAttributeProfile(ap, true); err != nil {
+		t.Error(err)
+	}
+	ids := []string{"AttrPrf1"}
+	if _, err := ComputeAttributeIndexes(dm, "cgrates.org", "con1", &ids, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+	expIndexes := map[string]utils.StringMap{
+		"*string:~*req.Attribute:AttributeProfile1": {
+			"AttrPrf1": true,
+		},
+		"*prefix:~*req.Account:1001": {
+			"AttrPrf1": true,
+		},
+	}
+	if fltrIndexer, err := ComputeAttributeIndexes(dm, "cgrates.org", "con1", nil, "ID"); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expIndexes, fltrIndexer.indexes) {
+		t.Errorf("Expected %v , Receveid %v", utils.ToJSON(expIndexes), utils.ToJSON(fltrIndexer.indexes))
+	}
+
+}
+
+func TestComputeDispatcherIndexes(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	Cache.Clear(nil)
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	fltr := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "DSP_FLT",
+		Rules: []*FilterRule{
+			{
+				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Account,
+				Type:    utils.MetaString,
+				Values:  []string{"2009"},
+			},
+		}}
+	if err := dm.SetFilter(fltr); err != nil {
+		t.Error(err)
+	}
+
+	dpP := &DispatcherProfile{
+		Tenant:    "cgrates.org",
+		ID:        "Dsp1",
+		FilterIDs: []string{"DSP_FLT"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+		},
+		Strategy:   utils.MetaFirst,
+		Weight:     20,
+		Subsystems: []string{utils.MetaAttributes, utils.MetaSessionS},
+	}
+	if err := dm.SetDispatcherProfile(dpP, true); err != nil {
+		t.Error(err)
+	}
+	ids := []string{"Dsp1"}
+	if _, err := ComputeDispatcherIndexes(dm, "cgrates.org", utils.MetaAttributes, &ids, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+	expIndexes := map[string]utils.StringMap{
+		"*string:~*req.Account:2009": {
+			"Dsp1": true,
+		},
+	}
+	if fltrIndexer, err := ComputeDispatcherIndexes(dm, "cgrates.org", utils.MetaSessionS, nil, "ID"); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expIndexes, fltrIndexer.indexes) {
+		t.Errorf("Expected %v,Received %v", utils.ToJSON(expIndexes), utils.ToJSON(fltrIndexer.indexes))
+	}
+}
