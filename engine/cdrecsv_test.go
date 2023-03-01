@@ -26,6 +26,7 @@ import (
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
 )
 
 func TestCsvCdrWriter(t *testing.T) {
@@ -526,5 +527,56 @@ func TestExportWithFilter2(t *testing.T) {
 	}
 	if cdre.TotalCost() != 0.15 {
 		t.Error("unexpected TotalCost: ", cdre.TotalCost())
+	}
+}
+
+func TestCsvCdrWriterWithAttributeContext(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	defer func() {
+		SetConnManager(connMgr)
+	}()
+	storedCdr1 := &CDR{
+		CGRID: utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()),
+		ToR:   utils.VOICE, OriginID: "dsafdsaf", OriginHost: "192.168.1.1",
+		RequestType: utils.META_RATED, Tenant: "cgrates.org", Category: "call",
+		Account: "1001", Subject: "1001", Destination: "1002",
+		SetupTime:  time.Unix(1383813745, 0).UTC(),
+		AnswerTime: time.Unix(1383813746, 0).UTC(),
+		Usage:      time.Duration(10) * time.Second,
+		RunID:      utils.MetaDefault, Cost: 1.01,
+		ExtraFields: map[string]string{"extra1": "val_extra1",
+			"extra2": "val_extra2", "extra3": "val_extra3"},
+	}
+	clientConn := make(chan rpcclient.ClientConnector, 1)
+	cdrEv := storedCdr1.AsCGREvent()
+	cdrEv.Event[utils.Account] = "1002"
+	cdrEv.Event[utils.Subject] = "1002"
+	cdrEv.Event[utils.Destination] = "1004"
+	clientConn <- &ccMock{
+		calls: map[string]func(args interface{}, reply interface{}) error{
+			utils.AttributeSv1ProcessEvent: func(args, reply interface{}) error {
+				rpl := AttrSProcessEventReply{
+					CGREvent:      cdrEv,
+					AlteredFields: []string{utils.Account, utils.Subject, utils.Destination},
+				}
+				*reply.(*AttrSProcessEventReply) = rpl
+				return nil
+			},
+		},
+	}
+	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		"con1": clientConn,
+	},
+	)
+	cfg.CdreProfiles[utils.MetaDefault].AttributeSContext = "context"
+	cdre, err := NewCDRExporter([]*CDR{storedCdr1},
+		cfg.CdreProfiles[utils.MetaDefault], utils.MetaFileCSV, "", "", "firstexport",
+		true, 1, utils.CSV_SEP, cfg.GeneralCfg().HttpSkipTlsVerify, []string{"con1"}, nil)
+	if err != nil {
+		t.Error("Unexpected error received: ", err)
+	}
+	SetConnManager(connMgr)
+	if err = cdre.processCDRs(); err != nil {
+		t.Error(err)
 	}
 }
