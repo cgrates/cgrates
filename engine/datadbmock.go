@@ -76,6 +76,7 @@ type DataDBMock struct {
 	HasDataDrvF                 func(ctx *context.Context, category, subject, tenant string) (bool, error)
 	RemoveIndexesDrvF           func(ctx *context.Context, idxItmType, tntCtx, idxKey string) error
 	GetStatQueueDrvF            func(ctx *context.Context, tenant, id string) (sq *StatQueue, err error)
+	GetResourceDrvF             func(ctx *context.Context, tenant, id string) (*Resource, error)
 }
 
 // Storage methods
@@ -141,7 +142,10 @@ func (dbM *DataDBMock) RemoveResourceProfileDrv(ctx *context.Context, tnt string
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) GetResourceDrv(*context.Context, string, string) (*Resource, error) {
+func (dbM *DataDBMock) GetResourceDrv(ctx *context.Context, tenant, id string) (*Resource, error) {
+	if dbM.GetResourceDrvF != nil {
+		return dbM.GetResourceDrvF(ctx, tenant, id)
+	}
 	return nil, utils.ErrNotImplemented
 }
 
