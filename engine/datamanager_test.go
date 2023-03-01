@@ -1610,7 +1610,7 @@ func TestDMSetStatQueueNewErr(t *testing.T) {
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
-	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data := &DataDBMock{}
 	cM := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg.CacheCfg(), cM)
 	experr := "marshal mock error"
