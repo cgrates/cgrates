@@ -21,6 +21,7 @@ package engine
 import (
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
@@ -68,7 +69,7 @@ func TestFilterHelpersWeightFromDynamicsErr(t *testing.T) {
 	expErr := "NOT_IMPLEMENTED:*stirng"
 	_, err := WeightFromDynamics(ctx, dWs, fltrs, tnt, ev)
 	if err == nil || err.Error() != expErr {
-		t.Errorf("Expected error <%v>, received error <%V>", expErr, err)
+		t.Errorf("Expected error <%+v>, received error <%+v>", expErr, err)
 	}
 
 }
@@ -92,7 +93,45 @@ func TestBlockerFromDynamicsErr(t *testing.T) {
 
 	expErr := "NOT_IMPLEMENTED:*stirng"
 	if _, err := BlockerFromDynamics(ctx, dBs, fltrs, tnt, ev); err == nil || err.Error() != expErr {
-		t.Errorf("Expected error <%v>, received error <%V>", expErr, err)
+		t.Errorf("Expected error <%+v>, received error <%+v>", expErr, err)
+	}
+
+}
+
+func TestMatchingItemIDsForEventGetKeysForPrefixErr(t *testing.T) {
+
+	matchEV = utils.MapStorage{utils.MetaReq: map[string]interface{}{
+		utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
+		"Field":          "profile",
+	}}
+	data := &DataDBMock{
+		GetKeysForPrefixF: func(ctx *context.Context, s string) ([]string, error) { return []string{}, utils.ErrNotImplemented },
+	}
+	dmMatch := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+
+	tntCtx := utils.ConcatenatedKey(utils.CGRateSorg, utils.MetaRating)
+
+	if _, err := MatchingItemIDsForEvent(context.Background(), matchEV, nil, nil, nil, nil, nil,
+		dmMatch, utils.CacheAttributeFilterIndexes, tntCtx, false, false); err != utils.ErrNotImplemented {
+		t.Errorf("Expected error <%+v>, received error <%+v>", utils.ErrNotImplemented, err)
+	}
+
+}
+
+func TestMatchingItemIDsForEventFilterIndexTypeNotNone(t *testing.T) {
+	matchEV = utils.MapStorage{utils.MetaReq: map[string]interface{}{
+		utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
+		"Fiel..d":        "profile",
+	}}
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dmMatch := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+
+	tntCtx := utils.ConcatenatedKey(utils.CGRateSorg, utils.MetaRating)
+
+	if _, err := MatchingItemIDsForEvent(context.Background(), matchEV, nil, nil, nil, nil, nil,
+		dmMatch, utils.CacheAttributeFilterIndexes, tntCtx, true, false); err != utils.ErrNotFound {
+		t.Errorf("Expected error <%+v>, received error <%+v>", utils.ErrNotFound, err)
 	}
 
 }
