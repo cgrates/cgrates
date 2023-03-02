@@ -1330,7 +1330,7 @@ func (apiv1 *APIerSv1) GetLoadTimes(args LoadTimeArgs, reply *map[string]string)
 }
 
 func (apiv1 *APIerSv1) ComputeActionPlanIndexes(_ string, reply *string) (err error) {
-	if apiv1.DataManager.DataDB().GetStorageType() != utils.REDIS {
+	if apiv1.DataManager.DataDB().GetStorageType() != utils.MetaRedis {
 		return utils.ErrNotImplemented
 	}
 	redisDB, can := apiv1.DataManager.DataDB().(*engine.RedisStorage)

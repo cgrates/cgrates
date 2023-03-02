@@ -4,7 +4,7 @@
 
 
 "general": {
-	"log_level": 7,
+	"log_level": 10,
 	"reply_timeout": "50s",
 },
 

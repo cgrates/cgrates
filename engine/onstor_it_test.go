@@ -143,7 +143,7 @@ func testOnStorITIsDBEmpty(t *testing.T) {
 }
 
 func testOnStorITCacheDestinations(t *testing.T) {
-	if onStor.dataDB.GetStorageType() == utils.INTERNAL {
+	if onStor.dataDB.GetStorageType() == utils.MetaInternal {
 		t.SkipNow()
 	}
 	if err := onStor.CacheDataFromDB("INVALID", nil, false); err == nil || err.Error() != utils.UnsupportedCachePrefix {
@@ -175,7 +175,7 @@ func testOnStorITCacheDestinations(t *testing.T) {
 }
 
 func testOnStorITCacheReverseDestinations(t *testing.T) {
-	if onStor.dataDB.GetStorageType() == utils.INTERNAL {
+	if onStor.dataDB.GetStorageType() == utils.MetaInternal {
 		t.SkipNow()
 	}
 	dst := &Destination{Id: "TEST_CACHE", Prefixes: []string{"+491", "+492", "+493"}}
@@ -200,7 +200,7 @@ func testOnStorITCacheReverseDestinations(t *testing.T) {
 }
 
 func testOnStorITCacheActionPlan(t *testing.T) {
-	if onStor.dataDB.GetStorageType() == utils.INTERNAL {
+	if onStor.dataDB.GetStorageType() == utils.MetaInternal {
 		t.SkipNow()
 	}
 	ap := &ActionPlan{
@@ -266,7 +266,7 @@ func testOnStorITCacheActionPlan(t *testing.T) {
 }
 
 func testOnStorITCacheAccountActionPlans(t *testing.T) {
-	if onStor.dataDB.GetStorageType() == utils.INTERNAL {
+	if onStor.dataDB.GetStorageType() == utils.MetaInternal {
 		t.SkipNow()
 	}
 	acntID := utils.ConcatenatedKey("cgrates.org", "1001")

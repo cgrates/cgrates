@@ -98,15 +98,15 @@ func (db *StorDBService) Reload() (err error) {
 		db.sync() // sync only if needed
 		return
 	}
-	if db.cfg.StorDbCfg().Type == utils.MONGO {
+	if db.cfg.StorDbCfg().Type == utils.MetaMongo {
 		mgo, canCast := db.db.(*engine.MongoStorage)
 		if !canCast {
 			return fmt.Errorf("can't conver StorDB of type %s to MongoStorage",
 				db.cfg.StorDbCfg().Type)
 		}
 		mgo.SetTTL(db.cfg.StorDbCfg().QueryTimeout)
-	} else if db.cfg.StorDbCfg().Type == utils.POSTGRES ||
-		db.cfg.StorDbCfg().Type == utils.MYSQL {
+	} else if db.cfg.StorDbCfg().Type == utils.MetaPostgres ||
+		db.cfg.StorDbCfg().Type == utils.MetaMySQL {
 		msql, canCast := db.db.(*engine.SQLStorage)
 		if !canCast {
 			return fmt.Errorf("can't conver StorDB of type %s to SQLStorage",
@@ -115,7 +115,7 @@ func (db *StorDBService) Reload() (err error) {
 		msql.Db.SetMaxOpenConns(db.cfg.StorDbCfg().MaxOpenConns)
 		msql.Db.SetMaxIdleConns(db.cfg.StorDbCfg().MaxIdleConns)
 		msql.Db.SetConnMaxLifetime(time.Duration(db.cfg.StorDbCfg().ConnMaxLifetime) * time.Second)
-	} else if db.cfg.StorDbCfg().Type == utils.INTERNAL {
+	} else if db.cfg.StorDbCfg().Type == utils.MetaInternal {
 		idb, canCast := db.db.(*engine.InternalDB)
 		if !canCast {
 			return fmt.Errorf("can't conver StorDB of type %s to InternalDB",
@@ -194,7 +194,7 @@ func (db *StorDBService) needsConnectionReload() bool {
 		db.oldDBCfg.Password != db.cfg.StorDbCfg().Password {
 		return true
 	}
-	if db.cfg.StorDbCfg().Type == utils.POSTGRES &&
+	if db.cfg.StorDbCfg().Type == utils.MetaPostgres &&
 		db.oldDBCfg.SSLMode != db.cfg.StorDbCfg().SSLMode {
 		return true
 	}

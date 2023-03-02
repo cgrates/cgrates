@@ -76,7 +76,7 @@ func TestDataDBReload(t *testing.T) {
 		t.Errorf("Expected service to be running")
 	}
 	oldcfg := &config.DataDbCfg{
-		DataDbType:   utils.MONGO,
+		DataDbType:   utils.MetaMongo,
 		DataDbHost:   "127.0.0.1",
 		DataDbPort:   "27017",
 		DataDbName:   "10",

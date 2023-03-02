@@ -26,6 +26,7 @@ import (
 	"os"
 	"os/exec"
 	"path"
+	"strings"
 	"time"
 
 	"github.com/cgrates/cgrates/config"
@@ -314,11 +315,12 @@ func InitStorDb(cfg *config.CGRConfig) error {
 	if err != nil {
 		return err
 	}
+	db_Path := strings.Trim(cfg.StorDbCfg().Type, "*")
 	if err := storDb.Flush(path.Join(cfg.DataFolderPath, "storage",
-		cfg.StorDbCfg().Type)); err != nil {
+		db_Path)); err != nil {
 		return err
 	}
-	if utils.IsSliceMember([]string{utils.MONGO, utils.MYSQL, utils.POSTGRES},
+	if utils.IsSliceMember([]string{utils.MetaMongo, utils.MetaMySQL, utils.MetaPostgres},
 		cfg.StorDbCfg().Type) {
 		if err := SetDBVersions(storDb); err != nil {
 			return err

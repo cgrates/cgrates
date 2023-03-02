@@ -90,7 +90,7 @@ func (db *DataDBService) Reload() (err error) {
 		db.oldDBCfg = db.cfg.DataDbCfg().Clone()
 		return
 	}
-	if db.cfg.DataDbCfg().DataDbType == utils.MONGO {
+	if db.cfg.DataDbCfg().DataDbType == utils.MetaMongo {
 		mgo, canCast := db.db.DataDB().(*engine.MongoStorage)
 		if !canCast {
 			return fmt.Errorf("can't conver DataDB of type %s to MongoStorage",
@@ -152,7 +152,7 @@ func (db *DataDBService) needsConnectionReload() bool {
 		db.oldDBCfg.DataDbPass != db.cfg.DataDbCfg().DataDbPass {
 		return true
 	}
-	if db.oldDBCfg.DataDbType == utils.REDIS {
+	if db.oldDBCfg.DataDbType == utils.MetaRedis {
 		return db.oldDBCfg.DataDbSentinelName != db.cfg.DataDbCfg().DataDbSentinelName
 	}
 	return false

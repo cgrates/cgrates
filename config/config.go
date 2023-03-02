@@ -51,27 +51,27 @@ var (
 
 func newDbDefaults() dbDefaults {
 	deflt := dbDefaults{
-		utils.MYSQL: map[string]string{
+		utils.MetaMySQL: map[string]string{
 			"DbName": "cgrates",
 			"DbPort": "3306",
 			"DbPass": "CGRateS.org",
 		},
-		utils.POSTGRES: map[string]string{
+		utils.MetaPostgres: map[string]string{
 			"DbName": "cgrates",
 			"DbPort": "5432",
 			"DbPass": "CGRateS.org",
 		},
-		utils.MONGO: map[string]string{
+		utils.MetaMongo: map[string]string{
 			"DbName": "cgrates",
 			"DbPort": "27017",
 			"DbPass": "",
 		},
-		utils.REDIS: map[string]string{
+		utils.MetaRedis: map[string]string{
 			"DbName": "10",
 			"DbPort": "6379",
 			"DbPass": "",
 		},
-		utils.INTERNAL: map[string]string{
+		utils.MetaInternal: map[string]string{
 			"DbName": "internal",
 			"DbPort": "internal",
 			"DbPass": "internal",
@@ -416,7 +416,7 @@ func (cfg *CGRConfig) loadDataDBCfg(jsnCfg *CgrJsonCfg) (err error) {
 	}
 	// in case of internalDB we need to disable the cache
 	// so we enforce it here
-	if cfg.dataDbCfg.DataDbType == utils.INTERNAL {
+	if cfg.dataDbCfg.DataDbType == utils.MetaInternal {
 		zeroLimit := &CacheParamCfg{Limit: 0,
 			TTL: time.Duration(0), StaticTTL: false, Precache: false}
 		disabledCache := CacheCfg{

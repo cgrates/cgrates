@@ -516,7 +516,7 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 		}
 	}
 	// StorDB sanity checks
-	if cfg.storDbCfg.Type == utils.POSTGRES {
+	if cfg.storDbCfg.Type == utils.MetaPostgres {
 		if !utils.IsSliceMember([]string{utils.PostgressSSLModeDisable, utils.PostgressSSLModeAllow,
 			utils.PostgressSSLModePrefer, utils.PostgressSSLModeRequire, utils.PostgressSSLModeVerifyCa,
 			utils.PostgressSSLModeVerifyFull}, cfg.storDbCfg.SSLMode) {
@@ -524,7 +524,7 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 		}
 	}
 	// DataDB sanity checks
-	if cfg.dataDbCfg.DataDbType == utils.INTERNAL {
+	if cfg.dataDbCfg.DataDbType == utils.MetaInternal {
 		for key, config := range cfg.cacheCfg {
 			if utils.CacheDataDBPartitions.Has(key) && config.Limit != 0 {
 				return fmt.Errorf("<%s> %s needs to be 0 when DataBD is *internal, received : %d", utils.CacheS, key, config.Limit)

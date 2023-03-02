@@ -48,7 +48,7 @@ func TestDataDbCfgloadFromJsonCfg(t *testing.T) {
 	}
 }`
 	expected = DataDbCfg{
-		DataDbType:         "redis",
+		DataDbType:         "*redis",
 		DataDbHost:         "127.0.0.1",
 		DataDbPort:         "6379",
 		DataDbName:         "10",
@@ -74,7 +74,7 @@ func TestDataDbCfgloadFromJsonCfgPort(t *testing.T) {
 	}
 }`
 	expected := DataDbCfg{
-		DataDbType: "mongo",
+		DataDbType: "*mongo",
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
@@ -92,7 +92,7 @@ func TestDataDbCfgloadFromJsonCfgPort(t *testing.T) {
 	}
 }`
 	expected = DataDbCfg{
-		DataDbType: "mongo",
+		DataDbType: "*mongo",
 		DataDbPort: "27017",
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
@@ -111,7 +111,7 @@ func TestDataDbCfgloadFromJsonCfgPort(t *testing.T) {
 	}
 }`
 	expected = DataDbCfg{
-		DataDbType: "internal",
+		DataDbType: "*internal",
 		DataDbPort: "internal",
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
@@ -141,7 +141,7 @@ func TestDataDBRemoteReplication(t *testing.T) {
 }`
 
 	expected = DataDbCfg{
-		DataDbType:         "redis",
+		DataDbType:         "*redis",
 		DataDbHost:         "127.0.0.1",
 		DataDbPort:         "6379",
 		DataDbName:         "10",
@@ -169,7 +169,7 @@ func TestDataDBRemoteReplication(t *testing.T) {
 }`
 
 	expected = DataDbCfg{
-		DataDbType:         utils.INTERNAL,
+		DataDbType:         utils.MetaInternal,
 		DataDbHost:         "127.0.0.1",
 		DataDbPort:         "6379",
 		DataDbName:         "10",
@@ -198,7 +198,7 @@ func TestDataDBRemoteReplication(t *testing.T) {
 }`
 
 	expected = DataDbCfg{
-		DataDbType:         utils.INTERNAL,
+		DataDbType:         utils.MetaInternal,
 		DataDbHost:         "127.0.0.1",
 		DataDbPort:         "6379",
 		DataDbName:         "10",
@@ -240,7 +240,7 @@ func TestDataDbCfgloadFromJsonCfgItems(t *testing.T) {
 }`
 
 	expected = DataDbCfg{
-		DataDbType:         "redis",
+		DataDbType:         "*redis",
 		DataDbHost:         "127.0.0.1",
 		DataDbPort:         "6379",
 		DataDbName:         "10",
@@ -293,7 +293,7 @@ func TestDataDbCfgloadFromJsonCfgItems(t *testing.T) {
 		}`
 
 	expected = DataDbCfg{
-		DataDbType:         "redis",
+		DataDbType:         "*redis",
 		DataDbHost:         "127.0.0.1",
 		DataDbPort:         "6379",
 		DataDbName:         "10",
@@ -353,7 +353,7 @@ func TestDataDbCfgloadFromJsonCfgItems(t *testing.T) {
 		}`
 
 	expected = DataDbCfg{
-		DataDbType:         "redis",
+		DataDbType:         "*redis",
 		DataDbHost:         "127.0.0.1",
 		DataDbPort:         "6379",
 		DataDbName:         "10",

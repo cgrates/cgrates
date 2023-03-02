@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 	"time"
@@ -50,7 +51,12 @@ func (dbcfg *StorDbCfg) loadFromJsonCfg(jsnDbCfg *DbJsonCfg) (err error) {
 		return nil
 	}
 	if jsnDbCfg.Db_type != nil {
-		dbcfg.Type = strings.TrimPrefix(*jsnDbCfg.Db_type, "*")
+		if !strings.HasPrefix(*jsnDbCfg.Db_type, "*") {
+			dbcfg.Type = fmt.Sprintf("*%s", *jsnDbCfg.Db_type)
+		} else {
+			dbcfg.Type = *jsnDbCfg.Db_type
+		}
+
 	}
 	if jsnDbCfg.Db_host != nil {
 		dbcfg.Host = *jsnDbCfg.Db_host
@@ -138,7 +144,7 @@ func (dbcfg *StorDbCfg) AsMapInterface() map[string]interface{} {
 	dbPort, _ := strconv.Atoi(dbcfg.Port)
 
 	return map[string]interface{}{
-		utils.DataDbTypeCfg:          utils.Meta + dbcfg.Type,
+		utils.DataDbTypeCfg:          dbcfg.Type,
 		utils.DataDbHostCfg:          dbcfg.Host,
 		utils.DataDbPortCfg:          dbPort,
 		utils.DataDbNameCfg:          dbcfg.Name,

@@ -23,6 +23,7 @@ package engine
 import (
 	"log"
 	"path"
+	"strings"
 	"testing"
 
 	"github.com/cgrates/cgrates/config"
@@ -96,7 +97,8 @@ func testVersionsFlush(t *testing.T) {
 	if err != nil {
 		t.Error("Error when flushing Mongo ", err.Error())
 	}
-	if err := storageDb.Flush(path.Join(cfg.DataFolderPath, "storage", cfg.StorDbCfg().Type)); err != nil {
+	db_Path := strings.Trim(cfg.StorDbCfg().Type, "*")
+	if err := storageDb.Flush(path.Join(cfg.DataFolderPath, "storage", db_Path)); err != nil {
 		t.Error(err)
 	}
 	SetDBVersions(storageDb)
@@ -119,12 +121,12 @@ func testVersion(t *testing.T) {
 
 	storType := dm3.DataDB().GetStorageType()
 	switch storType {
-	case utils.INTERNAL:
+	case utils.MetaInternal:
 		currentVersion = allVersions
 		testVersion = allVersions
 		testVersion[utils.Accounts] = 1
 		test = "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*accounts>"
-	case utils.MONGO, utils.REDIS:
+	case utils.MetaMongo, utils.MetaRedis:
 		currentVersion = dataDbVersions
 		testVersion = dataDbVersions
 		testVersion[utils.Accounts] = 1
@@ -161,12 +163,12 @@ func testVersion(t *testing.T) {
 	}
 	storType = storageDb.GetStorageType()
 	switch storType {
-	case utils.INTERNAL:
+	case utils.MetaInternal:
 		currentVersion = allVersions
 		testVersion = allVersions
 		testVersion[utils.Accounts] = 1
 		test = "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*accounts>"
-	case utils.MONGO, utils.POSTGRES, utils.MYSQL:
+	case utils.MetaMongo, utils.MetaPostgres, utils.MetaMySQL:
 		currentVersion = storDbVersions
 		testVersion = allVersions
 		testVersion[utils.CostDetails] = 1
