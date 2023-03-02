@@ -36,7 +36,7 @@ func NewDataDBConn(dbType, host, port, name, user,
 	pass, marshaler, sentinelName string,
 	itemsCacheCfg map[string]*config.ItemOpt) (d DataDB, err error) {
 	switch dbType {
-	case utils.REDIS:
+	case utils.MetaRedis:
 		var dbNo int
 		dbNo, err = strconv.Atoi(name)
 		if err != nil {
@@ -47,9 +47,9 @@ func NewDataDBConn(dbType, host, port, name, user,
 			host += ":" + port
 		}
 		d, err = NewRedisStorage(host, dbNo, pass, marshaler, utils.REDIS_MAX_CONNS, sentinelName)
-	case utils.MONGO:
+	case utils.MetaMongo:
 		d, err = NewMongoStorage(host, port, name, user, pass, marshaler, utils.DataDB, nil, true)
-	case utils.INTERNAL:
+	case utils.MetaInternal:
 		d = NewInternalDB(nil, nil, true, itemsCacheCfg)
 	default:
 		err = fmt.Errorf("unsupported db_type <%s>", dbType)
@@ -63,17 +63,17 @@ func NewStorDBConn(dbType, host, port, name, user, pass, marshaler, sslmode stri
 	stringIndexedFields, prefixIndexedFields []string,
 	itemsCacheCfg map[string]*config.ItemOpt) (db StorDB, err error) {
 	switch dbType {
-	case utils.MONGO:
+	case utils.MetaMongo:
 		db, err = NewMongoStorage(host, port, name, user, pass, marshaler, utils.StorDB, stringIndexedFields, false)
-	case utils.POSTGRES:
+	case utils.MetaPostgres:
 		db, err = NewPostgresStorage(host, port, name, user, pass, sslmode, maxConn, maxIdleConn, connMaxLifetime)
-	case utils.MYSQL:
+	case utils.MetaMySQL:
 		db, err = NewMySQLStorage(host, port, name, user, pass, maxConn, maxIdleConn, connMaxLifetime)
-	case utils.INTERNAL:
+	case utils.MetaInternal:
 		db = NewInternalDB(stringIndexedFields, prefixIndexedFields, false, itemsCacheCfg)
 	default:
 		err = fmt.Errorf("unknown db '%s' valid options are [%s, %s, %s, %s]",
-			dbType, utils.MYSQL, utils.MONGO, utils.POSTGRES, utils.INTERNAL)
+			dbType, utils.MetaMySQL, utils.MetaMongo, utils.MetaPostgres, utils.MetaInternal)
 	}
 	return
 }

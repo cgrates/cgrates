@@ -446,7 +446,7 @@ func (iDB *InternalDB) RemoveVersions(vrs Versions) (err error) {
 }
 
 func (iDB *InternalDB) GetStorageType() string {
-	return utils.INTERNAL
+	return utils.MetaInternal
 }
 
 func (iDB *InternalDB) IsDBEmpty() (resp bool, err error) {

@@ -589,7 +589,7 @@ func testV1FIdxGetChargersIndexesHealth(t *testing.T) {
 	}
 
 	// those 2 charger object (*none:*any:*any index) are from tutorial2 tariffplan, so on imternal we must delete them by api
-	if tSv1Cfg.DataDbCfg().DataDbType == utils.INTERNAL {
+	if tSv1Cfg.DataDbCfg().DataDbType == utils.MetaInternal {
 		var result string
 		if err := tFIdxHRpc.Call(utils.APIerSv1RemoveChargerProfile,
 			&utils.TenantIDWithCache{
@@ -694,7 +694,7 @@ func testV1FIdxGetAttributesIndexesHealth(t *testing.T) {
 	}
 
 	// this attr object (*none:*any:*any index) must be deleted with api
-	if tSv1Cfg.DataDbCfg().DataDbType == utils.INTERNAL {
+	if tSv1Cfg.DataDbCfg().DataDbType == utils.MetaInternal {
 		var result string
 		if err := tFIdxHRpc.Call(utils.APIerSv1RemoveAttributeProfile,
 			&utils.TenantIDWithCache{

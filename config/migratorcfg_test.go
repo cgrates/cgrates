@@ -54,14 +54,14 @@ func TestMigratorCgrCfgloadFromJsonCfg(t *testing.T) {
 },	
 }`
 	expected = MigratorCgrCfg{
-		OutDataDBType:     "redis",
+		OutDataDBType:     "*redis",
 		OutDataDBHost:     "127.0.0.1",
 		OutDataDBPort:     "6379",
 		OutDataDBName:     "10",
 		OutDataDBUser:     "cgrates",
 		OutDataDBPassword: "",
 		OutDataDBEncoding: "msgpack",
-		OutStorDBType:     "mysql",
+		OutStorDBType:     "*mysql",
 		OutStorDBHost:     "127.0.0.1",
 		OutStorDBPort:     "3306",
 		OutStorDBName:     "cgrates",
@@ -101,14 +101,14 @@ func TestMigratorCgrCfgAsMapInterface(t *testing.T) {
 }`
 	var users_filters []string
 	eMap := map[string]interface{}{
-		"out_datadb_type":           "redis",
+		"out_datadb_type":           "*redis",
 		"out_datadb_host":           "127.0.0.1",
 		"out_datadb_port":           "6379",
 		"out_datadb_name":           "10",
 		"out_datadb_user":           "cgrates",
 		"out_datadb_password":       "",
 		"out_datadb_encoding":       "msgpack",
-		"out_stordb_type":           "mysql",
+		"out_stordb_type":           "*mysql",
 		"out_stordb_host":           "127.0.0.1",
 		"out_stordb_port":           "3306",
 		"out_stordb_name":           "cgrates",
@@ -147,14 +147,14 @@ func TestMigratorCgrCfgAsMapInterface(t *testing.T) {
 	}`
 
 	eMap = map[string]interface{}{
-		"out_datadb_type":           "redis",
+		"out_datadb_type":           "*redis",
 		"out_datadb_host":           "127.0.0.1",
 		"out_datadb_port":           "6379",
 		"out_datadb_name":           "10",
 		"out_datadb_user":           "cgrates",
 		"out_datadb_password":       "out_datadb_password",
 		"out_datadb_encoding":       "msgpack",
-		"out_stordb_type":           "mysql",
+		"out_stordb_type":           "*mysql",
 		"out_stordb_host":           "127.0.0.1",
 		"out_stordb_port":           "3306",
 		"out_stordb_name":           "cgrates",

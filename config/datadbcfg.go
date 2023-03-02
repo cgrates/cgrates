@@ -49,7 +49,11 @@ func (dbcfg *DataDbCfg) loadFromJsonCfg(jsnDbCfg *DbJsonCfg) (err error) {
 		return nil
 	}
 	if jsnDbCfg.Db_type != nil {
-		dbcfg.DataDbType = strings.TrimPrefix(*jsnDbCfg.Db_type, "*")
+		if !strings.HasPrefix(*jsnDbCfg.Db_type, "*") {
+			dbcfg.DataDbType = fmt.Sprintf("*%s", *jsnDbCfg.Db_type)
+		} else {
+			dbcfg.DataDbType = *jsnDbCfg.Db_type
+		}
 	}
 	if jsnDbCfg.Db_host != nil {
 		dbcfg.DataDbHost = *jsnDbCfg.Db_host
@@ -145,7 +149,7 @@ func (dbcfg *DataDbCfg) AsMapInterface() map[string]interface{} {
 	dbPort, _ := strconv.Atoi(dbcfg.DataDbPort)
 
 	return map[string]interface{}{
-		utils.DataDbTypeCfg:          utils.Meta + dbcfg.DataDbType,
+		utils.DataDbTypeCfg:          dbcfg.DataDbType,
 		utils.DataDbHostCfg:          dbcfg.DataDbHost,
 		utils.DataDbPortCfg:          dbPort,
 		utils.DataDbNameCfg:          dbcfg.DataDbName,

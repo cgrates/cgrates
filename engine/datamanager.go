@@ -120,7 +120,7 @@ func (dm *DataManager) DataDB() DataDB {
 func (dm *DataManager) LoadDataDBCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs,
 	aaPlIDs, atrgIDs, sgIDs, rpIDs, resIDs, stqIDs, stqpIDs, thIDs, thpIDs, fltrIDs,
 	splPrflIDs, alsPrfIDs, cppIDs, dppIDs, dphIDs []string) (err error) {
-	if dm.DataDB().GetStorageType() == utils.INTERNAL {
+	if dm.DataDB().GetStorageType() == utils.MetaInternal {
 		if dm.cacheCfg == nil {
 			return
 		}
@@ -515,7 +515,7 @@ func (dm *DataManager) GetStatQueue(tenant, id string,
 			if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RmtConns, nil, utils.ReplicatorSv1GetStatQueue,
 				&utils.TenantID{Tenant: tenant, ID: id}, sq); err == nil {
 				var ssq *StoredStatQueue
-				if dm.dataDB.GetStorageType() != utils.INTERNAL {
+				if dm.dataDB.GetStorageType() != utils.MetaInternal {
 					// in case of internal we don't marshal
 					if ssq, err = NewStoredStatQueue(sq, dm.ms); err != nil {
 						return
@@ -544,7 +544,7 @@ func (dm *DataManager) GetStatQueue(tenant, id string,
 // SetStatQueue converts to StoredStatQueue and stores the result in dataDB
 func (dm *DataManager) SetStatQueue(sq *StatQueue) (err error) {
 	var ssq *StoredStatQueue
-	if dm.dataDB.GetStorageType() != utils.INTERNAL ||
+	if dm.dataDB.GetStorageType() != utils.MetaInternal ||
 		config.CgrConfig().DataDbCfg().Items[utils.MetaStatQueues].Replicate {
 		// in case of internal we don't marshal
 		if ssq, err = NewStoredStatQueue(sq, dm.ms); err != nil {
@@ -767,7 +767,7 @@ func (dm *DataManager) GetThresholdProfile(tenant, id string, cacheRead, cacheWr
 		}
 		if err != nil {
 			err = utils.CastRPCErr(err)
-			if err == utils.ErrNotFound && cacheWrite && dm.dataDB.GetStorageType() != utils.INTERNAL {
+			if err == utils.ErrNotFound && cacheWrite && dm.dataDB.GetStorageType() != utils.MetaInternal {
 				Cache.Set(utils.CacheThresholdProfiles, tntID, nil, nil,
 					cacheCommit(transactionID), transactionID)
 
@@ -2191,7 +2191,7 @@ func (dm *DataManager) GetChargerProfile(tenant, id string, cacheRead, cacheWrit
 		}
 		if err != nil {
 			err = utils.CastRPCErr(err)
-			if err == utils.ErrNotFound && cacheWrite && dm.dataDB.GetStorageType() != utils.INTERNAL {
+			if err == utils.ErrNotFound && cacheWrite && dm.dataDB.GetStorageType() != utils.MetaInternal {
 				Cache.Set(utils.CacheChargerProfiles, tntID, nil, nil,
 					cacheCommit(transactionID), transactionID)
 

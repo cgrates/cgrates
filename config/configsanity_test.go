@@ -714,7 +714,7 @@ func TestConfigSanityEventReader(t *testing.T) {
 func TestConfigSanityStorDB(t *testing.T) {
 	cfg, _ = NewDefaultCGRConfig()
 	cfg.storDbCfg = &StorDbCfg{
-		Type:    utils.POSTGRES,
+		Type:    utils.MetaPostgres,
 		SSLMode: "wrongSSLMode",
 	}
 	expected := "<stor_db> unsuported sslmode for storDB"
@@ -725,7 +725,7 @@ func TestConfigSanityStorDB(t *testing.T) {
 
 func TestConfigSanityDataDB(t *testing.T) {
 	cfg, _ = NewDefaultCGRConfig()
-	cfg.dataDbCfg.DataDbType = utils.INTERNAL
+	cfg.dataDbCfg.DataDbType = utils.MetaInternal
 
 	cfg.cacheCfg = CacheCfg{
 		utils.CacheTimings: &CacheParamCfg{

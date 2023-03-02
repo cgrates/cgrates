@@ -39,17 +39,17 @@ func NewMigratorDataDB(db_type, host, port, name, user, pass,
 	dm := engine.NewDataManager(dbCon, cacheCfg, nil)
 	var d MigratorDataDB
 	switch db_type {
-	case utils.REDIS:
+	case utils.MetaRedis:
 		d = newRedisMigrator(dm)
-	case utils.MONGO:
+	case utils.MetaMongo:
 		d = newMongoMigrator(dm)
 		db = d.(MigratorDataDB)
-	case utils.INTERNAL:
+	case utils.MetaInternal:
 		d = newInternalMigrator(dm)
 		db = d.(MigratorDataDB)
 	default:
 		err = errors.New(fmt.Sprintf("Unknown db '%s' valid options are '%s' or '%s or '%s'",
-			db_type, utils.REDIS, utils.MONGO, utils.INTERNAL))
+			db_type, utils.MetaRedis, utils.MetaMongo, utils.MetaInternal))
 	}
 	return d, nil
 }
@@ -65,21 +65,21 @@ func NewMigratorStorDB(db_type, host, port, name, user, pass, marshaler, sslmode
 		return nil, err
 	}
 	switch db_type {
-	case utils.MONGO:
+	case utils.MetaMongo:
 		d = newMongoStorDBMigrator(storDb)
 		db = d.(MigratorStorDB)
-	case utils.MYSQL:
+	case utils.MetaMySQL:
 		d = newMigratorSQL(storDb)
 		db = d.(MigratorStorDB)
-	case utils.POSTGRES:
+	case utils.MetaPostgres:
 		d = newMigratorSQL(storDb)
 		db = d.(MigratorStorDB)
-	case utils.INTERNAL:
+	case utils.MetaInternal:
 		d = newInternalStorDBMigrator(storDb)
 		db = d.(MigratorStorDB)
 	default:
 		err = errors.New(fmt.Sprintf("Unknown db '%s' valid options are [%s, %s, %s, %s]",
-			db_type, utils.MYSQL, utils.MONGO, utils.POSTGRES, utils.INTERNAL))
+			db_type, utils.MetaMySQL, utils.MetaMongo, utils.MetaPostgres, utils.MetaInternal))
 	}
 	return d, nil
 }

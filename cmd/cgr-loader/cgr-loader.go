@@ -114,7 +114,7 @@ func loadConfig() (ldrCfg *config.CGRConfig) {
 	}
 	// Data for DataDB
 	if *dataDBType != dfltCfg.DataDbCfg().DataDbType {
-		ldrCfg.DataDbCfg().DataDbType = strings.TrimPrefix(*dataDBType, "*")
+		ldrCfg.DataDbCfg().DataDbType = *dataDBType
 	}
 
 	if *dataDBHost != dfltCfg.DataDbCfg().DataDbHost {
@@ -147,7 +147,7 @@ func loadConfig() (ldrCfg *config.CGRConfig) {
 
 	// Data for StorDB
 	if *storDBType != dfltCfg.StorDbCfg().Type {
-		ldrCfg.StorDbCfg().Type = strings.TrimPrefix(*storDBType, "*")
+		ldrCfg.StorDbCfg().Type = *storDBType
 	}
 
 	if *storDBHost != dfltCfg.StorDbCfg().Host {

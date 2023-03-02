@@ -52,7 +52,7 @@ func TestStoreDbCfgloadFromJsonCfg(t *testing.T) {
 	}
 }`
 	expected = StorDbCfg{
-		Type:                "mysql",
+		Type:                "*mysql",
 		Host:                "127.0.0.1",
 		Port:                "3306",
 		Name:                "cgrates",
@@ -82,7 +82,7 @@ func TestStoreDbCfgloadFromJsonCfgPort(t *testing.T) {
 	}
 }`
 	expected := StorDbCfg{
-		Type: "mongo",
+		Type: "*mongo",
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
@@ -100,7 +100,7 @@ func TestStoreDbCfgloadFromJsonCfgPort(t *testing.T) {
 	}
 }`
 	expected = StorDbCfg{
-		Type: "mongo",
+		Type: "*mongo",
 		Port: "27017",
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
@@ -119,7 +119,7 @@ func TestStoreDbCfgloadFromJsonCfgPort(t *testing.T) {
 	}
 }`
 	expected = StorDbCfg{
-		Type: "internal",
+		Type: "*internal",
 		Port: "internal",
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {

@@ -52,7 +52,7 @@ func TestApiersReload(t *testing.T) {
 	server := utils.NewServer()
 	srvMngr := servmanager.NewServiceManager(cfg, engineShutdown)
 	db := NewDataDBService(cfg, nil)
-	cfg.StorDbCfg().Type = utils.INTERNAL
+	cfg.StorDbCfg().Type = utils.MetaInternal
 	stordb := NewStorDBService(cfg)
 	schS := NewSchedulerService(cfg, db, chS, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil)
 	tS := NewThresholdService(cfg, db, chS, filterSChan, server, make(chan rpcclient.ClientConnector, 1))
