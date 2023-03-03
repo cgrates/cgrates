@@ -104,7 +104,7 @@ func testCdrITConnect(t *testing.T) {
 
 func testCdrITFlush(t *testing.T) {
 	if err := cdrMigrator.storDBOut.StorDB().Flush(
-		path.Join(cdrCfgIn.DataFolderPath, "storage", cdrCfgIn.StorDbCfg().Type)); err != nil {
+		path.Join(cdrCfgIn.DataFolderPath, "storage", dbPath(cdrCfgIn.StorDbCfg().Type))); err != nil {
 		t.Error(err)
 	}
 }

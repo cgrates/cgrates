@@ -142,7 +142,7 @@ func testSessionCostITRename(t *testing.T) {
 
 func testSessionCostITFlush(t *testing.T) {
 	if err := sCostMigrator.storDBOut.StorDB().Flush(
-		path.Join(sCostCfgIn.DataFolderPath, "storage", sCostCfgIn.StorDbCfg().Type)); err != nil {
+		path.Join(sCostCfgIn.DataFolderPath, "storage", dbPath(sCostCfgIn.StorDbCfg().Type))); err != nil {
 		t.Error(err)
 	}
 }

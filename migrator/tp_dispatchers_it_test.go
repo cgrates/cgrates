@@ -97,13 +97,13 @@ func testTpDispITConnect(t *testing.T) {
 func testTpDispITFlush(t *testing.T) {
 	if err := tpDispMigrator.storDBIn.StorDB().Flush(
 		path.Join(tpDispCfgIn.DataFolderPath, "storage",
-			tpDispCfgIn.StorDbCfg().Type)); err != nil {
+			dbPath(tpDispCfgIn.StorDbCfg().Type))); err != nil {
 		t.Error(err)
 	}
 
 	if err := tpDispMigrator.storDBOut.StorDB().Flush(
 		path.Join(tpDispCfgOut.DataFolderPath, "storage",
-			tpDispCfgOut.StorDbCfg().Type)); err != nil {
+			dbPath(tpDispCfgOut.StorDbCfg().Type))); err != nil {
 		t.Error(err)
 	}
 }

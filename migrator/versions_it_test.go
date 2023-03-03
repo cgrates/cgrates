@@ -103,7 +103,7 @@ func testVrsITConnect(t *testing.T) {
 func testVrsITFlush(t *testing.T) {
 	vrsMigrator.dmOut.DataManager().DataDB().Flush("")
 	vrsMigrator.storDBOut.StorDB().Flush((path.Join(vrsCfg.DataFolderPath, "storage",
-		vrsCfg.StorDbCfg().Type)))
+		dbPath(vrsCfg.StorDbCfg().Type))))
 	if vrs, err := vrsMigrator.dmOut.DataManager().DataDB().GetVersions(""); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expected err=%s recived err=%v and rply=%s", utils.ErrNotFound.Error(), err, utils.ToJSON(vrs))
 	}
