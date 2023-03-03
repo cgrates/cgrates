@@ -35,7 +35,7 @@ func NewDataDBConn(dbType, host, port, name, user,
 	pass, marshaler string, opts *config.DataDBOpts,
 	itmsCfg map[string]*config.ItemOpt) (d DataDB, err error) {
 	switch dbType {
-	case utils.Redis:
+	case utils.MetaRedis:
 		var dbNo int
 		dbNo, err = strconv.Atoi(name)
 		if err != nil {
@@ -49,9 +49,9 @@ func NewDataDBConn(dbType, host, port, name, user,
 			opts.RedisSentinel, opts.RedisCluster, opts.RedisClusterSync, opts.RedisClusterOndownDelay,
 			opts.RedisConnectTimeout, opts.RedisReadTimeout, opts.RedisWriteTimeout, opts.RedisTLS,
 			opts.RedisClientCertificate, opts.RedisClientKey, opts.RedisCACertificate)
-	case utils.Mongo:
+	case utils.MetaMongo:
 		d, err = NewMongoStorage(host, port, name, user, pass, marshaler, utils.DataDB, nil, opts.MongoQueryTimeout)
-	case utils.Internal:
+	case utils.MetaInternal:
 		d = NewInternalDB(nil, nil, true, itmsCfg)
 	default:
 		err = fmt.Errorf("unsupported db_type <%s>", dbType)
@@ -64,19 +64,19 @@ func NewStorDBConn(dbType, host, port, name, user, pass, marshaler string,
 	stringIndexedFields, prefixIndexedFields []string,
 	opts *config.StorDBOpts, itmsCfg map[string]*config.ItemOpt) (db StorDB, err error) {
 	switch dbType {
-	case utils.Mongo:
+	case utils.MetaMongo:
 		db, err = NewMongoStorage(host, port, name, user, pass, marshaler, utils.StorDB, stringIndexedFields, opts.MongoQueryTimeout)
-	case utils.Postgres:
+	case utils.MetaPostgres:
 		db, err = NewPostgresStorage(host, port, name, user, pass, opts.PgSSLMode,
 			opts.SQLMaxOpenConns, opts.SQLMaxIdleConns, opts.SQLConnMaxLifetime)
-	case utils.MySQL:
+	case utils.MetaMySQL:
 		db, err = NewMySQLStorage(host, port, name, user, pass, opts.SQLMaxOpenConns, opts.SQLMaxIdleConns,
 			opts.SQLConnMaxLifetime, opts.MySQLLocation, opts.MySQLDSNParams)
-	case utils.Internal:
+	case utils.MetaInternal:
 		db = NewInternalDB(stringIndexedFields, prefixIndexedFields, false, itmsCfg)
 	default:
-		err = fmt.Errorf("unknown db '%s' valid options are [%s, %s, %s, %s]",
-			dbType, utils.MySQL, utils.Mongo, utils.Postgres, utils.Internal)
+		err = fmt.Errorf("unknown db 1'%s' valid options are [%s, %s, %s, %s]",
+			dbType, utils.MetaMySQL, utils.MetaMongo, utils.MetaPostgres, utils.MetaInternal)
 	}
 	return
 }

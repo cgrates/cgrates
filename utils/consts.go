@@ -246,6 +246,7 @@ const (
 	FWV                     = "fwv"
 	MetaCombimed            = "*combimed"
 	MetaMongo               = "*mongo"
+	MetaRedis               = "*redis"
 	MetaPostgres            = "*postgres"
 	MetaInternal            = "*internal"
 	MetaLocalHost           = "*localhost"

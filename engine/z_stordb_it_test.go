@@ -130,14 +130,14 @@ func TestStorDBit(t *testing.T) {
 func testStorDBitIsDBEmpty(t *testing.T) {
 	x := storDB.GetStorageType()
 	switch x {
-	case utils.Mongo:
+	case utils.MetaMongo:
 		test, err := storDB.IsDBEmpty()
 		if err != nil {
 			t.Error(err)
 		} else if test != true {
 			t.Errorf("Expecting: true got :%+v", test)
 		}
-	case utils.Postgres, utils.MySQL:
+	case utils.MetaPostgres, utils.MetaMySQL:
 		test, err := storDB.IsDBEmpty()
 		if err != nil {
 			t.Error(err)

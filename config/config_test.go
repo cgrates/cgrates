@@ -101,14 +101,14 @@ func TestCgrCfgDataDBPortWithoutDynamic(t *testing.T) {
 	jsnCfg := `
 {
 "data_db": {
-	"db_type": "mongo",
+	"db_type": "*mongo",
 	}
 }`
 
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(jsnCfg); err != nil {
 		t.Error(err)
-	} else if cgrCfg.DataDbCfg().Type != utils.Mongo {
-		t.Errorf("Expected: %+v, received: %+v", cgrCfg.DataDbCfg().Type, utils.Mongo)
+	} else if cgrCfg.DataDbCfg().Type != utils.MetaMongo {
+		t.Errorf("Expected: %+v, received: %+v", cgrCfg.DataDbCfg().Type, utils.MetaMongo)
 	} else if cgrCfg.DataDbCfg().Port != "6379" {
 		t.Errorf("Expected: %+v, received: %+v", cgrCfg.DataDbCfg().Port, "6379")
 	}
@@ -132,15 +132,15 @@ func TestCgrCfgDataDBPortWithDymanic(t *testing.T) {
 	jsnCfg := `
 {
 "data_db": {
-	"db_type": "mongo",
+	"db_type": "*mongo",
 	"db_port": -1,
 	}
 }`
 
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(jsnCfg); err != nil {
 		t.Error(err)
-	} else if cgrCfg.DataDbCfg().Type != utils.Mongo {
-		t.Errorf("Expected: %+v, received: %+v", cgrCfg.DataDbCfg().Type, utils.Mongo)
+	} else if cgrCfg.DataDbCfg().Type != utils.MetaMongo {
+		t.Errorf("Expected: %+v, received: %+v", cgrCfg.DataDbCfg().Type, utils.MetaMongo)
 	} else if cgrCfg.DataDbCfg().Port != "27017" {
 		t.Errorf("Expected: %+v, received: %+v", cgrCfg.DataDbCfg().Port, "27017")
 	}
@@ -171,8 +171,8 @@ func TestCgrCfgStorDBPortWithoutDynamic(t *testing.T) {
 
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(jsnCfg); err != nil {
 		t.Error(err)
-	} else if cgrCfg.StorDbCfg().Type != utils.Mongo {
-		t.Errorf("Expected: %+v, received: %+v", cgrCfg.StorDbCfg().Type, utils.Mongo)
+	} else if cgrCfg.StorDbCfg().Type != utils.MetaMongo {
+		t.Errorf("Expected: %+v, received: %+v", cgrCfg.StorDbCfg().Type, utils.MetaMongo)
 	} else if cgrCfg.StorDbCfg().Port != "3306" {
 		t.Errorf("Expected: %+v, received: %+v", cgrCfg.StorDbCfg().Port, "3306")
 	}
@@ -189,8 +189,8 @@ func TestCgrCfgStorDBPortWithDymanic(t *testing.T) {
 
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(jsnCfg); err != nil {
 		t.Error(err)
-	} else if cgrCfg.StorDbCfg().Type != utils.Mongo {
-		t.Errorf("Expected: %+v, received: %+v", cgrCfg.StorDbCfg().Type, utils.Mongo)
+	} else if cgrCfg.StorDbCfg().Type != utils.MetaMongo {
+		t.Errorf("Expected: %+v, received: %+v", cgrCfg.StorDbCfg().Type, utils.MetaMongo)
 	} else if cgrCfg.StorDbCfg().Port != "27017" {
 		t.Errorf("Expected: %+v, received: %+v", cgrCfg.StorDbCfg().Port, "27017")
 	}
@@ -928,7 +928,7 @@ func TestRadiusAgentCfg(t *testing.T) {
 func TestDbDefaultsMetaDynamic(t *testing.T) {
 	dbdf := newDbDefaults()
 	flagInput := utils.MetaDynamic
-	dbs := []string{utils.Mongo, utils.Redis, utils.MySQL, utils.Internal}
+	dbs := []string{utils.MetaMongo, utils.MetaRedis, utils.MetaMySQL, utils.MetaInternal}
 	for _, dbtype := range dbs {
 		port := dbdf.dbPort(dbtype, flagInput)
 		if port != dbdf[dbtype]["DbPort"] {
@@ -943,7 +943,7 @@ func TestDbDefaultsMetaDynamic(t *testing.T) {
 
 func TestDbDefaults(t *testing.T) {
 	dbdf := newDbDefaults()
-	dbs := []string{utils.Mongo, utils.Redis, utils.MySQL, utils.Internal, utils.Postgres}
+	dbs := []string{utils.MetaMongo, utils.MetaRedis, utils.MetaMySQL, utils.MetaInternal, utils.MetaPostgres}
 	for _, dbtype := range dbs {
 		port := dbdf.dbPort(dbtype, "1234")
 		if port != "1234" {

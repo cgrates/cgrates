@@ -49,37 +49,37 @@ func TestVersionCompare(t *testing.T) {
 		utils.SharedGroups: 2, utils.CostDetails: 2,
 		utils.SessionSCosts: 2}
 
-	message1 := y.Compare(x, utils.Mongo, true)
+	message1 := y.Compare(x, utils.MetaMongo, true)
 	if message1 != "cgr-migrator -exec=*accounts" {
 		t.Errorf("Error failed to compare to curent version expected: %s received: %s", "cgr-migrator -exec=*accounts", message1)
 	}
-	message2 := z.Compare(x, utils.Mongo, true)
+	message2 := z.Compare(x, utils.MetaMongo, true)
 	if message2 != "cgr-migrator -exec=*action_plans" {
 		t.Errorf("Error failed to compare to curent version expected: %s received: %s", "cgr-migrator -exec=*action_plans", message2)
 	}
-	message3 := q.Compare(x, utils.Mongo, true)
+	message3 := q.Compare(x, utils.MetaMongo, true)
 	if message3 != "cgr-migrator -exec=*shared_groups" {
 		t.Errorf("Error failed to compare to curent version expected: %s received: %s", "cgr-migrator -exec=*shared_groups", message3)
 	}
-	message4 := c.Compare(x, utils.Mongo, false)
+	message4 := c.Compare(x, utils.MetaMongo, false)
 	if message4 != "cgr-migrator -exec=*cost_details" {
 		t.Errorf("Error failed to compare to curent version expected: %s received: %s", "cgr-migrator -exec=*cost_details", message4)
 	}
-	message5 := a.Compare(b, utils.MySQL, false)
+	message5 := a.Compare(b, utils.MetaMySQL, false)
 	if message5 != "cgr-migrator -exec=*sessions_costs" {
 		t.Errorf("Error failed to compare to curent version expected: %s received: %s", "cgr-migrator -exec=*sessions_costs", message5)
 	}
-	message6 := a.Compare(b, utils.Postgres, false)
+	message6 := a.Compare(b, utils.MetaPostgres, false)
 	if message6 != "cgr-migrator -exec=*sessions_costs" {
 		t.Errorf("Error failed to compare to curent version expected: %s received: %s", "cgr-migrator -exec=*sessions_costs", message6)
 	}
-	message7 := y.Compare(x, utils.Redis, true)
+	message7 := y.Compare(x, utils.MetaRedis, true)
 	if message7 != "cgr-migrator -exec=*accounts" {
 		t.Errorf("Error failed to compare to curent version expected: %s received: %s", "cgr-migrator -exec=*accounts", message7)
 	}
 
 	y[utils.Accounts] = 2
-	message8 := y.Compare(x, utils.Redis, true)
+	message8 := y.Compare(x, utils.MetaRedis, true)
 	if message8 != utils.EmptyString {
 		t.Errorf("Expected %+v, received %+v", utils.EmptyString, message8)
 	}
@@ -105,19 +105,19 @@ func TestCurrentDBVersions(t *testing.T) {
 		utils.TpResource: 1, utils.TpDestinations: 1, utils.TpRatingPlan: 1,
 		utils.TpRatingProfile: 1, utils.TpChargers: 1, utils.TpDispatchers: 1,
 	}
-	if vrs := CurrentDBVersions(utils.Mongo, true); !reflect.DeepEqual(expVersDataDB, vrs) {
+	if vrs := CurrentDBVersions(utils.MetaMongo, true); !reflect.DeepEqual(expVersDataDB, vrs) {
 		t.Errorf("Expectred %+v, received %+v", expVersDataDB, vrs)
 	}
 
-	if vrs := CurrentDBVersions(utils.Mongo, false); !reflect.DeepEqual(expVersStorDB, vrs) {
+	if vrs := CurrentDBVersions(utils.MetaMongo, false); !reflect.DeepEqual(expVersStorDB, vrs) {
 		t.Errorf("Expectred %+v, received %+v", expVersStorDB, vrs)
 	}
 
-	if vrs := CurrentDBVersions(utils.Postgres, false); !reflect.DeepEqual(expVersStorDB, vrs) {
+	if vrs := CurrentDBVersions(utils.MetaPostgres, false); !reflect.DeepEqual(expVersStorDB, vrs) {
 		t.Errorf("Expectred %+v, received %+v", expVersStorDB, vrs)
 	}
 
-	if vrs := CurrentDBVersions(utils.Redis, true); !reflect.DeepEqual(expVersDataDB, vrs) {
+	if vrs := CurrentDBVersions(utils.MetaRedis, true); !reflect.DeepEqual(expVersDataDB, vrs) {
 		t.Errorf("Expectred %+v, received %+v", expVersDataDB, vrs)
 	}
 
@@ -127,7 +127,7 @@ func TestCurrentDBVersions(t *testing.T) {
 
 	//Compare AllVersions
 	expStr := "cgr-migrator"
-	if rcv := expVersDataDB.Compare(expVersStorDB, utils.Internal, true); !strings.Contains(rcv, expStr) {
+	if rcv := expVersDataDB.Compare(expVersStorDB, utils.MetaInternal, true); !strings.Contains(rcv, expStr) {
 		t.Errorf("Expected %+v, received %+v", expStr, rcv)
 	}
 }
@@ -188,7 +188,7 @@ func (sM *storageMock) SelectDatabase(dbName string) (err error) {
 func (sM *storageMock) GetStorageType() string {
 	switch sM.testcase {
 	case "Compare returns non-nil message":
-		return utils.Postgres
+		return utils.MetaPostgres
 	}
 	return ""
 }

@@ -109,5 +109,5 @@ func (msqlS *MySQLStorage) notExtraFieldsValueQry(field, value string) string {
 }
 
 func (msqlS *MySQLStorage) GetStorageType() string {
-	return utils.MySQL
+	return utils.MetaMySQL
 }

@@ -152,7 +152,7 @@ func testVersion(t *testing.T) {
 		testVersion = allVersions
 		testVersion[utils.Accounts] = 1
 		test = "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*accounts>"
-	case utils.Mongo, utils.Redis:
+	case utils.MetaMongo, utils.MetaRedis:
 		currentVersion = dataDbVersions
 		testVersion = dataDbVersions
 		testVersion[utils.Accounts] = 1
@@ -189,12 +189,12 @@ func testVersion(t *testing.T) {
 	}
 	storType = storageDb.GetStorageType()
 	switch storType {
-	case utils.Internal:
+	case utils.MetaInternal:
 		currentVersion = allVersions
 		testVersion = allVersions
 		testVersion[utils.Accounts] = 1
 		test = "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*accounts>"
-	case utils.Mongo, utils.Postgres, utils.MySQL:
+	case utils.MetaMongo, utils.MetaPostgres, utils.MetaMySQL:
 		currentVersion = storDbVersions
 		testVersion = allVersions
 		testVersion[utils.CostDetails] = 1
