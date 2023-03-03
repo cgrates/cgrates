@@ -123,7 +123,7 @@ func TestStorDBReload(t *testing.T) {
 	if err := stordb.Reload(); err != nil {
 		t.Fatalf("\nExpecting <nil>,\n Received <%+v>", err)
 	}
-	cfg.StorDbCfg().Type = utils.Internal
+	cfg.StorDbCfg().Type = utils.MetaInternal
 	if err := stordb.Reload(); err != nil {
 		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
 	}
@@ -407,7 +407,7 @@ func TestStorDBReloadNewStorDBConnError(t *testing.T) {
 	cfg.StorDbCfg().Password = "CGRateS.org"
 	stordb := NewStorDBService(cfg, srvDep)
 	stordb.oldDBCfg = &config.StorDbCfg{
-		Type:     utils.Internal,
+		Type:     utils.MetaInternal,
 		Host:     "test_host",
 		Port:     "test_port",
 		Name:     "test_name",

@@ -121,8 +121,8 @@ func TestCgrCfgDataDBPortWithoutDynamic(t *testing.T) {
 
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(jsnCfg); err != nil {
 		t.Error(err)
-	} else if cgrCfg.DataDbCfg().Type != utils.Internal {
-		t.Errorf("Expected: %+v, received: %+v", cgrCfg.DataDbCfg().Type, utils.Internal)
+	} else if cgrCfg.DataDbCfg().Type != utils.MetaInternal {
+		t.Errorf("Expected: %+v, received: %+v", cgrCfg.DataDbCfg().Type, utils.MetaInternal)
 	} else if cgrCfg.DataDbCfg().Port != "6379" {
 		t.Errorf("Expected: %+v, received: %+v", cgrCfg.DataDbCfg().Port, "6379")
 	}
@@ -154,8 +154,8 @@ func TestCgrCfgDataDBPortWithDymanic(t *testing.T) {
 
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(jsnCfg); err != nil {
 		t.Error(err)
-	} else if cgrCfg.DataDbCfg().Type != utils.Internal {
-		t.Errorf("Expected: %+v, received: %+v", cgrCfg.DataDbCfg().Type, utils.Internal)
+	} else if cgrCfg.DataDbCfg().Type != utils.MetaInternal {
+		t.Errorf("Expected: %+v, received: %+v", cgrCfg.DataDbCfg().Type, utils.MetaInternal)
 	} else if cgrCfg.DataDbCfg().Port != "internal" {
 		t.Errorf("Expected: %+v, received: %+v", cgrCfg.DataDbCfg().Port, "internal")
 	}

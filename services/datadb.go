@@ -156,7 +156,7 @@ func (db *DataDBService) needsConnectionReload() bool {
 		db.oldDBCfg.Password != db.cfg.DataDbCfg().Password {
 		return true
 	}
-	if db.cfg.DataDbCfg().Type == utils.Internal { // in case of internal recreate the db using the new config
+	if db.cfg.DataDbCfg().Type == utils.MetaInternal { // in case of internal recreate the db using the new config
 		for key, itm := range db.oldDBCfg.Items {
 			if db.cfg.DataDbCfg().Items[key].Limit != itm.Limit &&
 				db.cfg.DataDbCfg().Items[key].StaticTTL != itm.StaticTTL &&

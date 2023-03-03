@@ -40,7 +40,7 @@ func TestRalsCoverage(t *testing.T) {
 	cfg.ThresholdSCfg().Enabled = true
 	server := cores.NewServer(nil)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	cfg.StorDbCfg().Type = utils.Internal
+	cfg.StorDbCfg().Type = utils.MetaInternal
 	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan rpcclient.ClientConnector, 1), srvDep)
 	ralS := NewRalService(cfg, chS, server,
 		make(chan rpcclient.ClientConnector, 1),
