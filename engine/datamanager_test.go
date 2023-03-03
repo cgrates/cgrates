@@ -5773,3 +5773,484 @@ func TestDMSetResourceProfileErr(t *testing.T) {
 	}
 
 }
+
+func TestDMRemoveResourceProfileNilDm(t *testing.T) {
+
+	var dm *DataManager
+
+	if err := dm.RemoveResourceProfile(context.Background(), utils.CGRateSorg, "RSP1", false); err != utils.ErrNoDatabaseConn {
+		t.Errorf("Expected error <%v>, received error <%v>", utils.ErrNoDatabaseConn, err)
+	}
+
+}
+
+func TestDMRemoveResourceProfileGetResourceProfileErr(t *testing.T) {
+
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	data := &DataDBMock{
+		GetResourceProfileDrvF: func(ctx *context.Context, tnt, id string) (*ResourceProfile, error) {
+			return &ResourceProfile{}, utils.ErrNotImplemented
+		},
+	}
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	if err := dm.RemoveResourceProfile(context.Background(), utils.CGRateSorg, "RSP1", false); err != utils.ErrNotImplemented {
+		t.Errorf("Expected error <%v>, received error <%v>", utils.ErrNotImplemented, err)
+	}
+
+}
+
+func TestDMRemoveResourceProfileRemoveResourceProfileDrvErr(t *testing.T) {
+
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	data := &DataDBMock{
+		GetResourceProfileDrvF: func(ctx *context.Context, tnt, id string) (*ResourceProfile, error) {
+			return &ResourceProfile{}, nil
+		},
+		RemoveResourceProfileDrvF: func(ctx *context.Context, tnt, id string) error { return utils.ErrNotImplemented },
+	}
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	if err := dm.RemoveResourceProfile(context.Background(), utils.CGRateSorg, "RSP1", false); err != utils.ErrNotImplemented {
+		t.Errorf("Expected error <%v>, received error <%v>", utils.ErrNotImplemented, err)
+	}
+
+}
+
+func TestDMRemoveResourceProfileOldResErr(t *testing.T) {
+
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	if err := dm.RemoveResourceProfile(context.Background(), utils.CGRateSorg, "RSP1", false); err != utils.ErrNotFound {
+		t.Errorf("Expected error <%v>, received error <%v>", utils.ErrNotFound, err)
+	}
+
+}
+
+func TestDMRemoveResourceProfileRemoveItemFromFilterIndexErr(t *testing.T) {
+
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+	Cache.Clear(nil)
+
+	rp := &ResourceProfile{
+		Tenant:    "cgrates.org",
+		ID:        "RSP1",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 100,
+			}},
+		Limit:        2,
+		ThresholdIDs: []string{"TEST_ACTIONS"},
+
+		UsageTTL:          time.Millisecond,
+		AllocationMessage: "ALLOC",
+	}
+
+	cfg := config.NewDefaultCGRConfig()
+	data := &DataDBMock{
+		GetResourceProfileDrvF: func(ctx *context.Context, tnt, id string) (*ResourceProfile, error) { return rp, nil },
+		RemoveResourceProfileDrvF: func(ctx *context.Context, tnt, id string) error {
+			return nil
+		},
+	}
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	if err := dm.RemoveResourceProfile(context.Background(), utils.CGRateSorg, rp.ID, true); err != utils.ErrNotImplemented {
+		t.Errorf("Expected error <%v>, received error <%v>", utils.ErrNotImplemented, err)
+	}
+
+}
+
+func TestDMRemoveResourceProfileRemoveIndexFiltersItemErr(t *testing.T) {
+
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+	Cache.Clear(nil)
+	rp := &ResourceProfile{
+		Tenant:    "cgrates.org",
+		ID:        "RSP1",
+		FilterIDs: []string{"fltrID"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 100,
+			}},
+		Limit:        2,
+		ThresholdIDs: []string{"TEST_ACTIONS"},
+
+		UsageTTL:          time.Millisecond,
+		AllocationMessage: "ALLOC",
+	}
+
+	cfg := config.NewDefaultCGRConfig()
+	data := &DataDBMock{
+		GetResourceProfileDrvF: func(ctx *context.Context, tnt, id string) (*ResourceProfile, error) { return rp, nil },
+		RemoveResourceProfileDrvF: func(ctx *context.Context, tnt, id string) error {
+			return nil
+		},
+	}
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	if err := dm.RemoveResourceProfile(context.Background(), utils.CGRateSorg, rp.ID, true); err != utils.ErrNotImplemented {
+		t.Errorf("Expected error <%v>, received error <%v>", utils.ErrNotImplemented, err)
+	}
+
+}
+func TestDMRemoveResourceProfileReplicate(t *testing.T) {
+
+	tmp := Cache
+	cfgtmp := config.CgrConfig()
+	defer func() {
+		Cache = tmp
+		config.SetCgrConfig(cfgtmp)
+	}()
+	Cache.Clear(nil)
+
+	rp := &ResourceProfile{
+		Tenant:    "cgrates.org",
+		ID:        "RSP1",
+		FilterIDs: []string{"fltrID"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 100,
+			}},
+		Limit:        2,
+		ThresholdIDs: []string{"TEST_ACTIONS"},
+
+		UsageTTL:          time.Millisecond,
+		AllocationMessage: "ALLOC",
+	}
+
+	cfg := config.NewDefaultCGRConfig()
+	cfg.DataDbCfg().Items[utils.MetaResourceProfile].Replicate = true
+	cfg.DataDbCfg().RplConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
+	config.SetCgrConfig(cfg)
+
+	cc := make(chan birpc.ClientConnector, 1)
+	cc <- &ccMock{
+
+		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+			utils.ReplicatorSv1SetResourceProfile: func(ctx *context.Context, args, reply interface{}) error { return utils.ErrNotImplemented },
+		},
+	}
+
+	cM := NewConnManager(cfg)
+	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.ReplicatorSv1, cc)
+	data := &DataDBMock{
+		GetResourceProfileDrvF: func(ctx *context.Context, tnt, id string) (*ResourceProfile, error) { return rp, nil },
+		RemoveResourceProfileDrvF: func(ctx *context.Context, tnt, id string) error {
+			return nil
+		},
+	}
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	// tests replicate
+	if err := dm.RemoveResourceProfile(context.Background(), utils.CGRateSorg, rp.ID, false); err != utils.ErrNotImplemented {
+		t.Errorf("Expected error <%v>, received error <%v>", utils.ErrNotImplemented, err)
+	}
+
+}
+
+func TestDMHasDataNilDmErr(t *testing.T) {
+
+	var dm *DataManager
+
+	if _, err := dm.HasData("Category", "subj", "cgrates.org"); err != utils.ErrNoDatabaseConn {
+		t.Errorf("Expected error <%v>, received error <%v>", utils.ErrNoDatabaseConn, err)
+	}
+
+}
+
+func TestDMHasDataOK(t *testing.T) {
+
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	fltrTh1 := &Filter{
+		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+		ID:     "FLTR_TH_1",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaString,
+				Element: "~*req.Threshold",
+				Values:  []string{"TH_1"},
+			},
+		},
+	}
+	if err := dm.SetFilter(context.Background(), fltrTh1, true); err != nil {
+		t.Error(err)
+	}
+
+	if has, err := dm.HasData(utils.FilterPrefix, fltrTh1.ID, fltrTh1.Tenant); err != nil {
+		t.Error(err)
+	} else if !has {
+		t.Errorf("Expected to have data")
+	}
+
+}
+
+func TestDMGetRouteProfileCacheGetErr(t *testing.T) {
+
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	if err := Cache.Set(context.Background(), utils.CacheRouteProfiles, utils.ConcatenatedKey(utils.CGRateSorg, "rsrc1"), nil, []string{}, true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+
+	_, err := dm.GetRouteProfile(context.Background(), utils.CGRateSorg, "rsrc1", true, false, utils.NonTransactional)
+	if err != utils.ErrNotFound {
+		t.Errorf("Expected error <%v>, received error <%v>", utils.ErrNotFound, err)
+	}
+}
+
+func TestDMGetRouteProfileNilDmErr(t *testing.T) {
+
+	var dm *DataManager
+
+	_, err := dm.GetRouteProfile(context.Background(), utils.CGRateSorg, "rsrc1", false, false, utils.NonTransactional)
+	if err != utils.ErrNoDatabaseConn {
+		t.Errorf("Expected error <%v>, received error <%v>", utils.ErrNoDatabaseConn, err)
+	}
+}
+
+func TestDMGetRouteProfileSetRouteProfileDrvErr(t *testing.T) {
+
+	tmp := Cache
+	cfgtmp := config.CgrConfig()
+	defer func() {
+		Cache = tmp
+		config.SetCgrConfig(cfgtmp)
+	}()
+	Cache.Clear(nil)
+
+	rp := &RouteProfile{
+
+		Tenant:            "cgrates.org",
+		ID:                "RP_1",
+		FilterIDs:         []string{"fltr_test"},
+		Weights:           utils.DynamicWeights{{}},
+		Sorting:           utils.MetaQOS,
+		SortingParameters: []string{"param"},
+		Routes: []*Route{{
+			ID:             "RT1",
+			FilterIDs:      []string{"fltr1"},
+			AccountIDs:     []string{"acc1"},
+			RateProfileIDs: []string{"rp1"},
+			ResourceIDs:    []string{"res1"},
+			StatIDs:        []string{"stat1"},
+			Weights:        utils.DynamicWeights{{}},
+			Blockers: utils.DynamicBlockers{
+				{
+					Blocker: true,
+				},
+			},
+			RouteParameters: "params",
+		}},
+	}
+
+	cfg := config.NewDefaultCGRConfig()
+	cfg.DataDbCfg().Items[utils.MetaRouteProfiles].Remote = true
+	cfg.DataDbCfg().RmtConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.RemoteConnsCfg)}
+	config.SetCgrConfig(cfg)
+
+	cc := make(chan birpc.ClientConnector, 1)
+	cc <- &ccMock{
+
+		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+			utils.ReplicatorSv1GetRouteProfile: func(ctx *context.Context, args, reply interface{}) error { return nil },
+		},
+	}
+
+	cM := NewConnManager(cfg)
+	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.RemoteConnsCfg), utils.ReplicatorSv1, cc)
+	data := &DataDBMock{
+		GetRouteProfileDrvF: func(ctx *context.Context, tnt, id string) (*RouteProfile, error) { return rp, utils.ErrNotFound },
+		SetRouteProfileDrvF: func(ctx *context.Context, rtPrf *RouteProfile) error { return utils.ErrNotImplemented },
+	}
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	_, err := dm.GetRouteProfile(context.Background(), utils.CGRateSorg, rp.ID, false, false, utils.NonTransactional)
+	if err != utils.ErrNotImplemented {
+		t.Errorf("Expected error <%v>, received error <%v>", utils.ErrNotImplemented, err)
+	}
+}
+
+func TestDMGetRouteProfileCacheWriteErr1(t *testing.T) {
+
+	rp := &RouteProfile{
+
+		Tenant:            "cgrates.org",
+		ID:                "RP_1",
+		FilterIDs:         []string{"fltr_test"},
+		Weights:           utils.DynamicWeights{{}},
+		Sorting:           utils.MetaQOS,
+		SortingParameters: []string{"param"},
+		Routes: []*Route{{
+			ID:             "RT1",
+			FilterIDs:      []string{"fltr1"},
+			AccountIDs:     []string{"acc1"},
+			RateProfileIDs: []string{"rp1"},
+			ResourceIDs:    []string{"res1"},
+			StatIDs:        []string{"stat1"},
+			Weights:        utils.DynamicWeights{{}},
+			Blockers: utils.DynamicBlockers{
+				{
+					Blocker: true,
+				},
+			},
+			RouteParameters: "params",
+		}},
+	}
+
+	tmp := Cache
+	cfgtmp := config.CgrConfig()
+	defer func() {
+		Cache = tmp
+		config.SetCgrConfig(cfgtmp)
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	cfg.CacheCfg().ReplicationConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
+	cfg.CacheCfg().Partitions[utils.CacheRouteProfiles].Replicate = true
+	config.SetCgrConfig(cfg)
+
+	cc := make(chan birpc.ClientConnector, 1)
+	cc <- &ccMock{
+
+		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply interface{}) error {
+
+				return utils.ErrNotImplemented
+			},
+		},
+	}
+
+	cM := NewConnManager(cfg)
+	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.CacheSv1, cc)
+
+	data := &DataDBMock{
+		GetRouteProfileDrvF: func(ctx *context.Context, tnt, id string) (*RouteProfile, error) { return rp, utils.ErrNotFound },
+	}
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	Cache = NewCacheS(cfg, dm, connMgr, nil)
+
+	_, err := dm.GetRouteProfile(context.Background(), utils.CGRateSorg, rp.ID, false, true, utils.NonTransactional)
+	if err != utils.ErrNotImplemented {
+		t.Errorf("Expected error <%v>, received error <%v>", utils.ErrNotImplemented, err)
+	}
+}
+
+func TestDMGetRouteProfileCacheWriteErr2(t *testing.T) {
+
+	tmp := Cache
+	cfgtmp := config.CgrConfig()
+	defer func() {
+		Cache = tmp
+		config.SetCgrConfig(cfgtmp)
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	cfg.CacheCfg().ReplicationConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
+	cfg.CacheCfg().Partitions[utils.CacheRouteProfiles].Replicate = true
+	config.SetCgrConfig(cfg)
+
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+
+	cc := make(chan birpc.ClientConnector, 1)
+	cc <- &ccMock{
+
+		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply interface{}) error { return utils.ErrNotImplemented },
+		},
+	}
+
+	cM := NewConnManager(cfg)
+	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.CacheSv1, cc)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	rp := &RouteProfile{
+
+		Tenant:            "cgrates.org",
+		ID:                "RP_1",
+		FilterIDs:         []string{"fltr_test"},
+		Weights:           utils.DynamicWeights{{}},
+		Sorting:           utils.MetaQOS,
+		SortingParameters: []string{"param"},
+		Routes: []*Route{{
+			ID:             "RT1",
+			FilterIDs:      []string{"fltr1"},
+			AccountIDs:     []string{"acc1"},
+			RateProfileIDs: []string{"rp1"},
+			ResourceIDs:    []string{"res1"},
+			StatIDs:        []string{"stat1"},
+			Weights:        utils.DynamicWeights{{}},
+			Blockers: utils.DynamicBlockers{
+				{
+					Blocker: true,
+				},
+			},
+			RouteParameters: "params",
+		}},
+	}
+
+	if err := dm.dataDB.SetRouteProfileDrv(context.Background(), rp); err != nil {
+		t.Error(err)
+	}
+
+	Cache = NewCacheS(cfg, dm, cM, nil)
+
+	if _, err := dm.GetRouteProfile(context.Background(), utils.CGRateSorg, rp.ID, false, true, utils.NonTransactional); err != utils.ErrNotImplemented {
+		t.Errorf("Expected error <%v>, received error <%v>", utils.ErrNotImplemented, err)
+	}
+
+}
