@@ -1672,7 +1672,7 @@ func TestConfigSanityRegistrarCDispatcher(t *testing.T) {
 func TestConfigSanityStorDB(t *testing.T) {
 	cfg = NewDefaultCGRConfig()
 	cfg.storDbCfg = &StorDbCfg{
-		Type: utils.Postgres,
+		Type: utils.MetaPostgres,
 		Opts: &StorDBOpts{
 			PgSSLMode: "wrongSSLMode",
 		},

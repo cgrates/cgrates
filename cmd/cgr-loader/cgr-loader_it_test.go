@@ -50,7 +50,7 @@ var (
 func TestLoadConfig(t *testing.T) {
 	// DataDb
 	*cfgPath = path.Join(*dataDir, "conf", "samples", "tutmongo")
-	*dataDBType = utils.Meta + utils.Redis
+	*dataDBType = utils.MetaRedis
 	*dataDBHost = "localhost"
 	*dataDBPort = "2012"
 	*dataDBName = "100"
@@ -59,7 +59,7 @@ func TestLoadConfig(t *testing.T) {
 	*dbRedisSentinel = "sentinel1"
 	*dbRedisConnectTimeout = 5 * time.Second
 	expDBcfg := &config.DataDbCfg{
-		Type:     utils.Redis,
+		Type:     utils.MetaRedis,
 		Host:     "localhost",
 		Port:     "2012",
 		Name:     "100",
@@ -87,7 +87,7 @@ func TestLoadConfig(t *testing.T) {
 	*storDBUser = "10"
 	*storDBPasswd = "toor"
 	expStorDB := &config.StorDbCfg{
-		Type:                utils.Postgres,
+		Type:                utils.MetaPostgres,
 		Host:                "localhost",
 		Port:                "2012",
 		Name:                "cgrates2",

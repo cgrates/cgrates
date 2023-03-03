@@ -1124,7 +1124,7 @@ func (rs *RedisStorage) RemoveDispatcherHostDrv(tenant, id string) (err error) {
 }
 
 func (rs *RedisStorage) GetStorageType() string {
-	return utils.Redis
+	return utils.MetaRedis
 }
 
 func (rs *RedisStorage) GetItemLoadIDsDrv(itemIDPrefix string) (loadIDs map[string]int64, err error) {

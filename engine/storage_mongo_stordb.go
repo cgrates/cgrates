@@ -1598,5 +1598,5 @@ func (ms *MongoStorage) RemoveVersions(vrs Versions) (err error) {
 }
 
 func (ms *MongoStorage) GetStorageType() string {
-	return utils.Mongo
+	return utils.MetaMongo
 }

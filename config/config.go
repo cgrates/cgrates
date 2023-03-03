@@ -50,23 +50,23 @@ var (
 
 func newDbDefaults() dbDefaults {
 	deflt := dbDefaults{
-		utils.MySQL: map[string]string{
+		utils.MetaMySQL: map[string]string{
 			"DbName": "cgrates",
 			"DbPort": "3306",
 		},
-		utils.Postgres: map[string]string{
+		utils.MetaPostgres: map[string]string{
 			"DbName": "cgrates",
 			"DbPort": "5432",
 		},
-		utils.Mongo: map[string]string{
+		utils.MetaMongo: map[string]string{
 			"DbName": "cgrates",
 			"DbPort": "27017",
 		},
-		utils.Redis: map[string]string{
+		utils.MetaRedis: map[string]string{
 			"DbName": "10",
 			"DbPort": "6379",
 		},
-		utils.Internal: map[string]string{
+		utils.MetaInternal: map[string]string{
 			"DbName": "internal",
 			"DbPort": "internal",
 		},

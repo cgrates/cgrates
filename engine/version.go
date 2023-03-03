@@ -123,17 +123,17 @@ func OverwriteDBVersions(storage Storage) (err error) {
 func (vers Versions) Compare(curent Versions, storType string, isDataDB bool) string {
 	var message map[string]string
 	switch storType {
-	case utils.Mongo:
+	case utils.MetaMongo:
 		if isDataDB {
 			message = dataDBVers
 		} else {
 			message = storDBVers
 		}
-	case utils.Internal:
+	case utils.MetaInternal:
 		message = allVers
-	case utils.Postgres, utils.MySQL:
+	case utils.MetaPostgres, utils.MetaMySQL:
 		message = storDBVers
-	case utils.Redis:
+	case utils.MetaRedis:
 		message = dataDBVers
 	}
 	for subsis, reason := range message {
@@ -217,16 +217,16 @@ func CurrentAllDBVersions() Versions {
 // CurrentDBVersions returns versions based on dbType
 func CurrentDBVersions(storType string, isDataDB bool) Versions {
 	switch storType {
-	case utils.Mongo:
+	case utils.MetaMongo:
 		if isDataDB {
 			return CurrentDataDBVersions()
 		}
 		return CurrentStorDBVersions()
-	case utils.Internal:
+	case utils.MetaInternal:
 		return CurrentAllDBVersions()
-	case utils.Postgres, utils.MySQL:
+	case utils.MetaPostgres, utils.MetaMySQL:
 		return CurrentStorDBVersions()
-	case utils.Redis:
+	case utils.MetaRedis:
 		return CurrentDataDBVersions()
 	}
 	return nil

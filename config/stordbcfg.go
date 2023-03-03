@@ -92,7 +92,11 @@ func (dbcfg *StorDbCfg) loadFromJSONCfg(jsnDbCfg *DbJsonCfg) (err error) {
 		return nil
 	}
 	if jsnDbCfg.Db_type != nil {
-		dbcfg.Type = strings.TrimPrefix(*jsnDbCfg.Db_type, "*")
+		if !strings.HasPrefix(*jsnDbCfg.Db_type, "*") {
+			dbcfg.Type = fmt.Sprintf("*%v", *jsnDbCfg.Db_type)
+		} else {
+			dbcfg.Type = *jsnDbCfg.Db_type
+		}
 	}
 	if jsnDbCfg.Db_host != nil {
 		dbcfg.Host = *jsnDbCfg.Db_host

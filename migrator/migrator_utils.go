@@ -41,15 +41,15 @@ func NewMigratorDataDB(db_type, host, port, name, user, pass,
 	}
 	dm := engine.NewDataManager(dbCon, cacheCfg, nil)
 	switch db_type {
-	case utils.Redis:
+	case utils.MetaRedis:
 		db = newRedisMigrator(dm)
-	case utils.Mongo:
+	case utils.MetaMongo:
 		db = newMongoMigrator(dm)
-	case utils.Internal:
+	case utils.MetaInternal:
 		db = newInternalMigrator(dm)
 	default:
 		err = fmt.Errorf("unknown db '%s' valid options are '%s' or '%s or '%s'",
-			db_type, utils.Redis, utils.Mongo, utils.Internal)
+			db_type, utils.MetaRedis, utils.MetaMongo, utils.MetaInternal)
 	}
 	return
 }
@@ -63,17 +63,17 @@ func NewMigratorStorDB(db_type, host, port, name, user, pass, marshaler string,
 		return
 	}
 	switch db_type {
-	case utils.Mongo:
+	case utils.MetaMongo:
 		db = newMongoStorDBMigrator(storDb)
-	case utils.MySQL:
+	case utils.MetaMySQL:
 		db = newMigratorSQL(storDb)
-	case utils.Postgres:
+	case utils.MetaPostgres:
 		db = newMigratorSQL(storDb)
-	case utils.Internal:
+	case utils.MetaInternal:
 		db = newInternalStorDBMigrator(storDb)
 	default:
 		err = fmt.Errorf("Unknown db '%s' valid options are [%s, %s, %s, %s]",
-			db_type, utils.MySQL, utils.Mongo, utils.Postgres, utils.Internal)
+			db_type, utils.MetaMySQL, utils.MetaMongo, utils.MetaPostgres, utils.MetaInternal)
 	}
 	return
 }

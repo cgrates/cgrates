@@ -124,13 +124,13 @@ func testAcc2ITFlush(t *testing.T) {
 	if err := engine.SetDBVersions(acc2Migrator.dmIN.DataManager().DataDB()); err != nil {
 		t.Error("Error  ", err.Error())
 	}
-	if acc2Migrator.dmOut.DataManager().DataDB().GetStorageType() != utils.Redis {
+	if acc2Migrator.dmOut.DataManager().DataDB().GetStorageType() != utils.MetaRedis {
 		t.Errorf("Unexpected datadb type : %+v", acc2Migrator.dmOut.DataManager().DataDB().GetStorageType())
 	}
-	if acc2Migrator.storDBIn.StorDB().GetStorageType() != utils.Internal {
+	if acc2Migrator.storDBIn.StorDB().GetStorageType() != utils.MetaInternal {
 		t.Errorf("Unexpected datadb type : %+v", acc2Migrator.storDBIn.StorDB().GetStorageType())
 	}
-	if acc2Migrator.storDBOut.StorDB().GetStorageType() != utils.Internal {
+	if acc2Migrator.storDBOut.StorDB().GetStorageType() != utils.MetaInternal {
 		t.Errorf("Unexpected datadb type : %+v", acc2Migrator.storDBOut.StorDB().GetStorageType())
 	}
 }

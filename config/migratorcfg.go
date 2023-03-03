@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/cgrates/cgrates/utils"
@@ -49,7 +50,11 @@ func (mg *MigratorCgrCfg) loadFromJSONCfg(jsnCfg *MigratorCfgJson) (err error) {
 		return
 	}
 	if jsnCfg.Out_dataDB_type != nil {
-		mg.OutDataDBType = strings.TrimPrefix(*jsnCfg.Out_dataDB_type, "*")
+		if !strings.HasPrefix(*jsnCfg.Out_dataDB_type, "*") {
+			mg.OutDataDBType = fmt.Sprintf("*%v", *jsnCfg.Out_dataDB_type)
+		} else {
+			mg.OutDataDBType = *jsnCfg.Out_dataDB_type
+		}
 	}
 	if jsnCfg.Out_dataDB_host != nil {
 		mg.OutDataDBHost = *jsnCfg.Out_dataDB_host
@@ -70,7 +75,11 @@ func (mg *MigratorCgrCfg) loadFromJSONCfg(jsnCfg *MigratorCfgJson) (err error) {
 		mg.OutDataDBEncoding = strings.TrimPrefix(*jsnCfg.Out_dataDB_encoding, "*")
 	}
 	if jsnCfg.Out_storDB_type != nil {
-		mg.OutStorDBType = *jsnCfg.Out_storDB_type
+		if !strings.HasPrefix(*jsnCfg.Out_storDB_type, "*") {
+			mg.OutStorDBType = fmt.Sprintf("*%v", *jsnCfg.Out_storDB_type)
+		} else {
+			mg.OutStorDBType = *jsnCfg.Out_storDB_type
+		}
 	}
 	if jsnCfg.Out_storDB_host != nil {
 		mg.OutStorDBHost = *jsnCfg.Out_storDB_host
