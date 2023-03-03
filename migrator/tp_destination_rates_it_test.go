@@ -96,12 +96,12 @@ func testTpDstRtITConnect(t *testing.T) {
 
 func testTpDstRtITFlush(t *testing.T) {
 	if err := tpDstRtMigrator.storDBIn.StorDB().Flush(
-		path.Join(tpDstRtCfgIn.DataFolderPath, "storage", tpDstRtCfgIn.StorDbCfg().Type)); err != nil {
+		path.Join(tpDstRtCfgIn.DataFolderPath, "storage", dbPath(tpDstRtCfgIn.StorDbCfg().Type))); err != nil {
 		t.Error(err)
 	}
 
 	if err := tpDstRtMigrator.storDBOut.StorDB().Flush(
-		path.Join(tpDstRtCfgOut.DataFolderPath, "storage", tpDstRtCfgOut.StorDbCfg().Type)); err != nil {
+		path.Join(tpDstRtCfgOut.DataFolderPath, "storage", dbPath(tpDstRtCfgOut.StorDbCfg().Type))); err != nil {
 		t.Error(err)
 	}
 }

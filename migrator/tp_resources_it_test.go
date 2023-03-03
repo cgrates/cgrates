@@ -98,12 +98,12 @@ func testTpResITConnect(t *testing.T) {
 
 func testTpResITFlush(t *testing.T) {
 	if err := tpResMigrator.storDBIn.StorDB().Flush(
-		path.Join(tpResCfgIn.DataFolderPath, "storage", tpResCfgIn.StorDbCfg().Type)); err != nil {
+		path.Join(tpResCfgIn.DataFolderPath, "storage", dbPath(tpResCfgIn.StorDbCfg().Type))); err != nil {
 		t.Error(err)
 	}
 
 	if err := tpResMigrator.storDBOut.StorDB().Flush(
-		path.Join(tpResCfgOut.DataFolderPath, "storage", tpResCfgOut.StorDbCfg().Type)); err != nil {
+		path.Join(tpResCfgOut.DataFolderPath, "storage", dbPath(tpResCfgOut.StorDbCfg().Type))); err != nil {
 		t.Error(err)
 	}
 }

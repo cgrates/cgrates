@@ -26,6 +26,7 @@ import (
 	"log"
 	"path"
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 
@@ -42,6 +43,9 @@ var (
 	accMigrator *Migrator
 	accAction   string
 	dataDir     = flag.String("data_dir", "/usr/share/cgrates", "CGR data dir path here")
+	dbPath      = func(dbType string) string {
+		return strings.TrimPrefix(dbType, "*")
+	}
 	sTestsAccIT = []func(t *testing.T){
 		testAccITConnect,
 		testAccITFlush,
