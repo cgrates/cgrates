@@ -181,7 +181,7 @@ func (iDB *InternalDB) RemoveVersions(vrs Versions) (err error) {
 
 // GetStorageType returns the storage type
 func (iDB *InternalDB) GetStorageType() string {
-	return utils.Internal
+	return utils.MetaInternal
 }
 
 // IsDBEmpty returns true if the cache is empty

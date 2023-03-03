@@ -64,7 +64,7 @@ func TestRalsReload(t *testing.T) {
 	srvMngr := servmanager.NewServiceManager(cfg, shdChan, shdWg, nil)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	db := NewDataDBService(cfg, nil, srvDep)
-	cfg.StorDbCfg().Type = utils.Internal
+	cfg.StorDbCfg().Type = utils.MetaInternal
 	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan rpcclient.ClientConnector, 1), srvDep)
 	stordb := NewStorDBService(cfg, srvDep)
 	schS := NewSchedulerService(cfg, db, chS, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil, anz, srvDep)
@@ -157,7 +157,7 @@ func TestRalsReload2(t *testing.T) {
 	cfg.ThresholdSCfg().Enabled = true
 	server := cores.NewServer(nil)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	cfg.StorDbCfg().Type = utils.Internal
+	cfg.StorDbCfg().Type = utils.MetaInternal
 	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan rpcclient.ClientConnector, 1), srvDep)
 	ralS := NewRalService(cfg, chS, server,
 		make(chan rpcclient.ClientConnector, 1),

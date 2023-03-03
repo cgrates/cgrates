@@ -42,7 +42,7 @@ func TestStorDBServiceCoverage(t *testing.T) {
 		t.Errorf("Expected service to be running")
 	}
 	srv.oldDBCfg = &config.StorDbCfg{
-		Type:     utils.Internal,
+		Type:     utils.MetaInternal,
 		Host:     "test_host",
 		Port:     "test_port",
 		Name:     "test_name",
