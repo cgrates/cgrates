@@ -159,7 +159,7 @@ func main() {
 
 	// inDataDB
 	if *inDataDBType != dfltCfg.DataDbCfg().Type {
-		mgrCfg.DataDbCfg().Type = strings.TrimPrefix(*inDataDBType, utils.Meta)
+		mgrCfg.DataDbCfg().Type = *inDataDBType
 	}
 	if *inDataDBHost != dfltCfg.DataDbCfg().Host {
 		mgrCfg.DataDbCfg().Host = *inDataDBHost
@@ -229,7 +229,7 @@ func main() {
 			mgrCfg.MigratorCgrCfg().OutDataDBType = mgrCfg.DataDbCfg().Type
 		}
 	} else {
-		mgrCfg.MigratorCgrCfg().OutDataDBType = strings.TrimPrefix(*outDataDBType, utils.Meta)
+		mgrCfg.MigratorCgrCfg().OutDataDBType = *outDataDBType
 	}
 
 	if *outDataDBHost == utils.MetaDataDB {
@@ -308,7 +308,7 @@ func main() {
 
 	// inStorDB
 	if *inStorDBType != dfltCfg.StorDbCfg().Type {
-		mgrCfg.StorDbCfg().Type = strings.TrimPrefix(*inStorDBType, utils.Meta)
+		mgrCfg.StorDbCfg().Type = *inStorDBType
 	}
 	if *inStorDBHost != dfltCfg.StorDbCfg().Host {
 		mgrCfg.StorDbCfg().Host = *inStorDBHost
@@ -332,7 +332,7 @@ func main() {
 			mgrCfg.MigratorCgrCfg().OutStorDBType = mgrCfg.StorDbCfg().Type
 		}
 	} else {
-		mgrCfg.MigratorCgrCfg().OutStorDBType = strings.TrimPrefix(*outStorDBType, utils.Meta)
+		mgrCfg.MigratorCgrCfg().OutStorDBType = *outStorDBType
 	}
 	if *outStorDBHost == utils.MetaStorDB {
 		if dfltCfg.MigratorCgrCfg().OutStorDBHost == mgrCfg.MigratorCgrCfg().OutStorDBHost {
