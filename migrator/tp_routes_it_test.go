@@ -95,12 +95,12 @@ func testTpSplITConnect(t *testing.T) {
 
 func testTpSplITFlush(t *testing.T) {
 	if err := tpSplMigrator.storDBIn.StorDB().Flush(
-		path.Join(tpSplCfgIn.DataFolderPath, "storage", tpSplCfgIn.StorDbCfg().Type)); err != nil {
+		path.Join(tpSplCfgIn.DataFolderPath, "storage", dbPath(tpSplCfgIn.StorDbCfg().Type))); err != nil {
 		t.Error(err)
 	}
 
 	if err := tpSplMigrator.storDBOut.StorDB().Flush(
-		path.Join(tpSplCfgOut.DataFolderPath, "storage", tpSplCfgOut.StorDbCfg().Type)); err != nil {
+		path.Join(tpSplCfgOut.DataFolderPath, "storage", dbPath(tpSplCfgOut.StorDbCfg().Type))); err != nil {
 		t.Error(err)
 	}
 }

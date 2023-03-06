@@ -2003,7 +2003,7 @@ func testStorDBitCRUDSMCosts2(t *testing.T) {
 }
 
 func testStorDBitFlush(t *testing.T) {
-	if err := storDB.Flush(path.Join(storDBCfg.DataFolderPath, "storage", storDBCfg.StorDbCfg().Type)); err != nil {
+	if err := storDB.Flush(path.Join(storDBCfg.DataFolderPath, "storage", dbPath(storDBCfg.StorDbCfg().Type))); err != nil {
 		t.Error(err)
 	}
 }
