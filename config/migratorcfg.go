@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/cgrates/birpc/context"
@@ -52,7 +53,12 @@ func (mg *MigratorCgrCfg) loadFromJSONCfg(jsnCfg *MigratorCfgJson) (err error) {
 		return
 	}
 	if jsnCfg.Out_dataDB_type != nil {
-		mg.OutDataDBType = strings.TrimPrefix(*jsnCfg.Out_dataDB_type, "*")
+
+		if !strings.HasPrefix(*jsnCfg.Out_dataDB_type, "*") {
+			mg.OutDataDBType = fmt.Sprintf("*%v", *jsnCfg.Out_dataDB_type)
+		} else {
+			mg.OutDataDBType = *jsnCfg.Out_dataDB_type
+		}
 	}
 	if jsnCfg.Out_dataDB_host != nil {
 		mg.OutDataDBHost = *jsnCfg.Out_dataDB_host

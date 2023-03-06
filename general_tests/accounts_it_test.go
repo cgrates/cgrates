@@ -126,7 +126,7 @@ func testV1AccGetAccountBeforeSet(t *testing.T) {
 
 func testV1AccLoadTarrifPlans(t *testing.T) {
 	caching := utils.MetaReload
-	if accCfg.DataDbCfg().Type == utils.Internal {
+	if accCfg.DataDbCfg().Type == utils.MetaInternal {
 		caching = utils.MetaNone
 	}
 	var reply string

@@ -129,7 +129,7 @@ func testExpRPCConn(t *testing.T) {
 
 func testExpLoadTPFromFolder(t *testing.T) {
 	caching := utils.MetaReload
-	if expCfg.DataDbCfg().Type == utils.Internal {
+	if expCfg.DataDbCfg().Type == utils.MetaInternal {
 		caching = utils.MetaNone
 	}
 	var reply string
@@ -207,7 +207,7 @@ func testExpCreatDirectoryWithTariffplan(t *testing.T) {
 
 func testExpLoadTPFromExported(t *testing.T) {
 	caching := utils.MetaReload
-	if expCfg.DataDbCfg().Type == utils.Internal {
+	if expCfg.DataDbCfg().Type == utils.MetaInternal {
 		caching = utils.MetaNone
 	}
 	var reply string

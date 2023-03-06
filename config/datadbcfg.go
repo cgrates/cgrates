@@ -31,15 +31,15 @@ import (
 func defaultDBPort(dbType, port string) string {
 	if port == utils.MetaDynamic {
 		switch dbType {
-		case utils.MySQL:
+		case utils.MetaMySQL:
 			port = "3306"
-		case utils.Postgres:
+		case utils.MetaPostgres:
 			port = "5432"
-		case utils.Mongo:
+		case utils.MetaMongo:
 			port = "27017"
-		case utils.Redis:
+		case utils.MetaRedis:
 			port = "6379"
-		case utils.Internal:
+		case utils.MetaInternal:
 			port = "internal"
 		}
 	}
@@ -91,7 +91,7 @@ func (dbcfg *DataDbCfg) Load(ctx *context.Context, jsnCfg ConfigDB, cfg *CGRConf
 	}
 	// in case of internalDB we need to disable the cache
 	// so we enforce it here
-	if cfg.dataDbCfg.Type == utils.Internal {
+	if cfg.dataDbCfg.Type == utils.MetaInternal {
 		// overwrite only DataDBPartitions and leave other unmodified ( e.g. *diameter_messages, *closed_sessions, etc... )
 		for key := range utils.DataDBPartitions {
 			if _, has := cfg.cacheCfg.Partitions[key]; has {
@@ -169,7 +169,11 @@ func (dbcfg *DataDbCfg) loadFromJSONCfg(jsnDbCfg *DbJsonCfg) (err error) {
 		return nil
 	}
 	if jsnDbCfg.Db_type != nil {
-		dbcfg.Type = strings.TrimPrefix(*jsnDbCfg.Db_type, "*")
+		if !strings.HasPrefix(*jsnDbCfg.Db_type, "*") {
+			dbcfg.Type = fmt.Sprintf("*%v", *jsnDbCfg.Db_type)
+		} else {
+			dbcfg.Type = *jsnDbCfg.Db_type
+		}
 	}
 	if jsnDbCfg.Db_host != nil {
 		dbcfg.Host = *jsnDbCfg.Db_host
@@ -303,7 +307,7 @@ func (dbcfg DataDbCfg) AsMapInterface(string) interface{} {
 		utils.RedisCACertificateCfg:      dbcfg.Opts.RedisCACertificate,
 	}
 	mp := map[string]interface{}{
-		utils.DataDbTypeCfg:          utils.Meta + dbcfg.Type,
+		utils.DataDbTypeCfg:          dbcfg.Type,
 		utils.DataDbHostCfg:          dbcfg.Host,
 		utils.DataDbNameCfg:          dbcfg.Name,
 		utils.DataDbUserCfg:          dbcfg.User,

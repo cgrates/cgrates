@@ -1575,7 +1575,7 @@ func TestConfigSanityAnalyzer(t *testing.T) {
 
 func TestConfigSanityDataDB(t *testing.T) {
 	cfg = NewDefaultCGRConfig()
-	cfg.dataDbCfg.Type = utils.Internal
+	cfg.dataDbCfg.Type = utils.MetaInternal
 
 	cfg.cacheCfg = &CacheCfg{
 		Partitions: map[string]*CacheParamCfg{},
@@ -1953,7 +1953,7 @@ func TestCGRConfigcheckConfigSanityCacheSErr(t *testing.T) {
 		},
 	}
 	cfg.dataDbCfg = &DataDbCfg{
-		Type: utils.Internal,
+		Type: utils.MetaInternal,
 	}
 
 	expErr := "<CacheS> *resource_profiles needs to be 0 when DataBD is *internal, received : 1"

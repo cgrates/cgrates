@@ -27,7 +27,7 @@ import (
 
 func TestMigratorCgrCfgloadFromJsonCfg(t *testing.T) {
 	cfgJSON := &MigratorCfgJson{
-		Out_dataDB_type:     utils.StringPointer(utils.Redis),
+		Out_dataDB_type:     utils.StringPointer(utils.MetaRedis),
 		Out_dataDB_host:     utils.StringPointer("127.0.0.1"),
 		Out_dataDB_port:     utils.StringPointer("6379"),
 		Out_dataDB_name:     utils.StringPointer("10"),
@@ -40,7 +40,7 @@ func TestMigratorCgrCfgloadFromJsonCfg(t *testing.T) {
 		},
 	}
 	expected := &MigratorCgrCfg{
-		OutDataDBType:     utils.Redis,
+		OutDataDBType:     utils.MetaRedis,
 		OutDataDBHost:     "127.0.0.1",
 		OutDataDBPort:     "6379",
 		OutDataDBName:     "10",
@@ -86,7 +86,7 @@ func TestMigratorCgrCfgAsMapInterface(t *testing.T) {
 	},
 }`
 	eMap := map[string]interface{}{
-		utils.OutDataDBTypeCfg:     "redis",
+		utils.OutDataDBTypeCfg:     "*redis",
 		utils.OutDataDBHostCfg:     "127.0.0.19",
 		utils.OutDataDBPortCfg:     "8865",
 		utils.OutDataDBNameCfg:     "12",
@@ -129,7 +129,7 @@ func TestMigratorCgrCfgAsMapInterface1(t *testing.T) {
 		},
 	}`
 	eMap := map[string]interface{}{
-		utils.OutDataDBTypeCfg:     "redis",
+		utils.OutDataDBTypeCfg:     "*redis",
 		utils.OutDataDBHostCfg:     "127.0.0.1",
 		utils.OutDataDBPortCfg:     "6379",
 		utils.OutDataDBNameCfg:     "10",
@@ -168,7 +168,7 @@ func TestMigratorCgrCfgAsMapInterface2(t *testing.T) {
 		"migrator": {},
 	}`
 	eMap := map[string]interface{}{
-		utils.OutDataDBTypeCfg:     "redis",
+		utils.OutDataDBTypeCfg:     "*redis",
 		utils.OutDataDBHostCfg:     "127.0.0.1",
 		utils.OutDataDBPortCfg:     "6379",
 		utils.OutDataDBNameCfg:     "10",
@@ -205,7 +205,7 @@ func TestMigratorCgrCfgAsMapInterface2(t *testing.T) {
 
 func TestMigratorCgrCfgClone(t *testing.T) {
 	sa := &MigratorCgrCfg{
-		OutDataDBType:     utils.Redis,
+		OutDataDBType:     utils.MetaRedis,
 		OutDataDBHost:     "127.0.0.1",
 		OutDataDBPort:     "6379",
 		OutDataDBName:     "10",

@@ -106,7 +106,7 @@ func testV1RtStatsRpcConn(t *testing.T) {
 
 func testV1RtStatsFromFolder(t *testing.T) {
 	caching := utils.MetaReload
-	if RtStatsSv1Cfg.DataDbCfg().Type == utils.Internal {
+	if RtStatsSv1Cfg.DataDbCfg().Type == utils.MetaInternal {
 		caching = utils.MetaNone
 	}
 	var reply string

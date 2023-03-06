@@ -48,7 +48,7 @@ func TestDataDBCoverage(t *testing.T) {
 		t.Errorf("Expected service to be running")
 	}
 	oldcfg := &config.DataDbCfg{
-		Type: utils.Mongo,
+		Type: utils.MetaMongo,
 		Host: "127.0.0.1",
 		Port: "27017",
 		Name: "10",

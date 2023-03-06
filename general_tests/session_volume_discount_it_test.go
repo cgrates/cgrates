@@ -126,7 +126,7 @@ func testSessVolDiscApierRpcConn(t *testing.T) {
 
 func testSessVolDiscLoadersLoad(t *testing.T) {
 	caching := utils.MetaReload
-	if tSessVolDiscCfg.DataDbCfg().Type == utils.Internal {
+	if tSessVolDiscCfg.DataDbCfg().Type == utils.MetaInternal {
 		caching = utils.MetaNone
 	}
 	var reply string

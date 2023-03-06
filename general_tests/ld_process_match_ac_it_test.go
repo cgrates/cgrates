@@ -129,7 +129,7 @@ func testLdPrMatchAcRPCConn(t *testing.T) {
 
 func testLdPrMatchAcLoadTP(t *testing.T) {
 	caching := utils.MetaReload
-	if testLdPrMatchAcCfg.DataDbCfg().Type == utils.Internal {
+	if testLdPrMatchAcCfg.DataDbCfg().Type == utils.MetaInternal {
 		caching = utils.MetaNone
 	}
 	var reply string

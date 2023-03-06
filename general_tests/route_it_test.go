@@ -113,7 +113,7 @@ func testV1SplSRpcConn(t *testing.T) {
 
 func testV1SplSLoadTarrifPlans(t *testing.T) {
 	caching := utils.MetaReload
-	if splSv1Cfg.DataDbCfg().Type == utils.Internal {
+	if splSv1Cfg.DataDbCfg().Type == utils.MetaInternal {
 		caching = utils.MetaNone
 	}
 	var reply string

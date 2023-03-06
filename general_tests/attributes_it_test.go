@@ -113,7 +113,7 @@ func testAttributeSRPCConn(t *testing.T) {
 
 func testAttributeSLoadFromFolder(t *testing.T) {
 	caching := utils.MetaReload
-	if attrCfg.DataDbCfg().Type == utils.Internal {
+	if attrCfg.DataDbCfg().Type == utils.MetaInternal {
 		caching = utils.MetaNone
 	}
 	var replyLD string

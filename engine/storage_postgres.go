@@ -50,5 +50,5 @@ func (poS *PostgresStorage) SetVersions(vrs Versions, overwrite bool) (err error
 }
 
 func (poS *PostgresStorage) GetStorageType() string {
-	return utils.Postgres
+	return utils.MetaPostgres
 }

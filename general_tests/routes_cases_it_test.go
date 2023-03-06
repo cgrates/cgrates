@@ -217,7 +217,7 @@ func testV1RtsCaseRpcConn(t *testing.T) {
 
 func testV1RtsCaseFromFolder(t *testing.T) {
 	caching := utils.MetaReload
-	if rtsCaseSv1Cfg.DataDbCfg().Type == utils.Internal {
+	if rtsCaseSv1Cfg.DataDbCfg().Type == utils.MetaInternal {
 		caching = utils.MetaNone
 	}
 	var reply string

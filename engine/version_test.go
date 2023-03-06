@@ -32,17 +32,17 @@ func TestVersionCompare(t *testing.T) {
 		utils.Attributes: 2, utils.Chargers: 2,
 		utils.CostDetails: 2}
 
-	message1 := y.Compare(x, utils.Mongo, true)
+	message1 := y.Compare(x, utils.MetaMongo, true)
 	if message1 != "cgr-migrator -exec=*accounts" {
 		t.Errorf("Error failed to compare to curent version expected: %s received: %s", "cgr-migrator -exec=*accounts", message1)
 	}
-	message7 := y.Compare(x, utils.Redis, true)
+	message7 := y.Compare(x, utils.MetaRedis, true)
 	if message7 != "cgr-migrator -exec=*accounts" {
 		t.Errorf("Error failed to compare to curent version expected: %s received: %s", "cgr-migrator -exec=*accounts", message7)
 	}
 
 	y[utils.Accounts] = 2
-	message8 := y.Compare(x, utils.Redis, true)
+	message8 := y.Compare(x, utils.MetaRedis, true)
 	if message8 != utils.EmptyString {
 		t.Errorf("Expected %+v, received %+v", utils.EmptyString, message8)
 	}
@@ -59,11 +59,11 @@ func TestCurrentDBVersions(t *testing.T) {
 		utils.ActionProfiles: 1,
 	}
 
-	if vrs := CurrentDBVersions(utils.Mongo, true); !reflect.DeepEqual(expVersDataDB, vrs) {
+	if vrs := CurrentDBVersions(utils.MetaMongo, true); !reflect.DeepEqual(expVersDataDB, vrs) {
 		t.Errorf("Expectred %+v, received %+v", expVersDataDB, vrs)
 	}
 
-	if vrs := CurrentDBVersions(utils.Redis, true); !reflect.DeepEqual(expVersDataDB, vrs) {
+	if vrs := CurrentDBVersions(utils.MetaRedis, true); !reflect.DeepEqual(expVersDataDB, vrs) {
 		t.Errorf("Expectred %+v, received %+v", expVersDataDB, vrs)
 	}
 

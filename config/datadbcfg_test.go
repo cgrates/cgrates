@@ -216,7 +216,7 @@ func TestDataDbCfgloadFromJsonCfgPort(t *testing.T) {
 }`
 	cfg := NewDefaultCGRConfig()
 	expected := DataDbCfg{
-		Type: "mongo",
+		Type: utils.MetaMongo,
 		Opts: &DataDBOpts{},
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
@@ -233,7 +233,7 @@ func TestDataDbCfgloadFromJsonCfgPort(t *testing.T) {
 	}
 }`
 	expected = DataDbCfg{
-		Type: "mongo",
+		Type: utils.MetaMongo,
 		Port: "27017",
 		Opts: &DataDBOpts{},
 	}
@@ -251,7 +251,7 @@ func TestDataDbCfgloadFromJsonCfgPort(t *testing.T) {
 	}
 }`
 	expected = DataDbCfg{
-		Type: "internal",
+		Type: utils.MetaInternal,
 		Port: "internal",
 		Opts: &DataDBOpts{},
 	}
@@ -283,7 +283,7 @@ func TestDataDBRemoteReplication(t *testing.T) {
 	cfg := NewDefaultCGRConfig()
 	dbcfg.Opts = &DataDBOpts{}
 	expected = DataDbCfg{
-		Type:     "redis",
+		Type:     "*redis",
 		Host:     "127.0.0.1",
 		Port:     "6379",
 		Name:     "10",
@@ -311,7 +311,7 @@ func TestDataDBRemoteReplication(t *testing.T) {
 }`
 
 	expected = DataDbCfg{
-		Type:     utils.Internal,
+		Type:     utils.MetaInternal,
 		Host:     "127.0.0.1",
 		Port:     "6379",
 		Name:     "10",
@@ -340,7 +340,7 @@ func TestDataDBRemoteReplication(t *testing.T) {
 }`
 
 	expected = DataDbCfg{
-		Type:     utils.Internal,
+		Type:     utils.MetaInternal,
 		Host:     "127.0.0.1",
 		Port:     "6379",
 		Name:     "10",
@@ -382,7 +382,7 @@ func TestDataDbCfgloadFromJsonCfgItems(t *testing.T) {
 }`
 
 	expected = DataDbCfg{
-		Type:     "redis",
+		Type:     "*redis",
 		Host:     "127.0.0.1",
 		Port:     "6379",
 		Name:     "10",
@@ -430,7 +430,7 @@ func TestDataDbCfgloadFromJsonCfgItems(t *testing.T) {
 		}`
 
 	expected = DataDbCfg{
-		Type:     "redis",
+		Type:     "*redis",
 		Host:     "127.0.0.1",
 		Port:     "6379",
 		Name:     "10",
@@ -483,7 +483,7 @@ func TestDataDbCfgloadFromJsonCfgItems(t *testing.T) {
 		}`
 
 	expected = DataDbCfg{
-		Type:     "redis",
+		Type:     "*redis",
 		Host:     "127.0.0.1",
 		Port:     "6379",
 		Name:     "10",
@@ -872,13 +872,13 @@ func TestDataDbDiffOptsJson(t *testing.T) {
 	}
 }
 func TestDataDbDefaultDBPort(t *testing.T) {
-	port := defaultDBPort(utils.Postgres, utils.MetaDynamic)
+	port := defaultDBPort(utils.MetaPostgres, utils.MetaDynamic)
 	if port != "5432" {
 		t.Errorf("Expected %v \n but received \n %v", "5432", port)
 	}
 }
 func TestDataDbDefaultDBPortMySQL(t *testing.T) {
-	port := defaultDBPort(utils.MySQL, utils.MetaDynamic)
+	port := defaultDBPort(utils.MetaMySQL, utils.MetaDynamic)
 	if port != "3306" {
 		t.Errorf("Expected %v \n but received \n %v", "3306", port)
 	}
