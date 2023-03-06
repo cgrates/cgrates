@@ -111,7 +111,7 @@ func testCDRsPostFailoverRpcConn(t *testing.T) {
 
 func testCDRsPostFailoverLoadTariffPlanFromFolder(t *testing.T) {
 	caching := utils.MetaReload
-	if cdrsPostFailCfg.DataDbCfg().Type == utils.Internal {
+	if cdrsPostFailCfg.DataDbCfg().Type == utils.MetaInternal {
 		caching = utils.MetaNone
 	}
 	var reply string

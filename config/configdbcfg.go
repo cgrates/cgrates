@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 
@@ -55,7 +56,11 @@ func (dbcfg *ConfigDBCfg) loadFromJSONCfg(jsnDbCfg *DbJsonCfg) (err error) {
 		return nil
 	}
 	if jsnDbCfg.Db_type != nil {
-		dbcfg.Type = strings.TrimPrefix(*jsnDbCfg.Db_type, "*")
+		if !strings.HasPrefix(*jsnDbCfg.Db_type, "*") {
+			dbcfg.Type = fmt.Sprintf("*%v", *jsnDbCfg.Db_type)
+		} else {
+			dbcfg.Type = *jsnDbCfg.Db_type
+		}
 	}
 	if jsnDbCfg.Db_host != nil {
 		dbcfg.Host = *jsnDbCfg.Db_host
@@ -118,7 +123,7 @@ func (dbcfg ConfigDBCfg) AsMapInterface(string) interface{} {
 		utils.RedisCACertificateCfg:      dbcfg.Opts.RedisCACertificate,
 	}
 	mp := map[string]interface{}{
-		utils.DataDbTypeCfg: utils.Meta + dbcfg.Type,
+		utils.DataDbTypeCfg: dbcfg.Type,
 		utils.DataDbHostCfg: dbcfg.Host,
 		utils.DataDbNameCfg: dbcfg.Name,
 		utils.DataDbUserCfg: dbcfg.User,

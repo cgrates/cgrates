@@ -41,17 +41,17 @@ func NewMigratorDataDB(db_type, host, port, name, user, pass,
 	dm := engine.NewDataManager(dbCon, cacheCfg, nil)
 	var d MigratorDataDB
 	switch db_type {
-	case utils.Redis:
+	case utils.MetaRedis:
 		d = newRedisMigrator(dm)
-	case utils.Mongo:
+	case utils.MetaMongo:
 		d = newMongoMigrator(dm)
 		db = d.(MigratorDataDB)
-	case utils.Internal:
+	case utils.MetaInternal:
 		d = newInternalMigrator(dm)
 		db = d.(MigratorDataDB)
 	default:
 		err = fmt.Errorf("unknown db '%s' valid options are '%s' or '%s or '%s'",
-			db_type, utils.Redis, utils.Mongo, utils.Internal)
+			db_type, utils.MetaRedis, utils.MetaMongo, utils.MetaInternal)
 	}
 	return d, nil
 }

@@ -134,7 +134,7 @@ func loadConfig() (ldrCfg *config.CGRConfig) {
 	}
 	// Data for DataDB
 	if *dataDBType != dfltCfg.DataDbCfg().Type {
-		ldrCfg.DataDbCfg().Type = strings.TrimPrefix(*dataDBType, utils.Meta)
+		ldrCfg.DataDbCfg().Type = *dataDBType
 	}
 
 	if *dataDBHost != dfltCfg.DataDbCfg().Host {

@@ -119,7 +119,7 @@ func testV1FltrRpcConn(t *testing.T) {
 func testV1FltrLoadTarrifPlans(t *testing.T) {
 
 	caching := utils.MetaReload
-	if fltrCfg.DataDbCfg().Type == utils.Internal {
+	if fltrCfg.DataDbCfg().Type == utils.MetaInternal {
 		caching = utils.MetaNone
 	}
 	var reply string

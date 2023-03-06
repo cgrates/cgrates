@@ -114,7 +114,7 @@ func testTpRpcConn(t *testing.T) {
 // Load the tariff plan, creating accounts and their balances
 func testTpLoadTariffPlanFromFolder(t *testing.T) {
 	caching := utils.MetaReload
-	if tpCfg.DataDbCfg().Type == utils.Internal {
+	if tpCfg.DataDbCfg().Type == utils.MetaInternal {
 		caching = utils.MetaNone
 	}
 	var reply string

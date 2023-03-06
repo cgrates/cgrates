@@ -215,6 +215,7 @@ const (
 	CSV                     = "csv"
 	FWV                     = "fwv"
 	MetaMongo               = "*mongo"
+	MetaRedis               = "*redis"
 	MetaPostgres            = "*postgres"
 	MetaInternal            = "*internal"
 	MetaLocalHost           = "*localhost"

@@ -77,7 +77,7 @@ func TestDataDBReload(t *testing.T) {
 		t.Errorf("Expected service to be running")
 	}
 	oldcfg := &config.DataDbCfg{
-		Type: utils.Mongo,
+		Type: utils.MetaMongo,
 		Host: "127.0.0.1",
 		Port: "27017",
 		Name: "10",
@@ -185,7 +185,7 @@ func TestDataDBReloadBadType(t *testing.T) {
 	cM := engine.NewConnManager(cfg)
 	db := NewDataDBService(cfg, cM, srvDep)
 	db.oldDBCfg = &config.DataDbCfg{
-		Type: utils.Mongo,
+		Type: utils.MetaMongo,
 		Host: "127.0.0.1",
 		Port: "27017",
 		Name: "10",
@@ -242,7 +242,7 @@ func TestDataDBReloadErrorMarsheler(t *testing.T) {
 		t.Errorf("Expected service to be down")
 	}
 	db.oldDBCfg = &config.DataDbCfg{
-		Type: utils.Mongo,
+		Type: utils.MetaMongo,
 		Host: "127.0.0.1",
 		Port: "27017",
 		Name: "10",
@@ -379,7 +379,7 @@ func TestDataDBReloadCastError(t *testing.T) {
 	cM := engine.NewConnManager(cfg)
 	db := NewDataDBService(cfg, cM, srvDep)
 	db.oldDBCfg = &config.DataDbCfg{
-		Type: utils.Mongo,
+		Type: utils.MetaMongo,
 		Host: "127.0.0.1",
 		Port: "27017",
 		Name: "10",
@@ -445,7 +445,7 @@ func TestDataDBReloadError(t *testing.T) {
 	db := NewDataDBService(cfg, cM, srvDep)
 	cfg.GeneralCfg().DBDataEncoding = utils.JSON
 	db.oldDBCfg = &config.DataDbCfg{
-		Type: utils.Mongo,
+		Type: utils.MetaMongo,
 		Host: "127.0.0.1",
 		Port: "27017",
 		Name: "10",

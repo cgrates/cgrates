@@ -34,7 +34,7 @@ func NewDataDBConn(dbType, host, port, name, user,
 	pass, marshaler string, opts *config.DataDBOpts,
 	itmsCfg map[string]*config.ItemOpts) (d DataDBDriver, err error) {
 	switch dbType {
-	case utils.Redis:
+	case utils.MetaRedis:
 		var dbNo int
 		dbNo, err = strconv.Atoi(name)
 		if err != nil {
@@ -48,9 +48,9 @@ func NewDataDBConn(dbType, host, port, name, user,
 			opts.RedisSentinel, opts.RedisCluster, opts.RedisClusterSync, opts.RedisClusterOndownDelay,
 			opts.RedisConnectTimeout, opts.RedisReadTimeout, opts.RedisWriteTimeout, opts.RedisTLS,
 			opts.RedisClientCertificate, opts.RedisClientKey, opts.RedisCACertificate)
-	case utils.Mongo:
+	case utils.MetaMongo:
 		d, err = NewMongoStorage(host, port, name, user, pass, marshaler, utils.DataDB, nil, opts.MongoQueryTimeout)
-	case utils.Internal:
+	case utils.MetaInternal:
 		d = NewInternalDB(nil, nil, itmsCfg)
 	default:
 		err = fmt.Errorf("unsupported db_type <%s>", dbType)

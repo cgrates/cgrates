@@ -64,7 +64,7 @@ func newRPCClient(cfg *config.ListenCfg) (c *birpc.Client, err error) {
 func TestLoadConfig(t *testing.T) {
 	// DataDb
 	*cfgPath = path.Join(*dataDir, "conf", "samples", "tutmongo")
-	*dataDBType = utils.Meta + utils.Redis
+	*dataDBType = utils.MetaRedis
 	*dataDBHost = "localhost"
 	*dataDBPort = "2012"
 	*dataDBName = "100"
@@ -72,7 +72,7 @@ func TestLoadConfig(t *testing.T) {
 	*dataDBPasswd = "toor"
 	*dbRedisSentinel = "sentinel1"
 	expDBcfg := &config.DataDbCfg{
-		Type:     utils.Redis,
+		Type:     utils.MetaRedis,
 		Host:     "localhost",
 		Port:     "2012",
 		Name:     "100",

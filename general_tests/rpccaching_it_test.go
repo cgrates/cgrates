@@ -119,7 +119,7 @@ func testRPCMethodsRpcConn(t *testing.T) {
 
 func testRPCMethodsFromFolder(t *testing.T) {
 	caching := utils.MetaReload
-	if rpcCfg.DataDbCfg().Type == utils.Internal {
+	if rpcCfg.DataDbCfg().Type == utils.MetaInternal {
 		caching = utils.MetaNone
 	}
 	var reply string

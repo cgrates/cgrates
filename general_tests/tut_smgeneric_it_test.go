@@ -108,7 +108,7 @@ func testTutSMGRpcConn(t *testing.T) {
 // Load the tariff plan, creating accounts and their balances
 func testTutSMGLoadTariffPlanFromFolder(t *testing.T) {
 	caching := utils.MetaReload
-	if tutSMGCfg.DataDbCfg().Type == utils.Internal {
+	if tutSMGCfg.DataDbCfg().Type == utils.MetaInternal {
 		caching = utils.MetaNone
 	}
 	var reply string
