@@ -52,12 +52,9 @@ func callURL(ub *engine.Account, a *engine.Action, _ engine.Actions, _ *engine.F
 	if err != nil {
 		return err
 	}
-	pstr, err := NewHTTPjsonMapEE(&config.EventExporterCfg{
-		ID:             a.Id,
-		ExportPath:     a.ExtraParameters,
-		Attempts:       config.CgrConfig().GeneralCfg().PosterAttempts,
-		FailedPostsDir: config.CgrConfig().GeneralCfg().FailedPostsDir,
-	}, config.CgrConfig(), nil, nil)
+	eeCfg := config.NewEventExporterCfg(a.Id, "", a.ExtraParameters, config.CgrConfig().GeneralCfg().FailedPostsDir,
+		config.CgrConfig().GeneralCfg().PosterAttempts, nil)
+	pstr, err := NewHTTPjsonMapEE(eeCfg, config.CgrConfig(), nil, nil)
 	if err != nil {
 		return err
 	}
@@ -74,12 +71,9 @@ func callURLAsync(ub *engine.Account, a *engine.Action, _ engine.Actions, _ *eng
 	if err != nil {
 		return err
 	}
-	pstr, err := NewHTTPjsonMapEE(&config.EventExporterCfg{
-		ID:             a.Id,
-		ExportPath:     a.ExtraParameters,
-		Attempts:       config.CgrConfig().GeneralCfg().PosterAttempts,
-		FailedPostsDir: config.CgrConfig().GeneralCfg().FailedPostsDir,
-	}, config.CgrConfig(), nil, nil)
+	eeCfg := config.NewEventExporterCfg(a.Id, "", a.ExtraParameters, config.CgrConfig().GeneralCfg().FailedPostsDir,
+		config.CgrConfig().GeneralCfg().PosterAttempts, nil)
+	pstr, err := NewHTTPjsonMapEE(eeCfg, config.CgrConfig(), nil, nil)
 	if err != nil {
 		return err
 	}
@@ -92,13 +86,9 @@ func postEvent(_ *engine.Account, a *engine.Action, _ engine.Actions, _ *engine.
 	if err != nil {
 		return err
 	}
-	pstr, err := NewHTTPjsonMapEE(&config.EventExporterCfg{
-		ID:             a.Id,
-		ExportPath:     a.ExtraParameters,
-		Attempts:       config.CgrConfig().GeneralCfg().PosterAttempts,
-		FailedPostsDir: config.CgrConfig().GeneralCfg().FailedPostsDir,
-		Opts:           &config.EventExporterOpts{},
-	}, config.CgrConfig(), nil, nil)
+	eeCfg := config.NewEventExporterCfg(a.Id, "", a.ExtraParameters, config.CgrConfig().GeneralCfg().FailedPostsDir,
+		config.CgrConfig().GeneralCfg().PosterAttempts, nil)
+	pstr, err := NewHTTPjsonMapEE(eeCfg, config.CgrConfig(), nil, nil)
 	if err != nil {
 		return err
 	}

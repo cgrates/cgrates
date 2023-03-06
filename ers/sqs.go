@@ -217,19 +217,12 @@ func (rdr *SQSER) readLoop(scv sqsClient) (err error) {
 
 func (rdr *SQSER) createPoster() {
 	processedOpt := getProcessOptions(rdr.Config().Opts)
-	if processedOpt == nil {
-		if len(rdr.Config().ProcessedPath) == 0 {
-			return
-		}
-		processedOpt = new(config.EventExporterOpts)
+	if processedOpt == nil && len(rdr.Config().ProcessedPath) == 0 {
+		return
 	}
-	rdr.poster = ees.NewSQSee(&config.EventExporterCfg{
-		ID:             rdr.Config().ID,
-		ExportPath:     utils.FirstNonEmpty(rdr.Config().ProcessedPath, rdr.Config().SourcePath),
-		Attempts:       rdr.cgrCfg.GeneralCfg().PosterAttempts,
-		Opts:           processedOpt,
-		FailedPostsDir: rdr.cgrCfg.GeneralCfg().FailedPostsDir,
-	}, nil)
+	eeCfg := config.NewEventExporterCfg(rdr.Config().ID, "", utils.FirstNonEmpty(rdr.Config().ProcessedPath, rdr.Config().SourcePath),
+		rdr.cgrCfg.GeneralCfg().FailedPostsDir, rdr.cgrCfg.GeneralCfg().PosterAttempts, processedOpt)
+	rdr.poster = ees.NewSQSee(eeCfg, nil)
 }
 
 func (rdr *SQSER) isClosed() bool {
