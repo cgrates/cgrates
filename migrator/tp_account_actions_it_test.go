@@ -94,12 +94,12 @@ func testTpAccActITConnect(t *testing.T) {
 
 func testTpAccActITFlush(t *testing.T) {
 	if err := tpAccActMigrator.storDBIn.StorDB().Flush(
-		path.Join(tpAccActCfgIn.DataFolderPath, "storage", tpAccActCfgIn.StorDbCfg().Type)); err != nil {
+		path.Join(tpAccActCfgIn.DataFolderPath, "storage", dbPath(tpAccActCfgIn.StorDbCfg().Type))); err != nil {
 		t.Error(err)
 	}
 
 	if err := tpAccActMigrator.storDBOut.StorDB().Flush(
-		path.Join(tpAccActCfgOut.DataFolderPath, "storage", tpAccActCfgOut.StorDbCfg().Type)); err != nil {
+		path.Join(tpAccActCfgOut.DataFolderPath, "storage", dbPath(tpAccActCfgOut.StorDbCfg().Type))); err != nil {
 		t.Error(err)
 	}
 }

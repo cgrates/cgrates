@@ -94,12 +94,12 @@ func testTpShrGrITConnect(t *testing.T) {
 
 func testTpShrGrITFlush(t *testing.T) {
 	if err := tpShrGrMigrator.storDBIn.StorDB().Flush(
-		path.Join(tpShrGrCfgIn.DataFolderPath, "storage", tpShrGrCfgIn.StorDbCfg().Type)); err != nil {
+		path.Join(tpShrGrCfgIn.DataFolderPath, "storage", dbPath(tpShrGrCfgIn.StorDbCfg().Type))); err != nil {
 		t.Error(err)
 	}
 
 	if err := tpShrGrMigrator.storDBOut.StorDB().Flush(
-		path.Join(tpShrGrCfgOut.DataFolderPath, "storage", tpShrGrCfgOut.StorDbCfg().Type)); err != nil {
+		path.Join(tpShrGrCfgOut.DataFolderPath, "storage", dbPath(tpShrGrCfgOut.StorDbCfg().Type))); err != nil {
 		t.Error(err)
 	}
 }

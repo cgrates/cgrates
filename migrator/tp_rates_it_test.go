@@ -94,12 +94,12 @@ func testTpRatesITConnect(t *testing.T) {
 
 func testTpRatesITFlush(t *testing.T) {
 	if err := tpRatesMigrator.storDBIn.StorDB().Flush(
-		path.Join(tpRatesCfgIn.DataFolderPath, "storage", tpRatesCfgIn.StorDbCfg().Type)); err != nil {
+		path.Join(tpRatesCfgIn.DataFolderPath, "storage", dbPath(tpRatesCfgIn.StorDbCfg().Type))); err != nil {
 		t.Error(err)
 	}
 
 	if err := tpRatesMigrator.storDBOut.StorDB().Flush(
-		path.Join(tpRatesCfgOut.DataFolderPath, "storage", tpRatesCfgOut.StorDbCfg().Type)); err != nil {
+		path.Join(tpRatesCfgOut.DataFolderPath, "storage", dbPath(tpRatesCfgOut.StorDbCfg().Type))); err != nil {
 		t.Error(err)
 	}
 }

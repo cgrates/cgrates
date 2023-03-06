@@ -95,12 +95,12 @@ func testTpTresITConnect(t *testing.T) {
 
 func testTpTresITFlush(t *testing.T) {
 	if err := tpTresMigrator.storDBIn.StorDB().Flush(
-		path.Join(tpTresCfgIn.DataFolderPath, "storage", tpTresCfgIn.StorDbCfg().Type)); err != nil {
+		path.Join(tpTresCfgIn.DataFolderPath, "storage", dbPath(tpTresCfgIn.StorDbCfg().Type))); err != nil {
 		t.Error(err)
 	}
 
 	if err := tpTresMigrator.storDBOut.StorDB().Flush(
-		path.Join(tpTresCfgOut.DataFolderPath, "storage", tpTresCfgOut.StorDbCfg().Type)); err != nil {
+		path.Join(tpTresCfgOut.DataFolderPath, "storage", dbPath(tpTresCfgOut.StorDbCfg().Type))); err != nil {
 		t.Error(err)
 	}
 }

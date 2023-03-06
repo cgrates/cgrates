@@ -271,7 +271,7 @@ func (dbcfg *DataDbCfg) AsMapInterface() (mp map[string]interface{}) {
 		utils.RedisCACertificate:         dbcfg.Opts.RedisCACertificate,
 	}
 	mp = map[string]interface{}{
-		utils.DataDbTypeCfg:          utils.Meta + dbcfg.Type,
+		utils.DataDbTypeCfg:          dbcfg.Type,
 		utils.DataDbHostCfg:          dbcfg.Host,
 		utils.DataDbNameCfg:          dbcfg.Name,
 		utils.DataDbUserCfg:          dbcfg.User,

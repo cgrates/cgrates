@@ -159,7 +159,7 @@ func TestStoreDbCfgloadFromJsonCfgPort(t *testing.T) {
 }`
 	dbcfg.Opts = &StorDBOpts{}
 	expected := StorDbCfg{
-		Type: "mongo",
+		Type: utils.MetaMongo,
 		Opts: &StorDBOpts{},
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
@@ -178,7 +178,7 @@ func TestStoreDbCfgloadFromJsonCfgPort(t *testing.T) {
 	}
 }`
 	expected = StorDbCfg{
-		Type: "mongo",
+		Type: utils.MetaMongo,
 		Port: "27017",
 		Opts: &StorDBOpts{},
 	}
@@ -198,7 +198,7 @@ func TestStoreDbCfgloadFromJsonCfgPort(t *testing.T) {
 	}
 }`
 	expected = StorDbCfg{
-		Type: "internal",
+		Type: utils.MetaInternal,
 		Port: "internal",
 		Opts: &StorDBOpts{},
 	}

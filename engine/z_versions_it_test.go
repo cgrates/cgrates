@@ -124,7 +124,7 @@ func testVersionsFlush(t *testing.T) {
 	if err != nil {
 		t.Error("Error when flushing Mongo ", err.Error())
 	}
-	if err := storageDb.Flush(path.Join(versionCfg.DataFolderPath, "storage", versionCfg.StorDbCfg().Type)); err != nil {
+	if err := storageDb.Flush(path.Join(versionCfg.DataFolderPath, "storage", dbPath(versionCfg.StorDbCfg().Type))); err != nil {
 		t.Error(err)
 	}
 	SetDBVersions(storageDb)

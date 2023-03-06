@@ -94,12 +94,12 @@ func testTpTimITConnect(t *testing.T) {
 
 func testTpTimITFlush(t *testing.T) {
 	if err := tpTimMigrator.storDBIn.StorDB().Flush(
-		path.Join(tpTimCfgIn.DataFolderPath, "storage", tpTimCfgIn.StorDbCfg().Type)); err != nil {
+		path.Join(tpTimCfgIn.DataFolderPath, "storage", dbPath(tpTimCfgIn.StorDbCfg().Type))); err != nil {
 		t.Error(err)
 	}
 
 	if err := tpTimMigrator.storDBOut.StorDB().Flush(
-		path.Join(tpTimCfgOut.DataFolderPath, "storage", tpTimCfgOut.StorDbCfg().Type)); err != nil {
+		path.Join(tpTimCfgOut.DataFolderPath, "storage", dbPath(tpTimCfgOut.StorDbCfg().Type))); err != nil {
 		t.Error(err)
 	}
 }
