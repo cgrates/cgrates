@@ -227,6 +227,22 @@ type EventExporterCfg struct {
 	trailerFields      []*FCTemplate
 }
 
+// NewEventExporterCfg is a constructor for the EventExporterCfg, that is needed to initialize posters that are used by the
+// readers and HTTP exporter actions
+func NewEventExporterCfg(ID, exportType, exportPath, failedPostsDir string, attempts int, opts *EventExporterOpts) *EventExporterCfg {
+	if opts == nil {
+		opts = new(EventExporterOpts)
+	}
+	return &EventExporterCfg{
+		ID:             ID,
+		Type:           exportType,
+		ExportPath:     exportPath,
+		FailedPostsDir: failedPostsDir,
+		Attempts:       attempts,
+		Opts:           opts,
+	}
+}
+
 func (eeOpts *EventExporterOpts) loadFromJSONCfg(jsnCfg *EventExporterOptsJson) (err error) {
 	if jsnCfg == nil {
 		return
