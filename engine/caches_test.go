@@ -20,25 +20,19 @@ package engine
 
 import (
 	"testing"
+	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
 func TestV1LoadCache(t *testing.T) {
+	defer func() {
+		InitCache(nil)
+	}()
 	cfg, _ := config.NewDefaultCGRConfig()
-	Cache.Clear(nil)
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
-	dm.cacheCfg[utils.CacheThresholds].Precache = true
-	thd := &Threshold{
-		Tenant: "cgrates.org",
-		ID:     "TH_1",
-		Hits:   0,
-	}
-	if err := dm.SetThreshold(thd); err != nil {
-		t.Error(err)
-	}
 	args := utils.AttrReloadCacheWithArgDispatcher{
 		ArgDispatcher: &utils.ArgDispatcher{},
 		AttrReloadCache: utils.AttrReloadCache{
@@ -46,6 +40,14 @@ func TestV1LoadCache(t *testing.T) {
 				ThresholdIDs: []string{"THD1"},
 			},
 		},
+	}
+	loadIds := map[string]int64{
+		utils.CacheThresholdProfiles: time.Now().Unix(),
+		utils.CacheStatQueueProfiles: time.Now().Unix(),
+		utils.CacheChargerProfiles:   time.Now().Unix(),
+	}
+	if err := dm.SetLoadIDs(loadIds); err != nil {
+		t.Error(err)
 	}
 	cacheS := NewCacheS(cfg, dm)
 	var reply string
@@ -59,37 +61,102 @@ func TestV1LoadCache(t *testing.T) {
 func TestCacheV1ReloadCache(t *testing.T) {
 	cfg, _ := config.NewDefaultCGRConfig()
 	defer func() {
-		InitCache(cfg.CacheCfg())
+		InitCache(nil)
 	}()
-	Cache.Clear(nil)
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
-
 	chS := NewCacheS(cfg, dm)
 	attrs := utils.AttrReloadCacheWithArgDispatcher{
 		AttrReloadCache: utils.AttrReloadCache{
 			ArgsCache: utils.ArgsCache{
-				FilterIDs: []string{"DSP_FLTR"},
+				FilterIDs: []string{"DSP_FLT"},
 			},
 		},
 	}
 	fltr := &Filter{
-		ID:     "DSP_FLTR",
 		Tenant: "cgrates.org",
+		ID:     "DSP_FLT",
 		Rules: []*FilterRule{
-			{Type: utils.MetaString,
-				Element: "~*req.Account",
-				Values:  []string{"1001"},
+			{
+				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Account,
+				Type:    utils.MetaString,
+				Values:  []string{"2009"},
 			},
 		},
 	}
 	if err := dm.SetFilter(fltr); err != nil {
 		t.Error(err)
 	}
-	Cache = db.db
+	if _, err := GetFilter(dm, "cgrates.org", "DSP_FLT", false, true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
 	var reply string
 	if err := chS.V1ReloadCache(attrs, &reply); err != nil {
 		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Expected ok ,received %v", reply)
+	}
+}
+
+func TestCacheSV1FlushCache(t *testing.T) {
+	defer func() {
+		InitCache(nil)
+	}()
+	cfg, _ := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	chS := NewCacheS(cfg, dm)
+	args := utils.AttrReloadCacheWithArgDispatcher{
+		AttrReloadCache: utils.AttrReloadCache{
+			ArgsCache: utils.ArgsCache{
+				DestinationIDs: []string{"DST1"},
+				RatingPlanIDs:  []string{"RP1"},
+				ResourceIDs:    []string{"RSC1"},
+			},
+		},
 	}
 
+	loadIds := map[string]int64{
+		utils.CacheAttributeProfiles: time.Now().UnixNano(),
+		utils.CacheSupplierProfiles:  time.Now().UnixNano(),
+	}
+	if err := dm.SetLoadIDs(loadIds); err != nil {
+		t.Error(err)
+	}
+	var reply string
+	if err := chS.V1FlushCache(args, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Expected ok,recieved %v", reply)
+	}
+	for id := range loadIds {
+		if _, has := Cache.Get(utils.CacheLoadIDs, id); !has {
+			t.Error("Load not stored in cache")
+		}
+	}
+}
+
+func TestLoadDataDbCache(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	rp := &RatingPlan{
+		Id:      "RT_PLAN1",
+		Timings: map[string]*RITiming{},
+		Ratings: map[string]*RIRate{
+			"asjkilj": {
+				ConnectFee:       10,
+				RoundingMethod:   utils.ROUNDING_UP,
+				RoundingDecimals: 1,
+				MaxCost:          10,
+			},
+		},
+		DestinationRates: map[string]RPRateList{},
+	}
+	if err := dm.SetRatingPlan(rp, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+	if err := dm.PreloadCacheForPrefix(utils.RATING_PLAN_PREFIX); err != nil {
+		t.Error(nil)
+	}
 }
