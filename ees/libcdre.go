@@ -282,15 +282,10 @@ func (expEv *FailedExportersEEs) ReplayFailedPosts(attempts int) (err error) {
 		Format: expEv.Format,
 	}
 
+	eeCfg := config.NewEventExporterCfg("ReplayFailedPosts", expEv.Format, expEv.Path,
+		utils.MetaNone, attempts, expEv.Opts)
 	var ee EventExporter
-	if ee, err = NewEventExporter(&config.EventExporterCfg{
-		ID:             "ReplayFailedPosts",
-		Type:           expEv.Format,
-		ExportPath:     expEv.Path,
-		Opts:           expEv.Opts,
-		Attempts:       attempts,
-		FailedPostsDir: utils.MetaNone,
-	}, config.CgrConfig(), nil, nil); err != nil {
+	if ee, err = NewEventExporter(eeCfg, config.CgrConfig(), nil, nil); err != nil {
 		return
 	}
 	keyFunc := func() string { return utils.EmptyString }

@@ -255,16 +255,10 @@ func (rdr *AMQPER) close() (err error) {
 
 func (rdr *AMQPER) createPoster() {
 	processedOpt := getProcessOptions(rdr.Config().Opts)
-	if processedOpt == nil {
-		if len(rdr.Config().ProcessedPath) == 0 {
-			return
-		}
-		processedOpt = new(config.EventExporterOpts)
+	if processedOpt == nil && len(rdr.Config().ProcessedPath) == 0 {
+		return
 	}
-	rdr.poster = ees.NewAMQPee(&config.EventExporterCfg{
-		ID:         rdr.Config().ID,
-		ExportPath: utils.FirstNonEmpty(rdr.Config().ProcessedPath, rdr.Config().SourcePath),
-		Attempts:   rdr.cgrCfg.EEsCfg().GetDefaultExporter().Attempts,
-		Opts:       processedOpt,
-	}, nil)
+	eeCfg := config.NewEventExporterCfg(rdr.Config().ID, "", utils.FirstNonEmpty(rdr.Config().ProcessedPath, rdr.Config().SourcePath),
+		"", rdr.cgrCfg.EEsCfg().GetDefaultExporter().Attempts, processedOpt)
+	rdr.poster = ees.NewAMQPee(eeCfg, nil)
 }
