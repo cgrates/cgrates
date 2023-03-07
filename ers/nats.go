@@ -192,19 +192,12 @@ func (rdr *NatsER) processMessage(msg []byte) (err error) {
 
 func (rdr *NatsER) createPoster() (err error) {
 	processedOpt := getProcessOptions(rdr.Config().Opts)
-	if processedOpt == nil {
-		if len(rdr.Config().ProcessedPath) == 0 {
-			return
-		}
-		processedOpt = new(config.EventExporterOpts)
+	if processedOpt == nil && len(rdr.Config().ProcessedPath) == 0 {
+		return
 	}
-	rdr.poster, err = ees.NewNatsEE(&config.EventExporterCfg{
-		ID: rdr.Config().ID,
-		ExportPath: utils.FirstNonEmpty(
-			rdr.Config().ProcessedPath, rdr.Config().SourcePath),
-		Opts:     processedOpt,
-		Attempts: rdr.cgrCfg.EEsCfg().GetDefaultExporter().Attempts,
-	}, rdr.cgrCfg.GeneralCfg().NodeID,
+	eeCfg := config.NewEventExporterCfg(rdr.Config().ID, "", utils.FirstNonEmpty(rdr.Config().ProcessedPath, rdr.Config().SourcePath),
+		"", rdr.cgrCfg.EEsCfg().GetDefaultExporter().Attempts, processedOpt)
+	rdr.poster, err = ees.NewNatsEE(eeCfg, rdr.cgrCfg.GeneralCfg().NodeID,
 		rdr.cgrCfg.GeneralCfg().ConnectTimeout, nil)
 	return
 }
