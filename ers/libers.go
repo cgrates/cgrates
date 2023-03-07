@@ -29,6 +29,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+// getProcessOptions assigns all non-nil fields ending in "Processed" from EventReaderOpts to their counterparts in EventExporterOpts
 func getProcessOptions(erOpts *config.EventReaderOpts) (eeOpts *config.EventExporterOpts) {
 	if erOpts.AMQPExchangeProcessed != nil {
 		if eeOpts == nil {
