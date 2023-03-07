@@ -317,8 +317,8 @@ func removeReverseFilterIndexForFilter(dm *DataManager, idxItmType, tnt, itemID 
 		var indexes map[string]utils.StringMap
 		if indexes, err = dm.GetFilterIndexes(utils.PrefixToIndexCache[utils.ReverseFilterIndexes], tntFltrID,
 			utils.EmptyString, nil); err != nil {
+			guardian.Guardian.UnguardIDs(refID)
 			if err != utils.ErrNotFound {
-				guardian.Guardian.UnguardIDs(refID)
 				return
 			}
 			err = nil
