@@ -23,7 +23,6 @@ package v1
 
 import (
 	"context"
-	"log"
 	"net/rpc"
 	"path"
 	"reflect"
@@ -215,7 +214,7 @@ func testKafkaVerifyExport(t *testing.T) {
 
 	conn, err := kafka.DialLeader(context.Background(), "tcp", "localhost:9092", topic, partition)
 	if err != nil {
-		log.Fatal("failed to dial leader:", err)
+		t.Fatal("failed to dial leader:", err)
 	}
 
 	conn.SetReadDeadline(time.Now().Add(10 * time.Second))
@@ -252,11 +251,11 @@ func testKafkaVerifyExport(t *testing.T) {
 	}
 
 	if err := batch.Close(); err != nil {
-		log.Fatal("failed to close batch:", err)
+		t.Fatal("failed to close batch:", err)
 	}
 
 	if err := conn.Close(); err != nil {
-		log.Fatal("failed to close connection:", err)
+		t.Fatal("failed to close connection:", err)
 	}
 
 }
