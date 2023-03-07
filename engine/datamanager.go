@@ -1440,7 +1440,7 @@ func (dm *DataManager) RemoveAttributeProfile(ctx *context.Context, tenant, id s
 		return utils.ErrNoDatabaseConn
 	}
 	oldAttr, err := dm.GetAttributeProfile(ctx, tenant, id, true, false, utils.NonTransactional)
-	if err != nil {
+	if err != nil && err != utils.ErrNotFound {
 		return err
 	}
 	if err = dm.DataDB().RemoveAttributeProfileDrv(ctx, tenant, id); err != nil {
