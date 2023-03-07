@@ -1751,3 +1751,128 @@ func TestComputeDispatcherIndexes(t *testing.T) {
 		t.Errorf("Expected %v,Received %v", utils.ToJSON(expIndexes), utils.ToJSON(fltrIndexer.indexes))
 	}
 }
+
+func TestRemoveItemFromIndexSQP(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	fltr := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "FLTR_1",
+		Rules: []*FilterRule{
+			{
+				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Account,
+				Type:    utils.MetaString,
+				Values:  []string{"1001"},
+			},
+		},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+		},
+	}
+	if err := dm.SetFilter(fltr); err != nil {
+		t.Error(err)
+	}
+	sqs := &StatQueueProfile{
+		Tenant:      "cgrates.org",
+		ID:          "DistinctMetricProfile",
+		QueueLength: 10,
+		FilterIDs:   []string{"FLTR_1"},
+		TTL:         time.Duration(10) * time.Second,
+		Metrics: []*MetricWithFilters{
+			{
+				MetricID: utils.MetaDDC,
+			},
+		},
+		ThresholdIDs: []string{utils.META_NONE},
+		Stored:       true,
+		Weight:       20,
+	}
+	if err := dm.SetStatQueueProfile(sqs, true); err != nil {
+		t.Error(err)
+	}
+	fltrIndexer := NewFilterIndexer(dm, utils.StatQueueProfilePrefix, sqs.Tenant)
+	if err := fltrIndexer.RemoveItemFromIndex(sqs.Tenant, sqs.ID, []string{}); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestRemoveItemFromIndexSPP(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	fltr := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "FLTR_SUPP_1",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaString,
+				Element: "~*req.Supplier",
+				Values:  []string{"SupplierProfile1"},
+			},
+		},
+	}
+	if err := dm.SetFilter(fltr); err != nil {
+		t.Error(err)
+	}
+	spp := &SupplierProfile{
+		Tenant:    "cgrates.org",
+		ID:        "SPL_ACNT_1001",
+		FilterIDs: []string{"FLTR_SUPP_1"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2017, 11, 27, 0, 0, 0, 0, time.UTC),
+		},
+		Sorting:           utils.MetaWeight,
+		SortingParameters: []string{},
+		Suppliers: []*Supplier{
+			{
+				ID:     "supplier1",
+				Weight: 10,
+			},
+		},
+		Weight: 20,
+	}
+	if err := dm.SetSupplierProfile(spp, true); err != nil {
+		t.Error(err)
+	}
+	fltrIndexer := NewFilterIndexer(dm, utils.SupplierProfilePrefix, spp.Tenant)
+	if err := fltrIndexer.RemoveItemFromIndex(spp.Tenant, spp.ID, []string{}); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestRemoveItemFromIndexDP(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	fltr := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "DSP_FLT",
+		Rules: []*FilterRule{
+			{
+				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Account,
+				Type:    utils.MetaString,
+				Values:  []string{"2009"},
+			},
+		},
+	}
+	if err := dm.SetFilter(fltr); err != nil {
+		t.Error(err)
+	}
+	dpp := &DispatcherProfile{
+		Tenant:     "cgrates.org",
+		ID:         "DSP_Test1",
+		FilterIDs:  []string{"DSP_FLT"},
+		Strategy:   utils.MetaFirst,
+		Subsystems: []string{utils.MetaAttributes, utils.MetaSessionS},
+		Weight:     20,
+	}
+	if err := dm.SetDispatcherProfile(dpp, true); err != nil {
+		t.Error(err)
+	}
+	fltrIndexer := NewFilterIndexer(dm, utils.DispatcherProfilePrefix, dpp.Tenant)
+	if err := fltrIndexer.RemoveItemFromIndex(dpp.Tenant, dpp.ID, []string{}); err != nil {
+		t.Error(err)
+	}
+}
