@@ -22,9 +22,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package ers
 
 import (
+	"fmt"
 	"net/rpc"
 	"os"
 	"path"
+	"strings"
 	"testing"
 	"time"
 
@@ -147,7 +149,7 @@ func testFWVITLoadTPFromFolder(t *testing.T) {
 	}
 }
 
-var fwvContent = `HDR0001DDB     ABC                                     Some Connect A.B.                       DDB-Some-10022-20120711-309.CDR         00030920120711100255
+var fwvContent = []string{`HDR0001DDB     ABC                                     Some Connect A.B.                       DDB-Some-10022-20120711-309.CDR         00030920120711100255
 CDR0000010  0 20120708181506000123451234         0040123123120                  004                                            000018009980010001ISDN  ABC   10Buiten uw regio                         EHV 00000009190000000009
 CDR0000020  0 20120708190945000123451234         0040123123120                  004                                            000016009980010001ISDN  ABC   10Buiten uw regio                         EHV 00000009190000000009
 CDR0000030  0 20120708191009000123451234         0040123123120                  004                                            000020009980010001ISDN  ABC   10Buiten uw regio                         EHV 00000009190000000009
@@ -170,44 +172,73 @@ CDR0000190  0 20120709155236000123451237         0040012323453100               
 CDR0000200  0 20120709160309000123451237         0040012323453100               001                                            000100009980030001ISDN  ABD   20Internationaal                          NLB 00000000190000000000
 CDR0000210  0 20120709160415000123451237         0040012323453100               001                                            000050009980030001ISDN  ABD   20Internationaal                          NLB 00000000190000000000
 CDR0000220  0 20120709161739000123451237         0040012323453100               001                                            000058009980030001ISDN  ABD   20Internationaal                          NLB 00000000190000000000
+TRL0001DDB     ABC                                     Some Connect A.B.                       DDB-Some-10022-20120711-309.CDR         0003090000002200000030550000000001000000000100Y
+`,
+	`HDR0002DDB     ABC                                     Some Connect A.B.                       DDB-Some-10022-20120711-310.CDR         00031020120711100255
 CDR0000230  0 20120709170356000123123459         0040123234531                  004                                            000012002760010001ISDN  276   10Buiten uw regio                         TB  00000009190000000009
 CDR0000240  0 20120709181036000123123450         0012323453                     004                                            000042009980010001ISDN  ABC   05Binnen uw regio                         AP  00000010190000000010
 CDR0000250  0 20120709191245000123123458         0040123232350                  004                                            000012002760000001PSTN  276   10Buiten uw regio                         TB  00000009190000000009
 CDR0000260  0 20120709202324000123123459         0040123234531                  004                                            000011002760010001ISDN  276   10Buiten uw regio                         TB  00000009190000000009
 CDR0000270  0 20120709211756000123451237         0040012323453100               001                                            000051009980030001ISDN  ABD   20Internationaal                          NLB 00000000190000000000
 CDR0000280  0 20120709211852000123451237         0040012323453100               001                                            000050009980030001ISDN  ABD   20Internationaal                          NLB 00000000190000000000
+TRL0002DDB     ABC                                     Some Connect A.B.                       DDB-Some-10022-20120711-310.CDR         0003100000000600000013330000000001000000000100Y
+`,
+	`HDR0003DDB     ABC                                     Some Connect A.B.                       DDB-Some-10022-20120711-311.CDR         00031120120711100255
 CDR0000290  0 20120709212904000123123458         0040123232350                  004                                            000012002760000001PSTN  276   10Buiten uw regio                         TB  00000009190000000009
 CDR0000300  0 20120709073707000123123459         0040123234531                  004                                            000012002760010001ISDN  276   10Buiten uw regio                         TB  00000009190000000009
 CDR0000310  0 20120709085451000123451237         0040012323453100               001                                            000744009980030001ISDN  ABD   20Internationaal                          NLB 00000000190000000000
 CDR0000320  0 20120709091756000123451237         0040012323453100               001                                            000050009980030001ISDN  ABD   20Internationaal                          NLB 00000000190000000000
 CDR0000330  0 20120710070434000123123458         0040123232350                  004                                            000012002760000001PSTN  276   10Buiten uw regio                         TB  00000009190000000009
-TRL0001DDB     ABC                                     Some Connect A.B.                       DDB-Some-10022-20120711-309.CDR         0003090000003300000030550000000001000000000100Y
-`
+TRL0003DDB     ABC                                     Some Connect A.B.                       DDB-Some-10022-20120711-311.CDR         0003110000000500000009640000000001000000000100Y
+`,
+}
 
 // The default scenario, out of ers defined in .cfg file
 func testFWVITHandleCdr1File(t *testing.T) {
-	fileName := "file1.fwv"
-	tmpFilePath := path.Join("/tmp", fileName)
-	if err := os.WriteFile(tmpFilePath, []byte(fwvContent), 0644); err != nil {
-		t.Fatal(err.Error())
-	}
-	if err := os.Rename(tmpFilePath, path.Join("/tmp/fwvErs/in", fileName)); err != nil {
-		t.Fatal("Error moving file to processing directory: ", err)
+	for idx, content := range fwvContent {
+		fileName := fmt.Sprintf("file%d.fwv", idx)
+		filePath := path.Join("/tmp", fileName)
+		if err := os.WriteFile(filePath, []byte(content), 0644); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.Rename(filePath, path.Join("/tmp/fwvErs/in", fileName)); err != nil {
+			t.Fatal("Error moving file to processing directory: ", err)
+		}
 	}
 }
 
 func testFWVITAnalyseCDRs(t *testing.T) {
 	time.Sleep(500 * time.Millisecond)
-	var reply []*engine.ExternalCDR
-	if err := fwvRPC.Call(utils.APIerSv2GetCDRs, utils.RPCCDRsFilter{}, &reply); err != nil {
+	var cdrs []*engine.ExternalCDR
+	if err := fwvRPC.Call(utils.APIerSv2GetCDRs, utils.RPCCDRsFilter{}, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
-	} else if len(reply) != 34 {
-		t.Error("Unexpected number of CDRs returned: ", len(reply))
+	} else if len(cdrs) != 33 {
+		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
 	}
-	if err := fwvRPC.Call(utils.APIerSv2GetCDRs, utils.RPCCDRsFilter{OriginIDs: []string{"CDR0000010"}}, &reply); err != nil {
+	if err := fwvRPC.Call(utils.APIerSv2GetCDRs, utils.RPCCDRsFilter{OriginIDs: []string{"CDR0000010", "CDR0000250", "CDR0000330"}},
+		&cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
-	} else if len(reply) != 1 {
-		t.Error("Unexpected number of CDRs returned: ", len(reply))
+	} else if len(cdrs) != 3 {
+		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
+	} else {
+		if strings.Trim(cdrs[0].ExtraFields["CdrFileName"], " ") != "DDB-Some-10022-20120711-309.CDR" ||
+			strings.TrimLeft(cdrs[0].ExtraFields["FileSeqNr"], "0") != "309" ||
+			strings.Trim(cdrs[0].ExtraFields["NrOfCdrs"], "0") != "22" ||
+			strings.Trim(cdrs[0].ExtraFields["TotalDuration"], "0") != "3055" {
+			t.Errorf("%s: unexpected CDR received: <%+v>", "CDR0000010", utils.ToJSON(cdrs[0]))
+		}
+		if strings.Trim(cdrs[1].ExtraFields["CdrFileName"], " ") != "DDB-Some-10022-20120711-310.CDR" ||
+			strings.TrimLeft(cdrs[1].ExtraFields["FileSeqNr"], "0") != "310" ||
+			strings.Trim(cdrs[1].ExtraFields["NrOfCdrs"], "0") != "6" ||
+			strings.Trim(cdrs[1].ExtraFields["TotalDuration"], "0") != "1333" {
+			t.Errorf("%s: unexpected CDR received: <%+v>", "CDR0000250", utils.ToJSON(cdrs[1]))
+		}
+		if strings.Trim(cdrs[2].ExtraFields["CdrFileName"], " ") != "DDB-Some-10022-20120711-311.CDR" ||
+			strings.TrimLeft(cdrs[2].ExtraFields["FileSeqNr"], "0") != "311" ||
+			strings.Trim(cdrs[2].ExtraFields["NrOfCdrs"], "0") != "5" ||
+			strings.Trim(cdrs[2].ExtraFields["TotalDuration"], "0") != "964" {
+			t.Errorf("%s: unexpected CDR received: <%+v>", "CDR0000330", utils.ToJSON(cdrs[2]))
+		}
 	}
 }
 
