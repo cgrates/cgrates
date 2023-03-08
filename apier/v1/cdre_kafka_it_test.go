@@ -23,10 +23,12 @@ package v1
 
 import (
 	"context"
+	"net"
 	"net/rpc"
 	"path"
 	"reflect"
 	"sort"
+	"strconv"
 	"testing"
 	"time"
 
@@ -49,6 +51,7 @@ var (
 		testKafkaStartEngine,
 		testKafkaRPCConn,
 		testKafkaAddCDRs,
+		testKafkaCreateTopic,
 		testKafkaExportCDRs,
 		testKafkaVerifyExport,
 		testKafkaDeleteTopic,
@@ -193,6 +196,37 @@ func testKafkaAddCDRs(t *testing.T) {
 	time.Sleep(100 * time.Millisecond)
 }
 
+func testKafkaCreateTopic(t *testing.T) {
+	conn, err := kafka.Dial("tcp", "localhost:9092")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer conn.Close()
+
+	controller, err := conn.Controller()
+	if err != nil {
+		t.Fatal(err)
+	}
+	controllerConn, err := kafka.Dial("tcp", net.JoinHostPort(controller.Host, strconv.Itoa(controller.Port)))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer controllerConn.Close()
+
+	topicConfigs := []kafka.TopicConfig{
+		{
+			Topic:             "cgrates_cdrs",
+			NumPartitions:     1,
+			ReplicationFactor: 1,
+		},
+	}
+
+	err = controllerConn.CreateTopics(topicConfigs...)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
 func testKafkaExportCDRs(t *testing.T) {
 	attr := ArgExportCDRs{
 		ExportArgs: map[string]interface{}{
@@ -246,7 +280,7 @@ func testKafkaVerifyExport(t *testing.T) {
 		if !reflect.DeepEqual(rcvCDRs, expCDRs) {
 			t.Errorf("expected: <%+v>, \nreceived: <%+v>", expCDRs, rcvCDRs)
 		}
-	case <-time.After(30 * time.Second):
+	case <-time.After(20 * time.Second):
 		t.Error("Timeout: Failed to consume the messages in due time")
 	}
 
