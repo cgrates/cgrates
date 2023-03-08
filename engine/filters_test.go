@@ -1504,6 +1504,9 @@ func TestRemoveItemFromIndexRP(t *testing.T) {
 	if err := fltInd.RemoveItemFromIndex("cgrates.org", rs.ID, []string{}); err != nil {
 		t.Error(err)
 	}
+	if err := dm.RemoveResourceProfile("cgrates.org", rs.ID, utils.NonTransactional, true); err != nil {
+		t.Error(err)
+	}
 }
 
 func TestRemoveItemFromIndexCHP(t *testing.T) {
@@ -1875,4 +1878,184 @@ func TestRemoveItemFromIndexDP(t *testing.T) {
 	if err := fltrIndexer.RemoveItemFromIndex(dpp.Tenant, dpp.ID, []string{}); err != nil {
 		t.Error(err)
 	}
+}
+
+func TestUpdateFilterIndexes(t *testing.T) {
+
+	cfg, _ := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+
+	oldFlt := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "FLTR_1",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaString,
+				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Account,
+				Values:  []string{"1001", "1002"},
+			},
+			{
+				Type:    "*prefix",
+				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Destination,
+				Values:  []string{"10", "20"},
+			},
+			{
+				Type:    "*rsr",
+				Element: "",
+				Values:  []string{"~*req.Subject(~^1.*1$)", "~*req.Destination(1002)"},
+			},
+		},
+	}
+	if err := dm.SetFilter(oldFlt); err != nil {
+		t.Error(err)
+	}
+	chg := &ChargerProfile{
+		Tenant:    "cgrates.org",
+		ID:        "CPP_3",
+		FilterIDs: []string{"FLTR_1"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+		},
+		RunID:        "*rated",
+		AttributeIDs: []string{"ATTR_1"},
+		Weight:       20,
+	}
+
+	if err := dm.SetChargerProfile(chg, true); err != nil {
+		t.Error(err)
+	}
+	thP := &ThresholdProfile{
+		Tenant:    "cgrates.org",
+		ID:        "THD_ACNT_1001",
+		FilterIDs: []string{"FLTR_1"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 29, 15, 0, 0, 0, time.UTC),
+		},
+		MaxHits:   1,
+		MinHits:   1,
+		MinSleep:  time.Duration(1 * time.Second),
+		Weight:    10.0,
+		ActionIDs: []string{"ACT_LOG_WARNING"},
+		Async:     true,
+	}
+	if err := dm.SetThresholdProfile(thP, true); err != nil {
+		t.Error(err)
+	}
+	rcf := &ResourceProfile{
+		Tenant:    "cgrates.org",
+		ID:        "RCFG1",
+		FilterIDs: []string{"FLTR_1"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+		},
+		UsageTTL:          time.Duration(10) * time.Microsecond,
+		Limit:             10,
+		AllocationMessage: "MessageAllocation",
+		Blocker:           true,
+		Stored:            true,
+		Weight:            20,
+	}
+	if err := dm.SetResourceProfile(rcf, true); err != nil {
+		t.Error(err)
+	}
+	supp := &SupplierProfile{
+		Tenant:    "cgrates.org",
+		ID:        "SPL_DESTINATION",
+		FilterIDs: []string{"FLTR_1"},
+		Sorting:   utils.MetaLC,
+		Suppliers: []*Supplier{
+			{
+				ID:            "local",
+				RatingPlanIDs: []string{"RP_LOCAL"},
+				Weight:        10,
+			},
+			{
+				ID:            "mobile",
+				RatingPlanIDs: []string{"RP_MOBILE"},
+				FilterIDs:     []string{"*destinations:~*req.Destination:DST_MOBILE"},
+				Weight:        10,
+			},
+		},
+		Weight: 100,
+	}
+	if err := dm.SetSupplierProfile(supp, true); err != nil {
+		t.Error(err)
+	}
+	stat := &StatQueueProfile{
+		Tenant:    "cgrates.org",
+		ID:        "TEST_PROFILE1",
+		FilterIDs: []string{"FLTR_1"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+		},
+		QueueLength: 10,
+		TTL:         time.Duration(10) * time.Second,
+		Metrics: []*MetricWithFilters{
+			{
+				MetricID: utils.MetaACD,
+			},
+		},
+		ThresholdIDs: []string{"THD_ACNT_1001"},
+		Blocker:      true,
+		Stored:       true,
+		Weight:       20,
+		MinItems:     1,
+	}
+	if err := dm.SetStatQueueProfile(stat, true); err != nil {
+		t.Error(err)
+	}
+	attr := &AttributeProfile{
+		Tenant:    "cgrates.org",
+		ID:        "ApierTest",
+		Contexts:  []string{utils.META_ANY},
+		FilterIDs: []string{"FLTR_1"},
+		Attributes: []*Attribute{
+			{
+				Path:  utils.MetaReq + utils.NestingSep + utils.Subject,
+				Value: config.NewRSRParsersMustCompile("1011", true, utils.INFIELD_SEP),
+			},
+		},
+		Weight: 20,
+	}
+	if err := dm.SetAttributeProfile(attr, true); err != nil {
+		t.Error(err)
+	}
+	dpp := &DispatcherProfile{
+		Tenant:     "cgrates.org",
+		ID:         "DSP_Test1",
+		FilterIDs:  []string{"FLTR_1"},
+		Strategy:   utils.MetaFirst,
+		Subsystems: []string{utils.MetaAttributes, utils.MetaSessionS},
+		Weight:     20,
+	}
+	if err := dm.SetDispatcherProfile(dpp, true); err != nil {
+		t.Error(err)
+	}
+	newFlt := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "FLTR_1",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaString,
+				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Account,
+				Values:  []string{"1001"},
+			},
+			{
+				Type:    utils.MetaString,
+				Element: "~*req.Subject",
+				Values:  []string{"1001"},
+			},
+			{
+				Type:    utils.MetaRSR,
+				Element: utils.EmptyString,
+				Values:  []string{"~*req.Tenant(~^cgr.*\\.org$)"},
+			},
+		},
+	}
+	if err := UpdateFilterIndexes(dm, "cgrates.org", oldFlt, newFlt); err != nil {
+		t.Error(err)
+	}
+
 }

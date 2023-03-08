@@ -865,3 +865,49 @@ func TestSupplierServiceGetSPForEvent(t *testing.T) {
 		t.Errorf("expected %v,received %v", utils.ToJSON([]*SupplierProfile{supplier}), utils.ToJSON(reply))
 	}
 }
+
+func TestV1GetSuppliersWithAttributeS(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	cfg.SupplierSCfg().AttributeSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}
+	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn <- &ccMock{
+		calls: map[string]func(args interface{}, reply interface{}) error{
+			utils.AttributeSv1ProcessEvent: func(args, reply interface{}) error {
+
+				return utils.ErrNotFound
+			},
+		},
+	}
+	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes): clientConn,
+	})
+	spS, err := NewSupplierService(dm, nil, cfg, connMgr)
+	if err != nil {
+		t.Error(err)
+	}
+	args := &ArgsGetSuppliers{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     utils.UUIDSha1Prefix(),
+			Event: map[string]interface{}{
+				utils.EVENT_NAME:  "Event1",
+				utils.Account:     "1002",
+				utils.Subject:     "1002",
+				utils.Destination: "1001",
+				utils.SetupTime:   time.Date(2017, 12, 1, 14, 25, 0, 0, time.UTC),
+				utils.Usage:       "1m20s",
+			},
+		},
+		ArgDispatcher: &utils.ArgDispatcher{
+			APIKey: utils.StringPointer("sup12345"),
+		},
+	}
+	var reply SortedSuppliers
+
+	if err := spS.V1GetSuppliers(args, &reply); err == nil {
+		t.Error(err)
+	}
+
+}
