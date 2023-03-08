@@ -1694,7 +1694,7 @@ func (dm *DataManager) RemoveDispatcherProfile(ctx *context.Context, tenant, id 
 		return utils.ErrNoDatabaseConn
 	}
 	oldDpp, err := dm.GetDispatcherProfile(ctx, tenant, id, true, false, utils.NonTransactional)
-	if err != nil && err != utils.ErrNotFound {
+	if err != nil && err != utils.ErrDSPProfileNotFound {
 		return err
 	}
 	if err = dm.DataDB().RemoveDispatcherProfileDrv(ctx, tenant, id); err != nil {
