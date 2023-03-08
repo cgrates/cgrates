@@ -6862,7 +6862,7 @@ func TestDMRemoveAttributeProfileNilOldAttrErr(t *testing.T) {
 
 }
 
-func TestDMRemoveAttributeProfileDrvRmvItemFromFiltrIndexErr(t *testing.T) {
+func TestDMRemoveAttributeProfileRmvItemFromFiltrIndexErr(t *testing.T) {
 
 	Cache.Clear(nil)
 
@@ -6976,5 +6976,451 @@ func TestDMRemoveAttributeProfileReplicate(t *testing.T) {
 
 	// tests replicate
 	dm.RemoveAttributeProfile(context.Background(), attrPrfl.Tenant, attrPrfl.ID, false)
+
+}
+
+func TestDMRemoveChargerProfileNoDMErr(t *testing.T) {
+	var dm *DataManager
+	err := dm.RemoveChargerProfile(context.Background(), "cgrates.org", "cp_1", false)
+	if err != utils.ErrNoDatabaseConn {
+		t.Errorf("\nExpected error <%+v>, \nReceived error <%+v>", utils.ErrNoDatabaseConn, err)
+	}
+}
+
+func TestDMRemoveChargerProfileGetChargerProfileErr(t *testing.T) {
+
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	data := &DataDBMock{
+		GetChargerProfileDrvF: func(ctx *context.Context, tnt, id string) (*ChargerProfile, error) {
+			return &ChargerProfile{}, utils.ErrNotImplemented
+		},
+	}
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	cpp := &ChargerProfile{
+		Tenant:       "cgrates.org",
+		ID:           "CPP_1",
+		FilterIDs:    []string{"FLTR_CP_1"},
+		RunID:        "TestRunID",
+		AttributeIDs: []string{"*none"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
+	}
+
+	err := dm.RemoveChargerProfile(context.Background(), cpp.Tenant, cpp.ID, false)
+	if err != utils.ErrNotImplemented {
+		t.Errorf("\nExpected error <%+v>, \nReceived error <%+v>", utils.ErrNotImplemented, err)
+	}
+
+}
+
+func TestDMRemoveChargerProfileRemoveChargerProfileDrvErr(t *testing.T) {
+
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	data := &DataDBMock{
+		GetChargerProfileDrvF: func(ctx *context.Context, tnt, id string) (*ChargerProfile, error) {
+			return &ChargerProfile{}, nil
+		},
+	}
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	cpp := &ChargerProfile{
+		Tenant:       "cgrates.org",
+		ID:           "CPP_1",
+		FilterIDs:    []string{"FLTR_CP_1"},
+		RunID:        "TestRunID",
+		AttributeIDs: []string{"*none"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
+	}
+
+	err := dm.RemoveChargerProfile(context.Background(), cpp.Tenant, cpp.ID, false)
+	if err != utils.ErrNotImplemented {
+		t.Errorf("\nExpected error <%+v>, \nReceived error <%+v>", utils.ErrNotImplemented, err)
+	}
+
+}
+
+func TestDMRemoveChargerProfileNilOldCppErr(t *testing.T) {
+
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	var Id string
+	var tnt string
+	err := dm.RemoveChargerProfile(context.Background(), tnt, Id, false)
+	if err != utils.ErrNotFound {
+		t.Errorf("\nExpected error <%+v>, \nReceived error <%+v>", utils.ErrNotFound, err)
+	}
+
+}
+
+func TestDMRemoveChargerProfileRmvItemFromFiltrIndexErr(t *testing.T) {
+
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	data := &DataDBMock{
+		GetChargerProfileDrvF: func(ctx *context.Context, tnt, id string) (*ChargerProfile, error) {
+			return &ChargerProfile{}, nil
+		},
+		RemoveChargerProfileDrvF: func(ctx *context.Context, chr, rpl string) error { return nil },
+	}
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	cpp := &ChargerProfile{
+		Tenant:       "cgrates.org",
+		ID:           "CPP_1",
+		FilterIDs:    []string{"FLTR_CP_1"},
+		RunID:        "TestRunID",
+		AttributeIDs: []string{"*none"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
+	}
+
+	err := dm.RemoveChargerProfile(context.Background(), cpp.Tenant, cpp.ID, true)
+	if err != utils.ErrNotImplemented {
+		t.Errorf("\nExpected error <%+v>, \nReceived error <%+v>", utils.ErrNotImplemented, err)
+	}
+
+}
+
+func TestDMRemoveChargerProfileRmvIndexFiltersItemErr(t *testing.T) {
+
+	Cache.Clear(nil)
+
+	cpp := &ChargerProfile{
+		Tenant:       "cgrates.org",
+		ID:           "CPP_1",
+		FilterIDs:    []string{"FLTR_CP_1"},
+		RunID:        "TestRunID",
+		AttributeIDs: []string{"*none"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
+	}
+
+	cfg := config.NewDefaultCGRConfig()
+	data := &DataDBMock{
+		GetChargerProfileDrvF: func(ctx *context.Context, tnt, id string) (*ChargerProfile, error) {
+			return cpp, nil
+		},
+		RemoveChargerProfileDrvF: func(ctx *context.Context, chr, rpl string) error { return nil },
+	}
+
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	err := dm.RemoveChargerProfile(context.Background(), cpp.Tenant, cpp.ID, true)
+	if err != utils.ErrNotImplemented {
+		t.Errorf("\nExpected error <%+v>, \nReceived error <%+v>", utils.ErrNotImplemented, err)
+	}
+
+}
+
+func TestDMRemoveChargerProfileReplicate(t *testing.T) {
+
+	cfgtmp := config.CgrConfig()
+	defer func() {
+		config.SetCgrConfig(cfgtmp)
+	}()
+	Cache.Clear(nil)
+
+	cpp := &ChargerProfile{
+		Tenant:       "cgrates.org",
+		ID:           "CPP_1",
+		FilterIDs:    []string{"FLTR_CP_1"},
+		RunID:        "TestRunID",
+		AttributeIDs: []string{"*none"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
+	}
+
+	cfg := config.NewDefaultCGRConfig()
+	cfg.DataDbCfg().Items[utils.MetaChargerProfiles].Replicate = true
+	cfg.DataDbCfg().RplConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
+	config.SetCgrConfig(cfg)
+
+	cc := make(chan birpc.ClientConnector, 1)
+	cc <- &ccMock{
+
+		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+			utils.ReplicatorSv1RemoveChargerProfile: func(ctx *context.Context, args, reply interface{}) error { return utils.ErrNotImplemented },
+		},
+	}
+
+	cM := NewConnManager(cfg)
+	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.ReplicatorSv1, cc)
+	data := &DataDBMock{
+		GetChargerProfileDrvF: func(ctx *context.Context, tnt, id string) (*ChargerProfile, error) {
+			return cpp, nil
+		},
+		RemoveChargerProfileDrvF: func(ctx *context.Context, chr, rpl string) error { return nil },
+	}
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	// tests replicate
+	dm.RemoveChargerProfile(context.Background(), cpp.Tenant, cpp.ID, false)
+
+}
+
+func TestDMRemoveDispatcherProfileNoDMErr(t *testing.T) {
+	var dm *DataManager
+	err := dm.RemoveDispatcherProfile(context.Background(), "cgrates.org", "dp_1", false)
+	if err != utils.ErrNoDatabaseConn {
+		t.Errorf("\nExpected error <%+v>, \nReceived error <%+v>", utils.ErrNoDatabaseConn, err)
+	}
+}
+
+func TestDMRemoveDispatcherProfileGetDispatcherProfileErr(t *testing.T) {
+
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	data := &DataDBMock{
+		GetDispatcherProfileDrvF: func(ctx *context.Context, s1, s2 string) (*DispatcherProfile, error) {
+			return &DispatcherProfile{}, utils.ErrNotImplemented
+		},
+	}
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	dpp := &DispatcherProfile{
+
+		Tenant:         "cgrates.org",
+		ID:             "ID",
+		FilterIDs:      []string{"fltr1"},
+		Weight:         65,
+		Strategy:       utils.MetaLoad,
+		StrategyParams: map[string]interface{}{"k": "v"},
+		Hosts: DispatcherHostProfiles{
+			{
+				ID:        "C3",
+				FilterIDs: []string{"fltr2"},
+				Weight:    20,
+				Params:    map[string]interface{}{},
+				Blocker:   true,
+			},
+		},
+	}
+
+	err := dm.RemoveDispatcherProfile(context.Background(), dpp.Tenant, dpp.ID, false)
+	if err != utils.ErrNotImplemented {
+		t.Errorf("\nExpected error <%+v>, \nReceived error <%+v>", utils.ErrNotImplemented, err)
+	}
+
+}
+
+func TestDMRemoveDispatcherProfileRemoveDispatcherProfileDrvErr(t *testing.T) {
+
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	data := &DataDBMock{
+		GetDispatcherProfileDrvF: func(ctx *context.Context, s1, s2 string) (*DispatcherProfile, error) {
+			return &DispatcherProfile{}, nil
+		},
+	}
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	dpp := &DispatcherProfile{
+
+		Tenant:         "cgrates.org",
+		ID:             "ID",
+		FilterIDs:      []string{"fltr1"},
+		Weight:         65,
+		Strategy:       utils.MetaLoad,
+		StrategyParams: map[string]interface{}{"k": "v"},
+		Hosts: DispatcherHostProfiles{
+			{
+				ID:        "C3",
+				FilterIDs: []string{"fltr2"},
+				Weight:    20,
+				Params:    map[string]interface{}{},
+				Blocker:   true,
+			},
+		},
+	}
+
+	err := dm.RemoveDispatcherProfile(context.Background(), dpp.Tenant, dpp.ID, false)
+	if err != utils.ErrNotImplemented {
+		t.Errorf("\nExpected error <%+v>, \nReceived error <%+v>", utils.ErrNotImplemented, err)
+	}
+
+}
+
+func TestDMRemoveDispatcherProfileNilOldDppErr(t *testing.T) {
+
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	var Id string
+	var tnt string
+	err := dm.RemoveDispatcherProfile(context.Background(), tnt, Id, false)
+	if err != utils.ErrDSPProfileNotFound {
+		t.Errorf("\nExpected error <%+v>, \nReceived error <%+v>", utils.ErrNotFound, err)
+	}
+
+}
+
+func TestDMRemoveDispatcherProfileRmvItemFromFiltrIndexErr(t *testing.T) {
+
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	data := &DataDBMock{
+		GetDispatcherProfileDrvF: func(ctx *context.Context, s1, s2 string) (*DispatcherProfile, error) {
+			return &DispatcherProfile{}, nil
+		},
+		RemoveDispatcherProfileDrvF: func(ctx *context.Context, s1, s2 string) error { return nil },
+	}
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	dpp := &DispatcherProfile{
+
+		Tenant:         "cgrates.org",
+		ID:             "ID",
+		FilterIDs:      []string{"fltr1"},
+		Weight:         65,
+		Strategy:       utils.MetaLoad,
+		StrategyParams: map[string]interface{}{"k": "v"},
+		Hosts: DispatcherHostProfiles{
+			{
+				ID:        "C3",
+				FilterIDs: []string{"fltr2"},
+				Weight:    20,
+				Params:    map[string]interface{}{},
+				Blocker:   true,
+			},
+		},
+	}
+
+	err := dm.RemoveDispatcherProfile(context.Background(), dpp.Tenant, dpp.ID, true)
+	if err != utils.ErrNotImplemented {
+		t.Errorf("\nExpected error <%+v>, \nReceived error <%+v>", utils.ErrNotImplemented, err)
+	}
+
+}
+
+func TestDMRemoveDispatcherProfileRmvIndexFiltersItemErr(t *testing.T) {
+
+	Cache.Clear(nil)
+
+	dpp := &DispatcherProfile{
+
+		Tenant:         "cgrates.org",
+		ID:             "ID",
+		FilterIDs:      []string{"fltr1"},
+		Weight:         65,
+		Strategy:       utils.MetaLoad,
+		StrategyParams: map[string]interface{}{"k": "v"},
+		Hosts: DispatcherHostProfiles{
+			{
+				ID:        "C3",
+				FilterIDs: []string{"fltr2"},
+				Weight:    20,
+				Params:    map[string]interface{}{},
+				Blocker:   true,
+			},
+		},
+	}
+
+	cfg := config.NewDefaultCGRConfig()
+	data := &DataDBMock{
+		GetDispatcherProfileDrvF:    func(ctx *context.Context, s1, s2 string) (*DispatcherProfile, error) { return dpp, nil },
+		RemoveDispatcherProfileDrvF: func(ctx *context.Context, s1, s2 string) error { return nil },
+	}
+
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	err := dm.RemoveDispatcherProfile(context.Background(), dpp.Tenant, dpp.ID, true)
+	if err != utils.ErrNotImplemented {
+		t.Errorf("\nExpected error <%+v>, \nReceived error <%+v>", utils.ErrNotImplemented, err)
+	}
+
+}
+
+func TestDMRemoveDispatcherProfileReplicate(t *testing.T) {
+
+	cfgtmp := config.CgrConfig()
+	defer func() {
+		config.SetCgrConfig(cfgtmp)
+	}()
+	Cache.Clear(nil)
+
+	dpp := &DispatcherProfile{
+
+		Tenant:         "cgrates.org",
+		ID:             "ID",
+		FilterIDs:      []string{"fltr1"},
+		Weight:         65,
+		Strategy:       utils.MetaLoad,
+		StrategyParams: map[string]interface{}{"k": "v"},
+		Hosts: DispatcherHostProfiles{
+			{
+				ID:        "C3",
+				FilterIDs: []string{"fltr2"},
+				Weight:    20,
+				Params:    map[string]interface{}{},
+				Blocker:   true,
+			},
+		},
+	}
+
+	cfg := config.NewDefaultCGRConfig()
+	cfg.DataDbCfg().Items[utils.MetaDispatcherProfiles].Replicate = true
+	cfg.DataDbCfg().RplConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
+	config.SetCgrConfig(cfg)
+
+	cc := make(chan birpc.ClientConnector, 1)
+	cc <- &ccMock{
+
+		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+			utils.ReplicatorSv1RemoveDispatcherProfile: func(ctx *context.Context, args, reply interface{}) error { return utils.ErrNotImplemented },
+		},
+	}
+
+	cM := NewConnManager(cfg)
+	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.ReplicatorSv1, cc)
+	data := &DataDBMock{
+		GetDispatcherProfileDrvF:    func(ctx *context.Context, s1, s2 string) (*DispatcherProfile, error) { return dpp, nil },
+		RemoveDispatcherProfileDrvF: func(ctx *context.Context, s1, s2 string) error { return nil },
+	}
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	// tests replicate
+	dm.RemoveDispatcherProfile(context.Background(), dpp.Tenant, dpp.ID, false)
 
 }
