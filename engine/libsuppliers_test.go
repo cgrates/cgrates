@@ -779,5 +779,71 @@ func TestSortSuppliersSortResourceAscendent(t *testing.T) {
 	if _, err := hCostSort.SortSuppliers("HCS_SUPP", suppls, suplEv, spl, nil); err != nil {
 		t.Error(err)
 	}
+}
 
+func TestPopulateSortingDataStatMetrics(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	cfg.SupplierSCfg().StatSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStatS)}
+	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn <- &ccMock{
+		calls: map[string]func(args interface{}, reply interface{}) error{
+			utils.StatSv1GetQueueFloatMetrics: func(args, reply interface{}) error {
+				rpl := map[string]float64{
+					"metric1": 22.1,
+				}
+				*reply.(*map[string]float64) = rpl
+				return nil
+			},
+		},
+	}
+	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStatS): clientConn,
+	})
+	spS, err := NewSupplierService(dm, nil, cfg, connMgr)
+	if err != nil {
+		t.Error(err)
+	}
+
+	suppls := &Supplier{
+		ID:          "supplier2",
+		ResourceIDs: []string{"ResourceSupplier2"},
+		StatIDs:     []string{"Stat1"},
+		Weight:      20,
+		Blocker:     false,
+		cacheSupplier: map[string]interface{}{
+			utils.MetaRatio: 3.3,
+		},
+	}
+
+	suplEv := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "utils.CGREvent1",
+		Event: map[string]interface{}{
+			"Account":        "1001",
+			"Destination":    "1002",
+			"Supplier":       "SupplierProfile2",
+			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
+			"UsageInterval":  "1s",
+			"PddInterval":    "1s",
+			utils.SetupTime:  time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+			"Weight":         "20.0",
+		},
+	}
+	spl := &optsGetSuppliers{
+		maxCost: 25.0,
+		sortingParameters: []string{
+			"ResourceUsage",
+		},
+		sortingStragety: utils.MetaReload,
+	}
+
+	if _, pass, err := spS.populateSortingData(suplEv, suppls, spl, nil); err != nil || !pass {
+		t.Error(err)
+	}
+	spl.sortingStragety = utils.MetaLoad
+	if _, pass, err := spS.populateSortingData(suplEv, suppls, spl, nil); err != nil || !pass {
+		t.Error(err)
+	}
 }
