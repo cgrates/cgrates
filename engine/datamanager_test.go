@@ -136,8 +136,25 @@ func TestDmSetSupplierProfileRpl(t *testing.T) {
 
 func TestDmMatchFilterIndexFromKey(t *testing.T) {
 	cfg, _ := config.NewDefaultCGRConfig()
+	defer func() {
+		cfg2, _ := config.NewDefaultCGRConfig()
+		config.SetCgrConfig(cfg2)
+	}()
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	cfg.DataDbCfg().Items[utils.MetaFilterIndexes].Remote = true
+	cfg.DataDbCfg().RmtConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1)}
+	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn <- &ccMock{
+		calls: map[string]func(args interface{}, reply interface{}) error{
+			utils.ReplicatorSv1MatchFilterIndex: func(args, reply interface{}) error {
+				return nil
+			},
+		},
+	}
+	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
+	})
+	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
 	fltr := &Filter{
 		Tenant: "cgrates.org",
 		ID:     "RES_FLT_1",
@@ -164,6 +181,7 @@ func TestDmMatchFilterIndexFromKey(t *testing.T) {
 	if err := dm.SetResourceProfile(rp, true); err != nil {
 		t.Error(err)
 	}
+	config.SetCgrConfig(cfg)
 	if err := dm.MatchFilterIndexFromKey(utils.CacheResourceFilterIndexes, "cgrates.org:*string:Account:1002"); err == nil {
 		t.Error(err)
 	}

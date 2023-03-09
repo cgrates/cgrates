@@ -911,3 +911,64 @@ func TestV1GetSuppliersWithAttributeS(t *testing.T) {
 	}
 
 }
+
+func TestSupplierServicePopulateSortingData(t *testing.T) {
+	cfg, err := config.NewDefaultCGRConfig()
+	if err != nil {
+		t.Error(err)
+	}
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	fltr := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "FLTR_2",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaString,
+				Element: "~*req.Supplier",
+				Values:  []string{"SupplierProfile2"},
+			},
+			{
+				Type:    utils.MetaGreaterOrEqual,
+				Element: "~*req.PddInterval",
+				Values:  []string{(1 * time.Second).String()},
+			},
+			{
+				Type:    utils.MetaGreaterOrEqual,
+				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Weight,
+				Values:  []string{"15.0"},
+			},
+		},
+	}
+	if err := dm.SetFilter(fltr); err != nil {
+		t.Error(err)
+	}
+	spl, err := NewSupplierService(dm, NewFilterS(cfg, nil, dm), cfg, nil)
+	if err != nil {
+		t.Error(err)
+	}
+
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "utils.CGREvent1",
+		Event: map[string]interface{}{
+			"Supplier":       "SupplierProfile2",
+			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
+			"UsageInterval":  "1s",
+			"PddInterval":    "1s",
+			"Weight":         "20.0",
+		},
+	}
+	sup := &Supplier{
+		ID:                 "SPL2",
+		FilterIDs:          []string{"FLTR_2"},
+		Weight:             20,
+		Blocker:            true,
+		SupplierParameters: "SortingParameter2",
+	}
+	extraOpt := &optsGetSuppliers{}
+
+	if _, pass, err := spl.populateSortingData(ev, sup, extraOpt, nil); err != nil || !pass {
+		t.Error(err)
+	}
+}

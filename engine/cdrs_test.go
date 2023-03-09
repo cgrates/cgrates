@@ -20,11 +20,12 @@ package engine
 
 import (
 	"fmt"
+	"testing"
+	"time"
+
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
-	"testing"
-	"time"
 )
 
 type clMock func(_ string, _ interface{}, _ interface{}) error
@@ -221,5 +222,49 @@ func TestCDRSV1V1ProcessExternalCDRNoTenant(t *testing.T) {
 
 	if err := cdrs.V1ProcessExternalCDR(args, &reply); err != nil {
 		t.Error(err)
+	}
+}
+
+func TestCDRSRateExportCDRS(t *testing.T) {
+	cfg, err := config.NewDefaultCGRConfig()
+	if err != nil {
+		t.Error(err)
+	}
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	cfg.CdrsCfg().OnlineCDRExports = []string{"stringy"}
+	cfg.CdreProfiles = map[string]*config.CdreCfg{"stringy": {}}
+	cdrs := &CDRServer{
+		cgrCfg:  cfg,
+		connMgr: nil,
+		cdrDb:   db,
+		dm:      dm,
+	}
+	cdr := &CDR{
+		ToR:         utils.VOICE,
+		OriginID:    "testDspCDRsProcessExternalCDR",
+		OriginHost:  "127.0.0.1",
+		Source:      utils.UNIT_TEST,
+		RequestType: utils.META_RATED,
+		Tenant:      "cgrates.org",
+		Category:    "call",
+		Account:     "1003",
+		Subject:     "1003",
+		Destination: "1001",
+
+		Usage: time.Second,
+	}
+	if err := cdrs.cdrDb.SetCDR(cdr, true); err != nil {
+		t.Error(err)
+	}
+	arg := &ArgRateCDRs{
+		Flags:         []string{"*export:true"},
+		RPCCDRsFilter: utils.RPCCDRsFilter{},
+	}
+	var reply string
+	if err := cdrs.V1RateCDRs(arg, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Expected ok ,received %v", reply)
 	}
 }
