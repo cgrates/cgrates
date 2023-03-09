@@ -401,3 +401,217 @@ func TestStatQueuesV1ProcessEvent(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
 	}
 }
+
+func TestStatQueueFloatMetrics(t *testing.T) {
+	cfg, err := config.NewDefaultCGRConfig()
+	if err != nil {
+		t.Error(err)
+	}
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+
+	sS, err := NewStatService(dm, cfg, nil, nil)
+	if err != nil {
+		t.Error(err)
+	}
+	sq := &StatQueue{
+		Tenant: "cgrates.org",
+		ID:     "TestStats",
+		SQItems: []SQItem{
+			{EventID: "cgrates.org:ev1"},
+			{EventID: "cgrates.org:ev2"},
+			{EventID: "cgrates.org:ev3"},
+		},
+		SQMetrics: map[string]StatMetric{
+			utils.MetaASR: &StatASR{
+				Answered: 2,
+				Count:    3,
+				Events: map[string]*StatWithCompress{
+					"cgrates.org:ev1": {Stat: 1},
+					"cgrates.org:ev2": {Stat: 1},
+					"cgrates.org:ev3": {Stat: 0},
+				},
+			},
+		},
+	}
+	dm.SetStatQueue(sq)
+	args := &utils.TenantID{
+		Tenant: "cgrates.org",
+		ID:     "TestStats",
+	}
+	var reply map[string]float64
+	exp := map[string]float64{
+		utils.MetaASR: 66.66667,
+	}
+	if err := sS.V1GetQueueFloatMetrics(args, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(reply, exp) {
+		t.Errorf("Expected %v,Received %v", utils.ToJSON(exp), utils.ToJSON(reply))
+	}
+}
+
+func TestStatStoreStatQueue(t *testing.T) {
+	cfg, err := config.NewDefaultCGRConfig()
+	if err != nil {
+		t.Error(err)
+	}
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+
+	sS, err := NewStatService(dm, cfg, nil, nil)
+	if err != nil {
+		t.Error(err)
+	}
+	sq := &StatQueue{
+		dirty: utils.BoolPointer(true),
+		SQMetrics: map[string]StatMetric{
+			utils.MetaASR: &StatASR{
+				Answered: 1,
+				Count:    1,
+				Events: map[string]*StatWithCompress{
+					"cgrates.org:TestStatRemExpired_1": {Stat: 1, CompressFactor: 1},
+				},
+			},
+		},
+		sqPrfl: &StatQueueProfile{
+			QueueLength: 2, //unlimited que
+		},
+	}
+	if err := sS.StoreStatQueue(sq); err != nil {
+		t.Error(err)
+	} else if *sq.dirty {
+		t.Error("Expected false")
+	}
+}
+
+func TestStatsGetStatQueuesForEvent(t *testing.T) {
+	cfg, err := config.NewDefaultCGRConfig()
+	if err != nil {
+		t.Error(err)
+	}
+	Cache.Clear(nil)
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	sS, err := NewStatService(dm, cfg, NewFilterS(cfg, nil, dm), nil)
+	if err != nil {
+		t.Error(err)
+	}
+	args := &StatsArgsProcessEvent{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     utils.GenUUID(),
+			Event: map[string]interface{}{
+				"Stat":           "Stat1_1",
+				utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+				utils.Usage:      time.Duration(11 * time.Second),
+				utils.COST:       12.5,
+				utils.PDD:        time.Duration(12 * time.Second),
+			},
+		},
+	}
+	fltr := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "FLTR_STAT_1",
+		Rules: []*FilterRule{{
+			Type:    "*string",
+			Element: "~*req.Stat",
+			Values:  []string{"Stat1_1"},
+		},
+		},
+	}
+	dm.SetFilter(fltr)
+	sqP := &StatQueueProfile{
+		Tenant: "cgrates.org",
+		ID:     "Stats1",
+		FilterIDs: []string{
+			"FLTR_STAT_1",
+		},
+		QueueLength: 10,
+		TTL:         time.Duration(10) * time.Second,
+		Metrics: []*MetricWithFilters{
+			{
+				MetricID: utils.MetaACD,
+			},
+			{
+				MetricID: utils.MetaTCD,
+			},
+		},
+		ThresholdIDs: []string{"*none"},
+		Weight:       20,
+		MinItems:     1,
+	}
+	sq := &StatQueue{
+		Tenant: "cgrates.org",
+		ID:     "Stats1",
+		SQItems: []SQItem{
+			{EventID: "cgrates.org:ev1", ExpiryTime: utils.TimePointer(time.Date(2023, 12, 24, 17, 0, 0, 0, time.UTC))},
+		},
+		SQMetrics: map[string]StatMetric{
+			utils.MetaASR: &StatASR{
+				Answered: 2,
+				Count:    3,
+				Events: map[string]*StatWithCompress{
+					"cgrates.org:ev1": {Stat: 1},
+				},
+			},
+		},
+	}
+	dm.SetStatQueue(sq)
+	dm.SetStatQueueProfile(sqP, true)
+	var reply []string
+	expIds := []string{
+		"Stats1",
+	}
+	if err := sS.V1GetStatQueuesForEvent(args, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expIds, reply) {
+		t.Errorf("Expected %v,Received %v", expIds, reply)
+	}
+}
+
+func TestStatSGetQueueIDs(t *testing.T) {
+	cfg, err := config.NewDefaultCGRConfig()
+	if err != nil {
+		t.Error(err)
+	}
+	Cache.Clear(nil)
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	sS, err := NewStatService(dm, cfg, NewFilterS(cfg, nil, dm), nil)
+	if err != nil {
+		t.Error(err)
+	}
+	sqs := StatQueues{
+		&StatQueue{
+			Tenant: "cgrates.org",
+			ID:     "Stats1",
+			SQMetrics: map[string]StatMetric{
+				"*tcc":           nil,
+				"*sum:~Usage":    nil,
+				"*avreage:~Cost": nil,
+			},
+		},
+		&StatQueue{
+			Tenant: "cgrates.org",
+			ID:     "Stats2",
+			SQMetrics: map[string]StatMetric{
+				utils.MetaASR: &StatASR{
+					Answered: 2,
+					Count:    3,
+				},
+			},
+		},
+	}
+	for _, sq := range sqs {
+		dm.SetStatQueue(sq)
+	}
+	var qIDs []string
+	expqIds := []string{
+		"Stats1", "Stats2",
+	}
+	if err := sS.V1GetQueueIDs("cgrates.org", &qIDs); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expqIds, qIDs) {
+		t.Errorf("Expected %v,Received %v", expqIds, qIDs)
+	}
+}

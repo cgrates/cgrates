@@ -24,6 +24,7 @@ import (
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
 )
 
 var (
@@ -220,4 +221,136 @@ func TestChargerProcessEvent(t *testing.T) {
 	if !reflect.DeepEqual(rpl[0], rcv[0]) {
 		t.Errorf("Expecting: %+v, received: %+v ", utils.ToJSON(rpl[0]), utils.ToJSON(rcv[0]))
 	}
+}
+
+func TestChargerV1GetChargersForEvent(t *testing.T) {
+	cfg, err := config.NewDefaultCGRConfig()
+	if err != nil {
+		t.Error(err)
+	}
+	Cache.Clear(nil)
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	chgS := &ChargerService{
+		dm:      dm,
+		cfg:     cfg,
+		filterS: NewFilterS(cfg, nil, dm),
+	}
+	args := &utils.CGREventWithArgDispatcher{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     utils.GenUUID(),
+			Event: map[string]interface{}{
+				"Charger":        "ChargerProfile1",
+				utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
+				"UsageInterval":  "1s",
+				utils.Weight:     "180.0",
+			},
+		},
+	}
+	flt := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "FLTR_CP_1",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaString,
+				Element: "~*req.Charger",
+				Values:  []string{"ChargerProfile1"},
+			},
+		},
+	}
+	if err := dm.SetFilter(flt); err != nil {
+		t.Error(err)
+	}
+	chP := &ChargerProfile{
+		Tenant:    "cgrates.org",
+		ID:        "CPP_1",
+		FilterIDs: []string{"FLTR_CP_1"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+		},
+		RunID:        "TestRunID",
+		AttributeIDs: []string{"*none"},
+		Weight:       20,
+	}
+	if err := dm.SetChargerProfile(chP, true); err != nil {
+		t.Error(err)
+	}
+	var reply ChargerProfiles
+	exp := ChargerProfiles{
+		chP,
+	}
+	if err := chgS.V1GetChargersForEvent(args, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(reply, exp) {
+		t.Errorf("Expected %v,Received %v", utils.ToJSON(exp), utils.ToJSON(reply))
+	}
+
+}
+
+func TestChargerV1ProcessEvent(t *testing.T) {
+	cfg, err := config.NewDefaultCGRConfig()
+	if err != nil {
+		t.Error(err)
+	}
+	Cache.Clear(nil)
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	cfg.ChargerSCfg().AttributeSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}
+	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn <- clMock(func(_ string, _, _ interface{}) error {
+		return nil
+	})
+	connMngr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes): clientConn,
+	})
+	chgS := &ChargerService{
+		dm:      dm,
+		cfg:     cfg,
+		filterS: NewFilterS(cfg, nil, dm),
+		connMgr: connMngr,
+	}
+	args := &utils.CGREventWithArgDispatcher{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     utils.GenUUID(),
+			Event: map[string]interface{}{
+				"Charger":        "ChargerProfile1",
+				utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
+				"UsageInterval":  "1s",
+				utils.Weight:     "180.0",
+			},
+		}}
+	flt := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "FLTR_CP_1",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaString,
+				Element: "~*req.Charger",
+				Values:  []string{"ChargerProfile1"},
+			},
+		},
+	}
+	if err := dm.SetFilter(flt); err != nil {
+		t.Error(err)
+	}
+	chP := &ChargerProfile{
+		Tenant:    "cgrates.org",
+		ID:        "CPP_1",
+		FilterIDs: []string{"FLTR_CP_1"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+		},
+		RunID:        "TestRunID",
+		AttributeIDs: []string{"ATTR_1"},
+	}
+	if err := dm.SetChargerProfile(chP, true); err != nil {
+		t.Error(err)
+	}
+	var reply []*ChrgSProcessEventReply
+	if err := chgS.V1ProcessEvent(args, &reply); err != nil {
+		t.Error(err)
+	}
+
 }
