@@ -1593,7 +1593,7 @@ func TestDMGetThresholdSetThErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.CacheSv1, cc)
 	dm := NewDataManager(data, cfg.CacheCfg(), cM)
-	Cache = NewCacheS(cfg, dm, connMgr, nil)
+	Cache = NewCacheS(cfg, dm, cM, nil)
 
 	expErr := utils.ErrNotImplemented
 	_, err := dm.GetThreshold(context.Background(), utils.CGRateSorg, "TH_1", false, true, utils.NonTransactional)
@@ -2078,7 +2078,7 @@ func TestDMGetThresholdProfileSetThErr2(t *testing.T) {
 		},
 	}
 
-	Cache = NewCacheS(cfg, dm, connMgr, nil)
+	Cache = NewCacheS(cfg, dm, cM, nil)
 
 	expErr := utils.ErrNotImplemented
 	_, err := dm.GetThreshold(context.Background(), utils.CGRateSorg, "TH_1", false, true, utils.NonTransactional)
@@ -2206,7 +2206,7 @@ func TestDMGetThresholdProfileSetThPrfErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.CacheSv1, cc)
 	dm := NewDataManager(data, cfg.CacheCfg(), cM)
-	Cache = NewCacheS(cfg, dm, connMgr, nil)
+	Cache = NewCacheS(cfg, dm, cM, nil)
 
 	expErr := utils.ErrNotImplemented
 	_, err := dm.GetThresholdProfile(context.Background(), utils.CGRateSorg, "TH_1", false, true, utils.NonTransactional)
@@ -2249,7 +2249,7 @@ func TestDMGetThresholdProfileSetThPrfErr2(t *testing.T) {
 			return &ThresholdProfile{}, nil
 		},
 	}
-	Cache = NewCacheS(cfg, dm, connMgr, nil)
+	Cache = NewCacheS(cfg, dm, cM, nil)
 
 	expErr := utils.ErrNotImplemented
 	_, err := dm.GetThresholdProfile(context.Background(), utils.CGRateSorg, "TH_1", false, true, utils.NonTransactional)
@@ -3822,7 +3822,7 @@ func TestGetAPIBanErrSingleCacheWrite(t *testing.T) {
 	cM := NewConnManager(cfg)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.CacheSv1, cc)
 	dm := NewDataManager(data, cfg.CacheCfg(), cM)
-	Cache = NewCacheS(cfg, dm, connMgr, nil)
+	Cache = NewCacheS(cfg, dm, cM, nil)
 
 	if _, err := GetAPIBan(context.Background(), "1.2.3.251", []string{"testKey"}, true, false, true); err != utils.ErrNotImplemented {
 		t.Errorf("Expected error <%v>, Received error <%v>", utils.ErrNotImplemented, err)
@@ -3892,7 +3892,7 @@ func TestGetAPIBanErrMultipleCacheWrite(t *testing.T) {
 	cM := NewConnManager(cfg)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.CacheSv1, cc)
 	dm := NewDataManager(data, cfg.CacheCfg(), cM)
-	Cache = NewCacheS(cfg, dm, connMgr, nil)
+	Cache = NewCacheS(cfg, dm, cM, nil)
 
 	if _, err := GetAPIBan(context.Background(), "1.2.3.251", []string{"testKey"}, false, false, true); err != utils.ErrNotImplemented {
 		t.Errorf("Expected error <%v>, Received error <%v>", utils.ErrNotImplemented, err)
@@ -3963,7 +3963,7 @@ func TestGetAPIBanErrNoBanCacheSet(t *testing.T) {
 	cM := NewConnManager(cfg)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.CacheSv1, cc)
 	dm := NewDataManager(data, cfg.CacheCfg(), cM)
-	Cache = NewCacheS(cfg, dm, connMgr, nil)
+	Cache = NewCacheS(cfg, dm, cM, nil)
 
 	if _, err := GetAPIBan(context.Background(), "1.2.3.254", []string{}, false, false, true); err != utils.ErrNotImplemented {
 		t.Errorf("Expected error <%v>, Received error <%v>", utils.ErrNotImplemented, err)
@@ -4179,7 +4179,7 @@ func TestDMGetIndexesErrCacheSet(t *testing.T) {
 	cM := NewConnManager(cfg)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.CacheSv1, cc)
 	dm := NewDataManager(data, cfg.CacheCfg(), cM)
-	Cache = NewCacheS(cfg, dm, connMgr, nil)
+	Cache = NewCacheS(cfg, dm, cM, nil)
 
 	if _, err := dm.GetIndexes(context.Background(), utils.CacheAttributeFilterIndexes, utils.CGRateSorg, "idxKey", utils.NonTransactional, false, true); err != utils.ErrNotImplemented {
 		t.Errorf("Expected error <%v>, received error <%v>", utils.ErrNotImplemented, err)
@@ -4216,7 +4216,7 @@ func TestDMGetIndexesErrCacheWriteSet(t *testing.T) {
 	cM := NewConnManager(cfg)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.CacheSv1, cc)
 	dm := NewDataManager(data, cfg.CacheCfg(), cM)
-	Cache = NewCacheS(cfg, dm, connMgr, nil)
+	Cache = NewCacheS(cfg, dm, cM, nil)
 
 	indexes := map[string]utils.StringSet{"*string:*req.Account:1002": {"ATTR1": {}, "ATTR2": {}}}
 
@@ -6181,7 +6181,7 @@ func TestDMGetRouteProfileCacheWriteErr1(t *testing.T) {
 	}
 	dm := NewDataManager(data, cfg.CacheCfg(), cM)
 
-	Cache = NewCacheS(cfg, dm, connMgr, nil)
+	Cache = NewCacheS(cfg, dm, cM, nil)
 
 	_, err := dm.GetRouteProfile(context.Background(), utils.CGRateSorg, rp.ID, false, true, utils.NonTransactional)
 	if err != utils.ErrNotImplemented {
@@ -7288,7 +7288,7 @@ func TestDMRemoveDispatcherProfileNilOldDppErr(t *testing.T) {
 	var tnt string
 	err := dm.RemoveDispatcherProfile(context.Background(), tnt, Id, false)
 	if err != utils.ErrDSPProfileNotFound {
-		t.Errorf("\nExpected error <%+v>, \nReceived error <%+v>", utils.ErrNotFound, err)
+		t.Errorf("\nExpected error <%+v>, \nReceived error <%+v>", utils.ErrDSPProfileNotFound, err)
 	}
 
 }
@@ -7422,5 +7422,313 @@ func TestDMRemoveDispatcherProfileReplicate(t *testing.T) {
 
 	// tests replicate
 	dm.RemoveDispatcherProfile(context.Background(), dpp.Tenant, dpp.ID, false)
+
+}
+
+func TestDMRemoveRateProfileNoDMErr(t *testing.T) {
+	var dm *DataManager
+	err := dm.RemoveRateProfile(context.Background(), "cgrates.org", "Rp_1", false)
+	if err != utils.ErrNoDatabaseConn {
+		t.Errorf("\nExpected error <%+v>, \nReceived error <%+v>", utils.ErrNoDatabaseConn, err)
+	}
+}
+
+func TestDMRemoveRateProfileGetRateProfileErr(t *testing.T) {
+
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	data := &DataDBMock{
+		GetRateProfileDrvF: func(ctx *context.Context, s1, s2 string) (*utils.RateProfile, error) {
+			return &utils.RateProfile{}, utils.ErrNotImplemented
+		},
+	}
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	rpp := &utils.RateProfile{
+		ID:        "test_ID1",
+		Tenant:    "cgrates.org",
+		FilterIDs: []string{"*string:~*req.Destination:1234"},
+		Rates: map[string]*utils.Rate{
+			"RT1": {
+				ID: "RT1",
+				IntervalRates: []*utils.IntervalRate{
+					{
+						IntervalStart: utils.NewDecimal(0, 0),
+						RecurrentFee:  utils.NewDecimal(1, 2),
+						Unit:          utils.NewDecimal(int64(time.Second), 0),
+						Increment:     utils.NewDecimal(int64(time.Second), 0),
+					},
+				},
+			},
+		},
+	}
+
+	err := dm.RemoveRateProfile(context.Background(), rpp.Tenant, rpp.ID, false)
+	if err != utils.ErrNotImplemented {
+		t.Errorf("\nExpected error <%+v>, \nReceived error <%+v>", utils.ErrNotImplemented, err)
+	}
+
+}
+
+func TestDMRemoveRateProfileRemoveRateProfileDrvErr(t *testing.T) {
+
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	data := &DataDBMock{
+		GetRateProfileDrvF: func(ctx *context.Context, s1, s2 string) (*utils.RateProfile, error) {
+			return &utils.RateProfile{}, nil
+		},
+	}
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	rpp := &utils.RateProfile{
+		ID:        "test_ID1",
+		Tenant:    "cgrates.org",
+		FilterIDs: []string{"*string:~*req.Destination:1234"},
+		Rates: map[string]*utils.Rate{
+			"RT1": {
+				ID: "RT1",
+				IntervalRates: []*utils.IntervalRate{
+					{
+						IntervalStart: utils.NewDecimal(0, 0),
+						RecurrentFee:  utils.NewDecimal(1, 2),
+						Unit:          utils.NewDecimal(int64(time.Second), 0),
+						Increment:     utils.NewDecimal(int64(time.Second), 0),
+					},
+				},
+			},
+		},
+	}
+
+	err := dm.RemoveRateProfile(context.Background(), rpp.Tenant, rpp.ID, false)
+	if err != utils.ErrNotImplemented {
+		t.Errorf("\nExpected error <%+v>, \nReceived error <%+v>", utils.ErrNotImplemented, err)
+	}
+
+}
+
+func TestDMRemoveRateProfileNilOldRppErr(t *testing.T) {
+
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	var Id string
+	var tnt string
+	err := dm.RemoveRateProfile(context.Background(), tnt, Id, false)
+	if err != utils.ErrNotFound {
+		t.Errorf("\nExpected error <%+v>, \nReceived error <%+v>", utils.ErrNotFound, err)
+	}
+
+}
+
+func TestDMRemoveRateProfileRemoveIndexFiltersItemErr1(t *testing.T) {
+
+	Cache.Clear(nil)
+
+	rpp := &utils.RateProfile{
+		ID:        "test_ID1",
+		Tenant:    "cgrates.org",
+		FilterIDs: []string{"*string:~*req.Destination:1234"},
+		Rates: map[string]*utils.Rate{
+			"RT1": {
+				FilterIDs: []string{"FltrId1"},
+				ID:        "RT1",
+				IntervalRates: []*utils.IntervalRate{
+					{
+						IntervalStart: utils.NewDecimal(0, 0),
+						RecurrentFee:  utils.NewDecimal(1, 2),
+						Unit:          utils.NewDecimal(int64(time.Second), 0),
+						Increment:     utils.NewDecimal(int64(time.Second), 0),
+					},
+				},
+			},
+		},
+	}
+
+	cfg := config.NewDefaultCGRConfig()
+	data := &DataDBMock{
+		GetRateProfileDrvF: func(ctx *context.Context, s1, s2 string) (*utils.RateProfile, error) {
+			return rpp, nil
+		},
+		RemoveRateProfileDrvF: func(ctx *context.Context, str1, str2 string, rateIDs *[]string) error { return nil },
+	}
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	err := dm.RemoveRateProfile(context.Background(), rpp.Tenant, rpp.ID, true)
+	if err != utils.ErrNotImplemented {
+		t.Errorf("\nExpected error <%+v>, \nReceived error <%+v>", utils.ErrNotImplemented, err)
+	}
+
+}
+func TestDMRemoveRateProfileRemoveIndexFiltersItemErr2(t *testing.T) {
+
+	Cache.Clear(nil)
+
+	rpp := &utils.RateProfile{
+		ID:        "test_ID1",
+		Tenant:    "cgrates.org",
+		FilterIDs: []string{"fltrId1"},
+	}
+
+	cfg := config.NewDefaultCGRConfig()
+	data := &DataDBMock{
+		GetRateProfileDrvF: func(ctx *context.Context, s1, s2 string) (*utils.RateProfile, error) {
+			return rpp, nil
+		},
+		RemoveRateProfileDrvF: func(ctx *context.Context, str1, str2 string, rateIDs *[]string) error { return nil },
+	}
+
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	err := dm.RemoveRateProfile(context.Background(), rpp.Tenant, rpp.ID, true)
+	if err != utils.ErrNotImplemented {
+		t.Errorf("\nExpected error <%+v>, \nReceived error <%+v>", utils.ErrNotImplemented, err)
+	}
+
+}
+
+func TestDMRemoveRateProfileRmvItemFromFiltrIndexErr(t *testing.T) {
+
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	data := &DataDBMock{
+		GetRateProfileDrvF: func(ctx *context.Context, s1, s2 string) (*utils.RateProfile, error) {
+			return &utils.RateProfile{}, nil
+		},
+		RemoveRateProfileDrvF: func(ctx *context.Context, str1, str2 string, rateIDs *[]string) error { return nil },
+	}
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	rpp := &utils.RateProfile{
+		ID:        "test_ID1",
+		Tenant:    "cgrates.org",
+		FilterIDs: []string{"*string:~*req.Destination:1234"},
+		Rates: map[string]*utils.Rate{
+			"RT1": {
+				ID: "RT1",
+				IntervalRates: []*utils.IntervalRate{
+					{
+						IntervalStart: utils.NewDecimal(0, 0),
+						RecurrentFee:  utils.NewDecimal(1, 2),
+						Unit:          utils.NewDecimal(int64(time.Second), 0),
+						Increment:     utils.NewDecimal(int64(time.Second), 0),
+					},
+				},
+			},
+		},
+	}
+
+	err := dm.RemoveRateProfile(context.Background(), rpp.Tenant, rpp.ID, true)
+	if err != utils.ErrNotImplemented {
+		t.Errorf("\nExpected error <%+v>, \nReceived error <%+v>", utils.ErrNotImplemented, err)
+	}
+
+}
+
+func TestDMRemoveRateProfileRmvIndexFiltersItemErr(t *testing.T) {
+
+	Cache.Clear(nil)
+
+	rpp := &utils.RateProfile{
+		ID:        "test_ID1",
+		Tenant:    "cgrates.org",
+		FilterIDs: []string{"*string:~*req.Destination:1234"},
+		Rates: map[string]*utils.Rate{
+			"RT1": {
+				ID: "RT1",
+				IntervalRates: []*utils.IntervalRate{
+					{
+						IntervalStart: utils.NewDecimal(0, 0),
+						RecurrentFee:  utils.NewDecimal(1, 2),
+						Unit:          utils.NewDecimal(int64(time.Second), 0),
+						Increment:     utils.NewDecimal(int64(time.Second), 0),
+					},
+				},
+			},
+		},
+	}
+
+	cfg := config.NewDefaultCGRConfig()
+	data := &DataDBMock{
+		GetRateProfileDrvF: func(ctx *context.Context, s1, s2 string) (*utils.RateProfile, error) {
+			return rpp, nil
+		},
+		RemoveRateProfileDrvF: func(ctx *context.Context, str1, str2 string, rateIDs *[]string) error { return nil },
+	}
+
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	err := dm.RemoveRateProfile(context.Background(), rpp.Tenant, rpp.ID, true)
+	if err != utils.ErrNotImplemented {
+		t.Errorf("\nExpected error <%+v>, \nReceived error <%+v>", utils.ErrNotImplemented, err)
+	}
+
+}
+
+func TestDMRemoveRateProfileReplicate(t *testing.T) {
+
+	cfgtmp := config.CgrConfig()
+	defer func() {
+		config.SetCgrConfig(cfgtmp)
+	}()
+	Cache.Clear(nil)
+
+	rpp := &utils.RateProfile{
+		ID:        "test_ID1",
+		Tenant:    "cgrates.org",
+		FilterIDs: []string{"*string:~*req.Destination:1234"},
+		Rates: map[string]*utils.Rate{
+			"RT1": {
+				ID: "RT1",
+				IntervalRates: []*utils.IntervalRate{
+					{
+						IntervalStart: utils.NewDecimal(0, 0),
+						RecurrentFee:  utils.NewDecimal(1, 2),
+						Unit:          utils.NewDecimal(int64(time.Second), 0),
+						Increment:     utils.NewDecimal(int64(time.Second), 0),
+					},
+				},
+			},
+		},
+	}
+
+	cfg := config.NewDefaultCGRConfig()
+	cfg.DataDbCfg().Items[utils.MetaRateProfiles].Replicate = true
+	cfg.DataDbCfg().RplConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
+	config.SetCgrConfig(cfg)
+
+	cc := make(chan birpc.ClientConnector, 1)
+	cc <- &ccMock{
+
+		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+			utils.ReplicatorSv1RemoveRateProfile: func(ctx *context.Context, args, reply interface{}) error { return utils.ErrNotImplemented },
+		},
+	}
+
+	cM := NewConnManager(cfg)
+	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.ReplicatorSv1, cc)
+	data := &DataDBMock{
+		GetRateProfileDrvF: func(ctx *context.Context, s1, s2 string) (*utils.RateProfile, error) {
+			return rpp, nil
+		},
+		RemoveRateProfileDrvF: func(ctx *context.Context, str1, str2 string, rateIDs *[]string) error { return nil },
+	}
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	// tests replicate
+	dm.RemoveRateProfile(context.Background(), rpp.Tenant, rpp.ID, false)
 
 }
