@@ -19,6 +19,7 @@ package engine
 
 import (
 	"reflect"
+	"sort"
 	"testing"
 	"time"
 
@@ -611,7 +612,11 @@ func TestStatSGetQueueIDs(t *testing.T) {
 	}
 	if err := sS.V1GetQueueIDs("cgrates.org", &qIDs); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(expqIds, qIDs) {
+	}
+	sort.Slice(qIDs, func(i, j int) bool {
+		return qIDs[i] < qIDs[j]
+	})
+	if !reflect.DeepEqual(expqIds, qIDs) {
 		t.Errorf("Expected %v,Received %v", expqIds, qIDs)
 	}
 }

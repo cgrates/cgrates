@@ -474,3 +474,196 @@ func TestResponderGetMaxSessionTimeMaxUsageVOICE(t *testing.T) {
 		t.Errorf("Expected %+v, received : %+v", utils.ErrMaxUsageExceeded, err)
 	}
 }
+
+func TestResponderGetCostOnRatingPlans(t *testing.T) {
+	tmpCache := Cache
+	defer func() {
+		Cache = tmpCache
+	}()
+	arg := &utils.GetCostOnRatingPlansArgs{
+		Tenant:        "cgrates.org",
+		Account:       "test",
+		Subject:       "1001",
+		Destination:   "*any",
+		SetupTime:     time.Date(2023, 3, 10, 8, 0, 0, 0, time.UTC),
+		Usage:         20 * time.Second,
+		RatingPlanIDs: []string{"RPL1"},
+	}
+	rp := &RatingPlan{
+		Id: "RPL1",
+		Timings: map[string]*RITiming{
+			"59a981b9": {
+				Years:     utils.Years{},
+				Months:    utils.Months{},
+				MonthDays: utils.MonthDays{},
+				WeekDays:  utils.WeekDays{1, 2, 3, 4, 5},
+				StartTime: "00:00:00",
+			},
+		},
+		Ratings: map[string]*RIRate{
+			"ebefae11": {
+				ConnectFee: 0,
+				Rates: []*Rate{
+					{
+						GroupIntervalStart: 0,
+						Value:              0.2,
+						RateIncrement:      2 * time.Second,
+						RateUnit:           time.Second,
+					},
+				},
+				RoundingMethod:   utils.ROUNDING_MIDDLE,
+				RoundingDecimals: 1,
+			},
+		},
+		DestinationRates: map[string]RPRateList{
+			"*any": []*RPRate{
+				{
+					Timing: "59a981b9",
+					Rating: "ebefae11",
+					Weight: 10,
+				},
+			},
+		},
+	}
+	Cache.Set(utils.CacheRatingPlans, "RPL1", rp, []string{}, true, utils.NonTransactional)
+	var reply map[string]interface{}
+	exp := map[string]interface{}{
+		utils.Cost:         4.0,
+		utils.RatingPlanID: "RPL1",
+	}
+	if err := rsponder.GetCostOnRatingPlans(arg, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(exp, reply) {
+		t.Errorf("Expected %v,Received %v", utils.ToJSON(exp), utils.ToJSON(reply))
+	}
+}
+
+func TestResponderGetCost(t *testing.T) {
+	tmpCache := Cache
+	cfg, err := config.NewDefaultCGRConfig()
+	if err != nil {
+		t.Error(err)
+	}
+	tmpDm := dm
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+
+	defer func() {
+		Cache = tmpCache
+		SetDataStorage(tmpDm)
+	}()
+	rsponder.MaxComputedUsage = map[string]time.Duration{
+		utils.VOICE: time.Duration(20 * time.Second),
+	}
+	cd := &CallDescriptorWithArgDispatcher{
+		CallDescriptor: &CallDescriptor{
+			Category:      "call",
+			Tenant:        "cgrates.org",
+			Subject:       "1001",
+			ToR:           utils.VOICE,
+			Account:       "1001",
+			Destination:   "1002",
+			DurationIndex: 90,
+			TimeStart:     time.Date(2023, 3, 10, 9, 30, 0, 0, time.UTC),
+			TimeEnd:       time.Date(2023, 3, 10, 9, 30, 2, 0, time.UTC),
+		},
+	}
+	rpDflt := &RatingPlan{
+		Id: "RP_DFLT",
+		Timings: map[string]*RITiming{
+			"30eab301": {
+				Years:     utils.Years{},
+				Months:    utils.Months{},
+				MonthDays: utils.MonthDays{},
+				WeekDays:  utils.WeekDays{},
+				StartTime: "00:00:00",
+			},
+		},
+		Ratings: map[string]*RIRate{
+			"b457f861": {
+				Rates: []*Rate{
+					{
+						GroupIntervalStart: 0,
+						Value:              0.01,
+						RateIncrement:      time.Second,
+						RateUnit:           time.Second,
+					},
+				},
+				RoundingMethod:   utils.ROUNDING_MIDDLE,
+				RoundingDecimals: 4,
+			},
+		},
+		DestinationRates: map[string]RPRateList{
+			"DEST": []*RPRate{
+				{
+					Timing: "30eab301",
+					Rating: "b457f861",
+					Weight: 10,
+				},
+			},
+		},
+	}
+
+	rpfTCDDBSWF := &RatingProfile{Id: utils.ConcatenatedKey(utils.META_OUT, cd.Tenant, "call", cd.Subject),
+		RatingPlanActivations: RatingPlanActivations{&RatingPlanActivation{
+			ActivationTime: time.Date(2015, 01, 01, 8, 0, 0, 0, time.UTC),
+			RatingPlanId:   rpDflt.Id,
+		}},
+	}
+	dest := &Destination{
+		Id:       "DEST",
+		Prefixes: []string{"1001", "1002", "1003"},
+	}
+	if err := dm.SetReverseDestination(dest, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+	Cache.Set(utils.CacheRatingPlans, rpDflt.Id, rpDflt, []string{}, true, utils.NonTransactional)
+	Cache.Set(utils.CacheRatingProfilesTmp, rpfTCDDBSWF.Id, rpfTCDDBSWF, []string{}, true, utils.NonTransactional)
+	var reply CallCost
+	SetDataStorage(dm)
+	if err := rsponder.GetCost(cd, &reply); err != nil {
+		t.Error(err)
+	} else if reply.Cost != 0.02 {
+		t.Errorf("Received %v", reply.Cost)
+	}
+}
+
+func TestResponderDebit11(t *testing.T) {
+	tmpCache := Cache
+	tmpDm := *dm
+	defer func() {
+		Cache = tmpCache
+		SetDataStorage(&tmpDm)
+	}()
+	rsponder.MaxComputedUsage = map[string]time.Duration{
+		utils.VOICE: time.Duration(60 * time.Second),
+	}
+	arg := &CallDescriptorWithArgDispatcher{
+		CallDescriptor: &CallDescriptor{
+			Category:      "call",
+			Tenant:        "cgrates.org",
+			Subject:       "1001",
+			ToR:           utils.VOICE,
+			Account:       "1001",
+			Destination:   "1002",
+			DurationIndex: 90,
+			TimeStart:     time.Date(2023, 3, 10, 9, 30, 0, 0, time.UTC),
+			TimeEnd:       time.Date(2023, 3, 10, 9, 30, 16, 0, time.UTC),
+		},
+	}
+	acc := &Account{
+		ID: "cgrates.org:1001",
+		BalanceMap: map[string]Balances{
+			utils.VOICE: {
+				&Balance{Value: 20 * float64(time.Second),
+					DestinationIDs: utils.NewStringMap("1002"),
+					Weight:         10, RatingSubject: "rif"},
+			}},
+	}
+	dm.SetAccount(acc)
+	var reply CallCost
+	if err := rsponder.Debit(arg, &reply); err != nil {
+		t.Error(err)
+	}
+
+}

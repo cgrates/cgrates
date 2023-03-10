@@ -1197,3 +1197,156 @@ func TestResourceMatchingResourcesForEventLocksActivationInterval(t *testing.T) 
 		t.Fatalf("Expected resource to not be locked %q", rPrf.ID)
 	}
 }
+
+func TestResourceForEvent(t *testing.T) {
+	Cache.Clear(nil)
+	cfg, _ := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	rS, _ := NewResourceService(dm, cfg,
+		NewFilterS(cfg, nil, dm), nil)
+
+	args := utils.ArgRSv1ResourceUsage{
+		UsageID: "651a8db2-4f67-4cf8-b622-169e8a482e51",
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     utils.UUIDSha1Prefix(),
+			Event: map[string]interface{}{
+				"Resource":    "Resource1",
+				"Account":     "1002",
+				"Subject":     "1001",
+				"Destination": "1002"},
+		},
+		Units: 1,
+		ArgDispatcher: &utils.ArgDispatcher{
+			APIKey: utils.StringPointer("res12345"),
+		},
+	}
+	fltr := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "RS_FLT",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaString,
+				Element: "~*req.Destination",
+				Values:  []string{"1002", "1003"},
+			},
+		},
+	}
+	dm.SetFilter(fltr)
+	fltr2 := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "RS_FLT2",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaString,
+				Element: "~*req.Resource",
+				Values:  []string{"Resource1"},
+			},
+		},
+	}
+	dm.SetFilter(fltr2)
+	var reply Resources
+
+	rsP := &ResourceProfile{
+		Tenant:            "cgrates.org",
+		ID:                "RES20",
+		FilterIDs:         []string{"RS_FLT"},
+		UsageTTL:          10 * time.Second,
+		Limit:             10.00,
+		AllocationMessage: "AllocationMessage",
+		Weight:            20.00,
+		ThresholdIDs:      []string{utils.META_NONE},
+	}
+
+	dm.SetResourceProfile(rsP, true)
+	dm.SetResource(&Resource{Tenant: "cgrates.org",
+		ID: rsP.ID})
+
+	rsP2 := &ResourceProfile{
+		Tenant:            "cgrates.org",
+		ID:                "RES21",
+		UsageTTL:          10 * time.Second,
+		Limit:             10.00,
+		FilterIDs:         []string{"RS_FLT2"},
+		AllocationMessage: "AllocationMessage",
+		Weight:            20.00,
+		ThresholdIDs:      []string{utils.META_NONE},
+		ActivationInterval: &utils.ActivationInterval{
+			ExpiryTime: time.Now().Add(-5 * time.Second),
+		},
+	}
+	dm.SetResourceProfile(rsP2, true)
+	dm.SetResource(&Resource{Tenant: "cgrates.org",
+		ID: rsP2.ID})
+
+	if err := rS.V1ResourcesForEvent(args, &reply); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestResourcesRelease(t *testing.T) {
+	Cache.Clear(nil)
+	cfg, _ := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	rS, _ := NewResourceService(dm, cfg,
+		NewFilterS(cfg, nil, dm), nil)
+
+	args := utils.ArgRSv1ResourceUsage{
+		UsageID: "651a8db2-4f67-4cf8-b622-169e8a482e51",
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     utils.UUIDSha1Prefix(),
+			Event: map[string]interface{}{
+				"Resource":    "Resource1",
+				"Account":     "1002",
+				"Subject":     "1001",
+				"Destination": "1002"},
+		},
+		Units: 1,
+		ArgDispatcher: &utils.ArgDispatcher{
+			APIKey: utils.StringPointer("res12345"),
+		},
+	}
+	fltr := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "RS_FLT",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaString,
+				Element: "~*req.Destination",
+				Values:  []string{"1002", "1003"},
+			},
+		},
+	}
+	dm.SetFilter(fltr)
+	rsP := &ResourceProfile{
+		Tenant:            "cgrates.org",
+		ID:                "RES20",
+		FilterIDs:         []string{"RS_FLT"},
+		UsageTTL:          10 * time.Second,
+		Limit:             10.00,
+		AllocationMessage: "AllocationMessage",
+		Weight:            20.00,
+		ThresholdIDs:      []string{utils.META_NONE},
+	}
+	dm.SetResourceProfile(rsP, true)
+	dm.SetResource(&Resource{
+		Tenant: "cgrates.org",
+		ID:     rsP.ID,
+		Usages: map[string]*ResourceUsage{
+			"651a8db2-4f67-4cf8-b622-169e8a482e51": {
+				Tenant: "cgrates.org",
+				ID:     "651a8db2-4f67-4cf8-b622-169e8a482e21",
+				Units:  2,
+			},
+		},
+	})
+	var reply string
+	if err := rS.V1ReleaseResource(args, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Expected OK,Received %v", reply)
+	}
+}
