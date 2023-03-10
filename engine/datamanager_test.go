@@ -7732,3 +7732,404 @@ func TestDMRemoveRateProfileReplicate(t *testing.T) {
 	dm.RemoveRateProfile(context.Background(), rpp.Tenant, rpp.ID, false)
 
 }
+
+func TestDMRemoveActionProfileNilOldActErr(t *testing.T) {
+
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	var Id string
+	var tnt string
+	err := dm.RemoveActionProfile(context.Background(), tnt, Id, false)
+	if err != utils.ErrNotFound {
+		t.Errorf("\nExpected error <%+v>, \nReceived error <%+v>", utils.ErrNotFound, err)
+	}
+
+}
+
+func TestDMRemoveActionProfileRmvItemFromFiltrIndexErr(t *testing.T) {
+
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	data := &DataDBMock{
+		GetActionProfileDrvF:    func(ctx *context.Context, tenant, ID string) (*ActionProfile, error) { return &ActionProfile{}, nil },
+		RemoveActionProfileDrvF: func(ctx *context.Context, tenant, ID string) error { return nil },
+	}
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	ap := &ActionProfile{
+
+		Tenant:    "cgrates.org",
+		ID:        "AP1",
+		FilterIDs: []string{"fltr1"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 65,
+			},
+		},
+		Schedule: "* * * * *",
+		Targets:  map[string]utils.StringSet{utils.MetaAccounts: {"1001": {}}},
+		Actions:  []*APAction{{}},
+	}
+
+	err := dm.RemoveActionProfile(context.Background(), ap.Tenant, ap.ID, true)
+	if err != utils.ErrNotImplemented {
+		t.Errorf("\nExpected error <%+v>, \nReceived error <%+v>", utils.ErrNotImplemented, err)
+	}
+
+}
+
+func TestDMRemoveActionProfileRmvIndexFiltersItemErr(t *testing.T) {
+
+	Cache.Clear(nil)
+
+	ap := &ActionProfile{
+
+		Tenant:    "cgrates.org",
+		ID:        "AP1",
+		FilterIDs: []string{"fltr1"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 65,
+			},
+		},
+		Schedule: "* * * * *",
+		Targets:  map[string]utils.StringSet{utils.MetaAccounts: {"1001": {}}},
+		Actions:  []*APAction{{}},
+	}
+
+	cfg := config.NewDefaultCGRConfig()
+	data := &DataDBMock{
+		GetActionProfileDrvF:    func(ctx *context.Context, tenant, ID string) (*ActionProfile, error) { return ap, nil },
+		RemoveActionProfileDrvF: func(ctx *context.Context, tenant, ID string) error { return nil },
+	}
+
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	err := dm.RemoveActionProfile(context.Background(), ap.Tenant, ap.ID, true)
+	if err != utils.ErrNotImplemented {
+		t.Errorf("\nExpected error <%+v>, \nReceived error <%+v>", utils.ErrNotImplemented, err)
+	}
+
+}
+
+func TestDMRemoveActionProfileReplicate(t *testing.T) {
+
+	cfgtmp := config.CgrConfig()
+	defer func() {
+		config.SetCgrConfig(cfgtmp)
+	}()
+	Cache.Clear(nil)
+
+	ap := &ActionProfile{
+
+		Tenant:    "cgrates.org",
+		ID:        "AP1",
+		FilterIDs: []string{"fltr1"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 65,
+			},
+		},
+		Schedule: "* * * * *",
+		Targets:  map[string]utils.StringSet{utils.MetaAccounts: {"1001": {}}},
+		Actions:  []*APAction{{}},
+	}
+
+	cfg := config.NewDefaultCGRConfig()
+	cfg.DataDbCfg().Items[utils.MetaActionProfiles].Replicate = true
+	cfg.DataDbCfg().RplConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
+	config.SetCgrConfig(cfg)
+
+	cc := make(chan birpc.ClientConnector, 1)
+	cc <- &ccMock{
+
+		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+			utils.ReplicatorSv1RemoveActionProfile: func(ctx *context.Context, args, reply interface{}) error { return utils.ErrNotImplemented },
+		},
+	}
+
+	cM := NewConnManager(cfg)
+	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.ReplicatorSv1, cc)
+	data := &DataDBMock{
+		GetActionProfileDrvF:    func(ctx *context.Context, tenant, ID string) (*ActionProfile, error) { return ap, nil },
+		RemoveActionProfileDrvF: func(ctx *context.Context, tenant, ID string) error { return nil },
+	}
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	// tests replicate
+	dm.RemoveActionProfile(context.Background(), ap.Tenant, ap.ID, false)
+
+}
+
+func TestDMSetAttributeProfileNoDMErr(t *testing.T) {
+	var dm *DataManager
+	err := dm.SetAttributeProfile(context.Background(), &AttributeProfile{}, false)
+	if err != utils.ErrNoDatabaseConn {
+		t.Errorf("\nExpected error <%+v>, \nReceived error <%+v>", utils.ErrNoDatabaseConn, err)
+	}
+}
+
+func TestDMSetAttributeProfileCheckFiltersErr(t *testing.T) {
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	attrPrfl := &AttributeProfile{
+		Tenant:    "cgrates.org",
+		ID:        "ATTR_ID",
+		FilterIDs: []string{":::"},
+		Attributes: []*Attribute{
+			{
+				Path:  utils.MetaReq + utils.NestingSep + "Account",
+				Value: config.NewRSRParsersMustCompile("1001", utils.InfieldSep),
+			},
+		},
+		Weights: make(utils.DynamicWeights, 1),
+	}
+
+	expErr := "broken reference to filter: <:::> for item with ID: cgrates.org:ATTR_ID"
+	if err := dm.SetAttributeProfile(context.Background(), attrPrfl, true); err == nil || err.Error() != expErr {
+		t.Errorf("Expected error <%v>, received error <%v>", expErr, err)
+	}
+}
+
+func TestDMSetAttributeProfileGetAttributeProfileErr(t *testing.T) {
+
+	cfg := config.NewDefaultCGRConfig()
+	data := &DataDBMock{
+		GetAttributeProfileDrvF: func(ctx *context.Context, str1, str2 string) (*AttributeProfile, error) {
+			return &AttributeProfile{}, utils.ErrNotImplemented
+		},
+	}
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	attrPrfl := &AttributeProfile{
+		Tenant:    "cgrates.org",
+		ID:        "ATTR_ID",
+		FilterIDs: []string{"filtrId1"},
+		Attributes: []*Attribute{
+			{
+				Path:  utils.MetaReq + utils.NestingSep + "Account",
+				Value: config.NewRSRParsersMustCompile("1001", utils.InfieldSep),
+			},
+		},
+		Weights: make(utils.DynamicWeights, 1),
+	}
+
+	if err := dm.SetAttributeProfile(context.Background(), attrPrfl, false); err == nil || err != utils.ErrNotImplemented {
+		t.Errorf("Expected error <%v>, received error <%v>", utils.ErrNotImplemented, err)
+	}
+}
+
+func TestDMSetAttributeProfileSetAttributeProfileDrvErr(t *testing.T) {
+
+	cfg := config.NewDefaultCGRConfig()
+	data := &DataDBMock{
+		GetAttributeProfileDrvF: func(ctx *context.Context, str1, str2 string) (*AttributeProfile, error) {
+			return &AttributeProfile{}, nil
+		},
+		SetAttributeProfileDrvF: func(ctx *context.Context, attr *AttributeProfile) error { return utils.ErrNotImplemented },
+	}
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	attrPrfl := &AttributeProfile{
+		Tenant:    "cgrates.org",
+		ID:        "ATTR_ID",
+		FilterIDs: []string{"filtrId1"},
+		Attributes: []*Attribute{
+			{
+				Path:  utils.MetaReq + utils.NestingSep + "Account",
+				Value: config.NewRSRParsersMustCompile("1001", utils.InfieldSep),
+			},
+		},
+		Weights: make(utils.DynamicWeights, 1),
+	}
+	if err := dm.SetAttributeProfile(context.Background(), attrPrfl, false); err == nil || err != utils.ErrNotImplemented {
+		t.Errorf("Expected error <%v>, received error <%v>", utils.ErrNotImplemented, err)
+	}
+}
+
+func TestDMSetAttributeProfileUpdatedIndexesErr(t *testing.T) {
+
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	data := &DataDBMock{
+		GetAttributeProfileDrvF: func(ctx *context.Context, str1, str2 string) (*AttributeProfile, error) {
+			return &AttributeProfile{}, nil
+		},
+		SetAttributeProfileDrvF: func(ctx *context.Context, attr *AttributeProfile) error { return nil },
+	}
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	attrPrfl := &AttributeProfile{
+		Tenant:    "cgrates.org",
+		ID:        "ATTR_ID",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		Attributes: []*Attribute{
+			{
+				Path:  utils.MetaReq + utils.NestingSep + "Account",
+				Value: config.NewRSRParsersMustCompile("1001", utils.InfieldSep),
+			},
+		},
+		Weights: make(utils.DynamicWeights, 1),
+	}
+
+	if err := dm.SetAttributeProfile(context.Background(), attrPrfl, true); err != utils.ErrNotImplemented {
+		t.Errorf("Expected error <%v>, received error <%v>", utils.ErrNotImplemented, err)
+	}
+}
+
+func TestDMSetAttributeProfileReplicate(t *testing.T) {
+
+	cfgtmp := config.CgrConfig()
+	defer func() {
+		config.SetCgrConfig(cfgtmp)
+	}()
+	Cache.Clear(nil)
+
+	attrPrfl := &AttributeProfile{
+		Tenant:    "cgrates.org",
+		ID:        "ATTR_ID",
+		FilterIDs: []string{"filtrId1"},
+		Attributes: []*Attribute{
+			{
+				Path:  utils.MetaReq + utils.NestingSep + "Account",
+				Value: config.NewRSRParsersMustCompile("1001", utils.InfieldSep),
+			},
+		},
+		Weights: make(utils.DynamicWeights, 1),
+	}
+
+	cfg := config.NewDefaultCGRConfig()
+	cfg.DataDbCfg().Items[utils.MetaAttributeProfiles].Replicate = true
+	cfg.DataDbCfg().RplConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
+	config.SetCgrConfig(cfg)
+
+	cc := make(chan birpc.ClientConnector, 1)
+	cc <- &ccMock{
+
+		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+			utils.ReplicatorSv1SetAttributeProfile: func(ctx *context.Context, args, reply interface{}) error { return utils.ErrNotImplemented },
+		},
+	}
+
+	cM := NewConnManager(cfg)
+	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.ReplicatorSv1, cc)
+	data := &DataDBMock{
+		GetAttributeProfileDrvF: func(ctx *context.Context, str1, str2 string) (*AttributeProfile, error) {
+			return attrPrfl, nil
+		},
+		SetAttributeProfileDrvF: func(ctx *context.Context, attr *AttributeProfile) error { return nil },
+	}
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	// tests replicate
+	if err := dm.SetAttributeProfile(context.Background(), attrPrfl, false); err != utils.ErrNotImplemented {
+		t.Errorf("Expected error <%v>, received error <%v>", utils.ErrNotImplemented, err)
+	}
+
+}
+
+func TestDMGetAttributeProfileNilDmErr(t *testing.T) {
+
+	var dm *DataManager
+
+	_, err := dm.GetAttributeProfile(context.Background(), utils.CGRateSorg, "ap_1", false, false, utils.NonTransactional)
+	if err != utils.ErrNoDatabaseConn {
+		t.Errorf("Expected error <%v>, received error <%v>", utils.ErrNoDatabaseConn, err)
+	}
+}
+
+func TestDMGetAttributeProfileSetAttributeProfileDrvErr(t *testing.T) {
+
+	cfgtmp := config.CgrConfig()
+	defer func() {
+		config.SetCgrConfig(cfgtmp)
+	}()
+	Cache.Clear(nil)
+
+	attrPrfl := &AttributeProfile{
+		Tenant:    "cgrates.org",
+		ID:        "ATTR_ID",
+		FilterIDs: []string{"filtrId1"},
+		Attributes: []*Attribute{
+			{
+				Path:  utils.MetaReq + utils.NestingSep + "Account",
+				Value: config.NewRSRParsersMustCompile("1001", utils.InfieldSep),
+			},
+		},
+		Weights: make(utils.DynamicWeights, 1),
+	}
+
+	cfg := config.NewDefaultCGRConfig()
+	cfg.DataDbCfg().Items[utils.MetaAttributeProfiles].Remote = true
+	cfg.DataDbCfg().RmtConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.RemoteConnsCfg)}
+	config.SetCgrConfig(cfg)
+
+	cc := make(chan birpc.ClientConnector, 1)
+	cc <- &ccMock{
+
+		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+			utils.ReplicatorSv1GetAttributeProfile: func(ctx *context.Context, args, reply interface{}) error { return nil },
+		},
+	}
+
+	cM := NewConnManager(cfg)
+	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.RemoteConnsCfg), utils.ReplicatorSv1, cc)
+	data := &DataDBMock{
+		GetAttributeProfileDrvF: func(ctx *context.Context, str1, str2 string) (*AttributeProfile, error) {
+			return attrPrfl, utils.ErrNotFound
+		},
+		SetAttributeProfileDrvF: func(ctx *context.Context, attr *AttributeProfile) error { return utils.ErrNotImplemented },
+	}
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	_, err := dm.GetAttributeProfile(context.Background(), utils.CGRateSorg, attrPrfl.ID, false, false, utils.NonTransactional)
+	if err != utils.ErrNotImplemented {
+		t.Errorf("Expected error <%v>, received error <%v>", utils.ErrNotImplemented, err)
+	}
+}
+
+func TestDMSetAttributeProfileComputeHashErr(t *testing.T) {
+
+	cfg := config.NewDefaultCGRConfig()
+	data := &DataDBMock{
+		GetAttributeProfileDrvF: func(ctx *context.Context, str1, str2 string) (*AttributeProfile, error) {
+			return &AttributeProfile{}, nil
+		},
+	}
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+	value := config.NewRSRParsersMustCompile("31 0a 0a 32 0a 0a 33 0a 0a 34 0a 0a 35 0a 0a 36 0a 0a 37 0a 0a 38 0a 0a 39 0a 0a 31 30 0a 0a 31", config.CgrConfig().GeneralCfg().RSRSep)
+	attrPrfl := &AttributeProfile{
+		Tenant:    "cgrates.org",
+		ID:        "ATTR_ID",
+		FilterIDs: []string{"filtrId1"},
+		Attributes: []*Attribute{
+			{
+				Type:  utils.MetaPassword,
+				Value: value,
+			},
+		},
+		Weights: make(utils.DynamicWeights, 1),
+	}
+
+	expErr := "bcrypt: password length exceeds 72 bytes"
+	if err := dm.SetAttributeProfile(context.Background(), attrPrfl, false); err == nil || err.Error() != expErr {
+		t.Errorf("Expected error <%v>, received error <%v>", expErr, err)
+	}
+}
