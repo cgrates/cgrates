@@ -2059,6 +2059,7 @@ func TestAttributesProcessEventSIPCIDWrongPathErr(t *testing.T) {
 }
 
 func TestAttributesProcessEventSIPCIDInvalidArgs(t *testing.T) {
+	Cache.Clear(nil)
 	defaultCfg, _ := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, true, defaultCfg.DataDbCfg().Items)
 	dmAtr = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
@@ -2113,5 +2114,61 @@ func TestAttributesProcessEventSIPCIDInvalidArgs(t *testing.T) {
 	if err := attrService.V1ProcessEvent(attrArgs, &reply); err == nil ||
 		err.Error() != experr {
 		t.Errorf("expected: <%+v>, \n received: <%+v>", experr, err)
+	}
+}
+
+func TestAttributeGetForEvent(t *testing.T) {
+	defaultCfg, _ := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, true, defaultCfg.DataDbCfg().Items)
+	dmAtr = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	attrService, err = NewAttributeService(dmAtr, NewFilterS(defaultCfg, nil, dmAtr), defaultCfg)
+	if err != nil {
+		t.Error(err)
+	}
+
+	args := &AttrArgsProcessEvent{
+		Context: utils.StringPointer("*sessions"),
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testAttributeSGetAttributeForEvent",
+			Event: map[string]interface{}{
+				utils.EVENT_NAME: "Internal",
+				utils.Account:    "1003",
+			},
+		},
+		ArgDispatcher: &utils.ArgDispatcher{
+			APIKey: utils.StringPointer("attr12345"),
+		},
+	}
+	fltr := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "ATTR_FLTR",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaString,
+				Element: "~*req.Account",
+				Values:  []string{"1003"},
+			},
+		},
+	}
+	dmAtr.SetFilter(fltr)
+	attr := &AttributeProfile{
+		Tenant:    "cgrates.org",
+		ID:        "attributeprofile1",
+		Contexts:  []string{utils.MetaSessionS},
+		FilterIDs: []string{"ATTR_FLTR"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2024, 7, 14, 14, 25, 0, 0, time.UTC),
+			ExpiryTime:     time.Date(2025, 7, 14, 14, 25, 0, 0, time.UTC),
+		},
+
+		Weight: 20,
+	}
+	if err := dmAtr.SetAttributeProfile(attr, true); err != nil {
+		t.Error(err)
+	}
+	var reply AttributeProfile
+	if err := attrService.V1GetAttributeForEvent(args, &reply); err != nil {
+		t.Error(err)
 	}
 }
