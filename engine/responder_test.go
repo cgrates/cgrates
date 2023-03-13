@@ -538,6 +538,53 @@ func TestResponderGetCostOnRatingPlans(t *testing.T) {
 	}
 }
 
+func TestResponderRefundIncrements22(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	tmpDm := dm
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	defer func() {
+		SetDataStorage(tmpDm)
+	}()
+	tStart, _ := utils.ParseTimeDetectLayout("2018-08-07T17:30:00Z", utils.EmptyString)
+	tEnd, _ := utils.ParseTimeDetectLayout("2018-08-07T17:31:30Z", utils.EmptyString)
+	acc := &Account{
+		ID: "cgrates.org:1001",
+		BalanceMap: map[string]Balances{
+			utils.VOICE: {
+				&Balance{Value: 20 * float64(time.Second),
+					DestinationIDs: utils.NewStringMap("1002"),
+					Weight:         10, RatingSubject: "rif"},
+			}},
+	}
+	SetDataStorage(dm)
+	if err := dm.SetAccount(acc); err != nil {
+		t.Error(err)
+	}
+	rsponder.MaxComputedUsage[utils.VOICE] = 30 * time.Minute
+	cd := &CallDescriptorWithArgDispatcher{
+		CallDescriptor: &CallDescriptor{
+			Category:      "call",
+			Tenant:        "cgrates.org",
+			Subject:       "1001",
+			Account:       "1001",
+			Destination:   "1002",
+			ToR:           utils.VOICE,
+			DurationIndex: 20,
+			TimeStart:     tStart,
+			TimeEnd:       tEnd,
+			Increments: Increments{
+				&Increment{Cost: 0, BalanceInfo: &DebitInfo{AccountID: acc.ID}},
+				&Increment{Cost: 0, Duration: 3 * time.Second, BalanceInfo: &DebitInfo{AccountID: acc.ID}},
+			},
+		},
+	}
+
+	var reply Account
+	if err := rsponder.RefundIncrements(cd, &reply); err != nil {
+		t.Error(err)
+	}
+}
 func TestResponderGetCost(t *testing.T) {
 	tmpCache := Cache
 	cfg, err := config.NewDefaultCGRConfig()
@@ -666,4 +713,162 @@ func TestResponderDebit11(t *testing.T) {
 		t.Error(err)
 	}
 
+}
+
+func TestResponderMaxDebit11(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	tmpDm := dm
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	defer func() {
+		SetDataStorage(tmpDm)
+	}()
+
+	tStart, _ := utils.ParseTimeDetectLayout("2021-08-07T17:30:00Z", utils.EmptyString)
+	tEnd, _ := utils.ParseTimeDetectLayout("2021-08-07T17:31:30Z", utils.EmptyString)
+	cd := &CallDescriptorWithArgDispatcher{
+		CallDescriptor: &CallDescriptor{
+			Category:      "call",
+			Tenant:        "cgrates.org",
+			Subject:       "1001",
+			Account:       "1001",
+			Destination:   "1002",
+			DurationIndex: 90,
+			TimeStart:     tStart,
+			TimeEnd:       tEnd,
+			ToR:           utils.MONETARY,
+		},
+	}
+	acc := &Account{
+		ID: "cgrates.org:1001",
+		BalanceMap: map[string]Balances{
+			utils.MONETARY: {
+				&Balance{Value: 11, Weight: 20, DestinationIDs: utils.NewStringMap("1002")},
+			}},
+	}
+	SetDataStorage(dm)
+	if err := dm.SetAccount(acc); err != nil {
+		t.Error(err)
+	}
+	dest := &Destination{
+		Id: "DEST",
+		Prefixes: []string{
+			"1002", "1003", "1004",
+		},
+	}
+	dm.SetReverseDestination(dest, utils.NonTransactional)
+	rp := &RatingPlan{
+		Id: "RP_1",
+		Ratings: map[string]*RIRate{
+			"b531174": {
+				Rates: RateGroups{
+					{
+						GroupIntervalStart: 0,
+						Value:              0.01,
+						RateIncrement:      time.Second,
+						RateUnit:           time.Second,
+					},
+				},
+				RoundingMethod:   utils.ROUNDING_MIDDLE,
+				RoundingDecimals: 2,
+			},
+		},
+		Timings: map[string]*RITiming{
+			"30eab301": {
+				Years:     utils.Years{},
+				Months:    utils.Months{},
+				MonthDays: utils.MonthDays{},
+				WeekDays:  utils.WeekDays{},
+				StartTime: "00:00:00",
+			},
+		},
+		DestinationRates: map[string]RPRateList{
+			"DEST": {
+				{
+					Rating: "b457f861",
+					Weight: 10,
+				},
+			},
+		},
+	}
+
+	if err := dm.SetRatingPlan(rp, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+	rP := &RatingProfile{
+		Id: utils.ConcatenatedKey(utils.META_OUT, cd.Tenant, "call", cd.Subject),
+		RatingPlanActivations: RatingPlanActivations{
+			{
+				RatingPlanId:   rp.Id,
+				ActivationTime: time.Date(2022, 12, 20, 8, 30, 0, 0, time.UTC),
+			},
+		},
+	}
+	if err := dm.SetRatingProfile(rP, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+	var reply CallCost
+	if err := rsponder.MaxDebit(cd, &reply); err == nil {
+		t.Error(err)
+	}
+
+}
+
+func TestResponderRefundRounding33(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	tmpDm := dm
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	defer func() {
+		SetDataStorage(tmpDm)
+	}()
+	tStart, _ := utils.ParseTimeDetectLayout("2019-08-07T17:30:00Z", utils.EmptyString)
+	tEnd, _ := utils.ParseTimeDetectLayout("2019-08-07T17:31:30Z", utils.EmptyString)
+	cd := &CallDescriptorWithArgDispatcher{
+		CallDescriptor: &CallDescriptor{
+			Category:      "call",
+			Tenant:        "cgrates.org",
+			Subject:       "1001",
+			Account:       "1001",
+			Destination:   "1002",
+			DurationIndex: 90,
+			TimeStart:     tStart,
+			TimeEnd:       tEnd,
+			Increments: Increments{
+				&Increment{
+					Duration: time.Minute,
+					Cost:     1,
+					BalanceInfo: &DebitInfo{
+						Unit:      &UnitInfo{UUID: "1", DestinationID: "1", Consumed: 2.3, ToR: utils.VOICE, RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}}},
+						Monetary:  &MonetaryInfo{UUID: "2"},
+						AccountID: "cgrates.org:1001"},
+				},
+				&Increment{
+					Duration: time.Minute,
+					Cost:     1,
+					BalanceInfo: &DebitInfo{
+						Unit:      &UnitInfo{UUID: "1", DestinationID: "1", Consumed: 2.3, ToR: utils.VOICE, RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}}},
+						Monetary:  &MonetaryInfo{UUID: "2"},
+						AccountID: "cgrates.org:1001"},
+				},
+			},
+		},
+	}
+	acc := &Account{
+		ID: "cgrates.org:1001",
+		BalanceMap: map[string]Balances{
+			utils.VOICE: {
+				&Balance{Value: 20 * float64(time.Second),
+					DestinationIDs: utils.NewStringMap("1002"),
+					Weight:         10, RatingSubject: "rif"},
+			}},
+	}
+	if err := dm.SetAccount(acc); err != nil {
+		t.Error(err)
+	}
+	SetDataStorage(dm)
+	var reply Account
+	if rsponder.RefundRounding(cd, &reply); err != nil {
+		t.Error(err)
+	}
 }

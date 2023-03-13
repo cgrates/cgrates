@@ -268,3 +268,104 @@ func TestCDRSRateExportCDRS(t *testing.T) {
 		t.Errorf("Expected ok ,received %v", reply)
 	}
 }
+
+func TestCDRSStoreSessionCost22(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+
+	cdrS := &CDRServer{
+		cgrCfg: cfg,
+		cdrDb:  db,
+		dm:     dm,
+	}
+	cdr := &AttrCDRSStoreSMCost{
+		Cost: &SMCost{
+			CGRID:      "test1",
+			RunID:      utils.MetaDefault,
+			OriginID:   "testV1CDRsRefundOutOfSessionCost",
+			CostSource: utils.MetaSessionS,
+			OriginHost: "",
+			Usage:      time.Duration(3 * time.Minute),
+			CostDetails: &EventCost{
+				CGRID:     "test1",
+				RunID:     utils.MetaDefault,
+				StartTime: time.Date(2017, 1, 9, 16, 18, 21, 0, time.UTC),
+				Usage:     utils.DurationPointer(time.Duration(3 * time.Minute)),
+				Cost:      utils.Float64Pointer(2.3),
+				Charges: []*ChargingInterval{
+					{
+						RatingID: "c1a5ab9",
+						Increments: []*ChargingIncrement{
+							{
+								Usage:          time.Duration(2 * time.Minute),
+								Cost:           2.0,
+								AccountingID:   "a012888",
+								CompressFactor: 1,
+							},
+							{
+								Usage:          time.Duration(1 * time.Second),
+								Cost:           0.005,
+								AccountingID:   "44d6c02",
+								CompressFactor: 60,
+							},
+						},
+						CompressFactor: 1,
+					},
+				},
+				AccountSummary: &AccountSummary{
+					Tenant: "cgrates.org",
+					ID:     "testV1CDRsRefundOutOfSessionCost",
+					BalanceSummaries: []*BalanceSummary{
+						{
+							UUID:  "random",
+							Type:  utils.MONETARY,
+							Value: 50,
+						},
+					},
+					AllowNegative: false,
+					Disabled:      false,
+				},
+				Rating: Rating{
+					"c1a5ab9": &RatingUnit{
+						ConnectFee:       0.1,
+						RoundingMethod:   "*up",
+						RoundingDecimals: 5,
+						RatesID:          "ec1a177",
+						RatingFiltersID:  "43e77dc",
+					},
+				},
+				Accounting: Accounting{
+					"a012888": &BalanceCharge{
+						AccountID:   "cgrates.org:testV1CDRsRefundOutOfSessionCost",
+						BalanceUUID: "random",
+						Units:       120.7,
+					},
+					"44d6c02": &BalanceCharge{
+						AccountID:   "cgrates.org:testV1CDRsRefundOutOfSessionCost",
+						BalanceUUID: "random",
+						Units:       120.7,
+					},
+				},
+				Rates: ChargedRates{
+					"ec1a177": RateGroups{
+						&Rate{
+							GroupIntervalStart: time.Duration(0),
+							Value:              0.01,
+							RateIncrement:      time.Duration(1 * time.Minute),
+							RateUnit:           time.Duration(1 * time.Second)},
+					},
+				},
+			},
+		},
+	}
+	var reply string
+	if err := cdrS.V1StoreSessionCost(cdr, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Expected ok,received %v", reply)
+	}
+	if _, err := cdrS.cdrDb.GetSMCosts(cdr.Cost.CGRID, cdr.Cost.RunID, "", cdr.Cost.OriginID); err != nil {
+		t.Error(err)
+	}
+}
