@@ -2753,3 +2753,65 @@ func TestRemoveIndexFiltersItemSetIndexesErr(t *testing.T) {
 	}
 
 }
+
+func TestAddIndexFiltersItemGetIndexesErr(t *testing.T) {
+
+	if err := addIndexFiltersItem(context.Background(), nil, "idxItmType", "cgrates.org", "itemID", []string{"FltrId_1"}); err != utils.ErrNoDatabaseConn {
+		t.Errorf("\nExpected error <%+v>, \nReceived error <%+v>", utils.ErrNotImplemented, err)
+	}
+
+}
+
+func TestAddIndexFiltersItemCacheRemoveErr(t *testing.T) {
+
+	cfg := config.NewDefaultCGRConfig()
+	cfg.CacheCfg().ReplicationConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
+	cfg.CacheCfg().Partitions[utils.CacheReverseFilterIndexes].Replicate = true
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+
+	cc := make(chan birpc.ClientConnector, 1)
+	cc <- &ccMock{
+
+		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+			utils.CacheSv1ReplicateRemove: func(ctx *context.Context, args, reply interface{}) error {
+
+				return utils.ErrNotImplemented
+			},
+		},
+	}
+
+	cM := NewConnManager(cfg)
+	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.CacheSv1, cc)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+	Cache = NewCacheS(cfg, dm, cM, nil)
+
+	indexes := map[string]utils.StringSet{utils.CacheRateFilterIndexes: {"Rate1": {}, "Rate2": {}}}
+
+	if err := dm.SetIndexes(context.Background(), utils.CacheReverseFilterIndexes, utils.ConcatenatedKey("cgrates.org", "fltrID1"), indexes, true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+
+	if err := addIndexFiltersItem(context.Background(), dm, utils.CacheRateFilterIndexes, "cgrates.org", "RPP_1", []string{"fltrID1"}); err != utils.ErrNotImplemented {
+		t.Errorf("\nExpected error <%+v>, \nReceived error <%+v>", utils.ErrNotImplemented, err)
+	}
+
+	Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+
+}
+
+func TestAddIndexFiltersItemSetIndexesErr(t *testing.T) {
+
+	cfg := config.NewDefaultCGRConfig()
+	data := &DataDBMock{
+		SetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
+			return utils.ErrNotImplemented
+		},
+	}
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	if err := addIndexFiltersItem(context.Background(), dm, utils.CacheRateFilterIndexes, "cgrates.org", "RPP_1", []string{"fltrID1"}); err != utils.ErrNotImplemented {
+		t.Errorf("\nExpected error <%+v>, \nReceived error <%+v>", utils.ErrNotImplemented, err)
+	}
+
+}
