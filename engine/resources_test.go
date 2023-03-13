@@ -1350,3 +1350,64 @@ func TestResourcesRelease(t *testing.T) {
 		t.Errorf("Expected OK,Received %v", reply)
 	}
 }
+
+func TestResourceAuthorizeResources22(t *testing.T) {
+	Cache.Clear(nil)
+	cfg, _ := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, config.CgrConfig().CacheCfg(), nil)
+	cfg.ResourceSCfg().StoreInterval = 1
+	cfg.ResourceSCfg().StringIndexedFields = nil
+	cfg.ResourceSCfg().PrefixIndexedFields = nil
+	rS, _ := NewResourceService(dm, cfg,
+		NewFilterS(cfg, nil, dm), nil)
+	args := utils.ArgRSv1ResourceUsage{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     utils.UUIDSha1Prefix(),
+			Event: map[string]interface{}{
+				utils.Account:     "1001",
+				utils.Destination: "1002",
+				"Resource":        "Resource1",
+			},
+		},
+
+		UsageID: utils.UUIDSha1Prefix(),
+		ArgDispatcher: &utils.ArgDispatcher{
+			APIKey: utils.StringPointer("res12345"),
+		},
+	}
+	fltr := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "FLTR_RES_1",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaString,
+				Element: "~*req.Resource",
+				Values:  []string{"Resource1"},
+			},
+		}}
+	dm.SetFilter(fltr)
+
+	resourse := &ResourceProfile{
+		Tenant:            "cgrates.org",
+		ID:                "RES20",
+		FilterIDs:         []string{"FLTR_RES_1"},
+		UsageTTL:          10 * time.Second,
+		Limit:             10.00,
+		AllocationMessage: "AllocationMessage",
+		Weight:            20.00,
+		ThresholdIDs:      []string{utils.META_NONE},
+	}
+	dm.SetResourceProfile(resourse, true)
+	dm.SetResource(&Resource{Tenant: "cgrates.org", ID: "RES20"})
+	var reply string
+	if err := rS.V1AuthorizeResources(args, &reply); err != nil {
+		t.Error(err)
+	}
+	var replyS Resource
+	if err := rS.V1GetResource(&utils.TenantID{Tenant: "cgrates.org", ID: "RES20"}, &replyS); err != nil {
+		t.Error(err)
+	}
+
+}

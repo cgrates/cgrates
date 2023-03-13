@@ -2043,3 +2043,29 @@ func TestCDRefundIncrementspanic(t *testing.T) {
 		t.Error("Error refunding money: ", utils.ToIJSON(ub.BalanceMap))
 	}
 }
+
+// func TestCallDescRefundRounding(t *testing.T) {
+// 	cgrEv := &utils.CGREvent{
+// 		Tenant: "cgrates.org",
+// 		ID:     "Generated",
+// 		Event: map[string]interface{}{
+// 			"Account":     "acc1",
+// 			"AnswerTime":  time.Date(2015, 3, 23, 6, 0, 0, 0, time.UTC),
+// 			"Category":    "call",
+// 			"Destination": "0723123113",
+// 			"Subject":     "acc1",
+// 			"Tenant":      "cgrates.org",
+// 			"ToR":         "",
+// 			"Usage":       time.Duration(30) * time.Minute,
+// 		},
+// 	}
+// 	cd, err := NewCallDescriptorFromCGREvent(cgrEv, "UTC")
+// 	if err != nil {
+// 		t.Error(err)
+// 	}
+
+// 	if _, err := cd.RefundRounding(); err != nil {
+// 		t.Error(err)
+// 	}
+// }
+// unfinished
