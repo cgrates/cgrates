@@ -376,7 +376,6 @@ func (sS *StatS) processEvent(ctx *context.Context, tnt string, args *utils.CGRE
 			return
 		}
 	}
-	matchSQs.unlock()
 	return
 }
 
