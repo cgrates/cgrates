@@ -338,6 +338,7 @@ func (sS *StatS) processEvent(ctx *context.Context, tnt string, args *utils.CGRE
 	if err != nil {
 		return nil, err
 	}
+	defer matchSQs.unlock()
 
 	statQueueIDs = matchSQs.IDs()
 	var withErrors bool
@@ -362,8 +363,7 @@ func (sS *StatS) processEvent(ctx *context.Context, tnt string, args *utils.CGRE
 	}
 	if sS.processThresholds(ctx, matchSQs, args.APIOpts) != nil ||
 		withErrors {
-		return nil, err
-		//err = utils.ErrPartiallyExecuted
+		err = utils.ErrPartiallyExecuted
 	}
 
 	var promIDs []string
