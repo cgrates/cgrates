@@ -6347,7 +6347,7 @@ func TestDMSetRouteProfileGetRouteProfileErr(t *testing.T) {
 		}},
 	}
 
-	if err := dm.SetRouteProfile(context.Background(), rpp, false); err == nil || err != utils.ErrNotImplemented {
+	if err := dm.SetRouteProfile(context.Background(), rpp, false); err != utils.ErrNotImplemented {
 		t.Errorf("Expected error <%v>, received error <%v>", utils.ErrNotImplemented, err)
 	}
 }
@@ -6394,7 +6394,7 @@ func TestDMSetRouteProfileSetRouteProfileDrvErr(t *testing.T) {
 		}},
 	}
 
-	if err := dm.SetRouteProfile(context.Background(), rpp, false); err == nil || err != utils.ErrNotImplemented {
+	if err := dm.SetRouteProfile(context.Background(), rpp, false); err != utils.ErrNotImplemented {
 		t.Errorf("Expected error <%v>, received error <%v>", utils.ErrNotImplemented, err)
 	}
 }
@@ -7927,7 +7927,7 @@ func TestDMSetAttributeProfileGetAttributeProfileErr(t *testing.T) {
 		Weights: make(utils.DynamicWeights, 1),
 	}
 
-	if err := dm.SetAttributeProfile(context.Background(), attrPrfl, false); err == nil || err != utils.ErrNotImplemented {
+	if err := dm.SetAttributeProfile(context.Background(), attrPrfl, false); err != utils.ErrNotImplemented {
 		t.Errorf("Expected error <%v>, received error <%v>", utils.ErrNotImplemented, err)
 	}
 }
@@ -7956,7 +7956,7 @@ func TestDMSetAttributeProfileSetAttributeProfileDrvErr(t *testing.T) {
 		},
 		Weights: make(utils.DynamicWeights, 1),
 	}
-	if err := dm.SetAttributeProfile(context.Background(), attrPrfl, false); err == nil || err != utils.ErrNotImplemented {
+	if err := dm.SetAttributeProfile(context.Background(), attrPrfl, false); err != utils.ErrNotImplemented {
 		t.Errorf("Expected error <%v>, received error <%v>", utils.ErrNotImplemented, err)
 	}
 }
@@ -8132,4 +8132,391 @@ func TestDMSetAttributeProfileComputeHashErr(t *testing.T) {
 	if err := dm.SetAttributeProfile(context.Background(), attrPrfl, false); err == nil || err.Error() != expErr {
 		t.Errorf("Expected error <%v>, received error <%v>", expErr, err)
 	}
+}
+
+func TestDMSetChargerProfileNoDMErr(t *testing.T) {
+	var dm *DataManager
+	err := dm.SetChargerProfile(context.Background(), &ChargerProfile{}, false)
+	if err != utils.ErrNoDatabaseConn {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ErrNoDatabaseConn, err)
+	}
+}
+
+func TestDMSetChargerProfileCheckFiltersErr(t *testing.T) {
+
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	cpp := &ChargerProfile{
+		Tenant:    "cgrates.org",
+		ID:        "CHP_1",
+		FilterIDs: []string{"*string*req.Account1001"},
+
+		RunID:        "*rated",
+		AttributeIDs: []string{"ATTR_1"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
+		weight: 20,
+	}
+
+	expErr := "broken reference to filter: <*string*req.Account1001> for item with ID: cgrates.org:CHP_1"
+	if err := dm.SetChargerProfile(context.Background(), cpp, true); err == nil || err.Error() != expErr {
+		t.Errorf("Expected error <%v>, received error <%v>", expErr, err)
+	}
+
+}
+
+func TestDMSetChargerProfileGetChargerProfileErr(t *testing.T) {
+
+	cfg := config.NewDefaultCGRConfig()
+	data := &DataDBMock{
+		GetChargerProfileDrvF: func(ctx *context.Context, tnt, id string) (*ChargerProfile, error) {
+			return &ChargerProfile{}, utils.ErrNotImplemented
+		},
+	}
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	cpp := &ChargerProfile{
+		Tenant:       "cgrates.org",
+		ID:           "CHP_1",
+		FilterIDs:    []string{"FltrId1"},
+		RunID:        "*rated",
+		AttributeIDs: []string{"ATTR_1"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
+		weight: 20,
+	}
+
+	if err := dm.SetChargerProfile(context.Background(), cpp, false); err != utils.ErrNotImplemented {
+		t.Errorf("Expected error <%v>, received error <%v>", utils.ErrNotImplemented, err)
+	}
+}
+
+func TestDMSetChargerProfileSetChargerProfileDrvErr(t *testing.T) {
+
+	cfg := config.NewDefaultCGRConfig()
+	data := &DataDBMock{
+		GetChargerProfileDrvF: func(ctx *context.Context, tnt, id string) (*ChargerProfile, error) {
+			return &ChargerProfile{}, nil
+		},
+		SetChargerProfileDrvF: func(ctx *context.Context, chr *ChargerProfile) (err error) { return utils.ErrNotImplemented },
+	}
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	cpp := &ChargerProfile{
+		Tenant:       "cgrates.org",
+		ID:           "CHP_1",
+		FilterIDs:    []string{"FltrId1"},
+		RunID:        "*rated",
+		AttributeIDs: []string{"ATTR_1"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
+		weight: 20,
+	}
+	if err := dm.SetChargerProfile(context.Background(), cpp, false); err != utils.ErrNotImplemented {
+		t.Errorf("Expected error <%v>, received error <%v>", utils.ErrNotImplemented, err)
+	}
+}
+
+func TestDMSetChargerProfileUpdatedIndexesErr(t *testing.T) {
+
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	data := &DataDBMock{
+		GetChargerProfileDrvF: func(ctx *context.Context, tnt, id string) (*ChargerProfile, error) {
+			return &ChargerProfile{}, nil
+		},
+		SetChargerProfileDrvF: func(ctx *context.Context, chr *ChargerProfile) (err error) { return nil },
+	}
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	cpp := &ChargerProfile{
+		Tenant:       "cgrates.org",
+		ID:           "CHP_1",
+		FilterIDs:    []string{"*string:~*req.Account:1001"},
+		RunID:        "*rated",
+		AttributeIDs: []string{"ATTR_1"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
+		weight: 20,
+	}
+
+	if err := dm.SetChargerProfile(context.Background(), cpp, true); err != utils.ErrNotImplemented {
+		t.Errorf("Expected error <%v>, received error <%v>", utils.ErrNotImplemented, err)
+	}
+}
+
+func TestDMSetChargerProfileReplicate(t *testing.T) {
+
+	cfgtmp := config.CgrConfig()
+	defer func() {
+		config.SetCgrConfig(cfgtmp)
+	}()
+	Cache.Clear(nil)
+
+	cpp := &ChargerProfile{
+		Tenant:       "cgrates.org",
+		ID:           "CHP_1",
+		FilterIDs:    []string{"*string:~*req.Account:1001"},
+		RunID:        "*rated",
+		AttributeIDs: []string{"ATTR_1"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
+		weight: 20,
+	}
+
+	cfg := config.NewDefaultCGRConfig()
+	cfg.DataDbCfg().Items[utils.MetaChargerProfiles].Replicate = true
+	cfg.DataDbCfg().RplConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
+	config.SetCgrConfig(cfg)
+
+	cc := make(chan birpc.ClientConnector, 1)
+	cc <- &ccMock{
+
+		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+			utils.ReplicatorSv1SetChargerProfile: func(ctx *context.Context, args, reply interface{}) error { return utils.ErrNotImplemented },
+		},
+	}
+
+	cM := NewConnManager(cfg)
+	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.ReplicatorSv1, cc)
+	data := &DataDBMock{
+		GetChargerProfileDrvF: func(ctx *context.Context, tnt, id string) (*ChargerProfile, error) {
+			return cpp, nil
+		},
+		SetChargerProfileDrvF: func(ctx *context.Context, chr *ChargerProfile) (err error) { return nil },
+	}
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	// tests replicate
+	if err := dm.SetChargerProfile(context.Background(), cpp, false); err != utils.ErrNotImplemented {
+		t.Errorf("Expected error <%v>, received error <%v>", utils.ErrNotImplemented, err)
+	}
+
+}
+
+func TestDMSetDispatcherProfileNoDMErr(t *testing.T) {
+	var dm *DataManager
+	err := dm.SetDispatcherProfile(context.Background(), &DispatcherProfile{}, false)
+	if err != utils.ErrNoDatabaseConn {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ErrNoDatabaseConn, err)
+	}
+}
+
+func TestDMSetDispatcherProfileCheckFiltersErr(t *testing.T) {
+
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	dpp := &DispatcherProfile{
+		Tenant:         "cgrates.org",
+		ID:             "DP_1",
+		FilterIDs:      []string{"*string*req.Account1001"},
+		Weight:         65,
+		Strategy:       utils.MetaLoad,
+		StrategyParams: map[string]interface{}{"k": "v"},
+		Hosts: DispatcherHostProfiles{
+			{
+				ID:        "C3",
+				FilterIDs: []string{"fltr2"},
+				Weight:    20,
+				Params:    map[string]interface{}{},
+				Blocker:   true,
+			},
+		},
+	}
+
+	expErr := "broken reference to filter: <*string*req.Account1001> for item with ID: cgrates.org:DP_1"
+	if err := dm.SetDispatcherProfile(context.Background(), dpp, true); err == nil || err.Error() != expErr {
+		t.Errorf("Expected error <%v>, received error <%v>", expErr, err)
+	}
+
+}
+
+func TestDMSetDispatcherProfileGetDispatcherProfileErr(t *testing.T) {
+
+	cfg := config.NewDefaultCGRConfig()
+	data := &DataDBMock{
+		GetDispatcherProfileDrvF: func(ctx *context.Context, s1, s2 string) (*DispatcherProfile, error) {
+			return &DispatcherProfile{}, utils.ErrNotImplemented
+		},
+	}
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	dpp := &DispatcherProfile{
+		Tenant:         "cgrates.org",
+		ID:             "DP_1",
+		FilterIDs:      []string{"*string*req.Account1001"},
+		Weight:         65,
+		Strategy:       utils.MetaLoad,
+		StrategyParams: map[string]interface{}{"k": "v"},
+		Hosts: DispatcherHostProfiles{
+			{
+				ID:        "C3",
+				FilterIDs: []string{"fltr2"},
+				Weight:    20,
+				Params:    map[string]interface{}{},
+				Blocker:   true,
+			},
+		},
+	}
+
+	if err := dm.SetDispatcherProfile(context.Background(), dpp, false); err != utils.ErrNotImplemented {
+		t.Errorf("Expected error <%v>, received error <%v>", utils.ErrNotImplemented, err)
+	}
+}
+
+func TestDMSetDispatcherProfileSetDispatcherProfileDrvErr(t *testing.T) {
+
+	cfg := config.NewDefaultCGRConfig()
+	data := &DataDBMock{
+		GetDispatcherProfileDrvF: func(ctx *context.Context, s1, s2 string) (*DispatcherProfile, error) {
+			return &DispatcherProfile{}, nil
+		},
+		SetDispatcherProfileDrvF: func(ctx *context.Context, dp *DispatcherProfile) error { return utils.ErrNotImplemented },
+	}
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	dpp := &DispatcherProfile{
+		Tenant:         "cgrates.org",
+		ID:             "DP_1",
+		FilterIDs:      []string{"*string*req.Account1001"},
+		Weight:         65,
+		Strategy:       utils.MetaLoad,
+		StrategyParams: map[string]interface{}{"k": "v"},
+		Hosts: DispatcherHostProfiles{
+			{
+				ID:        "C3",
+				FilterIDs: []string{"fltr2"},
+				Weight:    20,
+				Params:    map[string]interface{}{},
+				Blocker:   true,
+			},
+		},
+	}
+	if err := dm.SetDispatcherProfile(context.Background(), dpp, false); err != utils.ErrNotImplemented {
+		t.Errorf("Expected error <%v>, received error <%v>", utils.ErrNotImplemented, err)
+	}
+}
+
+func TestDMSetDispatcherProfileUpdatedIndexesErr(t *testing.T) {
+
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	data := &DataDBMock{
+		GetDispatcherProfileDrvF: func(ctx *context.Context, s1, s2 string) (*DispatcherProfile, error) {
+			return &DispatcherProfile{}, nil
+		},
+		SetDispatcherProfileDrvF: func(ctx *context.Context, dp *DispatcherProfile) error { return nil },
+	}
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	dpp := &DispatcherProfile{
+		Tenant:         "cgrates.org",
+		ID:             "DP_1",
+		FilterIDs:      []string{"*string:~*req.Account:1001"},
+		Weight:         65,
+		Strategy:       utils.MetaLoad,
+		StrategyParams: map[string]interface{}{"k": "v"},
+		Hosts: DispatcherHostProfiles{
+			{
+				ID:        "C3",
+				FilterIDs: []string{"fltr2"},
+				Weight:    20,
+				Params:    map[string]interface{}{},
+				Blocker:   true,
+			},
+		},
+	}
+
+	if err := dm.SetDispatcherProfile(context.Background(), dpp, true); err != utils.ErrNotImplemented {
+		t.Errorf("Expected error <%v>, received error <%v>", utils.ErrNotImplemented, err)
+	}
+}
+
+func TestDMSetDispatcherProfileReplicate(t *testing.T) {
+
+	cfgtmp := config.CgrConfig()
+	defer func() {
+		config.SetCgrConfig(cfgtmp)
+	}()
+	Cache.Clear(nil)
+
+	dpp := &DispatcherProfile{
+		Tenant:         "cgrates.org",
+		ID:             "DP_1",
+		FilterIDs:      []string{"*string:~*req.Account:1001"},
+		Weight:         65,
+		Strategy:       utils.MetaLoad,
+		StrategyParams: map[string]interface{}{"k": "v"},
+		Hosts: DispatcherHostProfiles{
+			{
+				ID:        "C3",
+				FilterIDs: []string{"fltr2"},
+				Weight:    20,
+				Params:    map[string]interface{}{},
+				Blocker:   true,
+			},
+		},
+	}
+
+	cfg := config.NewDefaultCGRConfig()
+	cfg.DataDbCfg().Items[utils.MetaDispatcherProfiles].Replicate = true
+	cfg.DataDbCfg().RplConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
+	config.SetCgrConfig(cfg)
+
+	cc := make(chan birpc.ClientConnector, 1)
+	cc <- &ccMock{
+
+		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+			utils.ReplicatorSv1SetDispatcherProfile: func(ctx *context.Context, args, reply interface{}) error { return utils.ErrNotImplemented },
+		},
+	}
+
+	cM := NewConnManager(cfg)
+	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.ReplicatorSv1, cc)
+	data := &DataDBMock{
+		GetDispatcherProfileDrvF: func(ctx *context.Context, s1, s2 string) (*DispatcherProfile, error) {
+			return dpp, nil
+		},
+		SetDispatcherProfileDrvF: func(ctx *context.Context, dp *DispatcherProfile) error { return nil },
+	}
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	// tests replicate
+	if err := dm.SetDispatcherProfile(context.Background(), dpp, false); err != utils.ErrNotImplemented {
+		t.Errorf("Expected error <%v>, received error <%v>", utils.ErrNotImplemented, err)
+	}
+
 }

@@ -1884,3 +1884,24 @@ func TestLibFiltersGetDurationPointerOptsFromMultipleMapsReturnOptFromStartOptsE
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 }
+
+func TestGetBoolOptsFieldAsInterfaceErr(t *testing.T) {
+
+	cfg := config.NewDefaultCGRConfig()
+	dataDB := NewInternalDB(nil, nil, nil)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	fS := NewFilterS(cfg, nil, dm)
+	dynOpts := []*utils.DynamicBoolOpt{
+		{
+			FilterIDs: []string{"*string:~*req.Account:1001"},
+			Tenant:    "cgrates.org",
+			Value:     false,
+		},
+	}
+
+	if _, err := GetBoolOpts(context.Background(), "cgrates.org", new(mockDP), fS, dynOpts,
+		config.ThresholdsProfileIgnoreFiltersDftOpt, "nonExistingAPIOpt", utils.MetaProfileIgnoreFilters); err != utils.ErrAccountNotFound {
+		t.Errorf("Expecting error <%+v>,\n Recevied  error <%+v>", utils.ErrAccountNotFound, err)
+	}
+
+}
