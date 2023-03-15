@@ -361,8 +361,9 @@ func (sS *StatS) processEvent(ctx *context.Context, tnt string, args *utils.CGRE
 		}
 
 	}
-	if sS.processThresholds(ctx, matchSQs, args.APIOpts) != nil ||
-		withErrors {
+
+	err = sS.processThresholds(ctx, matchSQs, args.APIOpts)
+	if withErrors {
 		err = utils.ErrPartiallyExecuted
 	}
 
@@ -373,7 +374,10 @@ func (sS *StatS) processEvent(ctx *context.Context, tnt string, args *utils.CGRE
 	}
 	if len(promIDs) != 0 {
 		if err = exportToPrometheus(matchSQs, utils.NewStringSet(promIDs)); err != nil {
-			return
+			utils.Logger.Warning(
+				fmt.Sprintf("<StatS> Failed to export the queues to Prometheus: error: %s",
+					err.Error()))
+			err = utils.ErrPartiallyExecuted
 		}
 	}
 	return
