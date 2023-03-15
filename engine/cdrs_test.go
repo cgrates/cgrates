@@ -24,6 +24,7 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
 )
@@ -367,5 +368,83 @@ func TestCDRSStoreSessionCost22(t *testing.T) {
 	}
 	if _, err := cdrS.cdrDb.GetSMCosts(cdr.Cost.CGRID, cdr.Cost.RunID, "", cdr.Cost.OriginID); err != nil {
 		t.Error(err)
+	}
+}
+
+func TestCDRSV2StoreSessionCost(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	cc := &CallCost{
+		Category:    "generic",
+		Tenant:      "cgrates.org",
+		Subject:     "1001",
+		Account:     "1001",
+		Destination: "1002",
+		ToR:         "*voice",
+		Cost:        0,
+	}
+	args := &ArgsV2CDRSStoreSMCost{
+		CheckDuplicate: true,
+		Cost: &V2SMCost{
+			CGRID:       "testRPCMethodsCdrsStoreSessionCost",
+			RunID:       utils.MetaDefault,
+			OriginHost:  "",
+			OriginID:    "testdatagrp_grp1",
+			CostSource:  "SMR",
+			Usage:       1536,
+			CostDetails: NewEventCostFromCallCost(cc, "testRPCMethodsCdrsStoreSessionCost", utils.MetaDefault),
+		},
+	}
+	cdrS := &CDRServer{
+		cgrCfg: cfg,
+		cdrDb:  db,
+		dm:     dm,
+		guard:  guardian.Guardian,
+	}
+	var reply string
+	if err := cdrS.V2StoreSessionCost(args, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Expected ok,received %s", reply)
+	}
+}
+
+func TestCDRSRateCDRs(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+
+	arg := utils.RPCCDRsFilterWithArgDispatcher{
+		RPCCDRsFilter: &utils.RPCCDRsFilter{
+			Accounts: []string{"1001"},
+			RunIDs:   []string{utils.MetaDefault},
+		},
+		TenantArg: &utils.TenantArg{
+			Tenant: "cgrates.org",
+		},
+		ArgDispatcher: &utils.ArgDispatcher{
+			APIKey: utils.StringPointer("cdrs12345"),
+		},
+	}
+
+	var cdrs []*CDR
+	cdrS := &CDRServer{
+		cgrCfg: cfg,
+		cdrDb:  db,
+		dm:     dm,
+	}
+	exp := []*CDR{
+		{Account: "1001", RunID: "*default"},
+	}
+	cdrS.cdrDb.SetCDR(exp[0], true)
+	if err := cdrS.V1GetCDRs(arg, &cdrs); err != nil {
+		t.Error(err)
+	}
+	var cnt int64
+	if err := cdrS.V1CountCDRs(&arg, &cnt); err != nil {
+		t.Error(err)
+	} else if cnt != 1 {
+		t.Errorf("Expected 1,Received %d", cnt)
 	}
 }

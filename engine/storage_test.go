@@ -405,3 +405,35 @@ func TestIDBGetTpSuppliers(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestTPDispatcherHosts(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, false, cfg.StorDbCfg().Items)
+
+	dpp := []*utils.TPDispatcherHost{
+		{
+			TPid:   "TP1",
+			Tenant: "cgrates.org",
+			ID:     "ALL1",
+			Conns: []*utils.TPDispatcherHostConn{
+				{
+					Address:   "127.0.0.1:2012",
+					Transport: utils.MetaJSON,
+					TLS:       true,
+				},
+				{
+					Address:   "127.0.0.1:3012",
+					Transport: utils.MetaJSON,
+					TLS:       false,
+				},
+			}},
+	}
+
+	if err := db.SetTPDispatcherHosts(dpp); err != nil {
+		t.Error(err)
+	}
+	if _, err := db.GetTPDispatcherHosts("TP1", "cgrates.org", "ALL1"); err != nil {
+		t.Error(err)
+	}
+
+}
