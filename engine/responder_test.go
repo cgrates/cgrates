@@ -475,6 +475,41 @@ func TestResponderGetMaxSessionTimeMaxUsageVOICE(t *testing.T) {
 	}
 }
 
+func TestMaxSessionTimeOnAccounts(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	tmpDm := dm
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	defer func() {
+		SetDataStorage(tmpDm)
+	}()
+	args := &utils.GetMaxSessionTimeOnAccountsArgs{
+		Subject:     "free",
+		Tenant:      "cgrates.org",
+		AccountIDs:  []string{"1001", "1002", "1003"},
+		Destination: "1004",
+		SetupTime:   time.Date(2022, 12, 15, 8, 0, 0, 0, time.UTC),
+		Usage:       time.Second * 30,
+	}
+	SetDataStorage(dm)
+	var reply map[string]interface{}
+	for i, acc := range args.AccountIDs {
+		dm.SetAccount(&Account{ID: utils.ConcatenatedKey("cgrates.org", acc),
+			BalanceMap: map[string]Balances{utils.VOICE: {&Balance{
+				DestinationIDs: utils.NewStringMap("1004"),
+				Value:          float64(10 * (i + 1)), Weight: 10}}},
+		})
+	}
+	if err := dm.SetReverseDestination(&Destination{
+		Id: "DEST", Prefixes: []string{"1004"}}, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+
+	if err := rsponder.GetMaxSessionTimeOnAccounts(args, &reply); err != nil {
+		t.Error(err)
+	}
+}
+
 func TestResponderGetCostOnRatingPlans(t *testing.T) {
 	tmpCache := Cache
 	defer func() {

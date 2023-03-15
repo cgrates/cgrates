@@ -385,3 +385,67 @@ func TestThresholdsProcessEvent2(t *testing.T) {
 		}
 	}
 }
+
+func TestThresholdSProcessEvent22(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	tmpDm := dm
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	thS, err := NewThresholdService(dm, cfg, NewFilterS(cfg, nil, dm))
+	defer func() {
+		SetDataStorage(tmpDm)
+	}()
+	if err != nil {
+		t.Error(err)
+	}
+	args := &ArgsProcessEvent{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "event1",
+			Event: map[string]interface{}{
+				utils.EventType:     utils.AccountUpdate,
+				utils.Account:       "1002",
+				utils.AllowNegative: true,
+				utils.Disabled:      false,
+				utils.Units:         12.3},
+		},
+	}
+	fltr := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "FLTR_1",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaString,
+				Element: "~*req.Account",
+				Values:  []string{"1002"},
+			},
+		},
+	}
+	dm.SetFilter(fltr)
+	thP := &ThresholdProfile{
+		Tenant:    "cgrates.org",
+		ID:        "THD_Test",
+		FilterIDs: []string{"FLTR_1"},
+		MaxHits:   -1,
+		MinSleep:  time.Duration(time.Second),
+		Blocker:   false,
+		Weight:    20.0,
+		Async:     false,
+	}
+	dm.SetThresholdProfile(thP, true)
+	dm.SetThreshold(&Threshold{Tenant: thP.Tenant, ID: thP.ID})
+	acs := Actions{
+		{ActionType: utils.TOPUP,
+			Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY),
+				Value:          &utils.ValueFormula{Static: 25},
+				DestinationIDs: utils.StringMapPointer(utils.NewStringMap("RET")),
+				Weight:         utils.Float64Pointer(20)}},
+	}
+	dm.SetActions("ACT_LOG", acs, utils.NonTransactional)
+	SetDataStorage(dm)
+
+	var reply []string
+	if err := thS.V1ProcessEvent(args, &reply); err == nil {
+		t.Error(err)
+	}
+}
