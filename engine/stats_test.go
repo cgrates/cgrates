@@ -3804,8 +3804,11 @@ func TestStatQueueProcessEventProfileIDsErr(t *testing.T) {
 
 }
 
-// unfinished should be unlocked from the main func
 func TestStatQueueProcessEventPrometheusStatIDsErr(t *testing.T) {
+
+	defer func() {
+		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+	}()
 
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
@@ -3815,7 +3818,7 @@ func TestStatQueueProcessEventPrometheusStatIDsErr(t *testing.T) {
 
 	sqPrf := &StatQueueProfile{
 		Tenant:    "cgrates.org",
-		ID:        "SQ2",
+		ID:        "SQ1",
 		FilterIDs: []string{"*string:~*req.Account:1001"},
 		Weights: utils.DynamicWeights{
 			{
@@ -3839,7 +3842,7 @@ func TestStatQueueProcessEventPrometheusStatIDsErr(t *testing.T) {
 	stq := &StatQueue{
 		sqPrfl: sqPrf,
 		Tenant: "cgrates.org",
-		ID:     "SQ2",
+		ID:     "SQ1",
 		SQItems: []SQItem{
 			{
 				EventID: "SqProcessEvent",
@@ -3865,7 +3868,7 @@ func TestStatQueueProcessEventPrometheusStatIDsErr(t *testing.T) {
 		},
 		APIOpts: map[string]interface{}{
 			utils.MetaUsage:           "10s",
-			utils.OptsStatsProfileIDs: []string{"SQ2"},
+			utils.OptsStatsProfileIDs: []string{"SQ1"},
 		},
 	}
 
@@ -3887,12 +3890,15 @@ func TestStatQueueProcessEventPrometheusStatIDsErr(t *testing.T) {
 
 }
 
-// unfinished should be unlocked from the main func
 func TestStatQueueProcessEventExpiredErr(t *testing.T) {
 
-	tmp := utils.Logger
 	defer func() {
-		utils.Logger = tmp
+		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+	}()
+
+	tmpl := utils.Logger
+	defer func() {
+		utils.Logger = tmpl
 	}()
 
 	buf := new(bytes.Buffer)
@@ -3961,7 +3967,7 @@ func TestStatQueueProcessEventExpiredErr(t *testing.T) {
 
 	if rcv, err := sS.processEvent(context.Background(), args.Tenant, args); err != nil {
 		t.Error(err)
-	} else if rcv != nil {
+	} else if !reflect.DeepEqual([]string{"SQ1"}, rcv) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", nil, rcv)
 
 	}
@@ -3974,8 +3980,12 @@ func TestStatQueueProcessEventExpiredErr(t *testing.T) {
 
 }
 
-// unfinished should be unlocked from the main func
 func TestStatQueueProcessEventBlockerErr(t *testing.T) {
+
+	defer func() {
+		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+	}()
+
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
@@ -3984,7 +3994,7 @@ func TestStatQueueProcessEventBlockerErr(t *testing.T) {
 
 	sqPrf := &StatQueueProfile{
 		Tenant:    "cgrates.org",
-		ID:        "SQ3",
+		ID:        "SQ1",
 		FilterIDs: []string{"*string:~*req.Account:1001"},
 		Weights: utils.DynamicWeights{
 			{
@@ -4013,7 +4023,7 @@ func TestStatQueueProcessEventBlockerErr(t *testing.T) {
 	stq := &StatQueue{
 		sqPrfl: sqPrf,
 		Tenant: "cgrates.org",
-		ID:     "SQ3",
+		ID:     "SQ1",
 		SQItems: []SQItem{
 			{
 				EventID: "SqProcessEvent",
@@ -4039,7 +4049,7 @@ func TestStatQueueProcessEventBlockerErr(t *testing.T) {
 		},
 		APIOpts: map[string]interface{}{
 			utils.MetaUsage:           "10s",
-			utils.OptsStatsProfileIDs: []string{"SQ3"},
+			utils.OptsStatsProfileIDs: []string{"SQ1"},
 		},
 	}
 
