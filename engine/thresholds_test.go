@@ -19,6 +19,7 @@ package engine
 
 import (
 	"reflect"
+	"sort"
 	"testing"
 	"time"
 
@@ -388,16 +389,18 @@ func TestThresholdsProcessEvent2(t *testing.T) {
 
 func TestThresholdSProcessEvent22(t *testing.T) {
 	cfg, _ := config.NewDefaultCGRConfig()
+	Cache.Clear(nil)
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	tmpDm := dm
-	dm := NewDataManager(db, cfg.CacheCfg(), nil)
-	thS, err := NewThresholdService(dm, cfg, NewFilterS(cfg, nil, dm))
 	defer func() {
 		SetDataStorage(tmpDm)
 	}()
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	thS, err := NewThresholdService(dm, cfg, NewFilterS(cfg, nil, dm))
 	if err != nil {
 		t.Error(err)
 	}
+
 	args := &ArgsProcessEvent{
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
@@ -421,6 +424,7 @@ func TestThresholdSProcessEvent22(t *testing.T) {
 			},
 		},
 	}
+	SetDataStorage(dm)
 	dm.SetFilter(fltr)
 	thP := &ThresholdProfile{
 		Tenant:    "cgrates.org",
@@ -431,6 +435,7 @@ func TestThresholdSProcessEvent22(t *testing.T) {
 		Blocker:   false,
 		Weight:    20.0,
 		Async:     false,
+		ActionIDs: []string{"ACT_LOG"},
 	}
 	dm.SetThresholdProfile(thP, true)
 	dm.SetThreshold(&Threshold{Tenant: thP.Tenant, ID: thP.ID})
@@ -442,10 +447,129 @@ func TestThresholdSProcessEvent22(t *testing.T) {
 				Weight:         utils.Float64Pointer(20)}},
 	}
 	dm.SetActions("ACT_LOG", acs, utils.NonTransactional)
-	SetDataStorage(dm)
-
 	var reply []string
-	if err := thS.V1ProcessEvent(args, &reply); err == nil {
+	if err := thS.V1ProcessEvent(args, &reply); err != nil {
 		t.Error(err)
+	}
+}
+
+func TestThresholdForEvent(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	tmpDm := dm
+	defer func() {
+		SetDataStorage(tmpDm)
+	}()
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	thS, err := NewThresholdService(dm, cfg, NewFilterS(cfg, nil, dm))
+	if err != nil {
+		t.Error(err)
+	}
+	args := &ArgsProcessEvent{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "TestSesItProccesCDR",
+			Event: map[string]interface{}{
+				utils.Tenant:      "cgrates.org",
+				utils.Category:    "call",
+				utils.ToR:         utils.VOICE,
+				utils.OriginID:    "TestTerminate",
+				utils.RequestType: utils.META_PREPAID,
+				utils.Account:     "1002",
+				utils.Subject:     "1001",
+				utils.Destination: "1001",
+				utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+				utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
+				utils.Usage:       2 * time.Second,
+			},
+		},
+	}
+	fltrs := []*Filter{
+		{
+			Tenant: "cgrates.org",
+			ID:     "FLTR_1",
+			Rules: []*FilterRule{
+				{
+					Type:    utils.MetaString,
+					Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.ToR,
+					Values:  []string{utils.VOICE},
+				},
+				{
+					Type:    utils.MetaString,
+					Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.RequestType,
+					Values:  []string{utils.META_PREPAID},
+				},
+			},
+		},
+		{
+			Tenant: "cgrates.org",
+			ID:     "FLTR_2",
+			Rules: []*FilterRule{
+				{
+					Type:    utils.MetaString,
+					Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.OriginID,
+					Values:  []string{"TestTerminate"},
+				},
+			},
+		},
+	}
+	for _, fltr := range fltrs {
+		dm.SetFilter(fltr)
+	}
+	thp := &ThresholdProfile{Tenant: "cgrates.org",
+		ID:        "TH_1",
+		FilterIDs: []string{"FLTR_1"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+			ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+		},
+		MaxHits:  -1,
+		MinSleep: time.Duration(1 * time.Millisecond),
+		Weight:   10.0}
+	dm.SetThresholdProfile(thp, true)
+	thp2 := &ThresholdProfile{
+		Tenant:    "cgrates.org",
+		ID:        "TH_2",
+		FilterIDs: []string{"FLTR_2"},
+		MaxHits:   -1,
+		MinSleep:  time.Duration(1 * time.Millisecond),
+		Weight:    90.0,
+		Async:     true,
+	}
+	dm.SetThresholdProfile(thp2, true)
+	ths := Thresholds{
+		&Threshold{
+			Tenant: thp.Tenant,
+			ID:     thp.ID,
+		},
+		&Threshold{
+			Tenant: thp2.Tenant,
+			ID:     thp2.ID,
+		},
+	}
+	for _, th := range ths {
+		dm.SetThreshold(th)
+	}
+	var reply Thresholds
+	if err := thS.V1GetThresholdsForEvent(args, &reply); err != nil {
+		t.Error(err)
+	}
+
+	sort.Slice(reply, func(i, j int) bool {
+		return reply[i].ID < reply[j].ID
+	})
+	if !reflect.DeepEqual(ths, reply) {
+		t.Errorf("Expected %v,Received %v", utils.ToJSON(ths), utils.ToJSON(reply))
+	}
+	expID := []string{"TH_1", "TH_2"}
+	var tIDs []string
+	if err := thS.V1GetThresholdIDs("cgrates.org", &tIDs); err != nil {
+		t.Error(err)
+	}
+	sort.Slice(tIDs, func(i, j int) bool {
+		return tIDs[i] < tIDs[j]
+	})
+	if !reflect.DeepEqual(tIDs, expID) {
+		t.Errorf("Expected %v,Received %v", expID, tIDs)
 	}
 }
