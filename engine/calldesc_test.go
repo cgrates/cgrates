@@ -24,6 +24,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -2044,28 +2045,54 @@ func TestCDRefundIncrementspanic(t *testing.T) {
 	}
 }
 
-// func TestCallDescRefundRounding(t *testing.T) {
-// 	cgrEv := &utils.CGREvent{
-// 		Tenant: "cgrates.org",
-// 		ID:     "Generated",
-// 		Event: map[string]interface{}{
-// 			"Account":     "acc1",
-// 			"AnswerTime":  time.Date(2015, 3, 23, 6, 0, 0, 0, time.UTC),
-// 			"Category":    "call",
-// 			"Destination": "0723123113",
-// 			"Subject":     "acc1",
-// 			"Tenant":      "cgrates.org",
-// 			"ToR":         "",
-// 			"Usage":       time.Duration(30) * time.Minute,
-// 		},
-// 	}
-// 	cd, err := NewCallDescriptorFromCGREvent(cgrEv, "UTC")
-// 	if err != nil {
-// 		t.Error(err)
-// 	}
+func TestCallDescRefundRounding(t *testing.T) {
+	tmpDm := dm
+	cfg, _ := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	defer func() {
+		SetDataStorage(tmpDm)
+	}()
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 
-// 	if _, err := cd.RefundRounding(); err != nil {
-// 		t.Error(err)
-// 	}
-// }
-// unfinished
+	cgrEv := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "Generated",
+		Event: map[string]interface{}{
+			"Account":     "1001",
+			"AnswerTime":  time.Date(2018, 3, 23, 6, 0, 0, 0, time.UTC),
+			"Category":    "call",
+			"Destination": "1002",
+			"Subject":     "1001",
+			"Tenant":      "cgrates.org",
+			"ToR":         "",
+			"Usage":       time.Duration(30) * time.Minute,
+			"SetupTime":   time.Date(2017, 3, 23, 6, 0, 0, 0, time.UTC),
+		},
+	}
+	cd, err := NewCallDescriptorFromCGREvent(cgrEv, "UTC")
+	if err != nil {
+		t.Error(err)
+	}
+	cd.Increments = Increments{
+		{Cost: 2, BalanceInfo: &DebitInfo{
+			Monetary: &MonetaryInfo{UUID: "moneya"}, AccountID: "cgrates.org:1001"}},
+		{Cost: 2, Duration: 3 * time.Second, BalanceInfo: &DebitInfo{
+			Unit:     &UnitInfo{UUID: "minutea"},
+			Monetary: &MonetaryInfo{UUID: "moneya"}, AccountID: "cgrates.org:1002"}},
+		&Increment{Duration: 4 * time.Second, BalanceInfo: &DebitInfo{
+			Unit: &UnitInfo{UUID: "minuteb"}, AccountID: "cgrates.org:1003"}},
+	}
+	expAcc := &Account{
+		ID: "cgrates.org:1001",
+	}
+	SetDataStorage(dm)
+	if err := dm.SetAccount(expAcc); err != nil {
+		t.Error(err)
+	}
+
+	if acc, err := cd.RefundRounding(); err != nil {
+		t.Error(err)
+	} else if expAcc.ID != acc.ID {
+		t.Errorf("Expected %v,Received %v", utils.ToJSON(expAcc), utils.ToJSON(acc))
+	}
+}

@@ -768,7 +768,7 @@ func TestResponderMaxDebit11(t *testing.T) {
 			Subject:       "1001",
 			Account:       "1001",
 			Destination:   "1002",
-			DurationIndex: 90,
+			DurationIndex: 30,
 			TimeStart:     tStart,
 			TimeEnd:       tEnd,
 			ToR:           utils.MONETARY,
@@ -805,7 +805,7 @@ func TestResponderMaxDebit11(t *testing.T) {
 					},
 				},
 				RoundingMethod:   utils.ROUNDING_MIDDLE,
-				RoundingDecimals: 2,
+				RoundingDecimals: 4,
 			},
 		},
 		Timings: map[string]*RITiming{
@@ -826,6 +826,9 @@ func TestResponderMaxDebit11(t *testing.T) {
 			},
 		},
 	}
+	rsponder.MaxComputedUsage = map[string]time.Duration{
+		utils.MONETARY: 90 * time.Second,
+	}
 
 	if err := dm.SetRatingPlan(rp, utils.NonTransactional); err != nil {
 		t.Error(err)
@@ -843,7 +846,7 @@ func TestResponderMaxDebit11(t *testing.T) {
 		t.Error(err)
 	}
 	var reply CallCost
-	if err := rsponder.MaxDebit(cd, &reply); err == nil {
+	if err := rsponder.MaxDebit(cd, &reply); err != nil {
 		t.Error(err)
 	}
 
@@ -904,6 +907,56 @@ func TestResponderRefundRounding33(t *testing.T) {
 	SetDataStorage(dm)
 	var reply Account
 	if rsponder.RefundRounding(cd, &reply); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestResponderRounding(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	tmpDm := dm
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	defer func() {
+		SetDataStorage(tmpDm)
+	}()
+	tStart, _ := utils.ParseTimeDetectLayout("2020-08-07T17:30:00Z", utils.EmptyString)
+	tEnd, _ := utils.ParseTimeDetectLayout("2020-08-07T17:31:30Z", utils.EmptyString)
+	arg := &CallDescriptorWithArgDispatcher{
+		CallDescriptor: &CallDescriptor{
+			Category:      "call",
+			Tenant:        "cgrates.org",
+			Subject:       "1001",
+			Account:       "1001",
+			Destination:   "1002",
+			DurationIndex: 90,
+			TimeStart:     tStart,
+			TimeEnd:       tEnd,
+			ToR:           utils.VOICE,
+			Increments: Increments{
+				&Increment{
+					Duration: time.Minute,
+					Cost:     10.4,
+					BalanceInfo: &DebitInfo{
+						Unit:      &UnitInfo{UUID: "1", DestinationID: "1", Consumed: 2.3, ToR: utils.VOICE, RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}}},
+						Monetary:  &MonetaryInfo{UUID: "2"},
+						AccountID: "cgrates.org:1001"},
+				},
+			},
+		},
+	}
+	SetDataStorage(dm)
+	dm.SetAccount(&Account{
+		ID: "cgrates.org:1001",
+		BalanceMap: map[string]Balances{
+			utils.MONETARY: {
+				&Balance{Value: 11, Weight: 20, DestinationIDs: utils.NewStringMap("1002")},
+			}},
+	})
+	rsponder.MaxComputedUsage = map[string]time.Duration{
+		utils.VOICE: 2 * time.Minute,
+	}
+	var reply Account
+	if err := rsponder.RefundRounding(arg, &reply); err != nil {
 		t.Error(err)
 	}
 }

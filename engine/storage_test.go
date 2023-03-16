@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"reflect"
 	"testing"
 	"time"
 
@@ -409,7 +410,6 @@ func TestIDBGetTpSuppliers(t *testing.T) {
 func TestTPDispatcherHosts(t *testing.T) {
 	cfg, _ := config.NewDefaultCGRConfig()
 	db := NewInternalDB(nil, nil, false, cfg.StorDbCfg().Items)
-
 	dpp := []*utils.TPDispatcherHost{
 		{
 			TPid:   "TP1",
@@ -428,12 +428,41 @@ func TestTPDispatcherHosts(t *testing.T) {
 				},
 			}},
 	}
-
 	if err := db.SetTPDispatcherHosts(dpp); err != nil {
 		t.Error(err)
 	}
 	if _, err := db.GetTPDispatcherHosts("TP1", "cgrates.org", "ALL1"); err != nil {
 		t.Error(err)
 	}
+}
 
+func TestTPThresholds(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, false, cfg.StorDbCfg().Items)
+	thresholds := []*utils.TPThresholdProfile{
+		{
+			TPid:      "TH1",
+			Tenant:    "cgrates.org",
+			ID:        "Threshold",
+			FilterIDs: []string{"FLTR_1", "FLTR_2"},
+			ActivationInterval: &utils.TPActivationInterval{
+				ActivationTime: "2014-07-29T15:00:00Z",
+				ExpiryTime:     "",
+			},
+			MaxHits:   -1,
+			MinSleep:  "1s",
+			Blocker:   true,
+			Weight:    10,
+			ActionIDs: []string{"Thresh1"},
+			Async:     true,
+		},
+	}
+	if err := db.SetTPThresholds(thresholds); err != nil {
+		t.Error(err)
+	}
+	if thds, err := db.GetTPThresholds("TH1", "cgrates.org", "Threshold"); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(thresholds, thds) {
+		t.Errorf("Expected %v,Received %v", utils.ToJSON(thresholds), utils.ToJSON(thds))
+	}
 }

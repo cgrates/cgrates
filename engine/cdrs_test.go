@@ -274,7 +274,6 @@ func TestCDRSStoreSessionCost22(t *testing.T) {
 	cfg, _ := config.NewDefaultCGRConfig()
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
-
 	cdrS := &CDRServer{
 		cgrCfg: cfg,
 		cdrDb:  db,

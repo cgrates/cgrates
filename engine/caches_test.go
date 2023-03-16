@@ -69,10 +69,56 @@ func TestCacheV1ReloadCache(t *testing.T) {
 	attrs := utils.AttrReloadCacheWithArgDispatcher{
 		AttrReloadCache: utils.AttrReloadCache{
 			ArgsCache: utils.ArgsCache{
-				FilterIDs: []string{"DSP_FLT"},
+				FilterIDs:             []string{"DSP_FLT"},
+				DestinationIDs:        []string{"CRUDDestination2"},
+				ReverseDestinationIDs: []string{"CRUDDestination2"},
+				RatingPlanIDs:         []string{"RP_DFLT"},
+				RatingProfileIDs:      []string{"*out:cgrates:call:1001"},
 			},
 		},
 	}
+	dst := &Destination{Id: "CRUDDestination2", Prefixes: []string{"+491", "+492", "+493"}}
+	dm.SetDestination(dst, utils.NonTransactional)
+	dm.SetReverseDestination(dst, utils.NonTransactional)
+	rp := &RatingPlan{
+		Id: "RP_DFLT",
+		Timings: map[string]*RITiming{
+			"30eab301": {
+				StartTime: "00:00:00",
+			},
+		},
+		Ratings: map[string]*RIRate{
+			"b457f861": {
+				Rates: []*Rate{
+					{
+						GroupIntervalStart: 0,
+						Value:              0.01,
+						RateIncrement:      time.Second,
+						RateUnit:           time.Second,
+					},
+				},
+				RoundingMethod:   utils.ROUNDING_MIDDLE,
+				RoundingDecimals: 4,
+			},
+		},
+		DestinationRates: map[string]RPRateList{
+			"CRUDDestination2": []*RPRate{
+				{
+					Timing: "30eab301",
+					Rating: "b457f861",
+					Weight: 10,
+				},
+			},
+		},
+	}
+	dm.SetRatingPlan(rp, utils.NonTransactional)
+	rP := &RatingProfile{Id: utils.ConcatenatedKey(utils.META_OUT, "cgrates", "call", "1001"),
+		RatingPlanActivations: RatingPlanActivations{&RatingPlanActivation{
+			ActivationTime: time.Date(2015, 01, 01, 8, 0, 0, 0, time.UTC),
+			RatingPlanId:   rp.Id,
+		}},
+	}
+	dm.SetRatingProfile(rP, utils.NonTransactional)
 	fltr := &Filter{
 		Tenant: "cgrates.org",
 		ID:     "DSP_FLT",
