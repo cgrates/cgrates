@@ -24,6 +24,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
 )
@@ -2582,6 +2583,77 @@ func TestCacheGetClonedActions(t *testing.T) {
 	aCloned := clned.(Actions)
 	if !reflect.DeepEqual(actions, aCloned) {
 		t.Errorf("Expecting: %+v, received: %+v", actions[1].Balance, aCloned[1].Balance)
+	}
+}
+
+func TestRemoveSessionCosts(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	tmpDM := dm
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	defer func() {
+		SetCdrStorage(cdrStorage)
+		SetDataStorage(tmpDM)
+	}()
+	aT := &ActionTiming{
+		ActionsID: "ACT_LOG",
+	}
+	SetDataStorage(dm)
+	SetCdrStorage(db)
+	fltrs := []*Filter{
+		{
+			Tenant: "cgrates.org",
+			ID:     "FLTR_1",
+			Rules: []*FilterRule{
+				{
+					Element: utils.DynamicDataPrefix + utils.RunID,
+					Type:    utils.MetaString,
+					Values:  []string{"RunID"},
+				},
+			},
+		},
+		{
+			Tenant: "cgrates.org",
+			ID:     "FLTR_2",
+			Rules: []*FilterRule{
+				{
+					Type:    utils.MetaGreaterOrEqual,
+					Element: "~Usage",
+					Values:  []string{"12s", "33s"},
+				},
+			},
+		},
+	}
+	for _, fltr := range fltrs {
+		dm.SetFilter(fltr)
+	}
+	acs := Actions{
+		{
+			ActionType: utils.MetaRemoveSessionCosts,
+			Balance: &BalanceFilter{
+				Type:           utils.StringPointer(utils.MONETARY),
+				Value:          &utils.ValueFormula{Static: 25},
+				DestinationIDs: utils.StringMapPointer(utils.NewStringMap("RET")),
+				Weight:         utils.Float64Pointer(20)},
+			ExtraParameters: "FLTR_1;FLTR_2",
+		},
+	}
+	smCost := &SMCost{
+		RunID: "RunID",
+		Usage: 12 * time.Second,
+		CostDetails: &EventCost{
+			CGRID: "EventCost_CGRID",
+			Cost:  utils.Float64Pointer(0.74),
+		},
+	}
+	if err := db.SetSMCost(smCost); err != nil {
+		t.Error(err)
+	}
+	if err := dm.SetActions("ACT_LOG", acs, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+	if err := aT.Execute(nil, nil); err != nil {
+		t.Error(err)
 	}
 }
 

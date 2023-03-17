@@ -18,6 +18,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"errors"
+	"reflect"
 	"testing"
 	"time"
 
@@ -186,4 +188,158 @@ func TestDmMatchFilterIndexFromKey(t *testing.T) {
 		t.Error(err)
 	}
 	//unifinished
+}
+
+func TestCacheDataFromDB(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	chgS := ChargerProfiles{
+		&ChargerProfile{
+			Tenant:    "cgrates.org",
+			ID:        "Charger1",
+			FilterIDs: []string{"*string:~*req.Account:1015", "*gt:~*req.Usage:10"},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 29, 15, 0, 0, 0, time.UTC),
+			},
+			RunID:        utils.MetaDefault,
+			AttributeIDs: []string{"*none"},
+			Weight:       20,
+		},
+		&ChargerProfile{
+			Tenant:    "cgrates.com",
+			ID:        "CHRG_1",
+			FilterIDs: []string{"*string:Account:1001"},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+				ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			},
+			AttributeIDs: []string{"ATTR_1"},
+			Weight:       20,
+		},
+	}
+	for _, chg := range chgS {
+		if err := dm.SetChargerProfile(chg, true); err != nil {
+			t.Error(err)
+		}
+	}
+	if err := dm.CacheDataFromDB(utils.ChargerProfilePrefix, nil, false); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestCacheDataFromDBFilterIndexes(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+
+	fltr := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "FLTR_ATTR_1",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaString,
+				Element: "~*req.Attribute",
+				Values:  []string{"AttributeProfile1"},
+			},
+			{
+				Type:    utils.MetaGreaterOrEqual,
+				Element: "~*req.UsageInterval",
+				Values:  []string{(1 * time.Second).String()},
+			},
+			{
+				Type:    utils.MetaGreaterOrEqual,
+				Element: "~*req." + utils.Weight,
+				Values:  []string{"9.0"},
+			},
+		},
+	}
+	dm.SetFilter(fltr)
+	attr := &AttributeProfile{
+		Tenant:    "cgrates.org",
+		ID:        "ATTR_1001_SIMPLEAUTH",
+		FilterIDs: []string{"FLTR_ATTR_1"},
+		Contexts:  []string{"simpleauth"},
+		Attributes: []*Attribute{
+			{
+				FilterIDs: []string{},
+				Path:      utils.MetaReq + utils.NestingSep + "Password",
+				Type:      utils.META_CONSTANT,
+				Value:     config.NewRSRParsersMustCompile("CGRateS.org", true, utils.INFIELD_SEP),
+			},
+		},
+		Weight: 20.0,
+	}
+	dm.SetAttributeProfile(attr, true)
+	if err := dm.CacheDataFromDB(utils.AttributeFilterIndexes, nil, false); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestFilterIndexesRmtRpl(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	Cache.Clear(nil)
+	cfg.DataDbCfg().Items[utils.MetaFilterIndexes].Remote = true
+	cfg.DataDbCfg().Items[utils.MetaFilterIndexes].Replicate = true
+	cfg.DataDbCfg().RplConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1)}
+	cfg.DataDbCfg().RmtConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1)}
+	defer func() {
+		cfg2, _ := config.NewDefaultCGRConfig()
+		config.SetCgrConfig(cfg2)
+	}()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	expIndx := map[string]utils.StringMap{
+		"*string:Account:1001": {
+			"RL1": true,
+		},
+		"*string:Account:1002": {
+			"RL1": true,
+			"RL2": true,
+		},
+	}
+	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn <- clMock(func(m string, a, r interface{}) error {
+		if m == utils.ReplicatorSv1SetFilterIndexes {
+			setFltrIndxArg, concat := a.(*utils.SetFilterIndexesArg)
+			if !concat {
+				return errors.New("Can't convert interfacea")
+			}
+			if err := dm.DataDB().SetFilterIndexesDrv(setFltrIndxArg.CacheID, setFltrIndxArg.ItemIDPrefix, setFltrIndxArg.Indexes, false, utils.EmptyString); err == nil {
+				*r.(*string) = utils.OK
+			}
+			return nil
+		} else if m == utils.ReplicatorSv1GetFilterIndexes {
+
+			rpl := expIndx
+			*r.(*map[string]utils.StringMap) = rpl
+			return nil
+		}
+		return utils.ErrNotImplemented
+	})
+	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
+	})
+	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
+	idx := map[string]utils.StringMap{
+		"*string:Account:1001": {
+			"DSP1": true,
+			"DSP2": true,
+		},
+		"*suffix:*opts.Destination:+100": {
+			"Dsp1": true,
+			"Dsp2": true,
+		},
+	}
+	config.SetCgrConfig(cfg)
+	if err := dm.SetFilterIndexes(utils.CacheDispatcherProfiles, "cgrates.org", idx, false, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+	if err := dm.RemoveFilterIndexes(utils.CacheDispatcherProfiles, "cgrates.org"); err != nil {
+		t.Error(err)
+	}
+	if rcvIdx, err := dm.GetFilterIndexes(utils.CacheResourceProfiles, "cgrates.org", utils.EmptyString, nil); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expIndx, rcvIdx) {
+		t.Errorf("Expected %+v,Received %+v", utils.ToJSON(expIndx), utils.ToJSON(idx))
+	}
 }
