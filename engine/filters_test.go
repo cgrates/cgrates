@@ -2205,3 +2205,83 @@ func TestCheckFilterErrValFuncValues(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestPassActivationIntervalParseTimeElementErr(t *testing.T) {
+	rf, err := NewFilterRule(utils.MetaEqual, "~*req.ASR", []string{"40"})
+	if err != nil {
+		t.Error(err)
+	}
+	ev := utils.MapStorage{
+		utils.MetaReq: utils.MapStorage{
+			"ASR": 39,
+		},
+	}
+
+	errExp := "Unsupported time format"
+	if ok, err := rf.passActivationInterval(ev); ok {
+		t.Errorf("Expected false, Received <%v>", ok)
+	} else if err == nil || err.Error() != errExp {
+		t.Errorf("Expected %v\n but received %v", errExp, err)
+	}
+
+}
+
+func TestPassActivationIntervalParseTimeEndErr(t *testing.T) {
+	rf, err := NewFilterRule(utils.MetaEqual, "~*req.AnswerTime", []string{"40", "50"})
+	if err != nil {
+		t.Error(err)
+	}
+	ev := utils.MapStorage{
+		utils.MetaReq: utils.MapStorage{
+			utils.AnswerTime: "2019-04-04T11:45:26.371Z",
+		},
+	}
+
+	errExp := "Unsupported time format"
+	if ok, err := rf.passActivationInterval(ev); ok {
+		t.Errorf("Expected false, Received <%v>", ok)
+	} else if err == nil || err.Error() != errExp {
+		t.Errorf("Expected %v\n but received %v", errExp, err)
+	}
+
+}
+
+func TestPassActivationIntervalParseTimeStartErr(t *testing.T) {
+	rf, err := NewFilterRule(utils.MetaEqual, "~*req.AnswerTime", []string{"40", "2020-04-04T11:45:26.371Z"})
+	if err != nil {
+		t.Error(err)
+	}
+	ev := utils.MapStorage{
+		utils.MetaReq: utils.MapStorage{
+			utils.AnswerTime: "2019-04-04T11:45:26.371Z",
+		},
+	}
+
+	errExp := "Unsupported time format"
+	if ok, err := rf.passActivationInterval(ev); ok {
+		t.Errorf("Expected false, Received <%v>", ok)
+	} else if err == nil || err.Error() != errExp {
+		t.Errorf("Expected %v\n but received %v", errExp, err)
+	}
+
+}
+
+func TestPassActivationIntervalParseTimeStart2Err(t *testing.T) {
+	rf, err := NewFilterRule(utils.MetaEqual, "~*req.AnswerTime", []string{"55"})
+	if err != nil {
+		t.Error(err)
+	}
+	ev := utils.MapStorage{
+		utils.MetaReq: utils.MapStorage{
+			utils.AnswerTime: "2019-04-04T11:45:26.371Z",
+		},
+	}
+
+	errExp := "Unsupported time format"
+	if ok, err := rf.passActivationInterval(ev); ok {
+		t.Errorf("Expected false, Received <%v>", ok)
+	} else if err == nil || err.Error() != errExp {
+		t.Errorf("Expected %v\n but received %v", errExp, err)
+	}
+
+}

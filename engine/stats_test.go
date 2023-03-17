@@ -3892,13 +3892,10 @@ func TestStatQueueProcessEventPrometheusStatIDsErr(t *testing.T) {
 
 func TestStatQueueProcessEventExpiredErr(t *testing.T) {
 
-	defer func() {
-		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
-	}()
-
 	tmpl := utils.Logger
 	defer func() {
 		utils.Logger = tmpl
+		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
 	}()
 
 	buf := new(bytes.Buffer)
