@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"fmt"
 	"reflect"
 	"testing"
 	"time"
@@ -464,5 +465,184 @@ func TestTPThresholds(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(thresholds, thds) {
 		t.Errorf("Expected %v,Received %v", utils.ToJSON(thresholds), utils.ToJSON(thds))
+	}
+}
+
+func TestTPFilters(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, false, cfg.StorDbCfg().Items)
+	tpFltr := []*utils.TPFilterProfile{
+		{
+			TPid:   "TP1",
+			Tenant: "cgrates.org",
+			ID:     "FLT_1",
+			Filters: []*utils.TPFilter{
+				{
+					Element: "Account",
+					Type:    utils.MetaString,
+					Values:  []string{"1001", "1002"},
+				},
+				{
+					Type:    utils.MetaGreaterOrEqual,
+					Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Weight,
+					Values:  []string{"15.0"},
+				},
+			},
+		},
+		{
+			TPid:   "TP1",
+			Tenant: "cgrates.org",
+			ID:     "FLT_2",
+			Filters: []*utils.TPFilter{
+				{
+					Type:    utils.MetaPrefix,
+					Element: "~*req.Cost",
+					Values:  []string{"10", "15", "210"},
+				},
+			},
+		},
+	}
+	if err := db.SetTPFilters(tpFltr); err != nil {
+		t.Error(err)
+	}
+	for i := range tpFltr {
+		if fltr, err := db.GetTPFilters("TP1", "cgrates.org", fmt.Sprintf("FLT_%d", i+1)); err != nil {
+			t.Error(err)
+		} else if !reflect.DeepEqual(fltr, tpFltr[i:i+1]) {
+			t.Errorf("Expected %v,Received %v", utils.ToJSON(tpFltr[i:i+1]), utils.ToJSON(fltr))
+		}
+	}
+}
+
+func TestTPAttributes(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, false, cfg.StorDbCfg().Items)
+	tpAttr := []*utils.TPAttributeProfile{
+		{
+			TPid:   "TP1",
+			Tenant: "cgrates.org",
+			ID:     "Attr1",
+
+			ActivationInterval: &utils.TPActivationInterval{
+				ActivationTime: "2019-07-29T15:00:00Z",
+				ExpiryTime:     "",
+			},
+			Contexts: []string{"con1"},
+			Attributes: []*utils.TPAttribute{
+				{
+					Path:      utils.MetaReq + utils.NestingSep + "FL1",
+					Value:     "Al1",
+					FilterIDs: []string{},
+				},
+			},
+			Weight: 20,
+		},
+		{
+			TPid:     "TP1",
+			Tenant:   "cgrates.org",
+			ID:       "Attr2",
+			Contexts: []string{"con1"},
+			ActivationInterval: &utils.TPActivationInterval{
+				ActivationTime: "2019-07-14T14:35:00Z",
+				ExpiryTime:     "",
+			},
+			Attributes: []*utils.TPAttribute{
+				{
+					Path:  utils.MetaReq + utils.NestingSep + "FL1",
+					Value: "Al1",
+				},
+			},
+			Weight: 20},
+	}
+	if err := db.SetTPAttributes(tpAttr); err != nil {
+		t.Error(err)
+	}
+	for i := range tpAttr {
+		if attr, err := db.GetTPAttributes("TP1", "cgrates.org", fmt.Sprintf("Attr%d", i+1)); err != nil {
+			t.Error(err)
+		} else if !reflect.DeepEqual(attr, tpAttr[i:i+1]) {
+			t.Errorf("Expected %v,Received %v", utils.ToJSON(tpAttr[i:i+1]), utils.ToJSON(attr))
+		}
+	}
+}
+
+func TestTPChargers(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, false, cfg.StorDbCfg().Items)
+	tpChrg := []*utils.TPChargerProfile{
+		{
+			TPid:   "TP1",
+			Tenant: "cgrates.org",
+			ID:     "Charger1",
+			RunID:  "*rated",
+			ActivationInterval: &utils.TPActivationInterval{
+				ActivationTime: "2022-07-14T14:35:00Z",
+				ExpiryTime:     "",
+			},
+			Weight: 20},
+		{
+			TPid:   "TP1",
+			Tenant: "cgrates.org",
+			ID:     "Charger2",
+			RunID:  "*prepaid",
+			ActivationInterval: &utils.TPActivationInterval{
+				ActivationTime: "2022-08-14T14:35:00Z",
+				ExpiryTime:     "",
+			},
+			Weight: 20,
+		},
+	}
+	if err := db.SetTPChargers(tpChrg); err != nil {
+		t.Error(err)
+	}
+	for i := range tpChrg {
+		if cpps, err := db.GetTPChargers("TP1", "cgrates.org", fmt.Sprintf("Charger%d", i+1)); err != nil {
+			t.Error(err)
+		} else if !reflect.DeepEqual(cpps, tpChrg[i:i+1]) {
+			t.Errorf("Expected %v,Received %v", utils.ToJSON(tpChrg[i:i+1]), utils.ToJSON(cpps))
+		}
+	}
+}
+
+func TestTPDispatcher(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, false, cfg.StorDbCfg().Items)
+	tpDsp := []*utils.TPDispatcherProfile{
+		{
+			TPid:      "TP1",
+			Tenant:    "cgrates.org",
+			ID:        "Dsp1",
+			FilterIDs: []string{"*string:Account:1002"},
+			ActivationInterval: &utils.TPActivationInterval{
+				ActivationTime: "2021-07-29T15:00:00Z",
+				ExpiryTime:     "",
+			},
+			Strategy: utils.MetaFirst,
+			Weight:   10,
+		}, {
+
+			TPid:       "TP1",
+			Tenant:     "cgrates.org",
+			ID:         "Dsp2",
+			Subsystems: []string{"*any"},
+			FilterIDs:  []string{},
+			Strategy:   utils.MetaFirst,
+			ActivationInterval: &utils.TPActivationInterval{
+				ActivationTime: "2022-07-14T14:35:00Z",
+				ExpiryTime:     "",
+			},
+			StrategyParams: []interface{}{},
+			Weight:         20,
+		},
+	}
+	if err := db.SetTPDispatcherProfiles(tpDsp); err != nil {
+		t.Error(err)
+	}
+	for i := range tpDsp {
+		if dpp, err := db.GetTPDispatcherProfiles("TP1", "cgrates.org", fmt.Sprintf("Dsp%d", i+1)); err != nil {
+			t.Error(err)
+		} else if !reflect.DeepEqual(dpp, tpDsp[i:i+1]) {
+			t.Errorf("Expected %v,Received %v", utils.ToJSON(tpDsp[i:i+1]), utils.ToJSON(dpp))
+		}
 	}
 }
