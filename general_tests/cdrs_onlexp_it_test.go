@@ -25,11 +25,14 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net"
 	"net/url"
 	"os"
 	"os/exec"
 	"path"
 	"reflect"
+	"sort"
+	"strconv"
 	"testing"
 	"time"
 
@@ -46,8 +49,8 @@ var (
 	cdrsMasterCfgDIR, cdrsSlaveCfgDIR   string
 	cdrsMasterCfg, cdrsSlaveCfg         *config.CGRConfig
 	cdrsMasterRpc                       *rpcclient.RPCClient
-	httpCGRID                           = utils.UUIDSha1Prefix()
-	amqpCGRID                           = utils.UUIDSha1Prefix()
+	httpCGRID                           = "1234abcd"
+	amqpCGRID                           = "5678wxyz"
 	failoverContent                     = []interface{}{[]byte(fmt.Sprintf(`{"CGRID":"%s"}`, httpCGRID)), []byte(fmt.Sprintf(`{"CGRID":"%s"}`, amqpCGRID))}
 
 	sTestsCDRsOnExp = []func(t *testing.T){
@@ -56,6 +59,7 @@ var (
 		testCDRsOnExpStartMasterEngine,
 		testCDRsOnExpStartSlaveEngine,
 		testCDRsOnExpAMQPQueuesCreation,
+		testCDRsOnExpKafkaPosterCreateTopic,
 		testCDRsOnExpInitMasterRPC,
 		testCDRsOnExpLoadDefaultCharger,
 		testCDRsOnExpDisableOnlineExport,
@@ -63,6 +67,7 @@ var (
 		testCDRsOnExpAMQPReplication,
 		testCDRsOnExpFileFailover,
 		testCDRsOnExpKafkaPosterFileFailover,
+		testCDRsOnExpKafkaPosterDeleteTopic,
 		testCDRsOnExpStopEngine,
 	}
 )
@@ -346,7 +351,7 @@ func testCDRsOnExpAMQPReplication(t *testing.T) {
 		if rcvCDR[utils.CGRID] != httpCGRID {
 			t.Errorf("Unexpected CDR received: %+v", rcvCDR)
 		}
-	case <-time.After(time.Duration(100 * time.Millisecond)):
+	case <-time.After(time.Duration(2 * time.Second)):
 		t.Error("No message received from RabbitMQ")
 	}
 	if msgs, err = ch.Consume(q1.Name, "consumer", true, false, false, false, nil); err != nil {
@@ -362,7 +367,7 @@ func testCDRsOnExpAMQPReplication(t *testing.T) {
 		if rcvCDR[utils.CGRID] != httpCGRID {
 			t.Errorf("Unexpected CDR received: %+v", rcvCDR)
 		}
-	case <-time.After(time.Duration(100 * time.Millisecond)):
+	case <-time.After(time.Duration(2 * time.Second)):
 		t.Error("No message received from RabbitMQ")
 	}
 	conn.Close()
@@ -428,7 +433,7 @@ func testCDRsOnExpAMQPReplication(t *testing.T) {
 		if rcvCDR[utils.CGRID] != testCdr.CGRID {
 			t.Errorf("Unexpected CDR received: %+v", rcvCDR)
 		}
-	case <-time.After(150 * time.Millisecond):
+	case <-time.After(2 * time.Second):
 		t.Error("No message received from RabbitMQ")
 	}
 
@@ -444,8 +449,16 @@ func testCDRsOnExpAMQPReplication(t *testing.T) {
 		if rcvCDR[utils.CGRID] != testCdr.CGRID {
 			t.Errorf("Unexpected CDR received: %s expeced: %s", utils.ToJSON(rcvCDR), utils.ToJSON(testCdr))
 		}
-	case <-time.After(150 * time.Millisecond):
+	case <-time.After(2 * time.Second):
 		t.Error("No message received from RabbitMQ")
+	}
+
+	// Delete both queues once we are done verifying the exports
+	if _, err := ch.QueueDelete(q.Name, false, false, false); err != nil {
+		t.Errorf("Failed to delete queue named %s, err: <%s>", q.Name, err.Error())
+	}
+	if _, err := ch.QueueDelete(q1.Name, false, false, false); err != nil {
+		t.Errorf("Failed to delete queue named %s, err: <%s>", q1.Name, err.Error())
 	}
 
 }
@@ -517,25 +530,96 @@ func testCDRsOnExpFileFailover(t *testing.T) {
 	}
 }
 
+func testCDRsOnExpKafkaPosterCreateTopic(t *testing.T) {
+	conn, err := kafka.Dial("tcp", "localhost:9092")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer conn.Close()
+
+	controller, err := conn.Controller()
+	if err != nil {
+		t.Fatal(err)
+	}
+	controllerConn, err := kafka.Dial("tcp", net.JoinHostPort(controller.Host, strconv.Itoa(controller.Port)))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer controllerConn.Close()
+
+	topicConfigs := []kafka.TopicConfig{
+		{
+			Topic:             "cgrates_cdrs",
+			NumPartitions:     1,
+			ReplicationFactor: 1,
+		},
+	}
+
+	err = controllerConn.CreateTopics(topicConfigs...)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
 func testCDRsOnExpKafkaPosterFileFailover(t *testing.T) {
 	reader := kafka.NewReader(kafka.ReaderConfig{
-		Brokers: []string{"localhost:9092"},
-		Topic:   "cgrates_cdrs",
-		GroupID: "tmp",
-		MaxWait: time.Millisecond,
+		Brokers:   []string{"localhost:9092"},
+		Topic:     "cgrates_cdrs",
+		Partition: 0,
+		MinBytes:  10e3, // 10KB
+		MaxBytes:  10e6, // 10MB
 	})
 
-	defer reader.Close()
-
-	for i := 0; i < 2; i++ { // no raw CDR
-		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-		if m, err := reader.ReadMessage(ctx); err != nil {
-			t.Fatal(err)
-		} else if !reflect.DeepEqual(failoverContent[0].([]byte), m.Value) && !reflect.DeepEqual(failoverContent[1].([]byte), m.Value) { // Checking just the prefix should do since some content is dynamic
-			t.Errorf("Expecting: %v or %v, received: %v", utils.IfaceAsString(failoverContent[0]), utils.IfaceAsString(failoverContent[1]), string(m.Value))
-		}
-		cancel()
+	expCDRs := []string{
+		string(failoverContent[0].([]byte)),
+		string(failoverContent[1].([]byte)),
 	}
+	rcvCDRs := make([]string, 2)
+	for i := 0; i < 2; i++ { // no raw CDR
+		m, err := reader.ReadMessage(context.Background())
+		if err != nil {
+			t.Errorf("Failed to read message nr. %d: %s", i, err.Error())
+			break
+		}
+		rcvCDRs[i] = string(m.Value)
+	}
+
+	sort.Strings(rcvCDRs)
+	if !reflect.DeepEqual(rcvCDRs, expCDRs) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", expCDRs, rcvCDRs)
+	}
+
+	if err := reader.Close(); err != nil {
+		t.Fatal("failed to close reader:", err)
+	}
+}
+
+func testCDRsOnExpKafkaPosterDeleteTopic(t *testing.T) {
+	conn, err := kafka.Dial("tcp", "localhost:9092")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer conn.Close()
+
+	partitions, err := conn.ReadPartitions("cgrates_cdrs")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(partitions) != 1 || partitions[0].Topic != "cgrates_cdrs" {
+		t.Fatal("expected topic named cgrates_cdrs to exist")
+	}
+
+	if err := conn.DeleteTopics("cgrates_cdrs"); err != nil {
+		t.Fatal(err)
+	}
+
+	experr := `[5] Leader Not Available: the cluster is in the middle of a leadership election and there is currently no leader for this partition and hence it is unavailable for writes`
+	_, err = conn.ReadPartitions("cgrates_cdrs")
+	if err == nil || err.Error() != experr {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+
 }
 
 /*

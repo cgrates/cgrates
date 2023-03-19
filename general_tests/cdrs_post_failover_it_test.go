@@ -95,6 +95,15 @@ func testCDRsPostFailoverInitCdrDb(t *testing.T) {
 }
 
 func testCDRsPostFailoverStartEngine(t *testing.T) {
+	// before starting the engine, create the directories needed for failed posts or
+	// clear their contents if they exist already
+	if err := os.RemoveAll(cdrsPostFailCfg.GeneralCfg().FailedPostsDir); err != nil {
+		t.Fatal("Error removing folder: ", cdrsPostFailCfg.GeneralCfg().FailedPostsDir, err)
+	}
+	if err := os.MkdirAll(cdrsPostFailCfg.GeneralCfg().FailedPostsDir, 0755); err != nil {
+		t.Error(err)
+	}
+
 	if _, err := engine.StopStartEngine(cdrsPostFailCfgPath, *waitRater); err != nil {
 		t.Fatal(err)
 	}
