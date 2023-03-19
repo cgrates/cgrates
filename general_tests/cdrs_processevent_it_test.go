@@ -31,7 +31,6 @@ import (
 	"testing"
 	"time"
 
-	v1 "github.com/cgrates/cgrates/apier/v1"
 	v2 "github.com/cgrates/cgrates/apier/v2"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -45,12 +44,15 @@ var (
 	pecdrsRpc     *rpc.Client
 
 	sTestsCDRsIT_ProcessEvent = []func(t *testing.T){
+		testV1CDRsRemoveFolders,
+		testV1CDRsCreateFolders,
 		testV1CDRsInitConfig,
 		testV1CDRsInitDataDb,
 		testV1CDRsInitCdrDb,
 		testV1CDRsStartEngine,
 		testV1CDRsRpcConn,
-		testV1CDRsLoadTariffPlanFromFolder,
+		testV1CDRsLoadTPs,
+
 		testV1CDRsProcessEventExport,
 		testV1CDRsProcessEventAttrS,
 		testV1CDRsProcessEventChrgS,
@@ -59,7 +61,9 @@ var (
 		testV1CDRsProcessEventStore,
 		testV1CDRsProcessEventThreshold,
 		testV1CDRsProcessEventExportCheck,
+
 		testV1CDRsKillEngine,
+		testV1CDRsRemoveFolders,
 	}
 )
 
@@ -102,6 +106,15 @@ func testV1CDRsInitCdrDb(t *testing.T) {
 }
 
 func testV1CDRsStartEngine(t *testing.T) {
+	// before starting the engine, create the directories needed for failed posts or
+	// clear their contents if they exist already
+	if err := os.RemoveAll(pecdrsCfg.GeneralCfg().FailedPostsDir); err != nil {
+		t.Fatal("Error removing folder: ", pecdrsCfg.GeneralCfg().FailedPostsDir, err)
+	}
+	if err := os.MkdirAll(pecdrsCfg.GeneralCfg().FailedPostsDir, 0755); err != nil {
+		t.Error(err)
+	}
+
 	if _, err := engine.StopStartEngine(pecdrsCfgPath, *waitRater); err != nil {
 		t.Fatal(err)
 	}
@@ -115,43 +128,121 @@ func testV1CDRsRpcConn(t *testing.T) {
 	}
 }
 
-func testV1CDRsLoadTariffPlanFromFolder(t *testing.T) {
+func testV1CDRsLoadTPs(t *testing.T) {
+	writeFile := func(fileName, data string) error {
+		csvFile, err := os.Create(path.Join("/tmp/TestCDRsITPE", fileName))
+		if err != nil {
+			return err
+		}
+		defer csvFile.Close()
+		_, err = csvFile.WriteString(data)
+		if err != nil {
+			return err
+
+		}
+		return csvFile.Sync()
+	}
+
+	// Create and populate AccountActions.csv
+	if err := writeFile(utils.AccountActionsCsv, `
+#Tenant,Account,ActionPlanId,ActionTriggersId,AllowNegative,Disabled
+cgrates.org,1001,PACKAGE_1001,,,
+`); err != nil {
+		t.Fatal(err)
+	}
+
+	// Create and populate ActionPlans.csv
+	if err := writeFile(utils.ActionPlansCsv, `
+#Id,ActionsId,TimingId,Weight
+PACKAGE_1001,TOPUP_RST_MONETARY_10,*asap,10
+`); err != nil {
+		t.Fatal(err)
+	}
+
+	// Create and populate Actions.csv
+	if err := writeFile(utils.ActionsCsv, `
+#ActionsId[0],Action[1],ExtraParameters[2],Filter[3],BalanceId[4],BalanceType[5],Categories[6],DestinationIds[7],RatingSubject[8],SharedGroup[9],ExpiryTime[10],TimingIds[11],Units[12],BalanceWeight[13],BalanceBlocker[14],BalanceDisabled[15],Weight[16]
+TOPUP_RST_MONETARY_10,*topup_reset,,,,*monetary,,*any,,,*unlimited,,10,10,false,false,10
+TOPUP_MONETARY_10,*topup,,,,*monetary,,*any,,,*unlimited,,10,10,false,false,10
+`); err != nil {
+		t.Fatal(err)
+	}
+
+	// Create and populate Attributes.csv
+	if err := writeFile(utils.AttributesCsv, `
+#Tenant,ID,Contexts,FilterIDs,ActivationInterval,AttributeFilterIDs,Path,Type,Value,Blocker,Weight
+cgrates.org,ATTR_SUPPLIER1,*chargers,,,,*req.Subject,*constant,SUPPLIER1,false,10
+cgrates.org,ATTR_SubjChange,,,,,*req.Subject,*constant,1011,false,10
+`); err != nil {
+		t.Fatal(err)
+	}
+
+	// Create and populate Chargers.csv
+	if err := writeFile(utils.ChargersCsv, `
+#Tenant,ID,FilterIDs,ActivationInterval,RunID,AttributeIDs,Weight
+cgrates.org,Raw,,,*raw,*constant:*req.RequestType:*none,20
+cgrates.org,CustomerCharges,,,CustomerCharges,*none,20
+cgrates.org,SupplierCharges,,,SupplierCharges,ATTR_SUPPLIER1,10
+`); err != nil {
+		t.Fatal(err)
+	}
+
+	// Create and populate DestinationRates.csv
+	if err := writeFile(utils.DestinationRatesCsv, `
+#Id,DestinationId,RatesTag,RoundingMethod,RoundingDecimals,MaxCost,MaxCostStrategy
+DR_ANY_1CNT,*any,RT_1CNT,*up,5,0,
+`); err != nil {
+		t.Fatal(err)
+	}
+
+	// Create and populate Rates.csv
+	if err := writeFile(utils.RatesCsv, `
+#Id,ConnectFee,Rate,RateUnit,RateIncrement,GroupIntervalStart
+RT_1CNT,0,0.01,60s,1s,0s
+`); err != nil {
+		t.Fatal(err)
+	}
+
+	// Create and populate RatingPlans.csv
+	if err := writeFile(utils.RatingPlansCsv, `
+#Id,DestinationRatesId,TimingTag,Weight
+RP_TESTIT1,DR_ANY_1CNT,*any,10
+`); err != nil {
+		t.Fatal(err)
+	}
+
+	// Create and populate RatingProfiles.csv
+	if err := writeFile(utils.RatingProfilesCsv, `
+#Tenant,Category,Subject,ActivationTime,RatingPlanId,RatesFallbackSubject
+cgrates.org,call,*any,2018-01-01T00:00:00Z,RP_TESTIT1,
+`); err != nil {
+		t.Fatal(err)
+	}
+
+	// Create and populate Stats.csv
+	if err := writeFile(utils.StatsCsv, `
+#Tenant[0],Id[1],FilterIDs[2],ActivationInterval[3],QueueLength[4],TTL[5],MinItems[6],Metrics[7],MetricFilterIDs[8],Stored[9],Blocker[10],Weight[11],ThresholdIDs[12]
+cgrates.org,Stat_1,*string:~*req.Account:1001,2014-07-29T15:00:00Z,100,5s,0,*acd;*tcd;*asr,,false,true,30,*none
+`); err != nil {
+		t.Fatal(err)
+	}
+
+	// Create and populate Thresholds.csv
+	if err := writeFile(utils.ThresholdsCsv, `
+#Tenant[0],Id[1],FilterIDs[2],ActivationInterval[3],MaxHits[4],MinHits[5],MinSleep[6],Blocker[7],Weight[8],ActionIDs[9],Async[10]
+cgrates.org,THD_ACNT_1001,*string:~*req.Account:1001,2014-07-29T15:00:00Z,-1,0,0,false,10,TOPUP_MONETARY_10,false
+`); err != nil {
+		t.Fatal(err)
+	}
+
 	var loadInst string
 	if err := pecdrsRpc.Call(utils.APIerSv1LoadTariffPlanFromFolder,
-		&utils.AttrLoadTpFromFolder{FolderPath: path.Join(
-			*dataDir, "tariffplans", "testit")}, &loadInst); err != nil {
+		&utils.AttrLoadTpFromFolder{FolderPath: "/tmp/TestCDRsITPE"}, &loadInst); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
 }
 
 func testV1CDRsProcessEventAttrS(t *testing.T) {
-	var acnt *engine.Account
-	acntAttrs := &utils.AttrGetAccount{
-		Tenant:  "cgrates.org",
-		Account: "test1_processEvent"}
-	attrSetBalance := utils.AttrSetBalance{
-		Tenant:      acntAttrs.Tenant,
-		Account:     acntAttrs.Account,
-		BalanceType: utils.VOICE,
-		Value:       120000000000,
-		Balance: map[string]interface{}{
-			utils.ID:     "BALANCE1",
-			utils.Weight: 20,
-		},
-	}
-	var reply string
-	if err := pecdrsRpc.Call(utils.APIerSv1SetBalance, attrSetBalance, &reply); err != nil {
-		t.Error(err)
-	} else if reply != utils.OK {
-		t.Errorf("received: %s", reply)
-	}
-	expectedVoice := 120000000000.0
-	if err := pecdrsRpc.Call(utils.APIerSv2GetAccount, acntAttrs, &acnt); err != nil {
-		t.Error(err)
-	} else if rply := acnt.BalanceMap[utils.VOICE].GetTotalValue(); rply != expectedVoice {
-		t.Errorf("Expecting: %v, received: %v", expectedVoice, rply)
-	}
 	argsEv := &engine.ArgV1ProcessEvent{
 		Flags: []string{utils.MetaAttributes, utils.MetaStore, "*chargers:false", "*export:false"},
 		CGREvent: utils.CGREvent{
@@ -170,37 +261,7 @@ func testV1CDRsProcessEventAttrS(t *testing.T) {
 		},
 	}
 	var cdrs []*engine.CDR
-	alsPrf := &v1.AttributeWithCache{
-		AttributeProfile: &engine.AttributeProfile{
-			Tenant:    "cgrates.org",
-			ID:        "ApierTest",
-			Contexts:  []string{utils.META_ANY},
-			FilterIDs: []string{"*string:~*req.Account:1001"},
-			Attributes: []*engine.Attribute{
-				{
-					Path:  utils.MetaReq + utils.NestingSep + utils.Subject,
-					Value: config.NewRSRParsersMustCompile("1011", true, utils.INFIELD_SEP),
-				},
-			},
-			Weight: 20,
-		},
-	}
-	alsPrf.Compile()
-	var result string
-	if err := pecdrsRpc.Call(utils.APIerSv1SetAttributeProfile, alsPrf, &result); err != nil {
-		t.Error(err)
-	} else if result != utils.OK {
-		t.Error("Unexpected reply returned", result)
-	}
-	var replyAt *engine.AttributeProfile
-	if err := pecdrsRpc.Call(utils.APIerSv1GetAttributeProfile, &utils.TenantIDWithArgDispatcher{
-		TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"}}, &replyAt); err != nil {
-		t.Fatal(err)
-	}
-	replyAt.Compile()
-	if !reflect.DeepEqual(alsPrf.AttributeProfile, replyAt) {
-		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(alsPrf.AttributeProfile), utils.ToJSON(replyAt))
-	}
+	var reply string
 	if err := pecdrsRpc.Call(utils.CDRsV1ProcessEvent, argsEv, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -230,10 +291,9 @@ func testV1CDRsProcessEventAttrS(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", argsEv.Event["Usage"], cdrs[0].Usage)
 	} else if !reflect.DeepEqual(argsEv.Tenant, cdrs[0].Tenant) {
 		t.Errorf("Expecting: %+v, received: %+v", argsEv.Tenant, cdrs[0].Tenant)
-	} else if !reflect.DeepEqual(alsPrf.Attributes[0].Value[0].Rules, cdrs[0].Subject) {
-		t.Errorf("Expecting: %+v, received: %+v", alsPrf.Attributes[0].Value[0].Rules, cdrs[0].Subject)
+	} else if cdrs[0].Subject != "1011" {
+		t.Errorf("Expecting: %+v, received: %+v", "1011", cdrs[0].Subject)
 	}
-	return
 }
 
 func testV1CDRsProcessEventChrgS(t *testing.T) {
@@ -600,6 +660,18 @@ func testV1CDRsProcessEventExportCheck(t *testing.T) {
 }
 func testV1CDRsKillEngine(t *testing.T) {
 	if err := engine.KillEngine(*waitRater); err != nil {
+		t.Error(err)
+	}
+}
+
+func testV1CDRsCreateFolders(t *testing.T) {
+	if err := os.MkdirAll("/tmp/TestCDRsITPE", 0755); err != nil {
+		t.Error(err)
+	}
+}
+
+func testV1CDRsRemoveFolders(t *testing.T) {
+	if err := os.RemoveAll("/tmp/TestCDRsITPE"); err != nil {
 		t.Error(err)
 	}
 }
