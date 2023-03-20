@@ -474,6 +474,112 @@ func TestResponderGetMaxSessionTimeMaxUsageVOICE(t *testing.T) {
 		t.Errorf("Expected %+v, received : %+v", utils.ErrMaxUsageExceeded, err)
 	}
 }
+func TestResponderGetMaxSessionTimePass(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	tmpDM := dm
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	defer func() {
+		cfg2, _ := config.NewDefaultCGRConfig()
+		config.SetCgrConfig(cfg2)
+		SetDataStorage(tmpDM)
+	}()
+	arg := &CallDescriptorWithArgDispatcher{
+		CallDescriptor: &CallDescriptor{
+			Category:     "call",
+			Tenant:       "cgrates.org",
+			Subject:      "1001",
+			Account:      "1001",
+			Destination:  "1002",
+			TimeStart:    time.Date(2023, 3, 4, 15, 54, 00, 0, time.UTC),
+			TimeEnd:      time.Date(2023, 3, 4, 15, 55, 40, 0, time.UTC),
+			MaxCostSoFar: 0,
+			ToR:          utils.MONETARY,
+		},
+	}
+	rsponder.MaxComputedUsage[utils.MONETARY] = 2 * time.Minute
+	dm.SetAccount(&Account{
+		ID: "cgrates.org:1001",
+		BalanceMap: map[string]Balances{
+			utils.MONETARY: {
+				&Balance{
+					Weight:         30,
+					Value:          12,
+					DestinationIDs: utils.NewStringMap("1002"),
+				},
+			},
+		},
+	})
+	dest := &Destination{
+		Id: "DEST",
+		Prefixes: []string{
+			"1002", "1003", "1004",
+		},
+	}
+	if err := dm.SetReverseDestination(dest, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+	rp := &RatingPlan{
+		Id: "RP_1001",
+		Timings: map[string]*RITiming{
+			"59a981b9": {
+				Years:     utils.Years{},
+				Months:    utils.Months{},
+				MonthDays: utils.MonthDays{},
+				WeekDays:  utils.WeekDays{1, 2, 3, 4, 5},
+				StartTime: "00:00:00",
+			},
+		},
+		Ratings: map[string]*RIRate{
+			"efwqpqq32": {
+				ConnectFee: 0.1,
+				Rates: RateGroups{
+					&Rate{
+						GroupIntervalStart: 0,
+						Value:              0.7,
+						RateIncrement:      time.Second,
+						RateUnit:           time.Minute,
+					},
+					&Rate{
+						GroupIntervalStart: 60,
+						Value:              1,
+						RateIncrement:      time.Second,
+						RateUnit:           time.Second,
+					},
+				},
+				RoundingMethod:   utils.ROUNDING_MIDDLE,
+				RoundingDecimals: 4,
+			},
+		},
+		DestinationRates: map[string]RPRateList{
+			"DEST": {
+				&RPRate{
+					Timing: "59a981b9",
+					Rating: "efwqpqq32",
+					Weight: 20,
+				},
+			},
+		},
+	}
+	dm.SetRatingPlan(rp, utils.NonTransactional)
+	rpP := &RatingProfile{
+		Id: utils.ConcatenatedKey(utils.META_OUT, "cgrates.org", "call", "1001"),
+		RatingPlanActivations: RatingPlanActivations{
+			&RatingPlanActivation{
+				RatingPlanId: "RP_1001",
+			},
+		},
+	}
+	dm.SetRatingProfile(rpP, utils.NonTransactional)
+
+	SetDataStorage(dm)
+
+	var reply time.Duration
+	if err := rsponder.GetMaxSessionTime(arg, &reply); err == nil {
+		t.Error(err)
+	}
+	//unfinished
+}
 
 func TestMaxSessionTimeOnAccounts(t *testing.T) {
 	cfg, _ := config.NewDefaultCGRConfig()
@@ -799,7 +905,7 @@ func TestResponderMaxDebit11(t *testing.T) {
 				Rates: RateGroups{
 					{
 						GroupIntervalStart: 0,
-						Value:              0.01,
+						Value:              0.1,
 						RateIncrement:      time.Second,
 						RateUnit:           time.Second,
 					},
@@ -949,7 +1055,9 @@ func TestResponderRounding(t *testing.T) {
 		ID: "cgrates.org:1001",
 		BalanceMap: map[string]Balances{
 			utils.MONETARY: {
-				&Balance{Value: 11, Weight: 20, DestinationIDs: utils.NewStringMap("1002")},
+				&Balance{
+					ID:    utils.MetaDefault,
+					Value: 11, Weight: 20, DestinationIDs: utils.NewStringMap("1002")},
 			}},
 	})
 	rsponder.MaxComputedUsage = map[string]time.Duration{
@@ -958,5 +1066,7 @@ func TestResponderRounding(t *testing.T) {
 	var reply Account
 	if err := rsponder.RefundRounding(arg, &reply); err != nil {
 		t.Error(err)
+	} else if reply.GetDefaultMoneyBalance().Value != 11 {
+		t.Error(utils.ToJSON(reply))
 	}
 }

@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"reflect"
 	"testing"
 	"time"
 
@@ -204,5 +205,29 @@ func TestLoadDataDbCache(t *testing.T) {
 	}
 	if err := dm.PreloadCacheForPrefix(utils.RATING_PLAN_PREFIX); err != nil {
 		t.Error(nil)
+	}
+}
+
+func TestPreCacheStatus(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	chS := NewCacheS(cfg, dm)
+	args := &utils.AttrCacheIDsWithArgDispatcher{
+		CacheIDs: []string{utils.CacheChargerProfiles, utils.CacheDispatcherHosts},
+	}
+	go func() {
+		chS.pcItems[utils.CacheChargerProfiles] <- struct{}{}
+	}()
+	time.Sleep(5 * time.Millisecond)
+	exp := map[string]string{
+		utils.CacheChargerProfiles: utils.MetaReady,
+		utils.CacheDispatcherHosts: utils.MetaPrecaching,
+	}
+	var reply map[string]string
+	if err := chS.V1PrecacheStatus(args, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(exp, reply) {
+		t.Errorf("Expected %v,Received %v", utils.ToJSON(exp), utils.ToJSON(reply))
 	}
 }
