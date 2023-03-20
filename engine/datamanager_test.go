@@ -274,6 +274,110 @@ func TestCacheDataFromDBFilterIndexes(t *testing.T) {
 	if err := dm.CacheDataFromDB(utils.AttributeFilterIndexes, nil, false); err != nil {
 		t.Error(err)
 	}
+	fltr2 := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "RS_FLT",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaString,
+				Element: "~*req.Destination",
+				Values:  []string{"1002", "1003"},
+			},
+		},
+	}
+	dm.SetFilter(fltr2)
+	rsc := &ResourceProfile{
+		Tenant:            "cgrates.org",
+		ID:                "RES1",
+		FilterIDs:         []string{"RS_FLT"},
+		ThresholdIDs:      []string{utils.META_NONE},
+		AllocationMessage: "Approved",
+		Weight:            10,
+		Limit:             10,
+		UsageTTL:          time.Minute,
+		Stored:            true,
+	}
+	dm.SetResourceProfile(rsc, true)
+	if err := dm.CacheDataFromDB(utils.ResourceFilterIndexes, nil, false); err != nil {
+		t.Error(err)
+	}
+	statFlt := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "FLTR_STATS_1",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaString,
+				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Account,
+				Values:  []string{"1001"},
+			},
+			{
+				Type:    utils.MetaGreaterOrEqual,
+				Element: "~*req.UsageInterval",
+				Values:  []string{(1 * time.Second).String()},
+			},
+			{
+				Type:    utils.MetaGreaterOrEqual,
+				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Usage,
+				Values:  []string{(1 * time.Second).String()},
+			},
+			{
+				Type:    utils.MetaGreaterOrEqual,
+				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Weight,
+				Values:  []string{"9.0"},
+			},
+		},
+	}
+	dm.SetFilter(statFlt)
+	sqP := &StatQueueProfile{
+		Tenant:      "cgrates.org",
+		ID:          "DistinctMetricProfile",
+		QueueLength: 10,
+		FilterIDs:   []string{"FLTR_STATS_1"},
+		TTL:         time.Duration(10) * time.Second,
+		Metrics: []*MetricWithFilters{
+			{
+				MetricID: utils.MetaDDC,
+			},
+		},
+		ThresholdIDs: []string{utils.META_NONE},
+		Stored:       true,
+		Weight:       20,
+	}
+	dm.SetStatQueueProfile(sqP, true)
+
+	if err := dm.CacheDataFromDB(utils.StatFilterIndexes, nil, false); err != nil {
+		t.Error(err)
+	}
+	thFltr := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "FLTR_TH_2",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaString,
+				Element: "~*req.Threshold",
+				Values:  []string{"TH_2"},
+			},
+			{
+				Type:    utils.MetaPrefix,
+				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Destination,
+				Values:  []string{"100"},
+			},
+		},
+	}
+	dm.SetFilter(thFltr)
+	thP := &ThresholdProfile{
+		Tenant:    "cgrates.org",
+		ID:        "THD_AccDisableAndLog",
+		FilterIDs: []string{"FLTR_TH_2"},
+		MaxHits:   -1,
+		MinSleep:  time.Duration(1 * time.Second),
+		Weight:    30.0,
+		ActionIDs: []string{"DISABLE_LOG"},
+	}
+	dm.SetThresholdProfile(thP, true)
+	if err := dm.CacheDataFromDB(utils.ThresholdFilterIndexes, nil, false); err != nil {
+		t.Error(err)
+	}
 }
 
 func TestFilterIndexesRmtRpl(t *testing.T) {
