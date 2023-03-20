@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
@@ -9304,4 +9305,191 @@ func TestDMGetChargerProfileNilDmErr(t *testing.T) {
 	if err != utils.ErrNoDatabaseConn {
 		t.Errorf("Expected error <%v>, received error <%v>", utils.ErrNoDatabaseConn, err)
 	}
+}
+
+func TestDMSetStatQueueProfileUpdatedIndexesErr(t *testing.T) {
+
+	defer func() { Cache = NewCacheS(config.CgrConfig(), nil, nil, nil) }()
+
+	cfg := config.NewDefaultCGRConfig()
+	data := &DataDBMock{
+		GetStatQueueProfileDrvF: func(ctx *context.Context, tenant, id string) (sq *StatQueueProfile, err error) {
+			return &StatQueueProfile{}, nil
+		},
+		SetStatQueueProfileDrvF: func(ctx *context.Context, sq *StatQueueProfile) (err error) { return nil },
+	}
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	sqp := &StatQueueProfile{
+		Tenant:      "cgrates.org",
+		ID:          "sqp003",
+		FilterIDs:   []string{"*string:~*req.Account:1001"},
+		QueueLength: 10,
+		TTL:         10 * time.Second,
+		Metrics: []*MetricWithFilters{
+			{
+				MetricID: "*sum#~*req.Usage",
+			},
+		},
+		ThresholdIDs: []string{},
+		Stored:       true,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
+		MinItems: 1,
+	}
+
+	if err := dm.SetStatQueueProfile(context.Background(), sqp, true); err != utils.ErrNotImplemented {
+		t.Errorf("Expected error <%v>, received error <%v>", utils.ErrNotImplemented, err)
+	}
+
+}
+
+func TestDMSetStatQueueProfileReplicate(t *testing.T) {
+
+	cfgtmp := config.CgrConfig()
+	defer func() {
+		config.SetCgrConfig(cfgtmp)
+		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+	}()
+
+	sqp := &StatQueueProfile{
+		Tenant:      "cgrates.org",
+		ID:          "sqp003",
+		FilterIDs:   []string{"*string:~*req.Account:1001"},
+		QueueLength: 10,
+		TTL:         10 * time.Second,
+		Metrics: []*MetricWithFilters{
+			{
+				MetricID: "*sum#~*req.Usage",
+			},
+		},
+		ThresholdIDs: []string{},
+		Stored:       true,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
+		MinItems: 1,
+	}
+
+	cfg := config.NewDefaultCGRConfig()
+	cfg.DataDbCfg().Items[utils.MetaStatQueueProfiles].Replicate = true
+	cfg.DataDbCfg().RplConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
+	config.SetCgrConfig(cfg)
+
+	cc := make(chan birpc.ClientConnector, 1)
+	cc <- &ccMock{
+
+		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+			utils.ReplicatorSv1SetStatQueueProfile: func(ctx *context.Context, args, reply interface{}) error { return utils.ErrNotImplemented },
+		},
+	}
+
+	cM := NewConnManager(cfg)
+	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.ReplicatorSv1, cc)
+	data := &DataDBMock{
+
+		GetStatQueueProfileDrvF: func(ctx *context.Context, tenant, id string) (sq *StatQueueProfile, err error) {
+			return sqp, nil
+		},
+		SetStatQueueProfileDrvF: func(ctx *context.Context, sq *StatQueueProfile) (err error) { return nil },
+	}
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	// tests replicate
+	if err := dm.SetStatQueueProfile(context.Background(), sqp, false); err != utils.ErrNotImplemented {
+		t.Errorf("Expected error <%v>, received error <%v>", utils.ErrNotImplemented, err)
+	}
+
+}
+
+func TestDMSetStatQueueProfileNewStatQueueNilOldStsErr(t *testing.T) {
+
+	defer func() {
+
+		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+	}()
+
+	var minItems int
+	sqp := &StatQueueProfile{
+		Tenant:      "cgrates.org",
+		ID:          "sqp003",
+		FilterIDs:   []string{"*string:~*req.Account:1001"},
+		QueueLength: 10,
+		TTL:         10 * time.Second,
+		Metrics: []*MetricWithFilters{
+			{
+				MetricID: "invalid",
+			},
+		},
+		ThresholdIDs: []string{},
+		Stored:       true,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
+		MinItems: minItems,
+	}
+
+	cfg := config.NewDefaultCGRConfig()
+	cM := NewConnManager(cfg)
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	experr := fmt.Sprintf("unsupported metric type <%s>", sqp.Metrics[0].MetricID)
+
+	if err := dm.SetStatQueueProfile(context.Background(), sqp, false); err == nil || err.Error() != experr {
+		t.Errorf("\nexpected error: %v, \nreceived error: %v", experr, err)
+	}
+
+}
+
+func TestDMSetStatQueueProfileNewStatQueueErr(t *testing.T) {
+
+	defer func() {
+		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+	}()
+
+	var minItems int
+	sqp := &StatQueueProfile{
+		Tenant:      "cgrates.org",
+		ID:          "sqp003",
+		FilterIDs:   []string{"*string:~*req.Account:1001"},
+		QueueLength: 10,
+		TTL:         10 * time.Second,
+		Metrics: []*MetricWithFilters{
+			{
+				MetricID: "invalid",
+			},
+		},
+		ThresholdIDs: []string{},
+		Stored:       true,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
+		MinItems: minItems,
+	}
+
+	cfg := config.NewDefaultCGRConfig()
+	cM := NewConnManager(cfg)
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	if err := dm.dataDB.SetStatQueueProfileDrv(context.Background(), sqp); err != nil {
+		t.Error(err)
+	}
+
+	experr := fmt.Sprintf("unsupported metric type <%s>", sqp.Metrics[0].MetricID)
+	if err := dm.SetStatQueueProfile(context.Background(), sqp, false); err == nil || err.Error() != experr {
+		t.Errorf("\nexpected error: %v, \nreceived error: %v", experr, err)
+	}
+
 }
