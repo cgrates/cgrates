@@ -505,7 +505,7 @@ func TestResponderGetMaxSessionTimePass(t *testing.T) {
 				&Balance{
 					Weight:         30,
 					Value:          12,
-					DestinationIDs: utils.NewStringMap("1002"),
+					DestinationIDs: utils.NewStringMap("DEST"),
 				},
 			},
 		},
@@ -575,10 +575,12 @@ func TestResponderGetMaxSessionTimePass(t *testing.T) {
 	SetDataStorage(dm)
 
 	var reply time.Duration
-	if err := rsponder.GetMaxSessionTime(arg, &reply); err == nil {
+	if err := rsponder.GetMaxSessionTime(arg, &reply); err != nil {
 		t.Error(err)
+	} else if reply != 0 {
+		t.Errorf("Expected 0,Received %v", reply)
 	}
-	//unfinished
+
 }
 
 func TestMaxSessionTimeOnAccounts(t *testing.T) {

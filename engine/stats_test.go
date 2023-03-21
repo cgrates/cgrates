@@ -464,7 +464,9 @@ func TestStatStoreStatQueue(t *testing.T) {
 		t.Error(err)
 	}
 	sq := &StatQueue{
-		dirty: utils.BoolPointer(true),
+		Tenant: "cgrates.org",
+		ID:     "SQ_1",
+		dirty:  utils.BoolPointer(true),
 		SQMetrics: map[string]StatMetric{
 			utils.MetaASR: &StatASR{
 				Answered: 1,
@@ -482,6 +484,16 @@ func TestStatStoreStatQueue(t *testing.T) {
 		t.Error(err)
 	} else if *sq.dirty {
 		t.Error("Expected false")
+	}
+	args := &utils.TenantIDWithArgDispatcher{
+		TenantID: &utils.TenantID{
+			Tenant: "cgrates.org",
+			ID:     "SQ_1",
+		},
+	}
+	var reply StatQueue
+	if err := sS.V1GetStatQueue(args, &reply); err != nil {
+		t.Error(err)
 	}
 }
 

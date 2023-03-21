@@ -378,6 +378,68 @@ func TestCacheDataFromDBFilterIndexes(t *testing.T) {
 	if err := dm.CacheDataFromDB(utils.ThresholdFilterIndexes, nil, false); err != nil {
 		t.Error(err)
 	}
+	suppFltr := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "FLTR_SUPP_1",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaString,
+				Element: "~*req.Supplier",
+				Values:  []string{"SupplierProfile2"},
+			}},
+	}
+	dm.SetFilter(suppFltr)
+	supp := &SupplierProfile{
+		Tenant:    "cgrates.org",
+		ID:        "SPP_1",
+		FilterIDs: []string{"FLTR_SUPP_1"},
+
+		Sorting:           utils.MetaLC,
+		SortingParameters: []string{},
+		Suppliers: []*Supplier{
+			{
+				ID:                 "supplier1",
+				RatingPlanIDs:      []string{"RPL_2"},
+				ResourceIDs:        []string{"ResGroup2", "ResGroup4"},
+				StatIDs:            []string{"Stat3"},
+				Weight:             10,
+				Blocker:            false,
+				SupplierParameters: utils.EmptyString,
+			},
+		},
+		Weight: 20,
+	}
+	dm.SetSupplierProfile(supp, true)
+	if err := dm.CacheDataFromDB(utils.SupplierFilterIndexes, nil, false); err != nil {
+		t.Error(err)
+	}
+	ddpFlt := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "DSP_FLT",
+		Rules: []*FilterRule{
+			{
+				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Account,
+				Type:    utils.MetaString,
+				Values:  []string{"2009"},
+			},
+		},
+	}
+	dm.SetFilter(ddpFlt)
+	dpp := &DispatcherProfile{
+		Tenant:     "cgrates.org",
+		ID:         "DSP_Test1",
+		FilterIDs:  []string{"DSP_FLT"},
+		Strategy:   utils.MetaFirst,
+		Subsystems: []string{utils.MetaAttributes, utils.MetaSessionS},
+		Weight:     20,
+	}
+	if err := dm.SetDispatcherProfile(dpp, true); err != nil {
+		t.Error(err)
+	}
+	if err := dm.CacheDataFromDB(utils.DispatcherFilterIndexes, nil, false); err != nil {
+		t.Error(err)
+	}
+
 }
 
 func TestFilterIndexesRmtRpl(t *testing.T) {
@@ -445,5 +507,100 @@ func TestFilterIndexesRmtRpl(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expIndx, rcvIdx) {
 		t.Errorf("Expected %+v,Received %+v", utils.ToJSON(expIndx), utils.ToJSON(idx))
+	}
+}
+
+func TestStatQueueProfileIndx(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	fltrs := []*Filter{
+		{
+			Tenant: "cgrates.org",
+			ID:     "SQ_FLT_1",
+			Rules: []*FilterRule{
+				{
+					Type:    utils.MetaString,
+					Element: "~*req.Destination",
+					Values:  []string{"1002", "1003", "1004"},
+				},
+			},
+		},
+		{
+			Tenant: "cgrates.org",
+			ID:     "SQ_FLT_2",
+			Rules: []*FilterRule{
+
+				{
+					Type:    utils.MetaGreaterOrEqual,
+					Element: "~*req.UsageInterval",
+					Values:  []string{(1 * time.Second).String()},
+				},
+				{
+					Type:    utils.MetaGreaterOrEqual,
+					Element: "~*req." + utils.Weight,
+					Values:  []string{"9.0"},
+				},
+			},
+		}}
+	for _, flt := range fltrs {
+		if err := dm.SetFilter(flt); err != nil {
+			t.Error(err)
+		}
+	}
+	sqP := &StatQueueProfile{
+		Tenant:      "cgrates.org",
+		ID:          "SQ_1",
+		FilterIDs:   []string{"SQ_FLT_1"},
+		QueueLength: 10,
+		TTL:         time.Duration(0) * time.Second,
+		Metrics: []*MetricWithFilters{
+			{
+				MetricID: "*asr",
+			},
+			{
+				MetricID: utils.MetaACD,
+			},
+			{
+				MetricID: "*acc",
+			},
+		},
+		ThresholdIDs: []string{"Test"},
+		Blocker:      false,
+		Stored:       true,
+		Weight:       float64(0),
+		MinItems:     0,
+	}
+	if err := dm.SetStatQueueProfile(sqP, true); err != nil {
+		t.Error(err)
+	}
+	sqP = &StatQueueProfile{
+		Tenant:      "cgrates.org",
+		ID:          "SQ_1",
+		FilterIDs:   []string{"SQ_FLT_2"},
+		QueueLength: 10,
+		TTL:         time.Duration(0) * time.Second,
+		Metrics: []*MetricWithFilters{
+			{
+				MetricID: "*asr",
+			},
+			{
+				MetricID: utils.MetaACD,
+			},
+			{
+				MetricID: "*acc",
+			},
+		},
+		ThresholdIDs: []string{"Test"},
+		Blocker:      false,
+		Stored:       true,
+		Weight:       float64(0),
+		MinItems:     0,
+	}
+	if err := dm.SetStatQueueProfile(sqP, true); err != nil {
+		t.Error(err)
+	}
+	if err := dm.RemoveStatQueueProfile("cgrates.org", "SQ_1", utils.NonTransactional, true); err != nil {
+		t.Error(err)
 	}
 }
