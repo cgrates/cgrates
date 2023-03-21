@@ -1,15 +1,15 @@
 {{ ansible_managed | comment }}
 [Unit]
-Description=Copr Custom Webhook Server 
-ConditionPathExists={{ copr_hooks_dir }}
+Description= Gateway between REST and Copr to add multiple branches support in Copr builds
+ConditionPathExists={{ coprgate_dir }}
 After=network.target
 [Service]
 Environment="V10={{ v10 }}" "MASTER={{ nightly }}"
-ExecStart=/usr/local/bin/copr-hooks-server
+ExecStart=/usr/local/bin/{{ service_name }}
 Restart=on-failure
 RestartSec=10
-StandardOutput=syslog
-StandardError=syslog
+StandardOutput=journal
+StandardError=journal
 SyslogIdentifier={{ service_name }}
 [Install]
 WantedBy=multi-user.target
