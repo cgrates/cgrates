@@ -15,7 +15,7 @@
     # Filename of Go language SDK redistributable package
     golang_redis_filename: 'go{{ golang_version }}.linux-amd64.tar.gz'
 
-    coprgate_dir: "/home/{{ user }}/go/src/github.com/coprgate"
+    coprgate_dir: "/home/{{ user }}/go/src/github.com/cgrates/coprgate"
     coprgate_bin: "{{ golang_gopath }}/bin/coprgate"
     service_name: coprgate
 
