@@ -646,3 +646,66 @@ func TestTPDispatcher(t *testing.T) {
 		}
 	}
 }
+
+func TestTpRLoadRatingProfilesFiltered(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	tpr, err := NewTpReader(db, db, "TP1", "UTC", nil, nil)
+	if err != nil {
+		t.Error(err)
+	}
+	tpRpl := []*utils.TPRatingPlan{
+		{
+
+			TPid: "TP1",
+			ID:   "TEST_RPLAN1",
+			RatingPlanBindings: []*utils.TPRatingPlanBinding{
+				{
+					DestinationRatesId: "RateId",
+					TimingId:           "TimingID",
+					Weight:             12,
+				},
+			},
+		},
+		{
+			TPid: "TP1",
+			ID:   "TEST_RPLAN2",
+			RatingPlanBindings: []*utils.TPRatingPlanBinding{
+				{
+					DestinationRatesId: "TEST_DSTRATE1",
+					TimingId:           "TEST_TIMING1",
+					Weight:             10.0},
+			},
+		},
+	}
+	if err := db.SetTPRatingPlans(tpRpl); err != nil {
+		t.Error(err)
+	}
+	qriedRpf := &utils.TPRatingProfile{
+		TPid:     "TP1",
+		LoadId:   "TEST_LOADID",
+		Tenant:   "cgrates.org",
+		Category: "call",
+		Subject:  "1001",
+		RatingPlanActivations: []*utils.TPRatingActivation{
+			{
+				ActivationTime:   "2014-01-14T00:00:00Z",
+				RatingPlanId:     "TEST_RPLAN1",
+				FallbackSubjects: "subj1;subj2"},
+			{
+				ActivationTime:   "2014-01-15T00:00:00Z",
+				RatingPlanId:     "TEST_RPLAN2",
+				FallbackSubjects: "subj1;subj2"},
+		},
+	}
+	tpRpf := []*utils.TPRatingProfile{
+		qriedRpf,
+	}
+	if err := db.SetTPRatingProfiles(tpRpf); err != nil {
+		t.Error(err)
+	}
+	if _, err := tpr.LoadRatingProfilesFiltered(qriedRpf); err == nil {
+		t.Error(err)
+	}
+	//unfinished
+}
