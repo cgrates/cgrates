@@ -255,6 +255,11 @@ func TestAttributeProfileSet(t *testing.T) {
 			Type:      utils.MetaConstant,
 			Value:     config.NewRSRParsersMustCompile("10", utils.InfieldSep),
 			FilterIDs: []string{"fltr1"},
+			Blockers: utils.DynamicBlockers{
+				{
+					Blocker: true,
+				},
+			},
 		}},
 		Weights: make(utils.DynamicWeights, 1),
 	}
@@ -298,7 +303,9 @@ func TestAttributeProfileSet(t *testing.T) {
 	if err := dp.Set([]string{utils.Attributes, utils.FilterIDs}, "fltr1", false, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
-
+	if err := dp.Set([]string{utils.Attributes, utils.Blockers}, ";true", false, utils.EmptyString); err != nil {
+		t.Error(err)
+	}
 	if err := dp.Set([]string{utils.Attributes, "Wrong"}, true, false, utils.EmptyString); err != utils.ErrWrongPath {
 		t.Error(err)
 	}
@@ -487,5 +494,41 @@ func TestAttributeProfileMerge(t *testing.T) {
 	}
 	if !reflect.DeepEqual(exp, dp) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(dp))
+	}
+}
+
+func TestAttributeProfilCompileSubstitutes(t *testing.T) {
+
+	ap := &AttributeProfile{
+		Attributes: []*Attribute{
+			{Value: config.RSRParsers{&config.RSRParser{
+				Rules: "~*req.Account{*unuportedConverter}",
+			}}},
+		},
+	}
+	expErr := "invalid converter value in string: <*unuportedConverter>, err: unsupported converter definition: <*unuportedConverter>"
+	if err := ap.compileSubstitutes(); err == nil || err.Error() != expErr {
+		t.Errorf("Expected error <%v> \n but received error \n <%v>", expErr, err)
+	}
+
+}
+
+func TestAttributeFieldAsInterface(t *testing.T) {
+	at := &Attribute{
+		Path:      "*req.Account",
+		Type:      utils.MetaConstant,
+		Value:     config.NewRSRParsersMustCompile("10", utils.InfieldSep),
+		FilterIDs: []string{"fltr1"},
+		Blockers: utils.DynamicBlockers{
+			{
+				Blocker: true,
+			},
+		},
+	}
+
+	if rcv, err := at.FieldAsInterface([]string{utils.Blockers}); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcv, at.Blockers) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(at), utils.ToJSON(rcv))
 	}
 }

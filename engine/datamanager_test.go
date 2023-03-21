@@ -9493,3 +9493,245 @@ func TestDMSetStatQueueProfileNewStatQueueErr(t *testing.T) {
 	}
 
 }
+
+func TestDMRemoveStatQueueProfileNilDMErr(t *testing.T) {
+
+	var dm *DataManager
+
+	err := dm.RemoveStatQueueProfile(context.Background(), "tnt", "Id", false)
+	if err != utils.ErrNoDatabaseConn {
+		t.Errorf("\nExpected error <%+v>, \nReceived error <%+v>", utils.ErrNoDatabaseConn, err)
+	}
+
+}
+
+func TestDMRemoveStatQueueProfileGetStatQueueProfileErr(t *testing.T) {
+
+	defer func() {
+		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	data := &DataDBMock{
+		GetStatQueueProfileDrvF: func(ctx *context.Context, tenant, id string) (sq *StatQueueProfile, err error) {
+			return &StatQueueProfile{}, utils.ErrNotImplemented
+		},
+	}
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	err := dm.RemoveStatQueueProfile(context.Background(), "tnt", "Id", false)
+	if err != utils.ErrNotImplemented {
+		t.Errorf("\nExpected error <%+v>, \nReceived error <%+v>", utils.ErrNotImplemented, err)
+	}
+
+}
+
+func TestDMRemoveStatQueueProfileRemStatQueueProfileDrvErr(t *testing.T) {
+
+	defer func() {
+		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	data := &DataDBMock{
+		GetStatQueueProfileDrvF: func(ctx *context.Context, tenant, id string) (sq *StatQueueProfile, err error) {
+			return &StatQueueProfile{}, nil
+		},
+	}
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	sqp := &StatQueueProfile{
+		Tenant:      "cgrates.org",
+		ID:          "sqp003",
+		FilterIDs:   []string{"*string:~*req.Account:1001"},
+		QueueLength: 10,
+		TTL:         10 * time.Second,
+		Metrics: []*MetricWithFilters{
+			{
+				MetricID: "*sum#~*req.Usage",
+			},
+		},
+		ThresholdIDs: []string{},
+		Stored:       true,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
+		MinItems: 1,
+	}
+
+	err := dm.RemoveStatQueueProfile(context.Background(), sqp.Tenant, sqp.ID, true)
+	if err != utils.ErrNotImplemented {
+		t.Errorf("\nExpected error <%+v>, \nReceived error <%+v>", utils.ErrNotImplemented, err)
+	}
+
+}
+
+func TestDMRemoveStatQueueProfileNilOldStsErr(t *testing.T) {
+
+	defer func() {
+		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	var Id string
+	var tnt string
+	err := dm.RemoveStatQueueProfile(context.Background(), tnt, Id, false)
+	if err != utils.ErrNotFound {
+		t.Errorf("\nExpected error <%+v>, \nReceived error <%+v>", utils.ErrNotFound, err)
+	}
+
+}
+
+func TestDMRemoveStatQueueProfileRmvItemFromFiltrIndexErr(t *testing.T) {
+
+	defer func() {
+		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	data := &DataDBMock{
+		GetStatQueueProfileDrvF: func(ctx *context.Context, tenant, id string) (sq *StatQueueProfile, err error) {
+			return &StatQueueProfile{}, nil
+		},
+		RemStatQueueProfileDrvF: func(ctx *context.Context, tenant, ID string) error { return nil },
+	}
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	sqp := &StatQueueProfile{
+		Tenant:      "cgrates.org",
+		ID:          "sqp003",
+		FilterIDs:   []string{"*string:~*req.Account:1001"},
+		QueueLength: 10,
+		TTL:         10 * time.Second,
+		Metrics: []*MetricWithFilters{
+			{
+				MetricID: "*sum#~*req.Usage",
+			},
+		},
+		ThresholdIDs: []string{},
+		Stored:       true,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
+		MinItems: 1,
+	}
+
+	err := dm.RemoveStatQueueProfile(context.Background(), sqp.Tenant, sqp.ID, true)
+	if err != utils.ErrNotImplemented {
+		t.Errorf("\nExpected error <%+v>, \nReceived error <%+v>", utils.ErrNotImplemented, err)
+	}
+
+}
+
+func TestDMRemoveStatQueueProfileRmvIndexFiltersItemErr(t *testing.T) {
+
+	defer func() {
+		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+	}()
+
+	sqp := &StatQueueProfile{
+		Tenant:      "cgrates.org",
+		ID:          "sqp003",
+		FilterIDs:   []string{"fltrID1"},
+		QueueLength: 10,
+		TTL:         10 * time.Second,
+		Metrics: []*MetricWithFilters{
+			{
+				MetricID: "*sum#~*req.Usage",
+			},
+		},
+		ThresholdIDs: []string{},
+		Stored:       true,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
+		MinItems: 1,
+	}
+
+	cfg := config.NewDefaultCGRConfig()
+	data := &DataDBMock{
+		GetStatQueueProfileDrvF: func(ctx *context.Context, tenant, id string) (sq *StatQueueProfile, err error) {
+			return sqp, nil
+		},
+		RemStatQueueProfileDrvF: func(ctx *context.Context, tenant, ID string) error { return nil },
+	}
+
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	err := dm.RemoveStatQueueProfile(context.Background(), sqp.Tenant, sqp.ID, true)
+	if err != utils.ErrNotImplemented {
+		t.Errorf("\nExpected error <%+v>, \nReceived error <%+v>", utils.ErrNotImplemented, err)
+	}
+
+}
+
+func TestDMRemoveStatQueueProfileReplicate(t *testing.T) {
+
+	cfgtmp := config.CgrConfig()
+	defer func() {
+		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+		config.SetCgrConfig(cfgtmp)
+	}()
+
+	sqp := &StatQueueProfile{
+		Tenant:      "cgrates.org",
+		ID:          "sqp003",
+		FilterIDs:   []string{"*string:~*req.Account:1001"},
+		QueueLength: 10,
+		TTL:         10 * time.Second,
+		Metrics: []*MetricWithFilters{
+			{
+				MetricID: "*sum#~*req.Usage",
+			},
+		},
+		ThresholdIDs: []string{},
+		Stored:       true,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
+		MinItems: 1,
+	}
+
+	cfg := config.NewDefaultCGRConfig()
+	cfg.DataDbCfg().Items[utils.MetaStatQueueProfiles].Replicate = true
+	cfg.DataDbCfg().RplConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
+	config.SetCgrConfig(cfg)
+
+	cc := make(chan birpc.ClientConnector, 1)
+	cc <- &ccMock{
+
+		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+			utils.ReplicatorSv1RemoveStatQueueProfile: func(ctx *context.Context, args, reply interface{}) error { return utils.ErrNotImplemented },
+		},
+	}
+
+	cM := NewConnManager(cfg)
+	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.ReplicatorSv1, cc)
+	data := &DataDBMock{
+		GetStatQueueProfileDrvF: func(ctx *context.Context, tenant, id string) (sq *StatQueueProfile, err error) {
+			return sqp, nil
+		},
+		RemStatQueueProfileDrvF: func(ctx *context.Context, tenant, ID string) error { return nil },
+	}
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	// tests replicate
+	dm.RemoveStatQueueProfile(context.Background(), sqp.Tenant, sqp.ID, false)
+
+}
