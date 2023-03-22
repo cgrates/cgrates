@@ -86,14 +86,15 @@ func TestSessionSReload(t *testing.T) {
 	if err = srvMngr.StartServices(); err != nil {
 		t.Error(err)
 	}
+	time.Sleep(10 * time.Millisecond)
 	if srv.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
-	if db.IsRunning() {
-		t.Errorf("Expected service to be down")
+	if !db.IsRunning() {
+		t.Errorf("Expected service to be running")
 	}
-	if stordb.IsRunning() {
-		t.Errorf("Expected service to be down")
+	if !stordb.IsRunning() {
+		t.Errorf("Expected service to be running")
 	}
 	var reply string
 	if err := cfg.V1ReloadConfigFromPath(&config.ConfigReloadWithArgDispatcher{

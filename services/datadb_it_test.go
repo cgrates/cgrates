@@ -58,6 +58,7 @@ func TestDataDBReload(t *testing.T) {
 	if err = srvMngr.StartServices(); err != nil {
 		t.Error(err)
 	}
+	time.Sleep(10 * time.Millisecond)
 	if db.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}

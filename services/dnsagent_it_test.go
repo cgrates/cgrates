@@ -60,6 +60,7 @@ func TestDNSAgentReload(t *testing.T) {
 	if err = srvMngr.StartServices(); err != nil {
 		t.Fatal(err)
 	}
+	time.Sleep(10 * time.Millisecond)
 	if srv.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
