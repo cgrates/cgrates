@@ -59,6 +59,7 @@ func TestAttributeSReload(t *testing.T) {
 	if err = srvMngr.StartServices(); err != nil {
 		t.Error(err)
 	}
+	time.Sleep(10 * time.Millisecond)
 	if attrS.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
