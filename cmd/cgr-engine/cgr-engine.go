@@ -506,7 +506,7 @@ func main() {
 	anz := services.NewAnalyzerService(cfg, server, exitChan, internalAnalyzerSChan)
 
 	srvManager.AddServices(attrS, chrS, tS, stS, reS, supS, schS, rals,
-		rals.GetResponder(), apiSv1, apiSv2, cdrS, smg,
+		apiSv1, apiSv2, cdrS, smg,
 		services.NewEventReaderService(cfg, filterSChan, exitChan, connManager),
 		services.NewDNSAgent(cfg, filterSChan, exitChan, connManager),
 		services.NewFreeswitchAgent(cfg, exitChan, connManager),
