@@ -604,3 +604,49 @@ func TestStatQueueProfileIndx(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestDmRatingProfileCategory(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	rdsITdb, err := NewRedisStorage(
+		"127.0.0.1:6379", 10, "", "msgpack", 4, "")
+	if err != nil {
+		t.Fatal("Could not connect to Redis", err.Error())
+	}
+	dm := NewDataManager(rdsITdb, cfg.CacheCfg(), nil)
+	rprfs := []*RatingProfile{
+		{
+			Id:                    utils.ConcatenatedKey(utils.META_OUT, "cgrates.org", "*any", "1002"),
+			RatingPlanActivations: RatingPlanActivations{},
+		}, {
+			Id:                    utils.ConcatenatedKey(utils.META_OUT, "cgrates.org", "call", "1002"),
+			RatingPlanActivations: RatingPlanActivations{},
+		},
+		{
+			Id:                    utils.ConcatenatedKey(utils.META_OUT, "cgrates.org", "*any", "1001"),
+			RatingPlanActivations: RatingPlanActivations{},
+		}, {
+			Id:                    utils.ConcatenatedKey(utils.META_OUT, "cgrates.org", "sms", "1001"),
+			RatingPlanActivations: RatingPlanActivations{},
+		},
+	}
+
+	for _, rprf := range rprfs {
+		if err := dm.SetRatingProfile(rprf, utils.NonTransactional); err != nil {
+			t.Error(err)
+		}
+
+	}
+	if err := dm.RemoveRatingProfile(rprfs[2].Id, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+	if _, err := dm.GetRatingProfile(rprfs[1].Id, true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+	if _, err := dm.GetRatingProfile(rprfs[0].Id, true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+	if _, err := dm.GetRatingProfile(rprfs[3].Id, true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+
+}
