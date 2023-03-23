@@ -4671,110 +4671,111 @@ func TestDMGetStatQueueCacheGetErr(t *testing.T) {
 	}
 }
 
-// unfinished
-// func TestDMGetStatQueueNewStoredStatQueueErr(t *testing.T) {
+func TestDMGetStatQueueNewStoredStatQueueErr(t *testing.T) {
 
-// 	tmp := Cache
-// 	cfgtmp := config.CgrConfig()
-// 	defer func() {
-// 		Cache = tmp
-// 		config.SetCgrConfig(cfgtmp)
-// 	}()
+	cfgtmp := config.CgrConfig()
+	defer func() {
+		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+		config.SetCgrConfig(cfgtmp)
+	}()
 
-// 	cfg := config.NewDefaultCGRConfig()
-// 	cfg.DataDbCfg().Items[utils.MetaStatQueues].Remote = true
-// 	cfg.DataDbCfg().RmtConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.RemoteConnsCfg)}
-// 	config.SetCgrConfig(cfg)
+	cfg := config.NewDefaultCGRConfig()
+	cfg.DataDbCfg().Items[utils.MetaStatQueues].Remote = true
+	cfg.DataDbCfg().RmtConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.RemoteConnsCfg)}
+	config.SetCgrConfig(cfg)
 
-// 	sq := StatQueue{
-// 		Tenant: "cgrates.org",
-// 		ID:     "sq01",
-// 		SQMetrics: map[string]StatMetric{
-// 			"key": statMetricMock(""),
-// 		},
-// 		SQItems: []SQItem{
-// 			{
-// 				EventID: "SqProcessEvent",
-// 			},
-// 		},
-// 	}
+	stq := &StatQueue{
+		Tenant: "cgrates.org",
+		ID:     "sq01",
+		SQMetrics: map[string]StatMetric{
+			"key": statMetricMock(""),
+		},
+		SQItems: []SQItem{
+			{
+				EventID: "SqProcessEvent",
+			},
+		},
+	}
 
-// 	cc := make(chan birpc.ClientConnector, 1)
-// 	cc <- &ccMock{
+	cc := make(chan birpc.ClientConnector, 1)
+	cc <- &ccMock{
 
-// 		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-// 			utils.ReplicatorSv1GetStatQueue: func(ctx *context.Context, args, reply interface{}) error {
-// 				*reply.(*StatQueue) = sq
-// 				return nil
-// 			},
-// 		},
-// 	}
+		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+			utils.ReplicatorSv1GetStatQueue: func(ctx *context.Context, args, reply interface{}) error {
+				return nil
+			},
+		},
+	}
 
-// 	cM := NewConnManager(cfg)
-// 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.RemoteConnsCfg), utils.ReplicatorSv1, cc)
+	cM := NewConnManager(cfg)
+	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.RemoteConnsCfg), utils.ReplicatorSv1, cc)
 
-// 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-// 	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+	data := &DataDBMock{
+		GetStatQueueDrvF: func(ctx *context.Context, tenant, id string) (sq *StatQueue, err error) {
+			return stq, utils.ErrNotFound
+		},
+	}
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
 
-// 	experr := "marshal mock error"
-// 	dm.ms = mockMarshal(experr)
+	experr := "marshal mock error"
+	dm.ms = mockMarshal(experr)
 
-// 	if _, err := dm.GetStatQueue(context.Background(), utils.CGRateSorg, "sq01", false, false, utils.NonTransactional); err == nil || err.Error() != experr {
-// 		t.Errorf("Expected error <%v>, received error <%v>", experr, err)
-// 	}
+	if _, err := dm.GetStatQueue(context.Background(), utils.CGRateSorg, "sq01", false, false, utils.NonTransactional); err == nil || err.Error() != experr {
+		t.Errorf("Expected error <%v>, received error <%v>", experr, err)
+	}
 
-// }
+}
 
-// unfinished
-// func TestDMGetStatQueueSetStatQueueDrvErr(t *testing.T) {
+func TestDMGetStatQueueSetStatQueueDrvErr(t *testing.T) {
 
-// 	tmp := Cache
-// 	cfgtmp := config.CgrConfig()
-// 	defer func() {
-// 		Cache = tmp
-// 		config.SetCgrConfig(cfgtmp)
-// 	}()
+	cfgtmp := config.CgrConfig()
+	defer func() {
+		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+		config.SetCgrConfig(cfgtmp)
+	}()
 
-// 	cfg := config.NewDefaultCGRConfig()
-// 	cfg.DataDbCfg().Items[utils.MetaStatQueues].Remote = true
-// 	cfg.DataDbCfg().RmtConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.RemoteConnsCfg)}
-// 	config.SetCgrConfig(cfg)
+	cfg := config.NewDefaultCGRConfig()
+	cfg.DataDbCfg().Items[utils.MetaStatQueues].Remote = true
+	cfg.DataDbCfg().RmtConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.RemoteConnsCfg)}
+	config.SetCgrConfig(cfg)
 
-// 	sq := StatQueue{
-// 		Tenant: "cgrates.org",
-// 		ID:     "sq01",
-// 		SQItems: []SQItem{
-// 			{
-// 				EventID: "SqProcessEvent",
-// 			},
-// 		},
-// 		SQMetrics: make(map[string]StatMetric),
-// 	}
+	stq := &StatQueue{
+		Tenant: "cgrates.org",
+		ID:     "sq01",
+		SQItems: []SQItem{
+			{
+				EventID: "SqProcessEvent",
+			},
+		},
+		SQMetrics: make(map[string]StatMetric),
+	}
 
-// 	cc := make(chan birpc.ClientConnector, 1)
-// 	cc <- &ccMock{
+	cc := make(chan birpc.ClientConnector, 1)
+	cc <- &ccMock{
 
-// 		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-// 			utils.ReplicatorSv1GetStatQueue: func(ctx *context.Context, args, reply interface{}) error {
-// 				*reply.(*StatQueue) = sq
-// 				return nil
-// 			},
-// 		},
-// 	}
+		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+			utils.ReplicatorSv1GetStatQueue: func(ctx *context.Context, args, reply interface{}) error {
+				return nil
+			},
+		},
+	}
 
-// 	cM := NewConnManager(cfg)
-// 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.RemoteConnsCfg), utils.ReplicatorSv1, cc)
+	cM := NewConnManager(cfg)
+	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.RemoteConnsCfg), utils.ReplicatorSv1, cc)
 
-// 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-// 	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+	data := &DataDBMock{
+		GetStatQueueDrvF: func(ctx *context.Context, tenant, id string) (sq *StatQueue, err error) {
+			return stq, utils.ErrNotFound
+		},
+		SetStatQueueDrvF: func(ctx *context.Context, ssq *StoredStatQueue, sq *StatQueue) error { return utils.ErrNotImplemented },
+	}
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
 
-// 	if rcv, err := dm.GetStatQueue(context.Background(), utils.CGRateSorg, "sq01", false, false, utils.NonTransactional); err != nil {
-// 		t.Error(err)
-// 	} else if !reflect.DeepEqual(&sq, rcv) {
-// 		t.Errorf("Expected <%v>, received <%v>", &sq, rcv)
-// 	}
+	if _, err := dm.GetStatQueue(context.Background(), utils.CGRateSorg, "sq01", false, false, utils.NonTransactional); err != utils.ErrNotImplemented {
+		t.Errorf("Expected error <%v>, received error <%v>", utils.ErrNotImplemented, err)
+	}
 
-// }
+}
 
 func TestDMGetStatQueueCacheWriteErr(t *testing.T) {
 
@@ -9734,4 +9735,158 @@ func TestDMRemoveStatQueueProfileReplicate(t *testing.T) {
 	// tests replicate
 	dm.RemoveStatQueueProfile(context.Background(), sqp.Tenant, sqp.ID, false)
 
+}
+
+func TestDMGetStatQueueCacheWriteErr1(t *testing.T) {
+
+	sq := &StatQueue{
+		Tenant: "cgrates.org",
+		ID:     "sq01",
+		SQItems: []SQItem{
+			{
+				EventID: "SqProcessEvent",
+			},
+		},
+		SQMetrics: make(map[string]StatMetric),
+	}
+
+	cfgtmp := config.CgrConfig()
+	defer func() {
+		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+		config.SetCgrConfig(cfgtmp)
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	cfg.CacheCfg().ReplicationConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
+	cfg.CacheCfg().Partitions[utils.CacheStatQueues].Replicate = true
+	config.SetCgrConfig(cfg)
+
+	cc := make(chan birpc.ClientConnector, 1)
+	cc <- &ccMock{
+
+		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply interface{}) error {
+
+				return utils.ErrNotImplemented
+			},
+		},
+	}
+
+	cM := NewConnManager(cfg)
+	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.CacheSv1, cc)
+
+	data := &DataDBMock{
+		GetStatQueueDrvF: func(ctx *context.Context, tenant, id string) (sq *StatQueue, err error) { return sq, utils.ErrNotFound },
+	}
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	Cache = NewCacheS(cfg, dm, cM, nil)
+
+	_, err := dm.GetStatQueue(context.Background(), utils.CGRateSorg, sq.ID, false, true, utils.NonTransactional)
+	if err != utils.ErrNotImplemented {
+		t.Errorf("Expected error <%v>, received error <%v>", utils.ErrNotImplemented, err)
+	}
+}
+
+func TestDMGetChargerProfileSetChargerProfileDrvErr(t *testing.T) {
+
+	cfgtmp := config.CgrConfig()
+	defer func() {
+		config.SetCgrConfig(cfgtmp)
+	}()
+	Cache.Clear(nil)
+
+	cpp := &ChargerProfile{
+		Tenant:       "cgrates.org",
+		ID:           "CHP_1",
+		FilterIDs:    []string{"*string:~*req.Account:1001"},
+		RunID:        "*rated",
+		AttributeIDs: []string{"ATTR_1"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
+		weight: 20,
+	}
+
+	cfg := config.NewDefaultCGRConfig()
+	cfg.DataDbCfg().Items[utils.MetaChargerProfiles].Remote = true
+	cfg.DataDbCfg().RmtConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.RemoteConnsCfg)}
+	config.SetCgrConfig(cfg)
+
+	cc := make(chan birpc.ClientConnector, 1)
+	cc <- &ccMock{
+
+		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+			utils.ReplicatorSv1GetChargerProfile: func(ctx *context.Context, args, reply interface{}) error { return nil },
+		},
+	}
+
+	cM := NewConnManager(cfg)
+	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.RemoteConnsCfg), utils.ReplicatorSv1, cc)
+	data := &DataDBMock{
+		GetChargerProfileDrvF: func(ctx *context.Context, tnt, id string) (*ChargerProfile, error) { return cpp, utils.ErrNotFound },
+		SetChargerProfileDrvF: func(ctx *context.Context, chr *ChargerProfile) (err error) { return utils.ErrNotImplemented },
+	}
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	_, err := dm.GetChargerProfile(context.Background(), utils.CGRateSorg, cpp.ID, false, false, utils.NonTransactional)
+	if err != utils.ErrNotImplemented {
+		t.Errorf("Expected error <%v>, received error <%v>", utils.ErrNotImplemented, err)
+	}
+}
+
+func TestDMGetChargerProfileCacheWriteErr1(t *testing.T) {
+
+	cpp := &ChargerProfile{
+		Tenant:       "cgrates.org",
+		ID:           "CHP_1",
+		FilterIDs:    []string{"*string:~*req.Account:1001"},
+		RunID:        "*rated",
+		AttributeIDs: []string{"ATTR_1"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
+		weight: 20,
+	}
+
+	cfgtmp := config.CgrConfig()
+	defer func() {
+		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+		config.SetCgrConfig(cfgtmp)
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	cfg.CacheCfg().ReplicationConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
+	cfg.CacheCfg().Partitions[utils.CacheChargerProfiles].Replicate = true
+	config.SetCgrConfig(cfg)
+
+	cc := make(chan birpc.ClientConnector, 1)
+	cc <- &ccMock{
+
+		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply interface{}) error {
+
+				return utils.ErrNotImplemented
+			},
+		},
+	}
+
+	cM := NewConnManager(cfg)
+	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.CacheSv1, cc)
+
+	data := &DataDBMock{
+		GetChargerProfileDrvF: func(ctx *context.Context, tnt, id string) (*ChargerProfile, error) { return cpp, utils.ErrNotFound },
+	}
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	Cache = NewCacheS(cfg, dm, cM, nil)
+
+	_, err := dm.GetChargerProfile(context.Background(), utils.CGRateSorg, cpp.ID, false, true, utils.NonTransactional)
+	if err != utils.ErrNotImplemented {
+		t.Errorf("Expected error <%v>, received error <%v>", utils.ErrNotImplemented, err)
+	}
 }
