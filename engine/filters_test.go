@@ -2059,3 +2059,62 @@ func TestUpdateFilterIndexes(t *testing.T) {
 	}
 
 }
+
+func TestFilterSPass11(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	acc := &Account{
+		ID: "cgrates.org:1001",
+		BalanceMap: map[string]Balances{
+			utils.VOICE: {
+				&Balance{Value: 20 * float64(time.Second),
+					DestinationIDs: utils.NewStringMap("DST1"),
+					Weight:         10},
+				&Balance{Value: 100 * float64(time.Second),
+					DestinationIDs: utils.NewStringMap("DST2"), Weight: 20},
+			}},
+	}
+	rsr := &Resource{
+		Tenant: "cgrates.org",
+		ID:     "RL1",
+
+		Usages: map[string]*ResourceUsage{
+			"RU1": {
+				ID:         "RU1",
+				ExpiryTime: time.Date(2014, 7, 3, 13, 43, 0, 0, time.UTC),
+				Units:      2,
+			},
+		},
+		TTLIdx: []string{"RU1"},
+	}
+	dm.SetResource(rsr)
+	dm.SetAccount(acc)
+	fltrAcc := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "FLTR_ACC",
+		Rules: []*FilterRule{{
+			Type:    utils.MetaString,
+			Element: "~*accounts.1001.BalanceMap.*voice[0].Value",
+			Values:  []string{utils.IfaceAsString(20 * float64(time.Second))},
+		}},
+	}
+	fltrRes := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "FLTR_RES",
+		Rules: []*FilterRule{
+			{
+				Type:    "*lte",
+				Element: "~*resources.RL1.Usage.RUI.Units",
+				Values:  []string{"2"},
+			},
+		},
+	}
+	dm.SetFilter(fltrRes)
+	ev := &utils.MapStorage{}
+	dm.SetFilter(fltrAcc)
+	fS := NewFilterS(cfg, nil, dm)
+	if _, err := fS.Pass("cgrates.org", []string{"FLTR_ACC", "FLTR_RES"}, ev); err == nil { //unfinished
+		t.Error(err)
+	}
+}

@@ -439,7 +439,33 @@ func TestCacheDataFromDBFilterIndexes(t *testing.T) {
 	if err := dm.CacheDataFromDB(utils.DispatcherFilterIndexes, nil, false); err != nil {
 		t.Error(err)
 	}
-
+	chgFlt := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "FLT_CPP",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaString,
+				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + "Charger",
+				Values:  []string{"Charger1"},
+			},
+		},
+	}
+	dm.SetFilter(chgFlt)
+	cpp := &ChargerProfile{
+		Tenant: "cgrates.org",
+		ID:     "Default",
+		FilterIDs: []string{"*string:~*req.Destination:+1442",
+			"*prefix:~*opts.Accounts:1002;1004"},
+		RunID:        utils.MetaDefault,
+		AttributeIDs: []string{"*none"},
+		Weight:       20,
+	}
+	if err := dm.SetChargerProfile(cpp, true); err != nil {
+		t.Error(err)
+	}
+	if err := dm.CacheDataFromDB(utils.ChargerFilterIndexes, nil, false); err != nil {
+		t.Error(err)
+	}
 }
 
 func TestFilterIndexesRmtRpl(t *testing.T) {
@@ -649,4 +675,61 @@ func TestDmRatingProfileCategory(t *testing.T) {
 		t.Error(err)
 	}
 
+}
+
+func TestDmDispatcherHost(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+
+	dppH := &DispatcherHost{
+		Tenant: "cgrates.org",
+		ID:     "ALL1",
+		Conns: []*config.RemoteHost{
+			{
+				Address:   "127.0.0.1:2012",
+				Transport: utils.MetaJSON,
+				TLS:       true,
+			},
+			{
+				Address:   "127.0.0.1:3012",
+				Transport: utils.MetaJSON,
+			},
+		},
+	}
+	if err := dm.SetDispatcherHost(dppH); err != nil {
+		t.Error(err)
+	}
+	if _, err := dm.GetDispatcherHost("cgrates.org", "ALL1", false, true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+	if err := dm.RemoveDispatcherHost("cgrates.org", "ALL1", utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestDmRemoveThresholdProfile(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+
+	thP := &ThresholdProfile{
+		Tenant:    "cgrates.org",
+		ID:        "THD_ACNT_1001",
+		FilterIDs: []string{"*prefix:Destination:46"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 29, 15, 0, 0, 0, time.UTC),
+		},
+		MaxHits:   -1,
+		MinSleep:  time.Duration(0),
+		Blocker:   false,
+		Weight:    10.0,
+		ActionIDs: []string{"TOPUP_MONETARY_10"},
+		Async:     false,
+	}
+	dm.SetThresholdProfile(thP, true)
+
+	if err := dm.RemoveThresholdProfile("cgrates.org", "THD_ACNT_1001", utils.NonTransactional, true); err != nil {
+		t.Error(err)
+	}
 }
