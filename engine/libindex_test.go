@@ -2815,3 +2815,21 @@ func TestAddIndexFiltersItemSetIndexesErr(t *testing.T) {
 	}
 
 }
+
+func TestAddItemToFilterIndexNewFilterIndexErr(t *testing.T) {
+
+	cfg := config.NewDefaultCGRConfig()
+	data := &DataDBMock{
+		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
+			return map[string]utils.StringSet{}, utils.ErrNotImplemented
+		},
+	}
+
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	if err := addItemToFilterIndex(context.Background(), dm, "", "cgrates.org", "", "", []string{""}); err != utils.ErrNotImplemented {
+		t.Errorf("Expected error <%v>, received <%v>", utils.ErrNotImplemented, err)
+	}
+
+}

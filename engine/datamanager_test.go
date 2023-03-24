@@ -9890,3 +9890,75 @@ func TestDMGetChargerProfileCacheWriteErr1(t *testing.T) {
 		t.Errorf("Expected error <%v>, received error <%v>", utils.ErrNotImplemented, err)
 	}
 }
+
+func TestDMGetChargerProfileCacheWriteErr2(t *testing.T) {
+
+	cfgtmp := config.CgrConfig()
+	defer func() {
+		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+		config.SetCgrConfig(cfgtmp)
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	cfg.CacheCfg().ReplicationConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
+	cfg.CacheCfg().Partitions[utils.CacheChargerProfiles].Replicate = true
+	config.SetCgrConfig(cfg)
+
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+
+	cc := make(chan birpc.ClientConnector, 1)
+	cc <- &ccMock{
+
+		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply interface{}) error { return utils.ErrNotImplemented },
+		},
+	}
+
+	cM := NewConnManager(cfg)
+	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.CacheSv1, cc)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	cpp := &ChargerProfile{
+		Tenant:       "cgrates.org",
+		ID:           "CHP_1",
+		FilterIDs:    []string{"*string:~*req.Account:1001"},
+		RunID:        "*rated",
+		AttributeIDs: []string{"ATTR_1"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
+		weight: 20,
+	}
+
+	if err := dm.dataDB.SetChargerProfileDrv(context.Background(), cpp); err != nil {
+		t.Error(err)
+	}
+
+	Cache = NewCacheS(cfg, dm, cM, nil)
+
+	if _, err := dm.GetChargerProfile(context.Background(), utils.CGRateSorg, cpp.ID, false, true, utils.NonTransactional); err != utils.ErrNotImplemented {
+		t.Errorf("Expected error <%v>, received error <%v>", utils.ErrNotImplemented, err)
+	}
+
+}
+
+func TestDMGetDispatcherProfileCacheGetErr(t *testing.T) {
+
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	if err := Cache.Set(context.Background(), utils.CacheDispatcherProfiles, utils.ConcatenatedKey(utils.CGRateSorg, "dp1"), nil, []string{}, true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+
+	_, err := dm.GetDispatcherProfile(context.Background(), utils.CGRateSorg, "dp1", true, false, utils.NonTransactional)
+	if err != utils.ErrDSPProfileNotFound {
+		t.Errorf("Expected error <%v>, received error <%v>", utils.ErrDSPProfileNotFound, err)
+	}
+}

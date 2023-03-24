@@ -532,3 +532,64 @@ func TestAttributeFieldAsInterface(t *testing.T) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(at), utils.ToJSON(rcv))
 	}
 }
+
+func TestAPIAPAsAttributeProfileNilPathErr(t *testing.T) {
+
+	ext := &APIAttributeProfile{
+		Tenant:    "cgrates.org",
+		ID:        "ATTR_ID",
+		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z|2014-07-14T14:36:00Z", "*string:~*opts.*context:*sessions|*cdrs"},
+		Attributes: []*ExternalAttribute{
+			{
+				Value: "1001",
+			},
+		},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
+	}
+
+	expErr := "MANDATORY_IE_MISSING: [Path]"
+	if _, err := ext.AsAttributeProfile(); err == nil || err.Error() != expErr {
+		t.Errorf("Expecting error <%v>, Reveived error <%v>", expErr, err)
+	}
+
+}
+
+func TestAPIAPAsAttributeProfileParseErr(t *testing.T) {
+
+	external := &APIAttributeProfile{
+		Tenant:    "cgrates.org",
+		ID:        "ATTR_ID",
+		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE", "*string:~*opts.*context:*sessions|*cdrs"},
+		Attributes: []*ExternalAttribute{
+			{
+				Path:  utils.MetaReq + utils.NestingSep + "Account",
+				Value: "a{*",
+			},
+		},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
+	}
+
+	expErr := "invalid converter terminator in rule: <a{*>"
+	if _, err := external.AsAttributeProfile(); err == nil || err.Error() != expErr {
+		t.Errorf("Expecting error <%v>, Reveived error <%v>", expErr, err)
+	}
+
+}
+
+func TestNewAttributeFromInlineNilPathErr(t *testing.T) {
+	attrID := "*variable:*req.Category:call_&*req.OriginID;*constant::"
+
+	expErr := "empty path in inline AttributeProfile <*variable:*req.Category:call_&*req.OriginID;*constant::>"
+	_, err := NewAttributeFromInline(config.CgrConfig().GeneralCfg().DefaultTenant, attrID)
+	if err == nil || err.Error() != expErr {
+		t.Errorf("Expecting error <%v>, Reveived error <%v>", expErr, err)
+	}
+}

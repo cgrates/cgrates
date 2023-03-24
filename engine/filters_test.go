@@ -2285,3 +2285,115 @@ func TestPassActivationIntervalParseTimeStart2Err(t *testing.T) {
 	}
 
 }
+
+func TestFilterRuleCompileValuesRSRParseErr(t *testing.T) {
+
+	fltr := &FilterRule{
+		Type:   utils.MetaRSR,
+		Values: []string{"~(^_^", "^rule2$"},
+	}
+
+	if err := fltr.CompileValues(); err == nil || err.Error() != "error parsing regexp: missing closing ): `(^_^`" {
+		t.Errorf("Expected <error parsing regexp: missing closing ): `(^_^`> ,received: <%+v>", err)
+	}
+
+}
+
+func TestFilterRuleCompileValuesNeverParseErr(t *testing.T) {
+
+	fltr, err := NewFilterRule(utils.MetaNever, utils.Accounts, []string{"val1"})
+	if err != nil {
+		t.Error(err)
+	}
+
+	cFiltr := fltr
+	if err := fltr.CompileValues(); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(cFiltr, fltr) {
+		t.Errorf("Expected \n<%v>, \n received \n<%v>", cFiltr, fltr)
+	}
+
+}
+
+func TestFilterRuleCompileValuesActivationIntervalParseErr(t *testing.T) {
+
+	fltr := &FilterRule{
+		Type:   utils.MetaActivationInterval,
+		Values: []string{"a{*"},
+	}
+
+	if err := fltr.CompileValues(); err == nil || err.Error() != "invalid converter terminator in rule: <a{*>" {
+		t.Errorf("Expected <invalid converter terminator in rule: <a{*>> ,received: <%+v>", err)
+	}
+
+}
+
+func TestFilterRuleCompileValuesNewRSRParsElementErr(t *testing.T) {
+
+	fltr := &FilterRule{
+		Type:    utils.MetaExists,
+		Element: "a{*",
+	}
+
+	if err := fltr.CompileValues(); err == nil || err.Error() != "invalid converter terminator in rule: <a{*>" {
+		t.Errorf("Expected <invalid converter terminator in rule: <a{*>> ,received: <%+v>", err)
+	}
+
+}
+
+func TestFRPassMetaNever(t *testing.T) {
+
+	fltr := &FilterRule{
+		Type: utils.MetaNever,
+	}
+
+	if pass, err := fltr.Pass(context.Background(), utils.MapStorage{}); err != nil {
+		t.Error(err)
+	} else if pass != false {
+		t.Errorf("Expected to never pass")
+	}
+
+}
+
+func TestFRPassStringParseDataProviderErr(t *testing.T) {
+	rsrParse := &config.RSRParser{
+		Rules: "~*opts.<~*opts.*originID;~*req.RunID;-Cost>",
+	}
+	if err := rsrParse.Compile(); err != nil {
+		t.Error(err)
+	}
+
+	valParse := config.RSRParsers{
+		&config.RSRParser{
+			Rules: "~*opts.*originID;~*req.RunID;-Cost",
+		},
+	}
+	if err := valParse.Compile(); err != nil {
+		t.Error(err)
+	}
+	fltr := &FilterRule{
+		Type:       utils.MetaString,
+		Element:    "~*req.Charger",
+		Values:     []string{"ChargerProfile1"},
+		rsrElement: rsrParse,
+		rsrValues:  valParse,
+	}
+
+	data := utils.MapStorage{
+		utils.MetaReq: utils.MapStorage{
+
+			utils.RunID: utils.MetaDefault,
+		},
+		utils.MetaOpts: utils.MapStorage{
+			utils.MetaOriginID:  "Uniq",
+			"Uniq*default-Cost": 10,
+		},
+	}
+
+	if pass, err := fltr.passString(data); err != nil {
+		t.Error(err)
+	} else if pass != false {
+		t.Errorf("Expected to never pass")
+	}
+
+}
