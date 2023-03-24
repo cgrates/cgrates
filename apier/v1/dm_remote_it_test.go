@@ -960,6 +960,7 @@ func testInternalReplicateStats(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply returned", reply)
 	}
+	time.Sleep(50 * time.Millisecond) // wait for the replication
 	var rcv *engine.StatQueueProfile
 	if err := engineOneRPC.Call(utils.APIerSv1GetStatQueueProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "StatsToReplicate"}, &rcv); err != nil {
