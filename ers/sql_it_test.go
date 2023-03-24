@@ -52,7 +52,7 @@ var (
 		testSQLStop,
 	}
 	cdr = &engine.CDR{
-		CGRID: "CGRID",
+		CGRID: utils.UUIDSha1Prefix(),
 		RunID: "RunID",
 	}
 	db           *gorm.DB
@@ -146,7 +146,6 @@ func testSQLInitDBs(t *testing.T) {
 	}
 }
 func testSQLInitDB(t *testing.T) {
-	cdr.CGRID = utils.UUIDSha1Prefix()
 	var err error
 	db, err = gorm.Open("mysql", fmt.Sprintf(dbConnString, "cgrates2"))
 	if err != nil {

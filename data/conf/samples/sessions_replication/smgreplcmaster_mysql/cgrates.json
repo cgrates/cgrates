@@ -1,64 +1,60 @@
 {
-// Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
-// Copyright (C) ITsysCOM GmbH
+
 "general": {
 	"log_level": 7,
-	"node_id":"MasterReplication",
+	"node_id":"MasterReplication"
 },
 
 "listen": {
 	"rpc_json": "127.0.0.1:2012",
 	"rpc_gob": "127.0.0.1:2013",
-	"http": "127.0.0.1:2080",
+	"http": "127.0.0.1:2080"
 },
-
 
 "rpc_conns": {
 	"rplConn": {
 		"strategy": "*broadcast_sync",
-		"conns": [{"address": "127.0.0.1:22012", "transport": "*json"}],
-	},
+		"conns": [{"address": "127.0.0.1:22012", "transport": "*json"}]
+	}
 },
 
-
-"stor_db": {								// database used to store offline tariff plans and CDRs
-	"db_password": "CGRateS.org",			// password to use when connecting to stordb
+"stor_db": {								
+	"db_password": "CGRateS.org"			
 },
 
 "rals": {
-	"enabled": true,
+	"enabled": true
 },
 
 "schedulers": {
-	"enabled": true,
+	"enabled": true
 },
 
 "cdrs": {
-	"enabled": true,
+	"enabled": true
 },
 
 "attributes": {
-	"enabled": true,
+	"enabled": true
 },
-
 
 "chargers": {
 	"enabled": true,
-	"attributes_conns": ["*internal"],
+	"attributes_conns": ["*internal"]
 },
 
 "sessions": {
 	"enabled": true,
-	"debit_interval": "5ms",					// interval to perform debits on.
+	"debit_interval": "5ms",					
 	"replication_conns": ["rplConn"],
 	"rals_conns": ["*internal"],
 	"cdrs_conns": ["*internal"],
-	"chargers_conns": ["*internal"],
+	"chargers_conns": ["*internal"]
 },
 
 "apiers": {
 	"enabled": true,
-	"scheduler_conns": ["*internal"],
-},
+	"scheduler_conns": ["*internal"]
+}
 
 }

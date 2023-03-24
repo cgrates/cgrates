@@ -313,7 +313,7 @@ func testSessionsDataLastUsedMultipleUpdates(t *testing.T) {
 				utils.RequestType: utils.META_PREPAID,
 				utils.SetupTime:   time.Date(2016, time.January, 5, 18, 30, 59, 0, time.UTC),
 				utils.AnswerTime:  time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
-				utils.Usage:       "6144", // 5MB
+				utils.Usage:       "6144", // 6MB
 			},
 		},
 	}
@@ -338,7 +338,7 @@ func testSessionsDataLastUsedMultipleUpdates(t *testing.T) {
 		t.Error(err)
 	} else if len(aSessions) != 1 ||
 		aSessions[0].Usage != time.Duration(6144) {
-		t.Errorf("wrong active sessions: %f", aSessions[0].Usage.Seconds())
+		t.Errorf("wrong active sessions: %d", aSessions[0].Usage)
 	}
 
 	usage = int64(8192)
@@ -360,7 +360,7 @@ func testSessionsDataLastUsedMultipleUpdates(t *testing.T) {
 				utils.SetupTime:   time.Date(2016, time.January, 5, 18, 30, 59, 0, time.UTC),
 				utils.AnswerTime:  time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
 				utils.Usage:       "8192", // 8 MB
-				utils.LastUsed:    "7168",
+				utils.LastUsed:    "7168", // 7 MB
 				"Extra1":          "other",
 			},
 		},
@@ -407,7 +407,7 @@ func testSessionsDataLastUsedMultipleUpdates(t *testing.T) {
 				utils.RequestType: utils.META_PREPAID,
 				utils.SetupTime:   time.Date(2016, time.January, 5, 18, 30, 59, 0, time.UTC),
 				utils.AnswerTime:  time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
-				utils.Usage:       "1024", // 8 MB
+				utils.Usage:       "1024", // 1 MB
 				utils.LastUsed:    "5120", // 5 MB
 				"Extra1":          "other2",
 				"Extra2":          "other",
@@ -432,7 +432,7 @@ func testSessionsDataLastUsedMultipleUpdates(t *testing.T) {
 		t.Error(err)
 	} else if len(aSessions) != 1 ||
 		aSessions[0].Usage != time.Duration(13312) { // 14MB in used, 2MB extra reserved
-		t.Errorf("wrong active sessions: %+v", aSessions[0].Usage)
+		t.Errorf("wrong active sessions: %d", aSessions[0].Usage)
 	} else if aSessions[0].ExtraFields["Extra1"] != "other2" {
 		t.Errorf("Expected: \"other2\", received: %v", aSessions[0].ExtraFields["Extra1"])
 	} else if _, has := aSessions[0].ExtraFields["Extra"]; has {
@@ -457,7 +457,7 @@ func testSessionsDataLastUsedMultipleUpdates(t *testing.T) {
 				utils.RequestType: utils.META_PREPAID,
 				utils.SetupTime:   time.Date(2016, time.January, 5, 18, 30, 59, 0, time.UTC),
 				utils.AnswerTime:  time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
-				utils.Usage:       "1024", // 8 MB
+				utils.Usage:       "1024", // 1 MB
 			},
 		},
 	}
@@ -479,7 +479,7 @@ func testSessionsDataLastUsedMultipleUpdates(t *testing.T) {
 		t.Error(err)
 	} else if len(aSessions) != 1 ||
 		aSessions[0].Usage != time.Duration(14336) { // 14MB in use
-		t.Errorf("wrong active sessions: %v", aSessions[0].Usage)
+		t.Errorf("wrong active sessions: %d", aSessions[0].Usage)
 	}
 
 	termArgs := &V1TerminateSessionArgs{
@@ -704,7 +704,7 @@ func testSessionsDataTTLExpMultiUpdates(t *testing.T) {
 		t.Error(err)
 	} else if len(aSessions) != 1 ||
 		int64(aSessions[0].Usage) != 4096 {
-		t.Errorf("wrong active sessions: %d", int64(aSessions[0].Usage))
+		t.Errorf("wrong active sessions: %d", aSessions[0].Usage)
 	}
 
 	usage = int64(4096)
@@ -842,7 +842,7 @@ func testSessionsDataMultipleDataNoUsage(t *testing.T) {
 		t.Error(err)
 	} else if len(aSessions) != 1 ||
 		int64(aSessions[0].Usage) != 2048 {
-		t.Errorf("wrong active sessions usage: %d", int64(aSessions[0].Usage))
+		t.Errorf("wrong active sessions usage: %d", aSessions[0].Usage)
 	}
 
 	usage = int64(1024)
@@ -889,7 +889,7 @@ func testSessionsDataMultipleDataNoUsage(t *testing.T) {
 		t.Error(err)
 	} else if len(aSessions) != 1 ||
 		int64(aSessions[0].Usage) != 2048 {
-		t.Errorf("wrong active sessions usage: %d", int64(aSessions[0].Usage))
+		t.Errorf("wrong active sessions usage: %d", aSessions[0].Usage)
 	}
 
 	usage = int64(0)
@@ -936,7 +936,7 @@ func testSessionsDataMultipleDataNoUsage(t *testing.T) {
 		t.Error(err)
 	} else if len(aSessions) != 1 ||
 		int64(aSessions[0].Usage) != 1024 {
-		t.Errorf("wrong active sessions usage: %d", int64(aSessions[0].Usage))
+		t.Errorf("wrong active sessions usage: %d", aSessions[0].Usage)
 	}
 
 	termArgs := &V1TerminateSessionArgs{
@@ -1050,7 +1050,7 @@ func testSessionsDataTTLUsageProtection(t *testing.T) {
 		t.Error(err)
 	} else if len(aSessions) != 1 ||
 		int64(aSessions[0].Usage) != 2048 {
-		t.Errorf("wrong active sessions usage: %d", int64(aSessions[0].Usage))
+		t.Errorf("wrong active sessions usage: %d", aSessions[0].Usage)
 	}
 	time.Sleep(60 * time.Millisecond)
 	if err := sDataRPC.Call(utils.SessionSv1GetActiveSessions,
