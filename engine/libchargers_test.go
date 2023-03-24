@@ -198,3 +198,38 @@ func TestChargerProfileMerge(t *testing.T) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(dp))
 	}
 }
+
+func TestChargerProfileSetBlockers(t *testing.T) {
+	cp := &ChargerProfile{}
+
+	exp := &ChargerProfile{
+		Blockers: utils.DynamicBlockers{
+			{Blocker: true},
+		},
+	}
+
+	err := cp.Set([]string{utils.Blockers}, ";true", false, "")
+	if err != nil {
+		t.Errorf("unexpected error: %v", err)
+	} else if !reflect.DeepEqual(exp, cp) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(cp))
+	}
+
+}
+
+func TestChargerProfileFieldAsInterfaceBlockers(t *testing.T) {
+
+	cp := &ChargerProfile{
+		Blockers: utils.DynamicBlockers{
+			{Blocker: true},
+		},
+	}
+
+	rcv, err := cp.FieldAsInterface([]string{utils.Blockers})
+	if err != nil {
+		t.Errorf("unexpected error: %v", err)
+	} else if !reflect.DeepEqual(rcv, cp.Blockers) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(cp), utils.ToJSON(rcv))
+	}
+
+}

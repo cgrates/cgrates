@@ -1905,3 +1905,22 @@ func TestGetBoolOptsFieldAsInterfaceErr(t *testing.T) {
 	}
 
 }
+
+func TestGetBoolOptsCantCastErr(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	dataDB := NewInternalDB(nil, nil, nil)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	fS := NewFilterS(cfg, nil, dm)
+	dynOpts := []*utils.DynamicBoolOpt{
+		{
+			FilterIDs: []string{"*string:~*req.Account:1001"},
+			Tenant:    "cgrates.org",
+			Value:     false,
+		},
+	}
+	if _, err := GetBoolOpts(context.Background(), "cgrates.org", utils.StringSet{utils.MetaOpts: {}}, fS, dynOpts,
+		config.ThresholdsProfileIgnoreFiltersDftOpt, "nonExistingAPIOpt", utils.MetaProfileIgnoreFilters); err != utils.ErrCastFailed {
+		t.Errorf("Expecting error <%+v>,\n Recevied  error <%+v>", utils.ErrCastFailed, err)
+	}
+
+}
