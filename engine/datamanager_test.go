@@ -9962,3 +9962,52 @@ func TestDMGetDispatcherProfileCacheGetErr(t *testing.T) {
 		t.Errorf("Expected error <%v>, received error <%v>", utils.ErrDSPProfileNotFound, err)
 	}
 }
+
+func TestDMGetDispatcherProfileCacheGet(t *testing.T) {
+
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	dpp := &DispatcherProfile{
+		Tenant:         "cgrates.org",
+		ID:             "DP_1",
+		FilterIDs:      []string{"*string:~*req.Account:1001"},
+		Weight:         65,
+		Strategy:       utils.MetaLoad,
+		StrategyParams: map[string]interface{}{"k": "v"},
+		Hosts: DispatcherHostProfiles{
+			{
+				ID:        "C3",
+				FilterIDs: []string{"fltr2"},
+				Weight:    20,
+				Params:    map[string]interface{}{},
+				Blocker:   true,
+			},
+		},
+	}
+
+	if err := Cache.Set(context.Background(), utils.CacheDispatcherProfiles, utils.ConcatenatedKey(utils.CGRateSorg, "dp1"), dpp, []string{}, true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+
+	if rcv, err := dm.GetDispatcherProfile(context.Background(), utils.CGRateSorg, "dp1", true, false, utils.NonTransactional); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcv, dpp) {
+		t.Errorf("Expected <%v>, received <%v>", dpp, rcv)
+	}
+}
+
+func TestDMGetDispatcherProfileNilDMErr(t *testing.T) {
+
+	var dm *DataManager
+
+	_, err := dm.GetDispatcherProfile(context.Background(), utils.CGRateSorg, "dp1", false, false, utils.NonTransactional)
+	if err != utils.ErrNoDatabaseConn {
+		t.Errorf("\nExpected error <%+v>, \nReceived error <%+v>", utils.ErrNoDatabaseConn, err)
+	}
+
+}
