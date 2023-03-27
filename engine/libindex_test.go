@@ -2833,3 +2833,266 @@ func TestAddItemToFilterIndexNewFilterIndexErr(t *testing.T) {
 	}
 
 }
+
+func TestNewFilterIndexGetIdxErr(t *testing.T) {
+
+	defer func() {
+		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	data := &DataDBMock{
+		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
+			return map[string]utils.StringSet{}, utils.ErrNotImplemented
+		},
+	}
+
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	cFltr := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "ID1",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaString,
+				Element: "~*req.Account",
+				Values:  []string{},
+			},
+		},
+	}
+
+	if err := Cache.Set(context.Background(), utils.CacheFilters, "cgrates.org:FLT1", cFltr, []string{}, true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+
+	if _, err := newFilterIndex(context.Background(), dm, utils.ChargerFilterIndexes, "cgrates.org", "", "CHRGR", utils.NonTransactional, []string{"FLT1"}, nil); err != utils.ErrNotImplemented {
+		t.Errorf("Expected error <%v>, received <%v>", utils.ErrNotImplemented, err)
+	}
+
+}
+
+func TestAddItemToFilterIndexCacheRemoveErr(t *testing.T) {
+
+	defer func() {
+		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	cfg.CacheCfg().ReplicationConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
+	cfg.CacheCfg().Partitions[utils.CacheRateFilterIndexes].Replicate = true
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+
+	cc := make(chan birpc.ClientConnector, 1)
+	cc <- &ccMock{
+
+		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+			utils.CacheSv1ReplicateRemove: func(ctx *context.Context, args, reply interface{}) error {
+
+				return utils.ErrNotImplemented
+			},
+		},
+	}
+
+	cM := NewConnManager(cfg)
+	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.CacheSv1, cc)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+	cFltr := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "fltrID1",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaString,
+				Element: "~*req.Account",
+				Values:  []string{"1001"},
+			},
+		},
+	}
+	if err := dm.SetFilter(context.Background(), cFltr, true); err != nil {
+		t.Error(err)
+	}
+
+	Cache = NewCacheS(cfg, dm, cM, nil)
+
+	if err := addItemToFilterIndex(context.Background(), dm, utils.CacheRateFilterIndexes, "cgrates.org", "", "RPP_1", []string{"fltrID1"}); err != utils.ErrNotImplemented {
+		t.Errorf("\nExpected error <%+v>, \nReceived error <%+v>", utils.ErrNotImplemented, err)
+	}
+
+}
+
+func TestRemoveItemFromFilterIndexCacheRemoveErr(t *testing.T) {
+
+	defer func() {
+		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	cfg.CacheCfg().ReplicationConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
+	cfg.CacheCfg().Partitions[utils.CacheRateFilterIndexes].Replicate = true
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+
+	cc := make(chan birpc.ClientConnector, 1)
+	cc <- &ccMock{
+
+		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+			utils.CacheSv1ReplicateRemove: func(ctx *context.Context, args, reply interface{}) error {
+
+				return utils.ErrNotImplemented
+			},
+		},
+	}
+
+	cM := NewConnManager(cfg)
+	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.CacheSv1, cc)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+	cFltr := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "fltrID1",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaString,
+				Element: "~*req.Account",
+				Values:  []string{"1001"},
+			},
+		},
+	}
+	if err := dm.SetFilter(context.Background(), cFltr, true); err != nil {
+		t.Error(err)
+	}
+
+	Cache = NewCacheS(cfg, dm, cM, nil)
+
+	if err := removeItemFromFilterIndex(context.Background(), dm, utils.CacheRateFilterIndexes, "cgrates.org", "", "RPP_1", []string{"fltrID1"}); err != utils.ErrNotImplemented {
+		t.Errorf("\nExpected error <%+v>, \nReceived error <%+v>", utils.ErrNotImplemented, err)
+	}
+
+}
+
+func TestUpdatedIndexesAddIndexFiltersItemErr(t *testing.T) {
+	var dm *DataManager
+
+	if err := updatedIndexes(context.Background(), dm, utils.CacheRateFilterIndexes, "cgrates.org", "", "RFID1", nil, []string{"fltr1"}, false); err != utils.ErrNoDatabaseConn {
+		t.Errorf("\nExpected error <%+v>, \nReceived error <%+v>", utils.ErrNoDatabaseConn, err)
+	}
+
+}
+
+func TestUpdatedIndexesRemoveIndexFiltersItemErr(t *testing.T) {
+	var dm *DataManager
+
+	if err := updatedIndexes(context.Background(), dm, utils.CacheRateFilterIndexes, "cgrates.org", "", "RFID1", &[]string{"fltr1"}, []string{}, false); err != utils.ErrNoDatabaseConn {
+		t.Errorf("\nExpected error <%+v>, \nReceived error <%+v>", utils.ErrNoDatabaseConn, err)
+	}
+
+}
+
+func TestComputeIndexesGetKeysForPrefixErr(t *testing.T) {
+	defer func() {
+		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	expErr := "unsupported prefix in GetKeysForPrefix: "
+	if _, err := ComputeIndexes(context.Background(), dm, "cgrates.org", "", utils.CacheRateFilterIndexes, nil, "", nil, nil); err == nil || err.Error() != expErr {
+		t.Errorf("\nExpected error <%+v>, \nReceived error <%+v>", expErr, err)
+	}
+
+}
+
+func TestComputeIndexesNilFilterIDs(t *testing.T) {
+	defer func() {
+		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	thd := &ThresholdProfile{
+		Tenant:           "cgrates.org",
+		ID:               "THD_2",
+		FilterIDs:        []string{"*string:~*req.Account:1001"},
+		ActionProfileIDs: []string{"actPrfID"},
+		MaxHits:          7,
+		MinHits:          0,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
+		Async: true,
+	}
+	dm.SetThresholdProfile(context.Background(), thd, false)
+	transactionID := utils.GenUUID()
+
+	indexes, err := ComputeIndexes(context.Background(), dm, "cgrates.org", "THD_2", utils.CacheThresholdFilterIndexes,
+		nil, transactionID, func(tnt, id, grp string) (*[]string, error) {
+			th, e := dm.GetThresholdProfile(context.Background(), tnt, id, true, false, utils.NonTransactional)
+			if e != nil {
+				return nil, e
+			}
+			return utils.SliceStringPointer(utils.CloneStringSlice(th.FilterIDs)), nil
+		}, nil)
+	if err != nil {
+		t.Error(err)
+	}
+	exp := make(utils.StringSet)
+	exp.Add(utils.ConcatenatedKey("cgrates.org", "THD_2", "*string:*req.Account:1001"))
+	if !reflect.DeepEqual(exp, indexes) {
+		t.Errorf("Expected %v\n but received %v", exp, indexes)
+	}
+
+	indexesNil, err := ComputeIndexes(context.Background(), dm, "cgrates.org", "THD_2", utils.CacheThresholdFilterIndexes,
+		nil, transactionID, func(tnt, id, grp string) (*[]string, error) {
+			return nil, nil
+		}, nil)
+	if err != nil {
+		t.Error(err)
+	}
+	expNil := make(utils.StringSet)
+	if !reflect.DeepEqual(expNil, indexesNil) {
+		t.Errorf("Expected %v\n but received %v", expNil, indexesNil)
+	}
+
+}
+
+func TestComputeIndexesNewFilterIndexErr(t *testing.T) {
+
+	thd := &ThresholdProfile{
+		Tenant:           "cgrates.org",
+		ID:               "THD_2",
+		FilterIDs:        []string{"*string:~*req.Account:1001"},
+		ActionProfileIDs: []string{"actPrfID"},
+		MaxHits:          7,
+		MinHits:          0,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
+		Async: true,
+	}
+
+	cfg := config.NewDefaultCGRConfig()
+	data := &DataDBMock{
+		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
+			return map[string]utils.StringSet{}, utils.ErrNotImplemented
+		},
+		SetThresholdProfileDrvF: func(ctx *context.Context, tp *ThresholdProfile) (err error) { return nil },
+		GetThresholdProfileDrvF: func(ctx *context.Context, tenant, id string) (tp *ThresholdProfile, err error) { return thd, nil },
+	}
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+
+	_, err := ComputeIndexes(context.Background(), dm, "cgrates.org", utils.EmptyString, utils.CacheThresholdFilterIndexes,
+		&[]string{"THD_2"}, utils.NonTransactional, func(tnt, id, grp string) (*[]string, error) {
+			return utils.SliceStringPointer(utils.CloneStringSlice(thd.FilterIDs)), nil
+		}, nil)
+	if err != utils.ErrNotImplemented {
+		t.Errorf("\nExpected error <%+v>, \nReceived error <%+v>", utils.ErrNotImplemented, err)
+	}
+
+}
