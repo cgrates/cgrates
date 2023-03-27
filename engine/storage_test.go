@@ -25,6 +25,7 @@ import (
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
 )
 
 func TestMsgpackStructsAdded(t *testing.T) {
@@ -654,33 +655,42 @@ func TestTpRLoadRatingProfilesFiltered(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	tpRpl := []*utils.TPRatingPlan{
-		{
+	rpl := &RatingPlan{
 
-			TPid: "TP1",
-			ID:   "TEST_RPLAN1",
-			RatingPlanBindings: []*utils.TPRatingPlanBinding{
+		Id: "TEST_RPLAN1",
+		Timings: map[string]*RITiming{
+			"TimingsId1": {
+				Years:     utils.Years{},
+				Months:    utils.Months{},
+				MonthDays: utils.MonthDays{1, 2, 3, 4, 5},
+			},
+		},
+		Ratings: map[string]*RIRate{
+			"RateId": {
+				ConnectFee: 0.0,
+				Rates: RateGroups{
+					&Rate{
+						GroupIntervalStart: 0,
+						Value:              0.3,
+						RateIncrement:      15 * time.Second,
+						RateUnit:           60 * time.Second,
+					},
+				},
+				RoundingMethod:   utils.ROUNDING_MIDDLE,
+				RoundingDecimals: 4,
+			},
+		},
+		DestinationRates: map[string]RPRateList{
+			"*any": []*RPRate{
 				{
-					DestinationRatesId: "RateId",
-					TimingId:           "TimingID",
-					Weight:             12,
+					Timing: "TimingsId1",
+					Rating: "RateId",
+					Weight: 10,
 				},
 			},
-		},
-		{
-			TPid: "TP1",
-			ID:   "TEST_RPLAN2",
-			RatingPlanBindings: []*utils.TPRatingPlanBinding{
-				{
-					DestinationRatesId: "TEST_DSTRATE1",
-					TimingId:           "TEST_TIMING1",
-					Weight:             10.0},
-			},
-		},
-	}
-	if err := db.SetTPRatingPlans(tpRpl); err != nil {
-		t.Error(err)
-	}
+		}}
+
+	db.SetRatingPlanDrv(rpl)
 	qriedRpf := &utils.TPRatingProfile{
 		TPid:     "TP1",
 		LoadId:   "TEST_LOADID",
@@ -692,20 +702,260 @@ func TestTpRLoadRatingProfilesFiltered(t *testing.T) {
 				ActivationTime:   "2014-01-14T00:00:00Z",
 				RatingPlanId:     "TEST_RPLAN1",
 				FallbackSubjects: "subj1;subj2"},
-			{
-				ActivationTime:   "2014-01-15T00:00:00Z",
-				RatingPlanId:     "TEST_RPLAN2",
-				FallbackSubjects: "subj1;subj2"},
 		},
 	}
 	tpRpf := []*utils.TPRatingProfile{
 		qriedRpf,
 	}
-	if err := db.SetTPRatingProfiles(tpRpf); err != nil {
+	db.SetTPRatingProfiles(tpRpf)
+	exp := []string{utils.ConcatenatedKey(utils.META_OUT, "cgrates.org", "call", "1001")}
+	if rpl, err := tpr.LoadRatingProfilesFiltered(qriedRpf); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(exp, rpl) {
+		t.Errorf("Expected %v,Received %v", utils.ToJSON(exp), utils.ToJSON(rpl))
+	}
+
+}
+
+func TestTprLoadRatingPlansFiltered(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	tpr, err := NewTpReader(db, db, "TP1", "UTC", nil, nil)
+	if err != nil {
 		t.Error(err)
 	}
-	if _, err := tpr.LoadRatingProfilesFiltered(qriedRpf); err == nil {
+	dests := []*utils.TPDestination{
+		{
+			TPid: "TP1",
+			ID:   "DEST1",
+			Prefixes: []string{
+				"+20", "+232",
+			},
+		},
+	}
+	db.SetTPDestinations(dests)
+	rates := []*utils.TPRate{
+		{
+			TPid: "TP1",
+			ID:   "RATE1",
+			RateSlots: []*utils.RateSlot{
+				{
+					ConnectFee:         0.100,
+					Rate:               0.200,
+					RateUnit:           "60",
+					RateIncrement:      "60",
+					GroupIntervalStart: "0"},
+				{
+					ConnectFee:         0.0,
+					Rate:               0.1,
+					RateUnit:           "1",
+					RateIncrement:      "60",
+					GroupIntervalStart: "60"},
+			},
+		},
+		{
+			TPid: "TP1",
+			ID:   "RT1",
+			RateSlots: []*utils.RateSlot{
+				{
+					ConnectFee:         0.0,
+					Rate:               0.1,
+					RateUnit:           "1",
+					RateIncrement:      "60",
+					GroupIntervalStart: "60"},
+			},
+		},
+	}
+	db.SetTPRates(rates)
+	dRates := []*utils.TPDestinationRate{
+		{
+			TPid: "TP1",
+			ID:   "TEST_DSTRATE1",
+			DestinationRates: []*utils.DestinationRate{
+				{
+					DestinationId:    "DEST1",
+					RateId:           "RATE1",
+					RoundingMethod:   "*up",
+					RoundingDecimals: 4},
+			},
+		},
+		{
+			TPid: "TP1",
+			ID:   "RateId",
+			DestinationRates: []*utils.DestinationRate{
+				{DestinationId: utils.ANY, RateId: "RT1", RoundingMethod: utils.ROUNDING_UP, RoundingDecimals: 1},
+			},
+		},
+	}
+	db.SetTPDestinationRates(dRates)
+	tms := []*utils.ApierTPTiming{
+		{
+			TPid:      "TP1",
+			ID:        "TEST_TIMING1",
+			Years:     "*any",
+			Months:    "*any",
+			MonthDays: "*any",
+			WeekDays:  "1;2;3;4;5",
+			Time:      "19:00:00",
+		},
+	}
+	db.SetTPTimings(tms)
+	rPs := []*utils.TPRatingPlan{
+		{
+			TPid: "TP1",
+			ID:   "RP_1",
+			RatingPlanBindings: []*utils.TPRatingPlanBinding{
+				{
+					DestinationRatesId: "TEST_DSTRATE1",
+					TimingId:           "TEST_TIMING1",
+					Weight:             10.0},
+			},
+		}, {
+
+			TPid: "TPP1",
+			ID:   "RP_2",
+			RatingPlanBindings: []*utils.TPRatingPlanBinding{
+				{
+					DestinationRatesId: "RateId",
+					TimingId:           "TEST_TIMING1",
+					Weight:             12,
+				},
+			},
+		},
+	}
+	db.SetTPRatingPlans(rPs)
+	if pass, err := tpr.LoadRatingPlansFiltered("RP"); err != nil || !pass {
 		t.Error(err)
 	}
-	//unfinished
+}
+
+func TestTPRLoadAccountActionsFiltered(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	tmpConn := connMgr
+	defer func() {
+		SetConnManager(tmpConn)
+	}()
+	aTriggers := []*utils.TPActionTriggers{
+		{
+			TPid: "TP1",
+			ID:   "STANDARD_TRIGGERS",
+			ActionTriggers: []*utils.TPActionTrigger{
+				{
+					Id:                    "STANDARD_TRIGGERS",
+					UniqueID:              "1",
+					ThresholdType:         "*min_balance",
+					ThresholdValue:        2.0,
+					Recurrent:             false,
+					MinSleep:              "0",
+					BalanceId:             "b1",
+					BalanceType:           "*monetary",
+					BalanceDestinationIds: "",
+					BalanceWeight:         "0.0",
+					BalanceExpirationDate: utils.UNLIMITED,
+					BalanceTimingTags:     "T1",
+					BalanceRatingSubject:  "special1",
+					BalanceCategories:     "call",
+					BalanceSharedGroups:   "",
+					BalanceBlocker:        "false",
+					BalanceDisabled:       "false",
+					ActionsId:             "TOPUP_RST_10",
+					Weight:                10},
+			},
+		},
+	}
+	db.SetTPActionTriggers(aTriggers)
+	timings := []*utils.ApierTPTiming{
+		{
+			TPid:      "TP1",
+			ID:        "ASAP",
+			Years:     "*any",
+			Months:    "*any",
+			MonthDays: "*any",
+			WeekDays:  "1;2;3;4;5",
+		},
+	}
+	db.SetTPTimings(timings)
+	acts := []*utils.TPActions{{
+		TPid: "TP1",
+		ID:   "TOPUP_RST_10",
+		Actions: []*utils.TPAction{
+			{
+				Identifier:      "*topup_reset",
+				BalanceType:     "*monetary",
+				Units:           "5.0",
+				ExpiryTime:      "*never",
+				DestinationIds:  "*any",
+				RatingSubject:   "special1",
+				Categories:      "call",
+				SharedGroups:    "GROUP1",
+				BalanceWeight:   "10.0",
+				ExtraParameters: "",
+				Weight:          10.0},
+		}},
+	}
+	db.SetTPActions(acts)
+	aPlans := []*utils.TPActionPlan{
+		{
+			TPid: "TP1",
+			ID:   "PACKAGE_10",
+			ActionPlan: []*utils.TPActionTiming{
+				{
+					ActionsId: "TOPUP_RST_10",
+					TimingId:  "ASAP",
+					Weight:    10.0},
+			},
+		},
+	}
+	db.SetTPActionPlans(aPlans)
+	qriedAA := &utils.TPAccountActions{
+		TPid:             "TP1",
+		LoadId:           "TEST_LOADID",
+		Tenant:           "cgrates.org",
+		Account:          "1001",
+		ActionPlanId:     "PACKAGE_10",
+		ActionTriggersId: "STANDARD_TRIGGERS",
+		AllowNegative:    true,
+		Disabled:         true,
+	}
+	db.SetTPAccountActions([]*utils.TPAccountActions{qriedAA})
+	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn <- clMock(func(serviceMethod string, _, reply interface{}) error {
+		if serviceMethod == utils.CacheSv1ReloadCache {
+			*reply.(*string) = utils.OK
+			return nil
+		}
+		return utils.ErrNotImplemented
+	},
+	)
+	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches): clientConn,
+	})
+	tpr, err := NewTpReader(db, db, "TP1", "UTC", []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}, nil)
+	if err != nil {
+		t.Error(err)
+	}
+	SetConnManager(connMgr)
+	if err := tpr.LoadAccountActionsFiltered(qriedAA); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestTprLoadDestinationsFiltered(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	tpr, err := NewTpReader(db, db, "TP1", "UTC", []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}, nil)
+	if err != nil {
+		t.Error(err)
+	}
+	dests := []*utils.TPDestination{
+		{TPid: "TP1", ID: "DST_1002", Prefixes: []string{"1002"}},
+		{TPid: "TP1", ID: "DST_1003", Prefixes: []string{"1003"}},
+		{TPid: "TP1", ID: "DST_1007", Prefixes: []string{"1007"}},
+	}
+	db.SetTPDestinations(dests)
+	if pass, err := tpr.LoadDestinationsFiltered("DST"); err != nil || !pass {
+		t.Error(err)
+	}
+
 }

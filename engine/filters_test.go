@@ -25,6 +25,7 @@ import (
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
 )
 
 func TestFilterPassString(t *testing.T) {
@@ -2062,6 +2063,11 @@ func TestUpdateFilterIndexes(t *testing.T) {
 
 func TestFilterSPass11(t *testing.T) {
 	cfg, _ := config.NewDefaultCGRConfig()
+	defer func() {
+		Cache.Clear(nil)
+	}()
+	cfg.FilterSCfg().ResourceSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}
+	cfg.FilterSCfg().StatSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStatS)}
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 	acc := &Account{
@@ -2088,33 +2094,91 @@ func TestFilterSPass11(t *testing.T) {
 		},
 		TTLIdx: []string{"RU1"},
 	}
+	sq := &StatQueue{
+		Tenant: "cgrates.org",
+		ID:     "SQ_1",
+		dirty:  utils.BoolPointer(true),
+		SQMetrics: map[string]StatMetric{
+			utils.MetaASR: &StatASR{
+				Answered: 1,
+				Count:    1,
+				Events: map[string]*StatWithCompress{
+					"cgrates.org:TestStatRemExpired_1": {Stat: 1, CompressFactor: 1},
+				},
+			},
+		}}
 	dm.SetResource(rsr)
 	dm.SetAccount(acc)
-	fltrAcc := &Filter{
-		Tenant: "cgrates.org",
-		ID:     "FLTR_ACC",
-		Rules: []*FilterRule{{
-			Type:    utils.MetaString,
-			Element: "~*accounts.1001.BalanceMap.*voice[0].Value",
-			Values:  []string{utils.IfaceAsString(20 * float64(time.Second))},
-		}},
-	}
-	fltrRes := &Filter{
-		Tenant: "cgrates.org",
-		ID:     "FLTR_RES",
-		Rules: []*FilterRule{
-			{
-				Type:    "*lte",
-				Element: "~*resources.RL1.Usage.RUI.Units",
-				Values:  []string{"2"},
+	dm.SetStatQueue(sq)
+	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn <- clMock(func(serviceMethod string, args, reply interface{}) error {
+		if serviceMethod == utils.ResourceSv1GetResource {
+			tntId, concat := args.(*utils.TenantID)
+			if !concat {
+				return utils.ErrNotConvertible
+			}
+			rpl, err := dm.GetResource(tntId.Tenant, tntId.ID, false, false, utils.NonTransactional)
+			if err != nil {
+				return err
+			}
+			*reply.(**Resource) = rpl
+			return nil
+		} else if serviceMethod == utils.StatSv1GetQueueFloatMetrics {
+			rpl := map[string]float64{
+				utils.MetaACC: 100.0,
+			}
+			*reply.(*map[string]float64) = rpl
+			return nil
+		}
+		return utils.ErrNotImplemented
+	})
+
+	fltrs := []*Filter{
+
+		{
+			Tenant: "cgrates.org",
+			ID:     "FLTR_ACC",
+			Rules: []*FilterRule{{
+				Type:    utils.MetaString,
+				Element: "~*accounts.1001.BalanceMap.*voice[0].Value",
+				Values:  []string{utils.IfaceAsString(20 * float64(time.Second))},
+			}},
+		},
+		{
+			Tenant: "cgrates.org",
+			ID:     "FLTR_RES",
+			Rules: []*FilterRule{
+				{
+					Type:    "*lte",
+					Element: "~*resources.RL1.Usage.RUI.Units",
+					Values:  []string{"2"},
+				},
+			},
+		},
+		{
+			Tenant: "cgrates.org",
+			ID:     "FLTR_STAT",
+			Rules: []*FilterRule{
+				{
+					Type:    "*gt",
+					Element: "~*stats.SQ_1.*asr",
+					Values:  []string{"10.0"},
+				},
 			},
 		},
 	}
-	dm.SetFilter(fltrRes)
+	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources): clientConn,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStatS):     clientConn,
+	})
 	ev := &utils.MapStorage{}
-	dm.SetFilter(fltrAcc)
-	fS := NewFilterS(cfg, nil, dm)
-	if _, err := fS.Pass("cgrates.org", []string{"FLTR_ACC", "FLTR_RES"}, ev); err == nil { //unfinished
+	fS := NewFilterS(cfg, connMgr, dm)
+	fltriDs := make([]string, len(fltrs))
+	for i, fltr := range fltrs {
+		dm.SetFilter(fltr)
+		fltriDs[i] = fltr.ID
+	}
+	if _, err := fS.Pass("cgrates.org", fltriDs, ev); err != nil {
 		t.Error(err)
 	}
 }
