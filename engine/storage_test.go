@@ -957,5 +957,156 @@ func TestTprLoadDestinationsFiltered(t *testing.T) {
 	if pass, err := tpr.LoadDestinationsFiltered("DST"); err != nil || !pass {
 		t.Error(err)
 	}
+}
 
+func TestTprRealoadSched(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	db2 := NewInternalDB(nil, nil, false, cfg.StorDbCfg().Items)
+	tmpConn := connMgr
+	defer func() {
+		SetConnManager(tmpConn)
+	}()
+	tpr, err := NewTpReader(db, db2, "TPID1", "UTC", nil, []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaScheduler)})
+	if err != nil {
+		t.Error(err)
+	}
+	timings := []*utils.ApierTPTiming{
+		{
+			TPid:      "TPID1",
+			ID:        "TEST_TIMING",
+			Years:     "*any",
+			Months:    "*any",
+			MonthDays: "*any",
+			WeekDays:  "1;2;4",
+			Time:      "00:00:01",
+		},
+	}
+	db2.SetTPTimings(timings)
+	if err := tpr.LoadTimings(); err != nil {
+		t.Error(err)
+	}
+	acP := &Action{
+		Id:         "TOPUP_RST_10",
+		ActionType: utils.TOPUP_RESET,
+	}
+	db.SetActionsDrv("TOPUP_RST_10", Actions{acP})
+	aPlans := []*utils.TPActionPlan{
+		{
+			TPid: "TPID1",
+			ID:   "PACKAGE_10",
+			ActionPlan: []*utils.TPActionTiming{
+				{
+					ActionsId: "TOPUP_RST_10",
+					TimingId:  utils.ASAP,
+					Weight:    10.0},
+			},
+		},
+	}
+	db2.SetTPActionPlans(aPlans)
+	if err := tpr.LoadActionPlans(); err != nil {
+		t.Error(err)
+	}
+	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn <- clMock(func(serviceMethod string, _, _ interface{}) error {
+		if serviceMethod == utils.SchedulerSv1Reload {
+			return nil
+		}
+		return utils.ErrNotImplemented
+	})
+	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaScheduler): clientConn,
+	})
+	SetConnManager(connMgr)
+	if err := tpr.ReloadScheduler(false); err != nil {
+		t.Error(err)
+	}
+}
+func TestTprReloadCache(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	dataDb := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	storDb := NewInternalDB(nil, nil, false, cfg.StorDbCfg().Items)
+	tmpConn := connMgr
+	defer func() {
+		SetConnManager(tmpConn)
+	}()
+	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn <- clMock(func(serviceMethod string, args, _ interface{}) error {
+		if serviceMethod == utils.CacheSv1LoadCache {
+			cacheargs, cancast := args.(*utils.AttrReloadCacheWithArgDispatcher)
+			if !cancast {
+				return utils.ErrNotConvertible
+			}
+			if err := dm.LoadDataDBCache(
+				cacheargs.DestinationIDs, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, cacheargs.FilterIDs, nil, nil, nil, nil, nil); err != nil {
+				return utils.NewErrServerError(err)
+			}
+			return nil
+		} else if serviceMethod == utils.CacheSv1Clear {
+			return nil
+		}
+		return utils.ErrNotImplemented
+	})
+	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches): clientConn,
+	})
+
+	SetConnManager(connMgr)
+	tpr, err := NewTpReader(dataDb, storDb, "TEST_TP", "UTC", []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}, nil)
+	if err != nil {
+		t.Error(err)
+	}
+	dests := []*utils.TPDestination{
+		{
+			TPid: "TEST_TP",
+			ID:   "DEST1",
+			Prefixes: []string{
+				"1001", "1002",
+			},
+		},
+		{
+			TPid: "TEST_TP",
+			ID:   "DEST2",
+			Prefixes: []string{
+				"1003", "1004",
+			},
+		},
+	}
+	storDb.SetTPDestinations(dests)
+	if err := tpr.LoadDestinations(); err != nil {
+		t.Error(err)
+	}
+	filters := []*utils.TPFilterProfile{
+		{
+			TPid:   "TEST_TP",
+			ID:     "FLT_1",
+			Tenant: "cgrates.org",
+			Filters: []*utils.TPFilter{
+				{
+					Type:    utils.MetaPrefix,
+					Element: "Account",
+					Values:  []string{"1001", "1002"},
+				},
+			},
+		},
+		{
+			TPid:   "TEST_TP",
+			ID:     "FLT_2",
+			Tenant: "cgrates.org",
+			Filters: []*utils.TPFilter{
+				{
+					Type:    utils.MetaGreaterOrEqual,
+					Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Weight,
+					Values:  []string{"15.0"},
+				},
+			},
+		},
+	}
+	storDb.SetTPFilters(filters)
+	if err := tpr.LoadFilters(); err != nil {
+		t.Error(err)
+	}
+	if err := tpr.ReloadCache(utils.MetaLoad, false, nil, "cgrates.org"); err == nil {
+		t.Error(err)
+	}
 }
