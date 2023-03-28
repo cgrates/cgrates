@@ -9946,7 +9946,9 @@ func TestDMGetChargerProfileCacheWriteErr2(t *testing.T) {
 
 func TestDMGetDispatcherProfileCacheGetErr(t *testing.T) {
 
-	Cache.Clear(nil)
+	defer func() {
+		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+	}()
 
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
@@ -9965,7 +9967,9 @@ func TestDMGetDispatcherProfileCacheGetErr(t *testing.T) {
 
 func TestDMGetDispatcherProfileCacheGet(t *testing.T) {
 
-	Cache.Clear(nil)
+	defer func() {
+		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+	}()
 
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
@@ -10008,6 +10012,179 @@ func TestDMGetDispatcherProfileNilDMErr(t *testing.T) {
 	_, err := dm.GetDispatcherProfile(context.Background(), utils.CGRateSorg, "dp1", false, false, utils.NonTransactional)
 	if err != utils.ErrNoDatabaseConn {
 		t.Errorf("\nExpected error <%+v>, \nReceived error <%+v>", utils.ErrNoDatabaseConn, err)
+	}
+
+}
+
+func TestDMGetDispatcherProfileSetChargerProfileDrvErr(t *testing.T) {
+
+	cfgtmp := config.CgrConfig()
+	defer func() {
+		config.SetCgrConfig(cfgtmp)
+		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+	}()
+
+	dpp := &DispatcherProfile{
+		Tenant:         "cgrates.org",
+		ID:             "DP_1",
+		FilterIDs:      []string{"*string:~*req.Account:1001"},
+		Weight:         65,
+		Strategy:       utils.MetaLoad,
+		StrategyParams: map[string]interface{}{"k": "v"},
+		Hosts: DispatcherHostProfiles{
+			{
+				ID:        "C3",
+				FilterIDs: []string{"fltr2"},
+				Weight:    20,
+				Params:    map[string]interface{}{},
+				Blocker:   true,
+			},
+		},
+	}
+
+	cfg := config.NewDefaultCGRConfig()
+	cfg.DataDbCfg().Items[utils.MetaDispatcherProfiles].Remote = true
+	cfg.DataDbCfg().RmtConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.RemoteConnsCfg)}
+	config.SetCgrConfig(cfg)
+
+	cc := make(chan birpc.ClientConnector, 1)
+	cc <- &ccMock{
+
+		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+			utils.ReplicatorSv1GetDispatcherProfile: func(ctx *context.Context, args, reply interface{}) error { return nil },
+		},
+	}
+
+	cM := NewConnManager(cfg)
+	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.RemoteConnsCfg), utils.ReplicatorSv1, cc)
+	data := &DataDBMock{
+		GetDispatcherProfileDrvF: func(ctx *context.Context, s1, s2 string) (*DispatcherProfile, error) {
+			return dpp, utils.ErrDSPProfileNotFound
+		},
+		SetDispatcherProfileDrvF: func(ctx *context.Context, dp *DispatcherProfile) error { return utils.ErrNotImplemented },
+	}
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	_, err := dm.GetDispatcherProfile(context.Background(), utils.CGRateSorg, dpp.ID, false, false, utils.NonTransactional)
+	if err != utils.ErrNotImplemented {
+		t.Errorf("Expected error <%v>, received error <%v>", utils.ErrNotImplemented, err)
+	}
+}
+
+func TestDMGetDispatcherProfileCacheWriteErr1(t *testing.T) {
+
+	dpp := &DispatcherProfile{
+		Tenant:         "cgrates.org",
+		ID:             "DP_1",
+		FilterIDs:      []string{"*string:~*req.Account:1001"},
+		Weight:         65,
+		Strategy:       utils.MetaLoad,
+		StrategyParams: map[string]interface{}{"k": "v"},
+		Hosts: DispatcherHostProfiles{
+			{
+				ID:        "C3",
+				FilterIDs: []string{"fltr2"},
+				Weight:    20,
+				Params:    map[string]interface{}{},
+				Blocker:   true,
+			},
+		},
+	}
+
+	cfgtmp := config.CgrConfig()
+	defer func() {
+		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+		config.SetCgrConfig(cfgtmp)
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	cfg.CacheCfg().ReplicationConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
+	cfg.CacheCfg().Partitions[utils.CacheDispatcherProfiles].Replicate = true
+	config.SetCgrConfig(cfg)
+
+	cc := make(chan birpc.ClientConnector, 1)
+	cc <- &ccMock{
+
+		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply interface{}) error {
+
+				return utils.ErrNotImplemented
+			},
+		},
+	}
+
+	cM := NewConnManager(cfg)
+	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.CacheSv1, cc)
+
+	data := &DataDBMock{
+		GetDispatcherProfileDrvF: func(ctx *context.Context, s1, s2 string) (*DispatcherProfile, error) {
+			return dpp, utils.ErrDSPProfileNotFound
+		},
+	}
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	Cache = NewCacheS(cfg, dm, cM, nil)
+
+	_, err := dm.GetDispatcherProfile(context.Background(), utils.CGRateSorg, dpp.ID, false, true, utils.NonTransactional)
+	if err != utils.ErrNotImplemented {
+		t.Errorf("Expected error <%v>, received error <%v>", utils.ErrNotImplemented, err)
+	}
+}
+
+func TestDMGetDispatcherProfileCacheWriteErr2(t *testing.T) {
+
+	cfgtmp := config.CgrConfig()
+	defer func() {
+		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+		config.SetCgrConfig(cfgtmp)
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	cfg.CacheCfg().ReplicationConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
+	cfg.CacheCfg().Partitions[utils.CacheDispatcherProfiles].Replicate = true
+	config.SetCgrConfig(cfg)
+
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+
+	cc := make(chan birpc.ClientConnector, 1)
+	cc <- &ccMock{
+
+		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply interface{}) error { return utils.ErrNotImplemented },
+		},
+	}
+
+	cM := NewConnManager(cfg)
+	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.CacheSv1, cc)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	dpp := &DispatcherProfile{
+		Tenant:         "cgrates.org",
+		ID:             "DP_1",
+		FilterIDs:      []string{"*string:~*req.Account:1001"},
+		Weight:         65,
+		Strategy:       utils.MetaLoad,
+		StrategyParams: map[string]interface{}{"k": "v"},
+		Hosts: DispatcherHostProfiles{
+			{
+				ID:        "C3",
+				FilterIDs: []string{"fltr2"},
+				Weight:    20,
+				Params:    map[string]interface{}{},
+				Blocker:   true,
+			},
+		},
+	}
+
+	if err := dm.dataDB.SetDispatcherProfileDrv(context.Background(), dpp); err != nil {
+		t.Error(err)
+	}
+
+	Cache = NewCacheS(cfg, dm, cM, nil)
+
+	_, err := dm.GetDispatcherProfile(context.Background(), utils.CGRateSorg, dpp.ID, false, true, utils.NonTransactional)
+	if err != utils.ErrNotImplemented {
+		t.Errorf("Expected error <%v>, received error <%v>", utils.ErrNotImplemented, err)
 	}
 
 }
