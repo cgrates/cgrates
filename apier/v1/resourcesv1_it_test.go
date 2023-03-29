@@ -51,6 +51,7 @@ var (
 		testV1RsCacheResourceBeforeLoad,
 		testV1RsFromFolder,
 		testV1RsCacheResourceAfterLoad,
+		testV1RsCacheResourceWithConfig,
 		testV1RsGetResourcesForEvent,
 		testV1RsTTL0,
 		testV1RsAllocateResource,
@@ -187,6 +188,42 @@ func testV1RsCacheResourceAfterLoad(t *testing.T) { // the APIerSv1LoadTariffPla
 		Usages: map[string]*engine.ResourceUsage{},
 	}
 	if err := rlsV1Rpc.Call(utils.ResourceSv1GetResource, &utils.TenantIDWithAPIOpts{
+		TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ResGroup1"},
+	}, &rplyRes); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expRes, rplyRes) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expRes), utils.ToJSON(rplyRes))
+	}
+}
+
+func testV1RsCacheResourceWithConfig(t *testing.T) {
+	var rplyRes *engine.ResourceWithConfig
+
+	expRes := &engine.ResourceWithConfig{
+		Resource: &engine.Resource{
+			Tenant: "cgrates.org",
+			ID:     "ResGroup1",
+			Usages: map[string]*engine.ResourceUsage{},
+			TTLIdx: nil,
+		},
+		Config: &engine.ResourceProfile{
+			Tenant:    "cgrates.org",
+			ID:        "ResGroup1",
+			FilterIDs: []string{"FLTR_1"},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 07, 29, 15, 0, 0, 0, time.UTC),
+				ExpiryTime:     time.Date(0001, 01, 01, 0, 0, 0, 0, time.UTC),
+			},
+			UsageTTL:          1000000000,
+			Limit:             7,
+			AllocationMessage: "",
+			Blocker:           false,
+			Stored:            false,
+			Weight:            20,
+			ThresholdIDs:      []string{"*none"},
+		},
+	}
+	if err := rlsV1Rpc.Call(utils.ResourceSv1GetResourceWithConfig, &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ResGroup1"},
 	}, &rplyRes); err != nil {
 		t.Error(err)
