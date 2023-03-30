@@ -26,12 +26,13 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 var (
@@ -44,11 +45,11 @@ var (
 	resp    *engine.Responder
 )
 
-// this structure will iplement rpcclient.ClientConnector
+// this structure will iplement birpc.ClientConnector
 // and will read forever the Event map
 type raceConn struct{}
 
-func (_ raceConn) Call(serviceMethod string, args interface{}, reply interface{}) (err error) {
+func (_ raceConn) Call(ctx *context.Context, serviceMethod string, args interface{}, reply interface{}) (err error) {
 	cgrev := args.(*engine.ArgsProcessEvent)
 	for {
 		for k := range cgrev.CGREvent.Event {
@@ -79,11 +80,11 @@ func TestSessionSRace(t *testing.T) {
 
 	utils.Logger.SetLogLevel(7)
 	// connManager
-	raceChan := make(chan rpcclient.ClientConnector, 1)
-	chargerSChan := make(chan rpcclient.ClientConnector, 1)
-	respChan := make(chan rpcclient.ClientConnector, 1)
+	raceChan := make(chan birpc.ClientConnector, 1)
+	chargerSChan := make(chan birpc.ClientConnector, 1)
+	respChan := make(chan birpc.ClientConnector, 1)
 	raceChan <- new(raceConn)
-	connMgr = engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr = engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds): raceChan,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers):   chargerSChan,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResponder):  respChan,

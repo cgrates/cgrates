@@ -23,9 +23,10 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 func TestDmSetSupplierProfileRpl(t *testing.T) {
@@ -37,16 +38,16 @@ func TestDmSetSupplierProfileRpl(t *testing.T) {
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	cfg.DataDbCfg().Items[utils.MetaSupplierProfiles].Replicate = true
 	cfg.DataDbCfg().RplConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1)}
-	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ReplicatorSv1SetSupplierProfile: func(args, reply interface{}) error {
+		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+			utils.ReplicatorSv1SetSupplierProfile: func(ctx *context.Context, args, reply interface{}) error {
 				*reply.(*string) = utils.OK
 				return nil
 			},
 		},
 	}
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
 	})
 	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
@@ -146,15 +147,15 @@ func TestDmMatchFilterIndexFromKey(t *testing.T) {
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	cfg.DataDbCfg().Items[utils.MetaFilterIndexes].Remote = true
 	cfg.DataDbCfg().RmtConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1)}
-	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ReplicatorSv1MatchFilterIndex: func(args, reply interface{}) error {
+		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+			utils.ReplicatorSv1MatchFilterIndex: func(ctx *context.Context, args, reply interface{}) error {
 				return nil
 			},
 		},
 	}
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
 	})
 	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
@@ -503,8 +504,8 @@ func TestFilterIndexesRmtRpl(t *testing.T) {
 			"RL2": true,
 		},
 	}
-	clientConn := make(chan rpcclient.ClientConnector, 1)
-	clientConn <- clMock(func(m string, a, r interface{}) error {
+	clientConn := make(chan birpc.ClientConnector, 1)
+	clientConn <- clMock(func(ctx *context.Context, m string, a, r interface{}) error {
 		if m == utils.ReplicatorSv1SetFilterIndexes {
 			setFltrIndxArg, concat := a.(*utils.SetFilterIndexesArg)
 			if !concat {
@@ -522,7 +523,7 @@ func TestFilterIndexesRmtRpl(t *testing.T) {
 		}
 		return utils.ErrNotImplemented
 	})
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
 	})
 	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)

@@ -21,6 +21,7 @@ package v1
 import (
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -34,8 +35,8 @@ type CoreSv1 struct {
 	cS *engine.CoreService
 }
 
-// Call implements rpcclient.ClientConnector interface for internal RPC
-func (cS *CoreSv1) Call(serviceMethod string,
+// Call implements birpc.ClientConnector interface for internal RPC
+func (cS *CoreSv1) Call(ctx *context.Context, serviceMethod string,
 	args interface{}, reply interface{}) error {
 	return utils.APIerRPCCall(cS, serviceMethod, args, reply)
 }

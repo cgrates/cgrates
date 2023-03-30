@@ -21,15 +21,15 @@ package services
 import (
 	"sync"
 
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 // NewResponderService returns the Resonder Service
 func NewResponderService(cfg *config.CGRConfig, server *utils.Server,
-	internalRALsChan chan rpcclient.ClientConnector,
+	internalRALsChan chan birpc.ClientConnector,
 	exitChan chan bool) *ResponderService {
 	return &ResponderService{
 		connChan: internalRALsChan,
@@ -47,7 +47,7 @@ type ResponderService struct {
 	exitChan chan bool
 
 	resp     *engine.Responder
-	connChan chan rpcclient.ClientConnector
+	connChan chan birpc.ClientConnector
 }
 
 // Start should handle the sercive start

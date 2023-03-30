@@ -21,6 +21,7 @@ package v1
 import (
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -121,8 +122,8 @@ type SupplierSv1 struct {
 	splS *engine.SupplierService
 }
 
-// Call implements rpcclient.ClientConnector interface for internal RPC
-func (splv1 *SupplierSv1) Call(serviceMethod string,
+// Call implements birpc.ClientConnector interface for internal RPC
+func (splv1 *SupplierSv1) Call(ctx *context.Context, serviceMethod string,
 	args interface{}, reply interface{}) error {
 	return utils.APIerRPCCall(splv1, serviceMethod, args, reply)
 }

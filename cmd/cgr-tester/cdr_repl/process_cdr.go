@@ -25,6 +25,7 @@ import (
 	"path"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -43,8 +44,8 @@ func main() {
 	if cdrsMasterCfg, err = config.NewCGRConfigFromPath(cdrsMasterCfgPath); err != nil {
 		log.Fatal("Got config error: ", err.Error())
 	}
-	cdrsMasterRpc, err = rpcclient.NewRPCClient(utils.TCP, cdrsMasterCfg.ListenCfg().RPCJSONListen, false, "", "", "", 1, 1,
-		time.Duration(1*time.Second), time.Duration(2*time.Second), rpcclient.JSONrpc, nil, false)
+	cdrsMasterRpc, err = rpcclient.NewRPCClient(context.TODO(), utils.TCP, cdrsMasterCfg.ListenCfg().RPCJSONListen, false, "", "", "", 1, 1,
+		0, utils.FibDuration, time.Second, 2*time.Second, rpcclient.JSONrpc, nil, false, nil)
 	if err != nil {
 		log.Fatal("Could not connect to rater: ", err.Error())
 	}
@@ -59,7 +60,7 @@ func main() {
 	}
 	var reply string
 	for _, cdr := range cdrs {
-		if err := cdrsMasterRpc.Call(utils.CdrsV2ProcessCdr, cdr, &reply); err != nil {
+		if err := cdrsMasterRpc.Call(context.TODO(), utils.CdrsV2ProcessCdr, cdr, &reply); err != nil {
 			log.Fatal("Unexpected error: ", err.Error())
 		} else if reply != utils.OK {
 			log.Fatal("Unexpected reply received: ", reply)

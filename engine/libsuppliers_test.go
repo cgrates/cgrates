@@ -22,9 +22,10 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 func TestLibSuppliersSortCost(t *testing.T) {
@@ -679,10 +680,10 @@ func TestSortSuppliersSortResourceAscendent(t *testing.T) {
 	cfg, _ := config.NewDefaultCGRConfig()
 	cfg.SupplierSCfg().ResourceSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}
 	cfg.SupplierSCfg().RALsConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs)}
-	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ResourceSv1GetResource: func(args, reply interface{}) error {
+		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+			utils.ResourceSv1GetResource: func(ctx *context.Context, args, reply interface{}) error {
 				res := Resource{
 					ID:     "ResourceSupplier2",
 					Tenant: "cgrates.org",
@@ -691,7 +692,7 @@ func TestSortSuppliersSortResourceAscendent(t *testing.T) {
 				*reply.(*Resource) = res
 				return nil
 			},
-			utils.ResponderGetCostOnRatingPlans: func(args, reply interface{}) error {
+			utils.ResponderGetCostOnRatingPlans: func(ctx *context.Context, args, reply interface{}) error {
 				rpl := map[string]interface{}{
 					utils.Cost: 23.1,
 				}
@@ -700,7 +701,7 @@ func TestSortSuppliersSortResourceAscendent(t *testing.T) {
 			},
 		},
 	}
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources): clientConn,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs):      clientConn,
 	})
@@ -786,10 +787,10 @@ func TestPopulateSortingDataStatMetrics(t *testing.T) {
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 	cfg.SupplierSCfg().StatSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStatS)}
-	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.StatSv1GetQueueFloatMetrics: func(args, reply interface{}) error {
+		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+			utils.StatSv1GetQueueFloatMetrics: func(ctx *context.Context, args, reply interface{}) error {
 				rpl := map[string]float64{
 					"metric1": 22.1,
 				}
@@ -798,7 +799,7 @@ func TestPopulateSortingDataStatMetrics(t *testing.T) {
 			},
 		},
 	}
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStatS): clientConn,
 	})
 	spS, err := NewSupplierService(dm, nil, cfg, connMgr)

@@ -25,8 +25,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cgrates/rpcclient"
-
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
@@ -52,12 +51,12 @@ func TestChargerSReload(t *testing.T) {
 	server := utils.NewServer()
 	srvMngr := servmanager.NewServiceManager(cfg, engineShutdown)
 	db := NewDataDBService(cfg, nil)
-	attrS := NewAttributeService(cfg, db, chS, filterSChan, server, make(chan rpcclient.ClientConnector, 1))
-	chrS := NewChargerService(cfg, db, chS, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil)
+	attrS := NewAttributeService(cfg, db, chS, filterSChan, server, make(chan birpc.ClientConnector, 1))
+	chrS := NewChargerService(cfg, db, chS, filterSChan, server, make(chan birpc.ClientConnector, 1), nil)
 	engine.NewConnManager(cfg, nil)
 	srvMngr.AddServices(attrS, chrS,
 		NewLoaderService(cfg, db, filterSChan, server,
-			engineShutdown, make(chan rpcclient.ClientConnector, 1), nil), db)
+			engineShutdown, make(chan birpc.ClientConnector, 1), nil), db)
 	if err = srvMngr.StartServices(); err != nil {
 		t.Error(err)
 	}

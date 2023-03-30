@@ -23,9 +23,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 var (
@@ -818,7 +818,7 @@ func TestResourcesStoreResourceError(t *testing.T) {
 	defer config.SetCgrConfig(dft)
 
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	dm := NewDataManager(db, cfg.CacheCfg(), NewConnManager(cfg, make(map[string]chan rpcclient.ClientConnector)))
+	dm := NewDataManager(db, cfg.CacheCfg(), NewConnManager(cfg, make(map[string]chan birpc.ClientConnector)))
 
 	rS, _ := NewResourceService(dm, cfg, NewFilterS(cfg, nil, dm), nil)
 

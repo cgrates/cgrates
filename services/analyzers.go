@@ -22,17 +22,17 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/analyzers"
 	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 // NewAnalyzerService returns the Analyzer Service
 func NewAnalyzerService(cfg *config.CGRConfig, server *utils.Server, exitChan chan bool,
-	internalAnalyzerSChan chan rpcclient.ClientConnector) servmanager.Service {
+	internalAnalyzerSChan chan birpc.ClientConnector) servmanager.Service {
 	return &AnalyzerService{
 		connChan: internalAnalyzerSChan,
 		cfg:      cfg,
@@ -50,7 +50,7 @@ type AnalyzerService struct {
 
 	anz      *analyzers.AnalyzerService
 	rpc      *v1.AnalyzerSv1
-	connChan chan rpcclient.ClientConnector
+	connChan chan birpc.ClientConnector
 }
 
 // Start should handle the sercive start

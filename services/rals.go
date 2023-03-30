@@ -21,17 +21,17 @@ package services
 import (
 	"sync"
 
+	"github.com/cgrates/birpc"
 	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 // NewRalService returns the Ral Service
 func NewRalService(cfg *config.CGRConfig, cacheS *engine.CacheS, server *utils.Server,
-	internalRALsChan, internalResponderChan chan rpcclient.ClientConnector, exitChan chan bool,
+	internalRALsChan, internalResponderChan chan birpc.ClientConnector, exitChan chan bool,
 	connMgr *engine.ConnManager) *RalService {
 	resp := NewResponderService(cfg, server, internalResponderChan, exitChan)
 
@@ -53,7 +53,7 @@ type RalService struct {
 	server    *utils.Server
 	rals      *v1.RALsV1
 	responder *ResponderService
-	connChan  chan rpcclient.ClientConnector
+	connChan  chan birpc.ClientConnector
 	connMgr   *engine.ConnManager
 }
 

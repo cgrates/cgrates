@@ -23,16 +23,17 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
-type clMock func(_ string, _ interface{}, _ interface{}) error
+type clMock func(_ *context.Context, _ string, _ interface{}, _ interface{}) error
 
-func (c clMock) Call(m string, a interface{}, r interface{}) error {
-	return c(m, a, r)
+func (c clMock) Call(ctx *context.Context, m string, a interface{}, r interface{}) error {
+	return c(ctx, m, a, r)
 }
 
 func TestCDRSV1ProcessCDRNoTenant(t *testing.T) {
@@ -41,7 +42,7 @@ func TestCDRSV1ProcessCDRNoTenant(t *testing.T) {
 		t.Error(err)
 	}
 	cfg.CdrsCfg().AttributeSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}
-	clMock := clMock(func(_ string, args interface{}, reply interface{}) error {
+	clMock := clMock(func(_ *context.Context, _ string, args interface{}, reply interface{}) error {
 		rply, cancast := reply.(*AttrSProcessEventReply)
 		if !cancast {
 			return fmt.Errorf("can't cast")
@@ -71,9 +72,9 @@ func TestCDRSV1ProcessCDRNoTenant(t *testing.T) {
 		}
 		return nil
 	})
-	chanClnt := make(chan rpcclient.ClientConnector, 1)
+	chanClnt := make(chan birpc.ClientConnector, 1)
 	chanClnt <- clMock
-	connMngr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMngr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes): chanClnt,
 	})
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
@@ -115,7 +116,7 @@ func TestCDRSV1ProcessEventNoTenant(t *testing.T) {
 		t.Error(err)
 	}
 	cfg.CdrsCfg().ChargerSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)}
-	clMock := clMock(func(_ string, args interface{}, reply interface{}) error {
+	clMock := clMock(func(_ *context.Context, _ string, args interface{}, reply interface{}) error {
 		rply, cancast := reply.(*[]*ChrgSProcessEventReply)
 		if !cancast {
 			return fmt.Errorf("can't cast")
@@ -130,9 +131,9 @@ func TestCDRSV1ProcessEventNoTenant(t *testing.T) {
 		*rply = []*ChrgSProcessEventReply{}
 		return nil
 	})
-	chanClnt := make(chan rpcclient.ClientConnector, 1)
+	chanClnt := make(chan birpc.ClientConnector, 1)
 	chanClnt <- clMock
-	connMngr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMngr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers): chanClnt,
 	})
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
@@ -172,7 +173,7 @@ func TestCDRSV1V1ProcessExternalCDRNoTenant(t *testing.T) {
 		t.Error(err)
 	}
 	cfg.CdrsCfg().ChargerSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)}
-	clMock := clMock(func(_ string, args interface{}, reply interface{}) error {
+	clMock := clMock(func(_ *context.Context, _ string, args interface{}, reply interface{}) error {
 		rply, cancast := reply.(*[]*ChrgSProcessEventReply)
 		if !cancast {
 			return fmt.Errorf("can't cast")
@@ -187,9 +188,9 @@ func TestCDRSV1V1ProcessExternalCDRNoTenant(t *testing.T) {
 		*rply = []*ChrgSProcessEventReply{}
 		return nil
 	})
-	chanClnt := make(chan rpcclient.ClientConnector, 1)
+	chanClnt := make(chan birpc.ClientConnector, 1)
 	chanClnt <- clMock
-	connMngr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMngr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers): chanClnt,
 	})
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)

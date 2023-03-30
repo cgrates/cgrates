@@ -24,9 +24,10 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 func TestCsvCdrWriter(t *testing.T) {
@@ -547,14 +548,14 @@ func TestCsvCdrWriterWithAttributeContext(t *testing.T) {
 		ExtraFields: map[string]string{"extra1": "val_extra1",
 			"extra2": "val_extra2", "extra3": "val_extra3"},
 	}
-	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn := make(chan birpc.ClientConnector, 1)
 	cdrEv := storedCdr1.AsCGREvent()
 	cdrEv.Event[utils.Account] = "1002"
 	cdrEv.Event[utils.Subject] = "1002"
 	cdrEv.Event[utils.Destination] = "1004"
 	clientConn <- &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.AttributeSv1ProcessEvent: func(args, reply interface{}) error {
+		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+			utils.AttributeSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
 				rpl := AttrSProcessEventReply{
 					CGREvent:      cdrEv,
 					AlteredFields: []string{utils.Account, utils.Subject, utils.Destination},
@@ -564,7 +565,7 @@ func TestCsvCdrWriterWithAttributeContext(t *testing.T) {
 			},
 		},
 	}
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		"con1": clientConn,
 	},
 	)

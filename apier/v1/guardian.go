@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/dispatchers"
 	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
@@ -48,8 +49,8 @@ func (self *GuardianSv1) Ping(ign *utils.CGREventWithArgDispatcher, reply *strin
 	return nil
 }
 
-// Call implements rpcclient.ClientConnector interface for internal RPC
-func (self *GuardianSv1) Call(serviceMethod string,
+// Call implements birpc.ClientConnector interface for internal RPC
+func (self *GuardianSv1) Call(ctx *context.Context, serviceMethod string,
 	args interface{}, reply interface{}) error {
 	return utils.APIerRPCCall(self, serviceMethod, args, reply)
 }

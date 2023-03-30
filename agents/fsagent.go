@@ -24,6 +24,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessions"
@@ -371,8 +372,8 @@ func (sm *FSsessions) Shutdown() (err error) {
 	return
 }
 
-// rpcclient.ClientConnector interface
-func (sm *FSsessions) Call(serviceMethod string, args interface{}, reply interface{}) error {
+// birpc.ClientConnector interface
+func (sm *FSsessions) Call(ctx *context.Context, serviceMethod string, args interface{}, reply interface{}) error {
 	return utils.RPCCall(sm, serviceMethod, args, reply)
 }
 

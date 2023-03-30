@@ -23,7 +23,8 @@ import (
 
 	"github.com/cenkalti/rpc2"
 	rpc2_jsonrpc "github.com/cenkalti/rpc2/jsonrpc"
-	"github.com/cgrates/rpcclient"
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 )
 
 // NewBiJSONrpcClient will create a bidirectional JSON client connection
@@ -42,12 +43,12 @@ func NewBiJSONrpcClient(addr string, handlers map[string]interface{}) (*rpc2.Cli
 
 // Interface which the server needs to work as BiRPCServer
 type BiRPCServer interface {
-	Call(string, interface{}, interface{}) error // So we can use it also as rpcclient.ClientConnector
-	CallBiRPC(rpcclient.ClientConnector, string, interface{}, interface{}) error
+	Call(*context.Context, string, interface{}, interface{}) error // So we can use it also as birpc.ClientConnector
+	CallBiRPC(birpc.ClientConnector, string, interface{}, interface{}) error
 }
 
 type BiRPCClient interface {
-	Call(string, interface{}, interface{}) error // So we can use it also as rpcclient.ClientConnector
+	Call(*context.Context, string, interface{}, interface{}) error // So we can use it also as birpc.ClientConnector
 	ID() string
 }
 
@@ -58,15 +59,15 @@ func NewBiRPCInternalClient(serverConn BiRPCServer) *BiRPCInternalClient {
 // Need separate client from the original RpcClientConnection since diretly passing the server is not enough without passing the client's reference
 type BiRPCInternalClient struct {
 	serverConn BiRPCServer
-	clntConn   rpcclient.ClientConnector // conn to reach client and do calls over it
+	clntConn   birpc.ClientConnector // conn to reach client and do calls over it
 }
 
 // Used in case when clientConn is not available at init time (eg: SMGAsterisk who needs the biRPCConn at initialization)
-func (clnt *BiRPCInternalClient) SetClientConn(clntConn rpcclient.ClientConnector) {
+func (clnt *BiRPCInternalClient) SetClientConn(clntConn birpc.ClientConnector) {
 	clnt.clntConn = clntConn
 }
 
-// Part of rpcclient.ClientConnector interface
-func (clnt *BiRPCInternalClient) Call(serviceMethod string, args interface{}, reply interface{}) error {
+// Part of birpc.ClientConnector interface
+func (clnt *BiRPCInternalClient) Call(ctx *context.Context, serviceMethod string, args interface{}, reply interface{}) error {
 	return clnt.serverConn.CallBiRPC(clnt.clntConn, serviceMethod, args, reply)
 }

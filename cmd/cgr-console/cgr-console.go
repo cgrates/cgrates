@@ -28,6 +28,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/console"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
@@ -106,7 +107,7 @@ func executeCommand(command string) {
 			param = param.(*console.StringMapWrapper).Items
 		}
 
-		if rpcErr := client.Call(cmd.RpcMethod(), param, res); rpcErr != nil {
+		if rpcErr := client.Call(context.TODO(), cmd.RpcMethod(), param, res); rpcErr != nil {
 			fmt.Println("Error executing command: " + rpcErr.Error())
 		} else {
 			fmt.Println(cmd.GetFormatedResult(res))
@@ -129,8 +130,8 @@ func main() {
 		return
 	}
 	var err error
-	client, err = rpcclient.NewRPCClient(utils.TCP, *server, *tls, *keyPath, *certificatePath, *caPath, 3, 3,
-		time.Duration(1*time.Second), time.Duration(*replyTimeOut)*time.Second, *rpcEncoding, nil, false)
+	client, err = rpcclient.NewRPCClient(context.TODO(), utils.TCP, *server, *tls, *keyPath, *certificatePath, *caPath, 3, 3,
+		0, utils.FibDuration, time.Second, time.Duration(*replyTimeOut)*time.Second, *rpcEncoding, nil, false, nil)
 	if err != nil {
 		cgrConsoleFlags.PrintDefaults()
 		log.Fatal("Could not connect to server " + *server)

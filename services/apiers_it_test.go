@@ -25,11 +25,11 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 func TestApiersReload(t *testing.T) {
@@ -54,15 +54,15 @@ func TestApiersReload(t *testing.T) {
 	db := NewDataDBService(cfg, nil)
 	cfg.StorDbCfg().Type = utils.MetaInternal
 	stordb := NewStorDBService(cfg)
-	schS := NewSchedulerService(cfg, db, chS, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil)
-	tS := NewThresholdService(cfg, db, chS, filterSChan, server, make(chan rpcclient.ClientConnector, 1))
+	schS := NewSchedulerService(cfg, db, chS, filterSChan, server, make(chan birpc.ClientConnector, 1), nil)
+	tS := NewThresholdService(cfg, db, chS, filterSChan, server, make(chan birpc.ClientConnector, 1))
 
 	apiSv1 := NewAPIerSv1Service(cfg, db, stordb, filterSChan, server, schS, new(ResponderService),
-		make(chan rpcclient.ClientConnector, 1), nil)
+		make(chan birpc.ClientConnector, 1), nil)
 
-	apiSv2 := NewAPIerSv2Service(apiSv1, cfg, server, make(chan rpcclient.ClientConnector, 1))
+	apiSv2 := NewAPIerSv2Service(apiSv1, cfg, server, make(chan birpc.ClientConnector, 1))
 	srvMngr.AddServices(apiSv1, apiSv2, schS, tS,
-		NewLoaderService(cfg, db, filterSChan, server, engineShutdown, make(chan rpcclient.ClientConnector, 1), nil), db, stordb)
+		NewLoaderService(cfg, db, filterSChan, server, engineShutdown, make(chan birpc.ClientConnector, 1), nil), db, stordb)
 	if err = srvMngr.StartServices(); err != nil {
 		t.Error(err)
 	}

@@ -22,18 +22,18 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/cgrates/birpc"
 	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 // NewAttributeService returns the Attribute Service
 func NewAttributeService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *engine.CacheS, filterSChan chan *engine.FilterS,
-	server *utils.Server, internalChan chan rpcclient.ClientConnector) servmanager.Service {
+	server *utils.Server, internalChan chan birpc.ClientConnector) servmanager.Service {
 	return &AttributeService{
 		connChan:    internalChan,
 		cfg:         cfg,
@@ -55,7 +55,7 @@ type AttributeService struct {
 
 	attrS    *engine.AttributeService
 	rpc      *v1.AttributeSv1
-	connChan chan rpcclient.ClientConnector
+	connChan chan birpc.ClientConnector
 }
 
 // Start should handle the sercive start

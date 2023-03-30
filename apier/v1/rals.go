@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/dispatchers"
 	"github.com/cgrates/cgrates/engine"
@@ -33,8 +34,8 @@ func NewRALsV1() *RALsV1 {
 type RALsV1 struct {
 }
 
-// Call implements rpcclient.ClientConnector interface for internal RPC
-func (rsv1 *RALsV1) Call(serviceMethod string, args interface{}, reply interface{}) error {
+// Call implements birpc.ClientConnector interface for internal RPC
+func (rsv1 *RALsV1) Call(ctx *context.Context, serviceMethod string, args interface{}, reply interface{}) error {
 	return utils.APIerRPCCall(rsv1, serviceMethod, args, reply)
 }
 

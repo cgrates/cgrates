@@ -26,9 +26,9 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 var (
@@ -97,9 +97,9 @@ func testLoaderITInitDataDB(t *testing.T) {
 	if err = dbConn.Flush(utils.EmptyString); err != nil {
 		t.Fatal("Error when flushing datadb")
 	}
-	cacheChan := make(chan rpcclient.ClientConnector, 1)
+	cacheChan := make(chan birpc.ClientConnector, 1)
 	cacheChan <- NewCacheS(lCfg, dataDbCsv)
-	connMgr = NewConnManager(lCfg, map[string]chan rpcclient.ClientConnector{
+	connMgr = NewConnManager(lCfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches): cacheChan,
 	})
 }

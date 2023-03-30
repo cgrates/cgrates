@@ -23,6 +23,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -41,7 +42,7 @@ var authReqs = engine.MapEvent{
 // BiRPClient is the interface implemented by Agents which are able to
 // communicate bidirectionally with SessionS and remote Communication Switch
 type BiRPClient interface {
-	Call(serviceMethod string, args interface{}, reply interface{}) error
+	Call(ctx *context.Context, serviceMethod string, args interface{}, reply interface{}) error
 	V1DisconnectSession(args utils.AttrDisconnectSession, reply *string) (err error)
 	V1GetActiveSessionIDs(ignParam string, sessionIDs *[]*SessionID) (err error)
 }

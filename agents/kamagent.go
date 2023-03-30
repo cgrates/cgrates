@@ -27,6 +27,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/engine"
 
 	"github.com/cgrates/cgrates/config"
@@ -105,8 +106,8 @@ func (self *KamailioAgent) Shutdown() (err error) {
 	return
 }
 
-// rpcclient.ClientConnector interface
-func (ka *KamailioAgent) Call(serviceMethod string, args interface{}, reply interface{}) error {
+// birpc.ClientConnector interface
+func (ka *KamailioAgent) Call(ctx *context.Context, serviceMethod string, args interface{}, reply interface{}) error {
 	return utils.RPCCall(ka, serviceMethod, args, reply)
 }
 
