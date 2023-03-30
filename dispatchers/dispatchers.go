@@ -25,6 +25,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -291,8 +292,8 @@ func (dS *DispatcherService) V1Apier(apier interface{}, args *utils.MethodParame
 
 }
 
-// Call implements rpcclient.ClientConnector interface for internal RPC
-func (dS *DispatcherService) Call(serviceMethod string, // all API fuction must be of type: SubsystemMethod
+// Call implements birpc.ClientConnector interface for internal RPC
+func (dS *DispatcherService) Call(ctx *context.Context, serviceMethod string, // all API fuction must be of type: SubsystemMethod
 	args interface{}, reply interface{}) error {
 	methodSplit := strings.Split(serviceMethod, ".")
 	if len(methodSplit) != 2 {

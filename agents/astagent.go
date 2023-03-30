@@ -28,6 +28,7 @@ import (
 	"time"
 
 	"github.com/cgrates/aringo"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessions"
@@ -336,8 +337,8 @@ func (sma *AsteriskAgent) V1DisconnectSession(args utils.AttrDisconnectSession, 
 	return nil
 }
 
-// Call implements rpcclient.ClientConnector interface
-func (sma *AsteriskAgent) Call(serviceMethod string, args interface{}, reply interface{}) error {
+// Call implements birpc.ClientConnector interface
+func (sma *AsteriskAgent) Call(ctx *context.Context, serviceMethod string, args interface{}, reply interface{}) error {
 	return utils.RPCCall(sma, serviceMethod, args, reply)
 }
 

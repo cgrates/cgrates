@@ -22,19 +22,19 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/cgrates/birpc"
 	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/dispatchers"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 // NewDispatcherService returns the Dispatcher Service
 func NewDispatcherService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *engine.CacheS, filterSChan chan *engine.FilterS,
-	server *utils.Server, internalChan chan rpcclient.ClientConnector, connMgr *engine.ConnManager) servmanager.Service {
+	server *utils.Server, internalChan chan birpc.ClientConnector, connMgr *engine.ConnManager) servmanager.Service {
 	return &DispatcherService{
 		connChan:    internalChan,
 		cfg:         cfg,
@@ -58,7 +58,7 @@ type DispatcherService struct {
 
 	dspS     *dispatchers.DispatcherService
 	rpc      *v1.DispatcherSv1
-	connChan chan rpcclient.ClientConnector
+	connChan chan birpc.ClientConnector
 }
 
 // Start should handle the sercive start

@@ -25,6 +25,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
@@ -355,7 +356,7 @@ func (chSv1 *Responder) Ping(ign *utils.CGREventWithArgDispatcher, reply *string
 	return nil
 }
 
-func (rs *Responder) Call(serviceMethod string, args interface{}, reply interface{}) error {
+func (rs *Responder) Call(ctx *context.Context, serviceMethod string, args interface{}, reply interface{}) error {
 	parts := strings.Split(serviceMethod, ".")
 	if len(parts) != 2 {
 		return utils.ErrNotImplemented

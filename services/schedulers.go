@@ -21,18 +21,18 @@ package services
 import (
 	"sync"
 
+	"github.com/cgrates/birpc"
 	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/scheduler"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 // NewSchedulerService returns the Scheduler Service
 func NewSchedulerService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *engine.CacheS, fltrSChan chan *engine.FilterS,
-	server *utils.Server, internalSchedulerrSChan chan rpcclient.ClientConnector,
+	server *utils.Server, internalSchedulerrSChan chan birpc.ClientConnector,
 	connMgr *engine.ConnManager) *SchedulerService {
 	return &SchedulerService{
 		connChan:  internalSchedulerrSChan,
@@ -56,7 +56,7 @@ type SchedulerService struct {
 
 	schS     *scheduler.Scheduler
 	rpc      *v1.SchedulerSv1
-	connChan chan rpcclient.ClientConnector
+	connChan chan birpc.ClientConnector
 	connMgr  *engine.ConnManager
 }
 

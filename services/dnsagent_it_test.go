@@ -25,11 +25,11 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 func TestDNSAgentReload(t *testing.T) {
@@ -45,18 +45,18 @@ func TestDNSAgentReload(t *testing.T) {
 	engineShutdown := make(chan bool, 1)
 	chS := engine.NewCacheS(cfg, nil)
 
-	cacheSChan := make(chan rpcclient.ClientConnector, 1)
+	cacheSChan := make(chan birpc.ClientConnector, 1)
 	cacheSChan <- chS
 
 	server := utils.NewServer()
 	srvMngr := servmanager.NewServiceManager(cfg, engineShutdown)
 	db := NewDataDBService(cfg, nil)
-	sS := NewSessionService(cfg, db, server, make(chan rpcclient.ClientConnector, 1),
+	sS := NewSessionService(cfg, db, server, make(chan birpc.ClientConnector, 1),
 		engineShutdown, nil)
 	srv := NewDNSAgent(cfg, filterSChan, engineShutdown, nil)
 	engine.NewConnManager(cfg, nil)
 	srvMngr.AddServices(srv, sS,
-		NewLoaderService(cfg, db, filterSChan, server, engineShutdown, make(chan rpcclient.ClientConnector, 1), nil), db)
+		NewLoaderService(cfg, db, filterSChan, server, engineShutdown, make(chan birpc.ClientConnector, 1), nil), db)
 	if err = srvMngr.StartServices(); err != nil {
 		t.Fatal(err)
 	}

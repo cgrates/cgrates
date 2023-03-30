@@ -1007,7 +1007,7 @@ func (cfg *CGRConfig) GetReloadChan(sectID string) chan struct{} {
 	return cfg.rldChans[sectID]
 }
 
-// Call implements rpcclient.ClientConnector interface for internal RPC
+// Call implements birpc.ClientConnector interface for internal RPC
 func (cfg *CGRConfig) Call(serviceMethod string,
 	args interface{}, reply interface{}) error {
 	return utils.APIerRPCCall(cfg, serviceMethod, args, reply)

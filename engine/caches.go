@@ -25,6 +25,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/ltcache"
@@ -120,7 +121,7 @@ func (chS *CacheS) Precache() (err error) {
 // APIs start here
 
 // Call gives the ability of CacheS to be passed as internal RPC
-func (chS *CacheS) Call(serviceMethod string, args interface{}, reply interface{}) error {
+func (chS *CacheS) Call(ctx *context.Context, serviceMethod string, args interface{}, reply interface{}) error {
 	return utils.RPCCall(chS, serviceMethod, args, reply)
 }
 

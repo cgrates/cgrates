@@ -24,6 +24,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
@@ -222,9 +223,9 @@ func (sS *StatService) matchingStatQueuesForEvent(args *StatsArgsProcessEvent) (
 	return
 }
 
-// Call implements rpcclient.ClientConnector interface for internal RPC
+// Call implements birpc.ClientConnector interface for internal RPC
 // here for cases when passing StatsService as rpccclient.RpcClientConnection
-func (ss *StatService) Call(serviceMethod string, args interface{}, reply interface{}) error {
+func (ss *StatService) Call(ctx *context.Context, serviceMethod string, args interface{}, reply interface{}) error {
 	return utils.RPCCall(ss, serviceMethod, args, reply)
 }
 

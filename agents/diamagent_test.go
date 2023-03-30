@@ -22,6 +22,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -35,22 +37,22 @@ func TestDAsSessionSClientIface(t *testing.T) {
 }
 
 type testMockSessionConn struct {
-	calls map[string]func(arg interface{}, rply interface{}) error
+	calls map[string]func(ctx *context.Context, arg interface{}, rply interface{}) error
 }
 
-func (s *testMockSessionConn) Call(method string, arg interface{}, rply interface{}) error {
+func (s *testMockSessionConn) Call(ctx *context.Context, method string, arg interface{}, rply interface{}) error {
 	if call, has := s.calls[method]; !has {
 		return rpcclient.ErrUnsupporteServiceMethod
 	} else {
-		return call(arg, rply)
+		return call(ctx, arg, rply)
 	}
 }
 
-func (s *testMockSessionConn) CallBiRPC(_ rpcclient.ClientConnector, method string, arg interface{}, rply interface{}) error {
+func (s *testMockSessionConn) CallBiRPC(_ birpc.ClientConnector, method string, arg interface{}, rply interface{}) error {
 	if call, has := s.calls[method]; !has {
 		return rpcclient.ErrUnsupporteServiceMethod
 	} else {
-		return call(arg, rply)
+		return call(context.TODO(), arg, rply)
 	}
 }
 
@@ -119,11 +121,11 @@ func TestProcessRequest(t *testing.T) {
 		utils.MetaCmd:     utils.NewNMData("cmdR"),
 	}
 
-	sS := &testMockSessionConn{calls: map[string]func(arg interface{}, rply interface{}) error{
-		utils.SessionSv1RegisterInternalBiJSONConn: func(arg interface{}, rply interface{}) error {
+	sS := &testMockSessionConn{calls: map[string]func(ctx *context.Context, arg interface{}, rply interface{}) error{
+		utils.SessionSv1RegisterInternalBiJSONConn: func(ctx *context.Context, arg interface{}, rply interface{}) error {
 			return nil
 		},
-		utils.SessionSv1AuthorizeEvent: func(arg interface{}, rply interface{}) error {
+		utils.SessionSv1AuthorizeEvent: func(ctx *context.Context, arg interface{}, rply interface{}) error {
 			var tm *time.Time
 			var id string
 			if arg == nil {
@@ -164,7 +166,7 @@ func TestProcessRequest(t *testing.T) {
 			}
 			return nil
 		},
-		utils.SessionSv1InitiateSession: func(arg interface{}, rply interface{}) error {
+		utils.SessionSv1InitiateSession: func(ctx *context.Context, arg interface{}, rply interface{}) error {
 			var tm *time.Time
 			var id string
 			if arg == nil {
@@ -228,7 +230,7 @@ func TestProcessRequest(t *testing.T) {
 			}
 			return nil
 		},
-		utils.SessionSv1UpdateSession: func(arg interface{}, rply interface{}) error {
+		utils.SessionSv1UpdateSession: func(ctx *context.Context, arg interface{}, rply interface{}) error {
 			var tm *time.Time
 			var id string
 			if arg == nil {
@@ -292,7 +294,7 @@ func TestProcessRequest(t *testing.T) {
 			}
 			return nil
 		},
-		utils.SessionSv1ProcessCDR: func(arg interface{}, rply interface{}) error {
+		utils.SessionSv1ProcessCDR: func(ctx *context.Context, arg interface{}, rply interface{}) error {
 			var tm *time.Time
 			var id string
 			if arg == nil {
@@ -330,7 +332,7 @@ func TestProcessRequest(t *testing.T) {
 			*prply = utils.OK
 			return nil
 		},
-		utils.SessionSv1TerminateSession: func(arg interface{}, rply interface{}) error {
+		utils.SessionSv1TerminateSession: func(ctx *context.Context, arg interface{}, rply interface{}) error {
 			var tm *time.Time
 			var id string
 			if arg == nil {
@@ -369,7 +371,7 @@ func TestProcessRequest(t *testing.T) {
 			*prply = utils.OK
 			return nil
 		},
-		utils.SessionSv1ProcessMessage: func(arg interface{}, rply interface{}) error {
+		utils.SessionSv1ProcessMessage: func(ctx *context.Context, arg interface{}, rply interface{}) error {
 			var tm *time.Time
 			var id string
 			if arg == nil {
@@ -439,9 +441,9 @@ func TestProcessRequest(t *testing.T) {
 		reqProcessor.Tenant, config.CgrConfig().GeneralCfg().DefaultTenant,
 		config.CgrConfig().GeneralCfg().DefaultTimezone, filters, nil, nil)
 
-	internalSessionSChan := make(chan rpcclient.ClientConnector, 1)
+	internalSessionSChan := make(chan birpc.ClientConnector, 1)
 	internalSessionSChan <- sS
-	connMgr := engine.NewConnManager(config.CgrConfig(), map[string]chan rpcclient.ClientConnector{
+	connMgr := engine.NewConnManager(config.CgrConfig(), map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS): internalSessionSChan,
 	})
 	da := &DiameterAgent{

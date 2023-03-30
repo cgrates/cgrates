@@ -26,6 +26,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
@@ -593,8 +594,8 @@ func (cdrS *CDRServer) processEvents(evs []*utils.CGREventWithArgDispatcher,
 	return
 }
 
-// Call implements the rpcclient.ClientConnector interface
-func (cdrS *CDRServer) Call(serviceMethod string, args interface{}, reply interface{}) error {
+// Call implements the birpc.ClientConnector interface
+func (cdrS *CDRServer) Call(ctx *context.Context, serviceMethod string, args interface{}, reply interface{}) error {
 	parts := strings.Split(serviceMethod, ".")
 	if len(parts) != 2 {
 		return rpcclient.ErrUnsupporteServiceMethod

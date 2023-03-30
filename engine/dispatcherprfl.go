@@ -22,6 +22,8 @@ import (
 	"math/rand"
 	"sort"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
@@ -130,7 +132,7 @@ type DispatcherHost struct {
 	Tenant  string
 	ID      string
 	Conns   []*config.RemoteHost
-	rpcConn rpcclient.ClientConnector
+	rpcConn birpc.ClientConnector
 }
 
 func (dH *DispatcherHost) TenantID() string {
@@ -151,5 +153,5 @@ func (dH *DispatcherHost) Call(serviceMethod string, args interface{}, reply int
 			return
 		}
 	}
-	return dH.rpcConn.Call(serviceMethod, args, reply)
+	return dH.rpcConn.Call(context.TODO(), serviceMethod, args, reply)
 }

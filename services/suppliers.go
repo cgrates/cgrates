@@ -22,18 +22,18 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/cgrates/birpc"
 	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 // NewSupplierService returns the Supplier Service
 func NewSupplierService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *engine.CacheS, filterSChan chan *engine.FilterS,
-	server *utils.Server, internalSupplierSChan chan rpcclient.ClientConnector,
+	server *utils.Server, internalSupplierSChan chan birpc.ClientConnector,
 	connMgr *engine.ConnManager) servmanager.Service {
 	return &SupplierService{
 		connChan:    internalSupplierSChan,
@@ -58,7 +58,7 @@ type SupplierService struct {
 
 	splS     *engine.SupplierService
 	rpc      *v1.SupplierSv1
-	connChan chan rpcclient.ClientConnector
+	connChan chan birpc.ClientConnector
 }
 
 // Start should handle the sercive start

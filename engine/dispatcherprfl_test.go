@@ -21,6 +21,7 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -229,7 +230,7 @@ type testRPCHost struct {
 	reply         interface{}
 }
 
-func (v *testRPCHost) Call(serviceMethod string, args interface{}, reply interface{}) error {
+func (v *testRPCHost) Call(ctx *context.Context, serviceMethod string, args interface{}, reply interface{}) error {
 	v.serviceMethod = serviceMethod
 	v.args = args
 	v.reply = reply

@@ -21,19 +21,19 @@ package services
 import (
 	"sync"
 
+	"github.com/cgrates/birpc"
 	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/loaders"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 // NewLoaderService returns the Loader Service
 func NewLoaderService(cfg *config.CGRConfig, dm *DataDBService,
 	filterSChan chan *engine.FilterS, server *utils.Server,
-	exitChan chan bool, internalLoaderSChan chan rpcclient.ClientConnector,
+	exitChan chan bool, internalLoaderSChan chan birpc.ClientConnector,
 	connMgr *engine.ConnManager) servmanager.Service {
 	return &LoaderService{
 		connChan:    internalLoaderSChan,
@@ -57,7 +57,7 @@ type LoaderService struct {
 
 	ldrs     *loaders.LoaderService
 	rpc      *v1.LoaderSv1
-	connChan chan rpcclient.ClientConnector
+	connChan chan birpc.ClientConnector
 	connMgr  *engine.ConnManager
 }
 

@@ -22,18 +22,18 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/cgrates/birpc"
 	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 // NewThresholdService returns the Threshold Service
 func NewThresholdService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *engine.CacheS, filterSChan chan *engine.FilterS,
-	server *utils.Server, internalThresholdSChan chan rpcclient.ClientConnector) servmanager.Service {
+	server *utils.Server, internalThresholdSChan chan birpc.ClientConnector) servmanager.Service {
 	return &ThresholdService{
 		connChan:    internalThresholdSChan,
 		cfg:         cfg,
@@ -55,7 +55,7 @@ type ThresholdService struct {
 
 	thrs     *engine.ThresholdService
 	rpc      *v1.ThresholdSv1
-	connChan chan rpcclient.ClientConnector
+	connChan chan birpc.ClientConnector
 }
 
 // Start should handle the sercive start

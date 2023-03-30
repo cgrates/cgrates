@@ -21,9 +21,10 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 func TestBalanceSortPrecision(t *testing.T) {
@@ -307,15 +308,15 @@ func TestBalancesSaveDirtyBalances(t *testing.T) {
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 
 	cfg.RalsCfg().ThresholdSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)}
-	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ThresholdSv1ProcessEvent: func(args, reply interface{}) error {
+		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+			utils.ThresholdSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
 				return nil
 			},
 		},
 	}
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds): clientConn,
 	})
 	acc := &Account{

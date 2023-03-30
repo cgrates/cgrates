@@ -21,7 +21,7 @@ package v1
 import (
 	"time"
 
-	"github.com/cenkalti/rpc2"
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -58,7 +58,7 @@ func (ssv1 *SessionSv1) Handlers() map[string]interface{} {
 	}
 }
 
-func (ssv1 *SessionSv1) BiRPCv1AuthorizeEvent(clnt *rpc2.Client, args *sessions.V1AuthorizeArgs,
+func (ssv1 *SessionSv1) BiRPCv1AuthorizeEvent(clnt birpc.ClientConnector, args *sessions.V1AuthorizeArgs,
 	rply *sessions.V1AuthorizeReply) (err error) {
 	if err = utils.ConReqs.Allocate(); err != nil {
 		return
@@ -67,7 +67,7 @@ func (ssv1 *SessionSv1) BiRPCv1AuthorizeEvent(clnt *rpc2.Client, args *sessions.
 	return ssv1.Ss.BiRPCv1AuthorizeEvent(clnt, args, rply)
 }
 
-func (ssv1 *SessionSv1) BiRPCv1AuthorizeEventWithDigest(clnt *rpc2.Client, args *sessions.V1AuthorizeArgs,
+func (ssv1 *SessionSv1) BiRPCv1AuthorizeEventWithDigest(clnt birpc.ClientConnector, args *sessions.V1AuthorizeArgs,
 	rply *sessions.V1AuthorizeReplyWithDigest) (err error) {
 	if err = utils.ConReqs.Allocate(); err != nil {
 		return
@@ -76,7 +76,7 @@ func (ssv1 *SessionSv1) BiRPCv1AuthorizeEventWithDigest(clnt *rpc2.Client, args 
 	return ssv1.Ss.BiRPCv1AuthorizeEventWithDigest(clnt, args, rply)
 }
 
-func (ssv1 *SessionSv1) BiRPCv1InitiateSession(clnt *rpc2.Client, args *sessions.V1InitSessionArgs,
+func (ssv1 *SessionSv1) BiRPCv1InitiateSession(clnt birpc.ClientConnector, args *sessions.V1InitSessionArgs,
 	rply *sessions.V1InitSessionReply) (err error) {
 	if err = utils.ConReqs.Allocate(); err != nil {
 		return
@@ -85,7 +85,7 @@ func (ssv1 *SessionSv1) BiRPCv1InitiateSession(clnt *rpc2.Client, args *sessions
 	return ssv1.Ss.BiRPCv1InitiateSession(clnt, args, rply)
 }
 
-func (ssv1 *SessionSv1) BiRPCv1InitiateSessionWithDigest(clnt *rpc2.Client, args *sessions.V1InitSessionArgs,
+func (ssv1 *SessionSv1) BiRPCv1InitiateSessionWithDigest(clnt birpc.ClientConnector, args *sessions.V1InitSessionArgs,
 	rply *sessions.V1InitReplyWithDigest) (err error) {
 	if err = utils.ConReqs.Allocate(); err != nil {
 		return
@@ -94,7 +94,7 @@ func (ssv1 *SessionSv1) BiRPCv1InitiateSessionWithDigest(clnt *rpc2.Client, args
 	return ssv1.Ss.BiRPCv1InitiateSessionWithDigest(clnt, args, rply)
 }
 
-func (ssv1 *SessionSv1) BiRPCv1UpdateSession(clnt *rpc2.Client, args *sessions.V1UpdateSessionArgs,
+func (ssv1 *SessionSv1) BiRPCv1UpdateSession(clnt birpc.ClientConnector, args *sessions.V1UpdateSessionArgs,
 	rply *sessions.V1UpdateSessionReply) (err error) {
 	if err = utils.ConReqs.Allocate(); err != nil {
 		return
@@ -103,7 +103,7 @@ func (ssv1 *SessionSv1) BiRPCv1UpdateSession(clnt *rpc2.Client, args *sessions.V
 	return ssv1.Ss.BiRPCv1UpdateSession(clnt, args, rply)
 }
 
-func (ssv1 *SessionSv1) BiRPCv1SyncSessions(clnt *rpc2.Client, args *string,
+func (ssv1 *SessionSv1) BiRPCv1SyncSessions(clnt birpc.ClientConnector, args *string,
 	rply *string) (err error) {
 	if err = utils.ConReqs.Allocate(); err != nil {
 		return
@@ -112,7 +112,7 @@ func (ssv1 *SessionSv1) BiRPCv1SyncSessions(clnt *rpc2.Client, args *string,
 	return ssv1.Ss.BiRPCv1SyncSessions(clnt, "", rply)
 }
 
-func (ssv1 *SessionSv1) BiRPCv1TerminateSession(clnt *rpc2.Client, args *sessions.V1TerminateSessionArgs,
+func (ssv1 *SessionSv1) BiRPCv1TerminateSession(clnt birpc.ClientConnector, args *sessions.V1TerminateSessionArgs,
 	rply *string) (err error) {
 	if err = utils.ConReqs.Allocate(); err != nil {
 		return
@@ -121,7 +121,7 @@ func (ssv1 *SessionSv1) BiRPCv1TerminateSession(clnt *rpc2.Client, args *session
 	return ssv1.Ss.BiRPCv1TerminateSession(clnt, args, rply)
 }
 
-func (ssv1 *SessionSv1) BiRPCv1ProcessCDR(clnt *rpc2.Client, cgrEv *utils.CGREventWithArgDispatcher,
+func (ssv1 *SessionSv1) BiRPCv1ProcessCDR(clnt birpc.ClientConnector, cgrEv *utils.CGREventWithArgDispatcher,
 	rply *string) (err error) {
 	if err = utils.ConReqs.Allocate(); err != nil {
 		return
@@ -130,7 +130,7 @@ func (ssv1 *SessionSv1) BiRPCv1ProcessCDR(clnt *rpc2.Client, cgrEv *utils.CGREve
 	return ssv1.Ss.BiRPCv1ProcessCDR(clnt, cgrEv, rply)
 }
 
-func (ssv1 *SessionSv1) BiRPCv1ProcessMessage(clnt *rpc2.Client, args *sessions.V1ProcessMessageArgs,
+func (ssv1 *SessionSv1) BiRPCv1ProcessMessage(clnt birpc.ClientConnector, args *sessions.V1ProcessMessageArgs,
 	rply *sessions.V1ProcessMessageReply) (err error) {
 	if err = utils.ConReqs.Allocate(); err != nil {
 		return
@@ -139,7 +139,7 @@ func (ssv1 *SessionSv1) BiRPCv1ProcessMessage(clnt *rpc2.Client, args *sessions.
 	return ssv1.Ss.BiRPCv1ProcessMessage(clnt, args, rply)
 }
 
-func (ssv1 *SessionSv1) BiRPCv1ProcessEvent(clnt *rpc2.Client, args *sessions.V1ProcessEventArgs,
+func (ssv1 *SessionSv1) BiRPCv1ProcessEvent(clnt birpc.ClientConnector, args *sessions.V1ProcessEventArgs,
 	rply *sessions.V1ProcessEventReply) (err error) {
 	if err = utils.ConReqs.Allocate(); err != nil {
 		return
@@ -148,7 +148,7 @@ func (ssv1 *SessionSv1) BiRPCv1ProcessEvent(clnt *rpc2.Client, args *sessions.V1
 	return ssv1.Ss.BiRPCv1ProcessEvent(clnt, args, rply)
 }
 
-func (ssv1 *SessionSv1) BiRPCv1GetActiveSessions(clnt *rpc2.Client, args *utils.SessionFilter,
+func (ssv1 *SessionSv1) BiRPCv1GetActiveSessions(clnt birpc.ClientConnector, args *utils.SessionFilter,
 	rply *[]*sessions.ExternalSession) (err error) {
 	if err = utils.ConReqs.Allocate(); err != nil {
 		return
@@ -157,7 +157,7 @@ func (ssv1 *SessionSv1) BiRPCv1GetActiveSessions(clnt *rpc2.Client, args *utils.
 	return ssv1.Ss.BiRPCv1GetActiveSessions(clnt, args, rply)
 }
 
-func (ssv1 *SessionSv1) BiRPCv1GetActiveSessionsCount(clnt *rpc2.Client, args *utils.SessionFilter,
+func (ssv1 *SessionSv1) BiRPCv1GetActiveSessionsCount(clnt birpc.ClientConnector, args *utils.SessionFilter,
 	rply *int) (err error) {
 	if err = utils.ConReqs.Allocate(); err != nil {
 		return
@@ -166,7 +166,7 @@ func (ssv1 *SessionSv1) BiRPCv1GetActiveSessionsCount(clnt *rpc2.Client, args *u
 	return ssv1.Ss.BiRPCv1GetActiveSessionsCount(clnt, args, rply)
 }
 
-func (ssv1 *SessionSv1) BiRPCv1GetPassiveSessions(clnt *rpc2.Client, args *utils.SessionFilter,
+func (ssv1 *SessionSv1) BiRPCv1GetPassiveSessions(clnt birpc.ClientConnector, args *utils.SessionFilter,
 	rply *[]*sessions.ExternalSession) (err error) {
 	if err = utils.ConReqs.Allocate(); err != nil {
 		return
@@ -175,7 +175,7 @@ func (ssv1 *SessionSv1) BiRPCv1GetPassiveSessions(clnt *rpc2.Client, args *utils
 	return ssv1.Ss.BiRPCv1GetPassiveSessions(clnt, args, rply)
 }
 
-func (ssv1 *SessionSv1) BiRPCv1GetPassiveSessionsCount(clnt *rpc2.Client, args *utils.SessionFilter,
+func (ssv1 *SessionSv1) BiRPCv1GetPassiveSessionsCount(clnt birpc.ClientConnector, args *utils.SessionFilter,
 	rply *int) (err error) {
 	if err = utils.ConReqs.Allocate(); err != nil {
 		return
@@ -184,7 +184,7 @@ func (ssv1 *SessionSv1) BiRPCv1GetPassiveSessionsCount(clnt *rpc2.Client, args *
 	return ssv1.Ss.BiRPCv1GetPassiveSessionsCount(clnt, args, rply)
 }
 
-func (ssv1 *SessionSv1) BiRPCv1ForceDisconnect(clnt *rpc2.Client, args *utils.SessionFilter,
+func (ssv1 *SessionSv1) BiRPCv1ForceDisconnect(clnt birpc.ClientConnector, args *utils.SessionFilter,
 	rply *string) (err error) {
 	if err = utils.ConReqs.Allocate(); err != nil {
 		return
@@ -193,7 +193,7 @@ func (ssv1 *SessionSv1) BiRPCv1ForceDisconnect(clnt *rpc2.Client, args *utils.Se
 	return ssv1.Ss.BiRPCv1ForceDisconnect(clnt, args, rply)
 }
 
-func (ssv1 *SessionSv1) BiRPCv1RegisterInternalBiJSONConn(clnt *rpc2.Client, args string,
+func (ssv1 *SessionSv1) BiRPCv1RegisterInternalBiJSONConn(clnt birpc.ClientConnector, args string,
 	rply *string) (err error) {
 	if err = utils.ConReqs.Allocate(); err != nil {
 		return
@@ -202,7 +202,7 @@ func (ssv1 *SessionSv1) BiRPCv1RegisterInternalBiJSONConn(clnt *rpc2.Client, arg
 	return ssv1.Ss.BiRPCv1RegisterInternalBiJSONConn(clnt, args, rply)
 }
 
-func (ssv1 *SessionSv1) BiRPCPing(clnt *rpc2.Client, ign *utils.CGREventWithArgDispatcher,
+func (ssv1 *SessionSv1) BiRPCPing(clnt birpc.ClientConnector, ign *utils.CGREventWithArgDispatcher,
 	reply *string) (err error) {
 	if err = utils.ConReqs.Allocate(); err != nil {
 		return
@@ -211,7 +211,7 @@ func (ssv1 *SessionSv1) BiRPCPing(clnt *rpc2.Client, ign *utils.CGREventWithArgD
 	return ssv1.Ping(ign, reply)
 }
 
-func (ssv1 *SessionSv1) BiRPCv1ReplicateSessions(clnt *rpc2.Client,
+func (ssv1 *SessionSv1) BiRPCv1ReplicateSessions(clnt birpc.ClientConnector,
 	args sessions.ArgsReplicateSessions, reply *string) (err error) {
 	if err = utils.ConReqs.Allocate(); err != nil {
 		return
@@ -220,7 +220,7 @@ func (ssv1 *SessionSv1) BiRPCv1ReplicateSessions(clnt *rpc2.Client,
 	return ssv1.BiRPCv1ReplicateSessions(clnt, args, reply)
 }
 
-func (ssv1 *SessionSv1) BiRPCv1SetPassiveSession(clnt *rpc2.Client,
+func (ssv1 *SessionSv1) BiRPCv1SetPassiveSession(clnt birpc.ClientConnector,
 	args *sessions.Session, reply *string) (err error) {
 	if err = utils.ConReqs.Allocate(); err != nil {
 		return
@@ -229,7 +229,7 @@ func (ssv1 *SessionSv1) BiRPCv1SetPassiveSession(clnt *rpc2.Client,
 	return ssv1.Ss.BiRPCv1SetPassiveSession(clnt, args, reply)
 }
 
-func (ssv1 *SessionSv1) BiRPCv1ActivateSessions(clnt *rpc2.Client,
+func (ssv1 *SessionSv1) BiRPCv1ActivateSessions(clnt birpc.ClientConnector,
 	args []string, reply *string) (err error) {
 	if err = utils.ConReqs.Allocate(); err != nil {
 		return
@@ -238,7 +238,7 @@ func (ssv1 *SessionSv1) BiRPCv1ActivateSessions(clnt *rpc2.Client,
 	return ssv1.Ss.BiRPCv1ActivateSessions(clnt, args, reply)
 }
 
-func (ssv1 *SessionSv1) BiRPCv1DeactivateSessions(clnt *rpc2.Client,
+func (ssv1 *SessionSv1) BiRPCv1DeactivateSessions(clnt birpc.ClientConnector,
 	args []string, reply *string) (err error) {
 	if err = utils.ConReqs.Allocate(); err != nil {
 		return
@@ -247,7 +247,7 @@ func (ssv1 *SessionSv1) BiRPCv1DeactivateSessions(clnt *rpc2.Client,
 	return ssv1.Ss.BiRPCv1DeactivateSessions(clnt, args, reply)
 }
 
-func (ssv1 *SessionSv1) BiRPCV1Sleep(clnt *rpc2.Client, arg *DurationArgs,
+func (ssv1 *SessionSv1) BiRPCV1Sleep(clnt birpc.ClientConnector, arg *DurationArgs,
 	reply *string) (err error) {
 	if err = utils.ConReqs.Allocate(); err != nil {
 		return

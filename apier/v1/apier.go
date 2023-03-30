@@ -27,6 +27,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/guardian"
@@ -52,8 +53,8 @@ type APIerSv1 struct {
 	StorDBChan chan engine.StorDB
 }
 
-// Call implements rpcclient.ClientConnector interface for internal RPC
-func (apiv1 *APIerSv1) Call(serviceMethod string,
+// Call implements birpc.ClientConnector interface for internal RPC
+func (apiv1 *APIerSv1) Call(ctx *context.Context, serviceMethod string,
 	args interface{}, reply interface{}) error {
 	return utils.APIerRPCCall(apiv1, serviceMethod, args, reply)
 }

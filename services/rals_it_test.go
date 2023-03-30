@@ -25,11 +25,11 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 func TestRalsReload(t *testing.T) {
@@ -64,14 +64,14 @@ func TestRalsReload(t *testing.T) {
 	db := NewDataDBService(cfg, nil)
 	cfg.StorDbCfg().Type = utils.MetaInternal
 	stordb := NewStorDBService(cfg)
-	schS := NewSchedulerService(cfg, db, chS, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil)
-	tS := NewThresholdService(cfg, db, chS, filterSChan, server, make(chan rpcclient.ClientConnector, 1))
+	schS := NewSchedulerService(cfg, db, chS, filterSChan, server, make(chan birpc.ClientConnector, 1), nil)
+	tS := NewThresholdService(cfg, db, chS, filterSChan, server, make(chan birpc.ClientConnector, 1))
 	ralS := NewRalService(cfg, chS, server,
-		make(chan rpcclient.ClientConnector, 1),
-		make(chan rpcclient.ClientConnector, 1),
+		make(chan birpc.ClientConnector, 1),
+		make(chan birpc.ClientConnector, 1),
 		engineShutdown, nil)
 	srvMngr.AddServices(ralS, schS, tS,
-		NewLoaderService(cfg, db, filterSChan, server, engineShutdown, make(chan rpcclient.ClientConnector, 1), nil), db, stordb)
+		NewLoaderService(cfg, db, filterSChan, server, engineShutdown, make(chan birpc.ClientConnector, 1), nil), db, stordb)
 	if err = srvMngr.StartServices(); err != nil {
 		t.Error(err)
 	}

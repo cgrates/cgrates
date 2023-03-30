@@ -19,10 +19,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"errors"
 	"fmt"
+	"reflect"
 	"strings"
 	"time"
+	"unicode"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
@@ -31,22 +36,24 @@ import (
 // NewRPCPool returns a new pool of connection with the given configuration
 func NewRPCPool(dispatchStrategy string, keyPath, certPath, caPath string, connAttempts, reconnects int,
 	connectTimeout, replyTimeout time.Duration, rpcConnCfgs []*config.RemoteHost,
-	internalConnChan chan rpcclient.ClientConnector, lazyConnect bool) (*rpcclient.RPCPool, error) {
+	internalConnChan chan birpc.ClientConnector, lazyConnect bool) (*rpcclient.RPCPool, error) {
 	var rpcClient *rpcclient.RPCClient
 	var err error
 	rpcPool := rpcclient.NewRPCPool(dispatchStrategy, replyTimeout)
 	atLestOneConnected := false // If one connected we don't longer return errors
 	for _, rpcConnCfg := range rpcConnCfgs {
 		if rpcConnCfg.Address == utils.MetaInternal {
-			rpcClient, err = rpcclient.NewRPCClient("", "", rpcConnCfg.TLS, keyPath, certPath, caPath, connAttempts,
-				reconnects, connectTimeout, replyTimeout, rpcclient.InternalRPC, internalConnChan, lazyConnect)
+			rpcClient, err = rpcclient.NewRPCClient(context.TODO(), "", "", rpcConnCfg.TLS, keyPath, certPath, caPath,
+				connAttempts, reconnects, 0, utils.FibDuration, connectTimeout, replyTimeout, rpcclient.InternalRPC,
+				internalConnChan, lazyConnect, nil)
 		} else if utils.SliceHasMember([]string{utils.EmptyString, utils.MetaGOB, utils.MetaJSON}, rpcConnCfg.Transport) {
 			codec := rpcclient.GOBrpc
 			if rpcConnCfg.Transport != "" {
 				codec = rpcConnCfg.Transport
 			}
-			rpcClient, err = rpcclient.NewRPCClient(utils.TCP, rpcConnCfg.Address, rpcConnCfg.TLS, keyPath, certPath, caPath,
-				connAttempts, reconnects, connectTimeout, replyTimeout, codec, nil, lazyConnect)
+			rpcClient, err = rpcclient.NewRPCClient(context.TODO(), utils.TCP, rpcConnCfg.Address, rpcConnCfg.TLS,
+				keyPath, certPath, caPath, connAttempts, reconnects, 0, utils.FibDuration,
+				connectTimeout, replyTimeout, codec, nil, lazyConnect, nil)
 		} else {
 			return nil, fmt.Errorf("Unsupported transport: <%s>", rpcConnCfg.Transport)
 		}
@@ -75,12 +82,11 @@ type RPCClientSet struct {
 }
 
 // AddInternalRPCClient creates and adds to the set a new rpc client using the provided configuration
-func (s *RPCClientSet) AddInternalRPCClient(name string, connChan chan rpcclient.ClientConnector) {
-	rpc, err := rpcclient.NewRPCClient(utils.EmptyString, utils.EmptyString, false,
-		utils.EmptyString, utils.EmptyString, utils.EmptyString,
-		config.CgrConfig().GeneralCfg().ConnectAttempts, config.CgrConfig().GeneralCfg().Reconnects,
-		config.CgrConfig().GeneralCfg().ConnectTimeout, config.CgrConfig().GeneralCfg().ReplyTimeout,
-		rpcclient.InternalRPC, connChan, true)
+func (s *RPCClientSet) AddInternalRPCClient(name string, connChan chan birpc.ClientConnector) {
+	rpc, err := rpcclient.NewRPCClient(context.TODO(), utils.EmptyString, utils.EmptyString, false,
+		utils.EmptyString, utils.EmptyString, utils.EmptyString, config.CgrConfig().GeneralCfg().ConnectAttempts,
+		config.CgrConfig().GeneralCfg().Reconnects, 0, utils.FibDuration, config.CgrConfig().GeneralCfg().ConnectTimeout,
+		config.CgrConfig().GeneralCfg().ReplyTimeout, rpcclient.InternalRPC, connChan, true, nil)
 	if err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> Error adding %s to the set: %s", utils.InternalRPCSet, name, err.Error()))
 		return
@@ -89,14 +95,14 @@ func (s *RPCClientSet) AddInternalRPCClient(name string, connChan chan rpcclient
 }
 
 // GetInternalChanel is used when RPCClientSet is passed as internal connection for RPCPool
-func (s *RPCClientSet) GetInternalChanel() chan rpcclient.ClientConnector {
-	connChan := make(chan rpcclient.ClientConnector, 1)
+func (s *RPCClientSet) GetInternalChanel() chan birpc.ClientConnector {
+	connChan := make(chan birpc.ClientConnector, 1)
 	connChan <- s
 	return connChan
 }
 
-// Call the implementation of the rpcclient.ClientConnector interface
-func (s *RPCClientSet) Call(method string, args interface{}, reply interface{}) error {
+// Call the implementation of the birpc.ClientConnector interface
+func (s *RPCClientSet) Call(ctx *context.Context, method string, args interface{}, reply interface{}) error {
 	methodSplit := strings.Split(method, ".")
 	if len(methodSplit) != 2 {
 		return rpcclient.ErrUnsupporteServiceMethod
@@ -105,5 +111,63 @@ func (s *RPCClientSet) Call(method string, args interface{}, reply interface{}) 
 	if !has {
 		return rpcclient.ErrUnsupporteServiceMethod
 	}
-	return conn.Call(method, args, reply)
+	return conn.Call(context.TODO(), method, args, reply)
+}
+
+func NewServiceWithName(val interface{}, name string, useName bool) (_ IntService, err error) {
+	var srv *birpc.Service
+	if srv, err = birpc.NewService(val, name, useName); err != nil {
+		return
+	}
+	srv.Methods["Ping"] = pingM
+	s := IntService{srv.Name: srv}
+	for m, v := range srv.Methods {
+		m = strings.TrimPrefix(m, "BiRPC")
+		if len(m) < 2 || unicode.ToLower(rune(m[0])) != 'v' {
+			continue
+		}
+
+		key := srv.Name
+		if unicode.IsLower(rune(key[len(key)-1])) {
+			key += "V"
+		} else {
+			key += "v"
+		}
+		key += string(m[1])
+		srv2, has := s[key]
+		if !has {
+			srv2 = new(birpc.Service)
+			*srv2 = *srv
+			srv2.Name = key
+			srv2.Methods = map[string]*birpc.MethodType{"Ping": pingM}
+			s[key] = srv2
+		}
+		srv2.Methods[m[2:]] = v
+	}
+	return s, nil
+}
+
+type IntService map[string]*birpc.Service
+
+func (s IntService) Call(ctx *context.Context, serviceMethod string, args, reply interface{}) error {
+	service, has := s[strings.Split(serviceMethod, utils.NestingSep)[0]]
+	if !has {
+		return errors.New("rpc: can't find service " + serviceMethod)
+	}
+	return service.Call(ctx, serviceMethod, args, reply)
+}
+
+func ping(_ interface{}, _ *context.Context, _ *utils.CGREvent, reply *string) error {
+	*reply = utils.Pong
+	return nil
+}
+
+var pingM = &birpc.MethodType{
+	Method: reflect.Method{
+		Name: "Ping",
+		Type: reflect.TypeOf(ping),
+		Func: reflect.ValueOf(ping),
+	},
+	ArgType:   reflect.TypeOf(new(utils.CGREvent)),
+	ReplyType: reflect.TypeOf(new(string)),
 }

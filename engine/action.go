@@ -32,6 +32,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
@@ -767,16 +769,16 @@ func cgrRPCAction(ub *Account, a *Action, acs Actions, extraData interface{}) er
 	if err != nil {
 		return err
 	}
-	var client rpcclient.ClientConnector
+	var client birpc.ClientConnector
 	if req.Address != utils.MetaInternal {
-		if client, err = rpcclient.NewRPCClient(utils.TCP, req.Address, false, "", "", "",
-			req.Attempts, 0, config.CgrConfig().GeneralCfg().ConnectTimeout,
+		if client, err = rpcclient.NewRPCClient(context.TODO(), utils.TCP, req.Address, false, "", "", "",
+			req.Attempts, 0, 0, utils.FibDuration, config.CgrConfig().GeneralCfg().ConnectTimeout,
 			config.CgrConfig().GeneralCfg().ReplyTimeout, req.Transport,
-			nil, false); err != nil {
+			nil, false, nil); err != nil {
 			return err
 		}
 	} else {
-		client = params.Object.(rpcclient.ClientConnector)
+		client = params.Object.(birpc.ClientConnector)
 	}
 	in, out := params.InParam, params.OutParam
 	//utils.Logger.Info("Params: " + utils.ToJSON(req.Params))
@@ -792,12 +794,12 @@ func cgrRPCAction(ub *Account, a *Action, acs Actions, extraData interface{}) er
 	}
 	utils.Logger.Info(fmt.Sprintf("<*cgr_rpc> calling: %s with: %s and result %v", req.Method, utils.ToJSON(in), out))
 	if !req.Async {
-		err = client.Call(req.Method, in, out)
+		err = client.Call(context.TODO(), req.Method, in, out)
 		utils.Logger.Info(fmt.Sprintf("<*cgr_rpc> result: %s err: %v", utils.ToJSON(out), err))
 		return err
 	}
 	go func() {
-		err := client.Call(req.Method, in, out)
+		err := client.Call(context.TODO(), req.Method, in, out)
 		utils.Logger.Info(fmt.Sprintf("<*cgr_rpc> result: %s err: %v", utils.ToJSON(out), err))
 	}()
 	return nil

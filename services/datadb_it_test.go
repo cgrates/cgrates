@@ -26,8 +26,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cgrates/rpcclient"
-
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
@@ -53,8 +52,8 @@ func TestDataDBReload(t *testing.T) {
 	cM := engine.NewConnManager(cfg, nil)
 	db := NewDataDBService(cfg, cM)
 	srvMngr.AddServices(NewAttributeService(cfg, db,
-		chS, filterSChan, server, make(chan rpcclient.ClientConnector, 1)),
-		NewLoaderService(cfg, db, filterSChan, server, engineShutdown, make(chan rpcclient.ClientConnector, 1), nil), db)
+		chS, filterSChan, server, make(chan birpc.ClientConnector, 1)),
+		NewLoaderService(cfg, db, filterSChan, server, engineShutdown, make(chan birpc.ClientConnector, 1), nil), db)
 	if err = srvMngr.StartServices(); err != nil {
 		t.Error(err)
 	}

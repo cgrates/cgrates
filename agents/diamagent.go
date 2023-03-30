@@ -24,6 +24,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessions"
@@ -432,8 +433,8 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.RequestProcessor,
 	return true, nil
 }
 
-// rpcclient.ClientConnector interface
-func (da *DiameterAgent) Call(serviceMethod string, args interface{}, reply interface{}) error {
+// birpc.ClientConnector interface
+func (da *DiameterAgent) Call(ctx *context.Context, serviceMethod string, args interface{}, reply interface{}) error {
 	return utils.RPCCall(da, serviceMethod, args, reply)
 }
 

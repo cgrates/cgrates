@@ -22,18 +22,18 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/cgrates/birpc"
 	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 // NewResourceService returns the Resource Service
 func NewResourceService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *engine.CacheS, filterSChan chan *engine.FilterS,
-	server *utils.Server, internalResourceSChan chan rpcclient.ClientConnector,
+	server *utils.Server, internalResourceSChan chan birpc.ClientConnector,
 	connMgr *engine.ConnManager) servmanager.Service {
 	return &ResourceService{
 		connChan:    internalResourceSChan,
@@ -57,7 +57,7 @@ type ResourceService struct {
 
 	reS      *engine.ResourceService
 	rpc      *v1.ResourceSv1
-	connChan chan rpcclient.ClientConnector
+	connChan chan birpc.ClientConnector
 	connMgr  *engine.ConnManager
 }
 

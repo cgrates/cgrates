@@ -22,18 +22,18 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/cgrates/birpc"
 	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 // NewStatService returns the Stat Service
 func NewStatService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *engine.CacheS, filterSChan chan *engine.FilterS,
-	server *utils.Server, internalStatSChan chan rpcclient.ClientConnector, connMgr *engine.ConnManager) servmanager.Service {
+	server *utils.Server, internalStatSChan chan birpc.ClientConnector, connMgr *engine.ConnManager) servmanager.Service {
 	return &StatService{
 		connChan:    internalStatSChan,
 		cfg:         cfg,
@@ -57,7 +57,7 @@ type StatService struct {
 
 	sts      *engine.StatService
 	rpc      *v1.StatSv1
-	connChan chan rpcclient.ClientConnector
+	connChan chan birpc.ClientConnector
 }
 
 // Start should handle the sercive start

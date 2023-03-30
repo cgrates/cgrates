@@ -22,6 +22,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
@@ -654,14 +656,14 @@ func TestSuppliersMatchWithIndexFalse(t *testing.T) {
 }
 
 type ccMock struct {
-	calls map[string]func(args interface{}, reply interface{}) error
+	calls map[string]func(ctx *context.Context, args interface{}, reply interface{}) error
 }
 
-func (ccM *ccMock) Call(serviceMethod string, args interface{}, reply interface{}) (err error) {
+func (ccM *ccMock) Call(ctx *context.Context, serviceMethod string, args interface{}, reply interface{}) (err error) {
 	if call, has := ccM.calls[serviceMethod]; !has {
 		return rpcclient.ErrUnsupporteServiceMethod
 	} else {
-		return call(args, reply)
+		return call(ctx, args, reply)
 	}
 }
 func TestSuppliersV1GetSuppliers(t *testing.T) {
@@ -674,17 +676,17 @@ func TestSuppliersV1GetSuppliers(t *testing.T) {
 	cfg.SupplierSCfg().RALsConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs)}
 	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
-	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ResponderGetMaxSessionTimeOnAccounts: func(args, reply interface{}) error {
+		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+			utils.ResponderGetMaxSessionTimeOnAccounts: func(ctx *context.Context, args, reply interface{}) error {
 				rpl := map[string]interface{}{
 					"Cost": 10,
 				}
 				*reply.(*map[string]interface{}) = rpl
 				return nil
 			},
-			utils.ResponderGetCostOnRatingPlans: func(args, reply interface{}) error {
+			utils.ResponderGetCostOnRatingPlans: func(ctx *context.Context, args, reply interface{}) error {
 				rpl := map[string]interface{}{
 					utils.CapMaxUsage: 1000000000,
 				}
@@ -694,7 +696,7 @@ func TestSuppliersV1GetSuppliers(t *testing.T) {
 			},
 		},
 	}
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs): clientConn,
 	})
 	splService, err := NewSupplierService(dm, &FilterS{
@@ -871,16 +873,15 @@ func TestV1GetSuppliersWithAttributeS(t *testing.T) {
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 	cfg.SupplierSCfg().AttributeSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}
-	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.AttributeSv1ProcessEvent: func(args, reply interface{}) error {
-
+		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+			utils.AttributeSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
 				return utils.ErrNotFound
 			},
 		},
 	}
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes): clientConn,
 	})
 	spS, err := NewSupplierService(dm, nil, cfg, connMgr)

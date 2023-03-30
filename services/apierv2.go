@@ -21,16 +21,16 @@ package services
 import (
 	"sync"
 
+	"github.com/cgrates/birpc"
 	v2 "github.com/cgrates/cgrates/apier/v2"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 // NewAPIerSv2Service returns the APIerSv2 Service
 func NewAPIerSv2Service(apiv1 *APIerSv1Service, cfg *config.CGRConfig,
 	server *utils.Server,
-	internalAPIerSv2Chan chan rpcclient.ClientConnector) *APIerSv2Service {
+	internalAPIerSv2Chan chan birpc.ClientConnector) *APIerSv2Service {
 	return &APIerSv2Service{
 		apiv1:    apiv1,
 		connChan: internalAPIerSv2Chan,
@@ -47,7 +47,7 @@ type APIerSv2Service struct {
 
 	apiv1    *APIerSv1Service
 	api      *v2.APIerSv2
-	connChan chan rpcclient.ClientConnector
+	connChan chan birpc.ClientConnector
 }
 
 // Start should handle the sercive start

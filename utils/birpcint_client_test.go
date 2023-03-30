@@ -24,7 +24,8 @@ import (
 	"testing"
 
 	"github.com/cenkalti/rpc2"
-	"github.com/cgrates/rpcclient"
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 )
 
 func TestNewBiJSONrpcClient(t *testing.T) {
@@ -57,8 +58,8 @@ type testBiRPCServer struct {
 	reply interface{}
 }
 
-func (*testBiRPCServer) Call(string, interface{}, interface{}) error { return nil }
-func (t *testBiRPCServer) CallBiRPC(_ rpcclient.ClientConnector, metod string, args interface{}, reply interface{}) error {
+func (*testBiRPCServer) Call(*context.Context, string, interface{}, interface{}) error { return nil }
+func (t *testBiRPCServer) CallBiRPC(_ birpc.ClientConnector, metod string, args interface{}, reply interface{}) error {
 	t.metod = metod
 	t.args = args
 	t.reply = reply
@@ -81,7 +82,7 @@ func TestNewBiRPCInternalClient(t *testing.T) {
 		t.Error("Client Connection must be not nil")
 	}
 
-	err := rcv.Call(APIerSv1ComputeActionPlanIndexes, "arg1", "reply")
+	err := rcv.Call(context.Background(), APIerSv1ComputeActionPlanIndexes, "arg1", "reply")
 	if err != nil {
 		t.Error(err)
 	}
