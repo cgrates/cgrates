@@ -23,9 +23,10 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 func TestMsgpackStructsAdded(t *testing.T) {
@@ -919,8 +920,8 @@ func TestTPRLoadAccountActionsFiltered(t *testing.T) {
 		Disabled:         true,
 	}
 	db.SetTPAccountActions([]*utils.TPAccountActions{qriedAA})
-	clientConn := make(chan rpcclient.ClientConnector, 1)
-	clientConn <- clMock(func(serviceMethod string, _, reply interface{}) error {
+	clientConn := make(chan birpc.ClientConnector, 1)
+	clientConn <- clMock(func(ctx *context.Context, serviceMethod string, _, reply interface{}) error {
 		if serviceMethod == utils.CacheSv1ReloadCache {
 			*reply.(*string) = utils.OK
 			return nil
@@ -928,7 +929,7 @@ func TestTPRLoadAccountActionsFiltered(t *testing.T) {
 		return utils.ErrNotImplemented
 	},
 	)
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches): clientConn,
 	})
 	tpr, err := NewTpReader(db, db, "TP1", "UTC", []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}, nil)
@@ -1007,14 +1008,14 @@ func TestTprRealoadSched(t *testing.T) {
 	if err := tpr.LoadActionPlans(); err != nil {
 		t.Error(err)
 	}
-	clientConn := make(chan rpcclient.ClientConnector, 1)
-	clientConn <- clMock(func(serviceMethod string, _, _ interface{}) error {
+	clientConn := make(chan birpc.ClientConnector, 1)
+	clientConn <- clMock(func(ctx *context.Context, serviceMethod string, _, _ interface{}) error {
 		if serviceMethod == utils.SchedulerSv1Reload {
 			return nil
 		}
 		return utils.ErrNotImplemented
 	})
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaScheduler): clientConn,
 	})
 	SetConnManager(connMgr)
@@ -1030,8 +1031,8 @@ func TestTprReloadCache(t *testing.T) {
 	defer func() {
 		SetConnManager(tmpConn)
 	}()
-	clientConn := make(chan rpcclient.ClientConnector, 1)
-	clientConn <- clMock(func(serviceMethod string, args, _ interface{}) error {
+	clientConn := make(chan birpc.ClientConnector, 1)
+	clientConn <- clMock(func(ctx *context.Context, serviceMethod string, args, _ interface{}) error {
 		if serviceMethod == utils.CacheSv1LoadCache {
 			return nil
 		} else if serviceMethod == utils.CacheSv1Clear {
@@ -1039,7 +1040,7 @@ func TestTprReloadCache(t *testing.T) {
 		}
 		return utils.ErrNotImplemented
 	})
-	connMgr2 := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr2 := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches): clientConn,
 	})
 
