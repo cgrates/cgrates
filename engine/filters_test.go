@@ -24,9 +24,10 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 func TestFilterPassString(t *testing.T) {
@@ -2110,8 +2111,8 @@ func TestFilterSPass11(t *testing.T) {
 	dm.SetResource(rsr)
 	dm.SetAccount(acc)
 	dm.SetStatQueue(sq)
-	clientConn := make(chan rpcclient.ClientConnector, 1)
-	clientConn <- clMock(func(serviceMethod string, args, reply interface{}) error {
+	clientConn := make(chan birpc.ClientConnector, 1)
+	clientConn <- clMock(func(ctx *context.Context, serviceMethod string, args, reply interface{}) error {
 		if serviceMethod == utils.ResourceSv1GetResource {
 			tntId, concat := args.(*utils.TenantID)
 			if !concat {
@@ -2166,7 +2167,7 @@ func TestFilterSPass11(t *testing.T) {
 			},
 		},
 	}
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources): clientConn,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStatS):     clientConn,
 	})

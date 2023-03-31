@@ -19,9 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
-	"time"
-
 	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -247,13 +246,11 @@ func (ssv1 *SessionSv1) BiRPCv1DeactivateSessions(clnt birpc.ClientConnector,
 	return ssv1.Ss.BiRPCv1DeactivateSessions(clnt, args, reply)
 }
 
-func (ssv1 *SessionSv1) BiRPCV1Sleep(clnt birpc.ClientConnector, arg *DurationArgs,
+func (ssv1 *SessionSv1) BiRPCV1Sleep(clnt birpc.ClientConnector, args *utils.DurationArgs,
 	reply *string) (err error) {
 	if err = utils.ConReqs.Allocate(); err != nil {
 		return
 	}
 	defer utils.ConReqs.Deallocate()
-	time.Sleep(arg.DurationTime)
-	*reply = utils.OK
-	return nil
+	return ssv1.Ss.BiRPCv1Sleep(context.TODO(), args, reply)
 }

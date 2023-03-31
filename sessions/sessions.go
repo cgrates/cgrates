@@ -3511,6 +3511,14 @@ func (sS *SessionS) BiRPCv1DeactivateSessions(clnt birpc.ClientConnector,
 	return
 }
 
+// BiRPCv1Sleep mimics a request whose process takes the given amount of time to process
+func (sS *SessionS) BiRPCv1Sleep(ctx *context.Context, args *utils.DurationArgs,
+	reply *string) (err error) {
+	time.Sleep(args.DurationTime)
+	*reply = utils.OK
+	return nil
+}
+
 // processThreshold will receive the event and send it to ThresholdS to be processed
 func (sS *SessionS) processThreshold(cgrEv *utils.CGREvent, argDisp *utils.ArgDispatcher, thIDs []string) (tIDs []string, err error) {
 	if len(sS.cfg.SessionSCfg().ThreshSConns) == 0 {

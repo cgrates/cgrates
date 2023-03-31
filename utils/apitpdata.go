@@ -1435,3 +1435,7 @@ type GetMaxSessionTimeOnAccountsArgs struct {
 	AccountIDs  []string
 	*ArgDispatcher
 }
+
+type DurationArgs struct {
+	DurationTime time.Duration
+}
