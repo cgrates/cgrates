@@ -2333,6 +2333,39 @@ func TestAccountGetBalanceWithID(t *testing.T) {
 	}
 }
 
+func TestAccExecuteAT(t *testing.T) {
+	acc := &Account{
+		ID: "1001",
+		ActionTriggers: ActionTriggers{
+			&ActionTrigger{
+				Balance: &BalanceFilter{
+					Type: utils.StringPointer(utils.MONETARY)},
+				ThresholdValue: 100,
+				ThresholdType:  "*monetary_counter",
+				ActionsID:      "TEST_ACTIONS"},
+		},
+		UnitCounters: UnitCounters{
+			utils.MONETARY: []*UnitCounter{
+				{
+					CounterType: "*monetary",
+					Counters: CounterFilters{&CounterFilter{Value: 1,
+						Filter: &BalanceFilter{},
+					},
+					}},
+			},
+		},
+	}
+	aT := &Action{
+		ActionType: utils.TOPUP,
+		Balance: &BalanceFilter{
+			Type:  utils.StringPointer(utils.MONETARY),
+			Value: &utils.ValueFormula{Static: 15},
+		},
+	}
+	acc.ExecuteActionTriggers(aT)
+	//unfinished
+}
+
 /*********************************** Benchmarks *******************************/
 
 func BenchmarkGetSecondForPrefix(b *testing.B) {

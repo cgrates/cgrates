@@ -21,8 +21,11 @@ import (
 	"reflect"
 	"sort"
 	"testing"
+	"time"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
 )
 
 func TestActionTimingTasks(t *testing.T) {
@@ -257,5 +260,82 @@ func TestCacheGetCloned(t *testing.T) {
 	at1Cloned := clned.(*ActionPlan)
 	if !reflect.DeepEqual(at1, at1Cloned) {
 		t.Errorf("Expecting: %+v, received: %+v", at1, at1Cloned)
+	}
+}
+
+func TestATExecute(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	cfg.SchedulerCfg().CDRsConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)}
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	tmpDm := dm
+	tmpConn := connMgr
+	defer func() {
+		cfg2, _ := config.NewDefaultCGRConfig()
+		config.SetCgrConfig(cfg2)
+		SetDataStorage(tmpDm)
+		SetConnManager(tmpConn)
+	}()
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn <- clMock(func(serviceMethod string, _, _ interface{}) error {
+		if serviceMethod == utils.CDRsV1ProcessEvent {
+
+			return nil
+		}
+		return utils.ErrNotImplemented
+	})
+	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs): clientConn,
+	})
+	acs := Actions{{
+		Id:               "MINI",
+		ActionType:       utils.CDRLOG,
+		ExpirationString: utils.UNLIMITED,
+		Weight:           10,
+		Balance: &BalanceFilter{
+			Type: utils.StringPointer(utils.MONETARY),
+			Uuid: utils.StringPointer(utils.GenUUID()),
+			Value: &utils.ValueFormula{Static: 10,
+				Params: make(map[string]interface{})},
+			Weight:   utils.Float64Pointer(10),
+			Disabled: utils.BoolPointer(false),
+			Timings: []*RITiming{
+				{
+					Years:     utils.Years{2016, 2017},
+					Months:    utils.Months{time.January, time.February, time.March},
+					MonthDays: utils.MonthDays{1, 2, 3, 4},
+					WeekDays:  utils.WeekDays{1, 2, 3},
+					StartTime: utils.ASAP,
+				},
+			},
+			Blocker: utils.BoolPointer(false),
+		},
+	},
+		{ActionType: utils.TOPUP,
+			Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY),
+				Value:          &utils.ValueFormula{Static: 25},
+				DestinationIDs: utils.StringMapPointer(utils.NewStringMap("RET")),
+				Weight:         utils.Float64Pointer(20)}},
+	}
+	dm.SetActions("MINI", acs, utils.NonTransactional)
+	at := &ActionTiming{
+		Uuid: utils.GenUUID(),
+		Timing: &RateInterval{
+			Timing: &RITiming{
+				Years:     utils.Years{2012},
+				Months:    utils.Months{},
+				MonthDays: utils.MonthDays{},
+				WeekDays:  utils.WeekDays{},
+				StartTime: utils.ASAP,
+			},
+		},
+		Weight:    10,
+		ActionsID: "MINI",
+	}
+	config.SetCgrConfig(cfg)
+	SetDataStorage(dm)
+	SetConnManager(connMgr)
+	if err := at.Execute(nil, nil); err == nil || err != utils.ErrPartiallyExecuted {
+		t.Error(err)
 	}
 }

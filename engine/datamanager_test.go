@@ -728,8 +728,71 @@ func TestDmRemoveThresholdProfile(t *testing.T) {
 		Async:     false,
 	}
 	dm.SetThresholdProfile(thP, true)
-
 	if err := dm.RemoveThresholdProfile("cgrates.org", "THD_ACNT_1001", utils.NonTransactional, true); err != nil {
 		t.Error(err)
 	}
+}
+
+func TestDMReplicateMultipleIds(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	tmpConn := connMgr
+	defer func() {
+		SetConnManager(tmpConn)
+	}()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn <- clMock(func(serviceMethod string, args, _ interface{}) error {
+		if serviceMethod == utils.ReplicatorSv1RemoveAccount {
+			keyList, err := dm.DataDB().GetKeysForPrefix(args.(string))
+			if err != nil {
+				return utils.ErrNotFound
+			}
+			for _, key := range keyList {
+				dm.RemoveAccount(key[len(utils.ACCOUNT_PREFIX):])
+			}
+			return nil
+		}
+		return utils.ErrNotImplemented
+	})
+	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
+	})
+	accs := []*Account{
+		{
+			ID: "cgrates.org:1001",
+			BalanceMap: map[string]Balances{
+				utils.MONETARY: {
+					&Balance{Value: 10},
+				},
+				utils.VOICE: {
+					&Balance{Value: 10, Weight: 20, DestinationIDs: utils.NewStringMap("GER")},
+					&Balance{Weight: 10, DestinationIDs: utils.NewStringMap("ENG")},
+				},
+			},
+		},
+		{
+			ID: "cgrates.org:1002",
+			BalanceMap: map[string]Balances{
+				utils.MONETARY: {
+					&Balance{
+						Weight:         30,
+						Value:          12,
+						DestinationIDs: utils.NewStringMap("DEST"),
+					},
+				},
+			},
+		},
+	}
+	connIds := make([]string, len(accs))
+	for i, acc := range accs {
+		dm.SetAccount(acc)
+		connIds[i] = acc.ID
+	}
+	if err := replicateMultipleIDs(connMgr, connIds, true, utils.ACCOUNT_PREFIX, connIds, utils.ReplicatorSv1RemoveAccount, "cgrates.org"); err != nil {
+		t.Error(err)
+	} else if ids, err := dm.DataDB().GetKeysForPrefix("cgrates"); len(ids) > 0 || err != nil {
+		t.Error(err)
+	}
+
 }
