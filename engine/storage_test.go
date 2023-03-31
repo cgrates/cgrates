@@ -1110,3 +1110,42 @@ func TestTprReloadCache(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestTpRLoadAll(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	dataDb := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	storDb := NewInternalDB(nil, nil, false, cfg.StorDbCfg().Items)
+	tpId := "TP1"
+	tpr, err := NewTpReader(dataDb, storDb, tpId, "UTC", nil, nil)
+	if err != nil {
+		t.Error(err)
+	}
+	dests := []*utils.TPDestination{
+		{
+			TPid: tpId,
+			ID:   "DEST",
+			Prefixes: []string{
+				"1001", "1002", "1003",
+			},
+		},
+	}
+	dest := &Destination{
+		Id: "DEST",
+		Prefixes: []string{
+			"1001", "1002", "1003",
+		},
+	}
+	if err := storDb.SetTPDestinations(dests); err != nil {
+		t.Error(err)
+	}
+	if err := dataDb.SetDestinationDrv(dest, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+	if err := tpr.LoadAll(); err != nil {
+		t.Error(err)
+	}
+
+	if err := tpr.RemoveFromDatabase(false, false); err != nil {
+		t.Error(err)
+	}
+}
