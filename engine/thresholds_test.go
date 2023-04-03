@@ -18,6 +18,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"bytes"
+	"log"
+	"os"
 	"reflect"
 	"sort"
 	"testing"
@@ -571,5 +574,150 @@ func TestThresholdForEvent(t *testing.T) {
 	})
 	if !reflect.DeepEqual(tIDs, expID) {
 		t.Errorf("Expected %v,Received %v", expID, tIDs)
+	}
+}
+
+func TestThresholdProcessEvent2(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
+	utils.Logger.SetLogLevel(4)
+	bf := new(bytes.Buffer)
+	utils.Logger.SetSyslog(nil)
+
+	log.SetOutput(bf)
+	tmpDm := dm
+	defer func() {
+		SetDataStorage(tmpDm)
+		utils.Logger.SetLogLevel(0)
+		log.SetOutput(os.Stderr)
+	}()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	cdrStor := NewInternalDB(nil, nil, false, cfg.StorDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	tPrfl := &ThresholdProfile{
+		Tenant:    "cgrates.org",
+		ID:        "TH2",
+		FilterIDs: []string{"*string:Account:1001", "*gt:Balance:1000"},
+		ActionIDs: []string{"ACT_1"},
+		Async:     true,
+		MaxHits:   -1,
+	}
+	th := &Threshold{
+		Tenant: "cgrates.org",
+		ID:     "THD_ACNT_1002",
+		Hits:   1,
+		tPrfl:  tPrfl,
+	}
+	args := &ArgsProcessEvent{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testRPCMethodsProcessCDR",
+			Event: map[string]interface{}{
+				utils.Tenant:      "cgrates.org",
+				utils.ToR:         utils.VOICE,
+				utils.OriginID:    "testRPCMethodsProcessCDR",
+				utils.RequestType: utils.META_PREPAID,
+				utils.Account:     "1001",
+				utils.Subject:     "ANY2CNT",
+				utils.Destination: "1002",
+				utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+				utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
+				utils.Usage:       10 * time.Minute,
+			},
+		},
+	}
+	SetDataStorage(dm)
+	as := Actions{
+		&Action{
+			ActionType: utils.MetaCDRAccount,
+			Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY),
+				Value: &utils.ValueFormula{Static: 10}},
+		},
+	}
+	cdr := &CDR{
+		Tenant:  "cgrates.org",
+		Account: "1001",
+		ToR:     utils.VOICE,
+		Subject: "ANY2CNT",
+		CostDetails: &EventCost{
+			Cost: utils.Float64Pointer(10),
+			AccountSummary: &AccountSummary{
+				Tenant: "cgrates.org",
+				ID:     "1001",
+				BalanceSummaries: []*BalanceSummary{
+					{ID: "voice2", Type: utils.VOICE, Value: 10, Disabled: false},
+				},
+				AllowNegative: true,
+				Disabled:      false,
+			},
+		},
+	}
+	if err := cdrStor.SetCDR(cdr, true); err != nil {
+		t.Error(err)
+	}
+	dm.SetActions("ACT_1", as, utils.NonTransactional)
+	acc := &Account{
+		ID:         utils.ConcatenatedKey("cgrates.org", "1001"),
+		BalanceMap: map[string]Balances{utils.MONETARY: {&Balance{Value: 10, Weight: 10}}},
+	}
+	dm.SetAccount(acc)
+	SetCdrStorage(cdrStor)
+	if err := th.ProcessEvent(args, dm); err != nil {
+		t.Error(err)
+	}
+	time.Sleep(10 * time.Millisecond)
+	if val := bf.String(); utils.EmptyString != val {
+		t.Errorf("Buffer %v", val)
+	}
+	expAcc := &Account{
+		ID: "cgrates.org:1001",
+		BalanceMap: map[string]Balances{
+			utils.VOICE: {
+				&Balance{
+					Uuid:  "1c5b18f6-8afc-4659-b731-acf0f76fa691",
+					ID:    "voice2",
+					Value: 10,
+				},
+			},
+		},
+	}
+	if val, err := dm.GetAccount("cgrates.org:1001"); err != nil {
+		t.Error(err)
+	} else if val.BalanceMap[utils.VOICE][0].ID != expAcc.BalanceMap[utils.VOICE][0].ID {
+		t.Errorf("Expected %v,Received %v", utils.ToJSON(val.BalanceMap[utils.VOICE]), utils.ToJSON(expAcc.BalanceMap[utils.VOICE]))
+	}
+}
+
+func TestTHSReload(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	cfg.ThresholdSCfg().StoreInterval = 10 * time.Millisecond
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	ts, err := NewThresholdService(dm, cfg, nil)
+	if err != nil {
+		t.Error(err)
+	}
+	go func() {
+		time.Sleep(5 * time.Millisecond)
+		ts.loopStoped <- struct{}{}
+	}()
+	ts.Reload()
+}
+
+func TestThSStoreThreshold(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	ts, err := NewThresholdService(dm, cfg, nil)
+	if err != nil {
+		t.Error(err)
+	}
+	th := &Threshold{
+		Tenant: "cgrates.org",
+		ID:     "THD_ACNT_1002",
+		Hits:   1,
+	}
+	if err := ts.StoreThreshold(th); err != nil {
+		t.Error(err)
 	}
 }
