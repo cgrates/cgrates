@@ -796,3 +796,66 @@ func TestDMReplicateMultipleIds(t *testing.T) {
 	}
 
 }
+
+func TestDmUpdateReverseDestination(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	dst := &Destination{Id: "DEST1", Prefixes: []string{"+456", "+457", "+458"}}
+	dst2 := &Destination{Id: "DEST2", Prefixes: []string{"+466", "467", "468"}}
+	if err := dm.SetReverseDestination(dst, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+	if err := dm.SetDestination(dst2, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+	for i := range dst.Prefixes {
+		if rcv, err := dm.GetReverseDestination(dst.Prefixes[i], true, utils.NonTransactional); err != nil {
+			t.Error(err)
+		} else if !reflect.DeepEqual(rcv, []string{dst.Id}) {
+			t.Errorf("Expected  %v,Received %v", utils.ToJSON(rcv), utils.ToJSON([]string{dst.Id}))
+		}
+	}
+	if err := dm.UpdateReverseDestination(dst, dst2, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+	for i := range dst2.Prefixes {
+		if rcv, err := dm.GetReverseDestination(dst2.Prefixes[i], true, utils.NonTransactional); err != nil {
+			t.Error(err)
+		} else if !reflect.DeepEqual(rcv, []string{dst2.Id}) {
+			t.Errorf("Expected  %v,Received %v", utils.ToJSON(rcv), utils.ToJSON([]string{dst2.Id}))
+		}
+	}
+
+}
+
+func TestActionTriggerRplRmt(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	attrs := ActionTriggers{
+		{
+			Balance: &BalanceFilter{
+				Type: utils.StringPointer(utils.MONETARY),
+			},
+			ThresholdType:  utils.TRIGGER_MAX_BALANCE,
+			ThresholdValue: 2,
+		},
+		{
+			UniqueID:      "TestTR1",
+			ThresholdType: utils.TRIGGER_MAX_EVENT_COUNTER,
+			Balance: &BalanceFilter{
+				Type:   utils.StringPointer(utils.MONETARY),
+				Weight: utils.Float64Pointer(10),
+			},
+		},
+	}
+	if err := dm.SetActionTriggers("TEST_ACTIONS", attrs, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+	if vals, err := dm.GetActionTriggers("TEST_ACTIONS", true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(attrs, vals) {
+		t.Errorf("Expected %v,Receive %v", attrs, vals)
+	}
+}

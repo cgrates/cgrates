@@ -1411,3 +1411,35 @@ func TestResourceAuthorizeResources22(t *testing.T) {
 	}
 
 }
+
+func TestResourceService(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	cfg.ResourceSCfg().StoreInterval = 4 * time.Millisecond
+	tmpCache := Cache
+	defer func() {
+		Cache = tmpCache
+	}()
+	Cache.Clear(nil)
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	rS, err := NewResourceService(dm, cfg, nil, nil)
+	if err != nil {
+		t.Error(err)
+	}
+	rS.storedResources = utils.StringMap{
+		"R1": true,
+	}
+	Cache.Set(utils.CacheResources, "R1", &Resource{Tenant: "cgrates.org", ID: "R1", Usages: map[string]*ResourceUsage{
+		"RU2": {
+			Tenant:     "cgrates.org",
+			ID:         "RU2",
+			ExpiryTime: time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC),
+			Units:      2,
+		},
+	}}, []string{}, true, utils.NonTransactional)
+	go func() {
+		rS.loopStoped <- struct{}{}
+	}()
+
+	rS.Reload()
+}

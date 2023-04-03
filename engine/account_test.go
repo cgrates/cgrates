@@ -22,6 +22,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -2334,24 +2335,46 @@ func TestAccountGetBalanceWithID(t *testing.T) {
 }
 
 func TestAccExecuteAT(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	tmpDm := dm
+	defer func() {
+		cfg2, _ := config.NewDefaultCGRConfig()
+		config.SetCgrConfig(cfg2)
+		SetDataStorage(tmpDm)
+	}()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 	acc := &Account{
-		ID: "1001",
+		ID: "cgrates.org:1001",
 		ActionTriggers: ActionTriggers{
 			&ActionTrigger{
 				Balance: &BalanceFilter{
+					ID:   utils.StringPointer("test_1234"),
 					Type: utils.StringPointer(utils.MONETARY)},
 				ThresholdValue: 100,
-				ThresholdType:  "*monetary_counter",
+				ThresholdType:  "*max_*monetary_counter",
 				ActionsID:      "TEST_ACTIONS"},
 		},
 		UnitCounters: UnitCounters{
 			utils.MONETARY: []*UnitCounter{
 				{
 					CounterType: "*monetary",
-					Counters: CounterFilters{&CounterFilter{Value: 1,
-						Filter: &BalanceFilter{},
+					Counters: CounterFilters{&CounterFilter{
+						Value: 101,
+						Filter: &BalanceFilter{
+							ID: utils.StringPointer("test_1234"),
+						},
 					},
 					}},
+			},
+		},
+		BalanceMap: map[string]Balances{
+			utils.MONETARY: {
+				&Balance{Value: 10},
+			},
+			utils.VOICE: {
+				&Balance{Value: 10, Weight: 20, DestinationIDs: utils.NewStringMap(utils.MetaDDC + "DEST1")},
+				&Balance{Weight: 10, DestinationIDs: utils.NewStringMap(utils.MetaDDC + "DEST2")},
 			},
 		},
 	}
@@ -2362,8 +2385,24 @@ func TestAccExecuteAT(t *testing.T) {
 			Value: &utils.ValueFormula{Static: 15},
 		},
 	}
+	dm.SetActions("TEST_ACTIONS", Actions{&Action{
+		Id:               "MINI",
+		ActionType:       utils.SET_DDESTINATIONS,
+		ExpirationString: utils.UNLIMITED,
+		Weight:           10,
+		Balance: &BalanceFilter{
+			Type: utils.StringPointer(utils.VOICE),
+			Value: &utils.ValueFormula{Static: 100,
+				Params: make(map[string]interface{})},
+			Weight:  utils.Float64Pointer(10),
+			Blocker: utils.BoolPointer(false),
+		},
+	}}, utils.NonTransactional)
+	SetDataStorage(dm)
 	acc.ExecuteActionTriggers(aT)
-	//unfinished
+	if _, err := dm.GetAccount("cgrates.org:1001"); err != nil {
+		t.Error(err)
+	}
 }
 
 /*********************************** Benchmarks *******************************/

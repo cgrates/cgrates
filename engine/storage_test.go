@@ -1033,14 +1033,6 @@ func TestTprReloadCache(t *testing.T) {
 	clientConn := make(chan rpcclient.ClientConnector, 1)
 	clientConn <- clMock(func(serviceMethod string, args, _ interface{}) error {
 		if serviceMethod == utils.CacheSv1LoadCache {
-			cacheargs, cancast := args.(*utils.AttrReloadCacheWithArgDispatcher)
-			if !cancast {
-				return utils.ErrNotConvertible
-			}
-			if err := dm.LoadDataDBCache(
-				cacheargs.DestinationIDs, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, cacheargs.FilterIDs, nil, nil, nil, nil, nil); err != nil {
-				return utils.NewErrServerError(err)
-			}
 			return nil
 		} else if serviceMethod == utils.CacheSv1Clear {
 			return nil
@@ -1135,12 +1127,80 @@ func TestTpRLoadAll(t *testing.T) {
 			"1001", "1002", "1003",
 		},
 	}
+	rates := []*utils.TPRate{
+		&utils.TPRate{
+			TPid: tpId,
+			ID:   "RATE1",
+			RateSlots: []*utils.RateSlot{
+				{ConnectFee: 12,
+					Rate:               3,
+					RateUnit:           "4s",
+					RateIncrement:      "6s",
+					GroupIntervalStart: "1s"},
+			},
+		}}
+	destRates := []*utils.TPDestinationRate{
+		{
+			TPid: tpId,
+			ID:   "DR_FREESWITCH_USERS",
+			DestinationRates: []*utils.DestinationRate{
+				{
+					DestinationId:    "DEST",
+					RateId:           "RATE1",
+					RoundingMethod:   "*up",
+					RoundingDecimals: 4},
+			},
+		},
+	}
+	timings := []*utils.ApierTPTiming{
+		{
+			TPid:      tpId,
+			ID:        "ALWAYS",
+			Years:     "*any",
+			Months:    "*any",
+			MonthDays: "*any",
+			WeekDays:  "1;2;3;4;5",
+			Time:      "19:00:00",
+		},
+	}
+
+	ratingPlans := []*utils.TPRatingPlan{
+		{
+			TPid: tpId,
+			ID:   "RP_1",
+			RatingPlanBindings: []*utils.TPRatingPlanBinding{
+				{
+					DestinationRatesId: "DR_FREESWITCH_USERS",
+					TimingId:           "ALWAYS",
+					Weight:             10,
+				},
+			},
+		},
+	}
+
 	if err := storDb.SetTPDestinations(dests); err != nil {
 		t.Error(err)
 	}
+
 	if err := dataDb.SetDestinationDrv(dest, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
+
+	if err := storDb.SetTPRates(rates); err != nil {
+		t.Error(err)
+	}
+
+	if err := storDb.SetTPDestinationRates(destRates); err != nil {
+		t.Error(err)
+	}
+
+	if err := storDb.SetTPTimings(timings); err != nil {
+		t.Error(err)
+	}
+	if err := storDb.SetTPRatingPlans(ratingPlans); err != nil {
+		t.Error(err)
+	}
+
 	if err := tpr.LoadAll(); err != nil {
 		t.Error(err)
 	}
