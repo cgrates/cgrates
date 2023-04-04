@@ -368,3 +368,70 @@ func TestBalancesSaveDirtyBalances(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestBalancePublish(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	tmpDm := dm
+	tmpConn := connMgr
+	defer func() {
+		cfg2, _ := config.NewDefaultCGRConfig()
+		config.SetCgrConfig(cfg2)
+		SetDataStorage(tmpDm)
+		SetConnManager(tmpConn)
+	}()
+	cfg.RalsCfg().StatSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}
+	cfg.RalsCfg().ThresholdSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)}
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn <- clMock(func(serviceMethod string, _, _ interface{}) error {
+		if serviceMethod == utils.StatSv1ProcessEvent {
+
+			return nil
+		} else if serviceMethod == utils.ThresholdSv1ProcessEvent {
+
+			return nil
+		}
+		return utils.ErrNotImplemented
+	})
+	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats):      clientConn,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds): clientConn,
+	})
+	SetConnManager(connMgr)
+	at := &ActionTrigger{
+		UniqueID:      "TestTR5",
+		ThresholdType: utils.TRIGGER_MAX_BALANCE,
+		Balance: &BalanceFilter{
+			Type:   utils.StringPointer(utils.VOICE),
+			Weight: utils.Float64Pointer(10),
+		},
+		ActionsID: "ACT_1",
+	}
+	ub := &Account{
+		ID: "cgrates.org:1001",
+		BalanceMap: map[string]Balances{
+			utils.VOICE: {
+				{
+					Value:          10,
+					DestinationIDs: utils.NewStringMap("DEST"),
+				},
+			},
+		},
+	}
+	dm.SetActions("ACT_1", Actions{
+		&Action{
+			ActionType: utils.MetaPublishBalance,
+			Balance: &BalanceFilter{
+				Type:  utils.StringPointer(utils.VOICE),
+				Value: &utils.ValueFormula{Static: 15},
+			},
+		},
+	}, utils.NonTransactional)
+	config.SetCgrConfig(cfg)
+	SetDataStorage(dm)
+	if err := at.Execute(ub); err != nil {
+		t.Error(err)
+	}
+
+}

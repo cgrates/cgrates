@@ -447,3 +447,105 @@ func TestCDRSRateCDRs(t *testing.T) {
 		t.Errorf("Expected 1,Received %d", cnt)
 	}
 }
+
+func TestCDRSRateCDRSucces(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	cfg.CdrsCfg().SMCostRetries = 0
+	cfg.CdrsCfg().RaterConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs)}
+	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn <- clMock(func(serviceMethod string, _, reply interface{}) error {
+		if serviceMethod == utils.ResponderDebit {
+			rpl := CallCost{
+				Destination: "1002",
+				Timespans: []*TimeSpan{
+					{
+						TimeStart:     time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
+						TimeEnd:       time.Date(2018, 8, 24, 16, 00, 36, 0, time.UTC),
+						ratingInfo:    &RatingInfo{},
+						DurationIndex: 0,
+						RateInterval: &RateInterval{
+							Rating: &RIRate{
+								Rates: RateGroups{
+									&Rate{GroupIntervalStart: 0,
+										Value:         100,
+										RateIncrement: 1,
+										RateUnit:      time.Nanosecond}}}},
+					},
+				},
+				ToR: utils.SMS,
+			}
+			*reply.(*CallCost) = rpl
+			return nil
+		}
+		return utils.ErrNotImplemented
+	})
+	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs): clientConn,
+	})
+	cdrS := &CDRServer{
+		cgrCfg:  cfg,
+		cdrDb:   db,
+		dm:      dm,
+		connMgr: connMgr,
+	}
+	cdr := &CDRWithArgDispatcher{
+		CDR: &CDR{CGRID: "Cdr1",
+			OrderID:     101,
+			ToR:         utils.VOICE,
+			OriginID:    "OriginCDR1",
+			OriginHost:  "192.168.1.1",
+			Source:      "test",
+			RequestType: utils.META_PREPAID,
+			Tenant:      "cgrates.org",
+			Category:    "call",
+			Account:     "1001",
+			Subject:     "1001",
+			Destination: "1002",
+			SetupTime:   time.Date(2018, 8, 24, 16, 00, 00, 0, time.UTC),
+			AnswerTime:  time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
+			RunID:       utils.MetaDefault,
+			Usage:       time.Duration(10) * time.Second,
+			ExtraFields: map[string]string{"ExtraHeader1": "ExtraVal1", "ExtraHeader2": "ExtraVal2"},
+			Cost:        1.01},
+	}
+	if _, err := cdrS.rateCDR(cdr); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestV2StoreSessionCost(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	cfg.CacheCfg()[utils.CacheRPCResponses].Limit = 1
+	Cache.Clear(nil)
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	cdrS := &CDRServer{
+		cgrCfg: cfg,
+		dm:     dm,
+		cdrDb:  db,
+		guard:  guardian.Guardian,
+	}
+	args := &ArgsV2CDRSStoreSMCost{
+		CheckDuplicate: true,
+		Cost: &V2SMCost{
+			CGRID:      "testRPCMethodsCdrsStoreSessionCost",
+			RunID:      utils.MetaDefault,
+			OriginHost: "",
+			OriginID:   "testdatagrp_grp1",
+			CostSource: "SMR",
+			Usage:      1536,
+			CostDetails: &EventCost{
+				AccountSummary: &AccountSummary{},
+			},
+		},
+	}
+	Cache.Set(utils.CacheRPCResponses, utils.ConcatenatedKey(utils.CDRsV1StoreSessionCost, args.Cost.CGRID, args.Cost.RunID),
+		&utils.CachedRPCResponse{Result: utils.OK, Error: nil},
+		nil, true, utils.NonTransactional)
+	var reply string
+	if err := cdrS.V2StoreSessionCost(args, &reply); err != nil {
+		t.Error(err)
+	}
+}

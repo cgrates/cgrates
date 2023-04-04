@@ -1039,15 +1039,16 @@ func TestTprReloadCache(t *testing.T) {
 		}
 		return utils.ErrNotImplemented
 	})
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr2 := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches): clientConn,
 	})
 
-	SetConnManager(connMgr)
+	SetConnManager(connMgr2)
 	tpr, err := NewTpReader(dataDb, storDb, "TEST_TP", "UTC", []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}, nil)
 	if err != nil {
 		t.Error(err)
 	}
+	tpr.dm.SetLoadIDs(map[string]int64{utils.CacheChargerProfiles: time.Now().UnixNano(), utils.CacheDispatcherProfiles: time.Now().UnixNano()})
 	dests := []*utils.TPDestination{
 		{
 			TPid: "TEST_TP",
@@ -1128,7 +1129,7 @@ func TestTpRLoadAll(t *testing.T) {
 		},
 	}
 	rates := []*utils.TPRate{
-		&utils.TPRate{
+		{
 			TPid: tpId,
 			ID:   "RATE1",
 			RateSlots: []*utils.RateSlot{
