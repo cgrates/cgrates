@@ -859,3 +859,32 @@ func TestActionTriggerRplRmt(t *testing.T) {
 		t.Errorf("Expected %v,Receive %v", attrs, vals)
 	}
 }
+
+func TestDMRemoveAttributeProfile(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	attrPrf := &AttributeProfile{
+		Tenant:    "cgrates.org",
+		ID:        "ATTR_1",
+		FilterIDs: []string{"*string:~*req.Account:1007"},
+		Contexts:  []string{utils.MetaSessionS, utils.MetaCDRs},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 1, 14, 0, 0, 0, 0, time.UTC)},
+		Attributes: []*Attribute{
+			{
+				Path:  utils.MetaReq + utils.NestingSep + utils.Account,
+				Value: config.NewRSRParsersMustCompile("1001", true, utils.INFIELD_SEP),
+			},
+			{
+				Path:  utils.MetaReq + utils.NestingSep + utils.Subject,
+				Value: config.NewRSRParsersMustCompile("1001", true, utils.INFIELD_SEP),
+			},
+		},
+		Weight: 10.0,
+	}
+	dm.SetAttributeProfile(attrPrf, true)
+	if err := dm.RemoveAttributeProfile("cgrates.org", "ATTR_1", utils.NonTransactional, true); err != nil {
+		t.Error(err)
+	}
+}

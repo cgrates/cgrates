@@ -1072,3 +1072,62 @@ func TestResponderRounding(t *testing.T) {
 		t.Error(utils.ToJSON(reply))
 	}
 }
+
+func TestResponderDebitCached(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	defer func() {
+		cfg2, _ := config.NewDefaultCGRConfig()
+		config.SetCgrConfig(cfg2)
+	}()
+	cfg.CacheCfg()[utils.CacheRPCResponses].Limit = 2
+	Cache.Clear(nil)
+	tStart, _ := utils.ParseTimeDetectLayout("2022-08-07T17:30:00Z", utils.EmptyString)
+	tEnd, _ := utils.ParseTimeDetectLayout("2022-08-07T17:31:30Z", utils.EmptyString)
+	cd := &CallDescriptorWithArgDispatcher{
+		CallDescriptor: &CallDescriptor{
+			CgrID:         "test",
+			Category:      "call",
+			Tenant:        "cgrates.org",
+			Subject:       "1001",
+			Account:       "1001",
+			ToR:           utils.VOICE,
+			Destination:   "1002",
+			TimeStart:     tStart,
+			DurationIndex: 10 * time.Second,
+			TimeEnd:       tEnd,
+		},
+	}
+	cc := &CallCost{
+		Cost:        1.23,
+		Destination: "1002",
+		Timespans: []*TimeSpan{
+			{
+				TimeStart:     time.Date(2022, 8, 7, 17, 30, 0, 0, time.UTC),
+				TimeEnd:       time.Date(2022, 8, 7, 17, 31, 30, 0, time.UTC),
+				DurationIndex: 0,
+				RateInterval: &RateInterval{
+					Rating: &RIRate{
+						Rates: RateGroups{
+							&Rate{
+								GroupIntervalStart: 0,
+								Value:              100,
+								RateIncrement:      10 * time.Second,
+								RateUnit:           time.Second,
+							},
+						},
+					},
+				},
+			},
+		},
+		ToR: utils.VOICE,
+	}
+	Cache.Set(utils.CacheRPCResponses, utils.ConcatenatedKey(utils.ResponderDebit, cd.CgrID),
+		&utils.CachedRPCResponse{Result: cc, Error: nil},
+		nil, true, utils.NonTransactional)
+	config.SetCgrConfig(cfg)
+	var reply CallCost
+	if err := rsponder.Debit(cd, &reply); err == nil {
+		t.Error(err)
+	}
+
+}
