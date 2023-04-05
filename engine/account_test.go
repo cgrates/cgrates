@@ -2405,6 +2405,49 @@ func TestAccExecuteAT(t *testing.T) {
 	}
 }
 
+func TestAccountSetRrecurrentAction(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	tmpDm := dm
+	defer func() {
+		cfg2, _ := config.NewDefaultCGRConfig()
+		config.SetCgrConfig(cfg2)
+		SetDataStorage(tmpDm)
+	}()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+
+	ub := &Account{
+		ID: "cgrates.org:1001",
+		ActionTriggers: ActionTriggers{
+			&ActionTrigger{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY)},
+				ThresholdValue: 2, ActionsID: "ACT_1", Executed: true},
+			&ActionTrigger{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY)},
+				ThresholdValue: 2, ActionsID: "TEST_ACTIONS", Executed: true}},
+	}
+	aT := ActionTrigger{
+		UniqueID:  "TestTR3",
+		ActionsID: "ACT_1",
+		Balance: &BalanceFilter{
+			Type:   utils.StringPointer(utils.VOICE),
+			Weight: utils.Float64Pointer(10),
+		},
+	}
+	dm.SetActions("ACT_1", Actions{
+		{ActionType: utils.SET_RECURRENT,
+			Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY),
+				Value:          &utils.ValueFormula{Static: 25},
+				DestinationIDs: utils.StringMapPointer(utils.NewStringMap("RET")),
+				Weight:         utils.Float64Pointer(20)}},
+	}, utils.NonTransactional)
+
+	config.SetCgrConfig(cfg)
+	SetDataStorage(dm)
+	if err := aT.Execute(ub); err != nil {
+		t.Error(err)
+	}
+
+}
+
 /*********************************** Benchmarks *******************************/
 
 func BenchmarkGetSecondForPrefix(b *testing.B) {

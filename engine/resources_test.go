@@ -1443,3 +1443,48 @@ func TestResourceService(t *testing.T) {
 
 	rS.Reload()
 }
+
+func TestRSProcessThreshold(t *testing.T) {
+	Cache.Clear(nil)
+	cfg, _ := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, config.CgrConfig().CacheCfg(), nil)
+	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn <- clMock(func(serviceMethod string, _, _ interface{}) error {
+		if serviceMethod == utils.ThresholdSv1ProcessEvent {
+			return nil
+		}
+		return utils.ErrNotImplemented
+	})
+	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds): clientConn})
+	rS, _ := NewResourceService(dm, cfg,
+		NewFilterS(cfg, nil, dm), connMgr)
+	cfg.ResourceSCfg().ThresholdSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)}
+	rs := Resources{
+		{
+			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+			ID:     "ResourceProfile1",
+			Usages: map[string]*ResourceUsage{},
+			TTLIdx: []string{},
+			rPrf:   resprf[0],
+		},
+		{
+			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+			ID:     "ResourceProfile2",
+			Usages: map[string]*ResourceUsage{},
+			TTLIdx: []string{},
+			rPrf:   resprf[1],
+		},
+		{
+			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+			ID:     "ResourceProfile3",
+			Usages: map[string]*ResourceUsage{},
+			TTLIdx: []string{},
+			rPrf:   resprf[2],
+		},
+	}
+	if err := rS.processThresholds(rs, nil); err != nil {
+		t.Error(err)
+	}
+}

@@ -2084,7 +2084,6 @@ func TestFilterSPass11(t *testing.T) {
 	rsr := &Resource{
 		Tenant: "cgrates.org",
 		ID:     "RL1",
-
 		Usages: map[string]*ResourceUsage{
 			"RU1": {
 				ID:         "RU1",
@@ -2134,14 +2133,13 @@ func TestFilterSPass11(t *testing.T) {
 	})
 
 	fltrs := []*Filter{
-
 		{
 			Tenant: "cgrates.org",
 			ID:     "FLTR_ACC",
 			Rules: []*FilterRule{{
 				Type:    utils.MetaString,
 				Element: "~*accounts.1001.BalanceMap.*voice[0].Value",
-				Values:  []string{utils.IfaceAsString(20 * float64(time.Second))},
+				Values:  []string{"~*accounts.1001.BalanceMap.*voice[0].Value" + utils.IfaceAsString(20*float64(time.Second))},
 			}},
 		},
 		{
@@ -2151,7 +2149,7 @@ func TestFilterSPass11(t *testing.T) {
 				{
 					Type:    "*lte",
 					Element: "~*resources.RL1.Usage.RUI.Units",
-					Values:  []string{"2"},
+					Values:  []string{"~*resources.RL1.Usage.RUI.Units.2"},
 				},
 			},
 		},
@@ -2162,7 +2160,7 @@ func TestFilterSPass11(t *testing.T) {
 				{
 					Type:    "*gt",
 					Element: "~*stats.SQ_1.*asr",
-					Values:  []string{"10.0"},
+					Values:  []string{"~*stats.SQ_1.*asr.10.0"},
 				},
 			},
 		},

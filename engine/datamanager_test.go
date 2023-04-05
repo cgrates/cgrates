@@ -888,3 +888,62 @@ func TestDMRemoveAttributeProfile(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestThresholdProfileSetWithIndex(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	fltr1 := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "FLTR_TH_2",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaString,
+				Element: "~*req.Threshold",
+				Values:  []string{"TH_2"},
+			},
+			{
+				Type:    utils.MetaGreaterOrEqual,
+				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Weight,
+				Values:  []string{"15.0"},
+			},
+		},
+	}
+	dm.SetFilter(fltr1)
+	thp := &ThresholdProfile{
+		Tenant:    "cgrates.org",
+		ID:        "THD_AccDisableAndLog",
+		FilterIDs: []string{"FLTR_TH_2"},
+		MaxHits:   -1,
+		MinSleep:  time.Duration(1 * time.Second),
+		Weight:    20.0,
+		Async:     true,
+		ActionIDs: []string{"DISABLE_LOG"},
+	}
+	dm.SetThresholdProfile(thp, true)
+	fltr2 := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "FLTR_TH_3",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaPrefix,
+				Element: "~*req.Threshold",
+				Values:  []string{"THD"},
+			},
+		},
+	}
+	dm.SetFilter(fltr2)
+	thp = &ThresholdProfile{
+		Tenant:    "cgrates.org",
+		ID:        "THD_AccDisableAndLog",
+		FilterIDs: []string{"FLTR_TH_3"},
+		MaxHits:   -1,
+		MinSleep:  time.Duration(1 * time.Second),
+		Weight:    20.0,
+		Async:     true,
+		ActionIDs: []string{"DISABLE_LOG"},
+	}
+	if err := dm.SetThresholdProfile(thp, true); err != nil {
+		t.Error(err)
+	}
+}
