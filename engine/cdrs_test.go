@@ -549,3 +549,74 @@ func TestV2StoreSessionCost(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+// func TestCRDSRefundEventCost(t *testing.T) {
+// 	cfg, _ := config.NewDefaultCGRConfig()
+// 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+// 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+// 	cfg.CdrsCfg().RaterConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs)}
+// 	cdrS := &CDRServer{cgrCfg: cfg, dm: dm, cdrDb: db}
+
+// 	clientConn := make(chan rpcclient.ClientConnector, 1)
+// 	clientConn <- clMock(func(serviceMethod string, _, _ interface{}) error {
+
+// 		if serviceMethod == utils.ResponderRefundIncrements {
+
+// 			return nil
+// 		}
+// 		return utils.ErrNotImplemented
+// 	})
+
+// 	ec := &EventCost{
+// 		Cost: utils.Float64Pointer(10),
+// 		Accounting: map[string]*BalanceCharge{
+// 			"3463957": &BalanceCharge{
+// 				Units:         0.002623,
+// 				RatingID:      "",
+// 				AccountID:     "cgrates.org:1001",
+// 				BalanceUUID:   "154419f2-45e0-4629-a203-06034ccb493f",
+// 				ExtraChargeID: "",
+// 			},
+// 			"fee8a3a": &BalanceCharge{
+// 				Units:         0.0787,
+// 				RatingID:      "",
+// 				AccountID:     "cgrates.org:1001",
+// 				BalanceUUID:   "154419f2-45e0-4629-a203-06034ccb493f",
+// 				ExtraChargeID: "",
+// 			},
+// 		},
+// 		AccountSummary: &AccountSummary{
+// 			Tenant: "cgrates.org",
+// 			ID:     "1001",
+
+// 			BalanceSummaries: []*BalanceSummary{
+// 				{ID: "voice2", Type: utils.VOICE, Value: 10, Disabled: false},
+// 			},
+// 			AllowNegative: true,
+// 			Disabled:      false,
+// 		},
+// 		Charges: []*ChargingInterval{
+// 			{
+// 				RatingID: "c1a5ab9",
+// 				Increments: []*ChargingIncrement{
+// 					{
+// 						Usage:          time.Duration(0),
+// 						Cost:           0.1,
+// 						AccountingID:   "3463957",
+// 						CompressFactor: 1,
+// 					},
+// 					{
+// 						Usage:          time.Duration(1 * time.Second),
+// 						Cost:           0,
+// 						AccountingID:   "fee8a3a",
+// 						CompressFactor: 10,
+// 					},
+// 				},
+// 				CompressFactor: 1,
+// 			},
+// 		}}
+
+// 	if err := cdrS.refundEventCost(ec, "*prepaid", "*monetary"); err != nil {
+// 		t.Error(err)
+// 	}
+// }
