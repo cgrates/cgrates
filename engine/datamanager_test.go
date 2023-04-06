@@ -10016,7 +10016,7 @@ func TestDMGetDispatcherProfileNilDMErr(t *testing.T) {
 
 }
 
-func TestDMGetDispatcherProfileSetChargerProfileDrvErr(t *testing.T) {
+func TestDMGetDispatcherProfileSetDispatcherProfileDrvErr(t *testing.T) {
 
 	cfgtmp := config.CgrConfig()
 	defer func() {
@@ -10187,4 +10187,191 @@ func TestDMGetDispatcherProfileCacheWriteErr2(t *testing.T) {
 		t.Errorf("Expected error <%v>, received error <%v>", utils.ErrNotImplemented, err)
 	}
 
+}
+
+func TestDMGetDispatcherHostCacheGetErr(t *testing.T) {
+
+	defer func() {
+		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	if err := Cache.Set(context.Background(), utils.CacheDispatcherHosts, utils.ConcatenatedKey(utils.CGRateSorg, "dh1"), nil, []string{}, true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+
+	_, err := dm.GetDispatcherHost(context.Background(), utils.CGRateSorg, "dh1", true, false, utils.NonTransactional)
+	if err != utils.ErrDSPHostNotFound {
+		t.Errorf("Expected error <%v>, received error <%v>", utils.ErrDSPHostNotFound, err)
+	}
+}
+
+func TestDMGetDispatcherHostCacheGet(t *testing.T) {
+
+	defer func() {
+		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	dH := &DispatcherHost{
+		Tenant: "cgrates.org",
+		RemoteHost: &config.RemoteHost{
+			ID:                   "ID",
+			Address:              "127.0.0.1",
+			Transport:            utils.MetaJSON,
+			ConnectAttempts:      1,
+			Reconnects:           1,
+			MaxReconnectInterval: 1,
+			ConnectTimeout:       time.Nanosecond,
+			ReplyTimeout:         time.Nanosecond,
+			TLS:                  true,
+			ClientKey:            "key",
+			ClientCertificate:    "ce",
+			CaCertificate:        "ca",
+		},
+	}
+
+	if err := Cache.Set(context.Background(), utils.CacheDispatcherHosts, utils.ConcatenatedKey(utils.CGRateSorg, "dh1"), dH, []string{}, true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+
+	if rcv, err := dm.GetDispatcherHost(context.Background(), utils.CGRateSorg, "dh1", true, false, utils.NonTransactional); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcv, dH) {
+		t.Errorf("Expected <%v>, received <%v>", dH, rcv)
+	}
+}
+
+func TestDMGetDispatcherHostNilDMErr(t *testing.T) {
+
+	var dm *DataManager
+
+	_, err := dm.GetDispatcherHost(context.Background(), utils.CGRateSorg, "dh1", false, false, utils.NonTransactional)
+	if err != utils.ErrNoDatabaseConn {
+		t.Errorf("\nExpected error <%+v>, \nReceived error <%+v>", utils.ErrNoDatabaseConn, err)
+	}
+
+}
+
+func TestDMGetDispatcherHostSetDispatcherHostDrvErr(t *testing.T) {
+
+	cfgtmp := config.CgrConfig()
+	defer func() {
+		config.SetCgrConfig(cfgtmp)
+		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+	}()
+
+	dH := &DispatcherHost{
+		Tenant: "cgrates.org",
+		RemoteHost: &config.RemoteHost{
+			ID:                   "ID",
+			Address:              "127.0.0.1",
+			Transport:            utils.MetaJSON,
+			ConnectAttempts:      1,
+			Reconnects:           1,
+			MaxReconnectInterval: 1,
+			ConnectTimeout:       time.Nanosecond,
+			ReplyTimeout:         time.Nanosecond,
+			TLS:                  true,
+			ClientKey:            "key",
+			ClientCertificate:    "ce",
+			CaCertificate:        "ca",
+		},
+	}
+
+	cfg := config.NewDefaultCGRConfig()
+	cfg.DataDbCfg().Items[utils.MetaDispatcherHosts].Remote = true
+	cfg.DataDbCfg().RmtConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.RemoteConnsCfg)}
+	config.SetCgrConfig(cfg)
+
+	cc := make(chan birpc.ClientConnector, 1)
+	cc <- &ccMock{
+
+		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+			utils.ReplicatorSv1GetDispatcherHost: func(ctx *context.Context, args, reply interface{}) error { return nil },
+		},
+	}
+
+	cM := NewConnManager(cfg)
+	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.RemoteConnsCfg), utils.ReplicatorSv1, cc)
+	data := &DataDBMock{
+		GetDispatcherHostDrvF: func(ctx *context.Context, s1, s2 string) (*DispatcherHost, error) {
+			return dH, utils.ErrDSPHostNotFound
+		},
+		SetDispatcherHostDrvF: func(ctx *context.Context, dh *DispatcherHost) error { return utils.ErrNotImplemented },
+	}
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	_, err := dm.GetDispatcherHost(context.Background(), utils.CGRateSorg, dH.ID, false, false, utils.NonTransactional)
+	if err != utils.ErrNotImplemented {
+		t.Errorf("Expected error <%v>, received error <%v>", utils.ErrNotImplemented, err)
+	}
+}
+
+func TestDMGetDispatcherHostCacheWriteErr1(t *testing.T) {
+
+	dH := &DispatcherHost{
+		Tenant: "cgrates.org",
+		RemoteHost: &config.RemoteHost{
+			ID:                   "ID",
+			Address:              "127.0.0.1",
+			Transport:            utils.MetaJSON,
+			ConnectAttempts:      1,
+			Reconnects:           1,
+			MaxReconnectInterval: 1,
+			ConnectTimeout:       time.Nanosecond,
+			ReplyTimeout:         time.Nanosecond,
+			TLS:                  true,
+			ClientKey:            "key",
+			ClientCertificate:    "ce",
+			CaCertificate:        "ca",
+		},
+	}
+
+	cfgtmp := config.CgrConfig()
+	defer func() {
+		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+		config.SetCgrConfig(cfgtmp)
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	cfg.CacheCfg().ReplicationConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
+	cfg.CacheCfg().Partitions[utils.CacheDispatcherHosts].Replicate = true
+	config.SetCgrConfig(cfg)
+
+	cc := make(chan birpc.ClientConnector, 1)
+	cc <- &ccMock{
+
+		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply interface{}) error {
+
+				return utils.ErrNotImplemented
+			},
+		},
+	}
+
+	cM := NewConnManager(cfg)
+	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.CacheSv1, cc)
+
+	data := &DataDBMock{
+		GetDispatcherHostDrvF: func(ctx *context.Context, s1, s2 string) (*DispatcherHost, error) {
+			return dH, utils.ErrDSPHostNotFound
+		},
+	}
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	Cache = NewCacheS(cfg, dm, cM, nil)
+
+	_, err := dm.GetDispatcherHost(context.Background(), utils.CGRateSorg, dH.ID, false, true, utils.NonTransactional)
+	if err != utils.ErrNotImplemented {
+		t.Errorf("Expected error <%v>, received error <%v>", utils.ErrNotImplemented, err)
+	}
 }
