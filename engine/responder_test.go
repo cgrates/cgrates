@@ -1129,5 +1129,4 @@ func TestResponderDebitCached(t *testing.T) {
 	if err := rsponder.Debit(cd, &reply); err == nil {
 		t.Error(err)
 	}
-
 }

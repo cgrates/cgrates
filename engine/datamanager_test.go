@@ -142,6 +142,7 @@ func TestDmMatchFilterIndexFromKey(t *testing.T) {
 		cfg2, _ := config.NewDefaultCGRConfig()
 		config.SetCgrConfig(cfg2)
 	}()
+	Cache.Clear(nil)
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	cfg.DataDbCfg().Items[utils.MetaFilterIndexes].Remote = true
 	cfg.DataDbCfg().RmtConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1)}
@@ -184,10 +185,9 @@ func TestDmMatchFilterIndexFromKey(t *testing.T) {
 		t.Error(err)
 	}
 	config.SetCgrConfig(cfg)
-	if err := dm.MatchFilterIndexFromKey(utils.CacheResourceFilterIndexes, "cgrates.org:*string:Account:1002"); err == nil {
+	if err := dm.MatchFilterIndexFromKey(utils.CacheResourceFilterIndexes, "cgrates.org:*string:Account:1002"); err != nil {
 		t.Error(err)
 	}
-	//unifinished
 }
 
 func TestCacheDataFromDB(t *testing.T) {
@@ -218,12 +218,26 @@ func TestCacheDataFromDB(t *testing.T) {
 			Weight:       20,
 		},
 	}
+	dest := &Destination{
+		Id: "DEST", Prefixes: []string{"1004", "1002", "1002"},
+	}
+	dm.SetDestination(dest, "")
+	dm.SetReverseDestination(dest, "")
+
 	for _, chg := range chgS {
 		if err := dm.SetChargerProfile(chg, true); err != nil {
 			t.Error(err)
 		}
 	}
 	if err := dm.CacheDataFromDB(utils.ChargerProfilePrefix, nil, false); err != nil {
+		t.Error(err)
+	}
+
+	if err := dm.CacheDataFromDB(utils.DESTINATION_PREFIX, nil, false); err != nil {
+		t.Error(err)
+	}
+
+	if err := dm.CacheDataFromDB(utils.REVERSE_DESTINATION_PREFIX, nil, false); err != nil {
 		t.Error(err)
 	}
 }
@@ -945,5 +959,61 @@ func TestThresholdProfileSetWithIndex(t *testing.T) {
 	}
 	if err := dm.SetThresholdProfile(thp, true); err != nil {
 		t.Error(err)
+	}
+}
+
+func TestDmAllActionPlans(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	apS := []*ActionPlan{
+		{
+			Id:         "AP1",
+			AccountIDs: utils.StringMap{"cgrates.org:1001": true},
+			ActionTimings: []*ActionTiming{
+				{
+					Uuid: utils.GenUUID(),
+					Timing: &RateInterval{
+						Timing: &RITiming{
+							Years:     utils.Years{2022},
+							Months:    utils.Months{},
+							MonthDays: utils.MonthDays{},
+							WeekDays:  utils.WeekDays{},
+							StartTime: utils.ASAP,
+						},
+					},
+					Weight:    10,
+					ActionsID: "ACT_1",
+				},
+			},
+		},
+		{
+			Id:         "AP2",
+			AccountIDs: utils.StringMap{"cgrates.org:1001": true},
+			ActionTimings: []*ActionTiming{{
+				Uuid: utils.GenUUID(),
+				Timing: &RateInterval{
+					Timing: &RITiming{
+						Years:     utils.Years{2022},
+						Months:    utils.Months{},
+						MonthDays: utils.MonthDays{},
+						WeekDays:  utils.WeekDays{},
+						StartTime: utils.ASAP,
+					},
+				},
+				Weight:    10,
+				ActionsID: "ACT_2",
+			},
+			},
+		}}
+	expMap := make(map[string]*ActionPlan)
+	for _, ap := range apS {
+		dm.SetActionPlan(ap.Id, ap, true, utils.NonTransactional)
+		expMap[ap.Id] = ap
+	}
+	if rpl, err := dm.GetAllActionPlans(); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expMap, rpl) {
+		t.Errorf("Expected %+v,Received %+v", utils.ToJSON(expMap), utils.ToJSON(rpl))
 	}
 }

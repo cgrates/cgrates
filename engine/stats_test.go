@@ -632,3 +632,93 @@ func TestStatSGetQueueIDs(t *testing.T) {
 		t.Errorf("Expected %v,Received %v", expqIds, qIDs)
 	}
 }
+
+func TestStatSReloadRunBackUp(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	cfg.StatSCfg().StoreInterval = 1
+	Cache.Clear(nil)
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	sts, err := NewStatService(dm, cfg, nil, nil)
+	sts.storedStatQueues["SQ1"] = true
+	if err != nil {
+		t.Error(err)
+	}
+	go func() {
+		time.Sleep(2 * time.Millisecond)
+		sts.loopStoped <- struct{}{}
+	}()
+	Cache.Set(utils.CacheStatQueues, "SQ1", &StatQueue{
+		Tenant: "cgrates.org",
+		ID:     "SQ1",
+		SQMetrics: map[string]StatMetric{
+			utils.MetaASR: &StatASR{
+				Answered: 1,
+				Count:    2,
+				Events: map[string]*StatWithCompress{
+					"cgrates.org:TestRemEventWithID_1": {Stat: 1, CompressFactor: 1},
+				},
+			},
+		}}, []string{}, true, utils.NonTransactional)
+	sts.Reload()
+}
+
+func TestStatProcessEvent2(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	tpDm := dm
+	defer func() {
+		dm = tpDm
+	}()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	sts, err := NewStatService(dm, cfg, nil, nil)
+	if err != nil {
+		t.Error(err)
+	}
+	args := &StatsArgsProcessEvent{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "event1",
+			Event: map[string]interface{}{
+				utils.Account:    "1001",
+				utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+				utils.Usage:      time.Duration(135 * time.Second),
+				utils.COST:       123.0,
+				utils.PDD:        time.Duration(12 * time.Second),
+			},
+		},
+		ArgDispatcher: &utils.ArgDispatcher{
+			APIKey: utils.StringPointer("12345"),
+		},
+	}
+	fltr := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "FLTR_TH_Stats1",
+		Rules: []*FilterRule{
+			{
+				Type:    "*lt",
+				Element: "~*req.Cost",
+				Values:  []string{"120.0"},
+			},
+		},
+	}
+	dm.SetFilter(fltr)
+	dm.SetStatQueueProfile(&StatQueueProfile{
+		Tenant:    "cgrates.org",
+		ID:        "STS_PoccessCDR",
+		FilterIDs: []string{"FLTR_TH_Stats1"},
+		Metrics: []*MetricWithFilters{{
+			MetricID: "*sum:~*req.Usage",
+		}},
+		ThresholdIDs: []string{utils.META_NONE},
+		Blocker:      true,
+		Stored:       true,
+		Weight:       20,
+		MinItems:     0,
+	}, true)
+	SetDataStorage(dm)
+	if _, err := sts.processEvent(args); err == nil {
+		t.Error(err)
+	}
+	//unfinished
+}

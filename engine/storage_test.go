@@ -1163,6 +1163,15 @@ func TestTpRLoadAll(t *testing.T) {
 			WeekDays:  "1;2;3;4;5",
 			Time:      "19:00:00",
 		},
+		{
+			TPid:      tpId,
+			ID:        "ASAP",
+			Years:     "*any",
+			Months:    "*any",
+			MonthDays: "*any",
+			WeekDays:  "1;2;3;4;5",
+			Time:      "08:00:00",
+		},
 	}
 
 	ratingPlans := []*utils.TPRatingPlan{
@@ -1176,6 +1185,78 @@ func TestTpRLoadAll(t *testing.T) {
 					Weight:             10,
 				},
 			},
+		},
+	}
+
+	ratingProfiles := []*utils.TPRatingProfile{
+		{
+			TPid:     tpId,
+			LoadId:   "TEST_LOADID",
+			Tenant:   "cgrates.org",
+			Category: "call",
+			Subject:  "*any",
+			RatingPlanActivations: []*utils.TPRatingActivation{
+				{
+					ActivationTime: "2022-01-14T00:00:00Z",
+					RatingPlanId:   "RP_1"},
+			},
+		},
+	}
+
+	actions := []*utils.TPActions{
+		{TPid: tpId,
+			ID: "TOPUP_RST_10",
+			Actions: []*utils.TPAction{
+				{
+					Identifier:     "*topup_reset",
+					BalanceType:    "*monetary",
+					Units:          "5.0",
+					ExpiryTime:     "*never",
+					DestinationIds: "*any",
+					Categories:     "call",
+					BalanceWeight:  "10.0",
+					Weight:         10.0},
+			},
+		},
+	}
+
+	actionPlans := []*utils.TPActionPlan{
+		{
+			TPid: tpId,
+			ID:   "PACKAGE_10",
+			ActionPlan: []*utils.TPActionTiming{
+				{
+					ActionsId: "TOPUP_RST_10",
+					TimingId:  "ASAP",
+					Weight:    10.0},
+			},
+		},
+	}
+
+	actionTriggers := []*utils.TPActionTriggers{
+		{
+			TPid: tpId,
+			ID:   "STANDARD_TRIGGERS",
+			ActionTriggers: []*utils.TPActionTrigger{
+				{
+					Id:             "STANDARD_TRIGGERS",
+					UniqueID:       "1",
+					ThresholdType:  "*min_balance",
+					ThresholdValue: 2.0,
+					Recurrent:      false,
+					Weight:         10},
+			},
+		},
+	}
+
+	accounts := []*utils.TPAccountActions{
+		{
+			TPid:             tpId,
+			LoadId:           "TEST_LOADID",
+			Tenant:           "cgrates.org",
+			Account:          "1001",
+			ActionPlanId:     "PACKAGE_10",
+			ActionTriggersId: "STANDARD_TRIGGERS",
 		},
 	}
 
@@ -1199,6 +1280,25 @@ func TestTpRLoadAll(t *testing.T) {
 		t.Error(err)
 	}
 	if err := storDb.SetTPRatingPlans(ratingPlans); err != nil {
+		t.Error(err)
+	}
+	if err := storDb.SetTPRatingProfiles(ratingProfiles); err != nil {
+		t.Error(err)
+	}
+
+	if err := storDb.SetTPActions(actions); err != nil {
+		t.Error(err)
+	}
+
+	if err := storDb.SetTPActionPlans(actionPlans); err != nil {
+		t.Error(err)
+	}
+
+	if err := storDb.SetTPActionTriggers(actionTriggers); err != nil {
+		t.Error(err)
+	}
+
+	if err := storDb.SetTPAccountActions(accounts); err != nil {
 		t.Error(err)
 	}
 
