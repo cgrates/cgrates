@@ -864,7 +864,7 @@ func TestUpdateFilterIndexRemoveIndexesFromThresholdErr2(t *testing.T) {
 	}
 
 	expErr := "SERVER_ERROR: NOT_IMPLEMENTED"
-	if err := UpdateFilterIndex(context.Background(), dm, oldFlt, newFlt); err.Error() != expErr {
+	if err := UpdateFilterIndex(context.Background(), dm, oldFlt, newFlt); err == nil || err.Error() != expErr {
 		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err)
 	}
 
@@ -1076,7 +1076,7 @@ func TestUpdateFilterIndexStatErr2(t *testing.T) {
 	}
 
 	expErr := "SERVER_ERROR: NOT_IMPLEMENTED"
-	if err := UpdateFilterIndex(context.Background(), dm, oldFlt, newFlt); err.Error() != expErr {
+	if err := UpdateFilterIndex(context.Background(), dm, oldFlt, newFlt); err == nil || err.Error() != expErr {
 		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err)
 	}
 
@@ -1278,7 +1278,7 @@ func TestUpdateFilterIndexResourceErr2(t *testing.T) {
 	}
 
 	expErr := "SERVER_ERROR: NOT_IMPLEMENTED"
-	if err := UpdateFilterIndex(context.Background(), dm, oldFlt, newFlt); err.Error() != expErr {
+	if err := UpdateFilterIndex(context.Background(), dm, oldFlt, newFlt); err == nil || err.Error() != expErr {
 		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err)
 	}
 
@@ -1489,7 +1489,7 @@ func TestUpdateFilterIndexRouteErr2(t *testing.T) {
 	}
 
 	expErr := "SERVER_ERROR: NOT_IMPLEMENTED"
-	if err := UpdateFilterIndex(context.Background(), dm, oldFlt, newFlt); err.Error() != expErr {
+	if err := UpdateFilterIndex(context.Background(), dm, oldFlt, newFlt); err == nil || err.Error() != expErr {
 		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err)
 	}
 
@@ -1691,7 +1691,7 @@ func TestUpdateFilterIndexChargerErr2(t *testing.T) {
 	}
 
 	expErr := "SERVER_ERROR: NOT_IMPLEMENTED"
-	if err := UpdateFilterIndex(context.Background(), dm, oldFlt, newFlt); err.Error() != expErr {
+	if err := UpdateFilterIndex(context.Background(), dm, oldFlt, newFlt); err == nil || err.Error() != expErr {
 		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err)
 	}
 
@@ -1904,7 +1904,7 @@ func TestUpdateFilterIndexAccountsErr2(t *testing.T) {
 	}
 
 	expErr := "SERVER_ERROR: NOT_IMPLEMENTED"
-	if err := UpdateFilterIndex(context.Background(), dm, oldFlt, newFlt); err.Error() != expErr {
+	if err := UpdateFilterIndex(context.Background(), dm, oldFlt, newFlt); err == nil || err.Error() != expErr {
 		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err)
 	}
 
@@ -2012,7 +2012,7 @@ func TestUpdateFilterIndexAttributeErr2(t *testing.T) {
 	}
 
 	expErr := "SERVER_ERROR: NOT_IMPLEMENTED"
-	if err := UpdateFilterIndex(context.Background(), dm, oldFlt, newFlt); err.Error() != expErr {
+	if err := UpdateFilterIndex(context.Background(), dm, oldFlt, newFlt); err == nil || err.Error() != expErr {
 		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err)
 	}
 
@@ -2226,7 +2226,7 @@ func TestUpdateFilterIndexActionProfilesErr2(t *testing.T) {
 	}
 
 	expErr := "SERVER_ERROR: NOT_IMPLEMENTED"
-	if err := UpdateFilterIndex(context.Background(), dm, oldFlt, newFlt); err.Error() != expErr {
+	if err := UpdateFilterIndex(context.Background(), dm, oldFlt, newFlt); err == nil || err.Error() != expErr {
 		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err)
 	}
 
@@ -2440,7 +2440,7 @@ func TestUpdateFilterIndexRateProfilesErr2(t *testing.T) {
 	}
 
 	expErr := "SERVER_ERROR: NOT_IMPLEMENTED"
-	if err := UpdateFilterIndex(context.Background(), dm, oldFlt, newFlt); err.Error() != expErr {
+	if err := UpdateFilterIndex(context.Background(), dm, oldFlt, newFlt); err == nil || err.Error() != expErr {
 		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err)
 	}
 
@@ -2647,7 +2647,7 @@ func TestUpdateFilterIndexDispatcherErr2(t *testing.T) {
 	}
 
 	expErr := "SERVER_ERROR: NOT_IMPLEMENTED"
-	if err := UpdateFilterIndex(context.Background(), dm, oldFlt, newFlt); err.Error() != expErr {
+	if err := UpdateFilterIndex(context.Background(), dm, oldFlt, newFlt); err == nil || err.Error() != expErr {
 		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err)
 	}
 
@@ -3093,6 +3093,234 @@ func TestComputeIndexesNewFilterIndexErr(t *testing.T) {
 		}, nil)
 	if err != utils.ErrNotImplemented {
 		t.Errorf("\nExpected error <%+v>, \nReceived error <%+v>", utils.ErrNotImplemented, err)
+	}
+
+}
+
+func TestUpdateFilterIndexRatedSplitErr(t *testing.T) {
+
+	defer func() {
+		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+
+	oldFlt := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "fltr_test",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaString,
+				Element: "~*req.Cost",
+				Values:  []string{"unRegVal2"},
+			},
+		},
+	}
+	newFlt := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "fltr_test",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaPrefix,
+				Element: "~*req.Usage",
+				Values:  []string{"10s"},
+			},
+		},
+	}
+
+	tntCtx := newFlt.TenantID()
+	if err := dm.dataDB.SetIndexesDrv(context.Background(), utils.CacheReverseFilterIndexes, tntCtx, map[string]utils.StringSet{
+		utils.CacheRateFilterIndexes: {
+			"RATE_TEST": {},
+		},
+	}, true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+
+	expErr := "Expected to be 2 values"
+	if err := UpdateFilterIndex(context.Background(), dm, oldFlt, newFlt); err == nil || err.Error() != expErr {
+		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err)
+	}
+
+}
+
+func TestUpdateFilterIndexRatedGetRateProfileErr(t *testing.T) {
+
+	defer func() {
+		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+
+	oldFlt := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "fltr_test",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaString,
+				Element: "~*req.Cost",
+				Values:  []string{"unRegVal2"},
+			},
+		},
+	}
+	newFlt := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "fltr_test",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaPrefix,
+				Element: "~*req.Usage",
+				Values:  []string{"10s"},
+			},
+		},
+	}
+
+	tntCtx := newFlt.TenantID()
+	if err := dm.dataDB.SetIndexesDrv(context.Background(), utils.CacheReverseFilterIndexes, tntCtx, map[string]utils.StringSet{
+		utils.CacheRateFilterIndexes: {
+			"CUSTOM_RATE2:RP2": {},
+		},
+	}, true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+
+	if err := UpdateFilterIndex(context.Background(), dm, oldFlt, newFlt); err != utils.ErrNotFound {
+		t.Errorf("Expected error <%v>, Received error <%v>", utils.ErrNotFound, err)
+	}
+
+}
+
+func TestUpdateFilterIndexRatedRemoveFilterErr(t *testing.T) {
+
+	defer func() {
+		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+
+	oldFlt := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "fltr_test",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaString,
+				Element: "~*req.Cost",
+				Values:  []string{"unRegVal2"},
+			},
+		},
+	}
+	newFlt := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "fltr_test",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaPrefix,
+				Element: "~*req.Usage",
+				Values:  []string{"10s"},
+			},
+		},
+	}
+
+	dm.dataDB = &DataDBMock{
+		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
+			return map[string]utils.StringSet{
+				utils.CacheRateFilterIndexes: {
+					"CUSTOM_RATE2:RP2": {},
+				},
+			}, nil
+		},
+		SetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
+			return utils.ErrNotImplemented
+		},
+	}
+
+	if err := UpdateFilterIndex(context.Background(), dm, oldFlt, newFlt); err != utils.ErrNotImplemented {
+		t.Errorf("Expected error <%v>, Received error <%v>", utils.ErrNotImplemented, err)
+	}
+
+}
+
+func TestUpdateFilterIndexRatedNoRatesErr(t *testing.T) {
+
+	defer func() {
+		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+
+	oldFlt := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "fltr_test",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaString,
+				Element: "~*req.Cost",
+				Values:  []string{"unRegVal2"},
+			},
+		},
+	}
+	newFlt := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "fltr_test",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaPrefix,
+				Element: "~*req.Usage",
+				Values:  []string{"10s"},
+			},
+		},
+	}
+
+	tntCtx := newFlt.TenantID()
+	if err := dm.dataDB.SetIndexesDrv(context.Background(), utils.CacheReverseFilterIndexes, tntCtx, map[string]utils.StringSet{
+		utils.CacheRateFilterIndexes: {
+			"CUSTOM_RATE2:RP2": {},
+		},
+	}, true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+
+	rpp := &utils.RateProfile{
+		Tenant:    "cgrates.org",
+		ID:        "RP2",
+		FilterIDs: []string{"*gt:~*req.Element:10"},
+		Weights: utils.DynamicWeights{
+			{
+				FilterIDs: []string{"fltr2"},
+				Weight:    40,
+			},
+		},
+		MaxCostStrategy: "*free",
+		Rates: map[string]*utils.Rate{
+			"FIRST_GI": {
+				ID:        "FIRST_GI",
+				FilterIDs: []string{"*string:~*req.Category:call"},
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 0,
+					},
+				},
+				Blocker: false,
+			},
+		},
+		MinCost: utils.DecimalNaN,
+		MaxCost: utils.DecimalNaN,
+	}
+
+	if err := dm.SetRateProfile(context.Background(), rpp, false, true); err != nil {
+		t.Error(err)
+	}
+
+	if err := UpdateFilterIndex(context.Background(), dm, oldFlt, newFlt); err != utils.ErrNotFound {
+		t.Errorf("Expected error <%v>, Received error <%v>", utils.ErrNotFound, err)
 	}
 
 }
