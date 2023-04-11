@@ -231,3 +231,25 @@ func TestPreCacheStatus(t *testing.T) {
 		t.Errorf("Expected %v,Received %v", utils.ToJSON(exp), utils.ToJSON(reply))
 	}
 }
+
+func TestCachesRPCCall(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	chS := NewCacheS(cfg, dm)
+	Cache.Clear(nil)
+	Cache.Set(utils.CacheThresholds, "cgrates:TH1", &Threshold{}, []string{}, true, utils.NonTransactional)
+	args := &utils.ArgsGetCacheItemIDsWithArgDispatcher{
+		ArgDispatcher: &utils.ArgDispatcher{},
+		ArgsGetCacheItemIDs: utils.ArgsGetCacheItemIDs{
+			CacheID: utils.CacheThresholds,
+		},
+	}
+	var reply []string
+	if err := chS.Call(utils.CacheSv1GetItemIDs, args, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(reply, []string{"cgrates:TH1"}) {
+		t.Errorf("Expected %v", []string{"cgrates:TH1"})
+	}
+
+}
