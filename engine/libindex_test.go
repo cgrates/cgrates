@@ -3201,7 +3201,18 @@ func TestUpdateFilterIndexRatedRemoveFilterErr(t *testing.T) {
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dataDB := &DataDBMock{
+		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
+			return map[string]utils.StringSet{
+				utils.CacheRateFilterIndexes: {
+					"CUSTOM_RATE2:RP2": {},
+				},
+			}, nil
+		},
+		SetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
+			return utils.ErrNotImplemented
+		},
+	}
 	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
 
 	oldFlt := &Filter{
@@ -3224,19 +3235,6 @@ func TestUpdateFilterIndexRatedRemoveFilterErr(t *testing.T) {
 				Element: "~*req.Usage",
 				Values:  []string{"10s"},
 			},
-		},
-	}
-
-	dm.dataDB = &DataDBMock{
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
-			return map[string]utils.StringSet{
-				utils.CacheRateFilterIndexes: {
-					"CUSTOM_RATE2:RP2": {},
-				},
-			}, nil
-		},
-		SetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
-			return utils.ErrNotImplemented
 		},
 	}
 

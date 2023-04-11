@@ -233,3 +233,304 @@ func TestGetFiltersDefault(t *testing.T) {
 	}
 
 }
+
+func TestGetFilterAsIndexSetDynamicVal(t *testing.T) {
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+
+	fltr := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "FL1",
+		Rules: []*FilterRule{
+			{
+				Type:    "*string",
+				Element: "*req.Account",
+				Values:  []string{"~*accounts"},
+			},
+		},
+	}
+
+	exp := map[string]utils.StringSet{}
+	if rcv, err := getFilterAsIndexSet(context.Background(), dm, ltcache.NewCache(50, 60*time.Second, true, nil), utils.CacheRateFilterIndexes, "cgrates.org:RPID", fltr); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("Expected %v\n but received %v", exp, rcv)
+	}
+
+}
+
+func TestGetFilterAsIndexSetElementNotDynamic(t *testing.T) {
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+
+	fltr := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "FL1",
+		Rules: []*FilterRule{
+			{
+				Type:    "*string",
+				Element: "*req.Account",
+				Values:  []string{"~*req.Account", "1001"},
+			},
+		},
+	}
+
+	exp := map[string]utils.StringSet{
+		"*string:*req.Account:*req.Account": {},
+	}
+	if rcv, err := getFilterAsIndexSet(context.Background(), dm, ltcache.NewCache(50, 60*time.Second, true, nil), utils.CacheRateFilterIndexes, "cgrates.org:RPID", fltr); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("Expected %+v\n but received %+v", exp, rcv)
+	}
+
+}
+
+func TestGetFilterAsIndexSetGetIHFltrIdxFromCacheErr(t *testing.T) {
+
+	cfg := config.NewDefaultCGRConfig()
+	data := &DataDBMock{
+		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
+			return nil, utils.ErrNotImplemented
+		},
+	}
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+
+	fltr := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "FL1",
+		Rules: []*FilterRule{
+			{
+				Type:    "*string",
+				Element: "~*req.Account",
+				Values:  []string{"1001"},
+			},
+		},
+	}
+
+	if _, err := getFilterAsIndexSet(context.Background(), dm, ltcache.NewCache(50, 60*time.Second, true, nil), utils.CacheRateFilterIndexes, "cgrates.org:RPID", fltr); err != utils.ErrNotImplemented {
+		t.Errorf("Expected error <%v>, Received error <%v>", utils.ErrNotImplemented, err)
+	}
+}
+
+func TestUpdateFilterIHMisingIndxGetIHFltrIdxFromCache1Err(t *testing.T) {
+
+	cfg := config.NewDefaultCGRConfig()
+	data := &DataDBMock{
+		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
+			return nil, utils.ErrNotImplemented
+		},
+	}
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+
+	rply := &FilterIHReply{
+		MissingObjects: nil,
+		MissingIndexes: map[string][]string{},
+		BrokenIndexes:  make(map[string][]string),
+		MissingFilters: make(map[string][]string),
+	}
+
+	if _, err := updateFilterIHMisingIndx(context.Background(), dm, ltcache.NewCache(0, 0, false, nil), ltcache.NewCache(0, 0, false, nil), []string{}, utils.CacheRateFilterIndexes, "cgrates.org", "cgrates.org:RP", "RP", rply); err != utils.ErrNotImplemented {
+		t.Errorf("Expected error <%v>, Received error <%v>", utils.ErrNotImplemented, err)
+	}
+}
+func TestUpdateFilterIHMisingIndxGetIHFltrIdxFromCache2Err(t *testing.T) {
+
+	cfg := config.NewDefaultCGRConfig()
+	data := &DataDBMock{
+		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
+			return nil, utils.ErrNotImplemented
+		},
+	}
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+
+	rply := &FilterIHReply{
+		MissingObjects: nil,
+		MissingIndexes: map[string][]string{},
+		BrokenIndexes:  make(map[string][]string),
+		MissingFilters: make(map[string][]string),
+	}
+
+	if _, err := updateFilterIHMisingIndx(context.Background(), dm, ltcache.NewCache(0, 0, false, nil), ltcache.NewCache(0, 0, false, nil), []string{"fltr"}, utils.CacheRateFilterIndexes, "cgrates.org", "cgrates.org:RP", "RP", rply); err != utils.ErrNotImplemented {
+		t.Errorf("Expected error <%v>, Received error <%v>", utils.ErrNotImplemented, err)
+	}
+}
+
+func TestUpdateFilterIHMisingIndxReplyIndexes(t *testing.T) {
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+
+	rply := &FilterIHReply{
+		MissingObjects: []string{"cgrates.org:ATTR2"},
+		MissingIndexes: map[string][]string{
+			"cgrates.org:*string:*req.Account:1001": {"ATTR1"},
+		},
+		BrokenIndexes: map[string][]string{
+			"cgrates.org:*string:*req.Account:1002": {"ATTR1"},
+		},
+		MissingFilters: map[string][]string{
+			"cgrates.org:Fltr1": {"ATTR1"},
+		},
+	}
+
+	if rcv, err := updateFilterIHMisingIndx(context.Background(), dm, ltcache.NewCache(0, 0, false, nil), ltcache.NewCache(0, 0, false, nil), []string{}, utils.CacheRateFilterIndexes, "cgrates.org", "cgrates.org:RP", "RP", rply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcv, rply) {
+		t.Errorf("Expected %+v\n but received %+v", rply, rcv)
+	}
+}
+
+func TestUpdateFilterIHMisingIndxHasNotReplyIndexes(t *testing.T) {
+
+	defer func() {
+		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+
+	rply := &FilterIHReply{
+		MissingObjects: []string{"cgrates.org:ATTR2"},
+		MissingIndexes: map[string][]string{
+			"cgrates.org:*string:*req.Account:1001": {"ATTR1"},
+		},
+		BrokenIndexes: map[string][]string{
+			"cgrates.org:*string:*req.Account:1002": {"ATTR1"},
+		},
+		MissingFilters: map[string][]string{
+			"cgrates.org:Fltr1": {"ATTR1"},
+		},
+	}
+
+	ssRt := utils.StringSet{
+		utils.CGRateSorg: {},
+	}
+
+	if err := Cache.Set(context.Background(), utils.CacheRateFilterIndexes, "cgrates.org:RP:*none:*any:*any", ssRt, []string{}, true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+
+	if rcv, err := updateFilterIHMisingIndx(context.Background(), dm, ltcache.NewCache(0, 0, false, nil), ltcache.NewCache(0, 0, false, nil), []string{}, utils.CacheRateFilterIndexes, "cgrates.org", "cgrates.org:RP", "NewRP", rply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcv, rply) {
+		t.Errorf("Expected %+v\n but received %+v", rply, rcv)
+	}
+}
+
+func TestUpdateFilterIHMisingIndxGetFilterAsIndexSetErr(t *testing.T) {
+
+	defer func() {
+		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	data := &DataDBMock{
+		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
+			return nil, utils.ErrNotImplemented
+		},
+	}
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+
+	rply := &FilterIHReply{
+		MissingObjects: nil,
+		MissingIndexes: map[string][]string{},
+		BrokenIndexes:  make(map[string][]string),
+		MissingFilters: make(map[string][]string),
+	}
+
+	flt := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "FL1",
+		Rules: []*FilterRule{
+			{
+				Type:    "*string",
+				Element: "~*req.Account",
+				Values:  []string{"1001"},
+			},
+		},
+	}
+
+	if err := Cache.Set(context.Background(), utils.CacheFilters, "cgrates.org:fltr", flt, []string{}, true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+
+	if _, err := updateFilterIHMisingIndx(context.Background(), dm, ltcache.NewCache(0, 0, false, nil), ltcache.NewCache(0, 0, false, nil), []string{"fltr"}, utils.CacheRateFilterIndexes, "cgrates.org", "cgrates.org:RP", "RP", rply); err != utils.ErrNotImplemented {
+		t.Errorf("Expected error <%v>, Received error <%v>", utils.ErrNotImplemented, err)
+	}
+}
+
+func TestGetFltrIdxHealthGetKeysForPrefixErr(t *testing.T) {
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+
+	useLtcache := ltcache.NewCache(0, 0, false, nil)
+
+	expErr := "unsupported prefix in GetKeysForPrefix: "
+	if _, err := GetFltrIdxHealth(context.Background(), dm, useLtcache, useLtcache, useLtcache, ""); err == nil || err.Error() != expErr {
+		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err)
+	}
+
+}
+
+func TestGetFltrIdxHealthgetIHObjFromCacheErr(t *testing.T) {
+
+	defer func() {
+		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+
+	useLtcache := ltcache.NewCache(0, 0, false, nil)
+	if err := dm.SetAttributeProfile(context.Background(), &AttributeProfile{
+		Tenant:    "cgrates.org",
+		ID:        "ATTR1",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+	}, false); err != nil {
+		t.Fatal(err)
+	}
+
+	Cache.Set(context.Background(), utils.CacheAttributeProfiles, "cgrates.org:ATTR1", nil, []string{}, true, utils.NonTransactional)
+
+	if _, err := GetFltrIdxHealth(context.Background(), dm, useLtcache, useLtcache, useLtcache, utils.CacheAttributeFilterIndexes); err != utils.ErrNotFound {
+		t.Errorf("Expected error <%v>, Received error <%v>", utils.ErrNotFound, err)
+	}
+
+}
+
+func TestGetFltrIdxHealthIdxKeyFormatErr(t *testing.T) {
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+
+	useLtcache := ltcache.NewCache(0, 0, false, nil)
+	if err := dm.SetAttributeProfile(context.Background(), &AttributeProfile{
+		Tenant:    "cgrates.org",
+		ID:        "ATTR1",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+	}, false); err != nil {
+		t.Fatal(err)
+	}
+	if err := dm.SetIndexes(context.Background(), utils.CacheAttributeFilterIndexes, "cgrates.org",
+		map[string]utils.StringSet{"*string:*req.Account": {"ATTR1": {}, "ATTR2": {}}},
+		true, utils.NonTransactional); err != nil {
+		t.Fatal(err)
+	}
+
+	expErr := "WRONG_IDX_KEY_FORMAT<cgrates.org:*string:*req.Account>"
+	if _, err := GetFltrIdxHealth(context.Background(), dm, useLtcache, useLtcache, useLtcache, utils.CacheAttributeFilterIndexes); err == nil || expErr != err.Error() {
+		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err)
+	}
+
+}
