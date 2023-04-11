@@ -1017,3 +1017,43 @@ func TestDmAllActionPlans(t *testing.T) {
 		t.Errorf("Expected %+v,Received %+v", utils.ToJSON(expMap), utils.ToJSON(rpl))
 	}
 }
+
+func TestDMRemoveCHP(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+
+	chp := &ChargerProfile{
+		Tenant:    "cgrates.org",
+		ID:        "Ch1",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 29, 15, 00, 0, 0, time.UTC),
+		},
+		RunID:        "*rated",
+		AttributeIDs: []string{"ATTR_1001_SIMPLEAUTH"},
+		Weight:       20,
+	}
+	dm.SetChargerProfile(chp, true)
+	if err := dm.RemoveChargerProfile("cgrates.org", "Ch1", utils.NonTransactional, true); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestDMGetTiming(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	timing := &utils.TPTiming{
+		ID:        "WEEKENDS",
+		Years:     utils.Years{},
+		Months:    utils.Months{},
+		MonthDays: utils.MonthDays{},
+		WeekDays:  utils.WeekDays{time.Saturday, time.Sunday},
+		StartTime: "00:00:00",
+	}
+	dm.SetTiming(timing)
+	if _, err := dm.GetTiming("WEEKENDS", true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+}

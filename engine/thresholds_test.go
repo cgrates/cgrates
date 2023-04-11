@@ -716,8 +716,12 @@ func TestThSStoreThreshold(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "THD_ACNT_1002",
 		Hits:   1,
+		dirty:  utils.BoolPointer(true),
 	}
 	if err := ts.StoreThreshold(th); err != nil {
+		t.Error(err)
+	}
+	if _, err := ts.dm.GetThreshold("cgrates.org", "THD_ACNT_1002", false, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
 }

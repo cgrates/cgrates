@@ -550,6 +550,48 @@ func TestV2StoreSessionCost(t *testing.T) {
 	}
 }
 
+func TestCDRSThDSProcessEvent(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	cfg.CdrsCfg().ThresholdSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)}
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn <- clMock(func(serviceMethod string, _, _ interface{}) error {
+		if serviceMethod == utils.ThresholdSv1ProcessEvent {
+			return nil
+		}
+		return utils.ErrNotImplemented
+	})
+	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds): clientConn,
+	})
+	cdrS := &CDRServer{
+		cgrCfg:  cfg,
+		cdrDb:   db,
+		dm:      dm,
+		connMgr: connMgr,
+	}
+	cgrEv := &utils.CGREventWithArgDispatcher{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "CGREvent1",
+			Event: map[string]interface{}{
+				utils.Account:     "1002",
+				utils.Subject:     "1002",
+				utils.Destination: "1001",
+				utils.SetupTime:   time.Date(2017, 12, 1, 14, 25, 0, 0, time.UTC),
+				utils.Usage:       "1m20s",
+			},
+		},
+		ArgDispatcher: &utils.ArgDispatcher{
+			APIKey: utils.StringPointer("sup12345"),
+		},
+	}
+	if err := cdrS.thdSProcessEvent(cgrEv); err != nil {
+		t.Error(err)
+	}
+}
+
 // func TestCRDSRefundEventCost(t *testing.T) {
 // 	cfg, _ := config.NewDefaultCGRConfig()
 // 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
