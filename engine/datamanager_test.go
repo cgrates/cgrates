@@ -1057,3 +1057,165 @@ func TestDMGetTiming(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestDmDispatcherProfile(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+
+	fltr := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "DSP_FLT",
+		Rules: []*FilterRule{
+			{
+				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Account,
+				Type:    utils.MetaString,
+				Values:  []string{"2009"},
+			},
+		},
+	}
+	fltr2 := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "DSP_FLT2",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaGreaterOrEqual,
+				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Weight,
+				Values:  []string{"15.0"},
+			},
+		},
+	}
+	dm.SetFilter(fltr)
+	dm.SetFilter(fltr2)
+	dpp := &DispatcherProfile{
+		Tenant:     "cgrates.org",
+		ID:         "DSP1",
+		FilterIDs:  []string{"DSP_FLT"},
+		Strategy:   utils.MetaFirst,
+		Subsystems: []string{utils.MetaAttributes, utils.MetaSessionS},
+		Weight:     20,
+		Hosts: DispatcherHostProfiles{
+			&DispatcherHostProfile{
+				ID:        "ALL2",
+				FilterIDs: []string{},
+				Weight:    20,
+				Params:    make(map[string]interface{}),
+			},
+			&DispatcherHostProfile{
+				ID:        "ALL",
+				FilterIDs: []string{},
+				Weight:    10,
+				Params:    make(map[string]interface{}),
+			},
+		},
+	}
+	dm.SetDispatcherProfile(dpp, true)
+	dpp.FilterIDs = []string{"DSP_FLT2"}
+	if err := dm.SetDispatcherProfile(dpp, true); err != nil {
+		t.Error(err)
+	}
+
+}
+
+func TestDmGetSQRemote(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	cfg.DataDbCfg().Items[utils.MetaStatQueues].Remote = true
+	cfg.DataDbCfg().RmtConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1)}
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	Cache.Clear(nil)
+	defer func() {
+		cfg2, _ := config.NewDefaultCGRConfig()
+		config.SetCgrConfig(cfg2)
+	}()
+	clientConnn := make(chan rpcclient.ClientConnector, 1)
+	clientConnn <- clMock(func(serviceMethod string, _, reply interface{}) error {
+		if serviceMethod == utils.ReplicatorSv1GetStatQueue {
+
+			*reply.(*StoredStatQueue) = StoredStatQueue{
+				Tenant:    "cgrates.org",
+				ID:        "SQ1",
+				SQItems:   []SQItem{},
+				SQMetrics: map[string][]byte{},
+			}
+			return nil
+		}
+
+		return utils.ErrNotFound
+	})
+	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConnn,
+	})
+	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
+	config.SetCgrConfig(cfg)
+	if _, err := dm.GetStatQueue("cgrates.org", "SQ1", false, true, utils.NonTransactional); err == nil {
+		t.Error(err)
+	}
+	// unfinished
+}
+
+func TestRemoveThresholdRpl(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	cfg.DataDbCfg().Items[utils.MetaThresholds].Replicate = true
+	cfg.DataDbCfg().RplConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1)}
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	Cache.Clear(nil)
+	defer func() {
+		cfg2, _ := config.NewDefaultCGRConfig()
+		config.SetCgrConfig(cfg2)
+	}()
+	clientConnn := make(chan rpcclient.ClientConnector, 1)
+	clientConnn <- clMock(func(serviceMethod string, _, reply interface{}) error {
+		if serviceMethod == utils.ReplicatorSv1RemoveThreshold {
+
+			return nil
+		}
+
+		return utils.ErrNotFound
+	})
+	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConnn,
+	})
+	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
+	config.SetCgrConfig(cfg)
+	if err := dm.RemoveThreshold("cgrates.org", "TH1", utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+
+}
+
+func TestRemoveDispatcherPrfRpl(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	cfg.DataDbCfg().Items[utils.MetaDispatcherProfiles].Replicate = true
+	cfg.DataDbCfg().RplConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1)}
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	Cache.Clear(nil)
+	defer func() {
+		cfg2, _ := config.NewDefaultCGRConfig()
+		config.SetCgrConfig(cfg2)
+	}()
+	clientConnn := make(chan rpcclient.ClientConnector, 1)
+	clientConnn <- clMock(func(serviceMethod string, _, reply interface{}) error {
+		if serviceMethod == utils.ReplicatorSv1RemoveDispatcherProfile {
+
+			return nil
+		}
+
+		return utils.ErrNotFound
+	})
+	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConnn,
+	})
+	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
+	dpp := &DispatcherProfile{
+		Tenant:     "cgrates.org",
+		ID:         "DSP_Test2",
+		Subsystems: []string{utils.MetaAttributes},
+		Weight:     20,
+	}
+	dm.SetDispatcherProfile(dpp, true)
+	config.SetCgrConfig(cfg)
+	if err := dm.RemoveDispatcherProfile("cgrates.org", "DSP_Test2", utils.NonTransactional, true); err != nil {
+		t.Error(err)
+	}
+
+}
