@@ -2445,7 +2445,6 @@ func TestAccountSetRrecurrentAction(t *testing.T) {
 	if err := aT.Execute(ub); err != nil {
 		t.Error(err)
 	}
-
 }
 
 func TestAccountEnableAccAct(t *testing.T) {
@@ -2505,7 +2504,53 @@ func TestAccountEnableAccAct(t *testing.T) {
 	if acc, err := dm.GetAccount("cgrates.org:1001"); err != nil || acc.Disabled {
 		t.Error(err)
 	}
+	dm.RemoveActions("ACT_1", utils.NonTransactional)
+	a.ActionType = utils.DISABLE_ACCOUNT
+	dm.SetActions("ACT_1", Actions{a}, utils.NonTransactional)
+	acc.ExecuteActionTriggers(a)
+	if _, err := dm.GetAccount("cgrates.org:1001"); err != nil {
+		t.Error(err)
+	}
+}
 
+func TestAccountPublishAct(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	tmpDm := dm
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	defer func() {
+		cfg2, _ := config.NewDefaultCGRConfig()
+		config.SetCgrConfig(cfg2)
+		SetDataStorage(tmpDm)
+	}()
+	ub := &Account{
+		ID: "cgrates.org:1002",
+		BalanceMap: map[string]Balances{
+			utils.MONETARY: {
+				&Balance{
+					Value:          10,
+					DestinationIDs: utils.StringMap{"DEST1": true, "DEST2": false},
+					ExpirationDate: time.Date(2022, 12, 23, 20, 0, 0, 0, time.UTC),
+				},
+			}},
+		ActionTriggers: ActionTriggers{
+			&ActionTrigger{
+				Balance: &BalanceFilter{
+
+					Type:           utils.StringPointer(utils.MONETARY),
+					DestinationIDs: &utils.StringMap{"DEST1": true, "DEST2": false},
+					ExpirationDate: utils.TimePointer(time.Date(2022, 12, 23, 20, 0, 0, 0, time.UTC)),
+				},
+
+				ThresholdValue: 2,
+				ThresholdType:  utils.TRIGGER_BALANCE_EXPIRED,
+				ActionsID:      "TEST_ACTIONS_ORDER"},
+		},
+	}
+	a := &Action{}
+	SetDataStorage(dm)
+
+	ub.ExecuteActionTriggers(a)
 }
 
 /*********************************** Benchmarks *******************************/

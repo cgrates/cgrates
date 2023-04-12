@@ -1259,7 +1259,6 @@ func TestTpRLoadAll(t *testing.T) {
 			ActionTriggersId: "STANDARD_TRIGGERS",
 		},
 	}
-
 	if err := storDb.SetTPDestinations(dests); err != nil {
 		t.Error(err)
 	}

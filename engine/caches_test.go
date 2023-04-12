@@ -251,5 +251,16 @@ func TestCachesRPCCall(t *testing.T) {
 	} else if !reflect.DeepEqual(reply, []string{"cgrates:TH1"}) {
 		t.Errorf("Expected %v", []string{"cgrates:TH1"})
 	}
+}
 
+func TestCacheSPreCache(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	cfg.CacheCfg()[utils.CacheAttributeProfiles].Precache = true
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	chS := NewCacheS(cfg, dm)
+	Cache.Clear(nil)
+	if err := chS.Precache(); err != nil {
+		t.Error(err)
+	}
 }
