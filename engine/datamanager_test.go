@@ -10375,3 +10375,61 @@ func TestDMGetDispatcherHostCacheWriteErr1(t *testing.T) {
 		t.Errorf("Expected error <%v>, received error <%v>", utils.ErrNotImplemented, err)
 	}
 }
+
+func TestDMGetDispatcherHostCacheWriteErr2(t *testing.T) {
+
+	cfgtmp := config.CgrConfig()
+	defer func() {
+		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+		config.SetCgrConfig(cfgtmp)
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	cfg.CacheCfg().ReplicationConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
+	cfg.CacheCfg().Partitions[utils.MetaDispatcherHosts].Replicate = true
+	config.SetCgrConfig(cfg)
+
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+
+	cc := make(chan birpc.ClientConnector, 1)
+	cc <- &ccMock{
+
+		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply interface{}) error { return utils.ErrNotImplemented },
+		},
+	}
+
+	cM := NewConnManager(cfg)
+	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.CacheSv1, cc)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	dH := &DispatcherHost{
+		Tenant: "cgrates.org",
+		RemoteHost: &config.RemoteHost{
+			ID:                   "ID",
+			Address:              "127.0.0.1",
+			Transport:            utils.MetaJSON,
+			ConnectAttempts:      1,
+			Reconnects:           1,
+			MaxReconnectInterval: 1,
+			ConnectTimeout:       time.Nanosecond,
+			ReplyTimeout:         time.Nanosecond,
+			TLS:                  true,
+			ClientKey:            "key",
+			ClientCertificate:    "ce",
+			CaCertificate:        "ca",
+		},
+	}
+
+	if err := dm.dataDB.SetDispatcherHostDrv(context.Background(), dH); err != nil {
+		t.Error(err)
+	}
+
+	Cache = NewCacheS(cfg, dm, cM, nil)
+
+	_, err := dm.GetDispatcherHost(context.Background(), utils.CGRateSorg, dH.ID, false, true, utils.NonTransactional)
+	if err != utils.ErrNotImplemented {
+		t.Errorf("Expected error <%v>, received error <%v>", utils.ErrNotImplemented, err)
+	}
+
+}

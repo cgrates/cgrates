@@ -500,7 +500,9 @@ func TestGetFltrIdxHealthgetIHObjFromCacheErr(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	Cache.Set(context.Background(), utils.CacheAttributeProfiles, "cgrates.org:ATTR1", nil, []string{}, true, utils.NonTransactional)
+	if err := Cache.Set(context.Background(), utils.CacheAttributeProfiles, "cgrates.org:ATTR1", nil, []string{}, true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
 
 	if _, err := GetFltrIdxHealth(context.Background(), dm, useLtcache, useLtcache, useLtcache, utils.CacheAttributeFilterIndexes); err != utils.ErrNotFound {
 		t.Errorf("Expected error <%v>, Received error <%v>", utils.ErrNotFound, err)
@@ -531,6 +533,105 @@ func TestGetFltrIdxHealthIdxKeyFormatErr(t *testing.T) {
 	expErr := "WRONG_IDX_KEY_FORMAT<cgrates.org:*string:*req.Account>"
 	if _, err := GetFltrIdxHealth(context.Background(), dm, useLtcache, useLtcache, useLtcache, utils.CacheAttributeFilterIndexes); err == nil || expErr != err.Error() {
 		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err)
+	}
+
+}
+
+func TestGetRevFltrIdxHealthFromObjGetKeysForPrefixErr(t *testing.T) {
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+
+	useLtcache := ltcache.NewCache(0, 0, false, nil)
+
+	expErr := "unsupported prefix in GetKeysForPrefix: "
+	if _, err := getRevFltrIdxHealthFromObj(context.Background(), dm, useLtcache, useLtcache, useLtcache, ""); err == nil || err.Error() != expErr {
+		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err)
+	}
+
+}
+
+func TestGetRevFltrIdxHealthFromObjIHObjFromCacheErr(t *testing.T) {
+
+	defer func() {
+		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+
+	useLtcache := ltcache.NewCache(0, 0, false, nil)
+	if err := dm.SetAttributeProfile(context.Background(), &AttributeProfile{
+		Tenant:    "cgrates.org",
+		ID:        "ATTR1",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+	}, false); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := Cache.Set(context.Background(), utils.CacheAttributeProfiles, "cgrates.org:ATTR1", nil, []string{}, true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+
+	if _, err := getRevFltrIdxHealthFromObj(context.Background(), dm, useLtcache, useLtcache, useLtcache, utils.CacheAttributeFilterIndexes); err != utils.ErrNotFound {
+		t.Errorf("Expected error <%v>, Received error <%v>", utils.ErrNotFound, err)
+	}
+
+}
+
+func TestGetRevFltrIdxHealthFromReverseGetKeysForPrefixErr(t *testing.T) {
+
+	cfg := config.NewDefaultCGRConfig()
+	data := &DataDBMock{
+		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
+			return nil, utils.ErrNotImplemented
+		},
+	}
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+
+	useLtcache := ltcache.NewCache(0, 0, false, nil)
+	objCaches := make(map[string]*ltcache.Cache)
+
+	rply := make(map[string]*ReverseFilterIHReply)
+
+	expErr := "unsupported prefix in GetKeysForPrefix: "
+	if _, err := getRevFltrIdxHealthFromReverse(context.Background(), dm, useLtcache, useLtcache, objCaches, rply); err != utils.ErrNotImplemented {
+		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err)
+	}
+
+}
+
+func TestGetRatesFromCacheGetRateProfileErr(t *testing.T) {
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+
+	useLtcache := ltcache.NewCache(0, 0, false, nil)
+
+	if _, err := getRatesFromCache(context.Background(), dm, useLtcache, "", ""); err != utils.ErrNotFound {
+		t.Errorf("Expected error <%v>, Received error <%v>", utils.ErrNotFound, err)
+	}
+
+}
+
+func TestGetRatesFromCacheObjValNil(t *testing.T) {
+
+	defer func() {
+		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+	}()
+
+	useLtcache := ltcache.NewCache(20, 20*time.Second, true, nil)
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+
+	useLtcache.Set("cgrates.org:ATTR1", nil, []string{})
+
+	if _, err := getRatesFromCache(context.Background(), dm, useLtcache, "cgrates.org", "ATTR1"); err != utils.ErrNotFound {
+		t.Errorf("Expected error <%v>, Received error <%v>", utils.ErrNotFound, err)
 	}
 
 }
