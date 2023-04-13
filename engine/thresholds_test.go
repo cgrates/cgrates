@@ -725,3 +725,27 @@ func TestThSStoreThreshold(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestV1GetThreshold(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	thS, err := NewThresholdService(dm, cfg, nil)
+	if err != nil {
+		t.Error(err)
+	}
+	dm.SetThreshold(&Threshold{
+		Tenant: "cgrates.org",
+		ID:     "TH_3",
+		Hits:   0,
+	})
+	var reply Threshold
+	tntID := &utils.TenantID{
+		Tenant: "cgrates.org",
+		ID:     "TH_3",
+	}
+	if err := thS.V1GetThreshold(tntID, &reply); err != nil {
+		t.Error(err)
+	}
+
+}

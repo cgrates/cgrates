@@ -1217,5 +1217,98 @@ func TestRemoveDispatcherPrfRpl(t *testing.T) {
 	if err := dm.RemoveDispatcherProfile("cgrates.org", "DSP_Test2", utils.NonTransactional, true); err != nil {
 		t.Error(err)
 	}
+}
+
+func TestDMReconnect(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	if err := dm.Reconnect(cfg.GeneralCfg().DBDataEncoding, cfg.DataDbCfg()); err != nil {
+		t.Error(err)
+	}
+
+}
+
+func TestDMRemAccountActionPlans(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	acc := &Account{
+		ID: "cgrates.org:1001",
+		BalanceMap: map[string]Balances{
+			utils.MONETARY: {
+				&Balance{
+					Value: 10,
+				},
+			}}}
+	dm.SetAccount(acc)
+	apIDs := []string{"PACKAGE_10_SHARED_A_5", "USE_SHARED_A"}
+	if err := dm.SetAccountActionPlans(acc.ID, apIDs, false); err != nil {
+		t.Error(err)
+	}
+	if err := dm.RemAccountActionPlans(acc.ID, apIDs); err != nil {
+		t.Error(err)
+	}
+
+}
+
+func TestDMGetDispacherHost(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	cfg.DataDbCfg().Items[utils.MetaDispatcherHosts].Remote = true
+	cfg.DataDbCfg().RmtConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1)}
+	Cache.Clear(nil)
+	defer func() {
+		cfg2, _ := config.NewDefaultCGRConfig()
+		config.SetCgrConfig(cfg2)
+	}()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn <- clMock(func(serviceMethod string, _, reply interface{}) error {
+		if serviceMethod == utils.ReplicatorSv1GetDispatcherHost {
+
+			rpl := &DispatcherHost{
+				Tenant: "	cgrates.org",
+				ID:     "DP_1",
+			}
+			*reply.(**DispatcherHost) = rpl
+			return nil
+		}
+		return utils.ErrNotImplemented
+	})
+	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
+	})
+	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
+	config.SetCgrConfig(cfg)
+	if _, err := dm.GetDispatcherHost("cgrates.org", "DP_1", false, true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestDmRemoveStatQueue(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	cfg.DataDbCfg().RplConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1)}
+	cfg.DataDbCfg().Items[utils.MetaStatQueues].Replicate = true
+	defer func() {
+		cfg2, _ := config.NewDefaultCGRConfig()
+		config.SetCgrConfig(cfg2)
+	}()
+	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn <- clMock(func(serviceMethod string, _, _ interface{}) error {
+		if serviceMethod == utils.ReplicatorSv1RemoveStatQueue {
+			return nil
+		}
+		return utils.ErrNotImplemented
+	})
+	connMgr := NewConnManager(cfg,
+		map[string]chan rpcclient.ClientConnector{
+			utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
+		})
+	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
+	config.SetCgrConfig(cfg)
+	if err := dm.RemoveStatQueue("cgrates.org", "SQ1", utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
 
 }

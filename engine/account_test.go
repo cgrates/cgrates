@@ -2553,6 +2553,63 @@ func TestAccountPublishAct(t *testing.T) {
 	ub.ExecuteActionTriggers(a)
 }
 
+func TestTestAccountActUnSetCurr(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	tmpDm := dm
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	defer func() {
+		cfg2, _ := config.NewDefaultCGRConfig()
+		config.SetCgrConfig(cfg2)
+		SetDataStorage(tmpDm)
+	}()
+	acc := &Account{
+		ID: "cgrates.org:1001",
+		BalanceMap: map[string]Balances{
+			utils.VOICE: {
+				&Balance{
+					Weight:         20,
+					DestinationIDs: utils.StringMap{"DEST1": true},
+					ExpirationDate: time.Date(2023, 3, 12, 0, 0, 0, 0, time.UTC),
+				},
+			},
+		},
+		ActionTriggers: ActionTriggers{
+			&ActionTrigger{
+				Recurrent: true,
+				Balance: &BalanceFilter{
+					Type:           utils.StringPointer(utils.VOICE),
+					ExpirationDate: utils.TimePointer(time.Date(2023, 3, 12, 0, 0, 0, 0, time.UTC)),
+					Weight:         utils.Float64Pointer(20),
+					DestinationIDs: &utils.StringMap{
+						"DEST1": true,
+					},
+				},
+				ThresholdValue: 2,
+				ThresholdType:  utils.TRIGGER_BALANCE_EXPIRED,
+				ActionsID:      "ACT_1",
+				Executed:       false},
+		},
+	}
+	a := &Action{
+		ActionType: utils.UNSET_RECURRENT,
+		Balance: &BalanceFilter{
+			Type:           utils.StringPointer(utils.VOICE),
+			ExpirationDate: utils.TimePointer(time.Date(2023, 3, 12, 0, 0, 0, 0, time.UTC)),
+			Weight:         utils.Float64Pointer(20),
+			DestinationIDs: &utils.StringMap{
+				"DEST1": true,
+			},
+		},
+	}
+	dm.SetActions("ACT_1", Actions{a}, utils.NonTransactional)
+	SetDataStorage(dm)
+	acc.ExecuteActionTriggers(a)
+	if acc, err := dm.GetAccount("cgrates.org:1001"); err != nil || acc.ActionTriggers[0].Recurrent {
+		t.Error(err)
+	}
+}
+
 /*********************************** Benchmarks *******************************/
 
 func BenchmarkGetSecondForPrefix(b *testing.B) {
