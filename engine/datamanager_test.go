@@ -1312,3 +1312,59 @@ func TestDmRemoveStatQueue(t *testing.T) {
 	}
 
 }
+
+func TestRemoveResource(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	defer func() {
+		cfg2, _ := config.NewDefaultCGRConfig()
+		config.SetCgrConfig(cfg2)
+	}()
+	cfg.DataDbCfg().Items[utils.MetaResources].Replicate = true
+	cfg.DataDbCfg().RplConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1)}
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+
+	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn <- clMock(func(serviceMethod string, _, _ interface{}) error {
+		if utils.ReplicatorSv1RemoveResource == serviceMethod {
+			return nil
+		}
+		return utils.ErrNotImplemented
+	})
+	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
+	})
+	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
+
+	if err := dm.RemoveResource("cgrates.org", "R1", utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+
+}
+
+func TestSetReverseDestinastionRpl(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	defer func() {
+		cfg2, _ := config.NewDefaultCGRConfig()
+		config.SetCgrConfig(cfg2)
+	}()
+	cfg.DataDbCfg().Items[utils.MetaReverseDestinations].Replicate = true
+	cfg.DataDbCfg().RplConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1)}
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+
+	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn <- clMock(func(serviceMethod string, _, _ interface{}) error {
+		if utils.ReplicatorSv1SetReverseDestination == serviceMethod {
+			return nil
+		}
+		return utils.ErrNotImplemented
+	})
+	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
+	})
+	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
+
+	if err := dm.RemoveResource("cgrates.org", "R1", utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+
+}

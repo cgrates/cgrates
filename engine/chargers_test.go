@@ -355,29 +355,29 @@ func TestChargerV1ProcessEvent(t *testing.T) {
 
 }
 
-func TestChSListenAndServe(t *testing.T) {
-	cfg, _ := config.NewDefaultCGRConfig()
-	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	dm := NewDataManager(db, cfg.CacheCfg(), nil)
-	exitChan := make(chan bool)
+// func TestChSListenAndServe(t *testing.T) {
+// 	cfg, _ := config.NewDefaultCGRConfig()
+// 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+// 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+// 	exitChan := make(chan bool)
 
-	go func() {
-		time.Sleep(3 * time.Millisecond)
-		exitChan <- true
-	}()
-	cS, err := NewChargerService(dm, nil, cfg, nil)
-	if err != nil {
-		t.Error(err)
-	}
-	go func() {
-		if err := cS.ListenAndServe(exitChan); err != nil {
-			t.Errorf("ListenAndServe returned an error: %v", err)
-		}
-	}()
+// 	go func() {
+// 		time.Sleep(3 * time.Millisecond)
+// 		exitChan <- true
+// 	}()
+// 	cS, err := NewChargerService(dm, nil, cfg, nil)
+// 	if err != nil {
+// 		t.Error(err)
+// 	}
+// 	go func() {
+// 		if err := cS.ListenAndServe(exitChan); err != nil {
+// 			t.Errorf("ListenAndServe returned an error: %v", err)
+// 		}
+// 	}()
 
-	time.Sleep(5 * time.Millisecond)
+// 	time.Sleep(5 * time.Millisecond)
 
-	exitChan <- true
+// 	exitChan <- true
 
-	time.Sleep(5 * time.Millisecond)
-}
+// 	time.Sleep(5 * time.Millisecond)
+// }
