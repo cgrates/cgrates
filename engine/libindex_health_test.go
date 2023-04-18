@@ -635,3 +635,94 @@ func TestGetRatesFromCacheObjValNil(t *testing.T) {
 	}
 
 }
+
+func TestGetRevFltrIdxHealthFromRateRatesGetKeysForPrefixErr(t *testing.T) {
+
+	cfg := config.NewDefaultCGRConfig()
+	data := &DataDBMock{
+		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
+			return nil, utils.ErrNotImplemented
+		},
+	}
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+
+	useLtcache := ltcache.NewCache(0, 0, false, nil)
+
+	expErr := "unsupported prefix in GetKeysForPrefix: "
+	if _, err := getRevFltrIdxHealthFromRateRates(context.Background(), dm, useLtcache, useLtcache, useLtcache); err != utils.ErrNotImplemented {
+		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err)
+	}
+
+}
+
+func TestGetRevFltrIdxHealthFromRateRatesGetRatesFromCacheErr(t *testing.T) {
+
+	defer func() {
+		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+
+	if err := dm.SetAttributeProfile(context.Background(), &AttributeProfile{
+		Tenant:    "cgrates.org",
+		ID:        "ATTR1",
+		FilterIDs: []string{"*string:~*req.Account:1001", "Fltr1", "Fltr3"},
+	}, false); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := dm.SetFilter(context.Background(), &Filter{
+		Tenant: "cgrates.org",
+		ID:     "Fltr3",
+	}, false); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := dm.SetIndexes(context.Background(), utils.CacheReverseFilterIndexes, "cgrates.org:Fltr2",
+		map[string]utils.StringSet{utils.CacheAttributeFilterIndexes: {"ATTR1": {}, "ATTR2": {}}},
+		true, utils.NonTransactional); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := dm.SetRateProfile(context.Background(), &utils.RateProfile{
+		Tenant: "cgrates.org",
+		ID:     "RP1",
+		Rates: map[string]*utils.Rate{
+			"RT1": {
+				ID:        "RT1",
+				FilterIDs: []string{"Fltr3"},
+			},
+		},
+	}, false, false); err != nil {
+		t.Fatal(err)
+	}
+
+	useLtcache := ltcache.NewCache(20, 20*time.Second, true, nil)
+	useLtcache.Set("cgrates.org:RP1", nil, []string{})
+
+	if _, err := getRevFltrIdxHealthFromRateRates(context.Background(), dm, useLtcache, useLtcache, useLtcache); err != utils.ErrNotFound {
+		t.Errorf("Expected error <%v>, Received error <%v>", utils.ErrNotFound, err)
+	}
+
+}
+
+func TestGetFltrIdxHealthForRateRatesGetKeysForPrefixErr(t *testing.T) {
+
+	cfg := config.NewDefaultCGRConfig()
+	data := &DataDBMock{
+		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
+			return nil, utils.ErrNotImplemented
+		},
+	}
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+
+	useLtcache := ltcache.NewCache(-1, 0, false, nil)
+
+	expErr := "unsupported prefix in GetKeysForPrefix: "
+	if _, err := GetFltrIdxHealthForRateRates(context.Background(), dm, useLtcache, useLtcache, useLtcache); err != utils.ErrNotImplemented {
+		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err)
+	}
+
+}

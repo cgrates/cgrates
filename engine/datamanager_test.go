@@ -10433,3 +10433,146 @@ func TestDMGetDispatcherHostCacheWriteErr2(t *testing.T) {
 	}
 
 }
+
+func TestDMGetItemLoadIDsNilDM(t *testing.T) {
+
+	var dm *DataManager
+
+	_, err := dm.GetItemLoadIDs(context.Background(), "", false)
+	if err != utils.ErrNoDatabaseConn {
+		t.Errorf("\nExpected error <%+v>, \nReceived error <%+v>", utils.ErrNoDatabaseConn, err)
+	}
+
+}
+
+func TestDMGetItemLoadIDsSetSetLoadIDsDrvErr(t *testing.T) {
+
+	cfgtmp := config.CgrConfig()
+	defer func() {
+		config.SetCgrConfig(cfgtmp)
+		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	cfg.DataDbCfg().Items[utils.MetaLoadIDs].Remote = true
+	cfg.DataDbCfg().RmtConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.RemoteConnsCfg)}
+	config.SetCgrConfig(cfg)
+
+	cc := make(chan birpc.ClientConnector, 1)
+	cc <- &ccMock{
+
+		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+			utils.ReplicatorSv1GetItemLoadIDs: func(ctx *context.Context, args, reply interface{}) error { return nil },
+		},
+	}
+
+	itmLIDs := map[string]int64{
+		"ID_1": 21,
+	}
+
+	cM := NewConnManager(cfg)
+	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.RemoteConnsCfg), utils.ReplicatorSv1, cc)
+	data := &DataDBMock{
+		GetItemLoadIDsDrvF: func(ctx *context.Context, itemIDPrefix string) (loadIDs map[string]int64, err error) {
+			return itmLIDs, utils.ErrNotFound
+		},
+		SetLoadIDsDrvF: func(ctx *context.Context, loadIDs map[string]int64) error { return utils.ErrNotImplemented },
+	}
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	_, err := dm.GetItemLoadIDs(context.Background(), cfg.GeneralCfg().DefaultTenant, false)
+	if err != utils.ErrNotImplemented {
+		t.Errorf("Expected error <%v>, received error <%v>", utils.ErrNotImplemented, err)
+	}
+}
+
+func TestDMGetItemLoadIDsCacheWriteErr1(t *testing.T) {
+
+	itmLIDs := map[string]int64{
+		"ID_1": 21,
+	}
+
+	cfgtmp := config.CgrConfig()
+	defer func() {
+		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+		config.SetCgrConfig(cfgtmp)
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	cfg.CacheCfg().ReplicationConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
+	cfg.CacheCfg().Partitions[utils.CacheLoadIDs].Replicate = true
+	config.SetCgrConfig(cfg)
+
+	cc := make(chan birpc.ClientConnector, 1)
+	cc <- &ccMock{
+
+		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply interface{}) error {
+
+				return utils.ErrNotImplemented
+			},
+		},
+	}
+
+	cM := NewConnManager(cfg)
+	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.CacheSv1, cc)
+
+	data := &DataDBMock{
+		GetItemLoadIDsDrvF: func(ctx *context.Context, itemIDPrefix string) (loadIDs map[string]int64, err error) {
+			return itmLIDs, utils.ErrNotFound
+		},
+	}
+
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	Cache = NewCacheS(cfg, dm, cM, nil)
+
+	_, err := dm.GetItemLoadIDs(context.Background(), cfg.GeneralCfg().DefaultTenant, true)
+	if err != utils.ErrNotImplemented {
+		t.Errorf("Expected error <%v>, received error <%v>", utils.ErrNotImplemented, err)
+	}
+}
+
+func TestDMGetItemLoadIDsCacheWriteErr2(t *testing.T) {
+
+	cfgtmp := config.CgrConfig()
+	defer func() {
+		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+		config.SetCgrConfig(cfgtmp)
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	cfg.CacheCfg().ReplicationConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
+	cfg.CacheCfg().Partitions[utils.CacheLoadIDs].Replicate = true
+	config.SetCgrConfig(cfg)
+
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+
+	cc := make(chan birpc.ClientConnector, 1)
+	cc <- &ccMock{
+
+		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply interface{}) error { return utils.ErrNotImplemented },
+		},
+	}
+
+	cM := NewConnManager(cfg)
+	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.CacheSv1, cc)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	itmLIDs := map[string]int64{
+		"ID_1": 21,
+	}
+
+	if err := dm.dataDB.SetLoadIDsDrv(context.Background(), itmLIDs); err != nil {
+		t.Error(err)
+	}
+
+	Cache = NewCacheS(cfg, dm, cM, nil)
+
+	_, err := dm.GetItemLoadIDs(context.Background(), cfg.GeneralCfg().DefaultTenant, true)
+	if err != utils.ErrNotImplemented {
+		t.Errorf("Expected error <%v>, received error <%v>", utils.ErrNotImplemented, err)
+	}
+
+}

@@ -374,6 +374,9 @@ func (dbM *DataDBMock) RemoveDispatcherProfileDrv(ctx *context.Context, tnt, id 
 }
 
 func (dbM *DataDBMock) GetItemLoadIDsDrv(ctx *context.Context, itemIDPrefix string) (loadIDs map[string]int64, err error) {
+	if dbM.GetItemLoadIDsDrvF != nil {
+		return dbM.GetItemLoadIDsDrvF(ctx, itemIDPrefix)
+	}
 	return nil, utils.ErrNotImplemented
 }
 
