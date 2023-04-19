@@ -439,7 +439,7 @@ func testRerateExpGetAccountAfterProcessEvent3(t *testing.T) {
 func testRerateExpRerateCDRs(t *testing.T) {
 	var reply string
 	if err := ng2RPC.Call(utils.CDRsV1RateCDRs, &engine.ArgRateCDRs{
-		Flags: []string{utils.MetaRALs},
+		Flags: []string{utils.MetaRerate},
 		RPCCDRsFilter: utils.RPCCDRsFilter{
 			OrderBy: utils.AnswerTime,
 			CGRIDs:  []string{ng1UUID, ng2UUID},

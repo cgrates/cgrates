@@ -339,7 +339,7 @@ func testRerateCDRsGetAccountAfterProcessEvent2(t *testing.T) {
 func testRerateCDRsRerateCDRs(t *testing.T) {
 	var reply string
 	if err := rrCdrsRPC.Call(utils.CDRsV1RateCDRs, &engine.ArgRateCDRs{
-		Flags: []string{utils.MetaRALs},
+		Flags: []string{utils.MetaRerate},
 		RPCCDRsFilter: utils.RPCCDRsFilter{
 			OrderBy: utils.AnswerTime,
 			CGRIDs:  []string{rrCdrsUUID},
