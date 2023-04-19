@@ -500,6 +500,30 @@ func (cdrS *CDRServer) processEvents(evs []*utils.CGREvent,
 	cdrs := make([]*CDR, len(cgrEvs))
 	if refund || ralS || store || reRate || export {
 		for i, cgrEv := range cgrEvs {
+			if refund {
+				if _, has := cgrEv.Event[utils.CostDetails]; !has {
+					// if CostDetails is not populated or is nil, look for it inside the previously stored cdr
+					var cgrID string // prepare CGRID to filter for previous CDR
+					if val, has := cgrEv.Event[utils.CGRID]; !has {
+						cgrID = utils.Sha1(utils.IfaceAsString(cgrEv.Event[utils.OriginID]),
+							utils.IfaceAsString(cgrEv.Event[utils.OriginHost]))
+					} else {
+						cgrID = utils.IfaceAsString(val)
+					}
+					var prevCDRs []*CDR // only one should be returned
+					if prevCDRs, _, err = cdrS.cdrDb.GetCDRs(
+						&utils.CDRsFilter{CGRIDs: []string{cgrID},
+							RunIDs: []string{utils.IfaceAsString(cgrEv.Event[utils.RunID])}}, false); err != nil {
+						utils.Logger.Err(
+							fmt.Sprintf("<%s> could not retrieve previously stored CDR, error: <%s>",
+								utils.CDRs, err.Error()))
+						err = utils.ErrPartiallyExecuted
+						return
+					} else {
+						cgrEv.Event[utils.CostDetails] = prevCDRs[0].CostDetails
+					}
+				}
+			}
 			if cdrs[i], err = NewMapEvent(cgrEv.Event).AsCDR(cdrS.cgrCfg,
 				cgrEv.Tenant, cdrS.cgrCfg.GeneralCfg().DefaultTimezone); err != nil {
 				utils.Logger.Warning(
@@ -516,25 +540,13 @@ func (cdrS *CDRServer) processEvents(evs []*utils.CGREvent,
 	}
 	if refund {
 		for i, cdr := range cdrs {
-			if cdr.CostDetails == nil { // if CostDetails is not populated, look for it inside the previously stored cdr
-				var prevCDRs []*CDR // only one should be returned
-				if prevCDRs, _, err = cdrS.cdrDb.GetCDRs(
-					&utils.CDRsFilter{CGRIDs: []string{cdr.CGRID},
-						RunIDs: []string{cdr.RunID}}, false); err != nil {
-					utils.Logger.Info(
-						fmt.Sprintf("<%s> could not retrieve previously stored CDR, error: <%s>",
-							utils.CDRs, err.Error()))
-					continue
-				}
-				cdr.CostDetails = prevCDRs[0].CostDetails
-			}
 			if rfnd, errRfd := cdrS.refundEventCost(cdr.CostDetails,
 				cdr.RequestType, cdr.ToR); errRfd != nil {
 				utils.Logger.Warning(
 					fmt.Sprintf("<%s> error: <%s> refunding CDR %+v",
 						utils.CDRs, errRfd.Error(), utils.ToJSON(cdr)))
 			} else if rfnd {
-				cdr.CostDetails = nil
+				cdr.CostDetails = nil // this makes sure that the rater will recalculate (and debit) the cost
 				procFlgs[i].Add(utils.MetaRefund)
 			}
 		}
@@ -1093,6 +1105,10 @@ func (cdrS *CDRServer) V1RateCDRs(arg *ArgRateCDRs, reply *string) (err error) {
 	if flgs.Has(utils.MetaAttributes) {
 		attrS = flgs.GetBool(utils.MetaAttributes)
 	}
+	var reRate bool
+	if flgs.Has(utils.MetaRerate) {
+		reRate = flgs.GetBool(utils.MetaRerate)
+	}
 
 	if chrgS && len(cdrS.cgrCfg.CdrsCfg().ChargerSConns) == 0 {
 		return utils.NewErrNotConnected(utils.ChargerS)
@@ -1104,7 +1120,7 @@ func (cdrS *CDRServer) V1RateCDRs(arg *ArgRateCDRs, reply *string) (err error) {
 		cgrEvs[i].APIOpts = arg.APIOpts
 	}
 	if _, err = cdrS.processEvents(cgrEvs, chrgS, attrS, false,
-		true, store, true, export, thdS, statS); err != nil {
+		true, store, reRate, export, thdS, statS); err != nil {
 		return utils.NewErrServerError(err)
 	}
 
