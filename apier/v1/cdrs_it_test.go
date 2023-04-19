@@ -237,12 +237,11 @@ func testV1CDRsProcessEventWithRefund(t *testing.T) {
 	}
 	if err := cdrsRpc.Call(utils.APIerSv2GetAccount, acntAttrs, &acnt); err != nil {
 		t.Error(err)
-	} else if blc1 := acnt.GetBalanceWithID(utils.MetaVoice, "BALANCE1"); blc1.Value != 120000000000 { // refund is done after debit
+	} else if blc1 := acnt.GetBalanceWithID(utils.MetaVoice, "BALANCE1"); blc1.Value != 60000000000 {
 		t.Errorf("Balance1 is: %s", utils.ToIJSON(blc1))
-	} else if blc2 := acnt.GetBalanceWithID(utils.MetaVoice, "BALANCE2"); blc2.Value != 120000000000 {
+	} else if blc2 := acnt.GetBalanceWithID(utils.MetaVoice, "BALANCE2"); blc2.Value != 180000000000 {
 		t.Errorf("Balance2 is: %s", utils.ToIJSON(blc2))
 	}
-	return
 }
 
 func testV1CDRsRefundOutOfSessionCost(t *testing.T) {

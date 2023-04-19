@@ -439,6 +439,9 @@ func (cdrS *CDRServer) eeSProcessEvent(cgrEv *CGREventWithEeIDs) (err error) {
 // in case of partially executed, both error and evs will be returned
 func (cdrS *CDRServer) processEvents(evs []*utils.CGREvent,
 	chrgS, attrS, refund, ralS, store, reRate, export, thdS, stS bool) (outEvs []*utils.EventWithFlags, err error) {
+	if reRate {
+		refund = true
+	}
 	if attrS {
 		for _, ev := range evs {
 			if err = cdrS.attrSProcessEvent(ev); err != nil {
@@ -513,6 +516,18 @@ func (cdrS *CDRServer) processEvents(evs []*utils.CGREvent,
 	}
 	if refund {
 		for i, cdr := range cdrs {
+			if cdr.CostDetails == nil { // if CostDetails is not populated, look for it inside the previously stored cdr
+				var prevCDRs []*CDR // only one should be returned
+				if prevCDRs, _, err = cdrS.cdrDb.GetCDRs(
+					&utils.CDRsFilter{CGRIDs: []string{cdr.CGRID},
+						RunIDs: []string{cdr.RunID}}, false); err != nil {
+					utils.Logger.Info(
+						fmt.Sprintf("<%s> could not retrieve previously stored CDR, error: <%s>",
+							utils.CDRs, err.Error()))
+					continue
+				}
+				cdr.CostDetails = prevCDRs[0].CostDetails
+			}
 			if rfnd, errRfd := cdrS.refundEventCost(cdr.CostDetails,
 				cdr.RequestType, cdr.ToR); errRfd != nil {
 				utils.Logger.Warning(
@@ -1088,7 +1103,7 @@ func (cdrS *CDRServer) V1RateCDRs(arg *ArgRateCDRs, reply *string) (err error) {
 		cgrEvs[i] = cdr.AsCGREvent()
 		cgrEvs[i].APIOpts = arg.APIOpts
 	}
-	if _, err = cdrS.processEvents(cgrEvs, chrgS, attrS, true,
+	if _, err = cdrS.processEvents(cgrEvs, chrgS, attrS, false,
 		true, store, true, export, thdS, statS); err != nil {
 		return utils.NewErrServerError(err)
 	}
