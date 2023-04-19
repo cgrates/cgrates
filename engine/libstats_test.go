@@ -1815,3 +1815,65 @@ func TestStatQueueWithAPIOptsUnmarshalJSONErrWithSSQ(t *testing.T) {
 	}
 
 }
+
+func TestStatQueueProfileSetBlockersErr(t *testing.T) {
+	sq := StatQueueProfile{}
+
+	expErr := "invalid DynamicBlocker format for string <incorrect input>"
+	if err := sq.Set([]string{utils.Metrics, utils.Blockers}, "incorrect input", false, utils.EmptyString); err == nil || err.Error() != expErr {
+		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err)
+	}
+
+}
+
+func TestStatQueueProfileSetBlockersOK(t *testing.T) {
+	sq := StatQueueProfile{}
+
+	exp := StatQueueProfile{
+		Metrics: []*MetricWithFilters{
+			{
+				Blockers: utils.DynamicBlockers{&utils.DynamicBlocker{
+					FilterIDs: []string{"*string:~*opts.*cost:0"},
+					Blocker:   false,
+				},
+					&utils.DynamicBlocker{FilterIDs: []string{"*suffix:~*req.Destination:+4432", "eq:~*opts.*usage:10s"},
+						Blocker: false},
+					&utils.DynamicBlocker{FilterIDs: []string{"*notstring:~*req.RequestType:*prepaid"},
+						Blocker: true},
+					&utils.DynamicBlocker{FilterIDs: nil,
+						Blocker: false},
+				},
+			},
+		},
+	}
+
+	if err := sq.Set([]string{utils.Metrics, utils.Blockers}, "*string:~*opts.*cost:0;false;*suffix:~*req.Destination:+4432&eq:~*opts.*usage:10s;false;*notstring:~*req.RequestType:*prepaid;true;;false", false, utils.EmptyString); err != nil {
+		t.Error(err)
+	}
+
+	if !reflect.DeepEqual(exp, sq) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(sq))
+	}
+}
+
+// unfinished
+// func TestStatQueueUnmarshalJSON(t *testing.T) {
+
+// 	sq := &StatQueue{
+// 		SQMetrics: map[string]StatMetric{
+// 			utils.MetaASR: &StatASR{
+// 				Metric: &Metric{
+// 					Value: utils.NewDecimal(2, 0),
+// 					Count: 3,
+// 					Events: map[string]*DecimalWithCompress{
+// 						"cgrates.org:TestStatRemExpired_1": {Stat: utils.NewDecimal(1, 0), CompressFactor: 1},
+// 					},
+// 				},
+// 			},
+// 		},
+// 		SQItems: []SQItem{
+// 			{"cgrates.org:TestStatRemExpired_1", utils.TimePointer(time.Now())},
+// 		},
+// 	}
+
+// }
