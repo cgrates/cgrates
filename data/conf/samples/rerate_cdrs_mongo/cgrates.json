@@ -1,0 +1,47 @@
+{
+
+"general": {
+    "log_level": 7,
+    "reply_timeout": "50s"
+},
+
+"listen": {
+    "rpc_json": ":2012",
+    "rpc_gob": ":2013",
+    "http": ":2080"
+},
+
+"data_db": {
+    "db_type": "mongo",
+    "db_name": "10",
+    "db_port": 27017
+},
+
+"stor_db": {
+    "db_type": "mongo",
+    "db_name": "cgrates",
+    "db_port": 27017
+},
+
+
+"rals": {
+    "enabled": true,
+    "max_increments":3000000
+},
+
+"cdrs": {
+    "enabled": true,
+    "rals_conns": ["*localhost"]
+},
+
+"sessions": {
+    "enabled": true,
+    "rals_conns": ["*localhost"],
+    "cdrs_conns": ["*localhost"]
+},
+
+"apiers": {
+    "enabled": true
+}
+   
+}
