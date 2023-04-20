@@ -2127,7 +2127,7 @@ func TestDMGetThresholdProfileDMErr(t *testing.T) {
 	}
 }
 
-// unfinished, open issue
+// unfinished
 // func TestGetThresholdProfileSetThErr(t *testing.T) {
 // 	tmp := Cache
 // 	cfgtmp := config.CgrConfig()
