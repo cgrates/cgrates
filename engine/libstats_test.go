@@ -1856,24 +1856,220 @@ func TestStatQueueProfileSetBlockersOK(t *testing.T) {
 	}
 }
 
-// unfinished
-// func TestStatQueueUnmarshalJSON(t *testing.T) {
+func TestStatQueueUnmarshalJSONOK(t *testing.T) {
 
-// 	sq := &StatQueue{
-// 		SQMetrics: map[string]StatMetric{
-// 			utils.MetaASR: &StatASR{
-// 				Metric: &Metric{
-// 					Value: utils.NewDecimal(2, 0),
-// 					Count: 3,
-// 					Events: map[string]*DecimalWithCompress{
-// 						"cgrates.org:TestStatRemExpired_1": {Stat: utils.NewDecimal(1, 0), CompressFactor: 1},
-// 					},
-// 				},
-// 			},
-// 		},
-// 		SQItems: []SQItem{
-// 			{"cgrates.org:TestStatRemExpired_1", utils.TimePointer(time.Now())},
-// 		},
-// 	}
+	sqData := &StatQueue{
+		Tenant: "cgrates.org",
+		ID:     "STS",
+		SQMetrics: map[string]StatMetric{
+			utils.MetaASR:      new(StatASR),
+			utils.MetaACD:      new(StatACD),
+			utils.MetaTCD:      new(StatTCD),
+			utils.MetaACC:      new(StatACC),
+			utils.MetaTCC:      new(StatTCC),
+			utils.MetaPDD:      new(StatPDD),
+			utils.MetaDDC:      new(StatDDC),
+			utils.MetaSum:      new(StatSum),
+			utils.MetaAverage:  new(StatAverage),
+			utils.MetaDistinct: new(StatDistinct),
+		},
+	}
 
-// }
+	sq := &StatQueue{}
+
+	data := []byte(utils.ToJSON(sqData))
+
+	if err := sq.UnmarshalJSON(data); err != nil {
+		t.Error(err)
+	}
+
+	if !reflect.DeepEqual(utils.ToJSON(sqData), utils.ToJSON(sq)) {
+		t.Errorf("Expected <%v>, \nReceived <%v>", utils.ToJSON(sqData), utils.ToJSON(sq))
+	}
+
+}
+
+func TestStatQueueUnmarshalJSONBadMetric(t *testing.T) {
+
+	sqData := &StatQueue{
+		Tenant: "cgrates.org",
+		ID:     "STS",
+		SQMetrics: map[string]StatMetric{
+			"Inexistent": new(StatASR),
+		},
+	}
+
+	sq := &StatQueue{}
+
+	data := []byte(utils.ToJSON(sqData))
+
+	expErr := "unsupported metric type <Inexistent>"
+	if err := sq.UnmarshalJSON(data); err == nil || err.Error() != expErr {
+		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err)
+	}
+
+}
+
+func TestStatQueueUnmarshalJSONValUnmarshalErr(t *testing.T) {
+
+	sqData := &StatQueue{
+		Tenant: "cgrates.org",
+		ID:     "STS",
+		SQMetrics: map[string]StatMetric{
+			utils.MetaASR: statMetricMock("bad value error"),
+		},
+	}
+
+	sq := &StatQueue{}
+
+	data := []byte(utils.ToJSON(sqData))
+
+	expErr := "json: cannot unmarshal string into Go value of type engine.StatASR"
+	if err := sq.UnmarshalJSON(data); err == nil || err.Error() != expErr {
+		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err)
+	}
+
+}
+
+func TestStatQueueCompressTTLTrue(t *testing.T) {
+
+	ttl := time.Millisecond
+	expiryTime1 := time.Date(2021, 1, 1, 23, 59, 59, 0, time.UTC)
+
+	sq := &StatQueue{
+		SQItems: []SQItem{
+			{
+				EventID:    "id1",
+				ExpiryTime: nil,
+			},
+			{
+				EventID:    "id2",
+				ExpiryTime: &expiryTime1,
+			},
+		},
+		SQMetrics: map[string]StatMetric{
+			utils.MetaTCD: &StatTCD{
+				Metric: &Metric{
+
+					Events: map[string]*DecimalWithCompress{
+						"id1": {},
+						"id2": {},
+					},
+				},
+			},
+		},
+		ttl: &ttl,
+	}
+
+	maxQL := uint64(1)
+
+	exp := []SQItem{
+		{
+			EventID:    "id2",
+			ExpiryTime: &expiryTime1,
+		},
+		{
+			EventID:    "id1",
+			ExpiryTime: nil,
+		},
+	}
+	rcv := sq.Compress(maxQL)
+	if rcv != true {
+		t.Fatalf("\nexpected: <%+v>, \nreceived: <%+v>", true, rcv)
+	}
+
+	if !reflect.DeepEqual(exp, sq.SQItems) {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", exp, sq.SQItems)
+	}
+}
+
+func TestStatQAddStatEventFilterPassErr(t *testing.T) {
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	fltrS := NewFilterS(cfg, cM, dm)
+
+	sq = &StatQueue{
+		SQMetrics: map[string]StatMetric{
+			utils.MetaASR: &StatASR{
+				Metric: &Metric{
+					Value: utils.NewDecimal(1, 0),
+					Count: 1,
+					Events: map[string]*DecimalWithCompress{
+						"cgrates.org:TestStatRemExpired_1": {Stat: utils.NewDecimalFromFloat64(1), CompressFactor: 1},
+					},
+				},
+			},
+		},
+		sqPrfl: &StatQueueProfile{
+			Metrics: []*MetricWithFilters{
+				{
+					FilterIDs: []string{"*"},
+					MetricID:  utils.MetaASR,
+				},
+			},
+		},
+	}
+	asrMetric := sq.SQMetrics[utils.MetaASR].(*StatASR)
+	if asr := asrMetric.GetValue(); asr.Compare(utils.NewDecimalFromFloat64(100)) != 0 {
+		t.Errorf("received ASR: %v", asr)
+	}
+	ev1 := &utils.CGREvent{Tenant: "cgrates.org", ID: "TestStatAddStatEvent_1"}
+
+	expErr := `inline parse error for string: <*>`
+	if err := sq.addStatEvent(context.Background(), ev1.Tenant, ev1.ID, fltrS, utils.MapStorage{utils.MetaOpts: ev1.Event}); err == nil || err.Error() != expErr {
+		t.Errorf("Expected error %s received: %v", expErr, err)
+	}
+
+}
+
+func TestStatQAddStatEventBlockerFromDynamicsErr(t *testing.T) {
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	fltrS := NewFilterS(cfg, cM, dm)
+
+	sq = &StatQueue{
+		SQMetrics: map[string]StatMetric{
+			utils.MetaASR: &StatASR{
+				Metric: &Metric{
+					Value: utils.NewDecimal(1, 0),
+					Count: 1,
+					Events: map[string]*DecimalWithCompress{
+						"cgrates.org:TestStatRemExpired_1": {Stat: utils.NewDecimalFromFloat64(1), CompressFactor: 1},
+					},
+				},
+			},
+		},
+		sqPrfl: &StatQueueProfile{
+			Metrics: []*MetricWithFilters{
+				{
+					MetricID: utils.MetaASR,
+					Blockers: utils.DynamicBlockers{
+						{
+							FilterIDs: []string{"*stirng:~*req.Account:1001"},
+							Blocker:   true,
+						},
+					},
+				},
+			},
+		},
+	}
+	asrMetric := sq.SQMetrics[utils.MetaASR].(*StatASR)
+	if asr := asrMetric.GetValue(); asr.Compare(utils.NewDecimalFromFloat64(100)) != 0 {
+		t.Errorf("received ASR: %v", asr)
+	}
+	ev1 := &utils.CGREvent{Tenant: "cgrates.org", ID: "TestStatAddStatEvent_1"}
+
+	expErr := `NOT_IMPLEMENTED:*stirng`
+	if err := sq.addStatEvent(context.Background(), ev1.Tenant, ev1.ID, fltrS, utils.MapStorage{utils.MetaOpts: ev1.Event}); err == nil || err.Error() != expErr {
+		t.Errorf("Expected error %s received: %v", expErr, err)
+	}
+
+}

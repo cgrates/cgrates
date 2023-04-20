@@ -184,17 +184,18 @@ func TestAPItoModelResource(t *testing.T) {
 func TestTPStatsAsTPStats(t *testing.T) {
 	tps := StatMdls{
 		&StatMdl{
-			Tpid:        "TEST_TPID",
-			Tenant:      "cgrates.org",
-			ID:          "Stats1",
-			FilterIDs:   "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z;FLTR_1",
-			QueueLength: 100,
-			TTL:         "1s",
-			MinItems:    2,
-			MetricIDs:   "*asr;*acc;*tcc;*acd;*tcd;*pdd",
-			Stored:      true,
-			Blockers:    ";true",
-			Weights:     ";20",
+			Tpid:           "TEST_TPID",
+			Tenant:         "cgrates.org",
+			ID:             "Stats1",
+			FilterIDs:      "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z;FLTR_1",
+			QueueLength:    100,
+			TTL:            "1s",
+			MinItems:       2,
+			MetricIDs:      "*asr;*acc;*tcc;*acd;*tcd;*pdd",
+			Stored:         true,
+			Blockers:       ";true",
+			Weights:        ";20",
+			MetricBlockers: ";false",
 		},
 		&StatMdl{
 			Tpid:         "TEST_TPID",
@@ -5137,5 +5138,86 @@ func TestModelHelpersAccountToAPI(t *testing.T) {
 	}
 	if result := AccountToAPI(testStruct); !reflect.DeepEqual(result, expStruct) {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ToJSON(expStruct), utils.ToJSON(result))
+	}
+}
+
+func TestAPItoModelResourceNoFilterIDs(t *testing.T) {
+	tpRL := &utils.TPResourceProfile{
+		Tenant:            "cgrates.org",
+		TPid:              testTPID,
+		ID:                "ResGroup1",
+		FilterIDs:         []string{},
+		Weights:           ";10",
+		Limit:             "2",
+		ThresholdIDs:      []string{"TRes1", "TRes2"},
+		AllocationMessage: "test",
+	}
+	expModel := &ResourceMdl{
+		Tpid:              testTPID,
+		Tenant:            "cgrates.org",
+		ID:                "ResGroup1",
+		FilterIDs:         "",
+		Weights:           ";10",
+		Limit:             "2",
+		ThresholdIDs:      "TRes1;TRes2",
+		AllocationMessage: "test",
+	}
+	rcv := APItoModelResource(tpRL)
+	if len(rcv) != 1 {
+		t.Errorf("Expecting: 1, received: %+v", len(rcv))
+	} else if !reflect.DeepEqual(rcv[0], expModel) {
+		t.Errorf("Expecting: \n%+v, \nreceived: \n%+v", utils.ToJSON(expModel), utils.ToJSON(rcv[0]))
+	}
+}
+
+func TestAPItoResourceNewDynamicWeightsFromStringErr(t *testing.T) {
+	tpRL := &utils.TPResourceProfile{
+		Tenant:            "cgrates.org",
+		TPid:              testTPID,
+		ID:                "ResGroup1",
+		FilterIDs:         []string{"FLTR_RES_GR_1", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z"},
+		Stored:            false,
+		Blocker:           false,
+		Weights:           ";10",
+		Limit:             "2",
+		ThresholdIDs:      []string{"TRes1"},
+		AllocationMessage: "asd",
+	}
+
+	expErr := "invalid Weight <not_a_float64> in string: <fltr1&fltr2;not_a_float64>"
+	tpRL.Weights = "fltr1&fltr2;not_a_float64"
+	if _, err := APItoResource(tpRL, "UTC"); err == nil || err.Error() != expErr {
+		t.Errorf("expecting: %+v, received: %+v", expErr, err)
+	}
+}
+
+func TestAPItoTPStatsNewDynamicWeightsFromStringErr(t *testing.T) {
+	tps := &utils.TPStatProfile{
+		TPid:        testTPID,
+		ID:          "Stats1",
+		FilterIDs:   []string{"FLTR_1", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z"},
+		QueueLength: 100,
+		TTL:         "1s",
+		Metrics: []*utils.MetricWithFilters{
+			{
+				MetricID: "*sum#BalanceValue",
+			},
+			{
+				MetricID: "*average#BalanceValue",
+			},
+			{
+				MetricID: "*tcc",
+			},
+		},
+		MinItems:     1,
+		ThresholdIDs: []string{"THRESH1", "THRESH2"},
+		Stored:       false,
+		Blockers:     ";false",
+		Weights:      "fltr1&fltr2;not_a_float64",
+	}
+
+	expErr := "invalid Weight <not_a_float64> in string: <fltr1&fltr2;not_a_float64>"
+	if _, err := APItoStats(tps, "UTC"); err == nil || err.Error() != expErr {
+		t.Errorf("expecting: %+v, received: %+v", expErr, err)
 	}
 }
