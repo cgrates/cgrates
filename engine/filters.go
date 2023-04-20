@@ -571,3 +571,14 @@ func (fS *FilterS) getFieldValueDataProvider(initialDP utils.DataProvider,
 
 	return
 }
+
+func validateInlineFilters(fltrs []string) (err error) {
+	for _, fltr := range fltrs {
+		if strings.HasPrefix(fltr, utils.Meta) {
+			if _, err = NewFilterFromInline(utils.EmptyString, fltr); err != nil {
+				return
+			}
+		}
+	}
+	return
+}

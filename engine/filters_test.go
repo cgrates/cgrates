@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"fmt"
 	"reflect"
 	"strings"
 	"testing"
@@ -2178,5 +2179,34 @@ func TestFilterSPass11(t *testing.T) {
 	}
 	if _, err := fS.Pass("cgrates.org", fltriDs, ev); err != nil {
 		t.Error(err)
+	}
+}
+
+func TestValidateInlineFilters(t *testing.T) {
+	cases := []struct {
+		fltrs       []string
+		expectedErr string
+	}{
+		{[]string{"FLTR", "*string:~*req.Account:1001"}, ""},
+		{[]string{"FLTR", "*string:~*req,Acoount1001"}, "inline parse error for string: <*string:~*req,Acoount1001>"},
+		{[]string{"*exists:~*req.Supplier:"}, ""},
+		{[]string{"*exists:*req.Supplier"}, "inline parse error for string: <*exists:*req.Supplier>"},
+		{[]string{"*rsr:~*req.Account:(10)"}, "invalid RSRFilter start rule in string: <(10)>"},
+	}
+	computeTestName := func(idx int, params []string) string {
+		return fmt.Sprintf("Test No %d with parameters: %v", idx, params)
+	}
+
+	for i, c := range cases {
+		t.Run(computeTestName(i, c.fltrs), func(t *testing.T) {
+			err := validateInlineFilters(c.fltrs)
+			if err != nil {
+				if c.expectedErr == "" {
+					t.Errorf("did not expect error, received: %v", err)
+				}
+			} else if c.expectedErr != "" {
+				t.Errorf("expected error: %v", err)
+			}
+		})
 	}
 }
