@@ -6,7 +6,7 @@ Scenario
 
  - Kamailio default configuration modified for **CGRateS** interaction. For script maintainability and simplicity we have separated CGRateS specific routes in *kamailio-cgrates.cfg* file which is included in main *kamailio.cfg* via include directive.
 
- - Considering the following users (with configs hardcoded in the *kamailio.cfg* configuration script and loaded in htable): 1001-prepaid, 1002-postpaid, 1003-pseudoprepaid, 1004-rated, 1005-rated, 1006-prepaid, 1007-prepaid.
+ - Considering the following users: 1001-prepaid, 1002-postpaid, 1003-pseudoprepaid, stored within CGRateS AttributeS directly.
 
 - **CGRateS** with following components:
 

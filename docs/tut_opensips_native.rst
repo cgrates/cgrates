@@ -1,24 +1,36 @@
-OpenSIPS_ interaction via  *event_datagram*
-===========================================
+OpenSIPS_ interaction via  own *cgrates* module
+===============================================
 
 Scenario
 --------
 
 - OpenSIPS out of *residential* configuration generated. 
 
- - Considering the following users (with configs hardcoded in the *opensips.cfg* configuration script): 1002-postpaid, 1003-pseudoprepaid, 1004-rated, 1007-rated.
+ - The users are all defined within CGRateS.
  - For simplicity we configure no authentication (WARNING: Not for production usage).
 
-- **CGRateS** with following components:
+- **CGRateS** with following subsystems:
 
- - CGR-SM started as translator between OpenSIPS_ and **cgr-rater** for both authorization events (pseudoprepaid) as well as CDR ones.
- - CGR-CDRS component processing raw CDRs from CGR-SM component and storing them inside CGR StorDB.
- - CGR-CDRE exporting rated CDRs from CGR StorDB (export path: */tmp*).
- - CGR-History component keeping the archive of the rates modifications (path browsable with git client at */tmp/cgr_history*).
+ - **SM**: (SessionManager) started as gateway between OpenSIPS_ and rest of CGRateS subsystems.
+ - **ChargerS**: used to decide the number of billing runs for customer/supplier charging.
+ - **AttributeS**: used to populate extra data to requests (ie: prepaid/postpaid, passwords, paypal account, LCR profile).
+ - **RALs**: used to calculate costs as well as account bundle management.
+ - **SupplierS**: selection of suppliers for each session. This will work in tandem with OpenSIPS_'s DRouting module.
+ - **StatS**: computing statistics in real-time regarding sessions and their charging.
+ - **ThresholdS**: monitoring and reacting to events coming from above subsystems.
+ - **CDRe**: exporting rated CDRs from CGR StorDB (export path: */tmp*).
+
+
+Creating OpenSIPS_ database for DRouting module
+-----------------------------------------------
+
+::
+
+ opensips-cli -x database create
 
 
 Starting OpenSIPS_ with custom configuration
-----------------------------------------------
+--------------------------------------------
 
 ::
 

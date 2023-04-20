@@ -1,0 +1,8 @@
+#Tenant,ID,FilterIDs,ActivationInterval,Sorting,SortingParamameters,SupplierID,SupplierFilterIDs,SupplierAccountIDs,SupplierRatingPlanIDs,SupplierResourceIDs,SupplierStatIDs,SupplierWeight,SupplierBlocker,SupplierParameters,Weight
+cgrates.org,SPL_ACNT_1001,*string:~*req.Account:1001,2017-11-27T00:00:00Z,*weight,,,,,,,,,,,10
+cgrates.org,SPL_ACNT_1001,,,,,supplier1,,,,,,10,,,
+cgrates.org,SPL_ACNT_1001,,,,,supplier2,,,,,,20,,,
+cgrates.org,SPL_ACNT_1002,*string:~*req.Account:1002,2017-11-27T00:00:00Z,*lc,,,,,,,,,,,10
+cgrates.org,SPL_ACNT_1002,,,,,supplier1,,,RP_SPL1,,,,,,
+cgrates.org,SPL_ACNT_1002,,,,,supplier2,,,RP_SPL2,,,,,,
+
