@@ -25,6 +25,7 @@ import (
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
 )
 
 var (
@@ -669,12 +670,25 @@ func TestStatProcessEvent2(t *testing.T) {
 	defer func() {
 		dm = tpDm
 	}()
+	cfg.StatSCfg().ThresholdSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)}
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
-	sts, err := NewStatService(dm, cfg, nil, nil)
+	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn <- clMock(func(serviceMethod string, _, _ interface{}) error {
+		if serviceMethod == utils.ThresholdSv1ProcessEvent {
+
+			return nil
+		}
+		return utils.ErrNotImplemented
+	})
+	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds): clientConn,
+	})
+	sts, err := NewStatService(dm, cfg, NewFilterS(cfg, nil, dm), connMgr)
 	if err != nil {
 		t.Error(err)
 	}
+
 	args := &StatsArgsProcessEvent{
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
@@ -696,9 +710,9 @@ func TestStatProcessEvent2(t *testing.T) {
 		ID:     "FLTR_TH_Stats1",
 		Rules: []*FilterRule{
 			{
-				Type:    "*lt",
-				Element: "~*req.Cost",
-				Values:  []string{"120.0"},
+				Type:    utils.MetaString,
+				Element: "~*req.Account",
+				Values:  []string{"1001"},
 			},
 		},
 	}
@@ -710,15 +724,29 @@ func TestStatProcessEvent2(t *testing.T) {
 		Metrics: []*MetricWithFilters{{
 			MetricID: "*sum:~*req.Usage",
 		}},
-		ThresholdIDs: []string{utils.META_NONE},
+		ThresholdIDs: []string{"Th1"},
 		Blocker:      true,
 		Stored:       true,
 		Weight:       20,
 		MinItems:     0,
 	}, true)
+
+	dm.SetStatQueue(&StatQueue{
+		Tenant: "cgrates.org",
+		ID:     "STS_PoccessCDR",
+		SQMetrics: map[string]StatMetric{
+			utils.MetaASR: &StatASR{
+				Answered: 2,
+				Count:    3,
+				Events: map[string]*StatWithCompress{
+					"cgrates.org:ev1": {Stat: 1},
+				},
+			},
+		},
+	})
 	SetDataStorage(dm)
-	if _, err := sts.processEvent(args); err == nil {
+	if _, err := sts.processEvent(args); err != nil {
 		t.Error(err)
 	}
-	//unfinished
+
 }
