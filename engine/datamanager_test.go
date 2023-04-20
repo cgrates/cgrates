@@ -1446,3 +1446,174 @@ func TestDmGetRatingPlanRmt(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestDMGetTimingRmt(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	cfg.DataDbCfg().Items[utils.MetaTimings].Remote = true
+	cfg.DataDbCfg().RmtConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1)}
+	Cache.Clear(nil)
+	defer func() {
+		cfg2, _ := config.NewDefaultCGRConfig()
+		config.SetCgrConfig(cfg2)
+	}()
+	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn <- clMock(func(serviceMethod string, _, reply interface{}) error {
+		if serviceMethod == utils.ReplicatorSv1GetTiming {
+			rpl := &utils.TPTiming{
+				ID:        "WEEKENDS",
+				Years:     utils.Years{},
+				Months:    utils.Months{},
+				MonthDays: utils.MonthDays{},
+				WeekDays:  utils.WeekDays{time.Saturday, time.Sunday},
+				StartTime: "00:00:00",
+			}
+			*reply.(**utils.TPTiming) = rpl
+
+			return nil
+		}
+		return utils.ErrNotImplemented
+	})
+	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
+	})
+	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
+	config.SetCgrConfig(cfg)
+
+	if _, err := dm.GetTiming("ALWAYS", true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestSetResourceProfileRPl(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	cfg.DataDbCfg().Items[utils.MetaResourceProfile].Remote = true
+	cfg.DataDbCfg().RmtConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1)}
+	Cache.Clear(nil)
+	defer func() {
+		cfg2, _ := config.NewDefaultCGRConfig()
+		config.SetCgrConfig(cfg2)
+	}()
+	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn <- clMock(func(serviceMethod string, _, reply interface{}) error {
+		if serviceMethod == utils.ReplicatorSv1GetResourceProfile {
+			rpl := &ResourceProfile{
+				Tenant:    "cgrates.org",
+				ID:        "RES_TEST",
+				FilterIDs: []string{"FLTR_1"},
+				ActivationInterval: &utils.ActivationInterval{
+					ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+					ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+				},
+				UsageTTL:          time.Duration(-1),
+				Limit:             2,
+				AllocationMessage: "",
+				Weight:            20,
+				ThresholdIDs:      []string{utils.META_NONE},
+			}
+			*reply.(**ResourceProfile) = rpl
+
+			return nil
+		}
+		return utils.ErrNotImplemented
+	})
+	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
+	})
+	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
+	config.SetCgrConfig(cfg)
+
+	if _, err := dm.GetResourceProfile("cgrates.org", "RES_TEST", false, false, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestDMGetActionTriggersRmt(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	cfg.DataDbCfg().Items[utils.MetaActionTriggers].Remote = true
+	cfg.DataDbCfg().RmtConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1)}
+	Cache.Clear(nil)
+	defer func() {
+		cfg2, _ := config.NewDefaultCGRConfig()
+		config.SetCgrConfig(cfg2)
+	}()
+	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn <- clMock(func(serviceMethod string, _, reply interface{}) error {
+		if serviceMethod == utils.ReplicatorSv1GetActionTriggers {
+			rpl := ActionTriggers{
+				&ActionTrigger{
+					Recurrent: true,
+					Balance: &BalanceFilter{
+						Type:           utils.StringPointer(utils.VOICE),
+						ExpirationDate: utils.TimePointer(time.Date(2023, 3, 12, 0, 0, 0, 0, time.UTC)),
+						Weight:         utils.Float64Pointer(20),
+						DestinationIDs: &utils.StringMap{
+							"DEST1": true,
+						},
+					},
+					ThresholdValue: 2,
+					ThresholdType:  utils.TRIGGER_BALANCE_EXPIRED,
+					ActionsID:      "ACT_1",
+					Executed:       false,
+				},
+			}
+			*reply.(*ActionTriggers) = rpl
+			return nil
+		}
+		return utils.ErrNotImplemented
+	})
+	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
+	})
+	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
+	config.SetCgrConfig(cfg)
+
+	if _, err := dm.GetActionTriggers("ACT_1", true, ""); err == nil {
+		t.Error(err)
+	}
+	//unfinished
+}
+
+func TestDMRemSQPRepl(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	defer func() {
+		cfg2, _ := config.NewDefaultCGRConfig()
+		config.SetCgrConfig(cfg2)
+	}()
+	cfg.DataDbCfg().Items[utils.MetaStatQueueProfiles].Replicate = true
+	cfg.DataDbCfg().RplConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1)}
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn <- clMock(func(serviceMethod string, _, _ interface{}) error {
+		if serviceMethod == utils.ReplicatorSv1RemoveStatQueueProfile {
+
+			return nil
+		}
+		return utils.ErrNotImplemented
+	})
+	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
+	})
+	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
+	dm.SetStatQueueProfile(&StatQueueProfile{
+		Tenant:      "cgrates.org",
+		ID:          "SQ1",
+		QueueLength: 10,
+		TTL:         time.Duration(0) * time.Second,
+		Metrics: []*MetricWithFilters{
+			{
+				MetricID: utils.MetaACD,
+			},
+		},
+		Blocker:  false,
+		Stored:   true,
+		Weight:   float64(0),
+		MinItems: 0}, true)
+	config.SetCgrConfig(cfg)
+
+	if err := dm.RemoveStatQueueProfile("cgrates.org", "SQ1", "", true); err != nil {
+		t.Error(err)
+	}
+}
