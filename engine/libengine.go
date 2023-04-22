@@ -19,9 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"errors"
 	"fmt"
-	"reflect"
 	"strings"
 	"time"
 	"unicode"
@@ -114,60 +112,20 @@ func (s *RPCClientSet) Call(ctx *context.Context, method string, args interface{
 	return conn.Call(context.TODO(), method, args, reply)
 }
 
-func NewServiceWithName(val interface{}, name string, useName bool) (_ IntService, err error) {
-	var srv *birpc.Service
-	if srv, err = birpc.NewService(val, name, useName); err != nil {
+func NewBiRPCService(val interface{}) (srv *birpc.Service, err error) {
+	var initialSrv *birpc.Service
+	if initialSrv, err = birpc.NewService(val, "", false); err != nil {
 		return
 	}
-	srv.Methods["Ping"] = pingM
-	s := IntService{srv.Name: srv}
-	for m, v := range srv.Methods {
-		m = strings.TrimPrefix(m, "BiRPC")
-		if len(m) < 2 || unicode.ToLower(rune(m[0])) != 'v' {
+	srv = new(birpc.Service)
+	*srv = *initialSrv
+	srv.Methods = make(map[string]*birpc.MethodType)
+	for mName, mType := range initialSrv.Methods {
+		mName = strings.TrimPrefix(mName, "BiRPC")
+		if len(mName) < 2 || unicode.ToLower(rune(mName[0])) != 'v' {
 			continue
 		}
-
-		key := srv.Name
-		if unicode.IsLower(rune(key[len(key)-1])) {
-			key += "V"
-		} else {
-			key += "v"
-		}
-		key += string(m[1])
-		srv2, has := s[key]
-		if !has {
-			srv2 = new(birpc.Service)
-			*srv2 = *srv
-			srv2.Name = key
-			srv2.Methods = map[string]*birpc.MethodType{"Ping": pingM}
-			s[key] = srv2
-		}
-		srv2.Methods[m[2:]] = v
+		srv.Methods[mName[2:]] = mType
 	}
-	return s, nil
-}
-
-type IntService map[string]*birpc.Service
-
-func (s IntService) Call(ctx *context.Context, serviceMethod string, args, reply interface{}) error {
-	service, has := s[strings.Split(serviceMethod, utils.NestingSep)[0]]
-	if !has {
-		return errors.New("rpc: can't find service " + serviceMethod)
-	}
-	return service.Call(ctx, serviceMethod, args, reply)
-}
-
-func ping(_ interface{}, _ *context.Context, _ *utils.CGREvent, reply *string) error {
-	*reply = utils.Pong
-	return nil
-}
-
-var pingM = &birpc.MethodType{
-	Method: reflect.Method{
-		Name: "Ping",
-		Type: reflect.TypeOf(ping),
-		Func: reflect.ValueOf(ping),
-	},
-	ArgType:   reflect.TypeOf(new(utils.CGREvent)),
-	ReplyType: reflect.TypeOf(new(string)),
+	return
 }

@@ -24,6 +24,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
@@ -2431,7 +2432,7 @@ func (trpcp *TestRPCParameters) Hopa(in Attr, out *float64) error {
 	return nil
 }
 
-func (trpcp *TestRPCParameters) Call(serviceMethod string, args interface{}, reply interface{}) error {
+func (trpcp *TestRPCParameters) Call(ctx *context.Context, serviceMethod string, args interface{}, reply interface{}) error {
 	parts := strings.Split(serviceMethod, ".")
 	if len(parts) != 2 {
 		return utils.ErrNotImplemented
