@@ -86,15 +86,14 @@ func (smg *SessionService) Start() (err error) {
 		}
 	}(smg.sm)
 
-	// Register RPC handler
-	srv, _ := engine.NewServiceWithName(smg.sm, utils.SessionS, true) // methods with multiple options
-
 	// Pass internal connection via BiRPCClient
 	smg.connChan <- smg.sm
+
 	// Register RPC handler
 	smg.rpc = v1.NewSMGenericV1(smg.sm)
-
 	smg.rpcv1 = v1.NewSessionSv1(smg.sm) // methods with multiple options
+
+	// Register RPC handler
 	if !smg.cfg.DispatcherSCfg().Enabled {
 		smg.server.RpcRegister(smg.rpc)
 		smg.server.RpcRegister(smg.rpcv1)
@@ -102,9 +101,11 @@ func (smg *SessionService) Start() (err error) {
 	// Register BiRpc handlers
 	if smg.cfg.SessionSCfg().ListenBijson != "" {
 		smg.bircpEnabled = true
-		for n, s := range srv {
-			smg.server.BiRPCRegisterName(n, s)
+		var srv *birpc.Service
+		if srv, err = engine.NewBiRPCService(smg.rpcv1); err != nil {
+			return
 		}
+		smg.server.BiRPCRegisterName(srv.Name, srv)
 		// run this in it's own goroutine
 		go func() {
 			if err := smg.server.ServeBiJSON(smg.cfg.SessionSCfg().ListenBijson, smg.sm.OnBiJSONConnect, smg.sm.OnBiJSONDisconnect); err != nil {
