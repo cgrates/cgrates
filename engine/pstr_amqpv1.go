@@ -94,7 +94,7 @@ func (pstr *AMQPv1Poster) Post(content []byte, _ string) (err error) {
 			continue
 		}
 		// Send message
-		err = sender.Send(ctx, amqpv1.NewMessage(content))
+		err = sender.Send(ctx, amqpv1.NewMessage(content), nil)
 		sender.Close(ctx)
 		if err == nil {
 			break
@@ -117,7 +117,7 @@ func (pstr *AMQPv1Poster) newPosterSession() (s *amqpv1.Session, err error) {
 	defer pstr.Unlock()
 	if pstr.conn == nil {
 		var client *amqpv1.Conn
-		client, err = amqpv1.Dial(pstr.dialURL, nil)
+		client, err = amqpv1.Dial(context.TODO(), pstr.dialURL, nil)
 		if err != nil {
 			return nil, err
 		}

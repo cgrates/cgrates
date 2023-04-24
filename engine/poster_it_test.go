@@ -297,20 +297,19 @@ func TestAMQPv1Poster(t *testing.T) {
 	if err := pstr.Post([]byte(body), ""); err != nil {
 		t.Fatal(err)
 	}
+	ctx := context.Background()
 	// Create client
-	client, err := amqpv1.Dial(endpoint, nil)
+	client, err := amqpv1.Dial(ctx, endpoint, nil)
 	if err != nil {
 		t.Fatal("Dialing AMQP server:", err)
 	}
 	defer client.Close()
 
 	// Open a session
-	session, err := client.NewSession(context.Background(), nil)
+	session, err := client.NewSession(ctx, nil)
 	if err != nil {
 		t.Fatal("Creating AMQP session:", err)
 	}
-
-	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
 
 	// Create a receiver
 	receiver, err := session.NewReceiver(ctx, "/"+qname, nil)
@@ -324,14 +323,13 @@ func TestAMQPv1Poster(t *testing.T) {
 	}()
 
 	// Receive next message
-	msg, err := receiver.Receive(ctx)
-	cancel()
+	msg, err := receiver.Receive(ctx, nil)
 	if err != nil {
 		t.Fatal("Reading message from AMQP:", err)
 	}
 
 	// Accept message
-	receiver.AcceptMessage(ctx, msg)
+	receiver.AcceptMessage(context.Background(), msg)
 	if rply := string(msg.GetData()); rply != body {
 		t.Errorf("Expected: %q, received: %q", body, rply)
 	}

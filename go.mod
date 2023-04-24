@@ -7,7 +7,7 @@ go 1.20
 
 require (
 	github.com/antchfx/xmlquery v1.3.15
-	github.com/aws/aws-sdk-go v1.44.230
+	github.com/aws/aws-sdk-go v1.44.248
 	github.com/cenkalti/rpc2 v0.0.0-20210604223624-c1acbc6ec984
 	github.com/cgrates/aringo v0.0.0-20220525160735-b5990313d99e
 	github.com/cgrates/fsock v0.0.0-20230123160954-12cae14030cc
@@ -21,26 +21,28 @@ require (
 	github.com/go-sql-driver/mysql v1.7.0
 	github.com/gorhill/cronexpr v0.0.0-20180427100037-88b0669f7d75
 	github.com/jinzhu/gorm v1.9.16
-	github.com/lib/pq v1.10.7
+	github.com/lib/pq v1.10.8
 	github.com/mediocregopher/radix.v2 v0.0.0-20181115013041-b67df6e626f9
-	github.com/miekg/dns v1.1.52
+	github.com/miekg/dns v1.1.53
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/nyaruka/phonenumbers v1.1.6
 	github.com/peterh/liner v1.2.2
 	github.com/segmentio/kafka-go v0.4.39
 	github.com/ugorji/go/codec v1.2.11
-	go.mongodb.org/mongo-driver v1.11.3
-	golang.org/x/net v0.8.0
-	golang.org/x/oauth2 v0.6.0
-	google.golang.org/api v0.114.0
+	go.mongodb.org/mongo-driver v1.11.4
+	golang.org/x/net v0.9.0
+	golang.org/x/oauth2 v0.7.0
+	google.golang.org/api v0.119.0
 )
 
-require github.com/Azure/go-amqp v0.18.1
+require github.com/Azure/go-amqp v0.19.1
 
 require github.com/cgrates/birpc v1.3.1-0.20211117095917-5b0ff29f3084
 
+require github.com/google/s2a-go v0.1.2 // indirect
+
 require (
-	cloud.google.com/go/compute v1.19.0 // indirect
+	cloud.google.com/go/compute v1.19.1 // indirect
 	cloud.google.com/go/compute/metadata v0.2.3 // indirect
 	github.com/antchfx/xpath v1.2.4 // indirect
 	github.com/cenkalti/hub v1.0.1 // indirect
@@ -50,10 +52,10 @@ require (
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.2.3 // indirect
 	github.com/googleapis/gax-go/v2 v2.8.0 // indirect
-	github.com/ishidawataru/sctp v0.0.0-20230328010247-a8b5b9ef884c // indirect
+	github.com/ishidawataru/sctp v0.0.0-20230406120618-7ff4192f6ff2 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
-	github.com/klauspost/compress v1.16.3 // indirect
+	github.com/klauspost/compress v1.16.5 // indirect
 	github.com/mattn/go-runewidth v0.0.14 // indirect
 	github.com/montanaflynn/stats v0.7.0 // indirect
 	github.com/pierrec/lz4/v4 v4.1.17 // indirect
@@ -65,14 +67,14 @@ require (
 	github.com/xdg-go/stringprep v1.0.4 // indirect
 	github.com/youmark/pkcs8 v0.0.0-20201027041543-1326539a0a0a // indirect
 	go.opencensus.io v0.24.0 // indirect
-	golang.org/x/crypto v0.7.0 // indirect
-	golang.org/x/mod v0.9.0 // indirect
+	golang.org/x/crypto v0.8.0 // indirect
+	golang.org/x/mod v0.10.0 // indirect
 	golang.org/x/sync v0.1.0 // indirect
-	golang.org/x/sys v0.6.0 // indirect
-	golang.org/x/text v0.8.0 // indirect
-	golang.org/x/tools v0.7.0 // indirect
+	golang.org/x/sys v0.7.0 // indirect
+	golang.org/x/text v0.9.0 // indirect
+	golang.org/x/tools v0.8.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
-	google.golang.org/genproto v0.0.0-20230327215041-6ac7f18bb9d5 // indirect
+	google.golang.org/genproto v0.0.0-20230410155749-daa745c078e1 // indirect
 	google.golang.org/grpc v1.54.0 // indirect
 	google.golang.org/protobuf v1.30.0 // indirect
 )
