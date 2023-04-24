@@ -4903,6 +4903,7 @@ func TestApitoAccountCase2(t *testing.T) {
 			},
 		},
 		ThresholdIDs: []string{"WARN_RES1"},
+		Blockers:     ";true",
 	}
 	exp := &utils.Account{
 		Tenant:    "cgrates.org",
@@ -4939,6 +4940,11 @@ func TestApitoAccountCase2(t *testing.T) {
 				},
 			}},
 		ThresholdIDs: []string{"WARN_RES1"},
+		Blockers: utils.DynamicBlockers{
+			{
+				Blocker: true,
+			},
+		},
 	}
 	result, err := APItoAccount(testStruct, "")
 	if err != nil {
@@ -5220,4 +5226,127 @@ func TestAPItoTPStatsNewDynamicWeightsFromStringErr(t *testing.T) {
 	if _, err := APItoStats(tps, "UTC"); err == nil || err.Error() != expErr {
 		t.Errorf("expecting: %+v, received: %+v", expErr, err)
 	}
+}
+
+func TestAPItoAccountNewDynamicBlockersFromStringErr(t *testing.T) {
+	testStruct := &utils.TPAccount{
+		Tenant:    "cgrates.org",
+		ID:        "ResGroup1",
+		FilterIDs: []string{"FLTR_RES_GR1", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z|2014-07-15T14:25:00Z"},
+		Weights:   ";10",
+		Balances: map[string]*utils.TPAccountBalance{
+			"VoiceBalance": {
+				ID:             "VoiceBalance",
+				FilterIDs:      []string{"FLTR_RES_GR2"},
+				Weights:        ";10",
+				Blockers:       "*string:~*req.Destination:122;true;;false",
+				Type:           utils.MetaVoice,
+				RateProfileIDs: []string{"RTPRF1"},
+				Units:          "1h",
+				Opts:           "key1:val1",
+			},
+		},
+		ThresholdIDs: []string{"WARN_RES1"},
+		Blockers:     "wrong input",
+	}
+
+	expErr := "invalid DynamicBlocker format for string <wrong input>"
+	_, err := APItoAccount(testStruct, "")
+	if err == nil || err.Error() != expErr {
+		t.Errorf("expecting: %+v, received: %+v", expErr, err)
+	}
+
+}
+
+func TestAPItoAccountNewDecimalFromUsageErr(t *testing.T) {
+	testStruct := &utils.TPAccount{
+		Tenant:    "cgrates.org",
+		ID:        "ResGroup1",
+		FilterIDs: []string{"FLTR_RES_GR1", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z|2014-07-15T14:25:00Z"},
+		Weights:   ";10",
+		Balances: map[string]*utils.TPAccountBalance{
+			"VoiceBalance": {
+				ID:             "VoiceBalance",
+				FilterIDs:      []string{"FLTR_RES_GR2"},
+				Weights:        ";10",
+				Blockers:       "*string:~*req.Destination:122;true;;false",
+				Type:           utils.MetaVoice,
+				RateProfileIDs: []string{"RTPRF1"},
+				Units:          "wrong input",
+				Opts:           "key1:val1",
+			},
+		},
+		ThresholdIDs: []string{"WARN_RES1"},
+		Blockers:     ";true",
+	}
+
+	expErr := "can't convert <wrong input> to decimal"
+	_, err := APItoAccount(testStruct, "")
+	if err == nil || err.Error() != expErr {
+		t.Errorf("expecting: %+v, received: %+v", expErr, err)
+	}
+
+}
+
+func TestAPItoAccountBalancesNewDynamicBlockersFromStringErr(t *testing.T) {
+	testStruct := &utils.TPAccount{
+		Tenant:    "cgrates.org",
+		ID:        "ResGroup1",
+		FilterIDs: []string{"FLTR_RES_GR1", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z|2014-07-15T14:25:00Z"},
+		Weights:   ";10",
+		Balances: map[string]*utils.TPAccountBalance{
+			"VoiceBalance": {
+				ID:             "VoiceBalance",
+				FilterIDs:      []string{"FLTR_RES_GR2"},
+				Weights:        ";10",
+				Blockers:       "wrong input",
+				Type:           utils.MetaVoice,
+				RateProfileIDs: []string{"RTPRF1"},
+				Units:          "1h",
+				Opts:           "key1:val1",
+			},
+		},
+		ThresholdIDs: []string{"WARN_RES1"},
+		Blockers:     ";true",
+	}
+
+	expErr := "invalid DynamicBlocker format for string <wrong input>"
+	_, err := APItoAccount(testStruct, "")
+	if err == nil || err.Error() != expErr {
+		t.Errorf("expecting: %+v, received: %+v", expErr, err)
+	}
+
+}
+
+func TestAPItoActionProfileNewDynamicWeightsFromStringErr(t *testing.T) {
+	testStruct := &utils.TPActionProfile{
+		Tenant:    "cgrates.org",
+		ID:        "RP1",
+		FilterIDs: []string{"*string:~*req.Subject:1001", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z|2014-07-15T14:25:00Z"},
+		Weights:   "wrong input",
+		Schedule:  "test_schedule",
+		Targets: []*utils.TPActionTarget{
+			{
+				TargetType: utils.MetaAccounts,
+				TargetIDs:  []string{"test_account_id1", "test_account_id2"},
+			},
+		},
+		Actions: []*utils.TPAPAction{
+			{
+				ID:        "test_action_id",
+				FilterIDs: []string{"test_action_filter_id1"},
+				Diktats: []*utils.TPAPDiktat{{
+					Path: "test_path",
+				}},
+				Opts: "key1:val1",
+			},
+		},
+	}
+
+	expErr := "invalid DynamicBlocker format for string <wrong input>"
+	_, err := APItoActionProfile(testStruct, "")
+	if err == nil || err.Error() != expErr {
+		t.Errorf("expecting: %+v, received: %+v", expErr, err)
+	}
+
 }
