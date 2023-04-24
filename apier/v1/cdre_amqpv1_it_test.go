@@ -215,19 +215,19 @@ func testAMQPv1ExportCDRs(t *testing.T) {
 }
 
 func testAMQPv1VerifyExport(t *testing.T) {
+	ctx := context.Background()
 	// Create client
-	client, err := amqp.Dial(amqpv1DialURL, nil)
+	client, err := amqp.Dial(ctx, amqpv1DialURL, nil)
 	/* an alternative way to create the client
-	client, err := amqp.Dial("amqps://name-space.servicebus.windows.net",
-		amqp.ConnSASLPlain("access-key-name", "access-key"),
-	)
+	client, err := amqp.Dial(ctx, "amqps://name-space.servicebus.windows.net", &amqp.ConnOptions{
+		SASLType: amqp.SASLTypePlain("access-key-name", "access-key"),
+	})
 	*/
+
 	if err != nil {
 		t.Fatal("Dialing AMQP server:", err)
 	}
 	defer client.Close()
-
-	ctx := context.Background()
 
 	// Open a session
 	session, err := client.NewSession(ctx, nil)
@@ -255,7 +255,7 @@ func testAMQPv1VerifyExport(t *testing.T) {
 	i := 0
 	for i < 2 {
 		// Receive next message
-		msg, err := receiver.Receive(ctx)
+		msg, err := receiver.Receive(ctx, nil)
 		if err != nil {
 			t.Fatal("Reading message from AMQP:", err)
 		}

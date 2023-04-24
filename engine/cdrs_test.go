@@ -455,8 +455,8 @@ func TestCDRSRateCDRSucces(t *testing.T) {
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 	cfg.CdrsCfg().SMCostRetries = 0
 	cfg.CdrsCfg().RaterConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs)}
-	clientConn := make(chan rpcclient.ClientConnector, 1)
-	clientConn <- clMock(func(serviceMethod string, _, reply interface{}) error {
+	clientConn := make(chan birpc.ClientConnector, 1)
+	clientConn <- clMock(func(ctx *context.Context, serviceMethod string, _, reply interface{}) error {
 		if serviceMethod == utils.ResponderDebit {
 			rpl := CallCost{
 				Destination: "1002",
@@ -482,7 +482,7 @@ func TestCDRSRateCDRSucces(t *testing.T) {
 		}
 		return utils.ErrNotImplemented
 	})
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs): clientConn,
 	})
 	cdrS := &CDRServer{
@@ -556,14 +556,14 @@ func TestCDRSThDSProcessEvent(t *testing.T) {
 	cfg.CdrsCfg().ThresholdSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)}
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
-	clientConn := make(chan rpcclient.ClientConnector, 1)
-	clientConn <- clMock(func(serviceMethod string, _, _ interface{}) error {
+	clientConn := make(chan birpc.ClientConnector, 1)
+	clientConn <- clMock(func(ctx *context.Context, serviceMethod string, _, _ interface{}) error {
 		if serviceMethod == utils.ThresholdSv1ProcessEvent {
 			return nil
 		}
 		return utils.ErrNotImplemented
 	})
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds): clientConn,
 	})
 	cdrS := &CDRServer{

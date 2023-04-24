@@ -756,8 +756,8 @@ func TestDMReplicateMultipleIds(t *testing.T) {
 	}()
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
-	clientConn := make(chan rpcclient.ClientConnector, 1)
-	clientConn <- clMock(func(serviceMethod string, args, _ interface{}) error {
+	clientConn := make(chan birpc.ClientConnector, 1)
+	clientConn <- clMock(func(ctx *context.Context, serviceMethod string, args, _ interface{}) error {
 		if serviceMethod == utils.ReplicatorSv1RemoveAccount {
 			keyList, err := dm.DataDB().GetKeysForPrefix(args.(string))
 			if err != nil {
@@ -770,7 +770,7 @@ func TestDMReplicateMultipleIds(t *testing.T) {
 		}
 		return utils.ErrNotImplemented
 	})
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
 	})
 	accs := []*Account{
@@ -1128,8 +1128,8 @@ func TestDmGetSQRemote(t *testing.T) {
 		cfg2, _ := config.NewDefaultCGRConfig()
 		config.SetCgrConfig(cfg2)
 	}()
-	clientConnn := make(chan rpcclient.ClientConnector, 1)
-	clientConnn <- clMock(func(serviceMethod string, _, reply interface{}) error {
+	clientConnn := make(chan birpc.ClientConnector, 1)
+	clientConnn <- clMock(func(ctx *context.Context, serviceMethod string, _, reply interface{}) error {
 		if serviceMethod == utils.ReplicatorSv1GetStatQueue {
 
 			*reply.(*StoredStatQueue) = StoredStatQueue{
@@ -1143,7 +1143,7 @@ func TestDmGetSQRemote(t *testing.T) {
 
 		return utils.ErrNotFound
 	})
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConnn,
 	})
 	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
@@ -1164,8 +1164,8 @@ func TestRemoveThresholdRpl(t *testing.T) {
 		cfg2, _ := config.NewDefaultCGRConfig()
 		config.SetCgrConfig(cfg2)
 	}()
-	clientConnn := make(chan rpcclient.ClientConnector, 1)
-	clientConnn <- clMock(func(serviceMethod string, _, reply interface{}) error {
+	clientConnn := make(chan birpc.ClientConnector, 1)
+	clientConnn <- clMock(func(ctx *context.Context, serviceMethod string, _, reply interface{}) error {
 		if serviceMethod == utils.ReplicatorSv1RemoveThreshold {
 
 			return nil
@@ -1173,7 +1173,7 @@ func TestRemoveThresholdRpl(t *testing.T) {
 
 		return utils.ErrNotFound
 	})
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConnn,
 	})
 	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
@@ -1194,8 +1194,8 @@ func TestRemoveDispatcherPrfRpl(t *testing.T) {
 		cfg2, _ := config.NewDefaultCGRConfig()
 		config.SetCgrConfig(cfg2)
 	}()
-	clientConnn := make(chan rpcclient.ClientConnector, 1)
-	clientConnn <- clMock(func(serviceMethod string, _, reply interface{}) error {
+	clientConnn := make(chan birpc.ClientConnector, 1)
+	clientConnn <- clMock(func(ctx *context.Context, serviceMethod string, _, reply interface{}) error {
 		if serviceMethod == utils.ReplicatorSv1RemoveDispatcherProfile {
 
 			return nil
@@ -1203,7 +1203,7 @@ func TestRemoveDispatcherPrfRpl(t *testing.T) {
 
 		return utils.ErrNotFound
 	})
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConnn,
 	})
 	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
@@ -1263,8 +1263,8 @@ func TestDMGetDispacherHost(t *testing.T) {
 		config.SetCgrConfig(cfg2)
 	}()
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	clientConn := make(chan rpcclient.ClientConnector, 1)
-	clientConn <- clMock(func(serviceMethod string, _, reply interface{}) error {
+	clientConn := make(chan birpc.ClientConnector, 1)
+	clientConn <- clMock(func(ctx *context.Context, serviceMethod string, _, reply interface{}) error {
 		if serviceMethod == utils.ReplicatorSv1GetDispatcherHost {
 
 			rpl := &DispatcherHost{
@@ -1276,7 +1276,7 @@ func TestDMGetDispacherHost(t *testing.T) {
 		}
 		return utils.ErrNotImplemented
 	})
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
 	})
 	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
@@ -1295,15 +1295,15 @@ func TestDmRemoveStatQueue(t *testing.T) {
 		cfg2, _ := config.NewDefaultCGRConfig()
 		config.SetCgrConfig(cfg2)
 	}()
-	clientConn := make(chan rpcclient.ClientConnector, 1)
-	clientConn <- clMock(func(serviceMethod string, _, _ interface{}) error {
+	clientConn := make(chan birpc.ClientConnector, 1)
+	clientConn <- clMock(func(ctx *context.Context, serviceMethod string, _, _ interface{}) error {
 		if serviceMethod == utils.ReplicatorSv1RemoveStatQueue {
 			return nil
 		}
 		return utils.ErrNotImplemented
 	})
 	connMgr := NewConnManager(cfg,
-		map[string]chan rpcclient.ClientConnector{
+		map[string]chan birpc.ClientConnector{
 			utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
 		})
 	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
@@ -1324,14 +1324,14 @@ func TestRemoveResource(t *testing.T) {
 	cfg.DataDbCfg().RplConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1)}
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 
-	clientConn := make(chan rpcclient.ClientConnector, 1)
-	clientConn <- clMock(func(serviceMethod string, _, _ interface{}) error {
+	clientConn := make(chan birpc.ClientConnector, 1)
+	clientConn <- clMock(func(ctx *context.Context, serviceMethod string, _, _ interface{}) error {
 		if utils.ReplicatorSv1RemoveResource == serviceMethod {
 			return nil
 		}
 		return utils.ErrNotImplemented
 	})
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
 	})
 	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
@@ -1352,14 +1352,14 @@ func TestSetReverseDestinastionRpl(t *testing.T) {
 	cfg.DataDbCfg().RplConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1)}
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 
-	clientConn := make(chan rpcclient.ClientConnector, 1)
-	clientConn <- clMock(func(serviceMethod string, _, _ interface{}) error {
+	clientConn := make(chan birpc.ClientConnector, 1)
+	clientConn <- clMock(func(ctx *context.Context, serviceMethod string, _, _ interface{}) error {
 		if utils.ReplicatorSv1SetReverseDestination == serviceMethod {
 			return nil
 		}
 		return utils.ErrNotImplemented
 	})
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
 	})
 	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)

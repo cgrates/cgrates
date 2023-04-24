@@ -23,6 +23,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -246,7 +247,7 @@ func TestCachesRPCCall(t *testing.T) {
 		},
 	}
 	var reply []string
-	if err := chS.Call(utils.CacheSv1GetItemIDs, args, &reply); err != nil {
+	if err := chS.Call(context.Background(), utils.CacheSv1GetItemIDs, args, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, []string{"cgrates:TH1"}) {
 		t.Errorf("Expected %v", []string{"cgrates:TH1"})

@@ -24,6 +24,7 @@ import (
 	"time"
 
 	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -1449,14 +1450,14 @@ func TestRSProcessThreshold(t *testing.T) {
 	cfg, _ := config.NewDefaultCGRConfig()
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, config.CgrConfig().CacheCfg(), nil)
-	clientConn := make(chan rpcclient.ClientConnector, 1)
-	clientConn <- clMock(func(serviceMethod string, _, _ interface{}) error {
+	clientConn := make(chan birpc.ClientConnector, 1)
+	clientConn <- clMock(func(ctx *context.Context, serviceMethod string, _, _ interface{}) error {
 		if serviceMethod == utils.ThresholdSv1ProcessEvent {
 			return nil
 		}
 		return utils.ErrNotImplemented
 	})
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds): clientConn})
 	rS, _ := NewResourceService(dm, cfg,
 		NewFilterS(cfg, nil, dm), connMgr)

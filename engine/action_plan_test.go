@@ -23,9 +23,10 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 func TestActionTimingTasks(t *testing.T) {
@@ -276,15 +277,15 @@ func TestATExecute(t *testing.T) {
 		SetConnManager(tmpConn)
 	}()
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
-	clientConn := make(chan rpcclient.ClientConnector, 1)
-	clientConn <- clMock(func(serviceMethod string, _, _ interface{}) error {
+	clientConn := make(chan birpc.ClientConnector, 1)
+	clientConn <- clMock(func(ctx *context.Context, serviceMethod string, _, _ interface{}) error {
 		if serviceMethod == utils.CDRsV1ProcessEvent {
 
 			return nil
 		}
 		return utils.ErrNotImplemented
 	})
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs): clientConn,
 	})
 	acs := Actions{{
