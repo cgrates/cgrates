@@ -24,6 +24,7 @@ import (
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
 )
 
 var (
@@ -2504,13 +2505,7 @@ func TestAccountEnableAccAct(t *testing.T) {
 	if acc, err := dm.GetAccount("cgrates.org:1001"); err != nil || acc.Disabled {
 		t.Error(err)
 	}
-	dm.RemoveActions("ACT_1", utils.NonTransactional)
-	a.ActionType = utils.DISABLE_ACCOUNT
-	dm.SetActions("ACT_1", Actions{a}, utils.NonTransactional)
-	acc.ExecuteActionTriggers(a)
-	if _, err := dm.GetAccount("cgrates.org:1001"); err != nil {
-		t.Error(err)
-	}
+
 }
 
 func TestAccountPublishAct(t *testing.T) {
@@ -2549,7 +2544,6 @@ func TestAccountPublishAct(t *testing.T) {
 	}
 	a := &Action{}
 	SetDataStorage(dm)
-
 	ub.ExecuteActionTriggers(a)
 }
 
@@ -2608,6 +2602,166 @@ func TestTestAccountActUnSetCurr(t *testing.T) {
 	if acc, err := dm.GetAccount("cgrates.org:1001"); err != nil || acc.ActionTriggers[0].Recurrent {
 		t.Error(err)
 	}
+}
+
+func TestPublishAccount(t *testing.T) {
+	cfgfunc := func() *config.CGRConfig {
+		cfg2, _ := config.NewDefaultCGRConfig()
+		config.SetCgrConfig(cfg2)
+		return cfg2
+	}
+	cfg := cfgfunc()
+	cfg.RalsCfg().StatSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStatS)}
+	cfg.RalsCfg().ThresholdSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)}
+	defer func() {
+		cfgfunc()
+	}()
+	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn <- clMock(func(serviceMethod string, _, _ interface{}) error {
+		if serviceMethod == utils.StatSv1ProcessEvent {
+
+			return nil
+		}
+		if serviceMethod == utils.ThresholdSv1ProcessEvent {
+
+			return nil
+		}
+		return utils.ErrNotFound
+	})
+	conngMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStatS):      clientConn,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds): clientConn,
+	})
+	SetConnManager(conngMgr)
+	acc := &Account{
+		ID: "cgrates.org:1001",
+		BalanceMap: map[string]Balances{
+			utils.VOICE: {
+				&Balance{
+					Weight:         20,
+					DestinationIDs: utils.StringMap{"DEST1": true},
+					ExpirationDate: time.Date(2023, 3, 12, 0, 0, 0, 0, time.UTC),
+				},
+				&Balance{
+					Weight:         10,
+					DestinationIDs: utils.StringMap{"DEST2": true},
+				}},
+		},
+	}
+	acc.Publish()
+	time.Sleep(5 * time.Millisecond)
+}
+
+func TestAccActDisable(t *testing.T) {
+	cfgfunc := func() *config.CGRConfig {
+		cfg2, _ := config.NewDefaultCGRConfig()
+		config.SetCgrConfig(cfg2)
+		return cfg2
+	}
+	Cache.Clear(nil)
+	cfg := cfgfunc()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	tmpDm := dm
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	dm.SetActions("ACTS", Actions{
+		&Action{
+			ActionType: utils.DISABLE_ACCOUNT,
+		},
+	}, "")
+	defer func() {
+		cfgfunc()
+		SetDataStorage(tmpDm)
+	}()
+	acc := &Account{
+		ID: "cgrates.org:1001",
+		ActionTriggers: ActionTriggers{
+			&ActionTrigger{
+				ActionsID:      "ACTS",
+				UniqueID:       "TestTR1",
+				ThresholdType:  utils.TRIGGER_MAX_EVENT_COUNTER,
+				ThresholdValue: 20,
+				Balance: &BalanceFilter{
+					Type:   utils.StringPointer(utils.VOICE),
+					Weight: utils.Float64Pointer(20.0),
+				},
+			},
+		},
+		UnitCounters: UnitCounters{
+			utils.MONETARY: []*UnitCounter{{
+				CounterType: "max_event_counter",
+				Counters: CounterFilters{&CounterFilter{Value: 21, Filter: &BalanceFilter{
+					ID: utils.StringPointer("TestTR1"),
+				}}}}},
+		},
+		BalanceMap: map[string]Balances{
+			utils.VOICE: {
+				&Balance{Value: 10, Weight: 20, DestinationIDs: utils.NewStringMap(utils.MetaDDC + "DEST1")},
+			},
+		},
+	}
+	SetDataStorage(dm)
+	a := &Action{}
+	acc.ExecuteActionTriggers(a)
+	if acc, err := dm.GetAccount("cgrates.org:1001"); err != nil || !acc.Disabled {
+		t.Error(err)
+	}
+}
+
+func TestAccActDebitResetAction(t *testing.T) {
+	cfgfunc := func() *config.CGRConfig {
+		cfg2, _ := config.NewDefaultCGRConfig()
+		config.SetCgrConfig(cfg2)
+		return cfg2
+	}
+	Cache.Clear(nil)
+	cfg := cfgfunc()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	tmpDm := dm
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	dm.SetActions("ACTS", Actions{
+		&Action{
+			ActionType: utils.DEBIT_RESET,
+		},
+	}, "")
+	defer func() {
+		cfgfunc()
+		SetDataStorage(tmpDm)
+	}()
+	acc := &Account{
+		ID: "cgrates.org:1001",
+		ActionTriggers: ActionTriggers{
+			&ActionTrigger{
+				ActionsID:      "ACTS",
+				UniqueID:       "TestTR1",
+				ThresholdType:  utils.TRIGGER_MAX_EVENT_COUNTER,
+				ThresholdValue: 20,
+				Balance: &BalanceFilter{
+					Type:   utils.StringPointer(utils.VOICE),
+					Weight: utils.Float64Pointer(20.0),
+				},
+			},
+		},
+		UnitCounters: UnitCounters{
+			utils.MONETARY: []*UnitCounter{{
+				CounterType: "max_event_counter",
+				Counters: CounterFilters{&CounterFilter{Value: 21, Filter: &BalanceFilter{
+					ID: utils.StringPointer("TestTR1"),
+				}}}}},
+		},
+		BalanceMap: map[string]Balances{
+			utils.VOICE: {
+				&Balance{Value: 10, Weight: 20, DestinationIDs: utils.NewStringMap(utils.MetaDDC + "DEST1")},
+			},
+		},
+	}
+	SetDataStorage(dm)
+	a := &Action{
+		Balance: &BalanceFilter{
+			Type: utils.StringPointer(utils.MONETARY),
+			ID:   utils.StringPointer("Bal1"),
+		}}
+	acc.ExecuteActionTriggers(a)
+	// unfinished
 }
 
 /*********************************** Benchmarks *******************************/

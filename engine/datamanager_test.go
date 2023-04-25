@@ -1368,3 +1368,80 @@ func TestSetReverseDestinastionRpl(t *testing.T) {
 	}
 
 }
+
+func TestDMGetThresholdRmt(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	defer func() {
+		cfg2, _ := config.NewDefaultCGRConfig()
+		config.SetCgrConfig(cfg2)
+	}()
+	Cache.Clear(nil)
+	cfg.DataDbCfg().Items[utils.MetaThresholds].Remote = true
+	cfg.DataDbCfg().RmtConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1)}
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn <- clMock(func(serviceMethod string, _, reply interface{}) error {
+		if serviceMethod == utils.ReplicatorSv1GetThreshold {
+			rpl := &Threshold{
+				Tenant: "cgrates.org", ID: "THD_Stat", Hits: 1,
+			}
+			*reply.(**Threshold) = rpl
+			return nil
+		}
+		return utils.ErrNotImplemented
+	})
+	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
+	})
+	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
+	config.SetCgrConfig(cfg)
+	if _, err := dm.GetThreshold("cgrates.org", "THD_Stat", false, true, ""); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestDmGetRatingPlanRmt(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	cfg.DataDbCfg().Items[utils.MetaRatingPlans].Remote = true
+	cfg.DataDbCfg().RmtConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1)}
+	defer func() {
+		cfg2, _ := config.NewDefaultCGRConfig()
+		config.SetCgrConfig(cfg2)
+	}()
+	Cache.Clear(nil)
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn <- clMock(func(serviceMethod string, _, reply interface{}) error {
+		if serviceMethod == utils.ReplicatorSv1GetRatingPlan {
+			rpl := &RatingPlan{
+				Id: "RP1",
+				Ratings: map[string]*RIRate{
+					"b457f86d": {
+						ConnectFee: 0,
+						Rates: []*Rate{
+							{
+								GroupIntervalStart: 0,
+								Value:              0.03,
+								RateIncrement:      time.Second,
+								RateUnit:           time.Second,
+							},
+						},
+						RoundingMethod:   utils.ROUNDING_MIDDLE,
+						RoundingDecimals: 4,
+					},
+				},
+			}
+			*reply.(**RatingPlan) = rpl
+			return nil
+		}
+		return utils.ErrNotImplemented
+	})
+	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
+	})
+	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
+	config.SetCgrConfig(cfg)
+	if _, err := dm.GetRatingPlan("RP1", true, ""); err != nil {
+		t.Error(err)
+	}
+}
