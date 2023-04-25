@@ -3767,6 +3767,7 @@ func TestActionProfileMdlsAsTPActionProfile(t *testing.T) {
 			TargetIDs:       "test_account_id1;test_account_id2",
 			ActionID:        "test_action_id",
 			ActionFilterIDs: "test_action_filter_ids",
+			Blockers:        ";false",
 		},
 	}
 	expStruct := []*utils.TPActionProfile{
@@ -3776,6 +3777,7 @@ func TestActionProfileMdlsAsTPActionProfile(t *testing.T) {
 			ID:        "RP1",
 			FilterIDs: []string{"*ai:~*req.AnswerTime:2014-07-29T15:00:00Z|2014-08-29T15:00:00Z", "*string:~*req.Subject:1001"},
 			Weights:   ";1",
+			Blockers:  ";false",
 			Schedule:  "test_schedule",
 			Targets: []*utils.TPActionTarget{
 				&utils.TPActionTarget{
@@ -5343,10 +5345,210 @@ func TestAPItoActionProfileNewDynamicWeightsFromStringErr(t *testing.T) {
 		},
 	}
 
+	expErr := "invalid DynamicWeight format for string <wrong input>"
+	_, err := APItoActionProfile(testStruct, "")
+	if err == nil || err.Error() != expErr {
+		t.Errorf("expecting: %+v, received: %+v", expErr, err)
+	}
+
+}
+
+func TestAPItoActionProfileNewDynamicBlockersFromStringErr(t *testing.T) {
+	testStruct := &utils.TPActionProfile{
+		Tenant:    "cgrates.org",
+		ID:        "RP1",
+		FilterIDs: []string{"*string:~*req.Subject:1001", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z|2014-07-15T14:25:00Z"},
+		Weights:   ";1",
+		Schedule:  "test_schedule",
+		Targets: []*utils.TPActionTarget{
+			{
+				TargetType: utils.MetaAccounts,
+				TargetIDs:  []string{"test_account_id1", "test_account_id2"},
+			},
+		},
+		Actions: []*utils.TPAPAction{
+			{
+				ID:        "test_action_id",
+				FilterIDs: []string{"test_action_filter_id1"},
+				Diktats: []*utils.TPAPDiktat{{
+					Path: "test_path",
+				}},
+				Opts: "key1:val1",
+			},
+		},
+		Blockers: "wrong input",
+	}
+
 	expErr := "invalid DynamicBlocker format for string <wrong input>"
 	_, err := APItoActionProfile(testStruct, "")
 	if err == nil || err.Error() != expErr {
 		t.Errorf("expecting: %+v, received: %+v", expErr, err)
+	}
+
+}
+
+func TestAPItoModelTPActionProfileActionProfileMdl(t *testing.T) {
+	testStruct := &utils.TPActionProfile{
+		TPid:      "test_id",
+		Tenant:    "cgrates.org",
+		ID:        "RP1",
+		FilterIDs: []string{"*string:~*req.Subject:1001", "*string:~*req.Subject:1002", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z|2014-08-29T15:00:00Z"},
+		Weights:   ";1",
+		Schedule:  "test_schedule",
+		Targets: []*utils.TPActionTarget{{
+			TargetType: utils.MetaAccounts,
+			TargetIDs:  []string{"test_account_id1", "test_account_id2"},
+		}},
+		Actions: []*utils.TPAPAction{
+			{
+				ID:        "test_action_id",
+				FilterIDs: []string{"test_action_filter_id1", "test_action_filter_id2"},
+				Diktats: []*utils.TPAPDiktat{
+					{
+						Path:  "*balance.AbstractBalance1.Units",
+						Value: "10",
+					},
+					{
+						Path:  "*balance.AbstractBalance1.Units",
+						Value: "5",
+					}},
+			},
+		},
+	}
+
+	expStruct := ActionProfileMdls{{
+		Tpid:        "test_id",
+		Tenant:      "cgrates.org",
+		ID:          "RP1",
+		ActionID:    "test_action_id",
+		ActionPath:  "*balance.AbstractBalance1.Units",
+		ActionValue: "5",
+	}}
+	result := APItoModelTPActionProfile(testStruct)
+	if !reflect.DeepEqual(result, expStruct) {
+		t.Errorf("\nExpecting %s,\n Received %s", utils.ToJSON(expStruct), utils.ToJSON(result))
+	}
+}
+
+func TestAsTPDispatcherHostsNilTransport(t *testing.T) {
+
+	tps := &DispatcherHostMdls{
+		&DispatcherHostMdl{
+			ID:                   "ID1",
+			Tenant:               "Tenant1",
+			Address:              "localhost:6012",
+			ConnectAttempts:      2,
+			Reconnects:           5,
+			MaxReconnectInterval: "5m",
+			ConnectTimeout:       "2m",
+			ReplyTimeout:         "1m",
+			TLS:                  true,
+			ClientKey:            "client_key",
+			ClientCertificate:    "client_certificate",
+			CaCertificate:        "ca_certificate",
+		}}
+
+	eOut := []*utils.TPDispatcherHost{
+		{
+			Tenant: "Tenant1",
+			ID:     "ID1",
+			Conn: &utils.TPDispatcherHostConn{
+				Address:              "localhost:6012",
+				Transport:            "*json",
+				ConnectAttempts:      2,
+				Reconnects:           5,
+				MaxReconnectInterval: 5 * time.Minute,
+				ConnectTimeout:       2 * time.Minute,
+				ReplyTimeout:         1 * time.Minute,
+				TLS:                  true,
+				ClientKey:            "client_key",
+				ClientCertificate:    "client_certificate",
+				CaCertificate:        "ca_certificate",
+			},
+		},
+	}
+	if rcv, err := tps.AsTPDispatcherHosts(); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcv, eOut) {
+		t.Errorf("Expecting: %+v,\nReceived: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
+	}
+
+}
+
+func TestAsTPDispatcherHostsMaxReconnectIntervalErr(t *testing.T) {
+
+	tps := &DispatcherHostMdls{
+		&DispatcherHostMdl{
+			ID:                   "ID1",
+			Tenant:               "Tenant1",
+			Address:              "localhost:6012",
+			Transport:            utils.MetaJSON,
+			ConnectAttempts:      2,
+			Reconnects:           5,
+			MaxReconnectInterval: "wrong input",
+			ConnectTimeout:       "2m",
+			ReplyTimeout:         "1m",
+			TLS:                  true,
+			ClientKey:            "client_key",
+			ClientCertificate:    "client_certificate",
+			CaCertificate:        "ca_certificate",
+		}}
+
+	expErr := `time: invalid duration "wrong input"`
+	if _, err := tps.AsTPDispatcherHosts(); err == nil || err.Error() != expErr {
+		t.Errorf("expecting: \n%+v\n, received: \n%+v", expErr, err)
+	}
+
+}
+
+func TestAsTPDispatcherHostsConnectTimeoutErr(t *testing.T) {
+
+	tps := &DispatcherHostMdls{
+		&DispatcherHostMdl{
+			ID:                   "ID1",
+			Tenant:               "Tenant1",
+			Address:              "localhost:6012",
+			Transport:            utils.MetaJSON,
+			ConnectAttempts:      2,
+			Reconnects:           5,
+			MaxReconnectInterval: "5m",
+			ConnectTimeout:       "wrong input",
+			ReplyTimeout:         "1m",
+			TLS:                  true,
+			ClientKey:            "client_key",
+			ClientCertificate:    "client_certificate",
+			CaCertificate:        "ca_certificate",
+		}}
+
+	expErr := `time: invalid duration "wrong input"`
+	if _, err := tps.AsTPDispatcherHosts(); err == nil || err.Error() != expErr {
+		t.Errorf("expecting: \n%+v\n, received: \n%+v", expErr, err)
+	}
+
+}
+
+func TestAsTPDispatcherHostsReplyTimeoutErr(t *testing.T) {
+
+	tps := &DispatcherHostMdls{
+		&DispatcherHostMdl{
+			ID:                   "ID1",
+			Tenant:               "Tenant1",
+			Address:              "localhost:6012",
+			Transport:            utils.MetaJSON,
+			ConnectAttempts:      2,
+			Reconnects:           5,
+			MaxReconnectInterval: "5m",
+			ConnectTimeout:       "2m",
+			ReplyTimeout:         "wrong input",
+			TLS:                  true,
+			ClientKey:            "client_key",
+			ClientCertificate:    "client_certificate",
+			CaCertificate:        "ca_certificate",
+		}}
+
+	expErr := `time: invalid duration "wrong input"`
+	if _, err := tps.AsTPDispatcherHosts(); err == nil || err.Error() != expErr {
+		t.Errorf("expecting: \n%+v\n, received: \n%+v", expErr, err)
 	}
 
 }
