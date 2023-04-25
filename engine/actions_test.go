@@ -2657,6 +2657,81 @@ func TestRemoveSessionCosts(t *testing.T) {
 	}
 }
 
+func TestActionSetDestinations(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	tmpConn := connMgr
+	tmpDm := dm
+	defer func() {
+		cfg2, _ := config.NewDefaultCGRConfig()
+		config.SetCgrConfig(cfg2)
+		SetConnManager(tmpConn)
+		SetDataStorage(tmpDm)
+	}()
+	cfg.RalsCfg().StatSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStatS)}
+	ddc := &StatDDC{
+		FieldValues: map[string]map[string]struct{}{
+			"1001": {
+				"EVENT_1": {},
+			},
+			"1002": {
+				"EVENT_3": {},
+			},
+		},
+		MinItems: 2,
+		Count:    3,
+	}
+
+	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn <- clMock(func(serviceMethod string, _, reply interface{}) error {
+		if serviceMethod == utils.StatSv1GetStatQueue {
+			rpl := &StatQueue{
+				Tenant: "cgrates.org",
+				SQMetrics: map[string]StatMetric{
+					utils.MetaDDC: ddc,
+				},
+			}
+			*reply.(*StatQueue) = *rpl
+			return nil
+		}
+		return utils.ErrNotImplemented
+	})
+	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStatS): clientConn,
+	})
+	dm := NewDataManager(NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items), cfg.CacheCfg(), nil)
+	ub := &Account{
+		ID: "cgrates.org:1001",
+		BalanceMap: map[string]Balances{
+			utils.VOICE: {
+				&Balance{Value: 20 * float64(time.Second),
+					DestinationIDs: utils.NewStringMap(utils.MetaDDC + "DST1"),
+					Weight:         10},
+				&Balance{Value: 100 * float64(time.Second),
+					DestinationIDs: utils.NewStringMap("DST2"), Weight: 20},
+			}},
+	}
+	a := &Action{
+		ActionType:      utils.ENABLE_ACCOUNT,
+		ExtraParameters: "SQ1;SQ2",
+		Balance: &BalanceFilter{
+			Type:   utils.StringPointer(utils.VOICE),
+			Weight: utils.Float64Pointer(10),
+		},
+	}
+	dm.SetDestination(&Destination{
+		Id: utils.MetaDDC + "DST1",
+		Prefixes: []string{
+			"1003", "1004",
+		},
+	}, "")
+	config.SetCgrConfig(cfg)
+	SetConnManager(connMgr)
+	SetDataStorage(dm)
+	if err := setddestinations(ub, a, nil, nil); err != nil {
+		t.Error(err)
+	}
+}
+
 // TestCdrLogAction
 type RPCMock struct {
 	args *ArgV1ProcessEvent
