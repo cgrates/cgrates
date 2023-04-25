@@ -593,6 +593,20 @@ func TestCDRSThDSProcessEvent(t *testing.T) {
 	}
 }
 
+// func TestCdrSStoreSessionCost(t *testing.T) {
+// 	cfg, _ := config.NewDefaultCGRConfig()
+// 	cfg.CdrsCfg().ThresholdSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)}
+// 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+// 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+// 	cdrS := &CDRServer{
+// 		cgrCfg:  cfg,
+// 		cdrDb:   db,
+// 		dm:      dm,
+// 		connMgr: connMgr,
+// 	}
+
+// }
+
 // func TestCRDSRefundEventCost(t *testing.T) {
 // 	cfg, _ := config.NewDefaultCGRConfig()
 // 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
@@ -663,3 +677,242 @@ func TestCDRSThDSProcessEvent(t *testing.T) {
 // 		t.Error(err)
 // 	}
 // }
+<<<<<<< Updated upstream
+=======
+
+func TestCDRSV1StoreSessionCostCache(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	cfg.CacheCfg()[utils.CacheRPCResponses].Limit = 1
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	defer func() {
+		cfg2, _ := config.NewDefaultCGRConfig()
+		config.SetCgrConfig(cfg2)
+	}()
+	Cache.Clear(nil)
+	cdrS := &CDRServer{
+		cgrCfg: cfg,
+		cdrDb:  db,
+		dm:     dm,
+	}
+	cc := &CallCost{
+		Category:    utils.CALL,
+		Tenant:      "cgrates.org",
+		Subject:     "1001",
+		Account:     "1001",
+		Destination: "1002",
+		ToR:         "ToR",
+		Cost:        10,
+	}
+	attr := &AttrCDRSStoreSMCost{
+		Cost: &SMCost{
+			CGRID:       "b783a8b",
+			RunID:       utils.MetaDefault,
+			OriginHost:  "",
+			OriginID:    "testdatagrp_grp1",
+			CostSource:  "SMR",
+			Usage:       1536,
+			CostDetails: NewEventCostFromCallCost(cc, "b783a8b", utils.MetaDefault),
+		},
+		CheckDuplicate: false,
+	}
+	Cache.Set(utils.CacheRPCResponses, utils.ConcatenatedKey(utils.CDRsV1StoreSessionCost, attr.Cost.CGRID, attr.Cost.RunID), &utils.CachedRPCResponse{Result: utils.OK, Error: nil},
+		nil, true, utils.NonTransactional)
+	var reply string
+	config.SetCgrConfig(cfg)
+	if err := cdrS.V1StoreSessionCost(attr, &reply); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestCDRsV1ProcessEventAll(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	defer func() {
+		cfg2, _ := config.NewDefaultCGRConfig()
+		config.SetCgrConfig(cfg2)
+	}()
+	cfg.CacheCfg()[utils.CacheRPCResponses].Limit = 1
+	cfg.CdrsCfg().StatSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStatS)}
+	cfg.CdrsCfg().ThresholdSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)}
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn <- clMock(func(serviceMeth string, _, _ interface{}) error {
+		if serviceMeth == utils.ThresholdSv1ProcessEvent {
+			return nil
+		}
+		if serviceMeth == utils.StatSv1ProcessEvent {
+			return nil
+		}
+		return utils.ErrNotImplemented
+	})
+	cdrS := &CDRServer{
+		cgrCfg: cfg,
+		dm:     dm,
+		cdrDb:  db,
+		connMgr: NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+			utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStatS):      clientConn,
+			utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds): clientConn,
+		}),
+	}
+	var reply string
+	arg := &ArgV1ProcessEvent{
+		Flags: []string{utils.MetaThresholds, utils.MetaStatS},
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			Event: map[string]interface{}{
+				utils.RequestType: utils.META_POSTPAID,
+				utils.Category:    "call",
+				utils.Account:     "1001",
+				utils.Subject:     "1001",
+				utils.Destination: "1002",
+				utils.AnswerTime:  time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
+				utils.Usage:       time.Minute,
+			},
+		},
+	}
+	if err := cdrS.V1ProcessEvent(arg, &reply); err != nil {
+		t.Error(err)
+	}
+	Cache.Set(utils.CacheRPCResponses, utils.ConcatenatedKey(utils.CDRsV1ProcessEvent, arg.CGREvent.ID), &utils.CachedRPCResponse{Result: reply, Error: nil},
+		nil, true, utils.NonTransactional)
+	config.SetCgrConfig(cfg)
+	Cache.Clear(nil)
+	if err := cdrS.V1ProcessEvent(arg, &reply); err == nil { //unfinished
+		t.Error(err)
+	}
+}
+
+func TestCDRSV2StoreCache(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	defer func() {
+		cfg2, _ := config.NewDefaultCGRConfig()
+		config.SetCgrConfig(cfg2)
+	}()
+	Cache.Clear(nil)
+	cfg.CacheCfg()[utils.CacheRPCResponses].Limit = 1
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	cdrS := &CDRServer{
+		cgrCfg: cfg,
+		dm:     dm,
+		cdrDb:  db,
+		guard:  guardian.Guardian,
+	}
+	cc := &CallCost{
+		Category:    "generic",
+		Tenant:      "cgrates.org",
+		Subject:     "1001",
+		Account:     "1001",
+		Destination: "1002",
+		ToR:         "*voice",
+		Cost:        0,
+	}
+	args := &ArgsV2CDRSStoreSMCost{
+		CheckDuplicate: true,
+		Cost: &V2SMCost{
+			CGRID:       "CGR_ID",
+			RunID:       utils.MetaDefault,
+			OriginHost:  "",
+			OriginID:    "testdatagrp_grp1",
+			CostSource:  "SMS",
+			Usage:       1536,
+			CostDetails: NewEventCostFromCallCost(cc, "CGR_ID", utils.MetaDefault),
+		},
+	}
+	config.SetCgrConfig(cfg)
+	Cache.Set(utils.CacheRPCResponses, utils.ConcatenatedKey(utils.CDRsV1StoreSessionCost, args.Cost.CGRID, args.Cost.RunID),
+		&utils.CachedRPCResponse{Result: utils.OK, Error: nil},
+		nil, true, utils.NonTransactional)
+	var reply string
+	if err := cdrS.V2StoreSessionCost(args, &reply); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestRemoveThresholdProfileRpl(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	defer func() {
+		cfg2, _ := config.NewDefaultCGRConfig()
+		config.SetCgrConfig(cfg2)
+	}()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	cfg.DataDbCfg().Items[utils.MetaThresholdProfiles].Replicate = true
+	cfg.DataDbCfg().RplConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1)}
+	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn <- clMock(func(servicemethod string, _, _ interface{}) error {
+		if servicemethod == utils.ReplicatorSv1RemoveThresholdProfile {
+
+			return nil
+		}
+		return utils.ErrNotImplemented
+	})
+
+	dm := NewDataManager(db, cfg.CacheCfg(), NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
+	}))
+	thp := &ThresholdProfile{
+		Tenant:    "cgrates.org",
+		ID:        "THD_Test",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2024, 7, 14, 14, 35, 0, 0, time.UTC),
+			ExpiryTime:     time.Date(2024, 7, 14, 14, 35, 0, 0, time.UTC),
+		},
+		MaxHits:  -1,
+		MinSleep: time.Duration(5 * time.Minute),
+		Blocker:  false,
+		Weight:   20.0,
+	}
+	config.SetCgrConfig(cfg)
+	dm.SetThresholdProfile(thp, true)
+	if err := dm.RemoveThresholdProfile("cgrates.org", "THD_Test", utils.NonTransactional, true); err != nil {
+		t.Error(err)
+	}
+
+}
+
+func TestCDRSV1ProcessCDRCache(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	cfg.CacheCfg()[utils.CacheRPCResponses].Limit = 1
+	Cache.Clear(nil)
+	defer func() {
+		cfg2, _ := config.NewDefaultCGRConfig()
+		config.SetCgrConfig(cfg2)
+	}()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	cdr := &CDRWithArgDispatcher{
+		CDR: &CDR{
+			Tenant:      "cgrates.org",
+			OriginID:    "testDspCDRsProcessCDR",
+			OriginHost:  "192.168.1.1",
+			Source:      "testDspCDRsProcessCDR",
+			RequestType: utils.META_RATED,
+			Account:     "1001",
+			Subject:     "1001",
+			Destination: "1002",
+			AnswerTime:  time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
+			Usage:       time.Duration(2) * time.Minute,
+		},
+		ArgDispatcher: &utils.ArgDispatcher{
+			APIKey: utils.StringPointer("cdrs12345"),
+		},
+	}
+	var reply string
+	Cache.Set(utils.CacheRPCResponses, utils.ConcatenatedKey(utils.CDRsV1ProcessCDR, cdr.CGRID, cdr.RunID),
+		&utils.CachedRPCResponse{Result: reply, Error: err},
+		nil, true, utils.NonTransactional)
+	cdrS := &CDRServer{
+		cgrCfg: cfg,
+		dm:     dm,
+		cdrDb:  db,
+		guard:  guardian.Guardian,
+	}
+	config.SetCgrConfig(cfg)
+	if err := cdrS.V1ProcessCDR(cdr, &reply); err != nil {
+		t.Error(err)
+	}
+
+}
+>>>>>>> Stashed changes
