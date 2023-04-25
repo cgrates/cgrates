@@ -677,11 +677,6 @@ func TestCDRSThDSProcessEvent(t *testing.T) {
 // 		t.Error(err)
 // 	}
 // }
-<<<<<<< HEAD
-<<<<<<< Updated upstream
-=======
-=======
->>>>>>> 9e7231e3a (Improving coverage of unit tests)
 
 func TestCDRSV1StoreSessionCostCache(t *testing.T) {
 	cfg, _ := config.NewDefaultCGRConfig()
@@ -784,10 +779,6 @@ func TestCDRsV1ProcessEventAll(t *testing.T) {
 	if err := cdrS.V1ProcessEvent(arg, &reply); err == nil { //unfinished
 		t.Error(err)
 	}
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> 591033e8b (Improving coverage of unit tests)
 }
 
 func TestCDRSV2StoreCache(t *testing.T) {
@@ -876,7 +867,6 @@ func TestRemoveThresholdProfileRpl(t *testing.T) {
 	if err := dm.RemoveThresholdProfile("cgrates.org", "THD_Test", utils.NonTransactional, true); err != nil {
 		t.Error(err)
 	}
-<<<<<<< HEAD
 
 }
 
@@ -923,10 +913,3 @@ func TestCDRSV1ProcessCDRCache(t *testing.T) {
 	}
 
 }
->>>>>>> Stashed changes
-=======
-=======
->>>>>>> 591033e8b (Improving coverage of unit tests)
-
-}
->>>>>>> 9e7231e3a (Improving coverage of unit tests)

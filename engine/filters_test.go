@@ -2183,7 +2183,6 @@ func TestFilterSPass11(t *testing.T) {
 	}
 }
 
-<<<<<<< HEAD
 func TestValidateInlineFilters(t *testing.T) {
 	cases := []struct {
 		fltrs       []string
@@ -2210,7 +2209,8 @@ func TestValidateInlineFilters(t *testing.T) {
 				t.Errorf("expected error: %v", err)
 			}
 		})
-=======
+	}
+}
 func TestComputeDispatcherIndexesErr(t *testing.T) {
 	cfg, _ := config.NewDefaultCGRConfig()
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
@@ -2227,6 +2227,6 @@ func TestComputeDispatcherIndexesErr(t *testing.T) {
 
 	if _, err := ComputeDispatcherIndexes(dm, "cgrates.org", utils.MetaSessionS, &[]string{"DSP1"}, ""); err == nil {
 		t.Error(err)
->>>>>>> bf34ad838 (Improving coverage of unit tests)
+
 	}
 }
