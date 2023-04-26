@@ -1617,3 +1617,79 @@ func TestDMRemSQPRepl(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestDmRemoveFilter(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	cfg.DataDbCfg().Items[utils.MetaFilters].Replicate = true
+	cfg.DataDbCfg().RplConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1)}
+	defer func() {
+		cfg2, _ := config.NewDefaultCGRConfig()
+		config.SetCgrConfig(cfg2)
+	}()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn <- clMock(func(serviceMethod string, _, _ interface{}) error {
+		if serviceMethod == utils.ReplicatorSv1RemoveFilter {
+
+			return nil
+		}
+		return utils.ErrNotImplemented
+	})
+	dm := NewDataManager(db, cfg.CacheCfg(), NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn}))
+	dm.SetFilter(&Filter{
+		Tenant: "cgrates.org",
+		ID:     "FLTR_CP",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaString,
+				Element: "~*req.Charger",
+				Values:  []string{"ChargerProfile2"},
+			},
+		},
+	})
+	dm.SetChargerProfile(&ChargerProfile{
+		Tenant:    "cgrates.org",
+		ID:        "Ch1",
+		FilterIDs: []string{"FLTR_CP"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 29, 15, 00, 0, 0, time.UTC),
+		},
+		RunID:        "*rated",
+		AttributeIDs: []string{"ATTR_1001_SIMPLEAUTH"},
+		Weight:       20,
+	}, true)
+	config.SetCgrConfig(cfg)
+	if err := dm.RemoveFilter("cgrates.org", "FLTR_CP", utils.NonTransactional); err == nil {
+		t.Error(err)
+	}
+	dm.RemoveChargerProfile("cgrates.org", "Ch1", "", true)
+	if err := dm.RemoveFilter("cgrates.org", "FLTR_CP", utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+}
+
+// func TestDMGetSupplierProfile(t *testing.T) {
+// 	cfg, _ := config.NewDefaultCGRConfig()
+// 	cfg.DataDbCfg().Items[utils.MetaSupplierProfiles].Remote = true
+// 	cfg.DataDbCfg().RmtConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1)}
+// 	defer func() {
+// 		cfg2, _ := config.NewDefaultCGRConfig()
+// 		config.SetCgrConfig(cfg2)
+// 	}()
+// 	clientConn := make(chan rpcclient.ClientConnector, 1)
+// 	clientConn <- clMock(func(serviceMethod string, _, _ interface{}) error {
+// 		if serviceMethod == utils.ReplicatorSv1GetSupplierProfile {
+// 			return nil
+// 		}
+// 		return utils.ErrNotFound
+// 	})
+// 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+// 	dm := NewDataManager(db, cfg.CacheCfg(), NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+// 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
+// 	}))
+// 	config.SetCgrConfig(cfg)
+// 	if _, err := dm.GetSupplierProfile("cgrates.org", "SPL1", false, false, ""); err != nil {
+// 		t.Error(err)
+// 	}
+
+// }
