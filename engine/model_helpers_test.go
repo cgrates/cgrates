@@ -5552,3 +5552,208 @@ func TestAsTPDispatcherHostsReplyTimeoutErr(t *testing.T) {
 	}
 
 }
+
+func TestAPItoDispatcherProfileNoParams(t *testing.T) {
+	tpDPP := &utils.TPDispatcherProfile{
+		TPid:           "TP1",
+		Tenant:         "cgrates.org",
+		ID:             "Dsp",
+		FilterIDs:      []string{"*ai:~*req.AnswerTime:2014-07-14T14:35:00Z", "FLTR_ACNT_dan", "FLTR_DST_DE"},
+		Strategy:       utils.MetaFirst,
+		StrategyParams: []interface{}{},
+		Weight:         20,
+		Hosts: []*utils.TPDispatcherHostProfile{
+			{
+				ID:        "C1",
+				FilterIDs: []string{},
+				Weight:    10,
+				Params:    []interface{}{""},
+				Blocker:   false,
+			},
+		},
+	}
+
+	expected := &DispatcherProfile{
+		Tenant:         "cgrates.org",
+		ID:             "Dsp",
+		FilterIDs:      []string{"*ai:~*req.AnswerTime:2014-07-14T14:35:00Z", "FLTR_ACNT_dan", "FLTR_DST_DE"},
+		Strategy:       utils.MetaFirst,
+		StrategyParams: map[string]interface{}{},
+		Weight:         20,
+		Hosts: DispatcherHostProfiles{
+			&DispatcherHostProfile{
+				ID:        "C1",
+				FilterIDs: []string{},
+				Params:    make(map[string]interface{}),
+				Weight:    10,
+				Blocker:   false,
+			},
+		},
+	}
+	if rcv := APItoDispatcherProfile(tpDPP, "UTC"); !reflect.DeepEqual(expected, rcv) {
+		t.Errorf("Expecting : \n%+v\n, received: \n%+v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+}
+
+func TestAPItoChargerProfileNewDynamicWeightsFromStringErr(t *testing.T) {
+	tpCPP := &utils.TPChargerProfile{
+		TPid:         "TP1",
+		Tenant:       "cgrates.org",
+		ID:           "Charger1",
+		FilterIDs:    []string{"FLTR_ACNT_dan", "FLTR_DST_DE", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z"},
+		RunID:        "*rated",
+		AttributeIDs: []string{"ATTR1", "ATTR2"},
+		Weights:      "wrong input",
+	}
+
+	expected := &ChargerProfile{
+		Tenant:       "cgrates.org",
+		ID:           "Charger1",
+		FilterIDs:    []string{"", "", ""},
+		Weights:      nil,
+		Blockers:     nil,
+		RunID:        "*rated",
+		AttributeIDs: []string{"", ""},
+	}
+	if rcv := APItoChargerProfile(tpCPP, "UTC"); !reflect.DeepEqual(expected, rcv) {
+		t.Errorf("Expecting : \n%+v\n, received: \n%+v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+}
+
+func TestAPItoChargerProfileNewDynamicBlockersFromStringErr(t *testing.T) {
+	tpCPP := &utils.TPChargerProfile{
+		TPid:         "TP1",
+		Tenant:       "cgrates.org",
+		ID:           "Charger1",
+		FilterIDs:    []string{"FLTR_ACNT_dan", "FLTR_DST_DE", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z"},
+		RunID:        "*rated",
+		AttributeIDs: []string{"ATTR1", "ATTR2"},
+		Weights:      ";10",
+		Blockers:     "wrong input",
+	}
+
+	expected := &ChargerProfile{
+		Tenant:    "cgrates.org",
+		ID:        "Charger1",
+		FilterIDs: []string{"", "", ""},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: float64(10),
+			},
+		},
+		Blockers:     nil,
+		RunID:        "*rated",
+		AttributeIDs: []string{"", ""},
+	}
+	if rcv := APItoChargerProfile(tpCPP, "UTC"); !reflect.DeepEqual(expected, rcv) {
+		t.Errorf("Expecting : \n%+v\n, received: \n%+v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+}
+
+// Number of FilterIDs is 0
+func TestAPItoModelTPCharger7(t *testing.T) {
+	tpCharger := &utils.TPChargerProfile{
+		TPid:         "TP1",
+		Tenant:       "cgrates.org",
+		ID:           "Charger1",
+		FilterIDs:    []string{},
+		RunID:        "*rated",
+		AttributeIDs: []string{"ATTR1", "ATTR2"},
+		Weights:      ";20",
+	}
+	expected := ChargerMdls{
+		&ChargerMdl{
+			Tpid:         "TP1",
+			Tenant:       "cgrates.org",
+			ID:           "Charger1",
+			FilterIDs:    "",
+			RunID:        "*rated",
+			AttributeIDs: "ATTR1",
+			Weights:      ";20",
+		},
+		&ChargerMdl{
+			Tpid:         "TP1",
+			Tenant:       "cgrates.org",
+			ID:           "Charger1",
+			FilterIDs:    "",
+			AttributeIDs: "ATTR2",
+		},
+	}
+	rcv := APItoModelTPCharger(tpCharger)
+	if !reflect.DeepEqual(expected, rcv) {
+		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+}
+
+func TestModelAsTPChargersWithBlockers(t *testing.T) {
+	models := ChargerMdls{
+		&ChargerMdl{
+			Tpid:         "TP1",
+			Tenant:       "cgrates.org",
+			ID:           "Charger1",
+			FilterIDs:    "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z;FLTR_ACNT_dan;FLTR_DST_DE",
+			RunID:        "*rated",
+			AttributeIDs: "*constant:*req.RequestType:*rated;*constant:*req.Category:call;ATTR1;*constant:*req.Category:call",
+			Weights:      ";20",
+			Blockers:     ";true",
+		},
+	}
+	expected := &utils.TPChargerProfile{
+		TPid:         "TP1",
+		Tenant:       "cgrates.org",
+		ID:           "Charger1",
+		FilterIDs:    []string{"*ai:~*req.AnswerTime:2014-07-14T14:35:00Z", "FLTR_ACNT_dan", "FLTR_DST_DE"},
+		RunID:        "*rated",
+		AttributeIDs: []string{"*constant:*req.RequestType:*rated;*constant:*req.Category:call", "ATTR1", "*constant:*req.Category:call"},
+		Weights:      ";20",
+		Blockers:     ";true",
+	}
+	rcv := models.AsTPChargers()
+	sort.Strings(rcv[0].FilterIDs)
+	if !reflect.DeepEqual(expected, rcv[0]) {
+		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(expected), utils.ToJSON(rcv[0]))
+	}
+}
+
+func TestAPItoAttributeProfileNewDynamicBlockersFromStringErr(t *testing.T) {
+	tpAlsPrf := &utils.TPAttributeProfile{
+		TPid:      "TP1",
+		Tenant:    "cgrates.org",
+		ID:        "ALS1",
+		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z", "*string:~*opts.*context:con1"},
+		Attributes: []*utils.TPAttribute{
+			{
+				Path:  utils.MetaReq + utils.NestingSep + "FL1",
+				Value: "Al1",
+			},
+		},
+		Weights:  ";20",
+		Blockers: "wrong input",
+	}
+
+	expErr := "invalid DynamicBlocker format for string <wrong input>"
+	if _, err := APItoAttributeProfile(tpAlsPrf, "UTC"); err == nil || err.Error() != expErr {
+		t.Errorf("expecting: %+v, received: %+v", expErr, err)
+	}
+}
+
+func TestAPItoAttributeProfileNewDynamicWeightsFromStringErr(t *testing.T) {
+	tpAlsPrf := &utils.TPAttributeProfile{
+		TPid:      "TP1",
+		Tenant:    "cgrates.org",
+		ID:        "ALS1",
+		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z", "*string:~*opts.*context:con1"},
+		Attributes: []*utils.TPAttribute{
+			{
+				Path:  utils.MetaReq + utils.NestingSep + "FL1",
+				Value: "Al1",
+			},
+		},
+		Weights: "wrong input",
+	}
+
+	expErr := "invalid DynamicWeight format for string <wrong input>"
+	if _, err := APItoAttributeProfile(tpAlsPrf, "UTC"); err == nil || err.Error() != expErr {
+		t.Errorf("expecting: %+v, received: %+v", expErr, err)
+	}
+}
