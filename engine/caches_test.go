@@ -264,3 +264,58 @@ func TestCacheSPreCache(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestCacheV1HasItem(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	Cache.Clear(nil)
+	chS := NewCacheS(cfg, dm)
+	args := &utils.ArgsGetCacheItemWithArgDispatcher{
+		ArgDispatcher: &utils.ArgDispatcher{},
+		ArgsGetCacheItem: utils.ArgsGetCacheItem{
+			CacheID: utils.CacheThresholds,
+			ItemID:  "cgrates.org:TH1",
+		},
+	}
+	thd := &Threshold{
+		Tenant: "cgrates.org",
+		ID:     "TH1",
+		Hits:   2,
+	}
+	Cache.Set(utils.CacheThresholds, utils.ConcatenatedKey(thd.Tenant, thd.ID), thd, []string{}, true, utils.NonTransactional)
+	var reply bool
+	if err := chS.V1HasItem(args, &reply); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestCacheV1GetItemExpiryTime(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	cfg.CacheCfg()[utils.CacheThresholds].TTL = 24 * time.Hour
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	Cache.Clear(nil)
+	chS := NewCacheS(cfg, dm)
+	args := &utils.ArgsGetCacheItemWithArgDispatcher{
+		ArgDispatcher: &utils.ArgDispatcher{},
+		ArgsGetCacheItem: utils.ArgsGetCacheItem{
+			CacheID: utils.CacheThresholds,
+			ItemID:  "cgrates.org:TH1",
+		},
+	}
+	thd := &Threshold{
+		Tenant: "cgrates.org",
+		ID:     "TH1",
+		Hits:   2,
+	}
+	Cache.Set(utils.CacheThresholds, utils.ConcatenatedKey(thd.Tenant, thd.ID), thd, []string{}, true, utils.NonTransactional)
+	var reply time.Time
+
+	if err := chS.V1GetItemExpiryTime(args, &reply); err != nil {
+		t.Error(err)
+	} else if reply.Day() != time.Now().Add(24*time.Hour).Day() {
+		t.Error("Expected 1 Day ttl")
+	}
+
+}
