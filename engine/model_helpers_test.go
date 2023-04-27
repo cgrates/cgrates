@@ -3100,7 +3100,8 @@ func TestAPItoModelTPRoutesEmptySlice(t *testing.T) {
 					RouteParameters: "SortingParam1",
 				},
 			},
-			Weights: ";20",
+			Weights:  ";20",
+			Blockers: ";false",
 		},
 	}
 	expMdl := RouteMdls{
@@ -3120,6 +3121,7 @@ func TestAPItoModelTPRoutesEmptySlice(t *testing.T) {
 			RouteBlockers:       ";false",
 			RouteParameters:     "SortingParam1",
 			Weights:             ";20",
+			Blockers:            ";false",
 		},
 	}
 	var mdl RouteMdls
@@ -5755,5 +5757,225 @@ func TestAPItoAttributeProfileNewDynamicWeightsFromStringErr(t *testing.T) {
 	expErr := "invalid DynamicWeight format for string <wrong input>"
 	if _, err := APItoAttributeProfile(tpAlsPrf, "UTC"); err == nil || err.Error() != expErr {
 		t.Errorf("expecting: %+v, received: %+v", expErr, err)
+	}
+}
+
+func TestAPItoAttributeProfileAttrNewDynamicBlockersFromStringErr(t *testing.T) {
+	tpAlsPrf := &utils.TPAttributeProfile{
+		TPid:      "TP1",
+		Tenant:    "cgrates.org",
+		ID:        "ALS1",
+		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z", "*string:~*opts.*context:con1"},
+		Attributes: []*utils.TPAttribute{
+			{
+				Path:     utils.MetaReq + utils.NestingSep + "FL1",
+				Value:    "Al1",
+				Blockers: "wrong input",
+			},
+		},
+		Weights: ";20",
+	}
+
+	expErr := "invalid DynamicBlocker format for string <wrong input>"
+	if _, err := APItoAttributeProfile(tpAlsPrf, "UTC"); err == nil || err.Error() != expErr {
+		t.Errorf("expecting: %+v, received: %+v", expErr, err)
+	}
+}
+
+func TestAPItoRouteProfileNewDynamicWeightsFromStringErr(t *testing.T) {
+	testStruct := &utils.TPRouteProfile{
+		FilterIDs:         []string{},
+		SortingParameters: []string{"param1"},
+		Routes:            []*utils.TPRoute{},
+		Weights:           "wrong input",
+	}
+
+	expErr := "invalid DynamicWeight format for string <wrong input>"
+	_, err := APItoRouteProfile(testStruct, "")
+	if err == nil || err.Error() != expErr {
+		t.Errorf("expecting: %+v, received: %+v", expErr, err)
+	}
+}
+
+func TestAPItoRouteProfileNewDynamicBlockersFromStringErr(t *testing.T) {
+	testStruct := &utils.TPRouteProfile{
+		FilterIDs:         []string{},
+		SortingParameters: []string{"param1"},
+		Routes:            []*utils.TPRoute{},
+		Weights:           ";10",
+		Blockers:          "wrong input",
+	}
+
+	expErr := "invalid DynamicBlocker format for string <wrong input>"
+	_, err := APItoRouteProfile(testStruct, "")
+	if err == nil || err.Error() != expErr {
+		t.Errorf("expecting: %+v, received: %+v", expErr, err)
+	}
+}
+
+func TestAPItoRouteProfileRouteNewDynamicWeightsFromStringErr(t *testing.T) {
+	testStruct := &utils.TPRouteProfile{
+		FilterIDs:         []string{},
+		SortingParameters: []string{"param1"},
+		Routes: []*utils.TPRoute{
+			{
+				ID:      "r1",
+				Weights: "wrong input",
+			},
+		},
+		Weights: ";10",
+	}
+
+	expErr := "invalid DynamicWeight format for string <wrong input>"
+	_, err := APItoRouteProfile(testStruct, "")
+	if err == nil || err.Error() != expErr {
+		t.Errorf("expecting: %+v, received: %+v", expErr, err)
+	}
+}
+
+func TestAPItoRouteProfileRouteNewDynamicBlockersFromStringErr(t *testing.T) {
+	testStruct := &utils.TPRouteProfile{
+		FilterIDs:         []string{},
+		SortingParameters: []string{"param1"},
+		Routes: []*utils.TPRoute{
+			{
+				ID:       "r1",
+				Weights:  ";10",
+				Blockers: "wrong input",
+			},
+		},
+		Weights:  ";10",
+		Blockers: ";true",
+	}
+
+	expErr := "invalid DynamicBlocker format for string <wrong input>"
+	_, err := APItoRouteProfile(testStruct, "")
+	if err == nil || err.Error() != expErr {
+		t.Errorf("expecting: %+v, received: %+v", expErr, err)
+	}
+}
+
+func TestAPItoTPThresholdNewDynamicWeightsFromStringErr(t *testing.T) {
+	tps := &utils.TPThresholdProfile{
+		TPid:             testTPID,
+		ID:               "TH1",
+		FilterIDs:        []string{"FilterID1", "FilterID2", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z"},
+		MaxHits:          12,
+		MinHits:          10,
+		MinSleep:         "1s",
+		Blocker:          false,
+		Weights:          "wrong input",
+		ActionProfileIDs: []string{"WARN3"},
+	}
+
+	expErr := "invalid DynamicWeight format for string <wrong input>"
+	_, err := APItoThresholdProfile(tps, "UTC")
+	if err == nil || err.Error() != expErr {
+		t.Errorf("expecting: \n%+v\n, received: \n%+v", expErr, err)
+	}
+}
+
+func TestAPItoModelTPThresholdNoFilters(t *testing.T) {
+	testStruct := &utils.TPThresholdProfile{
+		TPid:             "TP1",
+		Tenant:           "cgrates.org",
+		ID:               "TH_1",
+		FilterIDs:        []string{},
+		MaxHits:          12,
+		MinHits:          10,
+		MinSleep:         "1s",
+		Blocker:          false,
+		Weights:          ";20",
+		ActionProfileIDs: []string{"WARN3", "LOG"},
+	}
+	expStruct := ThresholdMdls{
+		{
+			Tpid:             "TP1",
+			Tenant:           "cgrates.org",
+			ID:               "TH_1",
+			FilterIDs:        "",
+			MaxHits:          12,
+			MinHits:          10,
+			MinSleep:         "1s",
+			Blocker:          false,
+			Weights:          ";20",
+			ActionProfileIDs: "WARN3",
+		},
+		{
+			Tpid:             "TP1",
+			Tenant:           "cgrates.org",
+			ID:               "TH_1",
+			ActionProfileIDs: "LOG",
+		},
+	}
+
+	result := APItoModelTPThreshold(testStruct)
+	if !reflect.DeepEqual(result, expStruct) {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ToJSON(expStruct), utils.ToJSON(result))
+	}
+}
+
+func TestAPItoTPStatsNewDynamicBlockersFromStringErr(t *testing.T) {
+	tps := &utils.TPStatProfile{
+		TPid:        testTPID,
+		ID:          "Stats1",
+		FilterIDs:   []string{"FLTR_1", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z"},
+		QueueLength: 100,
+		TTL:         "1s",
+		Metrics: []*utils.MetricWithFilters{
+			{
+				MetricID: "*sum#BalanceValue",
+			},
+			{
+				MetricID: "*average#BalanceValue",
+			},
+			{
+				MetricID: "*tcc",
+			},
+		},
+		MinItems:     1,
+		ThresholdIDs: []string{"THRESH1", "THRESH2"},
+		Stored:       false,
+		Blockers:     "wrong input",
+		Weights:      ";20.0",
+	}
+
+	expErr := "invalid DynamicBlocker format for string <wrong input>"
+	_, err := APItoStats(tps, "UTC")
+	if err == nil || err.Error() != expErr {
+		t.Errorf("expecting: \n%+v\n, received: \n%+v", expErr, err)
+	}
+}
+
+func TestAPItoTPStatsMetricNewDynamicBlockersFromStringErr(t *testing.T) {
+	tps := &utils.TPStatProfile{
+		TPid:        testTPID,
+		ID:          "Stats1",
+		FilterIDs:   []string{"FLTR_1", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z"},
+		QueueLength: 100,
+		TTL:         "1s",
+		Metrics: []*utils.MetricWithFilters{
+			{
+				MetricID: "*sum#BalanceValue",
+				Blockers: "wrong input",
+			},
+			{
+				MetricID: "*average#BalanceValue",
+			},
+			{
+				MetricID: "*tcc",
+			},
+		},
+		MinItems:     1,
+		ThresholdIDs: []string{"THRESH1", "THRESH2"},
+		Stored:       false,
+		Blockers:     ";false",
+		Weights:      ";20.0",
+	}
+
+	expErr := "invalid DynamicBlocker format for string <wrong input>"
+	_, err := APItoStats(tps, "UTC")
+	if err == nil || err.Error() != expErr {
+		t.Errorf("expecting: \n%+v\n, received: \n%+v", expErr, err)
 	}
 }
