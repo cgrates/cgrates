@@ -173,8 +173,28 @@ const CGRATES_CFG_JSON = `
 	}
 },
 
-
-
+"stor_db": {								// database used to store offline tariff plans and CDRs	
+	"db_type": "*mysql",					// stor database type to use: <*mongo|*mysql|*postgres|*internal>	
+	"db_host": "127.0.0.1",					// the host to connect to	
+	"db_port": 3306,						// the port to reach the stor_db	
+	"db_name": "cgrates",					// stor database name	
+	"db_user": "cgrates",					// username to use when connecting to stor_db	
+	"db_password": "",						// password to use when connecting to stor_db	
+	"string_indexed_fields": [],			// indexes on cdrs table to speed up queries, used in case of *mongo and *internal	
+	"prefix_indexed_fields": [],			// prefix indexes on cdrs table to speed up queries, used in case of *internal	
+	"opts": {	
+		"sqlMaxOpenConns": 100,				// maximum database connections opened, not applying for mongo	
+		"sqlMaxIdleConns": 10,				// maximum database connections idle, not applying for mongo	
+		"sqlConnMaxLifetime": "0", 			// maximum amount of time a connection may be reused (0 for unlimited), not applying for mongo	
+		"mysqlDSNParams":{},                // DSN params for opening db  	
+		"mongoQueryTimeout":"10s",			// timeout for query when mongo is used	
+		"pgSSLMode":"disable",				// ssl mode in case of *postgres	
+		"mysqlLocation": "Local",			// the location the time from mysql is retrived	
+	},	
+	"items":{	
+		"*cdrs": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},	
+	},	
+},
 
 "listen": {
 	"rpc_json": "127.0.0.1:2012",			// RPC JSON listening address
@@ -288,6 +308,7 @@ const CGRATES_CFG_JSON = `
 "cdrs": {									// CDRs config
 	"enabled": false,						// start the CDR Server:  <true|false>
 	"extra_fields": [],						// extra fields to store in CDRs for non-generic CDRs (ie: FreeSWITCH JSON)
+	"store_cdrs": true, 					// store cdrs in StorDB
 	"session_cost_retries": 5,				// number of queries to session_costs before recalculating CDR
 	"chargers_conns": [],					// connection to ChargerS for CDR forking, empty to disable billing for CDRs: <""|*internal|$rpc_conns_id>
 	"attributes_conns": [],					// connection to AttributeS for altering *raw CDRs, empty to disable attributes functionality: <""|*internal|$rpc_conns_id>

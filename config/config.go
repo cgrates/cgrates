@@ -110,6 +110,10 @@ func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 			Items: make(map[string]*ItemOpts),
 			Opts:  &DataDBOpts{},
 		},
+		storDbCfg: &StorDbCfg{
+			Items: make(map[string]*ItemOpts),
+			Opts:  &StorDBOpts{},
+		},
 		tlsCfg:    new(TLSCfg),
 		cacheCfg:  &CacheCfg{Partitions: make(map[string]*CacheParamCfg)},
 		listenCfg: new(ListenCfg),
@@ -328,6 +332,7 @@ type CGRConfig struct {
 	generalCfg       *GeneralCfg       // General config
 	loggerCfg        *LoggerCfg        // Logger config
 	dataDbCfg        *DataDbCfg        // Database config
+	storDbCfg        *StorDbCfg        // StorDb config
 	tlsCfg           *TLSCfg           // TLS config
 	cacheCfg         *CacheCfg         // Cache config
 	listenCfg        *ListenCfg        // Listen config
@@ -602,6 +607,13 @@ func (cfg *CGRConfig) DataDbCfg() *DataDbCfg {
 	cfg.lks[DataDBJSON].Lock()
 	defer cfg.lks[DataDBJSON].Unlock()
 	return cfg.dataDbCfg
+}
+
+// StorDbCfg returns the config for StorDb
+func (cfg *CGRConfig) StorDbCfg() *StorDbCfg {
+	cfg.lks[StorDBJSON].Lock()
+	defer cfg.lks[StorDBJSON].Unlock()
+	return cfg.storDbCfg
 }
 
 // GeneralCfg returns the General config section
@@ -983,20 +995,27 @@ func (cfg *CGRConfig) reloadSections(sections ...string) {
 		ChargerSJSON, ResourceSJSON, StatSJSON, ThresholdSJSON,
 		RouteSJSON, LoaderSJSON, DispatcherSJSON, RateSJSON, AdminSJSON, AccountSJSON,
 		ActionSJSON})
+	subsystemsThatNeedStorDB := utils.NewStringSet([]string{StorDBJSON, CDRsJSON})
 	needsDataDB := false
+	needsStorDB := false
 	for _, section := range sections {
 		if !needsDataDB && subsystemsThatNeedDataDB.Has(section) {
 			needsDataDB = true
 			cfg.rldCh <- SectionToService[DataDBJSON] // reload datadb before
 		}
-		if needsDataDB {
+		if !needsStorDB && subsystemsThatNeedStorDB.Has(section) {
+			needsStorDB = true
+			cfg.rldCh <- SectionToService[StorDBJSON] // reload stordb before
+		}
+		if needsDataDB && needsStorDB {
 			break
 		}
 	}
 	runtime.Gosched()
 	for _, section := range sections {
 		if srv := SectionToService[section]; srv != utils.EmptyString &&
-			section != DataDBJSON {
+			section != DataDBJSON &&
+			section != StorDBJSON {
 			cfg.rldCh <- srv
 		}
 	}
@@ -1020,6 +1039,7 @@ func (cfg *CGRConfig) Clone() (cln *CGRConfig) {
 		generalCfg:       cfg.generalCfg.Clone(),
 		loggerCfg:        cfg.loggerCfg.Clone(),
 		dataDbCfg:        cfg.dataDbCfg.Clone(),
+		storDbCfg:        cfg.storDbCfg.Clone(),
 		tlsCfg:           cfg.tlsCfg.Clone(),
 		cacheCfg:         cfg.cacheCfg.Clone(),
 		listenCfg:        cfg.listenCfg.Clone(),

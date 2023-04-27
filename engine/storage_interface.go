@@ -106,6 +106,10 @@ type DataDBDriver interface {
 	config.ConfigDB
 }
 
+type StorDB interface {
+	Storage
+}
+
 type LoadStorage interface {
 	Storage
 	LoadReader

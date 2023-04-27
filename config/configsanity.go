@@ -825,6 +825,16 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 			}
 		}
 	}
+
+	// StorDB sanity checks
+	if cfg.storDbCfg.Type == utils.Postgres {
+		if !utils.IsSliceMember([]string{utils.PostgresSSLModeDisable, utils.PostgresSSLModeAllow,
+			utils.PostgresSSLModePrefer, utils.PostgresSSLModeRequire, utils.PostgresSSLModeVerifyCa,
+			utils.PostgresSSLModeVerifyFull}, cfg.storDbCfg.Opts.PgSSLMode) {
+			return fmt.Errorf("<%s> unsupported ssl mode for storDB", utils.StorDB)
+		}
+	}
+
 	// DataDB sanity checks
 	if cfg.dataDbCfg.Type == utils.MetaInternal {
 		for key, config := range cfg.cacheCfg.Partitions {

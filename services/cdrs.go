@@ -34,7 +34,7 @@ import (
 
 // NewCDRServer returns the CDR Server
 func NewCDRServer(cfg *config.CGRConfig, dm *DataDBService,
-	filterSChan chan *engine.FilterS,
+	storDB *StorDBService, filterSChan chan *engine.FilterS,
 	server *cores.Server, internalCDRServerChan chan birpc.ClientConnector,
 	connMgr *engine.ConnManager, anz *AnalyzerService,
 	srvDep map[string]*sync.WaitGroup) servmanager.Service {
@@ -42,6 +42,7 @@ func NewCDRServer(cfg *config.CGRConfig, dm *DataDBService,
 		connChan:    internalCDRServerChan,
 		cfg:         cfg,
 		dm:          dm,
+		storDB:      storDB,
 		filterSChan: filterSChan,
 		server:      server,
 		connMgr:     connMgr,
@@ -53,8 +54,9 @@ func NewCDRServer(cfg *config.CGRConfig, dm *DataDBService,
 // CDRServer implements Service interface
 type CDRServer struct {
 	sync.RWMutex
-	cfg *config.CGRConfig
-	dm  *DataDBService
+	cfg    *config.CGRConfig
+	dm     *DataDBService
+	storDB *StorDBService
 
 	filterSChan chan *engine.FilterS
 	server      *cores.Server
@@ -86,12 +88,14 @@ func (cdrService *CDRServer) Start(ctx *context.Context, _ context.CancelFunc) (
 		return
 	}
 
+	storDBChan := make(chan engine.StorDB, 1)
 	cdrService.stopChan = make(chan struct{})
+	cdrService.storDB.RegisterSyncChan(storDBChan)
 
 	cdrService.Lock()
 	defer cdrService.Unlock()
 
-	cdrService.cdrS = engine.NewCDRServer(cdrService.cfg, datadb, filterS, cdrService.connMgr)
+	cdrService.cdrS = engine.NewCDRServer(cdrService.cfg, storDBChan, datadb, filterS, cdrService.connMgr)
 	go cdrService.cdrS.ListenAndServe(cdrService.stopChan)
 	runtime.Gosched()
 	utils.Logger.Info("Registering CDRS RPC service.")

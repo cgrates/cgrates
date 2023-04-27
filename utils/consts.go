@@ -335,6 +335,7 @@ const (
 	MetaDumpToJSON           = "*dump_to_json"
 	NonTransactional         = ""
 	DataDB                   = "data_db"
+	StorDB                   = "stor_db"
 	NotFoundCaps             = "NOT_FOUND"
 	ServerErrorCaps          = "SERVER_ERROR"
 	MandatoryIEMissingCaps   = "MANDATORY_IE_MISSING"
@@ -482,6 +483,7 @@ const (
 	//Destinations             = "Destinations"
 	MetaSubscribers          = "*subscribers"
 	MetaDataDB               = "*datadb"
+	MetaStorDB               = "*stordb"
 	MetaWeight               = "*weight"
 	MetaLC                   = "*lc"
 	MetaHC                   = "*hc"
@@ -1680,6 +1682,8 @@ const (
 	CacheVersions                    = "*versions"
 	CacheCapsEvents                  = "*caps_events"
 	CacheReplicationHosts            = "*replication_hosts"
+	// storDB
+	CacheCDRsTBL = "*cdrs"
 )
 
 // Prefix for indexing
@@ -1714,6 +1718,16 @@ const (
 const (
 	MetaGoogleAPI             = "*gapi"
 	GoogleCredentialsFileName = "credentials.json"
+)
+
+// StorDB
+var (
+	PostgresSSLModeDisable    = "disable"
+	PostgresSSLModeAllow      = "allow"
+	PostgresSSLModePrefer     = "prefer"
+	PostgresSSLModeRequire    = "require"
+	PostgresSSLModeVerifyCa   = "verify-ca"
+	PostgresSSLModeVerifyFull = "verify-full"
 )
 
 // GeneralCfg
@@ -1882,6 +1896,7 @@ const (
 	CDRsConnsCfg           = "cdrs_conns"
 	FiltersCfg             = "filters"
 	ExtraFieldsCfg         = "extra_fields"
+	StoreCdrsCfg           = "store_cdrs"
 	SMCostRetriesCfg       = "session_cost_retries"
 	ChargerSConnsCfg       = "chargers_conns"
 	AttributeSConnsCfg     = "attributes_conns"
