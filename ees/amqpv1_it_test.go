@@ -43,7 +43,7 @@ var (
 
 	sTestsAMQPv1 = []func(t *testing.T){
 		testAMQPv1LoadConfig,
-		testAMQPv1ResetDataDB,
+		testAMQPv1ResetDBs,
 		testAMQPv1StartEngine,
 		testAMQPv1RPCConn,
 
@@ -82,8 +82,11 @@ func testAMQPv1LoadConfig(t *testing.T) {
 	}
 }
 
-func testAMQPv1ResetDataDB(t *testing.T) {
+func testAMQPv1ResetDBs(t *testing.T) {
 	if err := engine.InitDataDB(amqpv1Cfg); err != nil {
+		t.Fatal(err)
+	}
+	if err := engine.InitStorDB(amqpv1Cfg); err != nil {
 		t.Fatal(err)
 	}
 }

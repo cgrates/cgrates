@@ -45,7 +45,7 @@ var (
 	// subtests to be executed for each confDIR
 	sTestsCDRsPostFailIT = []func(t *testing.T){
 		testCDRsPostFailoverInitConfig,
-		testCDRsPostFailoverInitDataDb,
+		testCDRsPostFailoverFlushDBs,
 		testCDRsPostFailoverStartEngine,
 		testCDRsPostFailoverRpcConn,
 		testCDRsPostFailoverLoadTariffPlanFromFolder,
@@ -89,8 +89,11 @@ func testCDRsPostFailoverInitConfig(t *testing.T) {
 	}
 }
 
-func testCDRsPostFailoverInitDataDb(t *testing.T) {
+func testCDRsPostFailoverFlushDBs(t *testing.T) {
 	if err := engine.InitDataDB(cdrsPostFailCfg); err != nil {
+		t.Fatal(err)
+	}
+	if err := engine.InitStorDB(cdrsPostFailCfg); err != nil {
 		t.Fatal(err)
 	}
 }

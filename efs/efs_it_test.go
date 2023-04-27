@@ -52,7 +52,7 @@ var (
 	sTestsEfs = []func(t *testing.T){
 		testCreateDirectory,
 		testEfSInitCfg,
-		testEfsInitDataDb,
+		testEfsResetDBs,
 		testEfsStartEngine,
 		testEfSRPCConn,
 		//testEfsProcessEvent,
@@ -125,8 +125,11 @@ func testEfSInitCfg(t *testing.T) {
 	}
 }
 
-func testEfsInitDataDb(t *testing.T) {
+func testEfsResetDBs(t *testing.T) {
 	if err := engine.InitDataDB(efsCfg); err != nil {
+		t.Fatal(err)
+	}
+	if err := engine.InitStorDB(efsCfg); err != nil {
 		t.Fatal(err)
 	}
 }

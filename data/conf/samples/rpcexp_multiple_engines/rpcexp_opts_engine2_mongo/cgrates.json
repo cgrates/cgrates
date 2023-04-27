@@ -1,45 +1,50 @@
 {
-    "general": {
-        "log_level": 7,
-        "reply_timeout": "50s"
-    },
     
-    "listen": {
-        "rpc_json": ":22012",
-        "rpc_gob": ":22013",
-        "http": ":22080"
-    },
-    
-    "data_db": {
-        "db_type": "mongo",
-        "db_name": "10",
-        "db_port": 27017
-    },
-    
-    
- 
+"general": {
+    "log_level": 7,
+    "reply_timeout": "50s"
+},
 
-    "thresholds": {
-        "enabled":true,
-        "store_interval": "-1",
-        "opts":{								
-            "*profileIDs": [					
-                {
-                	"Tenant": "",
-                	"FilterIDs": [],
-                	"Value": ["THD_1"]
-                }
-            ]
-           							
-        }
-    },
-    
-    "sessions": {
-        "enabled": true,
-	    "listen_bijson": "127.0.0.1:22014"		
-    },
-    
-    "admins": {
-        "enabled": true
+"listen": {
+    "rpc_json": ":22012",
+    "rpc_gob": ":22013",
+    "http": ":22080"
+},
+
+"data_db": {
+    "db_type": "mongo",
+    "db_name": "10",
+    "db_port": 27017
+},
+
+"stor_db": {
+    "db_type": "mongo",
+    "db_name": "cgrates",
+    "db_port": 27017
+},
+
+"thresholds": {
+    "enabled":true,
+    "store_interval": "-1",
+    "opts":{								
+        "*profileIDs": [					
+            {
+                "Tenant": "",
+                "FilterIDs": [],
+                "Value": ["THD_1"]
+            }
+        ]
+                                
     }
+},
+
+"sessions": {
+    "enabled": true,
+    "listen_bijson": "127.0.0.1:22014"		
+},
+
+"admins": {
+    "enabled": true
+}
+
 }

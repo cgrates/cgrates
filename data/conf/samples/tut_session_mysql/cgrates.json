@@ -8,7 +8,6 @@
 	"reply_timeout": "50s",
 },
 
-
 "listen": {
 	"rpc_json": ":2012",
 	"rpc_gob": ":2013",
@@ -21,7 +20,9 @@
 	"db_name": "10", 						// data_db database name to connect to
 },
 
-
+"stor_db": {
+    "db_password": "CGRateS.org"
+},
 
 "rals": {
 	"enabled": true,

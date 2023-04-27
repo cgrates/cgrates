@@ -46,7 +46,7 @@ var (
 
 	sTestsAnzDoc = []func(t *testing.T){
 		testAnzDocInitCfg,
-		testAnzDocInitDataDb,
+		testAnzDocFlushDBs,
 		testAnzDocStartEngine,
 		testAnzDocRPCConn,
 
@@ -80,8 +80,11 @@ func TestAnzDocIT(t *testing.T) {
 	}
 }
 
-func testAnzDocInitDataDb(t *testing.T) {
+func testAnzDocFlushDBs(t *testing.T) {
 	if err := engine.InitDataDB(anzDocCfg); err != nil {
+		t.Fatal(err)
+	}
+	if err := engine.InitStorDB(anzDocCfg); err != nil {
 		t.Fatal(err)
 	}
 }

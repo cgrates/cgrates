@@ -45,7 +45,7 @@ var (
 
 	LoadersIDBIdxTests = []func(t *testing.T){
 		testLoadersIDBIdxItLoadConfig,
-		testLoadersIDBIdxItDB,
+		testLoadersIDBIdxItFlushDBs,
 		testLoadersIDBIdxItStartEngines,
 		testLoadersIDBIdxItRPCConn,
 		testLoadersIDBIdxItLoad,
@@ -83,11 +83,13 @@ func testLoadersIDBIdxItLoadConfig(t *testing.T) {
 	}
 }
 
-func testLoadersIDBIdxItDB(t *testing.T) {
+func testLoadersIDBIdxItFlushDBs(t *testing.T) {
 	if err := engine.InitDataDB(loadersIDBIdxCfg); err != nil {
 		t.Fatal(err)
 	}
-
+	if err := engine.InitStorDB(loadersIDBIdxCfg); err != nil {
+		t.Fatal(err)
+	}
 }
 
 func testLoadersIDBIdxItStartEngines(t *testing.T) {

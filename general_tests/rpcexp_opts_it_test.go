@@ -43,7 +43,7 @@ var (
 
 	rrTests = []func(t *testing.T){
 		testRPCExpLoadConfig,
-		testRPCExpInitDataDb,
+		testRPCExpFlushDBs,
 
 		testRPCExpStartEngine,
 		testRPCExpRPCConn,
@@ -93,11 +93,17 @@ func testRPCExpLoadConfig(t *testing.T) {
 	rrDelay = 1000
 }
 
-func testRPCExpInitDataDb(t *testing.T) {
+func testRPCExpFlushDBs(t *testing.T) {
 	if err := engine.InitDataDB(ng1Cfg); err != nil {
 		t.Fatal(err)
 	}
 	if err := engine.InitDataDB(ng2Cfg); err != nil {
+		t.Fatal(err)
+	}
+	if err := engine.InitStorDB(ng1Cfg); err != nil {
+		t.Fatal(err)
+	}
+	if err := engine.InitStorDB(ng2Cfg); err != nil {
 		t.Fatal(err)
 	}
 }

@@ -12,14 +12,17 @@
 	"http": ":2080"
 },
 
-
-
 "data_db": {
 	"db_type": "mongo",
 	"db_name": "10",
 	"db_port": 27017
 },
 
+"stor_db": {
+	"db_type": "mongo",
+	"db_name": "cgrates",
+	"db_port": 27017
+},
 
 "filters": {								
 	"stats_conns": ["*localhost"],
@@ -69,7 +72,7 @@
 
 "admins": {
 	"enabled": true,
-	"caches_conns":["*localhost"],
+	"caches_conns":["*localhost"]
 },
 
 "loaders": [

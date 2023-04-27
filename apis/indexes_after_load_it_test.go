@@ -44,6 +44,7 @@ var (
 	idxLoadAccPrf = []func(t *testing.T){
 		testIdxLoadInitCfg,
 		testIdxLoadInitDataDb,
+		testIdxLoadResetStorDb,
 
 		testIdxLoadStartEngine,
 		testIdxLoadRPCConn,
@@ -82,6 +83,12 @@ func testIdxLoadInitCfg(t *testing.T) {
 
 func testIdxLoadInitDataDb(t *testing.T) {
 	if err := engine.InitDataDB(idxLoadCfg); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func testIdxLoadResetStorDb(t *testing.T) {
+	if err := engine.InitStorDB(idxLoadCfg); err != nil {
 		t.Fatal(err)
 	}
 }

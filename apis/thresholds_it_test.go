@@ -44,6 +44,7 @@ var (
 	sTestsTh = []func(t *testing.T){
 		testThresholdsInitCfg,
 		testThresholdsInitDataDB,
+		testThresholdsResetStorDB,
 
 		testThresholdsStartEngine,
 		testThresholdsRPCConn,
@@ -101,6 +102,12 @@ func testThresholdsInitCfg(t *testing.T) {
 
 func testThresholdsInitDataDB(t *testing.T) {
 	if err := engine.InitDataDB(thCfg); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func testThresholdsResetStorDB(t *testing.T) {
+	if err := engine.InitStorDB(thCfg); err != nil {
 		t.Fatal(err)
 	}
 }

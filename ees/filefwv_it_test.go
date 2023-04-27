@@ -46,7 +46,7 @@ var (
 	sTestsFwv = []func(t *testing.T){
 		testCreateDirectory,
 		testFwvLoadConfig,
-		testFwvResetDataDB,
+		testFwvResetDBs,
 
 		testFwvStartEngine,
 		testFwvRPCConn,
@@ -72,8 +72,11 @@ func testFwvLoadConfig(t *testing.T) {
 	}
 }
 
-func testFwvResetDataDB(t *testing.T) {
+func testFwvResetDBs(t *testing.T) {
 	if err := engine.InitDataDB(fwvCfg); err != nil {
+		t.Fatal(err)
+	}
+	if err := engine.InitStorDB(fwvCfg); err != nil {
 		t.Fatal(err)
 	}
 }

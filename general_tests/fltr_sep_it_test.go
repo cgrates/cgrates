@@ -48,7 +48,7 @@ var (
 		testFltrSepCreateFolders,
 
 		testFltrSepLoadConfig,
-		testFltrSepInitDataDb,
+		testFltrSepFlushDBs,
 		testFltrSepStartEngine,
 		testFltrSepRpcConn,
 
@@ -90,8 +90,11 @@ func testFltrSepLoadConfig(t *testing.T) {
 	fltrSepDelay = 1000
 }
 
-func testFltrSepInitDataDb(t *testing.T) {
+func testFltrSepFlushDBs(t *testing.T) {
 	if err := engine.InitDataDB(fltrSepCfg); err != nil {
+		t.Fatal(err)
+	}
+	if err := engine.InitStorDB(fltrSepCfg); err != nil {
 		t.Fatal(err)
 	}
 }

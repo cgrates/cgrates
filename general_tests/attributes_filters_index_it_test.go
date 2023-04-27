@@ -42,7 +42,7 @@ var (
 	alsPrfFltrConfigDIR string
 	sTestsAlsFltrPrf    = []func(t *testing.T){
 		testAttributeFltrSInitCfg,
-		testAttributeFltrSInitDataDb,
+		testAttributeFltrSFlushDBs,
 
 		testAttributeFltrSStartEngine,
 		testAttributeFltrSRPCConn,
@@ -81,8 +81,11 @@ func testAttributeFltrSInitCfg(t *testing.T) {
 	}
 }
 
-func testAttributeFltrSInitDataDb(t *testing.T) {
+func testAttributeFltrSFlushDBs(t *testing.T) {
 	if err := engine.InitDataDB(attrFltrCfg); err != nil {
+		t.Fatal(err)
+	}
+	if err := engine.InitStorDB(attrFltrCfg); err != nil {
 		t.Fatal(err)
 	}
 }

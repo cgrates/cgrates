@@ -45,7 +45,7 @@ var (
 	// subtests to be executed for each confDIR
 	sTestsCDRsIT = []func(t *testing.T){
 		testCDRsInitConfig,
-		testCDRsInitDataDb,
+		testCDRsFlushDBs,
 		testCDRsStartEngine,
 		testCDRsRpcConn,
 		testCDRsLoadTariffPlanFromFolder,
@@ -100,8 +100,11 @@ func testCDRsInitConfig(t *testing.T) {
 	}
 }
 
-func testCDRsInitDataDb(t *testing.T) {
+func testCDRsFlushDBs(t *testing.T) {
 	if err := engine.InitDataDB(cdrsCfg); err != nil {
+		t.Fatal(err)
+	}
+	if err := engine.InitStorDB(cdrsCfg); err != nil {
 		t.Fatal(err)
 	}
 }

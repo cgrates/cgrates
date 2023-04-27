@@ -49,6 +49,7 @@ var (
 
 		testLoadersInitCfg,
 		testLoadersInitDataDB,
+		testLoadersResetStorDB,
 		testLoadersStartEngine,
 		testLoadersRPCConn,
 
@@ -118,6 +119,12 @@ func testLoadersInitCfg(t *testing.T) {
 
 func testLoadersInitDataDB(t *testing.T) {
 	if err := engine.InitDataDB(ldrCfg); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func testLoadersResetStorDB(t *testing.T) {
+	if err := engine.InitStorDB(ldrCfg); err != nil {
 		t.Fatal(err)
 	}
 }

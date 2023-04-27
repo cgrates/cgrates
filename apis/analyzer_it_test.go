@@ -46,6 +46,7 @@ var (
 	sTestsAnz = []func(t *testing.T){
 		testAnalyzerSInitCfg,
 		testAnalyzerSInitDataDb,
+		testAnalyzerSResetStorDb,
 		testAnalyzerSStartEngine,
 		testAnzBiSRPCConn,
 		testAnalyzerSLoad,
@@ -90,6 +91,12 @@ func testAnalyzerSInitCfg(t *testing.T) {
 
 func testAnalyzerSInitDataDb(t *testing.T) {
 	if err := engine.InitDataDB(anzCfg); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func testAnalyzerSResetStorDb(t *testing.T) {
+	if err := engine.InitStorDB(anzCfg); err != nil {
 		t.Fatal(err)
 	}
 }

@@ -47,7 +47,7 @@ var (
 	testEngine1, testEngine2         *exec.Cmd
 	sTestsSession1                   = []func(t *testing.T){
 		testSessionSRplcInitCfg,
-		testSessionSRplcResetDB,
+		testSessionSRplcFlushDBs,
 		testSessionSRplcStartEngine,
 		testSessionSRplcApierRpcConn,
 		testSessionSRplcApierGetActiveSessionsNotFound,
@@ -96,11 +96,13 @@ func testSessionSRplcInitCfg(t *testing.T) {
 }
 
 // Remove data in both rating and accounting db
-func testSessionSRplcResetDB(t *testing.T) {
+func testSessionSRplcFlushDBs(t *testing.T) {
 	if err := engine.InitDataDB(smgRplCfg1); err != nil {
 		t.Fatal(err)
 	}
-
+	if err := engine.InitStorDB(smgRplCfg1); err != nil {
+		t.Fatal(err)
+	}
 }
 
 // Start CGR Engine

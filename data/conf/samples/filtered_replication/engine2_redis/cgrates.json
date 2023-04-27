@@ -1,24 +1,22 @@
 {
+
 "general": {
 	"log_level": 7,
-	"node_id" : "EngineMongo2",
+	"node_id" : "EngineMongo2"
 },
-
 
 "listen": {
 	"rpc_json": ":2032",
 	"rpc_gob": ":2033",
-	"http": ":2380",
+	"http": ":2380"
 },
-
 
 "rpc_conns": {
 	"conn1": {
 		"strategy": "*first",
-		"conns": [{"address": "127.0.0.1:2013", "transport":"*gob"}],
-	},
+		"conns": [{"address": "127.0.0.1:2013", "transport":"*gob"}]
+	}
 },
-
 
 "data_db": {
 	"db_type": "redis",
@@ -44,25 +42,28 @@
 		"*load_ids":{"remote":true,"replicate":false},
 		"*indexes":{"remote":true, "replicate":false}, 
 		"*action_profiles":{"remote":true,"replicate":false},
-		"*account_profiles":{"remote":true,"replicate":false},
-	},
+		"*account_profiles":{"remote":true,"replicate":false}
+	}
 },
 
+"stor_db": {
+	"db_password": "CGRateS.org"
+},
 
 "admins": {
-	"enabled": true,
+	"enabled": true
 },
 
 "thresholds": {
-	"enabled": true,
+	"enabled": true
 },
 
 "stats": {
-	"enabled": true,
+	"enabled": true
 },
 
 "resources": {
-	"enabled": true,
-},
+	"enabled": true
+}
 
 }

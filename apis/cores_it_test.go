@@ -49,6 +49,7 @@ var (
 	sTestCoreIt  = []func(t *testing.T){
 		testCoreItLoadCofig,
 		testCoreItInitDataDB,
+		testCoreItInitStorDB,
 
 		//engine separate with cpu
 		testCoreItStartEngineByExecWithCPUProfiling,
@@ -111,6 +112,12 @@ func testCoreItLoadCofig(t *testing.T) {
 
 func testCoreItInitDataDB(t *testing.T) {
 	if err := engine.InitDataDB(coreSCfg); err != nil {
+		t.Error(err)
+	}
+}
+
+func testCoreItInitStorDB(t *testing.T) {
+	if err := engine.InitStorDB(coreSCfg); err != nil {
 		t.Error(err)
 	}
 }

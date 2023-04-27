@@ -1,16 +1,15 @@
 {
+	
 "general": {
 	"log_level": 7,
-	"node_id": "InternalEngine",
+	"node_id": "InternalEngine"
 },
-
 
 "listen": {
 	"rpc_json": ":2012",
 	"rpc_gob": ":2013",
-	"http": ":2080",
+	"http": ":2080"
 },
-
 
 "rpc_conns": {
 	"conn2": {
@@ -18,10 +17,9 @@
 		"conns": [
 			{"id": "engine1", "address": "127.0.0.1:2023", "transport":"*gob"},
 			{"id": "engine2", "address": "127.0.0.1:2033", "transport":"*gob"}
-		],
-	},
+		]
+	}
 },
-
 
 "data_db": {
 	"db_type": "*internal",
@@ -45,40 +43,38 @@
 		"*rate_profiles":{"remote":false,"replicate":true},
 		"*load_ids":{"remote":false,"replicate":true},
 		"*action_profiles":{"remote":false,"replicate":true},
-		"*account_profiles":{"remote":false,"replicate":true},
-	},
-},
-
-
-"caches":{
-	"partitions": {
-		"*replication_hosts": {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false},
+		"*account_profiles":{"remote":false,"replicate":true}
 	}
 },
 
+"stor_db": {
+	"db_type": "*internal"
+},
 
+"caches":{
+	"partitions": {
+		"*replication_hosts": {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}
+	}
+},
 
 "thresholds": {
 	"enabled": true,
-	"store_interval": "-1",
+	"store_interval": "-1"
 },
-
 
 "resources": {
 	"enabled": true,
 	"store_interval": "-1",
-	"thresholds_conns": ["*internal"],
+	"thresholds_conns": ["*internal"]
 },
 
-
-
 "admins": {
-	"enabled": true,
+	"enabled": true
 },
 
 "stats": {
 	"enabled": true,
-	"store_interval": "-1",
-},
+	"store_interval": "-1"
+}
 
 }

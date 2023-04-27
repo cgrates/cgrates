@@ -18,6 +18,12 @@
 	"db_name": "10",
 },
 
+"stor_db": {
+    "db_type": "mongo",
+    "db_name": "cgrates",
+    "db_port": 27017
+},
+
 "rates": {
 	"enabled": true,
 },

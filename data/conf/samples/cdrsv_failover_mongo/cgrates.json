@@ -1,99 +1,102 @@
 {
 
-	"general": {
-		"log_level": 7,
-		"node_id": "TestFailCDRS",
-	},
+"general": {
+	"log_level": 7,
+	"node_id": "TestFailCDRS"
+},
 
-	"efs": {                                                    // ExportFailover service
-	    "enabled": true,						                // starts the EventReader service: <true|false>
-	    "poster_attempts": 1,									// number of attempts before considering post request failed (eg: *httpPost, CDR exports)
-	    "failed_posts_dir": "/tmp/failed_posts",	// directory path where we store failed requests
-	    "failed_posts_ttl": "1s",								// time to wait before writing the failed posts in a single file
-    },
-
-
-	"data_db": {
-		"db_type": "mongo",
-		"db_name": "10",
-		"db_port": 27017
-	},
-
-	"cdrs": {
-		"enabled": true,
-		"attributes_conns":["*internal"],
-		"chargers_conns":["*localhost"],
-		"rates_conns": ["*localhost"],
-		"stats_conns": ["*localhost"],
-		"thresholds_conns": ["*localhost"],
-		"online_cdr_exports": ["s3_test_file"],
-		"ees_conns": ["*localhost"]
-	},
-
-	"attributes": {
-		"enabled": true
-	},
-
-	"stats": {
-		"enabled": true,
-		"store_interval": "1s",
-		"thresholds_conns": ["*internal"]
-	},
-
-	"thresholds": {
-		"enabled": true,
-		"store_interval": "1s"
-	},
-
-	"chargers": {
-		"enabled": true,
-		"attributes_conns": ["*internal"]
-	},
-
-	"admins": {
-		"enabled": true,
-	},
+"efs": {                                                    
+	"enabled": true,						                
+	"poster_attempts": 1,									
+	"failed_posts_dir": "/tmp/failed_posts",	
+	"failed_posts_ttl": "1s"								
+},
 
 
-	"ees": {
-		"enabled": true,
-		"attributes_conns": ["*internal"],
-		"exporters": [
-			{
-				"id": "s3_test_file",
-				"type": "*s3JSONMap",
-				"export_path": "http://s3.us-east-2.amazonaws.com/",
-				"opts": {
-					"awsRegion": "eu-west-2",
-					"awsKey": "testkey",
-					"awsSecret": "testsecret",
-					"s3BucketID": "cgrates-cdrs"
-				},
-				"attempts": 1,
-				"failed_posts_dir": "/tmp/failed_posts",
-				"fields":[
-					{"tag": "*originID", "path": "*exp.*originID", "type": "*variable", "value": "~*opts.*originID"}
-				]
-			}
-		]
-	},
+"data_db": {
+	"db_type": "mongo",
+	"db_name": "10",
+	"db_port": 27017
+},
 
-	"rates": {
-		"enabled": true,
-	},
+"stor_db": {
+	"db_type": "mongo",
+	"db_name": "cgrates",
+	"db_port": 27017
+},
 
-	"loaders": [
+"cdrs": {
+	"enabled": true,
+	"attributes_conns":["*internal"],
+	"chargers_conns":["*localhost"],
+	"rates_conns": ["*localhost"],
+	"stats_conns": ["*localhost"],
+	"thresholds_conns": ["*localhost"],
+	"online_cdr_exports": ["s3_test_file"],
+	"ees_conns": ["*localhost"]
+},
+
+"attributes": {
+	"enabled": true
+},
+
+"stats": {
+	"enabled": true,
+	"store_interval": "1s",
+	"thresholds_conns": ["*internal"]
+},
+
+"thresholds": {
+	"enabled": true,
+	"store_interval": "1s"
+},
+
+"chargers": {
+	"enabled": true,
+	"attributes_conns": ["*internal"]
+},
+
+"admins": {
+	"enabled": true
+},
+
+
+"ees": {
+	"enabled": true,
+	"attributes_conns": ["*internal"],
+	"exporters": [
 		{
-			"id": "*default",
-			"enabled": true,
-			"tenant": "cgrates.org",
-			"lockfile_path": ".cgr.lck",
-			"tp_in_dir": "/usr/share/cgrates/tariffplans/testit",
-			"tp_out_dir": ""
+			"id": "s3_test_file",
+			"type": "*s3JSONMap",
+			"export_path": "http://s3.us-east-2.amazonaws.com/",
+			"opts": {
+				"awsRegion": "eu-west-2",
+				"awsKey": "testkey",
+				"awsSecret": "testsecret",
+				"s3BucketID": "cgrates-cdrs"
+			},
+			"attempts": 1,
+			"failed_posts_dir": "/tmp/failed_posts",
+			"fields":[
+				{"tag": "*originID", "path": "*exp.*originID", "type": "*variable", "value": "~*opts.*originID"}
+			]
 		}
 	]
+},
 
+"rates": {
+	"enabled": true
+},
 
-
+"loaders": [
+	{
+		"id": "*default",
+		"enabled": true,
+		"tenant": "cgrates.org",
+		"lockfile_path": ".cgr.lck",
+		"tp_in_dir": "/usr/share/cgrates/tariffplans/testit",
+		"tp_out_dir": ""
+	}
+]
 
 }

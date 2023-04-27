@@ -116,7 +116,7 @@ func (d *testDispatcher) initDataDb(t *testing.T) {
 // Wipe out the cdr database
 func (d *testDispatcher) resetStorDb(t *testing.T) {
 	if err := engine.InitStorDB(d.Cfg); err != nil {
-		t.Fatalf("Error at DataDB init:%v\n", err)
+		t.Fatalf("Error at StorDB init:%v\n", err)
 	}
 }
 

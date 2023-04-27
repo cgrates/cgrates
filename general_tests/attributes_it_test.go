@@ -42,7 +42,7 @@ var (
 	alsPrfConfigDIR string
 	sTestsAlsPrf    = []func(t *testing.T){
 		testAttributeSInitCfg,
-		testAttributeSInitDataDb,
+		testAttributeSFlushDBs,
 
 		testAttributeSStartEngine,
 		testAttributeSRPCConn,
@@ -89,8 +89,11 @@ func testAttributeSInitCfg(t *testing.T) {
 	attrCfg.DataFolderPath = *dataDir // Share DataFolderPath through config towards StoreDb for Flush()
 }
 
-func testAttributeSInitDataDb(t *testing.T) {
+func testAttributeSFlushDBs(t *testing.T) {
 	if err := engine.InitDataDB(attrCfg); err != nil {
+		t.Fatal(err)
+	}
+	if err := engine.InitStorDB(attrCfg); err != nil {
 		t.Fatal(err)
 	}
 }

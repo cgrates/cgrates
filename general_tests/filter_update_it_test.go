@@ -42,7 +42,7 @@ var (
 	testEng1                               *exec.Cmd
 	sTestsFilterUpdate                     = []func(t *testing.T){
 		testFilterUpdateInitCfg,
-		testFilterUpdateResetDB,
+		testFilterUpdateFlushDBs,
 		testFilterUpdateStartEngine,
 		testFilterUpdateRpcConn,
 		testFilterUpdateSetFilterE1,
@@ -109,8 +109,11 @@ func testFilterUpdateInitCfg(t *testing.T) {
 }
 
 // Remove data in both rating and accounting db
-func testFilterUpdateResetDB(t *testing.T) {
+func testFilterUpdateFlushDBs(t *testing.T) {
 	if err := engine.InitDataDB(fltrUpdateCfg1); err != nil {
+		t.Fatal(err)
+	}
+	if err := engine.InitStorDB(fltrUpdateCfg1); err != nil {
 		t.Fatal(err)
 	}
 }

@@ -44,7 +44,7 @@ var (
 
 	testLdPrMatchRtTests = []func(t *testing.T){
 		testLdPrMatchRtLoadConfig,
-		testLdPrMatchRtResetDataDB,
+		testLdPrMatchRtFlushDBs,
 
 		testLdPrMatchRtStartEngine,
 		testLdPrMatchRtRPCConn,
@@ -107,8 +107,11 @@ func testLdPrMatchRtLoadConfig(t *testing.T) {
 	}
 }
 
-func testLdPrMatchRtResetDataDB(t *testing.T) {
+func testLdPrMatchRtFlushDBs(t *testing.T) {
 	if err := engine.InitDataDB(testLdPrMatchRtCfg); err != nil {
+		t.Fatal(err)
+	}
+	if err := engine.InitStorDB(testLdPrMatchRtCfg); err != nil {
 		t.Fatal(err)
 	}
 }

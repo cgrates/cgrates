@@ -50,7 +50,7 @@ var (
 
 	sTestsFltrRpl = []func(t *testing.T){
 		testFltrRplInitCfg,
-		testFltrRplInitDBs,
+		testFltrRplFlushDBs,
 		testFltrRplStartEngine,
 		testFltrRplRPCConn,
 
@@ -108,15 +108,19 @@ func testFltrRplInitCfg(t *testing.T) {
 	}
 }
 
-func testFltrRplInitDBs(t *testing.T) {
+func testFltrRplFlushDBs(t *testing.T) {
 	if err := engine.InitDataDB(fltrRplEngine1Cfg); err != nil {
 		t.Fatal(err)
 	}
-
 	if err := engine.InitDataDB(fltrRplEngine2Cfg); err != nil {
 		t.Fatal(err)
 	}
-
+	if err := engine.InitStorDB(fltrRplEngine1Cfg); err != nil {
+		t.Fatal(err)
+	}
+	if err := engine.InitStorDB(fltrRplEngine2Cfg); err != nil {
+		t.Fatal(err)
+	}
 }
 
 func testFltrRplStartEngine(t *testing.T) {

@@ -49,6 +49,7 @@ var (
 	sTestsAct = []func(t *testing.T){
 		testActionsInitCfg,
 		testActionsInitDataDB,
+		testActionsResetStorDB,
 
 		testActionsStartEngine,
 		testActionsRPCConn,
@@ -125,6 +126,12 @@ func testActionsInitCfg(t *testing.T) {
 
 func testActionsInitDataDB(t *testing.T) {
 	if err := engine.InitDataDB(actCfg); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func testActionsResetStorDB(t *testing.T) {
+	if err := engine.InitStorDB(actCfg); err != nil {
 		t.Fatal(err)
 	}
 }

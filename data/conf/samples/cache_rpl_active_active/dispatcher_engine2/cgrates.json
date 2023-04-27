@@ -20,6 +20,10 @@
 	"db_name": "11",
 },
 
+"stor_db": {
+	"db_type": "*internal"
+},
+
 "caches":{
 	"partitions": {
 		"*dispatcher_routes": {"limit": -1, "ttl": "1h", "replicate": true},

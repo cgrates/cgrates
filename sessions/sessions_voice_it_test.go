@@ -39,7 +39,7 @@ var (
 
 	sessionsVoiceTests = []func(t *testing.T){
 		testSessionsVoiceInitCfg,
-		testSessionsVoiceResetDataDb,
+		testSessionsVoiceFlushDBs,
 
 		/*
 			testSessionsVoiceStartEngine,
@@ -89,8 +89,11 @@ func testSessionsVoiceInitCfg(t *testing.T) {
 }
 
 // Remove data in both rating and accounting db
-func testSessionsVoiceResetDataDb(t *testing.T) {
+func testSessionsVoiceFlushDBs(t *testing.T) {
 	if err := engine.InitDataDB(voiceCfg); err != nil {
+		t.Fatal(err)
+	}
+	if err := engine.InitStorDB(voiceCfg); err != nil {
 		t.Fatal(err)
 	}
 }

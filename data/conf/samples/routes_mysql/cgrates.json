@@ -1,30 +1,34 @@
 {
 
-	"general": {
-		"log_level": 7,
-		"reply_timeout": "50s"
-	},
+"general": {
+	"log_level": 7,
+	"reply_timeout": "50s"
+},
 
 
-	"listen": {
-		"rpc_json": ":2012",
-		"rpc_gob": ":2013",
-		"http": ":2080"
-	},
+"listen": {
+	"rpc_json": ":2012",
+	"rpc_gob": ":2013",
+	"http": ":2080"
+},
 
-	"data_db": {
-		"db_type": "redis",
-		"db_port": 6379,
-		"db_name": "10"
-	},
+"data_db": {
+	"db_type": "redis",
+	"db_port": 6379,
+	"db_name": "10"
+},
 
-	"routes": {
-		"enabled": true
-	},
+"stor_db": {
+	"db_password": "CGRateS.org"
+},
 
-	"admins": {
-		"enabled": true,
-		"scheduler_conns": ["*internal"]
-	}
+"routes": {
+	"enabled": true
+},
+
+"admins": {
+	"enabled": true,
+	"scheduler_conns": ["*internal"]
+}
 
 }

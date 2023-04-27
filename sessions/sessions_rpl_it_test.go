@@ -39,7 +39,7 @@ var (
 
 	SessionsRplTests = []func(t *testing.T){
 		testSessionSRplInitCfg,
-		testSessionSRplResetDB,
+		testSessionSRplFlushDBs,
 		/*
 			testSessionSRplStartEngine,
 			testSessionSRplApierRpcConn,
@@ -90,8 +90,11 @@ func testSessionSRplInitCfg(t *testing.T) {
 }
 
 // Remove data in both rating and accounting db
-func testSessionSRplResetDB(t *testing.T) {
+func testSessionSRplFlushDBs(t *testing.T) {
 	if err := engine.InitDataDB(smgRplcMasterCfg); err != nil {
+		t.Fatal(err)
+	}
+	if err := engine.InitStorDB(smgRplcMasterCfg); err != nil {
 		t.Fatal(err)
 	}
 }

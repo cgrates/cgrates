@@ -44,6 +44,7 @@ var (
 	sTestsAttr = []func(t *testing.T){
 		testAttributesInitCfg,
 		testAttributesInitDataDb,
+		testAttributeSResetStorDb,
 		testAttributesStartEngine,
 		testAttributesRPCConn,
 
@@ -130,6 +131,12 @@ func testAttributesInitCfg(t *testing.T) {
 
 func testAttributesInitDataDb(t *testing.T) {
 	if err := engine.InitDataDB(attrCfg); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func testAttributeSResetStorDb(t *testing.T) {
+	if err := engine.InitStorDB(attrCfg); err != nil {
 		t.Fatal(err)
 	}
 }

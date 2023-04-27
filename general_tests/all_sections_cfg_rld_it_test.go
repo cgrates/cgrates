@@ -39,7 +39,7 @@ var (
 
 	testSectTests = []func(t *testing.T){
 		testSectLoadConfig,
-		testSectResetDataDB,
+		testSectResetDBs,
 
 		testSectStartEngine,
 		testSectRPCConn,
@@ -109,8 +109,11 @@ func testSectLoadConfig(t *testing.T) {
 	}
 }
 
-func testSectResetDataDB(t *testing.T) {
+func testSectResetDBs(t *testing.T) {
 	if err := engine.InitDataDB(testSectCfg); err != nil {
+		t.Fatal(err)
+	}
+	if err := engine.InitStorDB(testSectCfg); err != nil {
 		t.Fatal(err)
 	}
 }

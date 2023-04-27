@@ -46,7 +46,7 @@ var (
 	sTestsVirt = []func(t *testing.T){
 		testCreateDirectory,
 		testVirtLoadConfig,
-		testVirtResetDataDB,
+		testVirtResetDBs,
 		testVirtStartEngine,
 		testVirtRPCConn,
 		testVirtExportSupplierEvent,
@@ -72,8 +72,11 @@ func testVirtLoadConfig(t *testing.T) {
 	}
 }
 
-func testVirtResetDataDB(t *testing.T) {
+func testVirtResetDBs(t *testing.T) {
 	if err := engine.InitDataDB(virtCfg); err != nil {
+		t.Fatal(err)
+	}
+	if err := engine.InitStorDB(virtCfg); err != nil {
 		t.Fatal(err)
 	}
 }

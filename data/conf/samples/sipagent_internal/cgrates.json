@@ -23,6 +23,10 @@
 	"db_type": "*internal",					// stor database type to use: <mysql|postgres>
 },
 
+"stor_db": {
+	"db_type": "*internal"			
+},
+
 "sessions": {
 	"enabled": true,
 	"attributes_conns": ["*localhost"],

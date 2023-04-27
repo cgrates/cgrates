@@ -43,7 +43,7 @@ var (
 
 	sTestsKafkaSSL = []func(t *testing.T){
 		testKafkaSSLLoadConfig,
-		testKafkaSSLResetDataDB,
+		testKafkaSSLFlushDBs,
 
 		testKafkaSSLStartEngine,
 		testKafkaSSLRPCConn,
@@ -95,8 +95,11 @@ func testKafkaSSLLoadConfig(t *testing.T) {
 	}
 }
 
-func testKafkaSSLResetDataDB(t *testing.T) {
+func testKafkaSSLFlushDBs(t *testing.T) {
 	if err := engine.InitDataDB(kafkaSSLCfg); err != nil {
+		t.Fatal(err)
+	}
+	if err := engine.InitStorDB(kafkaSSLCfg); err != nil {
 		t.Fatal(err)
 	}
 }

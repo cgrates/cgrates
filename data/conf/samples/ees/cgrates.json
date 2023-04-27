@@ -1,33 +1,32 @@
 {
-// Sample CGRateS Configuration file for EEs
-//
-// Copyright (C) ITsysCOM GmbH
-
 
 "logger": {
-	"type": "*syslog",        // controls the destination of logs <*syslog|*stdout|*kafka>
-	"level": 7,               // system level precision for floats 
+	"type": "*syslog",       
+	"level": 7              
 },
 
 "listen": {
 	"rpc_json": ":2012",
 	"rpc_gob": ":2013",
-	"http": ":2080",
+	"http": ":2080"
 },
 
 "data_db": {
 	"db_type": "redis",
 	"db_port": 6379,
-	"db_name": "10",
+	"db_name": "10"
+},
+
+"stor_db": {
+	"db_password": "CGRateS.org"
 },
 
 "cdrs": {
 	"enabled": true,
 	"chargers_conns": ["*localhost"],
 	"rates_conns": ["*internal"],
-	"session_cost_retries": 0,
+	"session_cost_retries": 0
 },
-
 
 "chargers": {
 	"enabled": true,

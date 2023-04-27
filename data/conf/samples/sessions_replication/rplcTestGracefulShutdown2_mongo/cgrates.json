@@ -1,47 +1,47 @@
 {
-// Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
-// Copyright (C) ITsysCOM GmbH
+
 "general": {
 	"log_level": 7,
-	"node_id":"MasterReplication",
+	"node_id":"MasterReplication"
 },
 
 "listen": {
 	"rpc_json": "127.0.0.1:2012",
 	"rpc_gob": "127.0.0.1:2013",
-	"http": "127.0.0.1:2080",
+	"http": "127.0.0.1:2080"
 },
-
 
 "rpc_conns": {
 	"rplConn": {
 		"strategy": "*broadcast_sync",
-		"conns": [{"address": "127.0.0.1:22012", "transport": "*json"}],
-	},
+		"conns": [{"address": "127.0.0.1:22012", "transport": "*json"}]
+	}
 },
-
 
 "data_db": {
 	"db_type": "mongo",
 	"db_name": "10",
-	"db_port": 27017,
+	"db_port": 27017
 },
 
-
-
+"stor_db": {
+	"db_type": "mongo",
+	"db_name": "cgrates",
+	"db_port": 27017
+},
 
 "chargers": {
-	"enabled": true,
+	"enabled": true
 },
 
 "sessions": {
-	"enabled": true,		// interval to perform debits on.
+	"enabled": true,		
 	"replication_conns": ["rplConn"],
-	"chargers_conns": ["*internal"],
+	"chargers_conns": ["*internal"]
 },
 
 "admins": {
-	"enabled": true,
-},
+	"enabled": true
+}
 
 }

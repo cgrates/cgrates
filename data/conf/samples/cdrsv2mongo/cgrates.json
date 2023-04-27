@@ -1,58 +1,65 @@
 {
-	"general": {
-		"log_level": 7
-	},
 
-	"rates": {
-		"enabled": true
-	},
+"general": {
+	"log_level": 7
+},
 
-	"cdrs": {
+"stor_db": {
+	"db_type": "mongo",
+	"db_port": 27017
+},
+
+"rates": {
+	"enabled": true
+},
+
+"cdrs": {
+	"enabled": true,
+	"attributes_conns":["*internal"],
+	"chargers_conns":["*localhost"],
+	"rates_conns": ["*localhost"],
+	"stats_conns": ["*localhost"],
+	"thresholds_conns": ["*localhost"]
+},
+
+"attributes": {
+	"enabled": true
+},
+
+"stats": {
+	"enabled": true,
+	"store_interval": "1s",
+	"thresholds_conns": ["*internal"]
+},
+
+"thresholds": {
+	"enabled": true,
+	"actions_conns": ["*localhost"],
+	"store_interval": "1s"
+},
+
+"chargers": {
+	"enabled": true,
+	"attributes_conns": ["*internal"]
+},
+
+"admins": {
+	"enabled": true
+},
+
+"actions": {
+	"enabled": true
+},
+
+"loaders": [
+	{
+		"id": "*default",
 		"enabled": true,
-		"attributes_conns":["*internal"],
-		"chargers_conns":["*localhost"],
-		"rates_conns": ["*localhost"],
-		"stats_conns": ["*localhost"],
-		"thresholds_conns": ["*localhost"],
-	},
+		"tenant": "cgrates.org",
+		"lockfile_path": ".cgr.lck",
+		"tp_in_dir": "/usr/share/cgrates/tariffplans/testit",
+		"tp_out_dir": ""
+	}
+]
 
-	"attributes": {
-		"enabled": true
-	},
-
-	"stats": {
-		"enabled": true,
-		"store_interval": "1s",
-		"thresholds_conns": ["*internal"]
-	},
-
-	"thresholds": {
-		"enabled": true,
-		"actions_conns": ["*localhost"],
-		"store_interval": "1s"
-	},
-
-	"chargers": {
-		"enabled": true,
-		"attributes_conns": ["*internal"]
-	},
-
-	"admins": {
-		"enabled": true,
-	},
-
-	"actions": {
-		"enabled": true
-	},
-
-	"loaders": [
-		{
-			"id": "*default",
-			"enabled": true,
-			"tenant": "cgrates.org",
-			"lockfile_path": ".cgr.lck",
-			"tp_in_dir": "/usr/share/cgrates/tariffplans/testit",
-			"tp_out_dir": ""
-		}
-	]
 }

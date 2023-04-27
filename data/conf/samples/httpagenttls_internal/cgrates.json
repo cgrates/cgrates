@@ -25,6 +25,10 @@
 	"ca_certificate":"/usr/share/cgrates/tls/ca.crt",
 },
 
+"stor_db": {
+	"db_type": "*internal"			
+},
+
 "rates": {
 	"enabled": true,
 },

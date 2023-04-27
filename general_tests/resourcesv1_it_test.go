@@ -39,7 +39,7 @@ var (
 
 	sTestsRLSV1 = []func(t *testing.T){
 		testV1RsLoadConfig,
-		testV1RsInitDataDb,
+		testV1RsFlushDBs,
 
 		testV1RsStartEngine,
 		testV1RsRpcConn,
@@ -77,8 +77,11 @@ func testV1RsLoadConfig(t *testing.T) {
 	}
 }
 
-func testV1RsInitDataDb(t *testing.T) {
+func testV1RsFlushDBs(t *testing.T) {
 	if err := engine.InitDataDB(rlsV1Cfg); err != nil {
+		t.Fatal(err)
+	}
+	if err := engine.InitStorDB(rlsV1Cfg); err != nil {
 		t.Fatal(err)
 	}
 }

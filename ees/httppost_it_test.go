@@ -47,7 +47,7 @@ var (
 	sTestsHTTPPost = []func(t *testing.T){
 		testCreateDirectory,
 		testHTTPPostLoadConfig,
-		testHTTPPostResetDataDB,
+		testHTTPPostResetDBs,
 
 		testHTTPPostStartEngine,
 		testHTTPPostRPCConn,
@@ -73,8 +73,11 @@ func testHTTPPostLoadConfig(t *testing.T) {
 	}
 }
 
-func testHTTPPostResetDataDB(t *testing.T) {
+func testHTTPPostResetDBs(t *testing.T) {
 	if err := engine.InitDataDB(httpPostCfg); err != nil {
+		t.Fatal(err)
+	}
+	if err := engine.InitStorDB(httpPostCfg); err != nil {
 		t.Fatal(err)
 	}
 }

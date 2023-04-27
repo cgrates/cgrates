@@ -48,7 +48,7 @@ var (
 
 var sTestsTwoEnginesIT = []func(t *testing.T){
 	testTwoEnginesInitConfig,
-	testTwoEnginesInitDataDB,
+	testTwoEnginesFlushDBs,
 
 	testTwoEnginesStartEngine,
 	testTwoEnginesRPC,
@@ -76,8 +76,11 @@ func testTwoEnginesInitConfig(t *testing.T) {
 	}
 
 }
-func testTwoEnginesInitDataDB(t *testing.T) {
+func testTwoEnginesFlushDBs(t *testing.T) {
 	if err := engine.InitDataDB(engineOneCfg); err != nil {
+		t.Fatal(err)
+	}
+	if err := engine.InitStorDB(engineOneCfg); err != nil {
 		t.Fatal(err)
 	}
 }

@@ -8,6 +8,9 @@
 	"reply_timeout": "50s",
 },
 
+"stor_db": {
+    "db_password": "CGRateS.org"
+},
 
 "listen": {
 	"rpc_json": ":2012",

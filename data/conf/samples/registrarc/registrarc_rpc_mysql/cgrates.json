@@ -1,27 +1,25 @@
 {
-// CGRateS Configuration file
-
 
 "general": {
 	"log_level": 7,
-	"reply_timeout": "30s",
+	"reply_timeout": "30s"
 },
-
 
 "listen": {
 	"rpc_json": ":3012",
 	"rpc_gob": ":3013",
-	"http": ":3080",
+	"http": ":3080"
 },
-
 
 "data_db": {								
 	"db_type": "redis",						
 	"db_port": 6379, 						
-	"db_name": "10", 						
+	"db_name": "10"					
 },
 
-
+"stor_db": {
+	"db_password": "CGRateS.org"
+},
 
 "rpc_conns": {
 	"regConn": {
@@ -30,17 +28,14 @@
 	}
 },
 
-
 "cdrs": {
-	"enabled": true,
+	"enabled": true
 },
-
 
 "chargers": {
 	"enabled": true,
-	"attributes_conns": ["*internal"],
+	"attributes_conns": ["*internal"]
 },
-
 
 "resources": {
 	"enabled": true,
@@ -48,27 +43,23 @@
 	"thresholds_conns": ["*internal"]
 },
 
-
 "stats": {
 	"enabled": true,
 	"store_interval": "1s",
-	"thresholds_conns": ["*internal"],
+	"thresholds_conns": ["*internal"]
 },
-
 
 "thresholds": {
 	"enabled": true,
-	"store_interval": "1s",
+	"store_interval": "1s"
 },
-
 
 "routes": {
 	"enabled": true,
 	"stats_conns": ["*localhost"],
 	"resources_conns": ["*localhost"],
-	"rates_conns": ["*internal"],
+	"rates_conns": ["*internal"]
 },
-
 
 "attributes": {
 	"enabled": true,
@@ -77,47 +68,40 @@
 	"accounts_conns": ["*localhost"]
 },
 
-
 "sessions": {
 	"enabled": true,
 	"rates_conns": ["*internal"],
 	"cdrs_conns": ["*internal"],
-	"chargers_conns": ["*internal"],
+	"chargers_conns": ["*internal"]
 },
-
 
 "migrator": {
 	"out_datadb_type": "mongo",
 	"out_datadb_port": "27017",
 	"out_datadb_name": "10",
 
-	"users_filters":["Account"],
+	"users_filters":["Account"]
 },
-
 
 "admins": {
-	"enabled": true,
+	"enabled": true
 },
-
 
 "rates": {
 	"enabled": true
 },
-
 
 "actions": {
 	"enabled": true,
 	"accounts_conns": ["*localhost"]
 },
 
-
 "accounts": {
-	"enabled": true,
+	"enabled": true
 },
 
-
 "filters": {								
-	"accounts_conns": ["*internal"],
+	"accounts_conns": ["*internal"]
 },
 
 "registrarc":{
@@ -130,10 +114,10 @@
 				"ID":"attributes",
 				"transport": "*json",
 				"tls": false
-			},
+			}
 		],
-        "refresh_interval": "1s",
-    },
-},
+        "refresh_interval": "1s"
+    }
+}
 
 }

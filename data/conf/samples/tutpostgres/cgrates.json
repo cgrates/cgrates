@@ -18,6 +18,11 @@
 	"db_name": "10", 						// data_db database name to connect to
 },
 
+"stor_db": {
+	"db_type": "postgres",					
+	"db_port": 5432, 						
+	"db_password": "CGRateS.org"
+},
 
 "cdrs": {
 	"enabled": true,					// start the CDR Server service:  <true|false>

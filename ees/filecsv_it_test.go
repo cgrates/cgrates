@@ -51,7 +51,7 @@ var (
 	sTestsCsv = []func(t *testing.T){
 		testCreateDirectory,
 		testCsvLoadConfig,
-		testCsvResetDataDB,
+		testCsvResetDBs,
 
 		testCsvStartEngine,
 		testCsvRPCConn,
@@ -84,8 +84,11 @@ func testCsvLoadConfig(t *testing.T) {
 	}
 }
 
-func testCsvResetDataDB(t *testing.T) {
+func testCsvResetDBs(t *testing.T) {
 	if err := engine.InitDataDB(csvCfg); err != nil {
+		t.Fatal(err)
+	}
+	if err := engine.InitStorDB(csvCfg); err != nil {
 		t.Fatal(err)
 	}
 }

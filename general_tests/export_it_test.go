@@ -50,7 +50,7 @@ var (
 
 	sTestsExp = []func(t *testing.T){
 		testExpLoadConfig,
-		testExpResetDataDB,
+		testExpFlushDBs,
 		testExpStartEngine,
 		testExpRPCConn,
 		testExpLoadTPFromFolder,
@@ -101,8 +101,11 @@ func testExpLoadConfig(t *testing.T) {
 	}
 }
 
-func testExpResetDataDB(t *testing.T) {
+func testExpFlushDBs(t *testing.T) {
 	if err := engine.InitDataDB(expCfg); err != nil {
+		t.Fatal(err)
+	}
+	if err := engine.InitStorDB(expCfg); err != nil {
 		t.Fatal(err)
 	}
 }

@@ -43,7 +43,7 @@ var (
 
 	sTestsCGRLoaders = []func(t *testing.T){
 		testCGRLoaderInitConfig,
-		testCGRLoaderInitDataDb,
+		testCGRLoaderFlushDBs,
 		testCGRLoaderStartEngine,
 		testCGRLoaderRpcConn,
 		testCGRLoaderLoadData,
@@ -83,8 +83,11 @@ func testCGRLoaderInitConfig(t *testing.T) {
 	}
 }
 
-func testCGRLoaderInitDataDb(t *testing.T) {
+func testCGRLoaderFlushDBs(t *testing.T) {
 	if err := engine.InitDataDB(cgrloaderCfg); err != nil {
+		t.Fatal(err)
+	}
+	if err := engine.InitStorDB(cgrloaderCfg); err != nil {
 		t.Fatal(err)
 	}
 }

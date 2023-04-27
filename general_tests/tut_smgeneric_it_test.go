@@ -43,7 +43,7 @@ var (
 
 	sTestTutSMG = []func(t *testing.T){
 		testTutSMGInitCfg,
-		testTutSMGResetDataDb,
+		testTutSMGFlushDBs,
 
 		testTutSMGStartEngine,
 		testTutSMGRpcConn,
@@ -83,8 +83,11 @@ func testTutSMGInitCfg(t *testing.T) {
 }
 
 // Remove data in both rating and accounting db
-func testTutSMGResetDataDb(t *testing.T) {
+func testTutSMGFlushDBs(t *testing.T) {
 	if err := engine.InitDataDB(tutSMGCfg); err != nil {
+		t.Fatal(err)
+	}
+	if err := engine.InitStorDB(tutSMGCfg); err != nil {
 		t.Fatal(err)
 	}
 }

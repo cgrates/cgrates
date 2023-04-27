@@ -44,6 +44,7 @@ var (
 	sTestsRo = []func(t *testing.T){
 		testRouteSInitCfg,
 		testRouteSInitDataDB,
+		testRouteSResetStorDB,
 		testRoutesStartEngine,
 		testRoutesRPCConn,
 
@@ -105,6 +106,12 @@ func testRouteSInitCfg(t *testing.T) {
 
 func testRouteSInitDataDB(t *testing.T) {
 	if err := engine.InitDataDB(roCfg); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func testRouteSResetStorDB(t *testing.T) {
+	if err := engine.InitStorDB(roCfg); err != nil {
 		t.Fatal(err)
 	}
 }
