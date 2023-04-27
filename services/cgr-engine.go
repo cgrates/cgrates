@@ -50,8 +50,10 @@ func NewCGREngine(cfg *config.CGRConfig, cM *engine.ConnManager, shdWg *sync.Wai
 		srvManager: servmanager.NewServiceManager(shdWg, cM, cfg),
 		server:     server, // Rpc/http server
 		srvDep: map[string]*sync.WaitGroup{
-			utils.AnalyzerS:       new(sync.WaitGroup),
+			utils.AccountS:        new(sync.WaitGroup),
+			utils.ActionS:         new(sync.WaitGroup),
 			utils.AdminS:          new(sync.WaitGroup),
+			utils.AnalyzerS:       new(sync.WaitGroup),
 			utils.AsteriskAgent:   new(sync.WaitGroup),
 			utils.AttributeS:      new(sync.WaitGroup),
 			utils.CDRServer:       new(sync.WaitGroup),
@@ -59,10 +61,10 @@ func NewCGREngine(cfg *config.CGRConfig, cM *engine.ConnManager, shdWg *sync.Wai
 			utils.CoreS:           new(sync.WaitGroup),
 			utils.DataDB:          new(sync.WaitGroup),
 			utils.DiameterAgent:   new(sync.WaitGroup),
-			utils.RegistrarC:      new(sync.WaitGroup),
 			utils.DispatcherS:     new(sync.WaitGroup),
 			utils.DNSAgent:        new(sync.WaitGroup),
 			utils.EEs:             new(sync.WaitGroup),
+			utils.EFs:             new(sync.WaitGroup),
 			utils.ERs:             new(sync.WaitGroup),
 			utils.FreeSWITCHAgent: new(sync.WaitGroup),
 			utils.GlobalVarS:      new(sync.WaitGroup),
@@ -71,17 +73,16 @@ func NewCGREngine(cfg *config.CGRConfig, cM *engine.ConnManager, shdWg *sync.Wai
 			utils.LoaderS:         new(sync.WaitGroup),
 			utils.RadiusAgent:     new(sync.WaitGroup),
 			utils.RateS:           new(sync.WaitGroup),
+			utils.RegistrarC:      new(sync.WaitGroup),
 			utils.ResourceS:       new(sync.WaitGroup),
 			utils.RouteS:          new(sync.WaitGroup),
 			utils.SchedulerS:      new(sync.WaitGroup),
 			utils.SessionS:        new(sync.WaitGroup),
 			utils.SIPAgent:        new(sync.WaitGroup),
 			utils.StatS:           new(sync.WaitGroup),
+			utils.StorDB:          new(sync.WaitGroup),
 			utils.ThresholdS:      new(sync.WaitGroup),
-			utils.ActionS:         new(sync.WaitGroup),
-			utils.AccountS:        new(sync.WaitGroup),
 			utils.TPeS:            new(sync.WaitGroup),
-			utils.EFs:             new(sync.WaitGroup),
 		},
 		iFilterSCh: make(chan *engine.FilterS, 1),
 	}
@@ -103,6 +104,7 @@ type CGREngine struct {
 	// services
 	gvS    servmanager.Service
 	dmS    *DataDBService
+	sdbS   *StorDBService
 	anzS   *AnalyzerService
 	coreS  *CoreService
 	cacheS *CacheService
@@ -194,6 +196,7 @@ func (cgr *CGREngine) InitServices(httpPrfPath string, cpuPrfFl io.Closer, memPr
 
 	cgr.gvS = NewGlobalVarS(cgr.cfg, cgr.srvDep)
 	cgr.dmS = NewDataDBService(cgr.cfg, cgr.cM, cgr.srvDep)
+	cgr.sdbS = NewStorDBService(cgr.cfg, cgr.srvDep)
 	cgr.anzS = NewAnalyzerService(cgr.cfg, cgr.server,
 		cgr.iFilterSCh, iAnalyzerSCh, cgr.srvDep) // init AnalyzerS
 
@@ -217,7 +220,7 @@ func (cgr *CGREngine) InitServices(httpPrfPath string, cpuPrfFl io.Closer, memPr
 	cgr.efs = NewExportFailoverService(cgr.cfg, cgr.cM, iEFsCh, cgr.server, cgr.srvDep)
 
 	cgr.srvManager.AddServices(cgr.gvS, cgr.coreS, cgr.cacheS,
-		cgr.ldrs, cgr.anzS, dspS, cgr.dmS, cgr.efs,
+		cgr.ldrs, cgr.anzS, dspS, cgr.dmS, cgr.sdbS, cgr.efs,
 		NewAdminSv1Service(cgr.cfg, cgr.dmS, cgr.iFilterSCh, cgr.server,
 			iAdminSCh, cgr.cM, cgr.anzS, cgr.srvDep),
 		NewSessionService(cgr.cfg, cgr.dmS, cgr.iFilterSCh, cgr.server, iSessionSCh, cgr.cM, cgr.anzS, cgr.srvDep),
@@ -246,7 +249,7 @@ func (cgr *CGREngine) InitServices(httpPrfPath string, cpuPrfFl io.Closer, memPr
 
 		NewEventExporterService(cgr.cfg, cgr.iFilterSCh,
 			cgr.cM, cgr.server, iEEsCh, cgr.anzS, cgr.srvDep),
-		NewCDRServer(cgr.cfg, cgr.dmS, cgr.iFilterSCh, cgr.server, iCDRServerCh,
+		NewCDRServer(cgr.cfg, cgr.dmS, cgr.sdbS, cgr.iFilterSCh, cgr.server, iCDRServerCh,
 			cgr.cM, cgr.anzS, cgr.srvDep),
 
 		NewRegistrarCService(cgr.cfg, cgr.server, cgr.cM, cgr.anzS, cgr.srvDep),
@@ -272,7 +275,7 @@ func (cgr *CGREngine) StartServices(ctx *context.Context, shtDw context.CancelFu
 		cgr.shdWg.Done()
 		return
 	}
-	if cgr.efs.ShouldRun() { // efs checking first beacause of loggers
+	if cgr.efs.ShouldRun() { // efs checking first because of loggers
 		cgr.shdWg.Add(1)
 		if err = cgr.efs.Start(ctx, shtDw); err != nil {
 			cgr.shdWg.Done()
@@ -286,7 +289,13 @@ func (cgr *CGREngine) StartServices(ctx *context.Context, shtDw context.CancelFu
 			return
 		}
 	}
-
+	if cgr.sdbS.ShouldRun() {
+		cgr.shdWg.Add(1)
+		if err = cgr.sdbS.Start(ctx, shtDw); err != nil {
+			cgr.shdWg.Done()
+			return
+		}
+	}
 	if cgr.anzS.ShouldRun() {
 		cgr.shdWg.Add(1)
 		if err = cgr.anzS.Start(ctx, shtDw); err != nil {

@@ -237,7 +237,7 @@ type MongoStorage struct {
 	ctxTTL      time.Duration
 	ctxTTLMutex sync.RWMutex // used for TTL reload
 	db          string
-	storageType string // datadb
+	storageType string // datadb, stordb
 	ms          utils.Marshaler
 	cdrsIndexes []string
 	cnter       *utils.Counter
@@ -368,6 +368,11 @@ func (ms *MongoStorage) EnsureIndexes(cols ...string) (err error) {
 			if err = ms.ensureIndexesForCol(col); err != nil {
 				return
 			}
+		}
+	}
+	if ms.storageType == utils.StorDB {
+		if err = ms.ensureIndexesForCol(utils.CDRsTBL); err != nil {
+			return
 		}
 	}
 	return

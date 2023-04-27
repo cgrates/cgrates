@@ -32,7 +32,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-// InternalDB is used as a DataDB
+// InternalDB is used as a DataDB and/or StorDB
 type InternalDB struct {
 	stringIndexedFields []string
 	prefixIndexedFields []string
@@ -61,6 +61,20 @@ func NewInternalDB(stringIndexedFields, prefixIndexedFields []string,
 		ms:                  ms,
 		db:                  ltcache.NewTransCache(tcCfg),
 	}
+}
+
+// SetStringIndexedFields set the stringIndexedFields, used at StorDB reload (is thread safe)
+func (iDB *InternalDB) SetStringIndexedFields(stringIndexedFields []string) {
+	iDB.indexedFieldsMutex.Lock()
+	iDB.stringIndexedFields = stringIndexedFields
+	iDB.indexedFieldsMutex.Unlock()
+}
+
+// SetPrefixIndexedFields set the prefixIndexedFields, used at StorDB reload (is thread safe)
+func (iDB *InternalDB) SetPrefixIndexedFields(prefixIndexedFields []string) {
+	iDB.indexedFieldsMutex.Lock()
+	iDB.prefixIndexedFields = prefixIndexedFields
+	iDB.indexedFieldsMutex.Unlock()
 }
 
 // Close only to implement Storage interface

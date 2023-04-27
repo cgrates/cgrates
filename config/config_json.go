@@ -32,6 +32,7 @@ const (
 	ListenJSON          = "listen"
 	HTTPJSON            = "http"
 	DataDBJSON          = "data_db"
+	StorDBJSON          = "stor_db"
 	FilterSJSON         = "filters"
 	CDRsJSON            = "cdrs"
 	SessionSJSON        = "sessions"
@@ -97,6 +98,7 @@ var (
 		AnalyzerSJSON:       utils.AnalyzerS,
 		DispatcherSJSON:     utils.DispatcherS,
 		DataDBJSON:          utils.DataDB,
+		StorDBJSON:          utils.StorDB,
 		EEsJSON:             utils.EEs,
 		EFsJSON:             utils.EFs,
 		RateSJSON:           utils.RateS,
@@ -157,6 +159,7 @@ func newSections(cfg *CGRConfig) Sections {
 		cfg.efsCfg,
 		cfg.rpcConns,
 		cfg.dataDbCfg,
+		cfg.storDbCfg,
 		cfg.listenCfg,
 		cfg.tlsCfg,
 		cfg.httpCfg,

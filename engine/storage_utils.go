@@ -57,3 +57,25 @@ func NewDataDBConn(dbType, host, port, name, user,
 	}
 	return
 }
+
+// NewStorDBConn returns a StorDB(implements Storage interface) based on dbType
+func NewStorDBConn(dbType, host, port, name, user, pass, marshaler string,
+	stringIndexedFields, prefixIndexedFields []string,
+	opts *config.StorDBOpts, itmsCfg map[string]*config.ItemOpts) (db StorDB, err error) {
+	switch dbType {
+	case utils.MetaMongo:
+		db, err = NewMongoStorage(host, port, name, user, pass, marshaler, utils.MetaStorDB, stringIndexedFields, opts.MongoQueryTimeout)
+	case utils.MetaPostgres:
+		db, err = NewPostgresStorage(host, port, name, user, pass, opts.PgSSLMode,
+			opts.SQLMaxOpenConns, opts.SQLMaxIdleConns, opts.SQLConnMaxLifetime)
+	case utils.MetaMySQL:
+		db, err = NewMySQLStorage(host, port, name, user, pass, opts.SQLMaxOpenConns, opts.SQLMaxIdleConns,
+			opts.SQLConnMaxLifetime, opts.MySQLLocation, opts.SQLDSNParams)
+	case utils.MetaInternal:
+		db = NewInternalDB(stringIndexedFields, prefixIndexedFields, itmsCfg)
+	default:
+		err = fmt.Errorf("unknown db '%s' valid options are [%s, %s, %s, %s]",
+			dbType, utils.MetaMySQL, utils.MetaMongo, utils.MetaPostgres, utils.MetaInternal)
+	}
+	return
+}
