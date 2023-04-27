@@ -32,6 +32,10 @@
 	"db_type": "*internal"
 },
 
+"stor_db": {
+	"db_type": "*internal"			
+},
+
 "cdrs": {
 	"enabled": true,
 	"chargers_conns":["*internal"]

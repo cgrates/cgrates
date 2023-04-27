@@ -1,14 +1,9 @@
 {
-// CGRateS Configuration file
-//
-// Used for SessionSv1 integration tests
-
 
 "general": {
     "log_level": 7,
 	"node_id":"MasterReplication"
 },
-
 
 "listen": {
 	"rpc_json": "127.0.0.1:22012",
@@ -17,28 +12,25 @@
 },
 
 "data_db": {
-	"db_type": "*internal",	
+	"db_type": "*internal"
 },
 
-
-
-
+"stor_db": {
+	"db_type": "*internal"
+},
 
 "chargers": {
-	"enabled": true,
+	"enabled": true
 },
 
-
-
 "sessions": {
-	"enabled": true,						// starts SessionManager service: <true|false>
-	"debit_interval": "5ms",					// interval to perform debits on.
-	"listen_bijson": "127.0.0.1:22014",		// address where to listen for bidirectional JSON-RPC requests
+	"enabled": true,						
+	"debit_interval": "5ms",					
+	"listen_bijson": "127.0.0.1:22014"		
 },
 
 "admins": {
-	"enabled": true,
-},
-
+	"enabled": true
+}
 
 }

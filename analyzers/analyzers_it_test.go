@@ -52,7 +52,7 @@ var (
 
 	sTestsAlsPrf = []func(t *testing.T){
 		testAnalyzerSInitCfg,
-		testAnalyzerSInitDataDb,
+		testAnalyzerSResetDbs,
 
 		testAnalyzerSStartEngine,
 		testAnalyzerSRPCConn,
@@ -106,8 +106,11 @@ func testAnalyzerSInitCfg(t *testing.T) {
 	}
 }
 
-func testAnalyzerSInitDataDb(t *testing.T) {
+func testAnalyzerSResetDbs(t *testing.T) {
 	if err := engine.InitDataDB(anzCfg); err != nil {
+		t.Fatal(err)
+	}
+	if err := engine.InitStorDB(anzCfg); err != nil {
 		t.Fatal(err)
 	}
 }

@@ -46,7 +46,7 @@ var (
 		// FIRST APRT OF THE TEST
 		// Start engine without Dispatcher on engine 4012
 		testDispatcherOptsAdminInitCfg,
-		testDispatcherOptsAdminInitDataDb,
+		testDispatcherOptsAdminFlushDBs,
 		testDispatcherOptsAdminStartEngine,
 		testDispatcherOptsAdminRPCConn,
 
@@ -111,8 +111,11 @@ func testDispatcherOptsAdminInitCfg(t *testing.T) {
 	}
 }
 
-func testDispatcherOptsAdminInitDataDb(t *testing.T) {
+func testDispatcherOptsAdminFlushDBs(t *testing.T) {
 	if err := engine.InitDataDB(adminsCfg); err != nil {
+		t.Fatal(err)
+	}
+	if err := engine.InitStorDB(adminsCfg); err != nil {
 		t.Fatal(err)
 	}
 }

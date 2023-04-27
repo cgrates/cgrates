@@ -42,7 +42,7 @@ var (
 	eesBlockerTests = []func(t *testing.T){
 		testEEsBlockerCreateFiles,
 		testEEsBlockerLoadConfig,
-		testEEsBlockerInitDataDB,
+		testEEsBlockerFlushDBs,
 		testEEsBlockerStartEngine,
 		testEEsBlockerRpcConn,
 		testEEsBlockerExportEvent,
@@ -98,8 +98,11 @@ func testEEsBlockerLoadConfig(t *testing.T) {
 	}
 }
 
-func testEEsBlockerInitDataDB(t *testing.T) {
+func testEEsBlockerFlushDBs(t *testing.T) {
 	if err := engine.InitDataDB(eesBlockerCfg); err != nil {
+		t.Fatal(err)
+	}
+	if err := engine.InitStorDB(eesBlockerCfg); err != nil {
 		t.Fatal(err)
 	}
 }

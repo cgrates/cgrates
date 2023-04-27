@@ -1,24 +1,21 @@
 {
 "general": {
 	"log_level": 7,
-	"node_id" : "EngineMongo1",
+	"node_id" : "EngineMongo1"
 },
-
 
 "listen": {
 	"rpc_json": ":2022",
 	"rpc_gob": ":2023",
-	"http": ":2280",
+	"http": ":2280"
 },
-
 
 "rpc_conns": {
 	"conn1": {
 		"strategy": "*first",
-		"conns": [{"address": "127.0.0.1:2013", "transport":"*gob"}],
-	},
+		"conns": [{"address": "127.0.0.1:2013", "transport":"*gob"}]
+	}
 },
-
 
 "data_db": {
 	"db_type": "mongo",
@@ -44,25 +41,30 @@
 		"*load_ids":{"remote":true,"replicate":false},
 		"*indexes":{"remote":true, "replicate":false}, 
 		"*action_profiles":{"remote":true,"replicate":false},
-		"*account_profiles":{"remote":true,"replicate":false},
-	},
+		"*account_profiles":{"remote":true,"replicate":false}
+	}
 },
 
+"stor_db": {
+	"db_type": "mongo",
+	"db_name": "cgrates",
+	"db_port": 27017
+},
 
 "admins": {
-	"enabled": true,
+	"enabled": true
 },
 
 "thresholds": {
-	"enabled": true,
+	"enabled": true
 },
 
 "stats": {
-	"enabled": true,
+	"enabled": true
 },
 
 "resources": {
-	"enabled": true,
-},
+	"enabled": true
+}
 
 }

@@ -43,7 +43,7 @@ var (
 
 	sTestsAccPrf = []func(t *testing.T){
 		testAccActionsInitCfg,
-		testAccActionsInitDataDb,
+		testAccActionsResetDBs,
 		testAccActionsStartEngine,
 		testAccActionsRPCConn,
 		testAccActionsSetActionProfile,
@@ -85,8 +85,11 @@ func testAccActionsInitCfg(t *testing.T) {
 	}
 }
 
-func testAccActionsInitDataDb(t *testing.T) {
+func testAccActionsResetDBs(t *testing.T) {
 	if err := engine.InitDataDB(accPrfCfg); err != nil {
+		t.Fatal(err)
+	}
+	if err := engine.InitStorDB(accPrfCfg); err != nil {
 		t.Fatal(err)
 	}
 }

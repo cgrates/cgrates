@@ -39,7 +39,7 @@ var (
 
 	sessionsITtests = []func(t *testing.T){
 		testSessionsItInitCfg,
-		testSessionsItResetDataDb,
+		testSessionsItFlushDBs,
 		/*
 			testSessionsItStartEngine,
 			testSessionsItApierRpcConn,
@@ -83,8 +83,11 @@ func testSessionsItInitCfg(t *testing.T) {
 }
 
 // Remove data in both rating and accounting db
-func testSessionsItResetDataDb(t *testing.T) {
+func testSessionsItFlushDBs(t *testing.T) {
 	if err := engine.InitDataDB(sItCfg); err != nil {
+		t.Fatal(err)
+	}
+	if err := engine.InitStorDB(sItCfg); err != nil {
 		t.Fatal(err)
 	}
 }

@@ -1,45 +1,41 @@
 {
-// CGRateS Configuration file
-
 
 "general": {
-	"log_level": 7,
+	"log_level": 7
 },
-
 
 "listen": {
 	"rpc_json": ":2012",
 	"rpc_gob": ":2013",
-	"http": ":2080",
+	"http": ":2080"
 },
-
 
 "data_db": {
 	"db_type": "mongo",
 	"db_name": "10",
-	"db_port": 27017,
+	"db_port": 27017
 },
 
-
-
-
+"stor_db": {
+	"db_type": "mongo",
+	"db_name": "cgrates",
+	"db_port": 27017
+},
 
 "rpc_conns": {
 	"conn1": {
 		"strategy": "*first",
-		"conns": [{"id": "attributes"}],
-	},
+		"conns": [{"id": "attributes"}]
+	}
 },
-
 
 "chargers": {
 	"enabled": true,
-	"attributes_conns": ["conn1"],
+	"attributes_conns": ["conn1"]
 },
 
-
 "admins": {
-	"enabled": true,
+	"enabled": true
 },
 
 "loaders": [
@@ -49,7 +45,8 @@
 		"tenant": "cgrates.org",
 		"lockfile_path": ".cgr.lck",
 		"tp_in_dir": "/usr/share/cgrates/tariffplans/testit",
-		"tp_out_dir": "",
-	},
-],
+		"tp_out_dir": ""
+	}
+]
+
 }

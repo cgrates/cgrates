@@ -43,6 +43,7 @@ var (
 	sTestsCfg = []func(t *testing.T){
 		testCfgInitCfg,
 		testCfgInitDataDb,
+		testCfgResetStorDb,
 		testCfgResetConfigDBStore,
 		testCfgStartEngine,
 		testCfgRPCConn,
@@ -55,6 +56,7 @@ var (
 		//Store Cfg in Database Test
 		testCfgInitCfgStore,
 		testCfgInitDataDbStore,
+		testCfgResetStorDbStore,
 		testCfgResetConfigDBStore,
 		testCfgStartEngineStore,
 		testCfgRPCConnStore,
@@ -100,6 +102,12 @@ func testCfgInitCfg(t *testing.T) {
 
 func testCfgInitDataDb(t *testing.T) {
 	if err := engine.InitDataDB(cfgCfg); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func testCfgResetStorDb(t *testing.T) {
+	if err := engine.InitStorDB(cfgCfg); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -384,6 +392,12 @@ func testCfgKillEngine(t *testing.T) {
 
 func testCfgInitDataDbStore(t *testing.T) {
 	if err := engine.InitDataDB(cfgCfg); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func testCfgResetStorDbStore(t *testing.T) {
+	if err := engine.InitStorDB(cfgCfg); err != nil {
 		t.Fatal(err)
 	}
 }

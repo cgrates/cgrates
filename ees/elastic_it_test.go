@@ -50,7 +50,7 @@ var (
 	sTestsElastic = []func(t *testing.T){
 		testCreateDirectory,
 		testElasticLoadConfig,
-		testElasticResetDataDB,
+		testElasticResetDBs,
 
 		testElasticStartEngine,
 		testElasticRPCConn,
@@ -84,8 +84,11 @@ func testElasticLoadConfig(t *testing.T) {
 	}
 }
 
-func testElasticResetDataDB(t *testing.T) {
+func testElasticResetDBs(t *testing.T) {
 	if err := engine.InitDataDB(elasticCfg); err != nil {
+		t.Fatal(err)
+	}
+	if err := engine.InitStorDB(elasticCfg); err != nil {
 		t.Fatal(err)
 	}
 }

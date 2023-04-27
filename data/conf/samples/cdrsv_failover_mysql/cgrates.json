@@ -9,6 +9,10 @@
 	"node_id": "TestFailCDRS",
 },
 
+"stor_db": {
+    "db_password": "CGRateS.org"
+},
+
 "efs": {                                                    // ExportFailover service
     "enabled": true,						                // starts the EventReader service: <true|false>
     "poster_attempts": 1,									// number of attempts before considering post request failed (eg: *httpPost, CDR exports)

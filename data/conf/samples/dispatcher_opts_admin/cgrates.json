@@ -1,66 +1,67 @@
 {
 
-    "general": {
-        "node_id": "HOST2",
-        "log_level": 7,
-    },
-        
+"general": {
+    "node_id": "HOST2",
+    "log_level": 7
+},
     
-    "listen": {
-        "rpc_json": ":4012",			// RPC JSON listening address
-        "rpc_gob": ":4013",			// RPC GOB listening address
-        "http": ":4080",				// HTTP listening address
-    },
+"listen": {
+    "rpc_json": ":4012",			
+    "rpc_gob": ":4013",			
+    "http": ":4080"				
+},
 
-    "data_db": {								// database used to store runtime data (eg: accounts, cdr stats)
-	    "db_type": "redis",						// data_db type: <redis|mongo>
-	    "db_port": 6379, 						// data_db port to reach the database
-	    "db_name": "10", 						// data_db database name to connect to
-    },
-      
- 
-    "dispatchers":{
-        "enabled": true,
-        "opts": {								
-		 "*dispatchers": [						
-		 	{
-		 		"Tenant": "cgrates.org",
-		 		"FilterIDs": ["*string:~*opts.*subsys:*dispatchers"],
-		 		"Value": false,
-		 	},
-		 ],
-	   }, 
-    },
+"data_db": {								
+    "db_type": "redis",						
+    "db_port": 6379, 						
+    "db_name": "10" 						
+},
     
-    "caches":{
-        "partitions": {
-            "*dispatcher_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":true, "replicate": false},
-            "*dispatcher_routes": {"limit": -1, "ttl": "", "static_ttl": false, "remote":true, "replicate": false}, 						// control dispatcher routes caching
-            "*dispatchers": {"limit": -1, "ttl": "", "static_ttl": false, "remote":true, "replicate": false}, 								// control dispatcher interface
-        },
-        "remote_conns": ["gob_cache"],						// the conns that are queried when the items are not found in cache
-    },    
-       
+"stor_db": {
+    "db_password": "CGRateS.org"
+},
 
-    "admins": {
-        "enabled": true,
-        "caches_conns":["broadcast_cache"],
-    },
-    
-    "rpc_conns": {
-        "broadcast_cache": {
-            "strategy": "*broadcast",
-            "conns": [
-                {"address": "127.0.0.1:2012", "transport":"*json"},
-                {"address": "127.0.0.1:4012", "transport":"*json"},
-            ],
-        },
-        "gob_cache": {
-            "strategy": "*first",
-            "conns": [
-                {"address": "127.0.0.1:4013", "transport":"*gob"},
-            ],
-        },
-    }, 
-    
+"dispatchers":{
+    "enabled": true,
+    "opts": {								
+        "*dispatchers": [						
+        {
+            "Tenant": "cgrates.org",
+            "FilterIDs": ["*string:~*opts.*subsys:*dispatchers"],
+            "Value": false
+        }
+        ]
     }
+},
+
+"caches":{
+    "partitions": {
+        "*dispatcher_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":true, "replicate": false},
+        "*dispatcher_routes": {"limit": -1, "ttl": "", "static_ttl": false, "remote":true, "replicate": false}, 						
+        "*dispatchers": {"limit": -1, "ttl": "", "static_ttl": false, "remote":true, "replicate": false}							
+    },
+    "remote_conns": ["gob_cache"]				
+},    
+    
+"admins": {
+    "enabled": true,
+    "caches_conns":["broadcast_cache"]
+},
+
+"rpc_conns": {
+    "broadcast_cache": {
+        "strategy": "*broadcast",
+        "conns": [
+            {"address": "127.0.0.1:2012", "transport":"*json"},
+            {"address": "127.0.0.1:4012", "transport":"*json"}
+        ]
+    },
+    "gob_cache": {
+        "strategy": "*first",
+        "conns": [
+            {"address": "127.0.0.1:4013", "transport":"*gob"}
+        ]
+    }
+}
+
+}

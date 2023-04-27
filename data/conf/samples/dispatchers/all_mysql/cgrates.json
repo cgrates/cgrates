@@ -1,38 +1,36 @@
 {
-// CGRateS Configuration file
-//
-
 
 "general": {
 	"node_id": "ALL",
 	"log_level": 7
 },
 
-
 "listen": {
 	"rpc_json": ":6012",
 	"rpc_gob": ":6013",
-	"http": ":6080",
+	"http": ":6080"
 },
 
-"data_db": {								// database used to store runtime data (eg: accounts, cdr stats)
-	"db_type": "redis",						// data_db type: <redis|mongo>
-	"db_port": 6379, 						// data_db port to reach the database
-	"db_name": "11", 						// data_db database name to connect to
+"data_db": {								
+	"db_type": "redis",						
+	"db_port": 6379, 						
+	"db_name": "11"						
 },
 
+"stor_db": {
+	"db_password": "CGRateS.org"
+},
 
 "rpc_conns": {
 	"conn1": {
 		"strategy": "*first",
-		"conns": [{"address": "127.0.0.1:6012", "transport":"*json"}],
+		"conns": [{"address": "127.0.0.1:6012", "transport":"*json"}]
 	},
 	"rplConn": {
 		"strategy": "*broadcast_sync",
-		"conns": [{"address": "127.0.0.1:7012", "transport":"*json"}],
+		"conns": [{"address": "127.0.0.1:7012", "transport":"*json"}]
 	}
 },
-
 
 "attributes": {
 	"enabled": true
@@ -40,47 +38,44 @@
 
 "chargers": {
 	"enabled": true,
-	"attributes_conns": ["*internal"],
+	"attributes_conns": ["*internal"]
 },
 
 "thresholds": {
-	"enabled": true,
+	"enabled": true
 },
 
 "routes": {
 	"enabled": true,
 	"rates_conns": ["*internal"],	
-	"accounts_conns": ["*internal"],
+	"accounts_conns": ["*internal"]
 },
 
 "stats": {
-	"enabled": true,
+	"enabled": true
 },
 
 "resources": {
-	"enabled": true,
+	"enabled": true
 },
 
-
 "rates": {
-	"enabled": true,
+	"enabled": true
 },
 
 
 "actions": {
-	"enabled": true,
+	"enabled": true
 },
-
 
 "accounts": {
-	"enabled": true,
+	"enabled": true
 },
-
 
 "cdrs": {
 	"enabled": true,	
 	"chargers_conns":["*internal"],
-	"rates_conns": ["*internal"],
+	"rates_conns": ["*internal"]
 },
 
 "sessions": {
@@ -91,12 +86,12 @@
 	"attributes_conns": ["*internal"],
 	"rates_conns": ["*internal"],
 	"chargers_conns": ["*internal"],
-	"cdrs_conns": ["*internal"],
+	"cdrs_conns": ["*internal"]
 },
 
 "admins": {
 	"enabled": true,
-	"caches_conns":["conn1"],
-},
+	"caches_conns":["conn1"]
+}
 
 }

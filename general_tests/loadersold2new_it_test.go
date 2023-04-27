@@ -46,7 +46,7 @@ var (
 	testLdro2nRtTests = []func(t *testing.T){
 		testCreateDirs,
 		testLdro2nRtLoadConfig,
-		testLdro2nRtResetDataDB,
+		testLdro2nRtFlushDBs,
 
 		testLdro2nRtStartEngine,
 		testLdro2nRtRPCConn,
@@ -99,8 +99,11 @@ func testLdro2nRtLoadConfig(t *testing.T) {
 	}
 }
 
-func testLdro2nRtResetDataDB(t *testing.T) {
+func testLdro2nRtFlushDBs(t *testing.T) {
 	if err := engine.InitDataDB(testLdro2nRtCfg); err != nil {
+		t.Fatal(err)
+	}
+	if err := engine.InitStorDB(testLdro2nRtCfg); err != nil {
 		t.Fatal(err)
 	}
 }

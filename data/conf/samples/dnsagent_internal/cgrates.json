@@ -1,67 +1,73 @@
 {
-	"general": {
-		"log_level": 7									
-	},
 
-	"data_db": {
-		"db_type": "*internal"
-	},
+"general": {
+	"log_level": 7									
+},
 
-	"schedulers": {
+"data_db": {
+	"db_type": "*internal"
+},
+
+"stor_db": {
+	"db_type": "*internal"			
+},
+
+"schedulers": {
+	"enabled": true,
+	"cdrs_conns": ["*internal"]
+},
+
+"sessions": {
+	"enabled": true,
+	"attributes_conns": ["*localhost"],
+	"rals_conns": ["*internal"],
+	"cdrs_conns": ["*internal"],
+	"chargers_conns": ["*internal"],
+	"routes_conns": ["*localhost"]
+},
+
+"rates": {
+	"enabled": true
+},
+
+"cdrs": {
+	"enabled": true,
+	"rates_conns": ["*internal"]
+},
+
+"chargers": {
+	"enabled": true
+},
+
+
+"attributes": {
+	"enabled": true
+},
+
+"routes": {
+	"enabled": true
+},
+
+"dns_agent": {
+	"enabled": true,
+	"listen": ":2053",
+	"sessions_conns": ["*localhost"]
+},
+
+"admins": {
+	"enabled": true,
+	"scheduler_conns": ["*internal"]
+},
+
+"loaders": [
+	{
+		"id": "*default",
 		"enabled": true,
-		"cdrs_conns": ["*internal"]
-	},
+		"tenant": "cgrates.org",
+		"lockfile_path": ".cgr.lck",
+		"tp_in_dir": "/usr/share/cgrates/tariffplans/dnsagent",
+		"tp_out_dir": ""
+	}
+]
 
-	"sessions": {
-		"enabled": true,
-		"attributes_conns": ["*localhost"],
-		"rals_conns": ["*internal"],
-		"cdrs_conns": ["*internal"],
-		"chargers_conns": ["*internal"],
-		"routes_conns": ["*localhost"]
-	},
-
-	"rates": {
-		"enabled": true
-	},
-
-	"cdrs": {
-		"enabled": true,
-		"rates_conns": ["*internal"]
-	},
-
-	"chargers": {
-		"enabled": true
-	},
-
-
-	"attributes": {
-		"enabled": true
-	},
-
-	"routes": {
-		"enabled": true
-	},
-
-	"dns_agent": {
-		"enabled": true,
-		"listen": ":2053",
-		"sessions_conns": ["*localhost"]
-	},
-
-	"admins": {
-		"enabled": true,
-		"scheduler_conns": ["*internal"]
-	},
-
-	"loaders": [
-		{
-			"id": "*default",
-			"enabled": true,
-			"tenant": "cgrates.org",
-			"lockfile_path": ".cgr.lck",
-			"tp_in_dir": "/usr/share/cgrates/tariffplans/dnsagent",
-			"tp_out_dir": ""
-		}
-	]
 }

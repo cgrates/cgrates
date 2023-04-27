@@ -42,7 +42,7 @@ var (
 
 	sTestTp = []func(t *testing.T){
 		testTpInitCfg,
-		testTpResetDataDb,
+		testTpFlushDBs,
 		testTpStartEngine,
 		testTpRpcConn,
 		testTpLoadTariffPlanFromFolder,
@@ -89,8 +89,11 @@ func testTpInitCfg(t *testing.T) {
 }
 
 // Remove data in both rating and accounting db
-func testTpResetDataDb(t *testing.T) {
+func testTpFlushDBs(t *testing.T) {
 	if err := engine.InitDataDB(tpCfg); err != nil {
+		t.Fatal(err)
+	}
+	if err := engine.InitStorDB(tpCfg); err != nil {
 		t.Fatal(err)
 	}
 }

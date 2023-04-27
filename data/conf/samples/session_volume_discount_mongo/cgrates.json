@@ -1,147 +1,150 @@
 {
-    // CGRateS Configuration file
-    //
-    // Used for sessions/sessions_volume_discount_it_test.go
         
-    "general": {
-        "log_level": 7,
-        "reply_timeout": "10s",
-    },
-        
-    "data_db": {
-        "db_type": "mongo",
-        "db_name": "10",
-        "db_port": 27017,
-    },
-          
-    "sessions": {
-        "enabled": true,
-        "routes_conns": ["*localhost"],
-        "cdrs_conns": ["*localhost"],
-    },
-        
-    "attributes": {
-        "enabled": true,
-        "opts":{								// 			
-            "*processRuns": [
-                {
-                    "Tenant": "*any",
-                    "Value": 2,
-                },
-            ],										
-        },
-    },
+"general": {
+    "log_level": 7,
+    "reply_timeout": "10s"
+},
+    
+"data_db": {
+    "db_type": "mongo",
+    "db_name": "10",
+    "db_port": 27017
+},
 
-    "cdrs": {
-        "enabled": true,
-        "chargers_conns": ["*localhost"],
-        "accounts_conns": ["*localhost"],
-        "rates_conns": ["*localhost"],
-        "ees_conns":["*localhost"],
-        "opts": {								
-            "*chargers": [
-                {
-                    "Tenant": "*any",
-                    "FilterIDs": ["*notstring:~*req.Account:sipp"],
-                    "Value": true,
-                },
-            ],
-            "*rates": [
-                {
-                    "Tenant": "*any",
-                    "FilterIDs": ["*notstring:~*req.Account:sipp|1001"],
-                    "Value": true,
-                },
-                {
-                    "Tenant": "*any",
-                    "FilterIDs": ["*string:~*opts.*runID:customers"],
-                    "Value": true,
-                },
-            ],	
-            "*accounts": [
-                {
-                    "Tenant": "*any",
-                    "FilterIDs": ["*string:~*req.Account:1001", "*string:~*opts.*runID:suppliers"],
-                    "Value": true,
-                },
-            ],		
-            "*ees": [
-                {
-                    "Tenant": "*any",
-                    "Value": true,
-                },
-            ],
-        },   
-    },
-
-    "ees": {
-        "enabled": true,
-        "exporters": [
-            {
-                "id": "MyLogger",
-                "type": "*log",
-            }
-        ]
-    },
+"stor_db": {
+    "db_type": "mongo",
+    "db_name": "cgrates",
+    "db_port": 27017
+},
         
-    "chargers": {
-        "enabled": true,
-        "attributes_conns": ["*localhost"],
-    },
-        
-    "rates": {
-        "enabled": true,
-        "string_indexed_fields": ["*opts.*runID"],
-        "rate_string_indexed_fields": [],
-        "rate_prefix_indexed_fields": ["*req.Destination"],
-        "opts":{
-            "*profileIgnoreFilters": [
-                {
-                    "Tenant": "*any",
-                    "Value": true,
-                },
-            ],	
-        },
-    },
-        
-    "accounts": {
-        "enabled": true,
-        "rates_conns": ["*localhost"],
-        "opts":{				
-            "*usage": [
-                {
-                    "Tenant": "*any",
-                    "Value": "1m",
-                },
-            ],
-        },
-    },
-        
-    "loaders": [
-        {
-            "id": "*default",
-            "enabled": true,
-            "tenant": "cgrates.org",
-            "tp_in_dir": "/usr/share/cgrates/tariffplans/sessions_discount_volume/routes1",
-            "tp_out_dir": "",
-            "lockfile_path": "",
-        },
-    ],
-        
-    "routes": {
-        "enabled": true,
-        "accounts_conns": ["*localhost"],
-        "rates_conns": ["*localhost"],
-        "*ignoreErrors": [						
+"sessions": {
+    "enabled": true,
+    "routes_conns": ["*localhost"],
+    "cdrs_conns": ["*localhost"]
+},
+    
+"attributes": {
+    "enabled": true,
+    "opts":{						
+        "*processRuns": [
             {
                 "Tenant": "*any",
-                "Value": true,
-            },
+                "Value": 2
+            }
+        ]					
+    }
+},
+
+"cdrs": {
+    "enabled": true,
+    "chargers_conns": ["*localhost"],
+    "accounts_conns": ["*localhost"],
+    "rates_conns": ["*localhost"],
+    "ees_conns":["*localhost"],
+    "opts": {								
+        "*chargers": [
+            {
+                "Tenant": "*any",
+                "FilterIDs": ["*notstring:~*req.Account:sipp"],
+                "Value": true
+            }
         ],
-    },
-        
-    "admins": {
-        "enabled": true,
-    },
+        "*rates": [
+            {
+                "Tenant": "*any",
+                "FilterIDs": ["*notstring:~*req.Account:sipp|1001"],
+                "Value": true
+            },
+            {
+                "Tenant": "*any",
+                "FilterIDs": ["*string:~*opts.*runID:customers"],
+                "Value": true
+            }
+        ],	
+        "*accounts": [
+            {
+                "Tenant": "*any",
+                "FilterIDs": ["*string:~*req.Account:1001", "*string:~*opts.*runID:suppliers"],
+                "Value": true
+            }
+        ],		
+        "*ees": [
+            {
+                "Tenant": "*any",
+                "Value": true
+            }
+        ]
+    }
+},
+
+"ees": {
+    "enabled": true,
+    "exporters": [
+        {
+            "id": "MyLogger",
+            "type": "*log"
+        }
+    ]
+},
     
+"chargers": {
+    "enabled": true,
+    "attributes_conns": ["*localhost"]
+},
+    
+"rates": {
+    "enabled": true,
+    "string_indexed_fields": ["*opts.*runID"],
+    "rate_string_indexed_fields": [],
+    "rate_prefix_indexed_fields": ["*req.Destination"],
+    "opts":{
+        "*profileIgnoreFilters": [
+            {
+                "Tenant": "*any",
+                "Value": true
+            }
+        ]
+    }
+},
+    
+"accounts": {
+    "enabled": true,
+    "rates_conns": ["*localhost"],
+    "opts":{				
+        "*usage": [
+            {
+                "Tenant": "*any",
+                "Value": "1m"
+            }
+        ]
+    }
+},
+    
+"loaders": [
+    {
+        "id": "*default",
+        "enabled": true,
+        "tenant": "cgrates.org",
+        "tp_in_dir": "/usr/share/cgrates/tariffplans/sessions_discount_volume/routes1",
+        "tp_out_dir": "",
+        "lockfile_path": ""
+    }
+],
+    
+"routes": {
+    "enabled": true,
+    "accounts_conns": ["*localhost"],
+    "rates_conns": ["*localhost"],
+    "*ignoreErrors": [						
+        {
+            "Tenant": "*any",
+            "Value": true
+        }
+    ]
+},
+    
+"admins": {
+    "enabled": true
+}
+
 }

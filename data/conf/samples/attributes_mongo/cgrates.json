@@ -1,23 +1,27 @@
 {
-  // CGRateS Configuration file
-  // will be used in apis/attributes_it_test.go
+ 
+"data_db": {
+  "db_type": "mongo",
+  "db_name": "10",
+  "db_port": 27017
+},
 
 
-  "data_db": {
-    "db_type": "mongo",
-    "db_name": "10",
-    "db_port": 27017,
-  },
+"attributes": {
+  "enabled": true,
+  "prefix_indexed_fields": ["*req.Destination"],
+  "exists_indexed_fields": ["*opts.*usage"], 
+  "notexists_indexed_fields": ["*req.ToR"] 
+},
 
+"admins": {
+  "enabled": true
+},
 
-  "attributes": {
-    "enabled": true,
-    "prefix_indexed_fields": ["*req.Destination"],
-    "exists_indexed_fields": ["*opts.*usage"], 
-    "notexists_indexed_fields": ["*req.ToR"], 
-  },
+"stor_db": {
+  "db_type": "mongo",
+  "db_name": "cgrates",
+  "db_port": 27017
+}
 
-  "admins": {
-    "enabled": true,
-  }
 }

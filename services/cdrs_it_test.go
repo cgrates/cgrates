@@ -54,10 +54,12 @@ func TestCdrsReload(t *testing.T) {
 	srvMngr := servmanager.NewServiceManager(shdWg, nil, cfg)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	db := NewDataDBService(cfg, nil, srvDep)
+	cfg.StorDbCfg().Type = utils.Internal
+	stordb := NewStorDBService(cfg, srvDep)
 	anz := NewAnalyzerService(cfg, server, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
 	chrS := NewChargerService(cfg, db, css, filterSChan, server, make(chan birpc.ClientConnector, 1), nil, anz, srvDep)
 	cdrsRPC := make(chan birpc.ClientConnector, 1)
-	cdrS := NewCDRServer(cfg, db, filterSChan, server,
+	cdrS := NewCDRServer(cfg, db, stordb, filterSChan, server,
 		cdrsRPC, nil, anz, srvDep)
 	srvMngr.AddServices(cdrS, chrS,
 		NewLoaderService(cfg, db, filterSChan, server,
@@ -68,6 +70,9 @@ func TestCdrsReload(t *testing.T) {
 		t.Errorf("Expected service to be down")
 	}
 	if db.IsRunning() {
+		t.Errorf("Expected service to be down")
+	}
+	if stordb.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
 
@@ -90,6 +95,9 @@ func TestCdrsReload(t *testing.T) {
 		t.Errorf("Expected service to be running")
 	}
 	if !db.IsRunning() {
+		t.Errorf("Expected service to be running")
+	}
+	if !stordb.IsRunning() {
 		t.Errorf("Expected service to be running")
 	}
 

@@ -20,6 +20,10 @@
 	"db_type": "*internal",	
 },
 
+"stor_db": {
+	"db_type": "*internal"
+},
+
 "cdrs": {
 	"enabled": true,						// start the CDR Server service:  <true|false>
 	"chargers_conns":["*localhost"],

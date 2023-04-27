@@ -43,7 +43,7 @@ var (
 
 	doubleRemoveIT = []func(t *testing.T){
 		testdoubleRemoveLoadConfig,
-		testdoubleRemoveInitDataDb,
+		testdoubleRemoveFlushDBs,
 		testdoubleRemoveStartEngine,
 		testdoubleRemoveRpcConn,
 
@@ -90,8 +90,11 @@ func testdoubleRemoveLoadConfig(t *testing.T) {
 	}
 }
 
-func testdoubleRemoveInitDataDb(t *testing.T) {
+func testdoubleRemoveFlushDBs(t *testing.T) {
 	if err := engine.InitDataDB(doubleRemove); err != nil {
+		t.Fatal(err)
+	}
+	if err := engine.InitStorDB(doubleRemove); err != nil {
 		t.Fatal(err)
 	}
 }

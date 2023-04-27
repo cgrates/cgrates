@@ -1,73 +1,76 @@
+
 {
-    "general": {
-        "log_level": 7,
-        "reply_timeout": "50s"
-    },
-    
-    
-    "listen": {
-        "rpc_json": ":2012",
-        "rpc_gob": ":2013",
-        "http": ":2080"
-    },
-    
-   
-    "data_db": {
-	    "db_type": "*internal"
-    },
+"general": {
+    "log_level": 7,
+    "reply_timeout": "50s"
+},
 
-    
-    "resources": {
-        "enabled": true,
-        "store_interval": "-1",
-        "thresholds_conns": ["*internal"]
-    },
-    
-    
-    "stats": {
-        "enabled": true,
-        "store_interval": "-1",
-        "thresholds_conns": ["*internal"]
-    },
-    
-    
-    "thresholds": {
-        "enabled": true,
-        "store_interval": "-1"
-    },
-    
-    
-    "routes": {
-        "enabled": true,
-        "stats_conns": ["*internal"],
-        "resources_conns": ["*internal"],
-        "rates_conns": ["*internal"],
-        "accounts_conns": ["*internal"]
-    },
 
-    "admins": {
-        "enabled": true,
-    },
-    
-    
-    "rates": {
-        "enabled": true
-    },
-    
-    
-    "accounts": {
-        "enabled": true
-    },
+"listen": {
+    "rpc_json": ":2012",
+    "rpc_gob": ":2013",
+    "http": ":2080"
+},
 
-    "loaders": [
-        {
-            "id": "*default",
-            "enabled": true,
-            "tenant": "cgrates.org",
-            "lockfile_path": ".cgr.lck",
-            "tp_in_dir": "/usr/share/cgrates/tariffplans/testit",
-            "tp_out_dir": ""
-        }
-    ]
+"data_db": {
+    "db_type": "*internal"
+},
+
+"stor_db": {
+    "db_type": "*internal"			
+},
+
+"resources": {
+    "enabled": true,
+    "store_interval": "-1",
+    "thresholds_conns": ["*internal"]
+},
+
+
+"stats": {
+    "enabled": true,
+    "store_interval": "-1",
+    "thresholds_conns": ["*internal"]
+},
+
+
+"thresholds": {
+    "enabled": true,
+    "store_interval": "-1"
+},
+
+
+"routes": {
+    "enabled": true,
+    "stats_conns": ["*internal"],
+    "resources_conns": ["*internal"],
+    "rates_conns": ["*internal"],
+    "accounts_conns": ["*internal"]
+},
+
+"admins": {
+    "enabled": true
+},
+
+
+"rates": {
+    "enabled": true
+},
+
+
+"accounts": {
+    "enabled": true
+},
+
+"loaders": [
+    {
+        "id": "*default",
+        "enabled": true,
+        "tenant": "cgrates.org",
+        "lockfile_path": ".cgr.lck",
+        "tp_in_dir": "/usr/share/cgrates/tariffplans/testit",
+        "tp_out_dir": ""
+    }
+]
     
 }

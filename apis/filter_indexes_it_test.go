@@ -43,7 +43,8 @@ var (
 
 	sTestsFilterIndexesSV1 = []func(t *testing.T){
 		testV1FIdxLoadConfig,
-		testV1FIdxdxInitDataDb,
+		testV1FIdxInitDataDb,
+		testV1FIdxResetStorDb,
 
 		testV1FIdxStartEngine,
 		testV1FIdxRpcConn,
@@ -143,7 +144,8 @@ var (
 		testV1FIdxThresholdSRemoveThresholdsProfileNoINdexes,
 		testV1IndexClearCache,
 
-		testV1FIdxdxInitDataDb,
+		testV1FIdxInitDataDb,
+		testV1FIdxResetStorDb,
 		testV1FidxSetProfilesWithFltrsAndOverwriteThemFIdx,
 		testV1FidxSetAndChangeFiltersOnProfiles,
 
@@ -253,8 +255,14 @@ func testV1FIdxLoadConfig(t *testing.T) {
 	}
 }
 
-func testV1FIdxdxInitDataDb(t *testing.T) {
+func testV1FIdxInitDataDb(t *testing.T) {
 	if err := engine.InitDataDB(tFltrIdxCfg); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func testV1FIdxResetStorDb(t *testing.T) {
+	if err := engine.InitStorDB(tFltrIdxCfg); err != nil {
 		t.Fatal(err)
 	}
 }

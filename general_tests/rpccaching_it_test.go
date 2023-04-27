@@ -44,7 +44,7 @@ var (
 
 	sTestsRPCMethods = []func(t *testing.T){
 		testRPCMethodsLoadConfig,
-		testRPCMethodsInitDataDb,
+		testRPCMethodsFlushDBs,
 		testRPCMethodsStartEngine,
 		testRPCMethodsRpcConn,
 		testRPCMethodsFromFolder,
@@ -56,11 +56,11 @@ var (
 		// testRPCMethodsProcessCDR,
 		// testRPCMethodsProcessEvent,
 
-		testRPCMethodsInitDataDb,
+		testRPCMethodsFlushDBs,
 
 		// testRPCMethodsCdrsProcessCDR,
 
-		testRPCMethodsInitDataDb,
+		testRPCMethodsFlushDBs,
 
 		// testRPCMethodsLoadData,
 		// testRPCMethodsResponderDebit,
@@ -97,8 +97,11 @@ func testRPCMethodsLoadConfig(t *testing.T) {
 	}
 }
 
-func testRPCMethodsInitDataDb(t *testing.T) {
+func testRPCMethodsFlushDBs(t *testing.T) {
 	if err := engine.InitDataDB(rpcCfg); err != nil {
+		t.Fatal(err)
+	}
+	if err := engine.InitStorDB(rpcCfg); err != nil {
 		t.Fatal(err)
 	}
 }

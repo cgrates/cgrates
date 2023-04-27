@@ -16,6 +16,10 @@
 	"db_name": "10", 						
 },
 
+"stor_db": {
+    "db_password": "CGRateS.org"
+},
+
 "cdrs": {
 	"enabled": true,			// start the CDR Server service:  <true|false>
 	"chargers_conns":["*internal"],

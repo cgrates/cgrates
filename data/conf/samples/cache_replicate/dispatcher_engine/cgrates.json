@@ -6,6 +6,9 @@
 	"reconnects": 1,
 },
 
+"stor_db": {
+	"db_type": "*internal"
+},
 
 "listen": {
 	"rpc_json": ":2012",

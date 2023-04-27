@@ -28,8 +28,10 @@
 	"db_port": 27017,
 },
 
-
-
+"stor_db": {
+	"db_type": "mongo",
+	"db_port": 27017
+},
 
 "schedulers": {
 	"enabled": true,

@@ -46,7 +46,7 @@ var (
 	auEngine, usEngine, dspEngine    *exec.Cmd
 	sTestsGOCS                       = []func(t *testing.T){
 		testGOCSInitCfg,
-		testGOCSResetDB,
+		testGOCSFlushDBs,
 		testGOCSStartEngine,
 		testGOCSApierRpcConn,
 		testGOCSLoadData,
@@ -85,7 +85,7 @@ func testGOCSInitCfg(t *testing.T) {
 }
 
 // Remove data in both rating and accounting db
-func testGOCSResetDB(t *testing.T) {
+func testGOCSFlushDBs(t *testing.T) {
 	if err := engine.InitDataDB(auCfg); err != nil {
 		t.Fatal(err)
 	}
@@ -95,7 +95,15 @@ func testGOCSResetDB(t *testing.T) {
 	if err := engine.InitDataDB(dspCfg); err != nil {
 		t.Fatal(err)
 	}
-
+	if err := engine.InitStorDB(auCfg); err != nil {
+		t.Fatal(err)
+	}
+	if err := engine.InitStorDB(usCfg); err != nil {
+		t.Fatal(err)
+	}
+	if err := engine.InitStorDB(dspCfg); err != nil {
+		t.Fatal(err)
+	}
 }
 
 // Start CGR Engine

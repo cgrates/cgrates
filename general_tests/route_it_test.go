@@ -44,7 +44,7 @@ var (
 
 	sTestsSupplierSV1 = []func(t *testing.T){
 		testV1SplSLoadConfig,
-		testV1SplSInitDataDb,
+		testV1SplSFlushDBs,
 		testV1SplSStartEngine,
 		testV1SplSRpcConn,
 		testV1SplSLoadTarrifPlans,
@@ -91,8 +91,11 @@ func testV1SplSLoadConfig(t *testing.T) {
 	}
 }
 
-func testV1SplSInitDataDb(t *testing.T) {
+func testV1SplSFlushDBs(t *testing.T) {
 	if err := engine.InitDataDB(splSv1Cfg); err != nil {
+		t.Fatal(err)
+	}
+	if err := engine.InitStorDB(splSv1Cfg); err != nil {
 		t.Fatal(err)
 	}
 }

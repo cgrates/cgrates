@@ -20,6 +20,10 @@
     "db_name": "13"
   },
 
+  "stor_db": {
+    "db_password": "CGRateS.org"
+  },
+
   "caches":{
     "partitions": {
       "*dispatcher_routes": {"limit": -1, "ttl": "2s"}

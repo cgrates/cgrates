@@ -45,7 +45,7 @@ var (
 	sTestsAMQP = []func(t *testing.T){
 		testCreateDirectory,
 		testAMQPLoadConfig,
-		testAMQPResetDataDB,
+		testAMQPResetDBs,
 
 		testAMQPStartEngine,
 		testAMQPRPCConn,
@@ -78,8 +78,11 @@ func testAMQPLoadConfig(t *testing.T) {
 	}
 }
 
-func testAMQPResetDataDB(t *testing.T) {
+func testAMQPResetDBs(t *testing.T) {
 	if err := engine.InitDataDB(amqpCfg); err != nil {
+		t.Fatal(err)
+	}
+	if err := engine.InitStorDB(amqpCfg); err != nil {
 		t.Fatal(err)
 	}
 }

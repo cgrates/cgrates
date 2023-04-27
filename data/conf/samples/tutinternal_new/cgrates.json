@@ -1,55 +1,53 @@
 {
-// CGRateS Configuration file
-//
-// used by gen/cdre_it_test.go
-
 
 "general": {
 	"log_level": 7,
-	"reply_timeout": "50s",
+	"reply_timeout": "50s"
 },
 
 
 "listen": {
 	"rpc_json": ":2012",
 	"rpc_gob": ":2013",
-	"http": ":2080",
+	"http": ":2080"
 },
 
 
 "data_db": {
-	"db_type": "*internal",	
+	"db_type": "*internal"
 },
 
-
+"stor_db": {
+	"db_type": "*internal"
+},
 
 "rals": {
 	"enabled": true,
 	"thresholds_conns": ["*internal"],
-	"max_increments":3000000,
+	"max_increments":3000000
 },
 
 
 "schedulers": {
 	"enabled": true,
-	"cdrs_conns": ["*internal"],
+	"cdrs_conns": ["*internal"]
 },
 
 
 "cdrs": {
 	"enabled": true,
-	"chargers_conns":["*internal"],
+	"chargers_conns":["*internal"]
 },
 
 
 "attributes": {
-	"enabled": true,
+	"enabled": true
 },
 
 
 "chargers": {
 	"enabled": true,
-	"attributes_conns": ["*internal"],
+	"attributes_conns": ["*internal"]
 },
 
 
@@ -63,12 +61,12 @@
 "stats": {
 	"enabled": true,
 	"store_interval": "-1",
-	"thresholds_conns": ["*internal"],
+	"thresholds_conns": ["*internal"]
 },
 
 "thresholds": {
 	"enabled": true,
-	"store_interval": "-1",
+	"store_interval": "-1"
 },
 
 
@@ -76,7 +74,7 @@
 	"enabled": true,
 	"prefix_indexed_fields":["*req.Destination"],
 	"stats_conns": ["*internal"],
-	"resources_conns": ["*internal"],
+	"resources_conns": ["*internal"]
 },
 
 
@@ -87,22 +85,22 @@
 	"attributes_conns": ["*internal"],
 	"rals_conns": ["*internal"],
 	"cdrs_conns": ["*internal"],
-	"chargers_conns": ["*internal"],
+	"chargers_conns": ["*internal"]
 },
 
 
 "admins": {
 	"enabled": true,
-	"scheduler_conns": ["*internal"],
+	"scheduler_conns": ["*internal"]
 },
 
 
 "filters": {								
-	"accounts_conns": ["*internal"],
+	"accounts_conns": ["*internal"]
 },
 
 "accounts": {
     "enabled": true
-},
+}
 
 }

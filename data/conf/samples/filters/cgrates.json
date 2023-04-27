@@ -1,75 +1,67 @@
 {
-// CGRateS Configuration file
-//
-
 
 "general": {
 	"log_level": 7,
-	"node_id": "CGRFilterS",
+	"node_id": "CGRFilterS"
 },
-
 
 "listen": {
 	"rpc_json": ":2012",
 	"rpc_gob": ":2013",
-	"http": ":2080",
+	"http": ":2080"
 },
 
-
-"data_db": {								// database used to store runtime data (eg: accounts, cdr stats)
-	"db_type": "redis",						// data_db type: <redis|mongo>
-	"db_port": 6379, 						// data_db port to reach the database
-	"db_name": "10", 						// data_db database name to connect to
+"data_db": {								
+	"db_type": "redis",						
+	"db_port": 6379, 						
+	"db_name": "10" 						
 },
 
+"stor_db": {
+	"db_password": "CGRateS.org"
+},
 
 "filters": {								
 	"stats_conns": ["*localhost"],
 	"resources_conns": ["*localhost"],
-	"accounts_conns": ["*localhost"],
+	"accounts_conns": ["*localhost"]
 },
 
 "accounts": {
     "enabled": true
 },
 
-
 "resources": {
 	"enabled": true,
 	"indexed_selects":false,					
-	"store_interval": "1s",
+	"store_interval": "1s"
 },
-
 
 "stats": {
 	"enabled": true,
 	"indexed_selects":false,					
-	"store_interval": "1s",
+	"store_interval": "1s"
 },
-
 
 "thresholds": {
 	"enabled": true,
 	"indexed_selects":false,					
-	"store_interval": "1s",
+	"store_interval": "1s"
 },
-
 
 "attributes": {
-	"enabled": true,
+	"enabled": true
 },
-
 
 "chargers": {
 	"enabled": true,
 	"suffix_indexed_fields": ["*req.Subject"],
-	"attributes_conns": ["*internal"],
+	"attributes_conns": ["*internal"]
 },
 
 "admins": {
 	"enabled": true,
-	"caches_conns":["*localhost"],
-},
-
+	"caches_conns":["*localhost"]
+}
 
 }

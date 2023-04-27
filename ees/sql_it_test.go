@@ -51,7 +51,7 @@ var (
 		testCreateDirectory,
 		testSqlEeCreateTable,
 		testSqlEeLoadConfig,
-		testSqlEeResetDataDB,
+		testSqlEeResetDBs,
 		testSqlEeStartEngine,
 		testSqlEeRPCConn,
 		testSqlEeExportEventFull,
@@ -123,8 +123,11 @@ func testSqlEeLoadConfig(t *testing.T) {
 	}
 }
 
-func testSqlEeResetDataDB(t *testing.T) {
+func testSqlEeResetDBs(t *testing.T) {
 	if err := engine.InitDataDB(sqlEeCfg); err != nil {
+		t.Fatal(err)
+	}
+	if err := engine.InitStorDB(sqlEeCfg); err != nil {
 		t.Fatal(err)
 	}
 }

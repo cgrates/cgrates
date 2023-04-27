@@ -1,32 +1,38 @@
 {
-	"general": {
-		"log_level": 7,
-		"reply_timeout": "30s"
-	},
+"general": {
+	"log_level": 7,
+	"reply_timeout": "30s"
+},
 
-	"listen": {
-		"rpc_json": ":2012",
-		"rpc_gob": ":2013",
-		"http": ":2080"
-	},
+"listen": {
+	"rpc_json": ":2012",
+	"rpc_gob": ":2013",
+	"http": ":2080"
+},
 
-	"data_db": {
-		"db_type": "mongo",
-		"db_name": "10",
-		"db_port": 27017
-	},
+"data_db": {
+	"db_type": "mongo",
+	"db_name": "10",
+	"db_port": 27017
+},
 
-	"attributes": {
-		"enabled": true
-	},
+"stor_db": {
+	"db_type": "mongo",
+	"db_name": "cgrates",
+	"db_port": 27017
+},
 
-	"chargers": {
-		"enabled": true,
-		"attributes_conns": ["*internal"]
-	},
+"attributes": {
+	"enabled": true
+},
 
-	"admins": {
-		"enabled": true
-	}
+"chargers": {
+	"enabled": true,
+	"attributes_conns": ["*internal"]
+},
+
+"admins": {
+	"enabled": true
+}
 
 }

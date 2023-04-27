@@ -46,7 +46,7 @@ var (
 	sTestsKafka = []func(t *testing.T){
 		testCreateDirectory,
 		testKafkaLoadConfig,
-		testKafkaResetDataDB,
+		testKafkaResetDBs,
 
 		testKafkaStartEngine,
 		testKafkaRPCConn,
@@ -74,8 +74,11 @@ func testKafkaLoadConfig(t *testing.T) {
 	}
 }
 
-func testKafkaResetDataDB(t *testing.T) {
+func testKafkaResetDBs(t *testing.T) {
 	if err := engine.InitDataDB(kafkaCfg); err != nil {
+		t.Fatal(err)
+	}
+	if err := engine.InitStorDB(kafkaCfg); err != nil {
 		t.Fatal(err)
 	}
 }

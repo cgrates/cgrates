@@ -6,6 +6,10 @@
 	"node_id":"MasterReplication",
 },
 
+"stor_db": {
+    "db_password": "CGRateS.org"
+},
+
 "listen": {
 	"rpc_json": "127.0.0.1:2012",
 	"rpc_gob": "127.0.0.1:2013",

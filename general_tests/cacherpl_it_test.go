@@ -50,8 +50,8 @@ var (
 
 	sTestsCacheRpl = []func(t *testing.T){
 		testCacheRplInitCfg,
-		testCacheRplInitDataDb,
-		//testCacheRplStartEngine,
+		testCacheRplFlushDBs,
+		testCacheRplStartEngine,
 		testCacheRplRpcConn,
 		testCacheRplAddData,
 		testCacheRplPing,
@@ -63,7 +63,7 @@ var (
 
 	sTestsCacheRplAA = []func(t *testing.T){
 		testCacheRplAAInitCfg,
-		testCacheRplInitDataDb,
+		testCacheRplFlushDBs,
 		testCacheRplStartEngine,
 		testCacheRplRpcConn,
 		testCacheRplAAAddData,
@@ -152,11 +152,17 @@ func testCacheRplAAInitCfg(t *testing.T) {
 	}
 }
 
-func testCacheRplInitDataDb(t *testing.T) {
+func testCacheRplFlushDBs(t *testing.T) {
 	if err := engine.InitDataDB(dspEngine1Cfg); err != nil {
 		t.Fatal(err)
 	}
 	if err := engine.InitDataDB(dspEngine2Cfg); err != nil {
+		t.Fatal(err)
+	}
+	if err := engine.InitStorDB(dspEngine1Cfg); err != nil {
+		t.Fatal(err)
+	}
+	if err := engine.InitStorDB(dspEngine2Cfg); err != nil {
 		t.Fatal(err)
 	}
 }

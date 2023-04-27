@@ -41,7 +41,7 @@ var (
 	err                  error
 	sessionsTests        = []func(t *testing.T){
 		testSessionsBiRPCInitCfg,
-		testSessionsBiRPCResetDataDb,
+		testSessionsBiRPCFlushDBs,
 		testSessionsBiRPCStartEngine,
 		testSessionsBiRPCApierRpcConn,
 		// testSessionsBiRPCTPFromFolder,
@@ -87,8 +87,11 @@ func testSessionsBiRPCInitCfg(t *testing.T) {
 }
 
 // Remove data in both rating and accounting db
-func testSessionsBiRPCResetDataDb(t *testing.T) {
+func testSessionsBiRPCFlushDBs(t *testing.T) {
 	if err := engine.InitDataDB(sessionsBiRPCCfg); err != nil {
+		t.Fatal(err)
+	}
+	if err := engine.InitStorDB(sessionsBiRPCCfg); err != nil {
 		t.Fatal(err)
 	}
 }

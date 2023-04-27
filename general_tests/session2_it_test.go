@@ -43,7 +43,7 @@ var (
 
 	ses2Tests = []func(t *testing.T){
 		testSes2ItLoadConfig,
-		testSes2ItResetDataDB,
+		testSes2ItFlushDBs,
 
 		testSes2ItStartEngine,
 		testSes2ItRPCConn,
@@ -83,8 +83,11 @@ func testSes2ItLoadConfig(t *testing.T) {
 	}
 }
 
-func testSes2ItResetDataDB(t *testing.T) {
+func testSes2ItFlushDBs(t *testing.T) {
 	if err := engine.InitDataDB(ses2Cfg); err != nil {
+		t.Fatal(err)
+	}
+	if err := engine.InitStorDB(ses2Cfg); err != nil {
 		t.Fatal(err)
 	}
 }

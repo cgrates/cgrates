@@ -44,6 +44,7 @@ var (
 	sTestsFltrs = []func(t *testing.T){
 		testFiltersInitCfg,
 		testFiltersInitDataDb,
+		testFiltersResetStorDb,
 		testFiltersStartEngine,
 		testFiltersRPCConn,
 
@@ -100,6 +101,12 @@ func testFiltersInitCfg(t *testing.T) {
 
 func testFiltersInitDataDb(t *testing.T) {
 	if err := engine.InitDataDB(fltrCfg); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func testFiltersResetStorDb(t *testing.T) {
+	if err := engine.InitStorDB(fltrCfg); err != nil {
 		t.Fatal(err)
 	}
 }

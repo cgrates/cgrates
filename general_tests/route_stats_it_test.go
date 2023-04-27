@@ -44,7 +44,7 @@ var (
 
 	sTestsRtStatsSV1 = []func(t *testing.T){
 		testV1RtStatsLoadConfig,
-		testV1RtStatsInitDataDb,
+		testV1RtStatsFlushDBs,
 		testV1RtStatsStartEngine,
 		testV1RtStatsRpcConn,
 		testV1RtStatsFromFolder,
@@ -84,8 +84,11 @@ func testV1RtStatsLoadConfig(t *testing.T) {
 	}
 }
 
-func testV1RtStatsInitDataDb(t *testing.T) {
+func testV1RtStatsFlushDBs(t *testing.T) {
 	if err := engine.InitDataDB(RtStatsSv1Cfg); err != nil {
+		t.Fatal(err)
+	}
+	if err := engine.InitStorDB(RtStatsSv1Cfg); err != nil {
 		t.Fatal(err)
 	}
 }

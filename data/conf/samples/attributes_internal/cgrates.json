@@ -1,25 +1,26 @@
 {
-  // CGRateS Configuration file
-  // will be used in apis/attributes_it_test.go
 
+"data_db": {
+  "db_type": "*internal"
+},
 
-  "data_db": {
-    "db_type": "*internal",
-  },
+"stor_db": {
+  "db_type": "*internal"
+},
 
+"attributes": {
+  "enabled": true,
+  "prefix_indexed_fields": ["*req.Destination"],
+  "exists_indexed_fields": ["*opts.*usage"], 
+  "notexists_indexed_fields": ["*req.ToR"]
+},
 
-  "attributes": {
-    "enabled": true,
-    "prefix_indexed_fields": ["*req.Destination"],
-    "exists_indexed_fields": ["*opts.*usage"], 
-    "notexists_indexed_fields": ["*req.ToR"], 
-  },
+"admins": {
+  "enabled": true
+},
 
-  "admins": {
-    "enabled": true,
-  },
+"tpes": {
+  "enabled": true
+}
 
-  "tpes": {
-    "enabled": true,
-  }
 }

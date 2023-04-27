@@ -45,7 +45,7 @@ var (
 
 	sTestsFltr = []func(t *testing.T){
 		testV1FltrLoadConfig,
-		testV1FltrInitDataDb,
+		testV1FltrFlushDBs,
 		testV1FltrStartEngine,
 		testV1FltrRpcConn,
 		testV1FltrLoadTarrifPlans,
@@ -58,7 +58,7 @@ var (
 		testV1FltrAccounts,
 		testV1FltrAccountsExistsDynamicaly,
 		testV1FltrAttributesPrefix,
-		testV1FltrInitDataDb,
+		testV1FltrFlushDBs,
 		testV1FltrChargerSuffix,
 		testV1FltrStopEngine,
 	}
@@ -96,8 +96,11 @@ func testV1FltrLoadConfig(t *testing.T) {
 	fltrDelay = 1000
 }
 
-func testV1FltrInitDataDb(t *testing.T) {
+func testV1FltrFlushDBs(t *testing.T) {
 	if err := engine.InitDataDB(fltrCfg); err != nil {
+		t.Fatal(err)
+	}
+	if err := engine.InitStorDB(fltrCfg); err != nil {
 		t.Fatal(err)
 	}
 }

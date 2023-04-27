@@ -43,7 +43,7 @@ var (
 
 	sTestsRtsCaseSV1 = []func(t *testing.T){
 		testV1RtsCaseLoadConfig,
-		testV1RtsCaseInitDataDb,
+		testV1RtsCaseFlushDBs,
 
 		testV1RtsCaseStartEngine,
 		testV1RtsCaseRpcConn,
@@ -195,8 +195,11 @@ func testV1RtsCaseLoadConfig(t *testing.T) {
 	}
 }
 
-func testV1RtsCaseInitDataDb(t *testing.T) {
+func testV1RtsCaseFlushDBs(t *testing.T) {
 	if err := engine.InitDataDB(rtsCaseSv1Cfg); err != nil {
+		t.Fatal(err)
+	}
+	if err := engine.InitStorDB(rtsCaseSv1Cfg); err != nil {
 		t.Fatal(err)
 	}
 }
