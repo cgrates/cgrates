@@ -602,7 +602,10 @@ func TestCMEnableDispatcher(t *testing.T) {
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	fltrs := NewFilterS(cfg, nil, dm)
 	Cache = NewCacheS(cfg, dm, nil, nil)
-	newCDRSrv := NewCDRServer(cfg, dm, fltrs, nil)
+	var storDB StorDB
+	storDBChan := make(chan StorDB, 1)
+	storDBChan <- storDB
+	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, nil)
 
 	srvcNames := []string{utils.AccountS, utils.ActionS, utils.AttributeS,
 		utils.CacheS, utils.ChargerS, utils.ConfigS, utils.DispatcherS,
@@ -670,7 +673,10 @@ func TestCMDisableDispatcher(t *testing.T) {
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	fltrs := NewFilterS(cfg, nil, dm)
-	newCDRSrv := NewCDRServer(cfg, dm, fltrs, nil)
+	var storDB StorDB
+	storDBChan := make(chan StorDB, 1)
+	storDBChan <- storDB
+	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, nil)
 	newSrvcWName, err := NewServiceWithName(newCDRSrv, utils.AccountS, true)
 	if err != nil {
 		t.Error(err)
@@ -713,7 +719,10 @@ func TestCMgetInternalConnChanFromDisp(t *testing.T) {
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	fltrs := NewFilterS(cfg, nil, dm)
-	newCDRSrv := NewCDRServer(cfg, dm, fltrs, nil)
+	var storDB StorDB
+	storDBChan := make(chan StorDB, 1)
+	storDBChan <- storDB
+	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, nil)
 	newSrvcWName, err := NewServiceWithName(newCDRSrv, utils.AccountS, true)
 	if err != nil {
 		t.Error(err)

@@ -33,7 +33,10 @@ func TestCDRsProcessEvent(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
-	cdrS := engine.NewCDRServer(cfg, dm, engine.NewFilterS(cfg, connMgr, dm), connMgr)
+	var storDB engine.StorDB
+	storDBChan := make(chan engine.StorDB, 1)
+	storDBChan <- storDB
+	cdrS := engine.NewCDRServer(cfg, storDBChan, dm, engine.NewFilterS(cfg, connMgr, dm), connMgr)
 	cdr := NewCDRsV1(cdrS)
 	var reply string
 	args := &utils.CGREvent{
@@ -57,7 +60,10 @@ func TestCDRsProcessEventWithGet(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
-	cdrS := engine.NewCDRServer(cfg, dm, engine.NewFilterS(cfg, connMgr, dm), connMgr)
+	var storDB engine.StorDB
+	storDBChan := make(chan engine.StorDB, 1)
+	storDBChan <- storDB
+	cdrS := engine.NewCDRServer(cfg, storDBChan, dm, engine.NewFilterS(cfg, connMgr, dm), connMgr)
 	cdr := NewCDRsV1(cdrS)
 	var reply []*utils.EventsWithOpts
 	args := &utils.CGREvent{
