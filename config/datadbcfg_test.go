@@ -796,7 +796,7 @@ func TestDiffDataDbJsonCfg(t *testing.T) {
 		},
 	}
 
-	rcv := diffDataDbJsonCfg(d, v1, v2)
+	rcv := diffDataDBJsonCfg(d, v1, v2)
 	if !reflect.DeepEqual(rcv, expected) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
 	}
@@ -806,7 +806,7 @@ func TestDiffDataDbJsonCfg(t *testing.T) {
 		Items: map[string]*ItemOptsJson{},
 		Opts:  &DBOptsJson{},
 	}
-	rcv = diffDataDbJsonCfg(d, v1, v2_2)
+	rcv = diffDataDBJsonCfg(d, v1, v2_2)
 	if !reflect.DeepEqual(rcv, expected2) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected2), utils.ToJSON(rcv))
 	}
