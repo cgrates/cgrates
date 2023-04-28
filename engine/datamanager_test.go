@@ -802,8 +802,10 @@ func TestDMReplicateMultipleIds(t *testing.T) {
 	for i, acc := range accs {
 		dm.SetAccount(acc)
 		connIds[i] = acc.ID
+		//UpdateReplicationFilters(utils.ACCOUNT_PREFIX, connIds[i], utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1))
 	}
-	if err := replicateMultipleIDs(connMgr, connIds, true, utils.ACCOUNT_PREFIX, connIds, utils.ReplicatorSv1RemoveAccount, "cgrates.org"); err != nil {
+
+	if err := replicateMultipleIDs(connMgr, []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1)}, true, utils.ACCOUNT_PREFIX, connIds, utils.ReplicatorSv1RemoveAccount, "cgrates.org"); err != nil {
 		t.Error(err)
 	} else if ids, err := dm.DataDB().GetKeysForPrefix("cgrates"); len(ids) > 0 || err != nil {
 		t.Error(err)
@@ -1667,28 +1669,51 @@ func TestDmRemoveFilter(t *testing.T) {
 	}
 }
 
-// func TestDMGetSupplierProfile(t *testing.T) {
-// 	cfg, _ := config.NewDefaultCGRConfig()
-// 	cfg.DataDbCfg().Items[utils.MetaSupplierProfiles].Remote = true
-// 	cfg.DataDbCfg().RmtConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1)}
-// 	defer func() {
-// 		cfg2, _ := config.NewDefaultCGRConfig()
-// 		config.SetCgrConfig(cfg2)
-// 	}()
-// 	clientConn := make(chan rpcclient.ClientConnector, 1)
-// 	clientConn <- clMock(func(serviceMethod string, _, _ interface{}) error {
-// 		if serviceMethod == utils.ReplicatorSv1GetSupplierProfile {
-// 			return nil
-// 		}
-// 		return utils.ErrNotFound
-// 	})
-// 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-// 	dm := NewDataManager(db, cfg.CacheCfg(), NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
-// 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
-// 	}))
-// 	config.SetCgrConfig(cfg)
-// 	if _, err := dm.GetSupplierProfile("cgrates.org", "SPL1", false, false, ""); err != nil {
-// 		t.Error(err)
-// 	}
+func TestDMGetSupplierProfile(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	Cache.Clear(nil)
+	cfg.DataDbCfg().Items[utils.MetaSupplierProfiles].Remote = true
+	cfg.DataDbCfg().RmtConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1)}
+	defer func() {
+		cfg2, _ := config.NewDefaultCGRConfig()
+		config.SetCgrConfig(cfg2)
+	}()
+	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn <- clMock(func(serviceMethod string, _, reply interface{}) error {
+		if serviceMethod == utils.ReplicatorSv1GetSupplierProfile {
+			rpl := &SupplierProfile{}
+			*reply.(**SupplierProfile) = rpl
+			return nil
+		}
+		return utils.ErrNotFound
+	})
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
+	}))
+	config.SetCgrConfig(cfg)
+	if _, err := dm.GetSupplierProfile("cgrates.org", "SPL1", false, false, ""); err != nil {
+		t.Error(err)
+	}
+}
 
-// }
+func TestConnManagerCallWithConnIDs(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	connId := utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1)
+	cfg.RPCConns()[connId] = &config.RPCConn{
+		Conns: []*config.RemoteHost{
+			{
+				ID:        connId,
+				Address:   "127.0.0.1:2012",
+				Transport: utils.MetaJSON,
+				TLS:       true,
+			},
+		},
+	}
+	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{})
+
+	if err := connMgr.CallWithConnIDs([]string{connId}, utils.StringSet{utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): {}}, utils.ReplicatorSv1GetAccount, nil, nil); err == nil {
+
+		t.Error(err)
+	}
+}

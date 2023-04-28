@@ -18,6 +18,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"errors"
+	"net/http"
+	"net/url"
 	"reflect"
 	"testing"
 	"time"
@@ -95,5 +98,60 @@ func TestReplicatedCgrCdrAsCDR(t *testing.T) {
 	}
 	if CDR := cgrCdr.AsCDR(""); !reflect.DeepEqual(expctRtCdr, CDR) {
 		t.Errorf("Expecting %v, received: %v", expctRtCdr, CDR)
+	}
+}
+
+func TestNewCgrCdrFromHttpReq(t *testing.T) {
+	testCases := []struct {
+		name           string
+		httpRequest    *http.Request
+		timezone       string
+		expectedCgrCdr CgrCdr
+		expectedError  error
+	}{
+		{
+			name: "Valid request",
+			httpRequest: &http.Request{
+				RemoteAddr: "127.0.0.1:2040",
+				Form: url.Values{
+					"key1": {"value1"},
+					"key2": {"value2"},
+				},
+			},
+			timezone: "UTC",
+			expectedCgrCdr: CgrCdr{
+				utils.Source: "127.0.0.1:2040",
+				"key1":       "value1",
+				"key2":       "value2",
+			},
+			expectedError: nil,
+		},
+		{
+			name: "Error parsing form",
+			httpRequest: &http.Request{
+				RemoteAddr: "127.0.0.1",
+				Form:       nil,
+			},
+			timezone:       "UTC",
+			expectedCgrCdr: nil,
+			expectedError:  errors.New("unable to parse form"),
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			httpRequestCopy := new(http.Request)
+			*httpRequestCopy = *tc.httpRequest
+			result, err := NewCgrCdrFromHttpReq(httpRequestCopy, tc.timezone)
+			if err != nil {
+				if tc.expectedError.Error() != err.Error() {
+					t.Error(err)
+				}
+			} else if tc.expectedCgrCdr != nil {
+				if !reflect.DeepEqual(tc.expectedCgrCdr, result) {
+					t.Errorf("Expected %v,Received %v", tc.expectedCgrCdr, result)
+				}
+			}
+		})
 	}
 }
