@@ -3710,3 +3710,131 @@ func TestExportToPrometheusOK(t *testing.T) {
 	}
 
 }
+
+func TestStatASRClone(t *testing.T) {
+
+	asr := &StatASR{Metric: NewMetric(2, nil)}
+
+	if rcv := asr.Clone(); !reflect.DeepEqual(rcv, asr) {
+		t.Errorf("Expecting <%+v>,\n Recevied <%+v>", asr, rcv)
+	}
+}
+
+func TestStatACDClone(t *testing.T) {
+
+	acd := &StatACD{Metric: NewMetric(2, nil)}
+
+	if rcv := acd.Clone(); !reflect.DeepEqual(rcv, acd) {
+		t.Errorf("Expecting <%+v>,\n Recevied <%+v>", acd, rcv)
+	}
+}
+
+func TestStatACCClone(t *testing.T) {
+
+	acc := &StatACC{Metric: NewMetric(2, nil)}
+
+	if rcv := acc.Clone(); !reflect.DeepEqual(rcv, acc) {
+		t.Errorf("Expecting <%+v>,\n Recevied <%+v>", acc, rcv)
+	}
+}
+
+func TestStatTCCClone(t *testing.T) {
+
+	tcc := &StatTCC{Metric: NewMetric(2, nil)}
+
+	if rcv := tcc.Clone(); !reflect.DeepEqual(rcv, tcc) {
+		t.Errorf("Expecting <%+v>,\n Recevied <%+v>", tcc, rcv)
+	}
+}
+
+func TestStatPDDClone(t *testing.T) {
+
+	pdd := &StatPDD{Metric: NewMetric(2, nil)}
+
+	if rcv := pdd.Clone(); !reflect.DeepEqual(rcv, pdd) {
+		t.Errorf("Expecting <%+v>,\n Recevied <%+v>", pdd, rcv)
+	}
+}
+
+func TestStatSumClone(t *testing.T) {
+
+	sum := &StatSum{Metric: NewMetric(2, nil), FieldName: "~*opts.*cost"}
+
+	if rcv := sum.Clone(); !reflect.DeepEqual(rcv, sum) {
+		t.Errorf("Expecting <%+v>,\n Recevied <%+v>", sum, rcv)
+	}
+}
+
+func TestStatAverageClone(t *testing.T) {
+
+	avg := &StatAverage{Metric: NewMetric(2, nil), FieldName: "~*opts.*cost"}
+
+	if rcv := avg.Clone(); !reflect.DeepEqual(rcv, avg) {
+		t.Errorf("Expecting <%+v>,\n Recevied <%+v>", avg, rcv)
+	}
+}
+
+func TestStatTCDClone(t *testing.T) {
+
+	sum := &StatTCD{Metric: NewMetric(2, nil)}
+
+	if rcv := sum.Clone(); !reflect.DeepEqual(rcv, sum) {
+		t.Errorf("Expecting <%+v>,\n Recevied <%+v>", sum, rcv)
+	}
+}
+
+func TestStatDDCClone(t *testing.T) {
+
+	ddc := &StatDDC{
+		Events: map[string]map[string]uint64{
+			"EVENT_1": {
+				"1001": 2,
+			},
+			"EVENT_3": {
+				"1002": 1,
+			},
+		},
+		FieldValues: map[string]utils.StringSet{
+			"1001": {
+				"EVENT_1": {},
+			},
+			"1002": {
+				"EVENT_3": {},
+			},
+		},
+		MinItems: 2,
+		Count:    3,
+	}
+
+	if rcv := ddc.Clone(); !reflect.DeepEqual(rcv, ddc) {
+		t.Errorf("Expecting <%+v>,\n Recevied <%+v>", ddc, rcv)
+	}
+}
+
+func TestStatDistinctClone(t *testing.T) {
+
+	dst := &StatDistinct{
+		Events: map[string]map[string]uint64{
+			"EVENT_1": {
+				"1001": 2,
+			},
+			"EVENT_3": {
+				"1002": 1,
+			},
+		},
+		FieldValues: map[string]utils.StringSet{
+			"1001": {
+				"EVENT_1": {},
+			},
+			"1002": {
+				"EVENT_3": {},
+			},
+		},
+		MinItems: 2,
+		Count:    3,
+	}
+
+	if rcv := dst.Clone(); !reflect.DeepEqual(rcv, dst) {
+		t.Errorf("Expecting <%+v>,\n Recevied <%+v>", dst, rcv)
+	}
+}
