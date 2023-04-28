@@ -5979,3 +5979,117 @@ func TestAPItoTPStatsMetricNewDynamicBlockersFromStringErr(t *testing.T) {
 		t.Errorf("expecting: \n%+v\n, received: \n%+v", expErr, err)
 	}
 }
+
+func TestCsvDumpForThresholdModels(t *testing.T) {
+	tpThPrf := &utils.TPThresholdProfile{
+		TPid:             "TP1",
+		Tenant:           "cgrates.org",
+		ID:               "TH_1",
+		FilterIDs:        []string{"FilterID1", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z"},
+		MaxHits:          12,
+		MinHits:          10,
+		MinSleep:         "1s",
+		Blocker:          false,
+		Weights:          ";20",
+		ActionProfileIDs: []string{"WARN3"},
+	}
+	expected := ThresholdMdls{
+		{
+			Tpid:             "TP1",
+			Tenant:           "cgrates.org",
+			ID:               "TH_1",
+			FilterIDs:        "FilterID1",
+			MaxHits:          12,
+			MinHits:          10,
+			MinSleep:         "1s",
+			Blocker:          false,
+			Weights:          ";20",
+			ActionProfileIDs: "WARN3",
+		},
+		{
+			Tpid:      "TP1",
+			ID:        "TH_1",
+			Tenant:    "cgrates.org",
+			FilterIDs: "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z",
+		},
+	}
+	rcv := APItoModelTPThreshold(tpThPrf)
+	if !reflect.DeepEqual(expected, rcv) {
+		t.Errorf("Expecting : %+v,\n received: %+v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+	expRecord := []string{"cgrates.org", "TH_1", "FilterID1", ";20", "12", "10", "1s", "false", "WARN3", "false"}
+	for i, model := range rcv {
+		if i == 1 {
+			expRecord = []string{"cgrates.org", "TH_1", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z", "", "0", "0", "", "false", "", "false"}
+		}
+		if csvRecordRcv, _ := CsvDump(model); !reflect.DeepEqual(expRecord, csvRecordRcv) {
+			t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(expRecord), utils.ToJSON(csvRecordRcv))
+		}
+	}
+
+}
+
+func TestCsvDumpForDispatcherModels(t *testing.T) {
+	tpDispPrf := &utils.TPDispatcherProfile{
+		TPid:           "TP1",
+		Tenant:         "cgrates.org",
+		ID:             "Dsp",
+		FilterIDs:      []string{"*ai:~*req.AnswerTime:2014-07-14T14:35:00Z", "FLTR_ACNT_dan", "FLTR_DST_DE"},
+		Strategy:       utils.MetaFirst,
+		StrategyParams: []interface{}{},
+		Weight:         20,
+		Hosts: []*utils.TPDispatcherHostProfile{
+			{
+				ID:        "C1",
+				FilterIDs: []string{},
+				Weight:    10,
+				Params:    []interface{}{"192.168.54.203"},
+				Blocker:   false,
+			},
+			{
+				ID:        "C2",
+				FilterIDs: []string{},
+				Weight:    10,
+				Params:    []interface{}{"192.168.54.204"},
+				Blocker:   false,
+			},
+		},
+	}
+	expected := DispatcherProfileMdls{
+		&DispatcherProfileMdl{
+			Tpid:           "TP1",
+			Tenant:         "cgrates.org",
+			ID:             "Dsp",
+			FilterIDs:      "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z;FLTR_ACNT_dan;FLTR_DST_DE",
+			Strategy:       utils.MetaFirst,
+			Weight:         20,
+			ConnID:         "C1",
+			ConnWeight:     10,
+			ConnBlocker:    false,
+			ConnParameters: "192.168.54.203",
+		},
+		&DispatcherProfileMdl{
+			Tpid:           "TP1",
+			Tenant:         "cgrates.org",
+			ID:             "Dsp",
+			ConnID:         "C2",
+			ConnWeight:     10,
+			ConnBlocker:    false,
+			ConnParameters: "192.168.54.204",
+		},
+	}
+	rcv := APItoModelTPDispatcherProfile(tpDispPrf)
+	if !reflect.DeepEqual(expected, rcv) {
+		t.Errorf("Expecting : %+v,\n received: %+v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+	expRecord := []string{"cgrates.org", "Dsp", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z;FLTR_ACNT_dan;FLTR_DST_DE", "20", "*first", "", "C1", "", "10", "false", "192.168.54.203"}
+	for i, model := range rcv {
+		if i == 1 {
+			expRecord = []string{"cgrates.org", "Dsp", "", "0", "", "", "C2", "", "10", "false", "192.168.54.204"}
+		}
+		if csvRecordRcv, _ := CsvDump(model); !reflect.DeepEqual(expRecord, csvRecordRcv) {
+			t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(expRecord), utils.ToJSON(csvRecordRcv))
+		}
+	}
+
+}
