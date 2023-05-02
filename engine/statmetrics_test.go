@@ -3838,3 +3838,144 @@ func TestStatDistinctClone(t *testing.T) {
 		t.Errorf("Expecting <%+v>,\n Recevied <%+v>", dst, rcv)
 	}
 }
+
+func TestACCAddEventErr(t *testing.T) {
+	acc := NewACC(2, "", nil)
+	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
+		APIOpts: map[string]interface{}{
+			utils.MetaStartTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			utils.MetaCost:      "wrong input"}}
+
+	expErr := "can't convert <wrong input> to decimal"
+	if err := acc.AddEvent(ev.ID, utils.MapStorage{utils.MetaOpts: ev.APIOpts}); err == nil || err.Error() != expErr {
+		t.Errorf("Expected error: <%v> received <%v>", expErr, err)
+	}
+
+}
+
+func TestTCCAddEventErr(t *testing.T) {
+	tcc := NewTCC(2, "", nil)
+	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
+		APIOpts: map[string]interface{}{
+			utils.MetaStartTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			utils.MetaCost:      "wrong input"}}
+
+	expErr := "can't convert <wrong input> to decimal"
+	if err := tcc.AddEvent(ev.ID, utils.MapStorage{utils.MetaOpts: ev.APIOpts}); err == nil || err.Error() != expErr {
+		t.Errorf("Expected error: <%v> received <%v>", expErr, err)
+	}
+
+}
+
+func TestDDCGetFilterIDs(t *testing.T) {
+
+	ddc := NewDDC(2, "", []string{"flt1", "flt2"})
+
+	exp := &StatDDC{
+		FilterIDs: []string{"flt1", "flt2"},
+	}
+
+	if rcv := ddc.GetFilterIDs(); !reflect.DeepEqual(rcv, exp.FilterIDs) {
+		t.Errorf("Expecting <%+v>,\n Recevied <%+v>", utils.ToJSON(exp.FilterIDs), utils.ToJSON(rcv))
+	}
+
+}
+
+func TestMetricClone(t *testing.T) {
+
+	sum := &Metric{
+		Value: utils.NewDecimal(2, 0),
+		Events: map[string]*DecimalWithCompress{
+			"Event1": {
+				Stat:           utils.NewDecimal(int64(time.Second), 0),
+				CompressFactor: 200000000,
+			},
+		},
+		MinItems: 3,
+		Count:    3,
+	}
+
+	if rcv := sum.Clone(); !reflect.DeepEqual(rcv, sum) {
+		t.Errorf("Expecting <%+v>,\n Recevied <%+v>", sum, rcv)
+	}
+}
+
+func TestMetricEqualFalse(t *testing.T) {
+
+	sum := &Metric{
+		Value: utils.NewDecimal(2, 0),
+		Events: map[string]*DecimalWithCompress{
+			"Event1": {
+				Stat:           utils.NewDecimal(int64(time.Second), 0),
+				CompressFactor: 200000000,
+			},
+		},
+		MinItems: 3,
+		Count:    3,
+	}
+
+	sum2 := &Metric{
+		Value: utils.NewDecimal(2, 0),
+		Events: map[string]*DecimalWithCompress{
+			"Event1": {
+				Stat:           utils.NewDecimal(int64(time.Second), 0),
+				CompressFactor: 200000000,
+			},
+			"Event2": {
+				Stat:           utils.NewDecimal(int64(time.Second), 0),
+				CompressFactor: 200000000,
+			},
+		},
+		MinItems: 3,
+		Count:    3,
+	}
+
+	if rcv := sum.Equal(sum2); rcv {
+		t.Errorf("Expecting to not be equal, Recevied equal <%v>", rcv)
+	}
+}
+
+func TestMetricEqualEventFalse(t *testing.T) {
+
+	sum := &Metric{
+		Value: utils.NewDecimal(2, 0),
+		Events: map[string]*DecimalWithCompress{
+			"even1": {
+				Stat:           utils.NewDecimal(int64(time.Second), 0),
+				CompressFactor: 200000000,
+			},
+		},
+		MinItems: 3,
+		Count:    3,
+	}
+
+	sum2 := &Metric{
+		Value: utils.NewDecimal(2, 0),
+		Events: map[string]*DecimalWithCompress{
+			"even1": {
+				Stat:           utils.NewDecimal(int64(time.Second), 0),
+				CompressFactor: 1,
+			},
+		},
+		MinItems: 3,
+		Count:    3,
+	}
+
+	if rcv := sum.Equal(sum2); rcv {
+		t.Errorf("Expecting to not be equal, Recevied equal <%v>", rcv)
+	}
+}
+
+func TestStatDistinctGetFilterIDs(t *testing.T) {
+
+	dst := NewStatDistinct(2, "", []string{"flt1", "flt2"})
+
+	exp := &StatDistinct{
+		FilterIDs: []string{"flt1", "flt2"},
+	}
+
+	if rcv := dst.GetFilterIDs(); !reflect.DeepEqual(rcv, exp.FilterIDs) {
+		t.Errorf("Expecting <%+v>,\n Recevied <%+v>", utils.ToJSON(exp.FilterIDs), utils.ToJSON(rcv))
+	}
+
+}

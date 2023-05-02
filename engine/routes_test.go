@@ -22,6 +22,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 
@@ -1371,6 +1372,202 @@ func TestRouteSV1GetRoutesListErr(t *testing.T) {
 
 	if err := rpS.V1GetRoutesList(context.Background(), testRoutesArgs[3], reply); err != utils.ErrNotFound {
 		t.Errorf("Expected error <%v>, Received error <%v>", utils.ErrNotFound, err)
+	}
+
+}
+
+func TestRouteSMatchingRouteProfilesForEventGetRouteProfileErr1(t *testing.T) {
+
+	defer func() {
+		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, config.CgrConfig().CacheCfg(), cM)
+	fltrS := NewFilterS(cfg, cM, dm)
+	rpS := NewRouteService(dm, fltrS, cfg, cM)
+
+	ev := []*utils.CGREvent{
+		{
+			Tenant: "cgrates.org",
+			ID:     "utils.CGREvent1",
+			Event: map[string]interface{}{
+				"Route":          "RouteProfile1",
+				utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
+				"UsageInterval":  "1s",
+				"PddInterval":    "1s",
+				utils.Weight:     "20.0",
+			},
+			APIOpts: map[string]interface{}{
+				utils.OptsRoutesProfilesCount: 1,
+			},
+		},
+	}
+
+	prepareRoutesData(t, dm)
+
+	if err := Cache.Set(context.Background(), utils.CacheRouteProfiles, "cgrates.org:RouteProfile1", nil, []string{}, true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+
+	if _, err := rpS.matchingRouteProfilesForEvent(context.Background(), "cgrates.org", ev[0]); err != utils.ErrNotFound {
+		t.Errorf("Expected error <%v>, Received error <%v>", utils.ErrNotFound, err)
+	}
+
+}
+
+func TestRouteSMatchingRouteProfilesForEventGetRouteProfileErr2(t *testing.T) {
+
+	cfgtmp := config.CgrConfig()
+	defer func() {
+		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+		config.SetCgrConfig(cfgtmp)
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	cfg.CacheCfg().ReplicationConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
+	cfg.CacheCfg().Partitions[utils.CacheRouteProfiles].Replicate = true
+	config.SetCgrConfig(cfg)
+
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+
+	cc := make(chan birpc.ClientConnector, 1)
+	cc <- &ccMock{
+
+		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply interface{}) error { return utils.ErrNotImplemented },
+		},
+	}
+
+	cM := NewConnManager(cfg)
+	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.CacheSv1, cc)
+
+	dm := NewDataManager(data, config.CgrConfig().CacheCfg(), cM)
+	fltrS := NewFilterS(cfg, cM, dm)
+	rpS := NewRouteService(dm, fltrS, cfg, cM)
+
+	ev := []*utils.CGREvent{
+		{
+			Tenant: "cgrates.org",
+			ID:     "utils.CGREvent1",
+			Event: map[string]interface{}{
+				"Route":          "RouteProfile1",
+				utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
+				"UsageInterval":  "1s",
+				"PddInterval":    "1s",
+				utils.Weight:     "20.0",
+			},
+			APIOpts: map[string]interface{}{
+				utils.OptsRoutesProfilesCount: 1,
+			},
+		},
+	}
+
+	Cache = NewCacheS(cfg, dm, cM, nil)
+
+	if err := dm.SetFilter(context.Background(), &Filter{
+		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+		ID:     "FLTR_RPP_1",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaString,
+				Element: "~*req.Route",
+				Values:  []string{"RouteProfile1"},
+			},
+			{
+				Type:    utils.MetaGreaterOrEqual,
+				Element: "~*req.UsageInterval",
+				Values:  []string{(time.Second).String()},
+			},
+			{
+				Type:    utils.MetaGreaterOrEqual,
+				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Weight,
+				Values:  []string{"9.0"},
+			},
+		},
+	}, true); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := dm.SetRouteProfile(context.Background(), testRoutesPrfs[0], true); err != nil {
+		t.Fatal(err)
+	}
+
+	if _, err := rpS.matchingRouteProfilesForEvent(context.Background(), "cgrates.org", ev[0]); err != utils.ErrNotImplemented {
+		t.Errorf("Expected error <%v>, Received error <%v>", utils.ErrNotImplemented, err)
+	}
+
+}
+
+func TestRouteSMatchingRouteProfilesForEventPassErr(t *testing.T) {
+
+	defer func() {
+		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+	}()
+
+	Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, config.CgrConfig().CacheCfg(), cM)
+	fltrS := NewFilterS(cfg, cM, dm)
+	rpS := NewRouteService(dm, fltrS, cfg, cM)
+
+	ev := []*utils.CGREvent{
+		{
+			Tenant: "cgrates.org",
+			ID:     "utils.CGREvent1",
+			Event: map[string]interface{}{
+				"Route":          "RouteProfile1",
+				utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
+				"UsageInterval":  "1s",
+				"PddInterval":    "1s",
+				utils.Weight:     "20.0",
+			},
+			APIOpts: map[string]interface{}{
+				utils.OptsRoutesProfilesCount: 1,
+			},
+		},
+	}
+
+	if err := dm.SetFilter(context.Background(), &Filter{
+		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+		ID:     "FLTR_RPP_1",
+		Rules: []*FilterRule{
+			{
+				Type:    "bad input",
+				Element: "bad input",
+				Values:  []string{"bad input"},
+			},
+			{
+				Type:    utils.MetaString,
+				Element: "~*req.Route",
+				Values:  []string{"RouteProfile1"},
+			},
+			{
+				Type:    utils.MetaGreaterOrEqual,
+				Element: "~*req.UsageInterval",
+				Values:  []string{(time.Second).String()},
+			},
+			{
+				Type:    utils.MetaGreaterOrEqual,
+				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Weight,
+				Values:  []string{"9.0"},
+			},
+		},
+	}, true); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := dm.SetRouteProfile(context.Background(), testRoutesPrfs[0], true); err != nil {
+		t.Fatal(err)
+	}
+
+	expErr := "NOT_IMPLEMENTED:bad input"
+	if _, err := rpS.matchingRouteProfilesForEvent(context.Background(), "cgrates.org", ev[0]); err == nil || err.Error() != expErr {
+		t.Errorf("Expected error <%v>, received <%v>", expErr, err)
 	}
 
 }
