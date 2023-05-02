@@ -1711,9 +1711,89 @@ func TestConnManagerCallWithConnIDs(t *testing.T) {
 		},
 	}
 	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{})
-
 	if err := connMgr.CallWithConnIDs([]string{connId}, utils.StringSet{utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): {}}, utils.ReplicatorSv1GetAccount, nil, nil); err == nil {
 
 		t.Error(err)
 	}
+}
+
+func TestDMRemResourceProfile(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	defer func() {
+		cfg2, _ := config.NewDefaultCGRConfig()
+		config.SetCgrConfig(cfg2)
+	}()
+	cfg.DataDbCfg().Items[utils.MetaResourceProfile].Replicate = true
+	cfg.DataDbCfg().RplConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1)}
+	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn <- clMock(func(serviceMethod string, _, _ interface{}) error {
+		if serviceMethod == utils.ReplicatorSv1RemoveResourceProfile {
+			return nil
+		}
+		return utils.ErrNotImplemented
+	})
+	dm := NewDataManager(db, cfg.CacheCfg(), NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
+	}))
+	rsP := &ResourceProfile{
+		Tenant:    "cgrates.org",
+		ID:        "RES_TEST",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+		},
+		UsageTTL:          time.Duration(-1),
+		Limit:             2,
+		AllocationMessage: "Account1Channels",
+		Weight:            20,
+		ThresholdIDs:      []string{utils.META_NONE},
+	}
+	config.SetCgrConfig(cfg)
+	dm.SetResourceProfile(rsP, true)
+	if err := dm.RemoveResourceProfile("cgrates.org", "RES_TEST", utils.NonTransactional, true); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestDMSetSQPrf(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	defer func() {
+		cfg2, _ := config.NewDefaultCGRConfig()
+		config.SetCgrConfig(cfg2)
+	}()
+	Cache.Clear(nil)
+	cfg.DataDbCfg().Items[utils.MetaStatQueueProfiles].Replicate = true
+	cfg.DataDbCfg().RplConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1)}
+	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn <- clMock(func(serviceMethod string, _, _ interface{}) error {
+		if serviceMethod == utils.ReplicatorSv1SetStatQueueProfile {
+			return nil
+		}
+		return utils.ErrNotImplemented
+	})
+	dm := NewDataManager(db, cfg.CacheCfg(), NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
+	}))
+	sqp := &StatQueueProfile{
+		Tenant:      "cgrates.org",
+		ID:          "DistinctMetricProfile",
+		QueueLength: 10,
+		TTL:         time.Duration(10) * time.Second,
+		Metrics: []*MetricWithFilters{
+			{
+				MetricID: utils.MetaDDC,
+			},
+		},
+		ThresholdIDs: []string{utils.META_NONE},
+		Stored:       true,
+		Weight:       20,
+	}
+	config.SetCgrConfig(cfg)
+	if err := dm.SetStatQueueProfile(sqp, true); err != nil {
+		t.Error(err)
+	}
+
 }

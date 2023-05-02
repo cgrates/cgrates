@@ -2707,6 +2707,61 @@ func TestAccActDisable(t *testing.T) {
 	}
 }
 
+func TestAccActCdrLog(t *testing.T) {
+	cfgfunc := func() *config.CGRConfig {
+		cfg2, _ := config.NewDefaultCGRConfig()
+		config.SetCgrConfig(cfg2)
+		return cfg2
+	}
+	Cache.Clear(nil)
+	cfg := cfgfunc()
+	cfg.SchedulerCfg().CDRsConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)}
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	tmpDm := dm
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	dm.SetActions("ACTS", Actions{
+		&Action{
+			ActionType:      utils.CDRLOG,
+			ExtraParameters: `{"BalanceType": "60.0"}`,
+		},
+	}, "")
+	defer func() {
+		cfgfunc()
+		SetDataStorage(tmpDm)
+	}()
+	acc := &Account{
+		ID: "cgrates.org:1001",
+		ActionTriggers: ActionTriggers{
+			&ActionTrigger{
+				ActionsID:      "ACTS",
+				UniqueID:       "TestTR1",
+				ThresholdType:  utils.TRIGGER_MAX_EVENT_COUNTER,
+				ThresholdValue: 20,
+				Balance: &BalanceFilter{
+					Type:   utils.StringPointer(utils.VOICE),
+					Weight: utils.Float64Pointer(20.0),
+				},
+			},
+		},
+		UnitCounters: UnitCounters{
+			utils.MONETARY: []*UnitCounter{{
+				CounterType: "max_event_counter",
+				Counters: CounterFilters{&CounterFilter{Value: 21, Filter: &BalanceFilter{
+					ID: utils.StringPointer("TestTR1"),
+				}}}}},
+		},
+		BalanceMap: map[string]Balances{
+			utils.VOICE: {
+				&Balance{Value: 10, Weight: 20, DestinationIDs: utils.NewStringMap(utils.MetaDDC + "DEST1")},
+			},
+		},
+	}
+	SetDataStorage(dm)
+	a := &Action{}
+	acc.ExecuteActionTriggers(a)
+
+}
+
 func TestAccActDebitResetAction(t *testing.T) {
 	cfgfunc := func() *config.CGRConfig {
 		cfg2, _ := config.NewDefaultCGRConfig()
