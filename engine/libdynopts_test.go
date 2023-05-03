@@ -1389,9 +1389,11 @@ func TestLibFiltersGetIntPointerOptsReturnDft(t *testing.T) {
 		},
 	}
 
-	if _, err := GetIntPointerOpts(context.Background(), "cgrates.org", ev, fS, dynOpts,
+	if rcv, err := GetIntPointerOpts(context.Background(), "cgrates.org", ev, fS, dynOpts,
 		utils.OptsRoutesProfilesCount); err != nil {
 		t.Error(err)
+	} else if rcv != nil {
+		t.Errorf("expected: <%+v>,\nreceived: <%+v>", nil, rcv)
 	}
 }
 
