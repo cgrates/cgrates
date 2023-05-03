@@ -43,7 +43,8 @@ var (
 					RouteParameters: "param1",
 				},
 			},
-			Weights: utils.DynamicWeights{{Weight: 10}},
+			Weights:  utils.DynamicWeights{{Weight: 10}},
+			Blockers: utils.DynamicBlockers{{Blocker: true}},
 		},
 		{
 			Tenant:    "cgrates.org",
@@ -1568,6 +1569,313 @@ func TestRouteSMatchingRouteProfilesForEventPassErr(t *testing.T) {
 	expErr := "NOT_IMPLEMENTED:bad input"
 	if _, err := rpS.matchingRouteProfilesForEvent(context.Background(), "cgrates.org", ev[0]); err == nil || err.Error() != expErr {
 		t.Errorf("Expected error <%v>, received <%v>", expErr, err)
+	}
+
+}
+
+func TestRouteSMatchingRPSForEventWeightFromDynamicsErr(t *testing.T) {
+
+	defer func() {
+		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+	}()
+
+	Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, config.CgrConfig().CacheCfg(), cM)
+	fltrS := NewFilterS(cfg, cM, dm)
+	rpS := NewRouteService(dm, fltrS, cfg, cM)
+
+	ev := []*utils.CGREvent{
+		{
+			Tenant: "cgrates.org",
+			ID:     "utils.CGREvent1",
+			Event: map[string]interface{}{
+				"Route":          "RouteProfile1",
+				utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
+				"UsageInterval":  "1s",
+				"PddInterval":    "1s",
+				utils.Weight:     "20.0",
+			},
+			APIOpts: map[string]interface{}{
+				utils.OptsRoutesProfilesCount: 1,
+			},
+		},
+	}
+	rprof := []*RouteProfile{
+		{
+			Tenant:    "cgrates.org",
+			ID:        "RouteProfile1",
+			FilterIDs: []string{"FLTR_RPP_1"},
+			Sorting:   utils.MetaWeight,
+			Routes: []*Route{
+				{
+					ID:              "route1",
+					Weights:         utils.DynamicWeights{{Weight: 10}},
+					RouteParameters: "param1",
+				},
+			},
+			Weights: utils.DynamicWeights{
+				{
+					FilterIDs: []string{"*stirng:~*req.Account:1001"},
+					Weight:    10,
+				},
+			},
+		}}
+	if err := dm.SetFilter(context.Background(), &Filter{
+		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+		ID:     "FLTR_RPP_1",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaString,
+				Element: "~*req.Route",
+				Values:  []string{"RouteProfile1"},
+			},
+			{
+				Type:    utils.MetaGreaterOrEqual,
+				Element: "~*req.UsageInterval",
+				Values:  []string{(time.Second).String()},
+			},
+			{
+				Type:    utils.MetaGreaterOrEqual,
+				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Weight,
+				Values:  []string{"9.0"},
+			},
+		},
+	}, true); err != nil {
+		t.Fatal(err)
+	}
+	if err := dm.SetRouteProfile(context.Background(), rprof[0], true); err != nil {
+		t.Fatal(err)
+	}
+
+	expErr := "NOT_IMPLEMENTED:*stirng"
+	_, err := rpS.matchingRouteProfilesForEvent(context.Background(), "cgrates.org", ev[0])
+	if err == nil || err.Error() != expErr {
+		t.Errorf("Expected error <%+v>, received error <%+v>", expErr, err)
+	}
+
+}
+
+func TestRouteSMatchingRPSForEventBlockerFromDynamicsErr(t *testing.T) {
+
+	defer func() {
+		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+	}()
+
+	Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, config.CgrConfig().CacheCfg(), cM)
+	fltrS := NewFilterS(cfg, cM, dm)
+	rpS := NewRouteService(dm, fltrS, cfg, cM)
+
+	ev := []*utils.CGREvent{
+		{
+			Tenant: "cgrates.org",
+			ID:     "utils.CGREvent1",
+			Event: map[string]interface{}{
+				"Route":          "RouteProfile1",
+				utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
+				"UsageInterval":  "1s",
+				"PddInterval":    "1s",
+				utils.Weight:     "20.0",
+			},
+			APIOpts: map[string]interface{}{
+				utils.OptsRoutesProfilesCount: 1,
+			},
+		},
+	}
+	rprof := []*RouteProfile{
+		{
+			Tenant:    "cgrates.org",
+			ID:        "RouteProfile1",
+			FilterIDs: []string{"FLTR_RPP_1"},
+			Sorting:   utils.MetaWeight,
+			Routes: []*Route{
+				{
+					ID:              "route1",
+					Weights:         utils.DynamicWeights{{Weight: 10}},
+					RouteParameters: "param1",
+				},
+			},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				},
+			},
+			Blockers: utils.DynamicBlockers{
+				{
+					FilterIDs: []string{"*stirng:~*req.Account:1001"},
+					Blocker:   false,
+				},
+			},
+		}}
+	if err := dm.SetFilter(context.Background(), &Filter{
+		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+		ID:     "FLTR_RPP_1",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaString,
+				Element: "~*req.Route",
+				Values:  []string{"RouteProfile1"},
+			},
+			{
+				Type:    utils.MetaGreaterOrEqual,
+				Element: "~*req.UsageInterval",
+				Values:  []string{(time.Second).String()},
+			},
+			{
+				Type:    utils.MetaGreaterOrEqual,
+				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Weight,
+				Values:  []string{"9.0"},
+			},
+		},
+	}, true); err != nil {
+		t.Fatal(err)
+	}
+	if err := dm.SetRouteProfile(context.Background(), rprof[0], true); err != nil {
+		t.Fatal(err)
+	}
+
+	expErr := "NOT_IMPLEMENTED:*stirng"
+	_, err := rpS.matchingRouteProfilesForEvent(context.Background(), "cgrates.org", ev[0])
+	if err == nil || err.Error() != expErr {
+		t.Errorf("Expected error <%+v>, received error <%+v>", expErr, err)
+	}
+
+}
+
+func TestNewOptsGetRoutesGetBoolOptsErr(t *testing.T) {
+
+	cfg := config.NewDefaultCGRConfig()
+	cfg.RouteSCfg().Opts.IgnoreErrors = []*utils.DynamicBoolOpt{
+		{
+			FilterIDs: []string{"*string.invalid:filter"},
+			Tenant:    "cgrates.org",
+			Value:     false,
+		},
+	}
+
+	dataDB := NewInternalDB(nil, nil, nil)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	fS := NewFilterS(cfg, nil, dm)
+
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "TestEvent",
+		Event: map[string]interface{}{
+			utils.AccountField: 1001,
+		},
+		APIOpts: map[string]interface{}{},
+	}
+
+	expErr := `inline parse error for string: <*string.invalid:filter>`
+	_, err := newOptsGetRoutes(context.Background(), ev, fS, cfg.RouteSCfg().Opts)
+	if err == nil ||
+		err.Error() != expErr {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", expErr, err)
+	}
+
+}
+
+func TestNewOptsGetRoutesGetIntPointerOptsLimitErr(t *testing.T) {
+
+	cfg := config.NewDefaultCGRConfig()
+	cfg.RouteSCfg().Opts.Limit = []*utils.DynamicIntPointerOpt{
+		{
+			FilterIDs: []string{"*string.invalid:filter"},
+			Tenant:    "cgrates.org",
+			Value:     utils.IntPointer(4),
+		},
+	}
+
+	dataDB := NewInternalDB(nil, nil, nil)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	fS := NewFilterS(cfg, nil, dm)
+
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "TestEvent",
+		Event: map[string]interface{}{
+			utils.AccountField: 1001,
+		},
+		APIOpts: map[string]interface{}{},
+	}
+
+	expErr := `inline parse error for string: <*string.invalid:filter>`
+	_, err := newOptsGetRoutes(context.Background(), ev, fS, cfg.RouteSCfg().Opts)
+	if err == nil ||
+		err.Error() != expErr {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", expErr, err)
+	}
+
+}
+
+func TestNewOptsGetRoutesGetIntPointerOptsOffsetErr(t *testing.T) {
+
+	cfg := config.NewDefaultCGRConfig()
+	cfg.RouteSCfg().Opts.Offset = []*utils.DynamicIntPointerOpt{
+		{
+			FilterIDs: []string{"*string.invalid:filter"},
+			Tenant:    "cgrates.org",
+			Value:     utils.IntPointer(4),
+		},
+	}
+
+	dataDB := NewInternalDB(nil, nil, nil)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	fS := NewFilterS(cfg, nil, dm)
+
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "TestEvent",
+		Event: map[string]interface{}{
+			utils.AccountField: 1001,
+		},
+		APIOpts: map[string]interface{}{},
+	}
+
+	expErr := `inline parse error for string: <*string.invalid:filter>`
+	_, err := newOptsGetRoutes(context.Background(), ev, fS, cfg.RouteSCfg().Opts)
+	if err == nil ||
+		err.Error() != expErr {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", expErr, err)
+	}
+
+}
+
+func TestNewOptsGetRoutesGetIntPointerOptsMaxItemsErr(t *testing.T) {
+
+	cfg := config.NewDefaultCGRConfig()
+	cfg.RouteSCfg().Opts.MaxItems = []*utils.DynamicIntPointerOpt{
+		{
+			FilterIDs: []string{"*string.invalid:filter"},
+			Tenant:    "cgrates.org",
+			Value:     utils.IntPointer(4),
+		},
+	}
+
+	dataDB := NewInternalDB(nil, nil, nil)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	fS := NewFilterS(cfg, nil, dm)
+
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "TestEvent",
+		Event: map[string]interface{}{
+			utils.AccountField: 1001,
+		},
+		APIOpts: map[string]interface{}{},
+	}
+
+	expErr := `inline parse error for string: <*string.invalid:filter>`
+	_, err := newOptsGetRoutes(context.Background(), ev, fS, cfg.RouteSCfg().Opts)
+	if err == nil ||
+		err.Error() != expErr {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", expErr, err)
 	}
 
 }
