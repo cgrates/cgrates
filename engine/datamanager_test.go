@@ -4879,3 +4879,42 @@ func TestDmRemoveRouteProfileErr(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestDmCheckFiltersRmt(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	defer func() {
+		cfg2 := config.NewDefaultCGRConfig()
+		config.SetCgrConfig(cfg2)
+	}()
+	Cache.Clear(nil)
+	cfg.DataDbCfg().Items[utils.MetaFilters].Remote = true
+	cfg.DataDbCfg().RmtConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1)}
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn <- clMock(func(serviceMethod string, _, _ interface{}) error {
+		if serviceMethod == utils.ReplicatorSv1GetFilter {
+
+			return nil
+		}
+		return utils.ErrNotFound
+	})
+	dm := NewDataManager(db, cfg.CacheCfg(), NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
+	}))
+	dm.SetFilter(&Filter{
+		Tenant: "cgrates.org",
+		ID:     "FLTR1",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaString,
+				Element: "~*req.Route",
+				Values:  []string{"RouteProfile2"},
+			},
+		},
+	}, true)
+	config.SetCgrConfig(cfg)
+	if err := dm.checkFilters("cgrates.org", []string{"*string:~*req.Destination:1002", "*gte:~*req.Duration:20m", "FLTR1", "FLTR2"}); err == nil {
+		t.Error(err)
+	}
+	//unfinished
+}

@@ -2200,3 +2200,189 @@ func TestTpReaderRemoveFromDatabaseDspHst(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestTprLoadAccountActionFiltered(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	tmpConn := connMgr
+	defer func() {
+		config.SetCgrConfig(config.NewDefaultCGRConfig())
+		SetConnManager(tmpConn)
+	}()
+	dataDb := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	storDb := NewInternalDB(nil, nil, false, cfg.StorDbCfg().Items)
+	tpr, err := NewTpReader(dataDb, storDb, "TP1", "", []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}, nil, false)
+	if err != nil {
+		t.Error(err)
+	}
+	clientconn := make(chan rpcclient.ClientConnector, 1)
+	clientconn <- clMock(func(serviceMethod string, _, _ interface{}) error {
+		if serviceMethod == utils.CacheSv1ReloadCache {
+
+			return nil
+		}
+		return utils.ErrNotImplemented
+	})
+	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches): clientconn,
+	})
+	timings := &utils.ApierTPTiming{
+		TPid:      "TP1",
+		ID:        "ASAP",
+		Years:     "",
+		Months:    "05",
+		MonthDays: "01",
+		WeekDays:  "1",
+		Time:      "15:00:00Z",
+	}
+
+	storDb.SetTPTimings([]*utils.ApierTPTiming{timings})
+
+	actions := &utils.TPActions{
+		TPid: "TP1",
+		ID:   "TOPUP_RST_10",
+		Actions: []*utils.TPAction{
+			{
+				Identifier:    "*topup_reset",
+				BalanceId:     "BalID",
+				BalanceType:   "*data",
+				Units:         "10",
+				ExpiryTime:    "*unlimited",
+				TimingTags:    utils.MetaASAP,
+				BalanceWeight: "10",
+				Weight:        10,
+			},
+		},
+	}
+
+	storDb.SetTPActions([]*utils.TPActions{actions})
+	actionplans := []*utils.TPActionPlan{
+		{
+			TPid: "TP1",
+			ID:   "PREPAID_10",
+			ActionPlan: []*utils.TPActionTiming{
+				{
+					ActionsId: "TOPUP_RST_10",
+					TimingId:  "ASAP",
+					Weight:    10.0},
+			},
+		},
+	}
+	tpatrs := &utils.TPActionTriggers{
+		TPid: "TP1",
+		ID:   "STANDARD_TRIGGERS",
+		ActionTriggers: []*utils.TPActionTrigger{
+			{
+				Id:                "STANDARD_TRIGGERS",
+				UniqueID:          "1",
+				ThresholdType:     "*min_balance",
+				ThresholdValue:    2.0,
+				Recurrent:         false,
+				BalanceType:       "*monetary",
+				BalanceCategories: "call",
+				ActionsId:         "LOG_WARNING",
+				Weight:            10},
+		},
+	}
+	storDb.SetTPActionTriggers([]*utils.TPActionTriggers{
+		tpatrs,
+	})
+	storDb.SetTPActionPlans(actionplans)
+	qriedAA := &utils.TPAccountActions{
+		TPid:             "TP1",
+		LoadId:           "ID",
+		Tenant:           "cgrates.org",
+		Account:          "1001",
+		ActionPlanId:     "PREPAID_10",
+		ActionTriggersId: "STANDARD_TRIGGERS",
+		AllowNegative:    true,
+		Disabled:         false,
+	}
+	storDb.SetTPAccountActions([]*utils.TPAccountActions{
+		qriedAA,
+	})
+
+	SetConnManager(connMgr)
+	if err := tpr.LoadAccountActionsFiltered(qriedAA); err == nil {
+		t.Error(err)
+	}
+	//unfinished
+}
+
+func TestTprLoadRatingPlansFiltered(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	defer func() {
+		config.SetCgrConfig(config.NewDefaultCGRConfig())
+	}()
+	dataDb := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	storDb := NewInternalDB(nil, nil, false, cfg.StorDbCfg().Items)
+
+	storDb.SetTPDestinations([]*utils.TPDestination{{
+		TPid:     "TP1",
+		ID:       "FS_USERS",
+		Prefixes: []string{"+664", "+554"}},
+	})
+
+	tprt := &utils.TPRateRALs{
+		TPid: "TP1",
+		ID:   "RT_FS_USERS",
+		RateSlots: []*utils.RateSlot{
+			{
+				ConnectFee:         12,
+				Rate:               3,
+				RateUnit:           "6s",
+				RateIncrement:      "6s",
+				GroupIntervalStart: "0s",
+			},
+			{
+				ConnectFee:         12,
+				Rate:               3,
+				RateUnit:           "4s",
+				RateIncrement:      "6s",
+				GroupIntervalStart: "1s",
+			},
+		},
+	}
+
+	storDb.SetTPRates([]*utils.TPRateRALs{tprt})
+
+	tpdr := &utils.TPDestinationRate{
+		TPid: "TP1",
+		ID:   "DR_FREESWITCH_USERS",
+		DestinationRates: []*utils.DestinationRate{
+			{
+				DestinationId:    "FS_USERS",
+				RateId:           "RT_FS_USERS",
+				RoundingMethod:   "*up",
+				RoundingDecimals: 2},
+		},
+	}
+	storDb.SetTPDestinationRates([]*utils.TPDestinationRate{tpdr})
+	storDb.SetTPTimings([]*utils.ApierTPTiming{
+		{
+			TPid:      "TP1",
+			ID:        "ALWAYS",
+			Years:     "*any",
+			Months:    "*any",
+			MonthDays: "*any",
+			WeekDays:  "1;2;3;4;5",
+			Time:      "00:00:00"},
+	})
+	rp := &utils.TPRatingPlan{
+		TPid: "TP1",
+		ID:   "RPl_SAMPLE_RATING_PLAN2",
+		RatingPlanBindings: []*utils.TPRatingPlanBinding{
+			{
+				DestinationRatesId: "DR_FREESWITCH_USERS",
+				TimingId:           "ALWAYS",
+				Weight:             10,
+			},
+		}}
+	storDb.SetTPRatingPlans([]*utils.TPRatingPlan{rp})
+	tpr, err := NewTpReader(dataDb, storDb, "TP1", "", []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}, nil, false)
+	if err != nil {
+		t.Error(err)
+	}
+	if load, err := tpr.LoadRatingPlansFiltered(""); err != nil || !load {
+		t.Error(err)
+	}
+}

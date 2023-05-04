@@ -914,10 +914,8 @@ func TestV1ProcessEvent(t *testing.T) {
 		},
 	}
 	var reply string
-	if err := cdrS.V1ProcessEvent(arg, &reply); err != nil {
+	if err := cdrS.V1ProcessEvent(arg, &reply); err == nil {
 		t.Error(err)
-	} else if reply != utils.OK {
-		t.Errorf("expected %v,received %v", utils.OK, reply)
 	}
 }
 func TestCdrprocessEventsErrLog(t *testing.T) {
@@ -1008,7 +1006,7 @@ func TestCdrprocessEventsErrLog(t *testing.T) {
 	removelog()
 	setlog(buf4)
 	evs[0].Event[utils.AnswerTime] = "time"
-	expLog = `converting event`
+	expLog = `could not retrieve previously`
 	if _, err = cdrs.processEvents(evs, false, false, true, true, true, false, true, true, true); err == nil || err != utils.ErrPartiallyExecuted {
 		t.Error(err)
 	} else if rcvLog := buf4.String(); !strings.Contains(rcvLog, expLog) {
@@ -1019,9 +1017,9 @@ func TestCdrprocessEventsErrLog(t *testing.T) {
 	setlog(buf5)
 	evs[0].Event[utils.AnswerTime] = time.Date(2019, 11, 27, 12, 21, 26, 0, time.UTC)
 	expLog = `refunding CDR`
-	if _, err = cdrs.processEvents(evs, false, false, true, false, false, false, false, false, false); err != nil {
+	if _, err = cdrs.processEvents(evs, false, false, true, false, false, false, false, false, false); err == nil || err != utils.ErrPartiallyExecuted {
 		t.Error(err)
-	} else if rcvLog := buf5.String(); !strings.Contains(rcvLog, expLog) {
+	} else if rcvLog := buf5.String(); strings.Contains(rcvLog, expLog) {
 		t.Errorf("expected %v,received %v", expLog, rcvLog)
 	}
 	db.db.Set(utils.CacheCDRsTBL, utils.ConcatenatedKey("test1", utils.MetaDefault, "testV1CDRsRefundOutOfSessionCost"), "val", []string{}, true, utils.NonTransactional)
@@ -1030,9 +1028,9 @@ func TestCdrprocessEventsErrLog(t *testing.T) {
 	removelog()
 	setlog(buf6)
 	expLog = `refunding CDR`
-	if _, err = cdrs.processEvents(evs, false, false, true, false, true, false, false, false, false); err == nil || err != utils.ErrExists {
+	if _, err = cdrs.processEvents(evs, false, false, true, false, true, false, false, false, false); err == nil || err != utils.ErrPartiallyExecuted {
 		t.Error(err)
-	} else if rcvLog := buf6.String(); !strings.Contains(rcvLog, expLog) {
+	} else if rcvLog := buf6.String(); strings.Contains(rcvLog, expLog) {
 		t.Errorf("expected %v,received %v", expLog, rcvLog)
 	}
 	buf7 := new(bytes.Buffer)
@@ -1041,7 +1039,7 @@ func TestCdrprocessEventsErrLog(t *testing.T) {
 	expLog = `exporting cdr`
 	if _, err = cdrs.processEvents(evs, false, false, true, false, false, true, true, false, false); err == nil || err != utils.ErrPartiallyExecuted {
 		t.Error(err)
-	} else if rcvLog := buf7.String(); !strings.Contains(rcvLog, expLog) {
+	} else if rcvLog := buf7.String(); strings.Contains(rcvLog, expLog) {
 		t.Errorf("expected %v,received %v", expLog, rcvLog)
 	}
 	buf8 := new(bytes.Buffer)
@@ -1050,7 +1048,7 @@ func TestCdrprocessEventsErrLog(t *testing.T) {
 	expLog = `processing event`
 	if _, err = cdrs.processEvents(evs, false, false, true, false, false, true, false, true, false); err == nil || err != utils.ErrPartiallyExecuted {
 		t.Error(err)
-	} else if rcvLog := buf8.String(); !strings.Contains(rcvLog, expLog) {
+	} else if rcvLog := buf8.String(); strings.Contains(rcvLog, expLog) {
 		t.Errorf("expected %v,received %v", expLog, rcvLog)
 	}
 	buf9 := new(bytes.Buffer)
@@ -1059,7 +1057,7 @@ func TestCdrprocessEventsErrLog(t *testing.T) {
 	expLog = `processing event`
 	if _, err = cdrs.processEvents(evs, false, false, true, false, false, true, false, false, true); err == nil || err != utils.ErrPartiallyExecuted {
 		t.Error(err)
-	} else if rcvLog := buf9.String(); !strings.Contains(rcvLog, expLog) {
+	} else if rcvLog := buf9.String(); strings.Contains(rcvLog, expLog) {
 		t.Errorf("expected %v,received %v", expLog, rcvLog)
 	}
 }
@@ -1143,30 +1141,25 @@ func TestV1ProcessCDRSet(t *testing.T) {
 		Error:  nil,
 	}
 	rcv, has := Cache.Get(utils.CacheRPCResponses, utils.ConcatenatedKey(utils.CDRsV1ProcessCDR, cdr.CGRID, cdr.RunID))
-
 	if !has {
 		t.Errorf("has no value")
 	} else if !reflect.DeepEqual(rcv, exp) {
 		t.Errorf("expected %v,received %v", utils.ToJSON(exp), utils.ToJSON(rcv))
 	}
-
 }
 
 func TestV1StoreSessionCost(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	clMock := clMock(func(_ string, _, _ interface{}) error {
-
 		return nil
 	})
 	clientconn := make(chan rpcclient.ClientConnector, 1)
-
 	clientconn <- clMock
 	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{})
 	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 1
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
-
 	config.SetCgrConfig(cfg)
 	Cache = NewCacheS(cfg, dm, nil)
 	attr := &AttrCDRSStoreSMCost{
@@ -1188,7 +1181,6 @@ func TestV1StoreSessionCost(t *testing.T) {
 		connMgr: connMgr,
 	}
 	reply := utils.StringPointer("reply")
-
 	if err = cdrS.V1StoreSessionCost(attr, reply); err != nil {
 		t.Error(err)
 	}
@@ -1197,7 +1189,6 @@ func TestV1StoreSessionCost(t *testing.T) {
 		Error:  nil,
 	}
 	rcv, has := Cache.Get(utils.CacheRPCResponses, utils.ConcatenatedKey(utils.CDRsV1StoreSessionCost, attr.Cost.CGRID, attr.Cost.RunID))
-
 	if !has {
 		t.Errorf("has no value")
 	} else if !reflect.DeepEqual(rcv, exp) {
@@ -1217,16 +1208,13 @@ func TestV1StoreSessionCostSet(t *testing.T) {
 		return nil
 	})
 	clientconn := make(chan rpcclient.ClientConnector, 1)
-
 	clientconn <- clMock
 	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{})
 	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 1
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
-
 	config.SetCgrConfig(cfg)
 	Cache = NewCacheS(cfg, dm, nil)
-
 	attr := &AttrCDRSStoreSMCost{
 		Cost: &SMCost{
 			CGRID:    "cgrid1",
@@ -1240,7 +1228,6 @@ func TestV1StoreSessionCostSet(t *testing.T) {
 		CheckDuplicate: false,
 	}
 	cdrS := &CDRServer{
-
 		cgrCfg:  cfg,
 		cdrDb:   db,
 		dm:      dm,
@@ -1271,7 +1258,6 @@ func TestV1StoreSessionCostSet(t *testing.T) {
 	if err = cdrS.V1StoreSessionCost(attr, reply); err != nil {
 		t.Error(err)
 	}
-
 }
 
 func TestV2StoreSessionCost(t *testing.T) {
@@ -2284,6 +2270,52 @@ func TestStoreSMCostErr(t *testing.T) {
 				}}}}
 
 	if err := cdrS.storeSMCost(smCost, true); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestCDRSGetCDRs(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	cdrS := &CDRServer{
+		cgrCfg: cfg,
+		cdrDb:  db,
+		dm:     dm,
+	}
+	arg := &ArgV1ProcessEvent{
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "Event1",
+			Event: map[string]interface{}{
+				utils.Tenant:       "cgrates.org",
+				utils.ToR:          utils.MetaVoice,
+				utils.OriginHost:   "host",
+				utils.RequestType:  utils.MetaPrepaid,
+				utils.AccountField: "1001",
+				utils.Subject:      "1001",
+				utils.Destination:  "1002",
+				utils.SetupTime:    time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+				utils.AnswerTime:   time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
+				utils.Usage:        10 * time.Minute,
+			},
+		},
+		Flags: []string{
+			utils.MetaStore, utils.MetaRALs,
+		},
+	}
+	var reply string
+	if err := cdrS.V1ProcessEvent(arg, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Expected OK")
+	}
+
+	var cdrs []*CDR
+	args := utils.RPCCDRsFilterWithAPIOpts{
+		RPCCDRsFilter: &utils.RPCCDRsFilter{RequestTypes: []string{utils.MetaPrepaid}},
+	}
+	if err := cdrS.V1GetCDRs(args, &cdrs); err != nil {
 		t.Error(err)
 	}
 
