@@ -1,0 +1,47 @@
+---
+- name: Install Asterisk dependencies
+  become: yes
+  apt:
+    name: "{{ item }}"
+    state: present
+    update_cache: "{{ 'yes' if item == asterisk_dependencies[0] else 'no' }}"
+    cache_valid_time: 86400
+  with_items: "{{ asterisk_dependencies }}"
+  
+- name: Download Asterisk
+  get_url:
+    url: "{{ asterisk_download_url }}/asterisk-{{ asterisk_version }}.tar.gz"
+    dest: "{{ asterisk_archive_dest }}/asterisk-{{ asterisk_version }}.tar.gz"
+
+- name: Extract Asterisk
+  become: yes
+  unarchive:
+    src: "{{ asterisk_archive_dest }}/asterisk-{{ asterisk_version }}.tar.gz"
+    dest: "{{ asterisk_src_dir }}"
+    remote_src: yes
+
+- name: Find extracted Asterisk directory
+  command: "find {{ asterisk_src_dir }} -type d -name 'asterisk-{{ asterisk_major_version }}*'"
+  register: asterisk_dir
+
+- name: Install Asterisk
+  become: yes
+  shell: "{{ item }}"
+  args:
+    chdir: "{{ asterisk_dir.stdout }}"
+  loop:
+    - "./configure --with-jansson-bundled"
+    - "make menuselect.makeopts"
+    - "make"
+    - "make install"
+    - "make samples"
+    - "make config"
+    - "ldconfig"
+
+- name: Create Asterisk user
+  become: yes
+  user:
+    name: asterisk
+    system: yes
+    createhome: no
+    shell: /bin/false

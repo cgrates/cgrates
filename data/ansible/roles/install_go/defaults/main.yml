@@ -1,0 +1,28 @@
+---
+# defaults for install_go
+
+# Go version to install
+golang_version: 1.20.4
+
+# Expected go version output
+go_version_target: "go version go{{ golang_version }} linux/amd64"
+
+# Set the Go workspace directory
+golang_gopath: /home/{{ ansible_user }}/go
+
+# Set the directory to download the Go archive to
+golang_download_dir: /tmp
+
+# Set the mirror to download Go from
+golang_mirror: https://storage.googleapis.com/golang
+
+# Set the filename of the Go archive to download
+golang_redis_filename: go{{ golang_version }}.linux-amd64.tar.gz
+
+# Set the Go installation directory
+golang_install_dir: /usr/local/go
+
+# Go dependencies
+go_dependencies:
+  - curl
+  - tar

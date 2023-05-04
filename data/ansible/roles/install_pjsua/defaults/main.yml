@@ -1,0 +1,10 @@
+---
+pjsua_version: "2.9"
+pjsua_url: "https://github.com/pjsip/pjproject/archive/refs/tags/{{ pjsua_version }}.tar.gz"
+tmp_dir: "/tmp"
+
+# PJSUA dependencies
+pjsua_dependencies:
+  - libasound2-dev
+  - libssl-dev
+  - build-essential
