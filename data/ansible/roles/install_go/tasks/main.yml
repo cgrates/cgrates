@@ -1,0 +1,49 @@
+---
+- name: Check if Go is already installed
+  command: /usr/local/go/bin/go version
+  ignore_errors: true
+  register: go_version_output
+
+- name: Install Go dependencies
+  become: yes
+  apt:
+    name: '{{ item }}'
+    state: present
+    update_cache: "{{ 'yes' if item == go_dependencies[0] else 'no' }}"
+    cache_valid_time: 86400
+  with_items: "{{ go_dependencies }}"
+
+- name: Remove old installation of Go if needed
+  become: yes
+  file:
+    path: /usr/local/go
+    state: absent
+  when: go_version_output.rc == 0 and go_version_output.stdout != go_version_target
+
+- name: Create Go language SDK installation directory
+  become: yes
+  file:
+    path: '{{ golang_install_dir }}'
+    state: directory
+    mode: '0755'
+
+- name: Download Go language SDK
+  get_url:
+    url: '{{ golang_mirror }}/{{ golang_redis_filename }}'
+    dest: '{{ golang_download_dir }}/{{ golang_redis_filename }}'
+    mode: '0644'
+
+- name: Install Go language SDK
+  become: yes
+  unarchive:
+    src: '{{ golang_download_dir }}/{{ golang_redis_filename }}'
+    remote_src: true
+    dest: '{{ golang_install_dir | dirname }}'
+    creates: '{{ golang_install_dir }}/bin'
+
+- name: Set Go language SDK environment variables
+  become: yes
+  template:
+    src: golang.sh.j2
+    dest: /etc/profile.d/golang.sh
+    mode: '0644'

@@ -1,0 +1,21 @@
+---
+asterisk_version: "20-current"
+asterisk_major_version: "{{ asterisk_version.split('-')[0] }}"
+asterisk_download_url: "https://downloads.asterisk.org/pub/telephony/asterisk"
+asterisk_archive_dest: "/tmp"
+asterisk_src_dir: "/usr/src"
+
+asterisk_dependencies:
+  - build-essential
+  - libasound2-dev
+  - autoconf
+  - openssl
+  - libssl-dev
+  - libxml2-dev
+  - libncurses5-dev
+  - uuid-dev
+  - sqlite3
+  - libsqlite3-dev
+  - pkg-config
+  - libedit-dev
+  - libjansson-dev
