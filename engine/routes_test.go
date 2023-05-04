@@ -1879,3 +1879,391 @@ func TestNewOptsGetRoutesGetIntPointerOptsMaxItemsErr(t *testing.T) {
 	}
 
 }
+
+func TestNewOptsGetRoutesGetInterfaceOptsErr(t *testing.T) {
+
+	cfg := config.NewDefaultCGRConfig()
+	cfg.RouteSCfg().Opts.MaxCost = []*utils.DynamicInterfaceOpt{
+		{
+			FilterIDs: []string{"*string.invalid:filter"},
+			Tenant:    "cgrates.org",
+			Value:     2,
+		},
+	}
+
+	dataDB := NewInternalDB(nil, nil, nil)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	fS := NewFilterS(cfg, nil, dm)
+
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "TestEvent",
+		Event: map[string]interface{}{
+			utils.AccountField: 1001,
+		},
+		APIOpts: map[string]interface{}{},
+	}
+
+	expErr := `inline parse error for string: <*string.invalid:filter>`
+	_, err := newOptsGetRoutes(context.Background(), ev, fS, cfg.RouteSCfg().Opts)
+	if err == nil ||
+		err.Error() != expErr {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", expErr, err)
+	}
+
+}
+
+func TestSortedRoutesForEventsortedRoutesForProfileErr(t *testing.T) {
+
+	cfg := config.NewDefaultCGRConfig()
+	cfg.RouteSCfg().Opts.ProfileCount = []*utils.DynamicIntPointerOpt{
+		{
+			FilterIDs: []string{"*string.invalid:filter"},
+			Tenant:    "cgrates.org",
+			Value:     utils.IntPointer(4),
+		},
+	}
+
+	dataDB := NewInternalDB(nil, nil, nil)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	fS := NewFilterS(cfg, nil, dm)
+	routeService := &RouteS{
+		dm:      dm,
+		fltrS:   fS,
+		cfg:     cfg,
+		connMgr: nil,
+	}
+
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "utils.CGREvent1",
+		Event: map[string]interface{}{
+			"Route":          "RouteProfile1",
+			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
+			"UsageInterval":  "1s",
+			"PddInterval":    "1s",
+			utils.Weight:     "20.0",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsRoutesProfilesCount: 1,
+		},
+	}
+
+	if err := dm.SetFilter(context.Background(), &Filter{
+		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+		ID:     "FLTR_RPP_1",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaString,
+				Element: "~*req.Route",
+				Values:  []string{"RouteProfile1"},
+			},
+			{
+				Type:    utils.MetaGreaterOrEqual,
+				Element: "~*req.UsageInterval",
+				Values:  []string{(time.Second).String()},
+			},
+			{
+				Type:    utils.MetaGreaterOrEqual,
+				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Weight,
+				Values:  []string{"9.0"},
+			},
+		},
+	}, true); err != nil {
+		t.Fatal(err)
+	}
+
+	rp := &RouteProfile{
+		Tenant:    "cgrates.org",
+		ID:        "RouteProfile1",
+		FilterIDs: []string{"FLTR_RPP_1"},
+		Sorting:   utils.MetaWeight,
+		Routes: []*Route{
+			{
+				ID:              "route1",
+				Weights:         utils.DynamicWeights{{Weight: 10}},
+				RouteParameters: "param1",
+			},
+		},
+		Weights:  utils.DynamicWeights{{Weight: 10}},
+		Blockers: utils.DynamicBlockers{{Blocker: true}},
+	}
+
+	if err := dm.SetRouteProfile(context.Background(), rp, true); err != nil {
+		t.Fatal(err)
+	}
+
+	expErr := `unsupported sorting strategy: *weight`
+	_, err := routeService.sortedRoutesForEvent(context.Background(), ev.Tenant, ev)
+	if err == nil ||
+		err.Error() != expErr {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", expErr, err)
+	}
+
+}
+
+func TestSortedRoutesForEventGetIntPointerOptsErr(t *testing.T) {
+
+	cfg := config.NewDefaultCGRConfig()
+	cfg.RouteSCfg().Opts.ProfileCount = []*utils.DynamicIntPointerOpt{
+		{
+			FilterIDs: []string{"*string.invalid:filter"},
+			Tenant:    "cgrates.org",
+			Value:     utils.IntPointer(4),
+		},
+	}
+
+	dataDB := NewInternalDB(nil, nil, nil)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	fS := NewFilterS(cfg, nil, dm)
+	routeService := &RouteS{
+		dm:      dm,
+		fltrS:   fS,
+		cfg:     cfg,
+		connMgr: nil,
+	}
+
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "utils.CGREvent1",
+		Event: map[string]interface{}{
+			"Route":          "RouteProfile1",
+			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
+			"UsageInterval":  "1s",
+			"PddInterval":    "1s",
+			utils.Weight:     "20.0",
+		},
+		APIOpts: map[string]interface{}{},
+	}
+
+	if err := dm.SetFilter(context.Background(), &Filter{
+		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+		ID:     "FLTR_RPP_1",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaString,
+				Element: "~*req.Route",
+				Values:  []string{"RouteProfile1"},
+			},
+			{
+				Type:    utils.MetaGreaterOrEqual,
+				Element: "~*req.UsageInterval",
+				Values:  []string{(time.Second).String()},
+			},
+			{
+				Type:    utils.MetaGreaterOrEqual,
+				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Weight,
+				Values:  []string{"9.0"},
+			},
+		},
+	}, true); err != nil {
+		t.Fatal(err)
+	}
+
+	rp := &RouteProfile{
+		Tenant:    "cgrates.org",
+		ID:        "RouteProfile1",
+		FilterIDs: []string{"FLTR_RPP_1"},
+		Sorting:   utils.MetaWeight,
+		Routes: []*Route{
+			{
+				ID:              "route1",
+				Weights:         utils.DynamicWeights{{Weight: 10}},
+				RouteParameters: "param1",
+			},
+		},
+		Weights:  utils.DynamicWeights{{Weight: 10}},
+		Blockers: utils.DynamicBlockers{{Blocker: true}},
+	}
+
+	if err := dm.SetRouteProfile(context.Background(), rp, true); err != nil {
+		t.Fatal(err)
+	}
+
+	expErr := `inline parse error for string: <*string.invalid:filter>`
+	_, err := routeService.sortedRoutesForEvent(context.Background(), ev.Tenant, ev)
+	if err == nil ||
+		err.Error() != expErr {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", expErr, err)
+	}
+
+}
+
+func TestSortedRoutesForEventNewOptsGetRoutesErr(t *testing.T) {
+
+	cfg := config.NewDefaultCGRConfig()
+	cfg.RouteSCfg().Opts.IgnoreErrors = []*utils.DynamicBoolOpt{
+		{
+			FilterIDs: []string{"*string.invalid:filter"},
+			Tenant:    "cgrates.org",
+			Value:     false,
+		},
+	}
+
+	dataDB := NewInternalDB(nil, nil, nil)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	fS := NewFilterS(cfg, nil, dm)
+	routeService := &RouteS{
+		dm:      dm,
+		fltrS:   fS,
+		cfg:     cfg,
+		connMgr: nil,
+	}
+
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "utils.CGREvent1",
+		Event: map[string]interface{}{
+			"Route":          "RouteProfile1",
+			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
+			"UsageInterval":  "1s",
+			"PddInterval":    "1s",
+			utils.Weight:     "20.0",
+		},
+		APIOpts: map[string]interface{}{},
+	}
+
+	if err := dm.SetFilter(context.Background(), &Filter{
+		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+		ID:     "FLTR_RPP_1",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaString,
+				Element: "~*req.Route",
+				Values:  []string{"RouteProfile1"},
+			},
+			{
+				Type:    utils.MetaGreaterOrEqual,
+				Element: "~*req.UsageInterval",
+				Values:  []string{(time.Second).String()},
+			},
+			{
+				Type:    utils.MetaGreaterOrEqual,
+				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Weight,
+				Values:  []string{"9.0"},
+			},
+		},
+	}, true); err != nil {
+		t.Fatal(err)
+	}
+
+	rp := &RouteProfile{
+		Tenant:    "cgrates.org",
+		ID:        "RouteProfile1",
+		FilterIDs: []string{"FLTR_RPP_1"},
+		Sorting:   utils.MetaWeight,
+		Routes: []*Route{
+			{
+				ID:              "route1",
+				Weights:         utils.DynamicWeights{{Weight: 10}},
+				RouteParameters: "param1",
+			},
+		},
+		Weights:  utils.DynamicWeights{{Weight: 10}},
+		Blockers: utils.DynamicBlockers{{Blocker: true}},
+	}
+
+	if err := dm.SetRouteProfile(context.Background(), rp, true); err != nil {
+		t.Fatal(err)
+	}
+
+	expErr := `inline parse error for string: <*string.invalid:filter>`
+	_, err := routeService.sortedRoutesForEvent(context.Background(), ev.Tenant, ev)
+	if err == nil ||
+		err.Error() != expErr {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", expErr, err)
+	}
+
+}
+
+func TestSortedRoutesForEventExceedMaxItemsErr(t *testing.T) {
+
+	cfg := config.NewDefaultCGRConfig()
+	cfg.RouteSCfg().Opts.MaxItems = []*utils.DynamicIntPointerOpt{
+		{
+			Tenant: "cgrates.org",
+			Value:  utils.IntPointer(1),
+		},
+	}
+	cfg.RouteSCfg().Opts.Limit = []*utils.DynamicIntPointerOpt{
+		{
+			Tenant: "cgrates.org",
+			Value:  utils.IntPointer(2),
+		},
+	}
+
+	dataDB := NewInternalDB(nil, nil, nil)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	fS := NewFilterS(cfg, nil, dm)
+	routeService := &RouteS{
+		dm:      dm,
+		fltrS:   fS,
+		cfg:     cfg,
+		connMgr: nil,
+	}
+
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "utils.CGREvent1",
+		Event: map[string]interface{}{
+			"Route":          "RouteProfile1",
+			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
+			"UsageInterval":  "1s",
+			"PddInterval":    "1s",
+			utils.Weight:     "20.0",
+		},
+		APIOpts: map[string]interface{}{},
+	}
+
+	if err := dm.SetFilter(context.Background(), &Filter{
+		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+		ID:     "FLTR_RPP_1",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaString,
+				Element: "~*req.Route",
+				Values:  []string{"RouteProfile1"},
+			},
+			{
+				Type:    utils.MetaGreaterOrEqual,
+				Element: "~*req.UsageInterval",
+				Values:  []string{(time.Second).String()},
+			},
+			{
+				Type:    utils.MetaGreaterOrEqual,
+				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Weight,
+				Values:  []string{"9.0"},
+			},
+		},
+	}, true); err != nil {
+		t.Fatal(err)
+	}
+
+	rp := &RouteProfile{
+		Tenant:    "cgrates.org",
+		ID:        "RouteProfile1",
+		FilterIDs: []string{"FLTR_RPP_1"},
+		Sorting:   utils.MetaWeight,
+		Routes: []*Route{
+			{
+				ID:              "route1",
+				Weights:         utils.DynamicWeights{{Weight: 10}},
+				RouteParameters: "param1",
+			},
+		},
+		Weights:  utils.DynamicWeights{{Weight: 10}},
+		Blockers: utils.DynamicBlockers{{Blocker: true}},
+	}
+
+	if err := dm.SetRouteProfile(context.Background(), rp, true); err != nil {
+		t.Fatal(err)
+	}
+
+	expErr := `SERVER_ERROR: maximum number of items exceeded`
+	_, err := routeService.sortedRoutesForEvent(context.Background(), ev.Tenant, ev)
+	if err == nil ||
+		err.Error() != expErr {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", expErr, err)
+	}
+
+}
