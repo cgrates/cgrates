@@ -22,9 +22,10 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 var (
@@ -2616,8 +2617,8 @@ func TestPublishAccount(t *testing.T) {
 	defer func() {
 		cfgfunc()
 	}()
-	clientConn := make(chan rpcclient.ClientConnector, 1)
-	clientConn <- clMock(func(serviceMethod string, _, _ interface{}) error {
+	clientConn := make(chan birpc.ClientConnector, 1)
+	clientConn <- clMock(func(ctx *context.Context, serviceMethod string, _, _ interface{}) error {
 		if serviceMethod == utils.StatSv1ProcessEvent {
 
 			return nil
@@ -2628,7 +2629,7 @@ func TestPublishAccount(t *testing.T) {
 		}
 		return utils.ErrNotFound
 	})
-	conngMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	conngMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStatS):      clientConn,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds): clientConn,
 	})

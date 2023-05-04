@@ -614,7 +614,7 @@ func TestCDRSThDSProcessEvent(t *testing.T) {
 // 	cfg.CdrsCfg().RaterConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs)}
 // 	cdrS := &CDRServer{cgrCfg: cfg, dm: dm, cdrDb: db}
 
-// 	clientConn := make(chan rpcclient.ClientConnector, 1)
+// 	clientConn := make(chan birpc.ClientConnector, 1)
 // 	clientConn <- clMock(func(serviceMethod string, _, _ interface{}) error {
 
 // 		if serviceMethod == utils.ResponderRefundIncrements {
@@ -734,8 +734,8 @@ func TestCDRsV1ProcessEventAll(t *testing.T) {
 	cfg.CdrsCfg().ThresholdSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)}
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
-	clientConn := make(chan rpcclient.ClientConnector, 1)
-	clientConn <- clMock(func(serviceMeth string, _, _ interface{}) error {
+	clientConn := make(chan birpc.ClientConnector, 1)
+	clientConn <- clMock(func(ctx *context.Context, serviceMeth string, _, _ interface{}) error {
 		if serviceMeth == utils.ThresholdSv1ProcessEvent {
 			return nil
 		}
@@ -748,7 +748,7 @@ func TestCDRsV1ProcessEventAll(t *testing.T) {
 		cgrCfg: cfg,
 		dm:     dm,
 		cdrDb:  db,
-		connMgr: NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		connMgr: NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 			utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStatS):      clientConn,
 			utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds): clientConn,
 		}),
@@ -837,8 +837,8 @@ func TestRemoveThresholdProfileRpl(t *testing.T) {
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	cfg.DataDbCfg().Items[utils.MetaThresholdProfiles].Replicate = true
 	cfg.DataDbCfg().RplConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1)}
-	clientConn := make(chan rpcclient.ClientConnector, 1)
-	clientConn <- clMock(func(servicemethod string, _, _ interface{}) error {
+	clientConn := make(chan birpc.ClientConnector, 1)
+	clientConn <- clMock(func(ctx *context.Context,servicemethod string, _, _ interface{}) error {
 		if servicemethod == utils.ReplicatorSv1RemoveThresholdProfile {
 
 			return nil
@@ -846,7 +846,7 @@ func TestRemoveThresholdProfileRpl(t *testing.T) {
 		return utils.ErrNotImplemented
 	})
 
-	dm := NewDataManager(db, cfg.CacheCfg(), NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	dm := NewDataManager(db, cfg.CacheCfg(), NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
 	}))
 	thp := &ThresholdProfile{

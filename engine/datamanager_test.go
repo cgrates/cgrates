@@ -1382,8 +1382,8 @@ func TestDMGetThresholdRmt(t *testing.T) {
 	cfg.DataDbCfg().Items[utils.MetaThresholds].Remote = true
 	cfg.DataDbCfg().RmtConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1)}
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	clientConn := make(chan rpcclient.ClientConnector, 1)
-	clientConn <- clMock(func(serviceMethod string, _, reply interface{}) error {
+	clientConn := make(chan birpc.ClientConnector, 1)
+	clientConn <- clMock(func(ctx *context.Context, serviceMethod string, _, reply interface{}) error {
 		if serviceMethod == utils.ReplicatorSv1GetThreshold {
 			rpl := &Threshold{
 				Tenant: "cgrates.org", ID: "THD_Stat", Hits: 1,
@@ -1393,7 +1393,7 @@ func TestDMGetThresholdRmt(t *testing.T) {
 		}
 		return utils.ErrNotImplemented
 	})
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
 	})
 	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
@@ -1413,8 +1413,8 @@ func TestDmGetRatingPlanRmt(t *testing.T) {
 	}()
 	Cache.Clear(nil)
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	clientConn := make(chan rpcclient.ClientConnector, 1)
-	clientConn <- clMock(func(serviceMethod string, _, reply interface{}) error {
+	clientConn := make(chan birpc.ClientConnector, 1)
+	clientConn <- clMock(func(ctx *context.Context, serviceMethod string, _, reply interface{}) error {
 		if serviceMethod == utils.ReplicatorSv1GetRatingPlan {
 			rpl := &RatingPlan{
 				Id: "RP1",
@@ -1439,7 +1439,7 @@ func TestDmGetRatingPlanRmt(t *testing.T) {
 		}
 		return utils.ErrNotImplemented
 	})
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
 	})
 	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
@@ -1459,8 +1459,8 @@ func TestDMGetTimingRmt(t *testing.T) {
 		cfg2, _ := config.NewDefaultCGRConfig()
 		config.SetCgrConfig(cfg2)
 	}()
-	clientConn := make(chan rpcclient.ClientConnector, 1)
-	clientConn <- clMock(func(serviceMethod string, _, reply interface{}) error {
+	clientConn := make(chan birpc.ClientConnector, 1)
+	clientConn <- clMock(func(ctx *context.Context, serviceMethod string, _, reply interface{}) error {
 		if serviceMethod == utils.ReplicatorSv1GetTiming {
 			rpl := &utils.TPTiming{
 				ID:        "WEEKENDS",
@@ -1476,7 +1476,7 @@ func TestDMGetTimingRmt(t *testing.T) {
 		}
 		return utils.ErrNotImplemented
 	})
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
 	})
 	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
@@ -1497,8 +1497,8 @@ func TestSetResourceProfileRPl(t *testing.T) {
 		cfg2, _ := config.NewDefaultCGRConfig()
 		config.SetCgrConfig(cfg2)
 	}()
-	clientConn := make(chan rpcclient.ClientConnector, 1)
-	clientConn <- clMock(func(serviceMethod string, _, reply interface{}) error {
+	clientConn := make(chan birpc.ClientConnector, 1)
+	clientConn <- clMock(func(ctx *context.Context, serviceMethod string, _, reply interface{}) error {
 		if serviceMethod == utils.ReplicatorSv1GetResourceProfile {
 			rpl := &ResourceProfile{
 				Tenant:    "cgrates.org",
@@ -1520,7 +1520,7 @@ func TestSetResourceProfileRPl(t *testing.T) {
 		}
 		return utils.ErrNotImplemented
 	})
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
 	})
 	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
@@ -1541,8 +1541,8 @@ func TestDMGetActionTriggersRmt(t *testing.T) {
 		cfg2, _ := config.NewDefaultCGRConfig()
 		config.SetCgrConfig(cfg2)
 	}()
-	clientConn := make(chan rpcclient.ClientConnector, 1)
-	clientConn <- clMock(func(serviceMethod string, _, reply interface{}) error {
+	clientConn := make(chan birpc.ClientConnector, 1)
+	clientConn <- clMock(func(ctx *context.Context, serviceMethod string, _, reply interface{}) error {
 		if serviceMethod == utils.ReplicatorSv1GetActionTriggers {
 			rpl := ActionTriggers{
 				&ActionTrigger{
@@ -1566,7 +1566,7 @@ func TestDMGetActionTriggersRmt(t *testing.T) {
 		}
 		return utils.ErrNotImplemented
 	})
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
 	})
 	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
@@ -1587,15 +1587,15 @@ func TestDMRemSQPRepl(t *testing.T) {
 	cfg.DataDbCfg().Items[utils.MetaStatQueueProfiles].Replicate = true
 	cfg.DataDbCfg().RplConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1)}
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	clientConn := make(chan rpcclient.ClientConnector, 1)
-	clientConn <- clMock(func(serviceMethod string, _, _ interface{}) error {
+	clientConn := make(chan birpc.ClientConnector, 1)
+	clientConn <- clMock(func(ctx *context.Context, serviceMethod string, _, _ interface{}) error {
 		if serviceMethod == utils.ReplicatorSv1RemoveStatQueueProfile {
 
 			return nil
 		}
 		return utils.ErrNotImplemented
 	})
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
 	})
 	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
@@ -1629,15 +1629,15 @@ func TestDmRemoveFilter(t *testing.T) {
 		config.SetCgrConfig(cfg2)
 	}()
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	clientConn := make(chan rpcclient.ClientConnector, 1)
-	clientConn <- clMock(func(serviceMethod string, _, _ interface{}) error {
+	clientConn := make(chan birpc.ClientConnector, 1)
+	clientConn <- clMock(func(ctx *context.Context, serviceMethod string, _, _ interface{}) error {
 		if serviceMethod == utils.ReplicatorSv1RemoveFilter {
 
 			return nil
 		}
 		return utils.ErrNotImplemented
 	})
-	dm := NewDataManager(db, cfg.CacheCfg(), NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn}))
+	dm := NewDataManager(db, cfg.CacheCfg(), NewConnManager(cfg, map[string]chan birpc.ClientConnector{utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn}))
 	dm.SetFilter(&Filter{
 		Tenant: "cgrates.org",
 		ID:     "FLTR_CP",
@@ -1679,8 +1679,8 @@ func TestDMGetSupplierProfile(t *testing.T) {
 		cfg2, _ := config.NewDefaultCGRConfig()
 		config.SetCgrConfig(cfg2)
 	}()
-	clientConn := make(chan rpcclient.ClientConnector, 1)
-	clientConn <- clMock(func(serviceMethod string, _, reply interface{}) error {
+	clientConn := make(chan birpc.ClientConnector, 1)
+	clientConn <- clMock(func(ctx *context.Context, serviceMethod string, _, reply interface{}) error {
 		if serviceMethod == utils.ReplicatorSv1GetSupplierProfile {
 			rpl := &SupplierProfile{}
 			*reply.(**SupplierProfile) = rpl
@@ -1689,7 +1689,7 @@ func TestDMGetSupplierProfile(t *testing.T) {
 		return utils.ErrNotFound
 	})
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	dm := NewDataManager(db, cfg.CacheCfg(), NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	dm := NewDataManager(db, cfg.CacheCfg(), NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
 	}))
 	config.SetCgrConfig(cfg)
@@ -1711,7 +1711,7 @@ func TestConnManagerCallWithConnIDs(t *testing.T) {
 			},
 		},
 	}
-	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{})
+	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{})
 	if err := connMgr.CallWithConnIDs([]string{connId}, utils.StringSet{utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): {}}, utils.ReplicatorSv1GetAccount, nil, nil); err == nil {
 
 		t.Error(err)
@@ -1727,14 +1727,14 @@ func TestDMRemResourceProfile(t *testing.T) {
 	}()
 	cfg.DataDbCfg().Items[utils.MetaResourceProfile].Replicate = true
 	cfg.DataDbCfg().RplConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1)}
-	clientConn := make(chan rpcclient.ClientConnector, 1)
-	clientConn <- clMock(func(serviceMethod string, _, _ interface{}) error {
+	clientConn := make(chan birpc.ClientConnector, 1)
+	clientConn <- clMock(func(ctx *context.Context, serviceMethod string, _, _ interface{}) error {
 		if serviceMethod == utils.ReplicatorSv1RemoveResourceProfile {
 			return nil
 		}
 		return utils.ErrNotImplemented
 	})
-	dm := NewDataManager(db, cfg.CacheCfg(), NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	dm := NewDataManager(db, cfg.CacheCfg(), NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
 	}))
 	rsP := &ResourceProfile{
@@ -1768,14 +1768,14 @@ func TestDMSetSQPrf(t *testing.T) {
 	Cache.Clear(nil)
 	cfg.DataDbCfg().Items[utils.MetaStatQueueProfiles].Replicate = true
 	cfg.DataDbCfg().RplConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1)}
-	clientConn := make(chan rpcclient.ClientConnector, 1)
-	clientConn <- clMock(func(serviceMethod string, _, _ interface{}) error {
+	clientConn := make(chan birpc.ClientConnector, 1)
+	clientConn <- clMock(func(ctx *context.Context, serviceMethod string, _, _ interface{}) error {
 		if serviceMethod == utils.ReplicatorSv1SetStatQueueProfile {
 			return nil
 		}
 		return utils.ErrNotImplemented
 	})
-	dm := NewDataManager(db, cfg.CacheCfg(), NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	dm := NewDataManager(db, cfg.CacheCfg(), NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
 	}))
 	sqp := &StatQueueProfile{
