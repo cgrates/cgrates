@@ -2,10 +2,10 @@
 - name: Update apt cache and install required packages
   become: yes
   ansible.builtin.apt:
-    name: "{{ item }}"
+    name: "{{ freeswitch_dependencies }}"
     state: present
-    update_cache: "{{ 'yes' if item == freeswitch_dependencies[0] else 'no' }}"
-  with_items: "{{ freeswitch_dependencies }}"
+    update_cache: yes
+    cache_valid_time: 86400
 
 - name: Download SignalWire FreeSWITCH GPG key
   become: yes

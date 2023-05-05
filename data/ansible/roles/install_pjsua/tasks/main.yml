@@ -2,11 +2,10 @@
 - name: Install PJSUA dependencies
   become: yes
   ansible.builtin.package:
-    name: '{{ item }}'
+    name: '{{ pjsua_dependencies }}'
     state: present
-    update_cache: "{{ 'yes' if item == pjsua_dependencies[0] else 'no' }}"
+    update_cache: yes
     cache_valid_time: 86400
-  with_items: "{{ pjsua_dependencies }}"
 
 - name: Download PJSUA
   ansible.builtin.get_url:
