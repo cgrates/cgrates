@@ -8,7 +8,7 @@ In these tutorials we exemplify a few cases of integration between OpenSIPS_ and
    :maxdepth: 2
 
    tut_opensips_installs
-   tut_osips_native
+   tut_opensips_native
    tut_cgrates_usage
 
 .. _OpenSIPS: https://opensips.org/
