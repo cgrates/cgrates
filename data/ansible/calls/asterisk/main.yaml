@@ -10,10 +10,10 @@
     import_role:
       name: ../../roles/install_cgrates
 
-  - name: Configure Asterisk
+  - name: Install Asterisk
     import_role:
       name: ../../roles/install_asterisk
 
-  - name: Configure PJSUA
+  - name: Install PJSUA
     import_role:
       name: ../../roles/install_pjsua

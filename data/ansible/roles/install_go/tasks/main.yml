@@ -7,11 +7,10 @@
 - name: Install Go dependencies
   become: yes
   apt:
-    name: '{{ item }}'
+    name: '{{ go_dependencies }}'
     state: present
-    update_cache: "{{ 'yes' if item == go_dependencies[0] else 'no' }}"
+    update_cache: yes
     cache_valid_time: 86400
-  with_items: "{{ go_dependencies }}"
 
 - name: Remove old installation of Go if needed
   become: yes
