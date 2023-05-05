@@ -2729,3 +2729,90 @@ func TestAgentRequestParseFieldDateTimeError2(t *testing.T) {
 		t.Errorf("Expected <%+v> but received <%+v>", expected, err)
 	}
 }
+
+func TestAgentRequestRemoveAll(t *testing.T) {
+	tntTpl := config.NewRSRParsersMustCompile("", utils.InfieldSep)
+	AgentReq := NewAgentRequest(utils.MapStorage{}, nil, nil, nil, nil, tntTpl, "", "", nil, nil)
+
+	testCases := []struct {
+		prefix  string
+		isError bool
+	}{
+		{prefix: utils.MetaVars, isError: false},
+		{prefix: utils.MetaCgreq, isError: false},
+		{prefix: utils.MetaCgrep, isError: false},
+		{prefix: utils.MetaRep, isError: false},
+		{prefix: utils.MetaDiamreq, isError: false},
+		{prefix: utils.MetaTmp, isError: false},
+		{prefix: utils.MetaUCH, isError: false},
+		{prefix: utils.MetaOpts, isError: false},
+		{prefix: "unsupported_prefix", isError: true},
+	}
+
+	for _, testCase := range testCases {
+		err := AgentReq.RemoveAll(testCase.prefix)
+		if testCase.isError && err == nil {
+			t.Fatalf("expected an error for prefix: <%s>, but got no error", testCase.prefix)
+		}
+		if !testCase.isError && err != nil {
+			t.Fatalf("expected no error for prefix: <%s>, but got error: %v", testCase.prefix, err)
+		}
+	}
+}
+
+func TestAgentRequestRemove(t *testing.T) {
+	tntTpl := config.NewRSRParsersMustCompile("", utils.InfieldSep)
+	AgentReq := NewAgentRequest(utils.MapStorage{}, nil, nil, nil, utils.MapStorage{utils.AccountField: "Field1"}, tntTpl, "", "", nil, nil)
+	testCases := []struct {
+		fullPath *utils.FullPath
+		isError  bool
+	}{
+		{fullPath: &utils.FullPath{PathSlice: []string{utils.MetaVars}, Path: utils.MetaVars + utils.NestingSep + utils.AccountField}, isError: false},
+		{fullPath: &utils.FullPath{PathSlice: []string{utils.MetaCgreq}, Path: utils.MetaCgreq + utils.NestingSep + utils.Usage}, isError: false},
+		{fullPath: &utils.FullPath{PathSlice: []string{utils.MetaCgrep}}, isError: false},
+		{fullPath: &utils.FullPath{PathSlice: []string{utils.MetaRep}, Path: utils.MetaRep + utils.NestingSep + "MaxUsage"}, isError: false},
+		{fullPath: &utils.FullPath{PathSlice: []string{utils.MetaDiamreq}, Path: utils.MetaDiamreq + utils.NestingSep + "Destination-Host"}, isError: false},
+		{fullPath: &utils.FullPath{PathSlice: []string{"unsupported_prefix"}}, isError: true},
+	}
+
+	for _, testCase := range testCases {
+		err := AgentReq.Remove(testCase.fullPath)
+		if testCase.isError && err == nil {
+			t.Fatalf("expected an error for fullPath: <%v>, but got no error", testCase.fullPath)
+		}
+		if !testCase.isError && err != nil {
+			t.Fatalf("expected no error for fullPath: <%v>, but got error: %v", testCase.fullPath, err)
+		}
+	}
+}
+
+// func TestAgentRequestAppend(t *testing.T) {
+// 	tntTpl := config.NewRSRParsersMustCompile("", utils.InfieldSep)
+// 	ar := NewAgentRequest(utils.MapStorage{}, &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{
+// 		utils.MetaAppID: utils.NewLeafNode("appID")}}, nil, nil, utils.MapStorage{utils.AccountField: "Field1"}, tntTpl, "", "", nil, nil)
+// 	testCases := []struct {
+// 		fullPath *utils.FullPath
+// 		val      *utils.DataLeaf
+// 		isError  bool
+// 	}{
+// 		{fullPath: &utils.FullPath{PathSlice: []string{utils.MetaVars}}, val: &utils.DataLeaf{Data: "test"}, isError: false},
+// 		{fullPath: &utils.FullPath{PathSlice: []string{utils.MetaCgreq}}, val: &utils.DataLeaf{Data: "test"}, isError: false},
+// 		{fullPath: &utils.FullPath{PathSlice: []string{utils.MetaCgrep}}, val: &utils.DataLeaf{Data: "test"}, isError: false},
+// 		{fullPath: &utils.FullPath{PathSlice: []string{utils.MetaRep}}, val: &utils.DataLeaf{Data: "test"}, isError: false},
+// 		{fullPath: &utils.FullPath{PathSlice: []string{utils.MetaDiamreq}}, val: &utils.DataLeaf{Data: "test"}, isError: false},
+// 		{fullPath: &utils.FullPath{PathSlice: []string{utils.MetaTmp}}, val: &utils.DataLeaf{Data: "test"}, isError: false},
+// 		{fullPath: &utils.FullPath{PathSlice: []string{utils.MetaOpts}}, val: &utils.DataLeaf{Data: "test"}, isError: false},
+// 		{fullPath: &utils.FullPath{PathSlice: []string{utils.MetaUCH}}, val: &utils.DataLeaf{Data: "test"}, isError: false},
+// 		{fullPath: &utils.FullPath{PathSlice: []string{"unsupported_prefix"}}, val: &utils.DataLeaf{Data: "test"}, isError: true},
+// 	}
+
+// 	for _, testCase := range testCases {
+// 		err := ar.Append(testCase.fullPath, testCase.val)
+// 		if testCase.isError && err == nil {
+// 			t.Fatalf("expected an error for fullPath: <%v>, but got no error", testCase.fullPath)
+// 		}
+// 		if !testCase.isError && err != nil {
+// 			t.Fatalf("expected no error for fullPath: <%v>, but got error: %v", testCase.fullPath, err)
+// 		}
+// 	}
+// }

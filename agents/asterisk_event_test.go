@@ -475,3 +475,55 @@ func TestRequestType(t *testing.T) {
 		t.Error("Received:", smaEv.RequestType())
 	}
 }
+
+func TestSMAsteriskEventUpdateCGREvent(t *testing.T) {
+	cgrEv := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "event1",
+		Event:  make(map[string]interface{}),
+	}
+
+	testCases := []struct {
+		smaEv     *SMAsteriskEvent
+		wantErr   bool
+		eventName string
+	}{
+		{
+			smaEv: &SMAsteriskEvent{
+				cachedFields: map[string]string{
+					eventType: ARIChannelStateChange,
+					timestamp: "2023-05-05T10:00:00Z",
+				},
+			},
+			wantErr:   false,
+			eventName: SMASessionStart,
+		},
+		{
+			smaEv: &SMAsteriskEvent{
+				cachedFields: map[string]string{
+					eventType: ARIChannelDestroyed,
+					timestamp: "2023-05-05T10:00:00Z",
+				},
+			},
+			wantErr:   false,
+			eventName: SMASessionTerminate,
+		},
+	}
+
+	for _, testCase := range testCases {
+		err := testCase.smaEv.UpdateCGREvent(cgrEv)
+		if testCase.wantErr && err == nil {
+			t.Fatal("expected an error, but got no error")
+		}
+		if !testCase.wantErr && err != nil {
+			t.Fatalf("expected no error, but got error: %v", err)
+		}
+
+		if !testCase.wantErr {
+			if eventName, ok := cgrEv.Event[utils.EventName]; !ok || eventName != testCase.eventName {
+				t.Fatalf("expected event name: %s, but got: %v", testCase.eventName, eventName)
+			}
+		}
+
+	}
+}

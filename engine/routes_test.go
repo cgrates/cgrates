@@ -2181,3 +2181,66 @@ func TestV1GetRoutesList(t *testing.T) {
 	}
 
 }
+
+func TestRoutesV1GetRoutes(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	rpS := NewRouteService(dm, NewFilterS(cfg, nil, dm), cfg, nil)
+
+	var reply []*RouteProfile
+	fltr := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "FLT1",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaString,
+				Element: "~*req.Account",
+				Values:  []string{"1003"},
+			},
+		},
+	}
+	dm.SetFilter(fltr, true)
+	rpp := &RouteProfile{
+		Tenant:    "cgrates.org",
+		ID:        "ROUTE1",
+		FilterIDs: []string{"FLT1"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2022, 11, 27, 0, 0, 0, 0, time.UTC),
+		},
+		Sorting: utils.MetaWeight,
+		Routes: []*Route{{
+			ID:     "route1",
+			Weight: 10,
+		}, {
+			ID:     "route2",
+			Weight: 20,
+		}},
+		Weight: 20,
+	}
+	dm.SetRouteProfile(rpp, true)
+
+	args := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "RouteProcessEvent",
+		Event: map[string]interface{}{
+			utils.RequestType:  utils.MetaPostpaid,
+			utils.Category:     utils.Call,
+			utils.AccountField: "1003",
+			utils.Subject:      "1003",
+			utils.Destination:  "1002",
+			utils.AnswerTime:   time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
+			utils.SetupTime:    time.Date(2018, 8, 24, 16, 00, 00, 0, time.UTC),
+			utils.Usage:        time.Minute,
+		},
+	}
+
+	if err := rpS.V1GetRouteProfilesForEvent(args, &reply); err != nil {
+		t.Error(err)
+	}
+
+	if !reflect.DeepEqual(reply[0], rpp) {
+		t.Errorf("expected %+v,received %+v", utils.ToJSON(rpp), utils.ToJSON(reply))
+	}
+
+}

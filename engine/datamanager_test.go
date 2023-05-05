@@ -4918,3 +4918,65 @@ func TestDmCheckFiltersRmt(t *testing.T) {
 	}
 	//unfinished
 }
+
+func TestDmRebuildReverseForPrefix(t *testing.T) {
+	testCases := []struct {
+		desc      string
+		prefix    string
+		expectErr bool
+	}{
+		{
+			desc:      "Valid prefix - ReverseDestinationPrefix",
+			prefix:    utils.ReverseDestinationPrefix,
+			expectErr: false,
+		},
+		{
+			desc:      "Valid prefix - AccountActionPlansPrefix",
+			prefix:    utils.AccountActionPlansPrefix,
+			expectErr: false,
+		},
+		{
+			desc:      "Invalid prefix",
+			prefix:    "invalid_prefix",
+			expectErr: true,
+		},
+	}
+	cfg := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	dm.SetDestination(&Destination{
+		Id:       "Dest",
+		Prefixes: []string{"1001", "1002"},
+	}, "")
+
+	apls := []*ActionPlan{
+		{
+			Id:         "DisableBal",
+			AccountIDs: utils.StringMap{"cgrates:1001": true},
+		},
+		{
+			Id:         "MoreMinutes",
+			AccountIDs: utils.StringMap{"cgrates:1002": true},
+		},
+	}
+	dm.SetAccount(&Account{ID: "cgrates:org:1001"})
+	dm.SetAccount(&Account{ID: "cgrates:org:1002"})
+	for _, apl := range apls {
+		dm.SetActionPlan(apl.Id, apl, true, "")
+
+	}
+	for _, tc := range testCases {
+		t.Run(tc.desc, func(t *testing.T) {
+			err := dm.RebuildReverseForPrefix(tc.prefix)
+			if tc.expectErr {
+				if err == nil {
+					t.Fatal("Expected error, got nil")
+				}
+			} else {
+				if err != nil {
+					t.Fatalf("Expected no error, got: %v", err)
+				}
+			}
+		})
+	}
+}
