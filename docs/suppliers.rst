@@ -73,13 +73,13 @@ attributes_conns
 	Connections to AttributeS for altering events before supplier queries. If undefined, fields modifications are disabled.
 
 resources_conns
-	Connections to ResourceS for *res sorting, empty to disable functionality.
+	Connections to ResourceS for \*res sorting, empty to disable functionality.
 
 stats_conns
-	Connections to StatS for *stats sorting, empty to disable stats functionality.
+	Connections to StatS for \*stats sorting, empty to disable stats functionality.
 
 default_ratio
-	Default ratio used in case of *load strategy
+	Default ratio used in case of \*load strategy
 
 
 .. _SupplierProfile:
@@ -159,19 +159,19 @@ FilterIDs
 	List of *FilterProfileIDs* which should match in order to consider the *Supplier* in use/active.
 	
 AccountIDs
-	List of account IDs which should be checked in case of some strategies (ie: *lc, *hc).
+	List of account IDs which should be checked in case of some strategies (ie: \*lc, \*hc).
 	
 RatingPlanIDs
-	List of RatingPlanIDs which should be checked in case of some strategies (ie: *lc, *hc).
+	List of RatingPlanIDs which should be checked in case of some strategies (ie: \*lc, \*hc).
 
 ResourceIDs
-	List of ResourceIDs which should be checked in case of some strategies (ie: *reas or *reds).
+	List of ResourceIDs which should be checked in case of some strategies (ie: \*reas or \*reds).
 
 StatIDs
-	List of StatIDs which should be checked in case of some strategies (ie: *qos or *load). Can also be defined as *StatID:MetricID*.
+	List of StatIDs which should be checked in case of some strategies (ie: \*qos or \*load). Can also be defined as *StatID:MetricID*.
 
 Weight
-	Used for sorting in some strategies (ie: *weight, *lc or *hc).
+	Used for sorting in some strategies (ie: \*weight, \*lc or \*hc).
 
 Blocker
 	No more suppliers are provided after this one.

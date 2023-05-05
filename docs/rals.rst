@@ -243,10 +243,10 @@ The following *BalanceTypes* are supported:
 	Coupled with MMS events, represents number of MMS units.
 
 \*generic
-	Matching all types of events after specific ones, represents generic units (ie: for each x *voice minutes, y *sms units, z *data units will have )
+	Matching all types of events after specific ones, representing generic units (i.e., for each x \*voice minutes, y \*sms units, and z \*data units will have their respective usage)
 
 \*monetary
-	Matching all types of events after specific ones, represents monetary units (can be interpreted as virtual currency).
+	Matching all types of events after specific ones, representing monetary units (can be interpreted as virtual currency).
 
 
 
@@ -381,7 +381,7 @@ Action
 
 Actions are routines executed on demand (ie. by one of the three subsystems: :ref:`SchedulerS`, :ref:`ThresholdS` or :ref:`ActionTriggers <ActionTrigger>`) or called by API by external scripts.
 
-An *Action has the following parameters:
+An \*Action has the following parameters:
 
 ID
 	*ActionSet* identifier.

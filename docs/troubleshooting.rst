@@ -6,7 +6,7 @@ In case of **troubleshooting**, CGRateS can monitor memory profiling and CPU pro
 Memory Profiling
 ----------------
 
-Creating the memory profile files.
+Creating the memory profile files
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Firstly, go to the main config directory and run the engine with the flag named ```-memprof_dir```. For this example, I choosed ```tmp``` directory from my machine.
