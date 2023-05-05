@@ -140,7 +140,7 @@ Use cases
 
 * Aggregate various traffic metrics for traffic transparency.
 * Revenue assurance applications.
-* Fraud detection by aggregating specific billing metrics during sensitive time intervals (*acc, *tcc, *tcd).
+* Fraud detection by aggregating specific billing metrics during sensitive time intervals (\*acc, \*tcc, \*tcd).
 * Building call patterns.
 * Building statistical information to train systems capable of artificial intelligence.
 * Building quality metrics used in traffic routing.

@@ -290,7 +290,7 @@ flags
 		Auxiliary flags available: all flags supported by the "SessionSv1.ProcessEvent" generic API
 
 	**\*cdrs**
-		Build a CDR out of the request on CGRateS side. Can be used simultaneously with other flags (except *\*dry_run)
+		Build a CDR out of the request on CGRateS side. Can be used simultaneously with other flags (except **\*dryrun**)
 
 
 path

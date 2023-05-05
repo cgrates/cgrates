@@ -21,8 +21,10 @@ following rules:
  - Rate id: *RT_1CNT_PER_SEC* having no connect fee and a rate of 1 cent per second, chargeable in 1 second increments.
 
 - Accounting part will have following configured:
- - Create 3 accounts: 1001, 1002, 1003.
- - 1001, 1002 will receive 10units of *\*monetary* balance.
+
+  - Create 3 accounts: 1001, 1002, 1003.
+  - 1001, 1002 will receive 10units of **\*monetary** balance.
+
 
 ::
 
