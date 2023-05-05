@@ -2,12 +2,11 @@
 - name: Install Asterisk dependencies
   become: yes
   apt:
-    name: "{{ item }}"
+    name: "{{ asterisk_dependencies }}"
     state: present
-    update_cache: "{{ 'yes' if item == asterisk_dependencies[0] else 'no' }}"
+    update_cache: yes
     cache_valid_time: 86400
-  with_items: "{{ asterisk_dependencies }}"
-  
+
 - name: Download Asterisk
   get_url:
     url: "{{ asterisk_download_url }}/asterisk-{{ asterisk_version }}.tar.gz"

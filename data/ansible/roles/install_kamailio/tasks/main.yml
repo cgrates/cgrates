@@ -1,0 +1,28 @@
+---
+- name: Add Kamailio repository key
+  become: yes
+  apt_key:
+    url: "{{ kamailio_repository_key_url }}"
+    state: present
+
+- name: Add Kamailio repository
+  become: yes
+  apt_repository:
+    repo: "{{ kamailio_repository_line }}"
+    state: present
+    filename: kamailio
+
+- name: Add Kamailio repository src
+  become: yes
+  apt_repository:
+    repo: "{{ kamailio_repository_src_line }}"
+    state: present
+    filename: kamailio
+
+- name: Install Kamailio packages
+  become: yes
+  apt:
+    name: "{{ kamailio_packages }}"
+    state: latest
+    update_cache: yes
+    cache_valid_time: 86400
