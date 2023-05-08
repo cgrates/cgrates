@@ -2607,3 +2607,316 @@ func TestV1GetRouteProfilesForEventOK(t *testing.T) {
 	}
 
 }
+
+func TestRoutessortedRoutesForProfileLazyPassErr(t *testing.T) {
+
+	defer func() {
+		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	fS := NewFilterS(cfg, nil, dm)
+	routeService := &RouteS{
+		dm:      dm,
+		fltrS:   fS,
+		cfg:     cfg,
+		connMgr: nil,
+	}
+
+	args := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "utils.CGREvent1",
+		Event: map[string]interface{}{
+			"Route":          "RouteProfile1",
+			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
+			"UsageInterval":  "1s",
+			"PddInterval":    "1s",
+			utils.Weight:     "20.0",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsRoutesProfilesCount: 1,
+		},
+	}
+
+	rp := &RouteProfile{
+		Tenant:  "cgrates.org",
+		ID:      "RouteProfile1",
+		Sorting: utils.MetaWeight,
+
+		Routes: []*Route{
+			{
+				ID:              "route1",
+				FilterIDs:       []string{"bad fltr"},
+				Weights:         utils.DynamicWeights{{Weight: 10}},
+				RouteParameters: "param1",
+			},
+		},
+		Weights:  utils.DynamicWeights{{Weight: 10}},
+		Blockers: utils.DynamicBlockers{{Blocker: true}},
+	}
+
+	pag := utils.Paginator{}
+	extraOpts := &optsGetRoutes{}
+	expErr := "NOT_FOUND:bad fltr"
+	if _, err := routeService.sortedRoutesForProfile(context.Background(), "cgrates.org", rp, args, pag, extraOpts); err == nil || err.Error() != expErr {
+		t.Errorf("Expected error <%v>, Received error <%v> ", expErr, err.Error())
+
+	}
+}
+
+func TestRoutessortedRoutesForProfileLazyPassFalse(t *testing.T) {
+
+	defer func() {
+		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	fS := NewFilterS(cfg, nil, dm)
+	routeService := &RouteS{
+		dm:      dm,
+		fltrS:   fS,
+		cfg:     cfg,
+		connMgr: nil,
+		sorter: RouteSortDispatcher{
+			utils.MetaWeight: NewWeightSorter(cfg),
+		},
+	}
+
+	args := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "utils.CGREvent1",
+		Event: map[string]interface{}{
+			"Route":          "RouteProfile1",
+			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
+			"UsageInterval":  "1s",
+			"PddInterval":    "1s",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsRoutesProfilesCount: 1,
+		},
+	}
+
+	rp := &RouteProfile{
+		Tenant:  "cgrates.org",
+		ID:      "RouteProfile1",
+		Sorting: utils.MetaWeight,
+		Routes: []*Route{
+			{
+				ID:              "route1",
+				FilterIDs:       []string{"*string:~*req.Account:1010", "*string:~*vars.Field1:Val1"},
+				Weights:         utils.DynamicWeights{{Weight: 10}},
+				RouteParameters: "param1",
+			},
+		},
+		Weights:  utils.DynamicWeights{{Weight: 10}},
+		Blockers: utils.DynamicBlockers{{Blocker: true}},
+	}
+
+	pag := utils.Paginator{}
+	extraOpts := &optsGetRoutes{}
+	exp := SortedRoutes{
+		ProfileID: "RouteProfile1",
+		Sorting:   "*weight",
+		Routes:    []*SortedRoute{},
+	}
+	if rcv, err := routeService.sortedRoutesForProfile(context.Background(), "cgrates.org", rp, args, pag, extraOpts); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(utils.ToJSON(exp), utils.ToJSON(rcv)) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(exp), utils.ToJSON(rcv))
+	}
+}
+
+func TestRoutessortedRoutesForProfileWeightFromDynamicsErr(t *testing.T) {
+
+	defer func() {
+		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	fS := NewFilterS(cfg, nil, dm)
+	routeService := &RouteS{
+		dm:      dm,
+		fltrS:   fS,
+		cfg:     cfg,
+		connMgr: nil,
+	}
+
+	args := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "utils.CGREvent1",
+		Event: map[string]interface{}{
+			"Route":          "RouteProfile1",
+			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
+			"UsageInterval":  "1s",
+			"PddInterval":    "1s",
+			utils.Weight:     "20.0",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsRoutesProfilesCount: 1,
+		},
+	}
+
+	rp := &RouteProfile{
+		Tenant:  "cgrates.org",
+		ID:      "RouteProfile1",
+		Sorting: utils.MetaWeight,
+
+		Routes: []*Route{
+			{
+				ID: "route1",
+				Weights: utils.DynamicWeights{
+					{
+						FilterIDs: []string{"*stirng:~*req.Account:1001"},
+						Weight:    10,
+					},
+				},
+				RouteParameters: "param1",
+			},
+		},
+		Weights:  utils.DynamicWeights{{Weight: 10}},
+		Blockers: utils.DynamicBlockers{{Blocker: true}},
+	}
+
+	pag := utils.Paginator{}
+	extraOpts := &optsGetRoutes{}
+	expErr := "NOT_IMPLEMENTED:*stirng"
+	_, err := routeService.sortedRoutesForProfile(context.Background(), "cgrates.org", rp, args, pag, extraOpts)
+	if err == nil || err.Error() != expErr {
+		t.Errorf("Expected error <%+v>, received error <%+v>", expErr, err)
+	}
+}
+
+func TestRoutessortedRoutesForProfileBlockerFromDynamicsErr(t *testing.T) {
+
+	defer func() {
+		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	fS := NewFilterS(cfg, nil, dm)
+	routeService := &RouteS{
+		dm:      dm,
+		fltrS:   fS,
+		cfg:     cfg,
+		connMgr: nil,
+	}
+
+	args := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "utils.CGREvent1",
+		Event: map[string]interface{}{
+			"Route":          "RouteProfile1",
+			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
+			"UsageInterval":  "1s",
+			"PddInterval":    "1s",
+			utils.Weight:     "20.0",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsRoutesProfilesCount: 1,
+		},
+	}
+
+	rp := &RouteProfile{
+		Tenant:  "cgrates.org",
+		ID:      "RouteProfile1",
+		Sorting: utils.MetaWeight,
+
+		Routes: []*Route{
+			{
+				ID: "route1",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 10,
+					},
+				},
+				Blockers: utils.DynamicBlockers{
+					{
+						FilterIDs: []string{"*stirng:~*req.Account:1001"},
+						Blocker:   false,
+					},
+				},
+				RouteParameters: "param1",
+			},
+		},
+		Weights:  utils.DynamicWeights{{Weight: 10}},
+		Blockers: utils.DynamicBlockers{{Blocker: true}},
+	}
+
+	pag := utils.Paginator{}
+	extraOpts := &optsGetRoutes{}
+	expErr := "NOT_IMPLEMENTED:*stirng"
+	_, err := routeService.sortedRoutesForProfile(context.Background(), "cgrates.org", rp, args, pag, extraOpts)
+	if err == nil || err.Error() != expErr {
+		t.Errorf("Expected error <%+v>, received error <%+v>", expErr, err)
+	}
+}
+
+func TestRoutessortedRoutesForProfileSortHasBlocker(t *testing.T) {
+
+	defer func() {
+		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	fS := NewFilterS(cfg, nil, dm)
+	routeService := NewRouteService(dm, fS, cfg, nil)
+
+	args := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "utils.CGREvent1",
+		Event: map[string]interface{}{
+			"Route":          "RouteProfile1",
+			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
+			"UsageInterval":  "1s",
+			"PddInterval":    "1s",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsRoutesProfilesCount: 1,
+		},
+	}
+
+	rp := &RouteProfile{
+		Tenant:  "cgrates.org",
+		ID:      "RouteProfile1",
+		Sorting: utils.MetaWeight,
+		Routes: []*Route{
+			{
+				ID:              "route1",
+				Weights:         utils.DynamicWeights{{Weight: 10}},
+				Blockers:        utils.DynamicBlockers{{Blocker: true}},
+				RouteParameters: "param1",
+			},
+		},
+		Weights:  utils.DynamicWeights{{Weight: 10}},
+		Blockers: utils.DynamicBlockers{{Blocker: true}},
+	}
+
+	pag := utils.Paginator{}
+	extraOpts := &optsGetRoutes{}
+	exp := SortedRoutes{
+		ProfileID: "RouteProfile1",
+		Sorting:   "*weight",
+		Routes: []*SortedRoute{
+			{
+				RouteID:         "route1",
+				RouteParameters: "param1",
+				SortingData:     map[string]interface{}{utils.Blocker: true, utils.Weight: 10}},
+		},
+	}
+
+	if rcv, err := routeService.sortedRoutesForProfile(context.Background(), "cgrates.org", rp, args, pag, extraOpts); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(utils.ToJSON(exp), utils.ToJSON(rcv)) {
+		t.Errorf("Expecting: \n%+v\n, received: \n%+v", utils.ToJSON(exp), utils.ToJSON(rcv))
+	}
+}
