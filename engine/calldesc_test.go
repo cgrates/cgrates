@@ -2096,3 +2096,88 @@ func TestCallDescRefundRounding(t *testing.T) {
 		t.Errorf("Expected %v,Received %v", utils.ToJSON(expAcc), utils.ToJSON(acc))
 	}
 }
+
+func TestNewCallDescriptorFromCGREventErr(t *testing.T) {
+	timezone := "UTC"
+	tests := []struct {
+		name    string
+		cgrEv   *utils.CGREvent
+		wantErr bool
+	}{
+		{
+			name: "Missing Account",
+			cgrEv: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				Event: map[string]interface{}{
+					utils.Category: "Call",
+				},
+			},
+			wantErr: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			_, err := NewCallDescriptorFromCGREvent(tt.cgrEv, timezone)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("NewCallDescriptorFromCGREvent() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+
+		})
+	}
+}
+
+func TestValidateCallData(t *testing.T) {
+	tests := []struct {
+		name    string
+		cd      *CallDescriptor
+		wantErr bool
+	}{
+		{
+			name: "Valid Call Data",
+			cd: &CallDescriptor{
+				TimeStart:     time.Date(2023, 5, 8, 12, 0, 0, 0, time.UTC),
+				TimeEnd:       time.Date(2023, 5, 8, 12, 30, 0, 0, time.UTC),
+				DurationIndex: time.Duration(30) * time.Minute,
+			},
+			wantErr: false,
+		},
+		{
+			name: "TimeStart is equal to TimeEnd",
+			cd: &CallDescriptor{
+				TimeStart:     time.Date(2023, 5, 8, 12, 0, 0, 0, time.UTC),
+				TimeEnd:       time.Date(2023, 5, 8, 12, 0, 0, 0, time.UTC),
+				DurationIndex: time.Duration(0),
+			},
+			wantErr: true,
+		},
+		{
+			name: "TimeStart is after TimeEnd",
+			cd: &CallDescriptor{
+				TimeStart:     time.Date(2023, 5, 8, 12, 30, 0, 0, time.UTC),
+				TimeEnd:       time.Date(2023, 5, 8, 12, 0, 0, 0, time.UTC),
+				DurationIndex: time.Duration(0),
+			},
+			wantErr: true,
+		},
+		{
+			name: "DurationIndex is less than TimeEnd - TimeStart",
+			cd: &CallDescriptor{
+				TimeStart:     time.Date(2023, 5, 8, 12, 15, 0, 0, time.UTC),
+				TimeEnd:       time.Date(2023, 5, 8, 12, 30, 0, 0, time.UTC),
+				DurationIndex: time.Duration(20) * time.Minute,
+			},
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := tt.cd.ValidateCallData()
+			if (err != nil) != tt.wantErr {
+				t.Errorf("ValidateCallData() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+		})
+	}
+}
