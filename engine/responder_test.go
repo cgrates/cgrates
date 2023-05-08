@@ -1130,3 +1130,75 @@ func TestResponderDebitCached(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+// func TestResponderGetCostCache(t *testing.T) {
+// 	cfg, _ := config.NewDefaultCGRConfig()
+// 	cfg.CacheCfg()[utils.CacheRPCResponses].Limit = 1
+// 	tmpCache := Cache
+// 	defer func() {
+// 		cfg2, _ := config.NewDefaultCGRConfig()
+// 		config.SetCgrConfig(cfg2)
+// 		Cache = tmpCache
+// 	}()
+// 	Cache.Clear(nil)
+// 	config.SetCgrConfig(cfg)
+// 	rs := &Responder{}
+// 	arg := &CallDescriptorWithArgDispatcher{
+// 		CallDescriptor: &CallDescriptor{
+// 			CgrID:       "CGRID",
+// 			Tenant:      "cgrates.org",
+// 			Category:    "call",
+// 			Account:     "1001",
+// 			Subject:     "1001",
+// 			Destination: "1002",
+// 			ToR:         utils.VOICE,
+// 			TimeStart:   time.Now(),
+// 			TimeEnd:     time.Now().Add(10 * time.Minute),
+// 		},
+// 	}
+
+// 	reply := &CallCost{}
+// 	cacheKey := utils.ConcatenatedKey(utils.ResponderGetCost, arg.CgrID)
+// 	Cache.Set(utils.CacheRPCResponses, cacheKey,
+// 		&utils.CachedRPCResponse{Result: &CallCost{
+// 			Tenant:      "cgrates.org",
+// 			Destination: "1002",
+// 			ToR:         utils.VOICE,
+// 			Cost:        1.5,
+// 			Timespans: TimeSpans{
+// 				&TimeSpan{
+// 					TimeStart: time.Now(),
+// 					TimeEnd:   time.Now().Add(10 * time.Minute),
+// 					Cost:      1.5,
+// 					RateInterval: &RateInterval{
+// 						Timing: &RITiming{
+// 							StartTime: "00:00:00",
+// 						},
+// 						Rating: &RIRate{
+// 							ConnectFee: 0,
+// 							Rates: RateGroups{
+// 								&Rate{
+// 									GroupIntervalStart: 0,
+// 									Value:              0.15,
+// 									RateIncrement:      time.Minute,
+// 									RateUnit:           time.Minute,
+// 								},
+// 							},
+// 						},
+// 					},
+// 				},
+// 			},
+// 		}, Error: nil},
+// 		nil, true, utils.NonTransactional)
+
+// 	err := rs.GetCost(arg, reply)
+// 	if err != nil {
+// 		t.Fatalf("Unexpected error: %v", err)
+// 	}
+
+// 	if rpl, has := Cache.Get(utils.CacheRPCResponses, cacheKey); !has {
+// 		t.Fatalf("Expected cached result, but not found")
+// 	} else if !reflect.DeepEqual(rpl, reply) {
+// 		t.Errorf("Expected %+v,Received %+v", utils.ToJSON(reply), utils.ToJSON(rpl))
+// 	}
+// }

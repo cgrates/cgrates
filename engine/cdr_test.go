@@ -1259,3 +1259,99 @@ func TestCDRcombimedCdrFieldVal(t *testing.T) {
 	}
 
 }
+
+func TestUsageAsCDR(t *testing.T) {
+	tests := []struct {
+		name      string
+		record    *UsageRecord
+		timezone  string
+		want      *CDR
+		wantError bool
+	}{
+		{
+			name: "Valid Usage Record",
+			record: &UsageRecord{
+				ToR:         utils.VOICE,
+				RequestType: utils.META_RATED,
+				Tenant:      "cgrates.org",
+				Category:    "call",
+				Account:     "1001",
+				Subject:     "1001",
+				Destination: "1002",
+				SetupTime:   "2013-11-07T08:42:20Z",
+				AnswerTime:  "2013-11-07T08:42:26Z",
+				Usage:       "10",
+				ExtraFields: map[string]string{"key1": "value1", "key2": "value2"},
+			},
+			timezone: "UTC",
+			want: &CDR{
+				ToR:         utils.VOICE,
+				RequestType: utils.META_RATED,
+				Tenant:      "cgrates.org",
+				Category:    "call",
+				Account:     "1001",
+				Subject:     "1001",
+				Destination: "1002",
+				SetupTime:   time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC),
+				AnswerTime:  time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
+				Usage:       time.Duration(10) * time.Second,
+				Cost:        1.01,
+				ExtraFields: map[string]string{"key1": "value1", "key2": "value2"},
+			},
+			wantError: false,
+		},
+		{
+			name: "Invalid SetupTime",
+			record: &UsageRecord{
+				SetupTime: "invalid-time",
+			},
+			timezone:  "UTC",
+			want:      nil,
+			wantError: true,
+		},
+		{
+			name: "Invalid AnswerTime",
+			record: &UsageRecord{
+				SetupTime:  "2023-05-08T10:00:00Z",
+				AnswerTime: "invalid-time",
+			},
+			timezone:  "UTC",
+			want:      nil,
+			wantError: true,
+		},
+		{
+			name: "Invalid Usage",
+			record: &UsageRecord{
+
+				SetupTime:  "2023-05-08T10:00:00Z",
+				AnswerTime: "2023-05-08T10:00:05Z",
+				Usage:      "invalid-usage",
+			},
+			timezone:  "UTC",
+			want:      nil,
+			wantError: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := tt.record.AsCDR(tt.timezone)
+			if (err != nil) != tt.wantError {
+				t.Errorf("AsCDR() error = %v, wantError %v", err, tt.wantError)
+				return
+			}
+			if tt.want != nil {
+				if got.ToR != tt.want.ToR || got.RequestType != tt.want.RequestType ||
+					got.Tenant != tt.want.Tenant || got.Category != tt.want.Category || got.Account != tt.want.Account ||
+					got.Subject != tt.want.Subject || got.Destination != tt.want.Destination {
+					t.Errorf("AsCDR() got = %v, want %v", got, tt.want)
+				}
+				for k, v := range tt.record.ExtraFields {
+					if gotV, ok := got.ExtraFields[k]; !ok || gotV != v {
+						t.Errorf("AsCDR() extra field key %s got value = %v, want value = %v", k, gotV, v)
+					}
+				}
+			}
+		})
+	}
+}

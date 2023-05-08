@@ -1798,3 +1798,183 @@ func TestDMSetSQPrf(t *testing.T) {
 	}
 
 }
+
+func TestRemoveAttributeProfile(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	defer func() {
+		cfg2, _ := config.NewDefaultCGRConfig()
+		config.SetCgrConfig(cfg2)
+	}()
+	cfg.DataDbCfg().Items[utils.MetaAttributeProfiles].Replicate = true
+	cfg.DataDbCfg().RplConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}
+	clientConn := make(chan birpc.ClientConnector, 1)
+	clientConn <- clMock(func(_ *context.Context, serviceMethod string, _, _ interface{}) error {
+		if serviceMethod == utils.ReplicatorSv1RemoveAttributeProfile {
+			return nil
+		}
+		return utils.ErrNotImplemented
+	})
+
+	dm := NewDataManager(NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items), cfg.CacheCfg(), NewConnManager(cfg, map[string]chan context.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes): clientConn,
+	}))
+
+	tests := []struct {
+		name          string
+		tenant        string
+		id            string
+		transactionID string
+		withIndex     bool
+		wantError     bool
+	}{
+		{
+			name:      "Remove Nonexistent Attribute Profile",
+			tenant:    "cgrates.org",
+			id:        "non_exst",
+			withIndex: true,
+			wantError: true,
+		},
+		{
+			name:      "Remove AttributeProfile non-existing filter",
+			tenant:    "cgrates.org",
+			id:        "ATTR_1002_SIMPLEAUTH",
+			withIndex: true,
+			wantError: true,
+		},
+		{
+			name:      "Remove an attribute profile without a specific index",
+			tenant:    "cgrates.org",
+			id:        "ATTR_NO_FLTR",
+			withIndex: false,
+			wantError: false,
+		},
+	}
+	attributes := []struct {
+		index     bool
+		attribute *AttributeProfile
+	}{
+		{
+			index: true,
+			attribute: &AttributeProfile{
+				Tenant:    "cgrates.org",
+				ID:        "ATTR_1002_SIMPLEAUTH",
+				FilterIDs: []string{"FLT_NIL"},
+				Contexts:  []string{"simpleauth"},
+				Weight:    20.0,
+			},
+		}, {
+			attribute: &AttributeProfile{
+				Tenant:   "cgrates.org",
+				ID:       "ATTR_NO_FLTR",
+				Contexts: []string{utils.MetaSessionS, utils.META_ANY},
+				Attributes: []*Attribute{
+					{
+						Path:  utils.MetaReq + utils.NestingSep + utils.CGRID,
+						Value: config.NewRSRParsersMustCompile("test_generated_id", true, utils.INFIELD_SEP),
+					},
+				},
+				Weight: 20.0,
+			},
+			index: false,
+		},
+	}
+	for _, attr := range attributes {
+		dm.SetAttributeProfile(attr.attribute, attr.index)
+	}
+
+	config.SetCgrConfig(cfg)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := dm.RemoveAttributeProfile(tt.tenant, tt.id, tt.transactionID, tt.withIndex)
+			if (err != nil) != tt.wantError {
+				t.Errorf("RemoveAttributeProfile() error = %v, wantError %v", err, tt.wantError)
+				return
+			}
+		})
+	}
+}
+
+func TestDataManagerRemoveChargerProfile(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	defer func() {
+		cfg2, _ := config.NewDefaultCGRConfig()
+		config.SetCgrConfig(cfg2)
+	}()
+	cfg.DataDbCfg().RplConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1)}
+	cfg.DataDbCfg().Items[utils.MetaChargerProfiles].Replicate = true
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	clientConn := make(chan birpc.ClientConnector, 1)
+	clientConn <- clMock(func(_ *context.Context, serviceMethod string, _, _ interface{}) error {
+		if serviceMethod == utils.ReplicatorSv1RemoveChargerProfile {
+			return nil
+		}
+		return utils.ErrNotFound
+	})
+	dm := NewDataManager(db, cfg.CacheCfg(), NewConnManager(cfg, map[string]chan context.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
+	}))
+	testCases := []struct {
+		name           string
+		tenant         string
+		id             string
+		transactionID  string
+		withIndex      bool
+		expectedErr    bool
+		chargerProfile *ChargerProfile
+	}{
+		{
+			name:          "RemoveChargerProfile - Not Found",
+			tenant:        "cgrates.org",
+			id:            "cpp1",
+			transactionID: "",
+			withIndex:     false,
+			expectedErr:   true,
+		},
+		{
+			name:          "RemoveChargerProfile - Broken Filter",
+			tenant:        "cgrates.org",
+			id:            "cpp2",
+			transactionID: "",
+			withIndex:     true,
+			chargerProfile: &ChargerProfile{
+				Tenant:    "cgrates.org",
+				ID:        "cpp2",
+				FilterIDs: []string{"FLTR_CP_2"},
+				ActivationInterval: &utils.ActivationInterval{
+					ActivationTime: time.Date(2023, 7, 14, 14, 25, 0, 0, time.UTC),
+				},
+				RunID:        "*rated",
+				AttributeIDs: []string{"ATTR_1"},
+				Weight:       20,
+			},
+			expectedErr: true,
+		},
+		{
+			name:          "RemoveChargerProfile - Successful Removal",
+			tenant:        "cgrates.org",
+			id:            "cpp1",
+			transactionID: "",
+			withIndex:     false,
+			expectedErr:   false,
+			chargerProfile: &ChargerProfile{
+				Tenant:    "cgrates.org",
+				ID:        "cpp1",
+				FilterIDs: []string{"*string:Account:1001"},
+				RunID:     "*default",
+				Weight:    20,
+			},
+		},
+	}
+	config.SetCgrConfig(cfg)
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			if tc.chargerProfile != nil {
+				dm.SetChargerProfile(tc.chargerProfile, true)
+			}
+			err := dm.RemoveChargerProfile(tc.tenant, tc.id, tc.transactionID, tc.withIndex)
+			if (err != nil) != tc.expectedErr {
+				t.Errorf("Expected error: %v, received error: %v", tc.expectedErr, err)
+			}
+		})
+	}
+}
