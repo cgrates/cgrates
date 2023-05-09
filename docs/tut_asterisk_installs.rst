@@ -59,6 +59,6 @@ To install Asterisk, follow these steps:
 
       sudo adduser --quiet --system --group --disabled-password --shell /bin/false --gecos "Asterisk" asterisk
 
-Once installed, we proceed with loading the configuration out of specific tutorial cases below.
+After the installation is complete, we will proceed to load the configuration based on the specific tutorial case provided in the subsequent section.
 
 .. _Asterisk: http://www.asterisk.org/
