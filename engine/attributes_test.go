@@ -2172,3 +2172,48 @@ func TestAttributeGetForEvent(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestAttrSGetAttributeForEventErrs(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	attrService, err := NewAttributeService(dm, NewFilterS(cfg, nil, dm), cfg)
+	if err != nil {
+		t.Error(err)
+	}
+	testCases := []struct {
+		name     string
+		args     *AttrArgsProcessEvent
+		attrPrfl *AttributeProfile
+	}{
+		{
+			name: "Missing CgrEvent",
+			args: &AttrArgsProcessEvent{},
+		},
+		{
+			name: "AttributeProfile not found",
+			args: &AttrArgsProcessEvent{
+				CGREvent: &utils.CGREvent{
+					Tenant: "cgrates.org",
+					ID:     "CGREvent1",
+					Event: map[string]interface{}{
+						utils.Account:     "1002",
+						utils.Subject:     "1002",
+						utils.Destination: "1001",
+						utils.SetupTime:   time.Date(2022, 12, 1, 14, 25, 0, 0, time.UTC),
+						utils.Usage:       "1m20s",
+					},
+				},
+			},
+			attrPrfl: new(AttributeProfile),
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			err := attrService.V1GetAttributeForEvent(tc.args, tc.attrPrfl)
+			if err == nil {
+				t.Error("expected error")
+			}
+		})
+	}
+}

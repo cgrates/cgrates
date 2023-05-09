@@ -607,76 +607,75 @@ func TestCDRSThDSProcessEvent(t *testing.T) {
 
 // }
 
-// func TestCRDSRefundEventCost(t *testing.T) {
-// 	cfg, _ := config.NewDefaultCGRConfig()
-// 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-// 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
-// 	cfg.CdrsCfg().RaterConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs)}
-// 	cdrS := &CDRServer{cgrCfg: cfg, dm: dm, cdrDb: db}
+func TestCRDSRefundEventCost(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	Cache.Clear(nil)
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	cfg.CdrsCfg().RaterConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs)}
+	clientConn := make(chan birpc.ClientConnector, 1)
+	clientConn <- clMock(func(ctx *context.Context, serviceMethod string, _, _ interface{}) error {
 
-// 	clientConn := make(chan birpc.ClientConnector, 1)
-// 	clientConn <- clMock(func(serviceMethod string, _, _ interface{}) error {
+		if serviceMethod == utils.ResponderRefundIncrements {
 
-// 		if serviceMethod == utils.ResponderRefundIncrements {
+			return nil
+		}
+		return utils.ErrNotImplemented
+	})
+	cdrS := &CDRServer{cgrCfg: cfg, dm: dm, cdrDb: db, connMgr: NewConnManager(cfg, map[string]chan birpc.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs): clientConn,
+	})}
+	ec := &EventCost{
+		Cost: utils.Float64Pointer(10),
+		Accounting: map[string]*BalanceCharge{
+			"3463957": {
+				Units:         0.002623,
+				RatingID:      "",
+				AccountID:     "cgrates.org:1001",
+				ExtraChargeID: "",
+			},
+			"fee8a3a": {
+				Units:         0.0787,
+				RatingID:      "",
+				AccountID:     "cgrates.org:1001",
+				ExtraChargeID: "",
+			},
+		},
+		AccountSummary: &AccountSummary{
+			Tenant: "cgrates.org",
+			ID:     "1001",
 
-// 			return nil
-// 		}
-// 		return utils.ErrNotImplemented
-// 	})
+			BalanceSummaries: []*BalanceSummary{
+				{ID: "voice2", Type: utils.VOICE, Value: 10, Disabled: false},
+			},
+			AllowNegative: true,
+			Disabled:      false,
+		},
+		Charges: []*ChargingInterval{
+			{
+				RatingID: "c1a5ab9",
+				Increments: []*ChargingIncrement{
+					{
+						Usage:          time.Duration(0),
+						Cost:           0.1,
+						AccountingID:   "3463957",
+						CompressFactor: 1,
+					},
+					{
+						Usage:          time.Duration(1 * time.Second),
+						Cost:           0,
+						AccountingID:   "fee8a3a",
+						CompressFactor: 10,
+					},
+				},
+				CompressFactor: 1,
+			},
+		}}
 
-// 	ec := &EventCost{
-// 		Cost: utils.Float64Pointer(10),
-// 		Accounting: map[string]*BalanceCharge{
-// 			"3463957": &BalanceCharge{
-// 				Units:         0.002623,
-// 				RatingID:      "",
-// 				AccountID:     "cgrates.org:1001",
-// 				BalanceUUID:   "154419f2-45e0-4629-a203-06034ccb493f",
-// 				ExtraChargeID: "",
-// 			},
-// 			"fee8a3a": &BalanceCharge{
-// 				Units:         0.0787,
-// 				RatingID:      "",
-// 				AccountID:     "cgrates.org:1001",
-// 				BalanceUUID:   "154419f2-45e0-4629-a203-06034ccb493f",
-// 				ExtraChargeID: "",
-// 			},
-// 		},
-// 		AccountSummary: &AccountSummary{
-// 			Tenant: "cgrates.org",
-// 			ID:     "1001",
-
-// 			BalanceSummaries: []*BalanceSummary{
-// 				{ID: "voice2", Type: utils.VOICE, Value: 10, Disabled: false},
-// 			},
-// 			AllowNegative: true,
-// 			Disabled:      false,
-// 		},
-// 		Charges: []*ChargingInterval{
-// 			{
-// 				RatingID: "c1a5ab9",
-// 				Increments: []*ChargingIncrement{
-// 					{
-// 						Usage:          time.Duration(0),
-// 						Cost:           0.1,
-// 						AccountingID:   "3463957",
-// 						CompressFactor: 1,
-// 					},
-// 					{
-// 						Usage:          time.Duration(1 * time.Second),
-// 						Cost:           0,
-// 						AccountingID:   "fee8a3a",
-// 						CompressFactor: 10,
-// 					},
-// 				},
-// 				CompressFactor: 1,
-// 			},
-// 		}}
-
-// 	if err := cdrS.refundEventCost(ec, "*prepaid", "*monetary"); err != nil {
-// 		t.Error(err)
-// 	}
-// }
+	if _, err := cdrS.refundEventCost(ec, "*prepaid", "*monetary"); err != nil {
+		t.Error(err)
+	}
+}
 
 func TestCDRSV1StoreSessionCostCache(t *testing.T) {
 	cfg, _ := config.NewDefaultCGRConfig()
@@ -838,7 +837,7 @@ func TestRemoveThresholdProfileRpl(t *testing.T) {
 	cfg.DataDbCfg().Items[utils.MetaThresholdProfiles].Replicate = true
 	cfg.DataDbCfg().RplConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1)}
 	clientConn := make(chan birpc.ClientConnector, 1)
-	clientConn <- clMock(func(ctx *context.Context,servicemethod string, _, _ interface{}) error {
+	clientConn <- clMock(func(ctx *context.Context, servicemethod string, _, _ interface{}) error {
 		if servicemethod == utils.ReplicatorSv1RemoveThresholdProfile {
 
 			return nil
@@ -911,5 +910,42 @@ func TestCDRSV1ProcessCDRCache(t *testing.T) {
 	if err := cdrS.V1ProcessCDR(cdr, &reply); err != nil {
 		t.Error(err)
 	}
+}
 
+func TestCDRSGetCostFromRater(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	cfg.CdrsCfg().RaterConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResponder)}
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	clientConn := make(chan birpc.ClientConnector, 1)
+	clientConn <- clMock(func(ctx *context.Context, servicemethod string, _, reply interface{}) error {
+		if servicemethod == utils.ResponderGetCost {
+			return nil
+		}
+		return utils.ErrNotImplemented
+	})
+	cdrS := &CDRServer{
+		cgrCfg: cfg,
+		dm:     dm,
+		cdrDb:  db,
+		connMgr: NewConnManager(cfg, map[string]chan birpc.ClientConnector{
+			utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResponder): clientConn,
+		}),
+	}
+	cdr := &CDRWithArgDispatcher{
+		CDR: &CDR{
+			Tenant:      "cgrates.org",
+			RequestType: "default",
+			Account:     "1001",
+			Subject:     "1001",
+			Destination: "1002",
+			ToR:         "voice",
+			SetupTime:   time.Now(),
+			AnswerTime:  time.Now().Add(time.Duration(2) * time.Second),
+			Usage:       time.Duration(2) * time.Minute,
+		},
+	}
+	if _, err := cdrS.getCostFromRater(cdr); err != nil {
+		t.Error(err)
+	}
 }
