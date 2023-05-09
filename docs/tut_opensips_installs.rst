@@ -21,6 +21,6 @@ We got OpenSIPS_ installed via following commands:
  apt-get update
  sudo apt-get install opensips opensips-mysql-module opensips-cgrates-module opensips-cli
 
-Once installed we proceed with loading the configuration out of specific tutorial cases bellow.
+After the installation is complete, we will proceed to load the configuration based on the specific tutorial case provided in the subsequent section.
 
 .. _OpenSIPS: https://opensips.org/
