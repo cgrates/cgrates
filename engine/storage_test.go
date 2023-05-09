@@ -1030,6 +1030,7 @@ func TestTprReloadCache(t *testing.T) {
 	cfg, _ := config.NewDefaultCGRConfig()
 	dataDb := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	storDb := NewInternalDB(nil, nil, false, cfg.StorDbCfg().Items)
+	Cache.Clear(nil)
 	tmpConn := connMgr
 	defer func() {
 		SetConnManager(tmpConn)
@@ -1103,7 +1104,7 @@ func TestTprReloadCache(t *testing.T) {
 	if err := tpr.LoadFilters(); err != nil {
 		t.Error(err)
 	}
-	if err := tpr.ReloadCache(utils.MetaLoad, false, nil, "cgrates.org"); err == nil {
+	if err := tpr.ReloadCache(utils.MetaLoad, false, nil, "cgrates.org"); err != nil {
 		t.Error(err)
 	}
 }

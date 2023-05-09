@@ -1978,3 +1978,170 @@ func TestDataManagerRemoveChargerProfile(t *testing.T) {
 		})
 	}
 }
+
+func TestDMGetFilter(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	defer func() {
+		cfg2, _ := config.NewDefaultCGRConfig()
+		config.SetCgrConfig(cfg2)
+	}()
+	cfg.DataDbCfg().RmtConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1)}
+	cfg.DataDbCfg().Items[utils.MetaFilters].Remote = true
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	clientConn := make(chan birpc.ClientConnector, 1)
+	clientConn <- clMock(func(_ *context.Context, serviceMethod string, _, reply interface{}) error {
+		if serviceMethod == utils.ReplicatorSv1GetFilter {
+			flt := &Filter{
+				Tenant: "cgrates.org",
+				ID:     "FLTR_2",
+				Rules: []*FilterRule{
+					{
+						Type:    "*prefix",
+						Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Destination,
+						Values:  []string{"10", "20"},
+					},
+				},
+			}
+			*reply.(**Filter) = flt
+			return nil
+		}
+		return utils.ErrNotFound
+	})
+	dm := NewDataManager(db, cfg.CacheCfg(), NewConnManager(cfg, map[string]chan context.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
+	}))
+	Cache.Clear(nil)
+	testCases := []struct {
+		name          string
+		dm            *DataManager
+		tenant        string
+		id            string
+		cacheRead     bool
+		cachWrite     bool
+		transactionID string
+		expectedErr   bool
+		expected      *Filter
+	}{
+		{
+			name:          "GetFilter - Stored In Cache",
+			dm:            dm,
+			tenant:        "cgrates.org",
+			cacheRead:     true,
+			id:            "FLT_1",
+			cachWrite:     false,
+			transactionID: utils.NonTransactional,
+			expectedErr:   false,
+			expected: &Filter{
+				Tenant: "cgrates.org",
+				ID:     "FLT_1",
+				Rules: []*FilterRule{
+					{
+						Type:    "*string",
+						Element: "~*req.Destination",
+						Values:  []string{"1002"},
+					},
+				},
+			},
+		},
+		{
+			name:          "GetFilter - Nil DataManager",
+			dm:            nil,
+			cacheRead:     false,
+			cachWrite:     false,
+			transactionID: utils.NonTransactional,
+
+			tenant:      "cgrates.org",
+			expectedErr: true,
+		},
+		{
+			name:        "GetFilter - Inline Filter Error",
+			dm:          dm,
+			tenant:      "cgrates.org",
+			id:          "*stringAccount:Error",
+			expectedErr: true,
+		},
+		{
+			name:          "GetFilter - Remote",
+			dm:            dm,
+			tenant:        "cgrates.org",
+			id:            "FLT_2",
+			expectedErr:   false,
+			cacheRead:     false,
+			cachWrite:     true,
+			transactionID: utils.NonTransactional,
+		},
+	}
+	Cache.Set(utils.CacheFilters, utils.ConcatenatedKey("cgrates.org", "FLT_1"), &Filter{
+		Tenant: "cgrates.org",
+		ID:     "FLT_1",
+		Rules: []*FilterRule{
+			{
+				Type:    "*string",
+				Element: "~*req.Destination",
+				Values:  []string{"1002"},
+			},
+		},
+	}, []string{}, true, "")
+	config.SetCgrConfig(cfg)
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			val, err := GetFilter(tc.dm, tc.tenant, tc.id, tc.cacheRead, tc.cachWrite, tc.transactionID)
+			if (err != nil) != tc.expectedErr {
+				t.Errorf("Expected error: %v, received error: %v", tc.expectedErr, err)
+			} else if tc.expected != nil {
+				if !reflect.DeepEqual(val, tc.expected) {
+					t.Errorf("Expected: %v, received: %v", tc.expected, val)
+				}
+			}
+		})
+	}
+}
+
+func TestDmRemoveThresholdProfileErrs(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	testCases := []struct {
+		name          string
+		tenant        string
+		id            string
+		transactionID string
+		withIndex     bool
+	}{
+		{
+			name:          "RemoveThresholdProfile - Profile not Found",
+			tenant:        "cgrates.org",
+			id:            "THP_1",
+			transactionID: "",
+		},
+		{
+			name:          "RemoveThresholdProfile - Broken Filter",
+			tenant:        "cgrates.org",
+			id:            "THP_2",
+			transactionID: "",
+			withIndex:     true,
+		},
+	}
+	dm.SetThresholdProfile(&ThresholdProfile{
+		Tenant:    "cgrates.org",
+		ID:        "THP_2",
+		FilterIDs: []string{"FLT2"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2024, 7, 14, 14, 35, 0, 0, time.UTC),
+			ExpiryTime:     time.Date(2024, 7, 14, 14, 35, 0, 0, time.UTC),
+		},
+		MaxHits:  -1,
+		MinSleep: time.Duration(5 * time.Minute),
+		Blocker:  false,
+		Weight:   20.0,
+	}, true)
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			err := dm.RemoveThresholdProfile(tc.tenant, tc.id, tc.transactionID, tc.withIndex)
+			if err == nil {
+				t.Error(err)
+			}
+		})
+	}
+}
