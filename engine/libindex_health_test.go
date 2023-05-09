@@ -389,7 +389,7 @@ func TestUpdateFilterIHMisingIndxReplyIndexes(t *testing.T) {
 func TestUpdateFilterIHMisingIndxHasNotReplyIndexes(t *testing.T) {
 
 	defer func() {
-		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
@@ -427,7 +427,7 @@ func TestUpdateFilterIHMisingIndxHasNotReplyIndexes(t *testing.T) {
 func TestUpdateFilterIHMisingIndxGetFilterAsIndexSetErr(t *testing.T) {
 
 	defer func() {
-		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
@@ -484,7 +484,7 @@ func TestGetFltrIdxHealthGetKeysForPrefixErr(t *testing.T) {
 func TestGetFltrIdxHealthgetIHObjFromCacheErr(t *testing.T) {
 
 	defer func() {
-		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
@@ -555,7 +555,7 @@ func TestGetRevFltrIdxHealthFromObjGetKeysForPrefixErr(t *testing.T) {
 func TestGetRevFltrIdxHealthFromObjIHObjFromCacheErr(t *testing.T) {
 
 	defer func() {
-		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
@@ -620,7 +620,7 @@ func TestGetRatesFromCacheGetRateProfileErr(t *testing.T) {
 func TestGetRatesFromCacheObjValNil(t *testing.T) {
 
 	defer func() {
-		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 	}()
 
 	useLtcache := ltcache.NewCache(20, 20*time.Second, true, nil)
@@ -658,7 +658,7 @@ func TestGetRevFltrIdxHealthFromRateRatesGetKeysForPrefixErr(t *testing.T) {
 func TestGetRevFltrIdxHealthFromRateRatesGetRatesFromCacheErr(t *testing.T) {
 
 	defer func() {
-		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
