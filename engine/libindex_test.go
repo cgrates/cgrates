@@ -2688,7 +2688,7 @@ func TestRemoveIndexFiltersItemCacheRemoveErr(t *testing.T) {
 	tmpc := Cache
 	defer func() {
 		Cache = tmpc
-		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
@@ -2729,7 +2729,7 @@ func TestRemoveIndexFiltersItemSetIndexesErr(t *testing.T) {
 	tmpc := Cache
 	defer func() {
 		Cache = tmpc
-		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
@@ -2795,7 +2795,7 @@ func TestAddIndexFiltersItemCacheRemoveErr(t *testing.T) {
 		t.Errorf("\nExpected error <%+v>, \nReceived error <%+v>", utils.ErrNotImplemented, err)
 	}
 
-	Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+	Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 
 }
 
@@ -2837,7 +2837,7 @@ func TestAddItemToFilterIndexNewFilterIndexErr(t *testing.T) {
 func TestNewFilterIndexGetIdxErr(t *testing.T) {
 
 	defer func() {
-		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
@@ -2875,7 +2875,7 @@ func TestNewFilterIndexGetIdxErr(t *testing.T) {
 func TestAddItemToFilterIndexCacheRemoveErr(t *testing.T) {
 
 	defer func() {
-		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
@@ -2923,7 +2923,7 @@ func TestAddItemToFilterIndexCacheRemoveErr(t *testing.T) {
 func TestRemoveItemFromFilterIndexCacheRemoveErr(t *testing.T) {
 
 	defer func() {
-		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
@@ -2988,7 +2988,7 @@ func TestUpdatedIndexesRemoveIndexFiltersItemErr(t *testing.T) {
 
 func TestComputeIndexesGetKeysForPrefixErr(t *testing.T) {
 	defer func() {
-		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
@@ -3006,7 +3006,7 @@ func TestComputeIndexesGetKeysForPrefixErr(t *testing.T) {
 
 func TestComputeIndexesNilFilterIDs(t *testing.T) {
 	defer func() {
-		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
@@ -3100,7 +3100,7 @@ func TestComputeIndexesNewFilterIndexErr(t *testing.T) {
 func TestUpdateFilterIndexRatedSplitErr(t *testing.T) {
 
 	defer func() {
-		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
@@ -3149,7 +3149,7 @@ func TestUpdateFilterIndexRatedSplitErr(t *testing.T) {
 func TestUpdateFilterIndexRatedGetRateProfileErr(t *testing.T) {
 
 	defer func() {
-		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
@@ -3197,7 +3197,7 @@ func TestUpdateFilterIndexRatedGetRateProfileErr(t *testing.T) {
 func TestUpdateFilterIndexRatedRemoveFilterErr(t *testing.T) {
 
 	defer func() {
-		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
@@ -3247,7 +3247,7 @@ func TestUpdateFilterIndexRatedRemoveFilterErr(t *testing.T) {
 func TestUpdateFilterIndexRatedNoRatesErr(t *testing.T) {
 
 	defer func() {
-		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 	}()
 
 	cfg := config.NewDefaultCGRConfig()

@@ -4675,7 +4675,7 @@ func TestDMGetStatQueueNewStoredStatQueueErr(t *testing.T) {
 
 	cfgtmp := config.CgrConfig()
 	defer func() {
-		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 		config.SetCgrConfig(cfgtmp)
 	}()
 
@@ -4730,7 +4730,7 @@ func TestDMGetStatQueueSetStatQueueDrvErr(t *testing.T) {
 
 	cfgtmp := config.CgrConfig()
 	defer func() {
-		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 		config.SetCgrConfig(cfgtmp)
 	}()
 
@@ -8998,7 +8998,7 @@ func TestDMGetActionProfileSetActionProfileDrvErr(t *testing.T) {
 
 	cfgtmp := config.CgrConfig()
 	defer func() {
-		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 		config.SetCgrConfig(cfgtmp)
 	}()
 
@@ -9063,7 +9063,7 @@ func TestDMGetActionProfileCacheWriteErr1(t *testing.T) {
 
 	cfgtmp := config.CgrConfig()
 	defer func() {
-		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 		config.SetCgrConfig(cfgtmp)
 	}()
 
@@ -9103,7 +9103,7 @@ func TestDMGetActionProfileCacheWriteErr2(t *testing.T) {
 
 	cfgtmp := config.CgrConfig()
 	defer func() {
-		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 		config.SetCgrConfig(cfgtmp)
 	}()
 
@@ -9189,7 +9189,7 @@ func TestDMGetAttributeProfileCacheWriteErr1(t *testing.T) {
 
 	cfgtmp := config.CgrConfig()
 	defer func() {
-		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 		config.SetCgrConfig(cfgtmp)
 	}()
 
@@ -9231,7 +9231,7 @@ func TestDMGetAttributeProfileCacheWriteErr2(t *testing.T) {
 
 	cfgtmp := config.CgrConfig()
 	defer func() {
-		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 		config.SetCgrConfig(cfgtmp)
 	}()
 
@@ -9310,7 +9310,7 @@ func TestDMGetChargerProfileNilDmErr(t *testing.T) {
 
 func TestDMSetStatQueueProfileUpdatedIndexesErr(t *testing.T) {
 
-	defer func() { Cache = NewCacheS(config.CgrConfig(), nil, nil, nil) }()
+	defer func() { Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil) }()
 
 	cfg := config.NewDefaultCGRConfig()
 	data := &DataDBMock{
@@ -9354,7 +9354,7 @@ func TestDMSetStatQueueProfileReplicate(t *testing.T) {
 	cfgtmp := config.CgrConfig()
 	defer func() {
 		config.SetCgrConfig(cfgtmp)
-		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 	}()
 
 	sqp := &StatQueueProfile{
@@ -9413,7 +9413,7 @@ func TestDMSetStatQueueProfileNewStatQueueNilOldStsErr(t *testing.T) {
 
 	defer func() {
 
-		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 	}()
 
 	var minItems int
@@ -9454,7 +9454,7 @@ func TestDMSetStatQueueProfileNewStatQueueNilOldStsErr(t *testing.T) {
 func TestDMSetStatQueueProfileNewStatQueueErr(t *testing.T) {
 
 	defer func() {
-		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 	}()
 
 	var minItems int
@@ -9509,7 +9509,7 @@ func TestDMRemoveStatQueueProfileNilDMErr(t *testing.T) {
 func TestDMRemoveStatQueueProfileGetStatQueueProfileErr(t *testing.T) {
 
 	defer func() {
-		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
@@ -9531,7 +9531,7 @@ func TestDMRemoveStatQueueProfileGetStatQueueProfileErr(t *testing.T) {
 func TestDMRemoveStatQueueProfileRemStatQueueProfileDrvErr(t *testing.T) {
 
 	defer func() {
-		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
@@ -9574,7 +9574,7 @@ func TestDMRemoveStatQueueProfileRemStatQueueProfileDrvErr(t *testing.T) {
 func TestDMRemoveStatQueueProfileNilOldStsErr(t *testing.T) {
 
 	defer func() {
-		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
@@ -9594,7 +9594,7 @@ func TestDMRemoveStatQueueProfileNilOldStsErr(t *testing.T) {
 func TestDMRemoveStatQueueProfileRmvItemFromFiltrIndexErr(t *testing.T) {
 
 	defer func() {
-		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
@@ -9638,7 +9638,7 @@ func TestDMRemoveStatQueueProfileRmvItemFromFiltrIndexErr(t *testing.T) {
 func TestDMRemoveStatQueueProfileRmvIndexFiltersItemErr(t *testing.T) {
 
 	defer func() {
-		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 	}()
 
 	sqp := &StatQueueProfile{
@@ -9684,7 +9684,7 @@ func TestDMRemoveStatQueueProfileReplicate(t *testing.T) {
 
 	cfgtmp := config.CgrConfig()
 	defer func() {
-		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 		config.SetCgrConfig(cfgtmp)
 	}()
 
@@ -9752,7 +9752,7 @@ func TestDMGetStatQueueCacheWriteErr1(t *testing.T) {
 
 	cfgtmp := config.CgrConfig()
 	defer func() {
-		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 		config.SetCgrConfig(cfgtmp)
 	}()
 
@@ -9855,7 +9855,7 @@ func TestDMGetChargerProfileCacheWriteErr1(t *testing.T) {
 
 	cfgtmp := config.CgrConfig()
 	defer func() {
-		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 		config.SetCgrConfig(cfgtmp)
 	}()
 
@@ -9895,7 +9895,7 @@ func TestDMGetChargerProfileCacheWriteErr2(t *testing.T) {
 
 	cfgtmp := config.CgrConfig()
 	defer func() {
-		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 		config.SetCgrConfig(cfgtmp)
 	}()
 
@@ -9947,7 +9947,7 @@ func TestDMGetChargerProfileCacheWriteErr2(t *testing.T) {
 func TestDMGetDispatcherProfileCacheGetErr(t *testing.T) {
 
 	defer func() {
-		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
@@ -9968,7 +9968,7 @@ func TestDMGetDispatcherProfileCacheGetErr(t *testing.T) {
 func TestDMGetDispatcherProfileCacheGet(t *testing.T) {
 
 	defer func() {
-		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
@@ -10021,7 +10021,7 @@ func TestDMGetDispatcherProfileSetDispatcherProfileDrvErr(t *testing.T) {
 	cfgtmp := config.CgrConfig()
 	defer func() {
 		config.SetCgrConfig(cfgtmp)
-		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 	}()
 
 	dpp := &DispatcherProfile{
@@ -10093,7 +10093,7 @@ func TestDMGetDispatcherProfileCacheWriteErr1(t *testing.T) {
 
 	cfgtmp := config.CgrConfig()
 	defer func() {
-		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 		config.SetCgrConfig(cfgtmp)
 	}()
 
@@ -10135,7 +10135,7 @@ func TestDMGetDispatcherProfileCacheWriteErr2(t *testing.T) {
 
 	cfgtmp := config.CgrConfig()
 	defer func() {
-		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 		config.SetCgrConfig(cfgtmp)
 	}()
 
@@ -10192,7 +10192,7 @@ func TestDMGetDispatcherProfileCacheWriteErr2(t *testing.T) {
 func TestDMGetDispatcherHostCacheGetErr(t *testing.T) {
 
 	defer func() {
-		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
@@ -10213,7 +10213,7 @@ func TestDMGetDispatcherHostCacheGetErr(t *testing.T) {
 func TestDMGetDispatcherHostCacheGet(t *testing.T) {
 
 	defer func() {
-		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
@@ -10266,7 +10266,7 @@ func TestDMGetDispatcherHostSetDispatcherHostDrvErr(t *testing.T) {
 	cfgtmp := config.CgrConfig()
 	defer func() {
 		config.SetCgrConfig(cfgtmp)
-		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 	}()
 
 	dH := &DispatcherHost{
@@ -10338,7 +10338,7 @@ func TestDMGetDispatcherHostCacheWriteErr1(t *testing.T) {
 
 	cfgtmp := config.CgrConfig()
 	defer func() {
-		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 		config.SetCgrConfig(cfgtmp)
 	}()
 
@@ -10380,7 +10380,7 @@ func TestDMGetDispatcherHostCacheWriteErr2(t *testing.T) {
 
 	cfgtmp := config.CgrConfig()
 	defer func() {
-		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 		config.SetCgrConfig(cfgtmp)
 	}()
 
@@ -10450,7 +10450,7 @@ func TestDMGetItemLoadIDsSetSetLoadIDsDrvErr(t *testing.T) {
 	cfgtmp := config.CgrConfig()
 	defer func() {
 		config.SetCgrConfig(cfgtmp)
-		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
@@ -10494,7 +10494,7 @@ func TestDMGetItemLoadIDsCacheWriteErr1(t *testing.T) {
 
 	cfgtmp := config.CgrConfig()
 	defer func() {
-		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 		config.SetCgrConfig(cfgtmp)
 	}()
 
@@ -10537,7 +10537,7 @@ func TestDMGetItemLoadIDsCacheWriteErr2(t *testing.T) {
 
 	cfgtmp := config.CgrConfig()
 	defer func() {
-		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 		config.SetCgrConfig(cfgtmp)
 	}()
 

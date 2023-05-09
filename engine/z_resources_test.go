@@ -7194,3 +7194,94 @@ func TestResourceProfileMerge(t *testing.T) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(dp))
 	}
 }
+
+func TestResourceMatchingResourcesForEventLocksErr(t *testing.T) {
+
+	defer func() {
+		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
+	}()
+	Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	ids := utils.StringSet{}
+	for i := 0; i < 10; i++ {
+		ids.Add(fmt.Sprintf("RES%d", i))
+	}
+	if err := Cache.Set(context.Background(), utils.CacheEventResources, "TestResourceMatchingResourcesForEventLocks3", ids, nil, true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+	Cache.cfg.CacheCfg().ReplicationConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
+	Cache.cfg.CacheCfg().Partitions[utils.CacheEventResources].Replicate = true
+
+	cc := make(chan birpc.ClientConnector, 1)
+	cc <- &ccMock{
+
+		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+			utils.CacheSv1ReplicateRemove: func(ctx *context.Context, args, reply interface{}) error { return utils.ErrNotImplemented },
+		},
+	}
+
+	cM := NewConnManager(cfg)
+	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.CacheSv1, cc)
+
+	Cache.connMgr = cM
+
+	dm := NewDataManager(db, config.CgrConfig().CacheCfg(), cM)
+	rS := NewResourceService(dm, cfg,
+		&FilterS{dm: dm, cfg: cfg, connMgr: cM}, cM)
+
+	_, err := rS.matchingResourcesForEvent(context.Background(), "cgrates.org", new(utils.CGREvent),
+		"TestResourceMatchingResourcesForEventLocks3", utils.DurationPointer(10*time.Second))
+	if err != utils.ErrNotImplemented {
+		t.Errorf("Error: %+v", err)
+	}
+
+}
+
+func TestResourceMatchingResourcesForEventWeightFromDynamicsErr(t *testing.T) {
+
+	defer func() {
+		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, config.CgrConfig().CacheCfg(), nil)
+	cfg.ResourceSCfg().StoreInterval = 1
+	cfg.ResourceSCfg().StringIndexedFields = nil
+	cfg.ResourceSCfg().PrefixIndexedFields = nil
+	rS := NewResourceService(dm, cfg,
+		&FilterS{dm: dm, cfg: cfg}, nil)
+
+	ids := utils.StringSet{}
+	for i := 0; i < 10; i++ {
+		rPrf := &ResourceProfile{
+			Tenant:            "cgrates.org",
+			ID:                fmt.Sprintf("RES%d", i),
+			UsageTTL:          10 * time.Second,
+			Limit:             10.00,
+			AllocationMessage: "AllocationMessage",
+			Weights: utils.DynamicWeights{
+				{
+					FilterIDs: []string{"*stirng:~*req.Account:1001"},
+					Weight:    float64(10 - i),
+				}},
+			Blocker:      i == 4,
+			ThresholdIDs: []string{utils.MetaNone},
+		}
+		dm.SetResourceProfile(context.Background(), rPrf, true)
+		ids.Add(rPrf.ID)
+	}
+	if err := Cache.Set(context.Background(), utils.CacheEventResources, "TestResourceMatchingResourcesForEventLocksBlocker", ids, nil, true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+
+	expErr := "NOT_IMPLEMENTED:*stirng"
+	_, err := rS.matchingResourcesForEvent(context.Background(), "cgrates.org", new(utils.CGREvent),
+		"TestResourceMatchingResourcesForEventLocksBlocker", utils.DurationPointer(10*time.Second))
+	if err == nil || err.Error() != expErr {
+		t.Errorf("Expected error <%+v>, received error <%+v>", expErr, err)
+	}
+
+}

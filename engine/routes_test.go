@@ -850,10 +850,13 @@ func TestRoutesV1GetRouteProfilesForEventMsnEventError(t *testing.T) {
 func TestRouteProfileSet(t *testing.T) {
 	rp := RouteProfile{}
 	exp := RouteProfile{
-		Tenant:            "cgrates.org",
-		ID:                "ID",
-		FilterIDs:         []string{"fltr1", "*string:~*req.Account:1001"},
-		Weights:           utils.DynamicWeights{{}},
+		Tenant:    "cgrates.org",
+		ID:        "ID",
+		FilterIDs: []string{"fltr1", "*string:~*req.Account:1001"},
+		Weights:   utils.DynamicWeights{{}},
+		Blockers: utils.DynamicBlockers{
+			{Blocker: false},
+		},
 		Sorting:           utils.MetaQOS,
 		SortingParameters: []string{"param"},
 		Routes: []*Route{{
@@ -895,6 +898,9 @@ func TestRouteProfileSet(t *testing.T) {
 		t.Error(err)
 	}
 	if err := rp.Set([]string{utils.Weights}, ";0", false, utils.EmptyString); err != nil {
+		t.Error(err)
+	}
+	if err := rp.Set([]string{utils.Blockers}, ";false", false, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
 	if err := rp.Set([]string{utils.Sorting}, utils.MetaQOS, false, utils.EmptyString); err != nil {
@@ -950,6 +956,7 @@ func TestRouteProfileAsInterface(t *testing.T) {
 		ID:                "ID",
 		FilterIDs:         []string{"fltr1", "*string:~*req.Account:1001"},
 		Weights:           utils.DynamicWeights{{}},
+		Blockers:          utils.DynamicBlockers{{Blocker: false}},
 		Sorting:           utils.MetaQOS,
 		SortingParameters: []string{"param"},
 		Routes: []*Route{{
@@ -990,6 +997,11 @@ func TestRouteProfileAsInterface(t *testing.T) {
 	if val, err := rp.FieldAsInterface([]string{utils.Weights}); err != nil {
 		t.Fatal(err)
 	} else if exp := ";0"; exp != val {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := rp.FieldAsInterface([]string{utils.Blockers}); err != nil {
+		t.Fatal(err)
+	} else if exp := ";false"; exp != val {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
 	}
 	if val, err := rp.FieldAsInterface([]string{utils.FilterIDs}); err != nil {
@@ -1380,7 +1392,7 @@ func TestRouteSV1GetRoutesListErr(t *testing.T) {
 func TestRouteSMatchingRouteProfilesForEventGetRouteProfileErr1(t *testing.T) {
 
 	defer func() {
-		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
@@ -1423,7 +1435,7 @@ func TestRouteSMatchingRouteProfilesForEventGetRouteProfileErr2(t *testing.T) {
 
 	cfgtmp := config.CgrConfig()
 	defer func() {
-		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 		config.SetCgrConfig(cfgtmp)
 	}()
 
@@ -1505,10 +1517,10 @@ func TestRouteSMatchingRouteProfilesForEventGetRouteProfileErr2(t *testing.T) {
 func TestRouteSMatchingRouteProfilesForEventPassErr(t *testing.T) {
 
 	defer func() {
-		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 	}()
 
-	Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+	Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	cM := NewConnManager(cfg)
@@ -1576,10 +1588,10 @@ func TestRouteSMatchingRouteProfilesForEventPassErr(t *testing.T) {
 func TestRouteSMatchingRPSForEventWeightFromDynamicsErr(t *testing.T) {
 
 	defer func() {
-		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 	}()
 
-	Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+	Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	cM := NewConnManager(cfg)
@@ -1661,10 +1673,10 @@ func TestRouteSMatchingRPSForEventWeightFromDynamicsErr(t *testing.T) {
 func TestRouteSMatchingRPSForEventBlockerFromDynamicsErr(t *testing.T) {
 
 	defer func() {
-		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 	}()
 
-	Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+	Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	cM := NewConnManager(cfg)
@@ -2315,7 +2327,7 @@ func TestRouteSV1GetRoutesGetStringOptsErr(t *testing.T) {
 func TestRoutesV1GetRoutesCallWithAlteredFields(t *testing.T) {
 
 	defer func() {
-		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
@@ -2423,7 +2435,7 @@ func TestRoutesV1GetRoutesCallWithAlteredFields(t *testing.T) {
 func TestRoutesV1GetRoutesSortedRoutesForEventErr(t *testing.T) {
 
 	defer func() {
-		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
@@ -2491,7 +2503,7 @@ func TestRoutesV1GetRoutesSortedRoutesForEventErr(t *testing.T) {
 func TestV1GetRouteProfilesForEventMatchingRouteProfErr(t *testing.T) {
 
 	defer func() {
-		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
@@ -2611,7 +2623,7 @@ func TestV1GetRouteProfilesForEventOK(t *testing.T) {
 func TestRoutessortedRoutesForProfileLazyPassErr(t *testing.T) {
 
 	defer func() {
-		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
@@ -2669,7 +2681,7 @@ func TestRoutessortedRoutesForProfileLazyPassErr(t *testing.T) {
 func TestRoutessortedRoutesForProfileLazyPassFalse(t *testing.T) {
 
 	defer func() {
-		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
@@ -2733,7 +2745,7 @@ func TestRoutessortedRoutesForProfileLazyPassFalse(t *testing.T) {
 func TestRoutessortedRoutesForProfileWeightFromDynamicsErr(t *testing.T) {
 
 	defer func() {
-		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
@@ -2795,7 +2807,7 @@ func TestRoutessortedRoutesForProfileWeightFromDynamicsErr(t *testing.T) {
 func TestRoutessortedRoutesForProfileBlockerFromDynamicsErr(t *testing.T) {
 
 	defer func() {
-		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
@@ -2862,7 +2874,7 @@ func TestRoutessortedRoutesForProfileBlockerFromDynamicsErr(t *testing.T) {
 func TestRoutessortedRoutesForProfileSortHasBlocker(t *testing.T) {
 
 	defer func() {
-		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
@@ -2917,6 +2929,177 @@ func TestRoutessortedRoutesForProfileSortHasBlocker(t *testing.T) {
 	if rcv, err := routeService.sortedRoutesForProfile(context.Background(), "cgrates.org", rp, args, pag, extraOpts); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(utils.ToJSON(exp), utils.ToJSON(rcv)) {
-		t.Errorf("Expecting: \n%+v\n, received: \n%+v", utils.ToJSON(exp), utils.ToJSON(rcv))
+		t.Errorf("Expecting: \n%+v,\n received: \n%+v", utils.ToJSON(exp), utils.ToJSON(rcv))
+	}
+}
+
+func TestRoutessortedRoutesForEventNoSortedRoutesErr(t *testing.T) {
+
+	defer func() {
+		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	cfg.RouteSCfg().Opts.Offset = []*utils.DynamicIntPointerOpt{
+		{
+			Value: utils.IntPointer(10),
+		},
+	}
+
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	fS := NewFilterS(cfg, nil, dm)
+	routeService := NewRouteService(dm, fS, cfg, nil)
+
+	args := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "utils.CGREvent1",
+		Event: map[string]interface{}{
+			"Route":          "RouteProfile1",
+			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
+			"UsageInterval":  "1s",
+			"PddInterval":    "1s",
+			utils.Weight:     "20.0",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsRoutesProfilesCount: 1,
+		},
+	}
+
+	rp := &RouteProfile{
+		Tenant:  "cgrates.org",
+		ID:      "RouteProfile1",
+		Sorting: utils.MetaWeight,
+		Routes: []*Route{
+			{
+				ID:              "route1",
+				Weights:         utils.DynamicWeights{{Weight: 10}},
+				Blockers:        utils.DynamicBlockers{{Blocker: true}},
+				RouteParameters: "param1",
+			},
+		},
+		Weights:  utils.DynamicWeights{{Weight: 10}},
+		Blockers: utils.DynamicBlockers{{Blocker: true}},
+	}
+
+	if err := dm.SetRouteProfile(context.Background(), rp, true); err != nil {
+		t.Fatal(err)
+	}
+
+	_, err := routeService.sortedRoutesForEvent(context.Background(), "cgrates.org", args)
+	if err != utils.ErrNotFound {
+		t.Errorf("Expected error <%+v>, received error <%+v>", utils.ErrNotFound, err)
+	}
+}
+
+func TestRouteSV1GetRoutesListOK(t *testing.T) {
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	fS := NewFilterS(cfg, nil, dm)
+	routeService := NewRouteService(dm, fS, cfg, nil)
+
+	args := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "utils.CGREvent1",
+		Event: map[string]interface{}{
+			"Route":          "RouteProfile1",
+			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
+			"UsageInterval":  "1s",
+			"PddInterval":    "1s",
+			utils.Weight:     "20.0",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsRoutesProfilesCount: 1,
+		},
+	}
+
+	rp := &RouteProfile{
+		Tenant:  "cgrates.org",
+		ID:      "RouteProfile1",
+		Sorting: utils.MetaWeight,
+		Routes: []*Route{
+			{
+				ID:              "route1",
+				Weights:         utils.DynamicWeights{{Weight: 10}},
+				RouteParameters: "param1",
+			},
+		},
+		Weights:  utils.DynamicWeights{{Weight: 10}},
+		Blockers: utils.DynamicBlockers{{Blocker: true}},
+	}
+
+	if err := dm.SetRouteProfile(context.Background(), rp, true); err != nil {
+		t.Fatal(err)
+	}
+
+	exp := []string{"route1:param1"}
+
+	var reply []string
+	err := routeService.V1GetRoutesList(context.Background(), args, &reply)
+	if err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(utils.ToJSON(exp), utils.ToJSON(reply)) {
+		t.Errorf("Expecting: \n%+v,\n received: \n%+v", utils.ToJSON(exp), utils.ToJSON(reply))
+	}
+
+}
+
+func TestRouteProfileMergeWithRPRoutes(t *testing.T) {
+	dp := &RouteProfile{
+		Routes: []*Route{
+			{
+				ID: "RT1",
+			},
+		},
+	}
+	exp := &RouteProfile{
+		Tenant:            "cgrates.org",
+		ID:                "ID",
+		FilterIDs:         []string{"fltr1", "*string:~*req.Account:1001"},
+		Weights:           utils.DynamicWeights{{}},
+		Sorting:           utils.MetaQOS,
+		SortingParameters: []string{"param"},
+		Routes: []*Route{{
+			ID:             "RT1",
+			FilterIDs:      []string{"fltr1"},
+			AccountIDs:     []string{"acc1"},
+			RateProfileIDs: []string{"rp1"},
+			ResourceIDs:    []string{"res1"},
+			StatIDs:        []string{"stat1"},
+			Weights:        utils.DynamicWeights{{}},
+			Blockers: utils.DynamicBlockers{
+				{
+					Blocker: true,
+				},
+			},
+			RouteParameters: "params",
+		}},
+	}
+	if dp.Merge(&RouteProfile{
+		Tenant:            "cgrates.org",
+		ID:                "ID",
+		FilterIDs:         []string{"fltr1", "*string:~*req.Account:1001"},
+		Weights:           utils.DynamicWeights{{}},
+		Sorting:           utils.MetaQOS,
+		SortingParameters: []string{"param"},
+		Routes: []*Route{{
+			ID:             "RT1",
+			FilterIDs:      []string{"fltr1"},
+			AccountIDs:     []string{"acc1"},
+			RateProfileIDs: []string{"rp1"},
+			ResourceIDs:    []string{"res1"},
+			StatIDs:        []string{"stat1"},
+			Weights:        utils.DynamicWeights{{}},
+			Blockers: utils.DynamicBlockers{
+				{
+					Blocker: true,
+				},
+			},
+			RouteParameters: "params",
+		}},
+	}); !reflect.DeepEqual(exp, dp) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(dp))
 	}
 }

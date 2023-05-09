@@ -3807,7 +3807,7 @@ func TestStatQueueProcessEventProfileIDsErr(t *testing.T) {
 func TestStatQueueProcessEventPrometheusStatIDsErr(t *testing.T) {
 
 	defer func() {
-		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
@@ -3895,7 +3895,7 @@ func TestStatQueueProcessEventExpiredErr(t *testing.T) {
 	tmpl := utils.Logger
 	defer func() {
 		utils.Logger = tmpl
-		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 	}()
 
 	buf := new(bytes.Buffer)
@@ -3980,7 +3980,7 @@ func TestStatQueueProcessEventExpiredErr(t *testing.T) {
 func TestStatQueueProcessEventBlockerErr(t *testing.T) {
 
 	defer func() {
-		Cache = NewCacheS(config.CgrConfig(), nil, nil, nil)
+		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
