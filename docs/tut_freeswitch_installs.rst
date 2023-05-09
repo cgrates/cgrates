@@ -32,6 +32,6 @@ Install FreeSWITCH by running the following commands:
  # If /etc/freeswitch does not exist, the standard vanilla configuration is deployed
  apt-get update && apt-get install -y freeswitch-meta-all
 
-After the installation, proceed with loading the configuration for specific tutorial cases provided below.
+After the installation is complete, we will proceed to load the configuration based on the specific tutorial case provided in the subsequent section.
 
 .. _FreeSWITCH: https://freeswitch.com//
