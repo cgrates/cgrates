@@ -973,3 +973,33 @@ func TestSupplierServicePopulateSortingData(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestArgsSuppAsOptsGetSupplier(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	tmpDm := dm
+	defer func() {
+		dm = tmpDm
+	}()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	ev := &ArgsGetSuppliers{
+		MaxCost: utils.MetaEventCost,
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "CostSuppliers",
+			Event: map[string]interface{}{
+				utils.Account:     "1003",
+				utils.Subject:     "1001",
+				utils.Destination: "1002",
+				utils.Category:    "call",
+				utils.SetupTime:   time.Date(2017, 12, 1, 14, 25, 0, 0, time.UTC),
+				utils.Usage:       "1m20s",
+			},
+		},
+	}
+	SetDataStorage(dm)
+	if _, err := ev.asOptsGetSuppliers(); err == nil {
+		t.Error(err)
+	}
+	//unifinished
+}

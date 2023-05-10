@@ -1355,3 +1355,50 @@ func TestUsageAsCDR(t *testing.T) {
 		})
 	}
 }
+
+func TestMetaHandler(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	storedCdr1 := &CDR{
+		CGRID: utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()),
+		ToR:   utils.VOICE, OriginID: "dsafdsaf", OriginHost: "192.168.1.1",
+		RequestType: utils.META_RATED, Tenant: "cgrates.org", Category: "call",
+		Account: "1001", Subject: "1001", Destination: "1002",
+		SetupTime:  time.Unix(1383813745, 0).UTC(),
+		AnswerTime: time.Unix(1383813746, 0).UTC(),
+		Usage:      time.Duration(10) * time.Second,
+		RunID:      utils.MetaDefault, Cost: 1.01,
+		ExtraFields: map[string]string{"extra1": "val_extra1",
+			"extra2": "val_extra2", "extra3": "val_extra3"},
+	}
+	cdre, err := NewCDRExporter([]*CDR{storedCdr1},
+		cfg.CdreProfiles[utils.MetaDefault], utils.MetaFileCSV, "", "", "firstexport",
+		true, 1, utils.CSV_SEP, cfg.GeneralCfg().HttpSkipTlsVerify, nil, nil)
+	if err != nil {
+		t.Error("Unexpected error received: ", err)
+	}
+
+	tests := []struct {
+		tag      string
+		expected string
+	}{
+		{metaExportID, cdre.exportID},
+		{metaTimeNow, time.Now().Format("")},
+		{metaSMSUsage, "~Usage"},
+		{metaMMSUsage, "~Usage"},
+		{metaGenericUsage, "~Usage"},
+		{metaDataUsage, "~Usage"},
+		{metaCostCDRs, "0"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.tag, func(t *testing.T) {
+			got, err := cdre.metaHandler(tt.tag, "")
+			if err != nil {
+				t.Errorf("metaHandler() returned error: %v", err)
+			}
+			if got != tt.expected {
+				t.Errorf("metaHandler() = %v, want %v", got, tt.expected)
+			}
+		})
+	}
+}
