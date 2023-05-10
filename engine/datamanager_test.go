@@ -1565,7 +1565,7 @@ func TestDMGetThresholdCacheGetErr(t *testing.T) {
 // 	}
 // }
 
-func TestDMGetThresholdSetThErr(t *testing.T) {
+func TestDMGetThresholdSetThCacheSetErr(t *testing.T) {
 	tmp := Cache
 	cfgtmp := config.CgrConfig()
 	defer func() {

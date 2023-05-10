@@ -23,6 +23,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -418,4 +419,350 @@ func TestUniqueAlteredFields(t *testing.T) {
 	if rcv := flds.UniqueAlteredFields(); !reflect.DeepEqual(exp, rcv) {
 		t.Errorf("Expected <%+v>, Received <%+v>", exp, rcv)
 	}
+}
+
+func TestAttributeProfileForEventWeightFromDynamicsErr(t *testing.T) {
+
+	defer func() {
+		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
+	}()
+
+	Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	filterS := NewFilterS(cfg, nil, dm)
+	attrS := NewAttributeService(dm, filterS, cfg)
+
+	attrIDs, err := utils.OptAsStringSlice(attrEvs[0].APIOpts, utils.OptsAttributesProfileIDs)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	value := config.NewRSRParsersMustCompile("abcd123", config.CgrConfig().GeneralCfg().RSRSep)
+
+	attrPrf := &AttributeProfile{
+		Tenant: "cgrates.org",
+		ID:     "ATTR_TEST",
+		Attributes: []*Attribute{
+			{
+				Path:  "*req.Password",
+				Type:  utils.MetaPassword,
+				Value: value,
+			},
+		},
+		Weights: utils.DynamicWeights{
+			{
+				FilterIDs: []string{"*stirng:~*req.Account:1001"},
+				Weight:    10,
+			},
+		},
+	}
+
+	if err := dm.SetAttributeProfile(context.Background(), attrPrf, true); err != nil {
+		t.Fatal(err)
+	}
+
+	attrEvs := &utils.CGREvent{
+
+		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+		ID:     utils.GenUUID(),
+		Event: map[string]interface{}{
+			"Attribute":      "AttributeProfile1",
+			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
+			"UsageInterval":  "1s",
+			utils.Weight:     "20.0",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsContext: utils.MetaSessionS,
+		},
+	}
+
+	expErr := "NOT_IMPLEMENTED:*stirng"
+	_, err = attrS.attributeProfileForEvent(context.TODO(), attrEvs.Tenant,
+		attrIDs, utils.MapStorage{
+			utils.MetaReq:  attrEvs.Event,
+			utils.MetaOpts: attrEvs.APIOpts,
+			utils.MetaVars: utils.MapStorage{
+				utils.OptsAttributesProcessRuns: 0,
+			},
+		}, utils.EmptyString, make(map[string]int), 0, false)
+	if err == nil || err.Error() != expErr {
+		t.Errorf("Expected error <%+v>, received error <%+v>", expErr, err)
+	}
+
+}
+
+func TestAttributeProcessEventBlockerFromDynamicsErr(t *testing.T) {
+	defer func() {
+		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
+	}()
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	filterS := NewFilterS(cfg, nil, dm)
+	attrS := NewAttributeService(dm, filterS, cfg)
+
+	value := config.NewRSRParsersMustCompile("abcd123", config.CgrConfig().GeneralCfg().RSRSep)
+
+	attrPrf := &AttributeProfile{
+		Tenant: "cgrates.org",
+		ID:     "ATTR_TEST",
+		Attributes: []*Attribute{
+			{
+				Path:  "*req.Password",
+				Type:  utils.MetaPassword,
+				Value: value,
+			},
+		},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
+		Blockers: utils.DynamicBlockers{
+			{
+				FilterIDs: []string{"*stirng:~*req.Account:1001"},
+				Blocker:   false,
+			},
+		},
+	}
+
+	if err := dm.SetAttributeProfile(context.Background(), attrPrf, true); err != nil {
+		t.Fatal(err)
+	}
+
+	attrEvs := &utils.CGREvent{
+
+		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+		ID:     utils.GenUUID(),
+		Event: map[string]interface{}{
+			"Attribute":      "AttributeProfile1",
+			"Account":        "1010",
+			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
+			"UsageInterval":  "1s",
+			utils.Weight:     "20.0",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsContext: utils.MetaSessionS,
+		},
+	}
+
+	eNM := utils.MapStorage{
+		utils.MetaReq:  attrEvs.Event,
+		utils.MetaOpts: attrEvs.APIOpts,
+		utils.MetaVars: utils.MapStorage{
+			utils.OptsAttributesProcessRuns: 0,
+		},
+	}
+
+	expErr := "NOT_IMPLEMENTED:*stirng"
+	_, err := attrS.processEvent(context.TODO(), attrEvs.Tenant, attrEvs, eNM, newDynamicDP(context.TODO(), nil, nil, nil, "cgrates.org", eNM), utils.EmptyString, make(map[string]int), 0)
+	if err == nil || err.Error() != expErr {
+		t.Errorf("Expected error <%+v>, received error <%+v>", expErr, err)
+	}
+
+}
+
+func TestAttributeSProcessEventPassErr(t *testing.T) {
+
+	defer func() {
+		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	filterS := NewFilterS(cfg, nil, dm)
+	attrS := NewAttributeService(dm, filterS, cfg)
+
+	attrPrf := &AttributeProfile{
+		Tenant: "cgrates.org",
+		ID:     "ATTR_TEST",
+		Attributes: []*Attribute{
+			{
+				FilterIDs: []string{"*apiban:~*req.<~*req.IP>{*}:*all"},
+				Path:      "*req.Password",
+				Type:      utils.MetaPassword,
+				Value:     config.NewRSRParsersMustCompile("abcd123", config.CgrConfig().GeneralCfg().RSRSep),
+			},
+		},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
+	}
+
+	if err := dm.SetAttributeProfile(context.TODO(), attrPrf, true); err != nil {
+		t.Error(err)
+	}
+	ev := &utils.CGREvent{
+		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+		ID:     utils.GenUUID(),
+		Event: map[string]interface{}{
+			"PassField": "Test",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsContext: utils.MetaSessionS,
+		},
+	}
+
+	eNM := utils.MapStorage{
+		utils.MetaOpts: ev.APIOpts,
+		utils.MetaVars: utils.MapStorage{
+			utils.OptsAttributesProcessRuns: 0,
+		},
+		utils.MetaReq: utils.MapStorage{
+			"bannedIP":  "1.2.3.251",
+			"bannedIP2": "1.2.3.252",
+			"IP":        "1.2.3.253",
+			"IP2":       "1.2.3.254",
+		},
+	}
+
+	expErr := `invalid converter value in string: <*>, err: unsupported converter definition: <*>`
+	_, err := attrS.processEvent(context.TODO(), attrPrf.Tenant, ev, eNM, newDynamicDP(context.TODO(), nil, nil, nil, "cgrates.org", eNM), utils.EmptyString, make(map[string]int), 0)
+	if err == nil || err.Error() != expErr {
+		t.Errorf("Expected error %s received: %v", expErr, err)
+	}
+
+}
+
+func TestAttributeSProcessAttrBlockerFromDynamicsErr(t *testing.T) {
+	defer func() {
+		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	filterS := NewFilterS(cfg, nil, dm)
+	attrS := NewAttributeService(dm, filterS, cfg)
+
+	attrPrf := &AttributeProfile{
+		Tenant: "cgrates.org",
+		ID:     "ATTR_TEST",
+		Attributes: []*Attribute{
+			{
+				Blockers: utils.DynamicBlockers{{
+					FilterIDs: []string{"*stirng:~*req.Account:1001"},
+					Blocker:   false,
+				}},
+				Path:  "*req.Password",
+				Type:  utils.MetaPassword,
+				Value: config.NewRSRParsersMustCompile("abcd123", config.CgrConfig().GeneralCfg().RSRSep),
+			},
+		},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
+	}
+
+	if err := dm.SetAttributeProfile(context.TODO(), attrPrf, true); err != nil {
+		t.Error(err)
+	}
+	ev := &utils.CGREvent{
+		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+		ID:     utils.GenUUID(),
+		Event: map[string]interface{}{
+			"PassField": "Test",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsContext: utils.MetaSessionS,
+		},
+	}
+
+	eNM := utils.MapStorage{
+		utils.MetaReq:  ev.Event,
+		utils.MetaOpts: ev.APIOpts,
+		utils.MetaVars: utils.MapStorage{
+			utils.OptsAttributesProcessRuns: 0,
+		},
+	}
+
+	expErr := "NOT_IMPLEMENTED:*stirng"
+	_, err := attrS.processEvent(context.TODO(), attrPrf.Tenant, ev, eNM, newDynamicDP(context.TODO(), nil, nil, nil, "cgrates.org", eNM), utils.EmptyString, make(map[string]int), 0)
+	if err == nil || err.Error() != expErr {
+		t.Errorf("Expected error %s received: %v", expErr, err)
+	}
+
+}
+
+func TestAttributeSProcessSubstituteRmvBlockerTrue(t *testing.T) {
+	defer func() {
+		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	filterS := NewFilterS(cfg, nil, dm)
+	attrS := NewAttributeService(dm, filterS, cfg)
+
+	attrPrf := &AttributeProfile{
+		Tenant: "cgrates.org",
+		ID:     "ATTR_TEST",
+		Attributes: []*Attribute{
+			{
+				Path:  utils.MetaRemove,
+				Type:  utils.MetaVariable,
+				Value: config.NewRSRParsersMustCompile(utils.MetaRemove, config.CgrConfig().GeneralCfg().RSRSep),
+			},
+			{
+				Blockers: utils.DynamicBlockers{{
+					Blocker: true,
+				}},
+				Path:  "*req.Password",
+				Type:  utils.MetaPassword,
+				Value: config.NewRSRParsersMustCompile("abcd123", config.CgrConfig().GeneralCfg().RSRSep),
+			},
+		},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
+	}
+
+	if err := dm.SetAttributeProfile(context.TODO(), attrPrf, true); err != nil {
+		t.Error(err)
+	}
+	ev := &utils.CGREvent{
+		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+		ID:     utils.GenUUID(),
+		Event: map[string]interface{}{
+			"PassField": "Test",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsContext: utils.MetaSessionS,
+		},
+	}
+
+	eNM := utils.MapStorage{
+		utils.MetaReq:      ev.Event,
+		utils.MetaOpts:     ev.APIOpts,
+		utils.MetaVariable: utils.MetaRemove,
+		utils.MetaVars: utils.MapStorage{
+			utils.OptsAttributesProcessRuns: 0,
+		},
+	}
+
+	exp := &AttrSProcessEventReply{
+		AlteredFields: []*FieldsAltered{{
+			MatchedProfileID: "cgrates.org:ATTR_TEST",
+			Fields:           []string{utils.MetaRemove, "*req.Password"},
+		}},
+		CGREvent: ev,
+	}
+
+	rcv, err := attrS.processEvent(context.TODO(), attrPrf.Tenant, ev, eNM, newDynamicDP(context.TODO(), nil, nil, nil, "cgrates.org", eNM), utils.EmptyString, make(map[string]int), 0)
+	if err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(utils.ToJSON(exp), utils.ToJSON(rcv)) {
+		t.Errorf("Expected \n<%+v>,\n Received \n<%+v>", utils.ToJSON(exp), utils.ToJSON(rcv))
+	}
+
 }
