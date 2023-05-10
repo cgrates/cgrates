@@ -4980,3 +4980,34 @@ func TestDmRebuildReverseForPrefix(t *testing.T) {
 		})
 	}
 }
+
+func TestDmUpdateReverseDestination(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	dst := &Destination{Id: "OldDest", Prefixes: []string{"+494", "+495", "+496"}}
+	dst2 := &Destination{Id: "NewDest", Prefixes: []string{"+497", "+498", "+499"}}
+	if _, rcvErr := dm.GetReverseDestination(dst.Id, false, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
+		t.Error(rcvErr)
+	}
+	if err := dm.SetReverseDestination(dst.Id, dst.Prefixes, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+	for i := range dst.Prefixes {
+		if rcv, err := dm.GetReverseDestination(dst.Prefixes[i], false, true, utils.NonTransactional); err != nil {
+			t.Error(err)
+		} else if !reflect.DeepEqual([]string{dst.Id}, rcv) {
+			t.Errorf("Expecting: %v, received: %v", []string{dst.Id}, rcv)
+		}
+	}
+	if err := dm.UpdateReverseDestination(dst, dst2, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+	for i := range dst.Prefixes {
+		if rcv, err := dm.GetReverseDestination(dst2.Prefixes[i], false, true, utils.NonTransactional); err != nil {
+			t.Error(err)
+		} else if !reflect.DeepEqual([]string{dst2.Id}, rcv) {
+			t.Errorf("Expecting: %v, received: %v", []string{dst.Id}, rcv)
+		}
+	}
+}

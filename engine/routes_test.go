@@ -24,6 +24,7 @@ import (
 	"log"
 	"os"
 	"reflect"
+	"sort"
 	"strings"
 	"testing"
 	"time"
@@ -2242,5 +2243,122 @@ func TestRoutesV1GetRoutes(t *testing.T) {
 	if !reflect.DeepEqual(reply[0], rpp) {
 		t.Errorf("expected %+v,received %+v", utils.ToJSON(rpp), utils.ToJSON(reply))
 	}
+}
 
+func TestRoutesV1GetRoutesList(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	Cache.Clear(nil)
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	rpS := NewRouteService(dm, NewFilterS(cfg, nil, dm), cfg, nil)
+	var reply []string
+
+	dm.SetFilter(&Filter{
+		Tenant: "cgrates.org",
+		ID:     "FLT1",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaString,
+				Element: "~*req.Route",
+				Values:  []string{"RouteProfile1"},
+			},
+		},
+	}, true)
+
+	dm.SetRouteProfile(&RouteProfile{
+		Tenant:            "cgrates.org",
+		ID:                "ROUTE1",
+		FilterIDs:         []string{"FLT1"},
+		Sorting:           utils.MetaWeight,
+		SortingParameters: []string{},
+		Routes: []*Route{
+			{
+				ID:              "route1",
+				Weight:          20,
+				Blocker:         false,
+				RouteParameters: utils.EmptyString,
+			},
+			{
+				ID:              "route2",
+				Weight:          10,
+				Blocker:         false,
+				RouteParameters: utils.EmptyString,
+			},
+		},
+		Weight: 10,
+	}, true)
+	if err := rpS.V1GetRoutesList(testRoutesArgs[0], &reply); err != nil {
+		t.Error(err)
+	}
+	sort.Slice(reply, func(i, j int) bool {
+		return reply[i] < reply[j]
+	})
+	if !reflect.DeepEqual(reply, []string{"route1", "route2"}) {
+
+		t.Errorf("expected %+v,received %+v", []string{"ROUTE1"}, reply)
+	}
+
+}
+
+func TestRouteServiceV1GetRoutesErr(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.RouteSCfg().AttributeSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn <- clMock(func(serviceMethod string, _, _ interface{}) error {
+		if serviceMethod == utils.AttributeSv1ProcessEvent {
+
+			return errors.New("Server Error")
+		}
+		return utils.ErrNotImplemented
+	})
+	rpS := NewRouteService(dm, NewFilterS(cfg, nil, dm), cfg, NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes): clientConn,
+	}))
+
+	testCases := []struct {
+		name  string
+		args  *utils.CGREvent
+		reply SortedRoutesList
+	}{
+		{
+			name: "Missing StructFields",
+			args: &utils.CGREvent{
+				Event: map[string]interface{}{
+					"Account": "1003",
+				},
+			},
+			reply: SortedRoutesList{},
+		},
+		{
+			name: "Missing Event",
+			args: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "RouteProcessEvent",
+			},
+			reply: SortedRoutesList{},
+		},
+		{
+			name: "Failed to process event ",
+			args: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "RouteProcessEvent",
+				Event: map[string]interface{}{
+					utils.RequestType:  utils.MetaPostpaid,
+					utils.Category:     utils.Call,
+					utils.AccountField: "1003",
+					utils.Subject:      "1003",
+					utils.Destination:  "1002",
+				},
+			},
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			if err := rpS.V1GetRoutes(tc.args, &tc.reply); err == nil {
+				t.Errorf("expected error, received nil")
+			}
+		})
+	}
 }
