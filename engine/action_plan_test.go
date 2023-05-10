@@ -340,3 +340,41 @@ func TestATExecute(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestGetNextStartTimeOld(t *testing.T) {
+	at := &ActionTiming{
+		Uuid: utils.GenUUID(),
+		Timing: &RateInterval{
+			Timing: &RITiming{
+				Years:     utils.Years{2023},
+				Months:    utils.Months{},
+				MonthDays: utils.MonthDays{},
+				WeekDays:  utils.WeekDays{},
+				StartTime: utils.ASAP,
+			},
+		},
+		Weight:    10,
+		ActionsID: "MINI",
+	}
+
+	loc, _ := time.LoadLocation("America/New_York")
+
+	tests := []struct {
+		name     string
+		expected time.Time
+	}{
+		{
+			name:     "Test Case 1",
+			expected: time.Date(2023, 1, 1, 0, 0, 0, 0, loc),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := at.GetNextStartTimeOld(now)
+			if !got.Equal(tt.expected) {
+				t.Errorf("GetNextStartTimeOld() = %v, want %v", got, tt.expected)
+			}
+		})
+	}
+}
