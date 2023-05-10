@@ -2276,12 +2276,35 @@ func TestStoreSMCostErr(t *testing.T) {
 
 func TestCDRSGetCDRs(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	cfg.CdrsCfg().EEsConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs)}
+	cfg.CdrsCfg().ThresholdSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)}
+	cfg.CdrsCfg().StatSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn <- clMock(func(serviceMethod string, _, _ interface{}) error {
+		if serviceMethod == utils.EeSv1ProcessEvent {
+
+			return nil
+		}
+		if serviceMethod == utils.ThresholdSv1ProcessEvent {
+			return nil
+		}
+		if serviceMethod == utils.StatSv1ProcessEvent {
+			return nil
+		}
+
+		return utils.ErrNotImplemented
+	})
 	cdrS := &CDRServer{
 		cgrCfg: cfg,
 		cdrDb:  db,
 		dm:     dm,
+		connMgr: NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+			utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs):        clientConn,
+			utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds): clientConn,
+			utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats):      clientConn,
+		}),
 	}
 	arg := &ArgV1ProcessEvent{
 		CGREvent: utils.CGREvent{
@@ -2293,15 +2316,21 @@ func TestCDRSGetCDRs(t *testing.T) {
 				utils.OriginHost:   "host",
 				utils.RequestType:  utils.MetaPrepaid,
 				utils.AccountField: "1001",
+				utils.OriginID:     "OriginCDR2",
+				utils.CGRID:        "TestCGRID",
 				utils.Subject:      "1001",
+				utils.RunID:        utils.MetaDefault,
 				utils.Destination:  "1002",
 				utils.SetupTime:    time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
 				utils.AnswerTime:   time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
 				utils.Usage:        10 * time.Minute,
 			},
+			APIOpts: map[string]interface{}{
+				utils.OptsStatS: true,
+			},
 		},
 		Flags: []string{
-			utils.MetaStore, utils.MetaRALs,
+			utils.MetaStore, utils.MetaRALs, utils.MetaExport, utils.MetaThresholds,
 		},
 	}
 	var reply string
@@ -2318,5 +2347,4 @@ func TestCDRSGetCDRs(t *testing.T) {
 	if err := cdrS.V1GetCDRs(args, &cdrs); err != nil {
 		t.Error(err)
 	}
-
 }

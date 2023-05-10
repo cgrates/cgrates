@@ -1292,3 +1292,185 @@ func TestResponderShutDown(t *testing.T) {
 		t.Errorf("Expected Done!,Received %v", reply)
 	}
 }
+
+func TestResponderDebitDebit(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	tmpdm := dm
+	defer func() {
+		dm = tmpdm
+	}()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	rsponder.MaxComputedUsage = map[string]time.Duration{
+		utils.MetaAny:   10 * time.Minute,
+		utils.MetaVoice: 80 * time.Minute,
+	}
+	cd := &CallDescriptorWithAPIOpts{
+		CallDescriptor: &CallDescriptor{
+			Category:      "call",
+			Tenant:        "cgrates.org",
+			Subject:       "1002",
+			Account:       "1002",
+			Destination:   "1004",
+			DurationIndex: 0,
+			ToR:           utils.MetaVoice,
+			TimeStart:     time.Date(2019, 3, 31, 0, 0, 0, 0, time.UTC),
+			TimeEnd:       time.Date(2019, 3, 31, 0, 0, 20, 0, time.UTC),
+		},
+	}
+	dm.SetAccount(&Account{
+		ID: utils.ConcatenatedKey(cd.Tenant, cd.Account),
+		BalanceMap: map[string]Balances{
+			utils.MetaVoice: {
+				&Balance{Value: 20,
+					DestinationIDs: utils.NewStringMap("Dest"),
+					Weight:         10},
+			},
+		},
+	})
+	dm.SetReverseDestination("Dest", []string{"1001", "1002", "1003", "1004"}, "")
+
+	dm.SetRatingPlan(&RatingPlan{
+		Id: "RP1",
+		Ratings: map[string]*RIRate{
+			"qpwq8so8": {
+				ConnectFee:       0.5,
+				RoundingMethod:   utils.MetaRoundingMiddle,
+				RoundingDecimals: 2,
+				Rates: RateGroups{
+					&RGRate{
+						GroupIntervalStart: 0,
+						Value:              1,
+						RateIncrement:      1 * time.Minute,
+						RateUnit:           1 * time.Minute,
+					},
+				},
+			},
+		},
+		Timings: map[string]*RITiming{
+			"83429156": {
+				Years:     utils.Years{},
+				Months:    utils.Months{},
+				MonthDays: utils.MonthDays{},
+				WeekDays:  utils.WeekDays{},
+				StartTime: "00:00:00",
+				tag:       "*any",
+			},
+		},
+		DestinationRates: map[string]RPRateList{
+			"Dest": {
+				{
+					Timing: "83429156",
+					Rating: "qpwq8so8",
+					Weight: 21,
+				},
+			},
+		},
+	})
+	dm.SetRatingProfile(&RatingProfile{
+		Id: "*out:cgrates.org:call:1002",
+		RatingPlanActivations: RatingPlanActivations{
+			&RatingPlanActivation{
+				ActivationTime: time.Date(2019, 3, 31, 0, 0, 0, 0, time.UTC),
+				RatingPlanId:   "RP1",
+			},
+		},
+	})
+	var reply CallCost
+	SetDataStorage(dm)
+	if err := rsponder.Debit(cd, &reply); err != nil {
+		t.Error(err)
+	} else if reply.Cost != 1.5 {
+		t.Errorf("expected Cost to be 1.5, got %v", reply.Cost)
+	}
+}
+
+func TestResponderGetCostOnRatingPlans(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	tmpdm := dm
+	Cache.Clear(nil)
+	defer func() {
+		dm = tmpdm
+	}()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+
+	arg := &utils.GetCostOnRatingPlansArgs{
+		Account: "1002",
+		RatingPlanIDs: []string{
+			"RP1",
+			"RP2",
+		},
+		Subject:     "1002",
+		Destination: "1001",
+		Usage:       2 * time.Minute,
+		Tenant:      "cgrates.org",
+	}
+	dm.SetAccount(&Account{
+		ID: utils.ConcatenatedKey("cgrates.org", "1002"),
+	})
+	dm.SetReverseDestination("Dest", []string{"1001", "1002", "1003", "1004"}, "")
+	dm.SetRatingPlan(&RatingPlan{
+		Id: "RP1",
+		Ratings: map[string]*RIRate{
+			"qpwq8so8": {
+				ConnectFee:       0.3,
+				RoundingMethod:   utils.MetaRoundingUp,
+				RoundingDecimals: 2,
+				Rates: RateGroups{
+					&RGRate{
+						GroupIntervalStart: 0,
+						Value:              0.01,
+						RateIncrement:      1 * time.Second,
+						RateUnit:           1 * time.Minute,
+					},
+					&RGRate{
+						GroupIntervalStart: 60 * time.Second,
+						Value:              0.3,
+						RateIncrement:      15 * time.Second,
+						RateUnit:           30 * time.Second,
+					},
+				},
+			},
+		},
+		Timings: map[string]*RITiming{
+			"83429156": {
+				Years:     utils.Years{},
+				Months:    utils.Months{},
+				MonthDays: utils.MonthDays{},
+				WeekDays:  utils.WeekDays{},
+				StartTime: "00:00:00",
+				tag:       "*any",
+			},
+		},
+		DestinationRates: map[string]RPRateList{
+			"Dest": {
+				{
+					Timing: "83429156",
+					Rating: "qpwq8so8",
+					Weight: 21,
+				},
+			},
+		},
+	})
+	dm.SetRatingProfile(&RatingProfile{
+		Id: "*out:cgrates.org:call:1002",
+		RatingPlanActivations: RatingPlanActivations{
+			&RatingPlanActivation{
+				ActivationTime: time.Date(2019, 3, 31, 0, 0, 0, 0, time.UTC),
+				RatingPlanId:   "RP1",
+			},
+		},
+	})
+	var reply map[string]interface{}
+	exp := map[string]interface{}{
+		utils.Cost:         0.92,
+		utils.RatingPlanID: "RP1",
+	}
+	SetDataStorage(dm)
+	if err := rsponder.GetCostOnRatingPlans(arg, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(reply, exp) {
+		t.Errorf("expected %v, got %v", exp, reply)
+	}
+}

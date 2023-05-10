@@ -1399,3 +1399,46 @@ func TestArgeesRPCClone(t *testing.T) {
 		t.Errorf("expected %v,received %v", utils.ToJSON(exp), utils.ToJSON(val))
 	}
 }
+
+func TestAttrSV1GetAttributeForEvent(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	filterS := NewFilterS(cfg, nil, dm)
+	Cache.Clear(nil)
+	attS := NewAttributeService(dm, filterS, cfg)
+	args := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "AttrEvent",
+		Event: map[string]interface{}{
+			utils.RequestType: utils.MetaPostpaid,
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsAttributesProcessRuns: 3,
+			utils.OptsContext:               utils.MetaAny,
+			utils.OptsAttributesProfileIDs:  []string{"ATTR1"},
+		},
+	}
+	postpaid, err := config.NewRSRParsers(utils.MetaPostpaid, utils.InfieldSep)
+	if err != nil {
+		t.Error(err)
+	}
+	dm.SetAttributeProfile(&AttributeProfile{
+		Tenant:   "cgrates.org",
+		ID:       "ATTR1",
+		Contexts: []string{utils.MetaAny},
+		Attributes: []*Attribute{
+			{
+				Path:  "*req.RequestType",
+				Type:  utils.MetaConstant,
+				Value: postpaid,
+			},
+		},
+		Weight: 10,
+	}, true)
+	var attrPrf AttributeProfile
+	if err := attS.V1GetAttributeForEvent(args, &attrPrf); err != nil {
+		t.Error(err)
+	}
+
+}
