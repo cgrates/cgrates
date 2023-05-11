@@ -747,5 +747,123 @@ func TestV1GetThreshold(t *testing.T) {
 	if err := thS.V1GetThreshold(tntID, &reply); err != nil {
 		t.Error(err)
 	}
+}
 
+func TestV1ProcessEventErrs(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	Cache.Clear(nil)
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	testCases := []struct {
+		name string
+		args *ArgsProcessEvent
+	}{
+		{
+			name: "CGREvent missing",
+			args: &ArgsProcessEvent{},
+		},
+		{
+			name: "Missing struct fields",
+			args: &ArgsProcessEvent{
+				CGREvent: &utils.CGREvent{},
+			},
+		},
+		{
+			name: "Missing Event",
+			args: &ArgsProcessEvent{
+				CGREvent: &utils.CGREvent{
+					Tenant: "cgrates.org",
+					ID:     "ThresholdProcessEvent",
+				},
+			},
+		},
+		{
+			name: "Failed Processing Event",
+			args: &ArgsProcessEvent{
+				CGREvent: &utils.CGREvent{
+					Tenant: "cgrates.org",
+					ID:     "ProcessEvent",
+					Event: map[string]interface{}{
+						utils.EventType:     utils.AccountUpdate,
+						utils.Account:       "1002",
+						utils.AllowNegative: true,
+						utils.Disabled:      false,
+						utils.Units:         12.3,
+					},
+				},
+			},
+		},
+	}
+
+	thS, err := NewThresholdService(dm, cfg, NewFilterS(cfg, nil, dm))
+	if err != nil {
+		t.Error(err)
+	}
+	var reply []string
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			if err := thS.V1ProcessEvent(tc.args, &reply); err == nil {
+				t.Error("Expected error, got nil")
+			}
+		})
+	}
+}
+
+func TestThSProcessEventMaxHits(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	tmpDm := dm
+	defer func() {
+		dm = tmpDm
+	}()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	thS, err := NewThresholdService(dm, cfg, NewFilterS(cfg, nil, dm))
+	if err != nil {
+		t.Error(err)
+	}
+	dm.SetFilter(&Filter{
+		Tenant: "cgrates.org",
+		ID:     "FLTR_2",
+		Rules: []*FilterRule{
+			{
+				Type:    "*string",
+				Element: "~*req.Category",
+				Values:  []string{"call"},
+			},
+		},
+	})
+	dm.SetThresholdProfile(&ThresholdProfile{
+		Tenant:    "cgrates.org",
+		ID:        "TH_2",
+		FilterIDs: []string{"FLTR_2"},
+		MaxHits:   2,
+		MinSleep:  time.Duration(1 * time.Millisecond),
+		Weight:    90.0,
+		Async:     true,
+	}, true)
+	dm.SetThreshold(&Threshold{
+		Tenant: "cgrates.org",
+		ID:     "TH_2",
+		Hits:   1,
+	})
+	args := &ArgsProcessEvent{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "ProcessEvent",
+			Event: map[string]interface{}{
+				utils.Tenant:      "cgrates.org",
+				utils.Category:    "call",
+				utils.ToR:         utils.VOICE,
+				utils.RequestType: utils.META_PREPAID,
+				utils.Account:     "1002",
+				utils.Subject:     "1001",
+				utils.Destination: "1001",
+			},
+		},
+	}
+	var reply []string
+	SetDataStorage(dm)
+	if err := thS.V1ProcessEvent(args, &reply); err != nil {
+		t.Error(err)
+	}
 }
