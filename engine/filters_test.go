@@ -2230,3 +2230,79 @@ func TestComputeDispatcherIndexesErr(t *testing.T) {
 
 	}
 }
+
+func TestFIRemoveItemFromIndexErr(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	defer func() {
+		cfg2, _ := config.NewDefaultCGRConfig()
+		config.SetCgrConfig(cfg2)
+	}()
+	cfg.DataDbCfg().RmtConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1)}
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	clientConn := make(chan birpc.ClientConnector, 1)
+	clientConn <- clMock(func(ctx *context.Context, serviceMethod string, _, _ interface{}) error {
+		return utils.ErrNotImplemented
+	})
+	dm := NewDataManager(db, cfg.CacheCfg(), NewConnManager(cfg, map[string]chan birpc.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
+	}))
+	testCases := []struct {
+		name       string
+		itemType   string
+		cachePart  string
+		itemID     string
+		oldFilters []string
+	}{
+		{
+			name:      "Threshold Not Found",
+			itemType:  utils.ThresholdProfilePrefix,
+			itemID:    "TH1",
+			cachePart: utils.MetaThresholdProfiles,
+		},
+		{
+			name:      "Attributes Not Found",
+			itemType:  utils.AttributeProfilePrefix,
+			itemID:    "ATTR_1",
+			cachePart: utils.MetaAttributeProfiles,
+		},
+		{
+			name:      "Resource Not Found",
+			itemType:  utils.ResourceProfilesPrefix,
+			itemID:    "RSC_1",
+			cachePart: utils.MetaResourceProfile,
+		},
+		{
+			name:      "Stat Queue Not Found",
+			itemType:  utils.StatQueueProfilePrefix,
+			itemID:    "SQ_1",
+			cachePart: utils.MetaStatQueueProfiles,
+		},
+		{
+			name:      "Supplier Not Found",
+			itemType:  utils.SupplierProfilePrefix,
+			itemID:    "SPP_1",
+			cachePart: utils.MetaSupplierProfiles,
+		},
+		{
+			name:      "ChargerProfile  Not Found",
+			itemType:  utils.ChargerProfilePrefix,
+			itemID:    "SQ_1",
+			cachePart: utils.MetaChargerProfiles,
+		},
+		{
+			name:      "DispatcherProfile   Not Found",
+			itemType:  utils.DispatcherProfilePrefix,
+			itemID:    "SPP_1",
+			cachePart: utils.MetaDispatcherProfiles,
+		},
+	}
+	config.SetCgrConfig(cfg)
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			cfg.DataDbCfg().Items[tc.cachePart].Remote = true
+			if err := NewFilterIndexer(dm, tc.itemType, "cgrates.org").RemoveItemFromIndex("cgrates.org", tc.itemID, tc.oldFilters); err == nil {
+				t.Error("expected error, received nil")
+			}
+		})
+	}
+}

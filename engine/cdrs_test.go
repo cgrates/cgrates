@@ -949,3 +949,60 @@ func TestCDRSGetCostFromRater(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestCDRSChrgsProcessEvent(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	cfg.CdrsCfg().ChargerSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ChargerSv1)}
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	clientConn := make(chan birpc.ClientConnector, 1)
+	clientConn <- clMock(func(ctx *context.Context, servicemethod string, _, reply interface{}) error {
+
+		if servicemethod == utils.ChargerSv1ProcessEvent {
+			chargers := []*ChrgSProcessEventReply{
+				{
+					ChargerSProfile:    "Charger1",
+					AttributeSProfiles: []string{"ATTR_1001_SIMPLEAUTH"},
+					AlteredFields:      []string{utils.MetaReqRunID},
+					CGREvent: &utils.CGREvent{ // matching Charger1
+						Tenant: "cgrates.org",
+						ID:     "event1",
+						Event: map[string]interface{}{
+							"Charger":        "ChargerProfile1",
+							utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
+							"UsageInterval":  "1s",
+							utils.Weight:     "200.0",
+							"RunID":          utils.MetaDefault,
+						},
+					},
+				},
+			}
+			*reply.(*[]*ChrgSProcessEventReply) = chargers
+			return nil
+		}
+		return utils.ErrNotImplemented
+	})
+
+	cdrs := &CDRServer{
+		cgrCfg: cfg,
+		dm:     dm,
+		cdrDb:  db,
+		connMgr: NewConnManager(cfg, map[string]chan birpc.ClientConnector{
+			utils.ConcatenatedKey(utils.MetaInternal, utils.ChargerSv1): clientConn,
+		}),
+	}
+	cgrEv := &utils.CGREventWithArgDispatcher{
+		CGREvent: &utils.CGREvent{Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+			ID: "event1",
+			Event: map[string]interface{}{
+				"Charger":        "ChargerProfile1",
+				utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
+				"UsageInterval":  "1s",
+				utils.Weight:     "200.0",
+			},
+		}}
+	if _, err := cdrs.chrgrSProcessEvent(cgrEv); err != nil {
+		t.Error(err)
+	}
+
+}

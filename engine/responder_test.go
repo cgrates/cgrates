@@ -1202,3 +1202,83 @@ func TestResponderDebitCached(t *testing.T) {
 // 		t.Errorf("Expected %+v,Received %+v", utils.ToJSON(reply), utils.ToJSON(rpl))
 // 	}
 // }
+
+func TestResponderGetMaxSessionTimeOnAccounts(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	tmpDm := dm
+	defer func() {
+		dm = tmpDm
+	}()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	arg := &utils.GetMaxSessionTimeOnAccountsArgs{
+		Subject:     "free",
+		Tenant:      "cgrates.org",
+		AccountIDs:  []string{"1001"},
+		Destination: "1004",
+		SetupTime:   time.Date(2022, 12, 15, 8, 0, 0, 0, time.UTC),
+		Usage:       time.Minute * 30,
+	}
+
+	SetDataStorage(dm)
+	var reply map[string]interface{}
+
+	dm.SetAccount(&Account{ID: utils.ConcatenatedKey("cgrates.org", "1001"),
+		BalanceMap: map[string]Balances{utils.VOICE: {&Balance{
+			DestinationIDs: utils.NewStringMap("DEST"),
+			Value:          float64(10), Weight: 10}}},
+	})
+
+	if err := dm.SetReverseDestination(&Destination{
+		Id: "DEST", Prefixes: []string{"1004"}}, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+
+	dm.SetRatingPlan(&RatingPlan{
+		Id: "RP1",
+		Timings: map[string]*RITiming{
+			"78r22g8": {
+				Years:     utils.Years{},
+				Months:    utils.Months{},
+				MonthDays: utils.MonthDays{},
+				WeekDays:  utils.WeekDays{},
+				StartTime: "00:00:00",
+			},
+		},
+		Ratings: map[string]*RIRate{
+			"29d929j": {
+				ConnectFee:       0.6,
+				RoundingMethod:   utils.ROUNDING_UP,
+				RoundingDecimals: 4,
+				Rates: RateGroups{
+					{
+						GroupIntervalStart: 0,
+						Value:              0.02,
+						RateIncrement:      5 * time.Second,
+						RateUnit:           15 * time.Second,
+					},
+				},
+			},
+		},
+		DestinationRates: map[string]RPRateList{
+			"DEST": {
+				{
+					Timing: "78r22g8",
+					Rating: "29d929j",
+				},
+			},
+		},
+	}, utils.NonTransactional)
+	dm.SetRatingProfile(&RatingProfile{
+		Id: utils.ConcatenatedKey(utils.META_OUT, "cgrates.org", utils.MetaSuppliers, "free"),
+		RatingPlanActivations: RatingPlanActivations{
+			&RatingPlanActivation{
+				RatingPlanId: "RP1",
+			},
+		},
+	}, "")
+	if err := rsponder.GetMaxSessionTimeOnAccounts(arg, &reply); err != nil {
+		t.Error(err)
+	}
+	//
+}
