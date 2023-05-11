@@ -1,25 +1,10 @@
 
 - hosts: pkg
   vars:
-   # Go language SDK version number
-    golang_version: '1.19.2'
-    go_version_target: "go version go{{ golang_version }} linux/amd64"
-    # Mirror to download the Go language SDK redistributable package from
-    golang_mirror: 'https://storage.googleapis.com/golang'
-    # Base installation directory the Go language SDK distribution
-    golang_install_dir: '/usr/local/go'
-    # Directory to store files downloaded for Go language SDK installation
-    golang_download_dir: "{{ x_ansible_download_dir | default(ansible_env.HOME + '/.ansible/tmp/downloads') }}"
-    # Location for GOPATH environment variable
-    golang_gopath: "/home/{{ user }}/go"
-    # Filename of Go language SDK redistributable package
-    golang_redis_filename: 'go{{ golang_version }}.linux-amd64.tar.gz'
     coprgate_dir: "/home/{{ user }}/go/src/github.com/cgrates/coprgate"
-    coprgate_bin: "{{ golang_gopath }}/bin/coprgate"
+    coprgate_bin: "/home/{{ user }}/go/bin/coprgate"
     service_name:  coprgate
-
   tasks:
-  
     - name: Install dependencies
       become: yes
       apt:
@@ -27,8 +12,9 @@
           - git
           - tar
         state: present
-    - name:  Install golang
-      include: go.yaml
+    - name: Install Go
+      import_role:
+        name: ../roles/install_go
 
     - name: Create coprgate directory
       become: yes
@@ -52,7 +38,7 @@
     - name:  Install coprgate
       shell: "go install coprgate.go"
       environment:
-        PATH: "{{ lookup('env','PATH') }}:{{ golang_gopath }}/bin:/usr/local/go/bin:{{ ansible_env.PATH }}"
+        PATH: "{{ lookup('env','PATH') }}:/home/{{ user }}/go/bin:/usr/local/go/bin:{{ ansible_env.PATH }}"
       args:
         chdir: '{{  coprgate_dir }}'
 
