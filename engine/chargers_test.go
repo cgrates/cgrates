@@ -714,3 +714,169 @@ func TestChargersShutdown(t *testing.T) {
 		}
 	}
 }
+
+func TestChargersmatchingChargerProfilesForEventCacheReadErr(t *testing.T) {
+
+	defer func() {
+		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	cS := &ChargerS{
+		dm: dm,
+		fltrS: &FilterS{
+			dm:  dm,
+			cfg: cfg,
+		},
+		cfg: cfg,
+	}
+	cpp := &ChargerProfile{
+		Tenant:       "cgrates.org",
+		ID:           "CPP_1",
+		RunID:        "TestRunID",
+		AttributeIDs: []string{"*none"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
+		weight: 20,
+	}
+
+	if err := cS.dm.SetChargerProfile(context.Background(), cpp, true); err != nil {
+		t.Error(err)
+	}
+
+	cgrEv := &utils.CGREvent{
+		Tenant: cfg.GeneralCfg().DefaultTenant,
+		ID:     "cgrEvID",
+		Event:  map[string]interface{}{},
+		APIOpts: map[string]interface{}{
+			utils.MetaSubsys: utils.MetaChargers,
+		},
+	}
+
+	if err := Cache.Set(context.Background(), utils.CacheChargerProfiles, "cgrates.org:CPP_1", nil, []string{}, true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+
+	_, err := cS.matchingChargerProfilesForEvent(context.Background(), cgrEv.Tenant, cgrEv)
+
+	if err != utils.ErrNotFound {
+		t.Fatalf("\nexpected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
+	}
+
+}
+
+func TestChargersmatchingChargerProfilesForEventWeightFromDynamicsErr(t *testing.T) {
+
+	defer func() {
+		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	cS := &ChargerS{
+		dm: dm,
+		fltrS: &FilterS{
+			dm:  dm,
+			cfg: cfg,
+		},
+		cfg: cfg,
+	}
+
+	cpp := &ChargerProfile{
+		Tenant:       "cgrates.org",
+		ID:           "CPP_2",
+		RunID:        "TestRunID2",
+		AttributeIDs: []string{"*none"},
+		Weights: utils.DynamicWeights{
+			{
+				FilterIDs: []string{"*stirng:~*req.Account:1001"},
+				Weight:    20,
+			},
+		},
+		weight: 20,
+	}
+
+	if err := cS.dm.SetChargerProfile(context.Background(), cpp, true); err != nil {
+		t.Error(err)
+	}
+
+	cgrEv := &utils.CGREvent{
+		Tenant: cfg.GeneralCfg().DefaultTenant,
+		ID:     "cgrEvID",
+		Event:  map[string]interface{}{},
+		APIOpts: map[string]interface{}{
+			utils.MetaSubsys: utils.MetaChargers,
+		},
+	}
+
+	expErr := "NOT_IMPLEMENTED:*stirng"
+	_, err := cS.matchingChargerProfilesForEvent(context.Background(), cgrEv.Tenant, cgrEv)
+	if err == nil || err.Error() != expErr {
+		t.Errorf("Expected error <%+v>, received error <%+v>", expErr, err)
+	}
+
+}
+
+func TestChargersmatchingChargerProfilesForEventBlockerFromDynamicsErr(t *testing.T) {
+
+	defer func() {
+		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	cS := &ChargerS{
+		dm: dm,
+		fltrS: &FilterS{
+			dm:  dm,
+			cfg: cfg,
+		},
+		cfg: cfg,
+	}
+
+	cpp := &ChargerProfile{
+		Tenant:       "cgrates.org",
+		ID:           "CPP_2",
+		RunID:        "TestRunID2",
+		AttributeIDs: []string{"*none"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
+		Blockers: utils.DynamicBlockers{
+			{
+				FilterIDs: []string{"*stirng:~*req.Account:1001"},
+				Blocker:   false,
+			},
+		},
+		weight: 20,
+	}
+
+	if err := cS.dm.SetChargerProfile(context.Background(), cpp, true); err != nil {
+		t.Error(err)
+	}
+
+	cgrEv := &utils.CGREvent{
+		Tenant: cfg.GeneralCfg().DefaultTenant,
+		ID:     "cgrEvID",
+		Event:  map[string]interface{}{},
+		APIOpts: map[string]interface{}{
+			utils.MetaSubsys: utils.MetaChargers,
+		},
+	}
+
+	expErr := "NOT_IMPLEMENTED:*stirng"
+	_, err := cS.matchingChargerProfilesForEvent(context.Background(), cgrEv.Tenant, cgrEv)
+	if err == nil || err.Error() != expErr {
+		t.Errorf("Expected error <%+v>, received error <%+v>", expErr, err)
+	}
+
+}

@@ -766,3 +766,160 @@ func TestAttributeSProcessSubstituteRmvBlockerTrue(t *testing.T) {
 	}
 
 }
+
+func TestV1GetAttributeForEventAttrProfEventErr(t *testing.T) {
+
+	defer func() {
+		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	conMng := NewConnManager(cfg)
+	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), conMng)
+	filterS := NewFilterS(cfg, conMng, dm)
+	attr := &AttributeProfile{
+		Tenant: "cgrates.org",
+		ID:     "AttributeProfile1",
+		Attributes: []*Attribute{
+			{
+				Path:  "*tenant",
+				Type:  "*variable",
+				Value: config.NewRSRParsersMustCompile("~*req.Account:s/(.*)@(.*)/${1}.${2}/", utils.InfieldSep),
+			},
+		},
+
+		Weights: utils.DynamicWeights{
+			{
+				FilterIDs: []string{"*stirng:~*req.Account:1001"},
+				Weight:    20,
+			},
+		},
+	}
+	err := dm.SetAttributeProfile(context.Background(), attr, true)
+	if err != nil {
+		t.Error(err)
+	}
+
+	alS := NewAttributeService(dm, filterS, cfg)
+	ev := &utils.CGREvent{
+		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+		ID:     utils.GenUUID(),
+		Event: map[string]interface{}{
+			"Attribute": "AttributeProfile1",
+		},
+		APIOpts: map[string]interface{}{},
+	}
+	var rply APIAttributeProfile
+	expErr := "SERVER_ERROR: NOT_IMPLEMENTED:*stirng"
+	err = alS.V1GetAttributeForEvent(context.Background(), ev, &rply)
+	if err == nil || err.Error() != expErr {
+		t.Errorf("Expected error <%+v>, received error <%+v>", expErr, err)
+	}
+
+}
+
+func TestAttributesV1ProcessEventFieldMissingErr(t *testing.T) {
+
+	defer func() {
+		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	cfg.FilterSCfg().ResourceSConns = []string{}
+	conMng := NewConnManager(cfg)
+	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, nil, conMng)
+	filterS := NewFilterS(cfg, conMng, dm)
+	attr := &AttributeProfile{
+		Tenant: "cgrates.org",
+		ID:     "ATTR_CHANGE_TENANT_FROM_USER",
+		Attributes: []*Attribute{
+			{
+				FilterIDs: nil,
+				Path:      "*tenant",
+				Type:      "*variable",
+				Value:     config.NewRSRParsersMustCompile("~*req.Account:s/(.*)@(.*)/${1}.${2}/", utils.InfieldSep),
+			},
+		},
+		Blockers: utils.DynamicBlockers{{Blocker: false}},
+		Weights:  utils.DynamicWeights{{Weight: 20}},
+	}
+	err := dm.SetAttributeProfile(context.Background(), attr, true)
+	if err != nil {
+		t.Error(err)
+	}
+
+	alS := NewAttributeService(dm, filterS, cfg)
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "123",
+		Event: map[string]interface{}{
+			"testfield": utils.MetaAttributes,
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsAttributesProcessRuns: 2,
+		},
+	}
+	var rply AttrSProcessEventReply
+	expErr := "MANDATORY_IE_MISSING: [testfield]"
+	err = alS.V1ProcessEvent(context.Background(), ev, &rply)
+	if err == nil || err.Error() != expErr {
+		t.Errorf("Expected error <%+v>, received error <%+v>", expErr, err)
+	}
+
+}
+
+func TestParseAtributeUsageDiffDetectLayoutErr2(t *testing.T) {
+	dp := utils.MapStorage{
+		utils.MetaReq: utils.MapStorage{
+			"UnixTimeStamp": "1554364297",
+			"usage2":        "35",
+		},
+	}
+	_, err := ParseAttribute(dp, utils.MetaUsageDifference, utils.EmptyString, config.NewRSRParsersMustCompile("~*req.UnixTimeStamp;~*req.usage2", utils.InfieldSep),
+		0, utils.EmptyString, utils.EmptyString, utils.InfieldSep)
+	errExp := "Unsupported time format"
+	if err == nil || err.Error() != errExp {
+		t.Errorf("Expected %v\n but received %v", errExp, err)
+	}
+}
+
+func TestParseAtributeMetaPrefixParseDPErr(t *testing.T) {
+	dp := utils.MapStorage{}
+
+	_, err := ParseAttribute(dp, utils.MetaPrefix, "constant;`>;q=0.7;expires=3600`;~*req.Account", config.NewRSRParsersMustCompile("~*req.UnixTimeStamp;~*req.usage2", utils.InfieldSep),
+		0, utils.EmptyString, utils.EmptyString, utils.InfieldSep)
+	if err != utils.ErrNotFound {
+		t.Errorf("Expected %v\n but received %v", utils.ErrNotFound, err)
+	}
+}
+
+func TestParseAtributeMetaSuffixParseDPErr(t *testing.T) {
+	dp := utils.MapStorage{}
+
+	_, err := ParseAttribute(dp, utils.MetaSuffix, "constant;`>;q=0.7;expires=3600`;~*req.Account", config.NewRSRParsersMustCompile("~*req.UnixTimeStamp;~*req.usage2", utils.InfieldSep),
+		0, utils.EmptyString, utils.EmptyString, utils.InfieldSep)
+	if err != utils.ErrNotFound {
+		t.Errorf("Expected %v\n but received %v", utils.ErrNotFound, err)
+	}
+}
+
+func TestParseAtributeCCUsageNegativeReqNr(t *testing.T) {
+	dp := utils.MapStorage{
+		utils.MetaReq: utils.MapStorage{
+			"cc1": "-1",
+			"cc2": "-20",
+			"cc3": "-20",
+		},
+	}
+	out, err := ParseAttribute(dp, utils.MetaCCUsage, utils.EmptyString, config.NewRSRParsersMustCompile("~*req.cc1;~*req.cc2;~*req.cc3", utils.InfieldSep),
+		0, utils.EmptyString, utils.EmptyString, utils.InfieldSep)
+	if err != nil {
+		t.Error(err)
+	}
+	exp := -20 * time.Nanosecond
+	if out.(time.Duration) != exp {
+		t.Errorf("Expected %v\n but received %v", exp, out)
+	}
+}
