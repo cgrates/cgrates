@@ -880,3 +880,78 @@ func TestChargersmatchingChargerProfilesForEventBlockerFromDynamicsErr(t *testin
 	}
 
 }
+
+func TestChargersmatchingChargerProfilesForEventBlockerTrue(t *testing.T) {
+
+	defer func() {
+		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	cS := &ChargerS{
+		dm: dm,
+		fltrS: &FilterS{
+			dm:  dm,
+			cfg: cfg,
+		},
+		cfg: cfg,
+	}
+
+	cpp := &ChargerProfile{
+		Tenant:       "cgrates.org",
+		ID:           "CPP_2",
+		RunID:        "TestRunID2",
+		AttributeIDs: []string{"*none"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
+		Blockers: utils.DynamicBlockers{
+			{
+				Blocker: true,
+			},
+		},
+		weight: 20,
+	}
+
+	if err := cS.dm.SetChargerProfile(context.Background(), cpp, true); err != nil {
+		t.Error(err)
+	}
+
+	cgrEv := &utils.CGREvent{
+		Tenant: cfg.GeneralCfg().DefaultTenant,
+		ID:     "cgrEvID",
+		Event:  map[string]interface{}{},
+		APIOpts: map[string]interface{}{
+			utils.MetaSubsys: utils.MetaChargers,
+		},
+	}
+
+	exp := ChargerProfiles{
+		{
+			Tenant: "cgrates.org",
+			ID:     "CPP_2",
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
+			Blockers: utils.DynamicBlockers{{
+				Blocker: true,
+			}},
+			RunID:        "TestRunID2",
+			AttributeIDs: []string{"*none"},
+		},
+	}
+
+	rcv, err := cS.matchingChargerProfilesForEvent(context.Background(), cgrEv.Tenant, cgrEv)
+	if err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(utils.ToJSON(exp), utils.ToJSON(rcv)) {
+		t.Fatalf("expected: \n<%+v>, \nreceived: <%+v>", utils.ToJSON(exp), utils.ToJSON(rcv))
+	}
+
+}

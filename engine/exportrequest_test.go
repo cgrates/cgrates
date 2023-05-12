@@ -340,3 +340,242 @@ func TestExportReqNewEventExporter(t *testing.T) {
 		t.Errorf("Expected %v \n but received \n %v", expected, eventReq)
 	}
 }
+
+func TestExportRequestString(t *testing.T) {
+	inData := map[string]utils.DataStorage{
+		utils.MetaReq: utils.MapStorage{
+			"Account": "1001",
+			"Usage":   "10m",
+		},
+	}
+	onm := utils.NewOrderedNavigableMap()
+
+	expData := map[string]*utils.OrderedNavigableMap{
+		utils.MetaReq: onm,
+	}
+
+	eeR := NewExportRequest(inData, "cgrates.org", nil, expData)
+
+	exp := utils.ToIJSON(eeR)
+
+	if rcv := eeR.String(); rcv != exp {
+		t.Error(rcv)
+	}
+
+}
+
+func TestExportReqFieldAsInterfaceBadPrefix(t *testing.T) {
+	inData := map[string]utils.DataStorage{
+		utils.MetaReq: utils.MapStorage{
+			"Account": "1001",
+			"Usage":   "10m",
+		},
+	}
+	eventReq := NewExportRequest(inData, "cgrates.org", nil, nil)
+
+	fldPath := []string{"inexistant"}
+	expErr := "unsupported field prefix: <inexistant>"
+	if _, err := eventReq.FieldAsInterface(fldPath); err == nil || err.Error() != expErr {
+		t.Errorf("Expected error <%+v>, received error <%+v>", expErr, err)
+	}
+}
+
+func TestExportReqFieldAsInterfaceMetaUCHErr(t *testing.T) {
+
+	inData := map[string]utils.DataStorage{
+		utils.MetaReq: utils.MapStorage{
+			"Account": "1001",
+			"Usage":   "10m",
+		},
+	}
+	eventReq := NewExportRequest(inData, "cgrates.org", nil, nil)
+
+	fldPath := []string{utils.MetaUCH}
+	if _, err := eventReq.FieldAsInterface(fldPath); err != utils.ErrNotFound {
+		t.Errorf("Expected error <%+v>, received error <%+v>", utils.ErrNotFound, err)
+	}
+}
+
+func TestExportReqFieldAsInterfaceNMSliceType(t *testing.T) {
+
+	inData := map[string]utils.DataStorage{
+		utils.MetaReq: utils.MapStorage{
+			"Slice": &utils.DataNode{
+				Type: utils.NMSliceType,
+				Slice: []*utils.DataNode{
+					{
+						Type: utils.NMDataType,
+						Value: &utils.DataLeaf{
+							Data: "cgrates.org",
+						},
+					},
+				},
+			},
+		},
+	}
+
+	eventReq := NewExportRequest(inData, "cgrates.org", nil, nil)
+	fldPath := []string{utils.MetaReq, "Slice"}
+	expVal := "cgrates.org"
+	if rcv, err := eventReq.FieldAsInterface(fldPath); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcv, expVal) {
+		t.Errorf("Expected %+v \n but received \n %+v", expVal, rcv)
+	}
+
+}
+
+func TestExportReqFieldAsStringOK(t *testing.T) {
+	inData := map[string]utils.DataStorage{
+		utils.MetaReq: utils.MapStorage{
+			"Account": "1001",
+			"Usage":   "10m",
+		},
+	}
+	eventReq := NewExportRequest(inData, "cgrates.org", nil, nil)
+	fldPath := []string{utils.MetaReq, "Usage"}
+	expVal := "10m"
+	if rcv, err := eventReq.FieldAsString(fldPath); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcv, expVal) {
+		t.Errorf("Expected %+v \n but received \n %+v", expVal, rcv)
+	}
+}
+
+func TestExportRequestParseFieldMetaFiller(t *testing.T) {
+
+	EventReq := NewExportRequest(map[string]utils.DataStorage{}, "", nil, nil)
+	fctTemp := &config.FCTemplate{
+		Type:     utils.MetaFiller,
+		Value:    config.NewRSRParsersMustCompile("*daily", utils.InfieldSep),
+		Layout:   "“Mon Jan _2 15:04:05 2006”",
+		Timezone: "",
+	}
+
+	rcv, err := EventReq.ParseField(fctTemp)
+	if err != nil {
+		t.Error(err)
+	} else if rcv != utils.MetaDaily {
+		t.Errorf("Expected %v but received %v", utils.MetaDaily, rcv)
+	}
+
+}
+
+func TestExportRequestParseFieldMetaGroup(t *testing.T) {
+
+	EventReq := NewExportRequest(map[string]utils.DataStorage{}, "", nil, nil)
+	fctTemp := &config.FCTemplate{
+		Type:     utils.MetaGroup,
+		Value:    config.NewRSRParsersMustCompile("*daily", utils.InfieldSep),
+		Layout:   "“Mon Jan _2 15:04:05 2006”",
+		Timezone: "",
+	}
+
+	rcv, err := EventReq.ParseField(fctTemp)
+	if err != nil {
+		t.Error(err)
+	} else if rcv != utils.MetaDaily {
+		t.Errorf("Expected %v but received %v", utils.MetaDaily, rcv)
+	}
+
+}
+
+func TestExportRequestSetAsSliceMetaUCH(t *testing.T) {
+
+	defer func() {
+		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
+	}()
+
+	inData := map[string]utils.DataStorage{
+		utils.MetaReq: utils.MapStorage{
+			"Account": "1001",
+			"Usage":   "10m",
+		},
+	}
+	onm := utils.NewOrderedNavigableMap()
+
+	expData := map[string]*utils.OrderedNavigableMap{
+		utils.MetaReq: onm,
+	}
+
+	eeR := NewExportRequest(inData, "cgrates.org", nil, expData)
+
+	fullPath := &utils.FullPath{
+		PathSlice: []string{utils.MetaUCH},
+		Path:      "*uch;RequestedUsage",
+	}
+	val := &utils.DataLeaf{
+		Data: "cgrates.org",
+	}
+	if err := eeR.SetAsSlice(fullPath, val); err != nil {
+		t.Errorf("Expected error <%v> but received <%v>", nil, err)
+	}
+
+	if rcv, ok := Cache.Get(utils.CacheUCH, "RequestedUsage"); !ok {
+		t.Error("Couldnt receive from cache")
+	} else if rcv != "cgrates.org" {
+		t.Errorf("Expected \n<%v>,\n but received \n<%v>", "cgrates.org", rcv)
+	}
+
+}
+
+func TestExportRequestSetAsSliceMetaOpts(t *testing.T) {
+
+	inData := map[string]utils.DataStorage{
+		utils.MetaOpts: utils.MapStorage{},
+	}
+	onm := utils.NewOrderedNavigableMap()
+
+	expData := map[string]*utils.OrderedNavigableMap{
+		utils.MetaReq: onm,
+	}
+
+	eeR := NewExportRequest(inData, "cgrates.org", nil, expData)
+
+	fullPath := &utils.FullPath{
+		PathSlice: []string{utils.MetaOpts, "Final-Unit-Indication"},
+	}
+	val := &utils.DataLeaf{
+		Data: "cgrates.org",
+	}
+	if err := eeR.SetAsSlice(fullPath, val); err != nil {
+		t.Errorf("Expected error <%v> but received <%v>", nil, err)
+	}
+
+	exp := map[string]utils.DataStorage{
+		utils.MetaOpts: utils.MapStorage{
+			"Final-Unit-Indication": "cgrates.org",
+		},
+	}
+
+	if !reflect.DeepEqual(eeR.inData[utils.MetaOpts], exp[utils.MetaOpts]) {
+		t.Errorf("Expected \n<%v>,\n but received \n<%v>", exp, eeR.inData[utils.MetaOpts])
+	}
+
+}
+
+func TestExportRequestSetAsSliceExpDataErr(t *testing.T) {
+
+	inData := map[string]utils.DataStorage{
+		utils.MetaOpts: utils.MapStorage{},
+	}
+	onm := utils.NewOrderedNavigableMap()
+
+	expData := map[string]*utils.OrderedNavigableMap{
+		utils.MetaReq: onm,
+	}
+
+	eeR := NewExportRequest(inData, "cgrates.org", nil, expData)
+
+	fullPath := &utils.FullPath{
+		PathSlice: []string{"Inexistant field"},
+	}
+	val := &utils.DataLeaf{
+		Data: "cgrates.org",
+	}
+	expErr := "unsupported field prefix: <Inexistant field> when set field"
+	if err := eeR.SetAsSlice(fullPath, val); err == nil || err.Error() != expErr {
+		t.Errorf("Expected error <%v> but received <%v>", expErr, err)
+	}
+
+}
