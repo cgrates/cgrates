@@ -3192,3 +3192,192 @@ func TestAccSetBalanceAction(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestAccEnableAccountAction(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	tmpDm := dm
+	defer func() {
+		dm = tmpDm
+	}()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	acc := &Account{
+		ID: "cgrates.org:1001",
+		BalanceMap: map[string]Balances{
+			utils.MetaVoice: {
+				&Balance{
+					ID:     "BALANCE_ID",
+					Value:  20 * float64(time.Second),
+					Weight: 10},
+				&Balance{Value: 100 * float64(time.Second),
+					Weight: 20},
+			}},
+		ActionTriggers: ActionTriggers{
+			&ActionTrigger{
+				Balance: &BalanceFilter{
+					ID:   utils.StringPointer("BALANCE_ID"),
+					Type: utils.StringPointer(utils.MetaMonetary)},
+				ThresholdValue: 100,
+				ThresholdType:  utils.TriggerMinEventCounter,
+				ActionsID:      "TEST_ACTIONS"},
+		},
+		UnitCounters: UnitCounters{
+			utils.MetaVoice: []*UnitCounter{
+				{
+					CounterType: "*event",
+					Counters: CounterFilters{
+						&CounterFilter{
+							Value: 0,
+							Filter: &BalanceFilter{
+								ID:             utils.StringPointer("BALANCE_ID"),
+								Type:           utils.StringPointer(utils.MetaVoice),
+								DestinationIDs: utils.StringMapPointer(utils.NewStringMap("GERMANY_O2")),
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+	acc2 := &Account{
+		ID: "cgrates.org:1002",
+		BalanceMap: map[string]Balances{
+			utils.MetaVoice: {
+				&Balance{
+					ID:     "BALANCE_ID",
+					Value:  20 * float64(time.Second),
+					Weight: 10},
+			}},
+		ActionTriggers: ActionTriggers{
+			&ActionTrigger{
+				Balance: &BalanceFilter{
+					ID:   utils.StringPointer("BALANCE_ID"),
+					Type: utils.StringPointer(utils.MetaVoice)},
+				ThresholdValue: 100,
+				ThresholdType:  utils.TriggerMinEventCounter,
+				ActionsID:      "TEST_ACTIONS2"},
+		},
+		UnitCounters: UnitCounters{
+			utils.MetaVoice: []*UnitCounter{
+				{
+					CounterType: "*event",
+					Counters: CounterFilters{
+						&CounterFilter{
+							Value: 0,
+							Filter: &BalanceFilter{
+								ID:             utils.StringPointer("BALANCE_ID"),
+								Type:           utils.StringPointer(utils.MetaVoice),
+								DestinationIDs: utils.StringMapPointer(utils.NewStringMap("GERMANY_O2")),
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+	acc3 := &Account{
+		ID: "cgrates.org:1003",
+		BalanceMap: map[string]Balances{
+			utils.MetaVoice: {
+				&Balance{
+					dirty:  true,
+					ID:     "BALANCE_ID",
+					Value:  150 * float64(time.Second),
+					Weight: 10},
+			}},
+		ActionTriggers: ActionTriggers{
+			&ActionTrigger{
+				Balance: &BalanceFilter{
+					ID:   utils.StringPointer("BALANCE_ID"),
+					Type: utils.StringPointer(utils.MetaVoice)},
+				ThresholdValue: 100,
+				ThresholdType:  utils.TriggerMaxBalance,
+				ActionsID:      "TEST_ACTIONS3"},
+		},
+	}
+	testCases := []struct {
+		name       string
+		account    *Account
+		actions    Actions
+		key        string
+		actiontype string
+	}{
+		{name: "Enable account action",
+			account: acc,
+			actions: Actions{
+				&Action{
+					ActionType: utils.MetaEnableAccount,
+					Filters:    []string{"*gte:~*req.BalanceMap.*voice[0].Value:20"},
+					Balance: &BalanceFilter{
+						ID:             utils.StringPointer("BALANCE_ID"),
+						Type:           utils.StringPointer(utils.MetaVoice),
+						DestinationIDs: utils.StringMapPointer(utils.NewStringMap("GERMANY_O2")),
+					},
+					Weight: 9,
+				},
+			},
+			key:        "TEST_ACTIONS",
+			actiontype: utils.MetaEnableAccount,
+		},
+		{
+			name:    "Disable account action",
+			account: acc2,
+			actions: Actions{
+				&Action{
+					ActionType: utils.MetaDisableAccount,
+					Filters:    []string{"*string:~*req.BalanceMap.*voice[0].ID:BALANCE_ID"},
+					Balance: &BalanceFilter{
+						ID:             utils.StringPointer("BALANCE_ID"),
+						Type:           utils.StringPointer(utils.MetaVoice),
+						DestinationIDs: utils.StringMapPointer(utils.NewStringMap("GERMANY_O2")),
+					},
+					Weight: 9,
+				},
+			},
+			key:        "TEST_ACTIONS2",
+			actiontype: utils.MetaDisableAccount,
+		},
+		{
+			name:    "Set recurrent Action",
+			account: acc3,
+			actions: Actions{
+				&Action{
+					ActionType: utils.MetaSetRecurrent,
+					Filters:    []string{"*string:~*req.BalanceMap.*voice[0].ID:BALANCE_ID"},
+					Balance: &BalanceFilter{
+						ID:             utils.StringPointer("BALANCE_ID"),
+						Type:           utils.StringPointer(utils.MetaVoice),
+						DestinationIDs: utils.StringMapPointer(utils.NewStringMap("GERMANY_O2")),
+					},
+					Weight: 9,
+				},
+			},
+			key:        "TEST_ACTIONS3",
+			actiontype: utils.MetaSetRecurrent,
+		},
+	}
+	SetDataStorage(dm)
+	for _, tc := range testCases {
+		dm.SetActions(tc.key, tc.actions)
+		t.Run(tc.name, func(t *testing.T) {
+			tc.account.ExecuteActionTriggers(&Action{}, NewFilterS(cfg, nil, dm))
+
+			switch tc.actiontype {
+			case utils.MetaEnableAccount:
+				if acc, err := dm.GetAccount(tc.account.ID); err != nil {
+					t.Error(err)
+				} else if acc.Disabled != false {
+					t.Errorf("account should be enabled")
+				}
+
+			case utils.MetaDisableAccount:
+				if acc, err := dm.GetAccount(tc.account.ID); err != nil {
+					t.Error(err)
+				} else if acc.Disabled != true {
+					t.Errorf("account should be disabled")
+				}
+			}
+
+		})
+	}
+}

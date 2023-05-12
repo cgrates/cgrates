@@ -2637,5 +2637,74 @@ func TestCDRefundIncrementWarning(t *testing.T) {
 	} else if rcvLog := buf.String(); !strings.Contains(rcvLog, expLog) {
 		t.Errorf("Logger %v doesn't contain %v", rcvLog, expLog)
 	}
+}
 
+func TestCallDescGetRatingPlansForPrefix(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	tmpDm := dm
+	defer func() {
+		dm = tmpDm
+	}()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	cd := &CallDescriptor{
+		Category:      "call",
+		Tenant:        "cgrates.org",
+		Subject:       "1005",
+		Account:       "1005",
+		Destination:   "1004",
+		TimeStart:     time.Date(2022, time.January, 7, 16, 60, 0, 0, time.UTC),
+		TimeEnd:       time.Date(2022, time.January, 7, 16, 60, 0, 0, time.UTC),
+		LoopIndex:     1,
+		ToR:           utils.MetaVoice,
+		RunID:         utils.MetaRaw,
+		DurationIndex: time.Second,
+	}
+	dm.SetRatingProfile(&RatingProfile{
+		Id: "*out:cgrates.org:call:1005",
+		RatingPlanActivations: RatingPlanActivations{&RatingPlanActivation{
+			ActivationTime: time.Date(2015, 01, 01, 8, 0, 0, 0, time.UTC),
+			RatingPlanId:   "RP_2CNT",
+		}},
+	})
+	dm.SetRatingPlan(&RatingPlan{
+		Id: "RP_2CNT",
+		Timings: map[string]*RITiming{
+			"30eab300": {
+				Years:     utils.Years{},
+				Months:    utils.Months{},
+				MonthDays: utils.MonthDays{},
+				WeekDays:  utils.WeekDays{},
+				StartTime: "00:00:00",
+			},
+		},
+		Ratings: map[string]*RIRate{
+			"b457f86d": {
+				Rates: []*RGRate{
+					{
+						GroupIntervalStart: 0,
+						Value:              0,
+						RateIncrement:      60 * time.Second,
+						RateUnit:           60 * time.Second,
+					},
+				},
+				RoundingMethod:   utils.MetaRoundingMiddle,
+				RoundingDecimals: 4,
+			},
+		},
+		DestinationRates: map[string]RPRateList{
+			"DEST": []*RPRate{
+				{
+					Timing: "30eab300",
+					Rating: "b457f86d",
+					Weight: 10,
+				},
+			},
+		},
+	})
+	dm.SetReverseDestination("DEST", []string{"1004"}, "")
+	SetDataStorage(dm)
+	if err, _ = cd.getRatingPlansForPrefix(cd.GetKey(cd.Subject), 1); err != nil {
+		t.Error(err)
+	}
 }
