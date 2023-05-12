@@ -21,6 +21,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -394,4 +395,71 @@ func TestRatingProfileSubjectPrefixMatching(t *testing.T) {
 		t.Errorf("Error getting rating profile by prefix: %+v (%v)", rp, err)
 	}
 	rpSubjectPrefixMatching = false
+}
+
+func TestRatingProfileGetRatingPlansPrefixAny(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	tmpDm := dm
+	defer func() {
+		dm = tmpDm
+	}()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	rpf := &RatingProfile{
+		Id: "*out:cgrates.org:call:1001",
+		RatingPlanActivations: RatingPlanActivations{&RatingPlanActivation{
+			ActivationTime: time.Date(2015, 01, 01, 8, 0, 0, 0, time.UTC),
+			RatingPlanId:   "RP_2CNT",
+		}},
+	}
+	cd := &CallDescriptor{
+		ToR:      "*prepaid",
+		Tenant:   "cgrates.org",
+		Category: "call", Account: "1001",
+		Subject: "1001", Destination: "1003",
+		TimeStart: time.Date(2023, 11, 7, 8, 42, 26, 0, time.UTC),
+		TimeEnd:   time.Date(2023, 11, 7, 8, 42, 26, 0, time.UTC).Add(50 * time.Second),
+	}
+	dm.SetRatingPlan(&RatingPlan{
+		Id: "RP_2CNT",
+		Timings: map[string]*RITiming{
+			"30eab300": {
+				Years:     utils.Years{},
+				Months:    utils.Months{},
+				MonthDays: utils.MonthDays{},
+				WeekDays:  utils.WeekDays{},
+				StartTime: "00:00:00",
+			},
+		},
+		Ratings: map[string]*RIRate{
+			"b457f86d": {
+				Rates: []*RGRate{
+					{
+						GroupIntervalStart: 0,
+						Value:              0,
+						RateIncrement:      60 * time.Second,
+						RateUnit:           60 * time.Second,
+					},
+				},
+				RoundingMethod:   utils.MetaRoundingMiddle,
+				RoundingDecimals: 4,
+			},
+		},
+		DestinationRates: map[string]RPRateList{
+			"*any": []*RPRate{
+				{
+					Timing: "30eab300",
+					Rating: "b457f86d",
+					Weight: 10,
+				},
+			},
+		},
+	})
+
+	dm.SetReverseDestination("DEST", []string{"1003"}, "")
+	SetDataStorage(dm)
+	if err := rpf.GetRatingPlansForPrefix(cd); err != nil {
+		t.Error("Error getting rating plans for prefix: ", err)
+	}
+
 }
