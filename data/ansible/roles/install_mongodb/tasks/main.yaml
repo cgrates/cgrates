@@ -1,33 +1,52 @@
 ---
-- name: Install dependencies
+- name: Determine the version of MongoDB
   become: yes
-  apt:
-    name: "{{ mongodb_dependencies }}"
-    state: present
-    update_cache: yes
+  command: mongod --version
+  register: mongodb_version_check
+  changed_when: false
+  failed_when: false
 
-- name: Import the MongoDB public GPG Key
-  ansible.builtin.shell: |
-    curl -fsSL https://pgp.mongodb.com/server-{{ mongodb_version }}.asc | sudo gpg -o /usr/share/keyrings/mongodb-server-{{ mongodb_version }}.gpg --dearmor
-  args:
-    executable: /bin/bash
+- name: Set fact for MongoDB current version
+  set_fact:
+    mongodb_current_version: "{{ mongodb_version_check.stdout_lines[0].split(' ')[2] if mongodb_version_check.rc == 0 else 'not installed' }}"
 
-- name: Create a /etc/apt/sources.list.d/mongodb-org-6.0.list file for MongoDB
-  become: yes
-  ansible.builtin.copy:
-    content: "deb [ signed-by=/usr/share/keyrings/mongodb-server-{{ mongodb_version }}.gpg] http://repo.mongodb.org/apt/debian bullseye/mongodb-org/{{ mongodb_version }} main"
-    dest: "/etc/apt/sources.list.d/{{ mongodb_package_name }}-{{ mongodb_version }}.list"
+- name: Set fact for MongoDB installation required
+  set_fact:
+    mongodb_installation_required: "{{ mongodb_current_version != mongodb_version }}"
 
-- name: Install MongoDB packages
-  become: yes
-  apt:
-    name: "{{ mongodb_package_name }}"
-    state: present
-    update_cache: yes
+- block:
 
-- name: Start and enable MongoDB service
-  become: yes
-  ansible.builtin.systemd:
-    name: "{{ mongodb_service_name }}"
-    state: "{{ mongodb_service_state }}"
-    enabled: "{{ mongodb_service_enabled }}"
+  - name: Install dependencies
+    become: yes
+    apt:
+      name: "{{ mongodb_dependencies }}"
+      state: present
+      update_cache: yes
+
+  - name: Import the MongoDB public GPG Key
+    become: yes
+    apt_key:
+      url: "https://pgp.mongodb.com/server-{{ mongodb_version }}.asc"
+      keyring: "/usr/share/keyrings/mongodb-server-{{ mongodb_version }}.gpg"
+
+  - name: Add MongoDB repository
+    become: yes
+    apt_repository:
+      repo: "deb [ signed-by=/usr/share/keyrings/mongodb-server-{{ mongodb_version }}.gpg] http://repo.mongodb.org/apt/debian bullseye/mongodb-org/{{ mongodb_version }} main"
+      filename: "{{ mongodb_package_name }}-{{ mongodb_version }}"
+
+  - name: Install MongoDB packages
+    become: yes
+    apt:
+      name: "{{ mongodb_package_name }}"
+      state: present
+      update_cache: yes
+
+  - name: Start and enable MongoDB service
+    become: yes
+    ansible.builtin.systemd:
+      name: "{{ mongodb_service_name }}"
+      state: "{{ mongodb_service_state }}"
+      enabled: "{{ mongodb_service_enabled }}"
+
+  when: mongodb_installation_required
