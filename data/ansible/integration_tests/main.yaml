@@ -1,145 +1,22 @@
 ---
 - hosts: local
-  vars:
-    ###############################################################
-    ###################### Kafka Vars #############################
-    ###############################################################
-    kafka_apache_mirror: https://archive.apache.org/dist/
-    kafka_user: kafka
-    kafka_version_kafka: 2.1.0
-    kafka_version_scala: 2.11
-    kafka_base_name: "kafka_{{ kafka_version_scala }}-{{ kafka_version_kafka }}"
-    kafka_url: "{{ kafka_apache_mirror }}/kafka/{{ kafka_version_kafka }}/{{ kafka_base_name }}.tgz"
-    kafka_download_folder: "/home/{{ kafka_user }}/Downloads"
-    kafka_install_folder: "/home/{{ kafka_user }}"
-    # kafka_user_password: "123456y"
-
-    ###############################################################
-    # CGRateS location
-    cgrates_dir: "/home/{{ user }}/go/src/github.com/cgrates/cgrates"
-    ###############################################################
-  remote_user: root
   tasks:
+  - name: Install RabbitMQ
+    import_role:
+      name: ../roles/install_rabbitmq
 
-###########################################################################################################################
+  - name: Install Kafka
+    import_role:
+      name: ../roles/install_kafka
 
-###########################################################################################################################
-# install dependencies
-  - name: Install build-essential
-    become: yes
-    apt:
-      name: build-essential
-      state: present
+  - name: Install MongoDB
+    import_role:
+      name: ../roles/install_mongodb
 
-  - name: Install the git
-    become: yes
-    apt:
-      name: git
-
-  - name: Install the redis
-    become: yes
-    apt:
-      name: redis-server
-      
-  - name: Install the mysql
-    become: yes
-    apt:
-      name: mariadb-server
-
-  - name: Install the postgresql
-    become: yes
-    apt:
-      name: postgresql
-
-  - name: Install the postgresql-contrib
-    become: yes
-    apt:
-      name: postgresql-contrib
-
-###########################################################################################################################
-  - name: Install mongo
-    include: mongo.yaml
-
-  - name: Install kafka
-    include: kafka.yaml
-
-  - name: Install rabbitmq
-    include: rabbitmq.yaml
-###########################################################################################################################
-
-###########################################################################################################################
   - name: Install Go
     import_role:
       name: ../roles/install_go
 
-###########################################################################################################################
-
-###########################################################################################################################
-# install cgrates
-  - name: create cgrates directory
-    file:
-      state: directory
-      mode: 'u=rwx,go=rx'
-      owner: "{{ user }}"
-      group: "{{ user }}"
-      dest: '{{ cgrates_dir }}'
-    become_user: "{{ user }}"
-
-  - name: git clone cgrates
-    git:
-      repo: https://github.com/cgrates/cgrates.git
-      dest: '{{ cgrates_dir }}'
-    become: yes
-    become_user: "{{ user }}"
-
-  - name:  build cgrates
-    command: 'sh {{ cgrates_dir }}/build.sh'
-    environment:
-      PATH: "{{ lookup('env','PATH') }}:/home/{{ user }}/go/bin:/usr/local/go/bin:{{ ansible_env.PATH }}"
-    args:
-      chdir: '{{ cgrates_dir }}'
-
-  - name: symbol link
-    become: yes
-    file:
-      src: "{{ cgrates_dir }}/data"
-      dest: "/usr/share/cgrates"
-      state: link
-###########################################################################################################################
-
-###########################################################################################################################
-# post install
-  - name:  post install mysql
-    become: yes
-    command: 'sh {{ cgrates_dir }}/data/storage/mysql/setup_cgr_db.sh root CGRateS.org localhost'
-    args:
-      chdir: '{{ cgrates_dir }}/data/storage/mysql/'
-
-  - name:  post install for ers mysql
-    become: yes
-    command: 'sh {{ cgrates_dir }}/data/storage/mysql/setup_ers_db.sh root CGRateS.org localhost'
-    args:
-      chdir: '{{ cgrates_dir }}/data/storage/mysql/'
-
-  - name:  post install postgres2
-    become: yes
-    command: 'sh {{ cgrates_dir }}/data/storage/postgres/create_db_with_users.sh'
-    args:
-      chdir: '{{ cgrates_dir }}/data/storage/postgres/'
-
-  - name:  post install for ers postgres
-    become: yes
-    command: 'sh {{ cgrates_dir }}/data/storage/postgres/create_ers_db.sh'
-    args:
-      chdir: '{{ cgrates_dir }}/data/storage/postgres/'
-
-  - name:  post install mongo
-    become: yes
-    command: 'sh {{ cgrates_dir }}/data/storage/mongo/setup_cgr_db.sh'
-    args:
-      chdir: '{{ cgrates_dir }}/data/storage/mongo/'
-
-  - name:  set versions
-    command: 'cgr-migrator -exec=*set_versions -config_path=/usr/share/cgrates/conf/samples/tutmysql'
-    environment:
-      PATH: "{{ lookup('env','PATH') }}:/home/{{ user }}/go/bin:/usr/local/go/bin:{{ ansible_env.PATH }}"
+  - name: Install and configure CGRateS
+    import_role:
+      name: ../roles/install_cgrates
