@@ -2145,3 +2145,161 @@ func TestDmRemoveThresholdProfileErrs(t *testing.T) {
 		})
 	}
 }
+
+func TestDmGetAccountActionPlans(t *testing.T) {
+
+	cfg, _ := config.NewDefaultCGRConfig()
+
+	defer func() {
+		cfg2, _ := config.NewDefaultCGRConfig()
+		config.SetCgrConfig(cfg2)
+	}()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	cfg.DataDbCfg().RmtConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1)}
+	cfg.DataDbCfg().Items[utils.MetaAccountActionPlans].Remote = true
+	clientConn := make(chan birpc.ClientConnector, 1)
+	clientConn <- clMock(func(_ *context.Context, serviceMethod string, _, _ interface{}) error {
+		if serviceMethod == utils.ReplicatorSv1GetAccountActionPlans {
+
+			return nil
+		}
+		return utils.ErrNotImplemented
+	})
+	dm := NewDataManager(db, cfg.CacheCfg(), NewConnManager(
+		cfg, map[string]chan birpc.ClientConnector{
+			utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
+		},
+	))
+	Cache.Clear(nil)
+	testCases := []struct {
+		name      string
+		acntId    string
+		cacheRead bool
+		error     bool
+	}{
+		{
+			name:      "Not Found in Cache",
+			acntId:    "Actions1",
+			cacheRead: true,
+			error:     true,
+		},
+		{
+			name:      "Get AccountActions Remote",
+			acntId:    "Actions2",
+			cacheRead: false,
+			error:     false,
+		},
+	}
+	Cache.Set(utils.CacheAccountActionPlans, "Actions1", nil, []string{}, true, "")
+	config.SetCgrConfig(cfg)
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			if _, err := dm.GetAccountActionPlans(tc.acntId, tc.cacheRead, false, utils.NonTransactional); (err != nil) != tc.error {
+				t.Error(err)
+			}
+		})
+	}
+}
+
+func TestDmSetFilter(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	defer func() {
+		cfg2, _ := config.NewDefaultCGRConfig()
+		config.SetCgrConfig(cfg2)
+	}()
+	Cache.Clear(nil)
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	cfg.DataDbCfg().Items[utils.MetaFilters].Replicate = true
+	cfg.DataDbCfg().RplConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1)}
+	clientConn := make(chan birpc.ClientConnector, 1)
+	clientConn <- clMock(func(_ *context.Context, serviceMethod string, _, _ interface{}) error {
+		if serviceMethod == utils.ReplicatorSv1SetFilter {
+			return nil
+		}
+		return utils.ErrNotImplemented
+	})
+	dm := NewDataManager(db, cfg.CacheCfg(), NewConnManager(cfg, map[string]chan context.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
+	}))
+	fltr := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "FLT_1",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaString,
+				Element: "~*req.Account",
+				Values:  []string{"1001"},
+			},
+		},
+	}
+
+	testCases := []struct {
+		name   string
+		fltr   *Filter
+		expErr bool
+	}{
+		{
+			name:   "GetFilter Remote",
+			fltr:   fltr,
+			expErr: false,
+		},
+	}
+	config.SetCgrConfig(cfg)
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			if err := dm.SetFilter(tc.fltr); (err != nil) != tc.expErr {
+				t.Error(err)
+			}
+		})
+	}
+
+}
+
+func TestDmRemAccountActionPlans(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	cfg.DataDbCfg().Items[utils.MetaAccountActionPlans].Replicate = true
+	cfg.DataDbCfg().RplConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1)}
+	clientConn := make(chan birpc.ClientConnector, 1)
+	clientConn <- clMock(func(_ *context.Context, serviceMethod string, _, _ interface{}) error {
+		if serviceMethod == utils.ReplicatorSv1RemAccountActionPlans {
+			return nil
+		}
+		return utils.ErrNotImplemented
+	})
+	dm := NewDataManager(db, cfg.CacheCfg(), NewConnManager(cfg, map[string]chan birpc.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
+	}))
+	defer func() {
+		cfg2, _ := config.NewDefaultCGRConfig()
+		config.SetCgrConfig(cfg2)
+	}()
+	testCases := []struct {
+		name   string
+		acnId  string
+		apIDs  []string
+		expErr bool
+	}{
+		{
+			name:   "DataManager.RemAccountActionPlans NotFound",
+			acnId:  "cgrates.org:1001",
+			apIDs:  []string{"Actions1"},
+			expErr: true,
+		},
+		{
+			name:   "DataManager.RemAccountActionPlans Replicate",
+			acnId:  "cgrates.org:1001",
+			apIDs:  []string{"ACTIONS1"},
+			expErr: false,
+		},
+	}
+	config.SetCgrConfig(cfg)
+	dm.SetAccountActionPlans(testCases[1].acnId, testCases[1].apIDs, true)
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			if err := dm.RemAccountActionPlans(tc.acnId, tc.apIDs); (err != nil) != tc.expErr {
+				t.Error("Expected error ,received nil")
+			}
+		})
+	}
+}
