@@ -1,7 +1,9 @@
 ---
-rabbitmq_dependencies:
+rabbitmq_dependencies: 
   - curl
   - gnupg
+  - debian-keyring
+  - debian-archive-keyring
   - apt-transport-https
 erlang_packages:
   - erlang-base
