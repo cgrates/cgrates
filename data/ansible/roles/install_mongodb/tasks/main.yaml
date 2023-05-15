@@ -1,0 +1,33 @@
+---
+- name: Install dependencies
+  become: yes
+  apt:
+    name: "{{ mongodb_dependencies }}"
+    state: present
+    update_cache: yes
+
+- name: Import the MongoDB public GPG Key
+  ansible.builtin.shell: |
+    curl -fsSL https://pgp.mongodb.com/server-{{ mongodb_version }}.asc | sudo gpg -o /usr/share/keyrings/mongodb-server-{{ mongodb_version }}.gpg --dearmor
+  args:
+    executable: /bin/bash
+
+- name: Create a /etc/apt/sources.list.d/mongodb-org-6.0.list file for MongoDB
+  become: yes
+  ansible.builtin.copy:
+    content: "deb [ signed-by=/usr/share/keyrings/mongodb-server-{{ mongodb_version }}.gpg] http://repo.mongodb.org/apt/debian bullseye/mongodb-org/{{ mongodb_version }} main"
+    dest: "/etc/apt/sources.list.d/{{ mongodb_package_name }}-{{ mongodb_version }}.list"
+
+- name: Install MongoDB packages
+  become: yes
+  apt:
+    name: "{{ mongodb_package_name }}"
+    state: present
+    update_cache: yes
+
+- name: Start and enable MongoDB service
+  become: yes
+  ansible.builtin.systemd:
+    name: "{{ mongodb_service_name }}"
+    state: "{{ mongodb_service_state }}"
+    enabled: "{{ mongodb_service_enabled }}"
