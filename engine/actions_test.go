@@ -2734,6 +2734,64 @@ func TestActionSetDestinations(t *testing.T) {
 	}
 }
 
+func TestActionRemBalanceActionErr(t *testing.T) {
+	testCases := []struct {
+		name string
+		ub   *Account
+		a    *Action
+		acs  Actions
+	}{
+		{
+			name: "Nil Account Error",
+		},
+		{
+			name: "Balance Not Found",
+			ub: &Account{
+				ID: "cgrates.org:1001",
+				BalanceMap: map[string]Balances{
+					utils.VOICE: {
+						&Balance{Value: 20 * float64(time.Second),
+							DestinationIDs: utils.NewStringMap("1002"),
+							Weight:         10, RatingSubject: "rif"},
+					}},
+			},
+			a: &Action{
+				ActionType: "*topup",
+				Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY),
+					Value: &utils.ValueFormula{Static: 10}},
+			},
+		},
+		{
+			name: "Unmatched Balance",
+			ub: &Account{
+				ID: "cgrates.org:1001",
+				BalanceMap: map[string]Balances{
+					utils.VOICE: {
+						&Balance{
+							ID:             "balance_id",
+							Value:          20 * float64(time.Second),
+							DestinationIDs: utils.NewStringMap("1002"),
+							Weight:         10, RatingSubject: "rif"},
+					}},
+			},
+			a: &Action{
+				ActionType: "*topup",
+				Balance: &BalanceFilter{
+					ID:    utils.StringPointer("balance_id2"),
+					Type:  utils.StringPointer(utils.VOICE),
+					Value: &utils.ValueFormula{Static: 10}},
+			},
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			if err := removeBalanceAction(tc.ub, tc.a, tc.acs, nil); err == nil {
+				t.Errorf("Expected error received nil")
+			}
+		})
+	}
+}
+
 // TestCdrLogAction
 type RPCMock struct {
 	args *ArgV1ProcessEvent
