@@ -6,3 +6,4 @@ mongodb_service_state: started
 mongodb_service_enabled: true
 mongodb_dependencies:
   - gnupg
+  - curl
