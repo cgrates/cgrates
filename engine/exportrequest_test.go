@@ -24,6 +24,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -502,7 +503,7 @@ func TestExportRequestSetAsSliceMetaUCH(t *testing.T) {
 
 	fullPath := &utils.FullPath{
 		PathSlice: []string{utils.MetaUCH},
-		Path:      "*uch;RequestedUsage",
+		Path:      "*uch;Tenant",
 	}
 	val := &utils.DataLeaf{
 		Data: "cgrates.org",
@@ -511,7 +512,7 @@ func TestExportRequestSetAsSliceMetaUCH(t *testing.T) {
 		t.Errorf("Expected error <%v> but received <%v>", nil, err)
 	}
 
-	if rcv, ok := Cache.Get(utils.CacheUCH, "RequestedUsage"); !ok {
+	if rcv, ok := Cache.Get(utils.CacheUCH, "Tenant"); !ok {
 		t.Error("Couldnt receive from cache")
 	} else if rcv != "cgrates.org" {
 		t.Errorf("Expected \n<%v>,\n but received \n<%v>", "cgrates.org", rcv)
@@ -533,7 +534,7 @@ func TestExportRequestSetAsSliceMetaOpts(t *testing.T) {
 	eeR := NewExportRequest(inData, "cgrates.org", nil, expData)
 
 	fullPath := &utils.FullPath{
-		PathSlice: []string{utils.MetaOpts, "Final-Unit-Indication"},
+		PathSlice: []string{utils.MetaOpts, "Tenant"},
 	}
 	val := &utils.DataLeaf{
 		Data: "cgrates.org",
@@ -544,7 +545,7 @@ func TestExportRequestSetAsSliceMetaOpts(t *testing.T) {
 
 	exp := map[string]utils.DataStorage{
 		utils.MetaOpts: utils.MapStorage{
-			"Final-Unit-Indication": "cgrates.org",
+			"Tenant": "cgrates.org",
 		},
 	}
 
@@ -576,6 +577,322 @@ func TestExportRequestSetAsSliceExpDataErr(t *testing.T) {
 	expErr := "unsupported field prefix: <Inexistant field> when set field"
 	if err := eeR.SetAsSlice(fullPath, val); err == nil || err.Error() != expErr {
 		t.Errorf("Expected error <%v> but received <%v>", expErr, err)
+	}
+
+}
+
+func TestExportRequestSetAsSliceDefaultOK(t *testing.T) {
+
+	inData := map[string]utils.DataStorage{
+		utils.MetaOpts: utils.MapStorage{},
+	}
+	onm := utils.NewOrderedNavigableMap()
+
+	expData := map[string]*utils.OrderedNavigableMap{
+		utils.MetaExp: onm,
+	}
+
+	eeR := NewExportRequest(inData, "cgrates.org", nil, expData)
+
+	fullPath := &utils.FullPath{
+		PathSlice: []string{utils.MetaExp, "Tenant"},
+		Path:      "*uch.Tenant",
+	}
+
+	val := &utils.DataLeaf{
+		Data: "cgrates.org",
+	}
+	exp := `{"Map":{"Tenant":{"Slice":[{"Value":{"Data":"cgrates.org"}}]}}}`
+
+	if err := eeR.SetAsSlice(fullPath, val); err != nil {
+		t.Error(err)
+	} else if eeR.ExpData[utils.MetaExp].String() != exp {
+		t.Errorf("Expected \n<%v>,\n Received <%v>", exp, eeR.ExpData[utils.MetaExp].String())
+	}
+
+}
+
+func TestExportRequestAppendMetaUCH(t *testing.T) {
+
+	defer func() {
+		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
+	}()
+
+	inData := map[string]utils.DataStorage{
+		utils.MetaReq: utils.MapStorage{
+			"Account": "1001",
+			"Usage":   "10m",
+		},
+	}
+	onm := utils.NewOrderedNavigableMap()
+
+	expData := map[string]*utils.OrderedNavigableMap{
+		utils.MetaReq: onm,
+	}
+
+	eeR := NewExportRequest(inData, "cgrates.org", nil, expData)
+
+	fullPath := &utils.FullPath{
+		PathSlice: []string{utils.MetaUCH},
+		Path:      "*uch;Tenant",
+	}
+	val := &utils.DataLeaf{
+		Data: "cgrates.org",
+	}
+	if err := eeR.Append(fullPath, val); err != nil {
+		t.Errorf("Expected error <%v> but received <%v>", nil, err)
+	}
+
+	if rcv, ok := Cache.Get(utils.CacheUCH, "Tenant"); !ok {
+		t.Error("Couldnt receive from cache")
+	} else if rcv != "cgrates.org" {
+		t.Errorf("Expected \n<%v>,\n but received \n<%v>", "cgrates.org", rcv)
+	}
+
+}
+
+func TestExportRequestAppendMetaOpts(t *testing.T) {
+
+	inData := map[string]utils.DataStorage{
+		utils.MetaOpts: utils.MapStorage{},
+	}
+	onm := utils.NewOrderedNavigableMap()
+
+	expData := map[string]*utils.OrderedNavigableMap{
+		utils.MetaReq: onm,
+	}
+
+	eeR := NewExportRequest(inData, "cgrates.org", nil, expData)
+
+	fullPath := &utils.FullPath{
+		PathSlice: []string{utils.MetaOpts, "Tenant"},
+	}
+	val := &utils.DataLeaf{
+		Data: "cgrates.org",
+	}
+	if err := eeR.Append(fullPath, val); err != nil {
+		t.Errorf("Expected error <%v> but received <%v>", nil, err)
+	}
+
+	exp := map[string]utils.DataStorage{
+		utils.MetaOpts: utils.MapStorage{
+			"Tenant": "cgrates.org",
+		},
+	}
+
+	if !reflect.DeepEqual(eeR.inData[utils.MetaOpts], exp[utils.MetaOpts]) {
+		t.Errorf("Expected \n<%v>,\n but received \n<%v>", exp, eeR.inData[utils.MetaOpts])
+	}
+
+}
+
+func TestExportRequestAppendExpDataErr(t *testing.T) {
+
+	inData := map[string]utils.DataStorage{
+		utils.MetaOpts: utils.MapStorage{},
+	}
+	onm := utils.NewOrderedNavigableMap()
+
+	expData := map[string]*utils.OrderedNavigableMap{
+		utils.MetaReq: onm,
+	}
+
+	eeR := NewExportRequest(inData, "cgrates.org", nil, expData)
+
+	fullPath := &utils.FullPath{
+		PathSlice: []string{"Inexistant field"},
+	}
+	val := &utils.DataLeaf{
+		Data: "cgrates.org",
+	}
+	expErr := "unsupported field prefix: <Inexistant field> when set field"
+	if err := eeR.Append(fullPath, val); err == nil || err.Error() != expErr {
+		t.Errorf("Expected error <%v> but received <%v>", expErr, err)
+	}
+
+}
+
+func TestExportRequestAppendDefaultOK(t *testing.T) {
+
+	inData := map[string]utils.DataStorage{
+		utils.MetaOpts: utils.MapStorage{},
+	}
+	onm := utils.NewOrderedNavigableMap()
+
+	expData := map[string]*utils.OrderedNavigableMap{
+		utils.MetaExp: onm,
+	}
+
+	eeR := NewExportRequest(inData, "cgrates.org", nil, expData)
+
+	fullPath := &utils.FullPath{
+		PathSlice: []string{utils.MetaExp, "Tenant"},
+		Path:      "*uch.Tenant",
+	}
+
+	val := &utils.DataLeaf{
+		Data: "cgrates.org",
+	}
+	exp := `{"Map":{"Tenant":{"Slice":[{"Value":{"Data":"cgrates.org"}}]}}}`
+
+	if err := eeR.Append(fullPath, val); err != nil {
+		t.Error(err)
+	} else if eeR.ExpData[utils.MetaExp].String() != exp {
+		t.Errorf("Expected \n<%v>,\n Received <%v>", exp, eeR.ExpData[utils.MetaExp].String())
+	}
+
+}
+
+func TestExportRequestComposeMetaUCHNotOK(t *testing.T) {
+
+	defer func() {
+		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
+	}()
+
+	inData := map[string]utils.DataStorage{
+		utils.MetaReq: utils.MapStorage{
+			"Account": "1001",
+			"Usage":   "10m",
+		},
+	}
+	onm := utils.NewOrderedNavigableMap()
+
+	expData := map[string]*utils.OrderedNavigableMap{
+		utils.MetaReq: onm,
+	}
+
+	eeR := NewExportRequest(inData, "cgrates.org", nil, expData)
+
+	fullPath := &utils.FullPath{
+		PathSlice: []string{utils.MetaUCH},
+		Path:      "*uch;Tenant",
+	}
+	val := &utils.DataLeaf{
+		Data: "cgrates.org",
+	}
+	if err := eeR.Compose(fullPath, val); err != nil {
+		t.Errorf("Expected error <%v> but received <%v>", nil, err)
+	}
+
+	if rcv, ok := Cache.Get(utils.CacheUCH, "Tenant"); !ok {
+		t.Error("Couldnt receive from cache")
+	} else if rcv != "cgrates.org" {
+		t.Errorf("Expected \n<%v>,\n but received \n<%v>", "cgrates.org", rcv)
+	}
+
+}
+
+func TestExportRequestComposeMetaUCHPathSet(t *testing.T) {
+
+	defer func() {
+		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
+	}()
+
+	inData := map[string]utils.DataStorage{
+		utils.MetaReq: utils.MapStorage{
+			"Account": "1001",
+			"Usage":   "10m",
+		},
+	}
+	onm := utils.NewOrderedNavigableMap()
+
+	expData := map[string]*utils.OrderedNavigableMap{
+		utils.MetaReq: onm,
+	}
+
+	eeR := NewExportRequest(inData, "cgrates.org", nil, expData)
+
+	fullPath := &utils.FullPath{
+		PathSlice: []string{utils.MetaUCH},
+		Path:      "*uch;Tenant",
+	}
+	val := &utils.DataLeaf{
+		Data: "cgrates.org",
+	}
+
+	if err := Cache.Set(context.Background(), utils.CacheUCH, "Tenant", "Extra", []string{}, true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+
+	if err := eeR.Compose(fullPath, val); err != nil {
+		t.Errorf("Expected error <%v> but received <%v>", nil, err)
+	}
+
+	if rcv, ok := Cache.Get(utils.CacheUCH, "Tenant"); !ok {
+		t.Error("Couldnt receive from cache")
+	} else if rcv != "Extracgrates.org" {
+		t.Errorf("Expected \n<%v>,\n but received \n<%v>", "cgrates.org", rcv)
+	}
+
+}
+
+func TestExportRequestComposeMetaOptsOK(t *testing.T) {
+
+	inData := map[string]utils.DataStorage{
+		utils.MetaOpts: utils.MapStorage{},
+	}
+	onm := utils.NewOrderedNavigableMap()
+
+	expData := map[string]*utils.OrderedNavigableMap{
+		utils.MetaReq: onm,
+	}
+
+	eeR := NewExportRequest(inData, "cgrates.org", nil, expData)
+
+	fullPath := &utils.FullPath{
+		PathSlice: []string{utils.MetaOpts, "Tenant"},
+	}
+	val := &utils.DataLeaf{
+		Data: "cgrates.org",
+	}
+	if err := eeR.Compose(fullPath, val); err != nil {
+		t.Errorf("Expected error <%v> but received <%v>", nil, err)
+	}
+
+	exp := map[string]utils.DataStorage{
+		utils.MetaOpts: utils.MapStorage{
+			"Tenant": "cgrates.org",
+		},
+	}
+
+	if !reflect.DeepEqual(eeR.inData[utils.MetaOpts], exp[utils.MetaOpts]) {
+		t.Errorf("Expected \n<%v>,\n but received \n<%v>", exp, eeR.inData[utils.MetaOpts])
+	}
+
+}
+
+func TestExportRequestComposeMetaOptsFoundOK(t *testing.T) {
+
+	inData := map[string]utils.DataStorage{
+		utils.MetaOpts: utils.MapStorage{
+			"Account": "1001",
+			"Usage":   "10m",
+			"Tenant":  "Extra",
+		},
+	}
+
+	eeR := NewExportRequest(inData, "cgrates.org", nil, nil)
+
+	fullPath := &utils.FullPath{
+		PathSlice: []string{utils.MetaOpts, "Tenant"},
+	}
+	val := &utils.DataLeaf{
+		Data: "cgrates.org",
+	}
+
+	if err := eeR.Compose(fullPath, val); err != nil {
+		t.Error(err)
+	}
+	exp := map[string]utils.DataStorage{
+		utils.MetaOpts: utils.MapStorage{
+			"Account": "1001",
+			"Usage":   "10m",
+			"Tenant":  "Extracgrates.org",
+		},
+	}
+
+	if !reflect.DeepEqual(eeR.inData[utils.MetaOpts], exp[utils.MetaOpts]) {
+		t.Errorf("Expected \n<%v>,\n but received \n<%v>", exp, eeR.inData[utils.MetaOpts])
 	}
 
 }
