@@ -10,7 +10,7 @@ CDRe
 ====
 
 
-**CDRe** is an extension of :ref:`CDRs`, responsible for exporting the *CDR* events processed by :ref:`CDRs`. It is accessed via `CGRateS RPC APIs <https://godoc.org/github.com/cgrates/cgrates/apier/>`_ and configured within *cdre* section inside :ref:`JSON configuration <configuration>`.
+**CDRe** is an extension of :ref:`CDRs`, responsible for exporting the *CDR* events processed by :ref:`CDRs`. It is accessed via `CGRateS RPC APIs <https://pkg.go.dev/github.com/cgrates/cgrates/apier@master/>`_ and configured within *cdre* section inside :ref:`JSON configuration <configuration>`.
 
 
 Export types
@@ -32,7 +32,7 @@ You can control the templates which are to be executed via the filters which are
 Offline exports
 ^^^^^^^^^^^^^^^
 
-Are exports which are triggered via `CGRateS RPC APIs <https://godoc.org/github.com/cgrates/cgrates/apier/>`_ and they have as data source the CDRs stored within *StorDB*.
+Are exports which are triggered via `CGRateS RPC APIs <https://pkg.go.dev/github.com/cgrates/cgrates/apier@master/>`_ and they have as data source the CDRs stored within *StorDB*.
 
 
 

@@ -10,7 +10,7 @@ RouteS
 =========
 
 
-**RouteS** is a standalone subsystem within **CGRateS** responsible to compute a list of routes which can be used for a specific event received to process. It is accessed via `CGRateS RPC APIs <https://godoc.org/github.com/cgrates/cgrates/apier/>`_.
+**RouteS** is a standalone subsystem within **CGRateS** responsible to compute a list of routes which can be used for a specific event received to process. It is accessed via `CGRateS RPC APIs <https://pkg.go.dev/github.com/cgrates/cgrates/apier@master/>`_.
 
 As most of the other subsystems, it is performance oriented, stored inside *DataDB* but cached inside the *cgr-engine* process. 
 Caching can be done dynamically/on-demand or at start-time/precached and it is configurable within *cache* section in the :ref:`JSON configuration <configuration>`.
