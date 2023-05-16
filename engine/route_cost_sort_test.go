@@ -56,3 +56,17 @@ func TestPopulateCostForRoutesConnRefused(t *testing.T) {
 		t.Errorf("Expected %v\n but received %v", errExpect, err)
 	}
 }
+
+func TestLeastCostSorterSortRoutesErr(t *testing.T) {
+
+	cfg := config.NewDefaultCGRConfig()
+	cM := NewConnManager(cfg)
+	fltrS := NewFilterS(cfg, cM, nil)
+	lcs := NewLeastCostSorter(cfg, cM, fltrS)
+
+	expErr := "MANDATORY_IE_MISSING: [connIDs]"
+	if _, err := lcs.SortRoutes(context.Background(), "", map[string]*RouteWithWeight{}, &utils.CGREvent{}, &optsGetRoutes{}); err == nil || err.Error() != expErr {
+		t.Errorf("Expected error <%+v>, received <%+v>", expErr, err)
+	}
+
+}

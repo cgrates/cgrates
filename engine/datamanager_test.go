@@ -10576,3 +10576,75 @@ func TestDMGetItemLoadIDsCacheWriteErr2(t *testing.T) {
 	}
 
 }
+
+func TestDMGetRateProfileCacheGetOK(t *testing.T) {
+
+	defer func() {
+		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	rP := &utils.RateProfile{
+		ID:        "test_ID1",
+		Tenant:    "cgrates.org",
+		FilterIDs: []string{"*string:*req.Account:1001"},
+		Rates: map[string]*utils.Rate{
+			"RT1": {
+				ID: "RT1",
+				IntervalRates: []*utils.IntervalRate{
+					{
+						IntervalStart: utils.NewDecimal(0, 0),
+						RecurrentFee:  utils.NewDecimal(1, 2),
+						Unit:          utils.NewDecimal(int64(time.Second), 0),
+						Increment:     utils.NewDecimal(int64(time.Second), 0),
+					},
+				},
+			},
+		},
+	}
+
+	if err := Cache.Set(context.Background(), utils.CacheRateProfiles, utils.ConcatenatedKey(utils.CGRateSorg, "rp1"), rP, []string{}, true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+
+	if rcv, err := dm.GetRateProfile(context.Background(), utils.CGRateSorg, "rp1", true, false, utils.NonTransactional); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcv, rP) {
+		t.Errorf("Expected <%v>, received <%v>", rP, rcv)
+	}
+}
+
+func TestDMGetRateProfileCacheGetErr(t *testing.T) {
+
+	defer func() {
+		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+
+	if err := Cache.Set(context.Background(), utils.CacheRateProfiles, utils.ConcatenatedKey(utils.CGRateSorg, "rp1"), nil, []string{}, true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+
+	_, err := dm.GetRateProfile(context.Background(), utils.CGRateSorg, "rp1", true, false, utils.NonTransactional)
+	if err != utils.ErrNotFound {
+		t.Errorf("Expected error <%v>, received error <%v>", utils.ErrNotFound, err)
+	}
+}
+
+func TestDMGetRateProfileNildm(t *testing.T) {
+
+	var dm *DataManager
+
+	_, err := dm.GetRateProfile(context.Background(), utils.CGRateSorg, "rp1", false, false, utils.NonTransactional)
+	if err != utils.ErrNoDatabaseConn {
+		t.Errorf("Expected error <%v>, received error <%v>", utils.ErrNoDatabaseConn, err)
+	}
+}

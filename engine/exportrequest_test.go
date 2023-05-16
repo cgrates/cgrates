@@ -896,3 +896,131 @@ func TestExportRequestComposeMetaOptsFoundOK(t *testing.T) {
 	}
 
 }
+
+func TestExportRequestComposeDefaultOK(t *testing.T) {
+
+	inData := map[string]utils.DataStorage{
+		utils.MetaOpts: utils.MapStorage{},
+	}
+	onm := utils.NewOrderedNavigableMap()
+
+	expData := map[string]*utils.OrderedNavigableMap{
+		utils.MetaExp: onm,
+	}
+
+	eeR := NewExportRequest(inData, "cgrates.org", nil, expData)
+
+	fullPath := &utils.FullPath{
+		PathSlice: []string{utils.MetaExp, "Tenant"},
+		Path:      "*uch.Tenant",
+	}
+
+	val := &utils.DataLeaf{
+		Data: "cgrates.org",
+	}
+	exp := `{"Map":{"Tenant":{"Slice":[{"Value":{"Data":"cgrates.org"}}]}}}`
+
+	if err := eeR.Compose(fullPath, val); err != nil {
+		t.Error(err)
+	} else if eeR.ExpData[utils.MetaExp].String() != exp {
+		t.Errorf("Expected \n<%v>,\n Received <%v>", exp, eeR.ExpData[utils.MetaExp].String())
+	}
+
+}
+func TestExportRequestComposeExpDataErr(t *testing.T) {
+
+	inData := map[string]utils.DataStorage{
+		utils.MetaOpts: utils.MapStorage{},
+	}
+	onm := utils.NewOrderedNavigableMap()
+
+	expData := map[string]*utils.OrderedNavigableMap{
+		utils.MetaReq: onm,
+	}
+
+	eeR := NewExportRequest(inData, "cgrates.org", nil, expData)
+
+	fullPath := &utils.FullPath{
+		PathSlice: []string{"Inexistant field"},
+	}
+	val := &utils.DataLeaf{
+		Data: "cgrates.org",
+	}
+	expErr := "unsupported field prefix: <Inexistant field> when set field"
+	if err := eeR.Compose(fullPath, val); err == nil || err.Error() != expErr {
+		t.Errorf("Expected error <%v> but received <%v>", expErr, err)
+	}
+
+}
+
+func TestExportRequestSetFieldsPassErr(t *testing.T) {
+
+	inData := map[string]utils.DataStorage{
+		utils.MetaOpts: utils.MapStorage{},
+	}
+	onm := utils.NewOrderedNavigableMap()
+
+	expData := map[string]*utils.OrderedNavigableMap{
+		utils.MetaReq: onm,
+	}
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	fltr := NewFilterS(cfg, nil, dm)
+
+	tplFlds := []*config.FCTemplate{
+		{
+			Tag:     "Tor",
+			Type:    utils.MetaConstant,
+			Value:   config.NewRSRParsersMustCompile("*voice", utils.InfieldSep),
+			Path:    "*cgreq.ToR",
+			Filters: []string{"inexistant"},
+		},
+	}
+
+	eeR := NewExportRequest(inData, "cgrates.org", fltr, expData)
+
+	expErr := "NOT_FOUND:inexistant"
+	if err := eeR.SetFields(context.Background(), tplFlds); err == nil || err.Error() != expErr {
+		t.Errorf("Expected error <%v> but received <%v>", expErr, err)
+	}
+
+}
+
+func TestExportRequestSetFieldsPassFalse(t *testing.T) {
+
+	inData := map[string]utils.DataStorage{
+
+		utils.MetaOpts: utils.MapStorage{},
+	}
+	onm := utils.NewOrderedNavigableMap()
+
+	expData := map[string]*utils.OrderedNavigableMap{
+		utils.MetaReq: onm,
+	}
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	fltr := NewFilterS(cfg, nil, dm)
+
+	tplFlds := []*config.FCTemplate{
+		{
+			Tag:     "Tor",
+			Type:    utils.MetaConstant,
+			Value:   config.NewRSRParsersMustCompile("*voice", utils.InfieldSep),
+			Path:    "*cgreq.ToR",
+			Filters: []string{"*gt:~*opts.*rateSCost.Cost:0.5"},
+		},
+	}
+
+	eeR := NewExportRequest(inData, "cgrates.org", fltr, expData)
+	pastEeR := eeR
+	if err := eeR.SetFields(context.Background(), tplFlds); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(pastEeR, eeR) {
+		t.Errorf("Expected \n<%v>,\n Received <%v>", pastEeR, eeR)
+	}
+
+}
