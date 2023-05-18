@@ -70,6 +70,7 @@ var (
 	ErrUnsupportedFormat              = errors.New("UNSUPPORTED_FORMAT")
 	ErrNoDatabaseConn                 = errors.New("NO_DATABASE_CONNECTION")
 	ErrMaxIncrementsExceeded          = errors.New("MAX_INCREMENTS_EXCEEDED")
+	ErrUncomputableIncrement          = errors.New("UNCOMPUTABLE_INCREMENT")
 	ErrIndexOutOfBounds               = errors.New("INDEX_OUT_OF_BOUNDS")
 	ErrWrongPath                      = errors.New("WRONG_PATH")
 	ErrServiceAlreadyRunning          = fmt.Errorf("service already running")
