@@ -2306,3 +2306,191 @@ func TestFIRemoveItemFromIndexErr(t *testing.T) {
 		})
 	}
 }
+
+func TestComputeSupplierIndexesErrs(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+
+	testCases := []struct {
+		name   string
+		dm     *DataManager
+		tenant string
+		sppIDs *[]string
+		expErr bool
+	}{
+		{
+			name:   "Supplier Not Found",
+			dm:     dm,
+			expErr: true,
+			sppIDs: &[]string{"SPP_1"},
+		},
+		{
+			name:   "Without Filter",
+			dm:     dm,
+			expErr: false,
+			sppIDs: &[]string{"SPP_2"},
+		},
+		{
+			name:   "Filter doesn't exist",
+			dm:     dm,
+			expErr: true,
+			sppIDs: &[]string{"SPP_3"},
+		},
+	}
+	dm.SetSupplierProfile(&SupplierProfile{
+		Tenant:  "cgrates.org",
+		ID:      "SPP_2",
+		Sorting: utils.MetaQOS,
+	}, true)
+
+	dm.SetSupplierProfile(&SupplierProfile{
+		Tenant:    "cgrates.org",
+		ID:        "SPP_3",
+		Sorting:   utils.MetaQOS,
+		FilterIDs: []string{"FLT_1"},
+	}, true)
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			if _, err := ComputeSupplierIndexes(tc.dm, "cgrates.org", tc.sppIDs, ""); (err != nil) != tc.expErr {
+				t.Errorf("expected error: %v, received: %v", tc.expErr, err)
+			}
+		})
+	}
+}
+
+func TestComputeStatIndexesErrs(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+
+	testCases := []struct {
+		name   string
+		dm     *DataManager
+		tenant string
+		stIDs  *[]string
+		expErr bool
+	}{
+		{
+			name:   "StatQueueProfile Not Found",
+			dm:     dm,
+			expErr: true,
+			stIDs:  &[]string{"SQ_1"},
+		},
+		{
+			name:   "Without Filter",
+			dm:     dm,
+			expErr: false,
+			stIDs:  &[]string{"TEST_PROFILE1"},
+		},
+		{
+			name:   "Filter dosnt exist ",
+			dm:     dm,
+			expErr: true,
+		},
+	}
+	dm.SetStatQueueProfile(&StatQueueProfile{
+		Tenant:      "cgrates.org",
+		ID:          "TEST_PROFILE1",
+		QueueLength: 10,
+		TTL:         time.Duration(10) * time.Second,
+		Metrics: []*MetricWithFilters{
+			{
+				MetricID: "*sum:~Val",
+			},
+		},
+		ThresholdIDs: []string{"*none"},
+	}, true)
+	dm.SetStatQueueProfile(&StatQueueProfile{
+		Tenant:      "cgrates.org",
+		ID:          "TestStats",
+		FilterIDs:   []string{"FLTR_STATS"},
+		QueueLength: 100,
+		TTL:         time.Duration(1 * time.Second),
+		Metrics: []*MetricWithFilters{
+			{
+				MetricID: "*sum:~Value",
+			},
+			{
+				MetricID: "*average:~Value",
+			},
+			{
+				MetricID: "*sum:~Usage",
+			},
+		},
+	}, true)
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			if _, err := ComputeStatIndexes(tc.dm, "cgrates.org", tc.stIDs, ""); (err != nil) != tc.expErr {
+				t.Errorf("expected error: %v, received: %v", tc.expErr, err)
+			}
+		})
+	}
+}
+
+func TestComputeAttributeIndexesErr(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	testCases := []struct {
+		name    string
+		dm      *DataManager
+		tenant  string
+		attrIDs *[]string
+		expErr  bool
+	}{
+		{
+			name:    "AttributeProfile Not Found",
+			dm:      dm,
+			expErr:  true,
+			attrIDs: &[]string{"ATTR_1"},
+		},
+		{
+			name:    "Without Filter",
+			dm:      dm,
+			expErr:  false,
+			attrIDs: &[]string{"ATTR_1002_SIMPLEAUTH"},
+		},
+		{
+			name:   "Filter dosnt exist ",
+			dm:     dm,
+			expErr: true,
+		},
+	}
+	dm.SetAttributeProfile(&AttributeProfile{
+		Tenant:   "cgrates.org",
+		ID:       "ATTR_1002_SIMPLEAUTH",
+		Contexts: []string{"simpleauth"},
+		Attributes: []*Attribute{
+			{
+				Path:  utils.MetaReq + utils.NestingSep + "Password",
+				Type:  utils.META_CONSTANT,
+				Value: config.NewRSRParsersMustCompile("CGRateS.org", true, utils.INFIELD_SEP),
+			},
+		},
+		Weight: 20.0,
+	}, true)
+	dm.SetAttributeProfile(&AttributeProfile{
+		Tenant:    "cgrates.org",
+		ID:        "ATTR_1001_AUTH",
+		Contexts:  []string{"simpleauth"},
+		FilterIDs: []string{"FLTR_Attr"},
+		Attributes: []*Attribute{
+			{
+				Path:  utils.MetaReq + utils.NestingSep + "Password",
+				Type:  utils.META_CONSTANT,
+				Value: config.NewRSRParsersMustCompile("CGRateS.org", true, utils.INFIELD_SEP),
+			},
+		},
+		Weight: 20.0,
+	}, true)
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			if _, err := ComputeAttributeIndexes(tc.dm, "cgrates.org", "simpleauth", tc.attrIDs, ""); (err != nil) != tc.expErr {
+				t.Errorf("expected error: %v, received: %v", tc.expErr, err)
+			}
+		})
+	}
+
+}
