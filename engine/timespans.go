@@ -471,6 +471,10 @@ func (ts *TimeSpan) createIncrementsSlice() {
 	// because ts cost is rounded
 	//incrementCost := rate / rateUnit.Seconds() * rateIncrement.Seconds()
 	nbIncrements := int(ts.GetDuration() / rateIncrement)
+	if nbIncrements < 0 {
+		utils.Logger.Warning(fmt.Sprintf("error: <%s with %+v>, when creating increments slice, TimeSpan: %s", utils.ErrUncomputableIncrement, nbIncrements, utils.ToJSON(ts)))
+		return
+	}
 	if nbIncrements > config.CgrConfig().RalsCfg().MaxIncrements {
 		utils.Logger.Warning(fmt.Sprintf("error: <%s with %+v>, when creating increments slice, TimeSpan: %s", utils.ErrMaxIncrementsExceeded, nbIncrements, utils.ToJSON(ts)))
 		ts.Increments = make([]*Increment, 0)
