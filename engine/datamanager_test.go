@@ -2303,3 +2303,75 @@ func TestDmRemAccountActionPlans(t *testing.T) {
 		})
 	}
 }
+
+func TestDMSetActionPlanRpl(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	clientConn := make(chan birpc.ClientConnector, 1)
+	clientConn <- clMock(func(_ *context.Context, serviceMethod string, _, _ interface{}) error {
+		if serviceMethod == utils.ReplicatorSv1SetActionPlan {
+			return nil
+		}
+		return utils.ErrNotImplemented
+	})
+	dm := NewDataManager(db, cfg.CacheCfg(), NewConnManager(cfg, map[string]chan birpc.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
+	}))
+	defer func() {
+		cfg2, _ := config.NewDefaultCGRConfig()
+		config.SetCgrConfig(cfg2)
+	}()
+	cfg.DataDbCfg().Items[utils.MetaAccountActionPlans].Replicate = true
+	cfg.DataDbCfg().RplConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1)}
+	testCases := []struct {
+		name      string
+		key       string
+		ats       *ActionPlan
+		overwrite bool
+		expErr    bool
+	}{
+		{
+			name: "Remove Action",
+			key:  "Actions1",
+			ats: &ActionPlan{
+				Id:            "Actions1",
+				AccountIDs:    utils.StringMap{"cgrates.org: 1001": true},
+				ActionTimings: []*ActionTiming{},
+			},
+			expErr:    false,
+			overwrite: true,
+		},
+		{
+			name: "Sett ActionPlans Replication",
+			key:  "MORE_MINUTES",
+			ats: &ActionPlan{
+				Id: "MORE_MINUTES",
+				ActionTimings: []*ActionTiming{
+					{
+						Timing: &RateInterval{
+							Timing: &RITiming{
+								Years:     utils.Years{2022},
+								Months:    utils.Months{},
+								MonthDays: utils.MonthDays{},
+								WeekDays:  utils.WeekDays{},
+								StartTime: utils.ASAP,
+							},
+						},
+						Weight:    10,
+						ActionsID: "MINI",
+					},
+				},
+			},
+			overwrite: false,
+			expErr:    false,
+		},
+	}
+	config.SetCgrConfig(cfg)
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			if err := dm.SetActionPlan(tc.key, tc.ats, tc.overwrite, utils.NonTransactional); (err != nil) != tc.expErr {
+				t.Errorf("Expected error:%v ,received %v", tc.expErr, err)
+			}
+		})
+	}
+}

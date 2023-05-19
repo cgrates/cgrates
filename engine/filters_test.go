@@ -2492,5 +2492,90 @@ func TestComputeAttributeIndexesErr(t *testing.T) {
 			}
 		})
 	}
+}
 
+func TestComputeDispatcherIndexesErrs(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	testCases := []struct {
+		name   string
+		dm     *DataManager
+		tenant string
+		dspIDs *[]string
+		expErr bool
+	}{
+		{
+			name:   "DispatcherProfile  Not Found",
+			dm:     dm,
+			tenant: "cgrates.org",
+			dspIDs: &[]string{"DISP_1"},
+			expErr: true,
+		},
+		{
+			name:   "Without Filter",
+			dm:     dm,
+			tenant: "cgrates.org",
+			dspIDs: &[]string{"DISP_2"},
+			expErr: false,
+		},
+	}
+	dm.SetDispatcherProfile(&DispatcherProfile{
+		Tenant:     "cgrates.org",
+		ID:         "DISP_2",
+		Subsystems: []string{utils.MetaSessionS},
+	}, true)
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			if _, err := ComputeDispatcherIndexes(tc.dm, "cgrates.org", utils.MetaSessionS, tc.dspIDs, ""); (err != nil) != tc.expErr {
+				t.Errorf("expected error: %v, received: %v", tc.expErr, err)
+			}
+		})
+	}
+}
+
+func TestComputeResourceIndexesErrs(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	testCases := []struct {
+		name   string
+		dm     *DataManager
+		tenant string
+		resIDs *[]string
+		expErr bool
+	}{
+		{
+			name:   "ResourceProfile  Not Found",
+			dm:     dm,
+			tenant: "cgrates.org",
+			resIDs: &[]string{"RES_1"},
+			expErr: true,
+		},
+		{
+			name:   "Without Filter",
+			dm:     dm,
+			tenant: "cgrates.org",
+			resIDs: &[]string{"RES_2"},
+			expErr: true,
+		},
+	}
+	dm.SetResourceProfile(&ResourceProfile{
+		Tenant:            "cgrates.org",
+		ID:                "RES_2",
+		FilterIDs:         []string{"FLTR_RES"},
+		UsageTTL:          time.Duration(-1),
+		Limit:             2,
+		AllocationMessage: "Account1Channels",
+		Weight:            20,
+		ThresholdIDs:      []string{utils.META_NONE},
+	}, true)
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			if _, err := ComputeResourceIndexes(tc.dm, "cgrates.org", tc.resIDs, ""); (err != nil) != tc.expErr {
+				t.Errorf("expected error: %v, received: %v", tc.expErr, err)
+			}
+		})
+	}
 }
