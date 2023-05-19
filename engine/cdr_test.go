@@ -308,22 +308,149 @@ func TestFieldAsStringForCostDetails(t *testing.T) {
 }
 
 func TestFormatCost(t *testing.T) {
-	cdr := CDR{Cost: 1.01}
-	if cdr.FormatCost(0, 4) != "1.0100" {
-		t.Error("Unexpected format of the cost: ", cdr.FormatCost(0, 4))
+	tests := []struct {
+		name           string
+		cost           float64
+		rawCost        string
+		parserPath     string
+		shiftDecimals  int
+		roundDecimals  int
+		expectedOutput string
+		expectedError  string
+	}{
+		{
+			name:           "Test1",
+			cost:           1.01,
+			rawCost:        "0.17",
+			parserPath:     "~*req.Cost",
+			shiftDecimals:  0,
+			roundDecimals:  4,
+			expectedOutput: "1.0100",
+			expectedError:  "",
+		},
+		{
+			name:           "Test2",
+			cost:           1.01001,
+			rawCost:        "0.17",
+			parserPath:     "~*req.Cost",
+			shiftDecimals:  0,
+			roundDecimals:  4,
+			expectedOutput: "1.0100",
+			expectedError:  "",
+		},
+		{
+			name:           "Test3",
+			cost:           1.01001,
+			rawCost:        "0.17",
+			parserPath:     "~*req.Cost",
+			shiftDecimals:  2,
+			roundDecimals:  0,
+			expectedOutput: "101",
+			expectedError:  "",
+		},
+		{
+			name:           "Test4",
+			cost:           1.01001,
+			rawCost:        "0.17",
+			parserPath:     "~*req.Cost",
+			shiftDecimals:  1,
+			roundDecimals:  0,
+			expectedOutput: "10",
+			expectedError:  "",
+		},
+		{
+			name:           "Test5",
+			cost:           1.01001,
+			rawCost:        "0.17",
+			parserPath:     "~*req.Cost",
+			shiftDecimals:  2,
+			roundDecimals:  3,
+			expectedOutput: "101.001",
+			expectedError:  "",
+		},
+		{
+			name:           "Test6",
+			cost:           1.01,
+			rawCost:        "0.17",
+			parserPath:     "~*req.RawCost",
+			shiftDecimals:  0,
+			roundDecimals:  4,
+			expectedOutput: "0.1700",
+			expectedError:  "",
+		},
+		{
+			name:           "Test7",
+			cost:           1.01001,
+			rawCost:        "0.17123",
+			parserPath:     "~*req.RawCost",
+			shiftDecimals:  0,
+			roundDecimals:  4,
+			expectedOutput: "0.1712",
+			expectedError:  "",
+		},
+		{
+			name:           "Test8",
+			cost:           1.01001,
+			rawCost:        "0.17123",
+			parserPath:     "~*req.RawCost",
+			shiftDecimals:  2,
+			roundDecimals:  0,
+			expectedOutput: "17",
+			expectedError:  "",
+		},
+		{
+			name:           "Test9",
+			cost:           1.01001,
+			rawCost:        "0.17123",
+			parserPath:     "~*req.RawCost",
+			shiftDecimals:  1,
+			roundDecimals:  0,
+			expectedOutput: "2",
+			expectedError:  "",
+		},
+		{
+			name:           "Test10",
+			cost:           1.01001,
+			rawCost:        "0.17123",
+			parserPath:     "~*req.RawCost",
+			shiftDecimals:  2,
+			roundDecimals:  3,
+			expectedOutput: "17.123",
+			expectedError:  "",
+		},
+		{
+			name:           "Test11",
+			cost:           1.01001,
+			rawCost:        "invalidCost",
+			parserPath:     "~*req.RawCost",
+			shiftDecimals:  2,
+			roundDecimals:  3,
+			expectedOutput: "",
+			expectedError:  `strconv.ParseFloat: parsing "invalidCost": invalid syntax`,
+		},
 	}
-	cdr = CDR{Cost: 1.01001}
-	if cdr.FormatCost(0, 4) != "1.0100" {
-		t.Error("Unexpected format of the cost: ", cdr.FormatCost(0, 4))
-	}
-	if cdr.FormatCost(2, 0) != "101" {
-		t.Error("Unexpected format of the cost: ", cdr.FormatCost(2, 0))
-	}
-	if cdr.FormatCost(1, 0) != "10" {
-		t.Error("Unexpected format of the cost: ", cdr.FormatCost(1, 0))
-	}
-	if cdr.FormatCost(2, 3) != "101.001" {
-		t.Error("Unexpected format of the cost: ", cdr.FormatCost(2, 3))
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			cdr := CDR{
+				Cost:        tt.cost,
+				ExtraFields: map[string]string{"RawCost": tt.rawCost},
+			}
+			prsr := config.NewRSRParserMustCompile(tt.parserPath, true)
+			rcv, err := cdr.FormatCost(prsr, tt.shiftDecimals, tt.roundDecimals)
+
+			if err != nil {
+				if tt.expectedError == "" {
+					t.Errorf("did not expect error, received: %v", err.Error())
+				}
+			} else if tt.expectedError != "" {
+				t.Errorf("expected error: %s, received %v", tt.expectedError, err)
+			}
+
+			if rcv != tt.expectedOutput {
+				t.Errorf("expected: <%v>, \nreceived: <%v>", tt.expectedOutput, rcv)
+			}
+		})
 	}
 }
 

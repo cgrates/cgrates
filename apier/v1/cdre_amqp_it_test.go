@@ -165,7 +165,7 @@ func testAMQPMapAddCDRs(t *testing.T) {
 			AnswerTime:  time.Now(),
 			RunID:       utils.MetaDefault,
 			Usage:       time.Duration(30) * time.Second,
-			ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
+			ExtraFields: map[string]string{"RawCost": "0.17"},
 			Cost:        1.01,
 		},
 		{
@@ -233,7 +233,7 @@ func testAMQPMapVerifyExport(t *testing.T) {
 	}
 	expCDRs := []string{
 		`{"Account":"1001","CGRID":"Cdr2","Category":"call","Cost":"-1.0000","Destination":"+4986517174963","OriginID":"OriginCDR2","RunID":"*default","Source":"test2","Tenant":"cgrates.org","Usage":"5s"}`,
-		`{"Account":"1001","CGRID":"Cdr3","Category":"call","Cost":"-1.0000","Destination":"+4986517174963","OriginID":"OriginCDR3","RunID":"*default","Source":"test2","Tenant":"cgrates.org","Usage":"30s"}`,
+		`{"Account":"1001","CGRID":"Cdr3","Category":"call","Cost":"0.1700","Destination":"+4986517174963","OriginID":"OriginCDR3","RunID":"*default","Source":"test2","Tenant":"cgrates.org","Usage":"30s"}`,
 	}
 	rcvCDRs := make([]string, 0)
 	waiting := true

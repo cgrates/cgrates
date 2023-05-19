@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"errors"
 	"fmt"
 	"regexp"
 	"strings"
@@ -317,4 +318,18 @@ func (prsr *RSRParser) ParseDataProviderWithInterfaces(dP utils.DataProvider, se
 		}
 	}
 	return prsr.ParseValue(outIface)
+}
+
+// ParseDataProviderAsFloat64 retrieves a field from the provided DataProvider and attempts
+// to parse it as a float64.
+func (prsr *RSRParser) ParseDataProviderAsFloat64(dP utils.DataProvider, separator string) (float64, error) {
+	if prsr.path == "" {
+		// If the path is empty, we cannot retrieve any data.
+		return 0, errors.New("empty path in parser")
+	}
+	outIface, err := dP.FieldAsInterface(strings.Split(prsr.path, separator))
+	if err != nil && (err != utils.ErrNotFound || prsr.filters.FilterRules() != "^$") {
+		return 0, err
+	}
+	return utils.IfaceAsFloat64(outIface)
 }
