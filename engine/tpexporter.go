@@ -92,8 +92,8 @@ func (tpExp *TPExporter) Run() error {
 
 	}
 	storDataModelTimings := APItoModelTimings(storDataTimings)
-	for i, sd := range storDataModelTimings {
-		toExportMap[utils.TimingsCsv][i] = sd
+	for _, sd := range storDataModelTimings {
+		toExportMap[utils.TimingsCsv] = append(toExportMap[utils.TimingsCsv], sd)
 	}
 
 	storDataDestinations, err := tpExp.storDb.GetTPDestinations(tpExp.tpID, "")
