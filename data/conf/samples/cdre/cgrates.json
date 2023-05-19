@@ -47,7 +47,8 @@
             {"path": "*exp.Account", "type": "*composed", "value": "~*req.Account"},
             {"path": "*exp.Destination", "type": "*composed", "value": "~*req.Destination"},
             {"path": "*exp.Usage", "type": "*composed", "value": "~*req.Usage"},
-            {"path": "*exp.Cost", "type": "*composed", "value": "~*req.Cost", "rounding_decimals": 4}
+            {"path": "*exp.Cost", "type": "*composed", "filters": ["*notstring:~*req.CGRID:Cdr3"], "value": "~*req.Cost", "rounding_decimals": 4},
+            {"path": "*exp.Cost", "type": "*variable", "filters": ["*string:~*req.CGRID:Cdr3"], "value": "~*req.RawCost", "rounding_decimals": 4}
         ]
     },
     "amqp_exporter_cdr": {

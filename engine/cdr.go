@@ -142,13 +142,19 @@ func (cdr *CDR) ComputeCGRID() {
 	cdr.CGRID = utils.Sha1(cdr.OriginID, cdr.OriginHost)
 }
 
-// FormatCost formats the cost as string on export
-func (cdr *CDR) FormatCost(shiftDecimals, roundDecimals int) string {
-	cost := cdr.Cost
+// FormatCost retrieves a cost related field from the CDR, shifts its decimal place,
+// rounds it to the specified number of decimal places, and formats it as a string.
+// The decimal place of the cost field is shifted by `shiftDecimals` places to the right.
+// The cost field is then rounded to `roundDecimals` decimal places before it is formatted as a string.
+func (cdr *CDR) FormatCost(value *config.RSRParser, shiftDecimals, roundDecimals int) (string, error) {
+	cost, err := cdr.FieldAsFloat64(value)
+	if err != nil {
+		return "", err
+	}
 	if shiftDecimals != 0 {
 		cost = cost * math.Pow10(shiftDecimals)
 	}
-	return strconv.FormatFloat(cost, 'f', roundDecimals, 64)
+	return strconv.FormatFloat(cost, 'f', roundDecimals, 64), nil
 }
 
 // FieldAsString is used to retrieve fields as string, primary fields are const labeled
@@ -159,6 +165,12 @@ func (cdr *CDR) FieldAsString(rsrPrs *config.RSRParser) (parsed string, err erro
 		return
 	}
 	return
+}
+
+// FieldAsFloat64 retrieves a field from the CDR and attempts to parse it as a float64.
+// It uses the provided parser to identify and parse the field.
+func (cdr *CDR) FieldAsFloat64(rsrPrs *config.RSRParser) (parsed float64, err error) {
+	return rsrPrs.ParseDataProviderAsFloat64(cdr.AsMapStorage(), utils.NestingSep)
 }
 
 // FieldsAsString concatenates values of multiple fields defined in template, used eg in CDR templates
@@ -315,8 +327,11 @@ func (cdr *CDR) exportFieldValue(cfgCdrFld *config.FCTemplate, filterS *FilterS)
 		var cdrVal string
 		switch cfgCdrFld.Path {
 		case utils.MetaExp + utils.NestingSep + utils.COST:
-			cdrVal = cdr.FormatCost(cfgCdrFld.CostShiftDigits,
+			cdrVal, err = cdr.FormatCost(rsrFld, cfgCdrFld.CostShiftDigits,
 				cfgCdrFld.RoundingDecimals)
+			if err != nil {
+				return
+			}
 		case utils.MetaExp + utils.NestingSep + utils.SetupTime:
 			if cfgCdrFld.Layout == "" {
 				cfgCdrFld.Layout = time.RFC3339
