@@ -19,8 +19,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"reflect"
 	"testing"
 
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
@@ -70,3 +72,194 @@ func TestLeastCostSorterSortRoutesErr(t *testing.T) {
 	}
 
 }
+
+func TestLeastCostSorterSortRoutesOK(t *testing.T) {
+
+	cfg := config.NewDefaultCGRConfig()
+	cfg.RouteSCfg().RateSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRates)}
+	cfg.RouteSCfg().AccountSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts)}
+
+	cc := make(chan birpc.ClientConnector, 1)
+	cc <- &ccMock{
+
+		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+			utils.AccountSv1MaxAbstracts: func(ctx *context.Context, args, reply interface{}) error {
+				return nil
+			},
+		},
+	}
+
+	cM := NewConnManager(cfg)
+	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts), utils.AccountSv1, cc)
+
+	fltrS := NewFilterS(cfg, cM, nil)
+	lcs := NewLeastCostSorter(cfg, cM, fltrS)
+
+	routeWW := map[string]*RouteWithWeight{
+		"RW1": {
+			Route: &Route{
+				ID:              "RouteId",
+				RouteParameters: "RouteParam",
+				Weights:         utils.DynamicWeights{{Weight: 1}},
+				Blockers:        utils.DynamicBlockers{{Blocker: false}},
+				AccountIDs:      []string{"AccId"},
+				RateProfileIDs:  []string{"RateProfileId"},
+				ResourceIDs:     []string{"ResourceId"},
+				StatIDs:         []string{"StatId"},
+			},
+			Weight: 1,
+		},
+		"RW2": {
+			Route: &Route{
+				ID:              "RouteId2",
+				RouteParameters: "RouteParam2",
+				Weights:         utils.DynamicWeights{{Weight: 10}},
+				Blockers:        utils.DynamicBlockers{{Blocker: false}},
+				AccountIDs:      []string{"AccId2"},
+				RateProfileIDs:  []string{"RateProfileId2"},
+				ResourceIDs:     []string{"ResourceId2"},
+				StatIDs:         []string{"StatId2"},
+			},
+			Weight: 10,
+		},
+	}
+	ev := &utils.CGREvent{
+		APIOpts: map[string]interface{}{
+			utils.MetaUsage: 400,
+		},
+	}
+
+	exp := &SortedRoutes{
+		ProfileID: "profID1",
+		Sorting:   utils.MetaLC,
+		Routes: []*SortedRoute{
+			{
+				RouteID:         "RouteId2",
+				RouteParameters: "RouteParam2",
+				SortingData: map[string]interface{}{
+					utils.AccountIDs: []string{},
+					utils.Cost:       nil,
+					utils.Weight:     10,
+				},
+			},
+			{
+				RouteID:         "RouteId",
+				RouteParameters: "RouteParam",
+				SortingData: map[string]interface{}{
+					utils.AccountIDs: []string{},
+					utils.Cost:       nil,
+					utils.Weight:     1,
+				},
+			},
+		},
+	}
+	if rcv, err := lcs.SortRoutes(context.Background(), "profID1", routeWW, ev, &optsGetRoutes{}); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(utils.ToJSON(exp), utils.ToJSON(rcv)) {
+		t.Errorf("Expecting \n<%+v>,\n received \n<%+v>", utils.ToJSON(exp), utils.ToJSON(rcv))
+	}
+
+}
+
+func TestHightCostSorterSortRoutesErr(t *testing.T) {
+
+	cfg := config.NewDefaultCGRConfig()
+	cM := NewConnManager(cfg)
+	fltrS := NewFilterS(cfg, cM, nil)
+	hcs := NewHighestCostSorter(cfg, cM, fltrS)
+
+	expErr := "MANDATORY_IE_MISSING: [connIDs]"
+	if _, err := hcs.SortRoutes(context.Background(), "", map[string]*RouteWithWeight{}, &utils.CGREvent{}, &optsGetRoutes{}); err == nil || err.Error() != expErr {
+		t.Errorf("Expected error <%+v>, received <%+v>", expErr, err)
+	}
+
+}
+
+// unfinished
+// func TestHightCostSorterSortRoutesOK(t *testing.T) {
+
+// 	cfg := config.NewDefaultCGRConfig()
+// 	cfg.RouteSCfg().RateSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRates)}
+// 	cfg.RouteSCfg().AccountSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts)}
+
+// 	cc := make(chan birpc.ClientConnector, 1)
+// 	cc <- &ccMock{
+
+// 		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+// 			utils.AccountSv1MaxAbstracts: func(ctx *context.Context, args, reply interface{}) error {
+// 				return nil
+// 			},
+// 		},
+// 	}
+
+// 	cM := NewConnManager(cfg)
+// 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts), utils.AccountSv1, cc)
+
+// 	fltrS := NewFilterS(cfg, cM, nil)
+// 	hcs := NewHighestCostSorter(cfg, cM, fltrS)
+
+// 	routeWW := map[string]*RouteWithWeight{
+// 		"RW1": {
+// 			Route: &Route{
+// 				ID:              "RouteId",
+// 				RouteParameters: "RouteParam",
+// 				Weights:         utils.DynamicWeights{{Weight: 1}},
+// 				Blockers:        utils.DynamicBlockers{{Blocker: false}},
+// 				AccountIDs:      []string{"AccId"},
+// 				RateProfileIDs:  []string{"RateProfileId"},
+// 				ResourceIDs:     []string{"ResourceId"},
+// 				StatIDs:         []string{"StatId"},
+// 			},
+// 			Weight: 10,
+// 		},
+// 		"RW2": {
+// 			Route: &Route{
+// 				ID:              "RouteId2",
+// 				RouteParameters: "RouteParam2",
+// 				Weights:         utils.DynamicWeights{{Weight: 10}},
+// 				Blockers:        utils.DynamicBlockers{{Blocker: false}},
+// 				AccountIDs:      []string{"AccId2"},
+// 				RateProfileIDs:  []string{"RateProfileId2"},
+// 				ResourceIDs:     []string{"ResourceId2"},
+// 				StatIDs:         []string{"StatId2"},
+// 			},
+// 			Weight: 1,
+// 		},
+// 	}
+// 	ev := &utils.CGREvent{
+// 		APIOpts: map[string]interface{}{
+// 			utils.MetaUsage: 400,
+// 		},
+// 	}
+
+// 	exp := &SortedRoutes{
+// 		ProfileID: "profID1",
+// 		Sorting:   utils.MetaHC,
+// 		Routes: []*SortedRoute{
+// 			{
+// 				RouteID:         "RouteId2",
+// 				RouteParameters: "RouteParam2",
+// 				SortingData: map[string]interface{}{
+// 					utils.AccountIDs: []string{},
+// 					utils.Cost:       nil,
+// 					utils.Weight:     10,
+// 				},
+// 			},
+// 			{
+// 				RouteID:         "RouteId",
+// 				RouteParameters: "RouteParam",
+// 				SortingData: map[string]interface{}{
+// 					utils.AccountIDs: []string{},
+// 					utils.Cost:       nil,
+// 					utils.Weight:     1,
+// 				},
+// 			},
+// 		},
+// 	}
+// 	if rcv, err := hcs.SortRoutes(context.Background(), "profID1", routeWW, ev, &optsGetRoutes{}); err != nil {
+// 		t.Error(err)
+// 	} else if !reflect.DeepEqual(utils.ToJSON(exp), utils.ToJSON(rcv)) {
+// 		t.Errorf("Expecting \n<%+v>,\n received \n<%+v>", utils.ToJSON(exp), utils.ToJSON(rcv))
+// 	}
+
+// }
