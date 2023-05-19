@@ -18,7 +18,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"bytes"
+	"log"
+	"os"
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 
@@ -2178,6 +2182,47 @@ func TestMIUIEqualFalse(t *testing.T) {
 		t.Errorf("expected false ,received %+v", val)
 	} else if val = ui.Equal(nil); val {
 		t.Errorf("expected false,received %+v", val)
+	}
+
+}
+
+func TestTimespanCreateSecondsSliceNegativeIncrementErr(t *testing.T) {
+
+	setLogger := func(buf *bytes.Buffer) {
+		utils.Logger.SetLogLevel(utils.LOGLEVEL_WARNING)
+		utils.Logger.SetSyslog(nil)
+		log.SetOutput(buf)
+	}
+	removeLogger := func() {
+		utils.Logger.SetLogLevel(0)
+		log.SetOutput(os.Stderr)
+	}
+	defer func() {
+		removeLogger()
+	}()
+	buf := new(bytes.Buffer)
+	setLogger(buf)
+
+	ts := &TimeSpan{
+		TimeStart: time.Date(2013, 9, 10, 14, 30, 0, 0, time.UTC),
+		TimeEnd:   time.Date(2013, 9, 10, 14, 30, 30, 0, time.UTC),
+		RateInterval: &RateInterval{
+			Rating: &RIRate{
+				Rates: RateGroups{
+					&RGRate{
+						GroupIntervalStart: 60 * time.Second,
+						Value:              2.0,
+					},
+				},
+			},
+		},
+	}
+
+	expLog := `error: <UNCOMPUTABLE_INCREMENT with -30000000000>, when creating increments slice, TimeSpan:`
+	ts.createIncrementsSlice()
+	if rcvLog := buf.String(); !strings.Contains(rcvLog, expLog) {
+		t.Errorf("expected log <%+v> to be included in: <%+v>",
+			expLog, rcvLog)
 	}
 
 }
