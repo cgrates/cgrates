@@ -565,7 +565,7 @@ func TestCgrCfgJSONDefaultsCdreProfiles(t *testing.T) {
 			Path:             "*exp.Cost",
 			Type:             "*composed",
 			Value:            NewRSRParsersMustCompile("~*req.Cost", true, utils.INFIELD_SEP),
-			RoundingDecimals: 4,
+			RoundingDecimals: utils.IntPointer(4),
 		},
 	}
 	for _, v := range eContentFlds {

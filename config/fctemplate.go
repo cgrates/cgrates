@@ -86,7 +86,8 @@ func NewFCTemplateFromFCTemplateJsonCfg(jsnCfg *FcTemplateJsonCfg, separator str
 		fcTmp.CostShiftDigits = *jsnCfg.Cost_shift_digits
 	}
 	if jsnCfg.Rounding_decimals != nil {
-		fcTmp.RoundingDecimals = *jsnCfg.Rounding_decimals
+		fcTmp.RoundingDecimals = new(int)
+		*fcTmp.RoundingDecimals = *jsnCfg.Rounding_decimals
 	}
 	if jsnCfg.Mask_destinationd_id != nil {
 		fcTmp.MaskDestID = *jsnCfg.Mask_destinationd_id
@@ -114,7 +115,7 @@ type FCTemplate struct {
 	BreakOnSuccess   bool
 	Layout           string // time format
 	CostShiftDigits  int    // Used for CDR
-	RoundingDecimals int
+	RoundingDecimals *int
 	MaskDestID       string
 	MaskLen          int
 	pathItems        utils.PathItems // Field identifier
@@ -196,7 +197,8 @@ func (fc *FCTemplate) Clone() *FCTemplate {
 	cln.BreakOnSuccess = fc.BreakOnSuccess
 	cln.Layout = fc.Layout
 	cln.CostShiftDigits = fc.CostShiftDigits
-	cln.RoundingDecimals = fc.RoundingDecimals
+	cln.RoundingDecimals = new(int)
+	*cln.RoundingDecimals = *fc.RoundingDecimals
 	cln.MaskDestID = fc.MaskDestID
 	cln.MaskLen = fc.MaskLen
 	return cln
@@ -261,8 +263,8 @@ func (fc *FCTemplate) AsMapInterface(separator string) (mp map[string]interface{
 	if fc.CostShiftDigits != 0 {
 		mp[utils.CostShiftDigitsCfg] = fc.CostShiftDigits
 	}
-	if fc.RoundingDecimals != 0 {
-		mp[utils.RoundingDecimalsCfg] = fc.RoundingDecimals
+	if fc.RoundingDecimals != nil {
+		mp[utils.RoundingDecimalsCfg] = *fc.RoundingDecimals
 	}
 	if fc.MaskDestID != utils.EmptyString {
 		mp[utils.MaskDestIDCfg] = fc.MaskDestID

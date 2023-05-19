@@ -327,8 +327,12 @@ func (cdr *CDR) exportFieldValue(cfgCdrFld *config.FCTemplate, filterS *FilterS)
 		var cdrVal string
 		switch cfgCdrFld.Path {
 		case utils.MetaExp + utils.NestingSep + utils.COST:
+			roundingDecimals := config.CgrConfig().GeneralCfg().RoundingDecimals
+			if cfgCdrFld.RoundingDecimals != nil {
+				roundingDecimals = *cfgCdrFld.RoundingDecimals
+			}
 			cdrVal, err = cdr.FormatCost(rsrFld, cfgCdrFld.CostShiftDigits,
-				cfgCdrFld.RoundingDecimals)
+				roundingDecimals)
 			if err != nil {
 				return
 			}

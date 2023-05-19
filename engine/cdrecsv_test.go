@@ -187,7 +187,7 @@ func TestExportVoiceWithConvert(t *testing.T) {
 			Path:             "*exp.Cost",
 			Type:             "*composed",
 			Value:            config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.MetaReq+utils.NestingSep+"Cost", true, utils.INFIELD_SEP),
-			RoundingDecimals: 5},
+			RoundingDecimals: utils.IntPointer(5)},
 	}
 	cdrVoice := &CDR{
 		CGRID: utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()),
@@ -326,7 +326,7 @@ func TestExportWithFilter(t *testing.T) {
 			Path:             "*exp.Cost",
 			Type:             "*composed",
 			Value:            config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.MetaReq+utils.NestingSep+"Cost", true, utils.INFIELD_SEP),
-			RoundingDecimals: 5},
+			RoundingDecimals: utils.IntPointer(5)},
 	}
 	cdrVoice := &CDR{
 		CGRID: utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()),
@@ -464,7 +464,7 @@ func TestExportWithFilter2(t *testing.T) {
 			Path:             "*exp.Cost",
 			Type:             "*composed",
 			Value:            config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.MetaReq+utils.NestingSep+"Cost", true, utils.INFIELD_SEP),
-			RoundingDecimals: 5},
+			RoundingDecimals: utils.IntPointer(5)},
 	}
 	cdrVoice := &CDR{
 		CGRID: utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()),
