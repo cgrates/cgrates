@@ -471,7 +471,12 @@ func (cdr *CDR) AsExportMap(exportFields []*config.FCTemplate, httpSkipTLSCheck 
 				err.Error(), utils.ToJSON(cfgFld), utils.ToJSON(cdr)))
 			return nil, err
 		}
-		expMap[strings.TrimPrefix(cfgFld.Path, utils.MetaExp+utils.NestingSep)] += fmtOut
+		switch cfgFld.Type {
+		case utils.META_CONSTANT, utils.MetaVariable:
+			expMap[strings.TrimPrefix(cfgFld.Path, utils.MetaExp+utils.NestingSep)] = fmtOut
+		default:
+			expMap[strings.TrimPrefix(cfgFld.Path, utils.MetaExp+utils.NestingSep)] += fmtOut
+		}
 	}
 	return
 }
