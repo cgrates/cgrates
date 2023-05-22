@@ -426,7 +426,8 @@ func (cdr *CDR) formatField(cfgFld *config.FCTemplate, httpSkipTLSCheck bool,
 // AsExportRecord is used in place where we need to export the CDR based on an export template
 // ExportRecord is a []string to keep it compatible with encoding/csv Writer
 func (cdr *CDR) AsExportRecord(exportFields []*config.FCTemplate,
-	httpSkipTLSCheck bool, groupedCDRs []*CDR, filterS *FilterS) (expRecord []string, err error) {
+	httpSkipTLSCheck bool, groupedCDRs []*CDR, filterS *FilterS) ([]string, error) {
+	orderedMap := utils.NewOrderedMap[string, string]()
 	nM := cdr.AsMapStorage()
 	for _, cfgFld := range exportFields {
 		if !strings.HasPrefix(cfgFld.Path, utils.MetaExp+utils.NestingSep) {
@@ -438,15 +439,15 @@ func (cdr *CDR) AsExportRecord(exportFields []*config.FCTemplate,
 		} else if !pass {
 			continue
 		}
-		var fmtOut string
-		if fmtOut, err = cdr.formatField(cfgFld, httpSkipTLSCheck, groupedCDRs, filterS); err != nil {
+		fmtOut, err := cdr.formatField(cfgFld, httpSkipTLSCheck, groupedCDRs, filterS)
+		if err != nil {
 			utils.Logger.Warning(fmt.Sprintf("<CDR> error: %s exporting field: %s, CDR: %s\n",
 				err.Error(), utils.ToJSON(cfgFld), utils.ToJSON(cdr)))
 			return nil, err
 		}
-		expRecord = append(expRecord, fmtOut)
+		orderedMap.Set(cfgFld.Path, fmtOut)
 	}
-	return expRecord, nil
+	return orderedMap.Values(), nil
 }
 
 // AsExportMap converts the CDR into a map[string]string based on export template
