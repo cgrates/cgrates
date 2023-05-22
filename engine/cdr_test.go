@@ -1001,6 +1001,89 @@ func TestCDRAsExportMap(t *testing.T) {
 	}
 }
 
+func TestCDRAsExportMapTypeConstant(t *testing.T) {
+	cdr := &CDR{CGRID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()),
+		OrderID: 123, ToR: utils.VOICE, OriginID: "dsafdsaf",
+		OriginHost: "192.168.1.1", Source: utils.UNIT_TEST, RequestType: utils.META_RATED,
+		Tenant: "cgrates.org", Category: "call", Account: "1001",
+		Subject:     "1001",
+		Destination: "+4986517174963",
+		SetupTime:   time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC),
+		AnswerTime:  time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), RunID: utils.MetaDefault,
+		Usage: time.Duration(10) * time.Second, Cost: 1.01,
+		ExtraFields: map[string]string{"TaxCode": "1", "fieldextr2": "valextr2"},
+	}
+	eCDRMp := map[string]string{
+		utils.COST:    "40",
+		"Destination": "+4986517174963",
+		"Duration":    "10s",
+	}
+	eCDRMp2 := map[string]string{
+		utils.COST:    "20",
+		"Destination": "+4986517174963",
+		"Duration":    "10s",
+	}
+
+	record := []*config.FcTemplateJsonCfg{
+		{
+			Tag:   utils.StringPointer("Cost"),
+			Path:  utils.StringPointer("*exp.Cost"),
+			Type:  utils.StringPointer(utils.META_CONSTANT),
+			Value: utils.StringPointer("40"),
+		},
+		{
+			Tag:   utils.StringPointer("Destination"),
+			Path:  utils.StringPointer("*exp.Destination"),
+			Type:  utils.StringPointer(utils.MetaVariable),
+			Value: utils.StringPointer("~*req.Destination")},
+		{
+			Tag:   utils.StringPointer("Duration"),
+			Path:  utils.StringPointer("*exp.Duration"),
+			Type:  utils.StringPointer(utils.META_COMPOSED),
+			Value: utils.StringPointer("~" + utils.MetaReq + utils.NestingSep + utils.Usage),
+		},
+	}
+
+	if expFlds, err := config.FCTemplatesFromFCTemplatesJsonCfg(record, utils.INFIELD_SEP); err != nil {
+		t.Error(err)
+	} else if cdrMp, err := cdr.AsExportMap(expFlds, false, nil, nil); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eCDRMp, cdrMp) {
+		t.Errorf("Expecting: \n<%+v>,\n received: \n<%+v>", eCDRMp, cdrMp)
+	}
+
+	// Overwrite it
+
+	record = []*config.FcTemplateJsonCfg{
+		{
+			Tag:   utils.StringPointer("Cost"),
+			Path:  utils.StringPointer("*exp.Cost"),
+			Type:  utils.StringPointer(utils.META_CONSTANT),
+			Value: utils.StringPointer("20"),
+		},
+		{
+			Tag:   utils.StringPointer("Destination"),
+			Path:  utils.StringPointer("*exp.Destination"),
+			Type:  utils.StringPointer(utils.MetaVariable),
+			Value: utils.StringPointer("~*req.Destination")},
+		{
+			Tag:   utils.StringPointer("Duration"),
+			Path:  utils.StringPointer("*exp.Duration"),
+			Type:  utils.StringPointer(utils.META_COMPOSED),
+			Value: utils.StringPointer("~" + utils.MetaReq + utils.NestingSep + utils.Usage),
+		},
+	}
+
+	if expFlds, err := config.FCTemplatesFromFCTemplatesJsonCfg(record, utils.INFIELD_SEP); err != nil {
+		t.Error(err)
+	} else if cdrMp, err := cdr.AsExportMap(expFlds, false, nil, nil); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eCDRMp2, cdrMp) {
+		t.Errorf("Expecting: \n<%+v>,\n received: \n<%+v>", eCDRMp2, cdrMp)
+	}
+
+}
+
 func TestCDRAsCDRsql(t *testing.T) {
 	cdr := &CDR{CGRID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()),
 		OrderID:     123,
