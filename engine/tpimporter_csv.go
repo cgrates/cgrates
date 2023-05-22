@@ -63,7 +63,11 @@ var fileHandlers = map[string]func(*TPCSVImporter, string) error{
 }
 
 func (tpImp *TPCSVImporter) Run() error {
-	tpImp.csvr = NewFileCSVStorage(tpImp.Sep, tpImp.DirPath)
+	var err error
+	tpImp.csvr, err = NewFileCSVStorage(tpImp.Sep, tpImp.DirPath)
+	if err != nil {
+		return err
+	}
 	files, _ := os.ReadDir(tpImp.DirPath)
 	var withErrors bool
 	for _, f := range files {
@@ -71,7 +75,7 @@ func (tpImp *TPCSVImporter) Run() error {
 		if !hasName {
 			continue
 		}
-		if err := fHandler(tpImp, f.Name()); err != nil {
+		if err = fHandler(tpImp, f.Name()); err != nil {
 			withErrors = true
 			utils.Logger.Err(fmt.Sprintf("<TPCSVImporter> Importing file: %s, got error: %s", f.Name(), err.Error()))
 		}

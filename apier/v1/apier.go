@@ -1049,10 +1049,15 @@ func (apierSv1 *APIerSv1) LoadTariffPlanFromFolder(attrs *utils.AttrLoadTpFromFo
 		return utils.ErrInvalidPath
 	}
 
+	// initialize CSV storage
+	csvStorage, err := engine.NewFileCSVStorage(utils.CSVSep, attrs.FolderPath)
+	if err != nil {
+		return utils.NewErrServerError(err)
+	}
+
 	// create the TpReader
 	loader, err := engine.NewTpReader(apierSv1.DataManager.DataDB(),
-		engine.NewFileCSVStorage(utils.CSVSep, attrs.FolderPath),
-		"", apierSv1.Config.GeneralCfg().DefaultTimezone,
+		csvStorage, "", apierSv1.Config.GeneralCfg().DefaultTimezone,
 		apierSv1.Config.ApierCfg().CachesConns, apierSv1.Config.ApierCfg().SchedulerConns,
 		apierSv1.Config.DataDbCfg().Type == utils.MetaInternal)
 	if err != nil {
@@ -1116,9 +1121,15 @@ func (apierSv1 *APIerSv1) RemoveTPFromFolder(attrs *utils.AttrLoadTpFromFolder, 
 		return utils.ErrInvalidPath
 	}
 
+	// initialize CSV storage
+	csvStorage, err := engine.NewFileCSVStorage(utils.CSVSep, attrs.FolderPath)
+	if err != nil {
+		return utils.NewErrServerError(err)
+	}
+
 	// create the TpReader
 	loader, err := engine.NewTpReader(apierSv1.DataManager.DataDB(),
-		engine.NewFileCSVStorage(utils.CSVSep, attrs.FolderPath), "", apierSv1.Config.GeneralCfg().DefaultTimezone,
+		csvStorage, "", apierSv1.Config.GeneralCfg().DefaultTimezone,
 		apierSv1.Config.ApierCfg().CachesConns, apierSv1.Config.ApierCfg().SchedulerConns,
 		apierSv1.Config.DataDbCfg().Type == utils.MetaInternal)
 	if err != nil {
