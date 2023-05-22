@@ -118,8 +118,15 @@ func (apiv2 *APIerSv2) LoadTariffPlanFromFolder(attrs *utils.AttrLoadTpFromFolde
 	} else if !fi.IsDir() {
 		return utils.ErrInvalidPath
 	}
+
+	// initialize CSV storage
+	csvStorage, err := engine.NewFileCSVStorage(utils.CSVSep, attrs.FolderPath)
+	if err != nil {
+		return utils.NewErrServerError(err)
+	}
+
 	loader, err := engine.NewTpReader(apiv2.DataManager.DataDB(),
-		engine.NewFileCSVStorage(utils.CSVSep, attrs.FolderPath), "", apiv2.Config.GeneralCfg().DefaultTimezone,
+		csvStorage, "", apiv2.Config.GeneralCfg().DefaultTimezone,
 		apiv2.Config.ApierCfg().CachesConns, apiv2.Config.ApierCfg().SchedulerConns,
 		apiv2.Config.DataDbCfg().Type == utils.MetaInternal)
 	if err != nil {

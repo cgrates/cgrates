@@ -321,8 +321,7 @@ func getLoader(cfg *config.CGRConfig) (loader engine.LoadReader, err error) {
 		return engine.NewGoogleCSVStorage(cfg.LoaderCgrCfg().FieldSeparator, strings.TrimPrefix(*dataPath, gprefix))
 	}
 	if !utils.IsURL(*dataPath) {
-		loader = engine.NewFileCSVStorage(cfg.LoaderCgrCfg().FieldSeparator, *dataPath)
-		return
+		return engine.NewFileCSVStorage(cfg.LoaderCgrCfg().FieldSeparator, *dataPath)
 	}
 	loader = engine.NewURLCSVStorage(cfg.LoaderCgrCfg().FieldSeparator, *dataPath)
 	return

@@ -100,10 +100,10 @@ func NewCSVStorage(sep rune,
 }
 
 // NewFileCSVStorage returns a csv storage that uses all files from the folder
-func NewFileCSVStorage(sep rune, dataPath string) *CSVStorage {
+func NewFileCSVStorage(sep rune, dataPath string) (*CSVStorage, error) {
 	allFoldersPath, err := getAllFolders(dataPath)
 	if err != nil {
-		log.Fatal(err)
+		return nil, fmt.Errorf("failed to retrieve the folders from data path '%s': %s", dataPath, err.Error())
 	}
 	destinationsPaths := appendName(allFoldersPath, utils.DestinationsCsv)
 	timingsPaths := appendName(allFoldersPath, utils.TimingsCsv)
@@ -146,7 +146,7 @@ func NewFileCSVStorage(sep rune, dataPath string) *CSVStorage {
 		chargersPaths,
 		dispatcherprofilesPaths,
 		dispatcherhostsPaths,
-	)
+	), nil
 }
 
 // NewStringCSVStorage creates a csv storage from strings
