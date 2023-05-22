@@ -197,8 +197,10 @@ func (fc *FCTemplate) Clone() *FCTemplate {
 	cln.BreakOnSuccess = fc.BreakOnSuccess
 	cln.Layout = fc.Layout
 	cln.CostShiftDigits = fc.CostShiftDigits
-	cln.RoundingDecimals = new(int)
-	*cln.RoundingDecimals = *fc.RoundingDecimals
+	if fc.RoundingDecimals != nil {
+		cln.RoundingDecimals = new(int)
+		*cln.RoundingDecimals = *fc.RoundingDecimals
+	}
 	cln.MaskDestID = fc.MaskDestID
 	cln.MaskLen = fc.MaskLen
 	return cln
