@@ -250,13 +250,16 @@ func (rts *RoutesOpts) Clone() (cln *RoutesOpts) {
 		MaxCost:      rts.MaxCost,
 	}
 	if rts.ProfileCount != nil {
-		cln.ProfileCount = utils.IntPointer(*rts.ProfileCount)
+		cln.ProfileCount = new(int)
+		*cln.ProfileCount = *rts.ProfileCount
 	}
 	if rts.Limit != nil {
-		cln.Limit = utils.IntPointer(*rts.Limit)
+		cln.Limit = new(int)
+		*cln.Limit = *rts.Limit
 	}
 	if rts.Offset != nil {
-		cln.Offset = utils.IntPointer(*rts.Offset)
+		cln.Offset = new(int)
+		*cln.Offset = *rts.Offset
 	}
 	return
 }

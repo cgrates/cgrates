@@ -182,7 +182,8 @@ func (fc FCTemplate) Clone() (cln *FCTemplate) {
 		MaskLen:         fc.MaskLen,
 	}
 	if fc.RoundingDecimals != nil {
-		cln.RoundingDecimals = utils.IntPointer(*fc.RoundingDecimals)
+		cln.RoundingDecimals = new(int)
+		*cln.RoundingDecimals = *fc.RoundingDecimals
 	}
 	if fc.pathSlice != nil {
 		cln.pathSlice = utils.CloneStringSlice(fc.pathSlice)

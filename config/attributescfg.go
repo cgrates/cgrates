@@ -218,7 +218,8 @@ func (attrOpts *AttributesOpts) Clone() *AttributesOpts {
 		ProcessRuns:          attrOpts.ProcessRuns,
 	}
 	if attrOpts.Context != nil {
-		cln.Context = utils.StringPointer(*attrOpts.Context)
+		cln.Context = new(string)
+		*cln.Context = *attrOpts.Context
 	}
 	return cln
 }
