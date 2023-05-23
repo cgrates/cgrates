@@ -688,19 +688,19 @@ func (erOpts *EventReaderOpts) Clone() *EventReaderOpts {
 		*cln.AWSToken = *erOpts.AWSToken
 	}
 	if erOpts.AWSRegionProcessed != nil {
-		cln.AWSRegion = new(string)
+		cln.AWSRegionProcessed = new(string)
 		*cln.AWSRegionProcessed = *erOpts.AWSRegionProcessed
 	}
 	if erOpts.AWSKeyProcessed != nil {
-		cln.AWSKey = new(string)
+		cln.AWSKeyProcessed = new(string)
 		*cln.AWSKeyProcessed = *erOpts.AWSKeyProcessed
 	}
 	if erOpts.AWSSecretProcessed != nil {
-		cln.AWSSecret = new(string)
+		cln.AWSSecretProcessed = new(string)
 		*cln.AWSSecretProcessed = *erOpts.AWSSecretProcessed
 	}
 	if erOpts.AWSTokenProcessed != nil {
-		cln.AWSToken = new(string)
+		cln.AWSTokenProcessed = new(string)
 		*cln.AWSTokenProcessed = *erOpts.AWSTokenProcessed
 	}
 	if erOpts.SQSQueueID != nil {
@@ -780,15 +780,15 @@ func (erOpts *EventReaderOpts) Clone() *EventReaderOpts {
 		*cln.NATSSeedFileProcessed = *erOpts.NATSSeedFileProcessed
 	}
 	if erOpts.NATSCertificateAuthorityProcessed != nil {
-		cln.NATSCertificateAuthority = new(string)
+		cln.NATSCertificateAuthorityProcessed = new(string)
 		*cln.NATSCertificateAuthorityProcessed = *erOpts.NATSCertificateAuthorityProcessed
 	}
 	if erOpts.NATSClientCertificateProcessed != nil {
-		cln.NATSClientCertificate = new(string)
+		cln.NATSClientCertificateProcessed = new(string)
 		*cln.NATSClientCertificateProcessed = *erOpts.NATSClientCertificateProcessed
 	}
 	if erOpts.NATSClientKeyProcessed != nil {
-		cln.NATSClientKey = new(string)
+		cln.NATSClientKeyProcessed = new(string)
 		*cln.NATSClientKeyProcessed = *erOpts.NATSClientKeyProcessed
 	}
 	if erOpts.NATSJetStreamMaxWaitProcessed != nil {
