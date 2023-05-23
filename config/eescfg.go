@@ -528,160 +528,210 @@ func (eeC *EventExporterCfg) TrailerFields() []*FCTemplate {
 func (eeOpts *EventExporterOpts) Clone() *EventExporterOpts {
 	cln := &EventExporterOpts{}
 	if eeOpts.CSVFieldSeparator != nil {
-		cln.CSVFieldSeparator = utils.StringPointer(*eeOpts.CSVFieldSeparator)
+		cln.CSVFieldSeparator = new(string)
+		*cln.CSVFieldSeparator = *eeOpts.CSVFieldSeparator
 	}
 	if eeOpts.ElsIndex != nil {
-		cln.ElsIndex = utils.StringPointer(*eeOpts.ElsIndex)
+		cln.ElsIndex = new(string)
+		*cln.ElsIndex = *eeOpts.ElsIndex
 	}
 	if eeOpts.ElsIfPrimaryTerm != nil {
-		cln.ElsIfPrimaryTerm = utils.IntPointer(*eeOpts.ElsIfPrimaryTerm)
+		cln.ElsIfPrimaryTerm = new(int)
+		*cln.ElsIfPrimaryTerm = *eeOpts.ElsIfPrimaryTerm
 	}
 	if eeOpts.ElsIfSeqNo != nil {
-		cln.ElsIfSeqNo = utils.IntPointer(*eeOpts.ElsIfSeqNo)
+		cln.ElsIfSeqNo = new(int)
+		*cln.ElsIfSeqNo = *eeOpts.ElsIfSeqNo
 	}
 	if eeOpts.ElsOpType != nil {
-		cln.ElsOpType = utils.StringPointer(*eeOpts.ElsOpType)
+		cln.ElsOpType = new(string)
+		*cln.ElsOpType = *eeOpts.ElsOpType
 	}
 	if eeOpts.ElsPipeline != nil {
-		cln.ElsPipeline = utils.StringPointer(*eeOpts.ElsPipeline)
+		cln.ElsPipeline = new(string)
+		*cln.ElsPipeline = *eeOpts.ElsPipeline
 	}
 	if eeOpts.ElsRouting != nil {
-		cln.ElsRouting = utils.StringPointer(*eeOpts.ElsRouting)
+		cln.ElsRouting = new(string)
+		*cln.ElsRouting = *eeOpts.ElsRouting
 	}
 	if eeOpts.ElsTimeout != nil {
-		cln.ElsTimeout = utils.DurationPointer(*eeOpts.ElsTimeout)
+		cln.ElsTimeout = new(time.Duration)
+		*cln.ElsTimeout = *eeOpts.ElsTimeout
 	}
 	if eeOpts.ElsVersion != nil {
-		cln.ElsVersion = utils.IntPointer(*eeOpts.ElsVersion)
+		cln.ElsVersion = new(int)
+		*cln.ElsVersion = *eeOpts.ElsVersion
 	}
 	if eeOpts.ElsVersionType != nil {
-		cln.ElsVersionType = utils.StringPointer(*eeOpts.ElsVersionType)
+		cln.ElsVersionType = new(string)
+		*cln.ElsVersionType = *eeOpts.ElsVersionType
 	}
 	if eeOpts.ElsWaitForActiveShards != nil {
-		cln.ElsWaitForActiveShards = utils.StringPointer(*eeOpts.ElsWaitForActiveShards)
+		cln.ElsWaitForActiveShards = new(string)
+		*cln.ElsWaitForActiveShards = *eeOpts.ElsWaitForActiveShards
 	}
 	if eeOpts.SQLMaxIdleConns != nil {
-		cln.SQLMaxIdleConns = utils.IntPointer(*eeOpts.SQLMaxIdleConns)
+		cln.SQLMaxIdleConns = new(int)
+		*cln.SQLMaxIdleConns = *eeOpts.SQLMaxIdleConns
 	}
 	if eeOpts.SQLMaxOpenConns != nil {
-		cln.SQLMaxOpenConns = utils.IntPointer(*eeOpts.SQLMaxOpenConns)
+		cln.SQLMaxOpenConns = new(int)
+		*cln.SQLMaxOpenConns = *eeOpts.SQLMaxOpenConns
 	}
 	if eeOpts.SQLConnMaxLifetime != nil {
-		cln.SQLConnMaxLifetime = utils.DurationPointer(*eeOpts.SQLConnMaxLifetime)
+		cln.SQLConnMaxLifetime = new(time.Duration)
+		*cln.SQLConnMaxLifetime = *eeOpts.SQLConnMaxLifetime
 	}
 	if eeOpts.MYSQLDSNParams != nil {
 		cln.MYSQLDSNParams = eeOpts.MYSQLDSNParams
 	}
 	if eeOpts.SQLTableName != nil {
-		cln.SQLTableName = utils.StringPointer(*eeOpts.SQLTableName)
+		cln.SQLTableName = new(string)
+		*cln.SQLTableName = *eeOpts.SQLTableName
 	}
 	if eeOpts.SQLDBName != nil {
-		cln.SQLDBName = utils.StringPointer(*eeOpts.SQLDBName)
+		cln.SQLDBName = new(string)
+		*cln.SQLDBName = *eeOpts.SQLDBName
 	}
 	if eeOpts.PgSSLMode != nil {
-		cln.PgSSLMode = utils.StringPointer(*eeOpts.PgSSLMode)
+		cln.PgSSLMode = new(string)
+		*cln.PgSSLMode = *eeOpts.PgSSLMode
 	}
 	if eeOpts.KafkaTopic != nil {
-		cln.KafkaTopic = utils.StringPointer(*eeOpts.KafkaTopic)
+		cln.KafkaTopic = new(string)
+		*cln.KafkaTopic = *eeOpts.KafkaTopic
 	}
 	if eeOpts.KafkaTLS != nil {
-		cln.KafkaTLS = utils.BoolPointer(*eeOpts.KafkaTLS)
+		cln.KafkaTLS = new(bool)
+		*cln.KafkaTLS = *eeOpts.KafkaTLS
 	}
 	if eeOpts.KafkaCAPath != nil {
-		cln.KafkaCAPath = utils.StringPointer(*eeOpts.KafkaCAPath)
+		cln.KafkaCAPath = new(string)
+		*cln.KafkaCAPath = *eeOpts.KafkaCAPath
 	}
 	if eeOpts.KafkaSkipTLSVerify != nil {
-		cln.KafkaSkipTLSVerify = utils.BoolPointer(*eeOpts.KafkaSkipTLSVerify)
+		cln.KafkaSkipTLSVerify = new(bool)
+		*cln.KafkaSkipTLSVerify = *eeOpts.KafkaSkipTLSVerify
 	}
 	if eeOpts.AMQPQueueID != nil {
-		cln.AMQPQueueID = utils.StringPointer(*eeOpts.AMQPQueueID)
+		cln.AMQPQueueID = new(string)
+		*cln.AMQPQueueID = *eeOpts.AMQPQueueID
 	}
 	if eeOpts.AMQPRoutingKey != nil {
-		cln.AMQPRoutingKey = utils.StringPointer(*eeOpts.AMQPRoutingKey)
+		cln.AMQPRoutingKey = new(string)
+		*cln.AMQPRoutingKey = *eeOpts.AMQPRoutingKey
 	}
 	if eeOpts.AMQPExchange != nil {
-		cln.AMQPExchange = utils.StringPointer(*eeOpts.AMQPExchange)
+		cln.AMQPExchange = new(string)
+		*cln.AMQPExchange = *eeOpts.AMQPExchange
 	}
 	if eeOpts.AMQPExchangeType != nil {
-		cln.AMQPExchangeType = utils.StringPointer(*eeOpts.AMQPExchangeType)
+		cln.AMQPExchangeType = new(string)
+		*cln.AMQPExchangeType = *eeOpts.AMQPExchangeType
 	}
 	if eeOpts.AMQPUsername != nil {
-		cln.AMQPUsername = utils.StringPointer(*eeOpts.AMQPUsername)
+		cln.AMQPUsername = new(string)
+		*cln.AMQPUsername = *eeOpts.AMQPUsername
 	}
 	if eeOpts.AMQPPassword != nil {
-		cln.AMQPPassword = utils.StringPointer(*eeOpts.AMQPPassword)
+		cln.AMQPPassword = new(string)
+		*cln.AMQPPassword = *eeOpts.AMQPPassword
 	}
 	if eeOpts.AWSRegion != nil {
-		cln.AWSRegion = utils.StringPointer(*eeOpts.AWSRegion)
+		cln.AWSRegion = new(string)
+		*cln.AWSRegion = *eeOpts.AWSRegion
 	}
 	if eeOpts.AWSKey != nil {
-		cln.AWSKey = utils.StringPointer(*eeOpts.AWSKey)
+		cln.AWSKey = new(string)
+		*cln.AWSKey = *eeOpts.AWSKey
 	}
 	if eeOpts.AWSSecret != nil {
-		cln.AWSSecret = utils.StringPointer(*eeOpts.AWSSecret)
+		cln.AWSSecret = new(string)
+		*cln.AWSSecret = *eeOpts.AWSSecret
 	}
 	if eeOpts.AWSToken != nil {
-		cln.AWSToken = utils.StringPointer(*eeOpts.AWSToken)
+		cln.AWSToken = new(string)
+		*cln.AWSToken = *eeOpts.AWSToken
 	}
 	if eeOpts.SQSQueueID != nil {
-		cln.SQSQueueID = utils.StringPointer(*eeOpts.SQSQueueID)
+		cln.SQSQueueID = new(string)
+		*cln.SQSQueueID = *eeOpts.SQSQueueID
 	}
 	if eeOpts.S3BucketID != nil {
-		cln.S3BucketID = utils.StringPointer(*eeOpts.S3BucketID)
+		cln.S3BucketID = new(string)
+		*cln.S3BucketID = *eeOpts.S3BucketID
 	}
 	if eeOpts.S3FolderPath != nil {
-		cln.S3FolderPath = utils.StringPointer(*eeOpts.S3FolderPath)
+		cln.S3FolderPath = new(string)
+		*cln.S3FolderPath = *eeOpts.S3FolderPath
 	}
 	if eeOpts.NATSJetStream != nil {
-		cln.NATSJetStream = utils.BoolPointer(*eeOpts.NATSJetStream)
+		cln.NATSJetStream = new(bool)
+		*cln.NATSJetStream = *eeOpts.NATSJetStream
 	}
 	if eeOpts.NATSSubject != nil {
-		cln.NATSSubject = utils.StringPointer(*eeOpts.NATSSubject)
+		cln.NATSSubject = new(string)
+		*cln.NATSSubject = *eeOpts.NATSSubject
 	}
 	if eeOpts.NATSJWTFile != nil {
-		cln.NATSJWTFile = utils.StringPointer(*eeOpts.NATSJWTFile)
+		cln.NATSJWTFile = new(string)
+		*cln.NATSJWTFile = *eeOpts.NATSJWTFile
 	}
 	if eeOpts.NATSSeedFile != nil {
-		cln.NATSSeedFile = utils.StringPointer(*eeOpts.NATSSeedFile)
+		cln.NATSSeedFile = new(string)
+		*cln.NATSSeedFile = *eeOpts.NATSSeedFile
 	}
 	if eeOpts.NATSCertificateAuthority != nil {
-		cln.NATSCertificateAuthority = utils.StringPointer(*eeOpts.NATSCertificateAuthority)
+		cln.NATSCertificateAuthority = new(string)
+		*cln.NATSCertificateAuthority = *eeOpts.NATSCertificateAuthority
 	}
 	if eeOpts.NATSClientCertificate != nil {
+		cln.NATSClientCertificate = new(string)
 		cln.NATSClientCertificate = utils.StringPointer(*eeOpts.NATSClientCertificate)
 	}
 	if eeOpts.NATSClientKey != nil {
-		cln.NATSClientKey = utils.StringPointer(*eeOpts.NATSClientKey)
+		cln.NATSClientKey = new(string)
+		*cln.NATSClientKey = *eeOpts.NATSClientKey
 	}
 	if eeOpts.NATSJetStreamMaxWait != nil {
-		cln.NATSJetStreamMaxWait = utils.DurationPointer(*eeOpts.NATSJetStreamMaxWait)
+		cln.NATSJetStreamMaxWait = new(time.Duration)
+		*cln.NATSJetStreamMaxWait = *eeOpts.NATSJetStreamMaxWait
 	}
 	if eeOpts.RPCCodec != nil {
-		cln.RPCCodec = utils.StringPointer(*eeOpts.RPCCodec)
+		cln.RPCCodec = new(string)
+		*cln.RPCCodec = *eeOpts.RPCCodec
 	}
 	if eeOpts.ServiceMethod != nil {
-		cln.ServiceMethod = utils.StringPointer(*eeOpts.ServiceMethod)
+		cln.ServiceMethod = new(string)
+		*cln.ServiceMethod = *eeOpts.ServiceMethod
 	}
 	if eeOpts.KeyPath != nil {
-		cln.KeyPath = utils.StringPointer(*eeOpts.KeyPath)
+		cln.KeyPath = new(string)
+		*cln.KeyPath = *eeOpts.KeyPath
 	}
 	if eeOpts.CertPath != nil {
-		cln.CertPath = utils.StringPointer(*eeOpts.CertPath)
+		cln.CertPath = new(string)
+		*cln.CertPath = *eeOpts.CertPath
 	}
 	if eeOpts.CAPath != nil {
-		cln.CAPath = utils.StringPointer(*eeOpts.CAPath)
+		cln.CAPath = new(string)
+		*cln.CAPath = *eeOpts.CAPath
 	}
 	if eeOpts.TLS != nil {
-		cln.TLS = utils.BoolPointer(*eeOpts.TLS)
+		cln.TLS = new(bool)
+		*cln.TLS = *eeOpts.TLS
 	}
 	if eeOpts.ConnIDs != nil {
 		cln.ConnIDs = utils.SliceStringPointer(*eeOpts.ConnIDs)
 	}
 	if eeOpts.RPCConnTimeout != nil {
-		cln.RPCConnTimeout = utils.DurationPointer(*eeOpts.RPCConnTimeout)
+		cln.RPCConnTimeout = new(time.Duration)
+		*cln.RPCConnTimeout = *eeOpts.RPCConnTimeout
 	}
 	if eeOpts.RPCReplyTimeout != nil {
-		cln.RPCReplyTimeout = utils.DurationPointer(*eeOpts.RPCReplyTimeout)
+		cln.RPCReplyTimeout = new(time.Duration)
+		*cln.RPCReplyTimeout = *eeOpts.RPCReplyTimeout
 	}
 	if eeOpts.RPCAPIOpts != nil {
 		cln.RPCAPIOpts = make(map[string]interface{})
