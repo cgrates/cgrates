@@ -723,7 +723,8 @@ func (eeOpts *EventExporterOpts) Clone() *EventExporterOpts {
 		*cln.TLS = *eeOpts.TLS
 	}
 	if eeOpts.ConnIDs != nil {
-		cln.ConnIDs = utils.SliceStringPointer(*eeOpts.ConnIDs)
+		cln.ConnIDs = new([]string)
+		*cln.ConnIDs = *eeOpts.ConnIDs
 	}
 	if eeOpts.RPCConnTimeout != nil {
 		cln.RPCConnTimeout = new(time.Duration)
