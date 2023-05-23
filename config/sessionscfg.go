@@ -483,16 +483,20 @@ func (scfg SessionSCfg) Clone() (cln *SessionSCfg) {
 		cln.DefaultUsage[k] = v
 	}
 	if scfg.SessionTTLMaxDelay != nil {
-		cln.SessionTTLMaxDelay = utils.DurationPointer(*scfg.SessionTTLMaxDelay)
+		cln.SessionTTLMaxDelay = new(time.Duration)
+		*cln.SessionTTLMaxDelay = *scfg.SessionTTLMaxDelay
 	}
 	if scfg.SessionTTLLastUsed != nil {
-		cln.SessionTTLLastUsed = utils.DurationPointer(*scfg.SessionTTLLastUsed)
+		cln.SessionTTLLastUsed = new(time.Duration)
+		*cln.SessionTTLLastUsed = *scfg.SessionTTLLastUsed
 	}
 	if scfg.SessionTTLUsage != nil {
-		cln.SessionTTLUsage = utils.DurationPointer(*scfg.SessionTTLUsage)
+		cln.SessionTTLUsage = new(time.Duration)
+		*cln.SessionTTLUsage = *scfg.SessionTTLUsage
 	}
 	if scfg.SessionTTLLastUsage != nil {
-		cln.SessionTTLLastUsage = utils.DurationPointer(*scfg.SessionTTLLastUsage)
+		cln.SessionTTLLastUsage = new(time.Duration)
+		*cln.SessionTTLLastUsage = *scfg.SessionTTLLastUsage
 	}
 
 	if scfg.ChargerSConns != nil {

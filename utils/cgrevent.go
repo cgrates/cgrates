@@ -134,7 +134,8 @@ func (ev *CGREvent) Clone() (clned *CGREvent) {
 		APIOpts: make(map[string]interface{}),
 	}
 	if ev.Time != nil {
-		clned.Time = TimePointer(*ev.Time)
+		clned.Time = new(time.Time)
+		*clned.Time = *ev.Time
 	}
 	for k, v := range ev.Event {
 		clned.Event[k] = v

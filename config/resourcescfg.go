@@ -177,7 +177,8 @@ func (resOpts *ResourcesOpts) Clone() (cln *ResourcesOpts) {
 		Units:   resOpts.Units,
 	}
 	if resOpts.UsageTTL != nil {
-		cln.UsageTTL = utils.DurationPointer(*resOpts.UsageTTL)
+		cln.UsageTTL = new(time.Duration)
+		*cln.UsageTTL = *resOpts.UsageTTL
 	}
 	return
 }
