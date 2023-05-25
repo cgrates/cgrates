@@ -48,6 +48,7 @@ var (
 		testTPRpcConn,
 		testTPImportTPFromFolderPath,
 		testTPExportTPToFolder,
+		testTPExportTPToFolderWithError,
 		testTPKillEngine,
 	}
 )
@@ -110,7 +111,7 @@ func testTPImportTPFromFolderPath(t *testing.T) {
 	var reply string
 	if err := tpRPC.Call(utils.APIerSv1ImportTariffPlanFromFolder,
 		utils.AttrImportTPFromFolder{TPid: "TEST_TPID2",
-			FolderPath: path.Join(tpDataDir, "tariffplans", "tutorial")}, &reply); err != nil {
+			FolderPath: path.Join(tpDataDir, "tariffplans", "precache")}, &reply); err != nil {
 		t.Error("Got error on APIerSv1.ImportTarrifPlanFromFolder: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Calling APIerSv1.ImportTarrifPlanFromFolder got reply: ", reply)
@@ -123,8 +124,8 @@ func testTPExportTPToFolder(t *testing.T) {
 	expectedTPStas := &utils.ExportedTPStats{
 		Compressed: true,
 		ExportPath: "/tmp/",
-		ExportedFiles: []string{utils.RatingProfilesCsv, utils.RatingPlansCsv, utils.ActionsCsv, utils.AccountActionsCsv,
-			utils.ChargersCsv, utils.TimingsCsv, utils.ActionPlansCsv, utils.ResourcesCsv, utils.StatsCsv, utils.ThresholdsCsv,
+		ExportedFiles: []string{utils.RatingProfilesCsv, utils.RatingPlansCsv, utils.ActionsCsv, utils.AccountActionsCsv, utils.SharedGroupsCsv, utils.DispatcherHostsCsv, utils.DispatcherProfilesCsv,
+			utils.ActionPlansCsv, utils.ResourcesCsv, utils.StatsCsv, utils.ThresholdsCsv, utils.ActionTriggersCsv, utils.TimingsCsv,
 			utils.DestinationsCsv, utils.RatesCsv, utils.DestinationRatesCsv, utils.FiltersCsv, utils.SuppliersCsv, utils.AttributesCsv},
 	}
 	sort.Strings(expectedTPStas.ExportedFiles)
@@ -141,6 +142,18 @@ func testTPExportTPToFolder(t *testing.T) {
 		t.Errorf("Expecting : %+v, received: %+v", expectedTPStas.ExportedFiles, reply.ExportedFiles)
 	}
 	time.Sleep(500 * time.Millisecond)
+
+}
+
+func testTPExportTPToFolderWithError(t *testing.T) {
+	var reply *utils.ExportedTPStats
+	tpid := "TP_NOT_EXIST"
+	compress := true
+	exportPath := "/tmp/"
+	if err := tpRPC.Call(utils.APIerSv1ExportTPToFolder,
+		&utils.AttrDirExportTP{TPid: &tpid, ExportPath: &exportPath, Compress: &compress}, &reply); err == nil || err.Error() != utils.NewErrServerError(utils.ErrNotFound).Error() {
+		t.Error("Expecting error, received: ", err)
+	}
 
 }
 
