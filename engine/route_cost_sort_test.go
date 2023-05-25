@@ -23,6 +23,7 @@ import (
 	"reflect"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
@@ -279,8 +280,8 @@ func TestPopulateCostForRoutesGetDecimalBigOptsErr(t *testing.T) {
 			Value:     decimal.New(-1, 0),
 		},
 	}
-	connMgr := NewConnManager(cfg)
-	fltrS := NewFilterS(cfg, connMgr, nil)
+	cM := NewConnManager(cfg)
+	fltrS := NewFilterS(cfg, cM, nil)
 	routes := map[string]*RouteWithWeight{
 		"RW": {
 			Route: &Route{
@@ -301,7 +302,7 @@ func TestPopulateCostForRoutesGetDecimalBigOptsErr(t *testing.T) {
 	extraOpts := &optsGetRoutes{}
 
 	experr := `inline parse error for string: <*string.invalid:filter>`
-	_, err := populateCostForRoutes(context.Background(), cfg, connMgr, fltrS, routes, ev, extraOpts)
+	_, err := populateCostForRoutes(context.Background(), cfg, cM, fltrS, routes, ev, extraOpts)
 	if err == nil || err.Error() != experr {
 		t.Errorf("Expected error \n<%v>\n but received \n<%v>", experr, err)
 	}
@@ -317,8 +318,8 @@ func TestPopulateCostForRoutesMissingIdsErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.RouteSCfg().RateSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRates)}
 
-	connMgr := NewConnManager(cfg)
-	fltrS := NewFilterS(cfg, connMgr, nil)
+	cM := NewConnManager(cfg)
+	fltrS := NewFilterS(cfg, cM, nil)
 	routes := map[string]*RouteWithWeight{
 		"RW": {
 			Route: &Route{
@@ -340,7 +341,7 @@ func TestPopulateCostForRoutesMissingIdsErr(t *testing.T) {
 	extraOpts := &optsGetRoutes{}
 
 	experr := `MANDATORY_IE_MISSING: [RateProfileIDs or AccountIDs]`
-	_, err := populateCostForRoutes(context.Background(), cfg, connMgr, fltrS, routes, ev, extraOpts)
+	_, err := populateCostForRoutes(context.Background(), cfg, cM, fltrS, routes, ev, extraOpts)
 	if err == nil || err.Error() != experr {
 		t.Errorf("Expected error \n<%v>\n but received \n<%v>", experr, err)
 	}
@@ -348,6 +349,10 @@ func TestPopulateCostForRoutesMissingIdsErr(t *testing.T) {
 }
 
 func TestPopulateCostForRoutesAccountSConnsIgnoreErr(t *testing.T) {
+
+	defer func() {
+		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
+	}()
 
 	var buf bytes.Buffer
 	utils.Logger = utils.NewStdLoggerWithWriter(&buf, "", 7)
@@ -407,6 +412,10 @@ func TestPopulateCostForRoutesAccountSConnsIgnoreErr(t *testing.T) {
 
 func TestPopulateCostForRoutesAccountSConnsErr(t *testing.T) {
 
+	defer func() {
+		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
+	}()
+
 	cfg := config.NewDefaultCGRConfig()
 	cfg.RouteSCfg().RateSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRates)}
 	cfg.RouteSCfg().AccountSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts)}
@@ -448,6 +457,216 @@ func TestPopulateCostForRoutesAccountSConnsErr(t *testing.T) {
 	_, err := populateCostForRoutes(context.Background(), cfg, cM, fltrS, routes, ev, extraOpts)
 	if err == nil || err.Error() != expErr {
 		t.Errorf("Expected error \n<%v>\n but received \n<%v>", expErr, err)
+	}
+
+}
+func TestPopulateCostForRoutesAccountCostOverMax(t *testing.T) {
+
+	defer func() {
+		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	cfg.RouteSCfg().RateSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRates)}
+	cfg.RouteSCfg().AccountSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts)}
+
+	acntCost := &utils.EventCharges{
+		Concretes: utils.NewDecimal(5, 0),
+	}
+
+	cc := make(chan birpc.ClientConnector, 1)
+	cc <- &ccMock{
+
+		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+			utils.AccountSv1MaxAbstracts: func(ctx *context.Context, args, reply interface{}) error {
+				rplCast, canCast := reply.(*utils.EventCharges)
+				if !canCast {
+					t.Errorf("Wrong argument type : %T", reply)
+					return nil
+				}
+				*rplCast = *acntCost
+				return nil
+			},
+		},
+	}
+	cM := NewConnManager(cfg)
+	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts), utils.AccountSv1, cc)
+
+	fltrS := NewFilterS(cfg, cM, nil)
+	routes := map[string]*RouteWithWeight{
+		"RW": {
+			Route: &Route{
+				ID:         "local",
+				AccountIDs: []string{"accID1"},
+			},
+			Weight: 10,
+		},
+	}
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "TestEvent",
+		Event: map[string]interface{}{
+			utils.AccountField: 1001,
+		},
+		APIOpts: map[string]interface{}{},
+	}
+	extraOpts := &optsGetRoutes{
+		maxCost: 1,
+	}
+
+	rcv, err := populateCostForRoutes(context.Background(), cfg, cM, fltrS, routes, ev, extraOpts)
+	if err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcv, []*SortedRoute{}) {
+		t.Errorf("Expected \n<%v>,\n received \n<%v>", []*SortedRoute{}, rcv)
+	}
+
+}
+
+func TestPopulateCostForRoutesAppendAccounts(t *testing.T) {
+
+	defer func() {
+		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	cfg.RouteSCfg().RateSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRates)}
+	cfg.RouteSCfg().AccountSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts)}
+
+	acnt := &utils.Account{
+		Tenant: "cgrates.org",
+		ID:     "accID1",
+		Balances: map[string]*utils.Balance{
+			"ab1": {
+				ID:    "ab1",
+				Type:  utils.MetaAbstract,
+				Units: utils.NewDecimal(int64(60*time.Second), 0),
+				CostIncrements: []*utils.CostIncrement{
+					{
+						FixedFee:  utils.NewDecimal(1, 1),
+						Increment: utils.NewDecimal(1, 0),
+					},
+				},
+			},
+		},
+	}
+
+	acntCost := &utils.EventCharges{
+		Accounts: map[string]*utils.Account{
+			"accID1": acnt,
+		},
+		Concretes: utils.NewDecimal(5, 0),
+	}
+
+	cc := make(chan birpc.ClientConnector, 1)
+	cc <- &ccMock{
+
+		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+			utils.AccountSv1MaxAbstracts: func(ctx *context.Context, args, reply interface{}) error {
+				rplCast, canCast := reply.(*utils.EventCharges)
+				if !canCast {
+					t.Errorf("Wrong argument type : %T", reply)
+					return nil
+				}
+				*rplCast = *acntCost
+				return nil
+			},
+		},
+	}
+	cM := NewConnManager(cfg)
+	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts), utils.AccountSv1, cc)
+
+	fltrS := NewFilterS(cfg, cM, nil)
+	routes := map[string]*RouteWithWeight{
+		"RW": {
+			Route: &Route{
+				ID:         "local",
+				AccountIDs: []string{"accID1"},
+			},
+			Weight: 10,
+		},
+	}
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "TestEvent",
+		Event: map[string]interface{}{
+			utils.AccountField: 1001,
+		},
+		APIOpts: map[string]interface{}{},
+	}
+	extraOpts := &optsGetRoutes{}
+
+	exp := []*SortedRoute{
+		{
+			RouteID:         "local",
+			RouteParameters: "",
+			SortingData: map[string]interface{}{
+				utils.AccountIDs: []string{"accID1"},
+				utils.Cost:       5,
+				utils.Weight:     10,
+			},
+		},
+	}
+
+	rcv, err := populateCostForRoutes(context.Background(), cfg, cM, fltrS, routes, ev, extraOpts)
+	if err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(utils.ToJSON(rcv), utils.ToJSON(exp)) {
+		t.Errorf("Expected \n<%v>,\n received \n<%v>", utils.ToJSON(exp), utils.ToJSON(rcv))
+	}
+
+}
+
+func TestPopulateCostForRoutesRateSIgnoreErr(t *testing.T) {
+
+	defer func() {
+		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	cfg.RouteSCfg().RateSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRates)}
+
+	cc := make(chan birpc.ClientConnector, 1)
+	cc <- &ccMock{
+
+		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+			utils.RateSv1CostForEvent: func(ctx *context.Context, args, reply interface{}) error {
+				return utils.ErrNotImplemented
+			},
+		},
+	}
+	cM := NewConnManager(cfg)
+	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRates), utils.RateSv1, cc)
+
+	fltrS := NewFilterS(cfg, cM, nil)
+	routes := map[string]*RouteWithWeight{
+		"RW": {
+			Route: &Route{
+				ID:             "local",
+				RateProfileIDs: []string{"RPID1"},
+			},
+			Weight: 10,
+		},
+	}
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "TestEvent",
+		Event: map[string]interface{}{
+			utils.AccountField: 1001,
+		},
+		APIOpts: map[string]interface{}{},
+	}
+	extraOpts := &optsGetRoutes{
+		ignoreErrors: true,
+	}
+
+	exp := []*SortedRoute{}
+
+	rcv, err := populateCostForRoutes(context.Background(), cfg, cM, fltrS, routes, ev, extraOpts)
+	if err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(utils.ToJSON(rcv), utils.ToJSON(exp)) {
+		t.Errorf("Expected \n<%v>,\n received \n<%v>", utils.ToJSON(exp), utils.ToJSON(rcv))
 	}
 
 }
