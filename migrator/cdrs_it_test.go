@@ -44,6 +44,7 @@ var sTestsCdrIT = []func(t *testing.T){
 	testCdrITConnect,
 	testCdrITFlush,
 	testCdrITMigrateAndMove,
+	testMongoGetCdrsRemoveErr,
 }
 
 func TestCdrITMongo(t *testing.T) {
@@ -187,4 +188,17 @@ func testCdrITMigrateAndMove(t *testing.T) {
 	//  else if cdrMigrator.stats[utils.CDRs] != 1 {
 	// 	t.Errorf("Expected 1, received: %v", cdrMigrator.stats[utils.CDRs])
 	// }
+}
+
+func testMongoGetCdrsRemoveErr(t *testing.T) {
+	cdrMigrator.Close()
+
+	expErr := "client is disconnected"
+	if cdrPathIn == "/usr/share/cgrates/conf/samples/tutmongo" {
+		_, _, err := cdrMigrator.storDBOut.StorDB().GetCDRs(new(utils.CDRsFilter), true)
+		if err == nil || err.Error() != expErr {
+			t.Errorf("Expected error <%v>, Received <%v>", expErr, err)
+		}
+	}
+
 }

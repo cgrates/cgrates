@@ -1100,6 +1100,9 @@ func (ms *MongoStorage) GetCDRs(qryFltr *utils.CDRsFilter, remove bool) ([]*CDR,
 		var chgd int64
 		err := ms.query(func(sctx mongo.SessionContext) (err error) {
 			dr, err := ms.getCol(ColCDRs).DeleteMany(sctx, filters)
+			if err != nil {
+				return err
+			}
 			chgd = dr.DeletedCount
 			return err
 		})
