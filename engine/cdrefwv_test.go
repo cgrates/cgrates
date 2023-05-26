@@ -88,7 +88,7 @@ var contentJsnCfgFlds = []*config.FcTemplateJsonCfg{
 		Tag:     utils.StringPointer("Account"),
 		Path:    utils.StringPointer("*exp.Account"),
 		Type:    utils.StringPointer(utils.META_COMPOSED),
-		Value:   utils.StringPointer("~" + utils.Account),
+		Value:   utils.StringPointer("~" + utils.MetaReq + utils.NestingSep + utils.Account),
 		Width:   utils.IntPointer(12),
 		Strip:   utils.StringPointer(utils.MetaLeft),
 		Padding: utils.StringPointer(utils.MetaRight)},
@@ -96,7 +96,7 @@ var contentJsnCfgFlds = []*config.FcTemplateJsonCfg{
 		Tag:     utils.StringPointer("Subject"),
 		Path:    utils.StringPointer("*exp.Subject"),
 		Type:    utils.StringPointer(utils.META_COMPOSED),
-		Value:   utils.StringPointer("~" + utils.Subject),
+		Value:   utils.StringPointer("~" + utils.MetaReq + utils.NestingSep + utils.Subject),
 		Width:   utils.IntPointer(5),
 		Strip:   utils.StringPointer(utils.MetaRight),
 		Padding: utils.StringPointer(utils.MetaRight)},
@@ -112,7 +112,7 @@ var contentJsnCfgFlds = []*config.FcTemplateJsonCfg{
 		Tag:     utils.StringPointer("Destination"),
 		Path:    utils.StringPointer("*exp.Destination"),
 		Type:    utils.StringPointer(utils.META_COMPOSED),
-		Value:   utils.StringPointer("~" + utils.Destination),
+		Value:   utils.StringPointer("~" + utils.MetaReq + utils.NestingSep + utils.Destination),
 		Width:   utils.IntPointer(24),
 		Strip:   utils.StringPointer(utils.MetaXRight),
 		Padding: utils.StringPointer(utils.MetaRight)},
@@ -133,7 +133,7 @@ var contentJsnCfgFlds = []*config.FcTemplateJsonCfg{
 		Tag:     utils.StringPointer("SetupTime"),
 		Path:    utils.StringPointer("*exp.SetupTime"),
 		Type:    utils.StringPointer(utils.META_COMPOSED),
-		Value:   utils.StringPointer("~" + utils.SetupTime),
+		Value:   utils.StringPointer("~" + utils.MetaReq + utils.NestingSep + utils.SetupTime),
 		Width:   utils.IntPointer(12),
 		Strip:   utils.StringPointer(utils.MetaRight),
 		Padding: utils.StringPointer(utils.MetaRight),
@@ -142,7 +142,7 @@ var contentJsnCfgFlds = []*config.FcTemplateJsonCfg{
 		Tag:     utils.StringPointer("Duration"),
 		Path:    utils.StringPointer("*exp.Duration"),
 		Type:    utils.StringPointer(utils.META_COMPOSED),
-		Value:   utils.StringPointer("~" + utils.Usage),
+		Value:   utils.StringPointer("~" + utils.MetaReq + utils.NestingSep + utils.Usage),
 		Width:   utils.IntPointer(6),
 		Strip:   utils.StringPointer(utils.MetaRight),
 		Padding: utils.StringPointer(utils.MetaRight),
@@ -184,17 +184,17 @@ var contentJsnCfgFlds = []*config.FcTemplateJsonCfg{
 		Tag:     utils.StringPointer("CallId"),
 		Path:    utils.StringPointer("*exp.CallId"),
 		Type:    utils.StringPointer(utils.META_COMPOSED),
-		Value:   utils.StringPointer("~" + utils.OriginID),
+		Value:   utils.StringPointer("~" + utils.MetaReq + utils.NestingSep + utils.OriginID),
 		Width:   utils.IntPointer(16),
 		Padding: utils.StringPointer(utils.MetaRight)},
 	{
-		Tag:   utils.StringPointer("Filler"),
-		Path:  utils.StringPointer("*exp.Filler"),
+		Tag:   utils.StringPointer("Filler1"),
+		Path:  utils.StringPointer("*exp.Filler1"),
 		Type:  utils.StringPointer(utils.META_FILLER),
 		Width: utils.IntPointer(8)},
 	{
-		Tag:   utils.StringPointer("Filler"),
-		Path:  utils.StringPointer("*exp.Filler"),
+		Tag:   utils.StringPointer("Filler2"),
+		Path:  utils.StringPointer("*exp.Filler2"),
 		Type:  utils.StringPointer(utils.META_FILLER),
 		Width: utils.IntPointer(8)},
 	{
@@ -210,7 +210,7 @@ var contentJsnCfgFlds = []*config.FcTemplateJsonCfg{
 		Path:              utils.StringPointer("*exp.Cost"),
 		Type:              utils.StringPointer(utils.META_COMPOSED),
 		Width:             utils.IntPointer(9),
-		Value:             utils.StringPointer("~" + utils.COST),
+		Value:             utils.StringPointer("~" + utils.MetaReq + utils.NestingSep + utils.COST),
 		Padding:           utils.StringPointer(utils.MetaZeroLeft),
 		Rounding_decimals: utils.IntPointer(5)},
 	{
@@ -328,10 +328,10 @@ func TestWriteCdr(t *testing.T) {
 	allOut := wrBuf.String()
 	eAllOut := eHeader + eContentOut + eTrailer
 	if math.Mod(float64(len(allOut)), 145) != 0 {
-		t.Errorf("Unexpected export content length %d, have output \n%q, \n expecting: \n%q",
+		t.Errorf("Unexpected export content length %d, have output \n%s, \n expecting: \n%s",
 			len(allOut), allOut, eAllOut)
 	} else if len(allOut) != len(eAllOut) {
-		t.Errorf("Output does not match expected length. Have output \n%q, \n expecting: \n%q",
+		t.Errorf("Output does not match expected length. Have output \n%s, \n expecting: \n%s",
 			allOut, eAllOut)
 	}
 	// Test stats
