@@ -49,7 +49,7 @@ func (self *CmdSetFilter) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdSetFilter) RpcParams(reset bool) interface{} {
+func (self *CmdSetFilter) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &engine.FilterWithAPIOpts{Filter: new(engine.Filter)}
 	}
@@ -60,7 +60,7 @@ func (self *CmdSetFilter) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdSetFilter) RpcResult() interface{} {
+func (self *CmdSetFilter) RpcResult() any {
 	var s string
 	return &s
 }

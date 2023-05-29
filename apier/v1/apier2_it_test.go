@@ -157,10 +157,10 @@ func testAPIerVerifyAttributesAfterLoad(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testAPIerAfterDelete",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsContext: "simpleauth",
 		},
 	}
@@ -233,10 +233,10 @@ func testAPIerVerifyAttributesAfterDelete(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testAPIerAfterDelete",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsContext: "simpleauth",
 		},
 	}

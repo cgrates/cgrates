@@ -37,7 +37,7 @@ type ActionTiming struct {
 	Uuid         string
 	Timing       *RateInterval
 	ActionsID    string
-	ExtraData    interface{}
+	ExtraData    any
 	Weight       float64
 	actions      Actions
 	accountIDs   utils.StringMap // copy of action plans accounts
@@ -80,7 +80,7 @@ func (apl *ActionPlan) RemoveAccountID(accID string) (found bool) {
 }
 
 // Clone clones *ActionPlan
-func (apl *ActionPlan) Clone() (interface{}, error) {
+func (apl *ActionPlan) Clone() (any, error) {
 	cln := &ActionPlan{
 		Id:         apl.Id,
 		AccountIDs: apl.AccountIDs.Clone(),

@@ -217,7 +217,7 @@ package general_tests
 // 		CGREvent: &utils.CGREvent{
 // 			Tenant: "cgrates.org",
 // 			ID:     "ResourceEvent",
-// 			Event: map[string]interface{}{
+// 			Event: map[string]any{
 // 				utils.AccountField: "1001",
 // 				utils.Subject:      "1001",
 // 				utils.Destination:  "1002",
@@ -327,7 +327,7 @@ package general_tests
 // 		CGREvent: &utils.CGREvent{
 // 			Tenant: "cgrates.org",
 // 			ID:     "ResourceAllocation",
-// 			Event: map[string]interface{}{
+// 			Event: map[string]any{
 // 				utils.AccountField: "1001",
 // 				utils.Subject:      "1001",
 // 				utils.Destination:  "1002",
@@ -432,7 +432,7 @@ package general_tests
 // 		CGREvent: &utils.CGREvent{
 // 			Tenant: "cgrates.org",
 // 			ID:     "ResourceRelease",
-// 			Event: map[string]interface{}{
+// 			Event: map[string]any{
 // 				utils.AccountField: "1001",
 // 				utils.Subject:      "1001",
 // 				utils.Destination:  "1002",
@@ -509,7 +509,7 @@ package general_tests
 // 		CGREvent: &utils.CGREvent{
 // 			Tenant: "cgrates.org",
 // 			ID:     "AllocateResource",
-// 			Event: map[string]interface{}{
+// 			Event: map[string]any{
 // 				utils.AccountField: "1001",
 // 				utils.Subject:      "1001",
 // 				utils.Destination:  "1002",

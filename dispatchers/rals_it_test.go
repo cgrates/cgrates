@@ -70,7 +70,7 @@ func testDspRALsPing(t *testing.T) {
 	if err := dispEngine.RPC.Call(utils.RALsV1Ping, &utils.CGREvent{
 		Tenant: "cgrates.org",
 
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "rals12345",
 		},
 	}, &reply); err != nil {
@@ -86,7 +86,7 @@ func testDspRALsGetRatingPlanCost(t *testing.T) {
 		RatingPlanIDs: []string{"RP_1001", "RP_1002"},
 		SetupTime:     utils.MetaNow,
 		Usage:         "1h",
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "rals12345",
 		},
 	}

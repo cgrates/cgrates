@@ -107,7 +107,7 @@ func (fCsv *FileCSVee) Cfg() *config.EventExporterCfg { return fCsv.cfg }
 
 func (fCsv *FileCSVee) Connect() (_ error) { return }
 
-func (fCsv *FileCSVee) ExportEvent(ev interface{}, _ string) error {
+func (fCsv *FileCSVee) ExportEvent(ev any, _ string) error {
 	fCsv.Lock() // make sure that only one event is writen in file at once
 	defer fCsv.Unlock()
 	return fCsv.csvWriter.Write(ev.([]string))

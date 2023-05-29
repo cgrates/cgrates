@@ -168,10 +168,10 @@ func testDispatcherCgr2RPCConn(t *testing.T) {
 
 func testDispatcherCgr1CoreStatus(t *testing.T) {
 	// HOST1 host matched :2012
-	var reply map[string]interface{}
+	var reply map[string]any
 	ev := utils.TenantWithAPIOpts{
 		Tenant: "cgrates.org",
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsRouteID:     "account#dan.bogos",
 			utils.MetaDispatchers: false,
 		},
@@ -185,10 +185,10 @@ func testDispatcherCgr1CoreStatus(t *testing.T) {
 
 func testDispatcherCgr2CoreStatus(t *testing.T) {
 	// HOST2 host matched because it was called from engine with port :4012 -> host2
-	var reply map[string]interface{}
+	var reply map[string]any
 	ev := utils.TenantWithAPIOpts{
 		Tenant: "cgrates.org",
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsRouteID:     "account#dan.bogos",
 			utils.MetaDispatchers: false,
 		},
@@ -204,7 +204,7 @@ func testDispatcherGetItemBothEnginesFirstAttempt(t *testing.T) {
 	// get for *dispatcher_routes
 	argsCache := &utils.ArgsGetCacheItemWithAPIOpts{
 		Tenant: "cgrates.org",
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaDispatchers: false,
 		},
 		ArgsGetCacheItem: utils.ArgsGetCacheItem{
@@ -212,7 +212,7 @@ func testDispatcherGetItemBothEnginesFirstAttempt(t *testing.T) {
 			ItemID:  "account#dan.bogos:*core",
 		},
 	}
-	var reply interface{}
+	var reply any
 	if err := cgr2RPC.Call(utils.CacheSv1GetItem, argsCache,
 		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
@@ -225,7 +225,7 @@ func testDispatcherGetItemBothEnginesFirstAttempt(t *testing.T) {
 	// get for *dispatcher_profiles
 	argsCache = &utils.ArgsGetCacheItemWithAPIOpts{
 		Tenant: "cgrates.org",
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaDispatchers: false,
 		},
 		ArgsGetCacheItem: utils.ArgsGetCacheItem{
@@ -245,7 +245,7 @@ func testDispatcherGetItemBothEnginesFirstAttempt(t *testing.T) {
 	// get for *dispatchers
 	argsCache = &utils.ArgsGetCacheItemWithAPIOpts{
 		Tenant: "cgrates.org",
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaDispatchers: false,
 		},
 		ArgsGetCacheItem: utils.ArgsGetCacheItem{
@@ -303,7 +303,7 @@ func testDispatcherSetterSetDispatcherProfile(t *testing.T) {
 				ReplyTimeout:    2 * time.Minute,
 			},
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaDispatchers: false,
 		},
 	}
@@ -326,7 +326,7 @@ func testDispatcherSetterSetDispatcherProfile(t *testing.T) {
 				ReplyTimeout:    2 * time.Minute,
 			},
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaDispatchers: false,
 		},
 	}
@@ -355,7 +355,7 @@ func testDispatcherSetterSetDispatcherProfile(t *testing.T) {
 				},
 			},
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaDispatchers: false,
 		},
 	}
@@ -367,10 +367,10 @@ func testDispatcherSetterSetDispatcherProfile(t *testing.T) {
 }
 
 func testDispatcherCgr2CoreStatusWithRouteID(t *testing.T) {
-	var reply map[string]interface{}
+	var reply map[string]any
 	ev := utils.TenantWithAPIOpts{
 		Tenant: "cgrates.org",
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsRouteID: "account#dan.bogos",
 		},
 	}
@@ -383,10 +383,10 @@ func testDispatcherCgr2CoreStatusWithRouteID(t *testing.T) {
 }
 
 func testDispatcherCgr1CoreStatusWithRouteIDSecondAttempt(t *testing.T) {
-	var reply map[string]interface{}
+	var reply map[string]any
 	ev := utils.TenantWithAPIOpts{
 		Tenant: "cgrates.org",
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsRouteID: "account#dan.bogos",
 		},
 	}
@@ -402,7 +402,7 @@ func testDispatcherCgr2GetItemHOST2(t *testing.T) {
 	// get for *dispatcher_routes
 	argsCache := &utils.ArgsGetCacheItemWithAPIOpts{
 		Tenant: "cgrates.org",
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaDispatchers: false,
 		},
 		ArgsGetCacheItem: utils.ArgsGetCacheItem{
@@ -410,12 +410,12 @@ func testDispatcherCgr2GetItemHOST2(t *testing.T) {
 			ItemID:  "account#dan.bogos:*core",
 		},
 	}
-	var reply interface{}
+	var reply any
 	if err := cgr2RPC.Call(utils.CacheSv1GetItem, argsCache,
 		&reply); err != nil {
 		t.Error(err)
 	} else {
-		expected := map[string]interface{}{
+		expected := map[string]any{
 			utils.Tenant:    "cgrates.org",
 			utils.ProfileID: "DSP1",
 			"HostID":        "HOST2",
@@ -428,7 +428,7 @@ func testDispatcherCgr2GetItemHOST2(t *testing.T) {
 	// get for *dispatcher_profiles
 	argsCache = &utils.ArgsGetCacheItemWithAPIOpts{
 		Tenant: "cgrates.org",
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaDispatchers: false,
 		},
 		ArgsGetCacheItem: utils.ArgsGetCacheItem{
@@ -440,17 +440,17 @@ func testDispatcherCgr2GetItemHOST2(t *testing.T) {
 		&reply); err != nil {
 		t.Error(err)
 	} else {
-		expected := map[string]interface{}{
+		expected := map[string]any{
 			utils.FilterIDs: nil,
-			"Hosts": []interface{}{
-				map[string]interface{}{
+			"Hosts": []any{
+				map[string]any{
 					utils.Blocker:   false,
 					utils.FilterIDs: nil,
 					utils.ID:        "HOST1",
 					utils.Params:    nil,
 					utils.Weight:    10.,
 				},
-				map[string]interface{}{
+				map[string]any{
 					utils.Blocker:   false,
 					utils.FilterIDs: nil,
 					utils.ID:        "HOST2",
@@ -461,7 +461,7 @@ func testDispatcherCgr2GetItemHOST2(t *testing.T) {
 			utils.ActivationIntervalString: nil,
 			utils.ID:                       "DSP1",
 			utils.Strategy:                 "*weight",
-			utils.Subsystems:               []interface{}{"*any"},
+			utils.Subsystems:               []any{"*any"},
 			"StrategyParams":               nil,
 			utils.Tenant:                   "cgrates.org",
 			utils.Weight:                   10.,
@@ -474,7 +474,7 @@ func testDispatcherCgr2GetItemHOST2(t *testing.T) {
 	// get for *dispatchers
 	argsCache = &utils.ArgsGetCacheItemWithAPIOpts{
 		Tenant: "cgrates.org",
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaDispatchers: false,
 		},
 		ArgsGetCacheItem: utils.ArgsGetCacheItem{
@@ -492,7 +492,7 @@ func testDispatcherCgr2GetItemHOST2(t *testing.T) {
 func testDisaptcherCacheClear(t *testing.T) {
 	var reply string
 	if err := cgr1RPC.Call(utils.CacheSv1Clear, &utils.AttrCacheIDsWithAPIOpts{
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaDispatchers: false,
 		},
 	}, &reply); err != nil {
@@ -502,7 +502,7 @@ func testDisaptcherCacheClear(t *testing.T) {
 	}
 
 	if err := cgr2RPC.Call(utils.CacheSv1Clear, &utils.AttrCacheIDsWithAPIOpts{
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaDispatchers: false,
 		},
 	}, &reply); err != nil {
@@ -513,10 +513,10 @@ func testDisaptcherCacheClear(t *testing.T) {
 }
 
 func testDispatcherCgr1CoreStatusWithRouteIDButHost1(t *testing.T) {
-	var reply map[string]interface{}
+	var reply map[string]any
 	ev := utils.TenantWithAPIOpts{
 		Tenant: "cgrates.org",
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsRouteID: "account#dan.bogos",
 		},
 	}
@@ -532,7 +532,7 @@ func testDispatcherCgr1CheckCacheAfterRouting(t *testing.T) {
 	// get for *dispatcher_routes
 	argsCache := &utils.ArgsGetCacheItemWithAPIOpts{
 		Tenant: "cgrates.org",
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaDispatchers: false,
 		},
 		ArgsGetCacheItem: utils.ArgsGetCacheItem{
@@ -540,12 +540,12 @@ func testDispatcherCgr1CheckCacheAfterRouting(t *testing.T) {
 			ItemID:  "account#dan.bogos:*core",
 		},
 	}
-	var reply interface{}
+	var reply any
 	if err := cgr1RPC.Call(utils.CacheSv1GetItem, argsCache,
 		&reply); err != nil {
 		t.Error(err)
 	} else {
-		expected := map[string]interface{}{
+		expected := map[string]any{
 			utils.Tenant:    "cgrates.org",
 			utils.ProfileID: "DSP1",
 			"HostID":        "HOST1",
@@ -558,7 +558,7 @@ func testDispatcherCgr1CheckCacheAfterRouting(t *testing.T) {
 	// get for *dispatcher_profiles
 	argsCache = &utils.ArgsGetCacheItemWithAPIOpts{
 		Tenant: "cgrates.org",
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaDispatchers: false,
 		},
 		ArgsGetCacheItem: utils.ArgsGetCacheItem{
@@ -570,18 +570,18 @@ func testDispatcherCgr1CheckCacheAfterRouting(t *testing.T) {
 		&reply); err != nil {
 		t.Error(err)
 	} else {
-		expected := map[string]interface{}{
+		expected := map[string]any{
 			utils.ActivationIntervalString: nil,
 			utils.FilterIDs:                nil,
-			"Hosts": []interface{}{
-				map[string]interface{}{
+			"Hosts": []any{
+				map[string]any{
 					utils.Blocker:   false,
 					utils.FilterIDs: nil,
 					utils.ID:        "HOST1",
 					utils.Params:    nil,
 					utils.Weight:    10.,
 				},
-				map[string]interface{}{
+				map[string]any{
 					utils.Blocker:   false,
 					utils.FilterIDs: nil,
 					utils.ID:        "HOST2",
@@ -591,7 +591,7 @@ func testDispatcherCgr1CheckCacheAfterRouting(t *testing.T) {
 			},
 			utils.ID:         "DSP1",
 			utils.Strategy:   "*weight",
-			utils.Subsystems: []interface{}{"*any"},
+			utils.Subsystems: []any{"*any"},
 			"StrategyParams": nil,
 			utils.Tenant:     "cgrates.org",
 			utils.Weight:     10.,
@@ -604,7 +604,7 @@ func testDispatcherCgr1CheckCacheAfterRouting(t *testing.T) {
 	// get for *dispatchers
 	argsCache = &utils.ArgsGetCacheItemWithAPIOpts{
 		Tenant: "cgrates.org",
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaDispatchers: false,
 		},
 		ArgsGetCacheItem: utils.ArgsGetCacheItem{
@@ -638,7 +638,7 @@ func testDispatcherSetterSetDispatcherProfileOverwrite(t *testing.T) {
 				},
 			},
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaDispatchers: false,
 		},
 	}
@@ -654,7 +654,7 @@ func testDispatcherCheckCacheAfterSetDispatcherDSP1(t *testing.T) {
 	// get for *dispatcher_routes
 	argsCache := &utils.ArgsGetCacheItemWithAPIOpts{
 		Tenant: "cgrates.org",
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaDispatchers: false,
 			"adi3":                "nu",
 		},
@@ -663,7 +663,7 @@ func testDispatcherCheckCacheAfterSetDispatcherDSP1(t *testing.T) {
 			ItemID:  "account#dan.bogos:*core",
 		},
 	}
-	var reply interface{} // Should receive NOT_FOUND, as CallCache that was called in API will remove the DispatcherRoute
+	var reply any // Should receive NOT_FOUND, as CallCache that was called in API will remove the DispatcherRoute
 	if err := cgr1RPC.Call(utils.CacheSv1GetItem, argsCache,
 		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Unexpected error returned: %v", err)
@@ -672,7 +672,7 @@ func testDispatcherCheckCacheAfterSetDispatcherDSP1(t *testing.T) {
 	// get for *dispatcher_profiles
 	argsCache = &utils.ArgsGetCacheItemWithAPIOpts{
 		Tenant: "cgrates.org",
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaDispatchers: false,
 			"adi2":                "nu",
 		},
@@ -686,10 +686,10 @@ func testDispatcherCheckCacheAfterSetDispatcherDSP1(t *testing.T) {
 		&reply); err != nil {
 		t.Error(err)
 	} else {
-		expected := map[string]interface{}{
+		expected := map[string]any{
 			utils.FilterIDs: nil,
-			"Hosts": []interface{}{
-				map[string]interface{}{
+			"Hosts": []any{
+				map[string]any{
 					utils.Blocker:   false,
 					utils.FilterIDs: nil,
 					utils.ID:        "HOST2",
@@ -698,7 +698,7 @@ func testDispatcherCheckCacheAfterSetDispatcherDSP1(t *testing.T) {
 				},
 			},
 			"ActivationInterval": nil,
-			"Subsystems":         []interface{}{"*any"},
+			"Subsystems":         []any{"*any"},
 			utils.ID:             "DSP1",
 			utils.Strategy:       "*weight",
 			"StrategyParams":     nil,
@@ -713,7 +713,7 @@ func testDispatcherCheckCacheAfterSetDispatcherDSP1(t *testing.T) {
 	// get for *dispatchers
 	argsCache = &utils.ArgsGetCacheItemWithAPIOpts{
 		Tenant: "cgrates.org",
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaDispatchers: false,
 			"adi1":                "nu",
 		},
@@ -750,7 +750,7 @@ func testDispatcherSetterSetAnotherProifle(t *testing.T) {
 				},
 			},
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaDispatchers: false,
 		},
 	}
@@ -766,7 +766,7 @@ func testDispatcherCheckCacheAfterSetDispatcherDSP2(t *testing.T) {
 	// get for *dispatcher_routes
 	argsCache := &utils.ArgsGetCacheItemWithAPIOpts{
 		Tenant: "cgrates.org",
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaDispatchers: false,
 		},
 		ArgsGetCacheItem: utils.ArgsGetCacheItem{
@@ -774,7 +774,7 @@ func testDispatcherCheckCacheAfterSetDispatcherDSP2(t *testing.T) {
 			ItemID:  "account#dan.bogos:*core",
 		},
 	}
-	var reply interface{}
+	var reply any
 	// NOT_FOUND
 	if err := cgr1RPC.Call(utils.CacheSv1GetItem, argsCache,
 		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
@@ -784,7 +784,7 @@ func testDispatcherCheckCacheAfterSetDispatcherDSP2(t *testing.T) {
 	// get for *dispatcher_profiles
 	argsCache = &utils.ArgsGetCacheItemWithAPIOpts{
 		Tenant: "cgrates.org",
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaDispatchers: false,
 		},
 		ArgsGetCacheItem: utils.ArgsGetCacheItem{
@@ -801,7 +801,7 @@ func testDispatcherCheckCacheAfterSetDispatcherDSP2(t *testing.T) {
 	// get for *dispatchers
 	argsCache = &utils.ArgsGetCacheItemWithAPIOpts{
 		Tenant: "cgrates.org",
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaDispatchers: false,
 		},
 		ArgsGetCacheItem: utils.ArgsGetCacheItem{

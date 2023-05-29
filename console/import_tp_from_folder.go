@@ -46,7 +46,7 @@ func (self *ImportTpFromFolder) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *ImportTpFromFolder) RpcParams(reset bool) interface{} {
+func (self *ImportTpFromFolder) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &utils.AttrImportTPFromFolder{}
 	}
@@ -57,7 +57,7 @@ func (self *ImportTpFromFolder) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *ImportTpFromFolder) RpcResult() interface{} {
+func (self *ImportTpFromFolder) RpcResult() any {
 	var s string
 	return &s
 }

@@ -83,7 +83,7 @@ func testSessionSRplAddVoiceBalance(t *testing.T) {
 		Account:     "1005",
 		BalanceType: utils.MetaVoice,
 		Value:       5 * float64(time.Second), //value -> 20ms for future
-		Balance: map[string]interface{}{
+		Balance: map[string]any{
 			utils.ID:            "TestDynamicDebitBalance",
 			utils.RatingSubject: "*zero5ms",
 		},
@@ -178,7 +178,7 @@ func testSessionSRplInitiate(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionSRplInitiate",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.EventName:    "TEST_EVENT",
 				utils.Tenant:       "cgrates.org",
 				utils.OriginID:     "123451",
@@ -357,7 +357,7 @@ func testSessionSRplTerminate(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionSRplTerminate",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.EventName:    "TEST_EVENT",
 				utils.Tenant:       "cgrates.org",
 				utils.OriginID:     "123451",

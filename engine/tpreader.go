@@ -2220,7 +2220,7 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disableReverse bool) (err error
 	return tpr.dm.SetLoadIDs(loadIDs)
 }
 
-func (tpr *TpReader) ReloadCache(caching string, verbose bool, opts map[string]interface{}, tenant string) (err error) {
+func (tpr *TpReader) ReloadCache(caching string, verbose bool, opts map[string]any, tenant string) (err error) {
 	if tpr.isInternalDB {
 		return
 	}
@@ -2320,9 +2320,9 @@ func (tpr *TpReader) ReloadCache(caching string, verbose bool, opts map[string]i
 }
 
 // CallCache call the cache reload after data load
-func CallCache(connMgr *ConnManager, cacheConns []string, caching string, args map[string][]string, cacheIDs []string, opts map[string]interface{}, verbose bool, tenant string) (err error) {
+func CallCache(connMgr *ConnManager, cacheConns []string, caching string, args map[string][]string, cacheIDs []string, opts map[string]any, verbose bool, tenant string) (err error) {
 	var method, reply string
-	var cacheArgs interface{} = utils.NewAttrReloadCacheWithOptsFromMap(args, tenant, opts)
+	var cacheArgs any = utils.NewAttrReloadCacheWithOptsFromMap(args, tenant, opts)
 	switch caching {
 	case utils.MetaNone:
 		return

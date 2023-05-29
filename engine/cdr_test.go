@@ -593,7 +593,7 @@ func TestCDRAsMapStringIface(t *testing.T) {
 		Cost:        1.01,
 	}
 
-	mp := map[string]interface{}{
+	mp := map[string]any{
 		"field_extr1":      "val_extr1",
 		"fieldextr2":       "valextr2",
 		utils.CGRID:        cdr.CGRID,
@@ -656,7 +656,7 @@ func TestCDRTestCDRAsMapStringIface2(t *testing.T) {
 		CostDetails: NewEventCostFromCallCost(cc, "TestCDRTestCDRAsMapStringIface2", utils.MetaDefault),
 	}
 
-	mp := map[string]interface{}{
+	mp := map[string]any{
 		"field_extr1":      "val_extr1",
 		"fieldextr2":       "valextr2",
 		utils.CGRID:        cdr.CGRID,
@@ -817,7 +817,7 @@ func TestCDRAsCGREvent(t *testing.T) {
 	eCGREvent := utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "GenePreRated",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Account":     "1001",
 			"AnswerTime":  time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
 			"CGRID":       cdr.CGRID,

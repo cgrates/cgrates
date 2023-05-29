@@ -57,7 +57,7 @@ type APIerSv1 struct {
 
 // Call implements rpcclient.ClientConnector interface for internal RPC
 func (apierSv1 *APIerSv1) Call(serviceMethod string,
-	args interface{}, reply interface{}) error {
+	args any, reply any) error {
 	return utils.APIerRPCCall(apierSv1, serviceMethod, args, reply)
 }
 
@@ -333,7 +333,7 @@ func (apierSv1 *APIerSv1) LoadRatingProfile(attrs *utils.TPRatingProfile, reply 
 	if err := apierSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheRatingProfiles: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
-	if err = dbReader.ReloadCache(config.CgrConfig().GeneralCfg().DefaultCaching, true, make(map[string]interface{}), attrs.Tenant); err != nil {
+	if err = dbReader.ReloadCache(config.CgrConfig().GeneralCfg().DefaultCaching, true, make(map[string]any), attrs.Tenant); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	*reply = utils.OK
@@ -368,7 +368,7 @@ type AttrLoadTpFromStorDb struct {
 	TPid     string
 	DryRun   bool // Only simulate, no write
 	Validate bool // Run structural checks
-	APIOpts  map[string]interface{}
+	APIOpts  map[string]any
 	Caching  *string // Caching strategy
 }
 
@@ -1232,7 +1232,7 @@ type AttrRemoveRatingProfile struct {
 	Tenant   string
 	Category string
 	Subject  string
-	APIOpts  map[string]interface{}
+	APIOpts  map[string]any
 }
 
 func (arrp *AttrRemoveRatingProfile) GetId() (result string) {
@@ -1893,7 +1893,7 @@ func (apierSv1 *APIerSv1) ExportToFolder(arg *utils.ArgExportToFolder, reply *st
 	return nil
 }
 
-func (apierSv1 *APIerSv1) ExportCDRs(args *utils.ArgExportCDRs, reply *map[string]interface{}) (err error) {
+func (apierSv1 *APIerSv1) ExportCDRs(args *utils.ArgExportCDRs, reply *map[string]any) (err error) {
 	if len(apierSv1.Config.ApierCfg().EEsConns) == 0 {
 		return utils.NewErrNotConnected(utils.EEs)
 	}
@@ -1908,7 +1908,7 @@ func (apierSv1 *APIerSv1) ExportCDRs(args *utils.ArgExportCDRs, reply *map[strin
 		return utils.ErrNotFound
 	}
 	withErros := false
-	var rplyCdr map[string]map[string]interface{}
+	var rplyCdr map[string]map[string]any
 	for _, cdr := range cdrs {
 		argCdr := &engine.CGREventWithEeIDs{
 			EeIDs:    args.ExporterIDs,

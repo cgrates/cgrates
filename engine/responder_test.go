@@ -499,7 +499,7 @@ func TestResponderGetCost(t *testing.T) {
 			Account:     "acount",
 			Destination: "uk",
 		},
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 	reply := &CallCost{
 
@@ -555,7 +555,7 @@ func TestResponderGetCostSet(t *testing.T) {
 			Account:     "acount",
 			Destination: "uk",
 		},
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 	reply := &CallCost{
 
@@ -618,7 +618,7 @@ func TestResponderDebit(t *testing.T) {
 			TimeStart:   time.Date(2022, 12, 1, 12, 0, 0, 0, time.UTC),
 			TimeEnd:     time.Date(2022, 12, 1, 12, 0, 0, 0, time.UTC),
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			"tor": 30 * time.Minute,
 		},
 	}
@@ -648,11 +648,11 @@ func TestGetCostOnRatingPlansErr(t *testing.T) {
 		SetupTime:     time.Date(2021, 12, 24, 8, 0, 0, 0, time.UTC),
 		Usage:         10 * time.Minute,
 		RatingPlanIDs: []string{"rplan1", "rplan2", "rplan3"},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			"apiopts": "opt",
 		},
 	}
-	reply := &map[string]interface{}{}
+	reply := &map[string]any{}
 	rs := &Responder{
 		FilterS: &FilterS{
 			cfg: cfg,
@@ -711,7 +711,7 @@ func TestResponderDebitSet(t *testing.T) {
 			TimeStart:   time.Date(2022, 12, 1, 12, 0, 0, 0, time.UTC),
 			TimeEnd:     time.Date(2022, 12, 1, 12, 0, 0, 0, time.UTC),
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			"tor": 30 * time.Minute,
 		},
 	}
@@ -773,7 +773,7 @@ func TestResponderMaxDebit(t *testing.T) {
 			TimeStart:   time.Date(2022, 12, 1, 12, 0, 0, 0, time.UTC),
 			TimeEnd:     time.Date(2022, 12, 1, 12, 0, 0, 0, time.UTC),
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			"tor": 30 * time.Minute,
 		},
 	}
@@ -832,7 +832,7 @@ func TestResponderMaxDebitSet(t *testing.T) {
 			TimeStart:   time.Date(2022, 12, 1, 12, 0, 0, 0, time.UTC),
 			TimeEnd:     time.Date(2022, 12, 1, 12, 0, 0, 0, time.UTC),
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			"tor": 30 * time.Minute,
 		},
 	}
@@ -894,7 +894,7 @@ func TestResponderRefundIncrements(t *testing.T) {
 			TimeStart:   time.Date(2022, 12, 1, 12, 0, 0, 0, time.UTC),
 			TimeEnd:     time.Date(2022, 12, 1, 12, 0, 0, 0, time.UTC),
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			"tor": 30 * time.Minute,
 		},
 	}
@@ -956,7 +956,7 @@ func TestResponderRefundIncrementsSet(t *testing.T) {
 			TimeStart:   time.Date(2022, 12, 1, 12, 0, 0, 0, time.UTC),
 			TimeEnd:     time.Date(2022, 12, 1, 12, 0, 0, 0, time.UTC),
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			"tor": 30 * time.Minute,
 		},
 	}
@@ -1024,7 +1024,7 @@ func TestResponderRefundRounding(t *testing.T) {
 			TimeStart:   time.Date(2022, 12, 1, 12, 0, 0, 0, time.UTC),
 			TimeEnd:     time.Date(2022, 12, 1, 12, 0, 0, 0, time.UTC),
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			"tor": 30 * time.Minute,
 		},
 	}
@@ -1086,7 +1086,7 @@ func TestResponderRefundRoundingSet(t *testing.T) {
 			TimeStart:   time.Date(2022, 12, 1, 12, 0, 0, 0, time.UTC),
 			TimeEnd:     time.Date(2022, 12, 1, 12, 0, 0, 0, time.UTC),
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			"tor": 30 * time.Minute,
 		},
 	}
@@ -1142,10 +1142,10 @@ func TestGetMaxSessionTimeOnAccountsErr(t *testing.T) {
 		AccountIDs:  []string{"acc_id1", "acc_id2"},
 		Usage:       10 * time.Minute,
 		SetupTime:   time.Date(2022, 12, 1, 1, 0, 0, 0, time.UTC),
-		APIOpts:     map[string]interface{}{},
+		APIOpts:     map[string]any{},
 	}
 
-	reply := &map[string]interface{}{}
+	reply := &map[string]any{}
 	rs := &Responder{
 		FilterS: &FilterS{
 			cfg:     cfg,
@@ -1281,7 +1281,7 @@ func TestResponderShutDown(t *testing.T) {
 	rs.ShdChan = utils.NewSyncedChan()
 	arg := &utils.TenantWithAPIOpts{
 		Tenant: "cgrates.org",
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "thr12345",
 		},
 	}
@@ -1462,8 +1462,8 @@ func TestResponderGetCostOnRatingPlans(t *testing.T) {
 			},
 		},
 	})
-	var reply map[string]interface{}
-	exp := map[string]interface{}{
+	var reply map[string]any
+	exp := map[string]any{
 		utils.Cost:         0.92,
 		utils.RatingPlanID: "RP1",
 	}

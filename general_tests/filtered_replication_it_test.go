@@ -495,7 +495,7 @@ func testFltrRplThresholdProfile(t *testing.T) {
 	tEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "dan",
 		},
 	}
@@ -682,7 +682,7 @@ func testFltrRplStatQueueProfile(t *testing.T) {
 	sEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "dan",
 			utils.Usage:        45 * time.Second,
 		},
@@ -701,7 +701,7 @@ func testFltrRplStatQueueProfile(t *testing.T) {
 	sq.SQItems = []engine.SQItem{{
 		EventID: "event1",
 	}}
-	s.AddEvent("event1", utils.MapStorage{utils.MetaReq: map[string]interface{}{utils.Usage: 45 * time.Second}})
+	s.AddEvent("event1", utils.MapStorage{utils.MetaReq: map[string]any{utils.Usage: 45 * time.Second}})
 	replySq.SQItems[0].ExpiryTime = sq.SQItems[0].ExpiryTime
 	if !reflect.DeepEqual(sq, replySq) {
 		t.Errorf("Expecting : %s, received: %s", utils.ToJSON(sq), utils.ToJSON(replySq))
@@ -860,10 +860,10 @@ func testFltrRplResourceProfile(t *testing.T) {
 	rEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     utils.UUIDSha1Prefix(),
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "dan",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e61",
 			utils.OptsResourcesUnits:   6,
 		},

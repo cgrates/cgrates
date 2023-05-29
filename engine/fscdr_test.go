@@ -473,7 +473,7 @@ func TestFsCdrSearchExtraFieldInSlice(t *testing.T) {
 	newReader := bytes.NewReader(body)
 	if fsCdr, err := NewFSCdr(newReader, fsCdrCfg); err != nil {
 		t.Error(err)
-	} else if value := fsCdr.searchExtraField("floatfld1", map[string]interface{}{"floatfld1": 6.4}); value != "6.4" {
+	} else if value := fsCdr.searchExtraField("floatfld1", map[string]any{"floatfld1": 6.4}); value != "6.4" {
 		t.Errorf("Expecting: 6.4, received: %s", value)
 	}
 }
@@ -744,7 +744,7 @@ func TestNewFSCdrDecodeError(t *testing.T) {
 func TestSearchExtraFieldDefaultType(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 
-	newMap := map[string]interface{}{
+	newMap := map[string]any{
 		"variables": map[string]string{
 			"cgr_orderid": "123",
 		},
@@ -759,8 +759,8 @@ func TestSearchExtraFieldDefaultType(t *testing.T) {
 func TestSearchExtraFieldInterface(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 
-	newMap := map[string]interface{}{ //There is a slice with no maps
-		"variables": []interface{}{
+	newMap := map[string]any{
+		"variables": []any{
 			2,
 			"randomValue",
 			true,

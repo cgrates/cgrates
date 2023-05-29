@@ -235,14 +235,14 @@ func TestCMgetConnWithConfigEmptyTransport(t *testing.T) {
 }
 
 type BiRPCConnectorMock struct {
-	calls map[string]func(rpcclient.ClientConnector, string, interface{}, interface{}) error
+	calls map[string]func(rpcclient.ClientConnector, string, any, any) error
 }
 
-func (bRCM *BiRPCConnectorMock) Call(serviceMethod string, args interface{}, reply interface{}) (err error) {
+func (bRCM *BiRPCConnectorMock) Call(serviceMethod string, args any, reply any) (err error) {
 	return nil
 }
 
-func (bRCM *BiRPCConnectorMock) CallBiRPC(cc rpcclient.ClientConnector, method string, args interface{}, reply interface{}) error {
+func (bRCM *BiRPCConnectorMock) CallBiRPC(cc rpcclient.ClientConnector, method string, args any, reply any) error {
 	if call, has := bRCM.calls[method]; !has {
 		return rpcclient.ErrUnsupporteServiceMethod
 	} else {
@@ -250,7 +250,7 @@ func (bRCM *BiRPCConnectorMock) CallBiRPC(cc rpcclient.ClientConnector, method s
 	}
 }
 
-func (bRCM *BiRPCConnectorMock) Handlers() map[string]interface{} {
+func (bRCM *BiRPCConnectorMock) Handlers() map[string]any {
 	return nil
 }
 
@@ -268,8 +268,8 @@ func TestCMgetConnWithConfigCallBiRPCNilErr(t *testing.T) {
 
 	cc := make(chan rpcclient.ClientConnector, 1)
 	birpc := &BiRPCConnectorMock{
-		calls: map[string]func(rpcclient.ClientConnector, string, interface{}, interface{}) error{
-			utils.SessionSv1RegisterInternalBiJSONConn: func(cc rpcclient.ClientConnector, s string, i1, i2 interface{}) error {
+		calls: map[string]func(rpcclient.ClientConnector, string, any, any) error{
+			utils.SessionSv1RegisterInternalBiJSONConn: func(cc rpcclient.ClientConnector, s string, i1, i2 any) error {
 				return nil
 			},
 		},
@@ -317,8 +317,8 @@ func TestCMgetConnWithConfigCallBiRPCErr(t *testing.T) {
 
 	cc := make(chan rpcclient.ClientConnector, 1)
 	birpc := &BiRPCConnectorMock{
-		calls: map[string]func(rpcclient.ClientConnector, string, interface{}, interface{}) error{
-			"wrong method": func(cc rpcclient.ClientConnector, s string, i1, i2 interface{}) error {
+		calls: map[string]func(rpcclient.ClientConnector, string, any, any) error{
+			"wrong method": func(cc rpcclient.ClientConnector, s string, i1, i2 any) error {
 				return nil
 			},
 		},
@@ -540,8 +540,8 @@ func TestCMCallWithConnIDs2(t *testing.T) {
 	}
 
 	ccM := &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			"testMethod": func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			"testMethod": func(args, reply any) error {
 				return utils.ErrExists
 			},
 		},

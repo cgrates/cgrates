@@ -1681,7 +1681,7 @@ type SetActionTriggersArgWithAPIOpts struct {
 	Key     string
 	Attrs   ActionTriggers
 	Tenant  string
-	APIOpts map[string]interface{}
+	APIOpts map[string]any
 }
 
 func (dm *DataManager) SetActionTriggers(key string, attr ActionTriggers) (err error) {
@@ -1858,7 +1858,7 @@ type SetActionsArgsWithAPIOpts struct {
 	Key     string
 	Acs     Actions
 	Tenant  string
-	APIOpts map[string]interface{}
+	APIOpts map[string]any
 }
 
 func (dm *DataManager) SetActions(key string, as Actions) (err error) {
@@ -1959,7 +1959,7 @@ type SetActionPlanArgWithAPIOpts struct {
 	Key     string
 	Ats     *ActionPlan
 	Tenant  string
-	APIOpts map[string]interface{}
+	APIOpts map[string]any
 }
 
 func (dm *DataManager) SetActionPlan(key string, ats *ActionPlan,
@@ -2095,7 +2095,7 @@ type SetAccountActionPlansArgWithAPIOpts struct {
 	AcntID  string
 	AplIDs  []string
 	Tenant  string
-	APIOpts map[string]interface{}
+	APIOpts map[string]any
 }
 
 func (dm *DataManager) SetAccountActionPlans(acntID string, aPlIDs []string, overwrite bool) (err error) {
@@ -2138,7 +2138,7 @@ type RemAccountActionPlansArgsWithAPIOpts struct {
 	AcntID  string
 	ApIDs   []string
 	Tenant  string
-	APIOpts map[string]interface{}
+	APIOpts map[string]any
 }
 
 func (dm *DataManager) RemAccountActionPlans(acntID string, apIDs []string) (err error) {

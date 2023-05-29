@@ -72,7 +72,7 @@ func (pstr *KafkaEE) Connect() (_ error) {
 	return
 }
 
-func (pstr *KafkaEE) ExportEvent(content interface{}, key string) (err error) {
+func (pstr *KafkaEE) ExportEvent(content any, key string) (err error) {
 	pstr.reqs.get()
 	pstr.RLock()
 	if pstr.writer == nil {

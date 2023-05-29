@@ -81,7 +81,7 @@ func testDspSupPing(t *testing.T) {
 	}
 	if err := dispEngine.RPC.Call(utils.RouteSv1Ping, &utils.CGREvent{
 		Tenant: "cgrates.org",
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "sup12345",
 		},
 	}, &reply); err != nil {
@@ -101,7 +101,7 @@ func testDspSupPingFailover(t *testing.T) {
 	ev := utils.CGREvent{
 		Tenant: "cgrates.org",
 
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "sup12345",
 		},
 	}
@@ -133,7 +133,7 @@ func testDspSupGetSupFailover(t *testing.T) {
 			{
 				RouteID:         "route1",
 				RouteParameters: "",
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Weight: 10.0,
 				},
 			},
@@ -146,7 +146,7 @@ func testDspSupGetSupFailover(t *testing.T) {
 			{
 				RouteID:         "route1",
 				RouteParameters: "",
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Cost:         0.3166,
 					utils.RatingPlanID: "RP_1002_LOW",
 					utils.Weight:       10.0,
@@ -155,7 +155,7 @@ func testDspSupGetSupFailover(t *testing.T) {
 			{
 				RouteID:         "route2",
 				RouteParameters: "",
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Cost:         0.6334,
 					utils.RatingPlanID: "RP_1002",
 					utils.Weight:       20.0,
@@ -167,7 +167,7 @@ func testDspSupGetSupFailover(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     utils.UUIDSha1Prefix(),
 		Time:   &nowTime,
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.EventName:    "Event1",
 			utils.AccountField: "1002",
 			utils.Subject:      "1002",
@@ -176,7 +176,7 @@ func testDspSupGetSupFailover(t *testing.T) {
 			utils.Usage:        "1m20s",
 		},
 
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "sup12345",
 		},
 	}
@@ -201,7 +201,7 @@ func testDspSupTestAuthKey(t *testing.T) {
 	args := &utils.CGREvent{
 		ID:   utils.UUIDSha1Prefix(),
 		Time: &nowTime,
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1002",
 			utils.Subject:      "1002",
 			utils.Destination:  "1001",
@@ -209,7 +209,7 @@ func testDspSupTestAuthKey(t *testing.T) {
 			utils.Usage:        "1m20s",
 		},
 
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "12345",
 		},
 	}
@@ -228,7 +228,7 @@ func testDspSupTestAuthKey2(t *testing.T) {
 			{
 				RouteID:         "route1",
 				RouteParameters: "",
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Cost:         0.3166,
 					utils.RatingPlanID: "RP_1002_LOW",
 					utils.Weight:       10.0,
@@ -237,7 +237,7 @@ func testDspSupTestAuthKey2(t *testing.T) {
 			{
 				RouteID:         "route2",
 				RouteParameters: "",
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Cost:         0.6334,
 					utils.RatingPlanID: "RP_1002",
 					utils.Weight:       20.0,
@@ -249,7 +249,7 @@ func testDspSupTestAuthKey2(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     utils.UUIDSha1Prefix(),
 		Time:   &nowTime,
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1002",
 			utils.Subject:      "1002",
 			utils.Destination:  "1001",
@@ -257,7 +257,7 @@ func testDspSupTestAuthKey2(t *testing.T) {
 			utils.Usage:        "1m20s",
 		},
 
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "sup12345",
 		},
 	}
@@ -278,7 +278,7 @@ func testDspSupGetSupRoundRobin(t *testing.T) {
 			{
 				RouteID:         "route1",
 				RouteParameters: "",
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Weight: 10.0,
 				},
 			},
@@ -291,7 +291,7 @@ func testDspSupGetSupRoundRobin(t *testing.T) {
 			{
 				RouteID:         "route1",
 				RouteParameters: "",
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Cost:         0.3166,
 					utils.RatingPlanID: "RP_1002_LOW",
 					utils.Weight:       10.0,
@@ -300,7 +300,7 @@ func testDspSupGetSupRoundRobin(t *testing.T) {
 			{
 				RouteID:         "route2",
 				RouteParameters: "",
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Cost:         0.6334,
 					utils.RatingPlanID: "RP_1002",
 					utils.Weight:       20.0,
@@ -312,7 +312,7 @@ func testDspSupGetSupRoundRobin(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     utils.UUIDSha1Prefix(),
 		Time:   &nowTime,
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.EventName:    "RoundRobin",
 			utils.AccountField: "1002",
 			utils.Subject:      "1002",
@@ -321,7 +321,7 @@ func testDspSupGetSupRoundRobin(t *testing.T) {
 			utils.Usage:        "1m20s",
 		},
 
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "sup12345",
 		},
 	}
@@ -343,7 +343,7 @@ func testDspSupGetSupplierForEvent(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testV1SplSGetHighestCostSuppliers",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1002",
 			utils.Subject:      "1002",
 			utils.Destination:  "1001",
@@ -351,7 +351,7 @@ func testDspSupGetSupplierForEvent(t *testing.T) {
 			utils.Usage:        "1m20s",
 		},
 
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "sup12345",
 		},
 	}

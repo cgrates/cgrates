@@ -25,7 +25,7 @@ import (
 type RoutesOpts struct {
 	Context      string
 	IgnoreErrors bool
-	MaxCost      interface{}
+	MaxCost      any
 	Limit        *int
 	Offset       *int
 	ProfileCount *int
@@ -154,9 +154,9 @@ func (rts *RouteSCfg) loadFromJSONCfg(jsnCfg *RouteSJsonCfg) (err error) {
 	return nil
 }
 
-// AsMapInterface returns the config as a map[string]interface{}
-func (rts *RouteSCfg) AsMapInterface() (initialMP map[string]interface{}) {
-	opts := map[string]interface{}{
+// AsMapInterface returns the config as a map[string]any
+func (rts *RouteSCfg) AsMapInterface() (initialMP map[string]any) {
+	opts := map[string]any{
 		utils.OptsContext:         rts.Opts.Context,
 		utils.MetaIgnoreErrorsCfg: rts.Opts.IgnoreErrors,
 	}
@@ -172,7 +172,7 @@ func (rts *RouteSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 	if rts.Opts.ProfileCount != nil {
 		opts[utils.MetaProfileCountCfg] = rts.Opts.ProfileCount
 	}
-	initialMP = map[string]interface{}{
+	initialMP = map[string]any{
 		utils.EnabledCfg:        rts.Enabled,
 		utils.IndexedSelectsCfg: rts.IndexedSelects,
 		utils.DefaultRatioCfg:   rts.DefaultRatio,

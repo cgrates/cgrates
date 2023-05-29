@@ -44,10 +44,10 @@ func (self *CmdStatus) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdStatus) RpcParams(reset bool) interface{} {
+func (self *CmdStatus) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &utils.TenantWithAPIOpts{
-			APIOpts: make(map[string]interface{}),
+			APIOpts: make(map[string]any),
 		}
 	}
 	return self.rpcParams
@@ -57,8 +57,8 @@ func (self *CmdStatus) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdStatus) RpcResult() interface{} {
-	var s map[string]interface{}
+func (self *CmdStatus) RpcResult() any {
+	var s map[string]any
 	return &s
 }
 

@@ -50,7 +50,7 @@ func (self *CmdGetTriggers) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdGetTriggers) RpcParams(reset bool) interface{} {
+func (self *CmdGetTriggers) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &v1.AttrGetActionTriggers{}
 	}
@@ -61,12 +61,12 @@ func (self *CmdGetTriggers) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdGetTriggers) RpcResult() interface{} {
+func (self *CmdGetTriggers) RpcResult() any {
 	var atr engine.ActionTriggers
 	return &atr
 }
 
-func (self *CmdGetTriggers) GetFormatedResult(result interface{}) string {
+func (self *CmdGetTriggers) GetFormatedResult(result any) string {
 	return GetFormatedSliceResult(result, utils.StringSet{
 		utils.MinSleep: {},
 	})

@@ -122,7 +122,7 @@ func (s RPCClientSet) GetInternalChanel() chan rpcclient.ClientConnector {
 }
 
 // Call the implementation of the rpcclient.ClientConnector interface
-func (s RPCClientSet) Call(method string, args interface{}, reply interface{}) error {
+func (s RPCClientSet) Call(method string, args any, reply any) error {
 	methodSplit := strings.Split(method, ".")
 	if len(methodSplit) != 2 {
 		return rpcclient.ErrUnsupporteServiceMethod

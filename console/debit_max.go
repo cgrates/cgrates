@@ -50,11 +50,11 @@ func (self *CmdMaxDebit) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdMaxDebit) RpcParams(reset bool) interface{} {
+func (self *CmdMaxDebit) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &engine.CallDescriptorWithAPIOpts{
 			CallDescriptor: new(engine.CallDescriptor),
-			APIOpts:        make(map[string]interface{}),
+			APIOpts:        make(map[string]any),
 		}
 	}
 	return self.rpcParams
@@ -64,7 +64,7 @@ func (self *CmdMaxDebit) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdMaxDebit) RpcResult() interface{} {
+func (self *CmdMaxDebit) RpcResult() any {
 	return &engine.CallCost{}
 }
 

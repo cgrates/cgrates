@@ -125,7 +125,7 @@ func testElasticExportEvents(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "voiceEvent",
 			Time:   utils.TimePointer(time.Now()),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.CGRID:        utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()),
 				utils.ToR:          utils.MetaVoice,
 				utils.OriginID:     "dsafdsaf",
@@ -153,7 +153,7 @@ func testElasticExportEvents(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "dataEvent",
 			Time:   utils.TimePointer(time.Now()),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.CGRID:        utils.Sha1("abcdef", time.Unix(1383813745, 0).UTC().String()),
 				utils.ToR:          utils.MetaData,
 				utils.OriginID:     "abcdef",
@@ -181,7 +181,7 @@ func testElasticExportEvents(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "SMSEvent",
 			Time:   utils.TimePointer(time.Now()),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.CGRID:        utils.Sha1("sdfwer", time.Unix(1383813745, 0).UTC().String()),
 				utils.ToR:          utils.MetaSMS,
 				utils.OriginID:     "sdfwer",
@@ -209,7 +209,7 @@ func testElasticExportEvents(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "SMSEvent",
 			Time:   utils.TimePointer(time.Now()),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.CGRID:        utils.Sha1("sms2", time.Unix(1383813745, 0).UTC().String()),
 				utils.ToR:          utils.MetaSMS,
 				utils.Tenant:       "cgrates.org",
@@ -219,7 +219,7 @@ func testElasticExportEvents(t *testing.T) {
 				utils.Destination:  "1002",
 				utils.RunID:        utils.MetaDefault,
 			},
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				"ExporterUsed": "ElasticExporterWithNoFields",
 			},
 		},
@@ -244,11 +244,11 @@ func testElasticVerifyExports(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	var r map[string]interface{}
+	var r map[string]any
 	var buf bytes.Buffer
-	query := map[string]interface{}{
-		"query": map[string]interface{}{
-			"match": map[string]interface{}{
+	query := map[string]any{
+		"query": map[string]any{
+			"match": map[string]any{
 				utils.Tenant: "cgrates.org",
 			},
 		},
@@ -270,7 +270,7 @@ func testElasticVerifyExports(t *testing.T) {
 	defer res.Body.Close()
 
 	if res.IsError() {
-		var e map[string]interface{}
+		var e map[string]any
 		if err := json.NewDecoder(res.Body).Decode(&e); err != nil {
 			t.Error(err)
 		} else {
@@ -281,10 +281,10 @@ func testElasticVerifyExports(t *testing.T) {
 	if err := json.NewDecoder(res.Body).Decode(&r); err != nil {
 		t.Error(err)
 	}
-	for _, hit := range r["hits"].(map[string]interface{})["hits"].([]interface{}) {
-		switch hit.(map[string]interface{})["_id"] {
+	for _, hit := range r["hits"].(map[string]any)["hits"].([]any) {
+		switch hit.(map[string]any)["_id"] {
 		case "2478e9f18ebcd3c684f3c14596b8bfeab2b0d6d4:*default":
-			eMp := map[string]interface{}{
+			eMp := map[string]any{
 				utils.AccountField: "1001",
 				utils.AnswerTime:   "2013-11-07T08:42:26Z",
 				utils.CGRID:        "2478e9f18ebcd3c684f3c14596b8bfeab2b0d6d4",
@@ -300,11 +300,11 @@ func testElasticVerifyExports(t *testing.T) {
 				utils.ToR:          "*sms",
 				utils.Usage:        "1",
 			}
-			if !reflect.DeepEqual(eMp, hit.(map[string]interface{})["_source"]) {
-				t.Errorf("Expected %+v, received: %+v", eMp, hit.(map[string]interface{})["_source"])
+			if !reflect.DeepEqual(eMp, hit.(map[string]any)["_source"]) {
+				t.Errorf("Expected %+v, received: %+v", eMp, hit.(map[string]any)["_source"])
 			}
 		case "dbafe9c8614c785a65aabd116dd3959c3c56f7f6:*default":
-			eMp := map[string]interface{}{
+			eMp := map[string]any{
 				utils.AccountField: "1001",
 				utils.AnswerTime:   "2013-11-07T08:42:26Z",
 				utils.CGRID:        "dbafe9c8614c785a65aabd116dd3959c3c56f7f6",
@@ -320,11 +320,11 @@ func testElasticVerifyExports(t *testing.T) {
 				utils.ToR:          "*voice",
 				utils.Usage:        "10000000000",
 			}
-			if !reflect.DeepEqual(eMp, hit.(map[string]interface{})["_source"]) {
-				t.Errorf("Expected %+v, received: %+v", eMp, hit.(map[string]interface{})["_source"])
+			if !reflect.DeepEqual(eMp, hit.(map[string]any)["_source"]) {
+				t.Errorf("Expected %+v, received: %+v", eMp, hit.(map[string]any)["_source"])
 			}
 		case utils.Sha1("sms2", time.Unix(1383813745, 0).UTC().String()) + ":*default":
-			eMp := map[string]interface{}{
+			eMp := map[string]any{
 				utils.CGRID:        utils.Sha1("sms2", time.Unix(1383813745, 0).UTC().String()),
 				utils.ToR:          utils.MetaSMS,
 				utils.Tenant:       "cgrates.org",
@@ -334,8 +334,8 @@ func testElasticVerifyExports(t *testing.T) {
 				utils.Destination:  "1002",
 				utils.RunID:        utils.MetaDefault,
 			}
-			if !reflect.DeepEqual(eMp, hit.(map[string]interface{})["_source"]) {
-				t.Errorf("Expected %+v, received: %+v", eMp, hit.(map[string]interface{})["_source"])
+			if !reflect.DeepEqual(eMp, hit.(map[string]any)["_source"]) {
+				t.Errorf("Expected %+v, received: %+v", eMp, hit.(map[string]any)["_source"])
 			}
 		}
 	}

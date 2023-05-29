@@ -180,6 +180,6 @@ func (schdSv1 *SchedulerSv1) Ping(ign *utils.CGREvent, reply *string) error {
 
 // Call implements rpcclient.ClientConnector interface for internal RPC
 func (schdSv1 *SchedulerSv1) Call(serviceMethod string,
-	args interface{}, reply interface{}) error {
+	args any, reply any) error {
 	return utils.APIerRPCCall(schdSv1, serviceMethod, args, reply)
 }

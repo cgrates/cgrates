@@ -47,7 +47,7 @@ func (self *CmdGetDispatcherProfileIDs) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdGetDispatcherProfileIDs) RpcParams(reset bool) interface{} {
+func (self *CmdGetDispatcherProfileIDs) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = new(utils.PaginatorWithTenant)
 	}
@@ -58,7 +58,7 @@ func (self *CmdGetDispatcherProfileIDs) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdGetDispatcherProfileIDs) RpcResult() interface{} {
+func (self *CmdGetDispatcherProfileIDs) RpcResult() any {
 	var s []string
 	return &s
 }

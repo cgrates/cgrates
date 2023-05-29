@@ -185,20 +185,20 @@ func TestChargerMatchingChargerProfilesForEvent(t *testing.T) {
 		{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"Charger":        "ChargerProfile1",
 				utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 				"UsageInterval":  "1s",
 				utils.Weight:     "200.0",
 			},
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.MetaSubsys: utils.MetaChargers,
 			},
 		},
 		{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"Charger":        "ChargerProfile2",
 				utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 			},
@@ -206,7 +206,7 @@ func TestChargerMatchingChargerProfilesForEvent(t *testing.T) {
 		{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"Charger":        "DistinctMatch",
 				utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 			},
@@ -352,20 +352,20 @@ func TestChargerProcessEvent(t *testing.T) {
 		{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"Charger":        "ChargerProfile1",
 				utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 				"UsageInterval":  "1s",
 				utils.Weight:     "200.0",
 			},
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.MetaSubsys: utils.MetaChargers,
 			},
 		},
 		{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"Charger":        "ChargerProfile2",
 				utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 			},
@@ -373,7 +373,7 @@ func TestChargerProcessEvent(t *testing.T) {
 		{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"Charger":        "DistinctMatch",
 				utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 			},
@@ -514,13 +514,13 @@ func TestChargersmatchingChargerProfilesForEventChargerProfileNotFound(t *testin
 	cgrEv := &utils.CGREvent{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "cgrEvID",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Charger":        "ChargerProfile1",
 			utils.AnswerTime: time.Date(2021, 4, 1, 10, 0, 0, 0, time.UTC),
 			"UsageInterval":  "1s",
 			utils.Weight:     "10.0",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaSubsys: utils.MetaChargers,
 		},
 	}
@@ -560,13 +560,13 @@ func TestChargersmatchingChargerProfilesForEventDoesNotPass(t *testing.T) {
 	cgrEv := &utils.CGREvent{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "cgrEvID",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Charger":        "ChargerProfile1",
 			utils.AnswerTime: time.Date(2021, 4, 1, 10, 0, 0, 0, time.UTC),
 			"UsageInterval":  "1s",
 			utils.Weight:     "10.0",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaSubsys: utils.MetaChargers,
 		},
 	}
@@ -610,13 +610,13 @@ func TestChargersmatchingChargerProfilesForEventErrGetChPrf(t *testing.T) {
 	cgrEv := &utils.CGREvent{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "cgrEvID",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Charger":        "ChargerProfile1",
 			utils.AnswerTime: time.Date(2021, 4, 1, 10, 0, 0, 0, time.UTC),
 			"UsageInterval":  "1s",
 			utils.Weight:     "10.0",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaSubsys: utils.MetaChargers,
 		},
 	}
@@ -641,7 +641,7 @@ func TestChargersprocessEvent(t *testing.T) {
 	}
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAttributesProcessRuns: 2,
 		},
 	}

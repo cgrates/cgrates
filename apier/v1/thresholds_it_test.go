@@ -45,34 +45,34 @@ var (
 		{ // hitting THD_ACNT_BALANCE_1
 			Tenant: "cgrates.org",
 			ID:     "event1",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.EventType:     utils.AccountUpdate,
 				utils.AccountField:  "1002",
 				utils.AllowNegative: true,
 				utils.Disabled:      false,
 				utils.Units:         12.3},
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.MetaEventType: utils.AccountUpdate,
 			},
 		},
 		{ // hitting THD_ACNT_BALANCE_1
 			Tenant: "cgrates.org",
 			ID:     "event2",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.EventType:    utils.BalanceUpdate,
 				utils.AccountField: "1002",
 				utils.BalanceID:    utils.MetaDefault,
 				utils.Units:        12.3,
 				utils.ExpiryTime:   time.Date(2009, 11, 10, 23, 00, 0, 0, time.UTC),
 			},
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.MetaEventType: utils.BalanceUpdate,
 			},
 		},
 		{ // hitting THD_STATS_1
 			Tenant: "cgrates.org",
 			ID:     "event3",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.EventType:    utils.StatUpdate,
 				utils.StatID:       "Stats1",
 				utils.AccountField: "1002",
@@ -83,14 +83,14 @@ var (
 				"ACC":              0.75,
 				"PDD":              "2s",
 			},
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.MetaEventType: utils.StatUpdate,
 			},
 		},
 		{ // hitting THD_STATS_1 and THD_STATS_2
 			Tenant: "cgrates.org",
 			ID:     "event4",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.EventType:    utils.StatUpdate,
 				utils.StatID:       "STATS_HOURLY_DE",
 				utils.AccountField: "1002",
@@ -98,67 +98,67 @@ var (
 				"ACD":              "2m45s",
 				"TCD":              "1h",
 			},
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.MetaEventType: utils.StatUpdate,
 			},
 		},
 		{ // hitting THD_STATS_3
 			Tenant: "cgrates.org",
 			ID:     "event5",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.EventType:    utils.StatUpdate,
 				utils.StatID:       "STATS_DAILY_DE",
 				utils.AccountField: "1002",
 				"ACD":              "2m45s",
 				"TCD":              "3h1s",
 			},
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.MetaEventType: utils.StatUpdate,
 			},
 		},
 		{ // hitting THD_RES_1
 			Tenant: "cgrates.org",
 			ID:     "event6",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.EventType:    utils.ResourceUpdate,
 				utils.AccountField: "1002",
 				utils.ResourceID:   "RES_GRP_1",
 				utils.Usage:        10.0,
 			},
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.MetaEventType: utils.ResourceUpdate,
 			},
 		},
 		{ // hitting THD_RES_1
 			Tenant: "cgrates.org",
 			ID:     "event6",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.EventType:    utils.ResourceUpdate,
 				utils.AccountField: "1002",
 				utils.ResourceID:   "RES_GRP_1",
 				utils.Usage:        10.0,
 			},
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.MetaEventType: utils.ResourceUpdate,
 			},
 		},
 		{ // hitting THD_RES_1
 			Tenant: "cgrates.org",
 			ID:     "event6",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.EventType:    utils.ResourceUpdate,
 				utils.AccountField: "1002",
 				utils.ResourceID:   "RES_GRP_1",
 				utils.Usage:        10.0,
 			},
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.MetaEventType: utils.ResourceUpdate,
 			},
 		},
 		{ // hitting THD_CDRS_1
 			Tenant: "cgrates.org",
 			ID:     "cdrev1",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"field_extr1":      "val_extr1",
 				"fieldextr2":       "valextr2",
 				utils.CGRID:        utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()),
@@ -181,7 +181,7 @@ var (
 				utils.Route:        "SUPPL1",
 				utils.Cost:         -1.0,
 			},
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.MetaEventType: utils.CDR,
 			},
 		},
@@ -602,7 +602,7 @@ func testV1TSMaxHits(t *testing.T) {
 	thEvent := &utils.CGREvent{ // hitting TH3
 		Tenant: "cgrates.org",
 		ID:     "event1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1002",
 		},
 	}
@@ -707,10 +707,10 @@ func testV1TSUpdateSnooze(t *testing.T) {
 	thEvent := &utils.CGREvent{ // hitting TH4
 		Tenant: "cgrates.org",
 		ID:     "event1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"CustomEv": "SnoozeEv",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsThresholdsProfileIDs: []string{"TH4"},
 		},
 	}
@@ -839,10 +839,10 @@ func testV1TSProcessEventWithoutTenant(t *testing.T) {
 	eIDs := []string{"TH4"}
 	thEvent := &utils.CGREvent{ // hitting TH4
 		ID: "event1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"CustomEv": "SnoozeEv",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsThresholdsProfileIDs: []string{"TH4"},
 		},
 	}
@@ -909,7 +909,7 @@ func testV1TSProcessAccountUpdateEvent(t *testing.T) {
 		Account:     "testV1TSProcessAccountUpdateEvent",
 		BalanceType: "*monetary",
 		Value:       1.5,
-		Balance: map[string]interface{}{
+		Balance: map[string]any{
 			utils.ID: "HolidayBalance",
 		},
 	}
@@ -932,7 +932,7 @@ func testV1TSProcessAccountUpdateEvent(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "SIMULATE_ACNT_UPDATE_EV",
 		Event:  acnt.AsAccountSummary().AsMapInterface(),
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaEventType: utils.AccountUpdate,
 		},
 	}
@@ -1015,10 +1015,10 @@ func testThresholdSCacheProcessEventNotFound(t *testing.T) {
 	thEvent := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "THRESHOLD_CACHE",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"CustomEv": "SnoozeEv",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsThresholdsProfileIDs: []string{"THRESHOLD_CACHE"},
 		},
 	}
@@ -1032,10 +1032,10 @@ func testThresholdSCacheProcessEventFound(t *testing.T) {
 	thEvent := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "THRESHOLD_CACHE",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"CustomEv": "SnoozeEv",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsThresholdsProfileIDs: []string{"THRESHOLD_CACHE"},
 		},
 	}
@@ -1051,7 +1051,7 @@ func testThresholdSCacheSet(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "THRESHOLD_CACHE",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.CacheOpt: utils.MetaNone,
 		},
 	}

@@ -36,7 +36,7 @@ type RatingPlan struct {
 type RatingPlanWithAPIOpts struct {
 	*RatingPlan
 	Tenant  string
-	APIOpts map[string]interface{}
+	APIOpts map[string]any
 }
 
 type RPRate struct {

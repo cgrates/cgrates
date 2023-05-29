@@ -70,7 +70,7 @@ func NewStatMetric(metricID string, minItems int, filterIDs []string) (sm StatMe
 
 // StatMetric is the interface which a metric should implement
 type StatMetric interface {
-	GetValue(roundingDecimal int) interface{}
+	GetValue(roundingDecimal int) any
 	GetStringValue(roundingDecimal int) (val string)
 	GetFloat64Value(roundingDecimal int) (val float64)
 	AddEvent(evID string, ev utils.DataProvider) error
@@ -112,7 +112,7 @@ func (asr *StatASR) getValue(roundingDecimal int) float64 {
 }
 
 // GetValue returns the ASR value as part of StatMetric interface
-func (asr *StatASR) GetValue(roundingDecimal int) (v interface{}) {
+func (asr *StatASR) GetValue(roundingDecimal int) (v any) {
 	return asr.getValue(roundingDecimal)
 }
 
@@ -264,7 +264,7 @@ func (acd *StatACD) GetStringValue(roundingDecimal int) (valStr string) {
 	return
 }
 
-func (acd *StatACD) GetValue(roundingDecimal int) (v interface{}) {
+func (acd *StatACD) GetValue(roundingDecimal int) (v any) {
 	return acd.getValue(roundingDecimal)
 }
 
@@ -279,7 +279,7 @@ func (acd *StatACD) GetFloat64Value(roundingDecimal int) (v float64) {
 
 func (acd *StatACD) AddEvent(evID string, ev utils.DataProvider) (err error) {
 	var dur time.Duration
-	var val interface{}
+	var val any
 	if val, err = ev.FieldAsInterface([]string{utils.MetaReq, utils.Usage}); err != nil {
 		if err == utils.ErrNotFound {
 			err = utils.ErrPrefix(err, utils.Usage)
@@ -401,7 +401,7 @@ func (tcd *StatTCD) GetStringValue(roundingDecimal int) (valStr string) {
 	return
 }
 
-func (tcd *StatTCD) GetValue(roundingDecimal int) (v interface{}) {
+func (tcd *StatTCD) GetValue(roundingDecimal int) (v any) {
 	return tcd.getValue(roundingDecimal)
 }
 
@@ -416,7 +416,7 @@ func (tcd *StatTCD) GetFloat64Value(roundingDecimal int) (v float64) {
 
 func (tcd *StatTCD) AddEvent(evID string, ev utils.DataProvider) (err error) {
 	var dur time.Duration
-	var val interface{}
+	var val any
 	if val, err = ev.FieldAsInterface([]string{utils.MetaReq, utils.Usage}); err != nil {
 		if err == utils.ErrNotFound {
 			err = utils.ErrPrefix(err, utils.Usage)
@@ -538,7 +538,7 @@ func (acc *StatACC) GetStringValue(roundingDecimal int) (valStr string) {
 
 }
 
-func (acc *StatACC) GetValue(roundingDecimal int) (v interface{}) {
+func (acc *StatACC) GetValue(roundingDecimal int) (v any) {
 	return acc.getValue(roundingDecimal)
 }
 
@@ -548,7 +548,7 @@ func (acc *StatACC) GetFloat64Value(roundingDecimal int) (v float64) {
 
 func (acc *StatACC) AddEvent(evID string, ev utils.DataProvider) (err error) {
 	var cost float64
-	var val interface{}
+	var val any
 	if val, err = ev.FieldAsInterface([]string{utils.MetaReq, utils.Cost}); err != nil {
 		if err == utils.ErrNotFound {
 			err = utils.ErrPrefix(err, utils.Cost)
@@ -670,7 +670,7 @@ func (tcc *StatTCC) GetStringValue(roundingDecimal int) (valStr string) {
 	return
 }
 
-func (tcc *StatTCC) GetValue(roundingDecimal int) (v interface{}) {
+func (tcc *StatTCC) GetValue(roundingDecimal int) (v any) {
 	return tcc.getValue(roundingDecimal)
 }
 
@@ -680,7 +680,7 @@ func (tcc *StatTCC) GetFloat64Value(roundingDecimal int) (v float64) {
 
 func (tcc *StatTCC) AddEvent(evID string, ev utils.DataProvider) (err error) {
 	var cost float64
-	var val interface{}
+	var val any
 	if val, err = ev.FieldAsInterface([]string{utils.MetaReq, utils.Cost}); err != nil {
 		if err == utils.ErrNotFound {
 			err = utils.ErrPrefix(err, utils.Cost)
@@ -804,7 +804,7 @@ func (pdd *StatPDD) GetStringValue(roundingDecimal int) (valStr string) {
 	return
 }
 
-func (pdd *StatPDD) GetValue(roundingDecimal int) (v interface{}) {
+func (pdd *StatPDD) GetValue(roundingDecimal int) (v any) {
 	return pdd.getValue(roundingDecimal)
 }
 
@@ -819,7 +819,7 @@ func (pdd *StatPDD) GetFloat64Value(roundingDecimal int) (v float64) {
 
 func (pdd *StatPDD) AddEvent(evID string, ev utils.DataProvider) (err error) {
 	var dur time.Duration
-	var val interface{}
+	var val any
 	if val, err = ev.FieldAsInterface([]string{utils.MetaReq, utils.PDD}); err != nil {
 		if err == utils.ErrNotFound {
 			err = utils.ErrPrefix(err, utils.PDD)
@@ -933,7 +933,7 @@ func (ddc *StatDDC) GetStringValue(roundingDecimal int) (valStr string) {
 	return
 }
 
-func (ddc *StatDDC) GetValue(roundingDecimal int) (v interface{}) {
+func (ddc *StatDDC) GetValue(roundingDecimal int) (v any) {
 	return ddc.getValue(roundingDecimal)
 }
 
@@ -1083,7 +1083,7 @@ func (sum *StatSum) GetStringValue(roundingDecimal int) (valStr string) {
 	return
 }
 
-func (sum *StatSum) GetValue(roundingDecimal int) (v interface{}) {
+func (sum *StatSum) GetValue(roundingDecimal int) (v any) {
 	return sum.getValue(roundingDecimal)
 }
 
@@ -1093,7 +1093,7 @@ func (sum *StatSum) GetFloat64Value(roundingDecimal int) (v float64) {
 
 func (sum *StatSum) AddEvent(evID string, ev utils.DataProvider) (err error) {
 	var val float64
-	var ival interface{}
+	var ival any
 	if ival, err = utils.DPDynamicInterface(sum.FieldName, ev); err != nil {
 		if err == utils.ErrNotFound {
 			err = utils.ErrPrefix(err, sum.FieldName)
@@ -1217,7 +1217,7 @@ func (avg *StatAverage) GetStringValue(roundingDecimal int) (valStr string) {
 
 }
 
-func (avg *StatAverage) GetValue(roundingDecimal int) (v interface{}) {
+func (avg *StatAverage) GetValue(roundingDecimal int) (v any) {
 	return avg.getValue(roundingDecimal)
 }
 
@@ -1227,7 +1227,7 @@ func (avg *StatAverage) GetFloat64Value(roundingDecimal int) (v float64) {
 
 func (avg *StatAverage) AddEvent(evID string, ev utils.DataProvider) (err error) {
 	var val float64
-	var ival interface{}
+	var ival any
 	if ival, err = utils.DPDynamicInterface(avg.FieldName, ev); err != nil {
 		if err == utils.ErrNotFound {
 			err = utils.ErrPrefix(err, avg.FieldName)
@@ -1343,7 +1343,7 @@ func (dst *StatDistinct) GetStringValue(roundingDecimal int) (valStr string) {
 	return
 }
 
-func (dst *StatDistinct) GetValue(roundingDecimal int) (v interface{}) {
+func (dst *StatDistinct) GetValue(roundingDecimal int) (v any) {
 	return dst.getValue(roundingDecimal)
 }
 

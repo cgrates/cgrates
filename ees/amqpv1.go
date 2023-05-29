@@ -84,7 +84,7 @@ func (pstr *AMQPv1EE) Connect() (err error) {
 	return
 }
 
-func (pstr *AMQPv1EE) ExportEvent(content interface{}, _ string) (err error) {
+func (pstr *AMQPv1EE) ExportEvent(content any, _ string) (err error) {
 	pstr.reqs.get()
 	pstr.RLock()
 	defer func() {

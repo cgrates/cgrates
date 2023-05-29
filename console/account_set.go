@@ -48,7 +48,7 @@ func (self *CmdAddAccount) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdAddAccount) RpcParams(reset bool) interface{} {
+func (self *CmdAddAccount) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &v2.AttrSetAccount{}
 	}
@@ -59,7 +59,7 @@ func (self *CmdAddAccount) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdAddAccount) RpcResult() interface{} {
+func (self *CmdAddAccount) RpcResult() any {
 	var s string
 	return &s
 }

@@ -89,7 +89,7 @@ func TestResourceSConfigAsMapInterface(t *testing.T) {
 	cfgJSONStr := `{
 	"resources": {},	
 }`
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		utils.EnabledCfg:             false,
 		utils.StoreIntervalCfg:       utils.EmptyString,
 		utils.ThresholdSConnsCfg:     []string{},
@@ -97,7 +97,7 @@ func TestResourceSConfigAsMapInterface(t *testing.T) {
 		utils.PrefixIndexedFieldsCfg: []string{},
 		utils.SuffixIndexedFieldsCfg: []string{},
 		utils.NestedFieldsCfg:        false,
-		utils.OptsCfg: map[string]interface{}{
+		utils.OptsCfg: map[string]any{
 			utils.MetaUnitsCfg:   1.,
 			utils.MetaUsageIDCfg: "",
 		},
@@ -126,7 +126,7 @@ func TestResourceSConfigAsMapInterface1(t *testing.T) {
 			}		
 		},	
 	}`
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		utils.EnabledCfg:             true,
 		utils.StoreIntervalCfg:       "7m0s",
 		utils.ThresholdSConnsCfg:     []string{utils.MetaInternal, "*conn1"},
@@ -135,7 +135,7 @@ func TestResourceSConfigAsMapInterface1(t *testing.T) {
 		utils.PrefixIndexedFieldsCfg: []string{"*req.prefix_indexed_fields1", "*req.prefix_indexed_fields2"},
 		utils.SuffixIndexedFieldsCfg: []string{"*req.prefix_indexed_fields1"},
 		utils.NestedFieldsCfg:        true,
-		utils.OptsCfg: map[string]interface{}{
+		utils.OptsCfg: map[string]any{
 			utils.MetaUnitsCfg:    1.,
 			utils.MetaUsageIDCfg:  "",
 			utils.MetaUsageTTLCfg: 1 * time.Nanosecond,

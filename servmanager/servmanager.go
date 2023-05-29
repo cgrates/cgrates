@@ -55,7 +55,7 @@ type ServiceManager struct {
 }
 
 // Call .
-func (srvMngr *ServiceManager) Call(serviceMethod string, args interface{}, reply interface{}) error {
+func (srvMngr *ServiceManager) Call(serviceMethod string, args any, reply any) error {
 	parts := strings.Split(serviceMethod, ".")
 	if len(parts) != 2 {
 		return rpcclient.ErrUnsupporteServiceMethod

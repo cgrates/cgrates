@@ -127,10 +127,10 @@ func testDsphLoadData(t *testing.T) {
 }
 
 func testDsphGetNodeID() (id string, err error) {
-	var status map[string]interface{}
+	var status map[string]any
 	if err = dspRPC.Call(utils.DispatcherSv1RemoteStatus, utils.TenantWithAPIOpts{
 		Tenant:  "cgrates.org",
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}, &status); err != nil {
 		return
 	}

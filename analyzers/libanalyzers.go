@@ -33,9 +33,9 @@ import (
 
 // NewInfoRPC returns a structure to be indexed
 func NewInfoRPC(id uint64, method string,
-	params, result, err interface{},
+	params, result, err any,
 	enc, from, to string, sTime, eTime time.Time) *InfoRPC {
-	var e interface{}
+	var e any
 	switch val := err.(type) {
 	default:
 	case nil:
@@ -73,16 +73,16 @@ type InfoRPC struct {
 
 	RequestID     uint64
 	RequestMethod string
-	RequestParams interface{}
-	Reply         interface{}
-	ReplyError    interface{}
+	RequestParams any
+	Reply         any
+	ReplyError    any
 }
 
 type rpcAPI struct {
-	ID     uint64      `json:"id"`
-	Method string      `json:"method"`
-	Params interface{} `json:"params"`
-	Error  string      `json:"err,omitempty"`
+	ID     uint64 `json:"id"`
+	Method string `json:"method"`
+	Params any    `json:"params"`
+	Error  string `json:"err,omitempty"`
 
 	StartTime time.Time
 }
@@ -101,9 +101,9 @@ func getIndex(indx string) (indxType, storeType string) {
 	return
 }
 
-// unmarshalJSON will transform the message in a map[string]interface{} of []interface{}
+// unmarshalJSON will transform the message in a map[string]any of []any
 // depending of the first character
-func unmarshalJSON(jsn json.RawMessage) (interface{}, error) {
+func unmarshalJSON(jsn json.RawMessage) (any, error) {
 	switch {
 	case string(jsn) == "null" ||
 		len(jsn) == 0: // nil or empty response
@@ -118,11 +118,11 @@ func unmarshalJSON(jsn json.RawMessage) (interface{}, error) {
 	case jsn[0] >= '0' && jsn[0] <= '9': // float64
 		return strconv.ParseFloat(string(jsn), 64)
 	case jsn[0] == '[': // slice
-		var val []interface{}
+		var val []any
 		err := json.Unmarshal(jsn, &val)
 		return val, err
 	case jsn[0] == '{': // map
-		var val map[string]interface{}
+		var val map[string]any
 		err := json.Unmarshal(jsn, &val)
 		return val, err
 	default:
@@ -131,7 +131,7 @@ func unmarshalJSON(jsn json.RawMessage) (interface{}, error) {
 }
 
 // getDPFromSearchresult will unmarshal the request and reply and populate a DataProvider
-// if the req is a map[string]interface{} we will try to put in *opts prefix the Opts field from req
+// if the req is a map[string]any we will try to put in *opts prefix the Opts field from req
 func getDPFromSearchresult(req, rep json.RawMessage, hdr utils.MapStorage) (utils.MapStorage, error) {
 	repDP, err := unmarshalJSON(rep)
 	if err != nil {
@@ -141,8 +141,8 @@ func getDPFromSearchresult(req, rep json.RawMessage, hdr utils.MapStorage) (util
 	if err != nil {
 		return nil, err
 	}
-	var opts interface{}
-	if reqMp, canCast := reqDP.(map[string]interface{}); canCast {
+	var opts any
+	if reqMp, canCast := reqDP.(map[string]any); canCast {
 		opts = reqMp[utils.Opts]
 	}
 	return utils.MapStorage{

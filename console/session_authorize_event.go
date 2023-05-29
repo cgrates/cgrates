@@ -50,7 +50,7 @@ func (self *CmdSessionsAuthorize) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdSessionsAuthorize) RpcParams(reset bool) interface{} {
+func (self *CmdSessionsAuthorize) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &sessions.V1AuthorizeArgs{
 			CGREvent: new(utils.CGREvent),
@@ -67,7 +67,7 @@ func (self *CmdSessionsAuthorize) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdSessionsAuthorize) RpcResult() interface{} {
+func (self *CmdSessionsAuthorize) RpcResult() any {
 	var atr sessions.V1AuthorizeReplyWithDigest
 	return &atr
 }

@@ -39,7 +39,7 @@ type DataConverters []DataConverter
 
 // ConvertString converts from and to string
 func (dcs DataConverters) ConvertString(in string) (out string, err error) {
-	outIface := interface{}(in)
+	outIface := any(in)
 	for _, cnv := range dcs {
 		if outIface, err = cnv.Convert(outIface); err != nil {
 			return
@@ -50,7 +50,7 @@ func (dcs DataConverters) ConvertString(in string) (out string, err error) {
 
 // DataConverter represents functions which should convert input into output
 type DataConverter interface {
-	Convert(interface{}) (interface{}, error)
+	Convert(any) (any, error)
 }
 
 // NewDataConverter is a factory of converters
@@ -137,8 +137,8 @@ func NewDurationSecondsConverter(params string) (hdlr DataConverter, err error) 
 // DurationSecondsConverter converts duration into seconds encapsulated in float64
 type DurationSecondsConverter struct{}
 
-func (mS *DurationSecondsConverter) Convert(in interface{}) (
-	out interface{}, err error) {
+func (mS *DurationSecondsConverter) Convert(in any) (
+	out any, err error) {
 	var inDur time.Duration
 	if inDur, err = IfaceAsDuration(in); err != nil {
 		return nil, err
@@ -155,8 +155,8 @@ func NewDurationNanosecondsConverter(params string) (
 // DurationNanosecondsConverter converts duration into nanoseconds encapsulated in int64
 type DurationNanosecondsConverter struct{}
 
-func (mS *DurationNanosecondsConverter) Convert(in interface{}) (
-	out interface{}, err error) {
+func (mS *DurationNanosecondsConverter) Convert(in any) (
+	out any, err error) {
 	var inDur time.Duration
 	if inDur, err = IfaceAsDuration(in); err != nil {
 		return nil, err
@@ -199,7 +199,7 @@ type RoundConverter struct {
 	Method   string
 }
 
-func (rnd *RoundConverter) Convert(in interface{}) (out interface{}, err error) {
+func (rnd *RoundConverter) Convert(in any) (out any, err error) {
 	var inFloat float64
 	if inFloat, err = IfaceAsFloat64(in); err != nil {
 		return
@@ -225,7 +225,7 @@ type MultiplyConverter struct {
 	Value float64
 }
 
-func (m *MultiplyConverter) Convert(in interface{}) (out interface{}, err error) {
+func (m *MultiplyConverter) Convert(in any) (out any, err error) {
 	var inFloat64 float64
 	if inFloat64, err = IfaceAsFloat64(in); err != nil {
 		return nil, err
@@ -251,7 +251,7 @@ type DivideConverter struct {
 	Value float64
 }
 
-func (m *DivideConverter) Convert(in interface{}) (out interface{}, err error) {
+func (m *DivideConverter) Convert(in any) (out any, err error) {
 	var inFloat64 float64
 	if inFloat64, err = IfaceAsFloat64(in); err != nil {
 		return nil, err
@@ -267,8 +267,8 @@ func NewDurationConverter(params string) (hdlr DataConverter, err error) {
 // DurationConverter converts duration into seconds encapsulated in float64
 type DurationConverter struct{}
 
-func (mS *DurationConverter) Convert(in interface{}) (
-	out interface{}, err error) {
+func (mS *DurationConverter) Convert(in any) (
+	out any, err error) {
 	return IfaceAsDuration(in)
 }
 
@@ -307,7 +307,7 @@ type PhoneNumberConverter struct {
 	Format      phonenumbers.PhoneNumberFormat
 }
 
-func (lc *PhoneNumberConverter) Convert(in interface{}) (out interface{}, err error) {
+func (lc *PhoneNumberConverter) Convert(in any) (out any, err error) {
 	num, err := phonenumbers.Parse(IfaceAsString(in), lc.CountryCode)
 	if err != nil {
 		return nil, err
@@ -319,7 +319,7 @@ func (lc *PhoneNumberConverter) Convert(in interface{}) (out interface{}, err er
 type IP2HexConverter struct{}
 
 // Convert implements DataConverter interface
-func (*IP2HexConverter) Convert(in interface{}) (out interface{}, err error) {
+func (*IP2HexConverter) Convert(in any) (out any, err error) {
 	var ip net.IP
 	switch val := in.(type) {
 	case string:
@@ -342,7 +342,7 @@ func (*IP2HexConverter) Convert(in interface{}) (out interface{}, err error) {
 type SIPURIHostConverter struct{}
 
 // Convert implements DataConverter interface
-func (*SIPURIHostConverter) Convert(in interface{}) (out interface{}, err error) {
+func (*SIPURIHostConverter) Convert(in any) (out any, err error) {
 	return sipingo.HostFrom(IfaceAsString(in)), nil
 }
 
@@ -350,7 +350,7 @@ func (*SIPURIHostConverter) Convert(in interface{}) (out interface{}, err error)
 type SIPURIUserConverter struct{}
 
 // Convert implements DataConverter interface
-func (*SIPURIUserConverter) Convert(in interface{}) (out interface{}, err error) {
+func (*SIPURIUserConverter) Convert(in any) (out any, err error) {
 	return sipingo.UserFrom(IfaceAsString(in)), nil
 }
 
@@ -358,7 +358,7 @@ func (*SIPURIUserConverter) Convert(in interface{}) (out interface{}, err error)
 type SIPURIMethodConverter struct{}
 
 // Convert implements DataConverter interface
-func (*SIPURIMethodConverter) Convert(in interface{}) (out interface{}, err error) {
+func (*SIPURIMethodConverter) Convert(in any) (out any, err error) {
 	return sipingo.MethodFrom(IfaceAsString(in)), nil
 }
 
@@ -371,8 +371,8 @@ type TimeStringConverter struct {
 }
 
 // Convert implements DataConverter interface
-func (tS *TimeStringConverter) Convert(in interface{}) (
-	out interface{}, err error) {
+func (tS *TimeStringConverter) Convert(in any) (
+	out any, err error) {
 	tm, err := ParseTimeDetectLayout(in.(string), EmptyString)
 	if err != nil {
 		return nil, err
@@ -384,7 +384,7 @@ func (tS *TimeStringConverter) Convert(in interface{}) (
 type String2HexConverter struct{}
 
 // Convert implements DataConverter interface
-func (*String2HexConverter) Convert(in interface{}) (o interface{}, err error) {
+func (*String2HexConverter) Convert(in any) (o any, err error) {
 	var out string
 	if out = hex.EncodeToString([]byte(IfaceAsString(in))); len(out) == 0 {
 		o = out
@@ -398,8 +398,8 @@ func (*String2HexConverter) Convert(in interface{}) (o interface{}, err error) {
 type UnixTimeConverter struct{}
 
 // Convert implements DataConverter interface
-func (tS *UnixTimeConverter) Convert(in interface{}) (
-	out interface{}, err error) {
+func (tS *UnixTimeConverter) Convert(in any) (
+	out any, err error) {
 	var tm time.Time
 	if tm, err = ParseTimeDetectLayout(in.(string), EmptyString); err != nil {
 		return
@@ -441,8 +441,8 @@ type RandomConverter struct {
 }
 
 // Convert implements DataConverter interface
-func (rC *RandomConverter) Convert(in interface{}) (
-	out interface{}, err error) {
+func (rC *RandomConverter) Convert(in any) (
+	out any, err error) {
 	if rC.begin == 0 {
 		if rC.end == 0 {
 			return rand.Int(), nil
@@ -462,13 +462,13 @@ func (rC *RandomConverter) Convert(in interface{}) (
 type LengthConverter struct{}
 
 // Convert implements DataConverter interface
-func (LengthConverter) Convert(in interface{}) (out interface{}, err error) {
+func (LengthConverter) Convert(in any) (out any, err error) {
 	switch val := in.(type) {
 	case string:
 		return len(val), nil
 	case []string:
 		return len(val), nil
-	case []interface{}:
+	case []any:
 		return len(val), nil
 	case []bool:
 		return len(val), nil
@@ -511,10 +511,10 @@ func (LengthConverter) Convert(in interface{}) (out interface{}, err error) {
 type SliceConverter struct{}
 
 // Convert implements DataConverter interface
-func (SliceConverter) Convert(in interface{}) (out interface{}, err error) {
+func (SliceConverter) Convert(in any) (out any, err error) {
 	switch val := in.(type) {
 	case []string,
-		[]interface{},
+		[]any,
 		[]bool,
 		[]int,
 		[]int8,
@@ -536,7 +536,7 @@ func (SliceConverter) Convert(in interface{}) (out interface{}, err error) {
 		src := IfaceAsString(in)
 		if strings.HasPrefix(src, IdxStart) &&
 			strings.HasSuffix(src, IdxEnd) { // it has a similar structure to a json marshaled slice
-			var slice []interface{}
+			var slice []any
 			if err := json.Unmarshal([]byte(src), &slice); err == nil { // no error when unmarshal safe to asume that this is a slice
 				return slice, nil
 			}
@@ -548,14 +548,14 @@ func (SliceConverter) Convert(in interface{}) (out interface{}, err error) {
 type Float64Converter struct{}
 
 // Convert implements DataConverter interface
-func (Float64Converter) Convert(in interface{}) (interface{}, error) {
+func (Float64Converter) Convert(in any) (any, error) {
 	return IfaceAsFloat64(in)
 }
 
 // e164DomainConverter extracts the domain part out of a NAPTR name record
 type e164DomainConverter struct{}
 
-func (e164DomainConverter) Convert(in interface{}) (interface{}, error) {
+func (e164DomainConverter) Convert(in any) (any, error) {
 	name := IfaceAsString(in)
 	if i := strings.Index(name, ".e164."); i != -1 {
 		name = name[i:]
@@ -566,7 +566,7 @@ func (e164DomainConverter) Convert(in interface{}) (interface{}, error) {
 // e164Converter extracts the E164 address out of a NAPTR name record
 type e164Converter struct{}
 
-func (e164Converter) Convert(in interface{}) (interface{}, error) {
+func (e164Converter) Convert(in any) (any, error) {
 	name := IfaceAsString(in)
 	i := strings.Index(name, ".e164.")
 	if i == -1 {
@@ -579,7 +579,7 @@ func (e164Converter) Convert(in interface{}) (interface{}, error) {
 // JSONConverter converts an object to json string
 type JSONConverter struct{}
 
-func (jsnC JSONConverter) Convert(in interface{}) (interface{}, error) {
+func (jsnC JSONConverter) Convert(in any) (any, error) {
 	b, err := json.Marshal(in)
 	if err != nil {
 		return EmptyString, err

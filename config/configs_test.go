@@ -53,7 +53,7 @@ func TestConfigsAsMapInterface(t *testing.T) {
           "root_dir": "/var/spool/cgrates/configs"
       },
 }`
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		utils.EnabledCfg: true,
 		utils.URLCfg:     "",
 		utils.RootDirCfg: "/var/spool/cgrates/configs",
@@ -69,7 +69,7 @@ func TestConfigsAsMapInterface2(t *testing.T) {
 	cfgsJSONStr := `{
       "configs":{}
 }`
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		utils.EnabledCfg: false,
 		utils.URLCfg:     "/configs/",
 		utils.RootDirCfg: "/var/spool/cgrates/configs",

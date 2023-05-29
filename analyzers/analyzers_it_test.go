@@ -135,7 +135,7 @@ func testAnalyzerSRPCConn(t *testing.T) {
 		t.Fatal(err)
 	}
 	anzBiRPC = rpc2.NewClientWithCodec(jsonrpc2.NewJSONCodec(conn))
-	anzBiRPC.Handle(utils.SessionSv1DisconnectPeer, func(clnt *rpc2.Client, args interface{}, rply *string) (err error) { return utils.ErrNotFound })
+	anzBiRPC.Handle(utils.SessionSv1DisconnectPeer, func(clnt *rpc2.Client, args any, rply *string) (err error) { return utils.ErrNotFound })
 	go anzBiRPC.Run()
 }
 
@@ -154,7 +154,7 @@ func testAnalyzerSChargerSv1ProcessEvent(t *testing.T) {
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1010",
 			utils.Subject:      "Something_inter",
 			utils.Destination:  "999",
@@ -169,13 +169,13 @@ func testAnalyzerSChargerSv1ProcessEvent(t *testing.T) {
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "event1",
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					"Account":     "1010",
 					"Destination": "999",
 					"RunID":       "*default",
 					"Subject":     "Something_inter",
 				},
-				APIOpts: map[string]interface{}{"*subsys": "*chargers"},
+				APIOpts: map[string]any{"*subsys": "*chargers"},
 			},
 		},
 		{
@@ -185,16 +185,16 @@ func testAnalyzerSChargerSv1ProcessEvent(t *testing.T) {
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "event1",
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					"Account":     "1010",
 					"Destination": "999",
 					"RequestType": "*none",
 					"RunID":       "*raw",
 					"Subject":     "Something_inter",
 				},
-				APIOpts: map[string]interface{}{
+				APIOpts: map[string]any{
 					"*subsys":                      "*chargers",
-					utils.OptsAttributesProfileIDs: []interface{}{"*constant:*req.RequestType:*none"},
+					utils.OptsAttributesProfileIDs: []any{"*constant:*req.RequestType:*none"},
 				},
 			},
 		},
@@ -215,7 +215,7 @@ func testAnalyzerSChargerSv1ProcessEvent(t *testing.T) {
 func testAnalyzerSV1Search(t *testing.T) {
 	// need to wait in order for the log gorutine to execute
 	time.Sleep(10 * time.Millisecond)
-	var result []map[string]interface{}
+	var result []map[string]any
 	if err := anzRPC.Call(utils.AnalyzerSv1StringQuery, &QueryArgs{HeaderFilters: `+RequestEncoding:\*internal +RequestMethod:AttributeSv1\.ProcessEvent`}, &result); err != nil {
 		t.Error(err)
 	} else if len(result) != 1 {
@@ -224,7 +224,7 @@ func testAnalyzerSV1Search(t *testing.T) {
 }
 
 func testAnalyzerSV1Search2(t *testing.T) {
-	var result []map[string]interface{}
+	var result []map[string]any
 	if err := anzRPC.Call(utils.AnalyzerSv1StringQuery, &QueryArgs{HeaderFilters: `+RequestEncoding:\*json +RequestMethod:ChargerSv1\.ProcessEvent`}, &result); err != nil {
 		t.Error(err)
 	} else if len(result) != 1 {
@@ -233,7 +233,7 @@ func testAnalyzerSV1Search2(t *testing.T) {
 }
 
 func testAnalyzerSV1SearchWithContentFilters(t *testing.T) {
-	var result []map[string]interface{}
+	var result []map[string]any
 	if err := anzRPC.Call(utils.AnalyzerSv1StringQuery, &QueryArgs{
 		HeaderFilters:  `+RequestEncoding:\*json`,
 		ContentFilters: []string{"*string:~*req.Event.Account:1010"},
@@ -253,7 +253,7 @@ func testAnalyzerSV1BirPCSession(t *testing.T) {
 		t.Fatal(err)
 	}
 	time.Sleep(10 * time.Second)
-	var result []map[string]interface{}
+	var result []map[string]any
 	if err := anzRPC.Call(utils.AnalyzerSv1StringQuery, &QueryArgs{HeaderFilters: `+RequestEncoding:\*birpc_json +RequestMethod:"SessionSv1.DisconnectPeer"`}, &result); err != nil {
 		t.Error(err)
 	} else if len(result) != 1 {

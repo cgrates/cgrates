@@ -25,7 +25,7 @@ import (
 )
 
 func TestValueFormulaDayWeek(t *testing.T) {
-	params := map[string]interface{}{
+	params := map[string]any{
 		"Units":     10.0,
 		"Interval":  "week",
 		"Increment": "day",
@@ -36,7 +36,7 @@ func TestValueFormulaDayWeek(t *testing.T) {
 }
 
 func TestValueFormulaDayMonth(t *testing.T) {
-	params := map[string]interface{}{
+	params := map[string]any{
 		"Units":     10.0,
 		"Interval":  "month",
 		"Increment": "day",
@@ -48,7 +48,7 @@ func TestValueFormulaDayMonth(t *testing.T) {
 }
 
 func TestValueFormulaDayYear(t *testing.T) {
-	params := map[string]interface{}{
+	params := map[string]any{
 		"Units":     10.0,
 		"Interval":  "year",
 		"Increment": "day",
@@ -137,7 +137,7 @@ func TestParseBalanceFilterValue(t *testing.T) {
 }
 
 func TestValueFormulaEmptyFields(t *testing.T) {
-	params := map[string]interface{}{}
+	params := map[string]any{}
 	expected := 0.0
 	received := incrementalFormula(params)
 	if !reflect.DeepEqual(expected, received) {
@@ -146,7 +146,7 @@ func TestValueFormulaEmptyFields(t *testing.T) {
 }
 
 func TestValueFormulaConvertFloat64(t *testing.T) {
-	params := map[string]interface{}{
+	params := map[string]any{
 		"Units":     50,
 		"Interval":  "day",
 		"Increment": "hour",
@@ -159,7 +159,7 @@ func TestValueFormulaConvertFloat64(t *testing.T) {
 }
 
 func TestValueFormulaIntervalByte(t *testing.T) {
-	params := map[string]interface{}{
+	params := map[string]any{
 		"Units":     10.0,
 		"Interval":  []byte("week"),
 		"Increment": "day",
@@ -174,7 +174,7 @@ func TestValueFormulaIntervalByte(t *testing.T) {
 }
 
 func TestValueFormulaIntervalDefault(t *testing.T) {
-	params := map[string]interface{}{
+	params := map[string]any{
 		"Units":     10.0,
 		"Interval":  5,
 		"Increment": "day",
@@ -189,7 +189,7 @@ func TestValueFormulaIntervalDefault(t *testing.T) {
 }
 
 func TestValueFormulaIncrementDefault(t *testing.T) {
-	params := map[string]interface{}{
+	params := map[string]any{
 		"Units":     10.0,
 		"Interval":  "week",
 		"Increment": 5,
@@ -204,7 +204,7 @@ func TestValueFormulaIncrementDefault(t *testing.T) {
 }
 
 func TestValueFormulaIncrementByte(t *testing.T) {
-	params := map[string]interface{}{
+	params := map[string]any{
 		"Units":     10.0,
 		"Interval":  "week",
 		"Increment": []byte("day"),
@@ -219,7 +219,7 @@ func TestValueFormulaIncrementByte(t *testing.T) {
 }
 
 func TestValueFormulaIncrementHourDay(t *testing.T) {
-	params := map[string]interface{}{
+	params := map[string]any{
 		"Units":     10.0,
 		"Interval":  "day",
 		"Increment": "hour",
@@ -234,7 +234,7 @@ func TestValueFormulaIncrementHourDay(t *testing.T) {
 }
 
 func TestValueFormulaIncrementHourMonth(t *testing.T) {
-	params := map[string]interface{}{
+	params := map[string]any{
 		"Units":     10.0,
 		"Interval":  "month",
 		"Increment": "hour",
@@ -249,7 +249,7 @@ func TestValueFormulaIncrementHourMonth(t *testing.T) {
 }
 
 func TestValueFormulaIncrementHourYear(t *testing.T) {
-	params := map[string]interface{}{
+	params := map[string]any{
 		"Units":     10.0,
 		"Interval":  "year",
 		"Increment": "hour",
@@ -263,7 +263,7 @@ func TestValueFormulaIncrementHourYear(t *testing.T) {
 }
 
 func TestValueFormulaIncrementMinute(t *testing.T) {
-	params := map[string]interface{}{
+	params := map[string]any{
 		"Units":     10.0,
 		"Interval":  "hour",
 		"Increment": "minute",
@@ -277,7 +277,7 @@ func TestValueFormulaIncrementMinute(t *testing.T) {
 }
 
 func TestValueFormulaCover(t *testing.T) {
-	params := map[string]interface{}{
+	params := map[string]any{
 		"Units":     10.0,
 		"Interval":  "cat",
 		"Increment": "cat",
@@ -299,7 +299,7 @@ func TestValueFieldAsInterface(t *testing.T) {
 	fldPath = []string{"test1"}
 	vf = &ValueFormula{
 		Method: "Method",
-		Params: map[string]interface{}{
+		Params: map[string]any{
 			"key": "val",
 		},
 		Static: 22,
@@ -350,7 +350,7 @@ func TestValueFieldAsString(t *testing.T) {
 
 	vf = &ValueFormula{
 		Method: "Method",
-		Params: map[string]interface{}{
+		Params: map[string]any{
 			"Params": "index",
 		},
 		Static: 22,

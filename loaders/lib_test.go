@@ -58,10 +58,10 @@ func newRPCClient(cfg *config.ListenCfg) (c *rpc.Client, err error) {
 }
 
 type testMockCacheConn struct {
-	calls map[string]func(arg interface{}, rply interface{}) error
+	calls map[string]func(arg any, rply any) error
 }
 
-func (s *testMockCacheConn) Call(method string, arg interface{}, rply interface{}) error {
+func (s *testMockCacheConn) Call(method string, arg any, rply any) error {
 	if call, has := s.calls[method]; !has {
 		return rpcclient.ErrUnsupporteServiceMethod
 	} else {
@@ -74,8 +74,8 @@ func TestProcessContentCallsRemoveItems(t *testing.T) {
 	engine.Cache.Clear([]string{utils.CacheRPCConnections})
 
 	sMock := &testMockCacheConn{
-		calls: map[string]func(arg interface{}, rply interface{}) error{
-			utils.CacheSv1RemoveItems: func(arg interface{}, rply interface{}) error {
+		calls: map[string]func(arg any, rply any) error{
+			utils.CacheSv1RemoveItems: func(arg any, rply any) error {
 				prply, can := rply.(*string)
 				if !can {
 					t.Errorf("Wrong argument type : %T", rply)
@@ -84,7 +84,7 @@ func TestProcessContentCallsRemoveItems(t *testing.T) {
 				*prply = utils.OK
 				return nil
 			},
-			utils.CacheSv1Clear: func(arg interface{}, rply interface{}) error {
+			utils.CacheSv1Clear: func(arg any, rply any) error {
 				prply, can := rply.(*string)
 				if !can {
 					t.Errorf("Wrong argument type : %T", rply)
@@ -187,8 +187,8 @@ func TestProcessContentCallsClear(t *testing.T) {
 	engine.Cache.Clear([]string{utils.CacheRPCConnections})
 
 	sMock := &testMockCacheConn{
-		calls: map[string]func(arg interface{}, rply interface{}) error{
-			utils.CacheSv1Clear: func(arg interface{}, rply interface{}) error {
+		calls: map[string]func(arg any, rply any) error{
+			utils.CacheSv1Clear: func(arg any, rply any) error {
 				prply, can := rply.(*string)
 				if !can {
 					t.Errorf("Wrong argument type : %T", rply)
@@ -289,8 +289,8 @@ func TestRemoveContentCallsReload(t *testing.T) {
 	engine.Cache.Clear([]string{utils.CacheRPCConnections})
 
 	sMock := &testMockCacheConn{
-		calls: map[string]func(arg interface{}, rply interface{}) error{
-			utils.CacheSv1ReloadCache: func(arg interface{}, rply interface{}) error {
+		calls: map[string]func(arg any, rply any) error{
+			utils.CacheSv1ReloadCache: func(arg any, rply any) error {
 				prply, can := rply.(*string)
 				if !can {
 					t.Errorf("Wrong argument type : %T", rply)
@@ -299,7 +299,7 @@ func TestRemoveContentCallsReload(t *testing.T) {
 				*prply = utils.OK
 				return nil
 			},
-			utils.CacheSv1Clear: func(arg interface{}, rply interface{}) error {
+			utils.CacheSv1Clear: func(arg any, rply any) error {
 				prply, can := rply.(*string)
 				if !can {
 					t.Errorf("Wrong argument type : %T", rply)
@@ -395,8 +395,8 @@ func TestRemoveContentCallsLoad(t *testing.T) {
 	engine.Cache.Clear([]string{utils.CacheRPCConnections})
 
 	sMock := &testMockCacheConn{
-		calls: map[string]func(arg interface{}, rply interface{}) error{
-			utils.CacheSv1LoadCache: func(arg interface{}, rply interface{}) error {
+		calls: map[string]func(arg any, rply any) error{
+			utils.CacheSv1LoadCache: func(arg any, rply any) error {
 				prply, can := rply.(*string)
 				if !can {
 					t.Errorf("Wrong argument type : %T", rply)
@@ -405,7 +405,7 @@ func TestRemoveContentCallsLoad(t *testing.T) {
 				*prply = utils.OK
 				return nil
 			},
-			utils.CacheSv1Clear: func(arg interface{}, rply interface{}) error {
+			utils.CacheSv1Clear: func(arg any, rply any) error {
 				prply, can := rply.(*string)
 				if !can {
 					t.Errorf("Wrong argument type : %T", rply)
@@ -501,8 +501,8 @@ func TestRemoveContentCallsRemove(t *testing.T) {
 	engine.Cache.Clear([]string{utils.CacheRPCConnections})
 
 	sMock := &testMockCacheConn{
-		calls: map[string]func(arg interface{}, rply interface{}) error{
-			utils.CacheSv1RemoveItems: func(arg interface{}, rply interface{}) error {
+		calls: map[string]func(arg any, rply any) error{
+			utils.CacheSv1RemoveItems: func(arg any, rply any) error {
 				prply, can := rply.(*string)
 				if !can {
 					t.Errorf("Wrong argument type : %T", rply)
@@ -511,7 +511,7 @@ func TestRemoveContentCallsRemove(t *testing.T) {
 				*prply = utils.OK
 				return nil
 			},
-			utils.CacheSv1Clear: func(arg interface{}, rply interface{}) error {
+			utils.CacheSv1Clear: func(arg any, rply any) error {
 				prply, can := rply.(*string)
 				if !can {
 					t.Errorf("Wrong argument type : %T", rply)
@@ -627,8 +627,8 @@ func TestRemoveContentCallsClear(t *testing.T) {
 	engine.Cache.Clear([]string{utils.CacheRPCConnections})
 
 	sMock := &testMockCacheConn{
-		calls: map[string]func(arg interface{}, rply interface{}) error{
-			utils.CacheSv1Clear: func(arg interface{}, rply interface{}) error {
+		calls: map[string]func(arg any, rply any) error{
+			utils.CacheSv1Clear: func(arg any, rply any) error {
 				prply, can := rply.(*string)
 				if !can {
 					t.Errorf("Wrong argument type : %T", rply)

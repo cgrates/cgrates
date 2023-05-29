@@ -49,10 +49,10 @@ func testCheckNatsData(t *testing.T, randomCGRID, expData string, ch chan *nats.
 			Tenant: "cgrates.org",
 			ID:     ev.cgrEvent.ID,
 			Time:   ev.cgrEvent.Time,
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"CGRID": randomCGRID,
 			},
-			APIOpts: map[string]interface{}{},
+			APIOpts: map[string]any{},
 		}
 		if !reflect.DeepEqual(ev.cgrEvent, expected) {
 			t.Fatalf("Expected %s ,received %s", utils.ToJSON(expected), utils.ToJSON(ev.cgrEvent))

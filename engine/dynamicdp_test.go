@@ -37,8 +37,8 @@ func TestDynamicDpFieldAsInterface(t *testing.T) {
 	dDp := newDynamicDP([]string{}, []string{utils.ConcatenatedKey(utils.MetaInternal, utils.StatSConnsCfg)}, []string{}, "cgrates.org", ms)
 	clientconn := make(chan rpcclient.ClientConnector, 1)
 	clientconn <- &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.StatSv1GetQueueFloatMetrics: func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.StatSv1GetQueueFloatMetrics: func(args, reply any) error {
 				rpl := &map[string]float64{
 					"stat1": 31,
 				}

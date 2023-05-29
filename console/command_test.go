@@ -91,7 +91,7 @@ func (*mockCommander) Usage() string {
 func (*mockCommander) RpcMethod() string {
 	return utils.EmptyString
 }
-func (*mockCommander) RpcParams(bool) interface{} {
+func (*mockCommander) RpcParams(bool) any {
 	return nil
 }
 
@@ -99,7 +99,7 @@ func (*mockCommander) PostprocessRpcParams() error {
 	return utils.ErrNotImplemented
 }
 
-func (*mockCommander) RpcResult() interface{} {
+func (*mockCommander) RpcResult() any {
 	return nil
 }
 func (*mockCommander) ClientArgs() []string {
@@ -111,7 +111,7 @@ func (*mockCommander) Name() string {
 func (*mockCommander) LocalExecute() string {
 	return utils.EmptyString
 }
-func (*mockCommander) GetFormatedResult(result interface{}) string {
+func (*mockCommander) GetFormatedResult(result any) string {
 	return utils.EmptyString
 }
 
@@ -138,7 +138,7 @@ func (*mockCommander2) Usage() string {
 func (*mockCommander2) RpcMethod() string {
 	return utils.EmptyString
 }
-func (*mockCommander2) RpcParams(bool) interface{} {
+func (*mockCommander2) RpcParams(bool) any {
 	return nil
 }
 
@@ -146,7 +146,7 @@ func (*mockCommander2) PostprocessRpcParams() error {
 	return nil
 }
 
-func (*mockCommander2) RpcResult() interface{} {
+func (*mockCommander2) RpcResult() any {
 	return nil
 }
 
@@ -162,7 +162,7 @@ func (*mockCommander2) LocalExecute() string {
 	return utils.EmptyString
 }
 
-func (*mockCommander2) GetFormatedResult(result interface{}) string {
+func (*mockCommander2) GetFormatedResult(result any) string {
 	return utils.EmptyString
 }
 

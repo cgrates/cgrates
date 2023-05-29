@@ -164,7 +164,7 @@ func testV2CDRsProcessCDR(t *testing.T) {
 
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.OriginID:     "testV2CDRsProcessCDR1",
 				utils.OriginHost:   "192.168.1.1",
 				utils.Source:       "testV2CDRsProcessCDR",
@@ -235,7 +235,7 @@ func testV2CDRsProcessCDR2(t *testing.T) {
 
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.OriginID:     "testV2CDRsProcessCDR2",
 				utils.OriginHost:   "192.168.1.1",
 				utils.Source:       "testV2CDRsProcessCDR2",
@@ -307,7 +307,7 @@ func testV2CDRsProcessCDR3(t *testing.T) {
 		Flags: []string{"*attributes:false", "*chargers:false"},
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.OriginID:     "testV2CDRsProcessCDR3",
 				utils.OriginHost:   "192.168.1.1",
 				utils.Source:       "testV2CDRsProcessCDR3",
@@ -368,7 +368,7 @@ func testV2CDRsProcessCDR4(t *testing.T) {
 		Flags: []string{utils.MetaAttributes, utils.MetaRALs},
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.OriginID:     "testV2CDRsProcessCDR4",
 				utils.OriginHost:   "192.168.1.1",
 				utils.Source:       "testV2CDRsProcessCDR4",
@@ -557,7 +557,7 @@ func testV2CDRsProcessCDR5(t *testing.T) {
 		Flags: []string{"*store:false", "*stats:false", "*thresholds:false"},
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.OriginID:     "testV2CDRsProcessCDR5",
 				utils.OriginHost:   "192.168.1.1",
 				utils.Source:       "testV2CDRsProcessCDR5",
@@ -623,7 +623,7 @@ func testV2CDRsProcessCDR6(t *testing.T) {
 		Flags: []string{"*store:false", "*stats:true", "*thresholds:true"},
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.OriginID:     "testV2CDRsProcessCDR5",
 				utils.OriginHost:   "192.168.1.2",
 				utils.Source:       "testV2CDRsProcessCDR6",
@@ -682,7 +682,7 @@ func testV2CDRsProcessCDR7(t *testing.T) {
 
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.OriginID:     "testV2CDRsProcessCDR7",
 				utils.OriginHost:   "192.168.1.1",
 				utils.Source:       "testV2CDRsProcessCDR7",

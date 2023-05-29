@@ -111,7 +111,7 @@ func (pstr *S3EE) Connect() (err error) {
 	return
 }
 
-func (pstr *S3EE) ExportEvent(message interface{}, key string) (err error) {
+func (pstr *S3EE) ExportEvent(message any, key string) (err error) {
 	pstr.reqs.get()
 	pstr.RLock()
 	_, err = pstr.up.Upload(&s3manager.UploadInput{

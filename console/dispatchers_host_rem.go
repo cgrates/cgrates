@@ -47,9 +47,9 @@ func (self *CmdRemoveDispatcherHost) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdRemoveDispatcherHost) RpcParams(reset bool) interface{} {
+func (self *CmdRemoveDispatcherHost) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &utils.TenantIDWithAPIOpts{APIOpts: make(map[string]interface{})}
+		self.rpcParams = &utils.TenantIDWithAPIOpts{APIOpts: make(map[string]any)}
 	}
 	return self.rpcParams
 }
@@ -58,7 +58,7 @@ func (self *CmdRemoveDispatcherHost) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdRemoveDispatcherHost) RpcResult() interface{} {
+func (self *CmdRemoveDispatcherHost) RpcResult() any {
 	var s string
 	return &s
 }

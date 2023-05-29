@@ -194,7 +194,7 @@ type TPTiming struct {
 type TPTimingWithAPIOpts struct {
 	*TPTiming
 	Tenant  string
-	APIOpts map[string]interface{}
+	APIOpts map[string]any
 }
 
 // ArgsGetTimingID is used by GetTiming API
@@ -276,7 +276,7 @@ type AttrSetRatingProfile struct {
 	Subject               string                // Rating subject, usually the same as account
 	Overwrite             bool                  // Overwrite if exists
 	RatingPlanActivations []*TPRatingActivation // Activate rating plans at specific time
-	APIOpts               map[string]interface{}
+	APIOpts               map[string]any
 }
 
 type AttrGetRatingProfile struct {
@@ -530,7 +530,7 @@ type AttrLoadTpFromFolder struct {
 	FolderPath string // Take files from folder absolute path
 	DryRun     bool   // Do not write to database but parse only
 	Validate   bool   // Run structural checks on data
-	APIOpts    map[string]interface{}
+	APIOpts    map[string]any
 	Caching    *string
 }
 
@@ -539,7 +539,7 @@ type AttrImportTPFromFolder struct {
 	FolderPath   string
 	RunId        string
 	CsvSeparator string
-	APIOpts      map[string]interface{}
+	APIOpts      map[string]any
 }
 
 func NewTAFromAccountKey(accountKey string) (*TenantAccount, error) {
@@ -653,47 +653,47 @@ func (fltr *CDRsFilter) Prepare() {
 // RPCCDRsFilter is a filter used in Rpc calls
 // RPCCDRsFilter is slightly different than CDRsFilter by using string instead of Time filters
 type RPCCDRsFilter struct {
-	CGRIDs                 []string               // If provided, it will filter based on the cgrids present in list
-	NotCGRIDs              []string               // Filter specific CgrIds out
-	RunIDs                 []string               // If provided, it will filter on mediation runid
-	NotRunIDs              []string               // Filter specific runIds out
-	OriginIDs              []string               // If provided, it will filter on OriginIDs
-	NotOriginIDs           []string               // Filter specific OriginIDs out
-	OriginHosts            []string               // If provided, it will filter cdrhost
-	NotOriginHosts         []string               // Filter out specific cdr hosts
-	Sources                []string               // If provided, it will filter cdrsource
-	NotSources             []string               // Filter out specific CDR sources
-	ToRs                   []string               // If provided, filter on TypeOfRecord
-	NotToRs                []string               // Filter specific TORs out
-	RequestTypes           []string               // If provided, it will fiter reqtype
-	NotRequestTypes        []string               // Filter out specific request types
-	Tenants                []string               // If provided, it will filter tenant
-	NotTenants             []string               // If provided, it will filter tenant
-	Categories             []string               // If provided, it will filter çategory
-	NotCategories          []string               // Filter out specific categories
-	Accounts               []string               // If provided, it will filter account
-	NotAccounts            []string               // Filter out specific Accounts
-	Subjects               []string               // If provided, it will filter the rating subject
-	NotSubjects            []string               // Filter out specific subjects
-	DestinationPrefixes    []string               // If provided, it will filter on destination prefix
-	NotDestinationPrefixes []string               // Filter out specific destination prefixes
-	Costs                  []float64              // Query based on costs specified
-	NotCosts               []float64              // Filter out specific costs out from result
-	ExtraFields            map[string]string      // Query based on extra fields content
-	NotExtraFields         map[string]string      // Filter out based on extra fields content
-	SetupTimeStart         string                 // Start of interval, bigger or equal than configured
-	SetupTimeEnd           string                 // End interval, smaller than setupTime
-	AnswerTimeStart        string                 // Start of interval, bigger or equal than configured
-	AnswerTimeEnd          string                 // End interval, smaller than answerTime
-	CreatedAtStart         string                 // Start of interval, bigger or equal than configured
-	CreatedAtEnd           string                 // End interval, smaller than
-	UpdatedAtStart         string                 // Start of interval, bigger or equal than configured
-	UpdatedAtEnd           string                 // End interval, smaller than
-	MinUsage               string                 // Start of the usage interval (>=)
-	MaxUsage               string                 // End of the usage interval (<)
-	OrderBy                string                 // Ascendent/Descendent
-	ExtraArgs              map[string]interface{} // it will contain optional arguments like: OrderIDStart,OrderIDEnd,MinCost and MaxCost
-	Paginator                                     // Add pagination
+	CGRIDs                 []string          // If provided, it will filter based on the cgrids present in list
+	NotCGRIDs              []string          // Filter specific CgrIds out
+	RunIDs                 []string          // If provided, it will filter on mediation runid
+	NotRunIDs              []string          // Filter specific runIds out
+	OriginIDs              []string          // If provided, it will filter on OriginIDs
+	NotOriginIDs           []string          // Filter specific OriginIDs out
+	OriginHosts            []string          // If provided, it will filter cdrhost
+	NotOriginHosts         []string          // Filter out specific cdr hosts
+	Sources                []string          // If provided, it will filter cdrsource
+	NotSources             []string          // Filter out specific CDR sources
+	ToRs                   []string          // If provided, filter on TypeOfRecord
+	NotToRs                []string          // Filter specific TORs out
+	RequestTypes           []string          // If provided, it will fiter reqtype
+	NotRequestTypes        []string          // Filter out specific request types
+	Tenants                []string          // If provided, it will filter tenant
+	NotTenants             []string          // If provided, it will filter tenant
+	Categories             []string          // If provided, it will filter çategory
+	NotCategories          []string          // Filter out specific categories
+	Accounts               []string          // If provided, it will filter account
+	NotAccounts            []string          // Filter out specific Accounts
+	Subjects               []string          // If provided, it will filter the rating subject
+	NotSubjects            []string          // Filter out specific subjects
+	DestinationPrefixes    []string          // If provided, it will filter on destination prefix
+	NotDestinationPrefixes []string          // Filter out specific destination prefixes
+	Costs                  []float64         // Query based on costs specified
+	NotCosts               []float64         // Filter out specific costs out from result
+	ExtraFields            map[string]string // Query based on extra fields content
+	NotExtraFields         map[string]string // Filter out based on extra fields content
+	SetupTimeStart         string            // Start of interval, bigger or equal than configured
+	SetupTimeEnd           string            // End interval, smaller than setupTime
+	AnswerTimeStart        string            // Start of interval, bigger or equal than configured
+	AnswerTimeEnd          string            // End interval, smaller than answerTime
+	CreatedAtStart         string            // Start of interval, bigger or equal than configured
+	CreatedAtEnd           string            // End interval, smaller than
+	UpdatedAtStart         string            // Start of interval, bigger or equal than configured
+	UpdatedAtEnd           string            // End interval, smaller than
+	MinUsage               string            // Start of the usage interval (>=)
+	MaxUsage               string            // End of the usage interval (<)
+	OrderBy                string            // Ascendent/Descendent
+	ExtraArgs              map[string]any    // it will contain optional arguments like: OrderIDStart,OrderIDEnd,MinCost and MaxCost
+	Paginator                                // Add pagination
 }
 
 func (fltr *RPCCDRsFilter) AsCDRsFilter(timezone string) (cdrFltr *CDRsFilter, err error) {
@@ -859,8 +859,8 @@ type AttrSetBalance struct {
 	Account         string
 	BalanceType     string
 	Value           float64
-	Balance         map[string]interface{}
-	ActionExtraData *map[string]interface{}
+	Balance         map[string]any
+	ActionExtraData *map[string]any
 	Cdrlog          bool
 }
 
@@ -873,8 +873,8 @@ type AttrSetBalances struct {
 type AttrBalance struct {
 	BalanceType     string
 	Value           float64
-	Balance         map[string]interface{}
-	ActionExtraData *map[string]interface{}
+	Balance         map[string]any
+	ActionExtraData *map[string]any
 	Cdrlog          bool
 }
 
@@ -903,7 +903,7 @@ type TPActivationInterval struct {
 type ArgsComputeFilterIndexIDs struct {
 	Tenant           string
 	Context          string
-	APIOpts          map[string]interface{}
+	APIOpts          map[string]any
 	AttributeIDs     []string
 	ResourceIDs      []string
 	StatIDs          []string
@@ -919,7 +919,7 @@ type ArgsComputeFilterIndexIDs struct {
 type ArgsComputeFilterIndexes struct {
 	Tenant      string
 	Context     string
-	APIOpts     map[string]interface{}
+	APIOpts     map[string]any
 	AttributeS  bool
 	ResourceS   bool
 	StatS       bool
@@ -953,7 +953,7 @@ func (ai *ActivationInterval) IsActiveAtTime(atTime time.Time) bool {
 
 // Attributes to send on SessionDisconnect by SMG
 type AttrDisconnectSession struct {
-	EventStart map[string]interface{}
+	EventStart map[string]any
 	Reason     string
 }
 
@@ -1086,7 +1086,7 @@ type TPDispatcherProfile struct {
 	FilterIDs          []string
 	ActivationInterval *TPActivationInterval // Time when this limit becomes active and expires
 	Strategy           string
-	StrategyParams     []interface{} // ie for distribution, set here the pool weights
+	StrategyParams     []any // ie for distribution, set here the pool weights
 	Weight             float64
 	Hosts              []*TPDispatcherHostProfile
 }
@@ -1095,9 +1095,9 @@ type TPDispatcherProfile struct {
 type TPDispatcherHostProfile struct {
 	ID        string
 	FilterIDs []string
-	Weight    float64       // applied in case of multiple connections need to be ordered
-	Params    []interface{} // additional parameters stored for a session
-	Blocker   bool          // no connection after this one
+	Weight    float64 // applied in case of multiple connections need to be ordered
+	Params    []any   // additional parameters stored for a session
+	Blocker   bool    // no connection after this one
 }
 
 // TPDispatcherHost is used in APIs to manage remotely offline DispatcherHost
@@ -1256,18 +1256,18 @@ func AppendToSMCostFilter(smcFilter *SMCostFilter, fieldType, fieldName string,
 
 type RPCCDRsFilterWithAPIOpts struct {
 	*RPCCDRsFilter
-	APIOpts map[string]interface{}
+	APIOpts map[string]any
 	Tenant  string
 }
 
 type ArgsGetCacheItemIDsWithAPIOpts struct {
-	APIOpts map[string]interface{}
+	APIOpts map[string]any
 	Tenant  string
 	ArgsGetCacheItemIDs
 }
 
 type ArgsGetCacheItemWithAPIOpts struct {
-	APIOpts map[string]interface{}
+	APIOpts map[string]any
 	Tenant  string
 	ArgsGetCacheItem
 }
@@ -1309,7 +1309,7 @@ func NewAttrReloadCacheWithOpts() *AttrReloadCacheWithAPIOpts {
 	}
 }
 
-func NewAttrReloadCacheWithOptsFromMap(arg map[string][]string, tnt string, opts map[string]interface{}) *AttrReloadCacheWithAPIOpts {
+func NewAttrReloadCacheWithOptsFromMap(arg map[string][]string, tnt string, opts map[string]any) *AttrReloadCacheWithAPIOpts {
 	return &AttrReloadCacheWithAPIOpts{
 		Tenant:  tnt,
 		APIOpts: opts,
@@ -1350,39 +1350,39 @@ func NewAttrReloadCacheWithOptsFromMap(arg map[string][]string, tnt string, opts
 }
 
 type AttrReloadCacheWithAPIOpts struct {
-	APIOpts                  map[string]interface{} `json:",omitempty"`
-	Tenant                   string                 `json:",omitempty"`
-	DestinationIDs           []string               `json:",omitempty"`
-	ReverseDestinationIDs    []string               `json:",omitempty"`
-	RatingPlanIDs            []string               `json:",omitempty"`
-	RatingProfileIDs         []string               `json:",omitempty"`
-	ActionIDs                []string               `json:",omitempty"`
-	ActionPlanIDs            []string               `json:",omitempty"`
-	AccountActionPlanIDs     []string               `json:",omitempty"`
-	ActionTriggerIDs         []string               `json:",omitempty"`
-	SharedGroupIDs           []string               `json:",omitempty"`
-	ResourceProfileIDs       []string               `json:",omitempty"`
-	ResourceIDs              []string               `json:",omitempty"`
-	StatsQueueIDs            []string               `json:",omitempty"`
-	StatsQueueProfileIDs     []string               `json:",omitempty"`
-	ThresholdIDs             []string               `json:",omitempty"`
-	ThresholdProfileIDs      []string               `json:",omitempty"`
-	FilterIDs                []string               `json:",omitempty"`
-	RouteProfileIDs          []string               `json:",omitempty"`
-	AttributeProfileIDs      []string               `json:",omitempty"`
-	ChargerProfileIDs        []string               `json:",omitempty"`
-	DispatcherProfileIDs     []string               `json:",omitempty"`
-	DispatcherHostIDs        []string               `json:",omitempty"`
-	Dispatchers              []string               `json:",omitempty"`
-	TimingIDs                []string               `json:",omitempty"`
-	AttributeFilterIndexIDs  []string               `json:",omitempty"`
-	ResourceFilterIndexIDs   []string               `json:",omitempty"`
-	StatFilterIndexIDs       []string               `json:",omitempty"`
-	ThresholdFilterIndexIDs  []string               `json:",omitempty"`
-	RouteFilterIndexIDs      []string               `json:",omitempty"`
-	ChargerFilterIndexIDs    []string               `json:",omitempty"`
-	DispatcherFilterIndexIDs []string               `json:",omitempty"`
-	FilterIndexIDs           []string               `json:",omitempty"`
+	APIOpts                  map[string]any `json:",omitempty"`
+	Tenant                   string         `json:",omitempty"`
+	DestinationIDs           []string       `json:",omitempty"`
+	ReverseDestinationIDs    []string       `json:",omitempty"`
+	RatingPlanIDs            []string       `json:",omitempty"`
+	RatingProfileIDs         []string       `json:",omitempty"`
+	ActionIDs                []string       `json:",omitempty"`
+	ActionPlanIDs            []string       `json:",omitempty"`
+	AccountActionPlanIDs     []string       `json:",omitempty"`
+	ActionTriggerIDs         []string       `json:",omitempty"`
+	SharedGroupIDs           []string       `json:",omitempty"`
+	ResourceProfileIDs       []string       `json:",omitempty"`
+	ResourceIDs              []string       `json:",omitempty"`
+	StatsQueueIDs            []string       `json:",omitempty"`
+	StatsQueueProfileIDs     []string       `json:",omitempty"`
+	ThresholdIDs             []string       `json:",omitempty"`
+	ThresholdProfileIDs      []string       `json:",omitempty"`
+	FilterIDs                []string       `json:",omitempty"`
+	RouteProfileIDs          []string       `json:",omitempty"`
+	AttributeProfileIDs      []string       `json:",omitempty"`
+	ChargerProfileIDs        []string       `json:",omitempty"`
+	DispatcherProfileIDs     []string       `json:",omitempty"`
+	DispatcherHostIDs        []string       `json:",omitempty"`
+	Dispatchers              []string       `json:",omitempty"`
+	TimingIDs                []string       `json:",omitempty"`
+	AttributeFilterIndexIDs  []string       `json:",omitempty"`
+	ResourceFilterIndexIDs   []string       `json:",omitempty"`
+	StatFilterIndexIDs       []string       `json:",omitempty"`
+	ThresholdFilterIndexIDs  []string       `json:",omitempty"`
+	RouteFilterIndexIDs      []string       `json:",omitempty"`
+	ChargerFilterIndexIDs    []string       `json:",omitempty"`
+	DispatcherFilterIndexIDs []string       `json:",omitempty"`
+	FilterIndexIDs           []string       `json:",omitempty"`
 }
 
 func (a *AttrReloadCacheWithAPIOpts) Map() map[string][]string {
@@ -1423,13 +1423,13 @@ func (a *AttrReloadCacheWithAPIOpts) Map() map[string][]string {
 }
 
 type AttrCacheIDsWithAPIOpts struct {
-	APIOpts  map[string]interface{}
+	APIOpts  map[string]any
 	Tenant   string
 	CacheIDs []string
 }
 
 type ArgsGetGroupWithAPIOpts struct {
-	APIOpts map[string]interface{}
+	APIOpts map[string]any
 	Tenant  string
 	ArgsGetGroup
 }
@@ -1453,7 +1453,7 @@ type SessionFilter struct {
 	Limit   *int
 	Filters []string
 	Tenant  string
-	APIOpts map[string]interface{}
+	APIOpts map[string]any
 }
 
 type RatingPlanCostArg struct {
@@ -1461,12 +1461,12 @@ type RatingPlanCostArg struct {
 	Destination   string
 	SetupTime     string
 	Usage         string
-	APIOpts       map[string]interface{}
+	APIOpts       map[string]any
 }
 type SessionIDsWithArgsDispatcher struct {
 	IDs     []string
 	Tenant  string
-	APIOpts map[string]interface{}
+	APIOpts map[string]any
 }
 
 type GetCostOnRatingPlansArgs struct {
@@ -1477,7 +1477,7 @@ type GetCostOnRatingPlansArgs struct {
 	SetupTime     time.Time
 	Usage         time.Duration
 	RatingPlanIDs []string
-	APIOpts       map[string]interface{}
+	APIOpts       map[string]any
 }
 
 type GetMaxSessionTimeOnAccountsArgs struct {
@@ -1487,7 +1487,7 @@ type GetMaxSessionTimeOnAccountsArgs struct {
 	SetupTime   time.Time
 	Usage       time.Duration
 	AccountIDs  []string
-	APIOpts     map[string]interface{}
+	APIOpts     map[string]any
 }
 
 type ArgExportToFolder struct {
@@ -1505,9 +1505,9 @@ type DPRArgs struct {
 type ArgCacheReplicateSet struct {
 	CacheID  string
 	ItemID   string
-	Value    interface{}
+	Value    any
 	Tenant   string
-	APIOpts  map[string]interface{}
+	APIOpts  map[string]any
 	GroupIDs []string
 }
 
@@ -1519,7 +1519,7 @@ type Compiler interface {
 type ArgCacheReplicateRemove struct {
 	CacheID string
 	ItemID  string
-	APIOpts map[string]interface{}
+	APIOpts map[string]any
 	Tenant  string
 }
 
@@ -1527,7 +1527,7 @@ type AttrsExecuteActions struct {
 	ActionPlanID string
 	TimeStart    time.Time
 	TimeEnd      time.Time // replay the action timings between the two dates
-	APIOpts      map[string]interface{}
+	APIOpts      map[string]any
 	Tenant       string
 }
 
@@ -1535,7 +1535,7 @@ type AttrsExecuteActionPlans struct {
 	ActionPlanIDs []string
 	Tenant        string
 	AccountID     string
-	APIOpts       map[string]interface{}
+	APIOpts       map[string]any
 }
 
 type ArgExportCDRs struct {

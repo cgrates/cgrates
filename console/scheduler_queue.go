@@ -49,7 +49,7 @@ func (self *CmdGetScheduledActions) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdGetScheduledActions) RpcParams(reset bool) interface{} {
+func (self *CmdGetScheduledActions) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &scheduler.ArgsGetScheduledActions{}
 	}
@@ -60,7 +60,7 @@ func (self *CmdGetScheduledActions) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdGetScheduledActions) RpcResult() interface{} {
+func (self *CmdGetScheduledActions) RpcResult() any {
 	s := make([]*scheduler.ScheduledAction, 0)
 	return &s
 }

@@ -150,7 +150,7 @@ func TestGeneralCfgAsMapInterface(t *testing.T) {
 		},
 	}`
 
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		utils.NodeIDCfg:               "cgrates",
 		utils.LoggerCfg:               "*syslog",
 		utils.LogLevelCfg:             6,
@@ -194,7 +194,7 @@ func TestGeneralCfgAsMapInterface1(t *testing.T) {
             "max_call_duration": "0"
         }
 }`
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		utils.NodeIDCfg:               "ENGINE1",
 		utils.LoggerCfg:               "*syslog",
 		utils.LogLevelCfg:             6,

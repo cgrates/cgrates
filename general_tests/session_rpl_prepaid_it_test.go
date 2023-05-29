@@ -115,7 +115,7 @@ func testSeSRplPrepaidTPFromFolder(t *testing.T) {
 		Account:     "1005",
 		BalanceType: utils.MetaVoice,
 		Value:       5 * float64(time.Hour), //value -> 20ms for future
-		Balance: map[string]interface{}{
+		Balance: map[string]any{
 			utils.ID:            "TestRplDebitBalance",
 			utils.RatingSubject: "*zero5ms",
 		},
@@ -146,7 +146,7 @@ func testSeSRplPrepaidActivateSessions(t *testing.T) {
 		Tenant:        "cgrates.org",
 		ResourceID:    "testSeSRplPrepaidActivateSessions",
 		DebitInterval: time.Second,
-		EventStart: engine.NewMapEvent(map[string]interface{}{
+		EventStart: engine.NewMapEvent(map[string]any{
 			utils.CGRID:        "ede927f8e42318a8db02c0f74adc2d9e16770339",
 			utils.Category:     "call",
 			utils.ToR:          utils.MetaVoice,
@@ -158,7 +158,7 @@ func testSeSRplPrepaidActivateSessions(t *testing.T) {
 			utils.AnswerTime:   time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
 		}),
 		SRuns: []*sessions.SRun{{
-			Event: engine.NewMapEvent(map[string]interface{}{
+			Event: engine.NewMapEvent(map[string]any{
 				utils.RunID:        utils.MetaRaw,
 				utils.CGRID:        "ede927f8e42318a8db02c0f74adc2d9e16770339",
 				utils.Category:     "call",
@@ -233,7 +233,7 @@ func testSeSRplPrepaidActivateSessions(t *testing.T) {
 			LastUsage:  time.Second,
 			TotalUsage: time.Second,
 		}},
-		OptsStart: map[string]interface{}{
+		OptsStart: map[string]any{
 			utils.DebitInterval: "5ms",
 		},
 		Chargeable: true,

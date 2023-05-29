@@ -48,7 +48,7 @@ func (self *CmdGetRouteForEvent) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdGetRouteForEvent) RpcParams(reset bool) interface{} {
+func (self *CmdGetRouteForEvent) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = new(utils.CGREvent)
 	}
@@ -59,7 +59,7 @@ func (self *CmdGetRouteForEvent) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdGetRouteForEvent) RpcResult() interface{} {
+func (self *CmdGetRouteForEvent) RpcResult() any {
 	var atr []*engine.RouteProfile
 	return &atr
 }

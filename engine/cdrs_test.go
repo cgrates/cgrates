@@ -34,16 +34,16 @@ import (
 	"github.com/cgrates/rpcclient"
 )
 
-type clMock func(_ string, _ interface{}, _ interface{}) error
+type clMock func(_ string, _ any, _ any) error
 
-func (c clMock) Call(m string, a interface{}, r interface{}) error {
+func (c clMock) Call(m string, a any, r any) error {
 	return c(m, a, r)
 }
 
 func TestCDRSV1ProcessCDRNoTenant(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CdrsCfg().AttributeSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}
-	clMock := clMock(func(_ string, args interface{}, reply interface{}) error {
+	clMock := clMock(func(_ string, args any, reply any) error {
 		rply, cancast := reply.(*AttrSProcessEventReply)
 		if !cancast {
 			return fmt.Errorf("can't cast")
@@ -60,7 +60,7 @@ func TestCDRSV1ProcessCDRNoTenant(t *testing.T) {
 			CGREvent: &utils.CGREvent{
 				ID:   "TestBiRPCv1AuthorizeEventNoTenant",
 				Time: utils.TimePointer(time.Date(2016, time.January, 5, 18, 30, 49, 0, time.UTC)),
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					"Account":     "1002",
 					"Category":    "call",
 					"Destination": "1003",
@@ -114,7 +114,7 @@ func TestCDRSV1ProcessCDRNoTenant(t *testing.T) {
 func TestCDRSV1ProcessEventNoTenant(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CdrsCfg().ChargerSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)}
-	clMock := clMock(func(_ string, args interface{}, reply interface{}) error {
+	clMock := clMock(func(_ string, args any, reply any) error {
 		rply, cancast := reply.(*[]*ChrgSProcessEventReply)
 		if !cancast {
 			return fmt.Errorf("can't cast")
@@ -146,7 +146,7 @@ func TestCDRSV1ProcessEventNoTenant(t *testing.T) {
 		Flags: []string{utils.MetaChargers},
 		CGREvent: utils.CGREvent{
 			ID: "TestV1ProcessEventNoTenant",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.CGRID:        "test1",
 				utils.RunID:        utils.MetaDefault,
 				utils.OriginID:     "testV1CDRsRefundOutOfSessionCost",
@@ -170,7 +170,7 @@ func TestCDRSV1ProcessEventNoTenant(t *testing.T) {
 func TestCDRSV1V1ProcessExternalCDRNoTenant(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CdrsCfg().ChargerSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)}
-	clMock := clMock(func(_ string, args interface{}, reply interface{}) error {
+	clMock := clMock(func(_ string, args any, reply any) error {
 		rply, cancast := reply.(*[]*ChrgSProcessEventReply)
 		if !cancast {
 			return fmt.Errorf("can't cast")
@@ -230,7 +230,7 @@ func TestArgV1ProcessClone(t *testing.T) {
 		CGREvent: utils.CGREvent{
 			ID:   "TestBiRPCv1AuthorizeEventNoTenant",
 			Time: utils.TimePointer(time.Date(2016, time.January, 5, 18, 30, 49, 0, time.UTC)),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"Account":     "1002",
 				"Category":    "call",
 				"Destination": "1003",
@@ -263,7 +263,7 @@ func TestCDRV1CountCDRs(t *testing.T) {
 
 		RPCCDRsFilter: &utils.RPCCDRsFilter{},
 		Tenant:        "cgrates.org",
-		APIOpts:       map[string]interface{}{},
+		APIOpts:       map[string]any{},
 	}
 
 	i := int64(3)
@@ -289,7 +289,7 @@ func TestV1CountCDRsErr(t *testing.T) {
 			SetupTimeStart: "fdd",
 		},
 		Tenant: "cgrates.org",
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "cdrs12345",
 		},
 	}
@@ -313,7 +313,7 @@ func TestV1RateCDRs(t *testing.T) {
 		Flags:         []string{utils.MetaAttributes, utils.MetaStats, utils.MetaExport, utils.MetaStore, utils.OptsThresholdS, utils.MetaThresholds, utils.MetaStats, utils.OptsChargerS, utils.MetaChargers, utils.OptsRALs, utils.MetaRALs, utils.OptsRerate, utils.MetaRerate, utils.OptsRefund, utils.MetaRefund},
 		Tenant:        "cgrates.rg",
 		RPCCDRsFilter: utils.RPCCDRsFilter{},
-		APIOpts:       map[string]interface{}{},
+		APIOpts:       map[string]any{},
 	}
 
 	var reply string
@@ -325,8 +325,8 @@ func TestV1RateCDRs(t *testing.T) {
 
 func TestCDRServerThdsProcessEvent(t *testing.T) {
 	clMock := &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ThresholdSv1ProcessEvent: func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.ThresholdSv1ProcessEvent: func(args, reply any) error {
 
 				rpl := &[]string{"event"}
 
@@ -363,8 +363,8 @@ func TestCDRServerThdsProcessEvent(t *testing.T) {
 }
 func TestCDRServerStatSProcessEvent(t *testing.T) {
 	ccMock := &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.StatSv1ProcessEvent: func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.StatSv1ProcessEvent: func(args, reply any) error {
 
 				rpl := &[]string{"status"}
 
@@ -403,14 +403,14 @@ func TestCDRServerStatSProcessEvent(t *testing.T) {
 
 func TestCDRServerEesProcessEvent(t *testing.T) {
 	ccMock := &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.EeSv1ProcessEvent: func(args, reply interface{}) error {
-				rpls := &map[string]map[string]interface{}{
+		calls: map[string]func(args any, reply any) error{
+			utils.EeSv1ProcessEvent: func(args, reply any) error {
+				rpls := &map[string]map[string]any{
 					"eeS": {
 						"process": "event",
 					},
 				}
-				*reply.(*map[string]map[string]interface{}) = *rpls
+				*reply.(*map[string]map[string]any) = *rpls
 
 				return nil
 			},
@@ -450,8 +450,8 @@ func TestCDRServerEesProcessEvent(t *testing.T) {
 func TestCDRefundEventCost(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	ccMock := &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ResponderRefundIncrements: func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.ResponderRefundIncrements: func(args, reply any) error {
 				return nil
 			},
 		},
@@ -486,9 +486,9 @@ func TestGetCostFromRater(t *testing.T) {
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 
 	ccMock := &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
+		calls: map[string]func(args any, reply any) error{
 
-			utils.ResponderDebit: func(args, reply interface{}) error {
+			utils.ResponderDebit: func(args, reply any) error {
 				rpl := &CallCost{
 					Category: "category",
 					Tenant:   "cgrates",
@@ -516,7 +516,7 @@ func TestGetCostFromRater(t *testing.T) {
 	}
 	cdr := &CDRWithAPIOpts{
 		CDR:     cd,
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 	exp := &CallCost{
 		Category: "category",
@@ -534,8 +534,8 @@ func TestRefundEventCost(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CdrsCfg().RaterConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.RateSConnsCfg)}
 	ccMock := &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ResponderRefundIncrements: func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.ResponderRefundIncrements: func(args, reply any) error {
 				rpl := &Account{}
 				*reply.(*Account) = *rpl
 				return nil
@@ -587,7 +587,7 @@ func TestCDRSV2ProcessEvent(t *testing.T) {
 	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 1
 
 	cfg.CdrsCfg().ChargerSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)}
-	clMock := clMock(func(_ string, args interface{}, reply interface{}) error {
+	clMock := clMock(func(_ string, args any, reply any) error {
 
 		return nil
 	})
@@ -611,7 +611,7 @@ func TestCDRSV2ProcessEvent(t *testing.T) {
 		Flags: []string{utils.MetaChargers},
 		CGREvent: utils.CGREvent{
 			ID: "TestV1ProcessEventNoTenant",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.CGRID:        "test1",
 				utils.RunID:        utils.MetaDefault,
 				utils.OriginID:     "testV1CDRsRefundOutOfSessionCost",
@@ -660,7 +660,7 @@ func TestCDRSV2ProcessEventCacheSet(t *testing.T) {
 		Flags: []string{utils.MetaChargers},
 		CGREvent: utils.CGREvent{
 			ID: "TestV1ProcessEventNoTenant",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.CGRID:        "test1",
 				utils.RunID:        utils.MetaDefault,
 				utils.OriginID:     "testV1CDRsRefundOutOfSessionCost",
@@ -696,7 +696,7 @@ func TestCDRSV1ProcessEvent(t *testing.T) {
 	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 1
 
 	cfg.CdrsCfg().ChargerSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)}
-	clMock := clMock(func(_ string, args interface{}, reply interface{}) error {
+	clMock := clMock(func(_ string, args any, reply any) error {
 
 		return nil
 	})
@@ -720,7 +720,7 @@ func TestCDRSV1ProcessEvent(t *testing.T) {
 		Flags: []string{utils.MetaChargers},
 		CGREvent: utils.CGREvent{
 			ID: "TestV1ProcessEventNoTenant",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.CGRID:        "test1",
 				utils.RunID:        utils.MetaDefault,
 				utils.OriginID:     "testV1CDRsRefundOutOfSessionCost",
@@ -769,7 +769,7 @@ func TestCDRSV1ProcessEventCacheSet(t *testing.T) {
 		Flags: []string{utils.MetaChargers},
 		CGREvent: utils.CGREvent{
 			ID: "TestV1ProcessEventNoTenant",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.CGRID:        "test1",
 				utils.RunID:        utils.MetaDefault,
 				utils.OriginID:     "testV1CDRsRefundOutOfSessionCost",
@@ -816,12 +816,12 @@ func TestV1ProcessEvent(t *testing.T) {
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 	clientconn := make(chan rpcclient.ClientConnector, 1)
 	clientconn <- &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.AttributeSv1ProcessEvent: func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.AttributeSv1ProcessEvent: func(args, reply any) error {
 				rpl := &AttrSProcessEventReply{
 					AlteredFields: []string{"*req.OfficeGroup"},
 					CGREvent: &utils.CGREvent{
-						Event: map[string]interface{}{
+						Event: map[string]any{
 							utils.CGRID: "cgrid",
 						},
 					},
@@ -830,13 +830,13 @@ func TestV1ProcessEvent(t *testing.T) {
 
 				return nil
 			},
-			utils.ChargerSv1ProcessEvent: func(args, reply interface{}) error {
+			utils.ChargerSv1ProcessEvent: func(args, reply any) error {
 				rpl := []*ChrgSProcessEventReply{
 					{
 						ChargerSProfile:    "chrgs1",
 						AttributeSProfiles: []string{"attr1", "attr2"},
 						CGREvent: &utils.CGREvent{
-							Event: map[string]interface{}{
+							Event: map[string]any{
 								utils.CGRID: "cgrid2",
 							},
 						},
@@ -845,7 +845,7 @@ func TestV1ProcessEvent(t *testing.T) {
 				*reply.(*[]*ChrgSProcessEventReply) = rpl
 				return nil
 			},
-			utils.ResponderRefundIncrements: func(args, reply interface{}) error {
+			utils.ResponderRefundIncrements: func(args, reply any) error {
 				rpl := &Account{
 					ID: "cgrates.org:1001",
 					BalanceMap: map[string]Balances{
@@ -855,27 +855,27 @@ func TestV1ProcessEvent(t *testing.T) {
 				*reply.(*Account) = *rpl
 				return nil
 			},
-			utils.ResponderDebit: func(args, reply interface{}) error {
+			utils.ResponderDebit: func(args, reply any) error {
 				rpl := &CallCost{}
 				*reply.(*CallCost) = *rpl
 				return nil
 			},
-			utils.ResponderGetCost: func(args, reply interface{}) error {
+			utils.ResponderGetCost: func(args, reply any) error {
 				rpl := &CallCost{}
 				*reply.(*CallCost) = *rpl
 				return nil
 			},
-			utils.EeSv1ProcessEvent: func(args, reply interface{}) error {
-				rpl := &map[string]map[string]interface{}{}
-				*reply.(*map[string]map[string]interface{}) = *rpl
+			utils.EeSv1ProcessEvent: func(args, reply any) error {
+				rpl := &map[string]map[string]any{}
+				*reply.(*map[string]map[string]any) = *rpl
 				return nil
 			},
-			utils.ThresholdSv1ProcessEvent: func(args, reply interface{}) error {
+			utils.ThresholdSv1ProcessEvent: func(args, reply any) error {
 				rpl := &[]string{}
 				*reply.(*[]string) = *rpl
 				return nil
 			},
-			utils.StatSv1ProcessEvent: func(args, reply interface{}) error {
+			utils.StatSv1ProcessEvent: func(args, reply any) error {
 				rpl := &[]string{}
 				*reply.(*[]string) = *rpl
 				return nil
@@ -901,7 +901,7 @@ func TestV1ProcessEvent(t *testing.T) {
 		Flags: []string{utils.MetaAttributes, utils.MetaStats, utils.MetaExport, utils.MetaStore, utils.OptsThresholdS, utils.MetaThresholds, utils.MetaStats, utils.OptsChargerS, utils.MetaChargers, utils.OptsRALs, utils.MetaRALs, utils.OptsRerate, utils.MetaRerate, utils.OptsRefund, utils.MetaRefund},
 		CGREvent: utils.CGREvent{
 			ID: "TestV1ProcessEventNoTenant",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.CGRID:        "test1",
 				utils.RunID:        utils.MetaDefault,
 				utils.OriginID:     "testV1CDRsRefundOutOfSessionCost",
@@ -948,8 +948,8 @@ func TestCdrprocessEventsErrLog(t *testing.T) {
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 	clientConn := make(chan rpcclient.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.EeSv1ProcessEvent: func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.EeSv1ProcessEvent: func(args, reply any) error {
 
 				return utils.ErrPartiallyExecuted
 			},
@@ -967,7 +967,7 @@ func TestCdrprocessEventsErrLog(t *testing.T) {
 
 	evs := []*utils.CGREvent{
 		{ID: "TestV1ProcessEventNoTenant",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.CGRID:        "test1",
 				utils.RunID:        utils.MetaDefault,
 				utils.OriginID:     "testV1CDRsRefundOutOfSessionCost",
@@ -1084,7 +1084,7 @@ func TestV1ProcessCDR(t *testing.T) {
 	}
 	cdr := &CDRWithAPIOpts{
 		CDR:     cd,
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 	reply := utils.StringPointer("reply")
 
@@ -1127,7 +1127,7 @@ func TestV1ProcessCDRSet(t *testing.T) {
 	}
 	cdr := &CDRWithAPIOpts{
 		CDR:     cd,
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 	reply := utils.StringPointer("reply")
 	Cache.Set(utils.CacheRPCResponses, utils.ConcatenatedKey(utils.CDRsV1ProcessCDR, cdr.CGRID, cdr.RunID),
@@ -1151,7 +1151,7 @@ func TestV1ProcessCDRSet(t *testing.T) {
 func TestV1StoreSessionCost(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	clMock := clMock(func(_ string, _, _ interface{}) error {
+	clMock := clMock(func(_ string, _, _ any) error {
 		return nil
 	})
 	clientconn := make(chan rpcclient.ClientConnector, 1)
@@ -1203,7 +1203,7 @@ func TestV1StoreSessionCost(t *testing.T) {
 func TestV1StoreSessionCostSet(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	clMock := clMock(func(_ string, _, _ interface{}) error {
+	clMock := clMock(func(_ string, _, _ any) error {
 
 		return nil
 	})
@@ -1264,8 +1264,8 @@ func TestV2StoreSessionCost(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	ccMock := &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ResponderRefundRounding: func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.ResponderRefundRounding: func(args, reply any) error {
 				rpl := &Account{}
 				*reply.(*Account) = *rpl
 				return nil
@@ -1339,8 +1339,8 @@ func TestV2StoreSessionCostSet(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	ccMock := &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ResponderRefundRounding: func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.ResponderRefundRounding: func(args, reply any) error {
 				rpl := &Account{}
 				*reply.(*Account) = *rpl
 				return nil
@@ -1476,7 +1476,7 @@ func TestV1RateCDRSErr(t *testing.T) {
 		Flags: []string{utils.MetaStore, utils.MetaExport, utils.MetaThresholds, utils.MetaStats, utils.MetaChargers, utils.MetaAttributes},
 
 		Tenant:  "cgrates.org",
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 	var reply string
 
@@ -1508,7 +1508,7 @@ func TestV1GetCDRsErr(t *testing.T) {
 			SetupTimeEnd:   "2020-04-18T11:46:26.371Z",
 		},
 		Tenant:  "cgrates.org",
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 	var cdrs *[]*CDR
 	if err := cdrS.V1GetCDRs(args, cdrs); err == nil {
@@ -1526,12 +1526,12 @@ func TestGetCostFromRater2(t *testing.T) {
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 	ccMock := &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ResponderDebit: func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.ResponderDebit: func(args, reply any) error {
 
 				return utils.ErrAccountNotFound
 			},
-			utils.SchedulerSv1ExecuteActionPlans: func(args, reply interface{}) error {
+			utils.SchedulerSv1ExecuteActionPlans: func(args, reply any) error {
 				rpl := "reply"
 				*reply.(*string) = rpl
 				return nil
@@ -1562,7 +1562,7 @@ func TestGetCostFromRater2(t *testing.T) {
 			RequestType: utils.MetaDynaprepaid,
 			Usage:       1 * time.Minute,
 		},
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 
 	if _, err := cdrS.getCostFromRater(cdr); err == nil || err != utils.ErrAccountNotFound {
@@ -1576,8 +1576,8 @@ func TestGetCostFromRater3(t *testing.T) {
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 	ccMock := &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ResponderGetCost: func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.ResponderGetCost: func(args, reply any) error {
 
 				return nil
 			},
@@ -1606,7 +1606,7 @@ func TestGetCostFromRater3(t *testing.T) {
 			RequestType: "default",
 			Usage:       1 * time.Minute,
 		},
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 
 	if _, err := cdrS.getCostFromRater(cdr); err == nil || err != rpcclient.ErrUnsupporteServiceMethod {
@@ -1622,8 +1622,8 @@ func TestV2StoreSessionCost2(t *testing.T) {
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 	ccMOck := &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ResponderRefundRounding: func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.ResponderRefundRounding: func(args, reply any) error {
 				rpl := &Account{}
 				*reply.(*Account) = *rpl
 				return nil
@@ -1750,7 +1750,7 @@ func TestV2StoreSessionCost2(t *testing.T) {
 			},
 		},
 		Tenant:  "cgrates.org",
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 	var reply string
 	if err := cdrS.V2StoreSessionCost(args, &reply); err != nil {
@@ -1761,8 +1761,8 @@ func TestV2StoreSessionCost2(t *testing.T) {
 	clientconn2 := make(chan rpcclient.ClientConnector, 1)
 	clientconn2 <- &ccMock{
 
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ResponderRefundRounding: func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.ResponderRefundRounding: func(args, reply any) error {
 				rpl := &Account{}
 				*reply.(*Account) = *rpl
 				return utils.ErrNotFound
@@ -1814,7 +1814,7 @@ func TestV1RateCDRSSuccesful(t *testing.T) {
 			CGRIDs: []string{"Cdr1"},
 		},
 		Tenant:  "cgrates.org",
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 	var reply *string
 
@@ -1893,8 +1893,8 @@ func TestCdrSRateCDR(t *testing.T) {
 	})
 	clientConn := make(chan rpcclient.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ResponderDebit: func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.ResponderDebit: func(args, reply any) error {
 				cc := &CallCost{
 					Category:    "generic",
 					Tenant:      "cgrates.org",
@@ -2007,8 +2007,8 @@ func TestChrgrSProcessEvent(t *testing.T) {
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 	clienConn := make(chan rpcclient.ClientConnector, 1)
 	clienConn <- &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ChargerSv1ProcessEvent: func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.ChargerSv1ProcessEvent: func(args, reply any) error {
 				*reply.(*[]*ChrgSProcessEventReply) = []*ChrgSProcessEventReply{
 					{
 						ChargerSProfile:    "Charger1",
@@ -2017,12 +2017,12 @@ func TestChrgrSProcessEvent(t *testing.T) {
 						CGREvent: &utils.CGREvent{ // matching Charger1
 							Tenant: "cgrates.org",
 							ID:     "event1",
-							Event: map[string]interface{}{
+							Event: map[string]any{
 								utils.AccountField: "1001",
 								"Password":         "CGRateS.org",
 								"RunID":            utils.MetaDefault,
 							},
-							APIOpts: map[string]interface{}{
+							APIOpts: map[string]any{
 								utils.OptsContext:              "simpleauth",
 								utils.MetaSubsys:               utils.MetaChargers,
 								utils.OptsAttributesProfileIDs: []string{"ATTR_1001_SIMPLEAUTH"},
@@ -2045,7 +2045,7 @@ func TestChrgrSProcessEvent(t *testing.T) {
 	}
 	cgrEv := utils.CGREvent{
 		ID: "TestV1ProcessEventNoTenant",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.CGRID:        "test1",
 			utils.RunID:        utils.MetaDefault,
 			utils.OriginID:     "testV1CDRsRefundOutOfSessionCost",
@@ -2060,12 +2060,12 @@ func TestChrgrSProcessEvent(t *testing.T) {
 		{
 			Tenant: "cgrates.org",
 			ID:     "event1",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.AccountField: "1001",
 				"Password":         "CGRateS.org",
 				"RunID":            utils.MetaDefault,
 			},
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.OptsContext:              "simpleauth",
 				utils.MetaSubsys:               utils.MetaChargers,
 				utils.OptsAttributesProfileIDs: []string{"ATTR_1001_SIMPLEAUTH"},
@@ -2282,7 +2282,7 @@ func TestCDRSGetCDRs(t *testing.T) {
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 	clientConn := make(chan rpcclient.ClientConnector, 1)
-	clientConn <- clMock(func(serviceMethod string, _, _ interface{}) error {
+	clientConn <- clMock(func(serviceMethod string, _, _ any) error {
 		if serviceMethod == utils.EeSv1ProcessEvent {
 
 			return nil
@@ -2310,7 +2310,7 @@ func TestCDRSGetCDRs(t *testing.T) {
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "Event1",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Tenant:       "cgrates.org",
 				utils.ToR:          utils.MetaVoice,
 				utils.OriginHost:   "host",
@@ -2325,7 +2325,7 @@ func TestCDRSGetCDRs(t *testing.T) {
 				utils.AnswerTime:   time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
 				utils.Usage:        10 * time.Minute,
 			},
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.OptsStatS: true,
 			},
 		},

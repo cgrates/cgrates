@@ -262,7 +262,7 @@ func testFraudAuthorizeandProcess1(t *testing.T) {
 	originID := utils.GenUUID()
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.Tenant:       "cgrates.org",
 			utils.Category:     "call",
 			utils.ToR:          utils.MetaVoice,
@@ -274,7 +274,7 @@ func testFraudAuthorizeandProcess1(t *testing.T) {
 			utils.SetupTime:    time.Date(2022, time.January, 7, 16, 60, 0, 0, time.UTC),
 			utils.AnswerTime:   time.Date(2022, time.January, 7, 16, 60, 10, 0, time.UTC),
 		},
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 	args := sessions.NewV1AuthorizeArgs(false, []string{},
 		false, []string{}, false, []string{}, false, true,
@@ -286,7 +286,7 @@ func testFraudAuthorizeandProcess1(t *testing.T) {
 	}
 	cgrEv = &utils.CGREvent{
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.Tenant:       "cgrates.org",
 			utils.Category:     "call",
 			utils.ToR:          utils.MetaVoice,
@@ -299,7 +299,7 @@ func testFraudAuthorizeandProcess1(t *testing.T) {
 			utils.AnswerTime:   time.Date(2022, time.January, 7, 16, 60, 10, 0, time.UTC),
 			utils.Usage:        5 * time.Minute,
 		},
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 	var reply string
 	if err := fraudRPC.Call(utils.SessionSv1ProcessCDR,
@@ -312,7 +312,7 @@ func testFraudAuthorizeandProcess2(t *testing.T) {
 	originID := utils.GenUUID()
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.Tenant:       "cgrates.org",
 			utils.Category:     "call",
 			utils.ToR:          utils.MetaVoice,
@@ -324,7 +324,7 @@ func testFraudAuthorizeandProcess2(t *testing.T) {
 			utils.SetupTime:    time.Date(2022, time.January, 7, 16, 60, 0, 0, time.UTC),
 			utils.AnswerTime:   time.Date(2022, time.January, 7, 16, 60, 10, 0, time.UTC),
 		},
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 	args := sessions.NewV1AuthorizeArgs(false, []string{},
 		false, []string{}, false, []string{}, false, true,
@@ -336,7 +336,7 @@ func testFraudAuthorizeandProcess2(t *testing.T) {
 	}
 	cgrEv = &utils.CGREvent{
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.Tenant:       "cgrates.org",
 			utils.Category:     "call",
 			utils.ToR:          utils.MetaVoice,
@@ -349,7 +349,7 @@ func testFraudAuthorizeandProcess2(t *testing.T) {
 			utils.AnswerTime:   time.Date(2022, time.January, 7, 16, 60, 10, 0, time.UTC),
 			utils.Usage:        2 * time.Minute,
 		},
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 	var reply string
 	if err := fraudRPC.Call(utils.SessionSv1ProcessCDR,
@@ -362,7 +362,7 @@ func testFraudAuthorizeandProcess3(t *testing.T) {
 	originID := utils.GenUUID()
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.Tenant:       "cgrates.org",
 			utils.Category:     "call",
 			utils.ToR:          utils.MetaVoice,
@@ -374,7 +374,7 @@ func testFraudAuthorizeandProcess3(t *testing.T) {
 			utils.SetupTime:    time.Date(2022, time.January, 7, 16, 60, 0, 0, time.UTC),
 			utils.AnswerTime:   time.Date(2022, time.January, 7, 16, 60, 10, 0, time.UTC),
 		},
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 	args := sessions.NewV1AuthorizeArgs(false, []string{},
 		false, []string{}, false, []string{}, false, true,
@@ -386,7 +386,7 @@ func testFraudAuthorizeandProcess3(t *testing.T) {
 	}
 	cgrEv = &utils.CGREvent{
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.Tenant:       "cgrates.org",
 			utils.Category:     "call",
 			utils.ToR:          utils.MetaVoice,
@@ -399,7 +399,7 @@ func testFraudAuthorizeandProcess3(t *testing.T) {
 			utils.AnswerTime:   time.Date(2022, time.January, 7, 16, 60, 10, 0, time.UTC),
 			utils.Usage:        3 * time.Minute,
 		},
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 	var reply string
 	if err := fraudRPC.Call(utils.SessionSv1ProcessCDR,
@@ -413,7 +413,7 @@ func testFraudAuthorizeandProcess3(t *testing.T) {
 func testFraudFinalAuthorize(t *testing.T) {
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.Tenant:       "cgrates.org",
 			utils.Category:     "call",
 			utils.ToR:          utils.MetaVoice,
@@ -425,7 +425,7 @@ func testFraudFinalAuthorize(t *testing.T) {
 			utils.SetupTime:    time.Date(2022, time.January, 7, 16, 60, 0, 0, time.UTC),
 			utils.AnswerTime:   time.Date(2022, time.January, 7, 16, 60, 10, 0, time.UTC),
 		},
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 	args := sessions.NewV1AuthorizeArgs(false, []string{},
 		false, []string{}, false, []string{}, false, true,

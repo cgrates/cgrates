@@ -88,7 +88,7 @@ func TestCdrsCfgAsMapInterface(t *testing.T) {
         "ees_conns": ["*internal:*ees","*conn1"],
 	},
 }`
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		utils.EnabledCfg:          true,
 		utils.ExtraFieldsCfg:      []string{"~*req.PayPalAccount", "~*req.LCRProfile", "~*req.ResourceID"},
 		utils.StoreCdrsCfg:        true,
@@ -118,7 +118,7 @@ func TestCdrsCfgAsMapInterface2(t *testing.T) {
           "ees_conns": ["conn1"],
        },
 }`
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		utils.EnabledCfg:          true,
 		utils.ExtraFieldsCfg:      []string{},
 		utils.StoreCdrsCfg:        true,

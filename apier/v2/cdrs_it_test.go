@@ -152,7 +152,7 @@ func testV2CDRsProcessCDR(t *testing.T) {
 		Flags: []string{utils.MetaRALs},
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.OriginID:    "testV2CDRsProcessCDR1",
 				utils.OriginHost:  "192.168.1.1",
 				utils.Source:      "testV2CDRsProcessCDR",
@@ -342,7 +342,7 @@ func testV2CDRsUsageNegative(t *testing.T) {
 		Flags: []string{utils.MetaRALs},
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.OriginID:     "testV2CDRsUsageNegative",
 				utils.OriginHost:   "192.168.1.1",
 				utils.Source:       "testV2CDRsUsageNegative",
@@ -443,7 +443,7 @@ func testV2CDRsDifferentTenants(t *testing.T) {
 			Blocker: false,
 			Weight:  10,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.CacheOpt: utils.MetaReload,
 		},
 	}
@@ -476,7 +476,7 @@ func testV2CDRsDifferentTenants(t *testing.T) {
 			AttributeIDs: []string{"*none"},
 			Weight:       20,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.CacheOpt: utils.MetaReload,
 		},
 	}
@@ -497,7 +497,7 @@ func testV2CDRsDifferentTenants(t *testing.T) {
 		Flags: []string{utils.MetaAttributes, utils.MetaChargers, "*stats:false", "*thresholds:false", utils.MetaStore},
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.com",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.OriginID:     "testV2CDRsDifferentTenants",
 				utils.OriginHost:   "192.168.1.1",
 				utils.Source:       "testV2CDRsDifferentTenants",
@@ -556,7 +556,7 @@ func testV2CDRsProcessCDRNoRattingPlan(t *testing.T) {
 		Flags: []string{utils.MetaRALs},
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.OriginID:     "testV2CDRsProcessCDR4",
 				utils.OriginHost:   "192.168.1.1",
 				utils.Source:       "testV2CDRsProcessCDR4",
@@ -764,7 +764,7 @@ func testV2CDRsSetThreshold(t *testing.T) {
 		Account:     "1005",
 		BalanceType: utils.MetaMonetary,
 		Value:       1,
-		Balance: map[string]interface{}{
+		Balance: map[string]any{
 			utils.ID:     utils.MetaDefault,
 			utils.Weight: 10.0,
 		},
@@ -779,7 +779,7 @@ func testV2CDRsProcessCDRWithThreshold(t *testing.T) {
 		Flags: []string{utils.MetaThresholds, utils.MetaRALs, utils.ConcatenatedKey(utils.MetaChargers, "false")},
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.OriginID:     "testV2CDRsProcessCDRWithThreshold",
 				utils.OriginHost:   "192.168.1.1",
 				utils.Source:       "testV2CDRsProcessCDRWithThreshold",
@@ -818,7 +818,7 @@ func testv2CDRsGetCDRsDest(t *testing.T) {
 		Flags: []string{utils.MetaStore},
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.CGRID:        "9b3cd5e698af94f8916220866c831a982ed16318",
 				utils.ToR:          utils.MetaVoice,
 				utils.RunID:        "raw",
@@ -872,7 +872,7 @@ func testV2CDRsRerate(t *testing.T) {
 			AttributeIDs: []string{"*none"},
 			Weight:       20,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.CacheOpt: utils.MetaReload,
 		},
 	}
@@ -894,7 +894,7 @@ func testV2CDRsRerate(t *testing.T) {
 		Account:     "voiceAccount",
 		BalanceType: utils.MetaVoice,
 		Value:       600000000000,
-		Balance: map[string]interface{}{
+		Balance: map[string]any{
 			utils.ID:        utils.MetaDefault,
 			"RatingSubject": "*zero1m",
 			utils.Weight:    10.0,
@@ -916,7 +916,7 @@ func testV2CDRsRerate(t *testing.T) {
 		Flags: []string{utils.MetaRerate},
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.OriginID:     "testV2CDRsRerate",
 				utils.OriginHost:   "192.168.1.1",
 				utils.Source:       "testV2CDRsRerate",
@@ -948,7 +948,7 @@ func testV2CDRsRerate(t *testing.T) {
 		Flags: []string{utils.MetaRerate},
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.OriginID:     "testV2CDRsRerate",
 				utils.OriginHost:   "192.168.1.1",
 				utils.Source:       "testV2CDRsRerate",
@@ -988,7 +988,7 @@ func testv2CDRsDynaPrepaid(t *testing.T) {
 		Flags: []string{utils.MetaRALs},
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.OriginID:     "testv2CDRsDynaPrepaid",
 				utils.OriginHost:   "192.168.1.1",
 				utils.Source:       "testv2CDRsDynaPrepaid",
@@ -1038,7 +1038,7 @@ func testV2CDRsDuplicateCDRs(t *testing.T) {
 			AttributeIDs: []string{"*none"},
 			Weight:       20,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.CacheOpt: utils.MetaReload,
 		},
 	}
@@ -1060,7 +1060,7 @@ func testV2CDRsDuplicateCDRs(t *testing.T) {
 		Account:     "testV2CDRsDuplicateCDRs",
 		BalanceType: utils.MetaVoice,
 		Value:       600000000000,
-		Balance: map[string]interface{}{
+		Balance: map[string]any{
 			utils.ID:        utils.MetaDefault,
 			"RatingSubject": "*zero1m",
 			utils.Weight:    10.0,
@@ -1082,7 +1082,7 @@ func testV2CDRsDuplicateCDRs(t *testing.T) {
 		Flags: []string{utils.MetaRerate},
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.OriginID:     "testV2CDRsDuplicateCDRs",
 				utils.OriginHost:   "192.168.1.1",
 				utils.Source:       "testV2CDRsDuplicateCDRs",
@@ -1119,7 +1119,7 @@ func testV2CDRsDuplicateCDRs(t *testing.T) {
 				Flags: []string{utils.MetaRerate},
 				CGREvent: utils.CGREvent{
 					Tenant: "cgrates.org",
-					Event: map[string]interface{}{
+					Event: map[string]any{
 						utils.OriginID:     "testV2CDRsDuplicateCDRs",
 						utils.OriginHost:   "192.168.1.1",
 						utils.Source:       "testV2CDRsDuplicateCDRs",

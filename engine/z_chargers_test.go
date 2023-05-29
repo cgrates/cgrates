@@ -63,13 +63,13 @@ func TestChargersmatchingChargerProfilesForEventErrPass(t *testing.T) {
 	cgrEv := &utils.CGREvent{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "cgrEvID",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Charger":        "ChargerProfile1",
 			utils.AnswerTime: time.Date(2021, 4, 19, 12, 0, 0, 0, time.UTC),
 			"UsageInterval":  "10s",
 			utils.Weight:     "10.0",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaSubsys: utils.MetaChargers,
 		},
 		Time: &cgrEvTm,
@@ -124,13 +124,13 @@ func TestChargersmatchingChargerProfilesForEventNotActive(t *testing.T) {
 	cgrEv := &utils.CGREvent{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "cgrEvID",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Charger":        "ChargerProfile1",
 			utils.AnswerTime: time.Date(2021, 4, 19, 12, 0, 0, 0, time.UTC),
 			"UsageInterval":  "10s",
 			utils.Weight:     "10.0",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaSubsys: utils.MetaChargers,
 		},
 		Time: &cgrEvTm,
@@ -185,13 +185,13 @@ func TestChargersprocessEventNoConnIDs(t *testing.T) {
 	cgrEv := &utils.CGREvent{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "cgrEvID",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Charger":        "ChargerProfile1",
 			utils.AnswerTime: time.Date(2021, 4, 19, 12, 0, 0, 0, time.UTC),
 			"UsageInterval":  "10s",
 			utils.Weight:     "10.0",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaSubsys:                utils.MetaChargers,
 			utils.OptsAttributesProcessRuns: 2,
 		},
@@ -212,10 +212,10 @@ func TestChargersprocessEventNoConnIDs(t *testing.T) {
 }
 
 type ccMock struct {
-	calls map[string]func(args interface{}, reply interface{}) error
+	calls map[string]func(args any, reply any) error
 }
 
-func (ccM *ccMock) Call(serviceMethod string, args interface{}, reply interface{}) (err error) {
+func (ccM *ccMock) Call(serviceMethod string, args any, reply any) (err error) {
 	if call, has := ccM.calls[serviceMethod]; !has {
 		return rpcclient.ErrUnsupporteServiceMethod
 	} else {
@@ -243,14 +243,14 @@ func TestChargersprocessEventCallNilErr(t *testing.T) {
 	}
 
 	ccM := &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.AttributeSv1ProcessEvent: func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.AttributeSv1ProcessEvent: func(args, reply any) error {
 				rply := AttrSProcessEventReply{
 					AlteredFields: []string{utils.AccountField},
 					CGREvent: &utils.CGREvent{
 						Tenant: "cgrates.org",
 						ID:     "cgrEvID",
-						Event: map[string]interface{}{
+						Event: map[string]any{
 							utils.AccountField: "1001",
 						},
 					},
@@ -278,7 +278,7 @@ func TestChargersprocessEventCallNilErr(t *testing.T) {
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "cgrEvID",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 		},
 	}
@@ -290,7 +290,7 @@ func TestChargersprocessEventCallNilErr(t *testing.T) {
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "cgrEvID",
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					utils.AccountField: "1001",
 				},
 			},
@@ -332,8 +332,8 @@ func TestChargersprocessEventCallErr(t *testing.T) {
 	}
 
 	ccM := &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.AttributeSv1ProcessEvent: func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.AttributeSv1ProcessEvent: func(args, reply any) error {
 				return utils.ErrNotFound
 			},
 		},
@@ -356,7 +356,7 @@ func TestChargersprocessEventCallErr(t *testing.T) {
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "cgrEvID",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 		},
 	}
@@ -368,11 +368,11 @@ func TestChargersprocessEventCallErr(t *testing.T) {
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "cgrEvID",
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					utils.AccountField: "1001",
 					"RunID":            utils.MetaDefault,
 				},
-				APIOpts: map[string]interface{}{
+				APIOpts: map[string]any{
 					utils.MetaSubsys:               utils.MetaChargers,
 					utils.OptsAttributesProfileIDs: []string(nil),
 				},
@@ -415,14 +415,14 @@ func TestChargersV1ProcessEventErrNotFound(t *testing.T) {
 	}
 
 	ccM := &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.AttributeSv1ProcessEvent: func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.AttributeSv1ProcessEvent: func(args, reply any) error {
 				rply := AttrSProcessEventReply{
 					AlteredFields: []string{utils.AccountField},
 					CGREvent: &utils.CGREvent{
 						Tenant: "cgrates.org",
 						ID:     "cgrEvID",
-						Event: map[string]interface{}{
+						Event: map[string]any{
 							utils.AccountField: "1001",
 						},
 					},
@@ -448,7 +448,7 @@ func TestChargersV1ProcessEventErrNotFound(t *testing.T) {
 	}
 	args := &utils.CGREvent{
 		ID: "cgrEvID",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1002",
 		},
 	}
@@ -486,14 +486,14 @@ func TestChargersV1ProcessEventErrOther(t *testing.T) {
 	}
 
 	ccM := &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			"invalidMethod": func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			"invalidMethod": func(args, reply any) error {
 				rply := AttrSProcessEventReply{
 					AlteredFields: []string{utils.AccountField},
 					CGREvent: &utils.CGREvent{
 						Tenant: "cgrates.org",
 						ID:     "cgrEvID",
-						Event: map[string]interface{}{
+						Event: map[string]any{
 							utils.AccountField: "1001",
 						},
 					},
@@ -519,7 +519,7 @@ func TestChargersV1ProcessEventErrOther(t *testing.T) {
 	}
 	args := &utils.CGREvent{
 		ID: "cgrEvID",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 		},
 	}
@@ -563,14 +563,14 @@ func TestChargersV1ProcessEvent(t *testing.T) {
 	}
 
 	ccM := &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.AttributeSv1ProcessEvent: func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.AttributeSv1ProcessEvent: func(args, reply any) error {
 				rply := AttrSProcessEventReply{
 					AlteredFields: []string{utils.AccountField},
 					CGREvent: &utils.CGREvent{
 						Tenant: "cgrates.org",
 						ID:     "cgrEvID",
-						Event: map[string]interface{}{
+						Event: map[string]any{
 							utils.AccountField: "1001",
 						},
 					},
@@ -596,7 +596,7 @@ func TestChargersV1ProcessEvent(t *testing.T) {
 	}
 	args := &utils.CGREvent{
 		ID: "cgrEvID",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 		},
 	}
@@ -609,7 +609,7 @@ func TestChargersV1ProcessEvent(t *testing.T) {
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "cgrEvID",
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					utils.AccountField: "1001",
 				},
 			},
@@ -660,7 +660,7 @@ func TestChargersV1GetChargersForEventNilErr(t *testing.T) {
 	}
 	args := &utils.CGREvent{
 		ID: "cgrEvID",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 		},
 	}
@@ -712,7 +712,7 @@ func TestChargersV1GetChargersForEventErr(t *testing.T) {
 	}
 	args := &utils.CGREvent{
 		ID: "cgrEvID",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 		},
 	}

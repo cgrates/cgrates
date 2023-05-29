@@ -123,8 +123,8 @@ func setAccounts(t *testing.T, n int) (err error) {
 	return nil
 }
 
-func getAccounts(ids []string) (accounts *[]interface{}, err error) {
-	var reply *[]interface{}
+func getAccounts(ids []string) (accounts *[]any, err error) {
+	var reply *[]any
 
 	attr := &utils.AttrGetAccounts{
 		Tenant:     "cgrates.org",
@@ -144,7 +144,7 @@ func setAccBalance(acc string) (err error) {
 		Account:     acc,
 		BalanceType: utils.MetaVoice,
 		Value:       float64(24 * time.Hour),
-		Balance: map[string]interface{}{
+		Balance: map[string]any{
 			utils.ID:            "TestBalance",
 			utils.RatingSubject: "*zero1ms",
 		},
@@ -170,7 +170,7 @@ func initSes(n int) (err error) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     utils.UUIDSha1Prefix(),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.EventName:    "TEST_EVENT",
 				utils.OriginID:     utils.UUIDSha1Prefix(),
 				utils.ToR:          utils.MetaVoice,
@@ -182,7 +182,7 @@ func initSes(n int) (err error) {
 				utils.RequestType:  utils.MetaPrepaid,
 				utils.AnswerTime:   time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
 			},
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.OptsDebitInterval: 2 * time.Second,
 			},
 		},
@@ -212,7 +212,7 @@ func testSesPItBenchmark(t *testing.T) {
 			RunID:        "runID1",
 			AttributeIDs: []string{"*none"},
 		},
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 	if err := sesPRPC.Call(utils.APIerSv1SetChargerProfile, args, &reply); err != nil {
 		t.Error(err)
@@ -227,7 +227,7 @@ func testSesPItBenchmark(t *testing.T) {
 			RunID:        "runID2",
 			AttributeIDs: []string{"*none"},
 		},
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 
 	if err := sesPRPC.Call(utils.APIerSv1SetChargerProfile, args2, &reply); err != nil {
@@ -245,7 +245,7 @@ func testSesPItBenchmark(t *testing.T) {
 	if err := initSes(n); err != nil {
 		t.Error(err)
 	}
-	var statusRpl map[string]interface{}
+	var statusRpl map[string]any
 
 	if err := sesPRPC.Call(utils.CoreSv1Status, nil, &statusRpl); err != nil {
 		t.Error(err)

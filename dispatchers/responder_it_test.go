@@ -67,7 +67,7 @@ func TestDspResponder(t *testing.T) {
 }
 
 func testDspResponderStatus(t *testing.T) {
-	var reply map[string]interface{}
+	var reply map[string]any
 	if err := allEngine.RPC.Call(utils.CoreSv1Status, utils.TenantWithAPIOpts{}, &reply); err != nil {
 		t.Error(err)
 	} else if reply[utils.NodeID] != "ALL" {
@@ -75,7 +75,7 @@ func testDspResponderStatus(t *testing.T) {
 	}
 	ev := utils.TenantWithAPIOpts{
 		Tenant: "cgrates.org",
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "rsp12345",
 		},
 	}
@@ -94,22 +94,22 @@ func testDspResponderStatus(t *testing.T) {
 }
 
 func getNodeWithRoute(route string, t *testing.T) string {
-	var reply map[string]interface{}
+	var reply map[string]any
 	var pingReply string
 	pingEv := utils.CGREvent{
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.EventName: "Random",
 		},
 
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey:  "rsp12345",
 			utils.OptsRouteID: route,
 		},
 	}
 	ev := utils.TenantWithAPIOpts{
 		Tenant: "cgrates.org",
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey:  "rsp12345",
 			utils.OptsRouteID: route,
 		},
@@ -141,10 +141,10 @@ func testDspResponderRandom(t *testing.T) {
 
 func testDspResponderShutdown(t *testing.T) {
 	var reply string
-	var statusReply map[string]interface{}
+	var statusReply map[string]any
 	ev := utils.TenantWithAPIOpts{
 		Tenant: "cgrates.org",
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "rsp12345",
 		},
 	}
@@ -171,11 +171,11 @@ func testDspResponderBroadcast(t *testing.T) {
 	var pingReply string
 	pingEv := utils.CGREvent{
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.EventName: "Broadcast",
 		},
 
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "rsp12345",
 		},
 	}
@@ -203,23 +203,23 @@ func testDspResponderBroadcast(t *testing.T) {
 }
 
 func testDspResponderInternal(t *testing.T) {
-	var reply map[string]interface{}
+	var reply map[string]any
 	var pingReply string
 	route := "internal"
 	pingEv := utils.CGREvent{
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.EventName: "Internal",
 		},
 
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey:  "rsp12345",
 			utils.OptsRouteID: route,
 		},
 	}
 	ev := utils.TenantWithAPIOpts{
 		Tenant: "cgrates.org",
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey:  "rsp12345",
 			utils.OptsRouteID: route,
 		},

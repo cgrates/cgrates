@@ -67,7 +67,7 @@ func (s *Server) SetAnalyzer(anz *analyzers.AnalyzerService) {
 	s.anz = anz
 }
 
-func (s *Server) RpcRegister(rcvr interface{}) {
+func (s *Server) RpcRegister(rcvr any) {
 	utils.RegisterRpcParams(utils.EmptyString, rcvr)
 	rpc.Register(rcvr)
 	s.Lock()
@@ -75,7 +75,7 @@ func (s *Server) RpcRegister(rcvr interface{}) {
 	s.Unlock()
 }
 
-func (s *Server) RpcRegisterName(name string, rcvr interface{}) {
+func (s *Server) RpcRegisterName(name string, rcvr any) {
 	utils.RegisterRpcParams(name, rcvr)
 	rpc.RegisterName(name, rcvr)
 	s.Lock()
@@ -108,7 +108,7 @@ func (s *Server) RegisterHttpHandler(pattern string, handler http.Handler) {
 }
 
 // Registers a new BiJsonRpc name
-func (s *Server) BiRPCRegisterName(method string, handlerFunc interface{}) {
+func (s *Server) BiRPCRegisterName(method string, handlerFunc any) {
 	s.RLock()
 	isNil := s.birpcSrv == nil
 	s.RUnlock()

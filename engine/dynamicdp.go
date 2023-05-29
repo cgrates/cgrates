@@ -66,7 +66,7 @@ var initialDPPrefixes = utils.NewStringSet([]string{
 	utils.MetaHdr, utils.MetaTrl, utils.MetaCfg,
 	utils.MetaTenant})
 
-func (dDP *dynamicDP) FieldAsInterface(fldPath []string) (val interface{}, err error) {
+func (dDP *dynamicDP) FieldAsInterface(fldPath []string) (val any, err error) {
 	if len(fldPath) == 0 {
 		return nil, utils.ErrNotFound
 	}
@@ -80,7 +80,7 @@ func (dDP *dynamicDP) FieldAsInterface(fldPath []string) (val interface{}, err e
 	return
 }
 
-func (dDP *dynamicDP) fieldAsInterface(fldPath []string) (val interface{}, err error) {
+func (dDP *dynamicDP) fieldAsInterface(fldPath []string) (val any, err error) {
 	if len(fldPath) < 2 {
 		return nil, fmt.Errorf("invalid fieldname <%s>", fldPath)
 	}
@@ -171,7 +171,7 @@ func (dDP *libphonenumberDP) FieldAsString(fldPath []string) (string, error) {
 	return utils.IfaceAsString(val), nil
 }
 
-func (dDP *libphonenumberDP) FieldAsInterface(fldPath []string) (val interface{}, err error) {
+func (dDP *libphonenumberDP) FieldAsInterface(fldPath []string) (val any, err error) {
 	if len(fldPath) == 0 {
 		dDP.setDefaultFields()
 		val = dDP.cache
@@ -183,7 +183,7 @@ func (dDP *libphonenumberDP) FieldAsInterface(fldPath []string) (val interface{}
 	return
 }
 
-func (dDP *libphonenumberDP) fieldAsInterface(fldPath []string) (val interface{}, err error) {
+func (dDP *libphonenumberDP) fieldAsInterface(fldPath []string) (val any, err error) {
 	if len(fldPath) != 1 {
 		return nil, fmt.Errorf("invalid field path <%+v> for libphonenumberDP", fldPath)
 	}

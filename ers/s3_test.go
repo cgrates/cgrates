@@ -88,10 +88,10 @@ func TestS3ERProcessMessage(t *testing.T) {
 	}
 	expEvent := &utils.CGREvent{
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.CGRID: "testCgrId",
 		},
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 	body := []byte(`{"CGRID":"testCgrId"}`)
 	rdr.Config().Fields = []*config.FCTemplate{
@@ -386,7 +386,7 @@ func TestS3ERReadMsg(t *testing.T) {
 		session:   nil,
 		poster:    nil,
 	}
-	// rdr.poster = engine.NewS3Poster(rdr.Config().SourcePath, 1, make(map[string]interface{}))
+	// rdr.poster = engine.NewS3Poster(rdr.Config().SourcePath, 1, make(map[string]any))
 	rdr.Config().SourcePath = rdr.awsRegion
 	rdr.Config().ConcurrentReqs = -1
 	rdr.Config().Fields = []*config.FCTemplate{

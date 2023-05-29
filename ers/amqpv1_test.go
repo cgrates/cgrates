@@ -43,10 +43,10 @@ func TestAMQPv1ERProcessMessage(t *testing.T) {
 	}
 	expEvent := &utils.CGREvent{
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.CGRID: "testCgrId",
 		},
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 	body := []byte(`{"CGRID":"testCgrId"}`)
 	rdr.Config().Fields = []*config.FCTemplate{

@@ -207,8 +207,8 @@ func (cdr *CDR) AsMapStorage() (mp utils.MapStorage) {
 	return
 }
 
-func (cdr *CDR) AsMapStringIface() (mp map[string]interface{}) {
-	mp = make(map[string]interface{})
+func (cdr *CDR) AsMapStringIface() (mp map[string]any) {
+	mp = make(map[string]any)
 	for fld, val := range cdr.ExtraFields {
 		mp[fld] = val
 	}
@@ -311,7 +311,7 @@ func (cdr *CDR) AsCGREvent() *utils.CGREvent {
 		Tenant:  cdr.Tenant,
 		ID:      utils.UUIDSha1Prefix(),
 		Event:   cdr.AsMapStringIface(),
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 }
 
@@ -431,15 +431,15 @@ func (uR *UsageRecord) GetId() string {
 
 type ExternalCDRWithAPIOpts struct {
 	*ExternalCDR
-	APIOpts map[string]interface{}
+	APIOpts map[string]any
 }
 
 type UsageRecordWithAPIOpts struct {
 	*UsageRecord
-	APIOpts map[string]interface{}
+	APIOpts map[string]any
 }
 
 type CDRWithAPIOpts struct {
 	*CDR
-	APIOpts map[string]interface{}
+	APIOpts map[string]any
 }

@@ -37,7 +37,7 @@ type RatingProfile struct {
 type RatingProfileWithAPIOpts struct {
 	*RatingProfile
 	Tenant  string
-	APIOpts map[string]interface{}
+	APIOpts map[string]any
 }
 
 type RatingPlanActivation struct {

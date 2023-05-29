@@ -121,7 +121,7 @@ func testHTTPExportEvent(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "voiceEvent",
 			Time:   utils.TimePointer(time.Now()),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.CGRID:        utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()),
 				utils.ToR:          utils.MetaVoice,
 				utils.OriginID:     "dsafdsaf",
@@ -149,7 +149,7 @@ func testHTTPExportEvent(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "dataEvent",
 			Time:   utils.TimePointer(time.Now()),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.CGRID:        utils.Sha1("abcdef", time.Unix(1383813745, 0).UTC().String()),
 				utils.ToR:          utils.MetaData,
 				utils.OriginID:     "abcdef",
@@ -177,7 +177,7 @@ func testHTTPExportEvent(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "SMSEvent",
 			Time:   utils.TimePointer(time.Now()),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.CGRID:        utils.Sha1("sdfwer", time.Unix(1383813745, 0).UTC().String()),
 				utils.ToR:          utils.MetaSMS,
 				utils.OriginID:     "sdfwer",
@@ -205,7 +205,7 @@ func testHTTPExportEvent(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "SMSEvent",
 			Time:   utils.TimePointer(time.Now()),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.CGRID:        utils.Sha1("sms2", time.Unix(1383813745, 0).UTC().String()),
 				utils.ToR:          utils.MetaSMS,
 				utils.OriginID:     "sms2",

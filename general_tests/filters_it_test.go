@@ -148,7 +148,7 @@ func testV1FltrAddStats(t *testing.T) {
 	ev1 := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 			utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			utils.Usage:        11 * time.Second,
@@ -165,7 +165,7 @@ func testV1FltrAddStats(t *testing.T) {
 	ev1 = &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event2",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 			utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			utils.Usage:        11 * time.Second,
@@ -182,7 +182,7 @@ func testV1FltrAddStats(t *testing.T) {
 	ev1 = &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event2",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1002",
 			utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			utils.Usage:        5 * time.Second,
@@ -199,7 +199,7 @@ func testV1FltrAddStats(t *testing.T) {
 	ev1 = &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event2",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1002",
 			utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			utils.Usage:        6 * time.Second,
@@ -216,7 +216,7 @@ func testV1FltrAddStats(t *testing.T) {
 	ev1 = &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event3",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1003",
 			utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			utils.Usage:        11 * time.Second,
@@ -233,7 +233,7 @@ func testV1FltrAddStats(t *testing.T) {
 	ev1 = &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event3",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Stat":           "Stat1_1",
 			utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			utils.Usage:      11 * time.Second,
@@ -251,7 +251,7 @@ func testV1FltrAddStats(t *testing.T) {
 	ev1 = &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event3",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Stat":           "Stat1_1",
 			utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			utils.Usage:      15 * time.Second,
@@ -336,7 +336,7 @@ func testV1FltrGetThresholdForEvent(t *testing.T) {
 	tEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1010"},
 	}
 	var ids []string
@@ -397,7 +397,7 @@ func testV1FltrGetThresholdForEvent2(t *testing.T) {
 	tEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1010"},
 	}
 	var ids []string
@@ -439,11 +439,11 @@ func testV1FltrPopulateResources(t *testing.T) {
 	argsRU := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     utils.UUIDSha1Prefix(),
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Account":     "3001",
 			"Destination": "3002",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e21",
 			utils.OptsResourcesUnits:   3,
 		},
@@ -504,7 +504,7 @@ func testV1FltrPopulateResources(t *testing.T) {
 	tEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "2020"},
 	}
 
@@ -583,11 +583,11 @@ func testV1FltrPopulateResourcesAvailableUnits(t *testing.T) {
 	argsRU := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     utils.UUIDSha1Prefix(),
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Account":     "3001",
 			"Destination": "3002",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e21",
 			utils.OptsResourcesUnits:   9,
 		},
@@ -652,7 +652,7 @@ func testV1FltrPopulateResourcesAvailableUnits(t *testing.T) {
 	statsEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event_nr2",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 			utils.Usage:        "1",
 		},
@@ -772,7 +772,7 @@ func testV1FltrAccounts(t *testing.T) {
 	tEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001"},
 	}
 	var ids []string
@@ -858,7 +858,7 @@ func testV1FltrAccountsExistsDynamicaly(t *testing.T) {
 	tEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001"},
 	}
 	var ids []string
@@ -871,7 +871,7 @@ func testV1FltrAccountsExistsDynamicaly(t *testing.T) {
 	tEv = &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event2",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "non"},
 	}
 	ids = nil
@@ -931,15 +931,15 @@ func testV1FltrChargerSuffix(t *testing.T) {
 			CGREvent: &utils.CGREvent{ // matching Charger1
 				Tenant: "cgrates.org",
 				ID:     "event1",
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					utils.AccountField: "1010",
 					utils.Subject:      "intraState",
 					utils.RunID:        "Intra",
 					utils.Destination:  "999",
 				},
-				APIOpts: map[string]interface{}{
+				APIOpts: map[string]any{
 					utils.MetaSubsys:               utils.MetaChargers,
-					utils.OptsAttributesProfileIDs: []interface{}{"*constant:*req.Subject:intraState"},
+					utils.OptsAttributesProfileIDs: []any{"*constant:*req.Subject:intraState"},
 				},
 			},
 		},
@@ -947,7 +947,7 @@ func testV1FltrChargerSuffix(t *testing.T) {
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1010",
 			utils.Subject:      "Something_intra",
 			utils.Destination:  "999",
@@ -969,15 +969,15 @@ func testV1FltrChargerSuffix(t *testing.T) {
 			CGREvent: &utils.CGREvent{ // matching Charger1
 				Tenant: "cgrates.org",
 				ID:     "event1",
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					utils.AccountField: "1010",
 					utils.Subject:      "interState",
 					utils.RunID:        "Inter",
 					utils.Destination:  "999",
 				},
-				APIOpts: map[string]interface{}{
+				APIOpts: map[string]any{
 					utils.MetaSubsys:               utils.MetaChargers,
-					utils.OptsAttributesProfileIDs: []interface{}{"*constant:*req.Subject:interState"},
+					utils.OptsAttributesProfileIDs: []any{"*constant:*req.Subject:interState"},
 				},
 			},
 		},
@@ -986,7 +986,7 @@ func testV1FltrChargerSuffix(t *testing.T) {
 
 		Tenant: "cgrates.org",
 		ID:     "event1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1010",
 			utils.Subject:      "Something_inter",
 			utils.Destination:  "999",
@@ -1031,12 +1031,12 @@ func testV1FltrAttributesPrefix(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.new",
 			ID:     "event1",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"CustomField":     "2007",
 				"CustomField2":    "+2007",
 				utils.Destination: "+1207",
 			},
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.OptsContext: "prefix",
 			},
 		},
@@ -1044,12 +1044,12 @@ func testV1FltrAttributesPrefix(t *testing.T) {
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.new",
 		ID:     "event1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"CustomField":     "+2007",
 			"CustomField2":    "+2007",
 			utils.Destination: "+1207",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsContext: "prefix",
 		},
 	}
@@ -1126,10 +1126,10 @@ func testV1FltrPopulateTimings(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testV1FltrPopulateTimings",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AnswerTime: "2021-04-29T08:35:00Z",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsContext:              utils.MetaAny,
 			utils.OptsAttributesProfileIDs: []string{"FltrTest"},
 		},
@@ -1140,11 +1140,11 @@ func testV1FltrPopulateTimings(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testV1FltrPopulateTimings",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.AnswerTime: "2021-04-29T10:45:00Z",
 			},
-			APIOpts: map[string]interface{}{
-				utils.OptsAttributesProfileIDs: []interface{}{"FltrTest"},
+			APIOpts: map[string]any{
+				utils.OptsAttributesProfileIDs: []any{"FltrTest"},
 				utils.OptsContext:              utils.MetaAny,
 			},
 		},

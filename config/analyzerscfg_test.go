@@ -49,7 +49,7 @@ func TestAnalyzerSCfgAsMapInterface(t *testing.T) {
 		"analyzers":{},
     }
 }`
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		utils.EnabledCfg:         false,
 		utils.CleanupIntervalCfg: "1h0m0s",
 		utils.DBPathCfg:          "/var/spool/cgrates/analyzers",
@@ -70,7 +70,7 @@ func TestAnalyzerSCfgAsMapInterface1(t *testing.T) {
         },
     }
 }`
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		utils.EnabledCfg:         true,
 		utils.CleanupIntervalCfg: "1h0m0s",
 		utils.DBPathCfg:          "/var/spool/cgrates/analyzers",

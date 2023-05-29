@@ -136,7 +136,7 @@ func testTimingSetTiming(t *testing.T) {
 			StartTime: "00:00:00",
 			EndTime:   "00:00:01",
 		},
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 
 	var reply string

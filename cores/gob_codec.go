@@ -51,11 +51,11 @@ func (c *gobServerCodec) ReadRequestHeader(r *rpc.Request) error {
 	return c.dec.Decode(r)
 }
 
-func (c *gobServerCodec) ReadRequestBody(body interface{}) error {
+func (c *gobServerCodec) ReadRequestBody(body any) error {
 	return c.dec.Decode(body)
 }
 
-func (c *gobServerCodec) WriteResponse(r *rpc.Response, body interface{}) (err error) {
+func (c *gobServerCodec) WriteResponse(r *rpc.Response, body any) (err error) {
 	if err = c.enc.Encode(r); err != nil {
 		if c.encBuf.Flush() == nil {
 			// Gob couldn't encode the header. Should not happen, so if it does,

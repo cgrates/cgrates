@@ -106,9 +106,9 @@ func (erS *ERsCfg) Clone() (cln *ERsCfg) {
 	return
 }
 
-// AsMapInterface returns the config as a map[string]interface{}
-func (erS *ERsCfg) AsMapInterface(separator string) (initialMP map[string]interface{}) {
-	initialMP = map[string]interface{}{
+// AsMapInterface returns the config as a map[string]any
+func (erS *ERsCfg) AsMapInterface(separator string) (initialMP map[string]any) {
+	initialMP = map[string]any{
 		utils.EnabledCfg:         erS.Enabled,
 		utils.PartialCacheTTLCfg: "0",
 	}
@@ -126,7 +126,7 @@ func (erS *ERsCfg) AsMapInterface(separator string) (initialMP map[string]interf
 		initialMP[utils.SessionSConnsCfg] = sessionSConns
 	}
 	if erS.Readers != nil {
-		readers := make([]map[string]interface{}, len(erS.Readers))
+		readers := make([]map[string]any, len(erS.Readers))
 		for i, item := range erS.Readers {
 			readers[i] = item.AsMapInterface(separator)
 		}
@@ -802,9 +802,9 @@ func (er EventReaderCfg) Clone() (cln *EventReaderCfg) {
 	return
 }
 
-// AsMapInterface returns the config as a map[string]interface{}
-func (er *EventReaderCfg) AsMapInterface(separator string) (initialMP map[string]interface{}) {
-	opts := map[string]interface{}{}
+// AsMapInterface returns the config as a map[string]any
+func (er *EventReaderCfg) AsMapInterface(separator string) (initialMP map[string]any) {
+	opts := map[string]any{}
 
 	if er.Opts.PartialPath != nil {
 		opts[utils.PartialPathOpt] = *er.Opts.PartialPath
@@ -996,7 +996,7 @@ func (er *EventReaderCfg) AsMapInterface(separator string) (initialMP map[string
 		opts[utils.NATSJetStreamMaxWaitProcessedCfg] = er.Opts.NATSJetStreamMaxWaitProcessed.String()
 	}
 
-	initialMP = map[string]interface{}{
+	initialMP = map[string]any{
 		utils.IDCfg:                 er.ID,
 		utils.TypeCfg:               er.Type,
 		utils.ConcurrentRequestsCfg: er.ConcurrentReqs,
@@ -1017,21 +1017,21 @@ func (er *EventReaderCfg) AsMapInterface(separator string) (initialMP map[string
 	}
 
 	if er.Fields != nil {
-		fields := make([]map[string]interface{}, len(er.Fields))
+		fields := make([]map[string]any, len(er.Fields))
 		for i, item := range er.Fields {
 			fields[i] = item.AsMapInterface(separator)
 		}
 		initialMP[utils.FieldsCfg] = fields
 	}
 	if er.CacheDumpFields != nil {
-		cacheDumpFields := make([]map[string]interface{}, len(er.CacheDumpFields))
+		cacheDumpFields := make([]map[string]any, len(er.CacheDumpFields))
 		for i, item := range er.CacheDumpFields {
 			cacheDumpFields[i] = item.AsMapInterface(separator)
 		}
 		initialMP[utils.CacheDumpFieldsCfg] = cacheDumpFields
 	}
 	if er.PartialCommitFields != nil {
-		parCFields := make([]map[string]interface{}, len(er.PartialCommitFields))
+		parCFields := make([]map[string]any, len(er.PartialCommitFields))
 		for i, item := range er.PartialCommitFields {
 			parCFields[i] = item.AsMapInterface(separator)
 		}

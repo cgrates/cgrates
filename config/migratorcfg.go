@@ -111,9 +111,9 @@ func (mg *MigratorCgrCfg) loadFromJSONCfg(jsnCfg *MigratorCfgJson) (err error) {
 	return nil
 }
 
-// AsMapInterface returns the config as a map[string]interface{}
-func (mg *MigratorCgrCfg) AsMapInterface() (initialMP map[string]interface{}) {
-	outDataDBOpts := map[string]interface{}{
+// AsMapInterface returns the config as a map[string]any
+func (mg *MigratorCgrCfg) AsMapInterface() (initialMP map[string]any) {
+	outDataDBOpts := map[string]any{
 		utils.RedisMaxConnsCfg:           mg.OutDataDBOpts.RedisMaxConns,
 		utils.RedisConnectAttemptsCfg:    mg.OutDataDBOpts.RedisConnectAttempts,
 		utils.RedisSentinelNameCfg:       mg.OutDataDBOpts.RedisSentinel,
@@ -129,7 +129,7 @@ func (mg *MigratorCgrCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		utils.RedisClientKey:             mg.OutDataDBOpts.RedisClientKey,
 		utils.RedisCACertificate:         mg.OutDataDBOpts.RedisCACertificate,
 	}
-	outStorDBOpts := map[string]interface{}{
+	outStorDBOpts := map[string]any{
 		utils.SQLMaxOpenConnsCfg:   mg.OutStorDBOpts.SQLMaxOpenConns,
 		utils.SQLMaxIdleConnsCfg:   mg.OutStorDBOpts.SQLMaxIdleConns,
 		utils.SQLConnMaxLifetime:   mg.OutStorDBOpts.SQLConnMaxLifetime.String(),
@@ -138,7 +138,7 @@ func (mg *MigratorCgrCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		utils.MysqlLocation:        mg.OutStorDBOpts.MySQLLocation,
 		utils.MYSQLDSNParams:       mg.OutStorDBOpts.MySQLDSNParams,
 	}
-	return map[string]interface{}{
+	return map[string]any{
 		utils.OutDataDBTypeCfg:     mg.OutDataDBType,
 		utils.OutDataDBHostCfg:     mg.OutDataDBHost,
 		utils.OutDataDBPortCfg:     mg.OutDataDBPort,

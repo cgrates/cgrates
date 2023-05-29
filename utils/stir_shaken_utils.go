@@ -92,7 +92,7 @@ func GetReaderFromPath(path string, timeout time.Duration) (r io.ReadCloser, err
 }
 
 // EncodeBase64JSON encodes the structure in json and then the string in base64
-func EncodeBase64JSON(val interface{}) (enc string, err error) {
+func EncodeBase64JSON(val any) (enc string, err error) {
 	var b []byte
 	if b, err = json.Marshal(val); err != nil {
 		return
@@ -102,7 +102,7 @@ func EncodeBase64JSON(val interface{}) (enc string, err error) {
 }
 
 // DecodeBase64JSON decodes the base64 json string in the given interface
-func DecodeBase64JSON(data string, val interface{}) (err error) {
+func DecodeBase64JSON(data string, val any) (err error) {
 	var b []byte
 	if b, err = jwt.DecodeSegment(data); err != nil {
 		return

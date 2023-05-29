@@ -536,22 +536,22 @@ func TestDataDbCfgAsMapInterface(t *testing.T) {
 		},
 	},		
 }`
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		utils.DataDbTypeCfg: "*redis",
 		utils.DataDbHostCfg: "127.0.0.1",
 		utils.DataDbPortCfg: 6379,
 		utils.DataDbNameCfg: "10",
 		utils.DataDbUserCfg: "cgrates",
 		utils.DataDbPassCfg: "",
-		utils.OptsCfg: map[string]interface{}{
+		utils.OptsCfg: map[string]any{
 			utils.RedisSentinelNameCfg: "",
 			utils.MongoQueryTimeoutCfg: "10s",
 		},
 		utils.RemoteConnsCfg:      []string{},
 		utils.ReplicationConnsCfg: []string{},
-		utils.ItemsCfg: map[string]interface{}{
-			utils.MetaAccounts:            map[string]interface{}{utils.RemoteCfg: true, utils.ReplicateCfg: false, utils.APIKeyCfg: "randomVal", utils.RouteIDCfg: "randomVal", utils.LimitCfg: -1, utils.StaticTTLCfg: false, utils.TTLCfg: "1ns"},
-			utils.MetaReverseDestinations: map[string]interface{}{utils.RemoteCfg: false, utils.ReplicateCfg: false, utils.APIKeyCfg: "randomVal", utils.RouteIDCfg: "randomVal", utils.LimitCfg: -1, utils.StaticTTLCfg: false, utils.TTLCfg: "1ns"},
+		utils.ItemsCfg: map[string]any{
+			utils.MetaAccounts:            map[string]any{utils.RemoteCfg: true, utils.ReplicateCfg: false, utils.APIKeyCfg: "randomVal", utils.RouteIDCfg: "randomVal", utils.LimitCfg: -1, utils.StaticTTLCfg: false, utils.TTLCfg: "1ns"},
+			utils.MetaReverseDestinations: map[string]any{utils.RemoteCfg: false, utils.ReplicateCfg: false, utils.APIKeyCfg: "randomVal", utils.RouteIDCfg: "randomVal", utils.LimitCfg: -1, utils.StaticTTLCfg: false, utils.TTLCfg: "1ns"},
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
@@ -561,14 +561,14 @@ func TestDataDbCfgAsMapInterface(t *testing.T) {
 		if err != nil {
 			t.Error(err)
 		}
-		if !reflect.DeepEqual(eMap[utils.ItemsCfg].(map[string]interface{})[utils.MetaAccounts],
-			rcv[utils.ItemsCfg].(map[string]interface{})[utils.MetaAccounts]) {
-			t.Errorf("Expected %+v, received %+v", eMap[utils.ItemsCfg].(map[string]interface{})[utils.MetaAccounts],
-				rcv[utils.ItemsCfg].(map[string]interface{})[utils.MetaAccounts])
-		} else if !reflect.DeepEqual(eMap[utils.ItemsCfg].(map[string]interface{})[utils.MetaReverseDestinations],
-			rcv[utils.ItemsCfg].(map[string]interface{})[utils.MetaReverseDestinations]) {
-			t.Errorf("Expected %+v, received %+v", eMap[utils.ItemsCfg].(map[string]interface{})[utils.MetaReverseDestinations],
-				rcv[utils.ItemsCfg].(map[string]interface{})[utils.MetaReverseDestinations])
+		if !reflect.DeepEqual(eMap[utils.ItemsCfg].(map[string]any)[utils.MetaAccounts],
+			rcv[utils.ItemsCfg].(map[string]any)[utils.MetaAccounts]) {
+			t.Errorf("Expected %+v, received %+v", eMap[utils.ItemsCfg].(map[string]any)[utils.MetaAccounts],
+				rcv[utils.ItemsCfg].(map[string]any)[utils.MetaAccounts])
+		} else if !reflect.DeepEqual(eMap[utils.ItemsCfg].(map[string]any)[utils.MetaReverseDestinations],
+			rcv[utils.ItemsCfg].(map[string]any)[utils.MetaReverseDestinations]) {
+			t.Errorf("Expected %+v, received %+v", eMap[utils.ItemsCfg].(map[string]any)[utils.MetaReverseDestinations],
+				rcv[utils.ItemsCfg].(map[string]any)[utils.MetaReverseDestinations])
 		}
 	}
 }

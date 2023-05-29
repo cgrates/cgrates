@@ -134,9 +134,9 @@ func (cdrscfg *CdrsCfg) loadFromJSONCfg(jsnCdrsCfg *CdrsJsonCfg) (err error) {
 	return nil
 }
 
-// AsMapInterface returns the config as a map[string]interface{}
-func (cdrscfg *CdrsCfg) AsMapInterface() (initialMP map[string]interface{}) {
-	initialMP = map[string]interface{}{
+// AsMapInterface returns the config as a map[string]any
+func (cdrscfg *CdrsCfg) AsMapInterface() (initialMP map[string]any) {
+	initialMP = map[string]any{
 		utils.EnabledCfg:       cdrscfg.Enabled,
 		utils.StoreCdrsCfg:     cdrscfg.StoreCdrs,
 		utils.SMCostRetriesCfg: cdrscfg.SMCostRetries,

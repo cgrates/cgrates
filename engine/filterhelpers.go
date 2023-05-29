@@ -56,7 +56,7 @@ func MatchingItemIDsForEvent(ev utils.MapStorage, stringFldIDs, prefixFldIDs, su
 				fieldIDs = &allFieldIDs
 			}
 			for _, fldName := range *fieldIDs {
-				var fieldValIf interface{}
+				var fieldValIf any
 				fieldValIf, err = ev.FieldAsInterface(utils.SplitPath(fldName, utils.NestingSep[0], -1))
 				if err != nil && filterIndexTypes[i] != utils.MetaNone {
 					continue

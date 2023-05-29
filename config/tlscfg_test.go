@@ -55,7 +55,7 @@ func TestTlsCfgAsMapInterface(t *testing.T) {
 	cfgJSONStr := `	{
 	"tls": {},
 }`
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		utils.ServerCerificateCfg: utils.EmptyString,
 		utils.ServerKeyCfg:        utils.EmptyString,
 		utils.ServerPolicyCfg:     4,
@@ -83,7 +83,7 @@ func TestTlsCfgAsMapInterface1(t *testing.T) {
 		"server_policy":3,					
 	},
 }`
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		utils.ServerCerificateCfg: "path/To/Server/Cert",
 		utils.ServerKeyCfg:        "path/To/Server/Key",
 		utils.ServerPolicyCfg:     3,

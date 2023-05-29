@@ -41,7 +41,7 @@ type AttrRemFilterIndexes struct {
 	Tenant   string
 	Context  string
 	ItemType string
-	APIOpts  map[string]interface{}
+	APIOpts  map[string]any
 }
 
 func (apierSv1 *APIerSv1) RemoveFilterIndexes(arg *AttrRemFilterIndexes, reply *string) (err error) {

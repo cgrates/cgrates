@@ -46,7 +46,7 @@ type Account struct {
 
 type AccountWithAPIOpts struct {
 	*Account
-	APIOpts map[string]interface{}
+	APIOpts map[string]any
 }
 
 // User's available minutes for the specified destination
@@ -553,14 +553,14 @@ func (acc *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun bo
 			thEv := &utils.CGREvent{
 				Tenant: acntTnt.Tenant,
 				ID:     utils.GenUUID(),
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					utils.EventType:    utils.BalanceUpdate,
 					utils.EventSource:  utils.AccountService,
 					utils.AccountField: acntTnt.ID,
 					utils.BalanceID:    defaultBalance.ID,
 					utils.Units:        defaultBalance.Value,
 				},
-				APIOpts: map[string]interface{}{
+				APIOpts: map[string]any{
 					utils.MetaEventType: utils.BalanceUpdate,
 				},
 			}
@@ -904,7 +904,7 @@ func (acc *Account) GetID() string {
 }
 
 // AsOldStructure used in some api for transition
-func (acc *Account) AsOldStructure() interface{} {
+func (acc *Account) AsOldStructure() any {
 	type Balance struct {
 		Uuid           string //system wide unique
 		Id             string // account wide unique
@@ -1076,7 +1076,7 @@ func (acc *Account) Publish(initBal map[string]float64) {
 		ID:     utils.GenUUID(),
 		Time:   utils.TimePointer(time.Now()),
 		Event:  acntSummary.AsMapInterface(),
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaEventType: utils.AccountUpdate,
 		},
 	}
@@ -1197,7 +1197,7 @@ func (acc *Account) GetBalanceWithID(blcType, blcID string) (blc *Balance) {
 }
 
 // FieldAsInterface func to help EventCost FieldAsInterface
-func (as *AccountSummary) FieldAsInterface(fldPath []string) (val interface{}, err error) {
+func (as *AccountSummary) FieldAsInterface(fldPath []string) (val any, err error) {
 	if as == nil || len(fldPath) == 0 {
 		return nil, utils.ErrNotFound
 	}
@@ -1252,7 +1252,7 @@ func (as *AccountSummary) FieldAsInterface(fldPath []string) (val interface{}, e
 }
 
 func (as *AccountSummary) FieldAsString(fldPath []string) (val string, err error) {
-	var iface interface{}
+	var iface any
 	iface, err = as.FieldAsInterface(fldPath)
 	if err != nil {
 		return
@@ -1265,8 +1265,8 @@ func (as *AccountSummary) String() string {
 	return utils.ToIJSON(as)
 }
 
-func (as *AccountSummary) AsMapInterface() map[string]interface{} {
-	return map[string]interface{}{
+func (as *AccountSummary) AsMapInterface() map[string]any {
+	return map[string]any{
 		utils.Tenant:           as.Tenant,
 		utils.ID:               as.ID,
 		utils.AllowNegative:    as.AllowNegative,
@@ -1279,7 +1279,7 @@ func (acc *Account) String() string {
 	return utils.ToJSON(acc)
 }
 
-func (acc *Account) FieldAsInterface(fldPath []string) (val interface{}, err error) {
+func (acc *Account) FieldAsInterface(fldPath []string) (val any, err error) {
 	if len(fldPath) == 0 {
 		return acc, nil
 	}
@@ -1403,7 +1403,7 @@ func (acc *Account) FieldAsInterface(fldPath []string) (val interface{}, err err
 }
 
 func (acc *Account) FieldAsString(fldPath []string) (val string, err error) {
-	var iface interface{}
+	var iface any
 	iface, err = acc.FieldAsInterface(fldPath)
 	if err != nil {
 		return

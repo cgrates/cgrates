@@ -1136,7 +1136,7 @@ func (cfg *CGRConfig) GetReloadChan(sectID string) chan struct{} {
 
 // Call implements rpcclient.ClientConnector interface for internal RPC
 func (cfg *CGRConfig) Call(serviceMethod string,
-	args interface{}, reply interface{}) error {
+	args any, reply any) error {
 	return utils.APIerRPCCall(cfg, serviceMethod, args, reply)
 }
 
@@ -1492,9 +1492,9 @@ func (cfg *CGRConfig) reloadSections(sections ...string) {
 	}
 }
 
-// AsMapInterface returns the config as a map[string]interface{}
-func (cfg *CGRConfig) AsMapInterface(separator string) (mp map[string]interface{}) {
-	return map[string]interface{}{
+// AsMapInterface returns the config as a map[string]any
+func (cfg *CGRConfig) AsMapInterface(separator string) (mp map[string]any) {
+	return map[string]any{
 		LoaderJson:         cfg.loaderCfg.AsMapInterface(separator),
 		HttpAgentJson:      cfg.httpAgentCfg.AsMapInterface(separator),
 		RPCConnsJsonName:   cfg.rpcConns.AsMapInterface(),
@@ -1542,7 +1542,7 @@ func (cfg *CGRConfig) AsMapInterface(separator string) (mp map[string]interface{
 
 // ReloadArgs the API params for V1ReloadConfig
 type ReloadArgs struct {
-	APIOpts map[string]interface{}
+	APIOpts map[string]any
 	Tenant  string
 	Path    string
 	Section string
@@ -1585,13 +1585,13 @@ func (cfg *CGRConfig) V1ReloadConfig(args *ReloadArgs, reply *string) (err error
 
 // SectionWithAPIOpts the API params for GetConfig
 type SectionWithAPIOpts struct {
-	APIOpts map[string]interface{}
+	APIOpts map[string]any
 	Tenant  string
 	Section string
 }
 
 // V1GetConfig will retrieve from CGRConfig a section
-func (cfg *CGRConfig) V1GetConfig(args *SectionWithAPIOpts, reply *map[string]interface{}) (err error) {
+func (cfg *CGRConfig) V1GetConfig(args *SectionWithAPIOpts, reply *map[string]any) (err error) {
 	args.Section = utils.FirstNonEmpty(args.Section, utils.MetaAll)
 	cfg.cacheDPMux.RLock()
 	if mp, has := cfg.cacheDP[args.Section]; has && mp != nil {
@@ -1608,7 +1608,7 @@ func (cfg *CGRConfig) V1GetConfig(args *SectionWithAPIOpts, reply *map[string]in
 		cfg.cacheDP[args.Section] = *reply
 		cfg.cacheDPMux.Unlock()
 	}()
-	var mp interface{}
+	var mp any
 	switch args.Section {
 	case utils.MetaAll:
 		*reply = cfg.AsMapInterface(cfg.GeneralCfg().RSRSep)
@@ -1700,15 +1700,15 @@ func (cfg *CGRConfig) V1GetConfig(args *SectionWithAPIOpts, reply *map[string]in
 	default:
 		return errors.New("Invalid section")
 	}
-	*reply = map[string]interface{}{args.Section: mp}
+	*reply = map[string]any{args.Section: mp}
 	return
 }
 
 // SetConfigArgs the API params for V1SetConfig
 type SetConfigArgs struct {
-	APIOpts map[string]interface{}
+	APIOpts map[string]any
 	Tenant  string
-	Config  map[string]interface{}
+	Config  map[string]any
 	DryRun  bool
 }
 
@@ -1771,7 +1771,7 @@ func (cfg *CGRConfig) V1GetConfigAsJSON(args *SectionWithAPIOpts, reply *string)
 		cfg.cacheDP[args.Section] = rplyMap
 		cfg.cacheDPMux.Unlock()
 	}()
-	var mp interface{}
+	var mp any
 	switch args.Section {
 	case utils.MetaAll:
 		rplyMap = cfg.AsMapInterface(cfg.GeneralCfg().RSRSep)
@@ -1864,14 +1864,14 @@ func (cfg *CGRConfig) V1GetConfigAsJSON(args *SectionWithAPIOpts, reply *string)
 	default:
 		return errors.New("Invalid section")
 	}
-	rplyMap = map[string]interface{}{args.Section: mp}
+	rplyMap = map[string]any{args.Section: mp}
 	*reply = utils.ToJSON(rplyMap)
 	return
 }
 
 // SetConfigFromJSONArgs the API params for V1SetConfigFromJSON
 type SetConfigFromJSONArgs struct {
-	APIOpts map[string]interface{}
+	APIOpts map[string]any
 	Tenant  string
 	Config  string
 	DryRun  bool

@@ -45,7 +45,7 @@ func (self *CmdRemoveChargers) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdRemoveChargers) RpcParams(reset bool) interface{} {
+func (self *CmdRemoveChargers) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &utils.TenantIDWithAPIOpts{}
 	}
@@ -56,7 +56,7 @@ func (self *CmdRemoveChargers) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdRemoveChargers) RpcResult() interface{} {
+func (self *CmdRemoveChargers) RpcResult() any {
 	var s string
 	return &s
 }

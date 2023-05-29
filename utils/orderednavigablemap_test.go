@@ -851,7 +851,7 @@ func TestOrderedNavigableMapOrderedFields(t *testing.T) {
 		PathSlice: []string{"Field5"},
 		Path:      "Field5",
 	})
-	exp := []interface{}{"1003", "1004", "1006"}
+	exp := []any{"1003", "1004", "1006"}
 	rcv := nm.OrderedFields()
 	if !reflect.DeepEqual(exp, rcv) {
 		t.Errorf("Expected %+v<%T>, received %+v<%T>", exp, exp[0], rcv, rcv[0])

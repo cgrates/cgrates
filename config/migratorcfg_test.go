@@ -112,7 +112,7 @@ func TestMigratorCgrCfgAsMapInterface(t *testing.T) {
 		 },
 	},
 }`
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		utils.OutDataDBTypeCfg:     "*redis",
 		utils.OutDataDBHostCfg:     "127.0.0.19",
 		utils.OutDataDBPortCfg:     "8865",
@@ -127,7 +127,7 @@ func TestMigratorCgrCfgAsMapInterface(t *testing.T) {
 		utils.OutStorDBUserCfg:     "cgrates",
 		utils.OutStorDBPasswordCfg: "",
 		utils.UsersFiltersCfg:      []string{"users", "filters", "Account"},
-		utils.OutStorDBOptsCfg: map[string]interface{}{
+		utils.OutStorDBOptsCfg: map[string]any{
 			utils.MongoQueryTimeoutCfg: "0s",
 			utils.MYSQLDSNParams: map[string]string{
 				"key": "value",
@@ -138,7 +138,7 @@ func TestMigratorCgrCfgAsMapInterface(t *testing.T) {
 			utils.SQLMaxIdleConnsCfg:    0,
 			utils.SQLMaxOpenConnsCfg:    0,
 		},
-		utils.OutDataDBOptsCfg: map[string]interface{}{
+		utils.OutDataDBOptsCfg: map[string]any{
 			utils.MongoQueryTimeoutCfg:       "0s",
 			utils.RedisMaxConnsCfg:           5,
 			utils.RedisConnectAttemptsCfg:    15,
@@ -172,7 +172,7 @@ func TestMigratorCgrCfgAsMapInterface1(t *testing.T) {
 			},
 		},
 	}`
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		utils.OutDataDBTypeCfg:     "*redis",
 		utils.OutDataDBHostCfg:     "127.0.0.1",
 		utils.OutDataDBPortCfg:     "6379",
@@ -187,7 +187,7 @@ func TestMigratorCgrCfgAsMapInterface1(t *testing.T) {
 		utils.OutStorDBUserCfg:     "cgrates",
 		utils.OutStorDBPasswordCfg: "out_stordb_password",
 		utils.UsersFiltersCfg:      []string{"users", "filters", "Account"},
-		utils.OutStorDBOptsCfg: map[string]interface{}{
+		utils.OutStorDBOptsCfg: map[string]any{
 			utils.MongoQueryTimeoutCfg:  "0s",
 			utils.MYSQLDSNParams:        map[string]string(nil),
 			utils.MysqlLocation:         utils.EmptyString,
@@ -196,7 +196,7 @@ func TestMigratorCgrCfgAsMapInterface1(t *testing.T) {
 			utils.SQLMaxIdleConnsCfg:    0,
 			utils.SQLMaxOpenConnsCfg:    0,
 		},
-		utils.OutDataDBOptsCfg: map[string]interface{}{
+		utils.OutDataDBOptsCfg: map[string]any{
 			utils.MongoQueryTimeoutCfg:       "0s",
 			utils.RedisMaxConnsCfg:           10,
 			utils.RedisConnectAttemptsCfg:    20,
@@ -224,7 +224,7 @@ func TestMigratorCgrCfgAsMapInterface2(t *testing.T) {
 	cfgJSONStr := `{
 		"migrator": {},
 	}`
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		utils.OutDataDBTypeCfg:     "*redis",
 		utils.OutDataDBHostCfg:     "127.0.0.1",
 		utils.OutDataDBPortCfg:     "6379",
@@ -239,7 +239,7 @@ func TestMigratorCgrCfgAsMapInterface2(t *testing.T) {
 		utils.OutStorDBUserCfg:     "cgrates",
 		utils.OutStorDBPasswordCfg: "",
 		utils.UsersFiltersCfg:      []string{},
-		utils.OutStorDBOptsCfg: map[string]interface{}{
+		utils.OutStorDBOptsCfg: map[string]any{
 			utils.MongoQueryTimeoutCfg:  "0s",
 			utils.MYSQLDSNParams:        map[string]string(nil),
 			utils.MysqlLocation:         utils.EmptyString,
@@ -248,7 +248,7 @@ func TestMigratorCgrCfgAsMapInterface2(t *testing.T) {
 			utils.SQLMaxIdleConnsCfg:    0,
 			utils.SQLMaxOpenConnsCfg:    0,
 		},
-		utils.OutDataDBOptsCfg: map[string]interface{}{
+		utils.OutDataDBOptsCfg: map[string]any{
 			utils.MongoQueryTimeoutCfg:       "0s",
 			utils.RedisMaxConnsCfg:           10,
 			utils.RedisConnectAttemptsCfg:    20,

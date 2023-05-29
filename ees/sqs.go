@@ -129,7 +129,7 @@ func (pstr *SQSee) Connect() (err error) {
 	return
 }
 
-func (pstr *SQSee) ExportEvent(message interface{}, _ string) (err error) {
+func (pstr *SQSee) ExportEvent(message any, _ string) (err error) {
 	pstr.reqs.get()
 	pstr.RLock()
 	_, err = pstr.svc.SendMessage(

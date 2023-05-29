@@ -80,14 +80,14 @@ func TestThresholdSCfgAsMapInterfaceCase1(t *testing.T) {
 	cfgJSONStr := `{
 		"thresholds": {},		
 }`
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		utils.EnabledCfg:             false,
 		utils.StoreIntervalCfg:       "",
 		utils.IndexedSelectsCfg:      true,
 		utils.PrefixIndexedFieldsCfg: []string{},
 		utils.SuffixIndexedFieldsCfg: []string{},
 		utils.NestedFieldsCfg:        false,
-		utils.OptsCfg: map[string]interface{}{
+		utils.OptsCfg: map[string]any{
 			utils.MetaProfileIDs:              []string{},
 			utils.MetaProfileIgnoreFiltersCfg: false,
 		},
@@ -111,7 +111,7 @@ func TestThresholdSCfgAsMapInterfaceCase2(t *testing.T) {
 			"nested_fields": true,					
 		},		
 }`
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		utils.EnabledCfg:             true,
 		utils.StoreIntervalCfg:       "96h0m0s",
 		utils.IndexedSelectsCfg:      false,
@@ -119,7 +119,7 @@ func TestThresholdSCfgAsMapInterfaceCase2(t *testing.T) {
 		utils.PrefixIndexedFieldsCfg: []string{"*req.prefix", "*req.indexed", "*req.fields"},
 		utils.SuffixIndexedFieldsCfg: []string{"*req.suffix_indexed_fields1", "*req.suffix_indexed_fields2"},
 		utils.NestedFieldsCfg:        true,
-		utils.OptsCfg: map[string]interface{}{
+		utils.OptsCfg: map[string]any{
 			utils.MetaProfileIDs:              []string{},
 			utils.MetaProfileIgnoreFiltersCfg: false,
 		},

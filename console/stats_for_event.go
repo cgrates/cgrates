@@ -50,7 +50,7 @@ func (self *CmdStatsQueueForEvent) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdStatsQueueForEvent) RpcParams(reset bool) interface{} {
+func (self *CmdStatsQueueForEvent) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = new(utils.CGREvent)
 	}
@@ -64,7 +64,7 @@ func (self *CmdStatsQueueForEvent) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdStatsQueueForEvent) RpcResult() interface{} {
+func (self *CmdStatsQueueForEvent) RpcResult() any {
 	var atr []string
 	return &atr
 }

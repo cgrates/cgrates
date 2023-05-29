@@ -29,25 +29,25 @@ import (
 )
 
 type ArgsReplicateSessionsWithAPIOpts struct {
-	APIOpts map[string]interface{}
+	APIOpts map[string]any
 	Tenant  string
 	sessions.ArgsReplicateSessions
 }
 
 type AttrRemoteLockWithAPIOpts struct {
-	APIOpts map[string]interface{}
+	APIOpts map[string]any
 	Tenant  string
 	utils.AttrRemoteLock
 }
 
 type AttrRemoteUnlockWithAPIOpts struct {
-	APIOpts map[string]interface{}
+	APIOpts map[string]any
 	Tenant  string
 	RefID   string
 }
 
 type ArgStartServiceWithAPIOpts struct {
-	APIOpts map[string]interface{}
+	APIOpts map[string]any
 	Tenant  string
 	servmanager.ArgStartService
 }

@@ -50,7 +50,7 @@ func (self *CmdGetActionPlan) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdGetActionPlan) RpcParams(reset bool) interface{} {
+func (self *CmdGetActionPlan) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &v1.AttrGetActionPlan{}
 	}
@@ -61,7 +61,7 @@ func (self *CmdGetActionPlan) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdGetActionPlan) RpcResult() interface{} {
+func (self *CmdGetActionPlan) RpcResult() any {
 	s := make([]*engine.ActionPlan, 0)
 	return &s
 }

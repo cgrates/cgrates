@@ -554,18 +554,18 @@ func SliceStringPointer(d []string) *[]string {
 	return &d
 }
 
-func ToIJSON(v interface{}) string {
+func ToIJSON(v any) string {
 	b, _ := json.MarshalIndent(v, "", " ")
 	return string(b)
 }
 
-func ToJSON(v interface{}) string {
+func ToJSON(v any) string {
 	b, _ := json.Marshal(v)
 	return string(b)
 }
 
 // Simple object cloner, b should be a pointer towards a value into which we want to decode
-func Clone(a, b interface{}) error {
+func Clone(a, b any) error {
 	buff := new(bytes.Buffer)
 	enc := gob.NewEncoder(buff)
 	dec := gob.NewDecoder(buff)
@@ -786,7 +786,7 @@ type PaginatorWithTenant struct {
 
 type TenantWithAPIOpts struct {
 	Tenant  string
-	APIOpts map[string]interface{}
+	APIOpts map[string]any
 }
 
 type MemoryPrf struct {
@@ -794,7 +794,7 @@ type MemoryPrf struct {
 	DirPath  string
 	Interval time.Duration
 	NrFiles  int
-	APIOpts  map[string]interface{}
+	APIOpts  map[string]any
 }
 
 type TenantID struct {
@@ -804,7 +804,7 @@ type TenantID struct {
 
 type TenantIDWithAPIOpts struct {
 	*TenantID
-	APIOpts map[string]interface{}
+	APIOpts map[string]any
 }
 
 func (tID *TenantID) TenantID() string {
@@ -818,7 +818,7 @@ func (tID *TenantIDWithAPIOpts) TenantIDConcatenated() string {
 // RPCCall is a generic method calling RPC on a struct instance
 // serviceMethod is assumed to be in the form InstanceV1.Method
 // where V1Method will become RPC method called on instance
-func RPCCall(inst interface{}, serviceMethod string, args interface{}, reply interface{}) error {
+func RPCCall(inst any, serviceMethod string, args any, reply any) error {
 	methodSplit := strings.Split(serviceMethod, ".")
 	if len(methodSplit) != 2 {
 		return rpcclient.ErrUnsupporteServiceMethod
@@ -844,7 +844,7 @@ func RPCCall(inst interface{}, serviceMethod string, args interface{}, reply int
 }
 
 // ApierRPCCall implements generic RPCCall for APIer instances
-func APIerRPCCall(inst interface{}, serviceMethod string, args interface{}, reply interface{}) error {
+func APIerRPCCall(inst any, serviceMethod string, args any, reply any) error {
 	methodSplit := strings.Split(serviceMethod, ".")
 	if len(methodSplit) != 2 {
 		return rpcclient.ErrUnsupporteServiceMethod
@@ -872,7 +872,7 @@ func APIerRPCCall(inst interface{}, serviceMethod string, args interface{}, repl
 // serviceMethod is assumed to be in the form InstanceV1.Method
 // where BiRPCV1Method will become RPC method called on instance
 // the subsystem is not checked
-func BiRPCCall(inst interface{}, clnt rpcclient.ClientConnector, serviceMethod string, args interface{}, reply interface{}) error {
+func BiRPCCall(inst any, clnt rpcclient.ClientConnector, serviceMethod string, args any, reply any) error {
 	parts := strings.Split(serviceMethod, ".")
 	if len(parts) != 2 {
 		return rpcclient.ErrUnsupporteServiceMethod
@@ -909,7 +909,7 @@ func BiRPCCall(inst interface{}, clnt rpcclient.ClientConnector, serviceMethod s
 
 // CachedRPCResponse is used to cache a RPC response
 type CachedRPCResponse struct {
-	Result interface{}
+	Result any
 	Error  error
 }
 
@@ -967,7 +967,7 @@ func LongExecTimeDetector(logID string, maxDur time.Duration) (endchan chan stru
 }
 
 type StringWithAPIOpts struct {
-	APIOpts map[string]interface{}
+	APIOpts map[string]any
 	Tenant  string
 	Arg     string
 }
@@ -989,7 +989,7 @@ func RandomInteger(min, max int) int {
 type LoadIDsWithAPIOpts struct {
 	LoadIDs map[string]int64
 	Tenant  string
-	APIOpts map[string]interface{}
+	APIOpts map[string]any
 }
 
 // IsURL returns if the path is an URL
@@ -1004,7 +1004,7 @@ type GetIndexesArg struct {
 	TntCtx     string
 	IdxKey     string
 	Tenant     string
-	APIOpts    map[string]interface{}
+	APIOpts    map[string]any
 }
 
 // SetIndexesArg the API arguments needed for seting an index
@@ -1013,18 +1013,18 @@ type SetIndexesArg struct {
 	TntCtx     string
 	Indexes    map[string]StringSet
 	Tenant     string
-	APIOpts    map[string]interface{}
+	APIOpts    map[string]any
 }
 
 type DurationArgs struct {
 	Duration time.Duration
-	APIOpts  map[string]interface{}
+	APIOpts  map[string]any
 	Tenant   string
 }
 
 type DirectoryArgs struct {
 	DirPath string
-	APIOpts map[string]interface{}
+	APIOpts map[string]any
 	Tenant  string
 }
 
@@ -1103,8 +1103,8 @@ func (b *boolGen) RandomBool() bool {
 
 // GenerateDBItemOpts will create the options for DB replication
 // if they are empty they should be omitted
-func GenerateDBItemOpts(apiKey, routeID, cache, rmtHost string) (mp map[string]interface{}) {
-	mp = make(map[string]interface{})
+func GenerateDBItemOpts(apiKey, routeID, cache, rmtHost string) (mp map[string]any) {
+	mp = make(map[string]any)
 	if apiKey != EmptyString {
 		mp[OptsAPIKey] = apiKey
 	}
@@ -1153,6 +1153,6 @@ func SplitPath(rule string, sep byte, n int) (splt []string) {
 
 type PanicMessageArgs struct {
 	Tenant  string
-	APIOpts map[string]interface{}
+	APIOpts map[string]any
 	Message string
 }

@@ -30,7 +30,7 @@ import (
 )
 
 // onCacheEvicted is called by ltcache when evicting an item
-func onCacheEvicted(_ string, value interface{}) {
+func onCacheEvicted(_ string, value any) {
 	ee := value.(EventExporter)
 	ee.Close()
 }
@@ -80,7 +80,7 @@ func (eeS *EventExporterS) Shutdown() {
 }
 
 // Call implements rpcclient.ClientConnector interface for internal RPC
-func (eeS *EventExporterS) Call(serviceMethod string, args interface{}, reply interface{}) error {
+func (eeS *EventExporterS) Call(serviceMethod string, args any, reply any) error {
 	return utils.RPCCall(eeS, serviceMethod, args, reply)
 }
 
@@ -104,7 +104,7 @@ func (eeS *EventExporterS) setupCache(chCfgs map[string]*config.CacheParamCfg) {
 func (eeS *EventExporterS) attrSProcessEvent(cgrEv *utils.CGREvent, attrIDs []string, ctx string) (err error) {
 	var rplyEv engine.AttrSProcessEventReply
 	if cgrEv.APIOpts == nil {
-		cgrEv.APIOpts = make(map[string]interface{})
+		cgrEv.APIOpts = make(map[string]any)
 	}
 	cgrEv.APIOpts[utils.MetaSubsys] = utils.MetaEEs
 	cgrEv.APIOpts[utils.OptsAttributesProfileIDs] = attrIDs
@@ -121,8 +121,8 @@ func (eeS *EventExporterS) attrSProcessEvent(cgrEv *utils.CGREvent, attrIDs []st
 }
 
 // V1ProcessEvent will be called each time a new event is received from readers
-// rply -> map[string]map[string]interface{}
-func (eeS *EventExporterS) V1ProcessEvent(cgrEv *engine.CGREventWithEeIDs, rply *map[string]map[string]interface{}) (err error) {
+// rply -> map[string]map[string]any
+func (eeS *EventExporterS) V1ProcessEvent(cgrEv *engine.CGREventWithEeIDs, rply *map[string]map[string]any) (err error) {
 	eeS.cfg.RLocks(config.EEsJson)
 	defer eeS.cfg.RUnlocks(config.EEsJson)
 
@@ -172,7 +172,7 @@ func (eeS *EventExporterS) V1ProcessEvent(cgrEv *engine.CGREventWithEeIDs, rply 
 		var isCached bool
 		var ee EventExporter
 		if hasCache {
-			var x interface{}
+			var x any
 			if x, isCached = eeCache.Get(eeCfg.ID); isCached {
 				ee = x.(EventExporter)
 			}
@@ -221,16 +221,16 @@ func (eeS *EventExporterS) V1ProcessEvent(cgrEv *engine.CGREventWithEeIDs, rply 
 		return
 	}
 
-	*rply = make(map[string]map[string]interface{})
+	*rply = make(map[string]map[string]any)
 	metricMapLock.Lock()
 	for exporterID, metrics := range metricsMap {
-		(*rply)[exporterID] = make(map[string]interface{})
+		(*rply)[exporterID] = make(map[string]any)
 		for key, val := range metrics {
 			switch key {
 			case utils.PositiveExports, utils.NegativeExports:
 				slsVal, canCast := val.(utils.StringSet)
 				if !canCast {
-					return fmt.Errorf("cannot cast to map[string]interface{} %+v for positive exports", val)
+					return fmt.Errorf("cannot cast to map[string]any %+v for positive exports", val)
 				}
 				(*rply)[exporterID][key] = slsVal.AsSlice()
 			default:
@@ -254,7 +254,7 @@ func exportEventWithExporter(exp EventExporter, ev *utils.CGREvent, oneTime bool
 			exp.Close()
 		}
 	}()
-	var eEv interface{}
+	var eEv any
 
 	exp.GetMetrics().Lock()
 	exp.GetMetrics().MapStorage[utils.NumberOfEvents] = exp.GetMetrics().MapStorage[utils.NumberOfEvents].(int64) + 1
@@ -284,7 +284,7 @@ func exportEventWithExporter(exp EventExporter, ev *utils.CGREvent, oneTime bool
 	return ExportWithAttempts(exp, eEv, key)
 }
 
-func ExportWithAttempts(exp EventExporter, eEv interface{}, key string) (err error) {
+func ExportWithAttempts(exp EventExporter, eEv any, key string) (err error) {
 	if exp.Cfg().FailedPostsDir != utils.MetaNone {
 		defer func() {
 			if err != nil {

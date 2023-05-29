@@ -128,10 +128,10 @@ func MemProfiling(memProfDir string, interval time.Duration, nrFiles int, shdWg 
 }
 
 // Status returns the status of the engine
-func (cS *CoreService) Status(arg *utils.TenantWithAPIOpts, reply *map[string]interface{}) (err error) {
+func (cS *CoreService) Status(arg *utils.TenantWithAPIOpts, reply *map[string]any) (err error) {
 	memstats := new(runtime.MemStats)
 	runtime.ReadMemStats(memstats)
-	response := make(map[string]interface{})
+	response := make(map[string]any)
 	response[utils.NodeID] = cS.cfg.GeneralCfg().NodeID
 	response[utils.MemoryUsage] = utils.SizeFmt(float64(memstats.HeapAlloc), "")
 	response[utils.ActiveGoroutines] = runtime.NumGoroutine()

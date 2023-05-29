@@ -371,7 +371,7 @@ func (cdrS *CDRServer) chrgrSProcessEvent(cgrEv *utils.CGREvent) (cgrEvs []*util
 func (cdrS *CDRServer) attrSProcessEvent(cgrEv *utils.CGREvent) (err error) {
 	var rplyEv AttrSProcessEventReply
 	if cgrEv.APIOpts == nil {
-		cgrEv.APIOpts = make(map[string]interface{})
+		cgrEv.APIOpts = make(map[string]any)
 	}
 	cgrEv.APIOpts[utils.MetaSubsys] = utils.MetaCDRs
 	ctx, has := cgrEv.APIOpts[utils.OptsContext]
@@ -398,7 +398,7 @@ func (cdrS *CDRServer) thdSProcessEvent(cgrEv *utils.CGREvent) (err error) {
 	// we clone the CGREvent so we can add EventType without being propagated
 	thArgs := cgrEv.Clone()
 	if thArgs.APIOpts == nil {
-		thArgs.APIOpts = make(map[string]interface{})
+		thArgs.APIOpts = make(map[string]any)
 	}
 	thArgs.APIOpts[utils.MetaEventType] = utils.CDR
 	if err = cdrS.connMgr.Call(cdrS.cgrCfg.CdrsCfg().ThresholdSConns, nil,
@@ -425,7 +425,7 @@ func (cdrS *CDRServer) statSProcessEvent(cgrEv *utils.CGREvent) (err error) {
 
 // eeSProcessEvent will process the event with the EEs component
 func (cdrS *CDRServer) eeSProcessEvent(cgrEv *CGREventWithEeIDs) (err error) {
-	var reply map[string]map[string]interface{}
+	var reply map[string]map[string]any
 	if err = cdrS.connMgr.Call(cdrS.cgrCfg.CdrsCfg().EEsConns, nil,
 		utils.EeSv1ProcessEvent,
 		cgrEv, &reply); err != nil &&
@@ -648,7 +648,7 @@ func (cdrS *CDRServer) processEvents(evs []*utils.CGREvent,
 }
 
 // Call implements the rpcclient.ClientConnector interface
-func (cdrS *CDRServer) Call(serviceMethod string, args interface{}, reply interface{}) error {
+func (cdrS *CDRServer) Call(serviceMethod string, args any, reply any) error {
 	parts := strings.Split(serviceMethod, ".")
 	if len(parts) != 2 {
 		return rpcclient.ErrUnsupporteServiceMethod
@@ -745,7 +745,7 @@ func (attr *ArgV1ProcessEvent) SetCloneable(rpcCloneable bool) {
 }
 
 // RPCClone implements rpcclient.RPCCloner interface
-func (attr *ArgV1ProcessEvent) RPCClone() (interface{}, error) {
+func (attr *ArgV1ProcessEvent) RPCClone() (any, error) {
 	if !attr.clnb {
 		return attr, nil
 	}
@@ -1066,7 +1066,7 @@ type ArgRateCDRs struct {
 	Flags []string
 	utils.RPCCDRsFilter
 	Tenant  string
-	APIOpts map[string]interface{}
+	APIOpts map[string]any
 }
 
 // V1RateCDRs is used for re-/rate CDRs which are already stored within StorDB

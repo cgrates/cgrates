@@ -27,8 +27,8 @@ import (
 )
 
 // Bidirectional JSON methods following
-func (ssv1 *SessionSv1) Handlers() map[string]interface{} {
-	return map[string]interface{}{
+func (ssv1 *SessionSv1) Handlers() map[string]any {
+	return map[string]any{
 		utils.SessionSv1GetActiveSessions:       ssv1.BiRPCv1GetActiveSessions,
 		utils.SessionSv1GetActiveSessionsCount:  ssv1.BiRPCv1GetActiveSessionsCount,
 		utils.SessionSv1GetPassiveSessions:      ssv1.BiRPCv1GetPassiveSessions,
@@ -207,7 +207,7 @@ func (ssv1 *SessionSv1) BiRPCV1Sleep(clnt *rpc2.Client, args *utils.DurationArgs
 	return nil
 }
 
-func (ssv1 *SessionSv1) BiRPCV1CapsError(clnt *rpc2.Client, args interface{},
+func (ssv1 *SessionSv1) BiRPCV1CapsError(clnt *rpc2.Client, args any,
 	reply *string) (err error) {
 	return ssv1.sS.BiRPCv1CapsError(clnt, args, reply)
 }

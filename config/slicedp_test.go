@@ -148,7 +148,7 @@ func TestFieldAsInterfaceMultiplePaths(t *testing.T) {
 
 func TestFieldAsInterfaceEmptyPath(t *testing.T) {
 	sliceDp := new(SliceDP)
-	var expected interface{}
+	var expected any
 	if value, err := sliceDp.FieldAsInterface([]string{}); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, value) {

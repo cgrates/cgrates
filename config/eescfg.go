@@ -121,9 +121,9 @@ func (eeS *EEsCfg) Clone() (cln *EEsCfg) {
 	return
 }
 
-// AsMapInterface returns the config as a map[string]interface{}
-func (eeS *EEsCfg) AsMapInterface(separator string) (initialMP map[string]interface{}) {
-	initialMP = map[string]interface{}{
+// AsMapInterface returns the config as a map[string]any
+func (eeS *EEsCfg) AsMapInterface(separator string) (initialMP map[string]any) {
+	initialMP = map[string]any{
 		utils.EnabledCfg: eeS.Enabled,
 	}
 	if eeS.AttributeSConns != nil {
@@ -137,14 +137,14 @@ func (eeS *EEsCfg) AsMapInterface(separator string) (initialMP map[string]interf
 		initialMP[utils.AttributeSConnsCfg] = attributeSConns
 	}
 	if eeS.Cache != nil {
-		cache := make(map[string]interface{}, len(eeS.Cache))
+		cache := make(map[string]any, len(eeS.Cache))
 		for key, value := range eeS.Cache {
 			cache[key] = value.AsMapInterface()
 		}
 		initialMP[utils.CacheCfg] = cache
 	}
 	if eeS.Exporters != nil {
-		exporters := make([]map[string]interface{}, len(eeS.Exporters))
+		exporters := make([]map[string]any, len(eeS.Exporters))
 		for i, item := range eeS.Exporters {
 			exporters[i] = item.AsMapInterface(separator)
 		}
@@ -203,7 +203,7 @@ type EventExporterOpts struct {
 	ConnIDs                  *[]string
 	RPCConnTimeout           *time.Duration
 	RPCReplyTimeout          *time.Duration
-	RPCAPIOpts               map[string]interface{}
+	RPCAPIOpts               map[string]any
 }
 
 // EventExporterCfg the config for a Event Exporter
@@ -416,7 +416,7 @@ func (eeOpts *EventExporterOpts) loadFromJSONCfg(jsnCfg *EventExporterOptsJson) 
 		eeOpts.RPCReplyTimeout = utils.DurationPointer(rpcReplyTimeout)
 	}
 	if jsnCfg.RPCAPIOpts != nil {
-		eeOpts.RPCAPIOpts = make(map[string]interface{})
+		eeOpts.RPCAPIOpts = make(map[string]any)
 		eeOpts.RPCAPIOpts = jsnCfg.RPCAPIOpts
 	}
 	return
@@ -718,7 +718,7 @@ func (eeOpts *EventExporterOpts) Clone() *EventExporterOpts {
 		*cln.RPCReplyTimeout = *eeOpts.RPCReplyTimeout
 	}
 	if eeOpts.RPCAPIOpts != nil {
-		cln.RPCAPIOpts = make(map[string]interface{})
+		cln.RPCAPIOpts = make(map[string]any)
 		cln.RPCAPIOpts = eeOpts.RPCAPIOpts
 	}
 	return cln
@@ -772,9 +772,9 @@ func (eeC EventExporterCfg) Clone() (cln *EventExporterCfg) {
 	return
 }
 
-// AsMapInterface returns the config as a map[string]interface{}
-func (eeC *EventExporterCfg) AsMapInterface(separator string) (initialMP map[string]interface{}) {
-	opts := map[string]interface{}{}
+// AsMapInterface returns the config as a map[string]any
+func (eeC *EventExporterCfg) AsMapInterface(separator string) (initialMP map[string]any) {
+	opts := map[string]any{}
 	if eeC.Opts.CSVFieldSeparator != nil {
 		opts[utils.CSVFieldSepOpt] = *eeC.Opts.CSVFieldSeparator
 	}
@@ -930,7 +930,7 @@ func (eeC *EventExporterCfg) AsMapInterface(separator string) (initialMP map[str
 	if flgs == nil {
 		flgs = []string{}
 	}
-	initialMP = map[string]interface{}{
+	initialMP = map[string]any{
 		utils.IDCfg:                 eeC.ID,
 		utils.TypeCfg:               eeC.Type,
 		utils.ExportPathCfg:         eeC.ExportPath,
@@ -947,7 +947,7 @@ func (eeC *EventExporterCfg) AsMapInterface(separator string) (initialMP map[str
 	}
 
 	if eeC.Fields != nil {
-		fields := make([]map[string]interface{}, 0, len(eeC.Fields))
+		fields := make([]map[string]any, 0, len(eeC.Fields))
 		for _, fld := range eeC.Fields {
 			fields = append(fields, fld.AsMapInterface(separator))
 		}

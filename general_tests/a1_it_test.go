@@ -162,7 +162,7 @@ func testA1itAddBalance1(t *testing.T) {
 		Account:     "rpdata1",
 		BalanceType: utils.MetaData,
 		Value:       10000000000,
-		Balance: map[string]interface{}{
+		Balance: map[string]any{
 			utils.ID: "rpdata1_test",
 		},
 	}
@@ -190,7 +190,7 @@ func testA1itDataSession1(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestA1itDataSession1",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.EventName:    "INITIATE_SESSION",
 				utils.ToR:          utils.MetaData,
 				utils.OriginID:     "504966119",
@@ -204,7 +204,7 @@ func testA1itDataSession1(t *testing.T) {
 				utils.AnswerTime:   "2017-03-03 11:39:32 +0100 CET",
 				utils.Usage:        "10240",
 			},
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.OptsSessionsTTL:         "28800s",
 				utils.OptsSessionsTTLLastUsed: "0s",
 				utils.OptsSessionsTTLUsage:    "0s",
@@ -227,7 +227,7 @@ func testA1itDataSession1(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsVoiceLastUsed",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.EventName:       "UPDATE_SESSION",
 				utils.AccountField:    "rpdata1",
 				utils.Category:        "data1",
@@ -243,7 +243,7 @@ func testA1itDataSession1(t *testing.T) {
 				utils.AnswerTime:      "2017-03-03 11:39:32 +0100 CET",
 				utils.Usage:           "2097152",
 			},
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.OptsSessionsTTL:         "28800s",
 				utils.OptsSessionsTTLLastUsed: "2097152s",
 				utils.OptsSessionsTTLUsage:    "0s",
@@ -266,7 +266,7 @@ func testA1itDataSession1(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsVoiceLastUsed",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.EventName:      "TERMINATE_SESSION",
 				utils.AccountField:   "rpdata1",
 				utils.Category:       "data1",

@@ -40,9 +40,9 @@ func (dps *RegistrarCCfgs) loadFromJSONCfg(jsnCfg *RegistrarCJsonCfgs) (err erro
 	return dps.Dispatchers.loadFromJSONCfg(jsnCfg.Dispatchers)
 }
 
-// AsMapInterface returns the config as a map[string]interface{}
-func (dps *RegistrarCCfgs) AsMapInterface() (initialMP map[string]interface{}) {
-	return map[string]interface{}{
+// AsMapInterface returns the config as a map[string]any
+func (dps *RegistrarCCfgs) AsMapInterface() (initialMP map[string]any) {
+	return map[string]any{
 		utils.RPCCfg:        dps.RPC.AsMapInterface(),
 		utils.DispatcherCfg: dps.Dispatchers.AsMapInterface(),
 	}
@@ -95,9 +95,9 @@ func (dps *RegistrarCCfg) loadFromJSONCfg(jsnCfg *RegistrarCJsonCfg) (err error)
 	return
 }
 
-// AsMapInterface returns the config as a map[string]interface{}
-func (dps *RegistrarCCfg) AsMapInterface() (initialMP map[string]interface{}) {
-	initialMP = map[string]interface{}{
+// AsMapInterface returns the config as a map[string]any
+func (dps *RegistrarCCfg) AsMapInterface() (initialMP map[string]any) {
+	initialMP = map[string]any{
 		utils.RegistrarsConnsCfg: dps.RegistrarSConns,
 		utils.RefreshIntervalCfg: dps.RefreshInterval.String(),
 	}
@@ -105,7 +105,7 @@ func (dps *RegistrarCCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		initialMP[utils.RefreshIntervalCfg] = "0"
 	}
 	if dps.Hosts != nil {
-		hosts := []map[string]interface{}{}
+		hosts := []map[string]any{}
 		for tnt, hs := range dps.Hosts {
 			for _, h := range hs {
 				mp := h.AsMapInterface()

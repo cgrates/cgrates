@@ -3782,7 +3782,7 @@ func TestECAsDataProvider2(t *testing.T) {
 
 func TestECFieldAsInterfaceNilEventCost(t *testing.T) {
 	dft := config.NewDefaultCGRConfig()
-	cdr, err := NewMapEvent(map[string]interface{}{}).AsCDR(dft, "cgrates.org", "UTC")
+	cdr, err := NewMapEvent(map[string]any{}).AsCDR(dft, "cgrates.org", "UTC")
 	if err != nil {
 		t.Fatal(err)
 	}

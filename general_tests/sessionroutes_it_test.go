@@ -119,7 +119,7 @@ func testSesRoutesItLoadFromFolder(t *testing.T) {
 func testSesRoutesAuthorizeEvent(t *testing.T) {
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.Source:       "testV4CDRsProcessCDR",
 			utils.OriginID:     "testV4CDRsProcessCDR",
 			utils.OriginHost:   "192.168.1.1",
@@ -132,7 +132,7 @@ func testSesRoutesAuthorizeEvent(t *testing.T) {
 			utils.SetupTime:    time.Date(2018, 8, 24, 16, 00, 00, 0, time.UTC),
 			utils.Usage:        time.Minute,
 		},
-		APIOpts: map[string]interface{}{utils.OptsRoutesProfileCount: 1},
+		APIOpts: map[string]any{utils.OptsRoutesProfileCount: 1},
 	}
 	args := sessions.NewV1AuthorizeArgs(false, []string{},
 		false, []string{}, false, []string{}, false, false,
@@ -150,7 +150,7 @@ func testSesRoutesAuthorizeEvent(t *testing.T) {
 				{
 					RouteID:         "route3",
 					RouteParameters: "",
-					SortingData: map[string]interface{}{
+					SortingData: map[string]any{
 						"Cost":         0.0102,
 						"RatingPlanID": "RP_SPECIAL_1002",
 						"Weight":       15.,
@@ -158,7 +158,7 @@ func testSesRoutesAuthorizeEvent(t *testing.T) {
 				}, {
 					RouteID:         "route1",
 					RouteParameters: "",
-					SortingData: map[string]interface{}{
+					SortingData: map[string]any{
 						"Cost":         0.0102,
 						"RatingPlanID": "RP_SPECIAL_1002",
 						"Weight":       10.,
@@ -166,7 +166,7 @@ func testSesRoutesAuthorizeEvent(t *testing.T) {
 				}, {
 					RouteID:         "route2",
 					RouteParameters: "",
-					SortingData: map[string]interface{}{
+					SortingData: map[string]any{
 						"Cost":         1.2,
 						"RatingPlanID": "RP_RETAIL1",
 						"Weight":       20.,
@@ -200,7 +200,7 @@ func testSesRoutesAuthorizeEvent(t *testing.T) {
 				{
 					RouteID:         "route3",
 					RouteParameters: "",
-					SortingData: map[string]interface{}{
+					SortingData: map[string]any{
 						"Cost":         0.0102,
 						"RatingPlanID": "RP_SPECIAL_1002",
 						"Weight":       15.,
@@ -208,7 +208,7 @@ func testSesRoutesAuthorizeEvent(t *testing.T) {
 				}, {
 					RouteID:         "route1",
 					RouteParameters: "",
-					SortingData: map[string]interface{}{
+					SortingData: map[string]any{
 						"Cost":         0.0102,
 						"RatingPlanID": "RP_SPECIAL_1002",
 						"Weight":       10.,
@@ -250,7 +250,7 @@ func testSesRoutesAuthorizeEvent(t *testing.T) {
 func testSesRoutesProcessMessage(t *testing.T) {
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.Source:       "testV4CDRsProcessCDR",
 			utils.OriginID:     "testV4CDRsProcessCDR",
 			utils.OriginHost:   "192.168.1.1",
@@ -263,7 +263,7 @@ func testSesRoutesProcessMessage(t *testing.T) {
 			utils.SetupTime:    time.Date(2018, 8, 24, 16, 00, 00, 0, time.UTC),
 			utils.Usage:        time.Minute,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsRoutesProfileCount: 1,
 		},
 	}
@@ -284,7 +284,7 @@ func testSesRoutesProcessMessage(t *testing.T) {
 				{
 					RouteID:         "route3",
 					RouteParameters: "",
-					SortingData: map[string]interface{}{
+					SortingData: map[string]any{
 						"Cost":         0.0102,
 						"RatingPlanID": "RP_SPECIAL_1002",
 						"Weight":       15.,
@@ -292,7 +292,7 @@ func testSesRoutesProcessMessage(t *testing.T) {
 				}, {
 					RouteID:         "route1",
 					RouteParameters: "",
-					SortingData: map[string]interface{}{
+					SortingData: map[string]any{
 						"Cost":         0.0102,
 						"RatingPlanID": "RP_SPECIAL_1002",
 						"Weight":       10.,
@@ -300,7 +300,7 @@ func testSesRoutesProcessMessage(t *testing.T) {
 				}, {
 					RouteID:         "route2",
 					RouteParameters: "",
-					SortingData: map[string]interface{}{
+					SortingData: map[string]any{
 						"Cost":         1.2,
 						"RatingPlanID": "RP_RETAIL1",
 						"Weight":       20.,
@@ -335,7 +335,7 @@ func testSesRoutesProcessMessage(t *testing.T) {
 				{
 					RouteID:         "route3",
 					RouteParameters: "",
-					SortingData: map[string]interface{}{
+					SortingData: map[string]any{
 						"Cost":         0.0102,
 						"RatingPlanID": "RP_SPECIAL_1002",
 						"Weight":       15.,
@@ -343,7 +343,7 @@ func testSesRoutesProcessMessage(t *testing.T) {
 				}, {
 					RouteID:         "route1",
 					RouteParameters: "",
-					SortingData: map[string]interface{}{
+					SortingData: map[string]any{
 						"Cost":         0.0102,
 						"RatingPlanID": "RP_SPECIAL_1002",
 						"Weight":       10.,
@@ -385,7 +385,7 @@ func testSesRoutesProcessMessage(t *testing.T) {
 func testSesRoutesProcessEvent(t *testing.T) {
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.Source:       "testV4CDRsProcessCDR",
 			utils.OriginID:     "testV4CDRsProcessCDR",
 			utils.OriginHost:   "192.168.1.1",
@@ -398,7 +398,7 @@ func testSesRoutesProcessEvent(t *testing.T) {
 			utils.SetupTime:    time.Date(2018, 8, 24, 16, 00, 00, 0, time.UTC),
 			utils.Usage:        time.Minute,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsRoutesProfileCount: 1,
 		},
 	}
@@ -421,7 +421,7 @@ func testSesRoutesProcessEvent(t *testing.T) {
 					{
 						RouteID:         "route3",
 						RouteParameters: "",
-						SortingData: map[string]interface{}{
+						SortingData: map[string]any{
 							"Cost":         0.0102,
 							"RatingPlanID": "RP_SPECIAL_1002",
 							"Weight":       15.,
@@ -429,7 +429,7 @@ func testSesRoutesProcessEvent(t *testing.T) {
 					}, {
 						RouteID:         "route1",
 						RouteParameters: "",
-						SortingData: map[string]interface{}{
+						SortingData: map[string]any{
 							"Cost":         0.0102,
 							"RatingPlanID": "RP_SPECIAL_1002",
 							"Weight":       10.,
@@ -437,7 +437,7 @@ func testSesRoutesProcessEvent(t *testing.T) {
 					}, {
 						RouteID:         "route2",
 						RouteParameters: "",
-						SortingData: map[string]interface{}{
+						SortingData: map[string]any{
 							"Cost":         1.2,
 							"RatingPlanID": "RP_RETAIL1",
 							"Weight":       20.,
@@ -476,7 +476,7 @@ func testSesRoutesProcessEvent(t *testing.T) {
 					{
 						RouteID:         "route3",
 						RouteParameters: "",
-						SortingData: map[string]interface{}{
+						SortingData: map[string]any{
 							"Cost":         0.0102,
 							"RatingPlanID": "RP_SPECIAL_1002",
 							"Weight":       15.,
@@ -484,7 +484,7 @@ func testSesRoutesProcessEvent(t *testing.T) {
 					}, {
 						RouteID:         "route1",
 						RouteParameters: "",
-						SortingData: map[string]interface{}{
+						SortingData: map[string]any{
 							"Cost":         0.0102,
 							"RatingPlanID": "RP_SPECIAL_1002",
 							"Weight":       10.,

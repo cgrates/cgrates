@@ -54,7 +54,7 @@ func TestApierCfgAsMapInterface1(t *testing.T) {
 	},
 }`
 	sls := make([]string, 0)
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		utils.EnabledCfg:         false,
 		utils.CachesConnsCfg:     sls,
 		utils.SchedulerConnsCfg:  sls,
@@ -78,7 +78,7 @@ func TestApierCfgAsMapInterface2(t *testing.T) {
        "scheduler_conns": ["*internal:*scheduler", "*conn1"],
     },
 }`
-	expectedMap := map[string]interface{}{
+	expectedMap := map[string]any{
 		utils.EnabledCfg:         true,
 		utils.CachesConnsCfg:     []string{utils.MetaInternal, "*conn1"},
 		utils.SchedulerConnsCfg:  []string{utils.MetaInternal, "*conn1"},

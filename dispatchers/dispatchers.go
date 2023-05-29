@@ -79,10 +79,10 @@ func (dS *DispatcherService) authorize(method, tenant string, apiKey string, evT
 		Tenant: tenant,
 		ID:     utils.UUIDSha1Prefix(),
 		Time:   evTime,
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.APIKey: apiKey,
 		},
-		APIOpts: map[string]interface{}{utils.MetaSubsys: utils.MetaDispatchers},
+		APIOpts: map[string]any{utils.MetaSubsys: utils.MetaDispatchers},
 	}
 	var rplyEv engine.AttrSProcessEventReply
 	if err = dS.authorizeEvent(ev, &rplyEv); err != nil {
@@ -199,13 +199,13 @@ func (dS *DispatcherService) dispatcherProfilesForEvent(tnt string, ev *utils.CG
 
 // Dispatch is the method forwarding the request towards the right connection
 func (dS *DispatcherService) Dispatch(ev *utils.CGREvent, subsys string,
-	serviceMethod string, args interface{}, reply interface{}) (err error) {
+	serviceMethod string, args any, reply any) (err error) {
 	tnt := ev.Tenant
 	if tnt == utils.EmptyString {
 		tnt = dS.cfg.GeneralCfg().DefaultTenant
 	}
 	if ev.APIOpts == nil {
-		ev.APIOpts = make(map[string]interface{})
+		ev.APIOpts = make(map[string]any)
 	}
 	evNm := utils.MapStorage{
 		utils.MetaReq:  ev.Event,
@@ -215,7 +215,7 @@ func (dS *DispatcherService) Dispatch(ev *utils.CGREvent, subsys string,
 			utils.MetaMethod: serviceMethod,
 		},
 	}
-	dspLoopAPIOpts := map[string]interface{}{
+	dspLoopAPIOpts := map[string]any{
 		utils.MetaSubsys: utils.MetaDispatchers,
 		utils.MetaNodeID: dS.cfg.GeneralCfg().NodeID,
 	}
@@ -253,7 +253,7 @@ func (dS *DispatcherService) Dispatch(ev *utils.CGREvent, subsys string,
 				CacheID: utils.CacheDispatcherRoutes,
 				ItemID:  routeID,
 			}}
-		var itmRemote interface{}
+		var itmRemote any
 		if itmRemote, err = engine.Cache.GetWithRemote(argsCache); err == nil && itmRemote != nil {
 			var canCast bool
 			if dR, canCast = itmRemote.(*DispatcherRoute); !canCast {
@@ -288,7 +288,7 @@ func (dS *DispatcherService) Dispatch(ev *utils.CGREvent, subsys string,
 			serviceMethod, args, reply)
 	}
 	if ev.APIOpts == nil {
-		ev.APIOpts = make(map[string]interface{})
+		ev.APIOpts = make(map[string]any)
 	}
 	ev.APIOpts[utils.MetaSubsys] = utils.MetaDispatchers // inject into args
 	ev.APIOpts[utils.MetaNodeID] = dS.cfg.GeneralCfg().NodeID
@@ -333,9 +333,9 @@ func (dS *DispatcherService) V1GetProfilesForEvent(ev *utils.CGREvent,
 
 /*
 // V1Apier is a generic way to cover all APIer methods
-func (dS *DispatcherService) V1Apier(apier interface{}, args *utils.MethodParameters, reply *interface{}) (err error) {
+func (dS *DispatcherService) V1Apier(apier any, args *utils.MethodParameters, reply *any) (err error) {
 
-	parameters, canCast := args.Parameters.(map[string]interface{})
+	parameters, canCast := args.Parameters.(map[string]any)
 	if !canCast {
 		return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 	}
@@ -388,7 +388,7 @@ func (dS *DispatcherService) V1Apier(apier interface{}, args *utils.MethodParame
 	// convert type of reply to the right one based on method
 	realReplyType := methodType.In(1)
 
-	var realReply interface{}
+	var realReply any
 	if realReplyType.Kind() == reflect.Ptr {
 		trply := reflect.New(realReplyType.Elem()).Elem().Interface()
 		realReply = &trply
@@ -403,7 +403,7 @@ func (dS *DispatcherService) V1Apier(apier interface{}, args *utils.MethodParame
 	// find the type for arg
 	realArgsType := methodType.In(0)
 	// create the arg with the right type for method
-	var realArgs interface{} = reflect.New(realArgsType).Interface()
+	var realArgs any = reflect.New(realArgsType).Interface()
 	// populate realArgs with data
 	if err := json.Unmarshal(argsByte, &realArgs); err != nil {
 		return err
@@ -428,7 +428,7 @@ func (dS *DispatcherService) V1Apier(apier interface{}, args *utils.MethodParame
 
 // Call implements rpcclient.ClientConnector interface for internal RPC
 func (dS *DispatcherService) Call(serviceMethod string, // all API fuction must be of type: SubsystemMethod
-	args interface{}, reply interface{}) error {
+	args any, reply any) error {
 	methodSplit := strings.Split(serviceMethod, ".")
 	if len(methodSplit) != 2 {
 		return rpcclient.ErrUnsupporteServiceMethod
@@ -453,7 +453,7 @@ func (dS *DispatcherService) Call(serviceMethod string, // all API fuction must 
 }
 
 func (dS *DispatcherService) DispatcherSv1RemoteStatus(args *utils.TenantWithAPIOpts,
-	reply *map[string]interface{}) (err error) {
+	reply *map[string]any) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args.Tenant != utils.EmptyString {
 		tnt = args.Tenant

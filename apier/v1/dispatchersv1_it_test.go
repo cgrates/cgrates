@@ -136,10 +136,10 @@ func testDspDspv1GetProfileForEvent(t *testing.T) {
 	arg := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testDspv1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.EventName: "Event1",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaSubsys:                   utils.MetaAny,
 			utils.OptsDispatchersProfilesCount: 1,
 		},
@@ -150,7 +150,7 @@ func testDspDspv1GetProfileForEvent(t *testing.T) {
 		ID:             "EVENT1",
 		Subsystems:     []string{utils.MetaAny},
 		FilterIDs:      []string{"*string:~*req.EventName:Event1"},
-		StrategyParams: make(map[string]interface{}),
+		StrategyParams: make(map[string]any),
 		Strategy:       utils.MetaWeight,
 		Weight:         30,
 		Hosts: engine.DispatcherHostProfiles{
@@ -158,13 +158,13 @@ func testDspDspv1GetProfileForEvent(t *testing.T) {
 				ID:        "ALL2",
 				FilterIDs: []string{},
 				Weight:    20,
-				Params:    make(map[string]interface{}),
+				Params:    make(map[string]any),
 			},
 			&engine.DispatcherHostProfile{
 				ID:        "ALL",
 				FilterIDs: []string{},
 				Weight:    10,
-				Params:    make(map[string]interface{}),
+				Params:    make(map[string]any),
 			},
 		},
 	}
@@ -185,10 +185,10 @@ func testDspDspv1GetProfileForEvent(t *testing.T) {
 
 	arg2 := &utils.CGREvent{
 		ID: "testDspvWithoutTenant",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.EventName: "Event1",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaSubsys:                   utils.MetaAny,
 			utils.OptsDispatchersProfilesCount: 1,
 		},
@@ -209,8 +209,8 @@ func testDspDspv1GetProfileForEventWithMethod(t *testing.T) {
 	arg := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testDspv2",
-		Event:  map[string]interface{}{},
-		APIOpts: map[string]interface{}{
+		Event:  map[string]any{},
+		APIOpts: map[string]any{
 			utils.MetaSubsys:                   utils.MetaAny,
 			"*method":                          utils.DispatcherSv1GetProfilesForEvent,
 			utils.OptsDispatchersProfilesCount: 1,
@@ -222,7 +222,7 @@ func testDspDspv1GetProfileForEventWithMethod(t *testing.T) {
 		ID:             "EVENT6",
 		Subsystems:     []string{utils.MetaAny},
 		FilterIDs:      []string{"*string:~*opts.*method:DispatcherSv1.GetProfilesForEvent"},
-		StrategyParams: make(map[string]interface{}),
+		StrategyParams: make(map[string]any),
 		Strategy:       utils.MetaWeight,
 		Weight:         20,
 		Hosts: engine.DispatcherHostProfiles{
@@ -230,7 +230,7 @@ func testDspDspv1GetProfileForEventWithMethod(t *testing.T) {
 				ID:        "SELF",
 				FilterIDs: []string{},
 				Weight:    20,
-				Params:    make(map[string]interface{}),
+				Params:    make(map[string]any),
 			},
 		},
 	}

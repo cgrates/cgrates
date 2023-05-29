@@ -106,7 +106,7 @@ func (rdr *SQSER) Serve() (err error) {
 }
 
 func (rdr *SQSER) processMessage(body []byte) (err error) {
-	var decodedMessage map[string]interface{}
+	var decodedMessage map[string]any
 	if err = json.Unmarshal(body, &decodedMessage); err != nil {
 		return
 	}

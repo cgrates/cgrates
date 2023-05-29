@@ -71,7 +71,7 @@ func (pk *radiusDP) String() string {
 }
 
 // FieldAsInterface is part of utils.DataProvider interface
-func (pk *radiusDP) FieldAsInterface(fldPath []string) (data interface{}, err error) {
+func (pk *radiusDP) FieldAsInterface(fldPath []string) (data any, err error) {
 	if len(fldPath) != 1 {
 		return nil, utils.ErrNotFound
 	}
@@ -92,7 +92,7 @@ func (pk *radiusDP) FieldAsInterface(fldPath []string) (data interface{}, err er
 
 // FieldAsString is part of utils.DataProvider interface
 func (pk *radiusDP) FieldAsString(fldPath []string) (data string, err error) {
-	var valIface interface{}
+	var valIface any
 	valIface, err = pk.FieldAsInterface(fldPath)
 	if err != nil {
 		return

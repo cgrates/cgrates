@@ -33,7 +33,7 @@ func TestCGREventHasField(t *testing.T) {
 	}
 	//normal check
 	cgrEvent = &CGREvent{
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			Usage: 20 * time.Second,
 		},
 	}
@@ -52,7 +52,7 @@ func TestCGREventCheckMandatoryFields(t *testing.T) {
 		t.Error(err)
 	}
 	cgrEvent = &CGREvent{
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			Usage:   20 * time.Second,
 			"test1": 1,
 			"test2": 2,
@@ -83,7 +83,7 @@ func TestCGREventFielAsString(t *testing.T) {
 	}
 	//normal check
 	cgrEvent = &CGREvent{
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			Usage:   20 * time.Second,
 			"test1": 1,
 			"test2": 2,
@@ -105,14 +105,14 @@ func TestLibRoutesUsage(t *testing.T) {
 	se := &CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "supplierEvent1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			Usage: 20 * time.Second,
 		},
 	}
 	seErr := &CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "supplierEvent1",
-		Event:  make(map[string]interface{}),
+		Event:  make(map[string]any),
 	}
 	answ, err := se.FieldAsDuration(Usage)
 	if err != nil {
@@ -131,14 +131,14 @@ func TestCGREventFieldAsTime(t *testing.T) {
 	se := &CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "supplierEvent1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			AnswerTime: time.Now(),
 		},
 	}
 	seErr := &CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "supplierEvent1",
-		Event:  make(map[string]interface{}),
+		Event:  make(map[string]any),
 	}
 	answ, err := se.FieldAsTime(AnswerTime, "UTC")
 	if err != nil {
@@ -157,7 +157,7 @@ func TestCGREventFieldAsString(t *testing.T) {
 	se := &CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "supplierEvent1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"supplierprofile1": "Supplier",
 			"UsageInterval":    time.Second,
 			"PddInterval":      "1s",
@@ -198,7 +198,7 @@ func TestCGREventFieldAsFloat64(t *testing.T) {
 	se := &CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "supplierEvent1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			AnswerTime:         time.Now(),
 			"supplierprofile1": "Supplier",
 			"UsageInterval":    "54.2",
@@ -265,14 +265,14 @@ func TestCGREventClone(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "supplierEvent1",
 		Time:   &now,
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			AnswerTime:         time.Now(),
 			"supplierprofile1": "Supplier",
 			"UsageInterval":    "54.2",
 			"PddInterval":      "1s",
 			"Weight":           20.0,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			"testKey": 12,
 		},
 	}
@@ -287,7 +287,7 @@ func TestCGREventClone(t *testing.T) {
 
 func TestCGREventconsumeRoutePaginator(t *testing.T) {
 	//empty check
-	var opts map[string]interface{}
+	var opts map[string]any
 	rcv, err := GetRoutePaginatorFromOpts(opts)
 	if err != nil {
 		t.Error(err)
@@ -305,7 +305,7 @@ func TestCGREventconsumeRoutePaginator(t *testing.T) {
 		t.Errorf("Expecting:  %+v, received: %+v", eOut, rcv)
 	}
 	//normal check
-	opts = map[string]interface{}{
+	opts = map[string]any{
 		OptsRoutesLimit:  18,
 		OptsRoutesOffset: 20,
 	}
@@ -328,7 +328,7 @@ func TestCGREventconsumeRoutePaginator(t *testing.T) {
 		t.Errorf("Expecting:  %+v, received: %+v", eOut, rcv)
 	}
 	//check without *rouLimit, but with *rouOffset
-	opts = map[string]interface{}{
+	opts = map[string]any{
 		OptsRoutesOffset: 20,
 	}
 
@@ -349,7 +349,7 @@ func TestCGREventconsumeRoutePaginator(t *testing.T) {
 		t.Errorf("Expecting:  %+v, received: %+v", eOut, rcv)
 	}
 	//check with notAnInt at *rouLimit
-	opts = map[string]interface{}{
+	opts = map[string]any{
 		OptsRoutesLimit: "Not an int",
 	}
 	eOut = Paginator{}
@@ -361,7 +361,7 @@ func TestCGREventconsumeRoutePaginator(t *testing.T) {
 		t.Errorf("Expecting:  %+v, received: %+v", eOut, rcv)
 	}
 	//check with notAnInt at and *rouOffset
-	opts = map[string]interface{}{
+	opts = map[string]any{
 		OptsRoutesOffset: "Not an int",
 	}
 	eOut = Paginator{}
@@ -375,7 +375,7 @@ func TestCGREventconsumeRoutePaginator(t *testing.T) {
 }
 
 func TestCGREventconsumeRoutePaginatorCase1(t *testing.T) {
-	opts := map[string]interface{}{}
+	opts := map[string]any{}
 	if _, err := GetRoutePaginatorFromOpts(opts); err != nil {
 		t.Error(err)
 	}
@@ -383,7 +383,7 @@ func TestCGREventconsumeRoutePaginatorCase1(t *testing.T) {
 
 func TestCGREventOptAsInt64(t *testing.T) {
 	ev := &CGREvent{
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			"testKey": "13",
 		},
 	}
@@ -407,7 +407,7 @@ func TestCGREventFieldAsInt64(t *testing.T) {
 	se := &CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "supplierEvent1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			AnswerTime:         time.Now(),
 			"supplierprofile1": "Supplier",
 			"UsageInterval":    "54",
@@ -463,7 +463,7 @@ func TestCGREventOptAsStringEmpty(t *testing.T) {
 
 func TestCGREventOptAsString(t *testing.T) {
 	ev := &CGREvent{
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			"testKey": 13,
 		},
 	}
@@ -496,7 +496,7 @@ func TestCGREventOptAsDurationEmpty(t *testing.T) {
 
 func TestCGREventOptAsDuration(t *testing.T) {
 	ev := &CGREvent{
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			"testKey": 30,
 		},
 	}
@@ -514,11 +514,11 @@ func TestCGREventOptAsDuration(t *testing.T) {
 
 func TestCGREventAsDataProvider(t *testing.T) {
 	ev := &CGREvent{
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			"testKey1": 13,
 			"testKey2": "testString1",
 		},
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"testKey1": 30,
 			"testKey2": "testString2",
 		},
@@ -612,7 +612,7 @@ func TestNMAsCGREvent(t *testing.T) {
 		}}}); err != nil {
 		t.Error(err)
 	}
-	eEv := map[string]interface{}{
+	eEv := map[string]any{
 		"FirstLevel2.SecondLevel2.Field2":        "Value2",
 		"FirstLevel.SecondLevel.ThirdLevel.Fld1": "Val1",
 		"FirstLevel2.Field3":                     "Value3",
@@ -634,10 +634,10 @@ func TestCGREventRPCClone(t *testing.T) {
 		ID:     "234",
 		clnb:   false,
 		Time:   TimePointer(time.Date(2013, 12, 30, 15, 0, 1, 0, time.UTC)),
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"key": "value",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			"rand": "we",
 		},
 	}

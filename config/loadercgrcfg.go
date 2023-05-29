@@ -82,9 +82,9 @@ func (ld *LoaderCgrCfg) loadFromJSONCfg(jsnCfg *LoaderCfgJson) (err error) {
 	return nil
 }
 
-// AsMapInterface returns the config as a map[string]interface{}
-func (ld *LoaderCgrCfg) AsMapInterface() (initialMP map[string]interface{}) {
-	initialMP = map[string]interface{}{
+// AsMapInterface returns the config as a map[string]any
+func (ld *LoaderCgrCfg) AsMapInterface() (initialMP map[string]any) {
+	initialMP = map[string]any{
 		utils.TpIDCfg:           ld.TpID,
 		utils.DataPathCfg:       ld.DataPath,
 		utils.DisableReverseCfg: ld.DisableReverse,

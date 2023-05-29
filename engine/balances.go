@@ -802,7 +802,7 @@ func (bs BalanceSummaries) BalanceSummaryWithUUD(bsUUID string) (b *BalanceSumma
 }
 
 // FieldAsInterface func to help EventCost FieldAsInterface
-func (bl *BalanceSummary) FieldAsInterface(fldPath []string) (val interface{}, err error) {
+func (bl *BalanceSummary) FieldAsInterface(fldPath []string) (val any, err error) {
 	if bl == nil || len(fldPath) != 1 {
 		return nil, utils.ErrNotFound
 	}
@@ -1103,7 +1103,7 @@ func (bc Balances) String() string {
 	return utils.ToJSON(bc)
 }
 
-func (bc Balances) FieldAsInterface(fldPath []string) (val interface{}, err error) {
+func (bc Balances) FieldAsInterface(fldPath []string) (val any, err error) {
 	if bc == nil || len(fldPath) == 0 {
 		return nil, utils.ErrNotFound
 	}
@@ -1137,7 +1137,7 @@ func (bc Balances) FieldAsInterface(fldPath []string) (val interface{}, err erro
 }
 
 func (bc Balances) FieldAsString(fldPath []string) (val string, err error) {
-	var iface interface{}
+	var iface any
 	iface, err = bc.FieldAsInterface(fldPath)
 	if err != nil {
 		return
@@ -1149,7 +1149,7 @@ func (b *Balance) String() string {
 	return utils.ToJSON(b)
 }
 
-func (b *Balance) FieldAsInterface(fldPath []string) (val interface{}, err error) {
+func (b *Balance) FieldAsInterface(fldPath []string) (val any, err error) {
 	if b == nil || len(fldPath) == 0 {
 		return nil, utils.ErrNotFound
 	}
@@ -1286,7 +1286,7 @@ func (b *Balance) FieldAsInterface(fldPath []string) (val interface{}, err error
 }
 
 func (b *Balance) FieldAsString(fldPath []string) (val string, err error) {
-	var iface interface{}
+	var iface any
 	iface, err = b.FieldAsInterface(fldPath)
 	if err != nil {
 		return
@@ -1298,7 +1298,7 @@ func (f ValueFactor) String() string {
 	return utils.ToJSON(f)
 }
 
-func (f ValueFactor) FieldAsInterface(fldPath []string) (val interface{}, err error) {
+func (f ValueFactor) FieldAsInterface(fldPath []string) (val any, err error) {
 	if f == nil || len(fldPath) != 1 {
 		return nil, utils.ErrNotFound
 	}
@@ -1310,7 +1310,7 @@ func (f ValueFactor) FieldAsInterface(fldPath []string) (val interface{}, err er
 }
 
 func (f ValueFactor) FieldAsString(fldPath []string) (val string, err error) {
-	var iface interface{}
+	var iface any
 	iface, err = f.FieldAsInterface(fldPath)
 	if err != nil {
 		return

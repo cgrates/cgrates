@@ -145,9 +145,9 @@ func (gencfg *GeneralCfg) loadFromJSONCfg(jsnGeneralCfg *GeneralJsonCfg) (err er
 	return nil
 }
 
-// AsMapInterface returns the config as a map[string]interface{}
-func (gencfg *GeneralCfg) AsMapInterface() (initialMP map[string]interface{}) {
-	initialMP = map[string]interface{}{
+// AsMapInterface returns the config as a map[string]any
+func (gencfg *GeneralCfg) AsMapInterface() (initialMP map[string]any) {
+	initialMP = map[string]any{
 		utils.NodeIDCfg:               gencfg.NodeID,
 		utils.LoggerCfg:               gencfg.Logger,
 		utils.LogLevelCfg:             gencfg.LogLevel,

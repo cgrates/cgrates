@@ -52,7 +52,7 @@ func valueIsEmpty(fld reflect.Value) bool {
 }
 
 // Detects missing field values based on mandatory field names, s should be a pointer to a struct
-func MissingStructFields(s interface{}, mandatories []string) []string {
+func MissingStructFields(s any, mandatories []string) []string {
 	missing := []string{}
 	sValue := reflect.ValueOf(s).Elem()
 	sType := sValue.Type()
@@ -65,8 +65,8 @@ func MissingStructFields(s interface{}, mandatories []string) []string {
 	return missing
 }
 
-// MissingMapFields detects missing field values based on mandatory field names from a map[string]interface{}
-func MissingMapFields(s map[string]interface{}, mandatories []string) []string {
+// MissingMapFields detects missing field values based on mandatory field names from a map[string]any
+func MissingMapFields(s map[string]any, mandatories []string) []string {
 	missing := []string{}
 	for _, fieldName := range mandatories {
 		if fldval, has := s[fieldName]; !has {
@@ -95,7 +95,7 @@ func MissingMapFields(s map[string]interface{}, mandatories []string) []string {
 // UpdateStructWithIfaceMap will update struct fields with values coming from map
 // if map values are not matching the ones in struct convertion is being attempted
 // ToDo: add here more fields
-func UpdateStructWithIfaceMap(s interface{}, mp map[string]interface{}) (err error) {
+func UpdateStructWithIfaceMap(s any, mp map[string]any) (err error) {
 	for key, val := range mp {
 		fld := reflect.ValueOf(s).Elem().FieldByName(key)
 		if fld.IsValid() {

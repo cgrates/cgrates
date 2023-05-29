@@ -388,8 +388,8 @@ func TestFCTemplateAsMapInterface(t *testing.T) {
            ],
      }
 }`
-	eMap := map[string]interface{}{
-		"custom_template": []map[string]interface{}{
+	eMap := map[string]any{
+		"custom_template": []map[string]any{
 			{
 				utils.TagCfg:              "Tenant",
 				utils.TypeCfg:             "*composed",
@@ -446,8 +446,8 @@ func TestFCTemplateAsMapInterface1(t *testing.T) {
 	     ],
     }
 }`
-	eMap := map[string]interface{}{
-		utils.MetaErr: []map[string]interface{}{
+	eMap := map[string]any{
+		utils.MetaErr: []map[string]any{
 			{utils.TagCfg: "SessionId", utils.PathCfg: "*rep.Session-Id", utils.TypeCfg: "*variable",
 				utils.ValueCfg: "~*req.Session-Id", utils.MandatoryCfg: true},
 			{utils.TagCfg: "OriginHost", utils.PathCfg: "*rep.Origin-Host", utils.TypeCfg: "*variable",
@@ -455,7 +455,7 @@ func TestFCTemplateAsMapInterface1(t *testing.T) {
 			{utils.TagCfg: "OriginRealm", utils.PathCfg: "*rep.Origin-Realm", utils.TypeCfg: "*variable",
 				utils.ValueCfg: "~*vars.OriginRealm", utils.MandatoryCfg: true},
 		},
-		utils.MetaASR: []map[string]interface{}{
+		utils.MetaASR: []map[string]any{
 			{utils.TagCfg: "SessionId", utils.PathCfg: "*diamreq.Session-Id", utils.TypeCfg: "*variable",
 				utils.ValueCfg: "~*req.Session-Id", utils.MandatoryCfg: true},
 			{utils.TagCfg: "OriginHost", utils.PathCfg: "*diamreq.Origin-Host", utils.TypeCfg: "*variable",

@@ -251,10 +251,10 @@ func testSQLReader(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     ev.cgrEvent.ID,
 			Time:   ev.cgrEvent.Time,
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"CGRID": cdr.CGRID,
 			},
-			APIOpts: map[string]interface{}{},
+			APIOpts: map[string]any{},
 		}
 		if !reflect.DeepEqual(ev.cgrEvent, expected) {
 			t.Errorf("Expected %s ,received %s", utils.ToJSON(expected), utils.ToJSON(ev.cgrEvent))
@@ -285,10 +285,10 @@ func testSQLReader2(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     ev.cgrEvent.ID,
 			Time:   ev.cgrEvent.Time,
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"CGRID": cdr.CGRID,
 			},
-			APIOpts: map[string]interface{}{},
+			APIOpts: map[string]any{},
 		}
 		if !reflect.DeepEqual(ev.cgrEvent, expected) {
 			t.Errorf("Expected %s ,received %s", utils.ToJSON(expected), utils.ToJSON(ev.cgrEvent))
@@ -308,15 +308,15 @@ func testSQLPoster(t *testing.T) {
 		t.Fatal(err)
 	}
 	for rows.Next() {
-		columns := make([]interface{}, len(colNames))
-		columnPointers := make([]interface{}, len(colNames))
+		columns := make([]any, len(colNames))
+		columnPointers := make([]any, len(colNames))
 		for i := range columns {
 			columnPointers[i] = &columns[i]
 		}
 		if err = rows.Scan(columnPointers...); err != nil {
 			t.Fatal(err)
 		}
-		msg := make(map[string]interface{})
+		msg := make(map[string]any)
 		for i, colName := range colNames {
 			msg[colName] = columns[i]
 		}
@@ -498,10 +498,10 @@ func testSQLReader3(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     ev.cgrEvent.ID,
 			Time:   ev.cgrEvent.Time,
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"CGRID": cdr.CGRID,
 			},
-			APIOpts: map[string]interface{}{},
+			APIOpts: map[string]any{},
 		}
 		if !reflect.DeepEqual(ev.cgrEvent, expected) {
 			t.Errorf("Expected %s ,received %s", utils.ToJSON(expected), utils.ToJSON(ev.cgrEvent))
@@ -532,10 +532,10 @@ func testSQLReader4(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     ev.cgrEvent.ID,
 			Time:   ev.cgrEvent.Time,
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"CGRID": cdr.CGRID,
 			},
-			APIOpts: map[string]interface{}{},
+			APIOpts: map[string]any{},
 		}
 		if !reflect.DeepEqual(ev.cgrEvent, expected) {
 			t.Errorf("Expected %s ,received %s", utils.ToJSON(expected), utils.ToJSON(ev.cgrEvent))
@@ -555,15 +555,15 @@ func testSQLPoster2(t *testing.T) {
 		t.Fatal(err)
 	}
 	for rows.Next() {
-		columns := make([]interface{}, len(colNames))
-		columnPointers := make([]interface{}, len(colNames))
+		columns := make([]any, len(colNames))
+		columnPointers := make([]any, len(colNames))
 		for i := range columns {
 			columnPointers[i] = &columns[i]
 		}
 		if err = rows.Scan(columnPointers...); err != nil {
 			t.Fatal(err)
 		}
-		msg := make(map[string]interface{})
+		msg := make(map[string]any)
 		for i, colName := range colNames {
 			msg[colName] = columns[i]
 		}
@@ -611,7 +611,7 @@ func TestSQLProcessMessageError(t *testing.T) {
 		cap:           nil,
 	}
 
-	msgTest := map[string]interface{}{}
+	msgTest := map[string]any{}
 	err := testSQLEventReader.processMessage(msgTest)
 	expected := "NOT_FOUND:ToR"
 	if err == nil || err.Error() != expected {
@@ -690,7 +690,7 @@ func TestErsSqlPostCDRS(t *testing.T) {
 		t.Errorf("Expecting: <nil>, received: <%+v>", err)
 	}
 	sqlEvReader.(*SQLEventReader).expConnType = utils.MySQL
-	result := sqlEvReader.(*SQLEventReader).postCDR([]interface{}{})
+	result := sqlEvReader.(*SQLEventReader).postCDR([]any{})
 	expected := "Error 1045: Access denied for user ''@'localhost' (using password: NO)"
 	if result == nil {
 		t.Errorf("\nExpected: <%+v>, \nreceived: <%+v>", expected, result)
@@ -704,20 +704,20 @@ func TestErsSqlPostCDRS(t *testing.T) {
 //		Migrator(db *gorm.DB) gorm.Migrator
 //		DataTypeOf(*schema.Field) string
 //		DefaultValueOf(*schema.Field) clause.Expression
-//		BindVarTo(writer clause.Writer, stmt *Statement, v interface{})
+//		BindVarTo(writer clause.Writer, stmt *Statement, v any)
 //		QuoteTo(clause.Writer, string)
-//		Explain(sql string, vars ...interface{}) string
+//		Explain(sql string, vars ...any) string
 //	}
 type mockDialect struct{}
 
-func (mockDialect) Name() string                                                        { return "" }
-func (mockDialect) Initialize(db *gorm.DB) error                                        { return nil }
-func (mockDialect) Migrator(db *gorm.DB) gorm.Migrator                                  { return nil }
-func (mockDialect) DataTypeOf(*schema.Field) string                                     { return "" }
-func (mockDialect) DefaultValueOf(*schema.Field) clause.Expression                      { return nil }
-func (mockDialect) BindVarTo(writer clause.Writer, stmt *gorm.Statement, v interface{}) { return }
-func (mockDialect) QuoteTo(clause.Writer, string)                                       { return }
-func (mockDialect) Explain(sql string, vars ...interface{}) string                      { return "" }
+func (mockDialect) Name() string                                                { return "" }
+func (mockDialect) Initialize(db *gorm.DB) error                                { return nil }
+func (mockDialect) Migrator(db *gorm.DB) gorm.Migrator                          { return nil }
+func (mockDialect) DataTypeOf(*schema.Field) string                             { return "" }
+func (mockDialect) DefaultValueOf(*schema.Field) clause.Expression              { return nil }
+func (mockDialect) BindVarTo(writer clause.Writer, stmt *gorm.Statement, v any) { return }
+func (mockDialect) QuoteTo(clause.Writer, string)                               { return }
+func (mockDialect) Explain(sql string, vars ...any) string                      { return "" }
 
 func TestMockOpenDB(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()

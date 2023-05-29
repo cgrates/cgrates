@@ -98,16 +98,16 @@ func (ra *RadiusAgentCfg) loadFromJSONCfg(jsnCfg *RadiusAgentJsonCfg, separator 
 	return
 }
 
-// AsMapInterface returns the config as a map[string]interface{}
-func (ra *RadiusAgentCfg) AsMapInterface(separator string) (initialMP map[string]interface{}) {
-	initialMP = map[string]interface{}{
+// AsMapInterface returns the config as a map[string]any
+func (ra *RadiusAgentCfg) AsMapInterface(separator string) (initialMP map[string]any) {
+	initialMP = map[string]any{
 		utils.EnabledCfg:    ra.Enabled,
 		utils.ListenNetCfg:  ra.ListenNet,
 		utils.ListenAuthCfg: ra.ListenAuth,
 		utils.ListenAcctCfg: ra.ListenAcct,
 	}
 
-	requestProcessors := make([]map[string]interface{}, len(ra.RequestProcessors))
+	requestProcessors := make([]map[string]any, len(ra.RequestProcessors))
 	for i, item := range ra.RequestProcessors {
 		requestProcessors[i] = item.AsMapInterface(separator)
 	}

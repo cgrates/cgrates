@@ -93,11 +93,11 @@ func TestComposeArgsReload(t *testing.T) {
 
 type rpcRequest struct {
 	Method string
-	Params interface{}
+	Params any
 }
 type rpcMock chan *rpcRequest
 
-func (r rpcMock) Call(method string, args, _ interface{}) error {
+func (r rpcMock) Call(method string, args, _ any) error {
 	r <- &rpcRequest{
 		Method: method,
 		Params: args,
@@ -127,10 +127,10 @@ func TestCallCache(t *testing.T) {
 		Params: &utils.AttrCacheIDsWithAPIOpts{
 			Tenant:   "cgrates.org",
 			CacheIDs: []string{utils.CacheStatQueueProfiles, utils.CacheStatFilterIndexes, utils.CacheStatQueues},
-			APIOpts:  make(map[string]interface{}),
+			APIOpts:  make(map[string]any),
 		},
 	}
-	if err := apv1.CallCache(utils.MetaClear, "cgrates.org", utils.CacheStatQueueProfiles, "", utils.EmptyString, nil, nil, make(map[string]interface{})); err != nil {
+	if err := apv1.CallCache(utils.MetaClear, "cgrates.org", utils.CacheStatQueueProfiles, "", utils.EmptyString, nil, nil, make(map[string]any)); err != nil {
 		t.Fatal(err)
 	} else if len(cache) != 1 {
 		t.Fatal("Expected call cache to be called")
@@ -141,7 +141,7 @@ func TestCallCache(t *testing.T) {
 	exp = &rpcRequest{
 		Method: utils.CacheSv1ReloadCache,
 		Params: &utils.AttrReloadCacheWithAPIOpts{
-			APIOpts:              make(map[string]interface{}),
+			APIOpts:              make(map[string]any),
 			Tenant:               "cgrates.org",
 			StatsQueueProfileIDs: []string{"cgrates.org:Stat2"},
 			StatsQueueIDs:        []string{"cgrates.org:Stat2"},
@@ -154,7 +154,7 @@ func TestCallCache(t *testing.T) {
 
 	if err := apv1.CallCache(utils.MetaReload, "cgrates.org", utils.CacheStatQueueProfiles,
 		"cgrates.org:Stat2", utils.EmptyString, &[]string{"*string:~*req.Account:1001|~req.Subject", "*prefix:1001:~*req.Destination"},
-		nil, make(map[string]interface{})); err != nil {
+		nil, make(map[string]any)); err != nil {
 		t.Fatal(err)
 	} else if len(cache) != 1 {
 		t.Fatal("Expected call cache to be called")
@@ -164,7 +164,7 @@ func TestCallCache(t *testing.T) {
 	exp.Method = utils.CacheSv1LoadCache
 	if err := apv1.CallCache(utils.MetaLoad, "cgrates.org", utils.CacheStatQueueProfiles,
 		"cgrates.org:Stat2", utils.EmptyString, &[]string{"*string:~*req.Account:1001|~req.Subject", "*prefix:1001:~*req.Destination"},
-		nil, make(map[string]interface{})); err != nil {
+		nil, make(map[string]any)); err != nil {
 		t.Fatal(err)
 	} else if len(cache) != 1 {
 		t.Fatal("Expected call cache to be called")
@@ -174,7 +174,7 @@ func TestCallCache(t *testing.T) {
 	exp.Method = utils.CacheSv1RemoveItems
 	if err := apv1.CallCache(utils.MetaRemove, "cgrates.org", utils.CacheStatQueueProfiles,
 		"cgrates.org:Stat2", utils.EmptyString, &[]string{"*string:~*req.Account:1001|~req.Subject", "*prefix:1001:~*req.Destination"},
-		nil, make(map[string]interface{})); err != nil {
+		nil, make(map[string]any)); err != nil {
 		t.Fatal(err)
 	} else if len(cache) != 1 {
 		t.Fatal("Expected call cache to be called")
@@ -184,21 +184,21 @@ func TestCallCache(t *testing.T) {
 
 	if err := apv1.CallCache(utils.MetaLoad, "cgrates.org", utils.CacheStatQueueProfiles,
 		"cgrates.org:Stat2", utils.EmptyString, &[]string{"FLTR1", "*prefix:1001:~*req.Destination"},
-		nil, make(map[string]interface{})); err != utils.ErrNoDatabaseConn {
+		nil, make(map[string]any)); err != utils.ErrNoDatabaseConn {
 		t.Fatal(err)
 	} else if len(cache) != 0 {
 		t.Fatal("Expected call cache to not be called")
 	}
 	if err := apv1.CallCache(utils.MetaRemove, "cgrates.org", utils.CacheStatQueueProfiles,
 		"cgrates.org:Stat2", utils.EmptyString, &[]string{"FLTR1", "*prefix:1001:~*req.Destination"},
-		nil, make(map[string]interface{})); err != utils.ErrNoDatabaseConn {
+		nil, make(map[string]any)); err != utils.ErrNoDatabaseConn {
 		t.Fatal(err)
 	} else if len(cache) != 0 {
 		t.Fatal("Expected call cache to not be called")
 	}
 	if err := apv1.CallCache(utils.MetaReload, "cgrates.org", utils.CacheStatQueueProfiles,
 		"cgrates.org:Stat2", utils.EmptyString, &[]string{"FLTR1", "*prefix:1001:~*req.Destination"},
-		nil, make(map[string]interface{})); err != utils.ErrNoDatabaseConn {
+		nil, make(map[string]any)); err != utils.ErrNoDatabaseConn {
 		t.Fatal(err)
 	} else if len(cache) != 0 {
 		t.Fatal("Expected call cache to not be called")

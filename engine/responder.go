@@ -114,7 +114,7 @@ func (rs *Responder) GetCost(arg *CallDescriptorWithAPIOpts, reply *CallCost) (e
 
 // GetCostOnRatingPlans is used by RouteS to calculate the cost
 // Receive a list of RatingPlans and pick the first without error
-func (rs *Responder) GetCostOnRatingPlans(arg *utils.GetCostOnRatingPlansArgs, reply *map[string]interface{}) (err error) {
+func (rs *Responder) GetCostOnRatingPlans(arg *utils.GetCostOnRatingPlansArgs, reply *map[string]any) (err error) {
 	tnt := arg.Tenant
 	if tnt == utils.EmptyString {
 		tnt = config.CgrConfig().GeneralCfg().DefaultTenant
@@ -161,7 +161,7 @@ func (rs *Responder) GetCostOnRatingPlans(arg *utils.GetCostOnRatingPlansArgs, r
 			}
 			continue
 		}
-		*reply = map[string]interface{}{
+		*reply = map[string]any{
 			utils.Cost:         cc.Cost,
 			utils.RatingPlanID: rp,
 		}
@@ -345,7 +345,7 @@ func (rs *Responder) GetMaxSessionTime(arg *CallDescriptorWithAPIOpts, reply *ti
 }
 
 func (rs *Responder) GetMaxSessionTimeOnAccounts(arg *utils.GetMaxSessionTimeOnAccountsArgs,
-	reply *map[string]interface{}) (err error) {
+	reply *map[string]any) (err error) {
 	var maxDur time.Duration
 	tnt := arg.Tenant
 	if tnt == utils.EmptyString {
@@ -367,7 +367,7 @@ func (rs *Responder) GetMaxSessionTimeOnAccounts(arg *utils.GetMaxSessionTimeOnA
 				fmt.Sprintf("<%s> ignoring cost for account: %s, err: %s",
 					utils.Responder, anctID, err.Error()))
 		} else {
-			*reply = map[string]interface{}{
+			*reply = map[string]any{
 				utils.CapMaxUsage:  maxDur,
 				utils.Cost:         0.0,
 				utils.AccountField: anctID,
@@ -392,7 +392,7 @@ func (chSv1 *Responder) Ping(ign *utils.CGREvent, reply *string) error {
 	return nil
 }
 
-func (rs *Responder) Call(serviceMethod string, args interface{}, reply interface{}) error {
+func (rs *Responder) Call(serviceMethod string, args any, reply any) error {
 	parts := strings.Split(serviceMethod, ".")
 	if len(parts) != 2 {
 		return utils.ErrNotImplemented

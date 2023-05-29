@@ -163,7 +163,7 @@ func TestSQLPostCDR(t *testing.T) {
 		rdrErr:        nil,
 		cap:           nil,
 	}
-	in := make([]interface{}, 2)
+	in := make([]any, 2)
 	err := rdr.postCDR(in)
 	expected := "db type <testExpConnType> not supported"
 	if err == nil || err.Error() != expected {
@@ -220,7 +220,7 @@ func TestSQLPostCDRMySQLError(t *testing.T) {
 		rdrErr:        nil,
 		cap:           nil,
 	}
-	err := testSQLEventReader.postCDR([]interface{}{})
+	err := testSQLEventReader.postCDR([]any{})
 	expected := "Error 1045: Access denied for user ''@'localhost' (using password: NO)"
 	if err == nil {
 		t.Errorf("\nExpected: <%+v>, \nreceived: <%+v>", expected, err)
@@ -247,7 +247,7 @@ func TestSQLPostCDRPostgresError(t *testing.T) {
 		rdrErr:        nil,
 		cap:           nil,
 	}
-	err := testSQLEventReader.postCDR([]interface{}{})
+	err := testSQLEventReader.postCDR([]any{})
 	expected := "Error 1045: Access denied for user ''@'localhost' (using password: NO)"
 	if err == nil {
 		t.Errorf("\nExpected: <%+v>, \nreceived: <%+v>", expected, err)

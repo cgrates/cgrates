@@ -40,7 +40,7 @@ type APIerSv2 struct {
 
 // Call implements rpcclient.ClientConnector interface for internal RPC
 func (apiv2 *APIerSv2) Call(serviceMethod string,
-	args interface{}, reply interface{}) error {
+	args any, reply any) error {
 	return utils.APIerRPCCall(apiv2, serviceMethod, args, reply)
 }
 
@@ -67,7 +67,7 @@ func (apiv2 *APIerSv2) LoadRatingProfile(attrs *AttrLoadRatingProfile, reply *st
 	if err := apiv2.DataManager.SetLoadIDs(map[string]int64{utils.CacheRatingProfiles: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
-	if err = dbReader.ReloadCache(config.CgrConfig().GeneralCfg().DefaultCaching, true, make(map[string]interface{}), apiv2.Config.GeneralCfg().DefaultTenant); err != nil {
+	if err = dbReader.ReloadCache(config.CgrConfig().GeneralCfg().DefaultCaching, true, make(map[string]any), apiv2.Config.GeneralCfg().DefaultTenant); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	*reply = utils.OK

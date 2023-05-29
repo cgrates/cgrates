@@ -76,7 +76,7 @@ func testDspStsPingFailover(t *testing.T) {
 	}
 	ev := utils.CGREvent{
 		Tenant: "cgrates.org",
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "stat12345",
 		},
 	}
@@ -106,7 +106,7 @@ func testDspStsGetStatFailover(t *testing.T) {
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.EventName:    "Event1",
 			utils.AccountField: "1001",
 			utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
@@ -116,7 +116,7 @@ func testDspStsGetStatFailover(t *testing.T) {
 			utils.Destination:  "1002",
 		},
 
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "stat12345",
 		},
 	}
@@ -127,7 +127,7 @@ func testDspStsGetStatFailover(t *testing.T) {
 	}
 
 	args2 := utils.TenantIDWithAPIOpts{
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "stat12345",
 		},
 		TenantID: &utils.TenantID{
@@ -160,7 +160,7 @@ func testDspStsPing(t *testing.T) {
 	}
 	if err := dispEngine.RPC.Call(utils.StatSv1Ping, &utils.CGREvent{
 		Tenant: "cgrates.org",
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "stat12345",
 		},
 	}, &reply); err != nil {
@@ -175,13 +175,13 @@ func testDspStsTestAuthKey(t *testing.T) {
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 			utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			utils.Usage:        135 * time.Second,
 			utils.Cost:         123.0,
 			utils.PDD:          12 * time.Second},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "12345",
 		},
 	}
@@ -191,7 +191,7 @@ func testDspStsTestAuthKey(t *testing.T) {
 	}
 
 	args2 := utils.TenantIDWithAPIOpts{
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "12345",
 		},
 		TenantID: &utils.TenantID{
@@ -214,14 +214,14 @@ func testDspStsTestAuthKey2(t *testing.T) {
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 			utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			utils.Usage:        135 * time.Second,
 			utils.Cost:         123.0,
 			utils.RunID:        utils.MetaDefault,
 			utils.Destination:  "1002"},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "stat12345",
 		},
 	}
@@ -232,7 +232,7 @@ func testDspStsTestAuthKey2(t *testing.T) {
 	}
 
 	args2 := utils.TenantIDWithAPIOpts{
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "stat12345",
 		},
 		TenantID: &utils.TenantID{
@@ -255,7 +255,7 @@ func testDspStsTestAuthKey2(t *testing.T) {
 	args = &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1002",
 			utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			utils.Usage:        45 * time.Second,
@@ -263,7 +263,7 @@ func testDspStsTestAuthKey2(t *testing.T) {
 			utils.Cost:         10.0,
 			utils.Destination:  "1001",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "stat12345",
 		},
 	}
@@ -290,7 +290,7 @@ func testDspStsTestAuthKey3(t *testing.T) {
 	var metrics map[string]float64
 
 	args2 := utils.TenantIDWithAPIOpts{
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "stat12345",
 		},
 		TenantID: &utils.TenantID{
@@ -314,7 +314,7 @@ func testDspStsTestAuthKey3(t *testing.T) {
 	if err := dispEngine.RPC.Call(utils.StatSv1GetQueueIDs,
 		&utils.TenantWithAPIOpts{
 			Tenant: "cgrates.org",
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.OptsAPIKey: "stat12345",
 			},
 		}, &reply); err != nil {
@@ -330,7 +330,7 @@ func testDspStsTestAuthKey3(t *testing.T) {
 	if err := dispEngine.RPC.Call(utils.StatSv1GetStatQueuesForEvent, &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "GetStats",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1002",
 			utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			utils.Usage:        45 * time.Second,
@@ -338,7 +338,7 @@ func testDspStsTestAuthKey3(t *testing.T) {
 			utils.Cost:         10.0,
 			utils.Destination:  "1001",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "stat12345",
 		},
 	}, &reply); err != nil {

@@ -46,7 +46,7 @@ func (attr *CGREventWithEeIDs) SetCloneable(clnb bool) {
 }
 
 // RPCClone implements rpcclient.RPCCloner interface
-func (attr *CGREventWithEeIDs) RPCClone() (interface{}, error) {
+func (attr *CGREventWithEeIDs) RPCClone() (any, error) {
 	if !attr.clnb {
 		return attr, nil
 	}
@@ -71,7 +71,7 @@ func (cgr *CGREventWithEeIDs) UnmarshalJSON(data []byte) (err error) {
 		return
 	}
 	cgr.CGREvent = cgrEv
-	// check if we have CostDetails and modify it's type (by default it was map[string]interface{} by unrmarshaling, now it will be EventCost)
+	// check if we have CostDetails and modify it's type (by default it was map[string]any by unrmarshaling, now it will be EventCost)
 	if ecEv, has := cgrEv.Event[utils.CostDetails]; has {
 		var bts []byte
 		switch ecEv.(type) {

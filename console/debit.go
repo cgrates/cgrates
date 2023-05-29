@@ -50,11 +50,11 @@ func (self *CmdDebit) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdDebit) RpcParams(reset bool) interface{} {
+func (self *CmdDebit) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &engine.CallDescriptorWithAPIOpts{
 			CallDescriptor: new(engine.CallDescriptor),
-			APIOpts:        make(map[string]interface{}),
+			APIOpts:        make(map[string]any),
 		}
 	}
 	return self.rpcParams
@@ -64,7 +64,7 @@ func (self *CmdDebit) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdDebit) RpcResult() interface{} {
+func (self *CmdDebit) RpcResult() any {
 	return &engine.CallCost{}
 }
 

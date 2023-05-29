@@ -42,9 +42,9 @@ func NewDfltRPCConn() *RPCConn {
 // RPCConns the config for all rpc pools
 type RPCConns map[string]*RPCConn
 
-// AsMapInterface returns the config as a map[string]interface{}
-func (rC RPCConns) AsMapInterface() (rpcConns map[string]interface{}) {
-	rpcConns = make(map[string]interface{})
+// AsMapInterface returns the config as a map[string]any
+func (rC RPCConns) AsMapInterface() (rpcConns map[string]any) {
+	rpcConns = make(map[string]any)
 	for key, value := range rC {
 		rpcConns[key] = value.AsMapInterface()
 	}
@@ -86,14 +86,14 @@ func (rC *RPCConn) loadFromJSONCfg(jsnCfg *RPCConnsJson) {
 	}
 }
 
-// AsMapInterface returns the config as a map[string]interface{}
-func (rC *RPCConn) AsMapInterface() (initialMP map[string]interface{}) {
-	initialMP = map[string]interface{}{
+// AsMapInterface returns the config as a map[string]any
+func (rC *RPCConn) AsMapInterface() (initialMP map[string]any) {
+	initialMP = map[string]any{
 		utils.StrategyCfg: rC.Strategy,
 		utils.PoolSize:    rC.PoolSize,
 	}
 	if rC.Conns != nil {
-		conns := make([]map[string]interface{}, len(rC.Conns))
+		conns := make([]map[string]any, len(rC.Conns))
 		for i, item := range rC.Conns {
 			conns[i] = item.AsMapInterface()
 		}
@@ -185,9 +185,9 @@ func (rh *RemoteHost) loadFromJSONCfg(jsnCfg *RemoteHostJson) (err error) {
 	return
 }
 
-// AsMapInterface returns the config as a map[string]interface{}
-func (rh *RemoteHost) AsMapInterface() (mp map[string]interface{}) {
-	mp = map[string]interface{}{
+// AsMapInterface returns the config as a map[string]any
+func (rh *RemoteHost) AsMapInterface() (mp map[string]any) {
+	mp = map[string]any{
 		utils.AddressCfg:   rh.Address,
 		utils.TransportCfg: rh.Transport,
 	}

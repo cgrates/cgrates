@@ -73,7 +73,7 @@ type AsteriskAgent struct {
 	connMgr     *engine.ConnManager
 	astConnIdx  int
 	astConn     *aringo.ARInGO
-	astEvChan   chan map[string]interface{}
+	astEvChan   chan map[string]any
 	astErrChan  chan error
 	eventsCache map[string]*utils.CGREvent // used to gather information about events during various phases
 	evCacheMux  sync.RWMutex               // Protect eventsCache
@@ -81,7 +81,7 @@ type AsteriskAgent struct {
 
 func (sma *AsteriskAgent) connectAsterisk(stopChan <-chan struct{}) (err error) {
 	connCfg := sma.cgrCfg.AsteriskAgentCfg().AsteriskConns[sma.astConnIdx]
-	sma.astEvChan = make(chan map[string]interface{})
+	sma.astEvChan = make(chan map[string]any)
 	sma.astErrChan = make(chan error)
 	sma.astConn, err = aringo.NewARInGO(fmt.Sprintf("ws://%s/ari/events?api_key=%s:%s&app=%s",
 		connCfg.Address, connCfg.User, connCfg.Password, CGRAuthAPP), "http://cgrates.org",
@@ -323,7 +323,7 @@ func (sma *AsteriskAgent) handleChannelDestroyed(ev *SMAsteriskEvent) {
 }
 
 // Call implements rpcclient.ClientConnector interface
-func (sma *AsteriskAgent) Call(serviceMethod string, args interface{}, reply interface{}) error {
+func (sma *AsteriskAgent) Call(serviceMethod string, args any, reply any) error {
 	return utils.RPCCall(sma, serviceMethod, args, reply)
 }
 
@@ -338,7 +338,7 @@ func (sma *AsteriskAgent) V1DisconnectSession(args utils.AttrDisconnectSession, 
 // V1GetActiveSessionIDs is internal method to  get all active sessions in asterisk
 func (sma *AsteriskAgent) V1GetActiveSessionIDs(ignParam string,
 	sessionIDs *[]*sessions.SessionID) error {
-	var slMpIface []map[string]interface{} // decode the result from ari into a slice of map[string]interface{}
+	var slMpIface []map[string]any // decode the result from ari into a slice of map[string]any
 	if byts, err := sma.astConn.Call(
 		aringo.HTTP_GET,
 		fmt.Sprintf("http://%s/ari/channels",
@@ -374,12 +374,12 @@ func (*AsteriskAgent) V1DisconnectPeer(args *utils.DPRArgs, reply *string) (err 
 }
 
 // V1WarnDisconnect is used to implement the sessions.BiRPClient interface
-func (sma *AsteriskAgent) V1WarnDisconnect(args map[string]interface{}, reply *string) (err error) {
+func (sma *AsteriskAgent) V1WarnDisconnect(args map[string]any, reply *string) (err error) {
 	return utils.ErrNotImplemented
 }
 
 // CallBiRPC is part of utils.BiRPCServer interface to help internal connections do calls over rpcclient.ClientConnector interface
-func (sma *AsteriskAgent) CallBiRPC(clnt rpcclient.ClientConnector, serviceMethod string, args interface{}, reply interface{}) error {
+func (sma *AsteriskAgent) CallBiRPC(clnt rpcclient.ClientConnector, serviceMethod string, args any, reply any) error {
 	return utils.BiRPCCall(sma, clnt, serviceMethod, args, reply)
 }
 
@@ -405,18 +405,18 @@ func (sma *AsteriskAgent) BiRPCv1DisconnectPeer(clnt rpcclient.ClientConnector, 
 }
 
 // BiRPCv1WarnDisconnect is used to implement the sessions.BiRPClient interface
-func (sma *AsteriskAgent) BiRPCv1WarnDisconnect(clnt rpcclient.ClientConnector, args map[string]interface{}, reply *string) (err error) {
+func (sma *AsteriskAgent) BiRPCv1WarnDisconnect(clnt rpcclient.ClientConnector, args map[string]any, reply *string) (err error) {
 	return sma.V1WarnDisconnect(args, reply)
 }
 
 // BiRPCv1CapsError is used to return error when the caps limit is hit
-func (sma *AsteriskAgent) BiRPCv1CapsError(clnt rpcclient.ClientConnector, args interface{}, reply *string) (err error) {
+func (sma *AsteriskAgent) BiRPCv1CapsError(clnt rpcclient.ClientConnector, args any, reply *string) (err error) {
 	return utils.ErrMaxConcurrentRPCExceeded
 }
 
 // Handlers is used to implement the rpcclient.BiRPCConector interface
-func (sma *AsteriskAgent) Handlers() map[string]interface{} {
-	return map[string]interface{}{
+func (sma *AsteriskAgent) Handlers() map[string]any {
+	return map[string]any{
 		utils.SessionSv1DisconnectSession: func(clnt *rpc2.Client, args utils.AttrDisconnectSession, rply *string) error {
 			return sma.BiRPCv1DisconnectSession(clnt, args, rply)
 		},
@@ -429,10 +429,10 @@ func (sma *AsteriskAgent) Handlers() map[string]interface{} {
 		utils.SessionSv1DisconnectPeer: func(clnt *rpc2.Client, args *utils.DPRArgs, rply *string) (err error) {
 			return sma.BiRPCv1DisconnectPeer(clnt, args, rply)
 		},
-		utils.SessionSv1WarnDisconnect: func(clnt *rpc2.Client, args map[string]interface{}, rply *string) (err error) {
+		utils.SessionSv1WarnDisconnect: func(clnt *rpc2.Client, args map[string]any, rply *string) (err error) {
 			return sma.BiRPCv1WarnDisconnect(clnt, args, rply)
 		},
-		utils.SessionSv1CapsError: func(clnt *rpc2.Client, args interface{}, rply *string) (err error) {
+		utils.SessionSv1CapsError: func(clnt *rpc2.Client, args any, rply *string) (err error) {
 			return sma.BiRPCv1CapsError(clnt, args, rply)
 		},
 	}

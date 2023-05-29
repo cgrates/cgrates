@@ -54,7 +54,7 @@ func NewFSCdr(body io.Reader, cgrCfg *config.CGRConfig) (*FSCdr, error) {
 		return nil, err
 	}
 	if variables, ok := fsCdr.body[FS_CDR_MAP]; ok {
-		if variables, ok := variables.(map[string]interface{}); ok {
+		if variables, ok := variables.(map[string]any); ok {
 			for k, v := range variables {
 				fsCdr.vars[k] = v.(string)
 			}
@@ -66,7 +66,7 @@ func NewFSCdr(body io.Reader, cgrCfg *config.CGRConfig) (*FSCdr, error) {
 type FSCdr struct {
 	cgrCfg *config.CGRConfig
 	vars   map[string]string
-	body   map[string]interface{} // keeps the loaded body for extra field search
+	body   map[string]any // keeps the loaded body for extra field search
 }
 
 func (fsCdr FSCdr) getCGRID() string {
@@ -93,19 +93,19 @@ func (fsCdr FSCdr) getExtraFields() map[string]string {
 	return extraFields
 }
 
-func (fsCdr FSCdr) searchExtraField(field string, body map[string]interface{}) (result string) {
+func (fsCdr FSCdr) searchExtraField(field string, body map[string]any) (result string) {
 	for key, value := range body {
 		if key == field {
 			return utils.IfaceAsString(value)
 		}
 		switch v := value.(type) {
-		case map[string]interface{}:
+		case map[string]any:
 			if result = fsCdr.searchExtraField(field, v); len(result) != 0 {
 				return
 			}
-		case []interface{}:
+		case []any:
 			for _, item := range v {
-				if otherMap, ok := item.(map[string]interface{}); ok {
+				if otherMap, ok := item.(map[string]any); ok {
 					if result = fsCdr.searchExtraField(field, otherMap); len(result) != 0 {
 						return
 					}

@@ -137,7 +137,7 @@ func testSessionsItTerminatNonexist(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testSessionsItTerminatNonexist",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.EventName:    "TerminateEvent",
 				utils.ToR:          utils.MetaVoice,
 				utils.OriginID:     "123451",
@@ -151,7 +151,7 @@ func testSessionsItTerminatNonexist(t *testing.T) {
 				utils.AnswerTime:   time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
 				utils.Usage:        usage,
 			},
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.OptsDebitInterval: "10s",
 			},
 		},
@@ -212,7 +212,7 @@ func testSessionsItUpdateNonexist(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testSessionsItUpdateNonexist",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.EventName:    "UpdateEvent",
 				utils.ToR:          utils.MetaVoice,
 				utils.OriginID:     "123789",
@@ -226,7 +226,7 @@ func testSessionsItUpdateNonexist(t *testing.T) {
 				utils.AnswerTime:   time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
 				utils.Usage:        usage,
 			},
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.OptsDebitInterval: "0s",
 			},
 		},
@@ -254,7 +254,7 @@ func testSessionsItUpdateNonexist(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testSessionsItTerminatNonexist",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.EventName:    "TerminateEvent",
 				utils.ToR:          utils.MetaVoice,
 				utils.OriginID:     "123789",
@@ -278,7 +278,7 @@ func testSessionsItUpdateNonexist(t *testing.T) {
 
 func testSessionsItTerminatePassive(t *testing.T) {
 	//create the event for session
-	sEv := engine.NewMapEvent(map[string]interface{}{
+	sEv := engine.NewMapEvent(map[string]any{
 		utils.EventName:    "UpdateEvent",
 		utils.ToR:          utils.MetaVoice,
 		utils.OriginID:     "123789",
@@ -334,7 +334,7 @@ func testSessionsItTerminatePassive(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testSessionsItTerminatNonexist",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.EventName:    "TerminateEvent",
 				utils.ToR:          utils.MetaVoice,
 				utils.OriginID:     "123789",
@@ -376,7 +376,7 @@ func testSessionsItEventCostCompressing(t *testing.T) {
 		Account:     "TestSessionsItEventCostCompressing",
 		Value:       float64(5) * float64(time.Second),
 		BalanceType: utils.MetaVoice,
-		Balance: map[string]interface{}{
+		Balance: map[string]any{
 			utils.ID:            "TestSessionsItEventCostCompressing",
 			utils.RatingSubject: "*zero50ms",
 		},
@@ -393,7 +393,7 @@ func testSessionsItEventCostCompressing(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsItEventCostCompressing",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.OriginID:     "TestSessionsItEventCostCompressing",
 				utils.AccountField: "TestSessionsItEventCostCompressing",
 				utils.Destination:  "1002",
@@ -416,7 +416,7 @@ func testSessionsItEventCostCompressing(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsItEventCostCompressing",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.OriginID: "TestSessionsItEventCostCompressing",
 				utils.Usage:    "1s",
 			},
@@ -440,7 +440,7 @@ func testSessionsItEventCostCompressing(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsDataLastUsedData",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.OriginID:     "TestSessionsItEventCostCompressing",
 				utils.AccountField: "TestSessionsItEventCostCompressing",
 				utils.Destination:  "1002",

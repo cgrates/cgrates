@@ -173,7 +173,7 @@ func testChargerSAuthProcessEventAuth(t *testing.T) {
 		Account:     "1001",
 		BalanceType: utils.MetaVoice,
 		Value:       float64(2 * time.Minute),
-		Balance: map[string]interface{}{
+		Balance: map[string]any{
 			utils.ID:            "testSes",
 			utils.RatingSubject: "*zero1ms",
 		},
@@ -190,7 +190,7 @@ func testChargerSAuthProcessEventAuth(t *testing.T) {
 		Account:     "1234",
 		BalanceType: utils.MetaVoice,
 		Value:       float64(2 * time.Minute),
-		Balance: map[string]interface{}{
+		Balance: map[string]any{
 			utils.ID:            "testSes",
 			utils.RatingSubject: "*zero1ms",
 		},
@@ -207,7 +207,7 @@ func testChargerSAuthProcessEventAuth(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestEv1",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.ToR:          utils.MetaVoice,
 				utils.OriginID:     "TestEv1",
 				utils.RequestType:  utils.MetaPrepaid,

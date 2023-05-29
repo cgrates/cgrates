@@ -85,7 +85,7 @@ func TestCoreSAsMapInterface(t *testing.T) {
 			"shutdown_timeout": "0"				// the interval we sample for caps stats ( 0 to disabled )
 		},
 }`
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		utils.CapsCfg:              0,
 		utils.CapsStrategyCfg:      utils.MetaBusy,
 		utils.CapsStatsIntervalCfg: "0",

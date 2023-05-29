@@ -33,7 +33,7 @@ import (
 
 type mockConnector struct{}
 
-func (c *mockConnector) Call(_ string, _, _ interface{}) (err error) {
+func (c *mockConnector) Call(_ string, _, _ any) (err error) {
 	return errors.New("error")
 }
 func TestNewAnalyzeConnector(t *testing.T) {
@@ -66,10 +66,10 @@ func TestNewAnalyzeConnector(t *testing.T) {
 	}
 }
 
-func (c *mockConnector) CallBiRPC(cl rpcclient.ClientConnector, serviceMethod string, args, reply interface{}) (err error) {
+func (c *mockConnector) CallBiRPC(cl rpcclient.ClientConnector, serviceMethod string, args, reply any) (err error) {
 	return c.Call(serviceMethod, args, reply)
 }
-func (c *mockConnector) Handlers() map[string]interface{} { return make(map[string]interface{}) }
+func (c *mockConnector) Handlers() map[string]any { return make(map[string]any) }
 func TestNewAnalyzeBiRPCConnector1(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 
@@ -129,7 +129,7 @@ func TestNewAnalyzeBiRPCConnector2(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	exp := make(map[string]interface{})
+	exp := make(map[string]any)
 	if rply := rpc.Handlers(); !reflect.DeepEqual(rply, exp) {
 		t.Errorf("Expected: %v ,received:%v", exp, rply)
 	}

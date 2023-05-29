@@ -162,7 +162,7 @@ func (rdr *AMQPv1ER) readLoop(recv *amqpv1.Receiver) (err error) {
 }
 
 func (rdr *AMQPv1ER) processMessage(msg []byte) (err error) {
-	var decodedMessage map[string]interface{}
+	var decodedMessage map[string]any
 	if err = json.Unmarshal(msg, &decodedMessage); err != nil {
 		return
 	}

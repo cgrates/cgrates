@@ -80,16 +80,16 @@ func (da *DNSAgentCfg) loadFromJSONCfg(jsnCfg *DNSAgentJsonCfg, sep string) (err
 	return
 }
 
-// AsMapInterface returns the config as a map[string]interface{}
-func (da *DNSAgentCfg) AsMapInterface(separator string) (initialMP map[string]interface{}) {
-	initialMP = map[string]interface{}{
+// AsMapInterface returns the config as a map[string]any
+func (da *DNSAgentCfg) AsMapInterface(separator string) (initialMP map[string]any) {
+	initialMP = map[string]any{
 		utils.EnabledCfg:   da.Enabled,
 		utils.ListenCfg:    da.Listen,
 		utils.ListenNetCfg: da.ListenNet,
 		utils.TimezoneCfg:  da.Timezone,
 	}
 
-	requestProcessors := make([]map[string]interface{}, len(da.RequestProcessors))
+	requestProcessors := make([]map[string]any, len(da.RequestProcessors))
 	for i, item := range da.RequestProcessors {
 		requestProcessors[i] = item.AsMapInterface(separator)
 	}
@@ -179,9 +179,9 @@ func (rp *RequestProcessor) loadFromJSONCfg(jsnCfg *ReqProcessorJsnCfg, sep stri
 	return nil
 }
 
-// AsMapInterface returns the config as a map[string]interface{}
-func (rp *RequestProcessor) AsMapInterface(separator string) (initialMP map[string]interface{}) {
-	initialMP = map[string]interface{}{
+// AsMapInterface returns the config as a map[string]any
+func (rp *RequestProcessor) AsMapInterface(separator string) (initialMP map[string]any) {
+	initialMP = map[string]any{
 		utils.IDCfg:       rp.ID,
 		utils.FiltersCfg:  rp.Filters,
 		utils.FlagsCfg:    rp.Flags.SliceFlags(),
@@ -191,14 +191,14 @@ func (rp *RequestProcessor) AsMapInterface(separator string) (initialMP map[stri
 		initialMP[utils.TenantCfg] = rp.Tenant.GetRule(separator)
 	}
 	if rp.RequestFields != nil {
-		requestFields := make([]map[string]interface{}, len(rp.RequestFields))
+		requestFields := make([]map[string]any, len(rp.RequestFields))
 		for i, item := range rp.RequestFields {
 			requestFields[i] = item.AsMapInterface(separator)
 		}
 		initialMP[utils.RequestFieldsCfg] = requestFields
 	}
 	if rp.ReplyFields != nil {
-		replyFields := make([]map[string]interface{}, len(rp.ReplyFields))
+		replyFields := make([]map[string]any, len(rp.ReplyFields))
 		for i, item := range rp.ReplyFields {
 			replyFields[i] = item.AsMapInterface(separator)
 		}

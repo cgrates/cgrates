@@ -84,9 +84,9 @@ func (schdcfg *SchedulerCfg) loadFromJSONCfg(jsnCfg *SchedulerJsonCfg) error {
 	return nil
 }
 
-// AsMapInterface returns the config as a map[string]interface{}
-func (schdcfg *SchedulerCfg) AsMapInterface() (initialMP map[string]interface{}) {
-	initialMP = map[string]interface{}{
+// AsMapInterface returns the config as a map[string]any
+func (schdcfg *SchedulerCfg) AsMapInterface() (initialMP map[string]any) {
+	initialMP = map[string]any{
 		utils.EnabledCfg:                schdcfg.Enabled,
 		utils.FiltersCfg:                schdcfg.Filters,
 		utils.DynaprepaidActionplansCfg: schdcfg.DynaprepaidActionPlans,

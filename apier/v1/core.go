@@ -37,11 +37,11 @@ type CoreSv1 struct {
 
 // Call implements rpcclient.ClientConnector interface for internal RPC
 func (cS *CoreSv1) Call(serviceMethod string,
-	args interface{}, reply interface{}) error {
+	args any, reply any) error {
 	return utils.APIerRPCCall(cS, serviceMethod, args, reply)
 }
 
-func (cS *CoreSv1) Status(arg *utils.TenantWithAPIOpts, reply *map[string]interface{}) error {
+func (cS *CoreSv1) Status(arg *utils.TenantWithAPIOpts, reply *map[string]any) error {
 	return cS.cS.Status(arg, reply)
 }
 

@@ -122,7 +122,7 @@ func (dS *DispatcherService) ResponderShutdown(args *utils.TenantWithAPIOpts,
 	}, utils.MetaResponder, utils.ResponderShutdown, args, reply)
 }
 
-func (dS *DispatcherService) ResponderGetCostOnRatingPlans(arg *utils.GetCostOnRatingPlansArgs, reply *map[string]interface{}) (err error) {
+func (dS *DispatcherService) ResponderGetCostOnRatingPlans(arg *utils.GetCostOnRatingPlansArgs, reply *map[string]any) (err error) {
 	tnt := utils.FirstNonEmpty(arg.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ResponderGetCostOnRatingPlans, tnt,
@@ -136,7 +136,7 @@ func (dS *DispatcherService) ResponderGetCostOnRatingPlans(arg *utils.GetCostOnR
 	}, utils.MetaResponder, utils.ResponderGetCostOnRatingPlans, arg, reply)
 }
 
-func (dS *DispatcherService) ResponderGetMaxSessionTimeOnAccounts(arg *utils.GetMaxSessionTimeOnAccountsArgs, reply *map[string]interface{}) (err error) {
+func (dS *DispatcherService) ResponderGetMaxSessionTimeOnAccounts(arg *utils.GetMaxSessionTimeOnAccountsArgs, reply *map[string]any) (err error) {
 	tnt := utils.FirstNonEmpty(arg.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ResponderGetMaxSessionTimeOnAccounts, tnt,

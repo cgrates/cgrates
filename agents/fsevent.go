@@ -371,8 +371,8 @@ func (fsev FSEvent) AsCGREvent(timezone string) (cgrEv *utils.CGREvent, err erro
 }
 
 // Used with RLs
-func (fsev FSEvent) AsMapStringInterface(timezone string) map[string]interface{} {
-	mp := make(map[string]interface{})
+func (fsev FSEvent) AsMapStringInterface(timezone string) map[string]any {
+	mp := make(map[string]any)
 	for fld, val := range fsev.GetExtraFields() {
 		mp[fld] = val
 	}
@@ -471,8 +471,8 @@ func SliceAsFsArray(slc []string) (arry string) {
 }
 
 // GetOptions returns the possible options
-func (fsev FSEvent) GetOptions() (mp map[string]interface{}) {
-	mp = make(map[string]interface{})
+func (fsev FSEvent) GetOptions() (mp map[string]any) {
+	mp = make(map[string]any)
 	opts, has := fsev[VarCGROpts]
 	if !has {
 		return

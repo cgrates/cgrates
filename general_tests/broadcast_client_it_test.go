@@ -137,7 +137,7 @@ func testbrodcastItProccessEvent(t *testing.T) {
 	args := utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "TestSSv1ItProcessCDR",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.Tenant:       "cgrates.org",
 			utils.Category:     utils.Call,
 			utils.ToR:          utils.MetaVoice,

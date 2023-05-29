@@ -109,7 +109,7 @@ func testAMQPExportEvent(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "voiceEvent",
 			Time:   utils.TimePointer(time.Now()),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.CGRID:        utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()),
 				utils.ToR:          utils.MetaVoice,
 				utils.OriginID:     "dsafdsaf",

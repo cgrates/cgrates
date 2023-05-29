@@ -233,7 +233,7 @@ type RGRate struct {
 }
 
 // FieldAsInterface func to help EventCost FieldAsInterface
-func (r *RGRate) FieldAsInterface(fldPath []string) (val interface{}, err error) {
+func (r *RGRate) FieldAsInterface(fldPath []string) (val any, err error) {
 	if r == nil || len(fldPath) != 1 {
 		return nil, utils.ErrNotFound
 	}
@@ -529,7 +529,7 @@ func (r *RGRate) Clone() (cln *RGRate) {
 	return
 }
 
-func (rit *RITiming) FieldAsInterface(fldPath []string) (val interface{}, err error) {
+func (rit *RITiming) FieldAsInterface(fldPath []string) (val any, err error) {
 	if rit == nil || len(fldPath) == 0 {
 		return nil, utils.ErrNotFound
 	}
@@ -644,7 +644,7 @@ func (rit *RITiming) FieldAsInterface(fldPath []string) (val interface{}, err er
 }
 
 func (rit *RITiming) FieldAsString(fldPath []string) (val string, err error) {
-	var iface interface{}
+	var iface any
 	iface, err = rit.FieldAsInterface(fldPath)
 	if err != nil {
 		return

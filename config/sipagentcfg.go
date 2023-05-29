@@ -88,9 +88,9 @@ func (sa *SIPAgentCfg) loadFromJSONCfg(jsnCfg *SIPAgentJsonCfg, sep string) (err
 	return
 }
 
-// AsMapInterface returns the config as a map[string]interface{}
-func (sa *SIPAgentCfg) AsMapInterface(separator string) (initialMP map[string]interface{}) {
-	initialMP = map[string]interface{}{
+// AsMapInterface returns the config as a map[string]any
+func (sa *SIPAgentCfg) AsMapInterface(separator string) (initialMP map[string]any) {
+	initialMP = map[string]any{
 		utils.EnabledCfg:             sa.Enabled,
 		utils.ListenCfg:              sa.Listen,
 		utils.ListenNetCfg:           sa.ListenNet,
@@ -98,7 +98,7 @@ func (sa *SIPAgentCfg) AsMapInterface(separator string) (initialMP map[string]in
 		utils.RetransmissionTimerCfg: sa.RetransmissionTimer,
 	}
 
-	requestProcessors := make([]map[string]interface{}, len(sa.RequestProcessors))
+	requestProcessors := make([]map[string]any, len(sa.RequestProcessors))
 	for i, item := range sa.RequestProcessors {
 		requestProcessors[i] = item.AsMapInterface(separator)
 	}

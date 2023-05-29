@@ -49,13 +49,13 @@ type BiRPClient interface {
 	V1GetActiveSessionIDs(ignParam string, sessionIDs *[]*SessionID) (err error)
 	V1ReAuthorize(originID string, reply *string) (err error)
 	V1DisconnectPeer(args *utils.DPRArgs, reply *string) (err error)
-	V1WarnDisconnect(args map[string]interface{}, reply *string) (err error)
+	V1WarnDisconnect(args map[string]any, reply *string) (err error)
 
 	BiRPCv1DisconnectSession(clnt rpcclient.ClientConnector, args utils.AttrDisconnectSession, reply *string) (err error)
 	BiRPCv1GetActiveSessionIDs(clnt rpcclient.ClientConnector, ignParam string, sessionIDs *[]*SessionID) (err error)
 	BiRPCv1ReAuthorize(clnt rpcclient.ClientConnector, originID string, reply *string) (err error)
 	BiRPCv1DisconnectPeer(clnt rpcclient.ClientConnector, args *utils.DPRArgs, reply *string) (err error)
-	BiRPCv1WarnDisconnect(clnt rpcclient.ClientConnector, args map[string]interface{}, reply *string) (err error)
+	BiRPCv1WarnDisconnect(clnt rpcclient.ClientConnector, args map[string]any, reply *string) (err error)
 }
 
 // GetSetCGRID will populate the CGRID key if not present and return it
@@ -151,7 +151,7 @@ func (pi *ProcessedStirIdentity) VerifyHeader() (isValid bool) {
 
 // VerifySignature returns if the signature is valid
 func (pi *ProcessedStirIdentity) VerifySignature(timeoutVal time.Duration) (err error) {
-	var pubkey interface{}
+	var pubkey any
 	var ok bool
 	if pubkey, ok = engine.Cache.Get(utils.CacheSTIR, pi.Header.X5u); !ok {
 		if pubkey, err = utils.NewECDSAPubKey(pi.Header.X5u, timeoutVal); err != nil {
@@ -200,7 +200,7 @@ func (pi *ProcessedStirIdentity) VerifyPayload(originatorTn, originatorURI, dest
 
 // NewSTIRIdentity returns the identiy for stir header
 func NewSTIRIdentity(header *utils.PASSporTHeader, payload *utils.PASSporTPayload, prvkeyPath string, timeout time.Duration) (identity string, err error) {
-	var prvKey interface{}
+	var prvKey any
 	var ok bool
 	if prvKey, ok = engine.Cache.Get(utils.CacheSTIR, prvkeyPath); !ok {
 		if prvKey, err = utils.NewECDSAPrvKey(prvkeyPath, timeout); err != nil {
@@ -259,7 +259,7 @@ type V1STIRAuthenticateArgs struct {
 	OriginatorTn       string   // the expected originator telephone number
 	OriginatorURI      string   // the expected originator URI; if this is populated the OriginatorTn is ignored
 	PayloadMaxDuration string   // the duration the payload is valid after it's creation
-	APIOpts            map[string]interface{}
+	APIOpts            map[string]any
 }
 
 // V1STIRIdentityArgs are the arguments for STIRIdentity API
@@ -268,7 +268,7 @@ type V1STIRIdentityArgs struct {
 	PublicKeyPath  string                 // the path to the public key used in the header
 	PrivateKeyPath string                 // the private key path
 	OverwriteIAT   bool                   // if true the IAT from payload is overwrited with the present unix timestamp
-	APIOpts        map[string]interface{}
+	APIOpts        map[string]any
 }
 
 // getDerivedEvents returns only the *raw event if derivedReply flag is not specified

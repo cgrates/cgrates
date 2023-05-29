@@ -130,11 +130,11 @@ func testAttributeSProcessEvent(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testAttributeSProcessEvent",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.EventName: "VariableTest",
 			utils.ToR:       utils.MetaVoice,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsContext: utils.MetaSessionS,
 		},
 	}
@@ -144,12 +144,12 @@ func testAttributeSProcessEvent(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSProcessEvent",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.EventName: "VariableTest",
 				utils.Category:  utils.MetaVoice,
 				utils.ToR:       utils.MetaVoice,
 			},
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.OptsContext: utils.MetaSessionS,
 			},
 		},
@@ -214,10 +214,10 @@ func testAttributeSProcessEventWithAccount(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testAttributeSProcessEventWithAccount",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"EventName": "AddAccountInfo",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsContext: utils.MetaSessionS,
 		},
 	}
@@ -228,11 +228,11 @@ func testAttributeSProcessEventWithAccount(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSProcessEventWithAccount",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"EventName": "AddAccountInfo",
 				"Balance":   "10",
 			},
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.OptsContext: utils.MetaSessionS,
 			},
 		},
@@ -297,10 +297,10 @@ func testAttributeSProcessEventWithAccountFull(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testAttributeSProcessEventWithAccount2",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"EventName": "AddFullAccount",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsContext: utils.MetaSessionS,
 		},
 	}
@@ -311,11 +311,11 @@ func testAttributeSProcessEventWithAccountFull(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSProcessEventWithAccount2",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"EventName":   "AddFullAccount",
 				"FullAccount": "{\"ID\":\"cgrates.org:1001\",\"BalanceMap\":{\"*monetary\":[{\"Uuid\":\"18160631-a4ae-4078-8048-b4c6b87a36c6\",\"ID\":\"\",\"Value\":10,\"ExpirationDate\":\"0001-01-01T00:00:00Z\",\"Weight\":10,\"DestinationIDs\":{},\"RatingSubject\":\"\",\"Categories\":{},\"SharedGroups\":{},\"Timings\":null,\"TimingIDs\":{},\"Disabled\":false,\"Factor\":null,\"Blocker\":false}]},\"UnitCounters\":null,\"ActionTriggers\":null,\"AllowNegative\":false,\"Disabled\":false,\"UpdateTime\":\"2020-10-06T12:43:51.805Z\"}",
 			},
-			APIOpts: map[string]interface{}{},
+			APIOpts: map[string]any{},
 		},
 	}
 	sort.Strings(eRply.AlteredFields)
@@ -349,7 +349,7 @@ func testAttributeSProcessEventWithStat(t *testing.T) {
 	ev1 := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 			utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			utils.Usage:        11 * time.Second,
@@ -366,7 +366,7 @@ func testAttributeSProcessEventWithStat(t *testing.T) {
 	ev1 = &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event2",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 			utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			utils.Usage:        11 * time.Second,
@@ -425,10 +425,10 @@ func testAttributeSProcessEventWithStat(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testAttributeSProcessEventWithStat",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"EventName": "AddStatEvent",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsContext: utils.MetaSessionS,
 		},
 	}
@@ -439,11 +439,11 @@ func testAttributeSProcessEventWithStat(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSProcessEventWithStat",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"EventName": "AddStatEvent",
 				"AcdMetric": "11000000000",
 			},
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.OptsContext: utils.MetaSessionS,
 			},
 		},
@@ -508,10 +508,10 @@ func testAttributeSProcessEventWithStatFull(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testAttributeSProcessEventWithStat",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"EventName": "AddFullStats",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsContext: utils.MetaSessionS,
 		},
 	}
@@ -522,11 +522,11 @@ func testAttributeSProcessEventWithStatFull(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSProcessEventWithStat",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"EventName":  "AddFullStats",
 				"AllMetrics": "{\"*acd\":11000000000,\"*asr\":100,\"*tcd\":22000000000}",
 			},
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.OptsContext: utils.MetaSessionS,
 			},
 		},
@@ -576,10 +576,10 @@ func testAttributeSProcessEventWithResource(t *testing.T) {
 	argsRU := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     utils.UUIDSha1Prefix(),
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Account":     "3001",
 			"Destination": "3002"},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e21",
 			utils.OptsResourcesUnits:   3,
 		},
@@ -592,10 +592,10 @@ func testAttributeSProcessEventWithResource(t *testing.T) {
 	argsRU2 := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     utils.UUIDSha1Prefix(),
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Account":     "3001",
 			"Destination": "3002"},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e22",
 			utils.OptsResourcesUnits:   2,
 		},
@@ -650,10 +650,10 @@ func testAttributeSProcessEventWithResource(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testAttributeSProcessEventWithResource",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"EventName": "AddResourceUsages",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsContext: utils.MetaSessionS,
 		},
 	}
@@ -664,11 +664,11 @@ func testAttributeSProcessEventWithResource(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSProcessEventWithResource",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"EventName":           "AddResourceUsages",
 				"ResourceTotalUsages": "5",
 			},
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.OptsContext: utils.MetaSessionS,
 			},
 		},
@@ -733,10 +733,10 @@ func testAttributeSProcessEventWithResourceFull(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testAttributeSProcessEventWithResource2",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"EventName": "AddFullResource",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsContext: utils.MetaSessionS,
 		},
 	}
@@ -747,7 +747,7 @@ func testAttributeSProcessEventWithResourceFull(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSProcessEventWithResource2",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"EventName":    "AddFullResource",
 				"FullResource": "{\"Tenant\":\"cgrates.org\",\"ID\":\"ResTest\",\"Usages\":{\"651a8db2-4f67-4cf8-b622-169e8a482e21\":{\"Tenant\":\"cgrates.org\",\"ID\":\"651a8db2-4f67-4cf8-b622-169e8a482e21\",\"ExpiryTime\":\"2020-10-06T16:12:52.450804203+03:00\",\"Units\":3},\"651a8db2-4f67-4cf8-b622-169e8a482e22\":{\"Tenant\":\"cgrates.org\",\"ID\":\"651a8db2-4f67-4cf8-b622-169e8a482e22\",\"ExpiryTime\":\"2020-10-06T16:12:52.451034151+03:00\",\"Units\":2}},\"TTLIdx\":[\"651a8db2-4f67-4cf8-b622-169e8a482e21\",\"651a8db2-4f67-4cf8-b622-169e8a482e22\"]}",
 			},
@@ -824,11 +824,11 @@ func testAttributeSProcessEventWithLibPhoneNumber(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testAttributeSProcessEventWithLibPhoneNumber2",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"EventName":   "AddDestinationCarrier",
 			"Destination": "+447779330921",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsContext: utils.MetaSessionS,
 		},
 	}
@@ -839,12 +839,12 @@ func testAttributeSProcessEventWithLibPhoneNumber(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSProcessEventWithLibPhoneNumber2",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"EventName":          "AddDestinationCarrier",
 				"Destination":        "+447779330921",
 				"DestinationCarrier": "Orange",
 			},
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.OptsContext: utils.MetaSessionS,
 			},
 		},
@@ -927,11 +927,11 @@ func testAttributeSProcessEventWithLibPhoneNumberComposed(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testAttributeSProcessEventWithLibPhoneNumberComposed",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"EventName":   "AddComposedInfo",
 			"Destination": "+447779330921",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsContext: utils.MetaSessionS,
 		},
 	}
@@ -942,12 +942,12 @@ func testAttributeSProcessEventWithLibPhoneNumberComposed(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSProcessEventWithLibPhoneNumberComposed",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"EventName":          "AddComposedInfo",
 				"Destination":        "+447779330921",
 				"DestinationCarrier": "Orange;44",
 			},
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.OptsContext: utils.MetaSessionS,
 			},
 		},
@@ -1012,11 +1012,11 @@ func testAttributeSProcessEventWithLibPhoneNumberFull(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testAttributeSProcessEventWithLibPhoneNumber",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"EventName":   "AddDestinationDetails",
 			"Destination": "+447779330921",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsContext: utils.MetaSessionS,
 		},
 	}
@@ -1027,12 +1027,12 @@ func testAttributeSProcessEventWithLibPhoneNumberFull(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSProcessEventWithLibPhoneNumber",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"EventName":          "AddDestinationDetails",
 				"Destination":        "+447779330921",
 				"DestinationDetails": "{\"Carrier\":\"Orange\",\"CountryCode\":44,\"CountryCodeSource\":1,\"Extension\":\"\",\"GeoLocation\":\"United Kingdom\",\"ItalianLeadingZero\":false,\"LengthOfNationalDestinationCode\":0,\"NationalNumber\":7779330921,\"NumberOfLeadingZeros\":1,\"NumberType\":1,\"PreferredDomesticCarrierCode\":\"\",\"RawInput\":\"+447779330921\",\"Region\":\"GB\"}",
 			},
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.OptsContext: utils.MetaSessionS,
 			},
 		},

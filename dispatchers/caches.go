@@ -84,13 +84,13 @@ func (dS *DispatcherService) CacheSv1HasItem(args *utils.ArgsGetCacheItemWithAPI
 		utils.MetaCaches, utils.CacheSv1HasItem, args, reply)
 }
 
-func (dS *DispatcherService) CacheSv1GetItem(args *utils.ArgsGetCacheItemWithAPIOpts, reply *interface{}) (err error) {
+func (dS *DispatcherService) CacheSv1GetItem(args *utils.ArgsGetCacheItemWithAPIOpts, reply *any) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -217,13 +217,13 @@ func (dS *DispatcherService) CacheSv1PrecacheStatus(args *utils.AttrCacheIDsWith
 	}, utils.MetaCaches, utils.CacheSv1PrecacheStatus, args, reply)
 }
 
-func (dS *DispatcherService) CacheSv1GetItemWithRemote(args *utils.ArgsGetCacheItemWithAPIOpts, reply *interface{}) (err error) {
+func (dS *DispatcherService) CacheSv1GetItemWithRemote(args *utils.ArgsGetCacheItemWithAPIOpts, reply *any) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}

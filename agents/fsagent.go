@@ -375,7 +375,7 @@ func (fsa *FSsessions) Shutdown() (err error) {
 }
 
 // Call implements rpcclient.ClientConnector interface
-func (fsa *FSsessions) Call(serviceMethod string, args interface{}, reply interface{}) error {
+func (fsa *FSsessions) Call(serviceMethod string, args any, reply any) error {
 	return utils.RPCCall(fsa, serviceMethod, args, reply)
 }
 
@@ -454,7 +454,7 @@ func (*FSsessions) V1DisconnectPeer(args *utils.DPRArgs, reply *string) (err err
 }
 
 // V1WarnDisconnect is called when call goes under the minimum duration threshold, so FreeSWITCH can play an announcement message
-func (fsa *FSsessions) V1WarnDisconnect(args map[string]interface{}, reply *string) (err error) {
+func (fsa *FSsessions) V1WarnDisconnect(args map[string]any, reply *string) (err error) {
 	if fsa.cfg.LowBalanceAnnFile == utils.EmptyString {
 		*reply = utils.OK
 		return
@@ -483,7 +483,7 @@ func (fsa *FSsessions) V1WarnDisconnect(args map[string]interface{}, reply *stri
 }
 
 // CallBiRPC is part of utils.BiRPCServer interface to help internal connections do calls over rpcclient.ClientConnector interface
-func (fsa *FSsessions) CallBiRPC(clnt rpcclient.ClientConnector, serviceMethod string, args interface{}, reply interface{}) error {
+func (fsa *FSsessions) CallBiRPC(clnt rpcclient.ClientConnector, serviceMethod string, args any, reply any) error {
 	return utils.BiRPCCall(fsa, clnt, serviceMethod, args, reply)
 }
 
@@ -510,18 +510,18 @@ func (fsa *FSsessions) BiRPCv1DisconnectPeer(clnt rpcclient.ClientConnector, arg
 }
 
 // BiRPCv1WarnDisconnect is used to implement the sessions.BiRPClient interface
-func (fsa *FSsessions) BiRPCv1WarnDisconnect(clnt rpcclient.ClientConnector, args map[string]interface{}, reply *string) (err error) {
+func (fsa *FSsessions) BiRPCv1WarnDisconnect(clnt rpcclient.ClientConnector, args map[string]any, reply *string) (err error) {
 	return fsa.V1WarnDisconnect(args, reply)
 }
 
 // BiRPCv1CapsError is used to return error when the caps limit is hit
-func (fsa *FSsessions) BiRPCv1CapsError(clnt rpcclient.ClientConnector, args interface{}, reply *string) (err error) {
+func (fsa *FSsessions) BiRPCv1CapsError(clnt rpcclient.ClientConnector, args any, reply *string) (err error) {
 	return utils.ErrMaxConcurrentRPCExceeded
 }
 
 // Handlers is used to implement the rpcclient.BiRPCConector interface
-func (fsa *FSsessions) Handlers() map[string]interface{} {
-	return map[string]interface{}{
+func (fsa *FSsessions) Handlers() map[string]any {
+	return map[string]any{
 		utils.SessionSv1DisconnectSession: func(clnt *rpc2.Client, args utils.AttrDisconnectSession, rply *string) error {
 			return fsa.BiRPCv1DisconnectSession(clnt, args, rply)
 		},
@@ -534,10 +534,10 @@ func (fsa *FSsessions) Handlers() map[string]interface{} {
 		utils.SessionSv1DisconnectPeer: func(clnt *rpc2.Client, args *utils.DPRArgs, rply *string) (err error) {
 			return fsa.BiRPCv1DisconnectPeer(clnt, args, rply)
 		},
-		utils.SessionSv1WarnDisconnect: func(clnt *rpc2.Client, args map[string]interface{}, rply *string) (err error) {
+		utils.SessionSv1WarnDisconnect: func(clnt *rpc2.Client, args map[string]any, rply *string) (err error) {
 			return fsa.BiRPCv1WarnDisconnect(clnt, args, rply)
 		},
-		utils.SessionSv1CapsError: func(clnt *rpc2.Client, args interface{}, rply *string) (err error) {
+		utils.SessionSv1CapsError: func(clnt *rpc2.Client, args any, rply *string) (err error) {
 			return fsa.BiRPCv1CapsError(clnt, args, rply)
 		},
 	}

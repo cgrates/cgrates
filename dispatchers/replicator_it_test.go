@@ -100,7 +100,7 @@ func testDspRplPingFailover(t *testing.T) {
 	ev := utils.CGREvent{
 		Tenant: "cgrates.org",
 
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
@@ -140,7 +140,7 @@ func testDspRplAccount(t *testing.T) {
 			AllowNegative: true,
 			Disabled:      true,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
@@ -153,7 +153,7 @@ func testDspRplAccount(t *testing.T) {
 	var reply *engine.Account
 	argsGetAccount := &utils.StringWithAPIOpts{
 		Arg: "cgrates.org:1008",
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
@@ -177,7 +177,7 @@ func testDspRplAccount(t *testing.T) {
 	// Remove Account
 	if err := dispEngine.RPC.Call(utils.ReplicatorSv1RemoveAccount, &utils.StringWithAPIOpts{
 		Arg: "cgrates.org:1008",
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "repl12345",
 		},
 	}, &replyStr); err != nil {
@@ -199,7 +199,7 @@ func testDspRplSupplierProfile(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "ID",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
@@ -217,7 +217,7 @@ func testDspRplSupplierProfile(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "ID",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
@@ -260,7 +260,7 @@ func testDspRplAttributeProfile(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "id",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
@@ -277,7 +277,7 @@ func testDspRplAttributeProfile(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "id",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
@@ -320,7 +320,7 @@ func testDspRplChargerProfile(t *testing.T) {
 			ID:     "id",
 			Tenant: "cgrates.org",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
@@ -336,7 +336,7 @@ func testDspRplChargerProfile(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "id",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
@@ -379,7 +379,7 @@ func testDspRplDispatcherProfile(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "ID",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
@@ -395,7 +395,7 @@ func testDspRplDispatcherProfile(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "ID",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
@@ -440,7 +440,7 @@ func testDspRplDispatcherHost(t *testing.T) {
 				ID: "ID",
 			},
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
@@ -456,7 +456,7 @@ func testDspRplDispatcherHost(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "ID",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
@@ -499,7 +499,7 @@ func testDspRplFilter(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "ID",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
@@ -515,7 +515,7 @@ func testDspRplFilter(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "ID",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
@@ -558,7 +558,7 @@ func testDspRplThreshold(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "ID",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
@@ -574,7 +574,7 @@ func testDspRplThreshold(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "ID",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
@@ -617,7 +617,7 @@ func testDspRplThresholdProfile(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "ID",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
@@ -633,7 +633,7 @@ func testDspRplThresholdProfile(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "ID",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
@@ -676,7 +676,7 @@ func testDspRplStatQueue(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "ID",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
@@ -692,7 +692,7 @@ func testDspRplStatQueue(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "ID",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
@@ -735,7 +735,7 @@ func testDspRplStatQueueProfile(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "ID",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
@@ -751,7 +751,7 @@ func testDspRplStatQueueProfile(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "ID",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
@@ -794,7 +794,7 @@ func testDspRplResource(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "ID",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
@@ -810,7 +810,7 @@ func testDspRplResource(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "ID",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
@@ -853,7 +853,7 @@ func testDspRplResourceProfile(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "ID",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
@@ -869,7 +869,7 @@ func testDspRplResourceProfile(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "ID",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
@@ -913,7 +913,7 @@ func testDspRplTiming(t *testing.T) {
 			Years: utils.Years{1999},
 		},
 		Tenant: "cgrates.org",
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
@@ -927,7 +927,7 @@ func testDspRplTiming(t *testing.T) {
 	argsTiming := &utils.StringWithAPIOpts{
 		Arg:    "testTimings",
 		Tenant: "cgrates.org",
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
@@ -969,7 +969,7 @@ func testDspRplActionTriggers(t *testing.T) {
 		Key: "testActionTriggers",
 		Attrs: engine.ActionTriggers{
 			&engine.ActionTrigger{ID: "testActionTriggers"}},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
@@ -983,7 +983,7 @@ func testDspRplActionTriggers(t *testing.T) {
 	argsActionTriggers := &utils.StringWithAPIOpts{
 		Arg:    "testActionTriggers",
 		Tenant: "cgrates.org",
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
@@ -1023,7 +1023,7 @@ func testDspRplSharedGroup(t *testing.T) {
 		SharedGroup: &engine.SharedGroup{
 			Id: "IDSharedGroup",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
@@ -1037,7 +1037,7 @@ func testDspRplSharedGroup(t *testing.T) {
 	argsSharedGroup := &utils.StringWithAPIOpts{
 		Arg:    "IDSharedGroup",
 		Tenant: "cgrates.org",
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
@@ -1082,7 +1082,7 @@ func testDspRplActions(t *testing.T) {
 		},
 		Key:    "KeyActions",
 		Tenant: "cgrates.org",
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
@@ -1096,7 +1096,7 @@ func testDspRplActions(t *testing.T) {
 	argsActions := &utils.StringWithAPIOpts{
 		Arg:    "KeyActions",
 		Tenant: "cgrates.org",
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
@@ -1148,7 +1148,7 @@ func testDspRplActionPlan(t *testing.T) {
 		},
 		Key:    "KeyActionPlan",
 		Tenant: "cgrates.org",
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
@@ -1162,7 +1162,7 @@ func testDspRplActionPlan(t *testing.T) {
 	argsActionPlan := &utils.StringWithAPIOpts{
 		Arg:    "KeyActionPlan",
 		Tenant: "cgrates.org",
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
@@ -1202,7 +1202,7 @@ func testDspRplAccountActionPlans(t *testing.T) {
 		AplIDs: []string{"KeyAccountActionPlans"},
 		AcntID: "KeyAccountActionPlans",
 		Tenant: "cgrates.org",
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
@@ -1216,7 +1216,7 @@ func testDspRplAccountActionPlans(t *testing.T) {
 	argsAccountActionPlans := &utils.StringWithAPIOpts{
 		Arg:    "KeyAccountActionPlans",
 		Tenant: "cgrates.org",
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
@@ -1261,7 +1261,7 @@ func testDspRplRatingPlan(t *testing.T) {
 			Timings: map[string]*engine.RITiming{"Timings": {Months: utils.Months{4}}},
 		},
 		Tenant: "cgrates.org",
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
@@ -1275,7 +1275,7 @@ func testDspRplRatingPlan(t *testing.T) {
 	argsRatingPlan := &utils.StringWithAPIOpts{
 		Arg:    "id",
 		Tenant: "cgrates.org",
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
@@ -1318,7 +1318,7 @@ func testDspRplRatingProfile(t *testing.T) {
 				&engine.RatingPlanActivation{RatingPlanId: "RatingPlanId"}},
 		},
 		Tenant: "cgrates.org",
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
@@ -1332,7 +1332,7 @@ func testDspRplRatingProfile(t *testing.T) {
 	argsRatingProfile := &utils.StringWithAPIOpts{
 		Arg:    "idRatingProfile",
 		Tenant: "cgrates.org",
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
@@ -1373,7 +1373,7 @@ func testDspRplDestination(t *testing.T) {
 		Destination: &engine.Destination{
 			Id: "idDestination"},
 		Tenant: "cgrates.org",
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
@@ -1387,7 +1387,7 @@ func testDspRplDestination(t *testing.T) {
 	argsDestination := &utils.StringWithAPIOpts{
 		Arg:    "idDestination",
 		Tenant: "cgrates.org",
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
@@ -1428,7 +1428,7 @@ func testDspRplLoadIDs(t *testing.T) {
 			"LoadID1": 1,
 			"LoadID2": 2},
 		Tenant: "cgrates.org",
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
@@ -1442,7 +1442,7 @@ func testDspRplLoadIDs(t *testing.T) {
 	argsLoadIDs := &utils.StringWithAPIOpts{
 		Arg:    "idLoadIDs",
 		Tenant: "cgrates.org",
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "repl12345",
 		},
 	}

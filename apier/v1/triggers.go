@@ -208,7 +208,7 @@ type AttrSetAccountActionTriggers struct {
 type AttrSetActionTrigger struct {
 	GroupID       string
 	UniqueID      string
-	ActionTrigger map[string]interface{}
+	ActionTrigger map[string]any
 }
 
 // UpdateActionTrigger updates the ActionTrigger if is matching

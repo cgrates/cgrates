@@ -103,7 +103,7 @@ func TestUnmarshalJSON(t *testing.T) {
 	if _, err := unmarshalJSON(json.RawMessage(`a`)); err == nil || err.Error() != expErr.Error() {
 		t.Errorf("Expected error: %s,received %+v", expErr, err)
 	}
-	var exp interface{} = true
+	var exp any = true
 	if val, err := unmarshalJSON(json.RawMessage(`true`)); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(val, exp) {
@@ -131,13 +131,13 @@ func TestUnmarshalJSON(t *testing.T) {
 		t.Errorf("Expected: %s,received %s", utils.ToJSON(exp), utils.ToJSON(val))
 	}
 
-	exp = []interface{}{"1", "2", "3"}
+	exp = []any{"1", "2", "3"}
 	if val, err := unmarshalJSON(json.RawMessage(`["1","2","3"]`)); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(val, exp) {
 		t.Errorf("Expected: %s,received %s", utils.ToJSON(exp), utils.ToJSON(val))
 	}
-	exp = map[string]interface{}{"1": "A", "2": "B", "3": "C"}
+	exp = map[string]any{"1": "A", "2": "B", "3": "C"}
 	if val, err := unmarshalJSON(json.RawMessage(`{"1":"A","2":"B","3":"C"}`)); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(val, exp) {

@@ -49,7 +49,7 @@ func (self *CmdBalanceDebit) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdBalanceDebit) RpcParams(reset bool) interface{} {
+func (self *CmdBalanceDebit) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &v1.AttrAddBalance{}
 	}
@@ -60,7 +60,7 @@ func (self *CmdBalanceDebit) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdBalanceDebit) RpcResult() interface{} {
+func (self *CmdBalanceDebit) RpcResult() any {
 	var s string
 	return &s
 }

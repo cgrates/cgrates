@@ -98,8 +98,8 @@ func TestDecodeServerRequest(t *testing.T) {
 func TestWriteServerResponse(t *testing.T) {
 	writer := bytes.NewBufferString(EmptyString)
 	var id *json.RawMessage
-	var result interface{} = "OK"
-	var errMessage interface{}
+	var result any = "OK"
+	var errMessage any
 	slsByte := []byte("10")
 	id = (*json.RawMessage)(&slsByte)
 

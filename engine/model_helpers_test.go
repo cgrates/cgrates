@@ -3646,14 +3646,14 @@ func TestAPItoDispatcherProfile(t *testing.T) {
 			ActivationTime: "2014-07-14T14:35:00Z",
 			ExpiryTime:     "",
 		},
-		StrategyParams: []interface{}{},
+		StrategyParams: []any{},
 		Weight:         20,
 		Hosts: []*utils.TPDispatcherHostProfile{
 			{
 				ID:        "C1",
 				FilterIDs: []string{},
 				Weight:    10,
-				Params:    []interface{}{"192.168.54.203", "*ratio:2"},
+				Params:    []any{"192.168.54.203", "*ratio:2"},
 				Blocker:   false,
 			},
 		},
@@ -3668,14 +3668,14 @@ func TestAPItoDispatcherProfile(t *testing.T) {
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
 		},
-		StrategyParams: map[string]interface{}{},
+		StrategyParams: map[string]any{},
 		Weight:         20,
 		Hosts: DispatcherHostProfiles{
 			&DispatcherHostProfile{
 				ID:        "C1",
 				FilterIDs: []string{},
 				Weight:    10,
-				Params:    map[string]interface{}{"0": "192.168.54.203", utils.MetaRatio: "2"},
+				Params:    map[string]any{"0": "192.168.54.203", utils.MetaRatio: "2"},
 				Blocker:   false,
 			},
 		},
@@ -3698,14 +3698,14 @@ func TestDispatcherProfileToAPI(t *testing.T) {
 			ActivationTime: "2014-07-14T14:35:00Z",
 			ExpiryTime:     "",
 		},
-		StrategyParams: []interface{}{},
+		StrategyParams: []any{},
 		Weight:         20,
 		Hosts: []*utils.TPDispatcherHostProfile{
 			{
 				ID:        "C1",
 				FilterIDs: []string{},
 				Weight:    10,
-				Params:    []interface{}{"192.168.54.203", "*ratio:2"},
+				Params:    []any{"192.168.54.203", "*ratio:2"},
 				Blocker:   false,
 			},
 		},
@@ -3720,14 +3720,14 @@ func TestDispatcherProfileToAPI(t *testing.T) {
 			ActivationTime: "2014-07-14T14:35:00Z",
 			ExpiryTime:     "",
 		},
-		StrategyParams: []interface{}{},
+		StrategyParams: []any{},
 		Weight:         20,
 		Hosts: []*utils.TPDispatcherHostProfile{
 			{
 				ID:        "C1",
 				FilterIDs: []string{},
 				Weight:    10,
-				Params:    []interface{}{"*ratio:2", "192.168.54.203"},
+				Params:    []any{"*ratio:2", "192.168.54.203"},
 				Blocker:   false,
 			},
 		},
@@ -3742,14 +3742,14 @@ func TestDispatcherProfileToAPI(t *testing.T) {
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
 		},
-		StrategyParams: map[string]interface{}{},
+		StrategyParams: map[string]any{},
 		Weight:         20,
 		Hosts: DispatcherHostProfiles{
 			&DispatcherHostProfile{
 				ID:        "C1",
 				FilterIDs: []string{},
 				Weight:    10,
-				Params:    map[string]interface{}{"0": "192.168.54.203", utils.MetaRatio: "2"},
+				Params:    map[string]any{"0": "192.168.54.203", utils.MetaRatio: "2"},
 				Blocker:   false,
 			},
 		},
@@ -3773,21 +3773,21 @@ func TestAPItoModelTPDispatcher(t *testing.T) {
 			ActivationTime: "2014-07-14T14:35:00Z",
 			ExpiryTime:     "",
 		},
-		StrategyParams: []interface{}{},
+		StrategyParams: []any{},
 		Weight:         20,
 		Hosts: []*utils.TPDispatcherHostProfile{
 			{
 				ID:        "C1",
 				FilterIDs: []string{},
 				Weight:    10,
-				Params:    []interface{}{"192.168.54.203"},
+				Params:    []any{"192.168.54.203"},
 				Blocker:   false,
 			},
 			{
 				ID:        "C2",
 				FilterIDs: []string{},
 				Weight:    10,
-				Params:    []interface{}{"192.168.54.204"},
+				Params:    []any{"192.168.54.204"},
 				Blocker:   false,
 			},
 		},
@@ -4782,13 +4782,13 @@ func TestDispatcherProfileToAPICase2(t *testing.T) {
 			ExpiryTime:     time.Date(2014, 7, 15, 14, 35, 0, 0, time.UTC),
 		},
 		FilterIDs: []string{"field1", "field2"},
-		StrategyParams: map[string]interface{}{
+		StrategyParams: map[string]any{
 			"Field1": "Params1",
 		},
 		Hosts: []*DispatcherHostProfile{
 			{
 				FilterIDs: []string{"fieldA", "fieldB"},
-				Params:    map[string]interface{}{},
+				Params:    map[string]any{},
 			},
 		},
 	}
@@ -4800,11 +4800,11 @@ func TestDispatcherProfileToAPICase2(t *testing.T) {
 			ExpiryTime:     "2014-07-15T14:35:00Z",
 		},
 		FilterIDs:      []string{"field1", "field2"},
-		StrategyParams: []interface{}{"Params1"},
+		StrategyParams: []any{"Params1"},
 		Hosts: []*utils.TPDispatcherHostProfile{
 			{
 				FilterIDs: []string{"fieldA", "fieldB"},
-				Params:    []interface{}{},
+				Params:    []any{},
 			},
 		},
 	}
@@ -4820,20 +4820,20 @@ func TestAPItoDispatcherProfileCase2(t *testing.T) {
 	structTest := &utils.TPDispatcherProfile{
 		Subsystems:     []string{},
 		FilterIDs:      []string{},
-		StrategyParams: []interface{}{"Param1"},
+		StrategyParams: []any{"Param1"},
 		Hosts: []*utils.TPDispatcherHostProfile{{
-			Params: []interface{}{"Param1"},
+			Params: []any{"Param1"},
 		}},
 	}
 	expStruct := &DispatcherProfile{
 		Subsystems: []string{},
 		FilterIDs:  []string{},
-		StrategyParams: map[string]interface{}{
+		StrategyParams: map[string]any{
 			"0": "Param1",
 		},
 		Hosts: DispatcherHostProfiles{{
 			FilterIDs: []string{},
-			Params: map[string]interface{}{
+			Params: map[string]any{
 				"0": "Param1",
 			},
 		},
@@ -4851,9 +4851,9 @@ func TestAPItoDispatcherProfileError(t *testing.T) {
 			ActivationTime: "cat1",
 			ExpiryTime:     "cat2",
 		},
-		StrategyParams: []interface{}{"Param1"},
+		StrategyParams: []any{"Param1"},
 		Hosts: []*utils.TPDispatcherHostProfile{{
-			Params: []interface{}{""},
+			Params: []any{""},
 		}},
 	}
 
@@ -4874,7 +4874,7 @@ func TestAPItoModelTPDispatcherProfileNil(t *testing.T) {
 }
 
 func TestModelHelpersParamsToString(t *testing.T) {
-	testInterface := []interface{}{"Param1", "Param2"}
+	testInterface := []any{"Param1", "Param2"}
 	result := paramsToString(testInterface)
 	if !reflect.DeepEqual(result, "Param1;Param2") {
 		t.Errorf("\nExpecting <Param1;Param2>,\n Received <%+v>", result)
@@ -4893,7 +4893,7 @@ func TestModelHelpersAsTPDispatcherProfiles(t *testing.T) {
 			ActivationTime: "2014-07-29T15:00:00Z",
 			ExpiryTime:     "2014-08-29T15:00:00Z",
 		},
-		StrategyParams: []interface{}{"Param1"},
+		StrategyParams: []any{"Param1"},
 	},
 	}
 	result := structTest.AsTPDispatcherProfiles()

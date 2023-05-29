@@ -78,7 +78,7 @@ func addBalance(sBenchRPC *rpc.Client, sraccount string) {
 		Account:     sraccount,
 		BalanceType: utils.MetaVoice,
 		Value:       5 * float64(time.Hour),
-		Balance: map[string]interface{}{
+		Balance: map[string]any{
 			utils.ID: "TestDynamicDebitBalance",
 		},
 	}
@@ -111,7 +111,7 @@ func initSession(i int) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.EventName:   "TEST_EVENT",
 				utils.ToR:         utils.MetaVoice,
 				utils.Category:    "call",

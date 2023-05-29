@@ -144,7 +144,7 @@ func testJSONAddData(t *testing.T) {
 			AttributeIDs: []string{"*none"},
 			Weight:       20,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.CacheOpt: utils.MetaReload,
 		},
 	}
@@ -166,7 +166,7 @@ func testJSONAddData(t *testing.T) {
 		Account:     "voiceAccount",
 		BalanceType: utils.MetaVoice,
 		Value:       600000000000,
-		Balance: map[string]interface{}{
+		Balance: map[string]any{
 			utils.ID:        utils.MetaDefault,
 			"RatingSubject": "*zero1m",
 			utils.Weight:    10.0,
@@ -315,7 +315,7 @@ func TestFileJSONProcessEvent(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	fcTemp := map[string]interface{}{
+	fcTemp := map[string]any{
 		"2":  "tor_test",
 		"3":  "originid_test",
 		"4":  "requestType_test",
@@ -346,7 +346,7 @@ func TestFileJSONProcessEvent(t *testing.T) {
 	}
 	expEvent := &utils.CGREvent{
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "account_test",
 			utils.AnswerTime:   "answerTime_test",
 			utils.Category:     "category_test",
@@ -359,7 +359,7 @@ func TestFileJSONProcessEvent(t *testing.T) {
 			utils.ToR:          "tor_test",
 			utils.Usage:        "usage_test",
 		},
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 	// expEvent := &utils.CGREvent{}
 	eR.conReqs <- struct{}{}
@@ -416,7 +416,7 @@ func TestFileJSONProcessEventError2(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	fcTemp := map[string]interface{}{
+	fcTemp := map[string]any{
 		"2":  "tor_test",
 		"3":  "originid_test",
 		"4":  "requestType_test",
@@ -475,7 +475,7 @@ func TestFileJSONProcessEventError3(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	fcTemp := map[string]interface{}{
+	fcTemp := map[string]any{
 		"2":  "tor_test",
 		"3":  "originid_test",
 		"4":  "requestType_test",

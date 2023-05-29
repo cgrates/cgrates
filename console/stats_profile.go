@@ -49,7 +49,7 @@ func (self *CmdGetStatQueueProfile) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdGetStatQueueProfile) RpcParams(reset bool) interface{} {
+func (self *CmdGetStatQueueProfile) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &utils.TenantID{}
 	}
@@ -60,12 +60,12 @@ func (self *CmdGetStatQueueProfile) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdGetStatQueueProfile) RpcResult() interface{} {
+func (self *CmdGetStatQueueProfile) RpcResult() any {
 	var atr engine.StatQueueProfile
 	return &atr
 }
 
-func (self *CmdGetStatQueueProfile) GetFormatedResult(result interface{}) string {
+func (self *CmdGetStatQueueProfile) GetFormatedResult(result any) string {
 	return GetFormatedResult(result, utils.StringSet{
 		utils.TTL: {},
 	})

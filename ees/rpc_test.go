@@ -171,10 +171,10 @@ func TestRPCPrepareMap(t *testing.T) {
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "CGRID1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.Usage: 21,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaSubsys: "*attributes",
 		},
 	}

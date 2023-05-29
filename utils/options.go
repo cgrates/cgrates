@@ -105,9 +105,9 @@ func GetDecimalBigOpts(ev *CGREvent, dftOpt *decimal.Big, optNames ...string) (c
 	return dftOpt, nil
 }
 
-// GetInterfaceOpts checks the specified option names in order among the keys in APIOpts returning the first value it finds as interface{}, otherwise it
+// GetInterfaceOpts checks the specified option names in order among the keys in APIOpts returning the first value it finds as any, otherwise it
 // returns the default option (usually the value specified in config)
-func GetInterfaceOpts(ev *CGREvent, dftOpt interface{}, optNames ...string) (cfgOpt interface{}) {
+func GetInterfaceOpts(ev *CGREvent, dftOpt any, optNames ...string) (cfgOpt any) {
 	for _, optName := range optNames {
 		if opt, has := ev.APIOpts[optName]; has {
 			return opt

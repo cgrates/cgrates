@@ -277,7 +277,7 @@ func testCDRsOnExpHttpCdrReplication(t *testing.T) {
 	}
 	var reply string
 	arg := testCdr1.AsCGREvent()
-	arg.APIOpts = map[string]interface{}{"ExporterID": "http_localhost"}
+	arg.APIOpts = map[string]any{"ExporterID": "http_localhost"}
 
 	// we expect that the cdr export to fail and go into the failed post directory
 	if err := cdrsMasterRpc.Call(utils.CDRsV1ProcessEvent,
@@ -454,7 +454,7 @@ func testCDRsOnExpFileFailover(t *testing.T) {
 	v2 := url.Values{}
 	v1.Set("OriginID", "httpjsonrpc1")
 	v2.Set("OriginID", "amqpreconnect")
-	httpContent := []interface{}{&ees.HTTPPosterRequest{Body: v1, Header: http.Header{"Content-Type": []string{"application/x-www-form-urlencoded"}}},
+	httpContent := []any{&ees.HTTPPosterRequest{Body: v1, Header: http.Header{"Content-Type": []string{"application/x-www-form-urlencoded"}}},
 		&ees.HTTPPosterRequest{Body: v2, Header: http.Header{"Content-Type": []string{"application/x-www-form-urlencoded"}}}}
 	filesInDir, _ := os.ReadDir(cdrsMasterCfg.GeneralCfg().FailedPostsDir)
 	if len(filesInDir) == 0 {

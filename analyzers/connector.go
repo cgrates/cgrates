@@ -43,7 +43,7 @@ type AnalyzerConnector struct {
 	to   string
 }
 
-func (c *AnalyzerConnector) Call(serviceMethod string, args, reply interface{}) (err error) {
+func (c *AnalyzerConnector) Call(serviceMethod string, args, reply any) (err error) {
 	sTime := time.Now()
 	err = c.conn.Call(serviceMethod, args, reply)
 	go c.aS.logTrafic(0, serviceMethod, args, reply, err, c.enc, c.from, c.to, sTime, time.Now())
@@ -69,20 +69,20 @@ type AnalyzerBiRPCConnector struct {
 	to   string
 }
 
-func (c *AnalyzerBiRPCConnector) Call(serviceMethod string, args, reply interface{}) (err error) {
+func (c *AnalyzerBiRPCConnector) Call(serviceMethod string, args, reply any) (err error) {
 	sTime := time.Now()
 	err = c.conn.Call(serviceMethod, args, reply)
 	go c.aS.logTrafic(0, serviceMethod, args, reply, err, c.enc, c.from, c.to, sTime, time.Now())
 	return
 }
 
-func (c *AnalyzerBiRPCConnector) CallBiRPC(cl rpcclient.ClientConnector, serviceMethod string, args, reply interface{}) (err error) {
+func (c *AnalyzerBiRPCConnector) CallBiRPC(cl rpcclient.ClientConnector, serviceMethod string, args, reply any) (err error) {
 	sTime := time.Now()
 	err = c.conn.CallBiRPC(cl, serviceMethod, args, reply)
 	go c.aS.logTrafic(0, serviceMethod, args, reply, err, c.enc, c.from, c.to, sTime, time.Now())
 	return
 }
 
-func (c *AnalyzerBiRPCConnector) Handlers() map[string]interface{} {
+func (c *AnalyzerBiRPCConnector) Handlers() map[string]any {
 	return c.conn.Handlers()
 }

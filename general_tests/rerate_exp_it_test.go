@@ -168,7 +168,7 @@ func testRerateExpSetBalance(t *testing.T) {
 		Account:     "1001",
 		Value:       float64(time.Minute),
 		BalanceType: utils.MetaVoice,
-		Balance: map[string]interface{}{
+		Balance: map[string]any{
 			utils.ID: "1001",
 		},
 	}
@@ -211,7 +211,7 @@ func testRerateExpProcessEventCDR1(t *testing.T) {
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "event1",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.RunID:        "run_1",
 				utils.CGRID:        ng1UUID,
 				utils.Tenant:       "cgrates.org",
@@ -288,7 +288,7 @@ func testRerateExpProcessEventCDR2(t *testing.T) {
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "event2",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.RunID:        "run_2",
 				utils.CGRID:        ng1UUID,
 				utils.Tenant:       "cgrates.org",
@@ -364,7 +364,7 @@ func testRerateExpProcessEventCDR3(t *testing.T) {
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "event3",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.RunID:        "run_3",
 				utils.CGRID:        ng2UUID,
 				utils.Tenant:       "cgrates.org",

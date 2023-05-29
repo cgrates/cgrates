@@ -117,10 +117,10 @@ func TestAMQPER(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     ev.cgrEvent.ID,
 			Time:   ev.cgrEvent.Time,
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"CGRID": randomCGRID,
 			},
-			APIOpts: map[string]interface{}{},
+			APIOpts: map[string]any{},
 		}
 		if !reflect.DeepEqual(ev.cgrEvent, expected) {
 			t.Errorf("Expected %s ,received %s", utils.ToJSON(expected), utils.ToJSON(ev.cgrEvent))

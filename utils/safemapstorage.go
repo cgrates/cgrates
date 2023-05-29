@@ -36,7 +36,7 @@ func (ms *SafeMapStorage) String() string {
 }
 
 // FieldAsInterface returns the value from the path
-func (ms *SafeMapStorage) FieldAsInterface(fldPath []string) (val interface{}, err error) {
+func (ms *SafeMapStorage) FieldAsInterface(fldPath []string) (val any, err error) {
 	ms.RLock()
 	defer ms.RUnlock()
 	return ms.MapStorage.FieldAsInterface(fldPath)
@@ -50,7 +50,7 @@ func (ms *SafeMapStorage) FieldAsString(fldPath []string) (str string, err error
 }
 
 // Set sets the value at the given path
-func (ms *SafeMapStorage) Set(fldPath []string, val interface{}) (err error) {
+func (ms *SafeMapStorage) Set(fldPath []string, val any) (err error) {
 	ms.Lock()
 	defer ms.Unlock()
 	return ms.MapStorage.Set(fldPath, val)

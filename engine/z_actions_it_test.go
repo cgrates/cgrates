@@ -375,7 +375,7 @@ func testActionsitThresholdCDrLog(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "cdrev1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.EventType:    utils.CDR,
 			"field_extr1":      "val_extr1",
 			"fieldextr2":       "valextr2",
@@ -399,7 +399,7 @@ func testActionsitThresholdCDrLog(t *testing.T) {
 			utils.Route:        "SUPPL1",
 			utils.Cost:         -1.0,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaEventType: utils.CDR,
 		},
 	}
@@ -440,7 +440,7 @@ func testActionsitCDRAccount(t *testing.T) {
 		Account     string
 		BalanceType string
 		Value       float64
-		Balance     map[string]interface{}
+		Balance     map[string]any
 		Overwrite   bool
 	}
 	attrs := &AttrAddBalance{
@@ -448,7 +448,7 @@ func testActionsitCDRAccount(t *testing.T) {
 		Account:     acnt,
 		BalanceType: utils.MetaVoice,
 		Value:       float64(30 * time.Second),
-		Balance: map[string]interface{}{
+		Balance: map[string]any{
 			utils.UUID: "testUUID",
 			utils.ID:   "TestID",
 		},
@@ -591,7 +591,7 @@ func testActionsitThresholdCgrRpcAction(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     utils.UUIDSha1Prefix(),
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Method": "RALsV1.Ping",
 		},
 	}
@@ -655,7 +655,7 @@ func testActionsitThresholdPostEvent(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "cdrev1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"field_extr1":     "val_extr1",
 			"fieldextr2":      "valextr2",
 			utils.CGRID:       utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()),
@@ -673,7 +673,7 @@ func testActionsitThresholdPostEvent(t *testing.T) {
 			utils.Route:       "SUPPL1",
 			utils.Cost:        -1.0,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaEventType: utils.CDR,
 		},
 	}
@@ -767,7 +767,7 @@ func testActionsitSetSDestinations(t *testing.T) {
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.Destination: "333",
 			utils.Usage:       6 * time.Second,
 		},
@@ -781,7 +781,7 @@ func testActionsitSetSDestinations(t *testing.T) {
 	args = &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event2",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.Destination: "777",
 			utils.Usage:       6 * time.Second,
 		},

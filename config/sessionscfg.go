@@ -71,9 +71,9 @@ func (fs *FsConnCfg) loadFromJSONCfg(jsnCfg *FsConnJsonCfg) (err error) {
 	return
 }
 
-// AsMapInterface returns the config as a map[string]interface{}
-func (fs *FsConnCfg) AsMapInterface() map[string]interface{} {
-	return map[string]interface{}{
+// AsMapInterface returns the config as a map[string]any
+func (fs *FsConnCfg) AsMapInterface() map[string]any {
+	return map[string]any{
 		utils.AddressCfg:              fs.Address,
 		utils.Password:                fs.Password,
 		utils.ReconnectsCfg:           fs.Reconnects,
@@ -317,8 +317,8 @@ func (scfg *SessionSCfg) GetDefaultUsage(tor string) time.Duration {
 	return scfg.DefaultUsage[tor]
 }
 
-// AsMapInterface returns the config as a map[string]interface{}
-func (scfg *SessionSCfg) AsMapInterface() (initialMP map[string]interface{}) {
+// AsMapInterface returns the config as a map[string]any
+func (scfg *SessionSCfg) AsMapInterface() (initialMP map[string]any) {
 	maxComputed := make(map[string]string)
 	for key, item := range scfg.DefaultUsage {
 		if key == utils.MetaAny || key == utils.MetaVoice {
@@ -327,7 +327,7 @@ func (scfg *SessionSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 			maxComputed[key] = strconv.Itoa(int(item))
 		}
 	}
-	initialMP = map[string]interface{}{
+	initialMP = map[string]any{
 		utils.EnabledCfg:             scfg.Enabled,
 		utils.ListenBijsonCfg:        scfg.ListenBijson,
 		utils.ListenBigobCfg:         scfg.ListenBigob,
@@ -632,9 +632,9 @@ func (fscfg *FsAgentCfg) loadFromJSONCfg(jsnCfg *FreeswitchAgentJsonCfg) error {
 	return nil
 }
 
-// AsMapInterface returns the config as a map[string]interface{}
-func (fscfg *FsAgentCfg) AsMapInterface(separator string) (initialMP map[string]interface{}) {
-	initialMP = map[string]interface{}{
+// AsMapInterface returns the config as a map[string]any
+func (fscfg *FsAgentCfg) AsMapInterface(separator string) (initialMP map[string]any) {
+	initialMP = map[string]any{
 		utils.EnabledCfg:             fscfg.Enabled,
 		utils.SubscribeParkCfg:       fscfg.SubscribePark,
 		utils.CreateCdrCfg:           fscfg.CreateCdr,
@@ -664,7 +664,7 @@ func (fscfg *FsAgentCfg) AsMapInterface(separator string) (initialMP map[string]
 		initialMP[utils.MaxWaitConnectionCfg] = utils.EmptyString
 	}
 	if fscfg.EventSocketConns != nil {
-		eventSocketConns := make([]map[string]interface{}, len(fscfg.EventSocketConns))
+		eventSocketConns := make([]map[string]any, len(fscfg.EventSocketConns))
 		for key, item := range fscfg.EventSocketConns {
 			eventSocketConns[key] = item.AsMapInterface()
 		}
@@ -750,9 +750,9 @@ func (aConnCfg *AsteriskConnCfg) loadFromJSONCfg(jsnCfg *AstConnJsonCfg) (err er
 	return
 }
 
-// AsMapInterface returns the config as a map[string]interface{}
-func (aConnCfg *AsteriskConnCfg) AsMapInterface() map[string]interface{} {
-	return map[string]interface{}{
+// AsMapInterface returns the config as a map[string]any
+func (aConnCfg *AsteriskConnCfg) AsMapInterface() map[string]any {
+	return map[string]any{
 		utils.AliasCfg:                aConnCfg.Alias,
 		utils.AddressCfg:              aConnCfg.Address,
 		utils.UserCf:                  aConnCfg.User,
@@ -816,14 +816,14 @@ func (aCfg *AsteriskAgentCfg) loadFromJSONCfg(jsnCfg *AsteriskAgentJsonCfg) (err
 	return nil
 }
 
-// AsMapInterface returns the config as a map[string]interface{}
-func (aCfg *AsteriskAgentCfg) AsMapInterface() (initialMP map[string]interface{}) {
-	initialMP = map[string]interface{}{
+// AsMapInterface returns the config as a map[string]any
+func (aCfg *AsteriskAgentCfg) AsMapInterface() (initialMP map[string]any) {
+	initialMP = map[string]any{
 		utils.EnabledCfg:   aCfg.Enabled,
 		utils.CreateCDRCfg: aCfg.CreateCDR,
 	}
 	if aCfg.AsteriskConns != nil {
-		conns := make([]map[string]interface{}, len(aCfg.AsteriskConns))
+		conns := make([]map[string]any, len(aCfg.AsteriskConns))
 		for i, item := range aCfg.AsteriskConns {
 			conns[i] = item.AsMapInterface()
 		}
@@ -898,9 +898,9 @@ func (stirCfg *STIRcfg) loadFromJSONCfg(jsnCfg *STIRJsonCfg) (err error) {
 	return nil
 }
 
-// AsMapInterface returns the config as a map[string]interface{}
-func (stirCfg *STIRcfg) AsMapInterface() (initialMP map[string]interface{}) {
-	initialMP = map[string]interface{}{
+// AsMapInterface returns the config as a map[string]any
+func (stirCfg *STIRcfg) AsMapInterface() (initialMP map[string]any) {
+	initialMP = map[string]any{
 		utils.DefaultAttestCfg:      stirCfg.DefaultAttest,
 		utils.PublicKeyPathCfg:      stirCfg.PublicKeyPath,
 		utils.PrivateKeyPathCfg:     stirCfg.PrivateKeyPath,

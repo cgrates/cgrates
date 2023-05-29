@@ -127,10 +127,10 @@ func testCacheSReplicateProcessAttributes(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testCacheSReplicateProcessAttributes",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsContext: utils.MetaSessionS,
 		},
 	}
@@ -140,11 +140,11 @@ func testCacheSReplicateProcessAttributes(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testCacheSReplicateProcessAttributes",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.AccountField: "1001",
 				"OfficeGroup":      "Marketing",
 			},
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.OptsContext: utils.MetaSessionS,
 			},
 		},

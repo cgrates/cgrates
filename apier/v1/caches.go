@@ -49,13 +49,13 @@ func (chSv1 *CacheSv1) HasItem(args *utils.ArgsGetCacheItemWithAPIOpts,
 
 // GetItem returns an Item from the cache
 func (chSv1 *CacheSv1) GetItem(args *utils.ArgsGetCacheItemWithAPIOpts,
-	reply *interface{}) error {
+	reply *any) error {
 	return chSv1.cacheS.V1GetItem(args, reply)
 }
 
 // GetItemWithRemote returns an Item from local or remote cache
 func (chSv1 *CacheSv1) GetItemWithRemote(args *utils.ArgsGetCacheItemWithAPIOpts,
-	reply *interface{}) error {
+	reply *any) error {
 	return chSv1.cacheS.V1GetItemWithRemote(args, reply)
 }
 
@@ -140,6 +140,6 @@ func (chSv1 *CacheSv1) ReplicateRemove(args *utils.ArgCacheReplicateRemove, repl
 
 // Call implements rpcclient.ClientConnector interface for internal RPC
 func (chSv1 *CacheSv1) Call(serviceMethod string,
-	args interface{}, reply interface{}) error {
+	args any, reply any) error {
 	return utils.APIerRPCCall(chSv1, serviceMethod, args, reply)
 }

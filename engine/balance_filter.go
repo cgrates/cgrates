@@ -47,7 +47,7 @@ type BalanceFilter struct {
 }
 
 // NewBalanceFilter creates a new BalanceFilter based on given filter
-func NewBalanceFilter(filter map[string]interface{}, defaultTimezone string) (bf *BalanceFilter, err error) {
+func NewBalanceFilter(filter map[string]any, defaultTimezone string) (bf *BalanceFilter, err error) {
 	bf = new(BalanceFilter)
 	if id, has := filter[utils.ID]; has {
 		bf.ID = utils.StringPointer(utils.IfaceAsString(id))
@@ -424,7 +424,7 @@ func (bp *BalanceFilter) String() string {
 	return utils.ToJSON(bp)
 }
 
-func (bp *BalanceFilter) FieldAsInterface(fldPath []string) (val interface{}, err error) {
+func (bp *BalanceFilter) FieldAsInterface(fldPath []string) (val any, err error) {
 	if bp == nil || len(fldPath) == 0 {
 		return nil, utils.ErrNotFound
 	}
@@ -620,7 +620,7 @@ func (bp *BalanceFilter) FieldAsInterface(fldPath []string) (val interface{}, er
 }
 
 func (bp *BalanceFilter) FieldAsString(fldPath []string) (val string, err error) {
-	var iface interface{}
+	var iface any
 	iface, err = bp.FieldAsInterface(fldPath)
 	if err != nil {
 		return

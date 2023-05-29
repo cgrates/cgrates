@@ -25,7 +25,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func (dS *DispatcherService) ConfigSv1GetConfig(args *config.SectionWithAPIOpts, reply *map[string]interface{}) (err error) {
+func (dS *DispatcherService) ConfigSv1GetConfig(args *config.SectionWithAPIOpts, reply *map[string]any) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args.Tenant != utils.EmptyString {
 		tnt = args.Tenant

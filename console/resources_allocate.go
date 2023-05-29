@@ -50,7 +50,7 @@ func (self *CmdResourceAllocate) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdResourceAllocate) RpcParams(reset bool) interface{} {
+func (self *CmdResourceAllocate) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = new(utils.CGREvent)
 	}
@@ -64,7 +64,7 @@ func (self *CmdResourceAllocate) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdResourceAllocate) RpcResult() interface{} {
+func (self *CmdResourceAllocate) RpcResult() any {
 	var atr string
 	return &atr
 }

@@ -66,7 +66,7 @@ func (apierSv1 *APIerSv1) GetRouteProfileIDs(args *utils.PaginatorWithTenant, sp
 
 type RouteWithAPIOpts struct {
 	*engine.RouteProfile
-	APIOpts map[string]interface{}
+	APIOpts map[string]any
 }
 
 // SetRouteProfile add a new Route configuration
@@ -128,7 +128,7 @@ type RouteSv1 struct {
 }
 
 // Call implements rpcclient.ClientConnector interface for internal RPC
-func (rS *RouteSv1) Call(serviceMethod string, args interface{}, reply interface{}) error {
+func (rS *RouteSv1) Call(serviceMethod string, args any, reply any) error {
 	return utils.APIerRPCCall(rS, serviceMethod, args, reply)
 }
 

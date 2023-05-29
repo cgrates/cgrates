@@ -197,11 +197,11 @@ func (fc FCTemplate) Clone() (cln *FCTemplate) {
 // FcTemplates the config for the templates
 type FcTemplates map[string][]*FCTemplate
 
-// AsMapInterface returns the config as a map[string]interface{}
-func (sCft FcTemplates) AsMapInterface(separator string) (initialMP map[string][]map[string]interface{}) {
-	initialMP = make(map[string][]map[string]interface{})
+// AsMapInterface returns the config as a map[string]any
+func (sCft FcTemplates) AsMapInterface(separator string) (initialMP map[string][]map[string]any) {
+	initialMP = make(map[string][]map[string]any)
 	for key, value := range sCft {
-		initialMP[key] = make([]map[string]interface{}, len(value))
+		initialMP[key] = make([]map[string]any, len(value))
 		for i, item := range value {
 			initialMP[key][i] = item.AsMapInterface(separator)
 		}
@@ -209,9 +209,9 @@ func (sCft FcTemplates) AsMapInterface(separator string) (initialMP map[string][
 	return
 }
 
-// AsMapInterface returns the config as a map[string]interface{}
-func (fc *FCTemplate) AsMapInterface(separator string) (mp map[string]interface{}) {
-	mp = make(map[string]interface{})
+// AsMapInterface returns the config as a map[string]any
+func (fc *FCTemplate) AsMapInterface(separator string) (mp map[string]any) {
+	mp = make(map[string]any)
 	if fc.Tag != utils.EmptyString {
 		mp[utils.TagCfg] = fc.Tag
 	}

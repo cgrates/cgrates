@@ -166,7 +166,7 @@ func testAccWThdSetBalance(t *testing.T) {
 		Account:     "1002",
 		BalanceType: utils.MetaVoice,
 		Value:       float64(time.Hour),
-		Balance: map[string]interface{}{
+		Balance: map[string]any{
 			utils.ID:            "testBalanceID",
 			utils.RatingSubject: "*zero1s",
 		},

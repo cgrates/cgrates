@@ -49,9 +49,9 @@ func (self *CmdRelaodConfigSection) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdRelaodConfigSection) RpcParams(reset bool) interface{} {
+func (self *CmdRelaodConfigSection) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &config.ReloadArgs{APIOpts: make(map[string]interface{})}
+		self.rpcParams = &config.ReloadArgs{APIOpts: make(map[string]any)}
 	}
 	return self.rpcParams
 }
@@ -60,7 +60,7 @@ func (self *CmdRelaodConfigSection) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdRelaodConfigSection) RpcResult() interface{} {
+func (self *CmdRelaodConfigSection) RpcResult() any {
 	var s string
 	return &s
 }

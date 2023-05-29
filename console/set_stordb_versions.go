@@ -48,7 +48,7 @@ func (self *CmdSetStorDBVersions) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdSetStorDBVersions) RpcParams(reset bool) interface{} {
+func (self *CmdSetStorDBVersions) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &v1.SetVersionsArg{}
 	}
@@ -59,7 +59,7 @@ func (self *CmdSetStorDBVersions) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdSetStorDBVersions) RpcResult() interface{} {
+func (self *CmdSetStorDBVersions) RpcResult() any {
 	var atr string
 	return &atr
 }

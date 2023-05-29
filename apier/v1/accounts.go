@@ -353,7 +353,7 @@ func (apierSv1 *APIerSv1) RemoveAccount(attr *utils.AttrRemoveAccount, reply *st
 	return nil
 }
 
-func (apierSv1 *APIerSv1) GetAccounts(attr *utils.AttrGetAccounts, reply *[]interface{}) error {
+func (apierSv1 *APIerSv1) GetAccounts(attr *utils.AttrGetAccounts, reply *[]any) error {
 	tnt := attr.Tenant
 	if tnt == utils.EmptyString {
 		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
@@ -382,7 +382,7 @@ func (apierSv1 *APIerSv1) GetAccounts(attr *utils.AttrGetAccounts, reply *[]inte
 	} else {
 		limitedAccounts = accountKeys[attr.Offset:]
 	}
-	retAccounts := make([]interface{}, 0)
+	retAccounts := make([]any, 0)
 	for _, acntKey := range limitedAccounts {
 		if acnt, err := apierSv1.DataManager.GetAccount(acntKey[len(utils.AccountPrefix):]); err != nil && err != utils.ErrNotFound { // Not found is not an error here
 			return err
@@ -401,7 +401,7 @@ func (apierSv1 *APIerSv1) GetAccounts(attr *utils.AttrGetAccounts, reply *[]inte
 }
 
 // GetAccount returns the account
-func (apierSv1 *APIerSv1) GetAccount(attr *utils.AttrGetAccount, reply *interface{}) error {
+func (apierSv1 *APIerSv1) GetAccount(attr *utils.AttrGetAccount, reply *any) error {
 	tnt := attr.Tenant
 	if tnt == utils.EmptyString {
 		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
@@ -421,8 +421,8 @@ type AttrAddBalance struct {
 	Account         string
 	BalanceType     string
 	Value           float64
-	Balance         map[string]interface{}
-	ActionExtraData *map[string]interface{}
+	Balance         map[string]any
+	ActionExtraData *map[string]any
 	Overwrite       bool // When true it will reset if the balance is already there
 	Cdrlog          bool
 }

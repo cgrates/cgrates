@@ -173,7 +173,7 @@ func testPosterITAMQP(t *testing.T) {
 		t.Fatalf("Expected 1 event received: %d events", len(ev.Events))
 	}
 	body := ev.Events[0].([]byte)
-	var acc map[string]interface{}
+	var acc map[string]any
 	if err := json.Unmarshal(body, &acc); err != nil {
 		t.Fatal(err)
 	}
@@ -211,7 +211,7 @@ func testPosterITAMQPv1(t *testing.T) {
 		t.Fatalf("Expected 1 event received: %d events", len(ev.Events))
 	}
 	body := ev.Events[0].([]byte)
-	var acc map[string]interface{}
+	var acc map[string]any
 	if err := json.Unmarshal(body, &acc); err != nil {
 		t.Fatal(err)
 	}
@@ -249,7 +249,7 @@ func testPosterITSQS(t *testing.T) {
 		t.Fatalf("Expected 1 event received: %d events", len(ev.Events))
 	}
 	body := ev.Events[0].([]byte)
-	var acc map[string]interface{}
+	var acc map[string]any
 	if err := json.Unmarshal(body, &acc); err != nil {
 		t.Fatal(err)
 	}
@@ -287,7 +287,7 @@ func testPosterITS3(t *testing.T) {
 		t.Fatalf("Expected 1 event received: %d events", len(ev.Events))
 	}
 	body := ev.Events[0].([]byte)
-	var acc map[string]interface{}
+	var acc map[string]any
 	if err := json.Unmarshal(body, &acc); err != nil {
 		t.Fatal(err)
 	}
@@ -325,7 +325,7 @@ func testPosterITKafka(t *testing.T) {
 		t.Fatalf("Expected 1 event received: %d events", len(ev.Events))
 	}
 	body := ev.Events[0].([]byte)
-	var acc map[string]interface{}
+	var acc map[string]any
 	if err := json.Unmarshal(body, &acc); err != nil {
 		t.Fatal(err)
 	}

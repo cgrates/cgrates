@@ -73,7 +73,7 @@ func testDspEEsPingFailover(t *testing.T) {
 	}
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "ees12345",
 		},
 	}
@@ -101,17 +101,17 @@ func testDspEEsProcessEventFailover(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "event1",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.EventName:    "Event1",
 				utils.AccountField: "1001",
 			},
 
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.OptsAPIKey: "ees12345",
 			},
 		},
 	}
-	var reply map[string]map[string]interface{}
+	var reply map[string]map[string]any
 	if err := dispEngine.RPC.Call(utils.EeSv1ProcessEvent, args, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
@@ -134,7 +134,7 @@ func testDspEEsPing(t *testing.T) {
 	}
 	if err := dispEngine.RPC.Call(utils.EeSv1Ping, &utils.CGREvent{
 		Tenant: "cgrates.org",
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "ees12345",
 		},
 	}, &reply); err != nil {
@@ -149,15 +149,15 @@ func testDspEEsTestAuthKey(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "event1",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.AccountField: "1001",
 			},
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.OptsAPIKey: "12345",
 			},
 		},
 	}
-	var reply map[string]map[string]interface{}
+	var reply map[string]map[string]any
 	if err := dispEngine.RPC.Call(utils.EeSv1ProcessEvent,
 		args, &reply); err == nil || err.Error() != utils.ErrUnauthorizedApi.Error() {
 		t.Errorf("expected: <%+v>,\nreceived: <%+v>", utils.ErrUnauthorizedApi.Error(), err)
@@ -169,15 +169,15 @@ func testDspEEsTestAuthKey2(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "event1",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.AccountField: "1001",
 			},
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.OptsAPIKey: "ees12345",
 			},
 		},
 	}
-	var reply map[string]map[string]interface{}
+	var reply map[string]map[string]any
 	if err := dispEngine.RPC.Call(utils.EeSv1ProcessEvent,
 		args, &reply); err != nil {
 		t.Error(err)
@@ -191,16 +191,16 @@ func testDspEEsProcessEventRoundRobin(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "event1",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.EventName:    "RoundRobin",
 				utils.AccountField: "1001",
 			},
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.OptsAPIKey: "ees12345",
 			},
 		},
 	}
-	var reply map[string]map[string]interface{}
+	var reply map[string]map[string]any
 	// To ALL2
 	if err := dispEngine.RPC.Call(utils.EeSv1ProcessEvent,
 		args, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
