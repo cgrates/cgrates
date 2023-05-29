@@ -123,7 +123,7 @@ func testSesPauseItInitSession(t *testing.T, cgrID string, chargeable bool, usag
 		InitSession: true,
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.CGRID:        cgrID,
 				utils.Category:     utils.Call,
 				utils.ToR:          utils.MetaVoice,
@@ -136,7 +136,7 @@ func testSesPauseItInitSession(t *testing.T, cgrID string, chargeable bool, usag
 				utils.AnswerTime:   time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
 				utils.Usage:        usage,
 			},
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.OptsDebitInterval: "0s",
 				utils.OptsChargeable:    chargeable,
 			},
@@ -157,7 +157,7 @@ func testSesPauseItUpdateSession(t *testing.T, cgrID string, chargeable bool, us
 		UpdateSession: true,
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.CGRID:        cgrID,
 				utils.Category:     utils.Call,
 				utils.ToR:          utils.MetaVoice,
@@ -170,7 +170,7 @@ func testSesPauseItUpdateSession(t *testing.T, cgrID string, chargeable bool, us
 				utils.AnswerTime:   time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
 				utils.Usage:        usage,
 			},
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.OptsChargeable: chargeable,
 			},
 		},
@@ -190,7 +190,7 @@ func testSesPauseItTerminateSession(t *testing.T, cgrID string, chargeable bool,
 		TerminateSession: true,
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.CGRID:        cgrID,
 				utils.Category:     utils.Call,
 				utils.ToR:          utils.MetaVoice,
@@ -203,7 +203,7 @@ func testSesPauseItTerminateSession(t *testing.T, cgrID string, chargeable bool,
 				utils.AnswerTime:   time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
 				utils.Usage:        usage,
 			},
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.OptsChargeable: chargeable,
 			},
 		},
@@ -219,7 +219,7 @@ func testSesPauseItTerminateSession(t *testing.T, cgrID string, chargeable bool,
 	if err := sesPauseRPC.Call(utils.SessionSv1ProcessCDR, &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testSesPauseItProccesCDR",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.CGRID:        cgrID,
 			utils.Category:     utils.Call,
 			utils.ToR:          utils.MetaVoice,

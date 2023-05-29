@@ -3032,8 +3032,8 @@ func TestDebitCreditBalance(t *testing.T) {
 	cfg.RalsCfg().ThresholdSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)}
 	clientConn := make(chan rpcclient.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ThresholdSv1ProcessEvent: func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.ThresholdSv1ProcessEvent: func(args, reply any) error {
 				rpl := &[]string{"id"}
 				*reply.(*[]string) = *rpl
 				return errors.New("Can't process Event")

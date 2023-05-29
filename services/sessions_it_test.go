@@ -41,10 +41,10 @@ func init() {
 }
 
 type testMockClients struct {
-	calls func(args interface{}, reply interface{}) error
+	calls func(args any, reply any) error
 }
 
-func (sT *testMockClients) Call(method string, arg interface{}, rply interface{}) error {
+func (sT *testMockClients) Call(method string, arg any, rply any) error {
 	return sT.calls(arg, rply)
 }
 
@@ -80,7 +80,7 @@ func TestSessionSReload1(t *testing.T) {
 
 	clientConect := make(chan rpcclient.ClientConnector, 1)
 	clientConect <- &testMockClients{
-		calls: func(args interface{}, reply interface{}) error {
+		calls: func(args any, reply any) error {
 			rply, cancast := reply.(*[]*engine.ChrgSProcessEventReply)
 			if !cancast {
 				return fmt.Errorf("can't cast")
@@ -114,7 +114,7 @@ func TestSessionSReload1(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testSSv1ItProcessEventInitiateSession",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Tenant:       "cgrates.org",
 				utils.ToR:          utils.MetaVoice,
 				utils.OriginID:     "testSSv1ItProcessEvent",

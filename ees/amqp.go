@@ -136,7 +136,7 @@ func (pstr *AMQPee) Connect() (err error) {
 	return
 }
 
-func (pstr *AMQPee) ExportEvent(content interface{}, _ string) (err error) {
+func (pstr *AMQPee) ExportEvent(content any, _ string) (err error) {
 	pstr.reqs.get()
 	pstr.RLock()
 	if pstr.postChan == nil {

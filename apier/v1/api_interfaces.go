@@ -109,8 +109,8 @@ type ResponderInterface interface {
 	RefundIncrements(arg *engine.CallDescriptorWithAPIOpts, reply *engine.Account) (err error)
 	RefundRounding(arg *engine.CallDescriptorWithAPIOpts, reply *engine.Account) (err error)
 	GetMaxSessionTime(arg *engine.CallDescriptorWithAPIOpts, reply *time.Duration) (err error)
-	GetCostOnRatingPlans(arg *utils.GetCostOnRatingPlansArgs, reply *map[string]interface{}) (err error)
-	GetMaxSessionTimeOnAccounts(arg *utils.GetMaxSessionTimeOnAccountsArgs, reply *map[string]interface{}) (err error)
+	GetCostOnRatingPlans(arg *utils.GetCostOnRatingPlansArgs, reply *map[string]any) (err error)
+	GetMaxSessionTimeOnAccounts(arg *utils.GetMaxSessionTimeOnAccountsArgs, reply *map[string]any) (err error)
 	Shutdown(arg *utils.TenantWithAPIOpts, reply *string) (err error)
 	Ping(ign *utils.CGREvent, reply *string) error
 }
@@ -171,7 +171,7 @@ type RALsV1Interface interface {
 }
 
 type ConfigSv1Interface interface {
-	GetConfig(section *config.SectionWithAPIOpts, reply *map[string]interface{}) (err error)
+	GetConfig(section *config.SectionWithAPIOpts, reply *map[string]any) (err error)
 	ReloadConfig(section *config.ReloadArgs, reply *string) (err error)
 	SetConfig(args *config.SetConfigArgs, reply *string) (err error)
 	SetConfigFromJSON(args *config.SetConfigFromJSONArgs, reply *string) (err error)
@@ -179,7 +179,7 @@ type ConfigSv1Interface interface {
 }
 
 type CoreSv1Interface interface {
-	Status(arg *utils.TenantWithAPIOpts, reply *map[string]interface{}) error
+	Status(arg *utils.TenantWithAPIOpts, reply *map[string]any) error
 	Ping(ign *utils.CGREvent, reply *string) error
 	Sleep(arg *utils.DurationArgs, reply *string) error
 }

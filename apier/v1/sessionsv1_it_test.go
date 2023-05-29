@@ -165,7 +165,7 @@ func testSSv1ItRpcConn(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	clntHandlers := map[string]interface{}{
+	clntHandlers := map[string]any{
 		utils.SessionSv1DisconnectSession:   handleDisconnectSession,
 		utils.SessionSv1GetActiveSessionIDs: handleGetSessionIDs,
 	}
@@ -210,7 +210,7 @@ func testSSv1ItAuth(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItAuth",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Tenant:       "cgrates.org",
 				utils.ToR:          utils.MetaVoice,
 				utils.OriginID:     "TestSSv1It1",
@@ -239,13 +239,13 @@ func testSSv1ItAuth(t *testing.T) {
 		Routes: []*engine.SortedRoute{
 			{
 				RouteID: "route1",
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					"Weight": 20.0,
 				},
 			},
 			{
 				RouteID: "route2",
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					"Weight": 10.0,
 				},
 			},
@@ -255,7 +255,7 @@ func testSSv1ItAuth(t *testing.T) {
 		Sorting:   utils.MetaWeight,
 		Routes: []*engine.SortedRoute{{
 			RouteID: "route1",
-			SortingData: map[string]interface{}{
+			SortingData: map[string]any{
 				"Weight": 10.0,
 			},
 		}},
@@ -269,7 +269,7 @@ func testSSv1ItAuth(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItAuth",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.CGRID:        "5668666d6b8e44eb949042f25ce0796ec3592ff9",
 				utils.Tenant:       "cgrates.org",
 				utils.ToR:          utils.MetaVoice,
@@ -282,7 +282,7 @@ func testSSv1ItAuth(t *testing.T) {
 				utils.SetupTime:    "2018-01-07T17:00:00Z",
 				utils.Usage:        300000000000.0,
 			},
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.MetaSubsys:               utils.MetaSessionS,
 				utils.OptsAttributesProfileIDs: nil,
 				utils.OptsResourcesUsageID:     "TestSSv1It1",
@@ -306,7 +306,7 @@ func testSSv1ItAuthWithDigest(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItAuth",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Tenant:       "cgrates.org",
 				utils.ToR:          utils.MetaVoice,
 				utils.OriginID:     "TestSSv1It1",
@@ -317,7 +317,7 @@ func testSSv1ItAuthWithDigest(t *testing.T) {
 				utils.SetupTime:    time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
 				utils.Usage:        authUsage,
 			},
-			APIOpts: map[string]interface{}{utils.OptsRoutesProfileCount: 1},
+			APIOpts: map[string]any{utils.OptsRoutesProfileCount: 1},
 		},
 	}
 	var rply sessions.V1AuthorizeReplyWithDigest
@@ -351,7 +351,7 @@ func testSSv1ItInitiateSession(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItInitiateSession",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Tenant:       "cgrates.org",
 				utils.ToR:          utils.MetaVoice,
 				utils.OriginID:     "TestSSv1It1",
@@ -385,7 +385,7 @@ func testSSv1ItInitiateSession(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItInitiateSession",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.CGRID:        "5668666d6b8e44eb949042f25ce0796ec3592ff9",
 				utils.Tenant:       "cgrates.org",
 				utils.ToR:          utils.MetaVoice,
@@ -399,7 +399,7 @@ func testSSv1ItInitiateSession(t *testing.T) {
 				utils.AnswerTime:   "2018-01-07T17:00:10Z",
 				utils.Usage:        300000000000.0,
 			},
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.MetaSubsys:               utils.MetaSessionS,
 				utils.OptsAttributesProfileIDs: nil,
 				utils.OptsResourcesUnits:       1.,
@@ -428,7 +428,7 @@ func testSSv1ItInitiateSessionWithDigest(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItInitiateSession",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Tenant:       "cgrates.org",
 				utils.ToR:          utils.MetaVoice,
 				utils.OriginID:     "TestSSv1It2",
@@ -477,7 +477,7 @@ func testSSv1ItUpdateSession(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItUpdateSession",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Tenant:       "cgrates.org",
 				utils.ToR:          utils.MetaVoice,
 				utils.OriginID:     "TestSSv1It1",
@@ -502,7 +502,7 @@ func testSSv1ItUpdateSession(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItUpdateSession",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.CGRID:        "5668666d6b8e44eb949042f25ce0796ec3592ff9",
 				utils.Tenant:       "cgrates.org",
 				utils.ToR:          utils.MetaVoice,
@@ -516,7 +516,7 @@ func testSSv1ItUpdateSession(t *testing.T) {
 				utils.AnswerTime:   "2018-01-07T17:00:10Z",
 				utils.Usage:        300000000000.0,
 			},
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.MetaSubsys:               utils.MetaSessionS,
 				utils.OptsAttributesProfileIDs: nil,
 			},
@@ -547,7 +547,7 @@ func testSSv1ItTerminateSession(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItUpdateSession",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Tenant:       "cgrates.org",
 				utils.ToR:          utils.MetaVoice,
 				utils.OriginID:     "TestSSv1It1",
@@ -580,7 +580,7 @@ func testSSv1ItProcessCDR(t *testing.T) {
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "TestSSv1ItProcessCDR",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.Tenant:       "cgrates.org",
 			utils.ToR:          utils.MetaVoice,
 			utils.OriginID:     "TestSSv1It1",
@@ -613,7 +613,7 @@ func testSSv1ItProcessEvent(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItProcessEvent",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Tenant:       "cgrates.org",
 				utils.ToR:          utils.MetaVoice,
 				utils.OriginID:     "TestSSv1It2",
@@ -648,7 +648,7 @@ func testSSv1ItProcessEvent(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItProcessEvent",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.CGRID:        "f7f5cf1029905f9b98be1a608e4bd975b8e51413",
 				utils.Tenant:       "cgrates.org",
 				utils.ToR:          utils.MetaVoice,
@@ -663,7 +663,7 @@ func testSSv1ItProcessEvent(t *testing.T) {
 				utils.AnswerTime:   "2018-01-07T17:00:10Z",
 				utils.Usage:        300000000000.0,
 			},
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.MetaSubsys:               utils.MetaSessionS,
 				utils.OptsAttributesProfileIDs: nil,
 				utils.OptsResourcesUnits:       1.,
@@ -806,7 +806,7 @@ func testSSv1ItForceUpdateSession(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItUpdateSession",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Tenant:       "cgrates.org",
 				utils.Category:     "call",
 				utils.ToR:          utils.MetaVoice,
@@ -832,7 +832,7 @@ func testSSv1ItForceUpdateSession(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItUpdateSession",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.CGRID:        "70876773b294f0e1476065f8d18bb9ec6bcb3d5f",
 				utils.Tenant:       "cgrates.org",
 				utils.Category:     "call",
@@ -847,7 +847,7 @@ func testSSv1ItForceUpdateSession(t *testing.T) {
 				utils.AnswerTime:   "2018-01-07T17:00:10Z",
 				utils.Usage:        300000000000.0,
 			},
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.MetaSubsys:               utils.MetaSessionS,
 				utils.OptsAttributesProfileIDs: nil,
 			},
@@ -933,7 +933,7 @@ func testSSv1ItDynamicDebit(t *testing.T) {
 		Account:     "TestDynamicDebit",
 		BalanceType: utils.MetaVoice,
 		Value:       2 * float64(time.Second),
-		Balance: map[string]interface{}{
+		Balance: map[string]any{
 			utils.ID:            "TestDynamicDebitBalance",
 			utils.RatingSubject: "*zero5ms",
 		},
@@ -963,7 +963,7 @@ func testSSv1ItDynamicDebit(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItInitiateSession2",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Tenant:       "cgrates.org",
 				utils.Category:     "call",
 				utils.ToR:          utils.MetaVoice,
@@ -976,7 +976,7 @@ func testSSv1ItDynamicDebit(t *testing.T) {
 				utils.AnswerTime:   time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
 				utils.Usage:        0,
 			},
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.OptsDebitInterval: 30 * time.Millisecond,
 			},
 		},
@@ -1060,7 +1060,7 @@ func testSSv1ItDeactivateSessions(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItInitiateSession",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Tenant:       "cgrates.org",
 				utils.ToR:          utils.MetaVoice,
 				utils.OriginID:     "TestSSv1It1",
@@ -1110,7 +1110,7 @@ func testSSv1ItAuthNotFoundCharger(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "Unexist",
 			ID:     "testSSv1ItAuthNotFoundCharger",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Tenant:       "Unexist",
 				utils.ToR:          utils.MetaVoice,
 				utils.OriginID:     "testSSv1ItAuthNotFoundCharger",
@@ -1137,7 +1137,7 @@ func testSSv1ItInitiateSessionNotFoundCharger(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "Unexist",
 			ID:     "testSSv1ItInitiateSessionNotFoundCharger",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Tenant:       "Unexist",
 				utils.ToR:          utils.MetaVoice,
 				utils.OriginID:     "testSSv1ItInitiateSessionNotFoundCharger",

@@ -66,7 +66,7 @@ func TestDispatcherSCfgAsMapInterface(t *testing.T) {
 		},
 		
 }`
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		utils.EnabledCfg:             false,
 		utils.IndexedSelectsCfg:      true,
 		utils.PrefixIndexedFieldsCfg: []string{},
@@ -97,7 +97,7 @@ func TestDispatcherSCfgAsMapInterface1(t *testing.T) {
 		},
 		
 }`
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		utils.EnabledCfg:             false,
 		utils.IndexedSelectsCfg:      true,
 		utils.StringIndexedFieldsCfg: []string{"*req.prefix"},
@@ -119,7 +119,7 @@ func TestDispatcherSCfgAsMapInterface2(t *testing.T) {
 	cfgJSONStr := `{
 		"dispatchers":{},
 }`
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		utils.EnabledCfg:             false,
 		utils.IndexedSelectsCfg:      true,
 		utils.PrefixIndexedFieldsCfg: []string{},

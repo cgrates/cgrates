@@ -117,7 +117,7 @@ func testS3ExportEvent(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "dataEvent",
 			Time:   utils.TimePointer(time.Now()),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.CGRID:        cgrID,
 				utils.ToR:          utils.MetaData,
 				utils.OriginID:     "abcdef",

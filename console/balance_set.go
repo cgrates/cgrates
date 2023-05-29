@@ -47,7 +47,7 @@ func (self *CmdSetBalance) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdSetBalance) RpcParams(reset bool) interface{} {
+func (self *CmdSetBalance) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &utils.AttrSetBalance{BalanceType: utils.MetaMonetary}
 	}
@@ -58,7 +58,7 @@ func (self *CmdSetBalance) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdSetBalance) RpcResult() interface{} {
+func (self *CmdSetBalance) RpcResult() any {
 	var s string
 	return &s
 }

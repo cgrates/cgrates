@@ -66,16 +66,16 @@ func TestCoreServiceStatus(t *testing.T) {
 	cores := NewCoreService(cfgDflt, caps, nil, "/tmp", stopChan, nil, nil, nil)
 	args := &utils.TenantWithAPIOpts{
 		Tenant:  "cgrates.org",
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 
-	var reply map[string]interface{}
+	var reply map[string]any
 	cfgVrs, err := utils.GetCGRVersion()
 	if err != nil {
 		t.Error(err)
 	}
 
-	expected := map[string]interface{}{
+	expected := map[string]any{
 		utils.GoVersion:        runtime.Version(),
 		utils.RunningSince:     "TIME_CHANGED",
 		utils.VersionName:      cfgVrs,

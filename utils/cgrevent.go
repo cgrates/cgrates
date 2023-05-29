@@ -28,8 +28,8 @@ type CGREvent struct {
 	Tenant  string
 	ID      string
 	Time    *time.Time // event time
-	Event   map[string]interface{}
-	APIOpts map[string]interface{}
+	Event   map[string]any
+	APIOpts map[string]any
 	clnb    bool //rpcclonable
 }
 
@@ -130,8 +130,8 @@ func (ev *CGREvent) Clone() (clned *CGREvent) {
 	clned = &CGREvent{
 		Tenant:  ev.Tenant,
 		ID:      ev.ID,
-		Event:   make(map[string]interface{}), // a bit forced but safe
-		APIOpts: make(map[string]interface{}),
+		Event:   make(map[string]any),
+		APIOpts: make(map[string]any),
 	}
 	if ev.Time != nil {
 		clned.Time = new(time.Time)
@@ -157,11 +157,11 @@ func (cgrEv *CGREvent) AsDataProvider() (ev DataProvider) {
 // EventWithFlags is used where flags are needed to mark processing
 type EventWithFlags struct {
 	Flags []string
-	Event map[string]interface{}
+	Event map[string]any
 }
 
 // GetRoutePaginatorFromOpts will consume supplierPaginator if present
-func GetRoutePaginatorFromOpts(ev map[string]interface{}) (args Paginator, err error) {
+func GetRoutePaginatorFromOpts(ev map[string]any) (args Paginator, err error) {
 	if ev == nil {
 		return
 	}
@@ -198,7 +198,7 @@ func GetRoutePaginatorFromOpts(ev map[string]interface{}) (args Paginator, err e
 }
 
 // NMAsCGREvent builds a CGREvent considering Time as time.Now()
-// and Event as linear map[string]interface{} with joined paths
+// and Event as linear map[string]any with joined paths
 // treats particular case when the value of map is []*NMItem - used in agents/AgentRequest
 func NMAsCGREvent(nM *OrderedNavigableMap, tnt string, pathSep string, opts MapStorage) (cgrEv *CGREvent) {
 	if nM == nil {
@@ -212,7 +212,7 @@ func NMAsCGREvent(nM *OrderedNavigableMap, tnt string, pathSep string, opts MapS
 		Tenant:  tnt,
 		ID:      UUIDSha1Prefix(),
 		Time:    TimePointer(time.Now()),
-		Event:   make(map[string]interface{}),
+		Event:   make(map[string]any),
 		APIOpts: opts,
 	}
 	for ; el != nil; el = el.Next() {
@@ -236,7 +236,7 @@ func (attr *CGREvent) SetCloneable(rpcCloneable bool) {
 }
 
 // RPCClone implements rpcclient.RPCCloner interface
-func (attr *CGREvent) RPCClone() (interface{}, error) {
+func (attr *CGREvent) RPCClone() (any, error) {
 	if !attr.clnb {
 		return attr, nil
 	}

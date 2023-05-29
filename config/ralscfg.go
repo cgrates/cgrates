@@ -90,9 +90,9 @@ func (ralsCfg *RalsCfg) loadFromJSONCfg(jsnRALsCfg *RalsJsonCfg) (err error) {
 	return nil
 }
 
-// AsMapInterface returns the config as a map[string]interface{}
-func (ralsCfg *RalsCfg) AsMapInterface() (initialMP map[string]interface{}) {
-	initialMP = map[string]interface{}{
+// AsMapInterface returns the config as a map[string]any
+func (ralsCfg *RalsCfg) AsMapInterface() (initialMP map[string]any) {
+	initialMP = map[string]any{
 		utils.EnabledCfg:                 ralsCfg.Enabled,
 		utils.RpSubjectPrefixMatchingCfg: ralsCfg.RpSubjectPrefixMatching,
 		utils.RemoveExpiredCfg:           ralsCfg.RemoveExpired,
@@ -118,7 +118,7 @@ func (ralsCfg *RalsCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		}
 		initialMP[utils.StatSConnsCfg] = statS
 	}
-	maxComputed := make(map[string]interface{})
+	maxComputed := make(map[string]any)
 	for key, item := range ralsCfg.MaxComputedUsage {
 		if key == utils.MetaAny || key == utils.MetaVoice {
 			maxComputed[key] = item.String()

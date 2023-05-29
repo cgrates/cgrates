@@ -51,7 +51,7 @@ type HTTPPostEE struct {
 }
 type HTTPPosterRequest struct {
 	Header http.Header
-	Body   interface{}
+	Body   any
 }
 
 // Compose and cache the header
@@ -77,7 +77,7 @@ func (httpPost *HTTPPostEE) Cfg() *config.EventExporterCfg { return httpPost.cfg
 
 func (httpPost *HTTPPostEE) Connect() (_ error) { return }
 
-func (httpPost *HTTPPostEE) ExportEvent(content interface{}, _ string) (err error) {
+func (httpPost *HTTPPostEE) ExportEvent(content any, _ string) (err error) {
 	httpPost.reqs.get()
 	defer httpPost.reqs.done()
 	pReq := content.(*HTTPPosterRequest)
@@ -93,7 +93,7 @@ func (httpPost *HTTPPostEE) Close() (_ error) { return }
 
 func (httpPost *HTTPPostEE) GetMetrics() *utils.SafeMapStorage { return httpPost.dc }
 
-func (httpPost *HTTPPostEE) PrepareMap(mp *utils.CGREvent) (interface{}, error) {
+func (httpPost *HTTPPostEE) PrepareMap(mp *utils.CGREvent) (any, error) {
 	urlVals := url.Values{}
 	for k, v := range mp.Event {
 		urlVals.Set(k, utils.IfaceAsString(v))
@@ -104,7 +104,7 @@ func (httpPost *HTTPPostEE) PrepareMap(mp *utils.CGREvent) (interface{}, error) 
 	}, nil
 }
 
-func (httpPost *HTTPPostEE) PrepareOrderMap(mp *utils.OrderedNavigableMap) (interface{}, error) {
+func (httpPost *HTTPPostEE) PrepareOrderMap(mp *utils.OrderedNavigableMap) (any, error) {
 	urlVals := url.Values{}
 	for el := mp.GetFirstElement(); el != nil; el = el.Next() {
 		path := el.Value

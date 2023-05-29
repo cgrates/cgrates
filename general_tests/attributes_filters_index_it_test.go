@@ -163,10 +163,10 @@ func testAttributeSetProfile(t *testing.T) {
 
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Subject": "44",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsContext: utils.MetaSessionS,
 		},
 	}
@@ -213,10 +213,10 @@ func testAttributeSetFltr2(t *testing.T) {
 	//same event for process
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Subject": "4444",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsContext: utils.MetaSessionS,
 		},
 	}
@@ -225,11 +225,11 @@ func testAttributeSetFltr2(t *testing.T) {
 		AlteredFields:   []string{"*req.FL1"},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"Subject": "4444",
 				"FL1":     "Al1",
 			},
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.OptsContext: utils.MetaSessionS,
 			},
 		},

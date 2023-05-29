@@ -50,7 +50,7 @@ type AttributeProfile struct {
 // AttributeProfileWithAPIOpts is used in replicatorV1 for dispatcher
 type AttributeProfileWithAPIOpts struct {
 	*AttributeProfile
-	APIOpts map[string]interface{}
+	APIOpts map[string]any
 }
 
 func (ap *AttributeProfile) compileSubstitutes() (err error) {

@@ -48,7 +48,7 @@ func (self *CmdLoaderLoad) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdLoaderLoad) RpcParams(reset bool) interface{} {
+func (self *CmdLoaderLoad) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &loaders.ArgsProcessFolder{}
 	}
@@ -59,7 +59,7 @@ func (self *CmdLoaderLoad) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdLoaderLoad) RpcResult() interface{} {
+func (self *CmdLoaderLoad) RpcResult() any {
 	var s string
 	return &s
 }

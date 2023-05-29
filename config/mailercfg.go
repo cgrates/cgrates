@@ -48,9 +48,9 @@ func (mailcfg *MailerCfg) loadFromJSONCfg(jsnMailerCfg *MailerJsonCfg) (err erro
 	return nil
 }
 
-// AsMapInterface returns the config as a map[string]interface{}
-func (mailcfg *MailerCfg) AsMapInterface() (initialMP map[string]interface{}) {
-	return map[string]interface{}{
+// AsMapInterface returns the config as a map[string]any
+func (mailcfg *MailerCfg) AsMapInterface() (initialMP map[string]any) {
+	return map[string]any{
 		utils.MailerServerCfg:   mailcfg.MailerServer,
 		utils.MailerAuthUserCfg: mailcfg.MailerAuthUser,
 		utils.MailerAuthPassCfg: mailcfg.MailerAuthPass,

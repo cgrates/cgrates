@@ -166,10 +166,10 @@ func TestKafkaERProcessMessage(t *testing.T) {
 	}
 	expEvent := &utils.CGREvent{
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.ToR: "*voice",
 		},
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 	rdr.Config().Fields = []*config.FCTemplate{
 		{

@@ -159,7 +159,7 @@ func (uc *UnitCounter) String() string {
 	return utils.ToJSON(uc)
 }
 
-func (uc *UnitCounter) FieldAsInterface(fldPath []string) (val interface{}, err error) {
+func (uc *UnitCounter) FieldAsInterface(fldPath []string) (val any, err error) {
 	if uc == nil || len(fldPath) == 0 {
 		return nil, utils.ErrNotFound
 	}
@@ -202,7 +202,7 @@ func (uc *UnitCounter) FieldAsInterface(fldPath []string) (val interface{}, err 
 }
 
 func (uc *UnitCounter) FieldAsString(fldPath []string) (val string, err error) {
-	var iface interface{}
+	var iface any
 	iface, err = uc.FieldAsInterface(fldPath)
 	if err != nil {
 		return
@@ -214,7 +214,7 @@ func (cfs *CounterFilter) String() string {
 	return utils.ToJSON(cfs)
 }
 
-func (cfs *CounterFilter) FieldAsInterface(fldPath []string) (val interface{}, err error) {
+func (cfs *CounterFilter) FieldAsInterface(fldPath []string) (val any, err error) {
 	if cfs == nil || len(fldPath) == 0 {
 		return nil, utils.ErrNotFound
 	}
@@ -235,7 +235,7 @@ func (cfs *CounterFilter) FieldAsInterface(fldPath []string) (val interface{}, e
 }
 
 func (cfs *CounterFilter) FieldAsString(fldPath []string) (val string, err error) {
-	var iface interface{}
+	var iface any
 	iface, err = cfs.FieldAsInterface(fldPath)
 	if err != nil {
 		return

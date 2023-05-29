@@ -30,11 +30,11 @@ func (dS *DispatcherService) EeSv1Ping(args *utils.CGREvent, reply *string) (err
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
+	ev := make(map[string]any)
 	if args != nil {
 		ev = args.Event
 	}
-	opts := make(map[string]interface{})
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -47,16 +47,16 @@ func (dS *DispatcherService) EeSv1Ping(args *utils.CGREvent, reply *string) (err
 	return dS.Dispatch(&utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaCore, utils.EeSv1Ping, args, reply)
 }
 
-func (dS *DispatcherService) EeSv1ProcessEvent(args *engine.CGREventWithEeIDs, reply *map[string]map[string]interface{}) (err error) {
+func (dS *DispatcherService) EeSv1ProcessEvent(args *engine.CGREventWithEeIDs, reply *map[string]map[string]any) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
+	ev := make(map[string]any)
 	if args != nil {
 		ev = args.Event
 	}
-	opts := make(map[string]interface{})
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}

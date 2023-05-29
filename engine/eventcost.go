@@ -950,7 +950,7 @@ func (ec *EventCost) Trim(atUsage time.Duration) (srplusEC *EventCost, err error
 }
 
 // FieldAsInterface func to implement DataProvider
-func (ec *EventCost) FieldAsInterface(fldPath []string) (val interface{}, err error) {
+func (ec *EventCost) FieldAsInterface(fldPath []string) (val any, err error) {
 	if ec.cache == nil {
 		ec.initCache() // fix gob deserialization
 	}
@@ -974,7 +974,7 @@ func (ec *EventCost) FieldAsInterface(fldPath []string) (val interface{}, err er
 }
 
 // fieldAsInterface the implementation of FieldAsInterface
-func (ec *EventCost) fieldAsInterface(fldPath []string) (val interface{}, err error) {
+func (ec *EventCost) fieldAsInterface(fldPath []string) (val any, err error) {
 	switch fldPath[0] {
 	default: // "Charges[1]"
 		opath, indx := utils.GetPathIndex(fldPath[0])
@@ -1057,7 +1057,7 @@ func (ec *EventCost) fieldAsInterface(fldPath []string) (val interface{}, err er
 	return nil, fmt.Errorf("unsupported field prefix: <%s>", fldPath[0])
 }
 
-func (ec *EventCost) getChargesForPath(fldPath []string, chr *ChargingInterval) (val interface{}, err error) {
+func (ec *EventCost) getChargesForPath(fldPath []string, chr *ChargingInterval) (val any, err error) {
 	if chr == nil {
 		return nil, utils.ErrNotFound
 	}
@@ -1096,7 +1096,7 @@ func (ec *EventCost) getChargesForPath(fldPath []string, chr *ChargingInterval) 
 	return incr.FieldAsInterface(fldPath)
 }
 
-func (ec *EventCost) getRatingForPath(fldPath []string, rating *RatingUnit) (val interface{}, err error) {
+func (ec *EventCost) getRatingForPath(fldPath []string, rating *RatingUnit) (val any, err error) {
 	if rating == nil {
 		return nil, utils.ErrNotFound
 	}
@@ -1155,7 +1155,7 @@ func (ec *EventCost) getRatingForPath(fldPath []string, rating *RatingUnit) (val
 	return rating.FieldAsInterface(fldPath)
 }
 
-func (ec *EventCost) getAcountingForPath(fldPath []string, bc *BalanceCharge) (val interface{}, err error) {
+func (ec *EventCost) getAcountingForPath(fldPath []string, bc *BalanceCharge) (val any, err error) {
 	if bc == nil {
 		return nil, utils.ErrNotFound
 	}

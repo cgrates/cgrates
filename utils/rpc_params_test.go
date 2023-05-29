@@ -40,7 +40,7 @@ func (rpc *RpcStruct) Method2(pointer *Attr, out *float64) error {
 	return nil
 }
 
-func (rpc *RpcStruct) Call(string, interface{}, interface{}) error {
+func (rpc *RpcStruct) Call(string, any, any) error {
 	return nil
 }
 
@@ -54,7 +54,7 @@ func TestRPCObjectPointer(t *testing.T) {
 		t.Errorf("error getting rpcobject: %v (%+v)", rpcParamsMap, x)
 	}
 	a := x.InParam
-	if err := mapstructure.Decode(map[string]interface{}{"Name": "a", "Surname": "b", "Age": 10.2}, a); err != nil || a.(*Attr).Name != "a" || a.(*Attr).Surname != "b" || a.(*Attr).Age != 10.2 {
+	if err := mapstructure.Decode(map[string]any{"Name": "a", "Surname": "b", "Age": 10.2}, a); err != nil || a.(*Attr).Name != "a" || a.(*Attr).Surname != "b" || a.(*Attr).Age != 10.2 {
 		t.Errorf("error converting to struct: %+v (%v)", a, err)
 	}
 }

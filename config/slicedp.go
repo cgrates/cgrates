@@ -48,7 +48,7 @@ func (cP *SliceDP) String() string {
 }
 
 // FieldAsInterface is part of engine.utils.DataProvider interface
-func (cP *SliceDP) FieldAsInterface(fldPath []string) (data interface{}, err error) {
+func (cP *SliceDP) FieldAsInterface(fldPath []string) (data any, err error) {
 	if len(fldPath) == 0 {
 		return
 	}
@@ -74,7 +74,7 @@ func (cP *SliceDP) FieldAsInterface(fldPath []string) (data interface{}, err err
 
 // FieldAsString is part of engine.utils.DataProvider interface
 func (cP *SliceDP) FieldAsString(fldPath []string) (data string, err error) {
-	var valIface interface{}
+	var valIface any
 	valIface, err = cP.FieldAsInterface(fldPath)
 	if err != nil {
 		return

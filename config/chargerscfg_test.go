@@ -61,7 +61,7 @@ func TestChargerSCfgAsMapInterface(t *testing.T) {
 		"nested_fields": false,					
 	},	
 }`
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		utils.EnabledCfg:             false,
 		utils.AttributeSConnsCfg:     []string{},
 		utils.IndexedSelectsCfg:      true,
@@ -88,7 +88,7 @@ func TestChargerSCfgAsMapInterface1(t *testing.T) {
 			"nested_fields": false,					
 		},	
 	}`
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		utils.EnabledCfg:             false,
 		utils.AttributeSConnsCfg:     []string{utils.MetaInternal, "*conn1"},
 		utils.IndexedSelectsCfg:      true,

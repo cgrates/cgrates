@@ -133,11 +133,11 @@ func testV1RsAllocate(t *testing.T) {
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     utils.UUIDSha1Prefix(),
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Account":     "1001",
 			"Destination": "1002",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsResourcesUsageID: "chan_1",
 			utils.OptsResourcesUnits:   1,
 		},
@@ -153,11 +153,11 @@ func testV1RsAllocate(t *testing.T) {
 	cgrEv2 := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     utils.UUIDSha1Prefix(),
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Account":     "1001",
 			"Destination": "1002",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsResourcesUsageID: "chan_2",
 			utils.OptsResourcesUnits:   1,
 		},
@@ -175,11 +175,11 @@ func testV1RsAuthorize(t *testing.T) {
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     utils.UUIDSha1Prefix(),
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Account":     "1001",
 			"Destination": "1002",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsResourcesUsageID: "RandomUsageID",
 		},
 	}
@@ -208,11 +208,11 @@ func testV1RsAuthorize(t *testing.T) {
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     utils.UUIDSha1Prefix(),
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Account":     "1001",
 			"Destination": "1002",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsResourcesUsageID: "chan_1",
 			utils.OptsResourcesUnits:   1,
 		},

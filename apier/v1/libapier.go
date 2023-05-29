@@ -28,9 +28,9 @@ import (
 // CallCache caching the item based on cacheopt
 // visible in APIerSv2
 func (apierSv1 *APIerSv1) CallCache(cacheopt string, tnt, cacheID, itemID, groupID string,
-	filters *[]string, contexts []string, opts map[string]interface{}) (err error) {
+	filters *[]string, contexts []string, opts map[string]any) (err error) {
 	var reply, method string
-	var args interface{}
+	var args any
 	switch utils.FirstNonEmpty(cacheopt, apierSv1.Config.GeneralCfg().DefaultCaching) {
 	case utils.MetaNone:
 		return
@@ -170,9 +170,9 @@ func (apierSv1 *APIerSv1) composeArgsReload(tnt, cacheID, itemID string, filterI
 
 // callCacheForIndexes will only call CacheClear because don't have access at ItemID
 func (apierSv1 *APIerSv1) callCacheForRemoveIndexes(cacheopt string, tnt, cacheID string,
-	itemIDs []string, opts map[string]interface{}) (err error) {
+	itemIDs []string, opts map[string]any) (err error) {
 	var reply, method string
-	var args interface{} = utils.NewAttrReloadCacheWithOptsFromMap(map[string][]string{cacheID: itemIDs}, tnt, opts)
+	var args any = utils.NewAttrReloadCacheWithOptsFromMap(map[string][]string{cacheID: itemIDs}, tnt, opts)
 	switch utils.FirstNonEmpty(cacheopt, apierSv1.Config.GeneralCfg().DefaultCaching) {
 	case utils.MetaNone:
 		return
@@ -195,9 +195,9 @@ func (apierSv1 *APIerSv1) callCacheForRemoveIndexes(cacheopt string, tnt, cacheI
 }
 
 func (apierSv1 *APIerSv1) callCacheForComputeIndexes(cacheopt, tnt string,
-	cacheItems map[string][]string, opts map[string]interface{}) (err error) {
+	cacheItems map[string][]string, opts map[string]any) (err error) {
 	var reply, method string
-	var args interface{} = utils.NewAttrReloadCacheWithOptsFromMap(cacheItems, tnt, opts)
+	var args any = utils.NewAttrReloadCacheWithOptsFromMap(cacheItems, tnt, opts)
 	switch utils.FirstNonEmpty(cacheopt, apierSv1.Config.GeneralCfg().DefaultCaching) {
 	case utils.MetaNone:
 		return
@@ -224,12 +224,12 @@ func (apierSv1 *APIerSv1) callCacheForComputeIndexes(cacheopt, tnt string,
 }
 
 // callCacheRevDestinations used for reverse destination, loadIDs and indexes replication
-func (apierSv1 *APIerSv1) callCacheMultiple(cacheopt, tnt, cacheID string, itemIDs []string, opts map[string]interface{}) (err error) {
+func (apierSv1 *APIerSv1) callCacheMultiple(cacheopt, tnt, cacheID string, itemIDs []string, opts map[string]any) (err error) {
 	if len(itemIDs) == 0 {
 		return
 	}
 	var reply, method string
-	var args interface{}
+	var args any
 	switch utils.FirstNonEmpty(cacheopt, apierSv1.Config.GeneralCfg().DefaultCaching) {
 	case utils.MetaNone:
 		return
@@ -325,9 +325,9 @@ func composeCacheArgsForFilter(dm *engine.DataManager, fltr *engine.Filter, tnt,
 
 // callCacheForFilter will call the cache for filter
 func callCacheForFilter(connMgr *engine.ConnManager, cacheConns []string, cacheopt, dftCache, tnt string,
-	argC map[string][]string, opts map[string]interface{}) (err error) {
+	argC map[string][]string, opts map[string]any) (err error) {
 	var reply, method string
-	var args interface{} = utils.NewAttrReloadCacheWithOptsFromMap(argC, tnt, opts)
+	var args any = utils.NewAttrReloadCacheWithOptsFromMap(argC, tnt, opts)
 	switch utils.FirstNonEmpty(cacheopt, dftCache) {
 	case utils.MetaNone:
 		return

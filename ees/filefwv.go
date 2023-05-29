@@ -109,7 +109,7 @@ func (fFwv *FileFWVee) Cfg() *config.EventExporterCfg { return fFwv.cfg }
 
 func (fFwv *FileFWVee) Connect() (_ error) { return }
 
-func (fFwv *FileFWVee) ExportEvent(records interface{}, _ string) (err error) {
+func (fFwv *FileFWVee) ExportEvent(records any, _ string) (err error) {
 	fFwv.Lock() // make sure that only one event is writen in file at once
 	defer fFwv.Unlock()
 	for _, record := range records.([]string) {

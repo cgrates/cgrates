@@ -49,7 +49,7 @@ func (self *CmdSetTriggers) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdSetTriggers) RpcParams(reset bool) interface{} {
+func (self *CmdSetTriggers) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &v1.AttrSetActionTrigger{}
 	}
@@ -60,7 +60,7 @@ func (self *CmdSetTriggers) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdSetTriggers) RpcResult() interface{} {
+func (self *CmdSetTriggers) RpcResult() any {
 	var s string
 	return &s
 }

@@ -45,7 +45,7 @@ var (
 		{
 			Tenant: "cgrates.org",
 			ID:     "event1",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.AccountField: "1001",
 				utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 				utils.Usage:        135 * time.Second,
@@ -53,14 +53,14 @@ var (
 		{
 			Tenant: "cgrates.org",
 			ID:     "event2",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.AccountField: "1002",
 				utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 				utils.Usage:        45 * time.Second}},
 		{
 			Tenant: "cgrates.org",
 			ID:     "event3",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.AccountField: "1002",
 				utils.SetupTime:    time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 				utils.Usage:        0}},
@@ -291,7 +291,7 @@ func testV1STSProcessEvent(t *testing.T) {
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 			utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			utils.Usage:        135 * time.Second,
@@ -345,7 +345,7 @@ func testV1STSProcessEvent(t *testing.T) {
 	args2 := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event2",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1002",
 			utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			utils.Usage:        45 * time.Second,
@@ -360,7 +360,7 @@ func testV1STSProcessEvent(t *testing.T) {
 	args3 := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event3",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1002",
 			utils.SetupTime:    time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			utils.Usage:        0,
@@ -673,7 +673,7 @@ func testV1STSProcessMetricsWithFilter(t *testing.T) {
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"DistinctVal": "RandomVal",
 			utils.Usage:   6 * time.Second,
 			"CustomValue": 7.0,
@@ -701,7 +701,7 @@ func testV1STSProcessMetricsWithFilter(t *testing.T) {
 	args = &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event2",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"DistinctVal": "RandomVal",
 			utils.Usage:   12 * time.Second,
 			"CustomValue": 10.0,
@@ -780,7 +780,7 @@ func testV1STSProcessStaticMetrics(t *testing.T) {
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"StaticMetrics": "StaticMetrics",
 		},
 	}
@@ -905,7 +905,7 @@ func testV1STSProcessStatWithThreshold(t *testing.T) {
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"CustomEvent": "CustomEvent",
 			utils.Usage:   45 * time.Second,
 		},
@@ -1208,7 +1208,7 @@ func testV1STSProcessStatWithThreshold2(t *testing.T) {
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"CustomEvent2": "CustomEvent2",
 			utils.Usage:    45 * time.Second,
 		},
@@ -1362,7 +1362,7 @@ func testV1STSV1GetStatQueuesForEventWithoutTenant(t *testing.T) {
 	estats := []string{"Stats1"}
 	if err := stsV1Rpc.Call(utils.StatSv1GetStatQueuesForEvent, &utils.CGREvent{
 		ID: "GetStats",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1002",
 			utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			utils.Usage:        45 * time.Second,
@@ -1370,7 +1370,7 @@ func testV1STSV1GetStatQueuesForEventWithoutTenant(t *testing.T) {
 			utils.Cost:         10.0,
 			utils.Destination:  "1001",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "stat12345",
 		},
 	}, &reply); err != nil {
@@ -1435,7 +1435,7 @@ func testV1STSSimulateAccountUpdate(t *testing.T) {
 		Account:     "testV1STSSimulateAccountUpdate",
 		BalanceType: "*monetary",
 		Value:       1.5,
-		Balance: map[string]interface{}{
+		Balance: map[string]any{
 			utils.ID: "HolidayBalance",
 		},
 	}
@@ -1458,7 +1458,7 @@ func testV1STSSimulateAccountUpdate(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "SIMULATE_ACNT_UPDATE_EV",
 		Event:  acnt.AsAccountSummary().AsMapInterface(),
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaEventType: utils.AccountUpdate,
 		},
 	}
@@ -1538,7 +1538,7 @@ func testV1STSGetStatQueueWithoutExpired(t *testing.T) {
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event1012",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"StatQ":     "Sq1Nanao",
 			utils.Usage: 10,
 		},
@@ -1601,7 +1601,7 @@ func testV1STSGetStatQueueWithoutStored(t *testing.T) {
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "Sq1NotStored",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"StatQ":     "Sq1NotStored",
 			utils.Usage: 10 * time.Second,
 		},
@@ -1670,14 +1670,14 @@ func testStatSCacheProcessEventNotFound(t *testing.T) {
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "STAT_CACHE",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 			utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			utils.Usage:        135 * time.Second,
 			utils.Cost:         123.0,
 			utils.PDD:          12 * time.Second,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsStatsProfileIDs: []string{"STAT_CACHE"},
 		},
 	}
@@ -1690,14 +1690,14 @@ func testStatSCacheProcessEventFound(t *testing.T) {
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "STAT_CACHE",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 			utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			utils.Usage:        135 * time.Second,
 			utils.Cost:         123.0,
 			utils.PDD:          12 * time.Second,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsStatsProfileIDs: []string{"STAT_CACHE"},
 		},
 	}
@@ -1713,7 +1713,7 @@ func testStatSCacheSet(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "STAT_CACHE",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.CacheOpt: utils.MetaNone,
 		},
 	}

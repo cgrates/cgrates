@@ -83,10 +83,10 @@ func init() {
 	gob.Register(new(StatDistinct))
 
 	// others
-	gob.Register([]interface{}{})
-	gob.Register([]map[string]interface{}{})
-	gob.Register(map[string]interface{}{})
-	gob.Register(map[string][]map[string]interface{}{})
+	gob.Register([]any{})
+	gob.Register([]map[string]any{})
+	gob.Register(map[string]any{})
+	gob.Register(map[string][]map[string]any{})
 	gob.Register(map[string]string{})
 	gob.Register(time.Duration(0))
 	gob.Register(time.Time{})
@@ -111,7 +111,7 @@ func NewCacheS(cfg *config.CGRConfig, dm *DataManager, cpS *CapsStats) (c *Cache
 				k == utils.CacheCapsEvents {
 				continue
 			}
-			val.OnEvicted = func(itmID string, value interface{}) {
+			val.OnEvicted = func(itmID string, value any) {
 				if err := connMgr.Call(cfg.CacheCfg().ReplicationConns, nil, utils.CacheSv1ReplicateRemove,
 					&utils.ArgCacheReplicateRemove{
 						CacheID: k,
@@ -148,14 +148,14 @@ type CacheS struct {
 
 // Set is an exported method from TransCache
 // handled Replicate functionality
-func (chS *CacheS) Set(chID, itmID string, value interface{},
+func (chS *CacheS) Set(chID, itmID string, value any,
 	groupIDs []string, commit bool, transID string) (err error) {
 	chS.tCache.Set(chID, itmID, value, groupIDs, commit, transID)
 	return chS.ReplicateSet(chID, itmID, value)
 }
 
 // ReplicateSet replicates an item to ReplicationConns
-func (chS *CacheS) ReplicateSet(chID, itmID string, value interface{}) (err error) {
+func (chS *CacheS) ReplicateSet(chID, itmID string, value any) (err error) {
 	if len(chS.cfg.CacheCfg().ReplicationConns) == 0 ||
 		!chS.cfg.CacheCfg().Partitions[chID].Replicate {
 		return
@@ -171,7 +171,7 @@ func (chS *CacheS) ReplicateSet(chID, itmID string, value interface{}) (err erro
 
 // SetWithoutReplicate is an exported method from TransCache
 // handled Replicate functionality
-func (chS *CacheS) SetWithoutReplicate(chID, itmID string, value interface{},
+func (chS *CacheS) SetWithoutReplicate(chID, itmID string, value any,
 	groupIDs []string, commit bool, transID string) {
 	chS.tCache.Set(chID, itmID, value, groupIDs, commit, transID)
 }
@@ -195,12 +195,12 @@ func (chS *CacheS) HasItem(chID, itmID string) (has bool) {
 }
 
 // Get is an exported method from TransCache
-func (chS *CacheS) Get(chID, itmID string) (interface{}, bool) {
+func (chS *CacheS) Get(chID, itmID string) (any, bool) {
 	return chS.tCache.Get(chID, itmID)
 }
 
 // GetWithRemote queries locally the cache, followed by remotes
-func (chS *CacheS) GetWithRemote(args *utils.ArgsGetCacheItemWithAPIOpts) (itm interface{}, err error) {
+func (chS *CacheS) GetWithRemote(args *utils.ArgsGetCacheItemWithAPIOpts) (itm any, err error) {
 	var has bool
 	if itm, has = chS.tCache.Get(args.CacheID, args.ItemID); has {
 		return
@@ -259,7 +259,7 @@ func (chS *CacheS) CommitTransaction(transID string) {
 }
 
 // GetCloned is an exported method from TransCache
-func (chS *CacheS) GetCloned(chID, itmID string) (cln interface{}, err error) {
+func (chS *CacheS) GetCloned(chID, itmID string) (cln any, err error) {
 	return chS.tCache.GetCloned(chID, itmID)
 }
 
@@ -306,7 +306,7 @@ func (chS *CacheS) Precache() (err error) {
 // APIs start here
 
 // Call gives the ability of CacheS to be passed as internal RPC
-func (chS *CacheS) Call(serviceMethod string, args interface{}, reply interface{}) error {
+func (chS *CacheS) Call(serviceMethod string, args any, reply any) error {
 	return utils.RPCCall(chS, serviceMethod, args, reply)
 }
 
@@ -328,7 +328,7 @@ func (chS *CacheS) V1HasItem(args *utils.ArgsGetCacheItemWithAPIOpts,
 
 // V1GetItem returns a single item from the cache
 func (chS *CacheS) V1GetItem(args *utils.ArgsGetCacheItemWithAPIOpts,
-	reply *interface{}) (err error) {
+	reply *any) (err error) {
 	itmIface, has := chS.tCache.Get(args.CacheID, args.ItemID)
 	if !has {
 		return utils.ErrNotFound
@@ -339,8 +339,8 @@ func (chS *CacheS) V1GetItem(args *utils.ArgsGetCacheItemWithAPIOpts,
 
 // V1GetItemWithRemote queries the item from remote if not found locally
 func (chS *CacheS) V1GetItemWithRemote(args *utils.ArgsGetCacheItemWithAPIOpts,
-	reply *interface{}) (err error) {
-	var itmIface interface{}
+	reply *any) (err error) {
+	var itmIface any
 	if itmIface, err = chS.GetWithRemote(args); err != nil {
 		return
 	}

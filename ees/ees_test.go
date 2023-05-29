@@ -86,10 +86,10 @@ func TestCall(t *testing.T) {
 }
 
 type testMockEvent struct {
-	calls map[string]func(args interface{}, reply interface{}) error
+	calls map[string]func(args any, reply any) error
 }
 
-func (sT *testMockEvent) Call(method string, arg interface{}, rply interface{}) error {
+func (sT *testMockEvent) Call(method string, arg any, rply any) error {
 	if call, has := sT.calls[method]; !has {
 		return rpcclient.ErrUnsupporteServiceMethod
 	} else {
@@ -98,11 +98,11 @@ func (sT *testMockEvent) Call(method string, arg interface{}, rply interface{}) 
 }
 func TestAttrSProcessEvent(t *testing.T) {
 	testMock := &testMockEvent{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.AttributeSv1ProcessEvent: func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.AttributeSv1ProcessEvent: func(args, reply any) error {
 				rplyEv := &engine.AttrSProcessEventReply{
 					AlteredFields: []string{"testcase"},
-					CGREvent:      &utils.CGREvent{Event: map[string]interface{}{"testcase": 1}},
+					CGREvent:      &utils.CGREvent{Event: map[string]any{"testcase": 1}},
 				}
 				*reply.(*engine.AttrSProcessEventReply) = *rplyEv
 				return nil
@@ -110,7 +110,7 @@ func TestAttrSProcessEvent(t *testing.T) {
 		},
 	}
 	cgrEv := &utils.CGREvent{
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAttributesProcessRuns: "10",
 		},
 	}
@@ -126,7 +126,7 @@ func TestAttrSProcessEvent(t *testing.T) {
 	})
 	eeS := NewEventExporterS(cfg, filterS, connMgr)
 	// cgrEv := &utils.CGREvent{}
-	exp := &utils.CGREvent{Event: map[string]interface{}{"testcase": 1}}
+	exp := &utils.CGREvent{Event: map[string]any{"testcase": 1}}
 	if err := eeS.attrSProcessEvent(cgrEv, []string{}, utils.EmptyString); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(exp, cgrEv) {
@@ -137,8 +137,8 @@ func TestAttrSProcessEvent(t *testing.T) {
 func TestAttrSProcessEvent2(t *testing.T) {
 	engine.Cache.Clear(nil)
 	testMock := &testMockEvent{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.AttributeSv1ProcessEvent: func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.AttributeSv1ProcessEvent: func(args, reply any) error {
 				return utils.ErrNotFound
 			},
 		},
@@ -179,7 +179,7 @@ func TestV1ProcessEvent(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "voiceEvent",
 			Time:   utils.TimePointer(time.Now()),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.CGRID:        utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()),
 				utils.ToR:          utils.MetaVoice,
 				utils.OriginID:     "dsafdsaf",
@@ -200,8 +200,8 @@ func TestV1ProcessEvent(t *testing.T) {
 			},
 		},
 	}
-	var rply map[string]map[string]interface{}
-	rplyExpect := map[string]map[string]interface{}{
+	var rply map[string]map[string]any
+	rplyExpect := map[string]map[string]any{
 		"SQLExporterFull": {},
 	}
 	if err := eeS.V1ProcessEvent(cgrEv, &rply); err != nil {
@@ -229,17 +229,17 @@ func TestV1ProcessEvent2(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "voiceEvent",
 			Time:   utils.TimePointer(time.Now()),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Subject: "1001",
 				"ExtraFields": map[string]string{"extra1": "val_extra1",
 					"extra2": "val_extra2", "extra3": "val_extra3"},
 			},
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.OptsAttributesProcessRuns: "10",
 			},
 		},
 	}
-	var rply map[string]map[string]interface{}
+	var rply map[string]map[string]any
 	errExpect := "NOT_FOUND"
 	if err := eeS.V1ProcessEvent(cgrEv, &rply); err == nil || err.Error() != errExpect {
 		t.Errorf("Expecting %q but received %q", errExpect, err)
@@ -269,10 +269,10 @@ func TestV1ProcessEvent3(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "voiceEvent",
 			Time:   utils.TimePointer(time.Now()),
-			Event:  map[string]interface{}{},
+			Event:  map[string]any{},
 		},
 	}
-	var rply map[string]map[string]interface{}
+	var rply map[string]map[string]any
 	errExpect := "MANDATORY_IE_MISSING: [connIDs]"
 	if err := eeS.V1ProcessEvent(cgrEv, &rply); err == nil || err.Error() != errExpect {
 		t.Errorf("Expecting %q but received %q", errExpect, err)
@@ -303,13 +303,13 @@ func TestV1ProcessEvent4(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "voiceEvent",
 			Time:   utils.TimePointer(time.Now()),
-			Event:  map[string]interface{}{},
-			APIOpts: map[string]interface{}{
+			Event:  map[string]any{},
+			APIOpts: map[string]any{
 				utils.OptsEEsVerbose: struct{}{},
 			},
 		},
 	}
-	var rply map[string]map[string]interface{}
+	var rply map[string]map[string]any
 	errExpect := "PARTIALLY_EXECUTED"
 	if err := eeS.V1ProcessEvent(cgrEv, &rply); err == nil || err.Error() != errExpect {
 		t.Errorf("Expecting %q but received %q", errExpect, err)
@@ -336,9 +336,9 @@ func (m mockEventExporter) GetMetrics() *utils.SafeMapStorage {
 	return m.dc
 }
 
-func (mockEventExporter) Cfg() *config.EventExporterCfg         { return new(config.EventExporterCfg) }
-func (mockEventExporter) Connect() error                        { return nil }
-func (mockEventExporter) ExportEvent(interface{}, string) error { return nil }
+func (mockEventExporter) Cfg() *config.EventExporterCfg { return new(config.EventExporterCfg) }
+func (mockEventExporter) Connect() error                { return nil }
+func (mockEventExporter) ExportEvent(any, string) error { return nil }
 func (mockEventExporter) Close() error {
 	utils.Logger.Warning("NOT IMPLEMENTED")
 	return nil
@@ -365,14 +365,14 @@ func TestV1ProcessEventMockMetrics(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "voiceEvent",
 			Time:   utils.TimePointer(time.Now()),
-			Event:  map[string]interface{}{},
-			APIOpts: map[string]interface{}{
+			Event:  map[string]any{},
+			APIOpts: map[string]any{
 				utils.OptsEEsVerbose: struct{}{},
 			},
 		},
 	}
-	var rply map[string]map[string]interface{}
-	errExpect := "cannot cast to map[string]interface{} 5 for positive exports"
+	var rply map[string]map[string]any
+	errExpect := "cannot cast to map[string]any 5 for positive exports"
 	if err := eeS.V1ProcessEvent(cgrEv, &rply); err == nil || err.Error() != errExpect {
 		t.Errorf("Expecting %q but received %q", errExpect, err)
 	}
@@ -394,8 +394,8 @@ func TestV1ProcessEvent5(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "voiceEvent",
 			Time:   utils.TimePointer(time.Now()),
-			Event:  map[string]interface{}{},
-			APIOpts: map[string]interface{}{
+			Event:  map[string]any{},
+			APIOpts: map[string]any{
 				utils.OptsEEsVerbose: struct{}{},
 			},
 		},
@@ -404,7 +404,7 @@ func TestV1ProcessEvent5(t *testing.T) {
 	newDM := engine.NewDataManager(newIDb, cfg.CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, newDM)
 	eeS := NewEventExporterS(cfg, filterS, nil)
-	var rply map[string]map[string]interface{}
+	var rply map[string]map[string]any
 	errExpect := "unsupported exporter type: <invalid_type>"
 	if err := eeS.V1ProcessEvent(cgrEv, &rply); err == nil || err.Error() != errExpect {
 		t.Errorf("Expected %v but received %v", errExpect, err)
@@ -425,13 +425,13 @@ func TestV1ProcessEvent6(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "voiceEvent",
 			Time:   utils.TimePointer(time.Now()),
-			Event:  map[string]interface{}{},
-			APIOpts: map[string]interface{}{
+			Event:  map[string]any{},
+			APIOpts: map[string]any{
 				utils.OptsEEsVerbose: struct{}{},
 			},
 		},
 	}
-	var rply map[string]map[string]interface{}
+	var rply map[string]map[string]any
 	if err := eeS.V1ProcessEvent(cgrEv, &rply); err != nil {
 		t.Error(err)
 	}

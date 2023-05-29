@@ -1383,7 +1383,7 @@ func testApierSetAccountActionTriggers(t *testing.T) {
 		Account: "dan2",
 		AttrSetActionTrigger: AttrSetActionTrigger{
 			UniqueID: reply[0].UniqueID,
-			ActionTrigger: map[string]interface{}{
+			ActionTrigger: map[string]any{
 				utils.ActivationDate: "2016-02-05T18:00:00Z",
 			},
 		},
@@ -2134,7 +2134,7 @@ func testApierReplayFldPosts(t *testing.T) {
 	ev := &ees.ExportEvents{
 		Path:   "http://localhost:2081",
 		Format: utils.MetaHTTPjsonMap,
-		Events: []interface{}{&ees.HTTPPosterRequest{Body: bev, Header: http.Header{"Content-Type": []string{"application/json"}}}},
+		Events: []any{&ees.HTTPPosterRequest{Body: bev, Header: http.Header{"Content-Type": []string{"application/json"}}}},
 	}
 	fileName := "act>*http_post|63bed4ea-615e-4096-b1f4-499f64f29b28.json"
 
@@ -2176,7 +2176,7 @@ func testApierReplayFldPosts(t *testing.T) {
 			AMQPQueueID: utils.StringPointer("cgrates_cdrs"),
 		},
 		Format: utils.MetaAMQPjsonMap,
-		Events: []interface{}{bev},
+		Events: []any{bev},
 	}
 	err = ev.WriteToFile(path.Join(*args.FailedRequestsInDir, fileName))
 	if err != nil {
@@ -2278,7 +2278,7 @@ func testRatingProfileCachingMetaNone(t *testing.T) {
 			FallbackSubjects: "dan2",
 		}},
 		Overwrite: true,
-		APIOpts:   map[string]interface{}{utils.CacheOpt: utils.MetaNone},
+		APIOpts:   map[string]any{utils.CacheOpt: utils.MetaNone},
 	}
 	// set the profile
 	var result string
@@ -2329,7 +2329,7 @@ func testRatingProfileCachingMetaLoad(t *testing.T) {
 			RatingPlanId:     "RETAIL1",
 			FallbackSubjects: "dan2",
 		}},
-		APIOpts: map[string]interface{}{utils.CacheOpt: utils.MetaLoad},
+		APIOpts: map[string]any{utils.CacheOpt: utils.MetaLoad},
 	}
 	// set the profile
 	var result string
@@ -2375,7 +2375,7 @@ func testRatingProfileCachingMetaLoad(t *testing.T) {
 			Tenant:   rpf.Tenant,
 			Category: rpf.Category,
 			Subject:  rpf.Subject,
-			APIOpts:  map[string]interface{}{utils.CacheOpt: utils.MetaRemove}}, &resp); err != nil {
+			APIOpts:  map[string]any{utils.CacheOpt: utils.MetaRemove}}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
 		t.Error("Unexpected reply returned", resp)
@@ -2417,7 +2417,7 @@ func testRatingProfileCachingMetaReload1(t *testing.T) {
 			FallbackSubjects: "dan2",
 		}},
 		Overwrite: true,
-		APIOpts:   map[string]interface{}{utils.CacheOpt: utils.MetaReload},
+		APIOpts:   map[string]any{utils.CacheOpt: utils.MetaReload},
 	}
 	// set the profile
 	var result string
@@ -2469,7 +2469,7 @@ func testRatingProfileCachingMetaReload2(t *testing.T) {
 			FallbackSubjects: "dan2",
 		}},
 		Overwrite: true,
-		APIOpts:   map[string]interface{}{utils.CacheOpt: utils.MetaLoad},
+		APIOpts:   map[string]any{utils.CacheOpt: utils.MetaLoad},
 	}
 	expected := &engine.RatingProfile{
 		Id: "*out:cgrates.org:call:dan",
@@ -2527,7 +2527,7 @@ func testRatingProfileCachingMetaRemove(t *testing.T) {
 			RatingPlanId:     "RETAIL1",
 			FallbackSubjects: "dan2",
 		}},
-		APIOpts: map[string]interface{}{utils.CacheOpt: utils.MetaLoad},
+		APIOpts: map[string]any{utils.CacheOpt: utils.MetaLoad},
 	}
 	// set the profile
 	var result string
@@ -2569,7 +2569,7 @@ func testRatingProfileCachingMetaRemove(t *testing.T) {
 			RatingPlanId:     "RETAIL1",
 			FallbackSubjects: "dan2",
 		}},
-		APIOpts: map[string]interface{}{utils.CacheOpt: utils.MetaRemove},
+		APIOpts: map[string]any{utils.CacheOpt: utils.MetaRemove},
 	}
 	// set the profile
 	if err := rater.Call(utils.APIerSv1SetRatingProfile, rpf, &result); err != nil {

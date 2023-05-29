@@ -55,7 +55,7 @@ type ResourceProfile struct {
 // ResourceProfileWithAPIOpts is used in replicatorV1 for dispatcher
 type ResourceProfileWithAPIOpts struct {
 	*ResourceProfile
-	APIOpts map[string]interface{}
+	APIOpts map[string]any
 }
 
 // TenantID returns unique identifier of the ResourceProfile in a multi-tenant environment
@@ -165,7 +165,7 @@ func (r *Resource) isLocked() bool {
 // ResourceWithAPIOpts is used in replicatorV1 for dispatcher
 type ResourceWithAPIOpts struct {
 	*Resource
-	APIOpts map[string]interface{}
+	APIOpts map[string]any
 }
 
 // TenantID returns the unique ID in a multi-tenant environment
@@ -511,12 +511,12 @@ func (rS *ResourceService) storeMatchedResources(mtcRLs Resources) (err error) {
 }
 
 // processThresholds will pass the event for resource to ThresholdS
-func (rS *ResourceService) processThresholds(rs Resources, opts map[string]interface{}) (err error) {
+func (rS *ResourceService) processThresholds(rs Resources, opts map[string]any) (err error) {
 	if len(rS.cgrcfg.ResourceSCfg().ThresholdSConns) == 0 {
 		return
 	}
 	if opts == nil {
-		opts = make(map[string]interface{})
+		opts = make(map[string]any)
 	}
 	opts[utils.MetaEventType] = utils.ResourceUpdate
 
@@ -534,7 +534,7 @@ func (rS *ResourceService) processThresholds(rs Resources, opts map[string]inter
 		thEv := &utils.CGREvent{
 			Tenant: r.Tenant,
 			ID:     utils.GenUUID(),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.EventType:  utils.ResourceUpdate,
 				utils.ResourceID: r.ID,
 				utils.Usage:      r.TotalUsage(),

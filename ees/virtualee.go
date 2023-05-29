@@ -36,12 +36,12 @@ type VirtualEE struct {
 	dc  *utils.SafeMapStorage
 }
 
-func (vEe *VirtualEE) Cfg() *config.EventExporterCfg                   { return vEe.cfg }
-func (vEe *VirtualEE) Connect() error                                  { return nil }
-func (vEe *VirtualEE) ExportEvent(interface{}, string) error           { return nil }
-func (vEe *VirtualEE) Close() error                                    { return nil }
-func (vEe *VirtualEE) GetMetrics() *utils.SafeMapStorage               { return vEe.dc }
-func (vEe *VirtualEE) PrepareMap(*utils.CGREvent) (interface{}, error) { return nil, nil }
-func (vEe *VirtualEE) PrepareOrderMap(*utils.OrderedNavigableMap) (interface{}, error) {
+func (vEe *VirtualEE) Cfg() *config.EventExporterCfg           { return vEe.cfg }
+func (vEe *VirtualEE) Connect() error                          { return nil }
+func (vEe *VirtualEE) ExportEvent(any, string) error           { return nil }
+func (vEe *VirtualEE) Close() error                            { return nil }
+func (vEe *VirtualEE) GetMetrics() *utils.SafeMapStorage       { return vEe.dc }
+func (vEe *VirtualEE) PrepareMap(*utils.CGREvent) (any, error) { return nil, nil }
+func (vEe *VirtualEE) PrepareOrderMap(*utils.OrderedNavigableMap) (any, error) {
 	return nil, nil
 }

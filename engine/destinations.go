@@ -40,7 +40,7 @@ type Destination struct {
 type DestinationWithAPIOpts struct {
 	*Destination
 	Tenant  string
-	APIOpts map[string]interface{}
+	APIOpts map[string]any
 }
 
 // returns prefix precision

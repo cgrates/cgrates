@@ -145,7 +145,7 @@ func TestDiameterAgentCfgAsMapInterface(t *testing.T) {
         ]
 	},
 }`
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		utils.ASRTemplateCfg:        "",
 		utils.ConcurrentRequestsCfg: -1,
 		utils.DictionariesPathCfg:   "/usr/share/cgrates/diameter/dict/",
@@ -160,20 +160,20 @@ func TestDiameterAgentCfgAsMapInterface(t *testing.T) {
 		utils.SessionSConnsCfg:      []string{rpcclient.BiRPCInternal, utils.MetaInternal, "*conn1"},
 		utils.SyncedConnReqsCfg:     true,
 		utils.VendorIDCfg:           0,
-		utils.RequestProcessorsCfg: []map[string]interface{}{
+		utils.RequestProcessorsCfg: []map[string]any{
 			{
 				utils.IDCfg:       utils.CGRateSLwr,
 				utils.TenantCfg:   "1",
 				utils.FiltersCfg:  []string{},
 				utils.FlagsCfg:    []string{"1"},
 				utils.TimezoneCfg: utils.EmptyString,
-				utils.RequestFieldsCfg: []map[string]interface{}{
+				utils.RequestFieldsCfg: []map[string]any{
 					{
 						utils.PathCfg: "randomPath",
 						utils.TagCfg:  "randomPath",
 					},
 				},
-				utils.ReplyFieldsCfg: []map[string]interface{}{
+				utils.ReplyFieldsCfg: []map[string]any{
 					{
 						utils.PathCfg: "randomPath",
 						utils.TagCfg:  "randomPath",
@@ -206,7 +206,7 @@ func TestDiameterAgentCfgAsMapInterface1(t *testing.T) {
 		"synced_conn_requests": false,
 	},
 }`
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		utils.ASRTemplateCfg:        "",
 		utils.ConcurrentRequestsCfg: -1,
 		utils.DictionariesPathCfg:   "/usr/share/cgrates/diameter",
@@ -221,7 +221,7 @@ func TestDiameterAgentCfgAsMapInterface1(t *testing.T) {
 		utils.SessionSConnsCfg:      []string{rpcclient.BiRPCInternal},
 		utils.SyncedConnReqsCfg:     false,
 		utils.VendorIDCfg:           0,
-		utils.RequestProcessorsCfg:  []map[string]interface{}{},
+		utils.RequestProcessorsCfg:  []map[string]any{},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)

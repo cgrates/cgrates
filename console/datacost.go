@@ -51,9 +51,9 @@ func (self *CmdGetDataCost) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdGetDataCost) RpcParams(reset bool) interface{} {
+func (self *CmdGetDataCost) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &v1.AttrGetDataCost{Opts: make(map[string]interface{})}
+		self.rpcParams = &v1.AttrGetDataCost{Opts: make(map[string]any)}
 	}
 	return self.rpcParams
 }
@@ -62,7 +62,7 @@ func (self *CmdGetDataCost) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdGetDataCost) RpcResult() interface{} {
+func (self *CmdGetDataCost) RpcResult() any {
 	return &engine.DataCost{}
 }
 
@@ -70,7 +70,7 @@ func (self *CmdGetDataCost) ClientArgs() []string {
 	return self.clientArgs
 }
 
-func (self *CmdGetDataCost) GetFormatedResult(result interface{}) string {
+func (self *CmdGetDataCost) GetFormatedResult(result any) string {
 	return GetFormatedResult(result, utils.StringSet{
 		utils.Usage:              {},
 		utils.GroupIntervalStart: {},

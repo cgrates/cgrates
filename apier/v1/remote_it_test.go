@@ -805,7 +805,7 @@ func testInternalMatchThreshold(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event2",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1002",
 		},
 	}
@@ -819,7 +819,7 @@ func testInternalMatchThreshold(t *testing.T) {
 	ev = &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event2",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 		},
 	}
@@ -832,7 +832,7 @@ func testInternalMatchThreshold(t *testing.T) {
 	ev2 := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event3",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 		},
 	}
@@ -849,7 +849,7 @@ func testInternalAccountBalanceOperations(t *testing.T) {
 		Account:     "testAccount1",
 		BalanceType: utils.MetaMonetary,
 		Value:       17.4,
-		Balance: map[string]interface{}{
+		Balance: map[string]any{
 			utils.ID: "testAccSetBalance",
 		},
 	}

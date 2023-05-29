@@ -1096,7 +1096,7 @@ func TestLoaderProcessDispatches(t *testing.T) {
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 29, 15, 00, 0, 0, time.UTC),
 		},
-		StrategyParams: map[string]interface{}{},
+		StrategyParams: map[string]any{},
 		Strategy:       "*first",
 		Weight:         20,
 		Hosts: engine.DispatcherHostProfiles{
@@ -1104,14 +1104,14 @@ func TestLoaderProcessDispatches(t *testing.T) {
 				ID:        "C1",
 				FilterIDs: []string{"*gt:~*req.Usage:10"},
 				Weight:    10,
-				Params:    map[string]interface{}{"0": "192.168.56.203"},
+				Params:    map[string]any{"0": "192.168.56.203"},
 				Blocker:   false,
 			},
 			&engine.DispatcherHostProfile{
 				ID:        "C2",
 				FilterIDs: []string{"*lt:~*req.Usage:10"},
 				Weight:    10,
-				Params:    map[string]interface{}{"0": "192.168.56.204"},
+				Params:    map[string]any{"0": "192.168.56.204"},
 				Blocker:   false,
 			},
 		},
@@ -3039,10 +3039,10 @@ func TestLoaderServiceEnabled(t *testing.T) {
 }
 
 type ccMock struct {
-	calls map[string]func(args interface{}, reply interface{}) error
+	calls map[string]func(args any, reply any) error
 }
 
-func (ccM *ccMock) Call(serviceMethod string, args interface{}, reply interface{}) (err error) {
+func (ccM *ccMock) Call(serviceMethod string, args any, reply any) (err error) {
 	if call, has := ccM.calls[serviceMethod]; !has {
 		return rpcclient.ErrUnsupporteServiceMethod
 	} else {
@@ -3060,14 +3060,14 @@ func TestStoreLoadedDataAttributes(t *testing.T) {
 		AttributeProfileIDs: []string{"cgrates.org:attributesID"},
 	}
 	cM := &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.CacheSv1ReloadCache: func(args interface{}, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.CacheSv1ReloadCache: func(args any, reply any) error {
 				if !reflect.DeepEqual(args, argExpect) {
 					t.Errorf("Expected %v \nbut received %v", utils.ToJSON(argExpect), utils.ToJSON(args))
 				}
 				return nil
 			},
-			utils.CacheSv1Clear: func(args interface{}, reply interface{}) error {
+			utils.CacheSv1Clear: func(args any, reply any) error {
 				return nil
 			},
 		},
@@ -3109,14 +3109,14 @@ func TestStoreLoadedDataResources(t *testing.T) {
 		ResourceProfileIDs: []string{"cgrates.org:resourcesID"},
 	}
 	cM := &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.CacheSv1ReloadCache: func(args interface{}, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.CacheSv1ReloadCache: func(args any, reply any) error {
 				if !reflect.DeepEqual(args, argExpect) {
 					t.Errorf("Expected %v \nbut received %v", utils.ToJSON(argExpect), utils.ToJSON(args))
 				}
 				return nil
 			},
-			utils.CacheSv1Clear: func(args interface{}, reply interface{}) error {
+			utils.CacheSv1Clear: func(args any, reply any) error {
 				return nil
 			},
 		},
@@ -3157,14 +3157,14 @@ func TestStoreLoadedDataFilters(t *testing.T) {
 		FilterIDs: []string{"cgrates.org:filtersID"},
 	}
 	cM := &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.CacheSv1ReloadCache: func(args interface{}, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.CacheSv1ReloadCache: func(args any, reply any) error {
 				if !reflect.DeepEqual(args, argExpect) {
 					t.Errorf("Expected %v \nbut received %v", utils.ToJSON(argExpect), utils.ToJSON(args))
 				}
 				return nil
 			},
-			utils.CacheSv1Clear: func(args interface{}, reply interface{}) error {
+			utils.CacheSv1Clear: func(args any, reply any) error {
 				return nil
 			},
 		},
@@ -3206,14 +3206,14 @@ func TestStoreLoadedDataStats(t *testing.T) {
 		StatsQueueProfileIDs: []string{"cgrates.org:statsID"},
 	}
 	cM := &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.CacheSv1ReloadCache: func(args interface{}, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.CacheSv1ReloadCache: func(args any, reply any) error {
 				if !reflect.DeepEqual(args, argExpect) {
 					t.Errorf("Expected %v \nbut received %v", utils.ToJSON(argExpect), utils.ToJSON(args))
 				}
 				return nil
 			},
-			utils.CacheSv1Clear: func(args interface{}, reply interface{}) error {
+			utils.CacheSv1Clear: func(args any, reply any) error {
 				return nil
 			},
 		},
@@ -3255,14 +3255,14 @@ func TestStoreLoadedDataThresholds(t *testing.T) {
 		ThresholdProfileIDs: []string{"cgrates.org:thresholdsID"},
 	}
 	cM := &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.CacheSv1ReloadCache: func(args interface{}, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.CacheSv1ReloadCache: func(args any, reply any) error {
 				if !reflect.DeepEqual(args, argExpect) {
 					t.Errorf("Expected %v \nbut received %v", utils.ToJSON(argExpect), utils.ToJSON(args))
 				}
 				return nil
 			},
-			utils.CacheSv1Clear: func(args interface{}, reply interface{}) error {
+			utils.CacheSv1Clear: func(args any, reply any) error {
 				return nil
 			},
 		},
@@ -3303,14 +3303,14 @@ func TestStoreLoadedDataRoutes(t *testing.T) {
 		RouteProfileIDs: []string{"cgrates.org:routesID"},
 	}
 	cM := &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.CacheSv1ReloadCache: func(args interface{}, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.CacheSv1ReloadCache: func(args any, reply any) error {
 				if !reflect.DeepEqual(args, argExpect) {
 					t.Errorf("Expected %v \nbut received %v", utils.ToJSON(argExpect), utils.ToJSON(args))
 				}
 				return nil
 			},
-			utils.CacheSv1Clear: func(args interface{}, reply interface{}) error {
+			utils.CacheSv1Clear: func(args any, reply any) error {
 				return nil
 			},
 		},
@@ -3351,14 +3351,14 @@ func TestStoreLoadedDataChargers(t *testing.T) {
 		ChargerProfileIDs: []string{"cgrates.org:chargersID"},
 	}
 	cM := &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.CacheSv1ReloadCache: func(args interface{}, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.CacheSv1ReloadCache: func(args any, reply any) error {
 				if !reflect.DeepEqual(args, argExpect) {
 					t.Errorf("Expected %v \nbut received %v", utils.ToJSON(argExpect), utils.ToJSON(args))
 				}
 				return nil
 			},
-			utils.CacheSv1Clear: func(args interface{}, reply interface{}) error {
+			utils.CacheSv1Clear: func(args any, reply any) error {
 				return nil
 			},
 		},
@@ -3399,14 +3399,14 @@ func TestStoreLoadedDataDispatchers(t *testing.T) {
 		DispatcherProfileIDs: []string{"cgrates.org:dispatchersID"},
 	}
 	cM := &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.CacheSv1ReloadCache: func(args interface{}, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.CacheSv1ReloadCache: func(args any, reply any) error {
 				if !reflect.DeepEqual(args, argExpect) {
 					t.Errorf("Expected %v \nbut received %v", utils.ToJSON(argExpect), utils.ToJSON(args))
 				}
 				return nil
 			},
-			utils.CacheSv1Clear: func(args interface{}, reply interface{}) error {
+			utils.CacheSv1Clear: func(args any, reply any) error {
 				return nil
 			},
 		},
@@ -3447,14 +3447,14 @@ func TestStoreLoadedDataDispatcherHosts(t *testing.T) {
 		DispatcherHostIDs: []string{"cgrates.org:dispatcherHostsID"},
 	}
 	cM := &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.CacheSv1ReloadCache: func(args interface{}, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.CacheSv1ReloadCache: func(args any, reply any) error {
 				if !reflect.DeepEqual(args, argExpect) {
 					t.Errorf("Expected %v \nbut received %v", utils.ToJSON(argExpect), utils.ToJSON(args))
 				}
 				return nil
 			},
-			utils.CacheSv1Clear: func(args interface{}, reply interface{}) error {
+			utils.CacheSv1Clear: func(args any, reply any) error {
 				return nil
 			},
 		},

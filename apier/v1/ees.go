@@ -39,6 +39,6 @@ func (eeSv1 *EeSv1) Ping(ign *utils.CGREvent, reply *string) error {
 
 // ProcessEvent triggers exports on EEs side
 func (eeSv1 *EeSv1) ProcessEvent(args *engine.CGREventWithEeIDs,
-	reply *map[string]map[string]interface{}) error {
+	reply *map[string]map[string]any) error {
 	return eeSv1.eeS.V1ProcessEvent(args, reply)
 }

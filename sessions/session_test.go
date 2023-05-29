@@ -299,7 +299,7 @@ func TestSRunDebitReserve6(t *testing.T) {
 }
 
 func TestSessionAsCGREventsRawEvent(t *testing.T) {
-	ev := map[string]interface{}{
+	ev := map[string]any{
 		utils.EventName:    "TEST_EVENT",
 		utils.ToR:          utils.MetaVoice,
 		utils.OriginID:     "123451",
@@ -326,7 +326,7 @@ func TestSessionAsCGREventsRawEvent(t *testing.T) {
 }
 
 func TestSessionAsCGREvents(t *testing.T) {
-	startEv := map[string]interface{}{
+	startEv := map[string]any{
 		utils.EventName:    "TEST_EVENT",
 		utils.ToR:          utils.MetaVoice,
 		utils.OriginID:     "123451",
@@ -341,7 +341,7 @@ func TestSessionAsCGREvents(t *testing.T) {
 		utils.Usage:        2 * time.Second,
 		utils.Cost:         12.12,
 	}
-	ev := map[string]interface{}{
+	ev := map[string]any{
 		utils.EventName:    "TEST_EVENT2",
 		utils.ToR:          utils.MetaVoice,
 		utils.OriginID:     "123451",
@@ -379,7 +379,7 @@ func TestSessionAsCGREvents(t *testing.T) {
 }
 
 func TestSessionAsExternalSessions(t *testing.T) {
-	startEv := map[string]interface{}{
+	startEv := map[string]any{
 		utils.EventName:    "TEST_EVENT",
 		utils.ToR:          utils.MetaVoice,
 		utils.OriginID:     "123451",
@@ -394,7 +394,7 @@ func TestSessionAsExternalSessions(t *testing.T) {
 		utils.Usage:        2 * time.Second,
 		utils.Cost:         12.12,
 	}
-	ev := map[string]interface{}{
+	ev := map[string]any{
 		utils.EventName:    "TEST_EVENT2",
 		utils.ToR:          utils.MetaVoice,
 		utils.OriginID:     "123451",
@@ -459,7 +459,7 @@ func TestSessionAsExternalSessions(t *testing.T) {
 }
 
 func TestSessionAsExternalSessions2(t *testing.T) {
-	startEv := map[string]interface{}{
+	startEv := map[string]any{
 		utils.EventName:    "TEST_EVENT",
 		utils.ToR:          utils.MetaVoice,
 		utils.OriginID:     "123451",
@@ -474,7 +474,7 @@ func TestSessionAsExternalSessions2(t *testing.T) {
 		utils.Usage:        2 * time.Second,
 		utils.Cost:         12.12,
 	}
-	ev := map[string]interface{}{
+	ev := map[string]any{
 		utils.EventName:    "TEST_EVENT2",
 		utils.ToR:          utils.MetaVoice,
 		utils.OriginID:     "123451",
@@ -543,7 +543,7 @@ func TestSessionAsExternalSessions2(t *testing.T) {
 }
 
 func TestSessionAsExternalSessions3(t *testing.T) {
-	startEv := map[string]interface{}{
+	startEv := map[string]any{
 		utils.EventName:    "TEST_EVENT",
 		utils.ToR:          utils.MetaVoice,
 		utils.OriginID:     "123451",
@@ -558,7 +558,7 @@ func TestSessionAsExternalSessions3(t *testing.T) {
 		utils.Usage:        2 * time.Second,
 		utils.Cost:         12.12,
 	}
-	ev := map[string]interface{}{
+	ev := map[string]any{
 		utils.EventName:    "TEST_EVENT2",
 		utils.ToR:          utils.MetaVoice,
 		utils.OriginID:     "123451",
@@ -705,7 +705,7 @@ func TestSessionstopDebitLoops(t *testing.T) {
 }
 
 func TestUpdateSRuns(t *testing.T) {
-	startEv := map[string]interface{}{
+	startEv := map[string]any{
 		utils.EventName:    "TEST_EVENT",
 		utils.ToR:          utils.MetaVoice,
 		utils.OriginID:     "123451",
@@ -720,7 +720,7 @@ func TestUpdateSRuns(t *testing.T) {
 		utils.Usage:        2 * time.Second,
 		utils.Cost:         12.12,
 	}
-	ev := map[string]interface{}{
+	ev := map[string]any{
 		utils.EventName:    "TEST_EVENT2",
 		utils.ToR:          utils.MetaVoice,
 		utils.OriginID:     "123451",
@@ -753,7 +753,7 @@ func TestUpdateSRuns(t *testing.T) {
 			},
 		}},
 	}
-	updEv := map[string]interface{}{
+	updEv := map[string]any{
 		utils.EventName:   "TEST_EVENT2",
 		utils.Tenant:      "cgrates.org",
 		utils.RequestType: utils.MetaPostpaid,

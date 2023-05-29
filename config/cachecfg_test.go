@@ -164,9 +164,9 @@ func TestCachesCfgAsMapInterface1(t *testing.T) {
 				},
 			},
 		}`
-	eMap := map[string]interface{}{
-		utils.PartitionsCfg: map[string]interface{}{
-			utils.MetaDestinations: map[string]interface{}{"limit": 10000, "static_ttl": false, "precache": true, "remote": true, "replicate": true},
+	eMap := map[string]any{
+		utils.PartitionsCfg: map[string]any{
+			utils.MetaDestinations: map[string]any{"limit": 10000, "static_ttl": false, "precache": true, "remote": true, "replicate": true},
 		},
 		utils.ReplicationConnsCfg: []string{},
 	}
@@ -174,10 +174,10 @@ func TestCachesCfgAsMapInterface1(t *testing.T) {
 		t.Error(err)
 	} else {
 		newMap := cgrCfg.cacheCfg.AsMapInterface()
-		if !reflect.DeepEqual(newMap[utils.PartitionsCfg].(map[string]interface{})[utils.MetaDestinations],
-			eMap[utils.PartitionsCfg].(map[string]interface{})[utils.MetaDestinations]) {
-			t.Errorf("Expected %+v, received %+v", eMap[utils.PartitionsCfg].(map[string]interface{})[utils.MetaDestinations],
-				newMap[utils.PartitionsCfg].(map[string]interface{})[utils.MetaDestinations])
+		if !reflect.DeepEqual(newMap[utils.PartitionsCfg].(map[string]any)[utils.MetaDestinations],
+			eMap[utils.PartitionsCfg].(map[string]any)[utils.MetaDestinations]) {
+			t.Errorf("Expected %+v, received %+v", eMap[utils.PartitionsCfg].(map[string]any)[utils.MetaDestinations],
+				newMap[utils.PartitionsCfg].(map[string]any)[utils.MetaDestinations])
 		}
 	}
 }
@@ -191,9 +191,9 @@ func TestCachesCfgAsMapInterface2(t *testing.T) {
     "replication_conns": ["conn1", "conn2"],
 	},
 }`
-	eMap := map[string]interface{}{
-		utils.PartitionsCfg: map[string]interface{}{
-			utils.MetaRatingPlans: map[string]interface{}{"limit": 10, "ttl": "", "static_ttl": true, "precache": true},
+	eMap := map[string]any{
+		utils.PartitionsCfg: map[string]any{
+			utils.MetaRatingPlans: map[string]any{"limit": 10, "ttl": "", "static_ttl": true, "precache": true},
 		},
 		utils.ReplicationConnsCfg: []string{"conn1", "conn2"},
 	}
@@ -201,10 +201,10 @@ func TestCachesCfgAsMapInterface2(t *testing.T) {
 		t.Error(err)
 	} else {
 		newMap := cgrCfg.cacheCfg.AsMapInterface()
-		if !reflect.DeepEqual(newMap[utils.PartitionsCfg].(map[string]interface{})[utils.MetaRatingPlans],
-			newMap[utils.PartitionsCfg].(map[string]interface{})[utils.MetaRatingPlans]) {
-			t.Errorf("Expected %+v, received %+v", eMap[utils.PartitionsCfg].(map[string]interface{})[utils.MetaRatingPlans],
-				eMap[utils.PartitionsCfg].(map[string]interface{})[utils.MetaRatingPlans])
+		if !reflect.DeepEqual(newMap[utils.PartitionsCfg].(map[string]any)[utils.MetaRatingPlans],
+			newMap[utils.PartitionsCfg].(map[string]any)[utils.MetaRatingPlans]) {
+			t.Errorf("Expected %+v, received %+v", eMap[utils.PartitionsCfg].(map[string]any)[utils.MetaRatingPlans],
+				eMap[utils.PartitionsCfg].(map[string]any)[utils.MetaRatingPlans])
 		}
 		if !reflect.DeepEqual(newMap[utils.ReplicationConnsCfg], eMap[utils.ReplicationConnsCfg]) {
 			t.Errorf("Expected %+v, received %+v", eMap[utils.ReplicationConnsCfg], newMap[utils.ReplicationConnsCfg])

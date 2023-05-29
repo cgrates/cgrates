@@ -54,7 +54,7 @@ func TestMailerCfgAsMapInterface(t *testing.T) {
 		"from_address": "",
 		},
 }`
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		utils.MailerServerCfg:   "",
 		utils.MailerAuthUserCfg: "",
 		utils.MailerAuthPassCfg: "",
@@ -71,7 +71,7 @@ func TestMailerCfgAsMapInterface1(t *testing.T) {
 	cfgJSONStr := `{
 		"mailer": {},
 }`
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		utils.MailerServerCfg:   "localhost",
 		utils.MailerAuthUserCfg: "cgrates",
 		utils.MailerAuthPassCfg: "CGRateS.org",

@@ -198,7 +198,7 @@ func testGOCSLoadData(t *testing.T) {
 		Account:     acntAttrs.Account,
 		BalanceType: utils.MetaVoice,
 		Value:       3540000000000,
-		Balance: map[string]interface{}{
+		Balance: map[string]any{
 			utils.ID:     "BALANCE1",
 			utils.Weight: 20,
 		},
@@ -226,7 +226,7 @@ func testGOCSAuthSession(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItAuth",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Tenant:       "cgrates.org",
 				utils.ToR:          utils.MetaVoice,
 				utils.OriginID:     "testGOCS",
@@ -256,7 +256,7 @@ func testGOCSInitSession(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItInitiateSession",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Tenant:       "cgrates.org",
 				utils.ToR:          utils.MetaVoice,
 				utils.OriginID:     "testGOCS",
@@ -332,7 +332,7 @@ func testGOCSUpdateSession(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItUpdateSession",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Tenant:       "cgrates.org",
 				utils.ToR:          utils.MetaVoice,
 				utils.OriginID:     "testGOCS",
@@ -409,7 +409,7 @@ func testGOCSUpdateSession2(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItUpdateSession2",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Tenant:       "cgrates.org",
 				utils.ToR:          utils.MetaVoice,
 				utils.OriginID:     "testGOCS",
@@ -480,7 +480,7 @@ func testGOCSTerminateSession(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testGOCSTerminateSession",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Tenant:       "cgrates.org",
 				utils.ToR:          utils.MetaVoice,
 				utils.OriginID:     "testGOCS",
@@ -539,7 +539,7 @@ func testGOCSProcessCDR(t *testing.T) {
 
 		Tenant: "cgrates.org",
 		ID:     "TestSSv1ItProcessCDR",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.Tenant:       "cgrates.org",
 			utils.ToR:          utils.MetaVoice,
 			utils.OriginID:     "testGOCS",

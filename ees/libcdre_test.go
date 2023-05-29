@@ -55,7 +55,7 @@ func TestAddFldPost(t *testing.T) {
 	eOut := &ExportEvents{
 		Path:   "path1",
 		Format: "format1",
-		Events: []interface{}{"1"},
+		Events: []any{"1"},
 		Opts:   &config.EventExporterOpts{},
 	}
 	if !reflect.DeepEqual(eOut, failedPost) {
@@ -79,7 +79,7 @@ func TestAddFldPost(t *testing.T) {
 	eOut = &ExportEvents{
 		Path:   "path1",
 		Format: "format1",
-		Events: []interface{}{"1", "2"},
+		Events: []any{"1", "2"},
 		Opts:   &config.EventExporterOpts{},
 	}
 	if !reflect.DeepEqual(eOut, failedPost) {
@@ -99,7 +99,7 @@ func TestAddFldPost(t *testing.T) {
 	eOut = &ExportEvents{
 		Path:   "path2",
 		Format: "format2",
-		Events: []interface{}{"3"},
+		Events: []any{"3"},
 		Opts: &config.EventExporterOpts{
 			SQSQueueID: utils.StringPointer("qID"),
 		},
@@ -128,13 +128,13 @@ func TestFilePath(t *testing.T) {
 
 func TestAddEvent(t *testing.T) {
 	exportEvent := &ExportEvents{}
-	eOut := &ExportEvents{Events: []interface{}{"event1"}}
+	eOut := &ExportEvents{Events: []any{"event1"}}
 	exportEvent.AddEvent("event1")
 	if !reflect.DeepEqual(eOut, exportEvent) {
 		t.Errorf("Expecting: %+v, received: %+v", eOut, exportEvent)
 	}
 	exportEvent = &ExportEvents{}
-	eOut = &ExportEvents{Events: []interface{}{"event1", "event2", "event3"}}
+	eOut = &ExportEvents{Events: []any{"event1", "event2", "event3"}}
 	exportEvent.AddEvent("event1")
 	exportEvent.AddEvent("event2")
 	exportEvent.AddEvent("event3")

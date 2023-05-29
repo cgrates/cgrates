@@ -53,7 +53,7 @@ func TestSchedulerCfgAsMapInterface(t *testing.T) {
 	cfgJSONStr := `{
 	"schedulers": {},
 }`
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		utils.EnabledCfg:                false,
 		utils.CDRsConnsCfg:              []string{},
 		utils.ThreshSConnsCfg:           []string{},
@@ -80,7 +80,7 @@ func TestSchedulerCfgAsMapInterface1(t *testing.T) {
 		"dynaprepaid_actionplans":["randomPlan"],
     },
 }`
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		utils.EnabledCfg:                true,
 		utils.CDRsConnsCfg:              []string{utils.MetaInternal, "*conn1"},
 		utils.ThreshSConnsCfg:           []string{utils.MetaInternal, "*conn1"},

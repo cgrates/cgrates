@@ -27,7 +27,7 @@ import (
 )
 
 func TestNewBalanceFilter(t *testing.T) {
-	attrs := map[string]interface{}{}
+	attrs := map[string]any{}
 	expected := &BalanceFilter{}
 	if rply, err := NewBalanceFilter(attrs, ""); err != nil {
 		t.Error(err)
@@ -36,7 +36,7 @@ func TestNewBalanceFilter(t *testing.T) {
 	}
 
 	tNow := time.Now()
-	attrs = map[string]interface{}{
+	attrs = map[string]any{
 		utils.ID:             "ID",
 		utils.UUID:           "UUID",
 		utils.Value:          10.5,

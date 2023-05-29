@@ -99,13 +99,13 @@ func TestRalsCfgAsMapInterfaceCase1(t *testing.T) {
         }, 
     },
 }`
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		utils.EnabledCfg:                 true,
 		utils.ThresholdSConnsCfg:         []string{utils.MetaInternal, "*conn1"},
 		utils.StatSConnsCfg:              []string{utils.MetaInternal, "*conn1"},
 		utils.RpSubjectPrefixMatchingCfg: true,
 		utils.RemoveExpiredCfg:           true,
-		utils.MaxComputedUsageCfg: map[string]interface{}{
+		utils.MaxComputedUsageCfg: map[string]any{
 			"*any":   "189h0m0s",
 			"*voice": "48h0m0s",
 			"*data":  "107374182400",
@@ -132,13 +132,13 @@ func TestRalsCfgAsMapInterfaceCase2(t *testing.T) {
            "stats_conns": ["*internal:*stats"],
      }
 }`
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		utils.EnabledCfg:                 false,
 		utils.ThresholdSConnsCfg:         []string{},
 		utils.StatSConnsCfg:              []string{utils.MetaInternal},
 		utils.RpSubjectPrefixMatchingCfg: false,
 		utils.RemoveExpiredCfg:           true,
-		utils.MaxComputedUsageCfg: map[string]interface{}{
+		utils.MaxComputedUsageCfg: map[string]any{
 			"*any":   "189h0m0s",
 			"*voice": "72h0m0s",
 			"*data":  "107374182400",

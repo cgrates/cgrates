@@ -124,8 +124,8 @@ func testConfigSSetConfigSessionS(t *testing.T) {
 	var reply string
 	if err := configRPC.Call(utils.ConfigSv1SetConfig, &config.SetConfigArgs{
 		Tenant: "cgrates.org",
-		Config: map[string]interface{}{
-			"sessions": map[string]interface{}{
+		Config: map[string]any{
+			"sessions": map[string]any{
 				"enabled":          true,
 				"resources_conns":  []string{"*localhost"},
 				"routes_conns":     []string{"*localhost"},
@@ -140,29 +140,29 @@ func testConfigSSetConfigSessionS(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Expected OK received: %s", reply)
 	}
-	exp := map[string]interface{}{
+	exp := map[string]any{
 		"enabled":               true,
 		"channel_sync_interval": "0",
-		"alterable_fields":      []interface{}{},
+		"alterable_fields":      []any{},
 		"client_protocol":       1.,
 		"debit_interval":        "0",
 		"listen_bijson":         "127.0.0.1:2014",
 		"listen_bigob":          "",
 		"session_ttl":           "0",
-		"session_indexes":       []interface{}{utils.OriginID},
-		"attributes_conns":      []interface{}{utils.MetaLocalHost},
-		"cdrs_conns":            []interface{}{utils.MetaInternal},
-		"chargers_conns":        []interface{}{utils.MetaInternal},
-		"rals_conns":            []interface{}{utils.MetaInternal},
-		"replication_conns":     []interface{}{},
-		"resources_conns":       []interface{}{utils.MetaLocalHost},
-		"routes_conns":          []interface{}{utils.MetaLocalHost},
-		"scheduler_conns":       []interface{}{},
-		"thresholds_conns":      []interface{}{},
-		"stats_conns":           []interface{}{},
+		"session_indexes":       []any{utils.OriginID},
+		"attributes_conns":      []any{utils.MetaLocalHost},
+		"cdrs_conns":            []any{utils.MetaInternal},
+		"chargers_conns":        []any{utils.MetaInternal},
+		"rals_conns":            []any{utils.MetaInternal},
+		"replication_conns":     []any{},
+		"resources_conns":       []any{utils.MetaLocalHost},
+		"routes_conns":          []any{utils.MetaLocalHost},
+		"scheduler_conns":       []any{},
+		"thresholds_conns":      []any{},
+		"stats_conns":           []any{},
 		"min_dur_low_balance":   "0",
-		"stir": map[string]interface{}{
-			"allowed_attest":      []interface{}{utils.MetaAny},
+		"stir": map[string]any{
+			"allowed_attest":      []any{utils.MetaAny},
 			"default_attest":      "A",
 			"payload_maxduration": "-1",
 			"privatekey_path":     "",
@@ -170,7 +170,7 @@ func testConfigSSetConfigSessionS(t *testing.T) {
 		},
 		"store_session_costs": false,
 		"terminate_attempts":  5.,
-		utils.DefaultUsageCfg: map[string]interface{}{
+		utils.DefaultUsageCfg: map[string]any{
 			utils.MetaAny:   "3h0m0s",
 			utils.MetaVoice: "3h0m0s",
 			utils.MetaData:  "1048576",
@@ -179,7 +179,7 @@ func testConfigSSetConfigSessionS(t *testing.T) {
 	}
 	if *encoding == utils.MetaGOB {
 		var empty []string
-		exp = map[string]interface{}{
+		exp = map[string]any{
 			"enabled":               true,
 			"listen_bijson":         "127.0.0.1:2014",
 			"listen_bigob":          "",
@@ -202,7 +202,7 @@ func testConfigSSetConfigSessionS(t *testing.T) {
 			"store_session_costs":   false,
 			"min_dur_low_balance":   "0",
 			"alterable_fields":      empty,
-			"stir": map[string]interface{}{
+			"stir": map[string]any{
 				"allowed_attest":      []string{utils.MetaAny},
 				"default_attest":      "A",
 				"payload_maxduration": "-1",
@@ -217,10 +217,10 @@ func testConfigSSetConfigSessionS(t *testing.T) {
 			},
 		}
 	}
-	exp = map[string]interface{}{
+	exp = map[string]any{
 		config.SessionSJson: exp,
 	}
-	var rpl map[string]interface{}
+	var rpl map[string]any
 	if err := configRPC.Call(utils.ConfigSv1GetConfig, &config.SectionWithAPIOpts{
 		Tenant:  "cgrates.org",
 		Section: config.SessionSJson,
@@ -232,21 +232,21 @@ func testConfigSSetConfigSessionS(t *testing.T) {
 }
 
 func testConfigSv1GetJSONSectionWithoutTenant(t *testing.T) {
-	exp := map[string]interface{}{
+	exp := map[string]any{
 		"enabled":               true,
 		"listen_bijson":         "127.0.0.1:2014",
 		"listen_bigob":          "",
-		"chargers_conns":        []interface{}{utils.MetaInternal},
-		"rals_conns":            []interface{}{utils.MetaInternal},
-		"resources_conns":       []interface{}{utils.MetaLocalHost},
-		"thresholds_conns":      []interface{}{},
-		"stats_conns":           []interface{}{},
-		"routes_conns":          []interface{}{utils.MetaLocalHost},
-		"attributes_conns":      []interface{}{utils.MetaLocalHost},
-		"cdrs_conns":            []interface{}{utils.MetaInternal},
-		"replication_conns":     []interface{}{},
-		"scheduler_conns":       []interface{}{},
-		"session_indexes":       []interface{}{"OriginID"},
+		"chargers_conns":        []any{utils.MetaInternal},
+		"rals_conns":            []any{utils.MetaInternal},
+		"resources_conns":       []any{utils.MetaLocalHost},
+		"thresholds_conns":      []any{},
+		"stats_conns":           []any{},
+		"routes_conns":          []any{utils.MetaLocalHost},
+		"attributes_conns":      []any{utils.MetaLocalHost},
+		"cdrs_conns":            []any{utils.MetaInternal},
+		"replication_conns":     []any{},
+		"scheduler_conns":       []any{},
+		"session_indexes":       []any{"OriginID"},
 		"client_protocol":       1.,
 		"terminate_attempts":    5.,
 		"channel_sync_interval": "0",
@@ -254,15 +254,15 @@ func testConfigSv1GetJSONSectionWithoutTenant(t *testing.T) {
 		"session_ttl":           "0",
 		"store_session_costs":   false,
 		"min_dur_low_balance":   "0",
-		"alterable_fields":      []interface{}{},
-		"stir": map[string]interface{}{
-			"allowed_attest":      []interface{}{utils.MetaAny},
+		"alterable_fields":      []any{},
+		"stir": map[string]any{
+			"allowed_attest":      []any{utils.MetaAny},
 			"default_attest":      "A",
 			"payload_maxduration": "-1",
 			"privatekey_path":     "",
 			"publickey_path":      "",
 		},
-		utils.DefaultUsageCfg: map[string]interface{}{
+		utils.DefaultUsageCfg: map[string]any{
 			utils.MetaAny:   "3h0m0s",
 			utils.MetaVoice: "3h0m0s",
 			utils.MetaData:  "1048576",
@@ -271,7 +271,7 @@ func testConfigSv1GetJSONSectionWithoutTenant(t *testing.T) {
 	}
 	if *encoding == utils.MetaGOB {
 		var empty []string
-		exp = map[string]interface{}{
+		exp = map[string]any{
 			"enabled":               true,
 			"listen_bijson":         "127.0.0.1:2014",
 			"chargers_conns":        []string{utils.MetaInternal},
@@ -293,7 +293,7 @@ func testConfigSv1GetJSONSectionWithoutTenant(t *testing.T) {
 			"store_session_costs":   false,
 			"min_dur_low_balance":   "0",
 			"alterable_fields":      empty,
-			"stir": map[string]interface{}{
+			"stir": map[string]any{
 				"allowed_attest":      []string{utils.MetaAny},
 				"default_attest":      "A",
 				"payload_maxduration": "-1",
@@ -308,10 +308,10 @@ func testConfigSv1GetJSONSectionWithoutTenant(t *testing.T) {
 			},
 		}
 	}
-	exp = map[string]interface{}{
+	exp = map[string]any{
 		config.SessionSJson: exp,
 	}
-	var rpl map[string]interface{}
+	var rpl map[string]any
 	if err := configRPC.Call(utils.ConfigSv1GetConfig, &config.SectionWithAPIOpts{
 		Section: config.SessionSJson,
 	}, &rpl); err != nil {
@@ -327,8 +327,8 @@ func testConfigSSetConfigEEsDryRun(t *testing.T) {
 	}
 	var reply string
 	if err := configRPC.Call(utils.ConfigSv1SetConfig, &config.SetConfigArgs{
-		Config: map[string]interface{}{
-			"ees": map[string]interface{}{
+		Config: map[string]any{
+			"ees": map[string]any{
 				"enabled": true,
 			},
 		},
@@ -339,12 +339,12 @@ func testConfigSSetConfigEEsDryRun(t *testing.T) {
 		t.Errorf("Expected OK received: %s", reply)
 	}
 
-	var rpl map[string]interface{}
+	var rpl map[string]any
 	if err := configRPC.Call(utils.ConfigSv1GetConfig, &config.SectionWithAPIOpts{
 		Section: config.EEsJson,
 	}, &rpl); err != nil {
 		t.Error(err)
-	} else if rpl[config.EEsJson].(map[string]interface{})["enabled"] != false {
+	} else if rpl[config.EEsJson].(map[string]any)["enabled"] != false {
 		t.Errorf("Expected EEs to not change , received: %+v ", utils.ToJSON(rpl))
 	}
 }
@@ -355,14 +355,14 @@ func testConfigSSetConfigEEs(t *testing.T) {
 	}
 	var reply string
 	if err := configRPC.Call(utils.ConfigSv1SetConfig, &config.SetConfigArgs{
-		Config: map[string]interface{}{
-			"ees": map[string]interface{}{
+		Config: map[string]any{
+			"ees": map[string]any{
 				"enabled":          true,
 				"attributes_conns": []string{},
-				"cache":            map[string]interface{}{},
-				"exporters": []interface{}{map[string]interface{}{
+				"cache":            map[string]any{},
+				"exporters": []any{map[string]any{
 					"id":     utils.MetaDefault,
-					"fields": []interface{}{},
+					"fields": []any{},
 				}},
 			},
 		},
@@ -371,32 +371,32 @@ func testConfigSSetConfigEEs(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Expected OK received: %s", reply)
 	}
-	eporter := map[string]interface{}{
+	eporter := map[string]any{
 		"attempts":            1.,
 		"attribute_context":   "",
-		"attribute_ids":       []interface{}{},
+		"attribute_ids":       []any{},
 		"export_path":         "/var/spool/cgrates/ees",
-		"fields":              []interface{}{},
-		"filters":             []interface{}{},
-		"flags":               []interface{}{},
+		"fields":              []any{},
+		"filters":             []any{},
+		"flags":               []any{},
 		"id":                  "*default",
 		"synchronous":         false,
 		"timezone":            "",
 		"type":                "*none",
-		"opts":                map[string]interface{}{},
+		"opts":                map[string]any{},
 		"concurrent_requests": 0.,
 		"failed_posts_dir":    "/var/spool/cgrates/failed_posts",
 	}
-	exp := map[string]interface{}{
+	exp := map[string]any{
 		"enabled":          true,
-		"attributes_conns": []interface{}{},
-		"cache":            map[string]interface{}{"*file_csv": map[string]interface{}{"limit": -1., "precache": false, "replicate": false, "static_ttl": false, "remote": false, "ttl": "5s"}},
-		"exporters":        []interface{}{eporter},
+		"attributes_conns": []any{},
+		"cache":            map[string]any{"*file_csv": map[string]any{"limit": -1., "precache": false, "replicate": false, "static_ttl": false, "remote": false, "ttl": "5s"}},
+		"exporters":        []any{eporter},
 	}
-	exp = map[string]interface{}{
+	exp = map[string]any{
 		config.EEsJson: exp,
 	}
-	var rpl map[string]interface{}
+	var rpl map[string]any
 	if err := configRPC.Call(utils.ConfigSv1GetConfig, &config.SectionWithAPIOpts{
 		Section: config.EEsJson,
 	}, &rpl); err != nil {
@@ -426,7 +426,7 @@ func testConfigStartEngineWithConfigs(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	var rply map[string]interface{}
+	var rply map[string]any
 	if err := configRPC.Call(utils.CoreSv1Status, &utils.TenantWithAPIOpts{}, &rply); err != nil {
 		t.Error(err)
 	} else if rply[utils.NodeID] != "EngineWithConfigSActive" {
@@ -460,7 +460,7 @@ func testConfigStartEngineFromHTTP(t *testing.T) {
 		t.Errorf("engine did not open port <%s>", "localhost:2012")
 	}
 	time.Sleep(100 * time.Millisecond)
-	var rply map[string]interface{}
+	var rply map[string]any
 	if err := jsonClnt.Call(utils.CoreSv1Status, &utils.TenantWithAPIOpts{}, &rply); err != nil {
 		t.Error(err)
 	}

@@ -81,9 +81,9 @@ func (aCfg *ApierCfg) loadFromJSONCfg(jsnCfg *ApierJsonCfg) (err error) {
 	return nil
 }
 
-// AsMapInterface returns the config as a map[string]interface{}
-func (aCfg *ApierCfg) AsMapInterface() (initialMap map[string]interface{}) {
-	initialMap = map[string]interface{}{
+// AsMapInterface returns the config as a map[string]any
+func (aCfg *ApierCfg) AsMapInterface() (initialMap map[string]any) {
+	initialMap = map[string]any{
 		utils.EnabledCfg: aCfg.Enabled,
 	}
 	if aCfg.CachesConns != nil {

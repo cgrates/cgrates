@@ -682,7 +682,7 @@ func TestHexConvertor(t *testing.T) {
 type testMockConverter struct{}
 
 // Convert function to implement DataConverter
-func (*testMockConverter) Convert(interface{}) (interface{}, error) { return nil, ErrNotFound }
+func (*testMockConverter) Convert(any) (any, error) { return nil, ErrNotFound }
 func TestDataConvertersConvertString2(t *testing.T) {
 	hex, err := NewDataConverter(MetaIP2Hex)
 	if err != nil {
@@ -1047,7 +1047,7 @@ func TestLenTimeConverter3(t *testing.T) {
 	} else if !reflect.DeepEqual(expected, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, rcv)
 	}
-	if rcv, err := cnv.Convert([]interface{}{}); err != nil {
+	if rcv, err := cnv.Convert([]any{}); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, rcv)
@@ -1177,7 +1177,7 @@ func TestSliceConverter(t *testing.T) {
 	} else if !reflect.DeepEqual(expected, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, rcv)
 	}
-	expected2 := []interface{}{"A", "B"}
+	expected2 := []any{"A", "B"}
 	if rcv, err := cnv.Convert(`["A","B"]`); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected2, rcv) {
@@ -1270,10 +1270,10 @@ func TestDataConverterConvertJSONOK(t *testing.T) {
 	obj := &CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "TestCGREv",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			AccountField: "1001",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			"opt": "value",
 		},
 	}

@@ -69,7 +69,7 @@ func loadDictionaries(dictsDir, componentID string) error {
 }
 
 // diamAVPValue will extract the go primary value out of diameter type value
-func diamAVPAsIface(dAVP *diam.AVP) (val interface{}, err error) {
+func diamAVPAsIface(dAVP *diam.AVP) (val any, err error) {
 	if dAVP == nil {
 		return nil, errors.New("nil AVP")
 	}
@@ -112,7 +112,7 @@ func diamAVPAsIface(dAVP *diam.AVP) (val interface{}, err error) {
 }
 
 func diamAVPAsString(dAVP *diam.AVP) (s string, err error) {
-	var iface interface{}
+	var iface any
 	if iface, err = diamAVPAsIface(dAVP); err != nil {
 		return
 	}
@@ -310,7 +310,7 @@ func (dP *diameterDP) String() string {
 
 // FieldAsString is part of utils.DataProvider interface
 func (dP *diameterDP) FieldAsString(fldPath []string) (data string, err error) {
-	var valIface interface{}
+	var valIface any
 	valIface, err = dP.FieldAsInterface(fldPath)
 	if err != nil {
 		return
@@ -319,7 +319,7 @@ func (dP *diameterDP) FieldAsString(fldPath []string) (data string, err error) {
 }
 
 // FieldAsInterface is part of utils.DataProvider interface
-func (dP *diameterDP) FieldAsInterface(fldPath []string) (data interface{}, err error) {
+func (dP *diameterDP) FieldAsInterface(fldPath []string) (data any, err error) {
 	if data, err = dP.cache.FieldAsInterface(fldPath); err != nil {
 		if err != utils.ErrNotFound { // item found in cache
 			return nil, err

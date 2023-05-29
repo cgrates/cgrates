@@ -30,7 +30,7 @@ func TestOptionsGetFloat64Opts(t *testing.T) {
 
 	// option key not populated, retrieve default value
 	ev := &CGREvent{
-		APIOpts: make(map[string]interface{}),
+		APIOpts: make(map[string]any),
 	}
 	if rcv, err := GetFloat64Opts(ev, 1.2, "optionName"); err != nil {
 		t.Error(err)
@@ -59,7 +59,7 @@ func TestOptionsGetDurationOpts(t *testing.T) {
 
 	// option key not populated, retrieve default value
 	ev := &CGREvent{
-		APIOpts: make(map[string]interface{}),
+		APIOpts: make(map[string]any),
 	}
 	if rcv, err := GetDurationOpts(ev, time.Minute, "optionName"); err != nil {
 		t.Error(err)
@@ -100,7 +100,7 @@ func TestOptionsGetStringOpts(t *testing.T) {
 
 	// option key not populated, retrieve default value
 	ev := &CGREvent{
-		APIOpts: make(map[string]interface{}),
+		APIOpts: make(map[string]any),
 	}
 	if rcv := GetStringOpts(ev, "default", "optionName"); rcv != "default" {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", "default", rcv)
@@ -129,7 +129,7 @@ func TestOptionsGetStringSliceOpts(t *testing.T) {
 
 	// option key not populated, retrieve default value
 	ev := &CGREvent{
-		APIOpts: make(map[string]interface{}),
+		APIOpts: make(map[string]any),
 	}
 	defaultValue := []string{"default"}
 	if rcv, err := GetStringSliceOpts(ev, defaultValue, "optionName"); err != nil {
@@ -174,7 +174,7 @@ func TestOptionsGetIntOpts(t *testing.T) {
 
 	// option key not populated, retrieve default value
 	ev := &CGREvent{
-		APIOpts: make(map[string]interface{}),
+		APIOpts: make(map[string]any),
 	}
 	if rcv, err := GetIntOpts(ev, 5, "optionName"); err != nil {
 		t.Error(err)
@@ -209,7 +209,7 @@ func TestOptionsGetBoolOpts(t *testing.T) {
 
 	// option key not populated, retrieve default value
 	ev := &CGREvent{
-		APIOpts: make(map[string]interface{}),
+		APIOpts: make(map[string]any),
 	}
 	if rcv, err := GetBoolOpts(ev, false, "optionName"); err != nil {
 		t.Error(err)
@@ -250,7 +250,7 @@ func TestOptionsGetInterfaceOpts(t *testing.T) {
 
 	// option key not populated, retrieve default value
 	ev := &CGREvent{
-		APIOpts: make(map[string]interface{}),
+		APIOpts: make(map[string]any),
 	}
 	if rcv := GetInterfaceOpts(ev, "default", "optionName"); rcv != "default" {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", "default", rcv)
@@ -276,7 +276,7 @@ func TestOptionsGetIntPointerOpts(t *testing.T) {
 
 	// option key not populated, retrieve default value
 	ev := &CGREvent{
-		APIOpts: make(map[string]interface{}),
+		APIOpts: make(map[string]any),
 	}
 	if rcv, err := GetIntPointerOpts(ev, defaultValue, "optionName"); err != nil {
 		t.Error(err)
@@ -311,7 +311,7 @@ func TestOptionsGetDurationPointerOpts(t *testing.T) {
 	defaultValue := DurationPointer(time.Minute)
 	// option key not populated, retrieve default value
 	ev := &CGREvent{
-		APIOpts: make(map[string]interface{}),
+		APIOpts: make(map[string]any),
 	}
 	if rcv, err := GetDurationPointerOpts(ev, defaultValue, "optionName"); err != nil {
 		t.Error(err)
@@ -353,7 +353,7 @@ func TestOptionsGetDecimalBigOpts(t *testing.T) {
 
 	// option key not populated, retrieve default value
 	ev := &CGREvent{
-		APIOpts: make(map[string]interface{}),
+		APIOpts: make(map[string]any),
 	}
 	if rcv, err := GetDecimalBigOpts(ev, defaultValue, "optionName"); err != nil {
 		t.Error(err)

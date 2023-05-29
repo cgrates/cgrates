@@ -48,7 +48,7 @@ func (self *CmdCacheRemoveItem) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdCacheRemoveItem) RpcParams(reset bool) interface{} {
+func (self *CmdCacheRemoveItem) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &utils.ArgsGetCacheItemWithAPIOpts{}
 	}
@@ -59,7 +59,7 @@ func (self *CmdCacheRemoveItem) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdCacheRemoveItem) RpcResult() interface{} {
+func (self *CmdCacheRemoveItem) RpcResult() any {
 	var reply string
 	return &reply
 }

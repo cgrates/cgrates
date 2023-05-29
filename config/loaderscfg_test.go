@@ -279,7 +279,7 @@ func TestLoaderCfgAsMapInterfaceCase1(t *testing.T) {
 		},
 	],	
 }`
-	eMap := []map[string]interface{}{
+	eMap := []map[string]any{
 		{
 			utils.IDCfg:           "*default",
 			utils.EnabledCfg:      false,
@@ -291,11 +291,11 @@ func TestLoaderCfgAsMapInterfaceCase1(t *testing.T) {
 			utils.FieldSepCfg:     ",",
 			utils.TpInDirCfg:      "/var/spool/cgrates/loader/in",
 			utils.TpOutDirCfg:     "/var/spool/cgrates/loader/out",
-			utils.DataCfg: []map[string]interface{}{
+			utils.DataCfg: []map[string]any{
 				{
 					utils.TypeCfg:     "*attributes",
 					utils.FilenameCfg: "Attributes.csv",
-					utils.FieldsCfg: []map[string]interface{}{
+					utils.FieldsCfg: []map[string]any{
 						{
 							utils.TagCfg:       "TenantID",
 							utils.PathCfg:      "Tenant",
@@ -318,14 +318,14 @@ func TestLoaderCfgAsMapInterfaceCase1(t *testing.T) {
 		t.Error(err)
 	} else {
 		rcv := cgrCfg.loaderCfg.AsMapInterface(cfgCgr.generalCfg.RSRSep)
-		if !reflect.DeepEqual(eMap[0][utils.DataCfg].([]map[string]interface{})[0][utils.FieldsCfg].([]map[string]interface{})[0],
-			rcv[0][utils.DataCfg].([]map[string]interface{})[0][utils.FieldsCfg].([]map[string]interface{})[0]) {
-			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(eMap[0][utils.DataCfg].([]map[string]interface{})[0][utils.FieldsCfg].([]map[string]interface{})[0]),
-				utils.ToJSON(rcv[0][utils.DataCfg].([]map[string]interface{})[0][utils.FieldsCfg].([]map[string]interface{})[0]))
-		} else if !reflect.DeepEqual(eMap[0][utils.DataCfg].([]map[string]interface{})[0][utils.FieldsCfg].([]map[string]interface{})[1],
-			rcv[0][utils.DataCfg].([]map[string]interface{})[0][utils.FieldsCfg].([]map[string]interface{})[1]) {
-			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(eMap[0][utils.DataCfg].([]map[string]interface{})[0][utils.FieldsCfg].([]map[string]interface{})[1]),
-				utils.ToJSON(rcv[0][utils.DataCfg].([]map[string]interface{})[0][utils.FieldsCfg].([]map[string]interface{})[1]))
+		if !reflect.DeepEqual(eMap[0][utils.DataCfg].([]map[string]any)[0][utils.FieldsCfg].([]map[string]any)[0],
+			rcv[0][utils.DataCfg].([]map[string]any)[0][utils.FieldsCfg].([]map[string]any)[0]) {
+			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(eMap[0][utils.DataCfg].([]map[string]any)[0][utils.FieldsCfg].([]map[string]any)[0]),
+				utils.ToJSON(rcv[0][utils.DataCfg].([]map[string]any)[0][utils.FieldsCfg].([]map[string]any)[0]))
+		} else if !reflect.DeepEqual(eMap[0][utils.DataCfg].([]map[string]any)[0][utils.FieldsCfg].([]map[string]any)[1],
+			rcv[0][utils.DataCfg].([]map[string]any)[0][utils.FieldsCfg].([]map[string]any)[1]) {
+			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(eMap[0][utils.DataCfg].([]map[string]any)[0][utils.FieldsCfg].([]map[string]any)[1]),
+				utils.ToJSON(rcv[0][utils.DataCfg].([]map[string]any)[0][utils.FieldsCfg].([]map[string]any)[1]))
 		} else if !reflect.DeepEqual(eMap[0][utils.CachesConnsCfg], rcv[0][utils.CachesConnsCfg]) {
 			t.Errorf("Expected %+v, received %+v", eMap[0][utils.CachesConnsCfg], rcv[0][utils.CachesConnsCfg])
 		} else if !reflect.DeepEqual(eMap[0][utils.TpInDirCfg], rcv[0][utils.TpInDirCfg]) {
@@ -363,7 +363,7 @@ func TestLoaderCfgAsMapInterfaceCase2(t *testing.T) {
 		},
 	],	
 }`
-	eMap := []map[string]interface{}{
+	eMap := []map[string]any{
 		{
 			utils.IDCfg:           "*default",
 			utils.EnabledCfg:      false,
@@ -375,11 +375,11 @@ func TestLoaderCfgAsMapInterfaceCase2(t *testing.T) {
 			utils.FieldSepCfg:     ",",
 			utils.TpInDirCfg:      "/var/spool/cgrates/loader/in",
 			utils.TpOutDirCfg:     "/var/spool/cgrates/loader/out",
-			utils.DataCfg: []map[string]interface{}{
+			utils.DataCfg: []map[string]any{
 				{
 					utils.TypeCfg:     "*attributes",
 					utils.FilenameCfg: "Attributes.csv",
-					utils.FieldsCfg: []map[string]interface{}{
+					utils.FieldsCfg: []map[string]any{
 						{
 							utils.TagCfg:       "TenantID",
 							utils.PathCfg:      "Tenant",

@@ -136,7 +136,7 @@ func testAPIerSv2itAddBalance(t *testing.T) {
 		Account:     "dan",
 		BalanceType: utils.MetaMonetary,
 		Value:       5.0,
-		Balance: map[string]interface{}{
+		Balance: map[string]any{
 			utils.ID:     utils.MetaDefault,
 			utils.Weight: 10.0,
 		},
@@ -175,7 +175,7 @@ func testAPIerSv2itSetAccountActionTriggers(t *testing.T) {
 		Account: "dan",
 		AttrSetActionTrigger: v1.AttrSetActionTrigger{
 			GroupID: "MONITOR_MAX_BALANCE",
-			ActionTrigger: map[string]interface{}{
+			ActionTrigger: map[string]any{
 				utils.ThresholdType:  utils.TriggerMaxBalance,
 				utils.ThresholdValue: 50,
 				utils.BalanceType:    utils.MetaMonetary,
@@ -210,7 +210,7 @@ func testAPIerSv2itFraudMitigation(t *testing.T) {
 		Account:     "dan",
 		BalanceType: utils.MetaMonetary,
 		Value:       60.0,
-		Balance: map[string]interface{}{
+		Balance: map[string]any{
 			utils.ID:     utils.MetaDefault,
 			utils.Weight: 10.0,
 		},

@@ -309,12 +309,12 @@ func testCallCheckResourceBeforeAllocation(t *testing.T) {
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "ResourceEvent",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 			utils.Subject:      "1001",
 			utils.Destination:  "1002",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsResourcesUsageID: "OriginID",
 		},
 	}
@@ -460,12 +460,12 @@ func testCallCheckResourceAllocation(t *testing.T) {
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "ResourceAllocation",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 			utils.Subject:      "1001",
 			utils.Destination:  "1002",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsResourcesUsageID: "OriginID1",
 		},
 	}
@@ -650,12 +650,12 @@ func testCallCheckResourceRelease(t *testing.T) {
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "ResourceRelease",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 			utils.Subject:      "1001",
 			utils.Destination:  "1002",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsResourcesUsageID: "OriginID2",
 		},
 	}
@@ -727,12 +727,12 @@ func testCallSyncSessions(t *testing.T) {
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "AllocateResource",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 			utils.Subject:      "1001",
 			utils.Destination:  "1002",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsResourcesUsageID: "OriginID3",
 		},
 	}

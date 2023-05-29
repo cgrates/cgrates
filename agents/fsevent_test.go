@@ -580,7 +580,7 @@ func TestFsEvAsMapStringInterface(t *testing.T) {
 	ev := NewFSEvent(hangupEv)
 	setupTime, _ := utils.ParseTimeDetectLayout("1436280728", "")
 	aTime, _ := utils.ParseTimeDetectLayout("1436280728", "")
-	expectedMap := make(map[string]interface{})
+	expectedMap := make(map[string]any)
 	expectedMap[utils.ToR] = utils.MetaVoice
 	expectedMap[utils.OriginID] = "e3133bf7-dcde-4daf-9663-9a79ffcef5ad"
 	expectedMap[utils.OriginHost] = "10.0.3.15"
@@ -644,13 +644,13 @@ func TestSliceAsArraySortingParameter(t *testing.T) {
 		Routes: []*engine.SortedRoute{
 			{
 				RouteID: "rt1",
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					"Weight": 10.0,
 				},
 			},
 			{
 				RouteID: "rt2",
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					"Weight": 20.0,
 				},
 			},
@@ -661,13 +661,13 @@ func TestSliceAsArraySortingParameter(t *testing.T) {
 		Routes: []*engine.SortedRoute{
 			{
 				RouteID: "RT1",
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					"Weight": 10.0,
 				},
 			},
 			{
 				RouteID: "RT2",
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					"Weight": 10.0,
 				},
 			},

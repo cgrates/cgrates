@@ -100,7 +100,7 @@ func (eEe *ElasticEE) Connect() (err error) {
 }
 
 // ExportEvent implements EventExporter
-func (eEe *ElasticEE) ExportEvent(ev interface{}, key string) (err error) {
+func (eEe *ElasticEE) ExportEvent(ev any, key string) (err error) {
 	eEe.reqs.get()
 	eEe.RLock()
 	defer func() {
@@ -133,7 +133,7 @@ func (eEe *ElasticEE) ExportEvent(ev interface{}, key string) (err error) {
 	}
 	defer resp.Body.Close()
 	if resp.IsError() {
-		var e map[string]interface{}
+		var e map[string]any
 		if err = json.NewDecoder(resp.Body).Decode(&e); err != nil {
 			return
 		}

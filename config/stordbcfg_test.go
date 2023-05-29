@@ -242,7 +242,7 @@ func TestStorDbCfgAsMapInterface(t *testing.T) {
 		},
 }`
 
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		utils.DataDbTypeCfg:          "*mysql",
 		utils.DataDbHostCfg:          "127.0.0.1",
 		utils.DataDbPortCfg:          3306,
@@ -253,7 +253,7 @@ func TestStorDbCfgAsMapInterface(t *testing.T) {
 		utils.PrefixIndexedFieldsCfg: []string{},
 		utils.RemoteConnsCfg:         []string{"*conn1"},
 		utils.ReplicationConnsCfg:    []string{"*conn1"},
-		utils.OptsCfg: map[string]interface{}{
+		utils.OptsCfg: map[string]any{
 			utils.SQLMaxOpenConnsCfg:    100,
 			utils.SQLMaxIdleConnsCfg:    10,
 			utils.SQLConnMaxLifetimeCfg: "0s",
@@ -262,19 +262,19 @@ func TestStorDbCfgAsMapInterface(t *testing.T) {
 			utils.PgSSLModeCfg:          "disable",
 			utils.MysqlLocation:         "UTC",
 		},
-		utils.ItemsCfg: map[string]interface{}{
-			utils.SessionCostsTBL: map[string]interface{}{utils.RemoteCfg: false, utils.ReplicateCfg: false},
-			utils.CDRsTBL:         map[string]interface{}{utils.RemoteCfg: false, utils.ReplicateCfg: false},
+		utils.ItemsCfg: map[string]any{
+			utils.SessionCostsTBL: map[string]any{utils.RemoteCfg: false, utils.ReplicateCfg: false},
+			utils.CDRsTBL:         map[string]any{utils.RemoteCfg: false, utils.ReplicateCfg: false},
 		},
 	}
 	if cfgCgr, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
 	} else {
 		rcv := cfgCgr.storDbCfg.AsMapInterface()
-		if !reflect.DeepEqual(eMap[utils.ItemsCfg].(map[string]interface{})[utils.SessionSConnsCfg],
-			rcv[utils.ItemsCfg].(map[string]interface{})[utils.SessionSConnsCfg]) {
-			t.Errorf("Expected %+v, received %+v", eMap[utils.ItemsCfg].(map[string]interface{})[utils.SessionSConnsCfg],
-				rcv[utils.ItemsCfg].(map[string]interface{})[utils.SessionSConnsCfg])
+		if !reflect.DeepEqual(eMap[utils.ItemsCfg].(map[string]any)[utils.SessionSConnsCfg],
+			rcv[utils.ItemsCfg].(map[string]any)[utils.SessionSConnsCfg]) {
+			t.Errorf("Expected %+v, received %+v", eMap[utils.ItemsCfg].(map[string]any)[utils.SessionSConnsCfg],
+				rcv[utils.ItemsCfg].(map[string]any)[utils.SessionSConnsCfg])
 		} else if !reflect.DeepEqual(eMap[utils.OptsCfg], rcv[utils.OptsCfg]) {
 			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(eMap[utils.OptsCfg]), utils.ToJSON(rcv[utils.OptsCfg]))
 		} else if !reflect.DeepEqual(eMap[utils.PrefixIndexedFieldsCfg], rcv[utils.PrefixIndexedFieldsCfg]) {

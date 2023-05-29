@@ -30,7 +30,7 @@ func TestDspConfigSv1GetConfigNil(t *testing.T) {
 	CGREvent := &config.SectionWithAPIOpts{
 		Tenant: "tenant",
 	}
-	var reply *map[string]interface{}
+	var reply *map[string]any
 	result := dspSrv.ConfigSv1GetConfig(CGREvent, reply)
 	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
@@ -43,7 +43,7 @@ func TestDspConfigSv1GetConfigErrorNil(t *testing.T) {
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
 	CGREvent := &config.SectionWithAPIOpts{}
-	var reply *map[string]interface{}
+	var reply *map[string]any
 	result := dspSrv.ConfigSv1GetConfig(CGREvent, reply)
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
 	if result == nil || result.Error() != expected {

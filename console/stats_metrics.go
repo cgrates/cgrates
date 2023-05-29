@@ -48,11 +48,11 @@ func (self *CmdGetStatQueueStringMetrics) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdGetStatQueueStringMetrics) RpcParams(reset bool) interface{} {
+func (self *CmdGetStatQueueStringMetrics) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &utils.TenantIDWithAPIOpts{
 			TenantID: new(utils.TenantID),
-			APIOpts:  make(map[string]interface{}),
+			APIOpts:  make(map[string]any),
 		}
 	}
 	return self.rpcParams
@@ -62,7 +62,7 @@ func (self *CmdGetStatQueueStringMetrics) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdGetStatQueueStringMetrics) RpcResult() interface{} {
+func (self *CmdGetStatQueueStringMetrics) RpcResult() any {
 	var atr map[string]string
 	return &atr
 }

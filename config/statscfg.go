@@ -113,13 +113,13 @@ func (st *StatSCfg) loadFromJSONCfg(jsnCfg *StatServJsonCfg) (err error) {
 	return nil
 }
 
-// AsMapInterface returns the config as a map[string]interface{}
-func (st *StatSCfg) AsMapInterface() (initialMP map[string]interface{}) {
-	opts := map[string]interface{}{
+// AsMapInterface returns the config as a map[string]any
+func (st *StatSCfg) AsMapInterface() (initialMP map[string]any) {
+	opts := map[string]any{
 		utils.MetaProfileIDs:              st.Opts.ProfileIDs,
 		utils.MetaProfileIgnoreFiltersCfg: st.Opts.ProfileIgnoreFilters,
 	}
-	initialMP = map[string]interface{}{
+	initialMP = map[string]any{
 		utils.EnabledCfg:                st.Enabled,
 		utils.IndexedSelectsCfg:         st.IndexedSelects,
 		utils.StoreUncompressedLimitCfg: st.StoreUncompressedLimit,

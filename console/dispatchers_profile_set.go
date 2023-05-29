@@ -49,11 +49,11 @@ func (self *CmdSetDispatcherProfile) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdSetDispatcherProfile) RpcParams(reset bool) interface{} {
+func (self *CmdSetDispatcherProfile) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &v1.DispatcherWithAPIOpts{
 			DispatcherProfile: new(engine.DispatcherProfile),
-			APIOpts:           make(map[string]interface{}),
+			APIOpts:           make(map[string]any),
 		}
 	}
 	return self.rpcParams
@@ -63,7 +63,7 @@ func (self *CmdSetDispatcherProfile) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdSetDispatcherProfile) RpcResult() interface{} {
+func (self *CmdSetDispatcherProfile) RpcResult() any {
 	var s string
 	return &s
 }

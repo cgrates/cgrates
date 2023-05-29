@@ -2459,7 +2459,7 @@ func (trpcp *TestRPCParameters) Hopa(in Attr, out *float64) error {
 	return nil
 }
 
-func (trpcp *TestRPCParameters) Call(serviceMethod string, args interface{}, reply interface{}) error {
+func (trpcp *TestRPCParameters) Call(serviceMethod string, args any, reply any) error {
 	parts := strings.Split(serviceMethod, ".")
 	if len(parts) != 2 {
 		return utils.ErrNotImplemented
@@ -2644,7 +2644,7 @@ type RPCMock struct {
 	args *ArgV1ProcessEvent
 }
 
-func (r *RPCMock) Call(method string, args interface{}, rply interface{}) error {
+func (r *RPCMock) Call(method string, args any, rply any) error {
 	if method != utils.CDRsV1ProcessEvent {
 		return rpcclient.ErrUnsupporteServiceMethod
 	}
@@ -2674,7 +2674,7 @@ func TestCdrLogAction(t *testing.T) {
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs): internalChan,
 	})
 
-	extraData := map[string]interface{}{
+	extraData := map[string]any{
 		"test": "val",
 	}
 	acc := &Account{
@@ -2724,7 +2724,7 @@ func TestCdrLogAction(t *testing.T) {
 	expCgrEv := utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     mock.args.CGREvent.ID,
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Account":      "1001",
 			"ActionID":     "CdrDebit",
 			"AnswerTime":   mock.args.CGREvent.Event["AnswerTime"],
@@ -2751,7 +2751,7 @@ func TestCdrLogAction(t *testing.T) {
 			"Usage":        mock.args.CGREvent.Event["Usage"],
 			"test":         "val",
 		},
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 	if !reflect.DeepEqual(expCgrEv, mock.args.CGREvent) {
 		t.Errorf("Expected: %+v \n,received: %+v", expCgrEv, mock.args.CGREvent)
@@ -2769,7 +2769,7 @@ func TestRemoteSetAccountAction(t *testing.T) {
 		ActionTriggers: ActionTriggers{{
 			Balance: &BalanceFilter{
 				Value: &utils.ValueFormula{
-					Params: map[string]interface{}{utils.MetaVoice: func() {}},
+					Params: map[string]any{utils.MetaVoice: func() {}},
 				},
 			},
 		}},
@@ -2852,7 +2852,7 @@ func TestResetAccountCDR(t *testing.T) {
 	dm := NewDataManager(idb, cfg.CacheCfg(), nil)
 	fltrs := NewFilterS(cfg, nil, dm)
 	SetCdrStorage(idb)
-	var extraData interface{}
+	var extraData any
 	acc := &Account{
 		ID: "cgrates.org:1001",
 		BalanceMap: map[string]Balances{
@@ -2947,8 +2947,8 @@ func TestActionSetDDestinations(t *testing.T) {
 		},
 	}
 	ccMock := &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.StatSv1GetStatQueue: func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.StatSv1GetStatQueue: func(args, reply any) error {
 				rpl := &StatQueue{
 					Tenant: "cgrates",
 					ID:     "id",
@@ -3073,12 +3073,12 @@ func TestActionPublishAccount(t *testing.T) {
 	cfg.RalsCfg().StatSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.StatSConnsCfg)}
 	clientConn := make(chan rpcclient.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ThresholdSv1ProcessEvent: func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.ThresholdSv1ProcessEvent: func(args, reply any) error {
 				*reply.(*[]string) = []string{"*thr"}
 				return errors.New("Can't publish!")
 			},
-			utils.StatSv1ProcessEvent: func(args, reply interface{}) error {
+			utils.StatSv1ProcessEvent: func(args, reply any) error {
 				*reply.(*[]string) = []string{"*stat"}
 				return errors.New("Can't publish!")
 			},
@@ -3167,10 +3167,10 @@ func TestExportAction(t *testing.T) {
 	cfg.ApierCfg().EEsConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.EEsConnsCfg)}
 	config.SetCgrConfig(cfg)
 	ccMock := &ccMock{
-		calls: map[string]func(args, reply interface{}) error{
-			utils.EeSv1ProcessEvent: func(args, reply interface{}) error {
-				rpl := &map[string]map[string]interface{}{}
-				*reply.(*map[string]map[string]interface{}) = *rpl
+		calls: map[string]func(args, reply any) error{
+			utils.EeSv1ProcessEvent: func(args, reply any) error {
+				rpl := &map[string]map[string]any{}
+				*reply.(*map[string]map[string]any) = *rpl
 
 				return nil
 			},
@@ -3246,8 +3246,8 @@ func TestExportAction(t *testing.T) {
 		Tenant:  "tenant",
 		ID:      "id1",
 		Time:    utils.TimePointer(time.Date(2022, 12, 1, 1, 0, 0, 0, time.UTC)),
-		Event:   map[string]interface{}{},
-		APIOpts: map[string]interface{}{},
+		Event:   map[string]any{},
+		APIOpts: map[string]any{},
 	}
 	if err := export(ub, a, acs, nil, nil); err != nil {
 		t.Errorf("received %v", err)
@@ -3263,8 +3263,8 @@ func TestResetStatQueue(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.SchedulerCfg().StatSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.StatSConnsCfg)}
 	ccMock := &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.StatSv1ResetStatQueue: func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.StatSv1ResetStatQueue: func(args, reply any) error {
 				rpl := "reset"
 				*reply.(*string) = rpl
 				return nil
@@ -3294,8 +3294,8 @@ func TestResetTreshold(t *testing.T) {
 
 	cfg.SchedulerCfg().ThreshSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ThreshSConnsCfg)}
 	ccMock := &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ThresholdSv1ResetThreshold: func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.ThresholdSv1ResetThreshold: func(args, reply any) error {
 				rpl := "threshold_reset"
 				*reply.(*string) = rpl
 				return nil
@@ -3409,7 +3409,7 @@ func TestResetAccountCDRSuccesful(t *testing.T) {
 	}
 
 	SetCdrStorage(idb)
-	var extraData interface{}
+	var extraData any
 	acc := &Account{
 		ID: "cgrates.org:1001",
 		BalanceMap: map[string]Balances{
@@ -3516,7 +3516,7 @@ func TestLogAction(t *testing.T) {
 			},
 		},
 	}
-	extraData := map[string]interface{}{
+	extraData := map[string]any{
 		"field1": "value",
 		"field2": "second",
 	}
@@ -3706,8 +3706,8 @@ func TestRemoveAccountAcc(t *testing.T) {
 		Tenant:  "tenant",
 		ID:      "id1",
 		Time:    utils.TimePointer(time.Date(2022, 12, 1, 1, 0, 0, 0, time.UTC)),
-		Event:   map[string]interface{}{},
-		APIOpts: map[string]interface{}{},
+		Event:   map[string]any{},
+		APIOpts: map[string]any{},
 	}
 	if err := removeAccountAction(nil, a, acs, nil, extraData); err != nil {
 		t.Error(err)
@@ -3757,12 +3757,12 @@ func TestRemoveAccountActionErr(t *testing.T) {
 	cfg.DataDbCfg().RmtConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
 	clientConn := make(chan rpcclient.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ReplicatorSv1GetAccountActionPlans: func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.ReplicatorSv1GetAccountActionPlans: func(args, reply any) error {
 
 				return errors.New("ActionPlans not found")
 			},
-			utils.ReplicatorSv1GetActionPlan: func(args, reply interface{}) error {
+			utils.ReplicatorSv1GetActionPlan: func(args, reply any) error {
 				return errors.New("ActionPlan not found")
 			},
 		},
@@ -3795,8 +3795,8 @@ func TestRemoveAccountActionErr(t *testing.T) {
 		Tenant:  "tenant",
 		ID:      "id1",
 		Time:    utils.TimePointer(time.Date(2022, 12, 1, 1, 0, 0, 0, time.UTC)),
-		Event:   map[string]interface{}{},
-		APIOpts: map[string]interface{}{},
+		Event:   map[string]any{},
+		APIOpts: map[string]any{},
 	}
 	ub := &Account{
 		BalanceMap: map[string]Balances{
@@ -4037,8 +4037,8 @@ func TestSetDestinationsErr(t *testing.T) {
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	clientConn := make(chan rpcclient.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.StatSv1GetStatQueue: func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.StatSv1GetStatQueue: func(args, reply any) error {
 				rpl := StatQueue{
 					Tenant: "cgrates.org",
 					ID:     "StatsID",
@@ -4070,7 +4070,7 @@ func TestSetDestinationsErr(t *testing.T) {
 				*reply.(*StatQueue) = rpl
 				return nil
 			},
-			utils.ReplicatorSv1SetReverseDestination: func(args, reply interface{}) error {
+			utils.ReplicatorSv1SetReverseDestination: func(args, reply any) error {
 				return utils.ErrNotImplemented
 			},
 		},
@@ -4162,13 +4162,13 @@ func TestRemoveAccountActionLogg(t *testing.T) {
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	clientConn := make(chan rpcclient.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ReplicatorSv1GetAccountActionPlans: func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.ReplicatorSv1GetAccountActionPlans: func(args, reply any) error {
 				rpl := []string{"PACKAGE_10_SHARED_A_5"}
 				*reply.(*[]string) = rpl
 				return nil
 			},
-			utils.ReplicatorSv1GetActionPlan: func(args, reply interface{}) error {
+			utils.ReplicatorSv1GetActionPlan: func(args, reply any) error {
 				rpl := ActionPlan{
 					Id: "PACKAGE_10_SHARED_A_5",
 					AccountIDs: utils.StringMap{
@@ -4178,7 +4178,7 @@ func TestRemoveAccountActionLogg(t *testing.T) {
 				*reply.(**ActionPlan) = &rpl
 				return nil
 			},
-			utils.ReplicatorSv1SetActionPlan: func(args, reply interface{}) error {
+			utils.ReplicatorSv1SetActionPlan: func(args, reply any) error {
 				return utils.ErrNotFound
 			},
 		}}

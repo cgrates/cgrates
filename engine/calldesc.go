@@ -141,11 +141,11 @@ type CallDescriptor struct {
 }
 
 // AsCGREvent converts the CallDescriptor into CGREvent
-func (cd *CallDescriptor) AsCGREvent(opts map[string]interface{}) *utils.CGREvent {
+func (cd *CallDescriptor) AsCGREvent(opts map[string]any) *utils.CGREvent {
 	cgrEv := &utils.CGREvent{
 		Tenant:  cd.Tenant,
 		ID:      utils.UUIDSha1Prefix(), // make it unique
-		Event:   make(map[string]interface{}),
+		Event:   make(map[string]any),
 		APIOpts: opts,
 	}
 	for k, v := range cd.ExtraFields {
@@ -1016,7 +1016,7 @@ func (cd *CallDescriptor) AccountSummary(initialAcnt *AccountSummary) *AccountSu
 }
 
 // FieldAsInterface is part of utils.DataProvider
-func (cd *CallDescriptor) FieldAsInterface(fldPath []string) (fldVal interface{}, err error) {
+func (cd *CallDescriptor) FieldAsInterface(fldPath []string) (fldVal any, err error) {
 	if len(fldPath) == 0 {
 		return nil, utils.ErrNotFound
 	}
@@ -1038,5 +1038,5 @@ func (cd *CallDescriptor) String() string {
 
 type CallDescriptorWithAPIOpts struct {
 	*CallDescriptor
-	APIOpts map[string]interface{}
+	APIOpts map[string]any
 }

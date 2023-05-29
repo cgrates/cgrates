@@ -218,7 +218,7 @@ func (at *ActionTrigger) String() string {
 	return utils.ToJSON(at)
 }
 
-func (at *ActionTrigger) FieldAsInterface(fldPath []string) (val interface{}, err error) {
+func (at *ActionTrigger) FieldAsInterface(fldPath []string) (val any, err error) {
 	if at == nil || len(fldPath) == 0 {
 		return nil, utils.ErrNotFound
 	}
@@ -299,7 +299,7 @@ func (at *ActionTrigger) FieldAsInterface(fldPath []string) (val interface{}, er
 }
 
 func (at *ActionTrigger) FieldAsString(fldPath []string) (val string, err error) {
-	var iface interface{}
+	var iface any
 	iface, err = at.FieldAsInterface(fldPath)
 	if err != nil {
 		return

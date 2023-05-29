@@ -60,7 +60,7 @@ type SQLEe struct {
 
 type sqlPosterRequest struct {
 	Querry string
-	Values []interface{}
+	Values []any
 }
 
 func (sqlEe *SQLEe) initDialector() (err error) {
@@ -131,7 +131,7 @@ func (sqlEe *SQLEe) Connect() (err error) {
 	return
 }
 
-func (sqlEe *SQLEe) ExportEvent(req interface{}, _ string) error {
+func (sqlEe *SQLEe) ExportEvent(req any, _ string) error {
 	sqlEe.reqs.get()
 	sqlEe.RLock()
 	defer func() {
@@ -158,10 +158,10 @@ func (sqlEe *SQLEe) Close() (err error) {
 
 func (sqlEe *SQLEe) GetMetrics() *utils.SafeMapStorage { return sqlEe.dc }
 
-func (sqlEe *SQLEe) PrepareMap(*utils.CGREvent) (interface{}, error) { return nil, nil }
+func (sqlEe *SQLEe) PrepareMap(*utils.CGREvent) (any, error) { return nil, nil }
 
-func (sqlEe *SQLEe) PrepareOrderMap(mp *utils.OrderedNavigableMap) (interface{}, error) {
-	var vals []interface{}
+func (sqlEe *SQLEe) PrepareOrderMap(mp *utils.OrderedNavigableMap) (any, error) {
+	var vals []any
 	var colNames []string
 	for el := mp.GetFirstElement(); el != nil; el = el.Next() {
 		nmIt, _ := mp.Field(el.Value)

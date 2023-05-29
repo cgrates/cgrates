@@ -49,7 +49,7 @@ func (self *CmdGetRatingProfile) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdGetRatingProfile) RpcParams(reset bool) interface{} {
+func (self *CmdGetRatingProfile) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = new(utils.AttrGetRatingProfile)
 	}
@@ -60,7 +60,7 @@ func (self *CmdGetRatingProfile) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdGetRatingProfile) RpcResult() interface{} {
+func (self *CmdGetRatingProfile) RpcResult() any {
 	var s engine.RatingProfile
 	return &s
 }

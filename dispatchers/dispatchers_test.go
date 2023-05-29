@@ -73,12 +73,12 @@ func TestDispatcherServiceDispatcherProfileForEventGetDispatcherProfileNF(t *tes
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "321",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 			"Password":         "CGRateS.org",
 			"RunID":            utils.MetaDefault,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaSubsys: utils.MetaAccounts,
 		},
 	}
@@ -148,7 +148,7 @@ func TestDispatcherauthorizeEvent(t *testing.T) {
 	connMgr := &engine.ConnManager{}
 	dsp := NewDispatcherService(dm, cfg, fltr, connMgr)
 	ev := &utils.CGREvent{
-		APIOpts: make(map[string]interface{}),
+		APIOpts: make(map[string]any),
 	}
 	reply := &engine.AttrSProcessEventReply{}
 	err := dsp.authorizeEvent(ev, reply)
@@ -165,7 +165,7 @@ func TestDispatcherAuthorizeEventErr(t *testing.T) {
 	connMgr := &engine.ConnManager{}
 	dsp := NewDispatcherService(dm, cfg, fltr, connMgr)
 	ev := &utils.CGREvent{
-		APIOpts: make(map[string]interface{}),
+		APIOpts: make(map[string]any),
 	}
 	reply := &engine.AttrSProcessEventReply{}
 	err := dsp.authorizeEvent(ev, reply)
@@ -272,7 +272,7 @@ func TestDispatcherServiceAuthorizeEvenError1(t *testing.T) {
 	dsp := NewDispatcherService(dm, cfg, fltr, connMgr)
 	cfg.DispatcherSCfg().AttributeSConns = []string{"connID"}
 	ev := &utils.CGREvent{
-		APIOpts: make(map[string]interface{}),
+		APIOpts: make(map[string]any),
 	}
 	reply := &engine.AttrSProcessEventReply{}
 	engine.Cache.SetWithoutReplicate(utils.CacheRPCConnections, "connID",
@@ -296,7 +296,7 @@ func TestDispatcherServiceAuthorizeEventError2(t *testing.T) {
 	dsp := NewDispatcherService(dm, cfg, fltr, connMgr)
 	cfg.DispatcherSCfg().AttributeSConns = []string{"connID"}
 	ev := &utils.CGREvent{
-		APIOpts: make(map[string]interface{}),
+		APIOpts: make(map[string]any),
 	}
 	reply := &engine.AttrSProcessEventReply{}
 	value := &engine.DispatcherHost{
@@ -320,7 +320,7 @@ func TestDispatcherServiceAuthorizeEventError2(t *testing.T) {
 
 type mockTypeCon2 struct{}
 
-func (*mockTypeCon2) Call(serviceMethod string, args, reply interface{}) error {
+func (*mockTypeCon2) Call(serviceMethod string, args, reply any) error {
 	return nil
 }
 
@@ -341,8 +341,8 @@ func TestDispatcherServiceAuthorizeEventError3(t *testing.T) {
 		Tenant:  "testTenant",
 		ID:      "testID",
 		Time:    nil,
-		Event:   map[string]interface{}{},
-		APIOpts: make(map[string]interface{}),
+		Event:   map[string]any{},
+		APIOpts: make(map[string]any),
 	}
 	value := &engine.DispatcherHost{
 		Tenant: "testTenant",
@@ -367,13 +367,13 @@ func TestDispatcherServiceAuthorizeEventError3(t *testing.T) {
 
 type mockTypeCon3 struct{}
 
-func (*mockTypeCon3) Call(serviceMethod string, args, reply interface{}) error {
+func (*mockTypeCon3) Call(serviceMethod string, args, reply any) error {
 	eVreply := &engine.AttrSProcessEventReply{
 		CGREvent: &utils.CGREvent{
 			Tenant: "testTenant",
 			ID:     "testID",
 			Time:   nil,
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.APIMethods: "yes",
 			},
 			APIOpts: nil,
@@ -419,13 +419,13 @@ func TestDispatcherServiceAuthorizeError(t *testing.T) {
 
 type mockTypeCon4 struct{}
 
-func (*mockTypeCon4) Call(serviceMethod string, args, reply interface{}) error {
+func (*mockTypeCon4) Call(serviceMethod string, args, reply any) error {
 	eVreply := &engine.AttrSProcessEventReply{
 		CGREvent: &utils.CGREvent{
 			Tenant:  "testTenant",
 			ID:      "testID",
 			Time:    nil,
-			Event:   map[string]interface{}{},
+			Event:   map[string]any{},
 			APIOpts: nil,
 		},
 	}
@@ -469,13 +469,13 @@ func TestDispatcherServiceAuthorizeError2(t *testing.T) {
 
 type mockTypeCon5 struct{}
 
-func (*mockTypeCon5) Call(serviceMethod string, args, reply interface{}) error {
+func (*mockTypeCon5) Call(serviceMethod string, args, reply any) error {
 	eVreply := &engine.AttrSProcessEventReply{
 		CGREvent: &utils.CGREvent{
 			Tenant: "testTenant",
 			ID:     "testID",
 			Time:   nil,
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.APIMethods: "testMethod",
 			},
 			APIOpts: nil,
@@ -529,7 +529,7 @@ func TestDispatcherServiceCall1(t *testing.T) {
 		Tenant: "tenantTest",
 		ID:     "tenantID",
 		Time:   nil,
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"event": "value",
 		},
 		APIOpts: nil,
@@ -567,12 +567,12 @@ func TestDispatcherServiceDispatcherProfileForEventErrNil(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "123",
 		Time:   nil,
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 			"Password":         "CGRateS.org",
 			"RunID":            utils.MetaDefault,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaSubsys: utils.MetaAccounts,
 		},
 	}
@@ -614,12 +614,12 @@ func TestDispatcherV1GetProfileForEventReturn(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "123",
 		Time:   nil,
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 			"Password":         "CGRateS.org",
 			"RunID":            utils.MetaDefault,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaSubsys: utils.MetaAccounts,
 		},
 	}
@@ -667,12 +667,12 @@ func TestDispatcherServiceDispatcherProfileForEventErrNotFound(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "123",
 		Time:   nil,
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 			"Password":         "CGRateS.org",
 			"RunID":            utils.MetaDefault,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaSubsys: utils.MetaAny,
 		},
 	}
@@ -714,12 +714,12 @@ func TestDispatcherServiceDispatcherProfileForEventErrNotFound2(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "123",
 		Time:   nil,
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 			"Password":         "CGRateS.org",
 			"RunID":            utils.MetaDefault,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaSubsys: utils.MetaAccounts,
 		},
 	}
@@ -766,12 +766,12 @@ func TestDispatcherServiceDispatcherProfileForEventErrNotFoundTime(t *testing.T)
 		Tenant: "cgrates.org",
 		ID:     "123",
 		Time:   utils.TimePointer(time.Now()),
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 			"Password":         "CGRateS.org",
 			"RunID":            utils.MetaDefault,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaSubsys: utils.MetaAccounts,
 		},
 	}
@@ -814,12 +814,12 @@ func TestDispatcherServiceDispatcherProfileForEventErrNotFoundFilter(t *testing.
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "123",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 			"Password":         "CGRateS.org",
 			"RunID":            utils.MetaDefault,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaSubsys: utils.MetaAccounts,
 		},
 	}
@@ -862,12 +862,12 @@ func TestDispatcherServiceDispatchDspErr(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "123",
 		Time:   nil,
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 			"Password":         "CGRateS.org",
 			"RunID":            utils.MetaDefault,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaSubsys: utils.MetaAccounts,
 		},
 	}
@@ -893,7 +893,7 @@ func TestDispatcherServiceDispatchDspErrHostNotFound(t *testing.T) {
 		Subsystems:         []string{utils.MetaAccounts},
 		FilterIDs:          nil,
 		ActivationInterval: nil,
-		StrategyParams:     make(map[string]interface{}),
+		StrategyParams:     make(map[string]any),
 		Strategy:           utils.MetaWeight,
 		Weight:             0,
 		Hosts:              nil,
@@ -915,12 +915,12 @@ func TestDispatcherServiceDispatchDspErrHostNotFound(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "123",
 		Time:   nil,
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 			"Password":         "CGRateS.org",
 			"RunID":            utils.MetaDefault,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaSubsys: utils.MetaAccounts,
 		},
 	}
@@ -974,12 +974,12 @@ func TestDispatcherServiceDispatcherProfileForEventFoundFilter(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "123",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 			"Password":         "CGRateS.org",
 			"RunID":            utils.MetaDefault,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaSubsys: utils.MetaAccounts,
 		},
 	}
@@ -1017,12 +1017,12 @@ func TestDispatcherServiceDispatcherProfileForEventNotNotFound(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "123",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 			"Password":         "CGRateS.org",
 			"RunID":            utils.MetaDefault,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaSubsys: utils.MetaAccounts,
 		},
 	}
@@ -1079,12 +1079,12 @@ func TestDispatcherServiceDispatcherProfileForEventGetDispatcherError(t *testing
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "123",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 			"Password":         "CGRateS.org",
 			"RunID":            utils.MetaDefault,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaSubsys: utils.MetaAccounts,
 		},
 	}
@@ -1113,7 +1113,7 @@ func TestDispatcherServiceDispatchDspErrHostNotFound2(t *testing.T) {
 		Subsystems:         []string{utils.MetaAccounts},
 		FilterIDs:          nil,
 		ActivationInterval: nil,
-		StrategyParams:     make(map[string]interface{}),
+		StrategyParams:     make(map[string]any),
 		Strategy:           utils.MetaWeight,
 		Weight:             0,
 		Hosts:              nil,
@@ -1135,12 +1135,12 @@ func TestDispatcherServiceDispatchDspErrHostNotFound2(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "123",
 		Time:   nil,
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 			"Password":         "CGRateS.org",
 			"RunID":            utils.MetaDefault,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaSubsys: utils.MetaAccounts,
 		},
 	}
@@ -1155,7 +1155,7 @@ func TestDispatcherServiceDispatchDspErrHostNotFound2(t *testing.T) {
 
 type mockTypeConSetCache struct{}
 
-func (*mockTypeConSetCache) Call(serviceMethod string, args, reply interface{}) error {
+func (*mockTypeConSetCache) Call(serviceMethod string, args, reply any) error {
 	return utils.ErrNotImplemented
 }
 
@@ -1181,7 +1181,7 @@ func TestDispatcherServiceDispatchDspErrHostNotFound3(t *testing.T) {
 		Subsystems:         []string{utils.MetaAccounts},
 		FilterIDs:          nil,
 		ActivationInterval: nil,
-		StrategyParams:     make(map[string]interface{}),
+		StrategyParams:     make(map[string]any),
 		Strategy:           utils.MetaWeight,
 		Weight:             0,
 		Hosts:              nil,
@@ -1198,12 +1198,12 @@ func TestDispatcherServiceDispatchDspErrHostNotFound3(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "123",
 		Time:   nil,
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 			"Password":         "CGRateS.org",
 			"RunID":            utils.MetaDefault,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaSubsys: utils.MetaAccounts,
 		},
 	}
@@ -1216,7 +1216,7 @@ func TestDispatcherServiceDispatchDspErrHostNotFound3(t *testing.T) {
 	engine.Cache = cacheInit
 }
 
-func (dS *DispatcherService) DispatcherServiceTest(ev *utils.CGREvent, reply *string) (error, interface{}) {
+func (dS *DispatcherService) DispatcherServiceTest(ev *utils.CGREvent, reply *string) (error, any) {
 	*reply = utils.Pong
 	return nil, nil
 }
@@ -1232,12 +1232,12 @@ func TestDispatcherServiceCall2(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "123",
 		Time:   nil,
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 			"Password":         "CGRateS.org",
 			"RunID":            utils.MetaDefault,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaSubsys: utils.MetaDispatchers,
 		},
 	}
@@ -1248,7 +1248,7 @@ func TestDispatcherServiceCall2(t *testing.T) {
 	}
 }
 
-func (dS *DispatcherService) DispatcherServiceTest2(ev *utils.CGREvent, reply *string) interface{} {
+func (dS *DispatcherService) DispatcherServiceTest2(ev *utils.CGREvent, reply *string) any {
 	*reply = utils.Pong
 	return utils.ErrNotImplemented
 }
@@ -1264,12 +1264,12 @@ func TestDispatcherServiceCall3(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "123",
 		Time:   nil,
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 			"Password":         "CGRateS.org",
 			"RunID":            utils.MetaDefault,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaSubsys: utils.MetaDispatchers,
 		},
 	}
@@ -1296,12 +1296,12 @@ func TestDispatcherServiceCall4(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "123",
 		Time:   nil,
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 			"Password":         "CGRateS.org",
 			"RunID":            utils.MetaDefault,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaSubsys: utils.MetaDispatchers,
 		},
 	}
@@ -1359,10 +1359,10 @@ func TestDispatchersdispatcherProfileForEventAnySSfalses(t *testing.T) {
 	tnt := "cgrates.org"
 	ev := &utils.CGREvent{
 		Tenant: tnt,
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsDispatchersProfilesCount: 1,
 		},
 	}
@@ -1450,10 +1450,10 @@ func TestDispatchersdispatcherProfileForEventAnySSfalseFirstNotFound(t *testing.
 	tnt := "cgrates.org"
 	ev := &utils.CGREvent{
 		Tenant: tnt,
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsDispatchersProfilesCount: 1,
 		},
 	}
@@ -1518,10 +1518,10 @@ func TestDispatchersdispatcherProfileForEventAnySSfalseFound(t *testing.T) {
 	tnt := "cgrates.org"
 	ev := &utils.CGREvent{
 		Tenant: tnt,
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsDispatchersProfilesCount: 1,
 		},
 	}
@@ -1586,10 +1586,10 @@ func TestDispatchersdispatcherProfileForEventAnySSfalseNotFound(t *testing.T) {
 	tnt := "cgrates.org"
 	ev := &utils.CGREvent{
 		Tenant: tnt,
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsDispatchersProfilesCount: 1,
 		},
 	}
@@ -1651,10 +1651,10 @@ func TestDispatchersdispatcherProfileForEventAnySStrueNotFound(t *testing.T) {
 	tnt := "cgrates.org"
 	ev := &utils.CGREvent{
 		Tenant: tnt,
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsDispatchersProfilesCount: 1,
 		},
 	}
@@ -1716,10 +1716,10 @@ func TestDispatchersdispatcherProfileForEventAnySStrueBothFound(t *testing.T) {
 	tnt := "cgrates.org"
 	ev := &utils.CGREvent{
 		Tenant: tnt,
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsDispatchersProfilesCount: 1,
 		},
 	}

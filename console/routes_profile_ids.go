@@ -47,7 +47,7 @@ func (self *CmdRouteIDs) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdRouteIDs) RpcParams(reset bool) interface{} {
+func (self *CmdRouteIDs) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &utils.PaginatorWithTenant{}
 	}
@@ -58,7 +58,7 @@ func (self *CmdRouteIDs) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdRouteIDs) RpcResult() interface{} {
+func (self *CmdRouteIDs) RpcResult() any {
 	var atr []string
 	return &atr
 }

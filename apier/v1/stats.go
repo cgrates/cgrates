@@ -129,7 +129,7 @@ type StatSv1 struct {
 }
 
 // Call implements rpcclient.ClientConnector interface for internal RPC
-func (stsv1 *StatSv1) Call(serviceMethod string, args interface{}, reply interface{}) error {
+func (stsv1 *StatSv1) Call(serviceMethod string, args any, reply any) error {
 	return utils.APIerRPCCall(stsv1, serviceMethod, args, reply)
 }
 

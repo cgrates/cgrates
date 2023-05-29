@@ -310,7 +310,7 @@ func benchmarkInit(b *testing.B, cfgDir string) {
 }
 
 func benchmarkCall(b *testing.B) {
-	var rply map[string]interface{}
+	var rply map[string]any
 	for i := 0; i < b.N; i++ {
 		if err := capsRPC.Call(utils.CoreSv1Status, &utils.TenantWithAPIOpts{}, &rply); err != nil {
 			b.Error(err)

@@ -49,7 +49,7 @@ func (self *CmdLoadTimes) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdLoadTimes) RpcParams(reset bool) interface{} {
+func (self *CmdLoadTimes) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &v1.LoadTimeArgs{}
 	}
@@ -60,7 +60,7 @@ func (self *CmdLoadTimes) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdLoadTimes) RpcResult() interface{} {
+func (self *CmdLoadTimes) RpcResult() any {
 	a := make(map[string]string, 0)
 	return &a
 }

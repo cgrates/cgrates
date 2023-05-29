@@ -3416,7 +3416,7 @@ func TestCgrCfgJSONDefaultApierCfg(t *testing.T) {
 }
 
 func TestCgrCfgV1GetConfigAllConfig(t *testing.T) {
-	var rcv map[string]interface{}
+	var rcv map[string]any
 	cgrCfg := NewDefaultCGRConfig()
 	if err != nil {
 		t.Error(err)
@@ -3437,9 +3437,9 @@ func TestCgrCfgV1GetConfigAllConfig(t *testing.T) {
 }
 
 func TestCgrCfgV1GetConfigSectionLoader(t *testing.T) {
-	var reply map[string]interface{}
-	expected := map[string]interface{}{
-		LoaderJson: []map[string]interface{}{
+	var reply map[string]any
+	expected := map[string]any{
+		LoaderJson: []map[string]any{
 			{
 				utils.IDCfg:           "*default",
 				utils.EnabledCfg:      false,
@@ -3451,17 +3451,17 @@ func TestCgrCfgV1GetConfigSectionLoader(t *testing.T) {
 				utils.FieldSepCfg:     ",",
 				utils.TpInDirCfg:      "/var/spool/cgrates/loader/in",
 				utils.TpOutDirCfg:     "/var/spool/cgrates/loader/out",
-				utils.DataCfg:         []map[string]interface{}{},
+				utils.DataCfg:         []map[string]any{},
 			},
 		},
 	}
 	cgrCfg := NewDefaultCGRConfig()
 	if err := cgrCfg.V1GetConfig(&SectionWithAPIOpts{Section: LoaderJson}, &reply); err != nil {
 		t.Error(err)
-	} else if mp, can := reply[LoaderJson].([]map[string]interface{}); !can {
+	} else if mp, can := reply[LoaderJson].([]map[string]any); !can {
 		t.Errorf("Unexpected type: %t", reply[LoaderJson])
 	} else {
-		mp[0][utils.DataCfg] = []map[string]interface{}{}
+		mp[0][utils.DataCfg] = []map[string]any{}
 		if !reflect.DeepEqual(expected[LoaderJson], mp) {
 			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected[LoaderJson]), utils.ToJSON(mp))
 		}
@@ -3469,9 +3469,9 @@ func TestCgrCfgV1GetConfigSectionLoader(t *testing.T) {
 }
 
 func TestCgrCfgV1GetConfigSectionHTTPAgent(t *testing.T) {
-	var reply map[string]interface{}
-	expected := map[string]interface{}{
-		HttpAgentJson: []map[string]interface{}{},
+	var reply map[string]any
+	expected := map[string]any{
+		HttpAgentJson: []map[string]any{},
 	}
 	cgrCfg := NewDefaultCGRConfig()
 	if err := cgrCfg.V1GetConfig(&SectionWithAPIOpts{Section: HttpAgentJson}, &reply); err != nil {
@@ -3482,9 +3482,9 @@ func TestCgrCfgV1GetConfigSectionHTTPAgent(t *testing.T) {
 }
 
 func TestCgrCfgV1GetConfigSectionCoreS(t *testing.T) {
-	var reply map[string]interface{}
-	expected := map[string]interface{}{
-		CoreSCfgJson: map[string]interface{}{
+	var reply map[string]any
+	expected := map[string]any{
+		CoreSCfgJson: map[string]any{
 			utils.CapsCfg:              0,
 			utils.CapsStrategyCfg:      utils.MetaBusy,
 			utils.CapsStatsIntervalCfg: "0",
@@ -3508,8 +3508,8 @@ func TestCgrCfgV1GetConfigListen(t *testing.T) {
 	"http": ":2080",
 	}
 }`
-	expected := map[string]interface{}{
-		"listen": map[string]interface{}{
+	expected := map[string]any{
+		"listen": map[string]any{
 			"http":         ":2080",
 			"http_tls":     "127.0.0.1:2280",
 			"rpc_gob":      ":2013",
@@ -3518,7 +3518,7 @@ func TestCgrCfgV1GetConfigListen(t *testing.T) {
 			"rpc_json_tls": "127.0.0.1:2022",
 		},
 	}
-	var rcv map[string]interface{}
+	var rcv map[string]any
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(jsnCfg); err != nil {
 		t.Error(err)
 	} else if err := cgrCfg.V1GetConfig(&SectionWithAPIOpts{Section: LISTEN_JSN}, &rcv); err != nil {
@@ -3529,7 +3529,7 @@ func TestCgrCfgV1GetConfigListen(t *testing.T) {
 }
 
 func TestV1GetConfigGeneral(t *testing.T) {
-	var reply map[string]interface{}
+	var reply map[string]any
 	cfgJSONStr := `{
       "general": {
             "node_id": "ENGINE1",
@@ -3539,7 +3539,7 @@ func TestV1GetConfigGeneral(t *testing.T) {
             "reply_timeout": "0s",
         }
 }`
-	expected := map[string]interface{}{
+	expected := map[string]any{
 		utils.NodeIDCfg:               "ENGINE1",
 		utils.LoggerCfg:               "*syslog",
 		utils.LogLevelCfg:             6,
@@ -3565,7 +3565,7 @@ func TestV1GetConfigGeneral(t *testing.T) {
 		utils.RSRSepCfg:               ";",
 		utils.MaxParallelConnsCfg:     100,
 	}
-	expected = map[string]interface{}{
+	expected = map[string]any{
 		GENERAL_JSN: expected,
 	}
 	cfgCgr, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr)
@@ -3580,8 +3580,8 @@ func TestV1GetConfigGeneral(t *testing.T) {
 }
 
 func TestV1GetConfigDataDB(t *testing.T) {
-	var reply map[string]interface{}
-	expected := map[string]interface{}{
+	var reply map[string]any
+	expected := map[string]any{
 		utils.DataDbTypeCfg:          "*redis",
 		utils.DataDbHostCfg:          "127.0.0.1",
 		utils.DataDbPortCfg:          int(6379),
@@ -3591,22 +3591,22 @@ func TestV1GetConfigDataDB(t *testing.T) {
 		utils.ReplicationFilteredCfg: false,
 		utils.RemoteConnIDCfg:        "",
 		utils.ReplicationCache:       "",
-		utils.OptsCfg:                map[string]interface{}{},
+		utils.OptsCfg:                map[string]any{},
 		utils.RemoteConnsCfg:         []string{},
 		utils.ReplicationConnsCfg:    []string{},
-		utils.ItemsCfg:               map[string]interface{}{},
+		utils.ItemsCfg:               map[string]any{},
 	}
-	expected = map[string]interface{}{
+	expected = map[string]any{
 		DATADB_JSN: expected,
 	}
 	cfgCgr := NewDefaultCGRConfig()
 	if err := cfgCgr.V1GetConfig(&SectionWithAPIOpts{Section: DATADB_JSN}, &reply); err != nil {
 		t.Error(err)
-	} else if mp, can := reply[DATADB_JSN].(map[string]interface{}); !can {
+	} else if mp, can := reply[DATADB_JSN].(map[string]any); !can {
 		t.Errorf("Unexpected type: %t", reply[DATADB_JSN])
 	} else {
-		mp[utils.ItemsCfg] = map[string]interface{}{}
-		mp[utils.OptsCfg] = map[string]interface{}{}
+		mp[utils.ItemsCfg] = map[string]any{}
+		mp[utils.OptsCfg] = map[string]any{}
 		if !reflect.DeepEqual(reply, expected) {
 			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(reply))
 		}
@@ -3614,9 +3614,9 @@ func TestV1GetConfigDataDB(t *testing.T) {
 }
 
 func TestV1GetConfigStorDB(t *testing.T) {
-	var reply map[string]interface{}
+	var reply map[string]any
 	var empty []string
-	expected := map[string]interface{}{
+	expected := map[string]any{
 		utils.DataDbTypeCfg:          "*mysql",
 		utils.DataDbHostCfg:          "127.0.0.1",
 		utils.DataDbPortCfg:          3306,
@@ -3627,7 +3627,7 @@ func TestV1GetConfigStorDB(t *testing.T) {
 		utils.PrefixIndexedFieldsCfg: []string{},
 		utils.RemoteConnsCfg:         empty,
 		utils.ReplicationConnsCfg:    empty,
-		utils.OptsCfg: map[string]interface{}{
+		utils.OptsCfg: map[string]any{
 			utils.SQLMaxOpenConnsCfg:    100,
 			utils.SQLMaxIdleConnsCfg:    10,
 			utils.SQLConnMaxLifetimeCfg: "0s",
@@ -3636,18 +3636,18 @@ func TestV1GetConfigStorDB(t *testing.T) {
 			utils.PgSSLModeCfg:          "disable",
 			utils.MysqlLocation:         "Local",
 		},
-		utils.ItemsCfg: map[string]interface{}{},
+		utils.ItemsCfg: map[string]any{},
 	}
-	expected = map[string]interface{}{
+	expected = map[string]any{
 		STORDB_JSN: expected,
 	}
 	cfgCgr := NewDefaultCGRConfig()
 	if err := cfgCgr.V1GetConfig(&SectionWithAPIOpts{Section: STORDB_JSN}, &reply); err != nil {
 		t.Error(err)
-	} else if mp, can := reply[STORDB_JSN].(map[string]interface{}); !can {
+	} else if mp, can := reply[STORDB_JSN].(map[string]any); !can {
 		t.Errorf("Unexpected type: %t", reply[STORDB_JSN])
 	} else {
-		mp[utils.ItemsCfg] = map[string]interface{}{}
+		mp[utils.ItemsCfg] = map[string]any{}
 		if !reflect.DeepEqual(reply, expected) {
 			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(reply))
 		}
@@ -3655,9 +3655,9 @@ func TestV1GetConfigStorDB(t *testing.T) {
 }
 
 func TestV1GetConfigTLS(t *testing.T) {
-	var reply map[string]interface{}
-	expected := map[string]interface{}{
-		TlsCfgJson: map[string]interface{}{
+	var reply map[string]any
+	expected := map[string]any{
+		TlsCfgJson: map[string]any{
 			utils.ServerCerificateCfg: "",
 			utils.ServerKeyCfg:        "",
 			utils.ServerPolicyCfg:     4,
@@ -3676,10 +3676,10 @@ func TestV1GetConfigTLS(t *testing.T) {
 }
 
 func TestV1GetConfigCache(t *testing.T) {
-	var reply map[string]interface{}
-	expected := map[string]interface{}{
-		CACHE_JSN: map[string]interface{}{
-			utils.PartitionsCfg:       map[string]interface{}{},
+	var reply map[string]any
+	expected := map[string]any{
+		CACHE_JSN: map[string]any{
+			utils.PartitionsCfg:       map[string]any{},
 			utils.RemoteConnsCfg:      []string{},
 			utils.ReplicationConnsCfg: []string{},
 		},
@@ -3687,10 +3687,10 @@ func TestV1GetConfigCache(t *testing.T) {
 	cfgCgr := NewDefaultCGRConfig()
 	if err := cfgCgr.V1GetConfig(&SectionWithAPIOpts{Section: CACHE_JSN}, &reply); err != nil {
 		t.Error(err)
-	} else if mp, can := reply[CACHE_JSN].(map[string]interface{}); !can {
+	} else if mp, can := reply[CACHE_JSN].(map[string]any); !can {
 		t.Errorf("Unexpected type: %t", reply[CACHE_JSN])
 	} else {
-		mp[utils.PartitionsCfg] = map[string]interface{}{}
+		mp[utils.PartitionsCfg] = map[string]any{}
 		if !reflect.DeepEqual(reply, expected) {
 			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(reply))
 		}
@@ -3698,9 +3698,9 @@ func TestV1GetConfigCache(t *testing.T) {
 }
 
 func TestV1GetConfigHTTP(t *testing.T) {
-	var reply map[string]interface{}
-	expected := map[string]interface{}{
-		HTTP_JSN: map[string]interface{}{
+	var reply map[string]any
+	expected := map[string]any{
+		HTTP_JSN: map[string]any{
 			utils.HTTPJsonRPCURLCfg:        "/jsonrpc",
 			utils.RegistrarSURLCfg:         "/registrar",
 			utils.HTTPWSURLCfg:             "/ws",
@@ -3708,7 +3708,7 @@ func TestV1GetConfigHTTP(t *testing.T) {
 			utils.HTTPCDRsURLCfg:           "/cdr_http",
 			utils.HTTPUseBasicAuthCfg:      false,
 			utils.HTTPAuthUsersCfg:         map[string]string{},
-			utils.HTTPClientOptsCfg: map[string]interface{}{
+			utils.HTTPClientOptsCfg: map[string]any{
 				utils.HTTPClientTLSClientConfigCfg:       false,
 				utils.HTTPClientTLSHandshakeTimeoutCfg:   "10s",
 				utils.HTTPClientDisableKeepAlivesCfg:     false,
@@ -3735,9 +3735,9 @@ func TestV1GetConfigHTTP(t *testing.T) {
 }
 
 func TestV1GetConfigFilterS(t *testing.T) {
-	var reply map[string]interface{}
-	expected := map[string]interface{}{
-		FilterSjsn: map[string]interface{}{
+	var reply map[string]any
+	expected := map[string]any{
+		FilterSjsn: map[string]any{
 			utils.StatSConnsCfg:     []string{},
 			utils.ResourceSConnsCfg: []string{},
 			utils.ApierSConnsCfg:    []string{},
@@ -3752,15 +3752,15 @@ func TestV1GetConfigFilterS(t *testing.T) {
 }
 
 func TestV1GetConfigRals(t *testing.T) {
-	var reply map[string]interface{}
-	expected := map[string]interface{}{
-		RALS_JSN: map[string]interface{}{
+	var reply map[string]any
+	expected := map[string]any{
+		RALS_JSN: map[string]any{
 			utils.EnabledCfg:                 false,
 			utils.ThresholdSConnsCfg:         []string{},
 			utils.StatSConnsCfg:              []string{},
 			utils.RpSubjectPrefixMatchingCfg: false,
 			utils.RemoveExpiredCfg:           true,
-			utils.MaxComputedUsageCfg: map[string]interface{}{
+			utils.MaxComputedUsageCfg: map[string]any{
 				"*any":   "189h0m0s",
 				"*voice": "72h0m0s",
 				"*data":  "107374182400",
@@ -3783,9 +3783,9 @@ func TestV1GetConfigRals(t *testing.T) {
 }
 
 func TestV1GetConfigScheduler(t *testing.T) {
-	var reply map[string]interface{}
-	expected := map[string]interface{}{
-		SCHEDULER_JSN: map[string]interface{}{
+	var reply map[string]any
+	expected := map[string]any{
+		SCHEDULER_JSN: map[string]any{
 			utils.EnabledCfg:                false,
 			utils.CDRsConnsCfg:              []string{},
 			utils.ThreshSConnsCfg:           []string{},
@@ -3803,9 +3803,9 @@ func TestV1GetConfigScheduler(t *testing.T) {
 }
 
 func TestV1GetConfigCdrs(t *testing.T) {
-	var reply map[string]interface{}
-	expected := map[string]interface{}{
-		CDRS_JSN: map[string]interface{}{
+	var reply map[string]any
+	expected := map[string]any{
+		CDRS_JSN: map[string]any{
 			utils.EnabledCfg:          false,
 			utils.ExtraFieldsCfg:      []string{},
 			utils.StoreCdrsCfg:        true,
@@ -3829,9 +3829,9 @@ func TestV1GetConfigCdrs(t *testing.T) {
 }
 
 func TestV1GetConfigSessionS(t *testing.T) {
-	var reply map[string]interface{}
-	expected := map[string]interface{}{
-		SessionSJson: map[string]interface{}{
+	var reply map[string]any
+	expected := map[string]any{
+		SessionSJson: map[string]any{
 			utils.EnabledCfg:             false,
 			utils.ListenBijsonCfg:        "127.0.0.1:2014",
 			utils.ListenBigobCfg:         "",
@@ -3854,7 +3854,7 @@ func TestV1GetConfigSessionS(t *testing.T) {
 			utils.TerminateAttemptsCfg:   5,
 			utils.MinDurLowBalanceCfg:    "0",
 			utils.AlterableFieldsCfg:     []string{},
-			utils.STIRCfg: map[string]interface{}{
+			utils.STIRCfg: map[string]any{
 				utils.AllowedAtestCfg:       []string{"*any"},
 				utils.PayloadMaxdurationCfg: "-1",
 				utils.DefaultAttestCfg:      "A",
@@ -3878,9 +3878,9 @@ func TestV1GetConfigSessionS(t *testing.T) {
 }
 
 func TestV1GetConfigFsAgent(t *testing.T) {
-	var reply map[string]interface{}
-	expected := map[string]interface{}{
-		FreeSWITCHAgentJSN: map[string]interface{}{
+	var reply map[string]any
+	expected := map[string]any{
+		FreeSWITCHAgentJSN: map[string]any{
 			utils.EnabledCfg:             false,
 			utils.SessionSConnsCfg:       []string{rpcclient.BiRPCInternal},
 			utils.SubscribeParkCfg:       true,
@@ -3890,7 +3890,7 @@ func TestV1GetConfigFsAgent(t *testing.T) {
 			utils.EmptyBalanceContextCfg: "",
 			utils.EmptyBalanceAnnFileCfg: "",
 			utils.MaxWaitConnectionCfg:   "2s",
-			utils.EventSocketConnsCfg: []map[string]interface{}{
+			utils.EventSocketConnsCfg: []map[string]any{
 				{
 					utils.AddressCfg:              "127.0.0.1:8021",
 					utils.Password:                "ClueCon",
@@ -3909,14 +3909,14 @@ func TestV1GetConfigFsAgent(t *testing.T) {
 }
 
 func TestV1GetConfigKamailioAgent(t *testing.T) {
-	var reply map[string]interface{}
-	expected := map[string]interface{}{
-		KamailioAgentJSN: map[string]interface{}{
+	var reply map[string]any
+	expected := map[string]any{
+		KamailioAgentJSN: map[string]any{
 			utils.EnabledCfg:       false,
 			utils.SessionSConnsCfg: []string{rpcclient.BiRPCInternal},
 			utils.CreateCdrCfg:     false,
 			utils.TimezoneCfg:      "",
-			utils.EvapiConnsCfg: []map[string]interface{}{
+			utils.EvapiConnsCfg: []map[string]any{
 				{
 					utils.AddressCfg:              "127.0.0.1:8448",
 					utils.ReconnectsCfg:           5,
@@ -3935,13 +3935,13 @@ func TestV1GetConfigKamailioAgent(t *testing.T) {
 }
 
 func TestV1GetConfigAsteriskAgent(t *testing.T) {
-	var reply map[string]interface{}
-	expected := map[string]interface{}{
-		AsteriskAgentJSN: map[string]interface{}{
+	var reply map[string]any
+	expected := map[string]any{
+		AsteriskAgentJSN: map[string]any{
 			utils.EnabledCfg:       false,
 			utils.SessionSConnsCfg: []string{rpcclient.BiRPCInternal},
 			utils.CreateCdrCfg:     false,
-			utils.AsteriskConnsCfg: []map[string]interface{}{
+			utils.AsteriskConnsCfg: []map[string]any{
 				{
 					utils.AliasCfg:                "",
 					utils.AddressCfg:              "127.0.0.1:8088",
@@ -3963,9 +3963,9 @@ func TestV1GetConfigAsteriskAgent(t *testing.T) {
 }
 
 func TestV1GetConfigDiameterAgent(t *testing.T) {
-	var reply map[string]interface{}
-	expected := map[string]interface{}{
-		DA_JSN: map[string]interface{}{
+	var reply map[string]any
+	expected := map[string]any{
+		DA_JSN: map[string]any{
 			utils.ASRTemplateCfg:        "",
 			utils.ConcurrentRequestsCfg: -1,
 			utils.DictionariesPathCfg:   "/usr/share/cgrates/diameter/dict/",
@@ -3980,7 +3980,7 @@ func TestV1GetConfigDiameterAgent(t *testing.T) {
 			utils.SessionSConnsCfg:      []string{rpcclient.BiRPCInternal},
 			utils.SyncedConnReqsCfg:     false,
 			utils.VendorIDCfg:           0,
-			utils.RequestProcessorsCfg:  []map[string]interface{}{},
+			utils.RequestProcessorsCfg:  []map[string]any{},
 		},
 	}
 	cfgCgr := NewDefaultCGRConfig()
@@ -3992,9 +3992,9 @@ func TestV1GetConfigDiameterAgent(t *testing.T) {
 }
 
 func TestV1GetConfigRadiusAgent(t *testing.T) {
-	var reply map[string]interface{}
-	expected := map[string]interface{}{
-		RA_JSN: map[string]interface{}{
+	var reply map[string]any
+	expected := map[string]any{
+		RA_JSN: map[string]any{
 			utils.EnabledCfg:    false,
 			utils.ListenNetCfg:  "udp",
 			utils.ListenAuthCfg: "127.0.0.1:1812",
@@ -4006,7 +4006,7 @@ func TestV1GetConfigRadiusAgent(t *testing.T) {
 				utils.MetaDefault: "/usr/share/cgrates/radius/dict/",
 			},
 			utils.SessionSConnsCfg:     []string{"*internal"},
-			utils.RequestProcessorsCfg: []map[string]interface{}{},
+			utils.RequestProcessorsCfg: []map[string]any{},
 		},
 	}
 	cfgCgr := NewDefaultCGRConfig()
@@ -4018,15 +4018,15 @@ func TestV1GetConfigRadiusAgent(t *testing.T) {
 }
 
 func TestV1GetConfigDNSAgent(t *testing.T) {
-	var reply map[string]interface{}
-	expected := map[string]interface{}{
-		DNSAgentJson: map[string]interface{}{
+	var reply map[string]any
+	expected := map[string]any{
+		DNSAgentJson: map[string]any{
 			utils.EnabledCfg:           false,
 			utils.ListenCfg:            "127.0.0.1:2053",
 			utils.ListenNetCfg:         "udp",
 			utils.SessionSConnsCfg:     []string{utils.MetaInternal},
 			utils.TimezoneCfg:          "",
-			utils.RequestProcessorsCfg: []map[string]interface{}{},
+			utils.RequestProcessorsCfg: []map[string]any{},
 		},
 	}
 	cfgCgr := NewDefaultCGRConfig()
@@ -4038,9 +4038,9 @@ func TestV1GetConfigDNSAgent(t *testing.T) {
 }
 
 func TestV1GetConfigAttribute(t *testing.T) {
-	var reply map[string]interface{}
-	expected := map[string]interface{}{
-		ATTRIBUTE_JSN: map[string]interface{}{
+	var reply map[string]any
+	expected := map[string]any{
+		ATTRIBUTE_JSN: map[string]any{
 			utils.EnabledCfg:             false,
 			utils.StatSConnsCfg:          []string{},
 			utils.ResourceSConnsCfg:      []string{},
@@ -4050,7 +4050,7 @@ func TestV1GetConfigAttribute(t *testing.T) {
 			utils.SuffixIndexedFieldsCfg: []string{},
 			utils.NestedFieldsCfg:        false,
 			utils.AnyContextCfg:          true,
-			utils.OptsCfg: map[string]interface{}{
+			utils.OptsCfg: map[string]any{
 				utils.MetaProfileIDs:              []string{},
 				utils.MetaProcessRuns:             1,
 				utils.MetaProfileRuns:             0,
@@ -4067,9 +4067,9 @@ func TestV1GetConfigAttribute(t *testing.T) {
 }
 
 func TestV1GetConfigChargers(t *testing.T) {
-	var reply map[string]interface{}
-	expected := map[string]interface{}{
-		ChargerSCfgJson: map[string]interface{}{
+	var reply map[string]any
+	expected := map[string]any{
+		ChargerSCfgJson: map[string]any{
 			utils.EnabledCfg:             false,
 			utils.AttributeSConnsCfg:     []string{},
 			utils.IndexedSelectsCfg:      true,
@@ -4087,9 +4087,9 @@ func TestV1GetConfigChargers(t *testing.T) {
 }
 
 func TestV1GetConfigResourceS(t *testing.T) {
-	var reply map[string]interface{}
-	expected := map[string]interface{}{
-		RESOURCES_JSON: map[string]interface{}{
+	var reply map[string]any
+	expected := map[string]any{
+		RESOURCES_JSON: map[string]any{
 			utils.EnabledCfg:             false,
 			utils.StoreIntervalCfg:       utils.EmptyString,
 			utils.ThresholdSConnsCfg:     []string{},
@@ -4097,7 +4097,7 @@ func TestV1GetConfigResourceS(t *testing.T) {
 			utils.PrefixIndexedFieldsCfg: []string{},
 			utils.SuffixIndexedFieldsCfg: []string{},
 			utils.NestedFieldsCfg:        false,
-			utils.OptsCfg: map[string]interface{}{
+			utils.OptsCfg: map[string]any{
 				utils.MetaUnitsCfg:   1.,
 				utils.MetaUsageIDCfg: "",
 			},
@@ -4112,9 +4112,9 @@ func TestV1GetConfigResourceS(t *testing.T) {
 }
 
 func TestV1GetConfigStats(t *testing.T) {
-	var reply map[string]interface{}
-	expected := map[string]interface{}{
-		STATS_JSON: map[string]interface{}{
+	var reply map[string]any
+	expected := map[string]any{
+		STATS_JSON: map[string]any{
 			utils.EnabledCfg:                false,
 			utils.StoreIntervalCfg:          utils.EmptyString,
 			utils.StoreUncompressedLimitCfg: 0,
@@ -4123,7 +4123,7 @@ func TestV1GetConfigStats(t *testing.T) {
 			utils.PrefixIndexedFieldsCfg:    []string{},
 			utils.SuffixIndexedFieldsCfg:    []string{},
 			utils.NestedFieldsCfg:           false,
-			utils.OptsCfg: map[string]interface{}{
+			utils.OptsCfg: map[string]any{
 				utils.MetaProfileIDs:              []string{},
 				utils.MetaProfileIgnoreFiltersCfg: false,
 			},
@@ -4138,16 +4138,16 @@ func TestV1GetConfigStats(t *testing.T) {
 }
 
 func TestV1GetConfigThresholds(t *testing.T) {
-	var reply map[string]interface{}
-	expected := map[string]interface{}{
-		THRESHOLDS_JSON: map[string]interface{}{
+	var reply map[string]any
+	expected := map[string]any{
+		THRESHOLDS_JSON: map[string]any{
 			utils.EnabledCfg:             false,
 			utils.StoreIntervalCfg:       utils.EmptyString,
 			utils.IndexedSelectsCfg:      true,
 			utils.PrefixIndexedFieldsCfg: []string{},
 			utils.SuffixIndexedFieldsCfg: []string{},
 			utils.NestedFieldsCfg:        false,
-			utils.OptsCfg: map[string]interface{}{
+			utils.OptsCfg: map[string]any{
 				utils.MetaProfileIDs:              []string{},
 				utils.MetaProfileIgnoreFiltersCfg: false,
 			},
@@ -4162,9 +4162,9 @@ func TestV1GetConfigThresholds(t *testing.T) {
 }
 
 func TestV1GetConfigRoutes(t *testing.T) {
-	var reply map[string]interface{}
-	expected := map[string]interface{}{
-		RouteSJson: map[string]interface{}{
+	var reply map[string]any
+	expected := map[string]any{
+		RouteSJson: map[string]any{
 			utils.EnabledCfg:             false,
 			utils.IndexedSelectsCfg:      true,
 			utils.PrefixIndexedFieldsCfg: []string{},
@@ -4175,7 +4175,7 @@ func TestV1GetConfigRoutes(t *testing.T) {
 			utils.StatSConnsCfg:          []string{},
 			utils.RALsConnsCfg:           []string{},
 			utils.DefaultRatioCfg:        1,
-			utils.OptsCfg: map[string]interface{}{
+			utils.OptsCfg: map[string]any{
 				utils.OptsContext:         utils.MetaRoutes,
 				utils.MetaIgnoreErrorsCfg: false,
 				utils.MetaMaxCostCfg:      utils.EmptyString,
@@ -4191,9 +4191,9 @@ func TestV1GetConfigRoutes(t *testing.T) {
 }
 
 func TestV1GetConfigSuretax(t *testing.T) {
-	var reply map[string]interface{}
-	expected := map[string]interface{}{
-		SURETAX_JSON: map[string]interface{}{
+	var reply map[string]any
+	expected := map[string]any{
+		SURETAX_JSON: map[string]any{
 			utils.URLCfg:                  utils.EmptyString,
 			utils.ClientNumberCfg:         utils.EmptyString,
 			utils.ValidationKeyCfg:        utils.EmptyString,
@@ -4232,9 +4232,9 @@ func TestV1GetConfigSuretax(t *testing.T) {
 }
 
 func TestV1GetConfigDispatcherS(t *testing.T) {
-	var reply map[string]interface{}
-	expected := map[string]interface{}{
-		DispatcherSJson: map[string]interface{}{
+	var reply map[string]any
+	expected := map[string]any{
+		DispatcherSJson: map[string]any{
 			utils.EnabledCfg:             false,
 			utils.IndexedSelectsCfg:      true,
 			utils.PrefixIndexedFieldsCfg: []string{},
@@ -4254,17 +4254,17 @@ func TestV1GetConfigDispatcherS(t *testing.T) {
 }
 
 func TestV1GetConfigDispatcherH(t *testing.T) {
-	var reply map[string]interface{}
-	expected := map[string]interface{}{
-		RegistrarCJson: map[string]interface{}{
-			utils.DispatcherCfg: map[string]interface{}{
+	var reply map[string]any
+	expected := map[string]any{
+		RegistrarCJson: map[string]any{
+			utils.DispatcherCfg: map[string]any{
 				utils.RegistrarsConnsCfg: []string{},
-				utils.HostsCfg:           []map[string]interface{}{},
+				utils.HostsCfg:           []map[string]any{},
 				utils.RefreshIntervalCfg: "5m0s",
 			},
-			utils.RPCCfg: map[string]interface{}{
+			utils.RPCCfg: map[string]any{
 				utils.RegistrarsConnsCfg: []string{},
-				utils.HostsCfg:           []map[string]interface{}{},
+				utils.HostsCfg:           []map[string]any{},
 				utils.RefreshIntervalCfg: "5m0s",
 			},
 		},
@@ -4278,9 +4278,9 @@ func TestV1GetConfigDispatcherH(t *testing.T) {
 }
 
 func TestV1GetConfigSectionLoader(t *testing.T) {
-	var reply map[string]interface{}
-	expected := map[string]interface{}{
-		CgrLoaderCfgJson: map[string]interface{}{
+	var reply map[string]any
+	expected := map[string]any{
+		CgrLoaderCfgJson: map[string]any{
 			utils.TpIDCfg:            "",
 			utils.DataPathCfg:        "./",
 			utils.DisableReverseCfg:  false,
@@ -4300,9 +4300,9 @@ func TestV1GetConfigSectionLoader(t *testing.T) {
 }
 
 func TestV1GetConfigSectionMigrator(t *testing.T) {
-	var reply map[string]interface{}
-	expected := map[string]interface{}{
-		CgrMigratorCfgJson: map[string]interface{}{
+	var reply map[string]any
+	expected := map[string]any{
+		CgrMigratorCfgJson: map[string]any{
 			utils.OutDataDBTypeCfg:     "*redis",
 			utils.OutDataDBHostCfg:     "127.0.0.1",
 			utils.OutDataDBPortCfg:     "6379",
@@ -4317,7 +4317,7 @@ func TestV1GetConfigSectionMigrator(t *testing.T) {
 			utils.OutStorDBUserCfg:     "cgrates",
 			utils.OutStorDBPasswordCfg: "",
 			utils.UsersFiltersCfg:      []string{},
-			utils.OutStorDBOptsCfg: map[string]interface{}{
+			utils.OutStorDBOptsCfg: map[string]any{
 				utils.MongoQueryTimeoutCfg:  "0s",
 				utils.MYSQLDSNParams:        map[string]string(nil),
 				utils.MysqlLocation:         utils.EmptyString,
@@ -4326,7 +4326,7 @@ func TestV1GetConfigSectionMigrator(t *testing.T) {
 				utils.SQLMaxIdleConnsCfg:    0,
 				utils.SQLMaxOpenConnsCfg:    0,
 			},
-			utils.OutDataDBOptsCfg: map[string]interface{}{
+			utils.OutDataDBOptsCfg: map[string]any{
 				utils.MongoQueryTimeoutCfg:       "0s",
 				utils.RedisMaxConnsCfg:           10,
 				utils.RedisConnectAttemptsCfg:    20,
@@ -4353,9 +4353,9 @@ func TestV1GetConfigSectionMigrator(t *testing.T) {
 }
 
 func TestV1GetConfigSectionApierS(t *testing.T) {
-	var reply map[string]interface{}
-	expected := map[string]interface{}{
-		ApierS: map[string]interface{}{
+	var reply map[string]any
+	expected := map[string]any{
+		ApierS: map[string]any{
 			utils.EnabledCfg:         false,
 			utils.CachesConnsCfg:     []string{utils.MetaInternal},
 			utils.SchedulerConnsCfg:  []string{},
@@ -4372,13 +4372,13 @@ func TestV1GetConfigSectionApierS(t *testing.T) {
 }
 
 func TestV1GetConfigSectionEES(t *testing.T) {
-	var reply map[string]interface{}
-	expected := map[string]interface{}{
-		EEsJson: map[string]interface{}{
+	var reply map[string]any
+	expected := map[string]any{
+		EEsJson: map[string]any{
 			utils.EnabledCfg:         false,
 			utils.AttributeSConnsCfg: []string{},
-			utils.CacheCfg: map[string]interface{}{
-				utils.MetaFileCSV: map[string]interface{}{
+			utils.CacheCfg: map[string]any{
+				utils.MetaFileCSV: map[string]any{
 					utils.LimitCfg:     -1,
 					utils.PrecacheCfg:  false,
 					utils.ReplicateCfg: false,
@@ -4387,12 +4387,12 @@ func TestV1GetConfigSectionEES(t *testing.T) {
 					utils.StaticTTLCfg: false,
 				},
 			},
-			utils.ExportersCfg: []map[string]interface{}{
+			utils.ExportersCfg: []map[string]any{
 				{
 					utils.IDCfg:                 utils.MetaDefault,
 					utils.TypeCfg:               utils.MetaNone,
 					utils.ExportPathCfg:         "/var/spool/cgrates/ees",
-					utils.OptsCfg:               map[string]interface{}{},
+					utils.OptsCfg:               map[string]any{},
 					utils.TimezoneCfg:           utils.EmptyString,
 					utils.FiltersCfg:            []string{},
 					utils.FlagsCfg:              []string{},
@@ -4400,7 +4400,7 @@ func TestV1GetConfigSectionEES(t *testing.T) {
 					utils.AttributeContextCfg:   utils.EmptyString,
 					utils.SynchronousCfg:        false,
 					utils.AttemptsCfg:           1,
-					utils.FieldsCfg:             []map[string]interface{}{},
+					utils.FieldsCfg:             []map[string]any{},
 					utils.ConcurrentRequestsCfg: 0,
 					utils.FailedPostsDirCfg:     "/var/spool/cgrates/failed_posts",
 				},
@@ -4416,12 +4416,12 @@ func TestV1GetConfigSectionEES(t *testing.T) {
 }
 
 func TestV1GetConfigSectionERS(t *testing.T) {
-	var reply map[string]interface{}
-	expected := map[string]interface{}{
-		ERsJson: map[string]interface{}{
+	var reply map[string]any
+	expected := map[string]any{
+		ERsJson: map[string]any{
 			utils.EnabledCfg:       false,
 			utils.SessionSConnsCfg: []string{utils.MetaInternal},
-			utils.ReadersCfg: []map[string]interface{}{
+			utils.ReadersCfg: []map[string]any{
 				{
 					utils.FiltersCfg:             []string{},
 					utils.FlagsCfg:               []string{},
@@ -4431,12 +4431,12 @@ func TestV1GetConfigSectionERS(t *testing.T) {
 					utils.SourcePathCfg:          "/var/spool/cgrates/ers/in",
 					utils.TenantCfg:              utils.EmptyString,
 					utils.TimezoneCfg:            utils.EmptyString,
-					utils.CacheDumpFieldsCfg:     []map[string]interface{}{},
-					utils.PartialCommitFieldsCfg: []map[string]interface{}{},
+					utils.CacheDumpFieldsCfg:     []map[string]any{},
+					utils.PartialCommitFieldsCfg: []map[string]any{},
 					utils.ConcurrentRequestsCfg:  1024,
 					utils.TypeCfg:                utils.MetaNone,
 					utils.FieldsCfg:              []string{},
-					utils.OptsCfg: map[string]interface{}{
+					utils.OptsCfg: map[string]any{
 						"csvFieldSeparator":   ",",
 						"csvHeaderDefineChar": ":",
 						"csvRowLength":        0,
@@ -4453,10 +4453,10 @@ func TestV1GetConfigSectionERS(t *testing.T) {
 	cfgCgr := NewDefaultCGRConfig()
 	if err := cfgCgr.V1GetConfig(&SectionWithAPIOpts{Section: ERsJson}, &reply); err != nil {
 		t.Error(err)
-	} else if mp, can := reply[ERsJson].(map[string]interface{}); !can {
+	} else if mp, can := reply[ERsJson].(map[string]any); !can {
 		t.Errorf("Unexpected type: %t", reply[ERsJson])
 	} else {
-		mp[utils.ReadersCfg].([]map[string]interface{})[0][utils.FieldsCfg] = []string{}
+		mp[utils.ReadersCfg].([]map[string]any)[0][utils.FieldsCfg] = []string{}
 		if !reflect.DeepEqual(mp, expected[ERsJson]) {
 			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected[ERsJson]), utils.ToJSON(mp))
 		}
@@ -4464,43 +4464,43 @@ func TestV1GetConfigSectionERS(t *testing.T) {
 }
 
 func TestV1GetConfigSectionRPConns(t *testing.T) {
-	var reply map[string]interface{}
-	expected := map[string]interface{}{
-		RPCConnsJsonName: map[string]interface{}{
-			utils.MetaBiJSONLocalHost: map[string]interface{}{
+	var reply map[string]any
+	expected := map[string]any{
+		RPCConnsJsonName: map[string]any{
+			utils.MetaBiJSONLocalHost: map[string]any{
 				utils.PoolSize:    0,
 				utils.StrategyCfg: utils.MetaFirst,
-				utils.Conns: []map[string]interface{}{
+				utils.Conns: []map[string]any{
 					{
 						utils.AddressCfg:   "127.0.0.1:2014",
 						utils.TransportCfg: rpcclient.BiRPCJSON,
 					},
 				},
 			},
-			utils.MetaLocalHost: map[string]interface{}{
+			utils.MetaLocalHost: map[string]any{
 				utils.PoolSize:    0,
 				utils.StrategyCfg: utils.MetaFirst,
-				utils.Conns: []map[string]interface{}{
+				utils.Conns: []map[string]any{
 					{
 						utils.AddressCfg:   "127.0.0.1:2012",
 						utils.TransportCfg: "*json",
 					},
 				},
 			},
-			utils.MetaInternal: map[string]interface{}{
+			utils.MetaInternal: map[string]any{
 				utils.StrategyCfg: utils.MetaFirst,
 				utils.PoolSize:    0,
-				utils.Conns: []map[string]interface{}{
+				utils.Conns: []map[string]any{
 					{
 						utils.AddressCfg:   utils.MetaInternal,
 						utils.TransportCfg: utils.EmptyString,
 					},
 				},
 			},
-			rpcclient.BiRPCInternal: map[string]interface{}{
+			rpcclient.BiRPCInternal: map[string]any{
 				utils.StrategyCfg: utils.MetaFirst,
 				utils.PoolSize:    0,
-				utils.Conns: []map[string]interface{}{
+				utils.Conns: []map[string]any{
 					{
 						utils.AddressCfg:   rpcclient.BiRPCInternal,
 						utils.TransportCfg: utils.EmptyString,
@@ -4518,16 +4518,16 @@ func TestV1GetConfigSectionRPConns(t *testing.T) {
 }
 
 func TestV1GetConfigSectionSIPAgent(t *testing.T) {
-	var reply map[string]interface{}
-	expected := map[string]interface{}{
-		SIPAgentJson: map[string]interface{}{
+	var reply map[string]any
+	expected := map[string]any{
+		SIPAgentJson: map[string]any{
 			utils.EnabledCfg:             false,
 			utils.ListenCfg:              "127.0.0.1:5060",
 			utils.ListenNetCfg:           "udp",
 			utils.SessionSConnsCfg:       []string{utils.MetaInternal},
 			utils.TimezoneCfg:            utils.EmptyString,
 			utils.RetransmissionTimerCfg: time.Second,
-			utils.RequestProcessorsCfg:   []map[string]interface{}{},
+			utils.RequestProcessorsCfg:   []map[string]any{},
 		},
 	}
 	cfgCgr := NewDefaultCGRConfig()
@@ -4539,9 +4539,9 @@ func TestV1GetConfigSectionSIPAgent(t *testing.T) {
 }
 
 func TestV1GetConfigSectionTemplates(t *testing.T) {
-	var reply map[string]interface{}
-	expected := map[string]interface{}{
-		TemplatesJson: map[string][]map[string]interface{}{
+	var reply map[string]any
+	expected := map[string]any{
+		TemplatesJson: map[string][]map[string]any{
 			utils.MetaErr: {
 				{utils.TagCfg: "SessionId", utils.PathCfg: "*rep.Session-Id", utils.TypeCfg: "*variable",
 					utils.ValueCfg: "~*req.Session-Id", utils.MandatoryCfg: true},
@@ -4573,13 +4573,13 @@ func TestV1GetConfigSectionTemplates(t *testing.T) {
 	cfgCgr := NewDefaultCGRConfig()
 	if err := cfgCgr.V1GetConfig(&SectionWithAPIOpts{Section: TemplatesJson}, &reply); err != nil {
 		t.Error(err)
-	} else if mp, can := reply[TemplatesJson].(map[string][]map[string]interface{}); !can {
+	} else if mp, can := reply[TemplatesJson].(map[string][]map[string]any); !can {
 		t.Errorf("Unexpected type: %t", reply[TemplatesJson])
 	} else {
-		mp[utils.MetaCCA] = []map[string]interface{}{}
-		mp[utils.MetaRAR] = []map[string]interface{}{}
-		mp["*errSip"] = []map[string]interface{}{}
-		mp[utils.MetaCdrLog] = []map[string]interface{}{}
+		mp[utils.MetaCCA] = []map[string]any{}
+		mp[utils.MetaRAR] = []map[string]any{}
+		mp["*errSip"] = []map[string]any{}
+		mp[utils.MetaCdrLog] = []map[string]any{}
 		if !reflect.DeepEqual(reply, expected) {
 			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(reply))
 		}
@@ -4587,9 +4587,9 @@ func TestV1GetConfigSectionTemplates(t *testing.T) {
 }
 
 func TestV1GetConfigSectionConfigs(t *testing.T) {
-	var reply map[string]interface{}
-	expected := map[string]interface{}{
-		ConfigSJson: map[string]interface{}{
+	var reply map[string]any
+	expected := map[string]any{
+		ConfigSJson: map[string]any{
 			utils.EnabledCfg: true,
 			utils.URLCfg:     "/configs/",
 			utils.RootDirCfg: "/var/spool/cgrates/configs",
@@ -4624,9 +4624,9 @@ func TestV1GetConfigSectionConfigs(t *testing.T) {
 }
 
 func TestV1GetConfigSectionAPIBans(t *testing.T) {
-	var reply map[string]interface{}
-	expected := map[string]interface{}{
-		APIBanCfgJson: map[string]interface{}{
+	var reply map[string]any
+	expected := map[string]any{
+		APIBanCfgJson: map[string]any{
 			utils.EnabledCfg: false,
 			utils.KeysCfg:    []string{},
 		},
@@ -4640,9 +4640,9 @@ func TestV1GetConfigSectionAPIBans(t *testing.T) {
 }
 
 func TestV1GetConfigSectionMailer(t *testing.T) {
-	var reply map[string]interface{}
-	expected := map[string]interface{}{
-		MAILER_JSN: map[string]interface{}{
+	var reply map[string]any
+	expected := map[string]any{
+		MAILER_JSN: map[string]any{
 			utils.MailerServerCfg:   "localhost",
 			utils.MailerAuthUserCfg: "cgrates",
 			utils.MailerAuthPassCfg: "CGRateS.org",
@@ -4658,9 +4658,9 @@ func TestV1GetConfigSectionMailer(t *testing.T) {
 }
 
 func TestV1GetConfigSectionAnalyzer(t *testing.T) {
-	var reply map[string]interface{}
-	expected := map[string]interface{}{
-		AnalyzerCfgJson: map[string]interface{}{
+	var reply map[string]any
+	expected := map[string]any{
+		AnalyzerCfgJson: map[string]any{
 			utils.EnabledCfg:         false,
 			utils.CleanupIntervalCfg: "1h0m0s",
 			utils.DBPathCfg:          "/var/spool/cgrates/analyzers",
@@ -4677,7 +4677,7 @@ func TestV1GetConfigSectionAnalyzer(t *testing.T) {
 }
 
 func TestV1GetConfigSectionInvalidSection(t *testing.T) {
-	var reply map[string]interface{}
+	var reply map[string]any
 	expected := "Invalid section"
 	cfgCgr := NewDefaultCGRConfig()
 	if err := cfgCgr.V1GetConfig(&SectionWithAPIOpts{Section: "invalidSection"}, &reply); err == nil || err.Error() != expected {
@@ -4700,7 +4700,7 @@ func TestV1ReloadConfigUnmarshalError(t *testing.T) {
 	expected := "json: unsupported type: chan int"
 	cgrCfg := NewDefaultCGRConfig()
 	if err := cgrCfg.V1SetConfig(&SetConfigArgs{
-		Config: map[string]interface{}{
+		Config: map[string]any{
 			"randomValue": make(chan int),
 		},
 	},
@@ -4711,8 +4711,8 @@ func TestV1ReloadConfigUnmarshalError(t *testing.T) {
 
 func TestV1ReloadConfigJSONWithLocks(t *testing.T) {
 	var reply string
-	section := map[string]interface{}{
-		"inexistentSection": map[string]interface{}{},
+	section := map[string]any{
+		"inexistentSection": map[string]any{},
 	}
 	expected := "Invalid section: <inexistentSection>"
 	cfgCgr := NewDefaultCGRConfig()
@@ -4729,8 +4729,8 @@ func TestV1ReloadConfigCheckingSanity(t *testing.T) {
         "stats_conns": ["*internal:*stats"]
     }
 }`
-	ralsMap := map[string]interface{}{
-		RALS_JSN: map[string]interface{}{
+	ralsMap := map[string]any{
+		RALS_JSN: map[string]any{
 			utils.EnabledCfg:    true,
 			utils.StatSConnsCfg: []string{"*internal:*stats"},
 		},

@@ -46,9 +46,9 @@ func (self *CmdRemoveResource) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdRemoveResource) RpcParams(reset bool) interface{} {
+func (self *CmdRemoveResource) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &utils.TenantIDWithAPIOpts{APIOpts: make(map[string]interface{})}
+		self.rpcParams = &utils.TenantIDWithAPIOpts{APIOpts: make(map[string]any)}
 	}
 	return self.rpcParams
 }
@@ -57,7 +57,7 @@ func (self *CmdRemoveResource) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdRemoveResource) RpcResult() interface{} {
+func (self *CmdRemoveResource) RpcResult() any {
 	var s string
 	return &s
 }

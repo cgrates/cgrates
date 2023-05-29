@@ -63,12 +63,12 @@ func TestHttpJsonMapExportEvent2(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	cgrCfg.EEsCfg().Exporters[0].Type = utils.MetaSQSjsonMap
 
-	bodyExpect := map[string]interface{}{
+	bodyExpect := map[string]any{
 		"2": "*req.field2",
 	}
 	srv := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
 		defer r.Body.Close()
-		var body map[string]interface{}
+		var body map[string]any
 		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 			t.Fatal(err)
 		}
@@ -186,7 +186,7 @@ func TestHTTPJsonMapPrepareOrderMap(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	valMp := map[string]interface{}{
+	valMp := map[string]any{
 		"*req.*tenant": "value1",
 	}
 	body, err := json.Marshal(valMp)
@@ -201,7 +201,7 @@ func TestHTTPJsonMapPrepareOrderMap(t *testing.T) {
 
 func TestHTTPJsonMapPrepareMap(t *testing.T) {
 	httpEE := new(HTTPjsonMapEE)
-	valMp := map[string]interface{}{
+	valMp := map[string]any{
 		"*req.*tenant": "value1",
 	}
 	rcv, err := httpEE.PrepareMap(&utils.CGREvent{

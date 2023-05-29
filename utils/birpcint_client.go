@@ -26,7 +26,7 @@ import (
 )
 
 // NewBiJSONrpcClient will create a bidirectional JSON client connection
-func NewBiJSONrpcClient(addr string, handlers map[string]interface{}) (*rpc2.Client, error) {
+func NewBiJSONrpcClient(addr string, handlers map[string]any) (*rpc2.Client, error) {
 	conn, err := net.Dial(TCP, addr)
 	if err != nil {
 		return nil, err

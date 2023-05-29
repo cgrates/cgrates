@@ -38,7 +38,7 @@ func TestToJSON(t *testing.T) {
 
 func TestToJSONValid(t *testing.T) {
 	jsn := ToJSON(`TimeStart="Test"     Crazy = 1 Mama=true coco Test=1`)
-	a := make(map[string]interface{})
+	a := make(map[string]any)
 	if err := json.Unmarshal(jsn, &a); err != nil {
 		t.Error("Error unmarshaling generated json: ", err)
 	}
@@ -147,21 +147,21 @@ func TestGetStringValue(t *testing.T) {
 		t.Errorf("Expecting: %s , received: %s", expected, rply)
 	}
 
-	if rply := getStringValue(map[string]interface{}{
+	if rply := getStringValue(map[string]any{
 		"ID":        "id1",
 		"TimeValue": 10000}, dflt); rply != expected {
 		t.Errorf("Expecting: %s , received: %s", expected, rply)
 	}
 
 	expected = `{"ID":"id1","TimeValue":"1s"}`
-	if rply := getStringValue(map[string]interface{}{
+	if rply := getStringValue(map[string]any{
 		"ID":        "id1",
 		"TimeValue": int64(time.Second)}, utils.StringSet{"TimeValue": {}}); rply != expected {
 		t.Errorf("Expecting: %s , received: %s", expected, rply)
 	}
 
 	expected = "[10,20,30]"
-	if rply := getSliceAsString([]interface{}{10, 20, 30}, dflt); rply != expected {
+	if rply := getSliceAsString([]any{10, 20, 30}, dflt); rply != expected {
 		t.Errorf("Expecting: %s , received: %s", expected, rply)
 	}
 }
@@ -169,12 +169,12 @@ func TestGetStringValue(t *testing.T) {
 func TestGetSliceAsString(t *testing.T) {
 	dflt := utils.StringSet{}
 	expected := "[10,20,30]"
-	if rply := getSliceAsString([]interface{}{10, 20, 30}, dflt); rply != expected {
+	if rply := getSliceAsString([]any{10, 20, 30}, dflt); rply != expected {
 		t.Errorf("Expecting: %s , received: %s", expected, rply)
 	}
 
 	expected = `["test1","test2","test3"]`
-	if rply := getSliceAsString([]interface{}{"test1", "test2", "test3"}, dflt); rply != expected {
+	if rply := getSliceAsString([]any{"test1", "test2", "test3"}, dflt); rply != expected {
 		t.Errorf("Expecting: %s , received: %s", expected, rply)
 	}
 }
@@ -182,14 +182,14 @@ func TestGetSliceAsString(t *testing.T) {
 func TestGetMapAsString(t *testing.T) {
 	dflt := utils.StringSet{}
 	expected := `{"ID":"id1","TimeValue":10000}`
-	if rply := getStringValue(map[string]interface{}{
+	if rply := getStringValue(map[string]any{
 		"ID":        "id1",
 		"TimeValue": 10000}, dflt); rply != expected {
 		t.Errorf("Expecting: %s , received: %s", expected, rply)
 	}
 
 	expected = `{"ID":"id1","TimeValue":"1s"}`
-	if rply := getStringValue(map[string]interface{}{
+	if rply := getStringValue(map[string]any{
 		"ID":        "id1",
 		"TimeValue": int64(time.Second)}, utils.StringSet{"TimeValue": {}}); rply != expected {
 		t.Errorf("Expecting: %s , received: %s", expected, rply)
@@ -202,7 +202,7 @@ func TestGetFormatedResult(t *testing.T) {
  "ID": "id1",
  "TimeValue": 10000
 }`
-	if rply := GetFormatedResult(map[string]interface{}{
+	if rply := GetFormatedResult(map[string]any{
 		"ID":        "id1",
 		"TimeValue": 10000}, dflt); rply != expected {
 		t.Errorf("Expecting: %q , received: %q", expected, rply)
@@ -212,7 +212,7 @@ func TestGetFormatedResult(t *testing.T) {
  "ID": "id1",
  "TimeValue": "1s"
 }`
-	if rply := GetFormatedResult(map[string]interface{}{
+	if rply := GetFormatedResult(map[string]any{
 		"ID":        "id1",
 		"TimeValue": int64(time.Second)}, utils.StringSet{"TimeValue": {}}); rply != expected {
 		t.Errorf("Expecting: %s , received: %s", expected, rply)
@@ -233,12 +233,12 @@ func TestGetFormatedResult(t *testing.T) {
 func TestGetFormatedSliceResult(t *testing.T) {
 	dflt := utils.StringSet{}
 	expected := "[10,20,30]"
-	if rply := getSliceAsString([]interface{}{10, 20, 30}, dflt); rply != expected {
+	if rply := getSliceAsString([]any{10, 20, 30}, dflt); rply != expected {
 		t.Errorf("Expecting: %s , received: %s", expected, rply)
 	}
 
 	expected = `["test1","test2","test3"]`
-	if rply := getSliceAsString([]interface{}{"test1", "test2", "test3"}, dflt); rply != expected {
+	if rply := getSliceAsString([]any{"test1", "test2", "test3"}, dflt); rply != expected {
 		t.Errorf("Expecting: %s , received: %s", expected, rply)
 	}
 }
@@ -246,7 +246,7 @@ func TestGetFormatedSliceResult(t *testing.T) {
 func TestFromJSONInterestingFields2(t *testing.T) {
 	jsn := utils.ToJSON(&utils.TenantIDWithAPIOpts{
 		TenantID: new(utils.TenantID),
-		APIOpts:  make(map[string]interface{}),
+		APIOpts:  make(map[string]any),
 	})
 
 	line := FromJSON([]byte(jsn), []string{"Tenant", "ID", "APIOpts"})
@@ -259,8 +259,8 @@ func TestFromJSONInterestingFields2(t *testing.T) {
 
 func TestGetStringValueInterface(t *testing.T) {
 	dflt := utils.StringSet{}
-	expected := getSliceAsString([]interface{}{}, dflt)
-	rply := getStringValue([]interface{}{}, dflt)
+	expected := getSliceAsString([]any{}, dflt)
+	rply := getStringValue([]any{}, dflt)
 	if rply != expected {
 		t.Errorf("Expecting: %s , received: %s", expected, rply)
 	}
@@ -322,7 +322,7 @@ func (*mockCommandExecuter) RpcMethod() string {
 	return utils.EmptyString
 }
 
-func (*mockCommandExecuter) RpcParams(reset bool) interface{} {
+func (*mockCommandExecuter) RpcParams(reset bool) any {
 	return struct{}{}
 }
 
@@ -330,7 +330,7 @@ func (*mockCommandExecuter) PostprocessRpcParams() error {
 	return nil
 }
 
-func (*mockCommandExecuter) RpcResult() interface{} {
+func (*mockCommandExecuter) RpcResult() any {
 	return nil
 }
 

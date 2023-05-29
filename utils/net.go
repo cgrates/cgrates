@@ -29,11 +29,11 @@ import (
 )
 
 type Server interface {
-	RpcRegister(rcvr interface{})
-	RpcRegisterName(name string, rcvr interface{})
+	RpcRegister(rcvr any)
+	RpcRegisterName(name string, rcvr any)
 	RegisterHttpFunc(pattern string, handler func(http.ResponseWriter, *http.Request))
 	RegisterHttpHandler(pattern string, handler http.Handler)
-	BiRPCRegisterName(method string, handlerFunc interface{})
+	BiRPCRegisterName(method string, handlerFunc any)
 }
 
 func LocalAddr() *NetAddr {
@@ -126,7 +126,7 @@ type serverRequest struct {
 	Id     *json.RawMessage `json:"id"`
 }
 
-func WriteServerResponse(w io.Writer, id *json.RawMessage, result, err interface{}) error {
+func WriteServerResponse(w io.Writer, id *json.RawMessage, result, err any) error {
 	return json.NewEncoder(w).Encode(
 		serverResponse{
 			Id:     id,
@@ -137,6 +137,6 @@ func WriteServerResponse(w io.Writer, id *json.RawMessage, result, err interface
 
 type serverResponse struct {
 	Id     *json.RawMessage `json:"id"`
-	Result interface{}      `json:"result"`
-	Error  interface{}      `json:"error"`
+	Result any              `json:"result"`
+	Error  any              `json:"error"`
 }

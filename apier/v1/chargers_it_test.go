@@ -45,16 +45,16 @@ var (
 		{
 			Tenant: "cgrates.org",
 			ID:     "event1",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.AccountField: "1001",
 			},
-			APIOpts: map[string]interface{}{utils.OptsContext: "simpleauth"},
+			APIOpts: map[string]any{utils.OptsContext: "simpleauth"},
 		},
 
 		{
 			Tenant: "cgrates.org",
 			ID:     "event2",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.AccountField: "1010",
 				"DistinctMatch":    "cgrates",
 			},
@@ -62,10 +62,10 @@ var (
 		{
 			Tenant: "cgrates.org",
 			ID:     "event1",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.AccountField: "1007",
 			},
-			APIOpts: map[string]interface{}{utils.OptsContext: "simpleauth"},
+			APIOpts: map[string]any{utils.OptsContext: "simpleauth"},
 		},
 	}
 
@@ -305,7 +305,7 @@ func testChargerSGetChargersForEvent2(t *testing.T) {
 		&utils.CGREvent{ // matching Charger1
 			Tenant: utils.EmptyString,
 			ID:     "event1",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.AccountField: "1015",
 				utils.Usage:        1,
 			},
@@ -325,12 +325,12 @@ func testChargerSProcessEvent(t *testing.T) {
 			CGREvent: &utils.CGREvent{ // matching Charger1
 				Tenant: "cgrates.org",
 				ID:     "event1",
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					utils.AccountField: "1001",
 					"Password":         "CGRateS.org",
 					"RunID":            utils.MetaDefault,
 				},
-				APIOpts: map[string]interface{}{
+				APIOpts: map[string]any{
 					utils.OptsContext:              "simpleauth",
 					utils.MetaSubsys:               utils.MetaChargers,
 					utils.OptsAttributesProfileIDs: []string{"ATTR_1001_SIMPLEAUTH"},
@@ -357,13 +357,13 @@ func testChargerSProcessEvent(t *testing.T) {
 			CGREvent: &utils.CGREvent{ // matching Charger1
 				Tenant: "cgrates.org",
 				ID:     "event1",
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					utils.AccountField: "1007",
 					utils.RequestType:  "*rated",
 					utils.Category:     "call",
 					utils.RunID:        utils.MetaDefault,
 				},
-				APIOpts: map[string]interface{}{
+				APIOpts: map[string]any{
 					utils.OptsContext:              "simpleauth",
 					utils.MetaSubsys:               utils.MetaChargers,
 					utils.OptsAttributesProfileIDs: []string{"*constant:*req.RequestType:*rated;*constant:*req.Category:call"},
@@ -523,7 +523,7 @@ func testChargerSProcessWithNotFoundAttribute(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "CustomEvent",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "Random",
 			"CustomField":      "WithoutAttributes",
 		},
@@ -536,12 +536,12 @@ func testChargerSProcessWithNotFoundAttribute(t *testing.T) {
 			CGREvent: &utils.CGREvent{ // matching ChargerWithoutAttribute
 				Tenant: "cgrates.org",
 				ID:     "CustomEvent",
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					utils.AccountField: "Random",
 					"CustomField":      "WithoutAttributes",
 					"RunID":            "CustomRun",
 				},
-				APIOpts: map[string]interface{}{
+				APIOpts: map[string]any{
 					utils.MetaSubsys:               utils.MetaChargers,
 					utils.OptsAttributesProfileIDs: nil,
 				},
@@ -602,11 +602,11 @@ func testChargerSProccessEventWithProcceSRunS(t *testing.T) {
 			CGREvent: &utils.CGREvent{ // matching Charger1
 				Tenant: "cgrates.org",
 				ID:     "event1",
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					utils.AccountField: "1002",
 					utils.RunID:        "*default",
 				},
-				APIOpts: map[string]interface{}{
+				APIOpts: map[string]any{
 					utils.MetaSubsys:                utils.MetaChargers,
 					utils.OptsAttributesProfileIDs:  []string{"*constant:*req.Account:1002", "*constant:*req.Account:1003"},
 					utils.OptsAttributesProcessRuns: 1.,
@@ -617,10 +617,10 @@ func testChargerSProccessEventWithProcceSRunS(t *testing.T) {
 	cgrEv := &utils.CGREvent{ // matching Charger1
 		Tenant: "cgrates.org",
 		ID:     "event1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1010",
 		},
-		APIOpts: map[string]interface{}{utils.OptsAttributesProcessRuns: 1},
+		APIOpts: map[string]any{utils.OptsAttributesProcessRuns: 1},
 	}
 	var result2 []*engine.ChrgSProcessEventReply
 	if err := chargerRPC.Call(utils.ChargerSv1ProcessEvent, cgrEv, &result2); err != nil {
@@ -701,7 +701,7 @@ func testChargerSCacheTestSet(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "CHARGERS_CACHE",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.CacheOpt: utils.MetaNone,
 		},
 	}

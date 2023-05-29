@@ -118,16 +118,16 @@ func (rlcfg *ResourceSConfig) loadFromJSONCfg(jsnCfg *ResourceSJsonCfg) (err err
 	return
 }
 
-// AsMapInterface returns the config as a map[string]interface{}
-func (rlcfg *ResourceSConfig) AsMapInterface() (initialMP map[string]interface{}) {
-	opts := map[string]interface{}{
+// AsMapInterface returns the config as a map[string]any
+func (rlcfg *ResourceSConfig) AsMapInterface() (initialMP map[string]any) {
+	opts := map[string]any{
 		utils.MetaUsageIDCfg: rlcfg.Opts.UsageID,
 		utils.MetaUnitsCfg:   rlcfg.Opts.Units,
 	}
 	if rlcfg.Opts.UsageTTL != nil {
 		opts[utils.MetaUsageTTLCfg] = *rlcfg.Opts.UsageTTL
 	}
-	initialMP = map[string]interface{}{
+	initialMP = map[string]any{
 		utils.EnabledCfg:        rlcfg.Enabled,
 		utils.IndexedSelectsCfg: rlcfg.IndexedSelects,
 		utils.NestedFieldsCfg:   rlcfg.NestedFields,

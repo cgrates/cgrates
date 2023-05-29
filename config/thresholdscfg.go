@@ -98,13 +98,13 @@ func (t *ThresholdSCfg) loadFromJSONCfg(jsnCfg *ThresholdSJsonCfg) (err error) {
 	return nil
 }
 
-// AsMapInterface returns the config as a map[string]interface{}
-func (t *ThresholdSCfg) AsMapInterface() (initialMP map[string]interface{}) {
-	opts := map[string]interface{}{
+// AsMapInterface returns the config as a map[string]any
+func (t *ThresholdSCfg) AsMapInterface() (initialMP map[string]any) {
+	opts := map[string]any{
 		utils.MetaProfileIDs:              t.Opts.ProfileIDs,
 		utils.MetaProfileIgnoreFiltersCfg: t.Opts.ProfileIgnoreFilters,
 	}
-	initialMP = map[string]interface{}{
+	initialMP = map[string]any{
 		utils.EnabledCfg:        t.Enabled,
 		utils.IndexedSelectsCfg: t.IndexedSelects,
 		utils.NestedFieldsCfg:   t.NestedFields,

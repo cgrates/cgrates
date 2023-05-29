@@ -28,7 +28,7 @@ import (
 func TestNewBiJSONrpcClient(t *testing.T) {
 	//empty check
 	addr := "127.0.0.1:4024"
-	handlers := map[string]interface{}{}
+	handlers := map[string]any{}
 	rcv, err := NewBiJSONrpcClient(addr, handlers)
 	if err == nil || rcv != nil {
 		t.Error("Expencting: \"connection refused\", received : nil")
@@ -38,7 +38,7 @@ func TestNewBiJSONrpcClient(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	handlers = map[string]interface{}{
+	handlers = map[string]any{
 		"": func(*rpc2.Client, *struct{}, *string) error { return nil },
 	}
 

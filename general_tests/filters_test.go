@@ -99,10 +99,10 @@ func TestInlineFilterPassFiltersForEvent(t *testing.T) {
 	}
 	internalAPIerSv1Chan <- &v1.APIerSv1{DataManager: dmFilterPass}
 	engine.SetConnManager(connMgr)
-	failEvent := map[string]interface{}{
+	failEvent := map[string]any{
 		utils.Destination: "+5086517174963",
 	}
-	passEvent := map[string]interface{}{
+	passEvent := map[string]any{
 		utils.Destination: "+4986517174963",
 	}
 	fEv := utils.MapStorage{utils.MetaReq: failEvent}

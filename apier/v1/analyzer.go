@@ -35,7 +35,7 @@ type AnalyzerSv1 struct {
 
 // Call implements rpcclient.ClientConnector interface for internal RPC
 func (aSv1 *AnalyzerSv1) Call(serviceMethod string,
-	args interface{}, reply interface{}) error {
+	args any, reply any) error {
 	return utils.APIerRPCCall(aSv1, serviceMethod, args, reply)
 }
 
@@ -46,6 +46,6 @@ func (aSv1 *AnalyzerSv1) Ping(ign *utils.CGREvent, reply *string) error {
 }
 
 // StringQuery returns a list of API that match the query
-func (aSv1 *AnalyzerSv1) StringQuery(search *analyzers.QueryArgs, reply *[]map[string]interface{}) error {
+func (aSv1 *AnalyzerSv1) StringQuery(search *analyzers.QueryArgs, reply *[]map[string]any) error {
 	return aSv1.aS.V1StringQuery(search, reply)
 }

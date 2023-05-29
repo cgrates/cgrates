@@ -322,7 +322,7 @@ func testTutAccounts(t *testing.T) {
 		Account:     "1001",
 		BalanceType: utils.MetaMonetary,
 		Value:       1,
-		Balance: map[string]interface{}{
+		Balance: map[string]any{
 			utils.ID: utils.MetaDefault,
 		},
 	}
@@ -343,7 +343,7 @@ func testTutAccounts(t *testing.T) {
 		Account:     "1001",
 		BalanceType: utils.MetaMonetary,
 		Value:       101,
-		Balance: map[string]interface{}{
+		Balance: map[string]any{
 			utils.ID: utils.MetaDefault,
 		},
 	}

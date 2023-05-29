@@ -38,7 +38,7 @@ func TestERsProcessPartialEvent(t *testing.T) {
 	event := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "EventERsProcessPartial",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.OriginID: "originID",
 		},
 	}
@@ -84,7 +84,7 @@ func TestErsOnEvictedMetaPostCDROK(t *testing.T) {
 			{
 				Tenant: "cgrates.org",
 				ID:     "EventErsOnEvicted",
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					utils.AccountField: "1001",
 				},
 			},
@@ -138,7 +138,7 @@ func TestErsOnEvictedMetaPostCDRMergeErr(t *testing.T) {
 			{
 				Tenant: "cgrates.org",
 				ID:     "EventErsOnEvicted",
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					utils.AnswerTime:   time.Date(2021, 6, 1, 12, 0, 0, 0, time.UTC),
 					utils.AccountField: "1001",
 					utils.Destination:  "1002",
@@ -147,7 +147,7 @@ func TestErsOnEvictedMetaPostCDRMergeErr(t *testing.T) {
 			{
 				Tenant: "cgrates.org",
 				ID:     "EventErsOnEvicted",
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					utils.AnswerTime:   time.Date(2021, 6, 1, 13, 0, 0, 0, time.UTC),
 					utils.AccountField: "1001",
 					utils.Destination:  "1003",
@@ -198,7 +198,7 @@ func TestErsOnEvictedMetaDumpToFileSetFieldsErr(t *testing.T) {
 			{
 				Tenant: "cgrates.org",
 				ID:     "EventErsOnEvicted",
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					utils.AccountField: "1001",
 				},
 			},
@@ -254,7 +254,7 @@ func TestErsOnEvictedMetaDumpToFileMergeErr(t *testing.T) {
 			{
 				Tenant: "cgrates.org",
 				ID:     "EventErsOnEvicted",
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					utils.AnswerTime:   time.Date(2021, 6, 1, 12, 0, 0, 0, time.UTC),
 					utils.AccountField: "1001",
 					utils.Destination:  "1002",
@@ -263,7 +263,7 @@ func TestErsOnEvictedMetaDumpToFileMergeErr(t *testing.T) {
 			{
 				Tenant: "cgrates.org",
 				ID:     "EventErsOnEvicted",
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					utils.AnswerTime:   time.Date(2021, 6, 1, 13, 0, 0, 0, time.UTC),
 					utils.AccountField: "1001",
 					utils.Destination:  "1003",
@@ -307,7 +307,7 @@ func TestErsOnEvictedMetaDumpToFileEmptyPath(t *testing.T) {
 			{
 				Tenant: "cgrates.org",
 				ID:     "EventErsOnEvicted",
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					utils.AccountField: "1001",
 				},
 			},

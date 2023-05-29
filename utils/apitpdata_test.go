@@ -535,7 +535,7 @@ func TestRPCCDRsFilterAsCDRsFilter(t *testing.T) {
 		MinUsage:               "MinUsage",
 		MaxUsage:               "MaxUsage",
 		OrderBy:                "OrderBy",
-		ExtraArgs: map[string]interface{}{
+		ExtraArgs: map[string]any{
 			OrderIDStart: 0,
 			OrderIDEnd:   0,
 			MinCost:      0.,

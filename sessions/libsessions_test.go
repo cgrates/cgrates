@@ -31,7 +31,7 @@ import (
 )
 
 func TestLibSessionSGetSetCGRID(t *testing.T) {
-	sEv := engine.NewMapEvent(map[string]interface{}{
+	sEv := engine.NewMapEvent(map[string]any{
 		utils.EventName:       "TEST_EVENT",
 		utils.ToR:             "*voice",
 		utils.OriginID:        "12345",

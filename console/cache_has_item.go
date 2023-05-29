@@ -48,7 +48,7 @@ func (self *CmdCacheHasItem) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdCacheHasItem) RpcParams(reset bool) interface{} {
+func (self *CmdCacheHasItem) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &utils.ArgsGetCacheItemWithAPIOpts{}
 	}
@@ -59,7 +59,7 @@ func (self *CmdCacheHasItem) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdCacheHasItem) RpcResult() interface{} {
+func (self *CmdCacheHasItem) RpcResult() any {
 	var reply bool
 	return &reply
 }

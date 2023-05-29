@@ -42,7 +42,7 @@ type Route struct {
 	Blocker         bool // do not process further route after this one
 	RouteParameters string
 
-	cacheRoute     map[string]interface{} // cache["*ratio"]=ratio
+	cacheRoute     map[string]any // cache["*ratio"]=ratio
 	lazyCheckRules []*FilterRule
 }
 
@@ -61,7 +61,7 @@ type RouteProfile struct {
 // RouteProfileWithAPIOpts is used in replicatorV1 for dispatcher
 type RouteProfileWithAPIOpts struct {
 	*RouteProfile
-	APIOpts map[string]interface{}
+	APIOpts map[string]any
 }
 
 func (rp *RouteProfile) compileCacheParameters() error {
@@ -79,7 +79,7 @@ func (rp *RouteProfile) compileCacheParameters() error {
 		}
 		// add the ratio for each route
 		for _, route := range rp.Routes {
-			route.cacheRoute = make(map[string]interface{})
+			route.cacheRoute = make(map[string]any)
 			if ratioRoute, has := ratioMap[route.ID]; !has { // in case that ratio isn't defined for specific routes check for default
 				if ratioDefault, has := ratioMap[utils.MetaDefault]; !has { // in case that *default ratio isn't defined take it from config
 					route.cacheRoute[utils.MetaRatio] = config.CgrConfig().RouteSCfg().DefaultRatio
@@ -186,10 +186,10 @@ func (rpS *RouteService) matchingRouteProfilesForEvent(tnt string, ev *utils.CGR
 }
 
 // costForEvent will compute cost out of accounts and rating plans for event
-// returns map[string]interface{} with cost and relevant matching information inside
+// returns map[string]any with cost and relevant matching information inside
 func (rpS *RouteService) costForEvent(ev *utils.CGREvent,
-	acntIDs, rpIDs []string) (costData map[string]interface{}, err error) {
-	costData = make(map[string]interface{})
+	acntIDs, rpIDs []string) (costData map[string]any, err error) {
+	costData = make(map[string]any)
 	if err = ev.CheckMandatoryFields([]string{utils.AccountField,
 		utils.Destination, utils.SetupTime}); err != nil {
 		return
@@ -221,7 +221,7 @@ func (rpS *RouteService) costForEvent(ev *utils.CGREvent,
 		err = nil
 	}
 	var accountMaxUsage time.Duration
-	var acntCost map[string]interface{}
+	var acntCost map[string]any
 	var initialUsage time.Duration
 	if len(acntIDs) != 0 {
 		if err := rpS.connMgr.Call(rpS.cgrcfg.RouteSCfg().RALsConns, nil, utils.ResponderGetMaxSessionTimeOnAccounts,
@@ -257,7 +257,7 @@ func (rpS *RouteService) costForEvent(ev *utils.CGREvent,
 	}
 
 	if accountMaxUsage == 0 || accountMaxUsage < initialUsage {
-		var rpCost map[string]interface{}
+		var rpCost map[string]any
 		if err := rpS.connMgr.Call(rpS.cgrcfg.RouteSCfg().RALsConns, nil, utils.ResponderGetCostOnRatingPlans,
 			&utils.GetCostOnRatingPlansArgs{
 				Tenant:        ev.Tenant,
@@ -376,7 +376,7 @@ func (rpS *RouteService) populateSortingData(ev *utils.CGREvent, route *Route,
 	extraOpts *optsGetRoutes) (srtRoute *SortedRoute, pass bool, err error) {
 	sortedSpl := &SortedRoute{
 		RouteID: route.ID,
-		SortingData: map[string]interface{}{
+		SortingData: map[string]any{
 			utils.Weight: route.Weight,
 		},
 		sortingDataF64: map[string]float64{
@@ -572,7 +572,7 @@ func (rpS *RouteService) V1GetRoutes(args *utils.CGREvent, reply *SortedRoutesLi
 	}
 	if len(rpS.cgrcfg.RouteSCfg().AttributeSConns) != 0 {
 		if args.APIOpts == nil {
-			args.APIOpts = make(map[string]interface{})
+			args.APIOpts = make(map[string]any)
 		}
 		args.APIOpts[utils.MetaSubsys] = utils.MetaRoutes
 		context := utils.GetStringOpts(args, rpS.cgrcfg.RouteSCfg().Opts.Context, utils.OptsContext)

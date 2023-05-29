@@ -54,7 +54,7 @@ func (eeR *ExportRequest) String() string {
 }
 
 // FieldAsInterface implements utils.DataProvider
-func (eeR *ExportRequest) FieldAsInterface(fldPath []string) (val interface{}, err error) {
+func (eeR *ExportRequest) FieldAsInterface(fldPath []string) (val any, err error) {
 	switch fldPath[0] {
 	default:
 		var dp utils.DataProvider
@@ -91,7 +91,7 @@ func (eeR *ExportRequest) FieldAsInterface(fldPath []string) (val interface{}, e
 
 // FieldAsString implements utils.DataProvider
 func (eeR *ExportRequest) FieldAsString(fldPath []string) (val string, err error) {
-	var iface interface{}
+	var iface any
 	if iface, err = eeR.FieldAsInterface(fldPath); err != nil {
 		return
 	}
@@ -108,7 +108,7 @@ func (eeR *ExportRequest) SetFields(tplFlds []*config.FCTemplate) (err error) {
 			continue
 		}
 
-		var out interface{}
+		var out any
 		out, err = eeR.ParseField(tplFld)
 		if err != nil {
 			if err == utils.ErrNotFound {
@@ -170,7 +170,7 @@ func (eeR *ExportRequest) SetAsSlice(fullPath *utils.FullPath, val *utils.DataLe
 
 // ParseField outputs the value based on the template item
 func (eeR *ExportRequest) ParseField(
-	cfgFld *config.FCTemplate) (out interface{}, err error) {
+	cfgFld *config.FCTemplate) (out any, err error) {
 	tmpType := cfgFld.Type
 	switch tmpType {
 	case utils.MetaMaskedDestination:
@@ -231,7 +231,7 @@ func (eeR *ExportRequest) Compose(fullPath *utils.FullPath, val *utils.DataLeaf)
 	switch prfx := fullPath.PathSlice[0]; prfx {
 	case utils.MetaUCH:
 		path := fullPath.Path[5:]
-		var prv interface{}
+		var prv any
 		if prvI, ok := Cache.Get(utils.CacheUCH, path); !ok {
 			prv = val.Data
 		} else {
@@ -239,7 +239,7 @@ func (eeR *ExportRequest) Compose(fullPath *utils.FullPath, val *utils.DataLeaf)
 		}
 		return Cache.Set(utils.CacheUCH, path, prv, nil, true, utils.NonTransactional)
 	case utils.MetaOpts:
-		var prv interface{}
+		var prv any
 		if prv, err = eeR.inData[utils.MetaOpts].FieldAsInterface(fullPath.PathSlice[1:]); err != nil {
 			if err != utils.ErrNotFound {
 				return

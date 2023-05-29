@@ -29,8 +29,8 @@ func (dS *DispatcherService) CoreSv1Panic(args *utils.PanicMessageArgs, reply *s
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -47,11 +47,11 @@ func (dS *DispatcherService) CoreSv1Ping(args *utils.CGREvent, reply *string) (e
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
+	ev := make(map[string]any)
 	if args != nil {
 		ev = args.Event
 	}
-	opts := make(map[string]interface{})
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -69,8 +69,8 @@ func (dS *DispatcherService) CoreSv1Sleep(args *utils.DurationArgs, reply *strin
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -88,8 +88,8 @@ func (dS *DispatcherService) CoreSv1StartCPUProfiling(args *utils.DirectoryArgs,
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -106,8 +106,8 @@ func (dS *DispatcherService) CoreSv1StartMemoryProfiling(args *utils.MemoryPrf, 
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -119,13 +119,13 @@ func (dS *DispatcherService) CoreSv1StartMemoryProfiling(args *utils.MemoryPrf, 
 	}
 	return dS.Dispatch(&utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaCore, utils.CoreSv1StartMemoryProfiling, args, reply)
 }
-func (dS *DispatcherService) CoreSv1Status(args *utils.TenantWithAPIOpts, reply *map[string]interface{}) (err error) {
+func (dS *DispatcherService) CoreSv1Status(args *utils.TenantWithAPIOpts, reply *map[string]any) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -142,8 +142,8 @@ func (dS *DispatcherService) CoreSv1StopCPUProfiling(args *utils.TenantWithAPIOp
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -160,8 +160,8 @@ func (dS *DispatcherService) CoreSv1StopMemoryProfiling(args *utils.TenantWithAP
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}

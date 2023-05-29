@@ -229,11 +229,11 @@ func APIErrorHandler(errIn error) (err error) {
 	return cgrErr
 }
 
-func NewErrStringCast(valIface interface{}) error {
+func NewErrStringCast(valIface any) error {
 	return fmt.Errorf("cannot cast value: %v to string", valIface)
 }
 
-func NewErrFldStringCast(fldName string, valIface interface{}) error {
+func NewErrFldStringCast(fldName string, valIface any) error {
 	return fmt.Errorf("cannot cast field: %s with value: %v to string", fldName, valIface)
 }
 

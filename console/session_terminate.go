@@ -50,7 +50,7 @@ func (self *CmdSessionsTerminate) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdSessionsTerminate) RpcParams(reset bool) interface{} {
+func (self *CmdSessionsTerminate) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &sessions.V1TerminateSessionArgs{
 			CGREvent: new(utils.CGREvent),
@@ -67,7 +67,7 @@ func (self *CmdSessionsTerminate) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdSessionsTerminate) RpcResult() interface{} {
+func (self *CmdSessionsTerminate) RpcResult() any {
 	var atr string
 	return &atr
 }

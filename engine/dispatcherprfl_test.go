@@ -226,11 +226,11 @@ func TestDispatcherProfilesSort(t *testing.T) {
 
 type testRPCHost struct {
 	serviceMethod string
-	args          interface{}
-	reply         interface{}
+	args          any
+	reply         any
 }
 
-func (v *testRPCHost) Call(serviceMethod string, args interface{}, reply interface{}) error {
+func (v *testRPCHost) Call(serviceMethod string, args any, reply any) error {
 	v.serviceMethod = serviceMethod
 	v.args = args
 	v.reply = reply
@@ -301,7 +301,7 @@ func TestDispatcherHostProfileCloneWithParams(t *testing.T) {
 		ID:      "testID",
 		Weight:  10,
 		Blocker: false,
-		Params: map[string]interface{}{
+		Params: map[string]any{
 			"param1": "value of param1",
 			"param2": "value of param2",
 		},
@@ -311,7 +311,7 @@ func TestDispatcherHostProfileCloneWithParams(t *testing.T) {
 		ID:      "testID",
 		Weight:  10,
 		Blocker: false,
-		Params: map[string]interface{}{
+		Params: map[string]any{
 			"param1": "value of param1",
 			"param2": "value of param2",
 		},

@@ -1073,7 +1073,7 @@ func TestClone(t *testing.T) {
 	}
 	// Clone from an interface
 	c := "mystr"
-	ifaceC := interface{}(c)
+	ifaceC := any(c)
 	clndIface := reflect.Indirect(reflect.New(reflect.TypeOf(ifaceC))).Interface().(string)
 	if err := Clone(ifaceC, &clndIface); err != nil {
 		t.Error(err)
@@ -1384,15 +1384,15 @@ func (tRPC *TestRPC) V1Error(args *string, reply *string) error {
 	return errors.New("V1_err_test")
 }
 
-func (tRPC *TestRPC) Call(args interface{}, reply interface{}) error {
+func (tRPC *TestRPC) Call(args any, reply any) error {
 	return nil
 }
 
-func (tRPC *TestRPC) V1Error2(args interface{}, reply interface{}) (int, error) {
+func (tRPC *TestRPC) V1Error2(args any, reply any) (int, error) {
 	return 0, nil
 }
 
-func (tRPC *TestRPC) V1Error3(args interface{}, reply interface{}) int {
+func (tRPC *TestRPC) V1Error3(args any, reply any) int {
 	return 0
 }
 
@@ -1432,15 +1432,15 @@ func (tRPC *TestRPC2) Error(args *string, reply *string) error {
 	return errors.New("V1_err_test")
 }
 
-func (tRPC *TestRPC2) Call(args interface{}, reply interface{}) error {
+func (tRPC *TestRPC2) Call(args any, reply any) error {
 	return nil
 }
 
-func (tRPC *TestRPC2) Error2(args interface{}, reply interface{}) (int, error) {
+func (tRPC *TestRPC2) Error2(args any, reply any) (int, error) {
 	return 0, nil
 }
 
-func (tRPC *TestRPC2) Error3(args interface{}, reply interface{}) int {
+func (tRPC *TestRPC2) Error3(args any, reply any) int {
 	return 0
 }
 
@@ -1717,24 +1717,24 @@ type server struct{}
 
 type client struct{}
 
-func (c client) Call(serviceMethod string, args interface{}, reply interface{}) (err error) {
+func (c client) Call(serviceMethod string, args any, reply any) (err error) {
 	err = ErrExists
 	return
 }
 
-func (srv *server) BiRPCv1ValidMethod(cl rpcclient.ClientConnector, args interface{}, req interface{}) error {
+func (srv *server) BiRPCv1ValidMethod(cl rpcclient.ClientConnector, args any, req any) error {
 	return nil
 }
 
-func (srv *server) BiRPCv1MultipleParams(cl rpcclient.ClientConnector, args interface{}, req interface{}) (int, error) {
+func (srv *server) BiRPCv1MultipleParams(cl rpcclient.ClientConnector, args any, req any) (int, error) {
 	return 1, nil
 }
 
-func (srv *server) BiRPCv1NoErrorReturn(cl rpcclient.ClientConnector, args interface{}, req interface{}) int {
+func (srv *server) BiRPCv1NoErrorReturn(cl rpcclient.ClientConnector, args any, req any) int {
 	return 1
 }
 
-func (srv *server) BiRPCv1FinalError(cl rpcclient.ClientConnector, args interface{}, req interface{}) (err error) {
+func (srv *server) BiRPCv1FinalError(cl rpcclient.ClientConnector, args any, req any) (err error) {
 	err = ErrExists
 	return
 }
@@ -1809,7 +1809,7 @@ func TestCoreUtilsGenerateDBItemOpts(t *testing.T) {
 	cache := "testKey3"
 	rmtHost := "testKey4"
 
-	expected := map[string]interface{}{
+	expected := map[string]any{
 		OptsAPIKey:    apiKey,
 		OptsRouteID:   routeID,
 		CacheOpt:      cache,

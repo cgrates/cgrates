@@ -66,9 +66,9 @@ func (fSCfg *FilterSCfg) loadFromJSONCfg(jsnCfg *FilterSJsonCfg) (err error) {
 	return
 }
 
-// AsMapInterface returns the config as a map[string]interface{}
-func (fSCfg *FilterSCfg) AsMapInterface() (initialMP map[string]interface{}) {
-	initialMP = make(map[string]interface{})
+// AsMapInterface returns the config as a map[string]any
+func (fSCfg *FilterSCfg) AsMapInterface() (initialMP map[string]any) {
+	initialMP = make(map[string]any)
 	if fSCfg.StatSConns != nil {
 		statSConns := make([]string, len(fSCfg.StatSConns))
 		for i, item := range fSCfg.StatSConns {

@@ -193,8 +193,8 @@ func TestDMSetDestinationSucces(t *testing.T) {
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	clientConn := make(chan rpcclient.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ReplicatorSv1SetDestination: func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.ReplicatorSv1SetDestination: func(args, reply any) error {
 				*reply.(*string) = "reply"
 				return nil
 			},
@@ -229,8 +229,8 @@ func TestDMSetAccountSucces(t *testing.T) {
 	}*/
 	clientConn := make(chan rpcclient.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ReplicatorSv1SetAccount: func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.ReplicatorSv1SetAccount: func(args, reply any) error {
 				*reply.(*string) = "reply"
 				return nil
 			},
@@ -273,8 +273,8 @@ func TestDMSetReverseDestination(t *testing.T) {
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	clientConn := make(chan rpcclient.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ReplicatorSv1SetReverseDestination: func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.ReplicatorSv1SetReverseDestination: func(args, reply any) error {
 				*reply.(*string) = "reply"
 				return nil
 			},

@@ -276,7 +276,7 @@ func testSqlEeExportEventFull(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "voiceEvent",
 			Time:   utils.TimePointer(time.Now()),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.CGRID:        utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()),
 				utils.ToR:          utils.MetaVoice,
 				utils.OriginID:     "dsafdsaf",
@@ -313,7 +313,7 @@ func testSqlEeExportEventPartial(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "voiceEvent",
 			Time:   utils.TimePointer(time.Now()),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.CGRID:        utils.Sha1("asd", time.Unix(1383813745, 0).UTC().String()),
 				utils.ToR:          utils.MetaVoice,
 				utils.OriginID:     "dsafdsaf",
@@ -403,7 +403,7 @@ func TestSQLExportEvent1(t *testing.T) {
 	if err := sqlEe.Connect(); err != nil {
 		t.Fatal(err)
 	}
-	if err := sqlEe.ExportEvent(&sqlPosterRequest{Querry: "INSERT INTO cdrs VALUES (); ", Values: []interface{}{}}, ""); err != nil {
+	if err := sqlEe.ExportEvent(&sqlPosterRequest{Querry: "INSERT INTO cdrs VALUES (); ", Values: []any{}}, ""); err != nil {
 		t.Error(err)
 	}
 	sqlEe.Close()

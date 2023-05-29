@@ -340,7 +340,7 @@ func TestSessionSCfgAsMapInterfaceCase1(t *testing.T) {
 		},
     },
 }`
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		utils.EnabledCfg:             false,
 		utils.ListenBijsonCfg:        "127.0.0.1:2014",
 		utils.ListenBigobCfg:         "",
@@ -366,7 +366,7 @@ func TestSessionSCfgAsMapInterfaceCase1(t *testing.T) {
 		utils.TerminateAttemptsCfg:   5,
 		utils.MinDurLowBalanceCfg:    "0",
 		utils.AlterableFieldsCfg:     []string{},
-		utils.STIRCfg: map[string]interface{}{
+		utils.STIRCfg: map[string]any{
 			utils.AllowedAtestCfg:       []string{"*any"},
 			utils.PayloadMaxdurationCfg: "-1",
 			utils.DefaultAttestCfg:      "A",
@@ -418,7 +418,7 @@ func TestSessionSCfgAsMapInterfaceCase2(t *testing.T) {
 			"scheduler_conns": ["*internal:*scheduler", "*conn1"],
 		},
 	}`
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		utils.EnabledCfg:             true,
 		utils.ListenBijsonCfg:        "127.0.0.1:2018",
 		utils.ListenBigobCfg:         "",
@@ -440,7 +440,7 @@ func TestSessionSCfgAsMapInterfaceCase2(t *testing.T) {
 		utils.ChannelSyncIntervalCfg: "0",
 		utils.TerminateAttemptsCfg:   10,
 		utils.AlterableFieldsCfg:     []string{},
-		utils.STIRCfg: map[string]interface{}{
+		utils.STIRCfg: map[string]any{
 			utils.AllowedAtestCfg:       []string{"any1", "any2"},
 			utils.PayloadMaxdurationCfg: "1s",
 			utils.DefaultAttestCfg:      "B",
@@ -460,7 +460,7 @@ func TestSessionSCfgAsMapInterfaceCase2(t *testing.T) {
 		t.Error(err)
 	}
 	rcv := cgrCfg.sessionSCfg.AsMapInterface()
-	sort.Strings(rcv[utils.STIRCfg].(map[string]interface{})[utils.AllowedAtestCfg].([]string))
+	sort.Strings(rcv[utils.STIRCfg].(map[string]any)[utils.AllowedAtestCfg].([]string))
 	if !reflect.DeepEqual(eMap, rcv) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
@@ -475,8 +475,8 @@ func TestSessionSCfgAsMapInterfaceCase3(t *testing.T) {
 		},
     },
 }`
-	eMap := map[string]interface{}{
-		utils.STIRCfg: map[string]interface{}{
+	eMap := map[string]any{
+		utils.STIRCfg: map[string]any{
 			utils.AllowedAtestCfg:       []string{"*any"},
 			utils.PayloadMaxdurationCfg: "0",
 			utils.DefaultAttestCfg:      "A",
@@ -564,7 +564,7 @@ func TestFsAgentCfgAsMapInterfaceCase1(t *testing.T) {
 	cfgJSONStr := `{
 	"freeswitch_agent": {},
 }`
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		utils.EnabledCfg:             false,
 		utils.SessionSConnsCfg:       []string{rpcclient.BiRPCInternal},
 		utils.SubscribeParkCfg:       true,
@@ -574,7 +574,7 @@ func TestFsAgentCfgAsMapInterfaceCase1(t *testing.T) {
 		utils.EmptyBalanceContextCfg: "",
 		utils.EmptyBalanceAnnFileCfg: "",
 		utils.MaxWaitConnectionCfg:   "2s",
-		utils.EventSocketConnsCfg: []map[string]interface{}{
+		utils.EventSocketConnsCfg: []map[string]any{
 			{utils.AddressCfg: "127.0.0.1:8021", utils.Password: "ClueCon", utils.ReconnectsCfg: 5, utils.MaxReconnectIntervalCfg: "0s", utils.AliasCfg: "127.0.0.1:8021"},
 		},
 	}
@@ -597,7 +597,7 @@ func TestFsAgentCfgAsMapInterfaceCase2(t *testing.T) {
 		      {"address": "127.0.0.1:8000", "password": "ClueCon123", "reconnects": 8, "alias": "127.0.0.1:8000"}
 	],},
 }`
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		utils.EnabledCfg:             true,
 		utils.SessionSConnsCfg:       []string{rpcclient.BiRPCInternal, "*conn1", "*conn2"},
 		utils.SubscribeParkCfg:       false,
@@ -607,7 +607,7 @@ func TestFsAgentCfgAsMapInterfaceCase2(t *testing.T) {
 		utils.EmptyBalanceContextCfg: "",
 		utils.EmptyBalanceAnnFileCfg: "",
 		utils.MaxWaitConnectionCfg:   "7s",
-		utils.EventSocketConnsCfg: []map[string]interface{}{
+		utils.EventSocketConnsCfg: []map[string]any{
 			{utils.AddressCfg: "127.0.0.1:8000", utils.Password: "ClueCon123", utils.ReconnectsCfg: 8, utils.MaxReconnectIntervalCfg: "0s", utils.AliasCfg: "127.0.0.1:8000"},
 		},
 	}
@@ -626,7 +626,7 @@ func TestFsAgentCfgAsMapInterfaceCase3(t *testing.T) {
 		  "sessions_conns": ["*internal"]
     }
 }`
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		utils.EnabledCfg:             false,
 		utils.SessionSConnsCfg:       []string{utils.MetaInternal},
 		utils.SubscribeParkCfg:       true,
@@ -636,7 +636,7 @@ func TestFsAgentCfgAsMapInterfaceCase3(t *testing.T) {
 		utils.EmptyBalanceContextCfg: "",
 		utils.EmptyBalanceAnnFileCfg: "",
 		utils.MaxWaitConnectionCfg:   "",
-		utils.EventSocketConnsCfg: []map[string]interface{}{
+		utils.EventSocketConnsCfg: []map[string]any{
 			{utils.AddressCfg: "127.0.0.1:8021", utils.Password: "ClueCon", utils.ReconnectsCfg: 5, utils.MaxReconnectIntervalCfg: "0s", utils.AliasCfg: "127.0.0.1:8021"},
 		},
 	}
@@ -752,11 +752,11 @@ func TestAsteriskAgentCfgAsMapInterface(t *testing.T) {
 		"sessions_conns": ["*internal"],
 	},
 }`
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		utils.EnabledCfg:       false,
 		utils.SessionSConnsCfg: []string{utils.MetaInternal},
 		utils.CreateCdrCfg:     false,
-		utils.AsteriskConnsCfg: []map[string]interface{}{
+		utils.AsteriskConnsCfg: []map[string]any{
 			{utils.AliasCfg: "", utils.AddressCfg: "127.0.0.1:8088", utils.UserCf: "cgrates", utils.Password: "CGRateS.org", utils.ConnectAttemptsCfg: 3, utils.ReconnectsCfg: 5, utils.MaxReconnectIntervalCfg: "0s"},
 		},
 	}
@@ -778,11 +778,11 @@ func TestAsteriskAgentCfgAsMapInterface1(t *testing.T) {
 		],
 	},
 }`
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		utils.EnabledCfg:       true,
 		utils.SessionSConnsCfg: []string{rpcclient.BiRPCInternal, "*conn1", "*conn2"},
 		utils.CreateCdrCfg:     true,
-		utils.AsteriskConnsCfg: []map[string]interface{}{
+		utils.AsteriskConnsCfg: []map[string]any{
 			{utils.AliasCfg: "", utils.AddressCfg: "127.0.0.1:8089", utils.UserCf: "cgrates", utils.Password: "CGRateS.org", utils.ConnectAttemptsCfg: 5, utils.ReconnectsCfg: 8, utils.MaxReconnectIntervalCfg: "0s"},
 		},
 	}

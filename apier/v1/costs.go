@@ -32,7 +32,7 @@ type AttrGetCost struct {
 	AnswerTime  string
 	Destination string
 	Usage       string
-	APIOpts     map[string]interface{}
+	APIOpts     map[string]any
 }
 
 func (apierSv1 *APIerSv1) GetCost(attrs *AttrGetCost, ec *engine.EventCost) error {
@@ -77,7 +77,7 @@ type AttrGetDataCost struct {
 	Subject    string
 	AnswerTime string
 	Usage      time.Duration // the call duration so far (till TimeEnd)
-	Opts       map[string]interface{}
+	Opts       map[string]any
 }
 
 func (apierSv1 *APIerSv1) GetDataCost(attrs *AttrGetDataCost, reply *engine.DataCost) error {

@@ -110,7 +110,7 @@ func testSessionsBiRPCStartEngine(t *testing.T) {
 
 // Connect rpc client to rater
 func testSessionsBiRPCApierRpcConn(t *testing.T) {
-	clntHandlers := map[string]interface{}{utils.SessionSv1DisconnectSession: handleDisconnectSession}
+	clntHandlers := map[string]any{utils.SessionSv1DisconnectSession: handleDisconnectSession}
 	dummyClnt, err := utils.NewBiJSONrpcClient(sessionsBiRPCCfg.SessionSCfg().ListenBijson,
 		clntHandlers)
 	if err != nil { // First attempt is to make sure multiple clients are supported
@@ -142,7 +142,7 @@ func testSessionsBiRPCSessionAutomaticDisconnects(t *testing.T) {
 		Account:     "TestSessionsBiRPCSessionAutomaticDisconnects",
 		BalanceType: utils.MetaVoice,
 		Value:       0.01 * float64(time.Second),
-		Balance: map[string]interface{}{
+		Balance: map[string]any{
 			utils.ID:            "TestSessionsBiRPCSessionAutomaticDisconnects",
 			utils.RatingSubject: "*zero1ms",
 		},
@@ -171,7 +171,7 @@ func testSessionsBiRPCSessionAutomaticDisconnects(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsBiRPCSessionAutomaticDisconnects",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.EventName:    "TEST_EVENT",
 				utils.ToR:          utils.MetaVoice,
 				utils.OriginID:     "123451",
@@ -213,7 +213,7 @@ func testSessionsBiRPCSessionAutomaticDisconnects(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsDataLastUsedData",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.EventName:    "TEST_EVENT",
 				utils.ToR:          utils.MetaVoice,
 				utils.OriginID:     "123451",
@@ -268,7 +268,7 @@ func testSessionsBiRPCSessionOriginatorTerminate(t *testing.T) {
 		Account:     "TestSessionsBiRPCSessionOriginatorTerminate",
 		BalanceType: utils.MetaVoice,
 		Value:       float64(time.Second),
-		Balance: map[string]interface{}{
+		Balance: map[string]any{
 			utils.ID:            "TestSessionsBiRPCSessionOriginatorTerminate",
 			utils.RatingSubject: "*zero1ms",
 		},
@@ -293,7 +293,7 @@ func testSessionsBiRPCSessionOriginatorTerminate(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsBiRPCSessionOriginatorTerminate",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.EventName:    "TEST_EVENT",
 				utils.ToR:          utils.MetaVoice,
 				utils.OriginID:     "123452",
@@ -328,7 +328,7 @@ func testSessionsBiRPCSessionOriginatorTerminate(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsBiRPCSessionOriginatorTerminate",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.EventName:    "TEST_EVENT",
 				utils.ToR:          utils.MetaVoice,
 				utils.OriginID:     "123452",

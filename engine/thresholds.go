@@ -33,7 +33,7 @@ import (
 // ThresholdProfileWithAPIOpts is used in replicatorV1 for dispatcher
 type ThresholdProfileWithAPIOpts struct {
 	*ThresholdProfile
-	APIOpts map[string]interface{}
+	APIOpts map[string]any
 }
 
 // ThresholdProfile the profile for threshold
@@ -91,7 +91,7 @@ func (tp *ThresholdProfile) isLocked() bool {
 // ThresholdWithAPIOpts is used in replicatorV1 for dispatcher
 type ThresholdWithAPIOpts struct {
 	*Threshold
-	APIOpts map[string]interface{}
+	APIOpts map[string]any
 }
 
 // Threshold is the unit matched by filters

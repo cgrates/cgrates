@@ -47,7 +47,7 @@ var (
 
 	sesRndCgrEv = &utils.CGREvent{
 		Tenant: sesRndTenant,
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.Tenant:       sesRndTenant,
 			utils.Category:     utils.Call,
 			utils.ToR:          utils.MetaVoice,
@@ -57,7 +57,7 @@ var (
 			utils.AnswerTime:   time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
 			utils.Usage:        10 * time.Second,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsSessionsTTL:   0,
 			utils.OptsDebitInterval: time.Second,
 		},
@@ -300,7 +300,7 @@ func testSesRndItAddVoiceBalance(t *testing.T) {
 		Account:     sesRndAccount,
 		BalanceType: utils.MetaMonetary,
 		Value:       float64(time.Hour),
-		Balance: map[string]interface{}{
+		Balance: map[string]any{
 			utils.ID: "TestSesBal1",
 		},
 	}, &reply); err != nil {

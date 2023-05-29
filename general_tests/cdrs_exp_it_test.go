@@ -52,7 +52,7 @@ var (
 	cdrsExpCfg     *config.CGRConfig
 	cdrsExpRPC     *rpc.Client
 
-	cdrsExpHTTPEv     = make(chan map[string]interface{}, 1)
+	cdrsExpHTTPEv     = make(chan map[string]any, 1)
 	cdrsExpHTTPServer *http.Server
 
 	cdrsExpAMQPCon *amqp.Connection
@@ -61,7 +61,7 @@ var (
 
 		ID:     "Export",
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.CGRID:        "TestCGRID",
 			utils.ToR:          utils.MetaVoice,
 			utils.OriginID:     "TestCDRsExp",
@@ -77,10 +77,10 @@ var (
 			utils.Usage:        10 * time.Second,
 			utils.Cost:         1.201,
 		},
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 
-	cdrsExpEvExp = map[string]interface{}{
+	cdrsExpEvExp = map[string]any{
 		utils.CGRID:        "TestCGRID",
 		utils.ToR:          utils.MetaVoice,
 		utils.OriginID:     "TestCDRsExp",
@@ -171,7 +171,7 @@ func testCDRsExpPrepareHTTP(t *testing.T) {
 			return
 		}
 
-		ev := make(map[string]interface{})
+		ev := make(map[string]any)
 		for k, v := range vals {
 			ev[k] = v[0]
 		}
@@ -293,7 +293,7 @@ func testCDRsExpAMQP(t *testing.T) {
 	}
 	select {
 	case d := <-msgs:
-		var rcvCDR map[string]interface{}
+		var rcvCDR map[string]any
 		if err := json.Unmarshal(d.Body, &rcvCDR); err != nil {
 			t.Error(err)
 		}
@@ -321,7 +321,7 @@ func testCDRsExpKafka(t *testing.T) {
 	if m, err = reader.ReadMessage(ctx); err != nil {
 		t.Fatal(err)
 	}
-	var rcvCDR map[string]interface{}
+	var rcvCDR map[string]any
 	if err := json.Unmarshal(m.Value, &rcvCDR); err != nil {
 		t.Error(err)
 	}
@@ -331,7 +331,7 @@ func testCDRsExpKafka(t *testing.T) {
 	cancel()
 }
 
-func checkContent(ev *ees.ExportEvents, content []interface{}) error {
+func checkContent(ev *ees.ExportEvents, content []any) error {
 	match := false
 	for _, bev := range ev.Events {
 		for _, con := range content {
@@ -378,7 +378,7 @@ func testCDRsExpFileFailover(t *testing.T) {
 			continue
 		}
 		rcvFormats.Add(ev.Format)
-		if err := checkContent(ev, []interface{}{[]byte(utils.ToJSON(cdrsExpEvExp))}); err != nil {
+		if err := checkContent(ev, []any{[]byte(utils.ToJSON(cdrsExpEvExp))}); err != nil {
 			t.Errorf("For file <%s> and event <%s> received %s", filePath, utils.ToJSON(ev), err)
 		}
 	}

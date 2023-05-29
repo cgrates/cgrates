@@ -105,7 +105,7 @@ var (
 		{
 			Tenant: "cgrates.org",
 			ID:     "event1",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"Stats":          "StatQueueProfile1",
 				utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 				"UsageInterval":  "1s",
@@ -114,12 +114,12 @@ var (
 				utils.Usage:      135 * time.Second,
 				utils.Cost:       123.0,
 			},
-			APIOpts: map[string]interface{}{},
+			APIOpts: map[string]any{},
 		},
 		{
 			Tenant: "cgrates.org",
 			ID:     "event2",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"Stats":          "StatQueueProfile2",
 				utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 				"UsageInterval":  "1s",
@@ -127,16 +127,16 @@ var (
 				"Weight":         "15.0",
 				utils.Usage:      45 * time.Second,
 			},
-			APIOpts: map[string]interface{}{},
+			APIOpts: map[string]any{},
 		},
 		{
 			Tenant: "cgrates.org",
 			ID:     "event3",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"Stats":     "StatQueueProfilePrefix",
 				utils.Usage: 30 * time.Second,
 			},
-			APIOpts: map[string]interface{}{},
+			APIOpts: map[string]any{},
 		},
 	}
 )
@@ -1225,10 +1225,10 @@ func TestStatQueueProcessEventOK(t *testing.T) {
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "SqProcessEvent",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsStatsProfileIDs: []string{"SQ1"},
 		},
 	}
@@ -1283,7 +1283,7 @@ func TestStatQueueProcessEventProcessThPartExec(t *testing.T) {
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "SqProcessEvent",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1002",
 		},
 	}
@@ -1352,10 +1352,10 @@ func TestStatQueueProcessEventProcessEventErr(t *testing.T) {
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "SqProcessEvent",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsStatsProfileIDs: []string{"SQ1"},
 		},
 	}
@@ -1429,10 +1429,10 @@ func TestStatQueueV1ProcessEventProcessEventErr(t *testing.T) {
 
 	args := &utils.CGREvent{
 		ID: "SqProcessEvent",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsStatsProfileIDs: []string{"SQ1"},
 		},
 	}
@@ -1505,10 +1505,10 @@ func TestStatQueueV1ProcessEventMissingArgs(t *testing.T) {
 
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsStatsProfileIDs: []string{"SQ1"},
 		},
 	}
@@ -1523,7 +1523,7 @@ func TestStatQueueV1ProcessEventMissingArgs(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "SqProcessEvent",
 		Event:  nil,
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsStatsProfileIDs: []string{"SQ1"},
 		},
 	}
@@ -1845,7 +1845,7 @@ func TestStatQueueV1GetStatQueuesForEventOK(t *testing.T) {
 
 	args := &utils.CGREvent{
 		ID: "TestGetStatQueuesForEvent",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 		},
 	}
@@ -1900,7 +1900,7 @@ func TestStatQueueV1GetStatQueuesForEventNotFoundErr(t *testing.T) {
 
 	args := &utils.CGREvent{
 		ID: "TestGetStatQueuesForEvent",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1002",
 		},
 	}
@@ -1958,7 +1958,7 @@ func TestStatQueueV1GetStatQueuesForEventMissingArgs(t *testing.T) {
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     utils.EmptyString,
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 		},
 	}
@@ -2335,17 +2335,17 @@ func TestStatQueueProcessThresholdsOK(t *testing.T) {
 	Cache.Clear(nil)
 
 	ccM := &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ThresholdSv1ProcessEvent: func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.ThresholdSv1ProcessEvent: func(args, reply any) error {
 				exp := &utils.CGREvent{
 					Tenant: "cgrates.org",
 					ID:     args.(*utils.CGREvent).ID,
-					Event: map[string]interface{}{
+					Event: map[string]any{
 						utils.EventType:  utils.StatUpdate,
 						utils.StatID:     "SQ1",
 						"testMetricType": time.Duration(time.Hour),
 					},
-					APIOpts: map[string]interface{}{
+					APIOpts: map[string]any{
 						utils.MetaEventType:            utils.StatUpdate,
 						utils.OptsThresholdsProfileIDs: []string{"TH1"},
 					},
@@ -2443,8 +2443,8 @@ func TestStatQueueProcessThresholdsErrPartExec(t *testing.T) {
 	Cache.Clear(nil)
 
 	ccM := &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ThresholdSv1ProcessEvent: func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.ThresholdSv1ProcessEvent: func(args, reply any) error {
 				return utils.ErrExists
 			},
 		},
@@ -3205,10 +3205,10 @@ func TestStatQueueV1GetStatQueuesForSliceOptsErr(t *testing.T) {
 	}
 	args := &utils.CGREvent{
 		ID: "TestGetStatQueuesForEvent",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsStatsProfileIDs: "SQ1",
 		},
 	}
@@ -3273,10 +3273,10 @@ func TestStatQueueV1GetStatQueuesForEventBoolOptsErr(t *testing.T) {
 	}
 	args := &utils.CGREvent{
 		ID: "TestGetStatQueuesForEvent",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsStatsProfileIgnoreFilters: "test",
 		},
 	}
@@ -3300,7 +3300,7 @@ func TestMatchingStatQueuesForEventErr(t *testing.T) {
 
 	args := &utils.CGREvent{
 		ID: "TestGetStatQueuesForEvent",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 		},
 	}
@@ -3360,10 +3360,10 @@ func TestStatQueueProcessEventErr(t *testing.T) {
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "SqProcessEvent",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsStatsProfileIDs: "SQ1",
 		},
 	}

@@ -49,11 +49,11 @@ func (self *CmdSetThreshold) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdSetThreshold) RpcParams(reset bool) interface{} {
+func (self *CmdSetThreshold) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &engine.ThresholdProfileWithAPIOpts{
 			ThresholdProfile: new(engine.ThresholdProfile),
-			APIOpts:          map[string]interface{}{},
+			APIOpts:          map[string]any{},
 		}
 	}
 	return self.rpcParams
@@ -63,7 +63,7 @@ func (self *CmdSetThreshold) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdSetThreshold) RpcResult() interface{} {
+func (self *CmdSetThreshold) RpcResult() any {
 	var s string
 	return &s
 }

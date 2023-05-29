@@ -161,7 +161,7 @@ func (cM *ConnManager) getConnWithConfig(connID string, connCfg *config.RPCConn,
 
 // Call gets the connection calls the method on it
 func (cM *ConnManager) Call(connIDs []string, biRPCClient rpcclient.BiRPCConector,
-	method string, arg, reply interface{}) (err error) {
+	method string, arg, reply any) (err error) {
 	if len(connIDs) == 0 {
 		return utils.NewErrMandatoryIeMissing("connIDs")
 	}
@@ -181,7 +181,7 @@ func (cM *ConnManager) Call(connIDs []string, biRPCClient rpcclient.BiRPCConecto
 }
 
 // CallWithConnIDs will call the method only on specified rpcconns
-func (cM *ConnManager) CallWithConnIDs(connIDs []string, subsHostIDs utils.StringSet, method string, arg, reply interface{}) (err error) {
+func (cM *ConnManager) CallWithConnIDs(connIDs []string, subsHostIDs utils.StringSet, method string, arg, reply any) (err error) {
 	if len(connIDs) == 0 {
 		return utils.NewErrMandatoryIeMissing("connIDs")
 	}

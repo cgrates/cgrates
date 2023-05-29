@@ -31,11 +31,11 @@ import (
 
 func TestLoadMetricsGetHosts(t *testing.T) {
 	dhp := engine.DispatcherHostProfiles{
-		{ID: "DSP_1", Params: map[string]interface{}{utils.MetaRatio: 1}},
-		{ID: "DSP_2", Params: map[string]interface{}{utils.MetaRatio: 1}},
-		{ID: "DSP_3", Params: map[string]interface{}{utils.MetaRatio: 1}},
-		{ID: "DSP_4", Params: map[string]interface{}{utils.MetaRatio: 1}},
-		{ID: "DSP_5", Params: map[string]interface{}{utils.MetaRatio: 1}},
+		{ID: "DSP_1", Params: map[string]any{utils.MetaRatio: 1}},
+		{ID: "DSP_2", Params: map[string]any{utils.MetaRatio: 1}},
+		{ID: "DSP_3", Params: map[string]any{utils.MetaRatio: 1}},
+		{ID: "DSP_4", Params: map[string]any{utils.MetaRatio: 1}},
+		{ID: "DSP_5", Params: map[string]any{utils.MetaRatio: 1}},
 	}
 	lm, err := newLoadMetrics(dhp, 1)
 	if err != nil {
@@ -73,7 +73,7 @@ func TestNewSingleDispatcher(t *testing.T) {
 		{ID: "DSP_5"},
 	}
 	var exp Dispatcher = &singleResultDispatcher{hosts: dhp}
-	if rply, err := newSingleDispatcher(dhp, map[string]interface{}{}, utils.EmptyString, nil); err != nil {
+	if rply, err := newSingleDispatcher(dhp, map[string]any{}, utils.EmptyString, nil); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(exp, rply) {
 		t.Errorf("Expected:  singleResultDispatcher structure,received: %s", utils.ToJSON(rply))
@@ -84,14 +84,14 @@ func TestNewSingleDispatcher(t *testing.T) {
 		{ID: "DSP_2"},
 		{ID: "DSP_3"},
 		{ID: "DSP_4"},
-		{ID: "DSP_5", Params: map[string]interface{}{utils.MetaRatio: 1}},
+		{ID: "DSP_5", Params: map[string]any{utils.MetaRatio: 1}},
 	}
 	exp = &loadDispatcher{
 		hosts:        dhp,
 		tntID:        "cgrates.org",
 		defaultRatio: 1,
 	}
-	if rply, err := newSingleDispatcher(dhp, map[string]interface{}{}, "cgrates.org", nil); err != nil {
+	if rply, err := newSingleDispatcher(dhp, map[string]any{}, "cgrates.org", nil); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(exp, rply) {
 		t.Errorf("Expected:  loadDispatcher structure,received: %s", utils.ToJSON(rply))
@@ -108,7 +108,7 @@ func TestNewSingleDispatcher(t *testing.T) {
 		tntID:        "cgrates.org",
 		defaultRatio: 2,
 	}
-	if rply, err := newSingleDispatcher(dhp, map[string]interface{}{utils.MetaDefaultRatio: 2}, "cgrates.org", nil); err != nil {
+	if rply, err := newSingleDispatcher(dhp, map[string]any{utils.MetaDefaultRatio: 2}, "cgrates.org", nil); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(exp, rply) {
 		t.Errorf("Expected:  loadDispatcher structure,received: %s", utils.ToJSON(rply))
@@ -119,21 +119,21 @@ func TestNewSingleDispatcher(t *testing.T) {
 		tntID:        "cgrates.org",
 		defaultRatio: 0,
 	}
-	if rply, err := newSingleDispatcher(dhp, map[string]interface{}{utils.MetaDefaultRatio: 0}, "cgrates.org", nil); err != nil {
+	if rply, err := newSingleDispatcher(dhp, map[string]any{utils.MetaDefaultRatio: 0}, "cgrates.org", nil); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(exp, rply) {
 		t.Errorf("Expected:  loadDispatcher structure,received: %s", utils.ToJSON(rply))
 	}
 
-	if _, err := newSingleDispatcher(dhp, map[string]interface{}{utils.MetaDefaultRatio: "A"}, "cgrates.org", nil); err == nil {
+	if _, err := newSingleDispatcher(dhp, map[string]any{utils.MetaDefaultRatio: "A"}, "cgrates.org", nil); err == nil {
 		t.Fatalf("Expected error received: %v", err)
 	}
 }
 
 func TestNewLoadMetrics(t *testing.T) {
 	dhp := engine.DispatcherHostProfiles{
-		{ID: "DSP_1", Params: map[string]interface{}{utils.MetaRatio: 1}},
-		{ID: "DSP_2", Params: map[string]interface{}{utils.MetaRatio: 0}},
+		{ID: "DSP_1", Params: map[string]any{utils.MetaRatio: 1}},
+		{ID: "DSP_2", Params: map[string]any{utils.MetaRatio: 0}},
 		{ID: "DSP_3"},
 	}
 	exp := &LoadMetrics{
@@ -150,7 +150,7 @@ func TestNewLoadMetrics(t *testing.T) {
 		t.Errorf("Expected: %s ,received: %s", utils.ToJSON(exp), utils.ToJSON(lm))
 	}
 	dhp = engine.DispatcherHostProfiles{
-		{ID: "DSP_1", Params: map[string]interface{}{utils.MetaRatio: "A"}},
+		{ID: "DSP_1", Params: map[string]any{utils.MetaRatio: "A"}},
 	}
 	if _, err := newLoadMetrics(dhp, 2); err == nil {
 		t.Errorf("Expected error received: %v", err)
@@ -159,12 +159,12 @@ func TestNewLoadMetrics(t *testing.T) {
 
 func TestLoadMetricsGetHosts2(t *testing.T) {
 	dhp := engine.DispatcherHostProfiles{
-		{ID: "DSP_1", Params: map[string]interface{}{utils.MetaRatio: 2}},
-		{ID: "DSP_2", Params: map[string]interface{}{utils.MetaRatio: 3}},
-		{ID: "DSP_3", Params: map[string]interface{}{utils.MetaRatio: 1}},
-		{ID: "DSP_4", Params: map[string]interface{}{utils.MetaRatio: 5}},
-		{ID: "DSP_5", Params: map[string]interface{}{utils.MetaRatio: 1}},
-		{ID: "DSP_6", Params: map[string]interface{}{utils.MetaRatio: 0}},
+		{ID: "DSP_1", Params: map[string]any{utils.MetaRatio: 2}},
+		{ID: "DSP_2", Params: map[string]any{utils.MetaRatio: 3}},
+		{ID: "DSP_3", Params: map[string]any{utils.MetaRatio: 1}},
+		{ID: "DSP_4", Params: map[string]any{utils.MetaRatio: 5}},
+		{ID: "DSP_5", Params: map[string]any{utils.MetaRatio: 1}},
+		{ID: "DSP_6", Params: map[string]any{utils.MetaRatio: 0}},
 	}
 	lm, err := newLoadMetrics(dhp, 1)
 	if err != nil {
@@ -215,12 +215,12 @@ func TestLoadMetricsGetHosts2(t *testing.T) {
 	}
 
 	dhp = engine.DispatcherHostProfiles{
-		{ID: "DSP_1", Params: map[string]interface{}{utils.MetaRatio: -1}},
-		{ID: "DSP_2", Params: map[string]interface{}{utils.MetaRatio: 3}},
-		{ID: "DSP_3", Params: map[string]interface{}{utils.MetaRatio: 1}},
-		{ID: "DSP_4", Params: map[string]interface{}{utils.MetaRatio: 5}},
-		{ID: "DSP_5", Params: map[string]interface{}{utils.MetaRatio: 1}},
-		{ID: "DSP_6", Params: map[string]interface{}{utils.MetaRatio: 0}},
+		{ID: "DSP_1", Params: map[string]any{utils.MetaRatio: -1}},
+		{ID: "DSP_2", Params: map[string]any{utils.MetaRatio: 3}},
+		{ID: "DSP_3", Params: map[string]any{utils.MetaRatio: 1}},
+		{ID: "DSP_4", Params: map[string]any{utils.MetaRatio: 5}},
+		{ID: "DSP_5", Params: map[string]any{utils.MetaRatio: 1}},
+		{ID: "DSP_6", Params: map[string]any{utils.MetaRatio: 0}},
 	}
 	lm, err = newLoadMetrics(dhp, 1)
 	if err != nil {
@@ -263,7 +263,7 @@ func TestLibDispatcherNewDispatcherMetaWeight(t *testing.T) {
 func TestLibDispatcherNewDispatcherMetaWeightErr(t *testing.T) {
 	pfl := &engine.DispatcherProfile{
 		Hosts: engine.DispatcherHostProfiles{},
-		StrategyParams: map[string]interface{}{
+		StrategyParams: map[string]any{
 			utils.MetaDefaultRatio: false,
 		},
 		Strategy: utils.MetaWeight,
@@ -300,7 +300,7 @@ func TestLibDispatcherNewDispatcherMetaRandom(t *testing.T) {
 func TestLibDispatcherNewDispatcherMetaRandomErr(t *testing.T) {
 	pfl := &engine.DispatcherProfile{
 		Hosts: engine.DispatcherHostProfiles{},
-		StrategyParams: map[string]interface{}{
+		StrategyParams: map[string]any{
 			utils.MetaDefaultRatio: false,
 		},
 		Strategy: utils.MetaRandom,
@@ -337,7 +337,7 @@ func TestLibDispatcherNewDispatcherMetaRoundRobin(t *testing.T) {
 func TestLibDispatcherNewDispatcherMetaRoundRobinErr(t *testing.T) {
 	pfl := &engine.DispatcherProfile{
 		Hosts: engine.DispatcherHostProfiles{},
-		StrategyParams: map[string]interface{}{
+		StrategyParams: map[string]any{
 			utils.MetaDefaultRatio: false,
 		},
 		Strategy: utils.MetaRoundRobin,
@@ -463,7 +463,7 @@ func TestLibDispatcherLoadStrategyDispatchCaseCallError2(t *testing.T) {
 				ID: "testID2",
 				// FilterIDs: []string{"filterID"},
 				Weight: 4,
-				Params: map[string]interface{}{
+				Params: map[string]any{
 					utils.MetaRatio: 1,
 				},
 				Blocker: false,
@@ -493,7 +493,7 @@ func TestLibDispatcherLoadStrategyDispatchCaseHostsCastError(t *testing.T) {
 				ID: "testID",
 				// FilterIDs: []string{"filterID"},
 				Weight: 4,
-				Params: map[string]interface{}{
+				Params: map[string]any{
 					utils.MetaRatio: 1,
 				},
 				Blocker: false,
@@ -518,7 +518,7 @@ func TestLibDispatcherLoadStrategyDispatchCaseHostsCastError2(t *testing.T) {
 				ID: "testID",
 				// FilterIDs: []string{"filterID"},
 				Weight: 4,
-				Params: map[string]interface{}{
+				Params: map[string]any{
 					utils.MetaRatio: false,
 				},
 				Blocker: false,
@@ -562,7 +562,7 @@ func TestLibDispatcherSingleResultDispatcherCastError(t *testing.T) {
 
 type mockTypeCon struct{}
 
-func (*mockTypeCon) Call(serviceMethod string, args, reply interface{}) error {
+func (*mockTypeCon) Call(serviceMethod string, args, reply any) error {
 	return utils.ErrNotFound
 }
 
@@ -717,7 +717,7 @@ func TestLibDispatcherLoadDispatcherCacheError7(t *testing.T) {
 				ID: "testID",
 				// FilterIDs: []string{"filterID1", "filterID2"},
 				Weight: 3,
-				Params: map[string]interface{}{
+				Params: map[string]any{
 					utils.MetaRatio: 1,
 				},
 				Blocker: true,
@@ -726,7 +726,7 @@ func TestLibDispatcherLoadDispatcherCacheError7(t *testing.T) {
 				ID: "testID2",
 				// FilterIDs: []string{"filterID1", "filterID2"},
 				Weight: 3,
-				Params: map[string]interface{}{
+				Params: map[string]any{
 					utils.MetaRatio: 2,
 				},
 				Blocker: true,
@@ -745,7 +745,7 @@ func TestLibDispatcherLoadDispatcherCacheError7(t *testing.T) {
 
 type mockTypeConDispatch struct{}
 
-func (*mockTypeConDispatch) Call(serviceMethod string, args, reply interface{}) error {
+func (*mockTypeConDispatch) Call(serviceMethod string, args, reply any) error {
 	return rpc.ErrShutdown
 }
 
@@ -779,7 +779,7 @@ func TestLibDispatcherLoadDispatcherCacheError5(t *testing.T) {
 			{
 				ID:     "testID",
 				Weight: 3,
-				Params: map[string]interface{}{
+				Params: map[string]any{
 					utils.MetaRatio: 1,
 				},
 				Blocker: true,
@@ -828,7 +828,7 @@ func TestLibDispatcherSingleResultDispatcherCase1(t *testing.T) {
 
 type mockTypeConDispatch2 struct{}
 
-func (*mockTypeConDispatch2) Call(serviceMethod string, args, reply interface{}) error {
+func (*mockTypeConDispatch2) Call(serviceMethod string, args, reply any) error {
 	return nil
 }
 

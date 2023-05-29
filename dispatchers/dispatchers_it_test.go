@@ -51,7 +51,7 @@ func TestDspApierITMongo(t *testing.T) {
 	testDsp(t, sTestsDspApier, "TestDspApier", "all", "all2", "dispatchers_mongo", "tutorial", "oldtutorial", "dispatchers")
 }
 
-//because we import dispatchers in APIerSv1 we will send information as map[string]interface{}
+//because we import dispatchers in APIerSv1 we will send information as map[string]any
 func testDspApierSetAttributes(t *testing.T) {
 	attrPrf := &engine.AttributeProfileWithAPIOpts{
 		AttributeProfile: &engine.AttributeProfile{
@@ -73,7 +73,7 @@ func testDspApierSetAttributes(t *testing.T) {
 				},
 			},
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "apier12345",
 		},
 	}
@@ -113,7 +113,7 @@ func testDspApierGetAttributes(t *testing.T) {
 	if err := dispEngine.RPC.Call(utils.APIerSv1GetAttributeProfile,
 		utils.TenantIDWithAPIOpts{
 			TenantID:      &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_Dispatcher"},
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.OptsAPIKey:"apier12345",
 			},
 		}, &reply); err != nil {
@@ -131,7 +131,7 @@ func testDspApierUnkownAPiKey(t *testing.T) {
 	if err := dispEngine.RPC.Call(utils.APIerSv1GetAttributeProfile,
 		utils.TenantIDWithAPIOpts{
 			TenantID:      &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_Dispatcher"},
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.OptsAPIKey:"RandomApiKey",
 			},
 		}, &reply); err == nil || err.Error() != utils.ErrUnknownApiKey.Error() {
@@ -181,7 +181,7 @@ func TestDispatcherServiceDispatcherProfileForEventGetDispatchertWithoutAuthenti
 	dss := NewDispatcherService(dm, cfg, fltrs, connMng)
 	ev := &utils.CGREvent{
 		ID: "321",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 			"Password":         "CGRateS.org",
 			"RunID":            utils.MetaDefault,

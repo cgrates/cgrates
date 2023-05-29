@@ -196,7 +196,7 @@ func testAccITAddVoiceBalance(t *testing.T) {
 		Account:     accAcount,
 		BalanceType: utils.MetaVoice,
 		Value:       2 * float64(time.Second),
-		Balance: map[string]interface{}{
+		Balance: map[string]any{
 			utils.ID:            accBallID,
 			utils.RatingSubject: "*zero5ms",
 			utils.ExpiryTime:    time.Now().Add(5 * time.Second).Format("2006-01-02 15:04:05"),
@@ -241,7 +241,7 @@ func testAccITSetBalanceTimingIds(t *testing.T) {
 		Tenant:      accTenant,
 		Account:     accAcount,
 		BalanceType: utils.MetaVoice,
-		Balance: map[string]interface{}{
+		Balance: map[string]any{
 			utils.ID:        "testBalanceID",
 			utils.TimingIDs: "Timing",
 		},
@@ -391,7 +391,7 @@ func testAccITsetBalanceWithUUid(t *testing.T) {
 		Account:     "test",
 		BalanceType: "*sms",
 		Value:       1,
-		Balance:     map[string]interface{}{"UUID": "37b54e1a-e1e6-4df6-a9a5-d97b4552f2f6"},
+		Balance:     map[string]any{"UUID": "37b54e1a-e1e6-4df6-a9a5-d97b4552f2f6"},
 	}
 	if err := accRPC.Call(utils.APIerSv1SetBalance, attrs, &reply); err == nil || err.Error() != "PARTIALLY_EXECUTED" {
 		t.Error("Got error on APIerSv1.SetBalance: ", err.Error())
@@ -402,7 +402,7 @@ func testAccITsetBalanceWithUUid(t *testing.T) {
 		Account:     "test",
 		BalanceType: "*sms",
 		Value:       1,
-		Balance: map[string]interface{}{
+		Balance: map[string]any{
 			utils.Weight: 20,
 			utils.ID:     "balance1",
 		},
@@ -429,7 +429,7 @@ func testAccITsetBalanceWithUUid(t *testing.T) {
 		Account:     "test",
 		BalanceType: "*sms",
 		Value:       4,
-		Balance: map[string]interface{}{
+		Balance: map[string]any{
 			utils.UUID: balUuid,
 		},
 	}
@@ -449,7 +449,7 @@ func testAccITSetBalance(t *testing.T) {
 		Account:     "testAccSetBalance",
 		BalanceType: "*monetary",
 		Value:       1.5,
-		Balance: map[string]interface{}{
+		Balance: map[string]any{
 			utils.ID: "testAccSetBalance",
 		},
 		Cdrlog: true,
@@ -476,7 +476,7 @@ func testAccITSetBalanceWithoutTenant(t *testing.T) {
 		Account:     "testrandomAccoutSetBalance",
 		BalanceType: "*monetary",
 		Value:       1.5,
-		Balance: map[string]interface{}{
+		Balance: map[string]any{
 			utils.ID: "testAccSetBalance",
 		},
 		Cdrlog: true,
@@ -499,7 +499,7 @@ func testAccITSetBalanceWithoutTenant(t *testing.T) {
 }
 
 func testAccITSetBalanceWithExtraData(t *testing.T) {
-	extraDataMap := map[string]interface{}{
+	extraDataMap := map[string]any{
 		"ExtraField":  "ExtraValue",
 		"ExtraField2": "RandomValue",
 	}
@@ -509,7 +509,7 @@ func testAccITSetBalanceWithExtraData(t *testing.T) {
 		Account:     "testAccITSetBalanceWithExtraData",
 		BalanceType: utils.MetaMonetary,
 		Value:       1.5,
-		Balance: map[string]interface{}{
+		Balance: map[string]any{
 			utils.ID: "testAccITSetBalanceWithExtraData",
 		},
 		Cdrlog:          true,
@@ -534,7 +534,7 @@ func testAccITSetBalanceWithExtraData(t *testing.T) {
 }
 
 func testAccITSetBalanceWithExtraData2(t *testing.T) {
-	extraDataMap := map[string]interface{}{
+	extraDataMap := map[string]any{
 		"ExtraField": "ExtraValue",
 		"ActionVal":  "~*act.ActionValue",
 	}
@@ -544,7 +544,7 @@ func testAccITSetBalanceWithExtraData2(t *testing.T) {
 		Account:     "testAccITSetBalanceWithExtraData2",
 		BalanceType: utils.MetaMonetary,
 		Value:       1.5,
-		Balance: map[string]interface{}{
+		Balance: map[string]any{
 			utils.ID: "testAccITSetBalanceWithExtraData2",
 		},
 		Cdrlog:          true,
@@ -755,7 +755,7 @@ func testAccITSetBalanceWithVaslue0(t *testing.T) {
 		Tenant:      "cgrates.org",
 		Account:     "testAccSetBalance",
 		BalanceType: "*monetary",
-		Balance: map[string]interface{}{
+		Balance: map[string]any{
 			utils.ID:     "testAccSetBalance",
 			utils.Weight: 10,
 		},
@@ -795,7 +795,7 @@ func testAccITSetBalanceWithVaslueInMap(t *testing.T) {
 		Tenant:      "cgrates.org",
 		Account:     "testAccSetBalance",
 		BalanceType: "*monetary",
-		Balance: map[string]interface{}{
+		Balance: map[string]any{
 			utils.ID:     "testAccSetBalance",
 			utils.Weight: 10,
 			utils.Value:  2,
@@ -869,7 +869,7 @@ func testAccITAddBalanceWithValueInMap(t *testing.T) {
 		Tenant:      "cgrates.org",
 		Account:     "testAccAddBalance",
 		BalanceType: utils.MetaMonetary,
-		Balance: map[string]interface{}{
+		Balance: map[string]any{
 			utils.Value: 1.5,
 		},
 	}
@@ -917,7 +917,7 @@ func testAccITAddBalanceWithDestinations(t *testing.T) {
 		Tenant:      "cgrates.org",
 		Account:     "testAccITAddBalanceWithDestinations",
 		BalanceType: utils.MetaMonetary,
-		Balance: map[string]interface{}{
+		Balance: map[string]any{
 			utils.ID:             "testAccITAddBalanceWithDestinations",
 			utils.DestinationIDs: "DST_1002;!DST_1001;!DST_1003",
 			utils.Weight:         10,
@@ -1005,7 +1005,7 @@ func testAccITAccountWithTriggers(t *testing.T) {
 		Tenant:      "cgrates.org",
 		Account:     "testAccITAccountWithTriggers",
 		BalanceType: utils.MetaMonetary,
-		Balance: map[string]interface{}{
+		Balance: map[string]any{
 			utils.ID:     "testAccITAccountWithTriggers",
 			utils.Weight: 10,
 			utils.Value:  5,
@@ -1223,7 +1223,7 @@ func testAccITMultipleBalance(t *testing.T) {
 			{
 				BalanceType: utils.MetaVoice,
 				Value:       2 * float64(time.Second),
-				Balance: map[string]interface{}{
+				Balance: map[string]any{
 					utils.ID:            "Balance1",
 					utils.RatingSubject: "*zero5ms",
 				},
@@ -1231,7 +1231,7 @@ func testAccITMultipleBalance(t *testing.T) {
 			{
 				BalanceType: utils.MetaVoice,
 				Value:       10 * float64(time.Second),
-				Balance: map[string]interface{}{
+				Balance: map[string]any{
 					utils.ID:            "Balance2",
 					utils.RatingSubject: "*zero5ms",
 				},
@@ -1239,7 +1239,7 @@ func testAccITMultipleBalance(t *testing.T) {
 			{
 				BalanceType: utils.MetaMonetary,
 				Value:       10,
-				Balance: map[string]interface{}{
+				Balance: map[string]any{
 					utils.ID: "MonBalance",
 				},
 			},
@@ -1278,7 +1278,7 @@ func testAccITMultipleBalanceWithoutTenant(t *testing.T) {
 			{
 				BalanceType: utils.MetaVoice,
 				Value:       2 * float64(time.Second),
-				Balance: map[string]interface{}{
+				Balance: map[string]any{
 					utils.ID:            "Balance1",
 					utils.RatingSubject: "*zero5ms",
 				},
@@ -1286,7 +1286,7 @@ func testAccITMultipleBalanceWithoutTenant(t *testing.T) {
 			{
 				BalanceType: utils.MetaVoice,
 				Value:       10 * float64(time.Second),
-				Balance: map[string]interface{}{
+				Balance: map[string]any{
 					utils.ID:            "Balance2",
 					utils.RatingSubject: "*zero5ms",
 				},
@@ -1294,7 +1294,7 @@ func testAccITMultipleBalanceWithoutTenant(t *testing.T) {
 			{
 				BalanceType: utils.MetaMonetary,
 				Value:       10,
-				Balance: map[string]interface{}{
+				Balance: map[string]any{
 					utils.ID: "MonBalance",
 				},
 			},
@@ -1352,7 +1352,7 @@ func testAccITAddVoiceBalanceWithDestinations(t *testing.T) {
 		Tenant:      "cgrates.com",
 		Account:     "testAccITAddVoiceBalanceWithDestinations",
 		BalanceType: utils.MetaVoice,
-		Balance: map[string]interface{}{
+		Balance: map[string]any{
 			utils.ID:             "testAccITAddVoiceBalanceWithDestinations",
 			utils.DestinationIDs: "DST_1002",
 			utils.RatingSubject:  "RP_1001",
@@ -1424,7 +1424,7 @@ func testAccITSetBalanceWithTimeSuffix(t *testing.T) {
 		Tenant:      "cgrates.org",
 		Account:     "testAccSetBalanceTimeSuffix",
 		BalanceType: "*voice",
-		Balance: map[string]interface{}{
+		Balance: map[string]any{
 			utils.ID:     "testAccSetBalanceTimeSuffix",
 			utils.Weight: 10,
 			utils.Value:  "120ms",

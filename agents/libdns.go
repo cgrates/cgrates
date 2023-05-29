@@ -67,7 +67,7 @@ type dnsDP struct {
 }
 
 func (dp dnsDP) String() string { return dp.req.String() }
-func (dp dnsDP) FieldAsInterface(fldPath []string) (o interface{}, e error) {
+func (dp dnsDP) FieldAsInterface(fldPath []string) (o any, e error) {
 	if len(fldPath) != 0 && strings.HasPrefix(fldPath[0], utils.DNSOption) {
 		return dp.opts.FieldAsInterface(fldPath)
 	}
@@ -186,7 +186,7 @@ func updateDNSMsgFromNM(msg *dns.Msg, nm *utils.OrderedNavigableMap, qType uint1
 }
 
 // updateDnsQuestion
-func updateDnsQuestions(q []dns.Question, path []string, value interface{}, newBranch bool) (_ []dns.Question, err error) {
+func updateDnsQuestions(q []dns.Question, path []string, value any, newBranch bool) (_ []dns.Question, err error) {
 	var idx int
 	var field string
 	switch len(path) {
@@ -234,7 +234,7 @@ func updateDnsQuestions(q []dns.Question, path []string, value interface{}, newB
 	return q, nil
 }
 
-func updateDnsOption(q []dns.EDNS0, path []string, value interface{}, newBranch bool) (_ []dns.EDNS0, err error) {
+func updateDnsOption(q []dns.EDNS0, path []string, value any, newBranch bool) (_ []dns.EDNS0, err error) {
 	var idx int
 	var field string
 	switch len(path) {
@@ -447,7 +447,7 @@ func updateDnsOption(q []dns.EDNS0, path []string, value interface{}, newBranch 
 	return q, err
 }
 
-func createDnsOption(field string, value interface{}) (o dns.EDNS0, err error) {
+func createDnsOption(field string, value any) (o dns.EDNS0, err error) {
 	switch field {
 	case utils.DNSNsid: // EDNS0_NSID
 		o = &dns.EDNS0_NSID{Nsid: utils.IfaceAsString(value)}
@@ -557,7 +557,7 @@ func createDnsOption(field string, value interface{}) (o dns.EDNS0, err error) {
 	return
 }
 
-func updateDnsAnswer(q []dns.RR, qType uint16, qName string, path []string, value interface{}, newBranch bool) (_ []dns.RR, err error) {
+func updateDnsAnswer(q []dns.RR, qType uint16, qName string, path []string, value any, newBranch bool) (_ []dns.RR, err error) {
 	var idx int
 	if lPath := len(path); lPath == 0 {
 		err = utils.ErrWrongPath
@@ -638,7 +638,7 @@ func newDNSAnswer(qType uint16, qName string) (a dns.RR, err error) {
 	return
 }
 
-func updateDnsNAPTRAnswer(v *dns.NAPTR, path []string, value interface{}) (err error) {
+func updateDnsNAPTRAnswer(v *dns.NAPTR, path []string, value any) (err error) {
 	if len(path) < 1 ||
 		(path[0] != utils.DNSHdr && len(path) != 1) ||
 		(path[0] == utils.DNSHdr && len(path) != 2) {
@@ -673,7 +673,7 @@ func updateDnsNAPTRAnswer(v *dns.NAPTR, path []string, value interface{}) (err e
 	return
 }
 
-func updateDnsRRHeader(v *dns.RR_Header, path []string, value interface{}) (err error) {
+func updateDnsRRHeader(v *dns.RR_Header, path []string, value any) (err error) {
 	if len(path) != 1 {
 		return utils.ErrWrongPath
 	}

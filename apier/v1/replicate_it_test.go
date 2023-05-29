@@ -1133,7 +1133,7 @@ func testInternalReplicateITActionTrigger(t *testing.T) {
 	attrSet := AttrSetActionTrigger{
 		GroupID:  "TestATR",
 		UniqueID: "UniqueID",
-		ActionTrigger: map[string]interface{}{
+		ActionTrigger: map[string]any{
 			utils.BalanceID: utils.StringPointer("BalanceIDtest1"),
 		}}
 
@@ -1210,13 +1210,13 @@ func testInternalReplicateITThreshold(t *testing.T) {
 	tEvs := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.EventType:     utils.AccountUpdate,
 			utils.AccountField:  "1005",
 			utils.AllowNegative: true,
 			utils.Disabled:      false,
 			utils.Units:         12.3},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaEventType: utils.AccountUpdate,
 		},
 	}
@@ -1274,7 +1274,7 @@ func testInternalReplicateITThreshold(t *testing.T) {
 		Account:     "1005",
 		BalanceType: utils.MetaMonetary,
 		Value:       1,
-		Balance: map[string]interface{}{
+		Balance: map[string]any{
 			utils.ID:     utils.MetaDefault,
 			utils.Weight: 10.0,
 		},

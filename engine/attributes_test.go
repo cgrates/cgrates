@@ -174,11 +174,11 @@ func TestAttributesV1ProcessEvent(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "adrian.itsyscom.com.co.uk",
 			Time:   nil,
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.AccountField: "andrei.itsyscom.com",
 				"Password":         "CGRATES.ORG",
 			},
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.OptsAttributesProcessRuns: 2,
 			},
 		},
@@ -186,10 +186,10 @@ func TestAttributesV1ProcessEvent(t *testing.T) {
 	}
 	if err = alS.V1ProcessEvent(&utils.CGREvent{
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "adrian@itsyscom.com",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAttributesProcessRuns: 2,
 		},
 	}, &rply); err != nil {
@@ -229,10 +229,10 @@ func TestAttributesV1ProcessEventErrorMetaSum(t *testing.T) {
 	expErr := "SERVER_ERROR: NotEnoughParameters"
 	if err = alS.V1ProcessEvent(&utils.CGREvent{
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "adrian@itsyscom.com",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAttributesProcessRuns: 2,
 		},
 	}, &rply); err == nil || err.Error() != expErr {
@@ -272,10 +272,10 @@ func TestAttributesV1ProcessEventErrorMetaDifference(t *testing.T) {
 	expErr := "SERVER_ERROR: NotEnoughParameters"
 	if err := alS.V1ProcessEvent(&utils.CGREvent{
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "adrian@itsyscom.com",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAttributesProcessRuns: 2,
 		},
 	}, &rply); err == nil || err.Error() != expErr {
@@ -314,10 +314,10 @@ func TestAttributesV1ProcessEventErrorMetaValueExponent(t *testing.T) {
 	expErr := "SERVER_ERROR: invalid arguments <[{\"Rules\":\"CGRATES.ORG\"}]> to *value_exponent"
 	if err := alS.V1ProcessEvent(&utils.CGREvent{
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "adrian@itsyscom.com",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAttributesProcessRuns: 2,
 		},
 	}, &rply); err == nil || err.Error() != expErr {
@@ -1191,10 +1191,10 @@ func TestAttributesV1ProcessEventMultipleRuns1(t *testing.T) {
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "AttrProcessEventMultipleRuns",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Password": "passwd",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAttributesProcessRuns: 3,
 			utils.OptsContext:               utils.MetaAny,
 			utils.OptsAttributesProfileIDs:  []string{"ATTR1", "ATTR2"},
@@ -1207,11 +1207,11 @@ func TestAttributesV1ProcessEventMultipleRuns1(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "AttrProcessEventMultipleRuns",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"Password":        "CGRateS.org",
 				utils.RequestType: utils.MetaPostpaid,
 			},
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.OptsAttributesProcessRuns: 3,
 				utils.OptsContext:               utils.MetaAny,
 				utils.OptsAttributesProfileIDs:  []string{"ATTR1", "ATTR2"},
@@ -1305,8 +1305,8 @@ func TestAttributesV1ProcessEventMultipleRuns2(t *testing.T) {
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "AttrProcessEventMultipleRuns",
-		Event:  map[string]interface{}{},
-		APIOpts: map[string]interface{}{
+		Event:  map[string]any{},
+		APIOpts: map[string]any{
 			utils.OptsAttributesProcessRuns: 3,
 			utils.OptsContext:               utils.MetaAny,
 		},
@@ -1319,12 +1319,12 @@ func TestAttributesV1ProcessEventMultipleRuns2(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "AttrProcessEventMultipleRuns",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"Password":        "CGRateS.org",
 				"PaypalAccount":   "cgrates@paypal.com",
 				utils.RequestType: utils.MetaPostpaid,
 			},
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.OptsAttributesProcessRuns: 3,
 				utils.OptsContext:               utils.MetaAny,
 			},
@@ -1346,7 +1346,7 @@ func TestArgeesUnmarshalJSON(t *testing.T) {
 		EeIDs: []string{"eeID1", "eeID2", "eeID3", "eeID$"},
 		clnb:  true,
 		CGREvent: &utils.CGREvent{
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.CostDetails: "22",
 			},
 		},
@@ -1371,8 +1371,8 @@ func TestArgeesRPCClone(t *testing.T) {
 			Tenant:  "cgrates.org",
 			ID:      "id",
 			Time:    &time.Time{},
-			Event:   map[string]interface{}{},
-			APIOpts: map[string]interface{}{},
+			Event:   map[string]any{},
+			APIOpts: map[string]any{},
 		},
 		clnb: false,
 	}
@@ -1388,8 +1388,8 @@ func TestArgeesRPCClone(t *testing.T) {
 			Tenant:  "cgrates.org",
 			ID:      "id",
 			Time:    &time.Time{},
-			Event:   map[string]interface{}{},
-			APIOpts: map[string]interface{}{},
+			Event:   map[string]any{},
+			APIOpts: map[string]any{},
 		},
 	}
 
@@ -1410,10 +1410,10 @@ func TestAttrSV1GetAttributeForEvent(t *testing.T) {
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "AttrEvent",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.RequestType: utils.MetaPostpaid,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAttributesProcessRuns: 3,
 			utils.OptsContext:               utils.MetaAny,
 			utils.OptsAttributesProfileIDs:  []string{"ATTR1"},

@@ -282,7 +282,7 @@ func TestEEPrepareOrderMap(t *testing.T) {
 		t.Error(err)
 	}
 
-	valMp := map[string]interface{}{
+	valMp := map[string]any{
 		"*req.*tenant": "value1",
 	}
 	body, err := json.Marshal(valMp)

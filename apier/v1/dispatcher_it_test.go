@@ -549,7 +549,7 @@ func testDispatcherSCacheTestSet(t *testing.T) {
 			ID:         "DISPATCHER_CACHE",
 			Subsystems: []string{utils.MetaAny},
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.CacheOpt: utils.MetaNone,
 		},
 	}

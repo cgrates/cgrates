@@ -393,7 +393,7 @@ func testCacheSRemoveItems(t *testing.T) {
 	}
 	var remReply string
 	if err := chcRPC.Call(utils.CacheSv1RemoveItems, &utils.AttrReloadCacheWithAPIOpts{
-		APIOpts:              make(map[string]interface{}),
+		APIOpts:              make(map[string]any),
 		Tenant:               "cgrates.org",
 		StatsQueueProfileIDs: []string{"cgrates.org:Stats1"},
 		RouteProfileIDs:      []string{"cgrates.org:ROUTE_1"},

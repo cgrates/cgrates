@@ -49,11 +49,11 @@ func (self *CmdSetRoute) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdSetRoute) RpcParams(reset bool) interface{} {
+func (self *CmdSetRoute) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &v1.RouteWithAPIOpts{
 			RouteProfile: new(engine.RouteProfile),
-			APIOpts:      map[string]interface{}{},
+			APIOpts:      map[string]any{},
 		}
 	}
 	return self.rpcParams
@@ -63,7 +63,7 @@ func (self *CmdSetRoute) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdSetRoute) RpcResult() interface{} {
+func (self *CmdSetRoute) RpcResult() any {
 	var s string
 	return &s
 }

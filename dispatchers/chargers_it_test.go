@@ -78,7 +78,7 @@ func testDspCppPingFailover(t *testing.T) {
 	ev := utils.CGREvent{
 		Tenant: "cgrates.org",
 
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "chrg12345",
 		},
 	}
@@ -105,12 +105,12 @@ func testDspCppGetChtgFailover(t *testing.T) {
 	args := utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.EventName:    "Event1",
 			utils.AccountField: "1001",
 		},
 
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "chrg12345",
 		},
 	}
@@ -172,7 +172,7 @@ func testDspCppPing(t *testing.T) {
 	}
 	if err := dispEngine.RPC.Call(utils.ChargerSv1Ping, &utils.CGREvent{
 		Tenant: "cgrates.org",
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "chrg12345",
 		},
 	}, &reply); err != nil {
@@ -186,10 +186,10 @@ func testDspCppTestAuthKey(t *testing.T) {
 	args := utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "12345",
 		},
 	}
@@ -204,11 +204,11 @@ func testDspCppTestAuthKey2(t *testing.T) {
 	args := utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 		},
 
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "chrg12345",
 		},
 	}
@@ -251,11 +251,11 @@ func testDspCppGetChtgRoundRobin(t *testing.T) {
 	args := utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.EventName:    "RoundRobin",
 			utils.AccountField: "1001",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "chrg12345",
 		},
 	}

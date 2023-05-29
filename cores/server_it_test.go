@@ -94,7 +94,7 @@ func TestServerIT(t *testing.T) {
 
 type mockRegister string
 
-func (x *mockRegister) ForTest(method *rpc2.Client, args *interface{}, reply *interface{}) error {
+func (x *mockRegister) ForTest(method *rpc2.Client, args *any, reply *any) error {
 	return nil
 }
 
@@ -735,7 +735,7 @@ func testBiRPCRegisterName(t *testing.T) {
 	caps := engine.NewCaps(0, utils.MetaBusy)
 	server := NewServer(caps)
 
-	handler := func(method *rpc2.Client, args *interface{}, reply *interface{}) error {
+	handler := func(method *rpc2.Client, args *any, reply *any) error {
 		return nil
 	}
 	go server.BiRPCRegisterName(utils.APIerSv1Ping, handler)

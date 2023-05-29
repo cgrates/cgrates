@@ -392,7 +392,7 @@ func (sS *SessionS) forceSTerminate(s *Session, extraUsage time.Duration, tUsage
 			APIOpts: s.OptsStart,
 		}
 		if cgrEv.APIOpts == nil {
-			cgrEv.APIOpts = make(map[string]interface{})
+			cgrEv.APIOpts = make(map[string]any)
 		}
 		cgrEv.APIOpts[utils.OptsResourcesUsageID] = s.ResourceID
 		cgrEv.APIOpts[utils.OptsResourcesUnits] = 1
@@ -790,7 +790,7 @@ func (sS *SessionS) disconnectSession(s *Session, rsn string) (err error) {
 
 // warnSession will send warning from SessionS to clients
 // regarding low balance
-func (sS *SessionS) warnSession(connID string, ev map[string]interface{}) (err error) {
+func (sS *SessionS) warnSession(connID string, ev map[string]any) (err error) {
 	clnt := sS.biJClnt(connID)
 	if clnt == nil {
 		return fmt.Errorf("calling %s requires bidirectional JSON connection, connID: <%s>",
@@ -1631,7 +1631,7 @@ func (sS *SessionS) endSession(s *Session, tUsage, lastUsage *time.Duration,
 
 			// set cost fields
 			sr.Event[utils.Cost] = sr.EventCost.GetCost()
-			sr.Event[utils.CostDetails] = utils.ToJSON(sr.EventCost) // avoid map[string]interface{} when decoding
+			sr.Event[utils.CostDetails] = utils.ToJSON(sr.EventCost) // avoid map[string]any when decoding
 			sr.Event[utils.CostSource] = utils.MetaSessionS
 		}
 		// Set Usage field
@@ -1692,13 +1692,13 @@ func (sS *SessionS) chargeEvent(cgrEv *utils.CGREvent, forceDuration bool) (maxU
 // APIs start here
 
 // Call is part of RpcClientConnection interface
-func (sS *SessionS) Call(serviceMethod string, args interface{}, reply interface{}) error {
+func (sS *SessionS) Call(serviceMethod string, args any, reply any) error {
 	return sS.CallBiRPC(nil, serviceMethod, args, reply)
 }
 
 // CallBiRPC is part of utils.BiRPCServer interface to help internal connections do calls over rpcclient.ClientConnector interface
 func (sS *SessionS) CallBiRPC(clnt rpcclient.ClientConnector,
-	serviceMethod string, args interface{}, reply interface{}) error {
+	serviceMethod string, args any, reply any) error {
 	return utils.BiRPCCall(sS, clnt, serviceMethod, args, reply)
 }
 
@@ -2020,7 +2020,7 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(clnt rpcclient.ClientConnector,
 		}
 		var allocMsg string
 		if args.APIOpts == nil {
-			args.APIOpts = make(map[string]interface{})
+			args.APIOpts = make(map[string]any)
 		}
 		args.CGREvent.APIOpts[utils.OptsResourcesUsageID] = originID
 		args.CGREvent.APIOpts[utils.OptsResourcesUnits] = 1
@@ -2289,7 +2289,7 @@ func (sS *SessionS) BiRPCv1InitiateSession(clnt rpcclient.ClientConnector,
 			return utils.NewErrMandatoryIeMissing(utils.OriginID)
 		}
 		if args.APIOpts == nil {
-			args.APIOpts = make(map[string]interface{})
+			args.APIOpts = make(map[string]any)
 		}
 		args.CGREvent.APIOpts[utils.OptsResourcesUsageID] = originID
 		args.CGREvent.APIOpts[utils.OptsResourcesUnits] = 1
@@ -2709,7 +2709,7 @@ func (sS *SessionS) BiRPCv1TerminateSession(clnt rpcclient.ClientConnector,
 		}
 		var reply string
 		if args.APIOpts == nil {
-			args.APIOpts = make(map[string]interface{})
+			args.APIOpts = make(map[string]any)
 		}
 		args.CGREvent.APIOpts[utils.OptsResourcesUsageID] = originID // same ID should be accepted by first group since the previous resource should be expired
 		args.CGREvent.APIOpts[utils.OptsResourcesUnits] = 1
@@ -2990,7 +2990,7 @@ func (sS *SessionS) BiRPCv1ProcessMessage(clnt rpcclient.ClientConnector,
 			return utils.NewErrMandatoryIeMissing(utils.OriginID)
 		}
 		if args.APIOpts == nil {
-			args.APIOpts = make(map[string]interface{})
+			args.APIOpts = make(map[string]any)
 		}
 		args.CGREvent.APIOpts[utils.OptsResourcesUsageID] = originID
 		args.CGREvent.APIOpts[utils.OptsResourcesUnits] = 1
@@ -3348,7 +3348,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 					return utils.NewErrMandatoryIeMissing(utils.OriginID)
 				}
 				if args.APIOpts == nil {
-					args.APIOpts = make(map[string]interface{})
+					args.APIOpts = make(map[string]any)
 				}
 				args.CGREvent.APIOpts[utils.OptsResourcesUsageID] = originID
 				args.CGREvent.APIOpts[utils.OptsResourcesUnits] = 1
@@ -3824,7 +3824,7 @@ func (sS *SessionS) processThreshold(cgrEv *utils.CGREvent, thIDs []string, clnb
 		return tIDs, utils.NewErrNotConnected(utils.ThresholdS)
 	}
 	if cgrEv.APIOpts == nil {
-		cgrEv.APIOpts = make(map[string]interface{})
+		cgrEv.APIOpts = make(map[string]any)
 	}
 	// check if we have thresholdIDs
 	if len(thIDs) != 0 {
@@ -3842,7 +3842,7 @@ func (sS *SessionS) processStats(cgrEv *utils.CGREvent, stsIDs []string, clnb bo
 		return sIDs, utils.NewErrNotConnected(utils.StatS)
 	}
 	if cgrEv.APIOpts == nil {
-		cgrEv.APIOpts = make(map[string]interface{})
+		cgrEv.APIOpts = make(map[string]any)
 	}
 	// check in case we have StatIDs inside flags
 	if len(stsIDs) != 0 {
@@ -4135,13 +4135,13 @@ func (sS *SessionS) BiRPCv1STIRIdentity(clnt rpcclient.ClientConnector,
 
 // BiRPCv1STIRIdentity the API for STIR header creation
 func (sS *SessionS) BiRPCv1CapsError(clnt rpcclient.ClientConnector,
-	args interface{}, identity *string) (err error) {
+	args any, identity *string) (err error) {
 	return utils.ErrMaxConcurrentRPCExceeded
 }
 
 // Handlers bidirectional methods following
-func (sS *SessionS) Handlers() map[string]interface{} {
-	return map[string]interface{}{
+func (sS *SessionS) Handlers() map[string]any {
+	return map[string]any{
 		utils.SessionSv1AuthorizeEvent: func(clnt *rpc2.Client, args *V1AuthorizeArgs, rply *V1AuthorizeReply) (err error) {
 			return sS.BiRPCv1AuthorizeEvent(clnt, args, rply)
 		},
@@ -4217,7 +4217,7 @@ func (sS *SessionS) Handlers() map[string]interface{} {
 		utils.SessionSv1STIRIdentity: func(clnt *rpc2.Client, args *V1STIRIdentityArgs, rply *string) (err error) {
 			return sS.BiRPCv1STIRIdentity(clnt, args, rply)
 		},
-		utils.SessionSv1CapsError: func(clnt *rpc2.Client, args interface{}, rply *string) (err error) {
+		utils.SessionSv1CapsError: func(clnt *rpc2.Client, args any, rply *string) (err error) {
 			return sS.BiRPCv1CapsError(clnt, args, rply)
 		},
 	}

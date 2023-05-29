@@ -122,7 +122,7 @@ func TestS3ER(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     ev.cgrEvent.ID,
 			Time:   ev.cgrEvent.Time,
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"CGRID": randomCGRID,
 			},
 		}

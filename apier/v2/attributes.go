@@ -27,7 +27,7 @@ import (
 
 type AttributeWithAPIOpts struct {
 	*engine.APIAttributeProfile
-	APIOpts map[string]interface{}
+	APIOpts map[string]any
 }
 
 // SetAttributeProfile add/update a new Attribute Profile

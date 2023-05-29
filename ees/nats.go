@@ -93,7 +93,7 @@ func (pstr *NatsEE) Connect() (err error) {
 	return
 }
 
-func (pstr *NatsEE) ExportEvent(content interface{}, _ string) (err error) {
+func (pstr *NatsEE) ExportEvent(content any, _ string) (err error) {
 	pstr.reqs.get()
 	pstr.RLock()
 	if pstr.poster == nil {

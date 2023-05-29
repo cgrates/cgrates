@@ -34,7 +34,7 @@ type ConfigSv1 struct {
 }
 
 // GetConfig will retrieve from CGRConfig a section
-func (cSv1 *ConfigSv1) GetConfig(section *config.SectionWithAPIOpts, reply *map[string]interface{}) (err error) {
+func (cSv1 *ConfigSv1) GetConfig(section *config.SectionWithAPIOpts, reply *map[string]any) (err error) {
 	return cSv1.cfg.V1GetConfig(section, reply)
 }
 
@@ -60,6 +60,6 @@ func (cSv1 *ConfigSv1) GetConfigAsJSON(args *config.SectionWithAPIOpts, reply *s
 
 // Call implements rpcclient.ClientConnector interface for internal RPC
 func (cSv1 *ConfigSv1) Call(serviceMethod string,
-	args interface{}, reply interface{}) error {
+	args any, reply any) error {
 	return utils.APIerRPCCall(cSv1, serviceMethod, args, reply)
 }

@@ -29,12 +29,12 @@ var (
 )
 
 type RpcParams struct {
-	Object   interface{}
-	InParam  interface{}
-	OutParam interface{}
+	Object   any
+	InParam  any
+	OutParam any
 }
 
-func RegisterRpcParams(name string, obj interface{}) {
+func RegisterRpcParams(name string, obj any) {
 	objType := reflect.TypeOf(obj)
 	if name == "" {
 		val := reflect.ValueOf(obj)

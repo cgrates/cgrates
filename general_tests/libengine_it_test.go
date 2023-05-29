@@ -105,7 +105,7 @@ func testLibengITRPCConnection(t *testing.T) {
 	}
 	args := &utils.DurationArgs{
 		Duration: 50 * time.Millisecond,
-		APIOpts:  make(map[string]interface{}),
+		APIOpts:  make(map[string]any),
 		Tenant:   "cgrates.org",
 	}
 	var reply string

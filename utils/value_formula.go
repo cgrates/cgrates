@@ -29,7 +29,7 @@ import (
 // ValueFormula for computing a dynamic value for Value field
 type ValueFormula struct {
 	Method string
-	Params map[string]interface{}
+	Params map[string]any
 	Static float64
 }
 
@@ -48,7 +48,7 @@ func ParseBalanceFilterValue(tor string, val string) (*ValueFormula, error) {
 	return nil, errors.New("Invalid value: " + val)
 }
 
-type valueFormula func(map[string]interface{}) float64
+type valueFormula func(map[string]any) float64
 
 const (
 	INCREMENTAL = "*incremental"
@@ -62,7 +62,7 @@ func (vf *ValueFormula) String() string {
 	return ToJSON(vf)
 }
 
-func incrementalFormula(params map[string]interface{}) float64 {
+func incrementalFormula(params map[string]any) float64 {
 	// check parameters
 	unitsInterface, unitsFound := params["Units"]
 	intervalInterface, intervalFound := params["Interval"]
@@ -124,7 +124,7 @@ func incrementalFormula(params map[string]interface{}) float64 {
 	return 0.0
 }
 
-func (vf *ValueFormula) FieldAsInterface(fldPath []string) (val interface{}, err error) {
+func (vf *ValueFormula) FieldAsInterface(fldPath []string) (val any, err error) {
 	if vf == nil || len(fldPath) == 0 {
 		return nil, ErrNotFound
 	}
@@ -154,7 +154,7 @@ func (vf *ValueFormula) FieldAsInterface(fldPath []string) (val interface{}, err
 }
 
 func (vf *ValueFormula) FieldAsString(fldPath []string) (val string, err error) {
-	var iface interface{}
+	var iface any
 	iface, err = vf.FieldAsInterface(fldPath)
 	if err != nil {
 		return

@@ -242,7 +242,7 @@ func (sS *StatService) matchingStatQueuesForEvent(tnt string, statsIDs []string,
 
 // Call implements rpcclient.ClientConnector interface for internal RPC
 // here for cases when passing StatsService as rpccclient.RpcClientConnection
-func (sS *StatService) Call(serviceMethod string, args interface{}, reply interface{}) error {
+func (sS *StatService) Call(serviceMethod string, args any, reply any) error {
 	return utils.RPCCall(sS, serviceMethod, args, reply)
 }
 
@@ -273,12 +273,12 @@ func (sS *StatService) storeStatQueue(sq *StatQueue) {
 }
 
 // processThresholds will pass the event for statQueue to ThresholdS
-func (sS *StatService) processThresholds(sQs StatQueues, opts map[string]interface{}) (err error) {
+func (sS *StatService) processThresholds(sQs StatQueues, opts map[string]any) (err error) {
 	if len(sS.cgrcfg.StatSCfg().ThresholdSConns) == 0 {
 		return
 	}
 	if opts == nil {
-		opts = make(map[string]interface{})
+		opts = make(map[string]any)
 	}
 	opts[utils.MetaEventType] = utils.StatUpdate
 	var withErrs bool
@@ -295,7 +295,7 @@ func (sS *StatService) processThresholds(sQs StatQueues, opts map[string]interfa
 		thEv := &utils.CGREvent{
 			Tenant: sq.Tenant,
 			ID:     utils.GenUUID(),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.EventType: utils.StatUpdate,
 				utils.StatID:    sq.ID,
 			},

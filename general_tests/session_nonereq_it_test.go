@@ -129,7 +129,7 @@ func testSesNoneReqTypeItInit(t *testing.T) {
 		InitSession: true,
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.CGRID:        "cgrID",
 				utils.Category:     utils.Call,
 				utils.ToR:          utils.MetaVoice,
@@ -142,7 +142,7 @@ func testSesNoneReqTypeItInit(t *testing.T) {
 				utils.AnswerTime:   time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
 				utils.Usage:        10 * time.Second,
 			},
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.OptsDebitInterval: "0s",
 			},
 		},

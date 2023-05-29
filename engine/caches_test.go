@@ -42,8 +42,8 @@ func TestCachesReplicateRemove(t *testing.T) {
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 	clientconn := make(chan rpcclient.ClientConnector, 1)
 	clientconn <- &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.CacheSv1ReplicateRemove: func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.CacheSv1ReplicateRemove: func(args, reply any) error {
 				*reply.(*string) = utils.OK
 				return nil
 			},
@@ -81,8 +81,8 @@ func TestCacheSSetWithReplicate(t *testing.T) {
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 	clientconn := make(chan rpcclient.ClientConnector, 1)
 	clientconn <- &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.CacheSv1ReplicateSet: func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.CacheSv1ReplicateSet: func(args, reply any) error {
 
 				*reply.(*string) = "reply"
 				return nil
@@ -111,7 +111,7 @@ func TestCacheSSetWithReplicate(t *testing.T) {
 
 func TestCacheSV1GetItemIDs(t *testing.T) {
 	args := &utils.ArgsGetCacheItemIDsWithAPIOpts{
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 		Tenant:  "cgrates.org",
 		ArgsGetCacheItemIDs: utils.ArgsGetCacheItemIDs{
 			CacheID:      "cacheID",
@@ -124,7 +124,7 @@ func TestCacheSV1GetItemIDs(t *testing.T) {
 				MaxItems:  3,
 				TTL:       time.Second * 1,
 				StaticTTL: true,
-				OnEvicted: func(itmID string, value interface{}) {
+				OnEvicted: func(itmID string, value any) {
 
 				},
 			},
@@ -154,7 +154,7 @@ func TestCacheSV1GetItemIDs(t *testing.T) {
 
 func TestCacheSV1HasItem(t *testing.T) {
 	args := &utils.ArgsGetCacheItemWithAPIOpts{
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 		Tenant:  "cgrates.org",
 		ArgsGetCacheItem: utils.ArgsGetCacheItem{
 			CacheID: "cacheID",
@@ -167,7 +167,7 @@ func TestCacheSV1HasItem(t *testing.T) {
 				MaxItems:  3,
 				TTL:       time.Second * 1,
 				StaticTTL: true,
-				OnEvicted: func(itmID string, value interface{}) {
+				OnEvicted: func(itmID string, value any) {
 
 				},
 			},
@@ -205,8 +205,8 @@ func TestCacheSV1GetItemWithRemote(t *testing.T) {
 	}
 	clientconn := make(chan rpcclient.ClientConnector, 1)
 	clientconn <- &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.CacheSv1GetItem: func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.CacheSv1GetItem: func(args, reply any) error {
 
 				return nil
 			},
@@ -222,7 +222,7 @@ func TestCacheSV1GetItemWithRemote(t *testing.T) {
 				MaxItems:  3,
 				TTL:       time.Second * 1,
 				StaticTTL: true,
-				OnEvicted: func(itmID string, value interface{}) {
+				OnEvicted: func(itmID string, value any) {
 
 				},
 			},
@@ -233,7 +233,7 @@ func TestCacheSV1GetItemWithRemote(t *testing.T) {
 		tCache: tscache,
 	}
 	SetConnManager(connMgr)
-	var reply interface{} = "str"
+	var reply any = "str"
 	if err := chS.V1GetItemWithRemote(args, &reply); err != nil {
 		t.Error(err)
 	}
@@ -252,7 +252,7 @@ func TestCacheSV1GetItem(t *testing.T) {
 				MaxItems:  3,
 				TTL:       time.Second * 1,
 				StaticTTL: true,
-				OnEvicted: func(itmID string, value interface{}) {
+				OnEvicted: func(itmID string, value any) {
 
 				},
 			},
@@ -267,7 +267,7 @@ func TestCacheSV1GetItem(t *testing.T) {
 		dm:     dm,
 		tCache: tscache,
 	}
-	var reply interface{}
+	var reply any
 	if err := chS.V1GetItem(args, &reply); err != nil {
 		t.Error(err)
 	} else if val, cancast := reply.(string); cancast {
@@ -301,7 +301,7 @@ func TestCacheSV1GetItemExpiryTime(t *testing.T) {
 				MaxItems:  3,
 				TTL:       time.Minute * 30,
 				StaticTTL: false,
-				OnEvicted: func(itmID string, value interface{}) {
+				OnEvicted: func(itmID string, value any) {
 
 				},
 			},
@@ -340,7 +340,7 @@ func TestCacheSV1RemoveItem(t *testing.T) {
 				MaxItems:  3,
 				TTL:       time.Minute * 30,
 				StaticTTL: false,
-				OnEvicted: func(itmID string, value interface{}) {
+				OnEvicted: func(itmID string, value any) {
 
 				},
 			},
@@ -373,14 +373,14 @@ func TestCacheSV1RemoveItems(t *testing.T) {
 			MaxItems:  3,
 			TTL:       time.Minute * 30,
 			StaticTTL: false,
-			OnEvicted: func(itmID string, value interface{}) {
+			OnEvicted: func(itmID string, value any) {
 			},
 		},
 		utils.CacheResources: {
 			MaxItems:  3,
 			TTL:       time.Minute * 30,
 			StaticTTL: false,
-			OnEvicted: func(itmID string, value interface{}) {
+			OnEvicted: func(itmID string, value any) {
 
 			},
 		},
@@ -388,7 +388,7 @@ func TestCacheSV1RemoveItems(t *testing.T) {
 			MaxItems:  3,
 			TTL:       time.Minute * 30,
 			StaticTTL: false,
-			OnEvicted: func(itmID string, value interface{}) {
+			OnEvicted: func(itmID string, value any) {
 
 			},
 		},
@@ -427,7 +427,7 @@ func TestCacheSV1RemoveItems(t *testing.T) {
 
 func TestCacheSV1Clear(t *testing.T) {
 	args := &utils.AttrCacheIDsWithAPIOpts{
-		APIOpts:  map[string]interface{}{},
+		APIOpts:  map[string]any{},
 		Tenant:   "cgrates.org",
 		CacheIDs: []string{"cacheID", "cacheID2", "cacheID3"},
 	}
@@ -440,14 +440,14 @@ func TestCacheSV1Clear(t *testing.T) {
 			MaxItems:  3,
 			TTL:       time.Minute * 30,
 			StaticTTL: false,
-			OnEvicted: func(itmID string, value interface{}) {
+			OnEvicted: func(itmID string, value any) {
 			},
 		},
 		"cacheID2": {
 			MaxItems:  3,
 			TTL:       time.Minute * 30,
 			StaticTTL: false,
-			OnEvicted: func(itmID string, value interface{}) {
+			OnEvicted: func(itmID string, value any) {
 
 			},
 		},
@@ -455,7 +455,7 @@ func TestCacheSV1Clear(t *testing.T) {
 			MaxItems:  3,
 			TTL:       time.Minute * 30,
 			StaticTTL: false,
-			OnEvicted: func(itmID string, value interface{}) {
+			OnEvicted: func(itmID string, value any) {
 
 			},
 		},
@@ -491,7 +491,7 @@ func TestCacheSV1ReplicateSet(t *testing.T) {
 				MaxItems:  3,
 				TTL:       time.Minute * 30,
 				StaticTTL: false,
-				OnEvicted: func(itmID string, value interface{}) {
+				OnEvicted: func(itmID string, value any) {
 				},
 			}},
 	)
@@ -519,7 +519,7 @@ func TestCacheSV1ReplicateSet(t *testing.T) {
 
 func TestCacheSV1GetCacheStats(t *testing.T) {
 	args := &utils.AttrCacheIDsWithAPIOpts{
-		APIOpts:  map[string]interface{}{},
+		APIOpts:  map[string]any{},
 		Tenant:   "cgrates.org",
 		CacheIDs: []string{"cacheID", "cacheID2", "cacheID3"},
 	}
@@ -533,21 +533,21 @@ func TestCacheSV1GetCacheStats(t *testing.T) {
 				MaxItems:  3,
 				TTL:       time.Minute * 30,
 				StaticTTL: false,
-				OnEvicted: func(itmID string, value interface{}) {
+				OnEvicted: func(itmID string, value any) {
 				},
 			},
 			"cacheID2": {
 				MaxItems:  3,
 				TTL:       time.Minute * 30,
 				StaticTTL: false,
-				OnEvicted: func(itmID string, value interface{}) {
+				OnEvicted: func(itmID string, value any) {
 				},
 			},
 			"cacheID3": {
 				MaxItems:  3,
 				TTL:       time.Minute * 30,
 				StaticTTL: false,
-				OnEvicted: func(itmID string, value interface{}) {
+				OnEvicted: func(itmID string, value any) {
 				},
 			},
 		},
@@ -602,7 +602,7 @@ func TestCachesPrecache(t *testing.T) {
 
 func TestV1PrecacheStatus(t *testing.T) {
 	args := &utils.AttrCacheIDsWithAPIOpts{
-		APIOpts:  map[string]interface{}{},
+		APIOpts:  map[string]any{},
 		Tenant:   "cgrates.org",
 		CacheIDs: []string{utils.CacheFilters},
 	}
@@ -640,7 +640,7 @@ func TestCacheSV1HasGroup(t *testing.T) {
 			CacheID: "cacheId",
 			GroupID: "groupId",
 		},
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 	cfg := config.NewDefaultCGRConfig()
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
@@ -651,7 +651,7 @@ func TestCacheSV1HasGroup(t *testing.T) {
 				MaxItems:  3,
 				TTL:       time.Minute * 30,
 				StaticTTL: false,
-				OnEvicted: func(itmID string, value interface{}) {
+				OnEvicted: func(itmID string, value any) {
 				},
 			}},
 	)
@@ -677,7 +677,7 @@ func TestCacheSV1HasGroupItemIDs(t *testing.T) {
 			CacheID: "cacheId",
 			GroupID: "groupId",
 		},
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 	cfg := config.NewDefaultCGRConfig()
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
@@ -688,7 +688,7 @@ func TestCacheSV1HasGroupItemIDs(t *testing.T) {
 				MaxItems:  3,
 				TTL:       time.Minute * 30,
 				StaticTTL: false,
-				OnEvicted: func(itmID string, value interface{}) {
+				OnEvicted: func(itmID string, value any) {
 				},
 			}},
 	)
@@ -714,7 +714,7 @@ func TestV1RemoveGroup(t *testing.T) {
 			CacheID: "cacheId",
 			GroupID: "groupId",
 		},
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 	cfg := config.NewDefaultCGRConfig()
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
@@ -725,7 +725,7 @@ func TestV1RemoveGroup(t *testing.T) {
 				MaxItems:  3,
 				TTL:       time.Minute * 30,
 				StaticTTL: false,
-				OnEvicted: func(itmID string, value interface{}) {
+				OnEvicted: func(itmID string, value any) {
 				},
 			}},
 	)
@@ -753,7 +753,7 @@ func TestCacheSV1ReplicateRemove(t *testing.T) {
 	args := &utils.ArgCacheReplicateRemove{
 		CacheID: "cacheID",
 		ItemID:  "itemID",
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 		Tenant:  "cgrates.org",
 	}
 	cfg := config.NewDefaultCGRConfig()
@@ -765,7 +765,7 @@ func TestCacheSV1ReplicateRemove(t *testing.T) {
 				MaxItems:  3,
 				TTL:       time.Minute * 30,
 				StaticTTL: false,
-				OnEvicted: func(itmID string, value interface{}) {
+				OnEvicted: func(itmID string, value any) {
 				},
 			}},
 	)
@@ -803,8 +803,8 @@ func TestNewCacheS(t *testing.T) {
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 	clientconn := make(chan rpcclient.ClientConnector, 1)
 	clientconn <- &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.CacheSv1ReplicateRemove: func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.CacheSv1ReplicateRemove: func(args, reply any) error {
 
 				*reply.(*string) = "reply"
 				return nil
@@ -832,7 +832,7 @@ func TestCacheRemoveWithoutReplicate(t *testing.T) {
 				MaxItems:  3,
 				TTL:       time.Minute * 30,
 				StaticTTL: false,
-				OnEvicted: func(itmID string, value interface{}) {
+				OnEvicted: func(itmID string, value any) {
 				},
 			}},
 	)
@@ -858,7 +858,7 @@ func TestCacheRemoveGroup(t *testing.T) {
 				MaxItems:  3,
 				TTL:       time.Minute * 30,
 				StaticTTL: false,
-				OnEvicted: func(itmID string, value interface{}) {
+				OnEvicted: func(itmID string, value any) {
 				},
 			}},
 	)
@@ -915,8 +915,8 @@ func TestReplicateMultipleIDs(t *testing.T) {
 	Cache = NewCacheS(cfg, nil, nil)
 	connClient := make(chan rpcclient.ClientConnector, 1)
 	connClient <- &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.CacheSv1ReloadCache: func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.CacheSv1ReloadCache: func(args, reply any) error {
 				*reply.(*string) = "reply"
 				return nil
 			},
@@ -958,8 +958,8 @@ func TestCachesGetWithRemote(t *testing.T) {
 	chS := NewCacheS(cfg, dm, nil)
 	clientconn := make(chan rpcclient.ClientConnector, 1)
 	clientconn <- &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.CacheSv1GetItem: func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.CacheSv1GetItem: func(args, reply any) error {
 				*reply.(*string) = utils.OK
 				return utils.ErrNotFound
 			},

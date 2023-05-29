@@ -217,40 +217,40 @@ func NewMarshaler(mrshlerStr string) (ms Marshaler, err error) {
 }
 
 type Marshaler interface {
-	Marshal(v interface{}) ([]byte, error)
-	Unmarshal(data []byte, v interface{}) error
+	Marshal(v any) ([]byte, error)
+	Unmarshal(data []byte, v any) error
 }
 
 type JSONMarshaler struct{}
 
-func (jm *JSONMarshaler) Marshal(v interface{}) ([]byte, error) {
+func (jm *JSONMarshaler) Marshal(v any) ([]byte, error) {
 	return json.Marshal(v)
 }
 
-func (jm *JSONMarshaler) Unmarshal(data []byte, v interface{}) error {
+func (jm *JSONMarshaler) Unmarshal(data []byte, v any) error {
 	return json.Unmarshal(data, v)
 }
 
 type BSONMarshaler struct{}
 
-func (jm *BSONMarshaler) Marshal(v interface{}) ([]byte, error) {
+func (jm *BSONMarshaler) Marshal(v any) ([]byte, error) {
 	return bson.Marshal(v)
 }
 
-func (jm *BSONMarshaler) Unmarshal(data []byte, v interface{}) error {
+func (jm *BSONMarshaler) Unmarshal(data []byte, v any) error {
 	return bson.Unmarshal(data, v)
 }
 
 type JSONBufMarshaler struct{}
 
-func (jbm *JSONBufMarshaler) Marshal(v interface{}) (data []byte, err error) {
+func (jbm *JSONBufMarshaler) Marshal(v any) (data []byte, err error) {
 	buf := new(bytes.Buffer)
 	err = json.NewEncoder(buf).Encode(v)
 	data = buf.Bytes()
 	return
 }
 
-func (jbm *JSONBufMarshaler) Unmarshal(data []byte, v interface{}) error {
+func (jbm *JSONBufMarshaler) Unmarshal(data []byte, v any) error {
 	return json.NewDecoder(bytes.NewBuffer(data)).Decode(v)
 }
 
@@ -261,18 +261,18 @@ type CodecMsgpackMarshaler struct {
 func NewCodecMsgpackMarshaler() *CodecMsgpackMarshaler {
 	cmm := &CodecMsgpackMarshaler{new(codec.MsgpackHandle)}
 	mh := cmm.mh
-	mh.MapType = reflect.TypeOf(map[string]interface{}(nil))
+	mh.MapType = reflect.TypeOf(map[string]any(nil))
 	mh.RawToString = true
 	return cmm
 }
 
-func (cmm *CodecMsgpackMarshaler) Marshal(v interface{}) (b []byte, err error) {
+func (cmm *CodecMsgpackMarshaler) Marshal(v any) (b []byte, err error) {
 	enc := codec.NewEncoderBytes(&b, cmm.mh)
 	err = enc.Encode(v)
 	return
 }
 
-func (cmm *CodecMsgpackMarshaler) Unmarshal(data []byte, v interface{}) error {
+func (cmm *CodecMsgpackMarshaler) Unmarshal(data []byte, v any) error {
 	dec := codec.NewDecoderBytes(data, cmm.mh)
 	return dec.Decode(&v)
 }
@@ -285,27 +285,27 @@ func NewBincMarshaler() *BincMarshaler {
 	return &BincMarshaler{new(codec.BincHandle)}
 }
 
-func (bm *BincMarshaler) Marshal(v interface{}) (b []byte, err error) {
+func (bm *BincMarshaler) Marshal(v any) (b []byte, err error) {
 	enc := codec.NewEncoderBytes(&b, bm.bh)
 	err = enc.Encode(v)
 	return
 }
 
-func (bm *BincMarshaler) Unmarshal(data []byte, v interface{}) error {
+func (bm *BincMarshaler) Unmarshal(data []byte, v any) error {
 	dec := codec.NewDecoderBytes(data, bm.bh)
 	return dec.Decode(&v)
 }
 
 type GOBMarshaler struct{}
 
-func (gm *GOBMarshaler) Marshal(v interface{}) (data []byte, err error) {
+func (gm *GOBMarshaler) Marshal(v any) (data []byte, err error) {
 	buf := new(bytes.Buffer)
 	err = gob.NewEncoder(buf).Encode(v)
 	data = buf.Bytes()
 	return
 }
 
-func (gm *GOBMarshaler) Unmarshal(data []byte, v interface{}) error {
+func (gm *GOBMarshaler) Unmarshal(data []byte, v any) error {
 	return gob.NewDecoder(bytes.NewBuffer(data)).Decode(v)
 }
 

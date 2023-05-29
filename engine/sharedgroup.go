@@ -48,7 +48,7 @@ type SharedGroup struct {
 type SharedGroupWithAPIOpts struct {
 	*SharedGroup
 	Tenant  string
-	APIOpts map[string]interface{}
+	APIOpts map[string]any
 }
 
 type SharingParameters struct {

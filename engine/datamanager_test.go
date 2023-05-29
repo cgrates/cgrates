@@ -52,8 +52,8 @@ func TestDmGetDestinationRemote(t *testing.T) {
 	}
 	clientConn := make(chan rpcclient.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ReplicatorSv1GetDestination: func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.ReplicatorSv1GetDestination: func(args, reply any) error {
 				rpl := &Destination{
 					Id: "nat", Prefixes: []string{"0257", "0256", "0723"},
 				}
@@ -103,8 +103,8 @@ func TestDmGetAccountRemote(t *testing.T) {
 	}
 	clientConn := make(chan rpcclient.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ReplicatorSv1GetAccount: func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.ReplicatorSv1GetAccount: func(args, reply any) error {
 				rpl := &Account{
 					ID:         "cgrates.org:exp",
 					UpdateTime: time.Now(),
@@ -156,8 +156,8 @@ func TestDmGetFilterRemote(t *testing.T) {
 	}
 	clientConn := make(chan rpcclient.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ReplicatorSv1GetFilter: func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.ReplicatorSv1GetFilter: func(args, reply any) error {
 				rpl := &Filter{
 					Tenant: "cgrates.org",
 					ID:     "Filter1",
@@ -232,8 +232,8 @@ func TestDMGetThresholdRemote(t *testing.T) {
 	}
 	clientConn := make(chan rpcclient.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ReplicatorSv1GetThreshold: func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.ReplicatorSv1GetThreshold: func(args, reply any) error {
 				rpl := &Threshold{
 					Tenant: "cgrates.org",
 					ID:     "THD_ACNT_1001",
@@ -242,7 +242,7 @@ func TestDMGetThresholdRemote(t *testing.T) {
 				*reply.(**Threshold) = rpl
 				return nil
 			},
-			utils.CacheSv1ReplicateSet: func(args, reply interface{}) error {
+			utils.CacheSv1ReplicateSet: func(args, reply any) error {
 
 				return errors.New("Can't Replicate")
 			},
@@ -301,11 +301,11 @@ func TestDMGetThresholdRemoteErr(t *testing.T) {
 	}
 	clientConn := make(chan rpcclient.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ReplicatorSv1GetThreshold: func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.ReplicatorSv1GetThreshold: func(args, reply any) error {
 				return utils.ErrNotFound
 			},
-			utils.CacheSv1ReplicateSet: func(args, reply interface{}) error {
+			utils.CacheSv1ReplicateSet: func(args, reply any) error {
 				return errors.New("Can't Replicate")
 			},
 		},
@@ -349,8 +349,8 @@ func TestDMGetThresholdProfileRemote(t *testing.T) {
 	}
 	clientConn := make(chan rpcclient.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ReplicatorSv1GetThresholdProfile: func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.ReplicatorSv1GetThresholdProfile: func(args, reply any) error {
 				rpl := &ThresholdProfile{
 					Tenant: "cgrates.org",
 					ID:     "ID",
@@ -358,7 +358,7 @@ func TestDMGetThresholdProfileRemote(t *testing.T) {
 				*reply.(**ThresholdProfile) = rpl
 				return nil
 			},
-			utils.CacheSv1ReplicateSet: func(args, reply interface{}) error {
+			utils.CacheSv1ReplicateSet: func(args, reply any) error {
 
 				return errors.New("Can't Replicate")
 			},
@@ -411,11 +411,11 @@ func TestDMGetThresholdProfileRemoteErr(t *testing.T) {
 	}
 	clientConn := make(chan rpcclient.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ReplicatorSv1GetThresholdProfile: func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.ReplicatorSv1GetThresholdProfile: func(args, reply any) error {
 				return utils.ErrNotFound
 			},
-			utils.CacheSv1ReplicateSet: func(args, reply interface{}) error {
+			utils.CacheSv1ReplicateSet: func(args, reply any) error {
 				return errors.New("Can't Replicate")
 			},
 		},
@@ -463,8 +463,8 @@ func TestDMGetStatQueue(t *testing.T) {
 	}
 	clientConn := make(chan rpcclient.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ReplicatorSv1GetStatQueue: func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.ReplicatorSv1GetStatQueue: func(args, reply any) error {
 				rpl := &StatQueue{
 					Tenant: "cgrates.org",
 					ID:     "StatsID",
@@ -562,8 +562,8 @@ func TestDMSetAccount(t *testing.T) {
 	}
 	clientConn := make(chan rpcclient.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ReplicatorSv1SetAccount: func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.ReplicatorSv1SetAccount: func(args, reply any) error {
 				accApiOpts, cancast := args.(AccountWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -632,8 +632,8 @@ func TestDMRemoveAccount(t *testing.T) {
 
 	clientConn := make(chan rpcclient.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ReplicatorSv1RemoveAccount: func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.ReplicatorSv1RemoveAccount: func(args, reply any) error {
 				strApiOpts, cancast := args.(utils.StringWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -696,8 +696,8 @@ func TestDmSetFilter(t *testing.T) {
 	}
 	clientConn := make(chan rpcclient.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ReplicatorSv1SetFilter: func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.ReplicatorSv1SetFilter: func(args, reply any) error {
 				fltr, cancast := args.(FilterWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -751,8 +751,8 @@ func TestDMSetThreshold(t *testing.T) {
 	}
 	clientConn := make(chan rpcclient.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ReplicatorSv1SetThreshold: func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.ReplicatorSv1SetThreshold: func(args, reply any) error {
 				thS, cancast := args.(ThresholdWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -807,8 +807,8 @@ func TestDmRemoveThreshold(t *testing.T) {
 	}
 	clientConn := make(chan rpcclient.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ReplicatorSv1RemoveThreshold: func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.ReplicatorSv1RemoveThreshold: func(args, reply any) error {
 				tntApiOpts, cancast := args.(utils.TenantIDWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -856,8 +856,8 @@ func TestDMReverseDestinationRemote(t *testing.T) {
 	}
 	clientConn := make(chan rpcclient.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ReplicatorSv1SetReverseDestination: func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.ReplicatorSv1SetReverseDestination: func(args, reply any) error {
 				dest, cancast := args.(Destination)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -912,8 +912,8 @@ func TestDMStatQueueRemote(t *testing.T) {
 	}
 	clientConn := make(chan rpcclient.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ReplicatorSv1SetStatQueue: func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.ReplicatorSv1SetStatQueue: func(args, reply any) error {
 				sqApiOpts, cancast := args.(StatQueueWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -921,7 +921,7 @@ func TestDMStatQueueRemote(t *testing.T) {
 				dm.dataDB.SetStatQueueDrv(nil, sqApiOpts.StatQueue)
 				return nil
 			},
-			utils.ReplicatorSv1RemoveStatQueue: func(args, reply interface{}) error {
+			utils.ReplicatorSv1RemoveStatQueue: func(args, reply any) error {
 				tntIDApiOpts, cancast := args.(utils.TenantIDWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -986,8 +986,8 @@ func TestDmTimingR(t *testing.T) {
 	}
 	clientConn := make(chan rpcclient.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ReplicatorSv1SetTiming: func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.ReplicatorSv1SetTiming: func(args, reply any) error {
 				tpTimingApiOpts, cancast := args.(utils.TPTimingWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -995,7 +995,7 @@ func TestDmTimingR(t *testing.T) {
 				dm.DataDB().SetTimingDrv(tpTimingApiOpts.TPTiming)
 				return nil
 			},
-			utils.ReplicatorSv1RemoveTiming: func(args, reply interface{}) error {
+			utils.ReplicatorSv1RemoveTiming: func(args, reply any) error {
 				id, cancast := args.(string)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -1056,8 +1056,8 @@ func TestDMSetActionTriggers(t *testing.T) {
 	}
 	clientConn := make(chan rpcclient.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ReplicatorSv1SetActionTriggers: func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.ReplicatorSv1SetActionTriggers: func(args, reply any) error {
 				setActTrgAOpts, cancast := args.(SetActionTriggersArgWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -1065,7 +1065,7 @@ func TestDMSetActionTriggers(t *testing.T) {
 				dm.DataDB().SetActionTriggersDrv(setActTrgAOpts.Key, setActTrgAOpts.Attrs)
 				return nil
 			},
-			utils.ReplicatorSv1RemoveActionTriggers: func(args, reply interface{}) error {
+			utils.ReplicatorSv1RemoveActionTriggers: func(args, reply any) error {
 				strApiOpts, cancast := args.(utils.StringWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -1133,8 +1133,8 @@ func TestDMResourceProfileRemote(t *testing.T) {
 	}
 	clientConn := make(chan rpcclient.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ReplicatorSv1SetResourceProfile: func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.ReplicatorSv1SetResourceProfile: func(args, reply any) error {
 				rscPrflApiOpts, cancast := args.(ResourceProfileWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -1142,7 +1142,7 @@ func TestDMResourceProfileRemote(t *testing.T) {
 				dm.DataDB().SetResourceProfileDrv(rscPrflApiOpts.ResourceProfile)
 				return nil
 			},
-			utils.ReplicatorSv1SetResource: func(args, reply interface{}) error {
+			utils.ReplicatorSv1SetResource: func(args, reply any) error {
 				rscApiOpts, cancast := args.(ResourceWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -1150,7 +1150,7 @@ func TestDMResourceProfileRemote(t *testing.T) {
 				dm.DataDB().SetResourceDrv(rscApiOpts.Resource)
 				return nil
 			},
-			utils.ReplicatorSv1RemoveResourceProfile: func(args, reply interface{}) error {
+			utils.ReplicatorSv1RemoveResourceProfile: func(args, reply any) error {
 				tntApiOpts, cancast := args.(utils.TenantIDWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -1223,8 +1223,8 @@ func TestDmSharedGroup(t *testing.T) {
 	}
 	clientConn := make(chan rpcclient.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ReplicatorSv1SetSharedGroup: func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.ReplicatorSv1SetSharedGroup: func(args, reply any) error {
 				shGrpApiOpts, cancast := args.(SharedGroupWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -1232,7 +1232,7 @@ func TestDmSharedGroup(t *testing.T) {
 				dm.dataDB.SetSharedGroupDrv(shGrpApiOpts.SharedGroup)
 				return nil
 			},
-			utils.ReplicatorSv1RemoveSharedGroup: func(args, reply interface{}) error {
+			utils.ReplicatorSv1RemoveSharedGroup: func(args, reply any) error {
 				strApiOpts, cancast := args.(utils.StringWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -1302,8 +1302,8 @@ func TestDMThresholdProfile(t *testing.T) {
 	}
 	clientConn := make(chan rpcclient.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ReplicatorSv1SetThresholdProfile: func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.ReplicatorSv1SetThresholdProfile: func(args, reply any) error {
 				thPApiOpts, cancast := args.(ThresholdProfileWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -1311,7 +1311,7 @@ func TestDMThresholdProfile(t *testing.T) {
 				dm.DataDB().SetThresholdProfileDrv(thPApiOpts.ThresholdProfile)
 				return nil
 			},
-			utils.ReplicatorSv1SetThreshold: func(args, reply interface{}) error {
+			utils.ReplicatorSv1SetThreshold: func(args, reply any) error {
 				thApiOpts, cancast := args.(ThresholdWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -1319,7 +1319,7 @@ func TestDMThresholdProfile(t *testing.T) {
 				dm.DataDB().SetThresholdDrv(thApiOpts.Threshold)
 				return nil
 			},
-			utils.ReplicatorSv1RemoveThresholdProfile: func(args, reply interface{}) error {
+			utils.ReplicatorSv1RemoveThresholdProfile: func(args, reply any) error {
 				tntApiOpts, cancast := args.(utils.TenantIDWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -1382,8 +1382,8 @@ func TestDMRemoveThresholdProfileErr(t *testing.T) {
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	clientConn := make(chan rpcclient.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ReplicatorSv1GetThresholdProfile: func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.ReplicatorSv1GetThresholdProfile: func(args, reply any) error {
 				return fmt.Errorf("Can't Replicate")
 			},
 		},
@@ -1441,8 +1441,8 @@ func TestDmDispatcherHost(t *testing.T) {
 	}
 	clientConn := make(chan rpcclient.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ReplicatorSv1SetDispatcherHost: func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.ReplicatorSv1SetDispatcherHost: func(args, reply any) error {
 				dspApiOpts, cancast := args.(DispatcherHostWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -1450,7 +1450,7 @@ func TestDmDispatcherHost(t *testing.T) {
 				dm.DataDB().SetDispatcherHostDrv(dspApiOpts.DispatcherHost)
 				return nil
 			},
-			utils.ReplicatorSv1RemoveDispatcherHost: func(args, reply interface{}) error {
+			utils.ReplicatorSv1RemoveDispatcherHost: func(args, reply any) error {
 				tntApiOpts, cancast := args.(utils.TenantIDWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -1514,11 +1514,11 @@ func TestGetDispatcherHostErr(t *testing.T) {
 	}
 	clientConn := make(chan rpcclient.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ReplicatorSv1GetDispatcherHost: func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.ReplicatorSv1GetDispatcherHost: func(args, reply any) error {
 				return utils.ErrDSPHostNotFound
 			},
-			utils.CacheSv1ReplicateSet: func(args, reply interface{}) error {
+			utils.CacheSv1ReplicateSet: func(args, reply any) error {
 				return errors.New("Can't Replicate")
 			},
 		},
@@ -1574,8 +1574,8 @@ func TestChargerProfileRemote(t *testing.T) {
 	}
 	clientConn := make(chan rpcclient.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ReplicatorSv1SetDispatcherHost: func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.ReplicatorSv1SetDispatcherHost: func(args, reply any) error {
 				chrgPrflApiOpts, cancast := args.(ChargerProfileWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -1583,7 +1583,7 @@ func TestChargerProfileRemote(t *testing.T) {
 				dm.DataDB().SetChargerProfileDrv(chrgPrflApiOpts.ChargerProfile)
 				return nil
 			},
-			utils.ReplicatorSv1RemoveChargerProfile: func(args, reply interface{}) error {
+			utils.ReplicatorSv1RemoveChargerProfile: func(args, reply any) error {
 				tntApiOpts, cancast := args.(utils.TenantIDWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -1649,8 +1649,8 @@ func TestDispatcherProfileRemote(t *testing.T) {
 	}
 	clientConn := make(chan rpcclient.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ReplicatorSv1SetDispatcherProfile: func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.ReplicatorSv1SetDispatcherProfile: func(args, reply any) error {
 				dspApiOpts, cancast := args.(DispatcherProfileWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -1658,7 +1658,7 @@ func TestDispatcherProfileRemote(t *testing.T) {
 				dm.DataDB().SetDispatcherProfileDrv(dspApiOpts.DispatcherProfile)
 				return nil
 			},
-			utils.ReplicatorSv1RemoveDispatcherProfile: func(args, reply interface{}) error {
+			utils.ReplicatorSv1RemoveDispatcherProfile: func(args, reply any) error {
 				tntApiOpts, cancast := args.(utils.TenantIDWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -1721,8 +1721,8 @@ func TestRouteProfileRemote(t *testing.T) {
 	}
 	clientConn := make(chan rpcclient.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ReplicatorSv1SetRouteProfile: func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.ReplicatorSv1SetRouteProfile: func(args, reply any) error {
 				routeApiOpts, cancast := args.(RouteProfileWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -1730,7 +1730,7 @@ func TestRouteProfileRemote(t *testing.T) {
 				dm.DataDB().SetRouteProfileDrv(routeApiOpts.RouteProfile)
 				return nil
 			},
-			utils.ReplicatorSv1RemoveRouteProfile: func(args, reply interface{}) error {
+			utils.ReplicatorSv1RemoveRouteProfile: func(args, reply any) error {
 				tntApiOpts, cancast := args.(utils.TenantIDWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -1790,8 +1790,8 @@ func TestRatingPlanRemote(t *testing.T) {
 	}
 	clientConn := make(chan rpcclient.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ReplicatorSv1SetRatingPlan: func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.ReplicatorSv1SetRatingPlan: func(args, reply any) error {
 				rPnApiOpts, cancast := args.(RatingPlanWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -1799,7 +1799,7 @@ func TestRatingPlanRemote(t *testing.T) {
 				dm.DataDB().SetRatingPlanDrv(rPnApiOpts.RatingPlan)
 				return nil
 			},
-			utils.ReplicatorSv1RemoveRatingPlan: func(args, reply interface{}) error {
+			utils.ReplicatorSv1RemoveRatingPlan: func(args, reply any) error {
 				strApiOpts, cancast := args.(utils.StringWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -1881,8 +1881,8 @@ func TestGetResourceRemote(t *testing.T) {
 	}
 	clientConn := make(chan rpcclient.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ReplicatorSv1GetResource: func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.ReplicatorSv1GetResource: func(args, reply any) error {
 				tntApiOpts, cancast := args.(*utils.TenantIDWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -1891,7 +1891,7 @@ func TestGetResourceRemote(t *testing.T) {
 				*reply.(**Resource) = rS
 				return nil
 			},
-			utils.CacheSv1ReplicateSet: func(args, reply interface{}) error {
+			utils.CacheSv1ReplicateSet: func(args, reply any) error {
 				return errors.New("Can't Replicate")
 			},
 		},
@@ -1950,8 +1950,8 @@ func TestGetResourceProfileRemote(t *testing.T) {
 	}
 	clientConn := make(chan rpcclient.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ReplicatorSv1GetResourceProfile: func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.ReplicatorSv1GetResourceProfile: func(args, reply any) error {
 				tntApiOpts, cancast := args.(*utils.TenantIDWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -2006,8 +2006,8 @@ func TestGetActionTriggers(t *testing.T) {
 	}
 	clientConn := make(chan rpcclient.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ReplicatorSv1GetActionTriggers: func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.ReplicatorSv1GetActionTriggers: func(args, reply any) error {
 				strApiOpts, cancast := args.(*utils.StringWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -2016,7 +2016,7 @@ func TestGetActionTriggers(t *testing.T) {
 				*reply.(*ActionTriggers) = aT
 				return nil
 			},
-			utils.CacheSv1ReplicateSet: func(args, reply interface{}) error {
+			utils.CacheSv1ReplicateSet: func(args, reply any) error {
 
 				return errors.New("Can't Replicate")
 			},
@@ -2074,11 +2074,11 @@ func TestGetActionTriggersErr(t *testing.T) {
 	}
 	clientConn := make(chan rpcclient.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ReplicatorSv1GetActionTriggers: func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.ReplicatorSv1GetActionTriggers: func(args, reply any) error {
 				return utils.ErrNotFound
 			},
-			utils.CacheSv1ReplicateSet: func(args, reply interface{}) error {
+			utils.CacheSv1ReplicateSet: func(args, reply any) error {
 				return errors.New("Can't Replicate")
 			},
 		},
@@ -2148,8 +2148,8 @@ func TestGetSharedGroupRemote(t *testing.T) {
 	}
 	clientConn := make(chan rpcclient.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ReplicatorSv1GetSharedGroup: func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.ReplicatorSv1GetSharedGroup: func(args, reply any) error {
 				strApiOpts, cancast := args.(*utils.StringWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -2203,8 +2203,8 @@ func TestGetStatQueueProfileRemote(t *testing.T) {
 	}
 	clientConn := make(chan rpcclient.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ReplicatorSv1GetStatQueueProfile: func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.ReplicatorSv1GetStatQueueProfile: func(args, reply any) error {
 				tntApiOpts, cancast := args.(*utils.TenantIDWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -2266,8 +2266,8 @@ func TestStatQueueProfileRemote(t *testing.T) {
 	}
 	clientConn := make(chan rpcclient.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ReplicatorSv1SetStatQueueProfile: func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.ReplicatorSv1SetStatQueueProfile: func(args, reply any) error {
 				sqPApiOpts, cancast := args.(StatQueueProfileWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -2275,7 +2275,7 @@ func TestStatQueueProfileRemote(t *testing.T) {
 				dm.DataDB().SetStatQueueProfileDrv(sqPApiOpts.StatQueueProfile)
 				return nil
 			},
-			utils.ReplicatorSv1SetStatQueue: func(args, reply interface{}) error {
+			utils.ReplicatorSv1SetStatQueue: func(args, reply any) error {
 				sqApiOpts, cancast := args.(StatQueueWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -2324,8 +2324,8 @@ func TestDMActionsRemote(t *testing.T) {
 	}
 	clientConn := make(chan rpcclient.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ReplicatorSv1SetActions: func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.ReplicatorSv1SetActions: func(args, reply any) error {
 				sArgApiOpts, cancast := args.(SetActionsArgsWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -2333,7 +2333,7 @@ func TestDMActionsRemote(t *testing.T) {
 				dm.DataDB().SetActionsDrv(sArgApiOpts.Key, sArgApiOpts.Acs)
 				return nil
 			},
-			utils.ReplicatorSv1GetActions: func(args, reply interface{}) error {
+			utils.ReplicatorSv1GetActions: func(args, reply any) error {
 				strApiOpts, cancast := args.(utils.StringWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -2341,7 +2341,7 @@ func TestDMActionsRemote(t *testing.T) {
 				dm.DataDB().GetActionsDrv(strApiOpts.Arg)
 				return nil
 			},
-			utils.ReplicatorSv1RemoveActions: func(args, reply interface{}) error {
+			utils.ReplicatorSv1RemoveActions: func(args, reply any) error {
 				strApiOpts, cancast := args.(utils.StringWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -2410,8 +2410,8 @@ func TestGetDispatcherHost(t *testing.T) {
 	}
 	clientConn := make(chan rpcclient.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ReplicatorSv1GetDispatcherHost: func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.ReplicatorSv1GetDispatcherHost: func(args, reply any) error {
 				tntApiOpts, cancast := args.(*utils.TenantIDWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -2465,8 +2465,8 @@ func TestGetReverseDestinationRemote(t *testing.T) {
 	ids := []string{"dest1", "dest2"}
 	clientConn := make(chan rpcclient.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ReplicatorSv1GetReverseDestination: func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.ReplicatorSv1GetReverseDestination: func(args, reply any) error {
 				strApiOpts, cancast := args.(*utils.StringWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -2492,8 +2492,8 @@ func TestGetReverseDestinationRemote(t *testing.T) {
 	Cache = NewCacheS(cfg, dm, nil)
 	clientConn2 := make(chan rpcclient.ClientConnector, 1)
 	clientConn2 <- &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.CacheSv1ReplicateSet: func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.CacheSv1ReplicateSet: func(args, reply any) error {
 				return errors.New("Can't replicate")
 			},
 		},
@@ -2543,8 +2543,8 @@ func TestDMRemoveDestination(t *testing.T) {
 	}
 	clientConn := make(chan rpcclient.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ReplicatorSv1RemoveDestination: func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.ReplicatorSv1RemoveDestination: func(args, reply any) error {
 				strApiOpts, cancast := args.(utils.StringWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -2552,7 +2552,7 @@ func TestDMRemoveDestination(t *testing.T) {
 				dm.DataDB().RemoveDestinationDrv(strApiOpts.Arg, utils.NonTransactional)
 				return nil
 			},
-			utils.ReplicatorSv1GetReverseDestination: func(args, reply interface{}) error {
+			utils.ReplicatorSv1GetReverseDestination: func(args, reply any) error {
 				strApiOpts, cancast := args.(utils.StringWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -2579,8 +2579,8 @@ func TestDMRemoveDestination(t *testing.T) {
 	Cache = NewCacheS(cfg, dm, nil)
 	clientConn2 := make(chan rpcclient.ClientConnector, 1)
 	clientConn2 <- &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.CacheSv1ReplicateRemove: func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.CacheSv1ReplicateRemove: func(args, reply any) error {
 				return errors.New("Can't replicate")
 			},
 		},
@@ -2624,8 +2624,8 @@ func TestDMRemoveFilter(t *testing.T) {
 	}
 	clientConn := make(chan rpcclient.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ReplicatorSv1RemoveFilter: func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.ReplicatorSv1RemoveFilter: func(args, reply any) error {
 				tntApiOpts, cancast := args.(utils.TenantIDWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -2633,7 +2633,7 @@ func TestDMRemoveFilter(t *testing.T) {
 				dm.dataDB.RemoveFilterDrv(tntApiOpts.TenantID.Tenant, tntApiOpts.TenantID.ID)
 				return nil
 			},
-			utils.ReplicatorSv1GetIndexes: func(args, reply interface{}) error {
+			utils.ReplicatorSv1GetIndexes: func(args, reply any) error {
 				return nil
 			},
 		},
@@ -2714,8 +2714,8 @@ func TestRemoveStatQueueProfile(t *testing.T) {
 	}
 	clientConn := make(chan rpcclient.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ReplicatorSv1RemoveStatQueueProfile: func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.ReplicatorSv1RemoveStatQueueProfile: func(args, reply any) error {
 				tntApiOpts, cancast := args.(utils.TenantIDWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -2723,7 +2723,7 @@ func TestRemoveStatQueueProfile(t *testing.T) {
 				dm.DataDB().RemStatQueueProfileDrv(tntApiOpts.Tenant, tntApiOpts.ID)
 				return nil
 			},
-			utils.ReplicatorSv1GetIndexes: func(args, reply interface{}) error {
+			utils.ReplicatorSv1GetIndexes: func(args, reply any) error {
 
 				return errors.New("Can't replicate")
 			},
@@ -2790,8 +2790,8 @@ func TestDMGetTimingRemote(t *testing.T) {
 
 	clientConn := make(chan rpcclient.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ReplicatorSv1GetTiming: func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.ReplicatorSv1GetTiming: func(args, reply any) error {
 				strApiOpts, cancast := args.(*utils.StringWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -2815,8 +2815,8 @@ func TestDMGetTimingRemote(t *testing.T) {
 	Cache = NewCacheS(cfg, dm, nil)
 	clientConn2 := make(chan rpcclient.ClientConnector, 1)
 	clientConn2 <- &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.CacheSv1ReplicateSet: func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.CacheSv1ReplicateSet: func(args, reply any) error {
 				return errors.New("Can't replicate")
 			},
 		},
@@ -2863,8 +2863,8 @@ func TestDmGetActions(t *testing.T) {
 	}
 	clientConn := make(chan rpcclient.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ReplicatorSv1GetActions: func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.ReplicatorSv1GetActions: func(args, reply any) error {
 				strApiOpts, cancast := args.(*utils.StringWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -2911,8 +2911,8 @@ func TestDMSetLoadIDs(t *testing.T) {
 	}
 	clientConn := make(chan rpcclient.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ReplicatorSv1SetLoadIDs: func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.ReplicatorSv1SetLoadIDs: func(args, reply any) error {
 				ldApiOpts, cancast := args.(*utils.LoadIDsWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -2976,8 +2976,8 @@ func TestGetItemLoadIDsRemote(t *testing.T) {
 	}
 	clientConn := make(chan rpcclient.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ReplicatorSv1GetItemLoadIDs: func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.ReplicatorSv1GetItemLoadIDs: func(args, reply any) error {
 				strApiOpts, cancast := args.(*utils.StringWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -3009,8 +3009,8 @@ func TestGetItemLoadIDsRemote(t *testing.T) {
 	Cache = NewCacheS(cfg, dm, nil)
 	clientconn := make(chan rpcclient.ClientConnector, 1)
 	clientconn <- &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.CacheSv1ReplicateSet: func(args, reply interface{}) error { return errors.New("Can't replicate") },
+		calls: map[string]func(args any, reply any) error{
+			utils.CacheSv1ReplicateSet: func(args, reply any) error { return errors.New("Can't replicate") },
 		},
 	}
 	connMgr2 := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
@@ -3051,12 +3051,12 @@ func TestDMItemLoadIDsRemoteErr(t *testing.T) {
 	}
 	clientConn := make(chan rpcclient.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ReplicatorSv1GetItemLoadIDs: func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.ReplicatorSv1GetItemLoadIDs: func(args, reply any) error {
 				*reply.(*map[string]int64) = ld
 				return utils.ErrNotFound
 			},
-			utils.CacheSv1ReplicateSet: func(args, reply interface{}) error { return errors.New("Can't replicate") },
+			utils.CacheSv1ReplicateSet: func(args, reply any) error { return errors.New("Can't replicate") },
 		},
 	}
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
@@ -3120,8 +3120,8 @@ func TestActionPlanRemote(t *testing.T) {
 	}
 	clientConn := make(chan rpcclient.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ReplicatorSv1SetActionPlan: func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.ReplicatorSv1SetActionPlan: func(args, reply any) error {
 				setActPlnOpts, cancast := args.(*SetActionPlanArgWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -3129,7 +3129,7 @@ func TestActionPlanRemote(t *testing.T) {
 				dm.dataDB.SetActionPlanDrv(setActPlnOpts.Key, setActPlnOpts.Ats)
 				return nil
 			},
-			utils.ReplicatorSv1RemoveActionPlan: func(args, reply interface{}) error {
+			utils.ReplicatorSv1RemoveActionPlan: func(args, reply any) error {
 				strApiOpts, cancast := args.(*utils.StringWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -3137,7 +3137,7 @@ func TestActionPlanRemote(t *testing.T) {
 				dm.DataDB().RemoveActionPlanDrv(strApiOpts.Arg)
 				return nil
 			},
-			utils.ReplicatorSv1GetAllActionPlans: func(args, reply interface{}) error {
+			utils.ReplicatorSv1GetAllActionPlans: func(args, reply any) error {
 
 				*reply.(*map[string]*ActionPlan) = map[string]*ActionPlan{
 					"act_key": actPln,
@@ -3195,8 +3195,8 @@ func TestAccountActionPlansRemote(t *testing.T) {
 
 	clientConn := make(chan rpcclient.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ReplicatorSv1SetAccountActionPlans: func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.ReplicatorSv1SetAccountActionPlans: func(args, reply any) error {
 				setActPlnOpts, cancast := args.(*SetActionPlanArgWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -3204,7 +3204,7 @@ func TestAccountActionPlansRemote(t *testing.T) {
 				dm.dataDB.SetActionPlanDrv(setActPlnOpts.Key, setActPlnOpts.Ats)
 				return nil
 			},
-			utils.ReplicatorSv1RemAccountActionPlans: func(args, reply interface{}) error {
+			utils.ReplicatorSv1RemAccountActionPlans: func(args, reply any) error {
 
 				return nil
 			},
@@ -3478,8 +3478,8 @@ func TestDMRatingProfile(t *testing.T) {
 
 	clientConn := make(chan rpcclient.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ReplicatorSv1SetRatingProfile: func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.ReplicatorSv1SetRatingProfile: func(args, reply any) error {
 				rtPrfApiOpts, cancast := args.(*RatingProfileWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -3487,7 +3487,7 @@ func TestDMRatingProfile(t *testing.T) {
 				dm.dataDB.SetRatingProfileDrv(rtPrfApiOpts.RatingProfile)
 				return nil
 			},
-			utils.ReplicatorSv1RemoveRatingProfile: func(args, reply interface{}) error {
+			utils.ReplicatorSv1RemoveRatingProfile: func(args, reply any) error {
 				strApiOpts, cancast := args.(*utils.StringWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -3495,7 +3495,7 @@ func TestDMRatingProfile(t *testing.T) {
 				dm.DataDB().RemoveRatingProfileDrv(strApiOpts.Arg)
 				return nil
 			},
-			utils.ReplicatorSv1GetRatingProfile: func(args, reply interface{}) error {
+			utils.ReplicatorSv1GetRatingProfile: func(args, reply any) error {
 				strApiOpts, cancast := args.(*utils.StringWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -3556,7 +3556,7 @@ func TestUpdateFilterDispatcherIndex(t *testing.T) {
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
 		},
-		StrategyParams: map[string]interface{}{},
+		StrategyParams: map[string]any{},
 		Weight:         20,
 	}
 	if err := dm.SetDispatcherProfile(disp, true); err != nil {
@@ -3630,12 +3630,12 @@ func TestDMGetRatingPlan(t *testing.T) {
 	}
 	clientConn := make(chan rpcclient.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ReplicatorSv1GetRatingPlan: func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.ReplicatorSv1GetRatingPlan: func(args, reply any) error {
 				*reply.(**RatingPlan) = rpL
 				return nil
 			},
-			utils.CacheSv1ReplicateSet: func(args, reply interface{}) error {
+			utils.CacheSv1ReplicateSet: func(args, reply any) error {
 
 				return errors.New("Can't replicate ")
 			},
@@ -3693,12 +3693,12 @@ func TestDMChargerProfile(t *testing.T) {
 	}
 	clientConn := make(chan rpcclient.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ReplicatorSv1GetChargerProfile: func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.ReplicatorSv1GetChargerProfile: func(args, reply any) error {
 				*reply.(**ChargerProfile) = chP
 				return nil
 			},
-			utils.CacheSv1ReplicateSet: func(args, reply interface{}) error {
+			utils.CacheSv1ReplicateSet: func(args, reply any) error {
 
 				return errors.New("Can't replicate ")
 			},
@@ -3751,26 +3751,26 @@ func TestDMDispatcherProfile(t *testing.T) {
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
 		},
-		StrategyParams: map[string]interface{}{},
+		StrategyParams: map[string]any{},
 		Weight:         20,
 		Hosts: DispatcherHostProfiles{
 			&DispatcherHostProfile{
 				ID:        "C1",
 				FilterIDs: []string{},
 				Weight:    10,
-				Params:    map[string]interface{}{"0": "192.168.54.203", utils.MetaRatio: "2"},
+				Params:    map[string]any{"0": "192.168.54.203", utils.MetaRatio: "2"},
 				Blocker:   false,
 			},
 		},
 	}
 	clientConn := make(chan rpcclient.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ReplicatorSv1GetDispatcherProfile: func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.ReplicatorSv1GetDispatcherProfile: func(args, reply any) error {
 				*reply.(**DispatcherProfile) = dPP
 				return nil
 			},
-			utils.CacheSv1ReplicateSet: func(args, reply interface{}) error {
+			utils.CacheSv1ReplicateSet: func(args, reply any) error {
 
 				return errors.New("Can't replicate ")
 			},
@@ -4123,11 +4123,11 @@ func TestCacheDataFromDBErr(t *testing.T) {
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	clientConn := make(chan rpcclient.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ReplicatorSv1GetThresholdProfile: func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.ReplicatorSv1GetThresholdProfile: func(args, reply any) error {
 				return errors.New("Another Error")
 			},
-			utils.CacheSv1ReplicateSet: func(args, reply interface{}) error {
+			utils.CacheSv1ReplicateSet: func(args, reply any) error {
 				return fmt.Errorf("New Error")
 			},
 		},
@@ -4191,12 +4191,12 @@ func TestDMGetRouteProfile(t *testing.T) {
 	}
 	clientConn := make(chan rpcclient.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ReplicatorSv1GetRouteProfile: func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.ReplicatorSv1GetRouteProfile: func(args, reply any) error {
 				*reply.(**RouteProfile) = rpL
 				return nil
 			},
-			utils.CacheSv1ReplicateSet: func(args, reply interface{}) error {
+			utils.CacheSv1ReplicateSet: func(args, reply any) error {
 				return errors.New("Can't Replicate")
 			},
 		},
@@ -4244,11 +4244,11 @@ func TestDMGetRouteProfileErr(t *testing.T) {
 	}
 	clientConn := make(chan rpcclient.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ReplicatorSv1GetRouteProfile: func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.ReplicatorSv1GetRouteProfile: func(args, reply any) error {
 				return utils.ErrNotFound
 			},
-			utils.CacheSv1ReplicateSet: func(args, reply interface{}) error {
+			utils.CacheSv1ReplicateSet: func(args, reply any) error {
 				return errors.New("Can't Replicate")
 			},
 		},
@@ -4409,12 +4409,12 @@ func TestDMAttributeProfile(t *testing.T) {
 	}
 	clientConn := make(chan rpcclient.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ReplicatorSv1GetAttributeProfile: func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.ReplicatorSv1GetAttributeProfile: func(args, reply any) error {
 				*reply.(**AttributeProfile) = attrPrf
 				return nil
 			},
-			utils.ReplicatorSv1SetAttributeProfile: func(args, reply interface{}) error {
+			utils.ReplicatorSv1SetAttributeProfile: func(args, reply any) error {
 				attrPrfApiOpts, cancast := args.(*AttributeProfileWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -4422,7 +4422,7 @@ func TestDMAttributeProfile(t *testing.T) {
 				dm.DataDB().SetAttributeProfileDrv(attrPrfApiOpts.AttributeProfile)
 				return nil
 			},
-			utils.ReplicatorSv1RemoveAttributeProfile: func(args, reply interface{}) error {
+			utils.ReplicatorSv1RemoveAttributeProfile: func(args, reply any) error {
 				tntApiOpts, cancast := args.(*utils.TenantIDWithAPIOpts)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -4586,8 +4586,8 @@ func TestDmIndexes(t *testing.T) {
 	cfg.DataDbCfg().RplConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
 	clientConn := make(chan rpcclient.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ReplicatorSv1SetIndexes: func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.ReplicatorSv1SetIndexes: func(args, reply any) error {
 				setcastIndxArg, cancast := args.(*utils.SetIndexesArg)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -4595,7 +4595,7 @@ func TestDmIndexes(t *testing.T) {
 				dm.DataDB().SetIndexesDrv(setcastIndxArg.IdxItmType, setcastIndxArg.TntCtx, setcastIndxArg.Indexes, true, utils.NonTransactional)
 				return nil
 			},
-			utils.ReplicatorSv1RemoveIndexes: func(args, reply interface{}) error {
+			utils.ReplicatorSv1RemoveIndexes: func(args, reply any) error {
 				gIdxArg, cancast := args.(*utils.GetIndexesArg)
 				if !cancast {
 					return utils.ErrNotConvertible
@@ -4646,8 +4646,8 @@ func TestDmCheckFilters(t *testing.T) {
 	cfg.DataDbCfg().RmtConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
 	clientConn := make(chan rpcclient.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ReplicatorSv1GetFilter: func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.ReplicatorSv1GetFilter: func(args, reply any) error {
 				fltr := &Filter{
 					ID:     "FLTR_1",
 					Tenant: "cgrates.org",
@@ -4688,8 +4688,8 @@ func TestRemoveFilterIndexes(t *testing.T) {
 	cfg.DataDbCfg().RmtConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
 	clientConn := make(chan rpcclient.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ReplicatorSv1GetIndexes: func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.ReplicatorSv1GetIndexes: func(args, reply any) error {
 				return utils.ErrNotImplemented
 			},
 		},
@@ -4743,8 +4743,8 @@ func TestGetDispatcherProfileErr(t *testing.T) {
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	clientConn := make(chan rpcclient.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ReplicatorSv1GetDispatcherProfile: func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.ReplicatorSv1GetDispatcherProfile: func(args, reply any) error {
 				return utils.ErrDSPProfileNotFound
 			},
 		},
@@ -4891,7 +4891,7 @@ func TestDmCheckFiltersRmt(t *testing.T) {
 	cfg.DataDbCfg().RmtConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1)}
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	clientConn := make(chan rpcclient.ClientConnector, 1)
-	clientConn <- clMock(func(serviceMethod string, _, _ interface{}) error {
+	clientConn <- clMock(func(serviceMethod string, _, _ any) error {
 		if serviceMethod == utils.ReplicatorSv1GetFilter {
 
 			return nil

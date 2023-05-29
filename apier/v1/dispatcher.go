@@ -70,7 +70,7 @@ func (apierSv1 *APIerSv1) GetDispatcherProfileIDs(tenantArg *utils.PaginatorWith
 
 type DispatcherWithAPIOpts struct {
 	*engine.DispatcherProfile
-	APIOpts map[string]interface{}
+	APIOpts map[string]any
 }
 
 // SetDispatcherProfile add/update a new Dispatcher Profile
@@ -588,10 +588,10 @@ func (dS *DispatcherResponder) Shutdown(args *utils.TenantWithAPIOpts, reply *st
 	return dS.dS.ResponderShutdown(args, reply)
 }
 
-func (dS *DispatcherResponder) GetCostOnRatingPlans(arg *utils.GetCostOnRatingPlansArgs, reply *map[string]interface{}) (err error) {
+func (dS *DispatcherResponder) GetCostOnRatingPlans(arg *utils.GetCostOnRatingPlansArgs, reply *map[string]any) (err error) {
 	return dS.dS.ResponderGetCostOnRatingPlans(arg, reply)
 }
-func (dS *DispatcherResponder) GetMaxSessionTimeOnAccounts(arg *utils.GetMaxSessionTimeOnAccountsArgs, reply *map[string]interface{}) (err error) {
+func (dS *DispatcherResponder) GetMaxSessionTimeOnAccounts(arg *utils.GetMaxSessionTimeOnAccountsArgs, reply *map[string]any) (err error) {
 	return dS.dS.ResponderGetMaxSessionTimeOnAccounts(arg, reply)
 }
 
@@ -623,13 +623,13 @@ func (dS *DispatcherCacheSv1) HasItem(args *utils.ArgsGetCacheItemWithAPIOpts,
 
 // GetItem returns an Item from the cache
 func (dS *DispatcherCacheSv1) GetItem(args *utils.ArgsGetCacheItemWithAPIOpts,
-	reply *interface{}) error {
+	reply *any) error {
 	return dS.dS.CacheSv1GetItem(args, reply)
 }
 
 // GetItemWithRemote returns an Item from local or remote cache
 func (dS *DispatcherCacheSv1) GetItemWithRemote(args *utils.ArgsGetCacheItemWithAPIOpts,
-	reply *interface{}) error {
+	reply *any) error {
 	return dS.dS.CacheSv1GetItemWithRemote(args, reply)
 }
 
@@ -778,7 +778,7 @@ func (dSv1 DispatcherSv1) GetProfilesForEvent(ev *utils.CGREvent,
 	return dSv1.dS.V1GetProfilesForEvent(ev, dPrfl)
 }
 
-func (dS *DispatcherSv1) RemoteStatus(args *utils.TenantWithAPIOpts, reply *map[string]interface{}) (err error) {
+func (dS *DispatcherSv1) RemoteStatus(args *utils.TenantWithAPIOpts, reply *map[string]any) (err error) {
 	return dS.dS.DispatcherSv1RemoteStatus(args, reply)
 }
 
@@ -791,7 +791,7 @@ func (dS *DispatcherSv1) RemoteSleep(args *utils.DurationArgs, reply *string) (e
 }
 
 /*
-func (dSv1 DispatcherSv1) Apier(args *utils.MethodParameters, reply *interface{}) (err error) {
+func (dSv1 DispatcherSv1) Apier(args *utils.MethodParameters, reply *any) (err error) {
 	return dSv1.dS.V1Apier(new(APIerSv1), args, reply)
 }
 */
@@ -875,7 +875,7 @@ type DispatcherConfigSv1 struct {
 	dS *dispatchers.DispatcherService
 }
 
-func (dS *DispatcherConfigSv1) GetConfig(args *config.SectionWithAPIOpts, reply *map[string]interface{}) (err error) {
+func (dS *DispatcherConfigSv1) GetConfig(args *config.SectionWithAPIOpts, reply *map[string]any) (err error) {
 	return dS.dS.ConfigSv1GetConfig(args, reply)
 }
 
@@ -921,7 +921,7 @@ func NewDispatcherCoreSv1(dps *dispatchers.DispatcherService) *DispatcherCoreSv1
 	return &DispatcherCoreSv1{dS: dps}
 }
 
-func (dS *DispatcherCoreSv1) Status(args *utils.TenantWithAPIOpts, reply *map[string]interface{}) error {
+func (dS *DispatcherCoreSv1) Status(args *utils.TenantWithAPIOpts, reply *map[string]any) error {
 	return dS.dS.CoreSv1Status(args, reply)
 }
 
@@ -966,7 +966,7 @@ func (dS *DispatcherEeSv1) Ping(args *utils.CGREvent, reply *string) error {
 	return dS.dS.EeSv1Ping(args, reply)
 }
 
-func (dS *DispatcherEeSv1) ProcessEvent(args *engine.CGREventWithEeIDs, reply *map[string]map[string]interface{}) error {
+func (dS *DispatcherEeSv1) ProcessEvent(args *engine.CGREventWithEeIDs, reply *map[string]map[string]any) error {
 	return dS.dS.EeSv1ProcessEvent(args, reply)
 }
 

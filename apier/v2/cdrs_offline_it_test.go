@@ -126,7 +126,7 @@ func testV2CDRsOfflineBalanceUpdate(t *testing.T) {
 		Account:     "test",
 		BalanceType: utils.MetaMonetary,
 		Value:       10.0,
-		Balance: map[string]interface{}{
+		Balance: map[string]any{
 			utils.ID:     utils.MetaDefault,
 			utils.Weight: 10.0,
 		},
@@ -188,7 +188,7 @@ func testV2CDRsOfflineBalanceUpdate(t *testing.T) {
 
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.OriginID:     "testV2CDRsOfflineProcessCDR2",
 			utils.OriginHost:   "192.168.1.1",
 			utils.Source:       "testV2CDRsOfflineProcessCDR",
@@ -307,7 +307,7 @@ func testV2CDRsOfflineExpiryBalance(t *testing.T) {
 	args := &engine.ArgV1ProcessEvent{
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.OriginID:     "testV2CDRsOfflineProcessCDR1",
 				utils.OriginHost:   "192.168.1.1",
 				utils.Source:       "testV2CDRsOfflineProcessCDR",
@@ -336,7 +336,7 @@ func testV2CDRsBalancesWithSameWeight(t *testing.T) {
 		Account:     "specialTest",
 		BalanceType: utils.MetaMonetary,
 		Value:       10.0,
-		Balance: map[string]interface{}{
+		Balance: map[string]any{
 			utils.ID:     "SpecialBalance1",
 			utils.Weight: 10.0,
 		},
@@ -359,7 +359,7 @@ func testV2CDRsBalancesWithSameWeight(t *testing.T) {
 
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.OriginID:     "testV2CDRsBalancesWithSameWeight",
 			utils.OriginHost:   "192.168.1.1",
 			utils.Source:       "testV2CDRsBalancesWithSameWeight",

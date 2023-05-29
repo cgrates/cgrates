@@ -48,7 +48,7 @@ func (self *CmdComputeActionPlanIndexes) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdComputeActionPlanIndexes) RpcParams(reset bool) interface{} {
+func (self *CmdComputeActionPlanIndexes) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = new(EmptyWrapper)
 	}
@@ -59,7 +59,7 @@ func (self *CmdComputeActionPlanIndexes) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdComputeActionPlanIndexes) RpcResult() interface{} {
+func (self *CmdComputeActionPlanIndexes) RpcResult() any {
 	s := ""
 	return &s
 }

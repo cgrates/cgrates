@@ -39,9 +39,9 @@ func NewDfltLoaderSCfg() *LoaderSCfg {
 // LoaderSCfgs to export some methods for LoaderS profiles
 type LoaderSCfgs []*LoaderSCfg
 
-// AsMapInterface returns the config as a map[string]interface{}
-func (ldrs LoaderSCfgs) AsMapInterface(separator string) (loaderCfg []map[string]interface{}) {
-	loaderCfg = make([]map[string]interface{}, len(ldrs))
+// AsMapInterface returns the config as a map[string]any
+func (ldrs LoaderSCfgs) AsMapInterface(separator string) (loaderCfg []map[string]any) {
+	loaderCfg = make([]map[string]any, len(ldrs))
 	for i, item := range ldrs {
 		loaderCfg[i] = item.AsMapInterface(separator)
 	}
@@ -224,15 +224,15 @@ func (l LoaderSCfg) Clone() (cln *LoaderSCfg) {
 	return
 }
 
-// AsMapInterface returns the config as a map[string]interface{}
-func (lData *LoaderDataType) AsMapInterface(separator string) (initialMP map[string]interface{}) {
-	initialMP = map[string]interface{}{
+// AsMapInterface returns the config as a map[string]any
+func (lData *LoaderDataType) AsMapInterface(separator string) (initialMP map[string]any) {
+	initialMP = map[string]any{
 		utils.TypeCf:      lData.Type,
 		utils.FilenameCfg: lData.Filename,
 		utils.FlagsCfg:    lData.Flags.SliceFlags(),
 	}
 
-	fields := make([]map[string]interface{}, len(lData.Fields))
+	fields := make([]map[string]any, len(lData.Fields))
 	for i, item := range lData.Fields {
 		fields[i] = item.AsMapInterface(separator)
 	}
@@ -240,9 +240,9 @@ func (lData *LoaderDataType) AsMapInterface(separator string) (initialMP map[str
 	return
 }
 
-// AsMapInterface returns the config as a map[string]interface{}
-func (l *LoaderSCfg) AsMapInterface(separator string) (initialMP map[string]interface{}) {
-	initialMP = map[string]interface{}{
+// AsMapInterface returns the config as a map[string]any
+func (l *LoaderSCfg) AsMapInterface(separator string) (initialMP map[string]any) {
+	initialMP = map[string]any{
 		utils.IDCfg:           l.ID,
 		utils.TenantCfg:       l.Tenant,
 		utils.EnabledCfg:      l.Enabled,
@@ -254,7 +254,7 @@ func (l *LoaderSCfg) AsMapInterface(separator string) (initialMP map[string]inte
 		utils.RunDelayCfg:     "0",
 	}
 	if l.Data != nil {
-		data := make([]map[string]interface{}, len(l.Data))
+		data := make([]map[string]any, len(l.Data))
 		for i, item := range l.Data {
 			data[i] = item.AsMapInterface(separator)
 		}

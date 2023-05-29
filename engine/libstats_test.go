@@ -229,7 +229,7 @@ func TestStatAddStatEvent(t *testing.T) {
 	} else if asrMetric.Answered != 1 || asrMetric.Count != 2 {
 		t.Errorf("ASR: %v", asrMetric)
 	}
-	ev1.Event = map[string]interface{}{
+	ev1.Event = map[string]any{
 		utils.AnswerTime: time.Now()}
 	sq.addStatEvent(ev1.Tenant, ev1.ID, nil, utils.MapStorage{utils.MetaReq: ev1.Event})
 	if asr := asrMetric.GetFloat64Value(config.CgrConfig().GeneralCfg().RoundingDecimals); asr != 66.66667 {
@@ -714,7 +714,7 @@ type statMetricMock struct {
 	testcase string
 }
 
-func (sMM *statMetricMock) GetValue(roundingDecimal int) interface{} {
+func (sMM *statMetricMock) GetValue(roundingDecimal int) any {
 	return nil
 }
 
@@ -1251,7 +1251,7 @@ func TestStatQueueWithAPIOptsJSONMarshall(t *testing.T) {
 	}, 1)
 	exp2 := &StatQueueWithAPIOpts{
 		StatQueue: exp,
-		APIOpts:   map[string]interface{}{"a": "a"},
+		APIOpts:   map[string]any{"a": "a"},
 	}
 	if err != nil {
 		t.Fatal(err)

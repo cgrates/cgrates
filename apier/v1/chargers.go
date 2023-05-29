@@ -66,7 +66,7 @@ func (apierSv1 *APIerSv1) GetChargerProfileIDs(args *utils.PaginatorWithTenant, 
 
 type ChargerWithAPIOpts struct {
 	*engine.ChargerProfile
-	APIOpts map[string]interface{}
+	APIOpts map[string]any
 }
 
 // SetChargerProfile add/update a new Charger Profile
@@ -130,7 +130,7 @@ type ChargerSv1 struct {
 
 // Call implements rpcclient.ClientConnector interface for internal RPC
 func (cSv1 *ChargerSv1) Call(serviceMethod string,
-	args interface{}, reply interface{}) error {
+	args any, reply any) error {
 	return utils.APIerRPCCall(cSv1, serviceMethod, args, reply)
 }
 

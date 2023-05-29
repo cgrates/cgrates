@@ -44,7 +44,7 @@ func SetFailedPostCacheTTL(ttl time.Duration) {
 	failedPostCache = ltcache.NewCache(-1, ttl, false, writeFailedPosts)
 }
 
-func writeFailedPosts(_ string, value interface{}) {
+func writeFailedPosts(_ string, value any) {
 	expEv, canConvert := value.(*ExportEvents)
 	if !canConvert {
 		return
@@ -56,7 +56,7 @@ func writeFailedPosts(_ string, value interface{}) {
 	}
 }
 
-func AddFailedPost(failedPostsDir, expPath, format string, ev interface{}, opts *config.EventExporterOpts) {
+func AddFailedPost(failedPostsDir, expPath, format string, ev any, opts *config.EventExporterOpts) {
 	key := utils.ConcatenatedKey(failedPostsDir, expPath, format)
 	// also in case of amqp,amqpv1,s3,sqs and kafka also separe them after queue id
 	var amqpQueueID string
@@ -122,7 +122,7 @@ type ExportEvents struct {
 	Path           string
 	Opts           *config.EventExporterOpts
 	Format         string
-	Events         []interface{}
+	Events         []any
 	failedPostsDir string
 }
 
@@ -146,7 +146,7 @@ func (expEv *ExportEvents) WriteToFile(filePath string) (err error) {
 }
 
 // AddEvent adds one event
-func (expEv *ExportEvents) AddEvent(ev interface{}) {
+func (expEv *ExportEvents) AddEvent(ev any) {
 	expEv.lk.Lock()
 	expEv.Events = append(expEv.Events, ev)
 	expEv.lk.Unlock()

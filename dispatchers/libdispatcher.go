@@ -80,7 +80,7 @@ type Dispatcher interface {
 	// Dispatch is used to send the method over the connections given
 	Dispatch(dm *engine.DataManager, flts *engine.FilterS,
 		ev utils.DataProvider, tnt, routeID string, dR *DispatcherRoute,
-		serviceMethod string, args interface{}, reply interface{}) (err error)
+		serviceMethod string, args any, reply any) (err error)
 }
 
 // newDispatcher constructs instances of Dispatcher
@@ -169,7 +169,7 @@ func (rs *roundRobinSort) Sort(fltrs *engine.FilterS, ev utils.DataProvider, tnt
 }
 
 // newSingleDispatcher is the constructor for singleDispatcher struct
-func newSingleDispatcher(hosts engine.DispatcherHostProfiles, params map[string]interface{}, tntID string, sorter hostSorter) (_ Dispatcher, err error) {
+func newSingleDispatcher(hosts engine.DispatcherHostProfiles, params map[string]any, tntID string, sorter hostSorter) (_ Dispatcher, err error) {
 	if dflt, has := params[utils.MetaDefaultRatio]; has {
 		var ratio int64
 		if ratio, err = utils.IfaceAsTInt64(dflt); err != nil {
@@ -207,7 +207,7 @@ type singleResultDispatcher struct {
 
 func (sd *singleResultDispatcher) Dispatch(dm *engine.DataManager, flts *engine.FilterS,
 	ev utils.DataProvider, tnt, routeID string, dR *DispatcherRoute,
-	serviceMethod string, args interface{}, reply interface{}) (err error) {
+	serviceMethod string, args any, reply any) (err error) {
 	if dR != nil && dR.HostID != utils.EmptyString { // route to previously discovered route
 		return callDHwithID(tnt, dR.HostID, routeID, dR, dm,
 			serviceMethod, args, reply)
@@ -251,7 +251,7 @@ type broadcastDispatcher struct {
 
 func (b *broadcastDispatcher) Dispatch(dm *engine.DataManager, flts *engine.FilterS,
 	ev utils.DataProvider, tnt, routeID string, dR *DispatcherRoute,
-	serviceMethod string, args interface{}, reply interface{}) (err error) {
+	serviceMethod string, args any, reply any) (err error) {
 	var hostIDs []string
 	if hostIDs, err = getDispatcherHosts(flts, ev, tnt, b.hosts); err != nil {
 		return
@@ -299,7 +299,7 @@ type loadDispatcher struct {
 
 func (ld *loadDispatcher) Dispatch(dm *engine.DataManager, flts *engine.FilterS,
 	ev utils.DataProvider, tnt, routeID string, dR *DispatcherRoute,
-	serviceMethod string, args interface{}, reply interface{}) (err error) {
+	serviceMethod string, args any, reply any) (err error) {
 	var lM *LoadMetrics
 	if x, ok := engine.Cache.Get(utils.CacheDispatcherLoads, ld.tntID); ok && x != nil {
 		var canCast bool
@@ -437,16 +437,16 @@ type lazyDH struct {
 	dR      *DispatcherRoute
 }
 
-func (l *lazyDH) Call(method string, args, reply interface{}) (err error) {
+func (l *lazyDH) Call(method string, args, reply any) (err error) {
 	return callDH(l.dh, l.routeID, l.dR, method, args, reply)
 }
 
 func callDH(dh *engine.DispatcherHost, routeID string, dR *DispatcherRoute,
-	method string, args, reply interface{}) (err error) {
+	method string, args, reply any) (err error) {
 	if routeID != utils.EmptyString { // cache the discovered route before dispatching
 		argsCache := &utils.ArgCacheReplicateSet{
 			Tenant: dh.Tenant,
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.MetaSubsys: utils.MetaDispatchers,
 				utils.MetaNodeID: config.CgrConfig().GeneralCfg().NodeID,
 			},
@@ -472,7 +472,7 @@ func callDH(dh *engine.DispatcherHost, routeID string, dR *DispatcherRoute,
 
 // callDHwithID is a wrapper on callDH using ID of the host, will also cache once the call is successful
 func callDHwithID(tnt, hostID, routeID string, dR *DispatcherRoute, dm *engine.DataManager,
-	serviceMethod string, args, reply interface{}) (err error) {
+	serviceMethod string, args, reply any) (err error) {
 	var dH *engine.DispatcherHost
 	if dH, err = dm.GetDispatcherHost(tnt, hostID, true, true, utils.NonTransactional); err != nil {
 		return

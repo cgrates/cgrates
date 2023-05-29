@@ -66,7 +66,7 @@ func (e *RPCee) Connect() (err error) {
 	return
 }
 
-func (e *RPCee) ExportEvent(args interface{}, _ string) (err error) {
+func (e *RPCee) ExportEvent(args any, _ string) (err error) {
 	e.Lock()
 	defer e.Unlock()
 	var rply string
@@ -84,12 +84,12 @@ func (e *RPCee) GetMetrics() (mp *utils.SafeMapStorage) {
 	return e.dc
 }
 
-func (e *RPCee) PrepareMap(mp *utils.CGREvent) (interface{}, error) {
+func (e *RPCee) PrepareMap(mp *utils.CGREvent) (any, error) {
 	if mp == nil {
 		return nil, nil
 	}
 	if mp.APIOpts == nil {
-		mp.APIOpts = make(map[string]interface{})
+		mp.APIOpts = make(map[string]any)
 	}
 	for i, v := range e.Cfg().Opts.RPCAPIOpts {
 		mp.APIOpts[i] = v
@@ -97,8 +97,8 @@ func (e *RPCee) PrepareMap(mp *utils.CGREvent) (interface{}, error) {
 	return mp, nil
 }
 
-func (e *RPCee) PrepareOrderMap(oMp *utils.OrderedNavigableMap) (interface{}, error) {
-	mP := make(map[string]interface{})
+func (e *RPCee) PrepareOrderMap(oMp *utils.OrderedNavigableMap) (any, error) {
+	mP := make(map[string]any)
 	for i := oMp.GetFirstElement(); i != nil; i = i.Next() {
 		path := i.Value
 		val, _ := oMp.Field(path)

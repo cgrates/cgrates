@@ -38,7 +38,7 @@ type ChargerProfile struct {
 // ChargerProfileWithAPIOpts is used in replicatorV1 for dispatcher
 type ChargerProfileWithAPIOpts struct {
 	*ChargerProfile
-	APIOpts map[string]interface{}
+	APIOpts map[string]any
 }
 
 func (cP *ChargerProfile) TenantID() string {

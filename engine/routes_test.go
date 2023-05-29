@@ -173,43 +173,43 @@ var (
 		{ //matching RouteProfile1
 			Tenant: "cgrates.org",
 			ID:     "utils.CGREvent1",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"Route":          "RouteProfile1",
 				utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 				"UsageInterval":  "1s",
 				"PddInterval":    "1s",
 				utils.Weight:     "20.0",
 			},
-			APIOpts: map[string]interface{}{},
+			APIOpts: map[string]any{},
 		},
 		{ //matching RouteProfile2
 			Tenant: "cgrates.org",
 			ID:     "utils.CGREvent1",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"Route":          "RouteProfile2",
 				utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 				"UsageInterval":  "1s",
 				"PddInterval":    "1s",
 				utils.Weight:     "20.0",
 			},
-			APIOpts: map[string]interface{}{},
+			APIOpts: map[string]any{},
 		},
 		{ //matching RouteProfilePrefix
 			Tenant: "cgrates.org",
 			ID:     "utils.CGREvent1",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"Route": "RouteProfilePrefix",
 			},
-			APIOpts: map[string]interface{}{},
+			APIOpts: map[string]any{},
 		},
 		{
 			Tenant: "cgrates.org",
 			ID:     "CGR",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"UsageInterval": "1s",
 				"PddInterval":   "1s",
 			},
-			APIOpts: map[string]interface{}{},
+			APIOpts: map[string]any{},
 		},
 	}
 )
@@ -340,7 +340,7 @@ func TestRoutesSortedForEvent(t *testing.T) {
 				sortingDataF64: map[string]float64{
 					utils.Weight: 10.0,
 				},
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Weight: 10.0,
 				},
 				RouteParameters: "param1",
@@ -364,7 +364,7 @@ func TestRoutesSortedForEvent(t *testing.T) {
 				sortingDataF64: map[string]float64{
 					utils.Weight: 30.0,
 				},
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Weight: 30.0,
 				},
 				RouteParameters: "param1",
@@ -374,7 +374,7 @@ func TestRoutesSortedForEvent(t *testing.T) {
 				sortingDataF64: map[string]float64{
 					utils.Weight: 20.0,
 				},
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Weight: 20.0,
 				},
 				RouteParameters: "param2",
@@ -384,7 +384,7 @@ func TestRoutesSortedForEvent(t *testing.T) {
 				sortingDataF64: map[string]float64{
 					utils.Weight: 10.0,
 				},
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Weight: 10.0,
 				},
 				RouteParameters: "param3",
@@ -409,7 +409,7 @@ func TestRoutesSortedForEvent(t *testing.T) {
 				sortingDataF64: map[string]float64{
 					utils.Weight: 10.0,
 				},
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Weight: 10.0,
 				},
 				RouteParameters: "param1",
@@ -447,7 +447,7 @@ func TestRoutesSortedForEventWithLimit(t *testing.T) {
 				sortingDataF64: map[string]float64{
 					utils.Weight: 30.0,
 				},
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Weight: 30.0,
 				},
 				RouteParameters: "param1",
@@ -457,7 +457,7 @@ func TestRoutesSortedForEventWithLimit(t *testing.T) {
 				sortingDataF64: map[string]float64{
 					utils.Weight: 20.0,
 				},
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Weight: 20.0,
 				},
 				RouteParameters: "param2",
@@ -496,7 +496,7 @@ func TestRoutesSortedForEventWithOffset(t *testing.T) {
 				sortingDataF64: map[string]float64{
 					utils.Weight: 10.0,
 				},
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Weight: 10.0,
 				},
 				RouteParameters: "param3",
@@ -534,7 +534,7 @@ func TestRoutesSortedForEventWithLimitAndOffset(t *testing.T) {
 				sortingDataF64: map[string]float64{
 					utils.Weight: 20.0,
 				},
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Weight: 20.0,
 				},
 				RouteParameters: "param2",
@@ -706,8 +706,8 @@ func TestRoutesSortedForEventWithLimitAndOffset2(t *testing.T) {
 	argsGetRoutes := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "utils.CGREvent1",
-		Event:  map[string]interface{}{},
-		APIOpts: map[string]interface{}{
+		Event:  map[string]any{},
+		APIOpts: map[string]any{
 			utils.OptsRoutesProfileCount: 3,
 		},
 	}
@@ -742,7 +742,7 @@ func TestRoutesSortedForEventWithLimitAndOffset2(t *testing.T) {
 					sortingDataF64: map[string]float64{
 						utils.Weight: 10.,
 					},
-					SortingData: map[string]interface{}{
+					SortingData: map[string]any{
 						utils.Weight: 10.,
 					},
 					RouteParameters: "param1",
@@ -758,7 +758,7 @@ func TestRoutesSortedForEventWithLimitAndOffset2(t *testing.T) {
 					sortingDataF64: map[string]float64{
 						utils.Weight: 30.,
 					},
-					SortingData: map[string]interface{}{
+					SortingData: map[string]any{
 						utils.Weight: 30.,
 					},
 					RouteParameters: "param1",
@@ -859,8 +859,8 @@ func TestRouteServiceStatMetrics(t *testing.T) {
 
 	}()
 	testMock := &ccMock{
-		calls: map[string]func(args, reply interface{}) error{
-			utils.StatSv1GetQueueFloatMetrics: func(args, reply interface{}) error {
+		calls: map[string]func(args, reply any) error{
+			utils.StatSv1GetQueueFloatMetrics: func(args, reply any) error {
 				rpl := map[string]float64{
 					"metric1": 21.11,
 				}
@@ -901,8 +901,8 @@ func TestRouteServiceStatMetricsLog(t *testing.T) {
 		log.SetOutput(os.Stderr)
 	}()
 	testMock := &ccMock{
-		calls: map[string]func(args, reply interface{}) error{
-			utils.StatSv1GetQueueFloatMetrics: func(args, reply interface{}) error {
+		calls: map[string]func(args, reply any) error{
+			utils.StatSv1GetQueueFloatMetrics: func(args, reply any) error {
 				return errors.New("Error")
 			},
 		},
@@ -939,7 +939,7 @@ func TestRouteServiceV1GetRouteProfilesForEvent(t *testing.T) {
 		Tenant: "cgrates.orgs",
 		ID:     "id",
 		Time:   utils.TimePointer(time.Date(2022, 12, 1, 20, 0, 0, 0, time.UTC)),
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "acc_event",
 			utils.Destination:  "desc_event",
 			utils.SetupTime:    time.Now(),
@@ -1020,8 +1020,8 @@ func TestRouteServiceV1GetRoutes(t *testing.T) {
 
 	}()
 	ccMock := &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.AttributeSv1ProcessEvent: func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.AttributeSv1ProcessEvent: func(args, reply any) error {
 				rpl := &AttrSProcessEventReply{
 					AlteredFields: []string{"testcase"},
 					CGREvent:      testRoutesArgs[1],
@@ -1047,7 +1047,7 @@ func TestRouteServiceV1GetRoutes(t *testing.T) {
 		ID:     "CGREvent1",
 		Tenant: "cgrates.org",
 		Time:   utils.TimePointer(time.Date(2022, 12, 1, 20, 0, 0, 0, time.UTC)),
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"testcase": 1,
 		},
 	}
@@ -1063,7 +1063,7 @@ func TestRouteServiceV1GetRoutes(t *testing.T) {
 				{
 					RouteID:         "route2",
 					RouteParameters: "param1",
-					SortingData:     map[string]interface{}{"Weight": 10},
+					SortingData:     map[string]any{"Weight": 10},
 				},
 			},
 		}}
@@ -1108,7 +1108,7 @@ func TestRouteServiceSortRoutes(t *testing.T) {
 			Weight:          2.3,
 			Blocker:         true,
 			RouteParameters: "route",
-			cacheRoute: map[string]interface{}{
+			cacheRoute: map[string]any{
 				"*ratio": "ratio",
 			},
 			lazyCheckRules: []*FilterRule{},
@@ -1118,14 +1118,14 @@ func TestRouteServiceSortRoutes(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "utils.CGREvent1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Route":          "RouteProfile1",
 			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 			"UsageInterval":  "1s",
 			"PddInterval":    "1s",
 			utils.Weight:     "20.0",
 		},
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 	extraOpts := &optsGetRoutes{
 		ignoreErrors: true,
@@ -1190,7 +1190,7 @@ func TestRDSRSortRoutes(t *testing.T) {
 			Weight:          2.3,
 			Blocker:         true,
 			RouteParameters: "route",
-			cacheRoute: map[string]interface{}{
+			cacheRoute: map[string]any{
 				"*ratio": "ratio",
 			},
 			lazyCheckRules: []*FilterRule{
@@ -1210,8 +1210,8 @@ func TestRDSRSortRoutes(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "utils.CGREvent1",
-		Event:  map[string]interface{}{},
-		APIOpts: map[string]interface{}{
+		Event:  map[string]any{},
+		APIOpts: map[string]any{
 			utils.OptsRoutesProfileCount: 3,
 		},
 	}
@@ -1263,7 +1263,7 @@ func TestQosRSortRoutes(t *testing.T) {
 			Weight:          2.3,
 			Blocker:         true,
 			RouteParameters: "route",
-			cacheRoute: map[string]interface{}{
+			cacheRoute: map[string]any{
 				"*ratio": "ratio",
 			},
 			lazyCheckRules: []*FilterRule{
@@ -1296,7 +1296,7 @@ func TestQosRSortRoutes(t *testing.T) {
 			Weight:          2.3,
 			Blocker:         true,
 			RouteParameters: "route",
-			cacheRoute: map[string]interface{}{
+			cacheRoute: map[string]any{
 				"*ratio": "ratio",
 			},
 			lazyCheckRules: []*FilterRule{
@@ -1323,8 +1323,8 @@ func TestQosRSortRoutes(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "utils.CGREvent1",
-		Event:  map[string]interface{}{},
-		APIOpts: map[string]interface{}{
+		Event:  map[string]any{},
+		APIOpts: map[string]any{
 			utils.OptsRoutesProfileCount: 3,
 		},
 	}
@@ -1361,15 +1361,15 @@ func TestReaSortRoutes(t *testing.T) {
 	}()
 	clientConn := make(chan rpcclient.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ResponderGetMaxSessionTimeOnAccounts: func(args, reply interface{}) error {
-				rpl := map[string]interface{}{
+		calls: map[string]func(args any, reply any) error{
+			utils.ResponderGetMaxSessionTimeOnAccounts: func(args, reply any) error {
+				rpl := map[string]any{
 					utils.CapMaxUsage: 3 * time.Minute,
 				}
-				*reply.(*map[string]interface{}) = rpl
+				*reply.(*map[string]any) = rpl
 				return nil
 			},
-			utils.StatSv1GetQueueFloatMetrics: func(args, reply interface{}) error {
+			utils.StatSv1GetQueueFloatMetrics: func(args, reply any) error {
 				rpl := map[string]float64{
 					"metric":  22.0,
 					"metric3": 32.2,
@@ -1400,7 +1400,7 @@ func TestReaSortRoutes(t *testing.T) {
 			Weight:          2.3,
 			Blocker:         true,
 			RouteParameters: "route",
-			cacheRoute: map[string]interface{}{
+			cacheRoute: map[string]any{
 				"*ratio": "ratio",
 			},
 		},
@@ -1408,13 +1408,13 @@ func TestReaSortRoutes(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "utils.CGREvent1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "account",
 			utils.Destination:  "destination",
 			utils.SetupTime:    "*monthly",
 			utils.Usage:        2 * time.Minute,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsRoutesProfileCount: 3,
 		},
 	}
@@ -1467,7 +1467,7 @@ func TestHCRSortRoutes(t *testing.T) {
 			Weight:          2.3,
 			Blocker:         true,
 			RouteParameters: "route",
-			cacheRoute: map[string]interface{}{
+			cacheRoute: map[string]any{
 				"*ratio": "ratio",
 			},
 		},
@@ -1475,8 +1475,8 @@ func TestHCRSortRoutes(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "utils.CGREvent1",
-		Event:  map[string]interface{}{},
-		APIOpts: map[string]interface{}{
+		Event:  map[string]any{},
+		APIOpts: map[string]any{
 			utils.OptsRoutesProfileCount: 3,
 		},
 	}
@@ -1526,15 +1526,15 @@ func TestLoadDistributionSorterSortRoutes(t *testing.T) {
 	cfg.GeneralCfg().DefaultTimezone = "UTC"
 	clientConn := make(chan rpcclient.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ResponderGetMaxSessionTimeOnAccounts: func(args, reply interface{}) error {
-				rpl := map[string]interface{}{
+		calls: map[string]func(args any, reply any) error{
+			utils.ResponderGetMaxSessionTimeOnAccounts: func(args, reply any) error {
+				rpl := map[string]any{
 					utils.CapMaxUsage: 3 * time.Minute,
 				}
-				*reply.(*map[string]interface{}) = rpl
+				*reply.(*map[string]any) = rpl
 				return nil
 			},
-			utils.StatSv1GetQueueFloatMetrics: func(args, reply interface{}) error {
+			utils.StatSv1GetQueueFloatMetrics: func(args, reply any) error {
 				rpl := map[string]float64{
 					"metric":  22.0,
 					"metric3": 32.2,
@@ -1565,7 +1565,7 @@ func TestLoadDistributionSorterSortRoutes(t *testing.T) {
 			Weight:          2.3,
 			Blocker:         true,
 			RouteParameters: "route",
-			cacheRoute: map[string]interface{}{
+			cacheRoute: map[string]any{
 				"*ratio": "ratio",
 			},
 		},
@@ -1573,13 +1573,13 @@ func TestLoadDistributionSorterSortRoutes(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "utils.CGREvent1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "account",
 			utils.Destination:  "destination",
 			utils.SetupTime:    "*monthly",
 			utils.Usage:        2 * time.Minute,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsRoutesProfileCount: 3,
 		},
 	}
@@ -1593,7 +1593,7 @@ func TestLoadDistributionSorterSortRoutes(t *testing.T) {
 			{
 				RouteID:         "id",
 				RouteParameters: "route",
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					"Load":     21.11,
 					"MaxUsage": 180000000000,
 					"Ratio":    0,
@@ -1634,24 +1634,24 @@ func TestRouteServicePopulateSortingData(t *testing.T) {
 	Cache.Clear(nil)
 
 	ccMock := &ccMock{
-		calls: map[string]func(args, reply interface{}) error{
-			utils.ResponderGetMaxSessionTimeOnAccounts: func(args, reply interface{}) error {
-				rpl := map[string]interface{}{
+		calls: map[string]func(args, reply any) error{
+			utils.ResponderGetMaxSessionTimeOnAccounts: func(args, reply any) error {
+				rpl := map[string]any{
 					utils.CapMaxUsage: 1 * time.Second,
 					utils.Cost:        0,
 				}
-				*reply.(*map[string]interface{}) = rpl
+				*reply.(*map[string]any) = rpl
 				return nil
 			},
-			utils.ResponderGetCostOnRatingPlans: func(args, reply interface{}) error {
-				rpl := map[string]interface{}{
+			utils.ResponderGetCostOnRatingPlans: func(args, reply any) error {
+				rpl := map[string]any{
 					utils.CapMaxUsage: 5 * time.Second,
 					utils.Cost:        0,
 				}
-				*reply.(*map[string]interface{}) = rpl
+				*reply.(*map[string]any) = rpl
 				return nil
 			},
-			utils.StatSv1GetQueueFloatMetrics: func(args, reply interface{}) error {
+			utils.StatSv1GetQueueFloatMetrics: func(args, reply any) error {
 				rpl := &map[string]float64{
 					"metric1": 12,
 					"stat":    2.1,
@@ -1659,7 +1659,7 @@ func TestRouteServicePopulateSortingData(t *testing.T) {
 				*reply.(*map[string]float64) = *rpl
 				return nil
 			},
-			utils.ResourceSv1GetResource: func(args, reply interface{}) error {
+			utils.ResourceSv1GetResource: func(args, reply any) error {
 				rpl := &Resource{
 					Usages: map[string]*ResourceUsage{
 						"test_usage1": {
@@ -1697,7 +1697,7 @@ func TestRouteServicePopulateSortingData(t *testing.T) {
 		ID:     "id",
 
 		Time: utils.TimePointer(time.Date(2022, 12, 1, 20, 0, 0, 0, time.UTC)),
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "acc_event",
 			utils.Destination:  "desc_event",
 			utils.SetupTime:    time.Now(),
@@ -1721,7 +1721,7 @@ func TestRouteServicePopulateSortingData(t *testing.T) {
 	exp := &SortedRoute{
 		RouteID:         "id",
 		RouteParameters: "params",
-		SortingData: map[string]interface{}{
+		SortingData: map[string]any{
 			"Cost":          0,
 			"Load":          14.1,
 			"MaxUsage":      5 * time.Second,
@@ -1760,10 +1760,10 @@ func TestNewOptsGetRoutes(t *testing.T) {
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 	ev := &utils.CGREvent{
 
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsRoutesMaxCost: utils.MetaEventCost,
 		},
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "",
 			utils.Destination:  "",
 			utils.SetupTime:    "",
@@ -1798,8 +1798,8 @@ func TestRSStatMetricsLogg(t *testing.T) {
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 	clientConn := make(chan rpcclient.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.StatSv1GetQueueFloatMetrics: func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.StatSv1GetQueueFloatMetrics: func(args, reply any) error {
 				return errors.New("Can't get StatMetrics")
 			},
 		},
@@ -1833,8 +1833,8 @@ func TestRSStatMetricsForLoadDistributionLogg(t *testing.T) {
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 	clientConn := make(chan rpcclient.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.StatSv1GetQueueFloatMetrics: func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.StatSv1GetQueueFloatMetrics: func(args, reply any) error {
 				return errors.New("Can't get StatMetrics")
 			},
 		},
@@ -1867,8 +1867,8 @@ func TestResourceUsage(t *testing.T) {
 	resIds := []string{"RL1"}
 	clientConn := make(chan rpcclient.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ResourceSv1GetResource: func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.ResourceSv1GetResource: func(args, reply any) error {
 				return errors.New("Can't get Resources")
 			},
 		},
@@ -1894,10 +1894,10 @@ func TestRSLazyCheckRule(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "SqProcessEvent",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsStatsProfileIDs: []string{"SQ1"},
 		},
 	}
@@ -1944,8 +1944,8 @@ func TestRSPopulateSortingDataResourceErr(t *testing.T) {
 	cfg.RouteSCfg().ResourceSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}
 	clientConn := make(chan rpcclient.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ResourceSv1GetResource: func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.ResourceSv1GetResource: func(args, reply any) error {
 				return errors.New("No Resources")
 			},
 		},
@@ -1957,10 +1957,10 @@ func TestRSPopulateSortingDataResourceErr(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "SqProcessEvent",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsStatsProfileIDs: []string{"SQ1"},
 		},
 	}
@@ -2004,8 +2004,8 @@ func TestPopulateSortingDataStatsErr(t *testing.T) {
 	cfg.RouteSCfg().StatSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}
 	clientConn := make(chan rpcclient.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.StatSv1GetQueueFloatMetrics: func(args, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.StatSv1GetQueueFloatMetrics: func(args, reply any) error {
 				return errors.New("No Stats")
 			},
 		},
@@ -2017,8 +2017,8 @@ func TestPopulateSortingDataStatsErr(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "voiceEvent",
 		Time:   utils.TimePointer(time.Now()),
-		Event:  map[string]interface{}{},
-		APIOpts: map[string]interface{}{
+		Event:  map[string]any{},
+		APIOpts: map[string]any{
 			utils.OptsEEsVerbose: struct{}{},
 		},
 	}
@@ -2058,13 +2058,13 @@ func TestPopulateSortingDataAccsErr(t *testing.T) {
 	cfg.RouteSCfg().RALsConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs)}
 	clientConn := make(chan rpcclient.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ResponderGetMaxSessionTimeOnAccounts: func(args, reply interface{}) error {
-				rpl := map[string]interface{}{
+		calls: map[string]func(args any, reply any) error{
+			utils.ResponderGetMaxSessionTimeOnAccounts: func(args, reply any) error {
+				rpl := map[string]any{
 					utils.CapMaxUsage: 50 * time.Second,
 					utils.Cost:        12.12,
 				}
-				*reply.(*map[string]interface{}) = rpl
+				*reply.(*map[string]any) = rpl
 				return nil
 			},
 		},
@@ -2076,13 +2076,13 @@ func TestPopulateSortingDataAccsErr(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "voiceEvent",
 		Time:   utils.TimePointer(time.Now()),
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 			utils.Destination:  "1002",
 			utils.SetupTime:    "2023-03-03 11:39:32 +0100 CET",
 			utils.Usage:        5 * time.Second,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsEEsVerbose: struct{}{},
 		},
 	}
@@ -2120,13 +2120,13 @@ func TestPopulateSortingDataAccs2(t *testing.T) {
 	cfg.RouteSCfg().RALsConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs)}
 	clientConn := make(chan rpcclient.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ResponderGetMaxSessionTimeOnAccounts: func(args, reply interface{}) error {
-				rpl := map[string]interface{}{}
-				*reply.(*map[string]interface{}) = rpl
+		calls: map[string]func(args any, reply any) error{
+			utils.ResponderGetMaxSessionTimeOnAccounts: func(args, reply any) error {
+				rpl := map[string]any{}
+				*reply.(*map[string]any) = rpl
 				return nil
 			},
-			utils.ResponderGetCostOnRatingPlans: func(args, reply interface{}) error {
+			utils.ResponderGetCostOnRatingPlans: func(args, reply any) error {
 				return nil
 			},
 		},
@@ -2138,13 +2138,13 @@ func TestPopulateSortingDataAccs2(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "voiceEvent",
 		Time:   utils.TimePointer(time.Now()),
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 			utils.Destination:  "1002",
 			utils.SetupTime:    "2023-03-03 11:39:32 +0100 CET",
 			utils.Usage:        5 * time.Second,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsEEsVerbose: struct{}{},
 		},
 	}
@@ -2224,7 +2224,7 @@ func TestRoutesV1GetRoutes(t *testing.T) {
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "RouteProcessEvent",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.RequestType:  utils.MetaPostpaid,
 			utils.Category:     utils.Call,
 			utils.AccountField: "1003",
@@ -2306,7 +2306,7 @@ func TestRouteServiceV1GetRoutesErr(t *testing.T) {
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 	clientConn := make(chan rpcclient.ClientConnector, 1)
-	clientConn <- clMock(func(serviceMethod string, _, _ interface{}) error {
+	clientConn <- clMock(func(serviceMethod string, _, _ any) error {
 		if serviceMethod == utils.AttributeSv1ProcessEvent {
 
 			return errors.New("Server Error")
@@ -2325,7 +2325,7 @@ func TestRouteServiceV1GetRoutesErr(t *testing.T) {
 		{
 			name: "Missing StructFields",
 			args: &utils.CGREvent{
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					"Account": "1003",
 				},
 			},
@@ -2344,7 +2344,7 @@ func TestRouteServiceV1GetRoutesErr(t *testing.T) {
 			args: &utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "RouteProcessEvent",
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					utils.RequestType:  utils.MetaPostpaid,
 					utils.Category:     utils.Call,
 					utils.AccountField: "1003",

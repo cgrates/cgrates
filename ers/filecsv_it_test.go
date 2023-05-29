@@ -401,7 +401,7 @@ func TestFileCSVProcessEvent(t *testing.T) {
 	}
 	expEvent := &utils.CGREvent{
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 			utils.AnswerTime:   "2021-01-07 17:00:04 +0000 UTC",
 			utils.Category:     "*call",
@@ -414,7 +414,7 @@ func TestFileCSVProcessEvent(t *testing.T) {
 			utils.ToR:          "*voice",
 			utils.Usage:        "1h2m",
 		},
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 	eR.conReqs <- struct{}{}
 

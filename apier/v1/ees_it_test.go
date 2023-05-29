@@ -188,7 +188,7 @@ func testEEsExportCDRs(t *testing.T) {
 		ExporterIDs: []string{"CSVExporter"},
 		Verbose:     true,
 	}
-	var rply map[string]interface{}
+	var rply map[string]any
 	if err := eeSRPC.Call(utils.APIerSv1ExportCDRs, &attr, &rply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	}
@@ -196,7 +196,7 @@ func testEEsExportCDRs(t *testing.T) {
 		t.Errorf("Expected %+v, received: %+v", 1, len(rply))
 	} else {
 		val, _ := rply["CSVExporter"]
-		for k, v := range val.(map[string]interface{}) {
+		for k, v := range val.(map[string]any) {
 			switch k {
 			case utils.FirstExpOrderID:
 				if v != 1.0 {
@@ -251,7 +251,7 @@ func testEEsExportCDRsMultipleExporters(t *testing.T) {
 		ExporterIDs: []string{"CSVExporter", "CSVExporter2"},
 		Verbose:     true,
 	}
-	var rply map[string]interface{}
+	var rply map[string]any
 	if err := eeSRPC.Call(utils.APIerSv1ExportCDRs, &attr, &rply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	}
@@ -260,7 +260,7 @@ func testEEsExportCDRsMultipleExporters(t *testing.T) {
 	} else {
 		for _, expID := range []string{"CSVExporter", "CSVExporter2"} {
 			val, _ := rply[expID]
-			for k, v := range val.(map[string]interface{}) {
+			for k, v := range val.(map[string]any) {
 				switch k {
 				case utils.FirstExpOrderID:
 					if v != 1.0 {

@@ -51,7 +51,7 @@ type StatQueueProfile struct {
 // StatQueueProfileWithAPIOpts is used in replicatorV1 for dispatcher
 type StatQueueProfileWithAPIOpts struct {
 	*StatQueueProfile
-	APIOpts map[string]interface{}
+	APIOpts map[string]any
 }
 
 func (sqp *StatQueueProfile) TenantID() string {
@@ -127,7 +127,7 @@ type StoredStatQueue struct {
 
 type StatQueueWithAPIOpts struct {
 	*StatQueue
-	APIOpts map[string]interface{}
+	APIOpts map[string]any
 }
 
 // SqID will compose the unique identifier for the StatQueue out of Tenant and ID
@@ -468,7 +468,7 @@ func (ssq *StatQueueWithAPIOpts) UnmarshalJSON(data []byte) (err error) {
 		return
 	}
 	i := struct {
-		APIOpts map[string]interface{}
+		APIOpts map[string]any
 	}{}
 	if err = json.Unmarshal(data, &i); err != nil {
 		return

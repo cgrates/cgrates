@@ -107,9 +107,9 @@ func handleConfigSFile(path string, w http.ResponseWriter) {
 	}
 }
 
-// AsMapInterface returns the config as a map[string]interface{}
-func (cScfg *ConfigSCfg) AsMapInterface() (initialMP map[string]interface{}) {
-	initialMP = map[string]interface{}{
+// AsMapInterface returns the config as a map[string]any
+func (cScfg *ConfigSCfg) AsMapInterface() (initialMP map[string]any) {
+	initialMP = map[string]any{
 		utils.EnabledCfg: cScfg.Enabled,
 		utils.URLCfg:     cScfg.URL,
 		utils.RootDirCfg: cScfg.RootDir,

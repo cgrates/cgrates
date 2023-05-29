@@ -174,9 +174,9 @@ func (st *SureTaxCfg) loadFromJSONCfg(jsnCfg *SureTaxJsonCfg) (err error) {
 	return nil
 }
 
-// AsMapInterface returns the config as a map[string]interface{}
-func (st *SureTaxCfg) AsMapInterface(separator string) (initialMP map[string]interface{}) {
-	return map[string]interface{}{
+// AsMapInterface returns the config as a map[string]any
+func (st *SureTaxCfg) AsMapInterface(separator string) (initialMP map[string]any) {
+	return map[string]any{
 		utils.URLCfg:              st.URL,
 		utils.ClientNumberCfg:     st.ClientNumber,
 		utils.ValidationKeyCfg:    st.ValidationKey,

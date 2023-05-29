@@ -50,7 +50,7 @@ func (self *CmdSessionsUpdate) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdSessionsUpdate) RpcParams(reset bool) interface{} {
+func (self *CmdSessionsUpdate) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &sessions.V1UpdateSessionArgs{
 			CGREvent: new(utils.CGREvent),
@@ -67,12 +67,12 @@ func (self *CmdSessionsUpdate) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdSessionsUpdate) RpcResult() interface{} {
+func (self *CmdSessionsUpdate) RpcResult() any {
 	var atr sessions.V1UpdateSessionReply
 	return &atr
 }
 
-func (self *CmdSessionsUpdate) GetFormatedResult(result interface{}) string {
+func (self *CmdSessionsUpdate) GetFormatedResult(result any) string {
 	return GetFormatedResult(result, utils.StringSet{
 		utils.Usage:       {},
 		utils.CapMaxUsage: {},
