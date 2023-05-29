@@ -190,7 +190,7 @@ func testSQLReader(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     ev.cgrEvent.ID,
 			Time:   ev.cgrEvent.Time,
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"CGRID": cdr.CGRID,
 			},
 		}
@@ -213,15 +213,15 @@ func testSQLEmptyTable(t *testing.T) {
 		t.Fatal(err)
 	}
 	for rows.Next() {
-		columns := make([]interface{}, len(colNames))
-		columnPointers := make([]interface{}, len(colNames))
+		columns := make([]any, len(colNames))
+		columnPointers := make([]any, len(colNames))
 		for i := range columns {
 			columnPointers[i] = &columns[i]
 		}
 		if err = rows.Scan(columnPointers...); err != nil {
 			t.Fatal(err)
 		}
-		msg := make(map[string]interface{})
+		msg := make(map[string]any)
 		for i, colName := range colNames {
 			msg[colName] = columns[i]
 		}
@@ -241,7 +241,7 @@ func testSQLReader2(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     ev.cgrEvent.ID,
 			Time:   ev.cgrEvent.Time,
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"CGRID": cdr.CGRID,
 			},
 		}
@@ -263,15 +263,15 @@ func testSQLPoster(t *testing.T) {
 		t.Fatal(err)
 	}
 	for rows.Next() {
-		columns := make([]interface{}, len(colNames))
-		columnPointers := make([]interface{}, len(colNames))
+		columns := make([]any, len(colNames))
+		columnPointers := make([]any, len(colNames))
 		for i := range columns {
 			columnPointers[i] = &columns[i]
 		}
 		if err = rows.Scan(columnPointers...); err != nil {
 			t.Fatal(err)
 		}
-		msg := make(map[string]interface{})
+		msg := make(map[string]any)
 		for i, colName := range colNames {
 			msg[colName] = columns[i]
 		}

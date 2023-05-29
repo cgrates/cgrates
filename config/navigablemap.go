@@ -30,7 +30,7 @@ import (
 // NMItem is an item in the NavigableMap
 type NMItem struct {
 	Path   []string    // path in map
-	Data   interface{} // value of the element
+	Data   any         // value of the element
 	Config *FCTemplate // so we can store additional configuration
 }
 
@@ -39,7 +39,7 @@ func (nmi *NMItem) String() string {
 }
 
 // Interface returns the wraped interface
-func (nmi *NMItem) Interface() interface{} {
+func (nmi *NMItem) Interface() any {
 	return nmi.Data
 }
 
@@ -177,7 +177,7 @@ func NMAsXMLElements(nm *utils.OrderedNavigableMap) (ents []*XMLElement, err err
 }
 
 // NMAsCGREvent builds a CGREvent considering Time as time.Now()
-// and Event as linear map[string]interface{} with joined paths
+// and Event as linear map[string]any with joined paths
 // treats particular case when the value of map is []*NMItem - used in agents/AgentRequest
 func NMAsCGREvent(nM *utils.OrderedNavigableMap, tnt string, pathSep string) (cgrEv *utils.CGREvent) {
 	if nM == nil {
@@ -191,7 +191,7 @@ func NMAsCGREvent(nM *utils.OrderedNavigableMap, tnt string, pathSep string) (cg
 		Tenant: tnt,
 		ID:     utils.UUIDSha1Prefix(),
 		Time:   utils.TimePointer(time.Now()),
-		Event:  make(map[string]interface{}),
+		Event:  make(map[string]any),
 	}
 	for ; el != nil; el = el.Next() {
 		branchPath := el.Value

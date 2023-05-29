@@ -64,7 +64,7 @@ func TestAnalyzerSCfgAsMapInterface(t *testing.T) {
 		},
 		
 }`
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		"enabled": false,
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {

@@ -31,19 +31,19 @@ import (
 type dataStorage interface {
 	DataProvider
 
-	Set(fldPath []string, val interface{}) error
+	Set(fldPath []string, val any) error
 	Remove(fldPath []string) error
 	GetKeys(nesteed bool) []string
 }
 
 // MapStorage is the basic dataStorage
-type MapStorage map[string]interface{}
+type MapStorage map[string]any
 
 // String returns the map as json string
 func (ms MapStorage) String() string { return ToJSON(ms) }
 
 // FieldAsInterface returns the value from the path
-func (ms MapStorage) FieldAsInterface(fldPath []string) (val interface{}, err error) {
+func (ms MapStorage) FieldAsInterface(fldPath []string) (val any, err error) {
 	if len(fldPath) == 0 {
 		err = errors.New("empty field path")
 		return
@@ -66,7 +66,7 @@ func (ms MapStorage) FieldAsInterface(fldPath []string) (val interface{}, err er
 			}
 			val = rv[*indx]
 			return
-		case []interface{}:
+		case []any:
 			if len(rv) <= *indx {
 				return nil, ErrNotFound
 			}
@@ -93,7 +93,7 @@ func (ms MapStorage) FieldAsInterface(fldPath []string) (val interface{}, err er
 		switch dp := ms[fldPath[0]].(type) {
 		case DataProvider:
 			return dp.FieldAsInterface(fldPath[1:])
-		case map[string]interface{}:
+		case map[string]any:
 			return MapStorage(dp).FieldAsInterface(fldPath[1:])
 		default:
 			err = ErrWrongPath
@@ -112,20 +112,20 @@ func (ms MapStorage) FieldAsInterface(fldPath []string) (val interface{}, err er
 			return nil, ErrNotFound
 		}
 		return dp[*indx].FieldAsInterface(fldPath[1:])
-	case []map[string]interface{}:
+	case []map[string]any:
 		if len(dp) <= *indx {
 			return nil, ErrNotFound
 
 		}
 		return MapStorage(dp[*indx]).FieldAsInterface(fldPath[1:])
-	case []interface{}:
+	case []any:
 		if len(dp) <= *indx {
 			return nil, ErrNotFound
 		}
 		switch ds := dp[*indx].(type) {
 		case DataProvider:
 			return ds.FieldAsInterface(fldPath[1:])
-		case map[string]interface{}:
+		case map[string]any:
 			return MapStorage(ds).FieldAsInterface(fldPath[1:])
 		default:
 		}
@@ -139,7 +139,7 @@ func (ms MapStorage) FieldAsInterface(fldPath []string) (val interface{}, err er
 
 // FieldAsString returns the value from path as string
 func (ms MapStorage) FieldAsString(fldPath []string) (str string, err error) {
-	var val interface{}
+	var val any
 	if val, err = ms.FieldAsInterface(fldPath); err != nil {
 		return
 	}
@@ -147,7 +147,7 @@ func (ms MapStorage) FieldAsString(fldPath []string) (str string, err error) {
 }
 
 // Set sets the value at the given path
-func (ms MapStorage) Set(fldPath []string, val interface{}) (err error) {
+func (ms MapStorage) Set(fldPath []string, val any) (err error) {
 	if len(fldPath) == 0 {
 		return ErrWrongPath
 	}
@@ -165,7 +165,7 @@ func (ms MapStorage) Set(fldPath []string, val interface{}) (err error) {
 	switch dp := ms[fldPath[0]].(type) {
 	case dataStorage:
 		return dp.Set(fldPath[1:], val)
-	case map[string]interface{}:
+	case map[string]any:
 		return MapStorage(dp).Set(fldPath[1:], val)
 	default:
 		return ErrWrongPath
@@ -192,7 +192,7 @@ func (ms MapStorage) GetKeys(nesteed bool) (keys []string) {
 			for _, dsKey := range rv.GetKeys(nesteed) {
 				keys = append(keys, k+NestingSep+dsKey)
 			}
-		case map[string]interface{}:
+		case map[string]any:
 			for _, dsKey := range MapStorage(rv).GetKeys(nesteed) {
 				keys = append(keys, k+NestingSep+dsKey)
 			}
@@ -212,7 +212,7 @@ func (ms MapStorage) GetKeys(nesteed bool) (keys []string) {
 					keys = append(keys, pref+NestingSep+dsKey)
 				}
 			}
-		case []map[string]interface{}:
+		case []map[string]any:
 			for i, dp := range rv {
 				pref := k + fmt.Sprintf("[%v]", i)
 				// keys = append(keys, pref)
@@ -220,7 +220,7 @@ func (ms MapStorage) GetKeys(nesteed bool) (keys []string) {
 					keys = append(keys, pref+NestingSep+dsKey)
 				}
 			}
-		case []interface{}:
+		case []any:
 			for i := range rv {
 				keys = append(keys, k+fmt.Sprintf("[%v]", i))
 			}
@@ -245,7 +245,7 @@ func (ms MapStorage) Remove(fldPath []string) (err error) {
 	if len(fldPath) == 0 {
 		return ErrWrongPath
 	}
-	var val interface{}
+	var val any
 	var has bool
 	if val, has = ms[fldPath[0]]; !has {
 		return // ignore (already removed)
@@ -258,7 +258,7 @@ func (ms MapStorage) Remove(fldPath []string) (err error) {
 	switch dp := val.(type) {
 	case dataStorage:
 		return dp.Remove(fldPath[1:])
-	case map[string]interface{}:
+	case map[string]any:
 		return MapStorage(dp).Remove(fldPath[1:])
 	default:
 		return ErrWrongPath

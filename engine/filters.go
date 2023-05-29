@@ -550,7 +550,7 @@ func (fS *FilterS) getFieldValueDataProvider(initialDP utils.DataProvider,
 			&statValues); err != nil {
 			return nil, err
 		}
-		ifaceMetric := make(map[string]interface{})
+		ifaceMetric := make(map[string]any)
 		for k, v := range statValues {
 			ifaceMetric[k] = v
 		}

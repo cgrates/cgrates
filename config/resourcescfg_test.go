@@ -76,7 +76,7 @@ func TestResourceSConfigAsMapInterface(t *testing.T) {
 		"nested_fields": false,					
 	},	
 }`
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		"enabled":               false,
 		"store_interval":        "",
 		"thresholds_conns":      []string{},
@@ -105,7 +105,7 @@ func TestResourceSConfigAsMapInterface(t *testing.T) {
 			"nested_fields": false,					
 		},	
 	}`
-	eMap = map[string]interface{}{
+	eMap = map[string]any{
 		"enabled":               false,
 		"store_interval":        "7m0s",
 		"thresholds_conns":      []string{"*internal"},

@@ -136,14 +136,14 @@ func testV1RsGetResourcesForEvent(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "Event1",
-			Event:  map[string]interface{}{"Unknown": "unknown"},
+			Event:  map[string]any{"Unknown": "unknown"},
 		},
 		UsageID: "RandomUsageID",
 	}
 	if err := rlsV1Rpc.Call(utils.ResourceSv1GetResourcesForEvent, args, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	args.CGREvent.Event = map[string]interface{}{"Destination": "10", "Account": "1001"}
+	args.CGREvent.Event = map[string]any{"Destination": "10", "Account": "1001"}
 	args.CGREvent.ID = utils.UUIDSha1Prefix()
 	args.UsageID = "RandomUsageID2"
 	if err := rlsV1Rpc.Call(utils.ResourceSv1GetResourcesForEvent, args, &reply); err != nil {
@@ -163,14 +163,14 @@ func testV1RsGetResourcesForEvent(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", "ResGroup2", (*reply)[0].ID)
 	}
 
-	args.CGREvent.Event = map[string]interface{}{"Destination": "20"}
+	args.CGREvent.Event = map[string]any{"Destination": "20"}
 	args.CGREvent.ID = utils.UUIDSha1Prefix()
 	args.UsageID = "RandomUsageID3"
 	if err := rlsV1Rpc.Call(utils.ResourceSv1GetResourcesForEvent, args, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 
-	args.CGREvent.Event = map[string]interface{}{"Account": "1002", "Subject": "test", "Destination": "1002"}
+	args.CGREvent.Event = map[string]any{"Account": "1002", "Subject": "test", "Destination": "1002"}
 	args.CGREvent.ID = utils.UUIDSha1Prefix()
 	args.UsageID = "RandomUsageID5"
 	if err := rlsV1Rpc.Call(utils.ResourceSv1GetResourcesForEvent, args, &reply); err != nil {
@@ -180,7 +180,7 @@ func testV1RsGetResourcesForEvent(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", 2, len(*reply))
 	}
 
-	args.CGREvent.Event = map[string]interface{}{"Account": "1002", "Subject": "test", "Destination": "1001"}
+	args.CGREvent.Event = map[string]any{"Account": "1002", "Subject": "test", "Destination": "1001"}
 	args.CGREvent.ID = utils.UUIDSha1Prefix()
 	args.UsageID = "RandomUsageID5"
 	if err := rlsV1Rpc.Call(utils.ResourceSv1GetResourcesForEvent, args, &reply); err != nil {
@@ -200,7 +200,7 @@ func testV1RsTTL0(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     utils.UUIDSha1Prefix(),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"Account":     "3001",
 				"Destination": "3002"},
 		},
@@ -217,7 +217,7 @@ func testV1RsTTL0(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     utils.UUIDSha1Prefix(),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"Account":     "3001",
 				"Destination": "3002"},
 		},
@@ -232,7 +232,7 @@ func testV1RsTTL0(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     utils.UUIDSha1Prefix(),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"Account":     "3001",
 				"Destination": "3002"},
 		},
@@ -249,7 +249,7 @@ func testV1RsTTL0(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     utils.UUIDSha1Prefix(),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"Account":     "3001",
 				"Destination": "3002"},
 		},
@@ -293,7 +293,7 @@ func testV1RsTTL0(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     utils.UUIDSha1Prefix(),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"Account":     "3001",
 				"Destination": "3002"},
 		},
@@ -312,7 +312,7 @@ func testV1RsAllocateResource(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     utils.UUIDSha1Prefix(),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"Account":     "1002",
 				"Subject":     "1001",
 				"Destination": "1002"},
@@ -333,7 +333,7 @@ func testV1RsAllocateResource(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     utils.UUIDSha1Prefix(),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"Account":     "1002",
 				"Subject":     "1001",
 				"Destination": "1002"},
@@ -354,7 +354,7 @@ func testV1RsAllocateResource(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     utils.UUIDSha1Prefix(),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"Account":     "dan",
 				"Subject":     "dan",
 				"Destination": "1002"},
@@ -375,7 +375,7 @@ func testV1RsAllocateResource(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     utils.UUIDSha1Prefix(),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"Account":     "1002",
 				"Subject":     "1001",
 				"Destination": "1002"},
@@ -393,7 +393,7 @@ func testV1RsAllocateResource(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     utils.UUIDSha1Prefix(),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"Account":     "1002",
 				"Subject":     "1001",
 				"Destination": "1002"},
@@ -417,7 +417,7 @@ func testV1RsAuthorizeResources(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     utils.UUIDSha1Prefix(),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"Account":     "1002",
 				"Subject":     "1001",
 				"Destination": "1002"},
@@ -434,7 +434,7 @@ func testV1RsAuthorizeResources(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     utils.UUIDSha1Prefix(),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"Account":     "1002",
 				"Subject":     "1001",
 				"Destination": "1002"},
@@ -455,7 +455,7 @@ func testV1RsReleaseResource(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     utils.UUIDSha1Prefix(),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"Account":     "1002",
 				"Subject":     "1001",
 				"Destination": "1002"},
@@ -472,7 +472,7 @@ func testV1RsReleaseResource(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     utils.UUIDSha1Prefix(),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"Account":     "1002",
 				"Subject":     "1001",
 				"Destination": "1002"},
@@ -489,7 +489,7 @@ func testV1RsReleaseResource(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "Event5",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"Account":     "1002",
 				"Subject":     "1001",
 				"Destination": "1002"},
@@ -526,7 +526,7 @@ func testV1RsDBStore(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     utils.UUIDSha1Prefix(),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"Account":     "1002",
 				"Subject":     "1001",
 				"Destination": "1002"},
@@ -545,7 +545,7 @@ func testV1RsDBStore(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "Event3",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"Account":     "1002",
 				"Subject":     "1001",
 				"Destination": "1002"},
@@ -590,7 +590,7 @@ func testV1RsDBStore(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "Event4",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"Account":     "1002",
 				"Subject":     "1001",
 				"Destination": "1002"},

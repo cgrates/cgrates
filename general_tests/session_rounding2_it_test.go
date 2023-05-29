@@ -224,7 +224,7 @@ func testSesRnd2PrepaidInit(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testSesRnd2PrepaidInit",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.OriginID:         "session1",
 				utils.Tenant:           "cgrates.org",
 				utils.Category:         utils.CALL,
@@ -253,7 +253,7 @@ func testSesRnd2PrepaidUpdate1(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testSesRnd2PrepaidUpdate1",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.OriginID:         "session1",
 				utils.Tenant:           "cgrates.org",
 				utils.Category:         utils.CALL,
@@ -281,7 +281,7 @@ func testSesRnd2PrepaidUpdate2(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testSesRnd2PrepaidUpdate2",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.OriginID:         "session1",
 				utils.Tenant:           "cgrates.org",
 				utils.Category:         utils.CALL,
@@ -309,7 +309,7 @@ func testSesRnd2PrepaidTerminate(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testSesRnd2PrepaidTerminate",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.OriginID:         "session1",
 				utils.Tenant:           "cgrates.org",
 				utils.Category:         utils.CALL,
@@ -337,7 +337,7 @@ func testSesRnd2PrepaidProcessCDR(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testSesRnd2PrepaidProcessCDR",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.OriginID:         "session1",
 				utils.Tenant:           "cgrates.org",
 				utils.Category:         utils.CALL,
@@ -364,7 +364,7 @@ func testSesRnd2PostpaidProcessCDR(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testSesRnd2PostpaidProcessCDR",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.OriginID:    "session2",
 				utils.Tenant:      "cgrates.org",
 				utils.Category:    utils.CALL,

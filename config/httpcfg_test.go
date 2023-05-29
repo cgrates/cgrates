@@ -78,13 +78,13 @@ func TestHTTPCfgAsMapInterface(t *testing.T) {
 	},
 }`
 
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		"json_rpc_url":        "/jsonrpc",
 		"ws_url":              "/ws",
 		"freeswitch_cdrs_url": "/freeswitch_json",
 		"http_cdrs":           "/cdr_http",
 		"use_basic_auth":      false,
-		"auth_users":          map[string]interface{}{},
+		"auth_users":          map[string]any{},
 	}
 
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {

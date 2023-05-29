@@ -49,7 +49,7 @@ func (self *CmdAccountRemoveTriggers) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdAccountRemoveTriggers) RpcParams(reset bool) interface{} {
+func (self *CmdAccountRemoveTriggers) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &v1.AttrRemoveAccountActionTriggers{}
 	}
@@ -60,7 +60,7 @@ func (self *CmdAccountRemoveTriggers) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdAccountRemoveTriggers) RpcResult() interface{} {
+func (self *CmdAccountRemoveTriggers) RpcResult() any {
 	var s string
 	return &s
 }

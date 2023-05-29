@@ -196,7 +196,7 @@ func testS3AddCDRs(t *testing.T) {
 
 func testS3ExportCDRs(t *testing.T) {
 	attr := ArgExportCDRs{
-		ExportArgs: map[string]interface{}{
+		ExportArgs: map[string]any{
 			utils.ExportTemplate: "s3_exporter",
 		},
 		Verbose: true,

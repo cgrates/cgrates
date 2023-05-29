@@ -162,7 +162,7 @@ func testA1itAddBalance1(t *testing.T) {
 		Account:     "rpdata1",
 		BalanceType: utils.DATA,
 		Value:       10000000000,
-		Balance: map[string]interface{}{
+		Balance: map[string]any{
 			utils.ID: "rpdata1_test",
 		},
 	}
@@ -189,7 +189,7 @@ func testA1itDataSession1(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestA1itDataSession1",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.EVENT_NAME:         "INITIATE_SESSION",
 				utils.ToR:                utils.DATA,
 				utils.OriginID:           "504966119",
@@ -223,7 +223,7 @@ func testA1itDataSession1(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsVoiceLastUsed",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.EVENT_NAME:         "UPDATE_SESSION",
 				utils.Account:            "rpdata1",
 				utils.Category:           "data1",
@@ -260,7 +260,7 @@ func testA1itDataSession1(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsVoiceLastUsed",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.EVENT_NAME:     "TERMINATE_SESSION",
 				utils.Account:        "rpdata1",
 				utils.Category:       "data1",

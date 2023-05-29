@@ -48,10 +48,10 @@ func (cS *CoreService) Shutdown() (err error) {
 	return
 }
 
-func (cS *CoreService) Status(arg *utils.TenantWithArgDispatcher, reply *map[string]interface{}) (err error) {
+func (cS *CoreService) Status(arg *utils.TenantWithArgDispatcher, reply *map[string]any) (err error) {
 	memstats := new(runtime.MemStats)
 	runtime.ReadMemStats(memstats)
-	response := make(map[string]interface{})
+	response := make(map[string]any)
 	response[utils.NodeID] = config.CgrConfig().GeneralCfg().NodeID
 	response[utils.MemoryUsage] = utils.SizeFmt(float64(memstats.HeapAlloc), "")
 	response[utils.ActiveGoroutines] = runtime.NumGoroutine()

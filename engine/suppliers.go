@@ -41,7 +41,7 @@ type Supplier struct {
 	Blocker            bool // do not process further supplier after this one
 	SupplierParameters string
 
-	cacheSupplier map[string]interface{} // cache["*ratio"]=ratio
+	cacheSupplier map[string]any // cache["*ratio"]=ratio
 }
 
 // SupplierProfile represents the configuration of a Supplier profile
@@ -55,7 +55,7 @@ type SupplierProfile struct {
 	Suppliers          []*Supplier
 	Weight             float64
 
-	cache map[string]interface{}
+	cache map[string]any
 }
 
 func (sp *SupplierProfile) compileCacheParameters() error {
@@ -73,7 +73,7 @@ func (sp *SupplierProfile) compileCacheParameters() error {
 		}
 		// add the ratio for each supplier
 		for _, supplier := range sp.Suppliers {
-			supplier.cacheSupplier = make(map[string]interface{})
+			supplier.cacheSupplier = make(map[string]any)
 			if ratioSupplier, has := ratioMap[supplier.ID]; !has { // in case that ratio isn't defined for specific suppliers check for default
 				if ratioDefault, has := ratioMap[utils.MetaDefault]; !has { // in case that *default ratio isn't defined take it from config
 					supplier.cacheSupplier[utils.MetaRatio] = config.CgrConfig().SupplierSCfg().DefaultRatio
@@ -201,10 +201,10 @@ func (spS *SupplierService) matchingSupplierProfilesForEvent(ev *utils.CGREvent,
 }
 
 // costForEvent will compute cost out of accounts and rating plans for event
-// returns map[string]interface{} with cost and relevant matching information inside
+// returns map[string]any with cost and relevant matching information inside
 func (spS *SupplierService) costForEvent(ev *utils.CGREvent,
-	acntIDs, rpIDs []string, argDsp *utils.ArgDispatcher) (costData map[string]interface{}, err error) {
-	costData = make(map[string]interface{})
+	acntIDs, rpIDs []string, argDsp *utils.ArgDispatcher) (costData map[string]any, err error) {
+	costData = make(map[string]any)
 	if err = ev.CheckMandatoryFields([]string{utils.Account,
 		utils.Destination, utils.SetupTime}); err != nil {
 		return
@@ -236,7 +236,7 @@ func (spS *SupplierService) costForEvent(ev *utils.CGREvent,
 		err = nil
 	}
 	var accountMaxUsage time.Duration
-	var acntCost map[string]interface{}
+	var acntCost map[string]any
 	var initialUsage time.Duration
 	if len(acntIDs) != 0 {
 		if err := spS.connMgr.Call(spS.cgrcfg.SupplierSCfg().RALsConns, nil, utils.ResponderGetMaxSessionTimeOnAccounts,
@@ -272,7 +272,7 @@ func (spS *SupplierService) costForEvent(ev *utils.CGREvent,
 	}
 
 	if accountMaxUsage == 0 || accountMaxUsage < initialUsage {
-		var rpCost map[string]interface{}
+		var rpCost map[string]any
 		if err := spS.connMgr.Call(spS.cgrcfg.SupplierSCfg().RALsConns, nil, utils.ResponderGetCostOnRatingPlans,
 			&utils.GetCostOnRatingPlansArgs{
 				Tenant:        ev.Tenant,
@@ -393,7 +393,7 @@ func (spS *SupplierService) populateSortingData(ev *utils.CGREvent, spl *Supplie
 	extraOpts *optsGetSuppliers, argDsp *utils.ArgDispatcher) (srtSpl *SortedSupplier, pass bool, err error) {
 	sortedSpl := &SortedSupplier{
 		SupplierID: spl.ID,
-		SortingData: map[string]interface{}{
+		SortingData: map[string]any{
 			utils.Weight: spl.Weight,
 		},
 		SupplierParameters: spl.SupplierParameters,
@@ -542,7 +542,7 @@ func (spS *SupplierService) sortedSuppliersForEvent(args *ArgsGetSuppliers) (sor
 
 type ArgsGetSuppliers struct {
 	IgnoreErrors bool
-	MaxCost      string // toDo: try with interface{} here
+	MaxCost      string // toDo: try with any here
 	*utils.CGREvent
 	utils.Paginator
 	*utils.ArgDispatcher

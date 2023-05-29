@@ -65,7 +65,7 @@ func TestFilterSCfgAsMapInterface(t *testing.T) {
 	},
 }`
 	var emptySlice []string
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		"stats_conns":     []string{"*localhost"},
 		"resources_conns": emptySlice,
 		"apiers_conns":    emptySlice,

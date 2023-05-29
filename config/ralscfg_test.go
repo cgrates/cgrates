@@ -102,13 +102,13 @@ func TestRalsCfgAsMapInterface(t *testing.T) {
 		"dynaprepaid_actionplans": [],			
 	},
 }`
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		"enabled":                    false,
 		"thresholds_conns":           []string{},
 		"stats_conns":                []string{},
 		"rp_subject_prefix_matching": false,
 		"remove_expired":             true,
-		"max_computed_usage": map[string]interface{}{
+		"max_computed_usage": map[string]any{
 			"*any":   "189h0m0s",
 			"*voice": "72h0m0s",
 			"*data":  "107374182400",
@@ -116,7 +116,7 @@ func TestRalsCfgAsMapInterface(t *testing.T) {
 			"*mms":   "10000",
 		},
 		"max_increments": 1000000,
-		"balance_rating_subject": map[string]interface{}{
+		"balance_rating_subject": map[string]any{
 			"*any":   "*zero1ns",
 			"*voice": "*zero1s",
 		},

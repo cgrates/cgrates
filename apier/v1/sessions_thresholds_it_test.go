@@ -126,7 +126,7 @@ func testSessionSv1ItRpcConn(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	clntHandlers := map[string]interface{}{
+	clntHandlers := map[string]any{
 		utils.SessionSv1DisconnectSession: handleDisconnectSession2,
 	}
 	if sSv1BiRpc2, err = utils.NewBiJSONrpcClient(sSv1Cfg2.SessionSCfg().ListenBijson,
@@ -212,7 +212,7 @@ func testSessionSv1ItAuth(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItAuth",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.OriginID:    "TestSSv1It1",
 				utils.RequestType: utils.META_PREPAID,
 				utils.Account:     "1001",
@@ -273,7 +273,7 @@ func testSessionSv1ItInitiateSession(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItInitiateSession",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Tenant:      "cgrates.org",
 				utils.Category:    "call",
 				utils.ToR:         utils.VOICE,
@@ -335,7 +335,7 @@ func testSessionSv1ItTerminateSession(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItTerminateSession",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.OriginID:    "TestSSv1It1",
 				utils.RequestType: utils.META_PREPAID,
 				utils.Account:     "1001",
@@ -392,7 +392,7 @@ func testSessionSv1ItAuthNotFoundThreshold(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSesssonSv1ItNotFoundThreshold",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.OriginID:    "TestSesssonSv1ItNotFoundThreshold",
 				utils.RequestType: utils.META_PREPAID,
 				utils.Account:     "1002",
@@ -425,7 +425,7 @@ func testSessionSv1ItInitNotFoundThreshold(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionSv1ItInitNotFoundThreshold",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Tenant:      "cgrates.org",
 				utils.Category:    "call",
 				utils.ToR:         utils.DATA,
@@ -476,7 +476,7 @@ func testSessionSv1ItTerminateNotFoundThreshold(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionSv1ItTerminateNotFoundThreshold",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Tenant:      "cgrates.org",
 				utils.Category:    "call",
 				utils.ToR:         utils.DATA,
@@ -524,7 +524,7 @@ func testSessionSv1ItAuthNotFoundThresholdAndStats(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSesssonSv1ItNotFoundThreshold",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.OriginID:    "TestSesssonSv1ItNotFoundThreshold",
 				utils.RequestType: utils.META_PREPAID,
 				utils.Account:     "1002",
@@ -558,7 +558,7 @@ func testSessionSv1ItInitNotFoundThresholdAndStats(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionSv1ItInitNotFoundThreshold",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Tenant:      "cgrates.org",
 				utils.Category:    "call",
 				utils.ToR:         utils.DATA,
@@ -610,7 +610,7 @@ func testSessionSv1ItTerminateNotFoundThresholdAndStats(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionSv1ItTerminateNotFoundThreshold",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Tenant:      "cgrates.org",
 				utils.Category:    "call",
 				utils.ToR:         utils.DATA,

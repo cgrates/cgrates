@@ -2395,7 +2395,7 @@ func TestAccExecuteAT(t *testing.T) {
 		Balance: &BalanceFilter{
 			Type: utils.StringPointer(utils.VOICE),
 			Value: &utils.ValueFormula{Static: 100,
-				Params: make(map[string]interface{})},
+				Params: make(map[string]any)},
 			Weight:  utils.Float64Pointer(10),
 			Blocker: utils.BoolPointer(false),
 		},
@@ -2618,7 +2618,7 @@ func TestPublishAccount(t *testing.T) {
 		cfgfunc()
 	}()
 	clientConn := make(chan birpc.ClientConnector, 1)
-	clientConn <- clMock(func(ctx *context.Context, serviceMethod string, _, _ interface{}) error {
+	clientConn <- clMock(func(ctx *context.Context, serviceMethod string, _, _ any) error {
 		if serviceMethod == utils.StatSv1ProcessEvent {
 
 			return nil

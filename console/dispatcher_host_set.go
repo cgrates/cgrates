@@ -48,7 +48,7 @@ func (self *CmdSetDispatcherHost) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdSetDispatcherHost) RpcParams(reset bool) interface{} {
+func (self *CmdSetDispatcherHost) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = new(v1.DispatcherHostWithCache)
 	}
@@ -59,7 +59,7 @@ func (self *CmdSetDispatcherHost) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdSetDispatcherHost) RpcResult() interface{} {
+func (self *CmdSetDispatcherHost) RpcResult() any {
 	var s string
 	return &s
 }

@@ -141,7 +141,7 @@ func testV2CDRsProcessCDR(t *testing.T) {
 		Flags: []string{utils.MetaRALs},
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.OriginID:    "testV2CDRsProcessCDR1",
 				utils.OriginHost:  "192.168.1.1",
 				utils.Source:      "testV2CDRsProcessCDR",
@@ -331,7 +331,7 @@ func testV2CDRsUsageNegative(t *testing.T) {
 		Flags: []string{utils.MetaRALs},
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.OriginID:    "testV2CDRsUsageNegative",
 				utils.OriginHost:  "192.168.1.1",
 				utils.Source:      "testV2CDRsUsageNegative",
@@ -484,7 +484,7 @@ func testV2CDRsDifferentTenants(t *testing.T) {
 		Flags: []string{utils.MetaAttributes, utils.MetaChargers, "*stats:false", "*thresholds:false", utils.MetaStore},
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.com",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.OriginID:    "testV2CDRsDifferentTenants",
 				utils.OriginHost:  "192.168.1.1",
 				utils.Source:      "testV2CDRsDifferentTenants",
@@ -543,7 +543,7 @@ func testV2CDRsProcessCDRNoRattingPlan(t *testing.T) {
 		Flags: []string{utils.MetaRALs},
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.OriginID:    "testV2CDRsProcessCDR4",
 				utils.OriginHost:  "192.168.1.1",
 				utils.Source:      "testV2CDRsProcessCDR4",
@@ -750,7 +750,7 @@ func testV2CDRsSetThreshold(t *testing.T) {
 		Account:     "1005",
 		BalanceType: utils.MONETARY,
 		Value:       1,
-		Balance: map[string]interface{}{
+		Balance: map[string]any{
 			utils.ID:     utils.MetaDefault,
 			utils.Weight: 10.0,
 		},
@@ -765,7 +765,7 @@ func testV2CDRsProcessCDRWithThreshold(t *testing.T) {
 		Flags: []string{utils.MetaThresholds, utils.MetaRALs, utils.ConcatenatedKey(utils.MetaChargers, "false")},
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.OriginID:    "testV2CDRsProcessCDRWithThreshold",
 				utils.OriginHost:  "192.168.1.1",
 				utils.Source:      "testV2CDRsProcessCDRWithThreshold",
@@ -804,7 +804,7 @@ func testv2CDRsGetCDRsDest(t *testing.T) {
 		Flags: []string{utils.MetaStore},
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.CGRID:       "9b3cd5e698af94f8916220866c831a982ed16318",
 				utils.ToR:         utils.VOICE,
 				utils.RunID:       utils.MetaRaw,

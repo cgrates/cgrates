@@ -32,9 +32,9 @@ import (
 type DispatcherHostProfile struct {
 	ID        string
 	FilterIDs []string
-	Weight    float64                // applied in case of multiple connections need to be ordered
-	Params    map[string]interface{} // additional parameters stored for a session
-	Blocker   bool                   // no connection after this one
+	Weight    float64        // applied in case of multiple connections need to be ordered
+	Params    map[string]any // additional parameters stored for a session
+	Blocker   bool           // no connection after this one
 }
 
 func (dC *DispatcherHostProfile) Clone() (cln *DispatcherHostProfile) {
@@ -50,7 +50,7 @@ func (dC *DispatcherHostProfile) Clone() (cln *DispatcherHostProfile) {
 		}
 	}
 	if dC.Params != nil {
-		cln.Params = make(map[string]interface{})
+		cln.Params = make(map[string]any)
 		for k, v := range dC.Params {
 			cln.Params[k] = v
 		}
@@ -110,7 +110,7 @@ type DispatcherProfile struct {
 	FilterIDs          []string
 	ActivationInterval *utils.ActivationInterval // activation interval
 	Strategy           string
-	StrategyParams     map[string]interface{} // ie for distribution, set here the pool weights
+	StrategyParams     map[string]any         // ie for distribution, set here the pool weights
 	Weight             float64                // used for profile sorting on match
 	Hosts              DispatcherHostProfiles // dispatch to these connections
 }
@@ -140,7 +140,7 @@ func (dH *DispatcherHost) TenantID() string {
 }
 
 // GetRPCConnection builds or returns the cached connection
-func (dH *DispatcherHost) Call(serviceMethod string, args interface{}, reply interface{}) (err error) {
+func (dH *DispatcherHost) Call(serviceMethod string, args any, reply any) (err error) {
 	if dH.rpcConn == nil {
 		cfg := config.CgrConfig()
 		if dH.rpcConn, err = NewRPCPool(

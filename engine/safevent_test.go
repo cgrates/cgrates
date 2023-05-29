@@ -26,7 +26,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-var sMap = map[string]interface{}{
+var sMap = map[string]any{
 	"test1": nil,
 	"test2": 42,
 	"test3": 42.3,

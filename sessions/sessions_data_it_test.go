@@ -163,7 +163,7 @@ func testSessionsDataLastUsedData(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsDataLastUsedData",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.EVENT_NAME:  "TEST_EVENT",
 				utils.ToR:         utils.DATA,
 				utils.OriginID:    "123491",
@@ -202,7 +202,7 @@ func testSessionsDataLastUsedData(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsDataLastUsedData",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.EVENT_NAME:  "TEST_EVENT",
 				utils.ToR:         utils.DATA,
 				utils.OriginID:    "123491",
@@ -240,7 +240,7 @@ func testSessionsDataLastUsedData(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsDataLastUsedData",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.EVENT_NAME:  "TEST_EVENT",
 				utils.ToR:         utils.DATA,
 				utils.OriginID:    "123491",
@@ -279,7 +279,7 @@ func testSessionsDataLastUsedMultipleUpdates(t *testing.T) {
 		Tenant: acntAttrs.Tenant, Account: acntAttrs.Account,
 		BalanceType: utils.DATA,
 		Value:       eAcntVal,
-		Balance: map[string]interface{}{
+		Balance: map[string]any{
 			utils.ID: "TestSessionsDataLastUsedMultipleData",
 		},
 	}
@@ -301,7 +301,7 @@ func testSessionsDataLastUsedMultipleUpdates(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsDataLastUsedMultipleUpdates",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.EVENT_NAME:  "TEST_EVENT",
 				utils.ToR:         utils.DATA,
 				utils.OriginID:    "123492",
@@ -347,7 +347,7 @@ func testSessionsDataLastUsedMultipleUpdates(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsDataLastUsedMultipleUpdates",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.EVENT_NAME:  "TEST_EVENT",
 				utils.ToR:         utils.DATA,
 				utils.OriginID:    "123492",
@@ -395,7 +395,7 @@ func testSessionsDataLastUsedMultipleUpdates(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsDataLastUsedMultipleUpdates",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.EVENT_NAME:  "TEST_EVENT",
 				utils.ToR:         utils.DATA,
 				utils.OriginID:    "123492",
@@ -445,7 +445,7 @@ func testSessionsDataLastUsedMultipleUpdates(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsDataLastUsedMultipleUpdates",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.EVENT_NAME:  "TEST_EVENT",
 				utils.ToR:         utils.DATA,
 				utils.OriginID:    "123492",
@@ -487,7 +487,7 @@ func testSessionsDataLastUsedMultipleUpdates(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsDataLastUsedMultipleUpdates",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.EVENT_NAME:  "TEST_EVENT",
 				utils.ToR:         utils.DATA,
 				utils.OriginID:    "123492",
@@ -554,7 +554,7 @@ func testSessionsDataTTLExpired(t *testing.T) {
 		Tenant: acntAttrs.Tenant, Account: acntAttrs.Account,
 		BalanceType: utils.DATA,
 		Value:       eAcntVal,
-		Balance: map[string]interface{}{
+		Balance: map[string]any{
 			utils.ID: "TestSessionsDataTTLExpired",
 		},
 	}
@@ -576,7 +576,7 @@ func testSessionsDataTTLExpired(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsDataTTLExpired",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.EVENT_NAME:      "TEST_EVENT",
 				utils.ToR:             utils.DATA,
 				utils.OriginID:        "TestSessionsDataTTLExpired",
@@ -644,7 +644,7 @@ func testSessionsDataTTLExpMultiUpdates(t *testing.T) {
 		Tenant: acntAttrs.Tenant, Account: acntAttrs.Account,
 		BalanceType: utils.DATA,
 		Value:       eAcntVal,
-		Balance: map[string]interface{}{
+		Balance: map[string]any{
 			utils.ID: "TestSessionsDataTTLExpMultiUpdates",
 		},
 	}
@@ -666,7 +666,7 @@ func testSessionsDataTTLExpMultiUpdates(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsDataTTLExpMultiUpdates",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.EVENT_NAME:  "TEST_EVENT",
 				utils.ToR:         utils.DATA,
 				utils.OriginID:    "123495",
@@ -713,7 +713,7 @@ func testSessionsDataTTLExpMultiUpdates(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsDataTTLExpMultiUpdates",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.EVENT_NAME:         "TEST_EVENT",
 				utils.ToR:                utils.DATA,
 				utils.OriginID:           "123495",
@@ -783,7 +783,7 @@ func testSessionsDataMultipleDataNoUsage(t *testing.T) {
 		Tenant: acntAttrs.Tenant, Account: acntAttrs.Account,
 		BalanceType: utils.DATA,
 		Value:       eAcntVal,
-		Balance: map[string]interface{}{
+		Balance: map[string]any{
 			utils.ID: "TestSessionsDataTTLExpMultiUpdates",
 		},
 	}
@@ -805,7 +805,7 @@ func testSessionsDataMultipleDataNoUsage(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsDataMultipleDataNoUsage",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.EVENT_NAME:  "TEST_EVENT",
 				utils.ToR:         utils.DATA,
 				utils.OriginID:    "123495",
@@ -851,7 +851,7 @@ func testSessionsDataMultipleDataNoUsage(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsDataMultipleDataNoUsage",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.EVENT_NAME:  "TEST_EVENT",
 				utils.ToR:         utils.DATA,
 				utils.OriginID:    "123495",
@@ -898,7 +898,7 @@ func testSessionsDataMultipleDataNoUsage(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsDataMultipleDataNoUsage",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.EVENT_NAME:  "TEST_EVENT",
 				utils.ToR:         utils.DATA,
 				utils.OriginID:    "123495",
@@ -944,7 +944,7 @@ func testSessionsDataMultipleDataNoUsage(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsDataMultipleDataNoUsage",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.EVENT_NAME:  "TEST_EVENT",
 				utils.ToR:         utils.DATA,
 				utils.OriginID:    "123495",
@@ -991,7 +991,7 @@ func testSessionsDataTTLUsageProtection(t *testing.T) {
 		Tenant: acntAttrs.Tenant, Account: acntAttrs.Account,
 		BalanceType: utils.DATA,
 		Value:       eAcntVal,
-		Balance: map[string]interface{}{
+		Balance: map[string]any{
 			utils.ID: "TestSessionsDataTTLUsageProtection",
 		},
 	}
@@ -1013,7 +1013,7 @@ func testSessionsDataTTLUsageProtection(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsDataTTLUsageProtection",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.EVENT_NAME:  "TEST_EVENT",
 				utils.ToR:         utils.DATA,
 				utils.OriginID:    "123495",
@@ -1068,7 +1068,7 @@ func testSessionsDataTTLLastUsage(t *testing.T) {
 		Tenant: acntAttrs.Tenant, Account: acntAttrs.Account,
 		BalanceType: utils.DATA,
 		Value:       eAcntVal,
-		Balance: map[string]interface{}{
+		Balance: map[string]any{
 			utils.ID: "testSessionsDataTTLLastUsage",
 		},
 	}
@@ -1090,7 +1090,7 @@ func testSessionsDataTTLLastUsage(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsDataTTLLastUsage",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.EVENT_NAME:          "testSessionsDataTTLLastUsage",
 				utils.ToR:                 utils.DATA,
 				utils.OriginID:            "testSessionsDataTTLLastUsage",

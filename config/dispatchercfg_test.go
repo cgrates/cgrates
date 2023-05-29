@@ -89,7 +89,7 @@ func TestDispatcherSCfgAsMapInterface(t *testing.T) {
 		},
 		
 }`
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		"enabled":               false,
 		"indexed_selects":       true,
 		"prefix_indexed_fields": []string{},
@@ -118,7 +118,7 @@ func TestDispatcherSCfgAsMapInterface(t *testing.T) {
 		},
 		
 }`
-	eMap = map[string]interface{}{
+	eMap = map[string]any{
 		"enabled":               false,
 		"indexed_selects":       true,
 		"prefix_indexed_fields": []string{"prefix", "indexed", "fields"},

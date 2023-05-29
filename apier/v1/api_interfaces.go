@@ -101,8 +101,8 @@ type ResponderInterface interface {
 	RefundRounding(arg *engine.CallDescriptorWithArgDispatcher, reply *engine.Account) (err error)
 	GetMaxSessionTime(arg *engine.CallDescriptorWithArgDispatcher, reply *time.Duration) (err error)
 	Shutdown(arg *utils.TenantWithArgDispatcher, reply *string) (err error)
-	GetCostOnRatingPlans(arg *utils.GetCostOnRatingPlansArgs, reply *map[string]interface{}) (err error)
-	GetMaxSessionTimeOnAccounts(arg *utils.GetMaxSessionTimeOnAccountsArgs, reply *map[string]interface{}) (err error)
+	GetCostOnRatingPlans(arg *utils.GetCostOnRatingPlansArgs, reply *map[string]any) (err error)
+	GetMaxSessionTimeOnAccounts(arg *utils.GetMaxSessionTimeOnAccountsArgs, reply *map[string]any) (err error)
 	Ping(ign *utils.CGREventWithArgDispatcher, reply *string) error
 }
 
@@ -155,12 +155,12 @@ type RALsV1Interface interface {
 }
 
 type ConfigSv1Interface interface {
-	GetJSONSection(section *config.StringWithArgDispatcher, reply *map[string]interface{}) (err error)
+	GetJSONSection(section *config.StringWithArgDispatcher, reply *map[string]any) (err error)
 	ReloadConfigFromPath(section *config.ConfigReloadWithArgDispatcher, reply *string) (err error)
 	ReloadConfigFromJSON(args *config.JSONReloadWithArgDispatcher, reply *string) (err error)
 }
 
 type CoreSv1Interface interface {
-	Status(arg *utils.TenantWithArgDispatcher, reply *map[string]interface{}) error
+	Status(arg *utils.TenantWithArgDispatcher, reply *map[string]any) error
 	Ping(ign *utils.CGREventWithArgDispatcher, reply *string) error
 }

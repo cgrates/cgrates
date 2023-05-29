@@ -147,7 +147,7 @@ func testCDRsPostFailoverProcessCDR(t *testing.T) {
 		CGREvent: utils.CGREvent{
 			ID:     "1",
 			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.OriginID:    "testCDRsPostFailoverProcessCDR",
 				utils.OriginHost:  "192.168.1.1",
 				utils.Source:      "testCDRsPostFailoverProcessCDR",

@@ -310,7 +310,7 @@ func testCallCheckResourceBeforeAllocation(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "ResourceEvent",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Account:     "1001",
 				utils.Subject:     "1001",
 				utils.Destination: "1002"},
@@ -457,7 +457,7 @@ func testCallCheckResourceAllocation(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "ResourceAllocation",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Account:     "1001",
 				utils.Subject:     "1001",
 				utils.Destination: "1002"},
@@ -640,7 +640,7 @@ func testCallCheckResourceRelease(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "ResourceRelease",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Account:     "1001",
 				utils.Subject:     "1001",
 				utils.Destination: "1002"},
@@ -715,7 +715,7 @@ func testCallSyncSessions(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "AllocateResource",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Account:     "1001",
 				utils.Subject:     "1001",
 				utils.Destination: "1002"},

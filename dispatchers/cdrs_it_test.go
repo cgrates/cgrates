@@ -129,7 +129,7 @@ func testDspCDRsProcessEvent(t *testing.T) {
 	args := &engine.ArgV1ProcessEvent{
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.OriginID:    "testDspCDRsProcessEvent",
 				utils.OriginHost:  "192.168.1.1",
 				utils.Source:      "testDspCDRsProcessEvent",
@@ -354,7 +354,7 @@ func testDspCDRsProcessEventNoAuth(t *testing.T) {
 	args := &engine.ArgV1ProcessEvent{
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.OriginID:    "testDspCDRsProcessEvent",
 				utils.OriginHost:  "192.168.1.1",
 				utils.Source:      "testDspCDRsProcessEvent",

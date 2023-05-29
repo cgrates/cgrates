@@ -25,7 +25,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func (dS *DispatcherService) ConfigSv1GetJSONSection(args *config.StringWithArgDispatcher, reply *map[string]interface{}) (err error) {
+func (dS *DispatcherService) ConfigSv1GetJSONSection(args *config.StringWithArgDispatcher, reply *map[string]any) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args.TenantArg.Tenant != utils.EmptyString {
 		tnt = args.TenantArg.Tenant

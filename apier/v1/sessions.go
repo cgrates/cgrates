@@ -132,6 +132,6 @@ func (ssv1 *SessionSv1) DeactivateSessions(args []string, reply *string) error {
 
 // Call implements birpc.ClientConnector interface for internal RPC
 func (ssv1 *SessionSv1) Call(serviceMethod string,
-	args interface{}, reply interface{}) error {
+	args any, reply any) error {
 	return utils.APIerRPCCall(ssv1, serviceMethod, args, reply)
 }

@@ -27,7 +27,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func delayHandler() (interface{}, error) {
+func delayHandler() (any, error) {
 	time.Sleep(100 * time.Millisecond)
 	return nil, nil
 }
@@ -241,15 +241,15 @@ func TestGuardianGuardIDsTimeoutConcurrent(t *testing.T) {
 // BenchmarkGuard-8      	  200000	     13759 ns/op
 func BenchmarkGuard(b *testing.B) {
 	for n := 0; n < b.N; n++ {
-		go Guardian.Guard(func() (interface{}, error) {
+		go Guardian.Guard(func() (any, error) {
 			time.Sleep(time.Microsecond)
 			return 0, nil
 		}, 0, "1")
-		go Guardian.Guard(func() (interface{}, error) {
+		go Guardian.Guard(func() (any, error) {
 			time.Sleep(time.Microsecond)
 			return 0, nil
 		}, 0, "2")
-		go Guardian.Guard(func() (interface{}, error) {
+		go Guardian.Guard(func() (any, error) {
 			time.Sleep(time.Microsecond)
 			return 0, nil
 		}, 0, "1")
@@ -260,7 +260,7 @@ func BenchmarkGuard(b *testing.B) {
 // BenchmarkGuardian-8   	 1000000	      5794 ns/op
 func BenchmarkGuardian(b *testing.B) {
 	for n := 0; n < b.N; n++ {
-		go Guardian.Guard(func() (interface{}, error) {
+		go Guardian.Guard(func() (any, error) {
 			time.Sleep(time.Microsecond)
 			return 0, nil
 		}, 0, strconv.Itoa(n))

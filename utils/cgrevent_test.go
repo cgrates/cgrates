@@ -33,7 +33,7 @@ func TestCGREventHasField(t *testing.T) {
 	}
 	//normal check
 	cgrEvent = &CGREvent{
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			Usage: time.Duration(20 * time.Second),
 		},
 	}
@@ -52,7 +52,7 @@ func TestCGREventCheckMandatoryFields(t *testing.T) {
 		t.Error(err)
 	}
 	cgrEvent = &CGREvent{
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			Usage:   time.Duration(20 * time.Second),
 			"test1": 1,
 			"test2": 2,
@@ -83,7 +83,7 @@ func TestCGREventFielAsString(t *testing.T) {
 	}
 	//normal check
 	cgrEvent = &CGREvent{
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			Usage:   time.Duration(20 * time.Second),
 			"test1": 1,
 			"test2": 2,
@@ -105,14 +105,14 @@ func TestLibSuppliersUsage(t *testing.T) {
 	se := &CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "supplierEvent1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			Usage: time.Duration(20 * time.Second),
 		},
 	}
 	seErr := &CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "supplierEvent1",
-		Event:  make(map[string]interface{}),
+		Event:  make(map[string]any),
 	}
 	answ, err := se.FieldAsDuration(Usage)
 	if err != nil {
@@ -131,14 +131,14 @@ func TestCGREventFieldAsTime(t *testing.T) {
 	se := &CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "supplierEvent1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			AnswerTime: time.Now(),
 		},
 	}
 	seErr := &CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "supplierEvent1",
-		Event:  make(map[string]interface{}),
+		Event:  make(map[string]any),
 	}
 	answ, err := se.FieldAsTime(AnswerTime, "UTC")
 	if err != nil {
@@ -157,7 +157,7 @@ func TestCGREventFieldAsString(t *testing.T) {
 	se := &CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "supplierEvent1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"supplierprofile1": "Supplier",
 			"UsageInterval":    time.Duration(1 * time.Second),
 			"PddInterval":      "1s",
@@ -198,7 +198,7 @@ func TestCGREventFieldAsFloat64(t *testing.T) {
 	se := &CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "supplierEvent1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			AnswerTime:         time.Now(),
 			"supplierprofile1": "Supplier",
 			"UsageInterval":    "54.2",
@@ -265,7 +265,7 @@ func TestCGREventClone(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "supplierEvent1",
 		Time:   &now,
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			AnswerTime:         time.Now(),
 			"supplierprofile1": "Supplier",
 			"UsageInterval":    "54.2",
@@ -298,7 +298,7 @@ func TestCGREventconsumeArgDispatcher(t *testing.T) {
 	//normal check without APIkey
 	routeID := "route"
 	cgrEvent = &CGREvent{
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			MetaRouteID: routeID,
 		},
 	}
@@ -315,7 +315,7 @@ func TestCGREventconsumeArgDispatcher(t *testing.T) {
 	}
 	//normal check with routeID and APIKey
 	apiKey := "key"
-	cgrEvent.Event = map[string]interface{}{MetaRouteID: routeID, MetaApiKey: apiKey}
+	cgrEvent.Event = map[string]any{MetaRouteID: routeID, MetaApiKey: apiKey}
 	eOut.APIKey = &apiKey
 
 	rcv = cgrEvent.consumeArgDispatcher()
@@ -346,7 +346,7 @@ func TestCGREventconsumeSupplierPaginator(t *testing.T) {
 	}
 	//normal check
 	cgrEvent = &CGREvent{
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			MetaSuppliersLimit:  18,
 			MetaSuppliersOffset: 20,
 		},
@@ -368,7 +368,7 @@ func TestCGREventconsumeSupplierPaginator(t *testing.T) {
 	}
 	//check without *suppliers_limit, but with *suppliers_offset
 	cgrEvent = &CGREvent{
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			MetaSuppliersOffset: 20,
 		},
 	}
@@ -387,7 +387,7 @@ func TestCGREventconsumeSupplierPaginator(t *testing.T) {
 		t.Errorf("Expecting:  %+v, received: %+v", eOut, rcv)
 	}
 	//check with notAnInt at *suppliers_limit
-	cgrEvent = &CGREvent{Event: map[string]interface{}{
+	cgrEvent = &CGREvent{Event: map[string]any{
 		MetaSuppliersLimit: "Not an int",
 	},
 	}
@@ -397,7 +397,7 @@ func TestCGREventconsumeSupplierPaginator(t *testing.T) {
 		t.Errorf("Expecting:  %+v, received: %+v", eOut, rcv)
 	}
 	//check with notAnInt at and *suppliers_offset
-	cgrEvent = &CGREvent{Event: map[string]interface{}{
+	cgrEvent = &CGREvent{Event: map[string]any{
 		MetaSuppliersOffset: "Not an int",
 	},
 	}
@@ -478,7 +478,7 @@ func TestCGREventWithArgDispatcherClone(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "IDtest",
 			Time:   &now,
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"test1": 1,
 				"test2": 2,
 				"test3": 3,

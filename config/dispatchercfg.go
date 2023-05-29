@@ -75,7 +75,7 @@ func (dps *DispatcherSCfg) loadFromJsonCfg(jsnCfg *DispatcherSJsonCfg) (err erro
 	return nil
 }
 
-func (dps *DispatcherSCfg) AsMapInterface() map[string]interface{} {
+func (dps *DispatcherSCfg) AsMapInterface() map[string]any {
 	stringIndexedFields := []string{}
 	if dps.StringIndexedFields != nil {
 		stringIndexedFields = make([]string, len(*dps.StringIndexedFields))
@@ -100,7 +100,7 @@ func (dps *DispatcherSCfg) AsMapInterface() map[string]interface{} {
 		}
 	}
 
-	return map[string]interface{}{
+	return map[string]any{
 		utils.EnabledCfg:             dps.Enabled,
 		utils.IndexedSelectsCfg:      dps.IndexedSelects,
 		utils.StringIndexedFieldsCfg: stringIndexedFields,

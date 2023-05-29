@@ -210,7 +210,7 @@ func (alS *AttributeService) processEvent(args *AttrArgsProcessEvent) (
 			}
 			substitute = tEnd.Sub(tStart).String()
 		case utils.MetaSum:
-			iFaceVals := make([]interface{}, len(attribute.Value))
+			iFaceVals := make([]any, len(attribute.Value))
 			for i, val := range attribute.Value {
 				strVal, err := val.ParseDataProvider(evNm, utils.NestingSep)
 				if err != nil {
@@ -367,14 +367,14 @@ func (alS *AttributeService) V1ProcessEvent(args *AttrArgsProcessEvent,
 	// Make sure the requested fields were populated
 	if err == utils.ErrNotFound {
 		for val, valIface := range args.CGREvent.Event {
-			if valIface == interface{}(utils.MetaAttributes) {
+			if valIface == any(utils.MetaAttributes) {
 				err = utils.NewErrMandatoryIeMissing(val)
 				break
 			}
 		}
 	} else if err == nil {
 		for val, valIface := range apiRply.CGREvent.Event {
-			if valIface == interface{}(utils.MetaAttributes) {
+			if valIface == any(utils.MetaAttributes) {
 				// mandatory IE missing
 				err = utils.NewErrMandatoryIeMissing(val)
 				break

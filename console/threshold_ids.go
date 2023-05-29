@@ -47,7 +47,7 @@ func (self *CmdGetThresholdIDs) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdGetThresholdIDs) RpcParams(reset bool) interface{} {
+func (self *CmdGetThresholdIDs) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &utils.TenantArgWithPaginator{}
 	}
@@ -58,7 +58,7 @@ func (self *CmdGetThresholdIDs) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdGetThresholdIDs) RpcResult() interface{} {
+func (self *CmdGetThresholdIDs) RpcResult() any {
 	var atr []string
 	return &atr
 }

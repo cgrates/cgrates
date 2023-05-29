@@ -24,9 +24,9 @@ import (
 	"strings"
 )
 
-// Converts map[string]string into map[string]interface{}
-func ConvertMapValStrIf(inMap map[string]string) map[string]interface{} {
-	outMap := make(map[string]interface{})
+// Converts map[string]string into map[string]any
+func ConvertMapValStrIf(inMap map[string]string) map[string]any {
+	outMap := make(map[string]any)
 	for field, val := range inMap {
 		outMap[field] = val
 	}
@@ -191,8 +191,8 @@ func (sm StringMap) GetSlice() (result []string) {
 }
 
 // Used to merge multiple maps (eg: output of struct having ExtraFields)
-func MergeMapsStringIface(mps ...map[string]interface{}) (outMp map[string]interface{}) {
-	outMp = make(map[string]interface{})
+func MergeMapsStringIface(mps ...map[string]any) (outMp map[string]any) {
+	outMp = make(map[string]any)
 	for i, mp := range mps {
 		if i == 0 {
 			outMp = mp

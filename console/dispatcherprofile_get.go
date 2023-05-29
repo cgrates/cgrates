@@ -48,7 +48,7 @@ func (self *CmdGetDispatcherProfile) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdGetDispatcherProfile) RpcParams(reset bool) interface{} {
+func (self *CmdGetDispatcherProfile) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = new(utils.TenantID)
 	}
@@ -59,7 +59,7 @@ func (self *CmdGetDispatcherProfile) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdGetDispatcherProfile) RpcResult() interface{} {
+func (self *CmdGetDispatcherProfile) RpcResult() any {
 	var s engine.DispatcherProfile
 	return &s
 }

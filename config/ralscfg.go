@@ -92,8 +92,8 @@ func (ralsCfg *RalsCfg) loadFromJsonCfg(jsnRALsCfg *RalsJsonCfg) (err error) {
 	return nil
 }
 
-func (ralsCfg *RalsCfg) AsMapInterface() map[string]interface{} {
-	maxComputed := make(map[string]interface{})
+func (ralsCfg *RalsCfg) AsMapInterface() map[string]any {
+	maxComputed := make(map[string]any)
 	for key, item := range ralsCfg.MaxComputedUsage {
 		if key == utils.ANY || key == utils.VOICE {
 			maxComputed[key] = item.String()
@@ -102,12 +102,12 @@ func (ralsCfg *RalsCfg) AsMapInterface() map[string]interface{} {
 		}
 	}
 
-	balanceRating := make(map[string]interface{})
+	balanceRating := make(map[string]any)
 	for key, item := range ralsCfg.BalanceRatingSubject {
 		balanceRating[key] = item
 	}
 
-	return map[string]interface{}{
+	return map[string]any{
 		utils.EnabledCfg:                 ralsCfg.Enabled,
 		utils.ThresholdSConnsCfg:         ralsCfg.ThresholdSConns,
 		utils.StatSConnsCfg:              ralsCfg.StatSConns,

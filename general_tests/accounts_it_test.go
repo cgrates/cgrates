@@ -275,7 +275,7 @@ func testV1AccSendToThreshold(t *testing.T) {
 		Account:     "testAccThreshold",
 		BalanceType: "*monetary",
 		Value:       1.5,
-		Balance: map[string]interface{}{
+		Balance: map[string]any{
 			utils.ID: "testAccSetBalance",
 		},
 	}

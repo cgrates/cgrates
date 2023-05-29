@@ -48,7 +48,7 @@ func (xP *XmlProvider) String() string {
 }
 
 // FieldAsInterface is part of engine.utils.DataProvider interface
-func (xP *XmlProvider) FieldAsInterface(fldPath []string) (data interface{}, err error) {
+func (xP *XmlProvider) FieldAsInterface(fldPath []string) (data any, err error) {
 	if len(fldPath) == 0 {
 		return nil, utils.ErrNotFound
 	}
@@ -83,7 +83,7 @@ func (xP *XmlProvider) FieldAsInterface(fldPath []string) (data interface{}, err
 
 // FieldAsString is part of engine.utils.DataProvider interface
 func (xP *XmlProvider) FieldAsString(fldPath []string) (data string, err error) {
-	var valIface interface{}
+	var valIface any
 	valIface, err = xP.FieldAsInterface(fldPath)
 	if err != nil {
 		return

@@ -66,7 +66,7 @@ func TestSchedulerCfgAsMapInterface(t *testing.T) {
 		"filters": [],
 	},
 }`
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		"enabled":    true,
 		"cdrs_conns": []string{},
 		"filters":    []string{},

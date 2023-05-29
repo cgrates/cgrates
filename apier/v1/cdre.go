@@ -192,7 +192,7 @@ func (apier *APIerSv1) ReloadCdreConfig(attrs ConfigPathArg, reply *string) erro
 
 // ArgExportCDRs are the arguments passed to ExportCDRs method
 type ArgExportCDRs struct {
-	ExportArgs          map[string]interface{}
+	ExportArgs          map[string]any
 	Verbose             bool // Disable CgrIds reporting in reply/ExportedCgrIds and reply/UnexportedCgrIds
 	utils.RPCCDRsFilter      // Inherit the CDR filter attributes
 }

@@ -636,7 +636,7 @@ func TestTPDispatcher(t *testing.T) {
 				ActivationTime: "2022-07-14T14:35:00Z",
 				ExpiryTime:     "",
 			},
-			StrategyParams: []interface{}{},
+			StrategyParams: []any{},
 			Weight:         20,
 		},
 	}
@@ -924,7 +924,7 @@ func TestTPRLoadAccountActionsFiltered(t *testing.T) {
 	}
 	db.SetTPAccountActions([]*utils.TPAccountActions{qriedAA})
 	clientConn := make(chan birpc.ClientConnector, 1)
-	clientConn <- clMock(func(ctx *context.Context, serviceMethod string, _, reply interface{}) error {
+	clientConn <- clMock(func(ctx *context.Context, serviceMethod string, _, reply any) error {
 		if serviceMethod == utils.CacheSv1ReloadCache {
 			*reply.(*string) = utils.OK
 			return nil
@@ -1012,7 +1012,7 @@ func TestTprRealoadSched(t *testing.T) {
 		t.Error(err)
 	}
 	clientConn := make(chan birpc.ClientConnector, 1)
-	clientConn <- clMock(func(ctx *context.Context, serviceMethod string, _, _ interface{}) error {
+	clientConn <- clMock(func(ctx *context.Context, serviceMethod string, _, _ any) error {
 		if serviceMethod == utils.SchedulerSv1Reload {
 			return nil
 		}
@@ -1036,7 +1036,7 @@ func TestTprReloadCache(t *testing.T) {
 		SetConnManager(tmpConn)
 	}()
 	clientConn := make(chan birpc.ClientConnector, 1)
-	clientConn <- clMock(func(ctx *context.Context, serviceMethod string, args, _ interface{}) error {
+	clientConn <- clMock(func(ctx *context.Context, serviceMethod string, args, _ any) error {
 		if serviceMethod == utils.CacheSv1LoadCache {
 			return nil
 		} else if serviceMethod == utils.CacheSv1Clear {

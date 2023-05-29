@@ -75,7 +75,7 @@ func TestGetAccountIds(t *testing.T) {
 */
 
 func TestGetAccounts(t *testing.T) {
-	var accounts []interface{}
+	var accounts []any
 	var attrs utils.AttrGetAccounts
 	if err := apierAcnts.GetAccounts(utils.AttrGetAccounts{Tenant: "cgrates.org"}, &accounts); err != nil {
 		t.Error("Unexpected error", err.Error())

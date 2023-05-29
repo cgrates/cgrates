@@ -49,7 +49,7 @@ func (self *CmdSetSupplier) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdSetSupplier) RpcParams(reset bool) interface{} {
+func (self *CmdSetSupplier) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &v1.SupplierWithCache{SupplierProfile: new(engine.SupplierProfile)}
 	}
@@ -60,7 +60,7 @@ func (self *CmdSetSupplier) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdSetSupplier) RpcResult() interface{} {
+func (self *CmdSetSupplier) RpcResult() any {
 	var s string
 	return &s
 }

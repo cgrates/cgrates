@@ -90,7 +90,7 @@ func TestKamEvAsMapStringInterface(t *testing.T) {
 		"cgr_duration": "3", "cgr_pdd": "4",
 		utils.CGR_SUPPLIER:         "supplier2",
 		utils.CGR_DISCONNECT_CAUSE: "200"}
-	expMp := make(map[string]interface{})
+	expMp := make(map[string]any)
 	expMp["cgr_account"] = "1001"
 	expMp["cgr_duration"] = "3"
 	expMp["cgr_pdd"] = "4"
@@ -297,7 +297,7 @@ func TestKamEvAsKamAuthReply(t *testing.T) {
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "TestKamEvAsKamAuthReply",
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					utils.Tenant:      "cgrates.org",
 					utils.Account:     "1001",
 					"Password":        "check123",
@@ -484,7 +484,7 @@ func TestKamEvAsKamProcessEventReply(t *testing.T) {
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "TestKamEvAsKamAuthReply",
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					utils.Tenant:      "cgrates.org",
 					utils.Account:     "1001",
 					"Password":        "check123",

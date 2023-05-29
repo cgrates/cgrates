@@ -48,7 +48,7 @@ func (self *CmdExportCdrs) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdExportCdrs) RpcParams(reset bool) interface{} {
+func (self *CmdExportCdrs) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = new(v1.ArgExportCDRs)
 	}
@@ -59,7 +59,7 @@ func (self *CmdExportCdrs) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdExportCdrs) RpcResult() interface{} {
+func (self *CmdExportCdrs) RpcResult() any {
 	var reply *v1.RplExportedCDRs
 	return &reply
 }

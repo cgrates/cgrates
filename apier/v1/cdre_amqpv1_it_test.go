@@ -201,7 +201,7 @@ func testAMQPv1AddCDRs(t *testing.T) {
 
 func testAMQPv1ExportCDRs(t *testing.T) {
 	attr := ArgExportCDRs{
-		ExportArgs: map[string]interface{}{
+		ExportArgs: map[string]any{
 			utils.ExportTemplate: "amqpv1_exporter",
 		},
 		Verbose: true,

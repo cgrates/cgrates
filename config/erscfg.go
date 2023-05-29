@@ -99,14 +99,14 @@ func (erS *ERsCfg) Clone() (cln *ERsCfg) {
 	return
 }
 
-func (erS *ERsCfg) AsMapInterface(separator string) map[string]interface{} {
+func (erS *ERsCfg) AsMapInterface(separator string) map[string]any {
 
-	readers := make([]map[string]interface{}, len(erS.Readers))
+	readers := make([]map[string]any, len(erS.Readers))
 	for i, item := range erS.Readers {
 		readers[i] = item.AsMapInterface(separator)
 	}
 
-	return map[string]interface{}{
+	return map[string]any{
 		utils.EnabledCfg:       erS.Enabled,
 		utils.SessionSConnsCfg: erS.SessionSConns,
 		utils.ReadersCfg:       readers,
@@ -248,7 +248,7 @@ func (er *EventReaderCfg) Clone() (cln *EventReaderCfg) {
 	return
 }
 
-func (er *EventReaderCfg) AsMapInterface(separator string) map[string]interface{} {
+func (er *EventReaderCfg) AsMapInterface(separator string) map[string]any {
 	xmlRootPath := make([]string, len(er.XmlRootPath))
 	for i, item := range er.XmlRootPath {
 		xmlRootPath[i] = item
@@ -262,19 +262,19 @@ func (er *EventReaderCfg) AsMapInterface(separator string) map[string]interface{
 		tenant = strings.Join(values, separator)
 	}
 
-	flags := make(map[string][]interface{}, len(er.Flags))
+	flags := make(map[string][]any, len(er.Flags))
 	for key, val := range er.Flags {
-		buf := make([]interface{}, len(val))
+		buf := make([]any, len(val))
 		for i, item := range val {
 			buf[i] = item
 		}
 		flags[key] = buf
 	}
-	fields := make([]map[string]interface{}, len(er.Fields))
+	fields := make([]map[string]any, len(er.Fields))
 	for i, item := range er.Fields {
 		fields[i] = item.AsMapInterface(separator)
 	}
-	cacheDumpFields := make([]map[string]interface{}, len(er.CacheDumpFields))
+	cacheDumpFields := make([]map[string]any, len(er.CacheDumpFields))
 	for i, item := range er.CacheDumpFields {
 		cacheDumpFields[i] = item.AsMapInterface(separator)
 	}
@@ -292,7 +292,7 @@ func (er *EventReaderCfg) AsMapInterface(separator string) map[string]interface{
 		partialRecordCache = er.PartialRecordCache.String()
 	}
 
-	return map[string]interface{}{
+	return map[string]any{
 		utils.IDCfg:                       er.ID,
 		utils.TypeCfg:                     er.Type,
 		utils.RowLengthCfg:                er.RowLength,

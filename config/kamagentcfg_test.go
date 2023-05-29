@@ -102,12 +102,12 @@ func TestKamAgentCfgAsMapInterface(t *testing.T) {
 			],
 		},
 	}`
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		"enabled":        false,
 		"sessions_conns": []string{""},
 		"create_cdr":     false,
 		"timezone":       "",
-		"evapi_conns": []map[string]interface{}{
+		"evapi_conns": []map[string]any{
 			{"address": "127.0.0.1:8448", "reconnects": 5, "alias": ""},
 		},
 	}
@@ -132,12 +132,12 @@ func TestKamAgentCfgAsMapInterface(t *testing.T) {
 		],
 	},
 }`
-	eMap = map[string]interface{}{
+	eMap = map[string]any{
 		"enabled":        false,
 		"sessions_conns": []string{"*internal"},
 		"create_cdr":     false,
 		"timezone":       "",
-		"evapi_conns": []map[string]interface{}{
+		"evapi_conns": []map[string]any{
 			{"address": "127.0.0.1:8448", "reconnects": 5, "alias": ""},
 		},
 	}

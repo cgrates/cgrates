@@ -49,9 +49,9 @@ func TestDspApierITMongo(t *testing.T) {
 	testDsp(t, sTestsDspApier, "TestDspApier", "all", "all2", "dispatchers_mongo", "tutorial", "oldtutorial", "dispatchers")
 }
 
-//because we import dispatchers in APIerSv1 we will send information as map[string]interface{}
+//because we import dispatchers in APIerSv1 we will send information as map[string]any
 func testDspApierSetAttributes(t *testing.T) {
-	ev := &map[string]interface{}{
+	ev := &map[string]any{
 		utils.Tenant: "cgrates.org",
 		"ID":         "ATTR_Dispatcher",
 		"Contexts":   []string{utils.MetaSessionS},

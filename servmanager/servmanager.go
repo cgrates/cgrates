@@ -50,7 +50,7 @@ type ServiceManager struct {
 	subsystems     map[string]Service
 }
 
-func (srvMngr *ServiceManager) Call(ctx *context.Context, serviceMethod string, args interface{}, reply interface{}) error {
+func (srvMngr *ServiceManager) Call(ctx *context.Context, serviceMethod string, args any, reply any) error {
 	parts := strings.Split(serviceMethod, ".")
 	if len(parts) != 2 {
 		return rpcclient.ErrUnsupporteServiceMethod

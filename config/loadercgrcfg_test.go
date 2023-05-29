@@ -76,7 +76,7 @@ func TestLoaderCgrCfgAsMapInterface(t *testing.T) {
 		"gapi_token": ".gapi/token.json"
 	},
 }`
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		"tpid":             "",
 		"data_path":        "./",
 		"disable_reverse":  false,

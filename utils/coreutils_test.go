@@ -758,44 +758,44 @@ func TestFmtFieldWidth(t *testing.T) {
 }
 
 func TestCastIfToString(t *testing.T) {
-	v := interface{}("somestr")
+	v := any("somestr")
 	if sOut, casts := CastIfToString(v); !casts {
 		t.Error("Does not cast")
 	} else if sOut != "somestr" {
 		t.Errorf("Received: %+v", sOut)
 	}
-	v = interface{}(1)
+	v = any(1)
 	if sOut, casts := CastIfToString(v); !casts {
 		t.Error("Does not cast")
 	} else if sOut != "1" {
 		t.Errorf("Received: %+v", sOut)
 	}
-	v = interface{}((int64)(1))
+	v = any((int64)(1))
 	if sOut, casts := CastIfToString(v); !casts {
 		t.Error("Does not cast")
 	} else if sOut != "1" {
 		t.Errorf("Received: %+v", sOut)
 	}
-	v = interface{}(true)
+	v = any(true)
 	if sOut, casts := CastIfToString(v); !casts {
 		t.Error("Does not cast")
 	} else if sOut != "true" {
 		t.Errorf("Received: %+v", sOut)
 	}
-	v = interface{}([]byte("test"))
+	v = any([]byte("test"))
 	if sOut, casts := CastIfToString(v); !casts {
 		t.Error("Does not cast")
 	} else if sOut != "test" {
 		t.Errorf("Received: %+v", sOut)
 	}
-	v = interface{}(1.2)
+	v = any(1.2)
 	if sOut, casts := CastIfToString(v); !casts {
 		t.Error("Does not cast")
 	} else if sOut != "1.2" {
 		t.Errorf("Received: %+v", sOut)
 	}
 	//default
-	v = interface{}([]string{"test"})
+	v = any([]string{"test"})
 	if _, casts := CastIfToString(v); casts {
 		t.Error("Does cast")
 	}
@@ -948,7 +948,7 @@ func TestClone(t *testing.T) {
 	}
 	// Clone from an interface
 	c := "mystr"
-	ifaceC := interface{}(c)
+	ifaceC := any(c)
 	clndIface := reflect.Indirect(reflect.New(reflect.TypeOf(ifaceC))).Interface().(string)
 	if err := Clone(ifaceC, &clndIface); err != nil {
 		t.Error(err)
@@ -1208,10 +1208,10 @@ func TestTenantIDWithCache(t *testing.T) {
 type testRPC struct {
 }
 
-func (tRPC *testRPC) Name(args interface{}, reply interface{}) error {
+func (tRPC *testRPC) Name(args any, reply any) error {
 	return errors.New("err_test")
 }
-func (tRPC *testRPC) V1Name(args interface{}, reply interface{}) error {
+func (tRPC *testRPC) V1Name(args any, reply any) error {
 	return errors.New("V1_err_test")
 }
 func TestRPCCall(t *testing.T) {

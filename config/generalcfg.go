@@ -151,7 +151,7 @@ func (gencfg *GeneralCfg) loadFromJsonCfg(jsnGeneralCfg *GeneralJsonCfg) (err er
 	return nil
 }
 
-func (gencfg *GeneralCfg) AsMapInterface() map[string]interface{} {
+func (gencfg *GeneralCfg) AsMapInterface() map[string]any {
 	var lockingTimeout string = "0"
 	var failedPostsTTL string = "0"
 	var connectTimeout string = "0"
@@ -169,7 +169,7 @@ func (gencfg *GeneralCfg) AsMapInterface() map[string]interface{} {
 		replyTimeout = gencfg.ReplyTimeout.String()
 	}
 
-	return map[string]interface{}{
+	return map[string]any{
 		utils.NodeIDCfg:             gencfg.NodeID,
 		utils.LoggerCfg:             gencfg.Logger,
 		utils.LogLevelCfg:           gencfg.LogLevel,

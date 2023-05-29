@@ -47,7 +47,7 @@ var (
 
 	sesRndCgrEv = &utils.CGREvent{
 		Tenant: sesRndTenant,
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.Tenant:           sesRndTenant,
 			utils.Category:         utils.CALL,
 			utils.ToR:              utils.VOICE,
@@ -298,7 +298,7 @@ func testSesRndItAddVoiceBalance(t *testing.T) {
 		Account:     sesRndAccount,
 		BalanceType: utils.MONETARY,
 		Value:       float64(time.Hour),
-		Balance: map[string]interface{}{
+		Balance: map[string]any{
 			utils.ID: "TestSesBal1",
 		},
 	}, &reply); err != nil {

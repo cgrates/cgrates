@@ -61,7 +61,7 @@ func TestDspConfigIT(t *testing.T) {
 }
 
 func testDspConfigSv1GetJSONSection(t *testing.T) {
-	expected := map[string]interface{}{
+	expected := map[string]any{
 		"HTTPListen":       ":6080",
 		"HTTPTLSListen":    "127.0.0.1:2280",
 		"RPCGOBListen":     ":6013",
@@ -69,7 +69,7 @@ func testDspConfigSv1GetJSONSection(t *testing.T) {
 		"RPCJSONListen":    ":6012",
 		"RPCJSONTLSListen": "127.0.0.1:2022",
 	}
-	var reply map[string]interface{}
+	var reply map[string]any
 	if err := dispEngine.RPC.Call(utils.ConfigSv1GetJSONSection, &config.StringWithArgDispatcher{
 		TenantArg: utils.TenantArg{
 			Tenant: "cgrates.org",

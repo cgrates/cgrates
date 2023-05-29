@@ -134,7 +134,7 @@ func testSes3ItProcessEvent(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItProcessEvent",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.CGRID:       "c87609aa1cb6e9529ab1836cfeeebaab7aa7ebaf",
 				utils.Tenant:      "cgrates.org",
 				utils.Category:    "call",
@@ -169,7 +169,7 @@ func testSes3ItProcessEvent(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItProcessEvent",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.CGRID:       "c87609aa1cb6e9529ab1836cfeeebaab7aa7ebaf",
 				utils.Tenant:      "cgrates.org",
 				utils.Category:    "call",
@@ -266,7 +266,7 @@ func testSes3ItAddVoiceBalance(t *testing.T) {
 		Account:     "1002",
 		BalanceType: utils.VOICE,
 		Value:       5 * float64(time.Second),
-		Balance: map[string]interface{}{
+		Balance: map[string]any{
 			utils.ID:            "TestDynamicDebitBalance",
 			utils.RatingSubject: "*zero5ms",
 		},
@@ -298,7 +298,7 @@ func testSes3ItTerminatWithoutInit(t *testing.T) {
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "TestSesItUpdateSession",
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					utils.Tenant:      "cgrates.org",
 					utils.Category:    "call",
 					utils.ToR:         utils.VOICE,
@@ -332,7 +332,7 @@ func testSes3ItTerminatWithoutInit(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSesItInitiateSession",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Tenant:      "cgrates.org",
 				utils.Category:    "call",
 				utils.ToR:         utils.VOICE,
@@ -383,7 +383,7 @@ func testSes3ItCDRs(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSesItProccesCDR",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Tenant:      "cgrates.org",
 				utils.Category:    "call",
 				utils.ToR:         utils.VOICE,

@@ -41,7 +41,7 @@ type APIerSv2 struct {
 
 // Call implements birpc.ClientConnector interface for internal RPC
 func (apiv2 *APIerSv2) Call(ctx *context.Context, serviceMethod string,
-	args interface{}, reply interface{}) error {
+	args any, reply any) error {
 	return utils.APIerRPCCall(apiv2, serviceMethod, args, reply)
 }
 
@@ -88,7 +88,7 @@ func (apiv2 *APIerSv2) LoadAccountActions(attrs AttrLoadAccountActions, reply *s
 	}
 	tpAa := &utils.TPAccountActions{TPid: attrs.TPid}
 	tpAa.SetAccountActionsId(attrs.AccountActionsId)
-	if _, err := guardian.Guardian.Guard(func() (interface{}, error) {
+	if _, err := guardian.Guardian.Guard(func() (any, error) {
 		return 0, dbReader.LoadAccountActionsFiltered(tpAa)
 	}, config.CgrConfig().GeneralCfg().LockingTimeout, attrs.AccountActionsId); err != nil {
 		return utils.NewErrServerError(err)

@@ -160,7 +160,7 @@ func testSCncrRunSessions(t *testing.T) {
 				Account:     acntID,
 				BalanceType: utils.VOICE,
 				Value:       float64(bufferTopup.Nanoseconds()),
-				Balance: map[string]interface{}{
+				Balance: map[string]any{
 					utils.ID: "BUFFER",
 				},
 			}
@@ -211,7 +211,7 @@ func testRunSession(t *testing.T) {
 		Account:     acntID,
 		BalanceType: utils.VOICE,
 		Value:       float64(mainTopup.Nanoseconds()),
-		Balance: map[string]interface{}{
+		Balance: map[string]any{
 			utils.ID:     "MAIN",
 			utils.Weight: 10,
 		},
@@ -231,7 +231,7 @@ func testRunSession(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     fmt.Sprintf("TestSCncrAuth%s", originID),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Tenant:      "cgrates.org",
 				utils.OriginID:    originID,
 				utils.RequestType: utils.META_PREPAID,
@@ -257,7 +257,7 @@ func testRunSession(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     fmt.Sprintf("TestSCncrInit%s", originID),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.OriginID:    originID,
 				utils.RequestType: utils.META_PREPAID,
 				utils.Account:     acntID,
@@ -287,7 +287,7 @@ func testRunSession(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     fmt.Sprintf("TestSCncrUpdate%s", originID),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.OriginID:        originID,
 				utils.InitialOriginID: initOriginID,
 				utils.Usage:           updtUsage,
@@ -310,7 +310,7 @@ func testRunSession(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     fmt.Sprintf("TestSCncrTerminate%s", originID),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.OriginID: originID,
 				utils.Usage:    time.Duration(90 * time.Second),
 			},
@@ -331,7 +331,7 @@ func testRunSession(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     fmt.Sprintf("TestSCncrCDR%s", originID),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.OriginID: originID,
 			},
 		},

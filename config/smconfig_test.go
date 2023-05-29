@@ -173,7 +173,7 @@ func TestSessionSCfgAsMapInterface(t *testing.T) {
 		},
 	},
 }`
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		"enabled":                false,
 		"listen_bijson":          "127.0.0.1:2014",
 		"chargers_conns":         []string{},
@@ -197,7 +197,7 @@ func TestSessionSCfgAsMapInterface(t *testing.T) {
 		"session_ttl_max_delay":  "0",
 		"session_ttl_usage":      "0",
 		"session_ttl_last_usage": "0",
-		utils.DefaultUsageCfg: map[string]interface{}{
+		utils.DefaultUsageCfg: map[string]any{
 			utils.META_ANY: "3h0m0s",
 			utils.VOICE:    "3h0m0s",
 			utils.DATA:     "1048576",
@@ -252,7 +252,7 @@ func TestSessionSCfgAsMapInterface(t *testing.T) {
 			},
 		},
 	}`
-	eMap = map[string]interface{}{
+	eMap = map[string]any{
 		"enabled":                false,
 		"listen_bijson":          "127.0.0.1:2014",
 		"chargers_conns":         []string{"*internal"},
@@ -276,7 +276,7 @@ func TestSessionSCfgAsMapInterface(t *testing.T) {
 		"session_ttl_max_delay":  "0",
 		"session_ttl_usage":      "0",
 		"session_ttl_last_usage": "0",
-		utils.DefaultUsageCfg: map[string]interface{}{
+		utils.DefaultUsageCfg: map[string]any{
 			utils.META_ANY: "3h0m0s",
 			utils.VOICE:    "3h0m0s",
 			utils.DATA:     "1048576",
@@ -365,7 +365,7 @@ func TestFsAgentCfgAsMapInterface(t *testing.T) {
 		],
 	},
 }`
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		"enabled":                false,
 		"sessions_conns":         []string{"*internal"},
 		"subscribe_park":         true,
@@ -374,7 +374,7 @@ func TestFsAgentCfgAsMapInterface(t *testing.T) {
 		"empty_balance_context":  "",
 		"empty_balance_ann_file": "",
 		"max_wait_connection":    "2s",
-		"event_socket_conns": []map[string]interface{}{
+		"event_socket_conns": []map[string]any{
 			{"address": "127.0.0.1:8021", "password": "ClueCon", "reconnects": 5, "alias": "127.0.0.1:8021"},
 		},
 	}
@@ -502,11 +502,11 @@ func TestAsteriskAgentCfgAsMapInterface(t *testing.T) {
 		],
 	},
 }`
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		"enabled":        true,
 		"sessions_conns": []string{"*internal"},
 		"create_cdr":     false,
-		"asterisk_conns": []map[string]interface{}{
+		"asterisk_conns": []map[string]any{
 			{"alias": "", "address": "127.0.0.1:8088", "user": "cgrates", "password": "CGRateS.org", "connect_attempts": 3, "reconnects": 5},
 		},
 	}

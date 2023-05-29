@@ -81,7 +81,7 @@ func (dP *dnsDP) String() string {
 
 // FieldAsString is part of engine.DataProvider interface
 func (dP *dnsDP) FieldAsString(fldPath []string) (data string, err error) {
-	var valIface interface{}
+	var valIface any
 	valIface, err = dP.FieldAsInterface(fldPath)
 	if err != nil {
 		return
@@ -95,7 +95,7 @@ func (dP *dnsDP) RemoteHost() net.Addr {
 }
 
 // FieldAsInterface is part of engine.DataProvider interface
-func (dP *dnsDP) FieldAsInterface(fldPath []string) (data interface{}, err error) {
+func (dP *dnsDP) FieldAsInterface(fldPath []string) (data any, err error) {
 	if data, err = dP.cache.FieldAsInterface(fldPath); err != nil {
 		if err != utils.ErrNotFound { // item found in cache
 			return nil, err

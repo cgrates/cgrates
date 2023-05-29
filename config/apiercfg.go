@@ -76,7 +76,7 @@ func (aCfg *ApierCfg) loadFromJsonCfg(jsnCfg *ApierJsonCfg) (err error) {
 	return nil
 }
 
-func (aCfg *ApierCfg) AsMapInterface() map[string]interface{} {
+func (aCfg *ApierCfg) AsMapInterface() map[string]any {
 	cachesConns := make([]string, len(aCfg.CachesConns))
 	for i, item := range aCfg.CachesConns {
 		buf := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)
@@ -105,7 +105,7 @@ func (aCfg *ApierCfg) AsMapInterface() map[string]interface{} {
 		}
 	}
 
-	return map[string]interface{}{
+	return map[string]any{
 		utils.EnabledCfg:         aCfg.Enabled,
 		utils.CachesConnsCfg:     cachesConns,
 		utils.SchedulerConnsCfg:  schedulerConns,

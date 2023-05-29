@@ -35,7 +35,7 @@ type DataConverters []DataConverter
 
 // ConvertString converts from and to string
 func (dcs DataConverters) ConvertString(in string) (out string, err error) {
-	outIface := interface{}(in)
+	outIface := any(in)
 	for _, cnv := range dcs {
 		if outIface, err = cnv.Convert(outIface); err != nil {
 			return
@@ -46,7 +46,7 @@ func (dcs DataConverters) ConvertString(in string) (out string, err error) {
 
 // DataConverter represents functions which should convert input into output
 type DataConverter interface {
-	Convert(interface{}) (interface{}, error)
+	Convert(any) (any, error)
 }
 
 // NewDataConverter is a factory of converters
@@ -102,8 +102,8 @@ func NewDurationSecondsConverter(params string) (hdlr DataConverter, err error) 
 // DurationSecondsConverter converts duration into seconds encapsulated in float64
 type DurationSecondsConverter struct{}
 
-func (mS *DurationSecondsConverter) Convert(in interface{}) (
-	out interface{}, err error) {
+func (mS *DurationSecondsConverter) Convert(in any) (
+	out any, err error) {
 	var inDur time.Duration
 	if inDur, err = IfaceAsDuration(in); err != nil {
 		return nil, err
@@ -120,8 +120,8 @@ func NewDurationNanosecondsConverter(params string) (
 // DurationNanosecondsConverter converts duration into nanoseconds encapsulated in int64
 type DurationNanosecondsConverter struct{}
 
-func (mS *DurationNanosecondsConverter) Convert(in interface{}) (
-	out interface{}, err error) {
+func (mS *DurationNanosecondsConverter) Convert(in any) (
+	out any, err error) {
 	var inDur time.Duration
 	if inDur, err = IfaceAsDuration(in); err != nil {
 		return nil, err
@@ -164,7 +164,7 @@ type RoundConverter struct {
 	Method   string
 }
 
-func (rnd *RoundConverter) Convert(in interface{}) (out interface{}, err error) {
+func (rnd *RoundConverter) Convert(in any) (out any, err error) {
 	var inFloat float64
 	if inFloat, err = IfaceAsFloat64(in); err != nil {
 		return
@@ -190,7 +190,7 @@ type MultiplyConverter struct {
 	Value float64
 }
 
-func (m *MultiplyConverter) Convert(in interface{}) (out interface{}, err error) {
+func (m *MultiplyConverter) Convert(in any) (out any, err error) {
 	var inFloat64 float64
 	if inFloat64, err = IfaceAsFloat64(in); err != nil {
 		return nil, err
@@ -216,7 +216,7 @@ type DivideConverter struct {
 	Value float64
 }
 
-func (m *DivideConverter) Convert(in interface{}) (out interface{}, err error) {
+func (m *DivideConverter) Convert(in any) (out any, err error) {
 	var inFloat64 float64
 	if inFloat64, err = IfaceAsFloat64(in); err != nil {
 		return nil, err
@@ -232,8 +232,8 @@ func NewDurationConverter(params string) (hdlr DataConverter, err error) {
 // DurationConverter converts duration into seconds encapsulated in float64
 type DurationConverter struct{}
 
-func (mS *DurationConverter) Convert(in interface{}) (
-	out interface{}, err error) {
+func (mS *DurationConverter) Convert(in any) (
+	out any, err error) {
 	return IfaceAsDuration(in)
 }
 
@@ -272,7 +272,7 @@ type PhoneNumberConverter struct {
 	Format      phonenumbers.PhoneNumberFormat
 }
 
-func (lc *PhoneNumberConverter) Convert(in interface{}) (out interface{}, err error) {
+func (lc *PhoneNumberConverter) Convert(in any) (out any, err error) {
 	num, err := phonenumbers.Parse(IfaceAsString(in), lc.CountryCode)
 	if err != nil {
 		return nil, err
@@ -283,7 +283,7 @@ func (lc *PhoneNumberConverter) Convert(in interface{}) (out interface{}, err er
 // HexConvertor will round floats
 type IP2HexConverter struct{}
 
-func (*IP2HexConverter) Convert(in interface{}) (out interface{}, err error) {
+func (*IP2HexConverter) Convert(in any) (out any, err error) {
 	var ip net.IP
 	switch val := in.(type) {
 	case string:
@@ -306,7 +306,7 @@ func (*IP2HexConverter) Convert(in interface{}) (out interface{}, err error) {
 type String2HexConverter struct{}
 
 // Convert implements DataConverter interface
-func (*String2HexConverter) Convert(in interface{}) (o interface{}, err error) {
+func (*String2HexConverter) Convert(in any) (o any, err error) {
 	var out string
 	if out = hex.EncodeToString([]byte(IfaceAsString(in))); len(out) == 0 {
 		o = out

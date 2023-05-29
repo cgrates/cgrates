@@ -193,7 +193,7 @@ func testRerateCDRsSetBalance(t *testing.T) {
 		Account:     "1001",
 		Value:       float64(time.Minute),
 		BalanceType: utils.VOICE,
-		Balance: map[string]interface{}{
+		Balance: map[string]any{
 			utils.ID: "1001",
 		},
 	}
@@ -236,7 +236,7 @@ func testRerateCDRsProcessEventCDR1(t *testing.T) {
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "event1",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.RunID:       "run_1",
 				utils.CGRID:       rrCdrsUUID,
 				utils.Tenant:      "cgrates.org",
@@ -315,7 +315,7 @@ func testRerateCDRsProcessEventCDR2(t *testing.T) {
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "event2",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.RunID:       "run_2",
 				utils.CGRID:       rrCdrsUUID,
 				utils.Tenant:      "cgrates.org",

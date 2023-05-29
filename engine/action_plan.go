@@ -37,7 +37,7 @@ type ActionTiming struct {
 	Uuid         string
 	Timing       *RateInterval
 	ActionsID    string
-	ExtraData    interface{}
+	ExtraData    any
 	Weight       float64
 	actions      Actions
 	accountIDs   utils.StringMap // copy of action plans accounts
@@ -81,7 +81,7 @@ func (apl *ActionPlan) RemoveAccountID(accID string) (found bool) {
 }
 
 // Clone clones *ActionPlan
-func (apl *ActionPlan) Clone() (interface{}, error) {
+func (apl *ActionPlan) Clone() (any, error) {
 	if apl == nil {
 		return nil, nil
 	}
@@ -336,7 +336,7 @@ func (at *ActionTiming) Execute(successActions, failedActions chan *Action) (err
 	}
 	var partialyExecuted bool
 	for accID := range at.accountIDs {
-		_, err = guardian.Guardian.Guard(func() (interface{}, error) {
+		_, err = guardian.Guardian.Guard(func() (any, error) {
 			acc, err := dm.GetAccount(accID)
 			if err != nil {
 				utils.Logger.Warning(fmt.Sprintf("Could not get account id: %s. Skipping!", accID))

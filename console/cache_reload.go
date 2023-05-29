@@ -47,7 +47,7 @@ func (self *CmdReloadCache) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdReloadCache) RpcParams(reset bool) interface{} {
+func (self *CmdReloadCache) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &utils.AttrReloadCacheWithArgDispatcher{}
 	}
@@ -58,7 +58,7 @@ func (self *CmdReloadCache) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdReloadCache) RpcResult() interface{} {
+func (self *CmdReloadCache) RpcResult() any {
 	var s string
 	return &s
 }

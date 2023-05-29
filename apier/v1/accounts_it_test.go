@@ -181,7 +181,7 @@ func testAccITAddVoiceBalance(t *testing.T) {
 		Account:     accAcount,
 		BalanceType: utils.VOICE,
 		Value:       2 * float64(time.Second),
-		Balance: map[string]interface{}{
+		Balance: map[string]any{
 			utils.ID:            accBallID,
 			utils.RatingSubject: "*zero5ms",
 			utils.ExpiryTime:    time.Now().Add(5 * time.Second).Format("2006-01-02 15:04:05"),
@@ -224,7 +224,7 @@ func testAccITSetBalanceTimingIds(t *testing.T) {
 		Tenant:      accTenant,
 		Account:     accAcount,
 		BalanceType: utils.VOICE,
-		Balance: map[string]interface{}{
+		Balance: map[string]any{
 			utils.ID:        "testBalanceID",
 			utils.TimingIDs: "Timing",
 		},
@@ -330,7 +330,7 @@ func testAccITsetBalanceWithUUid(t *testing.T) {
 		Account:     "test",
 		BalanceType: "*sms",
 		Value:       1,
-		Balance:     map[string]interface{}{"UUID": "37b54e1a-e1e6-4df6-a9a5-d97b4552f2f6"},
+		Balance:     map[string]any{"UUID": "37b54e1a-e1e6-4df6-a9a5-d97b4552f2f6"},
 	}
 	if err := accRPC.Call(utils.APIerSv1SetBalance, attrs, &reply); err == nil || err.Error() != "PARTIALLY_EXECUTED" {
 		t.Error("Got error on APIerSv1.SetBalance: ", err.Error())
@@ -341,7 +341,7 @@ func testAccITsetBalanceWithUUid(t *testing.T) {
 		Account:     "test",
 		BalanceType: "*sms",
 		Value:       1,
-		Balance: map[string]interface{}{
+		Balance: map[string]any{
 			utils.Weight: 20,
 			utils.ID:     "balance1",
 		},
@@ -368,7 +368,7 @@ func testAccITsetBalanceWithUUid(t *testing.T) {
 		Account:     "test",
 		BalanceType: "*sms",
 		Value:       4,
-		Balance: map[string]interface{}{
+		Balance: map[string]any{
 			utils.UUID: balUuid,
 		},
 	}
@@ -388,7 +388,7 @@ func testAccITSetBalance(t *testing.T) {
 		Account:     "testAccSetBalance",
 		BalanceType: "*monetary",
 		Value:       1.5,
-		Balance: map[string]interface{}{
+		Balance: map[string]any{
 			utils.ID: "testAccSetBalance",
 		},
 		Cdrlog: true,
@@ -410,7 +410,7 @@ func testAccITSetBalance(t *testing.T) {
 }
 
 func testAccITSetBalanceWithExtraData(t *testing.T) {
-	extraDataMap := map[string]interface{}{
+	extraDataMap := map[string]any{
 		"ExtraField":  "ExtraValue",
 		"ExtraField2": "RandomValue",
 	}
@@ -420,7 +420,7 @@ func testAccITSetBalanceWithExtraData(t *testing.T) {
 		Account:     "testAccITSetBalanceWithExtraData",
 		BalanceType: utils.MONETARY,
 		Value:       1.5,
-		Balance: map[string]interface{}{
+		Balance: map[string]any{
 			utils.ID: "testAccITSetBalanceWithExtraData",
 		},
 		Cdrlog:          true,
@@ -445,7 +445,7 @@ func testAccITSetBalanceWithExtraData(t *testing.T) {
 }
 
 func testAccITSetBalanceWithExtraData2(t *testing.T) {
-	extraDataMap := map[string]interface{}{
+	extraDataMap := map[string]any{
 		"ExtraField": "ExtraValue",
 		"ActionVal":  "~ActionValue",
 	}
@@ -455,7 +455,7 @@ func testAccITSetBalanceWithExtraData2(t *testing.T) {
 		Account:     "testAccITSetBalanceWithExtraData2",
 		BalanceType: utils.MONETARY,
 		Value:       1.5,
-		Balance: map[string]interface{}{
+		Balance: map[string]any{
 			utils.ID: "testAccITSetBalanceWithExtraData2",
 		},
 		Cdrlog:          true,
@@ -600,7 +600,7 @@ func testAccITSetBalanceWithVaslue0(t *testing.T) {
 		Tenant:      "cgrates.org",
 		Account:     "testAccSetBalance",
 		BalanceType: "*monetary",
-		Balance: map[string]interface{}{
+		Balance: map[string]any{
 			utils.ID:     "testAccSetBalance",
 			utils.Weight: 10,
 		},
@@ -640,7 +640,7 @@ func testAccITSetBalanceWithVaslueInMap(t *testing.T) {
 		Tenant:      "cgrates.org",
 		Account:     "testAccSetBalance",
 		BalanceType: "*monetary",
-		Balance: map[string]interface{}{
+		Balance: map[string]any{
 			utils.ID:     "testAccSetBalance",
 			utils.Weight: 10,
 			utils.Value:  2,
@@ -714,7 +714,7 @@ func testAccITAddBalanceWithValueInMap(t *testing.T) {
 		Tenant:      "cgrates.org",
 		Account:     "testAccAddBalance",
 		BalanceType: utils.MONETARY,
-		Balance: map[string]interface{}{
+		Balance: map[string]any{
 			utils.Value: 1.5,
 		},
 	}

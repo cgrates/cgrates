@@ -49,7 +49,7 @@ func (self *CmdGetActions) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdGetActions) RpcParams(reset bool) interface{} {
+func (self *CmdGetActions) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &v2.AttrGetActions{}
 	}
@@ -60,7 +60,7 @@ func (self *CmdGetActions) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdGetActions) RpcResult() interface{} {
+func (self *CmdGetActions) RpcResult() any {
 	a := make(map[string]engine.Actions, 0)
 	return &a
 }

@@ -49,14 +49,14 @@ func (self *CmdParse) RpcMethod() string {
 	return ""
 }
 
-func (self *CmdParse) RpcParams(reset bool) interface{} {
+func (self *CmdParse) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &AttrParse{}
 	}
 	return self.rpcParams
 }
 
-func (self *CmdParse) RpcResult() interface{} {
+func (self *CmdParse) RpcResult() any {
 	return nil
 }
 

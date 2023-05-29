@@ -45,7 +45,7 @@ func (self *CmdReloadScheduler) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdReloadScheduler) RpcParams(reset bool) interface{} {
+func (self *CmdReloadScheduler) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &utils.CGREventWithArgDispatcher{}
 	}
@@ -56,7 +56,7 @@ func (self *CmdReloadScheduler) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdReloadScheduler) RpcResult() interface{} {
+func (self *CmdReloadScheduler) RpcResult() any {
 	var s string
 	return &s
 }

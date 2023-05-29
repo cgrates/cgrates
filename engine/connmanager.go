@@ -135,7 +135,7 @@ func (cM *ConnManager) getConn(connID string, biRPCClient birpc.ClientConnector)
 
 // Call gets the connection calls the method on it
 func (cM *ConnManager) Call(connIDs []string, biRPCClient birpc.ClientConnector,
-	method string, arg, reply interface{}) (err error) {
+	method string, arg, reply any) (err error) {
 	if len(connIDs) == 0 {
 		return utils.NewErrMandatoryIeMissing("connIDs")
 	}
@@ -159,7 +159,7 @@ func (cM *ConnManager) Reload() {
 	cM.connCache.Clear()
 }
 
-func (cM *ConnManager) CallWithConnIDs(connIDs []string, subsHostIDs utils.StringSet, method string, arg, reply interface{}) (err error) {
+func (cM *ConnManager) CallWithConnIDs(connIDs []string, subsHostIDs utils.StringSet, method string, arg, reply any) (err error) {
 	if len(connIDs) == 0 {
 		return utils.NewErrMandatoryIeMissing("connIDs")
 	}

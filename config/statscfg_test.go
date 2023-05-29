@@ -85,7 +85,7 @@ func TestStatSCfgAsMapInterface(t *testing.T) {
 			"nested_fields": false,	
 		},	
 		}`
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		"enabled":                  false,
 		"store_interval":           "",
 		"store_uncompressed_limit": 0,
@@ -116,7 +116,7 @@ func TestStatSCfgAsMapInterface(t *testing.T) {
 			"nested_fields": false,	
 		},	
 		}`
-	eMap = map[string]interface{}{
+	eMap = map[string]any{
 		"enabled":                  false,
 		"store_interval":           "72h0m0s",
 		"store_uncompressed_limit": 0,

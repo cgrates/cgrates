@@ -35,7 +35,7 @@ type ConfigSv1 struct {
 }
 
 // GetJSONSection will retrieve from CGRConfig a section
-func (cSv1 *ConfigSv1) GetJSONSection(section *config.StringWithArgDispatcher, reply *map[string]interface{}) (err error) {
+func (cSv1 *ConfigSv1) GetJSONSection(section *config.StringWithArgDispatcher, reply *map[string]any) (err error) {
 	return cSv1.cfg.V1GetConfigSection(section, reply)
 }
 
@@ -51,6 +51,6 @@ func (cSv1 *ConfigSv1) ReloadConfigFromJSON(args *config.JSONReloadWithArgDispat
 
 // Call implements birpc.ClientConnector interface for internal RPC
 func (cSv1 *ConfigSv1) Call(ctx *context.Context, serviceMethod string,
-	args interface{}, reply interface{}) error {
+	args any, reply any) error {
 	return utils.APIerRPCCall(cSv1, serviceMethod, args, reply)
 }

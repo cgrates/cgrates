@@ -136,7 +136,7 @@ func testDspResTestAuthKey(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     utils.UUIDSha1Prefix(),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Account:     "1001",
 				utils.Destination: "1002",
 			},
@@ -159,7 +159,7 @@ func testDspResTestAuthKey2(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     utils.UUIDSha1Prefix(),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Account:     "1001",
 				utils.Destination: "1002",
 			},
@@ -193,7 +193,7 @@ func testDspResTestAuthKey3(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     utils.UUIDSha1Prefix(),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"Account":     "1002",
 				"Subject":     "1001",
 				"Destination": "1002"},
@@ -222,7 +222,7 @@ func testDspResTestAuthKey3(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     utils.UUIDSha1Prefix(),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"Account":     "1002",
 				"Subject":     "1001",
 				"Destination": "1002"},
@@ -243,7 +243,7 @@ func testDspResTestAuthKey3(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     utils.UUIDSha1Prefix(),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"Account":     "1002",
 				"Subject":     "1001",
 				"Destination": "1002"},
@@ -263,7 +263,7 @@ func testDspResTestAuthKey3(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     utils.UUIDSha1Prefix(),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"Account":     "1002",
 				"Subject":     "1001",
 				"Destination": "1002"},
@@ -283,7 +283,7 @@ func testDspResTestAuthKey3(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "Event5",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"Account":     "1002",
 				"Subject":     "1001",
 				"Destination": "1002"},

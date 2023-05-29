@@ -33,7 +33,7 @@ const (
 // DataProvider is a data source from multiple formats
 type DataProvider interface {
 	String() string // printable version of data
-	FieldAsInterface(fldPath []string) (interface{}, error)
+	FieldAsInterface(fldPath []string) (any, error)
 	FieldAsString(fldPath []string) (string, error) // remove this
 	RemoteHost() net.Addr
 }
@@ -44,7 +44,7 @@ type NavigableMapper interface {
 }
 
 // DPDynamicInterface returns the value of the field if the path is dynamic
-func DPDynamicInterface(dnVal string, dP DataProvider) (interface{}, error) {
+func DPDynamicInterface(dnVal string, dP DataProvider) (any, error) {
 	if strings.HasPrefix(dnVal, DynamicDataPrefix) {
 		dnVal = strings.TrimPrefix(dnVal, DynamicDataPrefix)
 		return dP.FieldAsInterface(strings.Split(dnVal, NestingSep))
@@ -67,7 +67,7 @@ type NMType byte
 // NMInterface the basic interface
 type NMInterface interface {
 	String() string
-	Interface() interface{}
+	Interface() any
 	Field(path PathItems) (val NMInterface, err error)
 	Set(path PathItems, val NMInterface) (addedNew bool, err error)
 	Remove(path PathItems) (err error)

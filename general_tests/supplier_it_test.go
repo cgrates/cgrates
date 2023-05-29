@@ -164,7 +164,7 @@ func testV1SplSSetSupplierProfilesWithoutRatingPlanIDs(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testV1SplSGetLeastCostSuppliers",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Account:     "accc",
 				utils.Subject:     "1003",
 				utils.Destination: "1002",
@@ -344,7 +344,7 @@ func testV1SplSPopulateResUsage(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "Event1",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"Account":  "1002",
 				"Supplier": "supplier1",
 				"ResID":    "ResourceSupplier1",
@@ -367,7 +367,7 @@ func testV1SplSPopulateResUsage(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "Event2",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"Account":  "1002",
 				"Supplier": "supplier1",
 				"ResID":    "Resource2Supplier1",
@@ -389,7 +389,7 @@ func testV1SplSPopulateResUsage(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "Event3",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"Account":  "1002",
 				"Supplier": "supplier2",
 				"ResID":    "ResourceSupplier2",
@@ -411,7 +411,7 @@ func testV1SplSPopulateResUsage(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "Event4",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"Account":  "1002",
 				"Supplier": "supplier3",
 				"ResID":    "ResourceSupplier3",
@@ -435,7 +435,7 @@ func testV1SplSGetSortedSuppliers(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testV1SplSGetSortedSuppliers",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"CustomField": "ResourceTest",
 			},
 		},
@@ -519,7 +519,7 @@ func testV1SplSGetSortedSuppliers2(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testV1SplSGetSortedSuppliers2",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"CustomField": "ResourceDescendent",
 			},
 		},

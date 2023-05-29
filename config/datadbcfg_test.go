@@ -417,7 +417,7 @@ func TestDataDbCfgAsMapInterface(t *testing.T) {
 		},
 	},		
 }`
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		"db_type":              "*redis",
 		"db_host":              "127.0.0.1",
 		"db_port":              6379,
@@ -429,9 +429,9 @@ func TestDataDbCfgAsMapInterface(t *testing.T) {
 		"remote_conns":         []string{},
 		"replication_conns":    []string{},
 		"replication_filtered": false,
-		"items": map[string]interface{}{
-			"*accounts":             map[string]interface{}{"remote": true, "replicate": false, "limit": -1, "ttl": "", "static_ttl": false},
-			"*reverse_destinations": map[string]interface{}{"remote": false, "replicate": false, "limit": 7, "ttl": "", "static_ttl": true},
+		"items": map[string]any{
+			"*accounts":             map[string]any{"remote": true, "replicate": false, "limit": -1, "ttl": "", "static_ttl": false},
+			"*reverse_destinations": map[string]any{"remote": false, "replicate": false, "limit": 7, "ttl": "", "static_ttl": true},
 		},
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {

@@ -137,8 +137,8 @@ func (dbcfg *DataDbCfg) Clone() *DataDbCfg {
 	}
 }
 
-func (dbcfg *DataDbCfg) AsMapInterface() map[string]interface{} {
-	items := make(map[string]interface{})
+func (dbcfg *DataDbCfg) AsMapInterface() map[string]any {
+	items := make(map[string]any)
 	for key, item := range dbcfg.Items {
 		items[key] = item.AsMapInterface()
 	}
@@ -148,7 +148,7 @@ func (dbcfg *DataDbCfg) AsMapInterface() map[string]interface{} {
 	}
 	dbPort, _ := strconv.Atoi(dbcfg.DataDbPort)
 
-	return map[string]interface{}{
+	return map[string]any{
 		utils.DataDbTypeCfg:          dbcfg.DataDbType,
 		utils.DataDbHostCfg:          dbcfg.DataDbHost,
 		utils.DataDbPortCfg:          dbPort,
@@ -175,13 +175,13 @@ type ItemOpt struct {
 	APIKey  string
 }
 
-func (itm *ItemOpt) AsMapInterface() map[string]interface{} {
+func (itm *ItemOpt) AsMapInterface() map[string]any {
 	var ttl string = ""
 	if itm.TTL != 0 {
 		ttl = itm.TTL.String()
 	}
 
-	return map[string]interface{}{
+	return map[string]any{
 		utils.RemoteCfg:    itm.Remote,
 		utils.ReplicateCfg: itm.Replicate,
 		utils.LimitCfg:     itm.Limit,

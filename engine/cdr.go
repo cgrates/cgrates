@@ -232,8 +232,8 @@ func (cdr *CDR) AsMapStorage() (mp utils.MapStorage) {
 	return
 }
 
-func (cdr *CDR) AsMapStringIface() (mp map[string]interface{}) {
-	mp = make(map[string]interface{})
+func (cdr *CDR) AsMapStringIface() (mp map[string]any) {
+	mp = make(map[string]any)
 	for fld, val := range cdr.ExtraFields {
 		mp[fld] = val
 	}

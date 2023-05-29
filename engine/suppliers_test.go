@@ -135,7 +135,7 @@ var (
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "utils.CGREvent1",
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					"Supplier":       "SupplierProfile1",
 					utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 					"UsageInterval":  "1s",
@@ -148,7 +148,7 @@ var (
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "utils.CGREvent1",
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					"Supplier":       "SupplierProfile2",
 					utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 					"UsageInterval":  "1s",
@@ -161,7 +161,7 @@ var (
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "utils.CGREvent1",
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					"Supplier": "SupplierProfilePrefix",
 				},
 			},
@@ -170,7 +170,7 @@ var (
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "CGR",
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					"UsageInterval": "1s",
 					"PddInterval":   "1s",
 				},
@@ -413,7 +413,7 @@ func TestSuppliersSortedForEvent(t *testing.T) {
 		SortedSuppliers: []*SortedSupplier{
 			{
 				SupplierID: "supplier1",
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					"Weight": 10.0,
 				},
 				SupplierParameters: "param1",
@@ -435,21 +435,21 @@ func TestSuppliersSortedForEvent(t *testing.T) {
 		SortedSuppliers: []*SortedSupplier{
 			{
 				SupplierID: "supplier1",
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					"Weight": 30.0,
 				},
 				SupplierParameters: "param1",
 			},
 			{
 				SupplierID: "supplier2",
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					"Weight": 20.0,
 				},
 				SupplierParameters: "param2",
 			},
 			{
 				SupplierID: "supplier3",
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					"Weight": 10.0,
 				},
 				SupplierParameters: "param3",
@@ -472,7 +472,7 @@ func TestSuppliersSortedForEvent(t *testing.T) {
 		SortedSuppliers: []*SortedSupplier{
 			{
 				SupplierID: "supplier1",
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					"Weight": 10.0,
 				},
 				SupplierParameters: "param1",
@@ -497,14 +497,14 @@ func TestSuppliersSortedForEventWithLimit(t *testing.T) {
 		SortedSuppliers: []*SortedSupplier{
 			{
 				SupplierID: "supplier1",
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					"Weight": 30.0,
 				},
 				SupplierParameters: "param1",
 			},
 			{
 				SupplierID: "supplier2",
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					"Weight": 20.0,
 				},
 				SupplierParameters: "param2",
@@ -531,7 +531,7 @@ func TestSuppliersSortedForEventWithOffset(t *testing.T) {
 		SortedSuppliers: []*SortedSupplier{
 			{
 				SupplierID: "supplier3",
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					"Weight": 10.0,
 				},
 				SupplierParameters: "param3",
@@ -558,7 +558,7 @@ func TestSuppliersSortedForEventWithLimitAndOffset(t *testing.T) {
 		SortedSuppliers: []*SortedSupplier{
 			{
 				SupplierID: "supplier2",
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					"Weight": 20.0,
 				},
 				SupplierParameters: "param2",
@@ -656,10 +656,10 @@ func TestSuppliersMatchWithIndexFalse(t *testing.T) {
 }
 
 type ccMock struct {
-	calls map[string]func(ctx *context.Context, args interface{}, reply interface{}) error
+	calls map[string]func(ctx *context.Context, args any, reply any) error
 }
 
-func (ccM *ccMock) Call(ctx *context.Context, serviceMethod string, args interface{}, reply interface{}) (err error) {
+func (ccM *ccMock) Call(ctx *context.Context, serviceMethod string, args any, reply any) (err error) {
 	if call, has := ccM.calls[serviceMethod]; !has {
 		return rpcclient.ErrUnsupporteServiceMethod
 	} else {
@@ -678,19 +678,19 @@ func TestSuppliersV1GetSuppliers(t *testing.T) {
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.ResponderGetMaxSessionTimeOnAccounts: func(ctx *context.Context, args, reply interface{}) error {
-				rpl := map[string]interface{}{
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ResponderGetMaxSessionTimeOnAccounts: func(ctx *context.Context, args, reply any) error {
+				rpl := map[string]any{
 					"Cost": 10,
 				}
-				*reply.(*map[string]interface{}) = rpl
+				*reply.(*map[string]any) = rpl
 				return nil
 			},
-			utils.ResponderGetCostOnRatingPlans: func(ctx *context.Context, args, reply interface{}) error {
-				rpl := map[string]interface{}{
+			utils.ResponderGetCostOnRatingPlans: func(ctx *context.Context, args, reply any) error {
+				rpl := map[string]any{
 					utils.CapMaxUsage: 1000000000,
 				}
-				*reply.(*map[string]interface{}) = rpl
+				*reply.(*map[string]any) = rpl
 				return nil
 
 			},
@@ -708,7 +708,7 @@ func TestSuppliersV1GetSuppliers(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     utils.UUIDSha1Prefix(),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.EVENT_NAME:  "Event1",
 				utils.Account:     "1001",
 				utils.Subject:     "1001",
@@ -783,7 +783,7 @@ func TestSuppliersV1GetSuppliers(t *testing.T) {
 		SortedSuppliers: []*SortedSupplier{
 			{
 				SupplierID: "Sup",
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					"MaxUsage":      1 * time.Second,
 					"ResourceUsage": 0,
 					"Weight":        10,
@@ -814,7 +814,7 @@ func TestSupplierServiceGetSPForEvent(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testV1SplSGetHighestCostSuppliers",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Account:     "1001",
 				utils.Subject:     "1001",
 				utils.Destination: "1002",
@@ -875,8 +875,8 @@ func TestV1GetSuppliersWithAttributeS(t *testing.T) {
 	cfg.SupplierSCfg().AttributeSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}
 	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.AttributeSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.AttributeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
 				return utils.ErrNotFound
 			},
 		},
@@ -892,7 +892,7 @@ func TestV1GetSuppliersWithAttributeS(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     utils.UUIDSha1Prefix(),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.EVENT_NAME:  "Event1",
 				utils.Account:     "1002",
 				utils.Subject:     "1002",
@@ -952,7 +952,7 @@ func TestSupplierServicePopulateSortingData(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "utils.CGREvent1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Supplier":       "SupplierProfile2",
 			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 			"UsageInterval":  "1s",
@@ -987,7 +987,7 @@ func TestArgsSuppAsOptsGetSupplier(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "CostSuppliers",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Account:     "1003",
 				utils.Subject:     "1001",
 				utils.Destination: "1002",

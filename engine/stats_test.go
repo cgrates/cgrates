@@ -106,7 +106,7 @@ var (
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "event1",
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					"Stats":          "StatQueueProfile1",
 					utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 					"UsageInterval":  "1s",
@@ -121,7 +121,7 @@ var (
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "event2",
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					"Stats":          "StatQueueProfile2",
 					utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 					"UsageInterval":  "1s",
@@ -135,7 +135,7 @@ var (
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "event3",
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					"Stats":     "StatQueueProfilePrefix",
 					utils.Usage: time.Duration(30 * time.Second),
 				},
@@ -515,7 +515,7 @@ func TestStatsGetStatQueuesForEvent(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     utils.GenUUID(),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"Stat":           "Stat1_1",
 				utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 				utils.Usage:      time.Duration(11 * time.Second),
@@ -675,7 +675,7 @@ func TestStatProcessEvent2(t *testing.T) {
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 	clientConn := make(chan birpc.ClientConnector, 1)
-	clientConn <- clMock(func(ctx *context.Context, serviceMethod string, _, _ interface{}) error {
+	clientConn <- clMock(func(ctx *context.Context, serviceMethod string, _, _ any) error {
 		if serviceMethod == utils.ThresholdSv1ProcessEvent {
 
 			return nil
@@ -694,7 +694,7 @@ func TestStatProcessEvent2(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "event1",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Account:    "1001",
 				utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 				utils.Usage:      time.Duration(135 * time.Second),

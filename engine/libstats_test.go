@@ -226,7 +226,7 @@ func TestStatAddStatEvent(t *testing.T) {
 	} else if asrMetric.Answered != 1 || asrMetric.Count != 2 {
 		t.Errorf("ASR: %v", asrMetric)
 	}
-	ev1.Event = map[string]interface{}{
+	ev1.Event = map[string]any{
 		utils.AnswerTime: time.Now()}
 	sq.addStatEvent(ev1, nil)
 	if asr := asrMetric.GetFloat64Value(); asr != 66.66667 {

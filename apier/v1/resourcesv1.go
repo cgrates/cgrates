@@ -36,7 +36,7 @@ type ResourceSv1 struct {
 }
 
 // Call implements birpc.ClientConnector interface for internal RPC
-func (rsv1 *ResourceSv1) Call(ctx *context.Context, serviceMethod string, args interface{}, reply interface{}) error {
+func (rsv1 *ResourceSv1) Call(ctx *context.Context, serviceMethod string, args any, reply any) error {
 	return utils.APIerRPCCall(rsv1, serviceMethod, args, reply)
 }
 

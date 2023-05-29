@@ -73,7 +73,7 @@ func NewStatMetric(metricID string, minItems int, filterIDs []string) (sm StatMe
 
 // StatMetric is the interface which a metric should implement
 type StatMetric interface {
-	GetValue() interface{}
+	GetValue() any
 	GetStringValue(fmtOpts string) (val string)
 	GetFloat64Value() (val float64)
 	AddEvent(ev *utils.CGREvent) error
@@ -114,7 +114,7 @@ func (asr *StatASR) getValue() float64 {
 }
 
 // GetValue returns the ASR value as part of StatMetric interface
-func (asr *StatASR) GetValue() (v interface{}) {
+func (asr *StatASR) GetValue() (v any) {
 	return asr.getValue()
 }
 
@@ -258,7 +258,7 @@ func (acd *StatACD) GetStringValue(fmtOpts string) (valStr string) {
 	return
 }
 
-func (acd *StatACD) GetValue() (v interface{}) {
+func (acd *StatACD) GetValue() (v any) {
 	return acd.getValue()
 }
 
@@ -385,7 +385,7 @@ func (tcd *StatTCD) GetStringValue(fmtOpts string) (valStr string) {
 	return
 }
 
-func (tcd *StatTCD) GetValue() (v interface{}) {
+func (tcd *StatTCD) GetValue() (v any) {
 	return tcd.getValue()
 }
 
@@ -515,7 +515,7 @@ func (acc *StatACC) GetStringValue(fmtOpts string) (valStr string) {
 
 }
 
-func (acc *StatACC) GetValue() (v interface{}) {
+func (acc *StatACC) GetValue() (v any) {
 	return acc.getValue()
 }
 
@@ -639,7 +639,7 @@ func (tcc *StatTCC) GetStringValue(fmtOpts string) (valStr string) {
 	return
 }
 
-func (tcc *StatTCC) GetValue() (v interface{}) {
+func (tcc *StatTCC) GetValue() (v any) {
 	return tcc.getValue()
 }
 
@@ -763,7 +763,7 @@ func (pdd *StatPDD) GetStringValue(fmtOpts string) (valStr string) {
 	return
 }
 
-func (pdd *StatPDD) GetValue() (v interface{}) {
+func (pdd *StatPDD) GetValue() (v any) {
 	return pdd.getValue()
 }
 
@@ -885,7 +885,7 @@ func (ddc *StatDDC) GetStringValue(fmtOpts string) (valStr string) {
 	return
 }
 
-func (ddc *StatDDC) GetValue() (v interface{}) {
+func (ddc *StatDDC) GetValue() (v any) {
 	return ddc.getValue()
 }
 
@@ -1027,7 +1027,7 @@ func (sum *StatSum) GetStringValue(fmtOpts string) (valStr string) {
 	return
 }
 
-func (sum *StatSum) GetValue() (v interface{}) {
+func (sum *StatSum) GetValue() (v any) {
 	return sum.getValue()
 }
 
@@ -1165,7 +1165,7 @@ func (avg *StatAverage) GetStringValue(fmtOpts string) (valStr string) {
 
 }
 
-func (avg *StatAverage) GetValue() (v interface{}) {
+func (avg *StatAverage) GetValue() (v any) {
 	return avg.getValue()
 }
 
@@ -1295,7 +1295,7 @@ func (dst *StatDistinct) GetStringValue(fmtOpts string) (valStr string) {
 	return
 }
 
-func (dst *StatDistinct) GetValue() (v interface{}) {
+func (dst *StatDistinct) GetValue() (v any) {
 	return dst.getValue()
 }
 

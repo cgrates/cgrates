@@ -138,7 +138,7 @@ func TestAgReqSetFields(t *testing.T) {
 }
 
 func TestAgentRequestSetFields(t *testing.T) {
-	req := map[string]interface{}{
+	req := map[string]any{
 		utils.Account: 1009,
 		utils.Tenant:  "cgrates.org",
 	}
@@ -962,7 +962,7 @@ func TestAgReqFieldAsInterface(t *testing.T) {
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.Destination, PathItems: utils.PathItems{{Field: utils.Destination}}}, utils.NewNMData("1002"))
 
 	path := []string{utils.MetaCgreq, utils.Usage}
-	var expVal interface{}
+	var expVal any
 	expVal = 3 * time.Minute
 	if rply, err := agReq.FieldAsInterface(path); err != nil {
 		t.Error(err)

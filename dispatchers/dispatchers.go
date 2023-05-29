@@ -88,7 +88,7 @@ func (dS *DispatcherService) authorize(method, tenant string, apiKey *string, ev
 		Tenant: tenant,
 		ID:     utils.UUIDSha1Prefix(),
 		Time:   evTime,
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.APIKey: *apiKey,
 		},
 	}
@@ -170,7 +170,7 @@ func (dS *DispatcherService) dispatcherProfileForEvent(ev *utils.CGREvent,
 
 // Dispatch is the method forwarding the request towards the right connection
 func (dS *DispatcherService) Dispatch(ev *utils.CGREvent, subsys string, routeID *string,
-	serviceMethod string, args interface{}, reply interface{}) (err error) {
+	serviceMethod string, args any, reply any) (err error) {
 	dPrfl, errDsp := dS.dispatcherProfileForEvent(ev, subsys)
 	if errDsp != nil {
 		return utils.NewErrDispatcherS(errDsp)
@@ -200,9 +200,9 @@ func (dS *DispatcherService) V1GetProfileForEvent(ev *DispatcherEvent,
 }
 
 // V1Apier is a generic way to cover all APIer methods
-func (dS *DispatcherService) V1Apier(apier interface{}, args *utils.MethodParameters, reply *interface{}) (err error) {
+func (dS *DispatcherService) V1Apier(apier any, args *utils.MethodParameters, reply *any) (err error) {
 
-	parameters, canCast := args.Parameters.(map[string]interface{})
+	parameters, canCast := args.Parameters.(map[string]any)
 	if !canCast {
 		return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 	}
@@ -255,7 +255,7 @@ func (dS *DispatcherService) V1Apier(apier interface{}, args *utils.MethodParame
 	// convert type of reply to the right one based on method
 	realReplyType := methodType.In(1)
 
-	var realReply interface{}
+	var realReply any
 	if realReplyType.Kind() == reflect.Ptr {
 		trply := reflect.New(realReplyType.Elem()).Elem().Interface()
 		realReply = &trply
@@ -270,7 +270,7 @@ func (dS *DispatcherService) V1Apier(apier interface{}, args *utils.MethodParame
 	// find the type for arg
 	realArgsType := methodType.In(0)
 	// create the arg with the right type for method
-	var realArgs interface{} = reflect.New(realArgsType).Interface()
+	var realArgs any = reflect.New(realArgsType).Interface()
 	// populate realArgs with data
 	if err := json.Unmarshal(argsByte, &realArgs); err != nil {
 		return err
@@ -294,7 +294,7 @@ func (dS *DispatcherService) V1Apier(apier interface{}, args *utils.MethodParame
 
 // Call implements birpc.ClientConnector interface for internal RPC
 func (dS *DispatcherService) Call(ctx *context.Context, serviceMethod string, // all API fuction must be of type: SubsystemMethod
-	args interface{}, reply interface{}) error {
+	args any, reply any) error {
 	methodSplit := strings.Split(serviceMethod, ".")
 	if len(methodSplit) != 2 {
 		return rpcclient.ErrUnsupporteServiceMethod

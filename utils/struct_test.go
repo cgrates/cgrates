@@ -50,7 +50,7 @@ func TestMissingStructFieldsNilCorporate(t *testing.T) {
 
 func TestMissingStructFieldsNilCorporateTwoStructs(t *testing.T) {
 	tst := &struct {
-		APIOpts map[string]interface{}
+		APIOpts map[string]any
 		*TenantID
 		*TenantArg
 	}{
@@ -73,7 +73,7 @@ func TestUpdateStructWithIfaceMap(t *testing.T) {
 		Int    int64
 	}
 	s := new(myStruct)
-	mp := map[string]interface{}{
+	mp := map[string]any{
 		"String": "s",
 		"Bool":   true,
 		"Float":  6.4,
@@ -90,7 +90,7 @@ func TestUpdateStructWithIfaceMap(t *testing.T) {
 	} else if !reflect.DeepEqual(eStruct, s) {
 		t.Errorf("expecting: %+v, received: %+v", eStruct, s)
 	}
-	mp = map[string]interface{}{
+	mp = map[string]any{
 		"String": "aaa",
 		"Bool":   false,
 	}
@@ -116,7 +116,7 @@ func TestNonemptyStructFields(t *testing.T) {
 		ActionTimingsId string
 	}{"bevoip.eu", true, "testaccount", META_PREPAID, ""}
 	mapStruct := NonemptyStructFields(&attr)
-	expMapStruct := map[string]interface{}{
+	expMapStruct := map[string]any{
 		"Tenant":    "bevoip.eu",
 		"Direction": true,
 		"Account":   "testaccount",
@@ -136,7 +136,7 @@ func TestToMapMapStringInterface(t *testing.T) {
 		Type      string
 	}{"bevoip.eu", true, "testaccount", META_PREPAID}
 	mapStruct := ToMapMapStringInterface(&attr)
-	expMapStruct := map[string]interface{}{
+	expMapStruct := map[string]any{
 		"Tenant":    "bevoip.eu",
 		"Direction": true,
 		"Account":   "testaccount",
@@ -148,7 +148,7 @@ func TestToMapMapStringInterface(t *testing.T) {
 }*/
 
 func TestMissingMapFields(t *testing.T) {
-	var attr = map[string]interface{}{
+	var attr = map[string]any{
 		Tenant:            "cgrates.org",
 		Account:           "1001",
 		"Type":            META_PREPAID,

@@ -234,7 +234,7 @@ type Rate struct {
 }
 
 // FieldAsInterface func to help EventCost FieldAsInterface
-func (r *Rate) FieldAsInterface(fldPath []string) (val interface{}, err error) {
+func (r *Rate) FieldAsInterface(fldPath []string) (val any, err error) {
 	if r == nil || len(fldPath) != 1 {
 		return nil, utils.ErrNotFound
 	}

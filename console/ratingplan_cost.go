@@ -49,7 +49,7 @@ func (self *CmdGetRatingPlanCost) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdGetRatingPlanCost) RpcParams(reset bool) interface{} {
+func (self *CmdGetRatingPlanCost) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = new(utils.RatingPlanCostArg)
 	}
@@ -60,7 +60,7 @@ func (self *CmdGetRatingPlanCost) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdGetRatingPlanCost) RpcResult() interface{} {
+func (self *CmdGetRatingPlanCost) RpcResult() any {
 	var s dispatchers.RatingPlanCost
 	return &s
 }

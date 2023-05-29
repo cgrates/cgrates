@@ -106,7 +106,7 @@ func (sS *StatService) storeStats() {
 			break // no more keys, backup completed
 		}
 		lkID := utils.StatQueuePrefix + sID
-		guardian.Guardian.Guard(func() (gRes interface{}, gErr error) {
+		guardian.Guardian.Guard(func() (gRes any, gErr error) {
 			if sqIf, ok := Cache.Get(utils.CacheStatQueues, sID); !ok || sqIf == nil {
 				utils.Logger.Warning(
 					fmt.Sprintf("<%s> failed retrieving from cache stat queue with ID: %s",
@@ -190,7 +190,7 @@ func (sS *StatService) matchingStatQueuesForEvent(args *StatsArgsProcessEvent) (
 		}
 		var sq *StatQueue
 		lkID := utils.StatQueuePrefix + utils.ConcatenatedKey(sqPrfl.Tenant, sqPrfl.ID)
-		guardian.Guardian.Guard(func() (gRes interface{}, gErr error) {
+		guardian.Guardian.Guard(func() (gRes any, gErr error) {
 			sq, err = sS.dm.GetStatQueue(sqPrfl.Tenant, sqPrfl.ID, true, true, "")
 			return
 		}, config.CgrConfig().GeneralCfg().LockingTimeout, lkID)
@@ -225,7 +225,7 @@ func (sS *StatService) matchingStatQueuesForEvent(args *StatsArgsProcessEvent) (
 
 // Call implements birpc.ClientConnector interface for internal RPC
 // here for cases when passing StatsService as rpccclient.RpcClientConnection
-func (ss *StatService) Call(ctx *context.Context, serviceMethod string, args interface{}, reply interface{}) error {
+func (ss *StatService) Call(ctx *context.Context, serviceMethod string, args any, reply any) error {
 	return utils.RPCCall(ss, serviceMethod, args, reply)
 }
 
@@ -250,7 +250,7 @@ func (sS *StatService) processEvent(args *StatsArgsProcessEvent) (statQueueIDs [
 	for _, sq := range matchSQs {
 		stsIDs = append(stsIDs, sq.ID)
 		lkID := utils.StatQueuePrefix + sq.TenantID()
-		guardian.Guardian.Guard(func() (gRes interface{}, gErr error) {
+		guardian.Guardian.Guard(func() (gRes any, gErr error) {
 			err = sq.ProcessEvent(args.CGREvent, sS.filterS)
 			return
 		}, config.CgrConfig().GeneralCfg().LockingTimeout, lkID)
@@ -284,7 +284,7 @@ func (sS *StatService) processEvent(args *StatsArgsProcessEvent) (statQueueIDs [
 				CGREvent: &utils.CGREvent{
 					Tenant: sq.Tenant,
 					ID:     utils.GenUUID(),
-					Event: map[string]interface{}{
+					Event: map[string]any{
 						utils.EventType: utils.StatUpdate,
 						utils.StatID:    sq.ID,
 					},

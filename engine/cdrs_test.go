@@ -30,9 +30,9 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-type clMock func(_ *context.Context, _ string, _ interface{}, _ interface{}) error
+type clMock func(_ *context.Context, _ string, _ any, _ any) error
 
-func (c clMock) Call(ctx *context.Context, m string, a interface{}, r interface{}) error {
+func (c clMock) Call(ctx *context.Context, m string, a any, r any) error {
 	return c(ctx, m, a, r)
 }
 
@@ -42,7 +42,7 @@ func TestCDRSV1ProcessCDRNoTenant(t *testing.T) {
 		t.Error(err)
 	}
 	cfg.CdrsCfg().AttributeSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}
-	clMock := clMock(func(_ *context.Context, _ string, args interface{}, reply interface{}) error {
+	clMock := clMock(func(_ *context.Context, _ string, args any, reply any) error {
 		rply, cancast := reply.(*AttrSProcessEventReply)
 		if !cancast {
 			return fmt.Errorf("can't cast")
@@ -59,7 +59,7 @@ func TestCDRSV1ProcessCDRNoTenant(t *testing.T) {
 			CGREvent: &utils.CGREvent{
 				ID:   "TestBiRPCv1AuthorizeEventNoTenant",
 				Time: utils.TimePointer(time.Date(2016, time.January, 5, 18, 30, 49, 0, time.UTC)),
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					"Account":     "1002",
 					"Category":    "call",
 					"Destination": "1003",
@@ -116,7 +116,7 @@ func TestCDRSV1ProcessEventNoTenant(t *testing.T) {
 		t.Error(err)
 	}
 	cfg.CdrsCfg().ChargerSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)}
-	clMock := clMock(func(_ *context.Context, _ string, args interface{}, reply interface{}) error {
+	clMock := clMock(func(_ *context.Context, _ string, args any, reply any) error {
 		rply, cancast := reply.(*[]*ChrgSProcessEventReply)
 		if !cancast {
 			return fmt.Errorf("can't cast")
@@ -148,7 +148,7 @@ func TestCDRSV1ProcessEventNoTenant(t *testing.T) {
 		Flags: []string{utils.MetaChargers},
 		CGREvent: utils.CGREvent{
 			ID: "TestV1ProcessEventNoTenant",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.CGRID:       "test1",
 				utils.RunID:       utils.MetaDefault,
 				utils.OriginID:    "testV1CDRsRefundOutOfSessionCost",
@@ -173,7 +173,7 @@ func TestCDRSV1V1ProcessExternalCDRNoTenant(t *testing.T) {
 		t.Error(err)
 	}
 	cfg.CdrsCfg().ChargerSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)}
-	clMock := clMock(func(_ *context.Context, _ string, args interface{}, reply interface{}) error {
+	clMock := clMock(func(_ *context.Context, _ string, args any, reply any) error {
 		rply, cancast := reply.(*[]*ChrgSProcessEventReply)
 		if !cancast {
 			return fmt.Errorf("can't cast")
@@ -456,7 +456,7 @@ func TestCDRSRateCDRSucces(t *testing.T) {
 	cfg.CdrsCfg().SMCostRetries = 0
 	cfg.CdrsCfg().RaterConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs)}
 	clientConn := make(chan birpc.ClientConnector, 1)
-	clientConn <- clMock(func(ctx *context.Context, serviceMethod string, _, reply interface{}) error {
+	clientConn <- clMock(func(ctx *context.Context, serviceMethod string, _, reply any) error {
 		if serviceMethod == utils.ResponderDebit {
 			rpl := CallCost{
 				Destination: "1002",
@@ -557,7 +557,7 @@ func TestCDRSThDSProcessEvent(t *testing.T) {
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 	clientConn := make(chan birpc.ClientConnector, 1)
-	clientConn <- clMock(func(ctx *context.Context, serviceMethod string, _, _ interface{}) error {
+	clientConn <- clMock(func(ctx *context.Context, serviceMethod string, _, _ any) error {
 		if serviceMethod == utils.ThresholdSv1ProcessEvent {
 			return nil
 		}
@@ -576,7 +576,7 @@ func TestCDRSThDSProcessEvent(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "CGREvent1",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Account:     "1002",
 				utils.Subject:     "1002",
 				utils.Destination: "1001",
@@ -614,7 +614,7 @@ func TestCRDSRefundEventCost(t *testing.T) {
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 	cfg.CdrsCfg().RaterConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs)}
 	clientConn := make(chan birpc.ClientConnector, 1)
-	clientConn <- clMock(func(ctx *context.Context, serviceMethod string, _, _ interface{}) error {
+	clientConn <- clMock(func(ctx *context.Context, serviceMethod string, _, _ any) error {
 
 		if serviceMethod == utils.ResponderRefundIncrements {
 
@@ -734,7 +734,7 @@ func TestCDRsV1ProcessEventAll(t *testing.T) {
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 	clientConn := make(chan birpc.ClientConnector, 1)
-	clientConn <- clMock(func(ctx *context.Context, serviceMeth string, _, _ interface{}) error {
+	clientConn <- clMock(func(ctx *context.Context, serviceMeth string, _, _ any) error {
 		if serviceMeth == utils.ThresholdSv1ProcessEvent {
 			return nil
 		}
@@ -757,7 +757,7 @@ func TestCDRsV1ProcessEventAll(t *testing.T) {
 		Flags: []string{utils.MetaThresholds, utils.MetaStatS},
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.RequestType: utils.META_POSTPAID,
 				utils.Category:    "call",
 				utils.Account:     "1001",
@@ -837,7 +837,7 @@ func TestRemoveThresholdProfileRpl(t *testing.T) {
 	cfg.DataDbCfg().Items[utils.MetaThresholdProfiles].Replicate = true
 	cfg.DataDbCfg().RplConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1)}
 	clientConn := make(chan birpc.ClientConnector, 1)
-	clientConn <- clMock(func(ctx *context.Context, servicemethod string, _, _ interface{}) error {
+	clientConn <- clMock(func(ctx *context.Context, servicemethod string, _, _ any) error {
 		if servicemethod == utils.ReplicatorSv1RemoveThresholdProfile {
 
 			return nil
@@ -918,7 +918,7 @@ func TestCDRSGetCostFromRater(t *testing.T) {
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 	clientConn := make(chan birpc.ClientConnector, 1)
-	clientConn <- clMock(func(ctx *context.Context, servicemethod string, _, reply interface{}) error {
+	clientConn <- clMock(func(ctx *context.Context, servicemethod string, _, reply any) error {
 		if servicemethod == utils.ResponderGetCost {
 			return nil
 		}
@@ -956,7 +956,7 @@ func TestCDRSChrgsProcessEvent(t *testing.T) {
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 	clientConn := make(chan birpc.ClientConnector, 1)
-	clientConn <- clMock(func(ctx *context.Context, servicemethod string, _, reply interface{}) error {
+	clientConn <- clMock(func(ctx *context.Context, servicemethod string, _, reply any) error {
 
 		if servicemethod == utils.ChargerSv1ProcessEvent {
 			chargers := []*ChrgSProcessEventReply{
@@ -967,7 +967,7 @@ func TestCDRSChrgsProcessEvent(t *testing.T) {
 					CGREvent: &utils.CGREvent{ // matching Charger1
 						Tenant: "cgrates.org",
 						ID:     "event1",
-						Event: map[string]interface{}{
+						Event: map[string]any{
 							"Charger":        "ChargerProfile1",
 							utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 							"UsageInterval":  "1s",
@@ -994,7 +994,7 @@ func TestCDRSChrgsProcessEvent(t *testing.T) {
 	cgrEv := &utils.CGREventWithArgDispatcher{
 		CGREvent: &utils.CGREvent{Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID: "event1",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"Charger":        "ChargerProfile1",
 				utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 				"UsageInterval":  "1s",

@@ -54,7 +54,7 @@ func valueIsEmpty(fld reflect.Value) bool {
 }
 
 // Detects missing field values based on mandatory field names, s should be a pointer to a struct
-func MissingStructFields(s interface{}, mandatories []string) []string {
+func MissingStructFields(s any, mandatories []string) []string {
 	missing := []string{}
 	sValue := reflect.ValueOf(s).Elem()
 	sType := sValue.Type()
@@ -69,8 +69,8 @@ func MissingStructFields(s interface{}, mandatories []string) []string {
 
 // Detects nonempty struct fields, s should be a pointer to a struct
 // Useful to not overwrite db fields with non defined params in api
-func NonemptyStructFields(s interface{}) map[string]interface{} {
-	fields := make(map[string]interface{})
+func NonemptyStructFields(s any) map[string]any {
+	fields := make(map[string]any)
 	for i := 0; i < reflect.ValueOf(s).Elem().NumField(); i++ {
 		fld := reflect.ValueOf(s).Elem().Field(i)
 		switch fld.Kind() {
@@ -91,8 +91,8 @@ func NonemptyStructFields(s interface{}) map[string]interface{} {
 	return fields
 }
 
-// MissingMapFields detects missing field values based on mandatory field names from a map[string]interface{}
-func MissingMapFields(s map[string]interface{}, mandatories []string) []string {
+// MissingMapFields detects missing field values based on mandatory field names from a map[string]any
+func MissingMapFields(s map[string]any, mandatories []string) []string {
 	missing := []string{}
 	for _, fieldName := range mandatories {
 		if fldval, has := s[fieldName]; !has {
@@ -114,8 +114,8 @@ func MissingMapFields(s map[string]interface{}, mandatories []string) []string {
 }
 
 // Converts a struct to map
-/*func StrucToMap(s interface{}) map[string]interface{} {
-	mp := make(map[string]interface{})
+/*func StrucToMap(s any) map[string]any {
+	mp := make(map[string]any)
 	for i := 0; i < reflect.ValueOf(s).Elem().NumField(); i++ {
 		fld := reflect.ValueOf(s).Elem().Field(i)
 		switch fld.Kind() {
@@ -130,9 +130,9 @@ func MissingMapFields(s map[string]interface{}, mandatories []string) []string {
 	return mp
 }*/
 
-// Converts a struct to map[string]interface{}
-func ToMapMapStringInterface(in interface{}) map[string]interface{} { // Got error and it is not used anywhere
-	out := make(map[string]interface{})
+// Converts a struct to map[string]any
+func ToMapMapStringInterface(in any) map[string]any { // Got error and it is not used anywhere
+	out := make(map[string]any)
 
 	v := reflect.ValueOf(in)
 	if v.Kind() == reflect.Ptr {
@@ -146,7 +146,7 @@ func ToMapMapStringInterface(in interface{}) map[string]interface{} { // Got err
 }
 
 // Converts a struct to map[string]string
-func ToMapStringString(in interface{}) map[string]string {
+func ToMapStringString(in any) map[string]string {
 	out := make(map[string]string)
 
 	v := reflect.ValueOf(in)
@@ -166,7 +166,7 @@ func ToMapStringString(in interface{}) map[string]string {
 	return out
 }
 
-func GetMapExtraFields(in interface{}, extraFields string) map[string]string {
+func GetMapExtraFields(in any, extraFields string) map[string]string {
 	out := make(map[string]string)
 	v := reflect.ValueOf(in)
 	if v.Kind() == reflect.Ptr {
@@ -182,7 +182,7 @@ func GetMapExtraFields(in interface{}, extraFields string) map[string]string {
 	return out
 }
 
-func SetMapExtraFields(in interface{}, values map[string]string, extraFields string) {
+func SetMapExtraFields(in any, values map[string]string, extraFields string) {
 	v := reflect.ValueOf(in)
 	if v.Kind() == reflect.Ptr {
 		v = v.Elem()
@@ -200,7 +200,7 @@ func SetMapExtraFields(in interface{}, values map[string]string, extraFields str
 	}
 }
 
-func FromMapStringString(m map[string]string, in interface{}) {
+func FromMapStringString(m map[string]string, in any) {
 	v := reflect.ValueOf(in)
 	if v.Kind() == reflect.Ptr {
 		v = v.Elem()
@@ -217,7 +217,7 @@ func FromMapStringString(m map[string]string, in interface{}) {
 	}
 }
 
-func FromMapStringInterface(m map[string]interface{}, in interface{}) error {
+func FromMapStringInterface(m map[string]any, in any) error {
 	v := reflect.ValueOf(in)
 	if v.Kind() == reflect.Ptr {
 		v = v.Elem()
@@ -240,7 +240,7 @@ func FromMapStringInterface(m map[string]interface{}, in interface{}) error {
 }
 
 // initial intent was to use it with *cgr_rpc but does not handle slice and structure fields
-func FromMapStringInterfaceValue(m map[string]interface{}, v reflect.Value) (interface{}, error) {
+func FromMapStringInterfaceValue(m map[string]any, v reflect.Value) (any, error) {
 	if v.Kind() == reflect.Ptr {
 		v = v.Elem()
 	}
@@ -267,7 +267,7 @@ func FromMapStringInterfaceValue(m map[string]interface{}, v reflect.Value) (int
 }
 
 // Update struct with map fields, returns not matching map keys, s is a struct to be updated
-func UpdateStructWithStrMap(s interface{}, m map[string]string) []string { // Not tested and declared and used only here
+func UpdateStructWithStrMap(s any, m map[string]string) []string { // Not tested and declared and used only here
 	notMatched := []string{}
 	for key, val := range m {
 		fld := reflect.ValueOf(s).Elem().FieldByName(key)
@@ -298,7 +298,7 @@ func UpdateStructWithStrMap(s interface{}, m map[string]string) []string { // No
 // UpdateStructWithIfaceMap will update struct fields with values coming from map
 // if map values are not matching the ones in struct convertion is being attempted
 // ToDo: add here more fields
-func UpdateStructWithIfaceMap(s interface{}, mp map[string]interface{}) (err error) {
+func UpdateStructWithIfaceMap(s any, mp map[string]any) (err error) {
 	for key, val := range mp {
 		fld := reflect.ValueOf(s).Elem().FieldByName(key)
 		if fld.IsValid() {

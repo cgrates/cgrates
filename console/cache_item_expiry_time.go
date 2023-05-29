@@ -50,7 +50,7 @@ func (self *CmdCacheGetItemExpiryTime) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdCacheGetItemExpiryTime) RpcParams(reset bool) interface{} {
+func (self *CmdCacheGetItemExpiryTime) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &utils.ArgsGetCacheItemWithArgDispatcher{}
 	}
@@ -61,7 +61,7 @@ func (self *CmdCacheGetItemExpiryTime) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdCacheGetItemExpiryTime) RpcResult() interface{} {
+func (self *CmdCacheGetItemExpiryTime) RpcResult() any {
 	var reply time.Time
 	return &reply
 }

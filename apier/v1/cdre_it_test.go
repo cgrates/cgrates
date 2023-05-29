@@ -169,7 +169,7 @@ func testCDReAddCDRs(t *testing.T) {
 
 func testCDReExportCDRs(t *testing.T) {
 	attr := ArgExportCDRs{
-		ExportArgs: map[string]interface{}{
+		ExportArgs: map[string]any{
 			utils.ExportTemplate: "TemplateWithFilter",
 		},
 		Verbose: true,
@@ -323,7 +323,7 @@ func testCDReAddAttributes(t *testing.T) {
 
 func testCDReExportCDRsWithAttributes(t *testing.T) {
 	attr := ArgExportCDRs{
-		ExportArgs: map[string]interface{}{
+		ExportArgs: map[string]any{
 			utils.ExportTemplate: "TemplateWithAttributeS",
 		},
 		Verbose: true,

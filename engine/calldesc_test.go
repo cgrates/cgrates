@@ -1851,7 +1851,7 @@ func TestCallDescriptorUpdateFromCGREvent(t *testing.T) {
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "Generated",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Account":     "acc1",
 			"AnswerTime":  time.Date(2015, 3, 23, 6, 0, 0, 0, time.UTC),
 			"Category":    "call",
@@ -1892,7 +1892,7 @@ func TestCallDescriptorUpdateFromCGREvent(t *testing.T) {
 	cgrEv = &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "Generated",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Account":     "acc1",
 			"AnswerTime":  time.Date(2015, 3, 23, 6, 0, 0, 0, time.UTC),
 			"Category":    "call",
@@ -1926,7 +1926,7 @@ func TestCallDescriptorAsCGREvent(t *testing.T) {
 	}
 	eCGREvent := &utils.CGREvent{Tenant: "cgrates.org",
 		ID: "Generated",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Account":     "max",
 			"AnswerTime":  time.Date(2015, 3, 23, 6, 0, 0, 0, time.UTC),
 			"Category":    "call",
@@ -2057,7 +2057,7 @@ func TestCallDescRefundRounding(t *testing.T) {
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "Generated",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Account":     "1001",
 			"AnswerTime":  time.Date(2018, 3, 23, 6, 0, 0, 0, time.UTC),
 			"Category":    "call",
@@ -2108,7 +2108,7 @@ func TestNewCallDescriptorFromCGREventErr(t *testing.T) {
 			name: "Missing Account",
 			cgrEv: &utils.CGREvent{
 				Tenant: "cgrates.org",
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					utils.Category: "Call",
 				},
 			},

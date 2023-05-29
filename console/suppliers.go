@@ -50,7 +50,7 @@ func (self *CmdSuppliersSort) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdSuppliersSort) RpcParams(reset bool) interface{} {
+func (self *CmdSuppliersSort) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &engine.ArgsGetSuppliers{ArgDispatcher: new(utils.ArgDispatcher)}
 	}
@@ -65,7 +65,7 @@ func (self *CmdSuppliersSort) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdSuppliersSort) RpcResult() interface{} {
+func (self *CmdSuppliersSort) RpcResult() any {
 	var atr *engine.SortedSuppliers
 	return &atr
 }

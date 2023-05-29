@@ -693,7 +693,7 @@ func (b *Balance) Publish() {
 	cgrEv := &utils.CGREvent{
 		Tenant: acntTnt.Tenant,
 		ID:     utils.GenUUID(),
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.EventType:   utils.BalanceUpdate,
 			utils.EventSource: utils.AccountService,
 			utils.Account:     acntTnt.ID,
@@ -814,7 +814,7 @@ func (bc Balances) SaveDirtyBalances(acc *Account) {
 				CGREvent: &utils.CGREvent{
 					Tenant: acntTnt.Tenant,
 					ID:     utils.GenUUID(),
-					Event: map[string]interface{}{
+					Event: map[string]any{
 						utils.EventType:   utils.BalanceUpdate,
 						utils.EventSource: utils.AccountService,
 						utils.Account:     acntTnt.ID,
@@ -846,7 +846,7 @@ func (bc Balances) SaveDirtyBalances(acc *Account) {
 				CGREvent: &utils.CGREvent{
 					Tenant: acntTnt.Tenant,
 					ID:     utils.GenUUID(),
-					Event: map[string]interface{}{
+					Event: map[string]any{
 						utils.EventType:     utils.AccountUpdate,
 						utils.EventSource:   utils.AccountService,
 						utils.Account:       acntTnt.ID,
@@ -897,7 +897,7 @@ func (bs BalanceSummaries) BalanceSummaryWithUUD(bsUUID string) (b *BalanceSumma
 }
 
 // FieldAsInterface func to help EventCost FieldAsInterface
-func (bl *BalanceSummary) FieldAsInterface(fldPath []string) (val interface{}, err error) {
+func (bl *BalanceSummary) FieldAsInterface(fldPath []string) (val any, err error) {
 	if bl == nil || len(fldPath) != 1 {
 		return nil, utils.ErrNotFound
 	}

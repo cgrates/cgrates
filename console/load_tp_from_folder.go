@@ -46,7 +46,7 @@ func (self *LoadTpFromFolder) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *LoadTpFromFolder) RpcParams(reset bool) interface{} {
+func (self *LoadTpFromFolder) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &utils.AttrLoadTpFromFolder{}
 	}
@@ -57,7 +57,7 @@ func (self *LoadTpFromFolder) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *LoadTpFromFolder) RpcResult() interface{} {
+func (self *LoadTpFromFolder) RpcResult() any {
 	var s string
 	return &s
 }

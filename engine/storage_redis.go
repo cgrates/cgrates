@@ -169,7 +169,7 @@ func reconnectSentinel(addr, sentinelName string, db int, pass string, maxConns 
 
 // This CMD function get a connection from the pool.
 // Handles automatic failover in case of network disconnects
-func (rs *RedisStorage) Cmd(cmd string, args ...interface{}) *redis.Resp {
+func (rs *RedisStorage) Cmd(cmd string, args ...any) *redis.Resp {
 	if rs.sentinelName != "" {
 		var err error
 		for i := range rs.sentinelInsts {
@@ -753,7 +753,7 @@ func (rs *RedisStorage) AddLoadHistory(ldInst *utils.LoadInstance, loadHistSize 
 	if err != nil {
 		return err
 	}
-	_, err = guardian.Guardian.Guard(func() (interface{}, error) { // Make sure we do it locked since other instance can modify history while we read it
+	_, err = guardian.Guardian.Guard(func() (any, error) { // Make sure we do it locked since other instance can modify history while we read it
 		histLen, err := rs.Cmd(redis_LLEN, utils.LOADINST_KEY).Int()
 		if err != nil {
 			return nil, err
@@ -1054,7 +1054,7 @@ func (rs *RedisStorage) SetFilterIndexesDrv(cacheID, itemIDPrefix string,
 		return rs.Cmd(redis_RENAME, dbKey, originKey).Err
 	} else {
 		mp := make(map[string]string)
-		nameValSls := []interface{}{dbKey}
+		nameValSls := []any{dbKey}
 		for key, strMp := range indexes {
 			if len(strMp) == 0 { // remove with no more elements inside
 				nameValSls = append(nameValSls, key)

@@ -49,7 +49,7 @@ func (self *CmdGetCostDetails) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdGetCostDetails) RpcParams(reset bool) interface{} {
+func (self *CmdGetCostDetails) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &utils.AttrGetCallCost{RunId: utils.MetaDefault}
 	}
@@ -60,11 +60,11 @@ func (self *CmdGetCostDetails) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdGetCostDetails) RpcResult() interface{} {
+func (self *CmdGetCostDetails) RpcResult() any {
 	return &engine.EventCost{}
 }
 
-func (self *CmdGetCostDetails) GetFormatedResult(result interface{}) string {
+func (self *CmdGetCostDetails) GetFormatedResult(result any) string {
 	return GetFormatedResult(result, map[string]struct{}{
 		"Usage":              {},
 		"GroupIntervalStart": {},

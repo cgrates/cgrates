@@ -32,13 +32,13 @@ type Commander interface {
 	FromArgs(args string, verbose bool) error // Load data from os arguments or flag.Args()
 	Usage() string                            // usage message
 	RpcMethod() string                        // Method which should be called remotely
-	RpcParams(bool) interface{}               // Parameters to send out on rpc
+	RpcParams(bool) any                       // Parameters to send out on rpc
 	PostprocessRpcParams() error              // Corrects rpc parameters when needed
-	RpcResult() interface{}                   // Only requirement is to have a String method to print on console
+	RpcResult() any                           // Only requirement is to have a String method to print on console
 	ClientArgs() []string                     // for autocompletion
 	Name() string
 	LocalExecute() string
-	GetFormatedResult(result interface{}) string
+	GetFormatedResult(result any) string
 }
 
 func GetCommands() map[string]Commander {

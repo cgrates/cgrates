@@ -66,7 +66,7 @@ func (api *APIerSv1) AddAccountActionTriggers(attr AttrAddAccountActionTriggers,
 	}
 	accID := utils.ConcatenatedKey(attr.Tenant, attr.Account)
 	var account *engine.Account
-	_, err = guardian.Guardian.Guard(func() (interface{}, error) {
+	_, err = guardian.Guardian.Guard(func() (any, error) {
 		if account, err = api.DataManager.GetAccount(accID); err != nil {
 			return 0, err
 		}
@@ -115,7 +115,7 @@ func (api *APIerSv1) RemoveAccountActionTriggers(attr AttrRemoveAccountActionTri
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	accID := utils.ConcatenatedKey(attr.Tenant, attr.Account)
-	_, err := guardian.Guardian.Guard(func() (interface{}, error) {
+	_, err := guardian.Guardian.Guard(func() (any, error) {
 		var account *engine.Account
 		if acc, err := api.DataManager.GetAccount(accID); err == nil {
 			account = acc
@@ -158,7 +158,7 @@ func (api *APIerSv1) ResetAccountActionTriggers(attr AttrResetAccountActionTrigg
 	}
 	accID := utils.ConcatenatedKey(attr.Tenant, attr.Account)
 	var account *engine.Account
-	_, err := guardian.Guardian.Guard(func() (interface{}, error) {
+	_, err := guardian.Guardian.Guard(func() (any, error) {
 		if acc, err := api.DataManager.GetAccount(accID); err == nil {
 			account = acc
 		} else {
@@ -193,7 +193,7 @@ type AttrSetAccountActionTriggers struct {
 type AttrSetActionTrigger struct {
 	GroupID       string
 	UniqueID      string
-	ActionTrigger map[string]interface{}
+	ActionTrigger map[string]any
 }
 
 // UpdateActionTrigger updates the ActionTrigger if is matching
@@ -342,7 +342,7 @@ func (api *APIerSv1) SetAccountActionTriggers(attr AttrSetAccountActionTriggers,
 	}
 	accID := utils.ConcatenatedKey(attr.Tenant, attr.Account)
 	var account *engine.Account
-	_, err := guardian.Guardian.Guard(func() (interface{}, error) {
+	_, err := guardian.Guardian.Guard(func() (any, error) {
 		if acc, err := api.DataManager.GetAccount(accID); err == nil {
 			account = acc
 		} else {
@@ -549,7 +549,7 @@ func (api *APIerSv1) AddTriggeredAction(attr AttrAddActionTrigger, reply *string
 		at.Balance.SharedGroups = &utils.StringMap{attr.BalanceSharedGroup: true}
 	}
 	acntID := utils.ConcatenatedKey(attr.Tenant, attr.Account)
-	_, err := guardian.Guardian.Guard(func() (interface{}, error) {
+	_, err := guardian.Guardian.Guard(func() (any, error) {
 		acnt, err := api.DataManager.GetAccount(acntID)
 		if err != nil {
 			return 0, err

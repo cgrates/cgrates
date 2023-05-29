@@ -71,7 +71,7 @@ var (
 			CGREvent: &utils.CGREvent{
 				Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 				ID:     utils.GenUUID(),
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					"Charger":        "ChargerProfile1",
 					utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 					"UsageInterval":  "1s",
@@ -83,7 +83,7 @@ var (
 			CGREvent: &utils.CGREvent{
 				Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 				ID:     utils.GenUUID(),
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					"Charger":        "ChargerProfile2",
 					utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 				},
@@ -93,7 +93,7 @@ var (
 			CGREvent: &utils.CGREvent{
 				Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 				ID:     utils.GenUUID(),
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					"Charger":        "DistinctMatch",
 					utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 				},
@@ -241,7 +241,7 @@ func TestChargerV1GetChargersForEvent(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     utils.GenUUID(),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"Charger":        "ChargerProfile1",
 				utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 				"UsageInterval":  "1s",
@@ -299,7 +299,7 @@ func TestChargerV1ProcessEvent(t *testing.T) {
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 	cfg.ChargerSCfg().AttributeSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}
 	clientConn := make(chan birpc.ClientConnector, 1)
-	clientConn <- clMock(func(_ *context.Context, _ string, _, _ interface{}) error {
+	clientConn <- clMock(func(_ *context.Context, _ string, _, _ any) error {
 		return nil
 	})
 	connMngr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
@@ -315,7 +315,7 @@ func TestChargerV1ProcessEvent(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     utils.GenUUID(),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"Charger":        "ChargerProfile1",
 				utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 				"UsageInterval":  "1s",

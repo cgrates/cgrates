@@ -119,7 +119,7 @@ func testCDREGetCdrs(t *testing.T) {
 func testCDREExportNotFound(t *testing.T) {
 	var replyExport v1.RplExportedCDRs
 	exportArgs := v1.ArgExportCDRs{
-		ExportArgs: map[string]interface{}{
+		ExportArgs: map[string]any{
 			utils.ExportPath:     "/tmp",
 			utils.ExportFileName: "TestTutITExportCDR.csv",
 			utils.ExportTemplate: "TestTutITExportCDR",
@@ -166,7 +166,7 @@ func testCDREExport(t *testing.T) {
 	// time.Sleep(100 * time.Millisecond)
 	var replyExport v1.RplExportedCDRs
 	exportArgs := v1.ArgExportCDRs{
-		ExportArgs: map[string]interface{}{
+		ExportArgs: map[string]any{
 			utils.ExportPath:     "/tmp",
 			utils.ExportFileName: "TestTutITExportCDR.csv",
 			utils.ExportTemplate: "TestTutITExportCDR",

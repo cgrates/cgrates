@@ -48,7 +48,7 @@ func (self *CmdGetChargersForEvent) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdGetChargersForEvent) RpcParams(reset bool) interface{} {
+func (self *CmdGetChargersForEvent) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &utils.CGREventWithArgDispatcher{
 			CGREvent:      new(utils.CGREvent),
@@ -62,7 +62,7 @@ func (self *CmdGetChargersForEvent) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdGetChargersForEvent) RpcResult() interface{} {
+func (self *CmdGetChargersForEvent) RpcResult() any {
 	var atr engine.ChargerProfiles
 	return &atr
 }

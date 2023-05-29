@@ -51,7 +51,7 @@ var (
 	cdrsMasterRpc                       *rpcclient.RPCClient
 	httpCGRID                           = "1234abcd"
 	amqpCGRID                           = "5678wxyz"
-	failoverContent                     = []interface{}{[]byte(fmt.Sprintf(`{"CGRID":"%s"}`, httpCGRID)), []byte(fmt.Sprintf(`{"CGRID":"%s"}`, amqpCGRID))}
+	failoverContent                     = []any{[]byte(fmt.Sprintf(`{"CGRID":"%s"}`, httpCGRID)), []byte(fmt.Sprintf(`{"CGRID":"%s"}`, amqpCGRID))}
 
 	sTestsCDRsOnExp = []func(t *testing.T){
 		testCDRsOnExpInitConfig,
@@ -463,7 +463,7 @@ func testCDRsOnExpAMQPReplication(t *testing.T) {
 
 }
 
-func checkContent(ev *engine.ExportEvents, content []interface{}) error {
+func checkContent(ev *engine.ExportEvents, content []any) error {
 	match := false
 	for _, bev := range ev.Events {
 		for _, con := range content {
@@ -496,7 +496,7 @@ func testCDRsOnExpFileFailover(t *testing.T) {
 	v2 := url.Values{}
 	v1.Set("OriginID", "httpjsonrpc1")
 	v2.Set("OriginID", "amqpreconnect")
-	httpContent := []interface{}{v1, v2}
+	httpContent := []any{v1, v2}
 	filesInDir, _ := os.ReadDir(cdrsMasterCfg.GeneralCfg().FailedPostsDir)
 	if len(filesInDir) == 0 {
 		t.Fatalf("No files in directory: %s", cdrsMasterCfg.GeneralCfg().FailedPostsDir)

@@ -618,10 +618,10 @@ func TestInlineFilterPassFiltersForEvent(t *testing.T) {
 		cfg: cfg,
 		dm:  dmFilterPass,
 	}
-	failEvent := map[string]interface{}{
+	failEvent := map[string]any{
 		"Account": "1001",
 	}
-	passEvent := map[string]interface{}{
+	passEvent := map[string]any{
 		"Account": "1007",
 	}
 	fEv := utils.MapStorage{}
@@ -653,10 +653,10 @@ func TestInlineFilterPassFiltersForEvent(t *testing.T) {
 	} else if pass {
 		t.Errorf("Expecting: %+v, received: %+v", false, pass)
 	}
-	failEvent = map[string]interface{}{
+	failEvent = map[string]any{
 		"Account": "2001",
 	}
-	passEvent = map[string]interface{}{
+	passEvent = map[string]any{
 		"Account": "1007",
 	}
 	fEv = utils.MapStorage{}
@@ -694,10 +694,10 @@ func TestInlineFilterPassFiltersForEvent(t *testing.T) {
 	} else if pass {
 		t.Errorf("Expecting: %+v, received: %+v", false, pass)
 	}
-	failEvent = map[string]interface{}{
+	failEvent = map[string]any{
 		"Tenant": "anotherTenant.org",
 	}
-	passEvent = map[string]interface{}{
+	passEvent = map[string]any{
 		"Tenant": "cgrates.org",
 	}
 	fEv = utils.MapStorage{}
@@ -725,10 +725,10 @@ func TestInlineFilterPassFiltersForEvent(t *testing.T) {
 	}
 	Cache.Set(utils.CacheReverseDestinations, "+49",
 		[]string{"DE", "EU_LANDLINE"}, nil, true, "")
-	failEvent = map[string]interface{}{
+	failEvent = map[string]any{
 		utils.Destination: "+5086517174963",
 	}
-	passEvent = map[string]interface{}{
+	passEvent = map[string]any{
 		utils.Destination: "+4986517174963",
 	}
 	fEv = utils.MapStorage{}
@@ -747,10 +747,10 @@ func TestInlineFilterPassFiltersForEvent(t *testing.T) {
 	} else if !pass {
 		t.Errorf("Expecting: %+v, received: %+v", true, pass)
 	}
-	failEvent = map[string]interface{}{
+	failEvent = map[string]any{
 		utils.Weight: 10,
 	}
-	passEvent = map[string]interface{}{
+	passEvent = map[string]any{
 		utils.Weight: 20,
 	}
 	fEv = utils.MapStorage{}
@@ -770,7 +770,7 @@ func TestInlineFilterPassFiltersForEvent(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", true, pass)
 	}
 
-	failEvent = map[string]interface{}{
+	failEvent = map[string]any{
 		"EmptyString":   "nonEmpty",
 		"EmptySlice":    []string{""},
 		"EmptyMap":      map[string]string{"": ""},
@@ -781,7 +781,7 @@ func TestInlineFilterPassFiltersForEvent(t *testing.T) {
 	}
 	var testnil *struct{}
 	testnil = nil
-	passEvent = map[string]interface{}{
+	passEvent = map[string]any{
 		"EmptyString":   "",
 		"EmptySlice":    []string{},
 		"EmptyMap":      map[string]string{},
@@ -830,7 +830,7 @@ func TestPassRsr(t *testing.T) {
 		cfg: cfg,
 		dm:  dmFilterPass,
 	}
-	passEvent1 := map[string]interface{}{
+	passEvent1 := map[string]any{
 		"8": "0045664",
 	}
 	pEv1 := utils.MapStorage{}
@@ -843,7 +843,7 @@ func TestPassRsr(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", true, pass)
 	}
 
-	passEvent1 = map[string]interface{}{
+	passEvent1 = map[string]any{
 		"5": "0",
 	}
 	pEv1 = utils.MapStorage{}
@@ -886,13 +886,13 @@ func TestPassFiltersForEventWithEmptyFilter(t *testing.T) {
 		cfg: cfg,
 		dm:  dmFilterPass,
 	}
-	passEvent1 := map[string]interface{}{
+	passEvent1 := map[string]any{
 		utils.Tenant:      "cgrates.org",
 		utils.Account:     "1010",
 		utils.Destination: "+49",
 		utils.Weight:      10,
 	}
-	passEvent2 := map[string]interface{}{
+	passEvent2 := map[string]any{
 		utils.Tenant:      "itsyscom.com",
 		utils.Account:     "dan",
 		utils.Destination: "+4986517174963",
@@ -914,7 +914,7 @@ func TestPassFiltersForEventWithEmptyFilter(t *testing.T) {
 	} else if !pass {
 		t.Errorf("Expecting: %+v, received: %+v", true, pass)
 	}
-	ev := map[string]interface{}{
+	ev := map[string]any{
 		"Test": "MultipleCharacter",
 	}
 	pEv := utils.MapStorage{}
@@ -925,7 +925,7 @@ func TestPassFiltersForEventWithEmptyFilter(t *testing.T) {
 	} else if pass {
 		t.Errorf("Expecting: %+v, received: %+v", false, pass)
 	}
-	ev = map[string]interface{}{
+	ev = map[string]any{
 		"Test": "MultipleCharacter123456789MoreThan30Character",
 	}
 	pEv = utils.MapStorage{}
@@ -937,8 +937,8 @@ func TestPassFiltersForEventWithEmptyFilter(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", true, pass)
 	}
 
-	ev = map[string]interface{}{
-		"Test": map[string]interface{}{
+	ev = map[string]any{
+		"Test": map[string]any{
 			"Test2": "MultipleCharacter",
 		},
 	}
@@ -950,8 +950,8 @@ func TestPassFiltersForEventWithEmptyFilter(t *testing.T) {
 	} else if pass {
 		t.Errorf("Expecting: %+v, received: %+v", false, pass)
 	}
-	ev = map[string]interface{}{
-		"Test": map[string]interface{}{
+	ev = map[string]any{
+		"Test": map[string]any{
 			"Test2": "MultipleCharacter123456789MoreThan30Character",
 		},
 	}
@@ -964,7 +964,7 @@ func TestPassFiltersForEventWithEmptyFilter(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", false, pass)
 	}
 
-	ev = map[string]interface{}{
+	ev = map[string]any{
 		utils.Account:     "1003",
 		utils.Subject:     "1003",
 		utils.Destination: "1002",
@@ -992,7 +992,7 @@ func TestPassFilterMaxCost(t *testing.T) {
 		dm:  dmFilterPass,
 	}
 	//check with max usage -1 should fail
-	passEvent1 := map[string]interface{}{
+	passEvent1 := map[string]any{
 		"MaxUsage": time.Duration(-1),
 	}
 	pEv := utils.MapStorage{}
@@ -1004,7 +1004,7 @@ func TestPassFilterMaxCost(t *testing.T) {
 		t.Errorf("Expecting: false , received: %+v", pass)
 	}
 	//check with max usage 0 should fail
-	passEvent2 := map[string]interface{}{
+	passEvent2 := map[string]any{
 		"MaxUsage": time.Duration(0),
 	}
 	pEv = utils.MapStorage{}
@@ -1016,7 +1016,7 @@ func TestPassFilterMaxCost(t *testing.T) {
 		t.Errorf("Expecting: false, received: %+v", pass)
 	}
 	//check with max usage 123 should pass
-	passEvent3 := map[string]interface{}{
+	passEvent3 := map[string]any{
 		"MaxUsage": time.Duration(123),
 	}
 	pEv = utils.MapStorage{}
@@ -1044,7 +1044,7 @@ func TestPassFilterMissingField(t *testing.T) {
 		dm:  dmFilterPass,
 	}
 
-	passEvent1 := map[string]interface{}{
+	passEvent1 := map[string]any{
 		"test": "call",
 	}
 	pEv := utils.MapStorage{}
@@ -1056,7 +1056,7 @@ func TestPassFilterMissingField(t *testing.T) {
 		t.Errorf("Expecting: true , received: %+v", pass)
 	}
 
-	passEvent2 := map[string]interface{}{
+	passEvent2 := map[string]any{
 		"Category": "",
 	}
 	pEv = utils.MapStorage{}
@@ -1068,7 +1068,7 @@ func TestPassFilterMissingField(t *testing.T) {
 		t.Errorf("Expecting: true , received: %+v", pass)
 	}
 
-	passEvent3 := map[string]interface{}{
+	passEvent3 := map[string]any{
 		"Category": "call",
 	}
 	pEv = utils.MapStorage{}
@@ -2112,7 +2112,7 @@ func TestFilterSPass11(t *testing.T) {
 	dm.SetAccount(acc)
 	dm.SetStatQueue(sq)
 	clientConn := make(chan birpc.ClientConnector, 1)
-	clientConn <- clMock(func(ctx *context.Context, serviceMethod string, args, reply interface{}) error {
+	clientConn <- clMock(func(ctx *context.Context, serviceMethod string, args, reply any) error {
 		if serviceMethod == utils.ResourceSv1GetResource {
 			tntId, concat := args.(*utils.TenantID)
 			if !concat {
@@ -2240,7 +2240,7 @@ func TestFIRemoveItemFromIndexErr(t *testing.T) {
 	cfg.DataDbCfg().RmtConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1)}
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	clientConn := make(chan birpc.ClientConnector, 1)
-	clientConn <- clMock(func(ctx *context.Context, serviceMethod string, _, _ interface{}) error {
+	clientConn <- clMock(func(ctx *context.Context, serviceMethod string, _, _ any) error {
 		return utils.ErrNotImplemented
 	})
 	dm := NewDataManager(db, cfg.CacheCfg(), NewConnManager(cfg, map[string]chan birpc.ClientConnector{

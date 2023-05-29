@@ -153,7 +153,7 @@ func (rdr *KafkaER) readLoop(r *kafka.Reader) {
 }
 
 func (rdr *KafkaER) processMessage(msg []byte) (err error) {
-	var decodedMessage map[string]interface{}
+	var decodedMessage map[string]any
 	if err = json.Unmarshal(msg, &decodedMessage); err != nil {
 		return
 	}

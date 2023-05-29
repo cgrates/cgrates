@@ -121,7 +121,7 @@ func (chS *CacheS) Precache() (err error) {
 // APIs start here
 
 // Call gives the ability of CacheS to be passed as internal RPC
-func (chS *CacheS) Call(ctx *context.Context, serviceMethod string, args interface{}, reply interface{}) error {
+func (chS *CacheS) Call(ctx *context.Context, serviceMethod string, args any, reply any) error {
 	return utils.RPCCall(chS, serviceMethod, args, reply)
 }
 

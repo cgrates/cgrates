@@ -82,8 +82,8 @@ func (da *DNSAgentCfg) loadFromJsonCfg(jsnCfg *DNSAgentJsonCfg, sep string) (err
 	return nil
 }
 
-func (da *DNSAgentCfg) AsMapInterface(separator string) map[string]interface{} {
-	requestProcessors := make([]map[string]interface{}, len(da.RequestProcessors))
+func (da *DNSAgentCfg) AsMapInterface(separator string) map[string]any {
+	requestProcessors := make([]map[string]any, len(da.RequestProcessors))
 	for i, item := range da.RequestProcessors {
 		requestProcessors[i] = item.AsMapInterface(separator)
 	}
@@ -97,7 +97,7 @@ func (da *DNSAgentCfg) AsMapInterface(separator string) map[string]interface{} {
 		}
 	}
 
-	return map[string]interface{}{
+	return map[string]any{
 		utils.EnabledCfg:           da.Enabled,
 		utils.ListenCfg:            da.Listen,
 		utils.ListenNetCfg:         da.ListenNet,
@@ -158,13 +158,13 @@ func (rp *RequestProcessor) loadFromJsonCfg(jsnCfg *ReqProcessorJsnCfg, sep stri
 	return nil
 }
 
-func (rp *RequestProcessor) AsMapInterface(separator string) map[string]interface{} {
-	replyFields := make([]map[string]interface{}, len(rp.ReplyFields))
+func (rp *RequestProcessor) AsMapInterface(separator string) map[string]any {
+	replyFields := make([]map[string]any, len(rp.ReplyFields))
 	for i, item := range rp.ReplyFields {
 		replyFields[i] = item.AsMapInterface(separator)
 	}
 
-	requestFields := make([]map[string]interface{}, len(rp.RequestFields))
+	requestFields := make([]map[string]any, len(rp.RequestFields))
 	for i, item := range rp.RequestFields {
 		requestFields[i] = item.AsMapInterface(separator)
 	}
@@ -182,7 +182,7 @@ func (rp *RequestProcessor) AsMapInterface(separator string) map[string]interfac
 		flags[key] = item
 	}
 
-	return map[string]interface{}{
+	return map[string]any{
 		utils.IDCfg:            rp.ID,
 		utils.TenantCfg:        tenant,
 		utils.FiltersCfg:       rp.Filters,

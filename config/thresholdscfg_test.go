@@ -72,7 +72,7 @@ func TestThresholdSCfgAsMapInterface(t *testing.T) {
 			"nested_fields": false,					
 		},		
 }`
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		"enabled":               false,
 		"store_interval":        "",
 		"indexed_selects":       true,
@@ -100,7 +100,7 @@ func TestThresholdSCfgAsMapInterface(t *testing.T) {
 			"nested_fields": true,					
 		},		
 }`
-	eMap = map[string]interface{}{
+	eMap = map[string]any{
 		"enabled":               true,
 		"store_interval":        "96h0m0s",
 		"indexed_selects":       true,

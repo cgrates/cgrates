@@ -48,7 +48,7 @@ func (self *CmdGetSupplierForEvent) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdGetSupplierForEvent) RpcParams(reset bool) interface{} {
+func (self *CmdGetSupplierForEvent) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &utils.CGREventWithArgDispatcher{
 			CGREvent:      new(utils.CGREvent),
@@ -61,7 +61,7 @@ func (self *CmdGetSupplierForEvent) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdGetSupplierForEvent) RpcResult() interface{} {
+func (self *CmdGetSupplierForEvent) RpcResult() any {
 	var atr []*engine.SupplierProfile
 	return &atr
 }

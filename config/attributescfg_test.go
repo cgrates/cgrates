@@ -69,7 +69,7 @@ func TestAttributeSCfgAsMapInterface(t *testing.T) {
 	"process_runs": 3,						
 	},		
 }`
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		"enabled":               true,
 		"prefix_indexed_fields": []string{"index1", "index2"},
 		"process_runs":          3,

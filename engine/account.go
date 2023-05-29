@@ -151,7 +151,7 @@ func (acc *Account) setBalanceAction(a *Action) error {
 	}
 	// modify if necessary the shared groups here
 	if !found || !previousSharedGroups.Equal(balance.SharedGroups) {
-		_, err := guardian.Guardian.Guard(func() (interface{}, error) {
+		_, err := guardian.Guardian.Guard(func() (any, error) {
 			i := 0
 			for sgID := range balance.SharedGroups {
 				// add shared group member
@@ -241,7 +241,7 @@ func (acc *Account) debitBalanceAction(a *Action, reset, resetIfNegative bool) e
 			}
 		}
 		acc.BalanceMap[balanceType] = append(acc.BalanceMap[balanceType], bClone)
-		_, err := guardian.Guardian.Guard(func() (interface{}, error) {
+		_, err := guardian.Guardian.Guard(func() (any, error) {
 			sgs := make([]string, len(bClone.SharedGroups))
 			i := 0
 			for sgID := range bClone.SharedGroups {
@@ -549,7 +549,7 @@ func (acc *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun bo
 				CGREvent: &utils.CGREvent{
 					Tenant: acntTnt.Tenant,
 					ID:     utils.GenUUID(),
-					Event: map[string]interface{}{
+					Event: map[string]any{
 						utils.EventType:   utils.BalanceUpdate,
 						utils.EventSource: utils.AccountService,
 						utils.Account:     acntTnt.ID,
@@ -920,7 +920,7 @@ func (acc *Account) GetID() string {
 }
 
 // AsOldStructure used in some api for transition
-func (acc *Account) AsOldStructure() interface{} {
+func (acc *Account) AsOldStructure() any {
 	type Balance struct {
 		Uuid           string //system wide unique
 		Id             string // account wide unique
@@ -1090,7 +1090,7 @@ func (acc *Account) Publish() {
 	cgrEv := &utils.CGREvent{
 		Tenant: acntTnt.Tenant,
 		ID:     utils.GenUUID(),
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.EventType:     utils.AccountUpdate,
 			utils.EventSource:   utils.AccountService,
 			utils.Account:       acntTnt.ID,
@@ -1167,7 +1167,7 @@ func (acc *Account) GetBalanceWithID(blcType, blcID string) (blc *Balance) {
 }
 
 // FieldAsInterface func to help EventCost FieldAsInterface
-func (as *AccountSummary) FieldAsInterface(fldPath []string) (val interface{}, err error) {
+func (as *AccountSummary) FieldAsInterface(fldPath []string) (val any, err error) {
 	if as == nil || len(fldPath) == 0 {
 		return nil, utils.ErrNotFound
 	}

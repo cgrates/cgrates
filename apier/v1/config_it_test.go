@@ -111,8 +111,8 @@ func testConfigSReloadConfigFromJSONSessionS(t *testing.T) {
 
 	var reply string
 	if err := configRPC.Call(utils.ConfigSv1ReloadConfigFromJSON, &config.JSONReloadWithArgDispatcher{
-		JSON: map[string]interface{}{
-			"sessions": map[string]interface{}{
+		JSON: map[string]any{
+			"sessions": map[string]any{
 				"enabled":          true,
 				"resources_conns":  []string{"*localhost"},
 				"suppliers_conns":  []string{"*localhost"},
@@ -127,20 +127,20 @@ func testConfigSReloadConfigFromJSONSessionS(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Expected OK received: %s", reply)
 	}
-	exp := map[string]interface{}{
+	exp := map[string]any{
 		"Enabled":       true,
 		"ListenBijson":  "127.0.0.1:2014",
-		"ChargerSConns": []interface{}{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)},
-		"RALsConns":     []interface{}{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResponder)},
-		"ResSConns":     []interface{}{utils.MetaLocalHost},
-		"ThreshSConns":  []interface{}{},
-		"StatSConns":    []interface{}{},
-		"SupplSConns":   []interface{}{utils.MetaLocalHost},
-		"AttrSConns":    []interface{}{utils.MetaLocalHost},
-		"CDRsConns":     []interface{}{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)},
+		"ChargerSConns": []any{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)},
+		"RALsConns":     []any{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResponder)},
+		"ResSConns":     []any{utils.MetaLocalHost},
+		"ThreshSConns":  []any{},
+		"StatSConns":    []any{},
+		"SupplSConns":   []any{utils.MetaLocalHost},
+		"AttrSConns":    []any{utils.MetaLocalHost},
+		"CDRsConns":     []any{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)},
 
-		"ReplicationConns":    []interface{}{},
-		"SessionIndexes":      map[string]interface{}{"OriginID": true},
+		"ReplicationConns":    []any{},
+		"SessionIndexes":      map[string]any{"OriginID": true},
 		"ClientProtocol":      1.,
 		"TerminateAttempts":   5.,
 		"ChannelSyncInterval": 0.,
@@ -151,8 +151,8 @@ func testConfigSReloadConfigFromJSONSessionS(t *testing.T) {
 		"SessionTTLMaxDelay":  nil,
 		"SessionTTLUsage":     nil,
 		"StoreSCosts":         false,
-		"AlterableFields":     map[string]interface{}{},
-		"DefaultUsage": map[string]interface{}{
+		"AlterableFields":     map[string]any{},
+		"DefaultUsage": map[string]any{
 			utils.META_ANY: 10800000000000.,
 			utils.VOICE:    10800000000000.,
 			utils.DATA:     1048576.,
@@ -160,12 +160,12 @@ func testConfigSReloadConfigFromJSONSessionS(t *testing.T) {
 		},
 	}
 	if *encoding == utils.MetaGOB {
-		var empty []interface{}
+		var empty []any
 		exp["ThreshSConns"] = empty
 		exp["StatSConns"] = empty
 		exp["ReplicationConns"] = empty
 	}
-	var rpl map[string]interface{}
+	var rpl map[string]any
 	if err := configRPC.Call(utils.ConfigSv1GetJSONSection, &config.StringWithArgDispatcher{
 		Section: config.SessionSJson,
 	}, &rpl); err != nil {

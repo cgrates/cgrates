@@ -33,7 +33,7 @@ type ReplicatorSv1 struct {
 }
 
 // Call implements birpc.ClientConnector interface for internal RPC
-func (rplSv1 *ReplicatorSv1) Call(serviceMethod string, args interface{}, reply interface{}) error {
+func (rplSv1 *ReplicatorSv1) Call(serviceMethod string, args any, reply any) error {
 	return utils.APIerRPCCall(rplSv1, serviceMethod, args, reply)
 }
 

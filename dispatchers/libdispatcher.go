@@ -41,13 +41,13 @@ type Dispatcher interface {
 	HostIDs() (hostIDs []string)
 	// Dispatch is used to send the method over the connections given
 	Dispatch(routeID *string, subsystem,
-		serviceMethod string, args interface{}, reply interface{}) (err error)
+		serviceMethod string, args any, reply any) (err error)
 }
 
 type strategyDispatcher interface {
 	// dispatch is used to send the method over the connections given
 	dispatch(dm *engine.DataManager, routeID *string, subsystem, tnt string, hostIDs []string,
-		serviceMethod string, args interface{}, reply interface{}) (err error)
+		serviceMethod string, args any, reply any) (err error)
 }
 
 // newDispatcher constructs instances of Dispatcher
@@ -124,7 +124,7 @@ func (wd *WeightDispatcher) HostIDs() (hostIDs []string) {
 }
 
 func (wd *WeightDispatcher) Dispatch(routeID *string, subsystem,
-	serviceMethod string, args interface{}, reply interface{}) (err error) {
+	serviceMethod string, args any, reply any) (err error) {
 	return wd.strategy.dispatch(wd.dm, routeID, subsystem, wd.tnt, wd.HostIDs(),
 		serviceMethod, args, reply)
 }
@@ -154,7 +154,7 @@ func (d *RandomDispatcher) HostIDs() (hostIDs []string) {
 }
 
 func (d *RandomDispatcher) Dispatch(routeID *string, subsystem,
-	serviceMethod string, args interface{}, reply interface{}) (err error) {
+	serviceMethod string, args any, reply any) (err error) {
 	return d.strategy.dispatch(d.dm, routeID, subsystem, d.tnt, d.HostIDs(),
 		serviceMethod, args, reply)
 }
@@ -188,7 +188,7 @@ func (d *RoundRobinDispatcher) HostIDs() (hostIDs []string) {
 }
 
 func (d *RoundRobinDispatcher) Dispatch(routeID *string, subsystem,
-	serviceMethod string, args interface{}, reply interface{}) (err error) {
+	serviceMethod string, args any, reply any) (err error) {
 	return d.strategy.dispatch(d.dm, routeID, subsystem, d.tnt, d.HostIDs(),
 		serviceMethod, args, reply)
 }
@@ -217,7 +217,7 @@ func (d *BroadcastDispatcher) HostIDs() (hostIDs []string) {
 }
 
 func (d *BroadcastDispatcher) Dispatch(routeID *string, subsystem,
-	serviceMethod string, args interface{}, reply interface{}) (lastErr error) { // no cache needed for this strategy because we need to call all connections
+	serviceMethod string, args any, reply any) (lastErr error) { // no cache needed for this strategy because we need to call all connections
 	return d.strategy.dispatch(d.dm, routeID, subsystem, d.tnt, d.HostIDs(),
 		serviceMethod, args, reply)
 }
@@ -225,7 +225,7 @@ func (d *BroadcastDispatcher) Dispatch(routeID *string, subsystem,
 type singleResultstrategyDispatcher struct{}
 
 func (*singleResultstrategyDispatcher) dispatch(dm *engine.DataManager, routeID *string, subsystem, tnt string,
-	hostIDs []string, serviceMethod string, args interface{}, reply interface{}) (err error) {
+	hostIDs []string, serviceMethod string, args any, reply any) (err error) {
 	var dH *engine.DispatcherHost
 	if routeID != nil && *routeID != "" {
 		// overwrite routeID with RouteID:Subsystem
@@ -259,7 +259,7 @@ func (*singleResultstrategyDispatcher) dispatch(dm *engine.DataManager, routeID 
 type brodcastStrategyDispatcher struct{}
 
 func (*brodcastStrategyDispatcher) dispatch(dm *engine.DataManager, routeID *string, subsystem, tnt string, hostIDs []string,
-	serviceMethod string, args interface{}, reply interface{}) (err error) {
+	serviceMethod string, args any, reply any) (err error) {
 	var hasErrors bool
 	for _, hostID := range hostIDs {
 		var dH *engine.DispatcherHost
@@ -311,7 +311,7 @@ type loadStrategyDispatcher struct {
 }
 
 func (ld *loadStrategyDispatcher) dispatch(dm *engine.DataManager, routeID *string, subsystem, tnt string, hostIDs []string,
-	serviceMethod string, args interface{}, reply interface{}) (err error) {
+	serviceMethod string, args any, reply any) (err error) {
 	var dH *engine.DispatcherHost
 	if routeID != nil && *routeID != "" {
 		// overwrite routeID with RouteID:Subsystem

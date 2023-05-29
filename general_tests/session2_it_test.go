@@ -119,7 +119,7 @@ func testSes2ItInitSession(t *testing.T) {
 		Account:     "1001",
 		BalanceType: utils.VOICE,
 		Value:       float64(time.Hour),
-		Balance: map[string]interface{}{
+		Balance: map[string]any{
 			utils.ID: "TestDynamicDebitBalance",
 		},
 	}
@@ -135,7 +135,7 @@ func testSes2ItInitSession(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     utils.UUIDSha1Prefix(),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.EVENT_NAME:  "TEST_EVENT",
 				utils.OriginID:    utils.UUIDSha1Prefix(),
 				utils.ToR:         utils.VOICE,

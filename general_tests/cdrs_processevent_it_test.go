@@ -248,7 +248,7 @@ func testV1CDRsProcessEventAttrS(t *testing.T) {
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "test1",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.RunID:       "testv1",
 				utils.OriginID:    "test1_processEvent",
 				utils.OriginHost:  "OriginHost1",
@@ -302,7 +302,7 @@ func testV1CDRsProcessEventChrgS(t *testing.T) {
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "test2",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.RunID:       "testv1",
 				utils.OriginID:    "test2_processEvent",
 				utils.OriginHost:  "OriginHost2",
@@ -345,7 +345,7 @@ func testV1CDRsProcessEventRalS(t *testing.T) {
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "test3",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.RunID:       "testv1",
 				utils.OriginID:    "test3_processEvent",
 				utils.OriginHost:  "OriginHost3",
@@ -380,7 +380,7 @@ func testV1CDRsProcessEventSts(t *testing.T) {
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "test4",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.RunID:       "testv1",
 				utils.CGRID:       "c87609aa1cb6e9529ab1836cfeeebaab7aa7ebaf",
 				utils.Tenant:      "cgrates.org",
@@ -465,7 +465,7 @@ func testV1CDRsProcessEventStore(t *testing.T) {
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "test5",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.RunID:       "testv1",
 				utils.OriginID:    "test5_processEvent",
 				utils.OriginHost:  "OriginHost5",
@@ -544,7 +544,7 @@ func testV1CDRsProcessEventThreshold(t *testing.T) {
 		Account:     "1005",
 		BalanceType: utils.MONETARY,
 		Value:       1,
-		Balance: map[string]interface{}{
+		Balance: map[string]any{
 			utils.ID:     utils.MetaDefault,
 			utils.Weight: 10.0,
 		},
@@ -556,7 +556,7 @@ func testV1CDRsProcessEventThreshold(t *testing.T) {
 		Flags: []string{utils.MetaThresholds, utils.MetaRALs, utils.ConcatenatedKey(utils.MetaChargers, "false"), "*export:false"},
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.OriginID:    "testV2CDRsProcessCDRWithThreshold",
 				utils.OriginHost:  "OriginHost6",
 				utils.Source:      "testV2CDRsProcessCDRWithThreshold",
@@ -611,7 +611,7 @@ func testV1CDRsProcessEventExport(t *testing.T) {
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "test7",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.RunID:       "testv1",
 				utils.OriginID:    "test7_processEvent",
 				utils.OriginHost:  "OriginHost7",

@@ -48,7 +48,7 @@ func (self *CmdGetFilterIDs) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdGetFilterIDs) RpcParams(reset bool) interface{} {
+func (self *CmdGetFilterIDs) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &utils.TenantArgWithPaginator{}
 	}
@@ -59,7 +59,7 @@ func (self *CmdGetFilterIDs) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdGetFilterIDs) RpcResult() interface{} {
+func (self *CmdGetFilterIDs) RpcResult() any {
 	var atr []string
 	return &atr
 }

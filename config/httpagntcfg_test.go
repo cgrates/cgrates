@@ -389,22 +389,22 @@ func TestHttpAgentCfgAsMapInterface(t *testing.T) {
 		},
 	],	
 }`
-	eMap := []map[string]interface{}{
+	eMap := []map[string]any{
 		{
 			"id":              "conecto1",
 			"url":             "/conecto",
 			"sessions_conns":  []string{"*localhost"},
 			"request_payload": "*url",
 			"reply_payload":   "*xml",
-			"request_processors": []map[string]interface{}{
+			"request_processors": []map[string]any{
 				{
 					"id":             "OutboundAUTHDryRun",
 					"filters":        []string{"*string:~*req.request_type:OutboundAUTH", "*string:~*req.Msisdn:497700056231"},
 					"tenant":         "cgrates.org",
 					"flags":          map[string][]string{"*dryrun": {}},
 					"Timezone":       "",
-					"request_fields": []map[string]interface{}{},
-					"reply_fields": []map[string]interface{}{
+					"request_fields": []map[string]any{},
+					"reply_fields": []map[string]any{
 						{"tag": "Allow", "path": "*rep.response.Allow", "type": "*constant", "value": "1", "mandatory": true},
 						{"tag": "Concatenated1", "path": "*rep.response.Concatenated", "type": "*composed", "value": "~*req.MCC;/", "mandatory": true},
 						{"tag": "Concatenated2", "path": "*rep.response.Concatenated", "type": "*composed", "value": "Val1"},

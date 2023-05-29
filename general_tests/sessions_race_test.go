@@ -49,7 +49,7 @@ var (
 // and will read forever the Event map
 type raceConn struct{}
 
-func (_ raceConn) Call(ctx *context.Context, serviceMethod string, args interface{}, reply interface{}) (err error) {
+func (_ raceConn) Call(ctx *context.Context, serviceMethod string, args any, reply any) (err error) {
 	cgrev := args.(*engine.ArgsProcessEvent)
 	for {
 		for k := range cgrev.CGREvent.Event {
@@ -141,7 +141,7 @@ func TestSessionSRace(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testSSv1ItProcessEventInitiateSession",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Tenant:      "cgrates.org",
 				utils.ToR:         utils.VOICE,
 				utils.OriginID:    "testSSv1ItProcessEvent",
@@ -166,7 +166,7 @@ func TestSessionSRace(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testSSv1ItProcessEventInitiateSession",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Tenant:      "cgrates.org",
 				utils.ToR:         utils.VOICE,
 				utils.OriginID:    "testSSv1ItProcessEvent",

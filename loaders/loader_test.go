@@ -1019,7 +1019,7 @@ func TestLoaderProcessDispatches(t *testing.T) {
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 29, 15, 00, 0, 0, time.UTC),
 		},
-		StrategyParams: map[string]interface{}{},
+		StrategyParams: map[string]any{},
 		Strategy:       "*first",
 		Weight:         20,
 		Hosts: engine.DispatcherHostProfiles{
@@ -1027,14 +1027,14 @@ func TestLoaderProcessDispatches(t *testing.T) {
 				ID:        "C1",
 				FilterIDs: []string{"*gt:~*req.Usage:10"},
 				Weight:    10,
-				Params:    map[string]interface{}{"0": "192.168.56.203"},
+				Params:    map[string]any{"0": "192.168.56.203"},
 				Blocker:   false,
 			},
 			&engine.DispatcherHostProfile{
 				ID:        "C2",
 				FilterIDs: []string{"*lt:~*req.Usage:10"},
 				Weight:    10,
-				Params:    map[string]interface{}{"0": "192.168.56.204"},
+				Params:    map[string]any{"0": "192.168.56.204"},
 				Blocker:   false,
 			},
 		},

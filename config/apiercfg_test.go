@@ -71,7 +71,7 @@ func TestApierCfgAsMapInterface(t *testing.T) {
 		"attributes_conns": [],
 	},
 }`
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		"enabled":          false,
 		"caches_conns":     []string{},
 		"scheduler_conns":  []string{},
@@ -95,7 +95,7 @@ func TestApierCfgAsMapInterface(t *testing.T) {
 			"attributes_conns": ["*internal"],
 		},
 	}`
-	eMap = map[string]interface{}{
+	eMap = map[string]any{
 		"enabled":          false,
 		"caches_conns":     []string{"*internal"},
 		"scheduler_conns":  []string{"*internal"},

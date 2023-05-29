@@ -554,8 +554,8 @@ func TestCsvCdrWriterWithAttributeContext(t *testing.T) {
 	cdrEv.Event[utils.Subject] = "1002"
 	cdrEv.Event[utils.Destination] = "1004"
 	clientConn <- &ccMock{
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.AttributeSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.AttributeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
 				rpl := AttrSProcessEventReply{
 					CGREvent:      cdrEv,
 					AlteredFields: []string{utils.Account, utils.Subject, utils.Destination},

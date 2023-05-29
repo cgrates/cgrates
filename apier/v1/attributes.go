@@ -139,7 +139,7 @@ type AttributeSv1 struct {
 
 // Call implements birpc.ClientConnector interface for internal RPC
 func (alSv1 *AttributeSv1) Call(ctx *context.Context, serviceMethod string,
-	args interface{}, reply interface{}) error {
+	args any, reply any) error {
 	return utils.APIerRPCCall(alSv1, serviceMethod, args, reply)
 }
 

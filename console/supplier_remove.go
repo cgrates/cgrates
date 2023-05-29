@@ -45,7 +45,7 @@ func (self *CmdRemoveSupplier) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdRemoveSupplier) RpcParams(reset bool) interface{} {
+func (self *CmdRemoveSupplier) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &utils.TenantIDWithCache{}
 	}
@@ -56,7 +56,7 @@ func (self *CmdRemoveSupplier) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdRemoveSupplier) RpcResult() interface{} {
+func (self *CmdRemoveSupplier) RpcResult() any {
 	var s string
 	return &s
 }

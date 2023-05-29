@@ -72,7 +72,7 @@ type AsteriskAgent struct {
 	connMgr     *engine.ConnManager
 	astConnIdx  int
 	astConn     *aringo.ARInGO
-	astEvChan   chan map[string]interface{}
+	astEvChan   chan map[string]any
 	astErrChan  chan error
 	eventsCache map[string]*utils.CGREventWithArgDispatcher // used to gather information about events during various phases
 	evCacheMux  sync.RWMutex                                // Protect eventsCache
@@ -80,7 +80,7 @@ type AsteriskAgent struct {
 
 func (sma *AsteriskAgent) connectAsterisk() (err error) {
 	connCfg := sma.cgrCfg.AsteriskAgentCfg().AsteriskConns[sma.astConnIdx]
-	sma.astEvChan = make(chan map[string]interface{})
+	sma.astEvChan = make(chan map[string]any)
 	sma.astErrChan = make(chan error)
 	sma.astConn, err = aringo.NewARInGO(fmt.Sprintf("ws://%s/ari/events?api_key=%s:%s&app=%s",
 		connCfg.Address, connCfg.User, connCfg.Password, CGRAuthAPP), "http://cgrates.org",
@@ -338,14 +338,14 @@ func (sma *AsteriskAgent) V1DisconnectSession(args utils.AttrDisconnectSession, 
 }
 
 // Call implements birpc.ClientConnector interface
-func (sma *AsteriskAgent) Call(ctx *context.Context, serviceMethod string, args interface{}, reply interface{}) error {
+func (sma *AsteriskAgent) Call(ctx *context.Context, serviceMethod string, args any, reply any) error {
 	return utils.RPCCall(sma, serviceMethod, args, reply)
 }
 
 // V1GetActiveSessionIDs is internal method to  get all active sessions in asterisk
 func (sma *AsteriskAgent) V1GetActiveSessionIDs(ignParam string,
 	sessionIDs *[]*sessions.SessionID) error {
-	var slMpIface []map[string]interface{} // decode the result from ari into a slice of map[string]interface{}
+	var slMpIface []map[string]any // decode the result from ari into a slice of map[string]any
 	if byts, err := sma.astConn.Call(
 		aringo.HTTP_GET,
 		fmt.Sprintf("http://%s/ari/channels",

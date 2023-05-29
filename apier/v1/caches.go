@@ -117,6 +117,6 @@ func (chSv1 *CacheSv1) Ping(ign *utils.CGREventWithArgDispatcher, reply *string)
 
 // Call implements birpc.ClientConnector interface for internal RPC
 func (chSv1 *CacheSv1) Call(serviceMethod string,
-	args interface{}, reply interface{}) error {
+	args any, reply any) error {
 	return utils.APIerRPCCall(chSv1, serviceMethod, args, reply)
 }

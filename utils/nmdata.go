@@ -19,17 +19,17 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 // NewNMData returns the interface wraped in NMInterface struture
-func NewNMData(val interface{}) *NMData { return &NMData{data: val} }
+func NewNMData(val any) *NMData { return &NMData{data: val} }
 
 // NMData most basic NM structure
-type NMData struct{ data interface{} }
+type NMData struct{ data any }
 
 func (nmi *NMData) String() string {
 	return IfaceAsString(nmi.data)
 }
 
 // Interface returns the wraped interface
-func (nmi *NMData) Interface() interface{} {
+func (nmi *NMData) Interface() any {
 	return nmi.data
 }
 

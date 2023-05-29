@@ -49,7 +49,7 @@ func (self *CmdGetDestination) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdGetDestination) RpcParams(reset bool) interface{} {
+func (self *CmdGetDestination) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &v2.AttrGetDestinations{}
 	}
@@ -60,7 +60,7 @@ func (self *CmdGetDestination) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdGetDestination) RpcResult() interface{} {
+func (self *CmdGetDestination) RpcResult() any {
 	a := make([]*engine.Destination, 0)
 	return &a
 }

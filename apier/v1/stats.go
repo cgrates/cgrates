@@ -160,7 +160,7 @@ type StatSv1 struct {
 }
 
 // Call implements birpc.ClientConnector interface for internal RPC
-func (stsv1 *StatSv1) Call(ctx *context.Context, serviceMethod string, args interface{}, reply interface{}) error {
+func (stsv1 *StatSv1) Call(ctx *context.Context, serviceMethod string, args any, reply any) error {
 	return utils.APIerRPCCall(stsv1, serviceMethod, args, reply)
 }
 

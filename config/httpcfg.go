@@ -57,13 +57,13 @@ func (httpcfg *HTTPCfg) loadFromJsonCfg(jsnHttpCfg *HTTPJsonCfg) (err error) {
 	return nil
 }
 
-func (httpcfg *HTTPCfg) AsMapInterface() map[string]interface{} {
-	httpUsers := make(map[string]interface{}, len(httpcfg.HTTPAuthUsers))
+func (httpcfg *HTTPCfg) AsMapInterface() map[string]any {
+	httpUsers := make(map[string]any, len(httpcfg.HTTPAuthUsers))
 	for key, item := range httpcfg.HTTPAuthUsers {
 		httpUsers[key] = item
 	}
 
-	return map[string]interface{}{
+	return map[string]any{
 		utils.HTTPJsonRPCURLCfg:        httpcfg.HTTPJsonRPCURL,
 		utils.HTTPWSURLCfg:             httpcfg.HTTPWSURL,
 		utils.HTTPFreeswitchCDRsURLCfg: httpcfg.HTTPFreeswitchCDRsURL,

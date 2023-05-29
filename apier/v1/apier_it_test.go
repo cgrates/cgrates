@@ -1311,7 +1311,7 @@ func testApierSetAccountActionTriggers(t *testing.T) {
 		Account: "dan2",
 		AttrSetActionTrigger: AttrSetActionTrigger{
 			UniqueID: reply[0].UniqueID,
-			ActionTrigger: map[string]interface{}{
+			ActionTrigger: map[string]any{
 				utils.ActivationDate: "2016-02-05T18:00:00Z",
 			},
 		},
@@ -1976,7 +1976,7 @@ func testApierReplayFldPosts(t *testing.T) {
 	ev := &engine.ExportEvents{
 		Path:   "http://localhost:2081",
 		Format: utils.MetaHTTPjson,
-		Events: []interface{}{bev},
+		Events: []any{bev},
 	}
 	fileName := "act>*http_post|63bed4ea-615e-4096-b1f4-499f64f29b28.json"
 
@@ -2015,7 +2015,7 @@ func testApierReplayFldPosts(t *testing.T) {
 	ev = &engine.ExportEvents{
 		Path:   "amqp://guest:guest@localhost:5672/?queue_id=cgrates_cdrs",
 		Format: utils.MetaAMQPjsonMap,
-		Events: []interface{}{bev},
+		Events: []any{bev},
 	}
 	err = ev.WriteToFile(path.Join(*args.FailedRequestsInDir, fileName))
 	if err != nil {

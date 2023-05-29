@@ -50,7 +50,7 @@ func (self *CmdResourceAuthorize) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdResourceAuthorize) RpcParams(reset bool) interface{} {
+func (self *CmdResourceAuthorize) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &utils.ArgRSv1ResourceUsage{ArgDispatcher: new(utils.ArgDispatcher)}
 	}
@@ -65,7 +65,7 @@ func (self *CmdResourceAuthorize) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdResourceAuthorize) RpcResult() interface{} {
+func (self *CmdResourceAuthorize) RpcResult() any {
 	var atr *string
 	return &atr
 }

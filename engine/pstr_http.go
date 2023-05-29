@@ -84,13 +84,13 @@ type HTTPPoster struct {
 }
 
 // Post will post the event
-func (pstr *HTTPPoster) Post(content interface{}, key string) (err error) {
+func (pstr *HTTPPoster) Post(content any, key string) (err error) {
 	_, err = pstr.GetResponse(content)
 	return
 }
 
 // GetResponse will post the event and return the response
-func (pstr *HTTPPoster) GetResponse(content interface{}) (respBody []byte, err error) {
+func (pstr *HTTPPoster) GetResponse(content any) (respBody []byte, err error) {
 	var body []byte        // Used to write in file and send over http
 	var urlVals url.Values // Used when posting form
 	if pstr.contentType == utils.CONTENT_FORM {

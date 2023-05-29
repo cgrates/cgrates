@@ -100,7 +100,7 @@ func (s *RPCClientSet) GetInternalChanel() chan birpc.ClientConnector {
 }
 
 // Call the implementation of the birpc.ClientConnector interface
-func (s *RPCClientSet) Call(ctx *context.Context, method string, args interface{}, reply interface{}) error {
+func (s *RPCClientSet) Call(ctx *context.Context, method string, args any, reply any) error {
 	methodSplit := strings.Split(method, ".")
 	if len(methodSplit) != 2 {
 		return rpcclient.ErrUnsupporteServiceMethod
@@ -112,7 +112,7 @@ func (s *RPCClientSet) Call(ctx *context.Context, method string, args interface{
 	return conn.Call(context.TODO(), method, args, reply)
 }
 
-func NewBiRPCService(val interface{}) (srv *birpc.Service, err error) {
+func NewBiRPCService(val any) (srv *birpc.Service, err error) {
 	var initialSrv *birpc.Service
 	if initialSrv, err = birpc.NewService(val, "", false); err != nil {
 		return

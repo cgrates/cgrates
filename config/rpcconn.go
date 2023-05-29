@@ -62,13 +62,13 @@ func (rC *RPCConn) loadFromJsonCfg(jsnCfg *RPCConnsJson) (err error) {
 	return
 }
 
-func (rC *RPCConn) AsMapInterface() map[string]interface{} {
-	conns := make([]map[string]interface{}, len(rC.Conns))
+func (rC *RPCConn) AsMapInterface() map[string]any {
+	conns := make([]map[string]any, len(rC.Conns))
 	for i, item := range rC.Conns {
 		conns[i] = item.AsMapInterface()
 	}
 
-	return map[string]interface{}{
+	return map[string]any{
 		utils.StrategyCfg: rC.Strategy,
 		utils.PoolSize:    rC.PoolSize,
 		utils.Conns:       conns,
@@ -109,8 +109,8 @@ func (self *RemoteHost) loadFromJsonCfg(jsnCfg *RemoteHostJson) error {
 	return nil
 }
 
-func (rh *RemoteHost) AsMapInterface() map[string]interface{} {
-	return map[string]interface{}{
+func (rh *RemoteHost) AsMapInterface() map[string]any {
+	return map[string]any{
 		utils.AddressCfg:     rh.Address,
 		utils.TransportCfg:   rh.Transport,
 		utils.SynchronousCfg: rh.Synchronous,

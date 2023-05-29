@@ -124,7 +124,7 @@ func (cdrS *CDRServer) storeSMCost(smCost *SMCost, checkDuplicate bool) error {
 	smCost.CostDetails.Compute()                                              // make sure the total cost reflect the increment
 	lockKey := utils.MetaCDRs + smCost.CGRID + smCost.RunID + smCost.OriginID // Will lock on this ID
 	if checkDuplicate {
-		_, err := cdrS.guard.Guard(func() (interface{}, error) {
+		_, err := cdrS.guard.Guard(func() (any, error) {
 			smCosts, err := cdrS.cdrDb.GetSMCosts(smCost.CGRID, smCost.RunID, "", "")
 			if err != nil && err.Error() != utils.NotFoundCaps {
 				return nil, err
@@ -595,7 +595,7 @@ func (cdrS *CDRServer) processEvents(evs []*utils.CGREventWithArgDispatcher,
 }
 
 // Call implements the birpc.ClientConnector interface
-func (cdrS *CDRServer) Call(ctx *context.Context, serviceMethod string, args interface{}, reply interface{}) error {
+func (cdrS *CDRServer) Call(ctx *context.Context, serviceMethod string, args any, reply any) error {
 	parts := strings.Split(serviceMethod, ".")
 	if len(parts) != 2 {
 		return rpcclient.ErrUnsupporteServiceMethod

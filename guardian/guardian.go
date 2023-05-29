@@ -127,13 +127,13 @@ func (gl *GuardianLocker) unlockWithReference(refID string) (lkIDs []string) {
 }
 
 // Guard executes the handler between locks
-func (gl *GuardianLocker) Guard(handler func() (interface{}, error), timeout time.Duration, lockIDs ...string) (reply interface{}, err error) {
+func (gl *GuardianLocker) Guard(handler func() (any, error), timeout time.Duration, lockIDs ...string) (reply any, err error) {
 	for _, lockID := range lockIDs {
 		gl.lockItem(lockID)
 	}
-	rplyChan := make(chan interface{})
+	rplyChan := make(chan any)
 	errChan := make(chan error)
-	go func(rplyChan chan interface{}, errChan chan error) {
+	go func(rplyChan chan any, errChan chan error) {
 		// execute
 		if rply, err := handler(); err != nil {
 			errChan <- err

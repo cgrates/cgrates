@@ -48,7 +48,7 @@ func (self *CmdGetPrecacheStatus) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdGetPrecacheStatus) RpcParams(reset bool) interface{} {
+func (self *CmdGetPrecacheStatus) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = new(utils.AttrCacheIDsWithArgDispatcher)
 	}
@@ -59,7 +59,7 @@ func (self *CmdGetPrecacheStatus) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdGetPrecacheStatus) RpcResult() interface{} {
+func (self *CmdGetPrecacheStatus) RpcResult() any {
 	reply := make(map[string]string)
 	return &reply
 }

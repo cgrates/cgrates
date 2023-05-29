@@ -50,7 +50,7 @@ func (self *CmdAttributesProcessEvent) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdAttributesProcessEvent) RpcParams(reset bool) interface{} {
+func (self *CmdAttributesProcessEvent) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &engine.AttrArgsProcessEvent{ArgDispatcher: new(utils.ArgDispatcher)}
 	}
@@ -64,12 +64,12 @@ func (self *CmdAttributesProcessEvent) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdAttributesProcessEvent) RpcResult() interface{} {
+func (self *CmdAttributesProcessEvent) RpcResult() any {
 	var atr engine.AttrSProcessEventReply
 	return &atr
 }
 
-func (self *CmdAttributesProcessEvent) GetFormatedResult(result interface{}) string {
+func (self *CmdAttributesProcessEvent) GetFormatedResult(result any) string {
 	return GetFormatedResult(result, map[string]struct{}{
 		"Usage": {},
 	})

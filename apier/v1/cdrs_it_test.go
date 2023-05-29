@@ -135,7 +135,7 @@ func testV1CDRsProcessEventWithRefund(t *testing.T) {
 		Account:     acntAttrs.Account,
 		BalanceType: utils.VOICE,
 		Value:       120000000000,
-		Balance: map[string]interface{}{
+		Balance: map[string]any{
 			utils.ID:     "BALANCE1",
 			utils.Weight: 20,
 		},
@@ -151,7 +151,7 @@ func testV1CDRsProcessEventWithRefund(t *testing.T) {
 		Account:     acntAttrs.Account,
 		BalanceType: utils.VOICE,
 		Value:       180000000000,
-		Balance: map[string]interface{}{
+		Balance: map[string]any{
 			utils.ID:     "BALANCE2",
 			utils.Weight: 10,
 		},
@@ -171,7 +171,7 @@ func testV1CDRsProcessEventWithRefund(t *testing.T) {
 		Flags: []string{utils.MetaRALs},
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.RunID:       "testv1",
 				utils.OriginID:    "testV1CDRsProcessEventWithRefund",
 				utils.RequestType: utils.META_PSEUDOPREPAID,
@@ -222,7 +222,7 @@ func testV1CDRsProcessEventWithRefund(t *testing.T) {
 		Flags: []string{utils.MetaRALs, utils.MetaRerate},
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.RunID:       "testv1",
 				utils.OriginID:    "testV1CDRsProcessEventWithRefund",
 				utils.RequestType: utils.META_PSEUDOPREPAID,
@@ -259,7 +259,7 @@ func testV1CDRsRefundOutOfSessionCost(t *testing.T) {
 		Account:     acntAttrs.Account,
 		BalanceType: utils.MONETARY,
 		Value:       123,
-		Balance: map[string]interface{}{
+		Balance: map[string]any{
 			utils.ID:     utils.MetaDefault,
 			utils.Weight: 20,
 		},
@@ -369,7 +369,7 @@ func testV1CDRsRefundOutOfSessionCost(t *testing.T) {
 		Flags: []string{utils.MetaRALs},
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.CGRID:       "test1",
 				utils.RunID:       utils.MetaDefault,
 				utils.OriginID:    "testV1CDRsRefundOutOfSessionCost",
@@ -408,7 +408,7 @@ func testV1CDRsRefundCDR(t *testing.T) {
 		Account:     acntAttrs.Account,
 		BalanceType: utils.MONETARY,
 		Value:       123,
-		Balance: map[string]interface{}{
+		Balance: map[string]any{
 			utils.ID:     utils.MetaDefault,
 			utils.Weight: 20,
 		},
@@ -433,7 +433,7 @@ func testV1CDRsRefundCDR(t *testing.T) {
 		Flags: []string{utils.MetaRefund},
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.RunID:       utils.MetaDefault,
 				utils.OriginID:    "testV1CDRsRefundCDR",
 				utils.RequestType: utils.META_PSEUDOPREPAID,
@@ -588,7 +588,7 @@ func testV1CDRsAddBalanceForSMS(t *testing.T) {
 		Flags: []string{utils.MetaRALs},
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.CGRID:       "asdfas",
 				utils.ToR:         utils.SMS,
 				utils.Category:    "sms",

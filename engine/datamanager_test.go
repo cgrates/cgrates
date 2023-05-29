@@ -40,8 +40,8 @@ func TestDmSetSupplierProfileRpl(t *testing.T) {
 	cfg.DataDbCfg().RplConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1)}
 	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.ReplicatorSv1SetSupplierProfile: func(ctx *context.Context, args, reply interface{}) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ReplicatorSv1SetSupplierProfile: func(ctx *context.Context, args, reply any) error {
 				*reply.(*string) = utils.OK
 				return nil
 			},
@@ -149,8 +149,8 @@ func TestDmMatchFilterIndexFromKey(t *testing.T) {
 	cfg.DataDbCfg().RmtConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1)}
 	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.ReplicatorSv1MatchFilterIndex: func(ctx *context.Context, args, reply interface{}) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ReplicatorSv1MatchFilterIndex: func(ctx *context.Context, args, reply any) error {
 				return nil
 			},
 		},
@@ -505,7 +505,7 @@ func TestFilterIndexesRmtRpl(t *testing.T) {
 		},
 	}
 	clientConn := make(chan birpc.ClientConnector, 1)
-	clientConn <- clMock(func(ctx *context.Context, m string, a, r interface{}) error {
+	clientConn <- clMock(func(ctx *context.Context, m string, a, r any) error {
 		if m == utils.ReplicatorSv1SetFilterIndexes {
 			setFltrIndxArg, concat := a.(*utils.SetFilterIndexesArg)
 			if !concat {
@@ -757,7 +757,7 @@ func TestDMReplicateMultipleIds(t *testing.T) {
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 	clientConn := make(chan birpc.ClientConnector, 1)
-	clientConn <- clMock(func(ctx *context.Context, serviceMethod string, args, _ interface{}) error {
+	clientConn <- clMock(func(ctx *context.Context, serviceMethod string, args, _ any) error {
 		if serviceMethod == utils.ReplicatorSv1RemoveAccount {
 			keyList, err := dm.DataDB().GetKeysForPrefix(args.(string))
 			if err != nil {
@@ -1102,13 +1102,13 @@ func TestDmDispatcherProfile(t *testing.T) {
 				ID:        "ALL2",
 				FilterIDs: []string{},
 				Weight:    20,
-				Params:    make(map[string]interface{}),
+				Params:    make(map[string]any),
 			},
 			&DispatcherHostProfile{
 				ID:        "ALL",
 				FilterIDs: []string{},
 				Weight:    10,
-				Params:    make(map[string]interface{}),
+				Params:    make(map[string]any),
 			},
 		},
 	}
@@ -1131,7 +1131,7 @@ func TestDmGetSQRemote(t *testing.T) {
 		config.SetCgrConfig(cfg2)
 	}()
 	clientConnn := make(chan birpc.ClientConnector, 1)
-	clientConnn <- clMock(func(ctx *context.Context, serviceMethod string, _, reply interface{}) error {
+	clientConnn <- clMock(func(ctx *context.Context, serviceMethod string, _, reply any) error {
 		if serviceMethod == utils.ReplicatorSv1GetStatQueue {
 
 			*reply.(*StoredStatQueue) = StoredStatQueue{
@@ -1167,7 +1167,7 @@ func TestRemoveThresholdRpl(t *testing.T) {
 		config.SetCgrConfig(cfg2)
 	}()
 	clientConnn := make(chan birpc.ClientConnector, 1)
-	clientConnn <- clMock(func(ctx *context.Context, serviceMethod string, _, reply interface{}) error {
+	clientConnn <- clMock(func(ctx *context.Context, serviceMethod string, _, reply any) error {
 		if serviceMethod == utils.ReplicatorSv1RemoveThreshold {
 
 			return nil
@@ -1197,7 +1197,7 @@ func TestRemoveDispatcherPrfRpl(t *testing.T) {
 		config.SetCgrConfig(cfg2)
 	}()
 	clientConnn := make(chan birpc.ClientConnector, 1)
-	clientConnn <- clMock(func(ctx *context.Context, serviceMethod string, _, reply interface{}) error {
+	clientConnn <- clMock(func(ctx *context.Context, serviceMethod string, _, reply any) error {
 		if serviceMethod == utils.ReplicatorSv1RemoveDispatcherProfile {
 
 			return nil
@@ -1266,7 +1266,7 @@ func TestDMGetDispacherHost(t *testing.T) {
 	}()
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	clientConn := make(chan birpc.ClientConnector, 1)
-	clientConn <- clMock(func(ctx *context.Context, serviceMethod string, _, reply interface{}) error {
+	clientConn <- clMock(func(ctx *context.Context, serviceMethod string, _, reply any) error {
 		if serviceMethod == utils.ReplicatorSv1GetDispatcherHost {
 
 			rpl := &DispatcherHost{
@@ -1298,7 +1298,7 @@ func TestDmRemoveStatQueue(t *testing.T) {
 		config.SetCgrConfig(cfg2)
 	}()
 	clientConn := make(chan birpc.ClientConnector, 1)
-	clientConn <- clMock(func(ctx *context.Context, serviceMethod string, _, _ interface{}) error {
+	clientConn <- clMock(func(ctx *context.Context, serviceMethod string, _, _ any) error {
 		if serviceMethod == utils.ReplicatorSv1RemoveStatQueue {
 			return nil
 		}
@@ -1327,7 +1327,7 @@ func TestRemoveResource(t *testing.T) {
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 
 	clientConn := make(chan birpc.ClientConnector, 1)
-	clientConn <- clMock(func(ctx *context.Context, serviceMethod string, _, _ interface{}) error {
+	clientConn <- clMock(func(ctx *context.Context, serviceMethod string, _, _ any) error {
 		if utils.ReplicatorSv1RemoveResource == serviceMethod {
 			return nil
 		}
@@ -1355,7 +1355,7 @@ func TestSetReverseDestinastionRpl(t *testing.T) {
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 
 	clientConn := make(chan birpc.ClientConnector, 1)
-	clientConn <- clMock(func(ctx *context.Context, serviceMethod string, _, _ interface{}) error {
+	clientConn <- clMock(func(ctx *context.Context, serviceMethod string, _, _ any) error {
 		if utils.ReplicatorSv1SetReverseDestination == serviceMethod {
 			return nil
 		}
@@ -1383,7 +1383,7 @@ func TestDMGetThresholdRmt(t *testing.T) {
 	cfg.DataDbCfg().RmtConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1)}
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	clientConn := make(chan birpc.ClientConnector, 1)
-	clientConn <- clMock(func(ctx *context.Context, serviceMethod string, _, reply interface{}) error {
+	clientConn <- clMock(func(ctx *context.Context, serviceMethod string, _, reply any) error {
 		if serviceMethod == utils.ReplicatorSv1GetThreshold {
 			rpl := &Threshold{
 				Tenant: "cgrates.org", ID: "THD_Stat", Hits: 1,
@@ -1414,7 +1414,7 @@ func TestDmGetRatingPlanRmt(t *testing.T) {
 	Cache.Clear(nil)
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	clientConn := make(chan birpc.ClientConnector, 1)
-	clientConn <- clMock(func(ctx *context.Context, serviceMethod string, _, reply interface{}) error {
+	clientConn <- clMock(func(ctx *context.Context, serviceMethod string, _, reply any) error {
 		if serviceMethod == utils.ReplicatorSv1GetRatingPlan {
 			rpl := &RatingPlan{
 				Id: "RP1",
@@ -1460,7 +1460,7 @@ func TestDMGetTimingRmt(t *testing.T) {
 		config.SetCgrConfig(cfg2)
 	}()
 	clientConn := make(chan birpc.ClientConnector, 1)
-	clientConn <- clMock(func(ctx *context.Context, serviceMethod string, _, reply interface{}) error {
+	clientConn <- clMock(func(ctx *context.Context, serviceMethod string, _, reply any) error {
 		if serviceMethod == utils.ReplicatorSv1GetTiming {
 			rpl := &utils.TPTiming{
 				ID:        "WEEKENDS",
@@ -1498,7 +1498,7 @@ func TestSetResourceProfileRPl(t *testing.T) {
 		config.SetCgrConfig(cfg2)
 	}()
 	clientConn := make(chan birpc.ClientConnector, 1)
-	clientConn <- clMock(func(ctx *context.Context, serviceMethod string, _, reply interface{}) error {
+	clientConn <- clMock(func(ctx *context.Context, serviceMethod string, _, reply any) error {
 		if serviceMethod == utils.ReplicatorSv1GetResourceProfile {
 			rpl := &ResourceProfile{
 				Tenant:    "cgrates.org",
@@ -1542,7 +1542,7 @@ func TestDMGetActionTriggersRmt(t *testing.T) {
 		config.SetCgrConfig(cfg2)
 	}()
 	clientConn := make(chan birpc.ClientConnector, 1)
-	clientConn <- clMock(func(ctx *context.Context, serviceMethod string, _, reply interface{}) error {
+	clientConn <- clMock(func(ctx *context.Context, serviceMethod string, _, reply any) error {
 		if serviceMethod == utils.ReplicatorSv1GetActionTriggers {
 			rpl := ActionTriggers{
 				&ActionTrigger{
@@ -1588,7 +1588,7 @@ func TestDMRemSQPRepl(t *testing.T) {
 	cfg.DataDbCfg().RplConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1)}
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	clientConn := make(chan birpc.ClientConnector, 1)
-	clientConn <- clMock(func(ctx *context.Context, serviceMethod string, _, _ interface{}) error {
+	clientConn <- clMock(func(ctx *context.Context, serviceMethod string, _, _ any) error {
 		if serviceMethod == utils.ReplicatorSv1RemoveStatQueueProfile {
 
 			return nil
@@ -1630,7 +1630,7 @@ func TestDmRemoveFilter(t *testing.T) {
 	}()
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	clientConn := make(chan birpc.ClientConnector, 1)
-	clientConn <- clMock(func(ctx *context.Context, serviceMethod string, _, _ interface{}) error {
+	clientConn <- clMock(func(ctx *context.Context, serviceMethod string, _, _ any) error {
 		if serviceMethod == utils.ReplicatorSv1RemoveFilter {
 
 			return nil
@@ -1680,7 +1680,7 @@ func TestDMGetSupplierProfile(t *testing.T) {
 		config.SetCgrConfig(cfg2)
 	}()
 	clientConn := make(chan birpc.ClientConnector, 1)
-	clientConn <- clMock(func(ctx *context.Context, serviceMethod string, _, reply interface{}) error {
+	clientConn <- clMock(func(ctx *context.Context, serviceMethod string, _, reply any) error {
 		if serviceMethod == utils.ReplicatorSv1GetSupplierProfile {
 			rpl := &SupplierProfile{}
 			*reply.(**SupplierProfile) = rpl
@@ -1728,7 +1728,7 @@ func TestDMRemResourceProfile(t *testing.T) {
 	cfg.DataDbCfg().Items[utils.MetaResourceProfile].Replicate = true
 	cfg.DataDbCfg().RplConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1)}
 	clientConn := make(chan birpc.ClientConnector, 1)
-	clientConn <- clMock(func(ctx *context.Context, serviceMethod string, _, _ interface{}) error {
+	clientConn <- clMock(func(ctx *context.Context, serviceMethod string, _, _ any) error {
 		if serviceMethod == utils.ReplicatorSv1RemoveResourceProfile {
 			return nil
 		}
@@ -1769,7 +1769,7 @@ func TestDMSetSQPrf(t *testing.T) {
 	cfg.DataDbCfg().Items[utils.MetaStatQueueProfiles].Replicate = true
 	cfg.DataDbCfg().RplConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1)}
 	clientConn := make(chan birpc.ClientConnector, 1)
-	clientConn <- clMock(func(ctx *context.Context, serviceMethod string, _, _ interface{}) error {
+	clientConn <- clMock(func(ctx *context.Context, serviceMethod string, _, _ any) error {
 		if serviceMethod == utils.ReplicatorSv1SetStatQueueProfile {
 			return nil
 		}
@@ -1808,7 +1808,7 @@ func TestRemoveAttributeProfile(t *testing.T) {
 	cfg.DataDbCfg().Items[utils.MetaAttributeProfiles].Replicate = true
 	cfg.DataDbCfg().RplConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}
 	clientConn := make(chan birpc.ClientConnector, 1)
-	clientConn <- clMock(func(_ *context.Context, serviceMethod string, _, _ interface{}) error {
+	clientConn <- clMock(func(_ *context.Context, serviceMethod string, _, _ any) error {
 		if serviceMethod == utils.ReplicatorSv1RemoveAttributeProfile {
 			return nil
 		}
@@ -1904,7 +1904,7 @@ func TestDataManagerRemoveChargerProfile(t *testing.T) {
 	cfg.DataDbCfg().Items[utils.MetaChargerProfiles].Replicate = true
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	clientConn := make(chan birpc.ClientConnector, 1)
-	clientConn <- clMock(func(_ *context.Context, serviceMethod string, _, _ interface{}) error {
+	clientConn <- clMock(func(_ *context.Context, serviceMethod string, _, _ any) error {
 		if serviceMethod == utils.ReplicatorSv1RemoveChargerProfile {
 			return nil
 		}
@@ -1989,7 +1989,7 @@ func TestDMGetFilter(t *testing.T) {
 	cfg.DataDbCfg().Items[utils.MetaFilters].Remote = true
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	clientConn := make(chan birpc.ClientConnector, 1)
-	clientConn <- clMock(func(_ *context.Context, serviceMethod string, _, reply interface{}) error {
+	clientConn <- clMock(func(_ *context.Context, serviceMethod string, _, reply any) error {
 		if serviceMethod == utils.ReplicatorSv1GetFilter {
 			flt := &Filter{
 				Tenant: "cgrates.org",
@@ -2158,7 +2158,7 @@ func TestDmGetAccountActionPlans(t *testing.T) {
 	cfg.DataDbCfg().RmtConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1)}
 	cfg.DataDbCfg().Items[utils.MetaAccountActionPlans].Remote = true
 	clientConn := make(chan birpc.ClientConnector, 1)
-	clientConn <- clMock(func(_ *context.Context, serviceMethod string, _, _ interface{}) error {
+	clientConn <- clMock(func(_ *context.Context, serviceMethod string, _, _ any) error {
 		if serviceMethod == utils.ReplicatorSv1GetAccountActionPlans {
 
 			return nil
@@ -2212,7 +2212,7 @@ func TestDmSetFilter(t *testing.T) {
 	cfg.DataDbCfg().Items[utils.MetaFilters].Replicate = true
 	cfg.DataDbCfg().RplConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1)}
 	clientConn := make(chan birpc.ClientConnector, 1)
-	clientConn <- clMock(func(_ *context.Context, serviceMethod string, _, _ interface{}) error {
+	clientConn <- clMock(func(_ *context.Context, serviceMethod string, _, _ any) error {
 		if serviceMethod == utils.ReplicatorSv1SetFilter {
 			return nil
 		}
@@ -2261,7 +2261,7 @@ func TestDmRemAccountActionPlans(t *testing.T) {
 	cfg.DataDbCfg().Items[utils.MetaAccountActionPlans].Replicate = true
 	cfg.DataDbCfg().RplConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1)}
 	clientConn := make(chan birpc.ClientConnector, 1)
-	clientConn <- clMock(func(_ *context.Context, serviceMethod string, _, _ interface{}) error {
+	clientConn <- clMock(func(_ *context.Context, serviceMethod string, _, _ any) error {
 		if serviceMethod == utils.ReplicatorSv1RemAccountActionPlans {
 			return nil
 		}
@@ -2308,7 +2308,7 @@ func TestDMSetActionPlanRpl(t *testing.T) {
 	cfg, _ := config.NewDefaultCGRConfig()
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	clientConn := make(chan birpc.ClientConnector, 1)
-	clientConn <- clMock(func(_ *context.Context, serviceMethod string, _, _ interface{}) error {
+	clientConn <- clMock(func(_ *context.Context, serviceMethod string, _, _ any) error {
 		if serviceMethod == utils.ReplicatorSv1SetActionPlan {
 			return nil
 		}

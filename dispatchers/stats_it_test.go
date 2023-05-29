@@ -111,7 +111,7 @@ func testDspStsGetStatFailover(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "event1",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.EVENT_NAME:  "Event1",
 				utils.Account:     "1001",
 				utils.AnswerTime:  time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
@@ -191,7 +191,7 @@ func testDspStsTestAuthKey(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "event1",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Account:    "1001",
 				utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 				utils.Usage:      time.Duration(135 * time.Second),
@@ -232,7 +232,7 @@ func testDspStsTestAuthKey2(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "event1",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Account:     "1001",
 				utils.AnswerTime:  time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 				utils.Usage:       time.Duration(135 * time.Second),
@@ -275,7 +275,7 @@ func testDspStsTestAuthKey2(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "event1",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Account:     "1002",
 				utils.AnswerTime:  time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 				utils.Usage:       time.Duration(45 * time.Second),
@@ -355,7 +355,7 @@ func testDspStsTestAuthKey3(t *testing.T) {
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "GetStats",
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					utils.Account:     "1002",
 					utils.AnswerTime:  time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 					utils.Usage:       time.Duration(45 * time.Second),

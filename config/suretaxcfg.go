@@ -175,7 +175,7 @@ func (self *SureTaxCfg) loadFromJsonCfg(jsnCfg *SureTaxJsonCfg) (err error) {
 	return nil
 }
 
-func (st *SureTaxCfg) AsMapInterface(separator string) map[string]interface{} {
+func (st *SureTaxCfg) AsMapInterface(separator string) map[string]any {
 	var clientTracking string
 	if st.ClientTracking != nil {
 		values := make([]string, len(st.ClientTracking))
@@ -305,7 +305,7 @@ func (st *SureTaxCfg) AsMapInterface(separator string) map[string]interface{} {
 		taxExemptionCodeList = strings.Join(values, separator)
 	}
 
-	return map[string]interface{}{
+	return map[string]any{
 		utils.UrlCfg:                  st.Url,
 		utils.ClientNumberCfg:         st.ClientNumber,
 		utils.ValidationKeyCfg:        st.ValidationKey,

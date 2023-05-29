@@ -66,7 +66,7 @@ func TestDspResponder(t *testing.T) {
 }
 
 func testDspResponderStatus(t *testing.T) {
-	var reply map[string]interface{}
+	var reply map[string]any
 	if err := allEngine.RPC.Call(utils.CoreSv1Status, utils.TenantWithArgDispatcher{}, &reply); err != nil {
 		t.Error(err)
 	} else if reply[utils.NodeID] != "ALL" {
@@ -95,12 +95,12 @@ func testDspResponderStatus(t *testing.T) {
 }
 
 func getNodeWithRoute(route string, t *testing.T) string {
-	var reply map[string]interface{}
+	var reply map[string]any
 	var pingReply string
 	pingEv := utils.CGREventWithArgDispatcher{
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.EVENT_NAME: "Random",
 			},
 		},
@@ -145,7 +145,7 @@ func testDspResponderRandom(t *testing.T) {
 
 func testDspResponderShutdown(t *testing.T) {
 	var reply string
-	var statusReply map[string]interface{}
+	var statusReply map[string]any
 	ev := utils.TenantWithArgDispatcher{
 		TenantArg: &utils.TenantArg{
 			Tenant: "cgrates.org",
@@ -178,7 +178,7 @@ func testDspResponderBroadcast(t *testing.T) {
 	pingEv := utils.CGREventWithArgDispatcher{
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.EVENT_NAME: "Broadcast",
 			},
 		},
@@ -209,13 +209,13 @@ func testDspResponderBroadcast(t *testing.T) {
 }
 
 func testDspResponderInternal(t *testing.T) {
-	var reply map[string]interface{}
+	var reply map[string]any
 	var pingReply string
 	route := "internal"
 	pingEv := utils.CGREventWithArgDispatcher{
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.EVENT_NAME: "Internal",
 			},
 		},

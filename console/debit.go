@@ -50,7 +50,7 @@ func (self *CmdDebit) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdDebit) RpcParams(reset bool) interface{} {
+func (self *CmdDebit) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &engine.CallDescriptorWithArgDispatcher{
 			CallDescriptor: new(engine.CallDescriptor),
@@ -64,7 +64,7 @@ func (self *CmdDebit) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdDebit) RpcResult() interface{} {
+func (self *CmdDebit) RpcResult() any {
 	return &engine.CallCost{}
 }
 

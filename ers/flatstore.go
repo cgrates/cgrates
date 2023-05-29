@@ -282,7 +282,7 @@ func pairToRecord(part1, part2 *UnpairedRecord) ([]string, error) {
 	return record, nil
 }
 
-func (rdr *FlatstoreER) dumpToFile(itmID string, value interface{}) {
+func (rdr *FlatstoreER) dumpToFile(itmID string, value any) {
 	unpRcd := value.(*UnpairedRecord)
 
 	dumpFilePath := path.Join(rdr.Config().ProcessedPath, unpRcd.FileName+utils.TmpSuffix)

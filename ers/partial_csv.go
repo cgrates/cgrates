@@ -57,7 +57,7 @@ func NewPartialCSVFileER(cfg *config.CGRConfig, cfgIdx int,
 		rdrExit:   rdrExit,
 		conReqs:   make(chan struct{}, cfg.ERsCfg().Readers[cfgIdx].ConcurrentReqs)}
 
-	var function func(itmID string, value interface{})
+	var function func(itmID string, value any)
 	if cfg.ERsCfg().Readers[cfgIdx].PartialCacheExpiryAction == utils.MetaDumpToFile {
 		function = pCSVFileER.dumpToFile
 	} else {
@@ -267,7 +267,7 @@ const (
 	PartialRecordsSuffix = "partial"
 )
 
-func (rdr *PartialCSVFileER) dumpToFile(itmID string, value interface{}) {
+func (rdr *PartialCSVFileER) dumpToFile(itmID string, value any) {
 	origCgrEvs := value.([]*utils.CGREvent)
 	for _, origCgrEv := range origCgrEvs {
 		// complete CDR are handling in processFile function
@@ -333,7 +333,7 @@ func (rdr *PartialCSVFileER) dumpToFile(itmID string, value interface{}) {
 	csvWriter.Flush()
 }
 
-func (rdr *PartialCSVFileER) postCDR(itmID string, value interface{}) {
+func (rdr *PartialCSVFileER) postCDR(itmID string, value any) {
 	origCgrEvs := value.([]*utils.CGREvent)
 	for _, origCgrEv := range origCgrEvs {
 		// complete CDR are handling in processFile function
@@ -359,7 +359,7 @@ func (rdr *PartialCSVFileER) postCDR(itmID string, value interface{}) {
 	cgrEv := &utils.CGREvent{
 		ID:    utils.UUIDSha1Prefix(),
 		Time:  utils.TimePointer(time.Now()),
-		Event: make(map[string]interface{}),
+		Event: make(map[string]any),
 	}
 	for i, origCgrEv := range origCgrEvs {
 		if i == 0 {

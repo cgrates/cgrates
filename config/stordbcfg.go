@@ -132,8 +132,8 @@ func (dbcfg *StorDbCfg) Clone() *StorDbCfg {
 	}
 }
 
-func (dbcfg *StorDbCfg) AsMapInterface() map[string]interface{} {
-	items := make(map[string]interface{})
+func (dbcfg *StorDbCfg) AsMapInterface() map[string]any {
+	items := make(map[string]any)
 	for key, item := range dbcfg.Items {
 		items[key] = item.AsMapInterface()
 	}
@@ -143,7 +143,7 @@ func (dbcfg *StorDbCfg) AsMapInterface() map[string]interface{} {
 	}
 	dbPort, _ := strconv.Atoi(dbcfg.Port)
 
-	return map[string]interface{}{
+	return map[string]any{
 		utils.DataDbTypeCfg:          dbcfg.Type,
 		utils.DataDbHostCfg:          dbcfg.Host,
 		utils.DataDbPortCfg:          dbPort,

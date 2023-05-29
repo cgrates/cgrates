@@ -137,7 +137,7 @@ func testSrItAddVoiceBalance(t *testing.T) {
 		Account:     sraccount,
 		BalanceType: utils.VOICE,
 		Value:       5 * float64(time.Second),
-		Balance: map[string]interface{}{
+		Balance: map[string]any{
 			utils.ID:            "TestDynamicDebitBalance",
 			utils.RatingSubject: "*zero5ms",
 		},
@@ -157,7 +157,7 @@ func testSrItInitSession(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: srtenant,
 			ID:     "TestSrItInitiateSession",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Tenant:      srtenant,
 				utils.Category:    "call",
 				utils.ToR:         utils.VOICE,
@@ -189,7 +189,7 @@ func testSrItTerminateSession(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: srtenant,
 			ID:     "TestSrItUpdateSession",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Tenant:      srtenant,
 				utils.Category:    "call",
 				utils.ToR:         utils.VOICE,
@@ -227,7 +227,7 @@ func testSrItAddMonetaryBalance(t *testing.T) {
 		Account:     sraccount,
 		BalanceType: utils.MONETARY,
 		Value:       10.65,
-		Balance: map[string]interface{}{
+		Balance: map[string]any{
 			utils.ID: utils.MetaDefault,
 		},
 	}
@@ -246,7 +246,7 @@ func testSrItInitSession2(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: srtenant,
 			ID:     "TestSrItInitiateSession1",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Tenant:      srtenant,
 				utils.Category:    "call",
 				utils.ToR:         utils.VOICE,
@@ -278,7 +278,7 @@ func testSrItTerminateSession2(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: srtenant,
 			ID:     "TestSrItUpdateSession",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Tenant:      srtenant,
 				utils.Category:    "call",
 				utils.ToR:         utils.VOICE,

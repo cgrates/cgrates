@@ -36,7 +36,7 @@ var (
 			CGREvent: &utils.CGREvent{ //matching AttributeProfile1
 				Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 				ID:     utils.GenUUID(),
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					"Attribute":      "AttributeProfile1",
 					utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 					"UsageInterval":  "1s",
@@ -49,7 +49,7 @@ var (
 			CGREvent: &utils.CGREvent{ //matching AttributeProfile2
 				Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 				ID:     utils.GenUUID(),
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					"Attribute": "AttributeProfile2",
 				},
 			},
@@ -59,7 +59,7 @@ var (
 			CGREvent: &utils.CGREvent{ //matching AttributeProfilePrefix
 				Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 				ID:     utils.GenUUID(),
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					"Attribute": "AttributeProfilePrefix",
 				},
 			},
@@ -69,7 +69,7 @@ var (
 			CGREvent: &utils.CGREvent{ //matching AttributeProfilePrefix
 				Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 				ID:     utils.GenUUID(),
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					"DistinctMatch": 20,
 				},
 			},
@@ -309,7 +309,7 @@ func TestAttributeEventReplyDigest(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSProcessEvent",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Account:      "1001",
 				utils.Subject:      "1001",
 				utils.Destinations: "+491511231234",
@@ -330,7 +330,7 @@ func TestAttributeEventReplyDigest2(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSProcessEvent",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Account:      "1001",
 				utils.Subject:      "1001",
 				utils.Destinations: "+491511231234",
@@ -351,7 +351,7 @@ func TestAttributeEventReplyDigest3(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSProcessEvent",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Account:      "1001",
 				utils.Subject:      "1001",
 				utils.Destinations: "+491511231234",
@@ -372,7 +372,7 @@ func TestAttributeEventReplyDigest4(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSProcessEvent",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Account:      "1001",
 				utils.Destinations: "+491511231234",
 			},
@@ -528,7 +528,7 @@ func TestAttributeProcessWithMultipleRuns1(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"InitialField": "InitialValue",
 			},
 		},
@@ -543,7 +543,7 @@ func TestAttributeProcessWithMultipleRuns1(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"InitialField": "InitialValue",
 				"Field1":       "Value1",
 				"Field2":       "Value2",
@@ -640,7 +640,7 @@ func TestAttributeProcessWithMultipleRuns2(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"InitialField": "InitialValue",
 			},
 		},
@@ -652,7 +652,7 @@ func TestAttributeProcessWithMultipleRuns2(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"InitialField": "InitialValue",
 				"Field1":       "Value1",
 				"Field2":       "Value2",
@@ -748,7 +748,7 @@ func TestAttributeProcessWithMultipleRuns3(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"InitialField": "InitialValue",
 			},
 		},
@@ -760,7 +760,7 @@ func TestAttributeProcessWithMultipleRuns3(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"InitialField": "InitialValue",
 				"Field1":       "Value1",
 				"Field2":       "Value2",
@@ -837,7 +837,7 @@ func TestAttributeProcessWithMultipleRuns4(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"InitialField": "InitialValue",
 			},
 		},
@@ -849,7 +849,7 @@ func TestAttributeProcessWithMultipleRuns4(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"InitialField": "InitialValue",
 				"Field1":       "Value1",
 				"Field2":       "Value2",
@@ -948,7 +948,7 @@ func TestAttributeMultipleProcessWithBlocker(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"InitialField": "InitialValue",
 			},
 		},
@@ -960,7 +960,7 @@ func TestAttributeMultipleProcessWithBlocker(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"InitialField": "InitialValue",
 				"Field1":       "Value1",
 				"Field2":       "Value2",
@@ -1058,7 +1058,7 @@ func TestAttributeMultipleProcessWithBlocker2(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"InitialField": "InitialValue",
 			},
 		},
@@ -1069,7 +1069,7 @@ func TestAttributeMultipleProcessWithBlocker2(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"InitialField": "InitialValue",
 				"Field1":       "Value1",
 			},
@@ -1128,7 +1128,7 @@ func TestAttributeProcessValue(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"Field1": "Value1",
 			},
 		},
@@ -1139,7 +1139,7 @@ func TestAttributeProcessValue(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"Field1": "Value1",
 				"Field2": "Value1",
 			},
@@ -1207,7 +1207,7 @@ func TestAttributeAttributeFilterIDs(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"PassField": "Test",
 			},
 		},
@@ -1219,7 +1219,7 @@ func TestAttributeAttributeFilterIDs(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"PassField":   "Pass",
 				"RandomField": "RandomValue",
 			},
@@ -1279,7 +1279,7 @@ func TestAttributeProcessEventConstant(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"Field1": "Value1",
 			},
 		},
@@ -1290,7 +1290,7 @@ func TestAttributeProcessEventConstant(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"Field1": "Value1",
 				"Field2": "ConstVal",
 			},
@@ -1355,7 +1355,7 @@ func TestAttributeProcessEventVariable(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"Field1":   "Value1",
 				"TheField": "TheVal",
 			},
@@ -1367,7 +1367,7 @@ func TestAttributeProcessEventVariable(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"Field1":   "Value1",
 				"Field2":   "TheVal",
 				"TheField": "TheVal",
@@ -1438,7 +1438,7 @@ func TestAttributeProcessEventComposed(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"Field1":   "Value1",
 				"TheField": "TheVal",
 			},
@@ -1450,7 +1450,7 @@ func TestAttributeProcessEventComposed(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"Field1":   "Value1",
 				"Field2":   "Value1_TheVal",
 				"TheField": "TheVal",
@@ -1511,7 +1511,7 @@ func TestAttributeProcessEventSum(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"Field1":   "Value1",
 				"TheField": "TheVal",
 				"NumField": "20",
@@ -1524,7 +1524,7 @@ func TestAttributeProcessEventSum(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"Field1":   "Value1",
 				"TheField": "TheVal",
 				"NumField": "20",
@@ -1586,7 +1586,7 @@ func TestAttributeProcessEventUsageDifference(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"Field1":         "Value1",
 				"TheField":       "TheVal",
 				"UnixTimeStamp":  "1554364297",
@@ -1600,7 +1600,7 @@ func TestAttributeProcessEventUsageDifference(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"Field1":         "Value1",
 				"TheField":       "TheVal",
 				"UnixTimeStamp":  "1554364297",
@@ -1663,7 +1663,7 @@ func TestAttributeProcessEventValueExponent(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"Field1":     "Value1",
 				"TheField":   "TheVal",
 				"Multiplier": "2",
@@ -1677,7 +1677,7 @@ func TestAttributeProcessEventValueExponent(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"Field1":     "Value1",
 				"TheField":   "TheVal",
 				"Multiplier": "2",
@@ -1748,7 +1748,7 @@ func BenchmarkAttributeProcessEventConstant(b *testing.B) {
 		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"Field1": "Value1",
 			},
 		},
@@ -1809,7 +1809,7 @@ func BenchmarkAttributeProcessEventVariable(b *testing.B) {
 		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"Field1": "Value1",
 			},
 		},
@@ -1888,7 +1888,7 @@ func TestAttributesProcessEventSIPCID(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"cid":  "12345",
 				"to":   "1001",
 				"from": "1002",
@@ -1901,7 +1901,7 @@ func TestAttributesProcessEventSIPCID(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"cid":      "12345",
 				"to":       "1001",
 				"from":     "1002",
@@ -1923,12 +1923,12 @@ func TestAttributesProcessEventSIPCID(t *testing.T) {
 		t.Errorf("Expecting %+v, received: %+v", eRply.CGREvent.Event, reply.CGREvent.Event)
 	}
 
-	attrArgs.CGREvent.Event = map[string]interface{}{
+	attrArgs.CGREvent.Event = map[string]any{
 		"cid":  "12345",
 		"to":   "1002",
 		"from": "1001",
 	}
-	eRply.CGREvent.Event = map[string]interface{}{
+	eRply.CGREvent.Event = map[string]any{
 		"cid":      "12345",
 		"to":       "1002",
 		"from":     "1001",
@@ -1991,7 +1991,7 @@ func TestAttributesProcessEventSIPCIDNotFoundErr(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
-			Event:  map[string]interface{}{},
+			Event:  map[string]any{},
 		},
 	}
 	var reply AttrSProcessEventReply
@@ -2044,7 +2044,7 @@ func TestAttributesProcessEventSIPCIDWrongPathErr(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"cid": "12345",
 				"123": struct{}{},
 			},
@@ -2102,7 +2102,7 @@ func TestAttributesProcessEventSIPCIDInvalidArgs(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"cid":  "12345",
 				"to":   "1001",
 				"from": "1002",
@@ -2131,7 +2131,7 @@ func TestAttributeGetForEvent(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSGetAttributeForEvent",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.EVENT_NAME: "Internal",
 				utils.Account:    "1003",
 			},
@@ -2196,7 +2196,7 @@ func TestAttrSGetAttributeForEventErrs(t *testing.T) {
 				CGREvent: &utils.CGREvent{
 					Tenant: "cgrates.org",
 					ID:     "CGREvent1",
-					Event: map[string]interface{}{
+					Event: map[string]any{
 						utils.Account:     "1002",
 						utils.Subject:     "1002",
 						utils.Destination: "1001",

@@ -101,7 +101,7 @@ func (ar *AgentRequest) RemoteHost() net.Addr {
 }
 
 // FieldAsInterface implements utils.DataProvider
-func (ar *AgentRequest) FieldAsInterface(fldPath []string) (val interface{}, err error) {
+func (ar *AgentRequest) FieldAsInterface(fldPath []string) (val any, err error) {
 	switch fldPath[0] {
 	default:
 		return nil, fmt.Errorf("unsupported field prefix: <%s>", fldPath[0])
@@ -152,7 +152,7 @@ func (ar *AgentRequest) Field(fldPath utils.PathItems) (val utils.NMInterface, e
 
 // FieldAsString implements utils.DataProvider
 func (ar *AgentRequest) FieldAsString(fldPath []string) (val string, err error) {
-	var iface interface{}
+	var iface any
 	if iface, err = ar.FieldAsInterface(fldPath); err != nil {
 		return
 	}
@@ -183,7 +183,7 @@ func (ar *AgentRequest) SetFields(tplFlds []*config.FCTemplate) (err error) {
 				return
 			}
 		default:
-			var out interface{}
+			var out any
 			out, err = ar.ParseField(tplFld)
 			if err != nil {
 				if err == utils.ErrNotFound {
@@ -295,7 +295,7 @@ func (ar *AgentRequest) Remove(fullPath *utils.FullPath) error {
 
 // ParseField outputs the value based on the template item
 func (ar *AgentRequest) ParseField(
-	cfgFld *config.FCTemplate) (out interface{}, err error) {
+	cfgFld *config.FCTemplate) (out any, err error) {
 	var isString bool
 	switch cfgFld.Type {
 	default:
@@ -376,7 +376,7 @@ func (ar *AgentRequest) ParseField(
 		}
 		return usedCCTime + time.Duration(debitItvl.Nanoseconds()*mltpl), nil
 	case utils.MetaSum:
-		iFaceVals := make([]interface{}, len(cfgFld.Value))
+		iFaceVals := make([]any, len(cfgFld.Value))
 		for i, val := range cfgFld.Value {
 			strVal, err := val.ParseDataProvider(ar, utils.NestingSep)
 			if err != nil {
@@ -386,7 +386,7 @@ func (ar *AgentRequest) ParseField(
 		}
 		out, err = utils.Sum(iFaceVals...)
 	case utils.MetaDifference:
-		iFaceVals := make([]interface{}, len(cfgFld.Value))
+		iFaceVals := make([]any, len(cfgFld.Value))
 		for i, val := range cfgFld.Value {
 			strVal, err := val.ParseDataProvider(ar, utils.NestingSep)
 			if err != nil {
