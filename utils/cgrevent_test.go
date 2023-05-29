@@ -33,7 +33,7 @@ func TestCGREventCheckMandatoryFields(t *testing.T) {
 		t.Error(err)
 	}
 	cgrEvent = &CGREvent{
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			Usage:   20 * time.Second,
 			"test1": 1,
 			"test2": 2,
@@ -64,7 +64,7 @@ func TestCGREventFielAsString(t *testing.T) {
 	}
 	//normal check
 	cgrEvent = &CGREvent{
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			Usage:   20 * time.Second,
 			"test1": 1,
 			"test2": 2,
@@ -86,14 +86,14 @@ func TestLibRoutesUsage(t *testing.T) {
 	se := &CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "supplierEvent1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			Usage: 20 * time.Second,
 		},
 	}
 	seErr := &CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "supplierEvent1",
-		Event:  make(map[string]interface{}),
+		Event:  make(map[string]any),
 	}
 	answ, err := se.FieldAsDuration(Usage)
 	if err != nil {
@@ -112,14 +112,14 @@ func TestCGREventFieldAsTime(t *testing.T) {
 	se := &CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "supplierEvent1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			AnswerTime: time.Now(),
 		},
 	}
 	seErr := &CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "supplierEvent1",
-		Event:  make(map[string]interface{}),
+		Event:  make(map[string]any),
 	}
 	answ, err := se.FieldAsTime(AnswerTime, "UTC")
 	if err != nil {
@@ -138,7 +138,7 @@ func TestCGREventFieldAsString(t *testing.T) {
 	se := &CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "supplierEvent1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"supplierprofile1": "Supplier",
 			"UsageInterval":    time.Second,
 			"PddInterval":      "1s",
@@ -179,14 +179,14 @@ func TestCGREventClone(t *testing.T) {
 	ev := &CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "supplierEvent1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			AnswerTime:         time.Now(),
 			"supplierprofile1": "Supplier",
 			"UsageInterval":    "54.2",
 			"PddInterval":      "1s",
 			"Weight":           20.0,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			"testKey": 12,
 		},
 	}
@@ -198,7 +198,7 @@ func TestCGREventClone(t *testing.T) {
 
 func TestCGREventOptAsInt64(t *testing.T) {
 	ev := &CGREvent{
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			"testKey": "13",
 		},
 	}
@@ -220,11 +220,11 @@ func TestCGREventOptAsInt64(t *testing.T) {
 
 func TestCGREventAsDataProvider(t *testing.T) {
 	ev := &CGREvent{
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			"testKey1": 13,
 			"testKey2": "testString1",
 		},
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"testKey1": 30,
 			"testKey2": "testString2",
 		},
@@ -318,7 +318,7 @@ func TestNMAsCGREvent(t *testing.T) {
 		}}}); err != nil {
 		t.Error(err)
 	}
-	eEv := map[string]interface{}{
+	eEv := map[string]any{
 		"FirstLevel2.SecondLevel2.Field2":        "Value2",
 		"FirstLevel.SecondLevel.ThirdLevel.Fld1": "Val1",
 		"FirstLevel2.Field3":                     "Value3",
@@ -348,14 +348,14 @@ func TestCGREventRPCClone(t *testing.T) {
 	cgrEv := &CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testID",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			AnswerTime:         nil,
 			"supplierprofile1": "Supplier",
 			"UsageInterval":    "54.2",
 			"PddInterval":      "1s",
 			"Weight":           20.0,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			"testKey": 12,
 		},
 		clnb: false, //first make it non clonable
@@ -378,14 +378,14 @@ func TestCGREventRPCClone(t *testing.T) {
 	exp := &CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testID",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			AnswerTime:         nil,
 			"supplierprofile1": "Supplier",
 			"UsageInterval":    "54.2",
 			"PddInterval":      "1s",
 			"Weight":           20.0,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			"testKey": 12,
 		},
 		clnb: false,
@@ -397,7 +397,7 @@ func TestCGREventRPCClone(t *testing.T) {
 
 func TestHasField(t *testing.T) {
 	ev := &CGREvent{
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"supplierprofile1": "Supplier",
 		},
 	}

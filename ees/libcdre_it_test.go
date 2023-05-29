@@ -71,7 +71,7 @@ func TestWriteToFile(t *testing.T) {
 	}
 	//populate the exportEvent struct
 	exportEvent = &ExportEvents{
-		Events: []interface{}{"something1", "something2"},
+		Events: []any{"something1", "something2"},
 		Path:   "path",
 		Format: "test",
 	}

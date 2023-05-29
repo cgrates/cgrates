@@ -208,11 +208,11 @@ func (sCft FCTemplates) Load(ctx *context.Context, jsnCfg ConfigDB, cfg *CGRConf
 	return
 }
 
-// AsMapInterface returns the config as a map[string]interface{}
-func (sCft FCTemplates) AsMapInterface(separator string) interface{} {
-	mp := make(map[string][]map[string]interface{})
+// AsMapInterface returns the config as a map[string]any
+func (sCft FCTemplates) AsMapInterface(separator string) any {
+	mp := make(map[string][]map[string]any)
 	for key, value := range sCft {
-		mp[key] = make([]map[string]interface{}, len(value))
+		mp[key] = make([]map[string]any, len(value))
 		for i, item := range value {
 			mp[key][i] = item.AsMapInterface(separator)
 		}
@@ -236,9 +236,9 @@ func (sCft FCTemplates) Clone() (cln FCTemplates) {
 	return
 }
 
-// AsMapInterface returns the config as a map[string]interface{}
-func (fc *FCTemplate) AsMapInterface(separator string) (mp map[string]interface{}) {
-	mp = make(map[string]interface{})
+// AsMapInterface returns the config as a map[string]any
+func (fc *FCTemplate) AsMapInterface(separator string) (mp map[string]any) {
+	mp = make(map[string]any)
 	if fc.Tag != utils.EmptyString {
 		mp[utils.TagCfg] = fc.Tag
 	}

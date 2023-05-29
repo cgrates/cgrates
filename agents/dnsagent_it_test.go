@@ -119,7 +119,7 @@ package agents
 // 	var reply string
 // 	if err := dnsRPC.Call(context.Background(), utils.LoaderSv1Run,
 // 		&loaders.ArgsProcessFolder{
-// 			APIOpts: map[string]interface{}{
+// 			APIOpts: map[string]any{
 // 				utils.MetaCache:       caching,
 // 				utils.MetaStopOnError: false,
 // 			},

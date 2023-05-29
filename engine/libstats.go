@@ -53,7 +53,7 @@ type StatQueueProfile struct {
 // StatQueueProfileWithAPIOpts is used in replicatorV1 for dispatcher
 type StatQueueProfileWithAPIOpts struct {
 	*StatQueueProfile
-	APIOpts map[string]interface{}
+	APIOpts map[string]any
 }
 
 func (sqp *StatQueueProfile) TenantID() string {
@@ -127,7 +127,7 @@ type StoredStatQueue struct {
 
 type StatQueueWithAPIOpts struct {
 	StatQueue *StatQueue
-	APIOpts   map[string]interface{}
+	APIOpts   map[string]any
 }
 
 // SqID will compose the unique identifier for the StatQueue out of Tenant and ID
@@ -523,7 +523,7 @@ func (ssq *StatQueueWithAPIOpts) MarshalJSON() (rply []byte, err error) {
 	}
 	type tmp struct {
 		StatQueue
-		APIOpts map[string]interface{}
+		APIOpts map[string]any
 	}
 	rply, err = json.Marshal(tmp{
 		StatQueue: *ssq.StatQueue,
@@ -539,7 +539,7 @@ func (ssq *StatQueueWithAPIOpts) UnmarshalJSON(data []byte) (err error) {
 		return
 	}
 	i := struct {
-		APIOpts map[string]interface{}
+		APIOpts map[string]any
 	}{}
 	if err = json.Unmarshal(data, &i); err != nil {
 		return
@@ -549,7 +549,7 @@ func (ssq *StatQueueWithAPIOpts) UnmarshalJSON(data []byte) (err error) {
 	return
 }
 
-func (sqp *StatQueueProfile) Set(path []string, val interface{}, newBranch bool, _ string) (err error) {
+func (sqp *StatQueueProfile) Set(path []string, val any, newBranch bool, _ string) (err error) {
 	switch len(path) {
 	default:
 		return utils.ErrWrongPath
@@ -626,7 +626,7 @@ func (sqp *StatQueueProfile) Set(path []string, val interface{}, newBranch bool,
 	return
 }
 
-func (sqp *StatQueueProfile) Merge(v2 interface{}) {
+func (sqp *StatQueueProfile) Merge(v2 any) {
 	vi := v2.(*StatQueueProfile)
 	if len(vi.Tenant) != 0 {
 		sqp.Tenant = vi.Tenant
@@ -656,13 +656,13 @@ func (sqp *StatQueueProfile) Merge(v2 interface{}) {
 
 func (sqp *StatQueueProfile) String() string { return utils.ToJSON(sqp) }
 func (sqp *StatQueueProfile) FieldAsString(fldPath []string) (_ string, err error) {
-	var val interface{}
+	var val any
 	if val, err = sqp.FieldAsInterface(fldPath); err != nil {
 		return
 	}
 	return utils.IfaceAsString(val), nil
 }
-func (sqp *StatQueueProfile) FieldAsInterface(fldPath []string) (_ interface{}, err error) {
+func (sqp *StatQueueProfile) FieldAsInterface(fldPath []string) (_ any, err error) {
 	if len(fldPath) == 1 {
 		switch fldPath[0] {
 		default:
@@ -724,13 +724,13 @@ func (sqp *StatQueueProfile) FieldAsInterface(fldPath []string) (_ interface{}, 
 
 func (mf *MetricWithFilters) String() string { return utils.ToJSON(mf) }
 func (mf *MetricWithFilters) FieldAsString(fldPath []string) (_ string, err error) {
-	var val interface{}
+	var val any
 	if val, err = mf.FieldAsInterface(fldPath); err != nil {
 		return
 	}
 	return utils.IfaceAsString(val), nil
 }
-func (mf *MetricWithFilters) FieldAsInterface(fldPath []string) (_ interface{}, err error) {
+func (mf *MetricWithFilters) FieldAsInterface(fldPath []string) (_ any, err error) {
 	if len(fldPath) != 1 {
 		return nil, utils.ErrNotFound
 	}

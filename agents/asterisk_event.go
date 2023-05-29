@@ -25,30 +25,30 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewSMAsteriskEvent(ariEv map[string]interface{}, asteriskIP, asteriskAlias string) *SMAsteriskEvent {
+func NewSMAsteriskEvent(ariEv map[string]any, asteriskIP, asteriskAlias string) *SMAsteriskEvent {
 	smsmaEv := &SMAsteriskEvent{
 		ariEv:         ariEv,
 		asteriskIP:    asteriskIP,
 		asteriskAlias: asteriskAlias,
 		cachedFields:  make(map[string]string),
-		opts:          make(map[string]interface{}),
+		opts:          make(map[string]any),
 	}
 	smsmaEv.parseStasisArgs() // Populate appArgs
 	return smsmaEv
 }
 
 type SMAsteriskEvent struct { // Standalone struct so we can cache the fields while we parse them
-	ariEv         map[string]interface{} // stasis event
+	ariEv         map[string]any // stasis event
 	asteriskIP    string
 	asteriskAlias string
 	cachedFields  map[string]string // Cache replies here
-	opts          map[string]interface{}
+	opts          map[string]any
 }
 
 // parseStasisArgs will convert the args passed to Stasis into CGRateS attribute/value pairs understood by CGRateS and store them in cachedFields
 // args need to be in the form of []string{"key=value", "key2=value2"}
 func (smaEv *SMAsteriskEvent) parseStasisArgs() {
-	args, _ := smaEv.ariEv["args"].([]interface{})
+	args, _ := smaEv.ariEv["args"].([]any)
 	for _, arg := range args {
 		if splt := strings.Split(arg.(string), "="); len(splt) > 1 {
 			if !utils.CGROptionsSet.Has(splt[0]) {
@@ -78,7 +78,7 @@ func (smaEv *SMAsteriskEvent) ChannelID() string {
 	cachedKey := channelID
 	cachedVal, hasIt := smaEv.cachedFields[cachedKey]
 	if !hasIt {
-		channelData, _ := smaEv.ariEv["channel"].(map[string]interface{})
+		channelData, _ := smaEv.ariEv["channel"].(map[string]any)
 		cachedVal, _ = channelData["id"].(string)
 		smaEv.cachedFields[cachedKey] = cachedVal
 	}
@@ -99,7 +99,7 @@ func (smaEv *SMAsteriskEvent) ChannelState() string {
 	cachedKey := channelState
 	cachedVal, hasIt := smaEv.cachedFields[cachedKey]
 	if !hasIt {
-		channelData, _ := smaEv.ariEv["channel"].(map[string]interface{})
+		channelData, _ := smaEv.ariEv["channel"].(map[string]any)
 		cachedVal, _ = channelData["state"].(string)
 	}
 	return cachedVal
@@ -109,7 +109,7 @@ func (smaEv *SMAsteriskEvent) SetupTime() string {
 	cachedKey := utils.SetupTime
 	cachedVal, hasIt := smaEv.cachedFields[cachedKey]
 	if !hasIt {
-		channelData, _ := smaEv.ariEv["channel"].(map[string]interface{})
+		channelData, _ := smaEv.ariEv["channel"].(map[string]any)
 		cachedVal, _ = channelData["creationtime"].(string)
 		smaEv.cachedFields[cachedKey] = cachedVal
 	}
@@ -120,8 +120,8 @@ func (smaEv *SMAsteriskEvent) Account() string {
 	cachedKey := utils.CGRAccount
 	cachedVal, hasIt := smaEv.cachedFields[cachedKey]
 	if !hasIt {
-		channelData, _ := smaEv.ariEv["channel"].(map[string]interface{})
-		callerData, _ := channelData["caller"].(map[string]interface{})
+		channelData, _ := smaEv.ariEv["channel"].(map[string]any)
+		callerData, _ := channelData["caller"].(map[string]any)
 		cachedVal, _ = callerData["number"].(string)
 		smaEv.cachedFields[cachedKey] = cachedVal
 	}
@@ -132,8 +132,8 @@ func (smaEv *SMAsteriskEvent) Destination() string {
 	cachedKey := utils.CGRDestination
 	cachedVal, hasIt := smaEv.cachedFields[cachedKey]
 	if !hasIt {
-		channelData, _ := smaEv.ariEv["channel"].(map[string]interface{})
-		dialplanData, _ := channelData["dialplan"].(map[string]interface{})
+		channelData, _ := smaEv.ariEv["channel"].(map[string]any)
+		dialplanData, _ := channelData["dialplan"].(map[string]any)
 		cachedVal, _ = dialplanData["exten"].(string)
 		smaEv.cachedFields[cachedKey] = cachedVal
 	}
@@ -229,8 +229,8 @@ func (smaEv *SMAsteriskEvent) UpdateCGREvent(cgrEv *utils.CGREvent) error {
 	return nil
 }
 
-func (smaEv *SMAsteriskEvent) AsMapStringInterface() (mp map[string]interface{}) {
-	mp = make(map[string]interface{})
+func (smaEv *SMAsteriskEvent) AsMapStringInterface() (mp map[string]any) {
+	mp = make(map[string]any)
 	switch smaEv.EventType() {
 	case ARIStasisStart:
 		mp[utils.EventName] = SMAAuthorization

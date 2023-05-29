@@ -186,7 +186,7 @@ func (rdr *AMQPER) readLoop(msgChan <-chan amqp.Delivery) {
 }
 
 func (rdr *AMQPER) processMessage(msg []byte) (err error) {
-	var decodedMessage map[string]interface{}
+	var decodedMessage map[string]any
 	if err = json.Unmarshal(msg, &decodedMessage); err != nil {
 		return
 	}

@@ -30,8 +30,8 @@ func (dS *DispatcherService) ReplicatorSv1GetAccount(ctx *context.Context, args 
 	if args != nil && (args.TenantID != nil && len(args.TenantID.Tenant) != 0) {
 		tnt = args.TenantID.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -42,8 +42,8 @@ func (dS *DispatcherService) ReplicatorSv1GetActionProfile(ctx *context.Context,
 	if args != nil && (args.TenantID != nil && len(args.TenantID.Tenant) != 0) {
 		tnt = args.TenantID.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -54,8 +54,8 @@ func (dS *DispatcherService) ReplicatorSv1GetAttributeProfile(ctx *context.Conte
 	if args != nil && (args.TenantID != nil && len(args.TenantID.Tenant) != 0) {
 		tnt = args.TenantID.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -66,8 +66,8 @@ func (dS *DispatcherService) ReplicatorSv1GetChargerProfile(ctx *context.Context
 	if args != nil && (args.TenantID != nil && len(args.TenantID.Tenant) != 0) {
 		tnt = args.TenantID.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -78,8 +78,8 @@ func (dS *DispatcherService) ReplicatorSv1GetDispatcherHost(ctx *context.Context
 	if args != nil && (args.TenantID != nil && len(args.TenantID.Tenant) != 0) {
 		tnt = args.TenantID.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -90,8 +90,8 @@ func (dS *DispatcherService) ReplicatorSv1GetDispatcherProfile(ctx *context.Cont
 	if args != nil && (args.TenantID != nil && len(args.TenantID.Tenant) != 0) {
 		tnt = args.TenantID.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -102,8 +102,8 @@ func (dS *DispatcherService) ReplicatorSv1GetFilter(ctx *context.Context, args *
 	if args != nil && (args.TenantID != nil && len(args.TenantID.Tenant) != 0) {
 		tnt = args.TenantID.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -114,8 +114,8 @@ func (dS *DispatcherService) ReplicatorSv1GetIndexes(ctx *context.Context, args 
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -126,8 +126,8 @@ func (dS *DispatcherService) ReplicatorSv1GetItemLoadIDs(ctx *context.Context, a
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -138,8 +138,8 @@ func (dS *DispatcherService) ReplicatorSv1GetRateProfile(ctx *context.Context, a
 	if args != nil && (args.TenantID != nil && len(args.TenantID.Tenant) != 0) {
 		tnt = args.TenantID.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -150,8 +150,8 @@ func (dS *DispatcherService) ReplicatorSv1GetResource(ctx *context.Context, args
 	if args != nil && (args.TenantID != nil && len(args.TenantID.Tenant) != 0) {
 		tnt = args.TenantID.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -162,8 +162,8 @@ func (dS *DispatcherService) ReplicatorSv1GetResourceProfile(ctx *context.Contex
 	if args != nil && (args.TenantID != nil && len(args.TenantID.Tenant) != 0) {
 		tnt = args.TenantID.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -174,8 +174,8 @@ func (dS *DispatcherService) ReplicatorSv1GetRouteProfile(ctx *context.Context, 
 	if args != nil && (args.TenantID != nil && len(args.TenantID.Tenant) != 0) {
 		tnt = args.TenantID.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -186,8 +186,8 @@ func (dS *DispatcherService) ReplicatorSv1GetStatQueue(ctx *context.Context, arg
 	if args != nil && (args.TenantID != nil && len(args.TenantID.Tenant) != 0) {
 		tnt = args.TenantID.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -198,8 +198,8 @@ func (dS *DispatcherService) ReplicatorSv1GetStatQueueProfile(ctx *context.Conte
 	if args != nil && (args.TenantID != nil && len(args.TenantID.Tenant) != 0) {
 		tnt = args.TenantID.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -210,8 +210,8 @@ func (dS *DispatcherService) ReplicatorSv1GetThreshold(ctx *context.Context, arg
 	if args != nil && (args.TenantID != nil && len(args.TenantID.Tenant) != 0) {
 		tnt = args.TenantID.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -222,8 +222,8 @@ func (dS *DispatcherService) ReplicatorSv1GetThresholdProfile(ctx *context.Conte
 	if args != nil && (args.TenantID != nil && len(args.TenantID.Tenant) != 0) {
 		tnt = args.TenantID.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -234,11 +234,11 @@ func (dS *DispatcherService) ReplicatorSv1Ping(ctx *context.Context, args *utils
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
+	ev := make(map[string]any)
 	if args != nil {
 		ev = args.Event
 	}
-	opts := make(map[string]interface{})
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -249,8 +249,8 @@ func (dS *DispatcherService) ReplicatorSv1RemoveAccount(ctx *context.Context, ar
 	if args != nil && (args.TenantID != nil && len(args.TenantID.Tenant) != 0) {
 		tnt = args.TenantID.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -261,8 +261,8 @@ func (dS *DispatcherService) ReplicatorSv1RemoveActionProfile(ctx *context.Conte
 	if args != nil && (args.TenantID != nil && len(args.TenantID.Tenant) != 0) {
 		tnt = args.TenantID.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -273,8 +273,8 @@ func (dS *DispatcherService) ReplicatorSv1RemoveAttributeProfile(ctx *context.Co
 	if args != nil && (args.TenantID != nil && len(args.TenantID.Tenant) != 0) {
 		tnt = args.TenantID.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -285,8 +285,8 @@ func (dS *DispatcherService) ReplicatorSv1RemoveChargerProfile(ctx *context.Cont
 	if args != nil && (args.TenantID != nil && len(args.TenantID.Tenant) != 0) {
 		tnt = args.TenantID.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -297,8 +297,8 @@ func (dS *DispatcherService) ReplicatorSv1RemoveDispatcherHost(ctx *context.Cont
 	if args != nil && (args.TenantID != nil && len(args.TenantID.Tenant) != 0) {
 		tnt = args.TenantID.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -309,8 +309,8 @@ func (dS *DispatcherService) ReplicatorSv1RemoveDispatcherProfile(ctx *context.C
 	if args != nil && (args.TenantID != nil && len(args.TenantID.Tenant) != 0) {
 		tnt = args.TenantID.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -321,8 +321,8 @@ func (dS *DispatcherService) ReplicatorSv1RemoveFilter(ctx *context.Context, arg
 	if args != nil && (args.TenantID != nil && len(args.TenantID.Tenant) != 0) {
 		tnt = args.TenantID.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -333,8 +333,8 @@ func (dS *DispatcherService) ReplicatorSv1RemoveIndexes(ctx *context.Context, ar
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -345,8 +345,8 @@ func (dS *DispatcherService) ReplicatorSv1RemoveRateProfile(ctx *context.Context
 	if args != nil && (args.TenantID != nil && len(args.TenantID.Tenant) != 0) {
 		tnt = args.TenantID.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -357,8 +357,8 @@ func (dS *DispatcherService) ReplicatorSv1RemoveResource(ctx *context.Context, a
 	if args != nil && (args.TenantID != nil && len(args.TenantID.Tenant) != 0) {
 		tnt = args.TenantID.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -369,8 +369,8 @@ func (dS *DispatcherService) ReplicatorSv1RemoveResourceProfile(ctx *context.Con
 	if args != nil && (args.TenantID != nil && len(args.TenantID.Tenant) != 0) {
 		tnt = args.TenantID.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -381,8 +381,8 @@ func (dS *DispatcherService) ReplicatorSv1RemoveRouteProfile(ctx *context.Contex
 	if args != nil && (args.TenantID != nil && len(args.TenantID.Tenant) != 0) {
 		tnt = args.TenantID.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -393,8 +393,8 @@ func (dS *DispatcherService) ReplicatorSv1RemoveStatQueue(ctx *context.Context, 
 	if args != nil && (args.TenantID != nil && len(args.TenantID.Tenant) != 0) {
 		tnt = args.TenantID.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -405,8 +405,8 @@ func (dS *DispatcherService) ReplicatorSv1RemoveStatQueueProfile(ctx *context.Co
 	if args != nil && (args.TenantID != nil && len(args.TenantID.Tenant) != 0) {
 		tnt = args.TenantID.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -417,8 +417,8 @@ func (dS *DispatcherService) ReplicatorSv1RemoveThreshold(ctx *context.Context, 
 	if args != nil && (args.TenantID != nil && len(args.TenantID.Tenant) != 0) {
 		tnt = args.TenantID.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -429,8 +429,8 @@ func (dS *DispatcherService) ReplicatorSv1RemoveThresholdProfile(ctx *context.Co
 	if args != nil && (args.TenantID != nil && len(args.TenantID.Tenant) != 0) {
 		tnt = args.TenantID.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -441,8 +441,8 @@ func (dS *DispatcherService) ReplicatorSv1SetAccount(ctx *context.Context, args 
 	if args != nil && (args.Account != nil && len(args.Account.Tenant) != 0) {
 		tnt = args.Account.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -453,8 +453,8 @@ func (dS *DispatcherService) ReplicatorSv1SetActionProfile(ctx *context.Context,
 	if args != nil && (args.ActionProfile != nil && len(args.ActionProfile.Tenant) != 0) {
 		tnt = args.ActionProfile.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -465,8 +465,8 @@ func (dS *DispatcherService) ReplicatorSv1SetAttributeProfile(ctx *context.Conte
 	if args != nil && (args.AttributeProfile != nil && len(args.AttributeProfile.Tenant) != 0) {
 		tnt = args.AttributeProfile.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -477,8 +477,8 @@ func (dS *DispatcherService) ReplicatorSv1SetChargerProfile(ctx *context.Context
 	if args != nil && (args.ChargerProfile != nil && len(args.ChargerProfile.Tenant) != 0) {
 		tnt = args.ChargerProfile.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -489,8 +489,8 @@ func (dS *DispatcherService) ReplicatorSv1SetDispatcherHost(ctx *context.Context
 	if args != nil && (args.DispatcherHost != nil && len(args.DispatcherHost.Tenant) != 0) {
 		tnt = args.DispatcherHost.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -501,8 +501,8 @@ func (dS *DispatcherService) ReplicatorSv1SetDispatcherProfile(ctx *context.Cont
 	if args != nil && (args.DispatcherProfile != nil && len(args.DispatcherProfile.Tenant) != 0) {
 		tnt = args.DispatcherProfile.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -513,8 +513,8 @@ func (dS *DispatcherService) ReplicatorSv1SetFilter(ctx *context.Context, args *
 	if args != nil && (args.Filter != nil && len(args.Filter.Tenant) != 0) {
 		tnt = args.Filter.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -525,8 +525,8 @@ func (dS *DispatcherService) ReplicatorSv1SetIndexes(ctx *context.Context, args 
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -537,8 +537,8 @@ func (dS *DispatcherService) ReplicatorSv1SetLoadIDs(ctx *context.Context, args 
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -549,8 +549,8 @@ func (dS *DispatcherService) ReplicatorSv1SetRateProfile(ctx *context.Context, a
 	if args != nil && (args.RateProfile != nil && len(args.RateProfile.Tenant) != 0) {
 		tnt = args.RateProfile.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -561,8 +561,8 @@ func (dS *DispatcherService) ReplicatorSv1SetResource(ctx *context.Context, args
 	if args != nil && (args.Resource != nil && len(args.Resource.Tenant) != 0) {
 		tnt = args.Resource.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -573,8 +573,8 @@ func (dS *DispatcherService) ReplicatorSv1SetResourceProfile(ctx *context.Contex
 	if args != nil && (args.ResourceProfile != nil && len(args.ResourceProfile.Tenant) != 0) {
 		tnt = args.ResourceProfile.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -585,8 +585,8 @@ func (dS *DispatcherService) ReplicatorSv1SetRouteProfile(ctx *context.Context, 
 	if args != nil && (args.RouteProfile != nil && len(args.RouteProfile.Tenant) != 0) {
 		tnt = args.RouteProfile.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -594,8 +594,8 @@ func (dS *DispatcherService) ReplicatorSv1SetRouteProfile(ctx *context.Context, 
 }
 func (dS *DispatcherService) ReplicatorSv1SetStatQueue(ctx *context.Context, args *engine.StatQueueWithAPIOpts, reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -606,8 +606,8 @@ func (dS *DispatcherService) ReplicatorSv1SetStatQueueProfile(ctx *context.Conte
 	if args != nil && (args.StatQueueProfile != nil && len(args.StatQueueProfile.Tenant) != 0) {
 		tnt = args.StatQueueProfile.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -618,8 +618,8 @@ func (dS *DispatcherService) ReplicatorSv1SetThreshold(ctx *context.Context, arg
 	if args != nil && (args.Threshold != nil && len(args.Threshold.Tenant) != 0) {
 		tnt = args.Threshold.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -630,8 +630,8 @@ func (dS *DispatcherService) ReplicatorSv1SetThresholdProfile(ctx *context.Conte
 	if args != nil && (args.ThresholdProfile != nil && len(args.ThresholdProfile.Tenant) != 0) {
 		tnt = args.ThresholdProfile.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}

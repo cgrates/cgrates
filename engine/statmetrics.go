@@ -98,7 +98,7 @@ func (asr *StatASR) GetValue() (val *utils.Decimal) {
 // AddEvent is part of StatMetric interface
 func (asr *StatASR) AddEvent(evID string, ev utils.DataProvider) (err error) {
 	var answered int
-	var val interface{}
+	var val any
 	if val, err = ev.FieldAsInterface([]string{utils.MetaOpts, utils.MetaStartTime}); err != nil {
 		if err != utils.ErrNotFound {
 			return err
@@ -530,7 +530,7 @@ func (sum *Metric) GetValue() (v *utils.Decimal) {
 	return sum.getTotalValue()
 }
 
-func (sum *Metric) addEvent(evID string, ival interface{}) (err error) {
+func (sum *Metric) addEvent(evID string, ival any) (err error) {
 	var val *decimal.Big
 	if val, err = utils.IfaceAsBig(ival); err != nil {
 		return

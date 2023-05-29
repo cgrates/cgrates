@@ -36,18 +36,18 @@ func TestDAsSessionSClientIface(t *testing.T) {
 }
 
 type testMockSessionConn struct {
-	calls map[string]func(_ *context.Context, _, _ interface{}) error
+	calls map[string]func(_ *context.Context, _, _ any) error
 }
 
-func (s *testMockSessionConn) Call(ctx *context.Context, method string, arg, rply interface{}) error {
+func (s *testMockSessionConn) Call(ctx *context.Context, method string, arg, rply any) error {
 	if call, has := s.calls[method]; has {
 		return call(ctx, arg, rply)
 	}
 	return rpcclient.ErrUnsupporteServiceMethod
 }
 
-func (s *testMockSessionConn) Handlers() (b map[string]interface{}) {
-	b = make(map[string]interface{})
+func (s *testMockSessionConn) Handlers() (b map[string]any) {
+	b = make(map[string]any)
 	for n, f := range s.calls {
 		b[n] = f
 	}
@@ -120,11 +120,11 @@ func TestProcessRequest(t *testing.T) {
 		utils.RemoteHost:  utils.NewLeafNode(utils.LocalAddr().String()),
 	}}
 
-	sS := &testMockSessionConn{calls: map[string]func(_ *context.Context, _, _ interface{}) error{
-		utils.SessionSv1RegisterInternalBiJSONConn: func(_ *context.Context, _, _ interface{}) error {
+	sS := &testMockSessionConn{calls: map[string]func(_ *context.Context, _, _ any) error{
+		utils.SessionSv1RegisterInternalBiJSONConn: func(_ *context.Context, _, _ any) error {
 			return nil
 		},
-		utils.SessionSv1AuthorizeEvent: func(_ *context.Context, arg, rply interface{}) error {
+		utils.SessionSv1AuthorizeEvent: func(_ *context.Context, arg, rply any) error {
 			var id string
 			if arg == nil {
 				t.Errorf("args is nil")
@@ -136,7 +136,7 @@ func TestProcessRequest(t *testing.T) {
 			expargs := &utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     id,
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					"Account":     "1001",
 					"Category":    "call",
 					"Destination": "1003",
@@ -145,7 +145,7 @@ func TestProcessRequest(t *testing.T) {
 					"ToR":         "*voice",
 					"Usage":       "10s",
 				},
-				APIOpts: map[string]interface{}{},
+				APIOpts: map[string]any{},
 			}
 			if !reflect.DeepEqual(expargs, arg) {
 				t.Errorf("Expected:%s ,received: %s", utils.ToJSON(expargs), utils.ToJSON(arg))
@@ -160,7 +160,7 @@ func TestProcessRequest(t *testing.T) {
 			}
 			return nil
 		},
-		utils.SessionSv1InitiateSession: func(_ *context.Context, arg, rply interface{}) error {
+		utils.SessionSv1InitiateSession: func(_ *context.Context, arg, rply any) error {
 			var id string
 			if arg == nil {
 				t.Errorf("args is nil")
@@ -172,7 +172,7 @@ func TestProcessRequest(t *testing.T) {
 			expargs := &utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     id,
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					"Account":     "1001",
 					"Category":    "call",
 					"Destination": "1003",
@@ -181,7 +181,7 @@ func TestProcessRequest(t *testing.T) {
 					"ToR":         "*voice",
 					"Usage":       "10s",
 				},
-				APIOpts: map[string]interface{}{
+				APIOpts: map[string]any{
 					utils.MetaAttributes:  "true",
 					utils.OptsSesInitiate: "true",
 				},
@@ -205,7 +205,7 @@ func TestProcessRequest(t *testing.T) {
 					CGREvent: &utils.CGREvent{
 						Tenant: "cgrates.org",
 						ID:     "e7d35bf",
-						Event: map[string]interface{}{
+						Event: map[string]any{
 							"Account":       "1001",
 							"Category":      "call",
 							"Destination":   "1003",
@@ -218,7 +218,7 @@ func TestProcessRequest(t *testing.T) {
 							"ToR":           "*voice",
 							"Usage":         "10s",
 						},
-						APIOpts: map[string]interface{}{
+						APIOpts: map[string]any{
 							"*originID": "1133dc80896edf5049b46aa911cb9085eeb27f4c",
 						},
 					},
@@ -227,7 +227,7 @@ func TestProcessRequest(t *testing.T) {
 			}
 			return nil
 		},
-		utils.SessionSv1UpdateSession: func(_ *context.Context, arg, rply interface{}) error {
+		utils.SessionSv1UpdateSession: func(_ *context.Context, arg, rply any) error {
 			var id string
 			if arg == nil {
 				t.Errorf("args is nil")
@@ -239,7 +239,7 @@ func TestProcessRequest(t *testing.T) {
 			expargs := &utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     id,
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					"Account":     "1001",
 					"Category":    "call",
 					"Destination": "1003",
@@ -248,7 +248,7 @@ func TestProcessRequest(t *testing.T) {
 					"ToR":         "*voice",
 					"Usage":       "10s",
 				},
-				APIOpts: map[string]interface{}{
+				APIOpts: map[string]any{
 					utils.MetaAttributes: "true",
 					utils.OptsSesUpdate:  "true",
 				},
@@ -272,7 +272,7 @@ func TestProcessRequest(t *testing.T) {
 					CGREvent: &utils.CGREvent{
 						Tenant: "cgrates.org",
 						ID:     "e7d35bf",
-						Event: map[string]interface{}{
+						Event: map[string]any{
 							"Account": "1001",
 
 							"Category":      "call",
@@ -286,7 +286,7 @@ func TestProcessRequest(t *testing.T) {
 							"ToR":           "*voice",
 							"Usage":         "10s",
 						},
-						APIOpts: map[string]interface{}{
+						APIOpts: map[string]any{
 							"*originID": "1133dc80896edf5049b46aa911cb9085eeb27f4c",
 						},
 					},
@@ -295,7 +295,7 @@ func TestProcessRequest(t *testing.T) {
 			}
 			return nil
 		},
-		utils.SessionSv1ProcessCDR: func(_ *context.Context, arg, rply interface{}) error {
+		utils.SessionSv1ProcessCDR: func(_ *context.Context, arg, rply any) error {
 			var id string
 			if arg == nil {
 				t.Errorf("args is nil")
@@ -307,7 +307,7 @@ func TestProcessRequest(t *testing.T) {
 			expargs := &utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     id,
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					"Account":     "1001",
 					"Category":    "call",
 					"Destination": "1003",
@@ -316,7 +316,7 @@ func TestProcessRequest(t *testing.T) {
 					"ToR":         "*voice",
 					"Usage":       "10s",
 				},
-				APIOpts: map[string]interface{}{
+				APIOpts: map[string]any{
 					utils.OptsSesTerminate: "true",
 				},
 			}
@@ -331,7 +331,7 @@ func TestProcessRequest(t *testing.T) {
 			*prply = utils.OK
 			return nil
 		},
-		utils.SessionSv1TerminateSession: func(_ *context.Context, arg, rply interface{}) error {
+		utils.SessionSv1TerminateSession: func(_ *context.Context, arg, rply any) error {
 			var id string
 			if arg == nil {
 				t.Errorf("args is nil")
@@ -343,7 +343,7 @@ func TestProcessRequest(t *testing.T) {
 			expargs := &utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     id,
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					"Account":     "1001",
 					"Category":    "call",
 					"Destination": "1003",
@@ -352,7 +352,7 @@ func TestProcessRequest(t *testing.T) {
 					"ToR":         "*voice",
 					"Usage":       "10s",
 				},
-				APIOpts: map[string]interface{}{
+				APIOpts: map[string]any{
 					utils.OptsSesTerminate: "true",
 				},
 			}
@@ -367,7 +367,7 @@ func TestProcessRequest(t *testing.T) {
 			*prply = utils.OK
 			return nil
 		},
-		utils.SessionSv1ProcessMessage: func(_ *context.Context, arg, rply interface{}) error {
+		utils.SessionSv1ProcessMessage: func(_ *context.Context, arg, rply any) error {
 			var id string
 			if arg == nil {
 				t.Errorf("args is nil")
@@ -379,7 +379,7 @@ func TestProcessRequest(t *testing.T) {
 			expargs := &utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     id,
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					"Account":     "1001",
 					"Category":    "call",
 					"Destination": "1003",
@@ -388,7 +388,7 @@ func TestProcessRequest(t *testing.T) {
 					"ToR":         "*voice",
 					"Usage":       "10s",
 				},
-				APIOpts: map[string]interface{}{
+				APIOpts: map[string]any{
 					utils.MetaAttributes: "true",
 					utils.OptsSesMessage: "true",
 				},
@@ -412,7 +412,7 @@ func TestProcessRequest(t *testing.T) {
 					CGREvent: &utils.CGREvent{
 						Tenant: "cgrates.org",
 						ID:     "e7d35bf",
-						Event: map[string]interface{}{
+						Event: map[string]any{
 							"Account": "1001",
 
 							"Category":      "call",
@@ -426,7 +426,7 @@ func TestProcessRequest(t *testing.T) {
 							"ToR":           "*voice",
 							"Usage":         "10s",
 						},
-						APIOpts: map[string]interface{}{
+						APIOpts: map[string]any{
 							"*originID": "1133dc80896edf5049b46aa911cb9085eeb27f4c",
 						},
 					},

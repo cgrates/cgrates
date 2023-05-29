@@ -213,9 +213,9 @@ func (dbcfg StorDbCfg) Clone() (cln *StorDbCfg) {
 	return
 }
 
-// AsMapInterface returns the config as a map[string]interface{}
-func (dbcfg StorDbCfg) AsMapInterface(string) interface{} {
-	opts := map[string]interface{}{
+// AsMapInterface returns the config as a map[string]any
+func (dbcfg StorDbCfg) AsMapInterface(string) any {
+	opts := map[string]any{
 		utils.SQLMaxOpenConnsCfg:   dbcfg.Opts.SQLMaxOpenConns,
 		utils.SQLMaxIdleConnsCfg:   dbcfg.Opts.SQLMaxIdleConns,
 		utils.SQLConnMaxLifetime:   dbcfg.Opts.SQLConnMaxLifetime.String(),
@@ -224,7 +224,7 @@ func (dbcfg StorDbCfg) AsMapInterface(string) interface{} {
 		utils.PgSSLModeCfg:         dbcfg.Opts.PgSSLMode,
 		utils.MysqlLocation:        dbcfg.Opts.MySQLLocation,
 	}
-	mp := map[string]interface{}{
+	mp := map[string]any{
 		utils.DataDbTypeCfg:          utils.Meta + dbcfg.Type,
 		utils.DataDbHostCfg:          dbcfg.Host,
 		utils.DataDbNameCfg:          dbcfg.Name,
@@ -237,7 +237,7 @@ func (dbcfg StorDbCfg) AsMapInterface(string) interface{} {
 		utils.OptsCfg:                opts,
 	}
 	if dbcfg.Items != nil {
-		items := make(map[string]interface{})
+		items := make(map[string]any)
 		for key, item := range dbcfg.Items {
 			items[key] = item.AsMapInterface()
 		}

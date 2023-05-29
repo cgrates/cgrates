@@ -90,12 +90,12 @@ func (alS *AnalyzerSCfg) loadFromJSONCfg(jsnCfg *AnalyzerSJsonCfg) (err error) {
 	return nil
 }
 
-// AsMapInterface returns the config as a map[string]interface{}
-func (alS AnalyzerSCfg) AsMapInterface(string) interface{} {
-	opts := map[string]interface{}{
+// AsMapInterface returns the config as a map[string]any
+func (alS AnalyzerSCfg) AsMapInterface(string) any {
+	opts := map[string]any{
 		utils.MetaExporterIDs: alS.Opts.ExporterIDs,
 	}
-	mp := map[string]interface{}{
+	mp := map[string]any{
 		utils.EnabledCfg:         alS.Enabled,
 		utils.DBPathCfg:          alS.DBPath,
 		utils.IndexTypeCfg:       alS.IndexType,

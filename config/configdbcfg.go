@@ -104,9 +104,9 @@ func (dbcfg ConfigDBCfg) Clone() (cln *ConfigDBCfg) {
 	return
 }
 
-// AsMapInterface returns the config as a map[string]interface{}
-func (dbcfg ConfigDBCfg) AsMapInterface(string) interface{} {
-	opts := map[string]interface{}{
+// AsMapInterface returns the config as a map[string]any
+func (dbcfg ConfigDBCfg) AsMapInterface(string) any {
+	opts := map[string]any{
 		utils.RedisMaxConnsCfg:           dbcfg.Opts.RedisMaxConns,
 		utils.RedisConnectAttemptsCfg:    dbcfg.Opts.RedisConnectAttempts,
 		utils.RedisSentinelNameCfg:       dbcfg.Opts.RedisSentinel,
@@ -122,7 +122,7 @@ func (dbcfg ConfigDBCfg) AsMapInterface(string) interface{} {
 		utils.RedisClientKeyCfg:          dbcfg.Opts.RedisClientKey,
 		utils.RedisCACertificateCfg:      dbcfg.Opts.RedisCACertificate,
 	}
-	mp := map[string]interface{}{
+	mp := map[string]any{
 		utils.DataDbTypeCfg: dbcfg.Type,
 		utils.DataDbHostCfg: dbcfg.Host,
 		utils.DataDbNameCfg: dbcfg.Name,

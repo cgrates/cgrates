@@ -116,7 +116,7 @@ func testV1RtStatsFromFolder(t *testing.T) {
 	if err := RtStatsSv1BiRpc.Call(context.Background(), utils.LoaderSv1Run,
 		&loaders.ArgsProcessFolder{
 			// StopOnError: true,
-			APIOpts: map[string]interface{}{utils.MetaCache: caching},
+			APIOpts: map[string]any{utils.MetaCache: caching},
 		}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -130,12 +130,12 @@ func testV1RtStatsProcessStatsValid(t *testing.T) {
 	ev1 := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1010",
 			utils.Destination:  "1021",
 			utils.Category:     "call",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCost:      1.8,
 			utils.MetaStartTime: "2022-04-01T05:00:00Z",
 			utils.MetaUsage:     "1m20s",
@@ -159,11 +159,11 @@ func testV1RtStatsProcessStatsNotAnswered(t *testing.T) {
 	ev1 := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event2",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1010",
 			utils.Destination:  "1021",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCost:  1.8,
 			utils.MetaUsage: "26s",
 		},
@@ -194,11 +194,11 @@ func testV1RtStatsProcessStatsNotAnswered(t *testing.T) {
 	ev1 = &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event3",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1010",
 			utils.Category:     "call",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCost:      1.8,
 			utils.MetaUsage:     "50s",
 			utils.MetaStartTime: "2022-04-01T05:00:00Z",
@@ -280,7 +280,7 @@ func testV1RtStatsGetRoutesQOSStrategy(t *testing.T) {
 	ev := &utils.CGREvent{
 		ID:     "LC_SORT",
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "10015",
 			utils.Destination:  "+33426654",
 		},
@@ -292,7 +292,7 @@ func testV1RtStatsGetRoutesQOSStrategy(t *testing.T) {
 			Routes: []*engine.SortedRoute{
 				{
 					RouteID: "route1",
-					SortingData: map[string]interface{}{
+					SortingData: map[string]any{
 						utils.MetaACD: 46400000000.,
 						utils.MetaASR: 60.,
 						utils.Weight:  20.,
@@ -300,7 +300,7 @@ func testV1RtStatsGetRoutesQOSStrategy(t *testing.T) {
 				},
 				{
 					RouteID: "route2",
-					SortingData: map[string]interface{}{
+					SortingData: map[string]any{
 						utils.MetaACD: 44000000000.,
 						utils.MetaASR: 33.33333333333333,
 						utils.Weight:  50.,
@@ -322,7 +322,7 @@ func testV1RtStatsGetRoutesLowestCostStrategy(t *testing.T) {
 	ev := &utils.CGREvent{
 		ID:     "LC_SORT",
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "10015",
 			utils.Destination:  "+2273676400",
 		},
@@ -334,7 +334,7 @@ func testV1RtStatsGetRoutesLowestCostStrategy(t *testing.T) {
 			Routes: []*engine.SortedRoute{
 				{
 					RouteID: "route3",
-					SortingData: map[string]interface{}{
+					SortingData: map[string]any{
 						utils.Cost:          0.05,
 						utils.RateProfileID: "RP_VENDOR2",
 						utils.Weight:        10.,
@@ -342,7 +342,7 @@ func testV1RtStatsGetRoutesLowestCostStrategy(t *testing.T) {
 				},
 				{
 					RouteID: "route1",
-					SortingData: map[string]interface{}{
+					SortingData: map[string]any{
 						utils.Cost:          0.1,
 						utils.RateProfileID: "RP_VENDOR1",
 						utils.Weight:        20.,
@@ -350,7 +350,7 @@ func testV1RtStatsGetRoutesLowestCostStrategy(t *testing.T) {
 				},
 				{
 					RouteID: "route2",
-					SortingData: map[string]interface{}{
+					SortingData: map[string]any{
 						utils.Cost:          0.6,
 						utils.RateProfileID: "RP_STANDARD",
 						utils.Weight:        15.,

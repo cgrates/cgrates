@@ -48,7 +48,7 @@ func (self *CmdChargersProcessEvent) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdChargersProcessEvent) RpcParams(reset bool) interface{} {
+func (self *CmdChargersProcessEvent) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = new(utils.CGREvent)
 	}
@@ -59,12 +59,12 @@ func (self *CmdChargersProcessEvent) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdChargersProcessEvent) RpcResult() interface{} {
+func (self *CmdChargersProcessEvent) RpcResult() any {
 	var atr []*engine.ChrgSProcessEventReply
 	return &atr
 }
 
-func (self *CmdChargersProcessEvent) GetFormatedResult(result interface{}) string {
+func (self *CmdChargersProcessEvent) GetFormatedResult(result any) string {
 	return GetFormatedResult(result, utils.StringSet{
 		utils.Usage: {},
 	})

@@ -30,7 +30,7 @@ func SetFailedPostCacheTTL(ttl time.Duration) {
 	failedPostCache = ltcache.NewCache(-1, ttl, true, writeFailedPosts)
 }
 
-func writeFailedPosts(_ string, value interface{}) {
+func writeFailedPosts(_ string, value any) {
 	expEv, canConvert := value.(*FailedExportersLogg)
 	if !canConvert {
 		return
@@ -67,15 +67,15 @@ func WriteToFile(filePath string, expEv FailoverPoster) (err error) {
 type FailedExportersLogg struct {
 	lk             sync.RWMutex
 	Path           string
-	Opts           map[string]interface{} // THIS WILL BE META
+	Opts           map[string]any // THIS WILL BE META
 	Format         string
-	Events         []interface{}
+	Events         []any
 	FailedPostsDir string
 	Module         string
 }
 
 func AddFailedMessage(failedPostsDir, expPath, format,
-	module string, ev interface{}, opts map[string]interface{}) {
+	module string, ev any, opts map[string]any) {
 	key := ConcatenatedKey(failedPostsDir, expPath, format, module)
 	switch module {
 	case EEs:
@@ -122,7 +122,7 @@ func AddFailedMessage(failedPostsDir, expPath, format,
 }
 
 // AddEvent adds one event
-func (expEv *FailedExportersLogg) AddEvent(ev interface{}) {
+func (expEv *FailedExportersLogg) AddEvent(ev any) {
 	expEv.lk.Lock()
 	expEv.Events = append(expEv.Events, ev)
 	expEv.lk.Unlock()

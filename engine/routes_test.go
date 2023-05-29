@@ -89,49 +89,49 @@ var (
 		{ //matching RouteProfile1
 			Tenant: "cgrates.org",
 			ID:     "utils.CGREvent1",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"Route":          "RouteProfile1",
 				utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 				"UsageInterval":  "1s",
 				"PddInterval":    "1s",
 				utils.Weight:     "20.0",
 			},
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.OptsRoutesProfilesCount: 1,
 			},
 		},
 		{ //matching RouteProfile2
 			Tenant: "cgrates.org",
 			ID:     "utils.CGREvent1",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"Route":          "RouteProfile2",
 				utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 				"UsageInterval":  "1s",
 				"PddInterval":    "1s",
 				utils.Weight:     "20.0",
 			},
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.OptsRoutesProfilesCount: 1,
 			},
 		},
 		{ //matching RouteProfilePrefix
 			Tenant: "cgrates.org",
 			ID:     "utils.CGREvent1",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"Route": "RouteProfilePrefix",
 			},
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.OptsRoutesProfilesCount: 1,
 			},
 		},
 		{ //matching
 			Tenant: "cgrates.org",
 			ID:     "CGR",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"UsageInterval": "1s",
 				"PddInterval":   "1s",
 			},
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.OptsRoutesProfilesCount: 1,
 			},
 		},
@@ -266,7 +266,7 @@ func TestRoutesSortedForEvent(t *testing.T) {
 				sortingDataDecimal: map[string]*utils.Decimal{
 					utils.Weight: utils.NewDecimalFromFloat64(10.0),
 				},
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Weight: 10.0,
 				},
 				RouteParameters: "param1",
@@ -290,7 +290,7 @@ func TestRoutesSortedForEvent(t *testing.T) {
 				sortingDataDecimal: map[string]*utils.Decimal{
 					utils.Weight: utils.NewDecimalFromFloat64(30.0),
 				},
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Weight: 30.0,
 				},
 				RouteParameters: "param1",
@@ -300,7 +300,7 @@ func TestRoutesSortedForEvent(t *testing.T) {
 				sortingDataDecimal: map[string]*utils.Decimal{
 					utils.Weight: utils.NewDecimalFromFloat64(20.0),
 				},
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Weight: 20.0,
 				},
 				RouteParameters: "param2",
@@ -310,7 +310,7 @@ func TestRoutesSortedForEvent(t *testing.T) {
 				sortingDataDecimal: map[string]*utils.Decimal{
 					utils.Weight: utils.NewDecimalFromFloat64(10.0),
 				},
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Weight: 10.0,
 				},
 				RouteParameters: "param3",
@@ -335,7 +335,7 @@ func TestRoutesSortedForEvent(t *testing.T) {
 				sortingDataDecimal: map[string]*utils.Decimal{
 					utils.Weight: utils.NewDecimalFromFloat64(10.0),
 				},
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Weight: 10.0,
 				},
 				RouteParameters: "param1",
@@ -371,7 +371,7 @@ func TestRoutesSortedForEventWithLimit(t *testing.T) {
 				sortingDataDecimal: map[string]*utils.Decimal{
 					utils.Weight: utils.NewDecimalFromFloat64(30.0),
 				},
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Weight: 30.0,
 				},
 				RouteParameters: "param1",
@@ -381,7 +381,7 @@ func TestRoutesSortedForEventWithLimit(t *testing.T) {
 				sortingDataDecimal: map[string]*utils.Decimal{
 					utils.Weight: utils.NewDecimalFromFloat64(20.0),
 				},
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Weight: 20.0,
 				},
 				RouteParameters: "param2",
@@ -420,7 +420,7 @@ func TestRoutesSortedForEventWithOffset(t *testing.T) {
 				sortingDataDecimal: map[string]*utils.Decimal{
 					utils.Weight: utils.NewDecimalFromFloat64(10.0),
 				},
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Weight: 10.0,
 				},
 				RouteParameters: "param3",
@@ -458,7 +458,7 @@ func TestRoutesSortedForEventWithLimitAndOffset(t *testing.T) {
 				sortingDataDecimal: map[string]*utils.Decimal{
 					utils.Weight: utils.NewDecimalFromFloat64(20.0),
 				},
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Weight: 20.0,
 				},
 				RouteParameters: "param2",
@@ -479,7 +479,7 @@ func TestRoutesSortedForEventWithLimitAndOffset(t *testing.T) {
 
 func TestRoutesNewOptsGetRoutes(t *testing.T) {
 	ev := &utils.CGREvent{
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsRoutesMaxCost:      10,
 			utils.OptsRoutesIgnoreErrors: true,
 		},
@@ -501,7 +501,7 @@ func TestRoutesNewOptsGetRoutes(t *testing.T) {
 func TestRoutesNewOptsGetRoutesFromCfg(t *testing.T) {
 	config.CgrConfig().RouteSCfg().Opts.IgnoreErrors = []*utils.DynamicBoolOpt{{Value: true}}
 	ev := &utils.CGREvent{
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 	spl := &optsGetRoutes{
 		ignoreErrors: true,
@@ -518,7 +518,7 @@ func TestRoutesNewOptsGetRoutesFromCfg(t *testing.T) {
 
 func TestRoutesNewOptsGetRoutesIgnoreErrors(t *testing.T) {
 	ev := &utils.CGREvent{
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsRoutesIgnoreErrors: true,
 		},
 	}
@@ -627,8 +627,8 @@ func TestRoutesSortedForEventWithLimitAndOffset2(t *testing.T) {
 	args := &utils.CGREvent{
 		Tenant:  "cgrates.org",
 		ID:      "utils.CGREvent1",
-		Event:   map[string]interface{}{},
-		APIOpts: map[string]interface{}{utils.OptsRoutesProfilesCount: 3},
+		Event:   map[string]any{},
+		APIOpts: map[string]any{utils.OptsRoutesProfilesCount: 3},
 	}
 
 	cfg := config.NewDefaultCGRConfig()
@@ -661,7 +661,7 @@ func TestRoutesSortedForEventWithLimitAndOffset2(t *testing.T) {
 					sortingDataDecimal: map[string]*utils.Decimal{
 						utils.Weight: utils.NewDecimalFromFloat64(10.),
 					},
-					SortingData: map[string]interface{}{
+					SortingData: map[string]any{
 						utils.Weight: 10.,
 					},
 					RouteParameters: "param1",
@@ -677,7 +677,7 @@ func TestRoutesSortedForEventWithLimitAndOffset2(t *testing.T) {
 					sortingDataDecimal: map[string]*utils.Decimal{
 						utils.Weight: utils.NewDecimalFromFloat64(30.),
 					},
-					SortingData: map[string]interface{}{
+					SortingData: map[string]any{
 						utils.Weight: 30.,
 					},
 					RouteParameters: "param1",
@@ -706,7 +706,7 @@ func TestRoutesV1GetRoutesMsnStructFieldIDError(t *testing.T) {
 	var reply SortedRoutesList
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
-		Event:  map[string]interface{}{},
+		Event:  map[string]any{},
 	}
 	err := routeService.V1GetRoutes(context.Background(), args, &reply)
 	if err == nil || err.Error() != "MANDATORY_IE_MISSING: [ID]" {
@@ -743,7 +743,7 @@ func TestRoutesV1GetRoutesNotFoundError(t *testing.T) {
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "CGREvent1",
-		Event:  map[string]interface{}{},
+		Event:  map[string]any{},
 	}
 	err := routeService.V1GetRoutes(context.Background(), args, &reply)
 	if err == nil || err.Error() != utils.NotFoundCaps {
@@ -761,7 +761,7 @@ func TestRoutesV1GetRoutesNoTenantNotFoundError(t *testing.T) {
 	var reply SortedRoutesList
 	args := &utils.CGREvent{
 		ID:    "CGREvent1",
-		Event: map[string]interface{}{},
+		Event: map[string]any{},
 	}
 	err := routeService.V1GetRoutes(context.Background(), args, &reply)
 	if err == nil || err.Error() != utils.NotFoundCaps {
@@ -782,7 +782,7 @@ func TestRoutesV1GetRoutesAttrConnError(t *testing.T) {
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "CGREvent1",
-		Event:  map[string]interface{}{},
+		Event:  map[string]any{},
 	}
 	err := routeService.V1GetRoutes(context.Background(), args, &reply)
 	if err == nil || err.Error() != "ROUTES_ERROR:%!s(<nil>)" {
@@ -801,7 +801,7 @@ func TestRoutesV1GetRouteProfilesForEventError(t *testing.T) {
 	var reply []*RouteProfile
 	args := &utils.CGREvent{
 		ID:    "CGREvent1",
-		Event: map[string]interface{}{},
+		Event: map[string]any{},
 	}
 	err := routeService.V1GetRouteProfilesForEvent(context.Background(), args, &reply)
 	if err == nil || err.Error() != utils.NotFoundCaps {
@@ -820,7 +820,7 @@ func TestRoutesV1GetRouteProfilesForEventMsnIDError(t *testing.T) {
 	var reply []*RouteProfile
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
-		Event:  map[string]interface{}{},
+		Event:  map[string]any{},
 	}
 	err := routeService.V1GetRouteProfilesForEvent(context.Background(), args, &reply)
 	if err == nil || err.Error() != "MANDATORY_IE_MISSING: [ID]" {
@@ -1406,14 +1406,14 @@ func TestRouteSMatchingRouteProfilesForEventGetRouteProfileErr1(t *testing.T) {
 		{
 			Tenant: "cgrates.org",
 			ID:     "utils.CGREvent1",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"Route":          "RouteProfile1",
 				utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 				"UsageInterval":  "1s",
 				"PddInterval":    "1s",
 				utils.Weight:     "20.0",
 			},
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.OptsRoutesProfilesCount: 1,
 			},
 		},
@@ -1449,8 +1449,8 @@ func TestRouteSMatchingRouteProfilesForEventGetRouteProfileErr2(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply interface{}) error { return utils.ErrNotImplemented },
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply any) error { return utils.ErrNotImplemented },
 		},
 	}
 
@@ -1465,14 +1465,14 @@ func TestRouteSMatchingRouteProfilesForEventGetRouteProfileErr2(t *testing.T) {
 		{
 			Tenant: "cgrates.org",
 			ID:     "utils.CGREvent1",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"Route":          "RouteProfile1",
 				utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 				"UsageInterval":  "1s",
 				"PddInterval":    "1s",
 				utils.Weight:     "20.0",
 			},
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.OptsRoutesProfilesCount: 1,
 			},
 		},
@@ -1532,14 +1532,14 @@ func TestRouteSMatchingRouteProfilesForEventPassErr(t *testing.T) {
 		{
 			Tenant: "cgrates.org",
 			ID:     "utils.CGREvent1",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"Route":          "RouteProfile1",
 				utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 				"UsageInterval":  "1s",
 				"PddInterval":    "1s",
 				utils.Weight:     "20.0",
 			},
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.OptsRoutesProfilesCount: 1,
 			},
 		},
@@ -1603,14 +1603,14 @@ func TestRouteSMatchingRPSForEventWeightFromDynamicsErr(t *testing.T) {
 		{
 			Tenant: "cgrates.org",
 			ID:     "utils.CGREvent1",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"Route":          "RouteProfile1",
 				utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 				"UsageInterval":  "1s",
 				"PddInterval":    "1s",
 				utils.Weight:     "20.0",
 			},
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.OptsRoutesProfilesCount: 1,
 			},
 		},
@@ -1688,14 +1688,14 @@ func TestRouteSMatchingRPSForEventBlockerFromDynamicsErr(t *testing.T) {
 		{
 			Tenant: "cgrates.org",
 			ID:     "utils.CGREvent1",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"Route":          "RouteProfile1",
 				utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 				"UsageInterval":  "1s",
 				"PddInterval":    "1s",
 				utils.Weight:     "20.0",
 			},
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.OptsRoutesProfilesCount: 1,
 			},
 		},
@@ -1778,10 +1778,10 @@ func TestNewOptsGetRoutesGetBoolOptsErr(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "TestEvent",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: 1001,
 		},
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 
 	expErr := `inline parse error for string: <*string.invalid:filter>`
@@ -1811,10 +1811,10 @@ func TestNewOptsGetRoutesGetIntPointerOptsLimitErr(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "TestEvent",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: 1001,
 		},
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 
 	expErr := `inline parse error for string: <*string.invalid:filter>`
@@ -1844,10 +1844,10 @@ func TestNewOptsGetRoutesGetIntPointerOptsOffsetErr(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "TestEvent",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: 1001,
 		},
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 
 	expErr := `inline parse error for string: <*string.invalid:filter>`
@@ -1877,10 +1877,10 @@ func TestNewOptsGetRoutesGetIntPointerOptsMaxItemsErr(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "TestEvent",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: 1001,
 		},
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 
 	expErr := `inline parse error for string: <*string.invalid:filter>`
@@ -1910,10 +1910,10 @@ func TestNewOptsGetRoutesGetInterfaceOptsErr(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "TestEvent",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: 1001,
 		},
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 
 	expErr := `inline parse error for string: <*string.invalid:filter>`
@@ -1949,14 +1949,14 @@ func TestSortedRoutesForEventsortedRoutesForProfileErr(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "utils.CGREvent1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Route":          "RouteProfile1",
 			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 			"UsageInterval":  "1s",
 			"PddInterval":    "1s",
 			utils.Weight:     "20.0",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsRoutesProfilesCount: 1,
 		},
 	}
@@ -2038,14 +2038,14 @@ func TestSortedRoutesForEventGetIntPointerOptsErr(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "utils.CGREvent1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Route":          "RouteProfile1",
 			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 			"UsageInterval":  "1s",
 			"PddInterval":    "1s",
 			utils.Weight:     "20.0",
 		},
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 
 	if err := dm.SetFilter(context.Background(), &Filter{
@@ -2125,14 +2125,14 @@ func TestSortedRoutesForEventNewOptsGetRoutesErr(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "utils.CGREvent1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Route":          "RouteProfile1",
 			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 			"UsageInterval":  "1s",
 			"PddInterval":    "1s",
 			utils.Weight:     "20.0",
 		},
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 
 	if err := dm.SetFilter(context.Background(), &Filter{
@@ -2217,14 +2217,14 @@ func TestSortedRoutesForEventExceedMaxItemsErr(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "utils.CGREvent1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Route":          "RouteProfile1",
 			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 			"UsageInterval":  "1s",
 			"PddInterval":    "1s",
 			utils.Weight:     "20.0",
 		},
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 
 	if err := dm.SetFilter(context.Background(), &Filter{
@@ -2304,14 +2304,14 @@ func TestRouteSV1GetRoutesGetStringOptsErr(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "utils.CGREvent1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Route":          "RouteProfile1",
 			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 			"UsageInterval":  "1s",
 			"PddInterval":    "1s",
 			utils.Weight:     "20.0",
 		},
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 
 	var reply *SortedRoutesList
@@ -2339,8 +2339,8 @@ func TestRoutesV1GetRoutesCallWithAlteredFields(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.AttributeSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.AttributeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
 				*reply.(*AttrSProcessEventReply) = AttrSProcessEventReply{
 					AlteredFields: []*FieldsAltered{{
 						Fields: []string{utils.AccountField},
@@ -2348,14 +2348,14 @@ func TestRoutesV1GetRoutesCallWithAlteredFields(t *testing.T) {
 					CGREvent: &utils.CGREvent{
 						Tenant: "cgrates.org",
 						ID:     "utils.CGREvent1",
-						Event: map[string]interface{}{
+						Event: map[string]any{
 							"Route":          "RouteProfile1",
 							utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 							"UsageInterval":  "1s",
 							"PddInterval":    "1s",
 							utils.Weight:     "20.0",
 						},
-						APIOpts: map[string]interface{}{
+						APIOpts: map[string]any{
 							utils.OptsRoutesProfilesCount: 1,
 						},
 					},
@@ -2375,14 +2375,14 @@ func TestRoutesV1GetRoutesCallWithAlteredFields(t *testing.T) {
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "utils.CGREvent1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Route":          "RouteProfile1",
 			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 			"UsageInterval":  "1s",
 			"PddInterval":    "1s",
 			utils.Weight:     "20.0",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsRoutesProfilesCount: 1,
 		},
 	}
@@ -2416,7 +2416,7 @@ func TestRoutesV1GetRoutesCallWithAlteredFields(t *testing.T) {
 				{
 					RouteID:         "route1",
 					RouteParameters: "param1",
-					SortingData: map[string]interface{}{
+					SortingData: map[string]any{
 						"Weight": 10,
 					},
 				},
@@ -2459,14 +2459,14 @@ func TestRoutesV1GetRoutesSortedRoutesForEventErr(t *testing.T) {
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "utils.CGREvent1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Route":          "RouteProfile1",
 			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 			"UsageInterval":  "1s",
 			"PddInterval":    "1s",
 			utils.Weight:     "20.0",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsRoutesProfilesCount: 1,
 		},
 	}
@@ -2516,14 +2516,14 @@ func TestV1GetRouteProfilesForEventMatchingRouteProfErr(t *testing.T) {
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "utils.CGREvent1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Route":          "RouteProfile1",
 			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 			"UsageInterval":  "1s",
 			"PddInterval":    "1s",
 			utils.Weight:     "20.0",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsRoutesProfilesCount: 1,
 		},
 	}
@@ -2640,14 +2640,14 @@ func TestRoutessortedRoutesForProfileLazyPassErr(t *testing.T) {
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "utils.CGREvent1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Route":          "RouteProfile1",
 			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 			"UsageInterval":  "1s",
 			"PddInterval":    "1s",
 			utils.Weight:     "20.0",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsRoutesProfilesCount: 1,
 		},
 	}
@@ -2701,13 +2701,13 @@ func TestRoutessortedRoutesForProfileLazyPassFalse(t *testing.T) {
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "utils.CGREvent1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Route":          "RouteProfile1",
 			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 			"UsageInterval":  "1s",
 			"PddInterval":    "1s",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsRoutesProfilesCount: 1,
 		},
 	}
@@ -2762,14 +2762,14 @@ func TestRoutessortedRoutesForProfileWeightFromDynamicsErr(t *testing.T) {
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "utils.CGREvent1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Route":          "RouteProfile1",
 			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 			"UsageInterval":  "1s",
 			"PddInterval":    "1s",
 			utils.Weight:     "20.0",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsRoutesProfilesCount: 1,
 		},
 	}
@@ -2824,14 +2824,14 @@ func TestRoutessortedRoutesForProfileBlockerFromDynamicsErr(t *testing.T) {
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "utils.CGREvent1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Route":          "RouteProfile1",
 			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 			"UsageInterval":  "1s",
 			"PddInterval":    "1s",
 			utils.Weight:     "20.0",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsRoutesProfilesCount: 1,
 		},
 	}
@@ -2886,13 +2886,13 @@ func TestRoutessortedRoutesForProfileSortHasBlocker(t *testing.T) {
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "utils.CGREvent1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Route":          "RouteProfile1",
 			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 			"UsageInterval":  "1s",
 			"PddInterval":    "1s",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsRoutesProfilesCount: 1,
 		},
 	}
@@ -2922,7 +2922,7 @@ func TestRoutessortedRoutesForProfileSortHasBlocker(t *testing.T) {
 			{
 				RouteID:         "route1",
 				RouteParameters: "param1",
-				SortingData:     map[string]interface{}{utils.Blocker: true, utils.Weight: 10}},
+				SortingData:     map[string]any{utils.Blocker: true, utils.Weight: 10}},
 		},
 	}
 
@@ -2954,14 +2954,14 @@ func TestRoutessortedRoutesForEventNoSortedRoutesErr(t *testing.T) {
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "utils.CGREvent1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Route":          "RouteProfile1",
 			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 			"UsageInterval":  "1s",
 			"PddInterval":    "1s",
 			utils.Weight:     "20.0",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsRoutesProfilesCount: 1,
 		},
 	}
@@ -3003,14 +3003,14 @@ func TestRouteSV1GetRoutesListOK(t *testing.T) {
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "utils.CGREvent1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Route":          "RouteProfile1",
 			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 			"UsageInterval":  "1s",
 			"PddInterval":    "1s",
 			utils.Weight:     "20.0",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsRoutesProfilesCount: 1,
 		},
 	}

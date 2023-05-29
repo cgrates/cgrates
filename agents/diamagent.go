@@ -433,13 +433,13 @@ func (da *DiameterAgent) V1ReAuthorize(ctx *context.Context, originID string, re
 	select {
 	case raa := <-raaCh:
 		var avps []*diam.AVP
-		if avps, err = raa.FindAVPsWithPath([]interface{}{avp.ResultCode}, dict.UndefinedVendorID); err != nil {
+		if avps, err = raa.FindAVPsWithPath([]any{avp.ResultCode}, dict.UndefinedVendorID); err != nil {
 			return
 		}
 		if len(avps) == 0 {
 			return fmt.Errorf("Missing AVP")
 		}
-		var data interface{}
+		var data any
 		if data, err = diamAVPAsIface(avps[0]); err != nil {
 			return
 		} else if data != uint32(diam.Success) {
@@ -546,13 +546,13 @@ func (da *DiameterAgent) V1DisconnectPeer(ctx *context.Context, args *utils.DPRA
 	select {
 	case dpa := <-dpaCh:
 		var avps []*diam.AVP
-		if avps, err = dpa.FindAVPsWithPath([]interface{}{avp.ResultCode}, dict.UndefinedVendorID); err != nil {
+		if avps, err = dpa.FindAVPsWithPath([]any{avp.ResultCode}, dict.UndefinedVendorID); err != nil {
 			return
 		}
 		if len(avps) == 0 {
 			return fmt.Errorf("Missing AVP")
 		}
-		var data interface{}
+		var data any
 		if data, err = diamAVPAsIface(avps[0]); err != nil {
 			return
 		} else if data != uint32(diam.Success) {
@@ -566,6 +566,6 @@ func (da *DiameterAgent) V1DisconnectPeer(ctx *context.Context, args *utils.DPRA
 }
 
 // V1WarnDisconnect is used to implement the sessions.BiRPClient interface
-func (*DiameterAgent) V1WarnDisconnect(ctx *context.Context, args map[string]interface{}, reply *string) (err error) {
+func (*DiameterAgent) V1WarnDisconnect(ctx *context.Context, args map[string]any, reply *string) (err error) {
 	return utils.ErrNotImplemented
 }

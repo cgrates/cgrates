@@ -65,7 +65,7 @@ func (hU *httpUrlDP) String() string {
 }
 
 // FieldAsInterface is part of utils.DataProvider interface
-func (hU *httpUrlDP) FieldAsInterface(fldPath []string) (data interface{}, err error) {
+func (hU *httpUrlDP) FieldAsInterface(fldPath []string) (data any, err error) {
 	if len(fldPath) != 1 {
 		return nil, utils.ErrNotFound
 	}
@@ -84,7 +84,7 @@ func (hU *httpUrlDP) FieldAsInterface(fldPath []string) (data interface{}, err e
 
 // FieldAsString is part of utils.DataProvider interface
 func (hU *httpUrlDP) FieldAsString(fldPath []string) (data string, err error) {
-	var valIface interface{}
+	var valIface any
 	valIface, err = hU.FieldAsInterface(fldPath)
 	if err != nil {
 		return
@@ -121,7 +121,7 @@ func (hU *httpXmlDP) String() string {
 }
 
 // FieldAsInterface is part of utils.DataProvider interface
-func (hU *httpXmlDP) FieldAsInterface(fldPath []string) (data interface{}, err error) {
+func (hU *httpXmlDP) FieldAsInterface(fldPath []string) (data any, err error) {
 	//if path is missing return here error because if it arrived in xmlquery library will panic
 	if len(fldPath) == 0 {
 		return nil, fmt.Errorf("Empty path")
@@ -165,7 +165,7 @@ func (hU *httpXmlDP) FieldAsInterface(fldPath []string) (data interface{}, err e
 
 // FieldAsString is part of utils.DataProvider interface
 func (hU *httpXmlDP) FieldAsString(fldPath []string) (data string, err error) {
-	var valIface interface{}
+	var valIface any
 	valIface, err = hU.FieldAsInterface(fldPath)
 	if err != nil {
 		return

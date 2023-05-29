@@ -60,7 +60,7 @@ type TPeS struct {
 
 type ArgsExportTP struct {
 	Tenant      string
-	APIOpts     map[string]interface{}
+	APIOpts     map[string]any
 	ExportItems map[string][]string // map[expType][]string{"itemID1", "itemID2"}
 }
 

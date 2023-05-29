@@ -65,16 +65,16 @@ func (da *DNSAgentCfg) loadFromJSONCfg(jsnCfg *DNSAgentJsonCfg, sep string) (err
 	return
 }
 
-// AsMapInterface returns the config as a map[string]interface{}
-func (da DNSAgentCfg) AsMapInterface(separator string) interface{} {
-	mp := map[string]interface{}{
+// AsMapInterface returns the config as a map[string]any
+func (da DNSAgentCfg) AsMapInterface(separator string) any {
+	mp := map[string]any{
 		utils.EnabledCfg:   da.Enabled,
 		utils.ListenCfg:    da.Listen,
 		utils.ListenNetCfg: da.ListenNet,
 		utils.TimezoneCfg:  da.Timezone,
 	}
 
-	requestProcessors := make([]map[string]interface{}, len(da.RequestProcessors))
+	requestProcessors := make([]map[string]any, len(da.RequestProcessors))
 	for i, item := range da.RequestProcessors {
 		requestProcessors[i] = item.AsMapInterface(separator)
 	}

@@ -339,7 +339,7 @@ func main() {
 	}
 
 	// reload cache
-	if err = tpReader.ReloadCache(context.Background(), ldrCfg.GeneralCfg().DefaultCaching, *verbose, map[string]interface{}{
+	if err = tpReader.ReloadCache(context.Background(), ldrCfg.GeneralCfg().DefaultCaching, *verbose, map[string]any{
 		utils.OptsAPIKey:  *apiKey,
 		utils.OptsRouteID: *routeID,
 	}, *tenant); err != nil {

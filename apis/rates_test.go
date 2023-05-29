@@ -622,7 +622,7 @@ func TestRatesCostForEvent(t *testing.T) {
 		Tenant: "tenant",
 		ID:     "ID",
 		Event:  nil,
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsRatesProfileIDs: []string{"rtID"},
 		},
 	}
@@ -1496,7 +1496,7 @@ func TestRatesSetRateProfileErrorCache(t *testing.T) {
 				},
 			},
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: "1",
 		},
 	}
@@ -1712,12 +1712,12 @@ func TestRatesCostForEventRateIDxSelects(t *testing.T) {
 	//math the rates with true rates index selects from config
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 			utils.RequestType:  "*postpaid",
 			utils.Destination:  "+332145",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsRatesUsage: "1m24s",
 		},
 	}
@@ -1935,7 +1935,7 @@ func TestRatesGetRateProfilesGetIDsErr(t *testing.T) {
 	argsGet := &utils.ArgsItemIDs{
 		Tenant:      "cgrates.org",
 		ItemsPrefix: "test_ID",
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.PageLimitOpt:    2,
 			utils.PageOffsetOpt:   4,
 			utils.PageMaxItemsOpt: 5,
@@ -2019,7 +2019,7 @@ func TestRatesGetRateProfileIDsGetOptsErr(t *testing.T) {
 	if err := adms.GetRateProfileIDs(context.Background(),
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.PageLimitOpt: true,
 			},
 		}, &reply); err == nil || err.Error() != experr {
@@ -2064,7 +2064,7 @@ func TestRatesGetRateProfileIDsPaginateErr(t *testing.T) {
 	if err := adms.GetRateProfileIDs(context.Background(),
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.PageLimitOpt:    2,
 				utils.PageOffsetOpt:   4,
 				utils.PageMaxItemsOpt: 5,
@@ -2400,7 +2400,7 @@ func TestRatesGetRateProfileRateIDsGetOptsErr(t *testing.T) {
 		&utils.ArgsSubItemIDs{
 			Tenant:    "cgrates.org",
 			ProfileID: "prfID",
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.PageLimitOpt: true,
 			},
 		}, &reply); err == nil || err.Error() != experr {
@@ -2439,7 +2439,7 @@ func TestRatesGetRateProfileRateIDsPaginateErr(t *testing.T) {
 	if err := adms.GetRateProfileRateIDs(context.Background(),
 		&utils.ArgsSubItemIDs{
 			ProfileID: "prfID",
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.PageLimitOpt:    2,
 				utils.PageOffsetOpt:   4,
 				utils.PageMaxItemsOpt: 5,
@@ -2495,7 +2495,7 @@ func TestRatesSetRateProfileErrConvertOverwriteOpt(t *testing.T) {
 			},
 			ID: "RateProfile",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaRateSOverwrite: "invalid_opt",
 		},
 	}
@@ -2605,7 +2605,7 @@ func TestRatesGetRateProfilePagination(t *testing.T) {
 		TenantID: &utils.TenantID{
 			ID: "RATE_PROFILE",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.PageLimitOpt:   4,
 			utils.PageOffsetOpt:  1,
 			utils.ItemsPrefixOpt: "RateB",
@@ -2672,7 +2672,7 @@ func TestRatesGetRateProfilePagination(t *testing.T) {
 		TenantID: &utils.TenantID{
 			ID: "RATE_PROFILE",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.PageLimitOpt:   4,
 			utils.PageOffsetOpt:  1,
 			utils.ItemsPrefixOpt: "RateA",
@@ -2721,7 +2721,7 @@ func TestRatesGetRateProfilePagination(t *testing.T) {
 		TenantID: &utils.TenantID{
 			ID: "RATE_PROFILE",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.PageOffsetOpt: 1,
 		},
 	}
@@ -2816,7 +2816,7 @@ func TestRatesGetRateProfilePagination(t *testing.T) {
 		TenantID: &utils.TenantID{
 			ID: "RATE_PROFILE",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.PageLimitOpt:    4,
 			utils.PageOffsetOpt:   1,
 			utils.PageMaxItemsOpt: 4,
@@ -2834,7 +2834,7 @@ func TestRatesGetRateProfilePagination(t *testing.T) {
 		TenantID: &utils.TenantID{
 			ID: "RATE_PROFILE",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.PageLimitOpt:  true,
 			utils.PageOffsetOpt: 1,
 		},

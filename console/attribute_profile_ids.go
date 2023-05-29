@@ -48,7 +48,7 @@ func (self *CmdGetAttributeProfileIDs) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdGetAttributeProfileIDs) RpcParams(reset bool) interface{} {
+func (self *CmdGetAttributeProfileIDs) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &utils.ArgsItemIDs{}
 	}
@@ -59,7 +59,7 @@ func (self *CmdGetAttributeProfileIDs) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdGetAttributeProfileIDs) RpcResult() interface{} {
+func (self *CmdGetAttributeProfileIDs) RpcResult() any {
 	var atr []string
 	return &atr
 }

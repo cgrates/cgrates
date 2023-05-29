@@ -194,8 +194,8 @@ func (sqls *SQLStorage) GetTpTableIds(tpid, table string, distinct []string,
 		if err != nil {
 			return nil, err
 		}
-		vals := make([]string, len(cols))      // Allocate enough values
-		ints := make([]interface{}, len(cols)) // Make a slice of []interface{}
+		vals := make([]string, len(cols)) // Allocate enough values
+		ints := make([]any, len(cols))    // Make a slice of []any
 		for i := range ints {
 			ints[i] = &vals[i] // Copy references into the slice
 		}

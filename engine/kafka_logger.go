@@ -88,7 +88,7 @@ func (el *ExportLogger) Close() (err error) {
 func (el *ExportLogger) call(m string, level int) (err error) {
 	eventExport := &utils.CGREvent{
 		Tenant: el.Tenant,
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.NodeID:    el.NodeID,
 			utils.Message:   m,
 			utils.Severity:  level,
@@ -261,8 +261,8 @@ func (el *ExportLogger) Warning(m string) (err error) {
 	return
 }
 
-func (el *ExportLogger) GetMeta() map[string]interface{} {
-	return map[string]interface{}{
+func (el *ExportLogger) GetMeta() map[string]any {
+	return map[string]any{
 		utils.Tenant:         el.Tenant,
 		utils.NodeID:         el.NodeID,
 		utils.Level:          el.LogLevel,

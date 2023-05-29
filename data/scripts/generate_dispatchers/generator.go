@@ -54,7 +54,7 @@ func main() {
 	type genFile struct {
 		path       string
 		subsystem  string // the name of the constant
-		obj        interface{}
+		obj        any
 		customName string
 	}
 	fmt.Println("Generating dispatcher files ...")
@@ -90,7 +90,7 @@ func main() {
 
 }
 
-func createFile(filePath, subsystem, customName string, obj interface{}) (err error) {
+func createFile(filePath, subsystem, customName string, obj any) (err error) {
 	var f io.WriteCloser
 	if f, err = os.Create(filePath); err != nil {
 		return
@@ -99,7 +99,7 @@ func createFile(filePath, subsystem, customName string, obj interface{}) (err er
 	return writeFile(f, subsystem, customName, obj)
 }
 
-func writeFile(w io.Writer, subsystem, customName string, obj interface{}) (err error) {
+func writeFile(w io.Writer, subsystem, customName string, obj any) (err error) {
 	if _, err = w.Write([]byte(`/*
 Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
 Copyright (C) ITsysCOM GmbH
@@ -327,9 +327,9 @@ func generateFuncBody(arg reflect.Type, funcName, subsystem string) (p []ast.Stm
 	tnt := ast.NewIdent("tnt")
 	p = append(p, generateCond(arg, tnt, ast.NewIdent("dS.cfg.GeneralCfg().DefaultTenant"), utils.Tenant, reflect.String)...)
 	ev := ast.NewIdent("ev")
-	p = append(p, generateCond(arg, ev, ast.NewIdent("make(map[string]interface{})"), utils.Event, reflect.Map)...)
+	p = append(p, generateCond(arg, ev, ast.NewIdent("make(map[string]any)"), utils.Event, reflect.Map)...)
 	opts := ast.NewIdent("opts")
-	p = append(p, generateCond(arg, opts, ast.NewIdent("make(map[string]interface{})"), "APIOpts", reflect.Map)...)
+	p = append(p, generateCond(arg, opts, ast.NewIdent("make(map[string]any)"), "APIOpts", reflect.Map)...)
 
 	p = append(p, &ast.ReturnStmt{Results: []ast.Expr{&ast.CallExpr{
 		Fun: &ast.SelectorExpr{
@@ -397,7 +397,7 @@ func getArgType(args reflect.Type) ast.Expr {
 	case reflect.Interface:
 		name := args.Name()
 		if len(name) == 0 {
-			name = "interface{}"
+			name = "any"
 		}
 		return ast.NewIdent(name)
 	case reflect.Ptr:

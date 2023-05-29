@@ -524,11 +524,11 @@ func TestResourcesGetResource(t *testing.T) {
 
 	rsv1 := NewResourceSv1(rls)
 	args := &utils.CGREvent{
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 		},
 		ID: "EventTest",
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsResourcesUsageID: "RU_Test",
 		},
 	}
@@ -632,11 +632,11 @@ func TestResourcesAuthorizeAllocateReleaseResource(t *testing.T) {
 
 	rsv1 := NewResourceSv1(rls)
 	args := &utils.CGREvent{
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 		},
 		ID: "EventTest",
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsResourcesUsageID: "RU_Test",
 		},
 	}
@@ -813,7 +813,7 @@ func TestResourcesGetResourceProfilesGetIDsErr(t *testing.T) {
 	argsGet := &utils.ArgsItemIDs{
 		Tenant:      "cgrates.org",
 		ItemsPrefix: "test_ID",
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.PageLimitOpt:    2,
 			utils.PageOffsetOpt:   4,
 			utils.PageMaxItemsOpt: 5,
@@ -897,7 +897,7 @@ func TestResourcesGetResourceProfileIDsGetOptsErr(t *testing.T) {
 	if err := adms.GetResourceProfileIDs(context.Background(),
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.PageLimitOpt: true,
 			},
 		}, &reply); err == nil || err.Error() != experr {
@@ -942,7 +942,7 @@ func TestResourcesGetResourceProfileIDsPaginateErr(t *testing.T) {
 	if err := adms.GetResourceProfileIDs(context.Background(),
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.PageLimitOpt:    2,
 				utils.PageOffsetOpt:   4,
 				utils.PageMaxItemsOpt: 5,

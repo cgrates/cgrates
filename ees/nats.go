@@ -94,7 +94,7 @@ func (pstr *NatsEE) Connect() (err error) {
 	return
 }
 
-func (pstr *NatsEE) ExportEvent(ctx *context.Context, content, _ interface{}) (err error) {
+func (pstr *NatsEE) ExportEvent(ctx *context.Context, content, _ any) (err error) {
 	pstr.reqs.get()
 	pstr.RLock()
 	if pstr.poster == nil {
@@ -124,7 +124,7 @@ func (pstr *NatsEE) Close() (err error) {
 
 func (pstr *NatsEE) GetMetrics() *utils.SafeMapStorage { return pstr.dc }
 
-func (pstr *NatsEE) ExtraData(ev *utils.CGREvent) interface{} { return nil }
+func (pstr *NatsEE) ExtraData(ev *utils.CGREvent) any { return nil }
 
 func GetNatsOpts(opts *config.EventExporterOpts, nodeID string, connTimeout time.Duration) (nop []nats.Option, err error) {
 	nop = make([]nats.Option, 0, 7)

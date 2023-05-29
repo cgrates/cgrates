@@ -149,7 +149,7 @@ func (cM *ConnManager) getConnWithConfig(ctx *context.Context, connID string, co
 
 // Call gets the connection calls the method on it
 func (cM *ConnManager) Call(ctx *context.Context, connIDs []string,
-	method string, arg, reply interface{}) (err error) {
+	method string, arg, reply any) (err error) {
 	if len(connIDs) == 0 {
 		return utils.NewErrMandatoryIeMissing("connIDs")
 	}
@@ -166,7 +166,7 @@ func (cM *ConnManager) Call(ctx *context.Context, connIDs []string,
 }
 
 // CallWithConnIDs will call the method only on specified rpcconns
-func (cM *ConnManager) CallWithConnIDs(connIDs []string, ctx *context.Context, subsHostIDs utils.StringSet, method string, arg, reply interface{}) (err error) {
+func (cM *ConnManager) CallWithConnIDs(connIDs []string, ctx *context.Context, subsHostIDs utils.StringSet, method string, arg, reply any) (err error) {
 	if len(connIDs) == 0 {
 		return utils.NewErrMandatoryIeMissing("connIDs")
 	}

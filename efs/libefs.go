@@ -44,7 +44,7 @@ func SetFailedPostCacheTTL(ttl time.Duration) {
 	failedPostCache = ltcache.NewCache(-1, ttl, true, writeFailedPosts)
 }
 
-func writeFailedPosts(_ string, value interface{}) {
+func writeFailedPosts(_ string, value any) {
 	expEv, canConvert := value.(*FailedExportersLogg)
 	if !canConvert {
 		return

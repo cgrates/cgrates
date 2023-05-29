@@ -64,9 +64,9 @@ func (efsCfg *EFsCfg) loadFromJSONCfg(jsonEFsCfg *EfsJsonCfg) (err error) {
 	return
 }
 
-// AsMapInterface returns the config of EFsCfg as a map[string]interface{}
-func (efsCfg EFsCfg) AsMapInterface(string) interface{} {
-	mp := map[string]interface{}{
+// AsMapInterface returns the config of EFsCfg as a map[string]any
+func (efsCfg EFsCfg) AsMapInterface(string) any {
+	mp := map[string]any{
 		utils.EnabledCfg:        efsCfg.Enabled,
 		utils.FailedPostsDirCfg: efsCfg.FailedPostsDir,
 		utils.PosterAttemptsCfg: efsCfg.PosterAttempts,

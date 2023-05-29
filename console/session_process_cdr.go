@@ -47,7 +47,7 @@ func (self *CmdSessionsProcessCDR) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdSessionsProcessCDR) RpcParams(reset bool) interface{} {
+func (self *CmdSessionsProcessCDR) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = new(utils.CGREvent)
 	}
@@ -58,7 +58,7 @@ func (self *CmdSessionsProcessCDR) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdSessionsProcessCDR) RpcResult() interface{} {
+func (self *CmdSessionsProcessCDR) RpcResult() any {
 	var atr string
 	return &atr
 }

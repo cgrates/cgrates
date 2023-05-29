@@ -121,7 +121,7 @@ func TestGetTariffPlansKeys(t *testing.T) {
 	acc := &utils.Account{
 		Tenant: "cgrates.org",
 		ID:     "Account_simple",
-		Opts:   map[string]interface{}{},
+		Opts:   map[string]any{},
 		Balances: map[string]*utils.Balance{
 			"VoiceBalance": {
 				ID:        "VoiceBalance",
@@ -132,7 +132,7 @@ func TestGetTariffPlansKeys(t *testing.T) {
 					},
 				},
 				Type: "*abstract",
-				Opts: map[string]interface{}{
+				Opts: map[string]any{
 					"Destination": "10",
 				},
 				Units: utils.NewDecimal(0, 0),
@@ -353,7 +353,7 @@ func TestGetTariffPlansKeys(t *testing.T) {
 		ID:        "Dsp1",
 		FilterIDs: []string{"*string:~*req.Account:1001", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
 		Strategy:  utils.MetaFirst,
-		StrategyParams: map[string]interface{}{
+		StrategyParams: map[string]any{
 			utils.MetaDefaultRatio: "false",
 		},
 		Weight: 20,
@@ -362,7 +362,7 @@ func TestGetTariffPlansKeys(t *testing.T) {
 				ID:        "C1",
 				FilterIDs: []string{},
 				Weight:    10,
-				Params:    map[string]interface{}{"0": "192.168.54.203"},
+				Params:    map[string]any{"0": "192.168.54.203"},
 				Blocker:   false,
 			},
 		},

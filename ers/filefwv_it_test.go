@@ -233,7 +233,7 @@ func TestFWVFileConfig(t *testing.T) {
 			Timezone:       utils.EmptyString,
 			Filters:        []string{},
 			Flags:          utils.FlagsWithParams{},
-			Opts:           make(map[string]interface{}),
+			Opts:           make(map[string]any),
 		},
 		{
 			ID:             "file_reader2",
@@ -246,7 +246,7 @@ func TestFWVFileConfig(t *testing.T) {
 			Timezone:       utils.EmptyString,
 			Filters:        []string{},
 			Flags:          utils.FlagsWithParams{},
-			Opts:           make(map[string]interface{}),
+			Opts:           make(map[string]any),
 		},
 	}
 	expected := cfg.ERsCfg().Readers[0]
@@ -446,10 +446,10 @@ func TestFileFWVProcessTrailer(t *testing.T) {
 	}
 	expEvent := &utils.CGREvent{
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"OriginID": "testOriginID",
 		},
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 	eR.conReqs <- struct{}{}
 	filePath := "/tmp/TestFileFWVProcessTrailer/"
@@ -620,10 +620,10 @@ func TestFileFWVCreateHeaderMap(t *testing.T) {
 	eR.conReqs <- struct{}{}
 	expEvent := &utils.CGREvent{
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"OriginID": "testOriginID",
 		},
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 	hdrFields := []*config.FCTemplate{
 		{

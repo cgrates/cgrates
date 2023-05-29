@@ -133,7 +133,7 @@ func testSessionsVoiceMonetaryRefund(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsVoiceMonetaryRefund",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.EventName:    "TEST_EVENT",
 				utils.ToR:          utils.MetaVoice,
 				utils.OriginID:     "123451",
@@ -173,7 +173,7 @@ func testSessionsVoiceMonetaryRefund(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsVoiceMonetaryRefund",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.EventName:    "TEST_EVENT",
 				utils.ToR:          utils.MetaVoice,
 				utils.OriginID:     "123451",
@@ -210,7 +210,7 @@ func testSessionsVoiceVoiceRefund(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsVoiceVoiceRefund",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.EventName:    "TEST_EVENT",
 				utils.ToR:          utils.MetaVoice,
 				utils.OriginID:     "123452",
@@ -252,7 +252,7 @@ func testSessionsVoiceVoiceRefund(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsVoiceVoiceRefund",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.EventName:    "TEST_EVENT",
 				utils.ToR:          utils.MetaVoice,
 				utils.OriginID:     "123452",
@@ -295,7 +295,7 @@ func testSessionsVoiceMixedRefund(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsVoiceMixedRefund",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.EventName:    "TEST_EVENT",
 				utils.ToR:          utils.MetaVoice,
 				utils.OriginID:     "123453",
@@ -340,7 +340,7 @@ func testSessionsVoiceMixedRefund(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsVoiceMixedRefund",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.EventName:    "TEST_EVENT",
 				utils.ToR:          utils.MetaVoice,
 				utils.OriginID:     "123453",
@@ -392,7 +392,7 @@ func testSessionsVoiceLastUsed(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsVoiceLastUsed",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.EventName:    "TEST_EVENT",
 				utils.ToR:          utils.MetaVoice,
 				utils.OriginID:     "12350",
@@ -431,7 +431,7 @@ func testSessionsVoiceLastUsed(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsVoiceLastUsed",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.EventName:    "Update1",
 				utils.ToR:          utils.MetaVoice,
 				utils.OriginID:     "12350",
@@ -468,7 +468,7 @@ func testSessionsVoiceLastUsed(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsVoiceLastUsed",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.EventName:    "Update2",
 				utils.ToR:          utils.MetaVoice,
 				utils.OriginID:     "12350",
@@ -506,7 +506,7 @@ func testSessionsVoiceLastUsed(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsVoiceLastUsed",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.EventName:    "TEST_EVENT",
 				utils.ToR:          utils.MetaVoice,
 				utils.OriginID:     "12350",
@@ -553,7 +553,7 @@ func testSessionsVoiceLastUsedEnd(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsVoiceLastUsedEnd",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.EventName:    "TEST_EVENT",
 				utils.ToR:          utils.MetaVoice,
 				utils.OriginID:     "1234911",
@@ -592,7 +592,7 @@ func testSessionsVoiceLastUsedEnd(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsVoiceLastUsedEnd",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.EventName:    "TEST_EVENT",
 				utils.ToR:          utils.MetaVoice,
 				utils.OriginID:     "1234911",
@@ -630,7 +630,7 @@ func testSessionsVoiceLastUsedEnd(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsVoiceLastUsedEnd",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.EventName:    "TEST_EVENT",
 				utils.ToR:          utils.MetaVoice,
 				utils.OriginID:     "1234911",
@@ -675,7 +675,7 @@ func testSessionsVoiceLastUsedNotFixed(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsVoiceLastUsedNotFixed",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.EventName:    "TEST_EVENT",
 				utils.ToR:          utils.MetaVoice,
 				utils.OriginID:     "1234922",
@@ -715,7 +715,7 @@ func testSessionsVoiceLastUsedNotFixed(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsVoiceLastUsedNotFixed",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.EventName:    "TEST_EVENT",
 				utils.ToR:          utils.MetaVoice,
 				utils.OriginID:     "1234922",
@@ -752,7 +752,7 @@ func testSessionsVoiceLastUsedNotFixed(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsVoiceLastUsedNotFixed",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.EventName:    "TEST_EVENT",
 				utils.ToR:          utils.MetaVoice,
 				utils.OriginID:     "1234922",
@@ -798,7 +798,7 @@ func testSessionsVoiceSessionTTL(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsVoiceSessionTTL",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.EventName:    "TEST_EVENT_SESSION_TTL",
 				utils.ToR:          utils.MetaVoice,
 				utils.OriginID:     "12360",
@@ -866,7 +866,7 @@ func testSessionsVoiceSessionTTL(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsVoiceSessionTTL",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.EventName:    "TEST_EVENT_SESSION_TTL",
 				utils.ToR:          utils.MetaVoice,
 				utils.OriginID:     "12360",
@@ -941,7 +941,7 @@ func testSessionsVoiceSessionTTLWithRelocate(t *testing.T) {
 		Account:     "TestTTLWithRelocate",
 		BalanceType: utils.MetaVoice,
 		Value:       300 * float64(time.Second),
-		Balance: map[string]interface{}{
+		Balance: map[string]any{
 			utils.ID:            "TestTTLWithRelocate",
 			utils.RatingSubject: "*zero50ms",
 		},
@@ -971,7 +971,7 @@ func testSessionsVoiceSessionTTLWithRelocate(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsVoiceSessionTTLWithRelocate",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.EventName:    "TEST_EVENT_SESSION_TTL_RELOCATE",
 				utils.ToR:          utils.MetaVoice,
 				utils.OriginID:     "12361",
@@ -1027,7 +1027,7 @@ func testSessionsVoiceSessionTTLWithRelocate(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsVoiceSessionTTLWithRelocate",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.EventName:       "TEST_EVENT_SESSION_TTL_RELOCATE",
 				utils.ToR:             utils.MetaVoice,
 				utils.InitialOriginID: "12361", //take the initial originID from init
@@ -1114,7 +1114,7 @@ func testSessionsVoiceRelocateWithOriginIDPrefix(t *testing.T) {
 		Account:     "TestRelocateWithOriginIDPrefix",
 		BalanceType: utils.MetaVoice,
 		Value:       300 * float64(time.Second),
-		Balance: map[string]interface{}{
+		Balance: map[string]any{
 			utils.ID:            "TestRelocateWithOriginIDPrefix",
 			utils.RatingSubject: "*zero1s",
 		},
@@ -1144,7 +1144,7 @@ func testSessionsVoiceRelocateWithOriginIDPrefix(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsVoiceRelocateWithOriginIDPrefix",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.EventName:    "TEST_EVENT_RELOCATE_ORIGPREFIX",
 				utils.ToR:          utils.MetaVoice,
 				utils.OriginID:     "12371",
@@ -1200,7 +1200,7 @@ func testSessionsVoiceRelocateWithOriginIDPrefix(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsVoiceSessionTTLWithRelocate",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.EventName:       "TEST_EVENT_RELOCATE_ORIGPREFIX",
 				utils.ToR:             utils.MetaVoice,
 				utils.InitialOriginID: "12371",
@@ -1255,7 +1255,7 @@ func testSessionsVoiceRelocateWithOriginIDPrefix(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsVoiceLastUsedNotFixed",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.EventName:    "TEST_EVENT_RELOCATE_ORIGPREFIX",
 				utils.ToR:          utils.MetaVoice,
 				utils.OriginID:     "12372-1",
@@ -1331,7 +1331,7 @@ func TestSMGDataDerivedChargingNoCredit(t *testing.T) {
 	} else if acnt.BalanceMap[utils.MetaVoice].GetTotalValue() != eAcntVal {
 		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.MetaVoice].GetTotalValue())
 	}
-	smgEv := map[string]interface{}{
+	smgEv := map[string]any{
 		utils.EventName:  "TEST_EVENT",
 		utils.ToR:         utils.MetaVoice,
 		utils.OriginID:       "1234967",

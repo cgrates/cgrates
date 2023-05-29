@@ -132,7 +132,7 @@ package general_tests
 // 		Account:     "testV1DataDataCost",
 // 		BalanceType: utils.MetaData,
 // 		Value:       356000000,
-// 		Balance: map[string]interface{}{
+// 		Balance: map[string]any{
 // 			utils.Categories:    "data",
 // 			utils.ID:            "testV1DataDataCost",
 // 			utils.RatingSubject: "*zero10000ns",
@@ -211,7 +211,7 @@ package general_tests
 // 		Account:     "testV1DataDebitBalance",
 // 		BalanceType: utils.MetaData,
 // 		Value:       356000000,
-// 		Balance: map[string]interface{}{
+// 		Balance: map[string]any{
 // 			utils.Categories:    "data",
 // 			utils.ID:            "testV1DataDebitBalance",
 // 			utils.RatingSubject: "*zero10000ns",
@@ -270,7 +270,7 @@ package general_tests
 // 		Account:     "testV1DataDataDebitUsage1G0",
 // 		BalanceType: utils.MetaData,
 // 		Value:       1100000000,
-// 		Balance: map[string]interface{}{
+// 		Balance: map[string]any{
 // 			utils.Categories:    "data",
 // 			utils.ID:            "testV1DataDataDebitUsage1G0",
 // 			utils.RatingSubject: "*zero10000ns",
@@ -349,7 +349,7 @@ package general_tests
 // 		Account:     "testV1DataDebitBalance1G0",
 // 		BalanceType: utils.MetaData,
 // 		Value:       1100000000,
-// 		Balance: map[string]interface{}{
+// 		Balance: map[string]any{
 // 			utils.Categories:    "data",
 // 			utils.ID:            "testV1DataDebitBalance1G0",
 // 			utils.RatingSubject: "*zero10000ns",
@@ -408,7 +408,7 @@ package general_tests
 // 		Account:     "testV1DataInitSession",
 // 		BalanceType: utils.MetaData,
 // 		Value:       1100000000,
-// 		Balance: map[string]interface{}{
+// 		Balance: map[string]any{
 // 			utils.Categories:    "data",
 // 			utils.ID:            "testV1DataInitSession",
 // 			utils.RatingSubject: "*zero10000ns",
@@ -441,7 +441,7 @@ package general_tests
 // 		CGREvent: &utils.CGREvent{
 // 			Tenant: "cgrates.org",
 // 			ID:     "testV1DataInitSession",
-// 			Event: map[string]interface{}{
+// 			Event: map[string]any{
 // 				utils.Tenant:       "cgrates.org",
 // 				utils.ToR:          utils.MetaData,
 // 				utils.Category:     "data",
@@ -454,7 +454,7 @@ package general_tests
 // 				utils.AnswerTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
 // 				utils.Usage:        initUsage,
 // 			},
-// 			APIOpts: map[string]interface{}{
+// 			APIOpts: map[string]any{
 // 				utils.OptsSesTTL:         "300s",
 // 				utils.OptsSesTTLLastUsed: "0s",
 // 				utils.OptsSesTTLMaxDelay: "1800s",
@@ -486,7 +486,7 @@ package general_tests
 // 		CGREvent: &utils.CGREvent{
 // 			Tenant: "cgrates.org",
 // 			ID:     "testV1DataUpdateWith1Mo",
-// 			Event: map[string]interface{}{
+// 			Event: map[string]any{
 // 				utils.Tenant:       "cgrates.org",
 // 				utils.ToR:          utils.MetaData,
 // 				utils.Category:     "data",
@@ -501,7 +501,7 @@ package general_tests
 // 				utils.AnswerTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
 // 				utils.Usage:        reqUsage,
 // 			},
-// 			APIOpts: map[string]interface{}{
+// 			APIOpts: map[string]any{
 // 				utils.OptsSesTTL:         "28807s",
 // 				utils.OptsSesTTLLastUsed: "0s",
 // 				utils.OptsSesTTLMaxDelay: "1800s",
@@ -530,7 +530,7 @@ package general_tests
 // 		CGREvent: &utils.CGREvent{
 // 			Tenant: "cgrates.org",
 // 			ID:     "testV1DataUpdateWith1Go",
-// 			Event: map[string]interface{}{
+// 			Event: map[string]any{
 // 				utils.Tenant:       "cgrates.org",
 // 				utils.ToR:          utils.MetaData,
 // 				utils.Category:     "data",
@@ -545,7 +545,7 @@ package general_tests
 // 				utils.AnswerTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
 // 				utils.Usage:        reqUsage,
 // 			},
-// 			APIOpts: map[string]interface{}{
+// 			APIOpts: map[string]any{
 // 				utils.OptsSesTTL:         "28807s",
 // 				utils.OptsSesTTLLastUsed: "0s",
 // 				utils.OptsSesTTLMaxDelay: "1800s",

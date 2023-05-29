@@ -133,14 +133,14 @@ func (acS *ActionSCfg) loadFromJSONCfg(jsnCfg *ActionSJsonCfg) (err error) {
 	return
 }
 
-// AsMapInterface returns the config as a map[string]interface{}
-func (acS ActionSCfg) AsMapInterface(string) interface{} {
-	opts := map[string]interface{}{
+// AsMapInterface returns the config as a map[string]any
+func (acS ActionSCfg) AsMapInterface(string) any {
+	opts := map[string]any{
 		utils.MetaProfileIDs:           acS.Opts.ProfileIDs,
 		utils.MetaProfileIgnoreFilters: acS.Opts.ProfileIgnoreFilters,
 		utils.MetaPosterAttempts:       acS.Opts.PosterAttempts,
 	}
-	mp := map[string]interface{}{
+	mp := map[string]any{
 		utils.EnabledCfg:                acS.Enabled,
 		utils.IndexedSelectsCfg:         acS.IndexedSelects,
 		utils.NestedFieldsCfg:           acS.NestedFields,

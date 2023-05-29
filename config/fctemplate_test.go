@@ -389,8 +389,8 @@ func TestFCTemplateAsMapInterface(t *testing.T) {
            ],
      }
 }`
-	eMap := map[string]interface{}{
-		"custom_template": []map[string]interface{}{
+	eMap := map[string]any{
+		"custom_template": []map[string]any{
 			{
 				utils.TagCfg:              "Tenant",
 				utils.TypeCfg:             "*composed",
@@ -415,7 +415,7 @@ func TestFCTemplateAsMapInterface(t *testing.T) {
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
-	} else if rcv := cgrCfg.templates.AsMapInterface(cgrCfg.generalCfg.RSRSep).(map[string][]map[string]interface{}); !reflect.DeepEqual(eMap["custom_template"], rcv["custom_template"]) {
+	} else if rcv := cgrCfg.templates.AsMapInterface(cgrCfg.generalCfg.RSRSep).(map[string][]map[string]any); !reflect.DeepEqual(eMap["custom_template"], rcv["custom_template"]) {
 		t.Errorf("Expected %+v \n, recieved %+v", utils.ToJSON(eMap["custom_template"]), utils.ToJSON(rcv["custom_template"]))
 	}
 }
@@ -447,8 +447,8 @@ func TestFCTemplateAsMapInterface1(t *testing.T) {
 	     ],
     }
 }`
-	eMap := map[string]interface{}{
-		utils.MetaErr: []map[string]interface{}{
+	eMap := map[string]any{
+		utils.MetaErr: []map[string]any{
 			{utils.TagCfg: "SessionId", utils.PathCfg: "*rep.Session-Id", utils.TypeCfg: "*variable",
 				utils.ValueCfg: "~*req.Session-Id", utils.MandatoryCfg: true},
 			{utils.TagCfg: "OriginHost", utils.PathCfg: "*rep.Origin-Host", utils.TypeCfg: "*variable",
@@ -456,7 +456,7 @@ func TestFCTemplateAsMapInterface1(t *testing.T) {
 			{utils.TagCfg: "OriginRealm", utils.PathCfg: "*rep.Origin-Realm", utils.TypeCfg: "*variable",
 				utils.ValueCfg: "~*vars.OriginRealm", utils.MandatoryCfg: true},
 		},
-		utils.MetaASR: []map[string]interface{}{
+		utils.MetaASR: []map[string]any{
 			{utils.TagCfg: "SessionId", utils.PathCfg: "*diamreq.Session-Id", utils.TypeCfg: "*variable",
 				utils.ValueCfg: "~*req.Session-Id", utils.MandatoryCfg: true},
 			{utils.TagCfg: "OriginHost", utils.PathCfg: "*diamreq.Origin-Host", utils.TypeCfg: "*variable",
@@ -474,7 +474,7 @@ func TestFCTemplateAsMapInterface1(t *testing.T) {
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
 	} else {
-		rcv := cgrCfg.templates.AsMapInterface(cgrCfg.generalCfg.RSRSep).(map[string][]map[string]interface{})
+		rcv := cgrCfg.templates.AsMapInterface(cgrCfg.generalCfg.RSRSep).(map[string][]map[string]any)
 		if !reflect.DeepEqual(eMap[utils.MetaErr], rcv[utils.MetaErr]) {
 			t.Errorf("Expected %+v \n, recieved %+v", utils.ToJSON(eMap[utils.MetaErr]), utils.ToJSON(rcv[utils.MetaErr]))
 		} else if !reflect.DeepEqual(eMap[utils.MetaASR], rcv[utils.MetaASR]) {

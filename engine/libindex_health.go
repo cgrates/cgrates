@@ -41,7 +41,7 @@ type IndexHealthArgs struct {
 	FilterCacheLimit     int
 	FilterCacheTTL       time.Duration
 	FilterCacheStaticTTL bool
-	APIOpts              map[string]interface{} // Only for dispatcher.
+	APIOpts              map[string]any // Only for dispatcher.
 }
 
 type FilterIHReply struct {

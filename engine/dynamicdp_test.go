@@ -319,82 +319,82 @@ func TestLibphonenumberDPfieldAsInterface(t *testing.T) {
 	dDP.pNumber.Extension = utils.StringPointer("+")
 	dDP.pNumber.PreferredDomesticCarrierCode = utils.StringPointer("49 172")
 
-	exp := interface{}(pInt)
+	exp := any(pInt)
 	if rcv, err := dDP.fieldAsInterface([]string{"CountryCode"}); err != nil {
 		t.Error(err)
 	} else if rcv != exp {
 		t.Errorf("Expected <%+v>, Received <%v>", exp, rcv)
 	}
 
-	exp = interface{}(nNum)
+	exp = any(nNum)
 	if rcv, err := dDP.fieldAsInterface([]string{"NationalNumber"}); err != nil {
 		t.Error(err)
 	} else if rcv != exp {
 		t.Errorf("Expected <%+v>, Received <%v>", exp, rcv)
 	}
 
-	exp = interface{}("DE")
+	exp = any("DE")
 	if rcv, err := dDP.fieldAsInterface([]string{"Region"}); err != nil {
 		t.Error(err)
 	} else if rcv != exp {
 		t.Errorf("Expected <%+v>, Received <%v>", exp, rcv)
 	}
-	exp = interface{}(phonenumbers.PhoneNumberType(11))
+	exp = any(phonenumbers.PhoneNumberType(11))
 	if rcv, err := dDP.fieldAsInterface([]string{"NumberType"}); err != nil {
 		t.Error(err)
 	} else if rcv != exp {
 		t.Errorf("Expected <%+v>, Received <%v><%t>", exp, rcv, rcv)
 	}
 
-	exp = interface{}("Deutschland")
+	exp = any("Deutschland")
 	if rcv, err := dDP.fieldAsInterface([]string{"GeoLocation"}); err != nil {
 		t.Error(err)
 	} else if rcv != exp {
 		t.Errorf("Expected <%+v>, Received <%v>", exp, rcv)
 	}
-	exp = interface{}("Vodafone")
+	exp = any("Vodafone")
 	if rcv, err := dDP.fieldAsInterface([]string{"Carrier"}); err != nil {
 		t.Error(err)
 	} else if rcv != exp {
 		t.Errorf("Expected <%+v>, Received <%v><%T>", exp, rcv, rcv)
 	}
-	exp = interface{}(0)
+	exp = any(0)
 	if rcv, err := dDP.fieldAsInterface([]string{"LengthOfNationalDestinationCode"}); err != nil {
 		t.Error(err)
 	} else if rcv != exp {
 		t.Errorf("Expected <%+v>, Received <%v>", exp, rcv)
 	}
-	exp = interface{}("+49 17222020")
+	exp = any("+49 17222020")
 	if rcv, err := dDP.fieldAsInterface([]string{"RawInput"}); err != nil {
 		t.Error(err)
 	} else if rcv != exp {
 		t.Errorf("Expected <%+v>, Received <%v>", exp, rcv)
 	}
-	exp = interface{}("+")
+	exp = any("+")
 	if rcv, err := dDP.fieldAsInterface([]string{"Extension"}); err != nil {
 		t.Error(err)
 	} else if rcv != exp {
 		t.Errorf("Expected <%+v>, Received <%v>", exp, rcv)
 	}
-	exp = interface{}(leadingZeros)
+	exp = any(leadingZeros)
 	if rcv, err := dDP.fieldAsInterface([]string{"NumberOfLeadingZeros"}); err != nil {
 		t.Error(err)
 	} else if rcv != exp {
 		t.Errorf("Expected <%+v>, Received <%v>", exp, rcv)
 	}
-	exp = interface{}(false)
+	exp = any(false)
 	if rcv, err := dDP.fieldAsInterface([]string{"ItalianLeadingZero"}); err != nil {
 		t.Error(err)
 	} else if rcv != exp {
 		t.Errorf("Expected <%+v>, Received <%v>", exp, rcv)
 	}
-	exp = interface{}("49 172")
+	exp = any("49 172")
 	if rcv, err := dDP.fieldAsInterface([]string{"PreferredDomesticCarrierCode"}); err != nil {
 		t.Error(err)
 	} else if rcv != exp {
 		t.Errorf("Expected <%+v>, Received <%v>", exp, rcv)
 	}
-	exp = interface{}(phonenumbers.PhoneNumber_FROM_NUMBER_WITH_PLUS_SIGN)
+	exp = any(phonenumbers.PhoneNumber_FROM_NUMBER_WITH_PLUS_SIGN)
 	if rcv, err := dDP.fieldAsInterface([]string{"CountryCodeSource"}); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcv, exp) {
@@ -425,7 +425,7 @@ func TestDynamicDPfieldAsInterfaceMetaLibPhoneNumber(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	exp := interface{}(expAsField)
+	exp := any(expAsField)
 	if rcv, err := dDP.fieldAsInterface([]string{utils.MetaLibPhoneNumber, "+4917642092123"}); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcv, exp) {
@@ -479,8 +479,8 @@ func TestDynamicDPfieldAsInterfaceErrMetaStats(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 
 	cc := &ccMock{
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.StatSv1GetQueueDecimalMetrics: func(ctx *context.Context, args, reply interface{}) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.StatSv1GetQueueDecimalMetrics: func(ctx *context.Context, args, reply any) error {
 				return utils.ErrNotImplemented
 			},
 		},
@@ -510,8 +510,8 @@ func TestDynamicDPfieldAsInterfaceErrMetaResources(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 
 	cc := &ccMock{
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.ResourceSv1GetResourceWithConfig: func(ctx *context.Context, args, reply interface{}) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ResourceSv1GetResourceWithConfig: func(ctx *context.Context, args, reply any) error {
 				return utils.ErrNotImplemented
 			},
 		},
@@ -541,8 +541,8 @@ func TestDynamicDPfieldAsInterfaceErrMetaAccounts(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 
 	cc := &ccMock{
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.AccountSv1GetAccount: func(ctx *context.Context, args, reply interface{}) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.AccountSv1GetAccount: func(ctx *context.Context, args, reply any) error {
 				return utils.ErrNotImplemented
 			},
 		},
@@ -599,8 +599,8 @@ func TestDynamicDPfieldAsInterfaceMetaAccounts(t *testing.T) {
 	}
 
 	cc := &ccMock{
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.AccountSv1GetAccount: func(ctx *context.Context, args, reply interface{}) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.AccountSv1GetAccount: func(ctx *context.Context, args, reply any) error {
 				rplCast, canCast := reply.(*utils.Account)
 				if !canCast {
 					t.Errorf("Wrong argument type : %T", reply)
@@ -668,8 +668,8 @@ func TestDynamicDPfieldAsInterfaceMetaResources(t *testing.T) {
 	}
 
 	cc := &ccMock{
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.ResourceSv1GetResourceWithConfig: func(ctx *context.Context, args, reply interface{}) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ResourceSv1GetResourceWithConfig: func(ctx *context.Context, args, reply any) error {
 				rplCast, canCast := reply.(*ResourceWithConfig)
 				if !canCast {
 					t.Errorf("Wrong argument type : %T", reply)
@@ -715,8 +715,8 @@ func TestDynamicDPfieldAsInterfaceMetaStats(t *testing.T) {
 	}
 
 	cc := &ccMock{
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.StatSv1GetQueueDecimalMetrics: func(ctx *context.Context, args, reply interface{}) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.StatSv1GetQueueDecimalMetrics: func(ctx *context.Context, args, reply any) error {
 				rplCast, canCast := reply.(*map[string]*utils.Decimal)
 				if !canCast {
 					t.Errorf("Wrong argument type : %T", reply)

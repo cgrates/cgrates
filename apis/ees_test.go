@@ -50,7 +50,7 @@ func TestEeSProcessEvent(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "voiceEvent",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 
 				utils.ToR:          utils.MetaVoice,
 				utils.OriginID:     "dsafdsaf",
@@ -69,13 +69,13 @@ func TestEeSProcessEvent(t *testing.T) {
 				"ExtraFields": map[string]string{"extra1": "val_extra1",
 					"extra2": "val_extra2", "extra3": "val_extra3"},
 			},
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.MetaOriginID: utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()),
 			},
 		},
 	}
-	var reply map[string]map[string]interface{}
-	replyExpect := map[string]map[string]interface{}{
+	var reply map[string]map[string]any
+	replyExpect := map[string]map[string]any{
 		"SQLExporterFull": {},
 	}
 	if err := cS.ProcessEvent(context.Background(), cgrEv, &reply); err != nil {
@@ -101,12 +101,12 @@ func TestArchiveEventsInReply(t *testing.T) {
 
 	args := &ees.ArchiveEventsArgs{
 		Tenant: "cgrates.org",
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaExporterID: "SQLExporterFull",
 		},
 		Events: []*utils.EventsWithOpts{
 			{
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					"Account": "1001",
 				},
 			},

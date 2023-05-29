@@ -2408,11 +2408,11 @@ func TestMergeRate(t *testing.T) {
 
 type MockMarshaler struct{}
 
-func (MockMarshaler) Marshal(interface{}) ([]byte, error) {
+func (MockMarshaler) Marshal(any) ([]byte, error) {
 	return nil, ErrNotImplemented
 }
 
-func (MockMarshaler) Unmarshal([]byte, interface{}) error {
+func (MockMarshaler) Unmarshal([]byte, any) error {
 	return ErrNotImplemented
 }
 
@@ -2448,7 +2448,7 @@ func TestAsDataDBMap(t *testing.T) {
 }
 
 func TestNewRateProfileFromMapDataDBMap(t *testing.T) {
-	mapRP := map[string]interface{}{
+	mapRP := map[string]any{
 		"FilterIDs":  "fltrID1",
 		"Weights":    "fltrID1;20",
 		"MinCost":    "2",
@@ -2459,7 +2459,7 @@ func TestNewRateProfileFromMapDataDBMap(t *testing.T) {
 		t.Error(rcv, err)
 	}
 
-	mapRP = map[string]interface{}{
+	mapRP = map[string]any{
 		"FilterIDs": "fltrID1",
 		"Weights":   "wrong",
 	}
@@ -2467,7 +2467,7 @@ func TestNewRateProfileFromMapDataDBMap(t *testing.T) {
 	if _, err := NewRateProfileFromMapDataDBMap("cgrates.org", "ExID", mapRP, JSONMarshaler{}); err == nil || err.Error() != expErr {
 		t.Errorf("Expected error <%v>, received <%v>", expErr, err)
 	}
-	mapRP = map[string]interface{}{
+	mapRP = map[string]any{
 		"FilterIDs": "fltrID1",
 		"MinCost":   "wrong",
 	}
@@ -2475,7 +2475,7 @@ func TestNewRateProfileFromMapDataDBMap(t *testing.T) {
 	if _, err := NewRateProfileFromMapDataDBMap("cgrates.org", "ExID", mapRP, JSONMarshaler{}); err == nil || err.Error() != expErr {
 		t.Errorf("Expected error <%v>, received <%v>", expErr, err)
 	}
-	mapRP = map[string]interface{}{
+	mapRP = map[string]any{
 		"FilterIDs": "fltrID1",
 		"MaxCost":   "wrong",
 	}
@@ -2483,7 +2483,7 @@ func TestNewRateProfileFromMapDataDBMap(t *testing.T) {
 	if _, err := NewRateProfileFromMapDataDBMap("cgrates.org", "ExID", mapRP, JSONMarshaler{}); err == nil || err.Error() != expErr {
 		t.Errorf("Expected error <%v>, received <%v>", expErr, err)
 	}
-	mapRP = map[string]interface{}{
+	mapRP = map[string]any{
 		"FilterIDs":  "fltrID1",
 		"Rates:rat1": "{\"ID\":\"rat1\",\"FilterIDs\":null,\"ActivationTimes\":\"\",\"Weights\":null,\"Blocker\":false,\"IntervalRates\":null}\",\"Rates:rat2\":\"{\"ID\":\"rat2\",\"FilterIDs\":null,\"ActivationTimes\":\"\",\"Weights\":null,\"Blocker\":false,\"IntervalRates\":null}\",\"Weights\":\";10\"}",
 	}

@@ -69,7 +69,7 @@ func TestPrefixSliceItems(t *testing.T) {
 }
 
 func TestSliceStringToIface(t *testing.T) {
-	exp := []interface{}{"*default", "ToR", "*voice"}
+	exp := []any{"*default", "ToR", "*voice"}
 	if rply := SliceStringToIface([]string{"*default", "ToR", "*voice"}); !reflect.DeepEqual(exp, rply) {
 		t.Errorf("Expected: %s ,received: %s", ToJSON(exp), ToJSON(rply))
 	}

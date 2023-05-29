@@ -635,11 +635,11 @@ func TestEEsCfgAsMapInterface(t *testing.T) {
             }]
 	  }
     }`
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		utils.EnabledCfg:         true,
 		utils.AttributeSConnsCfg: []string{utils.MetaInternal, "*conn2"},
-		utils.CacheCfg: map[string]interface{}{
-			utils.MetaFileCSV: map[string]interface{}{
+		utils.CacheCfg: map[string]any{
+			utils.MetaFileCSV: map[string]any{
 				utils.LimitCfg:     -2,
 				utils.PrecacheCfg:  false,
 				utils.RemoteCfg:    false,
@@ -648,12 +648,12 @@ func TestEEsCfgAsMapInterface(t *testing.T) {
 				utils.StaticTTLCfg: false,
 			},
 		},
-		utils.ExportersCfg: []map[string]interface{}{
+		utils.ExportersCfg: []map[string]any{
 			{
 				utils.IDCfg:         "CSVExporter",
 				utils.TypeCfg:       "*fileCSV",
 				utils.ExportPathCfg: "/tmp/testCSV",
-				utils.OptsCfg: map[string]interface{}{
+				utils.OptsCfg: map[string]any{
 					utils.AWSSecret: "test",
 					utils.MYSQLDSNParams: map[string]string{
 						"allowOldPasswords":    "true",
@@ -669,7 +669,7 @@ func TestEEsCfgAsMapInterface(t *testing.T) {
 				utils.AttemptsCfg:           1,
 				utils.ConcurrentRequestsCfg: 0,
 				utils.BlockerCfg:            false,
-				utils.FieldsCfg: []map[string]interface{}{
+				utils.FieldsCfg: []map[string]any{
 					{
 						utils.TagCfg:   utils.MetaOriginID,
 						utils.PathCfg:  "*exp.*originID",
@@ -685,20 +685,20 @@ func TestEEsCfgAsMapInterface(t *testing.T) {
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
 	} else {
-		rcv := cgrCfg.eesCfg.AsMapInterface(cgrCfg.generalCfg.RSRSep).(map[string]interface{})
-		if len(rcv[utils.ExportersCfg].([]map[string]interface{})) != 2 {
-			t.Errorf("Expected %+v, received %+v", 2, len(rcv[utils.ExportersCfg].([]map[string]interface{})))
-		} else if !reflect.DeepEqual(eMap[utils.ExportersCfg].([]map[string]interface{})[0][utils.FieldsCfg].([]map[string]interface{})[0][utils.ValueCfg],
-			rcv[utils.ExportersCfg].([]map[string]interface{})[1][utils.FieldsCfg].([]map[string]interface{})[0][utils.ValueCfg]) {
-			t.Errorf("Expected %+v, received %+v", eMap[utils.ExportersCfg].([]map[string]interface{})[0][utils.FieldsCfg].([]map[string]interface{})[0][utils.ValueCfg],
-				rcv[utils.ExportersCfg].([]map[string]interface{})[1][utils.FieldsCfg].([]map[string]interface{})[0][utils.ValueCfg])
+		rcv := cgrCfg.eesCfg.AsMapInterface(cgrCfg.generalCfg.RSRSep).(map[string]any)
+		if len(rcv[utils.ExportersCfg].([]map[string]any)) != 2 {
+			t.Errorf("Expected %+v, received %+v", 2, len(rcv[utils.ExportersCfg].([]map[string]any)))
+		} else if !reflect.DeepEqual(eMap[utils.ExportersCfg].([]map[string]any)[0][utils.FieldsCfg].([]map[string]any)[0][utils.ValueCfg],
+			rcv[utils.ExportersCfg].([]map[string]any)[1][utils.FieldsCfg].([]map[string]any)[0][utils.ValueCfg]) {
+			t.Errorf("Expected %+v, received %+v", eMap[utils.ExportersCfg].([]map[string]any)[0][utils.FieldsCfg].([]map[string]any)[0][utils.ValueCfg],
+				rcv[utils.ExportersCfg].([]map[string]any)[1][utils.FieldsCfg].([]map[string]any)[0][utils.ValueCfg])
 		}
-		rcv[utils.ExportersCfg].([]map[string]interface{})[1][utils.FieldsCfg] = nil
-		eMap[utils.ExportersCfg].([]map[string]interface{})[0][utils.FieldsCfg] = nil
-		if !reflect.DeepEqual(rcv[utils.ExportersCfg].([]map[string]interface{})[1],
-			eMap[utils.ExportersCfg].([]map[string]interface{})[0]) {
-			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(eMap[utils.ExportersCfg].([]map[string]interface{})[0]),
-				utils.ToJSON(rcv[utils.ExportersCfg].([]map[string]interface{})[1]))
+		rcv[utils.ExportersCfg].([]map[string]any)[1][utils.FieldsCfg] = nil
+		eMap[utils.ExportersCfg].([]map[string]any)[0][utils.FieldsCfg] = nil
+		if !reflect.DeepEqual(rcv[utils.ExportersCfg].([]map[string]any)[1],
+			eMap[utils.ExportersCfg].([]map[string]any)[0]) {
+			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(eMap[utils.ExportersCfg].([]map[string]any)[0]),
+				utils.ToJSON(rcv[utils.ExportersCfg].([]map[string]any)[1]))
 		}
 		rcv[utils.ExportersCfg] = nil
 		eMap[utils.ExportersCfg] = nil
@@ -1369,7 +1369,7 @@ func TestEventExporterOptsClone(t *testing.T) {
 		MYSQLDSNParams:           make(map[string]string),
 		KafkaTLS:                 utils.BoolPointer(false),
 		ConnIDs:                  utils.SliceStringPointer([]string{"testID"}),
-		RPCAPIOpts:               make(map[string]interface{}),
+		RPCAPIOpts:               make(map[string]any),
 	}
 
 	exp := &EventExporterOpts{
@@ -1423,7 +1423,7 @@ func TestEventExporterOptsClone(t *testing.T) {
 		MYSQLDSNParams:           make(map[string]string),
 		KafkaTLS:                 utils.BoolPointer(false),
 		ConnIDs:                  utils.SliceStringPointer([]string{"testID"}),
-		RPCAPIOpts:               make(map[string]interface{}),
+		RPCAPIOpts:               make(map[string]any),
 	}
 
 	if rcv := eeOpts.Clone(); !reflect.DeepEqual(exp, rcv) {
@@ -1484,7 +1484,7 @@ func TestLoadFromJSONCfg(t *testing.T) {
 		RPCReplyTimeout:          utils.StringPointer("2s"),
 		KafkaTLS:                 utils.BoolPointer(false),
 		ConnIDs:                  utils.SliceStringPointer([]string{"testID"}),
-		RPCAPIOpts:               make(map[string]interface{}),
+		RPCAPIOpts:               make(map[string]any),
 	}
 
 	exp := &EventExporterOpts{
@@ -1537,7 +1537,7 @@ func TestLoadFromJSONCfg(t *testing.T) {
 		RPCReplyTimeout:          utils.DurationPointer(2 * time.Second),
 		KafkaTLS:                 utils.BoolPointer(false),
 		ConnIDs:                  utils.SliceStringPointer([]string{"testID"}),
-		RPCAPIOpts:               make(map[string]interface{}),
+		RPCAPIOpts:               make(map[string]any),
 	}
 
 	if err := eeOpts.loadFromJSONCfg(eeSJson); err != nil {
@@ -1697,12 +1697,12 @@ func TestEEsAsMapInterface(t *testing.T) {
 			RPCReplyTimeout:          utils.DurationPointer(2 * time.Second),
 			KafkaTLS:                 utils.BoolPointer(false),
 			ConnIDs:                  utils.SliceStringPointer([]string{"testID"}),
-			RPCAPIOpts:               make(map[string]interface{}),
+			RPCAPIOpts:               make(map[string]any),
 		},
 	}
 
-	exp := map[string]interface{}{
-		"opts": map[string]interface{}{
+	exp := map[string]any{
+		"opts": map[string]any{
 			"tls":                      false,
 			"amqpExchange":             "amqp_exchange",
 			"amqpExchangeType":         "amqp_exchange_type",
@@ -1752,7 +1752,7 @@ func TestEEsAsMapInterface(t *testing.T) {
 			"pgSSLMode":                "sslm",
 			"kafkaTLS":                 false,
 			"connIDs":                  []string{"testID"},
-			"rpcAPIOpts":               make(map[string]interface{}),
+			"rpcAPIOpts":               make(map[string]any),
 		},
 	}
 

@@ -38,7 +38,7 @@ func TestTPEnewTPAccounts(t *testing.T) {
 			acc := &utils.Account{
 				Tenant: "cgrates.org",
 				ID:     "Account_simple",
-				Opts:   map[string]interface{}{},
+				Opts:   map[string]any{},
 				Balances: map[string]*utils.Balance{
 					"VoiceBalance": {
 						ID:        "VoiceBalance",
@@ -49,7 +49,7 @@ func TestTPEnewTPAccounts(t *testing.T) {
 							},
 						},
 						Type: "*abstract",
-						Opts: map[string]interface{}{
+						Opts: map[string]any{
 							"Destination": "10",
 						},
 						Units: utils.NewDecimal(0, 0),
@@ -95,7 +95,7 @@ func TestTPEExportItemsAccount(t *testing.T) {
 	acc := &utils.Account{
 		Tenant: "cgrates.org",
 		ID:     "Account_simple",
-		Opts:   map[string]interface{}{},
+		Opts:   map[string]any{},
 		Balances: map[string]*utils.Balance{
 			"VoiceBalance": {
 				ID:        "VoiceBalance",
@@ -106,7 +106,7 @@ func TestTPEExportItemsAccount(t *testing.T) {
 					},
 				},
 				Type: "*abstract",
-				Opts: map[string]interface{}{
+				Opts: map[string]any{
 					"Destination": "10",
 				},
 				Units: utils.NewDecimal(0, 0),
@@ -133,7 +133,7 @@ func TestTPEExportItemsAccountNoDbConn(t *testing.T) {
 	acc := &utils.Account{
 		Tenant: "cgrates.org",
 		ID:     "Account_simple",
-		Opts:   map[string]interface{}{},
+		Opts:   map[string]any{},
 		Balances: map[string]*utils.Balance{
 			"VoiceBalance": {
 				ID:        "VoiceBalance",
@@ -144,7 +144,7 @@ func TestTPEExportItemsAccountNoDbConn(t *testing.T) {
 					},
 				},
 				Type: "*abstract",
-				Opts: map[string]interface{}{
+				Opts: map[string]any{
 					"Destination": "10",
 				},
 				Units: utils.NewDecimal(0, 0),
@@ -179,7 +179,7 @@ func TestTPEExportItemsAccountNoDbConn(t *testing.T) {
 // 			acc := &utils.Account{
 // 				Tenant: "cgrates.org",
 // 				ID:     "Account_simple",
-// 				Opts:   map[string]interface{}{},
+// 				Opts:   map[string]any{},
 // 				Balances: map[string]*utils.Balance{
 // 					"VoiceBalance": {
 // 						ID:        "VoiceBalance",
@@ -190,7 +190,7 @@ func TestTPEExportItemsAccountNoDbConn(t *testing.T) {
 // 							},
 // 						},
 // 						Type: "*abstract",
-// 						Opts: map[string]interface{}{
+// 						Opts: map[string]any{
 // 							"Destination": "10",
 // 						},
 // 						Units: utils.NewDecimal(0, 0),
@@ -225,7 +225,7 @@ func TestTPEExportItemsAccountIDNotFound(t *testing.T) {
 	acc := &utils.Account{
 		Tenant: "cgrates.org",
 		ID:     "Account_complicated",
-		Opts:   map[string]interface{}{},
+		Opts:   map[string]any{},
 		Balances: map[string]*utils.Balance{
 			"VoiceBalance": {
 				ID:        "VoiceBalance",
@@ -236,7 +236,7 @@ func TestTPEExportItemsAccountIDNotFound(t *testing.T) {
 					},
 				},
 				Type: "*abstract",
-				Opts: map[string]interface{}{
+				Opts: map[string]any{
 					"Destination": "10",
 				},
 				Units: utils.NewDecimal(0, 0),

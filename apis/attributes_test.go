@@ -254,7 +254,7 @@ func TestAttributesRemoveAttributeProfileCheckErrors(t *testing.T) {
 			TenantID: &utils.TenantID{
 				ID: "TestGetAttributeProfile",
 			},
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.MetaUsage: 10,
 			}}, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
@@ -495,7 +495,7 @@ func TestAttributesGetAttributeForEvent(t *testing.T) {
 
 	attsv1 := NewAttributeSv1(attrS)
 	ev := &utils.CGREvent{
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1002",
 		},
 	}
@@ -535,11 +535,11 @@ func TestAttributesGetAttributeForEvent(t *testing.T) {
 		},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.AccountField: "1002",
 				utils.RequestType:  utils.MetaPrepaid,
 			},
-			APIOpts: map[string]interface{}{},
+			APIOpts: map[string]any{},
 		},
 	}
 	if err := attsv1.ProcessEvent(context.Background(), ev, &rplyev); err != nil {
@@ -736,7 +736,7 @@ func TestAttributesGetAttributeProfilesGetIDsErr(t *testing.T) {
 	argsGet := &utils.ArgsItemIDs{
 		Tenant:      "cgrates.org",
 		ItemsPrefix: "test_ID",
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.PageLimitOpt:    2,
 			utils.PageOffsetOpt:   4,
 			utils.PageMaxItemsOpt: 5,
@@ -820,7 +820,7 @@ func TestAttributesGetAttributeProfileIDsGetOptsErr(t *testing.T) {
 	if err := adms.GetAttributeProfileIDs(context.Background(),
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.PageLimitOpt: true,
 			},
 		}, &reply); err == nil || err.Error() != experr {
@@ -865,7 +865,7 @@ func TestAttributesGetAttributeProfileIDsPaginateErr(t *testing.T) {
 	if err := adms.GetAttributeProfileIDs(context.Background(),
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.PageLimitOpt:    2,
 				utils.PageOffsetOpt:   4,
 				utils.PageMaxItemsOpt: 5,

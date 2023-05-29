@@ -30,8 +30,8 @@ func (dS *DispatcherService) SessionSv1ActivateSessions(ctx *context.Context, ar
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -42,11 +42,11 @@ func (dS *DispatcherService) SessionSv1AuthorizeEvent(ctx *context.Context, args
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
+	ev := make(map[string]any)
 	if args != nil {
 		ev = args.Event
 	}
-	opts := make(map[string]interface{})
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -57,11 +57,11 @@ func (dS *DispatcherService) SessionSv1AuthorizeEventWithDigest(ctx *context.Con
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
+	ev := make(map[string]any)
 	if args != nil {
 		ev = args.Event
 	}
-	opts := make(map[string]interface{})
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -72,8 +72,8 @@ func (dS *DispatcherService) SessionSv1DeactivateSessions(ctx *context.Context, 
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -81,8 +81,8 @@ func (dS *DispatcherService) SessionSv1DeactivateSessions(ctx *context.Context, 
 }
 func (dS *DispatcherService) SessionSv1DisconnectPeer(ctx *context.Context, args *utils.DPRArgs, reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaSessionS, utils.SessionSv1DisconnectPeer, args, reply)
 }
 func (dS *DispatcherService) SessionSv1ForceDisconnect(ctx *context.Context, args *utils.SessionFilter, reply *string) (err error) {
@@ -90,8 +90,8 @@ func (dS *DispatcherService) SessionSv1ForceDisconnect(ctx *context.Context, arg
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -102,8 +102,8 @@ func (dS *DispatcherService) SessionSv1GetActiveSessions(ctx *context.Context, a
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -114,8 +114,8 @@ func (dS *DispatcherService) SessionSv1GetActiveSessionsCount(ctx *context.Conte
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -126,8 +126,8 @@ func (dS *DispatcherService) SessionSv1GetPassiveSessions(ctx *context.Context, 
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -138,8 +138,8 @@ func (dS *DispatcherService) SessionSv1GetPassiveSessionsCount(ctx *context.Cont
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -150,11 +150,11 @@ func (dS *DispatcherService) SessionSv1InitiateSession(ctx *context.Context, arg
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
+	ev := make(map[string]any)
 	if args != nil {
 		ev = args.Event
 	}
-	opts := make(map[string]interface{})
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -165,11 +165,11 @@ func (dS *DispatcherService) SessionSv1InitiateSessionWithDigest(ctx *context.Co
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
+	ev := make(map[string]any)
 	if args != nil {
 		ev = args.Event
 	}
-	opts := make(map[string]interface{})
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -180,11 +180,11 @@ func (dS *DispatcherService) SessionSv1Ping(ctx *context.Context, args *utils.CG
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
+	ev := make(map[string]any)
 	if args != nil {
 		ev = args.Event
 	}
-	opts := make(map[string]interface{})
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -195,11 +195,11 @@ func (dS *DispatcherService) SessionSv1ProcessCDR(ctx *context.Context, args *ut
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
+	ev := make(map[string]any)
 	if args != nil {
 		ev = args.Event
 	}
-	opts := make(map[string]interface{})
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -210,11 +210,11 @@ func (dS *DispatcherService) SessionSv1ProcessEvent(ctx *context.Context, args *
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
+	ev := make(map[string]any)
 	if args != nil {
 		ev = args.Event
 	}
-	opts := make(map[string]interface{})
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -225,11 +225,11 @@ func (dS *DispatcherService) SessionSv1ProcessMessage(ctx *context.Context, args
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
+	ev := make(map[string]any)
 	if args != nil {
 		ev = args.Event
 	}
-	opts := make(map[string]interface{})
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -240,8 +240,8 @@ func (dS *DispatcherService) SessionSv1ReAuthorize(ctx *context.Context, args *u
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -249,8 +249,8 @@ func (dS *DispatcherService) SessionSv1ReAuthorize(ctx *context.Context, args *u
 }
 func (dS *DispatcherService) SessionSv1RegisterInternalBiJSONConn(ctx *context.Context, args string, reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaSessionS, utils.SessionSv1RegisterInternalBiJSONConn, args, reply)
 }
 func (dS *DispatcherService) SessionSv1ReplicateSessions(ctx *context.Context, args sessions.ArgsReplicateSessions, reply *string) (err error) {
@@ -258,14 +258,14 @@ func (dS *DispatcherService) SessionSv1ReplicateSessions(ctx *context.Context, a
 	if len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
+	ev := make(map[string]any)
 	opts := args.APIOpts
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaSessionS, utils.SessionSv1ReplicateSessions, args, reply)
 }
 func (dS *DispatcherService) SessionSv1STIRAuthenticate(ctx *context.Context, args *sessions.V1STIRAuthenticateArgs, reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -273,8 +273,8 @@ func (dS *DispatcherService) SessionSv1STIRAuthenticate(ctx *context.Context, ar
 }
 func (dS *DispatcherService) SessionSv1STIRIdentity(ctx *context.Context, args *sessions.V1STIRIdentityArgs, reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -285,8 +285,8 @@ func (dS *DispatcherService) SessionSv1SetPassiveSession(ctx *context.Context, a
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaSessionS, utils.SessionSv1SetPassiveSession, args, reply)
 }
 func (dS *DispatcherService) SessionSv1SyncSessions(ctx *context.Context, args *utils.TenantWithAPIOpts, reply *string) (err error) {
@@ -294,8 +294,8 @@ func (dS *DispatcherService) SessionSv1SyncSessions(ctx *context.Context, args *
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -306,11 +306,11 @@ func (dS *DispatcherService) SessionSv1TerminateSession(ctx *context.Context, ar
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
+	ev := make(map[string]any)
 	if args != nil {
 		ev = args.Event
 	}
-	opts := make(map[string]interface{})
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -321,11 +321,11 @@ func (dS *DispatcherService) SessionSv1UpdateSession(ctx *context.Context, args 
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
+	ev := make(map[string]any)
 	if args != nil {
 		ev = args.Event
 	}
-	opts := make(map[string]interface{})
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}

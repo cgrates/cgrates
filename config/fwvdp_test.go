@@ -71,7 +71,7 @@ func TestFieldAsInterfaceFWV(t *testing.T) {
 
 func TestFieldAsInterfaceFWVEmptyPath(t *testing.T) {
 	dp := new(FWVProvider)
-	var expected interface{}
+	var expected any
 	if received, err := dp.FieldAsInterface([]string{}); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, received) {

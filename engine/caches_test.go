@@ -59,8 +59,8 @@ func TestCacheSSetWithReplicateTrue(t *testing.T) {
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 	clientconn := make(chan birpc.ClientConnector, 1)
 	clientconn <- &ccMock{
-		calls: map[string]func(_ *context.Context, args interface{}, reply interface{}) error{
-			utils.CacheSv1ReplicateSet: func(_ *context.Context, args, reply interface{}) error {
+		calls: map[string]func(_ *context.Context, args any, reply any) error{
+			utils.CacheSv1ReplicateSet: func(_ *context.Context, args, reply any) error {
 				argCache, canCast := args.(*utils.ArgCacheReplicateSet)
 				if !canCast {
 					return errors.New("cannot cast")
@@ -161,10 +161,10 @@ func TestCacheSGetWithRemote(t *testing.T) {
 	}
 	clientconn := make(chan birpc.ClientConnector, 1)
 	clientconn <- &ccMock{
-		calls: map[string]func(_ *context.Context, args interface{}, reply interface{}) error{
-			utils.CacheSv1GetItem: func(_ *context.Context, args, reply interface{}) error {
+		calls: map[string]func(_ *context.Context, args any, reply any) error{
+			utils.CacheSv1GetItem: func(_ *context.Context, args, reply any) error {
 				var valBack string = "test_value_was_set"
-				*reply.(*interface{}) = valBack
+				*reply.(*any) = valBack
 				return nil
 			},
 		},
@@ -179,7 +179,7 @@ func TestCacheSGetWithRemote(t *testing.T) {
 
 	// first we have to set the value in order to get it from our mock
 	cacheS.Set(context.Background(), utils.CacheAccounts, "itemId", "test_value_was_set", []string{}, true, utils.NonTransactional)
-	var reply interface{}
+	var reply any
 	expected := "test_value_was_set"
 	if err := cacheS.V1GetItemWithRemote(context.Background(), args, &reply); err != nil {
 		t.Error(err)
@@ -224,7 +224,7 @@ func TestCacheSGetWithRemoteFalse(t *testing.T) {
 
 	cacheS := NewCacheS(cfg, dm, connMgr, nil)
 
-	var reply interface{} = utils.OK
+	var reply any = utils.OK
 	if err := cacheS.V1GetItemWithRemote(context.Background(), args, &reply); err == nil || err != utils.ErrNotFound {
 		t.Errorf("Expected error <%v>, received error <%v>", utils.ErrNotFound, err)
 	}
@@ -297,7 +297,7 @@ func TestV1GetItemErr(t *testing.T) {
 
 	cacheS := NewCacheS(cfg, dm, connMgr, nil)
 
-	var reply interface{}
+	var reply any
 	if err := cacheS.V1GetItem(context.Background(), args, &reply); err == nil || err != utils.ErrNotFound {
 		t.Errorf("Expected error <%v>, Received error <%v>", utils.ErrNotFound, err)
 	}
@@ -354,8 +354,8 @@ func TestCacheSGetWithRemoteQueryErr(t *testing.T) {
 	}
 	clientconn := make(chan birpc.ClientConnector, 1)
 	clientconn <- &ccMock{
-		calls: map[string]func(_ *context.Context, args interface{}, reply interface{}) error{
-			utils.CacheSv1GetItem: func(_ *context.Context, args, reply interface{}) error {
+		calls: map[string]func(_ *context.Context, args any, reply any) error{
+			utils.CacheSv1GetItem: func(_ *context.Context, args, reply any) error {
 				return utils.ErrNotFound
 			},
 		},
@@ -388,15 +388,15 @@ func TestCacheSGetWithRemoteTCacheGet(t *testing.T) {
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 	cfg.CacheCfg().RemoteConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.RemoteConnsCfg)}
 
-	var customRply interface{} = utils.ArgsGetCacheItem{
+	var customRply any = utils.ArgsGetCacheItem{
 		CacheID: utils.Accounts,
 		ItemID:  "itemId",
 	}
 	clientconn := make(chan birpc.ClientConnector, 1)
 	clientconn <- &ccMock{
-		calls: map[string]func(_ *context.Context, args interface{}, reply interface{}) error{
-			utils.CacheSv1GetItem: func(_ *context.Context, args, reply interface{}) error {
-				*reply.(*interface{}) = customRply
+		calls: map[string]func(_ *context.Context, args any, reply any) error{
+			utils.CacheSv1GetItem: func(_ *context.Context, args, reply any) error {
+				*reply.(*any) = customRply
 				return nil
 			},
 		},
@@ -434,10 +434,10 @@ func TestCacheSV1ReplicateRemove(t *testing.T) {
 	cfg.CacheCfg().ReplicationConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicationConnsCfg)}
 	clientconn := make(chan birpc.ClientConnector, 1)
 	clientconn <- &ccMock{
-		calls: map[string]func(_ *context.Context, args interface{}, reply interface{}) error{
-			utils.CacheSv1ReplicateRemove: func(_ *context.Context, args, reply interface{}) error {
+		calls: map[string]func(_ *context.Context, args any, reply any) error{
+			utils.CacheSv1ReplicateRemove: func(_ *context.Context, args, reply any) error {
 				var valBack string = utils.OK
-				*reply.(*interface{}) = valBack
+				*reply.(*any) = valBack
 				return nil
 			},
 		},
@@ -473,8 +473,8 @@ func TestCacheSReplicateRemove(t *testing.T) {
 	}
 	clientconn := make(chan birpc.ClientConnector, 1)
 	clientconn <- &ccMock{
-		calls: map[string]func(_ *context.Context, args interface{}, reply interface{}) error{
-			utils.CacheSv1ReplicateRemove: func(_ *context.Context, args, reply interface{}) error {
+		calls: map[string]func(_ *context.Context, args any, reply any) error{
+			utils.CacheSv1ReplicateRemove: func(_ *context.Context, args, reply any) error {
 				if err := Cache.Remove(context.Background(), utils.CacheAccounts, "itemId", true, utils.NonTransactional); err != nil {
 					t.Error(err)
 				}
@@ -817,7 +817,7 @@ func TestCacheSV1RemoveGroup(t *testing.T) {
 
 	args := &utils.ArgsGetGroupWithAPIOpts{
 		Tenant:  "cgrates.org",
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 		ArgsGetGroup: utils.ArgsGetGroup{
 			CacheID: utils.CacheAccounts,
 			GroupID: "Group",
@@ -858,7 +858,7 @@ func TestV1GetCacheStats(t *testing.T) {
 	cacheS := NewCacheS(cfg, dm, connMgr, nil)
 
 	args := &utils.AttrCacheIDsWithAPIOpts{
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaSubsys: utils.MetaChargers,
 		},
 		CacheIDs: []string{"cacheId1"},
@@ -893,7 +893,7 @@ func TestCacheSV1Clear(t *testing.T) {
 	cacheS := NewCacheS(cfg, dm, connMgr, nil)
 
 	args := &utils.AttrCacheIDsWithAPIOpts{
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaSubsys: utils.MetaChargers,
 		},
 		CacheIDs: []string{"cacheId1", "cacheId2", "cacheId3", "cacheId4"},
@@ -1067,8 +1067,8 @@ func TestV1GetItemSingular(t *testing.T) {
 		t.Error(err)
 	}
 
-	exp := interface{}("valinterface")
-	var reply interface{}
+	exp := any("valinterface")
+	var reply any
 	if err := cacheS.V1GetItem(context.Background(), args, &reply); err != nil {
 		t.Error(err)
 	} else if reply != exp {
@@ -1147,7 +1147,7 @@ type ccCloner struct {
 	mckField string
 }
 
-func (cc *ccCloner) Clone() (interface{}, error) {
+func (cc *ccCloner) Clone() (any, error) {
 	cc.mckField = "value"
 	return cc, nil
 }
@@ -1224,7 +1224,7 @@ func TestCacheSV1PrecacheStatusDefault(t *testing.T) {
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 
 	args := &utils.AttrCacheIDsWithAPIOpts{
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaSubsys: utils.MetaChargers,
 		},
 		CacheIDs: []string{},
@@ -1234,7 +1234,7 @@ func TestCacheSV1PrecacheStatusDefault(t *testing.T) {
 	cacheS := NewCacheS(cfg, dm, connMgr, nil)
 
 	expArgs := &utils.AttrCacheIDsWithAPIOpts{
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaSubsys: utils.MetaChargers,
 		},
 		CacheIDs: []string{},
@@ -1269,7 +1269,7 @@ func TestCacheSV1PrecacheStatusErrUnknownCacheID(t *testing.T) {
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 
 	args := &utils.AttrCacheIDsWithAPIOpts{
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaSubsys: utils.MetaChargers,
 		},
 		CacheIDs: []string{"Inproper ID"},
@@ -1298,7 +1298,7 @@ func TestCacheSV1PrecacheStatusMetaReady(t *testing.T) {
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 
 	args := &utils.AttrCacheIDsWithAPIOpts{
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaSubsys: utils.MetaChargers,
 		},
 		CacheIDs: []string{utils.MetaAccounts},

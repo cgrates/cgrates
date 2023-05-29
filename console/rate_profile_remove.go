@@ -45,9 +45,9 @@ func (self *CmdRemoveRateProfile) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdRemoveRateProfile) RpcParams(reset bool) interface{} {
+func (self *CmdRemoveRateProfile) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &utils.TenantIDWithAPIOpts{APIOpts: make(map[string]interface{})}
+		self.rpcParams = &utils.TenantIDWithAPIOpts{APIOpts: make(map[string]any)}
 	}
 	return self.rpcParams
 }
@@ -56,7 +56,7 @@ func (self *CmdRemoveRateProfile) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdRemoveRateProfile) RpcResult() interface{} {
+func (self *CmdRemoveRateProfile) RpcResult() any {
 	var s string
 	return &s
 }

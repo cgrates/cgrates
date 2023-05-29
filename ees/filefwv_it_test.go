@@ -101,7 +101,7 @@ func testFwvExportEvent(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "Event",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.OrderID: 1,
 
 				utils.ToR:          utils.MetaVoice,
@@ -120,7 +120,7 @@ func testFwvExportEvent(t *testing.T) {
 				utils.Cost:    2.34567,
 				"ExtraFields": map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
 			},
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.MetaOriginID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC).String()),
 				utils.RunID:        utils.MetaDefault,
 			},

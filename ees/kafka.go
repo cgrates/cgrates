@@ -113,7 +113,7 @@ func (pstr *KafkaEE) Connect() (err error) {
 	return
 }
 
-func (pstr *KafkaEE) ExportEvent(ctx *context.Context, content interface{}, extraData interface{}) (err error) {
+func (pstr *KafkaEE) ExportEvent(ctx *context.Context, content any, extraData any) (err error) {
 	pstr.reqs.get()
 	pstr.RLock()
 	if pstr.writer == nil {
@@ -142,7 +142,7 @@ func (pstr *KafkaEE) Close() (err error) {
 }
 
 func (pstr *KafkaEE) GetMetrics() *utils.SafeMapStorage { return pstr.dc }
-func (pstr *KafkaEE) ExtraData(ev *utils.CGREvent) interface{} {
+func (pstr *KafkaEE) ExtraData(ev *utils.CGREvent) any {
 	return utils.ConcatenatedKey(
 		utils.FirstNonEmpty(engine.MapEvent(ev.APIOpts).GetStringIgnoreErrors(utils.MetaOriginID), utils.GenUUID()),
 		utils.FirstNonEmpty(engine.MapEvent(ev.APIOpts).GetStringIgnoreErrors(utils.MetaRunID), utils.MetaDefault),

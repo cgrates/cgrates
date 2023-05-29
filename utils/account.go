@@ -35,7 +35,7 @@ type Account struct {
 	FilterIDs    []string
 	Weights      DynamicWeights
 	Blockers     DynamicBlockers
-	Opts         map[string]interface{}
+	Opts         map[string]any
 	Balances     map[string]*Balance
 	ThresholdIDs []string
 }
@@ -110,7 +110,7 @@ type Balance struct {
 	Type           string
 	Units          *Decimal
 	UnitFactors    []*UnitFactor
-	Opts           map[string]interface{}
+	Opts           map[string]any
 	CostIncrements []*CostIncrement
 	AttributeIDs   []string
 	RateProfileIDs []string
@@ -347,7 +347,7 @@ func (acc *Account) Clone() (cln *Account) {
 		copy(cln.FilterIDs, acc.FilterIDs)
 	}
 	if acc.Opts != nil {
-		cln.Opts = make(map[string]interface{})
+		cln.Opts = make(map[string]any)
 		for key, value := range acc.Opts {
 			cln.Opts[key] = value
 		}
@@ -398,7 +398,7 @@ func (blnc *Balance) Clone() (cln *Balance) {
 		}
 	}
 	if blnc.Opts != nil {
-		cln.Opts = make(map[string]interface{})
+		cln.Opts = make(map[string]any)
 		for key, value := range blnc.Opts {
 			cln.Opts[key] = value
 		}
@@ -495,7 +495,7 @@ func (bWws BalancesWithWeight) Balances() (blncs []*Balance) {
 
 type AccountWithAPIOpts struct {
 	*Account
-	APIOpts map[string]interface{}
+	APIOpts map[string]any
 }
 
 type ArgsActSetBalance struct {
@@ -503,7 +503,7 @@ type ArgsActSetBalance struct {
 	AccountID string
 	Diktats   []*BalDiktat
 	Reset     bool
-	APIOpts   map[string]interface{}
+	APIOpts   map[string]any
 }
 
 type BalDiktat struct {
@@ -515,10 +515,10 @@ type ArgsActRemoveBalances struct {
 	Tenant     string
 	AccountID  string
 	BalanceIDs []string
-	APIOpts    map[string]interface{}
+	APIOpts    map[string]any
 }
 
-func (ap *Account) Set(path []string, val interface{}, newBranch bool, _ string) (err error) {
+func (ap *Account) Set(path []string, val any, newBranch bool, _ string) (err error) {
 	switch len(path) {
 	case 0:
 		return ErrWrongPath
@@ -534,7 +534,7 @@ func (ap *Account) Set(path []string, val interface{}, newBranch bool, _ string)
 			// 	path[0][8] == '[' && path[0][len(path[0])-1] == ']' {
 			// 	id := path[0][9 : len(path[0])-1]
 			// 	if _, has := ap.Balances[id]; !has {
-			// 		ap.Balances[id] = &Balance{ID: id, Opts: make(map[string]interface{}), Units: NewDecimal(0, 0)}
+			// 		ap.Balances[id] = &Balance{ID: id, Opts: make(map[string]any), Units: NewDecimal(0, 0)}
 			// 	}
 			// 	return ap.Balances[id].Set(path[1:], val, newBranch)
 			// }
@@ -582,14 +582,14 @@ func (ap *Account) Set(path []string, val interface{}, newBranch bool, _ string)
 	}
 	if id != EmptyString {
 		if _, has := ap.Balances[id]; !has {
-			ap.Balances[id] = &Balance{ID: path[0], Opts: make(map[string]interface{}), Units: NewDecimal(0, 0)}
+			ap.Balances[id] = &Balance{ID: path[0], Opts: make(map[string]any), Units: NewDecimal(0, 0)}
 		}
 		return ap.Balances[id].Set(path[1:], val, newBranch)
 	}
 	return ErrWrongPath
 }
 
-func (bL *Balance) Set(path []string, val interface{}, newBranch bool) (err error) {
+func (bL *Balance) Set(path []string, val any, newBranch bool) (err error) {
 	switch len(path) {
 	default:
 	case 0:
@@ -752,7 +752,7 @@ func (bL *Balance) Set(path []string, val interface{}, newBranch bool) (err erro
 	return ErrWrongPath
 }
 
-func (ap *Account) Merge(v2 interface{}) {
+func (ap *Account) Merge(v2 any) {
 	vi := v2.(*Account)
 	if len(vi.Tenant) != 0 {
 		ap.Tenant = vi.Tenant
@@ -778,13 +778,13 @@ func (ap *Account) Merge(v2 interface{}) {
 
 func (ap *Account) String() string { return ToJSON(ap) }
 func (ap *Account) FieldAsString(fldPath []string) (_ string, err error) {
-	var val interface{}
+	var val any
 	if val, err = ap.FieldAsInterface(fldPath); err != nil {
 		return
 	}
 	return IfaceAsString(val), nil
 }
-func (ap *Account) FieldAsInterface(fldPath []string) (_ interface{}, err error) {
+func (ap *Account) FieldAsInterface(fldPath []string) (_ any, err error) {
 	if len(fldPath) == 1 {
 		switch fldPath[0] {
 		default:
@@ -865,13 +865,13 @@ func (ap *Account) FieldAsInterface(fldPath []string) (_ interface{}, err error)
 
 func (bL *Balance) String() string { return ToJSON(bL) }
 func (bL *Balance) FieldAsString(fldPath []string) (_ string, err error) {
-	var val interface{}
+	var val any
 	if val, err = bL.FieldAsInterface(fldPath); err != nil {
 		return
 	}
 	return IfaceAsString(val), nil
 }
-func (bL *Balance) FieldAsInterface(fldPath []string) (_ interface{}, err error) {
+func (bL *Balance) FieldAsInterface(fldPath []string) (_ any, err error) {
 	if len(fldPath) == 1 {
 		switch fldPath[0] {
 		default:
@@ -989,13 +989,13 @@ func (bL *Balance) FieldAsInterface(fldPath []string) (_ interface{}, err error)
 
 func (uF *UnitFactor) String() string { return ToJSON(uF) }
 func (uF *UnitFactor) FieldAsString(fldPath []string) (_ string, err error) {
-	var val interface{}
+	var val any
 	if val, err = uF.FieldAsInterface(fldPath); err != nil {
 		return
 	}
 	return IfaceAsString(val), nil
 }
-func (uF *UnitFactor) FieldAsInterface(fldPath []string) (_ interface{}, err error) {
+func (uF *UnitFactor) FieldAsInterface(fldPath []string) (_ any, err error) {
 	if len(fldPath) != 1 {
 		return nil, ErrNotFound
 	}
@@ -1018,13 +1018,13 @@ func (uF *UnitFactor) FieldAsInterface(fldPath []string) (_ interface{}, err err
 
 func (cI *CostIncrement) String() string { return ToJSON(cI) }
 func (cI *CostIncrement) FieldAsString(fldPath []string) (_ string, err error) {
-	var val interface{}
+	var val any
 	if val, err = cI.FieldAsInterface(fldPath); err != nil {
 		return
 	}
 	return IfaceAsString(val), nil
 }
-func (cI *CostIncrement) FieldAsInterface(fldPath []string) (_ interface{}, err error) {
+func (cI *CostIncrement) FieldAsInterface(fldPath []string) (_ any, err error) {
 	if len(fldPath) != 1 {
 		return nil, ErrNotFound
 	}

@@ -188,7 +188,7 @@ func TestCdrsCfgAsMapInterface(t *testing.T) {
         "accounts_conns": ["*internal:*accounts","*conn1"],
 	},
 }`
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		utils.EnabledCfg:          true,
 		utils.ExtraFieldsCfg:      []string{"~*req.PayPalAccount", "~*req.LCRProfile", "~*req.ResourceID"},
 		utils.SessionCostRetires:  5,
@@ -202,7 +202,7 @@ func TestCdrsCfgAsMapInterface(t *testing.T) {
 		utils.RateSConnsCfg:       []string{utils.MetaInternal, "*conn1"},
 		utils.AccountSConnsCfg:    []string{utils.MetaInternal, "*conn1"},
 		utils.StoreCdrsCfg:        false,
-		utils.OptsCfg: map[string]interface{}{
+		utils.OptsCfg: map[string]any{
 			utils.MetaAccounts:   []*utils.DynamicBoolOpt{},
 			utils.MetaAttributes: []*utils.DynamicBoolOpt{},
 			utils.MetaChargers:   []*utils.DynamicBoolOpt{},
@@ -229,7 +229,7 @@ func TestCdrsCfgAsMapInterface2(t *testing.T) {
           "ees_conns": ["conn1"],
        },
 }`
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		utils.EnabledCfg:          true,
 		utils.ExtraFieldsCfg:      []string{},
 		utils.StoreCdrsCfg:        false,
@@ -243,7 +243,7 @@ func TestCdrsCfgAsMapInterface2(t *testing.T) {
 		utils.EEsConnsCfg:         []string{"conn1"},
 		utils.RateSConnsCfg:       []string{},
 		utils.AccountSConnsCfg:    []string{},
-		utils.OptsCfg: map[string]interface{}{
+		utils.OptsCfg: map[string]any{
 			utils.MetaAccounts:   []*utils.DynamicBoolOpt{},
 			utils.MetaAttributes: []*utils.DynamicBoolOpt{},
 			utils.MetaChargers:   []*utils.DynamicBoolOpt{},

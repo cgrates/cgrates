@@ -49,7 +49,7 @@ func (self *CmdGetChargerProfile) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdGetChargerProfile) RpcParams(reset bool) interface{} {
+func (self *CmdGetChargerProfile) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &utils.TenantIDWithAPIOpts{}
 	}
@@ -60,7 +60,7 @@ func (self *CmdGetChargerProfile) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdGetChargerProfile) RpcResult() interface{} {
+func (self *CmdGetChargerProfile) RpcResult() any {
 	var atr engine.ChargerProfile
 	return &atr
 }

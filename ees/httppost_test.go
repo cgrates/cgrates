@@ -58,7 +58,7 @@ func TestHttpPostExportEvent(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	cgrEv.Event = map[string]interface{}{
+	cgrEv.Event = map[string]any{
 		"Test1": 3,
 	}
 	errExpect := `Post "/var/spool/cgrates/ees": unsupported protocol scheme ""`
@@ -88,7 +88,7 @@ func TestHttpPostExportEvent2(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	vals, err := httpPost.PrepareMap(&utils.CGREvent{Event: map[string]interface{}{"2": "*req.field2"}})
+	vals, err := httpPost.PrepareMap(&utils.CGREvent{Event: map[string]any{"2": "*req.field2"}})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -128,7 +128,7 @@ func TestHttpPostSync(t *testing.T) {
 	}
 
 	mp := &utils.CGREvent{
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Account":     "1001",
 			"Destination": "1002",
 		},
@@ -184,7 +184,7 @@ func TestHttpPostSyncLimit(t *testing.T) {
 		t.Error(err)
 	}
 	mp := &utils.CGREvent{
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Account":     "1001",
 			"Destination": "1002",
 		},

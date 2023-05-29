@@ -32,7 +32,7 @@ func init() {
 type CmdSleep struct {
 	name      string
 	rpcMethod string
-	rpcParams interface{}
+	rpcParams any
 	*CommandExecuter
 }
 
@@ -44,7 +44,7 @@ func (cmd *CmdSleep) RpcMethod() string {
 	return cmd.rpcMethod
 }
 
-func (cmd *CmdSleep) RpcParams(reset bool) interface{} {
+func (cmd *CmdSleep) RpcParams(reset bool) any {
 	if reset || cmd.rpcParams == nil {
 		cmd.rpcParams = &utils.DurationArgs{}
 	}
@@ -63,7 +63,7 @@ func (cmd *CmdSleep) PostprocessRpcParams() (err error) {
 	return
 }
 
-func (cmd *CmdSleep) RpcResult() interface{} {
+func (cmd *CmdSleep) RpcResult() any {
 	var s string
 	return &s
 }

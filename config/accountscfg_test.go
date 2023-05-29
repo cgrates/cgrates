@@ -156,7 +156,7 @@ func TestAccountSCfgAsMapInterface(t *testing.T) {
 },	
 }`
 
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		utils.EnabledCfg:                true,
 		utils.IndexedSelectsCfg:         false,
 		utils.AttributeSConnsCfg:        []string{utils.MetaInternal},
@@ -170,7 +170,7 @@ func TestAccountSCfgAsMapInterface(t *testing.T) {
 		utils.NestedFieldsCfg:           true,
 		utils.MaxIterations:             100,
 		utils.MaxUsage:                  "259200000000000", // 72h in ns
-		utils.OptsCfg: map[string]interface{}{
+		utils.OptsCfg: map[string]any{
 			utils.MetaProfileIDs:           []*utils.DynamicStringSliceOpt{},
 			utils.MetaUsage:                []*utils.DynamicDecimalBigOpt{},
 			utils.MetaProfileIgnoreFilters: []*utils.DynamicBoolOpt{},

@@ -519,11 +519,11 @@ func TestActionsAPIs(t *testing.T) {
 
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 		},
 		ID: "EventTest",
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsActionsProfileIDs: []string{"actPrfID"},
 		},
 	}
@@ -555,14 +555,14 @@ func TestActionsExecuteActionsResetTH(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "THD_ID",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsActionsProfileIDs: []string{"actPrfID"},
 		},
 	}
 	var executed bool
 	cc := &mockClientConn{
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.ThresholdSv1ResetThreshold: func(ctx *context.Context, args, reply interface{}) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ThresholdSv1ResetThreshold: func(ctx *context.Context, args, reply any) error {
 				if !reflect.DeepEqual(args, expArgs) {
 					return fmt.Errorf("expected: <%+v>,\nreceived: <%+v>",
 						utils.ToJSON(expArgs), utils.ToJSON(args))
@@ -615,10 +615,10 @@ func TestActionsExecuteActionsResetTH(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "EventExecuteActions",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsActionsProfileIDs: []string{"actPrfID"},
 		},
 	}
@@ -651,14 +651,14 @@ func TestActionsExecuteActionsResetSQ(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "SQ_ID",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsActionsProfileIDs: []string{"actPrfID"},
 		},
 	}
 	var executed bool
 	cc := &mockClientConn{
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.StatSv1ResetStatQueue: func(ctx *context.Context, args, reply interface{}) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.StatSv1ResetStatQueue: func(ctx *context.Context, args, reply any) error {
 				if !reflect.DeepEqual(args, expArgs) {
 					return fmt.Errorf("expected: <%+v>,\nreceived: <%+v>",
 						utils.ToJSON(expArgs), utils.ToJSON(args))
@@ -711,10 +711,10 @@ func TestActionsExecuteActionsResetSQ(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "EventExecuteActions",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsActionsProfileIDs: []string{"actPrfID"},
 		},
 	}
@@ -783,10 +783,10 @@ func TestActionsExecuteActionsLog(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "EventExecuteActions",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsActionsProfileIDs: []string{"actPrfID"},
 		},
 	}
@@ -823,8 +823,8 @@ func TestActionsExecuteActionsLogCDRs(t *testing.T) {
 	// }
 	var executed bool
 	cc := &mockClientConn{
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.CDRsV1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.CDRsV1ProcessEvent: func(ctx *context.Context, args, reply any) error {
 				// if !reflect.DeepEqual(args, expArgs) {
 				// 	return fmt.Errorf("expected: <%+v>,\nreceived: <%+v>",
 				// 		utils.ToJSON(expArgs), utils.ToJSON(args))
@@ -872,14 +872,14 @@ func TestActionsExecuteActionsLogCDRs(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "EventExecuteActions",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 			utils.Tenant:       "cgrates.org",
 			utils.BalanceType:  utils.MetaConcrete,
 			utils.Cost:         0.15,
 			utils.ActionType:   utils.MetaTopUp,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsActionsProfileIDs: []string{"actPrfID"},
 		},
 	}
@@ -916,8 +916,8 @@ func TestActionsExecuteActionsSetBalance(t *testing.T) {
 	}
 	var executed bool
 	cc := &mockClientConn{
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.AccountSv1ActionSetBalance: func(ctx *context.Context, args, reply interface{}) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.AccountSv1ActionSetBalance: func(ctx *context.Context, args, reply any) error {
 				if !reflect.DeepEqual(args, expArgs) {
 					return fmt.Errorf("expected: <%+v>,\nreceived: <%+v>",
 						utils.ToJSON(expArgs), utils.ToJSON(args))
@@ -970,10 +970,10 @@ func TestActionsExecuteActionsSetBalance(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "EventExecuteActions",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsActionsProfileIDs: []string{"actPrfID"},
 		},
 	}
@@ -1009,8 +1009,8 @@ func TestActionsExecuteActionsRemBalance(t *testing.T) {
 	}
 	var executed bool
 	cc := &mockClientConn{
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.AccountSv1ActionRemoveBalance: func(ctx *context.Context, args, reply interface{}) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.AccountSv1ActionRemoveBalance: func(ctx *context.Context, args, reply any) error {
 				if !reflect.DeepEqual(args, expArgs) {
 					return fmt.Errorf("expected: <%+v>,\nreceived: <%+v>",
 						utils.ToJSON(expArgs), utils.ToJSON(args))
@@ -1063,10 +1063,10 @@ func TestActionsExecuteActionsRemBalance(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "EventExecuteActions",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsActionsProfileIDs: []string{"actPrfID"},
 		},
 	}
@@ -1103,8 +1103,8 @@ func TestActionsExecuteActionsAddBalance(t *testing.T) {
 	}
 	var executed bool
 	cc := &mockClientConn{
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.AccountSv1ActionSetBalance: func(ctx *context.Context, args, reply interface{}) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.AccountSv1ActionSetBalance: func(ctx *context.Context, args, reply any) error {
 				if !reflect.DeepEqual(args, expArgs) {
 					return fmt.Errorf("expected: <%+v>,\nreceived: <%+v>",
 						utils.ToJSON(expArgs), utils.ToJSON(args))
@@ -1157,10 +1157,10 @@ func TestActionsExecuteActionsAddBalance(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "EventExecuteActions",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsActionsProfileIDs: []string{"actPrfID"},
 		},
 	}
@@ -1345,7 +1345,7 @@ func TestActionsGetActionProfilesGetIDsErr(t *testing.T) {
 	argsGet := &utils.ArgsItemIDs{
 		Tenant:      "cgrates.org",
 		ItemsPrefix: "test_ID",
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.PageLimitOpt:    2,
 			utils.PageOffsetOpt:   4,
 			utils.PageMaxItemsOpt: 5,
@@ -1429,7 +1429,7 @@ func TestActionsGetActionProfileIDsGetOptsErr(t *testing.T) {
 	if err := adms.GetActionProfileIDs(context.Background(),
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.PageLimitOpt: true,
 			},
 		}, &reply); err == nil || err.Error() != experr {
@@ -1474,7 +1474,7 @@ func TestActionsGetActionProfileIDsPaginateErr(t *testing.T) {
 	if err := adms.GetActionProfileIDs(context.Background(),
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.PageLimitOpt:    2,
 				utils.PageOffsetOpt:   4,
 				utils.PageMaxItemsOpt: 5,

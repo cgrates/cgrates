@@ -144,7 +144,7 @@ func TestAttributeSCfgAsMapInterface(t *testing.T) {
 	},					
 	},		
 }`
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		utils.EnabledCfg:                true,
 		utils.StatSConnsCfg:             []string{utils.MetaInternal},
 		utils.ResourceSConnsCfg:         []string{utils.MetaInternal},
@@ -156,7 +156,7 @@ func TestAttributeSCfgAsMapInterface(t *testing.T) {
 		utils.IndexedSelectsCfg:         true,
 		utils.NestedFieldsCfg:           false,
 		utils.SuffixIndexedFieldsCfg:    []string{},
-		utils.OptsCfg: map[string]interface{}{
+		utils.OptsCfg: map[string]any{
 			utils.MetaProfileIDs: []*utils.DynamicStringSliceOpt{},
 			utils.MetaProcessRunsCfg: []*utils.DynamicIntOpt{
 				{
@@ -190,7 +190,7 @@ func TestAttributeSCfgAsMapInterface2(t *testing.T) {
 		},	
      },
 }`
-	expectedMap := map[string]interface{}{
+	expectedMap := map[string]any{
 		utils.EnabledCfg:                true,
 		utils.StatSConnsCfg:             []string{},
 		utils.ResourceSConnsCfg:         []string{},
@@ -201,7 +201,7 @@ func TestAttributeSCfgAsMapInterface2(t *testing.T) {
 		utils.ExistsIndexedFieldsCfg:    []string{},
 		utils.NotExistsIndexedFieldsCfg: []string{"*req.index1", "*req.index2"},
 		utils.NestedFieldsCfg:           true,
-		utils.OptsCfg: map[string]interface{}{
+		utils.OptsCfg: map[string]any{
 			utils.MetaProfileIDs: []*utils.DynamicStringSliceOpt{},
 			utils.MetaProcessRunsCfg: []*utils.DynamicIntOpt{
 				{
@@ -225,7 +225,7 @@ func TestAttributeSCfgAsMapInterface3(t *testing.T) {
     "attributes": {}
 }
 `
-	expectedMap := map[string]interface{}{
+	expectedMap := map[string]any{
 		utils.EnabledCfg:                false,
 		utils.StatSConnsCfg:             []string{},
 		utils.ResourceSConnsCfg:         []string{},
@@ -236,7 +236,7 @@ func TestAttributeSCfgAsMapInterface3(t *testing.T) {
 		utils.ExistsIndexedFieldsCfg:    []string{},
 		utils.NotExistsIndexedFieldsCfg: []string{},
 		utils.NestedFieldsCfg:           false,
-		utils.OptsCfg: map[string]interface{}{
+		utils.OptsCfg: map[string]any{
 			utils.MetaProfileIDs:           []*utils.DynamicStringSliceOpt{},
 			utils.MetaProcessRunsCfg:       []*utils.DynamicIntOpt{},
 			utils.MetaProfileRunsCfg:       []*utils.DynamicIntOpt{},

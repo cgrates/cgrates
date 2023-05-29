@@ -48,10 +48,10 @@ func testCheckNatsData(t *testing.T, randomOriginID, expData string, ch chan *na
 		expected := &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     ev.cgrEvent.ID,
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"OriginID": randomOriginID,
 			},
-			APIOpts: map[string]interface{}{},
+			APIOpts: map[string]any{},
 		}
 		if !reflect.DeepEqual(ev.cgrEvent, expected) {
 			t.Fatalf("Expected %s ,received %s", utils.ToJSON(expected), utils.ToJSON(ev.cgrEvent))

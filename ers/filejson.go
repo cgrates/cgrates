@@ -138,7 +138,7 @@ func (rdr *JSONFileER) processFile(fPath, fName string) (err error) {
 		return
 	}
 
-	var data map[string]interface{}
+	var data map[string]any
 	if err = json.Unmarshal(byteValue, &data); err != nil {
 		return
 	}

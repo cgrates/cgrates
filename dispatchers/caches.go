@@ -31,8 +31,8 @@ func (dS *DispatcherService) CacheSv1Clear(ctx *context.Context, args *utils.Att
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -43,8 +43,8 @@ func (dS *DispatcherService) CacheSv1GetCacheStats(ctx *context.Context, args *u
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -55,20 +55,20 @@ func (dS *DispatcherService) CacheSv1GetGroupItemIDs(ctx *context.Context, args 
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaCaches, utils.CacheSv1GetGroupItemIDs, args, reply)
 }
-func (dS *DispatcherService) CacheSv1GetItem(ctx *context.Context, args *utils.ArgsGetCacheItemWithAPIOpts, reply *interface{}) (err error) {
+func (dS *DispatcherService) CacheSv1GetItem(ctx *context.Context, args *utils.ArgsGetCacheItemWithAPIOpts, reply *any) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -79,8 +79,8 @@ func (dS *DispatcherService) CacheSv1GetItemExpiryTime(ctx *context.Context, arg
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -91,20 +91,20 @@ func (dS *DispatcherService) CacheSv1GetItemIDs(ctx *context.Context, args *util
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaCaches, utils.CacheSv1GetItemIDs, args, reply)
 }
-func (dS *DispatcherService) CacheSv1GetItemWithRemote(ctx *context.Context, args *utils.ArgsGetCacheItemWithAPIOpts, reply *interface{}) (err error) {
+func (dS *DispatcherService) CacheSv1GetItemWithRemote(ctx *context.Context, args *utils.ArgsGetCacheItemWithAPIOpts, reply *any) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -115,8 +115,8 @@ func (dS *DispatcherService) CacheSv1HasGroup(ctx *context.Context, args *utils.
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -127,8 +127,8 @@ func (dS *DispatcherService) CacheSv1HasItem(ctx *context.Context, args *utils.A
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -139,8 +139,8 @@ func (dS *DispatcherService) CacheSv1LoadCache(ctx *context.Context, args *utils
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -151,11 +151,11 @@ func (dS *DispatcherService) CacheSv1Ping(ctx *context.Context, args *utils.CGRE
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
+	ev := make(map[string]any)
 	if args != nil {
 		ev = args.Event
 	}
-	opts := make(map[string]interface{})
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -166,8 +166,8 @@ func (dS *DispatcherService) CacheSv1PrecacheStatus(ctx *context.Context, args *
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -178,8 +178,8 @@ func (dS *DispatcherService) CacheSv1ReloadCache(ctx *context.Context, args *uti
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -190,8 +190,8 @@ func (dS *DispatcherService) CacheSv1RemoveGroup(ctx *context.Context, args *uti
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -202,8 +202,8 @@ func (dS *DispatcherService) CacheSv1RemoveItem(ctx *context.Context, args *util
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -214,8 +214,8 @@ func (dS *DispatcherService) CacheSv1RemoveItems(ctx *context.Context, args *uti
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -226,8 +226,8 @@ func (dS *DispatcherService) CacheSv1ReplicateRemove(ctx *context.Context, args 
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -238,8 +238,8 @@ func (dS *DispatcherService) CacheSv1ReplicateSet(ctx *context.Context, args *ut
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}

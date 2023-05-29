@@ -124,7 +124,7 @@ package general_tests
 // 	// will make the BalanceInfo nil and result in a panic
 // 	args := &utils.CGREvent{
 // 		Tenant: "cgrates.org",
-// 		Event: map[string]interface{}{
+// 		Event: map[string]any{
 // 			utils.OriginID:     "testV2CDRsProcessCDR1",
 // 			utils.OriginHost:   "192.168.1.1",
 // 			utils.Source:       "testV2CDRsProcessCDR",
@@ -136,7 +136,7 @@ package general_tests
 // 			utils.AnswerTime:   time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
 // 			utils.Usage:        time.Minute,
 // 		},
-// 		APIOpts: map[string]interface{}{
+// 		APIOpts: map[string]any{
 // 			// utils.MetaRALs:true,
 // 			utils.OptsCDRsStore:  true,
 // 			utils.OptsRouteS:     false,

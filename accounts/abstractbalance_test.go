@@ -35,7 +35,7 @@ func TestABDebitUsageFromConcretes1(t *testing.T) {
 				blnCfg: &utils.Balance{
 					ID:   "CB1",
 					Type: utils.MetaConcrete,
-					Opts: map[string]interface{}{
+					Opts: map[string]any{
 						utils.MetaBalanceLimit: -200.0,
 					},
 					UnitFactors: []*utils.UnitFactor{
@@ -50,7 +50,7 @@ func TestABDebitUsageFromConcretes1(t *testing.T) {
 				blnCfg: &utils.Balance{
 					ID:   "CB2",
 					Type: utils.MetaConcrete,
-					Opts: map[string]interface{}{
+					Opts: map[string]any{
 						utils.MetaBalanceLimit: -1.0,
 					},
 					Units: utils.NewDecimal(125, 2),
@@ -445,7 +445,7 @@ func TestABCost0WithUnlimitedWithConcrete(t *testing.T) {
 			ID:    "AB_COST_0",
 			Type:  utils.MetaAbstract,
 			Units: utils.NewDecimal(int64(60*time.Second), 0), // 1 Minute
-			Opts: map[string]interface{}{
+			Opts: map[string]any{
 				utils.MetaBalanceUnlimited: true,
 			},
 			CostIncrements: []*utils.CostIncrement{
@@ -486,7 +486,7 @@ func TestABCost0WithLimit(t *testing.T) {
 			ID:    "AB_COST_0",
 			Type:  utils.MetaAbstract,
 			Units: utils.NewDecimal(int64(60*time.Second), 0), // 1 Minute
-			Opts: map[string]interface{}{
+			Opts: map[string]any{
 				utils.MetaBalanceLimit: 30000000000.0,
 			},
 			UnitFactors: []*utils.UnitFactor{
@@ -521,7 +521,7 @@ func TestABCost0WithLimitWithConcrete(t *testing.T) {
 			ID:    "AB_COST_0",
 			Type:  utils.MetaAbstract,
 			Units: utils.NewDecimal(int64(60*time.Second), 0), // 1 Minute
-			Opts: map[string]interface{}{
+			Opts: map[string]any{
 				utils.MetaBalanceLimit: 30000000000.0,
 			},
 			CostIncrements: []*utils.CostIncrement{
@@ -562,7 +562,7 @@ func TestABCost0WithLimitExceed(t *testing.T) {
 			ID:    "AB_COST_0",
 			Type:  utils.MetaAbstract,
 			Units: utils.NewDecimal(int64(60*time.Second), 0), // 1 Minute
-			Opts: map[string]interface{}{
+			Opts: map[string]any{
 				utils.MetaBalanceLimit: 30000000000.0,
 			},
 			CostIncrements: []*utils.CostIncrement{
@@ -592,7 +592,7 @@ func TestABCost0WithLimitExceedWithConcrete(t *testing.T) {
 			ID:    "AB_COST_0",
 			Type:  utils.MetaAbstract,
 			Units: utils.NewDecimal(int64(60*time.Second), 0), // 1 Minute
-			Opts: map[string]interface{}{
+			Opts: map[string]any{
 				utils.MetaBalanceLimit: 30000000000.0,
 			},
 			CostIncrements: []*utils.CostIncrement{
@@ -647,7 +647,7 @@ func TestDebitUsageFiltersError(t *testing.T) {
 
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.Usage: "10s",
 		},
 	}
@@ -670,7 +670,7 @@ func TestDebitUsageBalanceLimitErrors(t *testing.T) {
 		blnCfg: &utils.Balance{
 			ID:   "ID_TEST",
 			Type: utils.MetaAbstract,
-			Opts: map[string]interface{}{
+			Opts: map[string]any{
 				utils.MetaBalanceLimit: "not_FLOAT64",
 			},
 			CostIncrements: []*utils.CostIncrement{
@@ -686,7 +686,7 @@ func TestDebitUsageBalanceLimitErrors(t *testing.T) {
 
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.Usage: "10s",
 		},
 	}
@@ -734,7 +734,7 @@ func TestDebitUsageUnitFactorsErrors(t *testing.T) {
 
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.Usage: "10s",
 		},
 	}
@@ -771,7 +771,7 @@ func TestDebitUsageCostIncrementError(t *testing.T) {
 	}
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.Usage: "10s",
 		},
 	}
@@ -863,10 +863,10 @@ func TestABCostWithFiltersNotMatch(t *testing.T) {
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "EV",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"CustomField2": "CustomValue2",
 		},
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 	if _, err := aB.debitAbstracts(decimal.New(int64(10*time.Second), 0),
 		cgrEv); err == nil || err.Error() != "RATES_ERROR:NOT_CONNECTED: RateS" {
@@ -907,7 +907,7 @@ func TestABCostWithFilters(t *testing.T) {
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "EV",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"CustomField": "CustomValue",
 		},
 	}
@@ -969,7 +969,7 @@ func TestABCostUnlimitedExceed(t *testing.T) {
 			ID:    "AB_COST_0",
 			Type:  utils.MetaAbstract,
 			Units: utils.NewDecimal(int64(60*time.Second), 0), // 1 Minute
-			Opts: map[string]interface{}{
+			Opts: map[string]any{
 				utils.MetaBalanceUnlimited: true,
 			},
 			CostIncrements: []*utils.CostIncrement{
@@ -1010,7 +1010,7 @@ func TestABCostLimit(t *testing.T) {
 			ID:    "AB_COST_0",
 			Type:  utils.MetaAbstract,
 			Units: utils.NewDecimal(int64(60*time.Second), 0), // 1 Minute
-			Opts: map[string]interface{}{
+			Opts: map[string]any{
 				utils.MetaBalanceLimit: 30000000000.0,
 			},
 			CostIncrements: []*utils.CostIncrement{
@@ -1051,7 +1051,7 @@ func TestABCostLimitExceed(t *testing.T) {
 			ID:    "AB_COST_0",
 			Type:  utils.MetaAbstract,
 			Units: utils.NewDecimal(int64(60*time.Second), 0), // 1 Minute
-			Opts: map[string]interface{}{
+			Opts: map[string]any{
 				utils.MetaBalanceLimit: 30000000000.0,
 			},
 			CostIncrements: []*utils.CostIncrement{
@@ -1177,7 +1177,7 @@ func TestABCostMultipleConcreteUnlimited(t *testing.T) {
 			ID:    "AB_COST_0",
 			Type:  utils.MetaAbstract,
 			Units: utils.NewDecimal(int64(60*time.Second), 0), // 1 Minute
-			Opts: map[string]interface{}{
+			Opts: map[string]any{
 				utils.MetaBalanceUnlimited: true,
 			},
 			CostIncrements: []*utils.CostIncrement{
@@ -1258,7 +1258,7 @@ func TestAMCostWithUnitFactor(t *testing.T) {
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "EV",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"CustomField": "CustomValue",
 		},
 	}

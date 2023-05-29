@@ -481,7 +481,7 @@ func TestSessionSCfgAsMapInterfaceCase1(t *testing.T) {
 		},
     },
 }`
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		utils.EnabledCfg:             false,
 		utils.ListenBijsonCfg:        "127.0.0.1:2014",
 		utils.ListenBigobCfg:         "",
@@ -503,7 +503,7 @@ func TestSessionSCfgAsMapInterfaceCase1(t *testing.T) {
 		utils.TerminateAttemptsCfg:   5,
 		utils.MinDurLowBalanceCfg:    "0",
 		utils.AlterableFieldsCfg:     []string{},
-		utils.STIRCfg: map[string]interface{}{
+		utils.STIRCfg: map[string]any{
 			utils.AllowedAtestCfg:       []string{"*any"},
 			utils.PayloadMaxdurationCfg: "-1",
 			utils.DefaultAttestCfg:      "A",
@@ -516,7 +516,7 @@ func TestSessionSCfgAsMapInterfaceCase1(t *testing.T) {
 			utils.MetaData:  "1048576",
 			utils.MetaSMS:   "1",
 		},
-		utils.OptsCfg: map[string]interface{}{
+		utils.OptsCfg: map[string]any{
 			utils.MetaAccounts:                  []*utils.DynamicBoolOpt{},
 			utils.MetaAttributes:                []*utils.DynamicBoolOpt{},
 			utils.MetaCDRs:                      []*utils.DynamicBoolOpt{},
@@ -598,7 +598,7 @@ func TestSessionSCfgAsMapInterfaceCase2(t *testing.T) {
 			},
 		},
 	}`
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		utils.EnabledCfg:             true,
 		utils.ListenBijsonCfg:        "127.0.0.1:2018",
 		utils.ListenBigobCfg:         "",
@@ -620,7 +620,7 @@ func TestSessionSCfgAsMapInterfaceCase2(t *testing.T) {
 		utils.ChannelSyncIntervalCfg: "0",
 		utils.TerminateAttemptsCfg:   10,
 		utils.AlterableFieldsCfg:     []string{},
-		utils.STIRCfg: map[string]interface{}{
+		utils.STIRCfg: map[string]any{
 			utils.AllowedAtestCfg:       []string{"any1", "any2"},
 			utils.PayloadMaxdurationCfg: "1s",
 			utils.DefaultAttestCfg:      "B",
@@ -633,7 +633,7 @@ func TestSessionSCfgAsMapInterfaceCase2(t *testing.T) {
 			utils.MetaData:  "1048576",
 			utils.MetaSMS:   "1",
 		},
-		utils.OptsCfg: map[string]interface{}{
+		utils.OptsCfg: map[string]any{
 			utils.MetaAccounts:                  []*utils.DynamicBoolOpt{},
 			utils.MetaAttributes:                []*utils.DynamicBoolOpt{},
 			utils.MetaCDRs:                      []*utils.DynamicBoolOpt{},
@@ -679,8 +679,8 @@ func TestSessionSCfgAsMapInterfaceCase2(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	rcv := cgrCfg.sessionSCfg.AsMapInterface("").(map[string]interface{})
-	sort.Strings(rcv[utils.STIRCfg].(map[string]interface{})[utils.AllowedAtestCfg].([]string))
+	rcv := cgrCfg.sessionSCfg.AsMapInterface("").(map[string]any)
+	sort.Strings(rcv[utils.STIRCfg].(map[string]any)[utils.AllowedAtestCfg].([]string))
 	if !reflect.DeepEqual(eMap, rcv) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
@@ -695,8 +695,8 @@ func TestSessionSCfgAsMapInterfaceCase3(t *testing.T) {
 		},
     },
 }`
-	eMap := map[string]interface{}{
-		utils.STIRCfg: map[string]interface{}{
+	eMap := map[string]any{
+		utils.STIRCfg: map[string]any{
 			utils.AllowedAtestCfg:       []string{"*any"},
 			utils.PayloadMaxdurationCfg: "0",
 			utils.DefaultAttestCfg:      "A",
@@ -706,7 +706,7 @@ func TestSessionSCfgAsMapInterfaceCase3(t *testing.T) {
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
-	} else if rcv := cgrCfg.sessionSCfg.AsMapInterface("").(map[string]interface{}); !reflect.DeepEqual(eMap[utils.STIRCfg], rcv[utils.STIRCfg]) {
+	} else if rcv := cgrCfg.sessionSCfg.AsMapInterface("").(map[string]any); !reflect.DeepEqual(eMap[utils.STIRCfg], rcv[utils.STIRCfg]) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(eMap[utils.STIRCfg]), utils.ToJSON(rcv[utils.STIRCfg]))
 	}
 }
@@ -784,7 +784,7 @@ func TestFsAgentCfgAsMapInterfaceCase1(t *testing.T) {
 	cfgJSONStr := `{
 	"freeswitch_agent": {},
 }`
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		utils.EnabledCfg:             false,
 		utils.SessionSConnsCfg:       []string{rpcclient.BiRPCInternal},
 		utils.SubscribeParkCfg:       true,
@@ -794,7 +794,7 @@ func TestFsAgentCfgAsMapInterfaceCase1(t *testing.T) {
 		utils.EmptyBalanceContextCfg: "",
 		utils.EmptyBalanceAnnFileCfg: "",
 		utils.MaxWaitConnectionCfg:   "2s",
-		utils.EventSocketConnsCfg: []map[string]interface{}{
+		utils.EventSocketConnsCfg: []map[string]any{
 			{
 				utils.AddressCfg:              "127.0.0.1:8021",
 				utils.Password:                "ClueCon",
@@ -823,7 +823,7 @@ func TestFsAgentCfgAsMapInterfaceCase2(t *testing.T) {
 		      {"address": "127.0.0.1:8000", "password": "ClueCon123", "reconnects": 8, "max_reconnect_interval": "5m", "alias": "127.0.0.1:8000"}
 	],},
 }`
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		utils.EnabledCfg:             true,
 		utils.SessionSConnsCfg:       []string{rpcclient.BiRPCInternal, "*conn1", "*conn2"},
 		utils.SubscribeParkCfg:       false,
@@ -833,7 +833,7 @@ func TestFsAgentCfgAsMapInterfaceCase2(t *testing.T) {
 		utils.EmptyBalanceContextCfg: "",
 		utils.EmptyBalanceAnnFileCfg: "",
 		utils.MaxWaitConnectionCfg:   "7s",
-		utils.EventSocketConnsCfg: []map[string]interface{}{
+		utils.EventSocketConnsCfg: []map[string]any{
 			{
 				utils.AddressCfg:              "127.0.0.1:8000",
 				utils.Password:                "ClueCon123",
@@ -858,7 +858,7 @@ func TestFsAgentCfgAsMapInterfaceCase3(t *testing.T) {
 		  "sessions_conns": ["*internal"]
     }
 }`
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		utils.EnabledCfg:             false,
 		utils.SessionSConnsCfg:       []string{utils.MetaInternal},
 		utils.SubscribeParkCfg:       true,
@@ -868,7 +868,7 @@ func TestFsAgentCfgAsMapInterfaceCase3(t *testing.T) {
 		utils.EmptyBalanceContextCfg: "",
 		utils.EmptyBalanceAnnFileCfg: "",
 		utils.MaxWaitConnectionCfg:   "",
-		utils.EventSocketConnsCfg: []map[string]interface{}{
+		utils.EventSocketConnsCfg: []map[string]any{
 			{
 				utils.AddressCfg:              "127.0.0.1:8021",
 				utils.Password:                "ClueCon",
@@ -984,11 +984,11 @@ func TestAsteriskAgentCfgAsMapInterface(t *testing.T) {
 		"sessions_conns": ["*internal"],
 	},
 }`
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		utils.EnabledCfg:       false,
 		utils.SessionSConnsCfg: []string{utils.MetaInternal},
 		utils.CreateCdrCfg:     false,
-		utils.AsteriskConnsCfg: []map[string]interface{}{
+		utils.AsteriskConnsCfg: []map[string]any{
 			{
 				utils.AliasCfg:                "",
 				utils.AddressCfg:              "127.0.0.1:8088",
@@ -1018,11 +1018,11 @@ func TestAsteriskAgentCfgAsMapInterface1(t *testing.T) {
 		],
 	},
 }`
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		utils.EnabledCfg:       true,
 		utils.SessionSConnsCfg: []string{rpcclient.BiRPCInternal, "*conn1", "*conn2"},
 		utils.CreateCdrCfg:     true,
-		utils.AsteriskConnsCfg: []map[string]interface{}{
+		utils.AsteriskConnsCfg: []map[string]any{
 			{
 				utils.AliasCfg:                "",
 				utils.AddressCfg:              "127.0.0.1:8089",

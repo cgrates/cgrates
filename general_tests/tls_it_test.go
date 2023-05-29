@@ -144,7 +144,7 @@ package general_tests
 // 		CGREvent: &utils.CGREvent{
 // 			Tenant: "cgrates.org",
 // 			ID:     "TestSSv1ItInitiateSession",
-// 			Event: map[string]interface{}{
+// 			Event: map[string]any{
 // 				utils.Tenant:       "cgrates.org",
 // 				utils.Category:     "call",
 // 				utils.ToR:          utils.MetaVoice,

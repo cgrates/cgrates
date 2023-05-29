@@ -210,7 +210,7 @@ func TestRemoteHostAsMapInterface(t *testing.T) {
 		MaxReconnectInterval: 2 * time.Nanosecond,
 	}
 
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		utils.IDCfg:                   "rh_id1",
 		utils.AddressCfg:              "localhost",
 		utils.TransportCfg:            "*json",
@@ -252,21 +252,21 @@ func TestRPCConnsAsMapInterface(t *testing.T) {
 			},
 		},	
 }`
-	eMap := map[string]interface{}{
-		utils.MetaBiJSONLocalHost: map[string]interface{}{
+	eMap := map[string]any{
+		utils.MetaBiJSONLocalHost: map[string]any{
 			utils.PoolSize:    0,
 			utils.StrategyCfg: utils.MetaFirst,
-			utils.Conns: []map[string]interface{}{
+			utils.Conns: []map[string]any{
 				{
 					utils.AddressCfg:   "127.0.0.1:2014",
 					utils.TransportCfg: rpcclient.BiRPCJSON,
 				},
 			},
 		},
-		utils.MetaLocalHost: map[string]interface{}{
+		utils.MetaLocalHost: map[string]any{
 			utils.PoolSize:    0,
 			utils.StrategyCfg: utils.MetaFirst,
-			utils.Conns: []map[string]interface{}{
+			utils.Conns: []map[string]any{
 				{
 					utils.AddressCfg:   "127.0.0.1:2012",
 					utils.TransportCfg: "*json",
@@ -282,20 +282,20 @@ func TestRPCConnsAsMapInterface(t *testing.T) {
 				},
 			},
 		},
-		utils.MetaInternal: map[string]interface{}{
+		utils.MetaInternal: map[string]any{
 			utils.StrategyCfg: utils.MetaFirst,
 			utils.PoolSize:    0,
-			utils.Conns: []map[string]interface{}{
+			utils.Conns: []map[string]any{
 				{
 					utils.AddressCfg:   utils.MetaInternal,
 					utils.TransportCfg: utils.EmptyString,
 				},
 			},
 		},
-		rpcclient.BiRPCInternal: map[string]interface{}{
+		rpcclient.BiRPCInternal: map[string]any{
 			utils.StrategyCfg: utils.MetaFirst,
 			utils.PoolSize:    0,
-			utils.Conns: []map[string]interface{}{
+			utils.Conns: []map[string]any{
 				{
 					utils.AddressCfg:   rpcclient.BiRPCInternal,
 					utils.TransportCfg: utils.EmptyString,
@@ -321,9 +321,9 @@ func TestRpcConnAsMapInterface1(t *testing.T) {
 	      },
      },		
 }`
-	eMap := map[string]interface{}{
-		utils.MetaBiJSONLocalHost: map[string]interface{}{
-			utils.Conns: []map[string]interface{}{
+	eMap := map[string]any{
+		utils.MetaBiJSONLocalHost: map[string]any{
+			utils.Conns: []map[string]any{
 				{
 					utils.AddressCfg:   "127.0.0.1:2014",
 					utils.TransportCfg: rpcclient.BiRPCJSON,
@@ -332,8 +332,8 @@ func TestRpcConnAsMapInterface1(t *testing.T) {
 			utils.PoolSize:    0,
 			utils.StrategyCfg: utils.MetaFirst,
 		},
-		utils.MetaInternal: map[string]interface{}{
-			utils.Conns: []map[string]interface{}{
+		utils.MetaInternal: map[string]any{
+			utils.Conns: []map[string]any{
 				{
 					utils.AddressCfg:   utils.MetaInternal,
 					utils.TransportCfg: utils.EmptyString,
@@ -342,8 +342,8 @@ func TestRpcConnAsMapInterface1(t *testing.T) {
 			utils.PoolSize:    0,
 			utils.StrategyCfg: utils.MetaFirst,
 		},
-		rpcclient.BiRPCInternal: map[string]interface{}{
-			utils.Conns: []map[string]interface{}{
+		rpcclient.BiRPCInternal: map[string]any{
+			utils.Conns: []map[string]any{
 				{
 					utils.AddressCfg:   rpcclient.BiRPCInternal,
 					utils.TransportCfg: utils.EmptyString,
@@ -352,8 +352,8 @@ func TestRpcConnAsMapInterface1(t *testing.T) {
 			utils.PoolSize:    0,
 			utils.StrategyCfg: utils.MetaFirst,
 		},
-		utils.MetaLocalHost: map[string]interface{}{
-			utils.Conns: []map[string]interface{}{
+		utils.MetaLocalHost: map[string]any{
+			utils.Conns: []map[string]any{
 				{
 					utils.AddressCfg:   "127.0.0.1:2018",
 					utils.TransportCfg: "*json",
@@ -908,7 +908,7 @@ func TestRPCConnAsMapInterface(t *testing.T) {
 		ReplyTimeout: time.Duration(2),
 	}
 
-	exp := map[string]interface{}{
+	exp := map[string]any{
 		"poolSize":      0,
 		"reply_timeout": time.Duration(2),
 		"strategy":      "",

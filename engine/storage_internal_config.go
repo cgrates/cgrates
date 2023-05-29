@@ -24,9 +24,9 @@ import (
 
 // no config for internal
 
-func (*InternalDB) GetSection(*context.Context, string, interface{}) error {
+func (*InternalDB) GetSection(*context.Context, string, any) error {
 	return nil
 }
-func (*InternalDB) SetSection(*context.Context, string, interface{}) error {
+func (*InternalDB) SetSection(*context.Context, string, any) error {
 	return nil
 }

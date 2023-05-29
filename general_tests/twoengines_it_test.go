@@ -255,7 +255,7 @@ func testTwoEnginesUpdateThreshold(t *testing.T) {
 			ActionProfileIDs: []string{"ACT_1.1"},
 			Async:            true,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaReload,
 		},
 	}

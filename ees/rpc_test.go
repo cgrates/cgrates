@@ -137,7 +137,7 @@ func TestRPCConnect(t *testing.T) {
 // 	rpcEe.serviceMethod = utils.APIerSv1ExportToFolder
 // 	args := &utils.TenantWithAPIOpts{
 // 		Tenant:  "cgrates.org",
-// 		APIOpts: map[string]interface{}{},
+// 		APIOpts: map[string]any{},
 // 	}
 
 // 	if err := rpcEe.ExportEvent(context.Background(), args, ""); err != nil {
@@ -198,10 +198,10 @@ func TestRPCPrepareMap(t *testing.T) {
 	exp := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testID1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.Usage: 21,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaSubsys: "*attributes",
 		},
 	}
@@ -209,10 +209,10 @@ func TestRPCPrepareMap(t *testing.T) {
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testID1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.Usage: 21,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaSubsys: "*attributes",
 		},
 	}

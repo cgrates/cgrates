@@ -435,22 +435,22 @@ func TestHttpAgentCfgAsMapInterface(t *testing.T) {
 		},
 	],	
 }`
-	eMap := []map[string]interface{}{
+	eMap := []map[string]any{
 		{
 			utils.IDCfg:             "conecto1",
 			utils.URLCfg:            "/conecto",
 			utils.SessionSConnsCfg:  []string{rpcclient.BiRPCInternal, "*localhost", "*internal"},
 			utils.RequestPayloadCfg: "*url",
 			utils.ReplyPayloadCfg:   "*xml",
-			utils.RequestProcessorsCfg: []map[string]interface{}{
+			utils.RequestProcessorsCfg: []map[string]any{
 				{
 					utils.IDCfg:            "OutboundAUTHDryRun",
 					utils.FiltersCfg:       []string{"*string:~*req.request_type:OutboundAUTH", "*string:~*req.Msisdn:497700056231"},
 					utils.TenantCfg:        "cgrates.org",
 					utils.FlagsCfg:         []string{"*dryRun"},
 					utils.TimezoneCfg:      "",
-					utils.RequestFieldsCfg: []map[string]interface{}{},
-					utils.ReplyFieldsCfg: []map[string]interface{}{
+					utils.RequestFieldsCfg: []map[string]any{},
+					utils.ReplyFieldsCfg: []map[string]any{
 						{utils.TagCfg: "Allow", utils.PathCfg: "*rep.response.Allow", utils.TypeCfg: "*constant", utils.ValueCfg: "1", utils.MandatoryCfg: true},
 						{utils.TagCfg: "Concatenated1", utils.PathCfg: "*rep.response.Concatenated", utils.TypeCfg: "*composed", utils.ValueCfg: "~*req.MCC;/", utils.MandatoryCfg: true},
 						{utils.TagCfg: "Concatenated2", utils.PathCfg: "*rep.response.Concatenated", utils.TypeCfg: "*composed", utils.ValueCfg: "Val1"},

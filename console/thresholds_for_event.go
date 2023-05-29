@@ -50,7 +50,7 @@ func (self *CmdThresholdsForEvent) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdThresholdsForEvent) RpcParams(reset bool) interface{} {
+func (self *CmdThresholdsForEvent) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &utils.CGREvent{}
 	}
@@ -61,7 +61,7 @@ func (self *CmdThresholdsForEvent) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdThresholdsForEvent) RpcResult() interface{} {
+func (self *CmdThresholdsForEvent) RpcResult() any {
 	var s engine.Thresholds
 	return &s
 }

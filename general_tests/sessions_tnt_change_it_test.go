@@ -166,7 +166,7 @@ package general_tests
 // 		Account:     "1001",
 // 		BalanceType: utils.VOICE,
 // 		Value:       float64(2 * time.Minute),
-// 		Balance: map[string]interface{}{
+// 		Balance: map[string]any{
 // 			utils.ID:            "testSes",
 // 			utils.RatingSubject: "*zero1ms",
 // 		},
@@ -183,7 +183,7 @@ package general_tests
 // 		Account:     "1234",
 // 		BalanceType: utils.VOICE,
 // 		Value:       float64(2 * time.Minute),
-// 		Balance: map[string]interface{}{
+// 		Balance: map[string]any{
 // 			utils.ID:            "testSes",
 // 			utils.RatingSubject: "*zero1ms",
 // 		},
@@ -200,7 +200,7 @@ package general_tests
 // 		CGREvent: &utils.CGREvent{
 // 			Tenant: "cgrates.org",
 // 			ID:     "TestEv1",
-// 			Event: map[string]interface{}{
+// 			Event: map[string]any{
 // 				utils.ToR:         utils.VOICE,
 // 				utils.OriginID:    "TestEv1",
 // 				utils.RequestType: "*prepaid",

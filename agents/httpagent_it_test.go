@@ -224,7 +224,7 @@ package agents
 // 		Account:     acnt,
 // 		BalanceType: utils.MetaVoice,
 // 		Value:       float64(maxDuration) * float64(time.Second),
-// 		Balance: map[string]interface{}{
+// 		Balance: map[string]any{
 // 			utils.ID:            "TestDynamicDebitBalance",
 // 			utils.RatingSubject: "*zero5ms",
 // 		},

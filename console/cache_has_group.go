@@ -48,7 +48,7 @@ func (self *CmdCacheHasGroup) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdCacheHasGroup) RpcParams(reset bool) interface{} {
+func (self *CmdCacheHasGroup) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &utils.ArgsGetGroupWithAPIOpts{}
 	}
@@ -59,7 +59,7 @@ func (self *CmdCacheHasGroup) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdCacheHasGroup) RpcResult() interface{} {
+func (self *CmdCacheHasGroup) RpcResult() any {
 	var reply bool
 	return &reply
 }

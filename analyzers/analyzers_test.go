@@ -203,7 +203,7 @@ func TestAnalyzersV1Search(t *testing.T) {
 	t1 := time.Now()
 	if err = anz.logTrafic(0, utils.CoreSv1Ping,
 		&utils.CGREvent{
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.EventSource: utils.MetaCDRs,
 			},
 		}, utils.Pong, nil, utils.MetaJSON, "127.0.0.1:5565",
@@ -213,7 +213,7 @@ func TestAnalyzersV1Search(t *testing.T) {
 
 	if err = anz.logTrafic(1, utils.CoreSv1Ping,
 		&utils.CGREvent{
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.EventSource: utils.MetaAttributes,
 			},
 		}, utils.Pong, nil,
@@ -225,7 +225,7 @@ func TestAnalyzersV1Search(t *testing.T) {
 
 	if err = anz.logTrafic(2, utils.CoreSv1Ping,
 		&utils.CGREvent{
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.EventSource: utils.MetaAttributes,
 			},
 		}, utils.Pong, nil,
@@ -237,7 +237,7 @@ func TestAnalyzersV1Search(t *testing.T) {
 
 	if err = anz.logTrafic(3, utils.CoreSv1Ping,
 		&utils.CGREvent{
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.EventSource: utils.MetaAttributes,
 			},
 		}, utils.Pong, nil,
@@ -248,7 +248,7 @@ func TestAnalyzersV1Search(t *testing.T) {
 	}
 	if err = anz.logTrafic(3, utils.CoreSv1Status,
 		&utils.CGREvent{
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.EventSource: utils.MetaEEs,
 			},
 		}, utils.Pong, nil,
@@ -257,20 +257,20 @@ func TestAnalyzersV1Search(t *testing.T) {
 		t1.Add(-11*time.Hour), t1.Add(-10*time.Hour-30*time.Minute)); err != nil {
 		t.Fatal(err)
 	}
-	reply := []map[string]interface{}{}
+	reply := []map[string]any{}
 	if err = anz.V1StringQuery(context.Background(), &QueryArgs{HeaderFilters: `"` + utils.CoreSv1Ping + `"`}, &reply); err != nil {
 		t.Fatal(err)
 	} else if len(reply) != 4 {
 		t.Errorf("Expected 4 hits received: %v", len(reply))
 	}
-	reply = []map[string]interface{}{}
+	reply = []map[string]any{}
 	if err = anz.V1StringQuery(context.Background(), &QueryArgs{HeaderFilters: "RequestMethod:" + `"` + utils.CoreSv1Ping + `"`}, &reply); err != nil {
 		t.Fatal(err)
 	} else if len(reply) != 4 {
 		t.Errorf("Expected 4 hits received: %v", len(reply))
 	}
 
-	expRply := []map[string]interface{}{{
+	expRply := []map[string]any{{
 		"RequestDestination": "127.0.0.1:2013",
 		"RequestDuration":    "1h0m0s",
 		"RequestEncoding":    "*gob",
@@ -282,27 +282,27 @@ func TestAnalyzersV1Search(t *testing.T) {
 		"RequestStartTime":   t1.Add(-24 * time.Hour).UTC().Format(time.RFC3339),
 		"ReplyError":         nil,
 	}}
-	reply = []map[string]interface{}{}
+	reply = []map[string]any{}
 	if err = anz.V1StringQuery(context.Background(), &QueryArgs{HeaderFilters: utils.RequestDuration + ":>=" + strconv.FormatInt(int64(time.Hour), 10)}, &reply); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(expRply, reply) {
 		t.Errorf("Expected %s received: %s", utils.ToJSON(expRply), utils.ToJSON(reply))
 	}
 
-	reply = []map[string]interface{}{}
+	reply = []map[string]any{}
 	if err = anz.V1StringQuery(context.Background(), &QueryArgs{HeaderFilters: utils.RequestStartTime + ":<=\"" + t1.Add(-23*time.Hour).UTC().Format(time.RFC3339) + "\""}, &reply); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(expRply, reply) {
 		t.Errorf("Expected %s received: %s", utils.ToJSON(expRply), utils.ToJSON(reply))
 	}
-	reply = []map[string]interface{}{}
+	reply = []map[string]any{}
 	if err = anz.V1StringQuery(context.Background(), &QueryArgs{HeaderFilters: "RequestEncoding:*gob"}, &reply); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(expRply, reply) {
 		t.Errorf("Expected %s received: %s", utils.ToJSON(expRply), utils.ToJSON(reply))
 	}
 
-	reply = []map[string]interface{}{}
+	reply = []map[string]any{}
 	if err = anz.V1StringQuery(context.Background(), &QueryArgs{
 		HeaderFilters:  "RequestEncoding:*gob",
 		ContentFilters: []string{"*string:~*rep:Pong"},
@@ -311,7 +311,7 @@ func TestAnalyzersV1Search(t *testing.T) {
 	} else if !reflect.DeepEqual(expRply, reply) {
 		t.Errorf("Expected %s received: %s", utils.ToJSON(expRply), utils.ToJSON(reply))
 	}
-	reply = []map[string]interface{}{}
+	reply = []map[string]any{}
 	if err = anz.V1StringQuery(context.Background(), &QueryArgs{
 		HeaderFilters:  "RequestEncoding:*gob",
 		ContentFilters: []string{"*string:~*req.APIOpts.EventSource:*attributes"},
@@ -320,7 +320,7 @@ func TestAnalyzersV1Search(t *testing.T) {
 	} else if !reflect.DeepEqual(expRply, reply) {
 		t.Errorf("Expected %s received: %s", utils.ToJSON(expRply), utils.ToJSON(reply))
 	}
-	reply = []map[string]interface{}{}
+	reply = []map[string]any{}
 	if err = anz.V1StringQuery(context.Background(), &QueryArgs{
 		HeaderFilters:  "RequestEncoding:*gob",
 		ContentFilters: []string{"*gt:~*hdr.RequestDuration:1m"},
@@ -329,7 +329,7 @@ func TestAnalyzersV1Search(t *testing.T) {
 	} else if !reflect.DeepEqual(expRply, reply) {
 		t.Errorf("Expected %s received: %s", utils.ToJSON(expRply), utils.ToJSON(reply))
 	}
-	reply = []map[string]interface{}{}
+	reply = []map[string]any{}
 	if err = anz.V1StringQuery(context.Background(), &QueryArgs{
 		HeaderFilters:  "RequestEncoding:*gob",
 		ContentFilters: []string{"*string:~*req.APIOpts.EventSource:*attributes"},
@@ -338,7 +338,7 @@ func TestAnalyzersV1Search(t *testing.T) {
 	} else if !reflect.DeepEqual(expRply, reply) {
 		t.Errorf("Expected %s received: %s", utils.ToJSON(expRply), utils.ToJSON(reply))
 	}
-	expRply = []map[string]interface{}{{
+	expRply = []map[string]any{{
 		"RequestDestination": "127.0.0.1:2013",
 		"RequestDuration":    "30m0s",
 		"RequestEncoding":    "*birpc_json",
@@ -350,7 +350,7 @@ func TestAnalyzersV1Search(t *testing.T) {
 		"RequestStartTime":   t1.Add(-11 * time.Hour).UTC().Format(time.RFC3339),
 		"ReplyError":         nil,
 	}}
-	reply = []map[string]interface{}{}
+	reply = []map[string]any{}
 	if err = anz.V1StringQuery(context.Background(), &QueryArgs{
 		ContentFilters: []string{"*string:~*req.APIOpts.EventSource:*ees"},
 	}, &reply); err != nil {
@@ -359,8 +359,8 @@ func TestAnalyzersV1Search(t *testing.T) {
 		t.Errorf("Expected %s received: %s", utils.ToJSON(expRply), utils.ToJSON(reply))
 	}
 
-	expRply = []map[string]interface{}{}
-	reply = []map[string]interface{}{}
+	expRply = []map[string]any{}
+	reply = []map[string]any{}
 	if err = anz.V1StringQuery(context.Background(), &QueryArgs{
 		HeaderFilters:  "RequestEncoding:*gob",
 		ContentFilters: []string{"*string:~*req.APIOpts.EventSource:*cdrs"},

@@ -36,7 +36,7 @@ func init() {
 type CmdPassiveSessions struct {
 	name      string
 	rpcMethod string
-	rpcParams interface{}
+	rpcParams any
 	*CommandExecuter
 }
 
@@ -48,9 +48,9 @@ func (cmd *CmdPassiveSessions) RpcMethod() string {
 	return cmd.rpcMethod
 }
 
-func (cmd *CmdPassiveSessions) RpcParams(reset bool) interface{} {
+func (cmd *CmdPassiveSessions) RpcParams(reset bool) any {
 	if reset || cmd.rpcParams == nil {
-		cmd.rpcParams = &utils.SessionFilter{APIOpts: make(map[string]interface{})}
+		cmd.rpcParams = &utils.SessionFilter{APIOpts: make(map[string]any)}
 	}
 	return cmd.rpcParams
 }
@@ -61,12 +61,12 @@ func (cmd *CmdPassiveSessions) PostprocessRpcParams() error {
 	return nil
 }
 
-func (cmd *CmdPassiveSessions) RpcResult() interface{} {
+func (cmd *CmdPassiveSessions) RpcResult() any {
 	var sessions []*sessions.ExternalSession
 	return &sessions
 }
 
-func (cmd *CmdPassiveSessions) GetFormatedResult(result interface{}) string {
+func (cmd *CmdPassiveSessions) GetFormatedResult(result any) string {
 	return GetFormatedSliceResult(result, utils.StringSet{
 		utils.Usage:         {},
 		utils.DurationIndex: {},

@@ -59,7 +59,7 @@ func (ce *CommandExecuter) FromArgs(args string, verbose bool) error {
 	return nil
 }
 
-func (ce *CommandExecuter) clientArgs(iface interface{}) (args []string) {
+func (ce *CommandExecuter) clientArgs(iface any) (args []string) {
 	val := reflect.ValueOf(iface)
 	if val.Kind() == reflect.Ptr {
 		val = val.Elem()
@@ -136,7 +136,7 @@ func FromJSON(jsn []byte, interestingFields []string) (line string) {
 	return strings.TrimSpace(line)
 }
 
-func getStringValue(v interface{}, defaultDurationFields utils.StringSet) string {
+func getStringValue(v any, defaultDurationFields utils.StringSet) string {
 	switch o := v.(type) {
 	case nil:
 		return "null"
@@ -146,15 +146,15 @@ func getStringValue(v interface{}, defaultDurationFields utils.StringSet) string
 		return fmt.Sprintf(`%v`, o)
 	case string:
 		return fmt.Sprintf(`"%s"`, o)
-	case map[string]interface{}:
+	case map[string]any:
 		return getMapAsString(o, defaultDurationFields)
-	case []interface{}:
+	case []any:
 		return getSliceAsString(o, defaultDurationFields)
 	}
 	return utils.ToJSON(v)
 }
 
-func getSliceAsString(mp []interface{}, defaultDurationFields utils.StringSet) (out string) {
+func getSliceAsString(mp []any, defaultDurationFields utils.StringSet) (out string) {
 	out = utils.IdxStart
 	for _, v := range mp {
 		out += fmt.Sprintf(`%s,`, getStringValue(v, defaultDurationFields))
@@ -162,7 +162,7 @@ func getSliceAsString(mp []interface{}, defaultDurationFields utils.StringSet) (
 	return strings.TrimSuffix(out, utils.FieldsSep) + utils.IdxEnd
 }
 
-func getMapAsString(mp map[string]interface{}, defaultDurationFields utils.StringSet) (out string) {
+func getMapAsString(mp map[string]any, defaultDurationFields utils.StringSet) (out string) {
 	// in order to find the data faster
 	keylist := []string{} // add key value pairs to list so at the end we can sort them
 	for k, v := range mp {
@@ -178,9 +178,9 @@ func getMapAsString(mp map[string]interface{}, defaultDurationFields utils.Strin
 	return fmt.Sprintf(`{%s}`, strings.Join(keylist, utils.FieldsSep))
 }
 
-func GetFormatedResult(result interface{}, defaultDurationFields utils.StringSet) string {
+func GetFormatedResult(result any, defaultDurationFields utils.StringSet) string {
 	jsonResult, _ := json.Marshal(result)
-	var mp map[string]interface{}
+	var mp map[string]any
 	if err := json.Unmarshal(jsonResult, &mp); err != nil {
 		out, _ := json.MarshalIndent(result, utils.EmptyString, " ")
 		return string(out)
@@ -191,9 +191,9 @@ func GetFormatedResult(result interface{}, defaultDurationFields utils.StringSet
 	return out.String()
 }
 
-func GetFormatedSliceResult(result interface{}, defaultDurationFields utils.StringSet) string {
+func GetFormatedSliceResult(result any, defaultDurationFields utils.StringSet) string {
 	jsonResult, _ := json.Marshal(result)
-	var mp []interface{}
+	var mp []any
 	if err := json.Unmarshal(jsonResult, &mp); err != nil {
 		out, _ := json.MarshalIndent(result, utils.EmptyString, " ")
 		return string(out)
@@ -204,7 +204,7 @@ func GetFormatedSliceResult(result interface{}, defaultDurationFields utils.Stri
 	return out.String()
 }
 
-func (ce *CommandExecuter) GetFormatedResult(result interface{}) string {
+func (ce *CommandExecuter) GetFormatedResult(result any) string {
 	out, _ := json.MarshalIndent(result, utils.EmptyString, " ")
 	return string(out)
 }

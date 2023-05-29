@@ -130,7 +130,7 @@ var (
 				AttributeIDs: []string{"*none"},
 				Weight:       20,
 			},
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.CacheOpt: utils.MetaReload,
 			},
 		}
@@ -152,7 +152,7 @@ var (
 			Account:     "voiceAccount",
 			BalanceType: utils.MetaVoice,
 			Value:       600000000000,
-			Balance: map[string]interface{}{
+			Balance: map[string]any{
 				utils.ID:        utils.MetaDefault,
 				"RatingSubject": "*zero1m",
 				utils.Weight:    10.0,

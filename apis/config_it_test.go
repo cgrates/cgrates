@@ -128,7 +128,7 @@ func testCfgRPCConn(t *testing.T) {
 }
 
 func testCfgGetConfigInvalidSection(t *testing.T) {
-	var reply map[string]interface{}
+	var reply map[string]any
 	expected := "Invalid section "
 	if err := cfgRPC.Call(context.Background(), utils.ConfigSv1GetConfig,
 		&config.SectionWithAPIOpts{
@@ -142,9 +142,9 @@ func testCfgGetConfigInvalidSection(t *testing.T) {
 }
 
 func testCfgGetConfig(t *testing.T) {
-	var reply map[string]interface{}
-	expected := map[string]interface{}{
-		"attributes": map[string]interface{}{
+	var reply map[string]any
+	expected := map[string]any{
+		"attributes": map[string]any{
 			"accounts_conns":           []string{"*localhost"},
 			"enabled":                  true,
 			"indexed_selects":          true,
@@ -155,7 +155,7 @@ func testCfgGetConfig(t *testing.T) {
 			"suffix_indexed_fields":    []string{},
 			"exists_indexed_fields":    []string{},
 			"notexists_indexed_fields": []string{},
-			utils.OptsCfg: map[string]interface{}{
+			utils.OptsCfg: map[string]any{
 				utils.MetaProfileIDs:           []*utils.DynamicStringSliceOpt{},
 				utils.MetaProcessRunsCfg:       []*utils.DynamicIntOpt{},
 				utils.MetaProfileRunsCfg:       []*utils.DynamicIntOpt{},
@@ -184,8 +184,8 @@ func testCfgSetGetConfig(t *testing.T) {
 		&config.SetConfigArgs{
 			APIOpts: nil,
 			Tenant:  "",
-			Config: map[string]interface{}{
-				"attributes": map[string]interface{}{
+			Config: map[string]any{
+				"attributes": map[string]any{
 					"accounts_conns":        []string{"*internal"},
 					"enabled":               true,
 					"indexed_selects":       false,
@@ -194,7 +194,7 @@ func testCfgSetGetConfig(t *testing.T) {
 					"resources_conns":       []string{"*internal"},
 					"stats_conns":           []string{"*internal"},
 					"suffix_indexed_fields": []string{},
-					utils.OptsCfg: map[string]interface{}{
+					utils.OptsCfg: map[string]any{
 						utils.MetaProcessRunsCfg: []*utils.DynamicIntOpt{
 							{
 								Value: 2,
@@ -211,32 +211,32 @@ func testCfgSetGetConfig(t *testing.T) {
 	if reply != utils.OK {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "OK", utils.ToJSON(reply))
 	}
-	expectedGet := map[string]interface{}{
-		"attributes": map[string]interface{}{
-			"accounts_conns":           []interface{}{"*internal"},
+	expectedGet := map[string]any{
+		"attributes": map[string]any{
+			"accounts_conns":           []any{"*internal"},
 			"enabled":                  true,
 			"indexed_selects":          false,
 			"nested_fields":            false,
-			"prefix_indexed_fields":    []interface{}{},
-			"resources_conns":          []interface{}{"*internal"},
-			"stats_conns":              []interface{}{"*internal"},
-			"suffix_indexed_fields":    []interface{}{},
-			"exists_indexed_fields":    []interface{}{},
-			"notexists_indexed_fields": []interface{}{},
-			utils.OptsCfg: map[string]interface{}{
-				utils.MetaProfileIDs: []interface{}{},
-				utils.MetaProcessRunsCfg: []interface{}{
-					map[string]interface{}{
+			"prefix_indexed_fields":    []any{},
+			"resources_conns":          []any{"*internal"},
+			"stats_conns":              []any{"*internal"},
+			"suffix_indexed_fields":    []any{},
+			"exists_indexed_fields":    []any{},
+			"notexists_indexed_fields": []any{},
+			utils.OptsCfg: map[string]any{
+				utils.MetaProfileIDs: []any{},
+				utils.MetaProcessRunsCfg: []any{
+					map[string]any{
 						"Value":  2.,
 						"Tenant": utils.EmptyString,
 					},
 				},
-				utils.MetaProfileRunsCfg:       []interface{}{},
-				utils.MetaProfileIgnoreFilters: []interface{}{},
+				utils.MetaProfileRunsCfg:       []any{},
+				utils.MetaProfileIgnoreFilters: []any{},
 			},
 		},
 	}
-	var replyGet map[string]interface{}
+	var replyGet map[string]any
 	if err := cfgRPC.Call(context.Background(), utils.ConfigSv1GetConfig,
 		&config.SectionWithAPIOpts{
 			APIOpts:  nil,
@@ -257,8 +257,8 @@ func testCfgSetEmptyReload(t *testing.T) {
 		&config.SetConfigArgs{
 			APIOpts: nil,
 			Tenant:  "",
-			Config: map[string]interface{}{
-				"rates": map[string]interface{}{
+			Config: map[string]any{
+				"rates": map[string]any{
 					"enabled":         true,
 					"indexed_selects": false,
 				},
@@ -285,8 +285,8 @@ func testCfgSetEmptyReload(t *testing.T) {
 	if !reflect.DeepEqual(`"OK"`, utils.ToJSON(rldArgs)) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "OK", utils.ToJSON(rldArgs))
 	}
-	expectedGet := map[string]interface{}{
-		"rates": map[string]interface{}{
+	expectedGet := map[string]any{
+		"rates": map[string]any{
 			"enabled":                       true,
 			"indexed_selects":               false,
 			"nested_fields":                 false,
@@ -301,7 +301,7 @@ func testCfgSetEmptyReload(t *testing.T) {
 			"rate_exists_indexed_fields":    []string{},
 			"rate_notexists_indexed_fields": []string{},
 			"verbosity":                     1000,
-			utils.OptsCfg: map[string]interface{}{
+			utils.OptsCfg: map[string]any{
 				utils.MetaProfileIDs:           []*utils.DynamicStringSliceOpt{},
 				utils.MetaStartTime:            []*utils.DynamicStringOpt{},
 				utils.MetaUsage:                []*utils.DynamicDecimalBigOpt{},
@@ -310,7 +310,7 @@ func testCfgSetEmptyReload(t *testing.T) {
 			},
 		},
 	}
-	var replyGet map[string]interface{}
+	var replyGet map[string]any
 	if err := cfgRPC.Call(context.Background(), utils.ConfigSv1GetConfig,
 		&config.SectionWithAPIOpts{
 			APIOpts:  nil,
@@ -492,8 +492,8 @@ func testCfgSetGetConfigStore(t *testing.T) {
 		&config.SetConfigArgs{
 			APIOpts: nil,
 			Tenant:  "",
-			Config: map[string]interface{}{
-				"attributes": map[string]interface{}{
+			Config: map[string]any{
+				"attributes": map[string]any{
 					"accounts_conns":        []string{"*internal"},
 					"enabled":               true,
 					"indexed_selects":       false,
@@ -503,7 +503,7 @@ func testCfgSetGetConfigStore(t *testing.T) {
 					"stats_conns":           []string{"*internal"},
 					"profile_runs":          0.,
 					"suffix_indexed_fields": []string{},
-					utils.OptsCfg: map[string]interface{}{
+					utils.OptsCfg: map[string]any{
 						utils.MetaProcessRunsCfg: []*utils.DynamicIntOpt{},
 					},
 				},
@@ -516,8 +516,8 @@ func testCfgSetGetConfigStore(t *testing.T) {
 	if !reflect.DeepEqual(`"OK"`, utils.ToJSON(reply)) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "OK", utils.ToJSON(reply))
 	}
-	expectedGet := map[string]interface{}{
-		"attributes": map[string]interface{}{
+	expectedGet := map[string]any{
+		"attributes": map[string]any{
 			"accounts_conns":           []string{"*internal"},
 			"enabled":                  true,
 			"indexed_selects":          false,
@@ -528,7 +528,7 @@ func testCfgSetGetConfigStore(t *testing.T) {
 			"suffix_indexed_fields":    []string{},
 			"exists_indexed_fields":    []string{},
 			"notexists_indexed_fields": []string{},
-			utils.OptsCfg: map[string]interface{}{
+			utils.OptsCfg: map[string]any{
 				utils.MetaProfileIDs:           []*utils.DynamicStringSliceOpt{},
 				utils.MetaProcessRunsCfg:       []*utils.DynamicIntOpt{},
 				utils.MetaProfileRunsCfg:       []*utils.DynamicIntOpt{},
@@ -536,7 +536,7 @@ func testCfgSetGetConfigStore(t *testing.T) {
 			},
 		},
 	}
-	var replyGet map[string]interface{}
+	var replyGet map[string]any
 	if err := cfgRPC.Call(context.Background(), utils.ConfigSv1GetConfig,
 		&config.SectionWithAPIOpts{
 			APIOpts:  nil,
@@ -617,32 +617,32 @@ func testCfgReloadConfigStore(t *testing.T) {
 }
 
 func testCfgGetAfterReloadStore(t *testing.T) {
-	expectedGet := map[string]interface{}{
-		"attributes": map[string]interface{}{
-			"accounts_conns":           []interface{}{"*internal"},
+	expectedGet := map[string]any{
+		"attributes": map[string]any{
+			"accounts_conns":           []any{"*internal"},
 			"enabled":                  true,
 			"indexed_selects":          true,
 			"nested_fields":            false,
-			"prefix_indexed_fields":    []interface{}{},
-			"resources_conns":          []interface{}{"*internal"},
-			"stats_conns":              []interface{}{"*internal"},
-			"suffix_indexed_fields":    []interface{}{},
-			"exists_indexed_fields":    []interface{}{},
-			"notexists_indexed_fields": []interface{}{},
-			utils.OptsCfg: map[string]interface{}{
-				utils.MetaProfileIDs: []interface{}{},
-				utils.MetaProcessRunsCfg: []interface{}{
-					map[string]interface{}{
+			"prefix_indexed_fields":    []any{},
+			"resources_conns":          []any{"*internal"},
+			"stats_conns":              []any{"*internal"},
+			"suffix_indexed_fields":    []any{},
+			"exists_indexed_fields":    []any{},
+			"notexists_indexed_fields": []any{},
+			utils.OptsCfg: map[string]any{
+				utils.MetaProfileIDs: []any{},
+				utils.MetaProcessRunsCfg: []any{
+					map[string]any{
 						"Tenant": utils.EmptyString,
 						"Value":  2.,
 					},
 				},
-				utils.MetaProfileRunsCfg:       []interface{}{},
-				utils.MetaProfileIgnoreFilters: []interface{}{},
+				utils.MetaProfileRunsCfg:       []any{},
+				utils.MetaProfileIgnoreFilters: []any{},
 			},
 		},
 	}
-	var replyGet map[string]interface{}
+	var replyGet map[string]any
 	if err := cfgRPC.Call(context.Background(), utils.ConfigSv1GetConfig,
 		&config.SectionWithAPIOpts{
 			APIOpts:  nil,

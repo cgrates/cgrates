@@ -183,13 +183,13 @@ func (gl *GuardianLocker) UnguardIDs(refID string) []string {
 }
 
 type AttrRemoteLockWithAPIOpts struct {
-	APIOpts map[string]interface{}
+	APIOpts map[string]any
 	Tenant  string
 	utils.AttrRemoteLock
 }
 
 type AttrRemoteUnlockWithAPIOpts struct {
-	APIOpts map[string]interface{}
+	APIOpts map[string]any
 	Tenant  string
 	RefID   string
 }

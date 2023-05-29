@@ -171,7 +171,7 @@ package general_tests
 // 		t.Fatalf("Expected 1 event received: %d events", len(ev.Events))
 // 	}
 // 	body := ev.Events[0].([]byte)
-// 	var acc map[string]interface{}
+// 	var acc map[string]any
 // 	if err := json.Unmarshal(body, &acc); err != nil {
 // 		t.Fatal(err)
 // 	}
@@ -209,7 +209,7 @@ package general_tests
 // 		t.Fatalf("Expected 1 event received: %d events", len(ev.Events))
 // 	}
 // 	body := ev.Events[0].([]byte)
-// 	var acc map[string]interface{}
+// 	var acc map[string]any
 // 	if err := json.Unmarshal(body, &acc); err != nil {
 // 		t.Fatal(err)
 // 	}
@@ -247,7 +247,7 @@ package general_tests
 // 		t.Fatalf("Expected 1 event received: %d events", len(ev.Events))
 // 	}
 // 	body := ev.Events[0].([]byte)
-// 	var acc map[string]interface{}
+// 	var acc map[string]any
 // 	if err := json.Unmarshal(body, &acc); err != nil {
 // 		t.Fatal(err)
 // 	}
@@ -285,7 +285,7 @@ package general_tests
 // 		t.Fatalf("Expected 1 event received: %d events", len(ev.Events))
 // 	}
 // 	body := ev.Events[0].([]byte)
-// 	var acc map[string]interface{}
+// 	var acc map[string]any
 // 	if err := json.Unmarshal(body, &acc); err != nil {
 // 		t.Fatal(err)
 // 	}
@@ -323,7 +323,7 @@ package general_tests
 // 		t.Fatalf("Expected 1 event received: %d events", len(ev.Events))
 // 	}
 // 	body := ev.Events[0].([]byte)
-// 	var acc map[string]interface{}
+// 	var acc map[string]any
 // 	if err := json.Unmarshal(body, &acc); err != nil {
 // 		t.Fatal(err)
 // 	}

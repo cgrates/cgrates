@@ -68,7 +68,7 @@ type DynamicDecimalBigOpt struct {
 type DynamicInterfaceOpt struct {
 	FilterIDs []string `json:",omitempty"`
 	Tenant    string
-	Value     interface{}
+	Value     any
 }
 
 type DynamicIntPointerOpt struct {

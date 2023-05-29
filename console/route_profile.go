@@ -48,7 +48,7 @@ func (self *CmdGetRouteProfile) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdGetRouteProfile) RpcParams(reset bool) interface{} {
+func (self *CmdGetRouteProfile) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &utils.TenantIDWithAPIOpts{}
 	}
@@ -59,7 +59,7 @@ func (self *CmdGetRouteProfile) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdGetRouteProfile) RpcResult() interface{} {
+func (self *CmdGetRouteProfile) RpcResult() any {
 	var atr engine.RouteProfile
 	return &atr
 }

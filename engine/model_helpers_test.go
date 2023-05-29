@@ -1710,14 +1710,14 @@ func TestAPItoDispatcherProfile(t *testing.T) {
 		ID:             "Dsp",
 		FilterIDs:      []string{"*ai:~*req.AnswerTime:2014-07-14T14:35:00Z", "FLTR_ACNT_dan", "FLTR_DST_DE"},
 		Strategy:       utils.MetaFirst,
-		StrategyParams: []interface{}{},
+		StrategyParams: []any{},
 		Weight:         20,
 		Hosts: []*utils.TPDispatcherHostProfile{
 			{
 				ID:        "C1",
 				FilterIDs: []string{},
 				Weight:    10,
-				Params:    []interface{}{"192.168.54.203", "*ratio:2"},
+				Params:    []any{"192.168.54.203", "*ratio:2"},
 				Blocker:   false,
 			},
 		},
@@ -1728,14 +1728,14 @@ func TestAPItoDispatcherProfile(t *testing.T) {
 		ID:             "Dsp",
 		FilterIDs:      []string{"*ai:~*req.AnswerTime:2014-07-14T14:35:00Z", "FLTR_ACNT_dan", "FLTR_DST_DE"},
 		Strategy:       utils.MetaFirst,
-		StrategyParams: map[string]interface{}{},
+		StrategyParams: map[string]any{},
 		Weight:         20,
 		Hosts: DispatcherHostProfiles{
 			&DispatcherHostProfile{
 				ID:        "C1",
 				FilterIDs: []string{},
 				Weight:    10,
-				Params:    map[string]interface{}{"0": "192.168.54.203", utils.MetaRatio: "2"},
+				Params:    map[string]any{"0": "192.168.54.203", utils.MetaRatio: "2"},
 				Blocker:   false,
 			},
 		},
@@ -1751,14 +1751,14 @@ func TestDispatcherProfileToAPI(t *testing.T) {
 		ID:             "Dsp",
 		FilterIDs:      []string{"*ai:~*req.AnswerTime:2014-07-14T14:35:00Z", "FLTR_ACNT_dan", "FLTR_DST_DE"},
 		Strategy:       utils.MetaFirst,
-		StrategyParams: []interface{}{},
+		StrategyParams: []any{},
 		Weight:         20,
 		Hosts: []*utils.TPDispatcherHostProfile{
 			{
 				ID:        "C1",
 				FilterIDs: []string{},
 				Weight:    10,
-				Params:    []interface{}{"192.168.54.203", "*ratio:2"},
+				Params:    []any{"192.168.54.203", "*ratio:2"},
 				Blocker:   false,
 			},
 		},
@@ -1768,14 +1768,14 @@ func TestDispatcherProfileToAPI(t *testing.T) {
 		ID:             "Dsp",
 		FilterIDs:      []string{"*ai:~*req.AnswerTime:2014-07-14T14:35:00Z", "FLTR_ACNT_dan", "FLTR_DST_DE"},
 		Strategy:       utils.MetaFirst,
-		StrategyParams: []interface{}{},
+		StrategyParams: []any{},
 		Weight:         20,
 		Hosts: []*utils.TPDispatcherHostProfile{
 			{
 				ID:        "C1",
 				FilterIDs: []string{},
 				Weight:    10,
-				Params:    []interface{}{"*ratio:2", "192.168.54.203"},
+				Params:    []any{"*ratio:2", "192.168.54.203"},
 				Blocker:   false,
 			},
 		},
@@ -1786,14 +1786,14 @@ func TestDispatcherProfileToAPI(t *testing.T) {
 		ID:             "Dsp",
 		FilterIDs:      []string{"*ai:~*req.AnswerTime:2014-07-14T14:35:00Z", "FLTR_ACNT_dan", "FLTR_DST_DE"},
 		Strategy:       utils.MetaFirst,
-		StrategyParams: map[string]interface{}{},
+		StrategyParams: map[string]any{},
 		Weight:         20,
 		Hosts: DispatcherHostProfiles{
 			&DispatcherHostProfile{
 				ID:        "C1",
 				FilterIDs: []string{},
 				Weight:    10,
-				Params:    map[string]interface{}{"0": "192.168.54.203", utils.MetaRatio: "2"},
+				Params:    map[string]any{"0": "192.168.54.203", utils.MetaRatio: "2"},
 				Blocker:   false,
 			},
 		},
@@ -1810,21 +1810,21 @@ func TestAPItoModelTPDispatcher(t *testing.T) {
 		ID:             "Dsp",
 		FilterIDs:      []string{"*ai:~*req.AnswerTime:2014-07-14T14:35:00Z", "FLTR_ACNT_dan", "FLTR_DST_DE"},
 		Strategy:       utils.MetaFirst,
-		StrategyParams: []interface{}{},
+		StrategyParams: []any{},
 		Weight:         20,
 		Hosts: []*utils.TPDispatcherHostProfile{
 			{
 				ID:        "C1",
 				FilterIDs: []string{},
 				Weight:    10,
-				Params:    []interface{}{"192.168.54.203"},
+				Params:    []any{"192.168.54.203"},
 				Blocker:   false,
 			},
 			{
 				ID:        "C2",
 				FilterIDs: []string{},
 				Weight:    10,
-				Params:    []interface{}{"192.168.54.204"},
+				Params:    []any{"192.168.54.204"},
 				Blocker:   false,
 			},
 		},
@@ -3395,24 +3395,24 @@ func TestRateProfileMdlsCSVHeader(t *testing.T) {
 func TestDispatcherProfileToAPICase2(t *testing.T) {
 	structTest := &DispatcherProfile{
 		FilterIDs: []string{"field1", "field2", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z|2014-07-15T14:35:00Z"},
-		StrategyParams: map[string]interface{}{
+		StrategyParams: map[string]any{
 			"Field1": "Params1",
 		},
 		Hosts: []*DispatcherHostProfile{
 			{
 				FilterIDs: []string{"fieldA", "fieldB"},
-				Params:    map[string]interface{}{},
+				Params:    map[string]any{},
 			},
 		},
 	}
 
 	expStruct := &utils.TPDispatcherProfile{
 		FilterIDs:      []string{"*ai:~*req.AnswerTime:2014-07-14T14:35:00Z|2014-07-15T14:35:00Z", "field1", "field2"},
-		StrategyParams: []interface{}{"Params1"},
+		StrategyParams: []any{"Params1"},
 		Hosts: []*utils.TPDispatcherHostProfile{
 			{
 				FilterIDs: []string{"fieldA", "fieldB"},
-				Params:    []interface{}{},
+				Params:    []any{},
 			},
 		},
 	}
@@ -3427,19 +3427,19 @@ func TestDispatcherProfileToAPICase2(t *testing.T) {
 func TestAPItoDispatcherProfileCase2(t *testing.T) {
 	structTest := &utils.TPDispatcherProfile{
 		FilterIDs:      []string{},
-		StrategyParams: []interface{}{"Param1"},
+		StrategyParams: []any{"Param1"},
 		Hosts: []*utils.TPDispatcherHostProfile{{
-			Params: []interface{}{"Param1"},
+			Params: []any{"Param1"},
 		}},
 	}
 	expStruct := &DispatcherProfile{
 		FilterIDs: []string{},
-		StrategyParams: map[string]interface{}{
+		StrategyParams: map[string]any{
 			"0": "Param1",
 		},
 		Hosts: DispatcherHostProfiles{{
 			FilterIDs: []string{},
-			Params: map[string]interface{}{
+			Params: map[string]any{
 				"0": "Param1",
 			},
 		},
@@ -3461,7 +3461,7 @@ func TestAPItoModelTPDispatcherProfileNil(t *testing.T) {
 }
 
 func TestModelHelpersParamsToString(t *testing.T) {
-	testInterface := []interface{}{"Param1", "Param2"}
+	testInterface := []any{"Param1", "Param2"}
 	result := paramsToString(testInterface)
 	if !reflect.DeepEqual(result, "Param1;Param2") {
 		t.Errorf("\nExpecting <Param1;Param2>,\n Received <%+v>", result)
@@ -3477,7 +3477,7 @@ func TestModelHelpersAsTPDispatcherProfiles(t *testing.T) {
 	}
 	expStruct := []*utils.TPDispatcherProfile{{
 		FilterIDs:      []string{"*ai:~*req.AnswerTime:2014-07-29T15:00:00Z|2014-08-29T15:00:00Z"},
-		StrategyParams: []interface{}{"Param1"},
+		StrategyParams: []any{"Param1"},
 	},
 	}
 	result := structTest.AsTPDispatcherProfiles()
@@ -3905,7 +3905,7 @@ func TestModelHelpersAPItoActionProfile(t *testing.T) {
 				Diktats: []*APDiktat{{
 					Path: "test_path",
 				}},
-				Opts: map[string]interface{}{
+				Opts: map[string]any{
 					"key1": "val1",
 					"key2": "val2",
 				},
@@ -3989,7 +3989,7 @@ func TestModelHelpersActionProfileToAPI(t *testing.T) {
 				Diktats: []*APDiktat{{
 					Path: "test_path",
 				}},
-				Opts: map[string]interface{}{
+				Opts: map[string]any{
 					"key1": "val1",
 				},
 			},
@@ -4939,7 +4939,7 @@ func TestApitoAccountCase2(t *testing.T) {
 				Type:           utils.MetaVoice,
 				Units:          utils.NewDecimal(3600000000000, 0),
 				RateProfileIDs: []string{"RTPRF1"},
-				Opts: map[string]interface{}{
+				Opts: map[string]any{
 					"key1": "val1",
 				},
 			}},
@@ -5107,7 +5107,7 @@ func TestModelHelpersAccountToAPI(t *testing.T) {
 						Factor:    utils.NewDecimal(21, 0),
 					},
 				},
-				Opts: map[string]interface{}{
+				Opts: map[string]any{
 					"key1": "val1",
 				},
 			}},
@@ -5562,14 +5562,14 @@ func TestAPItoDispatcherProfileNoParams(t *testing.T) {
 		ID:             "Dsp",
 		FilterIDs:      []string{"*ai:~*req.AnswerTime:2014-07-14T14:35:00Z", "FLTR_ACNT_dan", "FLTR_DST_DE"},
 		Strategy:       utils.MetaFirst,
-		StrategyParams: []interface{}{},
+		StrategyParams: []any{},
 		Weight:         20,
 		Hosts: []*utils.TPDispatcherHostProfile{
 			{
 				ID:        "C1",
 				FilterIDs: []string{},
 				Weight:    10,
-				Params:    []interface{}{""},
+				Params:    []any{""},
 				Blocker:   false,
 			},
 		},
@@ -5580,13 +5580,13 @@ func TestAPItoDispatcherProfileNoParams(t *testing.T) {
 		ID:             "Dsp",
 		FilterIDs:      []string{"*ai:~*req.AnswerTime:2014-07-14T14:35:00Z", "FLTR_ACNT_dan", "FLTR_DST_DE"},
 		Strategy:       utils.MetaFirst,
-		StrategyParams: map[string]interface{}{},
+		StrategyParams: map[string]any{},
 		Weight:         20,
 		Hosts: DispatcherHostProfiles{
 			&DispatcherHostProfile{
 				ID:        "C1",
 				FilterIDs: []string{},
-				Params:    make(map[string]interface{}),
+				Params:    make(map[string]any),
 				Weight:    10,
 				Blocker:   false,
 			},
@@ -6036,21 +6036,21 @@ func TestCsvDumpForDispatcherModels(t *testing.T) {
 		ID:             "Dsp",
 		FilterIDs:      []string{"*ai:~*req.AnswerTime:2014-07-14T14:35:00Z", "FLTR_ACNT_dan", "FLTR_DST_DE"},
 		Strategy:       utils.MetaFirst,
-		StrategyParams: []interface{}{},
+		StrategyParams: []any{},
 		Weight:         20,
 		Hosts: []*utils.TPDispatcherHostProfile{
 			{
 				ID:        "C1",
 				FilterIDs: []string{},
 				Weight:    10,
-				Params:    []interface{}{"192.168.54.203"},
+				Params:    []any{"192.168.54.203"},
 				Blocker:   false,
 			},
 			{
 				ID:        "C2",
 				FilterIDs: []string{},
 				Weight:    10,
-				Params:    []interface{}{"192.168.54.204"},
+				Params:    []any{"192.168.54.204"},
 				Blocker:   false,
 			},
 		},

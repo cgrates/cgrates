@@ -26,7 +26,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-var mapEv = MapEvent(map[string]interface{}{
+var mapEv = MapEvent(map[string]any{
 	"test1": nil,
 	"test2": 42,
 	"test3": 42.3,
@@ -39,10 +39,10 @@ var mapEv = MapEvent(map[string]interface{}{
 })
 
 func TestMapEventNewMapEvent(t *testing.T) {
-	if rply, expected := NewMapEvent(nil), MapEvent(make(map[string]interface{})); !reflect.DeepEqual(expected, rply) {
+	if rply, expected := NewMapEvent(nil), MapEvent(make(map[string]any)); !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v, received: %+v", expected, rply)
 	}
-	mp := map[string]interface{}{
+	mp := map[string]any{
 		"test1": nil,
 		"test2": 42,
 		"test3": 42.3,
@@ -417,7 +417,7 @@ func TestMapEventData(t *testing.T) {
 	testStruct := MapEvent{
 		"key1": "val1",
 	}
-	expStruct := map[string]interface{}{
+	expStruct := map[string]any{
 		"key1": "val1",
 	}
 	result := testStruct.Data()
@@ -444,7 +444,7 @@ func TestMapEventGetBoolOrDefault(t *testing.T) {
 	}
 
 	me = MapEvent{
-		fldName: interface{}("false"),
+		fldName: any("false"),
 	}
 	if out := me.GetBoolOrDefault(fldName, dflt); out != false {
 		t.Errorf("Expected bool to same output as fldName <false>, Received <%v>", out)

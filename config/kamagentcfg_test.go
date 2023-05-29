@@ -98,12 +98,12 @@ func TestKamAgentCfgAsMapInterface(t *testing.T) {
 			],
 		},
 	}`
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		utils.EnabledCfg:       false,
 		utils.SessionSConnsCfg: []string{rpcclient.BiRPCInternal, "*conn1", "*conn2", utils.MetaInternal},
 		utils.CreateCdrCfg:     true,
 		utils.TimezoneCfg:      "UTC",
-		utils.EvapiConnsCfg: []map[string]interface{}{
+		utils.EvapiConnsCfg: []map[string]any{
 			{
 				utils.AddressCfg:              "127.0.0.1:8448",
 				utils.ReconnectsCfg:           5,
@@ -122,12 +122,12 @@ func TestKamAgentCfgAsMapInterface1(t *testing.T) {
 	cfgJSONStr := `{
 	"kamailio_agent": {},
 }`
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		utils.EnabledCfg:       false,
 		utils.SessionSConnsCfg: []string{rpcclient.BiRPCInternal},
 		utils.CreateCdrCfg:     false,
 		utils.TimezoneCfg:      "",
-		utils.EvapiConnsCfg: []map[string]interface{}{
+		utils.EvapiConnsCfg: []map[string]any{
 			{
 				utils.AddressCfg:              "127.0.0.1:8448",
 				utils.ReconnectsCfg:           5,

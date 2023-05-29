@@ -152,7 +152,7 @@ func testSqlEeExportEventFull(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "voiceEvent",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 
 				utils.ToR:          utils.MetaVoice,
 				utils.OriginID:     "dsafdsaf",
@@ -170,7 +170,7 @@ func testSqlEeExportEventFull(t *testing.T) {
 				"ExtraFields": map[string]string{"extra1": "val_extra1",
 					"extra2": "val_extra2", "extra3": "val_extra3"},
 			},
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.MetaOriginID: utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()),
 				utils.RunID:        utils.MetaDefault,
 			},
@@ -190,7 +190,7 @@ func testSqlEeExportEventPartial(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "voiceEvent",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 
 				utils.ToR:          utils.MetaVoice,
 				utils.OriginID:     "dsafdsaf",
@@ -208,7 +208,7 @@ func testSqlEeExportEventPartial(t *testing.T) {
 				"ExtraFields": map[string]string{"extra1": "val_extra1",
 					"extra2": "val_extra2", "extra3": "val_extra3"},
 			},
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.MetaOriginID: utils.Sha1("asd", time.Unix(1383813745, 0).UTC().String()),
 				utils.RunID:        utils.MetaDefault,
 			},
@@ -283,7 +283,7 @@ func TestSQLExportEvent1(t *testing.T) {
 	if err := sqlEe.Connect(); err != nil {
 		t.Fatal(err)
 	}
-	if err := sqlEe.ExportEvent(context.Background(), &sqlPosterRequest{Querry: "INSERT INTO cdrs VALUES (); ", Values: []interface{}{}}, ""); err != nil {
+	if err := sqlEe.ExportEvent(context.Background(), &sqlPosterRequest{Querry: "INSERT INTO cdrs VALUES (); ", Values: []any{}}, ""); err != nil {
 		t.Error(err)
 	}
 	sqlEe.Close()

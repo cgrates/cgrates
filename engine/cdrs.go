@@ -101,7 +101,7 @@ func (cdrS *CDRServer) chrgrSProcessEvent(ctx *context.Context, cgrEv *utils.CGR
 func (cdrS *CDRServer) attrSProcessEvent(ctx *context.Context, cgrEv *utils.CGREvent) (err error) {
 	var rplyEv AttrSProcessEventReply
 	if cgrEv.APIOpts == nil {
-		cgrEv.APIOpts = make(map[string]interface{})
+		cgrEv.APIOpts = make(map[string]any)
 	}
 	cgrEv.APIOpts[utils.MetaSubsys] = utils.MetaCDRs
 	cgrEv.APIOpts[utils.OptsContext] = utils.FirstNonEmpty(
@@ -143,7 +143,7 @@ func (cdrS *CDRServer) accountSDebitEvent(ctx *context.Context, cgrEv *utils.CGR
 
 // accountSRefundCharges will refund the charges into Account
 func (cdrS *CDRServer) accountSRefundCharges(ctx *context.Context, tnt string, eChrgs *utils.EventCharges,
-	apiOpts map[string]interface{}) (err error) {
+	apiOpts map[string]any) (err error) {
 	var rply string
 	argsRefund := &utils.APIEventCharges{
 		Tenant:       tnt,
@@ -186,7 +186,7 @@ func (cdrS *CDRServer) statSProcessEvent(ctx *context.Context, cgrEv *utils.CGRE
 
 // eeSProcessEvent will process the event with the EEs component
 func (cdrS *CDRServer) eeSProcessEvent(ctx *context.Context, cgrEv *utils.CGREventWithEeIDs) (err error) {
-	var reply map[string]map[string]interface{}
+	var reply map[string]map[string]any
 	if err = cdrS.connMgr.Call(ctx, cdrS.cfg.CdrsCfg().EEsConns,
 		utils.EeSv1ProcessEvent,
 		cgrEv, &reply); err != nil &&
@@ -261,7 +261,7 @@ func (cdrS *CDRServer) processEvent(ctx *context.Context, ev *utils.CGREvent) (e
 			if ecCostIface, wasCharged := cgrEv.APIOpts[utils.MetaAccountSCost]; wasCharged {
 				// before converting into EventChargers, we must get the JSON encoding and Unmarshal it into an EventChargers
 				var btsEvCh []byte
-				btsEvCh, err = json.Marshal(ecCostIface.(map[string]interface{}))
+				btsEvCh, err = json.Marshal(ecCostIface.(map[string]any))
 				if err != nil {
 					return
 				}
@@ -428,7 +428,7 @@ func (cdrS *CDRServer) V1ProcessEventWithGet(ctx *context.Context, arg *utils.CG
 	return nil
 }
 
-func populateCost(cgrOpts map[string]interface{}) *utils.Decimal {
+func populateCost(cgrOpts map[string]any) *utils.Decimal {
 	// if the cost is already present, get out
 	if _, has := cgrOpts[utils.MetaCost]; has {
 		return nil

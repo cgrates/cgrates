@@ -48,7 +48,7 @@ func (self *CmdGetRouteProfiles) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdGetRouteProfiles) RpcParams(reset bool) interface{} {
+func (self *CmdGetRouteProfiles) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &utils.ArgsItemIDs{}
 	}
@@ -59,7 +59,7 @@ func (self *CmdGetRouteProfiles) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdGetRouteProfiles) RpcResult() interface{} {
+func (self *CmdGetRouteProfiles) RpcResult() any {
 	var atr []*engine.RouteProfile
 	return &atr
 }

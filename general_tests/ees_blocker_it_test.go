@@ -126,14 +126,14 @@ func testEEsBlockerExportEvent(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "EEsProcessEvent",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"TestCase": "EEsBlockerBehaviour",
 			},
-			APIOpts: map[string]interface{}{},
+			APIOpts: map[string]any{},
 		},
 	}
 
-	var reply map[string]map[string]interface{}
+	var reply map[string]map[string]any
 	if err := eesBlockerRPC.Call(context.Background(), utils.EeSv1ProcessEvent, exportedEvent, &reply); err != nil {
 		t.Error(err)
 	}

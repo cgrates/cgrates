@@ -65,11 +65,11 @@ func (ap *ActionProfile) GetWeightFromDynamics(ctx *context.Context,
 
 // APAction defines action related information used within a ActionProfile
 type APAction struct {
-	ID        string                 // Action ID
-	FilterIDs []string               // Action FilterIDs
-	TTL       time.Duration          // Cancel Action if not executed within TTL
-	Type      string                 // Type of Action
-	Opts      map[string]interface{} // Extra options to pass depending on action type
+	ID        string         // Action ID
+	FilterIDs []string       // Action FilterIDs
+	TTL       time.Duration  // Cancel Action if not executed within TTL
+	Type      string         // Type of Action
+	Opts      map[string]any // Extra options to pass depending on action type
 	Diktats   []*APDiktat
 }
 
@@ -91,10 +91,10 @@ func (dk *APDiktat) RSRValues(sep string) (_ config.RSRParsers, err error) {
 // ActionProfileWithAPIOpts is used in API calls
 type ActionProfileWithAPIOpts struct {
 	*ActionProfile
-	APIOpts map[string]interface{}
+	APIOpts map[string]any
 }
 
-func (aP *ActionProfile) Set(path []string, val interface{}, newBranch bool, _ string) (err error) {
+func (aP *ActionProfile) Set(path []string, val any, newBranch bool, _ string) (err error) {
 	switch len(path) {
 	case 0:
 		return utils.ErrWrongPath
@@ -159,13 +159,13 @@ func (aP *ActionProfile) Set(path []string, val interface{}, newBranch bool, _ s
 		}
 	}
 	if ac == nil {
-		ac = &APAction{ID: acID, Opts: make(map[string]interface{})}
+		ac = &APAction{ID: acID, Opts: make(map[string]any)}
 		aP.Actions = append(aP.Actions, ac)
 	}
 	return ac.Set(path[1:], val, newBranch)
 }
 
-func (aP *APAction) Set(path []string, val interface{}, newBranch bool) (err error) {
+func (aP *APAction) Set(path []string, val any, newBranch bool) (err error) {
 	switch len(path) {
 	default:
 		if path[0] == utils.Opts {
@@ -217,7 +217,7 @@ func (aP *APAction) Set(path []string, val interface{}, newBranch bool) (err err
 	return
 }
 
-func (ap *ActionProfile) Merge(v2 interface{}) {
+func (ap *ActionProfile) Merge(v2 any) {
 	vi := v2.(*ActionProfile)
 	if len(vi.Tenant) != 0 {
 		ap.Tenant = vi.Tenant
@@ -280,13 +280,13 @@ func (apAct *APAction) Merge(v2 *APAction) {
 
 func (ap *ActionProfile) String() string { return utils.ToJSON(ap) }
 func (ap *ActionProfile) FieldAsString(fldPath []string) (_ string, err error) {
-	var val interface{}
+	var val any
 	if val, err = ap.FieldAsInterface(fldPath); err != nil {
 		return
 	}
 	return utils.IfaceAsString(val), nil
 }
-func (ap *ActionProfile) FieldAsInterface(fldPath []string) (_ interface{}, err error) {
+func (ap *ActionProfile) FieldAsInterface(fldPath []string) (_ any, err error) {
 	if len(fldPath) == 1 {
 		switch fldPath[0] {
 		default:
@@ -364,13 +364,13 @@ func (ap *ActionProfile) FieldAsInterface(fldPath []string) (_ interface{}, err 
 
 func (a *APAction) String() string { return utils.ToJSON(a) }
 func (a *APAction) FieldAsString(fldPath []string) (_ string, err error) {
-	var val interface{}
+	var val any
 	if val, err = a.FieldAsInterface(fldPath); err != nil {
 		return
 	}
 	return utils.IfaceAsString(val), nil
 }
-func (ap *APAction) FieldAsInterface(fldPath []string) (_ interface{}, err error) {
+func (ap *APAction) FieldAsInterface(fldPath []string) (_ any, err error) {
 	switch len(fldPath) {
 	default:
 		if fld, idxStr := utils.GetPathIndexString(fldPath[0]); fld == utils.Opts {
@@ -452,13 +452,13 @@ func (ap *APAction) FieldAsInterface(fldPath []string) (_ interface{}, err error
 
 func (dk *APDiktat) String() string { return utils.ToJSON(dk) }
 func (dk *APDiktat) FieldAsString(fldPath []string) (_ string, err error) {
-	var val interface{}
+	var val any
 	if val, err = dk.FieldAsInterface(fldPath); err != nil {
 		return
 	}
 	return utils.IfaceAsString(val), nil
 }
-func (dk *APDiktat) FieldAsInterface(fldPath []string) (_ interface{}, err error) {
+func (dk *APDiktat) FieldAsInterface(fldPath []string) (_ any, err error) {
 	if len(fldPath) != 1 {
 		return nil, utils.ErrNotFound
 	}

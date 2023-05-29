@@ -128,7 +128,7 @@ func testCDRsLoadTariffPlanFromFolder(t *testing.T) {
 	var rpl string
 	if err := cdrsRpc.Call(context.Background(), utils.LoaderSv1Run,
 		&loaders.ArgsProcessFolder{
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.MetaCache:       caching,
 				utils.MetaStopOnError: true,
 			},
@@ -155,7 +155,7 @@ func testCDRsLoadTariffPlanFromFolder(t *testing.T) {
 func testCDRsProcessCDR(t *testing.T) {
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.OriginID:     "testCDRsProcessCDR1",
 			utils.OriginHost:   "192.168.1.1",
 			utils.Source:       "testCDRsProcessCDR",
@@ -167,7 +167,7 @@ func testCDRsProcessCDR(t *testing.T) {
 			"field_extr1":      "val_extr1",
 			"fieldextr2":       "valextr2",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaAttributes: true,
 			utils.MetaChargers:   true,
 			utils.MetaRates:      true,
@@ -193,8 +193,8 @@ func testCDRsProcessCDR(t *testing.T) {
 			t.Errorf("PayPalAccount should be added by AttributeS, have: %s",
 				reply[0].Event["PayPalAccount"])
 		}
-		if reply[1].Opts[utils.MetaRateSCost].(map[string]interface{})[utils.Cost] != 0.4666666666666667 {
-			t.Errorf("Unexpected cost for CDR: %f", reply[1].Opts[utils.MetaRateSCost].(map[string]interface{})[utils.Cost])
+		if reply[1].Opts[utils.MetaRateSCost].(map[string]any)[utils.Cost] != 0.4666666666666667 {
+			t.Errorf("Unexpected cost for CDR: %f", reply[1].Opts[utils.MetaRateSCost].(map[string]any)[utils.Cost])
 		}
 		if reply[1].Event["PayPalAccount"] != "paypal@cgrates.org" {
 			t.Errorf("PayPalAccount should be added by AttributeS, have: %s",
@@ -207,7 +207,7 @@ func testCDRsProcessCDR(t *testing.T) {
 func testCDRsProcessCDR2(t *testing.T) {
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.OriginID:     "testCDRsProcessCDR2",
 			utils.OriginHost:   "192.168.1.1",
 			utils.Source:       "testCDRsProcessCDR2",
@@ -219,7 +219,7 @@ func testCDRsProcessCDR2(t *testing.T) {
 			"field_extr1":      "val_extr1",
 			"fieldextr2":       "valextr2",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaAttributes: false,
 			utils.MetaChargers:   true,
 			utils.MetaRates:      true,
@@ -245,8 +245,8 @@ func testCDRsProcessCDR2(t *testing.T) {
 			t.Errorf("PayPalAccount should NOT be added by AttributeS, have: %s",
 				reply[0].Event["PayPalAccount"])
 		}
-		if reply[1].Opts[utils.MetaRateSCost].(map[string]interface{})[utils.Cost] != 0.4666666666666667 {
-			t.Errorf("Unexpected cost for CDR: %f", reply[1].Opts[utils.MetaRateSCost].(map[string]interface{})[utils.Cost])
+		if reply[1].Opts[utils.MetaRateSCost].(map[string]any)[utils.Cost] != 0.4666666666666667 {
+			t.Errorf("Unexpected cost for CDR: %f", reply[1].Opts[utils.MetaRateSCost].(map[string]any)[utils.Cost])
 		}
 		//we disable the connection to AttributeS and PayPalAccount shouldn't be present
 		if _, has := reply[1].Event["PayPalAccount"]; has {
@@ -260,7 +260,7 @@ func testCDRsProcessCDR2(t *testing.T) {
 func testCDRsProcessCDR3(t *testing.T) {
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.OriginID:     "testCDRsProcessCDR3",
 			utils.OriginHost:   "192.168.1.1",
 			utils.Source:       "testCDRsProcessCDR3",
@@ -272,7 +272,7 @@ func testCDRsProcessCDR3(t *testing.T) {
 			"field_extr1":      "val_extr1",
 			"fieldextr2":       "valextr2",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaAttributes: false,
 			utils.MetaChargers:   false,
 			utils.MetaRates:      true,
@@ -417,7 +417,7 @@ func testCDRsSetThresholdProfile(t *testing.T) {
 func testCDRsProcessCDR4(t *testing.T) {
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.OriginID:     "testCDRsProcessCDR4",
 			utils.OriginHost:   "192.168.1.1",
 			utils.Source:       "testCDRsProcessCDR4",
@@ -429,7 +429,7 @@ func testCDRsProcessCDR4(t *testing.T) {
 			"field_extr1":      "val_extr1",
 			"fieldextr2":       "valextr2",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaAttributes: true,
 			utils.MetaChargers:   true,
 			utils.MetaRates:      true,
@@ -489,7 +489,7 @@ func testCDRsGetThreshold1(t *testing.T) {
 func testCDRsProcessCDR5(t *testing.T) {
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.OriginID:     "testCDRsProcessCDR4",
 			utils.OriginHost:   "192.168.1.2",
 			utils.Source:       "testCDRsProcessCDR5",
@@ -501,7 +501,7 @@ func testCDRsProcessCDR5(t *testing.T) {
 			"field_extr1":      "val_extr1",
 			"fieldextr2":       "valextr2",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaAttributes: true,
 			utils.MetaChargers:   true,
 			utils.MetaRates:      true,

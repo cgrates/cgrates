@@ -139,8 +139,8 @@ func TestExportLoggerCallErrWriter(t *testing.T) {
 
 	rpcInternal := make(chan birpc.ClientConnector, 1)
 	rpcInternal <- &ccMock{
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.EfSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.EfSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
 				return nil
 			},
 		},
@@ -202,8 +202,8 @@ func TestLoggerExportEmergNil(t *testing.T) {
 
 // 	rpcInternal := make(chan birpc.ClientConnector, 1)
 // 	rpcInternal <- &ccMock{
-// 		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-// 			utils.EfSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
+// 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+// 			utils.EfSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
 // 				return nil
 // 			},
 // 		},
@@ -249,9 +249,9 @@ func TestLoggerExportEmergNil(t *testing.T) {
 		Cache = NewCacheS(cfg, dm, nil, nil)
 		newCDRSrv := NewCDRServer(cfg, dm, fltrs, cM)
 		ccM := &ccMock{
-			calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-				utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
-					*reply.(*map[string]map[string]interface{}) = map[string]map[string]interface{}{}
+			calls: map[string]func(ctx *context.Context, args any, reply any) error{
+				utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
+					*reply.(*map[string]map[string]any) = map[string]map[string]any{}
 					return utils.ErrNotFound
 				},
 			},
@@ -283,13 +283,13 @@ func TestLoggerExportEmergNil(t *testing.T) {
 		Cache = NewCacheS(cfg, nil, nil)
 		cM := NewConnManager(cfg)
 		ccM := &ccMock{
-			calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-				utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
+			calls: map[string]func(ctx *context.Context, args any, reply any) error{
+				utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
 					delete(args.(*utils.CGREventWithEeIDs).Event, "Timestamp")
 					exp := &utils.CGREventWithEeIDs{
 						CGREvent: &utils.CGREvent{
 							Tenant: "cgrates.org",
-							Event: map[string]interface{}{
+							Event: map[string]any{
 								utils.NodeID: "123",
 								"Message":    "Critical message",
 								"Severity":   utils.LOGLEVEL_CRITICAL,
@@ -330,13 +330,13 @@ func TestLoggerExportEmergNil(t *testing.T) {
 // 	Cache = NewCacheS(cfg, nil, nil, nil)
 // 	cM := NewConnManager(cfg)
 // 	ccM := &ccMock{
-// 		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-// 			utils.EfSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
+// 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+// 			utils.EfSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
 // 				delete(args.(*utils.CGREventWithEeIDs).Event, "Timestamp")
 // 				exp := &utils.CGREventWithEeIDs{
 // 					CGREvent: &utils.CGREvent{
 // 						Tenant: "cgrates.org",
-// 						Event: map[string]interface{}{
+// 						Event: map[string]any{
 // 							utils.NodeID: "123",
 // 							"Message":    "Error message",
 // 							"Severity":   utils.LOGLEVEL_ERROR,
@@ -378,13 +378,13 @@ func TestLoggerExportWarning(t *testing.T) {
 	Cache = NewCacheS(cfg, nil, nil)
 	cM := NewConnManager(cfg)
 	ccM := &ccMock{
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
 				delete(args.(*utils.CGREventWithEeIDs).Event, "Timestamp")
 				exp := &utils.CGREventWithEeIDs{
 					CGREvent: &utils.CGREvent{
 						Tenant: "cgrates.org",
-						Event: map[string]interface{}{
+						Event: map[string]any{
 							utils.NodeID: "123",
 							"Message":    "Warning message",
 							"Severity":   utils.LOGLEVEL_WARNING,
@@ -425,13 +425,13 @@ func TestLoggerExportNotice(t *testing.T) {
 	Cache = NewCacheS(cfg, nil, nil)
 	cM := NewConnManager(cfg)
 	ccM := &ccMock{
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
 				delete(args.(*utils.CGREventWithEeIDs).Event, "Timestamp")
 				exp := &utils.CGREventWithEeIDs{
 					CGREvent: &utils.CGREvent{
 						Tenant: "cgrates.org",
-						Event: map[string]interface{}{
+						Event: map[string]any{
 							utils.NodeID: "123",
 							"Message":    "Notice message",
 							"Severity":   utils.LOGLEVEL_NOTICE,
@@ -472,13 +472,13 @@ func TestLoggerExportInfo(t *testing.T) {
 	Cache = NewCacheS(cfg, nil, nil)
 	cM := NewConnManager(cfg)
 	ccM := &ccMock{
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
 				delete(args.(*utils.CGREventWithEeIDs).Event, "Timestamp")
 				exp := &utils.CGREventWithEeIDs{
 					CGREvent: &utils.CGREvent{
 						Tenant: "cgrates.org",
-						Event: map[string]interface{}{
+						Event: map[string]any{
 							utils.NodeID: "123",
 							"Message":    "Info message",
 							"Severity":   utils.LOGLEVEL_INFO,
@@ -519,13 +519,13 @@ func TestLoggerExportDebug(t *testing.T) {
 	Cache = NewCacheS(cfg, nil, nil)
 	cM := NewConnManager(cfg)
 	ccM := &ccMock{
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
 				delete(args.(*utils.CGREventWithEeIDs).Event, "Timestamp")
 				exp := &utils.CGREventWithEeIDs{
 					CGREvent: &utils.CGREvent{
 						Tenant: "cgrates.org",
-						Event: map[string]interface{}{
+						Event: map[string]any{
 							utils.NodeID: "123",
 							"Message":    "Debug message",
 							"Severity":   utils.LOGLEVEL_DEBUG,
@@ -590,13 +590,13 @@ func TestLoggerExportWrite(t *testing.T) {
 	Cache = NewCacheS(cfg, nil, nil)
 	cM := NewConnManager(cfg)
 	ccM := &ccMock{
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
 				delete(args.(*utils.CGREventWithEeIDs).Event, "Timestamp")
 				exp := &utils.CGREventWithEeIDs{
 					CGREvent: &utils.CGREvent{
 						Tenant: "cgrates.org",
-						Event: map[string]interface{}{
+						Event: map[string]any{
 							utils.NodeID: "123",
 							"Message":    "message",
 							"Severity":   8,

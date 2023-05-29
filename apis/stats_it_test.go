@@ -156,10 +156,10 @@ func testStatsGetStatQueueBeforeSet(t *testing.T) {
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "StatsEventTest",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsStatsProfileIDs: []string{"SQ_1", "SQ_2"},
 		},
 	}
@@ -616,10 +616,10 @@ func testStatsGetStatQueuesAfterRemove(t *testing.T) {
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "StatsEventTest",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsStatsProfileIDs: []string{"SQ_1", "SQ_2"},
 		},
 	}
@@ -688,12 +688,12 @@ func testStatsProcessEventWithBlockersOnMetrics(t *testing.T) {
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "SQ_WithBlockers_Event",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 			"StatsMetrics":     "*exists",
 			"CallerID":         "443321",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaUsage:       30 * time.Second,
 			utils.MetaCost:        102.1,
 			utils.MetaDestination: "332214",
@@ -737,12 +737,12 @@ func testStatsProcessEventWithBlockersOnMetricsSecond(t *testing.T) {
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "SQ_WithBlockers_Event",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 			"StatsMetrics":     "*exists",
 			"CallerID":         "441123455",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaUsage:       30 * time.Second,
 			utils.MetaCost:        102.1,
 			utils.MetaDestination: "332214",
@@ -786,12 +786,12 @@ func testStatsProcessEventNoBlockers(t *testing.T) {
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "SQ_WithBlockers_Event",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 			"StatsMetrics":     "*exists",
 			"CallerID":         "differentID",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaUsage:       30 * time.Second,
 			utils.MetaCost:        102.1,
 			utils.MetaDestination: "332214",
@@ -924,11 +924,11 @@ func testStatsGetStatQueueForEventWithBlockers(t *testing.T) {
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "StatsEventTest",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"StatsBlockers":    "correct",
 			utils.AccountField: "1001",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			"*usage": "1m",
 		},
 	}
@@ -1141,10 +1141,10 @@ func testStatsProcessEvent(t *testing.T) {
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "StatsEventTest",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsStatsProfileIDs: []string{"SQ_3"},
 			utils.MetaUsage:           30 * time.Second,
 		},

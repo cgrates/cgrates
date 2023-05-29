@@ -268,14 +268,14 @@ func TestConfigLoadFromDB(t *testing.T) {
 
 func TestGetSectionAsMap(t *testing.T) {
 	cfg := NewDefaultCGRConfig()
-	expected := map[string]interface{}{
+	expected := map[string]any{
 		"db_type":     utils.MetaInternal,
 		"db_host":     "",
 		"db_port":     0,
 		"db_name":     "",
 		"db_user":     "",
 		"db_password": "",
-		"opts": map[string]interface{}{
+		"opts": map[string]any{
 			"redisMaxConns":           10,
 			"redisConnectAttempts":    20,
 			"redisSentinel":           "",
@@ -302,18 +302,18 @@ func TestGetSectionAsMap(t *testing.T) {
 }
 
 type mockDb struct {
-	GetSectionF func(*context.Context, string, interface{}) error
-	SetSectionF func(*context.Context, string, interface{}) error
+	GetSectionF func(*context.Context, string, any) error
+	SetSectionF func(*context.Context, string, any) error
 }
 
-func (m *mockDb) GetSection(ctx *context.Context, sec string, val interface{}) error {
+func (m *mockDb) GetSection(ctx *context.Context, sec string, val any) error {
 	if m.GetSectionF != nil {
 		return m.GetSectionF(ctx, sec, val)
 	}
 	return utils.ErrNotImplemented
 }
 
-func (m *mockDb) SetSection(ctx *context.Context, sec string, val interface{}) error {
+func (m *mockDb) SetSection(ctx *context.Context, sec string, val any) error {
 	if m.SetSectionF != nil {
 		return m.SetSectionF(ctx, sec, val)
 	}
@@ -923,8 +923,8 @@ func TestStoreDiffSectionAccountS(t *testing.T) {
 func TestV1SetConfigErr1(t *testing.T) {
 	cfg := NewDefaultCGRConfig()
 	args := &SetConfigArgs{
-		Config: map[string]interface{}{
-			"cores": map[string]interface{}{
+		Config: map[string]any{
+			"cores": map[string]any{
 				"caps":                "0",
 				"caps_strategy":       "*busy",
 				"caps_stats_interval": "0",
@@ -943,8 +943,8 @@ func TestV1SetConfigErr1(t *testing.T) {
 func TestV1SetConfigErr2(t *testing.T) {
 	cfg := NewDefaultCGRConfig()
 	args := &SetConfigArgs{
-		Config: map[string]interface{}{
-			"cdrs": map[string]interface{}{
+		Config: map[string]any{
+			"cdrs": map[string]any{
 				"enabled":      false,
 				"extra_fields": []string{},
 
@@ -972,8 +972,8 @@ func TestV1SetConfigErr2(t *testing.T) {
 func TestV1SetConfigErr3(t *testing.T) {
 	cfg := NewDefaultCGRConfig()
 	args := &SetConfigArgs{
-		Config: map[string]interface{}{
-			"cdrs": map[string]interface{}{
+		Config: map[string]any{
+			"cdrs": map[string]any{
 				"enabled":              false,
 				"extra_fields":         []string{},
 				"session_cost_retries": 5,
@@ -1049,7 +1049,7 @@ func TestV1GetConfig(t *testing.T) {
 		Sections: []string{GeneralJSON},
 	}
 
-	var reply map[string]interface{}
+	var reply map[string]any
 	section := &GeneralJsonCfg{
 		Node_id:              utils.StringPointer("randomID"),
 		Rounding_decimals:    utils.IntPointer(5),
@@ -1070,7 +1070,7 @@ func TestV1GetConfig(t *testing.T) {
 		Digest_equal:         utils.StringPointer(":"),
 		Max_parallel_conns:   utils.IntPointer(100),
 	}
-	expected := map[string]interface{}{
+	expected := map[string]any{
 		GeneralJSON: section,
 	}
 	if err := cfg.V1GetConfig(context.Background(), args, &reply); err != nil {
@@ -1133,8 +1133,8 @@ func TestCGRConfigV1StoreCfgInDB(t *testing.T) {
 	cfg := NewDefaultCGRConfig()
 	cfg.rldCh = make(chan string, 100)
 	cfg.db = &mockDb{
-		GetSectionF: func(ctx *context.Context, s string, i interface{}) error { return nil },
-		SetSectionF: func(ctx *context.Context, s string, i interface{}) error { return utils.ErrNotImplemented },
+		GetSectionF: func(ctx *context.Context, s string, i any) error { return nil },
+		SetSectionF: func(ctx *context.Context, s string, i any) error { return utils.ErrNotImplemented },
 	}
 
 	args := &SectionWithAPIOpts{

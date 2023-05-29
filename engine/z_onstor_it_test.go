@@ -1199,7 +1199,7 @@ func testOnStorITAccount(t *testing.T) {
 				Units: &utils.Decimal{
 					Big: decimal.WithContext(utils.DecimalContext).SetUint64(10),
 				},
-				Opts: map[string]interface{}{
+				Opts: map[string]any{
 					"key1": "val1",
 				},
 			}},

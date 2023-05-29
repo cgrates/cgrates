@@ -48,7 +48,7 @@ func (self *CmdGetAccount) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdGetAccount) RpcParams(reset bool) interface{} {
+func (self *CmdGetAccount) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &utils.TenantIDWithAPIOpts{}
 	}
@@ -59,7 +59,7 @@ func (self *CmdGetAccount) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdGetAccount) RpcResult() interface{} {
+func (self *CmdGetAccount) RpcResult() any {
 	var atr utils.Account
 	return &atr
 }

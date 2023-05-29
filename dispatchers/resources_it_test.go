@@ -75,7 +75,7 @@ func testDspResPingFailover(t *testing.T) {
 	ev := utils.CGREvent{
 		Tenant: "cgrates.org",
 
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "res12345",
 		},
 	}
@@ -107,7 +107,7 @@ func testDspResPing(t *testing.T) {
 	}
 	if err := dispEngine.RPC.Call(utils.ResourceSv1Ping, &utils.CGREvent{
 		Tenant: "cgrates.org",
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "res12345",
 		},
 	}, &reply); err != nil {
@@ -122,12 +122,12 @@ func testDspResTestAuthKey(t *testing.T) {
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     utils.UUIDSha1Prefix(),
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 			utils.Destination:  "1002",
 		},
 
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey:           "12345",
 			utils.OptsResourcesUsageID: utils.UUIDSha1Prefix(),
 		},
@@ -144,12 +144,12 @@ func testDspResTestAuthKey2(t *testing.T) {
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     utils.UUIDSha1Prefix(),
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 			utils.Destination:  "1002",
 		},
 
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey:           "res12345",
 			utils.OptsResourcesUsageID: utils.UUIDSha1Prefix(),
 		},
@@ -176,11 +176,11 @@ func testDspResTestAuthKey3(t *testing.T) {
 	argsRU := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     utils.UUIDSha1Prefix(),
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Account":     "1002",
 			"Subject":     "1001",
 			"Destination": "1002"},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey:           "res12345",
 			utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e51",
 			utils.OptsResourcesUnits:   1,
@@ -203,11 +203,11 @@ func testDspResTestAuthKey3(t *testing.T) {
 	argsRU = &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     utils.UUIDSha1Prefix(),
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Account":     "1002",
 			"Subject":     "1001",
 			"Destination": "1002"},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey:           "res12345",
 			utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e61",
 			utils.OptsResourcesUnits:   17,
@@ -222,11 +222,11 @@ func testDspResTestAuthKey3(t *testing.T) {
 	argsRU = &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     utils.UUIDSha1Prefix(),
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Account":     "1002",
 			"Subject":     "1001",
 			"Destination": "1002"},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey:           "res12345",
 			utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e51",
 		},
@@ -240,11 +240,11 @@ func testDspResTestAuthKey3(t *testing.T) {
 	argsRU = &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     utils.UUIDSha1Prefix(),
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Account":     "1002",
 			"Subject":     "1001",
 			"Destination": "1002"},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey:           "res12345",
 			utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e61",
 			utils.OptsResourcesUnits:   6,
@@ -259,11 +259,11 @@ func testDspResTestAuthKey3(t *testing.T) {
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "Event5",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Account":     "1002",
 			"Subject":     "1001",
 			"Destination": "1002"},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey:           "res12345",
 			utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e61",
 		},
@@ -286,7 +286,7 @@ func testDspResTestAuthKey3(t *testing.T) {
 	var r *engine.Resource
 	argsGetResource := &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ResGroup1"},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAPIKey: "res12345",
 		},
 	}

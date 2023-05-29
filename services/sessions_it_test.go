@@ -68,7 +68,7 @@ func TestSessionSReload1(t *testing.T) {
 
 	clientConect := make(chan birpc.ClientConnector, 1)
 	clientConect <- &testMockClients{
-		calls: func(ctx *context.Context, args, reply interface{}) error {
+		calls: func(ctx *context.Context, args, reply any) error {
 			rply, cancast := reply.(*[]*engine.ChrgSProcessEventReply)
 			if !cancast {
 				return fmt.Errorf("can't cast")
@@ -110,7 +110,7 @@ func TestSessionSReload1(t *testing.T) {
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testSSv1ItProcessEventInitiateSession",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.Tenant:           "cgrates.org",
 			utils.ToR:              utils.MetaVoice,
 			utils.OriginID:         "testSSv1ItProcessEvent",
@@ -122,7 +122,7 @@ func TestSessionSReload1(t *testing.T) {
 			utils.AnswerTime:       time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
 			utils.Usage:            0,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaRunID:       utils.MetaDefault,
 			utils.OptsSesInitiate: true,
 			utils.MetaThresholds:  true,

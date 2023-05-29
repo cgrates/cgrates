@@ -590,78 +590,78 @@ func testCgrCfgV1ReloadConfigSection(t *testing.T) {
 			t.Fatal("Error creating folder: ", dir, err)
 		}
 	}
-	content := []interface{}{
-		map[string]interface{}{
+	content := []any{
+		map[string]any{
 			"path":      "*cgreq.ToR",
 			"mandatory": true,
 			"tag":       "ToR",
 			"type":      "*variable",
 			"value":     "~*req.2",
 		},
-		map[string]interface{}{
+		map[string]any{
 			"path":      "*cgreq.OriginID",
 			"mandatory": true,
 			"tag":       "OriginID",
 			"type":      "*variable",
 			"value":     "~*req.3",
 		},
-		map[string]interface{}{
+		map[string]any{
 			"path":      "*cgreq.RequestType",
 			"mandatory": true,
 			"tag":       "RequestType",
 			"type":      "*variable",
 			"value":     "~*req.4",
 		},
-		map[string]interface{}{
+		map[string]any{
 			"path":      "*cgreq.Tenant",
 			"mandatory": true,
 			"tag":       "Tenant",
 			"type":      "*variable",
 			"value":     "~*req.6",
 		},
-		map[string]interface{}{
+		map[string]any{
 			"path":      "*cgreq.Category",
 			"mandatory": true,
 			"tag":       "Category",
 			"type":      "*variable",
 			"value":     "~*req.7",
 		},
-		map[string]interface{}{
+		map[string]any{
 			"path":      "*cgreq.Account",
 			"mandatory": true,
 			"tag":       "Account",
 			"type":      "*variable",
 			"value":     "~*req.8",
 		},
-		map[string]interface{}{
+		map[string]any{
 			"path":      "*cgreq.Subject",
 			"mandatory": true,
 			"tag":       "Subject",
 			"type":      "*variable",
 			"value":     "~*req.9",
 		},
-		map[string]interface{}{
+		map[string]any{
 			"path":      "*cgreq.Destination",
 			"mandatory": true,
 			"tag":       "Destination",
 			"type":      "*variable",
 			"value":     "~*req.10",
 		},
-		map[string]interface{}{
+		map[string]any{
 			"path":      "*cgreq.SetupTime",
 			"mandatory": true,
 			"tag":       "SetupTime",
 			"type":      "*variable",
 			"value":     "~*req.11",
 		},
-		map[string]interface{}{
+		map[string]any{
 			"path":      "*cgreq.AnswerTime",
 			"mandatory": true,
 			"tag":       "AnswerTime",
 			"type":      "*variable",
 			"value":     "~*req.12",
 		},
-		map[string]interface{}{
+		map[string]any{
 			"path":      "*cgreq.Usage",
 			"mandatory": true,
 			"tag":       "Usage",
@@ -669,13 +669,13 @@ func testCgrCfgV1ReloadConfigSection(t *testing.T) {
 			"value":     "~*req.13",
 		},
 	}
-	expected := map[string]interface{}{
+	expected := map[string]any{
 		"enabled":           true,
 		"partial_cache_ttl": "1s",
-		"readers": []interface{}{
-			map[string]interface{}{
+		"readers": []any{
+			map[string]any{
 				"id":                  utils.MetaDefault,
-				"cache_dump_fields":   []interface{}{},
+				"cache_dump_fields":   []any{},
 				"concurrent_requests": 1024,
 				"fields":              content,
 				"filters":             []string{},
@@ -686,7 +686,7 @@ func testCgrCfgV1ReloadConfigSection(t *testing.T) {
 				"tenant":              "",
 				"timezone":            "",
 				"type":                utils.MetaNone,
-				"opts": map[string]interface{}{
+				"opts": map[string]any{
 					"csvFieldSeparator":         ",",
 					"csvHeaderDefineChar":       ":",
 					"csvRowLength":              0.,
@@ -695,10 +695,10 @@ func testCgrCfgV1ReloadConfigSection(t *testing.T) {
 					"xmlRootPath":               "",
 					"natsSubject":               "cgrates_cdrs",
 				},
-				"partial_commit_fields": []interface{}{},
+				"partial_commit_fields": []any{},
 			},
-			map[string]interface{}{
-				"cache_dump_fields":   []interface{}{},
+			map[string]any{
+				"cache_dump_fields":   []any{},
 				"concurrent_requests": 1024,
 				"filters":             []string{},
 				"flags":               []string{"*dryRun"},
@@ -710,7 +710,7 @@ func testCgrCfgV1ReloadConfigSection(t *testing.T) {
 				"timezone":            "",
 				"type":                "*fileCSV",
 				"fields":              content,
-				"opts": map[string]interface{}{
+				"opts": map[string]any{
 					"csvFieldSeparator":         ",",
 					"csvHeaderDefineChar":       ":",
 					"csvRowLength":              0.,
@@ -719,7 +719,7 @@ func testCgrCfgV1ReloadConfigSection(t *testing.T) {
 					"xmlRootPath":               "",
 					"natsSubject":               "cgrates_cdrs",
 				},
-				"partial_commit_fields": []interface{}{},
+				"partial_commit_fields": []any{},
 			},
 		},
 		"sessions_conns": []string{
@@ -730,7 +730,7 @@ func testCgrCfgV1ReloadConfigSection(t *testing.T) {
 	cfg := NewDefaultCGRConfig()
 	cfg.rldCh = make(chan string, 100)
 	var reply string
-	var rcv map[string]interface{}
+	var rcv map[string]any
 
 	cfg.ConfigPath = "/usr/share/cgrates/conf/samples/ers_example"
 	if err := cfg.V1ReloadConfig(context.Background(), &ReloadArgs{
@@ -741,7 +741,7 @@ func testCgrCfgV1ReloadConfigSection(t *testing.T) {
 		t.Errorf("Expected: %s \n,received: %s", utils.OK, reply)
 	}
 
-	expected = map[string]interface{}{
+	expected = map[string]any{
 		ERsJSON: expected,
 	}
 	if err := cfg.V1GetConfig(context.Background(), &SectionWithAPIOpts{Sections: []string{ERsJSON}}, &rcv); err != nil {
@@ -764,8 +764,8 @@ func testCGRConfigReloadConfigFromJSONSessionS(t *testing.T) {
 	cfg.CdrsCfg().Enabled = true
 	var reply string
 	if err = cfg.V1SetConfig(context.Background(), &SetConfigArgs{
-		Config: map[string]interface{}{
-			"sessions": map[string]interface{}{
+		Config: map[string]any{
+			"sessions": map[string]any{
 				"enabled":          true,
 				"resources_conns":  []string{"*localhost"},
 				"routes_conns":     []string{"*localhost"},

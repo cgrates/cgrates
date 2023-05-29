@@ -68,7 +68,7 @@ func (ldrS *LoaderS) ListenAndServe(stopChan chan struct{}) (err error) {
 
 type ArgsProcessFolder struct {
 	LoaderID string
-	APIOpts  map[string]interface{}
+	APIOpts  map[string]any
 }
 
 func (ldrS *LoaderS) V1Run(ctx *context.Context, args *ArgsProcessFolder,
@@ -124,7 +124,7 @@ func (ldrS *LoaderS) V1Run(ctx *context.Context, args *ArgsProcessFolder,
 type ArgsProcessZip struct {
 	LoaderID string
 	Data     []byte
-	APIOpts  map[string]interface{}
+	APIOpts  map[string]any
 }
 
 func (ldrS *LoaderS) V1ImportZip(ctx *context.Context, args *ArgsProcessZip,

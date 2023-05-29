@@ -84,7 +84,7 @@ func (pstr *AMQPv1EE) Connect() (err error) {
 	return
 }
 
-func (pstr *AMQPv1EE) ExportEvent(ctx *context.Context, content, _ interface{}) (err error) {
+func (pstr *AMQPv1EE) ExportEvent(ctx *context.Context, content, _ any) (err error) {
 	pstr.reqs.get()
 	pstr.RLock()
 	defer func() {
@@ -120,4 +120,4 @@ func (pstr *AMQPv1EE) Close() (err error) {
 
 func (pstr *AMQPv1EE) GetMetrics() *utils.SafeMapStorage { return pstr.dc }
 
-func (pstr *AMQPv1EE) ExtraData(*utils.CGREvent) interface{} { return nil }
+func (pstr *AMQPv1EE) ExtraData(*utils.CGREvent) any { return nil }

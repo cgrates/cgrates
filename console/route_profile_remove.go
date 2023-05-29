@@ -45,9 +45,9 @@ func (self *CmdRemoveRouteProfile) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdRemoveRouteProfile) RpcParams(reset bool) interface{} {
+func (self *CmdRemoveRouteProfile) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &utils.TenantIDWithAPIOpts{APIOpts: make(map[string]interface{})}
+		self.rpcParams = &utils.TenantIDWithAPIOpts{APIOpts: make(map[string]any)}
 	}
 	return self.rpcParams
 }
@@ -56,7 +56,7 @@ func (self *CmdRemoveRouteProfile) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdRemoveRouteProfile) RpcResult() interface{} {
+func (self *CmdRemoveRouteProfile) RpcResult() any {
 	var s string
 	return &s
 }

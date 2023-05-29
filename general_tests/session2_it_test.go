@@ -110,7 +110,7 @@ func testSes2ItLoadFromFolder(t *testing.T) {
 	var reply string
 	if err := ses2RPC.Call(context.Background(), utils.LoaderSv1Run,
 		&loaders.ArgsProcessFolder{
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.MetaStopOnError: true,
 				utils.MetaCache:       utils.MetaReload,
 			},
@@ -129,7 +129,7 @@ func testSes2ItInitSession(t *testing.T) {
 	// 	Account:     "1001",
 	// 	BalanceType: utils.MetaVoice,
 	// 	Value:       float64(time.Hour),
-	// 	Balance: map[string]interface{}{
+	// 	Balance: map[string]any{
 	// 		utils.ID: "TestDynamicDebitBalance",
 	// 	},
 	// }
@@ -143,7 +143,7 @@ func testSes2ItInitSession(t *testing.T) {
 	initArgs := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     utils.UUIDSha1Prefix(),
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.EventName:    "TEST_EVENT",
 			utils.OriginID:     utils.UUIDSha1Prefix(),
 			utils.ToR:          utils.MetaVoice,
@@ -192,7 +192,7 @@ func testSes2StirAuthenticate(t *testing.T) {
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testSes2StirAuthorize",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.ToR:          utils.MetaVoice,
 			utils.OriginID:     "testSes2StirAuthorize",
 			utils.RequestType:  utils.MetaPrepaid,
@@ -201,7 +201,7 @@ func testSes2StirAuthenticate(t *testing.T) {
 			utils.Destination:  "1002",
 			utils.Usage:        10 * time.Minute,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsStirIdentity: "eyJhbGciOiJFUzI1NiIsInBwdCI6InNoYWtlbiIsInR5cCI6InBhc3Nwb3J0IiwieDV1IjoiL3Vzci9zaGFyZS9jZ3JhdGVzL3N0aXIvc3Rpcl9wdWJrZXkucGVtIn0.eyJhdHRlc3QiOiJBIiwiZGVzdCI6eyJ0biI6WyIxMDAyIl19LCJpYXQiOjE1ODcwMzg4MDIsIm9yaWciOnsidG4iOiIxMDAxIn0sIm9yaWdpZCI6IjEyMzQ1NiJ9.cMEMlFnfyTu8uxfeU4RoZTamA7ifFT9Ibwrvi1_LKwL2xAU6fZ_CSIxKbtyOpNhM_sV03x7CfA_v0T4sHkifzg;info=</usr/share/cgrates/stir/stir_pubkey.pem>;ppt=shaken",
 		},
 	}
@@ -229,7 +229,7 @@ func testSes2StirInit(t *testing.T) {
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testSes2StirInit",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.ToR:          utils.MetaVoice,
 			utils.OriginID:     "testSes2StirInit",
 			utils.RequestType:  utils.MetaPrepaid,
@@ -238,7 +238,7 @@ func testSes2StirInit(t *testing.T) {
 			utils.Destination:  "1002",
 			utils.Usage:        10 * time.Minute,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsStirPublicKeyPath:  "/usr/share/cgrates/stir/stir_pubkey.pem",
 			utils.OptsStirPrivateKeyPath: "/usr/share/cgrates/stir/stir_privatekey.pem",
 		},

@@ -51,13 +51,13 @@ func (chSv1 *CacheSv1) HasItem(ctx *context.Context, args *utils.ArgsGetCacheIte
 
 // GetItem returns an Item from the cache
 func (chSv1 *CacheSv1) GetItem(ctx *context.Context, args *utils.ArgsGetCacheItemWithAPIOpts,
-	reply *interface{}) error {
+	reply *any) error {
 	return chSv1.cacheS.V1GetItem(ctx, args, reply)
 }
 
 // GetItemWithRemote returns an Item from local or remote cache
 func (chSv1 *CacheSv1) GetItemWithRemote(ctx *context.Context, args *utils.ArgsGetCacheItemWithAPIOpts,
-	reply *interface{}) error {
+	reply *any) error {
 	return chSv1.cacheS.V1GetItemWithRemote(ctx, args, reply)
 }
 

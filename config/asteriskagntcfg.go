@@ -66,9 +66,9 @@ func (aConnCfg *AsteriskConnCfg) loadFromJSONCfg(jsnCfg *AstConnJsonCfg) (err er
 	return
 }
 
-// AsMapInterface returns the config as a map[string]interface{}
-func (aConnCfg AsteriskConnCfg) AsMapInterface() map[string]interface{} {
-	return map[string]interface{}{
+// AsMapInterface returns the config as a map[string]any
+func (aConnCfg AsteriskConnCfg) AsMapInterface() map[string]any {
+	return map[string]any{
 		utils.AliasCfg:                aConnCfg.Alias,
 		utils.AddressCfg:              aConnCfg.Address,
 		utils.UserCf:                  aConnCfg.User,
@@ -133,14 +133,14 @@ func (aCfg *AsteriskAgentCfg) loadFromJSONCfg(jsnCfg *AsteriskAgentJsonCfg) (err
 	return nil
 }
 
-// AsMapInterface returns the config as a map[string]interface{}
-func (aCfg AsteriskAgentCfg) AsMapInterface(string) interface{} {
-	mp := map[string]interface{}{
+// AsMapInterface returns the config as a map[string]any
+func (aCfg AsteriskAgentCfg) AsMapInterface(string) any {
+	mp := map[string]any{
 		utils.EnabledCfg:   aCfg.Enabled,
 		utils.CreateCDRCfg: aCfg.CreateCDR,
 	}
 	if aCfg.AsteriskConns != nil {
-		conns := make([]map[string]interface{}, len(aCfg.AsteriskConns))
+		conns := make([]map[string]any, len(aCfg.AsteriskConns))
 		for i, item := range aCfg.AsteriskConns {
 			conns[i] = item.AsMapInterface()
 		}

@@ -48,8 +48,8 @@ func PrefixSliceItems(prfx string, slc []string) (out []string) {
 }
 
 // SliceStringToIface converts slice of strings into a slice of interfaces
-func SliceStringToIface(slc []string) (ifc []interface{}) {
-	ifc = make([]interface{}, len(slc))
+func SliceStringToIface(slc []string) (ifc []any) {
+	ifc = make([]any, len(slc))
 	for i, itm := range slc {
 		ifc[i] = itm
 	}

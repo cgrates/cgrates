@@ -174,7 +174,7 @@ func TestRadiusAgentCfgAsMapInterface(t *testing.T) {
 			},],									
      },
 }`
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		utils.EnabledCfg:    true,
 		utils.ListenNetCfg:  "udp",
 		utils.ListenAuthCfg: "127.0.0.1:1816",
@@ -186,15 +186,15 @@ func TestRadiusAgentCfgAsMapInterface(t *testing.T) {
 			utils.MetaDefault: "/usr/share/cgrates/",
 		},
 		utils.SessionSConnsCfg: []string{rpcclient.BiRPCInternal, "*conn1", "*conn2"},
-		utils.RequestProcessorsCfg: []map[string]interface{}{
+		utils.RequestProcessorsCfg: []map[string]any{
 			{
 				utils.IDCfg:            "OutboundAUTHDryRun",
 				utils.FiltersCfg:       []string{"*string:~*req.request_type:OutboundAUTH", "*string:~*req.Msisdn:497700056231"},
 				utils.TenantCfg:        "cgrates.org",
 				utils.FlagsCfg:         []string{"*dryRun"},
 				utils.TimezoneCfg:      "",
-				utils.RequestFieldsCfg: []map[string]interface{}{},
-				utils.ReplyFieldsCfg: []map[string]interface{}{
+				utils.RequestFieldsCfg: []map[string]any{},
+				utils.ReplyFieldsCfg: []map[string]any{
 					{utils.TagCfg: "Allow", utils.PathCfg: "*rep.response.Allow", utils.TypeCfg: "*constant", utils.ValueCfg: "1", utils.MandatoryCfg: true},
 				},
 			},
@@ -211,7 +211,7 @@ func TestRadiusAgentCfgAsMapInterface1(t *testing.T) {
 	cfgJSONStr := `{
 	"radius_agent": {},
 }`
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		utils.EnabledCfg:    false,
 		utils.ListenNetCfg:  "udp",
 		utils.ListenAuthCfg: "127.0.0.1:1812",
@@ -223,7 +223,7 @@ func TestRadiusAgentCfgAsMapInterface1(t *testing.T) {
 			utils.MetaDefault: "/usr/share/cgrates/radius/dict/",
 		},
 		utils.SessionSConnsCfg:     []string{"*internal"},
-		utils.RequestProcessorsCfg: []map[string]interface{}{},
+		utils.RequestProcessorsCfg: []map[string]any{},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)

@@ -36,7 +36,7 @@ func TestCloneBalance(t *testing.T) {
 			},
 		},
 		Type: "*abstract",
-		Opts: map[string]interface{}{
+		Opts: map[string]any{
 			"Destination": 10,
 		},
 		CostIncrements: []*CostIncrement{
@@ -77,7 +77,7 @@ func TestCloneAccount(t *testing.T) {
 				Weight: 2.4,
 			},
 		},
-		Opts: map[string]interface{}{
+		Opts: map[string]any{
 			"Destination": 10,
 		},
 		Balances: map[string]*Balance{
@@ -90,7 +90,7 @@ func TestCloneAccount(t *testing.T) {
 					},
 				},
 				Type: "*abstract",
-				Opts: map[string]interface{}{
+				Opts: map[string]any{
 					"Destination": 10,
 				},
 				CostIncrements: []*CostIncrement{
@@ -450,7 +450,7 @@ func TestAPBalances(t *testing.T) {
 						Factor: NewDecimal(1, 1),
 					},
 				},
-				Opts: map[string]interface{}{
+				Opts: map[string]any{
 					MetaBalanceLimit: -1.0,
 				},
 				CostIncrements: []*CostIncrement{
@@ -476,7 +476,7 @@ func TestAPBalances(t *testing.T) {
 						Factor: NewDecimal(1, 1),
 					},
 				},
-				Opts: map[string]interface{}{
+				Opts: map[string]any{
 					MetaBalanceLimit: -1.0,
 				},
 				CostIncrements: []*CostIncrement{
@@ -636,7 +636,7 @@ func TestBalanceEqualsCase5(t *testing.T) {
 	eBL := &Balance{
 		ID:    "2f5ba2",
 		Units: NewDecimal(53, 0),
-		Opts: map[string]interface{}{
+		Opts: map[string]any{
 			"Opt1": "*opt",
 		},
 	}
@@ -644,7 +644,7 @@ func TestBalanceEqualsCase5(t *testing.T) {
 	extBl := &Balance{
 		ID:    "2f5ba2",
 		Units: NewDecimal(53, 0),
-		Opts: map[string]interface{}{
+		Opts: map[string]any{
 			"Opt1": "*opt2",
 		},
 	}
@@ -828,7 +828,7 @@ func TestAccountEqualsCase4(t *testing.T) {
 	eAc := &Account{
 		Tenant: "cgrates.org",
 		ID:     "f43a2c",
-		Opts: map[string]interface{}{
+		Opts: map[string]any{
 			"Opt1": "*opt",
 		},
 	}
@@ -836,7 +836,7 @@ func TestAccountEqualsCase4(t *testing.T) {
 	extAc := &Account{
 		Tenant: "cgrates.org",
 		ID:     "f43a2c",
-		Opts: map[string]interface{}{
+		Opts: map[string]any{
 			"Opt1": "*opt2",
 		},
 	}
@@ -868,7 +868,7 @@ func TestAccountEqualsCase5(t *testing.T) {
 						Factor:    NewDecimal(2, 1),
 					},
 				},
-				Opts:           map[string]interface{}{},
+				Opts:           map[string]any{},
 				CostIncrements: []*CostIncrement{},
 				AttributeIDs:   []string{MetaNone},
 				RateProfileIDs: []string{MetaNone},
@@ -897,7 +897,7 @@ func TestAccountEqualsCase5(t *testing.T) {
 						Factor:    NewDecimal(3, 1),
 					},
 				},
-				Opts:           map[string]interface{}{},
+				Opts:           map[string]any{},
 				CostIncrements: []*CostIncrement{},
 				AttributeIDs:   []string{MetaNone},
 				RateProfileIDs: []string{MetaNone},
@@ -959,7 +959,7 @@ func TestAccountSet(t *testing.T) {
 		Weights:      DynamicWeights{{}},
 		Blockers:     DynamicBlockers{{}},
 		ThresholdIDs: []string{"TH1"},
-		Opts: map[string]interface{}{
+		Opts: map[string]any{
 			"bal":  "val",
 			"bal2": "val2",
 			"bal3": "val2",
@@ -970,7 +970,7 @@ func TestAccountSet(t *testing.T) {
 			"bal1": {
 				ID:   "bal1",
 				Type: MetaConcrete,
-				Opts: map[string]interface{}{
+				Opts: map[string]any{
 					"bal7":  "val3",
 					"bal8":  MapStorage{"bal9": "val3"},
 					"bal10": "val3",
@@ -1151,7 +1151,7 @@ func TestAccountFieldAsInterface(t *testing.T) {
 		Weights:      DynamicWeights{{}},
 		Blockers:     DynamicBlockers{{}},
 		ThresholdIDs: []string{"TH1"},
-		Opts: map[string]interface{}{
+		Opts: map[string]any{
 			"bal":  "val",
 			"bal2": "val2",
 			"bal3": "val2",
@@ -1162,7 +1162,7 @@ func TestAccountFieldAsInterface(t *testing.T) {
 			"bal1": {
 				ID:   "bal1",
 				Type: MetaConcrete,
-				Opts: map[string]interface{}{
+				Opts: map[string]any{
 					"bal7":  "val3",
 					"bal8":  MapStorage{"bal9": "val3"},
 					"bal10": "val3",
@@ -1506,11 +1506,11 @@ func TestAccountFieldAsInterface(t *testing.T) {
 
 func TestAccountMerge(t *testing.T) {
 	acc := &Account{
-		Opts: make(map[string]interface{}),
+		Opts: make(map[string]any),
 		Balances: map[string]*Balance{
 			"bal1": {
 				Type: MetaConcrete,
-				Opts: make(map[string]interface{}),
+				Opts: make(map[string]any),
 			},
 			"bal3": {},
 		},
@@ -1520,7 +1520,7 @@ func TestAccountMerge(t *testing.T) {
 		ID:           "ID",
 		FilterIDs:    []string{"fltr1"},
 		Weights:      DynamicWeights{{}},
-		Opts:         map[string]interface{}{"opt1": "val"},
+		Opts:         map[string]any{"opt1": "val"},
 		ThresholdIDs: []string{"TH1"},
 		Balances: map[string]*Balance{
 			"bal1": {
@@ -1529,7 +1529,7 @@ func TestAccountMerge(t *testing.T) {
 				FilterIDs:      []string{"fltr1"},
 				Weights:        DynamicWeights{{}},
 				Units:          DecimalNaN,
-				Opts:           map[string]interface{}{"opt1": "val"},
+				Opts:           map[string]any{"opt1": "val"},
 				AttributeIDs:   []string{"ATTR1"},
 				RateProfileIDs: []string{"RT1"},
 				UnitFactors:    []*UnitFactor{{}},
@@ -1544,7 +1544,7 @@ func TestAccountMerge(t *testing.T) {
 		ID:           "ID",
 		FilterIDs:    []string{"fltr1"},
 		Weights:      DynamicWeights{{}},
-		Opts:         map[string]interface{}{"opt1": "val"},
+		Opts:         map[string]any{"opt1": "val"},
 		ThresholdIDs: []string{"TH1"},
 		Balances: map[string]*Balance{
 			"bal3": {Type: MetaConcrete},
@@ -1554,7 +1554,7 @@ func TestAccountMerge(t *testing.T) {
 				FilterIDs:      []string{"fltr1"},
 				Weights:        DynamicWeights{{}},
 				Units:          DecimalNaN,
-				Opts:           map[string]interface{}{"opt1": "val"},
+				Opts:           map[string]any{"opt1": "val"},
 				AttributeIDs:   []string{"ATTR1"},
 				RateProfileIDs: []string{"RT1"},
 				UnitFactors:    []*UnitFactor{{}},

@@ -149,7 +149,7 @@ func TestLoaderServiceV1Run(t *testing.T) {
 	ld := NewLoaderS(cfg, dm, fS, cM)
 	var rply string
 	if err := ld.V1Run(context.Background(), &ArgsProcessFolder{
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache:       utils.MetaNone,
 			utils.MetaWithIndex:   true,
 			utils.MetaStopOnError: true,
@@ -227,7 +227,7 @@ func TestLoaderServiceV1RunErrors(t *testing.T) {
 
 	expErrMsg := "SERVER_ERROR: inline parse error for string: <*string>"
 	if err := ld.V1Run(context.Background(), &ArgsProcessFolder{
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache:       utils.MetaNone,
 			utils.MetaWithIndex:   true,
 			utils.MetaStopOnError: true,
@@ -239,7 +239,7 @@ func TestLoaderServiceV1RunErrors(t *testing.T) {
 
 	expErrMsg = `strconv.ParseBool: parsing "notfloat": invalid syntax`
 	if err := ld.V1Run(context.Background(), &ArgsProcessFolder{
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache:       utils.MetaNone,
 			utils.MetaWithIndex:   true,
 			utils.MetaStopOnError: "notfloat",
@@ -249,7 +249,7 @@ func TestLoaderServiceV1RunErrors(t *testing.T) {
 		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
 	}
 	if err := ld.V1Run(context.Background(), &ArgsProcessFolder{
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache:       utils.MetaNone,
 			utils.MetaWithIndex:   "notfloat",
 			utils.MetaStopOnError: "notfloat",
@@ -261,7 +261,7 @@ func TestLoaderServiceV1RunErrors(t *testing.T) {
 
 	ld.ldrs[utils.MetaDefault].Locker.Lock()
 	if err := ld.V1Run(context.Background(), &ArgsProcessFolder{
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache:       utils.MetaNone,
 			utils.MetaWithIndex:   "notfloat",
 			utils.MetaStopOnError: "notfloat",
@@ -273,7 +273,7 @@ func TestLoaderServiceV1RunErrors(t *testing.T) {
 
 	expErrMsg = `ANOTHER_LOADER_RUNNING`
 	if err := ld.V1Run(context.Background(), &ArgsProcessFolder{
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache:       utils.MetaNone,
 			utils.MetaWithIndex:   "notfloat",
 			utils.MetaStopOnError: "notfloat",
@@ -291,7 +291,7 @@ func TestLoaderServiceV1RunErrors(t *testing.T) {
 	}
 
 	ld.ldrs[utils.MetaDefault].Locker = mockLock2{}
-	if err := ld.V1Run(context.Background(), &ArgsProcessFolder{APIOpts: map[string]interface{}{
+	if err := ld.V1Run(context.Background(), &ArgsProcessFolder{APIOpts: map[string]any{
 		utils.MetaForceLock: true}}, &rply); err == nil || err.Error() != expErrMsg {
 		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
 	}
@@ -344,7 +344,7 @@ func TestLoaderServiceV1ImportZip(t *testing.T) {
 	var rply string
 	if err := ld.V1ImportZip(context.Background(), &ArgsProcessZip{
 		Data: buf.Bytes(),
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache:       utils.MetaNone,
 			utils.MetaWithIndex:   true,
 			utils.MetaStopOnError: true,
@@ -402,7 +402,7 @@ func TestLoaderServiceV1ImportZipErrors(t *testing.T) {
 	expErrMsg := "SERVER_ERROR: inline parse error for string: <*string>"
 	if err := ld.V1ImportZip(context.Background(), &ArgsProcessZip{
 		Data: buf.Bytes(),
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache:       utils.MetaNone,
 			utils.MetaWithIndex:   true,
 			utils.MetaStopOnError: true,
@@ -414,7 +414,7 @@ func TestLoaderServiceV1ImportZipErrors(t *testing.T) {
 
 	expErrMsg = "zip: not a valid zip file"
 	if err := ld.V1ImportZip(context.Background(), &ArgsProcessZip{
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache:       utils.MetaNone,
 			utils.MetaWithIndex:   true,
 			utils.MetaStopOnError: true,
@@ -427,7 +427,7 @@ func TestLoaderServiceV1ImportZipErrors(t *testing.T) {
 	expErrMsg = `strconv.ParseBool: parsing "notfloat": invalid syntax`
 	if err := ld.V1ImportZip(context.Background(), &ArgsProcessZip{
 		Data: buf.Bytes(),
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache:       utils.MetaNone,
 			utils.MetaWithIndex:   true,
 			utils.MetaStopOnError: "notfloat",
@@ -438,7 +438,7 @@ func TestLoaderServiceV1ImportZipErrors(t *testing.T) {
 	}
 	if err := ld.V1ImportZip(context.Background(), &ArgsProcessZip{
 		Data: buf.Bytes(),
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache:       utils.MetaNone,
 			utils.MetaWithIndex:   "notfloat",
 			utils.MetaStopOnError: "notfloat",
@@ -451,7 +451,7 @@ func TestLoaderServiceV1ImportZipErrors(t *testing.T) {
 	ld.ldrs[utils.MetaDefault].Locker.Lock()
 	if err := ld.V1ImportZip(context.Background(), &ArgsProcessZip{
 		Data: buf.Bytes(),
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache:       utils.MetaNone,
 			utils.MetaWithIndex:   "notfloat",
 			utils.MetaStopOnError: "notfloat",
@@ -464,7 +464,7 @@ func TestLoaderServiceV1ImportZipErrors(t *testing.T) {
 	expErrMsg = `ANOTHER_LOADER_RUNNING`
 	if err := ld.V1ImportZip(context.Background(), &ArgsProcessZip{
 		Data: buf.Bytes(),
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache:       utils.MetaNone,
 			utils.MetaWithIndex:   "notfloat",
 			utils.MetaStopOnError: "notfloat",
@@ -485,7 +485,7 @@ func TestLoaderServiceV1ImportZipErrors(t *testing.T) {
 
 	ld.ldrs[utils.MetaDefault].Locker = mockLock2{}
 	if err := ld.V1ImportZip(context.Background(), &ArgsProcessZip{
-		Data: buf.Bytes(), APIOpts: map[string]interface{}{
+		Data: buf.Bytes(), APIOpts: map[string]any{
 			utils.MetaForceLock: true}}, &rply); err == nil || err.Error() != expErrMsg {
 		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
 	}

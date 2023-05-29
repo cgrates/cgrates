@@ -130,7 +130,7 @@ func TestActionSCfgAsMapInterface(t *testing.T) {
 	},		
 }`
 
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		utils.EnabledCfg:                true,
 		utils.EEsConnsCfg:               []string{utils.MetaInternal},
 		utils.ThresholdSConnsCfg:        []string{utils.MetaInternal},
@@ -146,7 +146,7 @@ func TestActionSCfgAsMapInterface(t *testing.T) {
 		utils.NotExistsIndexedFieldsCfg: []string{"*req.index1"},
 		utils.NestedFieldsCfg:           true,
 		utils.DynaprepaidActionplansCfg: []string{},
-		utils.OptsCfg: map[string]interface{}{
+		utils.OptsCfg: map[string]any{
 			utils.MetaProfileIDs:           []*utils.DynamicStringSliceOpt{},
 			utils.MetaProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
 			utils.MetaPosterAttempts:       []*utils.DynamicIntOpt{},

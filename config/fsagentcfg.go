@@ -60,9 +60,9 @@ func (fs *FsConnCfg) loadFromJSONCfg(jsnCfg *FsConnJsonCfg) (err error) {
 	return
 }
 
-// AsMapInterface returns the config as a map[string]interface{}
-func (fs FsConnCfg) AsMapInterface() map[string]interface{} {
-	return map[string]interface{}{
+// AsMapInterface returns the config as a map[string]any
+func (fs FsConnCfg) AsMapInterface() map[string]any {
+	return map[string]any{
 		utils.AddressCfg:              fs.Address,
 		utils.Password:                fs.Password,
 		utils.ReconnectsCfg:           fs.Reconnects,
@@ -152,9 +152,9 @@ func (fscfg *FsAgentCfg) loadFromJSONCfg(jsnCfg *FreeswitchAgentJsonCfg) error {
 	return nil
 }
 
-// AsMapInterface returns the config as a map[string]interface{}
-func (fscfg FsAgentCfg) AsMapInterface(separator string) interface{} {
-	mp := map[string]interface{}{
+// AsMapInterface returns the config as a map[string]any
+func (fscfg FsAgentCfg) AsMapInterface(separator string) any {
+	mp := map[string]any{
 		utils.EnabledCfg:             fscfg.Enabled,
 		utils.SubscribeParkCfg:       fscfg.SubscribePark,
 		utils.CreateCdrCfg:           fscfg.CreateCdr,
@@ -174,7 +174,7 @@ func (fscfg FsAgentCfg) AsMapInterface(separator string) interface{} {
 		mp[utils.MaxWaitConnectionCfg] = fscfg.MaxWaitConnection.String()
 	}
 	if fscfg.EventSocketConns != nil {
-		eventSocketConns := make([]map[string]interface{}, len(fscfg.EventSocketConns))
+		eventSocketConns := make([]map[string]any, len(fscfg.EventSocketConns))
 		for key, item := range fscfg.EventSocketConns {
 			eventSocketConns[key] = item.AsMapInterface()
 		}

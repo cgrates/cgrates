@@ -374,10 +374,10 @@ func TestFileXMLProcessEvent(t *testing.T) {
 	}
 	expEvent := &utils.CGREvent{
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"OriginID": "25160047719:0",
 		},
-		APIOpts: make(map[string]interface{}),
+		APIOpts: make(map[string]any),
 	}
 	select {
 	case data := <-eR.rdrEvents:

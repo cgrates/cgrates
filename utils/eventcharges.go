@@ -374,6 +374,6 @@ func (ac *AccountCharge) equals(nAc *AccountCharge) (eq bool) {
 // APIEventCharges is used in APIs, ie: refundCharges
 type APIEventCharges struct {
 	Tenant  string
-	APIOpts map[string]interface{}
+	APIOpts map[string]any
 	*EventCharges
 }

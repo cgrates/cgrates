@@ -70,7 +70,7 @@ func TestCDRsChrgrSProcessEventErrMsnConnIDs(t *testing.T) {
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testID",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Resources":      "ResourceProfile1",
 			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 			"UsageInterval":  "1s",
@@ -79,7 +79,7 @@ func TestCDRsChrgrSProcessEventErrMsnConnIDs(t *testing.T) {
 			utils.Usage:      135 * time.Second,
 			utils.Cost:       123.0,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaSubsys:   utils.MetaChargers,
 			utils.MetaOriginID: "originID",
 		},
@@ -103,7 +103,7 @@ func TestCDRsAttrSProcessEventNoOpts(t *testing.T) {
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testID",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Resources":      "ResourceProfile1",
 			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 			"UsageInterval":  "1s",
@@ -134,7 +134,7 @@ func TestCDRsAttrSProcessEvent(t *testing.T) {
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testID",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Resources":      "ResourceProfile1",
 			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 			"UsageInterval":  "1s",
@@ -143,7 +143,7 @@ func TestCDRsAttrSProcessEvent(t *testing.T) {
 			utils.Usage:      135 * time.Second,
 			utils.Cost:       123.0,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaSubsys: utils.MetaChargers,
 		},
 	}
@@ -168,7 +168,7 @@ func TestCDRsRateSCostForEventErr(t *testing.T) {
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testID",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Resources":      "ResourceProfile1",
 			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 			"UsageInterval":  "1s",
@@ -177,7 +177,7 @@ func TestCDRsRateSCostForEventErr(t *testing.T) {
 			utils.Usage:      135 * time.Second,
 			utils.Cost:       123.0,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaSubsys: utils.MetaChargers,
 		},
 	}
@@ -202,7 +202,7 @@ func TestCDRsAccountSDebitEventErr(t *testing.T) {
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testID",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Resources":      "ResourceProfile1",
 			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 			"UsageInterval":  "1s",
@@ -211,7 +211,7 @@ func TestCDRsAccountSDebitEventErr(t *testing.T) {
 			utils.Usage:      135 * time.Second,
 			utils.Cost:       123.0,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaSubsys: utils.MetaChargers,
 		},
 	}
@@ -236,7 +236,7 @@ func TestCDRsThdSProcessEventErr(t *testing.T) {
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testID",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Resources":      "ResourceProfile1",
 			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 			"UsageInterval":  "1s",
@@ -268,7 +268,7 @@ func TestCDRsStatSProcessEventErrMsnConnIDs(t *testing.T) {
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testID",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Resources":      "ResourceProfile1",
 			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 			"UsageInterval":  "1s",
@@ -277,7 +277,7 @@ func TestCDRsStatSProcessEventErrMsnConnIDs(t *testing.T) {
 			utils.Usage:      135 * time.Second,
 			utils.Cost:       123.0,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaSubsys: utils.MetaChargers,
 		},
 	}
@@ -304,7 +304,7 @@ func TestCDRsEESProcessEventErrMsnConnIDs(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testID",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"Resources":      "ResourceProfile1",
 				utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 				"UsageInterval":  "1s",
@@ -313,7 +313,7 @@ func TestCDRsEESProcessEventErrMsnConnIDs(t *testing.T) {
 				utils.Usage:      135 * time.Second,
 				utils.Cost:       123.0,
 			},
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.MetaSubsys: utils.MetaChargers,
 			},
 		},
@@ -368,8 +368,8 @@ func TestCDRsAttrSProcessEventMock(t *testing.T) {
 	storDBChan <- storDB
 	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
 	ccM := &ccMock{
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.AttributeSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.AttributeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
 				*reply.(*AttrSProcessEventReply) = AttrSProcessEventReply{
 					AlteredFields: []*FieldsAltered{},
 				}
@@ -385,7 +385,7 @@ func TestCDRsAttrSProcessEventMock(t *testing.T) {
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testID",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Resources":      "ResourceProfile1",
 			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 			"UsageInterval":  "1s",
@@ -394,7 +394,7 @@ func TestCDRsAttrSProcessEventMock(t *testing.T) {
 			utils.Usage:      135 * time.Second,
 			utils.Cost:       123.0,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaSubsys: utils.MetaAttributes,
 		},
 	}
@@ -405,7 +405,7 @@ func TestCDRsAttrSProcessEventMock(t *testing.T) {
 	expected := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testID",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Resources":      "ResourceProfile1",
 			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 			"UsageInterval":  "1s",
@@ -414,7 +414,7 @@ func TestCDRsAttrSProcessEventMock(t *testing.T) {
 			utils.Usage:      135 * time.Second,
 			utils.Cost:       123.0,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsContext: utils.MetaCDRs,
 			utils.MetaSubsys:  utils.MetaCDRs,
 		},
@@ -448,8 +448,8 @@ func TestCDRsAttrSProcessEventMockNotFoundErr(t *testing.T) {
 	storDBChan <- storDB
 	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
 	ccM := &ccMock{
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.AttributeSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.AttributeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
 				*reply.(*AttrSProcessEventReply) = AttrSProcessEventReply{
 					AlteredFields: []*FieldsAltered{{
 						Fields: []string{},
@@ -467,7 +467,7 @@ func TestCDRsAttrSProcessEventMockNotFoundErr(t *testing.T) {
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testID",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Resources":      "ResourceProfile1",
 			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 			"UsageInterval":  "1s",
@@ -476,7 +476,7 @@ func TestCDRsAttrSProcessEventMockNotFoundErr(t *testing.T) {
 			utils.Usage:      135 * time.Second,
 			utils.Cost:       123.0,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaSubsys: utils.MetaAttributes,
 		},
 	}
@@ -487,7 +487,7 @@ func TestCDRsAttrSProcessEventMockNotFoundErr(t *testing.T) {
 	expected := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testID",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Resources":      "ResourceProfile1",
 			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 			"UsageInterval":  "1s",
@@ -496,7 +496,7 @@ func TestCDRsAttrSProcessEventMockNotFoundErr(t *testing.T) {
 			utils.Usage:      135 * time.Second,
 			utils.Cost:       123.0,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsContext: utils.MetaCDRs,
 			utils.MetaSubsys:  utils.MetaCDRs,
 		},
@@ -530,8 +530,8 @@ func TestCDRsAttrSProcessEventMockNotEmptyAF(t *testing.T) {
 	storDBChan <- storDB
 	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
 	ccM := &ccMock{
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.AttributeSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.AttributeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
 				*reply.(*AttrSProcessEventReply) = AttrSProcessEventReply{
 					AlteredFields: []*FieldsAltered{{
 						Fields: []string{utils.AccountField},
@@ -539,7 +539,7 @@ func TestCDRsAttrSProcessEventMockNotEmptyAF(t *testing.T) {
 					CGREvent: &utils.CGREvent{
 						Tenant: "cgrates.org",
 						ID:     "testID",
-						Event: map[string]interface{}{
+						Event: map[string]any{
 							utils.AccountField: "1001",
 							"Resources":        "ResourceProfile1",
 							utils.AnswerTime:   time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
@@ -549,7 +549,7 @@ func TestCDRsAttrSProcessEventMockNotEmptyAF(t *testing.T) {
 							utils.Usage:        135 * time.Second,
 							utils.Cost:         123.0,
 						},
-						APIOpts: map[string]interface{}{
+						APIOpts: map[string]any{
 							utils.MetaSubsys:   utils.MetaAttributes,
 							utils.AccountField: "1001",
 						},
@@ -567,7 +567,7 @@ func TestCDRsAttrSProcessEventMockNotEmptyAF(t *testing.T) {
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testID",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 			"Resources":        "ResourceProfile1",
 			utils.AnswerTime:   time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
@@ -577,7 +577,7 @@ func TestCDRsAttrSProcessEventMockNotEmptyAF(t *testing.T) {
 			utils.Usage:        135 * time.Second,
 			utils.Cost:         123.0,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaSubsys: utils.MetaAttributes,
 		},
 	}
@@ -588,7 +588,7 @@ func TestCDRsAttrSProcessEventMockNotEmptyAF(t *testing.T) {
 	expected := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testID",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 			"Resources":        "ResourceProfile1",
 			utils.AnswerTime:   time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
@@ -598,7 +598,7 @@ func TestCDRsAttrSProcessEventMockNotEmptyAF(t *testing.T) {
 			utils.Usage:        135 * time.Second,
 			utils.Cost:         123.0,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.AccountField: "1001",
 			utils.MetaSubsys:   utils.MetaAttributes,
 		},
@@ -631,8 +631,8 @@ func TestCDRsChrgrSProcessEvent(t *testing.T) {
 	storDBChan <- storDB
 	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
 	ccM := &ccMock{
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.ChargerSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ChargerSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
 				*reply.(*[]*ChrgSProcessEventReply) = []*ChrgSProcessEventReply{
 					{
 						ChargerSProfile: "string",
@@ -650,7 +650,7 @@ func TestCDRsChrgrSProcessEvent(t *testing.T) {
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testID",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Resources":      "ResourceProfile1",
 			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 			"UsageInterval":  "1s",
@@ -659,7 +659,7 @@ func TestCDRsChrgrSProcessEvent(t *testing.T) {
 			utils.Usage:      135 * time.Second,
 			utils.Cost:       123.0,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaSubsys: utils.MetaChargers,
 		},
 	}
@@ -701,8 +701,8 @@ func TestCDRsRateProcessEventMock(t *testing.T) {
 	storDBChan <- storDB
 	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
 	ccM := &ccMock{
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.RateSv1CostForEvent: func(ctx *context.Context, args, reply interface{}) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.RateSv1CostForEvent: func(ctx *context.Context, args, reply any) error {
 				*reply.(*utils.RateProfileCost) = utils.RateProfileCost{}
 				return nil
 			},
@@ -716,7 +716,7 @@ func TestCDRsRateProcessEventMock(t *testing.T) {
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testID",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Resources":      "ResourceProfile1",
 			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 			"UsageInterval":  "1s",
@@ -725,7 +725,7 @@ func TestCDRsRateProcessEventMock(t *testing.T) {
 			utils.Usage:      135 * time.Second,
 			utils.Cost:       123.0,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaSubsys: utils.MetaRates,
 		},
 	}
@@ -736,7 +736,7 @@ func TestCDRsRateProcessEventMock(t *testing.T) {
 	expected := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testID",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 
 			"Resources":      "ResourceProfile1",
 			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
@@ -746,7 +746,7 @@ func TestCDRsRateProcessEventMock(t *testing.T) {
 			utils.Usage:      135 * time.Second,
 			utils.Cost:       123.0,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaRateSCost: utils.RateProfileCost{},
 			utils.MetaSubsys:    utils.MetaRates,
 		},
@@ -780,8 +780,8 @@ func TestCDRsAccountProcessEventMock(t *testing.T) {
 	storDBChan <- storDB
 	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
 	ccM := &ccMock{
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.AccountSv1DebitAbstracts: func(ctx *context.Context, args, reply interface{}) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.AccountSv1DebitAbstracts: func(ctx *context.Context, args, reply any) error {
 				*reply.(*utils.EventCharges) = utils.EventCharges{}
 				return nil
 			},
@@ -795,7 +795,7 @@ func TestCDRsAccountProcessEventMock(t *testing.T) {
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testID",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 
 			"Resources":      "ResourceProfile1",
 			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
@@ -805,7 +805,7 @@ func TestCDRsAccountProcessEventMock(t *testing.T) {
 			utils.Usage:      135 * time.Second,
 			utils.Cost:       123.0,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaAccountSCost: &utils.EventCharges{},
 			utils.MetaSubsys:       utils.MetaAccounts,
 		},
@@ -817,7 +817,7 @@ func TestCDRsAccountProcessEventMock(t *testing.T) {
 	expected := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testID",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 
 			"Resources":      "ResourceProfile1",
 			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
@@ -827,7 +827,7 @@ func TestCDRsAccountProcessEventMock(t *testing.T) {
 			utils.Usage:      135 * time.Second,
 			utils.Cost:       123.0,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaAccountSCost: cgrEv.APIOpts[utils.MetaAccountSCost],
 			utils.MetaSubsys:       utils.MetaAccounts,
 		},
@@ -861,8 +861,8 @@ func TestCDRsThdSProcessEventMock(t *testing.T) {
 	storDBChan <- storDB
 	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
 	ccM := &ccMock{
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.ThresholdSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ThresholdSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
 				*reply.(*[]string) = []string{"testID"}
 				return nil
 			},
@@ -876,7 +876,7 @@ func TestCDRsThdSProcessEventMock(t *testing.T) {
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testID",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Resources":      "ResourceProfile1",
 			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 			"UsageInterval":  "1s",
@@ -894,7 +894,7 @@ func TestCDRsThdSProcessEventMock(t *testing.T) {
 	expected := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testID",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Resources":      "ResourceProfile1",
 			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 			"UsageInterval":  "1s",
@@ -934,8 +934,8 @@ func TestCDRsThdSProcessEventMockNotfound(t *testing.T) {
 	storDBChan <- storDB
 	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
 	ccM := &ccMock{
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.ThresholdSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ThresholdSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
 				return utils.ErrNotFound
 			},
 		},
@@ -948,7 +948,7 @@ func TestCDRsThdSProcessEventMockNotfound(t *testing.T) {
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testID",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Resources":      "ResourceProfile1",
 			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 			"UsageInterval":  "1s",
@@ -966,7 +966,7 @@ func TestCDRsThdSProcessEventMockNotfound(t *testing.T) {
 	expected := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testID",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Resources":      "ResourceProfile1",
 			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 			"UsageInterval":  "1s",
@@ -1006,8 +1006,8 @@ func TestCDRsStatSProcessEventMock(t *testing.T) {
 	storDBChan <- storDB
 	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
 	ccM := &ccMock{
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.StatSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.StatSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
 				*reply.(*[]string) = []string{"testID"}
 				return utils.ErrNotFound
 			},
@@ -1021,7 +1021,7 @@ func TestCDRsStatSProcessEventMock(t *testing.T) {
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testID",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Resources":      "ResourceProfile1",
 			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 			"UsageInterval":  "1s",
@@ -1039,7 +1039,7 @@ func TestCDRsStatSProcessEventMock(t *testing.T) {
 	expected := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testID",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Resources":      "ResourceProfile1",
 			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 			"UsageInterval":  "1s",
@@ -1079,9 +1079,9 @@ func TestCDRsEESProcessEventMock(t *testing.T) {
 	storDBChan <- storDB
 	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
 	ccM := &ccMock{
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
-				*reply.(*map[string]map[string]interface{}) = map[string]map[string]interface{}{}
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
+				*reply.(*map[string]map[string]any) = map[string]map[string]any{}
 				return utils.ErrNotFound
 			},
 		},
@@ -1095,7 +1095,7 @@ func TestCDRsEESProcessEventMock(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testID",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"Resources":      "ResourceProfile1",
 				utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 				"UsageInterval":  "1s",
@@ -1115,7 +1115,7 @@ func TestCDRsEESProcessEventMock(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testID",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"Resources":      "ResourceProfile1",
 				utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 				"UsageInterval":  "1s",
@@ -1156,9 +1156,9 @@ func TestCDRsProcessEventMock(t *testing.T) {
 	storDBChan <- storDB
 	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
 	ccM := &ccMock{
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
-				*reply.(*map[string]map[string]interface{}) = map[string]map[string]interface{}{}
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
+				*reply.(*map[string]map[string]any) = map[string]map[string]any{}
 				return utils.ErrNotFound
 			},
 		},
@@ -1171,7 +1171,7 @@ func TestCDRsProcessEventMock(t *testing.T) {
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testID",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Resources":      "ResourceProfile1",
 			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 			"UsageInterval":  "1s",
@@ -1189,7 +1189,7 @@ func TestCDRsProcessEventMock(t *testing.T) {
 	expected := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testID",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Resources":      "ResourceProfile1",
 			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 			"UsageInterval":  "1s",
@@ -1229,9 +1229,9 @@ func TestCDRsProcessEventMockSkipOpts(t *testing.T) {
 	storDBChan <- storDB
 	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
 	ccM := &ccMock{
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
-				*reply.(*map[string]map[string]interface{}) = map[string]map[string]interface{}{}
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
+				*reply.(*map[string]map[string]any) = map[string]map[string]any{}
 				return utils.ErrNotFound
 			},
 		},
@@ -1244,7 +1244,7 @@ func TestCDRsProcessEventMockSkipOpts(t *testing.T) {
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testID",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Resources":      "ResourceProfile1",
 			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 			"UsageInterval":  "1s",
@@ -1262,7 +1262,7 @@ func TestCDRsProcessEventMockSkipOpts(t *testing.T) {
 	expected := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testID",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Resources":      "ResourceProfile1",
 			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 			"UsageInterval":  "1s",
@@ -1321,9 +1321,9 @@ func TestCDRsProcessEventMockAttrsErr(t *testing.T) {
 	storDBChan <- storDB
 	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
 	ccM := &ccMock{
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
-				*reply.(*map[string]map[string]interface{}) = map[string]map[string]interface{}{}
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
+				*reply.(*map[string]map[string]any) = map[string]map[string]any{}
 				return utils.ErrNotFound
 			},
 		},
@@ -1336,7 +1336,7 @@ func TestCDRsProcessEventMockAttrsErr(t *testing.T) {
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testID",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Resources":      "ResourceProfile1",
 			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 			"UsageInterval":  "1s",
@@ -1345,7 +1345,7 @@ func TestCDRsProcessEventMockAttrsErr(t *testing.T) {
 			utils.Usage:      135 * time.Second,
 			utils.Cost:       123.0,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaAttributes: true,
 			"*context":           utils.MetaCDRs,
 		},
@@ -1385,9 +1385,9 @@ func TestCDRsProcessEventMockAttrsErrBoolOpts(t *testing.T) {
 	storDBChan <- storDB
 	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
 	ccM := &ccMock{
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
-				*reply.(*map[string]map[string]interface{}) = map[string]map[string]interface{}{}
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
+				*reply.(*map[string]map[string]any) = map[string]map[string]any{}
 				return utils.ErrNotFound
 			},
 		},
@@ -1400,7 +1400,7 @@ func TestCDRsProcessEventMockAttrsErrBoolOpts(t *testing.T) {
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testID",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Resources":      "ResourceProfile1",
 			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 			"UsageInterval":  "1s",
@@ -1409,7 +1409,7 @@ func TestCDRsProcessEventMockAttrsErrBoolOpts(t *testing.T) {
 			utils.Usage:      135 * time.Second,
 			utils.Cost:       123.0,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaAttributes: time.Second,
 			"*context":           utils.MetaCDRs,
 		},
@@ -1449,9 +1449,9 @@ func TestCDRsProcessEventMockChrgsErr(t *testing.T) {
 	storDBChan <- storDB
 	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
 	ccM := &ccMock{
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
-				*reply.(*map[string]map[string]interface{}) = map[string]map[string]interface{}{}
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
+				*reply.(*map[string]map[string]any) = map[string]map[string]any{}
 				return utils.ErrNotFound
 			},
 		},
@@ -1464,7 +1464,7 @@ func TestCDRsProcessEventMockChrgsErr(t *testing.T) {
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testID",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Resources":      "ResourceProfile1",
 			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 			"UsageInterval":  "1s",
@@ -1473,7 +1473,7 @@ func TestCDRsProcessEventMockChrgsErr(t *testing.T) {
 			utils.Usage:      135 * time.Second,
 			utils.Cost:       123.0,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaChargers: true,
 			"*context":         utils.MetaCDRs,
 		},
@@ -1514,9 +1514,9 @@ func TestCDRsProcessEventMockChrgsErrBoolOpts(t *testing.T) {
 	storDBChan <- storDB
 	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
 	ccM := &ccMock{
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
-				*reply.(*map[string]map[string]interface{}) = map[string]map[string]interface{}{}
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
+				*reply.(*map[string]map[string]any) = map[string]map[string]any{}
 				return utils.ErrNotFound
 			},
 		},
@@ -1529,7 +1529,7 @@ func TestCDRsProcessEventMockChrgsErrBoolOpts(t *testing.T) {
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testID",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Resources":      "ResourceProfile1",
 			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 			"UsageInterval":  "1s",
@@ -1538,7 +1538,7 @@ func TestCDRsProcessEventMockChrgsErrBoolOpts(t *testing.T) {
 			utils.Usage:      135 * time.Second,
 			utils.Cost:       123.0,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaChargers: time.Second,
 			"*context":         utils.MetaCDRs,
 		},
@@ -1579,9 +1579,9 @@ func TestCDRsProcessEventMockRateSErr(t *testing.T) {
 	storDBChan <- storDB
 	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
 	ccM := &ccMock{
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
-				*reply.(*map[string]map[string]interface{}) = map[string]map[string]interface{}{}
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
+				*reply.(*map[string]map[string]any) = map[string]map[string]any{}
 				return utils.ErrNotFound
 			},
 		},
@@ -1594,7 +1594,7 @@ func TestCDRsProcessEventMockRateSErr(t *testing.T) {
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testID",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Resources":      "ResourceProfile1",
 			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 			"UsageInterval":  "1s",
@@ -1603,7 +1603,7 @@ func TestCDRsProcessEventMockRateSErr(t *testing.T) {
 			utils.Usage:      135 * time.Second,
 			utils.Cost:       123.0,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaRates: true,
 			"*context":      utils.MetaCDRs,
 		},
@@ -1644,9 +1644,9 @@ func TestCDRsProcessEventMockRateSErrBoolOpts(t *testing.T) {
 	storDBChan <- storDB
 	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
 	ccM := &ccMock{
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
-				*reply.(*map[string]map[string]interface{}) = map[string]map[string]interface{}{}
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
+				*reply.(*map[string]map[string]any) = map[string]map[string]any{}
 				return utils.ErrNotFound
 			},
 		},
@@ -1659,7 +1659,7 @@ func TestCDRsProcessEventMockRateSErrBoolOpts(t *testing.T) {
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testID",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Resources":      "ResourceProfile1",
 			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 			"UsageInterval":  "1s",
@@ -1668,7 +1668,7 @@ func TestCDRsProcessEventMockRateSErrBoolOpts(t *testing.T) {
 			utils.Usage:      135 * time.Second,
 			utils.Cost:       123.0,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaRates: time.Second,
 			"*context":      utils.MetaCDRs,
 		},
@@ -1709,9 +1709,9 @@ func TestCDRsProcessEventMockAcntsErr(t *testing.T) {
 	storDBChan <- storDB
 	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
 	ccM := &ccMock{
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
-				*reply.(*map[string]map[string]interface{}) = map[string]map[string]interface{}{}
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
+				*reply.(*map[string]map[string]any) = map[string]map[string]any{}
 				return utils.ErrNotFound
 			},
 		},
@@ -1724,7 +1724,7 @@ func TestCDRsProcessEventMockAcntsErr(t *testing.T) {
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testID",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Resources":      "ResourceProfile1",
 			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 			"UsageInterval":  "1s",
@@ -1733,7 +1733,7 @@ func TestCDRsProcessEventMockAcntsErr(t *testing.T) {
 			utils.Usage:      135 * time.Second,
 			utils.Cost:       123.0,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaAccounts: true,
 			"*context":         utils.MetaCDRs,
 		},
@@ -1774,9 +1774,9 @@ func TestCDRsProcessEventMockAcntsErrBoolOpts(t *testing.T) {
 	storDBChan <- storDB
 	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
 	ccM := &ccMock{
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
-				*reply.(*map[string]map[string]interface{}) = map[string]map[string]interface{}{}
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
+				*reply.(*map[string]map[string]any) = map[string]map[string]any{}
 				return utils.ErrNotFound
 			},
 		},
@@ -1789,7 +1789,7 @@ func TestCDRsProcessEventMockAcntsErrBoolOpts(t *testing.T) {
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testID",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Resources":      "ResourceProfile1",
 			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 			"UsageInterval":  "1s",
@@ -1798,7 +1798,7 @@ func TestCDRsProcessEventMockAcntsErrBoolOpts(t *testing.T) {
 			utils.Usage:      135 * time.Second,
 			utils.Cost:       123.0,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaAccounts: time.Second,
 			"*context":         utils.MetaCDRs,
 		},
@@ -1840,9 +1840,9 @@ func TestCDRsProcessEventMockExportErr(t *testing.T) {
 	storDBChan <- storDB
 	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
 	ccM := &ccMock{
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
-				*reply.(*map[string]map[string]interface{}) = map[string]map[string]interface{}{}
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
+				*reply.(*map[string]map[string]any) = map[string]map[string]any{}
 				return utils.ErrExists
 			},
 		},
@@ -1855,7 +1855,7 @@ func TestCDRsProcessEventMockExportErr(t *testing.T) {
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testID",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Resources":      "ResourceProfile1",
 			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 			"UsageInterval":  "1s",
@@ -1864,7 +1864,7 @@ func TestCDRsProcessEventMockExportErr(t *testing.T) {
 			utils.Usage:      135 * time.Second,
 			utils.Cost:       123.0,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsCDRsExport: true,
 			"*context":           utils.MetaCDRs,
 		},
@@ -1905,9 +1905,9 @@ func TestCDRsProcessEventMockExportErrBoolOpts(t *testing.T) {
 	storDBChan <- storDB
 	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
 	ccM := &ccMock{
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
-				*reply.(*map[string]map[string]interface{}) = map[string]map[string]interface{}{}
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
+				*reply.(*map[string]map[string]any) = map[string]map[string]any{}
 				return utils.ErrExists
 			},
 		},
@@ -1920,7 +1920,7 @@ func TestCDRsProcessEventMockExportErrBoolOpts(t *testing.T) {
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testID",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Resources":      "ResourceProfile1",
 			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 			"UsageInterval":  "1s",
@@ -1929,7 +1929,7 @@ func TestCDRsProcessEventMockExportErrBoolOpts(t *testing.T) {
 			utils.Usage:      135 * time.Second,
 			utils.Cost:       123.0,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsCDRsExport: time.Second,
 			"*context":           utils.MetaCDRs,
 		},
@@ -1970,9 +1970,9 @@ func TestCDRsProcessEventMockThdsErr(t *testing.T) {
 	storDBChan <- storDB
 	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
 	ccM := &ccMock{
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
-				*reply.(*map[string]map[string]interface{}) = map[string]map[string]interface{}{}
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
+				*reply.(*map[string]map[string]any) = map[string]map[string]any{}
 				return utils.ErrNotFound
 			},
 		},
@@ -1985,7 +1985,7 @@ func TestCDRsProcessEventMockThdsErr(t *testing.T) {
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testID",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Resources":      "ResourceProfile1",
 			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 			"UsageInterval":  "1s",
@@ -1994,7 +1994,7 @@ func TestCDRsProcessEventMockThdsErr(t *testing.T) {
 			utils.Usage:      135 * time.Second,
 			utils.Cost:       123.0,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaThresholds: true,
 			"*context":           utils.MetaCDRs,
 		},
@@ -2035,9 +2035,9 @@ func TestCDRsProcessEventMockThdsErrBoolOpts(t *testing.T) {
 	storDBChan <- storDB
 	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
 	ccM := &ccMock{
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
-				*reply.(*map[string]map[string]interface{}) = map[string]map[string]interface{}{}
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
+				*reply.(*map[string]map[string]any) = map[string]map[string]any{}
 				return utils.ErrNotFound
 			},
 		},
@@ -2050,7 +2050,7 @@ func TestCDRsProcessEventMockThdsErrBoolOpts(t *testing.T) {
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testID",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Resources":      "ResourceProfile1",
 			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 			"UsageInterval":  "1s",
@@ -2059,7 +2059,7 @@ func TestCDRsProcessEventMockThdsErrBoolOpts(t *testing.T) {
 			utils.Usage:      135 * time.Second,
 			utils.Cost:       123.0,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaThresholds: time.Second,
 			"*context":           utils.MetaCDRs,
 		},
@@ -2100,9 +2100,9 @@ func TestCDRsProcessEventMockStatsErr(t *testing.T) {
 	storDBChan <- storDB
 	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
 	ccM := &ccMock{
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
-				*reply.(*map[string]map[string]interface{}) = map[string]map[string]interface{}{}
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
+				*reply.(*map[string]map[string]any) = map[string]map[string]any{}
 				return utils.ErrExists
 			},
 		},
@@ -2115,7 +2115,7 @@ func TestCDRsProcessEventMockStatsErr(t *testing.T) {
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testID",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Resources":      "ResourceProfile1",
 			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 			"UsageInterval":  "1s",
@@ -2124,7 +2124,7 @@ func TestCDRsProcessEventMockStatsErr(t *testing.T) {
 			utils.Usage:      135 * time.Second,
 			utils.Cost:       123.0,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaStats: true,
 			"*context":      utils.MetaCDRs,
 		},
@@ -2165,9 +2165,9 @@ func TestCDRsProcessEventMockStatsErrGetBoolOpts(t *testing.T) {
 	storDBChan <- storDB
 	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
 	ccM := &ccMock{
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
-				*reply.(*map[string]map[string]interface{}) = map[string]map[string]interface{}{}
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
+				*reply.(*map[string]map[string]any) = map[string]map[string]any{}
 				return utils.ErrExists
 			},
 		},
@@ -2180,7 +2180,7 @@ func TestCDRsProcessEventMockStatsErrGetBoolOpts(t *testing.T) {
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testID",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Resources":      "ResourceProfile1",
 			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 			"UsageInterval":  "1s",
@@ -2189,7 +2189,7 @@ func TestCDRsProcessEventMockStatsErrGetBoolOpts(t *testing.T) {
 			utils.Usage:      135 * time.Second,
 			utils.Cost:       123.0,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaStats: time.Second,
 			"*context":      utils.MetaCDRs,
 		},
@@ -2225,9 +2225,9 @@ func TestCDRsV1ProcessEventMock(t *testing.T) {
 	storDBChan <- storDB
 	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
 	ccM := &ccMock{
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
-				*reply.(*map[string]map[string]interface{}) = map[string]map[string]interface{}{}
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
+				*reply.(*map[string]map[string]any) = map[string]map[string]any{}
 				return utils.ErrNotFound
 			},
 		},
@@ -2238,7 +2238,7 @@ func TestCDRsV1ProcessEventMock(t *testing.T) {
 		utils.MetaEEs), utils.ThresholdSv1, rpcInternal)
 
 	cgrEv := &utils.CGREvent{
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Resources":      "ResourceProfile1",
 			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 			"UsageInterval":  "1s",
@@ -2247,7 +2247,7 @@ func TestCDRsV1ProcessEventMock(t *testing.T) {
 			utils.Usage:      135 * time.Second,
 			utils.Cost:       123.0,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsCDRsExport: true,
 			"*context":           utils.MetaCDRs,
 		},
@@ -2260,7 +2260,7 @@ func TestCDRsV1ProcessEventMock(t *testing.T) {
 	expected := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testID",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Resources":      "ResourceProfile1",
 			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 			"UsageInterval":  "1s",
@@ -2269,7 +2269,7 @@ func TestCDRsV1ProcessEventMock(t *testing.T) {
 			utils.Usage:      135 * time.Second,
 			utils.Cost:       123.0,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsCDRsExport: true,
 			"*context":           utils.MetaCDRs,
 		},
@@ -2304,9 +2304,9 @@ func TestCDRsV1ProcessEventMockErr(t *testing.T) {
 	storDBChan <- storDB
 	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
 	ccM := &ccMock{
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
-				*reply.(*map[string]map[string]interface{}) = map[string]map[string]interface{}{}
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
+				*reply.(*map[string]map[string]any) = map[string]map[string]any{}
 				return utils.ErrNotFound
 			},
 		},
@@ -2319,7 +2319,7 @@ func TestCDRsV1ProcessEventMockErr(t *testing.T) {
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testID",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Resources":      "ResourceProfile1",
 			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 			"UsageInterval":  "1s",
@@ -2328,7 +2328,7 @@ func TestCDRsV1ProcessEventMockErr(t *testing.T) {
 			utils.Usage:      135 * time.Second,
 			utils.Cost:       123.0,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaStats:      true,
 			utils.OptsCDRsExport: true,
 			"*context":           utils.MetaCDRs,
@@ -2342,7 +2342,7 @@ func TestCDRsV1ProcessEventMockErr(t *testing.T) {
 	expected := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testID",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Resources":      "ResourceProfile1",
 			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 			"UsageInterval":  "1s",
@@ -2351,7 +2351,7 @@ func TestCDRsV1ProcessEventMockErr(t *testing.T) {
 			utils.Usage:      135 * time.Second,
 			utils.Cost:       123.0,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaStats:      true,
 			utils.OptsCDRsExport: true,
 			"*context":           utils.MetaCDRs,
@@ -2386,9 +2386,9 @@ func TestCDRsV1ProcessEventMockCache(t *testing.T) {
 	storDBChan <- storDB
 	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
 	ccM := &ccMock{
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
-				*reply.(*map[string]map[string]interface{}) = map[string]map[string]interface{}{}
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
+				*reply.(*map[string]map[string]any) = map[string]map[string]any{}
 				return utils.ErrNotFound
 			},
 		},
@@ -2401,7 +2401,7 @@ func TestCDRsV1ProcessEventMockCache(t *testing.T) {
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testID",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Resources":      "ResourceProfile1",
 			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 			"UsageInterval":  "1s",
@@ -2410,7 +2410,7 @@ func TestCDRsV1ProcessEventMockCache(t *testing.T) {
 			utils.Usage:      135 * time.Second,
 			utils.Cost:       123.0,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsCDRsExport: true,
 			"*context":           utils.MetaCDRs,
 		},
@@ -2428,7 +2428,7 @@ func TestCDRsV1ProcessEventMockCache(t *testing.T) {
 	expected := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testID",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Resources":      "ResourceProfile1",
 			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 			"UsageInterval":  "1s",
@@ -2437,7 +2437,7 @@ func TestCDRsV1ProcessEventMockCache(t *testing.T) {
 			utils.Usage:      135 * time.Second,
 			utils.Cost:       123.0,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsCDRsExport: true,
 			"*context":           utils.MetaCDRs,
 		},
@@ -2470,9 +2470,9 @@ func TestCDRsV1ProcessEventWithGetMockCache(t *testing.T) {
 	storDBChan <- storDB
 	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
 	ccM := &ccMock{
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
-				*reply.(*map[string]map[string]interface{}) = map[string]map[string]interface{}{}
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
+				*reply.(*map[string]map[string]any) = map[string]map[string]any{}
 				return utils.ErrNotFound
 			},
 		},
@@ -2483,7 +2483,7 @@ func TestCDRsV1ProcessEventWithGetMockCache(t *testing.T) {
 		utils.MetaEEs), utils.ThresholdSv1, rpcInternal)
 
 	cgrEv := &utils.CGREvent{
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Resources":      "ResourceProfile1",
 			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 			"UsageInterval":  "1s",
@@ -2492,7 +2492,7 @@ func TestCDRsV1ProcessEventWithGetMockCache(t *testing.T) {
 			utils.Usage:      135 * time.Second,
 			utils.Cost:       123.0,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsCDRsExport: true,
 			"*context":           utils.MetaCDRs,
 		},
@@ -2510,7 +2510,7 @@ func TestCDRsV1ProcessEventWithGetMockCache(t *testing.T) {
 	expected := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testID",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Resources":      "ResourceProfile1",
 			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 			"UsageInterval":  "1s",
@@ -2519,7 +2519,7 @@ func TestCDRsV1ProcessEventWithGetMockCache(t *testing.T) {
 			utils.Usage:      135 * time.Second,
 			utils.Cost:       123.0,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsCDRsExport: true,
 			"*context":           utils.MetaCDRs,
 		},
@@ -2553,9 +2553,9 @@ func TestCDRsV1ProcessEventWithGetMockCacheErr(t *testing.T) {
 	storDBChan <- storDB
 	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
 	ccM := &ccMock{
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
-				*reply.(*map[string]map[string]interface{}) = map[string]map[string]interface{}{}
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
+				*reply.(*map[string]map[string]any) = map[string]map[string]any{}
 				return utils.ErrNotFound
 			},
 		},
@@ -2568,7 +2568,7 @@ func TestCDRsV1ProcessEventWithGetMockCacheErr(t *testing.T) {
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testID",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Resources":      "ResourceProfile1",
 			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 			"UsageInterval":  "1s",
@@ -2577,7 +2577,7 @@ func TestCDRsV1ProcessEventWithGetMockCacheErr(t *testing.T) {
 			utils.Usage:      135 * time.Second,
 			utils.Cost:       123.0,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsCDRsExport: true,
 			utils.MetaAttributes: time.Second,
 			"*context":           utils.MetaCDRs,
@@ -2619,8 +2619,8 @@ func TestCDRsChrgrSProcessEventEmptyChrgrs(t *testing.T) {
 	storDBChan <- storDB
 	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
 	ccM := &ccMock{
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.ChargerSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ChargerSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
 				return nil
 			},
 		},
@@ -2633,7 +2633,7 @@ func TestCDRsChrgrSProcessEventEmptyChrgrs(t *testing.T) {
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testID",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Resources":      "ResourceProfile1",
 			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 			"UsageInterval":  "1s",
@@ -2642,7 +2642,7 @@ func TestCDRsChrgrSProcessEventEmptyChrgrs(t *testing.T) {
 			utils.Usage:      135 * time.Second,
 			utils.Cost:       123.0,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaSubsys: utils.MetaChargers,
 		},
 	}
@@ -2677,7 +2677,7 @@ func TestCDRsV1ProcessEventCacheGet(t *testing.T) {
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testID",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.Cost: 123,
 		},
 	}
@@ -2694,7 +2694,7 @@ func TestCDRsV1ProcessEventCacheGet(t *testing.T) {
 	expected := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testID",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.Cost: 123,
 		},
 	}
@@ -2727,7 +2727,7 @@ func TestCDRsV1ProcessEventWithGetCacheGet(t *testing.T) {
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testID",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.Cost: 123,
 		},
 	}
@@ -2744,7 +2744,7 @@ func TestCDRsV1ProcessEventWithGetCacheGet(t *testing.T) {
 	expected := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testID",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.Cost: 123,
 		},
 	}
@@ -2777,8 +2777,8 @@ func TestCDRServerAccountSRefundCharges(t *testing.T) {
 	storDBChan <- storDB
 	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
 	ccM := &ccMock{
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.AccountSv1RefundCharges: func(ctx *context.Context, args, reply interface{}) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.AccountSv1RefundCharges: func(ctx *context.Context, args, reply any) error {
 				*reply.(*string) = utils.OK
 				return nil
 			},
@@ -2789,7 +2789,7 @@ func TestCDRServerAccountSRefundCharges(t *testing.T) {
 	newCDRSrv.connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal,
 		utils.AccountSConnsCfg), utils.AccountSv1, rpcInternal)
 
-	apiOpts := map[string]interface{}{
+	apiOpts := map[string]any{
 		utils.MetaAccountSCost: &utils.EventCharges{},
 		utils.MetaSubsys:       utils.AccountSConnsCfg,
 	}
@@ -2857,8 +2857,8 @@ func TestCDRServerAccountSRefundChargesErr(t *testing.T) {
 	storDBChan <- storDB
 	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
 	ccM := &ccMock{
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.ChargerSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ChargerSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
 				*reply.(*string) = utils.OK
 				return nil
 			},
@@ -2869,7 +2869,7 @@ func TestCDRServerAccountSRefundChargesErr(t *testing.T) {
 	newCDRSrv.connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal,
 		utils.AccountSConnsCfg), utils.AccountSv1, rpcInternal)
 
-	apiOpts := map[string]interface{}{
+	apiOpts := map[string]any{
 		utils.MetaAccountSCost: &utils.EventCharges{},
 		utils.MetaSubsys:       utils.AccountSConnsCfg,
 	}
@@ -2889,10 +2889,10 @@ func TestPopulateCost(t *testing.T) {
 
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.Usage: "10s",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaAccountSCost: &utils.EventCharges{
 				Concretes: utils.NewDecimal(400, 0),
 			},
@@ -2904,10 +2904,10 @@ func TestPopulateCost(t *testing.T) {
 	}
 	ev = &utils.CGREvent{
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.Usage: "10s",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 
 			utils.MetaRateSCost: utils.RateProfileCost{
 
@@ -2920,10 +2920,10 @@ func TestPopulateCost(t *testing.T) {
 	}
 	ev = &utils.CGREvent{
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.Usage: "10s",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 
 			utils.MetaCost: 102.1,
 		},
@@ -2961,9 +2961,9 @@ func TestCDRsProcessEventMockThdsEcCostIface(t *testing.T) {
 	storDBChan <- storDB
 	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
 	ccM := &ccMock{
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 
-			utils.AccountSv1DebitAbstracts: func(ctx *context.Context, args, reply interface{}) error {
+			utils.AccountSv1DebitAbstracts: func(ctx *context.Context, args, reply any) error {
 				*reply.(*utils.EventCharges) = utils.EventCharges{
 					Concretes: utils.NewDecimal(400, 0),
 				}
@@ -2979,7 +2979,7 @@ func TestCDRsProcessEventMockThdsEcCostIface(t *testing.T) {
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testID",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Resources":      "ResourceProfile1",
 			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 			"UsageInterval":  "1s",
@@ -2988,10 +2988,10 @@ func TestCDRsProcessEventMockThdsEcCostIface(t *testing.T) {
 			utils.Usage:      135 * time.Second,
 			utils.Cost:       123.0,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaAccounts: true,
 			"*context":         utils.MetaCDRs,
-			utils.MetaAccountSCost: map[string]interface{}{
+			utils.MetaAccountSCost: map[string]any{
 				"Concretes": utils.NewDecimal(400, 0),
 			},
 		},
@@ -3030,10 +3030,10 @@ func TestCDRsProcessEventMockThdsEcCostIfaceMarshalErr(t *testing.T) {
 		utils.MetaAccounts), utils.AccountSv1, rpcInternal)
 
 	cgrEv := &utils.CGREvent{
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaAccounts: true,
 			"*context":         utils.MetaCDRs,
-			utils.MetaAccountSCost: map[string]interface{}{
+			utils.MetaAccountSCost: map[string]any{
 				"Concretes": make(chan string),
 			},
 		},
@@ -3072,10 +3072,10 @@ func TestCDRsProcessEventMockThdsEcCostIfaceUnmarshalErr(t *testing.T) {
 		utils.MetaAccounts), utils.AccountSv1, rpcInternal)
 
 	cgrEv := &utils.CGREvent{
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaAccounts: true,
 			"*context":         utils.MetaCDRs,
-			utils.MetaAccountSCost: map[string]interface{}{
+			utils.MetaAccountSCost: map[string]any{
 				"Charges": "not unmarshable",
 			},
 		},
@@ -3115,15 +3115,15 @@ func TestCDRsV1ProcessEventWithGetMockCacheErrResp(t *testing.T) {
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testID",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.Cost: 123,
 		},
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 
 	evs := []*utils.EventsWithOpts{
 		{
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Cost: 666,
 			},
 		},
@@ -3139,7 +3139,7 @@ func TestCDRsV1ProcessEventWithGetMockCacheErrResp(t *testing.T) {
 
 	expectedVal := []*utils.EventsWithOpts{
 		{
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Cost: 666,
 			},
 		},

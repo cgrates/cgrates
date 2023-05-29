@@ -132,7 +132,7 @@ func (prsrs RSRParsers) Compile() (err error) {
 }
 
 // ParseValue will parse the value out considering converters
-func (prsrs RSRParsers) ParseValue(value interface{}) (out string, err error) {
+func (prsrs RSRParsers) ParseValue(value any) (out string, err error) {
 	for _, prsr := range prsrs {
 		var outPrsr string
 		if outPrsr, err = prsr.ParseValue(value); err != nil {
@@ -168,7 +168,7 @@ func (prsrs RSRParsers) ParseDataProviderWithInterfaces(dP utils.DataProvider) (
 }
 
 // ParseDataProviderWithInterfaces will parse the dataprovider using DPDynamicInterface
-func (prsrs RSRParsers) ParseDataProviderWithInterfaces2(dP utils.DataProvider) (out interface{}, err error) {
+func (prsrs RSRParsers) ParseDataProviderWithInterfaces2(dP utils.DataProvider) (out any, err error) {
 	for i, prsr := range prsrs {
 		outPrsr, err := prsr.ParseDataProviderWithInterfaces2(dP)
 		if err != nil {
@@ -184,8 +184,8 @@ func (prsrs RSRParsers) ParseDataProviderWithInterfaces2(dP utils.DataProvider) 
 }
 
 // GetIfaceFromValues returns an interface for each RSRParser
-func (prsrs RSRParsers) GetIfaceFromValues(evNm utils.DataProvider) (iFaceVals []interface{}, err error) {
-	iFaceVals = make([]interface{}, len(prsrs))
+func (prsrs RSRParsers) GetIfaceFromValues(evNm utils.DataProvider) (iFaceVals []any, err error) {
+	iFaceVals = make([]any, len(prsrs))
 	for i, val := range prsrs {
 		var strVal string
 		if strVal, err = val.ParseDataProvider(evNm); err != nil {
@@ -328,7 +328,7 @@ func (prsr *RSRParser) parseValue(value string) (out string, err error) {
 }
 
 // parseValue the field value from a string
-func (prsr *RSRParser) parseValueInterface(value interface{}) (out interface{}, err error) {
+func (prsr *RSRParser) parseValueInterface(value any) (out any, err error) {
 	for _, rsRule := range prsr.rsrRules {
 		value = rsRule.Process(utils.IfaceAsString(value))
 	}
@@ -336,7 +336,7 @@ func (prsr *RSRParser) parseValueInterface(value interface{}) (out interface{}, 
 }
 
 // ParseValue will parse the value out considering converters
-func (prsr *RSRParser) ParseValue(value interface{}) (out string, err error) {
+func (prsr *RSRParser) ParseValue(value any) (out string, err error) {
 	out = prsr.path
 	if out != utils.DynamicDataPrefix &&
 		strings.HasPrefix(out, utils.DynamicDataPrefix) { // Enforce parsing of static values
@@ -378,7 +378,7 @@ func (prsr *RSRParser) ParseDataProviderWithInterfaces(dP utils.DataProvider) (o
 		}
 		return dynRSR.ParseDataProviderWithInterfaces(dP)
 	}
-	var outIface interface{}
+	var outIface any
 	if outIface, err = utils.DPDynamicInterface(prsr.path, dP); err != nil {
 		return
 	}
@@ -386,7 +386,7 @@ func (prsr *RSRParser) ParseDataProviderWithInterfaces(dP utils.DataProvider) (o
 }
 
 // ParseDataProviderWithInterfaces will parse the dataprovider using DPDynamicInterface
-func (prsr *RSRParser) ParseDataProviderWithInterfaces2(dP utils.DataProvider) (out interface{}, err error) {
+func (prsr *RSRParser) ParseDataProviderWithInterfaces2(dP utils.DataProvider) (out any, err error) {
 	if prsr.dynRules != nil {
 		var dynPath string
 		if dynPath, err = prsr.dynRules.ParseDataProvider(dP); err != nil {
@@ -398,7 +398,7 @@ func (prsr *RSRParser) ParseDataProviderWithInterfaces2(dP utils.DataProvider) (
 		}
 		return dynRSR.ParseDataProviderWithInterfaces2(dP)
 	}
-	var outIface interface{}
+	var outIface any
 	if outIface, err = utils.DPDynamicInterface(prsr.path, dP); err != nil {
 		return
 	}

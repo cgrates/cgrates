@@ -74,10 +74,10 @@ func TestConfigSetGetConfig(t *testing.T) {
 	argsGet := &config.SectionWithAPIOpts{
 		Sections: []string{"attributes"},
 	}
-	var replyGet map[string]interface{}
+	var replyGet map[string]any
 	err = rlcCfg.GetConfig(context.Background(), argsGet, &replyGet)
-	expectedGet := map[string]interface{}{
-		"attributes": map[string]interface{}{
+	expectedGet := map[string]any{
+		"attributes": map[string]any{
 			"accounts_conns":           []string{"*internal"},
 			"enabled":                  true,
 			"indexed_selects":          true,
@@ -88,7 +88,7 @@ func TestConfigSetGetConfig(t *testing.T) {
 			"suffix_indexed_fields":    []string{},
 			"exists_indexed_fields":    []string{},
 			"notexists_indexed_fields": []string{},
-			utils.OptsCfg: map[string]interface{}{
+			utils.OptsCfg: map[string]any{
 				utils.MetaProfileIDs: []*utils.DynamicStringSliceOpt{},
 				utils.MetaProcessRunsCfg: []*utils.DynamicIntOpt{
 					{
@@ -113,8 +113,8 @@ func TestConfigSetGetReloadConfig(t *testing.T) {
 	rlcCfg := NewConfigSv1(cfg)
 	args := &config.SetConfigArgs{
 		Tenant: utils.CGRateSorg,
-		Config: map[string]interface{}{
-			"attributes": map[string]interface{}{
+		Config: map[string]any{
+			"attributes": map[string]any{
 				"accounts_conns":           []string{"*internal"},
 				"enabled":                  true,
 				"indexed_selects":          false,
@@ -125,7 +125,7 @@ func TestConfigSetGetReloadConfig(t *testing.T) {
 				"suffix_indexed_fields":    []string{},
 				"exists_indexed_fields":    []string{},
 				"notexists_indexed_fields": []string{},
-				utils.OptsCfg: map[string]interface{}{
+				utils.OptsCfg: map[string]any{
 					utils.MetaProcessRunsCfg: []*utils.DynamicIntOpt{
 						{
 							Value: 2,
@@ -145,8 +145,8 @@ func TestConfigSetGetReloadConfig(t *testing.T) {
 	argsGet := &config.SectionWithAPIOpts{
 		Sections: []string{"attributes"},
 	}
-	expectedGet := map[string]interface{}{
-		"attributes": map[string]interface{}{
+	expectedGet := map[string]any{
+		"attributes": map[string]any{
 			"accounts_conns":           []string{},
 			"enabled":                  false,
 			"indexed_selects":          true,
@@ -157,7 +157,7 @@ func TestConfigSetGetReloadConfig(t *testing.T) {
 			"suffix_indexed_fields":    []string{},
 			"exists_indexed_fields":    []string{},
 			"notexists_indexed_fields": []string{},
-			utils.OptsCfg: map[string]interface{}{
+			utils.OptsCfg: map[string]any{
 				utils.MetaProfileIDs:           []*utils.DynamicStringSliceOpt{},
 				utils.MetaProcessRunsCfg:       []*utils.DynamicIntOpt{},
 				utils.MetaProfileRunsCfg:       []*utils.DynamicIntOpt{},
@@ -165,7 +165,7 @@ func TestConfigSetGetReloadConfig(t *testing.T) {
 			},
 		},
 	}
-	var replyGet map[string]interface{}
+	var replyGet map[string]any
 	if err := rlcCfg.GetConfig(context.Background(), argsGet, &replyGet); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedGet, replyGet) {
@@ -185,8 +185,8 @@ func TestConfigSetGetReloadConfig(t *testing.T) {
 	argsGetRld := &config.SectionWithAPIOpts{
 		Sections: []string{"attributes"},
 	}
-	expectedGetRld := map[string]interface{}{
-		"attributes": map[string]interface{}{
+	expectedGetRld := map[string]any{
+		"attributes": map[string]any{
 			"accounts_conns":           []string{},
 			"enabled":                  false,
 			"indexed_selects":          true,
@@ -197,7 +197,7 @@ func TestConfigSetGetReloadConfig(t *testing.T) {
 			"suffix_indexed_fields":    []string{},
 			"exists_indexed_fields":    []string{},
 			"notexists_indexed_fields": []string{},
-			utils.OptsCfg: map[string]interface{}{
+			utils.OptsCfg: map[string]any{
 				utils.MetaProfileIDs:           []*utils.DynamicStringSliceOpt{},
 				utils.MetaProcessRunsCfg:       []*utils.DynamicIntOpt{},
 				utils.MetaProfileRunsCfg:       []*utils.DynamicIntOpt{},
@@ -205,7 +205,7 @@ func TestConfigSetGetReloadConfig(t *testing.T) {
 			},
 		},
 	}
-	var replyGetRld map[string]interface{}
+	var replyGetRld map[string]any
 	if err := rlcCfg.GetConfig(context.Background(), argsGetRld, &replyGetRld); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedGetRld, replyGetRld) {

@@ -98,7 +98,7 @@ func TestMatchingAccountsForEventMockingErrors(t *testing.T) {
 	cgrEvent := &utils.CGREvent{
 		ID:     "TestMatchingAccountsForEvent",
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1004",
 		},
 	}
@@ -163,7 +163,7 @@ func TestMatchingAccountsForEvent(t *testing.T) {
 	cgrEvent := &utils.CGREvent{
 		ID:     "TestMatchingAccountsForEvent",
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1003",
 		},
 	}
@@ -178,7 +178,7 @@ func TestMatchingAccountsForEvent(t *testing.T) {
 		t.Error(err)
 	}
 
-	cgrEvent.APIOpts = make(map[string]interface{})
+	cgrEvent.APIOpts = make(map[string]any)
 	if _, err := accnts.matchingAccountsForEvent(context.Background(), "cgrates.org", cgrEvent,
 		[]string{}, false, true); err == nil || err != utils.ErrNotFound {
 		t.Errorf("Expected %+v, received %+v", utils.ErrNotFound, err)
@@ -268,7 +268,7 @@ func TestAccountDebit(t *testing.T) {
 	cgrEvent := &utils.CGREvent{
 		ID:     "TEST_EVENT",
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1004",
 		},
 	}
@@ -407,10 +407,10 @@ func TestAccountsDebitGetUsage(t *testing.T) {
 	cgrEvent := &utils.CGREvent{
 		ID:     "TEST_EVENT_get_usage",
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.Destination: "+445643",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAccountsUsage: "2s",
 		},
 	}
@@ -428,10 +428,10 @@ func TestAccountsDebitGetUsage(t *testing.T) {
 	cgrEvent = &utils.CGREvent{
 		ID:     "TEST_EVENT_get_usage",
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.Destination: "+445643",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaUsage: "2s",
 		},
 	}
@@ -493,10 +493,10 @@ func TestAccountsDebit(t *testing.T) {
 	cgrEvent := &utils.CGREvent{
 		ID:     "TEST_EVENT",
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1004",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAccountsUsage: "not_time_format",
 		},
 	}
@@ -599,7 +599,7 @@ func TestV1AccountsForEvent(t *testing.T) {
 	ev := &utils.CGREvent{
 		ID:     "TestMatchingAccountsForEvent",
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1004",
 		},
 	}
@@ -677,10 +677,10 @@ func TestV1MaxAbstracts(t *testing.T) {
 	ev := &utils.CGREvent{
 		ID:     "TestMatchingAccountsForEvent",
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1004",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaUsage: "210ns",
 		},
 	}
@@ -803,10 +803,10 @@ func TestV1DebitAbstracts1(t *testing.T) {
 	ev := &utils.CGREvent{
 		ID:     "TestV1DebitID",
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1004",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaUsage: "27s",
 		},
 	}
@@ -971,10 +971,10 @@ func TestV1MaxConcretes(t *testing.T) {
 	ev := &utils.CGREvent{
 		ID:     "TestV1DebitID",
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1004",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaUsage: "3m",
 		},
 	}
@@ -1117,10 +1117,10 @@ func TestV1DebitConcretes(t *testing.T) {
 	args := &utils.CGREvent{
 		ID:     "TestV1DebitID",
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1004",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaUsage: "3m",
 		},
 	}
@@ -1295,7 +1295,7 @@ func TestMultipleAccountsErr(t *testing.T) {
 	args := &utils.CGREvent{
 		ID:     "TestMatchingAccountsForEvent",
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1004",
 			utils.Usage:        "210ns",
 		},
@@ -1608,7 +1608,7 @@ func TestV1DebitAbstractsEventCharges(t *testing.T) {
 						Weight: 30,
 					},
 				},
-				Opts: map[string]interface{}{
+				Opts: map[string]any{
 					utils.MetaBalanceLimit: -200.0,
 				},
 				CostIncrements: []*utils.CostIncrement{
@@ -1717,7 +1717,7 @@ func TestV1DebitAbstractsEventCharges(t *testing.T) {
 			cb2ID: { // absorb all costs, standard rating used when primary debiting
 				ID:   cb2ID,
 				Type: utils.MetaConcrete,
-				Opts: map[string]interface{}{
+				Opts: map[string]any{
 					utils.MetaBalanceUnlimited: true,
 				},
 				CostIncrements: []*utils.CostIncrement{
@@ -1742,7 +1742,7 @@ func TestV1DebitAbstractsEventCharges(t *testing.T) {
 	args := &utils.CGREvent{
 		ID:     "TestV1DebitAbstractsEventCharges",
 		Tenant: utils.CGRateSorg,
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaUsage: "7m26s",
 		},
 	}
@@ -2124,7 +2124,7 @@ func TestV1DebitAbstractsEventChargesWithRefundCharges(t *testing.T) {
 						Weight: 30,
 					},
 				},
-				Opts: map[string]interface{}{
+				Opts: map[string]any{
 					utils.MetaBalanceLimit: -200.0,
 				},
 				CostIncrements: []*utils.CostIncrement{
@@ -2233,7 +2233,7 @@ func TestV1DebitAbstractsEventChargesWithRefundCharges(t *testing.T) {
 			cb2ID: { // absorb all costs, standard rating used when primary debiting
 				ID:   cb2ID,
 				Type: utils.MetaConcrete,
-				Opts: map[string]interface{}{
+				Opts: map[string]any{
 					utils.MetaBalanceUnlimited: true,
 				},
 				CostIncrements: []*utils.CostIncrement{
@@ -2258,7 +2258,7 @@ func TestV1DebitAbstractsEventChargesWithRefundCharges(t *testing.T) {
 	args := &utils.CGREvent{
 		ID:     "TestV1DebitAbstractsEventCharges",
 		Tenant: utils.CGRateSorg,
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaUsage: "7m26s",
 		},
 	}
@@ -2350,7 +2350,7 @@ func TestV1DebitAbstractsWithRecurrentFeeNegative(t *testing.T) {
 	args := &utils.CGREvent{
 		ID:     "TestV1DebitAbstractsWithRecurrentFeeNegative",
 		Tenant: "cgrates.org",
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaUsage: "30s",
 		},
 	}
@@ -2485,12 +2485,12 @@ func TestDebitAbstractsMaxDebitAbstractFromConcreteNoConcrBal(t *testing.T) {
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "EV",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.ToR:          utils.MetaVoice,
 			utils.AccountField: "1001",
 			utils.Destination:  "1002",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaUsage:    2 * time.Minute,
 			utils.MetaAccounts: true,
 		},
@@ -2637,11 +2637,11 @@ func TestDebitAbstractUsingRatesWithRoundByIncrement(t *testing.T) {
 	cgrEv := &utils.CGREvent{
 		ID:     "TestDebitAbstractUsingRatesWithRoundByIncrement",
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1001",
 			utils.Destination:  "1234",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.StartTime: time.Date(2020, time.January, 7, 16, 60, 0, 0, time.UTC),
 			utils.MetaUsage: "44825100us",
 		},
@@ -2853,10 +2853,10 @@ func TestV1AccountsForEventProfileIgnoreFilters(t *testing.T) {
 	ev := &utils.CGREvent{
 		ID:     "TestMatchingAccountsForEvent",
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1004",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAccountsProfileIDs:   []string{"AC1"},
 			utils.MetaProfileIgnoreFilters: false,
 		},
@@ -2873,10 +2873,10 @@ func TestV1AccountsForEventProfileIgnoreFilters(t *testing.T) {
 	ev2 := &utils.CGREvent{
 		ID:     "TestMatchingAccountsForEvent",
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1003",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAccountsProfileIDs:   []string{"AC1"},
 			utils.MetaProfileIgnoreFilters: true,
 		},
@@ -2893,10 +2893,10 @@ func TestV1AccountsForEventProfileIgnoreFilters(t *testing.T) {
 	ev3 := &utils.CGREvent{
 		ID:     "TestMatchingAccountsForEvent",
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1003",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAccountsProfileIDs:   []string{"AC1"},
 			utils.MetaProfileIgnoreFilters: time.Second,
 		},
@@ -2971,10 +2971,10 @@ func TestV1MaxAbstractsMetaProfileIgnoreFilters(t *testing.T) {
 	ev := &utils.CGREvent{
 		ID:     "TestMatchingAccountsForEvent",
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1003",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaUsage:                "210ns",
 			utils.OptsAccountsProfileIDs:   []string{"TestV1MaxAbstracts"},
 			utils.MetaProfileIgnoreFilters: true,
@@ -3068,10 +3068,10 @@ func TestV1MaxAbstractsMetaProfileIgnoreFiltersError(t *testing.T) {
 	ev := &utils.CGREvent{
 		ID:     "TestMatchingAccountsForEvent",
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1003",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaUsage:                "210ns",
 			utils.OptsAccountsProfileIDs:   []string{"TestV1MaxAbstracts"},
 			utils.MetaProfileIgnoreFilters: time.Second,
@@ -3145,10 +3145,10 @@ func TestV1DebitAbstractsMetaProfileIgnoreFilters(t *testing.T) {
 	ev := &utils.CGREvent{
 		ID:     "TestV1DebitID",
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1003",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaUsage:                "27s",
 			utils.OptsAccountsProfileIDs:   []string{"TestV1MaxAbstracts"},
 			utils.MetaProfileIgnoreFilters: true,
@@ -3295,10 +3295,10 @@ func TestV1DebitAbstractsMetaProfileIgnoreFiltersError(t *testing.T) {
 	ev := &utils.CGREvent{
 		ID:     "TestV1DebitID",
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1003",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaUsage:                "27s",
 			utils.OptsAccountsProfileIDs:   []string{"TestV1MaxAbstracts"},
 			utils.MetaProfileIgnoreFilters: time.Second,
@@ -3398,11 +3398,11 @@ func TestV1MaxConcretesProfileIgnoreFilters(t *testing.T) {
 	ev := &utils.CGREvent{
 		ID:     "TestV1DebitID",
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField:  "1004",
 			"TestFieldAcccount": "testValue1",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaUsage:                "3m",
 			utils.OptsAccountsProfileIDs:   []string{"TestV1DebitAbstracts"},
 			utils.MetaProfileIgnoreFilters: true,
@@ -3490,11 +3490,11 @@ func TestV1MaxConcretesProfileIgnoreFiltersError(t *testing.T) {
 	ev := &utils.CGREvent{
 		ID:     "TestV1DebitID",
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField:  "1004",
 			"TestFieldAcccount": "testValue1",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaUsage:                "3m",
 			utils.OptsAccountsProfileIDs:   []string{"TestV1DebitAbstracts"},
 			utils.MetaProfileIgnoreFilters: time.Second,
@@ -3593,11 +3593,11 @@ func TestV1DebitConcretesProfileIgnoreFilters(t *testing.T) {
 	args := &utils.CGREvent{
 		ID:     "TestV1DebitID",
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField:  "1004",
 			"TestFieldAcccount": "testValue1",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaUsage:                "3m",
 			utils.OptsAccountsProfileIDs:   []string{"TestV1DebitAbstracts"},
 			utils.MetaProfileIgnoreFilters: true,
@@ -3698,11 +3698,11 @@ func TestV1DebitConcretesProfileIgnoreFiltersError(t *testing.T) {
 	args := &utils.CGREvent{
 		ID:     "TestV1DebitID",
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField:  "1004",
 			"TestFieldAcccount": "testValue1",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaUsage:                "3m",
 			utils.OptsAccountsProfileIDs:   []string{"TestV1DebitAbstracts"},
 			utils.MetaProfileIgnoreFilters: time.Second,

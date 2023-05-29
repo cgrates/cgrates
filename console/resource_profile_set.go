@@ -49,11 +49,11 @@ func (self *CmdSetResourceProfile) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdSetResourceProfile) RpcParams(reset bool) interface{} {
+func (self *CmdSetResourceProfile) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &engine.ResourceProfileWithAPIOpts{
 			ResourceProfile: new(engine.ResourceProfile),
-			APIOpts:         make(map[string]interface{}),
+			APIOpts:         make(map[string]any),
 		}
 	}
 	return self.rpcParams
@@ -63,7 +63,7 @@ func (self *CmdSetResourceProfile) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdSetResourceProfile) RpcResult() interface{} {
+func (self *CmdSetResourceProfile) RpcResult() any {
 	var s string
 	return &s
 }

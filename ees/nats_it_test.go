@@ -101,7 +101,7 @@ func TestNatsEE(t *testing.T) {
 
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Account":     "1001",
 			"Destination": "1002",
 		},
@@ -167,7 +167,7 @@ func TestNatsEE2(t *testing.T) {
 
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Account":     "1001",
 			"Destination": "1002",
 		},

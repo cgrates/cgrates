@@ -72,19 +72,19 @@ func TestDPFieldAsInterface(t *testing.T) {
 		}})
 
 	dP := newDADataProvider(nil, m)
-	eOut := interface{}("simuhuawei;1449573472;00002")
+	eOut := any("simuhuawei;1449573472;00002")
 	if out, err := dP.FieldAsInterface([]string{"Session-Id"}); err != nil {
 		t.Error(err)
 	} else if eOut != out {
 		t.Errorf("Expecting: %v, received: %v", eOut, out)
 	}
-	eOut = interface{}(int64(10000))
+	eOut = any(int64(10000))
 	if out, err := dP.FieldAsInterface([]string{"Requested-Service-Unit", "CC-Money", "Unit-Value", "Value-Digits"}); err != nil {
 		t.Error(err)
 	} else if eOut != out {
 		t.Errorf("Expecting: %v, received: %v", eOut, out)
 	}
-	eOut = interface{}("208708000003") // with filter on second group item
+	eOut = any("208708000003") // with filter on second group item
 	if out, err := dP.FieldAsInterface([]string{"Subscription-Id",
 		"Subscription-Id-Data[1]"}); err != nil { // on index
 		t.Error(err)
@@ -97,14 +97,14 @@ func TestDPFieldAsInterface(t *testing.T) {
 	} else if out != eOut { // can be any result since both entries are matching single filter
 		t.Errorf("expecting: %v, received: %v", eOut, out)
 	}
-	eOut = interface{}("208708000004")
+	eOut = any("208708000004")
 	if out, err := dP.FieldAsInterface([]string{"Subscription-Id",
 		"Subscription-Id-Data[~Subscription-Id-Type(2)|~Value-Digits(20000)]"}); err != nil { // on multiple filter
 		t.Error(err)
 	} else if eOut != out {
 		t.Errorf("Expecting: %v, received: %v", eOut, out)
 	}
-	eOut = interface{}("33708000003")
+	eOut = any("33708000003")
 	if out, err := dP.FieldAsInterface([]string{"Subscription-Id", "Subscription-Id-Data"}); err != nil {
 		t.Error(err)
 	} else if eOut != out {
@@ -744,7 +744,7 @@ func TestUpdateDiamMsgFromNavMap4(t *testing.T) {
 
 func TestDiamAVPAsIface(t *testing.T) {
 	args := diam.NewAVP(435, avp.Mbit, 0, datatype.Address("127.0.0.1"))
-	var exp interface{} = net.IP([]byte("127.0.0.1"))
+	var exp any = net.IP([]byte("127.0.0.1"))
 	if rply, err := diamAVPAsIface(args); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(exp, rply) {
@@ -1104,7 +1104,7 @@ func TestDiamAvpGroupIface(t *testing.T) {
 			diam.NewAVP(432, avp.Mbit, 0, datatype.Unsigned32(99)),
 		}})
 	dP := newDADataProvider(nil, avps)
-	eOut := interface{}(uint32(1))
+	eOut := any(uint32(1))
 	if out, err := dP.FieldAsInterface([]string{"Multiple-Services-Credit-Control", "Rating-Group"}); err != nil {
 		t.Error(err)
 	} else if eOut != out {
@@ -1117,7 +1117,7 @@ func TestDiamAvpGroupIface(t *testing.T) {
 		t.Errorf("Expecting: %v, received: %v", eOut, out)
 	}
 	dP.(*diameterDP).cache = utils.MapStorage{}
-	eOut = interface{}(uint32(99))
+	eOut = any(uint32(99))
 	if out, err := dP.FieldAsInterface([]string{"Multiple-Services-Credit-Control", "Rating-Group[1]"}); err != nil {
 		t.Error(err)
 	} else if eOut != out {

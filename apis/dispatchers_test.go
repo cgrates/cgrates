@@ -47,7 +47,7 @@ func TestDispatchersGetDispatcherProfilesOK(t *testing.T) {
 			},
 			Weight: 10,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaNone,
 		},
 	}
@@ -70,7 +70,7 @@ func TestDispatchersGetDispatcherProfilesOK(t *testing.T) {
 			},
 			Weight: 10,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaNone,
 		},
 	}
@@ -93,7 +93,7 @@ func TestDispatchersGetDispatcherProfilesOK(t *testing.T) {
 			},
 			Weight: 10,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaNone,
 		},
 	}
@@ -158,7 +158,7 @@ func TestDispatchersSetGetRemDispatcherProfile(t *testing.T) {
 		TenantID: &utils.TenantID{
 			ID: "dspID",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaNone,
 		},
 	}
@@ -177,7 +177,7 @@ func TestDispatchersSetGetRemDispatcherProfile(t *testing.T) {
 			},
 			Weight: 10,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaNone,
 		},
 	}
@@ -357,7 +357,7 @@ func TestDispatchersRemoveDispatcherProfileCheckErrors(t *testing.T) {
 			},
 			Weight: 10,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaNone,
 		},
 	}
@@ -409,7 +409,7 @@ func TestDispatchersRemoveDispatcherProfileCheckErrors(t *testing.T) {
 	if err := adms.RemoveDispatcherProfile(context.Background(), &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{
 			ID: "TestDispatchersRemoveDispatcherProfileCheckErrors",
-		}, APIOpts: map[string]interface{}{
+		}, APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaNone,
 		}}, &reply); err == nil || err.Error() != experr {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
@@ -451,7 +451,7 @@ func TestDispatchersRemoveDispatcherProfileCheckErrors(t *testing.T) {
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{
 				ID: "TestDispatchersRemoveDispatcherProfileCheckErrors",
-			}, APIOpts: map[string]interface{}{
+			}, APIOpts: map[string]any{
 				utils.MetaCache: utils.MetaNone,
 			}}, &reply); err == nil || err.Error() != experr {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
@@ -621,7 +621,7 @@ func TestDispatchersGetDispatcherProfileIDsGetOptsErr(t *testing.T) {
 	if err := adms.GetDispatcherProfileIDs(context.Background(),
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.PageLimitOpt: true,
 			},
 		}, &reply); err == nil || err.Error() != experr {
@@ -666,7 +666,7 @@ func TestDispatchersGetDispatcherProfileIDsPaginateErr(t *testing.T) {
 	if err := adms.GetDispatcherProfileIDs(context.Background(),
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.PageLimitOpt:    2,
 				utils.PageOffsetOpt:   4,
 				utils.PageMaxItemsOpt: 5,
@@ -1168,7 +1168,7 @@ func TestDispatchersGetDispatcherHostIDsGetOptsErr(t *testing.T) {
 	if err := adms.GetDispatcherHostIDs(context.Background(),
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.PageLimitOpt: true,
 			},
 		}, &reply); err == nil || err.Error() != experr {
@@ -1215,7 +1215,7 @@ func TestDispatchersGetDispatcherHostIDsPaginateErr(t *testing.T) {
 	if err := adms.GetDispatcherHostIDs(context.Background(),
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.PageLimitOpt:    2,
 				utils.PageOffsetOpt:   4,
 				utils.PageMaxItemsOpt: 5,
@@ -1307,7 +1307,7 @@ func TestDispatchersGetDispatcherProfilesGetIDsErr(t *testing.T) {
 			},
 			Weight: 10,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaNone,
 		},
 	}
@@ -1322,7 +1322,7 @@ func TestDispatchersGetDispatcherProfilesGetIDsErr(t *testing.T) {
 	argsGet := &utils.ArgsItemIDs{
 		Tenant:      "cgrates.org",
 		ItemsPrefix: "test_ID",
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.PageLimitOpt:    2,
 			utils.PageOffsetOpt:   4,
 			utils.PageMaxItemsOpt: 5,
@@ -1399,7 +1399,7 @@ func TestDispatchersGetDispatcherHostsGetIDsErr(t *testing.T) {
 	argsGet := &utils.ArgsItemIDs{
 		Tenant:      "cgrates.org",
 		ItemsPrefix: "test_ID",
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.PageLimitOpt:    2,
 			utils.PageOffsetOpt:   4,
 			utils.PageMaxItemsOpt: 5,

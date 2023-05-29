@@ -49,7 +49,7 @@ func (self *CmdSetChargerProfile) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdSetChargerProfile) RpcParams(reset bool) interface{} {
+func (self *CmdSetChargerProfile) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &apis.ChargerWithAPIOpts{ChargerProfile: new(engine.ChargerProfile)}
 	}
@@ -60,7 +60,7 @@ func (self *CmdSetChargerProfile) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdSetChargerProfile) RpcResult() interface{} {
+func (self *CmdSetChargerProfile) RpcResult() any {
 	var s string
 	return &s
 }

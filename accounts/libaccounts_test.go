@@ -97,10 +97,10 @@ func TestNewAccountBalanceOperators(t *testing.T) {
 }
 
 type testMockCall struct {
-	calls map[string]func(_ *context.Context, _, _ interface{}) error
+	calls map[string]func(_ *context.Context, _, _ any) error
 }
 
-func (tS *testMockCall) Call(ctx *context.Context, method string, args, rply interface{}) error {
+func (tS *testMockCall) Call(ctx *context.Context, method string, args, rply any) error {
 	if call, has := tS.calls[method]; !has {
 		return rpcclient.ErrUnsupporteServiceMethod
 	} else {
@@ -113,8 +113,8 @@ func TestProcessAttributeS(t *testing.T) {
 	engine.Cache.Clear(nil)
 
 	sTestMock := &testMockCall{ // coverage purpose
-		calls: map[string]func(_ *context.Context, _, _ interface{}) error{
-			utils.AttributeSv1ProcessEvent: func(_ *context.Context, _, _ interface{}) error {
+		calls: map[string]func(_ *context.Context, _, _ any) error{
+			utils.AttributeSv1ProcessEvent: func(_ *context.Context, _, _ any) error {
 				return utils.ErrNotImplemented
 			},
 		},
@@ -126,7 +126,7 @@ func TestProcessAttributeS(t *testing.T) {
 	cgrEvent := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "TEST_ID1",
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAttributesProcessRuns: "20",
 		},
 	}
@@ -143,8 +143,8 @@ func TestRateSCostForEvent(t *testing.T) { // coverage purpose
 	engine.Cache.Clear(nil)
 
 	sTestMock := &testMockCall{
-		calls: map[string]func(_ *context.Context, _, _ interface{}) error{
-			utils.RateSv1CostForEvent: func(_ *context.Context, _, _ interface{}) error {
+		calls: map[string]func(_ *context.Context, _, _ any) error{
+			utils.RateSv1CostForEvent: func(_ *context.Context, _, _ any) error {
 				return utils.ErrNotImplemented
 			},
 		},
@@ -156,7 +156,7 @@ func TestRateSCostForEvent(t *testing.T) { // coverage purpose
 	cgrEvent := &utils.CGREvent{
 		Tenant:  "cgrates.org",
 		ID:      "TEST_ID1",
-		APIOpts: make(map[string]interface{}),
+		APIOpts: make(map[string]any),
 	}
 
 	rateSConns := []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRates)}
@@ -171,8 +171,8 @@ func TestRateSCostForEvent2(t *testing.T) { // coverage purpose
 	engine.Cache.Clear(nil)
 
 	sTestMock := &testMockCall{
-		calls: map[string]func(_ *context.Context, _, _ interface{}) error{
-			utils.RateSv1CostForEvent: func(_ *context.Context, args, reply interface{}) error {
+		calls: map[string]func(_ *context.Context, _, _ any) error{
+			utils.RateSv1CostForEvent: func(_ *context.Context, args, reply any) error {
 				rplCast, canCast := reply.(*utils.RateProfileCost)
 				if !canCast {
 					t.Errorf("Wrong argument type : %T", reply)
@@ -194,7 +194,7 @@ func TestRateSCostForEvent2(t *testing.T) { // coverage purpose
 	cgrEvent := &utils.CGREvent{
 		Tenant:  "cgrates.org",
 		ID:      "TEST_ID1",
-		APIOpts: make(map[string]interface{}),
+		APIOpts: make(map[string]any),
 	}
 
 	rateSConns := []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRates)}
@@ -293,8 +293,8 @@ func TestDebitUsageFromConcretesFromRateS(t *testing.T) {
 	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
 	sTestMock := &testMockCall{
-		calls: map[string]func(_ *context.Context, _, _ interface{}) error{
-			utils.RateSv1CostForEvent: func(_ *context.Context, args, reply interface{}) error {
+		calls: map[string]func(_ *context.Context, _, _ any) error{
+			utils.RateSv1CostForEvent: func(_ *context.Context, args, reply any) error {
 				rplCast, canCast := reply.(*utils.RateProfileCost)
 				if !canCast {
 					t.Errorf("Wrong argument type : %T", reply)
@@ -717,7 +717,7 @@ func TestDebitFromBothBalances(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			ID:     "TestV1DebitID",
 			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.AccountField: "2003",
 				utils.Usage:        "300",
 			},

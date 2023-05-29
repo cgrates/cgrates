@@ -179,13 +179,13 @@ func newRedisClient(address, sentinelName string, isCluster bool,
 
 // Cmd function get a connection from the pool.
 // Handles automatic failover in case of network disconnects
-func (rs *RedisStorage) Cmd(rcv interface{}, cmd string, args ...string) error {
+func (rs *RedisStorage) Cmd(rcv any, cmd string, args ...string) error {
 	return rs.client.Do(radix.Cmd(rcv, cmd, args...))
 }
 
 // FlatCmd function get a connection from the pool.
 // Handles automatic failover in case of network disconnects
-func (rs *RedisStorage) FlatCmd(rcv interface{}, cmd, key string, args ...interface{}) error {
+func (rs *RedisStorage) FlatCmd(rcv any, cmd, key string, args ...any) error {
 	return rs.client.Do(radix.FlatCmd(rcv, cmd, key, args...))
 }
 
@@ -768,7 +768,7 @@ func (rs *RedisStorage) SetRateProfileDrv(ctx *context.Context, rpp *utils.RateP
 }
 
 func (rs *RedisStorage) GetRateProfileDrv(ctx *context.Context, tenant, id string) (rpp *utils.RateProfile, err error) {
-	mapRP := make(map[string]interface{})
+	mapRP := make(map[string]any)
 	if err = rs.Cmd(&mapRP, redisHGETALL, utils.RateProfilePrefix+utils.ConcatenatedKey(tenant, id)); err != nil {
 		return
 	} else if len(mapRP) == 0 {

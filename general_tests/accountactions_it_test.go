@@ -180,7 +180,7 @@ func testAccActionsSetActionProfile(t *testing.T) {
 				},
 			},
 		},
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 	var reply string
 	if err := accSRPC.Call(context.Background(), utils.AdminSv1SetActionProfile, actPrf, &reply); err != nil {
@@ -201,10 +201,10 @@ func testAccActionsExecuteAction(t *testing.T) {
 	var reply string
 	if err := accSRPC.Call(context.Background(), utils.ActionSv1ExecuteActions, &utils.CGREvent{
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Account": 1001,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			"BAL_NEW": true,
 			"BAL_ADD": true,
 		},
@@ -219,10 +219,10 @@ func testAccActionsExecuteAction2(t *testing.T) {
 	var reply string
 	if err := accSRPC.Call(context.Background(), utils.ActionSv1ExecuteActions, &utils.CGREvent{
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Account": 1001,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			"BAL_NEW":                   true,
 			"BAL_ADD":                   true,
 			utils.OptsActionsProfileIDs: []string{"CREATE_ACC"},
@@ -304,7 +304,7 @@ func testAccActionsSetActionProfile2(t *testing.T) {
 				},
 			},
 		},
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 	var reply string
 	if err := accSRPC.Call(context.Background(), utils.AdminSv1SetActionProfile, actPrf, &reply); err != nil {
@@ -325,10 +325,10 @@ func testAccActionsExecuteAction3(t *testing.T) {
 	var reply string
 	if err := accSRPC.Call(context.Background(), utils.ActionSv1ExecuteActions, &utils.CGREvent{
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Account": 1001,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsActionsProfileIDs: []string{"REM_ACC"},
 		},
 	}, &reply); err != nil {

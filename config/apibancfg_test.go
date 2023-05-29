@@ -66,7 +66,7 @@ func TestAPIBanCfgAsMapInterface(t *testing.T) {
 		},
 		
 }`
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		"enabled": false,
 		"keys":    []string{"key1", "key2"},
 	}

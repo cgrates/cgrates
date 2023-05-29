@@ -46,7 +46,7 @@ func TestRemoveFilterIndexes(t *testing.T) {
 		Tenant:   "cgrates.org",
 		Context:  "cgrates",
 		ItemType: utils.MetaThresholds,
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaNone,
 		},
 	}
@@ -65,7 +65,7 @@ func TestRemoveFilterIndexes(t *testing.T) {
 		Tenant:   "cgrates.org",
 		Context:  "cgrates",
 		ItemType: utils.MetaRoutes,
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaNone,
 		},
 	}
@@ -84,7 +84,7 @@ func TestRemoveFilterIndexes(t *testing.T) {
 		Tenant:   "cgrates.org",
 		Context:  "cgrates",
 		ItemType: utils.MetaStats,
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaNone,
 		},
 	}
@@ -103,7 +103,7 @@ func TestRemoveFilterIndexes(t *testing.T) {
 		Tenant:   "cgrates.org",
 		Context:  "cgrates",
 		ItemType: utils.MetaResources,
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaNone,
 		},
 	}
@@ -122,7 +122,7 @@ func TestRemoveFilterIndexes(t *testing.T) {
 		Tenant:   "cgrates.org",
 		Context:  "cgrates",
 		ItemType: utils.MetaChargers,
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaNone,
 		},
 	}
@@ -141,7 +141,7 @@ func TestRemoveFilterIndexes(t *testing.T) {
 		Tenant:   "cgrates.org",
 		Context:  "cgrates",
 		ItemType: utils.MetaAccounts,
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaNone,
 		},
 	}
@@ -160,7 +160,7 @@ func TestRemoveFilterIndexes(t *testing.T) {
 		Tenant:   "cgrates.org",
 		Context:  "cgrates",
 		ItemType: utils.MetaActions,
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaNone,
 		},
 	}
@@ -179,7 +179,7 @@ func TestRemoveFilterIndexes(t *testing.T) {
 		Tenant:   "cgrates.org",
 		Context:  "cgrates",
 		ItemType: utils.MetaRateProfiles,
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaNone,
 		},
 	}
@@ -198,7 +198,7 @@ func TestRemoveFilterIndexes(t *testing.T) {
 		Tenant:   "cgrates.org",
 		Context:  "cgrates",
 		ItemType: utils.MetaRateProfileRates,
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaNone,
 		},
 	}
@@ -217,7 +217,7 @@ func TestRemoveFilterIndexes(t *testing.T) {
 		Tenant:   "cgrates.org",
 		Context:  "cgrates",
 		ItemType: utils.MetaDispatchers,
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaNone,
 		},
 	}
@@ -236,7 +236,7 @@ func TestRemoveFilterIndexes(t *testing.T) {
 		Tenant:   "cgrates.org",
 		Context:  "cgrates",
 		ItemType: utils.MetaAttributes,
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaNone,
 		},
 	}
@@ -271,7 +271,7 @@ func TestRemoveFilterIndexes(t *testing.T) {
 // 		Tenant:   "cgrates.org",
 // 		Context:  "cgrates",
 // 		ItemType: utils.MetaThresholds,
-// 		APIOpts: map[string]interface{}{
+// 		APIOpts: map[string]any{
 // 			utils.MetaCache: utils.MetaNone,
 // 		},
 // 	}
@@ -300,7 +300,7 @@ func TestComputeFilterIndexes(t *testing.T) {
 	args := &utils.ArgsComputeFilterIndexes{
 		Tenant:     "cgrates.org",
 		ThresholdS: true,
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaNone,
 		},
 	}
@@ -313,7 +313,7 @@ func TestComputeFilterIndexes(t *testing.T) {
 	args = &utils.ArgsComputeFilterIndexes{
 		Tenant: "cgrates.org",
 		StatS:  true,
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaNone,
 		},
 	}
@@ -326,7 +326,7 @@ func TestComputeFilterIndexes(t *testing.T) {
 	args = &utils.ArgsComputeFilterIndexes{
 		Tenant:    "cgrates.org",
 		ResourceS: true,
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaNone,
 		},
 	}
@@ -339,7 +339,7 @@ func TestComputeFilterIndexes(t *testing.T) {
 	args = &utils.ArgsComputeFilterIndexes{
 		Tenant: "cgrates.org",
 		RouteS: true,
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaNone,
 		},
 	}
@@ -352,7 +352,7 @@ func TestComputeFilterIndexes(t *testing.T) {
 	args = &utils.ArgsComputeFilterIndexes{
 		Tenant:     "cgrates.org",
 		AttributeS: true,
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaNone,
 		},
 	}
@@ -365,7 +365,7 @@ func TestComputeFilterIndexes(t *testing.T) {
 	args = &utils.ArgsComputeFilterIndexes{
 		Tenant:   "cgrates.org",
 		ChargerS: true,
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaNone,
 		},
 	}
@@ -378,7 +378,7 @@ func TestComputeFilterIndexes(t *testing.T) {
 	args = &utils.ArgsComputeFilterIndexes{
 		Tenant:   "cgrates.org",
 		AccountS: true,
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaNone,
 		},
 	}
@@ -391,7 +391,7 @@ func TestComputeFilterIndexes(t *testing.T) {
 	args = &utils.ArgsComputeFilterIndexes{
 		Tenant:  "cgrates.org",
 		ActionS: true,
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaNone,
 		},
 	}
@@ -404,7 +404,7 @@ func TestComputeFilterIndexes(t *testing.T) {
 	args = &utils.ArgsComputeFilterIndexes{
 		Tenant: "cgrates.org",
 		RateS:  true,
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaNone,
 		},
 	}
@@ -417,7 +417,7 @@ func TestComputeFilterIndexes(t *testing.T) {
 	args = &utils.ArgsComputeFilterIndexes{
 		Tenant:      "cgrates.org",
 		DispatcherS: true,
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaNone,
 		},
 	}
@@ -445,7 +445,7 @@ func TestComputeFilterIndexIDs(t *testing.T) {
 	//ThresholdProfile
 	args := &utils.ArgsComputeFilterIndexIDs{
 		Tenant: "cgrates.org",
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaNone,
 		},
 		ThresholdIDs: []string{""},
@@ -458,7 +458,7 @@ func TestComputeFilterIndexIDs(t *testing.T) {
 	//StatQueueProfile
 	args = &utils.ArgsComputeFilterIndexIDs{
 		Tenant: "cgrates.org",
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaNone,
 		},
 		StatIDs: []string{""},
@@ -471,7 +471,7 @@ func TestComputeFilterIndexIDs(t *testing.T) {
 	//ResourceProfile
 	args = &utils.ArgsComputeFilterIndexIDs{
 		Tenant: "cgrates.org",
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaNone,
 		},
 		ResourceIDs: []string{""},
@@ -484,7 +484,7 @@ func TestComputeFilterIndexIDs(t *testing.T) {
 	//RouteProfile
 	args = &utils.ArgsComputeFilterIndexIDs{
 		Tenant: "cgrates.org",
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaNone,
 		},
 		RouteIDs: []string{""},
@@ -497,7 +497,7 @@ func TestComputeFilterIndexIDs(t *testing.T) {
 	//AttributeProfile
 	args = &utils.ArgsComputeFilterIndexIDs{
 		Tenant: "cgrates.org",
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaNone,
 		},
 		AttributeIDs: []string{""},
@@ -510,7 +510,7 @@ func TestComputeFilterIndexIDs(t *testing.T) {
 	//ChargerProfile
 	args = &utils.ArgsComputeFilterIndexIDs{
 		Tenant: "cgrates.org",
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaNone,
 		},
 		ChargerIDs: []string{""},
@@ -523,7 +523,7 @@ func TestComputeFilterIndexIDs(t *testing.T) {
 	//Account
 	args = &utils.ArgsComputeFilterIndexIDs{
 		Tenant: "cgrates.org",
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaNone,
 		},
 		AccountIDs: []string{""},
@@ -536,7 +536,7 @@ func TestComputeFilterIndexIDs(t *testing.T) {
 	//ActionProfile
 	args = &utils.ArgsComputeFilterIndexIDs{
 		Tenant: "cgrates.org",
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaNone,
 		},
 		ActionProfileIDs: []string{""},
@@ -549,7 +549,7 @@ func TestComputeFilterIndexIDs(t *testing.T) {
 	//RateProfile
 	args = &utils.ArgsComputeFilterIndexIDs{
 		Tenant: "cgrates.org",
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaNone,
 		},
 		ActionProfileIDs: []string{""},
@@ -562,7 +562,7 @@ func TestComputeFilterIndexIDs(t *testing.T) {
 	//DispatcherProfile
 	args = &utils.ArgsComputeFilterIndexIDs{
 		Tenant: "cgrates.org",
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaNone,
 		},
 		DispatcherIDs: []string{""},
@@ -593,7 +593,7 @@ func TestGetFilterIndexes(t *testing.T) {
 		Tenant:   "cgrates.org",
 		Context:  "cgrates",
 		ItemType: utils.MetaThresholds,
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaNone,
 		},
 	}
@@ -607,7 +607,7 @@ func TestGetFilterIndexes(t *testing.T) {
 		Tenant:   "cgrates.org",
 		Context:  "cgrates",
 		ItemType: utils.MetaRoutes,
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaNone,
 		},
 	}
@@ -621,7 +621,7 @@ func TestGetFilterIndexes(t *testing.T) {
 		Tenant:   "cgrates.org",
 		Context:  "cgrates",
 		ItemType: utils.MetaStats,
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaNone,
 		},
 	}
@@ -635,7 +635,7 @@ func TestGetFilterIndexes(t *testing.T) {
 		Tenant:   "cgrates.org",
 		Context:  "cgrates",
 		ItemType: utils.MetaResources,
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaNone,
 		},
 	}
@@ -649,7 +649,7 @@ func TestGetFilterIndexes(t *testing.T) {
 		Tenant:   "cgrates.org",
 		Context:  "cgrates",
 		ItemType: utils.MetaChargers,
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaNone,
 		},
 	}
@@ -663,7 +663,7 @@ func TestGetFilterIndexes(t *testing.T) {
 		Tenant:   "cgrates.org",
 		Context:  "cgrates",
 		ItemType: utils.MetaAccounts,
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaNone,
 		},
 	}
@@ -677,7 +677,7 @@ func TestGetFilterIndexes(t *testing.T) {
 		Tenant:   "cgrates.org",
 		Context:  "cgrates",
 		ItemType: utils.MetaActions,
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaNone,
 		},
 	}
@@ -691,7 +691,7 @@ func TestGetFilterIndexes(t *testing.T) {
 		Tenant:   "cgrates.org",
 		Context:  "cgrates",
 		ItemType: utils.MetaRateProfiles,
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaNone,
 		},
 	}
@@ -705,7 +705,7 @@ func TestGetFilterIndexes(t *testing.T) {
 		Tenant:   "cgrates.org",
 		Context:  "cgrates",
 		ItemType: utils.MetaRateProfileRates,
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaNone,
 		},
 	}
@@ -719,7 +719,7 @@ func TestGetFilterIndexes(t *testing.T) {
 		Tenant:   "cgrates.org",
 		Context:  "cgrates",
 		ItemType: utils.MetaDispatchers,
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaNone,
 		},
 	}
@@ -733,7 +733,7 @@ func TestGetFilterIndexes(t *testing.T) {
 		Tenant:   "cgrates.org",
 		Context:  "cgrates",
 		ItemType: utils.MetaAttributes,
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaNone,
 		},
 	}
@@ -760,7 +760,7 @@ func TestGetReverseFilterHealth(t *testing.T) {
 
 	args := &engine.IndexHealthArgs{
 		Tenant: "cgrates.org",
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaNone,
 		},
 	}
@@ -787,7 +787,7 @@ func TestGetThresholdsIndexesHealth(t *testing.T) {
 
 	args := &engine.IndexHealthArgs{
 		Tenant: "cgrates.org",
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaNone,
 		},
 	}
@@ -814,7 +814,7 @@ func TestGetResourcesIndexesHealth(t *testing.T) {
 
 	args := &engine.IndexHealthArgs{
 		Tenant: "cgrates.org",
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaNone,
 		},
 	}
@@ -841,7 +841,7 @@ func TestGetStatsIndexesHealth(t *testing.T) {
 
 	args := &engine.IndexHealthArgs{
 		Tenant: "cgrates.org",
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaNone,
 		},
 	}
@@ -868,7 +868,7 @@ func TestGetRoutesIndexesHealth(t *testing.T) {
 
 	args := &engine.IndexHealthArgs{
 		Tenant: "cgrates.org",
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaNone,
 		},
 	}
@@ -895,7 +895,7 @@ func TestGetAttributesIndexHealth(t *testing.T) {
 
 	args := &engine.IndexHealthArgs{
 		Tenant: "cgrates.org",
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaNone,
 		},
 	}
@@ -922,7 +922,7 @@ func TestGetChargersIndexHealth(t *testing.T) {
 
 	args := &engine.IndexHealthArgs{
 		Tenant: "cgrates.org",
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaNone,
 		},
 	}
@@ -949,7 +949,7 @@ func TestGetDispatchersIndexesHealth(t *testing.T) {
 
 	args := &engine.IndexHealthArgs{
 		Tenant: "cgrates.org",
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaNone,
 		},
 	}
@@ -976,7 +976,7 @@ func TestGetRateProfilesIndexesHealth(t *testing.T) {
 
 	args := &engine.IndexHealthArgs{
 		Tenant: "cgrates.org",
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaNone,
 		},
 	}
@@ -1003,7 +1003,7 @@ func TestGetActionsIndexesHealth(t *testing.T) {
 
 	args := &engine.IndexHealthArgs{
 		Tenant: "cgrates.org",
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaNone,
 		},
 	}
@@ -1030,7 +1030,7 @@ func TestGetAccountsIndexesHealth(t *testing.T) {
 
 	args := &engine.IndexHealthArgs{
 		Tenant: "cgrates.org",
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaNone,
 		},
 	}
@@ -1057,7 +1057,7 @@ func TestGetRateRatesIndexesHealth(t *testing.T) {
 
 	args := &engine.IndexHealthArgs{
 		Tenant: "cgrates.org",
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaNone,
 		},
 	}

@@ -35,14 +35,14 @@ type AttrGetFilterIndexes struct {
 	FilterType  string
 	FilterField string
 	FilterValue string
-	APIOpts     map[string]interface{}
+	APIOpts     map[string]any
 }
 
 type AttrRemFilterIndexes struct {
 	Tenant   string
 	Context  string
 	ItemType string
-	APIOpts  map[string]interface{}
+	APIOpts  map[string]any
 }
 
 func (adms *AdminSv1) RemoveFilterIndexes(ctx *context.Context, arg *AttrRemFilterIndexes, reply *string) (err error) {

@@ -259,7 +259,7 @@ func TestSetToDB(t *testing.T) {
 		t.Errorf("Expected: %v, received: %v", utils.ToJSON(v5), utils.ToJSON(prf))
 	}
 
-	v6 := &engine.DispatcherProfile{Tenant: "cgrates.org", ID: "ID", StrategyParams: make(map[string]interface{})}
+	v6 := &engine.DispatcherProfile{Tenant: "cgrates.org", ID: "ID", StrategyParams: make(map[string]any)}
 	if err := setToDB(context.Background(), dm, utils.MetaDispatchers, v6, true, false); err != nil {
 		t.Fatal(err)
 	}
@@ -320,7 +320,7 @@ func TestSetToDB(t *testing.T) {
 		t.Errorf("Expected: %v, received: %v", utils.ToJSON(v11), utils.ToJSON(prf))
 	}
 
-	v12 := &utils.Account{Tenant: "cgrates.org", ID: "ID", Balances: map[string]*utils.Balance{}, Opts: make(map[string]interface{})}
+	v12 := &utils.Account{Tenant: "cgrates.org", ID: "ID", Balances: map[string]*utils.Balance{}, Opts: make(map[string]any)}
 	if err := setToDB(context.Background(), dm, utils.MetaAccounts, v12, true, false); err != nil {
 		t.Fatal(err)
 	}
@@ -365,12 +365,12 @@ func TestLoaderProcess(t *testing.T) {
 
 	expErrMsg := `unsupported loader action: <"notSupported">`
 	if err := ld.process(context.Background(), nil, utils.MetaAttributes, "notSupported",
-		map[string]interface{}{utils.MetaCache: utils.MetaNone}, true, false); err == nil || err.Error() != expErrMsg {
+		map[string]any{utils.MetaCache: utils.MetaNone}, true, false); err == nil || err.Error() != expErrMsg {
 		t.Errorf("Expected: %v, received: %v", expErrMsg, err)
 	}
 
 	if err := ld.process(context.Background(), nil, utils.MetaAttributes, utils.MetaParse,
-		map[string]interface{}{utils.MetaCache: utils.MetaNone}, true, false); err != nil {
+		map[string]any{utils.MetaCache: utils.MetaNone}, true, false); err != nil {
 		t.Error(err)
 	}
 
@@ -382,7 +382,7 @@ func TestLoaderProcess(t *testing.T) {
 	utils.Logger = utils.NewStdLoggerWithWriter(&buf, "", 7)
 
 	if err := ld.process(context.Background(), profileTest{utils.Tenant: "cgrates.org", utils.ID: "ID"}, utils.MetaAttributes, utils.MetaDryRun,
-		map[string]interface{}{utils.MetaCache: utils.MetaNone}, true, false); err != nil {
+		map[string]any{utils.MetaCache: utils.MetaNone}, true, false); err != nil {
 		t.Error(err)
 	}
 
@@ -393,7 +393,7 @@ func TestLoaderProcess(t *testing.T) {
 
 	v1 := &engine.AttributeProfile{Tenant: "cgrates.org", ID: "ID"}
 	if err := ld.process(context.Background(), v1, utils.MetaAttributes, utils.MetaStore,
-		map[string]interface{}{utils.MetaCache: utils.MetaNone}, true, false); err != nil {
+		map[string]any{utils.MetaCache: utils.MetaNone}, true, false); err != nil {
 		t.Error(err)
 	}
 	if prf, err := dm.GetAttributeProfile(context.Background(), "cgrates.org", "ID", true, true, utils.NonTransactional); err != nil {
@@ -402,7 +402,7 @@ func TestLoaderProcess(t *testing.T) {
 		t.Errorf("Expected: %v, received: %v", utils.ToJSON(v1), utils.ToJSON(prf))
 	}
 	if err := ld.process(context.Background(), v1, utils.MetaAttributes, utils.MetaRemove,
-		map[string]interface{}{utils.MetaCache: utils.MetaNone}, true, false); err != nil {
+		map[string]any{utils.MetaCache: utils.MetaNone}, true, false); err != nil {
 		t.Error(err)
 	}
 	if _, err := dm.GetAttributeProfile(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != utils.ErrNotFound {
@@ -410,9 +410,9 @@ func TestLoaderProcess(t *testing.T) {
 	}
 }
 
-type ccMock map[string]func(ctx *context.Context, args interface{}, reply interface{}) error
+type ccMock map[string]func(ctx *context.Context, args any, reply any) error
 
-func (ccM ccMock) Call(ctx *context.Context, serviceMethod string, args interface{}, reply interface{}) (err error) {
+func (ccM ccMock) Call(ctx *context.Context, serviceMethod string, args any, reply any) (err error) {
 	if call, has := ccM[serviceMethod]; has {
 		return call(ctx, args, reply)
 	}
@@ -420,15 +420,15 @@ func (ccM ccMock) Call(ctx *context.Context, serviceMethod string, args interfac
 }
 
 func TestLoaderProcessCallCahe(t *testing.T) {
-	var reloadCache, clearCache interface{}
+	var reloadCache, clearCache any
 	cfg := config.NewDefaultCGRConfig()
 	cM := engine.NewConnManager(cfg)
 	connID := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCache)
 	tntID := "cgrates.org:ID"
 	iCh := make(chan birpc.ClientConnector, 1)
 	iCh <- ccMock{
-		utils.CacheSv1ReloadCache: func(_ *context.Context, args, _ interface{}) error { reloadCache = args; return nil },
-		utils.CacheSv1Clear:       func(_ *context.Context, args, _ interface{}) error { clearCache = args; return nil },
+		utils.CacheSv1ReloadCache: func(_ *context.Context, args, _ any) error { reloadCache = args; return nil },
+		utils.CacheSv1Clear:       func(_ *context.Context, args, _ any) error { clearCache = args; return nil },
 	}
 	cM.AddInternalConn(connID, utils.CacheSv1, iCh)
 	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items), cfg.CacheCfg(), cM)
@@ -441,7 +441,7 @@ func TestLoaderProcessCallCahe(t *testing.T) {
 	{
 		v := &engine.AttributeProfile{Tenant: "cgrates.org", ID: "ID"}
 		if err := ld.process(context.Background(), v, utils.MetaAttributes, utils.MetaStore,
-			map[string]interface{}{utils.MetaCache: utils.MetaReload}, true, false); err != nil {
+			map[string]any{utils.MetaCache: utils.MetaReload}, true, false); err != nil {
 			t.Error(err)
 		}
 		if prf, err := dm.GetAttributeProfile(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != nil {
@@ -450,14 +450,14 @@ func TestLoaderProcessCallCahe(t *testing.T) {
 			t.Errorf("Expected: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
 		}
 		if exp := (&utils.AttrReloadCacheWithAPIOpts{
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.MetaCache: utils.MetaReload,
 			},
 			AttributeProfileIDs: []string{tntID}}); !reflect.DeepEqual(exp, reloadCache) {
 			t.Errorf("Expected: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(reloadCache))
 		}
 		if exp := (&utils.AttrCacheIDsWithAPIOpts{
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.MetaCache: utils.MetaReload,
 			},
 			CacheIDs: []string{utils.CacheAttributeFilterIndexes}}); !reflect.DeepEqual(exp, clearCache) {
@@ -467,7 +467,7 @@ func TestLoaderProcessCallCahe(t *testing.T) {
 	{
 		v := (&engine.ResourceProfile{Tenant: "cgrates.org", ID: "ID"})
 		if err := ld.process(context.Background(), v, utils.MetaResources, utils.MetaStore,
-			map[string]interface{}{utils.MetaCache: utils.MetaReload}, true, false); err != nil {
+			map[string]any{utils.MetaCache: utils.MetaReload}, true, false); err != nil {
 			t.Error(err)
 		}
 		if prf, err := dm.GetResourceProfile(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != nil {
@@ -476,14 +476,14 @@ func TestLoaderProcessCallCahe(t *testing.T) {
 			t.Errorf("Expected: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
 		}
 		if exp := (&utils.AttrReloadCacheWithAPIOpts{
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.MetaCache: utils.MetaReload,
 			},
 			ResourceProfileIDs: []string{tntID}, ResourceIDs: []string{tntID}}); !reflect.DeepEqual(exp, reloadCache) {
 			t.Errorf("Expected: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(reloadCache))
 		}
 		if exp := (&utils.AttrCacheIDsWithAPIOpts{
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.MetaCache: utils.MetaReload,
 			},
 			CacheIDs: []string{utils.CacheResourceFilterIndexes}}); !reflect.DeepEqual(exp, clearCache) {
@@ -493,7 +493,7 @@ func TestLoaderProcessCallCahe(t *testing.T) {
 	{
 		v := (&engine.StatQueueProfile{Tenant: "cgrates.org", ID: "ID"})
 		if err := ld.process(context.Background(), v, utils.MetaStats, utils.MetaStore,
-			map[string]interface{}{utils.MetaCache: utils.MetaReload}, true, false); err != nil {
+			map[string]any{utils.MetaCache: utils.MetaReload}, true, false); err != nil {
 			t.Error(err)
 		}
 		if prf, err := dm.GetStatQueueProfile(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != nil {
@@ -502,14 +502,14 @@ func TestLoaderProcessCallCahe(t *testing.T) {
 			t.Errorf("Expected: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
 		}
 		if exp := (&utils.AttrReloadCacheWithAPIOpts{
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.MetaCache: utils.MetaReload,
 			},
 			StatsQueueProfileIDs: []string{tntID}, StatsQueueIDs: []string{tntID}}); !reflect.DeepEqual(exp, reloadCache) {
 			t.Errorf("Expected: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(reloadCache))
 		}
 		if exp := (&utils.AttrCacheIDsWithAPIOpts{
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.MetaCache: utils.MetaReload,
 			},
 			CacheIDs: []string{utils.CacheStatFilterIndexes}}); !reflect.DeepEqual(exp, clearCache) {
@@ -520,7 +520,7 @@ func TestLoaderProcessCallCahe(t *testing.T) {
 	{
 		v := (&engine.ThresholdProfile{Tenant: "cgrates.org", ID: "ID"})
 		if err := ld.process(context.Background(), v, utils.MetaThresholds, utils.MetaStore,
-			map[string]interface{}{utils.MetaCache: utils.MetaReload}, true, false); err != nil {
+			map[string]any{utils.MetaCache: utils.MetaReload}, true, false); err != nil {
 			t.Error(err)
 		}
 		if prf, err := dm.GetThresholdProfile(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != nil {
@@ -529,14 +529,14 @@ func TestLoaderProcessCallCahe(t *testing.T) {
 			t.Errorf("Expected: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
 		}
 		if exp := (&utils.AttrReloadCacheWithAPIOpts{
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.MetaCache: utils.MetaReload,
 			},
 			ThresholdProfileIDs: []string{tntID}, ThresholdIDs: []string{tntID}}); !reflect.DeepEqual(exp, reloadCache) {
 			t.Errorf("Expected: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(reloadCache))
 		}
 		if exp := (&utils.AttrCacheIDsWithAPIOpts{
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.MetaCache: utils.MetaReload,
 			},
 			CacheIDs: []string{utils.CacheThresholdFilterIndexes}}); !reflect.DeepEqual(exp, clearCache) {
@@ -547,7 +547,7 @@ func TestLoaderProcessCallCahe(t *testing.T) {
 	{
 		v := (&engine.RouteProfile{Tenant: "cgrates.org", ID: "ID"})
 		if err := ld.process(context.Background(), v, utils.MetaRoutes, utils.MetaStore,
-			map[string]interface{}{utils.MetaCache: utils.MetaReload}, true, false); err != nil {
+			map[string]any{utils.MetaCache: utils.MetaReload}, true, false); err != nil {
 			t.Error(err)
 		}
 		if prf, err := dm.GetRouteProfile(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != nil {
@@ -556,14 +556,14 @@ func TestLoaderProcessCallCahe(t *testing.T) {
 			t.Errorf("Expected: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
 		}
 		if exp := (&utils.AttrReloadCacheWithAPIOpts{
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.MetaCache: utils.MetaReload,
 			},
 			RouteProfileIDs: []string{tntID}}); !reflect.DeepEqual(exp, reloadCache) {
 			t.Errorf("Expected: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(reloadCache))
 		}
 		if exp := (&utils.AttrCacheIDsWithAPIOpts{
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.MetaCache: utils.MetaReload,
 			},
 			CacheIDs: []string{utils.CacheRouteFilterIndexes}}); !reflect.DeepEqual(exp, clearCache) {
@@ -574,7 +574,7 @@ func TestLoaderProcessCallCahe(t *testing.T) {
 	{
 		v := (&engine.ChargerProfile{Tenant: "cgrates.org", ID: "ID"})
 		if err := ld.process(context.Background(), v, utils.MetaChargers, utils.MetaStore,
-			map[string]interface{}{utils.MetaCache: utils.MetaReload}, true, false); err != nil {
+			map[string]any{utils.MetaCache: utils.MetaReload}, true, false); err != nil {
 			t.Error(err)
 		}
 		if prf, err := dm.GetChargerProfile(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != nil {
@@ -583,14 +583,14 @@ func TestLoaderProcessCallCahe(t *testing.T) {
 			t.Errorf("Expected: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
 		}
 		if exp := (&utils.AttrReloadCacheWithAPIOpts{
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.MetaCache: utils.MetaReload,
 			},
 			ChargerProfileIDs: []string{tntID}}); !reflect.DeepEqual(exp, reloadCache) {
 			t.Errorf("Expected: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(reloadCache))
 		}
 		if exp := (&utils.AttrCacheIDsWithAPIOpts{
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.MetaCache: utils.MetaReload,
 			},
 			CacheIDs: []string{utils.CacheChargerFilterIndexes}}); !reflect.DeepEqual(exp, clearCache) {
@@ -599,9 +599,9 @@ func TestLoaderProcessCallCahe(t *testing.T) {
 	}
 
 	{
-		v := (&engine.DispatcherProfile{Tenant: "cgrates.org", ID: "ID", StrategyParams: make(map[string]interface{})})
+		v := (&engine.DispatcherProfile{Tenant: "cgrates.org", ID: "ID", StrategyParams: make(map[string]any)})
 		if err := ld.process(context.Background(), v, utils.MetaDispatchers, utils.MetaStore,
-			map[string]interface{}{utils.MetaCache: utils.MetaReload}, true, false); err != nil {
+			map[string]any{utils.MetaCache: utils.MetaReload}, true, false); err != nil {
 			t.Error(err)
 		}
 		if prf, err := dm.GetDispatcherProfile(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != nil {
@@ -610,14 +610,14 @@ func TestLoaderProcessCallCahe(t *testing.T) {
 			t.Errorf("Expected: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
 		}
 		if exp := (&utils.AttrReloadCacheWithAPIOpts{
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.MetaCache: utils.MetaReload,
 			},
 			DispatcherProfileIDs: []string{tntID}}); !reflect.DeepEqual(exp, reloadCache) {
 			t.Errorf("Expected: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(reloadCache))
 		}
 		if exp := (&utils.AttrCacheIDsWithAPIOpts{
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.MetaCache: utils.MetaReload,
 			},
 			CacheIDs: []string{utils.CacheDispatcherFilterIndexes}}); !reflect.DeepEqual(exp, clearCache) {
@@ -628,7 +628,7 @@ func TestLoaderProcessCallCahe(t *testing.T) {
 	{
 		v := (&utils.RateProfile{Tenant: "cgrates.org", ID: "ID", Rates: map[string]*utils.Rate{}, MinCost: utils.NewDecimal(0, 0), MaxCost: utils.NewDecimal(0, 0)})
 		if err := ld.process(context.Background(), v, utils.MetaRateProfiles, utils.MetaStore,
-			map[string]interface{}{utils.MetaCache: utils.MetaReload}, true, false); err != nil {
+			map[string]any{utils.MetaCache: utils.MetaReload}, true, false); err != nil {
 			t.Error(err)
 		}
 		if prf, err := dm.GetRateProfile(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != nil {
@@ -637,14 +637,14 @@ func TestLoaderProcessCallCahe(t *testing.T) {
 			t.Errorf("Expected: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
 		}
 		if exp := (&utils.AttrReloadCacheWithAPIOpts{
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.MetaCache: utils.MetaReload,
 			},
 			RateProfileIDs: []string{tntID}}); !reflect.DeepEqual(exp, reloadCache) {
 			t.Errorf("Expected: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(reloadCache))
 		}
 		if exp := (&utils.AttrCacheIDsWithAPIOpts{
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.MetaCache: utils.MetaReload,
 			},
 			CacheIDs: []string{utils.CacheRateProfilesFilterIndexes, utils.CacheRateFilterIndexes}}); !reflect.DeepEqual(exp, clearCache) {
@@ -655,7 +655,7 @@ func TestLoaderProcessCallCahe(t *testing.T) {
 	{
 		v := (&engine.ActionProfile{Tenant: "cgrates.org", ID: "ID", Targets: map[string]utils.StringSet{}})
 		if err := ld.process(context.Background(), v, utils.MetaActionProfiles, utils.MetaStore,
-			map[string]interface{}{utils.MetaCache: utils.MetaReload}, true, false); err != nil {
+			map[string]any{utils.MetaCache: utils.MetaReload}, true, false); err != nil {
 			t.Error(err)
 		}
 		if prf, err := dm.GetActionProfile(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != nil {
@@ -664,14 +664,14 @@ func TestLoaderProcessCallCahe(t *testing.T) {
 			t.Errorf("Expected: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
 		}
 		if exp := (&utils.AttrReloadCacheWithAPIOpts{
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.MetaCache: utils.MetaReload,
 			},
 			ActionProfileIDs: []string{tntID}}); !reflect.DeepEqual(exp, reloadCache) {
 			t.Errorf("Expected: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(reloadCache))
 		}
 		if exp := (&utils.AttrCacheIDsWithAPIOpts{
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.MetaCache: utils.MetaReload,
 			},
 			CacheIDs: []string{utils.CacheActionProfiles, utils.CacheActionProfilesFilterIndexes}}); !reflect.DeepEqual(exp, clearCache) {
@@ -684,7 +684,7 @@ func TestLoaderProcessCallCahe(t *testing.T) {
 	{
 		v := (&engine.Filter{Tenant: "cgrates.org", ID: "ID", Rules: make([]*engine.FilterRule, 0)})
 		if err := ld.process(context.Background(), v, utils.MetaFilters, utils.MetaStore,
-			map[string]interface{}{utils.MetaCache: utils.MetaReload}, true, false); err != nil {
+			map[string]any{utils.MetaCache: utils.MetaReload}, true, false); err != nil {
 			t.Error(err)
 		}
 		if prf, err := dm.GetFilter(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != nil {
@@ -693,7 +693,7 @@ func TestLoaderProcessCallCahe(t *testing.T) {
 			t.Errorf("Expected: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
 		}
 		if exp := (&utils.AttrReloadCacheWithAPIOpts{
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.MetaCache: utils.MetaReload,
 			},
 			FilterIDs: []string{tntID}}); !reflect.DeepEqual(exp, reloadCache) {
@@ -707,7 +707,7 @@ func TestLoaderProcessCallCahe(t *testing.T) {
 	{
 		v := (&engine.DispatcherHost{Tenant: "cgrates.org", RemoteHost: &config.RemoteHost{ID: "ID", Address: "127.0.0.1", Transport: utils.MetaJSON}})
 		if err := ld.process(context.Background(), v, utils.MetaDispatcherHosts, utils.MetaStore,
-			map[string]interface{}{utils.MetaCache: utils.MetaReload}, true, false); err != nil {
+			map[string]any{utils.MetaCache: utils.MetaReload}, true, false); err != nil {
 			t.Error(err)
 		}
 		if prf, err := dm.GetDispatcherHost(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != nil {
@@ -716,7 +716,7 @@ func TestLoaderProcessCallCahe(t *testing.T) {
 			t.Errorf("Expected: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
 		}
 		if exp := (&utils.AttrReloadCacheWithAPIOpts{
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.MetaCache: utils.MetaReload,
 			},
 			DispatcherHostIDs: []string{tntID}}); !reflect.DeepEqual(exp, reloadCache) {
@@ -730,9 +730,9 @@ func TestLoaderProcessCallCahe(t *testing.T) {
 	reloadCache, clearCache = nil, nil
 
 	{
-		v := (&utils.Account{Tenant: "cgrates.org", ID: "ID", Balances: map[string]*utils.Balance{}, Opts: make(map[string]interface{})})
+		v := (&utils.Account{Tenant: "cgrates.org", ID: "ID", Balances: map[string]*utils.Balance{}, Opts: make(map[string]any)})
 		if err := ld.process(context.Background(), v, utils.MetaAccounts, utils.MetaStore,
-			map[string]interface{}{utils.MetaCache: utils.MetaReload}, true, false); err != nil {
+			map[string]any{utils.MetaCache: utils.MetaReload}, true, false); err != nil {
 			t.Error(err)
 		}
 		if prf, err := dm.GetAccount(context.Background(), "cgrates.org", "ID"); err != nil {
@@ -741,7 +741,7 @@ func TestLoaderProcessCallCahe(t *testing.T) {
 			t.Errorf("Expected: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
 		}
 		if exp := (&utils.AttrReloadCacheWithAPIOpts{
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.MetaCache: utils.MetaReload,
 			},
 		}); !reflect.DeepEqual(exp, reloadCache) {
@@ -749,7 +749,7 @@ func TestLoaderProcessCallCahe(t *testing.T) {
 		}
 		if exp := (&utils.AttrCacheIDsWithAPIOpts{
 			CacheIDs: []string{utils.CacheAccounts, utils.CacheAccountsFilterIndexes},
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.MetaCache: utils.MetaReload,
 			},
 		}); !reflect.DeepEqual(exp, clearCache) {
@@ -778,7 +778,7 @@ func TestLoaderProcessData(t *testing.T) {
 	}
 	if err := ld.processData(context.Background(), NewStringCSV(`cgrates.org,ID
 cgrates.org,ID2`, utils.CSVSep, -1), fc, utils.MetaAttributes, utils.MetaStore,
-		map[string]interface{}{utils.MetaCache: utils.MetaNone}, true, false); err != nil {
+		map[string]any{utils.MetaCache: utils.MetaNone}, true, false); err != nil {
 		t.Fatal(err)
 	}
 	if prf, err := dm.GetAttributeProfile(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != nil {
@@ -817,7 +817,7 @@ func TestLoaderProcessDataErrors(t *testing.T) {
 	expErrMsg := "inline parse error for string: <*string>"
 	if err := ld.processData(context.Background(), NewStringCSV(`cgrates.org,ID
 cgrates.org,ID2`, utils.CSVSep, -1), fc, utils.MetaAttributes, utils.MetaStore,
-		map[string]interface{}{utils.MetaCache: utils.MetaNone}, true, false); err == nil || err.Error() != expErrMsg {
+		map[string]any{utils.MetaCache: utils.MetaNone}, true, false); err == nil || err.Error() != expErrMsg {
 		t.Errorf("Expected: %q, received: %v", expErrMsg, err)
 	}
 
@@ -831,12 +831,12 @@ cgrates.org,ID2`, utils.CSVSep, -1), fc, utils.MetaAttributes, utils.MetaStore,
 	expErrMsg = `unsupported loader action: <"notSupported">`
 	if err := ld.processData(context.Background(), NewStringCSV(`cgrates.org,ID
 cgrates.org,ID2`, utils.CSVSep, -1), fc, utils.MetaAttributes, "notSupported",
-		map[string]interface{}{utils.MetaCache: utils.MetaNone}, true, false); err == nil || err.Error() != expErrMsg {
+		map[string]any{utils.MetaCache: utils.MetaNone}, true, false); err == nil || err.Error() != expErrMsg {
 		t.Errorf("Expected: %q, received: %v", expErrMsg, err)
 	}
 
 	if err := ld.processData(context.Background(), &CSVFile{csvRdr: csv.NewReader(mockReader{})}, fc, utils.MetaAttributes, "notSupported",
-		map[string]interface{}{utils.MetaCache: utils.MetaNone}, true, false); err != utils.ErrNotFound {
+		map[string]any{utils.MetaCache: utils.MetaNone}, true, false); err != utils.ErrNotFound {
 		t.Errorf("Expected: %q, received: %v", utils.ErrNotFound, err)
 	}
 }
@@ -871,7 +871,7 @@ func TestLoaderProcessFileURL(t *testing.T) {
 		Filename: utils.AttributesCsv,
 		Fields:   fc,
 	}, s.URL+"/ok", utils.EmptyString, utils.MetaStore,
-		map[string]interface{}{utils.MetaCache: utils.MetaNone}, true, urlProvider{}); err != nil {
+		map[string]any{utils.MetaCache: utils.MetaNone}, true, urlProvider{}); err != nil {
 		t.Fatal(err)
 	}
 	if prf, err := dm.GetAttributeProfile(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != nil {
@@ -885,7 +885,7 @@ func TestLoaderProcessFileURL(t *testing.T) {
 		Filename: utils.AttributesCsv,
 		Fields:   fc,
 	}, s.URL+"/notFound", utils.EmptyString, utils.MetaStore,
-		map[string]interface{}{utils.MetaCache: utils.MetaNone}, true, urlProvider{}); err != utils.ErrNotFound {
+		map[string]any{utils.MetaCache: utils.MetaNone}, true, urlProvider{}); err != utils.ErrNotFound {
 		t.Errorf("Expected: %v, received: %v", utils.ErrNotFound, err)
 	}
 
@@ -1060,7 +1060,7 @@ func TestLoaderProcessFolder(t *testing.T) {
 		t.Fatal(err)
 	}
 	if err := ld.processFolder(context.Background(),
-		map[string]interface{}{utils.MetaCache: utils.MetaNone}, true, true); err != nil {
+		map[string]any{utils.MetaCache: utils.MetaNone}, true, true); err != nil {
 		t.Fatal(err)
 	}
 
@@ -1090,7 +1090,7 @@ func TestLoaderProcessFolder(t *testing.T) {
 
 	ld.Locker = mockLock{}
 	if err := ld.processFolder(context.Background(),
-		map[string]interface{}{utils.MetaCache: utils.MetaNone}, true, true); err != utils.ErrExists {
+		map[string]any{utils.MetaCache: utils.MetaNone}, true, true); err != utils.ErrExists {
 		t.Fatal(err)
 	}
 
@@ -1098,7 +1098,7 @@ func TestLoaderProcessFolder(t *testing.T) {
 	ld.ldrCfg.TpInDir = "http://localhost:0"
 	expErrMsg := `path:"http://localhost:0/Attributes.csv" is not reachable`
 	if err := ld.processFolder(context.Background(),
-		map[string]interface{}{utils.MetaCache: utils.MetaNone}, true, true); err == nil || err.Error() != expErrMsg {
+		map[string]any{utils.MetaCache: utils.MetaNone}, true, true); err == nil || err.Error() != expErrMsg {
 		t.Errorf("Expected: %v, received: %v", expErrMsg, err)
 	}
 }
@@ -1164,7 +1164,7 @@ func TestLoaderProcessFolderErrors(t *testing.T) {
 
 	expErrMsg := "inline parse error for string: <*string>"
 	if err := ld.processFolder(context.Background(),
-		map[string]interface{}{utils.MetaCache: utils.MetaNone}, true, true); err == nil || err.Error() != expErrMsg {
+		map[string]any{utils.MetaCache: utils.MetaNone}, true, true); err == nil || err.Error() != expErrMsg {
 		t.Errorf("Expected: %v, received: %v", expErrMsg, err)
 	}
 
@@ -1184,7 +1184,7 @@ func TestLoaderProcessFolderErrors(t *testing.T) {
 	utils.Logger = utils.NewStdLoggerWithWriter(&buf, "", 7)
 
 	if err := ld.processFolder(context.Background(),
-		map[string]interface{}{utils.MetaCache: utils.MetaNone}, true, false); err != nil {
+		map[string]any{utils.MetaCache: utils.MetaNone}, true, false); err != nil {
 		t.Fatal(err)
 	}
 
@@ -1371,7 +1371,7 @@ func TestLoaderProcessZipErrors(t *testing.T) {
 
 	expErrMsg := "inline parse error for string: <*string>"
 	if err := ld.processZip(context.Background(),
-		map[string]interface{}{utils.MetaCache: utils.MetaNone}, true, true, r); err == nil || err.Error() != expErrMsg {
+		map[string]any{utils.MetaCache: utils.MetaNone}, true, true, r); err == nil || err.Error() != expErrMsg {
 		t.Errorf("Expected: %v, received: %v", expErrMsg, err)
 	}
 
@@ -1386,7 +1386,7 @@ func TestLoaderProcessZipErrors(t *testing.T) {
 	var buf bytes.Buffer
 	utils.Logger = utils.NewStdLoggerWithWriter(&buf, "", 7)
 	if err := ld.processZip(context.Background(),
-		map[string]interface{}{utils.MetaCache: utils.MetaNone}, true, false, r); err != nil {
+		map[string]any{utils.MetaCache: utils.MetaNone}, true, false, r); err != nil {
 		t.Fatal(err)
 	}
 
@@ -1401,7 +1401,7 @@ func TestLoaderProcessZipErrors(t *testing.T) {
 
 	ld.Locker = mockLock{}
 	if err := ld.processZip(context.Background(),
-		map[string]interface{}{utils.MetaCache: utils.MetaNone}, true, true, r); err != utils.ErrExists {
+		map[string]any{utils.MetaCache: utils.MetaNone}, true, true, r); err != utils.ErrExists {
 		t.Fatal(err)
 	}
 

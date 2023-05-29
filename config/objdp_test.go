@@ -29,7 +29,7 @@ func TestNewObjectDP(t *testing.T) {
 	object := "cgrates.org"
 	objDp := &ObjectDP{
 		obj:   "cgrates.org",
-		cache: make(map[string]interface{}),
+		cache: make(map[string]any),
 	}
 	if received := NewObjectDP(object); !reflect.DeepEqual(objDp, received) {
 		t.Errorf("Expected %+v, received %+v", objDp, received)
@@ -39,7 +39,7 @@ func TestNewObjectDP(t *testing.T) {
 func TestStringObjDP(t *testing.T) {
 	objDp := &ObjectDP{
 		obj:   "cgrates.org",
-		cache: make(map[string]interface{}),
+		cache: make(map[string]any),
 	}
 	expected := `"cgrates.org"`
 	if received := objDp.String(); !reflect.DeepEqual(expected, received) {
@@ -51,7 +51,7 @@ func TestFieldAsInterfaceObjDPSliceOfInt(t *testing.T) {
 	object := []string{"1"}
 	objDp := &ObjectDP{
 		obj:   []int{12, 13},
-		cache: make(map[string]interface{}),
+		cache: make(map[string]any),
 	}
 	expected := 13
 	if received, err := objDp.FieldAsInterface(object); err != nil {
@@ -65,7 +65,7 @@ func TestFieldAsInterfaceObjDPInvalidSyntax(t *testing.T) {
 	object := []string{"1]"}
 	objDp := &ObjectDP{
 		obj:   []int{12, 13},
-		cache: make(map[string]interface{}),
+		cache: make(map[string]any),
 	}
 	expected := "strconv.Atoi: parsing \"1]\": invalid syntax"
 	if _, err := objDp.FieldAsInterface(object); err == nil || err.Error() != expected {
@@ -77,7 +77,7 @@ func TestFieldAsInterfaceObjDPInvalidFormat(t *testing.T) {
 	object := []string{"invalid[path"}
 	objDp := &ObjectDP{
 		obj:   []int{12, 13},
-		cache: make(map[string]interface{}),
+		cache: make(map[string]any),
 	}
 	expected := "filter rule <path> needs to end in ]"
 	if _, err := objDp.FieldAsInterface(object); err == nil || err.Error() != expected {
@@ -88,7 +88,7 @@ func TestFieldAsInterfaceObjDPInvalidFormat(t *testing.T) {
 func TestFieldAsInterfaceObjDPCache(t *testing.T) {
 	object := []string{"validPath"}
 	objDp := &ObjectDP{
-		cache: map[string]interface{}{
+		cache: map[string]any{
 			"validPath": "cgrates.org",
 		},
 	}
@@ -104,7 +104,7 @@ func TestFieldAsInterfaceObjDPChangedObject(t *testing.T) {
 	object := []string{"0[1]"}
 	objDp := &ObjectDP{
 		obj:   []int{1},
-		cache: map[string]interface{}{},
+		cache: map[string]any{},
 	}
 	expected := "unsupported field kind: int"
 	if _, err := objDp.FieldAsInterface(object); err == nil || err.Error() != expected {
@@ -115,13 +115,13 @@ func TestFieldAsInterfaceObjDPChangedObject(t *testing.T) {
 func TestFieldAsInterfaceObjDPValid1(t *testing.T) {
 	object := []string{"0[1]"}
 	objDp := &ObjectDP{
-		obj: []map[string]interface{}{
+		obj: []map[string]any{
 			{
 				"1": 1,
 				"2": 2,
 			},
 		},
-		cache: map[string]interface{}{},
+		cache: map[string]any{},
 	}
 	if rcv, err := objDp.FieldAsInterface(object); err != nil {
 		t.Error(err)
@@ -133,13 +133,13 @@ func TestFieldAsInterfaceObjDPValid1(t *testing.T) {
 func TestFieldAsStringObjDP(t *testing.T) {
 	object := []string{"0[1]"}
 	objDp := &ObjectDP{
-		obj: []map[string]interface{}{
+		obj: []map[string]any{
 			{
 				"1": 1,
 				"2": 2,
 			},
 		},
-		cache: map[string]interface{}{},
+		cache: map[string]any{},
 	}
 	if rcv, err := objDp.FieldAsString(object); err != nil {
 		t.Error(err)
@@ -152,7 +152,7 @@ func TestFieldAsStringError(t *testing.T) {
 	object := []string{"0[1]"}
 	objDp := &ObjectDP{
 		obj:   []int{1},
-		cache: map[string]interface{}{},
+		cache: map[string]any{},
 	}
 	expected := "unsupported field kind: int"
 	if _, err := objDp.FieldAsString(object); err == nil || err.Error() != expected {
@@ -179,7 +179,7 @@ func TestFieldAsInterfaceObjDPMultiplePaths(t *testing.T) {
 			Field4: 2,
 			Field5: []string{"1", "2"},
 		},
-		cache: map[string]interface{}{},
+		cache: map[string]any{},
 	}
 	if rcv, err := objDp.FieldAsInterface([]string{"Field3", "Field2"}); err != nil {
 		t.Error(err)
@@ -213,7 +213,7 @@ func TestFieldAsInterface(t *testing.T) {
 			Field4: 2,
 			Field5: []string{""},
 		},
-		cache: map[string]interface{}{
+		cache: map[string]any{
 			"field1": nil,
 		},
 	}

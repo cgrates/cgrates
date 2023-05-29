@@ -55,7 +55,7 @@ func TestSessionOriginIDOpts(t *testing.T) {
 	}
 	//normal check
 	session = &Session{
-		OptsStart: map[string]interface{}{
+		OptsStart: map[string]any{
 			utils.MetaOriginID: "testID",
 		},
 	}
@@ -98,7 +98,7 @@ func TestSessionClone(t *testing.T) {
 				NextAutoDebit: &tTime2,
 			},
 		},
-		OptsStart: map[string]interface{}{
+		OptsStart: map[string]any{
 			utils.MetaOriginID: "originID",
 		},
 	}
@@ -123,7 +123,7 @@ func TestSessionClone(t *testing.T) {
 				NextAutoDebit: &tTime2,
 			},
 		},
-		OptsStart: map[string]interface{}{
+		OptsStart: map[string]any{
 			utils.MetaOriginID: "originID",
 		},
 	}
@@ -132,7 +132,7 @@ func TestSessionClone(t *testing.T) {
 		t.Errorf("Expecting: %s, received: %s", utils.ToJSON(eOut), utils.ToJSON(rcv))
 	}
 	//check clone
-	rcv.OptsStart = map[string]interface{}{
+	rcv.OptsStart = map[string]any{
 		utils.MetaOriginID: "neworiginID",
 	}
 
@@ -153,7 +153,7 @@ func TestSessionClone(t *testing.T) {
 }
 
 func TestSessionAsCGREventsRawEvent(t *testing.T) {
-	ev := map[string]interface{}{
+	ev := map[string]any{
 		utils.EventName:    "TEST_EVENT",
 		utils.ToR:          utils.MetaVoice,
 		utils.OriginID:     "123451",
@@ -169,7 +169,7 @@ func TestSessionAsCGREventsRawEvent(t *testing.T) {
 		utils.Cost:         12.12,
 	}
 	s := &Session{
-		OptsStart: map[string]interface{}{
+		OptsStart: map[string]any{
 			utils.MetaOriginID: "RandomoriginID",
 		},
 		Tenant:     "cgrates.org",
@@ -182,7 +182,7 @@ func TestSessionAsCGREventsRawEvent(t *testing.T) {
 }
 
 func TestSessionAsCGREvents(t *testing.T) {
-	startEv := map[string]interface{}{
+	startEv := map[string]any{
 		utils.EventName:    "TEST_EVENT",
 		utils.ToR:          utils.MetaVoice,
 		utils.OriginID:     "123451",
@@ -197,7 +197,7 @@ func TestSessionAsCGREvents(t *testing.T) {
 		utils.Usage:        2 * time.Second,
 		utils.Cost:         12.12,
 	}
-	ev := map[string]interface{}{
+	ev := map[string]any{
 		utils.EventName:    "TEST_EVENT2",
 		utils.ToR:          utils.MetaVoice,
 		utils.OriginID:     "123451",
@@ -213,7 +213,7 @@ func TestSessionAsCGREvents(t *testing.T) {
 		utils.Cost:         12.13,
 	}
 	s := &Session{
-		OptsStart: map[string]interface{}{
+		OptsStart: map[string]any{
 			utils.MetaOriginID: "RandomoriginID",
 		},
 		Tenant:     "cgrates.org",
@@ -236,7 +236,7 @@ func TestSessionAsCGREvents(t *testing.T) {
 }
 
 func TestSessionAsExternalSessions(t *testing.T) {
-	startEv := map[string]interface{}{
+	startEv := map[string]any{
 		utils.EventName:    "TEST_EVENT",
 		utils.ToR:          utils.MetaVoice,
 		utils.OriginID:     "123451",
@@ -251,7 +251,7 @@ func TestSessionAsExternalSessions(t *testing.T) {
 		utils.Usage:        2 * time.Second,
 		utils.Cost:         12.12,
 	}
-	ev := map[string]interface{}{
+	ev := map[string]any{
 		utils.EventName:    "TEST_EVENT2",
 		utils.ToR:          utils.MetaVoice,
 		utils.OriginID:     "123451",
@@ -269,7 +269,7 @@ func TestSessionAsExternalSessions(t *testing.T) {
 	}
 	tTime := time.Date(2020, time.April, 18, 23, 0, 0, 0, time.UTC)
 	s := &Session{
-		OptsStart: map[string]interface{}{
+		OptsStart: map[string]any{
 			utils.MetaOriginID: "RandomoriginID",
 		},
 		Tenant:        "cgrates.org",
@@ -318,7 +318,7 @@ func TestSessionAsExternalSessions(t *testing.T) {
 
 /*
 	func TestSessionAsExternalSessions2(t *testing.T) {
-		startEv := map[string]interface{}{
+		startEv := map[string]any{
 			utils.EventName:    "TEST_EVENT",
 			utils.ToR:          utils.MetaVoice,
 			utils.OriginID:     "123451",
@@ -333,7 +333,7 @@ func TestSessionAsExternalSessions(t *testing.T) {
 			utils.Usage:        2 * time.Second,
 			utils.Cost:         12.12,
 		}
-		ev := map[string]interface{}{
+		ev := map[string]any{
 			utils.EventName:    "TEST_EVENT2",
 			utils.ToR:          utils.MetaVoice,
 			utils.OriginID:     "123451",
@@ -350,7 +350,7 @@ func TestSessionAsExternalSessions(t *testing.T) {
 			utils.Cost:         12.13,
 		}
 		s := &Session{
-			OptsStart: map[string]interface{}{
+			OptsStart: map[string]any{
 				utils.MetaOriginID: "RandomoriginID",
 			},
 			Tenant:        "cgrates.org",
@@ -397,7 +397,7 @@ func TestSessionAsExternalSessions(t *testing.T) {
 }
 
 	func TestSessionAsExternalSessions3(t *testing.T) {
-		startEv := map[string]interface{}{
+		startEv := map[string]any{
 			utils.EventName:    "TEST_EVENT",
 			utils.ToR:          utils.MetaVoice,
 			utils.OriginID:     "123451",
@@ -412,7 +412,7 @@ func TestSessionAsExternalSessions(t *testing.T) {
 			utils.Usage:        2 * time.Second,
 			utils.Cost:         12.12,
 		}
-		ev := map[string]interface{}{
+		ev := map[string]any{
 			utils.EventName:    "TEST_EVENT2",
 			utils.ToR:          utils.MetaVoice,
 			utils.OriginID:     "123451",
@@ -431,7 +431,7 @@ func TestSessionAsExternalSessions(t *testing.T) {
 		tTime := time.Date(2020, time.April, 18, 23, 0, 0, 0, time.UTC)
 
 		s := &Session{
-			OptsStart: map[string]interface{}{
+			OptsStart: map[string]any{
 				utils.MetaOriginID: "RandomCGRID",
 			},
 			Tenant:        "cgrates.org",
@@ -491,7 +491,7 @@ func TestSessiontotalUsage(t *testing.T) {
 	tTime := time.Now()
 	tTime2 := time.Date(2020, time.April, 18, 23, 0, 0, 0, time.UTC)
 	session = &Session{
-		OptsStart: map[string]interface{}{
+		OptsStart: map[string]any{
 			utils.MetaOriginID: "originID",
 		},
 		Tenant:        "cgrates.org",
@@ -552,7 +552,7 @@ func TestSessionstopDebitLoops(t *testing.T) {
 }
 
 func TestUpdateSRuns(t *testing.T) {
-	startEv := map[string]interface{}{
+	startEv := map[string]any{
 		utils.EventName:    "TEST_EVENT",
 		utils.ToR:          utils.MetaVoice,
 		utils.OriginID:     "123451",
@@ -567,7 +567,7 @@ func TestUpdateSRuns(t *testing.T) {
 		utils.Usage:        2 * time.Second,
 		utils.Cost:         12.12,
 	}
-	ev := map[string]interface{}{
+	ev := map[string]any{
 		utils.EventName:    "TEST_EVENT2",
 		utils.ToR:          utils.MetaVoice,
 		utils.OriginID:     "123451",
@@ -584,7 +584,7 @@ func TestUpdateSRuns(t *testing.T) {
 		utils.Cost:         12.13,
 	}
 	s := &Session{
-		OptsStart: map[string]interface{}{
+		OptsStart: map[string]any{
 			utils.MetaOriginID: "RandomOriginID",
 		},
 		Tenant:        "cgrates.org",
@@ -595,7 +595,7 @@ func TestUpdateSRuns(t *testing.T) {
 			TotalUsage: 2 * time.Second,
 		}},
 	}
-	updEv := map[string]interface{}{
+	updEv := map[string]any{
 		utils.EventName:   "TEST_EVENT2",
 		utils.Tenant:      "cgrates.org",
 		utils.RequestType: utils.MetaPostpaid,

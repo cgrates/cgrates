@@ -61,9 +61,9 @@ func (ldrs *LoaderSCfgs) Load(ctx *context.Context, jsnCfg ConfigDB, cfg *CGRCon
 	return
 }
 
-// AsMapInterface returns the config as a map[string]interface{}
-func (ldrs LoaderSCfgs) AsMapInterface(separator string) interface{} {
-	mp := make([]map[string]interface{}, len(ldrs))
+// AsMapInterface returns the config as a map[string]any
+func (ldrs LoaderSCfgs) AsMapInterface(separator string) any {
+	mp := make([]map[string]any, len(ldrs))
 	for i, item := range ldrs {
 		mp[i] = item.AsMapInterface(separator)
 	}
@@ -301,15 +301,15 @@ func (l LoaderSCfg) Clone() (cln *LoaderSCfg) {
 	return
 }
 
-// AsMapInterface returns the config as a map[string]interface{}
-func (lData LoaderDataType) AsMapInterface(separator string) (initialMP map[string]interface{}) {
-	initialMP = map[string]interface{}{
+// AsMapInterface returns the config as a map[string]any
+func (lData LoaderDataType) AsMapInterface(separator string) (initialMP map[string]any) {
+	initialMP = map[string]any{
 		utils.TypeCf:      lData.Type,
 		utils.FilenameCfg: lData.Filename,
 		utils.FlagsCfg:    lData.Flags.SliceFlags(),
 	}
 
-	fields := make([]map[string]interface{}, len(lData.Fields))
+	fields := make([]map[string]any, len(lData.Fields))
 	for i, item := range lData.Fields {
 		fields[i] = item.AsMapInterface(separator)
 	}
@@ -317,9 +317,9 @@ func (lData LoaderDataType) AsMapInterface(separator string) (initialMP map[stri
 	return
 }
 
-// AsMapInterface returns the config as a map[string]interface{}
-func (l LoaderSCfg) AsMapInterface(separator string) (mp map[string]interface{}) {
-	mp = map[string]interface{}{
+// AsMapInterface returns the config as a map[string]any
+func (l LoaderSCfg) AsMapInterface(separator string) (mp map[string]any) {
+	mp = map[string]any{
 		utils.IDCfg:           l.ID,
 		utils.TenantCfg:       l.Tenant,
 		utils.EnabledCfg:      l.Enabled,
@@ -329,7 +329,7 @@ func (l LoaderSCfg) AsMapInterface(separator string) (mp map[string]interface{})
 		utils.TpOutDirCfg:     l.TpOutDir,
 		utils.RunDelayCfg:     "0",
 		utils.ActionCfg:       l.Action,
-		utils.OptsCfg: map[string]interface{}{
+		utils.OptsCfg: map[string]any{
 			utils.MetaCache:       l.Opts.Cache,
 			utils.MetaWithIndex:   l.Opts.WithIndex,
 			utils.MetaForceLock:   l.Opts.ForceLock,
@@ -337,7 +337,7 @@ func (l LoaderSCfg) AsMapInterface(separator string) (mp map[string]interface{})
 		},
 	}
 	if l.Data != nil {
-		data := make([]map[string]interface{}, len(l.Data))
+		data := make([]map[string]any, len(l.Data))
 		for i, item := range l.Data {
 			data[i] = item.AsMapInterface(separator)
 		}
@@ -350,7 +350,7 @@ func (l LoaderSCfg) AsMapInterface(separator string) (mp map[string]interface{})
 		mp[utils.CachesConnsCfg] = getInternalJSONConns(l.CacheSConns)
 	}
 	if l.Cache != nil {
-		cache := make(map[string]interface{}, len(l.Cache))
+		cache := make(map[string]any, len(l.Cache))
 		for key, value := range l.Cache {
 			cache[key] = value.AsMapInterface()
 		}

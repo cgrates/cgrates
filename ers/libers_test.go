@@ -47,12 +47,12 @@ func TestLibErsMergePartialEvents(t *testing.T) {
 		{
 			Tenant: "cgrates.org",
 			ID:     "ev1",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"EvField1":       "Value1",
 				"EvField2":       "Value4",
 				utils.AnswerTime: 6.,
 			},
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				"Field1": "Value1",
 				"Field2": "Value2",
 			},
@@ -60,12 +60,12 @@ func TestLibErsMergePartialEvents(t *testing.T) {
 		{
 			Tenant: "cgrates.org",
 			ID:     "ev2",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"EvField3":       "Value1",
 				"EvField2":       "Value2",
 				utils.AnswerTime: 4.,
 			},
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				"Field4": "Value2",
 				"Field2": "Value3",
 			},
@@ -73,13 +73,13 @@ func TestLibErsMergePartialEvents(t *testing.T) {
 		{
 			Tenant: "cgrates.org",
 			ID:     "ev3",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"EvField2":       "Value2",
 				"EvField4":       "Value4",
 				"EvField3":       "Value3",
 				utils.AnswerTime: 8.,
 			},
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				"Field3": "Value3",
 				"Field4": "Value4",
 			},
@@ -87,14 +87,14 @@ func TestLibErsMergePartialEvents(t *testing.T) {
 	}
 	exp := &utils.CGREvent{
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AnswerTime: 8.,
 			"EvField1":       "Value1",
 			"EvField2":       "Value2",
 			"EvField3":       "Value3",
 			"EvField4":       "Value4",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			"Field1": "Value1",
 			"Field2": "Value2",
 			"Field3": "Value3",

@@ -78,7 +78,7 @@ func (httpEE *HTTPjsonMapEE) Cfg() *config.EventExporterCfg { return httpEE.cfg 
 
 func (httpEE *HTTPjsonMapEE) Connect() (_ error) { return }
 
-func (httpEE *HTTPjsonMapEE) ExportEvent(ctx *context.Context, content, _ interface{}) (err error) {
+func (httpEE *HTTPjsonMapEE) ExportEvent(ctx *context.Context, content, _ any) (err error) {
 	httpEE.reqs.get()
 	defer httpEE.reqs.done()
 	pReq := content.(*HTTPPosterRequest)
@@ -94,9 +94,9 @@ func (httpEE *HTTPjsonMapEE) Close() (_ error) { return }
 
 func (httpEE *HTTPjsonMapEE) GetMetrics() *utils.SafeMapStorage { return httpEE.dc }
 
-func (httpEE *HTTPjsonMapEE) ExtraData(ev *utils.CGREvent) interface{} { return nil }
+func (httpEE *HTTPjsonMapEE) ExtraData(ev *utils.CGREvent) any { return nil }
 
-func (httpEE *HTTPjsonMapEE) PrepareMap(mp *utils.CGREvent) (interface{}, error) {
+func (httpEE *HTTPjsonMapEE) PrepareMap(mp *utils.CGREvent) (any, error) {
 	body, err := json.Marshal(mp.Event)
 	return &HTTPPosterRequest{
 		Header: httpEE.hdr,
@@ -104,8 +104,8 @@ func (httpEE *HTTPjsonMapEE) PrepareMap(mp *utils.CGREvent) (interface{}, error)
 	}, err
 }
 
-func (httpEE *HTTPjsonMapEE) PrepareOrderMap(mp *utils.OrderedNavigableMap) (interface{}, error) {
-	valMp := make(map[string]interface{})
+func (httpEE *HTTPjsonMapEE) PrepareOrderMap(mp *utils.OrderedNavigableMap) (any, error) {
+	valMp := make(map[string]any)
 	for el := mp.GetFirstElement(); el != nil; el = el.Next() {
 		path := el.Value
 		nmIt, _ := mp.Field(path)
@@ -119,7 +119,7 @@ func (httpEE *HTTPjsonMapEE) PrepareOrderMap(mp *utils.OrderedNavigableMap) (int
 	}, err
 }
 
-func prepareRequest(ctx *context.Context, addr, cType string, content interface{}, hdr http.Header) (req *http.Request, err error) {
+func prepareRequest(ctx *context.Context, addr, cType string, content any, hdr http.Header) (req *http.Request, err error) {
 	var body io.Reader
 	if cType == utils.ContentForm {
 		body = strings.NewReader(content.(url.Values).Encode())

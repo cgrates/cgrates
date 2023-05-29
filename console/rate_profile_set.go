@@ -47,10 +47,10 @@ func (self *CmdSetRateProfile) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdSetRateProfile) RpcParams(reset bool) interface{} {
+func (self *CmdSetRateProfile) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &utils.APIRateProfile{
-			APIOpts: make(map[string]interface{}),
+			APIOpts: make(map[string]any),
 		}
 	}
 	return self.rpcParams
@@ -60,7 +60,7 @@ func (self *CmdSetRateProfile) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdSetRateProfile) RpcResult() interface{} {
+func (self *CmdSetRateProfile) RpcResult() any {
 	var s string
 	return &s
 }

@@ -29,7 +29,7 @@ import (
 )
 
 // getSectionAsMap returns a section from config as a map[string]interface
-func (cfg *CGRConfig) getSectionAsMap(section string) (mp interface{}, err error) {
+func (cfg *CGRConfig) getSectionAsMap(section string) (mp any, err error) {
 	if sec, has := cfg.sections.Get(section); has {
 		mp = sec.AsMapInterface(cfg.GeneralCfg().RSRSep)
 		return
@@ -40,7 +40,7 @@ func (cfg *CGRConfig) getSectionAsMap(section string) (mp interface{}, err error
 
 // ReloadArgs the API params for V1ReloadConfig
 type ReloadArgs struct {
-	APIOpts map[string]interface{}
+	APIOpts map[string]any
 	Tenant  string
 	Section string
 	DryRun  bool
@@ -87,18 +87,18 @@ func (cfg *CGRConfig) V1ReloadConfig(ctx *context.Context, args *ReloadArgs, rep
 
 // SectionWithAPIOpts the API params for GetConfig
 type SectionWithAPIOpts struct {
-	APIOpts  map[string]interface{}
+	APIOpts  map[string]any
 	Tenant   string
 	Sections []string
 }
 
 // V1GetConfig will retrieve from CGRConfig a section
-func (cfg *CGRConfig) V1GetConfig(ctx *context.Context, args *SectionWithAPIOpts, reply *map[string]interface{}) (err error) {
+func (cfg *CGRConfig) V1GetConfig(ctx *context.Context, args *SectionWithAPIOpts, reply *map[string]any) (err error) {
 	if len(args.Sections) == 0 ||
 		args.Sections[0] == utils.MetaAll {
 		args.Sections = cfg.GetAllSectionIDs()
 	}
-	mp := make(map[string]interface{})
+	mp := make(map[string]any)
 	sections := utils.StringSet{}
 	cfg.cacheDPMux.RLock()
 	for _, section := range args.Sections {
@@ -117,7 +117,7 @@ func (cfg *CGRConfig) V1GetConfig(ctx *context.Context, args *SectionWithAPIOpts
 		mp = cfg.AsMapInterface(cfg.GeneralCfg().RSRSep)
 	} else {
 		for section := range sections {
-			var val interface{}
+			var val any
 			if val, err = cfg.getSectionAsMap(section); err != nil {
 				return
 			}
@@ -133,9 +133,9 @@ func (cfg *CGRConfig) V1GetConfig(ctx *context.Context, args *SectionWithAPIOpts
 
 // SetConfigArgs the API params for V1SetConfig
 type SetConfigArgs struct {
-	APIOpts map[string]interface{}
+	APIOpts map[string]any
 	Tenant  string
-	Config  map[string]interface{}
+	Config  map[string]any
 	DryRun  bool
 }
 
@@ -201,7 +201,7 @@ func (cfg *CGRConfig) V1SetConfig(ctx *context.Context, args *SetConfigArgs, rep
 
 // V1GetConfigAsJSON will retrieve from CGRConfig a section as a string
 func (cfg *CGRConfig) V1GetConfigAsJSON(ctx *context.Context, args *SectionWithAPIOpts, reply *string) (err error) {
-	var mp map[string]interface{}
+	var mp map[string]any
 	if err = cfg.V1GetConfig(ctx, args, &mp); err != nil {
 		return
 	}
@@ -211,7 +211,7 @@ func (cfg *CGRConfig) V1GetConfigAsJSON(ctx *context.Context, args *SectionWithA
 
 // SetConfigFromJSONArgs the API params for V1SetConfigFromJSON
 type SetConfigFromJSONArgs struct {
-	APIOpts map[string]interface{}
+	APIOpts map[string]any
 	Tenant  string
 	Config  string
 	DryRun  bool

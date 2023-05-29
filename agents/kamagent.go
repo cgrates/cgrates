@@ -178,7 +178,7 @@ func (ka *KamailioAgent) onCallStart(evData []byte, connIdx int) {
 	}
 	cgrEv := kev.AsCGREvent(config.CgrConfig().GeneralCfg().DefaultTimezone)
 	if cgrEv.APIOpts == nil {
-		cgrEv.APIOpts = map[string]interface{}{utils.OptsSesInitiate: true}
+		cgrEv.APIOpts = map[string]any{utils.OptsSesInitiate: true}
 	}
 	cgrEv.Event[EvapiConnID] = connIdx // Attach the connection ID so we can properly disconnect later
 
@@ -217,7 +217,7 @@ func (ka *KamailioAgent) onCallEnd(evData []byte, connIdx int) {
 	}
 	cgrEv := kev.AsCGREvent(config.CgrConfig().GeneralCfg().DefaultTimezone)
 	if cgrEv.APIOpts == nil {
-		cgrEv.APIOpts = map[string]interface{}{utils.OptsSesTerminate: true}
+		cgrEv.APIOpts = map[string]any{utils.OptsSesTerminate: true}
 	}
 	var reply string
 	cgrEv.Event[EvapiConnID] = connIdx // Attach the connection ID in case we need to create a session and disconnect it
@@ -440,6 +440,6 @@ func (*KamailioAgent) V1DisconnectPeer(ctx *context.Context, args *utils.DPRArgs
 }
 
 // V1WarnDisconnect is used to implement the sessions.BiRPClient interface
-func (*KamailioAgent) V1WarnDisconnect(ctx *context.Context, args map[string]interface{}, reply *string) (err error) {
+func (*KamailioAgent) V1WarnDisconnect(ctx *context.Context, args map[string]any, reply *string) (err error) {
 	return utils.ErrNotImplemented
 }

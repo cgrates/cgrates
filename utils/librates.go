@@ -199,7 +199,7 @@ func (rt *Rate) RunTimes(sTime, eTime time.Time, verbosity int) (aTimes [][]time
 // RateProfileWithAPIOpts is used in replicatorV1 for dispatcher
 type RateProfileWithAPIOpts struct {
 	*RateProfile
-	APIOpts map[string]interface{}
+	APIOpts map[string]any
 }
 
 // RateSInterval is used by RateS to integrate Rate info for one charging interval
@@ -544,7 +544,7 @@ func (rIcr *RateSIncrement) Cost(rts map[string]*IntervalRate) (cost *decimal.Bi
 
 type APIRateProfile struct {
 	*RateProfile
-	APIOpts map[string]interface{}
+	APIOpts map[string]any
 }
 
 // AsRate converts APIRate to Rate
@@ -613,10 +613,10 @@ type RemoveRPrfRates struct {
 	Tenant  string
 	ID      string
 	RateIDs []string
-	APIOpts map[string]interface{}
+	APIOpts map[string]any
 }
 
-func (rp *RateProfile) Set(path []string, val interface{}, newBranch bool, _ string) (err error) {
+func (rp *RateProfile) Set(path []string, val any, newBranch bool, _ string) (err error) {
 	if len(path) == 0 {
 		return ErrWrongPath
 	}
@@ -673,7 +673,7 @@ func (rp *RateProfile) Set(path []string, val interface{}, newBranch bool, _ str
 
 }
 
-func (rt *Rate) Set(path []string, val interface{}, newBranch bool) (err error) {
+func (rt *Rate) Set(path []string, val any, newBranch bool) (err error) {
 	switch len(path) {
 	default:
 		return ErrWrongPath
@@ -731,7 +731,7 @@ func (rt *Rate) Set(path []string, val interface{}, newBranch bool) (err error) 
 	return
 }
 
-func (rp *RateProfile) Merge(v2 interface{}) {
+func (rp *RateProfile) Merge(v2 any) {
 	vi := v2.(*RateProfile)
 	if len(vi.Tenant) != 0 {
 		rp.Tenant = vi.Tenant
@@ -809,13 +809,13 @@ func (ivalRate *IntervalRate) Merge(v2 *IntervalRate) {
 
 func (rp *RateProfile) String() string { return ToJSON(rp) }
 func (rp *RateProfile) FieldAsString(fldPath []string) (_ string, err error) {
-	var val interface{}
+	var val any
 	if val, err = rp.FieldAsInterface(fldPath); err != nil {
 		return
 	}
 	return IfaceAsString(val), nil
 }
-func (rp *RateProfile) FieldAsInterface(fldPath []string) (_ interface{}, err error) {
+func (rp *RateProfile) FieldAsInterface(fldPath []string) (_ any, err error) {
 	if len(fldPath) == 1 {
 		switch fldPath[0] {
 		default:
@@ -880,13 +880,13 @@ func (rp *RateProfile) FieldAsInterface(fldPath []string) (_ interface{}, err er
 
 func (rt *Rate) String() string { return ToJSON(rt) }
 func (rt *Rate) FieldAsString(fldPath []string) (_ string, err error) {
-	var val interface{}
+	var val any
 	if val, err = rt.FieldAsInterface(fldPath); err != nil {
 		return
 	}
 	return IfaceAsString(val), nil
 }
-func (rt *Rate) FieldAsInterface(fldPath []string) (_ interface{}, err error) {
+func (rt *Rate) FieldAsInterface(fldPath []string) (_ any, err error) {
 	switch len(fldPath) {
 	default:
 		return nil, ErrNotFound
@@ -933,13 +933,13 @@ func (rt *Rate) FieldAsInterface(fldPath []string) (_ interface{}, err error) {
 
 func (iR *IntervalRate) String() string { return ToJSON(iR) }
 func (iR *IntervalRate) FieldAsString(fldPath []string) (_ string, err error) {
-	var val interface{}
+	var val any
 	if val, err = iR.FieldAsInterface(fldPath); err != nil {
 		return
 	}
 	return IfaceAsString(val), nil
 }
-func (iR *IntervalRate) FieldAsInterface(fldPath []string) (_ interface{}, err error) {
+func (iR *IntervalRate) FieldAsInterface(fldPath []string) (_ any, err error) {
 	if len(fldPath) != 1 {
 		return nil, ErrNotFound
 	}
@@ -960,8 +960,8 @@ func (iR *IntervalRate) FieldAsInterface(fldPath []string) (_ interface{}, err e
 }
 
 // AsDataDBMap is used to is a convert method in order to properly set trough a hasmap in redis server our rate profile
-func (rp *RateProfile) AsDataDBMap(ms Marshaler) (mp map[string]interface{}, err error) {
-	mp = map[string]interface{}{
+func (rp *RateProfile) AsDataDBMap(ms Marshaler) (mp map[string]any, err error) {
+	mp = map[string]any{
 		MaxCostStrategy: rp.MaxCostStrategy,
 	}
 	if len(rp.FilterIDs) != 0 {
@@ -995,7 +995,7 @@ func (rp *RateProfile) AsDataDBMap(ms Marshaler) (mp map[string]interface{}, err
 }
 
 // NewRateProfileFromMapDataDBMap will convert a RateProfile map into a RatePRofile struct. This is used when we get the map from redis database
-func NewRateProfileFromMapDataDBMap(tnt, id string, mapRP map[string]interface{}, ms Marshaler) (rp *RateProfile, err error) {
+func NewRateProfileFromMapDataDBMap(tnt, id string, mapRP map[string]any, ms Marshaler) (rp *RateProfile, err error) {
 	rp = &RateProfile{
 		ID:              id,
 		Tenant:          tnt,

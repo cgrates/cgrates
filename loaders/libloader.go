@@ -54,7 +54,7 @@ type record struct {
 func (r *record) String() string { return r.req.String() }
 
 func (r *record) FieldAsString(path []string) (str string, err error) {
-	var val interface{}
+	var val any
 	if val, err = r.FieldAsInterface(path); err != nil {
 		return
 	}
@@ -79,7 +79,7 @@ func RateIDsFromOrderedNavigableMap(data *utils.OrderedNavigableMap) ([]string, 
 }
 
 // FieldAsInterface implements utils.DataProvider
-func (ar *record) FieldAsInterface(fldPath []string) (val interface{}, err error) {
+func (ar *record) FieldAsInterface(fldPath []string) (val any, err error) {
 	switch fldPath[0] {
 	default:
 		val, err = ar.data.FieldAsInterface(fldPath)
@@ -144,7 +144,7 @@ func (ar *record) SetFields(ctx *context.Context, tmpls []*config.FCTemplate, fi
 		case utils.MetaRemoveAll:
 			ar.RemoveAll(fld.GetPathSlice()[0])
 		default:
-			var out interface{}
+			var out any
 			if out, err = engine.ParseAttribute(ar, fld.Type, fld.Path, fld.Value, rndDec,
 				utils.FirstNonEmpty(fld.Timezone, dftTmz), fld.Layout, rsrSep); err != nil {
 				if err == utils.ErrNotFound {
@@ -220,7 +220,7 @@ func (ar *record) Compose(fullPath *utils.FullPath, val *utils.DataLeaf, sep str
 		return ar.tmp.Compose(fullPath.PathSlice[1:], val)
 	case utils.MetaUCH:
 		path := fullPath.Path[5:]
-		var prv interface{}
+		var prv any
 		if prvI, ok := ar.cache.Get(path); !ok {
 			prv = val.Data
 		} else {
@@ -253,8 +253,8 @@ func (ar *record) Set(fullPath *utils.FullPath, nm *utils.DataLeaf, sep string) 
 
 type profile interface {
 	utils.DataProvider
-	Set([]string, interface{}, bool, string) error
-	Merge(interface{})
+	Set([]string, any, bool, string) error
+	Merge(any)
 	TenantID() string
 }
 
@@ -291,7 +291,7 @@ func newProfileFunc(lType string) func() profile {
 	case utils.MetaDispatchers:
 		return func() profile {
 			return &engine.DispatcherProfile{
-				StrategyParams: make(map[string]interface{}),
+				StrategyParams: make(map[string]any),
 			}
 		}
 	case utils.MetaDispatcherHosts:
@@ -319,7 +319,7 @@ func newProfileFunc(lType string) func() profile {
 	case utils.MetaAccounts:
 		return func() profile {
 			return &utils.Account{
-				Opts:     make(map[string]interface{}),
+				Opts:     make(map[string]any),
 				Balances: make(map[string]*utils.Balance),
 			}
 		}

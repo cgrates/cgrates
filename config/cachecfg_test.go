@@ -141,20 +141,20 @@ func TestCachesCfgAsMapInterface1(t *testing.T) {
 				},
 			},
 		}`
-	eMap := map[string]interface{}{
-		utils.PartitionsCfg: map[string]interface{}{
-			utils.MetaDispatchers: map[string]interface{}{"limit": -1, "static_ttl": false, "precache": true, "remote": false, "replicate": true},
+	eMap := map[string]any{
+		utils.PartitionsCfg: map[string]any{
+			utils.MetaDispatchers: map[string]any{"limit": -1, "static_ttl": false, "precache": true, "remote": false, "replicate": true},
 		},
 		utils.ReplicationConnsCfg: []string{},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
 	} else {
-		newMap := cgrCfg.cacheCfg.AsMapInterface("").(map[string]interface{})
-		if !reflect.DeepEqual(newMap[utils.PartitionsCfg].(map[string]interface{})[utils.MetaDispatchers],
-			eMap[utils.PartitionsCfg].(map[string]interface{})[utils.MetaDispatchers]) {
-			t.Errorf("Expected %+v, received %+v", eMap[utils.PartitionsCfg].(map[string]interface{})[utils.MetaDispatchers],
-				newMap[utils.PartitionsCfg].(map[string]interface{})[utils.MetaDispatchers])
+		newMap := cgrCfg.cacheCfg.AsMapInterface("").(map[string]any)
+		if !reflect.DeepEqual(newMap[utils.PartitionsCfg].(map[string]any)[utils.MetaDispatchers],
+			eMap[utils.PartitionsCfg].(map[string]any)[utils.MetaDispatchers]) {
+			t.Errorf("Expected %+v, received %+v", eMap[utils.PartitionsCfg].(map[string]any)[utils.MetaDispatchers],
+				newMap[utils.PartitionsCfg].(map[string]any)[utils.MetaDispatchers])
 		}
 	}
 }

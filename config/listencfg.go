@@ -68,9 +68,9 @@ func (lstcfg *ListenCfg) loadFromJSONCfg(jsnListenCfg *ListenJsonCfg) (err error
 	return nil
 }
 
-// AsMapInterface returns the config as a map[string]interface{}
-func (lstcfg ListenCfg) AsMapInterface(string) interface{} {
-	return map[string]interface{}{
+// AsMapInterface returns the config as a map[string]any
+func (lstcfg ListenCfg) AsMapInterface(string) any {
+	return map[string]any{
 		utils.RPCJSONListenCfg:    lstcfg.RPCJSONListen,
 		utils.RPCGOBListenCfg:     lstcfg.RPCGOBListen,
 		utils.HTTPListenCfg:       lstcfg.HTTPListen,

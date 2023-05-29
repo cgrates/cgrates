@@ -108,7 +108,7 @@ func (rdr *SQSER) Serve() (err error) {
 }
 
 func (rdr *SQSER) processMessage(body []byte) (err error) {
-	var decodedMessage map[string]interface{}
+	var decodedMessage map[string]any
 	if err = json.Unmarshal(body, &decodedMessage); err != nil {
 		return
 	}
@@ -130,7 +130,7 @@ func (rdr *SQSER) processMessage(body []byte) (err error) {
 	}
 	cgrEv := utils.NMAsCGREvent(agReq.CGRRequest, agReq.Tenant, utils.NestingSep, agReq.Opts)
 	rdrEv := rdr.rdrEvents
-	cgrEv.APIOpts = make(map[string]interface{})
+	cgrEv.APIOpts = make(map[string]any)
 	if _, isPartial := cgrEv.APIOpts[utils.PartialOpt]; isPartial {
 		rdrEv = rdr.partialEvents
 	}

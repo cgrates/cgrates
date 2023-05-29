@@ -2066,7 +2066,7 @@ func TestUpdateFilterIndexActionProfilesIndex(t *testing.T) {
 				FilterIDs: []string{"FLTR1", "FLTR2", "FLTR3"},
 				TTL:       time.Minute,
 				Type:      "type2",
-				Opts: map[string]interface{}{
+				Opts: map[string]any{
 					"key1": "value1",
 					"key2": "value2",
 				},
@@ -2482,13 +2482,13 @@ func TestUpdateFilterIndexDispatcherIndex(t *testing.T) {
 		FilterIDs:      []string{"fltr_test"},
 		Weight:         65,
 		Strategy:       utils.MetaLoad,
-		StrategyParams: map[string]interface{}{"k": "v"},
+		StrategyParams: map[string]any{"k": "v"},
 		Hosts: DispatcherHostProfiles{
 			{
 				ID:        "C2",
 				FilterIDs: []string{"fltr3"},
 				Weight:    10,
-				Params: map[string]interface{}{
+				Params: map[string]any{
 					"param3": "value3",
 				},
 				Blocker: false,
@@ -2699,8 +2699,8 @@ func TestRemoveIndexFiltersItemCacheRemoveErr(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.CacheSv1ReplicateRemove: func(ctx *context.Context, args, reply interface{}) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.CacheSv1ReplicateRemove: func(ctx *context.Context, args, reply any) error {
 
 				return utils.ErrNotImplemented
 			},
@@ -2772,8 +2772,8 @@ func TestAddIndexFiltersItemCacheRemoveErr(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.CacheSv1ReplicateRemove: func(ctx *context.Context, args, reply interface{}) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.CacheSv1ReplicateRemove: func(ctx *context.Context, args, reply any) error {
 
 				return utils.ErrNotImplemented
 			},
@@ -2886,8 +2886,8 @@ func TestAddItemToFilterIndexCacheRemoveErr(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.CacheSv1ReplicateRemove: func(ctx *context.Context, args, reply interface{}) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.CacheSv1ReplicateRemove: func(ctx *context.Context, args, reply any) error {
 
 				return utils.ErrNotImplemented
 			},
@@ -2934,8 +2934,8 @@ func TestRemoveItemFromFilterIndexCacheRemoveErr(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.CacheSv1ReplicateRemove: func(ctx *context.Context, args, reply interface{}) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.CacheSv1ReplicateRemove: func(ctx *context.Context, args, reply any) error {
 
 				return utils.ErrNotImplemented
 			},

@@ -136,7 +136,7 @@ func testAnalyzerSRPCConn(t *testing.T) {
 		t.Fatal(err)
 	}
 	anzBiRPC = rpc2.NewClientWithCodec(jsonrpc2.NewJSONCodec(conn))
-	anzBiRPC.Handle(utils.SessionSv1DisconnectPeer, func(clnt *rpc2.Client, args interface{}, rply *string) (err error) { return utils.ErrNotFound })
+	anzBiRPC.Handle(utils.SessionSv1DisconnectPeer, func(clnt *rpc2.Client, args any, rply *string) (err error) { return utils.ErrNotFound })
 	go anzBiRPC.Run()
 }
 
@@ -144,7 +144,7 @@ func testAnalyzerSLoadTarrifPlans(t *testing.T) {
 	var reply string
 	time.Sleep(100 * time.Millisecond)
 	if err := anzRPC.Call(utils.LoaderSv1Run, &loaders.ArgsProcessFolder{
-		APIOpts: map[string]interface{}{utils.MetaCache: utils.MetaReload},
+		APIOpts: map[string]any{utils.MetaCache: utils.MetaReload},
 	}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -157,7 +157,7 @@ func testAnalyzerSChargerSv1ProcessEvent(t *testing.T) {
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: "1010",
 			utils.Subject:      "Something_inter",
 			utils.Destination:  "999",
@@ -177,12 +177,12 @@ func testAnalyzerSChargerSv1ProcessEvent(t *testing.T) {
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "event1",
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					"Account":     "1010",
 					"Destination": "999",
 					"Subject":     "Something_inter",
 				},
-				APIOpts: map[string]interface{}{
+				APIOpts: map[string]any{
 					"*chargeID": "51d52496c3d63ffd60ba91e69aa532d89cc5bd79",
 					"*subsys":   "*chargers",
 					"*runID":    "*default",
@@ -204,16 +204,16 @@ func testAnalyzerSChargerSv1ProcessEvent(t *testing.T) {
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "event1",
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					"Account":     "1010",
 					"Destination": "999",
 					"RequestType": "*none",
 					"Subject":     "Something_inter",
 				},
-				APIOpts: map[string]interface{}{
+				APIOpts: map[string]any{
 					"*chargeID":       "94e6cdc358e52bd7061f224a4bcf5faa57735989",
 					"*runID":          "*raw",
-					"*attrProfileIDs": []interface{}{"*constant:*req.RequestType:*none"},
+					"*attrProfileIDs": []any{"*constant:*req.RequestType:*none"},
 					"*context":        "*chargers",
 					"*subsys":         "*chargers",
 				},
@@ -236,7 +236,7 @@ func testAnalyzerSChargerSv1ProcessEvent(t *testing.T) {
 func testAnalyzerSV1Search(t *testing.T) {
 	// need to wait in order for the log gorutine to execute
 	time.Sleep(50 * time.Millisecond)
-	var result []map[string]interface{}
+	var result []map[string]any
 	if err := anzRPC.Call(utils.AnalyzerSv1StringQuery, &QueryArgs{HeaderFilters: `+RequestEncoding:\*internal +RequestMethod:AttributeSv1\.ProcessEvent`}, &result); err != nil {
 		t.Error(err)
 	} else if len(result) != 1 {
@@ -245,7 +245,7 @@ func testAnalyzerSV1Search(t *testing.T) {
 }
 
 func testAnalyzerSV1Search2(t *testing.T) {
-	var result []map[string]interface{}
+	var result []map[string]any
 	if err := anzRPC.Call(utils.AnalyzerSv1StringQuery, &QueryArgs{HeaderFilters: `+RequestEncoding:\*json +RequestMethod:ChargerSv1\.ProcessEvent`}, &result); err != nil {
 		t.Error(err)
 	} else if len(result) != 1 {
@@ -254,7 +254,7 @@ func testAnalyzerSV1Search2(t *testing.T) {
 }
 
 func testAnalyzerSV1SearchWithContentFilters(t *testing.T) {
-	var result []map[string]interface{}
+	var result []map[string]any
 	if err := anzRPC.Call(utils.AnalyzerSv1StringQuery, &QueryArgs{
 		HeaderFilters:  `+RequestEncoding:\*json`,
 		ContentFilters: []string{"*string:~*req.Event.Account:1010"},
@@ -274,7 +274,7 @@ func testAnalyzerSV1BirPCSession(t *testing.T) {
 		t.Fatal(err)
 	}
 	time.Sleep(50 * time.Millisecond)
-	var result []map[string]interface{}
+	var result []map[string]any
 	if err := anzRPC.Call(utils.AnalyzerSv1StringQuery, &QueryArgs{HeaderFilters: `+RequestEncoding:\*birpc_json +RequestMethod:"SessionSv1.DisconnectPeer"`}, &result); err != nil {
 		t.Error(err)
 	} else if len(result) != 1 {
@@ -386,7 +386,7 @@ func testAnalyzerSv1MultipleQuery(t *testing.T) {
 		}
 	}
 	time.Sleep(50 * time.Millisecond)
-	var result []map[string]interface{}
+	var result []map[string]any
 	if err := anzRPC.Call(utils.AnalyzerSv1StringQuery, &QueryArgs{
 		HeaderFilters:  `+RequestMethod:"AdminSv1.SetFilter"`,
 		ContentFilters: []string{"*prefix:~*req.ID:TestA"},

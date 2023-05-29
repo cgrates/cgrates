@@ -77,11 +77,11 @@ func (s *Server) SetAnalyzer(anz *analyzers.AnalyzerS) {
 	s.anz = anz
 }
 
-func (s *Server) RpcRegister(rcvr interface{}) {
+func (s *Server) RpcRegister(rcvr any) {
 	s.rpcServer.Register(rcvr)
 }
 
-func (s *Server) RpcRegisterName(name string, rcvr interface{}) {
+func (s *Server) RpcRegisterName(name string, rcvr any) {
 	s.rpcServer.RegisterName(name, rcvr)
 }
 
@@ -106,7 +106,7 @@ func (s *Server) RegisterHttpHandler(pattern string, handler http.Handler) {
 }
 
 // Registers a new BiJsonRpc name
-func (s *Server) BiRPCRegisterName(name string, rcv interface{}) {
+func (s *Server) BiRPCRegisterName(name string, rcv any) {
 	s.birpcSrv.RegisterName(name, rcv)
 }
 

@@ -354,7 +354,7 @@ func testLoadersLoad(t *testing.T) {
 	var reply string
 	if err := ldrRPC.Call(context.Background(), utils.LoaderSv1Run,
 		&loaders.ArgsProcessFolder{
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.MetaCache:       utils.MetaReload,
 				utils.MetaStopOnError: true,
 			},
@@ -380,7 +380,7 @@ func testLoadersGetAccounts(t *testing.T) {
 					Blocker: false,
 				},
 			},
-			Opts: make(map[string]interface{}),
+			Opts: make(map[string]any),
 			Balances: map[string]*utils.Balance{
 				"MonetaryBalance": {
 					ID: "MonetaryBalance",
@@ -410,7 +410,7 @@ func testLoadersGetAccounts(t *testing.T) {
 							Factor:    utils.NewDecimal(200, 0),
 						},
 					},
-					Opts: map[string]interface{}{},
+					Opts: map[string]any{},
 					CostIncrements: []*utils.CostIncrement{
 						{
 							FilterIDs:    []string{"fltr1", "fltr2"},
@@ -430,7 +430,7 @@ func testLoadersGetAccounts(t *testing.T) {
 					},
 					Type:  utils.MetaVoice,
 					Units: utils.NewDecimal(int64(time.Hour), 0),
-					Opts:  make(map[string]interface{}),
+					Opts:  make(map[string]any),
 				},
 			},
 			ThresholdIDs: []string{utils.MetaNone},
@@ -448,7 +448,7 @@ func testLoadersGetAccounts(t *testing.T) {
 					Blocker: false,
 				},
 			},
-			Opts: make(map[string]interface{}),
+			Opts: make(map[string]any),
 			Balances: map[string]*utils.Balance{
 				"MonetaryBalance": {
 					ID: "MonetaryBalance",
@@ -460,7 +460,7 @@ func testLoadersGetAccounts(t *testing.T) {
 
 					Type:  utils.MetaMonetary,
 					Units: utils.NewDecimal(int64(time.Hour), 0),
-					Opts:  map[string]interface{}{},
+					Opts:  map[string]any{},
 				},
 				"VoiceBalance": {
 					ID: "VoiceBalance",
@@ -471,7 +471,7 @@ func testLoadersGetAccounts(t *testing.T) {
 					},
 					Type:  utils.MetaVoice,
 					Units: utils.NewDecimal(14, 0),
-					Opts:  make(map[string]interface{}),
+					Opts:  make(map[string]any),
 					UnitFactors: []*utils.UnitFactor{
 						{
 							FilterIDs: []string{"fltr3", "fltr4"},
@@ -539,7 +539,7 @@ func testLoadersGetActionProfiles(t *testing.T) {
 					ID:   "TOPUP",
 					TTL:  0,
 					Type: utils.MetaAddBalance,
-					Opts: map[string]interface{}{},
+					Opts: map[string]any{},
 					Diktats: []*engine.APDiktat{
 						{
 							Path:  "*balance.TestBalance.Value",
@@ -551,7 +551,7 @@ func testLoadersGetActionProfiles(t *testing.T) {
 					ID:   "SET_BALANCE_TEST_DATA",
 					TTL:  0,
 					Type: utils.MetaSetBalance,
-					Opts: map[string]interface{}{},
+					Opts: map[string]any{},
 					Diktats: []*engine.APDiktat{
 						{
 							Path:  "*balance.TestDataBalance.Type",
@@ -563,7 +563,7 @@ func testLoadersGetActionProfiles(t *testing.T) {
 					ID:   "TOPUP_TEST_DATA",
 					TTL:  0,
 					Type: utils.MetaAddBalance,
-					Opts: map[string]interface{}{},
+					Opts: map[string]any{},
 					Diktats: []*engine.APDiktat{
 						{
 							Path:  "*balance.TestDataBalance.Value",
@@ -575,7 +575,7 @@ func testLoadersGetActionProfiles(t *testing.T) {
 					ID:   "SET_BALANCE_TEST_VOICE",
 					TTL:  0,
 					Type: utils.MetaSetBalance,
-					Opts: map[string]interface{}{},
+					Opts: map[string]any{},
 					Diktats: []*engine.APDiktat{
 						{
 							Path:  "*balance.TestVoiceBalance.Type",
@@ -587,7 +587,7 @@ func testLoadersGetActionProfiles(t *testing.T) {
 					ID:   "TOPUP_TEST_VOICE",
 					TTL:  0,
 					Type: utils.MetaAddBalance,
-					Opts: map[string]interface{}{},
+					Opts: map[string]any{},
 					Diktats: []*engine.APDiktat{
 						{
 							Path:  "*balance.TestVoiceBalance.Value",
@@ -753,14 +753,14 @@ func testLoadersGetDispatcherProfiles(t *testing.T) {
 			ID:             "D1",
 			FilterIDs:      []string{"*string:~*req.Account:1001"},
 			Strategy:       utils.MetaFirst,
-			StrategyParams: map[string]interface{}{},
+			StrategyParams: map[string]any{},
 			Weight:         20,
 			Hosts: engine.DispatcherHostProfiles{
 				{
 					ID:        "C1",
 					FilterIDs: []string{"fltr1", "fltr2", "fltr4"},
 					Weight:    10,
-					Params: map[string]interface{}{
+					Params: map[string]any{
 						utils.MetaRatio: "1",
 						"param1":        "value1",
 						"param2":        "value2",
@@ -774,21 +774,21 @@ func testLoadersGetDispatcherProfiles(t *testing.T) {
 			ID:             "D2",
 			FilterIDs:      []string{"*string:~*req.Account:1002"},
 			Strategy:       utils.MetaFirst,
-			StrategyParams: map[string]interface{}{},
+			StrategyParams: map[string]any{},
 			Weight:         20,
 			Hosts: engine.DispatcherHostProfiles{
 				{
 					ID:        "C3",
 					FilterIDs: []string{"fltr2"},
 					Weight:    20,
-					Params:    map[string]interface{}{},
+					Params:    map[string]any{},
 					Blocker:   true,
 				},
 				{
 					ID:        "C2",
 					FilterIDs: []string{"fltr3"},
 					Weight:    10,
-					Params: map[string]interface{}{
+					Params: map[string]any{
 						"param3": "value3",
 					},
 					Blocker: false,
@@ -1368,7 +1368,7 @@ func testLoadersRemove(t *testing.T) {
 	if err := ldrRPC.Call(context.Background(), utils.LoaderSv1Run, //Remove,
 		&loaders.ArgsProcessFolder{
 			LoaderID: "remove",
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.MetaCache:       utils.MetaReload,
 				utils.MetaStopOnError: true,
 			},

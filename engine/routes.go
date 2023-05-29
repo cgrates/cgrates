@@ -40,7 +40,7 @@ type Route struct {
 	Blockers        utils.DynamicBlockers // do not process further route after this one
 	RouteParameters string
 
-	cacheRoute map[string]interface{} // cache["*ratio"]=ratio
+	cacheRoute map[string]any // cache["*ratio"]=ratio
 }
 
 // RouteProfile represents the configuration of a Route profile
@@ -58,7 +58,7 @@ type RouteProfile struct {
 // RouteProfileWithAPIOpts is used in replicatorV1 for dispatcher
 type RouteProfileWithAPIOpts struct {
 	*RouteProfile
-	APIOpts map[string]interface{}
+	APIOpts map[string]any
 }
 
 func (rp *RouteProfile) compileCacheParameters() error {
@@ -76,7 +76,7 @@ func (rp *RouteProfile) compileCacheParameters() error {
 		}
 		// add the ratio for each route
 		for _, route := range rp.Routes {
-			route.cacheRoute = make(map[string]interface{})
+			route.cacheRoute = make(map[string]any)
 			if ratioRoute, has := ratioMap[route.ID]; !has { // in case that ratio isn't defined for specific routes check for default
 				if ratioDefault, has := ratioMap[utils.MetaDefault]; !has { // in case that *default ratio isn't defined take it from config
 					route.cacheRoute[utils.MetaRatio] = config.CgrConfig().RouteSCfg().DefaultRatio
@@ -228,7 +228,7 @@ func newOptsGetRoutes(ctx *context.Context, ev *utils.CGREvent, fS *FilterS, cfg
 		opts.paginator.MaxItems = maxItems
 	}
 
-	var maxCost interface{}
+	var maxCost any
 	if maxCost, err = GetInterfaceOpts(ctx, ev.Tenant, ev, fS, cfgOpts.MaxCost, config.RoutesMaxCostDftOpt,
 		utils.OptsRoutesMaxCost); err != nil {
 		return
@@ -281,7 +281,7 @@ func (rpS *RouteS) V1GetRoutes(ctx *context.Context, args *utils.CGREvent, reply
 		tnt = rpS.cfg.GeneralCfg().DefaultTenant
 	}
 	if args.APIOpts == nil {
-		args.APIOpts = make(map[string]interface{})
+		args.APIOpts = make(map[string]any)
 	}
 	if len(rpS.cfg.RouteSCfg().AttributeSConns) != 0 {
 		args.APIOpts[utils.MetaSubsys] = utils.MetaRoutes
@@ -490,7 +490,7 @@ func (rpS *RouteS) V1GetRoutesList(ctx *context.Context, args *utils.CGREvent, r
 	return
 }
 
-func (rp *RouteProfile) Set(path []string, val interface{}, newBranch bool, _ string) (err error) {
+func (rp *RouteProfile) Set(path []string, val any, newBranch bool, _ string) (err error) {
 	switch len(path) {
 	default:
 		return utils.ErrWrongPath
@@ -574,7 +574,7 @@ func (rp *RouteProfile) Set(path []string, val interface{}, newBranch bool, _ st
 	return
 }
 
-func (rp *RouteProfile) Merge(v2 interface{}) {
+func (rp *RouteProfile) Merge(v2 any) {
 	vi := v2.(*RouteProfile)
 	if len(vi.Tenant) != 0 {
 		rp.Tenant = vi.Tenant
@@ -623,13 +623,13 @@ func (route *Route) Merge(v2 *Route) {
 
 func (rp *RouteProfile) String() string { return utils.ToJSON(rp) }
 func (rp *RouteProfile) FieldAsString(fldPath []string) (_ string, err error) {
-	var val interface{}
+	var val any
 	if val, err = rp.FieldAsInterface(fldPath); err != nil {
 		return
 	}
 	return utils.IfaceAsString(val), nil
 }
-func (rp *RouteProfile) FieldAsInterface(fldPath []string) (_ interface{}, err error) {
+func (rp *RouteProfile) FieldAsInterface(fldPath []string) (_ any, err error) {
 	if len(fldPath) == 1 {
 		switch fldPath[0] {
 		default:
@@ -685,13 +685,13 @@ func (rp *RouteProfile) FieldAsInterface(fldPath []string) (_ interface{}, err e
 
 func (rt *Route) String() string { return utils.ToJSON(rt) }
 func (rt *Route) FieldAsString(fldPath []string) (_ string, err error) {
-	var val interface{}
+	var val any
 	if val, err = rt.FieldAsInterface(fldPath); err != nil {
 		return
 	}
 	return utils.IfaceAsString(val), nil
 }
-func (rt *Route) FieldAsInterface(fldPath []string) (_ interface{}, err error) {
+func (rt *Route) FieldAsInterface(fldPath []string) (_ any, err error) {
 	if len(fldPath) != 1 {
 		return nil, utils.ErrNotFound
 	}

@@ -60,7 +60,7 @@ type TestRPC1 struct {
 
 var testRPC2 TestRPC1
 
-func (rpc *TestRPC1) ProcessEvent(ctx *context.Context, cgrEv *utils.CGREventWithEeIDs, rply *map[string]map[string]interface{}) (err error) {
+func (rpc *TestRPC1) ProcessEvent(ctx *context.Context, cgrEv *utils.CGREventWithEeIDs, rply *map[string]map[string]any) (err error) {
 	rpc.Event = cgrEv
 	return nil
 }
@@ -138,7 +138,7 @@ func testLdPrMatchAcLoadTP(t *testing.T) {
 	var reply string
 	if err := testLdPrMatchAcRPC.Call(context.Background(), utils.LoaderSv1Run,
 		&loaders.ArgsProcessFolder{
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.MetaCache:       caching,
 				utils.MetaStopOnError: true,
 			},
@@ -153,7 +153,7 @@ func testLdPrMatchAcCDRSProcessEvent(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "TestEv1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.ToR:          utils.MetaVoice,
 			utils.OriginID:     "TestEv1",
 			utils.RequestType:  utils.MetaPrepaid,
@@ -161,7 +161,7 @@ func testLdPrMatchAcCDRSProcessEvent(t *testing.T) {
 			utils.Subject:      "1001",
 			utils.Destination:  "1002",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaUsage:      2 * time.Minute,
 			utils.MetaRates:      false,
 			utils.OptsCDRsExport: true,
@@ -182,7 +182,7 @@ func testLdPrMatchAcCDRSProcessEvent(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestEv1",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 
 				"Account":     "1001",
 				"Destination": "1002",
@@ -191,25 +191,25 @@ func testLdPrMatchAcCDRSProcessEvent(t *testing.T) {
 				"Subject":     "1001",
 				"ToR":         "*voice",
 			},
-			APIOpts: map[string]interface{}{
-				utils.MetaAccountSCost: map[string]interface{}{
+			APIOpts: map[string]any{
+				utils.MetaAccountSCost: map[string]any{
 					"Abstracts":  0,
-					"Accounting": map[string]interface{}{},
-					"Accounts": map[string]interface{}{
-						"1001": map[string]interface{}{
-							"Balances": map[string]interface{}{
-								"VoiceBalance": map[string]interface{}{
+					"Accounting": map[string]any{},
+					"Accounts": map[string]any{
+						"1001": map[string]any{
+							"Balances": map[string]any{
+								"VoiceBalance": map[string]any{
 									"AttributeIDs":   nil,
 									"Blockers":       nil,
 									"CostIncrements": nil,
 									"FilterIDs":      nil,
 									"ID":             "VoiceBalance",
-									"Opts":           map[string]interface{}{},
+									"Opts":           map[string]any{},
 									"RateProfileIDs": nil,
 									"Type":           utils.MetaAbstract,
 									"UnitFactors":    nil,
 									"Units":          3600000000000,
-									"Weights": []map[string]interface{}{
+									"Weights": []map[string]any{
 										{
 											"FilterIDs": nil,
 											"Weight":    10,
@@ -220,7 +220,7 @@ func testLdPrMatchAcCDRSProcessEvent(t *testing.T) {
 							"Blockers":     nil,
 							"FilterIDs":    nil,
 							"ID":           "1001",
-							"Opts":         map[string]interface{}{},
+							"Opts":         map[string]any{},
 							"Tenant":       "cgrates.org",
 							"ThresholdIDs": nil,
 							"Weights":      nil,
@@ -228,9 +228,9 @@ func testLdPrMatchAcCDRSProcessEvent(t *testing.T) {
 					},
 					"Charges":     nil,
 					"Concretes":   nil,
-					"Rates":       map[string]interface{}{},
-					"Rating":      map[string]interface{}{},
-					"UnitFactors": map[string]interface{}{},
+					"Rates":       map[string]any{},
+					"Rating":      map[string]any{},
+					"UnitFactors": map[string]any{},
 				},
 				utils.MetaUsage:      2 * time.Minute,
 				utils.OptsCDRsExport: true,

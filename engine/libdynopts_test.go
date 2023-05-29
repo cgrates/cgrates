@@ -37,10 +37,10 @@ func TestLibFiltersGetFloat64OptsReturnConfigOpt(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "TestEvent",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: 1001,
 		},
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 	dynOpts := []*utils.DynamicFloat64Opt{
 		// tenant will not be recognized, will ignore this opt
@@ -79,10 +79,10 @@ func TestLibFiltersGetFloat64OptsFilterCheckErr(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "TestEvent",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: 1001,
 		},
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 	dynOpts := []*utils.DynamicFloat64Opt{
 		// function will return error after trying to parse the filter
@@ -109,10 +109,10 @@ func TestLibFiltersGetFloat64OptsReturnDefaultOpt(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "TestEvent",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: 1001,
 		},
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 	dynOpts := []*utils.DynamicFloat64Opt{
 		// filter will not pass, will ignore this opt
@@ -139,10 +139,10 @@ func TestLibFiltersGetFloat64OptsReturnOptFromAPIOpts(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "TestEvent",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: 1001,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsResourcesUnits: 6,
 		},
 	}
@@ -173,10 +173,10 @@ func TestLibFiltersGetStringOptsReturnConfigOpt(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "TestEvent",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: 1001,
 		},
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 	dynOpts := []*utils.DynamicStringOpt{
 		// tenant will not be recognized, will ignore this opt
@@ -215,10 +215,10 @@ func TestLibFiltersGetStringOptsFilterCheckErr(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "TestEvent",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: 1001,
 		},
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 	dynOpts := []*utils.DynamicStringOpt{
 		// function will return error after trying to parse the filter
@@ -245,10 +245,10 @@ func TestLibFiltersGetStringOptsReturnDefaultOpt(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "TestEvent",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: 1001,
 		},
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 	dynOpts := []*utils.DynamicStringOpt{
 		// filter will not pass, will ignore this opt
@@ -275,10 +275,10 @@ func TestLibFiltersGetStringOptsReturnOptFromAPIOpts(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "TestEvent",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: 1001,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsResourcesUsageID: "value4",
 		},
 	}
@@ -309,10 +309,10 @@ func TestLibFiltersGetDurationOptsReturnConfigOpt(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "TestEvent",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: 1001,
 		},
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 	dynOpts := []*utils.DynamicDurationOpt{
 		// tenant will not be recognized, will ignore this opt
@@ -351,10 +351,10 @@ func TestLibFiltersGetDurationOptsFilterCheckErr(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "TestEvent",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: 1001,
 		},
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 	dynOpts := []*utils.DynamicDurationOpt{
 		// function will return error after trying to parse the filter
@@ -381,10 +381,10 @@ func TestLibFiltersGetDurationOptsReturnDefaultOpt(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "TestEvent",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: 1001,
 		},
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 	dynOpts := []*utils.DynamicDurationOpt{
 		// filter will not pass, will ignore this opt
@@ -411,10 +411,10 @@ func TestLibFiltersGetDurationOptsReturnOptFromAPIOpts(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "TestEvent",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: 1001,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsResourcesUsageTTL: time.Hour,
 		},
 	}
@@ -445,10 +445,10 @@ func TestLibFiltersGetIntOptsReturnConfigOpt(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "TestEvent",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: 1001,
 		},
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 	dynOpts := []*utils.DynamicIntOpt{
 		// tenant will not be recognized, will ignore this opt
@@ -487,10 +487,10 @@ func TestLibFiltersGetIntOptsFilterCheckErr(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "TestEvent",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: 1001,
 		},
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 	dynOpts := []*utils.DynamicIntOpt{
 		// function will return error after trying to parse the filter
@@ -517,10 +517,10 @@ func TestLibFiltersGetIntOptsReturnDefaultOpt(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "TestEvent",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: 1001,
 		},
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 	dynOpts := []*utils.DynamicIntOpt{
 		// filter will not pass, will ignore this opt
@@ -547,10 +547,10 @@ func TestLibFiltersGetIntOptsReturnOptFromAPIOptsOK(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "TestEvent",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: 1001,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAttributesProcessRuns: 6,
 		},
 	}
@@ -581,10 +581,10 @@ func TestLibFiltersGetIntOptsReturnOptFromAPIOptsErr(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "TestEvent",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: 1001,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAttributesProcessRuns: true,
 		},
 	}
@@ -613,10 +613,10 @@ func TestLibFiltersGetTimeOptsReturnConfigOpt(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "TestEvent",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: 1001,
 		},
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 	dynOpts := []*utils.DynamicStringOpt{
 		// tenant will not be recognized, will ignore this opt
@@ -655,10 +655,10 @@ func TestLibFiltersGetTimeOptsFilterCheckErr(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "TestEvent",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: 1001,
 		},
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 	dynOpts := []*utils.DynamicStringOpt{
 		// function will return error after trying to parse the filter
@@ -685,10 +685,10 @@ func TestLibFiltersGetTimeOptsReturnDefaultOpt(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "TestEvent",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: 1001,
 		},
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 	dynOpts := []*utils.DynamicStringOpt{
 		// filter will not pass, will ignore this opt
@@ -719,10 +719,10 @@ func TestLibFiltersGetTimeOptsReturnOptFromAPIOpts(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "TestEvent",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: 1001,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsRatesStartTime: "*yearly",
 		},
 	}
@@ -759,10 +759,10 @@ func TestLibFiltersGetBoolOptsReturnConfigOpt(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "TestEvent",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: 1001,
 		},
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 	dynOpts := []*utils.DynamicBoolOpt{
 		// tenant will not be recognized, will ignore this opt
@@ -801,10 +801,10 @@ func TestLibFiltersGetBoolOptsFilterCheckErr(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "TestEvent",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: 1001,
 		},
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 	dynOpts := []*utils.DynamicBoolOpt{
 		// function will return error after trying to parse the filter
@@ -831,10 +831,10 @@ func TestLibFiltersGetBoolOptsReturnDefaultOpt(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "TestEvent",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: 1001,
 		},
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 	dynOpts := []*utils.DynamicBoolOpt{
 		// filter will not pass, will ignore this opt
@@ -861,10 +861,10 @@ func TestLibFiltersGetBoolOptsReturnOptFromAPIOpts(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "TestEvent",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: 1001,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.MetaProfileIgnoreFilters: true,
 		},
 	}
@@ -895,10 +895,10 @@ func TestLibFiltersGetInterfaceOptsReturnConfigOpt(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "TestEvent",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: 1001,
 		},
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 	dynOpts := []*utils.DynamicInterfaceOpt{
 		// tenant will not be recognized, will ignore this opt
@@ -937,10 +937,10 @@ func TestLibFiltersGetInterfaceOptsFilterCheckErr(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "TestEvent",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: 1001,
 		},
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 	dynOpts := []*utils.DynamicInterfaceOpt{
 		// function will return error after trying to parse the filter
@@ -967,10 +967,10 @@ func TestLibFiltersGetInterfaceOptsReturnDefaultOpt(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "TestEvent",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: 1001,
 		},
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 	dynOpts := []*utils.DynamicInterfaceOpt{
 		// filter will not pass, will ignore this opt
@@ -997,10 +997,10 @@ func TestLibFiltersGetInterfaceOptsReturnOptFromAPIOpts(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "TestEvent",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: 1001,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsRoutesMaxCost: 4,
 		},
 	}
@@ -1031,10 +1031,10 @@ func TestLibFiltersGetStringSliceOptsReturnConfigOpt(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "TestEvent",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: 1001,
 		},
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 	dynOpts := []*utils.DynamicStringSliceOpt{
 		// tenant will not be recognized, will ignore this opt
@@ -1073,10 +1073,10 @@ func TestLibFiltersGetStringSliceOptsFilterCheckErr(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "TestEvent",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: 1001,
 		},
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 	dynOpts := []*utils.DynamicStringSliceOpt{
 		// function will return error after trying to parse the filter
@@ -1103,10 +1103,10 @@ func TestLibFiltersGetStringSliceOptsReturnDefaultOpt(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "TestEvent",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: 1001,
 		},
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 	dynOpts := []*utils.DynamicStringSliceOpt{
 		// filter will not pass, will ignore this opt
@@ -1133,10 +1133,10 @@ func TestLibFiltersGetStringSliceOptsReturnOptFromAPIOpts(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "TestEvent",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: 1001,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsAttributesProfileIDs: []string{"value4"},
 		},
 	}
@@ -1167,10 +1167,10 @@ func TestLibFiltersGetDecimalBigOptsReturnConfigOpt(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "TestEvent",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: 1001,
 		},
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 	dynOpts := []*utils.DynamicDecimalBigOpt{
 		// tenant will not be recognized, will ignore this opt
@@ -1209,10 +1209,10 @@ func TestLibFiltersGetDecimalBigOptsFilterCheckErr(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "TestEvent",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: 1001,
 		},
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 	dynOpts := []*utils.DynamicDecimalBigOpt{
 		// function will return error after trying to parse the filter
@@ -1239,10 +1239,10 @@ func TestLibFiltersGetDecimalBigOptsReturnDefaultOpt(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "TestEvent",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: 1001,
 		},
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 	dynOpts := []*utils.DynamicDecimalBigOpt{
 		// filter will not pass, will ignore this opt
@@ -1269,10 +1269,10 @@ func TestLibFiltersGetDecimalBigOptsReturnOptFromAPIOpts(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "TestEvent",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: 1001,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsRatesUsage: decimal.New(4321, 5),
 		},
 	}
@@ -1303,10 +1303,10 @@ func TestLibFiltersGetIntPointerOptsReturnConfigOpt(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "TestEvent",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: 1001,
 		},
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 	dynOpts := []*utils.DynamicIntPointerOpt{
 		// tenant will not be recognized, will ignore this opt
@@ -1345,10 +1345,10 @@ func TestLibFiltersGetIntPointerOptsFilterCheckErr(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "TestEvent",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: 1001,
 		},
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 	dynOpts := []*utils.DynamicIntPointerOpt{
 		// function will return error after trying to parse the filter
@@ -1375,10 +1375,10 @@ func TestLibFiltersGetIntPointerOptsReturnDft(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "TestEvent",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: 1001,
 		},
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]any{},
 	}
 	dynOpts := []*utils.DynamicIntPointerOpt{
 		// filter will not pass, will ignore this opt
@@ -1405,10 +1405,10 @@ func TestLibFiltersGetIntPointerOptsReturnOptFromAPIOptsOK(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "TestEvent",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: 1001,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsRoutesProfilesCount: 6,
 		},
 	}
@@ -1439,10 +1439,10 @@ func TestLibFiltersGetIntPointerOptsReturnOptFromAPIOptsErr(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "TestEvent",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.AccountField: 1001,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsRoutesProfilesCount: true,
 		},
 	}
@@ -1468,11 +1468,11 @@ func TestLibFiltersGetDurationOptsFromMultipleMapsReturnConfigOpt(t *testing.T) 
 	dataDB := NewInternalDB(nil, nil, nil)
 	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
 	fS := NewFilterS(cfg, nil, dm)
-	eventStart := map[string]interface{}{
+	eventStart := map[string]any{
 		utils.AccountField: 1001,
 	}
-	apiOpts := map[string]interface{}{}
-	startOpts := map[string]interface{}{}
+	apiOpts := map[string]any{}
+	startOpts := map[string]any{}
 	dynOpts := []*utils.DynamicDurationOpt{
 		// tenant will not be recognized, will ignore this opt
 		{
@@ -1507,11 +1507,11 @@ func TestLibFiltersGetDurationOptsFromMultipleMapsFilterCheckErr(t *testing.T) {
 	dataDB := NewInternalDB(nil, nil, nil)
 	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
 	fS := NewFilterS(cfg, nil, dm)
-	eventStart := map[string]interface{}{
+	eventStart := map[string]any{
 		utils.AccountField: 1001,
 	}
-	apiOpts := map[string]interface{}{}
-	startOpts := map[string]interface{}{}
+	apiOpts := map[string]any{}
+	startOpts := map[string]any{}
 	dynOpts := []*utils.DynamicDurationOpt{
 		// function will return error after trying to parse the filter
 		{
@@ -1534,11 +1534,11 @@ func TestLibFiltersGetDurationOptsFromMultipleMapsErrNotFound(t *testing.T) {
 	dataDB := NewInternalDB(nil, nil, nil)
 	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
 	fS := NewFilterS(cfg, nil, dm)
-	eventStart := map[string]interface{}{
+	eventStart := map[string]any{
 		utils.AccountField: 1001,
 	}
-	apiOpts := map[string]interface{}{}
-	startOpts := map[string]interface{}{}
+	apiOpts := map[string]any{}
+	startOpts := map[string]any{}
 	dynOpts := []*utils.DynamicDurationOpt{
 		// filter will not pass, will ignore this opt
 		{
@@ -1561,13 +1561,13 @@ func TestLibFiltersGetDurationOptsFromMultipleMapsReturnOptFromAPIOptsOK(t *test
 	dataDB := NewInternalDB(nil, nil, nil)
 	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
 	fS := NewFilterS(cfg, nil, dm)
-	eventStart := map[string]interface{}{
+	eventStart := map[string]any{
 		utils.AccountField: 1001,
 	}
-	apiOpts := map[string]interface{}{
+	apiOpts := map[string]any{
 		utils.OptsSesTTL: time.Hour,
 	}
-	startOpts := map[string]interface{}{}
+	startOpts := map[string]any{}
 	dynOpts := []*utils.DynamicDurationOpt{
 		// will never get to this opt because it will return once it
 		// finds the one set in APIOpts
@@ -1592,13 +1592,13 @@ func TestLibFiltersGetDurationOptsFromMultipleMapsReturnOptFromAPIOptsErr(t *tes
 	dataDB := NewInternalDB(nil, nil, nil)
 	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
 	fS := NewFilterS(cfg, nil, dm)
-	eventStart := map[string]interface{}{
+	eventStart := map[string]any{
 		utils.AccountField: 1001,
 	}
-	apiOpts := map[string]interface{}{
+	apiOpts := map[string]any{
 		utils.OptsSesTTL: true,
 	}
-	startOpts := map[string]interface{}{}
+	startOpts := map[string]any{}
 	dynOpts := []*utils.DynamicDurationOpt{
 		// will never get to this opt because it will return once it
 		// finds the one set in APIOpts
@@ -1621,11 +1621,11 @@ func TestLibFiltersGetDurationOptsFromMultipleMapsReturnOptFromStartOptsOK(t *te
 	dataDB := NewInternalDB(nil, nil, nil)
 	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
 	fS := NewFilterS(cfg, nil, dm)
-	eventStart := map[string]interface{}{
+	eventStart := map[string]any{
 		utils.AccountField: 1001,
 	}
-	apiOpts := map[string]interface{}{}
-	startOpts := map[string]interface{}{
+	apiOpts := map[string]any{}
+	startOpts := map[string]any{
 		utils.OptsSesTTL: time.Hour,
 	}
 	dynOpts := []*utils.DynamicDurationOpt{
@@ -1652,11 +1652,11 @@ func TestLibFiltersGetDurationOptsFromMultipleMapsReturnOptFromStartOptsErr(t *t
 	dataDB := NewInternalDB(nil, nil, nil)
 	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
 	fS := NewFilterS(cfg, nil, dm)
-	eventStart := map[string]interface{}{
+	eventStart := map[string]any{
 		utils.AccountField: 1001,
 	}
-	apiOpts := map[string]interface{}{}
-	startOpts := map[string]interface{}{
+	apiOpts := map[string]any{}
+	startOpts := map[string]any{
 		utils.OptsSesTTL: true,
 	}
 	dynOpts := []*utils.DynamicDurationOpt{
@@ -1681,11 +1681,11 @@ func TestLibFiltersGetDurationPointerOptsFromMultipleMapsReturnConfigOpt(t *test
 	dataDB := NewInternalDB(nil, nil, nil)
 	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
 	fS := NewFilterS(cfg, nil, dm)
-	eventStart := map[string]interface{}{
+	eventStart := map[string]any{
 		utils.AccountField: 1001,
 	}
-	apiOpts := map[string]interface{}{}
-	startOpts := map[string]interface{}{}
+	apiOpts := map[string]any{}
+	startOpts := map[string]any{}
 	dynOpts := []*utils.DynamicDurationPointerOpt{
 		// tenant will not be recognized, will ignore this opt
 		{
@@ -1720,11 +1720,11 @@ func TestLibFiltersGetDurationPointerOptsFromMultipleMapsFilterCheckErr(t *testi
 	dataDB := NewInternalDB(nil, nil, nil)
 	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
 	fS := NewFilterS(cfg, nil, dm)
-	eventStart := map[string]interface{}{
+	eventStart := map[string]any{
 		utils.AccountField: 1001,
 	}
-	apiOpts := map[string]interface{}{}
-	startOpts := map[string]interface{}{}
+	apiOpts := map[string]any{}
+	startOpts := map[string]any{}
 	dynOpts := []*utils.DynamicDurationPointerOpt{
 		// function will return error after trying to parse the filter
 		{
@@ -1747,11 +1747,11 @@ func TestLibFiltersGetDurationPointerOptsFromMultipleMapsReturnDft(t *testing.T)
 	dataDB := NewInternalDB(nil, nil, nil)
 	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
 	fS := NewFilterS(cfg, nil, dm)
-	eventStart := map[string]interface{}{
+	eventStart := map[string]any{
 		utils.AccountField: 1001,
 	}
-	apiOpts := map[string]interface{}{}
-	startOpts := map[string]interface{}{}
+	apiOpts := map[string]any{}
+	startOpts := map[string]any{}
 	dynOpts := []*utils.DynamicDurationPointerOpt{
 		// filter will not pass, will ignore this opt
 		{
@@ -1772,13 +1772,13 @@ func TestLibFiltersGetDurationPointerOptsFromMultipleMapsReturnOptFromAPIOptsOK(
 	dataDB := NewInternalDB(nil, nil, nil)
 	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
 	fS := NewFilterS(cfg, nil, dm)
-	eventStart := map[string]interface{}{
+	eventStart := map[string]any{
 		utils.AccountField: 1001,
 	}
-	apiOpts := map[string]interface{}{
+	apiOpts := map[string]any{
 		utils.OptsSesTTLUsage: time.Hour,
 	}
-	startOpts := map[string]interface{}{}
+	startOpts := map[string]any{}
 	dynOpts := []*utils.DynamicDurationPointerOpt{
 		// will never get to this opt because it will return once it
 		// finds the one set in APIOpts
@@ -1803,13 +1803,13 @@ func TestLibFiltersGetDurationPointerOptsFromMultipleMapsReturnOptFromAPIOptsErr
 	dataDB := NewInternalDB(nil, nil, nil)
 	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
 	fS := NewFilterS(cfg, nil, dm)
-	eventStart := map[string]interface{}{
+	eventStart := map[string]any{
 		utils.AccountField: 1001,
 	}
-	apiOpts := map[string]interface{}{
+	apiOpts := map[string]any{
 		utils.OptsSesTTLUsage: true,
 	}
-	startOpts := map[string]interface{}{}
+	startOpts := map[string]any{}
 	dynOpts := []*utils.DynamicDurationPointerOpt{
 		// will never get to this opt because it will return once it
 		// finds the one set in APIOpts
@@ -1832,11 +1832,11 @@ func TestLibFiltersGetDurationPointerOptsFromMultipleMapsReturnOptFromStartOptsO
 	dataDB := NewInternalDB(nil, nil, nil)
 	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
 	fS := NewFilterS(cfg, nil, dm)
-	eventStart := map[string]interface{}{
+	eventStart := map[string]any{
 		utils.AccountField: 1001,
 	}
-	apiOpts := map[string]interface{}{}
-	startOpts := map[string]interface{}{
+	apiOpts := map[string]any{}
+	startOpts := map[string]any{
 		utils.OptsSesTTLUsage: time.Hour,
 	}
 	dynOpts := []*utils.DynamicDurationPointerOpt{
@@ -1863,11 +1863,11 @@ func TestLibFiltersGetDurationPointerOptsFromMultipleMapsReturnOptFromStartOptsE
 	dataDB := NewInternalDB(nil, nil, nil)
 	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
 	fS := NewFilterS(cfg, nil, dm)
-	eventStart := map[string]interface{}{
+	eventStart := map[string]any{
 		utils.AccountField: 1001,
 	}
-	apiOpts := map[string]interface{}{}
-	startOpts := map[string]interface{}{
+	apiOpts := map[string]any{}
+	startOpts := map[string]any{
 		utils.OptsSesTTLUsage: true,
 	}
 	dynOpts := []*utils.DynamicDurationPointerOpt{

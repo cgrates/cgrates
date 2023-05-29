@@ -118,7 +118,7 @@ func testTutSMGLoadTariffPlanFromFolder(t *testing.T) {
 	if err := tutSMGRpc.Call(context.Background(), utils.LoaderSv1Run,
 		&loaders.ArgsProcessFolder{
 			// StopOnError: true,
-			APIOpts: map[string]interface{}{utils.MetaCache: caching},
+			APIOpts: map[string]any{utils.MetaCache: caching},
 		}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {

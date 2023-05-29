@@ -289,7 +289,7 @@ func TestForceSTerminatorPostCDRs(t *testing.T) {
 		EventStart: engine.NewMapEvent(nil),
 		SRuns: []*SRun{
 			{
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					utils.RequestType: utils.MetaPostpaid,
 				},
 				ExtraDuration: 1,
@@ -325,7 +325,7 @@ func TestForceSTerminatorReleaseSession(t *testing.T) {
 		ResourceID: "resourceID",
 		SRuns: []*SRun{
 			{
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					utils.RequestType: utils.MetaPostpaid,
 				},
 				ExtraDuration: 1,
@@ -347,7 +347,7 @@ type testMockClientConn struct {
 	*testRPCClientConnection
 }
 
-func (sT *testMockClientConn) Call(method string, arg interface{}, rply interface{}) error {
+func (sT *testMockClientConn) Call(method string, arg any, rply any) error {
 	return utils.ErrNoActiveSession
 }
 
@@ -373,7 +373,7 @@ func TestForceSTerminatorClientCall(t *testing.T) {
 		ClientConnID: "ClientConnID",
 		SRuns: []*SRun{
 			{
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					utils.RequestType: utils.MetaPostpaid,
 				},
 				ExtraDuration: 1,
@@ -405,7 +405,7 @@ func TestDebitSession(t *testing.T) {
 		EventStart: engine.NewMapEvent(nil),
 		SRuns: []*SRun{
 			{
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					utils.RequestType: utils.MetaPostpaid,
 				},
 				ExtraDuration: 1,
@@ -441,10 +441,10 @@ func TestDebitSession(t *testing.T) {
 
 //mocking for
 type testMockClients struct {
-	calls map[string]func(args interface{}, reply interface{}) error
+	calls map[string]func(args any, reply any) error
 }
 
-func (sT *testMockClients) Call(method string, arg interface{}, rply interface{}) error {
+func (sT *testMockClients) Call(method string, arg any, rply any) error {
 	if call, has := sT.calls[method]; !has {
 		return rpcclient.ErrUnsupporteServiceMethod
 	} else {
@@ -456,8 +456,8 @@ func TestDebitSessionResponderMaxDebit(t *testing.T) {
 	log.SetOutput(io.Discard)
 	engine.Cache.Clear(nil)
 	testMock1 := &testMockClients{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			// utils.ResponderMaxDebit: func(args interface{}, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			// utils.ResponderMaxDebit: func(args any, reply any) error {
 			// 	callCost := new(engine.CallCost)
 			// 	callCost.Timespans = []*engine.TimeSpan{
 			// 		{
@@ -489,7 +489,7 @@ func TestDebitSessionResponderMaxDebit(t *testing.T) {
 		EventStart: engine.NewMapEvent(nil),
 		SRuns: []*SRun{
 			{
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					utils.RequestType: utils.MetaPostpaid,
 				},
 				ExtraDuration: time.Minute,
@@ -523,11 +523,11 @@ func TestDebitSessionResponderMaxDebitError(t *testing.T) {
 	log.SetOutput(io.Discard)
 	engine.Cache.Clear(nil)
 	sMock := &testMockClients{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			// utils.ResponderMaxDebit: func(args interface{}, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			// utils.ResponderMaxDebit: func(args any, reply any) error {
 			// 	return utils.ErrAccountNotFound
 			// },
-			// utils.SchedulerSv1ExecuteActionPlans: func(args interface{}, reply interface{}) error {
+			// utils.SchedulerSv1ExecuteActionPlans: func(args any, reply any) error {
 			// 	return nil
 			// },
 		},
@@ -551,7 +551,7 @@ func TestDebitSessionResponderMaxDebitError(t *testing.T) {
 		EventStart: engine.NewMapEvent(nil),
 		SRuns: []*SRun{
 			{
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					utils.RequestType: utils.MetaDynaprepaid,
 				},
 				// CD:            &engine.CallDescriptor{Category: "test"},
@@ -573,7 +573,7 @@ func TestDebitSessionResponderMaxDebitError(t *testing.T) {
 	}
 
 	engine.Cache.Clear(nil)
-	// sMock.calls[utils.SchedulerSv1ExecuteActionPlans] = func(args interface{}, reply interface{}) error {
+	// sMock.calls[utils.SchedulerSv1ExecuteActionPlans] = func(args any, reply any) error {
 	// return utils.ErrNotImplemented
 	// }
 	newInternalRpcChan := make(chan birpc.ClientConnector, 1)
@@ -607,7 +607,7 @@ func TestInitSessionDebitLoops(t *testing.T) {
 		debitStop:     make(chan struct{}, 1),
 		SRuns: []*SRun{
 			{
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					utils.RequestType: utils.MetaPrepaid,
 				},
 				// CD:            &engine.CallDescriptor{Category: "test"},
@@ -631,7 +631,7 @@ type testMockClientConnDiscSess struct {
 	*testRPCClientConnection
 }
 
-func (sT *testMockClientConnDiscSess) Call(method string, arg interface{}, rply interface{}) error {
+func (sT *testMockClientConnDiscSess) Call(method string, arg any, rply any) error {
 	return nil
 }
 
@@ -654,7 +654,7 @@ func TestDebitLoopSessionErrorDebiting(t *testing.T) {
 		DebitInterval: time.Minute,
 		SRuns: []*SRun{
 			{
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					utils.RequestType: utils.MetaDynaprepaid,
 				},
 				// CD:            &engine.CallDescriptor{Category: "test"},
@@ -677,11 +677,11 @@ func TestDebitLoopSessionErrorDebiting(t *testing.T) {
 	ss.debitStop = make(chan struct{})
 	engine.Cache.Clear(nil)
 	sMock := &testMockClients{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			// utils.ResponderMaxDebit: func(args interface{}, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			// utils.ResponderMaxDebit: func(args any, reply any) error {
 			// 	return utils.ErrAccountNotFound
 			// },
-			// utils.SchedulerSv1ExecuteActionPlans: func(args interface{}, reply interface{}) error {
+			// utils.SchedulerSv1ExecuteActionPlans: func(args any, reply any) error {
 			// 	return utils.ErrUnauthorizedDestination
 			// },
 		},
@@ -706,8 +706,8 @@ func TestDebitLoopSession(t *testing.T) {
 	log.SetOutput(io.Discard)
 	engine.Cache.Clear(nil)
 	testMock1 := &testMockClients{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ResponderMaxDebit: func(args interface{}, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.ResponderMaxDebit: func(args any, reply any) error {
 				callCost := new(engine.CallCost)
 				callCost.Timespans = []*engine.TimeSpan{
 					{
@@ -740,7 +740,7 @@ func TestDebitLoopSession(t *testing.T) {
 		debitStop:  make(chan struct{}),
 		SRuns: []*SRun{
 			{
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					utils.RequestType: utils.MetaPrepaid,
 				},
 				CD: &engine.CallDescriptor{
@@ -769,8 +769,8 @@ func TestDebitLoopSessionFrcDiscLowerDbtInterval(t *testing.T) {
 	log.SetOutput(io.Discard)
 	engine.Cache.Clear(nil)
 	testMock1 := &testMockClients{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ResponderMaxDebit: func(args interface{}, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.ResponderMaxDebit: func(args any, reply any) error {
 				callCost := new(engine.CallCost)
 				callCost.Timespans = []*engine.TimeSpan{
 					{
@@ -803,7 +803,7 @@ func TestDebitLoopSessionFrcDiscLowerDbtInterval(t *testing.T) {
 		debitStop:  make(chan struct{}),
 		SRuns: []*SRun{
 			{
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					utils.RequestType: utils.MetaPostpaid,
 				},
 				CD: &engine.CallDescriptor{
@@ -830,8 +830,8 @@ func TestDebitLoopSessionLowBalance(t *testing.T) {
 	log.SetOutput(io.Discard)
 	engine.Cache.Clear(nil)
 	testMock1 := &testMockClients{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ResponderMaxDebit: func(args interface{}, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.ResponderMaxDebit: func(args any, reply any) error {
 				return nil
 			},
 		},
@@ -857,7 +857,7 @@ func TestDebitLoopSessionLowBalance(t *testing.T) {
 		debitStop:  make(chan struct{}),
 		SRuns: []*SRun{
 			{
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					utils.RequestType: utils.MetaPostpaid,
 				},
 				CD: &engine.CallDescriptor{
@@ -889,11 +889,11 @@ func TestDebitLoopSessionWarningSessions(t *testing.T) {
 	log.SetOutput(io.Discard)
 	engine.Cache.Clear(nil)
 	testMock1 := &testMockClients{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ResponderMaxDebit: func(args interface{}, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.ResponderMaxDebit: func(args any, reply any) error {
 				return nil
 			},
-			utils.ResourceSv1ReleaseResources: func(args interface{}, reply interface{}) error {
+			utils.ResourceSv1ReleaseResources: func(args any, reply any) error {
 				return utils.ErrNotImplemented
 			},
 		},
@@ -945,11 +945,11 @@ func TestDebitLoopSessionDisconnectSession(t *testing.T) {
 	log.SetOutput(io.Discard)
 	engine.Cache.Clear(nil)
 	testMock1 := &testMockClients{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ResponderMaxDebit: func(args interface{}, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.ResponderMaxDebit: func(args any, reply any) error {
 				return nil
 			},
-			utils.ResourceSv1ReleaseResources: func(args interface{}, reply interface{}) error {
+			utils.ResourceSv1ReleaseResources: func(args any, reply any) error {
 				return utils.ErrNotImplemented
 			},
 		},
@@ -1015,8 +1015,8 @@ func TestStoreSCost(t *testing.T) {
 	log.SetOutput(io.Discard)
 	engine.Cache.Clear(nil)
 	testMock1 := &testMockClients{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.CDRsV1StoreSessionCost: func(args interface{}, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.CDRsV1StoreSessionCost: func(args any, reply any) error {
 				return utils.ErrExists
 			},
 		},
@@ -1063,8 +1063,8 @@ func TestRefundSession(t *testing.T) {
 	log.SetOutput(io.Discard)
 	engine.Cache.Clear(nil)
 	testMock1 := &testMockClients{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ResponderRefundIncrements: func(args interface{}, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.ResponderRefundIncrements: func(args any, reply any) error {
 				if args.(*engine.CallDescriptorWithAPIOpts).APIOpts != nil {
 					return utils.ErrNotImplemented
 				}
@@ -1175,8 +1175,8 @@ func TestRoundCost(t *testing.T) {
 	log.SetOutput(io.Discard)
 	engine.Cache.Clear(nil)
 	testMock1 := &testMockClients{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ResponderRefundRounding: func(args interface{}, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.ResponderRefundRounding: func(args any, reply any) error {
 				return utils.ErrNotImplemented
 			},
 		},
@@ -1254,7 +1254,7 @@ func TestDisconnectSession(t *testing.T) {
 
 	ss := &Session{
 		ClientConnID: "test",
-		EventStart:   make(map[string]interface{}),
+		EventStart:   make(map[string]any),
 		SRuns: []*SRun{
 			{
 				TotalUsage: time.Minute,
@@ -1287,8 +1287,8 @@ func TestReplicateSessions(t *testing.T) {
 	log.SetOutput(io.Discard)
 	engine.Cache.Clear(nil)
 	testMock1 := &testMockClients{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.SessionSv1SetPassiveSession: func(args interface{}, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.SessionSv1SetPassiveSession: func(args any, reply any) error {
 				return utils.ErrNotImplemented
 			},
 		},
@@ -1313,8 +1313,8 @@ func TestNewSession(t *testing.T) {
 	log.SetOutput(io.Discard)
 	engine.Cache.Clear(nil)
 	testMock1 := &testMockClients{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ChargerSv1ProcessEvent: func(args interface{}, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.ChargerSv1ProcessEvent: func(args any, reply any) error {
 				if args.(*utils.CGREvent).ID == utils.EmptyString {
 					return utils.ErrNotImplemented
 				}
@@ -1323,7 +1323,7 @@ func TestNewSession(t *testing.T) {
 						CGREvent: &utils.CGREvent{
 							Tenant: "cgrates.org",
 							ID:     "TEST_ID",
-							Event: map[string]interface{}{
+							Event: map[string]any{
 								utils.Destination: "10",
 							},
 						}},
@@ -1346,7 +1346,7 @@ func TestNewSession(t *testing.T) {
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "TEST_ID",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.Destination: "10",
 		},
 	}
@@ -1364,14 +1364,14 @@ func TestNewSession(t *testing.T) {
 		Tenant:       "cgrates.org",
 		ResourceID:   "resourceID",
 		ClientConnID: "clientConnID",
-		EventStart: map[string]interface{}{
+		EventStart: map[string]any{
 			utils.MetaOriginID:       "da39a3ee5e6b4b0d3255bfef95601890afd80709",
 			utils.Destination: "10",
 		},
 		DebitInterval: time.Second,
 		SRuns: []*SRun{
 			{
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					utils.Destination: "10",
 				},
 				CD: &engine.CallDescriptor{
@@ -1415,11 +1415,11 @@ func TestProcessChargerS(t *testing.T) {
 
 	engine.Cache.Clear(nil)
 	testMock1 := &testMockClients{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ChargerSv1ProcessEvent: func(args interface{}, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.ChargerSv1ProcessEvent: func(args any, reply any) error {
 				return utils.ErrExists
 			},
-			utils.CacheSv1ReplicateSet: func(args interface{}, reply interface{}) error {
+			utils.CacheSv1ReplicateSet: func(args any, reply any) error {
 				return utils.ErrNotImplemented
 			},
 		},
@@ -1437,7 +1437,7 @@ func TestProcessChargerS(t *testing.T) {
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "TEST_ID",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.Destination: "10",
 		},
 	}
@@ -1513,23 +1513,23 @@ func TestRelocateSession(t *testing.T) {
 	sessions.aSessions = map[string]*Session{
 		"0d0fe8779b54c88f121e26c5d83abee5935127e5": {
 			CGRID:      "TEST_CGRID",
-			EventStart: map[string]interface{}{},
+			EventStart: map[string]any{},
 			SRuns: []*SRun{
 				{
-					Event: map[string]interface{}{},
+					Event: map[string]any{},
 				},
 			},
 		},
 	}
 	expected := &Session{
 		CGRID: "dfa2adaa5ab49349777c1ab3bcf3455df0259880",
-		EventStart: map[string]interface{}{
+		EventStart: map[string]any{
 			utils.MetaOriginID:    "dfa2adaa5ab49349777c1ab3bcf3455df0259880",
 			utils.OriginID: "222",
 		},
 		SRuns: []*SRun{
 			{
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					utils.MetaOriginID:    "dfa2adaa5ab49349777c1ab3bcf3455df0259880",
 					utils.OriginID: "222",
 				},
@@ -1587,8 +1587,8 @@ func TestLibsessionsSetMockErrors(t *testing.T) {
 
 	engine.Cache.Clear(nil)
 	sTestMock := &testMockClients{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.CacheSv1ReplicateSet: func(args interface{}, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.CacheSv1ReplicateSet: func(args any, reply any) error {
 				return utils.ErrNotImplemented
 			},
 		},
@@ -1636,7 +1636,7 @@ type testMockClientSyncSessions struct {
 	*testRPCClientConnection
 }
 
-func (sT *testMockClientSyncSessions) Call(method string, arg interface{}, rply interface{}) error {
+func (sT *testMockClientSyncSessions) Call(method string, arg any, rply any) error {
 	queriedSessionIDs := []*SessionID{
 		{
 			OriginID:   "ORIGIN_ID",
@@ -1654,11 +1654,11 @@ func TestSyncSessions(t *testing.T) {
 	engine.Cache.Clear(nil)
 
 	sTestMock := &testMockClients{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ResourceSv1ReleaseResources: func(args interface{}, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.ResourceSv1ReleaseResources: func(args any, reply any) error {
 				return utils.ErrNotImplemented
 			},
-			utils.CacheSv1ReplicateSet: func(args interface{}, reply interface{}) error {
+			utils.CacheSv1ReplicateSet: func(args any, reply any) error {
 				return utils.ErrNotImplemented
 			},
 		},
@@ -1717,17 +1717,17 @@ func TestAuthEvent(t *testing.T) {
 	engine.Cache.Clear(nil)
 
 	sTestMock := &testMockClients{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ResponderGetMaxSessionTime: func(args interface{}, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.ResponderGetMaxSessionTime: func(args any, reply any) error {
 				return utils.ErrNotImplemented
 			},
-			utils.ChargerSv1ProcessEvent: func(args interface{}, reply interface{}) error {
+			utils.ChargerSv1ProcessEvent: func(args any, reply any) error {
 				chrgrs := []*engine.ChrgSProcessEventReply{
 					{ChargerSProfile: "TEST_PROFILE1",
 						CGREvent: &utils.CGREvent{
 							Tenant: "cgrates.org",
 							ID:     "TEST_ID",
-							Event: map[string]interface{}{
+							Event: map[string]any{
 								utils.Destination: "10",
 							},
 						}},
@@ -1752,7 +1752,7 @@ func TestAuthEvent(t *testing.T) {
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "TEST_ID",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.Destination: "10",
 			utils.Usage:       "invalid_time",
 		},
@@ -1785,8 +1785,8 @@ func TestAuthEventMockCall(t *testing.T) {
 	//mocking the GetMaxSession for checking the error
 	engine.Cache.Clear(nil)
 	sTestMock := &testMockClients{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ResponderGetMaxSessionTime: func(args interface{}, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.ResponderGetMaxSessionTime: func(args any, reply any) error {
 				usage := args.(*engine.CallDescriptorWithAPIOpts).APIOpts[utils.Usage]
 				if usage != 10 {
 					return utils.ErrNoMoreData
@@ -1794,13 +1794,13 @@ func TestAuthEventMockCall(t *testing.T) {
 				*reply.(*time.Duration) = 4 * time.Hour
 				return nil
 			},
-			utils.ChargerSv1ProcessEvent: func(args interface{}, reply interface{}) error {
+			utils.ChargerSv1ProcessEvent: func(args any, reply any) error {
 				chrgrs := []*engine.ChrgSProcessEventReply{
 					{ChargerSProfile: "TEST_PROFILE1",
 						CGREvent: &utils.CGREvent{
 							Tenant: "cgrates.org",
 							ID:     "TEST_ID",
-							Event: map[string]interface{}{
+							Event: map[string]any{
 								utils.Destination: "10",
 								utils.RequestType: utils.MetaPrepaid,
 							},
@@ -1825,10 +1825,10 @@ func TestAuthEventMockCall(t *testing.T) {
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "TEST_ID",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.Destination: "10",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.Usage: 10,
 		},
 	}
@@ -1843,7 +1843,7 @@ func TestAuthEventMockCall(t *testing.T) {
 		t.Errorf("Expected %+v, received %+v", expectedTime, usage)
 	}
 
-	cgrEv.APIOpts = map[string]interface{}{
+	cgrEv.APIOpts = map[string]any{
 		utils.Usage: 20,
 	}
 	expected := "RALS_ERROR:NO_MORE_DATA"
@@ -1858,17 +1858,17 @@ func TestChargeEvent(t *testing.T) {
 
 	engine.Cache.Clear(nil)
 	sTestMock := &testMockClients{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.CacheSv1ReplicateSet: func(args interface{}, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.CacheSv1ReplicateSet: func(args any, reply any) error {
 				return utils.ErrNotImplemented
 			},
-			utils.ChargerSv1ProcessEvent: func(args interface{}, reply interface{}) error {
+			utils.ChargerSv1ProcessEvent: func(args any, reply any) error {
 				chrgrs := []*engine.ChrgSProcessEventReply{
 					{ChargerSProfile: "TEST_PROFILE1",
 						CGREvent: &utils.CGREvent{
 							Tenant: "cgrates.org",
 							ID:     "TEST_ID",
-							Event: map[string]interface{}{
+							Event: map[string]any{
 								utils.Destination: "10",
 								utils.RequestType: utils.MetaPostpaid,
 							},
@@ -1880,7 +1880,7 @@ func TestChargeEvent(t *testing.T) {
 				*reply.(*[]*engine.ChrgSProcessEventReply) = chrgrs
 				return nil
 			},
-			utils.ResponderMaxDebit: func(args interface{}, reply interface{}) error {
+			utils.ResponderMaxDebit: func(args any, reply any) error {
 				return nil
 			},
 		},
@@ -1903,7 +1903,7 @@ func TestChargeEvent(t *testing.T) {
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "TEST_ID",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.Usage:       10,
 			utils.RequestType: utils.MetaPostpaid,
 		},
@@ -1953,15 +1953,15 @@ func TestUpdateSession(t *testing.T) {
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
 	sessions := NewSessionS(cfg, dm, nil)
 
-	updatedEv := map[string]interface{}{
+	updatedEv := map[string]any{
 		utils.Usage:       time.Second,
 		utils.Destination: 10,
 	}
 	ss := &Session{
-		EventStart: map[string]interface{}{},
+		EventStart: map[string]any{},
 		SRuns: []*SRun{
 			{
-				Event: map[string]interface{}{},
+				Event: map[string]any{},
 				CD: &engine.CallDescriptor{
 					RunID: "RUNID_TEST",
 				},
@@ -1990,14 +1990,14 @@ func TestEndSession(t *testing.T) {
 	log.SetOutput(io.Discard)
 	engine.Cache.Clear(nil)
 	sTestMock := &testMockClients{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ResponderDebit: func(args interface{}, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.ResponderDebit: func(args any, reply any) error {
 				return nil
 			},
-			utils.ResponderRefundRounding: func(args interface{}, reply interface{}) error {
+			utils.ResponderRefundRounding: func(args any, reply any) error {
 				return utils.ErrNotImplemented
 			},
-			utils.CDRsV1StoreSessionCost: func(args interface{}, reply interface{}) error {
+			utils.CDRsV1StoreSessionCost: func(args any, reply any) error {
 				return utils.ErrNotImplemented
 			},
 		},
@@ -2016,11 +2016,11 @@ func TestEndSession(t *testing.T) {
 	sessions := NewSessionS(cfg, dm, connMgr)
 
 	ss := &Session{
-		EventStart: map[string]interface{}{},
+		EventStart: map[string]any{},
 		SRuns: []*SRun{
 			{
 				TotalUsage: 50 * time.Minute,
-				Event:      map[string]interface{}{},
+				Event:      map[string]any{},
 				EventCost: &engine.EventCost{
 					Usage:          utils.DurationPointer(30 * time.Minute),
 					AccountSummary: &engine.AccountSummary{},
@@ -2135,7 +2135,7 @@ func TestBiRPCv1GetActivePassiveSessions(t *testing.T) {
 		t.Errorf("Expected %+v, received %+v", utils.ErrNotFound, err)
 	}
 
-	sEv := engine.NewMapEvent(map[string]interface{}{
+	sEv := engine.NewMapEvent(map[string]any{
 		utils.EventName:       "TEST_EVENT",
 		utils.ToR:             "*voice",
 		utils.OriginID:        "12345",
@@ -2330,8 +2330,8 @@ func TestBiRPCv1ReplicateSessions(t *testing.T) {
 	log.SetOutput(io.Discard)
 	engine.Cache.Clear(nil)
 	clnt := &testMockClients{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.SessionSv1SetPassiveSession: func(args interface{}, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.SessionSv1SetPassiveSession: func(args any, reply any) error {
 				return utils.ErrNotImplemented
 			},
 		},
@@ -2369,13 +2369,13 @@ func TestBiRPCv1AuthorizeEvent(t *testing.T) {
 
 	engine.Cache.Clear(nil)
 	clnt := &testMockClients{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.AttributeSv1ProcessEvent: func(args interface{}, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.AttributeSv1ProcessEvent: func(args any, reply any) error {
 				cgrEv := engine.AttrSProcessEventReply{
 					CGREvent: &utils.CGREvent{
 						ID:     "TestID",
 						Tenant: "cgrates.org",
-						Event:  map[string]interface{}{},
+						Event:  map[string]any{},
 					},
 				}
 				*reply.(*engine.AttrSProcessEventReply) = cgrEv
@@ -2395,7 +2395,7 @@ func TestBiRPCv1AuthorizeEvent(t *testing.T) {
 
 	cgrEvent := &utils.CGREvent{
 		ID: "TestID",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.Usage: "10s",
 		},
 	}
@@ -2462,14 +2462,14 @@ func TestBiRPCv1AuthorizeEvent2(t *testing.T) {
 	log.SetOutput(io.Discard)
 	engine.Cache.Clear(nil)
 	clnt := &testMockClients{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ChargerSv1ProcessEvent: func(args interface{}, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.ChargerSv1ProcessEvent: func(args any, reply any) error {
 				cghrgs := []*engine.ChrgSProcessEventReply{
 					{
 						CGREvent: &utils.CGREvent{
 							Tenant: "cgrates.org",
 							ID:     "TestID",
-							Event: map[string]interface{}{
+							Event: map[string]any{
 								utils.Usage: "10s",
 							},
 						},
@@ -2478,13 +2478,13 @@ func TestBiRPCv1AuthorizeEvent2(t *testing.T) {
 				*reply.(*[]*engine.ChrgSProcessEventReply) = cghrgs
 				return nil
 			},
-			utils.ResourceSv1AuthorizeResources: func(args interface{}, reply interface{}) error {
+			utils.ResourceSv1AuthorizeResources: func(args any, reply any) error {
 				if args.(*utils.ArgRSv1ResourceUsage).Tenant == "new_tenant" {
 					return utils.ErrNotImplemented
 				}
 				return nil
 			},
-			utils.RouteSv1GetRoutes: func(args interface{}, reply interface{}) error {
+			utils.RouteSv1GetRoutes: func(args any, reply any) error {
 				*reply.(*engine.SortedRoutesList) = engine.SortedRoutesList{{
 					Routes: []*engine.SortedRoute{
 						{
@@ -2494,7 +2494,7 @@ func TestBiRPCv1AuthorizeEvent2(t *testing.T) {
 				}}
 				return nil
 			},
-			utils.ThresholdSv1ProcessEvent: func(args interface{}, reply interface{}) error {
+			utils.ThresholdSv1ProcessEvent: func(args any, reply any) error {
 				return utils.ErrNotImplemented
 			},
 		},
@@ -2515,7 +2515,7 @@ func TestBiRPCv1AuthorizeEvent2(t *testing.T) {
 
 	cgrEvent := &utils.CGREvent{
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.Usage: "10s",
 		},
 	}
@@ -2597,25 +2597,25 @@ func TestBiRPCv1AuthorizeEventWithDigest(t *testing.T) {
 	log.SetOutput(io.Discard)
 	engine.Cache.Clear(nil)
 	clnt := &testMockClients{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.AttributeSv1ProcessEvent: func(args interface{}, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.AttributeSv1ProcessEvent: func(args any, reply any) error {
 				cgrEv := engine.AttrSProcessEventReply{
 					CGREvent: &utils.CGREvent{
 						ID:     "TestID",
 						Tenant: "cgrates.org",
-						Event:  map[string]interface{}{},
+						Event:  map[string]any{},
 					},
 				}
 				*reply.(*engine.AttrSProcessEventReply) = cgrEv
 				return nil
 			},
-			utils.ChargerSv1ProcessEvent: func(args interface{}, reply interface{}) error {
+			utils.ChargerSv1ProcessEvent: func(args any, reply any) error {
 				cghrgs := []*engine.ChrgSProcessEventReply{
 					{
 						CGREvent: &utils.CGREvent{
 							Tenant: "cgrates.org",
 							ID:     "TestID",
-							Event: map[string]interface{}{
+							Event: map[string]any{
 								utils.Usage: "10s",
 							},
 						},
@@ -2624,13 +2624,13 @@ func TestBiRPCv1AuthorizeEventWithDigest(t *testing.T) {
 				*reply.(*[]*engine.ChrgSProcessEventReply) = cghrgs
 				return nil
 			},
-			utils.ResourceSv1AuthorizeResources: func(args interface{}, reply interface{}) error {
+			utils.ResourceSv1AuthorizeResources: func(args any, reply any) error {
 				if args.(*utils.ArgRSv1ResourceUsage).Tenant == "new_tenant" {
 					return utils.ErrNotImplemented
 				}
 				return nil
 			},
-			utils.RouteSv1GetRoutes: func(args interface{}, reply interface{}) error {
+			utils.RouteSv1GetRoutes: func(args any, reply any) error {
 				*reply.(*engine.SortedRoutesList) = engine.SortedRoutesList{{
 					Routes: []*engine.SortedRoute{
 						{
@@ -2640,10 +2640,10 @@ func TestBiRPCv1AuthorizeEventWithDigest(t *testing.T) {
 				}}
 				return nil
 			},
-			utils.ThresholdSv1ProcessEvent: func(args interface{}, reply interface{}) error {
+			utils.ThresholdSv1ProcessEvent: func(args any, reply any) error {
 				return nil
 			},
-			utils.StatSv1ProcessEvent: func(args interface{}, reply interface{}) error {
+			utils.StatSv1ProcessEvent: func(args any, reply any) error {
 				return nil
 			},
 		},
@@ -2672,7 +2672,7 @@ func TestBiRPCv1AuthorizeEventWithDigest(t *testing.T) {
 
 	cgrEvent := &utils.CGREvent{
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.Usage: "10s",
 		},
 	}
@@ -2708,14 +2708,14 @@ func TestBiRPCv1InitiateSession1(t *testing.T) {
 
 	engine.Cache.Clear(nil)
 	clnt := &testMockClients{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ChargerSv1ProcessEvent: func(args interface{}, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.ChargerSv1ProcessEvent: func(args any, reply any) error {
 				cghrgs := []*engine.ChrgSProcessEventReply{
 					{
 						CGREvent: &utils.CGREvent{
 							Tenant: "cgrates.org",
 							ID:     "TestID",
-							Event: map[string]interface{}{
+							Event: map[string]any{
 								utils.Usage: "10s",
 							},
 						},
@@ -2724,19 +2724,19 @@ func TestBiRPCv1InitiateSession1(t *testing.T) {
 				*reply.(*[]*engine.ChrgSProcessEventReply) = cghrgs
 				return nil
 			},
-			utils.ResourceSv1AuthorizeResources: func(args interface{}, reply interface{}) error {
+			utils.ResourceSv1AuthorizeResources: func(args any, reply any) error {
 				if args.(*utils.ArgRSv1ResourceUsage).Tenant == "new_tenant" {
 					return utils.ErrNotImplemented
 				}
 				return nil
 			},
-			utils.ResourceSv1AllocateResources: func(args interface{}, reply interface{}) error {
+			utils.ResourceSv1AllocateResources: func(args any, reply any) error {
 				if args.(*utils.ArgRSv1ResourceUsage).UsageID == "ORIGIN_ID" {
 					return utils.ErrNotImplemented
 				}
 				return nil
 			},
-			utils.AttributeSv1ProcessEvent: func(args interface{}, reply interface{}) error {
+			utils.AttributeSv1ProcessEvent: func(args any, reply any) error {
 				if len(args.(*engine.AttrArgsProcessEvent).AttributeIDs) != 0 {
 					return utils.ErrNotImplemented
 				}
@@ -2761,7 +2761,7 @@ func TestBiRPCv1InitiateSession1(t *testing.T) {
 	sessions := NewSessionS(cfg, dm, connMgr)
 
 	cgrEvent := &utils.CGREvent{
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.Usage:    "10s",
 			utils.OriginID: "TEST_ID",
 		},
@@ -2829,7 +2829,7 @@ func TestBiRPCv1InitiateSession1(t *testing.T) {
 	cgrEvent = &utils.CGREvent{
 		ID:     "Test_id",
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.Usage:    "10s",
 			utils.OriginID: "ORIGIN_ID",
 		},
@@ -2856,14 +2856,14 @@ func TestBiRPCv1InitiateSession2(t *testing.T) {
 	log.SetOutput(io.Discard)
 	engine.Cache.Clear(nil)
 	clnt := &testMockClients{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ChargerSv1ProcessEvent: func(args interface{}, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.ChargerSv1ProcessEvent: func(args any, reply any) error {
 				cghrgs := []*engine.ChrgSProcessEventReply{
 					{
 						CGREvent: &utils.CGREvent{
 							Tenant: "cgrates.org",
 							ID:     "TestID",
-							Event: map[string]interface{}{
+							Event: map[string]any{
 								utils.Usage: "10s",
 							},
 						},
@@ -2875,13 +2875,13 @@ func TestBiRPCv1InitiateSession2(t *testing.T) {
 				*reply.(*[]*engine.ChrgSProcessEventReply) = cghrgs
 				return nil
 			},
-			utils.ResourceSv1AuthorizeResources: func(args interface{}, reply interface{}) error {
+			utils.ResourceSv1AuthorizeResources: func(args any, reply any) error {
 				if args.(*utils.ArgRSv1ResourceUsage).Tenant == "new_tenant" {
 					return utils.ErrNotImplemented
 				}
 				return nil
 			},
-			utils.ThresholdSv1ProcessEvent: func(args interface{}, reply interface{}) error {
+			utils.ThresholdSv1ProcessEvent: func(args any, reply any) error {
 				return utils.ErrNotImplemented
 			},
 		},
@@ -2904,10 +2904,10 @@ func TestBiRPCv1InitiateSession2(t *testing.T) {
 	cgrEvent := &utils.CGREvent{
 		ID:     "Test_id",
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.Usage: "invalid_usage",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsDebitInterval: "invalid_DUR_FORMAT",
 		},
 	}
@@ -2952,10 +2952,10 @@ func TestBiRPCv1InitiateSession2(t *testing.T) {
 	//is prepaid
 	cgrEvent = &utils.CGREvent{
 		ID: "PREPAID",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.Usage: "1s",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsDebitInterval: "10s",
 		},
 	}
@@ -2973,25 +2973,25 @@ func TestBiRPCv1InitiateSessionWithDigest(t *testing.T) {
 	log.SetOutput(io.Discard)
 	engine.Cache.Clear(nil)
 	clnt := &testMockClients{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.AttributeSv1ProcessEvent: func(args interface{}, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.AttributeSv1ProcessEvent: func(args any, reply any) error {
 				cgrEv := engine.AttrSProcessEventReply{
 					CGREvent: &utils.CGREvent{
 						ID:     "TestID",
 						Tenant: "cgrates.org",
-						Event:  map[string]interface{}{},
+						Event:  map[string]any{},
 					},
 				}
 				*reply.(*engine.AttrSProcessEventReply) = cgrEv
 				return nil
 			},
-			utils.ChargerSv1ProcessEvent: func(args interface{}, reply interface{}) error {
+			utils.ChargerSv1ProcessEvent: func(args any, reply any) error {
 				cghrgs := []*engine.ChrgSProcessEventReply{
 					{
 						CGREvent: &utils.CGREvent{
 							Tenant: "cgrates.org",
 							ID:     "TestID",
-							Event: map[string]interface{}{
+							Event: map[string]any{
 								utils.Usage: "10s",
 							},
 						},
@@ -3000,10 +3000,10 @@ func TestBiRPCv1InitiateSessionWithDigest(t *testing.T) {
 				*reply.(*[]*engine.ChrgSProcessEventReply) = cghrgs
 				return nil
 			},
-			utils.ResourceSv1AllocateResources: func(args interface{}, reply interface{}) error {
+			utils.ResourceSv1AllocateResources: func(args any, reply any) error {
 				return nil
 			},
-			utils.RouteSv1GetRoutes: func(args interface{}, reply interface{}) error {
+			utils.RouteSv1GetRoutes: func(args any, reply any) error {
 				*reply.(*engine.SortedRoutesList) = engine.SortedRoutesList{{
 					Routes: []*engine.SortedRoute{
 						{
@@ -3013,10 +3013,10 @@ func TestBiRPCv1InitiateSessionWithDigest(t *testing.T) {
 				}}
 				return nil
 			},
-			utils.ThresholdSv1ProcessEvent: func(args interface{}, reply interface{}) error {
+			utils.ThresholdSv1ProcessEvent: func(args any, reply any) error {
 				return nil
 			},
-			utils.StatSv1ProcessEvent: func(args interface{}, reply interface{}) error {
+			utils.StatSv1ProcessEvent: func(args any, reply any) error {
 				return nil
 			},
 		},
@@ -3045,7 +3045,7 @@ func TestBiRPCv1InitiateSessionWithDigest(t *testing.T) {
 
 	cgrEvent := &utils.CGREvent{
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.Usage:    "10s",
 			utils.OriginID: "ORIGIND_ID",
 		},
@@ -3082,8 +3082,8 @@ func TestBiRPCv1UpdateSession1(t *testing.T) {
 
 	engine.Cache.Clear(nil)
 	clnt := &testMockClients{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.AttributeSv1ProcessEvent: func(args interface{}, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.AttributeSv1ProcessEvent: func(args any, reply any) error {
 				if len(args.(*engine.AttrArgsProcessEvent).AttributeIDs) == 1 {
 					return utils.ErrNotImplemented
 				}
@@ -3104,7 +3104,7 @@ func TestBiRPCv1UpdateSession1(t *testing.T) {
 	sessions := NewSessionS(cfg, dm, connMgr)
 
 	cgrEvent := &utils.CGREvent{
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.Usage:    "10s",
 			utils.OriginID: "TEST_ID",
 		},
@@ -3162,14 +3162,14 @@ func TestBiRPCv1UpdateSession2(t *testing.T) {
 	log.SetOutput(io.Discard)
 	engine.Cache.Clear(nil)
 	clnt := &testMockClients{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ChargerSv1ProcessEvent: func(args interface{}, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.ChargerSv1ProcessEvent: func(args any, reply any) error {
 				cghrgs := []*engine.ChrgSProcessEventReply{
 					{
 						CGREvent: &utils.CGREvent{
 							Tenant: "cgrates.org",
 							ID:     "TestID",
-							Event: map[string]interface{}{
+							Event: map[string]any{
 								utils.Usage: "10s",
 							},
 						},
@@ -3192,11 +3192,11 @@ func TestBiRPCv1UpdateSession2(t *testing.T) {
 
 	cgrEvent := &utils.CGREvent{
 		ID: "test_id",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.Usage:    "invalid_dur_format",
 			utils.OriginID: "TEST_ID",
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsDebitInterval: "invalid_dur_format",
 		},
 	}
@@ -3236,14 +3236,14 @@ func TestBiRPCv1TerminateSession1(t *testing.T) {
 
 	engine.Cache.Clear(nil)
 	clnt := &testMockClients{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ChargerSv1ProcessEvent: func(args interface{}, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.ChargerSv1ProcessEvent: func(args any, reply any) error {
 				cghrgs := []*engine.ChrgSProcessEventReply{
 					{
 						CGREvent: &utils.CGREvent{
 							Tenant: "cgrates.org",
 							ID:     "TestID",
-							Event: map[string]interface{}{
+							Event: map[string]any{
 								utils.Usage: "10s",
 								utils.MetaOriginID: "TEST_ID",
 							},
@@ -3253,7 +3253,7 @@ func TestBiRPCv1TerminateSession1(t *testing.T) {
 				*reply.(*[]*engine.ChrgSProcessEventReply) = cghrgs
 				return nil
 			},
-			utils.CacheSv1ReplicateSet: func(args interface{}, reply interface{}) error {
+			utils.CacheSv1ReplicateSet: func(args any, reply any) error {
 				return utils.ErrNotImplemented
 			},
 		},
@@ -3272,7 +3272,7 @@ func TestBiRPCv1TerminateSession1(t *testing.T) {
 
 	cgrEvent := &utils.CGREvent{
 		ID: "test_id",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.Usage:    "10s",
 			utils.OriginID: "TEST_ID",
 		},
@@ -3314,7 +3314,7 @@ func TestBiRPCv1TerminateSession1(t *testing.T) {
 	}
 	cgrEvent.Event[utils.OriginID] = "ORIGIN_ID"
 
-	cgrEvent.APIOpts = make(map[string]interface{})
+	cgrEvent.APIOpts = make(map[string]any)
 	cgrEvent.APIOpts[utils.OptsDebitInterval] = "invalid_time_format"
 	args = NewV1TerminateSessionArgs(true, false, false, nil, false, nil, cgrEvent, true)
 	expected = "RALS_ERROR:time: invalid duration \"invalid_time_format\""
@@ -3353,7 +3353,7 @@ func TestBiRPCv1TerminateSession1(t *testing.T) {
 
 	cgrEvent = &utils.CGREvent{
 		ID: "test_id",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.Usage:    "10s",
 			utils.OriginID: "TEST_ID",
 		},
@@ -3384,8 +3384,8 @@ func TestBiRPCv1TerminateSession2(t *testing.T) {
 	log.SetOutput(io.Discard)
 	engine.Cache.Clear(nil)
 	clnt := &testMockClients{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ResourceSv1ReleaseResources: func(args interface{}, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.ResourceSv1ReleaseResources: func(args any, reply any) error {
 				if args.(*utils.ArgRSv1ResourceUsage).Tenant == "CHANGED_ID" {
 					return nil
 				}
@@ -3406,7 +3406,7 @@ func TestBiRPCv1TerminateSession2(t *testing.T) {
 
 	cgrEvent := &utils.CGREvent{
 		ID: "test_id",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.Usage:    "10s",
 			utils.OriginID: "TEST_ID",
 		},
@@ -3452,7 +3452,7 @@ func TestBiRPCv1ProcessCDR(t *testing.T) {
 	sessions := NewSessionS(cfg, dm, nil)
 
 	cgrEvent := &utils.CGREvent{
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.Usage:    "10s",
 			utils.OriginID: "TEST_ID",
 		},
@@ -3486,8 +3486,8 @@ func TestBiRPCv1ProcessMessage1(t *testing.T) {
 
 	engine.Cache.Clear(nil)
 	clnt := &testMockClients{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.AttributeSv1ProcessEvent: func(args interface{}, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.AttributeSv1ProcessEvent: func(args any, reply any) error {
 				if args.(*engine.AttrArgsProcessEvent).ID == "test_id" {
 					return nil
 				}
@@ -3509,7 +3509,7 @@ func TestBiRPCv1ProcessMessage1(t *testing.T) {
 
 	cgrEvent := &utils.CGREvent{
 		ID: "test_id",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.Usage:    "10s",
 			utils.OriginID: "TEST_ID",
 		},
@@ -3565,14 +3565,14 @@ func TestBiRPCv1ProcessMessage2(t *testing.T) {
 	log.SetOutput(io.Discard)
 	engine.Cache.Clear(nil)
 	clnt := &testMockClients{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ResourceSv1AllocateResources: func(args interface{}, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.ResourceSv1AllocateResources: func(args any, reply any) error {
 				if args.(*utils.ArgRSv1ResourceUsage).UsageID == "ORIGIN_ID" {
 					return nil
 				}
 				return utils.ErrNotImplemented
 			},
-			utils.RouteSv1GetRoutes: func(args interface{}, reply interface{}) error {
+			utils.RouteSv1GetRoutes: func(args any, reply any) error {
 				*reply.(*engine.SortedRoutesList) = engine.SortedRoutesList{{
 					Routes: []*engine.SortedRoute{
 						{
@@ -3582,13 +3582,13 @@ func TestBiRPCv1ProcessMessage2(t *testing.T) {
 				}}
 				return nil
 			},
-			utils.ChargerSv1ProcessEvent: func(args interface{}, reply interface{}) error {
+			utils.ChargerSv1ProcessEvent: func(args any, reply any) error {
 				chrgrs := []*engine.ChrgSProcessEventReply{
 					{ChargerSProfile: "TEST_PROFILE1",
 						CGREvent: &utils.CGREvent{
 							Tenant: "cgrates.org",
 							ID:     "TEST_ID",
-							Event: map[string]interface{}{
+							Event: map[string]any{
 								utils.Destination: "10",
 							},
 						}},
@@ -3614,7 +3614,7 @@ func TestBiRPCv1ProcessMessage2(t *testing.T) {
 
 	cgrEvent := &utils.CGREvent{
 		ID: "test_id",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.Usage: "10s",
 		},
 	}
@@ -3669,14 +3669,14 @@ func TestBiRPCv1ProcessEvent(t *testing.T) {
 
 	engine.Cache.Clear(nil)
 	clnt := &testMockClients{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ChargerSv1ProcessEvent: func(args interface{}, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.ChargerSv1ProcessEvent: func(args any, reply any) error {
 				chrgrs := []*engine.ChrgSProcessEventReply{
 					{ChargerSProfile: "TEST_PROFILE1",
 						CGREvent: &utils.CGREvent{
 							Tenant: "cgrates.org",
 							ID:     "TEST_ID",
-							Event: map[string]interface{}{
+							Event: map[string]any{
 								utils.Destination: "10",
 							},
 						}},
@@ -3684,12 +3684,12 @@ func TestBiRPCv1ProcessEvent(t *testing.T) {
 				*reply.(*[]*engine.ChrgSProcessEventReply) = chrgrs
 				return nil
 			},
-			utils.AttributeSv1ProcessEvent: func(args interface{}, reply interface{}) error {
+			utils.AttributeSv1ProcessEvent: func(args any, reply any) error {
 				attrs := engine.AttrSProcessEventReply{
 					CGREvent: &utils.CGREvent{
 						Tenant: "cgrates.org",
 						ID:     "TEST_ID",
-						Event: map[string]interface{}{
+						Event: map[string]any{
 							utils.Destination: "10",
 						},
 					},
@@ -3700,7 +3700,7 @@ func TestBiRPCv1ProcessEvent(t *testing.T) {
 				}
 				return utils.ErrNotImplemented
 			},
-			utils.RouteSv1GetRoutes: func(args interface{}, reply interface{}) error {
+			utils.RouteSv1GetRoutes: func(args any, reply any) error {
 				if args.(*engine.ArgsGetRoutes).ID == "SECOND_ID" {
 					*reply.(*engine.SortedRoutesList) = engine.SortedRoutesList{{
 						ProfileID: "ROUTE_PRFID",
@@ -3714,7 +3714,7 @@ func TestBiRPCv1ProcessEvent(t *testing.T) {
 				}
 				return utils.ErrNotImplemented
 			},
-			utils.ThresholdSv1ProcessEvent: func(args interface{}, reply interface{}) error {
+			utils.ThresholdSv1ProcessEvent: func(args any, reply any) error {
 				return utils.ErrNotImplemented
 			},
 		},
@@ -3735,7 +3735,7 @@ func TestBiRPCv1ProcessEvent(t *testing.T) {
 
 	cgrEvent := &utils.CGREvent{
 		ID: "test_id",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.Usage:    "10s",
 			utils.OriginID: "TEST_ID",
 		},
@@ -3811,14 +3811,14 @@ func TestBiRPCv1ProcessEventStats(t *testing.T) {
 	log.SetOutput(io.Discard)
 	engine.Cache.Clear(nil)
 	clnt := &testMockClients{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ChargerSv1ProcessEvent: func(args interface{}, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.ChargerSv1ProcessEvent: func(args any, reply any) error {
 				chrgrs := []*engine.ChrgSProcessEventReply{
 					{ChargerSProfile: "TEST_PROFILE1",
 						CGREvent: &utils.CGREvent{
 							Tenant: "cgrates.org",
 							ID:     "TEST_ID",
-							Event: map[string]interface{}{
+							Event: map[string]any{
 								utils.Destination: "10",
 							},
 						}},
@@ -3826,7 +3826,7 @@ func TestBiRPCv1ProcessEventStats(t *testing.T) {
 				*reply.(*[]*engine.ChrgSProcessEventReply) = chrgrs
 				return nil
 			},
-			utils.StatSv1ProcessEvent: func(args interface{}, reply interface{}) error {
+			utils.StatSv1ProcessEvent: func(args any, reply any) error {
 				return utils.ErrNotImplemented
 			},
 		},
@@ -3846,7 +3846,7 @@ func TestBiRPCv1ProcessEventStats(t *testing.T) {
 
 	cgrEvent := &utils.CGREvent{
 		ID: "test_id",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.Usage:    "10s",
 			utils.OriginID: "TEST_ID",
 		},
@@ -3869,7 +3869,7 @@ func TestBiRPCv1ProcessEventStats(t *testing.T) {
 	}
 
 	args.Flags = []string{utils.MetaSTIRAuthenticate}
-	args.CGREvent.APIOpts = make(map[string]interface{})
+	args.CGREvent.APIOpts = make(map[string]any)
 	args.CGREvent.APIOpts[utils.OptsStirATest] = "stir;test;opts"
 	expected = "*stir_authenticate: missing parts of the message header"
 	if err := sessions.BiRPCv1ProcessEvent(nil, args, &reply); err == nil || err.Error() != expected {
@@ -3877,7 +3877,7 @@ func TestBiRPCv1ProcessEventStats(t *testing.T) {
 	}
 
 	args.Flags = []string{utils.MetaSTIRInitiate}
-	args.CGREvent.APIOpts = make(map[string]interface{})
+	args.CGREvent.APIOpts = make(map[string]any)
 	args.CGREvent.APIOpts[utils.OptsStirATest] = "stir;test;opts"
 	expected = "*stir_authenticate: open : no such file or directory"
 	if err := sessions.BiRPCv1ProcessEvent(nil, args, &reply); err == nil || err.Error() != expected {
@@ -3893,11 +3893,11 @@ func TestBiRPCv1ProcessEventResources(t *testing.T) {
 	log.SetOutput(io.Discard)
 	engine.Cache.Clear(nil)
 	clnt := &testMockClients{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ChargerSv1ProcessEvent: func(args interface{}, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.ChargerSv1ProcessEvent: func(args any, reply any) error {
 				return nil
 			},
-			utils.StatSv1ProcessEvent: func(args interface{}, reply interface{}) error {
+			utils.StatSv1ProcessEvent: func(args any, reply any) error {
 				return utils.ErrNotImplemented
 			},
 		},
@@ -3922,7 +3922,7 @@ func TestBiRPCv1ProcessEventResources(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testBiRPCv1ProcessEventStatsResources",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Tenant:       "cgrates.org",
 				utils.ToR:          utils.MetaVoice,
 				utils.AccountField: "1001",
@@ -3993,8 +3993,8 @@ func TestBiRPCv1ProcessEventRals1(t *testing.T) {
 	log.SetOutput(io.Discard)
 	engine.Cache.Clear(nil)
 	clnt := &testMockClients{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ChargerSv1ProcessEvent: func(args interface{}, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.ChargerSv1ProcessEvent: func(args any, reply any) error {
 				if args.(*utils.CGREvent).ID != "RALS_ID" {
 					return nil
 				}
@@ -4003,7 +4003,7 @@ func TestBiRPCv1ProcessEventRals1(t *testing.T) {
 						CGREvent: &utils.CGREvent{
 							Tenant: "cgrates.org",
 							ID:     "TEST_ID",
-							Event: map[string]interface{}{
+							Event: map[string]any{
 								utils.Destination: "10",
 							},
 						}},
@@ -4011,7 +4011,7 @@ func TestBiRPCv1ProcessEventRals1(t *testing.T) {
 				*reply.(*[]*engine.ChrgSProcessEventReply) = chrgrs
 				return nil
 			},
-			utils.ResponderGetCost: func(args interface{}, reply interface{}) error {
+			utils.ResponderGetCost: func(args any, reply any) error {
 				if args.(*engine.CallDescriptorWithAPIOpts).Tenant == "CHANGED_ID" {
 					return nil
 				}
@@ -4040,7 +4040,7 @@ func TestBiRPCv1ProcessEventRals1(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testBiRPCv1ProcessEventStatsResources",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Tenant:       "cgrates.org",
 				utils.ToR:          utils.MetaVoice,
 				utils.AccountField: "1001",
@@ -4074,7 +4074,7 @@ func TestBiRPCv1ProcessEventRals1(t *testing.T) {
 	args.Flags = []string{utils.MetaRALs,
 		utils.ConcatenatedKey(utils.MetaRALs, utils.MetaInitiate),
 		utils.MetaChargers}
-	args.APIOpts = make(map[string]interface{})
+	args.APIOpts = make(map[string]any)
 	args.APIOpts[utils.OptsDebitInterval] = "invalid_dbtitrvl_format"
 	expected = "RALS_ERROR:time: invalid duration \"invalid_dbtitrvl_format\""
 	if err := sessions.BiRPCv1ProcessEvent(nil, args, &reply); err == nil || err.Error() != expected {
@@ -4104,14 +4104,14 @@ func TestBiRPCv1ProcessEventRals2(t *testing.T) {
 
 	engine.Cache.Clear(nil)
 	clnt := &testMockClients{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ChargerSv1ProcessEvent: func(args interface{}, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.ChargerSv1ProcessEvent: func(args any, reply any) error {
 				chrgrs := []*engine.ChrgSProcessEventReply{
 					{ChargerSProfile: "TEST_PROFILE1",
 						CGREvent: &utils.CGREvent{
 							Tenant: "cgrates.org",
 							ID:     "TEST_ID",
-							Event: map[string]interface{}{
+							Event: map[string]any{
 								utils.Destination: "10",
 								utils.RequestType: utils.MetaPrepaid,
 							},
@@ -4120,10 +4120,10 @@ func TestBiRPCv1ProcessEventRals2(t *testing.T) {
 				*reply.(*[]*engine.ChrgSProcessEventReply) = chrgrs
 				return nil
 			},
-			utils.CacheSv1ReplicateSet: func(args interface{}, reply interface{}) error {
+			utils.CacheSv1ReplicateSet: func(args any, reply any) error {
 				return utils.ErrNotImplemented
 			},
-			utils.ResponderMaxDebit: func(args interface{}, reply interface{}) error {
+			utils.ResponderMaxDebit: func(args any, reply any) error {
 				return nil
 			},
 		},
@@ -4150,12 +4150,12 @@ func TestBiRPCv1ProcessEventRals2(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testBiRPCv1ProcessEventStatsResources",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Tenant:      "cgrates.org",
 				utils.Destination: "1002",
 				utils.RequestType: utils.MetaPrepaid,
 			},
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.OptsDebitInterval: "10s",
 			},
 		},
@@ -4241,14 +4241,14 @@ func TestBiRPCv1ProcessEventCDRs11(t *testing.T) {
 
 	engine.Cache.Clear(nil)
 	clnt := &testMockClients{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ChargerSv1ProcessEvent: func(args interface{}, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.ChargerSv1ProcessEvent: func(args any, reply any) error {
 				chrgrs := []*engine.ChrgSProcessEventReply{
 					{ChargerSProfile: "TEST_PROFILE1",
 						CGREvent: &utils.CGREvent{
 							Tenant: "cgrates.org",
 							ID:     "TEST_ID",
-							Event: map[string]interface{}{
+							Event: map[string]any{
 								utils.Destination: "10",
 								utils.RequestType: utils.MetaPrepaid,
 							},
@@ -4257,7 +4257,7 @@ func TestBiRPCv1ProcessEventCDRs11(t *testing.T) {
 				*reply.(*[]*engine.ChrgSProcessEventReply) = chrgrs
 				return nil
 			},
-			utils.CDRsV1ProcessEvent: func(args interface{}, reply interface{}) error {
+			utils.CDRsV1ProcessEvent: func(args any, reply any) error {
 				return utils.ErrNotImplemented
 			},
 		},
@@ -4282,13 +4282,13 @@ func TestBiRPCv1ProcessEventCDRs11(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testBiRPCv1ProcessEventStatsResources",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Tenant:      "cgrates.org",
 				utils.MetaOriginID:       "TEST_CGRID",
 				utils.Destination: "1002",
 				utils.RequestType: utils.MetaPrepaid,
 			},
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.OptsDebitInterval: "10s",
 			},
 		},
@@ -4299,7 +4299,7 @@ func TestBiRPCv1ProcessEventCDRs11(t *testing.T) {
 			CGRID:  "TEST_CGRID",
 			SRuns: []*SRun{
 				{
-					Event: map[string]interface{}{
+					Event: map[string]any{
 						utils.RequestType: utils.MetaDynaprepaid,
 					},
 					CD:            &engine.CallDescriptor{Category: "test"},
@@ -4354,13 +4354,13 @@ func TestBiRPCv1GetCost(t *testing.T) {
 
 	engine.Cache.Clear(nil)
 	clnt := &testMockClients{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.AttributeSv1ProcessEvent: func(args interface{}, reply interface{}) error {
+		calls: map[string]func(args any, reply any) error{
+			utils.AttributeSv1ProcessEvent: func(args any, reply any) error {
 				attr := &engine.AttrSProcessEventReply{
 					CGREvent: &utils.CGREvent{
 						Tenant: "cgrates.org",
 						ID:     "ATTRIBUTES",
-						Event: map[string]interface{}{
+						Event: map[string]any{
 							utils.Usage: "20m",
 						},
 					},
@@ -4368,7 +4368,7 @@ func TestBiRPCv1GetCost(t *testing.T) {
 				*reply.(*engine.AttrSProcessEventReply) = *attr
 				return nil
 			},
-			utils.ResponderGetCost: func(args interface{}, reply interface{}) error {
+			utils.ResponderGetCost: func(args any, reply any) error {
 				return nil
 			},
 		},
@@ -4392,12 +4392,12 @@ func TestBiRPCv1GetCost(t *testing.T) {
 	}
 	cgrEvent := &utils.CGREvent{
 		ID: "TestBiRPCv1GetCost",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.Tenant:      "cgrates.org",
 			utils.Destination: "1002",
 			utils.RequestType: utils.MetaPrepaid,
 		},
-		APIOpts: map[string]interface{}{
+		APIOpts: map[string]any{
 			utils.OptsDebitInterval: "10s",
 		},
 	}
@@ -4443,7 +4443,7 @@ func TestBiRPCv1GetCost(t *testing.T) {
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "ATTRIBUTES",
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					utils.Usage: "20m",
 				},
 			},
@@ -4475,7 +4475,7 @@ func TestBiRPCv1GetCost(t *testing.T) {
 
 type mkCall struct{}
 
-func (sT *mkCall) Call(ctx *context.Context, method string, arg interface{}, rply interface{}) error {
+func (sT *mkCall) Call(ctx *context.Context, method string, arg any, rply any) error {
 	if arg.(*utils.DPRArgs).OriginHost != "cgrates" {
 		return utils.ErrNoActiveSession
 	}
@@ -4524,7 +4524,7 @@ func TestBiRPCv1DisconnectPeer(t *testing.T) {
 
 type mkCallForces struct{}
 
-func (sT *mkCallForces) Call(ctx *context.Context, method string, arg interface{}, rply interface{}) error {
+func (sT *mkCallForces) Call(ctx *context.Context, method string, arg any, rply any) error {
 	return utils.ErrNoActiveSession
 }
 
@@ -4556,26 +4556,26 @@ func TestBiRPCv1ForceDisconnect(t *testing.T) {
 	sessions.aSessions = map[string]*Session{
 		"sess1": {
 
-			EventStart: map[string]interface{}{
+			EventStart: map[string]any{
 
 				utils.OriginID: "222",
 			},
 			SRuns: []*SRun{
 				{
-					Event: map[string]interface{}{
+					Event: map[string]any{
 						utils.MetaOriginID: "dfa2adaa5ab49349777c1ab3bcf3455df0259880",
 						utils.OriginID:     "222",
 					},
 				},
 			},
-			OptsStart: map[string]interface{}{
+			OptsStart: map[string]any{
 
 				utils.MetaOriginID: "dfa2adaa5ab49349777c1ab3bcf3455df0259880",
 			},
 		},
 		"CGRATES_ID": {
 			Tenant: "cgrates.org",
-			EventStart: map[string]interface{}{
+			EventStart: map[string]any{
 				utils.Usage:    7 * time.Minute,
 				utils.OriginID: "1234",
 			},
@@ -4583,13 +4583,13 @@ func TestBiRPCv1ForceDisconnect(t *testing.T) {
 			ClientConnID: "client1",
 			SRuns: []*SRun{
 				{
-					Event: map[string]interface{}{
+					Event: map[string]any{
 						utils.MetaOriginID: "dfa2adaa5ab49349777c1ab3bcf3455df0259880",
 						utils.OriginID:     "222",
 					},
 				},
 			},
-			OptsStart: map[string]interface{}{
+			OptsStart: map[string]any{
 				utils.MetaOriginID: "CGRATES1_ID",
 			},
 		},

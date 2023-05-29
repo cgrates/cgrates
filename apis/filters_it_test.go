@@ -704,7 +704,7 @@ func testFiltersFiltersMatchTrue(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "EventTest",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.AccountField: "1001",
 				utils.Destination:  "1002",
 			},
@@ -729,7 +729,7 @@ func testFiltersFiltersMatchFalse(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "EventTest",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.AccountField: "1001",
 				utils.Destination:  "2002",
 			},

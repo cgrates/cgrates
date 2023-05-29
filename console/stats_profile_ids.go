@@ -48,7 +48,7 @@ func (self *CmdGetStatQueueProfileIDs) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdGetStatQueueProfileIDs) RpcParams(reset bool) interface{} {
+func (self *CmdGetStatQueueProfileIDs) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &utils.ArgsItemIDs{}
 	}
@@ -59,7 +59,7 @@ func (self *CmdGetStatQueueProfileIDs) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdGetStatQueueProfileIDs) RpcResult() interface{} {
+func (self *CmdGetStatQueueProfileIDs) RpcResult() any {
 	var atr []string
 	return &atr
 }

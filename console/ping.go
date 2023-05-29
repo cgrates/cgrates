@@ -36,7 +36,7 @@ func init() {
 type CmdApierPing struct {
 	name      string
 	rpcMethod string
-	rpcParams interface{}
+	rpcParams any
 	item      string
 	*CommandExecuter
 }
@@ -88,7 +88,7 @@ func (self *CmdApierPing) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdApierPing) RpcParams(reset bool) interface{} {
+func (self *CmdApierPing) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &StringWrapper{}
 	}
@@ -103,7 +103,7 @@ func (self *CmdApierPing) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdApierPing) RpcResult() interface{} {
+func (self *CmdApierPing) RpcResult() any {
 	var s string
 	return &s
 }

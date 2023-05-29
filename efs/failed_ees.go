@@ -34,14 +34,14 @@ type FailedExportersEEs struct {
 	Path           string
 	Opts           *config.EventExporterOpts
 	Format         string
-	Events         []interface{}
+	Events         []any
 	failedPostsDir string
 	module         string
 
 	connMngr *engine.ConnManager
 }
 
-func AsOptsEESConfig(opts map[string]interface{}) (*config.EventExporterOpts, error) {
+func AsOptsEESConfig(opts map[string]any) (*config.EventExporterOpts, error) {
 	optsCfg := new(config.EventExporterOpts)
 	if len(opts) == 0 {
 		return optsCfg, nil
@@ -236,13 +236,13 @@ func AsOptsEESConfig(opts map[string]interface{}) (*config.EventExporterOpts, er
 		optsCfg.RPCReplyTimeout = &t
 	}
 	if _, has := opts[utils.RPCAPIOpts]; has {
-		optsCfg.RPCAPIOpts = opts[utils.RPCAPIOpts].(map[string]interface{})
+		optsCfg.RPCAPIOpts = opts[utils.RPCAPIOpts].(map[string]any)
 	}
 	return optsCfg, nil
 }
 
 // AddEvent adds one event
-func (expEv *FailedExportersEEs) AddEvent(ev interface{}) {
+func (expEv *FailedExportersEEs) AddEvent(ev any) {
 	expEv.lk.Lock()
 	expEv.Events = append(expEv.Events, ev)
 	expEv.lk.Unlock()

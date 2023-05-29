@@ -33,10 +33,10 @@ import (
 )
 
 type testMockClients struct {
-	calls func(_ *context.Context, _, _ interface{}) error
+	calls func(_ *context.Context, _, _ any) error
 }
 
-func (sT *testMockClients) Call(ctx *context.Context, method string, arg, rply interface{}) error {
+func (sT *testMockClients) Call(ctx *context.Context, method string, arg, rply any) error {
 	return sT.calls(ctx, arg, rply)
 }
 

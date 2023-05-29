@@ -113,7 +113,7 @@ func (pstr *S3EE) Connect() (err error) {
 	return
 }
 
-func (pstr *S3EE) ExportEvent(ctx *context.Context, message, extraData interface{}) (err error) {
+func (pstr *S3EE) ExportEvent(ctx *context.Context, message, extraData any) (err error) {
 	pstr.reqs.get()
 	pstr.RLock()
 	sKey := extraData.(string)
@@ -140,7 +140,7 @@ func (pstr *S3EE) Close() (_ error) { return }
 
 func (pstr *S3EE) GetMetrics() *utils.SafeMapStorage { return pstr.dc }
 
-func (pstr *S3EE) ExtraData(ev *utils.CGREvent) interface{} {
+func (pstr *S3EE) ExtraData(ev *utils.CGREvent) any {
 	return utils.ConcatenatedKey(
 		utils.FirstNonEmpty(engine.MapEvent(ev.APIOpts).GetStringIgnoreErrors(utils.MetaOriginID), utils.GenUUID()),
 		utils.FirstNonEmpty(engine.MapEvent(ev.APIOpts).GetStringIgnoreErrors(utils.MetaRunID), utils.MetaDefault),

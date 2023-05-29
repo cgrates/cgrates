@@ -145,25 +145,25 @@ func TestNewRecordWithTmp(t *testing.T) {
 
 type profileTest utils.MapStorage
 
-func (p profileTest) Set(path []string, val interface{}, _ bool, _ string) error {
+func (p profileTest) Set(path []string, val any, _ bool, _ string) error {
 	return utils.MapStorage(p).Set(path, val)
 }
-func (p profileTest) Merge(v2 interface{}) {
-	var vi map[string]interface{}
+func (p profileTest) Merge(v2 any) {
+	var vi map[string]any
 	json.Unmarshal([]byte(utils.ToJSON(v2)), &vi)
 	for k, v := range vi {
-		(map[string]interface{}(p))[k] = v
+		(map[string]any(p))[k] = v
 	}
 }
 func (p profileTest) TenantID() string {
-	return utils.ConcatenatedKey(utils.IfaceAsString(map[string]interface{}(p)[utils.Tenant]), utils.IfaceAsString(map[string]interface{}(p)[utils.ID]))
+	return utils.ConcatenatedKey(utils.IfaceAsString(map[string]any(p)[utils.Tenant]), utils.IfaceAsString(map[string]any(p)[utils.ID]))
 }
 
 func (p profileTest) String() string { return utils.MapStorage(p).String() }
 func (p profileTest) FieldAsString(fldPath []string) (string, error) {
 	return utils.MapStorage(p).FieldAsString(fldPath)
 }
-func (p profileTest) FieldAsInterface(fldPath []string) (interface{}, error) {
+func (p profileTest) FieldAsInterface(fldPath []string) (any, error) {
 	return utils.MapStorage(p).FieldAsInterface(fldPath)
 }
 

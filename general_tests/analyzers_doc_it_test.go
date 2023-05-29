@@ -128,7 +128,7 @@ func testAnzDocKillEngine(t *testing.T) {
 }
 
 func testAnzDocCoreSStatus(t *testing.T) {
-	var status map[string]interface{}
+	var status map[string]any
 	if err = anzDocRPC.Call(context.Background(), utils.CoreSv1Status, utils.TenantWithAPIOpts{}, &status); err != nil {
 		return
 	}
@@ -368,7 +368,7 @@ func testAnzDocAttributeSProcessEvent(t *testing.T) {
 	eventCall1001to1002 := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "call1001to1002",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.ToR:          utils.MetaVoice,
 			utils.OriginID:     "abcdef",
 			utils.OriginHost:   "192.168.1.1",
@@ -388,7 +388,7 @@ func testAnzDocAttributeSProcessEvent(t *testing.T) {
 	eventCall1101to1002 := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "call1011to1002",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.ToR:          utils.MetaVoice,
 			utils.OriginID:     "ghijkl",
 			utils.OriginHost:   "192.168.1.1",
@@ -407,7 +407,7 @@ func testAnzDocAttributeSProcessEvent(t *testing.T) {
 	eventCall1102to1001 := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "call1102to1001",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.ToR:          utils.MetaVoice,
 			utils.OriginID:     "uvwxyz",
 			utils.OriginHost:   "192.168.1.1",
@@ -453,7 +453,7 @@ func testAnzDocAttributeSProcessEvent(t *testing.T) {
 
 func testAnzDocQueryWithHeaderFilters(t *testing.T) {
 	time.Sleep(500 * time.Millisecond)
-	var result []map[string]interface{}
+	var result []map[string]any
 
 	// Query results for the AdminSv1.SetAttributeProfile request method using HeaderFilters
 	if err := anzDocRPC.Call(context.Background(), utils.AnalyzerSv1StringQuery, &analyzers.QueryArgs{
@@ -549,7 +549,7 @@ func testAnzDocQueryWithHeaderFilters(t *testing.T) {
 }
 
 func testAnzDocQueryWithContentFiltersFilters(t *testing.T) {
-	var result []map[string]interface{}
+	var result []map[string]any
 	// Query results for the AdminSv1.SetAttributeProfile request method using ContentFilters
 	if err := anzDocRPC.Call(context.Background(), utils.AnalyzerSv1StringQuery, &analyzers.QueryArgs{
 		HeaderFilters:  "",
@@ -645,7 +645,7 @@ func testAnzDocQueryWithContentFiltersFilters(t *testing.T) {
 }
 
 func testAnzDocQuery(t *testing.T) {
-	var result []map[string]interface{}
+	var result []map[string]any
 
 	// Get results for AttributeSv1.ProcessEvent request replies whose events have a non-null cost
 	if err := anzDocRPC.Call(context.Background(), utils.AnalyzerSv1StringQuery, &analyzers.QueryArgs{

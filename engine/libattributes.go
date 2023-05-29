@@ -53,7 +53,7 @@ type AttributeProfile struct {
 // AttributeProfileWithAPIOpts is used in replicatorV1 for dispatcher
 type AttributeProfileWithAPIOpts struct {
 	*AttributeProfile
-	APIOpts map[string]interface{}
+	APIOpts map[string]any
 }
 
 func (ap *AttributeProfile) compileSubstitutes() (err error) {
@@ -108,7 +108,7 @@ type APIAttributeProfile struct {
 
 type APIAttributeProfileWithAPIOpts struct {
 	*APIAttributeProfile
-	APIOpts map[string]interface{}
+	APIOpts map[string]any
 }
 
 func NewAPIAttributeProfile(attr *AttributeProfile) (ext *APIAttributeProfile) {
@@ -191,7 +191,7 @@ func NewAttributeFromInline(tenant, inlnRule string) (attr *AttributeProfile, er
 	return
 }
 
-func (ap *AttributeProfile) Set(path []string, val interface{}, newBranch bool, rsrSep string) (err error) {
+func (ap *AttributeProfile) Set(path []string, val any, newBranch bool, rsrSep string) (err error) {
 	switch len(path) {
 	case 1:
 		switch path[0] {
@@ -245,7 +245,7 @@ func (ap *AttributeProfile) Set(path []string, val interface{}, newBranch bool, 
 	return
 }
 
-func (ap *AttributeProfile) Merge(v2 interface{}) {
+func (ap *AttributeProfile) Merge(v2 any) {
 	vi := v2.(*AttributeProfile)
 	if len(vi.Tenant) != 0 {
 		ap.Tenant = vi.Tenant
@@ -269,13 +269,13 @@ func (ap *AttributeProfile) Merge(v2 interface{}) {
 
 func (ap *AttributeProfile) String() string { return utils.ToJSON(ap) }
 func (ap *AttributeProfile) FieldAsString(fldPath []string) (_ string, err error) {
-	var val interface{}
+	var val any
 	if val, err = ap.FieldAsInterface(fldPath); err != nil {
 		return
 	}
 	return utils.IfaceAsString(val), nil
 }
-func (ap *AttributeProfile) FieldAsInterface(fldPath []string) (_ interface{}, err error) {
+func (ap *AttributeProfile) FieldAsInterface(fldPath []string) (_ any, err error) {
 	if len(fldPath) == 1 {
 		switch fldPath[0] {
 		default:
@@ -322,14 +322,14 @@ func (ap *AttributeProfile) FieldAsInterface(fldPath []string) (_ interface{}, e
 
 func (at *Attribute) String() string { return utils.ToJSON(at) }
 func (at *Attribute) FieldAsString(fldPath []string) (_ string, err error) {
-	var val interface{}
+	var val any
 	if val, err = at.FieldAsInterface(fldPath); err != nil {
 		return
 	}
 	return utils.IfaceAsString(val), nil
 }
 
-func (at *Attribute) FieldAsInterface(fldPath []string) (_ interface{}, err error) {
+func (at *Attribute) FieldAsInterface(fldPath []string) (_ any, err error) {
 	if len(fldPath) != 1 {
 		return nil, utils.ErrNotFound
 	}

@@ -31,8 +31,8 @@ func (dS *DispatcherService) AdminSv1ComputeFilterIndexIDs(ctx *context.Context,
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -43,8 +43,8 @@ func (dS *DispatcherService) AdminSv1ComputeFilterIndexes(ctx *context.Context, 
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -55,11 +55,11 @@ func (dS *DispatcherService) AdminSv1FiltersMatch(ctx *context.Context, args *en
 	if args != nil && (args.CGREvent != nil && len(args.CGREvent.Tenant) != 0) {
 		tnt = args.CGREvent.Tenant
 	}
-	ev := make(map[string]interface{})
+	ev := make(map[string]any)
 	if args != nil && args.CGREvent != nil {
 		ev = args.CGREvent.Event
 	}
-	opts := make(map[string]interface{})
+	opts := make(map[string]any)
 	if args != nil && args.CGREvent != nil {
 		opts = args.CGREvent.APIOpts
 	}
@@ -70,8 +70,8 @@ func (dS *DispatcherService) AdminSv1GetAccount(ctx *context.Context, args *util
 	if args != nil && (args.TenantID != nil && len(args.TenantID.Tenant) != 0) {
 		tnt = args.TenantID.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -82,8 +82,8 @@ func (dS *DispatcherService) AdminSv1GetAccountIDs(ctx *context.Context, args *u
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -94,8 +94,8 @@ func (dS *DispatcherService) AdminSv1GetAccounts(ctx *context.Context, args *uti
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -106,8 +106,8 @@ func (dS *DispatcherService) AdminSv1GetAccountsCount(ctx *context.Context, args
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -118,8 +118,8 @@ func (dS *DispatcherService) AdminSv1GetAccountsIndexesHealth(ctx *context.Conte
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -130,8 +130,8 @@ func (dS *DispatcherService) AdminSv1GetActionProfile(ctx *context.Context, args
 	if args != nil && (args.TenantID != nil && len(args.TenantID.Tenant) != 0) {
 		tnt = args.TenantID.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -142,8 +142,8 @@ func (dS *DispatcherService) AdminSv1GetActionProfileIDs(ctx *context.Context, a
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -154,8 +154,8 @@ func (dS *DispatcherService) AdminSv1GetActionProfiles(ctx *context.Context, arg
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -166,8 +166,8 @@ func (dS *DispatcherService) AdminSv1GetActionProfilesCount(ctx *context.Context
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -178,8 +178,8 @@ func (dS *DispatcherService) AdminSv1GetActionsIndexesHealth(ctx *context.Contex
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -190,8 +190,8 @@ func (dS *DispatcherService) AdminSv1GetAttributeProfile(ctx *context.Context, a
 	if args != nil && (args.TenantID != nil && len(args.TenantID.Tenant) != 0) {
 		tnt = args.TenantID.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -202,8 +202,8 @@ func (dS *DispatcherService) AdminSv1GetAttributeProfileIDs(ctx *context.Context
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -214,8 +214,8 @@ func (dS *DispatcherService) AdminSv1GetAttributeProfiles(ctx *context.Context, 
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -226,8 +226,8 @@ func (dS *DispatcherService) AdminSv1GetAttributeProfilesCount(ctx *context.Cont
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -238,8 +238,8 @@ func (dS *DispatcherService) AdminSv1GetAttributesIndexesHealth(ctx *context.Con
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -250,8 +250,8 @@ func (dS *DispatcherService) AdminSv1GetChargerProfile(ctx *context.Context, arg
 	if args != nil && (args.TenantID != nil && len(args.TenantID.Tenant) != 0) {
 		tnt = args.TenantID.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -262,8 +262,8 @@ func (dS *DispatcherService) AdminSv1GetChargerProfileIDs(ctx *context.Context, 
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -274,8 +274,8 @@ func (dS *DispatcherService) AdminSv1GetChargerProfiles(ctx *context.Context, ar
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -286,8 +286,8 @@ func (dS *DispatcherService) AdminSv1GetChargerProfilesCount(ctx *context.Contex
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -298,8 +298,8 @@ func (dS *DispatcherService) AdminSv1GetChargersIndexesHealth(ctx *context.Conte
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -310,8 +310,8 @@ func (dS *DispatcherService) AdminSv1GetDispatcherHost(ctx *context.Context, arg
 	if args != nil && (args.TenantID != nil && len(args.TenantID.Tenant) != 0) {
 		tnt = args.TenantID.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -322,8 +322,8 @@ func (dS *DispatcherService) AdminSv1GetDispatcherHostIDs(ctx *context.Context, 
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -334,8 +334,8 @@ func (dS *DispatcherService) AdminSv1GetDispatcherHosts(ctx *context.Context, ar
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -346,8 +346,8 @@ func (dS *DispatcherService) AdminSv1GetDispatcherHostsCount(ctx *context.Contex
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -358,8 +358,8 @@ func (dS *DispatcherService) AdminSv1GetDispatcherProfile(ctx *context.Context, 
 	if args != nil && (args.TenantID != nil && len(args.TenantID.Tenant) != 0) {
 		tnt = args.TenantID.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -370,8 +370,8 @@ func (dS *DispatcherService) AdminSv1GetDispatcherProfileIDs(ctx *context.Contex
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -382,8 +382,8 @@ func (dS *DispatcherService) AdminSv1GetDispatcherProfiles(ctx *context.Context,
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -394,8 +394,8 @@ func (dS *DispatcherService) AdminSv1GetDispatcherProfilesCount(ctx *context.Con
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -406,8 +406,8 @@ func (dS *DispatcherService) AdminSv1GetDispatchersIndexesHealth(ctx *context.Co
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -418,8 +418,8 @@ func (dS *DispatcherService) AdminSv1GetFilter(ctx *context.Context, args *utils
 	if args != nil && (args.TenantID != nil && len(args.TenantID.Tenant) != 0) {
 		tnt = args.TenantID.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -430,8 +430,8 @@ func (dS *DispatcherService) AdminSv1GetFilterIDs(ctx *context.Context, args *ut
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -442,8 +442,8 @@ func (dS *DispatcherService) AdminSv1GetFilterIndexes(ctx *context.Context, args
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -454,8 +454,8 @@ func (dS *DispatcherService) AdminSv1GetFilters(ctx *context.Context, args *util
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -466,8 +466,8 @@ func (dS *DispatcherService) AdminSv1GetFiltersCount(ctx *context.Context, args 
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -478,8 +478,8 @@ func (dS *DispatcherService) AdminSv1GetRateProfile(ctx *context.Context, args *
 	if args != nil && (args.TenantID != nil && len(args.TenantID.Tenant) != 0) {
 		tnt = args.TenantID.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -490,8 +490,8 @@ func (dS *DispatcherService) AdminSv1GetRateProfileIDs(ctx *context.Context, arg
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -502,8 +502,8 @@ func (dS *DispatcherService) AdminSv1GetRateProfileRateIDs(ctx *context.Context,
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -514,8 +514,8 @@ func (dS *DispatcherService) AdminSv1GetRateProfileRates(ctx *context.Context, a
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -526,8 +526,8 @@ func (dS *DispatcherService) AdminSv1GetRateProfileRatesCount(ctx *context.Conte
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -538,8 +538,8 @@ func (dS *DispatcherService) AdminSv1GetRateProfiles(ctx *context.Context, args 
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -550,8 +550,8 @@ func (dS *DispatcherService) AdminSv1GetRateProfilesCount(ctx *context.Context, 
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -562,8 +562,8 @@ func (dS *DispatcherService) AdminSv1GetRateProfilesIndexesHealth(ctx *context.C
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -574,8 +574,8 @@ func (dS *DispatcherService) AdminSv1GetRateRatesIndexesHealth(ctx *context.Cont
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -586,8 +586,8 @@ func (dS *DispatcherService) AdminSv1GetResourceProfile(ctx *context.Context, ar
 	if args != nil && (args.TenantID != nil && len(args.TenantID.Tenant) != 0) {
 		tnt = args.TenantID.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -598,8 +598,8 @@ func (dS *DispatcherService) AdminSv1GetResourceProfileIDs(ctx *context.Context,
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -610,8 +610,8 @@ func (dS *DispatcherService) AdminSv1GetResourceProfiles(ctx *context.Context, a
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -622,8 +622,8 @@ func (dS *DispatcherService) AdminSv1GetResourceProfilesCount(ctx *context.Conte
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -634,8 +634,8 @@ func (dS *DispatcherService) AdminSv1GetResourcesIndexesHealth(ctx *context.Cont
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -646,8 +646,8 @@ func (dS *DispatcherService) AdminSv1GetReverseFilterHealth(ctx *context.Context
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -658,8 +658,8 @@ func (dS *DispatcherService) AdminSv1GetRouteProfile(ctx *context.Context, args 
 	if args != nil && (args.TenantID != nil && len(args.TenantID.Tenant) != 0) {
 		tnt = args.TenantID.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -670,8 +670,8 @@ func (dS *DispatcherService) AdminSv1GetRouteProfileIDs(ctx *context.Context, ar
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -682,8 +682,8 @@ func (dS *DispatcherService) AdminSv1GetRouteProfiles(ctx *context.Context, args
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -694,8 +694,8 @@ func (dS *DispatcherService) AdminSv1GetRouteProfilesCount(ctx *context.Context,
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -706,8 +706,8 @@ func (dS *DispatcherService) AdminSv1GetRoutesIndexesHealth(ctx *context.Context
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -718,8 +718,8 @@ func (dS *DispatcherService) AdminSv1GetStatQueueProfile(ctx *context.Context, a
 	if args != nil && (args.TenantID != nil && len(args.TenantID.Tenant) != 0) {
 		tnt = args.TenantID.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -730,8 +730,8 @@ func (dS *DispatcherService) AdminSv1GetStatQueueProfileIDs(ctx *context.Context
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -742,8 +742,8 @@ func (dS *DispatcherService) AdminSv1GetStatQueueProfiles(ctx *context.Context, 
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -754,8 +754,8 @@ func (dS *DispatcherService) AdminSv1GetStatQueueProfilesCount(ctx *context.Cont
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -766,8 +766,8 @@ func (dS *DispatcherService) AdminSv1GetStatsIndexesHealth(ctx *context.Context,
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -778,8 +778,8 @@ func (dS *DispatcherService) AdminSv1GetThresholdProfile(ctx *context.Context, a
 	if args != nil && (args.TenantID != nil && len(args.TenantID.Tenant) != 0) {
 		tnt = args.TenantID.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -790,8 +790,8 @@ func (dS *DispatcherService) AdminSv1GetThresholdProfileIDs(ctx *context.Context
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -802,8 +802,8 @@ func (dS *DispatcherService) AdminSv1GetThresholdProfiles(ctx *context.Context, 
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -814,8 +814,8 @@ func (dS *DispatcherService) AdminSv1GetThresholdProfilesCount(ctx *context.Cont
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -826,8 +826,8 @@ func (dS *DispatcherService) AdminSv1GetThresholdsIndexesHealth(ctx *context.Con
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -838,11 +838,11 @@ func (dS *DispatcherService) AdminSv1Ping(ctx *context.Context, args *utils.CGRE
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
+	ev := make(map[string]any)
 	if args != nil {
 		ev = args.Event
 	}
-	opts := make(map[string]interface{})
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -853,8 +853,8 @@ func (dS *DispatcherService) AdminSv1RemoveAccount(ctx *context.Context, args *u
 	if args != nil && (args.TenantID != nil && len(args.TenantID.Tenant) != 0) {
 		tnt = args.TenantID.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -865,8 +865,8 @@ func (dS *DispatcherService) AdminSv1RemoveActionProfile(ctx *context.Context, a
 	if args != nil && (args.TenantID != nil && len(args.TenantID.Tenant) != 0) {
 		tnt = args.TenantID.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -877,8 +877,8 @@ func (dS *DispatcherService) AdminSv1RemoveAttributeProfile(ctx *context.Context
 	if args != nil && (args.TenantID != nil && len(args.TenantID.Tenant) != 0) {
 		tnt = args.TenantID.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -889,8 +889,8 @@ func (dS *DispatcherService) AdminSv1RemoveChargerProfile(ctx *context.Context, 
 	if args != nil && (args.TenantID != nil && len(args.TenantID.Tenant) != 0) {
 		tnt = args.TenantID.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -901,8 +901,8 @@ func (dS *DispatcherService) AdminSv1RemoveDispatcherHost(ctx *context.Context, 
 	if args != nil && (args.TenantID != nil && len(args.TenantID.Tenant) != 0) {
 		tnt = args.TenantID.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -913,8 +913,8 @@ func (dS *DispatcherService) AdminSv1RemoveDispatcherProfile(ctx *context.Contex
 	if args != nil && (args.TenantID != nil && len(args.TenantID.Tenant) != 0) {
 		tnt = args.TenantID.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -925,8 +925,8 @@ func (dS *DispatcherService) AdminSv1RemoveFilter(ctx *context.Context, args *ut
 	if args != nil && (args.TenantID != nil && len(args.TenantID.Tenant) != 0) {
 		tnt = args.TenantID.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -937,8 +937,8 @@ func (dS *DispatcherService) AdminSv1RemoveFilterIndexes(ctx *context.Context, a
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -949,8 +949,8 @@ func (dS *DispatcherService) AdminSv1RemoveRateProfile(ctx *context.Context, arg
 	if args != nil && (args.TenantID != nil && len(args.TenantID.Tenant) != 0) {
 		tnt = args.TenantID.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -961,8 +961,8 @@ func (dS *DispatcherService) AdminSv1RemoveRateProfileRates(ctx *context.Context
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -973,8 +973,8 @@ func (dS *DispatcherService) AdminSv1RemoveResourceProfile(ctx *context.Context,
 	if args != nil && (args.TenantID != nil && len(args.TenantID.Tenant) != 0) {
 		tnt = args.TenantID.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -985,8 +985,8 @@ func (dS *DispatcherService) AdminSv1RemoveRouteProfile(ctx *context.Context, ar
 	if args != nil && (args.TenantID != nil && len(args.TenantID.Tenant) != 0) {
 		tnt = args.TenantID.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -997,8 +997,8 @@ func (dS *DispatcherService) AdminSv1RemoveStatQueueProfile(ctx *context.Context
 	if args != nil && (args.TenantID != nil && len(args.TenantID.Tenant) != 0) {
 		tnt = args.TenantID.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -1009,8 +1009,8 @@ func (dS *DispatcherService) AdminSv1RemoveThresholdProfile(ctx *context.Context
 	if args != nil && (args.TenantID != nil && len(args.TenantID.Tenant) != 0) {
 		tnt = args.TenantID.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -1021,8 +1021,8 @@ func (dS *DispatcherService) AdminSv1SetAccount(ctx *context.Context, args *util
 	if args != nil && (args.Account != nil && len(args.Account.Tenant) != 0) {
 		tnt = args.Account.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -1033,8 +1033,8 @@ func (dS *DispatcherService) AdminSv1SetActionProfile(ctx *context.Context, args
 	if args != nil && (args.ActionProfile != nil && len(args.ActionProfile.Tenant) != 0) {
 		tnt = args.ActionProfile.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -1045,8 +1045,8 @@ func (dS *DispatcherService) AdminSv1SetAttributeProfile(ctx *context.Context, a
 	if args != nil && (args.APIAttributeProfile != nil && len(args.APIAttributeProfile.Tenant) != 0) {
 		tnt = args.APIAttributeProfile.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -1057,8 +1057,8 @@ func (dS *DispatcherService) AdminSv1SetChargerProfile(ctx *context.Context, arg
 	if args != nil && (args.ChargerProfile != nil && len(args.ChargerProfile.Tenant) != 0) {
 		tnt = args.ChargerProfile.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -1069,8 +1069,8 @@ func (dS *DispatcherService) AdminSv1SetDispatcherHost(ctx *context.Context, arg
 	if args != nil && (args.DispatcherHost != nil && len(args.DispatcherHost.Tenant) != 0) {
 		tnt = args.DispatcherHost.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -1081,8 +1081,8 @@ func (dS *DispatcherService) AdminSv1SetDispatcherProfile(ctx *context.Context, 
 	if args != nil && (args.DispatcherProfile != nil && len(args.DispatcherProfile.Tenant) != 0) {
 		tnt = args.DispatcherProfile.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -1093,8 +1093,8 @@ func (dS *DispatcherService) AdminSv1SetFilter(ctx *context.Context, args *engin
 	if args != nil && (args.Filter != nil && len(args.Filter.Tenant) != 0) {
 		tnt = args.Filter.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -1105,8 +1105,8 @@ func (dS *DispatcherService) AdminSv1SetRateProfile(ctx *context.Context, args *
 	if args != nil && (args.RateProfile != nil && len(args.RateProfile.Tenant) != 0) {
 		tnt = args.RateProfile.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -1117,8 +1117,8 @@ func (dS *DispatcherService) AdminSv1SetResourceProfile(ctx *context.Context, ar
 	if args != nil && (args.ResourceProfile != nil && len(args.ResourceProfile.Tenant) != 0) {
 		tnt = args.ResourceProfile.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -1129,8 +1129,8 @@ func (dS *DispatcherService) AdminSv1SetRouteProfile(ctx *context.Context, args 
 	if args != nil && (args.RouteProfile != nil && len(args.RouteProfile.Tenant) != 0) {
 		tnt = args.RouteProfile.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -1141,8 +1141,8 @@ func (dS *DispatcherService) AdminSv1SetStatQueueProfile(ctx *context.Context, a
 	if args != nil && (args.StatQueueProfile != nil && len(args.StatQueueProfile.Tenant) != 0) {
 		tnt = args.StatQueueProfile.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}
@@ -1153,8 +1153,8 @@ func (dS *DispatcherService) AdminSv1SetThresholdProfile(ctx *context.Context, a
 	if args != nil && (args.ThresholdProfile != nil && len(args.ThresholdProfile.Tenant) != 0) {
 		tnt = args.ThresholdProfile.Tenant
 	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
+	ev := make(map[string]any)
+	opts := make(map[string]any)
 	if args != nil {
 		opts = args.APIOpts
 	}

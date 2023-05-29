@@ -118,7 +118,7 @@ func testHTTPExportEvent(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "voiceEvent",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 
 				utils.ToR:          utils.MetaVoice,
 				utils.OriginID:     "dsafdsaf",
@@ -137,7 +137,7 @@ func testHTTPExportEvent(t *testing.T) {
 				"ExtraFields": map[string]string{"extra1": "val_extra1",
 					"extra2": "val_extra2", "extra3": "val_extra3"},
 			},
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.MetaOriginID: utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()),
 				utils.RunID:        utils.MetaDefault,
 			},
@@ -149,7 +149,7 @@ func testHTTPExportEvent(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "dataEvent",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 
 				utils.ToR:          utils.MetaData,
 				utils.OriginID:     "abcdef",
@@ -168,7 +168,7 @@ func testHTTPExportEvent(t *testing.T) {
 				"ExtraFields": map[string]string{"extra1": "val_extra1",
 					"extra2": "val_extra2", "extra3": "val_extra3"},
 			},
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.MetaOriginID: utils.Sha1("abcdef", time.Unix(1383813745, 0).UTC().String()),
 				utils.RunID:        utils.MetaDefault,
 			},
@@ -180,7 +180,7 @@ func testHTTPExportEvent(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "SMSEvent",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 
 				utils.ToR:          utils.MetaSMS,
 				utils.OriginID:     "sdfwer",
@@ -199,7 +199,7 @@ func testHTTPExportEvent(t *testing.T) {
 				"ExtraFields": map[string]string{"extra1": "val_extra1",
 					"extra2": "val_extra2", "extra3": "val_extra3"},
 			},
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.MetaOriginID: utils.Sha1("sdfwer", time.Unix(1383813745, 0).UTC().String()),
 				utils.RunID:        utils.MetaDefault,
 			},
@@ -211,7 +211,7 @@ func testHTTPExportEvent(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "SMSEvent",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 
 				utils.ToR:          utils.MetaSMS,
 				utils.OriginID:     "sms2",
@@ -222,7 +222,7 @@ func testHTTPExportEvent(t *testing.T) {
 				utils.Subject:      "1001",
 				utils.Destination:  "1002",
 			},
-			APIOpts: map[string]interface{}{
+			APIOpts: map[string]any{
 				utils.MetaOriginID: utils.Sha1("sms2", time.Unix(1383813745, 0).UTC().String()),
 				utils.RunID:        utils.MetaDefault,
 			},

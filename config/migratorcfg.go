@@ -87,9 +87,9 @@ func (mg *MigratorCgrCfg) loadFromJSONCfg(jsnCfg *MigratorCfgJson) (err error) {
 	return
 }
 
-// AsMapInterface returns the config as a map[string]interface{}
-func (mg MigratorCgrCfg) AsMapInterface(string) interface{} {
-	outDataDBOpts := map[string]interface{}{
+// AsMapInterface returns the config as a map[string]any
+func (mg MigratorCgrCfg) AsMapInterface(string) any {
+	outDataDBOpts := map[string]any{
 		utils.RedisMaxConnsCfg:           mg.OutDataDBOpts.RedisMaxConns,
 		utils.RedisConnectAttemptsCfg:    mg.OutDataDBOpts.RedisConnectAttempts,
 		utils.RedisSentinelNameCfg:       mg.OutDataDBOpts.RedisSentinel,
@@ -105,7 +105,7 @@ func (mg MigratorCgrCfg) AsMapInterface(string) interface{} {
 		utils.RedisClientKeyCfg:          mg.OutDataDBOpts.RedisClientKey,
 		utils.RedisCACertificateCfg:      mg.OutDataDBOpts.RedisCACertificate,
 	}
-	return map[string]interface{}{
+	return map[string]any{
 		utils.OutDataDBTypeCfg:     mg.OutDataDBType,
 		utils.OutDataDBHostCfg:     mg.OutDataDBHost,
 		utils.OutDataDBPortCfg:     mg.OutDataDBPort,

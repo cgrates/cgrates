@@ -141,10 +141,10 @@ func TestSQSERProcessMessage(t *testing.T) {
 	}
 	expEvent := &utils.CGREvent{
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.OriginID: "testID",
 		},
-		APIOpts: make(map[string]interface{}),
+		APIOpts: make(map[string]any),
 	}
 	body := []byte(`{"OriginID":"testID"}`)
 	rdr.Config().Fields = []*config.FCTemplate{

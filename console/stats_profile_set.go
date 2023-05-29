@@ -49,11 +49,11 @@ func (self *CmdSetStatQueue) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdSetStatQueue) RpcParams(reset bool) interface{} {
+func (self *CmdSetStatQueue) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &engine.StatQueueProfileWithAPIOpts{
 			StatQueueProfile: new(engine.StatQueueProfile),
-			APIOpts:          make(map[string]interface{}),
+			APIOpts:          make(map[string]any),
 		}
 	}
 	return self.rpcParams
@@ -63,7 +63,7 @@ func (self *CmdSetStatQueue) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdSetStatQueue) RpcResult() interface{} {
+func (self *CmdSetStatQueue) RpcResult() any {
 	var s string
 	return &s
 }

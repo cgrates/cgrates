@@ -226,7 +226,7 @@ func testPreloadITVerifyAccounts(t *testing.T) {
 	expAcc := &utils.Account{
 		Tenant: utils.CGRateSorg,
 		ID:     "1001",
-		Opts:   map[string]interface{}{},
+		Opts:   map[string]any{},
 		Weights: []*utils.DynamicWeight{
 			{
 				Weight: 20,
@@ -261,7 +261,7 @@ func testPreloadITVerifyAccounts(t *testing.T) {
 					},
 				},
 				AttributeIDs: []string{"attr1", "attr2"},
-				Opts:         map[string]interface{}{},
+				Opts:         map[string]any{},
 			},
 			"VoiceBalance": {
 				ID: "VoiceBalance",
@@ -281,7 +281,7 @@ func testPreloadITVerifyAccounts(t *testing.T) {
 				},
 				Type:  utils.MetaVoice,
 				Units: utils.NewDecimal(int64(time.Hour), 0),
-				Opts:  map[string]interface{}{},
+				Opts:  map[string]any{},
 			},
 		},
 		ThresholdIDs: []string{"*none"},
@@ -318,7 +318,7 @@ func testPreloadITVerifyActionProfiles(t *testing.T) {
 				ID:   "TOPUP",
 				TTL:  0,
 				Type: utils.MetaAddBalance,
-				Opts: map[string]interface{}{},
+				Opts: map[string]any{},
 				Diktats: []*engine.APDiktat{
 					{
 						Path:  "*balance.TestBalance.Value",
@@ -330,7 +330,7 @@ func testPreloadITVerifyActionProfiles(t *testing.T) {
 				ID:   "SET_BALANCE_TEST_DATA",
 				TTL:  0,
 				Type: utils.MetaSetBalance,
-				Opts: map[string]interface{}{},
+				Opts: map[string]any{},
 				Diktats: []*engine.APDiktat{
 					{
 						Path:  "*balance.TestDataBalance.Type",
@@ -342,7 +342,7 @@ func testPreloadITVerifyActionProfiles(t *testing.T) {
 				ID:   "TOPUP_TEST_DATA",
 				TTL:  0,
 				Type: utils.MetaAddBalance,
-				Opts: map[string]interface{}{},
+				Opts: map[string]any{},
 				Diktats: []*engine.APDiktat{
 					{
 						Path:  "*balance.TestDataBalance.Value",
@@ -354,7 +354,7 @@ func testPreloadITVerifyActionProfiles(t *testing.T) {
 				ID:   "SET_BALANCE_TEST_VOICE",
 				TTL:  0,
 				Type: utils.MetaSetBalance,
-				Opts: map[string]interface{}{},
+				Opts: map[string]any{},
 				Diktats: []*engine.APDiktat{
 					{
 						Path:  "*balance.TestVoiceBalance.Type",
@@ -366,7 +366,7 @@ func testPreloadITVerifyActionProfiles(t *testing.T) {
 				ID:   "TOPUP_TEST_VOICE",
 				TTL:  0,
 				Type: utils.MetaAddBalance,
-				Opts: map[string]interface{}{},
+				Opts: map[string]any{},
 				Diktats: []*engine.APDiktat{
 					{
 						Path:  "*balance.TestVoiceBalance.Value",

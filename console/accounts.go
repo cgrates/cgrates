@@ -48,7 +48,7 @@ func (self *CmdGetAccounts) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdGetAccounts) RpcParams(reset bool) interface{} {
+func (self *CmdGetAccounts) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &utils.ArgsItemIDs{}
 	}
@@ -59,7 +59,7 @@ func (self *CmdGetAccounts) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdGetAccounts) RpcResult() interface{} {
+func (self *CmdGetAccounts) RpcResult() any {
 	var accs []*utils.Account
 	return &accs
 }

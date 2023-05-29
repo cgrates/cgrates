@@ -1387,7 +1387,7 @@ func TestCoreUtilsGenerateDBItemOpts(t *testing.T) {
 	cache := "testKey3"
 	rmtHost := "testKey4"
 
-	expected := map[string]interface{}{
+	expected := map[string]any{
 		OptsAPIKey:    apiKey,
 		OptsRouteID:   routeID,
 		MetaCache:     cache,
@@ -1636,7 +1636,7 @@ func TestCoreUtilsPagination(t *testing.T) {
 }
 
 func TestAPITPDataGetPaginateOpts(t *testing.T) {
-	opts := map[string]interface{}{
+	opts := map[string]any{
 		PageLimitOpt:    1.3,
 		PageOffsetOpt:   4,
 		PageMaxItemsOpt: "5",

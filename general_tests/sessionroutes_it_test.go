@@ -113,7 +113,7 @@ package general_tests
 // func testSesRoutesAuthorizeEvent(t *testing.T) {
 // 	cgrEv := &utils.CGREvent{
 // 		Tenant: "cgrates.org",
-// 		Event: map[string]interface{}{
+// 		Event: map[string]any{
 // 			utils.Source:       "testV4CDRsProcessCDR",
 // 			utils.OriginID:     "testV4CDRsProcessCDR",
 // 			utils.OriginHost:   "192.168.1.1",
@@ -126,7 +126,7 @@ package general_tests
 // 			utils.SetupTime:    time.Date(2018, 8, 24, 16, 00, 00, 0, time.UTC),
 // 			utils.Usage:        time.Minute,
 // 		},
-// 		APIOpts: map[string]interface{}{utils.OptsRoutesProfileCount: 1},
+// 		APIOpts: map[string]any{utils.OptsRoutesProfileCount: 1},
 // 	}
 // 	args := sessions.NewV1AuthorizeArgs(false, []string{},
 // 		false, []string{}, false, []string{}, false, false,
@@ -144,7 +144,7 @@ package general_tests
 // 				{
 // 					RouteID:         "route3",
 // 					RouteParameters: "",
-// 					SortingData: map[string]interface{}{
+// 					SortingData: map[string]any{
 // 						"Cost":              0.0102,
 // 						utils.RateProfileID: "RP_SPECIAL_1002",
 // 						"Weight":            15.,
@@ -152,7 +152,7 @@ package general_tests
 // 				}, {
 // 					RouteID:         "route1",
 // 					RouteParameters: "",
-// 					SortingData: map[string]interface{}{
+// 					SortingData: map[string]any{
 // 						"Cost":              0.0102,
 // 						utils.RateProfileID: "RP_SPECIAL_1002",
 // 						"Weight":            10.,
@@ -160,7 +160,7 @@ package general_tests
 // 				}, {
 // 					RouteID:         "route2",
 // 					RouteParameters: "",
-// 					SortingData: map[string]interface{}{
+// 					SortingData: map[string]any{
 // 						"Cost":              1.2,
 // 						utils.RateProfileID: "RP_RETAIL1",
 // 						"Weight":            20.,
@@ -194,7 +194,7 @@ package general_tests
 // 				{
 // 					RouteID:         "route3",
 // 					RouteParameters: "",
-// 					SortingData: map[string]interface{}{
+// 					SortingData: map[string]any{
 // 						"Cost":              0.0102,
 // 						utils.RateProfileID: "RP_SPECIAL_1002",
 // 						"Weight":            15.,
@@ -202,7 +202,7 @@ package general_tests
 // 				}, {
 // 					RouteID:         "route1",
 // 					RouteParameters: "",
-// 					SortingData: map[string]interface{}{
+// 					SortingData: map[string]any{
 // 						"Cost":              0.0102,
 // 						utils.RateProfileID: "RP_SPECIAL_1002",
 // 						"Weight":            10.,
@@ -244,7 +244,7 @@ package general_tests
 // func testSesRoutesProcessMessage(t *testing.T) {
 // 	cgrEv := &utils.CGREvent{
 // 		Tenant: "cgrates.org",
-// 		Event: map[string]interface{}{
+// 		Event: map[string]any{
 // 			utils.Source:       "testV4CDRsProcessCDR",
 // 			utils.OriginID:     "testV4CDRsProcessCDR",
 // 			utils.OriginHost:   "192.168.1.1",
@@ -257,7 +257,7 @@ package general_tests
 // 			utils.SetupTime:    time.Date(2018, 8, 24, 16, 00, 00, 0, time.UTC),
 // 			utils.Usage:        time.Minute,
 // 		},
-// 		APIOpts: map[string]interface{}{utils.OptsRoutesProfileCount: 1},
+// 		APIOpts: map[string]any{utils.OptsRoutesProfileCount: 1},
 // 	}
 // 	args := sessions.NewV1ProcessMessageArgs(false, []string{},
 // 		false, []string{}, false, []string{}, false, false,
@@ -276,7 +276,7 @@ package general_tests
 // 				{
 // 					RouteID:         "route3",
 // 					RouteParameters: "",
-// 					SortingData: map[string]interface{}{
+// 					SortingData: map[string]any{
 // 						"Cost":              0.0102,
 // 						utils.RateProfileID: "RP_SPECIAL_1002",
 // 						"Weight":            15.,
@@ -284,7 +284,7 @@ package general_tests
 // 				}, {
 // 					RouteID:         "route1",
 // 					RouteParameters: "",
-// 					SortingData: map[string]interface{}{
+// 					SortingData: map[string]any{
 // 						"Cost":              0.0102,
 // 						utils.RateProfileID: "RP_SPECIAL_1002",
 // 						"Weight":            10.,
@@ -292,7 +292,7 @@ package general_tests
 // 				}, {
 // 					RouteID:         "route2",
 // 					RouteParameters: "",
-// 					SortingData: map[string]interface{}{
+// 					SortingData: map[string]any{
 // 						"Cost":              1.2,
 // 						utils.RateProfileID: "RP_RETAIL1",
 // 						"Weight":            20.,
@@ -327,7 +327,7 @@ package general_tests
 // 				{
 // 					RouteID:         "route3",
 // 					RouteParameters: "",
-// 					SortingData: map[string]interface{}{
+// 					SortingData: map[string]any{
 // 						"Cost":              0.0102,
 // 						utils.RateProfileID: "RP_SPECIAL_1002",
 // 						"Weight":            15.,
@@ -335,7 +335,7 @@ package general_tests
 // 				}, {
 // 					RouteID:         "route1",
 // 					RouteParameters: "",
-// 					SortingData: map[string]interface{}{
+// 					SortingData: map[string]any{
 // 						"Cost":              0.0102,
 // 						utils.RateProfileID: "RP_SPECIAL_1002",
 // 						"Weight":            10.,
@@ -377,7 +377,7 @@ package general_tests
 // func testSesRoutesProcessEvent(t *testing.T) {
 // 	cgrEv := &utils.CGREvent{
 // 		Tenant: "cgrates.org",
-// 		Event: map[string]interface{}{
+// 		Event: map[string]any{
 // 			utils.Source:       "testV4CDRsProcessCDR",
 // 			utils.OriginID:     "testV4CDRsProcessCDR",
 // 			utils.OriginHost:   "192.168.1.1",
@@ -390,7 +390,7 @@ package general_tests
 // 			utils.SetupTime:    time.Date(2018, 8, 24, 16, 00, 00, 0, time.UTC),
 // 			utils.Usage:        time.Minute,
 // 		},
-// 		APIOpts: map[string]interface{}{utils.OptsRoutesProfileCount: 1},
+// 		APIOpts: map[string]any{utils.OptsRoutesProfileCount: 1},
 // 	}
 // 	args := sessions.V1ProcessEventArgs{
 // 		Flags:     []string{"*routes"},
@@ -411,7 +411,7 @@ package general_tests
 // 					{
 // 						RouteID:         "route3",
 // 						RouteParameters: "",
-// 						SortingData: map[string]interface{}{
+// 						SortingData: map[string]any{
 // 							"Cost":              0.0102,
 // 							utils.RateProfileID: "RP_SPECIAL_1002",
 // 							"Weight":            15.,
@@ -419,7 +419,7 @@ package general_tests
 // 					}, {
 // 						RouteID:         "route1",
 // 						RouteParameters: "",
-// 						SortingData: map[string]interface{}{
+// 						SortingData: map[string]any{
 // 							"Cost":              0.0102,
 // 							utils.RateProfileID: "RP_SPECIAL_1002",
 // 							"Weight":            10.,
@@ -427,7 +427,7 @@ package general_tests
 // 					}, {
 // 						RouteID:         "route2",
 // 						RouteParameters: "",
-// 						SortingData: map[string]interface{}{
+// 						SortingData: map[string]any{
 // 							"Cost":              1.2,
 // 							utils.RateProfileID: "RP_RETAIL1",
 // 							"Weight":            20.,
@@ -466,7 +466,7 @@ package general_tests
 // 					{
 // 						RouteID:         "route3",
 // 						RouteParameters: "",
-// 						SortingData: map[string]interface{}{
+// 						SortingData: map[string]any{
 // 							"Cost":              0.0102,
 // 							utils.RateProfileID: "RP_SPECIAL_1002",
 // 							"Weight":            15.,
@@ -474,7 +474,7 @@ package general_tests
 // 					}, {
 // 						RouteID:         "route1",
 // 						RouteParameters: "",
-// 						SortingData: map[string]interface{}{
+// 						SortingData: map[string]any{
 // 							"Cost":              0.0102,
 // 							utils.RateProfileID: "RP_SPECIAL_1002",
 // 							"Weight":            10.,

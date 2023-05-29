@@ -32,7 +32,7 @@ import (
 
 // StringToInterface will parse string into supported types
 // if no other conversion possible, original string will be returned
-func StringToInterface(s string) interface{} {
+func StringToInterface(s string) any {
 	if s == EmptyString {
 		return s
 	}
@@ -61,7 +61,7 @@ func StringToInterface(s string) interface{} {
 	return s
 }
 
-func IfaceAsTime(itm interface{}, timezone string) (t time.Time, err error) {
+func IfaceAsTime(itm any, timezone string) (t time.Time, err error) {
 	switch v := itm.(type) {
 	case time.Time:
 		return v, nil
@@ -99,7 +99,7 @@ func StringAsBig(itm string) (b *decimal.Big, err error) {
 	return z, nil
 }
 
-func IfaceAsBig(itm interface{}) (b *decimal.Big, err error) {
+func IfaceAsBig(itm any) (b *decimal.Big, err error) {
 	switch it := itm.(type) {
 	case time.Duration:
 		return decimal.New(int64(it), 0), nil
@@ -139,7 +139,7 @@ func IfaceAsBig(itm interface{}) (b *decimal.Big, err error) {
 	return
 }
 
-func IfaceAsDuration(itm interface{}) (d time.Duration, err error) {
+func IfaceAsDuration(itm any) (d time.Duration, err error) {
 	switch it := itm.(type) {
 	case time.Duration:
 		return it, nil
@@ -175,7 +175,7 @@ func IfaceAsDuration(itm interface{}) (d time.Duration, err error) {
 	return
 }
 
-func IfaceAsInt64(itm interface{}) (i int64, err error) {
+func IfaceAsInt64(itm any) (i int64, err error) {
 	switch it := itm.(type) {
 	case int:
 		return int64(it), nil
@@ -194,7 +194,7 @@ func IfaceAsInt64(itm interface{}) (i int64, err error) {
 }
 
 // IfaceAsTInt converts interface to type int
-func IfaceAsInt(itm interface{}) (i int, err error) {
+func IfaceAsInt(itm any) (i int, err error) {
 	switch it := itm.(type) {
 	case int:
 		return it, nil
@@ -217,7 +217,7 @@ func IfaceAsInt(itm interface{}) (i int, err error) {
 }
 
 // same function as IfaceAsInt64 but if the value is float round it to int64 instead of returning error
-func IfaceAsTInt64(itm interface{}) (i int64, err error) {
+func IfaceAsTInt64(itm any) (i int64, err error) {
 	switch it := itm.(type) {
 	case int:
 		return int64(it), nil
@@ -239,7 +239,7 @@ func IfaceAsTInt64(itm interface{}) (i int64, err error) {
 	return
 }
 
-func IfaceAsFloat64(itm interface{}) (f float64, err error) {
+func IfaceAsFloat64(itm any) (f float64, err error) {
 	switch it := itm.(type) {
 	case float64:
 		return it, nil
@@ -257,7 +257,7 @@ func IfaceAsFloat64(itm interface{}) (f float64, err error) {
 	return
 }
 
-func IfaceAsBool(itm interface{}) (b bool, err error) {
+func IfaceAsBool(itm any) (b bool, err error) {
 	switch v := itm.(type) {
 	case bool:
 		return v, nil
@@ -284,7 +284,7 @@ func IfaceAsBool(itm interface{}) (b bool, err error) {
 	return
 }
 
-func IfaceAsString(fld interface{}) (out string) {
+func IfaceAsString(fld any) (out string) {
 	switch value := fld.(type) {
 	case nil:
 		return
@@ -319,7 +319,7 @@ func IfaceAsString(fld interface{}) (out string) {
 	}
 }
 
-func GetUniformType(item interface{}) (interface{}, error) {
+func GetUniformType(item any) (any, error) {
 	valItm := reflect.ValueOf(item)
 	switch valItm.Kind() { // convert evreting to float64
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
@@ -335,7 +335,7 @@ func GetUniformType(item interface{}) (interface{}, error) {
 	}
 }
 
-func GetBasicType(item interface{}) interface{} {
+func GetBasicType(item any) any {
 	valItm := reflect.ValueOf(item)
 	switch valItm.Kind() { // convert evreting to float64
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
@@ -351,7 +351,7 @@ func GetBasicType(item interface{}) interface{} {
 
 // GreaterThan attempts to compare two items
 // returns the result or error if not comparable
-func GreaterThan(item, oItem interface{}, orEqual bool) (gte bool, err error) {
+func GreaterThan(item, oItem any, orEqual bool) (gte bool, err error) {
 	item = GetBasicType(item)
 	oItem = GetBasicType(oItem)
 	typItem := reflect.TypeOf(item)
@@ -405,7 +405,7 @@ func GreaterThan(item, oItem interface{}, orEqual bool) (gte bool, err error) {
 	return
 }
 
-func EqualTo(item, oItem interface{}) (eq bool, err error) {
+func EqualTo(item, oItem any) (eq bool, err error) {
 	item = GetBasicType(item)
 	oItem = GetBasicType(oItem)
 	typItem := reflect.TypeOf(item)
@@ -447,7 +447,7 @@ func EqualTo(item, oItem interface{}) (eq bool, err error) {
 
 // Sum attempts to sum multiple items
 // returns the result or error if not comparable
-func Sum(items ...interface{}) (sum interface{}, err error) {
+func Sum(items ...any) (sum any, err error) {
 	//we need at least 2 items to sum them
 	if len(items) < 2 {
 		return nil, ErrNotEnoughParameters
@@ -510,7 +510,7 @@ func Sum(items ...interface{}) (sum interface{}, err error) {
 
 // Difference attempts to sum multiple items
 // returns the result or error if not comparable
-func Difference(tm string, items ...interface{}) (diff interface{}, err error) {
+func Difference(tm string, items ...any) (diff any, err error) {
 	//we need at least 2 items to diff them
 	if len(items) < 2 {
 		return nil, ErrNotEnoughParameters
@@ -579,7 +579,7 @@ func Difference(tm string, items ...interface{}) (diff interface{}, err error) {
 
 // Multiply attempts to multiply multiple items
 // returns the result or error if not comparable
-func Multiply(items ...interface{}) (mlt interface{}, err error) {
+func Multiply(items ...any) (mlt any, err error) {
 	//we need at least 2 items to diff them
 	if len(items) < 2 {
 		return nil, ErrNotEnoughParameters
@@ -623,7 +623,7 @@ func Multiply(items ...interface{}) (mlt interface{}, err error) {
 
 // Divide attempts to divide multiple items
 // returns the result or error if not comparable
-func Divide(items ...interface{}) (div interface{}, err error) {
+func Divide(items ...any) (div any, err error) {
 	//we need at least 2 items to diff them
 	if len(items) < 2 {
 		return nil, ErrNotEnoughParameters
@@ -667,7 +667,7 @@ func Divide(items ...interface{}) (div interface{}, err error) {
 
 // ReflectFieldMethodInterface parses intf attepting to return the field value or error otherwise
 // Supports "ExtraFields" where additional fields are dynamically inserted in map with field name: extraFieldsLabel
-func ReflectFieldMethodInterface(obj interface{}, fldName string) (retIf interface{}, err error) {
+func ReflectFieldMethodInterface(obj any, fldName string) (retIf any, err error) {
 	v := reflect.ValueOf(obj)
 	if v.Kind() == reflect.Ptr {
 		v = v.Elem()
@@ -721,7 +721,7 @@ func ReflectFieldMethodInterface(obj interface{}, fldName string) (retIf interfa
 	return field.Interface(), nil
 }
 
-func IfaceAsStringSlice(fld interface{}) (ss []string, err error) {
+func IfaceAsStringSlice(fld any) (ss []string, err error) {
 	switch value := fld.(type) {
 	case nil:
 	case []string:
@@ -766,7 +766,7 @@ func IfaceAsStringSlice(fld interface{}) (ss []string, err error) {
 		for i, v := range value {
 			ss[i] = strconv.FormatFloat(v, 'f', -1, 64)
 		}
-	case []interface{}:
+	case []any:
 		ss = make([]string, len(value))
 		for i, v := range value {
 			ss[i] = IfaceAsString(v)
@@ -781,7 +781,7 @@ func IfaceAsStringSlice(fld interface{}) (ss []string, err error) {
 	return
 }
 
-func OptAsBool(opts map[string]interface{}, name string) (b bool) {
+func OptAsBool(opts map[string]any, name string) (b bool) {
 	val, has := opts[name]
 	if !has {
 		return
@@ -790,7 +790,7 @@ func OptAsBool(opts map[string]interface{}, name string) (b bool) {
 	return
 }
 
-func OptAsBoolOrDef(opts map[string]interface{}, name string, def bool) (b bool) {
+func OptAsBoolOrDef(opts map[string]any, name string, def bool) (b bool) {
 	val, has := opts[name]
 	if !has {
 		return def
@@ -799,7 +799,7 @@ func OptAsBoolOrDef(opts map[string]interface{}, name string, def bool) (b bool)
 	return
 }
 
-func OptAsStringSlice(opts map[string]interface{}, name string) (b []string, err error) {
+func OptAsStringSlice(opts map[string]any, name string) (b []string, err error) {
 	val, has := opts[name]
 	if !has {
 		return

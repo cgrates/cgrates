@@ -49,7 +49,7 @@ func (self *CmdGetAttributeProfile) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdGetAttributeProfile) RpcParams(reset bool) interface{} {
+func (self *CmdGetAttributeProfile) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &utils.TenantIDWithAPIOpts{}
 	}
@@ -60,7 +60,7 @@ func (self *CmdGetAttributeProfile) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdGetAttributeProfile) RpcResult() interface{} {
+func (self *CmdGetAttributeProfile) RpcResult() any {
 	var atr engine.APIAttributeProfile
 	return &atr
 }
