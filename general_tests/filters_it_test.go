@@ -134,7 +134,7 @@ func testV1FltrAddStats(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "event1",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Account:    "1001",
 				utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 				utils.Usage:      time.Duration(11 * time.Second),
@@ -152,7 +152,7 @@ func testV1FltrAddStats(t *testing.T) {
 	ev1.CGREvent = &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event2",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.Account:    "1001",
 			utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			utils.Usage:      time.Duration(11 * time.Second),
@@ -169,7 +169,7 @@ func testV1FltrAddStats(t *testing.T) {
 	ev1.CGREvent = &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event2",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.Account:    "1002",
 			utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			utils.Usage:      time.Duration(5 * time.Second),
@@ -186,7 +186,7 @@ func testV1FltrAddStats(t *testing.T) {
 	ev1.CGREvent = &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event2",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.Account:    "1002",
 			utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			utils.Usage:      time.Duration(6 * time.Second),
@@ -203,7 +203,7 @@ func testV1FltrAddStats(t *testing.T) {
 	ev1.CGREvent = &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event3",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.Account:    "1003",
 			utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			utils.Usage:      time.Duration(11 * time.Second),
@@ -220,7 +220,7 @@ func testV1FltrAddStats(t *testing.T) {
 	ev1.CGREvent = &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event3",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Stat":           "Stat1_1",
 			utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			utils.Usage:      time.Duration(11 * time.Second),
@@ -238,7 +238,7 @@ func testV1FltrAddStats(t *testing.T) {
 	ev1.CGREvent = &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event3",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Stat":           "Stat1_1",
 			utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			utils.Usage:      time.Duration(15 * time.Second),
@@ -325,7 +325,7 @@ func testV1FltrGetThresholdForEvent(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "event1",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Account: "1010"},
 		},
 	}
@@ -388,7 +388,7 @@ func testV1FltrGetThresholdForEvent2(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "event1",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Account: "1010"},
 		},
 	}
@@ -432,7 +432,7 @@ func testV1FltrPopulateResources(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     utils.UUIDSha1Prefix(),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"Account":     "3001",
 				"Destination": "3002"},
 		},
@@ -496,7 +496,7 @@ func testV1FltrPopulateResources(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "event1",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Account: "2020"},
 		},
 	}
@@ -614,7 +614,7 @@ func testV1FltrAccounts(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "event1",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Account: "1001"},
 		},
 	}

@@ -46,7 +46,7 @@ func (self *CmdRemoveFilter) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdRemoveFilter) RpcParams(reset bool) interface{} {
+func (self *CmdRemoveFilter) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &utils.TenantIDWithCache{}
 	}
@@ -57,7 +57,7 @@ func (self *CmdRemoveFilter) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdRemoveFilter) RpcResult() interface{} {
+func (self *CmdRemoveFilter) RpcResult() any {
 	var s string
 	return &s
 }

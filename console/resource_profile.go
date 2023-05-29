@@ -49,7 +49,7 @@ func (self *CmdGetResourceProfile) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdGetResourceProfile) RpcParams(reset bool) interface{} {
+func (self *CmdGetResourceProfile) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &utils.TenantID{}
 	}
@@ -60,12 +60,12 @@ func (self *CmdGetResourceProfile) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdGetResourceProfile) RpcResult() interface{} {
+func (self *CmdGetResourceProfile) RpcResult() any {
 	var atr engine.ResourceProfile
 	return &atr
 }
 
-func (self *CmdGetResourceProfile) GetFormatedResult(result interface{}) string {
+func (self *CmdGetResourceProfile) GetFormatedResult(result any) string {
 	return GetFormatedResult(result, map[string]struct{}{
 		"UsageTTL": {},
 	})

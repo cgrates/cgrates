@@ -36,7 +36,7 @@ var (
 )
 
 func TestSMAParseStasisArgs(t *testing.T) {
-	var ev map[string]interface{}
+	var ev map[string]any
 	if err := json.Unmarshal([]byte(stasisStart), &ev); err != nil {
 		t.Error(err)
 	}
@@ -45,7 +45,7 @@ func TestSMAParseStasisArgs(t *testing.T) {
 	if !reflect.DeepEqual(smaEv.cachedFields, expAppArgs) {
 		t.Errorf("Expecting: %+v, received: %+v", smaEv.cachedFields, expAppArgs)
 	}
-	ev = make(map[string]interface{}) // Clear previous data
+	ev = make(map[string]any) // Clear previous data
 	if err := json.Unmarshal([]byte("{}"), &ev); err != nil {
 		t.Error(err)
 	}
@@ -57,7 +57,7 @@ func TestSMAParseStasisArgs(t *testing.T) {
 }
 
 func TestSMAEventType(t *testing.T) {
-	var ev map[string]interface{}
+	var ev map[string]any
 	if err := json.Unmarshal([]byte(stasisStart), &ev); err != nil {
 		t.Error(err)
 	}
@@ -65,7 +65,7 @@ func TestSMAEventType(t *testing.T) {
 	if smaEv.EventType() != "StasisStart" {
 		t.Error("Received:", smaEv.EventType())
 	}
-	ev = make(map[string]interface{}) // Clear previous data
+	ev = make(map[string]any) // Clear previous data
 	if err := json.Unmarshal([]byte("{}"), &ev); err != nil {
 		t.Error(err)
 	}
@@ -76,7 +76,7 @@ func TestSMAEventType(t *testing.T) {
 }
 
 func TestSMAEventChannelID(t *testing.T) {
-	var ev map[string]interface{}
+	var ev map[string]any
 	if err := json.Unmarshal([]byte(stasisStart), &ev); err != nil {
 		t.Error(err)
 	}
@@ -84,7 +84,7 @@ func TestSMAEventChannelID(t *testing.T) {
 	if smaEv.ChannelID() != "1473681228.6" {
 		t.Error("Received:", smaEv.ChannelID())
 	}
-	ev = make(map[string]interface{}) // Clear previous data
+	ev = make(map[string]any) // Clear previous data
 	if err := json.Unmarshal([]byte("{}"), &ev); err != nil {
 		t.Error(err)
 	}
@@ -95,7 +95,7 @@ func TestSMAEventChannelID(t *testing.T) {
 }
 
 func TestSMAEventOriginatorIP(t *testing.T) {
-	var ev map[string]interface{}
+	var ev map[string]any
 	if err := json.Unmarshal([]byte(stasisStart), &ev); err != nil {
 		t.Error(err)
 	}
@@ -106,7 +106,7 @@ func TestSMAEventOriginatorIP(t *testing.T) {
 }
 
 func TestSMAEventAccount(t *testing.T) {
-	var ev map[string]interface{}
+	var ev map[string]any
 	if err := json.Unmarshal([]byte(stasisStart), &ev); err != nil {
 		t.Error(err)
 	}
@@ -114,7 +114,7 @@ func TestSMAEventAccount(t *testing.T) {
 	if smaEv.Account() != "1001" {
 		t.Error("Received:", smaEv.Account())
 	}
-	ev = make(map[string]interface{}) // Clear previous data
+	ev = make(map[string]any) // Clear previous data
 	if err := json.Unmarshal([]byte("{}"), &ev); err != nil {
 		t.Error(err)
 	}
@@ -125,7 +125,7 @@ func TestSMAEventAccount(t *testing.T) {
 }
 
 func TestSMAEventDestination(t *testing.T) {
-	var ev map[string]interface{}
+	var ev map[string]any
 	if err := json.Unmarshal([]byte(stasisStart), &ev); err != nil {
 		t.Error(err)
 	}
@@ -133,7 +133,7 @@ func TestSMAEventDestination(t *testing.T) {
 	if smaEv.Destination() != "1002" {
 		t.Error("Received:", smaEv.Destination())
 	}
-	ev = make(map[string]interface{}) // Clear previous data
+	ev = make(map[string]any) // Clear previous data
 	if err := json.Unmarshal([]byte("{}"), &ev); err != nil {
 		t.Error(err)
 	}
@@ -144,7 +144,7 @@ func TestSMAEventDestination(t *testing.T) {
 }
 
 func TestSMAEventTimestamp(t *testing.T) {
-	var ev map[string]interface{}
+	var ev map[string]any
 	if err := json.Unmarshal([]byte(stasisStart), &ev); err != nil {
 		t.Error(err)
 	}
@@ -152,7 +152,7 @@ func TestSMAEventTimestamp(t *testing.T) {
 	if smaEv.Timestamp() != "2016-09-12T13:53:48.919+0200" {
 		t.Error("Received:", smaEv.Timestamp())
 	}
-	ev = make(map[string]interface{}) // Clear previous data
+	ev = make(map[string]any) // Clear previous data
 	if err := json.Unmarshal([]byte("{}"), &ev); err != nil {
 		t.Error(err)
 	}
@@ -163,7 +163,7 @@ func TestSMAEventTimestamp(t *testing.T) {
 }
 
 func TestSMAEventChannelState(t *testing.T) {
-	var ev map[string]interface{}
+	var ev map[string]any
 	if err := json.Unmarshal([]byte(channelStateChange), &ev); err != nil {
 		t.Error(err)
 	}
@@ -171,7 +171,7 @@ func TestSMAEventChannelState(t *testing.T) {
 	if smaEv.ChannelState() != "Up" {
 		t.Error("Received:", smaEv.ChannelState())
 	}
-	ev = make(map[string]interface{}) // Clear previous data
+	ev = make(map[string]any) // Clear previous data
 	if err := json.Unmarshal([]byte("{}"), &ev); err != nil {
 		t.Error(err)
 	}
@@ -182,7 +182,7 @@ func TestSMAEventChannelState(t *testing.T) {
 }
 
 func TestSMASetupTime(t *testing.T) {
-	var ev map[string]interface{}
+	var ev map[string]any
 	if err := json.Unmarshal([]byte(channelStateChange), &ev); err != nil {
 		t.Error(err)
 	}
@@ -190,7 +190,7 @@ func TestSMASetupTime(t *testing.T) {
 	if smaEv.SetupTime() != "2016-09-12T13:53:48.918+0200" {
 		t.Error("Received:", smaEv.SetupTime())
 	}
-	ev = make(map[string]interface{}) // Clear previous data
+	ev = make(map[string]any) // Clear previous data
 	if err := json.Unmarshal([]byte("{}"), &ev); err != nil {
 		t.Error(err)
 	}
@@ -201,7 +201,7 @@ func TestSMASetupTime(t *testing.T) {
 }
 
 func TestSMAEventRequestType(t *testing.T) {
-	var ev map[string]interface{}
+	var ev map[string]any
 	if err := json.Unmarshal([]byte(stasisStart), &ev); err != nil {
 		t.Error(err)
 	}
@@ -209,7 +209,7 @@ func TestSMAEventRequestType(t *testing.T) {
 	if smaEv.RequestType() != "*prepaid" {
 		t.Error("Received:", smaEv.RequestType())
 	}
-	ev = make(map[string]interface{}) // Clear previous data
+	ev = make(map[string]any) // Clear previous data
 	smaEv = NewSMAsteriskEvent(ev, "127.0.0.1", "")
 	if smaEv.RequestType() != "" {
 		t.Error("Received:", smaEv.RequestType())
@@ -217,7 +217,7 @@ func TestSMAEventRequestType(t *testing.T) {
 }
 
 func TestSMAEventTenant(t *testing.T) {
-	var ev map[string]interface{}
+	var ev map[string]any
 	if err := json.Unmarshal([]byte(stasisStart), &ev); err != nil {
 		t.Error(err)
 	}
@@ -225,7 +225,7 @@ func TestSMAEventTenant(t *testing.T) {
 	if smaEv.Tenant() != "" {
 		t.Error("Received:", smaEv.Tenant())
 	}
-	ev = map[string]interface{}{"args": []interface{}{"cgr_tenant=cgrates.org"}} // Clear previous data
+	ev = map[string]any{"args": []any{"cgr_tenant=cgrates.org"}} // Clear previous data
 	smaEv = NewSMAsteriskEvent(ev, "127.0.0.1", "")
 	if smaEv.Tenant() != "cgrates.org" {
 		t.Error("Received:", smaEv.Tenant())
@@ -233,7 +233,7 @@ func TestSMAEventTenant(t *testing.T) {
 }
 
 func TestSMAEventCategory(t *testing.T) {
-	var ev map[string]interface{}
+	var ev map[string]any
 	if err := json.Unmarshal([]byte(stasisStart), &ev); err != nil {
 		t.Error(err)
 	}
@@ -241,7 +241,7 @@ func TestSMAEventCategory(t *testing.T) {
 	if smaEv.Category() != "" {
 		t.Error("Received:", smaEv.Category())
 	}
-	ev = map[string]interface{}{"args": []interface{}{"cgr_category=premium_call"}} // Clear previous data
+	ev = map[string]any{"args": []any{"cgr_category=premium_call"}} // Clear previous data
 	smaEv = NewSMAsteriskEvent(ev, "127.0.0.1", "")
 	if smaEv.Category() != "premium_call" {
 		t.Error("Received:", smaEv.Category())
@@ -249,7 +249,7 @@ func TestSMAEventCategory(t *testing.T) {
 }
 
 func TestSMAEventSubject(t *testing.T) {
-	var ev map[string]interface{}
+	var ev map[string]any
 	if err := json.Unmarshal([]byte(stasisStart), &ev); err != nil {
 		t.Error(err)
 	}
@@ -257,7 +257,7 @@ func TestSMAEventSubject(t *testing.T) {
 	if smaEv.Subject() != "" {
 		t.Error("Received:", smaEv.Subject())
 	}
-	ev = map[string]interface{}{"args": []interface{}{"cgr_subject=dan"}} // Clear previous data
+	ev = map[string]any{"args": []any{"cgr_subject=dan"}} // Clear previous data
 	smaEv = NewSMAsteriskEvent(ev, "127.0.0.1", "")
 	if smaEv.Subject() != "dan" {
 		t.Error("Received:", smaEv.Subject())
@@ -265,7 +265,7 @@ func TestSMAEventSubject(t *testing.T) {
 }
 
 func TestSMAEventPDD(t *testing.T) {
-	var ev map[string]interface{}
+	var ev map[string]any
 	if err := json.Unmarshal([]byte(stasisStart), &ev); err != nil {
 		t.Error(err)
 	}
@@ -273,7 +273,7 @@ func TestSMAEventPDD(t *testing.T) {
 	if smaEv.PDD() != "" {
 		t.Error("Received:", smaEv.PDD())
 	}
-	ev = map[string]interface{}{"args": []interface{}{"cgr_pdd=2.1"}} // Clear previous data
+	ev = map[string]any{"args": []any{"cgr_pdd=2.1"}} // Clear previous data
 	smaEv = NewSMAsteriskEvent(ev, "127.0.0.1", "")
 	if smaEv.PDD() != "2.1" {
 		t.Error("Received:", smaEv.PDD())
@@ -281,7 +281,7 @@ func TestSMAEventPDD(t *testing.T) {
 }
 
 func TestSMAEventSupplier(t *testing.T) {
-	var ev map[string]interface{}
+	var ev map[string]any
 	if err := json.Unmarshal([]byte(stasisStart), &ev); err != nil {
 		t.Error(err)
 	}
@@ -289,7 +289,7 @@ func TestSMAEventSupplier(t *testing.T) {
 	if smaEv.Supplier() != "supplier1" {
 		t.Error("Received:", smaEv.Supplier())
 	}
-	ev = map[string]interface{}{"args": []interface{}{"cgr_supplier=supplier1"}} // Clear previous data
+	ev = map[string]any{"args": []any{"cgr_supplier=supplier1"}} // Clear previous data
 	smaEv = NewSMAsteriskEvent(ev, "127.0.0.1", "")
 	if smaEv.Supplier() != "supplier1" {
 		t.Error("Received:", smaEv.Supplier())
@@ -297,7 +297,7 @@ func TestSMAEventSupplier(t *testing.T) {
 }
 
 func TestSMAEventDisconnectCause(t *testing.T) {
-	var ev map[string]interface{}
+	var ev map[string]any
 	if err := json.Unmarshal([]byte(stasisStart), &ev); err != nil {
 		t.Error(err)
 	}
@@ -305,7 +305,7 @@ func TestSMAEventDisconnectCause(t *testing.T) {
 	if smaEv.DisconnectCause() != "" {
 		t.Error("Received:", smaEv.DisconnectCause())
 	}
-	ev = map[string]interface{}{"args": []interface{}{"cgr_disconnectcause=NORMAL_DISCONNECT"}} // Clear previous data
+	ev = map[string]any{"args": []any{"cgr_disconnectcause=NORMAL_DISCONNECT"}} // Clear previous data
 	smaEv = NewSMAsteriskEvent(ev, "127.0.0.1", "")
 	if smaEv.DisconnectCause() != "NORMAL_DISCONNECT" {
 		t.Error("Received:", smaEv.DisconnectCause())
@@ -317,7 +317,7 @@ func TestSMAEventExtraParameters(t *testing.T) {
 		"extra1": "val1",
 		"extra2": "val2",
 	}
-	var ev map[string]interface{}
+	var ev map[string]any
 	if err := json.Unmarshal([]byte(stasisStart), &ev); err != nil {
 		t.Error(err)
 	}
@@ -332,7 +332,7 @@ func TestSMAEventExtraParameters(t *testing.T) {
 
 func TestSMAEventV1AuthorizeArgs(t *testing.T) {
 	timezone := config.CgrConfig().GeneralCfg().DefaultTimezone
-	var ev map[string]interface{}
+	var ev map[string]any
 	if err := json.Unmarshal([]byte(stasisStart), &ev); err != nil {
 		t.Error(err)
 	}
@@ -350,7 +350,7 @@ func TestSMAEventV1AuthorizeArgs(t *testing.T) {
 	}
 
 	stasisStart2 := `{"type":"StasisStart","timestamp":"2018-11-25T05:03:26.464-0500","args":["cgr_reqtype=*prepaid","cgr_supplier=supplier1","cgr_flags=*accounts,*attributes,*resources,*stats,*suppliers,*thresholds"],"channel":{"id":"1543140206.0","dialplan":{"context":"internal","exten":"1002","priority":4},"caller":{"name":"","number":"1001"},"name":"PJSIP/1001-00000000","state":"Ring","connected":{"name":"","number":""},"language":"en","accountcode":"","creationtime":"2018-11-25T05:03:26.463-0500"},"asterisk_id":"08:00:27:b7:b8:1f","application":"cgrates_auth"}`
-	var ev2 map[string]interface{}
+	var ev2 map[string]any
 	if err := json.Unmarshal([]byte(stasisStart2), &ev2); err != nil {
 		t.Error(err)
 	}
@@ -387,7 +387,7 @@ func TestSMAEventV1InitSessionArgs(t *testing.T) {
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "AsteriskEvent",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"MissingCGRSubsustems": "",
 		},
 	}
@@ -395,7 +395,7 @@ func TestSMAEventV1InitSessionArgs(t *testing.T) {
 		InitSession: true,
 		CGREvent:    cgrEv,
 	}
-	var ev map[string]interface{}
+	var ev map[string]any
 	if err := json.Unmarshal([]byte(stasisStart), &ev); err != nil {
 		t.Error(err)
 	}
@@ -420,7 +420,7 @@ func TestSMAEventV1TerminateSessionArgs(t *testing.T) {
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "AsteriskEvent",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"MissingCGRSubsustems": "",
 		},
 	}
@@ -428,7 +428,7 @@ func TestSMAEventV1TerminateSessionArgs(t *testing.T) {
 		TerminateSession: true,
 		CGREvent:         cgrEv,
 	}
-	var ev map[string]interface{}
+	var ev map[string]any
 	if err := json.Unmarshal([]byte(stasisStart), &ev); err != nil {
 		t.Error(err)
 	}

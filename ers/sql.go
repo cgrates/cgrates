@@ -145,8 +145,8 @@ func (rdr *SQLEventReader) readLoop(db *gorm.DB) {
 			if rdr.Config().ConcurrentReqs != -1 {
 				<-rdr.cap // do not try to read if the limit is reached
 			}
-			columns := make([]interface{}, len(colNames))
-			columnPointers := make([]interface{}, len(colNames))
+			columns := make([]any, len(colNames))
+			columnPointers := make([]any, len(colNames))
 			for i := range columns {
 				columnPointers[i] = &columns[i]
 			}
@@ -154,8 +154,8 @@ func (rdr *SQLEventReader) readLoop(db *gorm.DB) {
 				rdr.rdrErr <- err
 				return
 			}
-			go func(columns []interface{}, colNames []string) {
-				msg := make(map[string]interface{})
+			go func(columns []any, colNames []string) {
+				msg := make(map[string]any)
 				for i, colName := range colNames {
 					msg[colName] = columns[i]
 				}
@@ -184,7 +184,7 @@ func (rdr *SQLEventReader) readLoop(db *gorm.DB) {
 	}
 }
 
-func (rdr *SQLEventReader) processMessage(msg map[string]interface{}) (err error) {
+func (rdr *SQLEventReader) processMessage(msg map[string]any) (err error) {
 	agReq := agents.NewAgentRequest(
 		utils.MapStorage(msg), nil,
 		nil, nil, rdr.Config().Tenant,
@@ -295,7 +295,7 @@ func (rdr *SQLEventReader) setURL(inURL, outURL string) (err error) {
 	return
 }
 
-func (rdr *SQLEventReader) postCDR(in []interface{}) (err error) {
+func (rdr *SQLEventReader) postCDR(in []any) (err error) {
 	sqlValues := make([]string, len(in))
 	for i := range in {
 		sqlValues[i] = "?"

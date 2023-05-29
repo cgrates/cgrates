@@ -48,7 +48,7 @@ func (self *CmdGetSupplier) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdGetSupplier) RpcParams(reset bool) interface{} {
+func (self *CmdGetSupplier) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &utils.TenantID{}
 	}
@@ -59,7 +59,7 @@ func (self *CmdGetSupplier) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdGetSupplier) RpcResult() interface{} {
+func (self *CmdGetSupplier) RpcResult() any {
 	var atr engine.SupplierProfile
 	return &atr
 }

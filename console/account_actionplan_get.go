@@ -49,7 +49,7 @@ func (self *CmdGetAccountActionPlan) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdGetAccountActionPlan) RpcParams(reset bool) interface{} {
+func (self *CmdGetAccountActionPlan) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &utils.TenantAccount{}
 	}
@@ -60,7 +60,7 @@ func (self *CmdGetAccountActionPlan) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdGetAccountActionPlan) RpcResult() interface{} {
+func (self *CmdGetAccountActionPlan) RpcResult() any {
 	s := make([]*v1.AccountActionTiming, 0)
 	return &s
 }

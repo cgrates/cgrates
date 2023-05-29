@@ -33,7 +33,7 @@ func (nms *NMSlice) String() (out string) {
 }
 
 // Interface returns itself
-func (nms *NMSlice) Interface() interface{} {
+func (nms *NMSlice) Interface() any {
 	return nms
 }
 

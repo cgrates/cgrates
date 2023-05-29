@@ -115,7 +115,7 @@ func (spl *SupplierSCfg) loadFromJsonCfg(jsnCfg *SupplierSJsonCfg) (err error) {
 	return nil
 }
 
-func (spl *SupplierSCfg) AsMapInterface() map[string]interface{} {
+func (spl *SupplierSCfg) AsMapInterface() map[string]any {
 	stringIndexedFields := []string{}
 	if spl.StringIndexedFields != nil {
 		stringIndexedFields = make([]string, len(*spl.StringIndexedFields))
@@ -158,7 +158,7 @@ func (spl *SupplierSCfg) AsMapInterface() map[string]interface{} {
 		}
 	}
 
-	return map[string]interface{}{
+	return map[string]any{
 		utils.EnabledCfg:             spl.Enabled,
 		utils.IndexedSelectsCfg:      spl.IndexedSelects,
 		utils.StringIndexedFieldsCfg: stringIndexedFields,

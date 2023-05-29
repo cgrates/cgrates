@@ -207,7 +207,7 @@ func testRPCMethodsAuthorizeSession(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testRPCMethodsAuthorizeSession",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Tenant:      "cgrates.org",
 				utils.ToR:         utils.VOICE,
 				utils.OriginID:    "testRPCMethodsAuthorizeSession",
@@ -235,7 +235,7 @@ func testRPCMethodsAuthorizeSession(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "DisableAccount",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Account:   "1001",
 				"DisableAction": "DisableAction",
 			},
@@ -281,7 +281,7 @@ func testRPCMethodsAuthorizeSession(t *testing.T) {
 	thEvent.CGREvent = &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "EnableAccount",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.Account:  "1001",
 			"EnableAction": "EnableAction",
 		},
@@ -301,7 +301,7 @@ func testRPCMethodsInitSession(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testRPCMethodsInitSession",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Tenant:      "cgrates.org",
 				utils.ToR:         utils.VOICE,
 				utils.OriginID:    "testRPCMethodsInitSession",
@@ -330,7 +330,7 @@ func testRPCMethodsInitSession(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "DisableAccount",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Account:   "1001",
 				"DisableAction": "DisableAction",
 			},
@@ -376,7 +376,7 @@ func testRPCMethodsInitSession(t *testing.T) {
 	thEvent.CGREvent = &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "EnableAccount",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.Account:  "1001",
 			"EnableAction": "EnableAction",
 		},
@@ -396,7 +396,7 @@ func testRPCMethodsUpdateSession(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testRPCMethodsUpdateSession",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Tenant:      "cgrates.org",
 				utils.ToR:         utils.VOICE,
 				utils.OriginID:    "testRPCMethodsUpdateSession",
@@ -425,7 +425,7 @@ func testRPCMethodsUpdateSession(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "DisableAccount",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Account:   "1001",
 				"DisableAction": "DisableAction",
 			},
@@ -471,7 +471,7 @@ func testRPCMethodsUpdateSession(t *testing.T) {
 	thEvent.CGREvent = &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "EnableAccount",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.Account:  "1001",
 			"EnableAction": "EnableAction",
 		},
@@ -490,7 +490,7 @@ func testRPCMethodsTerminateSession(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testRPCMethodsTerminateSession",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Tenant:      "cgrates.org",
 				utils.ToR:         utils.VOICE,
 				utils.OriginID:    "testRPCMethodsTerminateSession",
@@ -513,7 +513,7 @@ func testRPCMethodsTerminateSession(t *testing.T) {
 	}
 
 	//replace event with empty
-	args.CGREvent.Event = map[string]interface{}{}
+	args.CGREvent.Event = map[string]any{}
 
 	if err := rpcRpc.Call(utils.SessionSv1TerminateSession,
 		args, &rply); err != nil {
@@ -537,7 +537,7 @@ func testRPCMethodsProcessCDR(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testRPCMethodsProcessCDR",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Tenant:      "cgrates.org",
 				utils.ToR:         utils.VOICE,
 				utils.OriginID:    "testRPCMethodsProcessCDR",
@@ -611,7 +611,7 @@ func testRPCMethodsProcessEvent(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testRPCMethodsProcessEvent",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Tenant:      "cgrates.org",
 				utils.ToR:         utils.VOICE,
 				utils.OriginID:    "testRPCMethodsProcessEvent",
@@ -639,7 +639,7 @@ func testRPCMethodsProcessEvent(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "DisableAccount",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Account:   "1001",
 				"DisableAction": "DisableAction",
 			},
@@ -686,7 +686,7 @@ func testRPCMethodsProcessEvent(t *testing.T) {
 	thEvent.CGREvent = &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "EnableAccount",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.Account:  "1001",
 			"EnableAction": "EnableAction",
 		},
@@ -703,7 +703,7 @@ func testRPCMethodsCdrsProcessCDR(t *testing.T) {
 	args := utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testRPCMethodsCdrsProcessCDR",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.Tenant:      "cgrates.org",
 			utils.ToR:         utils.VOICE,
 			utils.OriginHost:  "host",

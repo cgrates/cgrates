@@ -119,7 +119,7 @@ func testSesSupplierSItLoadFromFolder(t *testing.T) {
 func testSesSupplierSAuthorizeEvent(t *testing.T) {
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.Source:      "testV4CDRsProcessCDR",
 			utils.OriginID:    "testV4CDRsProcessCDR",
 			utils.OriginHost:  "192.168.1.1",
@@ -150,7 +150,7 @@ func testSesSupplierSAuthorizeEvent(t *testing.T) {
 				{
 					SupplierID:         "supplier3",
 					SupplierParameters: "",
-					SortingData: map[string]interface{}{
+					SortingData: map[string]any{
 						"Cost":         0.0102,
 						"RatingPlanID": "RP_SPECIAL_1002",
 						"Weight":       15.,
@@ -158,7 +158,7 @@ func testSesSupplierSAuthorizeEvent(t *testing.T) {
 				}, {
 					SupplierID:         "supplier1",
 					SupplierParameters: "",
-					SortingData: map[string]interface{}{
+					SortingData: map[string]any{
 						"Cost":         0.0102,
 						"RatingPlanID": "RP_SPECIAL_1002",
 						"Weight":       10.,
@@ -166,7 +166,7 @@ func testSesSupplierSAuthorizeEvent(t *testing.T) {
 				}, {
 					SupplierID:         "supplier2",
 					SupplierParameters: "",
-					SortingData: map[string]interface{}{
+					SortingData: map[string]any{
 						"Cost":         1.2,
 						"RatingPlanID": "RP_RETAIL1",
 						"Weight":       20.,
@@ -201,7 +201,7 @@ func testSesSupplierSAuthorizeEvent(t *testing.T) {
 				{
 					SupplierID:         "supplier3",
 					SupplierParameters: "",
-					SortingData: map[string]interface{}{
+					SortingData: map[string]any{
 						"Cost":         0.0102,
 						"RatingPlanID": "RP_SPECIAL_1002",
 						"Weight":       15.,
@@ -209,7 +209,7 @@ func testSesSupplierSAuthorizeEvent(t *testing.T) {
 				}, {
 					SupplierID:         "supplier1",
 					SupplierParameters: "",
-					SortingData: map[string]interface{}{
+					SortingData: map[string]any{
 						"Cost":         0.0102,
 						"RatingPlanID": "RP_SPECIAL_1002",
 						"Weight":       10.,
@@ -251,7 +251,7 @@ func testSesSupplierSAuthorizeEvent(t *testing.T) {
 func testSesSupplierSProcessMessage(t *testing.T) {
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.Source:      "testV4CDRsProcessCDR",
 			utils.OriginID:    "testV4CDRsProcessCDR",
 			utils.OriginHost:  "192.168.1.1",
@@ -283,7 +283,7 @@ func testSesSupplierSProcessMessage(t *testing.T) {
 				{
 					SupplierID:         "supplier3",
 					SupplierParameters: "",
-					SortingData: map[string]interface{}{
+					SortingData: map[string]any{
 						"Cost":         0.0102,
 						"RatingPlanID": "RP_SPECIAL_1002",
 						"Weight":       15.,
@@ -291,7 +291,7 @@ func testSesSupplierSProcessMessage(t *testing.T) {
 				}, {
 					SupplierID:         "supplier1",
 					SupplierParameters: "",
-					SortingData: map[string]interface{}{
+					SortingData: map[string]any{
 						"Cost":         0.0102,
 						"RatingPlanID": "RP_SPECIAL_1002",
 						"Weight":       10.,
@@ -299,7 +299,7 @@ func testSesSupplierSProcessMessage(t *testing.T) {
 				}, {
 					SupplierID:         "supplier2",
 					SupplierParameters: "",
-					SortingData: map[string]interface{}{
+					SortingData: map[string]any{
 						"Cost":         1.2,
 						"RatingPlanID": "RP_RETAIL1",
 						"Weight":       20.,
@@ -335,7 +335,7 @@ func testSesSupplierSProcessMessage(t *testing.T) {
 				{
 					SupplierID:         "supplier3",
 					SupplierParameters: "",
-					SortingData: map[string]interface{}{
+					SortingData: map[string]any{
 						"Cost":         0.0102,
 						"RatingPlanID": "RP_SPECIAL_1002",
 						"Weight":       15.,
@@ -343,7 +343,7 @@ func testSesSupplierSProcessMessage(t *testing.T) {
 				}, {
 					SupplierID:         "supplier1",
 					SupplierParameters: "",
-					SortingData: map[string]interface{}{
+					SortingData: map[string]any{
 						"Cost":         0.0102,
 						"RatingPlanID": "RP_SPECIAL_1002",
 						"Weight":       10.,
@@ -385,7 +385,7 @@ func testSesSupplierSProcessMessage(t *testing.T) {
 func testSesSupplierSProcessEvent(t *testing.T) {
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.Source:      "testV4CDRsProcessCDR",
 			utils.OriginID:    "testV4CDRsProcessCDR",
 			utils.OriginHost:  "192.168.1.1",
@@ -418,7 +418,7 @@ func testSesSupplierSProcessEvent(t *testing.T) {
 				{
 					SupplierID:         "supplier3",
 					SupplierParameters: "",
-					SortingData: map[string]interface{}{
+					SortingData: map[string]any{
 						"Cost":         0.0102,
 						"RatingPlanID": "RP_SPECIAL_1002",
 						"Weight":       15.,
@@ -426,7 +426,7 @@ func testSesSupplierSProcessEvent(t *testing.T) {
 				}, {
 					SupplierID:         "supplier1",
 					SupplierParameters: "",
-					SortingData: map[string]interface{}{
+					SortingData: map[string]any{
 						"Cost":         0.0102,
 						"RatingPlanID": "RP_SPECIAL_1002",
 						"Weight":       10.,
@@ -434,7 +434,7 @@ func testSesSupplierSProcessEvent(t *testing.T) {
 				}, {
 					SupplierID:         "supplier2",
 					SupplierParameters: "",
-					SortingData: map[string]interface{}{
+					SortingData: map[string]any{
 						"Cost":         1.2,
 						"RatingPlanID": "RP_RETAIL1",
 						"Weight":       20.,
@@ -472,7 +472,7 @@ func testSesSupplierSProcessEvent(t *testing.T) {
 				{
 					SupplierID:         "supplier3",
 					SupplierParameters: "",
-					SortingData: map[string]interface{}{
+					SortingData: map[string]any{
 						"Cost":         0.0102,
 						"RatingPlanID": "RP_SPECIAL_1002",
 						"Weight":       15.,
@@ -480,7 +480,7 @@ func testSesSupplierSProcessEvent(t *testing.T) {
 				}, {
 					SupplierID:         "supplier1",
 					SupplierParameters: "",
-					SortingData: map[string]interface{}{
+					SortingData: map[string]any{
 						"Cost":         0.0102,
 						"RatingPlanID": "RP_SPECIAL_1002",
 						"Weight":       10.,

@@ -535,10 +535,10 @@ func (dS *DispatcherResponder) Shutdown(args *utils.TenantWithArgDispatcher, rep
 	return dS.dS.ResponderShutdown(args, reply)
 }
 
-func (dS *DispatcherResponder) GetCostOnRatingPlans(arg *utils.GetCostOnRatingPlansArgs, reply *map[string]interface{}) (err error) {
+func (dS *DispatcherResponder) GetCostOnRatingPlans(arg *utils.GetCostOnRatingPlansArgs, reply *map[string]any) (err error) {
 	return dS.dS.ResponderGetCostOnRatingPlans(arg, reply)
 }
-func (dS *DispatcherResponder) GetMaxSessionTimeOnAccounts(arg *utils.GetMaxSessionTimeOnAccountsArgs, reply *map[string]interface{}) (err error) {
+func (dS *DispatcherResponder) GetMaxSessionTimeOnAccounts(arg *utils.GetMaxSessionTimeOnAccountsArgs, reply *map[string]any) (err error) {
 	return dS.dS.ResponderGetMaxSessionTimeOnAccounts(arg, reply)
 }
 
@@ -692,7 +692,7 @@ func (dSv1 DispatcherSv1) GetProfileForEvent(ev *dispatchers.DispatcherEvent,
 	return dSv1.dS.V1GetProfileForEvent(ev, dPrfl)
 }
 
-func (dSv1 DispatcherSv1) Apier(args *utils.MethodParameters, reply *interface{}) (err error) {
+func (dSv1 DispatcherSv1) Apier(args *utils.MethodParameters, reply *any) (err error) {
 	return dSv1.dS.V1Apier(new(APIerSv1), args, reply)
 }
 
@@ -770,7 +770,7 @@ type DispatcherConfigSv1 struct {
 	dS *dispatchers.DispatcherService
 }
 
-func (dS *DispatcherConfigSv1) GetJSONSection(args *config.StringWithArgDispatcher, reply *map[string]interface{}) (err error) {
+func (dS *DispatcherConfigSv1) GetJSONSection(args *config.StringWithArgDispatcher, reply *map[string]any) (err error) {
 	return dS.dS.ConfigSv1GetJSONSection(args, reply)
 }
 
@@ -791,7 +791,7 @@ type DispatcherCoreSv1 struct {
 	dS *dispatchers.DispatcherService
 }
 
-func (dS *DispatcherCoreSv1) Status(args *utils.TenantWithArgDispatcher, reply *map[string]interface{}) error {
+func (dS *DispatcherCoreSv1) Status(args *utils.TenantWithArgDispatcher, reply *map[string]any) error {
 	return dS.dS.CoreSv1Status(args, reply)
 }
 

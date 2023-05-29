@@ -45,7 +45,7 @@ func (self *CmdCacheVersions) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdCacheVersions) RpcParams(reset bool) interface{} {
+func (self *CmdCacheVersions) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &StringWrapper{}
 	}
@@ -56,7 +56,7 @@ func (self *CmdCacheVersions) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdCacheVersions) RpcResult() interface{} {
+func (self *CmdCacheVersions) RpcResult() any {
 	a := make(map[string]int64, 0)
 	return &a
 }

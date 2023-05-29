@@ -110,7 +110,7 @@ func (apiv2 *APIerSv2) SetAccount(attr AttrSetAccount, reply *string) error {
 	dirtyActionPlans := make(map[string]*engine.ActionPlan)
 	var ub *engine.Account
 	var schedNeedsReload bool
-	_, err := guardian.Guardian.Guard(func() (interface{}, error) {
+	_, err := guardian.Guardian.Guard(func() (any, error) {
 		if bal, _ := apiv2.DataManager.GetAccount(accID); bal != nil {
 			ub = bal
 		} else { // Not found in db, create it here
@@ -118,7 +118,7 @@ func (apiv2 *APIerSv2) SetAccount(attr AttrSetAccount, reply *string) error {
 				ID: accID,
 			}
 		}
-		_, err := guardian.Guardian.Guard(func() (interface{}, error) {
+		_, err := guardian.Guardian.Guard(func() (any, error) {
 			acntAPids, err := apiv2.DataManager.GetAccountActionPlans(accID, true, true, utils.NonTransactional)
 			if err != nil && err != utils.ErrNotFound {
 				return 0, err

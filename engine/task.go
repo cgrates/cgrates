@@ -47,7 +47,7 @@ func (t *Task) String() string {
 
 // FieldAsInterface implements utils.DataProvider
 // ToDo: support Action fields
-func (t *Task) FieldAsInterface(fldPath []string) (iface interface{}, err error) {
+func (t *Task) FieldAsInterface(fldPath []string) (iface any, err error) {
 	return t.FieldAsString(fldPath)
 }
 

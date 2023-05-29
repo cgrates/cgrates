@@ -25,7 +25,7 @@ import (
 
 func TestConvertMapValStrIf(t *testing.T) {
 	var mapIn map[string]string
-	var mapOut map[string]interface{}
+	var mapOut map[string]any
 	if rcv := ConvertMapValStrIf(mapIn); reflect.TypeOf(rcv) != reflect.TypeOf(mapOut) {
 		t.Errorf("Expecting: %+v, received: %+v", reflect.TypeOf(mapOut), reflect.TypeOf(rcv))
 	}
@@ -130,16 +130,16 @@ func MapKeysStringMapParse(t *testing.T) {
 }
 
 func TestMapMergeMapsStringIface(t *testing.T) {
-	mp1 := map[string]interface{}{
+	mp1 := map[string]any{
 		"Hdr1": "Val1",
 		"Hdr2": "Val2",
 		"Hdr3": "Val3",
 	}
-	mp2 := map[string]interface{}{
+	mp2 := map[string]any{
 		"Hdr3": "Val4",
 		"Hdr4": "Val4",
 	}
-	eMergedMap := map[string]interface{}{
+	eMergedMap := map[string]any{
 		"Hdr1": "Val1",
 		"Hdr2": "Val2",
 		"Hdr3": "Val4",

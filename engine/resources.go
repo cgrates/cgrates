@@ -520,7 +520,7 @@ func (rS *ResourceService) processThresholds(rs Resources, argDispatcher *utils.
 			CGREvent: &utils.CGREvent{
 				Tenant: r.Tenant,
 				ID:     utils.GenUUID(),
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					utils.EventType:  utils.ResourceUpdate,
 					utils.ResourceID: r.ID,
 					utils.Usage:      r.TotalUsage(),

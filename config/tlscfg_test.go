@@ -80,7 +80,7 @@ func TestTlsCfgAsMapInterface(t *testing.T) {
 		"server_name":"",
 	},
 }`
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		"server_certificate": "",
 		"server_key":         "",
 		"client_certificate": "",
@@ -111,7 +111,7 @@ func TestTlsCfgAsMapInterface(t *testing.T) {
 		"server_policy":3,					
 	},
 }`
-	eMap = map[string]interface{}{
+	eMap = map[string]any{
 		"server_certificate": "path/To/Server/Cert",
 		"server_key":         "path/To/Server/Key",
 		"client_certificate": "path/To/Client/Cert",

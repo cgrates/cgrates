@@ -59,8 +59,8 @@ func (tls *TlsCfg) loadFromJsonCfg(jsnCfg *TlsJsonCfg) (err error) {
 	return
 }
 
-func (tls *TlsCfg) AsMapInterface() map[string]interface{} {
-	return map[string]interface{}{
+func (tls *TlsCfg) AsMapInterface() map[string]any {
+	return map[string]any{
 		utils.ServerCerificateCfg: tls.ServerCerificate,
 		utils.ServerKeyCfg:        tls.ServerKey,
 		utils.ServerPolicyCfg:     tls.ServerPolicy,

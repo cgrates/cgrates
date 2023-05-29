@@ -107,8 +107,8 @@ func (mg *MigratorCgrCfg) loadFromJsonCfg(jsnCfg *MigratorCfgJson) (err error) {
 	return nil
 }
 
-func (mg *MigratorCgrCfg) AsMapInterface() map[string]interface{} {
-	return map[string]interface{}{
+func (mg *MigratorCgrCfg) AsMapInterface() map[string]any {
+	return map[string]any{
 		utils.OutDataDBTypeCfg:          mg.OutDataDBType,
 		utils.OutDataDBHostCfg:          mg.OutDataDBHost,
 		utils.OutDataDBPortCfg:          mg.OutDataDBPort,

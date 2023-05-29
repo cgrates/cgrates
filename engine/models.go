@@ -291,8 +291,8 @@ func (t CDRsql) TableName() string {
 	return utils.CDRsTBL
 }
 
-func (t CDRsql) AsMapStringInterface() (out map[string]interface{}) {
-	out = make(map[string]interface{})
+func (t CDRsql) AsMapStringInterface() (out map[string]any) {
+	out = make(map[string]any)
 	// out["id"] = t.ID // ignore ID
 	out["cgrid"] = t.Cgrid
 	out["run_id"] = t.RunID

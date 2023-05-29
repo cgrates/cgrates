@@ -49,7 +49,7 @@ func (self *CmdGetResource) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdGetResource) RpcParams(reset bool) interface{} {
+func (self *CmdGetResource) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &utils.TenantID{}
 	}
@@ -60,7 +60,7 @@ func (self *CmdGetResource) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdGetResource) RpcResult() interface{} {
+func (self *CmdGetResource) RpcResult() any {
 	var atr engine.Resource
 	return &atr
 }

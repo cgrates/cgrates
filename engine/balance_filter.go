@@ -45,7 +45,7 @@ type BalanceFilter struct {
 }
 
 // NewBalanceFilter creates a new BalanceFilter based on given filter
-func NewBalanceFilter(filter map[string]interface{}, defaultTimezone string) (bf *BalanceFilter, err error) {
+func NewBalanceFilter(filter map[string]any, defaultTimezone string) (bf *BalanceFilter, err error) {
 	bf = new(BalanceFilter)
 	if id, has := filter[utils.ID]; has {
 		bf.ID = utils.StringPointer(utils.IfaceAsString(id))

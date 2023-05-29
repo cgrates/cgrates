@@ -71,7 +71,7 @@ func TestMailerCfgAsMapInterface(t *testing.T) {
 		"from_address": "",
 		},
 }`
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		"server":        "",
 		"auth_user":     "",
 		"auth_password": "",
@@ -95,7 +95,7 @@ func TestMailerCfgAsMapInterface(t *testing.T) {
 			"from_address": "cgr-mailer@localhost.localdomain",
 			},
 	}`
-	eMap = map[string]interface{}{
+	eMap = map[string]any{
 		"server":        "localhost",
 		"auth_user":     "cgrates",
 		"auth_password": "CGRateS.org",

@@ -185,7 +185,7 @@ func (dS *DispatcherService) ResponderShutdown(args *utils.TenantWithArgDispatch
 		routeID, utils.ResponderShutdown, args, reply)
 }
 
-func (dS *DispatcherService) ResponderGetCostOnRatingPlans(arg *utils.GetCostOnRatingPlansArgs, reply *map[string]interface{}) (err error) {
+func (dS *DispatcherService) ResponderGetCostOnRatingPlans(arg *utils.GetCostOnRatingPlansArgs, reply *map[string]any) (err error) {
 	tnt := utils.FirstNonEmpty(arg.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if arg.ArgDispatcher == nil {
@@ -204,7 +204,7 @@ func (dS *DispatcherService) ResponderGetCostOnRatingPlans(arg *utils.GetCostOnR
 		routeID, utils.ResponderGetCostOnRatingPlans, arg, reply)
 }
 
-func (dS *DispatcherService) ResponderGetMaxSessionTimeOnAccounts(args *utils.GetMaxSessionTimeOnAccountsArgs, reply *map[string]interface{}) (err error) {
+func (dS *DispatcherService) ResponderGetMaxSessionTimeOnAccounts(args *utils.GetMaxSessionTimeOnAccountsArgs, reply *map[string]any) (err error) {
 	tnt := utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if args.ArgDispatcher == nil {

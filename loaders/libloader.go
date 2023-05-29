@@ -28,7 +28,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-type LoaderData map[string]interface{}
+type LoaderData map[string]any
 
 func (ld LoaderData) TenantID() string {
 	tnt := ld[utils.Tenant].(string)
@@ -103,7 +103,7 @@ func (cP *csvProvider) String() string {
 }
 
 // FieldAsInterface is part of engine.DataProvider interface
-func (cP *csvProvider) FieldAsInterface(fldPath []string) (data interface{}, err error) {
+func (cP *csvProvider) FieldAsInterface(fldPath []string) (data any, err error) {
 	if data, err = cP.cache.FieldAsInterface(fldPath); err == nil ||
 		err != utils.ErrNotFound { // item found in cache
 		return
@@ -131,7 +131,7 @@ func (cP *csvProvider) FieldAsInterface(fldPath []string) (data interface{}, err
 
 // FieldAsString is part of engine.DataProvider interface
 func (cP *csvProvider) FieldAsString(fldPath []string) (data string, err error) {
-	var valIface interface{}
+	var valIface any
 	valIface, err = cP.FieldAsInterface(fldPath)
 	if err != nil {
 		return

@@ -112,7 +112,7 @@ func testDspThProcessEventFailover(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     utils.UUIDSha1Prefix(),
 			Time:   &nowTime,
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.EVENT_NAME: "Event1",
 				utils.Account:    "1001"},
 		},
@@ -172,7 +172,7 @@ func testDspThTestAuthKey(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     utils.UUIDSha1Prefix(),
 			Time:   &nowTime,
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Account: "1002"},
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
@@ -200,7 +200,7 @@ func testDspThTestAuthKey2(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     utils.UUIDSha1Prefix(),
 			Time:   &nowTime,
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Account: "1002"},
 		},
 		ArgDispatcher: &utils.ArgDispatcher{

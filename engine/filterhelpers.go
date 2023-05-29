@@ -29,7 +29,7 @@ import (
 // MatchingItemIDsForEvent returns the list of item IDs matching fieldName/fieldValue for an event
 // fieldIDs limits the fields which are checked against indexes
 // helper on top of dataDB.MatchFilterIndex, adding utils.ANY to list of fields queried
-func MatchingItemIDsForEvent(ev map[string]interface{}, stringFldIDs, prefixFldIDs *[]string,
+func MatchingItemIDsForEvent(ev map[string]any, stringFldIDs, prefixFldIDs *[]string,
 	dm *DataManager, cacheID, itemIDPrefix string, indexedSelects, nestedFields bool) (itemIDs utils.StringMap, err error) {
 	itemIDs = make(utils.StringMap)
 	var allFieldIDs []string
@@ -39,7 +39,7 @@ func MatchingItemIDsForEvent(ev map[string]interface{}, stringFldIDs, prefixFldI
 	}
 	// Guard will protect the function with automatic locking
 	lockID := utils.CacheInstanceToPrefix[cacheID] + itemIDPrefix
-	guardian.Guardian.Guard(func() (gRes interface{}, gErr error) {
+	guardian.Guardian.Guard(func() (gRes any, gErr error) {
 		if !indexedSelects {
 			var keysWithID []string
 			if keysWithID, err = dm.DataDB().GetKeysForPrefix(utils.CacheIndexesToPrefix[cacheID]); err != nil {

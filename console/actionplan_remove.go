@@ -49,7 +49,7 @@ func (self *CmdRemoveActionPlan) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdRemoveActionPlan) RpcParams(reset bool) interface{} {
+func (self *CmdRemoveActionPlan) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &v1.AttrGetActionPlan{}
 	}
@@ -60,7 +60,7 @@ func (self *CmdRemoveActionPlan) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdRemoveActionPlan) RpcResult() interface{} {
+func (self *CmdRemoveActionPlan) RpcResult() any {
 	var s string
 	return &s
 }

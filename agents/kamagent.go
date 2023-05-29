@@ -107,7 +107,7 @@ func (self *KamailioAgent) Shutdown() (err error) {
 }
 
 // birpc.ClientConnector interface
-func (ka *KamailioAgent) Call(ctx *context.Context, serviceMethod string, args interface{}, reply interface{}) error {
+func (ka *KamailioAgent) Call(ctx *context.Context, serviceMethod string, args any, reply any) error {
 	return utils.RPCCall(ka, serviceMethod, args, reply)
 }
 

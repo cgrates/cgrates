@@ -106,7 +106,7 @@ var (
 		{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     "event1",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"Resources":      "ResourceProfile1",
 				utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 				"UsageInterval":  "1s",
@@ -119,7 +119,7 @@ var (
 		{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     "event2",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"Resources":      "ResourceProfile2",
 				utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 				"UsageInterval":  "1s",
@@ -131,7 +131,7 @@ var (
 		{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     "event3",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"Resources": "ResourceProfilePrefix",
 				utils.Usage: time.Duration(30 * time.Second),
 			},
@@ -387,7 +387,7 @@ func TestResourceV1AuthorizeResourceMissingStruct(t *testing.T) {
 	argsMissingTenant := utils.ArgRSv1ResourceUsage{
 		CGREvent: &utils.CGREvent{
 			ID:    "id1",
-			Event: map[string]interface{}{},
+			Event: map[string]any{},
 		},
 		UsageID: "test1", // ResourceUsage Identifier
 		Units:   20,
@@ -396,7 +396,7 @@ func TestResourceV1AuthorizeResourceMissingStruct(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "id1",
-			Event:  map[string]interface{}{},
+			Event:  map[string]any{},
 		},
 		Units: 20,
 	}
@@ -784,7 +784,7 @@ func TestResourceCaching(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     utils.UUIDSha1Prefix(),
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Account":     "1001",
 			"Destination": "3002"},
 	}
@@ -852,7 +852,7 @@ func TestResourcesStoreResourceError(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "EventAuthorizeResource",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"Account": "1001",
 			},
 		},
@@ -1212,7 +1212,7 @@ func TestResourceForEvent(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     utils.UUIDSha1Prefix(),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"Resource":    "Resource1",
 				"Account":     "1002",
 				"Subject":     "1001",
@@ -1299,7 +1299,7 @@ func TestResourcesRelease(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     utils.UUIDSha1Prefix(),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"Resource":    "Resource1",
 				"Account":     "1002",
 				"Subject":     "1001",
@@ -1366,7 +1366,7 @@ func TestResourceAuthorizeResources22(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     utils.UUIDSha1Prefix(),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Account:     "1001",
 				utils.Destination: "1002",
 				"Resource":        "Resource1",
@@ -1451,7 +1451,7 @@ func TestRSProcessThreshold(t *testing.T) {
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, config.CgrConfig().CacheCfg(), nil)
 	clientConn := make(chan birpc.ClientConnector, 1)
-	clientConn <- clMock(func(ctx *context.Context, serviceMethod string, _, _ interface{}) error {
+	clientConn <- clMock(func(ctx *context.Context, serviceMethod string, _, _ any) error {
 		if serviceMethod == utils.ThresholdSv1ProcessEvent {
 			return nil
 		}

@@ -48,7 +48,7 @@ func (self *CmdRemoveActions) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdRemoveActions) RpcParams(reset bool) interface{} {
+func (self *CmdRemoveActions) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &v1.AttrRemoveActions{}
 	}
@@ -59,7 +59,7 @@ func (self *CmdRemoveActions) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdRemoveActions) RpcResult() interface{} {
+func (self *CmdRemoveActions) RpcResult() any {
 	var s string
 	return &s
 }

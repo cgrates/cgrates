@@ -172,7 +172,7 @@ func testAttributeSGetAttributeForEvent(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSGetAttributeForEvent",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Account:     "1007",
 				utils.Destination: "+491511231234",
 			},
@@ -225,7 +225,7 @@ func testAttributeSGetAttributeForEventNotFound(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSGetAttributeForEventWihMetaAnyContext",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Account:     "dan",
 				utils.Destination: "+491511231234",
 			},
@@ -277,7 +277,7 @@ func testAttributeSGetAttributeForEventWithMetaAnyContext(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSGetAttributeForEventWihMetaAnyContext",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Account:     "dan",
 				utils.Destination: "+491511231234",
 			},
@@ -333,7 +333,7 @@ func testAttributeSProcessEvent(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSProcessEvent",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Account:     "1007",
 				utils.Destination: "+491511231234",
 			},
@@ -346,7 +346,7 @@ func testAttributeSProcessEvent(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSProcessEvent",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Account:     "1001",
 				utils.Subject:     "1001",
 				utils.Destination: "+491511231234",
@@ -360,7 +360,7 @@ func testAttributeSProcessEvent(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSProcessEvent",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Account: "1001",
 				utils.Subject: "1001",
 				"Destination": "+491511231234",
@@ -384,7 +384,7 @@ func testAttributeSProcessEventNotFound(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSProcessEventNotFound",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Account:     "Inexistent",
 				utils.Destination: "+491511231234",
 			},
@@ -404,7 +404,7 @@ func testAttributeSProcessEventMissing(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSProcessEvent",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Account:     "NonExist",
 				utils.Category:    "*attributes",
 				utils.Destination: "+491511231234",
@@ -425,7 +425,7 @@ func testAttributeSProcessEventWithNoneSubstitute(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSWithNoneSubstitute",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Account:     "1008",
 				utils.Destination: "+491511231234",
 			},
@@ -469,7 +469,7 @@ func testAttributeSProcessEventWithNoneSubstitute(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSWithNoneSubstitute",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Account:     "1001",
 				utils.Destination: "+491511231234",
 			},
@@ -492,7 +492,7 @@ func testAttributeSProcessEventWithNoneSubstitute2(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSWithNoneSubstitute",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Account:     "1008",
 				utils.Subject:     "1008",
 				utils.Destination: "+491511231234",
@@ -535,7 +535,7 @@ func testAttributeSProcessEventWithNoneSubstitute2(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSWithNoneSubstitute",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Account:     "1001",
 				utils.Destination: "+491511231234",
 			},
@@ -548,7 +548,7 @@ func testAttributeSProcessEventWithNoneSubstitute2(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSWithNoneSubstitute",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Account:     "1001",
 				utils.Destination: "+491511231234",
 			},
@@ -571,7 +571,7 @@ func testAttributeSProcessEventWithNoneSubstitute3(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSWithNoneSubstitute",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Account:     "1008",
 				utils.Subject:     "1001",
 				utils.Destination: "+491511231234",
@@ -615,7 +615,7 @@ func testAttributeSProcessEventWithNoneSubstitute3(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSWithNoneSubstitute",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Account:     "1001",
 				utils.Subject:     "1001",
 				utils.Destination: "+491511231234",
@@ -664,7 +664,7 @@ func testAttributeSProcessEventWithHeader(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     "HeaderEventForAttribute",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"Field1": "Value1",
 			},
 		},
@@ -675,7 +675,7 @@ func testAttributeSProcessEventWithHeader(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     "HeaderEventForAttribute",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"Field1": "Value1",
 				"Field2": "Value1",
 			},
@@ -951,7 +951,7 @@ func testAttributeSProcessEventWithSearchAndReplace(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     "HeaderEventForAttribute",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"Category": "call",
 			},
 		},
@@ -962,7 +962,7 @@ func testAttributeSProcessEventWithSearchAndReplace(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     "HeaderEventForAttribute",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"Category": "call_suffix",
 			},
 		},
@@ -1055,7 +1055,7 @@ func testAttributeSProcessWithMultipleRuns(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"InitialField": "InitialValue",
 			},
 		},
@@ -1066,7 +1066,7 @@ func testAttributeSProcessWithMultipleRuns(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"InitialField": "InitialValue",
 				"Field1":       "Value1",
 				"Field2":       "Value2",
@@ -1165,7 +1165,7 @@ func testAttributeSProcessWithMultipleRuns2(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"InitialField": "InitialValue",
 			},
 		},
@@ -1176,7 +1176,7 @@ func testAttributeSProcessWithMultipleRuns2(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"InitialField": "InitialValue",
 				"Field1":       "Value1",
 				"Field2":       "Value2",

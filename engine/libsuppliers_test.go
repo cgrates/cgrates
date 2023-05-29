@@ -33,7 +33,7 @@ func TestLibSuppliersSortCost(t *testing.T) {
 		SortedSuppliers: []*SortedSupplier{
 			{
 				SupplierID: "supplier1",
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Cost:   0.1,
 					utils.Weight: 10.0,
 				},
@@ -41,7 +41,7 @@ func TestLibSuppliersSortCost(t *testing.T) {
 			},
 			{
 				SupplierID: "supplier2",
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Cost:   0.1,
 					utils.Weight: 20.0,
 				},
@@ -49,7 +49,7 @@ func TestLibSuppliersSortCost(t *testing.T) {
 			},
 			{
 				SupplierID: "supplier3",
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Cost:   0.05,
 					utils.Weight: 10.0,
 				},
@@ -62,7 +62,7 @@ func TestLibSuppliersSortCost(t *testing.T) {
 		SortedSuppliers: []*SortedSupplier{
 			{
 				SupplierID: "supplier3",
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Cost:   0.05,
 					utils.Weight: 10.0,
 				},
@@ -70,7 +70,7 @@ func TestLibSuppliersSortCost(t *testing.T) {
 			},
 			{
 				SupplierID: "supplier2",
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Cost:   0.1,
 					utils.Weight: 20.0,
 				},
@@ -78,7 +78,7 @@ func TestLibSuppliersSortCost(t *testing.T) {
 			},
 			{
 				SupplierID: "supplier1",
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Cost:   0.1,
 					utils.Weight: 10.0,
 				},
@@ -97,21 +97,21 @@ func TestLibSuppliersSortWeight(t *testing.T) {
 		SortedSuppliers: []*SortedSupplier{
 			{
 				SupplierID: "supplier1",
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Weight: 10.0,
 				},
 				SupplierParameters: "param1",
 			},
 			{
 				SupplierID: "supplier2",
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Weight: 20.0,
 				},
 				SupplierParameters: "param2",
 			},
 			{
 				SupplierID: "supplier3",
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Weight: 10.5,
 				},
 				SupplierParameters: "param3",
@@ -123,21 +123,21 @@ func TestLibSuppliersSortWeight(t *testing.T) {
 		SortedSuppliers: []*SortedSupplier{
 			{
 				SupplierID: "supplier2",
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Weight: 20.0,
 				},
 				SupplierParameters: "param2",
 			},
 			{
 				SupplierID: "supplier3",
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Weight: 10.5,
 				},
 				SupplierParameters: "param3",
 			},
 			{
 				SupplierID: "supplier1",
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Weight: 10.0,
 				},
 				SupplierParameters: "param1",
@@ -157,14 +157,14 @@ func TestSortedSuppliersDigest(t *testing.T) {
 		SortedSuppliers: []*SortedSupplier{
 			{
 				SupplierID: "supplier2",
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					"Weight": 20.0,
 				},
 				SupplierParameters: "param2",
 			},
 			{
 				SupplierID: "supplier1",
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					"Weight": 10.0,
 				},
 				SupplierParameters: "param1",
@@ -185,14 +185,14 @@ func TestSortedSuppliersDigest2(t *testing.T) {
 		SortedSuppliers: []*SortedSupplier{
 			{
 				SupplierID: "supplier1",
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					"Weight": 30.0,
 				},
 				SupplierParameters: "param1",
 			},
 			{
 				SupplierID: "supplier2",
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					"Weight": 20.0,
 				},
 				SupplierParameters: "param2",
@@ -224,7 +224,7 @@ func TestLibSuppliersSortHighestCost(t *testing.T) {
 		SortedSuppliers: []*SortedSupplier{
 			{
 				SupplierID: "supplier1",
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Cost:   0.1,
 					utils.Weight: 15.0,
 				},
@@ -232,7 +232,7 @@ func TestLibSuppliersSortHighestCost(t *testing.T) {
 			},
 			{
 				SupplierID: "supplier2",
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Cost:   0.2,
 					utils.Weight: 20.0,
 				},
@@ -240,7 +240,7 @@ func TestLibSuppliersSortHighestCost(t *testing.T) {
 			},
 			{
 				SupplierID: "supplier3",
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Cost:   0.05,
 					utils.Weight: 10.0,
 				},
@@ -253,7 +253,7 @@ func TestLibSuppliersSortHighestCost(t *testing.T) {
 		SortedSuppliers: []*SortedSupplier{
 			{
 				SupplierID: "supplier2",
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Cost:   0.2,
 					utils.Weight: 20.0,
 				},
@@ -261,7 +261,7 @@ func TestLibSuppliersSortHighestCost(t *testing.T) {
 			},
 			{
 				SupplierID: "supplier1",
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Cost:   0.1,
 					utils.Weight: 15.0,
 				},
@@ -269,7 +269,7 @@ func TestLibSuppliersSortHighestCost(t *testing.T) {
 			},
 			{
 				SupplierID: "supplier3",
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Cost:   0.05,
 					utils.Weight: 10.0,
 				},
@@ -290,7 +290,7 @@ func TestLibSuppliersSortQOS(t *testing.T) {
 			{
 				//the average value for supplier1 for *acd is 0.5 , *tcd  1.1
 				SupplierID: "supplier1",
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Cost:    0.5,
 					utils.Weight:  10.0,
 					utils.MetaACD: 0.5,
@@ -300,7 +300,7 @@ func TestLibSuppliersSortQOS(t *testing.T) {
 			{
 				//the average value for supplier2 for *acd is 0.5 , *tcd 4.1
 				SupplierID: "supplier2",
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Cost:    0.1,
 					utils.Weight:  15.0,
 					utils.MetaACD: 0.5,
@@ -310,7 +310,7 @@ func TestLibSuppliersSortQOS(t *testing.T) {
 			{
 				//the average value for supplier3 for *acd is 0.4 , *tcd 5.1
 				SupplierID: "supplier3",
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Cost:    1.1,
 					utils.Weight:  17.8,
 					utils.MetaACD: 0.4,
@@ -341,7 +341,7 @@ func TestLibSuppliersSortQOS2(t *testing.T) {
 			{
 				//the average value for supplier1 for *acd is 0.5 , *tcd  1.1
 				SupplierID: "supplier1",
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Weight:  10.0,
 					utils.MetaACD: 0.5,
 					utils.MetaTCD: 1.1,
@@ -352,7 +352,7 @@ func TestLibSuppliersSortQOS2(t *testing.T) {
 				//supplier1 and supplier2 have the same value for *acd and *tcd
 				//will be sorted based on weight
 				SupplierID: "supplier2",
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Weight:  17.0,
 					utils.MetaACD: 0.5,
 					utils.MetaTCD: 1.1,
@@ -361,7 +361,7 @@ func TestLibSuppliersSortQOS2(t *testing.T) {
 			{
 
 				SupplierID: "supplier3",
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Cost:    0.5,
 					utils.Weight:  10.0,
 					utils.MetaACD: 0.7,
@@ -392,7 +392,7 @@ func TestLibSuppliersSortQOS3(t *testing.T) {
 				//supplier1 and supplier3 have the same value for *pdd
 				//will be sorted based on weight
 				SupplierID: "supplier1",
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Weight:  15.0,
 					utils.MetaPDD: 0.7,
 					utils.MetaTCD: 1.1,
@@ -401,7 +401,7 @@ func TestLibSuppliersSortQOS3(t *testing.T) {
 			{
 				//the worst value for supplier2 for *pdd is 1.2, *tcd  1.1
 				SupplierID: "supplier2",
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Weight:  10.0,
 					utils.MetaPDD: 1.2,
 					utils.MetaTCD: 1.1,
@@ -410,7 +410,7 @@ func TestLibSuppliersSortQOS3(t *testing.T) {
 			{
 				//the worst value for supplier3 for *pdd is 0.7, *tcd  10.1
 				SupplierID: "supplier3",
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Weight:  10.0,
 					utils.MetaPDD: 0.7,
 					utils.MetaTCD: 10.1,
@@ -436,7 +436,7 @@ func TestLibSuppliersSortQOS4(t *testing.T) {
 		SortedSuppliers: []*SortedSupplier{
 			{
 				SupplierID: "supplier1",
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.MetaACD: 0.2,
 					utils.MetaTCD: 15.0,
 					utils.MetaASR: 1.2,
@@ -444,7 +444,7 @@ func TestLibSuppliersSortQOS4(t *testing.T) {
 			},
 			{
 				SupplierID: "supplier2",
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.MetaACD: 0.2,
 					utils.MetaTCD: 20.0,
 					utils.MetaASR: -1.0,
@@ -452,7 +452,7 @@ func TestLibSuppliersSortQOS4(t *testing.T) {
 			},
 			{
 				SupplierID: "supplier3",
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.MetaACD: 0.1,
 					utils.MetaTCD: 10.0,
 					utils.MetaASR: 1.2,
@@ -478,7 +478,7 @@ func TestLibSuppliersSortQOS5(t *testing.T) {
 		SortedSuppliers: []*SortedSupplier{
 			{
 				SupplierID: "supplier1",
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.MetaACD: 0.2,
 					utils.MetaTCD: 15.0,
 					utils.MetaASR: -1.0,
@@ -487,7 +487,7 @@ func TestLibSuppliersSortQOS5(t *testing.T) {
 			},
 			{
 				SupplierID: "supplier2",
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.MetaACD: 0.2,
 					utils.MetaTCD: 20.0,
 					utils.MetaASR: 1.2,
@@ -496,7 +496,7 @@ func TestLibSuppliersSortQOS5(t *testing.T) {
 			},
 			{
 				SupplierID: "supplier3",
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.MetaACD: 0.1,
 					utils.MetaTCD: 10.0,
 					utils.MetaASR: 1.2,
@@ -523,21 +523,21 @@ func TestLibSuppliersSortQOS6(t *testing.T) {
 		SortedSuppliers: []*SortedSupplier{
 			{
 				SupplierID: "supplier1",
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Weight:  15.0,
 					utils.MetaACD: 0.2,
 				},
 			},
 			{
 				SupplierID: "supplier2",
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Weight:  25.0,
 					utils.MetaACD: 0.2,
 				},
 			},
 			{
 				SupplierID: "supplier3",
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Weight:  20.0,
 					utils.MetaACD: 0.1,
 				},
@@ -562,21 +562,21 @@ func TestLibSuppliersSortQOS7(t *testing.T) {
 		SortedSuppliers: []*SortedSupplier{
 			{
 				SupplierID: "supplier1",
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Weight:  15.0,
 					utils.MetaACD: -1.0,
 				},
 			},
 			{
 				SupplierID: "supplier2",
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Weight:  25.0,
 					utils.MetaACD: -1.0,
 				},
 			},
 			{
 				SupplierID: "supplier3",
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Weight:  20.0,
 					utils.MetaACD: -1.0,
 				},
@@ -601,21 +601,21 @@ func TestLibSuppliersSortQOS8(t *testing.T) {
 		SortedSuppliers: []*SortedSupplier{
 			{
 				SupplierID: "supplier1",
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Weight:  15.0,
 					utils.MetaACD: -1.0,
 				},
 			},
 			{
 				SupplierID: "supplier2",
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Weight:  25.0,
 					utils.MetaACD: -1.0,
 				},
 			},
 			{
 				SupplierID: "supplier3",
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Weight:  20.0,
 					utils.MetaACD: 10.0,
 				},
@@ -640,7 +640,7 @@ func TestLibSuppliersSortLoadDistribution(t *testing.T) {
 		SortedSuppliers: []*SortedSupplier{
 			{
 				SupplierID: "supplier1",
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Weight: 25.0,
 					utils.Ratio:  4.0,
 					utils.Load:   3.0,
@@ -648,7 +648,7 @@ func TestLibSuppliersSortLoadDistribution(t *testing.T) {
 			},
 			{
 				SupplierID: "supplier2",
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Weight: 15.0,
 					utils.Ratio:  10.0,
 					utils.Load:   5.0,
@@ -656,7 +656,7 @@ func TestLibSuppliersSortLoadDistribution(t *testing.T) {
 			},
 			{
 				SupplierID: "supplier3",
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Weight: 25.0,
 					utils.Ratio:  1.0,
 					utils.Load:   1.0,
@@ -682,8 +682,8 @@ func TestSortSuppliersSortResourceAscendent(t *testing.T) {
 	cfg.SupplierSCfg().RALsConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs)}
 	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.ResourceSv1GetResource: func(ctx *context.Context, args, reply interface{}) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ResourceSv1GetResource: func(ctx *context.Context, args, reply any) error {
 				res := Resource{
 					ID:     "ResourceSupplier2",
 					Tenant: "cgrates.org",
@@ -692,11 +692,11 @@ func TestSortSuppliersSortResourceAscendent(t *testing.T) {
 				*reply.(*Resource) = res
 				return nil
 			},
-			utils.ResponderGetCostOnRatingPlans: func(ctx *context.Context, args, reply interface{}) error {
-				rpl := map[string]interface{}{
+			utils.ResponderGetCostOnRatingPlans: func(ctx *context.Context, args, reply any) error {
+				rpl := map[string]any{
 					utils.Cost: 23.1,
 				}
-				*reply.(*map[string]interface{}) = rpl
+				*reply.(*map[string]any) = rpl
 				return nil
 			},
 		},
@@ -725,7 +725,7 @@ func TestSortSuppliersSortResourceAscendent(t *testing.T) {
 			RatingPlanIDs: []string{"RPL_1"},
 			Weight:        20,
 			Blocker:       false,
-			cacheSupplier: map[string]interface{}{
+			cacheSupplier: map[string]any{
 				utils.MetaRatio: 3.3,
 			},
 		},
@@ -736,7 +736,7 @@ func TestSortSuppliersSortResourceAscendent(t *testing.T) {
 			RatingPlanIDs: []string{"RPL_2"},
 			Weight:        35,
 			Blocker:       false,
-			cacheSupplier: map[string]interface{}{
+			cacheSupplier: map[string]any{
 				utils.MetaRatio: 2.4,
 			},
 		},
@@ -744,7 +744,7 @@ func TestSortSuppliersSortResourceAscendent(t *testing.T) {
 	suplEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "utils.CGREvent1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Account":        "1001",
 			"Destination":    "1002",
 			"Supplier":       "SupplierProfile2",
@@ -789,8 +789,8 @@ func TestPopulateSortingDataStatMetrics(t *testing.T) {
 	cfg.SupplierSCfg().StatSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStatS)}
 	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.StatSv1GetQueueFloatMetrics: func(ctx *context.Context, args, reply interface{}) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.StatSv1GetQueueFloatMetrics: func(ctx *context.Context, args, reply any) error {
 				rpl := map[string]float64{
 					"metric1": 22.1,
 				}
@@ -813,7 +813,7 @@ func TestPopulateSortingDataStatMetrics(t *testing.T) {
 		StatIDs:     []string{"Stat1"},
 		Weight:      20,
 		Blocker:     false,
-		cacheSupplier: map[string]interface{}{
+		cacheSupplier: map[string]any{
 			utils.MetaRatio: 3.3,
 		},
 	}
@@ -821,7 +821,7 @@ func TestPopulateSortingDataStatMetrics(t *testing.T) {
 	suplEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "utils.CGREvent1",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			"Account":        "1001",
 			"Destination":    "1002",
 			"Supplier":       "SupplierProfile2",

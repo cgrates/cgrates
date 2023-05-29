@@ -579,7 +579,7 @@ func TestFsEvAsMapStringInterface(t *testing.T) {
 	ev := NewFSEvent(hangupEv)
 	setupTime, _ := utils.ParseTimeDetectLayout("1436280728", "")
 	aTime, _ := utils.ParseTimeDetectLayout("1436280728", "")
-	expectedMap := make(map[string]interface{})
+	expectedMap := make(map[string]any)
 	expectedMap[utils.ToR] = utils.VOICE
 	expectedMap[utils.OriginID] = "e3133bf7-dcde-4daf-9663-9a79ffcef5ad"
 	expectedMap[utils.OriginHost] = "10.0.3.15"

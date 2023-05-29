@@ -313,7 +313,7 @@ func (v1AttrPrf v1AttributeProfile) AsAttributeProfile() (attrPrf *engine.Attrib
 
 type v2Attribute struct {
 	FieldName  string
-	Initial    interface{}
+	Initial    any
 	Substitute config.RSRParsers
 	Append     bool
 }

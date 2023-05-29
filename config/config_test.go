@@ -1658,7 +1658,7 @@ func TestCgrCfgV1GetConfigSection(t *testing.T) {
 	"http": ":2080",
 	}
 }`
-	expected := map[string]interface{}{
+	expected := map[string]any{
 		"HTTPListen":       ":2080",
 		"HTTPTLSListen":    "127.0.0.1:2280",
 		"RPCGOBListen":     ":2013",
@@ -1666,7 +1666,7 @@ func TestCgrCfgV1GetConfigSection(t *testing.T) {
 		"RPCJSONListen":    ":2012",
 		"RPCJSONTLSListen": "127.0.0.1:2022",
 	}
-	var rcv map[string]interface{}
+	var rcv map[string]any
 	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(JSN_CFG); err != nil {
 		t.Error(err)
 	} else if err := cgrCfg.V1GetConfigSection(&StringWithArgDispatcher{Section: LISTEN_JSN}, &rcv); err != nil {
@@ -1909,7 +1909,7 @@ func TestGeneralCfg(t *testing.T) {
 			"concurrent_strategy":  "",
 		},
 }`
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		"node_id":              "",
 		"logger":               "*syslog",
 		"log_level":            6,

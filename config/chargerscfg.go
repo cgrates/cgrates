@@ -75,7 +75,7 @@ func (cS *ChargerSCfg) loadFromJsonCfg(jsnCfg *ChargerSJsonCfg) (err error) {
 	return
 }
 
-func (cS *ChargerSCfg) AsMapInterface() map[string]interface{} {
+func (cS *ChargerSCfg) AsMapInterface() map[string]any {
 	attributeSConns := make([]string, len(cS.AttributeSConns))
 	for i, item := range cS.AttributeSConns {
 		buf := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)
@@ -99,7 +99,7 @@ func (cS *ChargerSCfg) AsMapInterface() map[string]interface{} {
 			prefixIndexedFields[i] = item
 		}
 	}
-	return map[string]interface{}{
+	return map[string]any{
 		utils.EnabledCfg:             cS.Enabled,
 		utils.IndexedSelectsCfg:      cS.IndexedSelects,
 		utils.AttributeSConnsCfg:     attributeSConns,

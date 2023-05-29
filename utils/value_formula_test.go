@@ -25,7 +25,7 @@ import (
 )
 
 func TestValueFormulaDayWeek(t *testing.T) {
-	params := make(map[string]interface{})
+	params := make(map[string]any)
 	if err := json.Unmarshal([]byte(`{"Units":10, "Interval":"week", "Increment":"day"}`), &params); err != nil {
 		t.Error("error unmarshalling params: ", err)
 	}
@@ -35,7 +35,7 @@ func TestValueFormulaDayWeek(t *testing.T) {
 }
 
 func TestValueFormulaDayMonth(t *testing.T) {
-	params := make(map[string]interface{})
+	params := make(map[string]any)
 	if err := json.Unmarshal([]byte(`{"Units":10, "Interval":"month", "Increment":"day"}`), &params); err != nil {
 		t.Error("error unmarshalling params: ", err)
 	}
@@ -46,7 +46,7 @@ func TestValueFormulaDayMonth(t *testing.T) {
 }
 
 func TestValueFormulaDayYear(t *testing.T) {
-	params := make(map[string]interface{})
+	params := make(map[string]any)
 	if err := json.Unmarshal([]byte(`{"Units":10, "Interval":"year", "Increment":"day"}`), &params); err != nil {
 		t.Error("error unmarshalling params: ", err)
 	}

@@ -50,7 +50,7 @@ func (self *CmdThresholdProcessEvent) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdThresholdProcessEvent) RpcParams(reset bool) interface{} {
+func (self *CmdThresholdProcessEvent) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &engine.ArgsProcessEvent{ArgDispatcher: new(utils.ArgDispatcher)}
 	}
@@ -65,7 +65,7 @@ func (self *CmdThresholdProcessEvent) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdThresholdProcessEvent) RpcResult() interface{} {
+func (self *CmdThresholdProcessEvent) RpcResult() any {
 	var ids []string
 	return &ids
 }

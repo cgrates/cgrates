@@ -455,7 +455,7 @@ func TestFsCdrSearchExtraField(t *testing.T) {
 
 func TestFsCdrSearchExtraFieldInSlice(t *testing.T) {
 	fsCdr, _ := NewFSCdr(body, fsCdrCfg)
-	if value := fsCdr.searchExtraField("floatfld1", map[string]interface{}{"floatfld1": 6.4}); value != "6.4" {
+	if value := fsCdr.searchExtraField("floatfld1", map[string]any{"floatfld1": 6.4}); value != "6.4" {
 		t.Errorf("Expecting: 6.4, received: %s", value)
 	}
 }

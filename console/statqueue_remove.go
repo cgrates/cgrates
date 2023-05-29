@@ -46,7 +46,7 @@ func (self *CmdRemoveStatQueue) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdRemoveStatQueue) RpcParams(reset bool) interface{} {
+func (self *CmdRemoveStatQueue) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &utils.TenantIDWithCache{}
 	}
@@ -57,7 +57,7 @@ func (self *CmdRemoveStatQueue) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdRemoveStatQueue) RpcResult() interface{} {
+func (self *CmdRemoveStatQueue) RpcResult() any {
 	var s string
 	return &s
 }

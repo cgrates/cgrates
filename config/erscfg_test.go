@@ -253,13 +253,13 @@ func TestERsCfgAsMapInterface(t *testing.T) {
 	}
 }`
 	var filters []string
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		"enabled":        true,
 		"sessions_conns": []string{"conn1", "conn3"},
-		"readers": []map[string]interface{}{
+		"readers": []map[string]any{
 			{
 				"filters":                     []string{},
-				"flags":                       map[string][]interface{}{},
+				"flags":                       map[string][]any{},
 				"id":                          "*default",
 				"partial_record_cache":        "0",
 				"processed_path":              "/var/spool/cgrates/ers/out",
@@ -270,12 +270,12 @@ func TestERsCfgAsMapInterface(t *testing.T) {
 				"tenant":                      "",
 				"timezone":                    "",
 				"xml_root_path":               []string{""},
-				"cache_dump_fields":           []map[string]interface{}{},
+				"cache_dump_fields":           []map[string]any{},
 				"concurrent_requests":         1024,
 				"type":                        "*none",
 				"failed_calls_prefix":         "",
 				"field_separator":             ",",
-				"fields": []map[string]interface{}{
+				"fields": []map[string]any{
 					{"mandatory": true, "path": "*cgreq.ToR", "tag": "ToR", "type": "*variable", "value": "~*req.2"},
 					{"mandatory": true, "path": "*cgreq.OriginID", "tag": "OriginID", "type": "*variable", "value": "~*req.3"},
 					{"mandatory": true, "path": "*cgreq.RequestType", "tag": "RequestType", "type": "*variable", "value": "~*req.4"},
@@ -290,12 +290,12 @@ func TestERsCfgAsMapInterface(t *testing.T) {
 				},
 			},
 			{
-				"cache_dump_fields":   []map[string]interface{}{},
+				"cache_dump_fields":   []map[string]any{},
 				"concurrent_requests": 1024,
 				"type":                "*file_csv",
 				"failed_calls_prefix": "",
 				"field_separator":     ",",
-				"fields": []map[string]interface{}{
+				"fields": []map[string]any{
 					{"mandatory": true, "path": "*cgreq.ToR", "tag": "ToR", "type": "*variable", "value": "~*req.2"},
 					{"mandatory": true, "path": "*cgreq.OriginID", "tag": "OriginID", "type": "*variable", "value": "~*req.3"},
 					{"mandatory": true, "path": "*cgreq.RequestType", "tag": "RequestType", "type": "*variable", "value": "~*req.4"},
@@ -309,7 +309,7 @@ func TestERsCfgAsMapInterface(t *testing.T) {
 					{"mandatory": true, "path": "*cgreq.Usage", "tag": "Usage", "type": "*variable", "value": "~*req.13"},
 				},
 				"filters":                     filters,
-				"flags":                       map[string][]interface{}{},
+				"flags":                       map[string][]any{},
 				"id":                          "file_reader1",
 				"partial_record_cache":        "0",
 				"processed_path":              "/tmp/ers/out",

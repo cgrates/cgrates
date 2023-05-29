@@ -55,7 +55,7 @@ type APIerSv1 struct {
 
 // Call implements birpc.ClientConnector interface for internal RPC
 func (apiv1 *APIerSv1) Call(ctx *context.Context, serviceMethod string,
-	args interface{}, reply interface{}) error {
+	args any, reply any) error {
 	return utils.APIerRPCCall(apiv1, serviceMethod, args, reply)
 }
 
@@ -674,7 +674,7 @@ func (apiv1 *APIerSv1) SetActionPlan(attrs AttrSetActionPlan, reply *string) (er
 			return fmt.Errorf("%s:Action:%s:%v", utils.ErrMandatoryIeMissing.Error(), at.ActionsId, missing)
 		}
 	}
-	_, err = guardian.Guardian.Guard(func() (interface{}, error) {
+	_, err = guardian.Guardian.Guard(func() (any, error) {
 		var prevAccountIDs utils.StringMap
 		if prevAP, err := apiv1.DataManager.GetActionPlan(attrs.Id, true, true, utils.NonTransactional); err != nil && err != utils.ErrNotFound {
 			return 0, utils.NewErrServerError(err)
@@ -816,7 +816,7 @@ func (apiv1 *APIerSv1) RemoveActionPlan(attr AttrGetActionPlan, reply *string) (
 	if missing := utils.MissingStructFields(&attr, []string{"ID"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if _, err = guardian.Guardian.Guard(func() (interface{}, error) {
+	if _, err = guardian.Guardian.Guard(func() (any, error) {
 		var prevAccountIDs utils.StringMap
 		if prevAP, err := apiv1.DataManager.GetActionPlan(attr.ID, true, true, utils.NonTransactional); err != nil && err != utils.ErrNotFound {
 			return 0, err
@@ -864,7 +864,7 @@ func (apiv1 *APIerSv1) LoadAccountActions(attrs utils.TPAccountActions, reply *s
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
-	if _, err := guardian.Guardian.Guard(func() (interface{}, error) {
+	if _, err := guardian.Guardian.Guard(func() (any, error) {
 		return 0, dbReader.LoadAccountActionsFiltered(&attrs)
 	}, config.CgrConfig().GeneralCfg().LockingTimeout, attrs.LoadId); err != nil {
 		return utils.NewErrServerError(err)
@@ -1091,7 +1091,7 @@ func (apiv1 *APIerSv1) RemoveRatingProfile(attr AttrRemoveRatingProfile, reply *
 		return utils.ErrMandatoryIeMissing
 	}
 	keyID := attr.GetId()
-	_, err := guardian.Guardian.Guard(func() (interface{}, error) {
+	_, err := guardian.Guardian.Guard(func() (any, error) {
 		return 0, apiv1.DataManager.RemoveRatingProfile(keyID, utils.NonTransactional)
 	}, config.CgrConfig().GeneralCfg().LockingTimeout, "RemoveRatingProfile")
 	if err != nil {

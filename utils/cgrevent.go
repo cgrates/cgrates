@@ -27,7 +27,7 @@ type CGREvent struct {
 	Tenant string
 	ID     string
 	Time   *time.Time // event time
-	Event  map[string]interface{}
+	Event  map[string]any
 }
 
 func (ev *CGREvent) HasField(fldName string) (has bool) {
@@ -87,8 +87,8 @@ func (ev *CGREvent) TenantID() string {
 }
 
 /*
-func (ev *CGREvent) FilterableEvent(fltredFields []string) (fEv map[string]interface{}) {
-	fEv = make(map[string]interface{})
+func (ev *CGREvent) FilterableEvent(fltredFields []string) (fEv map[string]any) {
+	fEv = make(map[string]any)
 	if len(fltredFields) == 0 {
 		i := 0
 		fltredFields = make([]string, len(ev.Event))
@@ -117,7 +117,7 @@ func (ev *CGREvent) Clone() (clned *CGREvent) {
 	clned = &CGREvent{
 		Tenant: ev.Tenant,
 		ID:     ev.ID,
-		Event:  make(map[string]interface{}), // a bit forced but safe
+		Event:  make(map[string]any),
 	}
 	if ev.Time != nil {
 		clned.Time = TimePointer(*ev.Time)
@@ -220,7 +220,7 @@ type CGREvents struct {
 	Tenant string
 	ID     string
 	Time   *time.Time // event time
-	Events []map[string]interface{}
+	Events []map[string]any
 }
 
 func NewCGREventWithArgDispatcher() *CGREventWithArgDispatcher {

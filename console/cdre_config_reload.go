@@ -48,7 +48,7 @@ func (self *CmdCdreConfigReload) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdCdreConfigReload) RpcParams(reset bool) interface{} {
+func (self *CmdCdreConfigReload) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = new(v1.ConfigPathArg)
 	}
@@ -59,7 +59,7 @@ func (self *CmdCdreConfigReload) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdCdreConfigReload) RpcResult() interface{} {
+func (self *CmdCdreConfigReload) RpcResult() any {
 	var s string
 	return &s
 }

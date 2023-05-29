@@ -384,7 +384,7 @@ func testDiamItDryRun(t *testing.T) {
 		}
 		// Result-Code
 		eVal := "2002"
-		if avps, err := msg.FindAVPsWithPath([]interface{}{"Result-Code"}, dict.UndefinedVendorID); err != nil {
+		if avps, err := msg.FindAVPsWithPath([]any{"Result-Code"}, dict.UndefinedVendorID); err != nil {
 			t.Error(err)
 		} else if len(avps) == 0 {
 			t.Error("Missing AVP")
@@ -395,7 +395,7 @@ func testDiamItDryRun(t *testing.T) {
 		}
 
 		eVal = "cgrates;1451911932;00082"
-		if avps, err := msg.FindAVPsWithPath([]interface{}{"Session-Id"}, dict.UndefinedVendorID); err != nil {
+		if avps, err := msg.FindAVPsWithPath([]any{"Session-Id"}, dict.UndefinedVendorID); err != nil {
 			t.Error(err)
 		} else if len(avps) == 0 {
 			t.Error("Missing AVP")
@@ -405,7 +405,7 @@ func testDiamItDryRun(t *testing.T) {
 			t.Errorf("expecting: %s, received: <%s>", eVal, val)
 		}
 		eVal = "CGR-DA"
-		if avps, err := msg.FindAVPsWithPath([]interface{}{"Origin-Host"}, dict.UndefinedVendorID); err != nil {
+		if avps, err := msg.FindAVPsWithPath([]any{"Origin-Host"}, dict.UndefinedVendorID); err != nil {
 			t.Error(err)
 		} else if len(avps) == 0 {
 			t.Error("Missing AVP")
@@ -415,7 +415,7 @@ func testDiamItDryRun(t *testing.T) {
 			t.Errorf("expecting: %s, received: <%s>", eVal, val)
 		}
 		eVal = "cgrates.org"
-		if avps, err := msg.FindAVPsWithPath([]interface{}{"Origin-Realm"}, dict.UndefinedVendorID); err != nil {
+		if avps, err := msg.FindAVPsWithPath([]any{"Origin-Realm"}, dict.UndefinedVendorID); err != nil {
 			t.Error(err)
 		} else if len(avps) == 0 {
 			t.Error("Missing AVP")
@@ -425,7 +425,7 @@ func testDiamItDryRun(t *testing.T) {
 			t.Errorf("expecting: %s, received: <%s>", eVal, val)
 		}
 		eVal = "4"
-		if avps, err := msg.FindAVPsWithPath([]interface{}{"Auth-Application-Id"}, dict.UndefinedVendorID); err != nil {
+		if avps, err := msg.FindAVPsWithPath([]any{"Auth-Application-Id"}, dict.UndefinedVendorID); err != nil {
 			t.Error(err)
 		} else if len(avps) == 0 {
 			t.Error("Missing AVP")
@@ -435,7 +435,7 @@ func testDiamItDryRun(t *testing.T) {
 			t.Errorf("expecting: %s, received: <%s>", eVal, val)
 		}
 		eVal = "1"
-		if avps, err := msg.FindAVPsWithPath([]interface{}{"CC-Request-Type"}, dict.UndefinedVendorID); err != nil {
+		if avps, err := msg.FindAVPsWithPath([]any{"CC-Request-Type"}, dict.UndefinedVendorID); err != nil {
 			t.Error(err)
 		} else if len(avps) == 0 {
 			t.Error("Missing AVP")
@@ -445,7 +445,7 @@ func testDiamItDryRun(t *testing.T) {
 			t.Errorf("expecting: %s, received: <%s>", eVal, val)
 		}
 		eVal = "1"
-		if avps, err := msg.FindAVPsWithPath([]interface{}{"CC-Request-Number"}, dict.UndefinedVendorID); err != nil {
+		if avps, err := msg.FindAVPsWithPath([]any{"CC-Request-Number"}, dict.UndefinedVendorID); err != nil {
 			t.Error(err)
 		} else if len(avps) == 0 {
 			t.Error("Missing AVP")
@@ -454,7 +454,7 @@ func testDiamItDryRun(t *testing.T) {
 		} else if val != eVal {
 			t.Errorf("expecting: %s, received: <%s>", eVal, val)
 		}
-		if avps, err := msg.FindAVPsWithPath([]interface{}{"Multiple-Services-Credit-Control", "Rating-Group"}, dict.UndefinedVendorID); err != nil {
+		if avps, err := msg.FindAVPsWithPath([]any{"Multiple-Services-Credit-Control", "Rating-Group"}, dict.UndefinedVendorID); err != nil {
 			t.Error(err)
 		} else if len(avps) != 2 {
 			t.Errorf("Unexpected number of Multiple-Services-Credit-Control.Rating-Group : %d", len(avps))
@@ -470,7 +470,7 @@ func testDiamItDryRun(t *testing.T) {
 				t.Errorf("expecting: 2, received: <%s>", val)
 			}
 		}
-		if avps, err := msg.FindAVPsWithPath([]interface{}{"Multiple-Services-Credit-Control", "Used-Service-Unit", "CC-Total-Octets"}, dict.UndefinedVendorID); err != nil {
+		if avps, err := msg.FindAVPsWithPath([]any{"Multiple-Services-Credit-Control", "Used-Service-Unit", "CC-Total-Octets"}, dict.UndefinedVendorID); err != nil {
 			t.Error(err)
 		} else if len(avps) != 2 {
 			t.Errorf("Unexpected number of Multiple-Services-Credit-Control.Used-Service-Unit.CC-Total-Octets : %d", len(avps))
@@ -487,7 +487,7 @@ func testDiamItDryRun(t *testing.T) {
 			}
 		}
 		eVal = "6" // sum of items
-		if avps, err := msg.FindAVPsWithPath([]interface{}{"Granted-Service-Unit", "CC-Time"}, dict.UndefinedVendorID); err != nil {
+		if avps, err := msg.FindAVPsWithPath([]any{"Granted-Service-Unit", "CC-Time"}, dict.UndefinedVendorID); err != nil {
 			t.Error(err)
 		} else if len(avps) == 0 {
 			t.Error("Missing AVP")
@@ -526,7 +526,7 @@ func testDiamItDryRunMaxConn(t *testing.T) {
 		}
 		// Result-Code
 		eVal := "5012"
-		if avps, err := msg.FindAVPsWithPath([]interface{}{"Result-Code"}, dict.UndefinedVendorID); err != nil {
+		if avps, err := msg.FindAVPsWithPath([]any{"Result-Code"}, dict.UndefinedVendorID); err != nil {
 			t.Error(err)
 		} else if len(avps) == 0 {
 			t.Error("Missing AVP")
@@ -536,7 +536,7 @@ func testDiamItDryRunMaxConn(t *testing.T) {
 			t.Errorf("expecting: %s, received: <%s>", eVal, val)
 		}
 		eVal = "cgrates;1451911932;00082"
-		if avps, err := msg.FindAVPsWithPath([]interface{}{"Session-Id"}, dict.UndefinedVendorID); err != nil {
+		if avps, err := msg.FindAVPsWithPath([]any{"Session-Id"}, dict.UndefinedVendorID); err != nil {
 			t.Error(err)
 		} else if len(avps) == 0 {
 			t.Error("Missing AVP")
@@ -546,7 +546,7 @@ func testDiamItDryRunMaxConn(t *testing.T) {
 			t.Errorf("expecting: %s, received: <%s>", eVal, val)
 		}
 		eVal = "CGR-DA"
-		if avps, err := msg.FindAVPsWithPath([]interface{}{"Origin-Host"}, dict.UndefinedVendorID); err != nil {
+		if avps, err := msg.FindAVPsWithPath([]any{"Origin-Host"}, dict.UndefinedVendorID); err != nil {
 			t.Error(err)
 		} else if len(avps) == 0 {
 			t.Error("Missing AVP")
@@ -556,7 +556,7 @@ func testDiamItDryRunMaxConn(t *testing.T) {
 			t.Errorf("expecting: %s, received: <%s>", eVal, val)
 		}
 		eVal = "cgrates.org"
-		if avps, err := msg.FindAVPsWithPath([]interface{}{"Origin-Realm"}, dict.UndefinedVendorID); err != nil {
+		if avps, err := msg.FindAVPsWithPath([]any{"Origin-Realm"}, dict.UndefinedVendorID); err != nil {
 			t.Error(err)
 		} else if len(avps) == 0 {
 			t.Error("Missing AVP")
@@ -633,7 +633,7 @@ func testDiamItCCRAuth(t *testing.T) {
 	}
 	// Result-Code
 	eVal := "2001"
-	if avps, err := msg.FindAVPsWithPath([]interface{}{"Result-Code"}, dict.UndefinedVendorID); err != nil {
+	if avps, err := msg.FindAVPsWithPath([]any{"Result-Code"}, dict.UndefinedVendorID); err != nil {
 		t.Error(err)
 	} else if len(avps) == 0 {
 		t.Error("Missing AVP")
@@ -644,7 +644,7 @@ func testDiamItCCRAuth(t *testing.T) {
 	}
 	// Result-Code
 	eVal = "300" // 5 mins of session
-	if avps, err := msg.FindAVPsWithPath([]interface{}{"Granted-Service-Unit", "CC-Time"},
+	if avps, err := msg.FindAVPsWithPath([]any{"Granted-Service-Unit", "CC-Time"},
 		dict.UndefinedVendorID); err != nil {
 		t.Error(err)
 	} else if len(avps) == 0 {
@@ -721,7 +721,7 @@ func testDiamItCCRAuthForceDuration(t *testing.T) {
 	}
 	// Result-Code
 	eVal := "2001"
-	if avps, err := msg.FindAVPsWithPath([]interface{}{"Result-Code"}, dict.UndefinedVendorID); err != nil {
+	if avps, err := msg.FindAVPsWithPath([]any{"Result-Code"}, dict.UndefinedVendorID); err != nil {
 		t.Error(err)
 	} else if len(avps) == 0 {
 		t.Error("Missing AVP")
@@ -732,7 +732,7 @@ func testDiamItCCRAuthForceDuration(t *testing.T) {
 	}
 	// Result-Code
 	eVal = "300" // 5 mins of session
-	if avps, err := msg.FindAVPsWithPath([]interface{}{"Granted-Service-Unit", "CC-Time"},
+	if avps, err := msg.FindAVPsWithPath([]any{"Granted-Service-Unit", "CC-Time"},
 		dict.UndefinedVendorID); err != nil {
 		t.Error(err)
 	} else if len(avps) == 0 {
@@ -809,7 +809,7 @@ func testDiamItCCRInit(t *testing.T) {
 	}
 	// Result-Code
 	eVal := "2001"
-	if avps, err := msg.FindAVPsWithPath([]interface{}{"Result-Code"}, dict.UndefinedVendorID); err != nil {
+	if avps, err := msg.FindAVPsWithPath([]any{"Result-Code"}, dict.UndefinedVendorID); err != nil {
 		t.Error(err)
 	} else if len(avps) == 0 {
 		t.Error("Missing AVP")
@@ -820,7 +820,7 @@ func testDiamItCCRInit(t *testing.T) {
 	}
 	// Result-Code
 	eVal = "300" // 5 mins of session
-	if avps, err := msg.FindAVPsWithPath([]interface{}{"Granted-Service-Unit", "CC-Time"},
+	if avps, err := msg.FindAVPsWithPath([]any{"Granted-Service-Unit", "CC-Time"},
 		dict.UndefinedVendorID); err != nil {
 		t.Error(err)
 	} else if len(avps) == 0 {
@@ -897,7 +897,7 @@ func testDiamItCCRInitWithForceDuration(t *testing.T) {
 	}
 	// Result-Code
 	eVal := "5030"
-	if avps, err := msg.FindAVPsWithPath([]interface{}{"Result-Code"}, dict.UndefinedVendorID); err != nil {
+	if avps, err := msg.FindAVPsWithPath([]any{"Result-Code"}, dict.UndefinedVendorID); err != nil {
 		t.Error(err)
 	} else if len(avps) == 0 {
 		t.Error("Missing AVP")
@@ -974,7 +974,7 @@ func testDiamItCCRUpdate(t *testing.T) {
 	}
 	// Result-Code
 	eVal := "2001"
-	if avps, err := msg.FindAVPsWithPath([]interface{}{"Result-Code"}, dict.UndefinedVendorID); err != nil {
+	if avps, err := msg.FindAVPsWithPath([]any{"Result-Code"}, dict.UndefinedVendorID); err != nil {
 		t.Error(err)
 	} else if len(avps) == 0 {
 		t.Error("Missing AVP")
@@ -985,7 +985,7 @@ func testDiamItCCRUpdate(t *testing.T) {
 	}
 	// Result-Code
 	eVal = "300" // 5 mins of session
-	if avps, err := msg.FindAVPsWithPath([]interface{}{"Granted-Service-Unit", "CC-Time"},
+	if avps, err := msg.FindAVPsWithPath([]any{"Granted-Service-Unit", "CC-Time"},
 		dict.UndefinedVendorID); err != nil {
 		t.Error(err)
 	} else if len(avps) == 0 {
@@ -1062,7 +1062,7 @@ func testDiamItCCRTerminate(t *testing.T) {
 	}
 	// Result-Code
 	eVal := "2001"
-	if avps, err := msg.FindAVPsWithPath([]interface{}{"Result-Code"}, dict.UndefinedVendorID); err != nil {
+	if avps, err := msg.FindAVPsWithPath([]any{"Result-Code"}, dict.UndefinedVendorID); err != nil {
 		t.Error(err)
 	} else if len(avps) == 0 {
 		t.Error("Missing AVP")
@@ -1173,7 +1173,7 @@ func testDiamInitWithSessionDisconnect(t *testing.T) {
 		Account:     "testDiamInitWithSessionDisconnect",
 		BalanceType: utils.VOICE,
 		Value:       float64(time.Second),
-		Balance: map[string]interface{}{
+		Balance: map[string]any{
 			utils.ID:            "testDiamInitWithSessionDisconnect",
 			utils.RatingSubject: "*zero1ms",
 		},
@@ -1250,7 +1250,7 @@ func testDiamInitWithSessionDisconnect(t *testing.T) {
 	}
 	// Result-Code
 	eVal := "2001"
-	if avps, err := msg.FindAVPsWithPath([]interface{}{"Result-Code"}, dict.UndefinedVendorID); err != nil {
+	if avps, err := msg.FindAVPsWithPath([]any{"Result-Code"}, dict.UndefinedVendorID); err != nil {
 		t.Error(err)
 	} else if len(avps) == 0 {
 		t.Error("Missing AVP")
@@ -1264,7 +1264,7 @@ func testDiamInitWithSessionDisconnect(t *testing.T) {
 	if msg == nil {
 		t.Fatal("No message returned")
 	}
-	if avps, err := msg.FindAVPsWithPath([]interface{}{"Session-Id"}, dict.UndefinedVendorID); err != nil {
+	if avps, err := msg.FindAVPsWithPath([]any{"Session-Id"}, dict.UndefinedVendorID); err != nil {
 		t.Error(err)
 	} else if len(avps) == 0 {
 		t.Error("Missing AVP")
@@ -1354,7 +1354,7 @@ func testDiamItTemplateErr(t *testing.T) {
 	}
 	// Result-Code
 	eVal := "5012" // error code diam.UnableToComply
-	if avps, err := msg.FindAVPsWithPath([]interface{}{"Result-Code"}, dict.UndefinedVendorID); err != nil {
+	if avps, err := msg.FindAVPsWithPath([]any{"Result-Code"}, dict.UndefinedVendorID); err != nil {
 		t.Error(err)
 	} else if len(avps) == 0 {
 		t.Error("Missing AVP")

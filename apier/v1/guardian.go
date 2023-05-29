@@ -51,6 +51,6 @@ func (self *GuardianSv1) Ping(ign *utils.CGREventWithArgDispatcher, reply *strin
 
 // Call implements birpc.ClientConnector interface for internal RPC
 func (self *GuardianSv1) Call(ctx *context.Context, serviceMethod string,
-	args interface{}, reply interface{}) error {
+	args any, reply any) error {
 	return utils.APIerRPCCall(self, serviceMethod, args, reply)
 }

@@ -28,21 +28,21 @@ import (
 )
 
 // NewMapEvent makes sure the content is not nil
-func NewMapEvent(mp map[string]interface{}) (me MapEvent) {
+func NewMapEvent(mp map[string]any) (me MapEvent) {
 	if mp == nil {
-		mp = make(map[string]interface{})
+		mp = make(map[string]any)
 	}
 	return MapEvent(mp)
 }
 
-// MapEvent is a map[string]interface{} with convenience methods on top
-type MapEvent map[string]interface{}
+// MapEvent is a map[string]any with convenience methods on top
+type MapEvent map[string]any
 
 func (me MapEvent) String() string {
 	return utils.ToJSON(me)
 }
 
-func (me MapEvent) FieldAsInterface(fldPath []string) (interface{}, error) {
+func (me MapEvent) FieldAsInterface(fldPath []string) (any, error) {
 	if len(fldPath) != 1 {
 		return nil, utils.ErrNotFound
 	}
@@ -272,7 +272,7 @@ func (me MapEvent) AsCDR(cfg *config.CGRConfig, tnt, tmz string) (cdr *CDR, err 
 	return
 }
 
-// Data returns the MapEvent as a map[string]interface{}
-func (me MapEvent) Data() map[string]interface{} {
+// Data returns the MapEvent as a map[string]any
+func (me MapEvent) Data() map[string]any {
 	return me
 }

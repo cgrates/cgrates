@@ -33,7 +33,7 @@ func TestToJSON(t *testing.T) {
 
 func TestToJSONValid(t *testing.T) {
 	jsn := ToJSON(`TimeStart="Test"     Crazy = 1 Mama=true coco Test=1`)
-	a := make(map[string]interface{})
+	a := make(map[string]any)
 	if err := json.Unmarshal(jsn, &a); err != nil {
 		t.Error("Error unmarshaling generated json: ", err)
 	}
@@ -142,21 +142,21 @@ func TestGetStringValue(t *testing.T) {
 		t.Errorf("Expecting: %s , received: %s", expected, rply)
 	}
 
-	if rply := getStringValue(map[string]interface{}{
+	if rply := getStringValue(map[string]any{
 		"ID":        "id1",
 		"TimeValue": 10000}, dflt); rply != expected {
 		t.Errorf("Expecting: %s , received: %s", expected, rply)
 	}
 
 	expected = `{"ID":"id1","TimeValue":"1s"}`
-	if rply := getStringValue(map[string]interface{}{
+	if rply := getStringValue(map[string]any{
 		"ID":        "id1",
 		"TimeValue": int64(time.Second)}, map[string]struct{}{"TimeValue": {}}); rply != expected {
 		t.Errorf("Expecting: %s , received: %s", expected, rply)
 	}
 
 	expected = "[10,20,30]"
-	if rply := getSliceAsString([]interface{}{10, 20, 30}, dflt); rply != expected {
+	if rply := getSliceAsString([]any{10, 20, 30}, dflt); rply != expected {
 		t.Errorf("Expecting: %s , received: %s", expected, rply)
 	}
 }
@@ -164,12 +164,12 @@ func TestGetStringValue(t *testing.T) {
 func TestGetSliceAsString(t *testing.T) {
 	dflt := map[string]struct{}{}
 	expected := "[10,20,30]"
-	if rply := getSliceAsString([]interface{}{10, 20, 30}, dflt); rply != expected {
+	if rply := getSliceAsString([]any{10, 20, 30}, dflt); rply != expected {
 		t.Errorf("Expecting: %s , received: %s", expected, rply)
 	}
 
 	expected = `["test1","test2","test3"]`
-	if rply := getSliceAsString([]interface{}{"test1", "test2", "test3"}, dflt); rply != expected {
+	if rply := getSliceAsString([]any{"test1", "test2", "test3"}, dflt); rply != expected {
 		t.Errorf("Expecting: %s , received: %s", expected, rply)
 	}
 }
@@ -177,14 +177,14 @@ func TestGetSliceAsString(t *testing.T) {
 func TestGetMapAsString(t *testing.T) {
 	dflt := map[string]struct{}{}
 	expected := `{"ID":"id1","TimeValue":10000}`
-	if rply := getStringValue(map[string]interface{}{
+	if rply := getStringValue(map[string]any{
 		"ID":        "id1",
 		"TimeValue": 10000}, dflt); rply != expected {
 		t.Errorf("Expecting: %s , received: %s", expected, rply)
 	}
 
 	expected = `{"ID":"id1","TimeValue":"1s"}`
-	if rply := getStringValue(map[string]interface{}{
+	if rply := getStringValue(map[string]any{
 		"ID":        "id1",
 		"TimeValue": int64(time.Second)}, map[string]struct{}{"TimeValue": {}}); rply != expected {
 		t.Errorf("Expecting: %s , received: %s", expected, rply)
@@ -197,7 +197,7 @@ func TestGetFormatedResult(t *testing.T) {
  "ID": "id1",
  "TimeValue": 10000
 }`
-	if rply := GetFormatedResult(map[string]interface{}{
+	if rply := GetFormatedResult(map[string]any{
 		"ID":        "id1",
 		"TimeValue": 10000}, dflt); rply != expected {
 		t.Errorf("Expecting: %q , received: %q", expected, rply)
@@ -207,7 +207,7 @@ func TestGetFormatedResult(t *testing.T) {
  "ID": "id1",
  "TimeValue": "1s"
 }`
-	if rply := GetFormatedResult(map[string]interface{}{
+	if rply := GetFormatedResult(map[string]any{
 		"ID":        "id1",
 		"TimeValue": int64(time.Second)}, map[string]struct{}{"TimeValue": {}}); rply != expected {
 		t.Errorf("Expecting: %s , received: %s", expected, rply)
@@ -228,12 +228,12 @@ func TestGetFormatedResult(t *testing.T) {
 func TestGetFormatedSliceResult(t *testing.T) {
 	dflt := map[string]struct{}{}
 	expected := "[10,20,30]"
-	if rply := getSliceAsString([]interface{}{10, 20, 30}, dflt); rply != expected {
+	if rply := getSliceAsString([]any{10, 20, 30}, dflt); rply != expected {
 		t.Errorf("Expecting: %s , received: %s", expected, rply)
 	}
 
 	expected = `["test1","test2","test3"]`
-	if rply := getSliceAsString([]interface{}{"test1", "test2", "test3"}, dflt); rply != expected {
+	if rply := getSliceAsString([]any{"test1", "test2", "test3"}, dflt); rply != expected {
 		t.Errorf("Expecting: %s , received: %s", expected, rply)
 	}
 }

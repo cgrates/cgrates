@@ -47,8 +47,8 @@ func (self *KamConnCfg) loadFromJsonCfg(jsnCfg *KamConnJsonCfg) error {
 	return nil
 }
 
-func (kamCfg *KamConnCfg) AsMapInterface() map[string]interface{} {
-	return map[string]interface{}{
+func (kamCfg *KamConnCfg) AsMapInterface() map[string]any {
+	return map[string]any{
 		utils.AliasCfg:      kamCfg.Alias,
 		utils.AddressCfg:    kamCfg.Address,
 		utils.ReconnectsCfg: kamCfg.Reconnects,
@@ -95,8 +95,8 @@ func (ka *KamAgentCfg) loadFromJsonCfg(jsnCfg *KamAgentJsonCfg) error {
 	return nil
 }
 
-func (ka *KamAgentCfg) AsMapInterface() map[string]interface{} {
-	evapiConns := make([]map[string]interface{}, len(ka.EvapiConns))
+func (ka *KamAgentCfg) AsMapInterface() map[string]any {
+	evapiConns := make([]map[string]any, len(ka.EvapiConns))
 	for i, item := range ka.EvapiConns {
 		evapiConns[i] = item.AsMapInterface()
 	}
@@ -111,7 +111,7 @@ func (ka *KamAgentCfg) AsMapInterface() map[string]interface{} {
 		}
 	}
 
-	return map[string]interface{}{
+	return map[string]any{
 		utils.EnabledCfg:       ka.Enabled,
 		utils.SessionSConnsCfg: sessionSConns,
 		utils.CreateCdrCfg:     ka.CreateCdr,

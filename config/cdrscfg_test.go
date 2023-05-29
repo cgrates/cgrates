@@ -110,7 +110,7 @@ func TestCdrsCfgAsMapInterface(t *testing.T) {
 		"scheduler_conns": [],				
 	},
 }`
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		"enabled":              false,
 		"extra_fields":         []string{},
 		"store_cdrs":           true,
@@ -147,7 +147,7 @@ func TestCdrsCfgAsMapInterface(t *testing.T) {
 			"scheduler_conns": ["*internal"],				
 		},
 	}`
-	eMap = map[string]interface{}{
+	eMap = map[string]any{
 		"enabled":              true,
 		"extra_fields":         []string{"PayPalAccount", "LCRProfile", "ResourceID"},
 		"store_cdrs":           true,

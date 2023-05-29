@@ -226,11 +226,11 @@ func TestDispatcherProfilesSort(t *testing.T) {
 
 type testRPCHost struct {
 	serviceMethod string
-	args          interface{}
-	reply         interface{}
+	args          any
+	reply         any
 }
 
-func (v *testRPCHost) Call(ctx *context.Context, serviceMethod string, args interface{}, reply interface{}) error {
+func (v *testRPCHost) Call(ctx *context.Context, serviceMethod string, args any, reply any) error {
 	v.serviceMethod = serviceMethod
 	v.args = args
 	v.reply = reply

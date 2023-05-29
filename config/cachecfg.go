@@ -55,13 +55,13 @@ func (cParam *CacheParamCfg) loadFromJsonCfg(jsnCfg *CacheParamJsonCfg) error {
 	return nil
 }
 
-func (cParam *CacheParamCfg) AsMapInterface() map[string]interface{} {
+func (cParam *CacheParamCfg) AsMapInterface() map[string]any {
 	var TTL string = ""
 	if cParam.TTL != 0 {
 		TTL = cParam.TTL.String()
 	}
 
-	return map[string]interface{}{
+	return map[string]any{
 		utils.LimitCfg:     cParam.Limit,
 		utils.TTLCfg:       TTL,
 		utils.StaticTTLCfg: cParam.StaticTTL,
@@ -107,8 +107,8 @@ func (cCfg CacheCfg) AddTmpCaches() {
 	}
 }
 
-func (cCfg *CacheCfg) AsMapInterface() map[string]interface{} {
-	mp := make(map[string]interface{}, len(*cCfg))
+func (cCfg *CacheCfg) AsMapInterface() map[string]any {
+	mp := make(map[string]any, len(*cCfg))
 	for key, value := range *cCfg {
 		mp[key] = value.AsMapInterface()
 	}

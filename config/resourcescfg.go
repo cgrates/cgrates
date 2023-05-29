@@ -81,7 +81,7 @@ func (rlcfg *ResourceSConfig) loadFromJsonCfg(jsnCfg *ResourceSJsonCfg) (err err
 	return nil
 }
 
-func (rlcfg *ResourceSConfig) AsMapInterface() map[string]interface{} {
+func (rlcfg *ResourceSConfig) AsMapInterface() map[string]any {
 	thresholdSConns := make([]string, len(rlcfg.ThresholdSConns))
 	for i, item := range rlcfg.ThresholdSConns {
 		buf := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)
@@ -109,7 +109,7 @@ func (rlcfg *ResourceSConfig) AsMapInterface() map[string]interface{} {
 	if rlcfg.StoreInterval != 0 {
 		storeInterval = rlcfg.StoreInterval.String()
 	}
-	return map[string]interface{}{
+	return map[string]any{
 		utils.EnabledCfg:             rlcfg.Enabled,
 		utils.IndexedSelectsCfg:      rlcfg.IndexedSelects,
 		utils.ThresholdSConnsCfg:     thresholdSConns,

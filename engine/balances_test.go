@@ -310,8 +310,8 @@ func TestBalancesSaveDirtyBalances(t *testing.T) {
 	cfg.RalsCfg().ThresholdSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)}
 	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.ThresholdSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ThresholdSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
 				return nil
 			},
 		},
@@ -385,7 +385,7 @@ func TestBalancePublish(t *testing.T) {
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 	clientConn := make(chan birpc.ClientConnector, 1)
-	clientConn <- clMock(func(ctx *context.Context, serviceMethod string, _, _ interface{}) error {
+	clientConn <- clMock(func(ctx *context.Context, serviceMethod string, _, _ any) error {
 		if serviceMethod == utils.StatSv1ProcessEvent {
 
 			return nil

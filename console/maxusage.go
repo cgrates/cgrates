@@ -49,7 +49,7 @@ func (self *CmdGetMaxUsage) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdGetMaxUsage) RpcParams(reset bool) interface{} {
+func (self *CmdGetMaxUsage) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = new(engine.UsageRecord)
 	}
@@ -60,7 +60,7 @@ func (self *CmdGetMaxUsage) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdGetMaxUsage) RpcResult() interface{} {
+func (self *CmdGetMaxUsage) RpcResult() any {
 	var f int64
 	return &f
 }

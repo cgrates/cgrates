@@ -137,7 +137,7 @@ func testDspDspv1GetProfileForEvent(t *testing.T) {
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testDspv1",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.EVENT_NAME: "Event1",
 			},
 		},
@@ -149,7 +149,7 @@ func testDspDspv1GetProfileForEvent(t *testing.T) {
 		ID:             "EVENT1",
 		Subsystems:     []string{utils.META_ANY},
 		FilterIDs:      []string{"*string:~*req.EventName:Event1"},
-		StrategyParams: make(map[string]interface{}),
+		StrategyParams: make(map[string]any),
 		Strategy:       utils.MetaWeight,
 		Weight:         30,
 		Hosts: engine.DispatcherHostProfiles{
@@ -157,13 +157,13 @@ func testDspDspv1GetProfileForEvent(t *testing.T) {
 				ID:        "ALL2",
 				FilterIDs: []string{},
 				Weight:    20,
-				Params:    make(map[string]interface{}),
+				Params:    make(map[string]any),
 			},
 			&engine.DispatcherHostProfile{
 				ID:        "ALL",
 				FilterIDs: []string{},
 				Weight:    10,
-				Params:    make(map[string]interface{}),
+				Params:    make(map[string]any),
 			},
 		},
 	}

@@ -37,7 +37,7 @@ type ThresholdSv1 struct {
 }
 
 // Call implements birpc.ClientConnector interface for internal RPC
-func (tSv1 *ThresholdSv1) Call(ctx *context.Context, serviceMethod string, args interface{}, reply interface{}) error {
+func (tSv1 *ThresholdSv1) Call(ctx *context.Context, serviceMethod string, args any, reply any) error {
 	return utils.APIerRPCCall(tSv1, serviceMethod, args, reply)
 }
 

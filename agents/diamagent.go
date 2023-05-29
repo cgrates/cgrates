@@ -434,7 +434,7 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.RequestProcessor,
 }
 
 // birpc.ClientConnector interface
-func (da *DiameterAgent) Call(ctx *context.Context, serviceMethod string, args interface{}, reply interface{}) error {
+func (da *DiameterAgent) Call(ctx *context.Context, serviceMethod string, args any, reply any) error {
 	return utils.RPCCall(da, serviceMethod, args, reply)
 }
 

@@ -278,7 +278,7 @@ func TestATExecute(t *testing.T) {
 	}()
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 	clientConn := make(chan birpc.ClientConnector, 1)
-	clientConn <- clMock(func(ctx *context.Context, serviceMethod string, _, _ interface{}) error {
+	clientConn <- clMock(func(ctx *context.Context, serviceMethod string, _, _ any) error {
 		if serviceMethod == utils.CDRsV1ProcessEvent {
 
 			return nil
@@ -297,7 +297,7 @@ func TestATExecute(t *testing.T) {
 			Type: utils.StringPointer(utils.MONETARY),
 			Uuid: utils.StringPointer(utils.GenUUID()),
 			Value: &utils.ValueFormula{Static: 10,
-				Params: make(map[string]interface{})},
+				Params: make(map[string]any)},
 			Weight:   utils.Float64Pointer(10),
 			Disabled: utils.BoolPointer(false),
 			Timings: []*RITiming{

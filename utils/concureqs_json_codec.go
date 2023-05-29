@@ -78,7 +78,7 @@ func (c *concReqsServerCodec) ReadRequestHeader(r *rpc.Request) error {
 	return nil
 }
 
-func (c *concReqsServerCodec) ReadRequestBody(x interface{}) error {
+func (c *concReqsServerCodec) ReadRequestBody(x any) error {
 	if err := ConReqs.Allocate(); err != nil {
 		return err
 	}
@@ -93,12 +93,12 @@ func (c *concReqsServerCodec) ReadRequestBody(x interface{}) error {
 	// RPC params is struct.
 	// Unmarshal into array containing struct for now.
 	// Should think about making RPC more general.
-	var params [1]interface{}
+	var params [1]any
 	params[0] = x
 	return json.Unmarshal(*c.req.Params, &params)
 }
 
-func (c *concReqsServerCodec) WriteResponse(r *rpc.Response, x interface{}) error {
+func (c *concReqsServerCodec) WriteResponse(r *rpc.Response, x any) error {
 	if c.allocated {
 		defer func() {
 			ConReqs.Deallocate()

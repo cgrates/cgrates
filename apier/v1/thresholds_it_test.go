@@ -45,7 +45,7 @@ var (
 			CGREvent: &utils.CGREvent{ // hitting THD_ACNT_BALANCE_1
 				Tenant: "cgrates.org",
 				ID:     "event1",
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					utils.EventType:     utils.AccountUpdate,
 					utils.Account:       "1002",
 					utils.AllowNegative: true,
@@ -57,7 +57,7 @@ var (
 			CGREvent: &utils.CGREvent{ // hitting THD_ACNT_BALANCE_1
 				Tenant: "cgrates.org",
 				ID:     "event2",
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					utils.EventType:  utils.BalanceUpdate,
 					utils.Account:    "1002",
 					utils.BalanceID:  utils.MetaDefault,
@@ -70,7 +70,7 @@ var (
 			CGREvent: &utils.CGREvent{ // hitting THD_STATS_1
 				Tenant: "cgrates.org",
 				ID:     "event3",
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					utils.EventType: utils.StatUpdate,
 					utils.StatID:    "Stats1",
 					utils.Account:   "1002",
@@ -87,7 +87,7 @@ var (
 			CGREvent: &utils.CGREvent{ // hitting THD_STATS_1 and THD_STATS_2
 				Tenant: "cgrates.org",
 				ID:     "event4",
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					utils.EventType: utils.StatUpdate,
 					utils.StatID:    "STATS_HOURLY_DE",
 					utils.Account:   "1002",
@@ -101,7 +101,7 @@ var (
 			CGREvent: &utils.CGREvent{ // hitting THD_STATS_3
 				Tenant: "cgrates.org",
 				ID:     "event5",
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					utils.EventType: utils.StatUpdate,
 					utils.StatID:    "STATS_DAILY_DE",
 					utils.Account:   "1002",
@@ -114,7 +114,7 @@ var (
 			CGREvent: &utils.CGREvent{ // hitting THD_RES_1
 				Tenant: "cgrates.org",
 				ID:     "event6",
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					utils.EventType:  utils.ResourceUpdate,
 					utils.Account:    "1002",
 					utils.ResourceID: "RES_GRP_1",
@@ -126,7 +126,7 @@ var (
 			CGREvent: &utils.CGREvent{ // hitting THD_RES_1
 				Tenant: "cgrates.org",
 				ID:     "event6",
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					utils.EventType:  utils.ResourceUpdate,
 					utils.Account:    "1002",
 					utils.ResourceID: "RES_GRP_1",
@@ -138,7 +138,7 @@ var (
 			CGREvent: &utils.CGREvent{ // hitting THD_RES_1
 				Tenant: "cgrates.org",
 				ID:     "event6",
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					utils.EventType:  utils.ResourceUpdate,
 					utils.Account:    "1002",
 					utils.ResourceID: "RES_GRP_1",
@@ -150,7 +150,7 @@ var (
 			CGREvent: &utils.CGREvent{ // hitting THD_CDRS_1
 				Tenant: "cgrates.org",
 				ID:     "cdrev1",
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					utils.EventType:   utils.CDR,
 					"field_extr1":     "val_extr1",
 					"fieldextr2":      "valextr2",
@@ -495,7 +495,7 @@ func testV1TSMaxHits(t *testing.T) {
 		CGREvent: &utils.CGREvent{ // hitting TH3
 			Tenant: "cgrates.org",
 			ID:     "event1",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Account: "1002",
 			},
 		},

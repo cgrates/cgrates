@@ -162,7 +162,7 @@ func TestCdreCfgAsMapInterface(t *testing.T) {
 		},
 	},
 }`
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		"export_format":      "*file_csv",
 		"export_path":        "/var/spool/cgrates/cdre",
 		"filters":            []string{},
@@ -171,7 +171,7 @@ func TestCdreCfgAsMapInterface(t *testing.T) {
 		"attempts":           1,
 		"field_separator":    ",",
 		"attributes_context": "",
-		"fields": []map[string]interface{}{
+		"fields": []map[string]any{
 			{
 				"path":  "*exp.CGRID",
 				"tag":   "*exp.CGRID",

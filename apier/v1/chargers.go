@@ -125,7 +125,7 @@ type ChargerSv1 struct {
 
 // Call implements birpc.ClientConnector interface for internal RPC
 func (cSv1 *ChargerSv1) Call(ctx *context.Context, serviceMethod string,
-	args interface{}, reply interface{}) error {
+	args any, reply any) error {
 	return utils.APIerRPCCall(cSv1, serviceMethod, args, reply)
 }
 

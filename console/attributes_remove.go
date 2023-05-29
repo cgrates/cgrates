@@ -45,7 +45,7 @@ func (self *CmdRemoveAttributes) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdRemoveAttributes) RpcParams(reset bool) interface{} {
+func (self *CmdRemoveAttributes) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &utils.TenantIDWithCache{}
 	}
@@ -56,7 +56,7 @@ func (self *CmdRemoveAttributes) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdRemoveAttributes) RpcResult() interface{} {
+func (self *CmdRemoveAttributes) RpcResult() any {
 	var s string
 	return &s
 }

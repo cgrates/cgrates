@@ -50,7 +50,7 @@ func (c *concReqsGobServerCodec) ReadRequestHeader(r *rpc.Request) error {
 	return c.dec.Decode(r)
 }
 
-func (c *concReqsGobServerCodec) ReadRequestBody(body interface{}) error {
+func (c *concReqsGobServerCodec) ReadRequestBody(body any) error {
 	if err := ConReqs.Allocate(); err != nil {
 		return err
 	}
@@ -58,7 +58,7 @@ func (c *concReqsGobServerCodec) ReadRequestBody(body interface{}) error {
 	return c.dec.Decode(body)
 }
 
-func (c *concReqsGobServerCodec) WriteResponse(r *rpc.Response, body interface{}) (err error) {
+func (c *concReqsGobServerCodec) WriteResponse(r *rpc.Response, body any) (err error) {
 	if c.allocated {
 		defer func() {
 			ConReqs.Deallocate()

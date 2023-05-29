@@ -27,22 +27,22 @@ import (
 )
 
 // NewObjectDP constructs a DataProvider
-func NewObjectDP(obj interface{}, prfxSls []string) (dP utils.DataProvider) {
-	dP = &ObjectDP{obj: obj, cache: make(map[string]interface{}), prfxSls: prfxSls}
+func NewObjectDP(obj any, prfxSls []string) (dP utils.DataProvider) {
+	dP = &ObjectDP{obj: obj, cache: make(map[string]any), prfxSls: prfxSls}
 	return
 }
 
 type ObjectDP struct {
-	obj     interface{}
-	cache   map[string]interface{}
+	obj     any
+	cache   map[string]any
 	prfxSls []string
 }
 
-func (objDp *ObjectDP) setCache(path string, val interface{}) {
+func (objDp *ObjectDP) setCache(path string, val any) {
 	objDp.cache[path] = val
 }
 
-func (objDp *ObjectDP) getCache(path string) (val interface{}, has bool) {
+func (objDp *ObjectDP) getCache(path string) (val any, has bool) {
 	val, has = objDp.cache[path]
 	return
 }
@@ -54,7 +54,7 @@ func (objDP *ObjectDP) String() string {
 }
 
 // FieldAsInterface is part of engine.utils.DataProvider interface
-func (objDP *ObjectDP) FieldAsInterface(fldPath []string) (data interface{}, err error) {
+func (objDP *ObjectDP) FieldAsInterface(fldPath []string) (data any, err error) {
 	obj := objDP.obj
 	clnFldPath := fldPath
 	// []string{ BalanceMap *monetary[0] Value }
@@ -125,7 +125,7 @@ func (objDP *ObjectDP) FieldAsInterface(fldPath []string) (data interface{}, err
 
 // FieldAsString is part of engine.utils.DataProvider interface
 func (objDP *ObjectDP) FieldAsString(fldPath []string) (data string, err error) {
-	var valIface interface{}
+	var valIface any
 	valIface, err = objDP.FieldAsInterface(fldPath)
 	if err != nil {
 		return

@@ -1009,7 +1009,7 @@ func (cfg *CGRConfig) GetReloadChan(sectID string) chan struct{} {
 
 // Call implements birpc.ClientConnector interface for internal RPC
 func (cfg *CGRConfig) Call(serviceMethod string,
-	args interface{}, reply interface{}) error {
+	args any, reply any) error {
 	return utils.APIerRPCCall(cfg, serviceMethod, args, reply)
 }
 
@@ -1021,7 +1021,7 @@ type StringWithArgDispatcher struct {
 }
 
 // V1GetConfigSection will retrieve from CGRConfig a section
-func (cfg *CGRConfig) V1GetConfigSection(args *StringWithArgDispatcher, reply *map[string]interface{}) (err error) {
+func (cfg *CGRConfig) V1GetConfigSection(args *StringWithArgDispatcher, reply *map[string]any) (err error) {
 	var jsonString string
 	switch args.Section {
 	case GENERAL_JSN:
@@ -1334,7 +1334,7 @@ func (cfg *CGRConfig) initChanels() {
 type JSONReloadWithArgDispatcher struct {
 	*utils.ArgDispatcher
 	utils.TenantArg
-	JSON map[string]interface{}
+	JSON map[string]any
 }
 
 // V1ReloadConfigFromJSON reloads the sections of configz
@@ -1470,28 +1470,28 @@ func (cfg *CGRConfig) reloadSections(sections ...string) (err error) {
 	return
 }
 
-func (cfg *CGRConfig) AsMapInterface(separator string) map[string]interface{} {
-	rpcConns := make(map[string]map[string]interface{}, len(cfg.rpcConns))
+func (cfg *CGRConfig) AsMapInterface(separator string) map[string]any {
+	rpcConns := make(map[string]map[string]any, len(cfg.rpcConns))
 	for key, val := range cfg.rpcConns {
 		rpcConns[key] = val.AsMapInterface()
 	}
 
-	cdreProfiles := make(map[string]map[string]interface{})
+	cdreProfiles := make(map[string]map[string]any)
 	for key, val := range cfg.CdreProfiles {
 		cdreProfiles[key] = val.AsMapInterface(separator)
 	}
 
-	loaderCfg := make([]map[string]interface{}, len(cfg.loaderCfg))
+	loaderCfg := make([]map[string]any, len(cfg.loaderCfg))
 	for i, item := range cfg.loaderCfg {
 		loaderCfg[i] = item.AsMapInterface(separator)
 	}
 
-	httpAgentCfg := make([]map[string]interface{}, len(cfg.httpAgentCfg))
+	httpAgentCfg := make([]map[string]any, len(cfg.httpAgentCfg))
 	for i, item := range cfg.httpAgentCfg {
 		httpAgentCfg[i] = item.AsMapInterface(separator)
 	}
 
-	return map[string]interface{}{
+	return map[string]any{
 
 		utils.CdreProfiles:     cdreProfiles,
 		utils.LoaderCfg:        loaderCfg,

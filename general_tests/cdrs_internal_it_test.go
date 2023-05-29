@@ -97,7 +97,7 @@ func testCdrsIntTestTTL(t *testing.T) {
 		Flags: []string{"*store:true"},
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.OriginID:    "testCdrsIntTestTTL",
 				utils.OriginHost:  "192.168.1.1",
 				utils.Source:      "testCdrsIntTestTTL",

@@ -600,7 +600,7 @@ func TestMaxSessionTimeOnAccounts(t *testing.T) {
 		Usage:       time.Second * 30,
 	}
 	SetDataStorage(dm)
-	var reply map[string]interface{}
+	var reply map[string]any
 	for i, acc := range args.AccountIDs {
 		dm.SetAccount(&Account{ID: utils.ConcatenatedKey("cgrates.org", acc),
 			BalanceMap: map[string]Balances{utils.VOICE: {&Balance{
@@ -669,8 +669,8 @@ func TestResponderGetCostOnRatingPlans(t *testing.T) {
 		},
 	}
 	Cache.Set(utils.CacheRatingPlans, "RPL1", rp, []string{}, true, utils.NonTransactional)
-	var reply map[string]interface{}
-	exp := map[string]interface{}{
+	var reply map[string]any
+	exp := map[string]any{
 		utils.Cost:         4.0,
 		utils.RatingPlanID: "RPL1",
 	}
@@ -1221,7 +1221,7 @@ func TestResponderGetMaxSessionTimeOnAccounts(t *testing.T) {
 	}
 
 	SetDataStorage(dm)
-	var reply map[string]interface{}
+	var reply map[string]any
 
 	dm.SetAccount(&Account{ID: utils.ConcatenatedKey("cgrates.org", "1001"),
 		BalanceMap: map[string]Balances{utils.VOICE: {&Balance{

@@ -24,7 +24,7 @@ import (
 	"time"
 )
 
-func toJSON(v interface{}) string {
+func toJSON(v any) string {
 	b, _ := json.MarshalIndent(v, "", " ")
 	return string(b)
 }
@@ -214,7 +214,7 @@ func TestStructMatcherOperatorValue(t *testing.T) {
 	if check, err := root.checkStruct("zinc"); !check || err != nil {
 		t.Errorf("Error checking struct: %v %v  (%v)", check, err, toJSON(root))
 	}
-	root = &operatorValue{operator: CondHAS, value: []interface{}{"NAT", "RET", "EUR"}}
+	root = &operatorValue{operator: CondHAS, value: []any{"NAT", "RET", "EUR"}}
 	if check, err := root.checkStruct(StringMap{"WOR": true, "EUR": true, "NAT": true, "RET": true, "ROM": true}); !check || err != nil {
 		t.Errorf("Error checking struct: %v %v  (%v)", !check, err, toJSON(root))
 	}

@@ -34,10 +34,10 @@ func TestRPCConnsAsMapInterface(t *testing.T) {
 			},
 		},	
 }`
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		"poolSize": 0,
 		"strategy": "",
-		"conns": []map[string]interface{}{
+		"conns": []map[string]any{
 			{
 				"address":     "127.0.0.1:2012",
 				"transport":   "*json",

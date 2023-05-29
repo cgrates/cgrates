@@ -272,7 +272,7 @@ func TestNMAsCGREvent(t *testing.T) {
 	}}); err != nil {
 		t.Error(err)
 	}
-	eEv := map[string]interface{}{
+	eEv := map[string]any{
 		"FirstLevel2.SecondLevel2.Field2":        "Value2",
 		"FirstLevel.SecondLevel.ThirdLevel.Fld1": "Val1",
 		"FirstLevel2.Field3":                     "Value3",

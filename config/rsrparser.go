@@ -131,7 +131,7 @@ func (prsrs RSRParsers) Compile() (err error) {
 }
 
 // ParseValue will parse the value out considering converters and filters
-func (prsrs RSRParsers) ParseValue(value interface{}) (out string, err error) {
+func (prsrs RSRParsers) ParseValue(value any) (out string, err error) {
 	for _, prsr := range prsrs {
 		if outPrsr, err := prsr.ParseValue(value); err != nil {
 			return "", err
@@ -285,7 +285,7 @@ func (prsr *RSRParser) parseValue(value string) string {
 }
 
 // ParseValue will parse the value out considering converters and filters
-func (prsr *RSRParser) ParseValue(value interface{}) (out string, err error) {
+func (prsr *RSRParser) ParseValue(value any) (out string, err error) {
 	out = prsr.parseValue(utils.IfaceAsString(value))
 	if out, err = prsr.converters.ConvertString(out); err != nil {
 		return
@@ -309,7 +309,7 @@ func (prsr *RSRParser) ParseDataProvider(dP utils.DataProvider, separator string
 }
 
 func (prsr *RSRParser) ParseDataProviderWithInterfaces(dP utils.DataProvider, separator string) (out string, err error) {
-	var outIface interface{}
+	var outIface any
 	if prsr.path != "" {
 		if outIface, err = dP.FieldAsInterface(
 			strings.Split(prsr.path, separator)); err != nil &&

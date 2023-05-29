@@ -48,7 +48,7 @@ func (self *CmdGetThresholdProfile) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdGetThresholdProfile) RpcParams(reset bool) interface{} {
+func (self *CmdGetThresholdProfile) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &utils.TenantIDWithArgDispatcher{
 			TenantID:      new(utils.TenantID),
@@ -62,12 +62,12 @@ func (self *CmdGetThresholdProfile) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdGetThresholdProfile) RpcResult() interface{} {
+func (self *CmdGetThresholdProfile) RpcResult() any {
 	var atr engine.ThresholdProfile
 	return &atr
 }
 
-func (self *CmdGetThresholdProfile) GetFormatedResult(result interface{}) string {
+func (self *CmdGetThresholdProfile) GetFormatedResult(result any) string {
 	return GetFormatedResult(result, map[string]struct{}{
 		"MinSleep": {},
 	})

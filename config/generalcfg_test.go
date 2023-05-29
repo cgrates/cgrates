@@ -130,7 +130,7 @@ func TestGeneralCfgAsMapInterface(t *testing.T) {
 			"concurrent_strategy":  "",
 		},
 	}`
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		"node_id":              "",
 		"logger":               "*syslog",
 		"log_level":            6,

@@ -2544,7 +2544,7 @@ func (dm *DataManager) Reconnect(marshaller string, newcfg *config.DataDbCfg) (e
 	return
 }
 
-func replicate(connMgr *ConnManager, connIDs []string, filtered bool, objType, objID, method string, args interface{}) (err error) {
+func replicate(connMgr *ConnManager, connIDs []string, filtered bool, objType, objID, method string, args any) (err error) {
 	// the reply is string for Set/Remove APIs
 	// ignored in favor of the error
 	var reply string
@@ -2574,7 +2574,7 @@ func UpdateReplicationFilters(objType, objID, connID string) {
 
 // replicateMultipleIDs will do the same thing as replicate but uses multiple objectIDs
 // used when setting the LoadIDs
-func replicateMultipleIDs(connMgr *ConnManager, connIDs []string, filtered bool, objType string, objIDs []string, method string, args interface{}) (err error) {
+func replicateMultipleIDs(connMgr *ConnManager, connIDs []string, filtered bool, objType string, objIDs []string, method string, args any) (err error) {
 	// the reply is string for Set/Remove APIs
 	// ignored in favor of the error
 	var reply string

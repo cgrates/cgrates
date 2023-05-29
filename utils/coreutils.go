@@ -481,22 +481,22 @@ func DurationPointer(d time.Duration) *time.Duration {
 	return &d
 }
 
-func ToIJSON(v interface{}) string {
+func ToIJSON(v any) string {
 	b, _ := json.MarshalIndent(v, "", " ")
 	return string(b)
 }
 
-func ToJSON(v interface{}) string {
+func ToJSON(v any) string {
 	b, _ := json.Marshal(v)
 	return string(b)
 }
 
-func LogFull(v interface{}) {
+func LogFull(v any) {
 	log.Print(ToIJSON(v))
 }
 
 // Simple object cloner, b should be a pointer towards a value into which we want to decode
-func Clone(a, b interface{}) error {
+func Clone(a, b any) error {
 	buff := new(bytes.Buffer)
 	enc := gob.NewEncoder(buff)
 	dec := gob.NewDecoder(buff)
@@ -563,7 +563,7 @@ func FmtFieldWidth(fieldID, source string, width int, strip, padding string, man
 }
 
 // Returns the string representation of iface or error if not convertible
-func CastIfToString(iface interface{}) (strVal string, casts bool) {
+func CastIfToString(iface any) (strVal string, casts bool) {
 	switch rawVal := iface.(type) {
 	case string:
 		strVal = rawVal
@@ -782,7 +782,7 @@ func (tID *TenantIDWithCache) TenantID() string {
 // RPCCall is a generic method calling RPC on a struct instance
 // serviceMethod is assumed to be in the form InstanceV1.Method
 // where V1Method will become RPC method called on instance
-func RPCCall(inst interface{}, serviceMethod string, args interface{}, reply interface{}) error {
+func RPCCall(inst any, serviceMethod string, args any, reply any) error {
 	methodSplit := strings.Split(serviceMethod, ".")
 	if len(methodSplit) != 2 {
 		return rpcclient.ErrUnsupporteServiceMethod
@@ -808,7 +808,7 @@ func RPCCall(inst interface{}, serviceMethod string, args interface{}, reply int
 }
 
 // ApierRPCCall implements generic RPCCall for APIer instances
-func APIerRPCCall(inst interface{}, serviceMethod string, args interface{}, reply interface{}) error {
+func APIerRPCCall(inst any, serviceMethod string, args any, reply any) error {
 	methodSplit := strings.Split(serviceMethod, ".")
 	if len(methodSplit) != 2 {
 		return rpcclient.ErrUnsupporteServiceMethod
@@ -834,7 +834,7 @@ func APIerRPCCall(inst interface{}, serviceMethod string, args interface{}, repl
 
 // CachedRPCResponse is used to cache a RPC response
 type CachedRPCResponse struct {
-	Result interface{}
+	Result any
 	Error  error
 }
 

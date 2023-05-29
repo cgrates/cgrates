@@ -25,7 +25,7 @@ import (
 )
 
 func (dS *DispatcherService) CoreSv1Status(args *utils.TenantWithArgDispatcher,
-	reply *map[string]interface{}) (err error) {
+	reply *map[string]any) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args.TenantArg != nil && args.TenantArg.Tenant != utils.EmptyString {
 		tnt = args.TenantArg.Tenant

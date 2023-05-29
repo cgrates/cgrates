@@ -132,7 +132,7 @@ func testSes4CDRsProcessCDR(t *testing.T) {
 		Flags: []string{utils.MetaRALs, utils.MetaStore, "*routes:false", utils.MetaRerate},
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.OriginID:    "testV2CDRsProcessCDR1",
 				utils.OriginHost:  "192.168.1.1",
 				utils.Source:      "testV2CDRsProcessCDR",

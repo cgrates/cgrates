@@ -41,7 +41,7 @@ var attrs = &engine.AttrSProcessEventReply{
 	CGREvent: &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "TestSSv1ItAuth",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.CGRID:       "5668666d6b8e44eb949042f25ce0796ec3592ff9",
 			utils.Tenant:      "cgrates.org",
 			utils.Category:    "call",
@@ -67,7 +67,7 @@ func TestSessionSIndexAndUnindexSessions(t *testing.T) {
 		"Extra4":  true,
 	}
 	sS := NewSessionS(sSCfg, nil, nil)
-	sEv := engine.NewMapEvent(map[string]interface{}{
+	sEv := engine.NewMapEvent(map[string]any{
 		utils.EVENT_NAME:       "TEST_EVENT",
 		utils.ToR:              "*voice",
 		utils.OriginID:         "12345",
@@ -147,7 +147,7 @@ func TestSessionSIndexAndUnindexSessions(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", eRIdxes, sS.aSessionsRIdx)
 	}
 	// Index second session
-	sSEv2 := engine.NewMapEvent(map[string]interface{}{
+	sSEv2 := engine.NewMapEvent(map[string]any{
 		utils.EVENT_NAME:  "TEST_EVENT2",
 		utils.OriginID:    "12346",
 		utils.Account:     "account2",
@@ -170,7 +170,7 @@ func TestSessionSIndexAndUnindexSessions(t *testing.T) {
 		},
 	}
 	sS.indexSession(session2, false)
-	sSEv3 := engine.NewMapEvent(map[string]interface{}{
+	sSEv3 := engine.NewMapEvent(map[string]any{
 		utils.EVENT_NAME: "TEST_EVENT3",
 		utils.Tenant:     "cgrates.org",
 		utils.OriginID:   "12347",
@@ -385,7 +385,7 @@ func TestSessionSIndexAndUnindexSessions(t *testing.T) {
 func TestSessionSRegisterAndUnregisterASessions(t *testing.T) {
 	sSCfg, _ := config.NewDefaultCGRConfig()
 	sS := NewSessionS(sSCfg, nil, nil)
-	sSEv := engine.NewMapEvent(map[string]interface{}{
+	sSEv := engine.NewMapEvent(map[string]any{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.ToR:         "*voice",
 		utils.OriginID:    "111",
@@ -443,7 +443,7 @@ func TestSessionSRegisterAndUnregisterASessions(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", eRIdxes, sS.aSessionsRIdx)
 	}
 
-	sSEv2 := engine.NewMapEvent(map[string]interface{}{
+	sSEv2 := engine.NewMapEvent(map[string]any{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.ToR:         "*voice",
 		utils.OriginID:    "222",
@@ -509,7 +509,7 @@ func TestSessionSRegisterAndUnregisterASessions(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", eRIdxes, sS.aSessionsRIdx)
 	}
 
-	sSEv3 := engine.NewMapEvent(map[string]interface{}{
+	sSEv3 := engine.NewMapEvent(map[string]any{
 		utils.EVENT_NAME:       "TEST_EVENT",
 		utils.ToR:              "*voice",
 		utils.OriginID:         "111",
@@ -601,7 +601,7 @@ func TestSessionSRegisterAndUnregisterASessions(t *testing.T) {
 func TestSessionSRegisterAndUnregisterPSessions(t *testing.T) {
 	sSCfg, _ := config.NewDefaultCGRConfig()
 	sS := NewSessionS(sSCfg, nil, nil)
-	sSEv := engine.NewMapEvent(map[string]interface{}{
+	sSEv := engine.NewMapEvent(map[string]any{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.ToR:         "*voice",
 		utils.OriginID:    "111",
@@ -664,7 +664,7 @@ func TestSessionSRegisterAndUnregisterPSessions(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", eRIdxes, sS.pSessionsRIdx)
 	}
 
-	sSEv2 := engine.NewMapEvent(map[string]interface{}{
+	sSEv2 := engine.NewMapEvent(map[string]any{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.ToR:         "*voice",
 		utils.OriginID:    "222",
@@ -730,7 +730,7 @@ func TestSessionSRegisterAndUnregisterPSessions(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", eRIdxes, sS.pSessionsRIdx)
 	}
 
-	sSEv3 := engine.NewMapEvent(map[string]interface{}{
+	sSEv3 := engine.NewMapEvent(map[string]any{
 		utils.EVENT_NAME:       "TEST_EVENT",
 		utils.ToR:              "*voice",
 		utils.OriginID:         "111",
@@ -816,7 +816,7 @@ func TestSessionSNewV1AuthorizeArgs(t *testing.T) {
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "Event",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.Account:     "1001",
 			utils.Destination: "1002",
 		},
@@ -977,7 +977,7 @@ func TestSessionSNewV1UpdateSessionArgs(t *testing.T) {
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "Event",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.Account:     "1001",
 			utils.Destination: "1002",
 		},
@@ -1015,7 +1015,7 @@ func TestSessionSNewV1TerminateSessionArgs(t *testing.T) {
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "Event",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.Account:     "1001",
 			utils.Destination: "1002",
 		},
@@ -1056,7 +1056,7 @@ func TestSessionSNewV1ProcessMessageArgs(t *testing.T) {
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "Event",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.Account:     "1001",
 			utils.Destination: "1002",
 		},
@@ -1131,7 +1131,7 @@ func TestSessionSNewV1InitSessionArgs(t *testing.T) {
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "Event",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.Account:     "1001",
 			utils.Destination: "1002",
 		},
@@ -1160,7 +1160,7 @@ func TestSessionSNewV1InitSessionArgs(t *testing.T) {
 	cgrEv = &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "Event",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.Account:     "1001",
 			utils.Destination: "1002",
 		},
@@ -1200,13 +1200,13 @@ func TestSessionSV1AuthorizeReplyAsNavigableMap(t *testing.T) {
 		SortedSuppliers: []*engine.SortedSupplier{
 			{
 				SupplierID: "supplier1",
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					"Weight": 20.0,
 				},
 			},
 			{
 				SupplierID: "supplier2",
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					"Weight": 10.0,
 				},
 			},
@@ -1436,7 +1436,7 @@ func TestV1ProcessEventReplyAsNavigableMap(t *testing.T) {
 func TestSessionStransitSState(t *testing.T) {
 	sSCfg, _ := config.NewDefaultCGRConfig()
 	sS := NewSessionS(sSCfg, nil, nil)
-	sSEv := engine.NewMapEvent(map[string]interface{}{
+	sSEv := engine.NewMapEvent(map[string]any{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.ToR:         "*voice",
 		utils.OriginID:    "111",
@@ -1482,7 +1482,7 @@ func TestSessionStransitSState(t *testing.T) {
 func TestSessionSrelocateSessionS(t *testing.T) {
 	sSCfg, _ := config.NewDefaultCGRConfig()
 	sS := NewSessionS(sSCfg, nil, nil)
-	sSEv := engine.NewMapEvent(map[string]interface{}{
+	sSEv := engine.NewMapEvent(map[string]any{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.ToR:         "*voice",
 		utils.OriginID:    "111",
@@ -1519,7 +1519,7 @@ func TestSessionSrelocateSessionS(t *testing.T) {
 	if len(rcvS) != 0 {
 		t.Errorf("Expecting 0, received: %+v", len(rcvS))
 	}
-	ev := engine.NewMapEvent(map[string]interface{}{
+	ev := engine.NewMapEvent(map[string]any{
 		utils.OriginID:   "222",
 		utils.OriginHost: "127.0.0.1"})
 	cgrID := GetSetCGRID(ev)
@@ -1534,7 +1534,7 @@ func TestSessionSNewV1AuthorizeArgsWithArgDispatcher(t *testing.T) {
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "Event",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.Account:     "1001",
 			utils.Destination: "1002",
 			utils.MetaApiKey:  "testkey",
@@ -1582,7 +1582,7 @@ func TestSessionSNewV1AuthorizeArgsWithArgDispatcher2(t *testing.T) {
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "Event",
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.Account:     "1001",
 			utils.Destination: "1002",
 			utils.MetaRouteID: "testrouteid",
@@ -1683,7 +1683,7 @@ func TestSessionSgetSessionIDsMatchingIndexes(t *testing.T) {
 		"ToR": true,
 	}
 	sS := NewSessionS(sSCfg, nil, nil)
-	sEv := engine.NewMapEvent(map[string]interface{}{
+	sEv := engine.NewMapEvent(map[string]any{
 		utils.EVENT_NAME:       "TEST_EVENT",
 		utils.ToR:              "*voice",
 		utils.OriginID:         "12345",
@@ -1756,7 +1756,7 @@ func TestSessionSgetSessionIDsMatchingIndexes(t *testing.T) {
 			},
 		},
 		{
-			Event: engine.NewMapEvent(map[string]interface{}{
+			Event: engine.NewMapEvent(map[string]any{
 				utils.EVENT_NAME: "TEST_EVENT",
 				utils.ToR:        "*voice"}),
 			CD: &engine.CallDescriptor{
@@ -1985,7 +1985,7 @@ func TestV1ProcessMessageArgsParseFlags(t *testing.T) {
 func TestSessionSgetSession(t *testing.T) {
 	sSCfg, _ := config.NewDefaultCGRConfig()
 	sS := NewSessionS(sSCfg, nil, nil)
-	sSEv := engine.NewMapEvent(map[string]interface{}{
+	sSEv := engine.NewMapEvent(map[string]any{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.ToR:         "*voice",
 		utils.OriginID:    "111",
@@ -2032,7 +2032,7 @@ func TestSessionSfilterSessions(t *testing.T) {
 		"ToR": true,
 	}
 	sS := NewSessionS(sSCfg, nil, nil)
-	sEv := engine.NewMapEvent(map[string]interface{}{
+	sEv := engine.NewMapEvent(map[string]any{
 		utils.EVENT_NAME:       "TEST_EVENT",
 		utils.ToR:              "*voice",
 		utils.OriginID:         "12345",
@@ -2231,7 +2231,7 @@ func TestSessionSfilterSessionsCount(t *testing.T) {
 		"ToR": true,
 	}
 	sS := NewSessionS(sSCfg, nil, nil)
-	sEv := engine.NewMapEvent(map[string]interface{}{
+	sEv := engine.NewMapEvent(map[string]any{
 		utils.EVENT_NAME:       "TEST_EVENT",
 		utils.ToR:              "*voice",
 		utils.OriginID:         "12345",
@@ -2341,16 +2341,16 @@ func TestSessionSfilterSessionsCount(t *testing.T) {
 	}
 }
 
-type clMock func(_ *context.Context, _ string, _ interface{}, _ interface{}) error
+type clMock func(_ *context.Context, _ string, _ any, _ any) error
 
-func (c clMock) Call(ctx *context.Context, m string, a interface{}, r interface{}) error {
+func (c clMock) Call(ctx *context.Context, m string, a any, r any) error {
 	return c(ctx, m, a, r)
 }
 func TestInitSession(t *testing.T) {
 	cfg, _ := config.NewDefaultCGRConfig()
 	cfg.SessionSCfg().ChargerSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)}
 	clientConect := make(chan birpc.ClientConnector, 1)
-	clientConect <- clMock(func(_ *context.Context, _ string, args interface{}, reply interface{}) error {
+	clientConect <- clMock(func(_ *context.Context, _ string, args any, reply any) error {
 		rply, cancast := reply.(*[]*engine.ChrgSProcessEventReply)
 		if !cancast {
 			return fmt.Errorf("can't cast")
@@ -2416,7 +2416,7 @@ func TestBiRPCv1ProcessCDRNoTenant(t *testing.T) {
 	}
 	cfg.CdrsCfg().Enabled = true
 	cfg.SessionSCfg().CDRsConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)}
-	clMock := clMock(func(_ *context.Context, _ string, args interface{}, reply interface{}) error {
+	clMock := clMock(func(_ *context.Context, _ string, args any, reply any) error {
 		rply, cancast := reply.(*string)
 		if !cancast {
 			return fmt.Errorf("can't cast")
@@ -2444,7 +2444,7 @@ func TestBiRPCv1ProcessCDRNoTenant(t *testing.T) {
 	args := &utils.CGREventWithArgDispatcher{
 		CGREvent: &utils.CGREvent{
 			ID: "TestBiRPCv1ProcessCDRNoTenant",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.EVENT_NAME:       "TerminateEvent",
 				utils.ToR:              utils.VOICE,
 				utils.OriginID:         "123451",
@@ -2477,7 +2477,7 @@ func TestBiRPCv1AuthorizeEventNoTenant(t *testing.T) {
 	}
 	cfg.AttributeSCfg().Enabled = true
 	cfg.SessionSCfg().AttrSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.Attributes)}
-	clMock := clMock(func(_ *context.Context, _ string, args interface{}, reply interface{}) error {
+	clMock := clMock(func(_ *context.Context, _ string, args any, reply any) error {
 		rply, cancast := reply.(*engine.AttrSProcessEventReply)
 		if !cancast {
 			return fmt.Errorf("can't cast")
@@ -2494,7 +2494,7 @@ func TestBiRPCv1AuthorizeEventNoTenant(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "TestBiRPCv1AuthorizeEventNoTenant",
 				Time:   utils.TimePointer(time.Date(2016, time.January, 5, 18, 30, 49, 0, time.UTC)),
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					"Account":     "1001",
 					"Category":    "call",
 					"Destination": "1003",
@@ -2522,7 +2522,7 @@ func TestBiRPCv1AuthorizeEventNoTenant(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			ID:   "TestBiRPCv1AuthorizeEventNoTenant",
 			Time: utils.TimePointer(time.Date(2016, time.January, 5, 18, 30, 49, 0, time.UTC)),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"Account":     "1001",
 				"Category":    "call",
 				"Destination": "1003",
@@ -2550,7 +2550,7 @@ func TestBiRPCv1AuthorizeEventWithDigestNoTenant(t *testing.T) {
 	}
 	cfg.AttributeSCfg().Enabled = true
 	cfg.SessionSCfg().AttrSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.Attributes)}
-	clMock := clMock(func(_ *context.Context, _ string, args interface{}, reply interface{}) error {
+	clMock := clMock(func(_ *context.Context, _ string, args any, reply any) error {
 		rply, cancast := reply.(*engine.AttrSProcessEventReply)
 		if !cancast {
 			return fmt.Errorf("can't cast")
@@ -2567,7 +2567,7 @@ func TestBiRPCv1AuthorizeEventWithDigestNoTenant(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "TestBiRPCv1AuthorizeEventNoTenant",
 				Time:   utils.TimePointer(time.Date(2016, time.January, 5, 18, 30, 49, 0, time.UTC)),
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					"Account":     "1001",
 					"Category":    "call",
 					"Destination": "1003",
@@ -2595,7 +2595,7 @@ func TestBiRPCv1AuthorizeEventWithDigestNoTenant(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			ID:   "TestBiRPCv1AuthorizeEventNoTenant",
 			Time: utils.TimePointer(time.Date(2016, time.January, 5, 18, 30, 49, 0, time.UTC)),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"Account":     "1001",
 				"Category":    "call",
 				"Destination": "1003",
@@ -2621,7 +2621,7 @@ func TestBiRPCv1InitiateSessionNoTenant(t *testing.T) {
 	}
 	cfg.AttributeSCfg().Enabled = true
 	cfg.SessionSCfg().AttrSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.Attributes)}
-	clMock := clMock(func(_ *context.Context, _ string, args interface{}, reply interface{}) error {
+	clMock := clMock(func(_ *context.Context, _ string, args any, reply any) error {
 		rply, cancast := reply.(*engine.AttrSProcessEventReply)
 		if !cancast {
 			return fmt.Errorf("can't cast")
@@ -2638,7 +2638,7 @@ func TestBiRPCv1InitiateSessionNoTenant(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "TestBiRPCv1AuthorizeEventNoTenant",
 				Time:   utils.TimePointer(time.Date(2016, time.January, 5, 18, 30, 49, 0, time.UTC)),
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					"Account":     "1001",
 					"Category":    "call",
 					"Destination": "1003",
@@ -2666,7 +2666,7 @@ func TestBiRPCv1InitiateSessionNoTenant(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			ID:   "TestBiRPCv1AuthorizeEventNoTenant",
 			Time: utils.TimePointer(time.Date(2016, time.January, 5, 18, 30, 49, 0, time.UTC)),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"Account":     "1001",
 				"Category":    "call",
 				"Destination": "1003",
@@ -2692,7 +2692,7 @@ func TestBiRPCv1InitiateSessionWithDigestNoTenant(t *testing.T) {
 	}
 	cfg.AttributeSCfg().Enabled = true
 	cfg.SessionSCfg().AttrSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.Attributes)}
-	clMock := clMock(func(_ *context.Context, _ string, args interface{}, reply interface{}) error {
+	clMock := clMock(func(_ *context.Context, _ string, args any, reply any) error {
 		rply, cancast := reply.(*engine.AttrSProcessEventReply)
 		if !cancast {
 			return fmt.Errorf("can't cast")
@@ -2709,7 +2709,7 @@ func TestBiRPCv1InitiateSessionWithDigestNoTenant(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "TestBiRPCv1AuthorizeEventNoTenant",
 				Time:   utils.TimePointer(time.Date(2016, time.January, 5, 18, 30, 49, 0, time.UTC)),
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					"Account":     "1001",
 					"Category":    "call",
 					"Destination": "1003",
@@ -2736,7 +2736,7 @@ func TestBiRPCv1InitiateSessionWithDigestNoTenant(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			ID:   "TestBiRPCv1AuthorizeEventNoTenant",
 			Time: utils.TimePointer(time.Date(2016, time.January, 5, 18, 30, 49, 0, time.UTC)),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"Account":     "1001",
 				"Category":    "call",
 				"Destination": "1003",
@@ -2760,7 +2760,7 @@ func TestBiRPCv1UpdateSessionNoTenant(t *testing.T) {
 	}
 	cfg.AttributeSCfg().Enabled = true
 	cfg.SessionSCfg().AttrSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.Attributes)}
-	clMock := clMock(func(_ *context.Context, _ string, args interface{}, reply interface{}) error {
+	clMock := clMock(func(_ *context.Context, _ string, args any, reply any) error {
 		rply, cancast := reply.(*engine.AttrSProcessEventReply)
 		if !cancast {
 			return fmt.Errorf("can't cast")
@@ -2777,7 +2777,7 @@ func TestBiRPCv1UpdateSessionNoTenant(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "TestBiRPCv1AuthorizeEventNoTenant",
 				Time:   utils.TimePointer(time.Date(2016, time.January, 5, 18, 30, 49, 0, time.UTC)),
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					"Account":     "1001",
 					"Category":    "call",
 					"Destination": "1003",
@@ -2804,7 +2804,7 @@ func TestBiRPCv1UpdateSessionNoTenant(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			ID:   "TestBiRPCv1AuthorizeEventNoTenant",
 			Time: utils.TimePointer(time.Date(2016, time.January, 5, 18, 30, 49, 0, time.UTC)),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"Account":     "1001",
 				"Category":    "call",
 				"Destination": "1003",
@@ -2828,7 +2828,7 @@ func TestBiRPCv1TerminateSessionNoTenant(t *testing.T) {
 	}
 	cfg.ChargerSCfg().Enabled = true
 	cfg.SessionSCfg().ChargerSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)}
-	clMock := clMock(func(_ *context.Context, _ string, args interface{}, reply interface{}) error {
+	clMock := clMock(func(_ *context.Context, _ string, args any, reply any) error {
 		rply, cancast := reply.(*[]*engine.ChrgSProcessEventReply)
 		if !cancast {
 			return fmt.Errorf("can't cast")
@@ -2857,7 +2857,7 @@ func TestBiRPCv1TerminateSessionNoTenant(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			ID:   "TestBiRPCv1AuthorizeEventNoTenant",
 			Time: utils.TimePointer(time.Date(2016, time.January, 5, 18, 30, 49, 0, time.UTC)),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"Account":     "1001",
 				"Category":    "call",
 				"Destination": "1003",
@@ -2882,7 +2882,7 @@ func TestBiRPCv1ProcessMessageNoTenant(t *testing.T) {
 	}
 	cfg.AttributeSCfg().Enabled = true
 	cfg.SessionSCfg().AttrSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.Attributes)}
-	clMock := clMock(func(_ *context.Context, _ string, args interface{}, reply interface{}) error {
+	clMock := clMock(func(_ *context.Context, _ string, args any, reply any) error {
 		rply, cancast := reply.(*engine.AttrSProcessEventReply)
 		if !cancast {
 			return fmt.Errorf("can't cast")
@@ -2899,7 +2899,7 @@ func TestBiRPCv1ProcessMessageNoTenant(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "TestBiRPCv1AuthorizeEventNoTenant",
 				Time:   utils.TimePointer(time.Date(2016, time.January, 5, 18, 30, 49, 0, time.UTC)),
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					"Account":     "1001",
 					"Category":    "call",
 					"Destination": "1003",
@@ -2926,7 +2926,7 @@ func TestBiRPCv1ProcessMessageNoTenant(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			ID:   "TestBiRPCv1AuthorizeEventNoTenant",
 			Time: utils.TimePointer(time.Date(2016, time.January, 5, 18, 30, 49, 0, time.UTC)),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"Account":     "1001",
 				"Category":    "call",
 				"Destination": "1003",
@@ -2953,7 +2953,7 @@ func TestBiRPCv1ProcessEventNoTenant(t *testing.T) {
 	}
 	cfg.AttributeSCfg().Enabled = true
 	cfg.SessionSCfg().AttrSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.Attributes)}
-	clMock := clMock(func(_ *context.Context, _ string, args interface{}, reply interface{}) error {
+	clMock := clMock(func(_ *context.Context, _ string, args any, reply any) error {
 		rply, cancast := reply.(*engine.AttrSProcessEventReply)
 		if !cancast {
 			return fmt.Errorf("can't cast")
@@ -2970,7 +2970,7 @@ func TestBiRPCv1ProcessEventNoTenant(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "TestBiRPCv1AuthorizeEventNoTenant",
 				Time:   utils.TimePointer(time.Date(2016, time.January, 5, 18, 30, 49, 0, time.UTC)),
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					"Account":     "1001",
 					"Category":    "call",
 					"Destination": "1003",
@@ -2997,7 +2997,7 @@ func TestBiRPCv1ProcessEventNoTenant(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			ID:   "TestBiRPCv1AuthorizeEventNoTenant",
 			Time: utils.TimePointer(time.Date(2016, time.January, 5, 18, 30, 49, 0, time.UTC)),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"Account":     "1001",
 				"Category":    "call",
 				"Destination": "1003",

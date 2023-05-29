@@ -49,6 +49,6 @@ func (schdSv1 *SchedulerSv1) Ping(ign *utils.CGREventWithArgDispatcher, reply *s
 
 // Call implements birpc.ClientConnector interface for internal RPC
 func (schdSv1 *SchedulerSv1) Call(ctx *context.Context, serviceMethod string,
-	args interface{}, reply interface{}) error {
+	args any, reply any) error {
 	return utils.APIerRPCCall(schdSv1, serviceMethod, args, reply)
 }

@@ -45,7 +45,7 @@ var (
 			CGREvent: &utils.CGREvent{ // matching Charger1
 				Tenant: "cgrates.org",
 				ID:     "event1",
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					utils.Account: "1001",
 				},
 			},
@@ -54,7 +54,7 @@ var (
 			CGREvent: &utils.CGREvent{ // no matching
 				Tenant: "cgrates.org",
 				ID:     "event1",
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					utils.Account:   "1010",
 					"DistinctMatch": "cgrates",
 				},
@@ -242,7 +242,7 @@ func testChargerSGetChargersForEvent2(t *testing.T) {
 			CGREvent: &utils.CGREvent{ // matching Charger1
 				Tenant: "cgrates.org",
 				ID:     "event1",
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					utils.Account: "1015",
 					utils.Usage:   1,
 				},
@@ -263,7 +263,7 @@ func testChargerSProcessEvent(t *testing.T) {
 			CGREvent: &utils.CGREvent{ // matching Charger1
 				Tenant: "cgrates.org",
 				ID:     "event1",
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					utils.Account: "1001",
 					"Password":    "CGRateS.org",
 					"RunID":       utils.MetaDefault,

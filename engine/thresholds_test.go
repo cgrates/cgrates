@@ -98,7 +98,7 @@ var (
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "Ev1",
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					"Threshold": "TH_1",
 					"Weight":    "10.0",
 				},
@@ -108,7 +108,7 @@ var (
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "Ev1",
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					"Threshold": "TH_2",
 					"Weight":    "20.0",
 				},
@@ -118,7 +118,7 @@ var (
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "Ev1",
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					"Threshold": "ThresholdPrefix123",
 				},
 			},
@@ -408,7 +408,7 @@ func TestThresholdSProcessEvent22(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "event1",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.EventType:     utils.AccountUpdate,
 				utils.Account:       "1002",
 				utils.AllowNegative: true,
@@ -472,7 +472,7 @@ func TestThresholdForEvent(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSesItProccesCDR",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Tenant:      "cgrates.org",
 				utils.Category:    "call",
 				utils.ToR:         utils.VOICE,
@@ -612,7 +612,7 @@ func TestThresholdProcessEvent2(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testRPCMethodsProcessCDR",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Tenant:      "cgrates.org",
 				utils.ToR:         utils.VOICE,
 				utils.OriginID:    "testRPCMethodsProcessCDR",
@@ -783,7 +783,7 @@ func TestV1ProcessEventErrs(t *testing.T) {
 				CGREvent: &utils.CGREvent{
 					Tenant: "cgrates.org",
 					ID:     "ProcessEvent",
-					Event: map[string]interface{}{
+					Event: map[string]any{
 						utils.EventType:     utils.AccountUpdate,
 						utils.Account:       "1002",
 						utils.AllowNegative: true,
@@ -850,7 +850,7 @@ func TestThSProcessEventMaxHits(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "ProcessEvent",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Tenant:      "cgrates.org",
 				utils.Category:    "call",
 				utils.ToR:         utils.VOICE,

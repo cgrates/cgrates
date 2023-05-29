@@ -36,7 +36,7 @@ type AnalyzerSv1 struct {
 
 // Call implements birpc.ClientConnector interface for internal RPC
 func (aSv1 *AnalyzerSv1) Call(ctx *context.Context, serviceMethod string,
-	args interface{}, reply interface{}) error {
+	args any, reply any) error {
 	return utils.APIerRPCCall(aSv1, serviceMethod, args, reply)
 }
 

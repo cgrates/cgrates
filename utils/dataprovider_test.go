@@ -29,7 +29,7 @@ func TestDPDynamicInterface(t *testing.T) {
 		"Field3": NavigableMap2{"Field4": NewNMData("Val")},
 		"Field5": &NMSlice{NewNMData(10), NewNMData(101)},
 	}
-	var expected interface{} = "Field5[1]"
+	var expected any = "Field5[1]"
 	if rply, err := DPDynamicInterface("Field5[1]", nm); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, rply) {
@@ -52,7 +52,7 @@ func TestDPDynamicString(t *testing.T) {
 		"Field3": NavigableMap2{"Field4": NewNMData("Val")},
 		"Field5": &NMSlice{NewNMData(10), NewNMData(101)},
 	}
-	var expected interface{} = "Field5[1]"
+	var expected any = "Field5[1]"
 	if rply, err := DPDynamicString("Field5[1]", nm); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, rply) {
@@ -136,14 +136,14 @@ func TestComposeNavMapVal(t *testing.T) {
 
 // mock NMInterface structure
 
-type mockNMInterface struct{ data interface{} }
+type mockNMInterface struct{ data any }
 
 func (nmi *mockNMInterface) String() string {
 	return IfaceAsString(nmi.data)
 }
 
 // Interface returns the wraped interface
-func (nmi *mockNMInterface) Interface() interface{} {
+func (nmi *mockNMInterface) Interface() any {
 	return nmi.data
 }
 

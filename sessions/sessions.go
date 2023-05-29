@@ -1552,7 +1552,7 @@ func (sS *SessionS) endSession(s *Session, tUsage, lastUsage *time.Duration,
 			}
 			// set cost fields
 			sr.Event[utils.Cost] = sr.EventCost.GetCost()
-			sr.Event[utils.CostDetails] = utils.ToJSON(sr.EventCost) // avoid map[string]interface{} when decoding
+			sr.Event[utils.CostDetails] = utils.ToJSON(sr.EventCost) // avoid map[string]any when decoding
 			sr.Event[utils.CostSource] = utils.MetaSessionS
 		}
 		// Set Usage field
@@ -1603,13 +1603,13 @@ func (sS *SessionS) chargeEvent(tnt string, ev engine.MapEvent,
 // APIs start here
 
 // Call is part of RpcClientConnection interface
-func (sS *SessionS) Call(ctx *context.Context, serviceMethod string, args interface{}, reply interface{}) error {
+func (sS *SessionS) Call(ctx *context.Context, serviceMethod string, args any, reply any) error {
 	return sS.CallBiRPC(nil, serviceMethod, args, reply)
 }
 
 // CallBiRPC is part of utils.BiRPCServer interface to help internal connections do calls over birpc.ClientConnector interface
 func (sS *SessionS) CallBiRPC(clnt birpc.ClientConnector,
-	serviceMethod string, args interface{}, reply interface{}) error {
+	serviceMethod string, args any, reply any) error {
 	parts := strings.Split(serviceMethod, ".")
 	if len(parts) != 2 {
 		return rpcclient.ErrUnsupporteServiceMethod

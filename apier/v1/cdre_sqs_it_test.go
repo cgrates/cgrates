@@ -198,7 +198,7 @@ func testSQSAddCDRs(t *testing.T) {
 
 func testSQSExportCDRs(t *testing.T) {
 	attr := ArgExportCDRs{
-		ExportArgs: map[string]interface{}{
+		ExportArgs: map[string]any{
 			utils.ExportTemplate: "sqs_exporter",
 		},
 		Verbose: true,

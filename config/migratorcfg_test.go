@@ -100,7 +100,7 @@ func TestMigratorCgrCfgAsMapInterface(t *testing.T) {
 	},
 }`
 	var users_filters []string
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		"out_datadb_type":           "*redis",
 		"out_datadb_host":           "127.0.0.1",
 		"out_datadb_port":           "6379",
@@ -146,7 +146,7 @@ func TestMigratorCgrCfgAsMapInterface(t *testing.T) {
 		},
 	}`
 
-	eMap = map[string]interface{}{
+	eMap = map[string]any{
 		"out_datadb_type":           "*redis",
 		"out_datadb_host":           "127.0.0.1",
 		"out_datadb_port":           "6379",

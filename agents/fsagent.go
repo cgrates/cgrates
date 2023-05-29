@@ -373,7 +373,7 @@ func (sm *FSsessions) Shutdown() (err error) {
 }
 
 // birpc.ClientConnector interface
-func (sm *FSsessions) Call(ctx *context.Context, serviceMethod string, args interface{}, reply interface{}) error {
+func (sm *FSsessions) Call(ctx *context.Context, serviceMethod string, args any, reply any) error {
 	return utils.RPCCall(sm, serviceMethod, args, reply)
 }
 

@@ -51,7 +51,7 @@ func (self *CmdGetResourceForEvent) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdGetResourceForEvent) RpcParams(reset bool) interface{} {
+func (self *CmdGetResourceForEvent) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &utils.ArgRSv1ResourceUsage{ArgDispatcher: new(utils.ArgDispatcher)}
 	}
@@ -66,7 +66,7 @@ func (self *CmdGetResourceForEvent) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdGetResourceForEvent) RpcResult() interface{} {
+func (self *CmdGetResourceForEvent) RpcResult() any {
 	var atr *engine.Resources
 	return &atr
 }

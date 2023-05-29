@@ -90,7 +90,7 @@ func TestDiameterAgentCfgAsMapInterface(t *testing.T) {
 		"request_processors": [],
 	},
 }`
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		"asr_template":         "",
 		"concurrent_requests":  0,
 		"dictionaries_path":    "/usr/share/cgrates/diameter/dict/",
@@ -103,8 +103,8 @@ func TestDiameterAgentCfgAsMapInterface(t *testing.T) {
 		"sessions_conns":       []string{"*internal"},
 		"synced_conn_requests": true,
 		"vendor_id":            0,
-		"templates":            map[string][]map[string]interface{}{},
-		"request_processors":   []map[string]interface{}{},
+		"templates":            map[string][]map[string]any{},
+		"request_processors":   []map[string]any{},
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)

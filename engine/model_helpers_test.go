@@ -1639,14 +1639,14 @@ func TestAPItoDispatcherProfile(t *testing.T) {
 			ActivationTime: "2014-07-14T14:35:00Z",
 			ExpiryTime:     "",
 		},
-		StrategyParams: []interface{}{},
+		StrategyParams: []any{},
 		Weight:         20,
 		Hosts: []*utils.TPDispatcherHostProfile{
 			{
 				ID:        "C1",
 				FilterIDs: []string{},
 				Weight:    10,
-				Params:    []interface{}{"192.168.54.203", "*ratio:2"},
+				Params:    []any{"192.168.54.203", "*ratio:2"},
 				Blocker:   false,
 			},
 		},
@@ -1661,14 +1661,14 @@ func TestAPItoDispatcherProfile(t *testing.T) {
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
 		},
-		StrategyParams: map[string]interface{}{},
+		StrategyParams: map[string]any{},
 		Weight:         20,
 		Hosts: DispatcherHostProfiles{
 			&DispatcherHostProfile{
 				ID:        "C1",
 				FilterIDs: []string{},
 				Weight:    10,
-				Params:    map[string]interface{}{"0": "192.168.54.203", utils.MetaRatio: "2"},
+				Params:    map[string]any{"0": "192.168.54.203", utils.MetaRatio: "2"},
 				Blocker:   false,
 			},
 		},
@@ -1692,21 +1692,21 @@ func TestAPItoModelTPDispatcher(t *testing.T) {
 			ActivationTime: "2014-07-14T14:35:00Z",
 			ExpiryTime:     "",
 		},
-		StrategyParams: []interface{}{},
+		StrategyParams: []any{},
 		Weight:         20,
 		Hosts: []*utils.TPDispatcherHostProfile{
 			{
 				ID:        "C1",
 				FilterIDs: []string{},
 				Weight:    10,
-				Params:    []interface{}{"192.168.54.203"},
+				Params:    []any{"192.168.54.203"},
 				Blocker:   false,
 			},
 			{
 				ID:        "C2",
 				FilterIDs: []string{},
 				Weight:    10,
-				Params:    []interface{}{"192.168.54.204"},
+				Params:    []any{"192.168.54.204"},
 				Blocker:   false,
 			},
 		},

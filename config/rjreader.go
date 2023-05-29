@@ -422,7 +422,7 @@ func (rjr *rjReader) getJsonOffsetLine(offset int64) (line, character int64) {
 }
 
 // Loads the json config out of rjReader
-func (rjr *rjReader) Decode(cfg interface{}) (err error) {
+func (rjr *rjReader) Decode(cfg any) (err error) {
 	if err = json.NewDecoder(rjr).Decode(cfg); err != nil {
 		return rjr.HandleJSONError(err)
 	}

@@ -136,7 +136,7 @@ func testRPCITLclRpcConnPoolFirst(t *testing.T) {
 
 // Connect rpc client to rater
 func testRPCITLclStatusSecondEngine(t *testing.T) {
-	var status map[string]interface{}
+	var status map[string]any
 	if err := rpcPoolFirst.Call(context.Background(), utils.CoreSv1Status, utils.TenantWithArgDispatcher{}, &status); err != nil {
 		t.Error(err)
 	} else if status[utils.NodeID].(string) == "" {
@@ -158,7 +158,7 @@ func testRPCITLclStartFirstEngine(t *testing.T) {
 
 // Connect rpc client to rater
 func testRPCITLclStatusFirstInitial(t *testing.T) {
-	var status map[string]interface{}
+	var status map[string]any
 	if err := rpcPoolFirst.Call(context.Background(), utils.CoreSv1Status, utils.TenantWithArgDispatcher{}, &status); err != nil {
 		t.Error(err)
 	} else if status[utils.NodeID].(string) == "" {
@@ -179,7 +179,7 @@ func testRPCITLclStatusFirstFailover(t *testing.T) {
 		t.Error(err)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
-	var status map[string]interface{}
+	var status map[string]any
 	if err := rpcPoolFirst.Call(context.Background(), utils.CoreSv1Status, utils.TenantWithArgDispatcher{}, &status); err != nil {
 		t.Error(err)
 	} else if status[utils.NodeID].(string) == "" {
@@ -198,7 +198,7 @@ func testRPCITLclStatusFirstFailback(t *testing.T) {
 	if ral1, err = engine.StartEngine(rpcITCfgPath1, *waitRater); err != nil {
 		t.Fatal(err)
 	}
-	var status map[string]interface{}
+	var status map[string]any
 	if err := rpcPoolFirst.Call(context.Background(), utils.CoreSv1Status, utils.TenantWithArgDispatcher{}, &status); err != nil {
 		t.Error(err)
 	} else if status[utils.NodeID].(string) == node2 {
@@ -220,7 +220,7 @@ func testRPCITLclTDirectedRPC(t *testing.T) {
 }
 
 // func testRPCITLclTimeout(t *testing.T) {
-// 	var status map[string]interface{}
+// 	var status map[string]any
 // 	if err := rpcPoolFirst.Call(utils.CoreSv1Status, "10s", &status); err == nil {
 // 		t.Error("Expecting timeout")
 // 	} else if err.Error() != rpcclient.ErrReplyTimeout.Error() {
@@ -236,7 +236,7 @@ func testRPCITLclRpcConnPoolBcast(t *testing.T) {
 }
 
 func testRPCITLclBcastStatusInitial(t *testing.T) {
-	var status map[string]interface{}
+	var status map[string]any
 	if err := rpcPoolBroadcast.Call(context.Background(), utils.CoreSv1Status, utils.TenantWithArgDispatcher{}, &status); err != nil {
 		t.Error(err)
 	} else if status[utils.NodeID].(string) == "" {
@@ -254,7 +254,7 @@ func testRPCITLclBcastStatusNoRals1(t *testing.T) {
 		t.Error(err)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
-	var status map[string]interface{}
+	var status map[string]any
 	if err := rpcPoolBroadcast.Call(context.Background(), utils.CoreSv1Status, utils.TenantWithArgDispatcher{}, &status); err != nil {
 		t.Error(err)
 	} else if status[utils.NodeID].(string) == "" {
@@ -272,7 +272,7 @@ func testRPCITLclBcastStatusBcastNoRals(t *testing.T) {
 		t.Error(err)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
-	var status map[string]interface{}
+	var status map[string]any
 	if err := rpcPoolBroadcast.Call(context.Background(), utils.CoreSv1Status, utils.TenantWithArgDispatcher{}, &status); err == nil {
 		t.Error("Should get error")
 	}
@@ -282,7 +282,7 @@ func testRPCITLclBcastStatusRALs2Up(t *testing.T) {
 	if ral2, err = engine.StartEngine(rpcITCfgPath2, *waitRater); err != nil {
 		t.Fatal(err)
 	}
-	var status map[string]interface{}
+	var status map[string]any
 	if err := rpcPoolBroadcast.Call(context.Background(), utils.CoreSv1Status, utils.TenantWithArgDispatcher{}, &status); err != nil {
 		t.Error(err)
 	} else if status[utils.NodeID].(string) == "" {
@@ -299,7 +299,7 @@ func testRPCITLclStatusBcastRALs1Up(t *testing.T) {
 	if ral1, err = engine.StartEngine(rpcITCfgPath1, *waitRater); err != nil {
 		t.Fatal(err)
 	}
-	var status map[string]interface{}
+	var status map[string]any
 	if err := rpcPoolBroadcast.Call(context.Background(), utils.CoreSv1Status, utils.TenantWithArgDispatcher{}, &status); err != nil {
 		t.Error(err)
 	} else if status[utils.NodeID].(string) == "" {
@@ -372,7 +372,7 @@ func TestRPCITRmtStatusFirstInitial(t *testing.T) {
 	if !*testRemoteRALs {
 		return
 	}
-	var status map[string]interface{}
+	var status map[string]any
 	if err := rpcPoolFirst.Call(context.Background(), utils.CoreSv1Status, utils.TenantWithArgDispatcher{}, &status); err != nil {
 		t.Error(err)
 	} else if status[utils.NodeID].(string) == "" {
@@ -396,7 +396,7 @@ func TestRPCITRmtStatusFirstFailover(t *testing.T) {
 		time.Sleep(1 * time.Second)
 	}
 	fmt.Println("\n\nExecuting query ...")
-	var status map[string]interface{}
+	var status map[string]any
 	if err := rpcPoolFirst.Call(context.Background(), utils.CoreSv1Status, utils.TenantWithArgDispatcher{}, &status); err != nil {
 		t.Error(err)
 	} else if status[utils.NodeID].(string) == "" {
@@ -424,7 +424,7 @@ func TestRPCITRmtStatusFirstFailback(t *testing.T) {
 		time.Sleep(1 * time.Second)
 	}
 	fmt.Println("\n\nExecuting query ...")
-	var status map[string]interface{}
+	var status map[string]any
 	if err := rpcPoolFirst.Call(context.Background(), utils.CoreSv1Status, utils.TenantWithArgDispatcher{}, &status); err != nil {
 		t.Error(err)
 	} else if status[utils.NodeID].(string) == "" {

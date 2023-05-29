@@ -108,13 +108,13 @@ func TestDNSAgentCfgAsMapInterface(t *testing.T) {
 		],
 	},
 }`
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		"enabled":            false,
 		"listen":             "127.0.0.1:2053",
 		"listen_net":         "udp",
 		"sessions_conns":     []string{"*internal"},
 		"timezone":           "",
-		"request_processors": []map[string]interface{}{},
+		"request_processors": []map[string]any{},
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
@@ -157,21 +157,21 @@ func TestDNSAgentCfgAsMapInterface(t *testing.T) {
 			],
 		},
 	}`
-	eMap = map[string]interface{}{
+	eMap = map[string]any{
 		"enabled":        false,
 		"listen":         "127.0.0.1:2053",
 		"listen_net":     "udp",
 		"sessions_conns": []string{"*internal"},
 		"timezone":       "UTC",
-		"request_processors": []map[string]interface{}{
+		"request_processors": []map[string]any{
 			{
 				"id":             "OutboundAUTHDryRun",
 				"filters":        []string{"*string:~*req.request_type:OutboundAUTH", "*string:~*req.Msisdn:497700056231"},
 				"tenant":         "cgrates.org",
 				"flags":          map[string][]string{"*dryrun": {}},
 				"Timezone":       "",
-				"request_fields": []map[string]interface{}{},
-				"reply_fields": []map[string]interface{}{
+				"request_fields": []map[string]any{},
+				"reply_fields": []map[string]any{
 					{"tag": "Allow", "path": "*rep.response.Allow", "type": "*constant", "value": "1", "mandatory": true},
 					{"tag": "Concatenated1", "path": "*rep.response.Concatenated", "type": "*composed", "value": "~*req.MCC;/", "mandatory": true},
 					{"tag": "Concatenated2", "path": "*rep.response.Concatenated", "type": "*composed", "value": "Val1"},

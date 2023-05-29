@@ -142,7 +142,7 @@ func testSessionsItTerminatUnexist(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsItTerminatUnexist",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.EVENT_NAME:       "TerminateEvent",
 				utils.ToR:              utils.VOICE,
 				utils.OriginID:         "123451",
@@ -215,7 +215,7 @@ func testSessionsItUpdateUnexist(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsItUpdateUnexist",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.EVENT_NAME:       "UpdateEvent",
 				utils.ToR:              utils.VOICE,
 				utils.OriginID:         "123789",
@@ -255,7 +255,7 @@ func testSessionsItUpdateUnexist(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsItTerminatUnexist",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.EVENT_NAME:  "TerminateEvent",
 				utils.ToR:         utils.VOICE,
 				utils.OriginID:    "123789",
@@ -279,7 +279,7 @@ func testSessionsItUpdateUnexist(t *testing.T) {
 
 func testSessionsItTerminatePassive(t *testing.T) {
 	//create the event for session
-	sEv := engine.NewMapEvent(map[string]interface{}{
+	sEv := engine.NewMapEvent(map[string]any{
 		utils.EVENT_NAME:  "UpdateEvent",
 		utils.ToR:         utils.VOICE,
 		utils.OriginID:    "123789",
@@ -335,7 +335,7 @@ func testSessionsItTerminatePassive(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsItTerminatUnexist",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.EVENT_NAME:  "TerminateEvent",
 				utils.ToR:         utils.VOICE,
 				utils.OriginID:    "123789",
@@ -377,7 +377,7 @@ func testSessionsItEventCostCompressing(t *testing.T) {
 		Account:     "TestSessionsItEventCostCompressing",
 		Value:       float64(5) * float64(time.Second),
 		BalanceType: utils.VOICE,
-		Balance: map[string]interface{}{
+		Balance: map[string]any{
 			utils.ID:            "TestSessionsItEventCostCompressing",
 			utils.RatingSubject: "*zero50ms",
 		},
@@ -394,7 +394,7 @@ func testSessionsItEventCostCompressing(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsItEventCostCompressing",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.OriginID:    "TestSessionsItEventCostCompressing",
 				utils.Account:     "TestSessionsItEventCostCompressing",
 				utils.Destination: "1002",
@@ -417,7 +417,7 @@ func testSessionsItEventCostCompressing(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsItEventCostCompressing",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.OriginID: "TestSessionsItEventCostCompressing",
 				utils.Usage:    "1s",
 			},
@@ -441,7 +441,7 @@ func testSessionsItEventCostCompressing(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsDataLastUsedData",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.OriginID:    "TestSessionsItEventCostCompressing",
 				utils.Account:     "TestSessionsItEventCostCompressing",
 				utils.Destination: "1002",

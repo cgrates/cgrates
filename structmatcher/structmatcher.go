@@ -67,7 +67,7 @@ const (
 	CondRSR = "*rsr"
 )
 
-func NewErrInvalidArgument(arg interface{}) error {
+func NewErrInvalidArgument(arg any) error {
 	return fmt.Errorf("INVALID_ARGUMENT: %v", arg)
 }
 
@@ -76,11 +76,11 @@ type StringMap map[string]bool
 var (
 	ErrParserError = errors.New("PARSER_ERROR")
 
-	operatorMap = map[string]func(field, value interface{}) (bool, error){
-		CondEQ: func(field, value interface{}) (bool, error) {
+	operatorMap = map[string]func(field, value any) (bool, error){
+		CondEQ: func(field, value any) (bool, error) {
 			return value == field, nil
 		},
-		CondGT: func(field, value interface{}) (bool, error) {
+		CondGT: func(field, value any) (bool, error) {
 			var of, vf float64
 			var ok bool
 			if of, ok = field.(float64); !ok {
@@ -91,7 +91,7 @@ var (
 			}
 			return of > vf, nil
 		},
-		CondGTE: func(field, value interface{}) (bool, error) {
+		CondGTE: func(field, value any) (bool, error) {
 			var of, vf float64
 			var ok bool
 			if of, ok = field.(float64); !ok {
@@ -102,7 +102,7 @@ var (
 			}
 			return of >= vf, nil
 		},
-		CondLT: func(field, value interface{}) (bool, error) {
+		CondLT: func(field, value any) (bool, error) {
 			var of, vf float64
 			var ok bool
 			if of, ok = field.(float64); !ok {
@@ -113,7 +113,7 @@ var (
 			}
 			return of < vf, nil
 		},
-		CondLTE: func(field, value interface{}) (bool, error) {
+		CondLTE: func(field, value any) (bool, error) {
 			var of, vf float64
 			var ok bool
 			if of, ok = field.(float64); !ok {
@@ -124,7 +124,7 @@ var (
 			}
 			return of <= vf, nil
 		},
-		CondEXP: func(field, value interface{}) (bool, error) {
+		CondEXP: func(field, value any) (bool, error) {
 			var expDate time.Time
 			var ok bool
 			if expDate, ok = field.(time.Time); !ok {
@@ -140,14 +140,14 @@ var (
 				return expDate.IsZero() || expDate.After(time.Now()), nil
 			}
 		},
-		CondHAS: func(field, value interface{}) (bool, error) {
+		CondHAS: func(field, value any) (bool, error) {
 			var strMap StringMap
 			var ok bool
 			if strMap, ok = field.(StringMap); !ok {
 				return false, NewErrInvalidArgument(field)
 			}
-			var strSlice []interface{}
-			if strSlice, ok = value.([]interface{}); !ok {
+			var strSlice []any
+			if strSlice, ok = value.([]any); !ok {
 				return false, NewErrInvalidArgument(value)
 			}
 			for _, str := range strSlice {
@@ -157,7 +157,7 @@ var (
 			}
 			return true, nil
 		},
-		CondRSR: func(field, value interface{}) (bool, error) {
+		CondRSR: func(field, value any) (bool, error) {
 			fltr, err := utils.NewRSRFilter(value.(string))
 			if err != nil {
 				return false, err
@@ -173,7 +173,7 @@ type compositeElement interface {
 }
 
 type element interface {
-	checkStruct(interface{}) (bool, error)
+	checkStruct(any) (bool, error)
 }
 
 type operatorSlice struct {
@@ -185,7 +185,7 @@ func (os *operatorSlice) addChild(ce element) error {
 	os.slice = append(os.slice, ce)
 	return nil
 }
-func (os *operatorSlice) checkStruct(o interface{}) (bool, error) {
+func (os *operatorSlice) checkStruct(o any) (bool, error) {
 	switch os.operator {
 	case CondOR:
 		for _, cond := range os.slice {
@@ -224,7 +224,7 @@ func (ks *keyStruct) addChild(ce element) error {
 	ks.elem = ce
 	return nil
 }
-func (ks *keyStruct) checkStruct(o interface{}) (bool, error) {
+func (ks *keyStruct) checkStruct(o any) (bool, error) {
 	obj := reflect.ValueOf(o)
 	if obj.Kind() == reflect.Ptr {
 		obj = obj.Elem()
@@ -238,10 +238,10 @@ func (ks *keyStruct) checkStruct(o interface{}) (bool, error) {
 
 type operatorValue struct {
 	operator string
-	value    interface{}
+	value    any
 }
 
-func (ov *operatorValue) checkStruct(o interface{}) (bool, error) {
+func (ov *operatorValue) checkStruct(o any) (bool, error) {
 	if f, ok := operatorMap[ov.operator]; ok {
 		return f(o, ov.value)
 	}
@@ -250,10 +250,10 @@ func (ov *operatorValue) checkStruct(o interface{}) (bool, error) {
 
 type keyValue struct {
 	key   string
-	value interface{}
+	value any
 }
 
-func (kv *keyValue) checkStruct(o interface{}) (bool, error) {
+func (kv *keyValue) checkStruct(o any) (bool, error) {
 	obj := reflect.ValueOf(o)
 	if obj.Kind() == reflect.Ptr {
 		obj = obj.Elem()
@@ -267,7 +267,7 @@ func (kv *keyValue) checkStruct(o interface{}) (bool, error) {
 
 type trueElement struct{}
 
-func (te *trueElement) checkStruct(o interface{}) (bool, error) {
+func (te *trueElement) checkStruct(o any) (bool, error) {
 	return true, nil
 }
 
@@ -275,7 +275,7 @@ func isOperator(s string) bool {
 	return strings.HasPrefix(s, "*")
 }
 
-func notEmpty(x interface{}) bool {
+func notEmpty(x any) bool {
 	return !reflect.DeepEqual(x, reflect.Zero(reflect.TypeOf(x)).Interface())
 }
 
@@ -289,24 +289,24 @@ func NewStructMatcher(q string) (sm *StructMatcher, err error) {
 	return
 }
 
-func (sm *StructMatcher) load(a map[string]interface{}, parentElement compositeElement) (element, error) {
+func (sm *StructMatcher) load(a map[string]any, parentElement compositeElement) (element, error) {
 	for key, value := range a {
 		var currentElement element
 		switch t := value.(type) {
-		case []interface{}:
+		case []any:
 			if key == CondHAS {
 				currentElement = &operatorValue{operator: key, value: t}
 			} else {
 				currentElement = &operatorSlice{operator: key}
 				for _, e := range t {
-					sm.load(e.(map[string]interface{}), currentElement.(compositeElement))
+					sm.load(e.(map[string]any), currentElement.(compositeElement))
 				}
 			}
-		case map[string]interface{}:
+		case map[string]any:
 			currentElement = &keyStruct{key: key}
 			//log.Print("map: ", t)
 			sm.load(t, currentElement.(compositeElement))
-		case interface{}:
+		case any:
 			if isOperator(key) {
 				currentElement = &operatorValue{operator: key, value: t}
 			} else {
@@ -331,7 +331,7 @@ func (sm *StructMatcher) load(a map[string]interface{}, parentElement compositeE
 }
 
 func (sm *StructMatcher) Parse(s string) (err error) {
-	a := make(map[string]interface{})
+	a := make(map[string]any)
 	if len(s) != 0 {
 		if err := json.Unmarshal([]byte([]byte(s)), &a); err != nil {
 			return err
@@ -343,7 +343,7 @@ func (sm *StructMatcher) Parse(s string) (err error) {
 	return
 }
 
-func (sm *StructMatcher) Match(o interface{}) (bool, error) {
+func (sm *StructMatcher) Match(o any) (bool, error) {
 	if sm.rootElement == nil {
 		return false, ErrParserError
 	}

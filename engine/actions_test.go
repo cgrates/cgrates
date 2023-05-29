@@ -2433,7 +2433,7 @@ func (trpcp *TestRPCParameters) Hopa(in Attr, out *float64) error {
 	return nil
 }
 
-func (trpcp *TestRPCParameters) Call(ctx *context.Context, serviceMethod string, args interface{}, reply interface{}) error {
+func (trpcp *TestRPCParameters) Call(ctx *context.Context, serviceMethod string, args any, reply any) error {
 	parts := strings.Split(serviceMethod, ".")
 	if len(parts) != 2 {
 		return utils.ErrNotImplemented
@@ -2684,7 +2684,7 @@ func TestActionSetDestinations(t *testing.T) {
 	}
 
 	clientConn := make(chan birpc.ClientConnector, 1)
-	clientConn <- clMock(func(ctx *context.Context, serviceMethod string, _, reply interface{}) error {
+	clientConn <- clMock(func(ctx *context.Context, serviceMethod string, _, reply any) error {
 		if serviceMethod == utils.StatSv1GetStatQueue {
 			rpl := &StatQueue{
 				Tenant: "cgrates.org",
@@ -2797,7 +2797,7 @@ type RPCMock struct {
 	args *ArgV1ProcessEvent
 }
 
-func (r *RPCMock) Call(method string, args interface{}, rply interface{}) error {
+func (r *RPCMock) Call(method string, args any, rply any) error {
 	if method != utils.CDRsV1ProcessEvent {
 		return rpcclient.ErrUnsupporteServiceMethod
 	}
@@ -2818,7 +2818,7 @@ func TestCdrLogAction(t *testing.T) {
 	schedCdrsConns = &mock
 	defer func() { schedCdrsConns = bakSch }()
 
-	var extraData interface{}
+	var extraData any
 	acc := &Account{
 		ID: "cgrates.org:1001",
 		BalanceMap: map[string]Balances{
@@ -2866,7 +2866,7 @@ func TestCdrLogAction(t *testing.T) {
 	expCgrEv := utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     mock.args.CGREvent.ID,
-		Event: map[string]interface{}{
+		Event: map[string]any
 			"Account":      "1001",
 			"ActionID":     "CdrDebit",
 			"AnswerTime":   mock.args.CGREvent.Event["AnswerTime"],

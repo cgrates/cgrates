@@ -1225,7 +1225,7 @@ func (ms *MongoStorage) AddLoadHistory(ldInst *utils.LoadInstance,
 	if kv.Value != nil {
 		existingLoadHistory = kv.Value
 	}
-	_, err := guardian.Guardian.Guard(func() (interface{}, error) { // Make sure we do it locked since other instance can modify history while we read it
+	_, err := guardian.Guardian.Guard(func() (any, error) { // Make sure we do it locked since other instance can modify history while we read it
 		// insert on first position
 		existingLoadHistory = append(existingLoadHistory, nil)
 		copy(existingLoadHistory[1:], existingLoadHistory[0:])

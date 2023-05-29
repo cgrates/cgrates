@@ -148,7 +148,7 @@ func testV1FIdxCaProcessEventWithNotFound(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "event1",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.EventType: utils.BalanceUpdate,
 				utils.Account:   "1001"}}}
 	var thIDs []string
@@ -213,7 +213,7 @@ func testV1FIdxCaSetThresholdProfile(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "event1",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.EventType: utils.BalanceUpdate,
 				utils.Account:   "1001"}}}
 	var thIDs []string
@@ -234,7 +234,7 @@ func testV1FIdxCaGetThresholdFromTP(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "event1",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.EventType: utils.BalanceUpdate,
 				utils.Account:   "1001",
 				utils.BalanceID: utils.MetaDefault,
@@ -303,7 +303,7 @@ func testV1FIdxCaUpdateThresholdProfile(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "event1",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.EventType: utils.AccountUpdate,
 				utils.Account:   "1001"}}}
 	var thIDs []string
@@ -318,7 +318,7 @@ func testV1FIdxCaUpdateThresholdProfile(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "event1",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.EventType: utils.AccountUpdate,
 				utils.Account:   "1002"}}}
 	eIDs = []string{"TEST_PROFILE1"}
@@ -382,7 +382,7 @@ func testV1FIdxCaUpdateThresholdProfileFromTP(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "event1",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Account:   "1002",
 				utils.EventType: utils.BalanceUpdate}}}
 	var thIDs []string
@@ -395,7 +395,7 @@ func testV1FIdxCaUpdateThresholdProfileFromTP(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "event3",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Account:   "1003",
 				utils.EventType: utils.BalanceUpdate}}}
 	eIDs := []string{"THD_ACNT_BALANCE_1"}
@@ -413,7 +413,7 @@ func testV1FIdxCaRemoveThresholdProfile(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "event8",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Account:   "1002",
 				utils.EventType: utils.AccountUpdate}}}
 	var thIDs []string
@@ -428,7 +428,7 @@ func testV1FIdxCaRemoveThresholdProfile(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "event9",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Account:   "1003",
 				utils.EventType: utils.BalanceUpdate}}}
 	eIDs = []string{"THD_ACNT_BALANCE_1"}
@@ -481,7 +481,7 @@ func testV1FIdxCaGetStatQueuesWithNotFound(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "event1",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.EventType: utils.AccountUpdate,
 				utils.Account:   "1001",
 			},
@@ -553,7 +553,7 @@ func testV1FIdxCaSetStatQueueProfile(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "event1",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.EventType: utils.AccountUpdate,
 				utils.Account:   "1001",
 				"Val":           10,
@@ -577,7 +577,7 @@ func testV1FIdxCaGetStatQueuesFromTP(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "event2",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Account:    "1002",
 				utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 				utils.Usage:      time.Duration(45 * time.Second),
@@ -594,7 +594,7 @@ func testV1FIdxCaGetStatQueuesFromTP(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "event3",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Account:    "1002",
 				utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 				utils.Usage:      time.Duration(45 * time.Second),
@@ -612,7 +612,7 @@ func testV1FIdxCaGetStatQueuesFromTP(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "event1",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.EventType:  utils.AccountUpdate,
 				utils.Account:    "1001",
 				utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
@@ -630,7 +630,7 @@ func testV1FIdxCaGetStatQueuesFromTP(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "event1",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.EventType:  utils.AccountUpdate,
 				utils.Account:    "1001",
 				utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
@@ -707,7 +707,7 @@ func testV1FIdxCaUpdateStatQueueProfile(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "event1",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.EventType: utils.BalanceUpdate,
 				utils.Account:   "1003",
 				"Val":           10,
@@ -766,7 +766,7 @@ func testV1FIdxCaUpdateStatQueueProfileFromTP(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "event1",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.EventType:  utils.AccountUpdate,
 				utils.Account:    "1003",
 				utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
@@ -792,7 +792,7 @@ func testV1FIdxCaRemoveStatQueueProfile(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "event1",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.EventType: utils.BalanceUpdate,
 				utils.Account:   "1003",
 				"Val":           10,
@@ -809,7 +809,7 @@ func testV1FIdxCaRemoveStatQueueProfile(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "event1",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.EventType:  utils.AccountUpdate,
 				utils.Account:    "1003",
 				utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
@@ -869,7 +869,7 @@ func testV1FIdxCaProcessAttributeProfileEventWithNotFound(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSProcessEvent",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Account:     "3009",
 				utils.Destination: "+492511231234",
 			},
@@ -943,7 +943,7 @@ func testV1FIdxCaSetAttributeProfile(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSProcessEvent",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Account:     "1009",
 				utils.Destination: "+491511231234",
 			},
@@ -963,7 +963,7 @@ func testV1FIdxCaGetAttributeProfileFromTP(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSProcessEvent",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Account:     "1007",
 				utils.Destination: "+491511231234",
 			},
@@ -1036,7 +1036,7 @@ func testV1FIdxCaUpdateAttributeProfile(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSProcessEvent",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Account:     "2009",
 				utils.Destination: "+492511231234",
 			},
@@ -1094,7 +1094,7 @@ func testV1FIdxCaUpdateAttributeProfileFromTP(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSProcessEvent",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Account:     "3009",
 				utils.Destination: "+492511231234",
 			},
@@ -1113,7 +1113,7 @@ func testV1FIdxCaRemoveAttributeProfile(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSProcessEvent",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Account:     "3009",
 				utils.Destination: "+492511231234",
 			},
@@ -1129,7 +1129,7 @@ func testV1FIdxCaRemoveAttributeProfile(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSProcessEvent",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Account:     "2009",
 				utils.Destination: "+492511231234",
 			},
@@ -1185,7 +1185,7 @@ func testV1FIdxCaGetResourceProfileWithNotFound(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     utils.UUIDSha1Prefix(),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Account:     "1002",
 				utils.Subject:     "1001",
 				utils.Destination: "1002"},
@@ -1260,7 +1260,7 @@ func testV1FIdxCaSetResourceProfile(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     utils.UUIDSha1Prefix(),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Account:     "1001",
 				utils.Subject:     "1002",
 				utils.Destination: "1001"},
@@ -1288,7 +1288,7 @@ func testV1FIdxCaGetResourceProfileFromTP(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     utils.UUIDSha1Prefix(),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Account:     "1001",
 				utils.Subject:     "1002",
 				utils.Destination: "1001"},
@@ -1313,7 +1313,7 @@ func testV1FIdxCaGetResourceProfileFromTP(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     utils.UUIDSha1Prefix(),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Account:     "1002",
 				utils.Subject:     "1001",
 				utils.Destination: "1002"},
@@ -1388,7 +1388,7 @@ func testV1FIdxCaUpdateResourceProfile(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     utils.UUIDSha1Prefix(),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Account:     "2002",
 				utils.Subject:     "2001",
 				utils.Destination: "2002"},
@@ -1454,7 +1454,7 @@ func testV1FIdxCaUpdateResourceProfileFromTP(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     utils.UUIDSha1Prefix(),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Account:     "1002",
 				utils.Subject:     "1001",
 				utils.Destination: "1002"},
@@ -1475,7 +1475,7 @@ func testV1FIdxCaRemoveResourceProfile(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     utils.UUIDSha1Prefix(),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Account:     "2002",
 				utils.Subject:     "2001",
 				utils.Destination: "2002"},
@@ -1497,7 +1497,7 @@ func testV1FIdxCaRemoveResourceProfile(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     utils.UUIDSha1Prefix(),
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Account:     "1002",
 				utils.Subject:     "1001",
 				utils.Destination: "1002"},

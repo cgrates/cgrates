@@ -98,7 +98,7 @@ func (rs *Responder) GetCost(arg *CallDescriptorWithArgDispatcher, reply *CallCo
 	if !rs.usageAllowed(arg.ToR, arg.GetDuration()) {
 		return utils.ErrMaxUsageExceeded
 	}
-	r, e := guardian.Guardian.Guard(func() (interface{}, error) {
+	r, e := guardian.Guardian.Guard(func() (any, error) {
 		return arg.GetCost()
 	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.ACCOUNT_PREFIX+arg.GetAccountKey())
 	if r != nil {
@@ -112,7 +112,7 @@ func (rs *Responder) GetCost(arg *CallDescriptorWithArgDispatcher, reply *CallCo
 
 // GetCostOnRatingPlans is used by SupplierS to calculate the cost
 // Receive a list of RatingPlans and pick the first without error
-func (rs *Responder) GetCostOnRatingPlans(arg *utils.GetCostOnRatingPlansArgs, reply *map[string]interface{}) (err error) {
+func (rs *Responder) GetCostOnRatingPlans(arg *utils.GetCostOnRatingPlansArgs, reply *map[string]any) (err error) {
 	for _, rp := range arg.RatingPlanIDs { // loop through RatingPlans until we find one without errors
 		rPrfl := &RatingProfile{
 			Id: utils.ConcatenatedKey(utils.META_OUT,
@@ -146,7 +146,7 @@ func (rs *Responder) GetCostOnRatingPlans(arg *utils.GetCostOnRatingPlansArgs, r
 			}
 			continue
 		}
-		*reply = map[string]interface{}{
+		*reply = map[string]any{
 			utils.Cost:         cc.Cost,
 			utils.RatingPlanID: rp,
 		}
@@ -315,7 +315,7 @@ func (rs *Responder) GetMaxSessionTime(arg *CallDescriptorWithArgDispatcher, rep
 }
 
 func (rs *Responder) GetMaxSessionTimeOnAccounts(arg *utils.GetMaxSessionTimeOnAccountsArgs,
-	reply *map[string]interface{}) (err error) {
+	reply *map[string]any) (err error) {
 	for _, anctID := range arg.AccountIDs {
 		cd := &CallDescriptor{
 			Category:      utils.MetaSuppliers,
@@ -332,7 +332,7 @@ func (rs *Responder) GetMaxSessionTimeOnAccounts(arg *utils.GetMaxSessionTimeOnA
 				fmt.Sprintf("<%s> ignoring cost for account: %s, err: %s",
 					utils.Responder, anctID, err.Error()))
 		} else if maxDur >= arg.Usage {
-			*reply = map[string]interface{}{
+			*reply = map[string]any{
 				utils.Cost:    0.0,
 				utils.Account: anctID,
 			}
@@ -356,7 +356,7 @@ func (chSv1 *Responder) Ping(ign *utils.CGREventWithArgDispatcher, reply *string
 	return nil
 }
 
-func (rs *Responder) Call(ctx *context.Context, serviceMethod string, args interface{}, reply interface{}) error {
+func (rs *Responder) Call(ctx *context.Context, serviceMethod string, args any, reply any) error {
 	parts := strings.Split(serviceMethod, ".")
 	if len(parts) != 2 {
 		return utils.ErrNotImplemented

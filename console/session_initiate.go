@@ -50,7 +50,7 @@ func (self *CmdSessionsInitiate) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdSessionsInitiate) RpcParams(reset bool) interface{} {
+func (self *CmdSessionsInitiate) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &sessions.V1InitSessionArgs{ArgDispatcher: new(utils.ArgDispatcher)}
 	}
@@ -65,12 +65,12 @@ func (self *CmdSessionsInitiate) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdSessionsInitiate) RpcResult() interface{} {
+func (self *CmdSessionsInitiate) RpcResult() any {
 	var atr *sessions.V1InitSessionReply
 	return &atr
 }
 
-func (self *CmdSessionsInitiate) GetFormatedResult(result interface{}) string {
+func (self *CmdSessionsInitiate) GetFormatedResult(result any) string {
 	return GetFormatedResult(result, map[string]struct{}{
 		"Usage":    {},
 		"MaxUsage": {},

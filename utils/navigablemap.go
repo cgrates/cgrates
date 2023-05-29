@@ -37,7 +37,7 @@ func (nm NavigableMap2) String() (out string) {
 }
 
 // Interface returns itself
-func (nm NavigableMap2) Interface() interface{} {
+func (nm NavigableMap2) Interface() any {
 	return nm
 }
 
@@ -174,7 +174,7 @@ func (nm NavigableMap2) Len() int {
 
 // FieldAsInterface returns the interface at the path
 // Is used by AgentRequest FieldAsInterface
-func (nm NavigableMap2) FieldAsInterface(fldPath []string) (str interface{}, err error) {
+func (nm NavigableMap2) FieldAsInterface(fldPath []string) (str any, err error) {
 	var nmi NMInterface
 	if nmi, err = nm.Field(NewPathItems(fldPath)); err != nil {
 		return
@@ -185,7 +185,7 @@ func (nm NavigableMap2) FieldAsInterface(fldPath []string) (str interface{}, err
 // FieldAsString returns the string at the path
 // Used only to implement the DataProvider interface
 func (nm NavigableMap2) FieldAsString(fldPath []string) (str string, err error) {
-	var val interface{}
+	var val any
 	val, err = nm.FieldAsInterface(fldPath)
 	if err != nil {
 		return

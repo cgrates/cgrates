@@ -156,7 +156,7 @@ func testSSv1ItProcessEventAuth(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testSSv1ItProcessEventAuth",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Tenant:      "cgrates.org",
 				utils.ToR:         utils.VOICE,
 				utils.OriginID:    "testSSv1ItProcessEvent",
@@ -186,13 +186,13 @@ func testSSv1ItProcessEventAuth(t *testing.T) {
 		SortedSuppliers: []*engine.SortedSupplier{
 			{
 				SupplierID: "supplier1",
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					"Weight": 20.0,
 				},
 			},
 			{
 				SupplierID: "supplier2",
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					"Weight": 10.0,
 				},
 			},
@@ -207,7 +207,7 @@ func testSSv1ItProcessEventAuth(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testSSv1ItProcessEventAuth",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.CGRID:       "4be779c004d9f784e836db9ffd41b50319d71fe8",
 				utils.Tenant:      "cgrates.org",
 				utils.ToR:         utils.VOICE,
@@ -236,7 +236,7 @@ func testSSv1ItProcessEventInitiateSession(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testSSv1ItProcessEventInitiateSession",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Tenant:      "cgrates.org",
 				utils.ToR:         utils.VOICE,
 				utils.OriginID:    "testSSv1ItProcessEvent",
@@ -270,7 +270,7 @@ func testSSv1ItProcessEventInitiateSession(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testSSv1ItProcessEventInitiateSession",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Tenant:      "cgrates.org",
 				utils.ToR:         utils.VOICE,
 				utils.Account:     "1001",
@@ -304,7 +304,7 @@ func testSSv1ItProcessEventUpdateSession(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testSSv1ItProcessEventUpdateSession",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Tenant:      "cgrates.org",
 				utils.ToR:         utils.VOICE,
 				utils.OriginID:    "testSSv1ItProcessEvent",
@@ -329,7 +329,7 @@ func testSSv1ItProcessEventUpdateSession(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testSSv1ItProcessEventUpdateSession",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.CGRID:       "4be779c004d9f784e836db9ffd41b50319d71fe8",
 				utils.Tenant:      "cgrates.org",
 				utils.ToR:         utils.VOICE,
@@ -370,7 +370,7 @@ func testSSv1ItProcessEventTerminateSession(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testSSv1ItProcessEventTerminateSession",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Tenant:      "cgrates.org",
 				utils.ToR:         utils.VOICE,
 				utils.OriginID:    "testSSv1ItProcessEvent",
@@ -402,7 +402,7 @@ func testSSv1ItProcessCDRForSessionFromProcessEvent(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testSSv1ItProcessCDRForSessionFromProcessEvent",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Tenant:      "cgrates.org",
 				utils.ToR:         utils.VOICE,
 				utils.OriginID:    "testSSv1ItProcessEvent",

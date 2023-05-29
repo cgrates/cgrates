@@ -49,7 +49,7 @@ func (self *CmdSetResource) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdSetResource) RpcParams(reset bool) interface{} {
+func (self *CmdSetResource) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &v1.ResourceWithCache{}
 	}
@@ -60,7 +60,7 @@ func (self *CmdSetResource) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdSetResource) RpcResult() interface{} {
+func (self *CmdSetResource) RpcResult() any {
 	var s string
 	return &s
 }

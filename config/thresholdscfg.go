@@ -68,7 +68,7 @@ func (t *ThresholdSCfg) loadFromJsonCfg(jsnCfg *ThresholdSJsonCfg) (err error) {
 	return nil
 }
 
-func (t *ThresholdSCfg) AsMapInterface() map[string]interface{} {
+func (t *ThresholdSCfg) AsMapInterface() map[string]any {
 	var storeInterval string = ""
 	if t.StoreInterval != 0 {
 		storeInterval = t.StoreInterval.String()
@@ -87,7 +87,7 @@ func (t *ThresholdSCfg) AsMapInterface() map[string]interface{} {
 			prefixIndexedFields[i] = item
 		}
 	}
-	return map[string]interface{}{
+	return map[string]any{
 		utils.EnabledCfg:             t.Enabled,
 		utils.IndexedSelectsCfg:      t.IndexedSelects,
 		utils.StoreIntervalCfg:       storeInterval,

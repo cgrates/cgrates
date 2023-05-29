@@ -26,9 +26,9 @@ import (
 
 func TestNavMapGetFieldAsString(t *testing.T) {
 	nM := MapStorage{
-		"FirstLevel": map[string]interface{}{
-			"SecondLevel": map[string]interface{}{
-				"ThirdLevel": map[string]interface{}{
+		"FirstLevel": map[string]any{
+			"SecondLevel": map[string]any{
+				"ThirdLevel": map[string]any{
 					"Fld1": "Val1",
 				},
 			},
@@ -56,7 +56,7 @@ func TestNavMapGetFieldAsString(t *testing.T) {
 	}
 }
 
-type myEv map[string]interface{}
+type myEv map[string]any
 
 func (ev myEv) AsMapStorage() (MapStorage, error) {
 	return MapStorage(ev), nil
@@ -64,15 +64,15 @@ func (ev myEv) AsMapStorage() (MapStorage, error) {
 
 func TestNavMapAsMapStorage(t *testing.T) {
 	myData := myEv{
-		"FirstLevel": map[string]interface{}{
-			"SecondLevel": map[string]interface{}{
-				"ThirdLevel": map[string]interface{}{
+		"FirstLevel": map[string]any{
+			"SecondLevel": map[string]any{
+				"ThirdLevel": map[string]any{
 					"Fld1": 123.123,
 				},
 			},
 		},
-		"FistLever2": map[string]interface{}{
-			"SecondLevel2": map[string]interface{}{
+		"FistLever2": map[string]any{
+			"SecondLevel2": map[string]any{
 				"Field2": 123,
 			},
 			"Field3": "Value3",
@@ -84,15 +84,15 @@ func TestNavMapAsMapStorage(t *testing.T) {
 	}
 
 	eNavMap := MapStorage{
-		"FirstLevel": map[string]interface{}{
-			"SecondLevel": map[string]interface{}{
-				"ThirdLevel": map[string]interface{}{
+		"FirstLevel": map[string]any{
+			"SecondLevel": map[string]any{
+				"ThirdLevel": map[string]any{
 					"Fld1": 123.123,
 				},
 			},
 		},
-		"FistLever2": map[string]interface{}{
-			"SecondLevel2": map[string]interface{}{
+		"FistLever2": map[string]any{
+			"SecondLevel2": map[string]any{
 				"Field2": 123,
 			},
 			"Field3": "Value3",
@@ -157,16 +157,16 @@ func TestNavMapAdd2(t *testing.T) {
 }
 
 func TestNavMapString(t *testing.T) {
-	myData := map[string]interface{}{
-		"FirstLevel": map[string]interface{}{
-			"SecondLevel": map[string]interface{}{
-				"ThirdLevel": map[string]interface{}{
+	myData := map[string]any{
+		"FirstLevel": map[string]any{
+			"SecondLevel": map[string]any{
+				"ThirdLevel": map[string]any{
 					"Fld1": "Val1",
 				},
 			},
 		},
-		"FistLever2": map[string]interface{}{
-			"SecondLevel2": map[string]interface{}{
+		"FistLever2": map[string]any{
+			"SecondLevel2": map[string]any{
 				"Field2": "Value2",
 			},
 			"Field3": "Value3",
@@ -182,23 +182,23 @@ func TestNavMapString(t *testing.T) {
 
 func TestNavMapGetField(t *testing.T) {
 	nM := MapStorage{
-		"FirstLevel": map[string]interface{}{
-			"SecondLevel": map[string]interface{}{
-				"ThirdLevel": map[string]interface{}{
-					"Fld1": []interface{}{"Val1", "Val2"},
+		"FirstLevel": map[string]any{
+			"SecondLevel": map[string]any{
+				"ThirdLevel": map[string]any{
+					"Fld1": []any{"Val1", "Val2"},
 				},
 			},
 		},
-		"FirstLevel2": map[string]interface{}{
-			"SecondLevel2": []map[string]interface{}{
+		"FirstLevel2": map[string]any{
+			"SecondLevel2": []map[string]any{
 				{
-					"ThirdLevel2": map[string]interface{}{
+					"ThirdLevel2": map[string]any{
 						"Fld1": "Val1",
 					},
 				},
 				{
 					"Count": 10,
-					"ThirdLevel2": map[string]interface{}{
+					"ThirdLevel2": map[string]any{
 						"Fld2": []string{"Val1", "Val2", "Val3"},
 					},
 				},
@@ -213,7 +213,7 @@ func TestNavMapGetField(t *testing.T) {
 	} else if !reflect.DeepEqual(eFld, fld) {
 		t.Errorf("expecting: %s, received: %s", ToIJSON(eFld), ToIJSON(fld))
 	}
-	eFld2 := map[string]interface{}{"Fld1": "Val1"}
+	eFld2 := map[string]any{"Fld1": "Val1"}
 	pth = []string{"FirstLevel2", "SecondLevel2[0]", "ThirdLevel2"}
 	if fld, err := nM.FieldAsInterface(pth); err != nil {
 		t.Error(err)
@@ -239,16 +239,16 @@ func TestNavMapGetField(t *testing.T) {
 
 func TestNavMapFieldAsInterface(t *testing.T) {
 	nM := MapStorage{
-		"FirstLevel": map[string]interface{}{
-			"SecondLevel": []map[string]interface{}{
+		"FirstLevel": map[string]any{
+			"SecondLevel": []map[string]any{
 				{
-					"ThirdLevel": map[string]interface{}{
+					"ThirdLevel": map[string]any{
 						"Fld1": "Val1",
 					},
 				},
 				{
 					"Count": 10,
-					"ThirdLevel2": map[string]interface{}{
+					"ThirdLevel2": map[string]any{
 						"Fld2": []string{"Val1", "Val2", "Val3"},
 					},
 				},
@@ -259,7 +259,7 @@ func TestNavMapFieldAsInterface(t *testing.T) {
 
 	path := []string{"FirstLevel", "SecondLevel[0]", "Count"}
 	expErr := ErrNotFound
-	var eVal interface{} = nil
+	var eVal any = nil
 	if _, err := nM.FieldAsInterface(path); err != nil && err.Error() != expErr.Error() {
 		t.Errorf("Expected error: %s, received error: %v", expErr.Error(), err)
 	}
@@ -297,15 +297,15 @@ func TestNavMapFieldAsInterface(t *testing.T) {
 
 func TestNavMapGetKeys(t *testing.T) {
 	navMp := MapStorage{
-		"FirstLevel": map[string]interface{}{
-			"SecondLevel": map[string]interface{}{
-				"ThirdLevel": map[string]interface{}{
+		"FirstLevel": map[string]any{
+			"SecondLevel": map[string]any{
+				"ThirdLevel": map[string]any{
 					"Fld1": 123.123,
 				},
 			},
 		},
-		"FistLever2": map[string]interface{}{
-			"SecondLevel2": map[string]interface{}{
+		"FistLever2": map[string]any{
+			"SecondLevel2": map[string]any{
 				"Field2": 123,
 			},
 			"Field3": "Value3",

@@ -35,8 +35,8 @@ func (alS *AnalyzerSCfg) loadFromJsonCfg(jsnCfg *AnalyzerSJsonCfg) (err error) {
 	return nil
 }
 
-func (alS *AnalyzerSCfg) AsMapInterface() map[string]interface{} {
-	return map[string]interface{}{
+func (alS *AnalyzerSCfg) AsMapInterface() map[string]any {
+	return map[string]any{
 		utils.EnabledCfg: alS.Enabled,
 	}
 }

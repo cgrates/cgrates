@@ -146,7 +146,7 @@ func testV1SplSGetWeightSuppliers(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testV1SplSGetWeightSuppliers",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Account:     "1007",
 				utils.Destination: "+491511231234",
 			},
@@ -159,13 +159,13 @@ func testV1SplSGetWeightSuppliers(t *testing.T) {
 		SortedSuppliers: []*engine.SortedSupplier{
 			{
 				SupplierID: "supplier2",
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Weight: 20.0,
 				},
 			},
 			{
 				SupplierID: "supplier1",
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Weight: 10.0,
 				},
 			},
@@ -186,7 +186,7 @@ func testV1SplSGetLeastCostSuppliers(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testV1SplSGetLeastCostSuppliers",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Account:     "1003",
 				utils.Subject:     "1003",
 				utils.Destination: "1002",
@@ -202,7 +202,7 @@ func testV1SplSGetLeastCostSuppliers(t *testing.T) {
 		SortedSuppliers: []*engine.SortedSupplier{
 			{
 				SupplierID: "supplier3",
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Cost:         0.0136,
 					utils.RatingPlanID: "RP_SPECIAL_1002",
 					utils.Weight:       15.0,
@@ -210,7 +210,7 @@ func testV1SplSGetLeastCostSuppliers(t *testing.T) {
 			},
 			{
 				SupplierID: "supplier1",
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Cost:         0.0136,
 					utils.RatingPlanID: "RP_SPECIAL_1002",
 					utils.Weight:       10.0,
@@ -218,7 +218,7 @@ func testV1SplSGetLeastCostSuppliers(t *testing.T) {
 			},
 			{
 				SupplierID: "supplier2",
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Cost:         1.2667,
 					utils.RatingPlanID: "RP_RETAIL1",
 					utils.Weight:       20.0,
@@ -241,7 +241,7 @@ func testV1SplSGetLeastCostSuppliersWithoutUsage(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testV1SplSGetLeastCostSuppliers",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Account:     "1003",
 				utils.Subject:     "1003",
 				utils.Destination: "1002",
@@ -256,7 +256,7 @@ func testV1SplSGetLeastCostSuppliersWithoutUsage(t *testing.T) {
 		SortedSuppliers: []*engine.SortedSupplier{
 			{
 				SupplierID: "supplier3",
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Cost:         0.0102,
 					utils.RatingPlanID: "RP_SPECIAL_1002",
 					utils.Weight:       15.0,
@@ -264,7 +264,7 @@ func testV1SplSGetLeastCostSuppliersWithoutUsage(t *testing.T) {
 			},
 			{
 				SupplierID: "supplier1",
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Cost:         0.0102,
 					utils.RatingPlanID: "RP_SPECIAL_1002",
 					utils.Weight:       10.0,
@@ -272,7 +272,7 @@ func testV1SplSGetLeastCostSuppliersWithoutUsage(t *testing.T) {
 			},
 			{
 				SupplierID: "supplier2",
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Cost:         1.2,
 					utils.RatingPlanID: "RP_RETAIL1",
 					utils.Weight:       20.0,
@@ -296,7 +296,7 @@ func testV1SplSGetLeastCostSuppliersWithMaxCost(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testV1SplSGetLeastCostSuppliers",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Account:     "1003",
 				utils.Subject:     "1001",
 				utils.Destination: "1002",
@@ -312,7 +312,7 @@ func testV1SplSGetLeastCostSuppliersWithMaxCost(t *testing.T) {
 		SortedSuppliers: []*engine.SortedSupplier{
 			{
 				SupplierID: "supplier3",
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Cost:         0.0136,
 					utils.RatingPlanID: "RP_SPECIAL_1002",
 					utils.Weight:       15.0,
@@ -320,7 +320,7 @@ func testV1SplSGetLeastCostSuppliersWithMaxCost(t *testing.T) {
 			},
 			{
 				SupplierID: "supplier1",
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Cost:         0.0136,
 					utils.RatingPlanID: "RP_SPECIAL_1002",
 					utils.Weight:       10.0,
@@ -344,7 +344,7 @@ func testV1SplSGetLeastCostSuppliersWithMaxCostNotFound(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testV1SplSGetLeastCostSuppliers",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Account:     "1003",
 				utils.Subject:     "1001",
 				utils.Destination: "1002",
@@ -366,7 +366,7 @@ func testV1SplSGetLeastCostSuppliersWithMaxCost2(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testV1SplSGetLeastCostSuppliers",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Account:     "1003",
 				utils.Subject:     "SPECIAL_1002",
 				utils.Destination: "1002",
@@ -383,7 +383,7 @@ func testV1SplSGetLeastCostSuppliersWithMaxCost2(t *testing.T) {
 		SortedSuppliers: []*engine.SortedSupplier{
 			{
 				SupplierID: "supplier3",
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Cost:         0.1054,
 					utils.RatingPlanID: "RP_SPECIAL_1002",
 					utils.Weight:       15.0,
@@ -391,7 +391,7 @@ func testV1SplSGetLeastCostSuppliersWithMaxCost2(t *testing.T) {
 			},
 			{
 				SupplierID: "supplier1",
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Cost:         0.1054,
 					utils.RatingPlanID: "RP_SPECIAL_1002",
 					utils.Weight:       10.0,
@@ -414,7 +414,7 @@ func testV1SplSGetHighestCostSuppliers(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testV1SplSGetHighestCostSuppliers",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Account:     "1003",
 				utils.Destination: "1002",
 				utils.SetupTime:   time.Date(2017, 12, 1, 14, 25, 0, 0, time.UTC),
@@ -430,7 +430,7 @@ func testV1SplSGetHighestCostSuppliers(t *testing.T) {
 		SortedSuppliers: []*engine.SortedSupplier{
 			{
 				SupplierID: "supplier2",
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Cost:         1.2667,
 					utils.RatingPlanID: "RP_RETAIL1",
 					utils.Weight:       20.0,
@@ -438,7 +438,7 @@ func testV1SplSGetHighestCostSuppliers(t *testing.T) {
 			},
 			{
 				SupplierID: "supplier3",
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Cost:         0.0136,
 					utils.RatingPlanID: "RP_SPECIAL_1002",
 					utils.Weight:       15.0,
@@ -446,7 +446,7 @@ func testV1SplSGetHighestCostSuppliers(t *testing.T) {
 			},
 			{
 				SupplierID: "supplier1",
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Cost:         0.0136,
 					utils.RatingPlanID: "RP_SPECIAL_1002",
 					utils.Weight:       10.0,
@@ -470,7 +470,7 @@ func testV1SplSGetLeastCostSuppliersErr(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testV1SplSGetHighestCostSuppliers",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Account:     "1000",
 				utils.Destination: "1001",
 				utils.SetupTime:   "*now",
@@ -492,7 +492,7 @@ func testV1SplSPolulateStatsForQOS(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "event1",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Account:    "1001",
 				utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 				utils.Usage:      time.Duration(11 * time.Second),
@@ -511,7 +511,7 @@ func testV1SplSPolulateStatsForQOS(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "event2",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Account:    "1001",
 				utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 				utils.Usage:      time.Duration(11 * time.Second),
@@ -530,7 +530,7 @@ func testV1SplSPolulateStatsForQOS(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "event2",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Account:    "1002",
 				utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 				utils.Usage:      time.Duration(5 * time.Second),
@@ -549,7 +549,7 @@ func testV1SplSPolulateStatsForQOS(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "event2",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Account:    "1002",
 				utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 				utils.Usage:      time.Duration(6 * time.Second),
@@ -568,7 +568,7 @@ func testV1SplSPolulateStatsForQOS(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "event3",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Account:    "1003",
 				utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 				utils.Usage:      time.Duration(11 * time.Second),
@@ -587,7 +587,7 @@ func testV1SplSPolulateStatsForQOS(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "event3",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"Stat":           "Stat1_1",
 				utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 				utils.Usage:      time.Duration(11 * time.Second),
@@ -607,7 +607,7 @@ func testV1SplSPolulateStatsForQOS(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "event3",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"Stat":           "Stat1_1",
 				utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 				utils.Usage:      time.Duration(15 * time.Second),
@@ -628,7 +628,7 @@ func testV1SplSGetQOSSuppliers(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testV1SplSGetQOSSuppliers",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"DistinctMatch": "*qos",
 			},
 		},
@@ -659,7 +659,7 @@ func testV1SplSGetQOSSuppliers2(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testV1SplSGetQOSSuppliers",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"DistinctMatch": "*qos2",
 			},
 		},
@@ -690,7 +690,7 @@ func testV1SplSGetQOSSuppliers3(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testV1SplSGetQOSSuppliers",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"DistinctMatch": "*qos3",
 			},
 		},
@@ -721,7 +721,7 @@ func testV1SplSGetQOSSuppliersFiltred(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testV1SplSGetQOSSuppliers",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"DistinctMatch": "*qos_filtred",
 			},
 		},
@@ -752,7 +752,7 @@ func testV1SplSGetQOSSuppliersFiltred2(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testV1SplSGetQOSSuppliers",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"DistinctMatch":   "*qos_filtred2",
 				utils.Account:     "1003",
 				utils.Destination: "1002",
@@ -787,7 +787,7 @@ func testV1SplSGetSupplierWithoutFilter(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testV1SplSGetSupplierWithoutFilter",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Account:     "1008",
 				utils.Destination: "+49",
 			},
@@ -800,7 +800,7 @@ func testV1SplSGetSupplierWithoutFilter(t *testing.T) {
 		SortedSuppliers: []*engine.SortedSupplier{
 			{
 				SupplierID: "supplier1",
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Weight: 10.0,
 				},
 			},
@@ -971,7 +971,7 @@ func testV1SplSGetSupplierForEvent(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testV1SplSGetHighestCostSuppliers",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Account:     "1000",
 				utils.Destination: "1001",
 				utils.SetupTime:   "*now",
@@ -1079,7 +1079,7 @@ func testV1SplsOneSupplierWithoutDestination(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testV1SplsOneSupplierWithoutDestination",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Account:     "SpecialCase",
 				utils.Destination: "+24680",
 				utils.SetupTime:   utils.MetaNow,
@@ -1095,7 +1095,7 @@ func testV1SplsOneSupplierWithoutDestination(t *testing.T) {
 		SortedSuppliers: []*engine.SortedSupplier{
 			{
 				SupplierID: "local",
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Cost:     0.0396,
 					"RatingPlanID": "RP_LOCAL",
 					utils.Weight:   10.0,
@@ -1164,7 +1164,7 @@ func testV1SplMultipleSupplierSameID(t *testing.T) {
 			Tenant: "cgrates.org",
 			Time:   &tNow,
 			ID:     "testV1RouteMultipleRouteSameID",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Account:     "SpecialCase2",
 				utils.Destination: "+135876",
 				utils.SetupTime:   utils.MetaNow,
@@ -1180,7 +1180,7 @@ func testV1SplMultipleSupplierSameID(t *testing.T) {
 		SortedSuppliers: []*engine.SortedSupplier{
 			{
 				SupplierID: "Route1",
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Cost:     0.0396,
 					"RatingPlanID": "RP_LOCAL",
 					utils.Weight:   10.0,
@@ -1202,7 +1202,7 @@ func testV1SplMultipleSupplierSameID(t *testing.T) {
 			Tenant: "cgrates.org",
 			Time:   &tNow,
 			ID:     "testV1RouteMultipleRouteSameID",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Account:     "SpecialCase2",
 				utils.Destination: "+135876",
 				utils.SetupTime:   utils.MetaNow,
@@ -1218,7 +1218,7 @@ func testV1SplMultipleSupplierSameID(t *testing.T) {
 		SortedSuppliers: []*engine.SortedSupplier{
 			{
 				SupplierID: "Route1",
-				SortingData: map[string]interface{}{
+				SortingData: map[string]any{
 					utils.Cost:     0.0204,
 					"RatingPlanID": "RP_MOBILE",
 					utils.Weight:   10.0,

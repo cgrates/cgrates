@@ -560,8 +560,8 @@ func testCgrCfgV1ReloadConfigSection(t *testing.T) {
 			t.Fatal("Error creating folder: ", dir, err)
 		}
 	}
-	content := []interface{}{
-		map[string]interface{}{
+	content := []any{
+		map[string]any{
 			"AttributeID":      "",
 			"Blocker":          false,
 			"BreakOnSuccess":   false,
@@ -579,14 +579,14 @@ func testCgrCfgV1ReloadConfigSection(t *testing.T) {
 			"Tag":              "ToR",
 			"Timezone":         "",
 			"Type":             "*variable",
-			"Value": []interface{}{
-				map[string]interface{}{
+			"Value": []any{
+				map[string]any{
 					"AllFiltersMatch": true,
 					"Rules":           "~*req.2",
 				}},
 			"Width": 0,
 		},
-		map[string]interface{}{
+		map[string]any{
 			"AttributeID":      "",
 			"Blocker":          false,
 			"BreakOnSuccess":   false,
@@ -604,14 +604,14 @@ func testCgrCfgV1ReloadConfigSection(t *testing.T) {
 			"Tag":              "OriginID",
 			"Timezone":         "",
 			"Type":             "*variable",
-			"Value": []interface{}{
-				map[string]interface{}{
+			"Value": []any{
+				map[string]any{
 					"AllFiltersMatch": true,
 					"Rules":           "~*req.3",
 				}},
 			"Width": 0,
 		},
-		map[string]interface{}{
+		map[string]any{
 			"AttributeID":      "",
 			"Blocker":          false,
 			"BreakOnSuccess":   false,
@@ -629,14 +629,14 @@ func testCgrCfgV1ReloadConfigSection(t *testing.T) {
 			"Tag":              "RequestType",
 			"Timezone":         "",
 			"Type":             "*variable",
-			"Value": []interface{}{
-				map[string]interface{}{
+			"Value": []any{
+				map[string]any{
 					"AllFiltersMatch": true,
 					"Rules":           "~*req.4",
 				}},
 			"Width": 0,
 		},
-		map[string]interface{}{
+		map[string]any{
 			"AttributeID":      "",
 			"Blocker":          false,
 			"BreakOnSuccess":   false,
@@ -654,14 +654,14 @@ func testCgrCfgV1ReloadConfigSection(t *testing.T) {
 			"Tag":              "Tenant",
 			"Timezone":         "",
 			"Type":             "*variable",
-			"Value": []interface{}{
-				map[string]interface{}{
+			"Value": []any{
+				map[string]any{
 					"AllFiltersMatch": true,
 					"Rules":           "~*req.6",
 				}},
 			"Width": 0,
 		},
-		map[string]interface{}{
+		map[string]any{
 			"AttributeID":      "",
 			"Blocker":          false,
 			"BreakOnSuccess":   false,
@@ -679,14 +679,14 @@ func testCgrCfgV1ReloadConfigSection(t *testing.T) {
 			"Tag":              "Category",
 			"Timezone":         "",
 			"Type":             "*variable",
-			"Value": []interface{}{
-				map[string]interface{}{
+			"Value": []any{
+				map[string]any{
 					"AllFiltersMatch": true,
 					"Rules":           "~*req.7",
 				}},
 			"Width": 0,
 		},
-		map[string]interface{}{
+		map[string]any{
 			"AttributeID":      "",
 			"Blocker":          false,
 			"BreakOnSuccess":   false,
@@ -704,14 +704,14 @@ func testCgrCfgV1ReloadConfigSection(t *testing.T) {
 			"Tag":              "Account",
 			"Timezone":         "",
 			"Type":             "*variable",
-			"Value": []interface{}{
-				map[string]interface{}{
+			"Value": []any{
+				map[string]any{
 					"AllFiltersMatch": true,
 					"Rules":           "~*req.8",
 				}},
 			"Width": 0,
 		},
-		map[string]interface{}{
+		map[string]any{
 			"AttributeID":      "",
 			"Blocker":          false,
 			"BreakOnSuccess":   false,
@@ -729,14 +729,14 @@ func testCgrCfgV1ReloadConfigSection(t *testing.T) {
 			"Tag":              "Subject",
 			"Timezone":         "",
 			"Type":             "*variable",
-			"Value": []interface{}{
-				map[string]interface{}{
+			"Value": []any{
+				map[string]any{
 					"AllFiltersMatch": true,
 					"Rules":           "~*req.9",
 				}},
 			"Width": 0,
 		},
-		map[string]interface{}{
+		map[string]any{
 			"AttributeID":      "",
 			"Blocker":          false,
 			"BreakOnSuccess":   false,
@@ -754,14 +754,14 @@ func testCgrCfgV1ReloadConfigSection(t *testing.T) {
 			"Tag":              "Destination",
 			"Timezone":         "",
 			"Type":             "*variable",
-			"Value": []interface{}{
-				map[string]interface{}{
+			"Value": []any{
+				map[string]any{
 					"AllFiltersMatch": true,
 					"Rules":           "~*req.10",
 				}},
 			"Width": 0,
 		},
-		map[string]interface{}{
+		map[string]any{
 			"AttributeID":      "",
 			"Blocker":          false,
 			"BreakOnSuccess":   false,
@@ -779,14 +779,14 @@ func testCgrCfgV1ReloadConfigSection(t *testing.T) {
 			"Tag":              "SetupTime",
 			"Timezone":         "",
 			"Type":             "*variable",
-			"Value": []interface{}{
-				map[string]interface{}{
+			"Value": []any{
+				map[string]any{
 					"AllFiltersMatch": true,
 					"Rules":           "~*req.11",
 				}},
 			"Width": 0,
 		},
-		map[string]interface{}{
+		map[string]any{
 			"AttributeID":      "",
 			"Blocker":          false,
 			"BreakOnSuccess":   false,
@@ -804,14 +804,14 @@ func testCgrCfgV1ReloadConfigSection(t *testing.T) {
 			"Tag":              "AnswerTime",
 			"Timezone":         "",
 			"Type":             "*variable",
-			"Value": []interface{}{
-				map[string]interface{}{
+			"Value": []any{
+				map[string]any{
 					"AllFiltersMatch": true,
 					"Rules":           "~*req.12",
 				}},
 			"Width": 0,
 		},
-		map[string]interface{}{
+		map[string]any{
 			"AttributeID":      "",
 			"Blocker":          false,
 			"BreakOnSuccess":   false,
@@ -829,26 +829,26 @@ func testCgrCfgV1ReloadConfigSection(t *testing.T) {
 			"Tag":              "Usage",
 			"Timezone":         "",
 			"Type":             "*variable",
-			"Value": []interface{}{
-				map[string]interface{}{
+			"Value": []any{
+				map[string]any{
 					"AllFiltersMatch": true,
 					"Rules":           "~*req.13",
 				}},
 			"Width": 0,
 		},
 	}
-	expected := map[string]interface{}{
+	expected := map[string]any{
 		"Enabled": true,
-		"Readers": []interface{}{
-			map[string]interface{}{
+		"Readers": []any{
+			map[string]any{
 				"PartialCacheExpiryAction": "",
 				"PartialRecordCache":       0,
-				"CacheDumpFields":          []interface{}{},
+				"CacheDumpFields":          []any{},
 				"ConcurrentReqs":           1024,
 				"Fields":                   content,
 				"FieldSep":                 ",",
-				"Filters":                  []interface{}{},
-				"Flags":                    map[string]interface{}{},
+				"Filters":                  []any{},
+				"Flags":                    map[string]any{},
 				"FailedCallsPrefix":        "",
 				"ID":                       "*default",
 				"ProcessedPath":            "/var/spool/cgrates/ers/out",
@@ -858,15 +858,15 @@ func testCgrCfgV1ReloadConfigSection(t *testing.T) {
 				"Tenant":                   nil,
 				"Timezone":                 "",
 				"Type":                     "*none",
-				"XmlRootPath":              []interface{}{utils.EmptyString},
+				"XmlRootPath":              []any{utils.EmptyString},
 			},
-			map[string]interface{}{
-				"CacheDumpFields": []interface{}{},
+			map[string]any{
+				"CacheDumpFields": []any{},
 				"ConcurrentReqs":  1024,
 				"FieldSep":        ",",
 				"Filters":         nil,
-				"Flags": map[string]interface{}{
-					"*dryrun": []interface{}{},
+				"Flags": map[string]any{
+					"*dryrun": []any{},
 				},
 				"FailedCallsPrefix":        "",
 				"PartialCacheExpiryAction": "",
@@ -879,7 +879,7 @@ func testCgrCfgV1ReloadConfigSection(t *testing.T) {
 				"Tenant":                   nil,
 				"Timezone":                 "",
 				"Type":                     "*file_csv",
-				"XmlRootPath":              []interface{}{utils.EmptyString},
+				"XmlRootPath":              []any{utils.EmptyString},
 				"Fields":                   content,
 			},
 		},
@@ -890,7 +890,7 @@ func testCgrCfgV1ReloadConfigSection(t *testing.T) {
 
 	cfg, _ := NewDefaultCGRConfig()
 	var reply string
-	var rcv map[string]interface{}
+	var rcv map[string]any
 
 	if err := cfg.V1ReloadConfigFromPath(&ConfigReloadWithArgDispatcher{
 		Path:    "/usr/share/cgrates/conf/samples/ers_example",
@@ -924,8 +924,8 @@ func testCGRConfigReloadConfigFromJSONSessionS(t *testing.T) {
 	cfg.CdrsCfg().Enabled = true
 	var reply string
 	if err = cfg.V1ReloadConfigFromJSON(&JSONReloadWithArgDispatcher{
-		JSON: map[string]interface{}{
-			"sessions": map[string]interface{}{
+		JSON: map[string]any{
+			"sessions": map[string]any{
 				"enabled":          true,
 				"resources_conns":  []string{"*localhost"},
 				"suppliers_conns":  []string{"*localhost"},

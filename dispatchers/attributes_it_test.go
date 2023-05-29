@@ -146,7 +146,7 @@ func testDspAttrPingFailoverNotFoundHost(t *testing.T) {
 	ev := utils.CGREventWithArgDispatcher{
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"EventName": "UnexistedHost",
 			},
 		},
@@ -222,7 +222,7 @@ func testDspAttrGetAttrFailover(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSGetAttributeForEvent",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Account:    "1002",
 				utils.EVENT_NAME: "Event1",
 			},
@@ -257,7 +257,7 @@ func testDspAttrGetAttrFailover(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSGetAttributeForEvent",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Account:    "1002",
 				utils.EVENT_NAME: "Event1",
 				"Password":       "CGRateS.org",
@@ -343,7 +343,7 @@ func testDspAttrTestMissingArgDispatcher(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSGetAttributeForEvent",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Account: "1001",
 			},
 		},
@@ -361,7 +361,7 @@ func testDspAttrTestMissingApiKey(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSGetAttributeForEvent",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Account: "1001",
 			},
 		},
@@ -380,7 +380,7 @@ func testDspAttrTestUnknownApiKey(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSGetAttributeForEvent",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Account: "1001",
 			},
 		},
@@ -401,7 +401,7 @@ func testDspAttrTestAuthKey(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSGetAttributeForEvent",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Account: "1001",
 			},
 		},
@@ -422,7 +422,7 @@ func testDspAttrTestAuthKey2(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSGetAttributeForEvent",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Account: "1001",
 			},
 		},
@@ -467,7 +467,7 @@ func testDspAttrTestAuthKey2(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSGetAttributeForEvent",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Account: "1001",
 				"Password":    "CGRateS.org",
 			},
@@ -490,7 +490,7 @@ func testDspAttrTestAuthKey3(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSGetAttributeForEvent",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Account:    "1001",
 				utils.EVENT_NAME: "Event1",
 			},
@@ -512,7 +512,7 @@ func testDspAttrGetAttrRoundRobin(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSGetAttributeForEvent",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Account:    "1002",
 				utils.EVENT_NAME: "RoundRobin",
 			},
@@ -547,7 +547,7 @@ func testDspAttrGetAttrRoundRobin(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSGetAttributeForEvent",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Account:    "1002",
 				utils.EVENT_NAME: "RoundRobin",
 				"Password":       "CGRateS.org",
@@ -600,7 +600,7 @@ func testDspAttrGetAttrInternal(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSGetAttributeForEvent",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.EVENT_NAME: "Internal",
 				utils.Account:    "1003",
 			},
@@ -616,7 +616,7 @@ func testDspAttrGetAttrInternal(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSGetAttributeForEvent",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Account:    "1003",
 				utils.EVENT_NAME: "Internal",
 				"Password":       "CGRateS.com",

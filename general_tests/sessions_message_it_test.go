@@ -138,7 +138,7 @@ func testSesMFDItAddVoiceBalance(t *testing.T) {
 		Account:     "1001",
 		BalanceType: utils.SMS,
 		Value:       1,
-		Balance: map[string]interface{}{
+		Balance: map[string]any{
 			utils.ID:            "TestSesBal1",
 			utils.RatingSubject: "*zero1",
 		},
@@ -170,7 +170,7 @@ func testSesMFDItProcessMessage(t *testing.T) {
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     utils.UUIDSha1Prefix(),
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					utils.OriginID:    utils.UUIDSha1Prefix(),
 					utils.ToR:         utils.SMS,
 					utils.Category:    utils.SMS,

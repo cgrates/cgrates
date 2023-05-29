@@ -140,7 +140,7 @@ func testV1DataDataDebitUsageWith10Kilo(t *testing.T) {
 		Account:     "testV1DataDataCost",
 		BalanceType: utils.DATA,
 		Value:       356000000,
-		Balance: map[string]interface{}{
+		Balance: map[string]any{
 			utils.Categories:    "data",
 			utils.ID:            "testV1DataDataCost",
 			utils.RatingSubject: "*zero10000ns",
@@ -219,7 +219,7 @@ func testV1DataDebitBalanceWith10Kilo(t *testing.T) {
 		Account:     "testV1DataDebitBalance",
 		BalanceType: utils.DATA,
 		Value:       356000000,
-		Balance: map[string]interface{}{
+		Balance: map[string]any{
 			utils.Categories:    "data",
 			utils.ID:            "testV1DataDebitBalance",
 			utils.RatingSubject: "*zero10000ns",
@@ -278,7 +278,7 @@ func testV1DataDataDebitUsage1G0(t *testing.T) {
 		Account:     "testV1DataDataDebitUsage1G0",
 		BalanceType: utils.DATA,
 		Value:       1100000000,
-		Balance: map[string]interface{}{
+		Balance: map[string]any{
 			utils.Categories:    "data",
 			utils.ID:            "testV1DataDataDebitUsage1G0",
 			utils.RatingSubject: "*zero10000ns",
@@ -357,7 +357,7 @@ func testV1DataDebitBalance1G0(t *testing.T) {
 		Account:     "testV1DataDebitBalance1G0",
 		BalanceType: utils.DATA,
 		Value:       1100000000,
-		Balance: map[string]interface{}{
+		Balance: map[string]any{
 			utils.Categories:    "data",
 			utils.ID:            "testV1DataDebitBalance1G0",
 			utils.RatingSubject: "*zero10000ns",
@@ -416,7 +416,7 @@ func testV1DataInitSession(t *testing.T) {
 		Account:     "testV1DataInitSession",
 		BalanceType: utils.DATA,
 		Value:       1100000000,
-		Balance: map[string]interface{}{
+		Balance: map[string]any{
 			utils.Categories:    "data",
 			utils.ID:            "testV1DataInitSession",
 			utils.RatingSubject: "*zero10000ns",
@@ -448,7 +448,7 @@ func testV1DataInitSession(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testV1DataInitSession",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Tenant:         "cgrates.org",
 				utils.ToR:            utils.DATA,
 				utils.Category:       "data",
@@ -490,7 +490,7 @@ func testV1DataUpdateWith1Mo(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testV1DataUpdateWith1Mo",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Tenant:         "cgrates.org",
 				utils.ToR:            utils.DATA,
 				utils.Category:       "data",
@@ -533,7 +533,7 @@ func testV1DataUpdateWith1Go(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testV1DataUpdateWith1Go",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Tenant:         "cgrates.org",
 				utils.ToR:            utils.DATA,
 				utils.Category:       "data",

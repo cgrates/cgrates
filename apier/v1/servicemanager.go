@@ -52,6 +52,6 @@ func (servManager *ServiceManagerV1) Ping(ign *utils.CGREventWithArgDispatcher, 
 
 // Call implements birpc.ClientConnector interface for internal RPC
 func (servManager *ServiceManagerV1) Call(serviceMethod string,
-	args interface{}, reply interface{}) error {
+	args any, reply any) error {
 	return utils.APIerRPCCall(servManager, serviceMethod, args, reply)
 }

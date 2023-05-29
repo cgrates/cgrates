@@ -51,7 +51,7 @@ func (self *CmdRemRatingProfile) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdRemRatingProfile) RpcParams(reset bool) interface{} {
+func (self *CmdRemRatingProfile) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &v1.AttrRemoveRatingProfile{}
 	}
@@ -65,7 +65,7 @@ func (self *CmdRemRatingProfile) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdRemRatingProfile) RpcResult() interface{} {
+func (self *CmdRemRatingProfile) RpcResult() any {
 	var s string
 	return &s
 }

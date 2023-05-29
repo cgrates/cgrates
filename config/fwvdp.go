@@ -46,7 +46,7 @@ func (fP *FWVProvider) String() string {
 }
 
 // FieldAsInterface is part of engine.utils.DataProvider interface
-func (fP *FWVProvider) FieldAsInterface(fldPath []string) (data interface{}, err error) {
+func (fP *FWVProvider) FieldAsInterface(fldPath []string) (data any, err error) {
 	if len(fldPath) == 0 {
 		return
 	}
@@ -81,7 +81,7 @@ func (fP *FWVProvider) FieldAsInterface(fldPath []string) (data interface{}, err
 
 // FieldAsString is part of engine.utils.DataProvider interface
 func (fP *FWVProvider) FieldAsString(fldPath []string) (data string, err error) {
-	var valIface interface{}
+	var valIface any
 	valIface, err = fP.FieldAsInterface(fldPath)
 	if err != nil {
 		return

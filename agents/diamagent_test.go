@@ -37,10 +37,10 @@ func TestDAsSessionSClientIface(t *testing.T) {
 }
 
 type testMockSessionConn struct {
-	calls map[string]func(ctx *context.Context, arg interface{}, rply interface{}) error
+	calls map[string]func(ctx *context.Context, arg any, rply any) error
 }
 
-func (s *testMockSessionConn) Call(ctx *context.Context, method string, arg interface{}, rply interface{}) error {
+func (s *testMockSessionConn) Call(ctx *context.Context, method string, arg any, rply any) error {
 	if call, has := s.calls[method]; !has {
 		return rpcclient.ErrUnsupporteServiceMethod
 	} else {
@@ -48,7 +48,7 @@ func (s *testMockSessionConn) Call(ctx *context.Context, method string, arg inte
 	}
 }
 
-func (s *testMockSessionConn) CallBiRPC(_ birpc.ClientConnector, method string, arg interface{}, rply interface{}) error {
+func (s *testMockSessionConn) CallBiRPC(_ birpc.ClientConnector, method string, arg any, rply any) error {
 	if call, has := s.calls[method]; !has {
 		return rpcclient.ErrUnsupporteServiceMethod
 	} else {
@@ -121,11 +121,11 @@ func TestProcessRequest(t *testing.T) {
 		utils.MetaCmd:     utils.NewNMData("cmdR"),
 	}
 
-	sS := &testMockSessionConn{calls: map[string]func(ctx *context.Context, arg interface{}, rply interface{}) error{
-		utils.SessionSv1RegisterInternalBiJSONConn: func(ctx *context.Context, arg interface{}, rply interface{}) error {
+	sS := &testMockSessionConn{calls: map[string]func(ctx *context.Context, arg any, rply any) error{
+		utils.SessionSv1RegisterInternalBiJSONConn: func(ctx *context.Context, arg any, rply any) error {
 			return nil
 		},
-		utils.SessionSv1AuthorizeEvent: func(ctx *context.Context, arg interface{}, rply interface{}) error {
+		utils.SessionSv1AuthorizeEvent: func(ctx *context.Context, arg any, rply any) error {
 			var tm *time.Time
 			var id string
 			if arg == nil {
@@ -142,7 +142,7 @@ func TestProcessRequest(t *testing.T) {
 					Tenant: "cgrates.org",
 					ID:     id,
 					Time:   tm,
-					Event: map[string]interface{}{
+					Event: map[string]any{
 						"Account":     "1001",
 						"Category":    "call",
 						"Destination": "1003",
@@ -166,7 +166,7 @@ func TestProcessRequest(t *testing.T) {
 			}
 			return nil
 		},
-		utils.SessionSv1InitiateSession: func(ctx *context.Context, arg interface{}, rply interface{}) error {
+		utils.SessionSv1InitiateSession: func(ctx *context.Context, arg any, rply any) error {
 			var tm *time.Time
 			var id string
 			if arg == nil {
@@ -184,7 +184,7 @@ func TestProcessRequest(t *testing.T) {
 					Tenant: "cgrates.org",
 					ID:     id,
 					Time:   tm,
-					Event: map[string]interface{}{
+					Event: map[string]any{
 						"Account":     "1001",
 						"Category":    "call",
 						"Destination": "1003",
@@ -210,7 +210,7 @@ func TestProcessRequest(t *testing.T) {
 					CGREvent: &utils.CGREvent{
 						Tenant: "cgrates.org",
 						ID:     "e7d35bf",
-						Event: map[string]interface{}{
+						Event: map[string]any{
 							"Account":       "1001",
 							"CGRID":         "1133dc80896edf5049b46aa911cb9085eeb27f4c",
 							"Category":      "call",
@@ -230,7 +230,7 @@ func TestProcessRequest(t *testing.T) {
 			}
 			return nil
 		},
-		utils.SessionSv1UpdateSession: func(ctx *context.Context, arg interface{}, rply interface{}) error {
+		utils.SessionSv1UpdateSession: func(ctx *context.Context, arg any, rply any) error {
 			var tm *time.Time
 			var id string
 			if arg == nil {
@@ -248,7 +248,7 @@ func TestProcessRequest(t *testing.T) {
 					Tenant: "cgrates.org",
 					ID:     id,
 					Time:   tm,
-					Event: map[string]interface{}{
+					Event: map[string]any{
 						"Account":     "1001",
 						"Category":    "call",
 						"Destination": "1003",
@@ -274,7 +274,7 @@ func TestProcessRequest(t *testing.T) {
 					CGREvent: &utils.CGREvent{
 						Tenant: "cgrates.org",
 						ID:     "e7d35bf",
-						Event: map[string]interface{}{
+						Event: map[string]any{
 							"Account":       "1001",
 							"CGRID":         "1133dc80896edf5049b46aa911cb9085eeb27f4c",
 							"Category":      "call",
@@ -294,7 +294,7 @@ func TestProcessRequest(t *testing.T) {
 			}
 			return nil
 		},
-		utils.SessionSv1ProcessCDR: func(ctx *context.Context, arg interface{}, rply interface{}) error {
+		utils.SessionSv1ProcessCDR: func(ctx *context.Context, arg any, rply any) error {
 			var tm *time.Time
 			var id string
 			if arg == nil {
@@ -310,7 +310,7 @@ func TestProcessRequest(t *testing.T) {
 					Tenant: "cgrates.org",
 					ID:     id,
 					Time:   tm,
-					Event: map[string]interface{}{
+					Event: map[string]any{
 						"Account":     "1001",
 						"Category":    "call",
 						"Destination": "1003",
@@ -332,7 +332,7 @@ func TestProcessRequest(t *testing.T) {
 			*prply = utils.OK
 			return nil
 		},
-		utils.SessionSv1TerminateSession: func(ctx *context.Context, arg interface{}, rply interface{}) error {
+		utils.SessionSv1TerminateSession: func(ctx *context.Context, arg any, rply any) error {
 			var tm *time.Time
 			var id string
 			if arg == nil {
@@ -349,7 +349,7 @@ func TestProcessRequest(t *testing.T) {
 					Tenant: "cgrates.org",
 					ID:     id,
 					Time:   tm,
-					Event: map[string]interface{}{
+					Event: map[string]any{
 						"Account":     "1001",
 						"Category":    "call",
 						"Destination": "1003",
@@ -371,7 +371,7 @@ func TestProcessRequest(t *testing.T) {
 			*prply = utils.OK
 			return nil
 		},
-		utils.SessionSv1ProcessMessage: func(ctx *context.Context, arg interface{}, rply interface{}) error {
+		utils.SessionSv1ProcessMessage: func(ctx *context.Context, arg any, rply any) error {
 			var tm *time.Time
 			var id string
 			if arg == nil {
@@ -389,7 +389,7 @@ func TestProcessRequest(t *testing.T) {
 					Tenant: "cgrates.org",
 					ID:     id,
 					Time:   tm,
-					Event: map[string]interface{}{
+					Event: map[string]any{
 						"Account":     "1001",
 						"Category":    "call",
 						"Destination": "1003",
@@ -415,7 +415,7 @@ func TestProcessRequest(t *testing.T) {
 					CGREvent: &utils.CGREvent{
 						Tenant: "cgrates.org",
 						ID:     "e7d35bf",
-						Event: map[string]interface{}{
+						Event: map[string]any{
 							"Account":       "1001",
 							"CGRID":         "1133dc80896edf5049b46aa911cb9085eeb27f4c",
 							"Category":      "call",

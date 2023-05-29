@@ -199,7 +199,7 @@ func testAMQPMapAddCDRs(t *testing.T) {
 
 func testAMQPMapExportCDRs(t *testing.T) {
 	attr := ArgExportCDRs{
-		ExportArgs: map[string]interface{}{
+		ExportArgs: map[string]any{
 			utils.ExportTemplate: "amqp_exporter_map",
 		},
 		Verbose: true,
@@ -259,7 +259,7 @@ func testAMQPKillEngine(t *testing.T) {
 
 func testAMQPCDRExportCDRs(t *testing.T) {
 	attr := ArgExportCDRs{
-		ExportArgs: map[string]interface{}{
+		ExportArgs: map[string]any{
 			utils.ExportTemplate: "amqp_exporter_cdr",
 		},
 		Verbose: true,

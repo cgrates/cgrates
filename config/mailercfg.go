@@ -49,8 +49,8 @@ func (mailcfg *MailerCfg) loadFromJsonCfg(jsnMailerCfg *MailerJsonCfg) (err erro
 	return nil
 }
 
-func (mailcfg *MailerCfg) AsMapInterface() map[string]interface{} {
-	return map[string]interface{}{
+func (mailcfg *MailerCfg) AsMapInterface() map[string]any {
+	return map[string]any{
 		utils.MailerServerCfg:   mailcfg.MailerServer,
 		utils.MailerAuthUserCfg: mailcfg.MailerAuthUser,
 		utils.MailerAuthPassCfg: mailcfg.MailerAuthPass,

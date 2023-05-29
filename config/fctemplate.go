@@ -206,8 +206,8 @@ func (fc *FCTemplate) Clone() *FCTemplate {
 	return cln
 }
 
-func (fc *FCTemplate) AsMapInterface(separator string) (mp map[string]interface{}) {
-	mp = make(map[string]interface{})
+func (fc *FCTemplate) AsMapInterface(separator string) (mp map[string]any) {
+	mp = make(map[string]any)
 	if fc.Tag != utils.EmptyString {
 		mp[utils.TagCfg] = fc.Tag
 	}

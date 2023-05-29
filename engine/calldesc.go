@@ -179,7 +179,7 @@ func (cd *CallDescriptor) AsCGREvent() *utils.CGREvent {
 	cgrEv := &utils.CGREvent{
 		Tenant: cd.Tenant,
 		ID:     utils.UUIDSha1Prefix(), // make it unique
-		Event:  make(map[string]interface{}),
+		Event:  make(map[string]any),
 	}
 	for k, v := range cd.ExtraFields {
 		cgrEv.Event[k] = v
@@ -714,7 +714,7 @@ func (origCD *CallDescriptor) getMaxSessionDuration(origAcc *Account) (time.Dura
 
 func (cd *CallDescriptor) GetMaxSessionDuration() (duration time.Duration, err error) {
 	cd.account = nil // make sure it's not cached
-	_, err = guardian.Guardian.Guard(func() (iface interface{}, err error) {
+	_, err = guardian.Guardian.Guard(func() (iface any, err error) {
 		account, err := cd.getAccount()
 		if err != nil {
 			return 0, err
@@ -729,7 +729,7 @@ func (cd *CallDescriptor) GetMaxSessionDuration() (duration time.Duration, err e
 				lkIDs = append(lkIDs, utils.ACCOUNT_PREFIX+acntID)
 			}
 		}
-		_, err = guardian.Guardian.Guard(func() (iface interface{}, err error) {
+		_, err = guardian.Guardian.Guard(func() (iface any, err error) {
 			duration, err = cd.getMaxSessionDuration(account)
 			return
 		}, config.CgrConfig().GeneralCfg().LockingTimeout, lkIDs...)
@@ -786,7 +786,7 @@ func (cd *CallDescriptor) debit(account *Account, dryRun bool, goNegative bool) 
 
 func (cd *CallDescriptor) Debit() (cc *CallCost, err error) {
 	cd.account = nil // make sure it's not cached
-	_, err = guardian.Guardian.Guard(func() (iface interface{}, err error) {
+	_, err = guardian.Guardian.Guard(func() (iface any, err error) {
 		// lock all group members
 		account, err := cd.getAccount()
 		if err != nil {
@@ -803,7 +803,7 @@ func (cd *CallDescriptor) Debit() (cc *CallCost, err error) {
 				lkIDs = append(lkIDs, utils.ACCOUNT_PREFIX+acntID)
 			}
 		}
-		_, err = guardian.Guardian.Guard(func() (iface interface{}, err error) {
+		_, err = guardian.Guardian.Guard(func() (iface any, err error) {
 			cc, err = cd.debit(account, cd.DryRun, !cd.DenyNegativeAccount)
 			if err == nil {
 				cc.AccountSummary = cd.AccountSummary(initialAcnt)
@@ -821,7 +821,7 @@ func (cd *CallDescriptor) Debit() (cc *CallCost, err error) {
 // by the GetMaxSessionDuration method. The amount filed has to be filled in call descriptor.
 func (cd *CallDescriptor) MaxDebit() (cc *CallCost, err error) {
 	cd.account = nil // make sure it's not cached
-	_, err = guardian.Guardian.Guard(func() (iface interface{}, err error) {
+	_, err = guardian.Guardian.Guard(func() (iface any, err error) {
 		account, err := cd.getAccount()
 		if err != nil {
 			return nil, err
@@ -837,7 +837,7 @@ func (cd *CallDescriptor) MaxDebit() (cc *CallCost, err error) {
 				lkIDs = append(lkIDs, utils.ACCOUNT_PREFIX+acntID)
 			}
 		}
-		_, err = guardian.Guardian.Guard(func() (iface interface{}, err error) {
+		_, err = guardian.Guardian.Guard(func() (iface any, err error) {
 			remainingDuration, err := cd.getMaxSessionDuration(account)
 			if err != nil && cd.GetDuration() > 0 {
 				return nil, err
@@ -945,7 +945,7 @@ func (cd *CallDescriptor) RefundIncrements() (acnt *Account, err error) {
 			accMap[utils.ACCOUNT_PREFIX+increment.BalanceInfo.AccountID] = true
 		}
 	}
-	_, err = guardian.Guardian.Guard(func() (iface interface{}, err error) {
+	_, err = guardian.Guardian.Guard(func() (iface any, err error) {
 		acnt, err = cd.refundIncrements()
 		return
 	}, config.CgrConfig().GeneralCfg().LockingTimeout, accMap.Slice()...)
@@ -992,7 +992,7 @@ func (cd *CallDescriptor) RefundRounding() (acc *Account, err error) {
 	for _, inc := range cd.Increments {
 		accMap[utils.ACCOUNT_PREFIX+inc.BalanceInfo.AccountID] = true
 	}
-	guardian.Guardian.Guard(func() (_ interface{}, _ error) {
+	guardian.Guardian.Guard(func() (_ any, _ error) {
 		var accCache map[string]*Account
 		if accCache, err = cd.refundRounding(nil); err != nil {
 			return
@@ -1052,7 +1052,7 @@ func (cd *CallDescriptor) AccountSummary(initialAcnt *AccountSummary) *AccountSu
 }
 
 // FieldAsInterface is part of utils.DataProvider
-func (cd *CallDescriptor) FieldAsInterface(fldPath []string) (fldVal interface{}, err error) {
+func (cd *CallDescriptor) FieldAsInterface(fldPath []string) (fldVal any, err error) {
 	if len(fldPath) == 0 {
 		return nil, utils.ErrNotFound
 	}

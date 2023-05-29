@@ -69,7 +69,7 @@ func (a *Action) Clone() (cln *Action) {
 	}
 }
 
-type actionTypeFunc func(*Account, *Action, Actions, interface{}) error
+type actionTypeFunc func(*Account, *Action, Actions, any) error
 
 func getActionFunc(typ string) (actionTypeFunc, bool) {
 	actionFuncMap := map[string]actionTypeFunc{
@@ -115,7 +115,7 @@ func getActionFunc(typ string) (actionTypeFunc, bool) {
 	return f, exists
 }
 
-func logAction(ub *Account, a *Action, acs Actions, extraData interface{}) (err error) {
+func logAction(ub *Account, a *Action, acs Actions, extraData any) (err error) {
 	switch {
 	case ub != nil:
 		body, _ := json.Marshal(ub)
@@ -127,7 +127,7 @@ func logAction(ub *Account, a *Action, acs Actions, extraData interface{}) (err 
 	return
 }
 
-func cdrLogAction(acc *Account, a *Action, acs Actions, extraData interface{}) (err error) {
+func cdrLogAction(acc *Account, a *Action, acs Actions, extraData any) (err error) {
 	if len(config.CgrConfig().SchedulerCfg().CDRsConns) == 0 {
 		return fmt.Errorf("No connection with CDR Server")
 	}
@@ -154,7 +154,7 @@ func cdrLogAction(acc *Account, a *Action, acs Actions, extraData interface{}) (
 		}
 	}
 	//In case that we have extra data we populate default templates
-	mapExtraData, _ := extraData.(map[string]interface{})
+	mapExtraData, _ := extraData.(map[string]any)
 	for key, val := range mapExtraData {
 		if defaultTemplate[key], err = config.NewRSRParsers(utils.IfaceAsString(val),
 			true, config.CgrConfig().GeneralCfg().RSRSep); err != nil {
@@ -224,7 +224,7 @@ func cdrLogAction(acc *Account, a *Action, acs Actions, extraData interface{}) (
 	return
 }
 
-func resetTriggersAction(ub *Account, a *Action, acs Actions, extraData interface{}) (err error) {
+func resetTriggersAction(ub *Account, a *Action, acs Actions, extraData any) (err error) {
 	if ub == nil {
 		return errors.New("nil account")
 	}
@@ -232,7 +232,7 @@ func resetTriggersAction(ub *Account, a *Action, acs Actions, extraData interfac
 	return
 }
 
-func setRecurrentAction(ub *Account, a *Action, acs Actions, extraData interface{}) (err error) {
+func setRecurrentAction(ub *Account, a *Action, acs Actions, extraData any) (err error) {
 	if ub == nil {
 		return errors.New("nil account")
 	}
@@ -240,7 +240,7 @@ func setRecurrentAction(ub *Account, a *Action, acs Actions, extraData interface
 	return
 }
 
-func unsetRecurrentAction(ub *Account, a *Action, acs Actions, extraData interface{}) (err error) {
+func unsetRecurrentAction(ub *Account, a *Action, acs Actions, extraData any) (err error) {
 	if ub == nil {
 		return errors.New("nil account")
 	}
@@ -248,7 +248,7 @@ func unsetRecurrentAction(ub *Account, a *Action, acs Actions, extraData interfa
 	return
 }
 
-func allowNegativeAction(ub *Account, a *Action, acs Actions, extraData interface{}) (err error) {
+func allowNegativeAction(ub *Account, a *Action, acs Actions, extraData any) (err error) {
 	if ub == nil {
 		return errors.New("nil account")
 	}
@@ -256,7 +256,7 @@ func allowNegativeAction(ub *Account, a *Action, acs Actions, extraData interfac
 	return
 }
 
-func denyNegativeAction(ub *Account, a *Action, acs Actions, extraData interface{}) (err error) {
+func denyNegativeAction(ub *Account, a *Action, acs Actions, extraData any) (err error) {
 	if ub == nil {
 		return errors.New("nil account")
 	}
@@ -264,14 +264,14 @@ func denyNegativeAction(ub *Account, a *Action, acs Actions, extraData interface
 	return
 }
 
-func resetAccountAction(ub *Account, a *Action, acs Actions, extraData interface{}) (err error) {
+func resetAccountAction(ub *Account, a *Action, acs Actions, extraData any) (err error) {
 	if ub == nil {
 		return errors.New("nil account")
 	}
 	return genericReset(ub)
 }
 
-func topupResetAction(ub *Account, a *Action, acs Actions, extraData interface{}) (err error) {
+func topupResetAction(ub *Account, a *Action, acs Actions, extraData any) (err error) {
 	if ub == nil {
 		return errors.New("nil account")
 	}
@@ -285,7 +285,7 @@ func topupResetAction(ub *Account, a *Action, acs Actions, extraData interface{}
 	return
 }
 
-func topupAction(ub *Account, a *Action, acs Actions, extraData interface{}) (err error) {
+func topupAction(ub *Account, a *Action, acs Actions, extraData any) (err error) {
 	if ub == nil {
 		return errors.New("nil account")
 	}
@@ -296,7 +296,7 @@ func topupAction(ub *Account, a *Action, acs Actions, extraData interface{}) (er
 	return
 }
 
-func debitResetAction(ub *Account, a *Action, acs Actions, extraData interface{}) (err error) {
+func debitResetAction(ub *Account, a *Action, acs Actions, extraData any) (err error) {
 	if ub == nil {
 		return errors.New("nil account")
 	}
@@ -306,7 +306,7 @@ func debitResetAction(ub *Account, a *Action, acs Actions, extraData interface{}
 	return genericDebit(ub, a, true)
 }
 
-func debitAction(ub *Account, a *Action, acs Actions, extraData interface{}) (err error) {
+func debitAction(ub *Account, a *Action, acs Actions, extraData any) (err error) {
 	if ub == nil {
 		return errors.New("nil account")
 	}
@@ -314,7 +314,7 @@ func debitAction(ub *Account, a *Action, acs Actions, extraData interface{}) (er
 	return
 }
 
-func resetCountersAction(ub *Account, a *Action, acs Actions, extraData interface{}) (err error) {
+func resetCountersAction(ub *Account, a *Action, acs Actions, extraData any) (err error) {
 	if ub == nil {
 		return errors.New("nil account")
 	}
@@ -340,7 +340,7 @@ func genericDebit(ub *Account, a *Action, reset bool) (err error) {
 	return ub.debitBalanceAction(a, reset, false)
 }
 
-func enableAccountAction(acc *Account, a *Action, acs Actions, extraData interface{}) (err error) {
+func enableAccountAction(acc *Account, a *Action, acs Actions, extraData any) (err error) {
 	if acc == nil {
 		return errors.New("nil account")
 	}
@@ -348,7 +348,7 @@ func enableAccountAction(acc *Account, a *Action, acs Actions, extraData interfa
 	return
 }
 
-func disableAccountAction(acc *Account, a *Action, acs Actions, extraData interface{}) (err error) {
+func disableAccountAction(acc *Account, a *Action, acs Actions, extraData any) (err error) {
 	if acc == nil {
 		return errors.New("nil account")
 	}
@@ -373,7 +373,7 @@ func genericReset(ub *Account) error {
 	return nil
 }
 
-func getOneData(ub *Account, extraData interface{}) ([]byte, error) {
+func getOneData(ub *Account, extraData any) ([]byte, error) {
 	switch {
 	case ub != nil:
 		return json.Marshal(ub)
@@ -383,7 +383,7 @@ func getOneData(ub *Account, extraData interface{}) ([]byte, error) {
 	return nil, nil
 }
 
-func sendAMQP(ub *Account, a *Action, acs Actions, extraData interface{}) error {
+func sendAMQP(ub *Account, a *Action, acs Actions, extraData any) error {
 	body, err := getOneData(ub, extraData)
 	if err != nil {
 		return err
@@ -396,7 +396,7 @@ func sendAMQP(ub *Account, a *Action, acs Actions, extraData interface{}) error 
 	return err
 }
 
-func sendAWS(ub *Account, a *Action, acs Actions, extraData interface{}) error {
+func sendAWS(ub *Account, a *Action, acs Actions, extraData any) error {
 	body, err := getOneData(ub, extraData)
 	if err != nil {
 		return err
@@ -409,7 +409,7 @@ func sendAWS(ub *Account, a *Action, acs Actions, extraData interface{}) error {
 	return err
 }
 
-func sendSQS(ub *Account, a *Action, acs Actions, extraData interface{}) error {
+func sendSQS(ub *Account, a *Action, acs Actions, extraData any) error {
 	body, err := getOneData(ub, extraData)
 	if err != nil {
 		return err
@@ -422,7 +422,7 @@ func sendSQS(ub *Account, a *Action, acs Actions, extraData interface{}) error {
 	return err
 }
 
-func sendKafka(ub *Account, a *Action, acs Actions, extraData interface{}) error {
+func sendKafka(ub *Account, a *Action, acs Actions, extraData any) error {
 	body, err := getOneData(ub, extraData)
 	if err != nil {
 		return err
@@ -435,7 +435,7 @@ func sendKafka(ub *Account, a *Action, acs Actions, extraData interface{}) error
 	return err
 }
 
-func sendS3(ub *Account, a *Action, acs Actions, extraData interface{}) error {
+func sendS3(ub *Account, a *Action, acs Actions, extraData any) error {
 	body, err := getOneData(ub, extraData)
 	if err != nil {
 		return err
@@ -448,7 +448,7 @@ func sendS3(ub *Account, a *Action, acs Actions, extraData interface{}) error {
 	return err
 }
 
-func callURL(ub *Account, a *Action, acs Actions, extraData interface{}) error {
+func callURL(ub *Account, a *Action, acs Actions, extraData any) error {
 	body, err := getOneData(ub, extraData)
 	if err != nil {
 		return err
@@ -468,7 +468,7 @@ func callURL(ub *Account, a *Action, acs Actions, extraData interface{}) error {
 }
 
 // Does not block for posts, no error reports
-func callURLAsync(ub *Account, a *Action, acs Actions, extraData interface{}) error {
+func callURLAsync(ub *Account, a *Action, acs Actions, extraData any) error {
 	body, err := getOneData(ub, extraData)
 	if err != nil {
 		return err
@@ -489,7 +489,7 @@ func callURLAsync(ub *Account, a *Action, acs Actions, extraData interface{}) er
 }
 
 // Mails the balance hitting the threshold towards predefined list of addresses
-func mailAsync(ub *Account, a *Action, acs Actions, extraData interface{}) error {
+func mailAsync(ub *Account, a *Action, acs Actions, extraData any) error {
 	cgrCfg := config.CgrConfig()
 	params := strings.Split(a.ExtraParameters, string(utils.CSV_SEP))
 	if len(params) == 0 {
@@ -528,7 +528,7 @@ func mailAsync(ub *Account, a *Action, acs Actions, extraData interface{}) error
 	return nil
 }
 
-func setddestinations(ub *Account, a *Action, acs Actions, extraData interface{}) (err error) {
+func setddestinations(ub *Account, a *Action, acs Actions, extraData any) (err error) {
 	var ddcDestID string
 	for _, bchain := range ub.BalanceMap {
 		for _, b := range bchain {
@@ -599,7 +599,7 @@ func setddestinations(ub *Account, a *Action, acs Actions, extraData interface{}
 	return nil
 }
 
-func removeAccountAction(ub *Account, a *Action, acs Actions, extraData interface{}) error {
+func removeAccountAction(ub *Account, a *Action, acs Actions, extraData any) error {
 	var accID string
 	if ub != nil {
 		accID = ub.ID
@@ -624,7 +624,7 @@ func removeAccountAction(ub *Account, a *Action, acs Actions, extraData interfac
 		return err
 	}
 
-	_, err := guardian.Guardian.Guard(func() (interface{}, error) {
+	_, err := guardian.Guardian.Guard(func() (any, error) {
 		acntAPids, err := dm.GetAccountActionPlans(accID, true, true, utils.NonTransactional)
 		if err != nil && err != utils.ErrNotFound {
 			utils.Logger.Err(fmt.Sprintf("Could not get action plans: %s: %v", accID, err))
@@ -660,7 +660,7 @@ func removeAccountAction(ub *Account, a *Action, acs Actions, extraData interfac
 	return nil
 }
 
-func removeBalanceAction(ub *Account, a *Action, acs Actions, extraData interface{}) error {
+func removeBalanceAction(ub *Account, a *Action, acs Actions, extraData any) error {
 	if ub == nil {
 		return fmt.Errorf("nil account for %s action", utils.ToJSON(a))
 	}
@@ -685,14 +685,14 @@ func removeBalanceAction(ub *Account, a *Action, acs Actions, extraData interfac
 	return nil
 }
 
-func setBalanceAction(ub *Account, a *Action, acs Actions, extraData interface{}) error {
+func setBalanceAction(ub *Account, a *Action, acs Actions, extraData any) error {
 	if ub == nil {
 		return fmt.Errorf("nil account for %s action", utils.ToJSON(a))
 	}
 	return ub.setBalanceAction(a)
 }
 
-func transferMonetaryDefaultAction(ub *Account, a *Action, acs Actions, extraData interface{}) error {
+func transferMonetaryDefaultAction(ub *Account, a *Action, acs Actions, extraData any) error {
 	if ub == nil {
 		utils.Logger.Err("*transfer_monetary_default called without account")
 		return utils.ErrAccountNotFound
@@ -722,7 +722,7 @@ type RPCRequest struct {
 	Method    string
 	Attempts  int
 	Async     bool
-	Params    map[string]interface{}
+	Params    map[string]any
 }
 
 /*
@@ -740,7 +740,7 @@ Sq - CDRStatsQueueTriggered object
 
 We can actually use everythiong that go templates offer. You can read more here: https://golang.org/pkg/text/template/
 */
-func cgrRPCAction(ub *Account, a *Action, acs Actions, extraData interface{}) error {
+func cgrRPCAction(ub *Account, a *Action, acs Actions, extraData any) error {
 	// parse template
 	tmpl := template.New("extra_params")
 	tmpl.Delims("<<", ">>")
@@ -754,7 +754,7 @@ func cgrRPCAction(ub *Account, a *Action, acs Actions, extraData interface{}) er
 		Account   *Account
 		Action    *Action
 		Actions   Actions
-		ExtraData interface{}
+		ExtraData any
 	}{ub, a, acs, extraData}); err != nil {
 		utils.Logger.Err(fmt.Sprintf("error executing *cgr_rpc template %s:", err.Error()))
 		return err
@@ -805,7 +805,7 @@ func cgrRPCAction(ub *Account, a *Action, acs Actions, extraData interface{}) er
 	return nil
 }
 
-func topupZeroNegativeAction(ub *Account, a *Action, acs Actions, extraData interface{}) error {
+func topupZeroNegativeAction(ub *Account, a *Action, acs Actions, extraData any) error {
 	if ub == nil {
 		return errors.New("nil account")
 	}
@@ -815,7 +815,7 @@ func topupZeroNegativeAction(ub *Account, a *Action, acs Actions, extraData inte
 	return ub.debitBalanceAction(a, false, true)
 }
 
-func setExpiryAction(ub *Account, a *Action, acs Actions, extraData interface{}) error {
+func setExpiryAction(ub *Account, a *Action, acs Actions, extraData any) error {
 	if ub == nil {
 		return errors.New("nil account")
 	}
@@ -829,7 +829,7 @@ func setExpiryAction(ub *Account, a *Action, acs Actions, extraData interface{})
 }
 
 // publishAccount will publish the account as well as each balance received to ThresholdS
-func publishAccount(ub *Account, a *Action, acs Actions, extraData interface{}) error {
+func publishAccount(ub *Account, a *Action, acs Actions, extraData any) error {
 	if ub == nil {
 		return errors.New("nil account")
 	}
@@ -846,7 +846,7 @@ func publishAccount(ub *Account, a *Action, acs Actions, extraData interface{}) 
 }
 
 // publishAccount will publish the account as well as each balance received to ThresholdS
-func publishBalance(ub *Account, a *Action, acs Actions, extraData interface{}) error {
+func publishBalance(ub *Account, a *Action, acs Actions, extraData any) error {
 	if ub == nil {
 		return errors.New("nil account")
 	}
@@ -883,7 +883,7 @@ func (apl Actions) Sort() {
 }
 
 // Clone returns a clone from object
-func (apl Actions) Clone() (interface{}, error) {
+func (apl Actions) Clone() (any, error) {
 	if apl == nil {
 		return nil, nil
 	}
@@ -914,7 +914,7 @@ func (cdrP *cdrLogProvider) String() string {
 }
 
 // FieldAsInterface is part of engine.DataProvider interface
-func (cdrP *cdrLogProvider) FieldAsInterface(fldPath []string) (data interface{}, err error) {
+func (cdrP *cdrLogProvider) FieldAsInterface(fldPath []string) (data any, err error) {
 	if len(fldPath) != 1 {
 		return nil, utils.ErrNotFound
 	}
@@ -971,7 +971,7 @@ func (cdrP *cdrLogProvider) FieldAsInterface(fldPath []string) (data interface{}
 
 // FieldAsString is part of engine.DataProvider interface
 func (cdrP *cdrLogProvider) FieldAsString(fldPath []string) (data string, err error) {
-	var valIface interface{}
+	var valIface any
 	valIface, err = cdrP.FieldAsInterface(fldPath)
 	if err != nil {
 		return
@@ -984,7 +984,7 @@ func (cdrP *cdrLogProvider) RemoteHost() net.Addr {
 	return utils.LocalAddr()
 }
 
-func removeSessionCosts(_ *Account, action *Action, _ Actions, _ interface{}) error { // FiltersID;inlineFilter
+func removeSessionCosts(_ *Account, action *Action, _ Actions, _ any) error { // FiltersID;inlineFilter
 	tenant := config.CgrConfig().GeneralCfg().DefaultTenant
 	smcFilter := new(utils.SMCostFilter)
 	for _, fltrID := range strings.Split(action.ExtraParameters, utils.INFIELD_SEP) {
@@ -1007,7 +1007,7 @@ func removeSessionCosts(_ *Account, action *Action, _ Actions, _ interface{}) er
 	return cdrStorage.RemoveSMCosts(smcFilter)
 }
 
-func removeExpired(acc *Account, action *Action, _ Actions, extraData interface{}) error {
+func removeExpired(acc *Account, action *Action, _ Actions, extraData any) error {
 	if acc == nil {
 		return fmt.Errorf("nil account for %s action", utils.ToJSON(action))
 	}
@@ -1034,7 +1034,7 @@ func removeExpired(acc *Account, action *Action, _ Actions, extraData interface{
 	return nil
 }
 
-func postEvent(ub *Account, a *Action, acs Actions, extraData interface{}) error {
+func postEvent(ub *Account, a *Action, acs Actions, extraData any) error {
 	body, err := json.Marshal(extraData)
 	if err != nil {
 		return err
@@ -1053,7 +1053,7 @@ func postEvent(ub *Account, a *Action, acs Actions, extraData interface{}) error
 	return err
 }
 
-func resetAccount(ub *Account, action *Action, acts Actions, _ interface{}) error {
+func resetAccount(ub *Account, action *Action, acts Actions, _ any) error {
 	if ub == nil {
 		return errors.New("nil account")
 	}

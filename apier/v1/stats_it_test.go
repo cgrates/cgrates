@@ -44,7 +44,7 @@ var (
 		{
 			Tenant: "cgrates.org",
 			ID:     "event1",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Account:    "1001",
 				utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 				utils.Usage:      time.Duration(135 * time.Second),
@@ -52,14 +52,14 @@ var (
 		{
 			Tenant: "cgrates.org",
 			ID:     "event2",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Account:    "1002",
 				utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 				utils.Usage:      time.Duration(45 * time.Second)}},
 		{
 			Tenant: "cgrates.org",
 			ID:     "event3",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Account:   "1002",
 				utils.SetupTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 				utils.Usage:     0}},
@@ -183,7 +183,7 @@ func testV1STSProcessEvent(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "event1",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Account:    "1001",
 				utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 				utils.Usage:      time.Duration(135 * time.Second),
@@ -236,7 +236,7 @@ func testV1STSProcessEvent(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "event2",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Account:    "1002",
 				utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 				utils.Usage:      time.Duration(45 * time.Second),
@@ -250,7 +250,7 @@ func testV1STSProcessEvent(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "event3",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Account:   "1002",
 				utils.SetupTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 				utils.Usage:     0,
@@ -539,7 +539,7 @@ func testV1STSProcessMetricsWithFilter(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "event1",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"DistinctVal": "RandomVal",
 				utils.Usage:   time.Duration(6 * time.Second),
 				"CustomValue": 7.0}}}
@@ -566,7 +566,7 @@ func testV1STSProcessMetricsWithFilter(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "event2",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"DistinctVal": "RandomVal",
 				utils.Usage:   time.Duration(12 * time.Second),
 				"CustomValue": 10.0}}}
@@ -645,7 +645,7 @@ func testV1STSProcessStaticMetrics(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "event1",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"StaticMetrics": "StaticMetrics",
 			},
 		},
@@ -753,7 +753,7 @@ func testV1STSProcessStatWithThreshold(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "event1",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				"CustomEvent": "CustomEvent",
 				utils.Usage:   time.Duration(45 * time.Second),
 			},

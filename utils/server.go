@@ -42,8 +42,8 @@ import (
 )
 
 func init() {
-	gob.Register(map[string]interface{}{})
-	gob.Register([]interface{}{})
+	gob.Register(map[string]any{})
+	gob.Register([]any{})
 	gob.Register(time.Duration(0))
 	gob.Register(time.Time{})
 	gob.Register(url.Values{})
@@ -72,14 +72,14 @@ func (s *Server) SetDispatched() {
 	s.isDispatched = true
 }
 
-func (s *Server) RpcRegister(rcvr interface{}) {
+func (s *Server) RpcRegister(rcvr any) {
 	rpc.Register(rcvr)
 	s.Lock()
 	s.rpcEnabled = true
 	s.Unlock()
 }
 
-func (s *Server) RpcRegisterName(name string, rcvr interface{}) {
+func (s *Server) RpcRegisterName(name string, rcvr any) {
 	rpc.RegisterName(name, rcvr)
 	s.Lock()
 	s.rpcEnabled = true
@@ -111,7 +111,7 @@ func (s *Server) RegisterHttpHandler(pattern string, handler http.Handler) {
 }
 
 // Registers a new BiJsonRpc name
-func (s *Server) BiRPCRegisterName(name string, rcv interface{}) {
+func (s *Server) BiRPCRegisterName(name string, rcv any) {
 	s.birpcSrv.RegisterName(name, rcv)
 }
 

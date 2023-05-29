@@ -206,9 +206,9 @@ func (self *SQLStorage) GetTpTableIds(tpid, table string, distinct utils.TPDisti
 	for rows.Next() {
 		i++ //Keep here a reference so we know we got at least one
 
-		cols, err := rows.Columns()            // Get the column names; remember to check err
-		vals := make([]string, len(cols))      // Allocate enough values
-		ints := make([]interface{}, len(cols)) // Make a slice of []interface{}
+		cols, err := rows.Columns()       // Get the column names; remember to check err
+		vals := make([]string, len(cols)) // Allocate enough values
+		ints := make([]any, len(cols))    // Make a slice of []any
 		for i := range ints {
 			ints[i] = &vals[i] // Copy references into the slice
 		}

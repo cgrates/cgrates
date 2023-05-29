@@ -42,7 +42,7 @@ var (
 
 	sesExpCgrEv = &utils.CGREvent{
 		Tenant: sesExpTenant,
-		Event: map[string]interface{}{
+		Event: map[string]any{
 			utils.Tenant:           sesExpTenant,
 			utils.Category:         "call",
 			utils.ToR:              utils.VOICE,
@@ -147,7 +147,7 @@ func testSesExpItAddVoiceBalance(t *testing.T) {
 		Account:     sesExpAccount,
 		BalanceType: utils.VOICE,
 		Value:       float64(time.Hour),
-		Balance: map[string]interface{}{
+		Balance: map[string]any{
 			utils.ID:            "TestSesBal1",
 			utils.RatingSubject: "*zero1s",
 		},
@@ -163,7 +163,7 @@ func testSesExpItAddVoiceBalance(t *testing.T) {
 		Account:     sesExpAccount,
 		BalanceType: utils.VOICE,
 		Value:       float64(time.Second),
-		Balance: map[string]interface{}{
+		Balance: map[string]any{
 			utils.ID:            "TestSesBalExpire",
 			utils.RatingSubject: "*zero1s",
 			utils.ExpiryTime:    time.Now().Add(50 * time.Millisecond),

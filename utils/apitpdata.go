@@ -762,47 +762,47 @@ func (fltr *CDRsFilter) Prepare() {
 // RPCCDRsFilter is a filter used in Rpc calls
 // RPCCDRsFilter is slightly different than CDRsFilter by using string instead of Time filters
 type RPCCDRsFilter struct {
-	CGRIDs                 []string               // If provided, it will filter based on the cgrids present in list
-	NotCGRIDs              []string               // Filter specific CgrIds out
-	RunIDs                 []string               // If provided, it will filter on mediation runid
-	NotRunIDs              []string               // Filter specific runIds out
-	OriginIDs              []string               // If provided, it will filter on OriginIDs
-	NotOriginIDs           []string               // Filter specific OriginIDs out
-	OriginHosts            []string               // If provided, it will filter cdrhost
-	NotOriginHosts         []string               // Filter out specific cdr hosts
-	Sources                []string               // If provided, it will filter cdrsource
-	NotSources             []string               // Filter out specific CDR sources
-	ToRs                   []string               // If provided, filter on TypeOfRecord
-	NotToRs                []string               // Filter specific TORs out
-	RequestTypes           []string               // If provided, it will fiter reqtype
-	NotRequestTypes        []string               // Filter out specific request types
-	Tenants                []string               // If provided, it will filter tenant
-	NotTenants             []string               // If provided, it will filter tenant
-	Categories             []string               // If provided, it will filter çategory
-	NotCategories          []string               // Filter out specific categories
-	Accounts               []string               // If provided, it will filter account
-	NotAccounts            []string               // Filter out specific Accounts
-	Subjects               []string               // If provided, it will filter the rating subject
-	NotSubjects            []string               // Filter out specific subjects
-	DestinationPrefixes    []string               // If provided, it will filter on destination prefix
-	NotDestinationPrefixes []string               // Filter out specific destination prefixes
-	Costs                  []float64              // Query based on costs specified
-	NotCosts               []float64              // Filter out specific costs out from result
-	ExtraFields            map[string]string      // Query based on extra fields content
-	NotExtraFields         map[string]string      // Filter out based on extra fields content
-	SetupTimeStart         string                 // Start of interval, bigger or equal than configured
-	SetupTimeEnd           string                 // End interval, smaller than setupTime
-	AnswerTimeStart        string                 // Start of interval, bigger or equal than configured
-	AnswerTimeEnd          string                 // End interval, smaller than answerTime
-	CreatedAtStart         string                 // Start of interval, bigger or equal than configured
-	CreatedAtEnd           string                 // End interval, smaller than
-	UpdatedAtStart         string                 // Start of interval, bigger or equal than configured
-	UpdatedAtEnd           string                 // End interval, smaller than
-	MinUsage               string                 // Start of the usage interval (>=)
-	MaxUsage               string                 // End of the usage interval (<)
-	OrderBy                string                 // Ascendent/Descendent
-	ExtraArgs              map[string]interface{} // it will contain optional arguments like: OrderIDStart,OrderIDEnd,MinCost and MaxCost
-	Paginator                                     // Add pagination
+	CGRIDs                 []string          // If provided, it will filter based on the cgrids present in list
+	NotCGRIDs              []string          // Filter specific CgrIds out
+	RunIDs                 []string          // If provided, it will filter on mediation runid
+	NotRunIDs              []string          // Filter specific runIds out
+	OriginIDs              []string          // If provided, it will filter on OriginIDs
+	NotOriginIDs           []string          // Filter specific OriginIDs out
+	OriginHosts            []string          // If provided, it will filter cdrhost
+	NotOriginHosts         []string          // Filter out specific cdr hosts
+	Sources                []string          // If provided, it will filter cdrsource
+	NotSources             []string          // Filter out specific CDR sources
+	ToRs                   []string          // If provided, filter on TypeOfRecord
+	NotToRs                []string          // Filter specific TORs out
+	RequestTypes           []string          // If provided, it will fiter reqtype
+	NotRequestTypes        []string          // Filter out specific request types
+	Tenants                []string          // If provided, it will filter tenant
+	NotTenants             []string          // If provided, it will filter tenant
+	Categories             []string          // If provided, it will filter çategory
+	NotCategories          []string          // Filter out specific categories
+	Accounts               []string          // If provided, it will filter account
+	NotAccounts            []string          // Filter out specific Accounts
+	Subjects               []string          // If provided, it will filter the rating subject
+	NotSubjects            []string          // Filter out specific subjects
+	DestinationPrefixes    []string          // If provided, it will filter on destination prefix
+	NotDestinationPrefixes []string          // Filter out specific destination prefixes
+	Costs                  []float64         // Query based on costs specified
+	NotCosts               []float64         // Filter out specific costs out from result
+	ExtraFields            map[string]string // Query based on extra fields content
+	NotExtraFields         map[string]string // Filter out based on extra fields content
+	SetupTimeStart         string            // Start of interval, bigger or equal than configured
+	SetupTimeEnd           string            // End interval, smaller than setupTime
+	AnswerTimeStart        string            // Start of interval, bigger or equal than configured
+	AnswerTimeEnd          string            // End interval, smaller than answerTime
+	CreatedAtStart         string            // Start of interval, bigger or equal than configured
+	CreatedAtEnd           string            // End interval, smaller than
+	UpdatedAtStart         string            // Start of interval, bigger or equal than configured
+	UpdatedAtEnd           string            // End interval, smaller than
+	MinUsage               string            // Start of the usage interval (>=)
+	MaxUsage               string            // End of the usage interval (<)
+	OrderBy                string            // Ascendent/Descendent
+	ExtraArgs              map[string]any    // it will contain optional arguments like: OrderIDStart,OrderIDEnd,MinCost and MaxCost
+	Paginator                                // Add pagination
 }
 
 func (fltr *RPCCDRsFilter) AsCDRsFilter(timezone string) (cdrFltr *CDRsFilter, err error) {
@@ -968,8 +968,8 @@ type AttrSetBalance struct {
 	Account         string
 	BalanceType     string
 	Value           float64
-	Balance         map[string]interface{}
-	ActionExtraData *map[string]interface{}
+	Balance         map[string]any
+	ActionExtraData *map[string]any
 	Cdrlog          bool
 }
 
@@ -1051,7 +1051,7 @@ func (ai *ActivationInterval) IsActiveAtTime(atTime time.Time) bool {
 
 // Attributes to send on SessionDisconnect by SMG
 type AttrDisconnectSession struct {
-	EventStart map[string]interface{}
+	EventStart map[string]any
 	Reason     string
 }
 
@@ -1184,7 +1184,7 @@ type TPDispatcherProfile struct {
 	FilterIDs          []string
 	ActivationInterval *TPActivationInterval // Time when this limit becomes active and expires
 	Strategy           string
-	StrategyParams     []interface{} // ie for distribution, set here the pool weights
+	StrategyParams     []any // ie for distribution, set here the pool weights
 	Weight             float64
 	Hosts              []*TPDispatcherHostProfile
 }
@@ -1193,9 +1193,9 @@ type TPDispatcherProfile struct {
 type TPDispatcherHostProfile struct {
 	ID        string
 	FilterIDs []string
-	Weight    float64       // applied in case of multiple connections need to be ordered
-	Params    []interface{} // additional parameters stored for a session
-	Blocker   bool          // no connection after this one
+	Weight    float64 // applied in case of multiple connections need to be ordered
+	Params    []any   // additional parameters stored for a session
+	Blocker   bool    // no connection after this one
 }
 
 // TPDispatcherHost is used in APIs to manage remotely offline DispatcherHost

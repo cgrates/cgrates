@@ -134,7 +134,7 @@ func TestLoaderCfgAsMapInterface(t *testing.T) {
 	],
 	
 }`
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		"id":              "*default",
 		"enabled":         false,
 		"tenant":          "",
@@ -145,11 +145,11 @@ func TestLoaderCfgAsMapInterface(t *testing.T) {
 		"field_separator": ",",
 		"tp_in_dir":       "/var/spool/cgrates/loader/in",
 		"tp_out_dir":      "/var/spool/cgrates/loader/out",
-		"data": []map[string]interface{}{
+		"data": []map[string]any{
 			{
 				"type":      "*attributes",
 				"file_name": "Attributes.csv",
-				"fields": []map[string]interface{}{
+				"fields": []map[string]any{
 					{
 						"tag":       "TenantID",
 						"path":      "Tenant",

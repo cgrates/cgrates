@@ -46,7 +46,7 @@ func (self *CmdComputeFilterIndexes) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdComputeFilterIndexes) RpcParams(reset bool) interface{} {
+func (self *CmdComputeFilterIndexes) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &utils.ArgsComputeFilterIndexIDs{}
 	}
@@ -57,7 +57,7 @@ func (self *CmdComputeFilterIndexes) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdComputeFilterIndexes) RpcResult() interface{} {
+func (self *CmdComputeFilterIndexes) RpcResult() any {
 	var reply string
 	return &reply
 }

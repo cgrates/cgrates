@@ -93,7 +93,7 @@ func testDspSessionAddBalacne(t *testing.T) {
 		Account:     "1001",
 		BalanceType: utils.VOICE,
 		Value:       float64(initUsage),
-		Balance: map[string]interface{}{
+		Balance: map[string]any{
 			utils.ID:            "SessionBalance",
 			utils.RatingSubject: "*zero5ms",
 		},
@@ -203,7 +203,7 @@ func testDspSessionTestAuthKey(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItAuth",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Tenant:      "cgrates.org",
 				utils.Category:    "call",
 				utils.ToR:         utils.VOICE,
@@ -236,7 +236,7 @@ func testDspSessionAuthorize(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItAuth",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.CGRID:       "c87609aa1cb6e9529ab1836cfeeebaab7aa7ebaf",
 				utils.Tenant:      "cgrates.org",
 				utils.Category:    "call",
@@ -287,7 +287,7 @@ func testDspSessionInit(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItInitiateSession",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.CGRID:       "c87609aa1cb6e9529ab1836cfeeebaab7aa7ebaf",
 				utils.Tenant:      "cgrates.org",
 				utils.Category:    "call",
@@ -362,7 +362,7 @@ func testDspSessionUpdate(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItUpdateSession",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.CGRID:       "c87609aa1cb6e9529ab1836cfeeebaab7aa7ebaf",
 				utils.Tenant:      "cgrates.org",
 				utils.Category:    "call",
@@ -391,7 +391,7 @@ func testDspSessionUpdate(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItUpdateSession",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Tenant:      "cgrates.org",
 				utils.Category:    "call",
 				utils.ToR:         utils.VOICE,
@@ -429,7 +429,7 @@ func testDspSessionUpdate2(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItUpdateSession",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.CGRID:       "c87609aa1cb6e9529ab1836cfeeebaab7aa7ebaf",
 				utils.Tenant:      "cgrates.org",
 				utils.Category:    "call",
@@ -458,7 +458,7 @@ func testDspSessionUpdate2(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItUpdateSession",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.CGRID:       "c87609aa1cb6e9529ab1836cfeeebaab7aa7ebaf",
 				utils.Tenant:      "cgrates.org",
 				utils.Category:    "call",
@@ -501,7 +501,7 @@ func testDspSessionTerminate(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItUpdateSession",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.CGRID:       "c87609aa1cb6e9529ab1836cfeeebaab7aa7ebaf",
 				utils.Tenant:      "cgrates.org",
 				utils.Category:    "call",
@@ -534,7 +534,7 @@ func testDspSessionProcessCDR(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItProcessCDR",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Tenant:      "cgrates.org",
 				utils.Category:    "call",
 				utils.ToR:         utils.VOICE,
@@ -571,7 +571,7 @@ func testDspSessionProcessEvent(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItProcessEvent",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.CGRID:       "c87609aa1cb6e9529ab1836cfeeebaab7aa7ebac",
 				utils.Tenant:      "cgrates.org",
 				utils.Category:    "call",
@@ -607,7 +607,7 @@ func testDspSessionProcessEvent(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItProcessEvent",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.CGRID:       "c87609aa1cb6e9529ab1836cfeeebaab7aa7ebac",
 				utils.Tenant:      "cgrates.org",
 				utils.Category:    "call",
@@ -644,7 +644,7 @@ func testDspSessionProcessEvent2(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItProcessEvent",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.CGRID:       "c87609aa1cb6e9529ab1836cfeeebaab7aa7ebaf",
 				utils.Tenant:      "cgrates.org",
 				utils.Category:    "call",
@@ -680,7 +680,7 @@ func testDspSessionProcessEvent2(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItProcessEvent",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.CGRID:       "c87609aa1cb6e9529ab1836cfeeebaab7aa7ebaf",
 				utils.Tenant:      "cgrates.org",
 				utils.Category:    "call",
@@ -782,7 +782,7 @@ func testDspSessionPassive(t *testing.T) {
 		CGRID:      rply[0].CGRID,
 		Tenant:     rply[0].Tenant,
 		ResourceID: "TestSSv1It1",
-		EventStart: engine.NewMapEvent(map[string]interface{}{
+		EventStart: engine.NewMapEvent(map[string]any{
 			utils.CGRID:       "c87609aa1cb6e9529ab1836cfeeebaab7aa7ebaf",
 			utils.Tenant:      "cgrates.org",
 			utils.Category:    "call",
@@ -797,7 +797,7 @@ func testDspSessionPassive(t *testing.T) {
 		}),
 		SRuns: []*sessions.SRun{
 			{
-				Event: engine.NewMapEvent(map[string]interface{}{
+				Event: engine.NewMapEvent(map[string]any{
 					"RunID":           "CustomerCharges",
 					utils.CGRID:       "c87609aa1cb6e9529ab1836cfeeebaab7aa7ebaf",
 					utils.Tenant:      "cgrates.org",
@@ -906,7 +906,7 @@ func testDspSessionProcessEvent3(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testSSv1ItProcessEventTerminateSession",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Tenant:      "cgrates.org",
 				utils.ToR:         utils.VOICE,
 				utils.OriginID:    "TestSSv1It2",

@@ -153,7 +153,7 @@ func testAPIerVerifyAttributesAfterLoad(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAPIerAfterDelete",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Account: "1001",
 			},
 		},
@@ -229,7 +229,7 @@ func testAPIerVerifyAttributesAfterDelete(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAPIerAfterDelete",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Account: "1001",
 			},
 		},

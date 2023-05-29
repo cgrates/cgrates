@@ -158,7 +158,7 @@ func TestStorDbCfgAsMapInterface(t *testing.T) {
 		},
 }`
 
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		"db_type":               "*mysql",
 		"db_host":               "127.0.0.1",
 		"db_port":               3306,
@@ -172,9 +172,9 @@ func TestStorDbCfgAsMapInterface(t *testing.T) {
 		"prefix_indexed_fields": []string{},
 		"query_timeout":         "10s",
 		"sslmode":               "disable",
-		"items": map[string]interface{}{
-			"session_costs": map[string]interface{}{"limit": -1, "ttl": "", "static_ttl": false, "remote": false, "replicate": false},
-			"cdrs":          map[string]interface{}{"limit": -1, "ttl": "", "static_ttl": false, "remote": false, "replicate": false},
+		"items": map[string]any{
+			"session_costs": map[string]any{"limit": -1, "ttl": "", "static_ttl": false, "remote": false, "replicate": false},
+			"cdrs":          map[string]any{"limit": -1, "ttl": "", "static_ttl": false, "remote": false, "replicate": false},
 		},
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {

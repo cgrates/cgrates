@@ -134,8 +134,8 @@ func (kev KamEvent) MissingParameter() bool {
 }
 
 // AsMapStringIface converts KamEvent into event used by other subsystems
-func (kev KamEvent) AsMapStringInterface() (mp map[string]interface{}) {
-	mp = make(map[string]interface{})
+func (kev KamEvent) AsMapStringInterface() (mp map[string]any) {
+	mp = make(map[string]any)
 	for k, v := range kev {
 		if k == utils.Usage {
 			v += "s" // mark the Usage as seconds

@@ -229,7 +229,7 @@ func testKafkaCreateTopic(t *testing.T) {
 
 func testKafkaExportCDRs(t *testing.T) {
 	attr := ArgExportCDRs{
-		ExportArgs: map[string]interface{}{
+		ExportArgs: map[string]any{
 			utils.ExportTemplate: "kafka_exporter",
 		},
 		Verbose: true,

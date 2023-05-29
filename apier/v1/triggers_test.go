@@ -46,7 +46,7 @@ func TestAttrSetActionTriggerUpdateActionTrigger(t *testing.T) {
 	ast = AttrSetActionTrigger{
 		GroupID:  "GroupID",
 		UniqueID: "ID",
-		ActionTrigger: map[string]interface{}{
+		ActionTrigger: map[string]any{
 			utils.ThresholdType:         "THR",
 			utils.ThresholdValue:        10,
 			utils.Recurrent:             false,
@@ -56,7 +56,7 @@ func TestAttrSetActionTriggerUpdateActionTrigger(t *testing.T) {
 			utils.ActivationDate:        tNow,
 			utils.BalanceID:             "*default",
 			utils.BalanceType:           "*call",
-			utils.BalanceDestinationIds: []interface{}{"DST1", "DST2"},
+			utils.BalanceDestinationIds: []any{"DST1", "DST2"},
 			utils.BalanceWeight:         10,
 			utils.BalanceExpirationDate: tNow,
 			utils.BalanceTimingTags:     []string{"*asap"},

@@ -50,7 +50,7 @@ func (onm *OrderedNavigableMap) GetFirstElement() *PathItemElement {
 }
 
 // Interface returns navigble map that's inside
-func (onm *OrderedNavigableMap) Interface() interface{} {
+func (onm *OrderedNavigableMap) Interface() any {
 	return onm.nm
 }
 
@@ -153,7 +153,7 @@ func (onm *OrderedNavigableMap) FieldAsString(fldPath []string) (str string, err
 }
 
 // FieldAsInterface returns the interface at the path
-func (onm *OrderedNavigableMap) FieldAsInterface(fldPath []string) (str interface{}, err error) {
+func (onm *OrderedNavigableMap) FieldAsInterface(fldPath []string) (str any, err error) {
 	var val NMInterface
 	val, err = onm.nm.Field(NewPathItems(fldPath))
 	if err != nil {

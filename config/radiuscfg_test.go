@@ -90,19 +90,19 @@ func TestRadiusAgentCfgAsMapInterface(t *testing.T) {
 		],
 	},
 }`
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		"enabled":     false,
 		"listen_net":  "udp",
 		"listen_auth": "127.0.0.1:1812",
 		"listen_acct": "127.0.0.1:1813",
-		"client_secrets": map[string]interface{}{
+		"client_secrets": map[string]any{
 			"*default": "CGRateS.org",
 		},
-		"client_dictionaries": map[string]interface{}{
+		"client_dictionaries": map[string]any{
 			"*default": "/usr/share/cgrates/radius/dict/",
 		},
 		"sessions_conns":     []string{"*internal"},
-		"request_processors": []map[string]interface{}{},
+		"request_processors": []map[string]any{},
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)

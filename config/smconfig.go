@@ -65,8 +65,8 @@ func (self *FsConnCfg) loadFromJsonCfg(jsnCfg *FsConnJsonCfg) error {
 	return nil
 }
 
-func (fs *FsConnCfg) AsMapInterface() map[string]interface{} {
-	return map[string]interface{}{
+func (fs *FsConnCfg) AsMapInterface() map[string]any {
+	return map[string]any{
 		utils.AddressCfg:    fs.Address,
 		utils.Password:      fs.Password,
 		utils.ReconnectsCfg: fs.Reconnects,
@@ -285,12 +285,12 @@ func (scfg *SessionSCfg) GetDefaultUsage(tor string) time.Duration {
 	return scfg.DefaultUsage[tor]
 }
 
-func (scfg *SessionSCfg) AsMapInterface() map[string]interface{} {
+func (scfg *SessionSCfg) AsMapInterface() map[string]any {
 	var debitInterval string = "0"
 	if scfg.DebitInterval != 0 {
 		debitInterval = scfg.DebitInterval.String()
 	}
-	maxComputed := make(map[string]interface{})
+	maxComputed := make(map[string]any)
 	for key, item := range scfg.DefaultUsage {
 		if key == utils.ANY || key == utils.VOICE {
 			maxComputed[key] = item.String()
@@ -397,7 +397,7 @@ func (scfg *SessionSCfg) AsMapInterface() map[string]interface{} {
 			CDRsConns[i] = item
 		}
 	}
-	return map[string]interface{}{
+	return map[string]any{
 		utils.EnabledCfg:             scfg.Enabled,
 		utils.ListenBijsonCfg:        scfg.ListenBijson,
 		utils.ChargerSConnsCfg:       chargerSConns,
@@ -491,7 +491,7 @@ func (self *FsAgentCfg) loadFromJsonCfg(jsnCfg *FreeswitchAgentJsonCfg) error {
 	return nil
 }
 
-func (fscfg *FsAgentCfg) AsMapInterface(separator string) map[string]interface{} {
+func (fscfg *FsAgentCfg) AsMapInterface(separator string) map[string]any {
 	sessionSConns := make([]string, len(fscfg.SessionSConns))
 	for i, item := range fscfg.SessionSConns {
 		buf := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)
@@ -516,12 +516,12 @@ func (fscfg *FsAgentCfg) AsMapInterface(separator string) map[string]interface{}
 		maxWaitConnection = fscfg.MaxWaitConnection.String()
 	}
 
-	eventSocketConns := make([]map[string]interface{}, len(fscfg.EventSocketConns))
+	eventSocketConns := make([]map[string]any, len(fscfg.EventSocketConns))
 	for key, item := range fscfg.EventSocketConns {
 		eventSocketConns[key] = item.AsMapInterface()
 	}
 
-	return map[string]interface{}{
+	return map[string]any{
 		utils.EnabledCfg:             fscfg.Enabled,
 		utils.SessionSConnsCfg:       sessionSConns,
 		utils.SubscribeParkCfg:       fscfg.SubscribePark,
@@ -586,8 +586,8 @@ func (aConnCfg *AsteriskConnCfg) loadFromJsonCfg(jsnCfg *AstConnJsonCfg) error {
 	return nil
 }
 
-func (aConnCfg *AsteriskConnCfg) AsMapInterface() map[string]interface{} {
-	return map[string]interface{}{
+func (aConnCfg *AsteriskConnCfg) AsMapInterface() map[string]any {
+	return map[string]any{
 		utils.AliasCfg:           aConnCfg.Alias,
 		utils.AddressCfg:         aConnCfg.Address,
 		utils.UserCf:             aConnCfg.User,
@@ -635,8 +635,8 @@ func (aCfg *AsteriskAgentCfg) loadFromJsonCfg(jsnCfg *AsteriskAgentJsonCfg) (err
 	return nil
 }
 
-func (aCfg *AsteriskAgentCfg) AsMapInterface() map[string]interface{} {
-	conns := make([]map[string]interface{}, len(aCfg.AsteriskConns))
+func (aCfg *AsteriskAgentCfg) AsMapInterface() map[string]any {
+	conns := make([]map[string]any, len(aCfg.AsteriskConns))
 	for i, item := range aCfg.AsteriskConns {
 		conns[i] = item.AsMapInterface()
 	}
@@ -651,7 +651,7 @@ func (aCfg *AsteriskAgentCfg) AsMapInterface() map[string]interface{} {
 		}
 	}
 
-	return map[string]interface{}{
+	return map[string]any{
 		utils.EnabledCfg:       aCfg.Enabled,
 		utils.SessionSConnsCfg: sessionSConns,
 		utils.CreateCDRCfg:     aCfg.CreateCDR,

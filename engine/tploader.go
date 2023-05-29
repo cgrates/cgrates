@@ -21,7 +21,7 @@ package engine
 // TPReader is the data source for TPLoader
 type TPReader interface {
 	// Read will read one record from data source
-	Read() (interface{}, error)
+	Read() (any, error)
 }
 
 // TPLoader will read a record from TPReader and write it out to dataManager

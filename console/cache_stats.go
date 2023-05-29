@@ -49,7 +49,7 @@ func (self *CmdGetCacheStats) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdGetCacheStats) RpcParams(reset bool) interface{} {
+func (self *CmdGetCacheStats) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = new(utils.AttrCacheIDsWithArgDispatcher)
 	}
@@ -60,7 +60,7 @@ func (self *CmdGetCacheStats) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdGetCacheStats) RpcResult() interface{} {
+func (self *CmdGetCacheStats) RpcResult() any {
 	reply := make(map[string]*ltcache.CacheStats)
 	return &reply
 }

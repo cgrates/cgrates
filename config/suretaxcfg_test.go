@@ -139,7 +139,7 @@ func TestSureTaxCfgAsMapInterface(t *testing.T) {
 		"tax_exemption_code_list": "",
 	},
 }`
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		"url":                     "",
 		"client_number":           "",
 		"validation_key":          "",

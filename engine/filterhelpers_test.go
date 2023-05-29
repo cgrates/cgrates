@@ -26,7 +26,7 @@ import (
 )
 
 var (
-	matchEV             map[string]interface{}
+	matchEV             map[string]any
 	dmMatch             *DataManager
 	stringIndexedFields *[]string
 	prefixIndexedFields *[]string
@@ -77,7 +77,7 @@ func TestFilterMatchingItemIDsForEvent(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-	matchEV = map[string]interface{}{
+	matchEV = map[string]any{
 		utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 		"Field":          "profile",
 	}
@@ -90,7 +90,7 @@ func TestFilterMatchingItemIDsForEvent(t *testing.T) {
 	if !has {
 		t.Errorf("Expecting: %+v, received: %+v", stringFilterID, aPrflIDs)
 	}
-	matchEV = map[string]interface{}{
+	matchEV = map[string]any{
 		"Field": "profilePrefix",
 	}
 	aPrflIDs, err = MatchingItemIDsForEvent(matchEV, nil, nil,
@@ -149,9 +149,9 @@ func TestFilterMatchingItemIDsForEvent2(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-	matchEV = map[string]interface{}{
+	matchEV = map[string]any{
 		utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
-		"CallCost":       map[string]interface{}{"Account": 1001},
+		"CallCost":       map[string]any{"Account": 1001},
 	}
 	aPrflIDs, err := MatchingItemIDsForEvent(matchEV, nil, nil,
 		dmMatch, utils.CacheAttributeFilterIndexes, prefix, true, true)
@@ -162,8 +162,8 @@ func TestFilterMatchingItemIDsForEvent2(t *testing.T) {
 	if !has {
 		t.Errorf("Expecting: %+v, received: %+v", stringFilterID, aPrflIDs)
 	}
-	matchEV = map[string]interface{}{
-		"CallCost": map[string]interface{}{"Field": "profilePrefix"},
+	matchEV = map[string]any{
+		"CallCost": map[string]any{"Field": "profilePrefix"},
 	}
 	aPrflIDs, err = MatchingItemIDsForEvent(matchEV, nil, nil,
 		dmMatch, utils.CacheAttributeFilterIndexes, prefix, true, true)

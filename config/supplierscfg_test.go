@@ -80,7 +80,7 @@ func TestSupplierSCfgAsMapInterface(t *testing.T) {
 		"default_ratio":1
 	},
 }`
-	eMap := map[string]interface{}{
+	eMap := map[string]any{
 		"enabled":               false,
 		"indexed_selects":       true,
 		"prefix_indexed_fields": []string{},
@@ -114,7 +114,7 @@ func TestSupplierSCfgAsMapInterface(t *testing.T) {
 			"default_ratio":1
 		},
 	}`
-	eMap = map[string]interface{}{
+	eMap = map[string]any{
 		"enabled":               false,
 		"indexed_selects":       true,
 		"prefix_indexed_fields": []string{"prefix", "indexed", "fields"},

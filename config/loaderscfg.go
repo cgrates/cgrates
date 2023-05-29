@@ -183,27 +183,27 @@ func (self *LoaderSCfg) Clone() *LoaderSCfg {
 	return clnLoader
 }
 
-func (lData *LoaderDataType) AsMapInterface(separator string) map[string]interface{} {
-	fields := make([]map[string]interface{}, len(lData.Fields))
+func (lData *LoaderDataType) AsMapInterface(separator string) map[string]any {
+	fields := make([]map[string]any, len(lData.Fields))
 	for i, item := range lData.Fields {
 		fields[i] = item.AsMapInterface(separator)
 	}
 
-	return map[string]interface{}{
+	return map[string]any{
 		utils.TypeCf:      lData.Type,
 		utils.FilenameCfg: lData.Filename,
 		utils.FieldsCfg:   fields,
 	}
 }
 
-func (l *LoaderSCfg) AsMapInterface(separator string) map[string]interface{} {
+func (l *LoaderSCfg) AsMapInterface(separator string) map[string]any {
 	tenant := make([]string, len(l.Tenant))
 	for i, item := range l.Tenant {
 		tenant[i] = item.Rules
 	}
 	strings.Join(tenant, utils.EmptyString)
 
-	data := make([]map[string]interface{}, len(l.Data))
+	data := make([]map[string]any, len(l.Data))
 	for i, item := range l.Data {
 		data[i] = item.AsMapInterface(separator)
 	}
@@ -221,7 +221,7 @@ func (l *LoaderSCfg) AsMapInterface(separator string) map[string]interface{} {
 		}
 	}
 
-	return map[string]interface{}{
+	return map[string]any{
 		utils.IdCfg:             l.Id,
 		utils.EnabledCfg:        l.Enabled,
 		utils.TenantCfg:         strings.Join(tenant, utils.EmptyString),

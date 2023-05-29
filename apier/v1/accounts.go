@@ -42,7 +42,7 @@ func (api *APIerSv1) GetAccountActionPlan(attrs utils.TenantAccount, reply *[]*A
 		return utils.NewErrMandatoryIeMissing(strings.Join(missing, ","), "")
 	}
 	acntID := utils.ConcatenatedKey(attrs.Tenant, attrs.Account)
-	acntATsIf, err := guardian.Guardian.Guard(func() (interface{}, error) {
+	acntATsIf, err := guardian.Guardian.Guard(func() (any, error) {
 		acntAPids, err := api.DataManager.GetAccountActionPlans(acntID, true, true, utils.NonTransactional)
 		if err != nil && err != utils.ErrNotFound {
 			return nil, utils.NewErrServerError(err)
@@ -98,7 +98,7 @@ func (api *APIerSv1) RemoveActionTiming(attrs AttrRemoveActionTiming, reply *str
 	}
 
 	var remAcntAPids []string // list of accounts who's indexes need modification
-	_, err = guardian.Guardian.Guard(func() (interface{}, error) {
+	_, err = guardian.Guardian.Guard(func() (any, error) {
 		ap, err := api.DataManager.GetActionPlan(attrs.ActionPlanId, true, true, utils.NonTransactional)
 		if err != nil {
 			return 0, err
@@ -188,7 +188,7 @@ func (api *APIerSv1) SetAccount(attr utils.AttrSetAccount, reply *string) (err e
 	}
 	accID := utils.ConcatenatedKey(attr.Tenant, attr.Account)
 	dirtyActionPlans := make(map[string]*engine.ActionPlan)
-	_, err = guardian.Guardian.Guard(func() (interface{}, error) {
+	_, err = guardian.Guardian.Guard(func() (any, error) {
 		var ub *engine.Account
 		if bal, _ := api.DataManager.GetAccount(accID); bal != nil {
 			ub = bal
@@ -198,7 +198,7 @@ func (api *APIerSv1) SetAccount(attr utils.AttrSetAccount, reply *string) (err e
 			}
 		}
 		if attr.ActionPlanID != "" {
-			_, err := guardian.Guardian.Guard(func() (interface{}, error) {
+			_, err := guardian.Guardian.Guard(func() (any, error) {
 				acntAPids, err := api.DataManager.GetAccountActionPlans(accID, true, true, utils.NonTransactional)
 				if err != nil && err != utils.ErrNotFound {
 					return 0, err
@@ -314,9 +314,9 @@ func (api *APIerSv1) RemoveAccount(attr utils.AttrRemoveAccount, reply *string) 
 	}
 	dirtyActionPlans := make(map[string]*engine.ActionPlan)
 	accID := utils.ConcatenatedKey(attr.Tenant, attr.Account)
-	_, err = guardian.Guardian.Guard(func() (interface{}, error) {
+	_, err = guardian.Guardian.Guard(func() (any, error) {
 		// remove it from all action plans
-		_, err := guardian.Guardian.Guard(func() (interface{}, error) {
+		_, err := guardian.Guardian.Guard(func() (any, error) {
 			actionPlansMap, err := api.DataManager.GetAllActionPlans()
 			if err == utils.ErrNotFound {
 				// no action plans
@@ -371,7 +371,7 @@ func (api *APIerSv1) RemoveAccount(attr utils.AttrRemoveAccount, reply *string) 
 	return nil
 }
 
-func (api *APIerSv1) GetAccounts(attr utils.AttrGetAccounts, reply *[]interface{}) error {
+func (api *APIerSv1) GetAccounts(attr utils.AttrGetAccounts, reply *[]any) error {
 	if len(attr.Tenant) == 0 {
 		return utils.NewErrMandatoryIeMissing("Tenant")
 	}
@@ -399,7 +399,7 @@ func (api *APIerSv1) GetAccounts(attr utils.AttrGetAccounts, reply *[]interface{
 	} else {
 		limitedAccounts = accountKeys[attr.Offset:]
 	}
-	retAccounts := make([]interface{}, 0)
+	retAccounts := make([]any, 0)
 	for _, acntKey := range limitedAccounts {
 		if acnt, err := api.DataManager.GetAccount(acntKey[len(utils.ACCOUNT_PREFIX):]); err != nil && err != utils.ErrNotFound { // Not found is not an error here
 			return err
@@ -418,7 +418,7 @@ func (api *APIerSv1) GetAccounts(attr utils.AttrGetAccounts, reply *[]interface{
 }
 
 // GetAccount returns the account
-func (api *APIerSv1) GetAccount(attr *utils.AttrGetAccount, reply *interface{}) error {
+func (api *APIerSv1) GetAccount(attr *utils.AttrGetAccount, reply *any) error {
 	tag := utils.ConcatenatedKey(attr.Tenant, attr.Account)
 	userBalance, err := api.DataManager.GetAccount(tag)
 	if err != nil {
@@ -434,8 +434,8 @@ type AttrAddBalance struct {
 	Account         string
 	BalanceType     string
 	Value           float64
-	Balance         map[string]interface{}
-	ActionExtraData *map[string]interface{}
+	Balance         map[string]any
+	ActionExtraData *map[string]any
 	Overwrite       bool // When true it will reset if the balance is already there
 	Cdrlog          bool
 }

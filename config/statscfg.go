@@ -85,7 +85,7 @@ func (st *StatSCfg) loadFromJsonCfg(jsnCfg *StatServJsonCfg) (err error) {
 	return nil
 }
 
-func (st *StatSCfg) AsMapInterface() map[string]interface{} {
+func (st *StatSCfg) AsMapInterface() map[string]any {
 	var storeInterval string = ""
 	if st.StoreInterval != 0 {
 		storeInterval = st.StoreInterval.String()
@@ -114,7 +114,7 @@ func (st *StatSCfg) AsMapInterface() map[string]interface{} {
 		}
 	}
 
-	return map[string]interface{}{
+	return map[string]any{
 		utils.EnabledCfg:                st.Enabled,
 		utils.IndexedSelectsCfg:         st.IndexedSelects,
 		utils.StoreIntervalCfg:          storeInterval,

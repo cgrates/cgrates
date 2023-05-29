@@ -48,7 +48,7 @@ func (self *CmdCacheGetItemIDs) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdCacheGetItemIDs) RpcParams(reset bool) interface{} {
+func (self *CmdCacheGetItemIDs) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &utils.ArgsGetCacheItemIDsWithArgDispatcher{}
 	}
@@ -59,7 +59,7 @@ func (self *CmdCacheGetItemIDs) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdCacheGetItemIDs) RpcResult() interface{} {
+func (self *CmdCacheGetItemIDs) RpcResult() any {
 	var reply []string
 	return &reply
 }

@@ -46,7 +46,7 @@ func (self *CmdGetLoadHistory) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdGetLoadHistory) RpcParams(reset bool) interface{} {
+func (self *CmdGetLoadHistory) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = new(utils.Paginator)
 	}
@@ -57,7 +57,7 @@ func (self *CmdGetLoadHistory) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdGetLoadHistory) RpcResult() interface{} {
+func (self *CmdGetLoadHistory) RpcResult() any {
 	a := make([]*utils.LoadInstance, 0)
 	return &a
 }

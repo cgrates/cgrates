@@ -49,7 +49,7 @@ func (self *CmdGetJSONConfig) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdGetJSONConfig) RpcParams(reset bool) interface{} {
+func (self *CmdGetJSONConfig) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &config.StringWithArgDispatcher{ArgDispatcher: new(utils.ArgDispatcher)}
 	}
@@ -60,7 +60,7 @@ func (self *CmdGetJSONConfig) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdGetJSONConfig) RpcResult() interface{} {
-	var s map[string]interface{}
+func (self *CmdGetJSONConfig) RpcResult() any {
+	var s map[string]any
 	return &s
 }

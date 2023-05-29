@@ -241,7 +241,7 @@ func (cdre *CDRExporter) composeTrailer() (err error) {
 }
 
 func (cdre *CDRExporter) postCdr(cdr *CDR) (err error) {
-	var body interface{}
+	var body any
 	switch cdre.exportFormat {
 	case utils.MetaHTTPjsonCDR, utils.MetaAMQPjsonCDR:
 		if body, err = json.Marshal(cdr); err != nil {

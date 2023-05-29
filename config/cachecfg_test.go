@@ -127,11 +127,11 @@ func TestCacheCfgAsMapInterface(t *testing.T) {
 				},
 			},
 		}`
-	eMap := map[string]interface{}{
-		"partitions": map[string]interface{}{
-			"*destinations":         map[string]interface{}{"limit": -1, "ttl": "", "static_ttl": false, "precache": false},
-			"*reverse_destinations": map[string]interface{}{"limit": -1, "ttl": "", "static_ttl": false, "precache": false},
-			"*rating_plans":         map[string]interface{}{"limit": -1, "ttl": "", "static_ttl": false, "precache": false},
+	eMap := map[string]any{
+		"partitions": map[string]any{
+			"*destinations":         map[string]any{"limit": -1, "ttl": "", "static_ttl": false, "precache": false},
+			"*reverse_destinations": map[string]any{"limit": -1, "ttl": "", "static_ttl": false, "precache": false},
+			"*rating_plans":         map[string]any{"limit": -1, "ttl": "", "static_ttl": false, "precache": false},
 		},
 		"replication_conns": []string{},
 	}
@@ -155,11 +155,11 @@ func TestCacheCfgAsMapInterface(t *testing.T) {
 		},
 	},
 }`
-	eMap = map[string]interface{}{
-		"partitions": map[string]interface{}{
-			"*destinations":         map[string]interface{}{"limit": -1, "ttl": "8m0s", "static_ttl": false, "precache": false},
-			"*reverse_destinations": map[string]interface{}{"limit": -1, "ttl": "1m0s", "static_ttl": false, "precache": false},
-			"*rating_plans":         map[string]interface{}{"limit": 10, "ttl": "", "static_ttl": true, "precache": true},
+	eMap = map[string]any{
+		"partitions": map[string]any{
+			"*destinations":         map[string]any{"limit": -1, "ttl": "8m0s", "static_ttl": false, "precache": false},
+			"*reverse_destinations": map[string]any{"limit": -1, "ttl": "1m0s", "static_ttl": false, "precache": false},
+			"*rating_plans":         map[string]any{"limit": 10, "ttl": "", "static_ttl": true, "precache": true},
 		},
 		"replication_conns": []string{},
 	}

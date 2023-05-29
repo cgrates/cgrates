@@ -135,7 +135,7 @@ func testSesItAddVoiceBalance(t *testing.T) {
 		Account:     sesAccount,
 		BalanceType: utils.MONETARY,
 		Value:       0,
-		Balance: map[string]interface{}{
+		Balance: map[string]any{
 			utils.ID:            "TestDynamicDebitBalance",
 			utils.RatingSubject: "*zero1s",
 		},
@@ -155,7 +155,7 @@ func testSesItInitSession(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: sesTenant,
 			ID:     "TestSesItInitiateSession",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Tenant:      sesTenant,
 				utils.Category:    "call",
 				utils.ToR:         utils.VOICE,
@@ -187,7 +187,7 @@ func testSesItTerminateSession(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: sesTenant,
 			ID:     "TestSesItUpdateSession",
-			Event: map[string]interface{}{
+			Event: map[string]any{
 				utils.Tenant:      sesTenant,
 				utils.Category:    "call",
 				utils.ToR:         utils.VOICE,

@@ -30,7 +30,7 @@ import (
 type SortedSupplier struct {
 	SupplierID         string
 	SupplierParameters string
-	SortingData        map[string]interface{} // store here extra info like cost or stats
+	SortingData        map[string]any // store here extra info like cost or stats
 }
 
 // SuppliersReply is returned as part of GetSuppliers call
